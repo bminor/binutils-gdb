@@ -77,11 +77,15 @@ START_RELOC_NUMBERS (elf_x86_64_reloc_type)
      RELOC_NUMBER (R_X86_64_PLT32_BND, 40)    /* 32 bit PLT address with
 						 BND prefix */
      /* Load from 32 bit signed pc relative offset to GOT entry without
-	REX prefix, relaxable.  */
+	REX nor REX2 prefixes, relaxable.  */
      RELOC_NUMBER (R_X86_64_GOTPCRELX, 41)
      /* Load from 32 bit signed pc relative offset to GOT entry with
 	REX prefix, relaxable.  */
      RELOC_NUMBER (R_X86_64_REX_GOTPCRELX, 42)
+     /* Load from 32 bit signed pc relative offset to GOT entry if the
+	instruction starts at 4 bytes before the relocation offset,
+	relaxable.  */
+     RELOC_NUMBER (R_X86_64_CODE_4_GOTPCRELX, 43)
      RELOC_NUMBER (R_X86_64_GNU_VTINHERIT, 250)       /* GNU C++ hack  */
      RELOC_NUMBER (R_X86_64_GNU_VTENTRY, 251)         /* GNU C++ hack  */
 END_RELOC_NUMBERS (R_X86_64_max)

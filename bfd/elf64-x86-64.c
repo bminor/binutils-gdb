@@ -170,12 +170,15 @@ static reloc_howto_type x86_64_elf_howto_table[] =
   HOWTO(R_X86_64_REX_GOTPCRELX, 0, 4, 32, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_REX_GOTPCRELX", false, 0, 0xffffffff,
 	true),
+  HOWTO(R_X86_64_CODE_4_GOTPCRELX, 0, 4, 32, true, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_CODE_4_GOTPCRELX", false, 0, 0xffffffff,
+	true),
 
   /* We have a gap in the reloc numbers here.
      R_X86_64_standard counts the number up to this point, and
      R_X86_64_vt_offset is the value to subtract from a reloc type of
      R_X86_64_GNU_VT* to form an index into this table.  */
-#define R_X86_64_standard (R_X86_64_REX_GOTPCRELX + 1)
+#define R_X86_64_standard (R_X86_64_CODE_4_GOTPCRELX + 1)
 #define R_X86_64_vt_offset (R_X86_64_GNU_VTINHERIT - R_X86_64_standard)
 
 /* GNU extension to record C++ vtable hierarchy.  */
@@ -244,6 +247,7 @@ static const struct elf_reloc_map x86_64_reloc_map[] =
   { BFD_RELOC_X86_64_PLT32_BND,	R_X86_64_PLT32_BND, },
   { BFD_RELOC_X86_64_GOTPCRELX, R_X86_64_GOTPCRELX, },
   { BFD_RELOC_X86_64_REX_GOTPCRELX, R_X86_64_REX_GOTPCRELX, },
+  { BFD_RELOC_X86_64_CODE_4_GOTPCRELX, R_X86_64_CODE_4_GOTPCRELX, },
   { BFD_RELOC_VTABLE_INHERIT,	R_X86_64_GNU_VTINHERIT, },
   { BFD_RELOC_VTABLE_ENTRY,	R_X86_64_GNU_VTENTRY, },
 };
@@ -1586,7 +1590,8 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   bfd_vma roff = irel->r_offset;
   bfd_vma abs_relocation;
 
-  if (roff < (r_type == R_X86_64_REX_GOTPCRELX ? 3 : 2))
+  if (roff < (r_type == R_X86_64_CODE_4_GOTPCRELX
+	      ? 4 : (r_type == R_X86_64_REX_GOTPCRELX ? 3 : 2)))
     return true;
 
   raddend = irel->r_addend;
@@ -1597,8 +1602,18 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   htab = elf_x86_hash_table (link_info, X86_64_ELF_DATA);
   is_pic = bfd_link_pic (link_info);
 
-  relocx = (r_type == R_X86_64_GOTPCRELX
-	    || r_type == R_X86_64_REX_GOTPCRELX);
+  if (r_type == R_X86_64_CODE_4_GOTPCRELX)
+    {
+      /* Skip if this isn't a REX2 instruction.  */
+      opcode = bfd_get_8 (abfd, contents + roff - 4);
+      if (opcode != 0xd5)
+	return true;
+
+      relocx = true;
+    }
+  else
+    relocx = (r_type == R_X86_64_GOTPCRELX
+	      || r_type == R_X86_64_REX_GOTPCRELX);
 
   /* TRUE if --no-relax is used.  */
   no_overflow = link_info->disable_target_specific_optimizations > 1;
@@ -1610,9 +1625,9 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   /* Convert mov to lea since it has been done for a while.  */
   if (opcode != 0x8b)
     {
-      /* Only convert R_X86_64_GOTPCRELX and R_X86_64_REX_GOTPCRELX
-	 for call, jmp or one of adc, add, and, cmp, or, sbb, sub,
-	 test, xor instructions.  */
+      /* Only convert R_X86_64_GOTPCRELX, R_X86_64_REX_GOTPCRELX
+	 and R_X86_64_CODE_4_GOTPCRELX for call, jmp or one of adc,
+	 add, and, cmp, or, sbb, sub, test, xor instructions.  */
       if (!relocx)
 	return true;
     }
@@ -1797,13 +1812,22 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
     }
   else
     {
-      unsigned int rex;
+      unsigned int rex = 0;
       unsigned int rex_mask = REX_R;
+      unsigned int rex2 = 0;
+      unsigned int rex2_mask = REX_R | REX_R << 4;
+      bool rex_w = false;
 
-      if (r_type == R_X86_64_REX_GOTPCRELX)
-	rex = bfd_get_8 (abfd, contents + roff - 3);
-      else
-	rex = 0;
+      if (r_type == R_X86_64_CODE_4_GOTPCRELX)
+	{
+	  rex2 = bfd_get_8 (abfd, contents + roff - 3);
+	  rex_w = (rex2 & REX_W) != 0;
+	}
+      else if (r_type == R_X86_64_REX_GOTPCRELX)
+	{
+	  rex = bfd_get_8 (abfd, contents + roff - 3);
+	  rex_w = (rex & REX_W) != 0;
+	}
 
       if (opcode == 0x8b)
 	{
@@ -1824,8 +1848,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	      opcode = 0xc7;
 	      modrm = bfd_get_8 (abfd, contents + roff - 1);
 	      modrm = 0xc0 | (modrm & 0x38) >> 3;
-	      if ((rex & REX_W) != 0
-		  && ABI_64_P (link_info->output_bfd))
+	      if (rex_w && ABI_64_P (link_info->output_bfd))
 		{
 		  /* Keep the REX_W bit in REX byte for LP64.  */
 		  r_type = R_X86_64_32S;
@@ -1837,8 +1860,9 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 		     use R_X86_64_32 and clear the W bit to avoid
 		     sign-extend imm32 to imm64.  */
 		  r_type = R_X86_64_32;
-		  /* Clear the W bit in REX byte.  */
+		  /* Clear the W bit in REX byte and REX2 payload.  */
 		  rex_mask |= REX_W;
+		  rex2_mask |= REX_W;
 		  goto rewrite_modrm_rex;
 		}
 	    }
@@ -1867,7 +1891,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 
 	  /* Use R_X86_64_32 with 32-bit operand to avoid relocation
 	     overflow when sign-extending imm32 to imm64.  */
-	  r_type = (rex & REX_W) != 0 ? R_X86_64_32S : R_X86_64_32;
+	  r_type = rex_w ? R_X86_64_32S : R_X86_64_32;
 
 	rewrite_modrm_rex:
 	  if (abs_relocation)
@@ -1892,6 +1916,13 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	      /* Move the R bit to the B bit in REX byte.  */
 	      rex = (rex & ~rex_mask) | (rex & REX_R) >> 2;
 	      bfd_put_8 (abfd, rex, contents + roff - 3);
+	    }
+	  else if (rex2)
+	    {
+	      /* Move the R bits to the B bits in REX2 payload byte.  */
+	      rex2 = ((rex2 & ~rex2_mask)
+		      | (rex2 & (REX_R | REX_R << 4)) >> 2);
+	      bfd_put_8 (abfd, rex2, contents + roff - 3);
 	    }
 
 	  /* No addend for R_X86_64_32/R_X86_64_32S relocations.  */
@@ -2058,7 +2089,8 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
       converted_reloc = false;
       if ((r_type == R_X86_64_GOTPCREL
 	   || r_type == R_X86_64_GOTPCRELX
-	   || r_type == R_X86_64_REX_GOTPCRELX)
+	   || r_type == R_X86_64_REX_GOTPCRELX
+	   || r_type == R_X86_64_CODE_4_GOTPCRELX)
 	  && (h == NULL || h->type != STT_GNU_IFUNC))
 	{
 	  Elf_Internal_Rela *irel = (Elf_Internal_Rela *) rel;
@@ -2108,6 +2140,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_GOTPCREL:
 	case R_X86_64_GOTPCRELX:
 	case R_X86_64_REX_GOTPCRELX:
+	case R_X86_64_CODE_4_GOTPCRELX:
 	case R_X86_64_TLSGD:
 	case R_X86_64_GOT64:
 	case R_X86_64_GOTPCREL64:
@@ -2710,6 +2743,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	    case R_X86_64_GOTPCREL:
 	    case R_X86_64_GOTPCRELX:
 	    case R_X86_64_REX_GOTPCRELX:
+	    case R_X86_64_CODE_4_GOTPCRELX:
 	    case R_X86_64_GOTPCREL64:
 	      base_got = htab->elf.sgot;
 	      off = h->got.offset;
@@ -2935,6 +2969,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	case R_X86_64_GOTPCREL:
 	case R_X86_64_GOTPCRELX:
 	case R_X86_64_REX_GOTPCRELX:
+	case R_X86_64_CODE_4_GOTPCRELX:
 	case R_X86_64_GOTPCREL64:
 	  /* Use global offset table entry as symbol value.  */
 	case R_X86_64_GOTPLT64:
@@ -3025,7 +3060,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		      && !(sym->st_shndx == SHN_ABS
 			   && (r_type == R_X86_64_GOTPCREL
 			       || r_type == R_X86_64_GOTPCRELX
-			       || r_type == R_X86_64_REX_GOTPCRELX)))
+			       || r_type == R_X86_64_REX_GOTPCRELX
+			       || r_type == R_X86_64_CODE_4_GOTPCRELX)))
 		    relative_reloc = true;
 		}
 	    }
@@ -3063,6 +3099,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	  if (r_type != R_X86_64_GOTPCREL
 	      && r_type != R_X86_64_GOTPCRELX
 	      && r_type != R_X86_64_REX_GOTPCRELX
+	      && r_type != R_X86_64_CODE_4_GOTPCRELX
 	      && r_type != R_X86_64_GOTPCREL64)
 	    relocation -= htab->elf.sgotplt->output_section->vma
 			  - htab->elf.sgotplt->output_offset;
