@@ -1053,8 +1053,9 @@ class Target_x86_64 : public Sized_target<size, false>
     gold_assert(gsym != NULL);
     // We cannot do the conversion unless it's one of these relocations.
     if (r_type != elfcpp::R_X86_64_GOTPCREL
-        && r_type != elfcpp::R_X86_64_GOTPCRELX
-        && r_type != elfcpp::R_X86_64_REX_GOTPCRELX)
+	&& r_type != elfcpp::R_X86_64_GOTPCRELX
+	&& r_type != elfcpp::R_X86_64_REX_GOTPCRELX
+	&& r_type != elfcpp::R_X86_64_CODE_4_GOTPCRELX)
       return false;
     // We cannot convert references to IFUNC symbols, or to symbols that
     // are not local to the current module.
@@ -2971,6 +2972,7 @@ Target_x86_64<size>::Scan::get_reference_flags(unsigned int r_type)
     case elfcpp::R_X86_64_GOTPCREL:
     case elfcpp::R_X86_64_GOTPCRELX:
     case elfcpp::R_X86_64_REX_GOTPCRELX:
+    case elfcpp::R_X86_64_CODE_4_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       // Absolute in GOT.
       return Symbol::ABSOLUTE_REF;
@@ -3251,6 +3253,7 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
     case elfcpp::R_X86_64_GOTPCREL:
     case elfcpp::R_X86_64_GOTPCRELX:
     case elfcpp::R_X86_64_REX_GOTPCRELX:
+    case elfcpp::R_X86_64_CODE_4_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       {
 	// The symbol requires a GOT section.
@@ -3261,20 +3264,29 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
 	// mov foo@GOTPCREL(%rip), %reg
 	// to lea foo(%rip), %reg.
 	// in Relocate::relocate.
+	size_t r_offset = reloc.get_r_offset();
 	if (!parameters->incremental()
-	    && (r_type == elfcpp::R_X86_64_GOTPCREL
-		|| r_type == elfcpp::R_X86_64_GOTPCRELX
-		|| r_type == elfcpp::R_X86_64_REX_GOTPCRELX)
+	    && (((r_type == elfcpp::R_X86_64_GOTPCREL
+		  || r_type == elfcpp::R_X86_64_GOTPCRELX
+		  || r_type == elfcpp::R_X86_64_REX_GOTPCRELX)
+		 && r_offset >= 2)
+		|| (r_type == elfcpp::R_X86_64_CODE_4_GOTPCRELX
+		    && r_offset >= 4))
 	    && reloc.get_r_addend() == -4
-	    && reloc.get_r_offset() >= 2
 	    && !is_ifunc)
 	  {
 	    section_size_type stype;
 	    const unsigned char* view = object->section_contents(data_shndx,
 								 &stype, true);
-	    if (view[reloc.get_r_offset() - 2] == 0x8b)
+	    if (r_type == elfcpp::R_X86_64_CODE_4_GOTPCRELX
+		&& view[r_offset - 4] != 0xd5)
+	      goto need_got;
+
+	    if (view[r_offset - 2] == 0x8b)
 	      break;
 	  }
+
+need_got:
 
 	// The symbol requires a GOT entry.
 	unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
@@ -3498,6 +3510,7 @@ Target_x86_64<size>::Scan::possible_function_pointer_reloc(
     case elfcpp::R_X86_64_GOTPCREL:
     case elfcpp::R_X86_64_GOTPCRELX:
     case elfcpp::R_X86_64_REX_GOTPCRELX:
+    case elfcpp::R_X86_64_CODE_4_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       {
 	return true;
@@ -3714,6 +3727,7 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
     case elfcpp::R_X86_64_GOTPCREL:
     case elfcpp::R_X86_64_GOTPCRELX:
     case elfcpp::R_X86_64_REX_GOTPCRELX:
+    case elfcpp::R_X86_64_CODE_4_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       {
 	// The symbol requires a GOT entry.
@@ -3736,8 +3750,12 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
         size_t r_offset = reloc.get_r_offset();
         if (!parameters->incremental()
 	    && reloc.get_r_addend() == -4
-	    && r_offset >= 2
-            && Target_x86_64<size>::can_convert_mov_to_lea(gsym, r_type,
+	    && ((r_type != elfcpp::R_X86_64_CODE_4_GOTPCRELX
+		 && r_offset >= 2)
+		|| (r_type == elfcpp::R_X86_64_CODE_4_GOTPCRELX
+		    && r_offset >= 4
+		    && view[r_offset - 4] == 0xd5))
+	    && Target_x86_64<size>::can_convert_mov_to_lea(gsym, r_type,
                                                            r_offset, &view))
           break;
 
@@ -4420,6 +4438,7 @@ Target_x86_64<size>::Relocate::relocate(
     case elfcpp::R_X86_64_GOTPCREL:
     case elfcpp::R_X86_64_GOTPCRELX:
     case elfcpp::R_X86_64_REX_GOTPCRELX:
+    case elfcpp::R_X86_64_CODE_4_GOTPCRELX:
       {
       bool converted_p = false;
 

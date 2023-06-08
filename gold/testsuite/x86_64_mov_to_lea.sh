@@ -25,20 +25,36 @@
 set -e
 
 grep -q "lea    -0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea1.stdout
+grep -q "lea    -0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea1.stdout
 grep -q "lea    -0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea2.stdout
+grep -q "lea    -0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea2.stdout
 grep -q "lea    -0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea3.stdout
+grep -q "lea    -0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea3.stdout
 grep -q "lea    -0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea4.stdout
+grep -q "lea    -0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea4.stdout
 grep -q "lea    -0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea5.stdout
+grep -q "lea    -0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea5.stdout
 grep -q "lea    -0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea6.stdout
+grep -q "lea    -0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea6.stdout
 grep -q "mov    0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea7.stdout
+grep -q "mov    0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea7.stdout
 grep -q "mov    0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea8.stdout
+grep -q "mov    0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea8.stdout
 grep -q "lea    -0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea9.stdout
+grep -q "lea    -0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea9.stdout
 grep -q "lea    -0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea10.stdout
+grep -q "lea    -0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea10.stdout
 grep -q "mov    0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea11.stdout
+grep -q "mov    0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea11.stdout
 grep -q "mov    0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea12.stdout
+grep -q "mov    0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea12.stdout
 grep -q "lea    -0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea13.stdout
+grep -q "lea    -0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea13.stdout
 grep -q "lea    -0x[a-f0-9]\+(%rip),%rax" x86_64_mov_to_lea14.stdout
+grep -q "lea    -0x[a-f0-9]\+(%rip),%r26" x86_64_mov_to_lea14.stdout
 grep -q "mov    0x[a-f0-9]\+(%rip),%eax" x86_64_mov_to_lea15.stdout
+grep -q "mov    0x[a-f0-9]\+(%rip),%r26d" x86_64_mov_to_lea15.stdout
 grep -q "mov    0x[a-f0-9]\+(%rip),%eax" x86_64_mov_to_lea16.stdout
+grep -q "mov    0x[a-f0-9]\+(%rip),%r26d" x86_64_mov_to_lea16.stdout
 
 exit 0
