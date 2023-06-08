@@ -107,4 +107,13 @@ public:
 
 void mi_output_solib_attribs (ui_out *uiout, struct so_list *solib);
 
+/* Returns the INTERP's data cast as mi_interp if INTERP is an MI, and
+   returns NULL otherwise.  */
+
+static inline struct mi_interp *
+as_mi_interp (struct interp *interp)
+{
+  return dynamic_cast<mi_interp *> (interp);
+}
+
 #endif /* MI_MI_INTERP_H */

@@ -144,14 +144,21 @@ static void print_diff (struct ui_file *file, struct mi_timestamp *start,
 void
 mi_cmd_gdb_exit (const char *command, const char *const *argv, int argc)
 {
-  struct mi_interp *mi = (struct mi_interp *) current_interpreter ();
+  struct mi_interp *mi = as_mi_interp (current_interpreter ());
 
-  /* We have to print everything right here because we never return.  */
-  if (current_token)
-    gdb_puts (current_token, mi->raw_stdout);
-  gdb_puts ("^exit\n", mi->raw_stdout);
-  mi_out_put (current_uiout, mi->raw_stdout);
-  gdb_flush (mi->raw_stdout);
+  /* If the current interpreter is not an MI interpreter, then just
+     don't bother printing anything.  This case can arise from using
+     the Python gdb.execute_mi function -- but here the result does
+     not matter, as gdb is about to exit anyway.  */
+  if (mi != nullptr)
+    {
+      /* We have to print everything right here because we never return.  */
+      if (current_token)
+	gdb_puts (current_token, mi->raw_stdout);
+      gdb_puts ("^exit\n", mi->raw_stdout);
+      mi_out_put (current_uiout, mi->raw_stdout);
+      gdb_flush (mi->raw_stdout);
+    }
   /* FIXME: The function called is not yet a formal libgdb function.  */
   quit_force (NULL, FROM_TTY);
 }
@@ -1802,10 +1809,9 @@ mi_cmd_remove_inferior (const char *command, const char *const *argv, int argc)
    prompt, display error).  */
 
 static void
-captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
+captured_mi_execute_command (struct mi_interp *mi, struct ui_out *uiout,
+			     struct mi_parse *context)
 {
-  struct mi_interp *mi = (struct mi_interp *) command_interp ();
-
   if (do_timings)
     current_command_ts = context->cmd_start;
 
@@ -1891,10 +1897,9 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 /* Print a gdb exception to the MI output stream.  */
 
 static void
-mi_print_exception (const char *token, const struct gdb_exception &exception)
+mi_print_exception (struct mi_interp *mi, const char *token,
+		    const struct gdb_exception &exception)
 {
-  struct mi_interp *mi = (struct mi_interp *) current_interpreter ();
-
   gdb_puts (token, mi->raw_stdout);
   gdb_puts ("^error,msg=\"", mi->raw_stdout);
   if (exception.message == NULL)
@@ -1926,13 +1931,15 @@ mi_execute_command (const char *cmd, int from_tty)
 
   target_log_command (cmd);
 
+  struct mi_interp *mi
+    = gdb::checked_static_cast<mi_interp *> (command_interp ());
   try
     {
       command = mi_parse::make (cmd, &token);
     }
   catch (const gdb_exception &exception)
     {
-      mi_print_exception (token.c_str (), exception);
+      mi_print_exception (mi, token.c_str (), exception);
     }
 
   if (command != NULL)
@@ -1947,7 +1954,7 @@ mi_execute_command (const char *cmd, int from_tty)
 
       try
 	{
-	  captured_mi_execute_command (current_uiout, command.get ());
+	  captured_mi_execute_command (mi, current_uiout, command.get ());
 	}
       catch (const gdb_exception &result)
 	{
@@ -1960,7 +1967,7 @@ mi_execute_command (const char *cmd, int from_tty)
 
 	  /* The command execution failed and error() was called
 	     somewhere.  */
-	  mi_print_exception (command->token.c_str (), result);
+	  mi_print_exception (mi, command->token.c_str (), result);
 	  mi_out_rewind (current_uiout);
 
 	  /* Throw to a higher level catch for SIGTERM sent to GDB.  */
@@ -2189,7 +2196,12 @@ mi_load_progress (const char *section_name,
   static steady_clock::time_point last_update;
   static char *previous_sect_name = NULL;
   int new_section;
-  struct mi_interp *mi = (struct mi_interp *) current_interpreter ();
+  struct mi_interp *mi = as_mi_interp (current_interpreter ());
+
+  /* If the current interpreter is not an MI interpreter, then just
+     don't bother printing anything.  */
+  if (mi == nullptr)
+    return;
 
   /* This function is called through deprecated_show_load_progress
      which means uiout may not be correct.  Fix it for the duration

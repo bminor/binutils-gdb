@@ -72,15 +72,6 @@ display_mi_prompt (struct mi_interp *mi)
   ui->prompt_state = PROMPTED;
 }
 
-/* Returns the INTERP's data cast as mi_interp if INTERP is an MI, and
-   returns NULL otherwise.  */
-
-static struct mi_interp *
-as_mi_interp (struct interp *interp)
-{
-  return dynamic_cast<mi_interp *> (interp);
-}
-
 void
 mi_interp::on_command_error ()
 {
