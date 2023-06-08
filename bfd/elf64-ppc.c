@@ -18406,7 +18406,7 @@ ppc64_elf_free_cached_info (bfd *abfd)
       if (opd->reloc_count == 0)
 	free (ppc64_elf_section_data (opd)->u.opd.u.contents);
 
-  return _bfd_generic_bfd_free_cached_info (abfd);
+  return _bfd_elf_free_cached_info (abfd);
 }
 
 #include "elf64-target.h"

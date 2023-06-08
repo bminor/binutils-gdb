@@ -8742,7 +8742,7 @@ elfNN_aarch64_bfd_free_cached_info (bfd *abfd)
     bfd_map_over_sections (abfd,
 			   unrecord_section_via_map_over_sections, NULL);
 
-  return _bfd_generic_bfd_free_cached_info (abfd);
+  return _bfd_elf_free_cached_info (abfd);
 }
 
 /* Create dynamic sections. This is different from the ARM backend in that
