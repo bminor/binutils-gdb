@@ -1425,17 +1425,7 @@ elf64_alpha_read_ecoff_info (bfd *abfd, asection *section,
 
  error_return:
   free (ext_hdr);
-  free (debug->line);
-  free (debug->external_dnr);
-  free (debug->external_pdr);
-  free (debug->external_sym);
-  free (debug->external_opt);
-  free (debug->external_aux);
-  free (debug->ss);
-  free (debug->ssext);
-  free (debug->external_fdr);
-  free (debug->external_rfd);
-  free (debug->external_ext);
+  _bfd_ecoff_free_ecoff_debug_info (debug);
   return false;
 }
 

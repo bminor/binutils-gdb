@@ -117,12 +117,15 @@ _bfd_ecoff_bfd_free_cached_info (bfd *abfd)
   if ((bfd_get_format (abfd) == bfd_object
        || bfd_get_format (abfd) == bfd_core)
       && (tdata = ecoff_data (abfd)) != NULL)
-    while (tdata->mips_refhi_list != NULL)
-      {
-	struct mips_hi *ref = tdata->mips_refhi_list;
-	tdata->mips_refhi_list = ref->next;
-	free (ref);
-      }
+    {
+      while (tdata->mips_refhi_list != NULL)
+	{
+	  struct mips_hi *ref = tdata->mips_refhi_list;
+	  tdata->mips_refhi_list = ref->next;
+	  free (ref);
+	}
+      _bfd_ecoff_free_ecoff_debug_info (&tdata->debug_info);
+    }
   return _bfd_generic_bfd_free_cached_info (abfd);
 }
 
@@ -524,7 +527,7 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
 
   /* Check whether we've already gotten it, and whether there's any to
      get.  */
-  if (ecoff_data (abfd)->raw_syments != NULL)
+  if (debug->alloc_syments)
     return true;
   if (ecoff_data (abfd)->sym_filepos == 0)
     {
@@ -595,7 +598,7 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
   if (raw == NULL)
     return false;
 
-  ecoff_data (abfd)->raw_syments = raw;
+  debug->alloc_syments = true;
 
   /* Get pointers for the numeric offsets in the HDRR structure.  */
 #define FIX(start, count, ptr, type) \
@@ -1918,6 +1921,9 @@ _bfd_ecoff_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 
       oinfo->symbolic_header.crfd = iinfo->symbolic_header.crfd;
       oinfo->external_rfd = iinfo->external_rfd;
+
+      /* Flag that oinfo entries should not be freed.  */
+      oinfo->alloc_syments = true;
     }
   else
     {
@@ -3809,9 +3815,9 @@ ecoff_final_link_debug_accumulate (bfd *output_bfd,
       ((char *) debug->ptr)[amt] = 0;					\
     } while (0)
 
-  /* If raw_syments is not NULL, then the data was already by read by
+  /* If alloc_syments is true, then the data was already by read by
      _bfd_ecoff_slurp_symbolic_info.  */
-  if (ecoff_data (input_bfd)->raw_syments == NULL)
+  if (!debug->alloc_syments)
     {
       READ (line, cbLineOffset, cbLine, sizeof (unsigned char));
       READ (external_dnr, cbDnOffset, idnMax, swap->external_dnr_size);
@@ -3833,31 +3839,7 @@ ecoff_final_link_debug_accumulate (bfd *output_bfd,
 	  input_bfd, debug, swap, info));
 
  return_something:
-  if (ecoff_data (input_bfd)->raw_syments == NULL)
-    {
-      free (debug->line);
-      free (debug->external_dnr);
-      free (debug->external_pdr);
-      free (debug->external_sym);
-      free (debug->external_opt);
-      free (debug->external_aux);
-      free (debug->ss);
-      free (debug->external_fdr);
-      free (debug->external_rfd);
-
-      /* Make sure we don't accidentally follow one of these pointers
-	 into freed memory.  */
-      debug->line = NULL;
-      debug->external_dnr = NULL;
-      debug->external_pdr = NULL;
-      debug->external_sym = NULL;
-      debug->external_opt = NULL;
-      debug->external_aux = NULL;
-      debug->ss = NULL;
-      debug->external_fdr = NULL;
-      debug->external_rfd = NULL;
-    }
-
+  _bfd_ecoff_free_ecoff_debug_info (debug);
   return ret;
 }
 

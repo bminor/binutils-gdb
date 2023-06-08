@@ -3008,6 +3008,7 @@ elf_frob_file_after_relocs (void)
       ecoff_build_debug (&debug.symbolic_header, &buf, debug_swap);
 
       /* Set up the pointers in debug.  */
+      debug.alloc_syments = true;
 #define SET(ptr, offset, type) \
     debug.ptr = (type) (buf + debug.symbolic_header.offset)
 

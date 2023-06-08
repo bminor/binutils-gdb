@@ -1696,6 +1696,38 @@ bfd_ecoff_write_accumulated_debug (void * handle,
 /* Handle the find_nearest_line function for both ECOFF and MIPS ELF
    files.  */
 
+/* Free ECOFF debugging info used by find_nearest_line.  */
+
+void
+_bfd_ecoff_free_ecoff_debug_info (struct ecoff_debug_info *debug)
+{
+  if (!debug->alloc_syments)
+    {
+      free (debug->line);
+      free (debug->external_dnr);
+      free (debug->external_pdr);
+      free (debug->external_sym);
+      free (debug->external_opt);
+      free (debug->external_aux);
+      free (debug->ss);
+      free (debug->ssext);
+      free (debug->external_fdr);
+      free (debug->external_rfd);
+      free (debug->external_ext);
+    }
+  debug->line= NULL;
+  debug->external_dnr= NULL;
+  debug->external_pdr= NULL;
+  debug->external_sym= NULL;
+  debug->external_opt= NULL;
+  debug->external_aux= NULL;
+  debug->ss= NULL;
+  debug->ssext= NULL;
+  debug->external_fdr= NULL;
+  debug->external_rfd= NULL;
+  debug->external_ext= NULL;
+}
+
 /* Compare FDR entries.  This is called via qsort.  */
 
 static int

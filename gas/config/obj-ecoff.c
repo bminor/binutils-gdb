@@ -151,6 +151,7 @@ ecoff_frob_file (void)
   ecoff_build_debug (hdr, &buf, debug_swap);
 
   /* Finish up the ecoff_tdata structure.  */
+  ecoff_data (stdoutput)->debug_info.alloc_syments = true;
   set = buf;
 #define SET(ptr, count, type, size) \
   if (hdr->count == 0) \

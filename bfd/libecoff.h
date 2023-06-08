@@ -124,9 +124,6 @@ typedef struct ecoff_tdata
   /* The ECOFF symbolic debugging information.  */
   struct ecoff_debug_info debug_info;
 
-  /* The unswapped ECOFF symbolic information.  */
-  void * raw_syments;
-
   /* The canonical BFD symbols.  */
   struct ecoff_symbol_struct *canonical_symbols;
 

@@ -787,6 +787,8 @@ struct ecoff_debug_swap;
 struct ecoff_extr;
 struct ecoff_find_line;
 
+extern void _bfd_ecoff_free_ecoff_debug_info
+  (struct ecoff_debug_info *debug);
 extern bool _bfd_ecoff_locate_line
   (bfd *, asection *, bfd_vma, struct ecoff_debug_info * const,
    const struct ecoff_debug_swap * const, struct ecoff_find_line *,
