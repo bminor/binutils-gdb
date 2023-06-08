@@ -74,6 +74,10 @@ proc stop_process { description } {
       {
 	pass $description
       }
+    -re "Thread .* stopped.*\r\n$gdb_prompt $"
+      {
+	pass $description
+      }
     timeout
       {
 	fail "$description (timeout)"
