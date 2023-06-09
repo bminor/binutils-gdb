@@ -216,7 +216,6 @@ mi_parse::parse_argv ()
 mi_parse::~mi_parse ()
 {
   xfree (command);
-  xfree (token);
   freeargv (argv);
 }
 
@@ -290,7 +289,7 @@ mi_parse::set_language (const char *arg, const char **endp)
 }
 
 std::unique_ptr<struct mi_parse>
-mi_parse::make (const char *cmd, char **token)
+mi_parse::make (const char *cmd, std::string *token)
 {
   const char *chp;
 
@@ -302,9 +301,7 @@ mi_parse::make (const char *cmd, char **token)
   /* Find/skip any token and then extract it.  */
   for (chp = cmd; *chp >= '0' && *chp <= '9'; chp++)
     ;
-  *token = (char *) xmalloc (chp - cmd + 1);
-  memcpy (*token, cmd, (chp - cmd));
-  (*token)[chp - cmd] = '\0';
+  *token = std::string (cmd, chp - cmd);
 
   /* This wasn't a real MI command.  Return it as a CLI_COMMAND.  */
   if (*chp != '-')
@@ -422,7 +419,7 @@ mi_parse::make (gdb::unique_xmalloc_ptr<char> command,
   std::unique_ptr<struct mi_parse> parse (new struct mi_parse);
 
   parse->command = command.release ();
-  parse->token = xstrdup ("");
+  parse->token = "";
 
   if (parse->command[0] != '-')
     throw_error (UNDEFINED_COMMAND_ERROR,

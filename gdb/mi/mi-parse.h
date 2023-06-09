@@ -44,13 +44,12 @@ struct mi_parse
     /* Attempts to parse CMD returning a ``struct mi_parse''.  If CMD is
        invalid, an exception is thrown.  For an MI_COMMAND COMMAND, ARGS
        and OP are initialized.  Un-initialized fields are zero.  *TOKEN is
-       set to the token, even if an exception is thrown.  It is allocated
-       with xmalloc; it must either be freed with xfree, or assigned to
-       the TOKEN field of the resultant mi_parse object, to be freed by
-       mi_parse_free.  */
+       set to the token, even if an exception is thrown.  It can be
+       assigned to the TOKEN field of the resultant mi_parse object,
+       to be freed by mi_parse_free.  */
 
     static std::unique_ptr<struct mi_parse> make (const char *cmd,
-						  char **token);
+						  std::string *token);
 
     /* Create an mi_parse object given the command name and a vector
        of arguments.  Unlike with the other constructor, here the
@@ -74,7 +73,7 @@ struct mi_parse
 
     enum mi_command_type op = MI_COMMAND;
     char *command = nullptr;
-    char *token = nullptr;
+    std::string token;
     const struct mi_command *cmd = nullptr;
     struct mi_timestamp *cmd_start = nullptr;
     char **argv = nullptr;
