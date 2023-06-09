@@ -946,7 +946,7 @@ aarch64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     limit_pc = pc + 128;	/* Magic.  */
 
   limit_pc
-    = func_end_addr == 0? limit_pc : std::min (limit_pc, func_end_addr - 4);
+    = func_end_addr == 0 ? limit_pc : std::min (limit_pc, func_end_addr - 4);
 
   /* Try disassembling prologue.  */
   return aarch64_analyze_prologue (gdbarch, pc, limit_pc, NULL);

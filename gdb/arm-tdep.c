@@ -1504,7 +1504,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	      arm_debug_printf ("Found pacbti instruction at %s",
 				paddress (gdbarch, start));
 	      arm_debug_printf ("RA is %s",
-				*ra_signed_state? "signed" : "not signed");
+				*ra_signed_state ? "signed" : "not signed");
 	      cache->ra_signed_state = ra_signed_state;
 	    }
 
@@ -1847,11 +1847,11 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   /* Set the correct adjustment based on whether the function is thumb mode or
      not.  We use it to get the address of the last instruction in the
      function (as opposed to the first address of the next function).  */
-  CORE_ADDR adjustment = func_is_thumb? 2 : 4;
+  CORE_ADDR adjustment = func_is_thumb ? 2 : 4;
 
   limit_pc
-    = func_end_addr == 0? limit_pc : std::min (limit_pc,
-					       func_end_addr - adjustment);
+    = func_end_addr == 0 ? limit_pc : std::min (limit_pc,
+						func_end_addr - adjustment);
 
   /* Check if this is Thumb code.  */
   if (arm_pc_is_thumb (gdbarch, pc))
@@ -8625,7 +8625,7 @@ arm_displaced_init_closure (struct gdbarch *gdbarch, CORE_ADDR from,
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
   unsigned int i, len, offset;
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
-  int size = dsc->is_thumb? 2 : 4;
+  int size = dsc->is_thumb ? 2 : 4;
   const gdb_byte *bkp_insn;
 
   offset = 0;
@@ -10935,13 +10935,13 @@ arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file, _("arm_dump_tdep: vfp_register_count = %i\n"),
 	      (int) tdep->vfp_register_count);
   gdb_printf (file, _("arm_dump_tdep: have_s_pseudos = %s\n"),
-	      tdep->have_s_pseudos? "true" : "false");
+	      tdep->have_s_pseudos ? "true" : "false");
   gdb_printf (file, _("arm_dump_tdep: s_pseudo_base = %i\n"),
 	      (int) tdep->s_pseudo_base);
   gdb_printf (file, _("arm_dump_tdep: s_pseudo_count = %i\n"),
 	      (int) tdep->s_pseudo_count);
   gdb_printf (file, _("arm_dump_tdep: have_q_pseudos = %s\n"),
-	      tdep->have_q_pseudos? "true" : "false");
+	      tdep->have_q_pseudos ? "true" : "false");
   gdb_printf (file, _("arm_dump_tdep: q_pseudo_base = %i\n"),
 	      (int) tdep->q_pseudo_base);
   gdb_printf (file, _("arm_dump_tdep: q_pseudo_count = %i\n"),
@@ -10949,7 +10949,7 @@ arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file, _("arm_dump_tdep: have_neon = %i\n"),
 	      (int) tdep->have_neon);
   gdb_printf (file, _("arm_dump_tdep: have_mve = %s\n"),
-	      tdep->have_mve? "yes" : "no");
+	      tdep->have_mve ? "yes" : "no");
   gdb_printf (file, _("arm_dump_tdep: mve_vpr_regnum = %i\n"),
 	      tdep->mve_vpr_regnum);
   gdb_printf (file, _("arm_dump_tdep: mve_pseudo_base = %i\n"),
@@ -10971,13 +10971,13 @@ arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file, _("arm_dump_tdep: Lowest pc = 0x%lx\n"),
 	      (unsigned long) tdep->lowest_pc);
   gdb_printf (file, _("arm_dump_tdep: have_pacbti = %s\n"),
-	      tdep->have_pacbti? "yes" : "no");
+	      tdep->have_pacbti ? "yes" : "no");
   gdb_printf (file, _("arm_dump_tdep: pacbti_pseudo_base = %i\n"),
 	      tdep->pacbti_pseudo_base);
   gdb_printf (file, _("arm_dump_tdep: pacbti_pseudo_count = %i\n"),
 	      tdep->pacbti_pseudo_count);
   gdb_printf (file, _("arm_dump_tdep: is_m = %s\n"),
-	      tdep->is_m? "yes" : "no");
+	      tdep->is_m ? "yes" : "no");
 }
 
 #if GDB_SELF_TEST
@@ -12328,7 +12328,7 @@ arm_record_ld_st_reg_offset (arm_insn_decode_record *arm_insn_r)
 	      break;
 
 	      case 1:
-		offset_12 = (!shift_imm)?0:u_regval[0] >> shift_imm;
+		offset_12 = (!shift_imm) ? 0 : u_regval[0] >> shift_imm;
 	      break;
 
 	      case 2:
