@@ -25,6 +25,7 @@ if [string equal $COMPAT_DEJAGNU "no"] {
     verbose -log "SFrame testsuite needs perhaps a more recent DejaGnu"
     unsupported findfre-1
     unsupported findfunc-1
+    unsupported plt-findfre-1
     return;
 }
 
@@ -34,4 +35,8 @@ if { [host_execute "testsuite/libsframe.find/findfre-1"] ne "" } {
 
 if { [host_execute "testsuite/libsframe.find/findfunc-1"] ne "" } {
     fail "findfunc-1"
+}
+
+if { [host_execute "testsuite/libsframe.find/plt-findfre-1"] ne "" } {
+    fail "plt-findfre-1"
 }
