@@ -52,10 +52,10 @@ struct mi_command_mi : public mi_command
     parse->parse_argv ();
 
     if (parse->argv == nullptr)
-      error (_("Problem parsing arguments: %s %s"), parse->command,
+      error (_("Problem parsing arguments: %s %s"), parse->command.get (),
 	     parse->args ());
 
-    this->m_argv_function (parse->command, parse->argv, parse->argc);
+    this->m_argv_function (parse->command.get (), parse->argv, parse->argc);
   }
 
 private:

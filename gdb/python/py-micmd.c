@@ -358,7 +358,7 @@ mi_command_py::invoke (struct mi_parse *parse) const
   parse->parse_argv ();
 
   if (parse->argv == nullptr)
-    error (_("Problem parsing arguments: %s %s"), parse->command,
+    error (_("Problem parsing arguments: %s %s"), parse->command.get (),
 	   parse->args ());
 
 

@@ -72,7 +72,9 @@ struct mi_parse
     const char *args ();
 
     enum mi_command_type op = MI_COMMAND;
-    char *command = nullptr;
+    /* This is not std::string because it avoids a copy in the Python
+       API case.  */
+    gdb::unique_xmalloc_ptr<char> command;
     std::string token;
     const struct mi_command *cmd = nullptr;
     struct mi_timestamp *cmd_start = nullptr;

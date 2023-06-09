@@ -1821,7 +1821,8 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
       if (mi_debug_p)
 	gdb_printf (gdb_stdlog,
 		    " token=`%s' command=`%s' args=`%s'\n",
-		    context->token.c_str (), context->command, context->args ());
+		    context->token.c_str (), context->command.get (),
+		    context->args ());
 
       mi_cmd_execute (context);
 
@@ -1836,7 +1837,7 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	  gdb_puts (context->token.c_str (), mi->raw_stdout);
 	  /* There's no particularly good reason why target-connect results
 	     in not ^done.  Should kill ^connected for MI3.  */
-	  gdb_puts (strcmp (context->command, "target-select") == 0
+	  gdb_puts (strcmp (context->command.get (), "target-select") == 0
 		    ? "^connected" : "^done", mi->raw_stdout);
 	  mi_out_put (uiout, mi->raw_stdout);
 	  mi_out_rewind (uiout);
@@ -1858,10 +1859,10 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	/* This "feature" will be removed as soon as we have a
 	   complete set of mi commands.  */
 	/* Echo the command on the console.  */
-	gdb_printf (gdb_stdlog, "%s\n", context->command);
+	gdb_printf (gdb_stdlog, "%s\n", context->command.get ());
 	/* Call the "console" interpreter.  */
 	argv[0] = INTERP_CONSOLE;
-	argv[1] = context->command;
+	argv[1] = context->command.get ();
 	mi_cmd_interpreter_exec ("-interpreter-exec", argv, 2);
 
 	/* If we changed interpreters, DON'T print out anything.  */
