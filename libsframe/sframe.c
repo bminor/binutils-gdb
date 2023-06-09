@@ -1066,7 +1066,7 @@ sframe_find_fre (sframe_decoder_ctx *ctx, int32_t pc,
   /* FIXME - the bitmask should be picked per ABI or encoded in the format
      somehow. For AMD64, the pltN entry stub is 16 bytes. */
   if (fde_type == SFRAME_FDE_TYPE_PCMASK)
-    bitmask = 0xff;
+    bitmask = 0xf;
 
   fres = ctx->sfd_fres + fdep->sfde_func_start_fre_off;
   func_start_addr = fdep->sfde_func_start_address;
