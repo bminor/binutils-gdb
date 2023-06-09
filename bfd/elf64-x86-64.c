@@ -173,12 +173,18 @@ static reloc_howto_type x86_64_elf_howto_table[] =
   HOWTO(R_X86_64_CODE_4_GOTPCRELX, 0, 4, 32, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_CODE_4_GOTPCRELX", false, 0, 0xffffffff,
 	true),
+  HOWTO(R_X86_64_CODE_4_GOTTPOFF, 0, 4, 32, true, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_CODE_4_GOTTPOFF", false, 0, 0xffffffff,
+	true),
+  HOWTO(R_X86_64_CODE_4_GOTPC32_TLSDESC, 0, 4, 32, true, 0,
+	complain_overflow_bitfield, bfd_elf_generic_reloc,
+	"R_X86_64_CODE_4_GOTPC32_TLSDESC", false, 0, 0xffffffff, true),
 
   /* We have a gap in the reloc numbers here.
      R_X86_64_standard counts the number up to this point, and
      R_X86_64_vt_offset is the value to subtract from a reloc type of
      R_X86_64_GNU_VT* to form an index into this table.  */
-#define R_X86_64_standard (R_X86_64_CODE_4_GOTPCRELX + 1)
+#define R_X86_64_standard (R_X86_64_CODE_4_GOTPC32_TLSDESC + 1)
 #define R_X86_64_vt_offset (R_X86_64_GNU_VTINHERIT - R_X86_64_standard)
 
 /* GNU extension to record C++ vtable hierarchy.  */
@@ -248,6 +254,8 @@ static const struct elf_reloc_map x86_64_reloc_map[] =
   { BFD_RELOC_X86_64_GOTPCRELX, R_X86_64_GOTPCRELX, },
   { BFD_RELOC_X86_64_REX_GOTPCRELX, R_X86_64_REX_GOTPCRELX, },
   { BFD_RELOC_X86_64_CODE_4_GOTPCRELX, R_X86_64_CODE_4_GOTPCRELX, },
+  { BFD_RELOC_X86_64_CODE_4_GOTTPOFF, R_X86_64_CODE_4_GOTTPOFF, },
+  { BFD_RELOC_X86_64_CODE_4_GOTPC32_TLSDESC, R_X86_64_CODE_4_GOTPC32_TLSDESC, },
   { BFD_RELOC_VTABLE_INHERIT,	R_X86_64_GNU_VTINHERIT, },
   { BFD_RELOC_VTABLE_ENTRY,	R_X86_64_GNU_VTENTRY, },
 };
@@ -1262,6 +1270,19 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 	    return (r_type == R_X86_64_PC32 || r_type == R_X86_64_PLT32);
 	}
 
+    case R_X86_64_CODE_4_GOTTPOFF:
+      /* Check transition from IE access model:
+		mov foo@gottpoff(%rip), %reg
+		add foo@gottpoff(%rip), %reg
+		where reg is one of r16 to r31.  */
+
+      if (offset < 4
+	  || (offset + 4) > sec->size
+	  || contents[offset - 4] != 0xd5)
+	return false;
+
+      goto check_gottpoff;
+
     case R_X86_64_GOTTPOFF:
       /* Check transition from IE access model:
 		mov foo@gottpoff(%rip), %reg
@@ -1288,12 +1309,25 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 	    return false;
 	}
 
+ check_gottpoff:
       val = bfd_get_8 (abfd, contents + offset - 2);
       if (val != 0x8b && val != 0x03)
 	return false;
 
       val = bfd_get_8 (abfd, contents + offset - 1);
       return (val & 0xc7) == 5;
+
+    case R_X86_64_CODE_4_GOTPC32_TLSDESC:
+      /* Check transition from GDesc access model:
+		lea x@tlsdesc(%rip), %reg
+	 where reg is one of r16 to r31.  */
+
+      if (offset < 4
+	  || (offset + 4) > sec->size
+	  || contents[offset - 4] != 0xd5)
+	return false;
+
+      goto check_tlsdesc;
 
     case R_X86_64_GOTPC32_TLSDESC:
       /* Check transition from GDesc access model:
@@ -1312,6 +1346,7 @@ elf_x86_64_check_tls_transition (bfd *abfd,
       if (val != 0x48 && (ABI_64_P (abfd) || val != 0x40))
 	return false;
 
+ check_tlsdesc:
       if (bfd_get_8 (abfd, contents + offset - 2) != 0x8d)
 	return false;
 
@@ -1378,8 +1413,10 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
     {
     case R_X86_64_TLSGD:
     case R_X86_64_GOTPC32_TLSDESC:
+    case R_X86_64_CODE_4_GOTPC32_TLSDESC:
     case R_X86_64_TLSDESC_CALL:
     case R_X86_64_GOTTPOFF:
+    case R_X86_64_CODE_4_GOTTPOFF:
       if (bfd_link_executable (info))
 	{
 	  if (h == NULL)
@@ -1399,6 +1436,7 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
 	  if (to_type == R_X86_64_TLSGD
 	      || to_type == R_X86_64_GOTPC32_TLSDESC
+	      || to_type == R_X86_64_CODE_4_GOTPC32_TLSDESC
 	      || to_type == R_X86_64_TLSDESC_CALL)
 	    {
 	      if (tls_type == GOT_TLS_IE)
@@ -1424,7 +1462,9 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
     }
 
   /* Return TRUE if there is no transition.  */
-  if (from_type == to_type)
+  if (from_type == to_type
+      || (from_type == R_X86_64_CODE_4_GOTTPOFF
+	  && to_type == R_X86_64_GOTTPOFF))
     return true;
 
   /* Check if the transition can be performed.  */
@@ -2132,6 +2172,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_X86_64_GOTTPOFF:
+	case R_X86_64_CODE_4_GOTTPOFF:
 	  if (!bfd_link_executable (info))
 	    info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
@@ -2146,6 +2187,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_GOTPCREL64:
 	case R_X86_64_GOTPLT64:
 	case R_X86_64_GOTPC32_TLSDESC:
+	case R_X86_64_CODE_4_GOTPC32_TLSDESC:
 	case R_X86_64_TLSDESC_CALL:
 	  /* This symbol requires a global offset table entry.	*/
 	  {
@@ -2167,9 +2209,11 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 		tls_type = GOT_TLS_GD;
 		break;
 	      case R_X86_64_GOTTPOFF:
+	      case R_X86_64_CODE_4_GOTTPOFF:
 		tls_type = GOT_TLS_IE;
 		break;
 	      case R_X86_64_GOTPC32_TLSDESC:
+	      case R_X86_64_CODE_4_GOTPC32_TLSDESC:
 	      case R_X86_64_TLSDESC_CALL:
 		tls_type = GOT_TLS_GDESC;
 		break;
@@ -3518,8 +3562,10 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 
 	case R_X86_64_TLSGD:
 	case R_X86_64_GOTPC32_TLSDESC:
+	case R_X86_64_CODE_4_GOTPC32_TLSDESC:
 	case R_X86_64_TLSDESC_CALL:
 	case R_X86_64_GOTTPOFF:
+	case R_X86_64_CODE_4_GOTTPOFF:
 	  tls_type = GOT_UNKNOWN;
 	  if (h == NULL && local_got_offsets)
 	    tls_type = elf_x86_local_got_tls_type (input_bfd) [r_symndx];
@@ -3651,6 +3697,37 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		  val = bfd_get_8 (input_bfd, contents + roff - 1);
 		  bfd_put_8 (output_bfd,
 			     (type & 0x48) | ((type >> 2) & 1),
+			     contents + roff - 3);
+		  bfd_put_8 (output_bfd, 0xc7, contents + roff - 2);
+		  bfd_put_8 (output_bfd, 0xc0 | ((val >> 3) & 7),
+			     contents + roff - 1);
+		  bfd_put_32 (output_bfd,
+			      elf_x86_64_tpoff (info, relocation),
+			      contents + roff);
+		  continue;
+		}
+	      else if (r_type == R_X86_64_CODE_4_GOTPC32_TLSDESC)
+		{
+		  /* GDesc -> LE transition.
+		     It's originally something like:
+		     lea x@tlsdesc(%rip), %reg
+
+		     Change it to:
+		     mov $x@tpoff, %reg
+		     where reg is one of r16 to r31.  */
+
+		  unsigned int val, rex2;
+		  unsigned int rex2_mask = REX_R | REX_R << 4;
+
+		  if (roff < 4)
+		    goto corrupt_input;
+		  rex2 = bfd_get_8 (input_bfd, contents + roff - 3);
+		  val = bfd_get_8 (input_bfd, contents + roff - 1);
+		  /* Move the R bits to the B bits in REX2 payload
+		     byte.  */
+		  bfd_put_8 (output_bfd,
+			     ((rex2 & ~rex2_mask)
+			      | (rex2 & rex2_mask) >> 2),
 			     contents + roff - 3);
 		  bfd_put_8 (output_bfd, 0xc7, contents + roff - 2);
 		  bfd_put_8 (output_bfd, 0xc0 | ((val >> 3) & 7),
@@ -3799,6 +3876,46 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 			      contents + roff);
 		  continue;
 		}
+	      else if (r_type == R_X86_64_CODE_4_GOTTPOFF)
+		{
+		  /* IE->LE transition:
+		     Originally it can be one of:
+		     mov foo@gottpoff(%rip), %reg
+		     add foo@gottpoff(%rip), %reg
+		     We change it into:
+		     mov $foo@tpoff, %reg
+		     add $foo@tpoff, %reg
+		     where reg is one of r16 to r31.  */
+
+		  unsigned int rex2, type, reg;
+		  unsigned int rex2_mask = REX_R | REX_R << 4;
+
+		  if (roff < 4)
+		    goto corrupt_input;
+
+		  rex2 = bfd_get_8 (input_bfd, contents + roff - 3);
+		  type = bfd_get_8 (input_bfd, contents + roff - 2);
+		  reg = bfd_get_8 (input_bfd, contents + roff - 1);
+		  reg >>= 3;
+		  /* Move the R bits to the B bits in REX2 payload
+		     byte.  */
+		  if (type == 0x8b)
+		    type = 0xc7;
+		  else
+		    type = 0x81;
+		  bfd_put_8 (output_bfd,
+			     ((rex2 & ~rex2_mask)
+			      | (rex2 & rex2_mask) >> 2),
+			     contents + roff - 3);
+		  bfd_put_8 (output_bfd, type,
+			     contents + roff - 2);
+		  bfd_put_8 (output_bfd, 0xc0 | reg,
+			     contents + roff - 1);
+		  bfd_put_32 (output_bfd,
+			      elf_x86_64_tpoff (info, relocation),
+			      contents + roff);
+		  continue;
+		}
 	      else
 		BFD_ASSERT (false);
 	    }
@@ -3905,6 +4022,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	  if (r_type_tls == r_type)
 	    {
 	      if (r_type == R_X86_64_GOTPC32_TLSDESC
+		  || r_type == R_X86_64_CODE_4_GOTPC32_TLSDESC
 		  || r_type == R_X86_64_TLSDESC_CALL)
 		relocation = htab->elf.sgotplt->output_section->vma
 		  + htab->elf.sgotplt->output_offset
@@ -4000,7 +4118,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		  wrel++;
 		  continue;
 		}
-	      else if (r_type == R_X86_64_GOTPC32_TLSDESC)
+	      else if (r_type == R_X86_64_GOTPC32_TLSDESC
+		       || r_type == R_X86_64_CODE_4_GOTPC32_TLSDESC)
 		{
 		  /* GDesc -> IE transition.
 		     It's originally something like:

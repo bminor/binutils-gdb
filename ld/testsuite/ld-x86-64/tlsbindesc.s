@@ -126,3 +126,42 @@ fn2:
 
 	leave
 	ret
+
+	/* IE against global var  */
+	addq	sG2@gottpoff(%rip), %r16
+
+	/* IE -> LE against global var defined in exec */
+	addq	sg1@gottpoff(%rip), %r17
+
+	/* IE -> LE against local var */
+	addq	sl1@gottpoff(%rip), %r18
+
+	/* IE -> LE against hidden var */
+	addq	sh1@gottpoff(%rip), %r19
+
+	/* Direct access through %fs  */
+
+	/* IE against global var  */
+	movq	sG5@gottpoff(%rip), %r20
+
+	/* IE->LE against local var  */
+	movq	sl5@gottpoff(%rip), %r21
+
+	/* IE->LE against hidden var  */
+	movq	sh5@gottpoff(%rip), %r22
+
+	/* GD -> IE because variable is not defined in executable */
+	leaq	sG1@tlsdesc(%rip), %r16
+
+	/* GD -> IE because variable is not defined in executable where
+	   the variable is referenced through IE too */
+	leaq	sG2@tlsdesc(%rip), %r17
+
+	/* GD -> LE with global variable defined in executable */
+	leaq	sg1@tlsdesc(%rip), %r18
+
+	/* GD -> LE with local variable defined in executable */
+	leaq	sl1@tlsdesc(%rip), %r19
+
+	/* GD -> LE with hidden variable defined in executable */
+	leaq	sh1@tlsdesc(%rip), %r20

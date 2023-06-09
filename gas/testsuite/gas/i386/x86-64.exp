@@ -665,6 +665,9 @@ if [is_elf_format] then {
     run_dump_test "x86-64-gotpcrel-no-relax"
     run_dump_test "x86-64-gotpcrel-2"
 
+    run_dump_test "x86-64-gottpoff"
+    run_dump_test "x86-64-tlsdesc"
+
     run_dump_test "x86-64-no-got"
 
     run_dump_test "x86-64-addend"

@@ -86,6 +86,12 @@ START_RELOC_NUMBERS (elf_x86_64_reloc_type)
 	instruction starts at 4 bytes before the relocation offset,
 	relaxable.  */
      RELOC_NUMBER (R_X86_64_CODE_4_GOTPCRELX, 43)
+     /* PC relative offset to IE GOT entry if the instruction starts at
+	4 bytes before the relocation offset.  */
+     RELOC_NUMBER (R_X86_64_CODE_4_GOTTPOFF, 44)
+     /* 32 bit signed pc relative offset to TLS descriptor in the GOT if
+	instruction starts at 4 bytes before the relocation offset.  */
+     RELOC_NUMBER (R_X86_64_CODE_4_GOTPC32_TLSDESC, 45)
      RELOC_NUMBER (R_X86_64_GNU_VTINHERIT, 250)       /* GNU C++ hack  */
      RELOC_NUMBER (R_X86_64_GNU_VTENTRY, 251)         /* GNU C++ hack  */
 END_RELOC_NUMBERS (R_X86_64_max)
