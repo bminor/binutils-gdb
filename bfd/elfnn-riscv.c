@@ -4206,6 +4206,18 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   return false;
 }
 
+/* Ignore and report warning for the unknwon elf attribute.  */
+
+static bool
+riscv_elf_obj_attrs_handle_unknown (bfd *abfd, int tag)
+{
+  _bfd_error_handler
+    /* xgettext:c-format */
+    (_("warning: %pB: unknown RISCV ABI object attribute %d"),
+     abfd, tag);
+  return true;
+}
+
 /* A second format for recording PC-relative hi relocations.  This stores the
    information required to relax them to GP-relative addresses.  */
 
@@ -5708,5 +5720,6 @@ riscv_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 #define elf_backend_obj_attrs_section_type	SHT_RISCV_ATTRIBUTES
 #undef  elf_backend_obj_attrs_section
 #define elf_backend_obj_attrs_section		RISCV_ATTRIBUTES_SECTION_NAME
+#define elf_backend_obj_attrs_handle_unknown	riscv_elf_obj_attrs_handle_unknown
 
 #include "elfNN-target.h"
