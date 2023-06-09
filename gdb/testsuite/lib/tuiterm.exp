@@ -913,8 +913,8 @@ namespace eval Term {
 	wait_for $str
     }
 
-    # As proc command, but don't wait for a initial prompt.  This is used for
-    # inital terminal commands, where there's no prompt yet.
+    # As proc command, but don't wait for an initial prompt.  This is used for
+    # initial terminal commands, where there's no prompt yet.
     proc command_no_prompt_prefix {cmd} {
 	send_gdb "$cmd\n"
 	set str [string_to_regexp $cmd]

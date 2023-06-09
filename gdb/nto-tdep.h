@@ -186,7 +186,7 @@ int nto_in_dynsym_resolve_code (CORE_ADDR pc);
 
 const char *nto_extra_thread_info (struct target_ops *self, struct thread_info *);
 
-LONGEST nto_read_auxv_from_initial_stack (CORE_ADDR inital_stack,
+LONGEST nto_read_auxv_from_initial_stack (CORE_ADDR initial_stack,
 					  gdb_byte *readbuf,
 					  LONGEST len, size_t sizeof_auxv_t);
 

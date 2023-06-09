@@ -5916,7 +5916,7 @@ proc gdb_load_cmd { args } {
 	    return 0
 	}
 	-re "(.*)\r\n$gdb_prompt " {
-	    perror "Unexpected reponse from 'load' -- $expect_out(1,string)"
+	    perror "Unexpected response from 'load' -- $expect_out(1,string)"
 	    return -1
 	}
 	timeout {
