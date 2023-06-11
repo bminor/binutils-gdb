@@ -2200,9 +2200,11 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  goto no_push;
 
 	case DW_OP_GNU_uninit:
-	  if (op_ptr != op_end)
+	  if (op_ptr != op_end && *op_ptr != DW_OP_piece
+	      && *op_ptr != DW_OP_bit_piece)
 	    error (_("DWARF-2 expression error: DW_OP_GNU_uninit must always "
-		   "be the very last op."));
+		   "be the very last op in a DWARF expression or "
+		   "DW_OP_piece/DW_OP_bit_piece piece."));
 
 	  this->m_initialized = false;
 	  goto no_push;
