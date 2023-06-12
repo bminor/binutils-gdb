@@ -18,6 +18,12 @@ import gdb
 from .server import request
 from .startup import send_gdb_with_response, in_gdb_thread
 
+def _thread_name(thr):
+    if thr.name is not None:
+        return thr.name
+    if thr.details is not None:
+        return thr.details
+    return None
 
 # A helper function to construct the list of threads.
 @in_gdb_thread
@@ -27,7 +33,7 @@ def _get_threads():
         one_result = {
             "id": thr.global_num,
         }
-        name = thr.name
+        name = _thread_name(thr)
         if name is not None:
             one_result["name"] = name
         result.append(one_result)
