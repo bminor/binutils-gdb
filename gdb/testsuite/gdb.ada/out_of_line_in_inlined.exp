@@ -34,7 +34,7 @@ foreach_with_prefix scenario {all minimal} {
 
     gdb_run_cmd
     gdb_test "" \
-	"Breakpoint $decimal, ($hex in )?foo_o224_021\\.child1\\.child2 \\(s=\\.\\.\\.\\).*" \
+	"Breakpoint ($decimal|$bkptno_num_re), ($hex in )?foo_o224_021\\.child1\\.child2 \\(s=\\.\\.\\.\\).*" \
 	"run to foo_o224_021.child1.child2"
 
     set opt_addr_in "($hex in)?"
