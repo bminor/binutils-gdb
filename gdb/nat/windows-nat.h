@@ -524,7 +524,9 @@ struct WindowsContext<CONTEXT *>
 				     | CONTEXT_FLOATING_POINT
 				     | CONTEXT_SEGMENTS
 				     | CONTEXT_DEBUG_REGISTERS
-				     | CONTEXT_EXTENDED_REGISTERS);
+				     | CONTEXT_EXTENDED_REGISTERS
+				     /* What about WoW64? */
+				     | CONTEXT_EXCEPTION_REQUEST);
 };
 
 #ifdef __x86_64__

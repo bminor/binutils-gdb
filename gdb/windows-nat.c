@@ -4110,6 +4110,17 @@ windows_nat_target::extra_thread_info (thread_info *info)
 	   || th->last_event.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT)
     return "exiting process";
 
+  /* FIXME: Wow64? */
+  windows_process.fill_thread_context (th);
+
+  if ((th->context.ContextFlags & CONTEXT_EXCEPTION_REPORTING) != 0)
+    {
+      if ((th->context.ContextFlags & CONTEXT_EXCEPTION_ACTIVE) != 0)
+	return "in exception";
+      if ((th->context.ContextFlags & CONTEXT_SERVICE_ACTIVE) != 0)
+	return "in kernel";
+    }
+
   return nullptr;
 }
 
