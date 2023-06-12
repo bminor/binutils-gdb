@@ -4531,10 +4531,13 @@ proc get_compiler_info {{language "c"}} {
 	    # eval this line
 	    verbose "get_compiler_info: $cppline" 2
 	    eval "$cppline"
-	} elseif { [ regexp "flang.*warning.*'-fdiagnostics-color=never'" "$cppline"] } {
+	} elseif { [ regexp {[fc]lang.*warning.*'-fdiagnostics-color=never'} "$cppline"] } {
 	    # Both flang preprocessors (llvm flang and classic flang) print a
 	    # warning for the unused -fdiagnostics-color=never, so we skip this
 	    # output line here.
+	    # The armflang preprocessor has been observed to output the
+	    # warning prefixed with "clang", so the regex also accepts
+	    # this.
 	} else {
 	    # unknown line
 	    verbose -log "get_compiler_info: $cppline"
