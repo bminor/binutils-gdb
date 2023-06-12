@@ -1254,7 +1254,9 @@ print_value (value *val, const value_print_options &opts)
 
   annotate_value_history_begin (histindex, val->type ());
 
-  gdb_printf ("$%d = ", histindex);
+  std::string idx = string_printf ("$%d", histindex);
+  gdb_printf ("%ps = ", styled_string (variable_name_style.style (),
+				       idx.c_str ()));
 
   annotate_value_history_value ();
 

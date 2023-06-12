@@ -206,8 +206,9 @@ proc run_style_tests { } {
 	set sfield [limited_style string_field variable]
 	set efield [limited_style e_field variable]
 	set evalue [limited_style VALUE_TWO variable]
+	set lhs [limited_style "\\\$$decimal" variable]
 	gdb_test "print struct_value" \
-	    "\{$ifield = 23,.*$sfield = .*,.*$efield = $evalue.*"
+	    "$lhs = \{$ifield = 23,.*$sfield = .*,.*$efield = $evalue.*"
 
 	set ffield [limited_style field variable]
 	set cstart [string_to_regexp "/* XXX "]
