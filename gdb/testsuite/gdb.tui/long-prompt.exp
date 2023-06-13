@@ -57,10 +57,7 @@ with_test_prefix "prompt size == width + 1: end of screen" {
     }
 
     # Put prompt at last line.
-    Term::command "echo \\n"
-    Term::command "echo \\n"
-    Term::command "echo \\n"
-    Term::command "echo \\n"
+    Term::command "echo \\n\\n\\n\\n\\n\\n"
     gdb_assert { $Term::_cur_row == 23 } "at last line"
 
     set prompt "123456789A123456789B123456789C123456789D>"
