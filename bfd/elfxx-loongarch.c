@@ -1944,3 +1944,10 @@ loongarch_write_unsigned_leb128 (bfd_byte *p, unsigned int len, bfd_vma value)
   while (len);
   return p;
 }
+
+int loongarch_get_uleb128_length (bfd_byte *buf)
+{
+  unsigned int len = 0;
+  _bfd_read_unsigned_leb128 (NULL, buf, &len);
+  return len;
+}

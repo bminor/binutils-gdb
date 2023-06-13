@@ -1382,7 +1382,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_LARCH_SUB_ULEB128:
       {
 	unsigned int len = 0;
-	_bfd_read_unsigned_leb128 (NULL, (bfd_byte *)buf, &len);
+	len = loongarch_get_uleb128_length ((bfd_byte *)buf);
 	bfd_byte *endp = (bfd_byte*) buf + len -1;
 	/* Clean the uleb128 value to 0. Do not reduce the length.  */
 	memset (buf, 0x80, len - 1);
