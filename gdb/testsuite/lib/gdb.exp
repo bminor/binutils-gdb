@@ -9062,6 +9062,22 @@ proc hex_in_list { val hexlist } {
     return [expr $index != -1]
 }
 
+# As info args, but also add the default values.
+
+proc info_args_with_defaults { name } {
+    set args {}
+
+    foreach arg [info args $name] {
+	if { [info default $name $arg default_value] } {
+	    lappend args [list $arg $default_value]
+	} else {
+	    lappend args $arg
+	}
+    }
+
+    return $args
+}
+
 # Override proc NAME to proc OVERRIDE for the duration of the execution of
 # BODY.
 
@@ -9081,7 +9097,7 @@ proc with_override { name override body } {
 
     # Save the old proc, if it exists.
     if { [info procs $name] != "" } {
-	set old_args [info args $name]
+	set old_args [info_args_with_defaults $name]
 	set old_body [info body $name]
 	set existed true
     } else {
@@ -9089,7 +9105,7 @@ proc with_override { name override body } {
     }
 
     # Install the override.
-    set new_args [info args $override]
+    set new_args [info_args_with_defaults $override]
     set new_body [info body $override]
     eval proc $name {$new_args} {$new_body}
 
