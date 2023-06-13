@@ -159,6 +159,7 @@
 #define AARCH64_SVE_MAGIC			0x53564501
 #define AARCH64_ZA_MAGIC			0x54366345
 #define AARCH64_TPIDR2_MAGIC			0x54504902
+#define AARCH64_ZT_MAGIC			0x5a544e01
 
 /* Defines for the extra_context that follows an AARCH64_EXTRA_MAGIC.  */
 #define AARCH64_EXTRA_DATAP_OFFSET		8
@@ -192,6 +193,14 @@
 /* TPIDR2 register value offset in the TPIDR2 signal frame context.  */
 #define AARCH64_TPIDR2_CONTEXT_TPIDR2_OFFSET	8
 
+/* SME2 (ZT) constants.  */
+/* Offset of the field containing the number of registers in the SME2 signal
+   context state.  */
+#define AARCH64_SME2_CONTEXT_NREGS_OFFSET	8
+/* Offset of the beginning of the register data for the first ZT register in
+   the signal context state.  */
+#define AARCH64_SME2_CONTEXT_REGS_OFFSET	16
+
 /* Holds information about the signal frame.  */
 struct aarch64_linux_sigframe
 {
@@ -214,6 +223,8 @@ struct aarch64_linux_sigframe
   CORE_ADDR za_section = 0;
   /* Starting address of the section containing the TPIDR2 register.  */
   CORE_ADDR tpidr2_section = 0;
+  /* Starting address of the section containing the ZT registers.  */
+  CORE_ADDR zt_section = 0;
   /* Starting address of the section containing extra information.  */
   CORE_ADDR extra_section = 0;
 
@@ -221,10 +232,15 @@ struct aarch64_linux_sigframe
   ULONGEST vl = 0;
   /* The streaming vector length (SSVE/ZA).  */
   ULONGEST svl = 0;
+  /* Number of ZT registers in this context.  */
+  unsigned int zt_register_count = 0;
+
   /* True if we are in streaming mode, false otherwise.  */
   bool streaming_mode = false;
   /* True if we have a ZA payload, false otherwise.  */
   bool za_payload = false;
+  /* True if we have a ZT entry in the signal context, false otherwise.  */
+  bool zt_available = false;
 };
 
 /* Read an aarch64_ctx, returning the magic value, and setting *SIZE to the
@@ -481,6 +497,33 @@ aarch64_linux_read_signal_frame_info (frame_info_ptr this_frame,
 	    section += size;
 	    break;
 	  }
+	case AARCH64_ZT_MAGIC:
+	  {
+	    gdb_byte buf[2];
+
+	    /* Extract the number of ZT registers available in this
+	       context.  */
+	    if (target_read_memory (section + AARCH64_SME2_CONTEXT_NREGS_OFFSET,
+				    buf, 2) != 0)
+	      {
+		warning (_("Failed to read the number of ZT registers from the "
+			   "ZT signal frame context."));
+		section += size;
+		break;
+	      }
+
+	    signal_frame.zt_register_count
+	      = extract_unsigned_integer (buf, 2, byte_order);
+
+	    /* This is a context containing the ZT registers.  This should only
+	       exist if we also have the ZA context.  The presence of the ZT
+	       context without the ZA context is invalid.  */
+	    signal_frame.zt_section = section;
+	    signal_frame.zt_available = true;
+
+	    section += size;
+	    break;
+	  }
 	case AARCH64_EXTRA_MAGIC:
 	  {
 	    /* Extra is always the last valid section in reserved and points to
@@ -515,6 +558,12 @@ aarch64_linux_read_signal_frame_info (frame_info_ptr this_frame,
       if (!extra_found && section > section_end)
 	break;
     }
+
+    /* Sanity check that if the ZT entry exists, the ZA entry must also
+       exist.  */
+    if (signal_frame.zt_available && !signal_frame.za_payload)
+      error (_("While reading signal context information, found a ZT context "
+	       "without a ZA context, which is invalid."));
 }
 
 /* Implement the "init" method of struct tramp_frame.  */
@@ -620,6 +669,22 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
       /* Restore SVG.  */
       trad_frame_set_reg_value (this_cache, tdep->sme_svg_regnum,
 				sve_vg_from_vl (signal_frame.svl));
+
+      /* Handle SME2 (ZT).  */
+      if (tdep->has_sme2 ()
+	  && signal_frame.za_section != 0
+	  && signal_frame.zt_register_count > 0)
+	{
+	  /* Is ZA state available?  */
+	  gdb_assert (svcr & SVCR_ZA_BIT);
+
+	  /* Restore the ZT state.  For now we assume that we only have
+	     a single ZT register.  If/When more ZT registers appear, we
+	     should update the code to handle that case accordingly.  */
+	  trad_frame_set_reg_addr (this_cache, tdep->sme2_zt0_regnum,
+				   signal_frame.zt_section
+				   + AARCH64_SME2_CONTEXT_REGS_OFFSET);
+	}
     }
 
   /* Restore the tpidr2 register, if the target supports it and if there is
