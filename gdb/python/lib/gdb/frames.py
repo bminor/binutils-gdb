@@ -190,12 +190,8 @@ def execute_frame_filters(frame, frame_low, frame_high):
     frame_iterator = FrameIterator(frame)
 
     # Apply a basic frame decorator to all gdb.Frames.  This unifies
-    # the interface.  Python 3.x moved the itertools.imap
-    # functionality to map(), so check if it is available.
-    if hasattr(itertools, "imap"):
-        frame_iterator = itertools.imap(FrameDecorator, frame_iterator)
-    else:
-        frame_iterator = map(FrameDecorator, frame_iterator)
+    # the interface.
+    frame_iterator = map(FrameDecorator, frame_iterator)
 
     for ff in sorted_list:
         frame_iterator = ff.filter(frame_iterator)
