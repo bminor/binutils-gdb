@@ -788,7 +788,7 @@ namespace eval Term {
 
 	set fn "wait_for"
 
-	set prompt_wait_for "$gdb_prompt \$"
+	set prompt_wait_for "(^|\\|)$gdb_prompt \$"
 	debug_tui_matching "$fn: regexp: '$wait_for'"
 
 	while 1 {
@@ -909,7 +909,7 @@ namespace eval Term {
 	global gdb_prompt
 	send_gdb "$cmd\n"
 	set str [string_to_regexp $cmd]
-	set str "(^|\|)$gdb_prompt $str"
+	set str "(^|\\|)$gdb_prompt $str"
 	wait_for $str
     }
 
