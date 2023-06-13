@@ -3693,7 +3693,7 @@ md_assemble (char *str)
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, TARGET_BYTES_BIG_ENDIAN);
+  return ieee_md_atof (type, litP, sizeP, target_big_endian);
 }
 
 void
