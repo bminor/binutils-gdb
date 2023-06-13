@@ -35,3 +35,8 @@ gdb_test "python print(v.dereference().type.code is gdb.TYPE_CODE_VOID)" \
     "False"
 gdb_test "python print(v.type.strip_typedefs().target().code is gdb.TYPE_CODE_VOID)" \
     "False"
+
+# This was a convenient spot to put a regression test.  GNAT will
+# create a DW_TAG_unspecified_type in the main.adb CU, and if gdb
+# isn't careful, this will result in this 'whatis' yielding 'void'.
+gdb_test "whatis pkg.value_record" "type = pkg.value_record"
