@@ -94,3 +94,5 @@ def check_everything():
         check_map()
         check_opt()
         print("OK")
+    else:
+        print("UNSUPPORTED")
