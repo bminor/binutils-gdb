@@ -663,7 +663,16 @@ x86_dr_stopped_data_address (struct x86_debug_reg_state *state,
 	  addr = x86_dr_low_get_addr (i);
 	  rc = 1;
 	  if (show_debug_regs)
-	    x86_show_dr (state, "watchpoint_hit", addr, -1, hw_write);
+	    {
+	      x86_show_dr (state, "watchpoint_hit, mirror", addr, -1, hw_write);
+
+	      struct x86_debug_reg_state real_state {};
+	      for (int r = 0; r < DR_NADDR; r++)
+		real_state.dr_mirror[r] = x86_dr_low_get_addr (r);
+	      real_state.dr_status_mirror = status;
+	      real_state.dr_control_mirror = control;
+	      x86_show_dr (&real_state, "watchpoint_hit, real", addr, -1, hw_write);
+	    }
 	}
     }
 
@@ -723,7 +732,16 @@ x86_dr_stopped_by_hw_breakpoint (struct x86_debug_reg_state *state)
 	  addr = x86_dr_low_get_addr (i);
 	  rc = 1;
 	  if (show_debug_regs)
-	    x86_show_dr (state, "watchpoint_hit", addr, -1, hw_execute);
+	    {
+	      x86_show_dr (state, "watchpoint_hit", addr, -1, hw_execute);
+
+	      struct x86_debug_reg_state real_state {};
+	      for (int r = 0; r < DR_NADDR; r++)
+		real_state.dr_mirror[r] = x86_dr_low_get_addr (r);
+	      real_state.dr_status_mirror = status;
+	      real_state.dr_control_mirror = control;
+	      x86_show_dr (&real_state, "watchpoint_hit, real", addr, -1, hw_execute);
+	    }
 	}
     }
 
