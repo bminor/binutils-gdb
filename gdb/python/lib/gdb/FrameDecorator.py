@@ -223,31 +223,6 @@ class FrameVars(object):
 
     def __init__(self, frame):
         self.frame = frame
-        self.symbol_class = {
-            gdb.SYMBOL_LOC_STATIC: True,
-            gdb.SYMBOL_LOC_REGISTER: True,
-            gdb.SYMBOL_LOC_ARG: True,
-            gdb.SYMBOL_LOC_REF_ARG: True,
-            gdb.SYMBOL_LOC_LOCAL: True,
-            gdb.SYMBOL_LOC_REGPARM_ADDR: True,
-            gdb.SYMBOL_LOC_COMPUTED: True,
-        }
-
-    def fetch_b(self, sym):
-        """Local utility method to determine if according to Symbol
-        type whether it should be included in the iterator.  Not all
-        symbols are fetched, and only symbols that return
-        True from this method should be fetched."""
-
-        # SYM may be a string instead of a symbol in the case of
-        # synthetic local arguments or locals.  If that is the case,
-        # always fetch.
-        if isinstance(sym, str):
-            return True
-
-        sym_type = sym.addr_class
-
-        return self.symbol_class.get(sym_type, False)
 
     def fetch_frame_locals(self):
         """Public utility method to fetch frame local variables for
@@ -266,7 +241,7 @@ class FrameVars(object):
             for sym in block:
                 if sym.is_argument:
                     continue
-                if self.fetch_b(sym):
+                if sym.is_variable:
                     lvars.append(SymValueWrapper(sym, None))
 
             # Stop when the function itself is seen, to avoid showing
