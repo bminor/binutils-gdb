@@ -1,5 +1,10 @@
 -*- text -*-
 
+* The linker now accepts a command line option of --remap-inputs
+  <PATTERN>=<FILE> to relace any input file that matches <PATTERN> with
+  <FILE>.  In addition the option --remap-inputs-file=<FILE> can be used to
+  specify a file containing any number of these remapping directives.
+
 * The linker command line option --print-map-locals can be used to include
   local symbols in a linker map.  (ELF targets only).
 

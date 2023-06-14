@@ -219,6 +219,12 @@ static const struct ld_option ld_options[] =
   { {"just-symbols", required_argument, NULL, 'R'},
     'R', N_("FILE"), N_("Just link symbols (if directory, same as --rpath)"),
     TWO_DASHES },
+
+  { {"remap-inputs-file", required_argument, NULL, OPTION_REMAP_INPUTS_FILE},
+    '\0', N_("FILE"), "Provide a FILE containing input remapings", TWO_DASHES },
+  { {"remap-inputs", required_argument, NULL, OPTION_REMAP_INPUTS},
+    '\0', N_("PATTERN=FILE"), "Remap input files matching PATTERN to FILE", TWO_DASHES },
+
   { {"strip-all", no_argument, NULL, 's'},
     's', NULL, N_("Strip all symbols"), TWO_DASHES },
   { {"strip-debug", no_argument, NULL, 'S'},
@@ -1680,6 +1686,27 @@ parse_args (unsigned argc, char **argv)
 
 	case OPTION_FINI:
 	  link_info.fini_function = optarg;
+	  break;
+
+	case OPTION_REMAP_INPUTS_FILE:
+	  if (! ldfile_add_remap_file (optarg))
+	    einfo (_("%F%P: failed to add remap file %s\n"), optarg);
+	  break;
+
+	case OPTION_REMAP_INPUTS:
+	  {
+	    char *optarg2 = strchr (optarg, '=');
+	    if (optarg2 == NULL)
+	      /* FIXME: Should we allow --remap-inputs=@myfile as a synonym
+		 for --remap-inputs-file=myfile ?  */
+	      einfo (_("%F%P: invalid argument to option --remap-inputs\n"));
+	    size_t len = optarg2 - optarg;
+	    char * pattern = xmalloc (len + 1);
+	    memcpy (pattern, optarg, len);
+	    pattern[len] = 0;
+	    ldfile_add_remap (pattern, optarg2 + 1);
+	    free (pattern);
+	  }
 	  break;
 
 	case OPTION_REDUCE_MEMORY_OVERHEADS:

@@ -1125,6 +1125,10 @@ new_afile (const char *name,
 
   lang_has_input_file = true;
 
+  name = ldfile_possibly_remap_input (name);
+  if (name == NULL)
+    return NULL;
+
   p = new_stat (lang_input_statement, stat_ptr);
   memset (&p->the_bfd, 0,
 	  sizeof (*p) - offsetof (lang_input_statement_type, the_bfd));
@@ -1328,6 +1332,7 @@ void
 lang_finish (void)
 {
   output_section_statement_table_free ();
+  ldfile_remap_input_free ();
 }
 
 /*----------------------------------------------------------------------
@@ -2279,6 +2284,8 @@ lang_map (void)
 {
   lang_memory_region_type *m;
   bool dis_header_printed = false;
+
+  ldfile_print_input_remaps ();
 
   LANG_FOR_EACH_INPUT_STATEMENT (file)
     {

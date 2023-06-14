@@ -1,3 +1,25 @@
+2023-06-14  Nick Clifton  <nickc@redhat.com>
+
+	PR 30374
+	* ldfile.c (struct input_remap): New structure.
+	(ldfile_add_remap): New function.
+	(ldfile_remap_input_free): New function.
+	(ldfile_add_remap_file): New function.
+	(ldfile_possibly_remap_input): New function.
+	(ldfile_print_input_remaps): New function.
+	* ldfile.h: Add prototypes for new functions.
+	* ldlang.c (new_afile): Call ldfile_possibly_remap_input.
+	(lang_finish): Call ldfile_remap_input_free.
+	(lang_map): Call ldfile_print_input_remaps.
+	* ldlex.h (OPTION_REMAP_INPUTS, OPTION_REMAP_INPUTS_FILE): Define.
+	* lexsup.c (ld_options): Add --remap-inputs-file and --remap-inputs.
+	(parse_args): Handle new options.
+	* NEWS: Mention the new feature.
+	* ld.texi: Document the new options.
+	* testsuite/ld-misc/input-remap.exp: New test driver.
+	* testsuite/ld-misc/remaps.r: New file: Expected linker output.
+	* testsuite/ld-misc/remaps.txt: New file.  Input remaps file.
+
 2023-06-07  Nick Clifton  <nickc@redhat.com>
 
 	PR 30499

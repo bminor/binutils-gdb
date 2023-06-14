@@ -793,6 +793,66 @@ If the @samp{-m} option is not used, the emulation is taken from the
 Otherwise, the default emulation depends upon how the linker was
 configured.
 
+@cindex remapping inputs
+@kindex --remap-inputs=@file{pattern}=@file{filename}
+@kindex --remap-inputs-file=@file{file}
+@item --remap-inputs=@file{pattern}=@file{filename}
+@itemx --remap-inputs-file=@file{file}
+These options allow the names of input files to be changed before the
+linker attempts to open them.  The option
+@option{--remap-inputs=foo.o=bar.o} will cause any attempt to load a
+file called @file{foo.o} to instead try to load a file called
+@file{bar.o}.  Wildcard patterns are permitted in the first filename,
+so @option{--remap-inputs=foo*.o=bar.o} will rename any input file that
+matches @file{foo*.o} to @file{bar.o}.
+
+An alternative form of the option
+@option{--remap-inputs-file=filename} allows the remappings to be read
+from a file.  Each line in the file can contain a single remapping.
+Blank lines are ignored.  Anything from a hash character (@samp{#}) to
+the end of a line is considered to be a comment and is also ignored.
+The mapping pattern can be separated from the filename by whitespace
+or an equals (@samp{=}) character.
+
+The options can be specified multiple times.  Their contents
+accumulate.  The remappings will be processed in the order in which
+they occur on the command line, and if they come from a file, in the
+order in which they occur in the file.  If a match is made, no further
+checking for that filename will be performed.
+
+If the replacement filename is @file{/dev/null} or just @file{NUL}
+then the remapping will actually cause the input file to be ignored.
+This can be a convenient way to experiment with removing input files
+from a complicated build environment.
+
+Note that this option is position dependent and only affects filenames
+that come after it on the command line.  Thus:
+
+@smallexample
+  ld foo.o --remap-inputs=foo.o=bar.o
+@end smallexample
+
+Will have no effect, whereas:
+
+@smallexample
+  ld --remap-inputs=foo.o=bar.o foo.o 
+@end smallexample
+
+Will rename the input file @file{foo.o} to @file{bar.o}.
+
+Note - these options also affect files referenced by @emph{INPUT}
+statements in linker scripts.  But since linker scripts are processed
+after the entire command line is read, the position of the remap
+options on the command line is not significant.
+
+If the @option{verbose} option is enabled then any mappings that match
+will be reported, although again the @option{verbose} option needs to
+be enabled on the command line @emph{before} the remaped filenames
+appear.
+
+If the @option{-Map} or @option{--print-map} options are enabled then
+the remapping list will be included in the map output.
+
 @cindex link map
 @kindex -M
 @kindex --print-map
