@@ -156,37 +156,16 @@ def _sort_list():
     return sorted_frame_filters
 
 
-def execute_frame_filters(frame, frame_low, frame_high):
-    """Internal function called from GDB that will execute the chain
-    of frame filters.  Each filter is executed in priority order.
-    After the execution completes, slice the iterator to frame_low -
-    frame_high range.
-
-    Arguments:
-        frame: The initial frame.
-
-        frame_low: The low range of the slice, counting from 0.  If
-        this is a negative integer then it indicates a backward slice
-        (ie bt -4) which counts backward from the last frame in the
-        backtrace.
-
-        frame_high: The high range of the slice, inclusive.  If this
-        is -1 then it indicates all frames until the end of the stack
-        from frame_low.
-
-    Returns:
-        frame_iterator: The sliced iterator after all frame
-        filters have had a chance to execute, or None if no frame
-        filters are registered.
-
-    """
-
+# Internal function that implements frame_iterator and
+# execute_frame_filters.  If ALWAYS is True, then this will always
+# return an iterator.
+def _frame_iterator(frame, frame_low, frame_high, always):
     # Get a sorted list of frame filters.
     sorted_list = list(_sort_list())
 
     # Check to see if there are any frame-filters.  If not, just
     # return None and let default backtrace printing occur.
-    if len(sorted_list) == 0:
+    if not always and len(sorted_list) == 0:
         return None
 
     frame_iterator = FrameIterator(frame)
@@ -229,3 +208,57 @@ def execute_frame_filters(frame, frame_low, frame_high):
     sliced = itertools.islice(frame_iterator, frame_low, frame_high)
 
     return sliced
+
+
+def frame_iterator(frame, frame_low, frame_high):
+    """Helper function that will execute the chain of frame filters.
+    Each filter is executed in priority order.  After the execution
+    completes, slice the iterator to frame_low - frame_high range.  An
+    iterator is always returned.
+
+    Arguments:
+        frame: The initial frame.
+
+        frame_low: The low range of the slice, counting from 0.  If
+        this is a negative integer then it indicates a backward slice
+        (ie bt -4) which counts backward from the last frame in the
+        backtrace.
+
+        frame_high: The high range of the slice, inclusive.  If this
+        is -1 then it indicates all frames until the end of the stack
+        from frame_low.
+
+    Returns:
+        frame_iterator: The sliced iterator after all frame
+        filters have had a chance to execute.
+    """
+
+    return _frame_iterator(frame, frame_low, frame_high, True)
+
+
+def execute_frame_filters(frame, frame_low, frame_high):
+    """Internal function called from GDB that will execute the chain
+    of frame filters.  Each filter is executed in priority order.
+    After the execution completes, slice the iterator to frame_low -
+    frame_high range.
+
+    Arguments:
+        frame: The initial frame.
+
+        frame_low: The low range of the slice, counting from 0.  If
+        this is a negative integer then it indicates a backward slice
+        (ie bt -4) which counts backward from the last frame in the
+        backtrace.
+
+        frame_high: The high range of the slice, inclusive.  If this
+        is -1 then it indicates all frames until the end of the stack
+        from frame_low.
+
+    Returns:
+        frame_iterator: The sliced iterator after all frame
+        filters have had a chance to execute, or None if no frame
+        filters are registered.
+
+    """
+
+    return _frame_iterator(frame, frame_low, frame_high, False)
