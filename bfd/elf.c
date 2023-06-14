@@ -4254,11 +4254,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
     {
       bfd_map_over_sections (abfd, bfd_elf_set_group_contents, &failed);
       if (failed)
-	{
-	  if (need_symtab)
-	    _bfd_elf_strtab_free (strtab);
-	  return false;
-	}
+	goto err_free_strtab;
     }
 
   shstrtab_hdr = &elf_tdata (abfd)->shstrtab_hdr;
@@ -4274,9 +4270,9 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   shstrtab_hdr->sh_addralign = 1;
 
   if (!assign_file_positions_except_relocs (abfd, link_info))
-    return false;
+    goto err_free_strtab;
 
-  if (need_symtab)
+  if (strtab != NULL)
     {
       file_ptr off;
       Elf_Internal_Shdr *hdr;
@@ -4303,13 +4299,17 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
 	 out.  */
       if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) != 0
 	  || ! _bfd_elf_strtab_emit (abfd, strtab))
-	return false;
+	goto err_free_strtab;
       _bfd_elf_strtab_free (strtab);
     }
 
   abfd->output_has_begun = true;
-
   return true;
+
+ err_free_strtab:
+  if (strtab != NULL)
+    _bfd_elf_strtab_free (strtab);
+  return false;
 }
 
 /* Retrieve .eh_frame_hdr.  Prior to size_dynamic_sections the
