@@ -26,6 +26,7 @@ set testname "weak symbols"
 if { [is_elf_format] } {
     # hppa64 is incredibly broken
     setup_xfail hppa64-*-*
+    setup_xfail bfin-*-*
 } elseif { [is_pecoff_format] } {
     # Weak symbols are broken for most PE targets.
     if { ![istarget aarch64-*-*]

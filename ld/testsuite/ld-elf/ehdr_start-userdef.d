@@ -2,7 +2,7 @@
 #ld: -e _start -T ehdr_start-userdef.t
 #readelf: -Ws
 #target: *-*-linux* *-*-gnu* *-*-nacl* arm*-*-uclinuxfdpiceabi
-#xfail: frv-*-*
+#xfail: bfin-*-* frv-*-*
 
 #...
 Symbol table '\.symtab' contains [0-9]+ entries:

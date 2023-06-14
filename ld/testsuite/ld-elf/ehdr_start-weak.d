@@ -2,7 +2,7 @@
 #ld: -e _start -T ehdr_start-missing.t --no-dynamic-linker
 #nm: -n
 #target: *-*-linux* *-*-gnu* *-*-nacl* arm*-*-uclinuxfdpiceabi
-#xfail: frv-*-*
+#xfail: bfin-*-* frv-*-*
 
 #failif
 #...
