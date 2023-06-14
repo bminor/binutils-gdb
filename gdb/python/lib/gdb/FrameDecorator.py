@@ -269,6 +269,11 @@ class FrameVars(object):
                 if self.fetch_b(sym):
                     lvars.append(SymValueWrapper(sym, None))
 
+            # Stop when the function itself is seen, to avoid showing
+            # variables from outer functions in a nested function.
+            if block.function is not None:
+                break
+
             block = block.superblock
 
         return lvars
@@ -286,14 +291,18 @@ class FrameVars(object):
             block = None
 
         while block is not None:
-            if block.function is not None:
+            if block.is_global or block.is_static:
                 break
-            block = block.superblock
-
-        if block is not None:
             for sym in block:
                 if not sym.is_argument:
                     continue
                 args.append(SymValueWrapper(sym, None))
+
+            # Stop when the function itself is seen, to avoid showing
+            # variables from outer functions in a nested function.
+            if block.function is not None:
+                break
+
+            block = block.superblock
 
         return args
