@@ -7113,10 +7113,13 @@ find_thumb_glue (struct bfd_link_info *link_info,
   hash = elf_link_hash_lookup
     (&(hash_table)->root, tmp_name, false, false, true);
 
-  if (hash == NULL
-      && asprintf (error_message, _("unable to find %s glue '%s' for '%s'"),
-		   "Thumb", tmp_name, name) == -1)
-    *error_message = (char *) bfd_errmsg (bfd_error_system_call);
+  if (hash == NULL)
+    {
+      *error_message = bfd_asprintf (_("unable to find %s glue '%s' for '%s'"),
+				     "Thumb", tmp_name, name);
+      if (*error_message == NULL)
+	*error_message = (char *) bfd_errmsg (bfd_error_system_call);
+    }
 
   free (tmp_name);
 
@@ -7148,11 +7151,13 @@ find_arm_glue (struct bfd_link_info *link_info,
   myh = elf_link_hash_lookup
     (&(hash_table)->root, tmp_name, false, false, true);
 
-  if (myh == NULL
-      && asprintf (error_message, _("unable to find %s glue '%s' for '%s'"),
-		   "ARM", tmp_name, name) == -1)
-    *error_message = (char *) bfd_errmsg (bfd_error_system_call);
-
+  if (myh == NULL)
+    {
+      *error_message = bfd_asprintf (_("unable to find %s glue '%s' for '%s'"),
+				     "ARM", tmp_name, name);
+      if (*error_message == NULL)
+	*error_message = (char *) bfd_errmsg (bfd_error_system_call);
+    }
   free (tmp_name);
 
   return myh;

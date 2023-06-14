@@ -700,12 +700,16 @@ CODE_FRAGMENT
 .}
 .bfd_error_type;
 .
+INTERNAL
+.{* A buffer that is freed on bfd_close.  *}
+.extern char *_bfd_error_buf;
+.
 */
 
 static bfd_error_type bfd_error;
 static bfd_error_type input_error;
 static bfd *input_bfd;
-static char *input_error_msg;
+char *_bfd_error_buf;
 
 const char *const bfd_errmsgs[] =
 {
@@ -793,8 +797,8 @@ bfd_set_input_error (bfd *input, bfd_error_type error_tag)
   /* This is an error that occurred during bfd_close when writing an
      archive, but on one of the input files.  */
   bfd_error = bfd_error_on_input;
-  free (input_error_msg);
-  input_error_msg = NULL;
+  free (_bfd_error_buf);
+  _bfd_error_buf = NULL;
   input_bfd = input;
   input_error = error_tag;
   if (input_error >= bfd_error_on_input)
@@ -822,12 +826,10 @@ bfd_errmsg (bfd_error_type error_tag)
   if (error_tag == bfd_error_on_input)
     {
       const char *msg = bfd_errmsg (input_error);
-
-      free (input_error_msg);
-      input_error_msg = NULL;
-      if (asprintf (&input_error_msg, _(bfd_errmsgs [error_tag]),
-		    bfd_get_filename (input_bfd), msg) != -1)
-	return input_error_msg;
+      char *ret = bfd_asprintf (_(bfd_errmsgs[error_tag]),
+				bfd_get_filename (input_bfd), msg);
+      if (ret)
+	return ret;
 
       /* Ick, what to do on out of memory?  */
       return msg;
@@ -839,7 +841,7 @@ bfd_errmsg (bfd_error_type error_tag)
   if (error_tag > bfd_error_invalid_error_code)
     error_tag = bfd_error_invalid_error_code;	/* sanity check */
 
-  return _(bfd_errmsgs [error_tag]);
+  return _(bfd_errmsgs[error_tag]);
 }
 
 /*
@@ -866,6 +868,40 @@ bfd_perror (const char *message)
   else
     fprintf (stderr, "%s: %s\n", message, bfd_errmsg (bfd_get_error ()));
   fflush (stderr);
+}
+
+/*
+INTERNAL_FUNCTION
+	bfd_asprintf
+
+SYNOPSIS
+	char *bfd_asprintf (const char *fmt, ...);
+
+DESCRIPTION
+	Primarily for error reporting, this function is like
+	libiberty's xasprintf except that it can return NULL on no
+	memory and the returned string should not be freed.  Uses a
+	single malloc'd buffer managed by libbfd, _bfd_error_buf.
+	Be aware that a call to this function frees the result of any
+	previous call.  bfd_errmsg (bfd_error_on_input) also calls
+	this function.
+*/
+
+char *
+bfd_asprintf (const char *fmt, ...)
+{
+  free (_bfd_error_buf);
+  _bfd_error_buf = NULL;
+  va_list ap;
+  va_start (ap, fmt);
+  int count = vasprintf (&_bfd_error_buf, fmt, ap);
+  va_end (ap);
+  if (count == -1)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      _bfd_error_buf = NULL;
+    }
+  return _bfd_error_buf;
 }
 
 /*
@@ -1663,8 +1699,8 @@ bfd_init (void)
 {
   bfd_error = bfd_error_no_error;
   input_bfd = NULL;
-  free (input_error_msg);
-  input_error_msg = NULL;
+  free (_bfd_error_buf);
+  _bfd_error_buf = NULL;
   input_error = bfd_error_no_error;
   _bfd_error_program_name = NULL;
   _bfd_error_internal = error_handler_fprintf;

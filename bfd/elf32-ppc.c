@@ -987,14 +987,8 @@ ppc_elf_unhandled_reloc (bfd *abfd,
 				  input_section, output_bfd, error_message);
 
   if (error_message != NULL)
-    {
-      static char *message;
-      free (message);
-      if (asprintf (&message, _("generic linker can't handle %s"),
-		    reloc_entry->howto->name) < 0)
-	message = NULL;
-      *error_message = message;
-    }
+    *error_message = bfd_asprintf (_("generic linker can't handle %s"),
+				     reloc_entry->howto->name);
   return bfd_reloc_dangerous;
 }
 

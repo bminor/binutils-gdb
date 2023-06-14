@@ -2090,14 +2090,14 @@ riscv_resolve_pcrel_lo_relocs (riscv_pcrel_relocs *p)
 	       != RISCV_CONST_HIGH_PART (entry->value + r->reloc->r_addend))
 	{
 	  /* Check the overflow when adding reloc addend.  */
-	  if (asprintf (&string,
-			_("%%pcrel_lo overflow with an addend, the "
-			  "value of %%pcrel_hi is 0x%" PRIx64 " without "
-			  "any addend, but may be 0x%" PRIx64 " after "
-			  "adding the %%pcrel_lo addend"),
-			(int64_t) RISCV_CONST_HIGH_PART (entry->value),
-			(int64_t) RISCV_CONST_HIGH_PART
-				(entry->value + r->reloc->r_addend)) == -1)
+	  string = bfd_asprintf (_("%%pcrel_lo overflow with an addend,"
+				   " the value of %%pcrel_hi is 0x%" PRIx64
+				   " without any addend, but may be 0x%" PRIx64
+				   " after adding the %%pcrel_lo addend"),
+				 (int64_t) RISCV_CONST_HIGH_PART (entry->value),
+				 (int64_t) RISCV_CONST_HIGH_PART
+				 (entry->value + r->reloc->r_addend));
+	  if (string == NULL)
 	    string = _("%pcrel_lo overflow with an addend");
 	}
 
@@ -2184,7 +2184,6 @@ riscv_elf_relocate_section (bfd *output_bfd,
       int r_type = ELFNN_R_TYPE (rel->r_info), tls_type;
       reloc_howto_type *howto = riscv_elf_rtype_to_howto (input_bfd, r_type);
       const char *msg = NULL;
-      char *msg_buf = NULL;
       bool resolved_to_zero;
 
       if (howto == NULL)
@@ -2705,14 +2704,12 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 		     Perhaps we also need the similar checks for the
 		     R_RISCV_BRANCH and R_RISCV_RVC_BRANCH relocations.  */
-		  if (asprintf (&msg_buf,
-				_("%%X%%P: relocation %s against `%s' which "
-				  "may bind externally can not be used when "
-				  "making a shared object; recompile "
-				  "with -fPIC\n"),
-				howto->name, h->root.root.string) == -1)
-		    msg_buf = NULL;
-		  msg = msg_buf;
+		  msg = bfd_asprintf (_("%%X%%P: relocation %s against `%s'"
+					" which may bind externally"
+					" can not be used"
+					" when making a shared object;"
+					" recompile with -fPIC\n"),
+				      howto->name, h->root.root.string);
 		  r = bfd_reloc_notsupported;
 		}
 	    }
@@ -2999,13 +2996,10 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
-	  if (asprintf (&msg_buf,
-			_("%%X%%P: unresolvable %s relocation against "
-			  "symbol `%s'\n"),
-			howto->name,
-			h->root.root.string) == -1)
-	    msg_buf = NULL;
-	  msg = msg_buf;
+	  msg = bfd_asprintf (_("%%X%%P: unresolvable %s relocation against "
+				"symbol `%s'\n"),
+			      howto->name,
+			      h->root.root.string);
 	  r = bfd_reloc_notsupported;
 	}
 
@@ -3061,9 +3055,6 @@ riscv_elf_relocate_section (bfd *output_bfd,
       /* Do not report error message for the dangerous relocation again.  */
       if (msg && r != bfd_reloc_dangerous)
 	info->callbacks->einfo (msg);
-
-      /* Free the unused `msg_buf`.  */
-      free (msg_buf);
 
       /* We already reported the error via a callback, so don't try to report
 	 it again by returning false.  That leads to spurious errors.  */

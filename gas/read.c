@@ -322,6 +322,8 @@ read_end (void)
   stabs_end ();
   poend ();
   _obstack_free (&cond_obstack, NULL);
+  free (current_name);
+  free (current_label);
 }
 
 #ifndef TC_ADDRESS_BYTES
@@ -6048,6 +6050,8 @@ do_s_func (int end_p, const char *default_prefix)
       if (debug_type == DEBUG_STABS)
 	stabs_generate_asm_endfunc (current_name, current_label);
 
+      free (current_name);
+      free (current_label);
       current_name = current_label = NULL;
     }
   else /* ! end_p */
@@ -6084,7 +6088,7 @@ do_s_func (int end_p, const char *default_prefix)
 		    as_fatal ("%s", xstrerror (errno));
 		}
 	      else
-		label = name;
+		label = xstrdup (name);
 	    }
 	}
       else

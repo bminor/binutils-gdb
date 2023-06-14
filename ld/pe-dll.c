@@ -2107,6 +2107,7 @@ make_head (bfd *parent)
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
+  free (oname);
   bfd_find_target (pe_details->object_target, abfd);
   bfd_make_writable (abfd);
 
@@ -2200,6 +2201,7 @@ make_tail (bfd *parent)
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
+  free (oname);
   bfd_find_target (pe_details->object_target, abfd);
   bfd_make_writable (abfd);
 
@@ -2392,6 +2394,7 @@ make_one (def_file_export *exp, bfd *parent, bool include_jmp_stub)
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
+  free (oname);
   bfd_find_target (pe_details->object_target, abfd);
   bfd_make_writable (abfd);
 
@@ -2586,6 +2589,7 @@ make_singleton_name_thunk (const char *import, bfd *parent)
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
+  free (oname);
   bfd_find_target (pe_details->object_target, abfd);
   bfd_make_writable (abfd);
 
@@ -2666,6 +2670,7 @@ make_import_fixup_entry (const char *name,
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
+  free (oname);
   bfd_find_target (pe_details->object_target, abfd);
   bfd_make_writable (abfd);
 
@@ -2724,6 +2729,7 @@ make_runtime_pseudo_reloc (const char *name ATTRIBUTE_UNUSED,
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
+  free (oname);
   bfd_find_target (pe_details->object_target, abfd);
   bfd_make_writable (abfd);
 
@@ -2816,6 +2822,7 @@ pe_create_runtime_relocator_reference (bfd *parent)
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
+  free (oname);
   bfd_find_target (pe_details->object_target, abfd);
   bfd_make_writable (abfd);
 

@@ -929,6 +929,8 @@ bfd_close_all_done (bfd *abfd)
     }
 
   _bfd_delete_bfd (abfd);
+  free (_bfd_error_buf);
+  _bfd_error_buf = NULL;
 
   return ret;
 }
