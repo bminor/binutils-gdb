@@ -21,41 +21,17 @@ from .server import request
 from .varref import BaseReference
 
 
-# Helper function to return a frame's block without error.
-@in_gdb_thread
-def _safe_block(frame):
-    try:
-        return frame.block()
-    except gdb.error:
-        return None
-
-
-# Helper function to return two lists of variables of block, up to the
-# enclosing function.  The result is of the form (ARGS, LOCALS), where
-# each element is itself a list.
-@in_gdb_thread
-def _block_vars(block):
-    args = []
-    locs = []
-    while True:
-        for var in block:
-            if var.is_argument:
-                args.append(var)
-            elif var.is_variable or var.is_constant:
-                locs.append(var)
-        if block.function is not None:
-            break
-        block = block.superblock
-    return (args, locs)
-
-
-class ScopeReference(BaseReference):
+class _ScopeReference(BaseReference):
     def __init__(self, name, hint, frame, var_list):
         super().__init__(name)
         self.hint = hint
         self.frame = frame
+        self.inf_frame = frame.inferior_frame()
         self.func = frame.function()
-        self.var_list = var_list
+        self.line = frame.line()
+        # VAR_LIST might be any kind of iterator, but it's convenient
+        # here if it is just a collection.
+        self.var_list = tuple(var_list)
 
     def to_object(self):
         result = super().to_object()
@@ -63,8 +39,8 @@ class ScopeReference(BaseReference):
         # How would we know?
         result["expensive"] = False
         result["namedVariables"] = len(self.var_list)
-        if self.func is not None:
-            result["line"] = self.func.line
+        if self.line is not None:
+            result["line"] = self.line
             # FIXME construct a Source object
         return result
 
@@ -73,38 +49,45 @@ class ScopeReference(BaseReference):
 
     @in_gdb_thread
     def fetch_one_child(self, idx):
+        # Here SYM will conform to the SymValueWrapper interface.
         sym = self.var_list[idx]
-        if sym.needs_frame:
-            val = sym.value(self.frame)
-        else:
-            val = sym.value()
-        return (sym.print_name, val)
+        name = str(sym.symbol())
+        val = sym.value()
+        if val is None:
+            # No synthetic value, so must read the symbol value
+            # ourselves.
+            val = sym.symbol().value(self.inf_frame)
+        elif not isinstance(val, gdb.Value):
+            val = gdb.Value(val)
+        return (name, val)
 
 
-class RegisterReference(ScopeReference):
+class _RegisterReference(_ScopeReference):
     def __init__(self, name, frame):
         super().__init__(
-            name, "registers", frame, list(frame.architecture().registers())
+            name, "registers", frame, frame.inferior_frame().architecture().registers()
         )
 
     @in_gdb_thread
     def fetch_one_child(self, idx):
-        return (self.var_list[idx].name, self.frame.read_register(self.var_list[idx]))
+        return (
+            self.var_list[idx].name,
+            self.inf_frame.read_register(self.var_list[idx]),
+        )
 
 
 # Helper function to create a DAP scopes for a given frame ID.
 @in_gdb_thread
 def _get_scope(id):
     frame = frame_for_id(id)
-    block = _safe_block(frame)
     scopes = []
-    if block is not None:
-        (args, locs) = _block_vars(block)
-        if args:
-            scopes.append(ScopeReference("Arguments", "arguments", frame, args))
-        if locs:
-            scopes.append(ScopeReference("Locals", "locals", frame, locs))
-    scopes.append(RegisterReference("Registers", frame))
+    args = frame.frame_args()
+    if args:
+        scopes.append(_ScopeReference("Arguments", "arguments", frame, args))
+    locs = frame.frame_locals()
+    if locs:
+        scopes.append(_ScopeReference("Locals", "locals", frame, locs))
+    scopes.append(_RegisterReference("Registers", frame))
     return [x.to_object() for x in scopes]
 
 

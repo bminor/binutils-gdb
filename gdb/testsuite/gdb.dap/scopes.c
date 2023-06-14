@@ -30,6 +30,7 @@ int main ()
   {
     const char *inner = "inner block";
 
-    return 0;			/* BREAK */
+    /* Make sure to use 'scalar'.  */
+    return scalar - 23;			/* BREAK */
   }
 }

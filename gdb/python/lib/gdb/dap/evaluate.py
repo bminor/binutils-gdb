@@ -19,7 +19,7 @@ import gdb.printing
 # This is deprecated in 3.9, but required in older versions.
 from typing import Optional
 
-from .frames import frame_for_id
+from .frames import select_frame
 from .server import capability, request, client_bool_capability
 from .startup import send_gdb_with_response, in_gdb_thread
 from .varref import find_variable, VariableReference
@@ -35,8 +35,7 @@ class EvaluateResult(VariableReference):
 def _evaluate(expr, frame_id):
     global_context = True
     if frame_id is not None:
-        frame = frame_for_id(frame_id)
-        frame.select()
+        select_frame(frame_id)
         global_context = False
     val = gdb.parse_and_eval(expr, global_context=global_context)
     ref = EvaluateResult(val)
@@ -70,8 +69,7 @@ class _SetResult(VariableReference):
 def _set_expression(expression, value, frame_id):
     global_context = True
     if frame_id is not None:
-        frame = frame_for_id(frame_id)
-        frame.select()
+        select_frame(frame_id)
         global_context = False
     lhs = gdb.parse_and_eval(expression, global_context=global_context)
     rhs = gdb.parse_and_eval(value, global_context=global_context)
@@ -83,8 +81,7 @@ def _set_expression(expression, value, frame_id):
 @in_gdb_thread
 def _repl(command, frame_id):
     if frame_id is not None:
-        frame = frame_for_id(frame_id)
-        frame.select()
+        select_frame(frame_id)
     val = gdb.execute(command, from_tty=True, to_string=True)
     return {
         "result": val,

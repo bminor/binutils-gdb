@@ -15,29 +15,15 @@
 
 import gdb
 import os
+import itertools
 
+from gdb.frames import frame_iterator
+from gdb.FrameIterator import FrameIterator
+from gdb.FrameDecorator import FrameDecorator
 from .frames import frame_id
 from .server import request, capability
 from .startup import send_gdb_with_response, in_gdb_thread
 from .state import set_thread
-
-
-# Helper function to safely get the name of a frame as a string.
-@in_gdb_thread
-def _frame_name(frame):
-    name = frame.name()
-    if name is None:
-        name = "???"
-    return name
-
-
-# Helper function to get a frame's SAL without an error.
-@in_gdb_thread
-def _safe_sal(frame):
-    try:
-        return frame.find_sal()
-    except gdb.error:
-        return None
 
 
 # Helper function to compute a stack trace.
@@ -45,37 +31,40 @@ def _safe_sal(frame):
 def _backtrace(thread_id, levels, startFrame):
     set_thread(thread_id)
     frames = []
-    current_number = 0
+    if levels == 0:
+        # Zero means all remaining frames.
+        high = -1
+    else:
+        # frame_iterator uses an inclusive range, so subtract one.
+        high = startFrame + levels - 1
     try:
-        current_frame = gdb.newest_frame()
+        frame_iter = frame_iterator(gdb.newest_frame(), startFrame, high)
     except gdb.error:
-        current_frame = None
-    while current_frame is not None and (levels == 0 or len(frames) < levels):
-        # This condition handles the startFrame==0 case as well.
-        if current_number >= startFrame:
-            newframe = {
-                "id": frame_id(current_frame),
-                "name": _frame_name(current_frame),
-                # This must always be supplied, but we will set it
-                # correctly later if that is possible.
-                "line": 0,
-                # GDB doesn't support columns.
-                "column": 0,
-                "instructionPointerReference": hex(current_frame.pc()),
+        frame_iter = ()
+    for current_frame in frame_iter:
+        newframe = {
+            "id": frame_id(current_frame),
+            "name": current_frame.function(),
+            # This must always be supplied, but we will set it
+            # correctly later if that is possible.
+            "line": 0,
+            # GDB doesn't support columns.
+            "column": 0,
+            "instructionPointerReference": hex(current_frame.address()),
+        }
+        line = current_frame.line()
+        if line is not None:
+            newframe["line"] = line
+        filename = current_frame.filename()
+        if filename is not None:
+            newframe["source"] = {
+                "name": os.path.basename(filename),
+                "path": filename,
+                # We probably don't need this but it doesn't hurt
+                # to be explicit.
+                "sourceReference": 0,
             }
-            sal = _safe_sal(current_frame)
-            if sal is not None and sal.symtab is not None:
-                newframe["source"] = {
-                    "name": os.path.basename(sal.symtab.filename),
-                    "path": sal.symtab.filename,
-                    # We probably don't need this but it doesn't hurt
-                    # to be explicit.
-                    "sourceReference": 0,
-                }
-                newframe["line"] = sal.line
-            frames.append(newframe)
-        current_number = current_number + 1
-        current_frame = current_frame.older()
+        frames.append(newframe)
     # Note that we do not calculate totalFrames here.  Its absence
     # tells the client that it may simply ask for frames until a
     # response yields fewer frames than requested.

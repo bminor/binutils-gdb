@@ -52,3 +52,10 @@ def frame_for_id(id):
     """Given a frame identifier ID, return the corresponding frame."""
     global _all_frames
     return _all_frames[id]
+
+
+@in_gdb_thread
+def select_frame(id):
+    """Given a frame identifier ID, select the corresponding frame."""
+    frame = frame_for_id(id)
+    frame.inferior_frame().select()
