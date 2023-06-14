@@ -165,18 +165,20 @@ def execute_frame_filters(frame, frame_low, frame_high):
     Arguments:
         frame: The initial frame.
 
-        frame_low: The low range of the slice.  If this is a negative
-        integer then it indicates a backward slice (ie bt -4) which
-        counts backward from the last frame in the backtrace.
+        frame_low: The low range of the slice, counting from 0.  If
+        this is a negative integer then it indicates a backward slice
+        (ie bt -4) which counts backward from the last frame in the
+        backtrace.
 
-        frame_high: The high range of the slice.  If this is -1 then
-        it indicates all frames until the end of the stack from
-        frame_low.
+        frame_high: The high range of the slice, inclusive.  If this
+        is -1 then it indicates all frames until the end of the stack
+        from frame_low.
 
     Returns:
         frame_iterator: The sliced iterator after all frame
-        filters have had a change to execute, or None if no frame
+        filters have had a chance to execute, or None if no frame
         filters are registered.
+
     """
 
     # Get a sorted list of frame filters.
