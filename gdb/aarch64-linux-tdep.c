@@ -1373,6 +1373,56 @@ aarch64_linux_collect_za_regset (const struct regset *regset,
 			    size - SVE_HEADER_SIZE);
 }
 
+/* Supply register REGNUM from BUF to REGCACHE, using the register map
+   in REGSET.  If REGNUM is -1, do this for all registers in REGSET.
+   If BUF is NULL, set the registers to "unavailable" status.  */
+
+static void
+aarch64_linux_supply_zt_regset (const struct regset *regset,
+				struct regcache *regcache,
+				int regnum, const void *buf, size_t size)
+{
+  /* Read the ZT register note from a core file into the register buffer.  */
+
+  /* Make sure the buffer contains at least the expected amount of data we are
+     supposed to get.  */
+  gdb_assert (size >= AARCH64_SME2_ZT0_SIZE);
+
+  /* Handle an empty buffer.  */
+  if (buf == nullptr)
+    return regcache->supply_regset (regset, regnum, nullptr, size);
+
+  aarch64_gdbarch_tdep *tdep
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
+
+  /* Supply the ZT0 register contents.  */
+  regcache->raw_supply (tdep->sme2_zt0_regnum, buf);
+}
+
+/* Collect register REGNUM from REGCACHE to BUF, using the register
+   map in REGSET.  If REGNUM is -1, do this for all registers in
+   REGSET.  */
+
+static void
+aarch64_linux_collect_zt_regset (const struct regset *regset,
+				 const struct regcache *regcache,
+				 int regnum, void *buf, size_t size)
+{
+  /* Read the ZT register contents from the register buffer into the core
+     file section.  */
+
+  /* Make sure the buffer can hold the data we need to return.  */
+  gdb_assert (size >= AARCH64_SME2_ZT0_SIZE);
+  gdb_assert (buf != nullptr);
+
+  aarch64_gdbarch_tdep *tdep
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
+
+  /* Dump the register cache contents for the ZT register to the buffer.  */
+  regcache->collect_regset (regset, tdep->sme2_zt0_regnum, buf,
+			    AARCH64_SME2_ZT0_SIZE);
+}
+
 /* Implement the "iterate_over_regset_sections" gdbarch method.  */
 
 static void
@@ -1461,6 +1511,30 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	  SVE_HEADER_SIZE,
 	  SVE_HEADER_SIZE + std::pow (sve_vl_from_vq (tdep->sme_svq), 2),
 	  &aarch64_linux_za_regset, "ZA register", cb_data);
+
+      /* Handle SME2 (ZT) as well, which is only available if SME is
+	 available.  */
+      if (tdep->has_sme2 ())
+	{
+	  const struct regcache_map_entry zt_regmap[] =
+	    {
+	      { 1, tdep->sme2_zt0_regnum, AARCH64_SME2_ZT0_SIZE }
+	    };
+
+	  /* We set the register set size to REGSET_VARIABLE_SIZE here because
+	     in the future there might be more ZT registers.  */
+	  const struct regset aarch64_linux_zt_regset =
+	    {
+	      zt_regmap,
+	      aarch64_linux_supply_zt_regset, aarch64_linux_collect_zt_regset,
+	      REGSET_VARIABLE_SIZE
+	    };
+
+	  cb (".reg-aarch-zt",
+	      AARCH64_SME2_ZT0_SIZE,
+	      AARCH64_SME2_ZT0_SIZE,
+	      &aarch64_linux_zt_regset, "ZT registers", cb_data);
+	}
     }
 
   if (tdep->has_pauth ())
@@ -1565,6 +1639,19 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
 
   features.svq
     = aarch64_linux_core_read_vq (gdbarch, abfd, ".reg-aarch-za");
+
+  /* Are the ZT registers available?  */
+  if (bfd_get_section_by_name (abfd, ".reg-aarch-zt") != nullptr)
+    {
+      /* Check if ZA is also available, otherwise this is an invalid
+	 combination.  */
+      if (bfd_get_section_by_name (abfd, ".reg-aarch-za") != nullptr)
+	features.sme2 = true;
+      else
+	warning (_("While reading core file sections, found ZT registers entry "
+		   "but no ZA register entry.  The ZT contents will be "
+		   "ignored"));
+    }
 
   return aarch64_read_description (features);
 }
