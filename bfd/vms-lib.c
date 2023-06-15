@@ -2108,6 +2108,7 @@ _bfd_vms_lib_build_map (unsigned int nbr_modules,
 
   *res_cnt = map_count;
   *res = map;
+  free (syms);
   return true;
 
  error_return:
@@ -2394,6 +2395,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
       goto err;
   }
 
+  free (symbols);
   return true;
 
  input_err:
