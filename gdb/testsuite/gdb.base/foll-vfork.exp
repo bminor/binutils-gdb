@@ -70,9 +70,15 @@ proc setup_gdb {} {
 
 proc check_vfork_catchpoints {} {
   global gdb_prompt
-  global has_vfork_catchpoints
 
-  setup_gdb
+  # Because setup_gdb uses 'return -code return' which would return to
+  # our caller we need to wrap this call, spot when setup_gdb failed
+  # (with return code 2), and then issue our own 'return -code return'.
+  set code [catch {setup_gdb} string]
+  if { $code == 2 } {
+    unsupported "vfork catchpoints"
+    return -code return
+  }
 
   # Verify that the system supports "catch vfork".
   gdb_test "catch vfork" "Catchpoint \[0-9\]* \\(vfork\\)" "insert first vfork catchpoint"
