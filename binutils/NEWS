@@ -1,5 +1,10 @@
 -*- text -*-
 
+* The MIPS port now supports the Sony Interactive Entertainment Allegrex
+  processor, used with the PlayStation Portable, which implements the MIPS
+  II ISA along with a single-precision FPU and a few implementation-specific
+  integer instructions.
+
 * Objdump's --private option can now be used on PE format files to display the
   fields in the file header and section headers.
   
