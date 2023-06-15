@@ -1200,6 +1200,28 @@ pipe_command_completer (struct cmd_list_element *ignore,
      we don't know how to complete.  */
 }
 
+/* Helper for the list_command function.  Prints the lines around (and
+   including) line stored in CURSAL.  ARG contains the arguments used in
+   the command invocation, and is used to determine a special case when
+   printing backwards.  */
+static void
+list_around_line (const char *arg, symtab_and_line cursal)
+{
+  int first;
+
+  first = std::max (cursal.line - get_lines_to_list () / 2, 1);
+
+  /* A small special case --- if listing backwards, and we
+     should list only one line, list the preceding line,
+     instead of the exact line we've just shown after e.g.,
+     stopping for a breakpoint.  */
+  if (arg != NULL && arg[0] == '-'
+      && get_lines_to_list () == 1 && first > 1)
+    first -= 1;
+
+  print_source_lines (cursal.symtab, source_lines_range (first), 0);
+}
+
 static void
 list_command (const char *arg, int from_tty)
 {
@@ -1221,19 +1243,7 @@ list_command (const char *arg, int from_tty)
 	 source line, center the listing around that line.  */
       if (get_first_line_listed () == 0)
 	{
-	  int first;
-
-	  first = std::max (cursal.line - get_lines_to_list () / 2, 1);
-
-	  /* A small special case --- if listing backwards, and we
-	     should list only one line, list the preceding line,
-	     instead of the exact line we've just shown after e.g.,
-	     stopping for a breakpoint.  */
-	  if (arg != NULL && arg[0] == '-'
-	      && get_lines_to_list () == 1 && first > 1)
-	    first -= 1;
-
-	  print_source_lines (cursal.symtab, source_lines_range (first), 0);
+	  list_around_line (arg, cursal);
 	}
 
       /* "l" or "l +" lists next ten lines.  */
