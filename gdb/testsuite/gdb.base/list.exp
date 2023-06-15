@@ -175,8 +175,8 @@ proc_with_prefix test_list_forward {} {
 	"list 25-34"
     gdb_test "list" "35\[ \t\]+foo \\(.*\\);.*${last_line_re}" \
 	"list 35-42"
-    gdb_test "list" "Line number 44 out of range; \[^\r\n\]+ has 43 lines\." \
-	"end of file error after \"list\" command"
+    gdb_test "list" "End of the file was already reached, use \"list .\" to list the current location again" \
+	"list past end of file"
 }
 
 # Test that repeating the list linenum command doesn't print the same
@@ -194,8 +194,8 @@ proc_with_prefix test_repeat_list_command {} {
 	"list 25-34"
     gdb_test " " "35\[ \t\]+foo \\(.*\\);.*${last_line_re}" \
 	"list 35-42"
-    gdb_test "list" "Line number 44 out of range; \[^\r\n\]+ has 43 lines\." \
-	"end of file error after using 'return' to repeat the list command"
+    gdb_test "list" "End of the file was already reached, use \"list .\" to list the current location again" \
+	"list past end of file"
 }
 
 proc_with_prefix test_list_backwards {} {

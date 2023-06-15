@@ -90,6 +90,11 @@
   print the location where the inferior is stopped.  If the inferior hasn't
   started yet, the command will print around the main function.
 
+* Using the 'list' command with no arguments in a situation where the
+  command would attempt to list past the end of the file now warns the
+  user that the end of file has been reached, refers the user to the
+  newly added '.' argument
+
 * New commands
 
 maintenance print record-instruction [ N ]

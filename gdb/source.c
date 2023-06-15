@@ -1484,6 +1484,22 @@ print_source_lines (struct symtab *s, source_lines_range line_range,
 			   line_range.stopline (), flags);
 }
 
+/* See source.h.  */
+
+int
+last_symtab_line (struct symtab *s)
+{
+  const std::vector<off_t> *offsets;
+
+  /* Try to get the offsets for the start of each line.  */
+  if (!g_source_cache.get_line_charpos (s, &offsets))
+    return false;
+  if (offsets == nullptr)
+    return false;
+
+  return offsets->size ();
+}
+
 
 
 /* Print info on range of pc's in a specified line.  */

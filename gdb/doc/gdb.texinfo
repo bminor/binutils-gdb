@@ -9144,7 +9144,9 @@ Print more lines.  If the last lines printed were printed with a
 @code{list} command, this prints lines following the last lines
 printed; however, if the last line printed was a solitary line printed
 as part of displaying a stack frame (@pxref{Stack, ,Examining the
-Stack}), this prints lines centered around that line.
+Stack}), this prints lines centered around that line.  If no
+@code{list} command has been used and no solitary line was printed,
+it prints the lines around the function @code{main}.
 
 @item list -
 Print lines just before the lines last printed.

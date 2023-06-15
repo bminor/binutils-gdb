@@ -1246,10 +1246,19 @@ list_command (const char *arg, int from_tty)
 	  list_around_line (arg, cursal);
 	}
 
-      /* "l" or "l +" lists next ten lines.  */
-      else if (arg == NULL || arg[0] == '+')
-	print_source_lines (cursal.symtab,
-			    source_lines_range (cursal.line), 0);
+      /* "l" and "l +" lists the next few lines, unless we're listing past
+	 the end of the file.  */
+      else if (arg == nullptr || arg[0] == '+')
+	{
+	  if (last_symtab_line (cursal.symtab) >= cursal.line)
+	    print_source_lines (cursal.symtab,
+				source_lines_range (cursal.line), 0);
+	  else
+	    {
+	      error (_("End of the file was already reached, use \"list .\" to"
+		       " list the current location again"));
+	    }
+	}
 
       /* "l -" lists previous ten lines, the ones before the ten just
 	 listed.  */
