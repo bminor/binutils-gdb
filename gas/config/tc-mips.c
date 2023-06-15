@@ -437,6 +437,7 @@ static int mips_32bitmode = 0;
     || (ISA) == ISA_MIPS64R3		\
     || (ISA) == ISA_MIPS64R5		\
     || (ISA) == ISA_MIPS64R6		\
+    || (CPU) == CPU_ALLEGREX		\
     || (CPU) == CPU_R5900)		\
    && ((CPU) != CPU_GS464		\
     || (CPU) != CPU_GS464E		\
@@ -535,8 +536,9 @@ static int mips_32bitmode = 0;
 #define CPU_HAS_SEQ(CPU)	(CPU_IS_OCTEON (CPU))
 
 /* True, if CPU has support for ldc1 and sdc1. */
-#define CPU_HAS_LDC1_SDC1(CPU)	\
-   ((mips_opts.isa != ISA_MIPS1) && ((CPU) != CPU_R5900))
+#define CPU_HAS_LDC1_SDC1(CPU)	(mips_opts.isa != ISA_MIPS1		\
+				 && (CPU) != CPU_ALLEGREX		\
+				 && (CPU) != CPU_R5900)
 
 /* True if mflo and mfhi can be immediately followed by instructions
    which write to the HI and LO registers.
@@ -561,6 +563,7 @@ static int mips_32bitmode = 0;
    || mips_opts.isa == ISA_MIPS64R3                   \
    || mips_opts.isa == ISA_MIPS64R5                   \
    || mips_opts.isa == ISA_MIPS64R6                   \
+   || mips_opts.arch == CPU_ALLEGREX                  \
    || mips_opts.arch == CPU_R4010                     \
    || mips_opts.arch == CPU_R5900                     \
    || mips_opts.arch == CPU_R10000                    \
@@ -20008,6 +20011,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
 
   /* MIPS II */
   { "r6000",          0, 0,			ISA_MIPS2,    CPU_R6000 },
+  { "allegrex",       0, 0,			ISA_MIPS2,    CPU_ALLEGREX },
 
   /* MIPS III */
   { "r4000",          0, 0,			ISA_MIPS3,    CPU_R4000 },

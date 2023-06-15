@@ -317,6 +317,7 @@ decode_mips_operand (const char *p)
 /* Emotion Engine MIPS r5900. */
 #define EE      INSN_5900
 #define M1	INSN_10000
+#define AL	INSN_ALLEGREX
 #define SB1     INSN_SB1
 #define N411	INSN_4111
 #define N412	INSN_4120
@@ -341,8 +342,10 @@ decode_mips_operand (const char *p)
 
 #define G3      EE
 
-/* 64 bit CPU with 32 bit FPU (single float). */
-#define SF	EE
+/* CPU without 64 bit FPU support (single float only). */
+#define SF      (AL             \
+                 |EE            \
+                 )
 
 /* Support for 128 bit MMI instructions. */
 #define MMI	EE
@@ -1187,7 +1190,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ei",			"t",		0x41606020, 0xffe0ffff,	WR_1|WR_C0,		0,		I33,		0,	0 },
 {"emt",			"",		0x41600be1, 0xffffffff, TRAP,			0,		0,		MT32,	0 },
 {"emt",			"t",		0x41600be1, 0xffe0ffff, WR_1|TRAP,		0,		0,		MT32,	0 },
-{"eret",		"",		0x42000018, 0xffffffff, NODS,      		0,		I3_32,		0,	0 },
+{"eret",		"",		0x42000018, 0xffffffff, NODS,      		0,		I3_32|AL,	0,	0 },
 {"eretnc",		"",		0x42000058, 0xffffffff, NODS,      		0,		I36,		0,	0 },
 {"evpe",		"",		0x41600021, 0xffffffff, TRAP,			0,		0,		MT32,	0 },
 {"evpe",		"t",		0x41600021, 0xffe0ffff, WR_1|TRAP,		0,		0,		MT32,	0 },
@@ -1277,10 +1280,10 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"l.d",			"T,o(b)",	0xd4000000, 0xfc000000, WR_1|RD_3|CLD|FP_D,	0,		I2,		0,	SF }, /* ldc1 */
 {"l.d",			"T,A(b)",	0,    (int) M_L_DAB,	INSN_MACRO,		INSN2_M_FP_D,	I1,		0,	0 },
 {"ldc2",		"E,+:(d)",	0x49c00000, 0xffe00000,	RD_3|WR_C2|CLD,		0,		I37,		0,	0 },
-{"ldc2",		"E,o(b)",	0xd8000000, 0xfc000000,	RD_3|WR_CC|CLD,		0,		I2,		0,	N54|IOCT|IOCTP|IOCT2|EE|I37 },
-{"ldc2",		"E,A(b)",	0,    (int) M_LDC2_AB,	INSN_MACRO,		0,		I2,		0,	N54|IOCT|IOCTP|IOCT2|EE },
-{"ldc3",		"E,o(b)",	0xdc000000, 0xfc000000,	RD_3|WR_CC|CLD,		0,		I2,		0,	I3_32|EE },
-{"ldc3",		"E,A(b)",	0,    (int) M_LDC3_AB,	INSN_MACRO,		0,		I2,		0,	I3_32|EE },
+{"ldc2",		"E,o(b)",	0xd8000000, 0xfc000000,	RD_3|WR_CC|CLD,		0,		I2,		0,	N54|IOCT|IOCTP|IOCT2|EE|AL|I37 },
+{"ldc2",		"E,A(b)",	0,    (int) M_LDC2_AB,	INSN_MACRO,		0,		I2,		0,	N54|IOCT|IOCTP|IOCT2|EE|AL },
+{"ldc3",		"E,o(b)",	0xdc000000, 0xfc000000,	RD_3|WR_CC|CLD,		0,		I2,		0,	I3_32|EE|AL },
+{"ldc3",		"E,A(b)",	0,    (int) M_LDC3_AB,	INSN_MACRO,		0,		I2,		0,	I3_32|EE|AL },
 {"ldl",			"t,o(b)",	0x68000000, 0xfc000000, WR_1|RD_3|LM,		0,		I3,		0,	I69 },
 {"ldl",			"t,A(b)",	0,    (int) M_LDL_AB,	INSN_MACRO,		0,		I3,		0,	I69 },
 {"ldr",			"t,o(b)",	0x6c000000, 0xfc000000, WR_1|RD_3|LM,		0,		I3,		0,	I69 },
@@ -1326,8 +1329,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"lwc2",		"E,+:(d)",	0x49400000, 0xffe00000,	RD_3|WR_C2|CLD,		0,		I37,		0,	0 },
 {"lwc2",		"E,o(b)",	0xc8000000, 0xfc000000,	RD_3|WR_CC|CLD,		0,		I1,		0,	N54|IOCT|IOCTP|IOCT2|EE|I37 },
 {"lwc2",		"E,A(b)",	0,    (int) M_LWC2_AB,	INSN_MACRO,		0,		I1,		0,	N54|IOCT|IOCTP|IOCT2|EE },
-{"lwc3",		"E,o(b)",	0xcc000000, 0xfc000000,	RD_3|WR_CC|CLD,		0,		I1,		0,	I3_32|EE },
-{"lwc3",		"E,A(b)",	0,    (int) M_LWC3_AB,	INSN_MACRO,		0,		I1,		0,	I3_32|EE },
+{"lwc3",		"E,o(b)",	0xcc000000, 0xfc000000,	RD_3|WR_CC|CLD,		0,		I1,		0,	I3_32|EE|AL },
+{"lwc3",		"E,A(b)",	0,    (int) M_LWC3_AB,	INSN_MACRO,		0,		I1,		0,	I3_32|EE|AL },
 {"lwl",			"t,o(b)",	0x88000000, 0xfc000000,	WR_1|RD_3|LM,		0,		I1,		0,	I37 },
 {"lwl",			"t,A(b)",	0,    (int) M_LWL_AB,	INSN_MACRO,		0,		I1,		0,	I37 },
 {"lcache",		"t,o(b)",	0x88000000, 0xfc000000,	WR_1|RD_3|LM,		0,		I2,		0,	I37 }, /* same */
@@ -1855,10 +1858,10 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"sdc1",		"T,A(b)",	0,    (int) M_SDC1_AB,	INSN_MACRO,		INSN2_M_FP_D,	I2,		0,	SF },
 {"sdc1",		"E,A(b)",	0,    (int) M_SDC1_AB,	INSN_MACRO,		INSN2_M_FP_D,	I2,		0,	SF },
 {"sdc2",		"E,+:(d)",	0x49e00000, 0xffe00000,	RD_3|RD_C2|SM,		0,		I37,		0,	0 },
-{"sdc2",		"E,o(b)",	0xf8000000, 0xfc000000,	RD_3|RD_C2|SM,		0,		I2,		0,	N54|IOCT|IOCTP|IOCT2|EE|I37 },
-{"sdc2",		"E,A(b)",	0,    (int) M_SDC2_AB,	INSN_MACRO,		0,		I2,		0,	N54|IOCT|IOCTP|IOCT2|EE },
-{"sdc3",		"E,o(b)",	0xfc000000, 0xfc000000,	RD_3|RD_C3|SM,		0,		I2,		0,	I3_32|EE },
-{"sdc3",		"E,A(b)",	0,    (int) M_SDC3_AB,	INSN_MACRO,		0,		I2,		0,	I3_32|EE },
+{"sdc2",		"E,o(b)",	0xf8000000, 0xfc000000,	RD_3|RD_C2|SM,		0,		I2,		0,	N54|IOCT|IOCTP|IOCT2|EE|AL|I37 },
+{"sdc2",		"E,A(b)",	0,    (int) M_SDC2_AB,	INSN_MACRO,		0,		I2,		0,	N54|IOCT|IOCTP|IOCT2|EE|AL },
+{"sdc3",		"E,o(b)",	0xfc000000, 0xfc000000,	RD_3|RD_C3|SM,		0,		I2,		0,	I3_32|EE|AL },
+{"sdc3",		"E,A(b)",	0,    (int) M_SDC3_AB,	INSN_MACRO,		0,		I2,		0,	I3_32|EE|AL },
 {"s.d",			"T,o(b)",	0xf4000000, 0xfc000000, RD_1|RD_3|SM|FP_D,	0,		I2,		0,	SF },
 {"s.d",			"T,A(b)",	0,    (int) M_S_DAB,	INSN_MACRO,		INSN2_M_FP_D,	I1,		0,	0 },
 {"sdl",			"t,o(b)",	0xb0000000, 0xfc000000,	RD_1|RD_3|SM,		0,		I3,		0,	I69 },
@@ -1992,8 +1995,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"swc2",		"E,+:(d)",	0x49600000, 0xffe00000,	RD_3|RD_C2|SM,		0,		I37,		0,	0 },
 {"swc2",		"E,o(b)",	0xe8000000, 0xfc000000,	RD_3|RD_C2|SM,		0,		I1,		0,	N54|IOCT|IOCTP|IOCT2|EE|I37 },
 {"swc2",		"E,A(b)",	0,    (int) M_SWC2_AB,	INSN_MACRO,		0,		I1,		0,	N54|IOCT|IOCTP|IOCT2|EE },
-{"swc3",		"E,o(b)",	0xec000000, 0xfc000000,	RD_3|RD_C3|SM,		0,		I1,		0,	I3_32|EE },
-{"swc3",		"E,A(b)",	0,    (int) M_SWC3_AB,	INSN_MACRO,		0,		I1,		0,	I3_32|EE },
+{"swc3",		"E,o(b)",	0xec000000, 0xfc000000,	RD_3|RD_C3|SM,		0,		I1,		0,	I3_32|EE|AL },
+{"swc3",		"E,A(b)",	0,    (int) M_SWC3_AB,	INSN_MACRO,		0,		I1,		0,	I3_32|EE|AL },
 {"swl",			"t,o(b)",	0xa8000000, 0xfc000000,	RD_1|RD_3|SM,		0,		I1,		0,	I37 },
 {"swl",			"t,A(b)",	0,    (int) M_SWL_AB,	INSN_MACRO,		0,		I1,		0,	I37 },
 {"scache",		"t,o(b)",	0xa8000000, 0xfc000000,	RD_1|RD_3,		0,		I2,		0,	I37 }, /* same */
@@ -3343,7 +3346,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ctc0",		"t,g",		0x40c00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	I32 },
 
 /* RFE conflicts with the new Virt spec instruction tlbgp. */
-{"rfe",			"",		0x42000010, 0xffffffff,	0,			0,		I1|T3,		0,	I3_32 },
+{"rfe",			"",		0x42000010, 0xffffffff,	0,			0,		I1|T3,		0,	I3_32|AL },
 
 /* Coprocessor 2 move/branch operations overlap with VR5400 .ob format
    instructions so they are here for the latters to take precedence.  */
@@ -3390,16 +3393,16 @@ const struct mips_opcode mips_builtin_opcodes[] =
 
 /* Coprocessor 3 move/branch operations overlap with MIPS IV COP1X
    instructions, so they are here for the latters to take precedence.  */
-{"bc3f",		"p",		0x4d000000, 0xffff0000,	RD_CC|CBD,		0,		I1,		0,	I3_33|EE },
-{"bc3fl",		"p",		0x4d020000, 0xffff0000,	RD_CC|CBL,		0,		I2|T3,		0,	I3_33|EE },
-{"bc3t",		"p",		0x4d010000, 0xffff0000,	RD_CC|CBD,		0,		I1,		0,	I3_33|EE },
-{"bc3tl",		"p",		0x4d030000, 0xffff0000,	RD_CC|CBL,		0,		I2|T3,		0,	I3_33|EE },
-{"cfc3",		"t,g",		0x4c400000, 0xffe007ff,	WR_1|RD_C3|LC,		0,		I1,		0,	I3_33|EE },
-{"ctc3",		"t,g",		0x4cc00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	I3_33|EE },
-{"mfc3",		"t,G",		0x4c000000, 0xffe007ff,	WR_1|RD_C3|LC,		0,		I1,		0,	I3_33|EE },
-{"mfc3",		"t,G,H",	0x4c000000, 0xffe007f8,	WR_1|RD_C3|LC,		0,		I32,		0,	I3_33|EE },
-{"mtc3",		"t,G",		0x4c800000, 0xffe007ff,	RD_1|WR_C3|WR_CC|CM,	0,		I1,		0,	I3_33|EE },
-{"mtc3",		"t,G,H",	0x4c800000, 0xffe007f8,	RD_1|WR_C3|WR_CC|CM,	0,		I32,		0,	I3_33|EE },
+{"bc3f",		"p",		0x4d000000, 0xffff0000,	RD_CC|CBD,		0,		I1,		0,	I3_33|EE|AL },
+{"bc3fl",		"p",		0x4d020000, 0xffff0000,	RD_CC|CBL,		0,		I2|T3,		0,	I3_33|EE|AL },
+{"bc3t",		"p",		0x4d010000, 0xffff0000,	RD_CC|CBD,		0,		I1,		0,	I3_33|EE|AL },
+{"bc3tl",		"p",		0x4d030000, 0xffff0000,	RD_CC|CBL,		0,		I2|T3,		0,	I3_33|EE|AL },
+{"cfc3",		"t,g",		0x4c400000, 0xffe007ff,	WR_1|RD_C3|LC,		0,		I1,		0,	I3_33|EE|AL },
+{"ctc3",		"t,g",		0x4cc00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	I3_33|EE|AL },
+{"mfc3",		"t,G",		0x4c000000, 0xffe007ff,	WR_1|RD_C3|LC,		0,		I1,		0,	I3_33|EE|AL },
+{"mfc3",		"t,G,H",	0x4c000000, 0xffe007f8,	WR_1|RD_C3|LC,		0,		I32,		0,	I3_33|EE|AL },
+{"mtc3",		"t,G",		0x4c800000, 0xffe007ff,	RD_1|WR_C3|WR_CC|CM,	0,		I1,		0,	I3_33|EE|AL },
+{"mtc3",		"t,G,H",	0x4c800000, 0xffe007f8,	RD_1|WR_C3|WR_CC|CM,	0,		I32,		0,	I3_33|EE|AL },
 
 /* No hazard protection on coprocessor instructions--they shouldn't
    change the state of the processor and if they do it's up to the
