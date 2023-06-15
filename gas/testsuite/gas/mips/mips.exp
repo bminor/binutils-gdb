@@ -2077,15 +2077,18 @@ if { [istarget mips*-*-vxworks*] } {
 			[mips_arch_list_matching mips2 !singlefloat]
     run_dump_test_arches "fpxx-oddfpreg" \
 			[mips_arch_list_matching oddspreg !allegrex]
-    run_dump_test_arches "odd-spreg" "-mfp32" [mips_arch_list_matching oddspreg]
+    run_dump_test_arches "odd-spreg" "-mfp32" \
+			[mips_arch_list_matching oddspreg]
     run_dump_test_arches "odd-spreg" "-mfpxx" \
 			[mips_arch_list_matching oddspreg !allegrex]
-    run_dump_test_arches "odd-spreg" "-mfp64" [mips_arch_list_matching mips32r2]
-    run_dump_test_arches "no-odd-spreg" "-mfp32" [mips_arch_list_matching mips1 \
-							!mips32r6]
+    run_dump_test_arches "odd-spreg" "-mfp64" \
+			[mips_arch_list_matching mips32r2]
+    run_dump_test_arches "no-odd-spreg" "-mfp32" \
+			[mips_arch_list_matching mips1 !mips32r6]
     run_dump_test_arches "no-odd-spreg" "-mfpxx" \
 			[mips_arch_list_matching mips2 !r5900 !allegrex]
-    run_dump_test_arches "no-odd-spreg" "-mfp64" [mips_arch_list_matching mips32r2]
+    run_dump_test_arches "no-odd-spreg" "-mfp64" \
+			[mips_arch_list_matching mips32r2]
     run_dump_test "module-check"
     run_list_test "module-check-warn" "-32"
 
