@@ -1,10 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn -mmips:sb1 -M gpr-names=32
 #name: .set arch=FOO
 #warning_output: set-arch.l
-#as: -march=from-abi
-
-#FIXME: -march=mips32r6 will break this test: which is a problem
-#FIXME: We should find the real problem, and drop -march=from-abi
 
 .*:     file format .*
 

@@ -1,6 +1,6 @@
 #objdump: -dr --show-raw-insn -M gpr-names=numeric
 #name: microMIPS fixed-size branch delay slots
-#as: -mmicromips -march=from-abi
+#as: -mmicromips
 #source: micromips-warn-branch-delay.s
 #warning_output: micromips-warn-branch-delay.l
 

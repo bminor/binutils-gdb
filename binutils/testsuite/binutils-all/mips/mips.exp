@@ -52,8 +52,7 @@ proc run_dump_test_abi { abi name args } {
 	set ldflags $abi_ldflags($abi)
 	set args [lreplace $args 0 0]
     }
-    set abi_r [regsub "l$" $abi {}]
-    if !$has_abi($abi_r) {
+    if !$has_abi($abi) {
 	lappend args {notarget *-*-*}
     }
 
@@ -75,13 +74,6 @@ proc run_dump_test_abi { abi name args } {
 proc run_dump_test_o32 { name args } {
     run_dump_test_abi o32 $name [lindex $args 0]
 }
-proc run_dump_test_o32l { name args } {
-    if {[istarget *-linux*] || [istarget *-img-elf]} {
-      run_dump_test_abi o32l $name [lindex $args 0]
-    } else {
-      run_dump_test_abi o32 $name [lindex $args 0]
-    }
-}
 
 # run_dump_test_n32 NAME ARGS
 #
@@ -90,13 +82,6 @@ proc run_dump_test_o32l { name args } {
 proc run_dump_test_n32 { name args } {
     run_dump_test_abi n32 $name [lindex $args 0]
 }
-proc run_dump_test_n32l { name args } {
-    if {[istarget *-linux*] || [istarget *-img-elf]} {
-      run_dump_test_abi n32l $name [lindex $args 0]
-    } else {
-      run_dump_test_abi n32 $name [lindex $args 0]
-    }
-}
 
 # run_dump_test_n64 NAME ARGS
 #
@@ -104,13 +89,6 @@ proc run_dump_test_n32l { name args } {
 # passing ARGS.
 proc run_dump_test_n64 { name args } {
     run_dump_test_abi n64 $name [lindex $args 0]
-}
-proc run_dump_test_n64l { name args } {
-    if {[istarget *-linux*] || [istarget *-img-elf]} {
-      run_dump_test_abi n64l $name [lindex $args 0]
-    } else {
-      run_dump_test_abi n64 $name [lindex $args 0]
-    }
 }
 
 set has_abi(o32) [expr ![istarget *-*-openbsd*] \
@@ -131,68 +109,49 @@ set has_abi(n64) [expr [istarget *-*-freebsd*] \
 		     || [istarget *-*-openbsd*]]
 
 # Set defaults.
-# ABI with l tail means legacy, aka pre-R6.
-# Please use them, if the test only suite for pre-R6,
-# such as mips16/micromips tests.
 set abi_asflags(o32) ""
-set abi_asflags(o32l) ""
 set abi_asflags(n32) ""
-set abi_asflags(n32l) ""
 set abi_asflags(n64) ""
-set abi_asflags(n64l) ""
 set abi_asflags(eabi) ""
 set abi_ldflags(o32) ""
-set abi_ldflags(o32l) ""
 set abi_ldflags(n32) ""
-set abi_ldflags(n32l) ""
 set abi_ldflags(n64) ""
-set abi_ldflags(n64l) ""
 set abi_ldflags(eabi) ""
 
 # Override as needed.
 if {[istarget *-*-openbsd*] } {
     set irixemul 0
-} elseif { [istarget mips*64*-*-linux*] } {
-    set abi_asflags(o32) -32
-    set abi_asflags(o32l) "-32 -march=from-abi"
-    set abi_asflags(n32) ""
-    set abi_asflags(n32l) "-n32 -march=from-abi"
-    set abi_asflags(n64) "-64"
-    set abi_asflags(n64l) "-march=from-abi -64"
+} elseif { [istarget mips64*-*-linux*] } {
     if [istarget *el-*-*] {
+	set abi_asflags(o32) -32
 	set abi_ldflags(o32) -melf32ltsmip
-	set abi_ldflags(o32l) -melf32ltsmip
+	set abi_asflags(n64) "-march=from-abi -64"
 	set abi_ldflags(n64) -melf64ltsmip
-	set abi_ldflags(n64l) -melf64ltsmip
     } else {
+	set abi_asflags(o32) -32
 	set abi_ldflags(o32) -melf32btsmip
-	set abi_ldflags(o32l) -melf32btsmip
+	set abi_asflags(n64) "-march=from-abi -64"
 	set abi_ldflags(n64) -melf64btsmip
-	set abi_ldflags(n64l) -melf64btsmip
     }
     set irixemul 0
-} elseif {[istarget *-*-linux*] || [istarget *-img-elf] } {
-    set abi_asflags(o32) ""
-    set abi_asflags(o32l) "-march=from-abi"
-    set abi_asflags(n32) "-n32"
-    set abi_asflags(n32l) "-n32 -march=from-abi"
-    set abi_asflags(n64) "-64"
-    set abi_asflags(n64l) "-64 -march=from-abi"
+} elseif {[istarget *-*-linux*] } {
     if [istarget *el-*-*] {
+	set abi_asflags(n32) "-march=from-abi -n32"
 	set abi_ldflags(n32) -melf32ltsmipn32
-	set abi_ldflags(n32l) -melf32ltsmipn32
+	set abi_asflags(n64) "-march=from-abi -64"
 	set abi_ldflags(n64) -melf64ltsmip
-	set abi_ldflags(n64l) -melf64ltsmip
     } else {
+	set abi_asflags(n32) "-march=from-abi -n32"
 	set abi_ldflags(n32) -melf32btsmipn32
-	set abi_ldflags(n32l) -melf32btsmipn32
+	set abi_asflags(n64) "-march=from-abi -64"
 	set abi_ldflags(n64) -melf64btsmip
-	set abi_ldflags(n64l) -melf64btsmip
     }
     set irixemul 0
-} elseif {[istarget *-mti-elf*] \
+} elseif {[istarget *-img-elf*] \
+     || [istarget *-mti-elf*] \
      || [istarget *-sde-elf*] \
      || [istarget *-*-netbsd*] \
+     || [istarget *-*-linux*] \
      || [istarget *-*-sysv4*] } {
     if [istarget *el-*-*] {
 	set abi_asflags(o32) -32
@@ -270,13 +229,11 @@ run_dump_test "mips-xpa-virt-3"
 run_dump_test "mips-xpa-virt-4"
 run_dump_test_o32 "mixed-mips16" noarch
 run_dump_test_o32 "mixed-micromips" noarch
-run_dump_test_o32l "mixed-mips16-micromips"
-run_dump_test_n32l "mixed-mips16-micromips"
-run_dump_test_n64l "mixed-mips16-micromips"
+run_dump_test "mixed-mips16-micromips"
 run_dump_test_o32 "mips16-undecoded" noarch
 run_dump_test_o32 "mips16e2-undecoded" noarch
 run_dump_test_o32 "mips16-pcrel"
-run_dump_test_o32l "mips16-extend-noinsn"
+run_dump_test_o32 "mips16-extend-noinsn"
 run_dump_test_o32 "mips16-extend-insn" noarch
 run_dump_test_o32 "mips16e2-extend-insn" noarch
 run_dump_test_o32 "mips16-alias" noarch

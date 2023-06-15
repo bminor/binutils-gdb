@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS branch local symbol relocation 5 (ignore branch ISA)
-#as: -32 -mips1 -mignore-branch-isa
+#as: -32 -mignore-branch-isa
 #source: branch-local-5.s
 
 .*: +file format .*mips.*

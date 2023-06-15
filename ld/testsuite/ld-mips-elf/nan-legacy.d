@@ -1,6 +1,5 @@
 #source: nan-legacy.s
 #source: nan-legacy.s
-#as: -march=from-abi
 #ld: -r
 #objdump: -p
 

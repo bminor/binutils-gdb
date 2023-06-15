@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS16 jump to unaligned symbol 3
-#as: -n32 -march=from-abi --defsym n32=1
+#as: -n32 -march=from-abi
 #source: unaligned-jump-mips16-2.s
 
 .*: +file format .*mips.*

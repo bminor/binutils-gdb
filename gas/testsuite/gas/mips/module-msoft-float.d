@@ -1,4 +1,4 @@
-#as: -32 -mips1
+#as: -32
 #readelf: -A
 #name: MIPS module softfloat
 

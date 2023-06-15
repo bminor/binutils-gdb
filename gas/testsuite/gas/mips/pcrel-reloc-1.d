@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS local PC-relative relocations 1
-#as: -32 -mips1
+#as: -32
 #source: pcrel-reloc-1.s
 
 .*: +file format .*mips.*

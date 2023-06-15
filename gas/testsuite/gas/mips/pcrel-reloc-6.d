@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn -mmips:isa64r6
 #name: MIPS local PC-relative relocations 6a
-#as: -32 -mips1 --defsym offset=0
+#as: -32 --defsym offset=0
 #source: pcrel-reloc-6.s
 
 .*: +file format .*mips.*

@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: microMIPS fixed-size branch delay slots 1
-#as: -32 -mmicromips -mips32r2
+#as: -32 -mmicromips
 #source: micromips-warn-branch-delay-1.s
 
 .*: +file format .*mips.*

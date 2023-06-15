@@ -1,6 +1,6 @@
 #objdump: -dr
 #name: MIPS16 lui/addi
-#as: -mips16 -mabi=32 -mips32
+#as: -mips16 -mabi=32
 #source: mips16-hilo.s
 
 .*: +file format .*mips.*

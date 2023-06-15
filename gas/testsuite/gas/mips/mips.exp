@@ -296,15 +296,7 @@ proc mips_arch_list_matching {args} {
 	    continue
 	}
 	if { [mips_arch_matches $arch $args] } {
-	    # If the triple is mipsisa32*/mipsisa64*, we skip the 'default'
-	    # Since it will always run.
-	    if { [string compare $arch default] == 0 && [istarget mipsisa32*-*] } {
-	      continue
-	    } elseif { [string compare $arch default] == 0 && [istarget mipsisa64*-*] } {
-	      continue
-	    } else {
-	      lappend l $arch
-	    }
+	    lappend l $arch
 	}
     }
     return $l
@@ -564,8 +556,7 @@ if { [istarget mips*-*-vxworks*] } {
 	"MIPS invalid switch to SVR4 PIC from VxWorks PIC"
 } elseif { [istarget mips*-*-*] } {
     set addr32 [expr [istarget mipstx39*-*-*] || [istarget mips-*-linux*] || [istarget mipsel-*-linux*] \
-		     || [istarget mipsisa32*-*-linux*] || [istarget mipsisa32*el-*-linux*] \
-		     || [istarget mips-*-elf] || [istarget mipsel-*-elf]]
+		     || [istarget mipsisa32*-*-linux*] || [istarget mipsisa32*el-*-linux*]]
     set has_newabi [expr [istarget *-*-irix6*] || [istarget mips*-*-linux*] \
                          || [istarget mips*-sde-elf*] || [istarget mips*-mti-elf*] \
                          || [istarget mips*-img-elf*]]
@@ -630,7 +621,7 @@ if { [istarget mips*-*-vxworks*] } {
     # we use and some space will have been already consumed.  The exact
     # amount depends on the host's programming model.
     for { set count 960 } { $count <= 1024 } { incr count } {
-	run_list_test "branch-swap-2" "-march=from-abi --defsym count=$count" \
+	run_list_test "branch-swap-2" "--defsym count=$count" \
 	    "MIPS branch swapping ($count)"
     }
 
@@ -721,8 +712,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "compact-eh-el-5"
     run_dump_test "compact-eh-el-6"
     run_dump_test "compact-eh-el-7"
-    run_list_test "compact-eh-err1" "-march=from-abi"
-    run_list_test "compact-eh-err2" "-march=from-abi"
+    run_list_test "compact-eh-err1"
+    run_list_test "compact-eh-err2"
 
     run_dump_test "div"
 
@@ -959,30 +950,30 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "jalx-local-n64"
     }
 
-    run_list_test "unaligned-jump-1" "-32 -mips32r2" \
+    run_list_test "unaligned-jump-1" "-32" \
 				"MIPS jump to unaligned symbol 1"
-    run_list_test "unaligned-jump-2" "-32 -mips32r2" \
+    run_list_test "unaligned-jump-2" "-32" \
 				"MIPS jump to unaligned symbol 2"
     if $has_newabi {
 	run_dump_test "unaligned-jump-3"
     }
-    run_list_test "unaligned-jump-mips16-1" "-32 -mips1" \
+    run_list_test "unaligned-jump-mips16-1" "-32" \
 				"MIPS16 jump to unaligned symbol 1"
-    run_list_test "unaligned-jump-mips16-2" "-32 -mips1" \
+    run_list_test "unaligned-jump-mips16-2" "-32" \
 				"MIPS16 jump to unaligned symbol 2"
     if $has_newabi {
 	run_dump_test "unaligned-jump-mips16-3"
     }
-    run_list_test "unaligned-jump-micromips-1" "-32 -mips32r2" \
+    run_list_test "unaligned-jump-micromips-1" "-32" \
 				"microMIPS jump to unaligned symbol 1"
-    run_list_test "unaligned-jump-micromips-2" "-32 -mips32r2" \
+    run_list_test "unaligned-jump-micromips-2" "-32" \
 				"microMIPS jump to unaligned symbol 2"
     if $has_newabi {
 	run_dump_test "unaligned-jump-micromips-3"
     }
-    run_list_test "unaligned-branch-1" "-32 -mips32r2" \
+    run_list_test "unaligned-branch-1" "-32" \
 				"MIPS branch to unaligned symbol 1"
-    run_list_test "unaligned-branch-2" "-32 -mips32r2" \
+    run_list_test "unaligned-branch-2" "-32" \
 				"MIPS branch to unaligned symbol 2"
     if $has_newabi {
 	run_dump_test "unaligned-branch-3"
@@ -999,16 +990,16 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "unaligned-branch-r6-5"
 	run_dump_test "unaligned-branch-r6-6"
     }
-    run_list_test "unaligned-branch-mips16-1" "-32 -mips1" \
+    run_list_test "unaligned-branch-mips16-1" "-32" \
 				"MIPS16 branch to unaligned symbol 1"
-    run_list_test "unaligned-branch-mips16-2" "-32 -mips1" \
+    run_list_test "unaligned-branch-mips16-2" "-32" \
 				"MIPS16 branch to unaligned symbol 2"
     if $has_newabi {
 	run_dump_test "unaligned-branch-mips16-3"
     }
-    run_list_test "unaligned-branch-micromips-1" "-32 -mips32r2" \
+    run_list_test "unaligned-branch-micromips-1" "-32" \
 				"microMIPS branch to unaligned symbol 1"
-    run_list_test "unaligned-branch-micromips-2" "-32 -mips32r2" \
+    run_list_test "unaligned-branch-micromips-2" "-32" \
 				"microMIPS branch to unaligned symbol 2"
     if $has_newabi {
 	run_dump_test "unaligned-branch-micromips-3"
@@ -1113,7 +1104,7 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test_arches "eva"		[mips_arch_list_matching mips32r2 !octeon]
 
-    run_list_test "illegal" "-32 -mips1"
+    run_list_test "illegal" "-32"
     run_list_test "baddata1" "-32"
     run_list_test "jalr" ""
 
@@ -1247,7 +1238,6 @@ if { [istarget mips*-*-vxworks*] } {
     run_list_test_arches "elf-rel30" "-32" [mips_arch_list_all]
 
     run_dump_test "comdat-reloc"
-    run_dump_test "comdat-reloc-r6"
 
     run_dump_test "${tmips}mips${el}16-e"
     run_dump_test "${tmips}mips${el}16-f"
@@ -1602,7 +1592,7 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "micromips-branch-absolute-addend-n64"
     }
     run_dump_test "micromips-b16"
-    run_list_test "micromips-ill" "-march=from-abi"
+    run_list_test "micromips-ill"
 
     run_dump_test_arches "mcu"		[mips_arch_list_matching mips32r2 \
 					    !octeon]
@@ -1656,7 +1646,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "ulh-reloc"	[mips_arch_list_matching mips2 !mips32r6]
 
     run_dump_test "l_d-reloc"
-    run_list_test "bltzal" "-march=from-abi"
+    run_list_test "bltzal"
 
     run_dump_test_arches "msa"		[mips_arch_list_matching mips32r2]
     if { $has_newabi } {
@@ -1690,7 +1680,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "pcrel-reloc-5"
     run_dump_test "pcrel-reloc-5-r6"
     run_dump_test "pcrel-reloc-6"
-    run_list_test "pcrel-reloc-6" "-32 --defsym offset=4 -mips1" \
+    run_list_test "pcrel-reloc-6" "-32 --defsym offset=4" \
 	"MIPS local PC-relative relocations 6b"
 
     run_dump_test_arches "mips16-pcrel-0" [mips_arch_list_matching mips16-32]
@@ -2051,16 +2041,14 @@ if { [istarget mips*-*-vxworks*] } {
 				    [mips_arch_list_matching mips32r2]
 
     run_dump_test "attr-gnu-abi-fp-1"
-    run_dump_test "attr-gnu-abi-fp-5"
-    run_dump_test "attr-gnu-abi-fp-6"
     run_dump_test "attr-gnu-abi-msa-1"
 
     run_dump_test "module-override"
     run_dump_test "module-defer-warn1"
     run_list_test "module-defer-warn2" "-32 -mips1"
 
-    foreach testopt [list -mfp32 -mfpxx -mfp64 "-mfp64-noodd" -mfp64r6 "-mfp64r6-noodd" \
-			  -msingle-float -msoft-float -msoft-float-r6] {
+    foreach testopt [list -mfp32 -mfpxx -mfp64 "-mfp64-noodd" \
+			  -msingle-float -msoft-float] {
       foreach cmdopt [list -mfp32 -mfpxx -mfp64 "-mfp64 -mno-odd-spreg" \
 			   -msingle-float -msoft-float] {
         run_dump_test "module${testopt}" \

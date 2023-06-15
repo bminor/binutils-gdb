@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: microMIPS branch to absolute expression
-#as: -32 -mips32r2
+#as: -32
 
 .*: +file format .*mips.*
 

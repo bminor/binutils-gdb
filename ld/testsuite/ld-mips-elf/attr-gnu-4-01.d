@@ -1,6 +1,5 @@
 #source: attr-gnu-4-0.s
 #source: attr-gnu-4-1.s
-#as: -march=from-abi
 #ld: -r
 #readelf: -A
 

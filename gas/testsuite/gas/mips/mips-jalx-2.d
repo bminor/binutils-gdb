@@ -1,5 +1,5 @@
 #objdump: -d
-#as: -march=from-abi
+#as:
 #name: mips jalx-2
 
 .*:     file format .*

@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS `.option picX' with relaxation 4
-#as: -32 -mips32r2 -mmicromips --relax-branch
+#as: -32 -mmicromips --relax-branch
 #warning_output: option-pic-relax-4.l
 
 # Verify that relaxation is done according to the `.option picX' setting

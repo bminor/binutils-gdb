@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS16 PC-relative relaxation 2
-#as: -32 -mips1
+#as: -32
 
 # Check that PC-relative relaxation does not go into oscillation
 # where the address referred depends on the size of the instruction;

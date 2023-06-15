@@ -1,5 +1,5 @@
 #nm: -g --defined-only
-#as: --relax-branch -march=from-abi
+#as: --relax-branch
 #name: MIPS .org test 10
 #warning_output: org-10.l
 

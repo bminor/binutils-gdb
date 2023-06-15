@@ -1,4 +1,4 @@
-# as: -EB -march=from-abi
+# as: -EB
 # objdump: -dr
 
 .* file format .*

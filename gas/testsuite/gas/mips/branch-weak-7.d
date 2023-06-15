@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS16 short branch to a weak symbol
-#as: -32 -mips1 -mips16 --defsym align=4
+#as: -32 -mips16 --defsym align=4
 #source: branch-weak.s
 
 .*: +file format .*mips.*

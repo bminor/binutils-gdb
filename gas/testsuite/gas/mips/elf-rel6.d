@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses
 #name: MIPS ELF reloc 6
-#as: -32 -mips1
+#as: -32
 
 .*: +file format elf.*mips.*
 

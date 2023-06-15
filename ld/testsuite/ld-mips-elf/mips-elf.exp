@@ -72,8 +72,7 @@ proc run_dump_test_abi { abi name args } {
 	set asflags [regsub -- {-march=[^[:blank:]]*} $asflags {}]
 	set args [lreplace $args 0 0]
     }
-    set abi_r [regsub "l$" $abi {}]
-    if !$has_abi($abi_r) {
+    if !$has_abi($abi) {
 	lappend args {notarget *-*-*}
     }
     if { [llength $args] > 0 } {
@@ -92,13 +91,6 @@ proc run_dump_test_abi { abi name args } {
 proc run_dump_test_o32 { name args } {
     run_dump_test_abi o32 $name [lindex $args 0]
 }
-proc run_dump_test_o32l { name args } {
-    if {[istarget *-linux*] || [istarget *-img-elf]} {
-      run_dump_test_abi o32l $name [lindex $args 0]
-    } else {
-      run_dump_test_abi o32 $name [lindex $args 0]
-    }
-}
 
 # run_dump_test_n32 NAME ARGS
 #
@@ -107,13 +99,6 @@ proc run_dump_test_o32l { name args } {
 proc run_dump_test_n32 { name args } {
     run_dump_test_abi n32 $name [lindex $args 0]
 }
-proc run_dump_test_n32l { name args } {
-    if {[istarget *-linux*] || [istarget *-img-elf]} {
-      run_dump_test_abi n32l $name [lindex $args 0]
-    } else {
-      run_dump_test_abi n32 $name [lindex $args 0]
-    }
-}
 
 # run_dump_test_n64 NAME ARGS
 #
@@ -121,13 +106,6 @@ proc run_dump_test_n32l { name args } {
 # passing ARGS.
 proc run_dump_test_n64 { name args } {
     run_dump_test_abi n64 $name [lindex $args 0]
-}
-proc run_dump_test_n64l { name args } {
-    if {[istarget *-linux*] || [istarget *-img-elf]} {
-      run_dump_test_abi n64l $name [lindex $args 0]
-    } else {
-      run_dump_test_abi n64 $name [lindex $args 0]
-    }
 }
 
 # run_dump_test_eabi NAME ARGS
@@ -161,69 +139,49 @@ set linux_gnu [expr [istarget mips*-*-linux*]]
 set embedded_elf [expr [istarget mips*-*-elf]]
 
 # Set defaults.
-# ABI with l tail means legacy, aka pre-R6.
-# Please use them, if the test only suite for pre-R6,
-# such as mips16/micromips tests.
 set abi_asflags(o32) ""
-set abi_asflags(o32l) ""
 set abi_asflags(n32) ""
-set abi_asflags(n32l) ""
 set abi_asflags(n64) ""
-set abi_asflags(n64l) ""
 set abi_asflags(eabi) ""
 set abi_ldflags(o32) ""
-set abi_ldflags(o32l) ""
 set abi_ldflags(n32) ""
-set abi_ldflags(n32l) ""
 set abi_ldflags(n64) ""
-set abi_ldflags(n64l) ""
 set abi_ldflags(eabi) ""
 
 # Override as needed.
 if {[istarget *-*-openbsd*] } {
     set irixemul 0
-} elseif { [istarget mips*64*-*-linux*] } {
-    set abi_asflags(o32) -32
-    set abi_asflags(o32l) "-32 -march=from-abi"
-    set abi_asflags(n32) ""
-    set abi_asflags(n32l) "-n32 -march=from-abi"
-    set abi_asflags(n64) "-64"
-    set abi_asflags(n64l) "-march=from-abi -64"
+} elseif { [istarget mips64*-*-linux*] } {
     if [istarget *el-*-*] {
+	set abi_asflags(o32) -32
 	set abi_ldflags(o32) -melf32ltsmip
-	set abi_ldflags(o32l) -melf32ltsmip
+	set abi_asflags(n64) "-march=from-abi -64"
 	set abi_ldflags(n64) -melf64ltsmip
-	set abi_ldflags(n64l) -melf64ltsmip
     } else {
+	set abi_asflags(o32) -32
 	set abi_ldflags(o32) -melf32btsmip
-	set abi_ldflags(o32l) -melf32btsmip
+	set abi_asflags(n64) "-march=from-abi -64"
 	set abi_ldflags(n64) -melf64btsmip
-	set abi_ldflags(n64l) -melf64btsmip
     }
     set irixemul 0
-} elseif {[istarget *-*-linux*] || [istarget *-img-elf] } {
-    set abi_asflags(o32) ""
-    set abi_asflags(o32l) "-march=from-abi"
-    set abi_asflags(n32) "-n32"
-    set abi_asflags(n32l) "-n32 -march=from-abi"
-    set abi_asflags(n64) "-64"
-    set abi_asflags(n64l) "-64 -march=from-abi"
+} elseif {[istarget *-*-linux*] } {
     if [istarget *el-*-*] {
+	set abi_asflags(n32) "-march=from-abi -n32"
 	set abi_ldflags(n32) -melf32ltsmipn32
-	set abi_ldflags(n32l) -melf32ltsmipn32
+	set abi_asflags(n64) "-march=from-abi -64"
 	set abi_ldflags(n64) -melf64ltsmip
-	set abi_ldflags(n64l) -melf64ltsmip
     } else {
+	set abi_asflags(n32) "-march=from-abi -n32"
 	set abi_ldflags(n32) -melf32btsmipn32
-	set abi_ldflags(n32l) -melf32btsmipn32
+	set abi_asflags(n64) "-march=from-abi -64"
 	set abi_ldflags(n64) -melf64btsmip
-	set abi_ldflags(n64l) -melf64btsmip
     }
     set irixemul 0
 } elseif {[istarget *-img-elf*] \
      || [istarget *-mti-elf*] \
      || [istarget *-sde-elf*] \
      || [istarget *-*-netbsd*] \
+     || [istarget *-*-linux*] \
      || [istarget *-*-sysv4*] } {
     if [istarget *el-*-*] {
 	set abi_asflags(o32) -32
@@ -347,56 +305,56 @@ run_dump_test "mips16-1"
 # MIPS branch offset final link checking.
 run_dump_test "branch-misc-1"
 run_dump_test "branch-misc-2"
-run_dump_test_o32l "branch-absolute"
-run_dump_test_o32l "branch-absolute-addend"
-run_dump_test_n32l "branch-absolute-n32"
-run_dump_test_n32l "branch-absolute-addend-n32"
-run_dump_test_n64l "branch-absolute-n64"
-run_dump_test_n64l "branch-absolute-addend-n64"
+run_dump_test_o32 "branch-absolute"
+run_dump_test_o32 "branch-absolute-addend"
+run_dump_test_n32 "branch-absolute-n32"
+run_dump_test_n32 "branch-absolute-addend-n32"
+run_dump_test_n64 "branch-absolute-n64"
+run_dump_test_n64 "branch-absolute-addend-n64"
 
-run_dump_test_o32l "mips16-pcrel-0"
-run_dump_test_o32l "mips16-pcrel-1" noarch
-run_dump_test_o32l "mips16e2-pcrel-0" noarch
-run_dump_test_o32l "mips16e2-pcrel-1" noarch
-run_dump_test_o32l "mips16-pcrel-addend-2"
-run_dump_test_o32l "mips16-pcrel-addend-6" noarch
-run_dump_test_o32l "mips16e2-pcrel-addend-2" noarch
-run_dump_test_o32l "mips16e2-pcrel-addend-6" noarch
-run_dump_test_n32l "mips16-pcrel-n32-0"
-run_dump_test_n32l "mips16-pcrel-n32-1"
-run_dump_test_n64l "mips16-pcrel-n64-sym32-0"
-run_dump_test_n64l "mips16-pcrel-n64-sym32-1"
-run_dump_test_n32l "mips16e2-pcrel-n32-0" noarch
-run_dump_test_n32l "mips16e2-pcrel-n32-1" noarch
-run_dump_test_n64l "mips16e2-pcrel-n64-sym32-0" noarch
-run_dump_test_n64l "mips16e2-pcrel-n64-sym32-1" noarch
+run_dump_test_o32 "mips16-pcrel-0"
+run_dump_test_o32 "mips16-pcrel-1" noarch
+run_dump_test_o32 "mips16e2-pcrel-0" noarch
+run_dump_test_o32 "mips16e2-pcrel-1" noarch
+run_dump_test_o32 "mips16-pcrel-addend-2"
+run_dump_test_o32 "mips16-pcrel-addend-6"
+run_dump_test_o32 "mips16e2-pcrel-addend-2" noarch
+run_dump_test_o32 "mips16e2-pcrel-addend-6" noarch
+run_dump_test_n32 "mips16-pcrel-n32-0"
+run_dump_test_n32 "mips16-pcrel-n32-1"
+run_dump_test_n64 "mips16-pcrel-n64-sym32-0"
+run_dump_test_n64 "mips16-pcrel-n64-sym32-1"
+run_dump_test_n32 "mips16e2-pcrel-n32-0" noarch
+run_dump_test_n32 "mips16e2-pcrel-n32-1" noarch
+run_dump_test_n64 "mips16e2-pcrel-n64-sym32-0" noarch
+run_dump_test_n64 "mips16e2-pcrel-n64-sym32-1" noarch
 
-run_dump_test_o32l "mips16-branch-2"
-run_dump_test_o32l "mips16-branch-3"
-run_dump_test_o32l "mips16-branch-addend-2"
-run_dump_test_o32l "mips16-branch-addend-3"
-run_dump_test_o32l "mips16-branch-absolute"
-run_dump_test_o32l "mips16-branch-absolute-1"
-run_dump_test_o32l "mips16-branch-absolute-2"
-run_dump_test_o32l "mips16-branch-absolute-addend"
-run_dump_test_o32l "mips16-branch-absolute-addend-1"
-run_dump_test_n32l "mips16-branch-absolute-n32"
-run_dump_test_n32l "mips16-branch-absolute-n32-1"
-run_dump_test_n32l "mips16-branch-absolute-n32-2"
-run_dump_test_n32l "mips16-branch-absolute-addend-n32"
-run_dump_test_n32l "mips16-branch-absolute-addend-n32-1"
-run_dump_test_n64l "mips16-branch-absolute-n64"
-run_dump_test_n64l "mips16-branch-absolute-n64-1"
-run_dump_test_n64l "mips16-branch-absolute-n64-2"
-run_dump_test_n64l "mips16-branch-absolute-addend-n64"
-run_dump_test_n64l "mips16-branch-absolute-addend-n64-1"
+run_dump_test_o32 "mips16-branch-2"
+run_dump_test_o32 "mips16-branch-3"
+run_dump_test_o32 "mips16-branch-addend-2"
+run_dump_test_o32 "mips16-branch-addend-3"
+run_dump_test_o32 "mips16-branch-absolute"
+run_dump_test_o32 "mips16-branch-absolute-1"
+run_dump_test_o32 "mips16-branch-absolute-2"
+run_dump_test_o32 "mips16-branch-absolute-addend"
+run_dump_test_o32 "mips16-branch-absolute-addend-1"
+run_dump_test_n32 "mips16-branch-absolute-n32"
+run_dump_test_n32 "mips16-branch-absolute-n32-1"
+run_dump_test_n32 "mips16-branch-absolute-n32-2"
+run_dump_test_n32 "mips16-branch-absolute-addend-n32"
+run_dump_test_n32 "mips16-branch-absolute-addend-n32-1"
+run_dump_test_n64 "mips16-branch-absolute-n64"
+run_dump_test_n64 "mips16-branch-absolute-n64-1"
+run_dump_test_n64 "mips16-branch-absolute-n64-2"
+run_dump_test_n64 "mips16-branch-absolute-addend-n64"
+run_dump_test_n64 "mips16-branch-absolute-addend-n64-1"
 
-run_dump_test_o32l "micromips-branch-absolute"
-run_dump_test_o32l "micromips-branch-absolute-addend"
-run_dump_test_n32l "micromips-branch-absolute-n32"
-run_dump_test_n32l "micromips-branch-absolute-addend-n32"
-run_dump_test_n64l "micromips-branch-absolute-n64"
-run_dump_test_n64l "micromips-branch-absolute-addend-n64"
+run_dump_test_o32 "micromips-branch-absolute"
+run_dump_test_o32 "micromips-branch-absolute-addend"
+run_dump_test_n32 "micromips-branch-absolute-n32"
+run_dump_test_n32 "micromips-branch-absolute-addend-n32"
+run_dump_test_n64 "micromips-branch-absolute-n64"
+run_dump_test_n64 "micromips-branch-absolute-addend-n64"
 
 # Jalx test
 run_dump_test "jalx-1"
@@ -423,69 +381,69 @@ if { $linux_gnu } {
 	      "jalx-2"]]
 }
 
-run_dump_test_o32l "jalx-addend"
-run_dump_test_o32l "jalx-local"
-run_dump_test_o32l "bal-jalx-addend"
-run_dump_test_o32l "bal-jalx-addend-micromips"
-run_dump_test_o32l "bal-jalx-local"
-run_dump_test_o32l "bal-jalx-local-micromips"
-run_dump_test_o32l "bal-jalx-pic"
-run_dump_test_o32l "bal-jalx-pic-micromips"
-run_dump_test_o32l "bal-jalx-pic-ignore"
-run_dump_test_o32l "bal-jalx-pic-ignore-micromips"
-run_dump_test_n32l "jalx-addend-n32"
-run_dump_test_n32l "jalx-local-n32"
-run_dump_test_n32l "bal-jalx-addend-n32"
-run_dump_test_n32l "bal-jalx-addend-micromips-n32"
-run_dump_test_n32l "bal-jalx-local-n32"
-run_dump_test_n32l "bal-jalx-local-micromips-n32"
-run_dump_test_n32l "bal-jalx-pic-n32"
-run_dump_test_n32l "bal-jalx-pic-micromips-n32"
-run_dump_test_n32l "bal-jalx-pic-ignore-n32"
-run_dump_test_n32l "bal-jalx-pic-ignore-micromips-n32"
-run_dump_test_n64l "jalx-addend-n64"
-run_dump_test_n64l "jalx-local-n64"
-run_dump_test_n64l "bal-jalx-addend-n64"
-run_dump_test_n64l "bal-jalx-addend-micromips-n64"
-run_dump_test_n64l "bal-jalx-local-n64"
-run_dump_test_n64l "bal-jalx-local-micromips-n64"
-run_dump_test_n64l "bal-jalx-pic-n64"
-run_dump_test_n64l "bal-jalx-pic-micromips-n64"
-run_dump_test_n64l "bal-jalx-pic-ignore-n64"
-run_dump_test_n64l "bal-jalx-pic-ignore-micromips-n64"
+run_dump_test_o32 "jalx-addend"
+run_dump_test_o32 "jalx-local"
+run_dump_test_o32 "bal-jalx-addend"
+run_dump_test_o32 "bal-jalx-addend-micromips"
+run_dump_test_o32 "bal-jalx-local"
+run_dump_test_o32 "bal-jalx-local-micromips"
+run_dump_test_o32 "bal-jalx-pic"
+run_dump_test_o32 "bal-jalx-pic-micromips"
+run_dump_test_o32 "bal-jalx-pic-ignore"
+run_dump_test_o32 "bal-jalx-pic-ignore-micromips"
+run_dump_test_n32 "jalx-addend-n32"
+run_dump_test_n32 "jalx-local-n32"
+run_dump_test_n32 "bal-jalx-addend-n32"
+run_dump_test_n32 "bal-jalx-addend-micromips-n32"
+run_dump_test_n32 "bal-jalx-local-n32"
+run_dump_test_n32 "bal-jalx-local-micromips-n32"
+run_dump_test_n32 "bal-jalx-pic-n32"
+run_dump_test_n32 "bal-jalx-pic-micromips-n32"
+run_dump_test_n32 "bal-jalx-pic-ignore-n32"
+run_dump_test_n32 "bal-jalx-pic-ignore-micromips-n32"
+run_dump_test_n64 "jalx-addend-n64"
+run_dump_test_n64 "jalx-local-n64"
+run_dump_test_n64 "bal-jalx-addend-n64"
+run_dump_test_n64 "bal-jalx-addend-micromips-n64"
+run_dump_test_n64 "bal-jalx-local-n64"
+run_dump_test_n64 "bal-jalx-local-micromips-n64"
+run_dump_test_n64 "bal-jalx-pic-n64"
+run_dump_test_n64 "bal-jalx-pic-micromips-n64"
+run_dump_test_n64 "bal-jalx-pic-ignore-n64"
+run_dump_test_n64 "bal-jalx-pic-ignore-micromips-n64"
 
-run_dump_test_o32l "unaligned-jalx-0" [list [list ld $abi_ldflags(o32)]]
-run_dump_test_o32l "unaligned-jalx-1" [list [list ld $abi_ldflags(o32)]]
-run_dump_test_o32l "unaligned-jalx-2" [list [list ld $abi_ldflags(o32)]]
-run_dump_test_o32l "unaligned-jalx-3" [list [list ld $abi_ldflags(o32)]]
-run_dump_test_o32l "unaligned-jalx-mips16-0" [list [list ld $abi_ldflags(o32)]]
-run_dump_test_o32l "unaligned-jalx-mips16-1" [list [list ld $abi_ldflags(o32)]]
-run_dump_test_o32l "unaligned-jalx-micromips-0" [list [list ld $abi_ldflags(o32)]]
-run_dump_test_o32l "unaligned-jalx-micromips-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-2" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-3" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-mips16-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-mips16-1" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-micromips-0" [list [list ld $abi_ldflags(o32)]]
+run_dump_test "unaligned-jalx-micromips-1" [list [list ld $abi_ldflags(o32)]]
 
-run_dump_test_n32l "unaligned-jalx-addend-0"
-run_dump_test_n32l "unaligned-jalx-addend-1"
-run_dump_test_n32l "unaligned-jalx-addend-2"
-run_dump_test_n32l "unaligned-jalx-addend-3"
-run_dump_test_n32l "unaligned-jalx-addend-mips16-0"
-run_dump_test_n32l "unaligned-jalx-addend-mips16-1"
-run_dump_test_n32l "unaligned-jalx-addend-micromips-0"
-run_dump_test_n32l "unaligned-jalx-addend-micromips-1"
+run_dump_test_n32 "unaligned-jalx-addend-0"
+run_dump_test_n32 "unaligned-jalx-addend-1"
+run_dump_test_n32 "unaligned-jalx-addend-2"
+run_dump_test_n32 "unaligned-jalx-addend-3"
+run_dump_test_n32 "unaligned-jalx-addend-mips16-0"
+run_dump_test_n32 "unaligned-jalx-addend-mips16-1"
+run_dump_test_n32 "unaligned-jalx-addend-micromips-0"
+run_dump_test_n32 "unaligned-jalx-addend-micromips-1"
 
 run_dump_test_o32 "unaligned-branch" noarch
 
-run_dump_test_n32l "unaligned-branch-2"
-run_dump_test_n32l "unaligned-branch-ignore-2"
+run_dump_test_n32 "unaligned-branch-2"
+run_dump_test_n32 "unaligned-branch-ignore-2"
 run_dump_test_n32 "unaligned-branch-r6-1"
 run_dump_test_n32 "unaligned-branch-ignore-r6-1"
 run_dump_test_n32 "unaligned-branch-r6-2" noarch
-run_dump_test_n32l "unaligned-branch-mips16"
-run_dump_test_n32l "unaligned-branch-ignore-mips16"
-run_dump_test_n32l "unaligned-branch-micromips"
-run_dump_test_n32l "unaligned-branch-ignore-micromips"
-run_dump_test_n32l "unaligned-jump"
-run_dump_test_n32l "unaligned-jump-mips16"
-run_dump_test_n32l "unaligned-jump-micromips"
+run_dump_test_n32 "unaligned-branch-mips16"
+run_dump_test_n32 "unaligned-branch-ignore-mips16"
+run_dump_test_n32 "unaligned-branch-micromips"
+run_dump_test_n32 "unaligned-branch-ignore-micromips"
+run_dump_test_n32 "unaligned-jump"
+run_dump_test_n32 "unaligned-jump-mips16"
+run_dump_test_n32 "unaligned-jump-micromips"
 
 run_dump_test_o32 "unaligned-lwpc-0" noarch
 run_dump_test_o32 "unaligned-lwpc-1" noarch
@@ -516,11 +474,11 @@ if { $linux_gnu } {
 }
 
 if { $embedded_elf } {
-    run_dump_test_n32l "elf-rel-got-n32-embed" {{as -EB} {ld -EB}}
-    run_dump_test_n32l "elf-rel-xgot-n32-embed" {{as -EB} {ld -EB}}
+    run_dump_test_n32 "elf-rel-got-n32-embed" {{as -EB} {ld -EB}}
+    run_dump_test_n32 "elf-rel-xgot-n32-embed" {{as -EB} {ld -EB}}
 } else {
-    run_dump_test_n32l "elf-rel-got-n32" {{as -EB} {ld -EB}}
-    run_dump_test_n32l "elf-rel-xgot-n32" {{as -EB} {ld -EB}}
+    run_dump_test_n32 "elf-rel-got-n32" {{as -EB} {ld -EB}}
+    run_dump_test_n32 "elf-rel-xgot-n32" {{as -EB} {ld -EB}}
 }
 if { $irix } {
     run_dump_test_n64 "elf-rel-got-n64-irix"
@@ -529,8 +487,8 @@ if { $irix } {
     run_dump_test_n64 "elf-rel-got-n64-embed" {{as -EB} {ld -EB}}
     run_dump_test_n64 "elf-rel-xgot-n64-embed" {{as -EB} {ld -EB}}
 } else {
-    run_dump_test_n64l "elf-rel-got-n64" {{as -EB} {ld -EB}}
-    run_dump_test_n64l "elf-rel-xgot-n64" {{as -EB} {ld -EB}}
+    run_dump_test_n64 "elf-rel-got-n64" {{as -EB} {ld -EB}}
+    run_dump_test_n64 "elf-rel-xgot-n64" {{as -EB} {ld -EB}}
 }
 
 run_dump_test_n32 "relax-jalr-n32" {{as -EB} {ld -EB}}
@@ -837,8 +795,8 @@ run_dump_test_n32 "jalbal" noarch
 
 run_dump_test "mode-change-error-1"
 
-run_dump_test_o32l "mips16-hilo"
-run_dump_test_n32l "mips16-hilo-n32"
+run_dump_test_o32 "mips16-hilo"
+run_dump_test_n32 "mips16-hilo-n32"
 
 if { $linux_gnu } {
     run_dump_test_n32 "textrel-1"
@@ -907,8 +865,8 @@ if { $linux_gnu && $has_abi(o32) } {
     set base_syms 1
     foreach { isa aflag lflag suffix } \
 	{ MIPS -march=mips1 "" "" \
-	  microMIPS "-mips32r2 -mmicromips" "" -micromips \
-	  "microMIPS insn32" "-mips32r2 -mmicromips -minsn32" --insn32 \
+	  microMIPS -mmicromips "" -micromips \
+	  "microMIPS insn32" "-mmicromips -minsn32" --insn32 \
 	      -micromips-insn32 } {
 	foreach dynsym { 7fff 8000 fff0 10000 2fe80 } {
 	    run_ld_link_tests \
@@ -1248,7 +1206,7 @@ foreach { abi } $abis {
 	[list \
 	    "MIPS JALR reloc unaligned/cross-mode link test ($abi)" \
 	    "$abi_ldflags($abi) -T jalr3.ld" "" \
-	    "$abi_asflags($abi) -march=from-abi" \
+	    "$abi_asflags($abi)" \
 	    [list ../../../gas/testsuite/gas/mips/jalr4.s] \
 	    [list "objdump {-d --prefix-addresses --show-raw-insn} jalr4.dd"] \
 	    "jalr4-${abi}"] \
@@ -1286,8 +1244,6 @@ proc run_mips_plt_test { name abi filter micromips suffix {extra {}} } {
     append as_flags " --defsym micromips=$micromips --defsym $abi=1"
     if {[string equal $abi o32]} {
 	append as_flags " -march=mips2"
-    } else {
-	append as_flags " -march=mips3"
     }
     set ld_flags "$abi_ldflags($abi) -T compressed-plt-1.ld"
     set dynobj "tmpdir/compressed-plt-1-${abi}-dyn.so"
@@ -1427,7 +1383,7 @@ if { $has_abi(o32) } {
     run_ld_link_tests [list \
 	[list \
 	    "PR ld/21334 MIPS GOT16 relocation in static binary" \
-	    "$abi_ldflags(o32) -e foo -T pr21334.ld" "" "$abi_asflags(o32) -march=from-abi" \
+	    "$abi_ldflags(o32) -e foo -T pr21334.ld" "" "$abi_asflags(o32)" \
 	    {pr21334.s} \
 	    {{objdump {-d --prefix-addresses} pr21334.dd} \
 	     {readelf -A pr21334.gd}} \
@@ -1462,7 +1418,7 @@ if { $has_abi(o32) } {
 	[list \
 	    "microMIPS link PIC branch relaxation with offset" \
 	    "$abi_ldflags(o32) -shared -T relax-offset.ld" "" \
-	    "$abi_asflags(o32) -relax-branch -mips32r2 -mmicromips" \
+	    "$abi_asflags(o32) -relax-branch -mmicromips" \
 	    {../../../gas/testsuite/gas/mips/relax-offset.s} \
 	    {{objdump \
 	      {-d --prefix-addresses --show-raw-insn} \
@@ -1615,7 +1571,7 @@ proc run_mips_undefweak_test { name abi args } {
 		"$name" \
 		"$abi_ldflags($abi) -e foo -T pr21375${scrsuf}.ld ${ldxtra}" \
 		"" \
-		"$abi_asflags($abi) -march=from-abi ${asxtra}" \
+		"$abi_asflags($abi) ${asxtra}" \
 		[list pr21375${srcsuf}.s] \
 		[list \
 		    [list objdump -d pr21375${objsuf}.dd] \
@@ -1694,11 +1650,11 @@ run_dump_test "pic-reloc-2"
 run_dump_test "pic-reloc-3"
 run_dump_test "pic-reloc-4"
 run_dump_test_o32 "pic-reloc-5"
-run_dump_test_o32l "pic-reloc-5" [list [list name (microMIPS)] \
+run_dump_test_o32 "pic-reloc-5" [list [list name (microMIPS)] \
 				      [list as "-mmicromips"]]
-run_dump_test_o32l "pic-reloc-6"
+run_dump_test_o32 "pic-reloc-6"
 run_dump_test_n64 "pic-reloc-7"
-run_dump_test_n64l "pic-reloc-7" [list [list name (microMIPS)] \
+run_dump_test_n64 "pic-reloc-7" [list [list name (microMIPS)] \
 				      [list as "-mmicromips"]]
 
 run_dump_test_o32 "reloc-pcrel-r6"
