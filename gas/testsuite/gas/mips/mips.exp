@@ -1627,6 +1627,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "r5900-all-vu0"
     run_list_test "r5900-error-vu0" "-march=r5900"
 
+    run_dump_test "allegrex"
+
     run_list_test_arches "ext-ill"	[mips_arch_list_matching mips64r2]
 
     run_list_test "ase-errors-1" "-mabi=32 -march=mips1" "ASE errors (1)"
