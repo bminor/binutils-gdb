@@ -1234,14 +1234,14 @@ list_command (const char *arg, int from_tty)
   const char *p;
 
   /* Pull in the current default source line if necessary.  */
-  if (arg == NULL || ((arg[0] == '+' || arg[0] == '-') && arg[1] == '\0'))
+  if (arg == NULL || ((arg[0] == '+' || arg[0] == '-' || arg[0] == '.') && arg[1] == '\0'))
     {
       set_default_source_symtab_and_line ();
       symtab_and_line cursal = get_current_source_symtab_and_line ();
 
       /* If this is the first "list" since we've set the current
 	 source line, center the listing around that line.  */
-      if (get_first_line_listed () == 0)
+      if (get_first_line_listed () == 0 && (arg == nullptr || arg[0] != '.'))
 	{
 	  list_around_line (arg, cursal);
 	}
@@ -1261,6 +1261,32 @@ list_command (const char *arg, int from_tty)
 	  source_lines_range range (get_first_line_listed (),
 				    source_lines_range::BACKWARD);
 	  print_source_lines (cursal.symtab, range, 0);
+	}
+
+      /* "l ." lists the default location again.  */
+      else if (arg[0] == '.')
+	{
+	  try
+	    {
+	      /* Find the current line by getting the PC of the currently
+		 selected frame, and finding the line associated to it.  */
+	      frame_info_ptr frame = get_selected_frame (nullptr);
+	      CORE_ADDR curr_pc = get_frame_pc (frame);
+	      cursal = find_pc_line (curr_pc, 0);
+	    }
+	  catch (const gdb_exception &e)
+	    {
+	      /* If there was an exception above, it means the inferior
+		 is not running, so reset the current source location to
+		 the default.  */
+	      clear_current_source_symtab_and_line ();
+	      set_default_source_symtab_and_line ();
+	      cursal = get_current_source_symtab_and_line ();
+	    }
+	  list_around_line (arg, cursal);
+	  /* Advance argument so just pressing "enter" after using "list ."
+	     will print the following lines instead of the same lines again. */
+	  arg++;
 	}
 
       return;
@@ -2770,6 +2796,7 @@ and send its output to SHELL_COMMAND."));
     = add_com ("list", class_files, list_command, _("\
 List specified function or line.\n\
 With no argument, lists ten more lines after or around previous listing.\n\
+\"list .\" lists ten lines arond where the inferior is stopped.\n\
 \"list -\" lists the ten lines before a previous ten-line listing.\n\
 One argument specifies a line, and ten lines are listed around that line.\n\
 Two arguments with comma between specify starting and ending lines to list.\n\

@@ -86,6 +86,10 @@
 
 * The Ada 2022 Enum_Rep and Enum_Val attributes are now supported.
 
+* The 'list' command now accepts '.' as an argument, which tells GDB to
+  print the location where the inferior is stopped.  If the inferior hasn't
+  started yet, the command will print around the main function.
+
 * New commands
 
 maintenance print record-instruction [ N ]
