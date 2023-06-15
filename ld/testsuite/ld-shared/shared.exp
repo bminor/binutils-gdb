@@ -220,7 +220,7 @@ if ![ld_compile "$CC_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.
 	 || ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $SHCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
 	unsupported "shared (non PIC)"
     } else { if { [is_xcoff_format] } {
-	shared_test shnp "shared (non PIC)" mainnp.o sh1np.o sh2np.o xcoff
+	shared_test shnp "shared (nonPIC)" mainnp.o sh1np.o sh2np.o xcoff
     } else {
 	# Solaris defaults to -z text.
 	setup_xfail "*-*-solaris2*"
@@ -242,7 +242,6 @@ if ![ld_compile "$CC_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.
 	    setup_xfail "arm*-*-linux*"
 	}
 	setup_xfail "aarch64*-*-linux*"
-	setup_xfail "mips*-*-linux*"
 	shared_test shnp "shared (non PIC)" mainnp.o sh1np.o sh2np.o shared
 
 	# Test ELF shared library relocations with a non-zero load
@@ -324,7 +323,6 @@ if ![ld_compile "$CC_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdi
 		setup_xfail "arm*-*-linux*"
 	    }
 	    setup_xfail "aarch64*-*-linux*"
-	    setup_xfail "mips*-*-linux*"
 	    shared_test shmpnp "shared (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o shared
 	}
     } else {

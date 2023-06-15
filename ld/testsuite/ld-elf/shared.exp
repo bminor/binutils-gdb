@@ -774,6 +774,9 @@ set build_tests {
   {"Build libpr16496b.a"
    "" "-fPIC"
    {pr16496b.c} {} "libpr16496b.a"}
+  {"Build libpr16496b.so"
+   "-shared -Wl,--no-as-needed tmpdir/pr16496b.o tmpdir/libpr16496a.so" ""
+   {dummy.c} {{objdump {-R} pr16496b.od}} "libpr16496b.so"}
   {"Build libpr16452a.so"
    "-shared -Wl,-soname,libpr16452a.so,--version-script=pr16452.map" "-fPIC"
    {pr16452a.c} {} "libpr16452a.so"}
@@ -792,15 +795,6 @@ set build_tests {
   {"Build libpr18458b.so"
    "-shared -Wl,-z,now tmpdir/libpr18458a.so" "-fPIC"
    {pr18458b.c} {} "libpr18458b.so"}
-}
-
-# MIPS PIC uses different way: .MIPS.stub
-if { ![istarget mips*-linux*] } {
-    append build_tests {
-       {"Build libpr16496b.so"
-	"-shared -Wl,--no-as-needed tmpdir/pr16496b.o tmpdir/libpr16496a.so" ""
-	{dummy.c} {{objdump {-R} pr16496b.od}} "libpr16496b.so"}
-    }
 }
 
 run_cc_link_tests [list \

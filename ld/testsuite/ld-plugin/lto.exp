@@ -557,7 +557,7 @@ if { ! [istarget "arm*-*-*"] } {
 # when using the LTO plugin.  The HPPA target however requires an
 # executable stack for syscall restarts and signal returns, so we
 # skip this test for that target.
-if { ! [istarget "hppa*-*-*"] && ! [istarget "mips*-linux*"] } {
+if { ! [istarget "hppa*-*-*"] } {
     lappend lto_link_elf_tests \
   [list "PR ld/12982" \
    "-O2 -flto -fuse-linker-plugin" "-O2 -flto" \
@@ -909,10 +909,6 @@ if { [at_least_gcc_version 4 7] } {
     }
 }
 
-set save_asflags $ASFLAGS
-if { [istarget "mips*-*-linux*"] } {
-    append ASFLAGS " -KPIC"
-}
 # Run "ld -r" to generate inputs for complex LTO tests.
 run_dump_test "lto-3r"
 remote_exec host "mv" "tmpdir/dump tmpdir/lto-3.o"
@@ -926,12 +922,7 @@ run_ld_link_tests [list \
    "-r tmpdir/pr19317.o" "" "" \
    {dummy.s} {} "pr19317-r.o"] \
 ]
-set ASFLAGS $save_asflags
 
-if { [istarget "mips*-*-linux*"] } {
-  set lto_run_tests [xfail_from_runlist $lto_run_tests "PR ld/15323 (4)"]
-  set lto_run_tests [xfail_from_runlist $lto_run_tests "PR ld/19317 (3)"]
-}
 run_ld_link_exec_tests $lto_run_tests
 
 if { [is_elf_format] } {

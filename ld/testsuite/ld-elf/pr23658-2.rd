@@ -1,5 +1,5 @@
 #...
- +[0-9]+ +(\.MIPS\.abiflags \.MIPS\.options \.dynamic \.hash \.dynsym \.dynstr \.text |)\.interp \.note.4 \.note.1 \.note.2 \.note.3.*
+ +[0-9]+ +\.interp \.note.4 \.note.1 \.note.2 \.note.3.*
 #...
  +[0-9]+ +\.note\.4 \.note\.1 +
  +[0-9]+ +\.note\.2 .note\.3 +

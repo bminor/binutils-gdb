@@ -801,13 +801,13 @@ build_exec "vers3" vers3.c vers3 "-Wl,--no-as-needed" vers1.so vers3.ver vers3.d
 
 # This test fails on MIPS.  On the MIPS we must put foo in the dynamic
 # symbol table, which the test does not expect.
-setup_xfail "mips*-*-irix*" "mips*-linux-*"
+setup_xfail "mips*-*-irix*"
 build_exec "vers4" vers4.c vers4 "" "" "" "" vers4.sym
 
 build_exec "vers4a" vers4.c vers4a "-Wl,-export-dynamic" "" vers4a.ver vers4a.dsym vers4a.sym
 
 # Verify that --no-export-dynamic undoes the effect of --export-dynamic.
-setup_xfail "mips*-*-irix*" "mips*-linux-*"
+setup_xfail "mips*-*-irix*"
 build_exec "vers4b" vers4.c vers4b "-Wl,-export-dynamic -Wl,--no-export-dynamic" "" "" "" vers4.sym
 
 
@@ -932,20 +932,18 @@ set as_pic_flags ""
 if [istarget sparc*-*-*] {
   set as_pic_flags "-K PIC"
 }
-if { ![istarget mips*-*-*] } {
-  run_ld_link_tests [list "\"vers24a\"
+run_ld_link_tests [list "\"vers24a\"
 			 \"-shared --version-script $srcdir/$subdir/vers24.map\" \"\"
 			 \"$as_pic_flags $as_options\" {vers24a.c vers24b.c} { { readelf -Wrs vers24.rd } }
 			 \"libvers24a.so\" \"-fpic\""]
-  run_ld_link_tests [list "\"vers24b\"
+run_ld_link_tests [list "\"vers24b\"
 			 \"-shared --version-script $srcdir/$subdir/vers24.map\" \"\"
 			 \"$as_pic_flags $as_options\" {vers24b.c vers24a.c} { { readelf -Wrs vers24.rd } }
 			 \"libvers24b.so\" \"-fpic\""]
-  run_ld_link_tests [list "\"vers24c\"
+run_ld_link_tests [list "\"vers24c\"
 			 \"-shared --version-script $srcdir/$subdir/vers24.map\" \"\"
 			 \"$as_pic_flags $as_options\" {vers24c.c} { { readelf -Wrs vers24.rd } }
 			 \"libvers24c.so\" \"-fpic\""]
-}
 
 # Test versioned definition vs. normal definition in different files.
 if [string match "yes" $pic] then {

@@ -52,7 +52,7 @@ set ldflags "--gc-sections -Bstatic"
 
 if [istarget mips*-*] {
     # MIPS16 doesn't support PIC code.
-    set cflags "-mno-abicalls -fno-PIC $cflags"
+    set cflags "-mno-abicalls $cflags"
     # MIPS ELF uses __start by default, we override it.
     set ldflags "-e _start $ldflags"
 }

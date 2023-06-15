@@ -151,10 +151,6 @@ if { [check_compiler_available] } {
     }
 }
 
-set save_asflags $ASFLAGS
-if { [istarget "mips*-*-linux*"] } {
-    append ASFLAGS " -KPIC"
-}
 set symdefs ""
 if [is_pecoff_format] {
     set symdefs {{ld {--defsym __main=main --defsym ___main=main}}}
@@ -178,7 +174,6 @@ if { [check_compiler_available] } {
     }
     run_dump_test "pr19161" $symdefs
 }
-set ASFLAGS $save_asflags
 
 if { [is_elf_format] && [check_shared_lib_support] \
      && [check_compiler_available] } {
