@@ -509,7 +509,7 @@ mips_arch_create r3000 	32	mips1	{} \
 mips_arch_create r3900 	32	mips1	{ gpr_ilocks } \
 			{ -march=r3900 -mtune=r3900 } { -mmips:3900 } \
 			{ mipstx39-*-* mipstx39el-*-* }
-mips_arch_create allegrex 32	mips2	{ singlefloat oddspreg } \
+mips_arch_create allegrex 32	mips2	{ ror singlefloat oddspreg } \
 			{ -march=allegrex -mtune=allegrex } \
 			{ -mmips:allegrex }
 mips_arch_create r4000 	64	mips3	{} \
