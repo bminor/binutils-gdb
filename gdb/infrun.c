@@ -3503,19 +3503,29 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	  }
       }
     else if (!cur_thr->resumed ()
-	     && !thread_is_in_step_over_chain (cur_thr)
-	     /* In non-stop, forbid resuming a thread if some other thread of
-		that inferior is waiting for a vfork-done event (this means
-		breakpoints are out for this inferior).  */
-	     && !(non_stop
-		  && cur_thr->inf->thread_waiting_for_vfork_done != nullptr))
+	     && !thread_is_in_step_over_chain (cur_thr))
       {
-	/* The thread wasn't started, and isn't queued, run it now.  */
-	execution_control_state ecs (cur_thr);
-	switch_to_thread (cur_thr);
-	keep_going_pass_signal (&ecs);
-	if (!ecs.wait_some_more)
-	  error (_("Command aborted."));
+	/* In non-stop mode, if a there exists a thread waiting for a vfork
+	   then only allow that thread to resume (breakpoints are removed
+	   from an inferior when handling a vfork).
+
+	   We check target_is_non_stop_p here rather than just checking the
+	   non-stop flag, though these are equivalent (all-stop on a
+	   non-stop target was handled in a previous block, so at this
+	   point, if target_is_non_stop_p then GDB must be running on
+	   non-stop mode).  By using target_is_non_stop_p it will be easier
+	   to merge this block with the previous in a later commit.  */
+	if (!(target_is_non_stop_p ()
+	      && cur_thr->inf->thread_waiting_for_vfork_done != nullptr
+	      && cur_thr->inf->thread_waiting_for_vfork_done != cur_thr))
+	  {
+	    /* The thread wasn't started, and isn't queued, run it now.  */
+	    execution_control_state ecs (cur_thr);
+	    switch_to_thread (cur_thr);
+	    keep_going_pass_signal (&ecs);
+	    if (!ecs.wait_some_more)
+	      error (_("Command aborted."));
+	  }
       }
 
     disable_commit_resumed.reset_and_commit ();
