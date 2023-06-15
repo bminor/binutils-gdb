@@ -1,4 +1,4 @@
-#as: -mfix-rm7000 -mabi=n32
+#as: -mfix-rm7000
 #objdump: -dz --prefix-addresses
 #name: MIPS RM7000 workarounds test 2
 #source: fix-rm7000-2.s

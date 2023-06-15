@@ -5,21 +5,21 @@
 #readelf: -A
 
 Primary GOT:
- Canonical gp value: 0+068000
+ Canonical gp value: 00068000
 
  Reserved entries:
- * Address * Access * Initial Purpose
-  0+060010 -32752\(gp\) 0+000000 Lazy resolver
-  0+06001[48] -3274[48]\(gp\) 8000000+ Module pointer \(GNU extension\)
+   Address     Access  Initial Purpose
+  00060010 -32752\(gp\) 00000000 Lazy resolver
+  00060014 -32748\(gp\) 80000000 Module pointer \(GNU extension\)
 
  Local entries:
- * Address * Access * Initial
-  0+0600(18|20) -327(44|36)\(gp\) 0+060000
-  0+0600(1c|28) -327(40|28)\(gp\) 0+060004
+   Address     Access  Initial
+  00060018 -32744\(gp\) 00060000
+  0006001c -32740\(gp\) 00060004
 
  Global entries:
- * Address * Access * Initial * Sym.Val. Type * Ndx Name
-  0+0600(2|3)0 -327(36|20)\(gp\) 0+050020 0+050020 FUNC    UND extern
-  0+0600(24|38) -327(32|12)\(gp\) 0+050000 0+050000 FUNC      7 glob
-  0+0600(28|40) -327(28|04)\(gp\) 0+000000 0+000000 NOTYPE  UND undef
+   Address     Access  Initial Sym.Val. Type    Ndx Name
+  00060020 -32736\(gp\) 00050020 00050020 FUNC    UND extern
+  00060024 -32732\(gp\) 00050000 00050000 FUNC      7 glob
+  00060028 -32728\(gp\) 00000000 00000000 NOTYPE  UND undef
 

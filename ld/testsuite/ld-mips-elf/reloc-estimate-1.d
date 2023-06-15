@@ -8,8 +8,8 @@
 
 DYNAMIC RELOCATION RECORDS
 OFFSET +TYPE +VALUE
-0+000000 R_MIPS_NONE       \*ABS\*
-0+010000 R_MIPS_REL32      foo@@V2
+00000000 R_MIPS_NONE       \*ABS\*
+00010000 R_MIPS_REL32      foo@@V2
 
 
 # The address must be 0x810.  We should only ever allocate one dynamic

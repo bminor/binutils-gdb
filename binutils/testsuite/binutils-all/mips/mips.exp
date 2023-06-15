@@ -152,25 +152,6 @@ set abi_ldflags(eabi) ""
 # Override as needed.
 if {[istarget *-*-openbsd*] } {
     set irixemul 0
-} elseif { [istarget mips*64*-*-linux*-gnuabi64] } {
-    set abi_asflags(o32) -32
-    set abi_asflags(o32l) "-32 -march=from-abi"
-    set abi_asflags(n32) "-n32"
-    set abi_asflags(n32l) "-n32 -march=from-abi"
-    set abi_asflags(n64) ""
-    set abi_asflags(n64l) "-march=from-abi -64"
-    if [istarget *el-*-*] {
-	set abi_ldflags(o32) -melf32ltsmip
-	set abi_ldflags(o32l) -melf32ltsmip
-	set abi_ldflags(n32) -melf32ltsmipn32
-	set abi_ldflags(n32l) -melf32ltsmipn32
-    } else {
-	set abi_ldflags(o32) -melf32btsmip
-	set abi_ldflags(o32l) -melf32btsmip
-	set abi_ldflags(n32) -melf32btsmipn32
-	set abi_ldflags(n32l) -melf32btsmipn32
-    }
-    set irixemul 0
 } elseif { [istarget mips*64*-*-linux*] } {
     set abi_asflags(o32) -32
     set abi_asflags(o32l) "-32 -march=from-abi"

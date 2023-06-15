@@ -210,10 +210,6 @@ if { ![is_elf_format] || ![check_shared_lib_support]} then {
 	    set none_count 6
 	    set reloc_count 4
 	}
-	"mips*64*-linux-gnuabi64" {
-	    set none_count 6
-	    set reloc_count 4
-	}
 	"mips*" -
 	"score*" {
 	    set none_count 1

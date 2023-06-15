@@ -182,25 +182,6 @@ set abi_ldflags(eabi) ""
 # Override as needed.
 if {[istarget *-*-openbsd*] } {
     set irixemul 0
-} elseif { [istarget mips*64*-*-linux*-gnuabi64] } {
-    set abi_asflags(o32) -32
-    set abi_asflags(o32l) "-32 -march=from-abi"
-    set abi_asflags(n32) "-n32"
-    set abi_asflags(n32l) "-n32 -march=from-abi"
-    set abi_asflags(n64) ""
-    set abi_asflags(n64l) "-64 -march=from-abi"
-    if [istarget *el-*-*] {
-	set abi_ldflags(o32) -melf32ltsmip
-	set abi_ldflags(o32l) -melf32ltsmip
-	set abi_ldflags(n32) -melf32ltsmipn32
-	set abi_ldflags(n32l) -melf32ltsmipn32
-    } else {
-	set abi_ldflags(o32) -melf32btsmip
-	set abi_ldflags(o32l) -melf32btsmip
-	set abi_ldflags(n32) -melf32btsmipn32
-	set abi_ldflags(n32l) -melf32btsmipn32
-    }
-    set irixemul 0
 } elseif { [istarget mips*64*-*-linux*] } {
     set abi_asflags(o32) -32
     set abi_asflags(o32l) "-32 -march=from-abi"
@@ -911,8 +892,7 @@ if { $linux_gnu } {
     }
     run_dump_test "got-dump-1"
     run_dump_test_n64 "got-dump-2" noarch
-    run_dump_test_n32 "reloc-estimate-1"
-    run_dump_test_o32 "reloc-estimate-1"
+    run_dump_test "reloc-estimate-1"
 }
 
 run_dump_test_n32 "emit-relocs-1" {{as -EB} {ld -EB}}
@@ -1100,8 +1080,7 @@ if { $has_abi(o32) } {
     run_ld_link_tests $mips16_intermix_test
 }
 
-run_dump_test_o32 "mips16-local-stubs-1"
-run_dump_test_n32 "mips16-local-stubs-1"
+run_dump_test "mips16-local-stubs-1"
 
 set mips16_fp_stub_test [list \
     [list "Floating-point stub for mips16 functions" \
@@ -1127,8 +1106,7 @@ foreach firstfpabi [list 4 5 6 7 ] {
 }
 foreach firstfpabi [list 0 1 2 3 ] {
   foreach secondfpabi [list 0 1 2 3 8 9] {
-    run_dump_test_o32 "attr-gnu-4-${firstfpabi}${secondfpabi}"
-    run_dump_test_n32 "attr-gnu-4-${firstfpabi}${secondfpabi}"
+    run_dump_test "attr-gnu-4-${firstfpabi}${secondfpabi}"
   }
 }
 
