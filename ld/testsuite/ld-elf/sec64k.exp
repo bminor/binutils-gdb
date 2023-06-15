@@ -170,12 +170,13 @@ if [catch { set ofd [open "tmpdir/$test2.d" w] } x] {
 
 # too big for avr, d10v and msp
 # lack of fancy orphan section handling causes overlap on fr30 and iq2000
-# lm32 complains about relocations in read-only sections
+# bfin and lm32 complain about relocations in read-only sections
 if { ![istarget "d10v-*-*"]
      && ![istarget "avr-*-*"]
      && ![istarget "msp*-*-*"]
      && ![istarget "fr30-*-*"] 
      && ![istarget "iq2000-*-*"]
+     && ![istarget "bfin-*-linux*"]
      && ![istarget "lm32-*-linux*"]
      && ![istarget "pru-*-*"] } {
     foreach sfile $sfiles { puts $ofd "#source: $sfile" }

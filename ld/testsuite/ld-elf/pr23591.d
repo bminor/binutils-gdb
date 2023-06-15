@@ -3,7 +3,7 @@
 #source: pr23591c.s
 #ld: -e _start
 #readelf: -sW
-#xfail: bfin-*-*linux* frv-*-linux* lm32-*-linux*
+#xfail: bfin-*-linux* frv-*-linux* lm32-*-linux*
 # bfin, frv, and lm32 fail with complaints about emitting dynamic
 # relocations in read-only sections.
 

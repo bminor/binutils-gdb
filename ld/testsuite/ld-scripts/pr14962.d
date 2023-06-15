@@ -5,8 +5,8 @@
 #xfail: mmix-knuth-mmixware
 # The reference to x would normally generate a cross-reference error
 # but the linker script converts x to absolute to avoid the error.
-#xfail: bfin-*-*linux*
-# The bfin backend complains about attempting to put a fixup into a read-only section.
+#xfail: bfin-*-linux*
+# The bfinfd backend complains about fixups in read-only sections.
 
 #...
 0+2000 A x
