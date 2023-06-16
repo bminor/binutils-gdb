@@ -325,7 +325,7 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
   struct sframe_enc_info *sfe_info;
   sframe_decoder_ctx *sfd_ctx;
   sframe_encoder_ctx *sfe_ctx;
-  unsigned char sfd_ctx_abi_arch;
+  uint8_t sfd_ctx_abi_arch;
   int8_t sfd_ctx_fixed_fp_offset;
   int8_t sfd_ctx_fixed_ra_offset;
   int encerr = 0;
