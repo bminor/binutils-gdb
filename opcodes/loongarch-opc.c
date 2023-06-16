@@ -77,6 +77,16 @@ const char *const loongarch_f_lp64_name1[32] =
   "",     "",     "", "", "", "", "", "", "", "", "", "", "", "", "", "",
 };
 
+const char *const loongarch_fc_normal_name[4] =
+{
+  "$fcsr0", "$fcsr1", "$fcsr2", "$fcsr3",
+};
+
+const char *const loongarch_fc_numeric_name[4] =
+{
+  "$r0", "$r1", "$r2", "$r3",
+};
+
 const char *const loongarch_c_normal_name[8] =
 {
   "$fcc0", "$fcc1", "$fcc2", "$fcc3", "$fcc4", "$fcc5", "$fcc6", "$fcc7",
@@ -459,8 +469,8 @@ static struct loongarch_opcode loongarch_single_float_opcodes[] =
   { 0x0114ac00, 0xfffffc00,	"movgr2frh.w",	"f0:5,r5:5",			0,			0,	0,	0 },
   { 0x0114b400, 0xfffffc00,	"movfr2gr.s",	"r0:5,f5:5",			0,			0,	0,	0 },
   { 0x0114bc00, 0xfffffc00,	"movfrh2gr.s",	"r0:5,f5:5",			0,			0,	0,	0 },
-  { 0x0114c000, 0xfffffc00,	"movgr2fcsr",	"r0:5,r5:5",			0,			0,	0,	0 },
-  { 0x0114c800, 0xfffffc00,	"movfcsr2gr",	"r0:5,r5:5",			0,			0,	0,	0 },
+  { 0x0114c000, 0xfffffc1c,	"movgr2fcsr",	"fc0:2,r5:5",			0,			0,	0,	0 },
+  { 0x0114c800, 0xffffff80,	"movfcsr2gr",	"r0:5,fc5:2",			0,			0,	0,	0 },
   { 0x0114d000, 0xfffffc18,	"movfr2cf",	"c0:3,f5:5",			0,			0,	0,	0 },
   { 0x0114d400, 0xffffff00,	"movcf2fr",	"f0:5,c5:3",			0,			0,	0,	0 },
   { 0x0114d800, 0xfffffc18,	"movgr2cf",	"c0:3,r5:5",			0,			0,	0,	0 },

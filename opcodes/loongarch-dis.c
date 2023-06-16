@@ -61,6 +61,7 @@ get_loongarch_opcode_by_binfmt (insn_t insn)
 
 static const char *const *loongarch_r_disname = NULL;
 static const char *const *loongarch_f_disname = NULL;
+static const char *const *loongarch_fc_disname = NULL;
 static const char *const *loongarch_c_disname = NULL;
 static const char *const *loongarch_cr_disname = NULL;
 static const char *const *loongarch_v_disname = NULL;
@@ -78,6 +79,7 @@ set_default_loongarch_dis_options (void)
 
   loongarch_r_disname = loongarch_r_lp64_name;
   loongarch_f_disname = loongarch_f_lp64_name;
+  loongarch_fc_disname = loongarch_fc_normal_name;
   loongarch_c_disname = loongarch_c_normal_name;
   loongarch_cr_disname = loongarch_cr_normal_name;
   loongarch_v_disname = loongarch_v_normal_name;
@@ -142,7 +144,14 @@ dis_one_arg (char esc1, char esc2, const char *bit_field,
       info->fprintf_func (info->stream, "%s", loongarch_r_disname[u_imm]);
       break;
     case 'f':
-      info->fprintf_func (info->stream, "%s", loongarch_f_disname[u_imm]);
+      switch (esc2)
+	{
+	case 'c':
+	  info->fprintf_func (info->stream, "%s", loongarch_fc_disname[u_imm]);
+	  break;
+	default:
+	  info->fprintf_func (info->stream, "%s", loongarch_f_disname[u_imm]);
+	}
       break;
     case 'c':
       switch (esc2)
