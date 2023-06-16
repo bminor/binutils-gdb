@@ -105,12 +105,6 @@ proc_with_prefix vfork_parent_follow_through_step { binfile srcfile } {
 	    pass $gdb_test_name
 	}
     }
-
-    # The child has been detached; allow time for any output it might
-    # generate to arrive, so that output doesn't get confused with
-    # any gdb_expected debugger output from a subsequent testpoint.
-    #
-    exec sleep 1
 }
 
 proc_with_prefix vfork_parent_follow_to_bp { binfile srcfile } {
@@ -127,12 +121,6 @@ proc_with_prefix vfork_parent_follow_to_bp { binfile srcfile } {
 	    pass $gdb_test_name
 	}
     }
-
-    # The child has been detached; allow time for any output it might
-    # generate to arrive, so that output doesn't get confused with
-    # any expected debugger output from a subsequent testpoint.
-    #
-    exec sleep 1
 }
 
 proc_with_prefix vfork_child_follow_to_exit { binfile srcfile } {
@@ -148,12 +136,6 @@ proc_with_prefix vfork_child_follow_to_exit { binfile srcfile } {
 	    pass $gdb_test_name
 	}
     }
-
-    # The parent has been detached; allow time for any output it might
-    # generate to arrive, so that output doesn't get confused with
-    # any gdb_expected debugger output from a subsequent testpoint.
-    #
-    exec sleep 1
 }
 
 proc_with_prefix vfork_and_exec_child_follow_to_main_bp { binfile srcfile } {
@@ -168,12 +150,6 @@ proc_with_prefix vfork_and_exec_child_follow_to_main_bp { binfile srcfile } {
 	    pass $gdb_test_name
 	}
     }
-
-    # The parent has been detached; allow time for any output it might
-    # generate to arrive, so that output doesn't get confused with
-    # any gdb_expected debugger output from a subsequent testpoint.
-    #
-    exec sleep 1
 }
 
 proc_with_prefix vfork_and_exec_child_follow_through_step { binfile srcfile } {
@@ -189,12 +165,6 @@ proc_with_prefix vfork_and_exec_child_follow_through_step { binfile srcfile } {
 	    pass $gdb_test_name
 	}
     }
-
-    # The parent has been detached; allow time for any output it might
-    # generate to arrive, so that output doesn't get confused with
-    # any expected debugger output from a subsequent testpoint.
-    #
-    exec sleep 1
 }
 
 proc continue_to_vfork {} {
@@ -228,12 +198,6 @@ proc_with_prefix tcatch_vfork_then_parent_follow { binfile srcfile } {
 	    exp_continue
 	}
     }
-
-    # The child has been detached; allow time for any output it might
-    # generate to arrive, so that output doesn't get confused with
-    # any expected debugger output from a subsequent testpoint.
-    #
-    exec sleep 1
 }
 
 proc_with_prefix tcatch_vfork_then_child_follow_exec { binfile srcfile } {
@@ -260,12 +224,6 @@ proc_with_prefix tcatch_vfork_then_child_follow_exec { binfile srcfile } {
 	    pass "$gdb_test_name (followed exec)"
 	}
     }
-
-    # The parent has been detached; allow time for any output it might
-    # generate to arrive, so that output doesn't get confused with
-    # any expected debugger output from a subsequent testpoint.
-    #
-    exec sleep 1
 }
 
 proc tcatch_vfork_then_child_follow_exit { binfile srcfile } {
@@ -290,12 +248,6 @@ proc tcatch_vfork_then_child_follow_exit { binfile srcfile } {
 	    exp_continue
 	}
     }
-
-    # The parent has been detached; allow time for any output it might
-    # generate to arrive, so that output doesn't get confused with
-    # any expected debugger output from a subsequent testpoint.
-    #
-    exec sleep 1
 }
 
 proc_with_prefix vfork_relations_in_info_inferiors { variant binfile srcfile non_stop } {
