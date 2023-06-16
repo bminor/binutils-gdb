@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Exercise core file reading/writing in the presence of SME support.
+# Exercise core file reading/writing in the presence of SME and SME2 support.
 # This test exercises GDB's dumping/loading capability for Linux
 # Kernel core files and for gcore core files.
 

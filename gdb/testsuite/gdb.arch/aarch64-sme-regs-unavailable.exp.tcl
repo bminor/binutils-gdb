@@ -17,6 +17,7 @@
 # - Printing ZA registers when there is no ZA state.
 # - Setting values of ZA registers when there is no ZA state.
 # - Validating ZA state is activated when we write to ZA registers.
+# - Validate that reading ZT0 without an active ZA state works as expected.
 
 load_lib aarch64-scalable.exp
 
@@ -88,6 +89,17 @@ proc_with_prefix check_regs { vl svl } {
 	set last_tile [expr $last_tile * 2]
 	set expected_size [expr $expected_size / 2]
 	set elements [expr ($elements / 2)]
+    }
+
+    # Exercise reading from SME2 registers.
+    if [is_sme2_available] {
+	# The target supports SME2.
+	set zt_size 64
+	gdb_test "print sizeof \$zt0" " = $zt_size"
+
+	# If ZA is not active, ZT0 will always be zero.
+	set zt_pattern [string_to_regexp [1d_array_value_pattern 0 $zt_size]]
+	gdb_test "print \$zt0" " = $zt_pattern"
     }
 }
 

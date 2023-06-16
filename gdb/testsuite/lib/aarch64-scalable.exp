@@ -187,6 +187,18 @@ proc check_sme_regs { byte state svl } {
 }
 
 #
+# Validate the values of the SME2 registers.
+#
+proc check_sme2_regs { byte } {
+    # The size of the ZT registers should always be fixed to 64 bytes.
+    set zt_size 64
+    gdb_test "print sizeof \$zt0" " = $zt_size"
+    # Check that we have the expected pattern of bytes for the ZT registers.
+    set zt_pattern [string_to_regexp [1d_array_value_pattern $byte $zt_size]]
+    gdb_test "print \$zt0" $zt_pattern
+}
+
+#
 # With register STATE, vector length VL and streaming vector length SVL,
 # run some register state checks to make sure the values are the expected
 # ones
@@ -199,6 +211,9 @@ proc check_state { state vl svl } {
     # byte, including the predicate registers and FFR.
     #
     # The SME (ZA) register is initialized with a value of 0xaa (170) for
+    # each byte.
+    #
+    # The SME2 (ZT) registers are initialized with a value of 0xff (255) for
     # each byte.
 
     # Check VG to make sure it is correct
@@ -234,4 +249,35 @@ proc check_state { state vl svl } {
     check_sve_regs $sve_byte $state $vl $svl
     # Check SME registers
     check_sme_regs 170 $state $svl
+
+    # Check SME2 registers
+    if [is_sme2_available] {
+	# The SME2 ZT0 register will always be zero, except when ZA is active.
+	set sme2_byte 0
+	if {$state == "za" || $state == "za_ssve"} {
+	    set sme2_byte 255
+	}
+
+	# The target supports SME2, so check the ZT register values.
+	check_sme2_regs $sme2_byte
+    }
+}
+
+#
+# Return 1 if SME2 is available (meaning the ZT0 register exists).
+# Return 0 otherwise.
+#
+proc is_sme2_available { } {
+
+    # Does the ZT0 register exist?
+    gdb_test_multiple "print \$zt0" "" {
+	-re " = void.*${::gdb_prompt} $" {
+	    # SME2 is not available.
+	    return 0
+	}
+	-re " = {.*}\r\n${::gdb_prompt} $" {
+	    # SME2 is available.
+	    return 1
+	}
+    }
 }

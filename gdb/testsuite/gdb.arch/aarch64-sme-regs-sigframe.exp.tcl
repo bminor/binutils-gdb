@@ -98,10 +98,12 @@ proc test_sme_registers_sigframe { id_start id_end } {
 	    # Check the value of SVCR.
 	    gdb_test "print \$svcr" [get_svcr_value $state] "svcr before signal"
 
-	    # Handle SME ZA initialization and state.
+	    # Handle SME ZA and SME2 initialization and state.
 	    set byte 0
+	    set sme2_byte 0
 	    if { $state == "za" || $state == "za_ssve" } {
 		set byte 170
+		set sme2_byte 255
 	    }
 
 	    # Set the expected ZA pattern.
@@ -168,6 +170,15 @@ proc test_sme_registers_sigframe { id_start id_end } {
 
 	    # Check the value of TPIDR2 in the signal frame.
 	    gdb_test "print/x \$tpidr2" " = 0x102030405060708" "tpidr2 contents from signal frame"
+
+	    # Check the value of SME2 ZT0 in the signal frame.
+	    if [is_sme2_available] {
+		# The target supports SME2.
+		set zt_size 64
+		gdb_test "print sizeof \$zt0" " = $zt_size"
+		set zt_pattern [string_to_regexp [1d_array_value_pattern $sme2_byte $zt_size]]
+		gdb_test "print \$zt0" " = $zt_pattern" "zt contents from signal frame"
+	    }
 	}
     }
 }

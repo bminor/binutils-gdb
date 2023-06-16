@@ -34,6 +34,11 @@
 #define HWCAP2_SME (1 << 23)
 #endif
 
+#ifndef HWCAP2_SME2
+#define HWCAP2_SME2 (1UL << 37)
+#define HWCAP2_SME2P1 (1UL << 38)
+#endif
+
 #ifndef PR_SVE_SET_VL
 #define PR_SVE_SET_VL 50
 #define PR_SVE_GET_VL 51
@@ -150,6 +155,27 @@ initialize_za_state ()
   __asm __volatile ("add w12, w12, 1");
   __asm __volatile ("cmp w12, w17");
   __asm __volatile ("bne loop");
+}
+
+static void
+initialize_zt_state ()
+{
+  unsigned long hwcap2 = getauxval (AT_HWCAP2);
+
+  if (!(hwcap2 & HWCAP2_SME2) && !(hwcap2 & HWCAP2_SME2P1))
+    return;
+
+  char buffer[64];
+
+  for (int i = 0; i < 64; i++)
+    buffer[i] = 0xff;
+
+  __asm __volatile ("mov x0, %0\n\t" \
+		    : : "r" (buffer));
+
+  /* Initialize ZT0.  */
+  /* ldr zt0, x0 */
+  __asm __volatile (".word 0xe11f8000");
 }
 
 static void
@@ -271,8 +297,8 @@ static int set_svl_size (int new_svl)
    0 - FPSIMD
    1 - SVE
    2 - SSVE
-   3 - ZA
-   4 - ZA and SSVE.  */
+   3 - ZA (+ SME2 ZT0)
+   4 - ZA and SSVE (+ SME2 ZT0).  */
 
 void enable_states (int state)
 {
@@ -293,6 +319,7 @@ void enable_states (int state)
     {
       enable_za ();
       initialize_za_state ();
+      initialize_zt_state ();
     }
   else if (state == 4)
     {
@@ -300,6 +327,7 @@ void enable_states (int state)
       enable_sm ();
       initialize_sve_state ();
       initialize_za_state ();
+      initialize_zt_state ();
     }
 
   return;
