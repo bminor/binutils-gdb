@@ -647,14 +647,7 @@ enum
 #define EVEX_L3                6
   EVex,
 
-  /* AVX512 masking support:
-	1: Zeroing or merging masking depending on operands.
-	2: Merging-masking.
-	3: Both zeroing and merging masking.
-   */
-#define DYNAMIC_MASKING 1
-#define MERGING_MASKING 2
-#define BOTH_MASKING    3
+  /* AVX512 masking support */
   Masking,
 
   /* AVX512 broadcast support.  The number of bytes to broadcast is
@@ -735,7 +728,7 @@ typedef struct i386_opcode_modifier
   unsigned int sib:3;
   unsigned int sse2avx:1;
   unsigned int evex:3;
-  unsigned int masking:2;
+  unsigned int masking:1;
   unsigned int broadcast:3;
   unsigned int staticrounding:1;
   unsigned int sae:1;

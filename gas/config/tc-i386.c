@@ -6530,36 +6530,25 @@ check_VecOperands (const insn_template *t)
   /* Check if requested masking is supported.  */
   if (i.mask.reg)
     {
-      switch (t->opcode_modifier.masking)
+      if (!t->opcode_modifier.masking)
 	{
-	case BOTH_MASKING:
-	  break;
-	case MERGING_MASKING:
-	  if (i.mask.zeroing)
-	    {
-	case 0:
-	      i.error = unsupported_masking;
-	      return 1;
-	    }
-	  break;
-	case DYNAMIC_MASKING:
-	  /* Memory destinations allow only merging masking.  */
-	  if (i.mask.zeroing && i.mem_operands)
-	    {
-	      /* Find memory operand.  */
-	      for (op = 0; op < i.operands; op++)
-		if (i.flags[op] & Operand_Mem)
-		  break;
-	      gas_assert (op < i.operands);
-	      if (op == i.operands - 1)
-		{
-		  i.error = unsupported_masking;
-		  return 1;
-		}
-	    }
-	  break;
-	default:
-	  abort ();
+	  i.error = unsupported_masking;
+	  return 1;
+	}
+
+      /* Common rules for masking:
+	 - mask register destinations permit only zeroing-masking, without
+	   that actually being expressed by a {z} operand suffix or EVEX.z,
+	 - memory destinations allow only merging-masking,
+	 - scatter/gather insns (i.e. ones using vSIB) only allow merging-
+	   masking.  */
+      if (i.mask.zeroing
+	  && (t->operand_types[t->operands - 1].bitfield.class == RegMask
+	      || (i.flags[t->operands - 1] & Operand_Mem)
+	      || t->opcode_modifier.sib))
+	{
+	  i.error = unsupported_masking;
+	  return 1;
 	}
     }
 
