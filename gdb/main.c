@@ -1484,5 +1484,5 @@ Report bugs to %ps.\n\
   if (stream == gdb_stdout)
     gdb_printf (stream, _("\n\
 You can ask GDB-related questions on the GDB users mailing list\n\
-(gdb@sourceware.org) or on GDB's IRC channel (#gdb on Freenode).\n"));
+(gdb@sourceware.org) or on GDB's IRC channel (#gdb on Libera.Chat).\n"));
 }
