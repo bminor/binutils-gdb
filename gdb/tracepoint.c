@@ -618,7 +618,7 @@ finalize_tracepoint_aexpr (struct agent_expr *aexpr)
 {
   ax_reqs (aexpr);
 
-  if (aexpr->len > MAX_AGENT_EXPR_LEN)
+  if (aexpr->buf.size () > MAX_AGENT_EXPR_LEN)
     error (_("Expression is too complicated."));
 
   report_agent_reqs_errors (aexpr);
@@ -885,7 +885,7 @@ collection_list::add_local_register (struct gdbarch *gdbarch,
 	 corresponding raw registers in the ax mask, but if this isn't
 	 the case add the expression that is generated to the
 	 collection list.  */
-      if (aexpr->len > 0)
+      if (aexpr->buf.size () > 0)
 	add_aexpr (std::move (aexpr));
     }
 }
@@ -1215,18 +1215,19 @@ collection_list::stringify ()
   for (i = 0; i < m_aexprs.size (); i++)
     {
       QUIT;			/* Allow user to bail out with ^C.  */
-      if ((count + 10 + 2 * m_aexprs[i]->len) > MAX_AGENT_EXPR_LEN)
+      if ((count + 10 + 2 * m_aexprs[i]->buf.size ()) > MAX_AGENT_EXPR_LEN)
 	{
 	  str_list.emplace_back (temp_buf.data (), count);
 	  count = 0;
 	  end = temp_buf.data ();
 	}
-      sprintf (end, "X%08X,", m_aexprs[i]->len);
+      sprintf (end, "X%08X,", (int) m_aexprs[i]->buf.size ());
       end += 10;		/* 'X' + 8 hex digits + ',' */
       count += 10;
 
-      end += 2 * bin2hex (m_aexprs[i]->buf, end, m_aexprs[i]->len);
-      count += 2 * m_aexprs[i]->len;
+      end += 2 * bin2hex (m_aexprs[i]->buf.data (), end,
+			  m_aexprs[i]->buf.size ());
+      count += 2 * m_aexprs[i]->buf.size ();
     }
 
   if (count != 0)

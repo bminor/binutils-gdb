@@ -86,13 +86,7 @@ struct agent_expr
     ~agent_expr ();
 
     /* The bytes of the expression.  */
-    unsigned char *buf;
-
-    /* The number of bytecode in the expression.  */
-    int len;
-
-    /* Allocated space available currently.  */
-    int size;
+    gdb::byte_vector buf;
 
     /* The target architecture assumed to be in effect.  */
     struct gdbarch *gdbarch;

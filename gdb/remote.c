@@ -10690,9 +10690,9 @@ remote_add_target_side_condition (struct gdbarch *gdbarch,
   /* Send conditions to the target.  */
   for (agent_expr *aexpr : bp_tgt->conditions)
     {
-      xsnprintf (buf, buf_end - buf, "X%x,", aexpr->len);
+      xsnprintf (buf, buf_end - buf, "X%x,", (int) aexpr->buf.size ());
       buf += strlen (buf);
-      for (int i = 0; i < aexpr->len; ++i)
+      for (int i = 0; i < aexpr->buf.size (); ++i)
 	buf = pack_hex_byte (buf, aexpr->buf[i]);
       *buf = '\0';
     }
@@ -10715,9 +10715,9 @@ remote_add_target_side_commands (struct gdbarch *gdbarch,
      cmds parameter.  */
   for (agent_expr *aexpr : bp_tgt->tcommands)
     {
-      sprintf (buf, "X%x,", aexpr->len);
+      sprintf (buf, "X%x,", (int) aexpr->buf.size ());
       buf += strlen (buf);
-      for (int i = 0; i < aexpr->len; ++i)
+      for (int i = 0; i < aexpr->buf.size (); ++i)
 	buf = pack_hex_byte (buf, aexpr->buf[i]);
       *buf = '\0';
     }
@@ -13383,7 +13383,7 @@ remote_target::download_tracepoint (struct bp_location *loc)
 	  size_left = buf.size () - strlen (buf.data ());
 
 	  ret = snprintf (buf.data () + strlen (buf.data ()),
-			  size_left, ":X%x,", aexpr->len);
+			  size_left, ":X%x,", (int) aexpr->buf.size ());
 
 	  if (ret < 0 || ret >= size_left)
 	    error ("%s", err_msg);
@@ -13392,12 +13392,12 @@ remote_target::download_tracepoint (struct bp_location *loc)
 
 	  /* Two bytes to encode each aexpr byte, plus the terminating
 	     null byte.  */
-	  if (aexpr->len * 2 + 1 > size_left)
+	  if (aexpr->buf.size () * 2 + 1 > size_left)
 	    error ("%s", err_msg);
 
 	  pkt = buf.data () + strlen (buf.data ());
 
-	  for (int ndx = 0; ndx < aexpr->len; ++ndx)
+	  for (int ndx = 0; ndx < aexpr->buf.size (); ++ndx)
 	    pkt = pack_hex_byte (pkt, aexpr->buf[ndx]);
 	  *pkt = '\0';
 	}

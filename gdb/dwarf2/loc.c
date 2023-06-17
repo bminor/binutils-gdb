@@ -2399,7 +2399,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
       int64_t offset;
       int i;
 
-      offsets[op_ptr - base] = expr->len;
+      offsets[op_ptr - base] = expr->buf.size ();
       ++op_ptr;
 
       /* Our basic approach to code generation is to map DWARF
@@ -2734,7 +2734,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  ax_const_l (expr, 0);
 	  ax_simple (expr, aop_swap);
 	  ax_simple (expr, aop_sub);
-	  ax_label (expr, i, expr->len);
+	  ax_label (expr, i, expr->buf.size ());
 	  break;
 
 	case DW_OP_neg:

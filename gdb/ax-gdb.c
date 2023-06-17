@@ -818,7 +818,6 @@ static int
 is_nontrivial_conversion (struct type *from, struct type *to)
 {
   agent_expr_up ax (new agent_expr (NULL, 0));
-  int nontrivial;
 
   /* Actually generate the code, and see if anything came out.  At the
      moment, it would be trivial to replicate the code in
@@ -827,8 +826,7 @@ is_nontrivial_conversion (struct type *from, struct type *to)
      way allows this function to be independent of the logic in
      gen_conversion.  */
   gen_conversion (ax.get (), from, to);
-  nontrivial = ax->len > 0;
-  return nontrivial;
+  return !ax->buf.empty ();
 }
 
 
@@ -1719,10 +1717,10 @@ ternop_cond_operation::do_generate_ax (struct expression *exp,
   std::get<1> (m_storage)->generate_ax (exp, ax, &value2);
   gen_usual_unary (ax, &value2);
   end = ax_goto (ax, aop_goto);
-  ax_label (ax, if1, ax->len);
+  ax_label (ax, if1, ax->buf.size ());
   std::get<2> (m_storage)->generate_ax (exp, ax, &value3);
   gen_usual_unary (ax, &value3);
-  ax_label (ax, end, ax->len);
+  ax_label (ax, end, ax->buf.size ());
   /* This is arbitrary - what if B and C are incompatible types? */
   value->type = value2.type;
   value->kind = value2.kind;
@@ -1811,12 +1809,12 @@ unop_sizeof_operation::do_generate_ax (struct expression *exp,
      only way to find an expression's type is to generate code for it.
      So we generate code for the operand, and then throw it away,
      replacing it with code that simply pushes its size.  */
-  int start = ax->len;
+  int start = ax->buf.size ();
 
   std::get<0> (m_storage)->generate_ax (exp, ax, value);
 
   /* Throw away the code we just generated.  */
-  ax->len = start;
+  ax->buf.resize (start);
 
   ax_const_l (ax, value->type->length ());
   value->kind = axs_rvalue;
@@ -2033,18 +2031,18 @@ logical_and_operation::do_generate_ax (struct expression *exp,
   gen_usual_unary (ax, &value1);
   if1 = ax_goto (ax, aop_if_goto);
   go1 = ax_goto (ax, aop_goto);
-  ax_label (ax, if1, ax->len);
+  ax_label (ax, if1, ax->buf.size ());
   std::get<1> (m_storage)->generate_ax (exp, ax, &value2);
   gen_usual_unary (ax, &value2);
   if2 = ax_goto (ax, aop_if_goto);
   go2 = ax_goto (ax, aop_goto);
-  ax_label (ax, if2, ax->len);
+  ax_label (ax, if2, ax->buf.size ());
   ax_const_l (ax, 1);
   end = ax_goto (ax, aop_goto);
-  ax_label (ax, go1, ax->len);
-  ax_label (ax, go2, ax->len);
+  ax_label (ax, go1, ax->buf.size ());
+  ax_label (ax, go2, ax->buf.size ());
   ax_const_l (ax, 0);
-  ax_label (ax, end, ax->len);
+  ax_label (ax, end, ax->buf.size ());
   value->kind = axs_rvalue;
   value->type = builtin_type (ax->gdbarch)->builtin_int;
 }
@@ -2067,10 +2065,10 @@ logical_or_operation::do_generate_ax (struct expression *exp,
   if2 = ax_goto (ax, aop_if_goto);
   ax_const_l (ax, 0);
   end = ax_goto (ax, aop_goto);
-  ax_label (ax, if1, ax->len);
-  ax_label (ax, if2, ax->len);
+  ax_label (ax, if1, ax->buf.size ());
+  ax_label (ax, if2, ax->buf.size ());
   ax_const_l (ax, 1);
-  ax_label (ax, end, ax->len);
+  ax_label (ax, end, ax->buf.size ());
   value->kind = axs_rvalue;
   value->type = builtin_type (ax->gdbarch)->builtin_int;
 }
