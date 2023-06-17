@@ -81,9 +81,11 @@ enum agent_flaws
 struct agent_expr
   {
     /* Construct an empty agent expression.  */
-    explicit agent_expr (struct gdbarch *gdbarch, CORE_ADDR scope);
-
-    ~agent_expr ();
+    agent_expr (struct gdbarch *gdbarch, CORE_ADDR scope)
+      : gdbarch (gdbarch),
+	scope (scope),
+	tracing (0)
+    { }
 
     /* The bytes of the expression.  */
     gdb::byte_vector buf;
@@ -139,7 +141,7 @@ struct agent_expr
        tracenz bytecode to record nonzero bytes, up to a length that
        is the value of trace_string.  */
 
-    int trace_string;
+    int trace_string = 0;
   };
 
 /* An agent_expr owning pointer.  */

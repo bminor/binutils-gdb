@@ -36,19 +36,6 @@ static void generic_ext (struct agent_expr *x, enum agent_op op, int n);
 
 /* Functions for building expressions.  */
 
-agent_expr::agent_expr (struct gdbarch *gdbarch, CORE_ADDR scope)
-{
-  this->gdbarch = gdbarch;
-  this->scope = scope;
-
-  this->tracing = 0;
-  this->trace_string = 0;
-}
-
-agent_expr::~agent_expr ()
-{
-}
-
 /* Append the low N bytes of VAL as an N-byte integer to the
    expression X, in big-endian order.  */
 static void
