@@ -110,14 +110,10 @@ struct agent_expr
     int max_data_size;
 
     /* Bit vector of registers needed.  Register R is needed iff
-
-       reg_mask[R / 8] & (1 << (R % 8))
-
-       is non-zero.  Note!  You may not assume that this bitmask is long
-       enough to hold bits for all the registers of the machine; the
-       agent expression code has no idea how many registers the machine
-       has.  However, the bitmask is reg_mask_len bytes long, so the
-       valid register numbers run from 0 to reg_mask_len * 8 - 1.
+       reg_mask[R] is non-zero.  Note!  You may not assume that this
+       bitmask is long enough to hold bits for all the registers of
+       the machine; the agent expression code has no idea how many
+       registers the machine has.
 
        Also note that this mask may contain registers that are needed
        for the original collection expression to work, but that are
@@ -126,8 +122,7 @@ struct agent_expr
        compiler sets the mask bit and skips generating a bytecode whose
        result is going to be discarded anyway.
     */
-    int reg_mask_len;
-    unsigned char *reg_mask;
+    std::vector<bool> reg_mask;
 
     /* For the data tracing facility, we need to insert `trace' bytecodes
        before each data fetch; this records all the memory that the

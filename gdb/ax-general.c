@@ -41,17 +41,12 @@ agent_expr::agent_expr (struct gdbarch *gdbarch, CORE_ADDR scope)
   this->gdbarch = gdbarch;
   this->scope = scope;
 
-  /* Bit vector for registers used.  */
-  this->reg_mask_len = 1;
-  this->reg_mask = XCNEWVEC (unsigned char, this->reg_mask_len);
-
   this->tracing = 0;
   this->trace_string = 0;
 }
 
 agent_expr::~agent_expr ()
 {
-  xfree (this->reg_mask);
 }
 
 /* Append the low N bytes of VAL as an N-byte integer to the
@@ -330,8 +325,12 @@ ax_print (struct ui_file *f, struct agent_expr *x)
 
   gdb_printf (f, _("Scope: %s\n"), paddress (x->gdbarch, x->scope));
   gdb_printf (f, _("Reg mask:"));
-  for (i = 0; i < x->reg_mask_len; ++i)
-    gdb_printf (f, _(" %02x"), x->reg_mask[i]);
+  for (i = 0; i < x->reg_mask.size (); ++i)
+    {
+      if ((i % 8) == 0)
+	gdb_printf (f, " ");
+      gdb_printf (f, _("%d"), (int) x->reg_mask[i]);
+    }
   gdb_printf (f, _("\n"));
 
   /* Check the size of the name array against the number of entries in
@@ -401,28 +400,14 @@ ax_reg_mask (struct agent_expr *ax, int reg)
     }
   else
     {
-      int byte;
-
       /* Get the remote register number.  */
       reg = gdbarch_remote_register_number (ax->gdbarch, reg);
-      byte = reg / 8;
 
       /* Grow the bit mask if necessary.  */
-      if (byte >= ax->reg_mask_len)
-	{
-	  /* It's not appropriate to double here.  This isn't a
-	     string buffer.  */
-	  int new_len = byte + 1;
-	  unsigned char *new_reg_mask
-	    = XRESIZEVEC (unsigned char, ax->reg_mask, new_len);
+      if (reg >= ax->reg_mask.size ())
+	ax->reg_mask.resize (reg);
 
-	  memset (new_reg_mask + ax->reg_mask_len, 0,
-		  (new_len - ax->reg_mask_len) * sizeof (ax->reg_mask[0]));
-	  ax->reg_mask_len = new_len;
-	  ax->reg_mask = new_reg_mask;
-	}
-
-      ax->reg_mask[byte] |= 1 << (reg % 8);
+      ax->reg_mask[reg] = true;
     }
 }
 

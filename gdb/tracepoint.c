@@ -835,19 +835,13 @@ collection_list::add_remote_register (unsigned int regno)
 void
 collection_list::add_ax_registers (struct agent_expr *aexpr)
 {
-  if (aexpr->reg_mask_len > 0)
+  for (int ndx1 = 0; ndx1 < aexpr->reg_mask.size (); ndx1++)
     {
-      for (int ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
+      QUIT;	/* Allow user to bail out with ^C.  */
+      if (aexpr->reg_mask[ndx1])
 	{
-	  QUIT;	/* Allow user to bail out with ^C.  */
-	  if (aexpr->reg_mask[ndx1] != 0)
-	    {
-	      /* Assume chars have 8 bits.  */
-	      for (int ndx2 = 0; ndx2 < 8; ndx2++)
-		if (aexpr->reg_mask[ndx1] & (1 << ndx2))
-		  /* It's used -- record it.  */
-		  add_remote_register (ndx1 * 8 + ndx2);
-	    }
+	  /* It's used -- record it.  */
+	  add_remote_register (ndx1);
 	}
     }
 }
