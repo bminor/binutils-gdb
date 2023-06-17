@@ -19,6 +19,9 @@ load_lib dwarf.exp
 # This test can only be run on targets which support DWARF-2 and use gas.
 require dwarf2_support
 
+# This test can only be run on x86 targets.
+require is_x86_like_target
+
 standard_testfile .S
 set csrcfile ${testfile}.c
 set opts {}
@@ -27,10 +30,6 @@ if [info exists COMPILE] {
     # make check RUNTESTFLAGS='gdb.dwarf2/implptr.exp COMPILE=1 CC_FOR_TARGET=gcc\ -m32'
     set srcfile ${csrcfile}
     lappend opts debug optimize=-O2
-} elseif {![is_x86_like_target]} {
-    # This test can only be run on x86 targets.
-    unsupported "needs x86-like target"
-    return 0  
 }
 
 if {[prepare_for_testing "failed to prepare" ${testfile} $srcfile $opts]} {
