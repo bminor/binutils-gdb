@@ -254,7 +254,7 @@ class validating_unwinder(Unwinder):
         assert not old_info["matched"]
 
         for key, value in info.items():
-            assert key in old_info, f"{key} not in old_info"
+            assert key in old_info, key + " not in old_info"
             assert type(value) == type(old_info[key])
             if isinstance(value, gdb.Block):
                 assert value.start == old_info[key].start
