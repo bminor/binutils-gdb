@@ -22,7 +22,11 @@ require dwarf2_support is_x86_like_target
 standard_testfile .S
 set csrcfile ${testfile}.c
 
-if {[prepare_for_testing "failed to prepare" ${testfile} $srcfile]} {
+set opts {}
+lappend opts debug
+lappend opts nopie
+
+if {[prepare_for_testing "failed to prepare" ${testfile} $srcfile $opts]} {
     return -1
 }
 

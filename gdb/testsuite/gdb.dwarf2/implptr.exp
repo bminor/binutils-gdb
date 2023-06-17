@@ -26,6 +26,8 @@ standard_testfile .S
 set csrcfile ${testfile}.c
 set opts {}
 
+lappend opts nopie
+
 if [info exists COMPILE] {
     # make check RUNTESTFLAGS='gdb.dwarf2/implptr.exp COMPILE=1 CC_FOR_TARGET=gcc\ -m32'
     set srcfile ${csrcfile}

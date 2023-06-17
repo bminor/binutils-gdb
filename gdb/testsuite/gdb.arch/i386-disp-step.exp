@@ -22,7 +22,11 @@ require is_x86_like_target
 
 standard_testfile .S
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
+set opts {}
+lappend opts debug
+lappend opts nopie
+
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile $opts] } {
     return -1
 }
 
