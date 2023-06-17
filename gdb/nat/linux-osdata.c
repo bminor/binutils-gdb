@@ -133,55 +133,40 @@ command_from_pid (char *command, int maxlen, PID_T pid)
   command[maxlen - 1] = '\0'; /* Ensure string is null-terminated.  */
 }
 
-/* Returns the command-line of the process with the given PID. The
-   returned string needs to be freed using xfree after use.  */
+/* Returns the command-line of the process with the given PID.  */
 
-static char *
+static std::string
 commandline_from_pid (PID_T pid)
 {
   std::string pathname = string_printf ("/proc/%lld/cmdline", pid);
-  char *commandline = NULL;
+  std::string commandline;
   gdb_file_up f = gdb_fopen_cloexec (pathname, "r");
 
   if (f)
     {
-      size_t len = 0;
-
       while (!feof (f.get ()))
 	{
 	  char buf[1024];
 	  size_t read_bytes = fread (buf, 1, sizeof (buf), f.get ());
 
 	  if (read_bytes)
-	    {
-	      commandline = (char *) xrealloc (commandline, len + read_bytes + 1);
-	      memcpy (commandline + len, buf, read_bytes);
-	      len += read_bytes;
-	    }
+	    commandline.append (buf, read_bytes);
 	}
 
-      if (commandline)
+      if (!commandline.empty ())
 	{
-	  size_t i;
-
 	  /* Replace null characters with spaces.  */
-	  for (i = 0; i < len; ++i)
-	    if (commandline[i] == '\0')
-	      commandline[i] = ' ';
-
-	  commandline[len] = '\0';
+	  for (char &c : commandline)
+	    if (c == '\0')
+	      c = ' ';
 	}
       else
 	{
 	  /* Return the command in square brackets if the command-line
 	     is empty.  */
-	  commandline = (char *) xmalloc (32);
-	  commandline[0] = '[';
-	  command_from_pid (commandline + 1, 31, pid);
-
-	  len = strlen (commandline);
-	  if (len < 31)
-	    strcat (commandline, "]");
+	  char cmd[32];
+	  command_from_pid (cmd, 31, pid);
+	  commandline = std::string ("[") + cmd + "]";
 	}
     }
 
@@ -349,7 +334,6 @@ linux_xfer_osdata_processes ()
 	  PID_T pid;
 	  uid_t owner;
 	  char user[UT_NAMESIZE];
-	  char *command_line;
 	  int *cores;
 	  int task_count;
 	  std::string cores_str;
@@ -360,7 +344,7 @@ linux_xfer_osdata_processes ()
 	    continue;
 
 	  sscanf (dp->d_name, "%lld", &pid);
-	  command_line = commandline_from_pid (pid);
+	  std::string command_line = commandline_from_pid (pid);
 
 	  if (get_process_owner (&owner, pid) == 0)
 	    user_from_uid (user, sizeof (user), owner);
@@ -393,10 +377,8 @@ linux_xfer_osdata_processes ()
 	     "</item>",
 	     pid,
 	     user,
-	     command_line ? command_line : "",
+	     command_line.c_str (),
 	     cores_str.c_str());
-
-	  xfree (command_line);
 	}
 
       closedir (dirp);
@@ -487,10 +469,9 @@ linux_xfer_osdata_processgroups ()
 	  PID_T pid = entry.pid;
 	  PID_T pgid = entry.pgid;
 	  char leader_command[32];
-	  char *command_line;
 
 	  command_from_pid (leader_command, sizeof (leader_command), pgid);
-	  command_line = commandline_from_pid (pid);
+	  std::string command_line = commandline_from_pid (pid);
 
 	  string_xml_appendf
 	    (buffer,
@@ -503,9 +484,7 @@ linux_xfer_osdata_processgroups ()
 	     pgid,
 	     leader_command,
 	     pid,
-	     command_line ? command_line : "");
-
-	  xfree (command_line);
+	     command_line.c_str ());
 	}
     }
 
