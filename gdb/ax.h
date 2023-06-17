@@ -83,8 +83,7 @@ struct agent_expr
     /* Construct an empty agent expression.  */
     agent_expr (struct gdbarch *gdbarch, CORE_ADDR scope)
       : gdbarch (gdbarch),
-	scope (scope),
-	tracing (0)
+	scope (scope)
     { }
 
     /* The bytes of the expression.  */
@@ -132,10 +131,10 @@ struct agent_expr
        be available when the user later tries to evaluate the expression
        in GDB.
 
-       Setting the flag 'tracing' to non-zero enables the code that
+       Setting the flag 'tracing' to true enables the code that
        emits the trace bytecodes at the appropriate points.  */
 
-    unsigned int tracing : 1;
+    bool tracing = false;
 
     /* This indicates that pointers to chars should get an added
        tracenz bytecode to record nonzero bytes, up to a length that

@@ -2335,7 +2335,7 @@ gen_trace_for_var (CORE_ADDR scope, struct gdbarch *gdbarch,
   agent_expr_up ax (new agent_expr (gdbarch, scope));
   struct axs_value value;
 
-  ax->tracing = 1;
+  ax->tracing = true;
   ax->trace_string = trace_string;
   gen_var_ref (ax.get (), &value, var);
 
@@ -2368,7 +2368,7 @@ gen_trace_for_expr (CORE_ADDR scope, struct expression *expr,
   agent_expr_up ax (new agent_expr (expr->gdbarch, scope));
   struct axs_value value;
 
-  ax->tracing = 1;
+  ax->tracing = true;
   ax->trace_string = trace_string;
   value.optimized_out = 0;
   expr->op->generate_ax (expr, ax.get (), &value);
@@ -2395,7 +2395,7 @@ gen_eval_for_expr (CORE_ADDR scope, struct expression *expr)
   agent_expr_up ax (new agent_expr (expr->gdbarch, scope));
   struct axs_value value;
 
-  ax->tracing = 0;
+  ax->tracing = false;
   value.optimized_out = 0;
   expr->op->generate_ax (expr, ax.get (), &value);
 
@@ -2414,7 +2414,7 @@ gen_trace_for_return_address (CORE_ADDR scope, struct gdbarch *gdbarch,
   agent_expr_up ax (new agent_expr (gdbarch, scope));
   struct axs_value value;
 
-  ax->tracing = 1;
+  ax->tracing = true;
   ax->trace_string = trace_string;
 
   gdbarch_gen_return_address (gdbarch, ax.get (), &value, scope);
@@ -2443,7 +2443,7 @@ gen_printf (CORE_ADDR scope, struct gdbarch *gdbarch,
   int tem;
 
   /* We're computing values, not doing side effects.  */
-  ax->tracing = 0;
+  ax->tracing = false;
 
   /* Evaluate and push the args on the stack in reverse order,
      for simplicity of collecting them on the target side.  */
