@@ -1293,6 +1293,11 @@ get_detach_signal (struct lwp_info *lp)
 static void
 detach_one_lwp (struct lwp_info *lp, int *signo_p)
 {
+  LINUX_NAT_SCOPED_DEBUG_ENTER_EXIT;
+
+  linux_nat_debug_printf ("lwp %s (stopped = %d)",
+			  lp->ptid.to_string ().c_str (), lp->stopped);
+
   int lwpid = lp->ptid.lwp ();
   int signo;
 
@@ -1363,6 +1368,10 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
   else
     signo = *signo_p;
 
+  linux_nat_debug_printf ("preparing to resume lwp %s (stopped = %d)",
+			  lp->ptid.to_string ().c_str (),
+			  lp->stopped);
+
   /* Preparing to resume may try to write registers, and fail if the
      lwp is zombie.  If that happens, ignore the error.  We'll handle
      it below, when detach fails with ESRCH.  */
@@ -1395,6 +1404,8 @@ detach_callback (struct lwp_info *lp)
 void
 linux_nat_target::detach (inferior *inf, int from_tty)
 {
+  LINUX_NAT_SCOPED_DEBUG_ENTER_EXIT;
+
   struct lwp_info *main_lwp;
   int pid = inf->pid;
 
@@ -3122,12 +3133,12 @@ static ptid_t
 linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 		  target_wait_flags target_options)
 {
+  LINUX_NAT_SCOPED_DEBUG_ENTER_EXIT;
+
   sigset_t prev_mask;
   enum resume_kind last_resume_kind;
   struct lwp_info *lp;
   int status;
-
-  linux_nat_debug_printf ("enter");
 
   /* The first time we get here after starting a new inferior, we may
      not have added it to the LWP list yet - this is the earliest
@@ -3228,7 +3239,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 
       if (target_options & TARGET_WNOHANG)
 	{
-	  linux_nat_debug_printf ("exit (ignore)");
+	  linux_nat_debug_printf ("no interesting events found");
 
 	  ourstatus->set_ignore ();
 	  restore_child_signals_mask (&prev_mask);
@@ -3314,7 +3325,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
   else
     *ourstatus = host_status_to_waitstatus (status);
 
-  linux_nat_debug_printf ("exit");
+  linux_nat_debug_printf ("event found");
 
   restore_child_signals_mask (&prev_mask);
 
@@ -3410,6 +3421,8 @@ ptid_t
 linux_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 			target_wait_flags target_options)
 {
+  LINUX_NAT_SCOPED_DEBUG_ENTER_EXIT;
+
   ptid_t event_ptid;
 
   linux_nat_debug_printf ("[%s], [%s]", ptid.to_string ().c_str (),
@@ -3589,6 +3602,8 @@ linux_nat_target::kill ()
 void
 linux_nat_target::mourn_inferior ()
 {
+  LINUX_NAT_SCOPED_DEBUG_ENTER_EXIT;
+
   int pid = inferior_ptid.pid ();
 
   purge_lwp_list (pid);

@@ -435,6 +435,11 @@ show_follow_fork_mode_string (struct ui_file *file, int from_tty,
 static bool
 follow_fork_inferior (bool follow_child, bool detach_fork)
 {
+  INFRUN_SCOPED_DEBUG_ENTER_EXIT;
+
+  infrun_debug_printf ("follow_child = %d, detach_fork = %d",
+		       follow_child, detach_fork);
+
   target_waitkind fork_kind = inferior_thread ()->pending_follow.kind ();
   gdb_assert (fork_kind == TARGET_WAITKIND_FORKED
 	      || fork_kind == TARGET_WAITKIND_VFORKED);
@@ -543,6 +548,13 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  parent_inf->thread_waiting_for_vfork_done
 	    = detach_fork ? inferior_thread () : nullptr;
 	  parent_inf->pspace->breakpoints_not_allowed = detach_fork;
+
+	  infrun_debug_printf
+	    ("parent_inf->thread_waiting_for_vfork_done == %s",
+	     (parent_inf->thread_waiting_for_vfork_done == nullptr
+	      ? "nullptr"
+	      : (parent_inf->thread_waiting_for_vfork_done
+		 ->ptid.to_string ().c_str ())));
 	}
     }
   else
@@ -727,6 +739,8 @@ set_last_target_status_stopped (thread_info *tp)
 static bool
 follow_fork ()
 {
+  INFRUN_SCOPED_DEBUG_ENTER_EXIT;
+
   bool follow_child = (follow_fork_mode_string == follow_fork_mode_child);
   bool should_resume = true;
 
@@ -996,6 +1010,8 @@ proceed_after_vfork_done (thread_info *thread)
 static void
 handle_vfork_child_exec_or_exit (int exec)
 {
+  INFRUN_SCOPED_DEBUG_ENTER_EXIT;
+
   struct inferior *inf = current_inferior ();
 
   if (inf->vfork_parent)
@@ -1127,6 +1143,8 @@ handle_vfork_child_exec_or_exit (int exec)
 static void
 handle_vfork_done (thread_info *event_thread)
 {
+  INFRUN_SCOPED_DEBUG_ENTER_EXIT;
+
   /* We only care about this event if inferior::thread_waiting_for_vfork_done is
      set, that is if we are waiting for a vfork child not under our control
      (because we detached it) to exec or exit.
@@ -1141,8 +1159,6 @@ handle_vfork_done (thread_info *event_thread)
       infrun_debug_printf ("not waiting for a vfork-done event");
       return;
     }
-
-  INFRUN_SCOPED_DEBUG_ENTER_EXIT;
 
   /* We stopped all threads (other than the vforking thread) of the inferior in
      follow_fork and kept them stopped until now.  It should therefore not be
@@ -3407,6 +3423,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
   thread_info *cur_thr = inferior_thread ();
 
+  infrun_debug_printf ("cur_thr = %s", cur_thr->ptid.to_string ().c_str ());
+
   /* Fill in with reasonable starting values.  */
   init_thread_stepping_state (cur_thr);
 
@@ -3463,8 +3481,10 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   if (!cur_thr->control.in_infcall)
     set_running (resume_target, resume_ptid, true);
 
-  infrun_debug_printf ("addr=%s, signal=%s", paddress (gdbarch, addr),
-		       gdb_signal_to_symbol_string (siggnal));
+  infrun_debug_printf ("addr=%s, signal=%s, resume_ptid=%s",
+		       paddress (gdbarch, addr),
+		       gdb_signal_to_symbol_string (siggnal),
+		       resume_ptid.to_string ().c_str ());
 
   annotate_starting ();
 
