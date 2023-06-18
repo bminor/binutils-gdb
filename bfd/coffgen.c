@@ -293,6 +293,8 @@ coff_object_cleanup (bfd *abfd)
 	    htab_delete (td->section_by_index);
 	  if (td->section_by_target_index)
 	    htab_delete (td->section_by_target_index);
+	  if (obj_pe (abfd) && pe_data (abfd)->comdat_hash)
+	    htab_delete (pe_data (abfd)->comdat_hash);
 	}
     }
 }
@@ -3290,6 +3292,12 @@ _bfd_coff_free_cached_info (bfd *abfd)
 	{
 	  htab_delete (tdata->section_by_target_index);
 	  tdata->section_by_target_index = NULL;
+	}
+
+      if (obj_pe (abfd) && pe_data (abfd)->comdat_hash)
+	{
+	  htab_delete (pe_data (abfd)->comdat_hash);
+	  pe_data (abfd)->comdat_hash = NULL;
 	}
 
       _bfd_dwarf2_cleanup_debug_info (abfd, &tdata->dwarf2_find_line_info);

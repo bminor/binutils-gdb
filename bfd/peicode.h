@@ -255,6 +255,21 @@ coff_swap_scnhdr_in (bfd * abfd, void * ext, void * in)
 #endif
 }
 
+static hashval_t
+htab_hash_flags (const void *entry)
+{
+  const struct comdat_hash_entry *fe = entry;
+  return fe->target_index;
+}
+
+static int
+htab_eq_flags (const void *e1, const void *e2)
+{
+  const struct comdat_hash_entry *fe1 = e1;
+  const struct comdat_hash_entry *fe2 = e2;
+  return fe1->target_index == fe2->target_index;
+}
+
 static bool
 pe_mkobject (bfd * abfd)
 {
@@ -290,6 +305,8 @@ pe_mkobject (bfd * abfd)
   pe->dos_message[13] = 0x0a0d0d2e;
   pe->dos_message[14] = 0x24;
   pe->dos_message[15] = 0x0;
+
+  pe->comdat_hash = htab_create (10, htab_hash_flags, htab_eq_flags, NULL);
 
   memset (& pe->pe_opthdr, 0, sizeof pe->pe_opthdr);
 
