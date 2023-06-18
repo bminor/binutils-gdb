@@ -6420,6 +6420,9 @@ proc default_gdb_init { test_file_name } {
 
     set gdb_test_file_name [file rootname [file tail $test_file_name]]
 
+    # Clean directory containing the standard output files.
+    remote_exec build "rm -rf [standard_output_file ""]"
+
     # Make sure that the wrapper is rebuilt
     # with the appropriate multilib option.
     if { $gdb_wrapper_target != [current_target_name] } {
