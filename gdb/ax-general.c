@@ -294,7 +294,36 @@ ax_string (struct agent_expr *x, const char *str, int slen)
 /* Functions for disassembling agent expressions, and otherwise
    debugging the expression compiler.  */
 
-struct aop_map aop_map[] =
+/* An entry in the opcode map.  */
+struct aop_map
+  {
+
+    /* The name of the opcode.  Null means that this entry is not a
+       valid opcode --- a hole in the opcode space.  */
+    const char *name;
+
+    /* All opcodes take no operands from the bytecode stream, or take
+       unsigned integers of various sizes.  If this is a positive number
+       n, then the opcode is followed by an n-byte operand, which should
+       be printed as an unsigned integer.  If this is zero, then the
+       opcode takes no operands from the bytecode stream.
+
+       If we get more complicated opcodes in the future, don't add other
+       magic values of this; that's a crock.  Add an `enum encoding'
+       field to this, or something like that.  */
+    int op_size;
+
+    /* The size of the data operated upon, in bits, for bytecodes that
+       care about that (ref and const).  Zero for all others.  */
+    int data_size;
+
+    /* Number of stack elements consumed, and number produced.  */
+    int consumed, produced;
+  };
+
+/* Map of the bytecodes, indexed by bytecode number.  */
+
+static struct aop_map aop_map[] =
 {
   {0, 0, 0, 0, 0}
 #define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE) \
