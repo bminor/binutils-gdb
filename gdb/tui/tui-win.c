@@ -284,28 +284,20 @@ tui_update_variables ()
   struct tui_translate *entry;
 
   entry = translate (tui_border_mode, tui_border_mode_translate);
-  if (tui_border_attrs != entry->value)
-    {
-      tui_border_attrs = entry->value;
-      need_redraw = true;
-    }
+  need_redraw
+    |= assign_return_if_changed<int> (tui_border_attrs, entry->value);
+
   entry = translate (tui_active_border_mode, tui_border_mode_translate);
-  if (tui_active_border_attrs != entry->value)
-    {
-      tui_active_border_attrs = entry->value;
-      need_redraw = true;
-    }
+  need_redraw
+    |= assign_return_if_changed<int> (tui_active_border_attrs, entry->value);
 
   /* If one corner changes, all characters are changed.
      Only check the first one.  The ACS characters are determined at
      run time by curses terminal management.  */
   entry = translate (tui_border_kind, tui_border_kind_translate_lrcorner);
   int val = (entry->value < 0) ? ACS_LRCORNER : entry->value;
-  if (tui_border_lrcorner != (chtype) val)
-    {
-      tui_border_lrcorner = val;
-      need_redraw = true;
-    }
+  need_redraw |= assign_return_if_changed<chtype> (tui_border_lrcorner, val);
+
   entry = translate (tui_border_kind, tui_border_kind_translate_llcorner);
   tui_border_llcorner = (entry->value < 0) ? ACS_LLCORNER : entry->value;
 
