@@ -3346,7 +3346,14 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 static int
 resume_stopped_resumed_lwps (struct lwp_info *lp, const ptid_t wait_ptid)
 {
-  if (!lp->stopped)
+  inferior *inf = find_inferior_ptid (linux_target, lp->ptid);
+
+  if (inf->vfork_child != nullptr)
+    {
+      linux_nat_debug_printf ("NOT resuming LWP %s (vfork parent)",
+			      lp->ptid.to_string ().c_str ());
+    }
+  else if (!lp->stopped)
     {
       linux_nat_debug_printf ("NOT resuming LWP %s, not stopped",
 			      lp->ptid.to_string ().c_str ());
