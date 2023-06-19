@@ -173,7 +173,7 @@ extern void
 dump_sframe (sframe_decoder_ctx *decoder, uint64_t addr);
 
 /* Get the base reg id from the FRE info.  Sets errp if fails.  */
-extern unsigned int
+extern uint8_t
 sframe_fre_get_base_reg_id (sframe_frame_row_entry *fre, int *errp);
 
 /* Get the CFA offset from the FRE.  If the offset is invalid, sets errp.  */

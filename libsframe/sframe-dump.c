@@ -105,7 +105,7 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
   int32_t cfa_offset = 0;
   int32_t fp_offset = 0;
   int32_t ra_offset = 0;
-  unsigned int base_reg_id = 0;
+  uint8_t base_reg_id = 0;
   int err[3] = {0, 0, 0};
 
   sframe_frame_row_entry fre;
