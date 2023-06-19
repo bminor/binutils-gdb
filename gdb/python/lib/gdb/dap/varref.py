@@ -66,7 +66,7 @@ class BaseReference:
             "variablesReference": self.ref,
         }
         if self.name is not None:
-            result["name"] = self.name
+            result["name"] = str(self.name)
         return result
 
     def no_children(self):

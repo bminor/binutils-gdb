@@ -298,7 +298,7 @@ class NoOpArrayPrinter:
         return "array"
 
     def children(self):
-        for i in range(self.low, self.high):
+        for i in range(self.low, self.high + 1):
             yield (i, self.value[i])
 
 
