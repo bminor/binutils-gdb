@@ -3631,6 +3631,43 @@ copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
     }
 }
 
+#if GDB_SELF_TEST
+static void
+test_assign_set_return_if_changed ()
+{
+  bool changed;
+  int a;
+
+  for (bool initial : { false, true })
+    {
+      changed = initial;
+      a = 1;
+      assign_set_if_changed (a, 1, changed);
+      SELF_CHECK (a == 1);
+      SELF_CHECK (changed == initial);
+    }
+
+  for (bool initial : { false, true })
+    {
+      changed = initial;
+      a = 1;
+      assign_set_if_changed (a, 2, changed);
+      SELF_CHECK (a == 2);
+      SELF_CHECK (changed == true);
+    }
+
+  a = 1;
+  changed = assign_return_if_changed (a, 1);
+  SELF_CHECK (a == 1);
+  SELF_CHECK (changed == false);
+
+  a = 1;
+  assign_set_if_changed (a, 2, changed);
+  SELF_CHECK (a == 2);
+  SELF_CHECK (changed == true);
+}
+#endif
+
 void _initialize_utils ();
 void
 _initialize_utils ()
@@ -3695,5 +3732,7 @@ When set, debugging messages will be marked with seconds and microseconds."),
   selftests::register_test ("strncmp_iw_with_mode",
 			    strncmp_iw_with_mode_tests);
   selftests::register_test ("pager", test_pager);
+  selftests::register_test ("assign_set_return_if_changed",
+			    test_assign_set_return_if_changed);
 #endif
 }

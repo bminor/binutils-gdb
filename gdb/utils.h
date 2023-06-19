@@ -337,4 +337,31 @@ extern void copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
 
 extern int readline_hidden_cols;
 
+/* Assign VAL to LVAL, and set CHANGED to true if the assignment changed
+   LVAL.  */
+
+template<typename T>
+void
+assign_set_if_changed (T &lval, const T &val, bool &changed)
+{
+  if (lval == val)
+    return;
+
+  lval = val;
+  changed = true;
+}
+
+/* Assign VAL to LVAL, and return true if the assignment changed LVAL.  */
+
+template<typename T>
+bool
+assign_return_if_changed (T &lval, const T &val)
+{
+  if (lval == val)
+    return false;
+
+  lval = val;
+  return true;
+}
+
 #endif /* UTILS_H */
