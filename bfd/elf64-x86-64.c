@@ -3501,6 +3501,9 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	    {
 	      bfd_vma roff = rel->r_offset;
 
+	      if (roff >= input_section->size)
+		goto corrupt_input;
+
 	      BFD_ASSERT (! unresolved_reloc);
 
 	      if (r_type == R_X86_64_TLSGD)
@@ -3541,6 +3544,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		  int largepic = 0;
 		  if (ABI_64_P (output_bfd))
 		    {
+		      if (roff + 5 >= input_section->size)
+			goto corrupt_input;
 		      if (contents[roff + 5] == 0xb8)
 			{
 			  if (roff < 3
@@ -3576,6 +3581,10 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 			      "\x64\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
 			      15);
 		    }
+
+		  if (roff + 8 + largepic >= input_section->size)
+		    goto corrupt_input;
+
 		  bfd_put_32 (output_bfd,
 			      elf_x86_64_tpoff (info, relocation),
 			      contents + roff + 8 + largepic);
@@ -3633,12 +3642,18 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		    }
 		  if (prefix)
 		    {
+		      if (roff + 2 >= input_section->size)
+			goto corrupt_input;
+
 		      bfd_put_8 (output_bfd, 0x0f, contents + roff);
 		      bfd_put_8 (output_bfd, 0x1f, contents + roff + 1);
 		      bfd_put_8 (output_bfd, 0x00, contents + roff + 2);
 		    }
 		  else
 		    {
+		      if (roff + 1 >= input_section->size)
+			goto corrupt_input;
+
 		      bfd_put_8 (output_bfd, 0x66, contents + roff);
 		      bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
 		    }

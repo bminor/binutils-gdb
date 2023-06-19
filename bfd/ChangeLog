@@ -1,3 +1,9 @@
+2023-06-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 30560
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Add more checks
+	for a valid relocation offset.
+
 2023-06-07  Nick Clifton  <nickc@redhat.com>
 
 	PR 30499
