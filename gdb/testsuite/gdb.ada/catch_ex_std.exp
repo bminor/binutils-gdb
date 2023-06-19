@@ -17,7 +17,7 @@ require allow_shlib_tests
 
 load_lib "ada.exp"
 
-require allow_ada_tests gnat_runtime_has_debug_info
+require allow_ada_tests shared_gnat_runtime_has_debug_info
 
 standard_ada_testfile foo
 
