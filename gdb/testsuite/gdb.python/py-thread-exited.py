@@ -21,17 +21,25 @@ threadTwoExit = ""
 # store it here. we don't care about it though.
 mainThreadExit = ""
 
+
 def thread_exited_handler(event):
     global threadOneExit, threadTwoExit, mainThreadExit
     print("{}".format(event))
     assert isinstance(event, gdb.ThreadExitedEvent)
     if threadOneExit == "":
-        threadOneExit = "event type: thread-exited. global num: {}".format(event.inferior_thread.global_num)
+        threadOneExit = "event type: thread-exited. global num: {}".format(
+            event.inferior_thread.global_num
+        )
     else:
         if threadTwoExit == "":
-            threadTwoExit = "event type: thread-exited. global num: {}".format(event.inferior_thread.global_num)
+            threadTwoExit = "event type: thread-exited. global num: {}".format(
+                event.inferior_thread.global_num
+            )
         else:
-            mainThreadExit = "event type: thread-exited. global num: {}".format(event.inferior_thread.global_num)
+            mainThreadExit = "event type: thread-exited. global num: {}".format(
+                event.inferior_thread.global_num
+            )
+
 
 class test_events(gdb.Command):
     """Test events."""
@@ -42,5 +50,6 @@ class test_events(gdb.Command):
     def invoke(self, arg, from_tty):
         gdb.events.thread_exited.connect(thread_exited_handler)
         print("Event testers registered.")
+
 
 test_events()
