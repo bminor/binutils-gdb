@@ -69,7 +69,7 @@
    the worst case of maximum length for each of the pieces of a
    continuation packet.
 
-   NOTE: expressions get mem2hex'ed otherwise this would be twice as
+   NOTE: expressions get bin2hex'ed otherwise this would be twice as
    large.  (400 - 31)/2 == 184 */
 #define MAX_AGENT_EXPR_LEN	184
 
@@ -156,7 +156,6 @@ static std::string trace_stop_notes;
 /* support routines */
 
 struct collection_list;
-static char *mem2hex (gdb_byte *, char *, int);
 
 static counted_command_line all_tracepoint_actions (struct breakpoint *);
 
@@ -1226,7 +1225,7 @@ collection_list::stringify ()
       end += 10;		/* 'X' + 8 hex digits + ',' */
       count += 10;
 
-      end = mem2hex (m_aexprs[i]->buf, end, m_aexprs[i]->len);
+      end += 2 * bin2hex (m_aexprs[i]->buf, end, m_aexprs[i]->len);
       count += 2 * m_aexprs[i]->len;
     }
 
@@ -2886,31 +2885,6 @@ set_trace_stop_notes (const char *args, int from_tty,
 
   if (!ret)
     warning (_("Target does not support trace notes, stop note ignored"));
-}
-
-/* Convert the memory pointed to by mem into hex, placing result in buf.
- * Return a pointer to the last char put in buf (null)
- * "stolen" from sparc-stub.c
- */
-
-static const char hexchars[] = "0123456789abcdef";
-
-static char *
-mem2hex (gdb_byte *mem, char *buf, int count)
-{
-  gdb_byte ch;
-
-  while (count-- > 0)
-    {
-      ch = *mem++;
-
-      *buf++ = hexchars[ch >> 4];
-      *buf++ = hexchars[ch & 0xf];
-    }
-
-  *buf = 0;
-
-  return buf;
 }
 
 int
