@@ -340,14 +340,12 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
     {
     case var_string:
       {
-	char *newobj;
+	std::string newobj;
 	const char *p;
-	char *q;
 	int ch;
 
-	newobj = (char *) xmalloc (strlen (arg) + 2);
+	newobj.reserve (strlen (arg));
 	p = arg;
-	q = newobj;
 	while ((ch = *p++) != '\000')
 	  {
 	    if (ch == '\\')
@@ -365,20 +363,14 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 		if (ch == 0)
 		  break;	/* C loses */
 		else if (ch > 0)
-		  *q++ = ch;
+		  newobj.push_back (ch);
 	      }
 	    else
-	      *q++ = ch;
+	      newobj.push_back (ch);
 	  }
-#if 0
-	if (*(p - 1) != '\\')
-	  *q++ = ' ';
-#endif
-	*q++ = '\0';
-	newobj = (char *) xrealloc (newobj, q - newobj);
+	newobj.shrink_to_fit ();
 
-	option_changed = c->var->set<std::string> (std::string (newobj));
-	xfree (newobj);
+	option_changed = c->var->set<std::string> (std::move (newobj));
       }
       break;
     case var_string_noescape:
