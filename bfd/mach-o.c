@@ -2073,6 +2073,8 @@ bfd_mach_o_write_symtab_content (bfd *abfd, bfd_mach_o_symtab_command *sym)
   if (!_bfd_stringtab_emit (abfd, strtab))
     goto err;
 
+  _bfd_stringtab_free (strtab);
+
   /* Pad string table.  */
   padlen = bfd_mach_o_pad4 (abfd, sym->strsize);
   if (padlen < 0)
