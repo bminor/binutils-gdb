@@ -349,12 +349,6 @@ ax_print (struct ui_file *f, struct agent_expr *x)
     }
   gdb_printf (f, _("\n"));
 
-  /* Check the size of the name array against the number of entries in
-     the enum, to catch additions that people didn't sync.  */
-  if ((sizeof (aop_map) / sizeof (aop_map[0]))
-      != aop_last)
-    error (_("GDB bug: ax-general.c (ax_print): opcode map out of sync"));
-
   for (i = 0; i < x->buf.size ();)
     {
       enum agent_op op = (enum agent_op) x->buf[i];

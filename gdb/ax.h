@@ -154,7 +154,6 @@ enum agent_op
     aop_ ## NAME = VALUE,
 #include "gdbsupport/ax.def"
 #undef DEFOP
-    aop_last
   };
 
 
