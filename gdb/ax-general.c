@@ -353,8 +353,7 @@ ax_print (struct ui_file *f, struct agent_expr *x)
     {
       enum agent_op op = (enum agent_op) x->buf[i];
 
-      if (op >= (sizeof (aop_map) / sizeof (aop_map[0]))
-	  || !aop_map[op].name)
+      if (op >= ARRAY_SIZE (aop_map) || aop_map[op].name == nullptr)
 	{
 	  gdb_printf (f, _("%3d  <bad opcode %02x>\n"), i, op);
 	  i++;
@@ -454,7 +453,7 @@ ax_reqs (struct agent_expr *ax)
 
   for (i = 0; i < ax->buf.size (); i += 1 + op->op_size)
     {
-      if (ax->buf[i] > (sizeof (aop_map) / sizeof (aop_map[0])))
+      if (ax->buf[i] >= ARRAY_SIZE (aop_map))
 	{
 	  ax->flaw = agent_flaw_bad_instruction;
 	  return;
