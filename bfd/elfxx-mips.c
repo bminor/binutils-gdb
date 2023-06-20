@@ -2481,8 +2481,11 @@ _bfd_mips_elf_gprel16_with_gp (bfd *abfd, asymbol *symbol,
   else
     relocation = symbol->value;
 
-  relocation += symbol->section->output_section->vma;
-  relocation += symbol->section->output_offset;
+  if (symbol->section->output_section != NULL)
+    {
+      relocation += symbol->section->output_section->vma;
+      relocation += symbol->section->output_offset;
+    }
 
   /* Set val to the offset into the section or symbol.  */
   val = reloc_entry->addend;
@@ -2673,7 +2676,8 @@ _bfd_mips_elf_generic_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
 
   /* Build up the field adjustment in VAL.  */
   val = 0;
-  if (!relocatable || (symbol->flags & BSF_SECTION_SYM) != 0)
+  if ((!relocatable || (symbol->flags & BSF_SECTION_SYM) != 0)
+      && symbol->section->output_section != NULL)
     {
       /* Either we're calculating the final field value or we have a
 	 relocation against a section symbol.  Add in the section's

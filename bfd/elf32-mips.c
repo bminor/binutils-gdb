@@ -1858,8 +1858,11 @@ gprel32_with_gp (bfd *abfd, asymbol *symbol, arelent *reloc_entry,
   else
     relocation = symbol->value;
 
-  relocation += symbol->section->output_section->vma;
-  relocation += symbol->section->output_offset;
+  if (symbol->section->output_section != NULL)
+    {
+      relocation += symbol->section->output_section->vma;
+      relocation += symbol->section->output_offset;
+    }
 
   if (!_bfd_mips_reloc_offset_in_range (abfd, input_section, reloc_entry,
 					check_inplace))

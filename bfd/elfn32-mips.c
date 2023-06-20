@@ -3300,7 +3300,8 @@ mips_elf_gprel16_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
   else
     {
       relocatable = false;
-      output_bfd = symbol->section->output_section->owner;
+      if (symbol->section->output_section != NULL)
+	output_bfd = symbol->section->output_section->owner;
     }
 
   ret = mips_elf_final_gp (output_bfd, symbol, relocatable, error_message,
@@ -3340,7 +3341,8 @@ mips_elf_literal_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   else
     {
       relocatable = false;
-      output_bfd = symbol->section->output_section->owner;
+      if (symbol->section->output_section != NULL)
+	output_bfd = symbol->section->output_section->owner;
     }
 
   ret = mips_elf_final_gp (output_bfd, symbol, relocatable, error_message,
@@ -3383,7 +3385,8 @@ mips_elf_gprel32_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   else
     {
       relocatable = false;
-      output_bfd = symbol->section->output_section->owner;
+      if (symbol->section->output_section != NULL)
+	output_bfd = symbol->section->output_section->owner;
 
       ret = mips_elf_final_gp (output_bfd, symbol, relocatable,
 			       error_message, &gp);
@@ -3408,8 +3411,11 @@ gprel32_with_gp (bfd *abfd, asymbol *symbol, arelent *reloc_entry,
   else
     relocation = symbol->value;
 
-  relocation += symbol->section->output_section->vma;
-  relocation += symbol->section->output_offset;
+  if (symbol->section->output_section != NULL)
+    {
+      relocation += symbol->section->output_section->vma;
+      relocation += symbol->section->output_offset;
+    }
 
   if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd, input_section,
 				  reloc_entry->address))
@@ -3484,7 +3490,8 @@ mips16_gprel_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   else
     {
       relocatable = false;
-      output_bfd = symbol->section->output_section->owner;
+       if (symbol->section->output_section != NULL)
+	 output_bfd = symbol->section->output_section->owner;
     }
 
   ret = mips_elf_final_gp (output_bfd, symbol, relocatable, error_message,
