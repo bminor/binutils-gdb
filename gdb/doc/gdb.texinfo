@@ -9148,6 +9148,9 @@ Stack}), this prints lines centered around that line.  If no
 @code{list} command has been used and no solitary line was printed,
 it prints the lines around the function @code{main}.
 
+@item list +
+Same as using with no arguments.
+
 @item list -
 Print lines just before the lines last printed.
 

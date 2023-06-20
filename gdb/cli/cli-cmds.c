@@ -2806,6 +2806,7 @@ and send its output to SHELL_COMMAND."));
 List specified function or line.\n\
 With no argument, lists ten more lines after or around previous listing.\n\
 \"list .\" lists ten lines arond where the inferior is stopped.\n\
+\"list +\" lists the ten lines following a previous ten-line listing.\n\
 \"list -\" lists the ten lines before a previous ten-line listing.\n\
 One argument specifies a line, and ten lines are listed around that line.\n\
 Two arguments with comma between specify starting and ending lines to list.\n\
