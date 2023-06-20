@@ -216,7 +216,8 @@ record_minimal_symbol (minimal_symbol_reader &reader,
      ELF is malformed then this might not be the case.  In that case don't
      create an msymbol that references an uninitialised section object.  */
   int section_index = 0;
-  if ((bfd_section_flags (bfd_section) & SEC_ALLOC) == SEC_ALLOC)
+  if ((bfd_section_flags (bfd_section) & SEC_ALLOC) == SEC_ALLOC
+      || bfd_section == bfd_abs_section_ptr)
     section_index = gdb_bfd_section_index (objfile->obfd.get (), bfd_section);
 
   struct minimal_symbol *result
