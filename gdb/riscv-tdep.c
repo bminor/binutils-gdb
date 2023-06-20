@@ -1812,7 +1812,6 @@ ULONGEST
 riscv_insn::fetch_instruction (struct gdbarch *gdbarch,
 			       CORE_ADDR addr, int *len)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order_for_code (gdbarch);
   gdb_byte buf[RISCV_MAX_INSN_LEN];
   int instlen, status;
 
@@ -1833,7 +1832,8 @@ riscv_insn::fetch_instruction (struct gdbarch *gdbarch,
 	memory_error (TARGET_XFER_E_IO, addr + 2);
     }
 
-  return extract_unsigned_integer (buf, instlen, byte_order);
+  /* RISC-V Specification states instructions are always little endian */
+  return extract_unsigned_integer (buf, instlen, BFD_ENDIAN_LITTLE);
 }
 
 /* Fetch from target memory an instruction at PC and decode it.  This can
