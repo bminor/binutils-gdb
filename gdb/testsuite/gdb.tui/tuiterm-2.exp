@@ -93,6 +93,19 @@ with_override Term::accept_gdb_output test_accept_gdb_output {
 		}
 		gdb_assert { ![Term::command "foo"] }
 	    }
+
+	    with_test_prefix Term::wait_for {
+		Term::_setup 4 20
+		set send_cnt 0
+		set expect_send {}
+		set action_cnt 0
+		set actions {
+		    {
+			Term::_insert "(gdb) "
+		    }
+		}
+		gdb_assert { [Term::wait_for ""] }
+	    }
 	}
     }
 }

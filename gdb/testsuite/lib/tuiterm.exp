@@ -789,6 +789,10 @@ namespace eval Term {
 	set fn "wait_for"
 
 	set prompt_wait_for "(^|\\|)$gdb_prompt \$"
+	if { $wait_for == "" } {
+	    set wait_for $prompt_wait_for
+	}
+
 	debug_tui_matching "$fn: regexp: '$wait_for'"
 
 	while 1 {
