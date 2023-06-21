@@ -4632,7 +4632,15 @@ Target_powerpc<size, big_endian>::make_brlt_section(Layout* layout)
 	{
 	  // When PIC we can't fill in .branch_lt but must initialise at
 	  // runtime via dynamic relocations.
-	  brlt_rel = this->rela_dyn_section(layout);
+	  this->rela_dyn_section(layout);
+	  // FIXME: This reloc section won't have its relative relocs
+	  // sorted properly among the other relative relocs in rela_dyn_
+	  // but it must be a separate section due to needing to call
+	  // reset_data_size().
+	  brlt_rel = new Reloc_section(false);
+	  if (this->rela_dyn_->output_section())
+	    this->rela_dyn_->output_section()
+	      ->add_output_section_data(brlt_rel);
 	}
       this->brlt_section_
 	= new Output_data_brlt_powerpc<size, big_endian>(this, brlt_rel);
