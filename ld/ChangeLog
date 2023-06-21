@@ -1,3 +1,10 @@
+2023-06-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 29072
+	* testsuite/ld-elf/elf.exp (target_defaults_to_execstack): Always
+	return false for linkers configured with the --enable-default-execstack=no
+	option.
+
 2023-06-14  Nick Clifton  <nickc@redhat.com>
 
 	PR 30374

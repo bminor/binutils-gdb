@@ -180,6 +180,21 @@ if { [check_gc_sections_available] && ![istarget "v850-*-*"] } {
 }
 
 proc target_defaults_to_execstack {} {
+    global base_dir
+
+    # If the linker has been configured with --enable-default-execstack=no then
+    # this proc should always return 0.
+    if { [file exists $base_dir/config.status] } {
+	set status [remote_exec host grep "enable-default-execstack=no" $base_dir/config.status]
+	if { [lindex $status 0] == 0 } {
+	    return 0
+	} else {
+	    verbose -log "$base_dir/config.status does not contain enable-default-execstack=no"
+	}
+    } else {
+	verbose -log "there is no file $base_dir/config.status"
+    }
+    
     if {   [istarget "aarch64*-*-*"]
 	|| [istarget "arc*-*-*"]
 	|| [istarget "cris*-*-*"]
