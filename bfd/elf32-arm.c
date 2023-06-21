@@ -20073,15 +20073,9 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
   if (!elf32_arm_size_info.slurp_reloc_table (abfd, relplt, dynsyms, true))
     return -1;
 
-  data = plt->contents;
-  if (data == NULL)
-    {
-      if (!bfd_get_full_section_contents (abfd, plt, &data)
-	  || data == NULL)
-	return -1;
-      plt->contents = data;
-      plt->flags |= SEC_IN_MEMORY;
-    }
+  data = NULL;
+  if (!bfd_get_full_section_contents (abfd, plt, &data))
+    return -1;
 
   count = NUM_SHDR_ENTRIES (hdr);
   size = count * sizeof (asymbol);
@@ -20093,13 +20087,13 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
 	size += sizeof ("+0x") - 1 + 8;
     }
 
-  s = *ret = (asymbol *) bfd_malloc (size);
-  if (s == NULL)
-    return -1;
-
   offset = elf32_arm_plt0_size (abfd, data);
-  if (offset == (bfd_vma) -1)
-    return -1;
+  if (offset == (bfd_vma) -1
+      || (s = *ret = (asymbol *) bfd_malloc (size)) == NULL)
+    {
+      free (data);
+      return -1;
+    }
 
   names = (char *) (s + count);
   p = relplt->relocation;
@@ -20144,6 +20138,7 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
       offset += plt_size;
     }
 
+  free (data);
   return n;
 }
 
