@@ -25,6 +25,12 @@ set cols 50
 set lines 24
 set dims [list $lines $cols]
 
+# Sometimes we see ^C.  This is something we'd like to fix.  It's reported as
+# a readline problem here (
+# https://lists.gnu.org/archive/html/bug-readline/2023-06/msg00000.html ).
+# For now, ignore it.
+set re_control_c "(\\^C)?Quit"
+
 # Fill line, assuming we start after the gdb prompt.
 proc fill_line { width } {
     set res ""
@@ -47,7 +53,7 @@ proc fill_line { width } {
 proc test_wrap { wrap_width } {
     # Generate a prompt and parse it.
     send_gdb "\003"
-    gdb_assert { [Term::wait_for "(^|$::gdb_prompt )Quit"] } "start line"
+    gdb_assert { [Term::wait_for "(^|$::gdb_prompt )$::re_control_c"] } "start line"
 
     # Fill the line to just before wrapping.
     set str [fill_line $wrap_width]
@@ -64,7 +70,7 @@ proc test_wrap { wrap_width } {
 
     # Generate a prompt and parse it.
     send_gdb "\003"
-    gdb_assert { [Term::wait_for "^WQuit"] } "prompt after wrap"
+    gdb_assert { [Term::wait_for "^W$::re_control_c"] } "prompt after wrap"
 }
 
 # Test wrapping in both CLI and TUI.
