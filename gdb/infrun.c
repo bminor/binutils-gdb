@@ -3299,10 +3299,12 @@ proceed_resume_thread_checked (thread_info *tp)
     }
 
   /* When handling a vfork GDB removes all breakpoints from the program
-     space in which the vfork is being handled, as such we must take care
-     not to resume any thread other than the vfork parent -- resuming the
-     vfork parent allows GDB to receive and handle the 'vfork done'
-     event.  */
+     space in which the vfork is being handled.  If we are following the
+     parent then GDB will set the thread_waiting_for_vfork_done member of
+     the parent inferior.  In this case we should take care to only resume
+     the vfork parent thread, the kernel will hold this thread suspended
+     until the vfork child has exited or execd, at which point the parent
+     will be resumed and a VFORK_DONE event sent to GDB.  */
   if (tp->inf->thread_waiting_for_vfork_done != nullptr)
     {
       if (target_is_non_stop_p ())
@@ -3339,6 +3341,20 @@ proceed_resume_thread_checked (thread_info *tp)
 	     here.  */
 	  gdb_assert (tp == tp->inf->thread_waiting_for_vfork_done);
 	}
+    }
+
+  /* When handling a vfork GDB removes all breakpoints from the program
+     space in which the vfork is being handled.  If we are following the
+     child then GDB will set vfork_child member of the vfork parent
+     inferior.  Once the child has either exited or execd then GDB will
+     detach from the parent process.  Until that point GDB should not
+     resume any thread in the parent process.  */
+  if (tp->inf->vfork_child != nullptr)
+    {
+      infrun_debug_printf ("[%s] thread is part of a vfork parent, child is %d",
+			   tp->ptid.to_string ().c_str (),
+			   tp->inf->vfork_child->pid);
+      return;
     }
 
   infrun_debug_printf ("resuming %s",
