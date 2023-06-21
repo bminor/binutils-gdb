@@ -1377,6 +1377,8 @@
 					   may differ from AT_PLATFORM.  */
 #define AT_RANDOM	25		/* Address of 16 random bytes.  */
 #define AT_HWCAP2	26		/* Extension of AT_HWCAP.  */
+#define AT_RSEQ_FEATURE_SIZE	27	/* rseq supported feature size */
+#define AT_RSEQ_ALIGN	28		/* rseq allocation alignment */
 #define AT_EXECFN	31		/* Filename of executable.  */
 /* Pointer to the global system page used for system calls and other
    nice things.  */
