@@ -11055,19 +11055,20 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 		  *ins->obufp++ = ' ';
 		  break;
 		case 'L':
-		  if (!(ins->rex & REX_W))
-		    break;
-		  *ins->obufp++ = 'a';
-		  *ins->obufp++ = 'b';
-		  *ins->obufp++ = 's';
-		  break;
+		  if (ins->rex & REX_W)
+		    {
+		      *ins->obufp++ = 'a';
+		      *ins->obufp++ = 'b';
+		      *ins->obufp++ = 's';
+		    }
+		  goto case_S;
 		default:
 		  abort ();
 		}
 	    }
 	  else
 	    abort ();
-	  goto case_S;
+	  break;
 	case 'W':
 	  if (l == 0)
 	    {
