@@ -105,9 +105,11 @@ check_info_unwinder "info unwinder after failed disable" on
 # unwider.  Doing this is bad as the new name might clash with an
 # already registered name, which violates the promises made during
 # 'register_unwinder'.
+set pattern_1 "can't set attribute(?: 'name')?"
+set pattern_2 "property 'name' of 'TestUnwinder' object has no setter"
 gdb_test "python global_test_unwinder.name = \"foo\"" \
     [multi_line \
-	 "AttributeError: can't set attribute(?: 'name')?" \
+	 "AttributeError: (?:${pattern_1}|${pattern_2})" \
 	 "Error while executing Python code\\."]
 check_info_unwinder "info unwinder after failed name change" on
 
