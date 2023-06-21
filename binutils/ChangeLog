@@ -1,3 +1,8 @@
+2023-06-21  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/lib/binutils-common.exp (prune_warnings_extra): Prune
+	warnings about -z execstack creating an executable stack.
+
 2023-05-30  Nick Clifton  <nickc@redhat.com>
 
 	* od-pe.c (targ_info): New array.

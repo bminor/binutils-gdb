@@ -640,20 +640,32 @@ proc regexp_diff { file_1 file_2 args } {
 # ld: warning: /lib64/ld-linux-x86-64.so.2: unsupported GNU_PROPERTY_TYPE (5) type : 0xc0010001
 proc prune_warnings_extra { text } {
     global experimental
-    # Warnings are only pruned from non-experimental code (ie code not
-    # on a release branch).  For experimental code we want the warnings
+
+    # Property warnings are only pruned from non-experimental code (ie code
+    # not on a release branch).  For experimental code we want the warnings
     # as they indicate that the sources need to be updated to recognise
     # the new properties.
     if { "$experimental" == "false" } {
 	# The "\\1" is to try to preserve a "\n" but only if necessary.
 	regsub -all "(^|\n)(\[^\n\]*: warning:\[^\n\]*unsupported GNU_PROPERTY_TYPE\[^\n\]*\n?)+" $text "\\1" text
     }
+
     # PR binutils/23898: It is OK to have gaps in build notes.
     regsub -all "(^|\n)(\[^\n\]*: Warning: Gap in build notes detected from\[^\n\]*\n?)+" $text "\\1" text
+
+    # Many tests use assembler source files without a .note.GNU-stack section.
+    # So ignore warnings about it being missing.
     regsub -all "(^|\n)(\[^\n\]*: warning:\[^\n\]*missing \\.note\\.GNU-stack section\[^\n\]*\n?)+" $text "\\1" text
     regsub -all "(^|\n)(\[^\n\]*: NOTE: This behaviour is deprecated\[^\n\]*\n?)+" $text "\\1" text
+
+    # Ignore warnings about RWX segments.
     regsub -all "(^|\n)(\[^\n\]*: warning:\[^\n\]*has a LOAD segment with RWX permissions\[^\n\]*\n?)+" $text "\\1" text
     regsub -all "(^|\n)(\[^\n\]*: warning:\[^\n\]*has a TLS segment with execute permission\[^\n\]*\n?)+" $text "\\1" text
+
+    # Configuring with --enable-warn-execstack=yes will generate warnings if
+    # -z execstack is used.
+    regsub -all "(^|\n)(\[^\n\]*: warning: enabling an executable stack because of -z execstack command line option\[^\n\]*\n?)+" $text "\\1" text
+
     return $text
 }
 
