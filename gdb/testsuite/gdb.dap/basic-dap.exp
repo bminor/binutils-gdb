@@ -177,7 +177,7 @@ dap_match_values "global value in main" [lindex $obj 0] \
 set obj [dap_check_request_and_response "set global in main" \
 	     setExpression {o expression [s global_variable] value [s 23]}]
 dap_match_values "global value in main after set" [lindex $obj 0] \
-    "body result" 23 \
+    "body value" 23 \
     "body type" int
 
 set obj [dap_request_and_response \

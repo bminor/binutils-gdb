@@ -53,6 +53,18 @@ def _eval_for_hover(expr, frame_id):
                 return _evaluate(expr, frame_id)
 
 
+class _SetResult(VariableReference):
+    def __init__(self, value):
+        super().__init__(None, value, "value")
+
+    def to_object(self):
+        result = super().to_object()
+        # This is not specified in the setExpression result.
+        if "memoryReference" in result:
+            del result["memoryReference"]
+        return result
+
+
 # Helper function to perform an assignment.
 @in_gdb_thread
 def _set_expression(expression, value, frame_id):
@@ -64,7 +76,7 @@ def _set_expression(expression, value, frame_id):
     lhs = gdb.parse_and_eval(expression, global_context=global_context)
     rhs = gdb.parse_and_eval(value, global_context=global_context)
     lhs.assign(rhs)
-    return EvaluateResult(lhs).to_object()
+    return _SetResult(lhs).to_object()
 
 
 # Helper function to evaluate a gdb command in a certain frame.
