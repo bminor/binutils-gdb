@@ -18,6 +18,7 @@
 load_lib rust-support.exp
 require allow_rust_tests
 require {can_compile rust}
+require {have_host_locale C.UTF-8}
 
 # Non-ASCII identifiers were allowed starting in 1.53.
 require {rust_at_least 1.53}

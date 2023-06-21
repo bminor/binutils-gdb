@@ -25,6 +25,7 @@ if { [is_c_compiler_gcc] } {
     # Gcc fully supports fextended-identifiers starting GCC 5.
     require {expr [gcc_major_version] >= 5}
 }
+require {have_host_locale C.UTF-8}
 
 standard_testfile
 

@@ -18,6 +18,7 @@
 # This PR is fixed in the in-repo copy of readline.  System readline may or
 # may not be fixed, so skip this test-case.
 require !with_system_readline
+require {have_host_locale C.UTF-8}
 
 tuiterm_env
 

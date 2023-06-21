@@ -18,6 +18,7 @@
 load_lib "ada.exp"
 
 require allow_ada_tests
+require {have_host_locale C.UTF-8}
 
 # Enable basic use of UTF-8.  LC_ALL gets reset for each testfile.  We
 # want this despite the program itself using Latin-1, as this test is

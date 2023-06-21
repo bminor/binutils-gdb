@@ -9794,5 +9794,41 @@ proc lappend_include_file { flags file } {
     }
 }
 
+# Return a list of supported host locales.
+
+gdb_caching_proc host_locales { } {
+    set result [remote_exec host "locale -a"]
+    set status [lindex $result 0]
+    set output [lindex $result 1]
+
+    if { $status != 0 } {
+	return {}
+    }
+
+    # Split into list.
+    set output [string trim $output]
+    set l [split $output \n]
+
+    # Trim items.
+    set l [lmap v $l { string trim $v }]
+
+    # Normalize items to lower-case.
+    set l [lmap v $l { string tolower $v }]
+
+    return $l
+}
+
+# Return 1 if host locale LOCALE is supported.
+
+proc have_host_locale { locale } {
+    # Normalize to lower-case.
+    set locale [string tolower $locale]
+    # Normalize to without dash.
+    set locale [string map { "-" "" } $locale]
+
+    set idx [lsearch [host_locales] $locale]
+    return [expr $idx != -1]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
