@@ -875,6 +875,21 @@ namespace eval Term {
 	}
     }
 
+    # Generate prompt on TUIterm.
+    proc gen_prompt {} {
+	# Generate a prompt.
+	send_gdb "echo\n"
+
+	# Drain the output before the prompt.
+	gdb_expect {
+	    -re "echo\r\n" {
+	    }
+	}
+
+	# Interpret prompt using TUIterm.
+	wait_for ""
+    }
+
     # Setup ready for starting the tui, but don't actually start it.
     # Returns 1 on success, 0 if TUI tests should be skipped.
     proc prepare_for_tui {} {
@@ -920,9 +935,8 @@ namespace eval Term {
     # As proc command, but don't wait for an initial prompt.  This is used for
     # initial terminal commands, where there's no prompt yet.
     proc command_no_prompt_prefix {cmd} {
-	send_gdb "$cmd\n"
-	set str [string_to_regexp $cmd]
-	wait_for "^$str"
+	gen_prompt
+	command $cmd
     }
 
     # Apply the attribute list in ATTRS to attributes array UPVAR_NAME.
