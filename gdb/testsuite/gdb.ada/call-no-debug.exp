@@ -21,11 +21,6 @@ require allow_ada_tests
 
 standard_ada_testfile prog
 
-# Since we use no-force to compile prog, make sure we don't pick up files
-# from a previous compilation.
-remote_file host delete [standard_output_file prog.o]
-remote_file host delete [standard_output_file prog.ali]
-
 # Compile pck without debuginfo but prog with it.
 if {[gdb_compile_ada $srcdir/$subdir/$testdir/pck.adb \
 	 [standard_output_file pck.o] object {}] != ""} {
