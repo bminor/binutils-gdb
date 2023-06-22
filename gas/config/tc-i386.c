@@ -6288,10 +6288,11 @@ check_VecOperands (const insn_template *t)
   /* Templates allowing for ZMMword as well as YMMword and/or XMMword for
      any one operand are implicity requiring AVX512VL support if the actual
      operand size is YMMword or XMMword.  Since this function runs after
-     template matching, there's no need to check for YMMword/XMMword nor
-     AVX512VL in the template.  */
+     template matching, there's no need to check for YMMword/XMMword in
+     the template.  */
   cpu = cpu_flags_and (t->cpu_flags, avx512);
   if (!cpu_flags_all_zero (&cpu)
+      && !t->cpu_flags.bitfield.cpuavx512vl
       && !cpu_arch_flags.bitfield.cpuavx512vl)
     {
       for (op = 0; op < t->operands; ++op)
