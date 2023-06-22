@@ -26361,6 +26361,50 @@ incorrect values for SVE registers (when in streaming mode).
 This is the same limitation we have for the @acronym{SVE} registers, and there
 are plans to address this limitation going forward.
 
+@subsubsection AArch64 SME2.
+@anchor{AArch64 SME2}
+@cindex SME2
+@cindex AArch64 SME2
+@cindex Scalable Matrix Extension 2
+
+The Scalable Matrix Extension 2 is an AArch64 architecture extension that
+further expands the @acronym{SME} extension with the following:
+
+@itemize
+
+@item The ability to address the @code{ZA} array through groups of
+one-dimensional @code{ZA} array vectors, as opposed to @code{ZA} tiles
+with 2 dimensions.
+
+@item Instructions to operate on groups of @acronym{SVE} @code{Z} registers and
+@code{ZA} array vectors.
+
+@item A new 512 bit @code{ZT0} lookup table register, for data decompression.
+
+@end itemize
+
+When @value{GDBN} is debugging the AArch64 architecture, if the Scalable Matrix
+Extension 2 (@acronym{SME2}) is present, then @value{GDBN} will make the
+@code{ZT0} register available.
+
+The @code{ZT0} register is only considered active when the @code{ZA} register
+state is active, therefore when the @sc{za} bit of the @code{SVCR} is 1.
+
+When the @sc{za} bit of @code{SVCR} is 0, that means the @code{ZA} register
+state is not active, which means the @code{ZT0} register state is also not
+active.
+
+When @code{ZT0} is not active, it is comprised of zeroes, just like @code{ZA}.
+
+Similarly to the @code{ZA} register, if the @code{ZT0} state is not active and
+the user attempts to modify its value such that any of its bytes is non-zero,
+then @value{GDBN} will initialize the @code{ZA} register state as well, which
+means the @code{SVCR} @sc{za} bit gets set to 1.
+
+For more information about @acronym{SME2}, please refer to the
+official @url{https://developer.arm.com/documentation/ddi0487/latest,
+architecture documentation}.
+
 @subsubsection AArch64 Pointer Authentication.
 @cindex AArch64 Pointer Authentication.
 @anchor{AArch64 PAC}
@@ -48626,6 +48670,27 @@ not.
 The rest of the unused bits of the @code{SVCR} pseudo-register is undefined
 and reserved.  Such bits should not be used and may be defined by future
 extensions of the architecture.
+
+@end itemize
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+The @samp{org.gnu.gdb.aarch64.sme} feature is required when the target also
+reports support for the @samp{org.gnu.gdb.aarch64.sme2} feature.
+
+@subsubsection AArch64 SME2 registers feature
+
+The @samp{org.gnu.gdb.aarch64.sme2} feature is optional.  If present,
+then the @samp{org.gnu.gdb.aarch64.sme} feature must also be present.  The
+@samp{org.gnu.gdb.aarch64.sme2} feature should contain the following:
+@xref{AArch64 SME2}.
+
+@itemize @minus
+
+@item
+@code{ZT0} is a register of 512 bits (64 bytes).  It is defined as a vector
+of bytes.
 
 @end itemize
 

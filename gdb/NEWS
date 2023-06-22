@@ -3,6 +3,9 @@
 
 *** Changes since GDB 13
 
+* GDB now supports the AArch64 Scalable Matrix Extension 2 (SME2), which
+  includes a new 512 bit lookup table register named ZT0.
+
 * GDB now supports the AArch64 Scalable Matrix Extension (SME), which includes
   a new matrix register named ZA, a new thread register TPIDR2 and a new vector
   length register SVG (streaming vector granule).  GDB also supports tracking
