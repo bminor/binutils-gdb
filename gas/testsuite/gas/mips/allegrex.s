@@ -40,6 +40,7 @@
 	mfdr	$v0, $0
 	mfdr	$v0, $1
 	mtdr	$v1, $1
+	dbreak
 	dret
 
 # Force some (non-delay-slot) zero bytes, to make 'objdump' print ...
