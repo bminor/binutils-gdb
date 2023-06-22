@@ -282,9 +282,9 @@ class NoOpScalarPrinter:
 class NoOpArrayPrinter:
     """A no-op pretty printer that wraps an array value."""
 
-    def __init__(self, value):
+    def __init__(self, ty, value):
         self.value = value
-        (low, high) = self.value.type.range()
+        (low, high) = ty.range()
         self.low = low
         self.high = high
         # This is a convenience to the DAP code and perhaps other
@@ -305,14 +305,15 @@ class NoOpArrayPrinter:
 class NoOpStructPrinter:
     """A no-op pretty printer that wraps a struct or union value."""
 
-    def __init__(self, value):
+    def __init__(self, ty, value):
+        self.ty = ty
         self.value = value
 
     def to_string(self):
         return ""
 
     def children(self):
-        for field in self.value.type.fields():
+        for field in self.ty.fields():
             if field.name is not None:
                 yield (field.name, self.value[field])
 
@@ -327,14 +328,14 @@ def make_visualizer(value):
     if result is not None:
         # Found a pretty-printer.
         pass
-    elif value.type.code == gdb.TYPE_CODE_ARRAY:
-        result = gdb.printing.NoOpArrayPrinter(value)
-        (low, high) = value.type.range()
-        result.n_children = high - low + 1
-    elif value.type.code in (gdb.TYPE_CODE_STRUCT, gdb.TYPE_CODE_UNION):
-        result = gdb.printing.NoOpStructPrinter(value)
     else:
-        result = gdb.printing.NoOpScalarPrinter(value)
+        ty = value.type.strip_typedefs()
+        if ty.code == gdb.TYPE_CODE_ARRAY:
+            result = gdb.printing.NoOpArrayPrinter(ty, value)
+        elif ty.code in (gdb.TYPE_CODE_STRUCT, gdb.TYPE_CODE_UNION):
+            result = gdb.printing.NoOpStructPrinter(ty, value)
+        else:
+            result = gdb.printing.NoOpScalarPrinter(value)
     return result
 
 
