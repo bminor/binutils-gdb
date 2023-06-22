@@ -9005,9 +9005,14 @@ Target_powerpc<size, big_endian>::Scan::global(
 		  = target->rela_dyn_section(symtab, layout, is_ifunc);
 		unsigned int dynrel = (is_ifunc ? elfcpp::R_POWERPC_IRELATIVE
 				       : elfcpp::R_POWERPC_RELATIVE);
-		rela_dyn->add_symbolless_global_addend(
+		// Use the "add" method that marks the reloc as being
+		// relative.  This is proper here and in other places
+		// that add IRELATIVE relocs because those relocs go
+		// into a separate section that isn't sorted, so it
+		// doesn't matter that they are marked is_relative.
+		rela_dyn->add_global_relative(
 		    gsym, dynrel, output_section, object, data_shndx,
-		    reloc.get_r_offset(), reloc.get_r_addend());
+		    reloc.get_r_offset(), reloc.get_r_addend(), false);
 	      }
 	    else
 	      {
