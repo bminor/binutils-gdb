@@ -166,6 +166,8 @@ md_parse_option (int c, const char *arg)
 	{
 	  LARCH_opts.ase_ilp32 = 1;
 	  LARCH_opts.ase_lp64 = 1;
+	  LARCH_opts.ase_lsx = 1;
+	  LARCH_opts.ase_lasx = 1;
 	  LARCH_opts.ase_abi = lp64[suf[4]];
 	}
       else if (strncasecmp (arg, "ilp32", 5) == 0 && ilp32[suf[5]] != 0)
@@ -241,6 +243,8 @@ loongarch_after_parse_args ()
 	  LARCH_opts.ase_abi = EF_LOONGARCH_ABI_DOUBLE_FLOAT;
 	  LARCH_opts.ase_ilp32 = 1;
 	  LARCH_opts.ase_lp64 = 1;
+	  LARCH_opts.ase_lsx = 1;
+	  LARCH_opts.ase_lasx = 1;
 	}
       else if (strcmp (default_arch, "loongarch32") == 0)
 	{
