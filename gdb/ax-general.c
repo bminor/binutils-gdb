@@ -414,7 +414,7 @@ ax_reg_mask (struct agent_expr *ax, int reg)
 
       /* Grow the bit mask if necessary.  */
       if (reg >= ax->reg_mask.size ())
-	ax->reg_mask.resize (reg);
+	ax->reg_mask.resize (reg + 1);
 
       ax->reg_mask[reg] = true;
     }
