@@ -8767,35 +8767,6 @@ ada_to_fixed_value (struct value *val)
 
 /* Attributes */
 
-/* Table mapping attribute numbers to names.
-   NOTE: Keep up to date with enum ada_attribute definition in ada-lang.h.  */
-
-static const char * const attribute_names[] = {
-  "<?>",
-
-  "first",
-  "last",
-  "length",
-  "image",
-  "max",
-  "min",
-  "modulus",
-  "pos",
-  "size",
-  "tag",
-  "val",
-  0
-};
-
-static const char *
-ada_attribute_name (enum exp_opcode n)
-{
-  if (n >= OP_ATR_FIRST && n <= (int) OP_ATR_VAL)
-    return attribute_names[n - OP_ATR_FIRST + 1];
-  else
-    return attribute_names[0];
-}
-
 /* Evaluate the 'POS attribute applied to ARG.  */
 
 static LONGEST
@@ -10271,6 +10242,12 @@ static value *
 ada_unop_atr (struct expression *exp, enum noside noside, enum exp_opcode op,
 	      struct value *arg1, struct type *type_arg, int tem)
 {
+  const char *attr_name = nullptr;
+  if (op == OP_ATR_FIRST)
+    attr_name = "first";
+  else if (op == OP_ATR_LAST)
+    attr_name = "last";
+
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
       if (type_arg == NULL)
@@ -10288,7 +10265,7 @@ ada_unop_atr (struct expression *exp, enum noside noside, enum exp_opcode op,
 	    case OP_ATR_FIRST:
 	    case OP_ATR_LAST:
 	      type_arg = ada_index_type (type_arg, tem,
-					 ada_attribute_name (op));
+					 attr_name);
 	      break;
 	    case OP_ATR_LENGTH:
 	      type_arg = builtin_type (exp->gdbarch)->builtin_int;
@@ -10311,7 +10288,7 @@ ada_unop_atr (struct expression *exp, enum noside noside, enum exp_opcode op,
       else
 	{
 	  type = ada_index_type (arg1->type (), tem,
-				 ada_attribute_name (op));
+				 attr_name);
 	  if (type == NULL)
 	    type = builtin_type (exp->gdbarch)->builtin_int;
 	}
@@ -10369,7 +10346,7 @@ ada_unop_atr (struct expression *exp, enum noside noside, enum exp_opcode op,
 	type = builtin_type (exp->gdbarch)->builtin_int;
       else
 	{
-	  type = ada_index_type (type_arg, tem, ada_attribute_name (op));
+	  type = ada_index_type (type_arg, tem, attr_name);
 	  if (type == NULL)
 	    type = builtin_type (exp->gdbarch)->builtin_int;
 	}
