@@ -192,6 +192,16 @@ struct thread_control_state
      call.  */
   int in_infcall = 0;
 
+  /* True if this thread is single stepping due to a software
+     watchpoint.  This is set on the selected thread when an execution
+     command is issued.  It is not set on other threads that happen to
+     run because schedlock disabled.  This is so all-stop targets and
+     all-stop-on-top-of-non-stop targets behave the same as GDB
+     historically has behaved with all-stop backends -- with a
+     software watchpoint, only the selected/leader thread is single
+     stepped.  */
+  bool stepped_for_sw_watch = false;
+
   enum step_over_calls_kind step_over_calls = STEP_OVER_NONE;
 
   /* Nonzero if stopped due to a step command.  */

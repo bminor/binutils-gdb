@@ -169,7 +169,7 @@ func7 (void)
   foo4.val[3] = 33;
 }
 
-int main ()
+int test_main ()
 {
   struct1.val = 1;
   struct2.val = 2;
@@ -255,4 +255,55 @@ int main ()
   func7 ();
 
   return 0;
+}
+
+#if USE_THREADS
+#include <pthread.h>
+
+#define NUM 5
+
+/* Barrier used to wait until all threads are started, before calling
+   test_main.  */
+static pthread_barrier_t threads_started_barrier;
+
+/* Barrier used to prevent threads from exiting until test_main
+   returns.  */
+static pthread_barrier_t threads_exit_barrier;
+
+static void *
+thread_function (void *arg)
+{
+  pthread_barrier_wait (&threads_started_barrier);
+  pthread_barrier_wait (&threads_exit_barrier);
+}
+
+#endif /* USE_THREADS */
+
+int
+main ()
+{
+  int res;
+#if USE_THREADS
+  pthread_t threads[NUM];
+  long i;
+
+  pthread_barrier_init (&threads_started_barrier, NULL, NUM + 1);
+  pthread_barrier_init (&threads_exit_barrier, NULL, NUM + 1);
+
+  for (i = 0; i < NUM; i++)
+    pthread_create (&threads[i], NULL, thread_function, NULL);
+
+  pthread_barrier_wait (&threads_started_barrier);
+#endif /* USE_THREADS */
+
+  res = test_main ();
+
+#if USE_THREADS
+  pthread_barrier_wait (&threads_exit_barrier);
+
+  for (i = 0; i < NUM; i++)
+    pthread_join (threads[i], NULL);
+#endif /* USE_THREADS */
+
+  return res;
 }

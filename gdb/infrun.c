@@ -2828,7 +2828,7 @@ resume_1 (enum gdb_signal sig)
 
   /* If we have a breakpoint to step over, make sure to do a single
      step only.  Same if we have software watchpoints.  */
-  if (tp->control.trap_expected || bpstat_should_step ())
+  if (tp->control.trap_expected || tp->control.stepped_for_sw_watch)
     tp->control.may_range_step = 0;
 
   /* If displaced stepping is enabled, step over breakpoints by executing a
@@ -3116,6 +3116,7 @@ clear_proceed_status_thread (struct thread_info *tp)
   tp->control.step_stack_frame_id = null_frame_id;
   tp->control.step_over_calls = STEP_OVER_UNDEBUGGABLE;
   tp->control.step_start_function = nullptr;
+  tp->control.stepped_for_sw_watch = false;
   tp->stop_requested = false;
 
   tp->control.stop_step = 0;
@@ -3729,6 +3730,11 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
      still detect attempts to unblock a stuck connection with repeated
      Ctrl-C from within target_pass_ctrlc).  */
   target_terminal::inferior ();
+
+  /* Set the selected thread single stepping if there's a software
+     watchpoint.  Do this before GDB decides to switch to another
+     thread to step it past a breakpoint.  */
+  cur_thr->control.stepped_for_sw_watch = bpstat_should_step ();
 
   /* In a multi-threaded task we may select another thread and
      then continue or step.
@@ -8744,7 +8750,7 @@ should_step (thread_info *tp)
 	   && tp->control.step_resume_breakpoint == nullptr)
 	  || tp->control.trap_expected
 	  || tp->stepped_breakpoint
-	  || bpstat_should_step ());
+	  || tp->control.stepped_for_sw_watch);
 }
 
 /* Inferior has stepped into a subroutine call with source code that

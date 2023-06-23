@@ -25,9 +25,15 @@ set allow_hw_watchpoint_tests_p [allow_hw_watchpoint_tests]
 
 standard_testfile
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested "failed to compile"
-     return -1
+if {[build_executable "failed to prepare" $testfile $srcfile {debug}]} {
+    return -1
+}
+
+if {[build_executable "failed to prepare" $testfile-threads $srcfile \
+	 {debug pthreads additional_flags=-DUSE_THREADS=1}]} {
+    set use_threads 0
+} else {
+    set use_threads 1
 }
 
 # True if we're forcing no hardware watchpoints.
@@ -197,7 +203,7 @@ Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count
 
     if [target_info exists gdb,noresults] { return }
 
-    gdb_continue_to_end "continue to exit in test_simple_watchpoint"
+    gdb_continue_to_end "continue to exit in test_simple_watchpoint" continue 1
 }
 
 # Test disabling watchpoints.
@@ -268,7 +274,7 @@ proc test_disabling_watchpoints {} {
     
     if [target_info exists gdb,noresults] { return }
 
-    gdb_continue_to_end "continue to exit in test_disabling_watchpoints"
+    gdb_continue_to_end "continue to exit in test_disabling_watchpoints" continue 1
 }
 
 # Test stepping and other mundane operations with watchpoints enabled
@@ -434,7 +440,7 @@ proc test_watchpoint_triggered_in_syscall {} {
 
 	if [target_info exists gdb,noresults] { return }
 
-	gdb_continue_to_end "continue to exit in test_watchpoint_triggered_in_syscall"
+	gdb_continue_to_end "continue to exit in test_watchpoint_triggered_in_syscall" continue 1
     }
 }
 
@@ -569,7 +575,7 @@ proc test_complex_watchpoint {} {
 
 	if [target_info exists gdb,noresults] { return }
 
-	gdb_continue_to_end "continue to exit in test_complex_watchpoint"
+	gdb_continue_to_end "continue to exit in test_complex_watchpoint" continue 1
     }
 }
 
@@ -833,7 +839,7 @@ proc test_no_hw_watchpoints {} {
     # (This proves rather little on kernels that don't support
     # fast watchpoints, but still...)
     #
-    if {![runto_main]} {
+    if {![runto test_main]} {
 	return
     }
 
@@ -1015,6 +1021,35 @@ if {$allow_hw_watchpoint_tests_p} {
     with_test_prefix "no-hw" {
 	set no_hw 1
 	do_tests
+    }
+}
+
+# Test software watchpoints when the program is multithreaded.  On
+# some systems, the runtime always spawns some helper threads.
+# Testing on one such system -- Cygwin -- exposed paths in the
+# software single-step implementation that weren't exercised anywhere
+# else.  We thus here test the basic software watchpoint support with
+# explicitly started extra threads, to exercise it on all systems
+# (that can do threads).
+
+proc do_threaded_sw_tests {} {
+    global testfile
+    global no_hw
+    global allow_hw_watchpoint_tests_p
+
+    clean_restart $testfile-threads
+
+    gdb_test_no_output "set can-use-hw-watchpoints 0"\
+	"disable fast watches"
+
+    if {[initialize]} {
+	test_simple_watchpoint
+    }
+}
+
+if {$use_threads} {
+    with_test_prefix "threaded-no-hw" {
+	do_threaded_sw_tests
     }
 }
 
