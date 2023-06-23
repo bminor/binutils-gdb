@@ -6951,7 +6951,7 @@ Target_aarch64<size, big_endian>::do_finalize_sections(
 				  ? NULL
 				  : this->plt_->rela_plt());
   layout->add_target_dynamic_tags(false, this->got_plt_, rel_plt,
-				  this->rela_dyn_, true, false);
+				  this->rela_dyn_, true, false, false);
 
   // Emit any relocs we saved in an attempt to avoid generating COPY
   // relocs.

@@ -796,6 +796,10 @@ class Target_powerpc : public Sized_target<size, big_endian>
   void
   do_finalize_sections(Layout*, const Input_objects*, Symbol_table*);
 
+  // Get the custom dynamic tag value.
+  unsigned int
+  do_dynamic_tag_custom_value(elfcpp::DT) const;
+
   // Return the value to use for a dynamic which requires special
   // treatment.
   uint64_t
@@ -10135,7 +10139,7 @@ Target_powerpc<size, big_endian>::do_finalize_sections(
 				      ? NULL
 				      : this->plt_->rel_plt());
       layout->add_target_dynamic_tags(false, this->plt_, rel_plt,
-				      this->rela_dyn_, true, size == 32);
+				      this->rela_dyn_, true, size == 32, true);
 
       if (size == 32)
 	{
@@ -10204,6 +10208,18 @@ Target_powerpc<size, big_endian>::do_finalize_sections(
 				      elfcpp::SHT_GNU_ATTRIBUTES, 0,
 				      attributes_section, ORDER_INVALID, false);
     }
+}
+
+// Get the custom dynamic tag value.
+
+template<int size, bool big_endian>
+unsigned int
+Target_powerpc<size, big_endian>::do_dynamic_tag_custom_value(
+    elfcpp::DT tag) const
+{
+  if (tag != elfcpp::DT_RELACOUNT)
+    gold_unreachable();
+  return this->rela_dyn_->relative_reloc_count();
 }
 
 // Merge object attributes from input file called NAME with those of the

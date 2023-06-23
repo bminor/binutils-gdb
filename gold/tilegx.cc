@@ -4265,7 +4265,7 @@ Target_tilegx<size, big_endian>::do_finalize_sections(
                                   ? NULL
                                   : this->plt_->rela_plt());
   layout->add_target_dynamic_tags(false, this->got_plt_, rel_plt,
-                                  this->rela_dyn_, true, true);
+				  this->rela_dyn_, true, true, false);
 
   // Emit any relocs we saved in an attempt to avoid generating COPY
   // relocs.

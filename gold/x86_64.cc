@@ -4073,7 +4073,7 @@ Target_x86_64<size>::do_finalize_sections(
 				  ? NULL
 				  : this->plt_->rela_plt());
   layout->add_target_dynamic_tags(false, this->got_plt_, rel_plt,
-				  this->rela_dyn_, true, false);
+				  this->rela_dyn_, true, false, false);
 
   // Fill in some more dynamic tags.
   Output_data_dynamic* const odyn = layout->dynamic_data();

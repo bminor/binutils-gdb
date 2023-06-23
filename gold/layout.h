@@ -950,7 +950,8 @@ class Layout
   add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
 			  const Output_data* plt_rel,
 			  const Output_data_reloc_generic* dyn_rel,
-			  bool add_debug, bool dynrel_includes_plt);
+			  bool add_debug, bool dynrel_includes_plt,
+			  bool custom_relcount);
 
   // Add a target-specific dynamic tag with constant value.
   void

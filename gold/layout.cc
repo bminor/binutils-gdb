@@ -5138,7 +5138,8 @@ void
 Layout::add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
 				const Output_data* plt_rel,
 				const Output_data_reloc_generic* dyn_rel,
-				bool add_debug, bool dynrel_includes_plt)
+				bool add_debug, bool dynrel_includes_plt,
+				bool custom_relcount)
 {
   Output_data_dynamic* odyn = this->dynamic_data_;
   if (odyn == NULL)
@@ -5203,11 +5204,15 @@ Layout::add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
       if (parameters->options().combreloc() && have_dyn_rel)
 	{
 	  size_t c = dyn_rel->relative_reloc_count();
-	  if (c > 0)
-	    odyn->add_constant((use_rel
-				? elfcpp::DT_RELCOUNT
-				: elfcpp::DT_RELACOUNT),
-			       c);
+	  if (c != 0)
+	    {
+	      elfcpp::DT tag
+		= use_rel ? elfcpp::DT_RELCOUNT : elfcpp::DT_RELACOUNT;
+	      if (custom_relcount)
+		odyn->add_custom(tag);
+	      else
+		odyn->add_constant(tag, c);
+	    }
 	}
     }
 

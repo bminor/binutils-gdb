@@ -4043,7 +4043,7 @@ Target_s390<size>::do_finalize_sections(
 				  ? NULL
 				  : this->plt_->rela_plt());
   layout->add_target_dynamic_tags(false, this->got_plt_, rel_plt,
-				  this->rela_dyn_, true, size == 32);
+				  this->rela_dyn_, true, size == 32, false);
 
   this->layout_ = layout;
 
