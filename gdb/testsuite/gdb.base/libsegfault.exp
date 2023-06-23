@@ -24,6 +24,12 @@
 # the local machine.
 require {!is_remote host}
 
+# On Cygwin, the testcase would somehow end up trying to preload
+# libSegFault.so into the Expect process, which would fail and crash
+# it.  Since libSegFault.so is a glibc feature that doesn't exist on
+# Cygwin, just skip testing there.
+require {!expr {[isbuild "*-*-cygwin*"] && [ishost "*-*-cygwin*"]}}
+
 # Spawn GDB with LIB preloaded with LD_PRELOAD.  CMDLINE_OPTS are
 # command line options passed to GDB.
 
