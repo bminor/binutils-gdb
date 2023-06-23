@@ -9661,6 +9661,7 @@ ada_assign_operation::evaluate (struct type *expect_type,
 				enum noside noside)
 {
   value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  scoped_restore save_lhs = make_scoped_restore (&m_current, arg1);
 
   ada_aggregate_operation *ag_op
     = dynamic_cast<ada_aggregate_operation *> (std::get<1> (m_storage).get ());

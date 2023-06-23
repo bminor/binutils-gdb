@@ -553,6 +553,66 @@ public:
 
   enum exp_opcode opcode () const override
   { return BINOP_ASSIGN; }
+
+  value *current ()
+  { return m_current; }
+
+  /* A helper function for the parser to evaluate just the LHS of the
+     assignment.  */
+  value *eval_for_resolution (struct expression *exp)
+  {
+    return std::get<0> (m_storage)->evaluate (nullptr, exp,
+					      EVAL_AVOID_SIDE_EFFECTS);
+  }
+
+  /* The parser must construct the assignment node before parsing the
+     RHS, so that '@' can access the assignment, so this helper
+     function is needed to set the RHS after construction.  */
+  void set_rhs (operation_up rhs)
+  {
+    std::get<1> (m_storage) = std::move (rhs);
+  }
+
+private:
+
+  /* Temporary storage for the value of the left-hand-side.  */
+  value *m_current = nullptr;
+};
+
+/* Implement the Ada target name symbol ('@').  This is used to refer
+   to the LHS of an assignment from the RHS.  */
+class ada_target_operation : public operation
+{
+public:
+
+  explicit ada_target_operation (ada_assign_operation *lhs)
+    : m_lhs (lhs)
+  { }
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    if (noside == EVAL_AVOID_SIDE_EFFECTS)
+      return m_lhs->eval_for_resolution (exp);
+    return m_lhs->current ();
+  }
+
+  enum exp_opcode opcode () const override
+  {
+    /* It doesn't really matter.  */
+    return OP_VAR_VALUE;
+  }
+
+  void dump (struct ui_file *stream, int depth) const override
+  {
+    gdb_printf (stream, _("%*sAda target symbol '@'\n"), depth, "");
+  }
+
+private:
+
+  /* The left hand side of the assignment.  */
+  ada_assign_operation *m_lhs;
 };
 
 /* This abstract class represents a single component in an Ada

@@ -415,6 +415,13 @@ make_tick_completer (struct stoken tok)
 	  (new ada_tick_completer (std::string (tok.ptr, tok.length))));
 }
 
+/* A convenience typedef.  */
+typedef std::unique_ptr<ada_assign_operation> ada_assign_up;
+
+/* The stack of currently active assignment expressions.  This is used
+   to implement '@', the target name symbol.  */
+static std::vector<ada_assign_up> assignments;
+
 %}
 
 %union
@@ -492,17 +499,25 @@ start   :	exp1
 exp1	:	exp
 	|	exp1 ';' exp
 			{ ada_wrap2<comma_operation> (BINOP_COMMA); }
-	| 	primary ASSIGN exp   /* Extension for convenience */
+	| 	primary ASSIGN
 			{
+			  assignments.emplace_back
+			    (new ada_assign_operation (ada_pop (), nullptr));
+			}
+		exp   /* Extension for convenience */
+			{
+			  ada_assign_up assign
+			    = std::move (assignments.back ());
+			  assignments.pop_back ();
+			  value *lhs_val = (assign->eval_for_resolution
+					    (pstate->expout.get ()));
+
 			  operation_up rhs = pstate->pop ();
-			  operation_up lhs = ada_pop ();
-			  value *lhs_val
-			    = lhs->evaluate (nullptr, pstate->expout.get (),
-					     EVAL_AVOID_SIDE_EFFECTS);
 			  rhs = resolve (std::move (rhs), true,
 					 lhs_val->type ());
-			  pstate->push_new<ada_assign_operation>
-			    (std::move (lhs), std::move (rhs));
+
+			  assign->set_rhs (std::move (rhs));
+			  pstate->push (std::move (assign));
 			}
 	;
 
@@ -601,6 +616,17 @@ primary :     	aggregate
 			    (pop_component ());
 			}
 	;        
+
+primary :	'@'
+			{
+			  if (assignments.empty ())
+			    error (_("the target name symbol ('@') may only "
+				     "appear in an assignment context"));
+			  ada_assign_operation *current
+			    = assignments.back ().get ();
+			  pstate->push_new<ada_target_operation> (current);
+			}
+	;
 
 simple_exp : 	primary
 	;
@@ -1170,6 +1196,7 @@ ada_parse (struct parser_state *par_state)
   components.clear ();
   associations.clear ();
   int_storage.clear ();
+  assignments.clear ();
 
   int result = yyparse ();
   if (!result)

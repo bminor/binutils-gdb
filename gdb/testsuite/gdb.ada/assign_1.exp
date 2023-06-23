@@ -29,3 +29,18 @@ gdb_test "print \$xxx := 1" \
          "set convenience variable \$xxx to 1"
 
 
+gdb_test "print \$xxx := @ + 23 + @" \
+    " = 25" \
+    "update convenience using '@'"
+
+gdb_test "print \$yyy := 1" " = 1" "set yyy"
+
+gdb_test "print \$xxx := @ + (\$yyy := 1 + @)" \
+    " = 27" \
+    "nested assignment"
+
+gdb_test "print \$yyy" " = 2" "value of yyy after nested assignment"
+
+gdb_test "print 23 + @" \
+    "may only appear in an assignment context" \
+    "invalid use of '@' causes error"
