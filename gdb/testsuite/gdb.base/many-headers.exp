@@ -24,6 +24,11 @@ if { [target_info gdb_protocol] != "" } {
     return
 }
 
+# Running the many-headers binary on Cygwin is incredibly slow -- on
+# the order of 10 minutes compared to 0.1s on Linux.  So just skip the
+# testcase.
+require {!ishost "*-*-cygwin*"}
+
 standard_testfile
 
 if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
