@@ -79,7 +79,7 @@ set lto_link_tests [list \
    "" "-flto $lto_fat" \
    {lto-5b.c} {} ""] \
   [list "Compile PR ld/12365" \
-   "" "-flto -O2 $lto_fat" \
+   "" "-flto -O2 $lto_fat -finline" \
    {pr12365a.c pr12365b.c pr12365c.c} {} ""] \
   [list "Compile 9" \
    "" "-O2 -finline -flto" \
@@ -131,10 +131,10 @@ set lto_link_tests [list \
    "$NOSANITIZE_CFLAGS" \
    {dummy.c} {} "pr12758.exe"] \
   [list "Build libpr13183.a" \
-   "-T" "-flto -O2 $lto_fat" \
+   "-T" "-flto -O2 $lto_fat -finline" \
    {pr13183a.c} {} "libpr13183.a"] \
   [list "Compile PR ld/13183" \
-   "" "-flto -O2" \
+   "" "-flto -O2 -finline" \
    {pr13183b.c} {} ""] \
   [list "Compile PR ld/13201" \
    "" "-flto -O2" \
@@ -288,10 +288,10 @@ set lto_link_elf_tests [list \
    "-shared" "-O2 -fpic" \
    {lto-7d.c} {} "liblto-7.so" "c"] \
   [list "Build liblto-17a.so" \
-   "-shared -O2 -fpic -flto -fuse-linker-plugin" "-O2 -fpic -flto" \
+   "-shared -O2 -fpic -flto -fuse-linker-plugin" "-O2 -fpic -flto -finline" \
    {lto-17a.c} {{"nm" {} "lto-17a.d"}} "liblto-17a.so" "c"] \
   [list "Build liblto-17b.so 1" \
-   "-shared -O2 -fpic -flto -fuse-linker-plugin tmpdir/lto-17a.o" "-O2 -fpic -flto" \
+   "-shared -O2 -fpic -flto -fuse-linker-plugin tmpdir/lto-17a.o" "-O2 -fpic -flto -finline" \
    {lto-17b.c} {{"nm" {} "lto-17b-1.d"}} "liblto-17b.so"] \
   [list "Build liblto-17b.so 2" \
    "-shared -O2 -fpic -flto -fuse-linker-plugin tmpdir/lto-17a.o" "-O2 -fpic -flto" \
