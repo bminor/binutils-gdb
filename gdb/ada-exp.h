@@ -69,7 +69,14 @@ extern struct value *ada_pos_atr (struct type *expect_type,
 				  struct expression *exp,
 				  enum noside noside, enum exp_opcode op,
 				  struct value *arg);
-extern struct value *ada_val_atr (enum noside noside, struct type *type,
+extern struct value *ada_atr_enum_rep (struct expression *exp,
+				       enum noside noside, struct type *type,
+				       struct value *arg);
+extern struct value *ada_atr_enum_val (struct expression *exp,
+				       enum noside noside, struct type *type,
+				       struct value *arg);
+extern struct value *ada_val_atr (struct expression *exp,
+				  enum noside noside, struct type *type,
 				  struct value *arg);
 extern struct value *ada_binop_exp (struct type *expect_type,
 				    struct expression *exp,
@@ -424,8 +431,14 @@ protected:
   using operation::do_generate_ax;
 };
 
-/* Implement the Ada 'val attribute.  */
-class ada_atr_val_operation
+typedef struct value *ada_atr_ftype (struct expression *exp,
+				     enum noside noside,
+				     struct type *type,
+				     struct value *arg);
+
+/* Implement several Ada attributes.  */
+template<ada_atr_ftype FUNC>
+class ada_atr_operation
   : public tuple_holding_operation<struct type *, operation_up>
 {
 public:
@@ -434,11 +447,22 @@ public:
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
-		   enum noside noside) override;
+		   enum noside noside) override
+  {
+    value *arg = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    return FUNC (exp, noside, std::get<0> (m_storage), arg);
+  }
 
   enum exp_opcode opcode () const override
-  { return OP_ATR_VAL; }
+  {
+    /* The value here generally doesn't matter.  */
+    return OP_ATR_VAL;
+  }
 };
+
+using ada_atr_val_operation = ada_atr_operation<ada_val_atr>;
+using ada_atr_enum_rep_operation = ada_atr_operation<ada_atr_enum_rep>;
+using ada_atr_enum_val_operation = ada_atr_operation<ada_atr_enum_val>;
 
 /* The indirection operator for Ada.  */
 class ada_unop_ind_operation

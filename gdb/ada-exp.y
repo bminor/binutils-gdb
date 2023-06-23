@@ -474,7 +474,7 @@ make_tick_completer (struct stoken tok)
 %right TICK_ACCESS TICK_ADDRESS TICK_FIRST TICK_LAST TICK_LENGTH
 %right TICK_MAX TICK_MIN TICK_MODULUS
 %right TICK_POS TICK_RANGE TICK_SIZE TICK_TAG TICK_VAL
-%right TICK_COMPLETE
+%right TICK_COMPLETE TICK_ENUM_REP TICK_ENUM_VAL
  /* The following are right-associative only so that reductions at this
     precedence have lower precedence than '.' and '('.  The syntax still
     forces a.b.c, e.g., to be LEFT-associated.  */
@@ -862,6 +862,18 @@ primary :	primary TICK_ACCESS
 			{
 			  operation_up arg = ada_pop ();
 			  pstate->push_new<ada_atr_val_operation>
+			    ($1, std::move (arg));
+			}
+	|	type_prefix TICK_ENUM_REP '(' exp ')'
+			{
+			  operation_up arg = ada_pop (true, $1);
+			  pstate->push_new<ada_atr_enum_rep_operation>
+			    ($1, std::move (arg));
+			}
+	|	type_prefix TICK_ENUM_VAL '(' exp ')'
+			{
+			  operation_up arg = ada_pop (true, $1);
+			  pstate->push_new<ada_atr_enum_val_operation>
 			    ($1, std::move (arg));
 			}
 	|	type_prefix TICK_MODULUS

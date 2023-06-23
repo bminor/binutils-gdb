@@ -84,6 +84,8 @@
   is 64k.  To print longer strings you should increase
   'max-value-size'.
 
+* The Ada 2022 Enum_Rep and Enum_Val attributes are now supported.
+
 * New commands
 
 maintenance print record-instruction [ N ]

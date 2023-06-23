@@ -684,6 +684,8 @@ attributes[] = {
   { "size", TICK_SIZE },
   { "tag", TICK_TAG },
   { "val", TICK_VAL },
+  { "enum_rep", TICK_ENUM_REP },
+  { "enum_val", TICK_ENUM_VAL },
 };
 
 /* Return the syntactic code corresponding to the attribute name or

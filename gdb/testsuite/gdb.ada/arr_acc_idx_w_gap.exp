@@ -61,3 +61,8 @@ gdb_test "print enum_subrange'val(3)" " = lit3"
 
 gdb_test "print indexed_by_enum(lit2)" "43"
 gdb_test "print s(2)" "101 'e'"
+
+gdb_test "print enum_with_gaps'enum_rep(lit3)" " = 13" \
+    "enum_rep"
+gdb_test "print enum_with_gaps'enum_val(21)" " = lit4" \
+    "enum_val"
