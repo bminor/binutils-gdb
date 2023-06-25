@@ -40,3 +40,19 @@ if [istarget "loongarch32-*-*"] {
     run_dump_test "syscall"
     run_dump_test "disas-jirl-32"
 }
+
+if [istarget "loongarch64-*-*"] {
+  run_ld_link_tests \
+      [list \
+	  [list \
+	      "64_pcrel" \
+	      "-e 0x0 -z relro" "" \
+	      "" \
+	      {64_pcrel.s} \
+	      [list \
+		  [list objdump -D 64_pcrel.d] \
+	      ] \
+	      "64_pcrel" \
+	  ] \
+      ]
+}

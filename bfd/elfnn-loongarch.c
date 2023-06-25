@@ -2070,6 +2070,7 @@ perform_relocation (const Elf_Internal_Rela *rel, asection *input_section,
 
     /* For eh_frame and debug info.  */
     case R_LARCH_32_PCREL:
+    case R_LARCH_64_PCREL:
       {
 	value -= sec_addr (input_section) + rel->r_offset;
 	value += rel->r_addend;

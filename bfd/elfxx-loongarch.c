@@ -1535,6 +1535,24 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 NULL,					/* adjust_reloc_bits.  */
 	 NULL),					/* larch_reloc_type_name.  */
 
+  /* 64-bit PC relative.  */
+  LOONGARCH_HOWTO (R_LARCH_64_PCREL,		/* type (109).  */
+	 0,					/* rightshift.  */
+	 8,					/* size.  */
+	 64,					/* bitsize.  */
+	 true,					/* pc_relative.  */
+	 0,					/* bitpos.  */
+	 complain_overflow_signed,		/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,			/* special_function.  */
+	 "R_LARCH_64_PCREL",			/* name.  */
+	 false,					/* partial_inplace.  */
+	 0,					/* src_mask */
+	 0xffffffffffffffff,			/* dst_mask */
+	 false,					/* pcrel_offset */
+	 BFD_RELOC_LARCH_64_PCREL,		/* bfd_reloc_code_real_type */
+	 NULL,					/* adjust_reloc_bits */
+	 NULL),					/* larch_reloc_type_name */
+
 };
 
 reloc_howto_type *

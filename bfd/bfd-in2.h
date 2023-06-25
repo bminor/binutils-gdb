@@ -7343,6 +7343,7 @@ assembler and not (currently) written to any object files.  */
   BFD_RELOC_LARCH_SUB6,
   BFD_RELOC_LARCH_ADD_ULEB128,
   BFD_RELOC_LARCH_SUB_ULEB128,
+  BFD_RELOC_LARCH_64_PCREL,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 
