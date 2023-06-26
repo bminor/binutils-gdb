@@ -942,6 +942,7 @@ uninstall-am:
 @TCL_TRY_TRUE@	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
 @TCL_TRY_TRUE@	  $$runtest --tool $(DEJATOOL) --srcdir $${srcroot}/testsuite \
 @TCL_TRY_TRUE@		JDK_INC="$(jdk_inc)" \
+@TCL_TRY_TRUE@		CLOCK_GETTIME_LINK="$(CLOCK_GETTIME_LINK)" \
 @TCL_TRY_TRUE@		CHECK_TARGET=$@ \
 @TCL_TRY_TRUE@		PREFIX="$(prefix)" \
 @TCL_TRY_TRUE@		GPROFNG_BROKEN_JAVAC="$(GPROFNG_BROKEN_JAVAC)" \

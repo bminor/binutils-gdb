@@ -65,6 +65,7 @@ check-small check-extra check-install: site.exp development.exp
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
 	  $$runtest --tool $(DEJATOOL) --srcdir $${srcroot}/testsuite \
 		JDK_INC="$(jdk_inc)" \
+		CLOCK_GETTIME_LINK="$(CLOCK_GETTIME_LINK)" \
 		CHECK_TARGET=$@ \
 		PREFIX="$(prefix)" \
 		GPROFNG_BROKEN_JAVAC="$(GPROFNG_BROKEN_JAVAC)" \
