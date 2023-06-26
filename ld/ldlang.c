@@ -445,8 +445,19 @@ walk_wild_section_match (lang_wild_statement_type *ptr,
 	 about unset local_sym_name (in which case lookup_name simply adds
 	 the input file again).  */
       const char *filename = file->local_sym_name;
-      if (filename == NULL
-	  || filename_cmp (filename, file_spec) != 0)
+      lang_input_statement_type *arch_is;
+      if (filename && filename_cmp (filename, file_spec) == 0)
+	;
+      /* FIXME: see also walk_wild_file_in_exclude_list for why we
+	 also check parents BFD (local_sym_)name to match input statements
+	 with unadorned archive names.  */
+      else if (file->the_bfd
+	       && file->the_bfd->my_archive
+	       && (arch_is = bfd_usrdata (file->the_bfd->my_archive))
+	       && arch_is->local_sym_name
+	       && filename_cmp (arch_is->local_sym_name, file_spec) == 0)
+	;
+      else
 	return;
     }
 
