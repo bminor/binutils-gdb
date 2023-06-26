@@ -1,6 +1,8 @@
 # Check that expressions that generate relocations work when the symbol is a constant.
 #name: PR27217
 #objdump: -rd
+# This test is only valid on ELF based ports.
+#notarget: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd
 
 .*:     file format .*
 

@@ -1,6 +1,8 @@
 #as: -mabi=lp64
 #readelf: -S
 #name: AArch64 section tail padding
+# This test is only valid on ELF based ports.
+#notarget: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd
 
 There are .* section headers, starting at offset .*:
 

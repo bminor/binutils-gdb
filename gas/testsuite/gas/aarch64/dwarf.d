@@ -1,5 +1,7 @@
 #readelf: -s --debug-dump=aranges
 #as: -g --generate-missing-build-notes=no
+# This test is only valid on ELF based ports.
+#notarget: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd
 
 Symbol table '.symtab' contains 11 entries:
    Num:[ ]+Value[ ]+Size[ ]+Type[ ]+Bind[ ]+Vis[ ]+Ndx[ ]+Name
