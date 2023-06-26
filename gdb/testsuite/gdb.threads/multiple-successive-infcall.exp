@@ -122,3 +122,11 @@ for {set thread 1} {$thread <= $thread_count} {incr thread} {
 }
 
 gdb_assert {$testing_pthread == 4} "tested all pthreads"
+
+# Cygwin very often hangs closing GDB if we don't do this?  But WHY???
+# I don't really know.  I seems like GDB never sees stdin close.  But
+# then, DejaGnu sends kill after some seconds of timeout, and that
+# fails to kill gdb too.  On top of that, if I do "kill -9 GDBPID" on
+# another command line, GDB does die, and the testrun finishes...  For
+# now, force-kill so that the testsuite doesn't hang...
+gdb_test "with confirm off -- kill" ".*"
