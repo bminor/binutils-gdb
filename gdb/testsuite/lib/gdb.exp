@@ -4438,6 +4438,62 @@ gdb_caching_proc allow_btrace_ptw_tests {} {
 }
 
 
+# Run a test on the target to see if GDB supports event tracing on it.
+# Return 1 if so, 0 if it does not.
+
+gdb_caching_proc allow_btrace_pt_event_trace_tests {} {
+    global srcdir subdir
+    set me "allow_btrace_pt_event_trace_tests"
+    require allow_btrace_pt_tests
+
+    set src {
+	int
+	main ()
+	{
+	  return 0;
+	}
+    }
+
+    if {![gdb_simple_compile $me $src executable]} {
+	return 0
+    }
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+    if ![runto_main] {
+	return 0
+    }
+
+    set allow_event_trace_tests 0
+    gdb_test_multiple "set record btrace pt event-tracing on" "$me:  first check" {
+	-re -wrap "Event-tracing is not supported by GDB." {
+	}
+	-re -wrap "" {
+	    set allow_event_trace_tests 1
+	}
+    }
+
+    if { $allow_event_trace_tests == 1 } {
+	gdb_test_multiple "record btrace pt" "$me:  check OS support" {
+	    -re -wrap "^" {
+	    }
+	    -re -wrap "" {
+		verbose -log "$me:  Target doesn't support event tracing."
+		set allow_event_trace_tests 0
+	    }
+	}
+    }
+
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $allow_event_trace_tests" 2
+    return $allow_event_trace_tests
+}
+
+
 # Run a test on the target to see if it supports Aarch64 SVE hardware.
 # Return 1 if so, 0 if it does not.  Note this causes a restart of GDB.
 

@@ -810,7 +810,7 @@ recpy_bt_function_call_history (PyObject *self, void *closure)
 /* Helper function that calls PTW_FILTER with PAYLOAD and IP as arguments.
    Returns the string that will be printed, if there is a filter to call.  */
 static std::optional<std::string>
-recpy_call_filter (const uint64_t payload, const uint64_t ip,
+recpy_call_filter (const uint64_t payload, std::optional<uint64_t> ip,
 		   const void *ptw_filter)
 {
   std::optional<std::string> result;
@@ -824,10 +824,10 @@ recpy_call_filter (const uint64_t payload, const uint64_t ip,
   gdbpy_ref<> py_payload = gdb_py_object_from_ulongest (payload);
 
   gdbpy_ref<> py_ip;
-  if (ip == 0)
+  if (!ip.has_value ())
     py_ip = gdbpy_ref<>::new_reference (Py_None);
   else
-    py_ip = gdb_py_object_from_ulongest (ip);
+    py_ip = gdb_py_object_from_ulongest (*ip);
 
   gdbpy_ref<> py_result (PyObject_CallFunctionObjArgs ((PyObject *) ptw_filter,
 							py_payload.get (),
