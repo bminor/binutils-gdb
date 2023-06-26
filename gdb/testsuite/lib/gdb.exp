@@ -9312,7 +9312,12 @@ proc core_find {binfile {deletefiles {}} {arg ""}} {
     file mkdir $coredir
     catch "system \"(cd ${coredir}; ulimit -c unlimited; ${binfile} ${arg}; true) >/dev/null 2>&1\""
     #      remote_exec host "${binfile}"
-    foreach i "${coredir}/core ${coredir}/core.coremaker.c ${binfile}.core" {
+    set binfile_basename [file tail $binfile]
+    foreach i [list \
+		   ${coredir}/core \
+		   ${coredir}/core.coremaker.c \
+		   ${coredir}/${binfile_basename}.core \
+		   ${coredir}/${binfile_basename}.exe.core] {
 	if [remote_file build exists $i] {
 	    remote_exec build "mv $i $destcore"
 	    set found 1
