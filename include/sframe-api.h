@@ -94,7 +94,7 @@ sframe_errmsg (int error);
 /* Create an FDE function info bye given an FRE_TYPE and an FDE_TYPE.  */
 
 extern unsigned char
-sframe_fde_create_func_info (unsigned int fre_type, unsigned int fde_type);
+sframe_fde_create_func_info (uint32_t fre_type, uint32_t fde_type);
 
 /* Gather the FRE type given the function size.  */
 
