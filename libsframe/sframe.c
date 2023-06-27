@@ -601,7 +601,7 @@ sframe_fde_create_func_info (uint32_t fre_type,
 /* Get the FRE type given the function size.  */
 /* FIXME API for linker.  Revisit if its better placed somewhere else?  */
 
-unsigned int
+uint32_t
 sframe_calc_fre_type (size_t func_size)
 {
   uint32_t fre_type = 0;
