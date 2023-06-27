@@ -202,7 +202,7 @@ sframe_fre_get_ra_mangled_p (sframe_decoder_ctx *dctx,
 /* Create an encoder context with the given SFrame format version VER, FLAGS
    and ABI information.  Sets errp if failure.  */
 extern sframe_encoder_ctx *
-sframe_encode (unsigned char ver, unsigned char flags, int abi,
+sframe_encode (uint8_t ver, uint8_t flags, uint8_t abi_arch,
 	       int8_t fixed_fp_offset, int8_t fixed_ra_offset, int *errp);
 
 /* Free the encoder context.  */

@@ -1248,10 +1248,11 @@ sframe_encoder_get_funcdesc_at_index (sframe_encoder_ctx *encoder,
 }
 
 /* Create an encoder context with the given SFrame format version VER, FLAGS
-   and ABI information.  Sets errp if failure.  */
+   and ABI information.  Uses the ABI specific FIXED_FP_OFFSET and
+   FIXED_RA_OFFSET values as provided.  Sets errp if failure.  */
 
 sframe_encoder_ctx *
-sframe_encode (unsigned char ver, unsigned char flags, int abi_arch,
+sframe_encode (uint8_t ver, uint8_t flags, uint8_t abi_arch,
 	       int8_t fixed_fp_offset, int8_t fixed_ra_offset, int *errp)
 {
   sframe_header *hp;
