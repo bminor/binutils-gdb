@@ -61,12 +61,15 @@ gdb_continue_to_breakpoint "break at bp_2" ".*$srcfile:$bp_2.*"
 # gdb_test_sequence and check only for events that we can control.
 gdb_test_sequence "record function-call-history" "function-call-history" {
     "\[0-9\]+\tmain"
+    "\\\[iret(: ip = $hex)?\\\]"
     "\[0-9\]+\t\\\[non-contiguous\\\]"
     "\[0-9\]+\tsquare"
     "\\\[interrupt: vector = 0x3 \\\(#bp\\\)(, ip = 0x\[0-9a-fA-F\]+)?\\\]"
+    "\\\[iret(: ip = $hex)?\\\]"
     "\[0-9\]+\t\\\[non-contiguous\\\]"
     "\[0-9\]+\tmain"
     "\[0-9\]+\tsquare"
     "\\\[interrupt: vector = 0x3 \\\(#bp\\\)(, ip = 0x\[0-9a-fA-F\]+)?\\\]"
+    "\\\[iret(: ip = $hex)?\\\]"
     "\[0-9\]+\tmain"
 }

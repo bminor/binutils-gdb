@@ -34,10 +34,11 @@ gdb_test_no_output "record btrace pt"
 
 gdb_test "continue" "Program received signal SIGSEGV, Segmentation fault.*"
 
-# Test printing of at least one INTERRUPT event.
+# Test printing of at least one INTERRUPT and one IRET event.
 # This uses test_sequence to avoid random events failing the tests.
 gdb_test_sequence "record function-call-history" "function-call-history" {
     "\[0-9\]+\tmain"
+    "\t  \\\[iret(: ip = $hex)?\\\]"
     "\t  \\\[interrupt: vector = 0xe \\\(#pf\\\)(, cr2 = 0x0)?(, ip = 0x\[0-9a-fA-F\]+)?\\\]"
 }
 
