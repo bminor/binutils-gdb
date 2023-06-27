@@ -618,7 +618,7 @@ sframe_calc_fre_type (size_t func_size)
 
 /* Get the base reg id from the FRE info.  Set errp if failure.  */
 
-unsigned int
+uint8_t
 sframe_fre_get_base_reg_id (sframe_frame_row_entry *fre, int *errp)
 {
   if (fre == NULL)
