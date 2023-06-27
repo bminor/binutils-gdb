@@ -180,6 +180,9 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+libsframe_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libsframe_la_LDFLAGS) $(LDFLAGS) -o $@
 @INSTALL_LIBBFD_FALSE@am_libsframe_la_rpath =
 @INSTALL_LIBBFD_TRUE@am_libsframe_la_rpath = -rpath $(libdir)
 @HAVE_COMPAT_DEJAGNU_TRUE@am__EXEEXT_1 = testsuite/libsframe.decode/be-flipping$(EXEEXT) \
@@ -519,12 +522,15 @@ INCDIR = $(srcdir)/../include
 # include libctf for swap.h
 AM_CPPFLAGS = -I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../libctf
 AM_CFLAGS = @ac_libsframe_warn_cflags@
+libsframe_version_info = -version-info `grep -v '^\#' $(srcdir)/libtool-version`
 @INSTALL_LIBBFD_TRUE@lib_LTLIBRARIES = libsframe.la
 @INSTALL_LIBBFD_FALSE@include_HEADERS = 
 @INSTALL_LIBBFD_TRUE@include_HEADERS = $(INCDIR)/sframe.h $(INCDIR)/sframe-api.h
 @INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libsframe.la
 libsframe_la_SOURCES = sframe.c sframe-dump.c sframe-error.c
 libsframe_la_CPPFLAGS = $(AM_CPPFLAGS)
+libsframe_la_LDFLAGS = $(libsframe_version_info)
+EXTRA_DIST = libtool-version
 @BUILD_INFO_TRUE@AM_MAKEINFOFLAGS = --no-split
 
 # Setup the testing framework
@@ -654,7 +660,7 @@ clean-noinstLTLIBRARIES:
 	}
 
 libsframe.la: $(libsframe_la_OBJECTS) $(libsframe_la_DEPENDENCIES) $(EXTRA_libsframe_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK) $(am_libsframe_la_rpath) $(libsframe_la_OBJECTS) $(libsframe_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libsframe_la_LINK) $(am_libsframe_la_rpath) $(libsframe_la_OBJECTS) $(libsframe_la_LIBADD) $(LIBS)
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -1568,6 +1574,7 @@ uninstall-am: uninstall-dvi-am uninstall-html-am \
 
 .PRECIOUS: Makefile
 
+diststuff: $(EXTRA_DIST) info
 
 @BUILD_INFO_TRUE@html-local: doc/sframe-spec/index.html
 @BUILD_INFO_TRUE@doc/sframe-spec/index.html: doc/sframe-spec.texi doc/$(am__dirstamp)
