@@ -5239,7 +5239,7 @@ sub generate_caller_callee
 # Generate the html version of the disassembly file.
 #
 # Note to self (TBD)
-# https://software.intel.com/content/www/us/en/develop/blogs/intel-release-new-technology-specifications-protect-rop-attacks.html
+# https://community.intel.com/t5/Intel-oneAPI-AI-Analytics/bd-p/ai-analytics-toolkit
 #------------------------------------------------------------------------------
 sub generate_dis_html
 {
