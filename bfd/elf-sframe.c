@@ -403,10 +403,10 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
   /* Iterate over the function descriptor entries and the FREs of the
      function from the decoder context.  Add each of them to the encoder
      context, if suitable.  */
-  unsigned int i = 0, j = 0, cur_fidx = 0;
+  uint32_t i = 0, j = 0, cur_fidx = 0;
 
-  unsigned int num_fidx = sframe_decoder_get_num_fidx (sfd_ctx);
-  unsigned int num_enc_fidx = sframe_encoder_get_num_fidx (sfe_ctx);
+  uint32_t num_fidx = sframe_decoder_get_num_fidx (sfd_ctx);
+  uint32_t num_enc_fidx = sframe_encoder_get_num_fidx (sfe_ctx);
 
   for (i = 0; i < num_fidx; i++)
     {

@@ -349,7 +349,7 @@ sframe_decoder_get_funcdesc_at_index (sframe_decoder_ctx *ctx,
 				      uint32_t func_idx)
 {
   sframe_func_desc_entry *fdep;
-  unsigned int num_fdes;
+  uint32_t num_fdes;
   int err;
 
   num_fdes = sframe_decoder_get_num_fidx (ctx);
@@ -1119,10 +1119,10 @@ sframe_find_fre (sframe_decoder_ctx *ctx, int32_t pc,
 /* Return the number of function descriptor entries in the SFrame decoder
    DCTX.  */
 
-unsigned int
+uint32_t
 sframe_decoder_get_num_fidx (sframe_decoder_ctx *ctx)
 {
-  unsigned int num_fdes = 0;
+  uint32_t num_fdes = 0;
   sframe_header *dhp = NULL;
   dhp = sframe_decoder_get_header (ctx);
   if (dhp)
@@ -1337,10 +1337,10 @@ sframe_encoder_get_abi_arch (sframe_encoder_ctx *encoder)
 /* Return the number of function descriptor entries in the SFrame encoder
    ENCODER.  */
 
-unsigned int
+uint32_t
 sframe_encoder_get_num_fidx (sframe_encoder_ctx *encoder)
 {
-  unsigned int num_fdes = 0;
+  uint32_t num_fdes = 0;
   sframe_header *ehp = NULL;
   ehp = sframe_encoder_get_header (encoder);
   if (ehp)
