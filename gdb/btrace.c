@@ -1442,6 +1442,161 @@ handle_pt_insn_events (struct btrace_thread_info *btinfo,
 	    handle_pt_aux_insn (btinfo, aux_string, pc);
 	    break;
 	  }
+
+	case ptev_smi:
+	  {
+	    std::string aux_string = std::string (_("smi"));
+
+	    if (event.ip_suppressed == 0)
+	      {
+		pc = event.variant.smi.ip;
+		aux_string += std::string (": ip = ") + hex_string (*pc);
+	      }
+
+	    handle_pt_aux_insn (btinfo, aux_string, pc);
+	    break;
+	  }
+
+	case ptev_rsm:
+	  {
+	    std::string aux_string = std::string (_("rsm"));
+
+	    if (event.ip_suppressed == 0)
+	      {
+		pc = event.variant.rsm.ip;
+		aux_string += std::string (": ip = ") + hex_string (*pc);
+	      }
+
+	    handle_pt_aux_insn (btinfo, aux_string, pc);
+	    break;
+	  }
+
+	case ptev_sipi:
+	  {
+	    std::string aux_string = std::string (_("sipi: vector = "))
+	      + hex_string (event.variant.sipi.vector);
+
+	    handle_pt_aux_insn (btinfo, aux_string, pc);
+	    break;
+	  }
+
+	case ptev_init:
+	  {
+	    std::string aux_string = std::string (_("init"));
+
+	    if (event.ip_suppressed == 0)
+	      {
+		pc = event.variant.init.ip;
+		aux_string += std::string (": ip = ") + hex_string (*pc);
+	      }
+
+	    handle_pt_aux_insn (btinfo, aux_string, pc);
+	    break;
+	  }
+
+	case ptev_vmentry:
+	  {
+	    std::string aux_string = std::string (_("vmentry"));
+
+	    if (event.ip_suppressed == 0)
+	      {
+		pc = event.variant.vmentry.ip;
+		aux_string += std::string (": ip = ") + hex_string (*pc);
+	      }
+
+	    handle_pt_aux_insn (btinfo, aux_string, pc);
+	    break;
+	  }
+
+	case ptev_vmexit:
+	  {
+	    std::string aux_string = std::string (_("vmexit"));
+
+	    if (event.variant.vmexit.has_vector != 0
+		|| event.variant.vmexit.has_vmxr != 0
+		|| event.variant.vmexit.has_vmxq != 0
+		|| event.ip_suppressed != 0)
+	      aux_string += std::string (":");
+
+	    if (event.variant.vmexit.has_vector != 0)
+	      {
+		aux_string += std::string (_(" vector = "))
+			      + hex_string (event.variant.vmexit.vector);
+
+		const char* decoded = decode_interrupt_vector
+					(event.variant.vmexit.vector);
+		if (decoded != nullptr)
+		  aux_string += std::string (" (") + decoded + ")";
+	      }
+
+	    if (event.variant.vmexit.has_vmxr != 0)
+	      {
+		std::string seperator = aux_string.back () == ':' ? "" : ",";
+		aux_string += seperator + std::string (" vmxr = ")
+			      + hex_string (event.variant.vmexit.vmxr);
+	      }
+
+	    if (event.variant.vmexit.has_vmxq != 0)
+	      {
+		std::string seperator = aux_string.back () == ':' ? "" : ",";
+		aux_string += seperator + std::string (" vmxq = ")
+			      + hex_string (event.variant.vmexit.vmxq);
+	      }
+
+	    if (event.ip_suppressed == 0)
+	      {
+		pc = event.variant.vmexit.ip;
+		std::string seperator = aux_string.back () == ':' ? "" : ",";
+		aux_string += seperator + std::string (" ip = ")
+			      + hex_string (*pc);
+	      }
+
+	    handle_pt_aux_insn (btinfo, aux_string, pc);
+	    break;
+	  }
+
+	case ptev_shutdown:
+	  {
+	    std::string aux_string = std::string (_("shutdown"));
+
+	    if (event.ip_suppressed == 0)
+	      {
+		pc = event.variant.shutdown.ip;
+		aux_string += std::string (": ip = ") + hex_string (*pc);
+	      }
+
+	    handle_pt_aux_insn (btinfo, aux_string, pc);
+	    break;
+	  }
+
+	case ptev_uintr:
+	  {
+	    std::string aux_string = std::string (_("uintr: vector = "))
+				     + hex_string (event.variant.uintr.vector);
+
+	    if (event.ip_suppressed == 0)
+	      {
+		pc = event.variant.uintr.ip;
+		aux_string += std::string (", ip = ") + hex_string (*pc);
+	      }
+
+	    handle_pt_aux_insn (btinfo, aux_string, pc);
+	    break;
+	  }
+
+	case ptev_uiret:
+	  {
+	    std::string aux_string = std::string (_("uiret"));
+
+	    if (event.ip_suppressed == 0)
+	      {
+		pc = event.variant.uiret.ip;
+		aux_string += std::string (": ip = ") + hex_string (*pc);
+	      }
+
+	    handle_pt_aux_insn (btinfo, aux_string, pc);
+	    break;
+	  }
 #endif /* defined (LIBIPT_VERSION >= 0x201) */
 	}
     }
