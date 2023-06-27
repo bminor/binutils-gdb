@@ -523,14 +523,19 @@ INCDIR = $(srcdir)/../include
 AM_CPPFLAGS = -I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../libctf
 AM_CFLAGS = @ac_libsframe_warn_cflags@
 libsframe_version_info = -version-info `grep -v '^\#' $(srcdir)/libtool-version`
+@HAVE_LD_VERSION_SCRIPT_TRUE@@HAVE_SOLARIS_LD_FALSE@libsframe_version_script = -Wl,--version-script=$(srcdir)/libsframe.ver
+# libsframe does not restrict the set of exported symbols.  So, if linker does
+# not support symbol versioning, there is no need to fall back on libtool's
+# -export-symbols option.
+@HAVE_LD_VERSION_SCRIPT_TRUE@@HAVE_SOLARIS_LD_TRUE@libsframe_version_script = -Wl,-M -Wl,$(srcdir)/libsframe.ver
 @INSTALL_LIBBFD_TRUE@lib_LTLIBRARIES = libsframe.la
 @INSTALL_LIBBFD_FALSE@include_HEADERS = 
 @INSTALL_LIBBFD_TRUE@include_HEADERS = $(INCDIR)/sframe.h $(INCDIR)/sframe-api.h
 @INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libsframe.la
 libsframe_la_SOURCES = sframe.c sframe-dump.c sframe-error.c
 libsframe_la_CPPFLAGS = $(AM_CPPFLAGS)
-libsframe_la_LDFLAGS = $(libsframe_version_info)
-EXTRA_DIST = libtool-version
+libsframe_la_LDFLAGS = $(libsframe_version_info) $(libsframe_version_script)
+EXTRA_DIST = libtool-version libsframe.ver
 @BUILD_INFO_TRUE@AM_MAKEINFOFLAGS = --no-split
 
 # Setup the testing framework
