@@ -133,10 +133,13 @@ sframe_decoder_get_fixed_fp_offset (sframe_decoder_ctx *dctx);
 extern int8_t
 sframe_decoder_get_fixed_ra_offset (sframe_decoder_ctx *dctx);
 
-/* Find the function descriptor entry which contains the specified address.  */
-extern sframe_func_desc_entry *
-sframe_get_funcdesc_with_addr (sframe_decoder_ctx *dctx,
-			       int32_t addr, int *errp);
+/* Find the function descriptor entry which contains the specified address.
+
+   Note: This function is deprecated and will be removed from future release
+   X+2 of the library.  */
+extern void *
+sframe_get_funcdesc_with_addr (sframe_decoder_ctx *dctx, int32_t addr,
+			       int *errp);
 
 /* Find the SFrame Frame Row Entry which contains the PC.  Returns
    SFRAME_ERR if failure.  */
