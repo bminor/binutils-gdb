@@ -2113,6 +2113,11 @@
 #define MASK_CBO_INVAL 0xfff07fff
 #define MATCH_CBO_ZERO 0x40200f
 #define MASK_CBO_ZERO 0xfff07fff
+/* Zicond instructions. */
+#define MATCH_CZERO_EQZ 0xe005033
+#define MASK_CZERO_EQZ 0xfe00707f
+#define MATCH_CZERO_NEZ 0xe007033
+#define MASK_CZERO_NEZ 0xfe00707f
 /* Zawrs intructions.  */
 #define MATCH_WRS_NTO 0x00d00073
 #define MASK_WRS_NTO 0xffffffff
@@ -3120,6 +3125,9 @@ DECLARE_INSN(cbo_clean, MATCH_CBO_CLEAN, MASK_CBO_CLEAN);
 DECLARE_INSN(cbo_flush, MATCH_CBO_FLUSH, MASK_CBO_FLUSH);
 DECLARE_INSN(cbo_inval, MATCH_CBO_INVAL, MASK_CBO_INVAL);
 DECLARE_INSN(cbo_zero, MATCH_CBO_ZERO, MASK_CBO_ZERO);
+/* Zicond instructions. */
+DECLARE_INSN(czero_eqz, MATCH_CZERO_EQZ, MASK_CZERO_EQZ)
+DECLARE_INSN(czero_nez, MATCH_CZERO_NEZ, MASK_CZERO_NEZ)
 /* Zawrs instructions.  */
 DECLARE_INSN(wrs_nto, MATCH_WRS_NTO, MASK_WRS_NTO)
 DECLARE_INSN(wrs_sto, MATCH_WRS_STO, MASK_WRS_STO)
