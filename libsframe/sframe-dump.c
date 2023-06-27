@@ -32,9 +32,9 @@ is_sframe_abi_arch_aarch64 (sframe_decoder_ctx *sfd_ctx)
 {
   bool aarch64_p = false;
 
-  unsigned char abi_arch = sframe_decoder_get_abi_arch (sfd_ctx);
-  if ((abi_arch == SFRAME_ABI_AARCH64_ENDIAN_BIG)
-      || (abi_arch == SFRAME_ABI_AARCH64_ENDIAN_LITTLE))
+  uint8_t abi_arch = sframe_decoder_get_abi_arch (sfd_ctx);
+  if (abi_arch == SFRAME_ABI_AARCH64_ENDIAN_BIG
+      || abi_arch == SFRAME_ABI_AARCH64_ENDIAN_LITTLE)
     aarch64_p = true;
 
   return aarch64_p;

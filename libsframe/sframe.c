@@ -931,13 +931,13 @@ sframe_decoder_get_hdr_size (sframe_decoder_ctx *ctx)
   return sframe_get_hdr_size (dhp);
 }
 
-/* Get the SFrame's abi/arch info given the decoder context CTX.  */
+/* Get the SFrame's abi/arch info given the decoder context DCTX.  */
 
-unsigned char
-sframe_decoder_get_abi_arch (sframe_decoder_ctx *ctx)
+uint8_t
+sframe_decoder_get_abi_arch (sframe_decoder_ctx *dctx)
 {
   sframe_header *sframe_header;
-  sframe_header = sframe_decoder_get_header (ctx);
+  sframe_header = sframe_decoder_get_header (dctx);
   return sframe_header->sfh_abi_arch;
 }
 
@@ -1322,10 +1322,10 @@ sframe_encoder_get_hdr_size (sframe_encoder_ctx *encoder)
 
 /* Get the abi/arch info from the SFrame encoder context ENCODER.  */
 
-unsigned char
+uint8_t
 sframe_encoder_get_abi_arch (sframe_encoder_ctx *encoder)
 {
-  unsigned char abi_arch = 0;
+  uint8_t abi_arch = 0;
   sframe_header *ehp;
   ehp = sframe_encoder_get_header (encoder);
   if (ehp)

@@ -117,7 +117,7 @@ extern unsigned int
 sframe_decoder_get_hdr_size (sframe_decoder_ctx *dctx);
 
 /* Get the SFrame's abi/arch info.  */
-extern unsigned char
+extern uint8_t
 sframe_decoder_get_abi_arch (sframe_decoder_ctx *dctx);
 
 /* Return the number of function descriptor entries in the SFrame decoder
@@ -214,7 +214,7 @@ extern unsigned int
 sframe_encoder_get_hdr_size (sframe_encoder_ctx *encoder);
 
 /* Get the abi/arch info from the SFrame encoder context CTX.  */
-extern unsigned char
+extern uint8_t
 sframe_encoder_get_abi_arch (sframe_encoder_ctx *encoder);
 
 /* Return the number of function descriptor entries in the SFrame encoder
