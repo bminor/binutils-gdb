@@ -249,6 +249,14 @@ When the time comes to actually make the release....
 
          The gitlog-to-changelog script is part of the sources
 	 of the "config" project.
+
+         Add an entry for ChangeLog.git to the src-release.sh script's
+	 DEVO_SUPPORT list, so that it is included in the release.
+
+	 FIXME: it would be better if the ChangeLog.git file was permanently
+	 added to the src-release.sh script, but this mean that it would have
+	 to exist in the master repository, and that the GDB project would
+	 need to agree to have it there.
 	
       e. Add ChangeLog entries for all of the updates and add a
          "this-is-the-2.41-release" comment and commit.
