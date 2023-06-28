@@ -516,7 +516,8 @@ static void
 compute_struct_member (struct type *type,
 		       unsigned int *fixed_point_members,
 		       unsigned int *floating_point_members,
-		       bool *first_member_is_fixed_point)
+		       bool *first_member_is_fixed_point,
+		       bool *has_long_double)
 {
   for (int i = 0; i < type->num_fields (); i++)
     {
@@ -525,6 +526,12 @@ compute_struct_member (struct type *type,
 	continue;
 
       struct type *field_type = check_typedef (type->field (i).type ());
+
+      if ((field_type->code () == TYPE_CODE_FLT
+	   && field_type->length () == 16)
+	  || (field_type->code () == TYPE_CODE_COMPLEX
+	      && field_type->length () == 32))
+	*has_long_double = true;
 
       if (field_type->code () == TYPE_CODE_INT
 	  || field_type->code () == TYPE_CODE_BOOL
@@ -544,9 +551,76 @@ compute_struct_member (struct type *type,
 	compute_struct_member (field_type,
 			       fixed_point_members,
 			       floating_point_members,
-			       first_member_is_fixed_point);
+			       first_member_is_fixed_point,
+			       has_long_double);
       else if (field_type->code () == TYPE_CODE_COMPLEX)
 	(*floating_point_members) += 2;
+    }
+}
+
+/* Compute the lengths and offsets of struct member.  */
+
+static void
+struct_member_info (struct type *type,
+		    unsigned int *member_offsets,
+		    unsigned int *member_lens,
+		    unsigned int offset,
+		    unsigned int *fields)
+{
+  unsigned int count = type->num_fields ();
+  unsigned int i;
+
+  for (i = 0; i < count; ++i)
+    {
+      if (type->field (i).loc_kind () != FIELD_LOC_KIND_BITPOS)
+	continue;
+
+      struct type *field_type = check_typedef (type->field (i).type ());
+      int field_offset
+	= offset + type->field (i).loc_bitpos () / TARGET_CHAR_BIT;
+
+      switch (field_type->code ())
+	{
+	case TYPE_CODE_STRUCT:
+	  struct_member_info (field_type, member_offsets, member_lens,
+			      field_offset, fields);
+	  break;
+
+	case TYPE_CODE_COMPLEX:
+	  if (*fields == 0)
+	    {
+	      /* _Complex float */
+	      if (field_type->length () == 8)
+		{
+		  member_offsets[0] = field_offset;
+		  member_offsets[1] = field_offset + 4;
+		  member_lens[0] = member_lens[1] = 4;
+		  *fields = 2;
+		}
+	      /* _Complex double */
+	      else if (field_type->length () == 16)
+		{
+		  member_offsets[0] = field_offset;
+		  member_offsets[1] = field_offset + 8;
+		  member_lens[0] = member_lens[1] = 8;
+		  *fields = 2;
+		}
+	    }
+	  break;
+
+	default:
+	  if (*fields < 2)
+	    {
+	      member_offsets[*fields] = field_offset;
+	      member_lens[*fields] = field_type->length ();
+	    }
+	  (*fields)++;
+	  break;
+	}
+
+      /* only has special handling for structures with 1 or 2 fields. */
+      if (*fields > 2)
+	return;
     }
 }
 
@@ -569,6 +643,10 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
   unsigned int fixed_point_members;
   unsigned int floating_point_members;
   bool first_member_is_fixed_point;
+  bool has_long_double;
+  unsigned int member_offsets[2];
+  unsigned int member_lens[2];
+  unsigned int fields;
   gdb_byte buf[1024] = { 0 };
   gdb_byte *addr = buf;
 
@@ -698,12 +776,55 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	    fixed_point_members = 0;
 	    floating_point_members = 0;
 	    first_member_is_fixed_point = false;
+	    has_long_double = false;
+	    member_offsets[0] = member_offsets[1] = 0;
+	    member_lens[0] = member_offsets[1] = 0;
+	    fields = 0;
 	    compute_struct_member (type,
 				   &fixed_point_members,
 				   &floating_point_members,
-				   &first_member_is_fixed_point);
-
-	    if (len > 0 && len <= regsize)
+				   &first_member_is_fixed_point,
+				   &has_long_double);
+	    struct_member_info (type, member_offsets, member_lens, 0, &fields);
+	    /* If the structure consists of one floating-point member within
+	       FRLEN bits wide, it is passed in an FAR if available. If the
+	       structure consists of two floating-point members both within
+	       FRLEN bits wide, it is passed in two FARs if available. If the
+	       structure consists of one integer member within GRLEN bits wide
+	       and one floating-point member within FRLEN bits wide, it is
+	       passed in a GAR and an FAR if available. */
+	    if (has_long_double == false
+		&& ((fixed_point_members == 0 && floating_point_members == 1
+		     && far >= 1)
+		    || (fixed_point_members == 0 && floating_point_members == 2
+			&& far >= 2)
+		    || (fixed_point_members == 1 && floating_point_members == 1
+			&& far >= 1 && gar >= 1)))
+	      {
+		if (fixed_point_members == 0 && floating_point_members == 1)
+		  {
+		    pass_in_far (regcache, far--, val + member_offsets[0]);
+		  }
+		else if (fixed_point_members == 0 && floating_point_members == 2)
+		  {
+		    pass_in_far (regcache, far--, val + member_offsets[0]);
+		    pass_in_far (regcache, far--, val + member_offsets[1]);
+		  }
+		else if (fixed_point_members == 1 && floating_point_members == 1)
+		  {
+		    if (first_member_is_fixed_point == false)
+		      {
+			pass_in_far (regcache, far--, val + member_offsets[0]);
+			pass_in_gar (regcache, gar--, val + member_offsets[1]);
+		      }
+		    else
+		      {
+			pass_in_gar (regcache, gar--, val + member_offsets[0]);
+			pass_in_far (regcache, far--, val + member_offsets[1]);
+		      }
+		  }
+	      }
+	    else if (len > 0 && len <= regsize)
 	      {
 		/* The structure has only fixed-point members.  */
 		if (fixed_point_members > 0 && floating_point_members == 0)
@@ -1160,13 +1281,14 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
   unsigned int fixed_point_members;
   unsigned int floating_point_members;
   bool first_member_is_fixed_point;
+  bool has_long_double;
+  unsigned int member_offsets[2];
+  unsigned int member_lens[2];
+  unsigned int fields;
   int a0 = LOONGARCH_A0_REGNUM;
   int a1 = LOONGARCH_A0_REGNUM + 1;
   int f0 = LOONGARCH_FIRST_FP_REGNUM;
   int f1 = LOONGARCH_FIRST_FP_REGNUM + 1;
-
-  if (len > 2 * regsize)
-    return RETURN_VALUE_STRUCT_CONVENTION;
 
   switch (code)
     {
@@ -1220,12 +1342,56 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 	fixed_point_members = 0;
 	floating_point_members = 0;
 	first_member_is_fixed_point = false;
+	has_long_double = false;
+	member_offsets[0] = member_offsets[1] = 0;
+	member_lens[0] = member_offsets[1] = 0;
+	fields = 0;
 	compute_struct_member (type,
 			       &fixed_point_members,
 			       &floating_point_members,
-			       &first_member_is_fixed_point);
-
-	if (len > 0 && len <= regsize)
+			       &first_member_is_fixed_point,
+			       &has_long_double);
+	struct_member_info (type, member_offsets, member_lens, 0, &fields);
+	/* struct consists of one floating-point member;
+	   struct consists of two floating-point members;
+	   struct consists of one floating-point member
+	   and one integer member. */
+	if (has_long_double == false
+	    && ((fixed_point_members == 0 && floating_point_members == 1)
+		|| (fixed_point_members == 0 && floating_point_members == 2)
+		|| (fixed_point_members == 1 && floating_point_members == 1)))
+	  {
+	    if (fixed_point_members == 0 && floating_point_members == 1)
+	      {
+		loongarch_xfer_reg (regcache, f0, member_lens[0], readbuf,
+				    writebuf, member_offsets[0]);
+	      }
+	    else if (fixed_point_members == 0 && floating_point_members == 2)
+	      {
+		loongarch_xfer_reg (regcache, f0, member_lens[0], readbuf,
+				    writebuf, member_offsets[0]);
+		loongarch_xfer_reg (regcache, f1, member_lens[1], readbuf,
+				    writebuf, member_offsets[1]);
+	      }
+	    else if (fixed_point_members == 1 && floating_point_members == 1)
+	      {
+		if (first_member_is_fixed_point == false)
+		  {
+		    loongarch_xfer_reg (regcache, f0, member_lens[0], readbuf,
+					writebuf, member_offsets[0]);
+		    loongarch_xfer_reg (regcache, a0, member_lens[1], readbuf,
+					writebuf, member_offsets[1]);
+		  }
+		else
+		  {
+		    loongarch_xfer_reg (regcache, a0, member_lens[0], readbuf,
+					writebuf, member_offsets[0]);
+		    loongarch_xfer_reg (regcache, f0, member_lens[1], readbuf,
+					writebuf, member_offsets[1]);
+		  }
+	      }
+	  }
+	else if (len > 0 && len <= regsize)
 	  {
 	    /* The structure has only fixed-point members.  */
 	    if (fixed_point_members > 0 && floating_point_members == 0)
@@ -1338,6 +1504,8 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 		  }
 	      }
 	  }
+	else if (len > 2 * regsize)
+	  return RETURN_VALUE_STRUCT_CONVENTION;
       }
       break;
     case TYPE_CODE_UNION:
@@ -1352,13 +1520,18 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 	  loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf, 0);
 	  loongarch_xfer_reg (regcache, a1, len - regsize, readbuf, writebuf, regsize);
 	}
+      else if (len > 2 * regsize)
+	return RETURN_VALUE_STRUCT_CONVENTION;
       break;
     case TYPE_CODE_COMPLEX:
-      {
-	/* The return value is passed in f0 and f1.  */
-	loongarch_xfer_reg (regcache, f0, len / 2, readbuf, writebuf, 0);
-	loongarch_xfer_reg (regcache, f1, len / 2, readbuf, writebuf, len / 2);
-      }
+      if (len > 0 && len <= 2 * regsize)
+	{
+	  /* The return value is passed in f0 and f1.  */
+	  loongarch_xfer_reg (regcache, f0, len / 2, readbuf, writebuf, 0);
+	  loongarch_xfer_reg (regcache, f1, len / 2, readbuf, writebuf, len / 2);
+	}
+      else if (len > 2 * regsize)
+	return RETURN_VALUE_STRUCT_CONVENTION;
       break;
     default:
       break;
