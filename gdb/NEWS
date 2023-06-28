@@ -3,6 +3,11 @@
 
 *** Changes since GDB 15
 
+* GDB now supports printing of asynchronous events from the Intel Processor
+  Trace during 'record instruction-history', 'record function-call-history'
+  and all stepping commands.  This can be controlled with the new
+  "set record btrace pt event-tracing" command.
+
 * GDB now supports printing of ptwrite payloads from the Intel Processor
   Trace during 'record instruction-history', 'record function-call-history'
   and all stepping commands.  The payload is also accessible in Python as a

@@ -8116,6 +8116,16 @@ also need longer to process the branch trace data before it can be used.
 Show the current setting of the requested ring buffer size for branch
 tracing in Intel Processor Trace format.
 
+@item set record btrace pt event-tracing
+Enable or disable event tracing for branch tracing in Intel Processor
+Trace format.  When enabled, events are recorded during execution as
+auxiliary information and will be printed during stepping commands and
+commands displaying the execution history.  Changing this setting has no
+effect on an active recording.  The default is off.
+
+@item show record btrace pt event-tracing
+Show the current setting of Intel Processor Trace event tracing.
+
 @kindex info record
 @item info record
 Show various statistics about the recording depending on the recording
@@ -45007,6 +45017,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{Qbtrace-conf:pt:event-tracing}
+@tab Yes
+@tab @samp{-}
+@tab Yes
+
 @item @samp{QNonStop}
 @tab No
 @tab @samp{-}
@@ -45330,6 +45345,9 @@ The remote stub understands the @samp{Qbtrace-conf:pt:size} packet.
 
 @item Qbtrace-conf:pt:ptwrite
 The remote stub understands the @samp{Qbtrace-conf:pt:ptwrite} packet.
+
+@item Qbtrace-conf:pt:event-tracing
+The remote stub understands the @samp{Qbtrace-conf:pt:event-tracing} packet.
 
 @item swbreak
 The remote stub reports the @samp{swbreak} stop reason for memory
@@ -45828,6 +45846,18 @@ Reply:
 @table @samp
 @item OK
 The ptwrite config parameter has been set.
+@item E.errtext
+A badly formed request or an error was encountered.
+@end table
+
+@item Qbtrace-conf:pt:event-tracing=@var{(yes|no)}
+Indicate support for event-tracing packets.  This allows for backwards
+compatibility.
+
+Reply:
+@table @samp
+@item OK
+The event-tracing config parameter has been set.
 @item E.errtext
 A badly formed request or an error was encountered.
 @end table
@@ -48465,15 +48495,16 @@ branch trace configuration discovery.  @xref{Expat}.
 The formal DTD for the branch trace configuration format is given below:
 
 @smallexample
-<!ELEMENT btrace-conf	(bts?, pt?)>
-<!ATTLIST btrace-conf	version	CDATA	#FIXED "1.0">
+<!ELEMENT btrace-conf		(bts?, pt?)>
+<!ATTLIST btrace-conf		version	CDATA	#FIXED "1.0">
 
 <!ELEMENT bts	EMPTY>
-<!ATTLIST bts	size	CDATA	#IMPLIED>
+<!ATTLIST bts	size		CDATA	#IMPLIED>
 
 <!ELEMENT pt	EMPTY>
-<!ATTLIST pt	size	CDATA	#IMPLIED>
-<!ATTLIST pt	ptwrite	(yes | no)	#IMPLIED>
+<!ATTLIST pt	size		CDATA	#IMPLIED>
+<!ATTLIST pt	ptwrite		(yes | no)	#IMPLIED>
+<!ATTLIST pt	event-tracing	(yes | no)	#IMPLIED>
 @end smallexample
 
 @include agentexpr.texi

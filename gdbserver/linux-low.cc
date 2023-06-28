@@ -6970,6 +6970,8 @@ linux_process_target::read_btrace_conf (const btrace_target_info *tinfo,
 	  string_xml_appendf (*buffer, "/>\n");
 	  string_xml_appendf (*buffer, " ptwrite=\"%s\"",
 			     conf->pt.ptwrite ? "yes" : "no");
+	  string_xml_appendf (*buffer, " event-tracing=\"%s\"",
+			     conf->pt.event_tracing ? "yes" : "no");
 	  string_xml_appendf (*buffer, "/>\n");
 	  break;
 	}

@@ -123,6 +123,9 @@ struct btrace_config_pt
      If both gdb and gdbserver support this, gdb will try to enable ptwrite
      packets when tracing is started.  */
   bool ptwrite;
+
+  /* Event tracing setting.  */
+  bool event_tracing;
 };
 
 /* A branch tracing configuration.

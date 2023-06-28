@@ -3180,6 +3180,36 @@ show_record_pt_buffer_size_value (struct ui_file *file, int from_tty,
 	      value);
 }
 
+
+static bool event_tracing = false;
+
+/* The "record pt event-tracing" show value function.  */
+
+static void
+show_record_pt_event_tracing_value (struct ui_file *file, int from_tty,
+				    struct cmd_list_element *c,
+				    const char *value)
+{
+#if (LIBIPT_VERSION >= 0x201)
+  gdb_printf (file, _("record pt event-tracing is %s.\n"), value);
+#else
+  gdb_printf (_("Event-tracing is not supported by GDB.\n"));
+#endif /* defined (LIBIPT_VERSION >= 0x201) */
+}
+
+/* The "record pt event-tracing" set value function.  */
+
+static void
+set_record_pt_event_tracing_value (const char *args, int from_tty,
+				   cmd_list_element *c)
+{
+#if (LIBIPT_VERSION >= 0x201)
+  record_btrace_conf.pt.event_tracing = event_tracing;
+#else
+  gdb_printf (_("Event-tracing is not supported by GDB.\n"));
+#endif /* defined (LIBIPT_VERSION >= 0x201) */
+}
+
 /* Initialize btrace commands.  */
 
 void _initialize_record_btrace ();
@@ -3299,6 +3329,19 @@ to see the actual buffer size."), NULL, show_record_pt_buffer_size_value,
 			    &set_record_btrace_pt_cmdlist,
 			    &show_record_btrace_pt_cmdlist);
 
+  add_setshow_boolean_cmd ("event-tracing", no_class, &event_tracing,
+			   _("Set event-tracing for record pt."),
+			   _("Show event-tracing for record pt."),
+			   _("\
+Use \"on\" to enable event tracing for recordings with Intel Processor Trace,  \
+and \"off\" to disable it.\n\
+Without an argument, event tracing is enabled.  Changing this setting has no\
+effect on an active recording."),
+			   set_record_pt_event_tracing_value,
+			   show_record_pt_event_tracing_value,
+			   &set_record_btrace_pt_cmdlist,
+			   &show_record_btrace_pt_cmdlist);
+
   add_target (record_btrace_target_info, record_btrace_target_open);
 
   bfcache = htab_create_alloc (50, bfcache_hash, bfcache_eq, NULL,
@@ -3311,4 +3354,5 @@ to see the actual buffer size."), NULL, show_record_pt_buffer_size_value,
 #else
   record_btrace_conf.pt.ptwrite = false;
 #endif
+  record_btrace_conf.pt.event_tracing = false;
 }
