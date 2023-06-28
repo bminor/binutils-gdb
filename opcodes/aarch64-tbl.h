@@ -2453,7 +2453,12 @@
   QLF3(V_4S, V_8H, S_H),	\
 }
 
-/* Opcode table.  */
+/* Opcode table.
+
+  Any SVE or SVE2 feature must include AARCH64_FEATURE_{SVE|SVE2} in its
+  bitmask, even if this is implied by other selected feature bits.  This
+  allows verify_constraints to identify SVE instructions when selecting an
+  error message for MOVPRFX constraint violations.  */
 
 static const aarch64_feature_set aarch64_feature_v8 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8, 0);
@@ -2488,7 +2493,7 @@ static const aarch64_feature_set aarch64_feature_compnum =
 static const aarch64_feature_set aarch64_feature_rcpc =
   AARCH64_FEATURE (AARCH64_FEATURE_RCPC, 0);
 static const aarch64_feature_set aarch64_feature_dotprod =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_DOTPROD, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_DOTPROD, 0);
 static const aarch64_feature_set aarch64_feature_sha2 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8 | AARCH64_FEATURE_SHA2, 0);
 static const aarch64_feature_set aarch64_feature_aes =
@@ -2496,14 +2501,14 @@ static const aarch64_feature_set aarch64_feature_aes =
 static const aarch64_feature_set aarch64_feature_v8_4 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_4, 0);
 static const aarch64_feature_set aarch64_feature_sm4 =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_SM4
-		   | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_SM4 | AARCH64_FEATURE_SIMD
+		   | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_sha3 =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_SHA2
-		   | AARCH64_FEATURE_SHA3 | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_SHA2 | AARCH64_FEATURE_SHA3
+		   | AARCH64_FEATURE_SIMD | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_fp_16_v8_2 =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_F16_FML
-		   | AARCH64_FEATURE_F16 | AARCH64_FEATURE_FP, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_F16_FML | AARCH64_FEATURE_F16
+		   | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_v8_5 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_5, 0);
 static const aarch64_feature_set aarch64_feature_flagmanip =
@@ -2515,7 +2520,7 @@ static const aarch64_feature_set aarch64_feature_sb =
 static const aarch64_feature_set aarch64_feature_predres =
   AARCH64_FEATURE (AARCH64_FEATURE_PREDRES, 0);
 static const aarch64_feature_set aarch64_feature_memtag =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_5 | AARCH64_FEATURE_MEMTAG, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_MEMTAG, 0);
 static const aarch64_feature_set aarch64_feature_bfloat16 =
   AARCH64_FEATURE (AARCH64_FEATURE_BFLOAT16, 0);
 static const aarch64_feature_set aarch64_feature_bfloat16_sve =
@@ -2552,20 +2557,17 @@ static const aarch64_feature_set aarch64_feature_v8_6 =
 static const aarch64_feature_set aarch64_feature_v8_7 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_7, 0);
 static const aarch64_feature_set aarch64_feature_i8mm =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_I8MM, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_I8MM, 0);
 static const aarch64_feature_set aarch64_feature_i8mm_sve =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_I8MM
-       | AARCH64_FEATURE_SVE, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_I8MM | AARCH64_FEATURE_SVE, 0);
 static const aarch64_feature_set aarch64_feature_f32mm_sve =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_F32MM
-       | AARCH64_FEATURE_SVE, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_F32MM | AARCH64_FEATURE_SVE, 0);
 static const aarch64_feature_set aarch64_feature_f64mm_sve =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_F64MM
-       | AARCH64_FEATURE_SVE, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_F64MM | AARCH64_FEATURE_SVE, 0);
 static const aarch64_feature_set aarch64_feature_v8_r =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_R, 0);
 static const aarch64_feature_set aarch64_feature_ls64 =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_6 | AARCH64_FEATURE_LS64, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_LS64, 0);
 static const aarch64_feature_set aarch64_feature_flagm =
   AARCH64_FEATURE (AARCH64_FEATURE_FLAGM, 0);
 static const aarch64_feature_set aarch64_feature_mops =
