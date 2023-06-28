@@ -35,7 +35,7 @@ def start_thread(name, target, args=()):
     """Start a new thread, invoking TARGET with *ARGS there.
     This is a helper function that ensures that any GDB signals are
     correctly blocked."""
-    result = gdb.Thread(target=target, args=args, daemon=True)
+    result = gdb.Thread(name=name, target=target, args=args, daemon=True)
     result.start()
 
 
