@@ -3508,11 +3508,10 @@ particular frame (@pxref{Frames In Python}).
 @anchor{gdbpy_inferior_read_memory}
 @findex Inferior.read_memory
 @defun Inferior.read_memory (address, length)
-Read @var{length} addressable memory units from the inferior, starting at
-@var{address}.  Returns a buffer object, which behaves much like an array
-or a string.  It can be modified and given to the
-@code{Inferior.write_memory} function.  In Python 3, the return
-value is a @code{memoryview} object.
+Read @var{length} addressable memory units from the inferior, starting
+at @var{address}.  Returns a @code{memoryview} object, which behaves
+much like an array or a string.  It can be modified and given to the
+@code{Inferior.write_memory} function.
 @end defun
 
 @findex Inferior.write_memory
@@ -4060,8 +4059,7 @@ An integer representing this instruction's address.
 @end defvar
 
 @defvar Instruction.data
-A buffer with the raw instruction data.  In Python 3, the return value is a
-@code{memoryview} object.
+A @code{memoryview} object holding the raw instruction data.
 @end defvar
 
 @defvar Instruction.decoded
@@ -6814,19 +6812,14 @@ If @var{packet} is not a @code{bytes} object, or a @code{Unicode}
 string, then a @code{TypeError} is raised.  If @var{packet} is empty
 then a @code{ValueError} is raised.
 
-The response is returned as a @code{bytes} object.  For Python 3 if it
-is known that the response can be represented as a string then this
-can be decoded from the buffer.  For example, if it is known that the
+The response is returned as a @code{bytes} object.  If it is known
+that the response can be represented as a string then this can be
+decoded from the buffer.  For example, if it is known that the
 response is an @sc{ascii} string:
 
 @smallexample
 remote_connection.send_packet("some_packet").decode("ascii")
 @end smallexample
-
-In Python 2 @code{bytes} and @code{str} are aliases, so the result is
-already a string, if the response includes non-printable characters,
-or null characters, then these will be present in the result, care
-should be taken when processing the result to handle this case.
 
 The prefix, suffix, and checksum (as required by the remote serial
 protocol) are automatically added to the outgoing packet, and removed
