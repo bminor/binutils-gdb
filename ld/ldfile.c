@@ -352,7 +352,9 @@ ldfile_try_open_bfd (const char *attempt,
       return false;
     }
 
-  track_dependency_files (attempt);
+  /* PR 30568: Do not track lto generated temporary object files.  */
+  if (!entry->flags.lto_output)
+    track_dependency_files (attempt);
 
   /* Linker needs to decompress sections.  */
   entry->the_bfd->flags |= BFD_DECOMPRESS;
