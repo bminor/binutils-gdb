@@ -39097,6 +39097,11 @@ The target to which @value{GDBN} should connect.  This is a string and
 is passed to the @code{target remote} command.  @xref{Connecting}.
 @end table
 
+In response to the @code{disassemble} request, DAP allows the client
+to return the bytes of each instruction in an implementation-defined
+format.  @value{GDBN} implements this by sending a string with the
+bytes encoded in hex, like @code{"55a2b900"}.
+
 @node JIT Interface
 @chapter JIT Compilation Interface
 @cindex just-in-time compilation

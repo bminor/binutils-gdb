@@ -21,18 +21,21 @@ from .startup import send_gdb_with_response, in_gdb_thread
 
 @in_gdb_thread
 def _disassemble(pc, skip_insns, count):
+    inf = gdb.selected_inferior()
     try:
         arch = gdb.selected_frame().architecture()
     except gdb.error:
         # Maybe there was no frame.
-        arch = gdb.selected_inferior().architecture()
+        arch = inf.architecture()
     result = []
     total_count = skip_insns + count
     for elt in arch.disassemble(pc, count=total_count)[skip_insns:]:
+        mem = inf.read_memory(elt["addr"], elt["length"])
         result.append(
             {
                 "address": hex(elt["addr"]),
                 "instruction": elt["asm"],
+                "instructionBytes": mem.hex(),
             }
         )
     return {

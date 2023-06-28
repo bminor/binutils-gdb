@@ -191,6 +191,15 @@ set obj [dap_check_request_and_response "disassemble one instruction" \
 		  $insn_pc]]
 set response [lindex $obj 0]
 gdb_assert { [dict exists $response body instructions] } "instructions in disassemble output"
+foreach insn [dict get $response body instructions] {
+    gdb_assert {[dict exists $insn instructionBytes]} \
+	"instruction bytes in disassemble output"
+    set bytes [dict get $insn instructionBytes]
+    gdb_assert {[string length $bytes] % 2 == 0} \
+	"even number of digits"
+    gdb_assert {[regexp "^\[0-9A-Fa-f\]+\$" $bytes]} \
+	"instructionBytes is hex"
+}
 
 set obj [dap_check_request_and_response "command repl" \
 	     evaluate {o expression [s {output 23}] context [s repl]}]
