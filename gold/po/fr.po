@@ -3,23 +3,25 @@
 # This file is distributed under the same license as the binutils package.
 #
 # Grégoire Scano <gregoire.scano@malloc.fr>, 2015, 2018-2022.
+# Christian Wiatr <w9204-fs@yahoo.com>, 2023.
 #
 # stub => espace d'amorçage
 # patch space => espace de retouche
 # relocation => relocalisation
 msgid ""
 msgstr ""
-"Project-Id-Version: gold 2.38.90\n"
+"Project-Id-Version: gold 2.39.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-07-08 10:58+0100\n"
-"PO-Revision-Date: 2022-07-25 20:41+0800\n"
-"Last-Translator: Grégoire Scano <gregoire.scano@malloc.fr>\n"
+"POT-Creation-Date: 2022-12-31 12:19+0000\n"
+"PO-Revision-Date: 2023-06-26 19:10+0200\n"
+"Last-Translator: Christian Wiatr <w9204-fs@yahoo.com>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: aarch64-reloc-property.cc:173 arm-reloc-property.cc:303
 #, c-format
@@ -51,124 +53,124 @@ msgstr "symbole local %u non-défini ou écarté depuis l'objet %s dans la GOT"
 #: aarch64.cc:532 arm.cc:7413 mips.cc:6704
 #, c-format
 msgid "undefined or discarded symbol %s in GOT"
-msgstr "symbole %s non définit ou écarté dans la GOT"
+msgstr "symbole %s non défini ou écarté dans la GOT"
 
-#: aarch64.cc:1931 arm.cc:6543 object.cc:901
+#: aarch64.cc:1932 arm.cc:6543 object.cc:901
 #, c-format
 msgid "invalid symbol table name index: %u"
-msgstr "index de nom de table de symboles invalide : %u"
+msgstr "index de nom de table des symboles invalide : %u"
 
-#: aarch64.cc:1939 arm.cc:6551 object.cc:907
+#: aarch64.cc:1940 arm.cc:6551 object.cc:907
 #, c-format
 msgid "symbol table name section has wrong type: %u"
-msgstr "la section de nom de table de symboles a un type incorrect : %u"
+msgstr "la section de nom de table des symboles a un type incorrect : %u"
 
-#: aarch64.cc:3831 arm.cc:10905 mips.cc:9608 powerpc.cc:2911 target.cc:94
+#: aarch64.cc:3832 arm.cc:10905 mips.cc:9608 powerpc.cc:2911 target.cc:94
 #, c-format
 msgid "%s: unsupported ELF file type %d"
 msgstr "%s : type de fichier ELF %d non pris en charge"
 
-#: aarch64.cc:4013 arm.cc:12181
+#: aarch64.cc:4014 arm.cc:12181
 #, c-format
 msgid "cannot handle branch to local %u in a merged section %s"
 msgstr "impossible de gérer une branche vers %u local dans une section fusionnée %s"
 
-#: aarch64.cc:4378 arm.cc:7593 i386.cc:193 s390.cc:216 sparc.cc:1366
+#: aarch64.cc:4379 arm.cc:7593 i386.cc:193 s390.cc:216 sparc.cc:1366
 #: tilegx.cc:182 x86_64.cc:314
 msgid "** PLT"
 msgstr "** PLT"
 
-#: aarch64.cc:5553
+#: aarch64.cc:5554
 #, c-format
 msgid "Stub is too far away, try a smaller value for '--stub-group-size'. The current value is 0x%lx."
 msgstr "L'espace d'amorçage est bien trop loin, essayez une valeur plus petite pour « --stub-group-size ». La valeur actuelle est 0x%lx."
 
-#: aarch64.cc:6015 arm.cc:8477 i386.cc:1772 mips.cc:12461 powerpc.cc:7810
+#: aarch64.cc:6016 arm.cc:8477 i386.cc:1772 mips.cc:12461 powerpc.cc:7837
 #: s390.cc:2185 s390.cc:2633 sparc.cc:2134 tilegx.cc:3137 tilegx.cc:3589
-#: x86_64.cc:3471 x86_64.cc:3924
+#: x86_64.cc:3012 x86_64.cc:3459
 #, c-format
 msgid "%s: unsupported reloc %u against local symbol"
 msgstr "%s : la relocalisation %u vers un symbole local n'est pas prise en charge"
 
-#: aarch64.cc:6056 powerpc.cc:7915 s390.cc:2259 sparc.cc:2230
+#: aarch64.cc:6057 powerpc.cc:7942 s390.cc:2259 sparc.cc:2230
 msgid "requires unsupported dynamic reloc; recompile with -fPIC"
 msgstr "nécessite une relocalisation dynamique non prise en charge ; veuillez recompiler avec -fPIC"
 
-#: aarch64.cc:6078
+#: aarch64.cc:6079
 #, c-format
 msgid "%s: unsupported TLS reloc %s for IFUNC symbol"
 msgstr "%s : la relocalisation TLS %s pour un symbole IFUNC n'est pas prise en charge"
 
-#: aarch64.cc:6122 aarch64.cc:6186 aarch64.cc:6496
+#: aarch64.cc:6123 aarch64.cc:6187 aarch64.cc:6497
 #, c-format
 msgid "%s: unsupported reloc %u in pos independent link."
 msgstr "%s : la relocalisation %u n'est pas prise en charge pour un lien indépendant de la position"
 
-#: aarch64.cc:6287
+#: aarch64.cc:6288
 #, c-format
 msgid "%s: unsupported TLSLE reloc %u in shared code."
 msgstr "%s : relocalisation TLSLE %u non prise en charge dans un code partagé."
 
-#: aarch64.cc:6372 arm.cc:8885 i386.cc:2127 mips.cc:12474 powerpc.cc:8750
+#: aarch64.cc:6373 arm.cc:8885 i386.cc:2127 mips.cc:12474 powerpc.cc:8777
 #: s390.cc:3064 s390.cc:3081 sparc.cc:2572 tilegx.cc:3605 tilegx.cc:4144
-#: x86_64.cc:3940 x86_64.cc:4446
+#: x86_64.cc:3475 x86_64.cc:3979
 #, c-format
 msgid "%s: unsupported reloc %u against global symbol %s"
 msgstr "%s : la relocalisation %u vers le symbole global %s n'est pas prise en charge"
 
-#: aarch64.cc:6722
+#: aarch64.cc:6723
 #, c-format
 msgid "%s: unsupported TLSLE reloc type %u in shared objects."
 msgstr "%s : le type de relocalisation TLSLE %u n'est pas prise en charge pour les objets partagés"
 
-#: aarch64.cc:6767
+#: aarch64.cc:6768
 #, c-format
 msgid "%s: unsupported reloc type in global scan"
 msgstr "%s : type de relocalisation non prise en charge lors d'un balayage global"
 
-#: aarch64.cc:6907 powerpc.cc:9886 s390.cc:4014 sparc.cc:3164 tilegx.cc:4211
-#: x86_64.cc:4511
+#: aarch64.cc:6908 powerpc.cc:9913 s390.cc:4014 sparc.cc:3164 tilegx.cc:4211
+#: x86_64.cc:4044
 #, c-format
 msgid "%s: unsupported REL reloc section"
 msgstr "%s : section de relocalisation REL non prise en charge"
 
-#: aarch64.cc:7070 arm.cc:9615
+#: aarch64.cc:7071 arm.cc:9615
 #, c-format
 msgid "cannot relocate %s in object file"
 msgstr "impossible de relocaliser %s dans le fichier objet"
 
-#: aarch64.cc:7343 i386.cc:2987 i386.cc:3753 mips.cc:10076 powerpc.cc:12236
-#: s390.cc:3465 sparc.cc:3695 tilegx.cc:4726 x86_64.cc:5008
+#: aarch64.cc:7344 i386.cc:2987 i386.cc:3753 mips.cc:10076 powerpc.cc:12258
+#: s390.cc:3465 sparc.cc:3695 tilegx.cc:4726 x86_64.cc:4537
 #, c-format
 msgid "unexpected reloc %u in object file"
 msgstr "relocalisation %u inattendue dans le fichier objet"
 
-#: aarch64.cc:7349
+#: aarch64.cc:7350
 #, c-format
 msgid "unsupported reloc %s"
 msgstr "la relocalisation %s n'est pas prise en charge"
 
-#: aarch64.cc:7361 arm.cc:10095 arm.cc:10713
+#: aarch64.cc:7362 arm.cc:10095 arm.cc:10713
 #, c-format
 msgid "relocation overflow in %s"
 msgstr "débordement de relocalisation dans %s"
 
-#: aarch64.cc:7369 arm.cc:10103 arm.cc:10718
+#: aarch64.cc:7370 arm.cc:10103 arm.cc:10718
 #, c-format
 msgid "unexpected opcode while processing relocation %s"
 msgstr "code-opération (opcode) non attendu lors du traitement de la relocalisation %s"
 
-#: aarch64.cc:7465
+#: aarch64.cc:7466
 #, c-format
 msgid "unsupported gd_to_ie relaxation on %u"
 msgstr "la relaxation gd_to_ie sur %u n'est pas prise en charge"
 
-#: aarch64.cc:7637
+#: aarch64.cc:7638
 #, c-format
 msgid "%s: unsupported reloc %u in non-static TLSLE mode."
 msgstr "%s : la relocalisation %u n'est pas prise en charge dans un mode TLSLE non statique"
 
-#: aarch64.cc:7722
+#: aarch64.cc:7723
 #, c-format
 msgid "%s: unsupported TLS reloc %u."
 msgstr "%s : la relocalisation TLS %u n'est pas prise en charge"
@@ -181,32 +183,32 @@ msgstr "%s : la relocalisation TLS %u n'est pas prise en charge"
 #. However the gd_to_le relaxation decision has been made early
 #. in the scan stage, where we did not allocate a GOT entry for
 #. this symbol. Therefore we have to exit and report an error now.
-#: aarch64.cc:7779 aarch64.cc:7879
+#: aarch64.cc:7780 aarch64.cc:7880
 #, c-format
 msgid "unexpected reloc insn sequence while relaxing tls gd to le for reloc %u."
 msgstr "relocalisation de séquence insn imprévue lors de la relaxation tls_gd_to_le pour la relocalisation %u."
 
-#: aarch64.cc:7954
+#: aarch64.cc:7955
 #, c-format
 msgid "TLS variable referred by reloc %u is too far from TP."
 msgstr "la variable TLS visée par la relocalisation %u est trop loin du TP."
 
-#: aarch64.cc:8024
+#: aarch64.cc:8025
 #, c-format
 msgid "TLS variable referred by reloc %u is too far from TP. We Can't do gd_to_le relaxation.\n"
 msgstr "la variable TLS visée par la relocalisation %u est trop loin du TP. Impossible d'effectuer la relaxation gd_to_le.\n"
 
-#: aarch64.cc:8048
+#: aarch64.cc:8049
 #, c-format
 msgid "unsupported tlsdesc gd_to_le optimization on reloc %u"
 msgstr "optimisation tlsdesc gd_to_le sur la relocalisation %u non prise en charge"
 
-#: aarch64.cc:8120
+#: aarch64.cc:8121
 #, c-format
 msgid "Don't support tlsdesc gd_to_ie optimization on reloc %u"
 msgstr "Ne prend pas en charge l'optimisation tlsdesc gs_to_ie sur la relocalisation %u"
 
-#: aarch64.cc:8455
+#: aarch64.cc:8456
 #, c-format
 msgid "Erratum 835769 found and fixed at \"%s\", section %d, offset 0x%08x."
 msgstr "Erratum 835769 trouvé et corrigé à « %s », section %d, décalage 0x%08x."
@@ -219,12 +221,12 @@ msgstr "référence de script ou d'expression à %s"
 #: archive.cc:232
 #, c-format
 msgid "%s: no archive symbol table (run ranlib)"
-msgstr "%s : pas de table de symboles dans l'archive (exécuter ranlib)"
+msgstr "%s : pas de table des symboles dans l'archive (exécuter ranlib)"
 
 #: archive.cc:324
 #, c-format
 msgid "%s: bad archive symbol table names"
-msgstr "%s : mauvais noms pour la table de symboles de l'archive"
+msgstr "%s : mauvais noms pour la table des symboles de l'archive"
 
 #: archive.cc:356
 #, c-format
@@ -338,12 +340,12 @@ msgstr "A trouvé des sections d'entrée non EXIDX dans une section de sortie EX
 #: arm.cc:6058 arm.cc:6062
 #, c-format
 msgid "unwinding may not work because EXIDX input section %u of %s is not in EXIDX output section"
-msgstr "l'exécution de l'épilogue peut ne pas fonctionner parce que la section d'entrée EXIDX %u de %s n'est pas dans ma section de sortie EXIDX"
+msgstr "l'exécution de l'épilogue peut ne pas fonctionner parce que la section d'entrée EXIDX %u de %s n'est pas dans la section de sortie EXIDX"
 
 #: arm.cc:6875
 #, c-format
 msgid "EXIDX section %s(%u) links to invalid section %u in %s"
-msgstr "la section EXIDX %s (%u) a un lien vers la section %u dans %s"
+msgstr "la section EXIDX %s (%u) a un lien vers la section non valide %u dans %s"
 
 #: arm.cc:6884
 #, c-format
@@ -387,12 +389,12 @@ msgid "requires unsupported dynamic reloc %s; recompile with -fPIC"
 msgstr "nécessite une relocalisation dynamique %s non prise en charge ; recompiler avec -fPIC"
 
 #: arm.cc:8547 i386.cc:1786 s390.cc:2276 sparc.cc:2247 tilegx.cc:3223
-#: x86_64.cc:3581
+#: x86_64.cc:3118
 #, c-format
 msgid "%s: unsupported TLS reloc %u for IFUNC symbol"
 msgstr "%s : la relocalisation TLS %u pour un symbole IFUNC n'est pas prise en charge"
 
-#: arm.cc:8643 i386.cc:1862 powerpc.cc:8219 s390.cc:2369 x86_64.cc:3679
+#: arm.cc:8643 i386.cc:1862 powerpc.cc:8246 s390.cc:2369 x86_64.cc:3216
 #, c-format
 msgid "section symbol %u has bad shndx %u"
 msgstr "le symbole de section %u a un mauvais shndx %u"
@@ -401,13 +403,13 @@ msgstr "le symbole de section %u a un mauvais shndx %u"
 #. dynamic linker, and should never be seen here.
 #: arm.cc:8752 arm.cc:9233 i386.cc:1950 i386.cc:2436 mips.cc:11258
 #: s390.cc:2468 s390.cc:2902 sparc.cc:2553 sparc.cc:3033 tilegx.cc:3584
-#: tilegx.cc:4139 x86_64.cc:3796 x86_64.cc:4319
+#: tilegx.cc:4139 x86_64.cc:3331 x86_64.cc:3852
 #, c-format
 msgid "%s: unexpected reloc %u in object file"
 msgstr "%s : relocalisation %u inattendue dans le fichier objet"
 
 #: arm.cc:8784 i386.cc:1984 mips.cc:10707 s390.cc:2512 sparc.cc:2452
-#: tilegx.cc:3488 x86_64.cc:3828
+#: tilegx.cc:3488 x86_64.cc:3363
 #, c-format
 msgid "local symbol %u has bad shndx %u"
 msgstr "le symbole local %u a un mauvais shndx %u"
@@ -422,10 +424,10 @@ msgid "unable to provide V4BX reloc interworking fix up; the target profile does
 msgstr "impossible de fournir une correction de relocalisation V4BX interopérable ; le profil de la cible ne prend pas en charge l'instruction BX"
 
 #: arm.cc:10247 i386.cc:3019 i386.cc:3101 i386.cc:3166 i386.cc:3202
-#: i386.cc:3274 mips.cc:12296 powerpc.cc:12350 s390.cc:3471 s390.cc:3542
+#: i386.cc:3274 mips.cc:12296 powerpc.cc:12372 s390.cc:3471 s390.cc:3542
 #: s390.cc:3579 s390.cc:3601 s390.cc:3626 sparc.cc:3701 sparc.cc:3892
-#: sparc.cc:3953 sparc.cc:4060 tilegx.cc:4732 x86_64.cc:5029 x86_64.cc:5155
-#: x86_64.cc:5227 x86_64.cc:5261
+#: sparc.cc:3953 sparc.cc:4060 tilegx.cc:4732 x86_64.cc:4558 x86_64.cc:4684
+#: x86_64.cc:4756 x86_64.cc:4790
 #, c-format
 msgid "unsupported reloc %u"
 msgstr "la relocalisation %u n'est pas prise en charge"
@@ -547,7 +549,7 @@ msgstr "impossible d'ouvrir %s : %s :"
 msgid "out of patch space in section %s; relink with --incremental-full"
 msgstr "à court d'espace de retouche dans la section %s ; rééditer les liens avec --incremental-full"
 
-#: compressed_output.cc:320
+#: compressed_output.cc:347
 msgid "not compressing section data: zlib error"
 msgstr "impossible de compresser les données de section : erreur de zlib"
 
@@ -1062,8 +1064,8 @@ msgid "cannot mix split-stack '%s' and non-split-stack '%s' when using -r"
 msgstr "impossible d'utiliser split-stack « %s » et non-split-stack « %s » avec -r"
 
 #. FIXME: This needs to specify the location somehow.
-#: i386.cc:639 i386.cc:2800 sparc.cc:324 sparc.cc:3296 x86_64.cc:1074
-#: x86_64.cc:4707
+#: i386.cc:639 i386.cc:2800 sparc.cc:324 sparc.cc:3296 x86_64.cc:962
+#: x86_64.cc:4238
 msgid "missing expected TLS relocation"
 msgstr "absence de la relocalisation TLS attendue"
 
@@ -1101,7 +1103,7 @@ msgstr "SUN et GNU suivent les relocalisations TLS"
 msgid "unsupported reloc %u in object file"
 msgstr "la relocalisation %u n'est pas prise en charge dans le fichier objet"
 
-#: i386.cc:4036 powerpc.cc:9840 s390.cc:4886 x86_64.cc:6113
+#: i386.cc:4036 powerpc.cc:9867 s390.cc:4886 x86_64.cc:5642
 #, c-format
 msgid "failed to match split-stack sequence at section %u offset %0zx"
 msgstr "l'association de séquence de la pile scindée (split-stack) à la position %2$0zx de la section %1$u a échoué"
@@ -1114,12 +1116,12 @@ msgstr "impossible d'analyser la section eh_frame %s(%s) ; il se peut que l'ICF
 #: icf.cc:1058
 #, c-format
 msgid "%s: ICF Converged after %u iteration(s)"
-msgstr "%s : ICF a convergé après %u iteration(s)"
+msgstr "%s : ICF a convergé après %u itération(s)"
 
 #: icf.cc:1061
 #, c-format
 msgid "%s: ICF stopped after %u iteration(s)"
-msgstr "%s : ICF s'est arrêté après %u iteration(s)"
+msgstr "%s : ICF s'est arrêté après %u itération(s)"
 
 #: icf.cc:1075
 #, c-format
@@ -1145,7 +1147,7 @@ msgstr "version différente des données d'édition incrémentale"
 
 #: incremental.cc:433
 msgid "command line changed"
-msgstr "la ligne de commande a changée"
+msgstr "la ligne de commande a changé"
 
 #: incremental.cc:460
 #, c-format
@@ -1195,134 +1197,139 @@ msgstr "double inclusion du groupe COMDAT %s lors d'une édition de liens incré
 msgid "Unusually large LEB128 decoded, debug information may be corrupted"
 msgstr "Le décodage de LEB128 est anormalement volumineux, les informations de débogage sont peut être corrompues"
 
-#: layout.cc:228
+#: layout.cc:231
 #, c-format
 msgid "%s: total free lists: %u\n"
 msgstr "%s : nombre total de listes libérées : %u\n"
 
-#: layout.cc:230
+#: layout.cc:233
 #, c-format
 msgid "%s: total free list nodes: %u\n"
 msgstr "%s : nombre total de nœuds de liste libérés : %u\n"
 
-#: layout.cc:232
+#: layout.cc:235
 #, c-format
 msgid "%s: calls to Free_list::remove: %u\n"
 msgstr "%s : appels à Free_list::remove : %u\n"
 
-#: layout.cc:234 layout.cc:238
+#: layout.cc:237 layout.cc:241
 #, c-format
 msgid "%s: nodes visited: %u\n"
 msgstr "%s : nœuds visités : %u\n"
 
-#: layout.cc:236
+#: layout.cc:239
 #, c-format
 msgid "%s: calls to Free_list::allocate: %u\n"
 msgstr "%s : appels à Free_list::allocate : %u\n"
 
-#: layout.cc:974
+#: layout.cc:977
 #, c-format
 msgid "Unable to create output section '%s' because it is not allowed by the SECTIONS clause of the linker script"
 msgstr "Impossible de créer la section d'entrée « %s » car ceci n'est pas autorisé par la clause SECTIONS du script de l'éditeur de liens"
 
-#: layout.cc:2119
+#: layout.cc:2122
 msgid "multiple '.interp' sections in input files may cause confusing PT_INTERP segment"
 msgstr "de multiples sections « .interp » dans les fichiers d'entrée peuvent produire des segments PT_INTERP ambigus"
 
-#: layout.cc:2183
+#: layout.cc:2186
 #, c-format
 msgid "%s: missing .note.GNU-stack section implies executable stack"
 msgstr "%s : l'absence de section .note.GNU-stack implique une pile exécutable"
 
-#: layout.cc:2194
+#: layout.cc:2197
 #, c-format
 msgid "%s: requires executable stack"
 msgstr "%s : nécessite une pile exécutable"
 
-#: layout.cc:2223
+#: layout.cc:2226
 #, c-format
 msgid "%s: in .note.gnu.property section, pr_datasz must be 4 or 8"
 msgstr "%s : dans la section .note.gnu.property, pr_datasz doit valoir 4 ou 8"
 
-#: layout.cc:2356
+#: layout.cc:2359
 #, c-format
 msgid "%s: unknown program property type %d in .note.gnu.property section"
 msgstr "%s : le type %d de propriété de programme est inconnu dans la section .note.gnu.property"
 
-#: layout.cc:2926
+#: layout.cc:2930
 #, c-format
 msgid "unable to open --section-ordering-file file %s: %s"
 msgstr "impossible d'ouvrir le fichier %s relatif à l'option --section-ordering-file : %s"
 
-#: layout.cc:3373
+#: layout.cc:3377
 msgid "one or more inputs require executable stack, but -z noexecstack was given"
 msgstr "une ou plusieurs entrées nécessite une pile d'exécution ; mais -z noexecstack a été passé"
 
-#: layout.cc:3446
+#: layout.cc:3450
 #, c-format
 msgid "--build-id=uuid failed: could not open /dev/urandom: %s"
 msgstr "--build-id=uuid a échoué : impossible d'ouvrir /dev/urandom : %s"
 
-#: layout.cc:3453
+#: layout.cc:3457
 #, c-format
 msgid "/dev/urandom: read failed: %s"
 msgstr "/dev/urandom : échec de read() : %s"
 
-#: layout.cc:3455
+#: layout.cc:3459
 #, c-format
 msgid "/dev/urandom: expected %zu bytes, got %zd bytes"
 msgstr "/dev/urandom : %zu octets attendus, %zd octets lus"
 
-#: layout.cc:3467
+#: layout.cc:3471
 msgid "--build-id=uuid failed: could not load rpcrt4.dll"
 msgstr "--build-id=uuid a échoué : impossible de charger rpcrt4.dll"
 
-#: layout.cc:3473
+#: layout.cc:3477
 msgid "--build-id=uuid failed: could not find UuidCreate"
 msgstr "--build-id=uuid a échoué : impossible de trouver UuidCreate"
 
-#: layout.cc:3475
+#: layout.cc:3479
 msgid "__build_id=uuid failed: call UuidCreate() failed"
 msgstr "__build_id=uuid a échoué : échec de l'appel à UuidCreate()"
 
-#: layout.cc:3497
+#: layout.cc:3501
 #, c-format
 msgid "--build-id argument '%s' not a valid hex number"
 msgstr "l'argument « %s » de --build-id n'est pas un nombre hexadécimal valide"
 
-#: layout.cc:3503
+#: layout.cc:3507
 #, c-format
 msgid "unrecognized --build-id argument '%s'"
 msgstr "l'argument « %s » de --build-id n'est pas reconnu"
 
-#: layout.cc:4081
+#: layout.cc:3561
+#, c-format
+msgid "error: --package-metadata=%s does not contain valid JSON: %s\n"
+msgstr "erreur : --package-metadata=%s contient du JSON non valide : %s\n"
+
+#: layout.cc:4131
 #, c-format
 msgid "load segment overlap [0x%llx -> 0x%llx] and [0x%llx -> 0x%llx]"
 msgstr "le segment de chargement chevauche [0x%llx -> 0x%llx] et [0x%llx -> 0x%llx]"
 
-#: layout.cc:4242 output.cc:4549
+#: layout.cc:4292 output.cc:4549
 #, c-format
 msgid "out of patch space for section %s; relink with --incremental-full"
 msgstr "à court d'espace de retouche pour la section %s ; rééditer les liens avec --incremental-full"
 
-#: layout.cc:4251 output.cc:4557
+#: layout.cc:4301 output.cc:4557
 #, c-format
 msgid "%s: section changed size; relink with --incremental-full"
 msgstr "%s : changement de taille de la section ; rééditer les liens avec --incremental-full"
 
-#: layout.cc:4506
+#: layout.cc:4556
 msgid "out of patch space for symbol table; relink with --incremental-full"
-msgstr "à court d'espace de retouche pour la table de symboles ; rééditer les liens avec --incremental-full"
+msgstr "à court d'espace de retouche pour la table des symboles ; rééditer les liens avec --incremental-full"
 
-#: layout.cc:4577
+#: layout.cc:4627
 msgid "out of patch space for section header table; relink with --incremental-full"
 msgstr "à court d'espace de retouche pour la table d'en-tête de section ; rééditer les liens avec --incremental-full"
 
-#: layout.cc:5323
+#: layout.cc:5373
 msgid "read-only segment has dynamic relocations"
 msgstr "segment en lecture seule ayant des relocalisations dynamiques"
 
-#: layout.cc:5326
+#: layout.cc:5376
 msgid "shared library text segment is not shareable"
 msgstr "segment de texte de bibliothèque partagée non partageable"
 
@@ -1397,7 +1404,7 @@ msgstr "la longueur de la section des chaînes fusionnables n'est pas un multipl
 #: merge.cc:464
 #, c-format
 msgid "%s: last entry in mergeable string section '%s' not null terminated"
-msgstr "%s : la dernière entrée de la section des chaînes fusionnables « %s » ne termine pas par le caractère nul"
+msgstr "%s : la dernière entrée de la section des chaînes fusionnables « %s » ne se termine pas par le caractère nul"
 
 #: merge.cc:528
 #, c-format
@@ -1532,22 +1539,22 @@ msgstr "%s : édition de liens d'un code 32 bits avec un code 64 bits"
 #: mips.cc:9457 mips.cc:9509 mips.cc:9523
 #, c-format
 msgid "%s: linking %s module with previous %s modules"
-msgstr "%s : édition de liens du module %s avec les précédants %s modules"
+msgstr "%s : édition de liens du module %s avec les précédents %s modules"
 
 #: mips.cc:9473
 #, c-format
 msgid "%s: ABI mismatch: linking %s module with previous %s modules"
-msgstr "%s : désaccord ABI : édition de liens du module %s avec les précédants %s modules"
+msgstr "%s : désaccord ABI : édition de liens du module %s avec les précédents %s modules"
 
 #: mips.cc:9495
 #, c-format
 msgid "%s: ASE mismatch: linking %s module with previous %s modules"
-msgstr "%s : désaccord ASE : édition de liens du module %s avec les précédants %s modules"
+msgstr "%s : désaccord ASE : édition de liens du module %s avec les précédents %s modules"
 
 #: mips.cc:9536
 #, c-format
 msgid "%s: uses different e_flags (0x%x) fields than previous modules (0x%x)"
-msgstr "%s : utilise des champs de e_flags (0x%x) différents des modules précédants (0x%x)"
+msgstr "%s : utilise des champs de e_flags (0x%x) différents des modules précédents (0x%x)"
 
 #: mips.cc:9944
 #, c-format
@@ -1589,7 +1596,7 @@ msgstr "les fonctions MIPS16 et microMIPS ne peuvent pas s'appeler mutuellement"
 #: mips.cc:12327
 #, c-format
 msgid "relocation overflow: %u against '%s' defined in %s"
-msgstr "débordement de relocalisation : %u vers « %s » définit dans %s"
+msgstr "débordement de relocalisation : %u vers « %s » défini dans %s"
 
 #: mips.cc:12333
 #, c-format
@@ -1931,7 +1938,7 @@ msgstr "la valeur %g pour --hash-bucket-fraction n'est pas dans l'intervalle [0.
 msgid "Options --incremental-changed, --incremental-unchanged, --incremental-unknown require the use of --incremental"
 msgstr ""
 "Les options --incremental-changed, --incremental-unchanged, --incremental-\n"
-"unknown nécessite l'utilisation de --incremental"
+"unknown nécessitent l'utilisation de --incremental"
 
 #: options.cc:1408
 msgid "incremental linking is not compatible with -r"
@@ -1965,41 +1972,45 @@ msgstr "--icf ignoré pour l'édition de liens incrémentale"
 msgid "ignoring --compress-debug-sections for an incremental link"
 msgstr "--compress-debug-sections ignoré pour l'édition de liens incrémentale"
 
-#: options.cc:1510
+#: options.cc:1439
+msgid "--compress-debug-sections=zstd: gold is not built with zstd support"
+msgstr "--compress-debug-sections=zstd : gold n'est pas construit avec le support zstd"
+
+#: options.cc:1519
 msgid "May not nest groups"
 msgstr "Ne peut pas imbriquer des groupes"
 
-#: options.cc:1512
+#: options.cc:1521
 msgid "may not nest groups in libraries"
 msgstr "ne peut pas imbriquer des groupes dans les bibliothèques"
 
-#: options.cc:1524
+#: options.cc:1533
 msgid "Group end without group start"
 msgstr "Fin de groupe sans début de groupe"
 
-#: options.cc:1534
+#: options.cc:1543
 msgid "may not nest libraries"
 msgstr "ne peut imbriquer les bibliothèques"
 
-#: options.cc:1536
+#: options.cc:1545
 msgid "may not nest libraries in groups"
 msgstr "ne peut imbriquer des bibliothèques dans des groupes"
 
-#: options.cc:1548
+#: options.cc:1557
 msgid "lib end without lib start"
 msgstr "fin de bibliothèque sans début de bibliothèque"
 
 #. I guess it's neither a long option nor a short option.
-#: options.cc:1613
+#: options.cc:1622
 msgid "unknown option"
 msgstr "option inconnue"
 
-#: options.cc:1640
+#: options.cc:1649
 #, c-format
 msgid "%s: missing group end\n"
 msgstr "%s : fin de groupe manquante\n"
 
-#: options.cc:1646
+#: options.cc:1655
 #, c-format
 msgid "%s: missing lib end\n"
 msgstr "%s : fin de bibliothèque manquante\n"
@@ -2024,7 +2035,7 @@ msgstr "Non pris en charge"
 msgid "Do not copy DT_NEEDED tags from shared libraries"
 msgstr "Ne pas copier l'étiquette DT_NEEDED depuis des bibliothèques partagées"
 
-#: options.h:689 options.h:1493
+#: options.h:689 options.h:1494
 msgid "Allow multiple definitions of symbols"
 msgstr "Autorise les définitions multiples de symboles"
 
@@ -2046,7 +2057,7 @@ msgstr "Appliquer des valeurs de l'édition de liens pour les relocalisation dyn
 
 #: options.h:698
 msgid "(aarch64 only) Do not apply link-time values for dynamic relocations"
-msgstr "(aarch64) Ne pas appliquer les valeurs de l'édition de liens pour les relocalisations dynamiques"
+msgstr "(aarch64 seulement) Ne pas appliquer les valeurs de l'édition de liens pour les relocalisations dynamiques"
 
 #: options.h:702
 msgid "Use DT_NEEDED only for shared libraries that are used"
@@ -2056,7 +2067,7 @@ msgstr "Utiliser DT_NEEDED seulement pour les bibliothèques partagées utilisé
 msgid "Use DT_NEEDED for all shared libraries"
 msgstr "Utiliser DT_NEEDED pour toutes les bibliothèques partagées"
 
-#: options.h:706 options.h:919 options.h:1381 options.h:1395
+#: options.h:706 options.h:919 options.h:1385 options.h:1399
 msgid "Ignored"
 msgstr "Ignoré"
 
@@ -2070,7 +2081,7 @@ msgstr "Choisir le format d'entrée"
 
 #: options.h:719
 msgid "Output BE8 format image"
-msgstr "Retourner une image au format BE8"
+msgstr "Renvoyer une image au format BE8"
 
 #: options.h:722
 msgid "Generate build ID note"
@@ -2084,8 +2095,8 @@ msgstr "[=STYLE]"
 msgid "Chunk size for '--build-id=tree'"
 msgstr "Taille des morceaux pour « --build-id=tree »"
 
-#: options.h:727 options.h:732 options.h:1265 options.h:1274 options.h:1466
-#: options.h:1491 options.h:1524
+#: options.h:727 options.h:732 options.h:1269 options.h:1278 options.h:1467
+#: options.h:1492 options.h:1525
 msgid "SIZE"
 msgstr "TAILLE"
 
@@ -2143,7 +2154,7 @@ msgstr "Compresser les sections .debug_* dans le fichier de sortie"
 
 #: options.h:781
 msgid "Output cross reference table"
-msgstr "Afficher la table de références croisées"
+msgstr "Afficher la table des références croisées"
 
 #: options.h:782
 msgid "Do not output cross reference table"
@@ -2198,7 +2209,7 @@ msgid "Write a dependency file listing all files read"
 msgstr "Écrire un fichier de dépendances listant tous les fichiers lus"
 
 #: options.h:814 options.h:830 options.h:982 options.h:1011 options.h:1088
-#: options.h:1200 options.h:1340 options.h:1372
+#: options.h:1204 options.h:1344 options.h:1376
 msgid "FILE"
 msgstr "FICHIER"
 
@@ -2238,8 +2249,8 @@ msgstr "(PowerPC seulement) Ne pas étiquetter l'espace d'amorçage de l'éditeu
 msgid "Set program start address"
 msgstr "Définir l'adresse de début du programme"
 
-#: options.h:839 options.h:1343 options.h:1345 options.h:1347 options.h:1350
-#: options.h:1352
+#: options.h:839 options.h:1347 options.h:1349 options.h:1351 options.h:1354
+#: options.h:1356
 msgid "ADDRESS"
 msgstr "ADRESSE"
 
@@ -2277,10 +2288,10 @@ msgstr "Ne pas exporter tous les symboles dynamiques"
 
 #: options.h:863
 msgid "Export SYMBOL to dynamic symbol table"
-msgstr "Exporter SYMBOLE vers la table de symboles dynamiques"
+msgstr "Exporter SYMBOLE vers la table des symboles dynamiques"
 
-#: options.h:863 options.h:885 options.h:1003 options.h:1020 options.h:1357
-#: options.h:1426 options.h:1440
+#: options.h:863 options.h:885 options.h:1003 options.h:1020 options.h:1361
+#: options.h:1430 options.h:1444
 msgid "SYMBOL"
 msgstr "SYMBOLE"
 
@@ -2294,7 +2305,7 @@ msgstr "Éditer les liens des objets petits-boutistes"
 
 #: options.h:873
 msgid "Auxiliary filter for shared object symbol table"
-msgstr "Filtre auxiliaire pour la table de symboles des objets partagés"
+msgstr "Filtre auxiliaire pour la table des symboles des objets partagés"
 
 #: options.h:874 options.h:878
 msgid "SHLIB"
@@ -2302,7 +2313,7 @@ msgstr "SHLIB"
 
 #: options.h:877
 msgid "Filter for shared object symbol table"
-msgstr "Filtre pour la table de symboles des objets partagés"
+msgstr "Filtre pour la table des symboles des objets partagés"
 
 #: options.h:881
 msgid "Treat warnings as errors"
@@ -2334,11 +2345,11 @@ msgstr "(ARM seulement) Ne pas corriger les binaires conformément à l'erratum 
 
 #: options.h:896
 msgid "(AArch64 only) Fix Cortex-A53 erratum 843419"
-msgstr "(AArch64 seulement) Corriger les binaires conformément à l'erratum 843419 du Cortex-A8"
+msgstr "(AArch64 seulement) Corriger les binaires conformément à l'erratum 843419 du Cortex-A53"
 
 #: options.h:897
 msgid "(AArch64 only) Do not fix Cortex-A53 erratum 843419"
-msgstr "(AArch64 seulement) Ne pas corriger les binaires conformément à l'erratum 843419 du Cortex-A8"
+msgstr "(AArch64 seulement) Ne pas corriger les binaires conformément à l'erratum 843419 du Cortex-A53"
 
 #: options.h:900
 msgid "(AArch64 only) Fix Cortex-A53 erratum 835769"
@@ -2396,7 +2407,7 @@ msgstr "Générer une bibliothèque partagée"
 msgid "Set shared library name"
 msgstr "Définir le nom de la bibliothèque partagée"
 
-#: options.h:939 options.h:1175 options.h:1239
+#: options.h:939 options.h:1179 options.h:1243
 msgid "FILENAME"
 msgstr "NOM DE FICHIER"
 
@@ -2428,8 +2439,8 @@ msgstr "Regroupement de Code Identique. « --icf=safe » regroupe les construc
 msgid "Number of iterations of ICF (default 3)"
 msgstr "Nombre d'itérations pour ICF (3 par défaut)"
 
-#: options.h:962 options.h:1259 options.h:1316 options.h:1318 options.h:1320
-#: options.h:1322
+#: options.h:962 options.h:1263 options.h:1320 options.h:1322 options.h:1324
+#: options.h:1326
 msgid "COUNT"
 msgstr "DÉCOMPTE"
 
@@ -2525,7 +2536,7 @@ msgstr "Ne pas générer les informations d'épilogue pour PLT"
 msgid "Add directory to search path"
 msgstr "Ajouter les dossiers lors de l'exploration de l'arborescence"
 
-#: options.h:1032 options.h:1214 options.h:1217 options.h:1221 options.h:1290
+#: options.h:1032 options.h:1218 options.h:1221 options.h:1225 options.h:1294
 msgid "DIR"
 msgstr "DOSSIER"
 
@@ -2597,7 +2608,7 @@ msgstr "Aligner les données sur les pages, définir le texte en lecture seule"
 msgid "Use less memory and more disk I/O (included only for compatibility with GNU ld)"
 msgstr "Utiliser moins de mémoire et plus d'entrées/sorties disque (présent uniquement pour compatibilité avec GNU ld)"
 
-#: options.h:1075 options.h:1468
+#: options.h:1075 options.h:1469
 msgid "Report undefined symbols (even with --shared)"
 msgstr "Signaler les symboles non définis (même avec --shared)"
 
@@ -2641,631 +2652,631 @@ msgstr "[place,discard,warn,error]"
 msgid "Ignored for ARM compatibility"
 msgstr "Ignoré pour compatibilité avec ARM"
 
-#: options.h:1106 options.h:1109
+#: options.h:1106
+msgid "Generate package metadata note"
+msgstr "Générer une note sur les métadonnées du paquet."
+
+#: options.h:1107
+msgid "[=JSON]"
+msgstr "[=JSON]"
+
+#: options.h:1110 options.h:1113
 msgid "Create a position independent executable"
 msgstr "Créer un exécutable indépendant de la position"
 
-#: options.h:1107 options.h:1110
+#: options.h:1111 options.h:1114
 msgid "Do not create a position independent executable"
 msgstr "Ne pas créer un exécutable indépendant de la position"
 
-#: options.h:1114
+#: options.h:1118
 msgid "Force PIC sequences for ARM/Thumb interworking veneers"
 msgstr "Forcer les séquences PIC pour vernissage d'inter opérabilité ARM/Thumb "
 
-#: options.h:1118
+#: options.h:1122
 msgid "(ARM only) Ignore for backward compatibility"
 msgstr "(ARM seulement) Ignorer pour rétrocompatibilité"
 
-#: options.h:1121
+#: options.h:1125
 msgid "(PowerPC only) Align PLT call stubs to fit cache lines"
 msgstr "(PowerPC seulement) Aligner les espaces d'amorçage d'appel PLT pour qu'ils conviennent aux lignes de cache"
 
-#: options.h:1122
+#: options.h:1126
 msgid "[=P2ALIGN]"
 msgstr "[=P2ALIGN]"
 
-#: options.h:1125
+#: options.h:1129
 msgid "(PowerPC64 only) Optimize calls to ELFv2 localentry:0 functions"
 msgstr "(PowerPC64 seulement) Optimiser les appels aux fonctions ELFv2 localentry:0"
 
-#: options.h:1126
+#: options.h:1130
 msgid "(PowerPC64 only) Don't optimize ELFv2 calls"
 msgstr "(PowerPC64 seulement) Ne pas optimiser les appels ELFv2"
 
-#: options.h:1129
+#: options.h:1133
 msgid "(PowerPC64 only) PLT call stubs should load r11"
 msgstr "(PowerPC64 seulement) Les espaces d'amorçage d'appel PLT doivent charger r11"
 
-#: options.h:1130
+#: options.h:1134
 msgid "(PowerPC64 only) PLT call stubs should not load r11"
 msgstr "(PowerPC64 seulement) Les espaces d'amorçage d'appel PLT ne doivent pas charger r11"
 
-#: options.h:1133
+#: options.h:1137
 msgid "(PowerPC64 only) PLT call stubs with load-load barrier"
 msgstr "(PowerPC64 seulement) Espaces d'amorçage d'appel PLT avec barrière load-load"
 
-#: options.h:1134
+#: options.h:1138
 msgid "(PowerPC64 only) PLT call stubs without barrier"
 msgstr "(PowerPC64 seulement) Espaces d'amorçage d'appel PLT sans barrière"
 
-#: options.h:1138
+#: options.h:1142
 msgid "Load a plugin library"
 msgstr "Charger une bibliothèque greffon"
 
-#: options.h:1138 options.h:1143
+#: options.h:1142 options.h:1147
 msgid "PLUGIN"
 msgstr "GREFFON"
 
-#: options.h:1140
+#: options.h:1144
 msgid "Pass an option to the plugin"
 msgstr "Passer une option au greffon"
 
-#: options.h:1140 options.h:1146
+#: options.h:1144 options.h:1150
 msgid "OPTION"
 msgstr "OPTION"
 
-#: options.h:1143
+#: options.h:1147
 msgid "Load a plugin library (not supported)"
 msgstr "Charger une bibliothèque greffon (non pris en charge)"
 
-#: options.h:1145
+#: options.h:1149
 msgid "Pass an option to the plugin (not supported)"
 msgstr "Passer une option au greffon (non supporté)"
 
-#: options.h:1150
+#: options.h:1154
 msgid "Use posix_fallocate to reserve space in the output file"
 msgstr "Utiliser posix_fallocate() pour réserver de l'espace dans le fichier de sortie"
 
-#: options.h:1151
+#: options.h:1155
 msgid "Use fallocate or ftruncate to reserve space"
 msgstr "Utiliser fallocate() ou ftruncate() pour réserver de l'espace"
 
-#: options.h:1154
+#: options.h:1158
 msgid "(PowerPC64 only) stubs use power10 insns"
 msgstr "(PowerPC64 seulement) Les espaces d'amorçage utilisent les insns power10"
 
-#: options.h:1155
+#: options.h:1159
 msgid "[=auto,no,yes]"
 msgstr "[=auto,no,yes]"
 
-#: options.h:1157
+#: options.h:1161
 msgid "(PowerPC64 only) stubs do not use power10 insns"
 msgstr "(PowerPC64 seulement) Les espaces d'amorçage n'utilisent pas les insns power10"
 
-#: options.h:1160
+#: options.h:1164
 msgid "Preread archive symbols when multi-threaded"
 msgstr "Lire en amont (preread) les symboles d'archive lorsqu'en multi-thread"
 
-#: options.h:1163
+#: options.h:1167
 msgid "List removed unused sections on stderr"
 msgstr "Lister les sections non utilisées et supprimées sur la sortie d'erreurs standard"
 
-#: options.h:1164
+#: options.h:1168
 msgid "Do not list removed unused sections"
 msgstr "Ne pas lister les sections non utilisées et supprimées"
 
-#: options.h:1167
+#: options.h:1171
 msgid "List folded identical sections on stderr"
 msgstr "Lister les sections identiques regroupées sur la sortie d'erreurs standard"
 
-#: options.h:1168
+#: options.h:1172
 msgid "Do not list folded identical sections"
 msgstr "Ne pas lister les sections identiques regroupées"
 
-#: options.h:1171
+#: options.h:1175
 msgid "Print default output format"
 msgstr "Afficher le format de sortie par défaut"
 
-#: options.h:1174
+#: options.h:1178
 msgid "Print symbols defined and used for each input"
 msgstr "Afficher les symboles définis et utilisés pour chaque entrée"
 
-#: options.h:1178
+#: options.h:1182
 msgid "Save the state of flags related to input files"
 msgstr "Sauvegarder l'état des drapeaux liés aux fichiers d'entrée"
 
-#: options.h:1180
+#: options.h:1184
 msgid "Restore the state of flags related to input files"
 msgstr "Restaurer l'état des drapeaux liés aux fichiers d'entrée"
 
-#: options.h:1185
+#: options.h:1189
 msgid "Generate relocations in output"
 msgstr "Générer les relocalisations dans la sortie"
 
-#: options.h:1188
+#: options.h:1192
 msgid "Ignored for SVR4 compatibility"
 msgstr "Ignoré pour compatibilité avec SVR4"
 
-#: options.h:1193
+#: options.h:1197
 msgid "Generate relocatable output"
 msgstr "Générer une sortie relocalisable"
 
-#: options.h:1196
+#: options.h:1200
 msgid "Relax branches on certain targets"
 msgstr "Relâcher les branches pour certaines cibles"
 
-#: options.h:1197
+#: options.h:1201
 msgid "Do not relax branches"
 msgstr "Ne pas relâcher de branches"
 
-#: options.h:1200
+#: options.h:1204
 msgid "keep only symbols listed in this file"
 msgstr "garder uniquement les symboles listés dans ce fichier"
 
-#: options.h:1203
+#: options.h:1207
 msgid "Put read-only non-executable sections in their own segment"
 msgstr "Mettre les sections non exécutables en lecture seule dans leur propre segment"
 
-#: options.h:1204
+#: options.h:1208
 msgid "Do not put read-only non-executable sections in their own segment"
 msgstr "Ne pas mettre les sections non exécutables en lecture seule dans leur propre segment"
 
-#: options.h:1207
+#: options.h:1211
 msgid "Set offset between executable and read-only segments"
 msgstr "Définir le décalage entre les segments exécutables et en lecture seule"
 
-#: options.h:1208
+#: options.h:1212
 msgid "OFFSET"
 msgstr "DÉCALAGE"
 
-#: options.h:1214 options.h:1217
+#: options.h:1218 options.h:1221
 msgid "Add DIR to runtime search path"
 msgstr "Ajouter le DOSSIER au chemin de recherche utilisé à l'exécution"
 
-#: options.h:1220
+#: options.h:1224
 msgid "Add DIR to link time shared library search path"
 msgstr "Ajouter le DOSSIER au chemin de recherche de bibliothèques partagées au moment de l'édition de liens"
 
-#: options.h:1226
+#: options.h:1230
 msgid "Strip all symbols"
 msgstr "Élaguer tous les symboles"
 
-#: options.h:1228
+#: options.h:1232
 msgid "Strip debugging information"
 msgstr "Élaguer les informations de débogage"
 
-#: options.h:1230
+#: options.h:1234
 msgid "Emit only debug line number information"
 msgstr "Émettre uniquement les informations de débogage de numéro de ligne"
 
-#: options.h:1232
+#: options.h:1236
 msgid "Strip debug symbols that are unused by gdb (at least versions <= 7.4)"
-msgstr "Éliminer les symboles de débogage qui ne sont pas utilisés par gdb (du moins pour les versions inférieures à la 7.4)"
+msgstr "Éliminer les symboles de débogage non utilisés par gdb (du moins pour les versions antérieures à la 7.4 comprise)"
 
-#: options.h:1235
+#: options.h:1239
 msgid "Strip LTO intermediate code sections"
 msgstr "Éliminer les sections LTO de code intermédiaire"
 
-#: options.h:1238
+#: options.h:1242
 msgid "Layout sections in the order specified"
 msgstr "Disposer les sections dans l'ordre spécifié"
 
-#: options.h:1242
+#: options.h:1246
 msgid "Set address of section"
 msgstr "Définir l'adresse de section"
 
-#: options.h:1242
+#: options.h:1246
 msgid "SECTION=ADDRESS"
 msgstr "SECTION=ADRESSE"
 
-#: options.h:1245
+#: options.h:1249
 msgid "(PowerPC only) Use new-style PLT"
 msgstr "(PowerPC seulement) Utiliser les PLT nouvelle façon"
 
-#: options.h:1248
+#: options.h:1252
 msgid "Sort common symbols by alignment"
 msgstr "Trier les symboles communs en fonction de leur alignement"
 
-#: options.h:1249
+#: options.h:1253
 msgid "[={ascending,descending}]"
 msgstr "[={ascending (croissant),descending (décroissant)}]"
 
-#: options.h:1252
+#: options.h:1256
 msgid "Sort sections by name.  '--no-text-reorder' will override '--sort-section=name' for .text"
 msgstr "Trier les sections par nom. « --no-text-reorder » sera utilisé à la place de « --sort-section=name » pour .text"
 
-#: options.h:1254
+#: options.h:1258
 msgid "[none,name]"
 msgstr "[none(rien),name(nom)]"
 
-#: options.h:1258
+#: options.h:1262
 msgid "Dynamic tag slots to reserve (default 5)"
 msgstr "Emplacements de tags dynamiques à réserver (5 par défaut)"
 
-#: options.h:1262
+#: options.h:1266
 msgid "(ARM, PowerPC only) The maximum distance from instructions in a group of sections to their stubs. Negative values mean stubs are always after the group. 1 means use default size"
-msgstr "(ARM, PowerPC seulement) La distance maximale des instructions dans un groupe de sections à leurs espace d'amorçage de l'éditeur dynamique de liens. Des valeurs négatives impliquent qu'ils se trouvent toujours après le groupe. La valeur 1 correspond à l'utilisation de la taille par défaut."
+msgstr "(ARM, PowerPC seulement) La distance maximale des instructions dans un groupe de sections à leurs espace d'amorçage de l'éditeur dynamique de liens. Des valeurs négatives impliquent qu'ils se trouvent toujours après le groupe. La valeur 1 correspond à l'utilisation de la taille par défaut"
 
-#: options.h:1268
+#: options.h:1272
 msgid "(PowerPC only) Allow a group of stubs to serve multiple output sections"
 msgstr "(PowerPC seulement) Permettre à un group d'espace d'amorçage de servir des sections de sorties multiples"
 
-#: options.h:1270
+#: options.h:1274
 msgid "(PowerPC only) Each output section has its own stubs"
 msgstr "(PowerPC seulement) Chaque section de sortie possède son propre espace d'amorçage"
 
-#: options.h:1273
+#: options.h:1277
 msgid "Stack size when -fsplit-stack function calls non-split"
 msgstr "Taille de la pile lorsque la fonctionnalité -fsplit-stack appelle non-split"
 
-#: options.h:1279
+#: options.h:1283
 msgid "Do not link against shared libraries"
 msgstr "Ne pas établir de liens avec des bibliothèques partagées"
 
-#: options.h:1282
+#: options.h:1286
 msgid "Start a library"
 msgstr "Démarrer une bibliothèque"
 
-#: options.h:1284
+#: options.h:1288
 msgid "End a library "
 msgstr "Arrêter une bibliothèque"
 
-#: options.h:1287
+#: options.h:1291
 msgid "Print resource usage statistics"
 msgstr "Afficher les statistiques d'utilisation des ressources"
 
-#: options.h:1290
+#: options.h:1294
 msgid "Set target system root directory"
 msgstr "Définir le dossier racine du système cible"
 
-#: options.h:1295
+#: options.h:1299
 msgid "Print the name of each input file"
 msgstr "Afficher le nom de chaque fichier d'entrée"
 
-#: options.h:1298
+#: options.h:1302
 msgid "(ARM only) Force R_ARM_TARGET1 type to R_ARM_ABS32"
 msgstr "(ARM seulement) Forcer le type R_ARM_TARGET1 vers R_ARM_ABS32"
 
-#: options.h:1301
+#: options.h:1305
 msgid "(ARM only) Force R_ARM_TARGET1 type to R_ARM_REL32"
 msgstr "(ARM seulement) Forcer le type R_ARM_TARGET1 vers R_ARM_REL32"
 
-#: options.h:1304
+#: options.h:1308
 msgid "(ARM only) Set R_ARM_TARGET2 relocation type"
 msgstr "(ARM seulement) Fixe le type de relocalisation R_ARM_TARGET2"
 
-#: options.h:1305
+#: options.h:1309
 msgid "[rel, abs, got-rel"
 msgstr "[rel, abs, got-rel"
 
-#: options.h:1309
+#: options.h:1313
 msgid "Enable text section reordering for GCC section names"
 msgstr "Activer le réordonnancement des sections texte pour les noms de section GCC"
 
-#: options.h:1310
+#: options.h:1314
 msgid "Disable text section reordering for GCC section names"
 msgstr "Désactiver le réordonnancement des sections texte pour les noms de section GCC"
 
-#: options.h:1313
+#: options.h:1317
 msgid "Run the linker multi-threaded"
 msgstr "Lancer l'éditeur de liens en multi-threads"
 
-#: options.h:1314
+#: options.h:1318
 msgid "Do not run the linker multi-threaded"
 msgstr "Ne pas lancer l'éditeur de liens en multi-threads"
 
-#: options.h:1316
+#: options.h:1320
 msgid "Number of threads to use"
 msgstr "Nombre de threads à utiliser"
 
-#: options.h:1318
+#: options.h:1322
 msgid "Number of threads to use in initial pass"
 msgstr "Nombre de threads à utiliser lors de la passe initiale"
 
-#: options.h:1320
+#: options.h:1324
 msgid "Number of threads to use in middle pass"
 msgstr "Nombre de threads à utiliser lors de la passe intermédiaire"
 
-#: options.h:1322
+#: options.h:1326
 msgid "Number of threads to use in final pass"
 msgstr "Nombre de threads à utiliser lors de la dernière passe"
 
-#: options.h:1325
+#: options.h:1329
 msgid "(PowerPC/64 only) Optimize GD/LD/IE code to IE/LE"
 msgstr "(PowerPC/64 seulement) Optimiser le code GD/LS/IE en IE/LE"
 
-#: options.h:1326
+#: options.h:1330
 msgid "(PowerPC/64 only) Don'''t try to optimize TLS accesses"
 msgstr "(PowerPC/64 seulement) Ne pas essayer d'optimiser les accès TLS"
 
-#: options.h:1328
+#: options.h:1332
 msgid "(PowerPC/64 only) Use a special __tls_get_addr call"
 msgstr "(PowerPC/64 seulement) Utiliser a appel special __tls_get_addr"
 
-#: options.h:1329
+#: options.h:1333
 msgid "(PowerPC/64 only) Don't use a special __tls_get_addr call"
 msgstr "(PowerPC/64 seulement) Ne pas utiliser d'appel special __tls_get_addr"
 
-#: options.h:1332
+#: options.h:1336
 msgid "(PowerPC64 only) Optimize TOC code sequences"
 msgstr "(PowerPC64 seulement) Optimiser les séquences de code TOC"
 
-#: options.h:1333
+#: options.h:1337
 msgid "(PowerPC64 only) Don't optimize TOC code sequences"
 msgstr "(PowerPC64 seulement) Ne pas optimiser les séquence de code TOC"
 
-#: options.h:1336
+#: options.h:1340
 msgid "(PowerPC64 only) Sort TOC and GOT sections"
 msgstr "(PowerPC64 seulement) Trier les sections TOC and GOT"
 
-#: options.h:1337
+#: options.h:1341
 msgid "(PowerPC64 only) Don't sort TOC and GOT sections"
 msgstr "(PowerPC64 seulement) Ne pas trier les sections TOC and GOT"
 
-#: options.h:1340
+#: options.h:1344
 msgid "Read linker script"
 msgstr "Lire le script de l'éditeur de liens"
 
-#: options.h:1343
+#: options.h:1347
 msgid "Set the address of the bss segment"
 msgstr "Définir l'adresse du segment bss"
 
-#: options.h:1345
+#: options.h:1349
 msgid "Set the address of the data segment"
 msgstr "Définir l'adresse du segment de données"
 
-#: options.h:1347 options.h:1349
+#: options.h:1351 options.h:1353
 msgid "Set the address of the text segment"
 msgstr "Définir l'adresse du segment de texte"
 
-#: options.h:1352
+#: options.h:1356
 msgid "Set the address of the rodata segment"
 msgstr "Définir l'adresse du segment de données constantes en lecture seule (rodata)"
 
-#: options.h:1357
+#: options.h:1361
 msgid "Create undefined reference to SYMBOL"
 msgstr "Créer une référence non définie au SYMBOLE"
 
-#: options.h:1360
+#: options.h:1364
 msgid "How to handle unresolved symbols"
 msgstr "Comment traiter les symboles non résolus"
 
-#: options.h:1369
+#: options.h:1373
 msgid "Alias for --debug=files"
 msgstr "Synonyme de --debug=fichiers"
 
-#: options.h:1372
+#: options.h:1376
 msgid "Read version script"
 msgstr "Lire le script de version"
 
-#: options.h:1377
+#: options.h:1381
 msgid "Warn about duplicate common symbols"
 msgstr "Avertir des symboles communs dupliqués"
 
-#: options.h:1378
+#: options.h:1382
 msgid "Do not warn about duplicate common symbols"
 msgstr "Ne pas avertir des symboles communs dupliqués"
 
-#: options.h:1384
-msgid "Warn when discarding version information"
-msgstr "Avertir lorsque les informations de version sont écartés"
-
-#: options.h:1385
-msgid "Do not warn when discarding version information"
-msgstr "Ne pas avertir lorsque les informations de version sont écartés"
-
 #: options.h:1388
+msgid "Warn when discarding version information"
+msgstr "Avertir lorsque les informations de version sont écartées"
+
+#: options.h:1389
+msgid "Do not warn when discarding version information"
+msgstr "Ne pas avertir lorsque les informations de version sont écartées"
+
+#: options.h:1392
 msgid "Warn if the stack is executable"
 msgstr "Avertir si la pile est exécutable"
 
-#: options.h:1389
+#: options.h:1393
 msgid "Do not warn if the stack is executable"
-msgstr "Ne pas avertir si le tas est exécutable"
+msgstr "Ne pas avertir si la pile est exécutable"
 
-#: options.h:1392
+#: options.h:1396
 msgid "Don't warn about mismatched input files"
 msgstr "Ne pas avertir à propos des discordances dans les fichiers d'entrée"
 
-#: options.h:1398
+#: options.h:1402
 msgid "Warn when skipping an incompatible library"
 msgstr "Avertir lorsqu'une bibliothèque incompatible est écartée"
 
-#: options.h:1399
+#: options.h:1403
 msgid "Don't warn when skipping an incompatible library"
 msgstr "Ne pas avertir lorsqu'une bibliothèque incompatible est écartée"
 
-#: options.h:1402
+#: options.h:1406
 msgid "Warn if text segment is not shareable"
 msgstr "Avertir si le segment de texte n'est pas partageable"
 
-#: options.h:1403
+#: options.h:1407
 msgid "Do not warn if text segment is not shareable"
 msgstr "Ne pas avertir si le segment de texte n'est pas partageable"
 
-#: options.h:1406
+#: options.h:1410
 msgid "Report unresolved symbols as warnings"
 msgstr "Signaler les symboles non définis comme des avertissements"
 
-#: options.h:1410
+#: options.h:1414
 msgid "Report unresolved symbols as errors"
 msgstr "Signaler les symboles non définis comme des erreurs"
 
-#: options.h:1414
+#: options.h:1418
 msgid "(ARM only) Do not warn about objects with incompatible wchar_t sizes"
 msgstr "(ARM seulement) Ne pas avertir des objets avec des tailles du type wchar_t incompatibles"
 
-#: options.h:1418
+#: options.h:1422
 msgid "Convert unresolved symbols to weak references"
 msgstr "Convertir les symboles non résolus en références faibles"
 
-#: options.h:1422
+#: options.h:1426
 msgid "Include all archive contents"
 msgstr "Inclure tout le contenu de l'archive"
 
-#: options.h:1423
+#: options.h:1427
 msgid "Include only needed archive contents"
 msgstr "Inclure uniquement le contenu utile de l'archive"
 
-#: options.h:1426
+#: options.h:1430
 msgid "Use wrapper functions for SYMBOL"
 msgstr "Encapsuler le SYMBOLE dans des fonctions"
 
-#: options.h:1431
+#: options.h:1435
 msgid "Delete all local symbols"
 msgstr "Supprimer tous les symboles locaux"
 
-#: options.h:1433
+#: options.h:1437
 msgid "Delete all temporary local symbols"
 msgstr "Supprimer tous les symboles locaux temporaires"
 
-#: options.h:1435
+#: options.h:1439
 msgid "Keep all local symbols"
 msgstr "Conserver tous les symboles locaux"
 
-#: options.h:1440
+#: options.h:1444
 msgid "Trace references to symbol"
 msgstr "Tracer les références au symbole"
 
-#: options.h:1443
+#: options.h:1447
 msgid "Allow unused version in script"
 msgstr "Autoriser les versions inutilisées dans les scripts"
 
-#: options.h:1444
+#: options.h:1448
 msgid "Do not allow unused version in script"
 msgstr "Ne pas autoriser les versions inutilisées dans les scripts"
 
-#: options.h:1447
+#: options.h:1451
 msgid "Default search path for Solaris compatibility"
 msgstr "Chemin de recherche par défaut pour la compatibilité Solaris"
 
-#: options.h:1448
+#: options.h:1452
 msgid "PATH"
 msgstr "CHEMIN"
 
-#: options.h:1453
+#: options.h:1457
 msgid "Start a library search group"
 msgstr "Démarrer un groupe de recherche de bibliothèque"
 
-#: options.h:1455
+#: options.h:1459
 msgid "End a library search group"
 msgstr "Arrêter un groupe de recherche de bibliothèque"
 
-#: options.h:1460
-msgid "(x86-64 only) Generate a BND PLT for Intel MPX"
-msgstr "(x86-64 seulement) Génére un BND PLT pour Intel MPX"
-
-#: options.h:1461
-msgid "Generate a regular PLT"
-msgstr "Générer un PLT habituel"
-
-#: options.h:1463
+#: options.h:1464
 msgid "Sort dynamic relocs"
 msgstr "Trier les relocalisations dynamiques"
 
-#: options.h:1464
+#: options.h:1465
 msgid "Do not sort dynamic relocs"
 msgstr "Ne pas trier les relocalisations dynamiques"
 
-#: options.h:1466
+#: options.h:1467
 msgid "Set common page size to SIZE"
 msgstr "Fixer la taille des pages mémoire communes à TAILLE"
 
-#: options.h:1471
+#: options.h:1472
 msgid "Mark output as requiring executable stack"
 msgstr "Marquer la sortie comme nécessitant une pile exécutable"
 
-#: options.h:1473
+#: options.h:1474
 msgid "Make symbols in DSO available for subsequently loaded objects"
 msgstr "Rendre les symboles dans le DSO disponible pour les objets chargés ultérieurement"
 
-#: options.h:1476
+#: options.h:1477
 msgid "Mark DSO to be initialized first at runtime"
 msgstr "Marquer le DSO afin qu'il soit initialisé en premier lors de l'exécution"
 
-#: options.h:1479
+#: options.h:1480
 msgid "Mark object to interpose all DSOs but executable"
 msgstr "Marquer l'objet afin qu'il interpose tous les DSO sauf l'exécutable"
 
-#: options.h:1482
+#: options.h:1483
 msgid "Mark DSO to be loaded at most once, and only in the main namespace"
 msgstr "Marquer le DSO pour n'être chargé qu'une seule fois et uniquement dans l'espace de noms principal"
 
-#: options.h:1483
+#: options.h:1484
 msgid "Do not mark the DSO as one to be loaded only in the main namespace"
 msgstr "Ne pas marquer le DSO pour n'être chargé que dans l'espace de noms principal"
 
-#: options.h:1485
+#: options.h:1486
 msgid "Mark object for lazy runtime binding"
 msgstr "Marquer l'objet pour une liaison paresseuse lors de l'exécution"
 
-#: options.h:1488
+#: options.h:1489
 msgid "Mark object requiring immediate process"
 msgstr "Marquer l'objet comme nécessitant un traitement immédiat"
 
-#: options.h:1491
+#: options.h:1492
 msgid "Set maximum page size to SIZE"
 msgstr "Fixer la taille maximale des pages à TAILLE"
 
-#: options.h:1499
+#: options.h:1500
 msgid "Do not create copy relocs"
 msgstr "Ne pas créer de copies de relocalisations"
 
-#: options.h:1501
+#: options.h:1502
 msgid "Mark object not to use default search paths"
-msgstr "Marquer l'objet comme ne devant pas utiliser les chemins de recherches par défaut"
+msgstr "Marquer l'objet comme ne devant pas utiliser les chemins de recherche par défaut"
 
-#: options.h:1504
+#: options.h:1505
 msgid "Mark DSO non-deletable at runtime"
 msgstr "Marquer le DSO comme non supprimable à l'exécution"
 
-#: options.h:1507
+#: options.h:1508
 msgid "Mark DSO not available to dlopen"
 msgstr "Marquer le DSO comme non disponible pour dlopen()"
 
-#: options.h:1510
+#: options.h:1511
 msgid "Mark DSO not available to dldump"
 msgstr "Marquer le DSO comme non disponible pour dldump()"
 
-#: options.h:1513
+#: options.h:1514
 msgid "Mark output as not requiring executable stack"
-msgstr "Marquer la sortie comme ne nécessitant pas une pile exécutable"
+msgstr "Marquer la sortie comme ne nécessitant pas de pile exécutable"
 
-#: options.h:1515
+#: options.h:1516
 msgid "Mark object for immediate function binding"
 msgstr "Marquer l'objet pour la liaison immédiate des fonctions"
 
-#: options.h:1518
+#: options.h:1519
 msgid "Mark DSO to indicate that needs immediate $ORIGIN processing at runtime"
 msgstr "Marquer le DSO pour indiquer qu'il nécessite un traitement immédiat de $ORIGINE à l'exécution"
 
-#: options.h:1521
+#: options.h:1522
 msgid "Where possible mark variables read-only after relocation"
 msgstr "Marquer les variables en lecture seule après relocalisation lorsque cela est possible"
 
-#: options.h:1522
+#: options.h:1523
 msgid "Don't mark variables read-only after relocation"
 msgstr "Ne pas marquer les variables en lecture seule après relocalisation"
 
-#: options.h:1524
+#: options.h:1525
 msgid "Set PT_GNU_STACK segment p_memsz to SIZE"
 msgstr "Fixe la p_memsz du segment PT_GNU_STACK à TAILLE"
 
-#: options.h:1526
+#: options.h:1527
 msgid "ELF symbol visibility for synthesized __start_* and __stop_* symbols"
 msgstr "Visibilité des symboles ELF pour les symboles __start_* et __stop_* synthétisés"
 
-#: options.h:1531
+#: options.h:1532
 msgid "Do not permit relocations in read-only segments"
 msgstr "Ne pas permettre de relocalisations dans des segments en lecture seule"
 
-#: options.h:1532 options.h:1534
+#: options.h:1533 options.h:1535
 msgid "Permit relocations in read-only segments"
 msgstr "Permettre de relocalisations dans des segments en lecture seule"
 
-#: options.h:1537
+#: options.h:1538
 msgid "Move .text.unlikely sections to a separate segment."
 msgstr "Déplacer les sections .text.unlikely vers un segment séparé."
 
-#: options.h:1538
+#: options.h:1539
 msgid "Do not move .text.unlikely sections to a separate segment."
 msgstr "Ne pas déplacer les sections .text.unlikely vers un segment séparé."
 
-#: options.h:1541
+#: options.h:1542
 msgid "Keep .text.hot, .text.startup, .text.exit and .text.unlikely as separate sections in the final binary."
 msgstr "Garder .text.hot, .text.startup, .text.exit et .text.unlikely comme sections séparées dans le binaire final."
 
-#: options.h:1543
+#: options.h:1544
 msgid "Merge all .text.* prefix sections."
 msgstr "Fusionner tous les préfixes de section .text.* ."
 
@@ -3478,7 +3489,7 @@ msgstr "%s : .opd invalide dans abiv%d"
 #: powerpc.cc:2404
 #, c-format
 msgid "%s: unexpected reloc type %u in .opd section"
-msgstr "%s : type relocalisation %u inattendue dans la section .opd"
+msgstr "%s : type relocalisation %u inattendu dans la section .opd"
 
 #: powerpc.cc:2415
 #, c-format
@@ -3498,103 +3509,103 @@ msgstr "%s : %s dépasse la taille d'un groupe"
 #: powerpc.cc:3641
 #, c-format
 msgid "%s:%s: branch in non-executable section, no long branch stub for you"
-msgstr "%s : %s : branchement dans une section non exécutable, pas d'espace d'amorçage pour branche distante pour toi"
+msgstr "%s : %s : branchement dans une section non exécutable, pas d'espace d'amorçage pour branche distante pour vous"
 
 #: powerpc.cc:3758
 #, c-format
 msgid "%s: stub group size is too large; retrying with %#x"
 msgstr "%s : la taille du group d'espace d'amorçage est trop grande ; nouvelle tentative avec %#x"
 
-#: powerpc.cc:5729
+#: powerpc.cc:5730
 msgid "** glink"
 msgstr "** glink"
 
-#: powerpc.cc:6394 powerpc.cc:7109
+#: powerpc.cc:6395 powerpc.cc:7110
 #, c-format
 msgid "linkage table error against `%s'"
 msgstr "erreur dans la table d'édition de liens vers « %s »"
 
-#: powerpc.cc:6397
+#: powerpc.cc:6398
 #, c-format
 msgid "linkage table error against `%s:[local %u]'"
 msgstr "erreur dans la table d'édition de liens vers « %s :[%u local] »"
 
-#: powerpc.cc:7236
+#: powerpc.cc:7237
 msgid "** save/restore"
 msgstr "** sauvegarder/restaurer"
 
-#: powerpc.cc:8008
+#: powerpc.cc:8035
 #, c-format
 msgid "%s: unsupported reloc %u for IFUNC symbol"
 msgstr "%s : relocalisation %u pour un symbole IFUNC non prise en charge"
 
-#: powerpc.cc:8274 powerpc.cc:9060
+#: powerpc.cc:8301 powerpc.cc:9087
 #, c-format
 msgid "tocsave symbol %u has bad shndx %u"
 msgstr "le symbole tocsave %u a un mauvais shndx %u"
 
-#: powerpc.cc:8565 powerpc.cc:9397
+#: powerpc.cc:8592 powerpc.cc:9424
 #, c-format
 msgid "%s: toc optimization is not supported for %#08x instruction"
 msgstr "%s : optimization toc non prise en charge pour l'instruction %#08x"
 
-#: powerpc.cc:8631 powerpc.cc:9459
+#: powerpc.cc:8658 powerpc.cc:9486
 #, c-format
 msgid "%s: unsupported -mbss-plt code"
 msgstr "%s : code -mbss-plt non pris en charge"
 
-#: powerpc.cc:9806
+#: powerpc.cc:9833
 #, c-format
 msgid "split-stack stack size overflow at section %u offset %0zx"
 msgstr "dépassement de la taille de pile de la pile scindée à la position %2$0zx de la section %1$u a échoué"
 
-#: powerpc.cc:9877
+#: powerpc.cc:9904
 msgid "--plt-localentry is especially dangerous without ld.so support to detect ABI violations"
 msgstr "--plt-localentry est particulièrement dangereux sans support ld.so pour détecter les violations ABI"
 
-#: powerpc.cc:9906
+#: powerpc.cc:9933
 msgid "--plt-localentry is incompatible with power10 pc-relative code"
 msgstr "--plt-localentry n'est pas compatible avec du code power10 relatif au pointeur d'instruction"
 
-#: powerpc.cc:10201 powerpc.cc:10207
+#: powerpc.cc:10228 powerpc.cc:10234
 #, c-format
 msgid "%s uses hard float, %s uses soft float"
 msgstr "%s utilise des flottants matériels, %s utilise des flottants logiciels"
 
-#: powerpc.cc:10213 powerpc.cc:10220
+#: powerpc.cc:10240 powerpc.cc:10247
 #, c-format
 msgid "%s uses double-precision hard float, %s uses single-precision hard float"
 msgstr "%s utilise des flotants matériels double précision, %s utilise des flottants matériels simple précision"
 
-#: powerpc.cc:10240 powerpc.cc:10246
+#: powerpc.cc:10267 powerpc.cc:10273
 #, c-format
 msgid "%s uses 64-bit long double, %s uses 128-bit long double"
 msgstr "%s utilise des long double de 64 bits, %s utilise des long double de 128 bits"
 
-#: powerpc.cc:10252 powerpc.cc:10258
+#: powerpc.cc:10279 powerpc.cc:10285
 #, c-format
 msgid "%s uses IBM long double, %s uses IEEE long double"
 msgstr "%s utilise des long double IBM, %s utilise des long double IEEE"
 
-#: powerpc.cc:10312 powerpc.cc:10318
+#: powerpc.cc:10339 powerpc.cc:10345
 #, c-format
 msgid "%s uses AltiVec vector ABI, %s uses SPE vector ABI"
 msgstr "%s utilise des vecteurs ABI AltiVec, %s utilise des vecteurs ABI SPE"
 
-#: powerpc.cc:10347 powerpc.cc:10354
+#: powerpc.cc:10374 powerpc.cc:10381
 #, c-format
 msgid "%s uses r3/r4 for small structure returns, %s uses memory"
-msgstr "%s utilise r3/r4 pour le retour de petites structures, %s utilise la mémoire"
+msgstr "%s utilise r3/r4 pour le renvoi de petites structures, %s utilise la mémoire"
 
-#: powerpc.cc:10929
+#: powerpc.cc:10951
 msgid "call lacks nop, can't restore toc; recompile with -fPIC"
 msgstr "nop fait défaut lors de l'appel, impossible de restaurer la toc ; recompiler avec -fPIC"
 
-#: powerpc.cc:12381 s390.cc:3479
+#: powerpc.cc:12403 s390.cc:3479
 msgid "relocation overflow"
 msgstr "débordement de relocalisation"
 
-#: powerpc.cc:12383
+#: powerpc.cc:12405
 msgid "try relinking with a smaller --stub-group-size"
 msgstr "essayez d'éditer les liens avec un --stub-group-size plus petit"
 
@@ -3632,7 +3643,7 @@ msgstr "Les informations de débogage s'étendent au-delà de la section .debug_
 #: reloc.cc:317 reloc.cc:945
 #, c-format
 msgid "relocation section %u uses unexpected symbol table %u"
-msgstr "la section de relocalisation %u utilise de façon inattendue la table de symbole %u"
+msgstr "la section de relocalisation %u utilise de façon inattendue la table des symbole %u"
 
 #: reloc.cc:335 reloc.cc:962
 #, c-format
@@ -3733,11 +3744,11 @@ msgstr "éditeur de liens défini"
 msgid "R_390_PC32DBL target misaligned at %llx"
 msgstr "la cible R_390_PC32DBL n'est pas bien alignée à %llx"
 
-#: s390.cc:1099 tilegx.cc:2088 x86_64.cc:1809
+#: s390.cc:1099 tilegx.cc:2088 x86_64.cc:1697
 msgid "out of patch space (PLT); relink with --incremental-full"
 msgstr "à court d'espace de retouche (PLT) ; rééditer les liens avec --incremental-full"
 
-#: s390.cc:3677 s390.cc:3733 x86_64.cc:5349
+#: s390.cc:3677 s390.cc:3733 x86_64.cc:4878
 #, c-format
 msgid "unsupported reloc type %u"
 msgstr "le type de relocalisation %u n'est pas pris en charge"
@@ -4068,7 +4079,7 @@ msgstr "%s : la définition de la version par défaut pour %s@@%s est en confli
 #: symtab.cc:1064
 #, c-format
 msgid "%s: %s: previous definition of %s@@%s here"
-msgstr "%s : %s : définition précédante de %s@@%s ici"
+msgstr "%s : %s : définition précédente de %s@@%s ici"
 
 #: symtab.cc:1206
 #, c-format
@@ -4101,7 +4112,7 @@ msgstr "versym sans nom pour le symbole %zu : %u"
 #: symtab.cc:2633
 #, c-format
 msgid "discarding version information for %s@%s, defined in unused shared library %s (linked with --as-needed)"
-msgstr "abandonne l'information de version pour %s@%s, définit dans la bibiliothèque partagée %s (liens édités avec --as-needed)"
+msgstr "abandonne l'information de version pour %s@%s, défini dans la bibiliothèque partagée %s (liens édités avec --as-needed)"
 
 #: symtab.cc:2995 symtab.cc:3141
 #, c-format
@@ -4111,12 +4122,12 @@ msgstr "%s : la section de symbole 0x%x n'est pas prise en charge"
 #: symtab.cc:3473
 #, c-format
 msgid "%s: symbol table entries: %zu; buckets: %zu\n"
-msgstr "%s : entrées de la table de symboles : %zu ; groupes de blocs : %zu\n"
+msgstr "%s : entrées de la table des symboles : %zu ; groupes de blocs : %zu\n"
 
 #: symtab.cc:3476
 #, c-format
 msgid "%s: symbol table entries: %zu\n"
-msgstr "%s : entrées de la table de symbole : %zu\n"
+msgstr "%s : entrées de la table des symboles : %zu\n"
 
 #: symtab.cc:3633
 #, c-format
@@ -4152,12 +4163,12 @@ msgstr "le symbole %s « %s » n'est pas défini localement"
 #: target-reloc.h:243
 #, c-format
 msgid "relocation refers to local symbol \"%s\" [%u], which is defined in a discarded section"
-msgstr "la relocalisation fait référence au symbole local « %s » [%u], définit dans une section rejetée"
+msgstr "la relocalisation fait référence au symbole local « %s » [%u], défini dans une section rejetée"
 
 #: target-reloc.h:251
 #, c-format
 msgid "relocation refers to global symbol \"%s\", which is defined in a discarded section"
-msgstr "la relocalisation fait référence au un symbole global « %s », définit dans une section rejetée"
+msgstr "la relocalisation fait référence au symbole global « %s », défini dans une section rejetée"
 
 #: target-reloc.h:266
 #, c-format
@@ -4179,7 +4190,7 @@ msgstr "la relocalisation a un mauvais décalage %zu"
 msgid "linker does not include stack split support required by %s"
 msgstr "l'éditeur de liens n'inclut pas la prise en charge de la scission de pile requis par %s"
 
-#: tilegx.cc:2738 x86_64.cc:3171
+#: tilegx.cc:2738 x86_64.cc:2714
 msgid "TLS_DESC not yet supported for incremental linking"
 msgstr "TLS_DESC n'est pas encore pris en charge pour l'édition de liens incrémentale"
 
@@ -4187,7 +4198,7 @@ msgstr "TLS_DESC n'est pas encore pris en charge pour l'édition de liens incré
 msgid "TLS_DESC not yet supported for TILEGX"
 msgstr "TLS_DESC n'est pas encore pris en charge pour TILEGX"
 
-#: tilegx.cc:3202 x86_64.cc:3559
+#: tilegx.cc:3202 x86_64.cc:3096
 #, c-format
 msgid "requires unsupported dynamic reloc %u; recompile with -fPIC"
 msgstr "nécessite une relocalisation %u dynamique non prise en charge ; veuillez recompiler avec -fPIC"
@@ -4223,46 +4234,52 @@ msgstr ""
 msgid "%s failed: %s"
 msgstr "%s() a échoué : %s"
 
-#: x86_64.cc:1612
+#: x86_64.cc:1500
 #, c-format
 msgid "%s: corrupt .note.gnu.property section (pr_datasz for property %d is not 4)"
 msgstr "%s : section .note.gnu.property corrompue (pr_datasz pour la propriété %d n'est pas 4)"
 
-#: x86_64.cc:1620
+#: x86_64.cc:1508
 #, c-format
 msgid "%s: unknown program property type 0x%x in .note.gnu.property section"
 msgstr "%s : le type de propriété du programme 0x%x est inconnu dans la section .note.gnu.property"
 
-#: x86_64.cc:2042
+#: x86_64.cc:1930
 #, c-format
 msgid "PC-relative offset overflow in PLT entry %d"
 msgstr "débordement du décalage relatif au PC dans l'entrée PLT %d"
 
-#: x86_64.cc:2229 x86_64.cc:2468
+#: x86_64.cc:2140
 #, c-format
 msgid "PC-relative offset overflow in APLT entry %d"
 msgstr "débordement du décalage relatif au PC dans l'entrée APLT %d"
 
-#: x86_64.cc:3524
+#: x86_64.cc:3064
 msgid "requires dynamic R_X86_64_32 reloc which may overflow at runtime; recompile with -fPIC"
 msgstr "nécessite une relocalisation R_X86_64_32 dynamique pouvant déborder à l'exécution ; veuillez recompiler avec -fPIC"
 
-#: x86_64.cc:3544
+#: x86_64.cc:3081
 #, c-format
 msgid "requires dynamic %s reloc against '%s' which may overflow at runtime; recompile with -fPIC"
 msgstr "nécessite une relocalisation %s dynamique vers « %s » pouvant déborder à l'exécution ; recompiler avec -fPIC"
 
-#: x86_64.cc:5040
+#: x86_64.cc:4569
 #, c-format
 msgid "relocation overflow: reference to local symbol %u in %s"
 msgstr "débordement de relocalisation : référence au symbole local %u dans %s"
 
-#: x86_64.cc:5047
+#: x86_64.cc:4576
 #, c-format
 msgid "relocation overflow: reference to '%s' defined in %s"
 msgstr "débordement de relocalisation : la référence à  « %s » est définie dans %s"
 
-#: x86_64.cc:5055
+#: x86_64.cc:4584
 #, c-format
 msgid "relocation overflow: reference to '%s'"
 msgstr "débordement de relocalisation : référence à « %s »"
+
+#~ msgid "(x86-64 only) Generate a BND PLT for Intel MPX"
+#~ msgstr "(x86-64 seulement) Génére un BND PLT pour Intel MPX"
+
+#~ msgid "Generate a regular PLT"
+#~ msgstr "Générer un PLT habituel"
