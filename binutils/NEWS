@@ -13,6 +13,9 @@
   updates the ABI in an incompatible way: this includes removal of
   sframe_get_funcdesc_with_addr API, change in the behavior of
   sframe_fre_get_ra_offset and sframe_fre_get_fp_offset APIs.
+
+* SFrame Version 2 is now the default (and only) format version supported by
+  gas, ld, readelf and objdump.
   
 * Add command-line option, --strip-section-headers, to objcopy and strip to
   remove ELF section header from ELF file.
