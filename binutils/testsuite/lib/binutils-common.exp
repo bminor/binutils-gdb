@@ -666,6 +666,9 @@ proc prune_warnings_extra { text } {
     # -z execstack is used.
     regsub -all "(^|\n)(\[^\n\]*: warning: enabling an executable stack because of -z execstack command line option\[^\n\]*\n?)+" $text "\\1" text
 
+    # Ignore LTO warnings triggered by configuring with --enable-pgo-build=lto.
+    regsub -all "(^|\n)(\[^\n\]*lto-wrapper: warning: using serial compilation of \[0-9\]+ LTRANS jobs\[^\n\]*\n?)+" $text "\\1" text
+
     return $text
 }
 
