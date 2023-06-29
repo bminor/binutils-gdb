@@ -1647,11 +1647,15 @@ gdbpy_initialize_disasm ()
   gdb_disassembler_module = PyModule_Create (&python_disassembler_module_def);
   if (gdb_disassembler_module == nullptr)
     return -1;
-  PyModule_AddObject(gdb_module, "disassembler", gdb_disassembler_module);
+  if (gdb_pymodule_addobject (gdb_module, "disassembler",
+			      gdb_disassembler_module) < 0)
+    return -1;
 
   /* This is needed so that 'import _gdb.disassembler' will work.  */
   PyObject *dict = PyImport_GetModuleDict ();
-  PyDict_SetItemString (dict, "_gdb.disassembler", gdb_disassembler_module);
+  if (PyDict_SetItemString (dict, "_gdb.disassembler",
+			    gdb_disassembler_module) < 0)
+    return -1;
 
   for (int i = 0; i <= (int) dis_style_comment_start; ++i)
     {
