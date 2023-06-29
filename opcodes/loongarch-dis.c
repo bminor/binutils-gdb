@@ -134,6 +134,7 @@ dis_one_arg (char esc1, char esc2, const char *bit_field,
   struct disassemble_info *info = context;
   insn_t insn = *(insn_t *) info->private_data;
   int32_t imm, u_imm;
+  enum disassembler_style style;
 
   if (esc1)
     {
@@ -176,14 +177,26 @@ dis_one_arg (char esc1, char esc2, const char *bit_field,
       info->fprintf_styled_func (info->stream, dis_style_register, "%s", loongarch_x_disname[u_imm]);
       break;
     case 'u':
-      info->fprintf_styled_func (info->stream, dis_style_immediate, "0x%x", u_imm);
+      style = esc2 == 'o' ? dis_style_address_offset : dis_style_immediate;
+      info->fprintf_styled_func (info->stream, style, "0x%x", u_imm);
       break;
     case 's':
+      switch (esc2)
+	{
+	case 'b':
+	case 'o':
+	  /* Both represent address offsets.  */
+	  style = dis_style_address_offset;
+	  break;
+	default:
+	  style = dis_style_immediate;
+	  break;
+	}
       if (imm == 0)
-	info->fprintf_styled_func (info->stream, dis_style_immediate, "%d", imm);
+	info->fprintf_styled_func (info->stream, style, "%d", imm);
       else
 	{
-	  info->fprintf_styled_func (info->stream, dis_style_immediate, "%d", imm);
+	  info->fprintf_styled_func (info->stream, style, "%d", imm);
 	  info->fprintf_styled_func (info->stream, dis_style_text, "(0x%x)", u_imm);
 	}
       switch (esc2)
