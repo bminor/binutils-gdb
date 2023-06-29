@@ -223,8 +223,12 @@ md_parse_option (int c, const char *arg)
   return ret;
 }
 
+static const char *const *r_abi_names = NULL;
+static const char *const *f_abi_names = NULL;
 static struct htab *r_htab = NULL;
+static struct htab *r_deprecated_htab = NULL;
 static struct htab *f_htab = NULL;
+static struct htab *f_deprecated_htab = NULL;
 static struct htab *fc_htab = NULL;
 static struct htab *fcn_htab = NULL;
 static struct htab *c_htab = NULL;
@@ -272,7 +276,11 @@ loongarch_after_parse_args ()
   /* Init ilp32/lp64 registers names.  */
   if (!r_htab)
     r_htab = str_htab_create (), str_hash_insert (r_htab, "", 0, 0);
+  if (!r_deprecated_htab)
+    r_deprecated_htab = str_htab_create (),
+			str_hash_insert (r_deprecated_htab, "", 0, 0);
 
+  r_abi_names = loongarch_r_normal_name;
   for (i = 0; i < ARRAY_SIZE (loongarch_r_normal_name); i++)
     str_hash_insert (r_htab, loongarch_r_normal_name[i], (void *) (i + 1), 0);
 
@@ -287,7 +295,11 @@ loongarch_after_parse_args ()
     {
       if (!f_htab)
 	f_htab = str_htab_create (), str_hash_insert (f_htab, "", 0, 0);
+      if (!f_deprecated_htab)
+	f_deprecated_htab = str_htab_create (),
+			    str_hash_insert (f_deprecated_htab, "", 0, 0);
 
+      f_abi_names = loongarch_f_normal_name;
       for (i = 0; i < ARRAY_SIZE (loongarch_f_normal_name); i++)
 	str_hash_insert (f_htab, loongarch_f_normal_name[i], (void *) (i + 1),
 			 0);
@@ -338,22 +350,24 @@ loongarch_after_parse_args ()
   /* Init lp64 registers alias.  */
   if (LARCH_opts.ase_lp64)
     {
+      r_abi_names = loongarch_r_lp64_name;
       for (i = 0; i < ARRAY_SIZE (loongarch_r_lp64_name); i++)
 	str_hash_insert (r_htab, loongarch_r_lp64_name[i], (void *) (i + 1),
 			 0);
-      for (i = 0; i < ARRAY_SIZE (loongarch_r_lp64_name1); i++)
-	str_hash_insert (r_htab, loongarch_r_lp64_name1[i], (void *) (i + 1),
-			 0);
+      for (i = 0; i < ARRAY_SIZE (loongarch_r_lp64_name_deprecated); i++)
+	str_hash_insert (r_deprecated_htab, loongarch_r_lp64_name_deprecated[i],
+			 (void *) (i + 1), 0);
     }
 
   /* Init float-lp64 registers alias */
   if ((LARCH_opts.ase_sf || LARCH_opts.ase_df) && LARCH_opts.ase_lp64)
     {
+      f_abi_names = loongarch_f_lp64_name;
       for (i = 0; i < ARRAY_SIZE (loongarch_f_lp64_name); i++)
 	str_hash_insert (f_htab, loongarch_f_lp64_name[i],
 			 (void *) (i + 1), 0);
-      for (i = 0; i < ARRAY_SIZE (loongarch_f_lp64_name1); i++)
-	str_hash_insert (f_htab, loongarch_f_lp64_name1[i],
+      for (i = 0; i < ARRAY_SIZE (loongarch_f_lp64_name_deprecated); i++)
+	str_hash_insert (f_deprecated_htab, loongarch_f_lp64_name_deprecated[i],
 			 (void *) (i + 1), 0);
     }
 }
@@ -684,6 +698,15 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
       imm = (intptr_t) str_hash_find (r_htab, arg);
       ip->match_now = 0 < imm;
       ret = imm - 1;
+      if (ip->match_now)
+	break;
+      /* Handle potential usage of deprecated register aliases.  */
+      imm = (intptr_t) str_hash_find (r_deprecated_htab, arg);
+      ip->match_now = 0 < imm;
+      ret = imm - 1;
+      if (ip->match_now && !ip->macro_id)
+	as_warn (_("register alias %s is deprecated, use %s instead"),
+		 arg, r_abi_names[ret]);
       break;
     case 'f':
       switch (esc_ch2)
@@ -700,6 +723,15 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 	}
       ip->match_now = 0 < imm;
       ret = imm - 1;
+      if (ip->match_now && !ip->macro_id)
+	break;
+      /* Handle potential usage of deprecated register aliases.  */
+      imm = (intptr_t) str_hash_find (f_deprecated_htab, arg);
+      ip->match_now = 0 < imm;
+      ret = imm - 1;
+      if (ip->match_now)
+	as_warn (_("register alias %s is deprecated, use %s instead"),
+		 arg, f_abi_names[ret]);
       break;
     case 'c':
       switch (esc_ch2)

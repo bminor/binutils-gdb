@@ -45,14 +45,14 @@ const char *const loongarch_r_lp64_name[32] =
 {
   "$zero", "$ra", "$tp", "$sp", "$a0", "$a1", "$a2", "$a3",
   "$a4",   "$a5", "$a6", "$a7", "$t0", "$t1", "$t2", "$t3",
-  "$t4",   "$t5", "$t6", "$t7", "$t8", "$x",  "$fp", "$s0",
+  "$t4",   "$t5", "$t6", "$t7", "$t8", "$r21","$fp", "$s0",
   "$s1",   "$s2", "$s3", "$s4", "$s5", "$s6", "$s7", "$s8",
 };
 
-const char *const loongarch_r_lp64_name1[32] =
+const char *const loongarch_r_lp64_name_deprecated[32] =
 {
   "", "", "", "", "$v0", "$v1", "", "", "", "", "", "", "", "", "", "",
-  "", "", "", "", "",    "",    "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "",    "$x",  "", "", "", "", "", "", "", "", "", "",
 };
 
 const char *const loongarch_f_normal_name[32] =
@@ -71,7 +71,7 @@ const char *const loongarch_f_lp64_name[32] =
   "$fs0", "$fs1", "$fs2",  "$fs3",  "$fs4",  "$fs5",  "$fs6",  "$fs7",
 };
 
-const char *const loongarch_f_lp64_name1[32] =
+const char *const loongarch_f_lp64_name_deprecated[32] =
 {
   "$fv0", "$fv1", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
   "",     "",     "", "", "", "", "", "", "", "", "", "", "", "", "", "",

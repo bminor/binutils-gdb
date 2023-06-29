@@ -178,10 +178,10 @@ dec2 : [1-9][0-9]?
 
   extern const char *const loongarch_r_normal_name[32];
   extern const char *const loongarch_r_lp64_name[32];
-  extern const char *const loongarch_r_lp64_name1[32];
+  extern const char *const loongarch_r_lp64_name_deprecated[32];
   extern const char *const loongarch_f_normal_name[32];
   extern const char *const loongarch_f_lp64_name[32];
-  extern const char *const loongarch_f_lp64_name1[32];
+  extern const char *const loongarch_f_lp64_name_deprecated[32];
   extern const char *const loongarch_fc_normal_name[4];
   extern const char *const loongarch_fc_numeric_name[4];
   extern const char *const loongarch_c_normal_name[8];
