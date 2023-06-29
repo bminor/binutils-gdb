@@ -362,6 +362,53 @@ sframe_decoder_get_funcdesc_at_index (sframe_decoder_ctx *ctx,
   return fdep;
 }
 
+/* Check whether for the given FDEP, the SFrame Frame Row Entry identified via
+   the START_IP_OFFSET and the END_IP_OFFSET, provides the stack trace
+   information for the PC.  */
+
+static bool
+sframe_fre_check_range_p (sframe_func_desc_entry *fdep,
+			  int32_t start_ip_offset, int32_t end_ip_offset,
+			  int32_t pc)
+{
+  int32_t start_ip, end_ip;
+  int32_t func_start_addr;
+  uint32_t rep_block_size;
+  uint32_t fde_type;
+  int32_t masked_pc;
+  bool mask_p;
+  bool ret;
+
+  ret = false;
+  /* FIXME - the rep_block_size should be encoded in the format somehow.  For
+     AMD64, each pltN entry stub in .plt is 16 bytes.  */
+  rep_block_size = 16;
+
+  if (!fdep)
+    return ret;
+
+  func_start_addr = fdep->sfde_func_start_address;
+  fde_type = sframe_get_fde_type (fdep);
+  mask_p = (fde_type == SFRAME_FDE_TYPE_PCMASK);
+
+  if (!mask_p)
+    {
+      start_ip = start_ip_offset + func_start_addr;
+      end_ip = end_ip_offset + func_start_addr;
+      ret = ((start_ip <= pc) && (end_ip >= pc));
+    }
+  else
+    {
+      /* For FDEs for repetitive pattern of insns, we need to return the FRE
+	 where pc % rep_block_size is between start_ip_offset and
+	 end_ip_offset.  */
+      masked_pc = pc % rep_block_size;
+      ret = ((start_ip_offset <= masked_pc) && (end_ip_offset >= masked_pc));
+    }
+
+  return ret;
+}
+
 static int
 flip_fre (char *fp, uint32_t fre_type, size_t *fre_size)
 {
@@ -1056,19 +1103,14 @@ sframe_find_fre (sframe_decoder_ctx *ctx, int32_t pc,
 {
   sframe_frame_row_entry cur_fre;
   sframe_func_desc_entry *fdep;
-  uint32_t fre_type, fde_type;
-  uint32_t end_ip_offset, i;
-  int32_t start_ip, end_ip;
+  uint32_t fre_type, fde_type, i;
+  int32_t start_ip_offset;
   int32_t func_start_addr;
+  int32_t end_ip_offset;
   const char *fres;
   size_t size = 0;
   int err = 0;
-  /* For regular FDEs (i.e. fde_type SFRAME_FDE_TYPE_PCINC),
-     where the start address in the FRE is an offset from start pc,
-     use a bitmask with all bits set so that none of the address bits are
-     ignored.  In this case, we need to return the FRE where
-     (PC >= FRE_START_ADDR) */
-  uint64_t bitmask = 0xffffffff;
+  bool mask_p;
 
   if ((ctx == NULL) || (frep == NULL))
     return sframe_set_errno (&err, SFRAME_ERR_INVAL);
@@ -1080,14 +1122,7 @@ sframe_find_fre (sframe_decoder_ctx *ctx, int32_t pc,
 
   fre_type = sframe_get_fre_type (fdep);
   fde_type = sframe_get_fde_type (fdep);
-
-  /* For FDEs for repetitive pattern of insns, we need to return the FRE
-     such that (PC & FRE_START_ADDR_AS_MASK >= FRE_START_ADDR_AS_MASK).
-     so, update the bitmask to the start address.  */
-  /* FIXME - the bitmask should be picked per ABI or encoded in the format
-     somehow. For AMD64, the pltN entry stub is 16 bytes. */
-  if (fde_type == SFRAME_FDE_TYPE_PCMASK)
-    bitmask = 0xf;
+  mask_p = (fde_type == SFRAME_FDE_TYPE_PCMASK);
 
   fres = ctx->sfd_fres + fdep->sfde_func_start_fre_off;
   func_start_addr = fdep->sfde_func_start_address;
@@ -1098,15 +1133,14 @@ sframe_find_fre (sframe_decoder_ctx *ctx, int32_t pc,
      if (err)
        return sframe_set_errno (&err, SFRAME_ERR_FRE_INVAL);
 
-     start_ip = func_start_addr + cur_fre.fre_start_addr;
+     start_ip_offset = cur_fre.fre_start_addr;
      end_ip_offset = sframe_fre_get_end_ip_offset (fdep, i, fres + size);
-     end_ip = func_start_addr + end_ip_offset;
 
-     if ((start_ip & bitmask) > (pc & bitmask))
+     /* First FRE's start_ip must be more than pc for regular SFrame FDEs.  */
+     if (i == 0 && !mask_p && (start_ip_offset + func_start_addr) > pc)
        return sframe_set_errno (&err, SFRAME_ERR_FRE_INVAL);
 
-     if (((start_ip & bitmask) <= (pc & bitmask))
-	 && (end_ip & bitmask) >= (pc & bitmask))
+     if (sframe_fre_check_range_p (fdep, start_ip_offset, end_ip_offset, pc))
        {
 	 sframe_frame_row_entry_copy (frep, &cur_fre);
 	 return 0;

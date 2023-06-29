@@ -451,8 +451,10 @@ entries and trampolines.
 
 @item SFRAME_FDE_TYPE_PCMASK
 @tab 1 @tab  Unwinders perform a @*
-(PC & FRE_START_ADDR_AS_MASK >= FRE_START_ADDR_AS_MASK)
-to look up a matching FRE.
+(PC % REP_BLOCK_SIZE @*
+ >= FRE_START_ADDR)
+to look up a matching FRE.  REP_BLOCK_SIZE is the size in bytes of the
+repeating block of program instructions.
 
 @end multitable
 

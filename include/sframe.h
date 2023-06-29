@@ -117,8 +117,8 @@ extern "C"
 
 /* Unwinders perform a (PC >= FRE_START_ADDR) to look up a matching FRE.  */
 #define SFRAME_FDE_TYPE_PCINC   0
-/* Unwinders perform a (PC & FRE_START_ADDR_AS_MASK >= FRE_START_ADDR_AS_MASK)
-   to look up a matching FRE.  */
+/* Unwinders perform a (PC % REP_BLOCK_SIZE >= FRE_START_ADDR) to look up a
+   matching FRE.  */
 #define SFRAME_FDE_TYPE_PCMASK  1
 
 typedef struct sframe_preamble
