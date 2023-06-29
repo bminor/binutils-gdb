@@ -54,6 +54,10 @@ Term::check_contents "error message after trying to delete title" \
 Term::check_contents "title is unchanged" \
     "This Is The Title"
 
+Term::command "python change_window_title ()"
+Term::check_contents "test new title" \
+    "New Title"
+
 Term::resize 51 51
 # Remember that a resize request actually does two resizes...
 Term::check_contents "Window was updated" "Test: 2"

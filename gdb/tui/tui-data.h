@@ -146,6 +146,10 @@ public:
 
   void check_and_display_highlight_if_needed ();
 
+  /* A helper function to change the title and then redraw the
+     surrounding box, if needed.  */
+  void set_title (const char *new_title);
+
   /* Window handle.  */
   std::unique_ptr<WINDOW, curses_deleter> handle;
   /* Window width.  */
