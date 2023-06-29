@@ -82,6 +82,7 @@ public:
   char *toString ();
   void toFile (FILE *fp);
   void toFileLn (FILE *fp);
+  void write (int fd);
 
   // Not in Java
   StringBuilder *appendf (const char *fmt, ...) __attribute__ ((format (printf, 2, 3)));

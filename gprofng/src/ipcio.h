@@ -168,6 +168,8 @@ extern int ipc_single_threaded_mode;
 extern DbeThreadPool *responseThreadPool;
 extern DbeThreadPool *ipcThreadPool;
 extern int cancelRequestedChannelID;
+extern int cancellableChannelID;
+extern int error_flag;
 
 void ipc_default_log (const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 void ipc_response_log (IPCTraceLevel, const char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
