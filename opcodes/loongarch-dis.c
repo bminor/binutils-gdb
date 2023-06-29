@@ -322,38 +322,3 @@ with the -M switch (multiple options should be separated by commas):\n"));
     numeric       Print numeric register names, rather than ABI names.\n"));
   fprintf (stream, _("\n"));
 }
-
-int
-loongarch_parse_dis_options (const char *opts_in)
-{
-  return parse_loongarch_dis_options (opts_in);
-}
-
-static void
-my_print_address_func (bfd_vma addr, struct disassemble_info *dinfo)
-{
-  dinfo->fprintf_func (dinfo->stream, "0x%llx", (long long) addr);
-}
-
-void
-loongarch_disassemble_one (int64_t pc, insn_t insn,
-			   int (*fprintf_func) (void *stream,
-						const char *format, ...),
-			   void *stream)
-{
-  static struct disassemble_info my_disinfo =
-  {
-    .print_address_func = my_print_address_func,
-  };
-  static int not_init_yet = 1;
-  if (not_init_yet)
-    {
-      loongarch_parse_dis_options (NULL);
-      not_init_yet = 0;
-    }
-
-  my_disinfo.fprintf_func = fprintf_func;
-  my_disinfo.stream = stream;
-  my_disinfo.target = pc;
-  disassemble_one (insn, &my_disinfo);
-}
