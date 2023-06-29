@@ -25,6 +25,15 @@
 #include "libiberty.h"
 #include <stdlib.h>
 
+static bool loongarch_dis_show_aliases = true;
+static const char *const *loongarch_r_disname = NULL;
+static const char *const *loongarch_f_disname = NULL;
+static const char *const *loongarch_fc_disname = NULL;
+static const char *const *loongarch_c_disname = NULL;
+static const char *const *loongarch_cr_disname = NULL;
+static const char *const *loongarch_v_disname = NULL;
+static const char *const *loongarch_x_disname = NULL;
+
 static const struct loongarch_opcode *
 get_loongarch_opcode_by_binfmt (insn_t insn)
 {
@@ -41,7 +50,9 @@ get_loongarch_opcode_by_binfmt (insn_t insn)
 	{
 	  for (it = ase->opcodes; it->mask; it++)
 	    if (!ase->opc_htab[LARCH_INSN_OPC (it->match)]
-		&& it->macro == NULL)
+		&& it->macro == NULL
+		&& (!(it->pinfo & INSN_DIS_ALIAS)
+		    || loongarch_dis_show_aliases))
 	      ase->opc_htab[LARCH_INSN_OPC (it->match)] = it;
 	  for (i = 0; i < 16; i++)
 	    if (!ase->opc_htab[i])
@@ -58,14 +69,6 @@ get_loongarch_opcode_by_binfmt (insn_t insn)
     }
   return NULL;
 }
-
-static const char *const *loongarch_r_disname = NULL;
-static const char *const *loongarch_f_disname = NULL;
-static const char *const *loongarch_fc_disname = NULL;
-static const char *const *loongarch_c_disname = NULL;
-static const char *const *loongarch_cr_disname = NULL;
-static const char *const *loongarch_v_disname = NULL;
-static const char *const *loongarch_x_disname = NULL;
 
 static void
 set_default_loongarch_dis_options (void)
@@ -89,6 +92,9 @@ set_default_loongarch_dis_options (void)
 static int
 parse_loongarch_dis_option (const char *option)
 {
+  if (strcmp (option, "no-aliases") == 0)
+    loongarch_dis_show_aliases = false;
+
   if (strcmp (option, "numeric") == 0)
     {
       loongarch_r_disname = loongarch_r_normal_name;
@@ -310,6 +316,8 @@ print_loongarch_disassembler_options (FILE *stream)
 The following LoongArch disassembler options are supported for use\n\
 with the -M switch (multiple options should be separated by commas):\n"));
 
+  fprintf (stream, _("\n\
+    no-aliases    Use canonical instruction forms.\n"));
   fprintf (stream, _("\n\
     numeric       Print numeric register names, rather than ABI names.\n"));
   fprintf (stream, _("\n"));

@@ -1,7 +1,7 @@
 #...
 .*pcaddi.*
 .*pcaddi.*
-.*andi.*
-.*andi.*
+.*nop.*
+.*nop.*
 .*0:.*pcaddi.*
 #pass

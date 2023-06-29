@@ -344,9 +344,29 @@ static struct loongarch_opcode loongarch_macro_opcodes[] =
   { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
+static struct loongarch_opcode loongarch_alias_opcodes[] =
+{
+  /* match,	mask,		name,		format,				macro,	include, exclude, pinfo.  */
+  { 0x00150000,	0xfffffc00,	"move",		"r0:5,r5:5",			0,	0, 0, INSN_DIS_ALIAS }, /* or rd, rj, zero */
+  { 0x02800000, 0xffc003e0,	"li.w",		"r0:5,s10:12",			0,	0, 0, INSN_DIS_ALIAS }, /* addi.w rd, zero, simm */
+  { 0x02c00000, 0xffc003e0,	"li.d",		"r0:5,s10:12",			0,	0, 0, INSN_DIS_ALIAS }, /* addi.d rd, zero, simm */
+  { 0x03400000,	0xffffffff,	"nop",		"",				0,	0, 0, INSN_DIS_ALIAS }, /* andi zero, zero, 0 */
+  { 0x03800000, 0xffc003e0,	"li.w",		"r0:5,u10:12",			0,	0, 0, INSN_DIS_ALIAS }, /* ori rd, zero, uimm */
+  /* ret must come before jr because it is more specific.  */
+  { 0x4c000020,	0xffffffff,	"ret",		"",				0,	0, 0, INSN_DIS_ALIAS }, /* jirl zero, ra, 0 */
+  { 0x4c000000,	0xfffffc1f,	"jr",		"r5:5",				0,	0, 0, INSN_DIS_ALIAS }, /* jirl zero, rj, 0 */
+  { 0x60000000,	0xfc00001f,	"bltz",		"r5:5,sb10:16<<2",		0,	0, 0, INSN_DIS_ALIAS }, /* blt rj, zero, offset */
+  { 0x60000000,	0xfc0003e0,	"bgtz",		"r0:5,sb10:16<<2",		0,	0, 0, INSN_DIS_ALIAS }, /* blt zero, rd, offset */
+  { 0x64000000,	0xfc00001f,	"bgez",		"r5:5,sb10:16<<2",		0,	0, 0, INSN_DIS_ALIAS }, /* bge rj, zero, offset */
+  { 0x64000000,	0xfc0003e0,	"blez",		"r0:5,sb10:16<<2",		0,	0, 0, INSN_DIS_ALIAS }, /* bge zero, rd, offset */
+  { 0 } /* Terminate the list.  */
+};
+
+
 static struct loongarch_opcode loongarch_fix_opcodes[] =
 {
   /* match,	mask,		name,		format,				macro,			include, exclude, pinfo.  */
+  { 0x0,	0x0,		"move",		"r,r",				"or %1,%2,$r0",		0,	0,	0 },
   { 0x00001000, 0xfffffc00,	"clo.w",	"r0:5,r5:5",			0,			0,	0,	0 },
   { 0x00001400, 0xfffffc00,	"clz.w",	"r0:5,r5:5",			0,			0,	0,	0 },
   { 0x00001800, 0xfffffc00,	"cto.w",	"r0:5,r5:5",			0,			0,	0,	0 },
@@ -367,8 +387,6 @@ static struct loongarch_opcode loongarch_fix_opcodes[] =
   { 0x00005400, 0xfffffc00,	"bitrev.d",	"r0:5,r5:5",			0,			0,	0,	0 },
   { 0x00005800, 0xfffffc00,	"ext.w.h",	"r0:5,r5:5",			0,			0,	0,	0 },
   { 0x00005c00, 0xfffffc00,	"ext.w.b",	"r0:5,r5:5",			0,			0,	0,	0 },
-  /* or %1,%2,$r0  */
-  { 0x00150000, 0xfffffc00,	"move",		"r0:5,r5:5",			0,			0,	0,	0 },
   { 0x00006000, 0xfffffc00,	"rdtimel.w",	"r0:5,r5:5",			0,			0,	0,	0 },
   { 0x00006400, 0xfffffc00,	"rdtimeh.w",	"r0:5,r5:5",			0,			0,	0,	0 },
   { 0x00006800, 0xfffffc00,	"rdtime.d",	"r0:5,r5:5",			0,			0,	0,	0 },
@@ -2324,6 +2342,7 @@ static struct loongarch_opcode loongarch_lasx_opcodes[] =
 struct loongarch_ase loongarch_ASEs[] =
 {
   { &LARCH_opts.ase_ilp32, loongarch_macro_opcodes,		0, 0, { 0 }, 0, 0 },
+  { &LARCH_opts.ase_ilp32, loongarch_alias_opcodes,		0, 0, { 0 }, 0, 0 },
   { &LARCH_opts.ase_ilp32, loongarch_imm_opcodes,		0, 0, { 0 }, 0, 0 },
   { &LARCH_opts.ase_ilp32, loongarch_privilege_opcodes,		0, 0, { 0 }, 0, 0 },
   { &LARCH_opts.ase_ilp32, loongarch_load_store_opcodes,	0, 0, { 0 }, 0, 0 },

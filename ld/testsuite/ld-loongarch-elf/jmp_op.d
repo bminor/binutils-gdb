@@ -1,5 +1,5 @@
 #as:
-#objdump: -dr
+#objdump: -dr -M no-aliases
 
 .*:[    ]+file format .*
 

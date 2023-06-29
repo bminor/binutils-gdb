@@ -8,9 +8,9 @@ Disassembly of section .text:
 
 00000000.* <.L1>:
 [ 	]+0:[ 	]+00150004[ 	]+move[ 	]+\$a0,[ 	]+\$zero
-[ 	]+4:[ 	]+02bffc04[ 	]+addi.w[ 	]+\$a0,[ 	]+\$zero,[ 	]+-1\(0xfff\)
+[ 	]+4:[ 	]+02bffc04[ 	]+li\.w[ 	]+\$a0,[ 	]+-1\(0xfff\)
 [ 	]+8:[ 	]+00150004[ 	]+move[ 	]+\$a0,[ 	]+\$zero
-[ 	]+c:[ 	]+02bffc04[ 	]+addi.w[ 	]+\$a0,[ 	]+\$zero,[ 	]+-1\(0xfff\)
+[ 	]+c:[ 	]+02bffc04[ 	]+li\.w[ 	]+\$a0,[ 	]+-1\(0xfff\)
 [ 	]+10:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0,[ 	]+0
 [ 	]+10:[ 	]+R_LARCH_GOT_PC_HI20[ 	]+.L1
 [ 	]+10:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
@@ -26,7 +26,7 @@ Disassembly of section .text:
 [ 	]+20:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0,[ 	]+0
 [ 	]+20:[ 	]+R_LARCH_GOT_PC_HI20[ 	]+.L1
 [ 	]+20:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
-[ 	]+24:[ 	]+02c00005[ 	]+addi.d[ 	]+\$a1,[ 	]+\$zero,[ 	]+0
+[ 	]+24:[ 	]+02c00005[ 	]+li\.d[ 	]+\$a1,[ 	]+0
 [ 	]+24:[ 	]+R_LARCH_GOT_PC_LO12[ 	]+.L1
 [ 	]+24:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+28:[ 	]+16000005[ 	]+lu32i.d[ 	]+\$a1,[ 	]+0
@@ -43,7 +43,7 @@ Disassembly of section .text:
 [ 	]+3c:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0,[ 	]+0
 [ 	]+3c:[ 	]+R_LARCH_GOT_PC_HI20[ 	]+.L1
 [ 	]+3c:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
-[ 	]+40:[ 	]+02c00005[ 	]+addi.d[ 	]+\$a1,[ 	]+\$zero,[ 	]+0
+[ 	]+40:[ 	]+02c00005[ 	]+li\.d[ 	]+\$a1,[ 	]+0
 [ 	]+40:[ 	]+R_LARCH_GOT_PC_LO12[ 	]+.L1
 [ 	]+40:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+44:[ 	]+16000005[ 	]+lu32i.d[ 	]+\$a1,[ 	]+0
@@ -60,7 +60,7 @@ Disassembly of section .text:
 [ 	]+58:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0,[ 	]+0
 [ 	]+58:[ 	]+R_LARCH_GOT_PC_HI20[ 	]+.L1
 [ 	]+58:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
-[ 	]+5c:[ 	]+02c00005[ 	]+addi.d[ 	]+\$a1,[ 	]+\$zero,[ 	]+0
+[ 	]+5c:[ 	]+02c00005[ 	]+li\.d[ 	]+\$a1,[ 	]+0
 [ 	]+5c:[ 	]+R_LARCH_GOT_PC_LO12[ 	]+.L1
 [ 	]+5c:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+60:[ 	]+16000005[ 	]+lu32i.d[ 	]+\$a1,[ 	]+0
@@ -77,7 +77,7 @@ Disassembly of section .text:
 [ 	]+74:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0,[ 	]+0
 [ 	]+74:[ 	]+R_LARCH_PCALA_HI20[ 	]+.L1
 [ 	]+74:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
-[ 	]+78:[ 	]+02c00005[ 	]+addi.d[ 	]+\$a1,[ 	]+\$zero,[ 	]+0
+[ 	]+78:[ 	]+02c00005[ 	]+li\.d[ 	]+\$a1,[ 	]+0
 [ 	]+78:[ 	]+R_LARCH_PCALA_LO12[ 	]+.L1
 [ 	]+78:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+7c:[ 	]+16000005[ 	]+lu32i.d[ 	]+\$a1,[ 	]+0
@@ -94,7 +94,7 @@ Disassembly of section .text:
 [ 	]+90:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0,[ 	]+0
 [ 	]+90:[ 	]+R_LARCH_PCALA_HI20[ 	]+.L1
 [ 	]+90:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
-[ 	]+94:[ 	]+02c00005[ 	]+addi.d[ 	]+\$a1,[ 	]+\$zero,[ 	]+0
+[ 	]+94:[ 	]+02c00005[ 	]+li\.d[ 	]+\$a1,[ 	]+0
 [ 	]+94:[ 	]+R_LARCH_PCALA_LO12[ 	]+.L1
 [ 	]+94:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+98:[ 	]+16000005[ 	]+lu32i.d[ 	]+\$a1,[ 	]+0
@@ -126,7 +126,7 @@ Disassembly of section .text:
 [ 	]+c4:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0,[ 	]+0
 [ 	]+c4:[ 	]+R_LARCH_PCALA_HI20[ 	]+.L1
 [ 	]+c4:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
-[ 	]+c8:[ 	]+02c00005[ 	]+addi.d[ 	]+\$a1,[ 	]+\$zero,[ 	]+0
+[ 	]+c8:[ 	]+02c00005[ 	]+li\.d[ 	]+\$a1,[ 	]+0
 [ 	]+c8:[ 	]+R_LARCH_PCALA_LO12[ 	]+.L1
 [ 	]+c8:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+cc:[ 	]+16000005[ 	]+lu32i.d[ 	]+\$a1,[ 	]+0
@@ -143,7 +143,7 @@ Disassembly of section .text:
 [ 	]+e0:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0,[ 	]+0
 [ 	]+e0:[ 	]+R_LARCH_GOT_PC_HI20[ 	]+.L1
 [ 	]+e0:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
-[ 	]+e4:[ 	]+02c00005[ 	]+addi.d[ 	]+\$a1,[ 	]+\$zero,[ 	]+0
+[ 	]+e4:[ 	]+02c00005[ 	]+li\.d[ 	]+\$a1,[ 	]+0
 [ 	]+e4:[ 	]+R_LARCH_GOT_PC_LO12[ 	]+.L1
 [ 	]+e4:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+e8:[ 	]+16000005[ 	]+lu32i.d[ 	]+\$a1,[ 	]+0
@@ -161,7 +161,7 @@ Disassembly of section .text:
 [ 	]+100:[ 	]+R_LARCH_TLS_IE_PC_LO12[ 	]+TLS1
 [ 	]+104:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0,[ 	]+0
 [ 	]+104:[ 	]+R_LARCH_TLS_IE_PC_HI20[ 	]+TLS1
-[ 	]+108:[ 	]+02c00005[ 	]+addi.d[ 	]+\$a1,[ 	]+\$zero,[ 	]+0
+[ 	]+108:[ 	]+02c00005[ 	]+li\.d[ 	]+\$a1,[ 	]+0
 [ 	]+108:[ 	]+R_LARCH_TLS_IE_PC_LO12[ 	]+TLS1
 [ 	]+10c:[ 	]+16000005[ 	]+lu32i.d[ 	]+\$a1,[ 	]+0
 [ 	]+10c:[ 	]+R_LARCH_TLS_IE64_PC_LO20[ 	]+TLS1
@@ -175,7 +175,7 @@ Disassembly of section .text:
 [ 	]+11c:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+120:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0,[ 	]+0
 [ 	]+120:[ 	]+R_LARCH_TLS_LD_PC_HI20[ 	]+TLS1
-[ 	]+124:[ 	]+02c00005[ 	]+addi.d[ 	]+\$a1,[ 	]+\$zero,[ 	]+0
+[ 	]+124:[ 	]+02c00005[ 	]+li\.d[ 	]+\$a1,[ 	]+0
 [ 	]+124:[ 	]+R_LARCH_GOT_PC_LO12[ 	]+TLS1
 [ 	]+124:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+128:[ 	]+16000005[ 	]+lu32i.d[ 	]+\$a1,[ 	]+0
@@ -190,7 +190,7 @@ Disassembly of section .text:
 [ 	]+138:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+13c:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0,[ 	]+0
 [ 	]+13c:[ 	]+R_LARCH_TLS_GD_PC_HI20[ 	]+TLS1
-[ 	]+140:[ 	]+02c00005[ 	]+addi.d[ 	]+\$a1,[ 	]+\$zero,[ 	]+0
+[ 	]+140:[ 	]+02c00005[ 	]+li\.d[ 	]+\$a1,[ 	]+0
 [ 	]+140:[ 	]+R_LARCH_GOT_PC_LO12[ 	]+TLS1
 [ 	]+140:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+144:[ 	]+16000005[ 	]+lu32i.d[ 	]+\$a1,[ 	]+0

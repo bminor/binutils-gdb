@@ -14,10 +14,10 @@ Disassembly of section .text:
 [ 	]+4:[ 	]+02c00084[ 	]+addi\.d[ 	]+\$a0,[ 	]+\$a0,[ 	]+0
 [ 	]+4:[ 	]+R_LARCH_PCALA_LO12[ 	]+L1
 [ 	]+4:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
-[ 	]+8:[ 	]+03400000[ 	]+andi[ 	]+\$zero,[ 	]+\$zero,[ 	]+0x0
+[ 	]+8:[ 	]+03400000[ 	]+nop[ 	]+
 [ 	]+8:[ 	]+R_LARCH_ALIGN[ 	]+\*ABS\*\+0xc
-[ 	]+c:[ 	]+03400000[ 	]+andi[ 	]+\$zero,[ 	]+\$zero,[ 	]+0x0
-[ 	]+10:[ 	]+03400000[ 	]+andi[ 	]+\$zero,[ 	]+\$zero,[ 	]+0x0
+[ 	]+c:[ 	]+03400000[ 	]+nop[ 	]+
+[ 	]+10:[ 	]+03400000[ 	]+nop[ 	]+
 [ 	]+14:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0,[ 	]+0
 [ 	]+14:[ 	]+R_LARCH_PCALA_HI20[ 	]+L1
 [ 	]+14:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*

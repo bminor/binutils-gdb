@@ -120,6 +120,8 @@ dec2 : [1-9][0-9]?
 
     const unsigned long pinfo;
 #define USELESS 0x0l
+/* Instruction is a simple alias only for disassembler use.  */
+#define INSN_DIS_ALIAS		0x00000001l
   };
 
   struct hash_control;

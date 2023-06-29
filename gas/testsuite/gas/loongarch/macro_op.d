@@ -9,9 +9,9 @@ Disassembly of section .text:
 
 00000000.* <.text>:
 [ 	]+0:[ 	]+00150004[ 	]+move[ 	]+\$a0,[ 	]+\$zero
-[ 	]+4:[ 	]+02bffc04[ 	]+addi\.w[ 	]+\$a0,[ 	]+\$zero,[ 	]+-1\(0xfff\)
+[ 	]+4:[ 	]+02bffc04[ 	]+li\.w[ 	]+\$a0,[ 	]+-1\(0xfff\)
 [ 	]+8:[ 	]+00150004[ 	]+move[ 	]+\$a0,[ 	]+\$zero
-[ 	]+c:[ 	]+02bffc04[ 	]+addi\.w[ 	]+\$a0,[ 	]+\$zero,[ 	]+-1\(0xfff\)
+[ 	]+c:[ 	]+02bffc04[ 	]+li\.w[ 	]+\$a0,[ 	]+-1\(0xfff\)
 [ 	]+10:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0,[ 	]+0
 [ 	]+10:[ 	]+R_LARCH_GOT_PC_HI20[ 	]+\.L1
 [ 	]+10:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
