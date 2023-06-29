@@ -259,6 +259,7 @@ disassemble_one (insn_t insn, struct disassemble_info *info)
   if (!opc)
     {
       info->insn_type = dis_noninsn;
+      info->fprintf_styled_func (info->stream, dis_style_assembler_directive, ".word\t\t");
       info->fprintf_styled_func (info->stream, dis_style_immediate, "0x%08x", insn);
       return;
     }
