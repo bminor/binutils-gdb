@@ -988,6 +988,16 @@ sframe_decoder_get_abi_arch (sframe_decoder_ctx *dctx)
   return sframe_header->sfh_abi_arch;
 }
 
+/* Get the format version from the SFrame decoder context DCTX.  */
+
+uint8_t
+sframe_decoder_get_version (sframe_decoder_ctx *dctx)
+{
+  sframe_header *dhp;
+  dhp = sframe_decoder_get_header (dctx);
+  return dhp->sfh_preamble.sfp_version;
+}
+
 /* Get the SFrame's fixed FP offset given the decoder context CTX.  */
 int8_t
 sframe_decoder_get_fixed_fp_offset (sframe_decoder_ctx *ctx)
@@ -1366,6 +1376,16 @@ sframe_encoder_get_abi_arch (sframe_encoder_ctx *encoder)
   if (ehp)
     abi_arch = ehp->sfh_abi_arch;
   return abi_arch;
+}
+
+/* Get the format version from the SFrame encoder context ENCODER.  */
+
+uint8_t
+sframe_encoder_get_version (sframe_encoder_ctx *encoder)
+{
+  sframe_header *ehp;
+  ehp = sframe_encoder_get_header (encoder);
+  return ehp->sfh_preamble.sfp_version;
 }
 
 /* Return the number of function descriptor entries in the SFrame encoder

@@ -13,6 +13,7 @@ LIBSFRAME_1.0 {
     sframe_decode;
     sframe_decoder_get_hdr_size;
     sframe_decoder_get_abi_arch;
+    sframe_decoder_get_version;
     sframe_decoder_get_fixed_fp_offset;
     sframe_decoder_get_fixed_ra_offset;
     sframe_get_funcdesc_with_addr;
@@ -24,6 +25,7 @@ LIBSFRAME_1.0 {
     sframe_encoder_free;
     sframe_encoder_get_hdr_size;
     sframe_encoder_get_abi_arch;
+    sframe_encoder_get_version;
     sframe_encoder_get_num_fidx;
     sframe_encoder_add_fre;
     sframe_encoder_add_funcdesc;

@@ -120,6 +120,10 @@ sframe_decoder_get_hdr_size (sframe_decoder_ctx *dctx);
 extern uint8_t
 sframe_decoder_get_abi_arch (sframe_decoder_ctx *dctx);
 
+/* Get the format version from the SFrame decoder context DCTX.  */
+extern uint8_t
+sframe_decoder_get_version (sframe_decoder_ctx *dctx);
+
 /* Return the number of function descriptor entries in the SFrame decoder
    DCTX.  */
 extern uint32_t
@@ -216,6 +220,10 @@ sframe_encoder_get_hdr_size (sframe_encoder_ctx *encoder);
 /* Get the abi/arch info from the SFrame encoder context CTX.  */
 extern uint8_t
 sframe_encoder_get_abi_arch (sframe_encoder_ctx *encoder);
+
+/* Get the format version from the SFrame encoder context ENCODER.  */
+extern uint8_t
+sframe_encoder_get_version (sframe_encoder_ctx *encoder);
 
 /* Return the number of function descriptor entries in the SFrame encoder
    ENCODER.  */
