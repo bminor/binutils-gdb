@@ -192,13 +192,7 @@ dis_one_arg (char esc1, char esc2, const char *bit_field,
 	  style = dis_style_immediate;
 	  break;
 	}
-      if (imm == 0)
-	info->fprintf_styled_func (info->stream, style, "%d", imm);
-      else
-	{
-	  info->fprintf_styled_func (info->stream, style, "%d", imm);
-	  info->fprintf_styled_func (info->stream, dis_style_text, "(0x%x)", u_imm);
-	}
+      info->fprintf_styled_func (info->stream, style, "%d", imm);
       switch (esc2)
 	{
 	case 'b':
