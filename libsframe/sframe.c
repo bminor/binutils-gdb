@@ -206,9 +206,10 @@ sframe_header_sanity_check_p (sframe_header *hp)
 {
   unsigned char all_flags = SFRAME_F_FDE_SORTED | SFRAME_F_FRAME_POINTER;
   /* Check preamble is valid.  */
-  if ((hp->sfh_preamble.sfp_magic != SFRAME_MAGIC)
-      || (hp->sfh_preamble.sfp_version != SFRAME_VERSION)
-      || ((hp->sfh_preamble.sfp_flags | all_flags) != all_flags))
+  if (hp->sfh_preamble.sfp_magic != SFRAME_MAGIC
+      || (hp->sfh_preamble.sfp_version != SFRAME_VERSION_1
+	  && hp->sfh_preamble.sfp_version != SFRAME_VERSION_2)
+      || (hp->sfh_preamble.sfp_flags | all_flags) != all_flags)
     return false;
 
   /* Check offsets are valid.  */
@@ -373,16 +374,13 @@ sframe_fre_check_range_p (sframe_func_desc_entry *fdep,
 {
   int32_t start_ip, end_ip;
   int32_t func_start_addr;
-  uint32_t rep_block_size;
+  uint8_t rep_block_size;
   uint32_t fde_type;
   int32_t masked_pc;
   bool mask_p;
   bool ret;
 
   ret = false;
-  /* FIXME - the rep_block_size should be encoded in the format somehow.  For
-     AMD64, each pltN entry stub in .plt is 16 bytes.  */
-  rep_block_size = 16;
 
   if (!fdep)
     return ret;
@@ -390,6 +388,7 @@ sframe_fre_check_range_p (sframe_func_desc_entry *fdep,
   func_start_addr = fdep->sfde_func_start_address;
   fde_type = sframe_get_fde_type (fdep);
   mask_p = (fde_type == SFRAME_FDE_TYPE_PCMASK);
+  rep_block_size = fdep->sfde_func_rep_size;
 
   if (!mask_p)
     {
@@ -1208,6 +1207,36 @@ sframe_decoder_get_funcdesc (sframe_decoder_ctx *ctx,
   return 0;
 }
 
+int
+sframe_decoder_get_funcdesc_v2 (sframe_decoder_ctx *dctx,
+				unsigned int i,
+				uint32_t *num_fres,
+				uint32_t *func_size,
+				int32_t *func_start_address,
+				unsigned char *func_info,
+				uint8_t *rep_block_size)
+{
+  sframe_func_desc_entry *fdp;
+  int err = 0;
+
+  if (dctx == NULL || func_start_address == NULL
+      || num_fres == NULL || func_size == NULL
+      || sframe_decoder_get_version (dctx) == SFRAME_VERSION_1)
+    return sframe_set_errno (&err, SFRAME_ERR_INVAL);
+
+  fdp = sframe_decoder_get_funcdesc_at_index (dctx, i);
+
+  if (fdp == NULL)
+    return sframe_set_errno (&err, SFRAME_ERR_FDE_NOTFOUND);
+
+  *num_fres = fdp->sfde_func_num_fres;
+  *func_start_address = fdp->sfde_func_start_address;
+  *func_size = fdp->sfde_func_size;
+  *func_info = fdp->sfde_func_info;
+  *rep_block_size = fdp->sfde_func_rep_size;
+
+  return 0;
+}
 /* Get the FRE_IDX'th FRE of the function at FUNC_IDX'th function
    descriptor entry in the SFrame decoder CTX.  Returns error code as
    applicable.  */
@@ -1577,6 +1606,37 @@ bad:
   encoder->sfe_funcdesc = NULL;
   ehp->sfh_num_fdes = 0;
   return -1;
+}
+
+/* Add a new function descriptor entry with START_ADDR, FUNC_SIZE, FUNC_INFO
+   and REP_BLOCK_SIZE to the encoder.
+
+   This API is valid only for SFrame format version 2.  */
+
+int
+sframe_encoder_add_funcdesc_v2 (sframe_encoder_ctx *encoder,
+				int32_t start_addr,
+				uint32_t func_size,
+				unsigned char func_info,
+				uint8_t rep_block_size,
+				uint32_t num_fres __attribute__ ((unused)))
+{
+  sf_fde_tbl *fd_info;
+  int err;
+
+  if (encoder == NULL
+      || sframe_encoder_get_version (encoder) == SFRAME_VERSION_1)
+    return sframe_set_errno (&err, SFRAME_ERR_INVAL);
+
+  err = sframe_encoder_add_funcdesc (encoder, start_addr, func_size, func_info,
+				     num_fres);
+  if (err)
+    return SFRAME_ERR;
+
+  fd_info = encoder->sfe_funcdesc;
+  fd_info->entry[fd_info->count-1].sfde_func_rep_size = rep_block_size;
+
+  return 0;
 }
 
 static int

@@ -43,27 +43,33 @@ is_sframe_abi_arch_aarch64 (sframe_decoder_ctx *sfd_ctx)
 static void
 dump_sframe_header (sframe_decoder_ctx *sfd_ctx)
 {
-  const char *verstr = NULL;
+  uint8_t ver;
+  uint8_t flags;
+  char *flags_str;
+  const char *ver_str = NULL;
   const sframe_header *header = &(sfd_ctx->sfd_header);
 
   /* Prepare SFrame section version string.  */
   const char *version_names[]
     = { "NULL",
-	"SFRAME_VERSION_1" };
-  unsigned char ver = header->sfh_preamble.sfp_version;
+	"SFRAME_VERSION_1",
+	"SFRAME_VERSION_2" };
+
+  /* PS: Keep SFRAME_HEADER_FLAGS_STR_MAX_LEN in sync if adding more members to
+     this array.  */
+  const char *flag_names[]
+    = { "SFRAME_F_FDE_SORTED",
+	"SFRAME_F_FRAME_POINTER" };
+
+  ver = sframe_decoder_get_version (sfd_ctx);
   if (ver <= SFRAME_VERSION)
-    verstr = version_names[ver];
+    ver_str = version_names[ver];
 
   /* Prepare SFrame section flags string.  */
-  unsigned char flags = header->sfh_preamble.sfp_flags;
-  char *flags_str
-    = (char*) calloc (sizeof (char), SFRAME_HEADER_FLAGS_STR_MAX_LEN);
+  flags = header->sfh_preamble.sfp_flags;
+  flags_str = (char*) calloc (sizeof (char), SFRAME_HEADER_FLAGS_STR_MAX_LEN);
   if (flags)
     {
-      const char *flag_names[]
-	= { "SFRAME_F_FDE_SORTED",
-	    "SFRAME_F_FRAME_POINTER" };
-      unsigned char flags = header->sfh_preamble.sfp_flags;
       if (flags & SFRAME_F_FDE_SORTED)
 	strcpy (flags_str, flag_names[0]);
       if (flags & SFRAME_F_FRAME_POINTER)
@@ -80,9 +86,9 @@ dump_sframe_header (sframe_decoder_ctx *sfd_ctx)
   printf ("\n");
   printf ("  %s :\n", subsec_name);
   printf ("\n");
-  printf ("    Version: %s\n", verstr);
+  printf ("    Version: %s\n", ver_str);
   printf ("    Flags: %s\n", flags_str);
-  printf ("    Num FDEs: %d\n", header->sfh_num_fdes);
+  printf ("    Num FDEs: %d\n", sframe_decoder_get_num_fidx (sfd_ctx));
   printf ("    Num FREs: %d\n", header->sfh_num_fres);
 
   free (flags_str);
@@ -203,6 +209,14 @@ dump_sframe_functions (sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr)
 void
 dump_sframe (sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr)
 {
+  uint8_t ver;
+
   dump_sframe_header (sfd_ctx);
-  dump_sframe_functions (sfd_ctx, sec_addr);
+
+  ver = sframe_decoder_get_version (sfd_ctx);
+  if (ver == SFRAME_VERSION)
+    dump_sframe_functions (sfd_ctx, sec_addr);
+  else
+    printf ("\n No further information can be displayed.  %s",
+	    "SFrame version not supported\n");
 }

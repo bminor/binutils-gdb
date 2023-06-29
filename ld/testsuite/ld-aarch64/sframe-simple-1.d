@@ -3,14 +3,14 @@
 #source: sframe-bar.s
 #objdump: --sframe=.sframe
 #ld: -shared
-#name: SFrame Simple link
+#name: SFrame simple link
 
 .*:     file format .*
 
 Contents of the SFrame section .sframe:
   Header :
 
-    Version: SFRAME_VERSION_1
+    Version: SFRAME_VERSION_2
     Flags: SFRAME_F_FDE_SORTED
     Num FDEs: 2
     Num FREs: 2

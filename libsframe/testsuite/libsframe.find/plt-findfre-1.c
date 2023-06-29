@@ -42,7 +42,7 @@ add_plt_fde1 (sframe_encoder_ctx *ectx, int idx)
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
 						     SFRAME_FDE_TYPE_PCMASK);
   /* 5 pltN entries of 16 bytes each.  */
-  err = sframe_encoder_add_funcdesc (ectx, 0x1000, 16*5, finfo, 3);
+  err = sframe_encoder_add_funcdesc_v2 (ectx, 0x1000, 16*5, finfo, 16, 3);
   if (err == -1)
     return err;
 

@@ -10,7 +10,7 @@
 Contents of the SFrame section .sframe:
   Header :
 
-    Version: SFRAME_VERSION_1
+    Version: SFRAME_VERSION_2
     Flags: SFRAME_F_FDE_SORTED
 #...
 

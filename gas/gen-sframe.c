@@ -278,7 +278,10 @@ sframe_v1_set_func_info (unsigned int fde_type, unsigned int fre_type,
 static void
 sframe_set_version (uint32_t sframe_version ATTRIBUTE_UNUSED)
 {
-  sframe_ver_ops.format_version = SFRAME_VERSION_1;
+  sframe_ver_ops.format_version = SFRAME_VERSION_2;
+
+  /* These operations remain the same for SFRAME_VERSION_2 as fre_info and
+     func_info have not changed from SFRAME_VERSION_1.  */
 
   sframe_ver_ops.set_fre_info = sframe_v1_set_fre_info;
 
@@ -605,6 +608,8 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
 #else
   out_one (func_info);
 #endif
+  out_one (0);
+  out_two (0);
 }
 
 static void
@@ -1355,7 +1360,7 @@ output_sframe (segT sframe_seg)
   (void) sframe_seg;
 
   /* Setup the version specific access functions.  */
-  sframe_set_version (SFRAME_VERSION_1);
+  sframe_set_version (SFRAME_VERSION_2);
 
   /* Process all fdes and create SFrame stack trace information.  */
   create_sframe_all ();

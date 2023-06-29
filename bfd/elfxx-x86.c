@@ -1883,7 +1883,7 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
       break;
     }
 
-  *ectx = sframe_encode (SFRAME_VERSION_1,
+  *ectx = sframe_encode (SFRAME_VERSION_2,
 			 0,
 			 SFRAME_ABI_AMD64_ENDIAN_LITTLE,
 			 SFRAME_CFA_FIXED_FP_INVALID,
@@ -1900,11 +1900,12 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
     {
       /* Add SFrame FDE for plt0, the function start address is updated later
 	 at _bfd_elf_merge_section_sframe time.  */
-      sframe_encoder_add_funcdesc (*ectx,
-				   0, /* func start addr.  */
-				   plt0_entry_size,
-				   func_info,
-				   0 /* Num FREs.  */);
+      sframe_encoder_add_funcdesc_v2 (*ectx,
+				      0, /* func start addr.  */
+				      plt0_entry_size,
+				      func_info,
+				      16,
+				      0 /* Num FREs.  */);
       sframe_frame_row_entry plt0_fre;
       unsigned int num_plt0_fres = htab->sframe_plt->plt0_num_fres;
       for (unsigned int j = 0; j < num_plt0_fres; j++)
@@ -1928,11 +1929,12 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
 	 function start address = plt0_entry_size.  As usual, this will be
 	 updated later at _bfd_elf_merge_section_sframe, by when the
 	 sections are relocated.  */
-      sframe_encoder_add_funcdesc (*ectx,
-				   plt0_entry_size, /* func start addr.  */
-				   dpltsec->size - plt0_entry_size,
-				   func_info,
-				   0 /* Num FREs.  */);
+      sframe_encoder_add_funcdesc_v2 (*ectx,
+				      plt0_entry_size, /* func start addr.  */
+				      dpltsec->size - plt0_entry_size,
+				      func_info,
+				      16,
+				      0 /* Num FREs.  */);
 
       sframe_frame_row_entry pltn_fre;
       /* Now add the FREs for pltn.  Simply adding the two FREs suffices due
