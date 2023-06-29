@@ -214,7 +214,7 @@ check-DEJAGNU: site.exp
 		CC="$(CC)" CFLAGS="$(CFLAGS)" \
 		CC_FOR_BUILD="$(CC_FOR_BUILD)" \
 		CC_FOR_TARGET="$(CC_FOR_TARGET)" \
-		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET) -O0" \
+		CFLAGS_FOR_TARGET="$(filter-out -ffile-prefix-map=%,$(CFLAGS_FOR_TARGET)) -O0" \
 		$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
