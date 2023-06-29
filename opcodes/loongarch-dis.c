@@ -138,7 +138,7 @@ dis_one_arg (char esc1, char esc2, const char *bit_field,
   if (esc1)
     {
       if (need_comma)
-	info->fprintf_func (info->stream, ", ");
+	info->fprintf_styled_func (info->stream, dis_style_text, ", ");
       need_comma = 1;
       imm = loongarch_decode_imm (bit_field, insn, 1);
       u_imm = loongarch_decode_imm (bit_field, insn, 0);
@@ -147,42 +147,45 @@ dis_one_arg (char esc1, char esc2, const char *bit_field,
   switch (esc1)
     {
     case 'r':
-      info->fprintf_func (info->stream, "%s", loongarch_r_disname[u_imm]);
+      info->fprintf_styled_func (info->stream, dis_style_register, "%s", loongarch_r_disname[u_imm]);
       break;
     case 'f':
       switch (esc2)
 	{
 	case 'c':
-	  info->fprintf_func (info->stream, "%s", loongarch_fc_disname[u_imm]);
+	  info->fprintf_styled_func (info->stream, dis_style_register, "%s", loongarch_fc_disname[u_imm]);
 	  break;
 	default:
-	  info->fprintf_func (info->stream, "%s", loongarch_f_disname[u_imm]);
+	  info->fprintf_styled_func (info->stream, dis_style_register, "%s", loongarch_f_disname[u_imm]);
 	}
       break;
     case 'c':
       switch (esc2)
 	{
 	case 'r':
-	  info->fprintf_func (info->stream, "%s", loongarch_cr_disname[u_imm]);
+	  info->fprintf_styled_func (info->stream, dis_style_register, "%s", loongarch_cr_disname[u_imm]);
 	  break;
 	default:
-	  info->fprintf_func (info->stream, "%s", loongarch_c_disname[u_imm]);
+	  info->fprintf_styled_func (info->stream, dis_style_register, "%s", loongarch_c_disname[u_imm]);
 	}
       break;
     case 'v':
-      info->fprintf_func (info->stream, "%s", loongarch_v_disname[u_imm]);
+      info->fprintf_styled_func (info->stream, dis_style_register, "%s", loongarch_v_disname[u_imm]);
       break;
     case 'x':
-      info->fprintf_func (info->stream, "%s", loongarch_x_disname[u_imm]);
+      info->fprintf_styled_func (info->stream, dis_style_register, "%s", loongarch_x_disname[u_imm]);
       break;
     case 'u':
-      info->fprintf_func (info->stream, "0x%x", u_imm);
+      info->fprintf_styled_func (info->stream, dis_style_immediate, "0x%x", u_imm);
       break;
     case 's':
       if (imm == 0)
-	info->fprintf_func (info->stream, "%d", imm);
+	info->fprintf_styled_func (info->stream, dis_style_immediate, "%d", imm);
       else
-	info->fprintf_func (info->stream, "%d(0x%x)", imm, u_imm);
+	{
+	  info->fprintf_styled_func (info->stream, dis_style_immediate, "%d", imm);
+	  info->fprintf_styled_func (info->stream, dis_style_text, "(0x%x)", u_imm);
+	}
       switch (esc2)
 	{
 	case 'b':
@@ -236,44 +239,40 @@ disassemble_one (insn_t insn, struct disassemble_info *info)
   for (i = 31; 0 <= i; i--)
     {
       if (t & insn)
-	info->fprintf_func (info->stream, "1");
+	info->fprintf_styled_func (info->stream, dis_style_text, "1");
       else
-	info->fprintf_func (info->stream, "0");
+	info->fprintf_styled_func (info->stream, dis_style_text, "0");
       if (have_space[i])
-	info->fprintf_func (info->stream, " ");
+	info->fprintf_styled_func (info->stream, dis_style_text, " ");
       t = t >> 1;
     }
-  info->fprintf_func (info->stream, "\t");
+  info->fprintf_styled_func (info->stream, dis_style_text, "\t");
 #endif
 
   if (!opc)
     {
       info->insn_type = dis_noninsn;
-      info->fprintf_func (info->stream, "0x%08x", insn);
+      info->fprintf_styled_func (info->stream, dis_style_immediate, "0x%08x", insn);
       return;
     }
 
   info->insn_type = dis_nonbranch;
-  info->fprintf_func (info->stream, "%-12s", opc->name);
+  info->fprintf_styled_func (info->stream, dis_style_mnemonic, "%-12s", opc->name);
 
   {
     char *fake_args = xmalloc (strlen (opc->format) + 1);
     const char *fake_arg_strs[MAX_ARG_NUM_PLUS_2];
     strcpy (fake_args, opc->format);
     if (0 < loongarch_split_args_by_comma (fake_args, fake_arg_strs))
-      info->fprintf_func (info->stream, "\t");
+      info->fprintf_styled_func (info->stream, dis_style_text, "\t");
     info->private_data = &insn;
     loongarch_foreach_args (opc->format, fake_arg_strs, dis_one_arg, info);
     free (fake_args);
   }
 
-  if (info->insn_type == dis_branch || info->insn_type == dis_condbranch
-      /* Someother if we have extra info to print.  */)
-    info->fprintf_func (info->stream, "\t#");
-
   if (info->insn_type == dis_branch || info->insn_type == dis_condbranch)
     {
-      info->fprintf_func (info->stream, " ");
+      info->fprintf_styled_func (info->stream, dis_style_comment_start, "\t# ");
       info->print_address_func (info->target, info);
     }
 }

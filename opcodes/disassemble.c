@@ -647,6 +647,11 @@ disassemble_init_for_target (struct disassemble_info * info)
       info->skip_zeroes = 16;
       break;
 #endif
+#ifdef ARCH_loongarch
+    case bfd_arch_loongarch:
+      info->created_styled_output = true;
+      break;
+#endif
 #ifdef ARCH_tic4x
     case bfd_arch_tic4x:
       info->skip_zeroes = 32;
