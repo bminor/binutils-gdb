@@ -23,6 +23,8 @@
 * The RISC-V port now supports the following new standard extensions:
   - Zicond (conditional zero instructions)
   - Zfa (additional floating-point instructions)
+  - Zvbb, Zvbc, Zvkg, Zvkned, Zvknh[ab], Zvksed, Zvksh, Zvkn, Zvknc, Zvkng,
+    Zvks, Zvksc, Zvkg, Zvkt (vector crypto instructions)
 
 * The RISC-V port now supports the following vendor-defined extensions:
   - XVentanaCondOps
