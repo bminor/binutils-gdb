@@ -41,11 +41,11 @@ static void generic_ext (struct agent_expr *x, enum agent_op op, int n);
 static void
 append_const (struct agent_expr *x, LONGEST val, int n)
 {
-  int i;
-
-  for (i = n - 1; i >= 0; i--)
+  size_t len = x->buf.size ();
+  x->buf.resize (len + n);
+  for (int i = n - 1; i >= 0; i--)
     {
-      x->buf.push_back (val & 0xff);
+      x->buf[len + i] = val & 0xff;
       val >>= 8;
     }
 }
