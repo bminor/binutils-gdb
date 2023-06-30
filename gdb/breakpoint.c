@@ -9817,6 +9817,20 @@ break_range_command (const char *arg, int from_tty)
   install_breakpoint (false, std::move (br), true);
 }
 
+/* See breakpoint.h.  */
+
+watchpoint::~watchpoint ()
+{
+  /* Make sure to unlink the destroyed watchpoint from the related
+     breakpoint ring.  */
+
+  breakpoint *bpt = this;
+  while (bpt->related_breakpoint != this)
+    bpt = bpt->related_breakpoint;
+
+  bpt->related_breakpoint = this->related_breakpoint;
+}
+
 /*  Return non-zero if EXP is verified as constant.  Returned zero
     means EXP is variable.  Also the constant detection may fail for
     some constant expressions and in such case still falsely return

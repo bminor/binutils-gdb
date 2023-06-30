@@ -1000,6 +1000,9 @@ struct watchpoint : public breakpoint
   void print_recreate (struct ui_file *fp) const override;
   bool explains_signal (enum gdb_signal) override;
 
+  /* Destructor for WATCHPOINT.  */
+  ~watchpoint ();
+
   /* String form of exp to use for displaying to the user (malloc'd),
      or NULL if none.  */
   gdb::unique_xmalloc_ptr<char> exp_string;
