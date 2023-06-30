@@ -1904,6 +1904,8 @@ offset_from_vma (Elf_Internal_Phdr *phdrs, size_t phnum, bfd_vma vma,
 	return vma - seg->p_vaddr + seg->p_offset;
       }
 
+  if (max_size_p)
+    *max_size_p = 0;
   bfd_set_error (bfd_error_invalid_operation);
   return (file_ptr) -1;
 }
@@ -2001,8 +2003,8 @@ _bfd_elf_get_dynamic_symbols (bfd *abfd, Elf_Internal_Phdr *phdr,
   bfd_byte *versym = NULL;
   bfd_byte *verdef = NULL;
   bfd_byte *verneed = NULL;
-  size_t verdef_size;
-  size_t verneed_size;
+  size_t verdef_size = 0;
+  size_t verneed_size = 0;
   size_t extsym_size;
   const struct elf_backend_data *bed;
 
