@@ -211,6 +211,9 @@ dec2 : [1-9][0-9]?
 	    int use_lsx;
 	    int use_lasx;
 
+	    int use_lvz;
+	    int use_lbt;
+
 	    int use_la_local_with_abs;
 	    int use_la_global_with_pcrel;
 	    int use_la_global_with_abs;
@@ -224,6 +227,9 @@ dec2 : [1-9][0-9]?
 
 #define ase_lsx		isa.use_lsx
 #define ase_lasx	isa.use_lasx
+
+#define ase_lvz		isa.use_lvz
+#define ase_lbt		isa.use_lbt
 
 #define ase_labs	isa.use_la_local_with_abs
 #define ase_gpcr	isa.use_la_global_with_pcrel

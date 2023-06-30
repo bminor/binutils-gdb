@@ -79,6 +79,8 @@ set_default_loongarch_dis_options (void)
   LARCH_opts.ase_df = 1;
   LARCH_opts.ase_lsx = 1;
   LARCH_opts.ase_lasx = 1;
+  LARCH_opts.ase_lvz = 1;
+  LARCH_opts.ase_lbt = 1;
 
   loongarch_r_disname = loongarch_r_lp64_name;
   loongarch_f_disname = loongarch_f_lp64_name;
