@@ -113,6 +113,17 @@ proc goto_loop { msg } {
 }
 
 proc my_continue { msg } {
+
+    # On Cygwin, a Ctrl-C in the terminal results in Windows injecting
+    # a new thread in the inferior to report a
+    # EXCEPTION_DEBUG_EVENT/DBG_CONTROL_C event.  That means that even
+    # with schedlock on, Ctrl-C always switches focus to a different
+    # thread.  Hide that fact here by saving/restoring the current
+    # thread.
+    if {[istarget *-*-cygwin*]} {
+	set gdb_thr [get_valueof "" "\$_thread" 0 "save current gdb thread"]
+    }
+
     set test "continue ($msg)"
     gdb_test_multiple "continue" $test {
 	-re "Continuing" {
@@ -121,6 +132,13 @@ proc my_continue { msg } {
     }
 
     stop_process "stop all threads ($msg)"
+
+    # See above.  This must be done before goto_loop, otherwise with
+    # schedlock on, we'd be resuming the injected Ctrl-C thread.
+    if {[istarget *-*-cygwin*]} {
+	gdb_test "thread $gdb_thr" "Switching to thread .*" \
+	    "restore current gdb thread"
+    }
 
     goto_loop $msg
 }
@@ -209,6 +227,9 @@ if { $bad == 0 } {
 # before the command was run.  BEFORE_ARGS is the value of the
 # thread's args before the command was run.  LOCKED indicates whether
 # we expect threads other than the selected thread remained locked.
+#
+# Note, on Cygwin, the "we didn't switch threads" test is pointless,
+# see my_continue.
 
 proc check_result { cmd before_thread before_args locked } {
     global NUM
