@@ -28,6 +28,14 @@ if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 
 # Prepare environment for test.
 
+# These are filled in by "setup".  They hold the GDB thread IDs values
+# of the testcase's 2nd and 3rd threads.  On most systems, these will
+# be literally GDB thread ID 2 and 3.  On some systems, however, like
+# e.g., Cygwin, the runtime spawns a few internal threads before our
+# own threads are spawned.
+set thr2 0
+set thr3 0
+
 proc setup {} {
     global executable
     global displaced
@@ -41,20 +49,38 @@ proc setup {} {
 
 	gdb_test_no_output "set displaced-stepping $displaced"
 
+	gdb_breakpoint "child_function_2"
+	gdb_breakpoint "child_function_3"
+
+	gdb_test_multiple "c" "run to thread 2" {
+	    -re -wrap "Thread ($::decimal) .*hit Breakpoint .*, child_function_2.*" {
+		set ::thr2 $expect_out(1,string)
+		pass $gdb_test_name
+	    }
+	}
+
+	gdb_test_multiple "c" "run to thread 3" {
+	    -re -wrap "Thread ($::decimal) .*hit Breakpoint .*, child_function_3.*" {
+		set ::thr3 $expect_out(1,string)
+		pass $gdb_test_name
+	    }
+	}
+
 	gdb_breakpoint [gdb_get_line_number "set wait-threads breakpoint here"]
 	gdb_continue_to_breakpoint "run to breakpoint"
-	gdb_test "info threads" "\\\* 1 .* 2 .* 3 .*" "info threads shows all threads"
+	gdb_test "info threads" "\\\* 1 .* $::thr2 .* $::thr3 .*" \
+	    "info threads shows all threads"
 
 	gdb_test_no_output "set scheduler-locking on"
 
 	gdb_breakpoint [gdb_get_line_number "set breakpoint thread 3 here"]
 	gdb_breakpoint [gdb_get_line_number "set breakpoint thread 2 here"]
 
-	gdb_test "thread 3" "Switching.*"
+	gdb_test "thread $::thr3" "Switching.*" "switch to thread 3"
 	gdb_continue_to_breakpoint "run to breakpoint in thread 3"
 	gdb_test "p *myp = 0" " = 0" "unbreak loop in thread 3"
 
-	gdb_test "thread 2" "Switching.*"
+	gdb_test "thread $::thr2" "Switching.*" "switch to thread 2"
 	gdb_continue_to_breakpoint "run to breakpoint in thread 2"
 	gdb_test "p *myp = 0" " = 0" "unbreak loop in thread 2"
 
@@ -92,11 +118,21 @@ foreach displaced { "off" "on" } {
 	# of re-trapping the breakpoint the threads were already
 	# stopped at.
 	foreach thread {1 2 3} {
+	    if {$thread == 1} {
+		set gdb_thr 1
+	    } elseif {$thread == 2} {
+		set gdb_thr $::thr2
+	    } elseif {$thread == 3} {
+		set gdb_thr $::thr3
+	    } else {
+		error "unknown thread"
+	    }
+
 	    with_test_prefix "signal thr$thread" {
 		setup
 
 		# Queue a signal in THREAD.
-		gdb_test "thread $thread" "Switching.*"
+		gdb_test "thread $gdb_thr" "Switching.*" "switch to thread $thread"
 		gdb_test_no_output "queue-signal SIGUSR1"
 
 		# Switch back to thread 1, and continue.
@@ -113,6 +149,14 @@ foreach displaced { "off" "on" } {
 			    && $thread != 1 && $displaced == "off"} {
 			    setup_kfail "gdb/18214" "*-*-*"
 			}
+			fail $msg
+		    }
+		    -re "$inferior_exited_re normally.*$gdb_prompt $" {
+			# On Windows, we can't pass any signal other
+			# than the one that the thread stopped for, so
+			# the queued signal is just ignored, and the
+			# inferior ends up exiting.
+			setup_kfail "gdb/XXX" "*-*-cygwin*"
 			fail $msg
 		    }
 		}
