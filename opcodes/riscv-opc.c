@@ -1912,6 +1912,19 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vghsh.vv",   0, INSN_CLASS_ZVKG, "Vd,Vt,Vs", MATCH_VGHSH_VV, MASK_VGHSH_VV, match_opcode, 0},
 {"vgmul.vv",   0, INSN_CLASS_ZVKG, "Vd,Vt", MATCH_VGMUL_VV, MASK_VGMUL_VV, match_opcode, 0},
 
+/* Zvkned instructions.  */
+{"vaesdf.vv",   0, INSN_CLASS_ZVKNED, "Vd,Vt", MATCH_VAESDF_VV, MASK_VAESDF_VV, match_opcode, 0},
+{"vaesdf.vs",   0, INSN_CLASS_ZVKNED, "Vd,Vt", MATCH_VAESDF_VS, MASK_VAESDF_VV, match_opcode, 0},
+{"vaesdm.vv",   0, INSN_CLASS_ZVKNED, "Vd,Vt", MATCH_VAESDM_VV, MASK_VAESDM_VV, match_opcode, 0},
+{"vaesdm.vs",   0, INSN_CLASS_ZVKNED, "Vd,Vt", MATCH_VAESDM_VS, MASK_VAESDM_VV, match_opcode, 0},
+{"vaesef.vv",   0, INSN_CLASS_ZVKNED, "Vd,Vt", MATCH_VAESEF_VV, MASK_VAESEF_VV, match_opcode, 0},
+{"vaesef.vs",   0, INSN_CLASS_ZVKNED, "Vd,Vt", MATCH_VAESEF_VS, MASK_VAESEF_VV, match_opcode, 0},
+{"vaesem.vv",   0, INSN_CLASS_ZVKNED, "Vd,Vt", MATCH_VAESEM_VV, MASK_VAESEM_VV, match_opcode, 0},
+{"vaesem.vs",   0, INSN_CLASS_ZVKNED, "Vd,Vt", MATCH_VAESEM_VS, MASK_VAESEM_VV, match_opcode, 0},
+{"vaeskf1.vi",   0, INSN_CLASS_ZVKNED, "Vd,Vt,Vj", MATCH_VAESKF1_VI, MASK_VAESKF1_VI, match_opcode, 0},
+{"vaeskf2.vi",   0, INSN_CLASS_ZVKNED, "Vd,Vt,Vj", MATCH_VAESKF2_VI, MASK_VAESKF2_VI, match_opcode, 0},
+{"vaesz.vs",     0, INSN_CLASS_ZVKNED, "Vd,Vt", MATCH_VAESZ_VS, MASK_VAESZ_VS, match_opcode, 0},
+
 /* Supervisor instructions.  */
 {"csrr",       0, INSN_CLASS_ZICSR, "d,E",   MATCH_CSRRS, MASK_CSRRS|MASK_RS1, match_opcode, INSN_ALIAS },
 {"csrw",       0, INSN_CLASS_ZICSR, "E,s",   MATCH_CSRRW, MASK_CSRRW|MASK_RD, match_opcode, INSN_ALIAS },
