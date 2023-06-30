@@ -1873,14 +1873,29 @@ static void
 riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
 {
   struct riscv_implicit_subset *t = riscv_implicit_subsets;
-  for (; t->subset_name; t++)
+  bool finished = false;
+  while (!finished)
     {
-      riscv_subset_t *subset = NULL;
-      if (riscv_lookup_subset (rps->subset_list, t->subset_name, &subset)
-	  && t->check_func (t->implicit_name, subset))
-	riscv_parse_add_subset (rps, t->implicit_name,
-				RISCV_UNKNOWN_VERSION,
-				RISCV_UNKNOWN_VERSION, true);
+      finished = true;
+      for (; t->subset_name; t++)
+	{
+	  riscv_subset_t *subset = NULL;
+	  riscv_subset_t *implicit_subset = NULL;
+	  if (riscv_lookup_subset (rps->subset_list, t->subset_name, &subset)
+	      && !riscv_lookup_subset (rps->subset_list, t->implicit_name,
+				       &implicit_subset)
+	      && t->check_func (t->implicit_name, subset))
+	    {
+	      riscv_parse_add_subset (rps, t->implicit_name,
+				      RISCV_UNKNOWN_VERSION,
+				      RISCV_UNKNOWN_VERSION, true);
+
+	      /* Restart the loop and pick up any new implications.  */
+	      finished = false;
+	      t = riscv_implicit_subsets;
+	      break;
+	    }
+	}
     }
 }
 
