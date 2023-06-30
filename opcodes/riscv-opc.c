@@ -1930,6 +1930,11 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vsha2cl.vv",  0, INSN_CLASS_ZVKNHA_OR_ZVKNHB, "Vd,Vt,Vs", MATCH_VSHA2CL_VV, MASK_VSHA2CL_VV, match_opcode, 0},
 {"vsha2ms.vv",  0, INSN_CLASS_ZVKNHA_OR_ZVKNHB, "Vd,Vt,Vs", MATCH_VSHA2MS_VV, MASK_VSHA2MS_VV, match_opcode, 0},
 
+/* Zvksed instructions.  */
+{"vsm4k.vi",     0, INSN_CLASS_ZVKSED, "Vd,Vt,Vj", MATCH_VSM4K_VI, MASK_VSM4K_VI, match_opcode, 0},
+{"vsm4r.vv",     0, INSN_CLASS_ZVKSED, "Vd,Vt", MATCH_VSM4R_VV, MASK_VSM4R_VV, match_opcode, 0},
+{"vsm4r.vs",     0, INSN_CLASS_ZVKSED, "Vd,Vt", MATCH_VSM4R_VS, MASK_VSM4R_VS, match_opcode, 0},
+
 /* Supervisor instructions.  */
 {"csrr",       0, INSN_CLASS_ZICSR, "d,E",   MATCH_CSRRS, MASK_CSRRS|MASK_RS1, match_opcode, INSN_ALIAS },
 {"csrw",       0, INSN_CLASS_ZICSR, "E,s",   MATCH_CSRRW, MASK_CSRRW|MASK_RD, match_opcode, INSN_ALIAS },
