@@ -400,6 +400,10 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	      print (info->stream, dis_style_immediate, "%d",
 		     (int)EXTRACT_RVV_OFFSET (l));
 	      break;
+	    case 'l':
+	      print (info->stream, dis_style_immediate, "%d",
+		     (int)EXTRACT_RVV_VI_UIMM6 (l));
+	      break;
 	    case 'm':
 	      if (!EXTRACT_OPERAND (VMASK, l))
 		{

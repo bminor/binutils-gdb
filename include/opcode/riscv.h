@@ -100,6 +100,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   (RV_X(x, 15, 5) | (-RV_X(x, 19, 1) << 5))
 #define EXTRACT_RVV_VI_UIMM(x) \
   (RV_X(x, 15, 5))
+#define EXTRACT_RVV_VI_UIMM6(x) \
+  (RV_X(x, 15, 5) | (RV_X(x, 26, 1) << 5))
 #define EXTRACT_RVV_OFFSET(x) \
   (RV_X(x, 29, 3))
 #define EXTRACT_RVV_VB_IMM(x) \
@@ -151,6 +153,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   (RV_X(x, 0, 10) << 20)
 #define ENCODE_RVV_VC_IMM(x) \
   (RV_X(x, 0, 11) << 20)
+#define ENCODE_RVV_VI_UIMM6(x) \
+  (RV_X(x, 0, 5) << 15 | RV_X(x, 5, 1) << 26)
 
 #define VALID_ITYPE_IMM(x) (EXTRACT_ITYPE_IMM(ENCODE_ITYPE_IMM(x)) == (x))
 #define VALID_STYPE_IMM(x) (EXTRACT_STYPE_IMM(ENCODE_STYPE_IMM(x)) == (x))
@@ -410,6 +414,7 @@ enum riscv_insn_class
   INSN_CLASS_ZKND_OR_ZKNE,
   INSN_CLASS_V,
   INSN_CLASS_ZVEF,
+  INSN_CLASS_ZVBB,
   INSN_CLASS_SVINVAL,
   INSN_CLASS_ZICBOM,
   INSN_CLASS_ZICBOP,

@@ -1884,6 +1884,24 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vmv4r.v",    0, INSN_CLASS_V, "Vd,Vt", MATCH_VMV4RV, MASK_VMV4RV, match_opcode, 0},
 {"vmv8r.v",    0, INSN_CLASS_V, "Vd,Vt", MATCH_VMV8RV, MASK_VMV8RV, match_opcode, 0},
 
+/* Zvbb instructions.  */
+{"vandn.vv",   0, INSN_CLASS_ZVBB, "Vd,Vt,VsVm", MATCH_VANDN_VV, MASK_VANDN_VV, match_opcode, 0},
+{"vandn.vx",   0, INSN_CLASS_ZVBB, "Vd,Vt,sVm", MATCH_VANDN_VX, MASK_VANDN_VX, match_opcode, 0},
+{"vbrev.v",   0, INSN_CLASS_ZVBB, "Vd,VtVm", MATCH_VBREV_V, MASK_VBREV_V, match_opcode, 0},
+{"vbrev8.v",   0, INSN_CLASS_ZVBB, "Vd,VtVm", MATCH_VBREV8_V, MASK_VBREV8_V, match_opcode, 0},
+{"vrev8.v",   0, INSN_CLASS_ZVBB, "Vd,VtVm", MATCH_VREV8_V, MASK_VREV8_V, match_opcode, 0},
+{"vclz.v",   0, INSN_CLASS_ZVBB, "Vd,VtVm", MATCH_VCLZ_V, MASK_VCLZ_V, match_opcode, 0},
+{"vctz.v",   0, INSN_CLASS_ZVBB, "Vd,VtVm", MATCH_VCTZ_V, MASK_VCTZ_V, match_opcode, 0},
+{"vcpop.v",   0, INSN_CLASS_ZVBB, "Vd,VtVm", MATCH_VCPOP_V, MASK_VCPOP_V, match_opcode, 0},
+{"vrol.vv",    0, INSN_CLASS_ZVBB, "Vd,Vt,VsVm", MATCH_VROL_VV, MASK_VROL_VV, match_opcode, 0},
+{"vrol.vx",    0, INSN_CLASS_ZVBB, "Vd,Vt,sVm", MATCH_VROL_VX, MASK_VROL_VX, match_opcode, 0},
+{"vror.vv",    0, INSN_CLASS_ZVBB, "Vd,Vt,VsVm", MATCH_VROR_VV, MASK_VROR_VV, match_opcode, 0},
+{"vror.vx",    0, INSN_CLASS_ZVBB, "Vd,Vt,sVm", MATCH_VROR_VX, MASK_VROR_VX, match_opcode, 0},
+{"vror.vi",    0, INSN_CLASS_ZVBB, "Vd,Vt,VlVm", MATCH_VROR_VI, MASK_VROR_VI, match_opcode, 0},
+{"vwsll.vv",    0, INSN_CLASS_ZVBB, "Vd,Vt,VsVm", MATCH_VWSLL_VV, MASK_VWSLL_VV, match_opcode, 0},
+{"vwsll.vx",    0, INSN_CLASS_ZVBB, "Vd,Vt,sVm", MATCH_VWSLL_VX, MASK_VWSLL_VX, match_opcode, 0},
+{"vwsll.vi",    0, INSN_CLASS_ZVBB, "Vd,Vt,VjVm", MATCH_VWSLL_VI, MASK_VWSLL_VI, match_opcode, 0},
+
 /* Supervisor instructions.  */
 {"csrr",       0, INSN_CLASS_ZICSR, "d,E",   MATCH_CSRRS, MASK_CSRRS|MASK_RS1, match_opcode, INSN_ALIAS },
 {"csrw",       0, INSN_CLASS_ZICSR, "E,s",   MATCH_CSRRW, MASK_CSRRW|MASK_RD, match_opcode, INSN_ALIAS },
