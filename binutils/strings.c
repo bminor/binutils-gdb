@@ -315,8 +315,14 @@ main (int argc, char **argv)
       if (s != NULL && *s != 0)
 	fatal (_("invalid integer argument %s"), argv[numeric_opt - 1] + 1);
     }
+
   if (string_min < 1)
     fatal (_("invalid minimum string length %d"), string_min);
+  /* PR 30595: Look for excessive minimum string lengths.
+     The "(4 * string_min) + 1" is because this is the value
+     used to allocate space in print_unicode_stream().  */
+  else if (string_min == -1U || ((4 * string_min) + 1) == 0)
+    fatal (_("minimum string length %#x is too big"), string_min);
 
   switch (encoding)
     {

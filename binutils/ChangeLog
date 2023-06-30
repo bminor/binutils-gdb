@@ -1,3 +1,9 @@
+2023-06-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 30595
+	* strings.c (main): Check for an excessively large minimum string
+	length.
+
 2023-06-21  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/lib/binutils-common.exp (prune_warnings_extra): Prune
