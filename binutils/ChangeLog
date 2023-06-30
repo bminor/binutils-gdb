@@ -1,5 +1,12 @@
 2023-06-30  Nick Clifton  <nickc@redhat.com>
 
+	PR 30598
+	* strings.c (set_string_min): New function.
+	(main): Use it.
+	(print_unicode_stream): Calculate buffer size using a size_t.
+
+2023-06-30  Nick Clifton  <nickc@redhat.com>
+
 	PR 30595
 	* strings.c (main): Check for an excessively large minimum string
 	length.
