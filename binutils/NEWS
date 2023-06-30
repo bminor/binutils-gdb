@@ -20,6 +20,13 @@
 * Add command-line option, --strip-section-headers, to objcopy and strip to
   remove ELF section header from ELF file.
 
+* The RISC-V port now supports the following new standard extensions:
+  - Zicond (conditional zero instructions)
+  - Zfa (additional floating-point instructions)
+
+* The RISC-V port now supports the following vendor-defined extensions:
+  - XVentanaCondOps
+
 Changes in 2.40:
 
 * Objdump has a new command line option --show-all-symbols which will make it
