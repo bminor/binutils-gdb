@@ -226,10 +226,7 @@ foreach t [list indirect5a indirect5b indirect6a indirect6b] {
     }
 }
 
-send_log "$CC_FOR_TARGET -fPIE -pie $srcdir/$subdir/main.c -o tmpdir/pie"
-catch "exec $CC_FOR_TARGET -fPIE -pie $srcdir/$subdir/main.c -o tmpdir/pie" exec_output
-send_log "$exec_output"
-if { ! [string match "" $exec_output] } {
+if { ![run_host_cmd_yesno $CC_FOR_TARGET "-fPIC -pie $srcdir/$subdir/main.c -o tmpdir/pie"] } {
     return
 }
 
