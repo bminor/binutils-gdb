@@ -10,6 +10,18 @@
 
 * A new .insn directive is recognized by x86 gas.
 
+* Add support for LoongArch LSX instructions.
+
+* Add support for LoongArch LASX instructions.
+
+* Add support for LoongArch LVZ instructions.
+
+* Add support for LoongArch LBT instructions.
+
+* Initial LoongArch support for linker relaxation has been added.
+
+* Deprecate the LoongArch register aliases $v0, $v1, $x, $fv0 and $fv1.
+
 Changes in 2.40:
 
 * Add support for Intel RAO-INT instructions.
