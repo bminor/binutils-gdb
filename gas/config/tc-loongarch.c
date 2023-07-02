@@ -31,7 +31,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
-#include "libbfd.h"
 
 /* All information about an instruction during assemble.  */
 struct loongarch_cl_insn
