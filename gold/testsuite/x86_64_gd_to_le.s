@@ -7,6 +7,7 @@ _start:
 	subq	$8, %rsp
 	.cfi_def_cfa_offset 16
 	leaq	foo@TLSDESC(%rip), %r9
+	leaq	foo@TLSDESC(%rip), %r29
 	movq	%r9, %rax
 	call	*foo@TLSCALL(%rax)
 	addq	%fs:0, %rax

@@ -102,6 +102,14 @@ enum
 				  // GOT if the instruction starts at 4
 				  // bytes before the relocation offset,
 				  // relaxable.
+  R_X86_64_CODE_4_GOTTPOFF = 44,  // 32 bit signed PC relative offset to
+				  // GOT entry for IE symbol if the
+				  // instruction starts at 4 bytes before
+				  // the relocation offset.
+  R_X86_64_CODE_4_GOTPC32_TLSDESC = 45, // 32-bit PC relative to TLS
+					// descriptor in GOT if the
+					// instruction starts at 4 bytes
+					// before the relocation offset.
   // GNU vtable garbage collection extensions.
   R_X86_64_GNU_VTINHERIT = 250,
   R_X86_64_GNU_VTENTRY = 251

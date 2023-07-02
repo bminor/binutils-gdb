@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# x86_64_gd_to_ie.sh -- a test for GDesc -> IE conversion.
+# x86_64_ie_to_le.sh -- a test for IE -> LE conversion.
 
-# Copyright (C) 2020-2023 Free Software Foundation, Inc.
+# Copyright (C) 2023 Free Software Foundation, Inc.
 
 # This file is part of gold.
 
@@ -23,5 +23,7 @@
 
 set -e
 
-grep -q "mov[ \t]\+\$0x[a-f0-9]\+,%r9" x86_64_gd_to_le.stdout
-grep -q "mov[ \t]\+\$0x[a-f0-9]\+,%r29" x86_64_gd_to_le.stdout
+grep -q "add[ \t]\+\$0x[a-f0-9]\+,%r12" x86_64_ie_to_le.stdout
+grep -q "mov[ \t]\+\$0x[a-f0-9]\+,%rax" x86_64_ie_to_le.stdout
+grep -q "add[ \t]\+\$0x[a-f0-9]\+,%r16" x86_64_ie_to_le.stdout
+grep -q "mov[ \t]\+\$0x[a-f0-9]\+,%r20" x86_64_ie_to_le.stdout
