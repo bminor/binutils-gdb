@@ -29,6 +29,20 @@
 * The RISC-V port now supports the following vendor-defined extensions:
   - XVentanaCondOps
 
+* The LoongArch port now supports the following extensions:
+  - LSX (Loongson SIMD eXtension; 128-bit vectors)
+  - LASX (Loongson Advanced SIMD eXtension; 256-bit vectors)
+  - LVZ (Loongson Virtualization extension)
+  - LBT (Loongson Binary Translation extension)
+
+* The LoongArch disassembly output received the following tweaks:
+  - Colored output is now supported.
+  - Some pseudo-instructions are now shown in place of the canonical forms,
+    where semantics are equivalent. A disassembler option '-M no-aliases' is
+    added to disable the new behavior.
+  - Signed immediates are no longer printed with their hex representation.
+  - Unrecognized instruction words are now shown with '.word'.
+
 Changes in 2.40:
 
 * Objdump has a new command line option --show-all-symbols which will make it
