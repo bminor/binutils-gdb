@@ -52,8 +52,8 @@ Approx time to complete from here: 2 hours ....
 
   4. Create the release branch using:
 
-	git branch binutils-2_41-branch
-        git push origin binutils-2_41-branch
+	git branch binutils-2_42-branch
+        git push origin binutils-2_42-branch
 
      If you get a message like:
      
@@ -85,8 +85,8 @@ Approx time to complete from here: 2 hours ....
      ask Joel Brobecker <brobecker AT adacore DOT com>.
 
   7. Rename the current HEAD version entry in Bugzilla, and create a
-     new one.  E.g. rename "2.41 (HEAD)" to 2.41, and create
-     "2.42 (HEAD)":
+     new one.  E.g. rename "2.42 (HEAD)" to 2.42, and create
+     "2.43 (HEAD)":
      
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
@@ -99,13 +99,13 @@ Approx time to complete from here: 2 hours ....
      and the version number on the MAINLINE should be set to 2.41.50 -
      ie half way to 2.42 release.
 
-     So the branch bfd/version.m4 has:
+     So the BRANCH bfd/version.m4 has:
      
-       m4_define([BFD_VERSION], [2.40.90])
+       m4_define([BFD_VERSION], [2.41.90])
        
-     and the mainline has:
+     and the MAINLINE has:
 
-       m4_define([BFD_VERSION], [2.41.50])
+       m4_define([BFD_VERSION], [2.42.50])
 
      Regenerate various files on both branch and HEAD by configuring
      with "--enable-maintainer-mode --enable-gold --enable-shared" and then building
