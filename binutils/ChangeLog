@@ -1,5 +1,11 @@
 2023-07-03  Nick Clifton  <nickc@redhat.com>
 
+	* README-how-to-make-a-release: Change some version numbers.
+	* configure: Regenerate.
+	* po/binutils.pot: Regenerate.
+
+2023-07-03  Nick Clifton  <nickc@redhat.com>
+
 	2.41 Branch Point.
 
 2023-06-30  Nick Clifton  <nickc@redhat.com>
