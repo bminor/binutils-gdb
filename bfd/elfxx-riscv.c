@@ -2479,10 +2479,6 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zvkg");
     case INSN_CLASS_ZVKNED:
       return riscv_subset_supports (rps, "zvkned");
-    case INSN_CLASS_ZVKNHA:
-      return riscv_subset_supports (rps, "zvknha");
-    case INSN_CLASS_ZVKNHB:
-      return riscv_subset_supports (rps, "zvknhb");
     case INSN_CLASS_ZVKNHA_OR_ZVKNHB:
       return (riscv_subset_supports (rps, "zvknha")
 	      || riscv_subset_supports (rps, "zvknhb"));
@@ -2686,10 +2682,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return _("zvkg");
     case INSN_CLASS_ZVKNED:
       return _("zvkned");
-    case INSN_CLASS_ZVKNHA:
-      return _("zvknha");
-    case INSN_CLASS_ZVKNHB:
-      return _("zvknhb");
+    case INSN_CLASS_ZVKNHA_OR_ZVKNHB:
+      return _("zvknha' or `zvknhb");
     case INSN_CLASS_ZVKSED:
       return _("zvksed");
     case INSN_CLASS_ZVKSH:
