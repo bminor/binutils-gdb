@@ -137,21 +137,21 @@ Approx time to complete from here: 2 hours ....
           xz -9 binutils-<release>.tar
 
           eg:
-	    touch -d 2023-06-01 binutils-2.40.90/gas/doc/.dirstamp
-	    tar rvf binutils-2.40.90.tar binutils-2.40.90/gas/doc/.ditstamp
-            rm binutils-2.40.90.tar.xz
-            xz -9 binutils-2.40.90.tar
+	    touch -d 2024-01-01 binutils-2.41.90/gas/doc/.dirstamp
+	    tar rvf binutils-2.41.90.tar binutils-2.41.90/gas/doc/.dirstamp
+            rm binutils-2.41.90.tar.xz
+            xz -9 binutils-2.41.90.tar
 	    
 	 ...END OF FIXME   
 
      c. Build a test target using this tarball.
 
-           cp binutils-2.40.90.tar.xz /dev/shm
+           cp binutils-2.41.90.tar.xz /dev/shm
 	   pushd /dev/shm
-	   tar xvf binutils-2.40.90.tar.xz
+	   tar xvf binutils-2.41.90.tar.xz
 	   mkdir build
 	   cd build
-	   ../binutils-2.40.90/configure --quiet --enable-gold
+	   ../binutils-2.41.90/configure --quiet --enable-gold
 	   make
 	   popd
 
@@ -173,11 +173,11 @@ Approx time to complete from here: 2 hours ....
 ------------------------------------------------------------------------
 Dear Translation Project
 
-  The 2.40 release branch has been created for the GNU Binutils project.
+  The 2.42 release branch has been created for the GNU Binutils project.
 
   A snapshot of the branch sources can be found here:
 
-    https://sourceware.org/pub/binutils/snapshots/binutils-2.39.90.tar.xz
+    https://sourceware.org/pub/binutils/snapshots/binutils-2.41.90.tar.xz
 
   We hope to make the official release of the sources on the <DATE>
   although that could change if there are important bugs that need to
@@ -188,7 +188,7 @@ Dear Translation Project
       binutils mailing list.  Set a date for when the release will
       actually happen.  Something like:
       
-------------------------------------------------------------------------
+
 Hi Everyone, 
 
   The <NEW_VERSION> branch has now been created:
