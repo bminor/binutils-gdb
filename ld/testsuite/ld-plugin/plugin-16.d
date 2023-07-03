@@ -35,5 +35,6 @@ Sym: '_?func' Resolution: LDPR_PREVAILING_DEF
 Sym: '_?func2' Resolution: LDPR_PREVAILING_DEF_IRONLY
 .*: tmpdir/main.o: in function `main':
 .*main.c.*: undefined reference to `\.?func'
+#?.*main.c.*: undefined reference to `\.?func'
 hook called: cleanup.
 #...
