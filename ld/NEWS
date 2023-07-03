@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.41:
+
 * The linker now accepts a command line option of --remap-inputs
   <PATTERN>=<FILE> to relace any input file that matches <PATTERN> with
   <FILE>.  In addition the option --remap-inputs-file=<FILE> can be used to

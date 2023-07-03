@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.41:
+
 * The MIPS port now supports the Sony Interactive Entertainment Allegrex
   processor, used with the PlayStation Portable, which implements the MIPS
   II ISA along with a single-precision FPU and a few implementation-specific

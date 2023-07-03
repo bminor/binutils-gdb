@@ -1,3 +1,7 @@
+2023-07-03  Nick Clifton  <nickc@redhat.com>
+
+	2.41 Branch Point.
+
 2023-05-25  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* coff/pe.h (IMAGE_FILE_MACHINE_AMD64): Remove duplicate
