@@ -23,11 +23,11 @@
     { Bad_Opcode },
     { Bad_Opcode },
     { VEX_W_TABLE (EVEX_W_0F73_R_2) },
-    { "%XEvpsrldq",	{ Vex, EXx, Ib }, PREFIX_DATA },
+    { "%XEvpsrldqY",	{ Vex, EXx, Ib }, PREFIX_DATA },
     { Bad_Opcode },
     { Bad_Opcode },
     { VEX_W_TABLE (EVEX_W_0F73_R_6) },
-    { "%XEvpslldq",	{ Vex, EXx, Ib }, PREFIX_DATA },
+    { "%XEvpslldqY",	{ Vex, EXx, Ib }, PREFIX_DATA },
   },
   /* REG_EVEX_0F38C6_M_0_L_2 */
   {

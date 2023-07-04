@@ -9,22 +9,22 @@
   /* MOD_EVEX_0F3828_P_1 */
   {
     { Bad_Opcode },
-    { "vpmovm2%BW",	{ XM, MaskE }, 0 },
+    { "vpmovm2Y%BW",	{ XM, MaskE }, 0 },
   },
   /* MOD_EVEX_0F382A_P_1_W_1 */
   {
     { Bad_Opcode },
-    { "vpbroadcastmb2q",	{ XM, MaskE }, 0 },
+    { "vpbroadcastmb2qY",	{ XM, MaskE }, 0 },
   },
   /* MOD_EVEX_0F3838_P_1 */
   {
     { Bad_Opcode },
-    { "vpmovm2%DQ",	{ XM, MaskE }, 0 },
+    { "vpmovm2Y%DQ",	{ XM, MaskE }, 0 },
   },
   /* MOD_EVEX_0F383A_P_1_W_0 */
   {
     { Bad_Opcode },
-    { "vpbroadcastmw2d",	{ XM, MaskE }, 0 },
+    { "vpbroadcastmw2dY",	{ XM, MaskE }, 0 },
   },
   /* MOD_EVEX_0F385A */
   {

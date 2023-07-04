@@ -293,7 +293,7 @@
   },
   /* EVEX_W_0F382A_P_2 */
   {
-    { "%XEvmovntdqa",	{ XM, EXEvexXNoBcst }, 0 },
+    { "%XEvmovntdqaY",	{ XM, EXEvexXNoBcst }, 0 },
   },
   /* EVEX_W_0F382B */
   {

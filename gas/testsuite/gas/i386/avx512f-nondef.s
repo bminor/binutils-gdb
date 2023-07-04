@@ -38,3 +38,6 @@
 
 	# vpextrd $0, %xmm0, (%ecx) with non-zero EVEX.aaa
 	.insn EVEX.66.0f3a 0x16, $0, %xmm0, (%ecx){%k2}
+
+	# vmovntdqa (%ecx), %zmm0 with non-zero EVEX.aaa
+	.insn EVEX.66.0f38.W0 0x2a, (%ecx), %zmm0{%k2}
