@@ -190,6 +190,7 @@ optional arguments while skipping others.  Example:
 
 @menu
 * Basic Python::                Basic Python Functions.
+* Threading in GDB::		Using Python threads in GDB.
 * Exception Handling::          How Python exceptions are translated.
 * Values From Inferior::        Python representation of values.
 * Types In Python::             Python representation of types.
@@ -436,44 +437,6 @@ will be @code{None} and 0 respectively.  This is identical to
 historical compatibility.
 @end defun
 
-@defun gdb.post_event (event)
-Put @var{event}, a callable object taking no arguments, into
-@value{GDBN}'s internal event queue.  This callable will be invoked at
-some later point, during @value{GDBN}'s event processing.  Events
-posted using @code{post_event} will be run in the order in which they
-were posted; however, there is no way to know when they will be
-processed relative to other events inside @value{GDBN}.
-
-@value{GDBN} is not thread-safe.  If your Python program uses multiple
-threads, you must be careful to only call @value{GDBN}-specific
-functions in the @value{GDBN} thread.  @code{post_event} ensures
-this.  For example:
-
-@smallexample
-(@value{GDBP}) python
->import threading
->
->class Writer():
-> def __init__(self, message):
->        self.message = message;
-> def __call__(self):
->        gdb.write(self.message)
->
->class MyThread1 (threading.Thread):
-> def run (self):
->        gdb.post_event(Writer("Hello "))
->
->class MyThread2 (threading.Thread):
-> def run (self):
->        gdb.post_event(Writer("World\n"))
->
->MyThread1().start()
->MyThread2().start()
->end
-(@value{GDBP}) Hello World
-@end smallexample
-@end defun
-
 @defun gdb.write (string @r{[}, stream@r{]})
 Print a string to @value{GDBN}'s paginated output stream.  The
 optional @var{stream} determines the stream to print to.  The default
@@ -668,6 +631,71 @@ Return the name of the current language as a string.  Unlike
 In Python}), the @code{language} method might be preferable in some
 cases, as that is not affected by the user's language setting.
 @end defun
+
+@node Threading in GDB
+@subsubsection Threading in GDB
+
+@value{GDBN} is not thread-safe.  If your Python program uses multiple
+threads, you must be careful to only call @value{GDBN}-specific
+functions in the @value{GDBN} thread.  @value{GDBN} provides some
+functions to help with this.
+
+@defun gdb.block_signals ()
+As mentioned earlier (@pxref{Basic Python}), certain signals must be
+delivered to the @value{GDBN} main thread.  The @code{block_signals}
+function returns a context manager that will block these signals on
+entry.  This can be used when starting a new thread to ensure that the
+signals are blocked there, like:
+
+@smallexample
+with gdb.block_signals():
+   start_new_thread()
+@end smallexample
+@end defun
+
+@deftp {class} gdb.Thread
+This is a subclass of Python's @code{threading.Thread} class.  It
+overrides the @code{start} method to call @code{block_signals}, making
+this an easy-to-use drop-in replacement for creating threads that will
+work well in @value{GDBN}.
+@end deftp
+
+@defun gdb.post_event (event)
+Put @var{event}, a callable object taking no arguments, into
+@value{GDBN}'s internal event queue.  This callable will be invoked at
+some later point, during @value{GDBN}'s event processing.  Events
+posted using @code{post_event} will be run in the order in which they
+were posted; however, there is no way to know when they will be
+processed relative to other events inside @value{GDBN}.
+
+Unlike most Python APIs in @value{GDBN}, @code{post_event} is
+thread-safe.  For example:
+
+@smallexample
+(@value{GDBP}) python
+>import threading
+>
+>class Writer():
+> def __init__(self, message):
+>        self.message = message;
+> def __call__(self):
+>        gdb.write(self.message)
+>
+>class MyThread1 (threading.Thread):
+> def run (self):
+>        gdb.post_event(Writer("Hello "))
+>
+>class MyThread2 (threading.Thread):
+> def run (self):
+>        gdb.post_event(Writer("World\n"))
+>
+>MyThread1().start()
+>MyThread2().start()
+>end
+(@value{GDBP}) Hello World
+@end smallexample
+@end defun
+
 
 @node Exception Handling
 @subsubsection Exception Handling

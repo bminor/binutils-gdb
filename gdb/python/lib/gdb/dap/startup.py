@@ -18,10 +18,8 @@
 import functools
 import gdb
 import queue
-import signal
 import threading
 import traceback
-from contextlib import contextmanager
 import sys
 
 
@@ -33,32 +31,12 @@ _gdb_thread = threading.current_thread()
 _dap_thread = None
 
 
-@contextmanager
-def blocked_signals():
-    """A helper function that blocks and unblocks signals."""
-    if not hasattr(signal, "pthread_sigmask"):
-        yield
-        return
-
-    to_block = {signal.SIGCHLD, signal.SIGINT, signal.SIGALRM, signal.SIGWINCH}
-    signal.pthread_sigmask(signal.SIG_BLOCK, to_block)
-    try:
-        yield None
-    finally:
-        signal.pthread_sigmask(signal.SIG_UNBLOCK, to_block)
-
-
 def start_thread(name, target, args=()):
     """Start a new thread, invoking TARGET with *ARGS there.
     This is a helper function that ensures that any GDB signals are
     correctly blocked."""
-    # GDB requires that these be delivered to the gdb thread.  We
-    # do this here to avoid any possible race with the creation of
-    # the new thread.  The thread mask is inherited by new
-    # threads.
-    with blocked_signals():
-        result = threading.Thread(target=target, args=args, daemon=True)
-        result.start()
+    result = gdb.Thread(target=target, args=args, daemon=True)
+    result.start()
 
 
 def start_dap(target):

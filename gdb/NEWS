@@ -228,6 +228,12 @@ info main
   ** New function gdb.execute_mi(COMMAND, [ARG]...), that invokes a
      GDB/MI command and returns the output as a Python dictionary.
 
+  ** New function gdb.block_signals().  This returns a context manager
+     that blocks any signals that GDB needs to handle itself.
+
+  ** New class gdb.Thread.  This is a subclass of threading.Thread
+     that calls gdb.block_signals in its "start" method.
+
   ** gdb.parse_and_eval now has a new "global_context" parameter.
      This can be used to request that the parse only examine global
      symbols.

@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import signal
+import threading
 import traceback
 import os
 import sys
@@ -259,3 +261,33 @@ def with_parameter(name, value):
         yield None
     finally:
         set_parameter(name, old_value)
+
+
+@contextmanager
+def blocked_signals():
+    """A helper function that blocks and unblocks signals."""
+    if not hasattr(signal, "pthread_sigmask"):
+        yield
+        return
+
+    to_block = {signal.SIGCHLD, signal.SIGINT, signal.SIGALRM, signal.SIGWINCH}
+    signal.pthread_sigmask(signal.SIG_BLOCK, to_block)
+    try:
+        yield None
+    finally:
+        signal.pthread_sigmask(signal.SIG_UNBLOCK, to_block)
+
+
+class Thread(threading.Thread):
+    """A GDB-specific wrapper around threading.Thread
+
+    This wrapper ensures that the new thread blocks any signals that
+    must be delivered on GDB's main thread."""
+
+    def start(self):
+        # GDB requires that these be delivered to the main thread.  We
+        # do this here to avoid any possible race with the creation of
+        # the new thread.  The thread mask is inherited by new
+        # threads.
+        with blocked_signals():
+            super().start()
