@@ -9905,9 +9905,15 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 		      oappend (&ins, "{");
 		      oappend_register (&ins, reg_name);
 		      oappend (&ins, "}");
+
+		      if (ins.vex.zeroing)
+			oappend (&ins, "{z}");
 		    }
-		  if (ins.vex.zeroing)
-		    oappend (&ins, "{z}");
+		  else if (ins.vex.zeroing)
+		    {
+		      oappend (&ins, "{bad}");
+		      continue;
+		    }
 
 		  /* S/G insns require a mask and don't allow
 		     zeroing-masking.  */
@@ -9979,14 +9985,6 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
   /* If VEX.vvvv and EVEX.vvvv are unused, they must be all 1s, which
      are all 0s in inverted form.  */
   if (ins.need_vex && ins.vex.register_specifier != 0)
-    {
-      i386_dis_printf (info, dis_style_text, "(bad)");
-      ret = ins.end_codep - priv.the_buffer;
-      goto out;
-    }
-
-  /* If EVEX.z is set, there must be an actual mask register in use.  */
-  if (ins.vex.zeroing && ins.vex.mask_register_specifier == 0)
     {
       i386_dis_printf (info, dis_style_text, "(bad)");
       ret = ins.end_codep - priv.the_buffer;
