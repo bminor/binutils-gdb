@@ -229,3 +229,6 @@ _start:
 	pcmpeqq		%xmm12, %xmm12
 	vpcmpeqq	%xmm12, %xmm12, %xmm0
 	vpcmpeqq	%ymm12, %ymm12, %ymm0
+
+	vpbroadcastq	%xmm2, %xmm0
+	vpbroadcastq	%xmm12, %xmm0

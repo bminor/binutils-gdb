@@ -184,3 +184,5 @@ _start:
 	pcmpeqq		%xmm2, %xmm2
 	vpcmpeqq	%xmm2, %xmm2, %xmm0
 	vpcmpeqq	%ymm2, %ymm2, %ymm0
+
+	vpbroadcastq	%xmm2, %xmm0

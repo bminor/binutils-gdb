@@ -1734,7 +1734,7 @@ vbroadcastsd, 0x6619, AVX2, Modrm|Vex=2|Space0F38|VexW=1|NoSuf, { RegXMM, RegYMM
 vbroadcastss, 0x6618, AVX2, Modrm|Vex|Space0F38|VexW=1|NoSuf, { RegXMM, RegXMM|RegYMM }
 vpblendd, 0x6602, AVX2, Modrm|Vex|Space0F3A|VexVVVV|VexW0|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpbroadcast<bw>, 0x6678 | <bw:opc>, AVX2, Modrm|Vex|Space0F38|VexW0|NoSuf, { <bw:elem>|Unspecified|BaseIndex|RegXMM, RegXMM|RegYMM }
-vpbroadcast<dq>, 0x6658 | <dq:opc>, AVX2, Modrm|Vex|Space0F38|VexW0|NoSuf, { <dq:elem>|Unspecified|BaseIndex|RegXMM, RegXMM|RegYMM }
+vpbroadcast<dq>, 0x6658 | <dq:opc>, AVX2, Modrm|Vex|Space0F38|VexW0|NoSuf|Optimize, { <dq:elem>|Unspecified|BaseIndex|RegXMM, RegXMM|RegYMM }
 vperm2i128, 0x6646, AVX2, Modrm|Vex=2|Space0F3A|VexVVVV|VexW0|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
 vpermd, 0x6636, AVX2, Modrm|Vex256|Space0F38|VexVVVV|VexW0|NoSuf, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
 vpermpd, 0x6601, AVX2, Modrm|Vex=2|Space0F3A|VexW1|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegYMM, RegYMM }

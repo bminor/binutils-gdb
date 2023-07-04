@@ -165,4 +165,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	66 .*	pcmpeqq %xmm2,%xmm2
  +[a-f0-9]+:	c4 .*	vpcmpeqq %xmm2,%xmm2,%xmm0
  +[a-f0-9]+:	c4 .*	vpcmpeqq %ymm2,%ymm2,%ymm0
+ +[a-f0-9]+:	c4 .*	vpbroadcastq %xmm2,%xmm0
 #pass
