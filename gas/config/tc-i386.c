@@ -4563,6 +4563,23 @@ optimize_encoding (void)
 	i.types[j].bitfield.disp8
 	  = fits_in_disp8 (i.op[j].disps->X_add_number);
     }
+  else if (optimize_for_space
+	   && i.tm.base_opcode == 0x29
+	   && i.tm.opcode_space == SPACE_0F38
+	   && i.operands == i.reg_operands
+	   && i.op[0].regs == i.op[1].regs
+	   && (!i.tm.opcode_modifier.vex
+	       || !(i.op[0].regs->reg_flags & RegRex))
+	   && !is_evex_encoding (&i.tm))
+    {
+      /* Optimize: -Os:
+         pcmpeqq %xmmN, %xmmN          -> pcmpeqd %xmmN, %xmmN
+         vpcmpeqq %xmmN, %xmmN, %xmmM  -> vpcmpeqd %xmmN, %xmmN, %xmmM (N < 8)
+         vpcmpeqq %ymmN, %ymmN, %ymmM  -> vpcmpeqd %ymmN, %ymmN, %ymmM (N < 8)
+       */
+      i.tm.opcode_space = SPACE_0F;
+      i.tm.base_opcode = 0x76;
+    }
 }
 
 /* Return non-zero for load instruction.  */
