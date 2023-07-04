@@ -5,10 +5,10 @@
 # Yuri Chornoivan <yurchor@ukr.net>, 2012, 2014, 2018, 2019, 2020, 2021, 2022, 2023.
 msgid ""
 msgstr ""
-"Project-Id-Version: gold 2.39.90\n"
+"Project-Id-Version: gold 2.40.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-12-31 12:19+0000\n"
-"PO-Revision-Date: 2023-01-01 14:16+0200\n"
+"POT-Creation-Date: 2023-07-03 11:34+0100\n"
+"PO-Revision-Date: 2023-07-03 21:20+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -61,7 +61,7 @@ msgstr "некоректний індекс назви таблиці симво
 msgid "symbol table name section has wrong type: %u"
 msgstr "розділ назви таблиці символів належить до помилкового типу: %u"
 
-#: aarch64.cc:3832 arm.cc:10905 mips.cc:9608 powerpc.cc:2911 target.cc:94
+#: aarch64.cc:3832 arm.cc:10905 mips.cc:9608 powerpc.cc:2935 target.cc:94
 #, c-format
 msgid "%s: unsupported ELF file type %d"
 msgstr "%s: непідтримуваний тип файлів ELF %d"
@@ -81,14 +81,14 @@ msgstr "** PLT"
 msgid "Stub is too far away, try a smaller value for '--stub-group-size'. The current value is 0x%lx."
 msgstr "Заглушка надто далеко. Спробуйте вказати менше значення для --stub-group-size. Поточним значенням є 0x%lx."
 
-#: aarch64.cc:6016 arm.cc:8477 i386.cc:1772 mips.cc:12461 powerpc.cc:7837
+#: aarch64.cc:6016 arm.cc:8477 i386.cc:1772 mips.cc:12461 powerpc.cc:7845
 #: s390.cc:2185 s390.cc:2633 sparc.cc:2134 tilegx.cc:3137 tilegx.cc:3589
 #: x86_64.cc:3012 x86_64.cc:3459
 #, c-format
 msgid "%s: unsupported reloc %u against local symbol"
 msgstr "%s: непідтримуване пересування %u щодо локального символу"
 
-#: aarch64.cc:6057 powerpc.cc:7942 s390.cc:2259 sparc.cc:2230
+#: aarch64.cc:6057 powerpc.cc:7950 s390.cc:2259 sparc.cc:2230
 msgid "requires unsupported dynamic reloc; recompile with -fPIC"
 msgstr "потребує непідтримуваного динамічного пересування; зберіть повторно з -fPIC"
 
@@ -107,7 +107,7 @@ msgstr "%s: непідтримуване пересування %u у незал
 msgid "%s: unsupported TLSLE reloc %u in shared code."
 msgstr "%s: непідтримуване пересування TLSLE %u у коді спільного використання."
 
-#: aarch64.cc:6373 arm.cc:8885 i386.cc:2127 mips.cc:12474 powerpc.cc:8777
+#: aarch64.cc:6373 arm.cc:8885 i386.cc:2127 mips.cc:12474 powerpc.cc:8785
 #: s390.cc:3064 s390.cc:3081 sparc.cc:2572 tilegx.cc:3605 tilegx.cc:4144
 #: x86_64.cc:3475 x86_64.cc:3979
 #, c-format
@@ -124,7 +124,7 @@ msgstr "%s: непідтримуваний тип пересування TLSLE %
 msgid "%s: unsupported reloc type in global scan"
 msgstr "%s: непідтримуваний тип пересування у загальному скануванні"
 
-#: aarch64.cc:6908 powerpc.cc:9913 s390.cc:4014 sparc.cc:3164 tilegx.cc:4211
+#: aarch64.cc:6908 powerpc.cc:9922 s390.cc:4014 sparc.cc:3164 tilegx.cc:4211
 #: x86_64.cc:4044
 #, c-format
 msgid "%s: unsupported REL reloc section"
@@ -135,7 +135,7 @@ msgstr "%s: непідтримуваний розділ пересування R
 msgid "cannot relocate %s in object file"
 msgstr "пересування %s у об'єктному файлі неможливе"
 
-#: aarch64.cc:7344 i386.cc:2987 i386.cc:3753 mips.cc:10076 powerpc.cc:12258
+#: aarch64.cc:7344 i386.cc:2987 i386.cc:3753 mips.cc:10076 powerpc.cc:12279
 #: s390.cc:3465 sparc.cc:3695 tilegx.cc:4726 x86_64.cc:4537
 #, c-format
 msgid "unexpected reloc %u in object file"
@@ -390,7 +390,7 @@ msgstr "потребує непідтримуваного динамічного
 msgid "%s: unsupported TLS reloc %u for IFUNC symbol"
 msgstr "%s: непідтримуване пересування TLS %u для символу IFUNC"
 
-#: arm.cc:8643 i386.cc:1862 powerpc.cc:8246 s390.cc:2369 x86_64.cc:3216
+#: arm.cc:8643 i386.cc:1862 powerpc.cc:8254 s390.cc:2369 x86_64.cc:3216
 #, c-format
 msgid "section symbol %u has bad shndx %u"
 msgstr "символ розділу %u має помилковий shndx %u"
@@ -420,7 +420,7 @@ msgid "unable to provide V4BX reloc interworking fix up; the target profile does
 msgstr "не вдалося вказати належного виправлення взаємодії пересувань V4BX; у профілі призначення не передбачено підтримки інструкції BX"
 
 #: arm.cc:10247 i386.cc:3019 i386.cc:3101 i386.cc:3166 i386.cc:3202
-#: i386.cc:3274 mips.cc:12296 powerpc.cc:12372 s390.cc:3471 s390.cc:3542
+#: i386.cc:3274 mips.cc:12296 powerpc.cc:12393 s390.cc:3471 s390.cc:3542
 #: s390.cc:3579 s390.cc:3601 s390.cc:3626 sparc.cc:3701 sparc.cc:3892
 #: sparc.cc:3953 sparc.cc:4060 tilegx.cc:4732 x86_64.cc:4558 x86_64.cc:4684
 #: x86_64.cc:4756 x86_64.cc:4790
@@ -1099,7 +1099,7 @@ msgstr "TLS-пересування обох моделей, SUN і GNU"
 msgid "unsupported reloc %u in object file"
 msgstr "непідтримуване пересування %u у об'єктному файлі"
 
-#: i386.cc:4036 powerpc.cc:9867 s390.cc:4886 x86_64.cc:5642
+#: i386.cc:4036 powerpc.cc:9876 s390.cc:4886 x86_64.cc:5642
 #, c-format
 msgid "failed to match split-stack sequence at section %u offset %0zx"
 msgstr "не вдалося знайти відповідник послідовності поділу стека у розділі %u, зсув %0zx"
@@ -1252,80 +1252,80 @@ msgstr "%s: невідомий тип властивості програми %d
 msgid "unable to open --section-ordering-file file %s: %s"
 msgstr "не вдалося відкрити файл --section-ordering-file %s: %s"
 
-#: layout.cc:3377
+#: layout.cc:3396
 msgid "one or more inputs require executable stack, but -z noexecstack was given"
 msgstr "одне або декілька джерел вхідних даних потребують придатного до виконання стека, але вказано параметр -z noexecstack"
 
-#: layout.cc:3450
+#: layout.cc:3469
 #, c-format
 msgid "--build-id=uuid failed: could not open /dev/urandom: %s"
 msgstr "помилка використання --build-id=uuid: не вдалося відкрити /dev/urandom: %s"
 
-#: layout.cc:3457
+#: layout.cc:3476
 #, c-format
 msgid "/dev/urandom: read failed: %s"
 msgstr "/dev/urandom: помилка читання: %s"
 
-#: layout.cc:3459
+#: layout.cc:3478
 #, c-format
 msgid "/dev/urandom: expected %zu bytes, got %zd bytes"
 msgstr "/dev/urandom: мало бути отримано %zu байтів, отримано %zd байтів"
 
-#: layout.cc:3471
+#: layout.cc:3490
 msgid "--build-id=uuid failed: could not load rpcrt4.dll"
 msgstr "помилка використання --build-id=uuid: не вдалося завантажити rpcrt4.dll"
 
-#: layout.cc:3477
+#: layout.cc:3496
 msgid "--build-id=uuid failed: could not find UuidCreate"
 msgstr "помилка використання --build-id=uuid: не вдалося знайти UuidCreate"
 
-#: layout.cc:3479
+#: layout.cc:3498
 msgid "__build_id=uuid failed: call UuidCreate() failed"
 msgstr "помилка __build_id=uuid: помилка під час виклику UuidCreate()"
 
-#: layout.cc:3501
+#: layout.cc:3520
 #, c-format
 msgid "--build-id argument '%s' not a valid hex number"
 msgstr "аргумент --build-id, «%s», не є коректним шістнадцятковим числом"
 
-#: layout.cc:3507
+#: layout.cc:3526
 #, c-format
 msgid "unrecognized --build-id argument '%s'"
 msgstr "нерозпізнаний аргумент --build-id, «%s»"
 
-#: layout.cc:3561
+#: layout.cc:3580
 #, c-format
 msgid "error: --package-metadata=%s does not contain valid JSON: %s\n"
 msgstr "помилка: --package-metadata=%s не містить коректного JSON: %s\n"
 
-#: layout.cc:4131
+#: layout.cc:4150
 #, c-format
 msgid "load segment overlap [0x%llx -> 0x%llx] and [0x%llx -> 0x%llx]"
 msgstr "перекриття сегментів завантаження [0x%llx -> 0x%llx] і [0x%llx -> 0x%llx]"
 
-#: layout.cc:4292 output.cc:4549
+#: layout.cc:4311 output.cc:4549
 #, c-format
 msgid "out of patch space for section %s; relink with --incremental-full"
 msgstr "вихід за межі латки для розділу %s; виконайте повторне компонування за допомогою --incremental-full"
 
-#: layout.cc:4301 output.cc:4557
+#: layout.cc:4320 output.cc:4557
 #, c-format
 msgid "%s: section changed size; relink with --incremental-full"
 msgstr "%s: зміна розміру розділу; виконайте повторне компонування з параметром --incremental-full"
 
-#: layout.cc:4556
+#: layout.cc:4575
 msgid "out of patch space for symbol table; relink with --incremental-full"
 msgstr "вихід за межі латки для таблиці символів; виконайте повторне компонування за допомогою --incremental-full"
 
-#: layout.cc:4627
+#: layout.cc:4646
 msgid "out of patch space for section header table; relink with --incremental-full"
 msgstr "вихід за межі латки для таблиці заголовків; виконайте повторне компонування за допомогою --incremental-full"
 
-#: layout.cc:5373
+#: layout.cc:5397
 msgid "read-only segment has dynamic relocations"
 msgstr "сегмент, призначений лише для читання, містить динамічні пересування"
 
-#: layout.cc:5376
+#: layout.cc:5400
 msgid "shared library text segment is not shareable"
 msgstr "текстовий сегмент бібліотеки спільного використання непридатний до спільного використання"
 
@@ -2029,7 +2029,7 @@ msgstr "не підтримується"
 msgid "Do not copy DT_NEEDED tags from shared libraries"
 msgstr "не копіювати теґи DT_NEEDED зі спільних бібліотек"
 
-#: options.h:689 options.h:1494
+#: options.h:689 options.h:1498
 msgid "Allow multiple definitions of symbols"
 msgstr "дозволити декілька визначень символу"
 
@@ -2061,7 +2061,7 @@ msgstr "встановлювати DT_NEEDED лише для спільних б
 msgid "Use DT_NEEDED for all shared libraries"
 msgstr "використовувати DT_NEEDED для усіх спільних бібліотек"
 
-#: options.h:706 options.h:919 options.h:1385 options.h:1399
+#: options.h:706 options.h:923 options.h:1389 options.h:1403
 msgid "Ignored"
 msgstr "Проігнороване"
 
@@ -2089,8 +2089,8 @@ msgstr "[=СТИЛЬ]"
 msgid "Chunk size for '--build-id=tree'"
 msgstr "Розмір фрагмента для «--build-id=tree»"
 
-#: options.h:727 options.h:732 options.h:1269 options.h:1278 options.h:1467
-#: options.h:1492 options.h:1525
+#: options.h:727 options.h:732 options.h:1273 options.h:1282 options.h:1471
+#: options.h:1496 options.h:1529
 msgid "SIZE"
 msgstr "РОЗМІР"
 
@@ -2202,8 +2202,8 @@ msgstr "не розшифровувати символи C++ у повідомл
 msgid "Write a dependency file listing all files read"
 msgstr "Записати файл списку залежностей усіх прочитаних файлів"
 
-#: options.h:814 options.h:830 options.h:982 options.h:1011 options.h:1088
-#: options.h:1204 options.h:1344 options.h:1376
+#: options.h:814 options.h:830 options.h:986 options.h:1015 options.h:1092
+#: options.h:1208 options.h:1348 options.h:1380
 msgid "FILE"
 msgstr "ФАЙЛ"
 
@@ -2243,8 +2243,8 @@ msgstr "(лише PowerPC) не позначати заглушки компон
 msgid "Set program start address"
 msgstr "встановити початкову адресу програми"
 
-#: options.h:839 options.h:1347 options.h:1349 options.h:1351 options.h:1354
-#: options.h:1356
+#: options.h:839 options.h:1351 options.h:1353 options.h:1355 options.h:1358
+#: options.h:1360
 msgid "ADDRESS"
 msgstr "АДРЕСА"
 
@@ -2265,1012 +2265,1020 @@ msgid "Disable use of DT_RUNPATH"
 msgstr "вимкнути використання DT_RUNPATH"
 
 #: options.h:851
+msgid "Put the linker version string into the .comment section"
+msgstr "Додати рядок версії компонувальника до розділу .comment"
+
+#: options.h:852
+msgid "Put the linker version string into the .note.gnu.gold-version section"
+msgstr "Додати рядок версії компонувальника до розділу .note.gnu.gold-version"
+
+#: options.h:855
 msgid "(ARM only) Do not warn about objects with incompatible enum sizes"
 msgstr "(лише ARM) Не попереджати про об'єкти з несумісними з enum розмірами"
 
-#: options.h:855
+#: options.h:859
 msgid "Exclude libraries from automatic export"
 msgstr "виключити бібліотеки з автоматичного експортування"
 
-#: options.h:859
+#: options.h:863
 msgid "Export all dynamic symbols"
 msgstr "Експортувати всі динамічні символи"
 
-#: options.h:860
+#: options.h:864
 msgid "Do not export all dynamic symbols"
 msgstr "не експортувати всі динамічні символи"
 
-#: options.h:863
+#: options.h:867
 msgid "Export SYMBOL to dynamic symbol table"
 msgstr "Експортувати СИМВОЛ до динамічної таблиці символів"
 
-#: options.h:863 options.h:885 options.h:1003 options.h:1020 options.h:1361
-#: options.h:1430 options.h:1444
+#: options.h:867 options.h:889 options.h:1007 options.h:1024 options.h:1365
+#: options.h:1434 options.h:1448
 msgid "SYMBOL"
 msgstr "СИМВОЛ"
 
-#: options.h:866
+#: options.h:870
 msgid "Link big-endian objects."
 msgstr "Компонувати об'єкти з прямим порядком байтів."
 
-#: options.h:868
+#: options.h:872
 msgid "Link little-endian objects."
 msgstr "Компонувати об'єкти зі зворотним порядком байтів."
 
-#: options.h:873
+#: options.h:877
 msgid "Auxiliary filter for shared object symbol table"
 msgstr "допоміжне фільтрування таблиці символів за об'єктом спільного використання"
 
-#: options.h:874 options.h:878
+#: options.h:878 options.h:882
 msgid "SHLIB"
 msgstr "СПБІБЛ"
 
-#: options.h:877
+#: options.h:881
 msgid "Filter for shared object symbol table"
 msgstr "фільтрування таблиці символів за об'єктом спільного використання"
 
-#: options.h:881
+#: options.h:885
 msgid "Treat warnings as errors"
 msgstr "вважати попередження помилками"
 
-#: options.h:882
+#: options.h:886
 msgid "Do not treat warnings as errors"
 msgstr "не вважати попередження помилками"
 
-#: options.h:885
+#: options.h:889
 msgid "Call SYMBOL at unload-time"
 msgstr "викликати СИМВОЛ під час вивантаження"
 
-#: options.h:888
+#: options.h:892
 msgid "(ARM only) Fix binaries for ARM1176 erratum"
 msgstr "(лише ARM) Виправляти у виконуваних файлах помилки ARM1176"
 
-#: options.h:889
+#: options.h:893
 msgid "(ARM only) Do not fix binaries for ARM1176 erratum"
 msgstr "(лише ARM) Не виправляти у виконуваних файлах помилки ARM1176"
 
-#: options.h:892
+#: options.h:896
 msgid "(ARM only) Fix binaries for Cortex-A8 erratum"
 msgstr "(лише ARM) Виправляти у виконуваних файлах помилки Cortex-A8"
 
-#: options.h:893
+#: options.h:897
 msgid "(ARM only) Do not fix binaries for Cortex-A8 erratum"
 msgstr "(лише ARM) Не виправляти у виконуваних файлах помилки Cortex-A8"
 
-#: options.h:896
+#: options.h:900
 msgid "(AArch64 only) Fix Cortex-A53 erratum 843419"
 msgstr "(лише AArch64) виправляти помилку Cortex-A53 843419"
 
-#: options.h:897
+#: options.h:901
 msgid "(AArch64 only) Do not fix Cortex-A53 erratum 843419"
 msgstr "(лише AArch64) не виправляти помилку Cortex-A53 843419"
 
-#: options.h:900
+#: options.h:904
 msgid "(AArch64 only) Fix Cortex-A53 erratum 835769"
 msgstr "(лише AArch64) виправляти помилку Cortex-A53 835769"
 
-#: options.h:901
+#: options.h:905
 msgid "(AArch64 only) Do not fix Cortex-A53 erratum 835769"
 msgstr "(лише AArch64) не виправляти помилку Cortex-A53 835769"
 
-#: options.h:904
+#: options.h:908
 msgid "(ARM only) Rewrite BX rn as MOV pc, rn for ARMv4"
 msgstr "(лише ARM) Переписувати BX rn як MOV pc, rn для ARMv4"
 
-#: options.h:908
+#: options.h:912
 msgid "(ARM only) Rewrite BX rn branch to ARMv4 interworking veneer"
 msgstr "(лише ARM) Перезаписувати гілку rn BX на обгортку взаємодії ARMv4"
 
-#: options.h:913
+#: options.h:917
 msgid "Ignored for GCC linker option compatibility"
 msgstr "Проігноровано для забезпечення сумісності за параметрами з компонувальником GCC"
 
-#: options.h:914
+#: options.h:918
 msgid "[gold,bfd]"
 msgstr "[gold,bfd]"
 
-#: options.h:922
+#: options.h:926
 msgid "Remove unused sections"
 msgstr "вилучити невикористані розділи"
 
-#: options.h:923
+#: options.h:927
 msgid "Don't remove unused sections"
 msgstr "не вилучати невикористаних розділів"
 
-#: options.h:926
+#: options.h:930
 msgid "Generate .gdb_index section"
 msgstr "Створити розділ .gdb_index"
 
-#: options.h:927
+#: options.h:931
 msgid "Do not generate .gdb_index section"
 msgstr "Не створювати розділ .gdb_index"
 
-#: options.h:930
+#: options.h:934
 msgid "Enable STB_GNU_UNIQUE symbol binding"
 msgstr "Увімкнути прив'язку символів STB_GNU_UNIQUE"
 
-#: options.h:931
+#: options.h:935
 msgid "Disable STB_GNU_UNIQUE symbol binding"
 msgstr "Вимкнути прив'язку символів STB_GNU_UNIQUE"
 
-#: options.h:934
+#: options.h:938
 msgid "Generate shared library"
 msgstr "Створити бібліотеку спільного використання"
 
-#: options.h:939
+#: options.h:943
 msgid "Set shared library name"
 msgstr "встановити назву бібліотеки спільного використання"
 
-#: options.h:939 options.h:1179 options.h:1243
+#: options.h:943 options.h:1183 options.h:1247
 msgid "FILENAME"
 msgstr "НАЗВА ФАЙЛА"
 
-#: options.h:942
+#: options.h:946
 msgid "Min fraction of empty buckets in dynamic hash"
 msgstr "мінімальна частка порожніх блоків у динамічному хеші"
 
-#: options.h:943
+#: options.h:947
 msgid "FRACTION"
 msgstr "ЧАСТКА"
 
-#: options.h:946
+#: options.h:950
 msgid "Dynamic hash style"
 msgstr "динамічний стиль хешування"
 
-#: options.h:946
+#: options.h:950
 msgid "[sysv,gnu,both]"
 msgstr "[sysv,gnu,both]"
 
-#: options.h:952
+#: options.h:956
 msgid "Alias for -r"
 msgstr "замінник -r"
 
-#: options.h:955
+#: options.h:959
 msgid "Identical Code Folding. '--icf=safe' Folds ctors, dtors and functions whose pointers are definitely not taken"
 msgstr "згортання тотожного коду (ICF). «--icf=safe» згортає ctor, dtor та функції, вказівники яких не забрано явним чином"
 
-#: options.h:962
+#: options.h:966
 msgid "Number of iterations of ICF (default 3)"
 msgstr "Кількість ітерацій ICF (типовою кількістю є 3)"
 
-#: options.h:962 options.h:1263 options.h:1320 options.h:1322 options.h:1324
-#: options.h:1326
+#: options.h:966 options.h:1267 options.h:1324 options.h:1326 options.h:1328
+#: options.h:1330
 msgid "COUNT"
 msgstr "КІЛЬКІСТЬ"
 
-#: options.h:965
+#: options.h:969
 msgid "Do an incremental link if possible; otherwise, do a full link and prepare output for incremental linking"
 msgstr "Виконати нарощувальне компонування, якщо це можливо. Якщо неможливо, виконати повне компонування і приготувати виведені дані до нарощувального компонування."
 
-#: options.h:970
+#: options.h:974
 msgid "Do a full link (default)"
 msgstr "Виконати повне компонування (типово)"
 
-#: options.h:973
+#: options.h:977
 msgid "Do a full link and prepare output for incremental linking"
 msgstr "Виконати повне компонування і приготувати виведені дані до нарощувального компонування."
 
-#: options.h:977
+#: options.h:981
 msgid "Do an incremental link; exit if not possible"
 msgstr "Виконати нарощувальне компонування; вийти, якщо це неможливо"
 
-#: options.h:980
+#: options.h:984
 msgid "Set base file for incremental linking (default is output file)"
 msgstr "Встановити базовий файл для нарощувального компонування (типовим файлом є файл виведення)"
 
-#: options.h:985
+#: options.h:989
 msgid "Assume files changed"
 msgstr "припускати, що файли змінилися"
 
-#: options.h:988
+#: options.h:992
 msgid "Assume files didn't change"
 msgstr "припускати, що файли не змінилися"
 
-#: options.h:991
+#: options.h:995
 msgid "Use timestamps to check files (default)"
 msgstr "використовувати часові позначки для перевірки файлів (типова поведінка)"
 
-#: options.h:994
+#: options.h:998
 msgid "Assume startup files unchanged (files preceding this option)"
 msgstr "Припускати, що початкові файли є незмінними (файли, що передують цьому параметру)"
 
-#: options.h:998
+#: options.h:1002
 msgid "Amount of extra space to allocate for patches (default 10)"
 msgstr "Обсяг додаткової пам'яті, який слід зарезервувати для латок (типово, 10)"
 
-#: options.h:1000
+#: options.h:1004
 msgid "PERCENT"
 msgstr "ВІДСОТОК"
 
-#: options.h:1003
+#: options.h:1007
 msgid "Call SYMBOL at load-time"
 msgstr "Викликати СИМВОЛ під час завантаження"
 
-#: options.h:1006
+#: options.h:1010
 msgid "Set dynamic linker path"
 msgstr "встановити шлях до динамічного компонувальника"
 
-#: options.h:1006
+#: options.h:1010
 msgid "PROGRAM"
 msgstr "ПРОГРАМА"
 
-#: options.h:1011
+#: options.h:1015
 msgid "Read only symbol values from FILE"
 msgstr "читати лише значення символів з ФАЙЛА"
 
-#: options.h:1016
+#: options.h:1020
 msgid "Keep files mapped across passes"
 msgstr "підтримувати прив'язку файлів між проходами"
 
-#: options.h:1017
+#: options.h:1021
 msgid "Release mapped files after each pass"
 msgstr "Прибирати прив'язку файлів після кожного проходу"
 
-#: options.h:1020
+#: options.h:1024
 msgid "Do not fold this symbol during ICF"
 msgstr "не згортати цей символ під час ICF"
 
-#: options.h:1025
+#: options.h:1029
 msgid "Search for library LIBNAME"
 msgstr "шукати бібліотеку НАЗВА_БІБЛ"
 
-#: options.h:1025
+#: options.h:1029
 msgid "LIBNAME"
 msgstr "НАЗВА_БІБЛ"
 
-#: options.h:1028
+#: options.h:1032
 msgid "Generate unwind information for PLT"
 msgstr "створювати дані розгортання для PLT"
 
-#: options.h:1029
+#: options.h:1033
 msgid "Do not generate unwind information for PLT"
 msgstr "Не створювати даних розгортання для PLT"
 
-#: options.h:1032
+#: options.h:1036
 msgid "Add directory to search path"
 msgstr "додати каталог до шляху пошуку"
 
-#: options.h:1032 options.h:1218 options.h:1221 options.h:1225 options.h:1294
+#: options.h:1036 options.h:1222 options.h:1225 options.h:1229 options.h:1298
 msgid "DIR"
 msgstr "КАТАЛОГ"
 
-#: options.h:1035
+#: options.h:1039
 msgid "(ARM only) Generate long PLT entries"
 msgstr "(лише ARM) створювати довгі записи PLT"
 
-#: options.h:1036
+#: options.h:1040
 msgid "(ARM only) Do not generate long PLT entries"
 msgstr "(лише ARM) Не створювати довгих записів PLT"
 
-#: options.h:1041
+#: options.h:1045
 msgid "Set GNU linker emulation; obsolete"
 msgstr "Встановити режим емуляції компонувальника GNU; застаріле"
 
-#: options.h:1041
+#: options.h:1045
 msgid "EMULATION"
 msgstr "ЕМУЛЯЦІЯ"
 
-#: options.h:1045
+#: options.h:1049
 msgid "Map whole files to memory"
 msgstr "Копіювати усі файли до пам'яті"
 
-#: options.h:1046
+#: options.h:1050
 msgid "Map relevant file parts to memory"
 msgstr "Копіювати відповідні частини файлів до пам'яті"
 
-#: options.h:1049
+#: options.h:1053
 msgid "(ARM only) Merge exidx entries in debuginfo"
 msgstr "(лише ARM) Об'єднувати записи exidx у debuginfo"
 
-#: options.h:1050
+#: options.h:1054
 msgid "(ARM only) Do not merge exidx entries in debuginfo"
 msgstr "(лише ARM) Не об'єднувати записи exidx у debuginfo"
 
-#: options.h:1053
+#: options.h:1057
 msgid "Map the output file for writing"
 msgstr "відобразити файл вихідних даних для запису"
 
-#: options.h:1054
+#: options.h:1058
 msgid "Do not map the output file for writing"
 msgstr "Не відображати файл вихідних даних для запису"
 
-#: options.h:1057
+#: options.h:1061
 msgid "Write map file on standard output"
 msgstr "записати файл карти до стандартного виведення"
 
-#: options.h:1059
+#: options.h:1063
 msgid "Write map file"
 msgstr "записати файл карти (map)"
 
-#: options.h:1060
+#: options.h:1064
 msgid "MAPFILENAME"
 msgstr "НАЗВАФАЙЛАКАРТИ"
 
-#: options.h:1065
+#: options.h:1069
 msgid "Do not page align data"
 msgstr "не ділити дані вирівнювання на сторінки"
 
-#: options.h:1067
+#: options.h:1071
 msgid "Do not page align data, do not make text readonly"
 msgstr "не ділити дані вирівнювання на сторінки, не робити текст придатним лише для читання"
 
-#: options.h:1068
+#: options.h:1072
 msgid "Page align data, make text readonly"
 msgstr "поділити дані вирівнювання на сторінки, зробити текст придатним лише для читання"
 
-#: options.h:1071
+#: options.h:1075
 msgid "Use less memory and more disk I/O (included only for compatibility with GNU ld)"
 msgstr "використовувати менше пам'яті і ширший обмін даними з диском (включено для сумісності з GNU ld)"
 
-#: options.h:1075 options.h:1469
+#: options.h:1079 options.h:1473
 msgid "Report undefined symbols (even with --shared)"
 msgstr "повідомляти про невизначені символи (навіть з --shared)"
 
-#: options.h:1079
+#: options.h:1083
 msgid "Create an output file even if errors occur"
 msgstr "створити файл виведених даних, навіть якщо трапилися помилки"
 
-#: options.h:1082
+#: options.h:1086
 msgid "Only search directories specified on the command line"
 msgstr "Шукати лише у каталогах, вказаних у рядку команди"
 
-#: options.h:1088
+#: options.h:1092
 msgid "Set output file name"
 msgstr "встановити назву файла вихідних даних"
 
-#: options.h:1091
+#: options.h:1095
 msgid "Set output format"
 msgstr "встановити формат виведення даних"
 
-#: options.h:1091
+#: options.h:1095
 msgid "[binary]"
 msgstr "[двійковий]"
 
-#: options.h:1094
+#: options.h:1098
 msgid "Optimize output file size"
 msgstr "оптимізувати розмір файла виведених даних"
 
-#: options.h:1094
+#: options.h:1098
 msgid "LEVEL"
 msgstr "РІВЕНЬ"
 
-#: options.h:1097
+#: options.h:1101
 msgid "Orphan section handling"
 msgstr "Обробка осиротілих розділів"
 
-#: options.h:1097
+#: options.h:1101
 msgid "[place,discard,warn,error]"
 msgstr "[place,discard,warn,error]"
 
-#: options.h:1103
+#: options.h:1107
 msgid "Ignored for ARM compatibility"
 msgstr "Проігноровано для сумісності з ARM"
 
-#: options.h:1106
+#: options.h:1110
 msgid "Generate package metadata note"
 msgstr "Створити нотатку метаданих пакунка"
 
-#: options.h:1107
+#: options.h:1111
 msgid "[=JSON]"
 msgstr "[=JSON]"
 
-#: options.h:1110 options.h:1113
+#: options.h:1114 options.h:1117
 msgid "Create a position independent executable"
 msgstr "створити виконуваний файл з незалежним позиціюванням"
 
-#: options.h:1111 options.h:1114
+#: options.h:1115 options.h:1118
 msgid "Do not create a position independent executable"
 msgstr "не створювати виконуваний файл з незалежним позиціюванням"
 
-#: options.h:1118
+#: options.h:1122
 msgid "Force PIC sequences for ARM/Thumb interworking veneers"
 msgstr "примусово використовувати послідовності PIC для обгорток взаємодії ARM/Thumb"
 
-#: options.h:1122
+#: options.h:1126
 msgid "(ARM only) Ignore for backward compatibility"
 msgstr "(лише ARM) Ігнорувати для зворотної сумісності"
 
-#: options.h:1125
+#: options.h:1129
 msgid "(PowerPC only) Align PLT call stubs to fit cache lines"
 msgstr "(лише PowerPC) Вирівняти фіктивні виклики PLT за рядками кешу"
 
-#: options.h:1126
+#: options.h:1130
 msgid "[=P2ALIGN]"
 msgstr "[=P2ALIGN]"
 
-#: options.h:1129
+#: options.h:1133
 msgid "(PowerPC64 only) Optimize calls to ELFv2 localentry:0 functions"
 msgstr "(лише PowerPC64) Оптимізувати виклики функцій локальний_запис:0 ELFv2"
 
-#: options.h:1130
+#: options.h:1134
 msgid "(PowerPC64 only) Don't optimize ELFv2 calls"
 msgstr "(лише PowerPC64) не оптимізувати виклики ELFv2"
 
-#: options.h:1133
+#: options.h:1137
 msgid "(PowerPC64 only) PLT call stubs should load r11"
 msgstr "(лише PowerPC64) Фіктивні виклики PLT мають завантажувати r11"
 
-#: options.h:1134
+#: options.h:1138
 msgid "(PowerPC64 only) PLT call stubs should not load r11"
 msgstr "(лише PowerPC64) Фіктивні виклики PLT не повинні завантажувати r11"
 
-#: options.h:1137
+#: options.h:1141
 msgid "(PowerPC64 only) PLT call stubs with load-load barrier"
 msgstr "(лише PowerPC64) Фіктивні виклики PLT бар'єром завантаження-завантаження"
 
-#: options.h:1138
+#: options.h:1142
 msgid "(PowerPC64 only) PLT call stubs without barrier"
 msgstr "(лише PowerPC64) Фіктивні виклики PLT без бар'єра"
 
-#: options.h:1142
+#: options.h:1146
 msgid "Load a plugin library"
 msgstr "завантажити бібліотеку додатків"
 
-#: options.h:1142 options.h:1147
+#: options.h:1146 options.h:1151
 msgid "PLUGIN"
 msgstr "ДОДАТОК"
 
-#: options.h:1144
+#: options.h:1148
 msgid "Pass an option to the plugin"
 msgstr "передати додатку параметр"
 
-#: options.h:1144 options.h:1150
+#: options.h:1148 options.h:1154
 msgid "OPTION"
 msgstr "ПАРАМЕТР"
 
-#: options.h:1147
+#: options.h:1151
 msgid "Load a plugin library (not supported)"
 msgstr "Завантажити бібліотеку додатків (підтримки не передбачено)"
 
-#: options.h:1149
+#: options.h:1153
 msgid "Pass an option to the plugin (not supported)"
 msgstr "Передати додатку параметр (підтримки не передбачено)"
 
-#: options.h:1154
+#: options.h:1158
 msgid "Use posix_fallocate to reserve space in the output file"
 msgstr "Використовувати posix_fallocate для резервування місця у вихідному файлі"
 
-#: options.h:1155
+#: options.h:1159
 msgid "Use fallocate or ftruncate to reserve space"
 msgstr "Використовувати для резервування місця fallocate або ftruncate"
 
-#: options.h:1158
+#: options.h:1162
 msgid "(PowerPC64 only) stubs use power10 insns"
 msgstr "(лише PowerPC64) Фіктивні виклики використовують інструкції power10"
 
-#: options.h:1159
+#: options.h:1163
 msgid "[=auto,no,yes]"
 msgstr "[=auto,no,yes]"
 
-#: options.h:1161
+#: options.h:1165
 msgid "(PowerPC64 only) stubs do not use power10 insns"
 msgstr "(лише PowerPC64) Фіктивні виклики не використовують інструкції power10"
 
-#: options.h:1164
+#: options.h:1168
 msgid "Preread archive symbols when multi-threaded"
 msgstr "попередньо прочитати символи архіву у режимі з багатьма потоками"
 
-#: options.h:1167
+#: options.h:1171
 msgid "List removed unused sections on stderr"
 msgstr "вивести список вилучених невикористаних розділів до stderr"
 
-#: options.h:1168
+#: options.h:1172
 msgid "Do not list removed unused sections"
 msgstr "не виводити список вилучених невикористаних розділів"
 
-#: options.h:1171
+#: options.h:1175
 msgid "List folded identical sections on stderr"
 msgstr "вивести список згорнутих ідентичних розділів до stderr"
 
-#: options.h:1172
+#: options.h:1176
 msgid "Do not list folded identical sections"
 msgstr "не виводити список згорнутих ідентичних розділів"
 
-#: options.h:1175
+#: options.h:1179
 msgid "Print default output format"
 msgstr "вивести дані щодо типового формату виведення"
 
-#: options.h:1178
+#: options.h:1182
 msgid "Print symbols defined and used for each input"
 msgstr "вивести символи, визначені і використані для всіх вхідних даних"
 
-#: options.h:1182
+#: options.h:1186
 msgid "Save the state of flags related to input files"
 msgstr "зберегти стан прапорців, пов'язаних із файлами вхідних даних"
 
-#: options.h:1184
+#: options.h:1188
 msgid "Restore the state of flags related to input files"
 msgstr "відновити стан прапорців, пов'язаних із файлами вхідних даних"
 
-#: options.h:1189
+#: options.h:1193
 msgid "Generate relocations in output"
 msgstr "створювати пересування у виведених даних"
 
-#: options.h:1192
+#: options.h:1196
 msgid "Ignored for SVR4 compatibility"
 msgstr "проігноровано для сумісності з SVR4"
 
-#: options.h:1197
+#: options.h:1201
 msgid "Generate relocatable output"
 msgstr "вивести дані з можливістю пересування"
 
-#: options.h:1200
+#: options.h:1204
 msgid "Relax branches on certain targets"
 msgstr "оптимізувати розгалуження для певних призначень"
 
-#: options.h:1201
+#: options.h:1205
 msgid "Do not relax branches"
 msgstr "не оптимізувати розгалуження"
 
-#: options.h:1204
+#: options.h:1208
 msgid "keep only symbols listed in this file"
 msgstr "зберегти лише символи зі списку у цьому файлі"
 
-#: options.h:1207
+#: options.h:1211
 msgid "Put read-only non-executable sections in their own segment"
 msgstr "Розташувати придатні лише для читання невиконувані розділи у власному сегменті"
 
-#: options.h:1208
+#: options.h:1212
 msgid "Do not put read-only non-executable sections in their own segment"
 msgstr "Не розташовувати придатні лише для читання невиконувані розділи у власному сегменті"
 
-#: options.h:1211
+#: options.h:1215
 msgid "Set offset between executable and read-only segments"
 msgstr "Встановити відступ між виконуваними і придатними лише для читання сегментами"
 
-#: options.h:1212
+#: options.h:1216
 msgid "OFFSET"
 msgstr "ЗСУВ"
 
-#: options.h:1218 options.h:1221
+#: options.h:1222 options.h:1225
 msgid "Add DIR to runtime search path"
 msgstr "додати КАТАЛОГ до шляху пошуку даних під час виконання"
 
-#: options.h:1224
+#: options.h:1228
 msgid "Add DIR to link time shared library search path"
 msgstr "додати КАТАЛОГ до шлях пошуку бібліотеки спільного використання на час компонування"
 
-#: options.h:1230
+#: options.h:1234
 msgid "Strip all symbols"
 msgstr "вилучити всі символи"
 
-#: options.h:1232
+#: options.h:1236
 msgid "Strip debugging information"
 msgstr "вилучити діагностичні дані"
 
-#: options.h:1234
+#: options.h:1238
 msgid "Emit only debug line number information"
 msgstr "вивести лише дані щодо номера рядка діагностики"
 
-#: options.h:1236
+#: options.h:1240
 msgid "Strip debug symbols that are unused by gdb (at least versions <= 7.4)"
 msgstr "вилучити діагностичні символи, якими не зможе скористатися gdb (принаймні версії <= 7.4)"
 
-#: options.h:1239
+#: options.h:1243
 msgid "Strip LTO intermediate code sections"
 msgstr "вилучити проміжні розділи коду LTO"
 
-#: options.h:1242
+#: options.h:1246
 msgid "Layout sections in the order specified"
 msgstr "Компонувати розділи у вказаному порядку"
 
-#: options.h:1246
+#: options.h:1250
 msgid "Set address of section"
 msgstr "Встановити адресу розділу"
 
-#: options.h:1246
+#: options.h:1250
 msgid "SECTION=ADDRESS"
 msgstr "РОЗДІЛ=АДРЕСА"
 
-#: options.h:1249
+#: options.h:1253
 msgid "(PowerPC only) Use new-style PLT"
 msgstr "(лише PowerPC) використовувати PLT у новому стилі"
 
-#: options.h:1252
+#: options.h:1256
 msgid "Sort common symbols by alignment"
 msgstr "Упорядкувати загальні символи за вирівнюванням"
 
-#: options.h:1253
+#: options.h:1257
 msgid "[={ascending,descending}]"
 msgstr "[={ascending,descending}]"
 
-#: options.h:1256
+#: options.h:1260
 msgid "Sort sections by name.  '--no-text-reorder' will override '--sort-section=name' for .text"
 msgstr "Упорядкувати розділи за назвою. «--no-text-reorder» має вищий пріоритет за «--sort-section=name» для .text"
 
-#: options.h:1258
+#: options.h:1262
 msgid "[none,name]"
 msgstr "[none,name]"
 
-#: options.h:1262
+#: options.h:1266
 msgid "Dynamic tag slots to reserve (default 5)"
 msgstr "Кількість динамічних слотів теґів, які слід зарезервувати (типово 5)"
 
-#: options.h:1266
+#: options.h:1270
 msgid "(ARM, PowerPC only) The maximum distance from instructions in a group of sections to their stubs. Negative values mean stubs are always after the group. 1 means use default size"
 msgstr "(лише ARM та PowerPC) Максимальна відстань від команд у групі розділів до їхніх шаблонів. Від'ємні значення відповідають розташуванню шаблонів після групи. 1 — типовий розмір відстані."
 
-#: options.h:1272
+#: options.h:1276
 msgid "(PowerPC only) Allow a group of stubs to serve multiple output sections"
 msgstr "(лише PowerPC) дозволити групі заглушок обробляти декілька розділів виведення даних"
 
-#: options.h:1274
+#: options.h:1278
 msgid "(PowerPC only) Each output section has its own stubs"
 msgstr "(лише PowerPC) кожний розділ виведення має власні заглушки"
 
-#: options.h:1277
+#: options.h:1281
 msgid "Stack size when -fsplit-stack function calls non-split"
 msgstr "розмір стека, якщо функція -fsplit-stack викликає нерозділений стек"
 
-#: options.h:1283
+#: options.h:1287
 msgid "Do not link against shared libraries"
 msgstr "не компонувати з бібліотеками спільного використання"
 
-#: options.h:1286
+#: options.h:1290
 msgid "Start a library"
 msgstr "Почати бібліотеку"
 
-#: options.h:1288
+#: options.h:1292
 msgid "End a library "
 msgstr "Завершити бібліотеку "
 
-#: options.h:1291
+#: options.h:1295
 msgid "Print resource usage statistics"
 msgstr "вивести статистичні дані щодо використання ресурсів"
 
-#: options.h:1294
+#: options.h:1298
 msgid "Set target system root directory"
 msgstr "встановити кореневий каталог системи призначення"
 
-#: options.h:1299
+#: options.h:1303
 msgid "Print the name of each input file"
 msgstr "виводити назву всіх файлів вхідних даних"
 
-#: options.h:1302
+#: options.h:1306
 msgid "(ARM only) Force R_ARM_TARGET1 type to R_ARM_ABS32"
 msgstr "(лише ARM) примусово використовувати тип R_ARM_TARGET1 для R_ARM_ABS32"
 
-#: options.h:1305
+#: options.h:1309
 msgid "(ARM only) Force R_ARM_TARGET1 type to R_ARM_REL32"
 msgstr "(лише ARM) примусово використовувати тип R_ARM_TARGET1 для R_ARM_REL32"
 
-#: options.h:1308
+#: options.h:1312
 msgid "(ARM only) Set R_ARM_TARGET2 relocation type"
 msgstr "(лише ARM) встановити тип пересування R_ARM_TARGET2"
 
-#: options.h:1309
+#: options.h:1313
 msgid "[rel, abs, got-rel"
 msgstr "[rel, abs, got-rel"
 
-#: options.h:1313
+#: options.h:1317
 msgid "Enable text section reordering for GCC section names"
 msgstr "Уможливити перевпорядковування текстових розділів для назв розділів GCC"
 
-#: options.h:1314
+#: options.h:1318
 msgid "Disable text section reordering for GCC section names"
 msgstr "Заборонити перевпорядковування текстових розділів для назв розділів GCC"
 
-#: options.h:1317
+#: options.h:1321
 msgid "Run the linker multi-threaded"
 msgstr "використовувати компонування у декілька потоків"
 
-#: options.h:1318
+#: options.h:1322
 msgid "Do not run the linker multi-threaded"
 msgstr "не використовувати компонування у декілька потоків"
 
-#: options.h:1320
+#: options.h:1324
 msgid "Number of threads to use"
 msgstr "кількість потоків, які слід використати"
 
-#: options.h:1322
+#: options.h:1326
 msgid "Number of threads to use in initial pass"
 msgstr "кількість потоків, які слід використати під час початкового проходу"
 
-#: options.h:1324
+#: options.h:1328
 msgid "Number of threads to use in middle pass"
 msgstr "кількість потоків, які слід використати під час проміжного проходу"
 
-#: options.h:1326
+#: options.h:1330
 msgid "Number of threads to use in final pass"
 msgstr "кількість потоків, які слід використати під час останнього проходу"
 
-#: options.h:1329
+#: options.h:1333
 msgid "(PowerPC/64 only) Optimize GD/LD/IE code to IE/LE"
 msgstr "(лише PowerPC/64) оптимізувати код GD/LD/IE до IE/LE"
 
-#: options.h:1330
+#: options.h:1334
 msgid "(PowerPC/64 only) Don'''t try to optimize TLS accesses"
 msgstr "(лише PowerPC/64) не намагатися оптимізувати доступ до TLS"
 
-#: options.h:1332
+#: options.h:1336
 msgid "(PowerPC/64 only) Use a special __tls_get_addr call"
 msgstr "(лише PowerPC/64) використовувати спеціальний виклик __tls_get_addr"
 
-#: options.h:1333
+#: options.h:1337
 msgid "(PowerPC/64 only) Don't use a special __tls_get_addr call"
 msgstr "(лише PowerPC64) упорядковувати розділи TOC та GOT"
 
-#: options.h:1336
+#: options.h:1340
 msgid "(PowerPC64 only) Optimize TOC code sequences"
 msgstr "(лише PowerPC64) Оптимізувати кодові послідовності TOC"
 
-#: options.h:1337
+#: options.h:1341
 msgid "(PowerPC64 only) Don't optimize TOC code sequences"
 msgstr "(лише PowerPC64) Не оптимізувати кодові послідовності TOC"
 
-#: options.h:1340
+#: options.h:1344
 msgid "(PowerPC64 only) Sort TOC and GOT sections"
 msgstr "(лише PowerPC64) Упорядкувати розділи TOC та GOT"
 
-#: options.h:1341
+#: options.h:1345
 msgid "(PowerPC64 only) Don't sort TOC and GOT sections"
 msgstr "(лише PowerPC64) Не упорядковувати розділи TOC та GOT"
 
-#: options.h:1344
+#: options.h:1348
 msgid "Read linker script"
 msgstr "прочитати скрипт компонувальника"
 
-#: options.h:1347
+#: options.h:1351
 msgid "Set the address of the bss segment"
 msgstr "встановити адресу сегмента bss"
 
-#: options.h:1349
+#: options.h:1353
 msgid "Set the address of the data segment"
 msgstr "встановити адресу сегмента даних (data)"
 
-#: options.h:1351 options.h:1353
+#: options.h:1355 options.h:1357
 msgid "Set the address of the text segment"
 msgstr "встановити адресу текстового сегмента (text)"
 
-#: options.h:1356
+#: options.h:1360
 msgid "Set the address of the rodata segment"
 msgstr "Встановити адресу сегмента rodata"
 
-#: options.h:1361
+#: options.h:1365
 msgid "Create undefined reference to SYMBOL"
 msgstr "створити невизначене посилання на СИМВОЛ"
 
-#: options.h:1364
+#: options.h:1368
 msgid "How to handle unresolved symbols"
 msgstr "Спосіб обробки нерозв'язних символів"
 
-#: options.h:1373
+#: options.h:1377
 msgid "Alias for --debug=files"
 msgstr "синонім до --debug=files"
 
-#: options.h:1376
+#: options.h:1380
 msgid "Read version script"
 msgstr "читати скрипт версій"
 
-#: options.h:1381
+#: options.h:1385
 msgid "Warn about duplicate common symbols"
 msgstr "попереджати про дублювання загальних символів"
 
-#: options.h:1382
+#: options.h:1386
 msgid "Do not warn about duplicate common symbols"
 msgstr "не попереджати про дублювання загальних символів"
 
-#: options.h:1388
+#: options.h:1392
 msgid "Warn when discarding version information"
 msgstr "попереджати про пропускання даних щодо версії"
 
-#: options.h:1389
+#: options.h:1393
 msgid "Do not warn when discarding version information"
 msgstr "не попереджати про пропускання даних щодо версії"
 
-#: options.h:1392
+#: options.h:1396
 msgid "Warn if the stack is executable"
 msgstr "Попереджати, якщо стек є виконуваним"
 
-#: options.h:1393
+#: options.h:1397
 msgid "Do not warn if the stack is executable"
 msgstr "Не попереджати, якщо стек є виконуваним"
 
-#: options.h:1396
+#: options.h:1400
 msgid "Don't warn about mismatched input files"
 msgstr "не попереджати про невідповідність файлів вхідних даних"
 
-#: options.h:1402
+#: options.h:1406
 msgid "Warn when skipping an incompatible library"
 msgstr "попереджати у разі пропускання несумісної бібліотеки"
 
-#: options.h:1403
+#: options.h:1407
 msgid "Don't warn when skipping an incompatible library"
 msgstr "не попереджати у разі пропускання несумісної бібліотеки"
 
-#: options.h:1406
+#: options.h:1410
 msgid "Warn if text segment is not shareable"
 msgstr "Попереджати, якщо текстовий сегмент непридатний до спільного використання"
 
-#: options.h:1407
+#: options.h:1411
 msgid "Do not warn if text segment is not shareable"
 msgstr "Не попереджати, якщо текстовий сегмент непридатний до спільного використання"
 
-#: options.h:1410
+#: options.h:1414
 msgid "Report unresolved symbols as warnings"
 msgstr "повідомляти про нерозв'язні символи як про попередження"
 
-#: options.h:1414
+#: options.h:1418
 msgid "Report unresolved symbols as errors"
 msgstr "повідомляти про нерозв'язні символи як про помилки"
 
-#: options.h:1418
+#: options.h:1422
 msgid "(ARM only) Do not warn about objects with incompatible wchar_t sizes"
 msgstr "(лише ARM) Не попереджати про об'єкти з несумісними з wchar_t розмірами"
 
-#: options.h:1422
+#: options.h:1426
 msgid "Convert unresolved symbols to weak references"
 msgstr "перетворити невизначені символи на слабкі посилання"
 
-#: options.h:1426
+#: options.h:1430
 msgid "Include all archive contents"
 msgstr "включити весь вміст архіву"
 
-#: options.h:1427
+#: options.h:1431
 msgid "Include only needed archive contents"
 msgstr "включати лише потрібний вміст архіву"
 
-#: options.h:1430
+#: options.h:1434
 msgid "Use wrapper functions for SYMBOL"
 msgstr "використовувати функції-обгортки для символу СИМВОЛ"
 
-#: options.h:1435
+#: options.h:1439
 msgid "Delete all local symbols"
 msgstr "Вилучити усі локальні символи"
 
-#: options.h:1437
+#: options.h:1441
 msgid "Delete all temporary local symbols"
 msgstr "вилучати всі тимчасові локальні символи"
 
-#: options.h:1439
+#: options.h:1443
 msgid "Keep all local symbols"
 msgstr "Зберегти усі локальні символи"
 
-#: options.h:1444
+#: options.h:1448
 msgid "Trace references to symbol"
 msgstr "трасування посилань на символ"
 
-#: options.h:1447
+#: options.h:1451
 msgid "Allow unused version in script"
 msgstr "Дозволити невикористану версію у скрипті"
 
-#: options.h:1448
+#: options.h:1452
 msgid "Do not allow unused version in script"
 msgstr "Заборонити невикористану версію у скрипті"
 
-#: options.h:1451
+#: options.h:1455
 msgid "Default search path for Solaris compatibility"
 msgstr "типовий шлях пошуку для сумісності з Solaris"
 
-#: options.h:1452
+#: options.h:1456
 msgid "PATH"
 msgstr "ШЛЯХ"
 
-#: options.h:1457
+#: options.h:1461
 msgid "Start a library search group"
 msgstr "початок групи пошуку бібліотек"
 
-#: options.h:1459
+#: options.h:1463
 msgid "End a library search group"
 msgstr "завершення групи пошуку бібліотек"
 
-#: options.h:1464
+#: options.h:1468
 msgid "Sort dynamic relocs"
 msgstr "Впорядковувати динамічні пересування"
 
-#: options.h:1465
+#: options.h:1469
 msgid "Do not sort dynamic relocs"
 msgstr "не впорядковувати динамічні пересування"
 
-#: options.h:1467
+#: options.h:1471
 msgid "Set common page size to SIZE"
 msgstr "встановити для типової сторінки розмір РОЗМІР"
 
-#: options.h:1472
+#: options.h:1476
 msgid "Mark output as requiring executable stack"
 msgstr "позначити виведені дані як такі, що потребують виконання зі стеком"
 
-#: options.h:1474
+#: options.h:1478
 msgid "Make symbols in DSO available for subsequently loaded objects"
 msgstr "зробити символи у DSO доступними для наступних послідовно завантажених об'єктів"
 
-#: options.h:1477
+#: options.h:1481
 msgid "Mark DSO to be initialized first at runtime"
 msgstr "позначити DSO для першочергової ініціалізації під час виконання"
 
-#: options.h:1480
+#: options.h:1484
 msgid "Mark object to interpose all DSOs but executable"
 msgstr "позначити об'єкт як такий, що перериває всі DSO, окрім виконуваних"
 
-#: options.h:1483
+#: options.h:1487
 msgid "Mark DSO to be loaded at most once, and only in the main namespace"
 msgstr "Позначити DSO як такий, що завантажується принаймні один раз і лише до основного простору назв"
 
-#: options.h:1484
+#: options.h:1488
 msgid "Do not mark the DSO as one to be loaded only in the main namespace"
 msgstr "Не позначати DSO як такий, що завантажується лише до основного простору назв"
 
-#: options.h:1486
+#: options.h:1490
 msgid "Mark object for lazy runtime binding"
 msgstr "позначити об'єкт для відкладеної прив'язування під час виконання"
 
-#: options.h:1489
+#: options.h:1493
 msgid "Mark object requiring immediate process"
 msgstr "позначити об'єкт як такий, що потребує негайної обробки"
 
-#: options.h:1492
+#: options.h:1496
 msgid "Set maximum page size to SIZE"
 msgstr "встановити максимальний розмір сторінки у значення РОЗМІР"
 
-#: options.h:1500
+#: options.h:1504
 msgid "Do not create copy relocs"
 msgstr "не створювати пересувань з копіюванням"
 
-#: options.h:1502
+#: options.h:1506
 msgid "Mark object not to use default search paths"
 msgstr "позначити об'єкт як такий, що не використовує типових шляхів пошуку"
 
-#: options.h:1505
+#: options.h:1509
 msgid "Mark DSO non-deletable at runtime"
 msgstr "позначити DSO як такий, що не можна вилучати під час виконання"
 
-#: options.h:1508
+#: options.h:1512
 msgid "Mark DSO not available to dlopen"
 msgstr "позначити DSO як такий, що недоступний для dlopen"
 
-#: options.h:1511
+#: options.h:1515
 msgid "Mark DSO not available to dldump"
 msgstr "позначити DSO як такий, що недоступний для dldump"
 
-#: options.h:1514
+#: options.h:1518
 msgid "Mark output as not requiring executable stack"
 msgstr "позначити виведені дані як такі, що не потребують виконання зі стеком"
 
-#: options.h:1516
+#: options.h:1520
 msgid "Mark object for immediate function binding"
 msgstr "позначити об'єкт для негайного прив'язування функцій"
 
-#: options.h:1519
+#: options.h:1523
 msgid "Mark DSO to indicate that needs immediate $ORIGIN processing at runtime"
 msgstr "позначити DSO як такий, що потребує негайної обробки $ORIGIN під час виконання"
 
-#: options.h:1522
+#: options.h:1526
 msgid "Where possible mark variables read-only after relocation"
 msgstr "якщо можна, після пересування позначати змінні як придатні лише до читання"
 
-#: options.h:1523
+#: options.h:1527
 msgid "Don't mark variables read-only after relocation"
 msgstr "не позначати після пересування змінні як придатні лише до читання"
 
-#: options.h:1525
+#: options.h:1529
 msgid "Set PT_GNU_STACK segment p_memsz to SIZE"
 msgstr "встановити сегмент PT_GNU_STACK p_memsz у значення РОЗМІР"
 
-#: options.h:1527
+#: options.h:1531
 msgid "ELF symbol visibility for synthesized __start_* and __stop_* symbols"
 msgstr "Видимість символів ELF для синтезованих символів __start_* і __stop_*"
 
-#: options.h:1532
+#: options.h:1536
 msgid "Do not permit relocations in read-only segments"
 msgstr "Заборонити пересування у придатних лише для читання сегментах"
 
-#: options.h:1533 options.h:1535
+#: options.h:1537 options.h:1539
 msgid "Permit relocations in read-only segments"
 msgstr "Дозволити пересування у придатних лише для читання сегментах"
 
-#: options.h:1538
+#: options.h:1542
 msgid "Move .text.unlikely sections to a separate segment."
 msgstr "пересунути розділи .text.unlikely до окремого сегмента."
 
-#: options.h:1539
+#: options.h:1543
 msgid "Do not move .text.unlikely sections to a separate segment."
 msgstr "не пересувати розділи .text.unlikely до окремого сегмента."
 
-#: options.h:1542
+#: options.h:1546
 msgid "Keep .text.hot, .text.startup, .text.exit and .text.unlikely as separate sections in the final binary."
 msgstr "Зберегти .text.hot, .text.startup, .text.exit і .text.unlikely як окремі розділи у остаточному виконуваному файлі."
 
-#: options.h:1544
+#: options.h:1548
 msgid "Merge all .text.* prefix sections."
 msgstr "Об'єднати усіх розділи з префіксом .text.*."
 
@@ -3466,140 +3474,140 @@ msgstr "%s: помилка запису під час спроби створи�
 msgid "input files added by plug-ins in --incremental mode not supported yet"
 msgstr "підтримки файлів вхідних даних, доданих за допомогою додатків у режимі --incremental, ще не передбачено."
 
-#: powerpc.cc:1302
+#: powerpc.cc:1324
 msgid "missing expected __tls_get_addr call"
 msgstr "пропущено очікуваний виклик __tls_get_addr"
 
-#: powerpc.cc:2292 powerpc.cc:2627
+#: powerpc.cc:2316 powerpc.cc:2651
 #, c-format
 msgid "%s: ABI version %d is not compatible with ABI version %d output"
 msgstr "%s: версія ABI %d є несумісною з версією ABI %d результату"
 
-#: powerpc.cc:2326 powerpc.cc:2686
+#: powerpc.cc:2350 powerpc.cc:2710
 #, c-format
 msgid "%s: .opd invalid in abiv%d"
 msgstr "%s: .opd є некоректним у abiv%d"
 
-#: powerpc.cc:2404
+#: powerpc.cc:2428
 #, c-format
 msgid "%s: unexpected reloc type %u in .opd section"
 msgstr "%s: неочікуваний тип пересування, %u, у розділі .opd"
 
-#: powerpc.cc:2415
+#: powerpc.cc:2439
 #, c-format
 msgid "%s: .opd is not a regular array of opd entries"
 msgstr "%s: opd не є звичайним масивом записів opd"
 
-#: powerpc.cc:2555
+#: powerpc.cc:2579
 #, c-format
 msgid "%s: local symbol %d has invalid st_other for ABI version 1"
 msgstr "%s: локальний символ %d має некоректне значення st_other для версії ABI 1"
 
-#: powerpc.cc:3290
+#: powerpc.cc:3314
 #, c-format
 msgid "%s:%s exceeds group size"
 msgstr "%s:%s перевищує розмір групи"
 
-#: powerpc.cc:3641
+#: powerpc.cc:3665
 #, c-format
 msgid "%s:%s: branch in non-executable section, no long branch stub for you"
 msgstr "%s:%s: відгалуження у невиконуваному розділі, для вас немає шаблона довгої гілки"
 
-#: powerpc.cc:3758
+#: powerpc.cc:3795
 #, c-format
 msgid "%s: stub group size is too large; retrying with %#x"
 msgstr "%s: груповий розмір заглушки є надто великим; робимо повторну спробу з розміром %#x"
 
-#: powerpc.cc:5730
+#: powerpc.cc:5738
 msgid "** glink"
 msgstr "** glink"
 
-#: powerpc.cc:6395 powerpc.cc:7110
+#: powerpc.cc:6403 powerpc.cc:7118
 #, c-format
 msgid "linkage table error against `%s'"
 msgstr "помилка у таблиці компонування щодо «%s»"
 
-#: powerpc.cc:6398
+#: powerpc.cc:6406
 #, c-format
 msgid "linkage table error against `%s:[local %u]'"
 msgstr "помилка у таблиці компонування щодо «%s:[local %u]»"
 
-#: powerpc.cc:7237
+#: powerpc.cc:7245
 msgid "** save/restore"
 msgstr "** зберегти/відновити"
 
-#: powerpc.cc:8035
+#: powerpc.cc:8043
 #, c-format
 msgid "%s: unsupported reloc %u for IFUNC symbol"
 msgstr "%s: непідтримуване пересування %u для символу IFUNC"
 
-#: powerpc.cc:8301 powerpc.cc:9087
+#: powerpc.cc:8309 powerpc.cc:9096
 #, c-format
 msgid "tocsave symbol %u has bad shndx %u"
 msgstr "символ tocsave %u має помилковий shndx %u"
 
-#: powerpc.cc:8592 powerpc.cc:9424
+#: powerpc.cc:8600 powerpc.cc:9433
 #, c-format
 msgid "%s: toc optimization is not supported for %#08x instruction"
 msgstr "%s: для інструкції %#08x не передбачено підтримки оптимізації toc"
 
-#: powerpc.cc:8658 powerpc.cc:9486
+#: powerpc.cc:8666 powerpc.cc:9495
 #, c-format
 msgid "%s: unsupported -mbss-plt code"
 msgstr "%s: непідтримуваний код -mbss-plt"
 
-#: powerpc.cc:9833
+#: powerpc.cc:9842
 #, c-format
 msgid "split-stack stack size overflow at section %u offset %0zx"
 msgstr "перевищення розміру розділеного стека у розділі %u, зсув %0zx"
 
-#: powerpc.cc:9904
+#: powerpc.cc:9913
 msgid "--plt-localentry is especially dangerous without ld.so support to detect ABI violations"
 msgstr "--plt-localentry особливо небезпечний, якщо у ld.so не передбачено підтримки виявлення порушень ABI."
 
-#: powerpc.cc:9933
+#: powerpc.cc:9942
 msgid "--plt-localentry is incompatible with power10 pc-relative code"
 msgstr "--plt-localentry є несумісним із відносним щодо лічильника програми кодом power10"
 
-#: powerpc.cc:10228 powerpc.cc:10234
+#: powerpc.cc:10249 powerpc.cc:10255
 #, c-format
 msgid "%s uses hard float, %s uses soft float"
 msgstr "%s використовує апаратну підтримку дійсних чисел, а у %s — програмну"
 
-#: powerpc.cc:10240 powerpc.cc:10247
+#: powerpc.cc:10261 powerpc.cc:10268
 #, c-format
 msgid "%s uses double-precision hard float, %s uses single-precision hard float"
 msgstr "у %s використовується апаратна підтримка дійсних чисел з подвійною точністю, а у %s — апаратна підтримка для дійсних чисел з одинарною точністю"
 
-#: powerpc.cc:10267 powerpc.cc:10273
+#: powerpc.cc:10288 powerpc.cc:10294
 #, c-format
 msgid "%s uses 64-bit long double, %s uses 128-bit long double"
 msgstr "у %s використано 64-бітові довгі цілі значення із подвійною точністю, а у %s — 128-бітові"
 
-#: powerpc.cc:10279 powerpc.cc:10285
+#: powerpc.cc:10300 powerpc.cc:10306
 #, c-format
 msgid "%s uses IBM long double, %s uses IEEE long double"
 msgstr "у %s використано довгі цілі значення із подвійною точністю IBM, а у %s — IEEE"
 
-#: powerpc.cc:10339 powerpc.cc:10345
+#: powerpc.cc:10360 powerpc.cc:10366
 #, c-format
 msgid "%s uses AltiVec vector ABI, %s uses SPE vector ABI"
 msgstr "%s використовує векторний ABI AltiVec, %s використовує векторний ABI SPE"
 
-#: powerpc.cc:10374 powerpc.cc:10381
+#: powerpc.cc:10395 powerpc.cc:10402
 #, c-format
 msgid "%s uses r3/r4 for small structure returns, %s uses memory"
 msgstr "у %s r3/r4 використовується для повернення малих структур, а у %s для цього використовується пам'ять"
 
-#: powerpc.cc:10951
+#: powerpc.cc:10972
 msgid "call lacks nop, can't restore toc; recompile with -fPIC"
 msgstr "у виклику не вистачає nop, відновлення toc неможливе; зберіть повторно з -fPIC"
 
-#: powerpc.cc:12403 s390.cc:3479
+#: powerpc.cc:12424 s390.cc:3479
 msgid "relocation overflow"
 msgstr "переповнення під час пересування"
 
-#: powerpc.cc:12405
+#: powerpc.cc:12426
 msgid "try relinking with a smaller --stub-group-size"
 msgstr "спробуйте виконати повторне компонування із меншим значенням --stub-group-size"
 
@@ -4208,8 +4216,8 @@ msgstr "Пересування TLS щодо некоректної інстру�
 #. This output is intended to follow the GNU standards.
 #: version.cc:65
 #, c-format
-msgid "Copyright (C) 2022 Free Software Foundation, Inc.\n"
-msgstr "© Free Software Foundation, Inc., 2022\n"
+msgid "Copyright (C) 2023 Free Software Foundation, Inc.\n"
+msgstr "© Free Software Foundation, Inc., 2023\n"
 
 #: version.cc:66
 #, c-format
