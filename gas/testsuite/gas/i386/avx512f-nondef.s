@@ -29,3 +29,6 @@
 
 	# vcmpeqps %zmm0, %zmm0, %k0{%k7} with EVEX.z set
 	.insn EVEX.0f 0xc2, $0, %zmm0, %zmm0, %k0{%k7}{z}
+
+	# vmovaps %zmm0, (%eax){%k7} with EVEX.z set
+	.insn EVEX.0f 0x29, %zmm0, (%eax){%k7}{z}

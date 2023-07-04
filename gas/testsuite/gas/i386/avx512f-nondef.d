@@ -21,4 +21,5 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f2 7d cf 92 04 08 	vgatherdps \(%eax,%zmm1(,1)?\),%zmm0\{%k7\}\{z\}/\(bad\)
 [ 	]*[a-f0-9]+:	62 f2 7d 48 92 04 08 	vgatherdps \(%eax,%zmm1(,1)?\),%zmm0/\(bad\)
 [ 	]*[a-f0-9]+:	62 f1 7c cf c2 c0 00 	vcmpeqps %zmm0,%zmm0,%k0\{%k7\}\{z\}/\(bad\)
+[ 	]*[a-f0-9]+:	62 f1 7c cf 29 00    	vmovaps %zmm0,\(%eax\)\{%k7\}\{z\}/\(bad\)
 #pass

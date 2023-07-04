@@ -11855,6 +11855,13 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 
   if (ins->vex.evex)
     {
+
+      /* Zeroing-masking is invalid for memory destinations. Set the flag
+	 uniformly, as the consumer will inspect it only for the destination
+	 operand.  */
+      if (ins->vex.zeroing)
+	ins->illegal_masking = true;
+
       switch (bytemode)
 	{
 	case dw_mode:
