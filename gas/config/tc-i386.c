@@ -4580,6 +4580,46 @@ optimize_encoding (void)
       i.tm.opcode_space = SPACE_0F;
       i.tm.base_opcode = 0x76;
     }
+  else if (((i.tm.base_opcode >= 0x64
+	     && i.tm.base_opcode <= 0x66
+	     && i.tm.opcode_space == SPACE_0F)
+	    || (i.tm.base_opcode == 0x37
+		&& i.tm.opcode_space == SPACE_0F38))
+	   && i.operands == i.reg_operands
+	   && i.op[0].regs == i.op[1].regs
+	   && !is_evex_encoding (&i.tm))
+    {
+      /* Optimize: -O:
+         pcmpgt[bwd] %mmN, %mmN             -> pxor %mmN, %mmN
+         pcmpgt[bwdq] %xmmN, %xmmN          -> pxor %xmmN, %xmmN
+         vpcmpgt[bwdq] %xmmN, %xmmN, %xmmM  -> vpxor %xmmN, %xmmN, %xmmM (N < 8)
+         vpcmpgt[bwdq] %xmmN, %xmmN, %xmmM  -> vpxor %xmm0, %xmm0, %xmmM (N > 7)
+         vpcmpgt[bwdq] %ymmN, %ymmN, %ymmM  -> vpxor %ymmN, %ymmN, %ymmM (N < 8)
+         vpcmpgt[bwdq] %ymmN, %ymmN, %ymmM  -> vpxor %ymm0, %ymm0, %ymmM (N > 7)
+       */
+      i.tm.opcode_space = SPACE_0F;
+      i.tm.base_opcode = 0xef;
+      if (i.tm.opcode_modifier.vex && (i.op[0].regs->reg_flags & RegRex))
+	{
+	  if (i.operands == 2)
+	    {
+	      gas_assert (i.tm.opcode_modifier.sse2avx);
+
+	      i.operands = 3;
+	      i.reg_operands = 3;
+	      i.tm.operands = 3;
+
+	      i.op[2].regs = i.op[0].regs;
+	      i.types[2] = i.types[0];
+	      i.flags[2] = i.flags[0];
+	      i.tm.operand_types[2] = i.tm.operand_types[0];
+
+	      i.tm.opcode_modifier.sse2avx = 0;
+	    }
+	  i.op[0].regs -= i.op[0].regs->reg_num + 8;
+	  i.op[1].regs = i.op[0].regs;
+	}
+    }
 }
 
 /* Return non-zero for load instruction.  */
