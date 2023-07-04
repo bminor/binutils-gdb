@@ -11641,6 +11641,11 @@ print_register (instr_info *ins, unsigned int reg, unsigned int rexmask,
 {
   const char (*names)[8];
 
+  /* Masking is invalid for insns with GPR destination. Set the flag uniformly,
+     as the consumer will inspect it only for the destination operand.  */
+  if (bytemode != mask_mode && ins->vex.mask_register_specifier)
+    ins->illegal_masking = true;
+
   USED_REX (rexmask);
   if (ins->rex & rexmask)
     reg += 8;
@@ -12374,6 +12379,12 @@ OP_E (instr_info *ins, int bytemode, int sizeflag)
       print_register (ins, ins->modrm.rm, REX_B, bytemode, sizeflag);
       return true;
     }
+
+  /* Masking is invalid for insns with GPR-like memory destination. Set the
+     flag uniformly, as the consumer will inspect it only for the destination
+     operand.  */
+  if (ins->vex.mask_register_specifier)
+    ins->illegal_masking = true;
 
   return OP_E_memory (ins, bytemode, sizeflag);
 }
@@ -13157,10 +13168,14 @@ OP_XS (instr_info *ins, int bytemode, int sizeflag)
 static bool
 OP_M (instr_info *ins, int bytemode, int sizeflag)
 {
+  /* Skip mod/rm byte.  */
+  MODRM_CHECK;
+  ins->codep++;
+
   if (ins->modrm.mod == 3)
     /* bad bound,lea,lds,les,lfs,lgs,lss,cmpxchg8b,vmptrst modrm */
     return BadOp (ins);
-  return OP_E (ins, bytemode, sizeflag);
+  return OP_E_memory (ins, bytemode, sizeflag);
 }
 
 static bool
