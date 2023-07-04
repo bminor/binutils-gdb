@@ -26,3 +26,6 @@
 	.insn EVEX.66.0F38.W0 0x92, (%eax,%zmm1), %zmm0{%k7}{z}
 # vgatherdps (%eax,%zmm1), %zmm0		# without actual mask register
 	.insn EVEX.66.0F38.W0 0x92, (%eax,%zmm1), %zmm0
+
+	# vcmpeqps %zmm0, %zmm0, %k0{%k7} with EVEX.z set
+	.insn EVEX.0f 0xc2, $0, %zmm0, %zmm0, %k0{%k7}{z}

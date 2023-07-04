@@ -219,6 +219,9 @@ struct instr_info
 
   bool two_source_ops;
 
+  /* Record whether EVEX masking is used incorrectly.  */
+  bool illegal_masking;
+
   unsigned char op_ad;
   signed char op_index[MAX_OPERANDS];
   bool op_riprel[MAX_OPERANDS];
@@ -9915,12 +9918,21 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 		      continue;
 		    }
 
+		  /* Instructions with a mask register destination allow for
+		     zeroing-masking only (if any masking at all), which is
+		     _not_ expressed by EVEX.z.  */
+		  if (ins.vex.zeroing && dp->op[0].bytemode == mask_mode)
+		    ins.illegal_masking = true;
+
 		  /* S/G insns require a mask and don't allow
 		     zeroing-masking.  */
 		  if ((dp->op[0].bytemode == vex_vsib_d_w_dq_mode
 		       || dp->op[0].bytemode == vex_vsib_q_w_dq_mode)
 		      && (ins.vex.mask_register_specifier == 0
 			  || ins.vex.zeroing))
+		    ins.illegal_masking = true;
+
+		  if (ins.illegal_masking)
 		    oappend (&ins, "/(bad)");
 		}
 	    }
