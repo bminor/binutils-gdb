@@ -34,6 +34,7 @@
 #include "namespace.h"
 #include <map>
 #include <string>
+#include <string.h>
 
 static struct block_symbol
   cp_lookup_nested_symbol_1 (struct type *container_type,
@@ -177,8 +178,8 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
   /* Note: We can't do a simple assert for ':' not being in NAME because
      ':' may be in the args of a template spec.  This isn't intended to be
      a complete test, just cheap and documentary.  */
-  if (strchr (name, '<') == NULL && strchr (name, '(') == NULL)
-    gdb_assert (strstr (name, "::") == NULL);
+  gdb_assert (strpbrk ("<>()", name) != nullptr
+	      || strstr (name, "::") == nullptr);
 
   sym = lookup_symbol_in_static_block (name, block, domain);
   if (sym.symbol != NULL)

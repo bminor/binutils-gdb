@@ -250,3 +250,9 @@ gdb_test "print AAA::ALPHA" "\\$\[0-9\].* = AAA::ALPHA"
 # Regression tests for PR 9496.
 gdb_test "whatis ::C::CClass::NestedClass" "type = C::CClass::NestedClass"
 gdb_test "whatis ::C::CClass::NestedClass *" "type = C::CClass::NestedClass \\*"
+
+# Break on functions with a malformed name.
+gdb_test "break DNE>::DNE" "" "br malformed \'>\'" \
+    "Make breakpoint pending on future shared library load?.*" "y"
+gdb_test "break DNE)::DNE" "" "br malformed \')\'" \
+    "Make breakpoint pending on future shared library load?.*" "y"
