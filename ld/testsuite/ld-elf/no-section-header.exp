@@ -21,9 +21,7 @@
 # Written by H.J. Lu (hongjiu.lu@intel.com)
 #
 
-# Make sure that binutils can correctly handle ld output in ELF.
-
-if { ![istarget *-*-linux*] } {
+if { ![is_elf_format] } {
     return
 }
 
@@ -129,14 +127,13 @@ binutils_test strip "--hash-style=gnu -shared" start \
 binutils_test strip "--hash-style=sysv -shared" start \
 	start-shared-noheader-sysv.rd start-shared-noheader.nd
 
-# Skip non-native targets or -shared is not supported.
-if { ![isnative] || ![check_shared_lib_support] } {
+
+if { ![check_compiler_available] || ![check_shared_lib_support] } {
     return
 }
 
 proc binutils_run_test { prog } {
-    global CC
-    global gcc_B_opt
+    global CC_FOR_TARGET
     global READELF
     global NM
     global objcopy
@@ -286,20 +283,22 @@ proc binutils_run_test { prog } {
 	    return
 	}
 
-	send_log "tmpdir/pr25617-1-no-sec-hdr > tmpdir/pr25617-1.out\n"
-	catch "exec tmpdir/pr25617-1-no-sec-hdr > tmpdir/pr25617-1.out" got
-	if ![string match "" $got] then {
-	    send_log "$got\n"
-	    unresolved "Update pr25617-1a-no-sec-hdr.so ($prog_name)"
-	    return
-	}
+	if { [isnative] } {
+	    send_log "tmpdir/pr25617-1-no-sec-hdr > tmpdir/pr25617-1.out\n"
+	    catch "exec tmpdir/pr25617-1-no-sec-hdr > tmpdir/pr25617-1.out" got
+	    if ![string match "" $got] then {
+		send_log "$got\n"
+		unresolved "Update pr25617-1a-no-sec-hdr.so ($prog_name)"
+		return
+	    }
 
-	send_log "diff tmpdir/pr25617-1.out $srcdir/$subdir/pass.out\n"
-	catch "exec diff tmpdir/pr25617-1.out $srcdir/$subdir/pass.out" got
-	if ![string match "" $got] then {
-	    send_log "$got\n"
-	    fail "Update pr25617-1a-no-sec-hdr.so ($prog_name)"
-	    return
+	    send_log "diff tmpdir/pr25617-1.out $srcdir/$subdir/pass.out\n"
+	    catch "exec diff tmpdir/pr25617-1.out $srcdir/$subdir/pass.out" got
+	    if ![string match "" $got] then {
+		send_log "$got\n"
+		fail "Update pr25617-1a-no-sec-hdr.so ($prog_name)"
+		return
+	    }
 	}
 
 	pass "Update pr25617-1a-no-sec-hdr.so ($prog_name)"
@@ -338,24 +337,25 @@ proc binutils_run_test { prog } {
 	    return
 	}
 
-	send_log "tmpdir/pr25617-1-pie-no-sec-hdr > tmpdir/pr25617-1-pie.out\n"
-	catch "exec tmpdir/pr25617-1-pie-no-sec-hdr > tmpdir/pr25617-1-pie.out" got
-	if ![string match "" $got] then {
-	    send_log "$got\n"
-	    unresolved "Update pr25617-1a-now-no-sec-hdr.so ($prog_name)"
-	    return
+	if { [isnative] } {
+	    send_log "tmpdir/pr25617-1-pie-no-sec-hdr > tmpdir/pr25617-1-pie.out\n"
+	    catch "exec tmpdir/pr25617-1-pie-no-sec-hdr > tmpdir/pr25617-1-pie.out" got
+	    if ![string match "" $got] then {
+		send_log "$got\n"
+		unresolved "Update pr25617-1a-now-no-sec-hdr.so ($prog_name)"
+		return
+	    }
+
+	    send_log "diff tmpdir/pr25617-1-pie.out $srcdir/$subdir/pass.out\n"
+	    catch "exec diff tmpdir/pr25617-1-pie.out $srcdir/$subdir/pass.out" got
+	    if ![string match "" $got] then {
+		send_log "$got\n"
+		fail "Update pr25617-1a-now-no-sec-hdr.so ($prog_name)"
+		return
+	    }
 	}
 
-	send_log "diff tmpdir/pr25617-1-pie.out $srcdir/$subdir/pass.out\n"
-	catch "exec diff tmpdir/pr25617-1-pie.out $srcdir/$subdir/pass.out" got
-	if ![string match "" $got] then {
-	    send_log "$got\n"
-	    fail "Update pr25617-1a-now-no-sec-hdr.so ($prog_name)"
-	    return
-	}
-
-	send_log "$CC $gcc_B_opt -o tmpdir/pr25617-1 tmpdir/pr25617-1b.o tmpdir/pr25617-1a-now-no-sec-hdr.so\n"
-	catch "exec $CC $gcc_B_opt -o tmpdir/pr25617-1 tmpdir/pr25617-1b.o tmpdir/pr25617-1a-now-no-sec-hdr.so" got
+	set got [run_host_cmd $CC_FOR_TARGET "-o tmpdir/pr25617-1 tmpdir/pr25617-1b.o tmpdir/pr25617-1a-now-no-sec-hdr.so"]
 	if ![string match "*pr25617-1a-now-no-sec-hdr.so*file in wrong format*" $got] then {
 	    send_log "$got\n"
 	    fail "Update pr25617-1a-now-no-sec-hdr.so ($prog_name)"
