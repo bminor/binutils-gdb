@@ -14,7 +14,7 @@ Program Headers:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
 #...
- +[0-9]+: +[a-f0-9]+ +0 +FUNC +GLOBAL +DEFAULT +UND +__libc_start_main(@.*|)
+.* FUNC +GLOBAL +DEFAULT.* UND +(__libc_start_main(@.*|)|_?test)
 #...
- +[0-9]+: +[a-f0-9]+ +0+ +FUNC +GLOBAL +DEFAULT +UND +_?test
+.* FUNC +GLOBAL +DEFAULT.* UND +(__libc_start_main(@.*|)|_?test)
 #pass

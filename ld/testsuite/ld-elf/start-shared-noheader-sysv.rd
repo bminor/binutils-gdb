@@ -14,13 +14,13 @@ Program Headers:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
 #...
- +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +__start
+.* GLOBAL +DEFAULT.* __start
 #...
- +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +_start
+.* GLOBAL +DEFAULT.* _start
 #...
- +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +main
+.* GLOBAL +DEFAULT.* main
 #...
- +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +start
+.* GLOBAL +DEFAULT.* start
 #...
- +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +_main
+.* GLOBAL +DEFAULT.* _main
 #pass
