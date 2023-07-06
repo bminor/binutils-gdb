@@ -65,7 +65,7 @@ fetch_gregs_from_thread (struct regcache *regcache, int regnum, pid_t tid)
     if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, (long) &iov) < 0)
       perror_with_name (_("Couldn't get NT_PRSTATUS registers"));
     else
-      loongarch_gregset.supply_regset (nullptr, regcache, regnum,
+      loongarch_gregset.supply_regset (nullptr, regcache, -1,
 				       &regset, sizeof (regset));
   }
 }
@@ -116,7 +116,7 @@ fetch_fpregs_from_thread (struct regcache *regcache, int regnum, pid_t tid)
       if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, (long) &iovec) < 0)
 	perror_with_name (_("Couldn't get NT_FPREGSET registers"));
       else
-	loongarch_fpregset.supply_regset (nullptr, regcache, regnum,
+	loongarch_fpregset.supply_regset (nullptr, regcache, -1,
 					  &regset, sizeof (regset));
     }
 }
