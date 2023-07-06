@@ -88,13 +88,14 @@ gdb_continue_to_breakpoint "cont to Break here." ".*Break here\..*"
 
 gdb_py_test_silent_cmd "python addr = gdb.selected_frame ().read_var ('str')" \
   "read str address" 0
-gdb_py_test_silent_cmd "python str = gdb.inferiors()\[0\].read_memory (addr, 5); print(str)" \
-  "read str contents" 1
+gdb_test "python astr = gdb.inferiors()\[0\].read_memory (addr, 5); print(astr)" \
+    "<memory at $hex>" \
+    "read str contents"
 gdb_py_test_silent_cmd "python a = bytes('a', 'ascii')" "" 0
-gdb_py_test_silent_cmd "python str\[1\] = a" "change str" 0
-gdb_py_test_silent_cmd "python gdb.inferiors()\[0\].write_memory (addr, str)" \
+gdb_py_test_silent_cmd "python astr\[1\] = a" "change str" 0
+gdb_py_test_silent_cmd "python gdb.inferiors()\[0\].write_memory (addr, astr)" \
   "write str" 1
-gdb_test "print (str)" " = \"hallo, testsuite\"" \
+gdb_test "print str" " = \"hallo, testsuite\"" \
   "ensure str was changed in the inferior"
 
 # Test memory search.
