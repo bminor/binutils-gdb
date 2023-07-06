@@ -40,6 +40,20 @@ if {![runto_main]} {
     return 0
 }
 
+# The most recently added inferior.
+set most_recent_inf 1
+
+# A helper function that adds a new inferior.  It returns the expected
+# number of the new inferior.  ARG is a string to pass to
+# add-inferior.
+proc add_inferior {{arg ""}} {
+    global most_recent_inf
+    incr most_recent_inf
+    gdb_test "add-inferior $arg" "Added inferior $most_recent_inf.*" \
+	"add inferior $most_recent_inf"
+    return $most_recent_inf
+}
+
 # Test basic gdb.Inferior attributes and methods.
 
 gdb_py_test_silent_cmd "python inferiors = gdb.inferiors ()" "get inferiors list" 1
@@ -234,7 +248,7 @@ with_test_prefix "is_valid" {
 	"gdb.events.inferior_deleted.connect(del_inf_handler)" "" \
 	"end" ""
 
-    gdb_test "add-inferior" "Added inferior 2.*" "add empty inferior 2"
+    set num [add_inferior]
     gdb_py_test_silent_cmd "python inf_list = gdb.inferiors()" "get new list" 1
     gdb_test "python print (len(inf_list))" "2" "get inferior list length 2"
     gdb_test "python print (inf_list\[0\].is_valid())" "True" \
@@ -246,7 +260,7 @@ with_test_prefix "is_valid" {
     gdb_test "python print (inf_list\[1\].is_valid())" "True" \
 	"check inferior validity 3"
 
-    gdb_test_no_output "remove-inferiors 2"
+    gdb_test_no_output "remove-inferiors $num"
     gdb_test "python print (inf_list\[0\].is_valid())" "True" \
 	"check inferior validity 4"
 
@@ -287,15 +301,16 @@ with_test_prefix "selected_inferior" {
     # Figure out if inf 1 has a native target.
     set inf_1_is_native [gdb_is_target_native]
 
-    gdb_test "add-inferior -no-connection" "Added inferior 3" "create new inferior"
-    gdb_test "inferior 3" ".*" "switch to third inferior"
-    gdb_test "py print (gdb.selected_inferior().num)" "3" "third inferior selected"
+    set num [add_inferior "-no-connection"]
+    gdb_test "inferior $num" ".*" "switch to inferior $num"
+    gdb_test "py print (gdb.selected_inferior().num)" "$num" \
+	"inferior $num selected"
     gdb_test "py print (gdb.selected_inferior().connection_num)" "None" \
-	"third inferior's None connection number"
+	"inferior $num's None connection number"
     gdb_test "py print (gdb.selected_inferior().connection)" "None" \
-	"third inferior's None connection"
+	"inferior $num's None connection"
     gdb_test "target native" "Done.  Use the \"run\" command to start a process." \
-	"target for the third inferior"
+	"target for inferior $num"
 
     # If inf 1 has a native target, inf 3's target is shared with 1's.
     # Otherwise, it must have created a new target with a new number.
@@ -306,10 +321,10 @@ with_test_prefix "selected_inferior" {
     }
     gdb_test "py print (gdb.selected_inferior().connection_num)" \
 	"$expected_connection_num" \
-	"third inferior's native connection number"
+	"inferior $num's native connection number"
     gdb_test "py print (gdb.selected_inferior().connection.num)" \
 	"$expected_connection_num" \
-	"third inferior's native connection number, though connection object"
+	"inferior $num's native connection number, though connection object"
 
     # Test printing of gdb.TargetConnection object.
     gdb_test "py print (gdb.selected_inferior().connection)" \
@@ -317,18 +332,18 @@ with_test_prefix "selected_inferior" {
 	"print a connection object"
 
     gdb_test "inferior 1" ".*" "switch back to first inferior"
-    gdb_test_no_output "remove-inferiors 3"
+    gdb_test_no_output "remove-inferiors $num"
 }
 
 # Test repr()/str()
 with_test_prefix "__repr__" {
-    gdb_test "add-inferior" "Added inferior 4 on connection .*" "add inferior 4"
+    set num [add_inferior]
     gdb_py_test_silent_cmd "python infs = gdb.inferiors()" "get inferior list" 1
     gdb_test "python print (infs\[0\])" "<gdb.Inferior num=1, pid=$decimal>"
     gdb_test "python print (infs)" \
-	"\\\(<gdb.Inferior num=1, pid=$decimal>, <gdb.Inferior num=4, pid=$decimal>\\\)" \
+	"\\\(<gdb.Inferior num=1, pid=$decimal>, <gdb.Inferior num=$num, pid=$decimal>\\\)" \
 	"print all inferiors 1"
-    gdb_test_no_output "remove-inferiors 4"
+    gdb_test_no_output "remove-inferiors $num"
     gdb_test "python print (infs)" \
 	"\\\(<gdb.Inferior num=1, pid=$decimal>, <gdb.Inferior \\\(invalid\\\)>\\\)" \
 	"print all inferiors 2"
