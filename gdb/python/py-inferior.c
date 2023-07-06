@@ -30,6 +30,7 @@
 #include "gdbsupport/gdb_signals.h"
 #include "py-event.h"
 #include "py-stopevent.h"
+#include "progspace-and-thread.h"
 #include <unordered_map>
 
 using thread_map_t
@@ -528,10 +529,13 @@ gdbpy_inferiors (PyObject *unused, PyObject *unused2)
 static PyObject *
 infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
+  inferior_object *inf = (inferior_object *) self;
   CORE_ADDR addr, length;
   gdb::unique_xmalloc_ptr<gdb_byte> buffer;
   PyObject *addr_obj, *length_obj;
   static const char *keywords[] = { "address", "length", NULL };
+
+  INFPY_REQUIRE_VALID (inf);
 
   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "OO", keywords,
 					&addr_obj, &length_obj))
@@ -543,6 +547,11 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
 
   try
     {
+      /* Use this scoped-restore because we want to be able to read
+	 memory from an unwinder.  */
+      scoped_restore_current_inferior_for_memory restore_inferior
+	(inf->inferior, any_thread_of_inferior (inf->inferior)->ptid);
+
       buffer.reset ((gdb_byte *) xmalloc (length));
 
       read_memory (addr, buffer.get (), length);
@@ -565,6 +574,7 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
 static PyObject *
 infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
+  inferior_object *inf = (inferior_object *) self;
   struct gdb_exception except;
   Py_ssize_t buf_len;
   const gdb_byte *buffer;
@@ -572,6 +582,8 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
   PyObject *addr_obj, *length_obj = NULL;
   static const char *keywords[] = { "address", "buffer", "length", NULL };
   Py_buffer pybuf;
+
+  INFPY_REQUIRE_VALID (inf);
 
   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "Os*|O", keywords,
 					&addr_obj, &pybuf, &length_obj))
@@ -591,6 +603,13 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 
   try
     {
+      /* It's probably not too important to avoid invalidating the
+	 frame cache when writing memory, but this scoped-restore is
+	 still used here, just to keep the code similar to other code
+	 in this file.  */
+      scoped_restore_current_inferior_for_memory restore_inferior
+	(inf->inferior, any_thread_of_inferior (inf->inferior)->ptid);
+
       write_memory_with_notification (addr, buffer, length);
     }
   catch (gdb_exception &ex)
@@ -604,7 +623,7 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 }
 
 /* Implementation of
-   gdb.search_memory (address, length, pattern).  ADDRESS is the
+   Inferior.search_memory (address, length, pattern).  ADDRESS is the
    address to start the search.  LENGTH specifies the scope of the
    search from ADDRESS.  PATTERN is the pattern to search for (and
    must be a Python object supporting the buffer protocol).
@@ -614,6 +633,7 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 static PyObject *
 infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
+  inferior_object *inf = (inferior_object *) self;
   struct gdb_exception except;
   CORE_ADDR start_addr, length;
   static const char *keywords[] = { "address", "length", "pattern", NULL };
@@ -623,6 +643,8 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
   CORE_ADDR found_addr;
   int found = 0;
   Py_buffer pybuf;
+
+  INFPY_REQUIRE_VALID (inf);
 
   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "OOs*", keywords,
 					&start_addr_obj, &length_obj,
@@ -656,6 +678,13 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
 
   try
     {
+      /* It's probably not too important to avoid invalidating the
+	 frame cache when searching memory, but this scoped-restore is
+	 still used here, just to keep the code similar to other code
+	 in this file.  */
+      scoped_restore_current_inferior_for_memory restore_inferior
+	(inf->inferior, any_thread_of_inferior (inf->inferior)->ptid);
+
       found = target_search_memory (start_addr, length,
 				    buffer, pattern_size,
 				    &found_addr);
@@ -910,12 +939,12 @@ infpy_get_main_name (PyObject *self, void *closure)
   try
     {
       /* This is unfortunate but the implementation of main_name can
-	 reach into memory.  */
-      scoped_restore_current_inferior restore_inferior;
-      set_current_inferior (inf->inferior);
-
-      scoped_restore_current_program_space restore_current_progspace;
-      set_current_program_space (inf->inferior->pspace);
+	 reach into memory.  It's probably not too important to avoid
+	 invalidating the frame cache here, but this scoped-restore is
+	 still used, just to keep the code similar to other code in
+	 this file.  */
+      scoped_restore_current_inferior_for_memory restore_inferior
+	(inf->inferior, any_thread_of_inferior (inf->inferior)->ptid);
 
       name = main_name ();
     }
