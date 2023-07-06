@@ -589,6 +589,8 @@ static int proc_iterate_over_threads
   (procinfo *pi,
    int (*func) (procinfo *, procinfo *, void *),
    void *ptr);
+static void proc_resume (procinfo *pi, ptid_t scope_ptid,
+			 int step, enum gdb_signal signo);
 
 static void
 proc_warn (procinfo *pi, const char *func, int line)
@@ -2119,7 +2121,7 @@ wait_again:
 		      gdb_printf (_("[%s exited]\n"),
 				  target_pid_to_str (retval).c_str ());
 		    delete_thread (this->find_thread (retval));
-		    target_continue_no_signal (ptid);
+		    proc_resume (pi, ptid, 0, GDB_SIGNAL_0);
 		    goto wait_again;
 		  }
 		else if (what == SYS_exit)
@@ -2183,8 +2185,7 @@ wait_again:
 				      i, sysargs[i]);
 		      }
 
-		    /* How to keep going without returning to wfi: */
-		    target_continue_no_signal (ptid);
+		    proc_resume (pi, ptid, 0, GDB_SIGNAL_0);
 		    goto wait_again;
 		  }
 		break;
@@ -2217,7 +2218,7 @@ wait_again:
 		    if (!in_thread_list (this, temp_ptid))
 		      add_thread (this, temp_ptid);
 
-		    target_continue_no_signal (ptid);
+		    proc_resume (pi, ptid, 0, GDB_SIGNAL_0);
 		    goto wait_again;
 		  }
 		else if (what == SYS_lwp_exit)
@@ -2249,7 +2250,7 @@ wait_again:
 				      i, sysargs[i]);
 		      }
 
-		    target_continue_no_signal (ptid);
+		    proc_resume (pi, ptid, 0, GDB_SIGNAL_0);
 		    goto wait_again;
 		  }
 		break;
@@ -2428,20 +2429,16 @@ invalidate_cache (procinfo *parent, procinfo *pi, void *ptr)
   return 0;
 }
 
-/* Make the child process runnable.  Normally we will then call
-   procfs_wait and wait for it to stop again (unless gdb is async).
+/* Make child process PI runnable.
 
    If STEP is true, then arrange for the child to stop again after
-   executing a single instruction.  If SIGNO is zero, then cancel any
-   pending signal; if non-zero, then arrange for the indicated signal
-   to be delivered to the child when it runs.  If PID is -1, then
-   allow any child thread to run; if non-zero, then allow only the
-   indicated thread to run.  (not implemented yet).  */
+   executing a single instruction.  SCOPE_PTID, STEP and SIGNO are
+   like in the target_resume interface.  */
 
-void
-procfs_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
+static void
+proc_resume (procinfo *pi, ptid_t scope_ptid, int step, enum gdb_signal signo)
 {
-  procinfo *pi, *thread;
+  procinfo *thread;
   int native_signo;
 
   /* FIXME: Check/reword.  */
@@ -2453,10 +2450,6 @@ procfs_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
      So basically PR_STEP is the sole argument that must be passed
      to proc_run_process.  */
 
-  /* Find procinfo for main process.  */
-  pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
-
-  /* First cut: ignore pid argument.  */
   errno = 0;
 
   /* Convert signal to host numbering.  */
@@ -2473,11 +2466,11 @@ procfs_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
   /* Void the process procinfo's caches.  */
   invalidate_cache (NULL, pi, NULL);
 
-  if (ptid.pid () != -1)
+  if (scope_ptid.pid () != -1)
     {
       /* Resume a specific thread, presumably suppressing the
 	 others.  */
-      thread = find_procinfo (ptid.pid (), ptid.lwp ());
+      thread = find_procinfo (scope_ptid.pid (), scope_ptid.lwp ());
       if (thread != NULL)
 	{
 	  if (thread->tid != 0)
@@ -2500,6 +2493,17 @@ procfs_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
       else
 	proc_error (pi, "target_resume", __LINE__);
     }
+}
+
+/* Implementation of target_ops::resume.  */
+
+void
+procfs_target::resume (ptid_t scope_ptid, int step, enum gdb_signal signo)
+{
+  /* Find procinfo for main process.  */
+  procinfo *pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
+
+  proc_resume (pi, scope_ptid, step, signo);
 }
 
 /* Set up to trace signals in the child process.  */
