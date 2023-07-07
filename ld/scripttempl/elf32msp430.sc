@@ -137,9 +137,9 @@ SECTIONS
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)         }
 
   /* Internal text space.  */
-  .text ${RELOCATING-0} :
+  .text ${RELOCATING-0} : ${RELOCATING+ALIGN(2)}
   {
-    ${RELOCATING+. = ALIGN(2);
+    ${RELOCATING+
     *(SORT_NONE(.init))
     *(SORT_NONE(.init0))  /* Start here after reset.  */
     *(SORT_NONE(.init1))
@@ -189,9 +189,9 @@ SECTIONS
     _etext = .;}
   } ${RELOCATING+ > text}
 
-  .rodata ${RELOCATING-0} :
+  .rodata ${RELOCATING-0} : ${RELOCATING+ALIGN(2)}
   {
-    ${RELOCATING+. = ALIGN(2);
+    ${RELOCATING+
     *(.lower.rodata.* .lower.rodata)
 
     . = ALIGN(2);
@@ -254,11 +254,11 @@ SECTIONS
     ${RELOCATING+ _vectors_end = . ; }
   } ${RELOCATING+ > vectors}
 
-  .data ${RELOCATING-0} :
+  .data ${RELOCATING-0} : ${RELOCATING+ALIGN(2)}
   {
-    ${RELOCATING+ PROVIDE (__data_start = .) ; }
-    ${RELOCATING+ PROVIDE (__datastart = .) ; }
-    ${RELOCATING+. = ALIGN(2);
+    ${RELOCATING+
+    PROVIDE (__data_start = .) ;
+    PROVIDE (__datastart = .) ;
 
     KEEP (*(.jcr))
     *(.data.rel.ro.local) *(.data.rel.ro*)
@@ -287,9 +287,8 @@ SECTIONS
   ${RELOCATING+__romdatastart = LOADADDR(.data);
   __romdatacopysize = SIZEOF(.data);}
 
-  .bss ${RELOCATING-0}${RELOCATING+SIZEOF(.data) + ADDR(.data)} :
+  .bss ${RELOCATING-0}${RELOCATING+ALIGN(SIZEOF(.data) + ADDR(.data), 2)} :
   {
-    ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ PROVIDE (__bss_start = .); }
     ${RELOCATING+ PROVIDE (__bssstart = .);
     *(.lower.bss.* .lower.bss)
@@ -304,9 +303,8 @@ SECTIONS
 
   /* This section contains data that is not initialized during load,
      or during the application's initialization sequence.  */
-  .noinit ${RELOCATING-0}${RELOCATING+SIZEOF(.bss) + ADDR(.bss)} :
+  .noinit ${RELOCATING-0}${RELOCATING+ALIGN(SIZEOF(.bss) + ADDR(.bss), 2)} :
   {
-    ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ PROVIDE (__noinit_start = .) ; }
     *(.noinit${RELOCATING+ .noinit.* .gnu.linkonce.n.*})
     ${RELOCATING+. = ALIGN(2);}
@@ -315,9 +313,8 @@ SECTIONS
 
   /* This section contains data that is initialized during load,
      but not during the application's initialization sequence.  */
-  .persistent ${RELOCATING-0}${RELOCATING+SIZEOF(.noinit) + ADDR(.noinit)} :
+  .persistent ${RELOCATING-0}${RELOCATING+ALIGN(SIZEOF(.noinit) + ADDR(.noinit), 2)} :
   {
-    ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ PROVIDE (__persistent_start = .) ; }
     *(.persistent${RELOCATING+ .persistent.* .gnu.linkonce.p.*})
     ${RELOCATING+. = ALIGN(2);}
