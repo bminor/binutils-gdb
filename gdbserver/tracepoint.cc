@@ -859,14 +859,9 @@ static struct tracepoint *last_tracepoint;
 
 static const char * const eval_result_names[] =
   {
-    "terror:in the attic",  /* this should never be reported */
-    "terror:empty expression",
-    "terror:empty stack",
-    "terror:stack overflow",
-    "terror:stack underflow",
-    "terror:unhandled opcode",
-    "terror:unrecognized opcode",
-    "terror:divide by zero"
+#define AX_RESULT_TYPE(ENUM,STR) STR,
+#include "ax-result-types.def"
+#undef AX_RESULT_TYPE
   };
 
 #endif
