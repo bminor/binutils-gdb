@@ -1061,6 +1061,8 @@ guess_is_rela (unsigned int e_machine)
     case EM_ARC:
     case EM_ARC_COMPACT:
     case EM_ARC_COMPACT2:
+    case EM_ARC_COMPACT3:
+    case EM_ARC_COMPACT3_64:
     case EM_AVR:
     case EM_AVR_OLD:
     case EM_BLACKFIN:
@@ -1738,6 +1740,8 @@ dump_relocations (Filedata *filedata,
 	case EM_ARC:
 	case EM_ARC_COMPACT:
 	case EM_ARC_COMPACT2:
+	case EM_ARC_COMPACT3:
+	case EM_ARC_COMPACT3_64:
 	  rtype = elf_arc_reloc_type (type);
 	  break;
 
@@ -2968,9 +2972,9 @@ get_machine_name (unsigned e_machine)
     case EM_NFP:		return "Netronome Flow Processor";
     case EM_VE:			return "NEC Vector Engine";
     case EM_CSKY:		return "C-SKY";
-    case EM_ARC_COMPACT3_64:	return "Synopsys ARCv2.3 64-bit";
+    case EM_ARC_COMPACT3_64:	return "Synopsys ARCv3 64-bit processor";
     case EM_MCS6502:		return "MOS Technology MCS 6502 processor";
-    case EM_ARC_COMPACT3:	return "Synopsys ARCv2.3 32-bit";
+    case EM_ARC_COMPACT3:	return "Synopsys ARCv3 32-bit processor";
     case EM_KVX:		return "Kalray VLIW core of the MPPA processor family";
     case EM_65816:		return "WDC 65816/65C816";
     case EM_LOONGARCH:		return "LoongArch";
@@ -3713,6 +3717,14 @@ get_machine_flags (Filedata * filedata, unsigned e_flags, unsigned e_machine)
       switch (e_machine)
 	{
 	default:
+	  break;
+
+	case EM_ARC_COMPACT3:
+	  strcat (buf, ", HS5x");
+	  break;
+
+	case EM_ARC_COMPACT3_64:
+	  strcat (buf, ", HS6x");
 	  break;
 
 	case EM_ARC_COMPACT2:
@@ -4983,6 +4995,8 @@ get_section_type_name (Filedata * filedata, unsigned int sh_type)
 	    case EM_ARC:
 	    case EM_ARC_COMPACT:
 	    case EM_ARC_COMPACT2:
+	    case EM_ARC_COMPACT3:
+	    case EM_ARC_COMPACT3_64:
 	      result = get_arc_section_type_name (sh_type);
 	      break;
 	    case EM_MIPS:
@@ -14324,6 +14338,8 @@ is_32bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
       return reloc_type == 1; /* R_ARC_32.  */
     case EM_ARC_COMPACT:
     case EM_ARC_COMPACT2:
+    case EM_ARC_COMPACT3:
+    case EM_ARC_COMPACT3_64:
       return reloc_type == 4; /* R_ARC_32.  */
     case EM_ARM:
       return reloc_type == 2; /* R_ARM_ABS32 */
@@ -14518,6 +14534,8 @@ is_32bit_pcrel_reloc (Filedata * filedata, unsigned int reloc_type)
       return reloc_type == 10; /* R_ALPHA_SREL32.  */
     case EM_ARC_COMPACT:
     case EM_ARC_COMPACT2:
+    case EM_ARC_COMPACT3:
+    case EM_ARC_COMPACT3_64:
       return reloc_type == 49; /* R_ARC_32_PCREL.  */
     case EM_ARM:
       return reloc_type == 3;  /* R_ARM_REL32 */
@@ -14584,6 +14602,8 @@ is_64bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     {
     case EM_AARCH64:
       return reloc_type == 257;	/* R_AARCH64_ABS64.  */
+    case EM_ARC_COMPACT3_64:
+      return reloc_type == 5; /* R_ARC_64.  */
     case EM_ALPHA:
       return reloc_type == 2; /* R_ALPHA_REFQUAD.  */
     case EM_IA_64:
@@ -14687,6 +14707,8 @@ is_16bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_ARC:
     case EM_ARC_COMPACT:
     case EM_ARC_COMPACT2:
+    case EM_ARC_COMPACT3:
+    case EM_ARC_COMPACT3_64:
       return reloc_type == 2; /* R_ARC_16.  */
     case EM_ADAPTEVA_EPIPHANY:
       return reloc_type == 5;
@@ -14969,6 +14991,8 @@ is_none_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_ARC:     /* R_ARC_NONE.  */
     case EM_ARC_COMPACT2: /* R_ARC_NONE.  */
     case EM_ARC_COMPACT: /* R_ARC_NONE.  */
+    case EM_ARC_COMPACT3: /* R_ARC_NONE.  */
+    case EM_ARC_COMPACT3_64: /* R_ARC_NONE.  */
     case EM_ARM:     /* R_ARM_NONE.  */
     case EM_CRIS:    /* R_CRIS_NONE.  */
     case EM_FT32:    /* R_FT32_NONE.  */
@@ -22302,6 +22326,8 @@ process_arch_specific (Filedata * filedata)
     case EM_ARC:
     case EM_ARC_COMPACT:
     case EM_ARC_COMPACT2:
+    case EM_ARC_COMPACT3:
+    case EM_ARC_COMPACT3_64:
       return process_attributes (filedata, "ARC", SHT_ARC_ATTRIBUTES,
 				 display_arc_attribute,
 				 display_generic_attribute);
