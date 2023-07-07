@@ -342,9 +342,8 @@ STACK=".stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
 test "${HAVE_NOINIT}" = "yes" && NOINIT="
   /* This section contains data that is not initialized during load,
      or during the application's initialization sequence.  */
-  .noinit (NOLOAD) :
+  .noinit ${RELOCATING-0} (NOLOAD) : ${RELOCATING+ALIGN(${ALIGNMENT})}
   {
-    ${RELOCATING+. = ALIGN(${ALIGNMENT});}
     ${RELOCATING+PROVIDE (__noinit_start = .);}
     *(.noinit${RELOCATING+ .noinit.* .gnu.linkonce.n.*})
     ${RELOCATING+. = ALIGN(${ALIGNMENT});}
@@ -353,9 +352,8 @@ test "${HAVE_NOINIT}" = "yes" && NOINIT="
 test "${HAVE_PERSISTENT}" = "yes" && PERSISTENT="
   /* This section contains data that is initialized during load,
      but not during the application's initialization sequence.  */
-  .persistent :
+  .persistent ${RELOCATING-0} : ${RELOCATING+ALIGN(${ALIGNMENT})}
   {
-    ${RELOCATING+. = ALIGN(${ALIGNMENT});}
     ${RELOCATING+PROVIDE (__persistent_start = .);}
     *(.persistent${RELOCATING+ .persistent.* .gnu.linkonce.p.*})
     ${RELOCATING+. = ALIGN(${ALIGNMENT});}
