@@ -199,7 +199,7 @@ ldfile_add_remap_file (const char * file)
 	  continue;
 	}
 
-      char * rename = p;
+      char * renamed = p;
 
       /* Advance past the rename entry.  */
       while (*p && *p != '=' && *p != ' ' && *p != '\t' && *p != '\f'
@@ -208,7 +208,7 @@ ldfile_add_remap_file (const char * file)
       /* And terminate it.  */
       *p = '\0';
 
-      ldfile_add_remap (pattern, rename);
+      ldfile_add_remap (pattern, renamed);
     }
   while (! feof (f));
 
