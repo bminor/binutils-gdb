@@ -764,7 +764,7 @@ extern int thread_count (process_stratum_target *proc_target);
 /* Return true if we have any thread in any inferior.  */
 extern bool any_thread_p ();
 
-/* Switch context to thread THR.  Also sets the STOP_PC global.  */
+/* Switch context to thread THR.  */
 extern void switch_to_thread (struct thread_info *thr);
 
 /* Switch context to no thread selected.  */
