@@ -34,6 +34,10 @@ How to perform a release.
      directories and the top level Makefile and configure files.  Also
      consider updating the toplevel libtool files.
 
+-------------------------------------------------
+How to create the release branch.
+-------------------------------------------------
+
 Approx time to complete from here: 2 hours ....
 
   2.5 If you have not built from the sources recently then now is the
@@ -219,9 +223,19 @@ Hi Everyone,
       architectures...
 
 ==============================================================================
+==============================================================================
 
-When the time comes to actually make the release....
+For the next few weeks, monitor the mailing list for new translations
+and respond to any requests to have patches applied to the branch.
 
+==============================================================================
+==============================================================================
+
+Then, a couple of weeks later ...
+
+-------------------------------------------------
+How to create the release.
+-------------------------------------------------
 
   20. Make sure that the branch sources still build, test and install 
       correctly.  Make sure that the sources are clean, without any
