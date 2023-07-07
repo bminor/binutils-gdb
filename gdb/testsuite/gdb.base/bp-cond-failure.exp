@@ -44,10 +44,7 @@ if { [is_address_zero_readable] } {
     return
 }
 
-# Where the breakpoint will be placed.
-set bp_line [gdb_get_line_number "Breakpoint here"]
-
-proc run_test { cond_eval access_type } {
+proc run_test { cond_eval access_type lineno nloc } {
     clean_restart ${::binfile}
 
     if { ![runto_main] } {
@@ -59,17 +56,23 @@ proc run_test { cond_eval access_type } {
     }
 
     # Setup the conditional breakpoint and record its number.
-    gdb_breakpoint "${::srcfile}:${::bp_line} if (*(${access_type} *) 0) == 0"
+    gdb_breakpoint "${::srcfile}:${lineno} if (*(${access_type} *) 0) == 0"
     set bp_num [get_integer_valueof "\$bpnum" "*UNKNOWN*"]
+
+    if { $nloc > 1 } {
+	set bp_num_pattern "${bp_num}.1"
+    } else {
+	set bp_num_pattern "${bp_num}"
+    }
 
     gdb_test "continue" \
 	[multi_line \
 	     "Continuing\\." \
-	     "Error in testing condition for breakpoint ${bp_num}:" \
+	     "Error in testing condition for breakpoint ${bp_num_pattern}:" \
 	     "Cannot access memory at address 0x0" \
 	     "" \
-	     "Breakpoint ${bp_num}, foo \\(\\) at \[^\r\n\]+:${::bp_line}" \
-	     "${::decimal}\\s+\[^\r\n\]+Breakpoint here\[^\r\n\]+"]
+	     "Breakpoint ${bp_num_pattern}, \(foo\|bar\) \\(\\) at \[^\r\n\]+:${lineno}" \
+	     "${::decimal}\\s+\[^\r\n\]+ breakpoint here\\. \[^\r\n\]+"]
 }
 
 # If we're using a remote target then conditions could be evaulated
@@ -97,8 +100,17 @@ gdb_test_multiple "show breakpoint condition-evaluation" "" {
     }
 }
 
+# Where the breakpoint will be placed.
+set bp_line_multi_loc [gdb_get_line_number "Multi-location breakpoint here"]
+set bp_line_single_loc [gdb_get_line_number "Single-location breakpoint here"]
+
 foreach_with_prefix access_type { "char" "short" "int" "long long" } {
     foreach_with_prefix cond_eval $cond_eval_modes {
-	run_test $cond_eval $access_type
+	with_test_prefix "multi-loc" {
+	    run_test $cond_eval $access_type $bp_line_multi_loc 2
+	}
+	with_test_prefix "single-loc" {
+	    run_test $cond_eval $access_type $bp_line_single_loc 1
+	}
     }
 }

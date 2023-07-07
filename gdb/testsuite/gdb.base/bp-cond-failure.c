@@ -15,16 +15,26 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-int
+static inline int __attribute__((__always_inline__))
 foo ()
 {
-  return 0;	/* Breakpoint here.  */
+  return 0;	/* Multi-location breakpoint here.  */
+}
+
+static int __attribute__((noinline))
+bar ()
+{
+  int res = foo ();	/* Single-location breakpoint here.  */
+
+  return res;
 }
 
 int
 main ()
 {
-  int res = foo ();
+  int res = bar ();
+
+  res = foo ();
 
   return res;
 }

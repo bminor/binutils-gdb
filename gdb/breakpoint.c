@@ -5544,9 +5544,17 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
 	    }
 	  catch (const gdb_exception_error &ex)
 	    {
-	      exception_fprintf (gdb_stderr, ex,
-				 "Error in testing condition for breakpoint %d:\n",
-				 b->number);
+	      int locno = bpstat_locno (bs);
+	      if (locno != 0)
+		exception_fprintf
+		  (gdb_stderr, ex,
+		   "Error in testing condition for breakpoint %d.%d:\n",
+		   b->number, locno);
+	      else
+		exception_fprintf
+		  (gdb_stderr, ex,
+		   "Error in testing condition for breakpoint %d:\n",
+		   b->number);
 
 	      /* If the pc value changed as a result of evaluating the
 		 condition then we probably stopped within an inferior
