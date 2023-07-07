@@ -171,7 +171,7 @@ fi
 def_symbol()
 {
     if [ -z "${SYMBOL_ABI_ALIGNMENT}" ]; then
-	echo "${USER_LABEL_PREFIX}$1 =  . "
+	echo "${USER_LABEL_PREFIX}$1 = ."
     else
 	echo "${USER_LABEL_PREFIX}$1 = ALIGN(${SYMBOL_ABI_ALIGNMENT})"
     fi
@@ -688,6 +688,7 @@ cat <<EOF
   ${SDATA_GOT+${OTHER_GOT_SECTIONS}}
   ${DATA_SDATA-${SDATA}}
   ${DATA_SDATA-${OTHER_SDATA_SECTIONS}}
+  ${RELOCATING+${SYMBOL_ABI_ALIGNMENT+. = ALIGN(${SYMBOL_ABI_ALIGNMENT});}}
   ${RELOCATING+${DATA_END_SYMBOLS-${CREATE_SHLIB+PROVIDE (}$(def_symbol "_edata")${CREATE_SHLIB+)}; PROVIDE ($(def_symbol "edata"));}}
   ${PERSISTENT}
   ${RELOCATING+. = .;}
