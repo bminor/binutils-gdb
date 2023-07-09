@@ -424,7 +424,7 @@ int trace_regblock_size;
 static std::string trace_tdesc;
 
 static void tfile_append_tdesc_line (const char *line);
-static void tfile_interp_line (char *line,
+static void tfile_interp_line (const char *line,
 			       struct uploaded_tp **utpp,
 			       struct uploaded_tsv **utsvp);
 
@@ -574,15 +574,15 @@ tfile_target_open (const char *arg, int from_tty)
    file.  */
 
 static void
-tfile_interp_line (char *line, struct uploaded_tp **utpp,
+tfile_interp_line (const char *line, struct uploaded_tp **utpp,
 		   struct uploaded_tsv **utsvp)
 {
-  char *p = line;
+  const char *p = line;
 
   if (startswith (p, "R "))
     {
       p += strlen ("R ");
-      trace_regblock_size = strtol (p, &p, 16);
+      trace_regblock_size = strtol (p, nullptr, 16);
     }
   else if (startswith (p, "status "))
     {
