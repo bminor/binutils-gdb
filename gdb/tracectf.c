@@ -862,7 +862,7 @@ static struct bt_ctf_iter *ctf_iter = NULL;
 static struct bt_iter_pos *start_pos;
 
 /* The name of CTF directory.  */
-static char *trace_dirname;
+static gdb::unique_xmalloc_ptr<char> trace_dirname;
 
 static ctf_target ctf_ops;
 
@@ -1164,7 +1164,7 @@ ctf_target_open (const char *dirname, int from_tty)
   start_pos = bt_iter_get_pos (bt_ctf_get_iter (ctf_iter));
   gdb_assert (start_pos->type == BT_SEEK_RESTORE);
 
-  trace_dirname = xstrdup (dirname);
+  trace_dirname = make_unique_xstrdup (dirname);
   current_inferior ()->push_target (&ctf_ops);
 
   inferior_appeared (current_inferior (), CTF_PID);
@@ -1185,8 +1185,7 @@ void
 ctf_target::close ()
 {
   ctf_destroy ();
-  xfree (trace_dirname);
-  trace_dirname = NULL;
+  trace_dirname.reset ();
 
   switch_to_no_thread ();	/* Avoid confusion from thread stuff.  */
   exit_inferior_silent (current_inferior ());
@@ -1200,7 +1199,7 @@ ctf_target::close ()
 void
 ctf_target::files_info ()
 {
-  gdb_printf ("\t`%s'\n", trace_dirname);
+  gdb_printf ("\t`%s'\n", trace_dirname.get ());
 }
 
 /* This is the implementation of target_ops method to_fetch_registers.
