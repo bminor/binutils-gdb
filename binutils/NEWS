@@ -1,5 +1,8 @@
 -*- text -*-
 
+* objcopy --set-section-flags now supports "large" to set SHF_X86_64_LARGE
+  for ELF x86-64 objects.
+
 Changes in 2.41:
 
 * The MIPS port now supports the Sony Interactive Entertainment Allegrex

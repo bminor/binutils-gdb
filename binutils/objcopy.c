@@ -803,6 +803,7 @@ parse_flags (const char *s)
       PARSE_FLAG ("contents", SEC_HAS_CONTENTS);
       PARSE_FLAG ("merge", SEC_MERGE);
       PARSE_FLAG ("strings", SEC_STRINGS);
+      PARSE_FLAG ("large", SEC_ELF_LARGE);
 #undef PARSE_FLAG
       else
 	{
@@ -812,8 +813,10 @@ parse_flags (const char *s)
 	  strncpy (copy, s, len);
 	  copy[len] = '\0';
 	  non_fatal (_("unrecognized section flag `%s'"), copy);
-	  fatal (_("supported flags: %s"),
-		 "alloc, load, noload, readonly, debug, code, data, rom, exclude, share, contents, merge, strings");
+	  fatal (_ ("supported flags: %s"),
+		 "alloc, load, noload, readonly, debug, code, data, rom, "
+		 "exclude, contents, merge, strings, (COFF specific) share, "
+		 "(ELF x86-64 specific) large");
 	}
 
       s = snext;
@@ -2618,7 +2621,7 @@ merge_gnu_build_notes (bfd *          abfd,
 }
 
 static flagword
-check_new_section_flags (flagword flags, bfd * abfd, const char * secname)
+check_new_section_flags (flagword flags, bfd *abfd, const char * secname)
 {
   /* Only set the SEC_COFF_SHARED flag on COFF files.
      The same bit value is used by ELF targets to indicate
@@ -2631,6 +2634,19 @@ check_new_section_flags (flagword flags, bfd * abfd, const char * secname)
 		 bfd_get_filename (abfd), secname);
       flags &= ~ SEC_COFF_SHARED;
     }
+
+  /* Report a fatal error if 'large' is used with a non-x86-64 ELF target.
+     Suppress the error for non-ELF targets to allow -O binary and formats that
+     use the bit value SEC_ELF_LARGE for other purposes.  */
+  if ((flags & SEC_ELF_LARGE) != 0
+      && bfd_get_flavour (abfd) == bfd_target_elf_flavour
+      && get_elf_backend_data (abfd)->elf_machine_code != EM_X86_64)
+    {
+      fatal (_ ("%s[%s]: 'large' flag is ELF x86-64 specific"),
+	     bfd_get_filename (abfd), secname);
+      flags &= ~SEC_ELF_LARGE;
+    }
+
   return flags;
 }
 
