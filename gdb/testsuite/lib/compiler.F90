@@ -24,6 +24,10 @@ set compiler_info [join {gfortran __GNUC__ __GNUC_MINOR__ __GNUC_PATCHLEVEL__} -
 set compiler_info [join {armflang __armclang_major__ __armclang_minor__ 0} -]
 #endif
 
+#if defined (__NVCOMPILER_MAJOR__)
+set compiler_info [join {nvfortran __NVCOMPILER_MAJOR__ __NVCOMPILER_MINOR__ __NVCOMPILER_PATCHLEVEL__} -]
+#endif
+
 /* Classic flang and LLVM flang emit their respective macros differently.  */
 
 /* LLVM flang complains about non Fortran tokens so we do not use "{" here.  */
