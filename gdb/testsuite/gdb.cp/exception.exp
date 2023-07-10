@@ -27,9 +27,6 @@
 # Static-linked executables use a different mechanism to get the
 # address of the notification hook in the C++ support library.
 
-# TODO: this file has many absolute line numbers.
-# Replace them with gdb_get_line_number.
-
 set ws	"\[\r\n\t \]+"
 set nl	"\[\r\n\]+"
 
@@ -105,15 +102,9 @@ gdb_test "break catcher" "Breakpoint \[0-9\]+ at.*"
 
 # Get the first exception thrown
        
-set name "continue to first throw"
-gdb_test_multiple "continue" $name {
-    -re "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception thrown\\), throw location.*${srcfile}:30, catch location .*${srcfile}:50\r\n$gdb_prompt $" {
-	pass $name
-    }
-    -re "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception thrown\\).*\r\n$gdb_prompt $" {
-	pass $name
-    }
-}
+gdb_test "continue"  \
+    "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception thrown\\).*" \
+    "continue to first throw"
 
 # Backtrace from the throw point.
 # This should get to user code.
@@ -129,15 +120,9 @@ gdb_test_multiple "backtrace" $name {
 
 # Continue to the catch.
 
-set name "continue to first catch"
-gdb_test_multiple "continue" $name {
-    -re "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception caught\\), throw location.*${srcfile}:30, catch location .*${srcfile}:50\r\n$gdb_prompt $" {
-	pass $name
-    }
-    -re "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception caught\\).*\r\n$gdb_prompt $" {
-	pass $name
-    }
-}
+gdb_test "continue" \
+    "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception caught\\).*" \
+    "continue to first catch"
 
 # Backtrace from the catch point.
 # This should get to user code.
@@ -154,15 +139,9 @@ gdb_test "continue" ".*catcher \\(x=13\\).*" "continue to catcher for the first 
 
 # Continue to second throw.
 
-set name "continue to second throw"
-gdb_test_multiple "continue" $name {
-    -re "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception thrown\\), throw location.*${srcfile}:30, catch location .*${srcfile}:58\r\n$gdb_prompt $" {
-	pass $name
-    }
-    -re "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception thrown\\).*\r\n$gdb_prompt $" {
-	pass $name
-    }
-}
+gdb_test "continue" \
+    "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception thrown\\).*" \
+    "continue to second throw"
 
 # Backtrace from the throw point.
 # This should get to user code.
@@ -176,15 +155,9 @@ gdb_test_multiple "backtrace" $name {
 
 # Continue to second catch.
 
-set name "continue to second catch"
-gdb_test_multiple "continue" $name {
-    -re "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception caught\\), throw location.*${srcfile}:30, catch location .*${srcfile}:58\r\n$gdb_prompt $" {
-	pass $name
-    }
-    -re "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception caught\\).*\r\n$gdb_prompt $" {
-	pass $name
-    }
-}
+gdb_test "continue" \
+    "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception caught\\).*" \
+    "continue to second catch"
 
 # Backtrace from the catch point.
 # This should get to user code.

@@ -601,12 +601,7 @@ proc test_pointers_to_class_members {} {
     gdb_test "ptype Bar::z" "type = int"
     gdb_test "ptype &Bar::z" "type = int Bar::\\*"
 
-    # TODO: this is a bogus test.  It's looking at a variable that
-    # has not even been declared yet, so it's accessing random junk
-    # on the stack and comparing that it's NOT equal to a specific
-    # value.  It's been like this since gdb 4.10 in 1993!
-    # -- chastain 2004-01-01
-    gdb_test "print (int)pmi == sizeof(int)" ".* = false"
+    gdb_test "print (int)pmi == sizeof(int)" ".* = true"
 }
 
 # Test static members.
