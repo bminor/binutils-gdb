@@ -73,7 +73,8 @@ proc test_select_frame_view { with_pretty_printer } {
 
     # Select thread 2's frame in thread 1.
     gdb_test "thread 1" "Switching to thread 1 .*"
-    gdb_test_no_output "select-frame view $frame_sp $frame_pc"
+    gdb_test_no_output "select-frame view $frame_sp $frame_pc" \
+	"select thread 2 frame from thread 1"
 
     if { $with_pretty_printer } {
 	# When the pretty printer does its infcall, it is done on the currently
