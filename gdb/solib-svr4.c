@@ -2425,7 +2425,7 @@ enable_break (struct svr4_info *info, int from_tty)
       CORE_ADDR load_addr = 0;
       int load_addr_found = 0;
       int loader_found_in_list = 0;
-      struct target_ops *tmp_bfd_target;
+      target_ops_up tmp_bfd_target;
 
       sym_addr = 0;
 
@@ -2482,8 +2482,8 @@ enable_break (struct svr4_info *info, int from_tty)
 	    if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
 	      {
 		CORE_ADDR space_size = (CORE_ADDR) 1 << addr_bit;
-		CORE_ADDR tmp_entry_point = exec_entry_point (tmp_bfd.get (),
-							      tmp_bfd_target);
+		CORE_ADDR tmp_entry_point
+		  = exec_entry_point (tmp_bfd.get (), tmp_bfd_target.get ());
 
 		gdb_assert (load_addr < space_size);
 
@@ -2512,7 +2512,8 @@ enable_break (struct svr4_info *info, int from_tty)
 					inferior_ptid, target_gdbarch ());
 
 	  load_addr = (regcache_read_pc (regcache)
-		       - exec_entry_point (tmp_bfd.get (), tmp_bfd_target));
+		       - exec_entry_point (tmp_bfd.get (),
+					   tmp_bfd_target.get ()));
 	}
 
       if (!loader_found_in_list)
@@ -2564,12 +2565,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	   target, this will always produce an unrelocated value.  */
 	sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 						       sym_addr,
-						       tmp_bfd_target);
-
-      /* We're done with both the temporary bfd and target.  Closing
-	 the target closes the underlying bfd, because it holds the
-	 only remaining reference.  */
-      target_close (tmp_bfd_target);
+						       tmp_bfd_target.get ());
 
       if (sym_addr != 0)
 	{

@@ -1410,15 +1410,6 @@ extern target_ops *get_dummy_target ();
 
 extern const char *target_shortname ();
 
-/* Does whatever cleanup is required for a target that we are no
-   longer going to be calling.  This routine is automatically always
-   called after popping the target off the target stack - the target's
-   own methods are no longer available through the target vector.
-   Closing file descriptors and freeing all memory allocated memory are
-   typical things it should do.  */
-
-void target_close (struct target_ops *targ);
-
 /* Find the correct target to use for "attach".  If a target on the
    current stack supports attaching, then it is returned.  Otherwise,
    the default run target is returned.  */

@@ -25,6 +25,6 @@
 struct target_ops;
 
 /* Given an existing BFD, re-open it as a "struct target_ops".  */
-struct target_ops *target_bfd_reopen (const gdb_bfd_ref_ptr &bfd);
+target_ops_up target_bfd_reopen (const gdb_bfd_ref_ptr &bfd);
 
 #endif

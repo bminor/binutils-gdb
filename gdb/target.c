@@ -1173,7 +1173,16 @@ target_ops_ref_policy::decref (target_ops *t)
     {
       if (t->stratum () == process_stratum)
 	connection_list_remove (as_process_stratum_target (t));
-      target_close (t);
+
+      for (inferior *inf : all_inferiors ())
+	gdb_assert (!inf->target_is_pushed (t));
+
+      fileio_handles_invalidate_target (t);
+
+      t->close ();
+
+      if (targetdebug)
+	gdb_printf (gdb_stdlog, "closing target\n");
     }
 }
 
@@ -3751,20 +3760,6 @@ debug_target::info () const
 }
 
 
-
-void
-target_close (struct target_ops *targ)
-{
-  for (inferior *inf : all_inferiors ())
-    gdb_assert (!inf->target_is_pushed (targ));
-
-  fileio_handles_invalidate_target (targ);
-
-  targ->close ();
-
-  if (targetdebug)
-    gdb_printf (gdb_stdlog, "target_close ()\n");
-}
 
 int
 target_thread_alive (ptid_t ptid)
