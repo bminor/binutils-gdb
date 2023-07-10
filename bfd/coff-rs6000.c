@@ -1598,14 +1598,32 @@ _bfd_xcoff_archive_p (bfd *abfd)
 
 /* Track file ranges occupied by elements.  Add [START,END) to the
    list of ranges and return TRUE if there is no overlap between the
-   new and any other element or the archive file header.  Note that
-   this would seem to preclude calling _bfd_get_elt_at_filepos twice
-   for the same element, but we won't get to _bfd_xcoff_read_ar_hdr if
-   an element is read more than once.  See _bfd_get_elt_at_filepos use
-   of _bfd_look_for_bfd_in_cache.  Also, the xcoff archive code
-   doesn't call _bfd_read_ar_hdr when reading the armap, nor does it
-   need to use extended name tables.  So those other routines in
-   archive.c that call _bfd_read_ar_hdr are unused.  */
+   new and any other element or the archive file header.  This is
+   aimed at preventing infinite looping on malformed archives, for
+   "ar" and similar which typically use code like:
+   .  for (last = bfd_openr_next_archived_file (archive, NULL);
+   .       last;
+   .       last = next)
+   .    {
+   .      do_something_with (last);
+   .      next = bfd_openr_next_archived_file (archive, last);
+   .      bfd_close (last);
+   .    }
+   The check implemented here is only possible due to the fact that
+   for XCOFF archives bfd_openr_next_archived_file is the only code
+   path leading to _bfd_read_ar_hdr.  _bfd_read_ar_hdr is not called
+   when reading the armap, nor do XCOFF archives use the extended name
+   scheme implemented in archive.c.
+
+   Note that the check relies on the previous element being closed,
+   and there is one case where add_range might fail but I think it is
+   sufficently unusual that it doesn't warrant fixing:
+   If the loop body above called bfd_openr_next_archived_file twice
+   with the same arguments and the element returned is bfd_close'd
+   between those calls then we'll return false here for the second
+   call.  (For why this is so see _bfd_look_for_bfd_in_cache in
+   _bfd_get_elt_at_filepos, and know that bfd_close removes elements
+   from the cache.)  */
 
 static bool
 add_range (bfd *abfd, ufile_ptr start, ufile_ptr end)
@@ -1770,12 +1788,14 @@ _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
     {
       if (last_file == NULL)
 	{
+	  /* If we are scanning over elements twice in an open archive,
+	     which can happen in gdb after a fork, ensure we start the
+	     second scan with clean ranges.  */
+	  x_artdata (archive)->ranges.start = 0;
+	  x_artdata (archive)->ranges.end = SIZEOF_AR_FILE_HDR;
+	  x_artdata (archive)->ranges.next = NULL;
+	  x_artdata (archive)->ar_hdr_size = SIZEOF_AR_HDR;
 	  filestart = bfd_ardata (archive)->first_file_filepos;
-	  if (x_artdata (archive)->ar_hdr_size == 0)
-	    {
-	      x_artdata (archive)->ranges.end = SIZEOF_AR_FILE_HDR;
-	      x_artdata (archive)->ar_hdr_size = SIZEOF_AR_HDR;
-	    }
 	}
       else
 	GET_VALUE_IN_FIELD (filestart, arch_xhdr (last_file)->nextoff, 10);
@@ -1794,12 +1814,11 @@ _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
     {
       if (last_file == NULL)
 	{
+	  x_artdata (archive)->ranges.start = 0;
+	  x_artdata (archive)->ranges.end = SIZEOF_AR_FILE_HDR_BIG;
+	  x_artdata (archive)->ranges.next = NULL;
+	  x_artdata (archive)->ar_hdr_size = SIZEOF_AR_HDR_BIG;
 	  filestart = bfd_ardata (archive)->first_file_filepos;
-	  if (x_artdata (archive)->ar_hdr_size == 0)
-	    {
-	      x_artdata (archive)->ranges.end = SIZEOF_AR_FILE_HDR_BIG;
-	      x_artdata (archive)->ar_hdr_size = SIZEOF_AR_HDR_BIG;
-	    }
 	}
       else
 	GET_VALUE_IN_FIELD (filestart, arch_xhdr_big (last_file)->nextoff, 10);
