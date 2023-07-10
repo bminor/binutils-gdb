@@ -28,6 +28,7 @@ if {[istarget "x86_64-*-linux*"]} {
     set cf_size 8757248
 } else {
     unsupported "no pre-generated core file for this target"
+    return -1
 }
 
 # Decompress the core file.
