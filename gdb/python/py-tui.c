@@ -509,7 +509,7 @@ gdbpy_tui_title (PyObject *self, void *closure)
 {
   gdbpy_tui_window *win = (gdbpy_tui_window *) self;
   REQUIRE_WINDOW (win);
-  return host_string_to_python_string (win->window->title.c_str ()).release ();
+  return host_string_to_python_string (win->window->title ().c_str ()).release ();
 }
 
 /* Set the title of the TUI window.  */

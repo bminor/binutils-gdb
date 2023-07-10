@@ -210,7 +210,7 @@ tui_data_window::show_register_group (const reggroup *group,
   int regnum, pos;
 
   /* Make a new title showing which group we display.  */
-  title = string_printf ("Register group: %s", group->name ());
+  this->set_title (string_printf ("Register group: %s", group->name ()));
 
   /* See how many registers must be displayed.  */
   nr_regs = 0;

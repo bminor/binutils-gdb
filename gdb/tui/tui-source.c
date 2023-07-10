@@ -65,7 +65,7 @@ tui_source_window::set_contents (struct gdbarch *arch,
   int cur_line_no, cur_line;
   const char *s_filename = symtab_to_filename_for_display (s);
 
-  title = s_filename;
+  set_title (s_filename);
 
   m_fullname = make_unique_xstrdup (symtab_to_fullname (s));
 

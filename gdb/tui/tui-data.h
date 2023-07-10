@@ -148,7 +148,11 @@ public:
 
   /* A helper function to change the title and then redraw the
      surrounding box, if needed.  */
-  void set_title (const char *new_title);
+  void set_title (std::string &&new_title);
+
+  /* Return a reference to the current window title.  */
+  const std::string &title () const
+  { return m_title; }
 
   /* Window handle.  */
   std::unique_ptr<WINDOW, curses_deleter> handle;
@@ -159,9 +163,6 @@ public:
   /* Origin of window.  */
   int x = 0;
   int y = 0;
-
-  /* Window title to display.  */
-  std::string title;
 
   /* Is this window highlighted?  */
   bool is_highlighted = false;
@@ -175,6 +176,10 @@ protected:
   /* Scroll the contents horizontally.  This is only called via
      left_scroll and right_scroll.  */
   virtual void do_scroll_horizontal (int num_to_scroll) = 0;
+
+private:
+  /* Window title to display.  */
+  std::string m_title;
 };
 
 /* Constant definitions.  */

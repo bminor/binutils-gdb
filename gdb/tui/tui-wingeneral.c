@@ -102,19 +102,19 @@ box_win (struct tui_win_info *win_info,
 	   tui_border_hline, tui_border_hline,
 	   tui_border_ulcorner, tui_border_urcorner,
 	   tui_border_llcorner, tui_border_lrcorner);
-  if (!win_info->title.empty ())
+  if (!win_info->title ().empty ())
     {
       /* Emit "+-TITLE-+" -- so 2 characters on the right and 2 on
 	 the left.  */
       int max_len = win_info->width - 2 - 2;
 
-      if (win_info->title.size () <= max_len)
-	mvwaddstr (win, 0, 2, win_info->title.c_str ());
+      if (win_info->title ().size () <= max_len)
+	mvwaddstr (win, 0, 2, win_info->title ().c_str ());
       else
 	{
 	  std::string truncated
-	    = "..." + win_info->title.substr (win_info->title.size ()
-					      - max_len + 3);
+	    = "..." + win_info->title ().substr (win_info->title ().size ()
+						 - max_len + 3);
 	  mvwaddstr (win, 0, 2, truncated.c_str ());
 	}
     }
