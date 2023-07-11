@@ -23,11 +23,11 @@ static const struct dis386 evex_table[][256] = {
     { PREFIX_TABLE (PREFIX_0F10) },
     { PREFIX_TABLE (PREFIX_0F11) },
     { PREFIX_TABLE (PREFIX_VEX_0F12) },
-    { MOD_TABLE (MOD_VEX_0F13) },
+    { VEX_LEN_TABLE (VEX_LEN_0F13) },
     { "%XEvunpcklpX",	{ XM, Vex, EXx }, PREFIX_OPCODE },
     { "%XEvunpckhpX",	{ XM, Vex, EXx }, PREFIX_OPCODE },
     { PREFIX_TABLE (PREFIX_VEX_0F16) },
-    { MOD_TABLE (MOD_VEX_0F17) },
+    { VEX_LEN_TABLE (VEX_LEN_0F17) },
     /* 18 */
     { Bad_Opcode },
     { Bad_Opcode },

@@ -931,12 +931,6 @@ enum
   MOD_0F38FB_PREFIX_1,
   MOD_0F3A0F_PREFIX_1,
 
-  MOD_VEX_0F12_PREFIX_0,
-  MOD_VEX_0F12_PREFIX_2,
-  MOD_VEX_0F13,
-  MOD_VEX_0F16_PREFIX_0,
-  MOD_VEX_0F16_PREFIX_2,
-  MOD_VEX_0F17,
   MOD_VEX_0F2B,
   MOD_VEX_0F41_L_1,
   MOD_VEX_0F42_L_1,
@@ -1362,14 +1356,12 @@ enum
 
 enum
 {
-  VEX_LEN_0F12_P_0_M_0 = 0,
-  VEX_LEN_0F12_P_0_M_1,
-#define VEX_LEN_0F12_P_2_M_0 VEX_LEN_0F12_P_0_M_0
-  VEX_LEN_0F13_M_0,
-  VEX_LEN_0F16_P_0_M_0,
-  VEX_LEN_0F16_P_0_M_1,
-#define VEX_LEN_0F16_P_2_M_0 VEX_LEN_0F16_P_0_M_0
-  VEX_LEN_0F17_M_0,
+  VEX_LEN_0F12_P_0 = 0,
+  VEX_LEN_0F12_P_2,
+  VEX_LEN_0F13,
+  VEX_LEN_0F16_P_0,
+  VEX_LEN_0F16_P_2,
+  VEX_LEN_0F17,
   VEX_LEN_0F41,
   VEX_LEN_0F42,
   VEX_LEN_0F44,
@@ -3665,17 +3657,17 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_VEX_0F12 */
   {
-    { MOD_TABLE (MOD_VEX_0F12_PREFIX_0) },
+    { VEX_LEN_TABLE (VEX_LEN_0F12_P_0) },
     { "%XEvmov%XSldup",	{ XM, EXEvexXNoBcst }, 0 },
-    { MOD_TABLE (MOD_VEX_0F12_PREFIX_2) },
+    { VEX_LEN_TABLE (VEX_LEN_0F12_P_2) },
     { "%XEvmov%XDdup",	{ XM, EXymmq }, 0 },
   },
 
   /* PREFIX_VEX_0F16 */
   {
-    { MOD_TABLE (MOD_VEX_0F16_PREFIX_0) },
+    { VEX_LEN_TABLE (VEX_LEN_0F16_P_0) },
     { "%XEvmov%XShdup",	{ XM, EXEvexXNoBcst }, 0 },
-    { MOD_TABLE (MOD_VEX_0F16_PREFIX_2) },
+    { VEX_LEN_TABLE (VEX_LEN_0F16_P_2) },
   },
 
   /* PREFIX_VEX_0F2A */
@@ -5965,11 +5957,11 @@ static const struct dis386 vex_table[][256] = {
     { PREFIX_TABLE (PREFIX_0F10) },
     { PREFIX_TABLE (PREFIX_0F11) },
     { PREFIX_TABLE (PREFIX_VEX_0F12) },
-    { MOD_TABLE (MOD_VEX_0F13) },
+    { VEX_LEN_TABLE (VEX_LEN_0F13) },
     { "vunpcklpX",	{ XM, Vex, EXx }, PREFIX_OPCODE },
     { "vunpckhpX",	{ XM, Vex, EXx }, PREFIX_OPCODE },
     { PREFIX_TABLE (PREFIX_VEX_0F16) },
-    { MOD_TABLE (MOD_VEX_0F17) },
+    { VEX_LEN_TABLE (VEX_LEN_0F17) },
     /* 18 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -6819,34 +6811,34 @@ static const struct dis386 vex_table[][256] = {
 #include "i386-dis-evex.h"
 
 static const struct dis386 vex_len_table[][2] = {
-  /* VEX_LEN_0F12_P_0_M_0 / VEX_LEN_0F12_P_2_M_0 */
+  /* VEX_LEN_0F12_P_0 */
   {
-    { "%XEvmovlpYX",	{ XM, Vex, EXq }, 0 },
+    { MOD_TABLE (MOD_0F12_PREFIX_0) },
   },
 
-  /* VEX_LEN_0F12_P_0_M_1 */
+  /* VEX_LEN_0F12_P_2 */
   {
-    { "%XEvmovhlpY%XS",	{ XM, Vex, EXq }, 0 },
+    { MOD_TABLE (MOD_0F12_PREFIX_2) },
   },
 
-  /* VEX_LEN_0F13_M_0 */
+  /* VEX_LEN_0F13 */
   {
-    { "%XEvmovlpYX",	{ EXq, XM }, PREFIX_OPCODE },
+    { MOD_TABLE (MOD_0F13) },
   },
 
-  /* VEX_LEN_0F16_P_0_M_0 / VEX_LEN_0F16_P_2_M_0 */
+  /* VEX_LEN_0F16_P_0 */
   {
-    { "%XEvmovhpYX",	{ XM, Vex, EXq }, 0 },
+    { MOD_TABLE (MOD_0F16_PREFIX_0) },
   },
 
-  /* VEX_LEN_0F16_P_0_M_1 */
+  /* VEX_LEN_0F16_P_2 */
   {
-    { "%XEvmovlhpY%XS",	{ XM, Vex, EXq }, 0 },
+    { MOD_TABLE (MOD_0F16_PREFIX_2) },
   },
 
-  /* VEX_LEN_0F17_M_0 */
+  /* VEX_LEN_0F17 */
   {
-    { "%XEvmovhpYX",	{ EXq, XM }, PREFIX_OPCODE },
+    { MOD_TABLE (MOD_0F17) },
   },
 
   /* VEX_LEN_0F41 */
@@ -8039,29 +8031,29 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F12_PREFIX_0 */
-    { "movlpX",		{ XM, EXq }, 0 },
-    { "movhlps",	{ XM, EXq }, 0 },
+    { "%XEVmovlpYX",	{ XM, Vex, EXq }, 0 },
+    { "%XEVmovhlpY%XS",	{ XM, Vex, EXq }, 0 },
   },
   {
     /* MOD_0F12_PREFIX_2 */
-    { "movlpX",	{ XM, EXq }, 0 },
+    { "%XEVmovlpYX",	{ XM, Vex, EXq }, 0 },
   },
   {
     /* MOD_0F13 */
-    { "movlpX",		{ EXq, XM }, PREFIX_OPCODE },
+    { "%XEVmovlpYX",	{ EXq, XM }, PREFIX_OPCODE },
   },
   {
     /* MOD_0F16_PREFIX_0 */
-    { "movhpX",		{ XM, EXq }, 0 },
-    { "movlhps",	{ XM, EXq }, 0 },
+    { "%XEVmovhpYX",	{ XM, Vex, EXq }, 0 },
+    { "%XEVmovlhpY%XS",	{ XM, Vex, EXq }, 0 },
   },
   {
     /* MOD_0F16_PREFIX_2 */
-    { "movhpX",	{ XM, EXq }, 0 },
+    { "%XEVmovhpYX",	{ XM, Vex, EXq }, 0 },
   },
   {
     /* MOD_0F17 */
-    { "movhpX",		{ EXq, XM }, PREFIX_OPCODE },
+    { "%XEVmovhpYX",	{ EXq, XM }, PREFIX_OPCODE },
   },
   {
     /* MOD_0F18_REG_0 */
@@ -8300,32 +8292,6 @@ static const struct dis386 mod_table[][2] = {
     /* MOD_0F3A0F_PREFIX_1 */
     { Bad_Opcode },
     { REG_TABLE (REG_0F3A0F_PREFIX_1_MOD_3) },
-  },
-  {
-    /* MOD_VEX_0F12_PREFIX_0 */
-    { VEX_LEN_TABLE (VEX_LEN_0F12_P_0_M_0) },
-    { VEX_LEN_TABLE (VEX_LEN_0F12_P_0_M_1) },
-  },
-  {
-    /* MOD_VEX_0F12_PREFIX_2 */
-    { VEX_LEN_TABLE (VEX_LEN_0F12_P_2_M_0) },
-  },
-  {
-    /* MOD_VEX_0F13 */
-    { VEX_LEN_TABLE (VEX_LEN_0F13_M_0) },
-  },
-  {
-    /* MOD_VEX_0F16_PREFIX_0 */
-    { VEX_LEN_TABLE (VEX_LEN_0F16_P_0_M_0) },
-    { VEX_LEN_TABLE (VEX_LEN_0F16_P_0_M_1) },
-  },
-  {
-    /* MOD_VEX_0F16_PREFIX_2 */
-    { VEX_LEN_TABLE (VEX_LEN_0F16_P_2_M_0) },
-  },
-  {
-    /* MOD_VEX_0F17 */
-    { VEX_LEN_TABLE (VEX_LEN_0F17_M_0) },
   },
   {
     /* MOD_VEX_0F2B */
