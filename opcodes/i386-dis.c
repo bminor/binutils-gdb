@@ -789,20 +789,18 @@ enum
 #define FLOAT			NULL, { { NULL, FLOATCODE } }, 0
 
 #define DIS386(T, I)		NULL, { { NULL, (T)}, { NULL,  (I) } }, 0
-#define DIS386_PREFIX(T, I, P)		NULL, { { NULL, (T)}, { NULL,  (I) } }, P
 #define REG_TABLE(I)		DIS386 (USE_REG_TABLE, (I))
 #define MOD_TABLE(I)		DIS386 (USE_MOD_TABLE, (I))
 #define RM_TABLE(I)		DIS386 (USE_RM_TABLE, (I))
 #define PREFIX_TABLE(I)		DIS386 (USE_PREFIX_TABLE, (I))
 #define X86_64_TABLE(I)		DIS386 (USE_X86_64_TABLE, (I))
 #define THREE_BYTE_TABLE(I)	DIS386 (USE_3BYTE_TABLE, (I))
-#define THREE_BYTE_TABLE_PREFIX(I, P)	DIS386_PREFIX (USE_3BYTE_TABLE, (I), P)
-#define XOP_8F_TABLE(I)		DIS386 (USE_XOP_8F_TABLE, (I))
-#define VEX_C4_TABLE(I)		DIS386 (USE_VEX_C4_TABLE, (I))
-#define VEX_C5_TABLE(I)		DIS386 (USE_VEX_C5_TABLE, (I))
+#define XOP_8F_TABLE()		DIS386 (USE_XOP_8F_TABLE, 0)
+#define VEX_C4_TABLE()		DIS386 (USE_VEX_C4_TABLE, 0)
+#define VEX_C5_TABLE()		DIS386 (USE_VEX_C5_TABLE, 0)
 #define VEX_LEN_TABLE(I)	DIS386 (USE_VEX_LEN_TABLE, (I))
 #define VEX_W_TABLE(I)		DIS386 (USE_VEX_W_TABLE, (I))
-#define EVEX_TABLE(I)		DIS386 (USE_EVEX_TABLE, (I))
+#define EVEX_TABLE()		DIS386 (USE_EVEX_TABLE, 0)
 #define EVEX_LEN_TABLE(I)	DIS386 (USE_EVEX_LEN_TABLE, (I))
 
 enum
@@ -2081,9 +2079,9 @@ static const struct dis386 dis386_twobyte[] = {
   { Bad_Opcode },
   { "getsec",		{ XX }, 0 },
   /* 38 */
-  { THREE_BYTE_TABLE_PREFIX (THREE_BYTE_0F38, PREFIX_OPCODE) },
+  { THREE_BYTE_TABLE (THREE_BYTE_0F38) },
   { Bad_Opcode },
-  { THREE_BYTE_TABLE_PREFIX (THREE_BYTE_0F3A, PREFIX_OPCODE) },
+  { THREE_BYTE_TABLE (THREE_BYTE_0F3A) },
   { Bad_Opcode },
   { Bad_Opcode },
   { Bad_Opcode },
@@ -2493,11 +2491,11 @@ static const struct dis386 reg_table[][8] = {
   /* REG_8F */
   {
     { "pop{P|}", { stackEv }, 0 },
-    { XOP_8F_TABLE (XOP_09) },
+    { XOP_8F_TABLE () },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { XOP_8F_TABLE (XOP_09) },
+    { XOP_8F_TABLE () },
   },
   /* REG_C0 */
   {
@@ -4016,7 +4014,7 @@ static const struct dis386 x86_64_table[][2] = {
   /* X86_64_62 */
   {
     { MOD_TABLE (MOD_62_32BIT) },
-    { EVEX_TABLE (EVEX_0F) },
+    { EVEX_TABLE () },
   },
 
   /* X86_64_63 */
@@ -4063,13 +4061,13 @@ static const struct dis386 x86_64_table[][2] = {
   /* X86_64_C4 */
   {
     { MOD_TABLE (MOD_C4_32BIT) },
-    { VEX_C4_TABLE (VEX_0F) },
+    { VEX_C4_TABLE () },
   },
 
   /* X86_64_C5 */
   {
     { MOD_TABLE (MOD_C5_32BIT) },
-    { VEX_C5_TABLE (VEX_0F) },
+    { VEX_C5_TABLE () },
   },
 
   /* X86_64_CE */
@@ -7854,17 +7852,17 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_62_32BIT */
     { "bound{S|}",	{ Gv, Ma }, 0 },
-    { EVEX_TABLE (EVEX_0F) },
+    { EVEX_TABLE () },
   },
   {
     /* MOD_C4_32BIT */
     { "lesS",		{ Gv, Mp }, 0 },
-    { VEX_C4_TABLE (VEX_0F) },
+    { VEX_C4_TABLE () },
   },
   {
     /* MOD_C5_32BIT */
     { "ldsS",		{ Gv, Mp }, 0 },
-    { VEX_C5_TABLE (VEX_0F) },
+    { VEX_C5_TABLE () },
   },
   {
     /* MOD_0F01_REG_0 */
@@ -8710,7 +8708,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       ins->need_vex = 2;
       ins->codep++;
       vindex = *ins->codep++;
-      dp = &vex_table[dp->op[1].bytemode][vindex];
+      dp = &vex_table[VEX_0F][vindex];
       ins->end_codep = ins->codep;
       /* There is no MODRM byte for VEX 77.  */
       if (vindex != 0x77 && !fetch_modrm (ins))
