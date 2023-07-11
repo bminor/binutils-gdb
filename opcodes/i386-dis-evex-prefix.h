@@ -160,13 +160,13 @@
   /* PREFIX_EVEX_0F3828 */
   {
     { Bad_Opcode },
-    { MOD_TABLE (MOD_EVEX_0F3828_P_1) },
+    { "vpmovm2Y%BW",	{ XM, MaskR }, 0 },
     { VEX_W_TABLE (EVEX_W_0F3828_P_2) },
   },
   /* PREFIX_EVEX_0F3829 */
   {
     { Bad_Opcode },
-    { "vpmov%BW2mY",	{ MaskG, EXx }, 0 },
+    { "vpmov%BW2mY",	{ MaskG, Ux }, 0 },
     { VEX_W_TABLE (EVEX_W_0F3829_P_2) },
   },
   /* PREFIX_EVEX_0F382A */
@@ -214,13 +214,13 @@
   /* PREFIX_EVEX_0F3838 */
   {
     { Bad_Opcode },
-    { MOD_TABLE (MOD_EVEX_0F3838_P_1) },
+    { "vpmovm2Y%DQ",	{ XM, MaskR }, 0 },
     { "%XEvpminsb",	{ XM, Vex, EXx }, 0 },
   },
   /* PREFIX_EVEX_0F3839 */
   {
     { Bad_Opcode },
-    { "vpmov%DQ2mY",	{ MaskG, EXx }, 0 },
+    { "vpmov%DQ2mY",	{ MaskG, Ux }, 0 },
     { "%XEvpmins%DQ",	{ XM, Vex, EXx }, 0 },
   },
   /* PREFIX_EVEX_0F383A */

@@ -289,7 +289,7 @@
   /* EVEX_W_0F382A_P_1 */
   {
     { Bad_Opcode },
-    { MOD_TABLE (MOD_EVEX_0F382A_P_1_W_1) },
+    { "vpbroadcastmb2qY", { XM, MaskR }, 0 },
   },
   /* EVEX_W_0F382A_P_2 */
   {
@@ -334,7 +334,7 @@
   },
   /* EVEX_W_0F383A_P_1 */
   {
-    { MOD_TABLE (MOD_EVEX_0F383A_P_1_W_0) },
+    { "vpbroadcastmw2dY",	{ XM, MaskR }, 0 },
   },
   /* EVEX_W_0F3859 */
   {

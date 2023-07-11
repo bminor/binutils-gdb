@@ -145,7 +145,7 @@ struct instr_info
   uint8_t rex_used;
 
   bool need_modrm;
-  bool need_vex;
+  unsigned char need_vex;
   bool has_sib;
 
   /* Flags for ins->prefixes which we somehow handled when printing the
@@ -526,6 +526,7 @@ fetch_error (const instr_info *ins)
 #define EXymmq { OP_EX, ymmq_mode }
 #define EXEvexXGscat { OP_EX, evex_x_gscat_mode }
 #define EXEvexXNoBcst { OP_EX, evex_x_nobcst_mode }
+#define Rdq { OP_R, dq_mode }
 #define Nq { OP_R, q_mode }
 #define Ux { OP_R, x_mode }
 #define Uxmm { OP_R, xmm_mode }
@@ -558,6 +559,7 @@ fetch_error (const instr_info *ins)
 
 #define MaskG { OP_G, mask_mode }
 #define MaskE { OP_E, mask_mode }
+#define MaskR { OP_R, mask_mode }
 #define MaskBDE { OP_E, mask_bd_mode }
 #define MaskVex { OP_VEX, mask_mode }
 
@@ -900,35 +902,14 @@ enum
   MOD_0F38FB_PREFIX_1,
   MOD_0F3A0F_PREFIX_1,
 
-  MOD_VEX_0F41_L_1,
-  MOD_VEX_0F42_L_1,
-  MOD_VEX_0F44_L_0,
-  MOD_VEX_0F45_L_1,
-  MOD_VEX_0F46_L_1,
-  MOD_VEX_0F47_L_1,
-  MOD_VEX_0F4A_L_1,
-  MOD_VEX_0F4B_L_1,
-  MOD_VEX_0F91_L_0,
-  MOD_VEX_0F92_L_0,
-  MOD_VEX_0F93_L_0,
-  MOD_VEX_0F98_L_0,
-  MOD_VEX_0F99_L_0,
   MOD_VEX_0FD7,
   MOD_VEX_0F3849_X86_64_L_0_W_0,
   MOD_VEX_0F385C_X86_64,
   MOD_VEX_0F385E_X86_64,
   MOD_VEX_0F386C_X86_64,
-  MOD_VEX_0F3A30_L_0,
-  MOD_VEX_0F3A31_L_0,
-  MOD_VEX_0F3A32_L_0,
-  MOD_VEX_0F3A33_L_0,
 
   MOD_XOP_09_12,
 
-  MOD_EVEX_0F3828_P_1,
-  MOD_EVEX_0F382A_P_1_W_1,
-  MOD_EVEX_0F3838_P_1,
-  MOD_EVEX_0F383A_P_1_W_0,
   MOD_EVEX_0F387A_W_0,
   MOD_EVEX_0F387B_W_0,
   MOD_EVEX_0F387C,
@@ -1056,38 +1037,38 @@ enum
   PREFIX_VEX_0F2A,
   PREFIX_VEX_0F2C,
   PREFIX_VEX_0F2D,
-  PREFIX_VEX_0F41_L_1_M_1_W_0,
-  PREFIX_VEX_0F41_L_1_M_1_W_1,
-  PREFIX_VEX_0F42_L_1_M_1_W_0,
-  PREFIX_VEX_0F42_L_1_M_1_W_1,
-  PREFIX_VEX_0F44_L_0_M_1_W_0,
-  PREFIX_VEX_0F44_L_0_M_1_W_1,
-  PREFIX_VEX_0F45_L_1_M_1_W_0,
-  PREFIX_VEX_0F45_L_1_M_1_W_1,
-  PREFIX_VEX_0F46_L_1_M_1_W_0,
-  PREFIX_VEX_0F46_L_1_M_1_W_1,
-  PREFIX_VEX_0F47_L_1_M_1_W_0,
-  PREFIX_VEX_0F47_L_1_M_1_W_1,
-  PREFIX_VEX_0F4A_L_1_M_1_W_0,
-  PREFIX_VEX_0F4A_L_1_M_1_W_1,
-  PREFIX_VEX_0F4B_L_1_M_1_W_0,
-  PREFIX_VEX_0F4B_L_1_M_1_W_1,
+  PREFIX_VEX_0F41_L_1_W_0,
+  PREFIX_VEX_0F41_L_1_W_1,
+  PREFIX_VEX_0F42_L_1_W_0,
+  PREFIX_VEX_0F42_L_1_W_1,
+  PREFIX_VEX_0F44_L_0_W_0,
+  PREFIX_VEX_0F44_L_0_W_1,
+  PREFIX_VEX_0F45_L_1_W_0,
+  PREFIX_VEX_0F45_L_1_W_1,
+  PREFIX_VEX_0F46_L_1_W_0,
+  PREFIX_VEX_0F46_L_1_W_1,
+  PREFIX_VEX_0F47_L_1_W_0,
+  PREFIX_VEX_0F47_L_1_W_1,
+  PREFIX_VEX_0F4A_L_1_W_0,
+  PREFIX_VEX_0F4A_L_1_W_1,
+  PREFIX_VEX_0F4B_L_1_W_0,
+  PREFIX_VEX_0F4B_L_1_W_1,
   PREFIX_VEX_0F6F,
   PREFIX_VEX_0F70,
   PREFIX_VEX_0F7E,
   PREFIX_VEX_0F7F,
   PREFIX_VEX_0F90_L_0_W_0,
   PREFIX_VEX_0F90_L_0_W_1,
-  PREFIX_VEX_0F91_L_0_M_0_W_0,
-  PREFIX_VEX_0F91_L_0_M_0_W_1,
-  PREFIX_VEX_0F92_L_0_M_1_W_0,
-  PREFIX_VEX_0F92_L_0_M_1_W_1,
-  PREFIX_VEX_0F93_L_0_M_1_W_0,
-  PREFIX_VEX_0F93_L_0_M_1_W_1,
-  PREFIX_VEX_0F98_L_0_M_1_W_0,
-  PREFIX_VEX_0F98_L_0_M_1_W_1,
-  PREFIX_VEX_0F99_L_0_M_1_W_0,
-  PREFIX_VEX_0F99_L_0_M_1_W_1,
+  PREFIX_VEX_0F91_L_0_W_0,
+  PREFIX_VEX_0F91_L_0_W_1,
+  PREFIX_VEX_0F92_L_0_W_0,
+  PREFIX_VEX_0F92_L_0_W_1,
+  PREFIX_VEX_0F93_L_0_W_0,
+  PREFIX_VEX_0F93_L_0_W_1,
+  PREFIX_VEX_0F98_L_0_W_0,
+  PREFIX_VEX_0F98_L_0_W_1,
+  PREFIX_VEX_0F99_L_0_W_0,
+  PREFIX_VEX_0F99_L_0_W_1,
   PREFIX_VEX_0F3849_X86_64_L_0_W_0_M_0,
   PREFIX_VEX_0F3849_X86_64_L_0_W_0_M_1,
   PREFIX_VEX_0F384B_X86_64_L_0_W_0,
@@ -1460,20 +1441,20 @@ enum
 
 enum
 {
-  VEX_W_0F41_L_1_M_1 = 0,
-  VEX_W_0F42_L_1_M_1,
-  VEX_W_0F44_L_0_M_1,
-  VEX_W_0F45_L_1_M_1,
-  VEX_W_0F46_L_1_M_1,
-  VEX_W_0F47_L_1_M_1,
-  VEX_W_0F4A_L_1_M_1,
-  VEX_W_0F4B_L_1_M_1,
+  VEX_W_0F41_L_1 = 0,
+  VEX_W_0F42_L_1,
+  VEX_W_0F44_L_0,
+  VEX_W_0F45_L_1,
+  VEX_W_0F46_L_1,
+  VEX_W_0F47_L_1,
+  VEX_W_0F4A_L_1,
+  VEX_W_0F4B_L_1,
   VEX_W_0F90_L_0,
-  VEX_W_0F91_L_0_M_0,
-  VEX_W_0F92_L_0_M_1,
-  VEX_W_0F93_L_0_M_1,
-  VEX_W_0F98_L_0_M_1,
-  VEX_W_0F99_L_0_M_1,
+  VEX_W_0F91_L_0,
+  VEX_W_0F92_L_0,
+  VEX_W_0F93_L_0,
+  VEX_W_0F98_L_0,
+  VEX_W_0F99_L_0,
   VEX_W_0F380C,
   VEX_W_0F380D,
   VEX_W_0F380E,
@@ -3638,114 +3619,114 @@ static const struct dis386 prefix_table[][4] = {
     { "%XEvcvtsd2si",	{ Gdq, EXq, EXxEVexR }, 0 },
   },
 
-  /* PREFIX_VEX_0F41_L_1_M_1_W_0 */
+  /* PREFIX_VEX_0F41_L_1_W_0 */
   {
-    { "kandw",          { MaskG, MaskVex, MaskE }, 0 },
+    { "kandw",          { MaskG, MaskVex, MaskR }, 0 },
     { Bad_Opcode },
-    { "kandb",          { MaskG, MaskVex, MaskE }, 0 },
+    { "kandb",          { MaskG, MaskVex, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F41_L_1_M_1_W_1 */
+  /* PREFIX_VEX_0F41_L_1_W_1 */
   {
-    { "kandq",          { MaskG, MaskVex, MaskE }, 0 },
+    { "kandq",          { MaskG, MaskVex, MaskR }, 0 },
     { Bad_Opcode },
-    { "kandd",          { MaskG, MaskVex, MaskE }, 0 },
+    { "kandd",          { MaskG, MaskVex, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F42_L_1_M_1_W_0 */
+  /* PREFIX_VEX_0F42_L_1_W_0 */
   {
-    { "kandnw",         { MaskG, MaskVex, MaskE }, 0 },
+    { "kandnw",         { MaskG, MaskVex, MaskR }, 0 },
     { Bad_Opcode },
-    { "kandnb",         { MaskG, MaskVex, MaskE }, 0 },
+    { "kandnb",         { MaskG, MaskVex, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F42_L_1_M_1_W_1 */
+  /* PREFIX_VEX_0F42_L_1_W_1 */
   {
-    { "kandnq",         { MaskG, MaskVex, MaskE }, 0 },
+    { "kandnq",         { MaskG, MaskVex, MaskR }, 0 },
     { Bad_Opcode },
-    { "kandnd",         { MaskG, MaskVex, MaskE }, 0 },
+    { "kandnd",         { MaskG, MaskVex, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F44_L_0_M_1_W_0 */
+  /* PREFIX_VEX_0F44_L_0_W_0 */
   {
-    { "knotw",          { MaskG, MaskE }, 0 },
+    { "knotw",          { MaskG, MaskR }, 0 },
     { Bad_Opcode },
-    { "knotb",          { MaskG, MaskE }, 0 },
+    { "knotb",          { MaskG, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F44_L_0_M_1_W_1 */
+  /* PREFIX_VEX_0F44_L_0_W_1 */
   {
-    { "knotq",          { MaskG, MaskE }, 0 },
+    { "knotq",          { MaskG, MaskR }, 0 },
     { Bad_Opcode },
-    { "knotd",          { MaskG, MaskE }, 0 },
+    { "knotd",          { MaskG, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F45_L_1_M_1_W_0 */
+  /* PREFIX_VEX_0F45_L_1_W_0 */
   {
-    { "korw",       { MaskG, MaskVex, MaskE }, 0 },
+    { "korw",       { MaskG, MaskVex, MaskR }, 0 },
     { Bad_Opcode },
-    { "korb",       { MaskG, MaskVex, MaskE }, 0 },
+    { "korb",       { MaskG, MaskVex, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F45_L_1_M_1_W_1 */
+  /* PREFIX_VEX_0F45_L_1_W_1 */
   {
-    { "korq",       { MaskG, MaskVex, MaskE }, 0 },
+    { "korq",       { MaskG, MaskVex, MaskR }, 0 },
     { Bad_Opcode },
-    { "kord",       { MaskG, MaskVex, MaskE }, 0 },
+    { "kord",       { MaskG, MaskVex, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F46_L_1_M_1_W_0 */
+  /* PREFIX_VEX_0F46_L_1_W_0 */
   {
-    { "kxnorw",     { MaskG, MaskVex, MaskE }, 0 },
+    { "kxnorw",     { MaskG, MaskVex, MaskR }, 0 },
     { Bad_Opcode },
-    { "kxnorb",     { MaskG, MaskVex, MaskE }, 0 },
+    { "kxnorb",     { MaskG, MaskVex, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F46_L_1_M_1_W_1 */
+  /* PREFIX_VEX_0F46_L_1_W_1 */
   {
-    { "kxnorq",     { MaskG, MaskVex, MaskE }, 0 },
+    { "kxnorq",     { MaskG, MaskVex, MaskR }, 0 },
     { Bad_Opcode },
-    { "kxnord",     { MaskG, MaskVex, MaskE }, 0 },
+    { "kxnord",     { MaskG, MaskVex, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F47_L_1_M_1_W_0 */
+  /* PREFIX_VEX_0F47_L_1_W_0 */
   {
-    { "kxorw",      { MaskG, MaskVex, MaskE }, 0 },
+    { "kxorw",      { MaskG, MaskVex, MaskR }, 0 },
     { Bad_Opcode },
-    { "kxorb",      { MaskG, MaskVex, MaskE }, 0 },
+    { "kxorb",      { MaskG, MaskVex, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F47_L_1_M_1_W_1 */
+  /* PREFIX_VEX_0F47_L_1_W_1 */
   {
-    { "kxorq",      { MaskG, MaskVex, MaskE }, 0 },
+    { "kxorq",      { MaskG, MaskVex, MaskR }, 0 },
     { Bad_Opcode },
-    { "kxord",      { MaskG, MaskVex, MaskE }, 0 },
+    { "kxord",      { MaskG, MaskVex, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F4A_L_1_M_1_W_0 */
+  /* PREFIX_VEX_0F4A_L_1_W_0 */
   {
-    { "kaddw",          { MaskG, MaskVex, MaskE }, 0 },
+    { "kaddw",          { MaskG, MaskVex, MaskR }, 0 },
     { Bad_Opcode },
-    { "kaddb",          { MaskG, MaskVex, MaskE }, 0 },
+    { "kaddb",          { MaskG, MaskVex, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F4A_L_1_M_1_W_1 */
+  /* PREFIX_VEX_0F4A_L_1_W_1 */
   {
-    { "kaddq",          { MaskG, MaskVex, MaskE }, 0 },
+    { "kaddq",          { MaskG, MaskVex, MaskR }, 0 },
     { Bad_Opcode },
-    { "kaddd",          { MaskG, MaskVex, MaskE }, 0 },
+    { "kaddd",          { MaskG, MaskVex, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F4B_L_1_M_1_W_0 */
+  /* PREFIX_VEX_0F4B_L_1_W_0 */
   {
-    { "kunpckwd",   { MaskG, MaskVex, MaskE }, 0 },
+    { "kunpckwd",   { MaskG, MaskVex, MaskR }, 0 },
     { Bad_Opcode },
-    { "kunpckbw",   { MaskG, MaskVex, MaskE }, 0 },
+    { "kunpckbw",   { MaskG, MaskVex, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F4B_L_1_M_1_W_1 */
+  /* PREFIX_VEX_0F4B_L_1_W_1 */
   {
-    { "kunpckdq",   { MaskG, MaskVex, MaskE }, 0 },
+    { "kunpckdq",   { MaskG, MaskVex, MaskR }, 0 },
   },
 
   /* PREFIX_VEX_0F6F */
@@ -3791,78 +3772,78 @@ static const struct dis386 prefix_table[][4] = {
     { "kmovd",		{ MaskG, MaskBDE }, 0 },
   },
 
-  /* PREFIX_VEX_0F91_L_0_M_0_W_0 */
+  /* PREFIX_VEX_0F91_L_0_W_0 */
   {
-    { "kmovw",		{ Ew, MaskG }, 0 },
+    { "kmovw",		{ Mw, MaskG }, 0 },
     { Bad_Opcode },
-    { "kmovb",		{ Eb, MaskG }, 0 },
+    { "kmovb",		{ Mb, MaskG }, 0 },
   },
 
-  /* PREFIX_VEX_0F91_L_0_M_0_W_1 */
+  /* PREFIX_VEX_0F91_L_0_W_1 */
   {
-    { "kmovq",		{ Eq, MaskG }, 0 },
+    { "kmovq",		{ Mq, MaskG }, 0 },
     { Bad_Opcode },
-    { "kmovd",		{ Ed, MaskG }, 0 },
+    { "kmovd",		{ Md, MaskG }, 0 },
   },
 
-  /* PREFIX_VEX_0F92_L_0_M_1_W_0 */
+  /* PREFIX_VEX_0F92_L_0_W_0 */
   {
-    { "kmovw",		{ MaskG, Edq }, 0 },
+    { "kmovw",		{ MaskG, Rdq }, 0 },
     { Bad_Opcode },
-    { "kmovb",		{ MaskG, Edq }, 0 },
-    { "kmovd",		{ MaskG, Edq }, 0 },
+    { "kmovb",		{ MaskG, Rdq }, 0 },
+    { "kmovd",		{ MaskG, Rdq }, 0 },
   },
 
-  /* PREFIX_VEX_0F92_L_0_M_1_W_1 */
+  /* PREFIX_VEX_0F92_L_0_W_1 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "kmovK",		{ MaskG, Edq }, 0 },
+    { "kmovK",		{ MaskG, Rdq }, 0 },
   },
 
-  /* PREFIX_VEX_0F93_L_0_M_1_W_0 */
+  /* PREFIX_VEX_0F93_L_0_W_0 */
   {
-    { "kmovw",		{ Gdq, MaskE }, 0 },
+    { "kmovw",		{ Gdq, MaskR }, 0 },
     { Bad_Opcode },
-    { "kmovb",		{ Gdq, MaskE }, 0 },
-    { "kmovd",		{ Gdq, MaskE }, 0 },
+    { "kmovb",		{ Gdq, MaskR }, 0 },
+    { "kmovd",		{ Gdq, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F93_L_0_M_1_W_1 */
+  /* PREFIX_VEX_0F93_L_0_W_1 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "kmovK",		{ Gdq, MaskE }, 0 },
+    { "kmovK",		{ Gdq, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F98_L_0_M_1_W_0 */
+  /* PREFIX_VEX_0F98_L_0_W_0 */
   {
-    { "kortestw", { MaskG, MaskE }, 0 },
+    { "kortestw", { MaskG, MaskR }, 0 },
     { Bad_Opcode },
-    { "kortestb", { MaskG, MaskE }, 0 },
+    { "kortestb", { MaskG, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F98_L_0_M_1_W_1 */
+  /* PREFIX_VEX_0F98_L_0_W_1 */
   {
-    { "kortestq", { MaskG, MaskE }, 0 },
+    { "kortestq", { MaskG, MaskR }, 0 },
     { Bad_Opcode },
-    { "kortestd", { MaskG, MaskE }, 0 },
+    { "kortestd", { MaskG, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F99_L_0_M_1_W_0 */
+  /* PREFIX_VEX_0F99_L_0_W_0 */
   {
-    { "ktestw", { MaskG, MaskE }, 0 },
+    { "ktestw", { MaskG, MaskR }, 0 },
     { Bad_Opcode },
-    { "ktestb", { MaskG, MaskE }, 0 },
+    { "ktestb", { MaskG, MaskR }, 0 },
   },
 
-  /* PREFIX_VEX_0F99_L_0_M_1_W_1 */
+  /* PREFIX_VEX_0F99_L_0_W_1 */
   {
-    { "ktestq", { MaskG, MaskE }, 0 },
+    { "ktestq", { MaskG, MaskR }, 0 },
     { Bad_Opcode },
-    { "ktestd", { MaskG, MaskE }, 0 },
+    { "ktestd", { MaskG, MaskR }, 0 },
   },
 
   /* PREFIX_VEX_0F3849_X86_64_L_0_W_0_M_0 */
@@ -6788,48 +6769,48 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_0F41 */
   {
     { Bad_Opcode },
-    { MOD_TABLE (MOD_VEX_0F41_L_1) },
+    { VEX_W_TABLE (VEX_W_0F41_L_1) },
   },
 
   /* VEX_LEN_0F42 */
   {
     { Bad_Opcode },
-    { MOD_TABLE (MOD_VEX_0F42_L_1) },
+    { VEX_W_TABLE (VEX_W_0F42_L_1) },
   },
 
   /* VEX_LEN_0F44 */
   {
-    { MOD_TABLE (MOD_VEX_0F44_L_0) },
+    { VEX_W_TABLE (VEX_W_0F44_L_0) },
   },
 
   /* VEX_LEN_0F45 */
   {
     { Bad_Opcode },
-    { MOD_TABLE (MOD_VEX_0F45_L_1) },
+    { VEX_W_TABLE (VEX_W_0F45_L_1) },
   },
 
   /* VEX_LEN_0F46 */
   {
     { Bad_Opcode },
-    { MOD_TABLE (MOD_VEX_0F46_L_1) },
+    { VEX_W_TABLE (VEX_W_0F46_L_1) },
   },
 
   /* VEX_LEN_0F47 */
   {
     { Bad_Opcode },
-    { MOD_TABLE (MOD_VEX_0F47_L_1) },
+    { VEX_W_TABLE (VEX_W_0F47_L_1) },
   },
 
   /* VEX_LEN_0F4A */
   {
     { Bad_Opcode },
-    { MOD_TABLE (MOD_VEX_0F4A_L_1) },
+    { VEX_W_TABLE (VEX_W_0F4A_L_1) },
   },
 
   /* VEX_LEN_0F4B */
   {
     { Bad_Opcode },
-    { MOD_TABLE (MOD_VEX_0F4B_L_1) },
+    { VEX_W_TABLE (VEX_W_0F4B_L_1) },
   },
 
   /* VEX_LEN_0F6E */
@@ -6860,27 +6841,27 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F91 */
   {
-    { MOD_TABLE (MOD_VEX_0F91_L_0) },
+    { VEX_W_TABLE (VEX_W_0F91_L_0) },
   },
 
   /* VEX_LEN_0F92 */
   {
-    { MOD_TABLE (MOD_VEX_0F92_L_0) },
+    { VEX_W_TABLE (VEX_W_0F92_L_0) },
   },
 
   /* VEX_LEN_0F93 */
   {
-    { MOD_TABLE (MOD_VEX_0F93_L_0) },
+    { VEX_W_TABLE (VEX_W_0F93_L_0) },
   },
 
   /* VEX_LEN_0F98 */
   {
-    { MOD_TABLE (MOD_VEX_0F98_L_0) },
+    { VEX_W_TABLE (VEX_W_0F98_L_0) },
   },
 
   /* VEX_LEN_0F99 */
   {
-    { MOD_TABLE (MOD_VEX_0F99_L_0) },
+    { VEX_W_TABLE (VEX_W_0F99_L_0) },
   },
 
   /* VEX_LEN_0FAE_R_2 */
@@ -7060,22 +7041,22 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3A30 */
   {
-    { MOD_TABLE (MOD_VEX_0F3A30_L_0) },
+    { "kshiftr%BW",	{ MaskG, MaskR, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0F3A31 */
   {
-    { MOD_TABLE (MOD_VEX_0F3A31_L_0) },
+    { "kshiftr%DQ",	{ MaskG, MaskR, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0F3A32 */
   {
-    { MOD_TABLE (MOD_VEX_0F3A32_L_0) },
+    { "kshiftl%BW",	{ MaskG, MaskR, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0F3A33 */
   {
-    { MOD_TABLE (MOD_VEX_0F3A33_L_0) },
+    { "kshiftl%DQ",	{ MaskG, MaskR, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0F3A38 */
@@ -7427,43 +7408,43 @@ static const struct dis386 vex_len_table[][2] = {
 static const struct dis386 vex_w_table[][2] = {
   {
     /* VEX_W_0F41_L_1_M_1 */
-    { PREFIX_TABLE (PREFIX_VEX_0F41_L_1_M_1_W_0) },
-    { PREFIX_TABLE (PREFIX_VEX_0F41_L_1_M_1_W_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F41_L_1_W_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F41_L_1_W_1) },
   },
   {
     /* VEX_W_0F42_L_1_M_1 */
-    { PREFIX_TABLE (PREFIX_VEX_0F42_L_1_M_1_W_0) },
-    { PREFIX_TABLE (PREFIX_VEX_0F42_L_1_M_1_W_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F42_L_1_W_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F42_L_1_W_1) },
   },
   {
     /* VEX_W_0F44_L_0_M_1 */
-    { PREFIX_TABLE (PREFIX_VEX_0F44_L_0_M_1_W_0) },
-    { PREFIX_TABLE (PREFIX_VEX_0F44_L_0_M_1_W_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F44_L_0_W_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F44_L_0_W_1) },
   },
   {
     /* VEX_W_0F45_L_1_M_1 */
-    { PREFIX_TABLE (PREFIX_VEX_0F45_L_1_M_1_W_0) },
-    { PREFIX_TABLE (PREFIX_VEX_0F45_L_1_M_1_W_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F45_L_1_W_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F45_L_1_W_1) },
   },
   {
     /* VEX_W_0F46_L_1_M_1 */
-    { PREFIX_TABLE (PREFIX_VEX_0F46_L_1_M_1_W_0) },
-    { PREFIX_TABLE (PREFIX_VEX_0F46_L_1_M_1_W_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F46_L_1_W_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F46_L_1_W_1) },
   },
   {
     /* VEX_W_0F47_L_1_M_1 */
-    { PREFIX_TABLE (PREFIX_VEX_0F47_L_1_M_1_W_0) },
-    { PREFIX_TABLE (PREFIX_VEX_0F47_L_1_M_1_W_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F47_L_1_W_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F47_L_1_W_1) },
   },
   {
     /* VEX_W_0F4A_L_1_M_1 */
-    { PREFIX_TABLE (PREFIX_VEX_0F4A_L_1_M_1_W_0) },
-    { PREFIX_TABLE (PREFIX_VEX_0F4A_L_1_M_1_W_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F4A_L_1_W_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F4A_L_1_W_1) },
   },
   {
     /* VEX_W_0F4B_L_1_M_1 */
-    { PREFIX_TABLE (PREFIX_VEX_0F4B_L_1_M_1_W_0) },
-    { PREFIX_TABLE (PREFIX_VEX_0F4B_L_1_M_1_W_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F4B_L_1_W_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F4B_L_1_W_1) },
   },
   {
     /* VEX_W_0F90_L_0 */
@@ -7472,28 +7453,28 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F91_L_0_M_0 */
-    { PREFIX_TABLE (PREFIX_VEX_0F91_L_0_M_0_W_0) },
-    { PREFIX_TABLE (PREFIX_VEX_0F91_L_0_M_0_W_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F91_L_0_W_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F91_L_0_W_1) },
   },
   {
     /* VEX_W_0F92_L_0_M_1 */
-    { PREFIX_TABLE (PREFIX_VEX_0F92_L_0_M_1_W_0) },
-    { PREFIX_TABLE (PREFIX_VEX_0F92_L_0_M_1_W_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F92_L_0_W_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F92_L_0_W_1) },
   },
   {
     /* VEX_W_0F93_L_0_M_1 */
-    { PREFIX_TABLE (PREFIX_VEX_0F93_L_0_M_1_W_0) },
-    { PREFIX_TABLE (PREFIX_VEX_0F93_L_0_M_1_W_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F93_L_0_W_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F93_L_0_W_1) },
   },
   {
     /* VEX_W_0F98_L_0_M_1 */
-    { PREFIX_TABLE (PREFIX_VEX_0F98_L_0_M_1_W_0) },
-    { PREFIX_TABLE (PREFIX_VEX_0F98_L_0_M_1_W_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F98_L_0_W_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F98_L_0_W_1) },
   },
   {
     /* VEX_W_0F99_L_0_M_1 */
-    { PREFIX_TABLE (PREFIX_VEX_0F99_L_0_M_1_W_0) },
-    { PREFIX_TABLE (PREFIX_VEX_0F99_L_0_M_1_W_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F99_L_0_W_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F99_L_0_W_1) },
   },
   {
     /* VEX_W_0F380C  */
@@ -8097,70 +8078,6 @@ static const struct dis386 mod_table[][2] = {
     { REG_TABLE (REG_0F3A0F_PREFIX_1_MOD_3) },
   },
   {
-    /* MOD_VEX_0F41_L_1 */
-    { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F41_L_1_M_1) },
-  },
-  {
-    /* MOD_VEX_0F42_L_1 */
-    { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F42_L_1_M_1) },
-  },
-  {
-    /* MOD_VEX_0F44_L_0 */
-    { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F44_L_0_M_1) },
-  },
-  {
-    /* MOD_VEX_0F45_L_1 */
-    { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F45_L_1_M_1) },
-  },
-  {
-    /* MOD_VEX_0F46_L_1 */
-    { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F46_L_1_M_1) },
-  },
-  {
-    /* MOD_VEX_0F47_L_1 */
-    { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F47_L_1_M_1) },
-  },
-  {
-    /* MOD_VEX_0F4A_L_1 */
-    { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F4A_L_1_M_1) },
-  },
-  {
-    /* MOD_VEX_0F4B_L_1 */
-    { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F4B_L_1_M_1) },
-  },
-  {
-    /* MOD_VEX_0F91_L_0 */
-    { VEX_W_TABLE (VEX_W_0F91_L_0_M_0) },
-  },
-  {
-    /* MOD_VEX_0F92_L_0 */
-    { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F92_L_0_M_1) },
-  },
-  {
-    /* MOD_VEX_0F93_L_0 */
-    { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F93_L_0_M_1) },
-  },
-  {
-    /* MOD_VEX_0F98_L_0 */
-    { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F98_L_0_M_1) },
-  },
-  {
-    /* MOD_VEX_0F99_L_0 */
-    { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F99_L_0_M_1) },
-  },
-  {
     /* MOD_VEX_0FD7 */
     { Bad_Opcode },
     { "vpmovmskb",	{ Gdq, Ux }, PREFIX_DATA },
@@ -8184,26 +8101,6 @@ static const struct dis386 mod_table[][2] = {
     /* MOD_VEX_0F386C_X86_64 */
     { Bad_Opcode },
     { VEX_LEN_TABLE (VEX_LEN_0F386C_X86_64_M_1) },
-  },
-  {
-    /* MOD_VEX_0F3A30_L_0 */
-    { Bad_Opcode },
-    { "kshiftr%BW",	{ MaskG, MaskE, Ib }, PREFIX_DATA },
-  },
-  {
-    /* MOD_VEX_0F3A31_L_0 */
-    { Bad_Opcode },
-    { "kshiftr%DQ",	{ MaskG, MaskE, Ib }, PREFIX_DATA },
-  },
-  {
-    /* MOD_VEX_0F3A32_L_0 */
-    { Bad_Opcode },
-    { "kshiftl%BW",	{ MaskG, MaskE, Ib }, PREFIX_DATA },
-  },
-  {
-    /* MOD_VEX_0F3A33_L_0 */
-    { Bad_Opcode },
-    { "kshiftl%DQ",	{ MaskG, MaskE, Ib }, PREFIX_DATA },
   },
   {
     /* MOD_XOP_09_12 */
@@ -8786,7 +8683,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	  ins->vex.prefix = REPNE_PREFIX_OPCODE;
 	  break;
 	}
-      ins->need_vex = true;
+      ins->need_vex = 3;
       ins->codep++;
       vindex = *ins->codep++;
       dp = &xop_table[vex_table_index][vindex];
@@ -8851,7 +8748,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	  ins->vex.prefix = REPNE_PREFIX_OPCODE;
 	  break;
 	}
-      ins->need_vex = true;
+      ins->need_vex = 3;
       ins->codep++;
       vindex = *ins->codep++;
       dp = &vex_table[vex_table_index][vindex];
@@ -8886,7 +8783,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	  ins->vex.prefix = REPNE_PREFIX_OPCODE;
 	  break;
 	}
-      ins->need_vex = true;
+      ins->need_vex = 2;
       ins->codep++;
       vindex = *ins->codep++;
       dp = &vex_table[dp->op[1].bytemode][vindex];
@@ -8978,7 +8875,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	  ins->vex.r = true;
 	}
 
-      ins->need_vex = true;
+      ins->need_vex = 4;
       ins->codep++;
       vindex = *ins->codep++;
       dp = &evex_table[vex_table_index][vindex];
@@ -11346,7 +11243,7 @@ BadOp (instr_info *ins)
   /* Throw away prefixes and 1st. opcode byte.  */
   struct dis_private *priv = ins->info->private_data;
 
-  ins->codep = priv->the_buffer + ins->nr_prefixes + 1;
+  ins->codep = priv->the_buffer + ins->nr_prefixes + ins->need_vex + 1;
   ins->obufp = stpcpy (ins->obufp, "(bad)");
   return true;
 }
@@ -12669,6 +12566,9 @@ OP_R (instr_info *ins, int bytemode, int sizeflag)
 
   switch (bytemode)
     {
+    case dq_mode:
+    case mask_mode:
+      return OP_E (ins, bytemode, sizeflag);
     case q_mode:
       return OP_EM (ins, x_mode, sizeflag);
     case xmm_mode:
