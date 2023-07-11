@@ -337,7 +337,8 @@ riscv_set_arch (const char *s)
   riscv_reset_subsets_list_arch_str ();
 
   riscv_set_rvc (false);
-  if (riscv_subset_supports (&riscv_rps_as, "c"))
+  if (riscv_subset_supports (&riscv_rps_as, "c")
+      || riscv_subset_supports (&riscv_rps_as, "zca"))
     riscv_set_rvc (true);
 
   if (riscv_subset_supports (&riscv_rps_as, "ztso"))
