@@ -322,8 +322,8 @@ static const struct dis386 evex_table[][256] = {
     /* 18 */
     { VEX_W_TABLE (VEX_W_0F3818) },
     { EVEX_LEN_TABLE (EVEX_LEN_0F3819) },
-    { MOD_TABLE (MOD_EVEX_0F381A) },
-    { MOD_TABLE (MOD_EVEX_0F381B) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F381A) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F381B) },
     { "%XEvpabsb",		{ XM, EXx }, PREFIX_DATA },
     { "%XEvpabsw",		{ XM, EXx }, PREFIX_DATA },
     { VEX_W_TABLE (EVEX_W_0F381E) },
@@ -394,8 +394,8 @@ static const struct dis386 evex_table[][256] = {
     /* 58 */
     { VEX_W_TABLE (VEX_W_0F3858) },
     { VEX_W_TABLE (EVEX_W_0F3859) },
-    { MOD_TABLE (MOD_EVEX_0F385A) },
-    { MOD_TABLE (MOD_EVEX_0F385B) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F385A) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F385B) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -515,8 +515,8 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { "vpconflict%DQ",	{ XM, EXx }, PREFIX_DATA },
     { Bad_Opcode },
-    { MOD_TABLE (MOD_EVEX_0F38C6) },
-    { MOD_TABLE (MOD_EVEX_0F38C7) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F38C6) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F38C7) },
     /* C8 */
     { "vexp2p%XW",	{ XM, EXx, EXxEVexS }, PREFIX_DATA },
     { Bad_Opcode },

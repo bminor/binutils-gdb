@@ -29,7 +29,7 @@
     { VEX_W_TABLE (EVEX_W_0F73_R_6) },
     { "%XEvpslldqY",	{ Vex, EXx, Ib }, PREFIX_DATA },
   },
-  /* REG_EVEX_0F38C6_M_0_L_2 */
+  /* REG_EVEX_0F38C6_L_2 */
   {
     { Bad_Opcode },
     { "vgatherpf0dp%XW",  { MVexVSIBDWpX }, PREFIX_DATA },
@@ -39,7 +39,7 @@
     { "vscatterpf0dp%XW",  { MVexVSIBDWpX }, PREFIX_DATA },
     { "vscatterpf1dp%XW",  { MVexVSIBDWpX }, PREFIX_DATA },
   },
-  /* REG_EVEX_0F38C7_M_0_L_2_W_0 */
+  /* REG_EVEX_0F38C7_L_2 */
   {
     { Bad_Opcode },
     { "vgatherpf0qp%XW",  { MVexVSIBQWpX }, PREFIX_DATA },

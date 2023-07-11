@@ -229,15 +229,15 @@
     { "vbroadcastf32x2",	{ XM, EXq }, PREFIX_DATA },
     { "%XEvbroadcastsd",	{ XM, EXq }, PREFIX_DATA },
   },
-  /* EVEX_W_0F381A_M_0_L_n */
+  /* EVEX_W_0F381A_L_n */
   {
-    { "vbroadcastf32x4",	{ XM, EXxmm }, PREFIX_DATA },
-    { "vbroadcastf64x2",	{ XM, EXxmm }, PREFIX_DATA },
+    { "vbroadcastf32x4",	{ XM, Mxmm }, PREFIX_DATA },
+    { "vbroadcastf64x2",	{ XM, Mxmm }, PREFIX_DATA },
   },
-  /* EVEX_W_0F381B_M_0_L_2 */
+  /* EVEX_W_0F381B_L_2 */
   {
-    { "vbroadcastf32x8",	{ XM, EXymm }, PREFIX_DATA },
-    { "vbroadcastf64x4",	{ XM, EXymm }, PREFIX_DATA },
+    { "vbroadcastf32x8",	{ XM, Mymm }, PREFIX_DATA },
+    { "vbroadcastf64x4",	{ XM, Mymm }, PREFIX_DATA },
   },
   /* EVEX_W_0F381E */
   {
@@ -341,15 +341,15 @@
     { "vbroadcasti32x2",	{ XM, EXq }, PREFIX_DATA },
     { "%XEvpbroadcastq",	{ XM, EXq }, PREFIX_DATA },
   },
-  /* EVEX_W_0F385A_M_0_L_n */
+  /* EVEX_W_0F385A_L_n */
   {
-    { "vbroadcasti32x4",	{ XM, EXxmm }, PREFIX_DATA },
-    { "vbroadcasti64x2",	{ XM, EXxmm }, PREFIX_DATA },
+    { "vbroadcasti32x4",	{ XM, Mxmm }, PREFIX_DATA },
+    { "vbroadcasti64x2",	{ XM, Mxmm }, PREFIX_DATA },
   },
-  /* EVEX_W_0F385B_M_0_L_2 */
+  /* EVEX_W_0F385B_L_2 */
   {
-    { "vbroadcasti32x8",	{ XM, EXymm }, PREFIX_DATA },
-    { "vbroadcasti64x4",	{ XM, EXymm }, PREFIX_DATA },
+    { "vbroadcasti32x8",	{ XM, Mymm }, PREFIX_DATA },
+    { "vbroadcasti64x4",	{ XM, Mymm }, PREFIX_DATA },
   },
   /* EVEX_W_0F3870 */
   {

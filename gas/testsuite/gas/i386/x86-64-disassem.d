@@ -8,9 +8,9 @@
 Disassembly of section \.text:
 
 0+ <\.text>:
-[ 	]*[a-f0-9]+:[ 	]*ff[ 	]*\(bad\)
+[ 	]*[a-f0-9]+:[ 	]*ff[ 	]+ljmp[ 	]*\(bad\)
 [ 	]*[a-f0-9]+:[ 	]*ef[ 	]*out    %eax,\(%dx\)
-[ 	]*[a-f0-9]+:[ 	]*ff[ 	]*\(bad\)
+[ 	]*[a-f0-9]+:[ 	]*ff[ 	]+lcall[ 	]*\(bad\)
 [ 	]*[a-f0-9]+:[ 	]*d8 90 90 90 90 90[ 	]*fcoms  -0x6f6f6f70\(%rax\)
 [ 	]*[a-f0-9]+:[ 	]*c5 ec 4a[ 	]*\(bad\)
 [ 	]*[a-f0-9]+:[ 	]*9b[ 	]*fwait
