@@ -828,17 +828,17 @@ enum
   REG_0F1E_P_1_MOD_3,
   REG_0F38D8_PREFIX_1,
   REG_0F3A0F_PREFIX_1_MOD_3,
-  REG_0F71_MOD_0,
-  REG_0F72_MOD_0,
-  REG_0F73_MOD_0,
+  REG_0F71,
+  REG_0F72,
+  REG_0F73,
   REG_0FA6,
   REG_0FA7,
   REG_0FAE,
   REG_0FBA,
   REG_0FC7,
-  REG_VEX_0F71_M_0,
-  REG_VEX_0F72_M_0,
-  REG_VEX_0F73_M_0,
+  REG_VEX_0F71,
+  REG_VEX_0F72,
+  REG_VEX_0F73,
   REG_VEX_0FAE,
   REG_VEX_0F3849_X86_64_L_0_W_0_M_1_P_0,
   REG_VEX_0F38F3_L_0,
@@ -884,9 +884,6 @@ enum
   MOD_0F1C_PREFIX_0,
   MOD_0F1E_PREFIX_1,
   MOD_0F50,
-  MOD_0F71,
-  MOD_0F72,
-  MOD_0F73,
   MOD_0FAE_REG_0,
   MOD_0FAE_REG_1,
   MOD_0FAE_REG_2,
@@ -911,9 +908,6 @@ enum
   MOD_VEX_0F47_L_1,
   MOD_VEX_0F4A_L_1,
   MOD_VEX_0F4B_L_1,
-  MOD_VEX_0F71,
-  MOD_VEX_0F72,
-  MOD_VEX_0F73,
   MOD_VEX_0F91_L_0,
   MOD_VEX_0F92_L_0,
   MOD_VEX_0F93_L_0,
@@ -2188,9 +2182,9 @@ static const struct dis386 dis386_twobyte[] = {
   { PREFIX_TABLE (PREFIX_0F6F) },
   /* 70 */
   { PREFIX_TABLE (PREFIX_0F70) },
-  { MOD_TABLE (MOD_0F71) },
-  { MOD_TABLE (MOD_0F72) },
-  { MOD_TABLE (MOD_0F73) },
+  { REG_TABLE (REG_0F71) },
+  { REG_TABLE (REG_0F72) },
+  { REG_TABLE (REG_0F73) },
   { "pcmpeqb",		{ MX, EM }, PREFIX_OPCODE },
   { "pcmpeqw",		{ MX, EM }, PREFIX_OPCODE },
   { "pcmpeqd",		{ MX, EM }, PREFIX_OPCODE },
@@ -2745,7 +2739,7 @@ static const struct dis386 reg_table[][8] = {
   {
     { RM_TABLE (RM_0F3A0F_P_1_MOD_3_REG_0) },
   },
-  /* REG_0F71_MOD_0 */
+  /* REG_0F71 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
@@ -2755,7 +2749,7 @@ static const struct dis386 reg_table[][8] = {
     { Bad_Opcode },
     { "psllw",		{ MS, Ib }, PREFIX_OPCODE },
   },
-  /* REG_0F72_MOD_0 */
+  /* REG_0F72 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
@@ -2765,7 +2759,7 @@ static const struct dis386 reg_table[][8] = {
     { Bad_Opcode },
     { "pslld",		{ MS, Ib }, PREFIX_OPCODE },
   },
-  /* REG_0F73_MOD_0 */
+  /* REG_0F73 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
@@ -2824,7 +2818,7 @@ static const struct dis386 reg_table[][8] = {
     { MOD_TABLE (MOD_0FC7_REG_6) },
     { MOD_TABLE (MOD_0FC7_REG_7) },
   },
-  /* REG_VEX_0F71_M_0 */
+  /* REG_VEX_0F71 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
@@ -2834,7 +2828,7 @@ static const struct dis386 reg_table[][8] = {
     { Bad_Opcode },
     { "vpsllw",		{ Vex, XS, Ib }, PREFIX_DATA },
   },
-  /* REG_VEX_0F72_M_0 */
+  /* REG_VEX_0F72 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
@@ -2844,7 +2838,7 @@ static const struct dis386 reg_table[][8] = {
     { Bad_Opcode },
     { "vpslld",		{ Vex, XS, Ib }, PREFIX_DATA },
   },
-  /* REG_VEX_0F73_M_0 */
+  /* REG_VEX_0F73 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
@@ -6015,9 +6009,9 @@ static const struct dis386 vex_table[][256] = {
     { PREFIX_TABLE (PREFIX_VEX_0F6F) },
     /* 70 */
     { PREFIX_TABLE (PREFIX_VEX_0F70) },
-    { MOD_TABLE (MOD_VEX_0F71) },
-    { MOD_TABLE (MOD_VEX_0F72) },
-    { MOD_TABLE (MOD_VEX_0F73) },
+    { REG_TABLE (REG_VEX_0F71) },
+    { REG_TABLE (REG_VEX_0F72) },
+    { REG_TABLE (REG_VEX_0F73) },
     { "vpcmpeqb",	{ XM, Vex, EXx }, PREFIX_DATA },
     { "vpcmpeqw",	{ XM, Vex, EXx }, PREFIX_DATA },
     { "vpcmpeqd",	{ XM, Vex, EXx }, PREFIX_DATA },
@@ -8040,21 +8034,6 @@ static const struct dis386 mod_table[][2] = {
     { "VmovmskpX",	{ Gdq, XS }, PREFIX_OPCODE },
   },
   {
-    /* MOD_0F71 */
-    { Bad_Opcode },
-    { REG_TABLE (REG_0F71_MOD_0) },
-  },
-  {
-    /* MOD_0F72 */
-    { Bad_Opcode },
-    { REG_TABLE (REG_0F72_MOD_0) },
-  },
-  {
-    /* MOD_0F73 */
-    { Bad_Opcode },
-    { REG_TABLE (REG_0F73_MOD_0) },
-  },
-  {
     /* MOD_0FAE_REG_0 */
     { "fxsave",		{ FXSAVE }, 0 },
     { PREFIX_TABLE (PREFIX_0FAE_REG_0_MOD_3) },
@@ -8168,21 +8147,6 @@ static const struct dis386 mod_table[][2] = {
     /* MOD_VEX_0F4B_L_1 */
     { Bad_Opcode },
     { VEX_W_TABLE (VEX_W_0F4B_L_1_M_1) },
-  },
-  {
-    /* MOD_VEX_0F71 */
-    { Bad_Opcode },
-    { REG_TABLE (REG_VEX_0F71_M_0) },
-  },
-  {
-    /* MOD_VEX_0F72 */
-    { Bad_Opcode },
-    { REG_TABLE (REG_VEX_0F72_M_0) },
-  },
-  {
-    /* MOD_VEX_0F73 */
-    { Bad_Opcode },
-    { REG_TABLE (REG_VEX_0F73_M_0) },
   },
   {
     /* MOD_VEX_0F91_L_0 */
