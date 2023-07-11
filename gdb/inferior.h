@@ -761,6 +761,35 @@ private:
   inferior *m_saved_inf;
 };
 
+/* When reading memory from an inferior, the global inferior_ptid must
+   also be set.  This class arranges to save and restore the necessary
+   state for reading or writing memory, but without invalidating the
+   frame cache.  */
+
+class scoped_restore_current_inferior_for_memory
+{
+public:
+
+  /* Save the current globals and switch to the given inferior and the
+     inferior's program space.  PTID must name a thread in INF, it is
+     used as the new inferior_ptid.  */
+  scoped_restore_current_inferior_for_memory (inferior *inf, ptid_t ptid)
+    : m_save_ptid (&inferior_ptid)
+  {
+    set_current_inferior (inf);
+    set_current_program_space (inf->pspace);
+    inferior_ptid = ptid;
+  }
+
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_current_inferior_for_memory);
+
+private:
+
+  scoped_restore_current_inferior m_save_inferior;
+  scoped_restore_current_program_space m_save_progspace;
+  scoped_restore_tmpl<ptid_t> m_save_ptid;
+};
+
 
 /* Traverse all inferiors.  */
 

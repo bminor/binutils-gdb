@@ -72,14 +72,8 @@ static ps_err_e
 ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
 		gdb_byte *buf, size_t len, int write)
 {
-  scoped_restore_current_inferior restore_inferior;
-  set_current_inferior (ph->thread->inf);
-
-  scoped_restore_current_program_space restore_current_progspace;
-  set_current_program_space (ph->thread->inf->pspace);
-
-  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
-  inferior_ptid = ph->thread->ptid;
+  scoped_restore_current_inferior_for_memory save_inferior (ph->thread->inf,
+							    ph->thread->ptid);
 
   CORE_ADDR core_addr = ps_addr_to_core_addr (addr);
 
