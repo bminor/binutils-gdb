@@ -363,11 +363,11 @@
   },
   /* EVEX_W_0F387A */
   {
-    { MOD_TABLE (MOD_EVEX_0F387A_W_0) },
+    { "vpbroadcastb",	{ XM, Rd }, PREFIX_DATA },
   },
   /* EVEX_W_0F387B */
   {
-    { MOD_TABLE (MOD_EVEX_0F387B_W_0) },
+    { "vpbroadcastw",	{ XM, Rd }, PREFIX_DATA },
   },
   /* EVEX_W_0F3883 */
   {
