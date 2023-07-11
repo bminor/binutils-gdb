@@ -880,7 +880,7 @@ add_globals_ref (struct globals *glob, bfd *sym_rec_stream, const char *name,
   g->offset = bfd_tell (sym_rec_stream);
   g->hash = hash;
   g->refcount = 1;
-  memcpy (g->data, data, len + 1);
+  memcpy (g->data, data, len);
 
   glob->num_entries++;
 
