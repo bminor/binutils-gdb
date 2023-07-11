@@ -50,7 +50,7 @@ static const struct dis386 evex_table[][256] = {
     { "%XEvmovapX",	{ XM, EXx }, PREFIX_OPCODE },
     { "%XEvmovapX",	{ EXxS, XM }, PREFIX_OPCODE },
     { PREFIX_TABLE (PREFIX_VEX_0F2A) },
-    { MOD_TABLE (MOD_VEX_0F2B) },
+    { "%XEvmovntpX",	{ Mx, XM }, PREFIX_OPCODE },
     { PREFIX_TABLE (PREFIX_VEX_0F2C) },
     { PREFIX_TABLE (PREFIX_VEX_0F2D) },
     { PREFIX_TABLE (PREFIX_0F2E) },

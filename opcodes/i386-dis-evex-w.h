@@ -156,7 +156,7 @@
   },
   /* EVEX_W_0FE7 */
   {
-    { "%XEvmovntdq",	{ EXEvexXNoBcst, XM }, PREFIX_DATA },
+    { "%XEvmovntdq",	{ Mx, XM }, PREFIX_DATA },
   },
   /* EVEX_W_0FF2 */
   {
@@ -293,7 +293,7 @@
   },
   /* EVEX_W_0F382A_P_2 */
   {
-    { "%XEvmovntdqaY",	{ XM, EXEvexXNoBcst }, 0 },
+    { "%XEvmovntdqaY",	{ XM, Mx }, 0 },
   },
   /* EVEX_W_0F382B */
   {
