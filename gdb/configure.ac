@@ -1344,7 +1344,7 @@ AC_CHECK_FUNCS([getuid getgid \
 		pipe pread pread64 pwrite resize_term \
 		getpgid setsid \
 		sigaction sigsetmask socketpair \
-		ttrace wborder wresize setlocale iconvlist libiconvlist btowc \
+		ttrace wresize setlocale iconvlist libiconvlist btowc \
 		setrlimit getrlimit posix_madvise waitpid \
 		use_default_colors])
 AM_LANGINFO_CODESET

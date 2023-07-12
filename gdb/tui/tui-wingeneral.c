@@ -98,14 +98,10 @@ box_win (struct tui_win_info *win_info,
 			   ? tui_active_border_style.style ()
 			   : tui_border_style.style ()));
   wattron (win, attrs);
-#ifdef HAVE_WBORDER
   wborder (win, tui_border_vline, tui_border_vline,
 	   tui_border_hline, tui_border_hline,
 	   tui_border_ulcorner, tui_border_urcorner,
 	   tui_border_llcorner, tui_border_lrcorner);
-#else
-  box (win, tui_border_vline, tui_border_hline);
-#endif
   if (!win_info->title.empty ())
     {
       /* Emit "+-TITLE-+" -- so 2 characters on the right and 2 on

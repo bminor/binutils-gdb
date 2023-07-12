@@ -568,9 +568,6 @@
 /* Define to 1 if you have the <wait.h> header file. */
 #undef HAVE_WAIT_H
 
-/* Define to 1 if you have the `wborder' function. */
-#undef HAVE_WBORDER
-
 /* Define to 1 if you have the <windows.h> header file. */
 #undef HAVE_WINDOWS_H
 
