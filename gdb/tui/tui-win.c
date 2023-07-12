@@ -128,49 +128,41 @@ static struct tui_translate tui_border_mode_translate[] = {
   { 0, 0 }
 };
 
-/* Translation tables for border-kind, one for each border
-   character (see wborder, border curses operations).
-   -1 is used to indicate the ACS because ACS characters
-   are determined at run time by curses (depends on terminal).  */
+/* Translation tables for border-kind (acs excluded), one for each border
+   character (see wborder, border curses operations).  */
 static struct tui_translate tui_border_kind_translate_vline[] = {
   { "space",    ' ' },
   { "ascii",    '|' },
-  { "acs",      -1 },
   { 0, 0 }
 };
 
 static struct tui_translate tui_border_kind_translate_hline[] = {
   { "space",    ' ' },
   { "ascii",    '-' },
-  { "acs",      -1 },
   { 0, 0 }
 };
 
 static struct tui_translate tui_border_kind_translate_ulcorner[] = {
   { "space",    ' ' },
   { "ascii",    '+' },
-  { "acs",      -1 },
   { 0, 0 }
 };
 
 static struct tui_translate tui_border_kind_translate_urcorner[] = {
   { "space",    ' ' },
   { "ascii",    '+' },
-  { "acs",      -1 },
   { 0, 0 }
 };
 
 static struct tui_translate tui_border_kind_translate_llcorner[] = {
   { "space",    ' ' },
   { "ascii",    '+' },
-  { "acs",      -1 },
   { 0, 0 }
 };
 
 static struct tui_translate tui_border_kind_translate_lrcorner[] = {
   { "space",    ' ' },
   { "ascii",    '+' },
-  { "acs",      -1 },
   { 0, 0 }
 };
 
@@ -263,6 +255,19 @@ translate (const char *name, struct tui_translate *table)
   gdb_assert_not_reached ("");
 }
 
+/* Translate NAME to a value.  If NAME is "acs", use ACS_CHAR.  Otherwise, use
+   translation table TABLE. */
+static int
+translate_acs (const char *name, struct tui_translate *table, int acs_char)
+{
+  /* The ACS characters are determined at run time by curses terminal
+     management.  */
+  if (strcmp (name, "acs") == 0)
+    return acs_char;
+
+  return translate (name, table)->value;
+}
+
 /* Update the tui internal configuration according to gdb settings.
    Returns 1 if the configuration has changed and the screen should
    be redrawn.  */
@@ -280,27 +285,31 @@ tui_update_variables ()
   need_redraw
     |= assign_return_if_changed<int> (tui_active_border_attrs, entry->value);
 
-  /* If one corner changes, all characters are changed.
-     Only check the first one.  The ACS characters are determined at
-     run time by curses terminal management.  */
-  entry = translate (tui_border_kind, tui_border_kind_translate_lrcorner);
-  int val = (entry->value < 0) ? ACS_LRCORNER : entry->value;
+  /* If one corner changes, all characters are changed.  Only check the first
+     one.  */
+  int val = translate_acs (tui_border_kind, tui_border_kind_translate_lrcorner,
+			   ACS_LRCORNER);
   need_redraw |= assign_return_if_changed<chtype> (tui_border_lrcorner, val);
 
-  entry = translate (tui_border_kind, tui_border_kind_translate_llcorner);
-  tui_border_llcorner = (entry->value < 0) ? ACS_LLCORNER : entry->value;
+  tui_border_llcorner
+    = translate_acs (tui_border_kind, tui_border_kind_translate_llcorner,
+		     ACS_LLCORNER);
 
-  entry = translate (tui_border_kind, tui_border_kind_translate_ulcorner);
-  tui_border_ulcorner = (entry->value < 0) ? ACS_ULCORNER : entry->value;
+  tui_border_ulcorner
+    = translate_acs (tui_border_kind, tui_border_kind_translate_ulcorner,
+		     ACS_ULCORNER);
 
-  entry = translate (tui_border_kind, tui_border_kind_translate_urcorner);
-  tui_border_urcorner = (entry->value < 0) ? ACS_URCORNER : entry->value;
+  tui_border_urcorner =
+    translate_acs (tui_border_kind, tui_border_kind_translate_urcorner,
+		   ACS_URCORNER);
 
-  entry = translate (tui_border_kind, tui_border_kind_translate_hline);
-  tui_border_hline = (entry->value < 0) ? ACS_HLINE : entry->value;
+  tui_border_hline
+    = translate_acs (tui_border_kind, tui_border_kind_translate_hline,
+		     ACS_HLINE);
 
-  entry = translate (tui_border_kind, tui_border_kind_translate_vline);
-  tui_border_vline = (entry->value < 0) ? ACS_VLINE : entry->value;
+  tui_border_vline
+    = translate_acs (tui_border_kind, tui_border_kind_translate_vline,
+		     ACS_VLINE);
 
   return need_redraw;
 }
