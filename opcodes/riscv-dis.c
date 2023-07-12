@@ -614,6 +614,20 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		    goto undefined_modifier;
 		  }
 		break;
+	      case 'c': /* Zcb extension 16 bits length instruction fields. */
+		switch (*++oparg)
+		  {
+		  case 'b':
+		    print (info->stream, dis_style_immediate, "%d",
+		      (int)EXTRACT_ZCB_BYTE_UIMM (l));
+		    break;
+		  case 'h':
+		    print (info->stream, dis_style_immediate, "%d",
+		      (int)EXTRACT_ZCB_HALFWORD_UIMM (l));
+		    break;
+		  default: break;
+		  }
+		break;
 	      default:
 		goto undefined_modifier;
 	      }
