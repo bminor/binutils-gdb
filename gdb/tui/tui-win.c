@@ -116,8 +116,7 @@ struct tui_translate
 };
 
 /* Translation table for border-mode variables.
-   The list of values must be terminated by a NULL.
-   After the NULL value, an entry defines the default.  */
+   The list of values must be terminated by a NULL.  */
 static struct tui_translate tui_border_mode_translate[] = {
   { "normal",		A_NORMAL },
   { "standout",		A_STANDOUT },
@@ -126,8 +125,7 @@ static struct tui_translate tui_border_mode_translate[] = {
   { "half-standout",	A_DIM | A_STANDOUT },
   { "bold",		A_BOLD },
   { "bold-standout",	A_BOLD | A_STANDOUT },
-  { 0, 0 },
-  { "normal",		A_NORMAL }
+  { 0, 0 }
 };
 
 /* Translation tables for border-kind, one for each border
@@ -138,48 +136,42 @@ static struct tui_translate tui_border_kind_translate_vline[] = {
   { "space",    ' ' },
   { "ascii",    '|' },
   { "acs",      -1 },
-  { 0, 0 },
-  { "ascii",    '|' }
+  { 0, 0 }
 };
 
 static struct tui_translate tui_border_kind_translate_hline[] = {
   { "space",    ' ' },
   { "ascii",    '-' },
   { "acs",      -1 },
-  { 0, 0 },
-  { "ascii",    '-' }
+  { 0, 0 }
 };
 
 static struct tui_translate tui_border_kind_translate_ulcorner[] = {
   { "space",    ' ' },
   { "ascii",    '+' },
   { "acs",      -1 },
-  { 0, 0 },
-  { "ascii",    '+' }
+  { 0, 0 }
 };
 
 static struct tui_translate tui_border_kind_translate_urcorner[] = {
   { "space",    ' ' },
   { "ascii",    '+' },
   { "acs",      -1 },
-  { 0, 0 },
-  { "ascii",    '+' }
+  { 0, 0 }
 };
 
 static struct tui_translate tui_border_kind_translate_llcorner[] = {
   { "space",    ' ' },
   { "ascii",    '+' },
   { "acs",      -1 },
-  { 0, 0 },
-  { "ascii",    '+' }
+  { 0, 0 }
 };
 
 static struct tui_translate tui_border_kind_translate_lrcorner[] = {
   { "space",    ' ' },
   { "ascii",    '+' },
   { "acs",      -1 },
-  { 0, 0 },
-  { "ascii",    '+' }
+  { 0, 0 }
 };
 
 
@@ -257,8 +249,7 @@ chtype tui_border_lrcorner;
 int tui_border_attrs;
 int tui_active_border_attrs;
 
-/* Identify the item in the translation table.
-   When the item is not recognized, use the default entry.  */
+/* Identify the item in the translation table.  */
 static struct tui_translate *
 translate (const char *name, struct tui_translate *table)
 {
@@ -269,9 +260,7 @@ translate (const char *name, struct tui_translate *table)
       table++;
     }
 
-  /* Not found, return default entry.  */
-  table++;
-  return table;
+  gdb_assert_not_reached ("");
 }
 
 /* Update the tui internal configuration according to gdb settings.
