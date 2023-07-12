@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <time.h>
 
-time_t
+typedef long long hrtime_t;
+
+hrtime_t
 gethrtime (void)
 {
   struct timespec tp;
-  time_t rc = 0;
+  hrtime_t rc = 0;
 #ifdef CLOCK_MONOTONIC_RAW
   int r = clock_gettime (CLOCK_MONOTONIC_RAW, &tp);
 #else
@@ -13,7 +15,7 @@ gethrtime (void)
 #endif
 
   if (r == 0)
-    rc = ((time_t) tp.tv_sec) * 1e9 + (time_t) tp.tv_nsec;
+    rc = ((hrtime_t) tp.tv_sec) * 1e9 + (hrtime_t) tp.tv_nsec;
   return rc;
 }
 
@@ -23,7 +25,7 @@ int
 main (int argc, char **argv)
 {
   long long count = 0;
-  time_t start = gethrtime ();
+  hrtime_t start = gethrtime ();
 
   do
     {

@@ -74,14 +74,9 @@ build_src=
 AM_CONDITIONAL([BUILD_COLLECTOR], [test x$build_collector = xtrue])
 AM_CONDITIONAL([BUILD_SRC], [test x$build_src = xtrue])
 
-run_tests=false
 if test x$build_collector = xtrue; then
   AC_CONFIG_SUBDIRS([libcollector])
-  if test x${host} = x${target}; then
-    run_tests=true
-  fi
 fi
-AM_CONDITIONAL([RUN_TESTS], [test x$run_tests = xtrue])
 AX_PTHREAD
 
 # Specify a location for JDK
@@ -204,7 +199,11 @@ if @<:@llength @<:@info commands try@:>@@:>@ then { puts yes } else { puts no }
 EOF
 fi`
 ])
-AM_CONDITIONAL(TCL_TRY, test "${ac_cv_libctf_tcl_try}" = yes)
+
+# Only native testing and only on supported platforms:
+AM_CONDITIONAL(TCL_TRY, [test "${ac_cv_libctf_tcl_try}" = yes \
+	-a "x${build_src}" = xtrue -a "x${build_collector}" = xtrue \
+	-a "x${host}" = "x${target}"])
 
 AM_ZLIB
 

@@ -32,7 +32,7 @@ proc check_gp_archive { a_opt } {
     set out [lindex $output 1]
     send_log "'$cmd' failed\n"
     fail $tdir
-    exit 1
+    return -code break
   }
 
   run_native_host_cmd "mv $tdir/t.c $tdir/t.c.1"
@@ -42,7 +42,7 @@ proc check_gp_archive { a_opt } {
     set out [lindex $output 1]
     send_log "CORRECTSOURCE is not found aafter '$cmd'\n"
     fail $tdir
-    exit 1
+    return -code break
   }
 }
 
@@ -58,7 +58,7 @@ if { [lindex $output 0] != 0 } then {
   set out [lindex $output 1]
   send_log "Experiment is not created in $tdir\n"
   fail $tdir
-  exit 1
+  return
 }
 
 
@@ -67,4 +67,4 @@ check_gp_archive src
 run_native_host_cmd "rm -rf $tdir/exp.er/archives/*; mv $tdir/t.c.1 $tdir/t.c"
 check_gp_archive usedsrc
 
-pass $dir
+pass $tdir
