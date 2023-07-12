@@ -36,7 +36,7 @@ if { [lindex $output 0] != 0 } then {
   set out [lindex $output 1]
   send_log "Experiment is not created in $tdir\n"
   fail $tdir
-  exit 1
+  return
 }
 
 # Copy the "good" file to $tdir/src. Mark old file as "wrong":
@@ -49,7 +49,7 @@ if { [string first "CORRECTSOURCE" [lindex $output 1]] < 0 } then {
   set out [lindex $output 1]
   send_log "CORRECTSOURCE is not found in $gprofng display text -setpath $tdir/src -source main $tdir/exp.er\n"
   fail $tdir
-  exit 1
+  return
 }
 
 # Test -pathmap:
@@ -59,7 +59,7 @@ if { [string first "CORRECTSOURCE" [lindex $output 1]] < 0 } then {
   set out [lindex $output 1]
   send_log "CORRECTSOURCE is not found in $gprofng display text -pathmap $tdir $tdir/src -source main $tdir/exp.er\n"
   fail $tdir
-  exit 1
+  return
 }
 
 pass $dir

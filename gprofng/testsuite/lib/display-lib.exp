@@ -21,28 +21,26 @@
 # Run the COMMAND on the host and return a list of the form
 # { exit-status OUTPUT }.
 proc run_native_host_cmd { command } {
-    global link_output
-    global ld
+    global TEST_TIMEOUT
 
     verbose -log "$command"
     set run_output ""
     try {
-	set run_output [exec "sh" "-c" "$command" "2>@1"]
+	send_log "% timeout $TEST_TIMEOUT sh -c '$command' 2>&1\n"
+	set run_output [exec "timeout" $TEST_TIMEOUT "sh" "-c" "$command" "2>&1"]
 	set status 0
     } trap CHILDSTATUS {results options} {
 	set status [lindex [dict get $options -errorcode] 2]
-	set run_output $results
+	set run_output "$results"
+	if { $status == 124 ||  $status == 133 } {
+	    send_log "  ERROR: TIMEOUT($TEST_TIMEOUT sec.)\n"
+	}
     }
     regsub "\n$" $run_output "" run_output
     if { [lindex $status 0] != 0 && [string match "" $run_output] } then {
 	append run_output "child process exited abnormally"
     }
-
-    if [string match "" $run_output] then {
-	return ""
-    }
-
-    return [list [lindex $status 0] $run_output]
+    return [list [lindex $status 0] "$run_output"]
 }
 
 # Run a display test in DIR.

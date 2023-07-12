@@ -37,7 +37,13 @@ proc run_gp_collect_app { subExpCnt F_opt } {
     set out [lindex $output 1]
     send_log "Experiment is not created in $tdir\n"
     fail $tdir
-    exit 1
+    return -code break
+  }
+  if {[regexp "ERROR:.*LD_PRELOAD" [lindex $output 1] match]} {
+    set out [lindex $output 1]
+    send_log "Experiment is not created in $tdir\n"
+    xfail $tdir
+    return -code break
   }
 
   set output [run_native_host_cmd "find $tdir -name '*x1.er' | wc -l"]
@@ -46,7 +52,7 @@ proc run_gp_collect_app { subExpCnt F_opt } {
     set out [lindex $output 1]
     send_log "Test failed for -F $F_opt. subExp=$subExp. Shold be $subExpCnt\n"
     fail $tdir
-    exit 1
+    return -code break
   }
   return $output
 }
@@ -58,5 +64,5 @@ run_gp_collect_app 3 "on"
 run_gp_collect_app 1 "=mkd.r"
 run_gp_collect_app 2 "=mkdir|touch"
 
-pass $dir
+pass $tdir
 

@@ -24,13 +24,6 @@ if {[info exists env(LC_ALL)]} {
 set env(LC_ALL) "C"
 
 set pltf [exec uname -i]
-
-# Native testing only for now.
-if { ![istarget $pltf-*-*]
-     && (![string match i?86 $pltf] || ![istarget i?86-*-*]) } then {
-    return
-}
-
 if { "$pltf" == "aarch64" } {
 # Use a filter for not leaf functions due to the unwind problem in libgp-collector.so
     set ::env(ACCT_FILTER) [join { "|egrep -vw 'gpf|tailcallopt|"

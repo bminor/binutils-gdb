@@ -38,6 +38,8 @@ if { "$CHECK_TARGET" == "check-install" } {
     set ::env(GPROFNG) "$BUILDDIR/src/gprofng"
 }
 
+set TEST_TIMEOUT 300
+
 # Create directories where gprofng can find libraries and binaries:
 remote_exec host "sh -c \"rm -rf tmpdir; mkdir -p tmpdir\""
 remote_exec host "sh -c \"mkdir -p lib; rm -f lib/gprofng; ln -s ../libcollector/.libs lib/gprofng\""
