@@ -128,8 +128,8 @@ static struct tui_translate tui_border_mode_translate[] = {
   { 0, 0 }
 };
 
-/* Translation tables for border-kind (acs excluded), one for each border
-   character (see wborder, border curses operations).  */
+/* Translation tables for border-kind (acs excluded), one for vline, hline and
+   corners (see wborder, border curses operations).  */
 static struct tui_translate tui_border_kind_translate_vline[] = {
   { "space",    ' ' },
   { "ascii",    '|' },
@@ -142,25 +142,7 @@ static struct tui_translate tui_border_kind_translate_hline[] = {
   { 0, 0 }
 };
 
-static struct tui_translate tui_border_kind_translate_ulcorner[] = {
-  { "space",    ' ' },
-  { "ascii",    '+' },
-  { 0, 0 }
-};
-
-static struct tui_translate tui_border_kind_translate_urcorner[] = {
-  { "space",    ' ' },
-  { "ascii",    '+' },
-  { 0, 0 }
-};
-
-static struct tui_translate tui_border_kind_translate_llcorner[] = {
-  { "space",    ' ' },
-  { "ascii",    '+' },
-  { 0, 0 }
-};
-
-static struct tui_translate tui_border_kind_translate_lrcorner[] = {
+static struct tui_translate tui_border_kind_translate_corner[] = {
   { "space",    ' ' },
   { "ascii",    '+' },
   { 0, 0 }
@@ -287,20 +269,20 @@ tui_update_variables ()
 
   /* If one corner changes, all characters are changed.  Only check the first
      one.  */
-  int val = translate_acs (tui_border_kind, tui_border_kind_translate_lrcorner,
+  int val = translate_acs (tui_border_kind, tui_border_kind_translate_corner,
 			   ACS_LRCORNER);
   need_redraw |= assign_return_if_changed<chtype> (tui_border_lrcorner, val);
 
   tui_border_llcorner
-    = translate_acs (tui_border_kind, tui_border_kind_translate_llcorner,
+    = translate_acs (tui_border_kind, tui_border_kind_translate_corner,
 		     ACS_LLCORNER);
 
   tui_border_ulcorner
-    = translate_acs (tui_border_kind, tui_border_kind_translate_ulcorner,
+    = translate_acs (tui_border_kind, tui_border_kind_translate_corner,
 		     ACS_ULCORNER);
 
   tui_border_urcorner =
-    translate_acs (tui_border_kind, tui_border_kind_translate_urcorner,
+    translate_acs (tui_border_kind, tui_border_kind_translate_corner,
 		   ACS_URCORNER);
 
   tui_border_hline
