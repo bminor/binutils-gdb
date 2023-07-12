@@ -6818,19 +6818,21 @@ the standard bindings and precedence levels:
 @ifnottex
 @c END TEXI2ROFF-KILL
 @smallexample
-precedence      associativity   Operators                Notes
+precedence      associativity   Operators                           Notes
 (highest)
-1               left            !  -  ~                  (1)
+1               left            !  -  ~                             (1)
 2               left            *  /  %
 3               left            +  -
 4               left            >>  <<
-5               left            ==  !=  >  <  <=  >=
-6               left            &
-7               left            |
-8               left            &&
-9               left            ||
-10              right           ? :
-11              right           &=  +=  -=  *=  /=       (2)
+5               left            >  <  <=  >=
+6               left            ==  !=
+7               left            &
+8               left            ^
+9               left            |
+10              left            &&
+11              left            ||
+12              right           ? :
+13              right           +=  -=  *=  /=  <<=  >>=  &=  |=    (2)
 (lowest)
 @end smallexample
 Notes:
@@ -6856,13 +6858,15 @@ height2pt&\omit&&\omit&&\omit&\cr
 &2&&left&&*          /        \%&\cr
 &3&&left&&+          -&\cr
 &4&&left&&>>         <<&\cr
-&5&&left&&==         !=       >      <      <=      >=&\cr
-&6&&left&&\&&\cr
-&7&&left&&|&\cr
-&8&&left&&{\&\&}&\cr
-&9&&left&&||&\cr
-&10&&right&&?        :&\cr
-&11&&right&&\qquad\&=      +=       -=     *=     /=\qquad\ddag&\cr
+&5&&left&& >      <      <=      >=&\cr
+&6&&left&&==         !=&\cr
+&7&&left&&\&&\cr
+&8&&left&&^&\cr
+&9&&left&&|&\cr
+&10&&left&&{\&\&}&\cr
+&11&&left&&||&\cr
+&12&&right&&?        :&\cr
+&13&&right&&\qquad +=       -=     *=     /= <<= >>= \&= |=\qquad\ddag&\cr
 &lowest&&&&&\cr
 height2pt&\omit&&\omit&&\omit&\cr}
 \hrule}

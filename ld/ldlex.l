@@ -247,6 +247,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 <EXPRESSION,MRI>"/"			{ RTOKEN('/'); }
 <EXPRESSION,MRI>"%"			{ RTOKEN('%'); }
 <EXPRESSION,MRI>"<"			{ RTOKEN('<'); }
+<EXPRESSION,MRI>"^"			{ RTOKEN('^'); }
 <SCRIPT,EXPRESSION,MRI,WILD>"="		{ RTOKEN('='); }
 <SCRIPT,EXPRESSION,MRI,WILD>"}"		{ RTOKEN('}'); }
 <SCRIPT,EXPRESSION,MRI,WILD>"{"		{ RTOKEN('{'); }
