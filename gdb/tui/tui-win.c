@@ -223,14 +223,14 @@ chtype tui_border_lrcorner;
 int tui_border_attrs;
 int tui_active_border_attrs;
 
-/* Identify the item in the translation table.  */
-static struct tui_translate *
+/* Identify the item in the translation table, and return the corresponding value.  */
+static int
 translate (const char *name, struct tui_translate *table)
 {
   while (table->name)
     {
       if (name && strcmp (table->name, name) == 0)
-	return table;
+	return table->value;
       table++;
     }
 
@@ -247,7 +247,7 @@ translate_acs (const char *name, struct tui_translate *table, int acs_char)
   if (strcmp (name, "acs") == 0)
     return acs_char;
 
-  return translate (name, table)->value;
+  return translate (name, table);
 }
 
 /* Update the tui internal configuration according to gdb settings.
@@ -257,20 +257,18 @@ bool
 tui_update_variables ()
 {
   bool need_redraw = false;
-  struct tui_translate *entry;
+  int val;
 
-  entry = translate (tui_border_mode, tui_border_mode_translate);
-  need_redraw
-    |= assign_return_if_changed<int> (tui_border_attrs, entry->value);
+  val = translate (tui_border_mode, tui_border_mode_translate);
+  need_redraw |= assign_return_if_changed<int> (tui_border_attrs, val);
 
-  entry = translate (tui_active_border_mode, tui_border_mode_translate);
-  need_redraw
-    |= assign_return_if_changed<int> (tui_active_border_attrs, entry->value);
+  val = translate (tui_active_border_mode, tui_border_mode_translate);
+  need_redraw |= assign_return_if_changed<int> (tui_active_border_attrs, val);
 
   /* If one corner changes, all characters are changed.  Only check the first
      one.  */
-  int val = translate_acs (tui_border_kind, tui_border_kind_translate_corner,
-			   ACS_LRCORNER);
+  val = translate_acs (tui_border_kind, tui_border_kind_translate_corner,
+		       ACS_LRCORNER);
   need_redraw |= assign_return_if_changed<chtype> (tui_border_lrcorner, val);
 
   tui_border_llcorner
