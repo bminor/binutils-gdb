@@ -4458,6 +4458,8 @@ fetch_inferior_event ()
     auto defer_delete_threads
       = make_scope_exit (delete_just_stopped_threads_infrun_breakpoints);
 
+    int stop_id = get_stop_id ();
+
     /* Now figure out what to do with the result of the result.  */
     handle_inferior_event (&ecs);
 
@@ -4485,7 +4487,19 @@ fetch_inferior_event ()
 
 	    clean_up_just_stopped_threads_fsms (&ecs);
 
-	    if (thr != nullptr && thr->thread_fsm () != nullptr)
+	    if (stop_id != get_stop_id ())
+	      {
+		/* If the stop-id has changed then a stop has already been
+		   presented to the user in handle_inferior_event, this is
+		   likely a failed inferior call.  As the stop has already
+		   been announced then we should not notify again.
+
+		   Also, if the prompt state is not PROMPT_NEEDED then GDB
+		   will not be ready for user input after this function.  */
+		should_notify_stop = false;
+		gdb_assert (current_ui->prompt_state == PROMPT_NEEDED);
+	      }
+	    else if (thr != nullptr && thr->thread_fsm () != nullptr)
 	      should_notify_stop
 	       = thr->thread_fsm ()->should_notify_stop ();
 

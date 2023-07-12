@@ -564,10 +564,13 @@ call_thread_fsm::should_stop (struct thread_info *thread)
 	 call..  */
       return_value = get_call_return_value (&return_meta_info);
 
-      /* Break out of wait_sync_command_done.  */
+      /* Break out of wait_sync_command_done.  This is similar to the
+	 async_enable_stdin call in normal_stop (which we don't call),
+	 however, in this case we only change the WAITING_UI.  This is
+	 enough for wait_sync_command_done.  */
       scoped_restore save_ui = make_scoped_restore (&current_ui, waiting_ui);
-      target_terminal::ours ();
-      waiting_ui->prompt_state = PROMPT_NEEDED;
+      gdb_assert (current_ui->prompt_state == PROMPT_BLOCKED);
+      async_enable_stdin ();
     }
 
   return true;
@@ -661,14 +664,32 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
   infcall_debug_printf ("thread is now: %s",
 			inferior_ptid.to_string ().c_str ());
 
-  /* If GDB has the prompt blocked before, then ensure that it remains
-     so.  normal_stop calls async_enable_stdin, so reset the prompt
-     state again here.  In other cases, stdin will be re-enabled by
-     inferior_event_handler, when an exception is thrown.  */
+  /* After the inferior call finished, async_enable_stdin has been
+     called, either from normal_stop or from
+     call_thread_fsm::should_stop, and the prompt state has been
+     restored by the scoped_restore in the try block above.
+
+     If the inferior call finished successfully, then we should
+     disable stdin as we don't know yet whether the inferior will be
+     stopping.  Calling async_disable_stdin restores things to how
+     they were when this function was called.
+
+     If the inferior call didn't complete successfully, then
+     normal_stop has already been called, and we know for sure that we
+     are going to present this stop to the user.  In this case, we
+     call async_enable_stdin.  This changes the prompt state to
+     PROMPT_NEEDED.
+
+     If the previous prompt state was PROMPT_NEEDED, then as
+     async_enable_stdin has already been called, nothing additional
+     needs to be done here.  */
   if (current_ui->prompt_state == PROMPT_BLOCKED)
-    current_ui->unregister_file_handler ();
-  else
-    current_ui->register_file_handler ();
+    {
+      if (call_thread->thread_fsm ()->finished_p ())
+	async_disable_stdin ();
+      else
+	async_enable_stdin ();
+    }
 
   /* If the infcall does NOT succeed, normal_stop will have already
      finished the thread states.  However, on success, normal_stop

@@ -1,0 +1,67 @@
+# Copyright (C) 2023 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Check that when GDB fails to evaluate the condition of a conditional
+# breakpoint we only get one *stopped notification.
+
+load_lib mi-support.exp
+set MIFLAGS "-i=mi"
+
+standard_testfile
+
+if [build_executable ${testfile}.exp ${binfile} ${srcfile}] {
+    return -1
+}
+
+if {[mi_clean_restart $binfile]} {
+    return
+}
+
+if {[mi_runto_main] == -1} {
+    return
+}
+
+# Create the conditional breakpoint.
+set bp_location [gdb_get_line_number "Set breakpoint here"]
+mi_create_breakpoint "-c \"cond_fail ()\" $srcfile:$bp_location" \
+    "insert conditional breakpoint" \
+    -func foo -file ".*$srcfile" -line "$bp_location" \
+    -cond "cond_fail \\(\\)"
+
+# Number of the previous breakpoint.
+set bpnum [mi_get_valueof "/d" "\$bpnum" "INVALID" \
+	       "get number for breakpoint"]
+
+# The line where we expect the inferior to crash.
+set crash_linenum [gdb_get_line_number "Crash here"]
+
+# Run the inferior and wait for it to stop.
+mi_send_resuming_command "exec-continue" "continue the inferior"
+mi_gdb_test "" \
+    [multi_line \
+	 "~\"\\\\nProgram\"" \
+	 "~\" received signal SIGSEGV, Segmentation fault\\.\\\\n\"" \
+	 "~\"$hex in cond_fail \\(\\) at \[^\r\n\]+\"" \
+	 "~\"${crash_linenum}\\\\t\\s+return \\*p;\[^\r\n\]+\\\\n\"" \
+	 "\\*stopped,reason=\"signal-received\",signal-name=\"SIGSEGV\"\[^\r\n\]+" \
+	 "&\"Error in testing condition for breakpoint $bpnum:\\\\n\"" \
+	 "&\"The program being debugged was signaled while in a function called from GDB\\.\\\\n\"" \
+	 "&\"GDB remains in the frame where the signal was received\\.\\\\n\"" \
+	 "&\"To change this behavior use \\\\\"set unwindonsignal on\\\\\"\\.\\\\n\"" \
+	 "&\"Evaluation of the expression containing the function\\\\n\"" \
+	 "&\"\\(cond_fail\\) will be abandoned\\.\\\\n\"" \
+	 "&\"When the function is done executing, GDB will silently stop\\.\\\\n\"" \
+	 "=breakpoint-modified,bkpt={number=\"$bpnum\",type=\"breakpoint\",\[^\r\n\]+times=\"1\",\[^\r\n\]+}"] \
+    "wait for stop"

@@ -5535,7 +5535,6 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
 	  else
 	    within_current_scope = false;
 	}
-      CORE_ADDR pc_before_check = get_frame_pc (get_selected_frame (nullptr));
       if (within_current_scope)
 	{
 	  try
@@ -5555,17 +5554,6 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
 		  (gdb_stderr, ex,
 		   "Error in testing condition for breakpoint %d:\n",
 		   b->number);
-
-	      /* If the pc value changed as a result of evaluating the
-		 condition then we probably stopped within an inferior
-		 function call due to some unexpected stop, e.g. the thread
-		 hit another breakpoint, or the thread received an
-		 unexpected signal.  In this case we don't want to also
-		 print the information about this breakpoint.  */
-	      CORE_ADDR pc_after_check
-		= get_frame_pc (get_selected_frame (nullptr));
-	      if (pc_before_check != pc_after_check)
-		bs->print = 0;
 	    }
 	}
       else
