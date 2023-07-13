@@ -6832,7 +6832,7 @@ precedence      associativity   Operators                           Notes
 10              left            &&
 11              left            ||
 12              right           ? :
-13              right           +=  -=  *=  /=  <<=  >>=  &=  |=    (2)
+13              right           +=  -=  *=  /=  <<=  >>=  &=  |= ^= (2)
 (lowest)
 @end smallexample
 Notes:
@@ -6866,7 +6866,7 @@ height2pt&\omit&&\omit&&\omit&\cr
 &10&&left&&{\&\&}&\cr
 &11&&left&&||&\cr
 &12&&right&&?        :&\cr
-&13&&right&&\qquad +=       -=     *=     /= <<= >>= \&= |=\qquad\ddag&\cr
+&13&&right&&\qquad +=       -=     *=     /= <<= >>= \&= |= \^{}=\qquad\ddag&\cr
 &lowest&&&&&\cr
 height2pt&\omit&&\omit&&\omit&\cr}
 \hrule}

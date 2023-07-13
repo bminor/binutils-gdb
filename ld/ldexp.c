@@ -94,6 +94,7 @@ exp_print_token (token_code_type code, int infix_p)
     { RSHIFTEQ, ">>=" },
     { ANDEQ, "&=" },
     { OREQ, "|=" },
+    { XOREQ, "^=" },
     { OROR, "||" },
     { ANDAND, "&&" },
     { EQ, "==" },

@@ -108,7 +108,7 @@ static int error_index;
 %type <section_phdr> phdr_opt
 %type <integer> opt_nocrossrefs
 
-%right <token> PLUSEQ MINUSEQ MULTEQ DIVEQ  '=' LSHIFTEQ RSHIFTEQ   ANDEQ OREQ
+%right <token> PLUSEQ MINUSEQ MULTEQ DIVEQ  '=' LSHIFTEQ RSHIFTEQ   ANDEQ OREQ XOREQ
 %right <token> '?' ':'
 %left <token> OROR
 %left <token>  ANDAND
@@ -747,6 +747,8 @@ assign_op:
 			{ $$ = '&'; }
 	|	OREQ
 			{ $$ = '|'; }
+	|	XOREQ
+			{ $$ = '^'; }
 
 	;
 
