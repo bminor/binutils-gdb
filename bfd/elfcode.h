@@ -819,6 +819,7 @@ elf_object_p (bfd *abfd)
 	goto got_no_match;
       if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_phoff, SEEK_SET) != 0)
 	goto got_no_match;
+      bool eu_strip_broken_phdrs = false;
       i_phdr = elf_tdata (abfd)->phdr;
       for (i = 0; i < i_ehdrp->e_phnum; i++, i_phdr++)
 	{
@@ -839,21 +840,31 @@ elf_object_p (bfd *abfd)
 		  abfd->read_only = 1;
 		}
 	    }
-	  if (i_phdr->p_filesz != 0)
-	    {
-	      if ((i_phdr->p_offset + i_phdr->p_filesz) > filesize)
-		goto got_no_match;
-	      /* Try to reconstruct dynamic symbol table from PT_DYNAMIC
-		 segment if there is no section header.  */
-	      if (i_phdr->p_type == PT_DYNAMIC
-		  && i_ehdrp->e_shstrndx == 0
-		  && i_ehdrp->e_shoff == 0
-		  && !_bfd_elf_get_dynamic_symbols (abfd, i_phdr,
-						    elf_tdata (abfd)->phdr,
-						    i_ehdrp->e_phnum,
-						    filesize))
-		goto got_no_match;
-	    }
+	  /* Detect eu-strip -f debug files, which have program
+	     headers that describe the original file.  */
+	  if (i_phdr->p_filesz != 0
+	      && (i_phdr->p_filesz > filesize
+		  || i_phdr->p_offset > filesize - i_phdr->p_filesz))
+	    eu_strip_broken_phdrs = true;
+	}
+      if (!eu_strip_broken_phdrs
+	  && i_ehdrp->e_shoff == 0
+	  && i_ehdrp->e_shstrndx == 0)
+	{
+	  /* Try to reconstruct dynamic symbol table from PT_DYNAMIC
+	     segment if there is no section header.  */
+	  i_phdr = elf_tdata (abfd)->phdr;
+	  for (i = 0; i < i_ehdrp->e_phnum; i++, i_phdr++)
+	    if (i_phdr->p_type == PT_DYNAMIC)
+	      {
+		if (i_phdr->p_filesz != 0
+		    && !_bfd_elf_get_dynamic_symbols (abfd, i_phdr,
+						      elf_tdata (abfd)->phdr,
+						      i_ehdrp->e_phnum,
+						      filesize))
+		  goto got_no_match;
+		break;
+	      }
 	}
     }
 
