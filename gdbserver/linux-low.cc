@@ -38,14 +38,16 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <sched.h>
-#include <ctype.h>
 #include <pwd.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/vfs.h>
 #include <sys/uio.h>
+#include <langinfo.h>
+#include <iconv.h>
 #include "gdbsupport/filestuff.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 #include "tracepoint.h"
 #include <inttypes.h>
 #include "gdbsupport/common-inferior.h"
@@ -6999,10 +7001,63 @@ current_lwp_ptid (void)
   return ptid_of (current_thread);
 }
 
+/* A helper function that copies NAME to DEST, replacing non-printable
+   characters with '?'.  Returns DEST as a convenience.  */
+
+static const char *
+replace_non_ascii (char *dest, const char *name)
+{
+  while (*name != '\0')
+    {
+      if (!ISPRINT (*name))
+	*dest++ = '?';
+      else
+	*dest++ = *name;
+      ++name;
+    }
+  return dest;
+}
+
 const char *
 linux_process_target::thread_name (ptid_t thread)
 {
-  return linux_proc_tid_get_name (thread);
+  static char dest[100];
+
+  const char *name = linux_proc_tid_get_name (thread);
+  if (name == nullptr)
+    return nullptr;
+
+  /* Linux limits the comm file to 16 bytes (including the trailing
+     \0.  If the program or thread name is set when using a multi-byte
+     encoding, this might cause it to be truncated mid-character.  In
+     this situation, sending the truncated form in an XML <thread>
+     response will cause a parse error in gdb.  So, instead convert
+     from the locale's encoding (we can't be sure this is the correct
+     encoding, but it's as good a guess as we have) to UTF-8, but in a
+     way that ignores any encoding errors.  See PR remote/30618.  */
+  const char *cset = nl_langinfo (CODESET);
+  iconv_t handle = iconv_open ("UTF-8//IGNORE", cset);
+  if (handle == (iconv_t) -1)
+    return replace_non_ascii (dest, name);
+
+  size_t inbytes = strlen (name);
+  char *inbuf = const_cast<char *> (name);
+  size_t outbytes = sizeof (dest);
+  char *outbuf = dest;
+  size_t result = iconv (handle, &inbuf, &inbytes, &outbuf, &outbytes);
+
+  if (result == (size_t) -1)
+    {
+      if (errno == E2BIG)
+	outbuf = &dest[sizeof (dest) - 1];
+      else if ((errno == EILSEQ || errno == EINVAL)
+	       && outbuf < &dest[sizeof (dest) - 2])
+	*outbuf++ = '?';
+      *outbuf = '\0';
+    }
+
+  iconv_close (handle);
+  return *dest == '\0' ? nullptr : dest;
 }
 
 #if USE_THREAD_DB
