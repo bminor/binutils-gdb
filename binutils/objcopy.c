@@ -3615,8 +3615,10 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
     } *list, *l;
   bfd **ptr = &obfd->archive_head;
   bfd *this_element;
-  char *dir;
+  char *dir = NULL;
   char *filename;
+
+  list = NULL;
 
   /* PR 24281: It is not clear what should happen when copying a thin archive.
      One part is straight forward - if the output archive is in a different
@@ -3636,7 +3638,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       bfd_set_error (bfd_error_invalid_operation);
       bfd_nonfatal_message (NULL, ibfd, NULL,
 			    _("sorry: copying thin archives is not currently supported"));
-      return;
+      goto cleanup_and_exit;
     }
 
   /* Make a temp directory to hold the contents.  */
@@ -3653,8 +3655,6 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 
   if (deterministic)
     obfd->flags |= BFD_DETERMINISTIC_OUTPUT;
-
-  list = NULL;
 
   this_element = bfd_openr_next_archived_file (ibfd, NULL);
 
@@ -3797,44 +3797,46 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
     }
   *ptr = NULL;
 
+ cleanup_and_exit:
   filename = xstrdup (bfd_get_filename (obfd));
   if (!(status == 0 ? bfd_close : bfd_close_all_done) (obfd))
     {
+      if (!status)
+	bfd_nonfatal_message (filename, NULL, NULL, NULL);
       status = 1;
-      bfd_nonfatal_message (filename, NULL, NULL, NULL);
     }
   free (filename);
 
   filename = xstrdup (bfd_get_filename (ibfd));
   if (!bfd_close (ibfd))
     {
+      if (!status)
+	bfd_nonfatal_message (filename, NULL, NULL, NULL);
       status = 1;
-      bfd_nonfatal_message (filename, NULL, NULL, NULL);
     }
   free (filename);
 
- cleanup_and_exit:
   /* Delete all the files that we opened.  */
-  {
-    struct name_list * next;
+  struct name_list *next;
+  for (l = list; l != NULL; l = next)
+    {
+      if (l->obfd == NULL)
+	rmdir (l->name);
+      else
+	{
+	  bfd_close (l->obfd);
+	  unlink (l->name);
+	}
+      free ((char *) l->name);
+      next = l->next;
+      free (l);
+    }
 
-    for (l = list; l != NULL; l = next)
-      {
-	if (l->obfd == NULL)
-	  rmdir (l->name);
-	else
-	  {
-	    bfd_close (l->obfd);
-	    unlink (l->name);
-	  }
-	free ((char *) l->name);
-	next = l->next;
-	free (l);
-      }
-  }
-
-  rmdir (dir);
-  free (dir);
+  if (dir)
+    {
+      rmdir (dir);
+      free (dir);
+    }
 }
 
 /* The top-level control.  */
@@ -3933,7 +3935,8 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 
       if (obfd == NULL)
 	{
-	  close (ofd);
+	  if (ofd >= 0)
+	    close (ofd);
 	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
 	  bfd_close (ibfd);
 	  status = 1;
@@ -3966,7 +3969,8 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 
       if (obfd == NULL)
  	{
-	  close (ofd);
+	  if (ofd >= 0)
+	    close (ofd);
  	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
 	  bfd_close (ibfd);
  	  status = 1;
