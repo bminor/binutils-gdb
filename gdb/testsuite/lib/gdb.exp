@@ -9837,6 +9837,20 @@ gdb_caching_proc have_compile_and_link_flag { flag } {
 		additional_flags=$flag]
 }
 
+# Return 1 if this GDB is configured with a "native" target.
+
+gdb_caching_proc have_native_target {} {
+    gdb_test_multiple "help target native" "" {
+	-re -wrap "Undefined target command.*" {
+	    return 0
+	}
+	-re -wrap "Native process.*" {
+	    return 1
+	}
+    }
+    return 0
+}
+
 # Handle include file $srcdir/$subdir/FILE.
 
 proc include_file { file } {
