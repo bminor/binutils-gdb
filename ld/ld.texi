@@ -7114,10 +7114,13 @@ The builtin function @code{NEXT} is closely related to @code{ALIGN}.
 @kindex ALIGNOF(@var{section})
 @cindex section alignment
 Return the alignment in bytes of the named @var{section}, if that section has
-been allocated.  If the section has not been allocated when this is
-evaluated, the linker will report an error. In the following example,
-the alignment of the @code{.output} section is stored as the first
-value in that section.
+been allocated, or zero if the section has not been allocated.  If the
+section does not exist in the linker script the linker will report an
+error.  If @var{section} is @code{NEXT_SECTION} then @code{ALIGNOF} will
+return the alignment of the next allocated section specified in the
+linker script, or zero if there is no such section.  In the following
+example, the alignment of the @code{.output} section is stored as the
+first value in that section.
 @smallexample
 @group
 SECTIONS@{ @dots{}
@@ -7266,9 +7269,13 @@ name.
 @kindex SIZEOF(@var{section})
 @cindex section size
 Return the size in bytes of the named @var{section}, if that section has
-been allocated.  If the section has not been allocated when this is
-evaluated, the linker will report an error.  In the following example,
-@code{symbol_1} and @code{symbol_2} are assigned identical values:
+been allocated, or zero if the section has not been allocated.  If the
+section does not exist in the linker script the linker will report an
+error.  If @var{section} is @code{NEXT_SECTION} then @code{SIZEOF} will
+return the alignment of the next allocated section specified in the
+linker script, or zero if there is no such section.  In the following
+example, @code{symbol_1} and @code{symbol_2} are assigned identical
+values:
 @smallexample
 @group
 SECTIONS@{ @dots{}

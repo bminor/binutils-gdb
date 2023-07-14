@@ -578,7 +578,7 @@ cat <<EOF
   /* Align ___bss_start and _end to a multiple of 8 so that we can use strd
      to clear bss.  N.B., without adding any extra alignment, we would have
      to clear the bss byte by byte.  */
-  ${RELOCATING+. = ALIGN(8);}
+  ${RELOCATING+. = ALIGN(MAX(8,ALIGNOF(NEXT_SECTION)));}
   ${RELOCATING+___bss_start = .;}
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   ${SBSS}
