@@ -3346,6 +3346,51 @@ parse_pid_to_attach (const char *args)
   return pid;
 }
 
+/* Substitute all occurrences of string FROM by string TO in *STRINGP.  *STRINGP
+   must come from xrealloc-compatible allocator and it may be updated.  FROM
+   needs to be delimited by IS_DIR_SEPARATOR or DIRNAME_SEPARATOR (or be
+   located at the start or end of *STRINGP.  */
+
+void
+substitute_path_component (char **stringp, const char *from, const char *to)
+{
+  char *string = *stringp, *s;
+  const size_t from_len = strlen (from);
+  const size_t to_len = strlen (to);
+
+  for (s = string;;)
+    {
+      s = strstr (s, from);
+      if (s == NULL)
+	break;
+
+      if ((s == string || IS_DIR_SEPARATOR (s[-1])
+	   || s[-1] == DIRNAME_SEPARATOR)
+	  && (s[from_len] == '\0' || IS_DIR_SEPARATOR (s[from_len])
+	      || s[from_len] == DIRNAME_SEPARATOR))
+	{
+	  char *string_new;
+
+	  string_new
+	    = (char *) xrealloc (string, (strlen (string) + to_len + 1));
+
+	  /* Relocate the current S pointer.  */
+	  s = s - string + string_new;
+	  string = string_new;
+
+	  /* Replace from by to.  */
+	  memmove (&s[to_len], &s[from_len], strlen (&s[from_len]) + 1);
+	  memcpy (s, to, to_len);
+
+	  s += to_len;
+	}
+      else
+	s++;
+    }
+
+  *stringp = string;
+}
+
 #ifdef HAVE_WAITPID
 
 #ifdef SIGALRM

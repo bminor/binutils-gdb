@@ -490,6 +490,7 @@ SELFTESTS_SRCS = \
 	unittests/ui-file-selftests.c \
 	unittests/unique_xmalloc_ptr_char.c \
 	unittests/unpack-selftests.c \
+	unittests/utils-selftests.c \
 	unittests/vec-utils-selftests.c \
 	unittests/xml-utils-selftests.c
 

@@ -173,33 +173,24 @@ static std::string auto_load_safe_path = AUTO_LOAD_SAFE_PATH;
    counterpart.  */
 static std::vector<gdb::unique_xmalloc_ptr<char>> auto_load_safe_path_vec;
 
-/* Expand $datadir and $debugdir in STRING.  */
+/* Expand $datadir and $debugdir in STRING according to the rules of
+   substitute_path_component.  */
 
 static std::vector<gdb::unique_xmalloc_ptr<char>>
 auto_load_expand_dir_vars (const char *string)
 {
-  std::vector<gdb::unique_xmalloc_ptr<char>> result
-    = dirnames_to_char_ptr_vec (string);
+  char *s = xstrdup (string);
+  substitute_path_component (&s, "$datadir", gdb_datadir.c_str ());
+  substitute_path_component (&s, "$debugdir", debug_file_directory.c_str ());
 
-  for (auto &elt : result)
-    {
-      if (strcmp (elt.get (), "$datadir") == 0)
-	{
-	  elt = make_unique_xstrdup (gdb_datadir.c_str ());
-	  if (debug_auto_load)
-	    auto_load_debug_printf ("Expanded $datadir to \"%s\".",
-				    gdb_datadir.c_str ());
-	}
-      else if (strcmp (elt.get (), "$debugdir") == 0)
-	{
-	  elt = make_unique_xstrdup (debug_file_directory.c_str ());
-	  if (debug_auto_load)
-	    auto_load_debug_printf ("Expanded $debugdir to \"%s\".",
-				    debug_file_directory.c_str ());
-	}
-    }
+  if (debug_auto_load && strcmp (s, string) != 0)
+    auto_load_debug_printf ("Expanded $-variables to \"%s\".", s);
 
-  return result;
+  std::vector<gdb::unique_xmalloc_ptr<char>> dir_vec
+    = dirnames_to_char_ptr_vec (s);
+  xfree(s);
+
+  return dir_vec;
 }
 
 /* Update auto_load_safe_path_vec from current AUTO_LOAD_SAFE_PATH.  */
