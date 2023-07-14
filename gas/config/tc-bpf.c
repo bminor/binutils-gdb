@@ -22,41 +22,41 @@
 #include "as.h"
 #include "subsegs.h"
 #include "symcat.h"
-#include "opcodes/bpf-desc.h"
-#include "opcodes/bpf-opc.h"
-#include "cgen.h"
+#include "opcode/bpf.h"
 #include "elf/common.h"
 #include "elf/bpf.h"
 #include "dwarf2dbg.h"
+#include "libiberty.h"
 #include <ctype.h>
+
+/* Data structure representing a parsed BPF instruction.  */
+
+struct bpf_insn
+{
+  int size; /* Instruction size in bytes.  */
+  bpf_insn_word opcode;
+  uint8_t dst;
+  uint8_t src;
+  expressionS offset16;
+  expressionS imm32;
+  expressionS imm64;
+  expressionS disp16;
+  expressionS disp32;
+
+  unsigned int has_dst : 1;
+  unsigned int has_src : 1;
+  unsigned int has_offset16 : 1;
+  unsigned int has_disp16 : 1;
+  unsigned int has_disp32 : 1;
+  unsigned int has_imm32 : 1;
+  unsigned int has_imm64 : 1;
+};
 
 const char comment_chars[]        = ";";
 const char line_comment_chars[]   = "#";
 const char line_separator_chars[] = "`";
 const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "fFdD";
-
-static const char *invalid_expression;
-static char pseudoc_lex[256];
-static const char symbol_chars[] =
-"_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-static const char arithm_op[] = "+-/<>%&|^";
-
-static void init_pseudoc_lex (void);
-
-#define LEX_IS_SYMBOL_COMPONENT  1
-#define LEX_IS_WHITESPACE        2
-#define LEX_IS_NEWLINE           3
-#define LEX_IS_ARITHM_OP         4
-#define LEX_IS_STAR              6
-#define LEX_IS_CLSE_BR           7
-#define LEX_IS_OPEN_BR           8
-#define LEX_IS_EQUAL             9
-#define LEX_IS_EXCLA             10
-
-#define ST_EOI        100
-#define MAX_TOKEN_SZ  100
 
 /* Like s_lcomm_internal in gas/read.c but the alignment string
    is allowed to be optional.  */
@@ -110,18 +110,15 @@ const pseudo_typeS md_pseudo_table[] =
 
 
 
-/* ISA handling.  */
-static CGEN_BITSET *bpf_isa;
-
-
-
 /* Command-line options processing.  */
 
 enum options
 {
   OPTION_LITTLE_ENDIAN = OPTION_MD_BASE,
   OPTION_BIG_ENDIAN,
-  OPTION_XBPF
+  OPTION_XBPF,
+  OPTION_DIALECT,
+  OPTION_ISA_SPEC,
 };
 
 struct option md_longopts[] =
@@ -129,6 +126,8 @@ struct option md_longopts[] =
   { "EL", no_argument, NULL, OPTION_LITTLE_ENDIAN },
   { "EB", no_argument, NULL, OPTION_BIG_ENDIAN },
   { "mxbpf", no_argument, NULL, OPTION_XBPF },
+  { "mdialect", required_argument, NULL, OPTION_DIALECT},
+  { "misa-spec", required_argument, NULL, OPTION_ISA_SPEC},
   { NULL,          no_argument, NULL, 0 },
 };
 
@@ -136,18 +135,34 @@ size_t md_longopts_size = sizeof (md_longopts);
 
 const char * md_shortopts = "";
 
+/* BPF supports little-endian and big-endian variants.  The following
+   global records what endianness to use.  It can be configured using
+   command-line options.  It defaults to the host endianness
+   initialized in md_begin.  */
+
+static int set_target_endian = 0;
 extern int target_big_endian;
 
-/* Whether target_big_endian has been set while parsing command-line
-   arguments.  */
-static int set_target_endian = 0;
+/* The ISA specification can be one of BPF_V1, BPF_V2, BPF_V3, BPF_V4
+   or BPF_XPBF.  The ISA spec to use can be configured using
+   command-line options.  It defaults to the latest BPF spec.  */
 
-static int target_xbpf = 0;
+static int isa_spec = BPF_V4;
 
-static int set_xbpf = 0;
+/* The assembler supports two different dialects: "normal" syntax and
+   "pseudoc" syntax.  The dialect to use can be configured using
+   command-line options.  */
+
+enum target_asm_dialect
+{
+  DIALECT_NORMAL,
+  DIALECT_PSEUDOC
+};
+
+static int asm_dialect = DIALECT_NORMAL;
 
 int
-md_parse_option (int c, const char * arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, const char * arg)
 {
   switch (c)
     {
@@ -156,12 +171,36 @@ md_parse_option (int c, const char * arg ATTRIBUTE_UNUSED)
       target_big_endian = 1;
       break;
     case OPTION_LITTLE_ENDIAN:
-      set_target_endian = 1;
+      set_target_endian = 0;
       target_big_endian = 0;
       break;
+    case OPTION_DIALECT:
+      if (strcmp (arg, "normal") == 0)
+        asm_dialect = DIALECT_NORMAL;
+      else if (strcmp (arg, "pseudoc") == 0)
+        asm_dialect = DIALECT_PSEUDOC;
+      else
+        as_fatal (_("-mdialect=%s is not valid.  Expected normal or pseudoc"),
+                  arg);
+      break;
+    case OPTION_ISA_SPEC:
+      if (strcmp (arg, "v1") == 0)
+        isa_spec = BPF_V1;
+      else if (strcmp (arg, "v2") == 0)
+        isa_spec = BPF_V2;
+      else if (strcmp (arg, "v3") == 0)
+        isa_spec = BPF_V3;
+      else if (strcmp (arg, "v4") == 0)
+        isa_spec = BPF_V4;
+      else if (strcmp (arg, "xbpf") == 0)
+        isa_spec = BPF_XBPF;
+      else
+        as_fatal (_("-misa-spec=%s is not valid.  Expected v1, v2, v3, v4 o xbpf"),
+                  arg);
+      break;
     case OPTION_XBPF:
-      set_xbpf = 1;
-      target_xbpf = 1;
+      /* This is an alias for -misa-spec=xbpf.  */
+      isa_spec = BPF_XBPF;
       break;
     default:
       return 0;
@@ -175,43 +214,22 @@ md_show_usage (FILE * stream)
 {
   fprintf (stream, _("\nBPF options:\n"));
   fprintf (stream, _("\
-  --EL			generate code for a little endian machine\n\
-  --EB			generate code for a big endian machine\n\
-  -mxbpf                generate xBPF instructions\n"));
+BPF options:\n\
+  -EL                         generate code for a little endian machine\n\
+  -EB                         generate code for a big endian machine\n\
+  -mdialect=DIALECT           set the assembly dialect (normal, pseudoc)\n\
+  -misa-spec                  set the BPF ISA spec (v1, v2, v3, v4, xbpf)\n\
+  -mxbpf                      alias for -misa-spec=xbpf\n"));
 }
 
 
-
-static void
-init_pseudoc_lex (void)
-{
-  const char *p;
-
-  for (p = symbol_chars; *p; ++p)
-    pseudoc_lex[(unsigned char) *p] = LEX_IS_SYMBOL_COMPONENT;
-
-  pseudoc_lex[' '] = LEX_IS_WHITESPACE;
-  pseudoc_lex['\t'] = LEX_IS_WHITESPACE;
-  pseudoc_lex['\r'] = LEX_IS_WHITESPACE;
-  pseudoc_lex['\n'] = LEX_IS_NEWLINE;
-  pseudoc_lex['*'] = LEX_IS_STAR;
-  pseudoc_lex[')'] = LEX_IS_CLSE_BR;
-  pseudoc_lex['('] = LEX_IS_OPEN_BR;
-  pseudoc_lex[']'] = LEX_IS_CLSE_BR;
-  pseudoc_lex['['] = LEX_IS_OPEN_BR;
-
-  for (p = arithm_op; *p; ++p)
-    pseudoc_lex[(unsigned char) *p] = LEX_IS_ARITHM_OP;
-
-  pseudoc_lex['='] = LEX_IS_EQUAL;
-  pseudoc_lex['!'] = LEX_IS_EXCLA;
-}
+/* This function is called once, at assembler startup time.  This
+   should set up all the tables, etc that the MD part of the assembler
+   needs.  */
 
 void
 md_begin (void)
 {
-  /* Initialize the `cgen' interface.  */
-
   /* If not specified in the command line, use the host
      endianness.  */
   if (!set_target_endian)
@@ -223,49 +241,14 @@ md_begin (void)
 #endif
     }
 
-  /* If not specified in the command line, use eBPF rather
-     than xBPF.  */
-  if (!set_xbpf)
-      target_xbpf = 0;
-
-  /* Set the ISA, which depends on the target endianness. */
-  bpf_isa = cgen_bitset_create (ISA_MAX);
-  if (target_big_endian)
-    {
-      if (target_xbpf)
-	cgen_bitset_set (bpf_isa, ISA_XBPFBE);
-      else
-	cgen_bitset_set (bpf_isa, ISA_EBPFBE);
-    }
-  else
-    {
-      if (target_xbpf)
-	cgen_bitset_set (bpf_isa, ISA_XBPFLE);
-      else
-	cgen_bitset_set (bpf_isa, ISA_EBPFLE);
-    }
-
   /* Ensure that lines can begin with '*' in BPF store pseudoc instruction.  */
   lex_type['*'] |= LEX_BEGIN_NAME;
 
-  /* Set the machine number and endian.  */
-  gas_cgen_cpu_desc = bpf_cgen_cpu_open (CGEN_CPU_OPEN_ENDIAN,
-                                         target_big_endian ?
-                                         CGEN_ENDIAN_BIG : CGEN_ENDIAN_LITTLE,
-                                         CGEN_CPU_OPEN_INSN_ENDIAN,
-                                         CGEN_ENDIAN_LITTLE,
-                                         CGEN_CPU_OPEN_ISAS,
-                                         bpf_isa,
-                                         CGEN_CPU_OPEN_END);
-  bpf_cgen_init_asm (gas_cgen_cpu_desc);
-
-  /* This is a callback from cgen to gas to parse operands.  */
-  cgen_set_parse_operand_fn (gas_cgen_cpu_desc, gas_cgen_parse_operand);
-
   /* Set the machine type. */
   bfd_default_set_arch_mach (stdoutput, bfd_arch_bpf, bfd_mach_bpf);
-  init_pseudoc_lex();
 }
+
+/* Round up a section size to the appropriate boundary.  */
 
 valueT
 md_section_align (segT segment, valueT size)
@@ -310,33 +293,48 @@ md_number_to_chars (char * buf, valueT val, int n)
 }
 
 arelent *
-tc_gen_reloc (asection *sec, fixS *fix)
+tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED, fixS *fixP)
 {
-  return gas_cgen_tc_gen_reloc (sec, fix);
-}
+  bfd_reloc_code_real_type r_type = fixP->fx_r_type;
+  arelent *reloc;
 
-/* Return the bfd reloc type for OPERAND of INSN at fixup FIXP.  This
-   is called when the operand is an expression that couldn't be fully
-   resolved.  Returns BFD_RELOC_NONE if no reloc type can be found.
-   *FIXP may be modified if desired.  */
+  reloc = XNEW (arelent);
 
-bfd_reloc_code_real_type
-md_cgen_lookup_reloc (const CGEN_INSN *insn ATTRIBUTE_UNUSED,
-		      const CGEN_OPERAND *operand,
-		      fixS *fixP)
-{
-  switch (operand->type)
+  if (fixP->fx_pcrel)
+   {
+      r_type = (r_type == BFD_RELOC_8 ? BFD_RELOC_8_PCREL
+                : r_type == BFD_RELOC_16 ? BFD_RELOC_16_PCREL
+                : r_type == BFD_RELOC_24 ? BFD_RELOC_24_PCREL
+                : r_type == BFD_RELOC_32 ? BFD_RELOC_32_PCREL
+                : r_type == BFD_RELOC_64 ? BFD_RELOC_64_PCREL
+                : r_type);
+   }
+
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, r_type);
+
+  if (reloc->howto == (reloc_howto_type *) NULL)
     {
-    case BPF_OPERAND_IMM64:
-      return BFD_RELOC_BPF_64;
-    case BPF_OPERAND_DISP32:
-      fixP->fx_pcrel = 1;
-      return BFD_RELOC_BPF_DISP32;
-    default:
-      break;
+      as_bad_where (fixP->fx_file, fixP->fx_line,
+		    _("relocation is not supported"));
+      return NULL;
     }
-  return BFD_RELOC_NONE;
+
+  //XXX  gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
+
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
+
+  /* Use fx_offset for these cases.  */
+  if (fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT)
+    reloc->addend = fixP->fx_offset;
+  else
+    reloc->addend = fixP->fx_addnumber;
+
+  reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
+  return reloc;
 }
+
 
 /* *FRAGP has been relaxed to its final size, and now needs to have
    the bytes inside it modified to conform to the new size.
@@ -362,1555 +360,820 @@ md_estimate_size_before_relax (fragS *fragP ATTRIBUTE_UNUSED,
 }
 
 
+/* Apply a fixS (fixup of an instruction or data that we didn't have
+   enough info to complete immediately) to the data in a frag.  */
+
 void
-md_apply_fix (fixS *fixP, valueT *valP, segT seg)
+md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
-  /* Some fixups for instructions require special attention.  This is
-     handled in the code block below.  */
-  if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
+  char *where = fixP->fx_frag->fr_literal + fixP->fx_where;
+
+  switch (fixP->fx_r_type)
     {
-      int opindex = (int) fixP->fx_r_type - (int) BFD_RELOC_UNUSED;
-      const CGEN_OPERAND *operand = cgen_operand_lookup_by_num (gas_cgen_cpu_desc,
-                                                                opindex);
-      char *where;
+    case BFD_RELOC_BPF_DISP16:
+      /* Convert from bytes to number of 64-bit words to the target,
+         minus one.  */
+      *valP = (((long) (*valP)) - 8) / 8;
+      break;
+    case BFD_RELOC_BPF_DISP32:
+      /* eBPF supports two kind of CALL instructions: the so called
+         pseudo calls ("bpf to bpf") and external calls ("bpf to
+         kernel").
 
-      switch (operand->type)
+         Both kind of calls use the same instruction (CALL).  However,
+         external calls are constructed by passing a constant argument
+         to the instruction, whereas pseudo calls result from
+         expressions involving symbols.  In practice, instructions
+         requiring a fixup are interpreted as pseudo-calls.  If we are
+         executing this code, this is a pseudo call.
+
+         The kernel expects for pseudo-calls to be annotated by having
+         BPF_PSEUDO_CALL in the SRC field of the instruction.  But
+         beware the infamous nibble-swapping of eBPF and take
+         endianness into account here.
+
+         Note that the CALL instruction has only one operand, so
+         this code is executed only once per instruction.  */
+      md_number_to_chars (where + 1, target_big_endian ? 0x01 : 0x10, 1);
+
+      /* Convert from bytes to number of 64-bit words to the target,
+         minus one.  */
+      *valP = (((long) (*valP)) - 8) / 8;
+      break;
+    case BFD_RELOC_16_PCREL:
+      /* Convert from bytes to number of 64-bit words to the target,
+         minus one.  */
+      *valP = (((long) (*valP)) - 8) / 8;
+      break;
+    default:
+      break;
+    }
+
+  if (fixP->fx_addsy == (symbolS *) NULL)
+    fixP->fx_done = 1;
+
+  if (fixP->fx_done)
+    {
+      /* We're finished with this fixup.  Install it because
+	 bfd_install_relocation won't be called to do it.  */
+      switch (fixP->fx_r_type)
+	{
+	case BFD_RELOC_8:
+	  md_number_to_chars (where, *valP, 1);
+	  break;
+	case BFD_RELOC_16:
+	  md_number_to_chars (where, *valP, 2);
+	  break;
+	case BFD_RELOC_32:
+	  md_number_to_chars (where, *valP, 4);
+	  break;
+	case BFD_RELOC_64:
+	  md_number_to_chars (where, *valP, 8);
+	  break;
+        case BFD_RELOC_BPF_DISP16:
+          md_number_to_chars (where + 2, (uint16_t) *valP, 2);
+          break;
+        case BFD_RELOC_BPF_DISP32:
+          md_number_to_chars (where + 4, (uint32_t) *valP, 4);
+          break;
+        case BFD_RELOC_16_PCREL:
+          md_number_to_chars (where + 2, (uint32_t) *valP, 2);
+          break;
+	default:
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("internal error: can't install fix for reloc type %d (`%s')"),
+			fixP->fx_r_type, bfd_get_reloc_code_name (fixP->fx_r_type));
+	  break;
+	}
+    }
+
+  /* Tuck `value' away for use by tc_gen_reloc.
+     See the comment describing fx_addnumber in write.h.
+     This field is misnamed (or misused :-).  */
+  fixP->fx_addnumber = *valP;
+}
+
+/* Parse an operand expression.  Returns the first character that is
+   not part of the expression, or NULL in case of parse error.
+
+   See md_operand below to see how exp_parse_failed is used.  */
+
+static int exp_parse_failed = 0;
+
+static char *
+parse_expression (char *s, expressionS *exp)
+{
+  char *saved_input_line_pointer = input_line_pointer;
+  char *saved_s = s;
+
+  exp_parse_failed = 0;
+  input_line_pointer = s;
+  expression (exp);
+  s = input_line_pointer;
+  input_line_pointer = saved_input_line_pointer;
+
+  switch (exp->X_op == O_absent || exp_parse_failed)
+    return NULL;
+
+  /* The expression parser may consume trailing whitespaces.  We have
+     to undo that since the instruction templates may be expecting
+     these whitespaces.  */
+  {
+    char *p;
+    for (p = s - 1; p >= saved_s && *p == ' '; --p)
+      --s;
+  }
+
+  return s;
+}
+
+/* Parse a BPF register name and return the corresponding register
+   number.  Return NULL in case of parse error, or a pointer to the
+   first character in S that is not part of the register name.  */
+
+static char *
+parse_bpf_register (char *s, char rw, uint8_t *regno)
+{
+  if (asm_dialect == DIALECT_NORMAL)
+    {
+      rw = 'r';
+      if (*s != '%')
+	return NULL;
+      s += 1;
+
+      if (*s == 'f' && *(s + 1) == 'p')
+	{
+	  *regno = 10;
+	  s += 2;
+	  return s;
+	}
+    }
+
+  if (*s != rw)
+    return NULL;
+  s += 1;
+
+  if (*s == '1')
+    {
+      if (*(s + 1) == '0')
         {
-        case BPF_OPERAND_DISP32:
-          /* eBPF supports two kind of CALL instructions: the so
-             called pseudo calls ("bpf to bpf") and external calls
-             ("bpf to kernel").
+          *regno = 10;
+          s += 2;
+        }
+      else
+        {
+          *regno = 1;
+          s += 1;
+        }
+    }
+  else if (*s >= '0' && *s <= '9')
+    {
+      *regno = *s - '0';
+      s += 1;
+    }
 
-             Both kind of calls use the same instruction (CALL).
-             However, external calls are constructed by passing a
-             constant argument to the instruction, whereas pseudo
-             calls result from expressions involving symbols.  In
-             practice, instructions requiring a fixup are interpreted
-             as pseudo-calls.  If we are executing this code, this is
-             a pseudo call.
+  return s;
+}
 
-             The kernel expects for pseudo-calls to be annotated by
-             having BPF_PSEUDO_CALL in the SRC field of the
-             instruction.  But beware the infamous nibble-swapping of
-             eBPF and take endianness into account here.
+/* Collect a parse error message.  */
 
-             Note that the CALL instruction has only one operand, so
-             this code is executed only once per instruction.  */
-          where = fixP->fx_frag->fr_literal + fixP->fx_where + 1;
-          where[0] = target_big_endian ? 0x01 : 0x10;
-          /* Fallthrough.  */
-        case BPF_OPERAND_DISP16:
-          /* The PC-relative displacement fields in jump instructions
-             shouldn't be in bytes.  Instead, they hold the number of
-             64-bit words to the target, _minus one_.  */ 
-          *valP = (((long) (*valP)) - 8) / 8;
-          break;
-        default:
-          break;
+static int partial_match_length = 0;
+static char *errmsg = NULL;
+
+static void
+parse_error (int length, const char *fmt, ...)
+{
+  if (length > partial_match_length)
+    {
+      va_list args;
+
+      free (errmsg);
+      va_start (args, fmt);
+      errmsg = xvasprintf (fmt, args);
+      va_end (args);
+      partial_match_length = length;
+    }
+}
+
+/* Assemble a machine instruction in STR and emit the frags/bytes it
+   assembles to.  */
+
+void
+md_assemble (char *str ATTRIBUTE_UNUSED)
+{
+  /* There are two different syntaxes that can be used to write BPF
+     instructions.  One is very conventional and like any other
+     assembly language where each instruction is conformed by an
+     instruction mnemonic followed by its operands.  This is what we
+     call the "normal" syntax.  The other syntax tries to look like C
+     statements. We have to support both syntaxes in this assembler.
+
+     One of the many nuisances introduced by this eccentricity is that
+     in the pseudo-c syntax it is not possible to hash the opcodes
+     table by instruction mnemonic, because there is none.  So we have
+     no other choice than to try to parse all instruction opcodes
+     until one matches.  This is slow.
+
+     Another problem is that emitting detailed diagnostics becomes
+     tricky, since the lack of mnemonic means it is not clear what
+     instruction was intended by the user, and we cannot emit
+     diagnostics for every attempted template.  So if an instruction
+     is not parsed, we report the diagnostic corresponding to the
+     partially parsed instruction that was matched further.  */
+
+  unsigned int idx = 0;
+  struct bpf_insn insn;
+  const struct bpf_opcode *opcode;
+
+  /* Initialize the global diagnostic variables.  See the parse_error
+     function above.  */
+  partial_match_length = 0;
+  errmsg = NULL;
+
+#define PARSE_ERROR(...) parse_error (s - str, __VA_ARGS__)
+
+  while ((opcode = bpf_get_opcode (idx++)) != NULL)
+    {
+      const char *p;
+      char *s;
+      const char *template
+        = (asm_dialect == DIALECT_PSEUDOC ? opcode->pseudoc : opcode->normal);
+
+      /* Do not try to match opcodes with a higher version than the
+         selected ISA spec.  */
+      if (opcode->version > isa_spec)
+        continue;
+
+      memset (&insn, 0, sizeof (struct bpf_insn));
+      insn.size = 8;
+      for (s = str, p = template; *p != '\0';)
+        {
+          if (*p == ' ')
+            {
+              /* Expect zero or more spaces.  */
+              while (*s != '\0' && (*s == ' ' || *s == '\t'))
+                s += 1;
+              p += 1;
+            }
+          else if (*p == '%')
+            {
+              if (*(p + 1) == '%')
+                {
+                  if (*s != '%')
+                    {
+                      PARSE_ERROR ("expected '%%'");
+                      break;
+                    }
+                  p += 2;
+                  s += 1;
+                }
+              else if (*(p + 1) == 'w')
+                {
+                  /* Expect zero or more spaces.  */
+                  while (*s != '\0' && (*s == ' ' || *s == '\t'))
+                    s += 1;
+                  p += 2;
+                }
+              else if (*(p + 1) == 'W')
+                {
+                  /* Expect one or more spaces.  */
+                  if (*s != ' ' && *s != '\t')
+                    {
+                      PARSE_ERROR ("expected white space, got '%s'",
+                                   s);
+                      break;
+                    }
+                  while (*s != '\0' && (*s == ' ' || *s == '\t'))
+                    s += 1;
+                  p += 2;
+                }
+              else if (strncmp (p, "%dr", 3) == 0)
+                {
+                  uint8_t regno;
+                  char *news = parse_bpf_register (s, 'r', &regno);
+
+                  if (news == NULL || (insn.has_dst && regno != insn.dst))
+                    {
+                      if (news != NULL)
+                        PARSE_ERROR ("expected register r%d, got r%d",
+                                     insn.dst, regno);
+                      else
+                        PARSE_ERROR ("expected register name, got '%s'", s);
+                      break;
+                    }
+                  s = news;
+                  insn.dst = regno;
+                  insn.has_dst = 1;
+                  p += 3;
+                }
+              else if (strncmp (p, "%sr", 3) == 0)
+                {
+                  uint8_t regno;
+                  char *news = parse_bpf_register (s, 'r', &regno);
+
+                  if (news == NULL || (insn.has_src && regno != insn.src))
+                    {
+                      if (news != NULL)
+                        PARSE_ERROR ("expected register r%d, got r%d",
+                                     insn.dst, regno);
+                      else
+                        PARSE_ERROR ("expected register name, got '%s'", s);
+                      break;
+                    }
+                  s = news;
+                  insn.src = regno;
+                  insn.has_src = 1;
+                  p += 3;
+                }
+              else if (strncmp (p, "%dw", 3) == 0)
+                {
+                  uint8_t regno;
+                  char *news = parse_bpf_register (s, 'w', &regno);
+
+                  if (news == NULL || (insn.has_dst && regno != insn.dst))
+                    {
+                      if (news != NULL)
+                        PARSE_ERROR ("expected register r%d, got r%d",
+                                     insn.dst, regno);
+                      else
+                        PARSE_ERROR ("expected register name, got '%s'", s);
+                      break;
+                    }
+                  s = news;
+                  insn.dst = regno;
+                  insn.has_dst = 1;
+                  p += 3;
+                }
+              else if (strncmp (p, "%sw", 3) == 0)
+                {
+                  uint8_t regno;
+                  char *news = parse_bpf_register (s, 'w', &regno);
+
+                  if (news == NULL || (insn.has_src && regno != insn.src))
+                    {
+                      if (news != NULL)
+                        PARSE_ERROR ("expected register r%d, got r%d",
+                                     insn.dst, regno);
+                      else
+                        PARSE_ERROR ("expected register name, got '%s'", s);
+                      break;
+                    }
+                  s = news;
+                  insn.src = regno;
+                  insn.has_src = 1;
+                  p += 3;
+                }
+              else if (strncmp (p, "%i32", 4) == 0
+                       || strncmp (p, "%I32", 4) == 0)
+                {
+                  if (p[1] == 'I')
+                    {
+                      while (*s == ' ' || *s == '\t')
+                        s += 1;
+                      if (*s != '+' && *s != '-')
+                        {
+                          PARSE_ERROR ("expected `+' or `-', got `%c'", *s);
+                          break;
+                        }
+                    }
+
+                  s = parse_expression (s, &insn.imm32);
+                  if (s == NULL)
+                    {
+                      PARSE_ERROR ("expected signed 32-bit immediate");
+                      break;
+                    }
+                  insn.has_imm32 = 1;
+                  p += 4;
+                }
+              else if (strncmp (p, "%o16", 4) == 0)
+                {
+                  while (*s == ' ' || *s == '\t')
+                    s += 1;
+                  if (*s != '+' && *s != '-')
+                    {
+                      PARSE_ERROR ("expected `+' or `-', got `%c'", *s);
+                      break;
+                    }
+
+                  s = parse_expression (s, &insn.offset16);
+                  if (s == NULL)
+                    {
+                      PARSE_ERROR ("expected signed 16-bit offset");
+                      break;
+                    }
+                  insn.has_offset16 = 1;
+                  p += 4;
+                }
+              else if (strncmp (p, "%d16", 4) == 0)
+                {
+                  s = parse_expression (s, &insn.disp16);
+                  if (s == NULL)
+                    {
+                      PARSE_ERROR ("expected signed 16-bit displacement");
+                      break;
+                    }
+                  insn.has_disp16 = 1;
+                  p += 4;
+                }
+              else if (strncmp (p, "%d32", 4) == 0)
+                {
+                  s = parse_expression (s, &insn.disp32);
+                  if (s == NULL)
+                    {
+                      PARSE_ERROR ("expected signed 32-bit displacement");
+                      break;
+                    }
+                  insn.has_disp32 = 1;
+                  p += 4;
+                }
+              else if (strncmp (p, "%i64", 4) == 0)
+                {
+                  s = parse_expression (s, &insn.imm64);
+                  if (s == NULL)
+                    {
+                      PARSE_ERROR ("expected signed 64-bit immediate");
+                      break;
+                    }
+                  insn.has_imm64 = 1;
+                  insn.size = 16;
+                  p += 4;
+                }
+              else
+                as_fatal (_("invalid %%-tag in BPF opcode '%s'\n"), template);
+            }
+          else
+            {
+              /* Match a literal character.  */
+              if (*s != *p)
+                {
+                  if (*s == '\0')
+                    PARSE_ERROR ("expected '%c'", *p);
+                  else if (*s == '%')
+                    {
+                      /* This is to workaround a bug in as_bad. */
+                      char tmp[3];
+
+                      tmp[0] = '%';
+                      tmp[1] = '%';
+                      tmp[2] = '\0';
+
+                      PARSE_ERROR ("expected '%c', got '%s'", *p, tmp);
+                    }
+                  else
+                    PARSE_ERROR ("expected '%c', got '%c'", *p, *s);
+                  break;
+                }
+              p += 1;
+              s += 1;
+            }
+        }
+
+      if (*p == '\0')
+        {
+          /* Allow white spaces at the end of the line.  */
+          while (*s != '\0' && (*s == ' ' || *s == '\t'))
+            s += 1;
+          if (*s == '\0')
+            /* We parsed an instruction successfully.  */
+            break;
+          PARSE_ERROR ("extra junk at end of line");
         }
     }
 
-  /* And now invoke CGEN's handler, which will eventually install
-     *valP into the corresponding operand.  */
-  gas_cgen_md_apply_fix (fixP, valP, seg);
-}
+  if (opcode == NULL)
+    {
+      as_bad (_("unrecognized instruction `%s'"), str);
+      if (errmsg != NULL)
+        {
+          as_bad (errmsg);
+          free (errmsg);
+        }
 
-/*
-  The BPF pseudo grammar:
+      return;
+    }
+  insn.opcode = opcode->opcode;
 
-	instruction  : bpf_alu_insn
-		     | bpf_alu32_insn
-		     | bpf_jump_insn
-		     | bpf_load_store_insn
-		     | bpf_load_store32_insn
-		     | bpf_non_generic_load
-		     | bpf_endianness_conv_insn
-		     | bpf_64_imm_load_insn
-		     | bpf_atomic_insn
-		     ;
+#undef PARSE_ERROR
 
-	bpf_alu_insn : BPF_REG bpf_alu_operator register_or_imm32
-		     ;
-
-	bpf_alu32_insn : BPF_REG32 bpf_alu_operator register32_or_imm32
-		       ;
-
-	bpf_jump_insn  : BPF_JA offset
-		       | IF BPF_REG bpf_jump_operator register_or_imm32 BPF_JA offset
-		       | IF BPF_REG32 bpf_jump_operator register_or_imm32 BPF_JA offset
-		       | BPF_CALL offset
-		       | BPF_EXIT
-		       ;
-
-	bpf_load_store_insn  : BPF_REG CHR_EQUAL bpf_size_cast BPF_CHR_OPEN_BR \
-			       register_and_offset BPF_CHR_CLSE_BR
-			     | bpf_size_cast register_and_offset CHR_EQUAL BPF_REG
-			     ;
-
-	bpf_load_store32_insn  : BPF_REG CHR_EQUAL bpf_size_cast BPF_CHR_OPEN_BR \
-				 register32_and_offset BPF_CHR_CLSE_BR
-			       | bpf_size_cast register_and_offset CHR_EQUAL BPF_REG32
-			     ;
-
-	bpf_non_generic_load : BPF_REG_R0 CHR_EQUAL bpf_size_cast BPF_LD BPF_CHR_OPEN_BR \
-			       imm32 BPF_CHR_CLSE_BR
-			     ;
-
-	bpf_endianness_conv_insn : BPF_REG_N bpf_endianness_mnem BPF_REG_N
-				 ;
-
-	bpf_64_imm_load_insn : BPF_REG imm64 BPF_LL
-			     ;
-
-	bpf_atomic_insn : BPF_LOCK bpf_size_cast_32_64 register_and_offset BPF_ADD BPF_REG
-
-	register_and_offset : BPF_CHR_OPEN_BR BPF_REG offset BPF_CHR_CLSE_BR
-			    ;
-
-	register32_and_offset : BPF_CHR_OPEN_BR BPF_REG32 offset BPF_CHR_CLSE_BR
-			      ;
-
-	bpf_size_cast : CHR_START BPF_CHR_OPEN_BR bpf_size CHR_START BPF_CHR_CLSE_BR
-		      ;
-
-	bpf_size_cast_32_64 : CHR_START BPF_CHR_OPEN_BR bpf_size_cast_32_64 CHR_STAR BPF_CHR_CLSE_BR
-			    ;
-
-	bpf_size_32_64 : BPF_CAST_U32
-		       | BPF_CAST_U64
-		       ;
-
-	bpf_size  : BPF_CAST_U8
-		  | BPF_CAST_U16
-		  | BPF_CAST_U32
-		  | BPF_CAST_U64
-		  ;
-
-	bpf_jump_operator : BPF_JEQ
-			  | BPF_JGT
-			  | BPF_JGE
-			  | BPF_JNE
-			  | BPF_JSGT
-			  | BPF_JSGE
-			  | BPF_JLT
-			  | BPF_JLE
-			  | BPF_JSLT
-			  | BPF_JSLE
-			  ;
-
-	bpf_alu_operator : BPF_ADD
-			 | BPF_SUB
-			 | BPF_MUL
-			 | BPF_DIV
-			 | BPF_OR
-			 | BPF_AND
-			 | BPF_LSH
-			 | BPF_RSH
-			 | BPF_NEG
-			 | BPF_MOD
-			 | BPF_XOR
-			 | BPF_ARSH
-			 | CHR_EQUAL
-			 ;
-
-	bpf_endianness_mnem : BPF_LE16
-			    | BPF_LE32
-			    | BPF_LE64
-			    | BPF_BE16
-			    | BPF_BE32
-			    | BPF_BE64
-			    ;
-
-	offset : BPF_EXPR
-	       | BPF_SYMBOL
-	       ;
-
-	register_or_imm32 : BPF_REG
-			  | expression
-			  ;
-
-	register32_or_imm32 : BPF_REG32
-			    | expression
-			    ;
-
-	imm32 : BPF_EXPR
-	      | BPF_SYMBOL
-	      ;
-
-	imm64 : BPF_EXPR
-	      | BPF_SYMBOL
-	      ;
-
-	register_or_expression : BPF_EXPR
-			       | BPF_REG
-			       ;
-
-	BPF_EXPR : GAS_EXPR
-
-*/
-
-enum bpf_token_type
+  /* Generate the frags and fixups for the parsed instruction.  */
   {
-    /* Keep grouped to quickly access. */
-    BPF_ADD,
-    BPF_SUB,
-    BPF_MUL,
-    BPF_DIV,
-    BPF_OR,
-    BPF_AND,
-    BPF_LSH,
-    BPF_RSH,
-    BPF_MOD,
-    BPF_XOR,
-    BPF_MOV,
-    BPF_ARSH,
-    BPF_NEG,
+    char *this_frag = frag_more (insn.size);
+    char bytes[16];
+    uint8_t src, dst;
+    int i;
 
-    BPF_REG,
+    /* Zero all the bytes.  */
+    memset (bytes, 0, 16);
 
-    BPF_IF,
-    BPF_GOTO,
-
-    /* Keep grouped to quickly access.  */
-    BPF_JEQ,
-    BPF_JGT,
-    BPF_JGE,
-    BPF_JLT,
-    BPF_JLE,
-    BPF_JSET,
-    BPF_JNE,
-    BPF_JSGT,
-    BPF_JSGE,
-    BPF_JSLT,
-    BPF_JSLE,
-
-    BPF_SYMBOL,
-    BPF_CHR_CLSE_BR,
-    BPF_CHR_OPEN_BR,
-
-    /* Keep grouped to quickly access.  */
-    BPF_CAST_U8,
-    BPF_CAST_U16,
-    BPF_CAST_U32,
-    BPF_CAST_U64,
-
-    /* Keep grouped to quickly access.  */
-    BPF_LE16,
-    BPF_LE32,
-    BPF_LE64,
-    BPF_BE16,
-    BPF_BE32,
-    BPF_BE64,
-
-    BPF_LOCK,
-
-    BPF_IND_CALL,
-    BPF_LD,
-    BPF_LL,
-    BPF_EXPR,
-    BPF_UNKNOWN,
-  };
-
-static int
-valid_expr (const char *e, const char **end_expr)
-{
-  invalid_expression = NULL;
-  char *hold = input_line_pointer;
-  expressionS exp;
-
-  input_line_pointer = (char *) e;
-  deferred_expression  (&exp);
-  *end_expr = input_line_pointer;
-  input_line_pointer = hold;
-
-  return invalid_expression == NULL;
-}
-
-static char *
-build_bpf_non_generic_load (char *src, enum bpf_token_type cast,
-			    const char *imm32)
-{
-  char *bpf_insn;
-  static const char *cast_rw[] = {"b", "h", "w", "dw"};
-
-  bpf_insn = xasprintf ("%s%s%s %s%s%s%s",
-			"ld",
-			src ? "ind" : "abs",
-			cast_rw[cast - BPF_CAST_U8],
-			src ? "%" : "",
-			src ? src : "",
-			src ? "," : "",
-			imm32);
-  return bpf_insn;
-}
-
-static char *
-build_bpf_atomic_insn (char *dst, char *src,
-		       enum bpf_token_type atomic_insn,
-		       enum bpf_token_type cast,
-		       const char *offset)
-{
-  char *bpf_insn;
-  static const char *cast_rw[] = {"w", "dw"};
-  static const char *mnem[] = {"xadd"};
-
-  bpf_insn = xasprintf ("%s%s [%%%s%s%s],%%%s", mnem[atomic_insn - BPF_ADD],
-			cast_rw[cast - BPF_CAST_U32], dst,
-			*offset != '+' ? "+" : "",
-			offset, src);
-  return bpf_insn;
-}
-
-static char *
-build_bpf_jmp_insn (char *dst, char *src,
-		    char *imm32, enum bpf_token_type op,
-		    const char *sym, const char *offset)
-{
-  char *bpf_insn;
-  static const char *mnem[] =
-    {
-      "jeq", "jgt", "jge", "jlt",
-      "jle", "jset", "jne", "jsgt",
-      "jsge", "jslt", "jsle"
-    };
-
-  const char *in32 = (*dst == 'w' ? "32" : "");
-
-  *dst = 'r';
-  if (src)
-    *src = 'r';
-
-  bpf_insn = xasprintf ("%s%s %%%s,%s%s,%s",
-			mnem[op - BPF_JEQ], in32, dst,
-			src ? "%" : "",
-			src ? src : imm32,
-			offset ? offset : sym);
-  return bpf_insn;
-}
-
-static char *
-build_bpf_arithm_insn (char *dst, char *src,
-		       int load64, const char *imm32,
-		       enum bpf_token_type type)
-{
-  char *bpf_insn;
-  static const char *mnem[] =
-    {
-      "add", "sub", "mul", "div",
-      "or", "and", "lsh", "rsh",
-      "mod", "xor", "mov", "arsh",
-      "neg",
-    };
-  const char *in32 = (*dst == 'w' ? "32" : "");
-
-  *dst = 'r';
-  if (src)
-    *src = 'r';
-
-  if (type == BPF_NEG)
-    bpf_insn = xasprintf ("%s%s %%%s", mnem[type - BPF_ADD], in32, dst);
-  else if (load64)
-    bpf_insn = xasprintf ("%s %%%s,%s", "lddw", dst, imm32);
-  else
-    bpf_insn = xasprintf ("%s%s %%%s,%s%s", mnem[type - BPF_ADD],
-			  in32, dst,
-			  src ? "%" : "",
-			  src ? src: imm32);
-  return bpf_insn;
-}
-
-static char *
-build_bpf_endianness (char *dst, enum bpf_token_type endianness)
-{
-  char *bpf_insn;
-  static const char *size[] = {"16", "32", "64"};
-  int be = 1;
-
-  if (endianness == BPF_LE16
-      || endianness == BPF_LE32
-      || endianness == BPF_LE64)
-    be = 0;
-  else
-    gas_assert (endianness == BPF_BE16 || endianness == BPF_BE32 || endianness == BPF_BE64);
-
-  bpf_insn = xasprintf ("%s %%%s,%s", be ? "endbe" : "endle",
-			dst, be ? size[endianness - BPF_BE16] : size[endianness - BPF_LE16]);
-  return bpf_insn;
-}
-
-static char *
-build_bpf_load_store_insn (char *dst, char *src,
-			   enum bpf_token_type cast,
-			   const char *offset, int isload)
-{
-  char *bpf_insn;
-  static const char *cast_rw[] = {"b", "h", "w", "dw"};
-
-  *dst = *src = 'r';
-  if (isload)
-    bpf_insn = xasprintf ("%s%s %%%s,[%%%s%s%s]", "ldx",
-			  cast_rw[cast - BPF_CAST_U8], dst, src,
-			  *offset != '+' ? "+" : "",
-			  offset);
-  else
-    bpf_insn = xasprintf ("%s%s [%%%s%s%s],%%%s", "stx",
-			  cast_rw[cast - BPF_CAST_U8], dst,
-			  *offset != '+' ? "+" : "",
-			  offset, src);
-  return bpf_insn;
-}
-
-static int
-look_for_reserved_word (const char *token, enum bpf_token_type *type)
-{
-  int i;
-  static struct
-  {
-    const char *name;
-    enum bpf_token_type type;
-  } reserved_words[] =
-    {
+    /* First encode the opcodes.  Note that we have to handle the
+       endianness groups of the BPF instructions: 8 | 4 | 4 | 16 |
+       32. */
+    if (target_big_endian)
       {
-	.name = "if",
-	.type = BPF_IF
-      },
-      {
-	.name = "goto",
-	.type = BPF_GOTO
-      },
-      {
-	.name = "le16",
-	.type = BPF_LE16
-      },
-      {
-	.name = "le32",
-	.type = BPF_LE32
-      },
-      {
-	.name = "le64",
-	.type = BPF_LE64
-      },
-      {
-	.name = "be16",
-	.type = BPF_BE16
-      },
-      {
-	.name = "be32",
-	.type = BPF_BE32
-      },
-      {
-	.name = "be64",
-	.type = BPF_BE64
-	},
-      {
-	.name = "lock",
-	.type = BPF_LOCK
-      },
-      {
-	.name = "callx",
-	.type = BPF_IND_CALL
-      },
-      {
-	.name = "skb",
-	.type = BPF_LD
-      },
-      {
-	.name = "ll",
-	.type = BPF_LL
-      },
-      {
-	.name = NULL,
+        /* code */
+        bytes[0] = (insn.opcode >> 56) & 0xff;
+        /* regs */
+        bytes[1] = (insn.opcode >> 48) & 0xff;
+        /* offset16 */
+        bytes[2] = (insn.opcode >> 40) & 0xff;
+        bytes[3] = (insn.opcode >> 32) & 0xff;
+        /* imm32 */
+        bytes[4] = (insn.opcode >> 24) & 0xff;
+        bytes[5] = (insn.opcode >> 16) & 0xff;
+        bytes[6] = (insn.opcode >> 8) & 0xff;
+        bytes[7] = insn.opcode & 0xff;
       }
-    };
-
-  for (i = 0; reserved_words[i].name; ++i)
-    if (*reserved_words[i].name == *token
-	&& !strcmp (reserved_words[i].name, token))
+    else
       {
-	*type = reserved_words[i].type;
-	return 1;
+        /* code */
+        bytes[0] = (insn.opcode >> 56) & 0xff;
+        /* regs */
+        bytes[1] = (((((insn.opcode >> 48) & 0xff) & 0xf) << 4)
+                    | (((insn.opcode >> 48) & 0xff) & 0xf));
+        /* offset16 */
+        bytes[3] = (insn.opcode >> 40) & 0xff;
+        bytes[2] = (insn.opcode >> 32) & 0xff;
+        /* imm32 */
+        bytes[7] = (insn.opcode >> 24) & 0xff;
+        bytes[6] = (insn.opcode >> 16) & 0xff;
+        bytes[5] = (insn.opcode >> 8) & 0xff;
+        bytes[4] = insn.opcode & 0xff;
       }
 
-  return 0;
+    /* Now the registers.  */
+    src = insn.has_src ? insn.src : 0;
+    dst = insn.has_dst ? insn.dst : 0;
+
+    if (target_big_endian)
+      bytes[1] = ((dst & 0xf) << 4) | (src & 0xf);
+    else
+      bytes[1] = ((src & 0xf) << 4) | (dst & 0xf);
+
+    /* Now the immediates.  */
+    if (insn.has_imm64)
+      {
+        switch (insn.imm64.X_op)
+          {
+          case O_constant:
+            {
+              uint64_t imm64 = insn.imm64.X_add_number;
+
+              if (target_big_endian)
+                {
+                  bytes[12] = (imm64 >> 56) & 0xff;
+                  bytes[13] = (imm64 >> 48) & 0xff;
+                  bytes[14] = (imm64 >> 40) & 0xff;
+                  bytes[15] = (imm64 >> 32) & 0xff;
+                  bytes[4] = (imm64 >> 24) & 0xff;
+                  bytes[5] = (imm64 >> 16) & 0xff;
+                  bytes[6] = (imm64 >> 8) & 0xff;
+                  bytes[7] = imm64 & 0xff;
+                }
+              else
+                {
+                  bytes[15] = (imm64 >> 56) & 0xff;
+                  bytes[14] = (imm64 >> 48) & 0xff;
+                  bytes[13] = (imm64 >> 40) & 0xff;
+                  bytes[12] = (imm64 >> 32) & 0xff;
+                  bytes[7] = (imm64 >> 24) & 0xff;
+                  bytes[6] = (imm64 >> 16) & 0xff;
+                  bytes[5] = (imm64 >> 8) & 0xff;
+                  bytes[4] = imm64 & 0xff;
+                }
+              break;
+            }
+          case O_symbol:
+          case O_subtract:
+          case O_add:
+            {
+              reloc_howto_type *reloc_howto;
+              int size;
+
+              reloc_howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_BPF_64);
+              if (!reloc_howto)
+                abort ();
+
+              size = bfd_get_reloc_size (reloc_howto);
+
+              fix_new_exp (frag_now, this_frag - frag_now->fr_literal,
+                           size, &insn.imm64, reloc_howto->pc_relative,
+                           BFD_RELOC_BPF_64);
+              break;
+            }
+          default:
+            abort ();
+          }
+      }
+
+    if (insn.has_imm32)
+      {
+        switch (insn.imm32.X_op)
+          {
+          case O_constant:
+            {
+              uint32_t imm32 = insn.imm32.X_add_number;
+
+              if (target_big_endian)
+                {
+                  bytes[4] = (imm32 >> 24) & 0xff;
+                  bytes[5] = (imm32 >> 16) & 0xff;
+                  bytes[6] = (imm32 >> 8) & 0xff;
+                  bytes[7] = imm32 & 0xff;
+                }
+              else
+                {
+                  bytes[7] = (imm32 >> 24) & 0xff;
+                  bytes[6] = (imm32 >> 16) & 0xff;
+                  bytes[5] = (imm32 >> 8) & 0xff;
+                  bytes[4] = imm32 & 0xff;
+                }
+              break;
+            }
+          case O_symbol:
+          case O_subtract:
+          case O_add:
+          case O_uminus:
+            {
+              reloc_howto_type *reloc_howto;
+              int size;
+
+              reloc_howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_32);
+              if (!reloc_howto)
+                abort ();
+
+              size = bfd_get_reloc_size (reloc_howto);
+
+              fix_new_exp (frag_now, this_frag - frag_now->fr_literal + 4,
+                           size, &insn.imm32, reloc_howto->pc_relative,
+                           BFD_RELOC_32);
+              break;
+            }
+          default:
+            abort ();
+          }
+      }
+
+    if (insn.has_disp32)
+      {
+        switch (insn.disp32.X_op)
+          {
+          case O_constant:
+            {
+              uint32_t disp32 = insn.disp32.X_add_number;
+
+              if (target_big_endian)
+                {
+                  bytes[4] = (disp32 >> 24) & 0xff;
+                  bytes[5] = (disp32 >> 16) & 0xff;
+                  bytes[6] = (disp32 >> 8) & 0xff;
+                  bytes[7] = disp32 & 0xff;
+                }
+              else
+                {
+                  bytes[7] = (disp32 >> 24) & 0xff;
+                  bytes[6] = (disp32 >> 16) & 0xff;
+                  bytes[5] = (disp32 >> 8) & 0xff;
+                  bytes[4] = disp32 & 0xff;
+                }
+              break;
+            }
+          case O_symbol:
+          case O_subtract:
+          case O_add:
+            {
+              reloc_howto_type *reloc_howto;
+              int size;
+
+              reloc_howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_BPF_DISP32);
+              if (!reloc_howto)
+                abort ();
+
+              size = bfd_get_reloc_size (reloc_howto);
+
+              fix_new_exp (frag_now, this_frag - frag_now->fr_literal,
+                           size, &insn.disp32, reloc_howto->pc_relative,
+                           BFD_RELOC_BPF_DISP32);
+              break;
+            }
+          default:
+            abort ();
+          }
+      }
+
+    if (insn.has_offset16)
+      {
+        switch (insn.offset16.X_op)
+          {
+          case O_constant:
+            {
+              uint32_t offset16 = insn.offset16.X_add_number;
+
+              if (target_big_endian)
+                {
+                  bytes[2] = (offset16 >> 8) & 0xff;
+                  bytes[3] = offset16 & 0xff;
+                }
+              else
+                {
+                  bytes[3] = (offset16 >> 8) & 0xff;
+                  bytes[2] = offset16 & 0xff;
+                }
+              break;
+            }
+          case O_symbol:
+          case O_subtract:
+          case O_add:
+            {
+              reloc_howto_type *reloc_howto;
+              int size;
+
+              reloc_howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_BPF_DISP16);
+              if (!reloc_howto)
+                abort ();
+
+              size = bfd_get_reloc_size (reloc_howto);
+
+              fix_new_exp (frag_now, this_frag - frag_now->fr_literal,
+                           size, &insn.offset16, reloc_howto->pc_relative,
+                           BFD_RELOC_BPF_DISP16);
+              break;
+            }
+          default:
+            abort ();
+          }
+      }
+
+    if (insn.has_disp16)
+      {
+        switch (insn.disp16.X_op)
+          {
+          case O_constant:
+            {
+              uint32_t disp16 = insn.disp16.X_add_number;
+
+              if (target_big_endian)
+                {
+                  bytes[2] = (disp16 >> 8) & 0xff;
+                  bytes[3] = disp16 & 0xff;
+                }
+              else
+                {
+                  bytes[3] = (disp16 >> 8) & 0xff;
+                  bytes[2] = disp16 & 0xff;
+                }
+              break;
+            }
+          case O_symbol:
+          case O_subtract:
+          case O_add:
+            {
+              reloc_howto_type *reloc_howto;
+              int size;
+
+              reloc_howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_BPF_DISP16);
+              if (!reloc_howto)
+                abort ();
+
+              size = bfd_get_reloc_size (reloc_howto);
+
+              fix_new_exp (frag_now, this_frag - frag_now->fr_literal,
+                           size, &insn.disp16, reloc_howto->pc_relative,
+                           BFD_RELOC_BPF_DISP16);
+              break;
+            }
+          default:
+            abort ();
+          }
+      }
+
+    /* Emit bytes.  */
+    for (i = 0; i < insn.size; ++i)
+      {
+        md_number_to_chars (this_frag, (valueT) bytes[i], 1);
+        this_frag += 1;
+      }
+  }
+
+  /* Emit DWARF2 debugging information.  */
+  dwarf2_emit_insn (insn.size);
 }
 
-static int
-is_register (const char *token, int len)
-{
-  if (token[0] == 'r' || token[0] == 'w')
-    if ((len == 2 && isdigit (token[1]))
-	|| (len == 3 && token[1] == '1' && token[2] == '0'))
-      return 1;
-
-  return 0;
-}
-
-static enum bpf_token_type
-is_cast (const char *token)
-{
-  static const char *cast_rw[] = {"u8", "u16", "u32", "u64"};
-  unsigned int i;
-
-  for (i = 0; i < ARRAY_SIZE (cast_rw); ++i)
-    if (!strcmp (token, cast_rw[i]))
-      return BPF_CAST_U8 + i;
-
-  return BPF_UNKNOWN;
-}
-
-static enum bpf_token_type
-get_token (const char **insn, char *token, size_t *tlen)
-{
-#define GET()					\
-  (*str == '\0'					\
-   ? EOF					\
-   : *(unsigned char *)(str++))
-
-#define UNGET() (--str)
-
-#define START_EXPR()			       \
-  do					       \
-    {					       \
-      if (expr == NULL)			       \
-	expr = str - 1;			       \
-    } while (0)
-
-#define SCANNER_SKIP_WHITESPACE()		\
-  do						\
-    {						\
-      do					\
-	ch = GET ();				\
-      while (ch != EOF				\
-	     && ((ch) == ' ' || (ch) == '\t'));	\
-      if (ch != EOF)				\
-	UNGET ();				\
-    } while (0)
-
-  const char *str = *insn;
-  int ch, ch2 = 0;
-  enum bpf_token_type ttype = BPF_UNKNOWN;
-  size_t len = 0;
-  const char *expr = NULL;
-  const char *end_expr = NULL;
-  int state = 0;
-  int return_token = 0;
-
-  while (1)
-    {
-      ch = GET ();
-
-      if (ch == EOF || len > MAX_TOKEN_SZ)
-	break;
-
-      switch (pseudoc_lex[(unsigned char) ch])
-	{
-	case LEX_IS_WHITESPACE:
-	  SCANNER_SKIP_WHITESPACE ();
-	  return_token = 1;
-
-	  switch (state)
-	    {
-	    case 12: /* >' ' */
-	      ttype = BPF_JGT;
-	      break;
-
-	    case 17: /* ==' ' */
-	      ttype = BPF_JEQ;
-	      break;
-
-	    case 18: /* <' ' */
-	      ttype = BPF_JLT;
-	      break;
-
-	    case 20: /* &' ' */
-	      ttype = BPF_JSET;
-	      break;
-
-	    case 22:  /* s<' '*/
-	      ttype = BPF_JSLT;
-	      break;
-
-	    case 14: /* s> ' ' */
-	      ttype = BPF_JSGT;
-	      break;
-
-	    case 16: /* =' ' */
-	      ttype = BPF_MOV;
-	      break;
-
-	    default:
-	      return_token = 0;
-	    }
-	  break;
-
-	case LEX_IS_EXCLA:
-	  token[len++] = ch;
-	  state = 21;
-	  break;
-
-	case LEX_IS_ARITHM_OP:
-	  if (state == 16)
-	    {
-	      /* ='-' is handle as '=' */
-	      UNGET ();
-	      ttype = BPF_MOV;
-	      return_token = 1;
-	      break;
-	    }
-
-	  START_EXPR();
-	  token[len++] = ch;
-	  switch (ch)
-	    {
-#define BPF_ARITHM_OP(op, type)			\
-	      case (op):			\
-		state = 6;			\
-		ttype = (type);			\
-		break;
-
-	      BPF_ARITHM_OP('+', BPF_ADD);
-	      BPF_ARITHM_OP('-', BPF_SUB);
-	      BPF_ARITHM_OP('*', BPF_MUL);
-	      BPF_ARITHM_OP('/', BPF_DIV);
-	      BPF_ARITHM_OP('|', BPF_OR);
-	      BPF_ARITHM_OP('%', BPF_MOD);
-	      BPF_ARITHM_OP('^', BPF_XOR);
-
-	    case '&':
-	      state = 20; /* '&' */
-	      break;
-
-	    case '<':
-	      switch (state)
-		{
-		case 0:
-		  state = 18; /* '<' */
-		  break;
-
-		case 18:
-		  state = 19; /* <'<' */
-		  break;
-
-		case 8:
-		  state = 22; /* s'<' */
-		  break;
-		}
-	      break;
-
-	    case '>':
-	      switch (state)
-		{
-		case 0:
-		  state = 12; /* '>' */
-		  break;
-
-		case 12:
-		  state = 13; /* >'>' */
-		  break;
-
-		case 8:
-		  state = 14; /* s'>' */
-		  break;
-
-		case 14:
-		  state = 15; /* s>'>' */
-		  break;
-		}
-	      break;
-	    }
-	  break;
-
-	case LEX_IS_STAR:
-	  switch (state)
-	    {
-	    case 0:
-	      token[len++] = ch;
-	      START_EXPR ();
-	      state = 2; /* '*', It could be the fist cast char.  */
-	      break;
-
-	    case 16: /* ='*' Not valid token.  */
-	      ttype = BPF_MOV;
-	      return_token = 1;
-	      UNGET ();
-	      break;
-
-	    case 4: /* *(uXX'*' */
-	      token[len++] = ch;
-	      state = 5;
-	      break;
-	    }
-	  break;
-
-	case LEX_IS_OPEN_BR:
-	  START_EXPR ();
-	  token[len++] = ch;
-	  return_token = 1;
-
-	  switch (state)
-	    {
-	    case 2:
-	      state = 3; /* *'(' second char of a cast or expr.  */
-	      return_token = 0;
-	      break;
-
-	    case 6:
-	      if (valid_expr (expr, &end_expr))
-		{
-		  len = end_expr - expr;
-		  memcpy (token, expr, len);
-		  ttype = BPF_EXPR;
-		  str = end_expr;
-		}
-	      else
-		{
-		  len = 0;
-		  while (*invalid_expression)
-		    token[len++] = *invalid_expression++;
-
-		  token[len] = 0;
-		  ttype = BPF_UNKNOWN;
-		}
-	      break;
-
-	    default:
-	      ttype = BPF_CHR_OPEN_BR;
-	      SCANNER_SKIP_WHITESPACE ();
-	      ch2 = GET ();
-
-	      if ((isdigit (ch2) || ch2 == '(')
-		  && valid_expr (expr, &end_expr))
-		{
-		  len = end_expr - expr;
-		  memcpy (token, expr, len);
-		  ttype = BPF_EXPR;
-		  str = end_expr;
-		}
-	      else
-		UNGET ();
-	    }
-	  break;
-
-	case LEX_IS_CLSE_BR:
-	  token[len++] = ch;
-
-	  if (state == 0)
-	    {
-	      ttype = BPF_CHR_CLSE_BR;
-	      return_token = 1;
-	    }
-	  else if (state == 5) /* *(uXX*')'  */
-	    return_token = 1;
-	  break;
-
-	case LEX_IS_EQUAL:
-	  token[len++] = ch;
-	  return_token = 1;
-
-	  switch (state)
-	    {
-	    case 0:
-	      state = 16; /* '=' */
-	      return_token = 0;
-	      break;
-
-	    case 16:
-	      state = 17; /* ='=' */
-	      return_token = 0;
-	      break;
-
-	    case 2: /* *'=' */
-	      ttype = BPF_MUL;
-	      break;
-
-	    case 10: /* s>>'=' */
-	      ttype = BPF_ARSH;
-	      break;
-
-	    case 12: /* >'=' */
-	      ttype = BPF_JGE;
-	      break;
-
-	    case 13: /* >>'=' */
-	      ttype = BPF_RSH;
-	      break;
-
-	    case 14: /* s>'=' */
-	      ttype = BPF_JSGE;
-	      break;
-
-	    case 15: /* s>>'=' */
-	      ttype = BPF_ARSH;
-	      break;
-
-	    case 18: /* <'=' */
-	      ttype = BPF_JLE;
-	      break;
-
-	    case 19: /* <<'=' */
-	      ttype = BPF_LSH;
-	      break;
-
-	    case 20: /* &'=' */
-	      ttype = BPF_AND;
-	      break;
-
-	    case 21: /* !'=' */
-	      ttype = BPF_JNE;
-	      break;
-
-	    case 22: /* s<'=' */
-	      ttype = BPF_JSLE;
-	      break;
-	    }
-	  break;
-
-	case LEX_IS_SYMBOL_COMPONENT:
-	  return_token = 1;
-
-	  switch (state)
-	    {
-	    case 17: /* =='sym' */
-	      ttype = BPF_JEQ;
-	      break;
-
-	    case 12: /* >'sym' */
-	      ttype = BPF_JGT;
-	      break;
-
-	    case 18: /* <'sym' */
-	      ttype = BPF_JLT;
-	      break;
-
-	    case 20: /* &'sym' */
-	      ttype = BPF_JSET;
-	      break;
-
-	    case 14: /*s>'sym' */
-	      ttype = BPF_JSGT;
-	      break;
-
-	    case 22:  /* s<'sym' */
-	      ttype = BPF_JSLT;
-	      break;
-
-	    case 16: /* ='sym' */
-	      ttype = BPF_MOV;
-	      break;
-
-	    default:
-	      return_token = 0;
-	    }
-
-	  if (return_token)
-	    {
-	      UNGET ();
-	      break;
-	    }
-
-	  START_EXPR ();
-	  token[len++] = ch;
-
-	  while ((ch2 = GET ()) != EOF)
-	    {
-	      int type;
-
-	      type = pseudoc_lex[(unsigned char) ch2];
-	      if (type != LEX_IS_SYMBOL_COMPONENT)
-		break;
-	      token[len++] = ch2;
-	    }
-
-	  if (ch2 != EOF)
-	    UNGET ();
-
-	  if (state == 0)
-	    {
-	      if (len == 1 && ch == 's')
-		state = 8; /* signed instructions: 's' */
-	      else
-		{
-		  ttype = BPF_SYMBOL;
-		  if (is_register (token, len))
-		    ttype = BPF_REG;
-		  else if (look_for_reserved_word (token, &ttype))
-		    ;
-		  else if ((pseudoc_lex[(unsigned char) *token] == LEX_IS_ARITHM_OP
-			    || *token == '(' || isdigit(*token))
-			   && valid_expr (expr, &end_expr))
-		    {
-		      len = end_expr - expr;
-		      token[len] = '\0';
-		      ttype = BPF_EXPR;
-		      str = end_expr;
-		    }
-
-		  return_token = 1;
-		}
-	    }
-	  else if (state == 3) /* *('sym' */
-	    {
-	      if ((ttype = is_cast (&token[2])) != BPF_UNKNOWN)
-		state = 4; /* *('uXX' */
-	      else
-		{
-		  ttype = BPF_EXPR;
-		  return_token = 1;
-		}
-	    }
-	  else if (state == 6)
-	    {
-	      if (ttype == BPF_SUB) /* neg */
-		{
-		  if (is_register (&token[1], len - 1))
-		    ttype =  BPF_NEG;
-		  else if (valid_expr(expr, &end_expr))
-		    {
-		      len = end_expr - expr;
-		      memcpy(token, expr, len);
-		      ttype = BPF_EXPR;
-		      str = end_expr;
-		    }
-		  else
-		    {
-		      len = 0;
-		      while (*invalid_expression)
-			token[len++] = *invalid_expression++;
-		      token[len] = 0;
-		      ttype = BPF_UNKNOWN;
-		    }
-		}
-	      else if (valid_expr (expr, &end_expr))
-		{
-		  len = end_expr - expr;
-		  memcpy(token, expr, len);
-		  ttype = BPF_EXPR;
-		  str = end_expr;
-		}
-	      else
-		ttype = BPF_UNKNOWN;
-
-	      return_token = 1;
-	    }
-	  break;
-	}
-
-      if (return_token)
-	{
-	  *tlen = len;
-	  *insn = str;
-	  break;
-	}
-    }
-
-  return ttype;
-
-#undef GET
-#undef UNGET
-#undef START_EXPR
-#undef SCANNER_SKIP_WHITESPACE
-#undef BPF_ARITHM_OP
-}
-
-/*
-  The parser represent a FSM for the grammar described above. So for example
-  the following rule:
-
-     ` bpf_alu_insn : BPF_REG bpf_alu_operator register_or_imm32'
-
-  Is parser as follows:
-
-      1. It starts in state 0.
-
-      2. Consumes next token, e.g: `BPF_REG' and set `state' variable to a
-      particular state to helps to identify, in this case, that a register
-      token has been read, a comment surrounded by a single quote in the
-      pseudo-c token is added along with the new `state' value to indicate
-      what the scanner has read, e.g.:
-
-          state = 6; // dst_reg = str_cast ( 'src_reg'
-
-      So, in `state 6' the scanner has consumed: a destination register
-      (BPF_REG), an equal character (BPF_MOV), a cast token (BPF_CAST), an
-      open parenthesis (BPF_CHR_OPEN_BR) and the source register (BPF_REG).
-
-      3. If the accumulated tokens represent a complete BPF pseudo-c syntax
-      instruction then, a validation of the terms is made, for example: if
-      the registers have the same sizes (32/64 bits), if a specific
-      destination register must be used, etc., after that, a builder:
-      build_bfp_{non_generic_load,atomic_insn,jmp_insn,arithm_insn,endianness,load_store_insn}
-      is invoked, internally, it translates the BPF pseudo-c instruction to
-      a BPF GAS instruction using the previous terms recollected by the
-      scanner.
-
-      4. If a successful build of BPF GAS instruction was done, a final
-      state is set to `ST_EOI' (End Of Instruction) meaning that is not
-      expecting for more tokens in such instruction.  Otherwise if the
-      conditions to calling builder are not satisfied an error is emitted
-      and `parse_err' is set.
-*/
-
-static char *
-bpf_pseudoc_to_normal_syntax (const char *str, char **errmsg)
-{
-#define syntax_err(format, ...)						\
-  do									\
-    {									\
-      if (! parse_err)							\
-	{								\
-	  parse_err = 1;						\
-	  errbuf = xasprintf (format, ##__VA_ARGS__);			\
-	}								\
-    } while (0)
-
-  enum bpf_token_type ttype;
-  enum bpf_token_type bpf_endianness = BPF_UNKNOWN,
-		      bpf_atomic_insn;
-  enum bpf_token_type bpf_jmp_op = BPF_JEQ; /* Arbitrary.  */
-  enum bpf_token_type bpf_cast = BPF_CAST_U8; /* Arbitrary.  */
-  enum bpf_token_type bpf_arithm_op = BPF_ADD; /* Arbitrary.  */
-  char *bpf_insn = NULL;
-  char *errbuf = NULL;
-  char src_reg[3] = {0};
-  char dst_reg[3] = {0};
-  char str_imm32[40] = {0};
-  char str_offset[40] = {0};
-  char str_symbol[MAX_TOKEN_SZ] = {0};
-  char token[MAX_TOKEN_SZ] = {0};
-  int state = 0;
-  int parse_err = 0;
-  size_t tlen;
-
-  while (*str)
-    {
-      ttype = get_token (&str, token, &tlen);
-      if (ttype == BPF_UNKNOWN || state == ST_EOI)
-	{
-	  syntax_err ("unexpected token: '%s'", token);
-	  break;
-	}
-
-      switch (ttype)
-	{
-	case BPF_UNKNOWN:
-	case BPF_LL:
-	  break;
-
-	case BPF_REG:
-	  switch (state)
-	    {
-	    case 0:
-	      memcpy (dst_reg, token, tlen);
-	      state = 1; /* 'dst_reg' */
-	      break;
-
-	    case 3:
-	      /* dst_reg bpf_op 'src_reg' */
-	      memcpy (src_reg, token, tlen);
-	      if (*dst_reg == *src_reg)
-		bpf_insn = build_bpf_arithm_insn (dst_reg, src_reg, 0,
-						  NULL, bpf_arithm_op);
-	      else
-		{
-		  syntax_err ("different register sizes: '%s', '%s'",
-			      dst_reg, src_reg);
-		  break;
-		}
-	      state = ST_EOI;
-	      break;
-
-	    case 5:
-	      memcpy (src_reg, token, tlen);
-	      state = 6; /* dst_reg = str_cast ( 'src_reg' */
-	      break;
-
-	    case 9:
-	      memcpy (dst_reg, token, tlen);
-	      state = 10; /* str_cast ( 'dst_reg' */
-	      break;
-
-	    case 11:
-	      /* str_cast ( dst_reg offset ) = 'src_reg' */
-	      memcpy (src_reg, token, tlen);
-	      bpf_insn = build_bpf_load_store_insn (dst_reg, src_reg,
-						    bpf_cast, str_offset, 0);
-	      state = ST_EOI;
-	      break;
-
-	    case 14:
-	      memcpy (dst_reg, token, tlen);
-	      state = 15; /* if 'dst_reg' */
-	      break;
-
-	    case 16:
-	      memcpy (src_reg, token, tlen);
-	      state = 17; /* if dst_reg jmp_op 'src_reg' */
-	      break;
-
-	    case 24:
-	      /* dst_reg = endianness src_reg */
-	      memcpy (src_reg, token, tlen);
-	      if (*dst_reg == 'r' && !strcmp (dst_reg, src_reg))
-		bpf_insn = build_bpf_endianness (dst_reg, bpf_endianness);
-	      else
-		syntax_err ("invalid operand for instruction: '%s'", token);
-
-	      state = ST_EOI;
-	      break;
-
-	    case 28:
-	      memcpy (dst_reg, token, tlen);
-	      state = 29; /* lock str_cast ( 'dst_reg'  */
-	      break;
-
-	    case 32:
-	      {
-		/* lock str_cast ( dst_reg offset ) atomic_insn 'src_reg' */
-		int with_offset = *str_offset != '\0';
-
-		memcpy (src_reg, token, tlen);
-		if ((bpf_cast != BPF_CAST_U32
-		     && bpf_cast != BPF_CAST_U64)
-		    || *dst_reg != 'r'
-		    || *src_reg != 'r')
-		  syntax_err ("invalid wide atomic instruction");
-		else
-		  bpf_insn = build_bpf_atomic_insn (dst_reg, src_reg, bpf_atomic_insn,
-						    bpf_cast, with_offset ? str_offset : str_symbol);
-	      }
-
-	      state = ST_EOI;
-	      break;
-
-	    case 33:
-	      /* callx 'dst_reg' */
-	      bpf_insn = xasprintf ("%s %%%s", "call", token);
-	      state = ST_EOI;
-	      break;
-
-	    case 35:
-	      memcpy (src_reg, token, tlen);
-	      state = 36; /* dst_reg = str_cast skb [ 'src_reg' */
-	      break;
-	    }
-	  break;
-
-	case BPF_MOV:
-	case BPF_ADD:
-	case BPF_SUB:
-	case BPF_MUL:
-	case BPF_DIV:
-	case BPF_OR:
-	case BPF_AND:
-	case BPF_LSH:
-	case BPF_RSH:
-	case BPF_MOD:
-	case BPF_XOR:
-	case BPF_ARSH:
-	case BPF_NEG:
-	  switch (state)
-	    {
-	    case 1:
-	      state = 3;  /* dst_reg 'arith_op' */
-	      bpf_arithm_op = ttype;
-	      break;
-
-	    case 3:
-	      if (ttype == BPF_NEG)
-		{
-		  /* reg = -reg */
-		  bpf_arithm_op = ttype;
-		  memcpy (src_reg, token + 1, tlen - 1);
-		  if (strcmp (dst_reg, src_reg))
-		    {
-		      syntax_err ("found: '%s', expected: -%s", token, dst_reg);
-		      break;
-		    }
-
-		  bpf_insn = build_bpf_arithm_insn (dst_reg, src_reg, 0,
-						    NULL, bpf_arithm_op);
-		  state = ST_EOI;
-		}
-	      break;
-
-	    case 23:
-	      memcpy (src_reg, token, tlen);
-	      state = 11; /* str_cast ( dst_reg offset ) '=' */
-	      break;
-
-	    case 12:
-	      if (ttype == BPF_MOV)
-		state = 13; /* str_cast ( dst_reg offset ) '=' */
-	      break;
-
-	    case 31:
-	      bpf_atomic_insn = ttype;
-	      state = 32; /* lock str_cast ( dst_reg offset ) 'atomic_insn' */
-	      break;
-
-	    default:
-	      syntax_err ("unexpected '%s'", token);
-	      state = ST_EOI;
-	    }
-	  break;
-
-	case BPF_CAST_U8:
-	case BPF_CAST_U16:
-	case BPF_CAST_U32:
-	case BPF_CAST_U64:
-	  bpf_cast = ttype;
-	  switch (state)
-	    {
-	    case 3:
-	      state = 4; /* dst_reg = 'str_cast' */
-	      break;
-
-	    case 0:
-	      state = 8;  /* 'str_cast' */
-	      break;
-
-	    case 26:
-	      state = 27; /* lock 'str_cast' */
-	      break;
-	    }
-	  break;
-
-	case BPF_CHR_OPEN_BR:
-	  switch (state)
-	    {
-	    case 4:
-	      state = 5; /* dst_reg = str_cast '(' */
-	      break;
-
-	    case 8:
-	      state = 9; /* str_cast '(' */
-	      break;
-
-	    case 27:
-	      state = 28; /* lock str_cast '(' */
-	      break;
-
-	    case 34:
-	      state = 35; /* dst_reg = str_cast skb '[' */
-	      break;
-	    }
-	  break;
-
-	case BPF_CHR_CLSE_BR:
-	  switch (state)
-	    {
-	    case 7:
-	      /* dst_reg = str_cast ( imm32 ')' */
-	      bpf_insn = build_bpf_load_store_insn (dst_reg, src_reg,
-						    bpf_cast, str_imm32, 1);
-	      state = ST_EOI;
-	      break;
-
-	    case 11:
-	      state = 12; /* str_cast ( dst_reg imm32 ')' */
-	      break;
-
-	    case 21:
-	      /* dst_reg = str_cast ( src_reg  offset ')' */
-	      bpf_insn = build_bpf_load_store_insn (dst_reg, src_reg,
-						    bpf_cast, str_offset, 1);
-	      state = ST_EOI;
-	      break;
-
-	    case 22:
-	      state = 23; /* str_cast ( dst_reg offset ')' */
-	      break;
-
-	    case 30:
-	      state = 31; /* lock str_cast ( dst_reg offset ')' */
-	      break;
-
-	    case 37:
-	      /* dst_reg = str_cast skb [ src_reg imm32 ']' */
-	      if (*dst_reg != 'w' && !strcmp ("r0", dst_reg))
-		bpf_insn = build_bpf_non_generic_load (*src_reg != '\0' ? src_reg : NULL,
-						       bpf_cast, str_imm32);
-	      else
-		syntax_err ("invalid register operand: '%s'", dst_reg);
-
-	      state = ST_EOI;
-	      break;
-	    }
-	  break;
-
-	case BPF_EXPR:
-	  switch (state)
-	    {
-	    case 3:
-	      {
-		/* dst_reg bpf_arithm_op 'imm32' */
-		int load64 = 0;
-
-		memcpy (str_imm32, token, tlen);
-		memset (token, 0, tlen);
-
-		if ((ttype = get_token (&str, token, &tlen)) == BPF_LL
-		    && bpf_arithm_op == BPF_MOV)
-		  load64 = 1;
-		else if (ttype != BPF_UNKNOWN)
-		  syntax_err ("unexpected token: '%s'", token);
-
-		if (load64 && *dst_reg == 'w')
-		  syntax_err ("unexpected register size: '%s'", dst_reg);
-
-		if (! parse_err)
-		  bpf_insn = build_bpf_arithm_insn (dst_reg, NULL, load64,
-						    str_imm32, bpf_arithm_op);
-		state = ST_EOI;
-	      }
-	      break;
-
-	    case 18:
-	      {
-		/* if dst_reg jmp_op src_reg goto 'offset' */
-		int with_src = *src_reg != '\0';
-
-		memcpy (str_offset, token, tlen);
-		if (with_src && *dst_reg != *src_reg)
-		  syntax_err ("different register size: '%s', '%s'",
-			      dst_reg, src_reg);
-		else
-		  bpf_insn = build_bpf_jmp_insn (dst_reg, with_src ? src_reg : NULL,
-						 with_src ? NULL: str_imm32,
-						 bpf_jmp_op, NULL, str_offset);
-		state = ST_EOI;
-	      }
-	      break;
-
-	    case 19:
-	      /* goto 'offset' */
-	      memcpy (str_offset, token, tlen);
-	      bpf_insn = xasprintf ("%s %s", "ja", str_offset);
-	      state = ST_EOI;
-	      break;
-
-	    case 6:
-	      memcpy (str_offset, token, tlen);
-	      state = 21; /* dst_reg = str_cast ( src_reg  'offset' */
-	      break;
-
-	    case 10:
-	      memcpy (str_offset, token, tlen);
-	      state = 22; /* str_cast ( dst_reg 'offset' */
-	      break;
-
-	    case 16:
-	      memcpy (str_imm32, token, tlen);
-	      state = 25; /* if dst_reg jmp_op 'imm32' */
-	      break;
-
-	    case 29:
-	      memcpy (str_offset, token, tlen);
-	      state = 30; /* lock str_cast ( dst_reg 'offset' */
-	      break;
-
-	    case 34:
-	      /* dst_reg = str_cast skb 'imm32' */
-	      if (*dst_reg != 'w' && !strcmp ("r0", dst_reg))
-		{
-		  memcpy (str_imm32, token, tlen);
-		  bpf_insn = build_bpf_non_generic_load (*src_reg != '\0' ? src_reg : NULL,
-							 bpf_cast, str_imm32);
-		}
-	      else
-		syntax_err ("invalid register operand: '%s'", dst_reg);
-
-	      state = ST_EOI;
-	      break;
-
-	    case 36:
-	      memcpy (str_imm32, token, tlen);
-	      state = 37; /* dst_reg = str_cast skb [ src_reg 'imm32' */
-	      break;
-	    }
-	  break;
-
-	case BPF_IF:
-	  if (state == 0)
-	    state = 14;
-	  break;
-
-	case BPF_JSGT:
-	case BPF_JSLT:
-	case BPF_JSLE:
-	case BPF_JSGE:
-	case BPF_JGT:
-	case BPF_JGE:
-	case BPF_JLE:
-	case BPF_JSET:
-	case BPF_JNE:
-	case BPF_JLT:
-	case BPF_JEQ:
-	  if (state == 15)
-	    {
-	      bpf_jmp_op = ttype;
-	      state = 16; /* if dst_reg 'jmp_op' */
-	    }
-	  break;
-
-	case BPF_GOTO:
-	  switch (state)
-	    {
-	    case 17:
-	    case 25:
-	      state = 18; /* if dst_reg jmp_op src_reg|imm32 'goto' */
-	      break;
-
-	    case 0:
-	      state = 19;
-	      break;
-	    }
-	  break;
-
-	case BPF_SYMBOL:
-	  switch (state)
-	    {
-	    case 18:
-	      {
-		/* if dst_reg jmp_op src_reg goto 'sym' */
-		int with_src = *src_reg != '\0';
-
-		memcpy (str_symbol, token, tlen);
-		if (with_src && *dst_reg != *src_reg)
-		  syntax_err ("different register size: '%s', '%s'",
-			      dst_reg, src_reg);
-		else
-		  bpf_insn = build_bpf_jmp_insn (dst_reg, with_src ? src_reg : NULL,
-						 with_src ? NULL: str_imm32,
-						 bpf_jmp_op, str_symbol, NULL);
-		state = ST_EOI;
-	      }
-	      break;
-
-	    case 19:
-	      /* goto 'sym' */
-	      memcpy (str_symbol, token, tlen);
-	      bpf_insn = xasprintf ("%s %s", "ja", str_symbol);
-	      state = ST_EOI;
-	      break;
-
-	    case 0:
-	      state = ST_EOI;
-	      break;
-
-	    case 3:
-	      {
-		/* dst_reg arithm_op 'sym' */
-		int load64 = 0;
-		
-		memcpy (str_symbol, token, tlen);
-		memset (token, 0, tlen);
-
-		if ((ttype = get_token (&str, token, &tlen)) == BPF_LL
-		    && bpf_arithm_op == BPF_MOV)
-		  load64 = 1;
-		else if (ttype != BPF_UNKNOWN)
-		  syntax_err ("unexpected token: '%s'", token);
-
-		if (load64 && *dst_reg == 'w')
-		  syntax_err ("unexpected register size: '%s'", dst_reg);
-
-		if (! parse_err)
-		  bpf_insn = build_bpf_arithm_insn (dst_reg, NULL, load64,
-						    str_symbol, bpf_arithm_op);
-		state = ST_EOI;
-	      }
-	      break;
-	    }
-	  break;
-
-	case BPF_LE16:
-	case BPF_LE32:
-	case BPF_LE64:
-	case BPF_BE16:
-	case BPF_BE32:
-	case BPF_BE64:
-	  bpf_endianness = ttype;
-	  state = 24; /* dst_reg = 'endianness' */
-	  break;
-
-	case BPF_LOCK:
-	  state = 26;
-	  break;
-
-	case BPF_IND_CALL:
-	  state = 33;
-	  break;
-
-	case BPF_LD:
-	  state = 34; /* dst_reg = str_cast 'skb' */
-	  break;
-	}
-
-      memset (token, 0, tlen);
-    }
-
-  if (state != ST_EOI)
-    syntax_err ("incomplete instruction");
-
-  *errmsg = errbuf;
-  return bpf_insn;
-
-#undef syntax_err
-}
-
-void
-md_assemble (char *str)
-{
-  const CGEN_INSN *insn;
-  char *errmsg;
-  char *a_errmsg;
-  CGEN_FIELDS fields;
-  char *normal;
-
-#if CGEN_INT_INSN_P
-  CGEN_INSN_INT buffer[CGEN_MAX_INSN_SIZE / sizeof (CGEN_INT_INSN_P)];
-#else
-  unsigned char buffer[CGEN_MAX_INSN_SIZE];
-#endif
-
-  gas_cgen_init_parse ();
-  insn = bpf_cgen_assemble_insn (gas_cgen_cpu_desc, str, &fields,
-                                  buffer, &errmsg);
-  if (insn == NULL)
-    {
-      normal = bpf_pseudoc_to_normal_syntax (str, &a_errmsg);
-      if (normal)
-	{
-	  insn = bpf_cgen_assemble_insn (gas_cgen_cpu_desc, normal, &fields,
-					 buffer, &a_errmsg);
-	  xfree (normal);
-	}
-
-      if (insn == NULL)
-	{
-	  as_bad ("%s", errmsg);
-	  if (a_errmsg)
-	    {
-	      as_bad ("%s", a_errmsg);
-	      xfree (a_errmsg);
-	    }
-	  return;
-	}
-    }
-
-  gas_cgen_finish_insn (insn, buffer, CGEN_FIELDS_BITSIZE (&fields),
-                        0, /* zero to ban relaxable insns.  */
-                        NULL); /* NULL so results not returned here.  */
-}
+/* Parse an operand that is machine-specific.  */
 
 void
 md_operand (expressionS *expressionP)
 {
-  invalid_expression = input_line_pointer - 1;
-  gas_cgen_md_operand (expressionP);
+  /* If this hook is invoked it means GAS failed to parse a generic
+  expression.  We should inhibit the as_bad in expr.c, so we can fail
+  while parsing instruction alternatives.  To do that, we change the
+  expression to not have an O_absent.  But then we also need to set
+  exp_parse_failed to parse_expression above does the right thing.  */
+  ++input_line_pointer;
+  expressionP->X_op = O_constant;
+  expressionP->X_add_number = 0;
+  exp_parse_failed = 1;
 }
-
 
 symbolS *
 md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
@@ -1928,4 +1191,30 @@ const char *
 md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, false);
+}
+
+
+/* Determine whether the equal sign in the given string corresponds to
+   a BPF instruction, i.e. when it is not to be considered a symbol
+   assignment.  */
+
+bool
+bpf_tc_equal_in_insn (int c ATTRIBUTE_UNUSED, char *str ATTRIBUTE_UNUSED)
+{
+  uint8_t regno;
+
+  /* Only pseudo-c instructions can have equal signs, and of these,
+     all that could be confused with a symbol assignment all start
+     with a register name.  */
+  if (asm_dialect == DIALECT_PSEUDOC)
+    {
+      char *w = parse_bpf_register (str, 'w', &regno);
+      char *r = parse_bpf_register (str, 'r', &regno);
+
+      if ((w != NULL && *w == '\0')
+          || (r != NULL && *r == '\0'))
+        return 1;
+    }
+
+  return 0;
 }

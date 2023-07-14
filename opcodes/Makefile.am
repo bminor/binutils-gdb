@@ -59,7 +59,6 @@ BUILD_LIB_DEPS = @BUILD_LIB_DEPS@
 # Header files.
 HFILES = \
 	aarch64-asm.h aarch64-dis.h aarch64-opc.h aarch64-tbl.h \
-	bpf-desc.h bpf-opc.h \
 	cris-desc.h cris-opc.h \
 	epiphany-desc.h epiphany-opc.h \
 	fr30-desc.h fr30-opc.h \
@@ -94,10 +93,6 @@ TARGET64_LIBOPCODES_CFILES = \
 	aarch64-opc-2.c \
 	alpha-dis.c \
 	alpha-opc.c \
-	bpf-asm.c \
-	bpf-desc.c \
-	bpf-dis.c \
-	bpf-ibld.c \
 	bpf-opc.c \
 	ia64-dis.c \
 	ia64-opc.c \
@@ -352,7 +347,6 @@ CGENDEPS = \
 CGEN_CPUS = cris epiphany fr30 frv ip2k iq2000 lm32 m32c m32r mep mt or1k xstormy16
 
 if CGEN_MAINT
-BPF_DEPS = stamp-bpf
 CRIS_DEPS = stamp-cris
 EPIPHANY_DEPS = stamp-epiphany
 FR30_DEPS = stamp-fr30
@@ -367,7 +361,6 @@ MT_DEPS = stamp-mt
 OR1K_DEPS = stamp-or1k
 XSTORMY16_DEPS = stamp-xstormy16
 else
-BPF_DEPS =
 CRIS_DEPS =
 EPIPHANY_DEPS =
 FR30_DEPS =
@@ -399,15 +392,6 @@ run-cgen-all:
 .PHONY: run-cgen-all
 
 # For now, require developers to configure with --enable-cgen-maint.
-
-$(srcdir)/bpf-desc.h $(srcdir)/bpf-desc.c $(srcdir)/bpf-opc.h \
-		$(srcdir)/bpf-opc.c $(srcdir)/bpf-ibld.c \
-		$(srcdir)/bpf-asm.c $(srcdir)/bpf-dis.c: $(BPF_DEPS)
-	@true
-
-stamp-bpf: $(CGENDEPS) $(CPUDIR)/bpf.cpu $(CPUDIR)/bpf.opc
-	$(MAKE) run-cgen arch=bpf prefix=bpf \
-		archfile=$(CPUDIR)/bpf.cpu opcfile=$(CPUDIR)/bpf.opc
 
 $(srcdir)/cris-desc.h $(srcdir)/cris-desc.c $(srcdir)/cris-opc.h: $(CRIS_DEPS)
 	@true

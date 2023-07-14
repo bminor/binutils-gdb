@@ -1,7 +1,6 @@
-#as: --EB
+#as: -EB -mdialect=normal
 #source: jump.s
-#source: jump-pseudoc.s
-#objdump: -dr
+#objdump: -dr -M dec
 #name: eBPF JUMP instructions, big endian
 
 .*: +file format .*bpf.*

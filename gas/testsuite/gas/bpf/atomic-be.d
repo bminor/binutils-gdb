@@ -1,7 +1,6 @@
-#as: --EB
+#as: -EB -mdialect=normal
 #source: atomic.s
-#source: atomic-pseudoc.s
-#objdump: -dr
+#objdump: -dr -M hex,v1
 #name: eBPF atomic instructions, big endian
 
 .*: +file format .*bpf.*

@@ -105,7 +105,7 @@ if { [istarget "pdp11-*-*"] } then {
     run_dump_test eqv-dot
 }
 
-if { ![istarget "bfin-*-*"] && ![istarget "bpf-*-*"]  } then {
+if { ![istarget "bfin-*-*"] } then {
     gas_test "assign-ok.s" "" "" "== assignment support"
 }
 gas_test_error "assign-bad.s" "" "== assignment for symbol already set"
@@ -403,8 +403,7 @@ if {  ([istarget "i*86-*-*pe*"] && ![istarget "i*86-*-openbsd*"]) \
   gas_test "fastcall.s" ""   "" "fastcall labels"
 }
 
-if { ![istarget "bfin-*-*"] && ![istarget "nds32*-*-*"] \
-    && ![istarget "bpf-*-*"] } then {
+if { ![istarget "bfin-*-*"] && ![istarget "nds32*-*-*"] } then {
     run_dump_test assign
 }
 run_dump_test sleb128

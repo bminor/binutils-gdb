@@ -37,7 +37,6 @@
 
 /* .-foo gets turned into PC relative relocs.  */
 #define DIFF_EXPR_OK    1
-#define GAS_CGEN_PCREL_R_TYPE(R_TYPE) gas_cgen_pcrel_r_type (R_TYPE)
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
@@ -52,4 +51,5 @@
    a jump to offset 0 means jump to the next instruction.  */
 #define md_single_noop_insn "ja 0"
 
-#define TC_EQUAL_IN_INSN(c, s) 1
+#define TC_EQUAL_IN_INSN(c, s) bpf_tc_equal_in_insn ((c), (s))
+extern bool bpf_tc_equal_in_insn (int, char *);

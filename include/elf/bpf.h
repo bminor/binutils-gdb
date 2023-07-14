@@ -34,6 +34,7 @@ START_RELOC_NUMBERS (elf_bpf_reloc_type)
  * It is kept in this file to remind that the value is already taken. */
   RELOC_NUMBER (R_BPF_64_NODYLD32, 		4)
   RELOC_NUMBER (R_BPF_64_32,      		10)
+  RELOC_NUMBER (R_BPF_GNU_64_16,                256)
 END_RELOC_NUMBERS (R_BPF_max)
 
 #endif /* _ELF_BPF_H  */

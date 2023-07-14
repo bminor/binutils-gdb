@@ -2,7 +2,7 @@
 #name: eqv involving dot
 # bfin doesn't support 'symbol = expression'
 # tic30 and tic4x have 4 octets per byte, tic54x has 2 octets per byte
-#notarget: bfin-*-* *c30-*-* *c4x-*-* *c54x-*-* *bpf-*-*
+#notarget: bfin-*-* *c30-*-* *c4x-*-* *c54x-*-*
 # linkrelax targets don't handle equivalence expressions well (nor any
 # other forward expression).  mep uses complex relocs
 #xfail: am33_2.0-*-* crx-*-* h8300-*-* mn10200-*-* mn10300-*-* mep-*-*

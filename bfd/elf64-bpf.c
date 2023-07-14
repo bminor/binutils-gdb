@@ -89,6 +89,8 @@ bpf_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
       return &bpf_elf_howto_table[ (int) R_BPF_64_64_IDX];
     case BFD_RELOC_BPF_DISP32:
       return &bpf_elf_howto_table[ (int) R_BPF_64_32_IDX];
+    case BFD_RELOC_BPF_DISP16:
+      return &bpf_elf_howto_table[ (int) R_BPF_GNU_64_16_IDX];
 
     default:
       /* Pacify gcc -Wall.  */

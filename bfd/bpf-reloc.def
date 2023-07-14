@@ -72,3 +72,18 @@
         0xffffffff,            /* src_mask */
         0xffffffff,            /* dst_mask */
         true)                  /* pcrel_offset */
+
+  /* 16-bit PC-relative address in load instructions.  */
+  BPF_HOWTO (R_BPF_GNU_64_16,      /* type */
+        0,                     /* rightshift */
+        2,                     /* size */
+        16,                    /* bitsize */
+        true,                  /* pc_relative */
+        16,                    /* bitpos */
+        complain_overflow_signed, /* complain_on_overflow */
+        bpf_elf_generic_reloc, /* special_function */
+        "R_BPF_GNU_64_16",     /* name */
+        true,                  /* partial_inplace */
+        0xffff,                /* src_mask */
+        0xffff,                /* dst_mask */
+        true)                  /* pcrel_offset */

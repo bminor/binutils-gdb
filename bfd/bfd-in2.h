@@ -7148,6 +7148,7 @@ assembler and not (currently) written to any object files.  */
 /* Linux eBPF relocations.  */
   BFD_RELOC_BPF_64,
   BFD_RELOC_BPF_DISP32,
+  BFD_RELOC_BPF_DISP16,
 
 /* Adapteva EPIPHANY - 8 bit signed pc-relative displacement  */
   BFD_RELOC_EPIPHANY_SIMM8,
