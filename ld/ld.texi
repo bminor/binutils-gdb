@@ -6861,7 +6861,7 @@ height2pt&\omit&&\omit&&\omit&\cr
 &5&&left&& >      <      <=      >=&\cr
 &6&&left&&==         !=&\cr
 &7&&left&&\&&\cr
-&8&&left&&^&\cr
+&8&&left&&\^{}&\cr
 &9&&left&&|&\cr
 &10&&left&&{\&\&}&\cr
 &11&&left&&||&\cr
