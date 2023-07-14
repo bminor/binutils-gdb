@@ -272,6 +272,8 @@ for this_target in $target $canon_targets ; do
         ;;
 
 changequote(,)dnl
+      ppc-*-aix5.[01]*)
+	;;
       ppc-*-aix[5-9].*)
 changequote([,])dnl
 	AC_DEFINE(AIX_WEAK_SUPPORT, 1,

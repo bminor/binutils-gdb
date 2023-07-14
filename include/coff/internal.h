@@ -352,7 +352,7 @@ struct internal_aouthdr
 
 #define C_NULL_VALUE	0x00de1e00    /* Value for a C_NULL deleted entry.  */
 
-#if defined _AIX52 || defined AIX_WEAK_SUPPORT
+#ifdef AIX_WEAK_SUPPORT
 #undef C_WEAKEXT
 #define C_WEAKEXT       C_AIX_WEAKEXT
 #endif

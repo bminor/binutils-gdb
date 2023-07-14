@@ -12107,6 +12107,8 @@ $as_echo "#define STRICTCOFF 1" >>confdefs.h
       microblaze*)
         ;;
 
+      ppc-*-aix5.[01]*)
+	;;
       ppc-*-aix[5-9].*)
 
 $as_echo "#define AIX_WEAK_SUPPORT 1" >>confdefs.h

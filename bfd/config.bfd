@@ -1098,18 +1098,6 @@ case "${targ}" in
     targ_selvecs="rs6000_xcoff64_aix_vec"
     want64=true
     ;;
-  powerpc-*-haiku*)
-    targ_defvec=powerpc_elf32_vec
-    targ_selvecs="rs6000_xcoff_vec powerpc_elf32_le_vec pef_vec pef_xlib_vec powerpc_xcoff_vec powerpc_boot_vec"
-    targ_cflags=-D__HAIKU_TARGET__
-    ;;
-#ifdef BFD64
-  powerpc64-*-aix5.[01])
-    targ_defvec=rs6000_xcoff64_aix_vec
-    targ_selvecs="rs6000_xcoff_vec"
-    want64=true
-    ;;
-#endif
   powerpc-*-aix[5-9]* | rs6000-*-aix[5-9]*)
     targ_cflags=-DAIX_WEAK_SUPPORT
     targ_defvec=rs6000_xcoff_vec
@@ -1117,6 +1105,11 @@ case "${targ}" in
     want64=true
     ;;
 #ifdef BFD64
+  powerpc64-*-aix5.[01])
+    targ_defvec=rs6000_xcoff64_aix_vec
+    targ_selvecs="rs6000_xcoff_vec"
+    want64=true
+    ;;
   powerpc64-*-aix[5-9]*)
     targ_cflags=-DAIX_WEAK_SUPPORT
     targ_defvec=rs6000_xcoff64_aix_vec
@@ -1175,6 +1168,11 @@ case "${targ}" in
     targ_defvec=powerpc_elf32_vec
     targ_selvecs="rs6000_xcoff_vec powerpc_elf32_le_vec powerpc_boot_vec"
     targ64_selvecs="powerpc_elf64_vec powerpc_elf64_le_vec"
+    ;;
+  powerpc-*-haiku*)
+    targ_defvec=powerpc_elf32_vec
+    targ_selvecs="rs6000_xcoff_vec powerpc_elf32_le_vec pef_vec pef_xlib_vec powerpc_xcoff_vec powerpc_boot_vec"
+    targ_cflags=-D__HAIKU_TARGET__
     ;;
   powerpc-*-kaos*)
     targ_defvec=powerpc_elf32_vec
