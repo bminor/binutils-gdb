@@ -310,6 +310,9 @@ amd64_fbsd_nat_target::read_description ()
   struct reg regs;
   int is64;
 
+  if (inferior_ptid == null_ptid)
+    return this->beneath ()->read_description ();
+
   if (ptrace (PT_GETREGS, inferior_ptid.pid (),
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't get registers"));

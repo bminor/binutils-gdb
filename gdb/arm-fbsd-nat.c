@@ -93,6 +93,9 @@ arm_fbsd_nat_target::read_description ()
   const struct target_desc *desc;
   bool tls = false;
 
+  if (inferior_ptid == null_ptid)
+    return this->beneath ()->read_description ();
+
 #ifdef PT_GETREGSET
   tls = have_regset (inferior_ptid, NT_ARM_TLS) != 0;
 #endif

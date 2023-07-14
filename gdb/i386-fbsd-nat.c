@@ -315,6 +315,9 @@ i386_fbsd_nat_target::read_description ()
 #endif
   static int xmm_probed;
 
+  if (inferior_ptid == null_ptid)
+    return this->beneath ()->read_description ();
+
 #ifdef PT_GETXSTATE_INFO
   if (!xsave_probed)
     {
