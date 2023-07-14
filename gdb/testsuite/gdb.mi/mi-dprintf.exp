@@ -127,6 +127,7 @@ proc mi_continue_dprintf {args} {
 mi_continue_dprintf "gdb"
 
 # The "call" style depends on having I/O functions available, so test.
+set has_stderr_symbol [mi_gdb_is_stderr_available]
 
 if ![target_info exists gdb,noinferiorio] {
 
@@ -136,9 +137,13 @@ if ![target_info exists gdb,noinferiorio] {
     mi_gdb_test "set dprintf-style call" ".*" "mi set dprintf style to call"
     mi_continue_dprintf "call"
 
-    mi_gdb_test "set dprintf-function fprintf" ".*" "mi set dprintf-channel stderr"
-    mi_gdb_test "set dprintf-channel stderr" ".*" "mi set dprintf channel"
-    mi_continue_dprintf "fprintf"
+    # Some compilers don't add information about stderr,
+    # so skip these tests if needed.
+    if {$::has_stderr_symbol} {
+	mi_gdb_test "set dprintf-function fprintf" ".*" "mi set dprintf function"
+	mi_gdb_test "set dprintf-channel stderr" ".*" "mi set dprintf channel"
+	mi_continue_dprintf "fprintf"
+    }
 }
 
 set target_can_dprintf 0
