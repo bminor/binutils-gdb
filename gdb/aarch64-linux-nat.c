@@ -785,6 +785,9 @@ aarch64_linux_nat_target::read_description ()
   gdb_byte regbuf[ARM_VFP3_REGS_SIZE];
   struct iovec iovec;
 
+  if (inferior_ptid == null_ptid)
+    return this->beneath ()->read_description ();
+
   tid = inferior_ptid.pid ();
 
   iovec.iov_base = regbuf;

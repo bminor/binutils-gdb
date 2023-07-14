@@ -201,6 +201,9 @@ fill_fpregset (const struct regcache *regcache, prfpregset_t *fpregs,
 const struct target_desc *
 riscv_linux_nat_target::read_description ()
 {
+  if (inferior_ptid == null_ptid)
+    return this->beneath ()->read_description ();
+
   const struct riscv_gdbarch_features features
     = riscv_linux_read_features (inferior_ptid.pid ());
   return riscv_lookup_target_description (features);

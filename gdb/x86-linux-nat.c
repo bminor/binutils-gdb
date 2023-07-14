@@ -115,6 +115,9 @@ x86_linux_nat_target::read_description ()
   static uint64_t xcr0;
   uint64_t xcr0_features_bits;
 
+  if (inferior_ptid == null_ptid)
+    return this->beneath ()->read_description ();
+
   tid = inferior_ptid.pid ();
 
 #ifdef __x86_64__

@@ -458,6 +458,10 @@ mips_linux_nat_target::read_description ()
 
   if (have_dsp < 0)
     {
+      /* Assume no DSP if there is no inferior to inspect with ptrace.  */
+      if (inferior_ptid == null_ptid)
+	return _MIPS_SIM == _ABIO32 ? tdesc_mips_linux : tdesc_mips64_linux;
+
       int tid = get_ptrace_pid (inferior_ptid);
 
       errno = 0;

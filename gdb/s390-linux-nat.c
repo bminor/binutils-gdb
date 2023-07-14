@@ -987,6 +987,9 @@ s390_linux_nat_target::auxv_parse (const gdb_byte **readptr,
 const struct target_desc *
 s390_linux_nat_target::read_description ()
 {
+  if (inferior_ptid == null_ptid)
+    return this->beneath ()->read_description ();
+
   int tid = inferior_ptid.pid ();
 
   have_regset_last_break
