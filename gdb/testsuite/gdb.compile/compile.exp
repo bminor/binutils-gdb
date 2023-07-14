@@ -17,10 +17,8 @@ load_lib compile-support.exp
 
 standard_testfile .c compile-shlib.c compile-constvar.S compile-nodebug.c
 
-set options {}
-if [test_compiler_info gcc*] {
-    lappend options additional_flags=-g3
-}
+require is_c_compiler_gcc
+set options {additional_flags=-g3}
 
 if { ![is_x86_64_m64_target] } {
     verbose "Skipping x86_64 LOC_CONST test."

@@ -21,6 +21,8 @@ standard_testfile .cc
 
 require allow_cplus_tests
 
+require is_c_compiler_gcc
+
 if {[prepare_for_testing $testfile $testfile $srcfile \
 	 {debug nowarnings c++ additional_flags=-std=c++11}]} {
     return -1

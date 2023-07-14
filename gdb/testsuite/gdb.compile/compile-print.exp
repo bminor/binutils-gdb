@@ -17,6 +17,8 @@ load_lib compile-support.exp
 
 standard_testfile
 
+require is_c_compiler_gcc
+
 if { [prepare_for_testing "failed to prepare" "$testfile"] } {
     return -1
 }
