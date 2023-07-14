@@ -3103,7 +3103,7 @@ symbol_begin (void)
 {
   symbol_lastP = NULL;
   symbol_rootP = NULL;		/* In case we have 0 symbols (!!)  */
-  sy_hash = htab_create_alloc (16, hash_symbol_entry, eq_symbol_entry,
+  sy_hash = htab_create_alloc (1024, hash_symbol_entry, eq_symbol_entry,
 			       NULL, xcalloc, free);
 
 #if defined (EMIT_SECTION_SYMBOLS) || !defined (RELOC_REQUIRES_SYMBOL)
