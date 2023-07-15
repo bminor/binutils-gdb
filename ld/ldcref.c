@@ -721,7 +721,7 @@ check_reloc_refs (bfd *abfd, asection *sec, void *iarg)
 	     in OUTSECNAME.  This reloc is from a section which is
 	     mapped into a section from which references to OUTSECNAME
 	     are prohibited.  We must report an error.  */
-	  einfo (_("%X%P: %C: prohibited cross reference from %s to `%pT' in %s\n"),
+	  einfo (_("%X%P: %H: prohibited cross reference from %s to `%pT' in %s\n"),
 		 abfd, sec, q->address, outsecname,
 		 bfd_asymbol_name (*q->sym_ptr_ptr), outdefsecname);
 	}

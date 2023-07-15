@@ -304,7 +304,7 @@ set lto_link_elf_tests [list \
    {pr12760b.c} {} "libpr12760.a"] \
   [list "PR ld/12760" \
    "-O2 -Wl,-e,foo -nostdlib -flto -fuse-linker-plugin tmpdir/pr12760a.o -Wl,--start-group tmpdir/libpr12760.a -Wl,--end-group" "" \
-   {dummy.c} {{warning "pr12760a.c:6: warning: Bad \\.?bar"}} \
+   {dummy.c} {{warning {pr12760a.c:6:\(.*\): warning: Bad \.?bar}}} \
    "pr12760.exe" "c"] \
   [list "PR ld/12975" \
    "-shared -O2 -fPIC -flto -fuse-linker-plugin -nostdlib -Wl,-version-script,pr12975.t" "-O2 -flto" \

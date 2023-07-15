@@ -1394,7 +1394,7 @@ warning_find_reloc (bfd *abfd, asection *sec, void *iarg)
 	  && strcmp (bfd_asymbol_name (*q->sym_ptr_ptr), info->symbol) == 0)
 	{
 	  /* We found a reloc for the symbol we are looking for.  */
-	  einfo ("%P: %C: %s%s\n", abfd, sec, q->address, _("warning: "),
+	  einfo ("%P: %H: %s%s\n", abfd, sec, q->address, _("warning: "),
 		 info->warning);
 	  info->found = true;
 	  break;
@@ -1484,10 +1484,10 @@ undefined_symbol (struct bfd_link_info *info,
       if (error_count < MAX_ERRORS_IN_A_ROW)
 	{
 	  if (error)
-	    einfo (_("%X%P: %C: undefined reference to `%pT'\n"),
+	    einfo (_("%X%P: %H: undefined reference to `%pT'\n"),
 		   abfd, section, address, name);
 	  else
-	    einfo (_("%P: %C: warning: undefined reference to `%pT'\n"),
+	    einfo (_("%P: %H: warning: undefined reference to `%pT'\n"),
 		   abfd, section, address, name);
 	}
       else if (error_count == MAX_ERRORS_IN_A_ROW)
