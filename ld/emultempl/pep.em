@@ -1269,7 +1269,7 @@ read_addend (arelent *rel, asection *s)
       break;
     }
   if (!ok)
-    einfo (_("%P: %C: cannot get section contents - auto-import exception\n"),
+    einfo (_("%P: %H: cannot get section contents - auto-import exception\n"),
 	   s->owner, s, rel->address);
   return addend;
 }

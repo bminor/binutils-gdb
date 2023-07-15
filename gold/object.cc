@@ -3358,7 +3358,7 @@ Relocate_info<size, big_endian>::location(size_t, off_t offset) const
       if (info.enclosing_symbol_type == elfcpp::STT_FUNC)
 	ret += _("function ");
       ret += info.enclosing_symbol_name;
-      return ret;
+      ret += ":";
     }
 
   ret += "(";

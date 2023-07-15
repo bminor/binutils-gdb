@@ -2911,7 +2911,7 @@ pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend, char *name,
     }
 
   else if (addend != 0)
-    einfo (_("%X%P: %C: variable '%pT' can't be auto-imported; please read the documentation for ld's --enable-auto-import for details\n"),
+    einfo (_("%X%P: %H: variable '%pT' can't be auto-imported; please read the documentation for ld's --enable-auto-import for details\n"),
 	   s->owner, s, rel->address, (*rel->sym_ptr_ptr)->name);
 }
 

@@ -1270,7 +1270,7 @@ read_addend (arelent *rel, asection *s)
   bfd_vma addend = 0;
 
   if (!bfd_get_section_contents (s->owner, s, buf, rel->address, sizeof (buf)))
-    einfo (_("%P: %C: cannot get section contents - auto-import exception\n"),
+    einfo (_("%P: %H: cannot get section contents - auto-import exception\n"),
 	   s->owner, s, rel->address);
   else
     addend = bfd_get_32 (s->owner, buf);

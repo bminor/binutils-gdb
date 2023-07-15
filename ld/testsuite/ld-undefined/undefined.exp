@@ -89,7 +89,7 @@ if { ![check_compiler_available] } {
 	#setup_xfail "arm*-*-pe*"
     }
 
-    set ml "undefined.c:9: undefined reference to `*this_function_is_not_defined'"
+    set ml {undefined.c:9:(*): undefined reference to `*this_function_is_not_defined'}
     # With targets that use elf/dwarf2, such as the arm-elf toolchain,
     # the code in bfd/elf.c:_bfd_elf_find_nearest_line() is called in
     # order to locate the file name/line number where the undefined

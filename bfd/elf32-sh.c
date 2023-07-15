@@ -5010,14 +5010,14 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		{
 		  info->callbacks->einfo
 		    /* xgettext:c-format */
-		    (_("%X%C: relocation to \"%s\" references a different segment\n"),
+		    (_("%X%H: relocation to \"%s\" references a different segment\n"),
 		     input_bfd, input_section, rel->r_offset, symname);
 		  return false;
 		}
 	      else
 		info->callbacks->einfo
 		  /* xgettext:c-format */
-		  (_("%C: warning: relocation to \"%s\" references a different segment\n"),
+		  (_("%H: warning: relocation to \"%s\" references a different segment\n"),
 		   input_bfd, input_section, rel->r_offset, symname);
 	    }
 
