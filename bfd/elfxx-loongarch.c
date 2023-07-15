@@ -54,13 +54,7 @@ typedef struct loongarch_reloc_howto_type_struct
 static bool
 reloc_bits (bfd *abfd, reloc_howto_type *howto, bfd_vma *val);
 static bool
-reloc_bits_pcrel20_s2 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val);
-static bool
-reloc_bits_b16 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val);
-static bool
-reloc_bits_b21 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val);
-static bool
-reloc_bits_b26 (bfd *abfd, reloc_howto_type *howto, bfd_vma *val);
+reloc_sign_bits (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val);
 
 static bfd_reloc_status_type
 loongarch_elf_add_sub_reloc (bfd *, arelent *, asymbol *, void *,
@@ -457,7 +451,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 0x3fffc00,				  /* dst_mask */
 	 false,					  /* pcrel_offset */
 	 BFD_RELOC_LARCH_SOP_POP_32_S_10_16_S2,	  /* bfd_reloc_code_real_type */
-	 reloc_bits_b16,			  /* adjust_reloc_bits */
+	 reloc_sign_bits,			  /* adjust_reloc_bits */
 	 NULL),					  /* larch_reloc_type_name */
 
   LOONGARCH_HOWTO (R_LARCH_SOP_POP_32_S_5_20,	  /* type (43).  */
@@ -493,7 +487,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 false,					  /* pcrel_offset */
 	 BFD_RELOC_LARCH_SOP_POP_32_S_0_5_10_16_S2,
 						  /* bfd_reloc_code_real_type */
-	 reloc_bits_b21,			  /* adjust_reloc_bits */
+	 reloc_sign_bits,			  /* adjust_reloc_bits */
 	 NULL),					  /* larch_reloc_type_name */
 
   LOONGARCH_HOWTO (R_LARCH_SOP_POP_32_S_0_10_10_16_S2,	/* type (45).  */
@@ -511,7 +505,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 false,					/* pcrel_offset */
 	 BFD_RELOC_LARCH_SOP_POP_32_S_0_10_10_16_S2,
 						/* bfd_reloc_code_real_type */
-	 reloc_bits_b26,			/* adjust_reloc_bits */
+	 reloc_sign_bits,			/* adjust_reloc_bits */
 	 NULL),					/* larch_reloc_type_name */
 
   LOONGARCH_HOWTO (R_LARCH_SOP_POP_32_U,	/* type (46).  */
@@ -766,7 +760,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 0x3fffc00,				/* dst_mask.  */
 	 false,					/* pcrel_offset.  */
 	 BFD_RELOC_LARCH_B16,			/* bfd_reloc_code_real_type.  */
-	 reloc_bits_b16,			/* adjust_reloc_bits.  */
+	 reloc_sign_bits,			/* adjust_reloc_bits.  */
 	 "b16"),				/* larch_reloc_type_name.  */
 
   LOONGARCH_HOWTO (R_LARCH_B21,			/* type (65).  */
@@ -783,7 +777,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 0x3fffc1f,				/* dst_mask.  */
 	 false,					/* pcrel_offset.  */
 	 BFD_RELOC_LARCH_B21,			/* bfd_reloc_code_real_type.  */
-	 reloc_bits_b21,			/* adjust_reloc_bits.  */
+	 reloc_sign_bits,			/* adjust_reloc_bits.  */
 	 "b21"),				/* larch_reloc_type_name.  */
 
   LOONGARCH_HOWTO (R_LARCH_B26,			/* type (66).  */
@@ -800,7 +794,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 0x03ffffff,				/* dst_mask.  */
 	 false,					/* pcrel_offset.  */
 	 BFD_RELOC_LARCH_B26,			/* bfd_reloc_code_real_type.  */
-	 reloc_bits_b26,			/* adjust_reloc_bits.  */
+	 reloc_sign_bits,			/* adjust_reloc_bits.  */
 	 "b26"),				/* larch_reloc_type_name.  */
 
   LOONGARCH_HOWTO (R_LARCH_ABS_HI20,		/* type (67).  */
@@ -1436,7 +1430,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 0x1ffffe0,				/* dst_mask.  */
 	 false,					/* pcrel_offset.  */
 	 BFD_RELOC_LARCH_PCREL20_S2,		/* bfd_reloc_code_real_type.  */
-	 reloc_bits_pcrel20_s2,			/* adjust_reloc_bits.  */
+	 reloc_sign_bits,			/* adjust_reloc_bits.  */
 	 NULL),					/* larch_reloc_type_name.  */
 
   /* Canonical Frame Address.  */
@@ -1677,12 +1671,14 @@ reloc_bits (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 static bool
-reloc_bits_pcrel20_s2 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
+reloc_sign_bits (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
 {
-  bfd_signed_vma val = (bfd_signed_vma)(*fix_val);
-  bfd_signed_vma mask = ((bfd_signed_vma)0x1 << howto->bitsize) - 1;
+  if (howto->complain_on_overflow != complain_overflow_signed)
+    return false;
 
-  /* Check rightshift.  */
+  bfd_signed_vma val = (bfd_signed_vma)(*fix_val);
+
+  /* Check alignment. FIXME: if rightshift is not alingment.  */
   if (howto->rightshift
       && (val & ((((bfd_signed_vma) 1) << howto->rightshift) - 1)))
     {
@@ -1692,8 +1688,12 @@ reloc_bits_pcrel20_s2 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
       return false;
     }
 
-  val = val >> howto->rightshift;
+  bfd_signed_vma mask = ((bfd_signed_vma)0x1 << (howto->bitsize
+			  + howto->rightshift - 1)) - 1;
 
+  /* Positive number: high part is all 0;
+     Negative number: if high part is not all 0, high part must be all 1.
+     high part: from sign bit to highest bit.  */
   if ((val & ~mask) && ((val & ~mask) != ~mask))
     {
       (*_bfd_error_handler) (_("%pB: relocation %s overflow 0x%lx"),
@@ -1702,123 +1702,29 @@ reloc_bits_pcrel20_s2 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
       return false;
     }
 
-  /* Perform insn bits field.  */
-  val = val & mask;
-  val <<= howto->bitpos;
-
-  *fix_val = (bfd_vma)val;
-
-  return true;
-}
-
-
-/* Adjust val to perform insn
-   R_LARCH_SOP_POP_32_S_10_16_S2
-   R_LARCH_B16.  */
-static bool
-reloc_bits_b16 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
-{
-  bfd_signed_vma val = *fix_val;
-  bfd_signed_vma mask = ((bfd_signed_vma)0x1 << howto->bitsize) - 1;
-
-  if (howto->complain_on_overflow != complain_overflow_signed)
-    return false;
-
-  /* Judge whether 4 bytes align.  */
-  if (val & ((0x1UL << howto->rightshift) - 1))
-    return false;
-
   val = val >> howto->rightshift;
-
-  if ((val & ~mask) && ((val & ~mask) != ~mask))
-    {
-      (*_bfd_error_handler) (_("%pB: relocation %s overflow 0x%lx"),
-			     abfd, howto->name, (long) val);
-      bfd_set_error (bfd_error_bad_value);
-      return false;
-    }
-
-  /* Perform insn bits field.  */
+  /* can delete? */
+  mask = ((bfd_signed_vma)0x1 << howto->bitsize) - 1;
   val = val & mask;
-  val <<= howto->bitpos;
+
+  switch (howto->type)
+    {
+    case R_LARCH_SOP_POP_32_S_0_10_10_16_S2:
+    case R_LARCH_B26:
+      /* Perform insn bits field. 15:0<<10, 25:16>>16.  */
+      val = ((val & 0xffff) << 10) | ((val >> 16) & 0x3ff);
+      break;
+    case R_LARCH_SOP_POP_32_S_0_5_10_16_S2:
+    case R_LARCH_B21:
+      /* Perform insn bits field. 15:0<<10, 20:16>>16.  */
+      val = ((val & 0xffff) << 10) | ((val >> 16) & 0x1f);
+      break;
+    default:
+      val <<= howto->bitpos;
+      break;
+    }
 
   *fix_val = val;
-
-  return true;
-}
-
-/* Reloc type :
-   R_LARCH_SOP_POP_32_S_0_5_10_16_S2
-   R_LARCH_B21.  */
-static bool
-reloc_bits_b21 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
-{
-  bfd_signed_vma val = *fix_val;
-  bfd_signed_vma mask = ((bfd_signed_vma)0x1 << howto->bitsize) - 1;
-
-  if (howto->complain_on_overflow != complain_overflow_signed)
-    return false;
-
-  /* Judge whether 4 bytes align.  */
-  if (val & ((0x1UL << howto->rightshift) - 1))
-    return false;
-
-  val = val >> howto->rightshift;
-
-  if ((val & ~mask) && ((val & ~mask) != ~mask))
-    {
-      (*_bfd_error_handler) (_("%pB: relocation %s overflow 0x%lx"),
-			     abfd, howto->name, (long) val);
-      bfd_set_error (bfd_error_bad_value);
-      return false;
-    }
-
-  /* Perform insn bits field.  */
-  val = val & mask;
-
-  /* Perform insn bits field.  15:0<<10, 20:16>>16.  */
-  val = ((val & 0xffff) << 10) | ((val >> 16) & 0x1f);
-
-  *fix_val = val;
-
-  return true;
-}
-
-/* Reloc type:
-   R_LARCH_SOP_POP_32_S_0_10_10_16_S2
-   R_LARCH_B26.  */
-static bool
-reloc_bits_b26 (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
-{
-  bfd_signed_vma val = *fix_val;
-  bfd_signed_vma mask = ((bfd_signed_vma)0x1 << howto->bitsize) - 1;
-
-  if (howto->complain_on_overflow != complain_overflow_signed)
-    return false;
-
-  /* Judge whether 4 bytes align.  */
-  if (val & ((0x1UL << howto->rightshift) - 1))
-    return false;
-
-  val = val >> howto->rightshift;
-
-  if ((val & ~mask) && ((val & ~mask) != ~mask))
-    {
-      (*_bfd_error_handler) (_("%pB: relocation %s overflow 0x%lx"),
-			     abfd, howto->name, (long) val);
-      bfd_set_error (bfd_error_bad_value);
-      return false;
-    }
-
-
-  /* Perform insn bits field.  */
-  val = val & mask;
-
-  /* Perform insn bits field.  25:16>>16, 15:0<<10.  */
-  val = ((val & 0xffff) << 10) | ((val >> 16) & 0x3ff);
-
-  *fix_val = val;
-
   return true;
 }
 
