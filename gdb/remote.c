@@ -12403,19 +12403,27 @@ remote_target::pid_to_str (ptid_t ptid)
     {
       /* Printing an inferior target id.  */
 
+      /* When multi-process extensions are on, we have a real PID
+	 recorded in the PTID.  */
+      if (m_features.remote_multi_process_p ())
+	return normal_pid_to_str (ptid);
+
       /* When multi-process extensions are off, there's no way in the
 	 remote protocol to know the remote process id, if there's any
 	 at all.  There's one exception --- when we're connected with
 	 target extended-remote, and we manually attached to a process
-	 with "attach PID".  We don't record anywhere a flag that
-	 allows us to distinguish that case from the case of
-	 connecting with extended-remote and the stub already being
-	 attached to a process, and reporting yes to qAttached, hence
-	 no smart special casing here.  */
-      if (!m_features.remote_multi_process_p ())
-	return "Remote target";
+	 with "attach PID".  Note we need to be careful to distinguish
+	 that case from the case of connecting with extended-remote
+	 and the stub already being attached to a process, and
+	 reporting yes to qAttached.  We can look at fake_pid_p to
+	 tell which case we're handling.  */
+      inferior *inf = find_inferior_ptid (this, ptid);
+      if (inf != nullptr && inf->attach_flag && !inf->fake_pid_p)
+	return normal_pid_to_str (ptid);
 
-      return normal_pid_to_str (ptid);
+      /* No way to figure out a PID.  Return a string that doesn't
+	 leak out an internal fake PID to the user.  */
+      return "Remote target";
     }
   else
     {

@@ -3633,10 +3633,10 @@ target_announce_attach (int from_tty, int pid)
   if (exec_file != nullptr)
     gdb_printf ("Attaching to program: %ps, %s\n",
 		styled_string (file_name_style.style (), exec_file),
-		target_pid_to_str (ptid_t (pid)).c_str ());
+		normal_pid_to_str (ptid_t (pid)).c_str ());
   else
     gdb_printf ("Attaching to %s\n",
-		target_pid_to_str (ptid_t (pid)).c_str ());
+		normal_pid_to_str (ptid_t (pid)).c_str ());
 }
 
 /* The inferior process has died.  Long live the inferior!  */
