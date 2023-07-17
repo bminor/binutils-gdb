@@ -34,6 +34,16 @@ switch [get_endianness] {
     big { set python_pack_char ">" }
 }
 
+# Test memory read operations without execution.
+
+gdb_py_test_silent_cmd "python addr = gdb.lookup_global_symbol ('int8_global').value().address" \
+  "get global variable address" 0
+gdb_test "python \
+	    int8_global_mv = gdb.selected_inferior().read_memory (addr, 1); \
+	    print(int.from_bytes(int8_global_mv\[0\], byteorder='little'))" \
+    "\r\n42" \
+    "read memory without execution"
+
 # The following tests require execution.
 
 if {![runto_main]} {

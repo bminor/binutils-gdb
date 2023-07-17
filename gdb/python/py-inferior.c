@@ -550,7 +550,7 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
       /* Use this scoped-restore because we want to be able to read
 	 memory from an unwinder.  */
       scoped_restore_current_inferior_for_memory restore_inferior
-	(inf->inferior, any_thread_of_inferior (inf->inferior)->ptid);
+	(inf->inferior);
 
       buffer.reset ((gdb_byte *) xmalloc (length));
 
@@ -608,7 +608,7 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 	 still used here, just to keep the code similar to other code
 	 in this file.  */
       scoped_restore_current_inferior_for_memory restore_inferior
-	(inf->inferior, any_thread_of_inferior (inf->inferior)->ptid);
+	(inf->inferior);
 
       write_memory_with_notification (addr, buffer, length);
     }
@@ -683,7 +683,7 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
 	 still used here, just to keep the code similar to other code
 	 in this file.  */
       scoped_restore_current_inferior_for_memory restore_inferior
-	(inf->inferior, any_thread_of_inferior (inf->inferior)->ptid);
+	(inf->inferior);
 
       found = target_search_memory (start_addr, length,
 				    buffer, pattern_size,
@@ -944,7 +944,7 @@ infpy_get_main_name (PyObject *self, void *closure)
 	 still used, just to keep the code similar to other code in
 	 this file.  */
       scoped_restore_current_inferior_for_memory restore_inferior
-	(inf->inferior, any_thread_of_inferior (inf->inferior)->ptid);
+	(inf->inferior);
 
       name = main_name ();
     }
