@@ -1,5 +1,7 @@
 /* eBPF simulator main header
-   Copyright (C) 2020-2023 Free Software Foundation, Inc.
+   Copyright (C) 2023 Free Software Foundation, Inc.
+
+   Contributed by Oracle Inc.
 
    This file is part of GDB, the GNU debugger.
 
@@ -20,27 +22,6 @@
 #define SIM_MAIN_H
 
 #include "sim-basics.h"
-#include "opcodes/bpf-desc.h"
-#include "opcodes/bpf-opc.h"
-#include "arch.h"
 #include "sim-base.h"
-#include "cgen-sim.h"
-#include "bpf-sim.h"
-#include "bpf-helpers.h"
-
-struct bpf_sim_cpu
-{
-  /* CPU-model specific parts go here.
-     Note that in files that don't need to access these pieces WANT_CPU_FOO
-     won't be defined and thus these parts won't appear.  This is ok in the
-     sense that things work.  It is a source of bugs though.
-     One has to of course be careful to not take the size of this
-     struct and no structure members accessed in non-cpu specific files can
-     go after here.  */
-#if defined (WANT_CPU_BPFBF)
-  BPFBF_CPU_DATA cpu_data;
-#endif
-};
-#define BPF_SIM_CPU(cpu) ((struct bpf_sim_cpu *) CPU_ARCH_DATA (cpu))
 
 #endif /* ! SIM_MAIN_H */

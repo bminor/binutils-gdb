@@ -112,10 +112,10 @@ main:
     fail_ne     %r1, 0
 
     ;; neg
-    neg         %r2
+    neg         %r2, %r2
     fail_ne     %r2, -5
     mov         %r1, -1025
-    neg         %r1
+    neg         %r1, %r1
     fail_ne     %r1, 1025
 
     pass

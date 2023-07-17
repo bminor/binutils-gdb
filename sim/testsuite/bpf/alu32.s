@@ -100,11 +100,11 @@ main:
     ;; neg
     mov32       %r1, -1
     mov32       %r2, 0x7fffffff
-    neg32       %r1
-    neg32       %r2
+    neg32       %r1, %r1
+    neg32       %r2, %r2
     fail_ne32   %r1, 1
     fail_ne     %r2, 0x80000001 ; Note: check for (bad) sign-extend
-    neg32       %r2
+    neg32       %r2, %r2
     fail_ne32   %r2, 0x7fffffff
 
     pass
