@@ -976,6 +976,17 @@ static struct gdb_breakpoint *
 find_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind)
 {
   struct process_info *proc = current_process ();
+
+  /* In some situations the current process exits, we inform GDB, but
+     before GDB can acknowledge that the process has exited GDB tries to
+     detach from the inferior.  As part of the detach process GDB will
+     remove all breakpoints, which means we can end up here when the
+     current process has already exited and so PROC is nullptr.  In this
+     case just claim we can't find (and so delete) the breakpoint, GDB
+     will ignore this error during detach.  */
+  if (proc == nullptr)
+    return nullptr;
+
   struct breakpoint *bp;
   enum bkpt_type type = Z_packet_to_bkpt_type (z_type);
 

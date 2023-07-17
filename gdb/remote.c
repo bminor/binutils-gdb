@@ -6165,7 +6165,32 @@ remote_target::remote_detach_pid (int pid)
   else if (rs->buf[0] == '\0')
     error (_("Remote doesn't know how to detach"));
   else
-    error (_("Can't detach process."));
+    {
+      /* It is possible that we have an unprocessed exit event for this
+	 pid.  If this is the case then we can ignore the failure to detach
+	 and just pretend that the detach worked, as far as the user is
+	 concerned, the process exited immediately after the detach.  */
+      bool process_has_already_exited = false;
+      remote_notif_get_pending_events (&notif_client_stop);
+      for (stop_reply_up &reply : rs->stop_reply_queue)
+	{
+	  if (reply->ptid.pid () != pid)
+	    continue;
+
+	  enum target_waitkind kind = reply->ws.kind ();
+	  if (kind == TARGET_WAITKIND_EXITED
+	      || kind == TARGET_WAITKIND_SIGNALLED)
+	    {
+	      process_has_already_exited = true;
+	      remote_debug_printf
+		("detach failed, but process already exited");
+	      break;
+	    }
+	}
+
+      if (!process_has_already_exited)
+	error (_("can't detach process: %s"), (char *) rs->buf.data ());
+    }
 }
 
 /* This detaches a program to which we previously attached, using

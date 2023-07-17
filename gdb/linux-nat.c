@@ -1420,10 +1420,12 @@ linux_nat_target::detach (inferior *inf, int from_tty)
 
   iterate_over_lwps (ptid_t (pid), detach_callback);
 
-  /* Only the initial process should be left right now.  */
-  gdb_assert (num_lwps (pid) == 1);
-
-  main_lwp = find_lwp_pid (ptid_t (pid));
+  /* We have detached from everything except the main thread now, so
+     should only have one thread left.  However, in non-stop mode the
+     main thread might have exited, in which case we'll have no threads
+     left.  */
+  gdb_assert (num_lwps (pid) == 1
+	      || (target_is_non_stop_p () && num_lwps (pid) == 0));
 
   if (forks_exist_p ())
     {
@@ -1437,10 +1439,18 @@ linux_nat_target::detach (inferior *inf, int from_tty)
     {
       target_announce_detach (from_tty);
 
-      /* Pass on any pending signal for the last LWP.  */
-      int signo = get_detach_signal (main_lwp);
+      /* In non-stop mode it is possible that the main thread has exited,
+	 in which case we don't try to detach.  */
+      main_lwp = find_lwp_pid (ptid_t (pid));
+      if (main_lwp != nullptr)
+	{
+	  /* Pass on any pending signal for the last LWP.  */
+	  int signo = get_detach_signal (main_lwp);
 
-      detach_one_lwp (main_lwp, &signo);
+	  detach_one_lwp (main_lwp, &signo);
+	}
+      else
+	gdb_assert (target_is_non_stop_p ());
 
       detach_success (inf);
     }
