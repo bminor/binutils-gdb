@@ -1136,9 +1136,15 @@ new_afile (const char *name,
 
   lang_has_input_file = true;
 
-  name = ldfile_possibly_remap_input (name);
-  if (name == NULL)
-    return NULL;
+  /* PR 30632: It is OK for name to be NULL.  For example
+     see the initialization of first_file in lang_init().  */
+  if (name != NULL)
+    {
+      name = ldfile_possibly_remap_input (name);
+      /* But if a name is remapped to NULL, it should be ignored.  */
+      if (name == NULL)
+	return NULL;
+    }
 
   p = new_stat (lang_input_statement, stat_ptr);
   memset (&p->the_bfd, 0,
