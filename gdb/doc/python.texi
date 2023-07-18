@@ -812,6 +812,13 @@ structure, then @code{bar} can also be accessed as follows:
 bar = some_val[foo_field]
 @end smallexample
 
+If a @code{gdb.Value} has array or pointer type, an integer index can
+be used to access elements.
+
+@smallexample
+result = some_array[23]
+@end smallexample
+
 A @code{gdb.Value} that represents a function can be executed via
 inferior function call.  Any arguments provided to the call must match
 the function's prototype, and must be provided in the order specified
