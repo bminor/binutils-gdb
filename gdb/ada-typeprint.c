@@ -1065,9 +1065,6 @@ ada_print_type (struct type *type0, const char *varstring,
       case TYPE_CODE_STRUCT:
 	if (ada_is_array_descriptor_type (type))
 	  print_array_type (type, stream, show, level, flags);
-	else if (ada_is_bogus_array_descriptor (type))
-	  gdb_printf (stream,
-		      _("array (?) of ? (<mal-formed descriptor>)"));
 	else
 	  print_record_type (type, stream, show, level, flags);
 	break;

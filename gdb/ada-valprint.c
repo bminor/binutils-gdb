@@ -844,12 +844,6 @@ ada_val_print_struct_union (struct value *value,
 			    int recurse,
 			    const struct value_print_options *options)
 {
-  if (ada_is_bogus_array_descriptor (value->type ()))
-    {
-      gdb_printf (stream, "(...?)");
-      return;
-    }
-
   gdb_printf (stream, "(");
 
   if (print_field_values (value, value, stream, recurse, options,
@@ -1088,13 +1082,6 @@ ada_value_print (struct value *val0, struct ui_file *stream,
 	  type_print (type, "", stream, -1);
 	  gdb_printf (stream, ") ");
 	}
-    }
-  else if (ada_is_bogus_array_descriptor (type))
-    {
-      gdb_printf (stream, "(");
-      type_print (type, "", stream, -1);
-      gdb_printf (stream, ") (...?)");
-      return;
     }
 
   opts = *options;

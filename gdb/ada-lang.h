@@ -202,8 +202,6 @@ extern int ada_is_simple_array_type (struct type *);
 
 extern int ada_is_array_descriptor_type (struct type *);
 
-extern int ada_is_bogus_array_descriptor (struct type *);
-
 extern LONGEST ada_discrete_type_low_bound (struct type *);
 
 extern LONGEST ada_discrete_type_high_bound (struct type *);

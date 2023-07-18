@@ -2066,23 +2066,6 @@ ada_is_array_descriptor_type (struct type *type)
 	  && desc_arity (desc_bounds_type (type)) > 0);
 }
 
-/* Non-zero iff type is a partially mal-formed GNAT array
-   descriptor.  FIXME: This is to compensate for some problems with
-   debugging output from GNAT.  Re-examine periodically to see if it
-   is still needed.  */
-
-int
-ada_is_bogus_array_descriptor (struct type *type)
-{
-  return
-    type != NULL
-    && type->code () == TYPE_CODE_STRUCT
-    && (lookup_struct_elt_type (type, "P_BOUNDS", 1) != NULL
-	|| lookup_struct_elt_type (type, "P_ARRAY", 1) != NULL)
-    && !ada_is_array_descriptor_type (type);
-}
-
-
 /* If ARR has a record type in the form of a standard GNAT array descriptor,
    (fat pointer) returns the type of the array data described---specifically,
    a pointer-to-array type.  If BOUNDS is non-zero, the bounds data are filled
