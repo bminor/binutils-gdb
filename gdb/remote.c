@@ -7564,8 +7564,8 @@ remote_target::discard_pending_stop_replies (struct inferior *inf)
   for (auto it = iter; it != rs->stop_reply_queue.end (); ++it)
     remote_debug_printf
       ("discarding queued stop reply: ptid: %s, ws: %s\n",
-       reply->ptid.to_string().c_str(),
-       reply->ws.to_string ().c_str ());
+       (*it)->ptid.to_string().c_str(),
+       (*it)->ws.to_string ().c_str ());
   rs->stop_reply_queue.erase (iter, rs->stop_reply_queue.end ());
 }
 
