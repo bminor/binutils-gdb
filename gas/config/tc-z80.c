@@ -1143,10 +1143,11 @@ emit_data_val (expressionS * val, int size)
 	  but it does help to maintain compatibility with earlier versions
 	  of the assembler.  */
       if (! val->X_extrabit
-	  && is_overflow (val->X_add_number, size*8))
-	as_warn ( _("%d-bit overflow (%+ld)"), size*8, val->X_add_number);
+	  && is_overflow (val->X_add_number, size * 8))
+	as_warn ( _("%d-bit overflow (%+" PRId64 ")"), size * 8,
+		  (int64_t) val->X_add_number);
       for (i = 0; i < size; ++i)
-	p[i] = (char)(val->X_add_number >> (i*8));
+	p[i] = (val->X_add_number >> (i * 8)) & 0xff;
       return;
     }
 
@@ -1250,9 +1251,11 @@ emit_byte (expressionS * val, bfd_reloc_code_real_type r_type)
       if ((val->X_add_number < -128) || (val->X_add_number >= 128))
 	{
 	  if (r_type == BFD_RELOC_Z80_DISP8)
-	    as_bad (_("index overflow (%+ld)"), val->X_add_number);
+	    as_bad (_("index overflow (%+" PRId64 ")"),
+		    (int64_t) val->X_add_number);
 	  else
-	    as_bad (_("offset overflow (%+ld)"), val->X_add_number);
+	    as_bad (_("offset overflow (%+" PRId64 ")"),
+		    (int64_t) val->X_add_number);
 	}
     }
   else

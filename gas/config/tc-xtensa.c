@@ -7869,8 +7869,9 @@ dump_litpools (void)
 		count++;
 	      litfrag = litfrag->fr_next;
 	    }
-	  printf("   %ld <%d:%d> (%d) [%d]: ",
-		 lpf->addr, lpf->priority, lpf->original_priority,
+	  printf("   %" PRId64 " <%d:%d> (%d) [%d]: ",
+		 (int64_t) lpf->addr,
+		 lpf->priority, lpf->original_priority,
 		 lpf->fragP->fr_line, count);
 	  /* dump_frag(lpf->fragP);  */
 	}
