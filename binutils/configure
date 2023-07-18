@@ -14571,7 +14571,8 @@ do
 	fi
 	DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
 	BUILD_DLLWRAP='$(DLLWRAP_PROG)$(EXEEXT)'
-	od_vectors="$od_vectors objdump_private_desc_xcoff objdump_private_desc_pe"
+	od_vectors="objdump_private_desc_elf32_avr objdump_private_desc_xcoff\
+		    objdump_private_desc_pe objdump_private_desc_mach_o"
     else
 	case $targ in
 	*-*-hms*) BUILD_SRCONV='$(SRCONV_PROG)' ;;
