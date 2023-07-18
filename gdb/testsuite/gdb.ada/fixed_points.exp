@@ -91,4 +91,7 @@ foreach_with_prefix scenario {all minimal} {
     if {$scenario == "minimal" && [test_compiler_info {gcc-11-*}]} {
 	gdb_test "print fp5_var" " = 3e-19"
     }
+
+    gdb_test "p Float(Another_Fixed) = Float(Another_Delta * 5)" "true" \
+	"value of another_fixed"
 }

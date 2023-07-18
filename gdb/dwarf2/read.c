@@ -14867,6 +14867,8 @@ get_mpz (struct dwarf2_cu *cu, gdb_mpz *value, struct attribute *attr)
 		   ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE,
 		   true);
     }
+  else if (attr->form_is_unsigned ())
+    *value = gdb_mpz (attr->as_unsigned ());
   else
     *value = gdb_mpz (attr->constant_value (1));
 }
