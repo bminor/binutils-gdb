@@ -193,8 +193,12 @@ proc test_python_helper {} {
     send_inferior "ptype global_c\n"
     set test "hit breakpoint in outer gdb again"
     set in_outer_gdb 0
+    # With gdb build with -O2 -flto=auto and gcc 7.5.0, we get the mangled
+    # name of c_print_type due to a problem in the debug info, so we work
+    # around this by less strict matching.
+    set fn_name "\[^\r\n\]*c_print_type\[^\r\n\]*"
     gdb_test_multiple "" $test  -prompt $outer_prompt_re {
-	-re -wrap "Breakpoint $bkptno_numopt_re, c_print_type.*" {
+	-re -wrap "Breakpoint $bkptno_numopt_re, $fn_name.*" {
 	    pass $gdb_test_name
 	    set in_outer_gdb 1
 	}
