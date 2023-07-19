@@ -14,16 +14,17 @@
 # NU și a mesajelor traduse (acestea au rămas neschimbate).
 # Eliminare a mesajelor ce-au dispărut în ultima versiune.
 # Actualizări realizate de Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>, 15.01.2022.
-# Actualizare a traducerii pentru versiunea 2.38.90, făcută de R-GC, 2022.
-# Actualizare a traducerii pentru versiunea 2.39.90, făcută de R-GC,2023.
-# Actualizare a traducerii pentru versiunea Y, făcută de X, Z(anul).
+# Actualizare a traducerii pentru versiunea 2.38.90, făcută de R-GC, sep-2022.
+# Actualizare a traducerii pentru versiunea 2.39.90, făcută de R-GC, ian-2023.
+# Actualizare a traducerii pentru versiunea 2.40.90, făcută de R-GC, iul-2023.
+# Actualizare a traducerii pentru versiunea Y, făcută de X, Z(luna-anul).
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: opcodes 2.39.90\n"
+"Project-Id-Version: opcodes 2.40.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-12-31 12:18+0000\n"
-"PO-Revision-Date: 2023-01-02 00:21+0100\n"
+"POT-Creation-Date: 2023-07-03 11:31+0100\n"
+"PO-Revision-Date: 2023-07-18 20:18+0200\n"
 "Last-Translator: Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>\n"
 "Language-Team: Romanian <translation-team-ro@lists.sourceforge.net>\n"
 "Language: ro\n"
@@ -34,11 +35,11 @@ msgstr ""
 "X-Bugs: Report translation errors to the Language-Team address.\n"
 "X-Generator: Poedit 3.2.2\n"
 
-#: aarch64-asm.c:821
+#: aarch64-asm.c:834
 msgid "specified register cannot be read from"
 msgstr "nu se poate citi din registrul specificat"
 
-#: aarch64-asm.c:830
+#: aarch64-asm.c:843
 msgid "specified register cannot be written to"
 msgstr "nu se poate scrie în registrul specificat"
 
@@ -48,17 +49,17 @@ msgstr "nu se poate scrie în registrul specificat"
 msgid "unrecognised disassembler option: %s"
 msgstr "opțiune de dezasamblare nerecunoscută: %s"
 
-#: aarch64-dis.c:3574
+#: aarch64-dis.c:3730
 #, c-format
 msgid "this `%s' should have an immediately preceding `%s'"
 msgstr "acest „%s” ar trebui să aibă un „%s” imediat anterior"
 
-#: aarch64-dis.c:3581
+#: aarch64-dis.c:3737
 #, c-format
 msgid "expected `%s' after previous `%s'"
 msgstr "așteptat „%s” după „%s” anterior"
 
-#: aarch64-dis.c:4000
+#: aarch64-dis.c:4156
 #, c-format
 msgid ""
 "\n"
@@ -69,7 +70,7 @@ msgstr ""
 "Următoarele opțiuni de dezasamblare specifice AARCH64 sunt acceptate pentru\n"
 "utilizare opțiunea „-M” (opțiunile multiple trebuie separate prin virgulă):\n"
 
-#: aarch64-dis.c:4004
+#: aarch64-dis.c:4160
 #, c-format
 msgid ""
 "\n"
@@ -78,7 +79,7 @@ msgstr ""
 "\n"
 "  no-aliases         Nu afișează alias de instrucțiuni.\n"
 
-#: aarch64-dis.c:4007
+#: aarch64-dis.c:4163
 #, c-format
 msgid ""
 "\n"
@@ -87,7 +88,7 @@ msgstr ""
 "\n"
 "  aliases            Afișează alias de instrucțiuni.\n"
 
-#: aarch64-dis.c:4010
+#: aarch64-dis.c:4166
 #, c-format
 msgid ""
 "\n"
@@ -96,7 +97,7 @@ msgstr ""
 "\n"
 "  no-notes         Nu afișează note de instrucțiuni.\n"
 
-#: aarch64-dis.c:4013
+#: aarch64-dis.c:4169
 #, c-format
 msgid ""
 "\n"
@@ -105,7 +106,7 @@ msgstr ""
 "\n"
 "  notes            Afișează note de instrucțiuni.\n"
 
-#: aarch64-dis.c:4017
+#: aarch64-dis.c:4173
 #, c-format
 msgid ""
 "\n"
@@ -114,281 +115,305 @@ msgstr ""
 "\n"
 "  debug_dump         Comutare temporară pentru urmărirea depanării.\n"
 
-#: aarch64-dis.c:4021 arc-dis.c:1607 arc-dis.c:1630 arc-dis.c:1633
-#: loongarch-dis.c:306 mips-dis.c:2897 mips-dis.c:2909 mips-dis.c:2912
-#: nfp-dis.c:2993 riscv-dis.c:1282 riscv-dis.c:1285
+#: aarch64-dis.c:4177 arc-dis.c:1607 arc-dis.c:1630 arc-dis.c:1633
+#: loongarch-dis.c:332 mips-dis.c:2903 mips-dis.c:2915 mips-dis.c:2918
+#: nfp-dis.c:2995 riscv-dis.c:1362 riscv-dis.c:1365
 #, c-format
 msgid "\n"
 msgstr "\n"
 
-#: aarch64-opc.c:1357
+#: aarch64-opc.c:1431
 msgid "immediate value"
 msgstr "valoare directă"
 
-#: aarch64-opc.c:1367
+#: aarch64-opc.c:1441
 msgid "immediate offset"
 msgstr "poziția directă"
 
-#: aarch64-opc.c:1377
+#: aarch64-opc.c:1451
 msgid "register number"
 msgstr "numărul de registru"
 
-#: aarch64-opc.c:1387
+#: aarch64-opc.c:1461
 msgid "register element index"
 msgstr "indicele elementului de registru"
 
-#: aarch64-opc.c:1397
+#: aarch64-opc.c:1471
 msgid "shift amount"
 msgstr "lungimea decalajului"
 
-#: aarch64-opc.c:1409
+#: aarch64-opc.c:1483
 msgid "multiplier"
 msgstr "multiplicator"
 
-#: aarch64-opc.c:1483
+#: aarch64-opc.c:1602
+msgid "expected a selection register in the range w12-w15"
+msgstr "se aștepta un registru de selecție în intervalul w12-w15"
+
+#: aarch64-opc.c:1606
+msgid "expected a selection register in the range w8-w11"
+msgstr "se aștepta un registru de selecție în intervalul w8-w11"
+
+#: aarch64-opc.c:1625
+msgid "starting offset is not a multiple of 2"
+msgstr "decalajul de pornire nu este un multiplu de 2"
+
+#: aarch64-opc.c:1626
+msgid "starting offset is not a multiple of 4"
+msgstr "decalajul de pornire nu este un multiplu de 4"
+
+#: aarch64-opc.c:1634
+msgid "expected a single offset rather than a range"
+msgstr "se aștepta o singură poziție, și nu un interval"
+
+#: aarch64-opc.c:1638
+msgid "expected a range of two offsets"
+msgstr "se așteaptă un interval de două poziții"
+
+#: aarch64-opc.c:1641
+msgid "expected a range of four offsets"
+msgstr "se așteaptă un interval de patru poziții"
+
+#: aarch64-opc.c:1700
 msgid "reg pair must start from even reg"
 msgstr "perechea de registre trebuie să înceapă cu același registru"
 
-#: aarch64-opc.c:1489
+#: aarch64-opc.c:1706
 msgid "reg pair must be contiguous"
 msgstr "perechea de registre trebuie să fie contiguă"
 
-#: aarch64-opc.c:1503
+#: aarch64-opc.c:1720
 msgid "extraneous register"
 msgstr "registru extern"
 
-#: aarch64-opc.c:1509
+#: aarch64-opc.c:1726
 msgid "missing register"
 msgstr "lipsește registrul"
 
-#: aarch64-opc.c:1520
+#: aarch64-opc.c:1737
 msgid "stack pointer register expected"
 msgstr "se așteaptă un registru de indicatori de stivă"
 
-#: aarch64-opc.c:1545
-msgid "z0-z15 expected"
-msgstr "se aștepta z0-z15"
+#: aarch64-opc.c:1840 aarch64-opc.c:1856
+msgid "start register out of range"
+msgstr "începutul registrului în afara intervalului"
 
-#: aarch64-opc.c:1546
-msgid "z0-z7 expected"
-msgstr "se aștepta z0-z7"
-
-#: aarch64-opc.c:1572
-msgid "invalid register list"
-msgstr "listă de registru nevalidă"
-
-#: aarch64-opc.c:1586
-msgid "p0-p7 expected"
-msgstr "se aștepta p0-p7"
-
-#: aarch64-opc.c:1612 aarch64-opc.c:1620
+#: aarch64-opc.c:1985 aarch64-opc.c:1993
 msgid "unexpected address writeback"
 msgstr "rescriere neașteptată a adresei"
 
-#: aarch64-opc.c:1631
+#: aarch64-opc.c:2004
 msgid "address writeback expected"
 msgstr "se aștapta rescrierea adresei"
 
-#: aarch64-opc.c:1678
+#: aarch64-opc.c:2051
 msgid "negative or unaligned offset expected"
 msgstr "se aștepta o poziție negativă sau nealiniată"
 
-#: aarch64-opc.c:1735
+#: aarch64-opc.c:2108
 msgid "invalid register offset"
 msgstr "poziție de registru nevalidă"
 
-#: aarch64-opc.c:1757
+#: aarch64-opc.c:2130
 msgid "invalid post-increment amount"
 msgstr "vaoare post-increment nevalidă"
 
-#: aarch64-opc.c:1773 aarch64-opc.c:2293
+#: aarch64-opc.c:2146 aarch64-opc.c:2665
 msgid "invalid shift amount"
 msgstr "valoare de schimbare incorectă"
 
-#: aarch64-opc.c:1786
+#: aarch64-opc.c:2159
 msgid "invalid extend/shift operator"
 msgstr "operator de extindere/schimbare nevalid"
 
-#: aarch64-opc.c:1832 aarch64-opc.c:2093 aarch64-opc.c:2128 aarch64-opc.c:2147
-#: aarch64-opc.c:2155 aarch64-opc.c:2246 aarch64-opc.c:2423 aarch64-opc.c:2523
-#: aarch64-opc.c:2536
+#: aarch64-opc.c:2205 aarch64-opc.c:2465 aarch64-opc.c:2500 aarch64-opc.c:2519
+#: aarch64-opc.c:2527 aarch64-opc.c:2618 aarch64-opc.c:2795 aarch64-opc.c:2895
+#: aarch64-opc.c:2908
 msgid "immediate out of range"
 msgstr "valoare directă(immediate) în afara intervalului"
 
-#: aarch64-opc.c:1862 aarch64-opc.c:1904 aarch64-opc.c:1967 aarch64-opc.c:2001
+#: aarch64-opc.c:2235 aarch64-opc.c:2277 aarch64-opc.c:2340 aarch64-opc.c:2374
 msgid "invalid addressing mode"
 msgstr "mod de adresare nevalid"
 
-#: aarch64-opc.c:1959
+#: aarch64-opc.c:2332
 msgid "index register xzr is not allowed"
 msgstr "registrul de index xzr nu este permis"
 
-#: aarch64-opc.c:2081 aarch64-opc.c:2103 aarch64-opc.c:2326 aarch64-opc.c:2334
-#: aarch64-opc.c:2400 aarch64-opc.c:2429
+#: aarch64-opc.c:2453 aarch64-opc.c:2475 aarch64-opc.c:2698 aarch64-opc.c:2706
+#: aarch64-opc.c:2772 aarch64-opc.c:2801
 msgid "invalid shift operator"
 msgstr "operator de schimbare nevalid"
 
-#: aarch64-opc.c:2087
+#: aarch64-opc.c:2459
 msgid "shift amount must be 0 or 12"
 msgstr "valoarea schimbării trebuie să fie 0 sau 12"
 
-#: aarch64-opc.c:2110
+#: aarch64-opc.c:2482
 msgid "shift amount must be a multiple of 16"
 msgstr "valoarea schimbării trebuie să fie un multiplu de 16"
 
-#: aarch64-opc.c:2122
+#: aarch64-opc.c:2494
 msgid "negative immediate value not allowed"
 msgstr "valoarea directă(immediate) negativă nu este permisă"
 
-#: aarch64-opc.c:2257
+#: aarch64-opc.c:2629
 msgid "immediate zero expected"
 msgstr "se aștepta valoare directă(immediate) egală cu zero"
 
-#: aarch64-opc.c:2271
+#: aarch64-opc.c:2643
 msgid "rotate expected to be 0, 90, 180 or 270"
 msgstr "rotația se așteaptă să fie 0, 90, 180 sau 270"
 
-#: aarch64-opc.c:2282
+#: aarch64-opc.c:2654
 msgid "rotate expected to be 90 or 270"
 msgstr "rotația se așteaptă să fie 90 sau 270"
 
-#: aarch64-opc.c:2342
+#: aarch64-opc.c:2714
 msgid "shift is not permitted"
 msgstr "schimbul nu este permis"
 
-#: aarch64-opc.c:2367
+#: aarch64-opc.c:2739
 msgid "invalid value for immediate"
 msgstr "valoare nevalidă pentru valoarea directă(immediate)"
 
-#: aarch64-opc.c:2392
+#: aarch64-opc.c:2764
 msgid "shift amount must be 0 or 16"
 msgstr "valoarea schimbării trebuie să fie 0 sau 16"
 
-#: aarch64-opc.c:2413
+#: aarch64-opc.c:2785
 msgid "floating-point immediate expected"
 msgstr "se aștepta valoare directă(immediate) în virgulă mobilă"
 
-#: aarch64-opc.c:2447
+#: aarch64-opc.c:2819
 msgid "no shift amount allowed for 8-bit constants"
 msgstr "nu este permisă nicio valoare de schimbare pentru constantele de 8 biți"
 
-#: aarch64-opc.c:2457
+#: aarch64-opc.c:2829
 msgid "shift amount must be 0 or 8"
 msgstr "valoarea schimbării trebuie să fie 0 sau 8"
 
-#: aarch64-opc.c:2470
+#: aarch64-opc.c:2842
 msgid "immediate too big for element size"
 msgstr "valoare directă(immediate) prea mare pentru dimensiunea elementului"
 
-#: aarch64-opc.c:2477
+#: aarch64-opc.c:2849
 msgid "invalid arithmetic immediate"
 msgstr "valoare directă(immediate) aritmetică nevalidă"
 
-#: aarch64-opc.c:2491
+#: aarch64-opc.c:2863
 msgid "floating-point value must be 0.5 or 1.0"
 msgstr "valoarea în virgulă mobilă trebuie să fie 0,5 sau 1,0"
 
-#: aarch64-opc.c:2501
+#: aarch64-opc.c:2873
 msgid "floating-point value must be 0.5 or 2.0"
 msgstr "valoarea în virgulă mobilă trebuie să fie 0,5 sau 2,0"
 
-#: aarch64-opc.c:2511
+#: aarch64-opc.c:2883
 msgid "floating-point value must be 0.0 or 1.0"
 msgstr "valoarea în virgulă mobilă trebuie să fie 0,0 sau 1,0"
 
-#: aarch64-opc.c:2542
+#: aarch64-opc.c:2914
 msgid "invalid replicated MOV immediate"
 msgstr "valoare directă(immediate) replicată MOV nevalidă"
 
-#: aarch64-opc.c:2650
+#: aarch64-opc.c:2972
+msgid "byte index must be a multiple of 8"
+msgstr "indexul de octeți trebuie să fie un multiplu de 8"
+
+#: aarch64-opc.c:3002
+msgid "the register-index form of PRFM does not accept opcodes in the range 24-31"
+msgstr "formularul registru-index al PRFM nu acceptă coduri operaționale în intervalul 24-31."
+
+#: aarch64-opc.c:3055
 msgid "extend operator expected"
 msgstr "se aștepta operatorul de extindere"
 
-#: aarch64-opc.c:2663
+#: aarch64-opc.c:3068
 msgid "missing extend operator"
 msgstr "lipsește operatorul de extindere"
 
-#: aarch64-opc.c:2669
+#: aarch64-opc.c:3074
 msgid "'LSL' operator not allowed"
 msgstr "operatorul „LSL” nu este permis"
 
-#: aarch64-opc.c:2690
+#: aarch64-opc.c:3095
 msgid "W register expected"
 msgstr "se aștepta un registru W"
 
-#: aarch64-opc.c:2701
+#: aarch64-opc.c:3106
 msgid "shift operator expected"
 msgstr "se aștepta operatorul de schimbare"
 
-#: aarch64-opc.c:2708
+#: aarch64-opc.c:3113
 msgid "'ROR' operator not allowed"
 msgstr "operatorul „ROR” nu este permis"
 
-#: aarch64-opc.c:3998
+#: aarch64-opc.c:4525
 msgid "reading from a write-only register"
 msgstr "se încearcă citirea dintr-un registru numai pentru scriere"
 
-#: aarch64-opc.c:4000
+#: aarch64-opc.c:4527
 msgid "writing to a read-only register"
 msgstr "se încearcă scrierea într-un registru numai pentru citire"
 
-#: aarch64-opc.c:5606
+#: aarch64-opc.c:6166
 msgid "the three register operands must be distinct from one another"
 msgstr "cei trei operanzi de registru trebuie sa fie distincți unul de altul"
 
-#: aarch64-opc.c:5717
+#: aarch64-opc.c:6277
 msgid "destination register differs from preceding instruction"
 msgstr "registrul de destinație este diferit față de instrucțiunea precedentă"
 
-#: aarch64-opc.c:5720
+#: aarch64-opc.c:6280
 msgid "source register differs from preceding instruction"
 msgstr "registrul sursă este diferit față de instrucțiunea precedentă"
 
-#: aarch64-opc.c:5723
+#: aarch64-opc.c:6283
 msgid "size register differs from preceding instruction"
 msgstr "dimensiunea registrului este diferită față de instrucțiunea precedentă"
 
-#: aarch64-opc.c:5771
+#: aarch64-opc.c:6331
 msgid "instruction opens new dependency sequence without ending previous one"
 msgstr "instrucțiunea deschide o nouă secvență de dependență fără a o termina pe cea anterioară"
 
-#: aarch64-opc.c:5800
+#: aarch64-opc.c:6360
 msgid "previous `movprfx' sequence not closed"
 msgstr "secvența anterioară „movprfx” nu este închisă"
 
-#: aarch64-opc.c:5819
+#: aarch64-opc.c:6379
 msgid "SVE instruction expected after `movprfx'"
 msgstr "instrucțiune SVE este așteptată după „movprfx”"
 
-#: aarch64-opc.c:5832
+#: aarch64-opc.c:6392
 msgid "SVE `movprfx' compatible instruction expected"
 msgstr "se aștepta o instrucțiune SVE compatibilă cu „movprfx”"
 
-#: aarch64-opc.c:5920
+#: aarch64-opc.c:6480
 msgid "predicated instruction expected after `movprfx'"
 msgstr "se aștepta instrucțiunea prezisă după „movprfx”"
 
-#: aarch64-opc.c:5932
+#: aarch64-opc.c:6492
 msgid "merging predicate expected due to preceding `movprfx'"
 msgstr "se aștepta instrucțiunea de fuzionare prezisă de către instrucțiunea anterioară „movprfx”"
 
-#: aarch64-opc.c:5944
+#: aarch64-opc.c:6504
 msgid "predicate register differs from that in preceding `movprfx'"
 msgstr "registrul prezis este diferit față de cel din instrucțiunea anterioară „movprfx”"
 
-#: aarch64-opc.c:5963
+#: aarch64-opc.c:6523
 msgid "output register of preceding `movprfx' not used in current instruction"
 msgstr "registrul de ieșire al instrucțiunii „movprfx” precedente nu este utilizat în instrucțiunea curentă"
 
-#: aarch64-opc.c:5976
+#: aarch64-opc.c:6536
 msgid "output register of preceding `movprfx' expected as output"
 msgstr "registrul de ieșire al instrucțiunii „movprfx” precedente era așteptat ca ieștre"
 
-#: aarch64-opc.c:5988
+#: aarch64-opc.c:6548
 msgid "output register of preceding `movprfx' used as input"
 msgstr "registrul de ieșire al instrucțiunii „movprfx” precedente utilizat ca intrare"
 
-#: aarch64-opc.c:6004
+#: aarch64-opc.c:6564
 msgid "register size not compatible with previous `movprfx'"
 msgstr "dimensiunea registrului nu este compatibilă cu instrucțiunea „movprfx” anterioară"
 
@@ -480,7 +505,7 @@ msgstr ""
 "Următoarele opțiuni de dezasamblare specifice ARC sunt acceptate pentru\n"
 "utilizare cu opțiunea -M (opțiunile multiple trebuie să fie separate prin virgule):\n"
 
-#: arc-dis.c:1616 mips-dis.c:2904 riscv-dis.c:1277
+#: arc-dis.c:1616 mips-dis.c:2910 riscv-dis.c:1357
 #, c-format
 msgid ""
 "\n"
@@ -721,7 +746,7 @@ msgstr "«coproc» trebuie să aibă un argument: %s"
 msgid "coprocN argument takes options \"generic\", \"cde\", or \"CDE\": %s"
 msgstr "argumentul „coprocN” acceptă numai valorile „generic”, „cde” sau „CDE”: %s"
 
-#: arm-dis.c:13009
+#: arm-dis.c:13016
 #, c-format
 msgid ""
 "\n"
@@ -753,7 +778,7 @@ msgstr "se aștepta 16, 32 sau 64 în"
 
 #: bpf-asm.c:181 epiphany-asm.c:456 fr30-asm.c:311 frv-asm.c:1264
 #: ip2k-asm.c:512 iq2000-asm.c:460 lm32-asm.c:350 m32c-asm.c:1585
-#: m32r-asm.c:329 mep-asm.c:1287 mt-asm.c:596 or1k-asm.c:576
+#: m32r-asm.c:329 mep-asm.c:1286 mt-asm.c:596 or1k-asm.c:576
 #: xstormy16-asm.c:277
 #, c-format
 msgid "internal error: unrecognized field %d while parsing"
@@ -761,7 +786,7 @@ msgstr "eroare internă: câmp necunoscut %d în timpul analizării"
 
 #: bpf-asm.c:233 epiphany-asm.c:508 fr30-asm.c:363 frv-asm.c:1316
 #: ip2k-asm.c:564 iq2000-asm.c:512 lm32-asm.c:402 m32c-asm.c:1637
-#: m32r-asm.c:381 mep-asm.c:1339 mt-asm.c:648 or1k-asm.c:628
+#: m32r-asm.c:381 mep-asm.c:1338 mt-asm.c:648 or1k-asm.c:628
 #: xstormy16-asm.c:329
 msgid "missing mnemonic in syntax string"
 msgstr "mnemonică lipsă în sintaxă"
@@ -775,7 +800,7 @@ msgstr "mnemonică lipsă în sintaxă"
 #: iq2000-asm.c:847 lm32-asm.c:537 lm32-asm.c:541 lm32-asm.c:630
 #: lm32-asm.c:737 m32c-asm.c:1772 m32c-asm.c:1776 m32c-asm.c:1865
 #: m32c-asm.c:1972 m32r-asm.c:516 m32r-asm.c:520 m32r-asm.c:609 m32r-asm.c:716
-#: mep-asm.c:1474 mep-asm.c:1478 mep-asm.c:1567 mep-asm.c:1674 mt-asm.c:783
+#: mep-asm.c:1473 mep-asm.c:1477 mep-asm.c:1566 mep-asm.c:1673 mt-asm.c:783
 #: mt-asm.c:787 mt-asm.c:876 mt-asm.c:983 or1k-asm.c:763 or1k-asm.c:767
 #: or1k-asm.c:856 or1k-asm.c:963 xstormy16-asm.c:464 xstormy16-asm.c:468
 #: xstormy16-asm.c:557 xstormy16-asm.c:664
@@ -784,7 +809,7 @@ msgstr "instrucțiune nerecunoscută"
 
 #: bpf-asm.c:415 epiphany-asm.c:690 fr30-asm.c:545 frv-asm.c:1498
 #: ip2k-asm.c:746 iq2000-asm.c:694 lm32-asm.c:584 m32c-asm.c:1819
-#: m32r-asm.c:563 mep-asm.c:1521 mt-asm.c:830 or1k-asm.c:810
+#: m32r-asm.c:563 mep-asm.c:1520 mt-asm.c:830 or1k-asm.c:810
 #: xstormy16-asm.c:511
 #, c-format
 msgid "syntax error (expected char `%c', found `%c')"
@@ -792,7 +817,7 @@ msgstr "eroare de sintaxă ( se aștepta „%c”, s-a găsit „%c”)"
 
 #: bpf-asm.c:425 epiphany-asm.c:700 fr30-asm.c:555 frv-asm.c:1508
 #: ip2k-asm.c:756 iq2000-asm.c:704 lm32-asm.c:594 m32c-asm.c:1829
-#: m32r-asm.c:573 mep-asm.c:1531 mt-asm.c:840 or1k-asm.c:820
+#: m32r-asm.c:573 mep-asm.c:1530 mt-asm.c:840 or1k-asm.c:820
 #: xstormy16-asm.c:521
 #, c-format
 msgid "syntax error (expected char `%c', found end of instruction)"
@@ -800,21 +825,21 @@ msgstr "eroare de sintaxă (se aștepta char „%c”, s-a găsit sfârșit de i
 
 #: bpf-asm.c:455 epiphany-asm.c:730 fr30-asm.c:585 frv-asm.c:1538
 #: ip2k-asm.c:786 iq2000-asm.c:734 lm32-asm.c:624 m32c-asm.c:1859
-#: m32r-asm.c:603 mep-asm.c:1561 mt-asm.c:870 or1k-asm.c:850
+#: m32r-asm.c:603 mep-asm.c:1560 mt-asm.c:870 or1k-asm.c:850
 #: xstormy16-asm.c:551
 msgid "junk at end of line"
 msgstr "gunoi la sfârșit de linie"
 
 #: bpf-asm.c:567 epiphany-asm.c:842 fr30-asm.c:697 frv-asm.c:1650
 #: ip2k-asm.c:898 iq2000-asm.c:846 lm32-asm.c:736 m32c-asm.c:1971
-#: m32r-asm.c:715 mep-asm.c:1673 mt-asm.c:982 or1k-asm.c:962
+#: m32r-asm.c:715 mep-asm.c:1672 mt-asm.c:982 or1k-asm.c:962
 #: xstormy16-asm.c:663
 msgid "unrecognized form of instruction"
 msgstr "formă de instrucțiune nerecunoscută"
 
 #: bpf-asm.c:581 epiphany-asm.c:856 fr30-asm.c:711 frv-asm.c:1664
 #: ip2k-asm.c:912 iq2000-asm.c:860 lm32-asm.c:750 m32c-asm.c:1985
-#: m32r-asm.c:729 mep-asm.c:1687 mt-asm.c:996 or1k-asm.c:976
+#: m32r-asm.c:729 mep-asm.c:1686 mt-asm.c:996 or1k-asm.c:976
 #: xstormy16-asm.c:677
 #, c-format
 msgid "bad instruction `%.50s...'"
@@ -822,7 +847,7 @@ msgstr "instrucțiune greșită „%.50s...”"
 
 #: bpf-asm.c:584 epiphany-asm.c:859 fr30-asm.c:714 frv-asm.c:1667
 #: ip2k-asm.c:915 iq2000-asm.c:863 lm32-asm.c:753 m32c-asm.c:1988
-#: m32r-asm.c:732 mep-asm.c:1690 mt-asm.c:999 or1k-asm.c:979
+#: m32r-asm.c:732 mep-asm.c:1689 mt-asm.c:999 or1k-asm.c:979
 #: xstormy16-asm.c:680
 #, c-format
 msgid "bad instruction `%.50s'"
@@ -852,7 +877,7 @@ msgstr "*necunoscută*"
 
 #: bpf-dis.c:203 epiphany-dis.c:279 fr30-dis.c:300 frv-dis.c:397
 #: ip2k-dis.c:289 iq2000-dis.c:190 lm32-dis.c:148 m32c-dis.c:892
-#: m32r-dis.c:280 mep-dis.c:1188 mt-dis.c:288 or1k-dis.c:175
+#: m32r-dis.c:280 mep-dis.c:1202 mt-dis.c:288 or1k-dis.c:175
 #: xstormy16-dis.c:169
 #, c-format
 msgid "internal error: unrecognized field %d while printing insn"
@@ -971,12 +996,12 @@ msgstr "Eroare necunoscută %d\n"
 msgid "Address 0x%<PRIx64> is out of bounds.\n"
 msgstr "Adresa 0x%<PRIx64> este în afara limitelor.\n"
 
-#: disassemble.c:876
+#: disassemble.c:887
 #, c-format
 msgid "assertion fail %s:%d"
 msgstr "aserțiune eșuată %s:%d"
 
-#: disassemble.c:877
+#: disassemble.c:888
 msgid "Please report this bug"
 msgstr "Raportați această eroare"
 
@@ -1117,11 +1142,11 @@ msgstr "Hmmmm 0x%x"
 msgid "Don't understand 0x%x \n"
 msgstr "Nu se înțelege 0x%x \n"
 
-#: i386-dis.c:8839
+#: i386-dis.c:8819
 msgid "<internal disassembler error>"
 msgstr "<eroare internă de dezasamblor>"
 
-#: i386-dis.c:9065
+#: i386-dis.c:9047
 #, c-format
 msgid ""
 "\n"
@@ -1132,32 +1157,32 @@ msgstr ""
 "Următoarele opțiuni de dezasamblare specifice i386/x86-64 sunt acceptate pentru\n"
 "utilizare cu opțiunea -M (opțiunile multiple trebuie să fie separate prin virgule):\n"
 
-#: i386-dis.c:9069
+#: i386-dis.c:9051
 #, c-format
 msgid "  x86-64      Disassemble in 64bit mode\n"
 msgstr "  x86-64      Dezasamblează în modul pe 64 de biți\n"
 
-#: i386-dis.c:9070
+#: i386-dis.c:9052
 #, c-format
 msgid "  i386        Disassemble in 32bit mode\n"
 msgstr "  i386        Dezasamblează în modul pe 32 de biți\n"
 
-#: i386-dis.c:9071
+#: i386-dis.c:9053
 #, c-format
 msgid "  i8086       Disassemble in 16bit mode\n"
 msgstr "  i8086       Dezasamblează în modul pe 16 de biți\n"
 
-#: i386-dis.c:9072
+#: i386-dis.c:9054
 #, c-format
 msgid "  att         Display instruction in AT&T syntax\n"
 msgstr "  att         Afișează instrucțiunile în sintaxa AT&T\n"
 
-#: i386-dis.c:9073
+#: i386-dis.c:9055
 #, c-format
 msgid "  intel       Display instruction in Intel syntax\n"
 msgstr "  intel       Afișează instrucțiunile în sintaxa Intel\n"
 
-#: i386-dis.c:9074
+#: i386-dis.c:9056
 #, c-format
 msgid ""
 "  att-mnemonic\n"
@@ -1166,7 +1191,7 @@ msgstr ""
 "  att-mnemonic\n"
 "              Afișează instrucțiunile în mnemonicul AT&T\n"
 
-#: i386-dis.c:9076
+#: i386-dis.c:9058
 #, c-format
 msgid ""
 "  intel-mnemonic\n"
@@ -1175,32 +1200,32 @@ msgstr ""
 "  intel-mnemonic\n"
 "              Afișează instrucțiunile în mnemonicul Intel\n"
 
-#: i386-dis.c:9078
+#: i386-dis.c:9060
 #, c-format
 msgid "  addr64      Assume 64bit address size\n"
 msgstr "  addr64      Presupune că dimensiunea adresei este de 64 de biți\n"
 
-#: i386-dis.c:9079
+#: i386-dis.c:9061
 #, c-format
 msgid "  addr32      Assume 32bit address size\n"
 msgstr "  addr32      Presupune că dimensiunea adresei este de 32 de biți\\n\n"
 
-#: i386-dis.c:9080
+#: i386-dis.c:9062
 #, c-format
 msgid "  addr16      Assume 16bit address size\n"
 msgstr "  addr16      Presupune că dimensiunea adresei este de 16 de biți\\n\n"
 
-#: i386-dis.c:9081
+#: i386-dis.c:9063
 #, c-format
 msgid "  data32      Assume 32bit data size\n"
 msgstr "  data32      Presupune că dimensiunea datelor este de 32 de biți\\n\n"
 
-#: i386-dis.c:9082
+#: i386-dis.c:9064
 #, c-format
 msgid "  data16      Assume 16bit data size\n"
 msgstr "  data16      Presupune că dimensiunea datelor este de 16 de biți\n"
 
-#: i386-dis.c:9083
+#: i386-dis.c:9065
 #, c-format
 msgid "  suffix      Always display instruction suffix in AT&T syntax\n"
 msgstr "  suffix      Afișează întotdeauna sufixul instrucțiunilor în sintaxa AT&T\n"
@@ -1215,227 +1240,19 @@ msgstr "  suffix      Afișează întotdeauna sufixul instrucțiunilor în sinta
 # două se folosește în cazul de față.
 # Pentru curioși, interesați Wikipedia are ample
 # articole pentru amîndoi termeni/sigle.
-#: i386-dis.c:9084
+#: i386-dis.c:9066
 #, c-format
 msgid "  amd64       Display instruction in AMD64 ISA\n"
 msgstr "  amd64       Afișează instrucțiunile în ISA AMD64\n"
 
-#: i386-dis.c:9085
+#: i386-dis.c:9067
 #, c-format
 msgid "  intel64     Display instruction in Intel64 ISA\n"
 msgstr "  intel64     Afișează instrucțiunile în ISA Intel64\n"
 
-#: i386-dis.c:9773
+#: i386-dis.c:9760
 msgid "64-bit address is disabled"
 msgstr "adresa pe 64 de biți este dezactivată"
-
-#: i386-gen.c:560
-#, c-format
-msgid "%s: error: "
-msgstr "%s: eroare: "
-
-#: i386-gen.c:686
-#, c-format
-msgid "%s: %d: unknown bitfield: %s\n"
-msgstr "%s: %d: câmp de biți necunoscut: %s\n"
-
-#: i386-gen.c:688 i386-gen.c:755
-#, c-format
-msgid "unknown bitfield: %s\n"
-msgstr "câmp de biți necunoscut: %s\n"
-
-#: i386-gen.c:820
-#, c-format
-msgid "%s: %d: missing `)' in bitfield: %s\n"
-msgstr "%s: %d: lipsește „)” în câmpul de biți: %s\n"
-
-#: i386-gen.c:920
-#, c-format
-msgid "%s: %d: no memory operand\n"
-msgstr "%s: %d: nu există operand de memorie\n"
-
-#: i386-gen.c:956
-#, c-format
-msgid "%s: %d: unknown element size: %s\n"
-msgstr "%s: %d: dimensiune necunoscută a elementului: %s\n"
-
-#: i386-gen.c:1013
-#, c-format
-msgid "%s:%d: Conflicting opcode space specifications\n"
-msgstr "%s:%d: Specificații de spațiu pentru codul operațional în conflict\n"
-
-#: i386-gen.c:1017
-#, c-format
-msgid "%s:%d: Warning: redundant opcode space specification\n"
-msgstr "%s:%d: Avertisment: specificație redundantă a spațiului de cod operațional\n"
-
-#: i386-gen.c:1026
-#, c-format
-msgid "%s:%d: Conflicting prefix specifications\n"
-msgstr "%s:%d: Specificații de prefix în conflict\n"
-
-#: i386-gen.c:1030
-#, c-format
-msgid "%s:%d: Warning: redundant prefix specification\n"
-msgstr "%s:%d: Avertisment: specificație redundantă a prefixului\n"
-
-#: i386-gen.c:1239
-#, c-format
-msgid "%s:%d: %s: unrecognized opcode encoding space\n"
-msgstr "%s:%d: %s: spațiu de codificare a codului operațional nerecunoscut\n"
-
-#: i386-gen.c:1245
-#, c-format
-msgid "%s:%d: %s: residual opcode (0x%0*llx) too large\n"
-msgstr "%s:%d: %s: cod operațional rezidual (0x%0*llx) prea mare\n"
-
-#: i386-gen.c:1612
-#, c-format
-msgid "%s: %d: (continued) line too long\n"
-msgstr "%s: %d: (continuare) linie prea lungă\n"
-
-#: i386-gen.c:1719
-#, c-format
-msgid "can't find i386-reg.tbl for reading, errno = %s\n"
-msgstr "nu se poate găsi i386-reg.tbl pentru citire, număr_eroare = %s\n"
-
-#: i386-gen.c:1796
-#, c-format
-msgid "can't create i386-init.h, errno = %s\n"
-msgstr "nu se poate crea i386-init.h, număr_eroare = %s\n"
-
-#: i386-gen.c:1911 ia64-gen.c:2819
-#, c-format
-msgid "unable to change directory to \"%s\", errno = %s\n"
-msgstr "nu s-a putut schimba directorul la „%s”, număr_eroare = %s\n"
-
-#: i386-gen.c:1925 i386-gen.c:1930
-#, c-format
-msgid "CpuMax != %d!\n"
-msgstr "CpuMax != %d!\n"
-
-#: i386-gen.c:1934
-#, c-format
-msgid "%d unused bits in i386_cpu_flags.\n"
-msgstr "%d biți neutilizați în i386_cpu_flags.\n"
-
-#: i386-gen.c:1949
-#, c-format
-msgid "%d unused bits in i386_operand_type.\n"
-msgstr "%d biți neutilizați în i386_operand_type.\n"
-
-#: i386-gen.c:1963
-#, c-format
-msgid "can't create i386-tbl.h, errno = %s\n"
-msgstr "nu se poate crea i386-tbl.h, număr_eroare = %s\n"
-
-#: ia64-gen.c:297
-#, c-format
-msgid "%s: Error: "
-msgstr "%s: Eroare: "
-
-#: ia64-gen.c:310
-#, c-format
-msgid "%s: Warning: "
-msgstr "%s: Avertisment: "
-
-#: ia64-gen.c:496 ia64-gen.c:727
-#, c-format
-msgid "multiple note %s not handled\n"
-msgstr "nota multiplă %s nu este gestionată\n"
-
-#: ia64-gen.c:607
-msgid "can't find ia64-ic.tbl for reading\n"
-msgstr "nu se poate găsi ia64-ic.tbl pentru citire\n"
-
-#: ia64-gen.c:809
-#, c-format
-msgid "can't find %s for reading\n"
-msgstr "nu se poate găsi %s pentru citire\n"
-
-#: ia64-gen.c:1041
-#, c-format
-msgid ""
-"most recent format '%s'\n"
-"appears more restrictive than '%s'\n"
-msgstr ""
-"cel mai recent format „%s”, \n"
-"pare mai restrictiv decât „%s”\n"
-
-#: ia64-gen.c:1052
-#, c-format
-msgid "overlapping field %s->%s\n"
-msgstr "suprapunere de câmp %s -> %s\n"
-
-#: ia64-gen.c:1249
-#, c-format
-msgid "overwriting note %d with note %d (IC:%s)\n"
-msgstr "se suprascrie nota %d cu nota %d (IC:%s)\n"
-
-#: ia64-gen.c:1456
-#, c-format
-msgid "don't know how to specify %% dependency %s\n"
-msgstr "nu se știe cum să se specifice dependența %%, %s\n"
-
-#: ia64-gen.c:1478
-#, c-format
-msgid "Don't know how to specify # dependency %s\n"
-msgstr "Nu se știe cum să se specifice dependența numărul # %s\n"
-
-#: ia64-gen.c:1517
-#, c-format
-msgid "IC:%s [%s] has no terminals or sub-classes\n"
-msgstr "IC:%s [%s] nu are terminale sau subclase\n"
-
-#: ia64-gen.c:1520
-#, c-format
-msgid "IC:%s has no terminals or sub-classes\n"
-msgstr "IC:%s nu are terminale sau subclase\n"
-
-#: ia64-gen.c:1529
-#, c-format
-msgid "no insns mapped directly to terminal IC %s [%s]"
-msgstr "nicio instrucțiune nu este atribuită direct la terminalul IC %s [%s]"
-
-#: ia64-gen.c:1532
-#, c-format
-msgid "no insns mapped directly to terminal IC %s\n"
-msgstr "nicio instrucțiune nu este atribuită direct la terminalul IC %s\n"
-
-#: ia64-gen.c:1543
-#, c-format
-msgid "class %s is defined but not used\n"
-msgstr "clasa %s este definită dar nu este folosită\n"
-
-#: ia64-gen.c:1556
-#, c-format
-msgid "Warning: rsrc %s (%s) has no chks\n"
-msgstr "Avertisment: registrul sursă „rsrc” %s (%s) nu are chks\n"
-
-#: ia64-gen.c:1559
-#, c-format
-msgid "Warning: rsrc %s (%s) has no chks or regs\n"
-msgstr "Avertisment: registrul sursă „rsrc” %s (%s) nu are chks sau regs\n"
-
-#: ia64-gen.c:1563
-#, c-format
-msgid "rsrc %s (%s) has no regs\n"
-msgstr "registrul sursă „rsrc” %s (%s) nu are regs\n"
-
-#: ia64-gen.c:2455
-#, c-format
-msgid "IC note %d in opcode %s (IC:%s) conflicts with resource %s note %d\n"
-msgstr "Nota IC %d din codul operațional %s (IC:%s) este în conflict cu resursa %s nota %d\n"
-
-#: ia64-gen.c:2483
-#, c-format
-msgid "IC note %d for opcode %s (IC:%s) conflicts with resource %s note %d\n"
-msgstr "Nota IC %d pentru codul operațional %s (IC:%s) este în conflict cu resursa %s nota %d\n"
-
-#: ia64-gen.c:2497
-#, c-format
-msgid "opcode %s has no class (ops %d %d %d)\n"
-msgstr "codul operațional %s nu are clasă (operanzi %d %d %d)\n"
 
 #. We've been passed a w.  Return with an error message so that
 #. cgen will try the next parsing option.
@@ -1562,7 +1379,7 @@ msgstr "eroare internă: lm32_cgen_cpu_open: argument neacceptat „%d”"
 msgid "internal error: lm32_cgen_cpu_open: no endianness specified"
 msgstr "eroare internă: lm32_cgen_cpu_open: endianness nedefinit"
 
-#: loongarch-dis.c:300
+#: loongarch-dis.c:324
 #, c-format
 msgid ""
 "\n"
@@ -1573,7 +1390,16 @@ msgstr ""
 "Următoarele opțiuni de dezasamblare specifice LoongArch sunt acceptate pentru\n"
 "utilizare cu opțiunea -M (opțiunile multiple trebuie să fie separate prin virgule):\n"
 
-#: loongarch-dis.c:304
+#: loongarch-dis.c:328
+#, c-format
+msgid ""
+"\n"
+"    no-aliases    Use canonical instruction forms.\n"
+msgstr ""
+"\n"
+"    no-aliases    Folosește formulare de instrucțiuni canonice.\n"
+
+#: loongarch-dis.c:330
 #, c-format
 msgid ""
 "\n"
@@ -1696,12 +1522,12 @@ msgstr "eroare internă: m32r_cgen_cpu_open: argument neacceptat „%d”"
 msgid "internal error: m32r_cgen_cpu_open: no endianness specified"
 msgstr "eroare internă: m32r_cgen_cpu_open: endianness nedefinit"
 
-#: m68k-dis.c:1288
+#: m68k-dis.c:1403
 #, c-format
 msgid "<function code %d>"
 msgstr "<cod funcție %d>"
 
-#: m68k-dis.c:1451
+#: m68k-dis.c:1567
 #, c-format
 msgid "<internal error in opcode table: %s %s>\n"
 msgstr "<eroare internă în tabelul de coduri operaționale: %s %s>\n"
@@ -1754,24 +1580,29 @@ msgstr "eroare internă: mep_cgen_cpu_open: argument neacceptat „%d”"
 msgid "internal error: mep_cgen_cpu_open: no endianness specified"
 msgstr "eroare internă: mep_cgen_cpu_open: endianness nedefinit"
 
-#: mips-dis.c:1904 mips-dis.c:2137
+#: mep-dis.c:662
+#, c-format
+msgid "illegal MEP INDEX setting '%x' in ELF header e_flags field"
+msgstr "parametru ilegal MEP INDEX „%x” în câmpul e_flags din antetul ELF"
+
+#: mips-dis.c:1907 mips-dis.c:2140
 #, c-format
 msgid "# internal error, undefined operand in `%s %s'"
 msgstr "# eroare internă, operand nedefinit în „%s %s”"
 
-#: mips-dis.c:2739
+#: mips-dis.c:2745
 msgid "Use canonical instruction forms.\n"
 msgstr "Folosește formulare de instrucțiuni canonice.\n"
 
-#: mips-dis.c:2741
+#: mips-dis.c:2747
 msgid "Recognize MSA instructions.\n"
 msgstr "Recunoaște instrucțiunile MSA.\n"
 
-#: mips-dis.c:2743
+#: mips-dis.c:2749
 msgid "Recognize the virtualization ASE instructions.\n"
 msgstr "Recunoaște instrucțiunile ASE de virtualizare.\n"
 
-#: mips-dis.c:2745
+#: mips-dis.c:2751
 msgid ""
 "Recognize the eXtended Physical Address (XPA) ASE\n"
 "                  instructions.\n"
@@ -1779,27 +1610,27 @@ msgstr ""
 "Recunoaște instrucțiunile ASE de adresă fizică \n"
 "                 extinsă (XPA).\n"
 
-#: mips-dis.c:2748
+#: mips-dis.c:2754
 msgid "Recognize the Global INValidate (GINV) ASE instructions.\n"
 msgstr "Recunoaște instrucțiunile ASE Global INValidate (GINV).\n"
 
-#: mips-dis.c:2752
+#: mips-dis.c:2758
 msgid "Recognize the Loongson MultiMedia extensions Instructions (MMI) ASE instructions.\n"
 msgstr "Recunoaște instrucțiunile ASE Loongson MultiMedia Extensions Instructions (MMI).\n"
 
-#: mips-dis.c:2756
+#: mips-dis.c:2762
 msgid "Recognize the Loongson Content Address Memory (CAM)  instructions.\n"
 msgstr "Recunoaște instrucțiunile Loongson Content Address Memory (CAM).\n"
 
-#: mips-dis.c:2760
+#: mips-dis.c:2766
 msgid "Recognize the Loongson EXTensions (EXT)  instructions.\n"
 msgstr "Recunoaște instrucțiunile Loongson EXTensions (EXT).\n"
 
-#: mips-dis.c:2764
+#: mips-dis.c:2770
 msgid "Recognize the Loongson EXTensions R2 (EXT2)  instructions.\n"
 msgstr "Recunoaște instrucțiunile Loongson EXTensions R2 (EXT2).\n"
 
-#: mips-dis.c:2767
+#: mips-dis.c:2773
 msgid ""
 "Print GPR names according to specified ABI.\n"
 "                  Default: based on binary being disassembled.\n"
@@ -1807,7 +1638,7 @@ msgstr ""
 "Afișează numele GPR conform ABI specificat.\n"
 "                  Implicit: bazat pe binarul care este dezasamblat.\n"
 
-#: mips-dis.c:2770
+#: mips-dis.c:2776
 msgid ""
 "Print FPR names according to specified ABI.\n"
 "                  Default: numeric.\n"
@@ -1815,7 +1646,7 @@ msgstr ""
 "Afișează numele FPR conform ABI specificat.\n"
 "                  Implicit: numeric.\n"
 
-#: mips-dis.c:2773
+#: mips-dis.c:2779
 msgid ""
 "Print CP0 register names according to specified architecture.\n"
 "                  Default: based on binary being disassembled.\n"
@@ -1823,7 +1654,7 @@ msgstr ""
 "Afișează numele registrului CP0 conform arhitecturii specificate.\n"
 "                  Implicit: bazat pe binarul care este dezasamblat.\n"
 
-#: mips-dis.c:2777
+#: mips-dis.c:2783
 msgid ""
 "Print HWR names according to specified architecture.\n"
 "                  Default: based on binary being disassembled.\n"
@@ -1831,11 +1662,11 @@ msgstr ""
 "Afișează numele HWR conform arhitecturii specificate.\n"
 "                  Implicit: bazat pe binarul care este dezasamblat.\n"
 
-#: mips-dis.c:2780
+#: mips-dis.c:2786
 msgid "Print GPR and FPR names according to specified ABI.\n"
 msgstr "Afișează numele GPR și FPR conform ABI specificat.\n"
 
-#: mips-dis.c:2782
+#: mips-dis.c:2788
 msgid ""
 "Print CP0 register and HWR names according to specified\n"
 "                  architecture."
@@ -1843,7 +1674,7 @@ msgstr ""
 "Afișează registrul CP0 și numele HWR conform arhitecturii\n"
 "                  specificate."
 
-#: mips-dis.c:2868
+#: mips-dis.c:2874
 #, c-format
 msgid ""
 "\n"
@@ -1991,17 +1822,17 @@ msgstr "Fișierul nu are o secțiune ME-Config."
 msgid "File has invalid ME-Config section."
 msgstr "Fișierul are o secțiune ME-Config nevalidă."
 
-#: nfp-dis.c:2717
+#: nfp-dis.c:2719
 #, c-format
 msgid "Error processing section %u "
 msgstr "Eroare la procesarea secțiunii %u "
 
-#: nfp-dis.c:2746
+#: nfp-dis.c:2748
 #, c-format
 msgid "Invalid NFP option: %s"
 msgstr "Opțiune NFP nevalidă: %s"
 
-#: nfp-dis.c:2984
+#: nfp-dis.c:2986
 #, c-format
 msgid ""
 "\n"
@@ -2012,7 +1843,7 @@ msgstr ""
 "Următoarele opțiuni de dezasamblare specifice NFP sunt acceptate pentru\n"
 "utilizare cu opțiunea -M (opțiunile multiple trebuie să fie separate prin virgule):\n"
 
-#: nfp-dis.c:2988
+#: nfp-dis.c:2990
 #, c-format
 msgid ""
 "\n"
@@ -2213,46 +2044,46 @@ msgid "invalid TH value"
 msgstr "valoare TH nevalidă"
 
 #. The option without '=' should be defined above.
-#: riscv-dis.c:117 riscv-dis.c:154
+#: riscv-dis.c:120 riscv-dis.c:157
 #, c-format
 msgid "unrecognized disassembler option: %s"
 msgstr "opțiune de dezasamblare nerecunoscută: %s"
 
 #. Invalid options with '=', no option name before '=',
 #. and no value after '='.
-#: riscv-dis.c:125
+#: riscv-dis.c:128
 #, c-format
 msgid "unrecognized disassembler option with '=': %s"
 msgstr "opțiune de dezasamblare nerecunoscută cu „=”: %s"
 
-#: riscv-dis.c:139
+#: riscv-dis.c:142
 #, c-format
 msgid "unknown privileged spec set by %s=%s"
 msgstr "specificație de privilegiu necunoscută stabilită de %s=%s"
 
-#: riscv-dis.c:146
+#: riscv-dis.c:149
 #, c-format
 msgid "mis-matched privilege spec set by %s=%s, the elf privilege attribute is %s"
 msgstr "specificație de privilegiu nepotrivită stabilită de %s=%s, atributul de privilegiu elf este %s"
 
-#: riscv-dis.c:631
+#: riscv-dis.c:670
 #, c-format
 msgid "# internal error, undefined modifier (%c)"
 msgstr "# eroare internă, modificator nedefinit (%c)"
 
-#: riscv-dis.c:1158
+#: riscv-dis.c:1238
 msgid "Print numeric register names, rather than ABI names."
 msgstr "Afișează nume de registru numeric, mai degrabă decât nume ABI."
 
-#: riscv-dis.c:1161
+#: riscv-dis.c:1241
 msgid "Disassemble only into canonical instructions."
 msgstr "Dezasamblează numai în instrucțiuni canonice."
 
-#: riscv-dis.c:1164
+#: riscv-dis.c:1244
 msgid "Print the CSR according to the chosen privilege spec."
 msgstr "Afișează CSR conform specificației de privilegiu alese."
 
-#: riscv-dis.c:1240
+#: riscv-dis.c:1320
 #, c-format
 msgid ""
 "\n"
@@ -2521,6 +2352,145 @@ msgstr "eroare internă: xstormy16_cgen_cpu_open: argument neacceptat „%d”"
 #, c-format
 msgid "internal error: xstormy16_cgen_cpu_open: no endianness specified"
 msgstr "eroare internă: xstormy16_cgen_cpu_open: endianness nedefinit"
+
+#~ msgid "z0-z15 expected"
+#~ msgstr "se aștepta z0-z15"
+
+#~ msgid "z0-z7 expected"
+#~ msgstr "se aștepta z0-z7"
+
+#~ msgid "invalid register list"
+#~ msgstr "listă de registru nevalidă"
+
+#~ msgid "p0-p7 expected"
+#~ msgstr "se aștepta p0-p7"
+
+#~ msgid "%s: error: "
+#~ msgstr "%s: eroare: "
+
+#~ msgid "%s: %d: unknown bitfield: %s\n"
+#~ msgstr "%s: %d: câmp de biți necunoscut: %s\n"
+
+#~ msgid "unknown bitfield: %s\n"
+#~ msgstr "câmp de biți necunoscut: %s\n"
+
+#~ msgid "%s: %d: missing `)' in bitfield: %s\n"
+#~ msgstr "%s: %d: lipsește „)” în câmpul de biți: %s\n"
+
+#~ msgid "%s: %d: no memory operand\n"
+#~ msgstr "%s: %d: nu există operand de memorie\n"
+
+#~ msgid "%s: %d: unknown element size: %s\n"
+#~ msgstr "%s: %d: dimensiune necunoscută a elementului: %s\n"
+
+#~ msgid "%s:%d: Conflicting opcode space specifications\n"
+#~ msgstr "%s:%d: Specificații de spațiu pentru codul operațional în conflict\n"
+
+#~ msgid "%s:%d: Warning: redundant opcode space specification\n"
+#~ msgstr "%s:%d: Avertisment: specificație redundantă a spațiului de cod operațional\n"
+
+#~ msgid "%s:%d: Conflicting prefix specifications\n"
+#~ msgstr "%s:%d: Specificații de prefix în conflict\n"
+
+#~ msgid "%s:%d: Warning: redundant prefix specification\n"
+#~ msgstr "%s:%d: Avertisment: specificație redundantă a prefixului\n"
+
+#~ msgid "%s:%d: %s: unrecognized opcode encoding space\n"
+#~ msgstr "%s:%d: %s: spațiu de codificare a codului operațional nerecunoscut\n"
+
+#~ msgid "%s:%d: %s: residual opcode (0x%0*llx) too large\n"
+#~ msgstr "%s:%d: %s: cod operațional rezidual (0x%0*llx) prea mare\n"
+
+#~ msgid "%s: %d: (continued) line too long\n"
+#~ msgstr "%s: %d: (continuare) linie prea lungă\n"
+
+#~ msgid "can't find i386-reg.tbl for reading, errno = %s\n"
+#~ msgstr "nu se poate găsi i386-reg.tbl pentru citire, număr_eroare = %s\n"
+
+#~ msgid "can't create i386-init.h, errno = %s\n"
+#~ msgstr "nu se poate crea i386-init.h, număr_eroare = %s\n"
+
+#~ msgid "unable to change directory to \"%s\", errno = %s\n"
+#~ msgstr "nu s-a putut schimba directorul la „%s”, număr_eroare = %s\n"
+
+#~ msgid "CpuMax != %d!\n"
+#~ msgstr "CpuMax != %d!\n"
+
+#~ msgid "%d unused bits in i386_cpu_flags.\n"
+#~ msgstr "%d biți neutilizați în i386_cpu_flags.\n"
+
+#~ msgid "%d unused bits in i386_operand_type.\n"
+#~ msgstr "%d biți neutilizați în i386_operand_type.\n"
+
+#~ msgid "can't create i386-tbl.h, errno = %s\n"
+#~ msgstr "nu se poate crea i386-tbl.h, număr_eroare = %s\n"
+
+#~ msgid "%s: Error: "
+#~ msgstr "%s: Eroare: "
+
+#~ msgid "%s: Warning: "
+#~ msgstr "%s: Avertisment: "
+
+#~ msgid "multiple note %s not handled\n"
+#~ msgstr "nota multiplă %s nu este gestionată\n"
+
+#~ msgid "can't find ia64-ic.tbl for reading\n"
+#~ msgstr "nu se poate găsi ia64-ic.tbl pentru citire\n"
+
+#~ msgid "can't find %s for reading\n"
+#~ msgstr "nu se poate găsi %s pentru citire\n"
+
+#~ msgid ""
+#~ "most recent format '%s'\n"
+#~ "appears more restrictive than '%s'\n"
+#~ msgstr ""
+#~ "cel mai recent format „%s”, \n"
+#~ "pare mai restrictiv decât „%s”\n"
+
+#~ msgid "overlapping field %s->%s\n"
+#~ msgstr "suprapunere de câmp %s -> %s\n"
+
+#~ msgid "overwriting note %d with note %d (IC:%s)\n"
+#~ msgstr "se suprascrie nota %d cu nota %d (IC:%s)\n"
+
+#~ msgid "don't know how to specify %% dependency %s\n"
+#~ msgstr "nu se știe cum să se specifice dependența %%, %s\n"
+
+#~ msgid "Don't know how to specify # dependency %s\n"
+#~ msgstr "Nu se știe cum să se specifice dependența numărul # %s\n"
+
+#~ msgid "IC:%s [%s] has no terminals or sub-classes\n"
+#~ msgstr "IC:%s [%s] nu are terminale sau subclase\n"
+
+#~ msgid "IC:%s has no terminals or sub-classes\n"
+#~ msgstr "IC:%s nu are terminale sau subclase\n"
+
+#~ msgid "no insns mapped directly to terminal IC %s [%s]"
+#~ msgstr "nicio instrucțiune nu este atribuită direct la terminalul IC %s [%s]"
+
+#~ msgid "no insns mapped directly to terminal IC %s\n"
+#~ msgstr "nicio instrucțiune nu este atribuită direct la terminalul IC %s\n"
+
+#~ msgid "class %s is defined but not used\n"
+#~ msgstr "clasa %s este definită dar nu este folosită\n"
+
+#~ msgid "Warning: rsrc %s (%s) has no chks\n"
+#~ msgstr "Avertisment: registrul sursă „rsrc” %s (%s) nu are chks\n"
+
+#~ msgid "Warning: rsrc %s (%s) has no chks or regs\n"
+#~ msgstr "Avertisment: registrul sursă „rsrc” %s (%s) nu are chks sau regs\n"
+
+#~ msgid "rsrc %s (%s) has no regs\n"
+#~ msgstr "registrul sursă „rsrc” %s (%s) nu are regs\n"
+
+#~ msgid "IC note %d in opcode %s (IC:%s) conflicts with resource %s note %d\n"
+#~ msgstr "Nota IC %d din codul operațional %s (IC:%s) este în conflict cu resursa %s nota %d\n"
+
+#~ msgid "IC note %d for opcode %s (IC:%s) conflicts with resource %s note %d\n"
+#~ msgstr "Nota IC %d pentru codul operațional %s (IC:%s) este în conflict cu resursa %s nota %d\n"
+
+#~ msgid "opcode %s has no class (ops %d %d %d)\n"
+#~ msgstr "codul operațional %s nu are clasă (operanzi %d %d %d)\n"
 
 #~ msgid "unknown broadcast operand: %s\n"
 #~ msgstr "operand de transmitere(broadcast) necunoscut: %s\n"
