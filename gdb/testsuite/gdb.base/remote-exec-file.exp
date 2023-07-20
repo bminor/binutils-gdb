@@ -37,10 +37,13 @@ with_test_prefix "set inf 2" {
 
 with_test_prefix "show inf 1" {
     gdb_test "inferior 1" "Switching to inferior 1.*"
-    gdb_test "show remote exec-file" "prog1"
+    gdb_test "show remote exec-file" \
+	"The remote exec-file is \"prog1\"\\."
+
 }
 
 with_test_prefix "show inf 2" {
     gdb_test "inferior 2" "Switching to inferior 2.*"
-    gdb_test "show remote exec-file" "prog2"
+    gdb_test "show remote exec-file" \
+	"The remote exec-file is \"prog2\"\\."
 }

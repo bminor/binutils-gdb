@@ -90,7 +90,7 @@ foreach_with_prefix inf $inferiors {
     gdb_test "show inferior-tty" "/inf${inf}-tty.*"
 
     gdb_test "with remote exec-file tmp-value -- print 1" " = 1"
-    gdb_test "show remote exec-file" "/inf${inf}-remote-exec"
+    gdb_test "show remote exec-file" "/inf${inf}-remote-exec.*"
 
     # If the inferiors are running check $_gdb_setting_str and
     # $_gdb_setting return the correct values.

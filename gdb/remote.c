@@ -1890,7 +1890,12 @@ static void
 show_remote_exec_file (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *cmd, const char *value)
 {
-  gdb_printf (file, "%s\n", get_remote_exec_file ().c_str ());
+  const std::string &filename = get_remote_exec_file ();
+  if (filename.empty ())
+    gdb_printf (file, _("The remote exec-file is unset, the default remote "
+			"executable will be used.\n"));
+  else
+    gdb_printf (file, "The remote exec-file is \"%s\".\n", filename.c_str ());
 }
 
 static int
@@ -16654,8 +16659,12 @@ Transfer files to and from the remote target system."),
 
   add_setshow_string_noescape_cmd ("exec-file", class_files,
 				   _("\
-Set the remote pathname for \"run\"."), _("\
-Show the remote pathname for \"run\"."), NULL,
+Set the remote file name for starting inferiors."), _("\
+Show the remote file name for starting inferiors."), _("\
+This is the file name, on the remote target, used when starting an\n\
+inferior, for example with the \"run\", \"start\", or \"starti\"\n\
+commands.  This setting is only useful when debugging a remote target,\n\
+otherwise, this setting is not used."),
 				   set_remote_exec_file_cb,
 				   get_remote_exec_file,
 				   show_remote_exec_file,
