@@ -7176,10 +7176,11 @@ _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
 
     case SHN_COMMON:
       /* Common symbols less than the GP size are automatically
-	 treated as SHN_MIPS_SCOMMON symbols on IRIX5.  */
+	 treated as SHN_MIPS_SCOMMON symbols, with some exceptions.  */
       if (asym->value > elf_gp_size (abfd)
 	  || ELF_ST_TYPE (elfsym->internal_elf_sym.st_info) == STT_TLS
-	  || IRIX_COMPAT (abfd) == ict_irix6)
+	  || IRIX_COMPAT (abfd) == ict_irix6
+	  || strcmp (asym->name, "__gnu_lto_slim") == 0)
 	break;
       /* Fall through.  */
     case SHN_MIPS_SCOMMON:
@@ -7862,10 +7863,11 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
     {
     case SHN_COMMON:
       /* Common symbols less than the GP size are automatically
-	 treated as SHN_MIPS_SCOMMON symbols.  */
+	 treated as SHN_MIPS_SCOMMON symbols, with some exceptions.  */
       if (sym->st_size > elf_gp_size (abfd)
 	  || ELF_ST_TYPE (sym->st_info) == STT_TLS
-	  || IRIX_COMPAT (abfd) == ict_irix6)
+	  || IRIX_COMPAT (abfd) == ict_irix6
+	  || strcmp (*namep, "__gnu_lto_slim") == 0)
 	break;
       /* Fall through.  */
     case SHN_MIPS_SCOMMON:
