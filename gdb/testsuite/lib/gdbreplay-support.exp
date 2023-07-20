@@ -115,29 +115,62 @@ proc gdbreplay_start { remotelog } {
 #
 # update_log $logname "${logname}.updated" "vMustReplyEmpty" "E.failed"
 
-proc update_log { filename_in filename_out match_regexp newline } {
+proc update_log { filename_in filename_out match_regexp newline truncate } {
     set fh_in [open $filename_in r]
     set fh_out [open $filename_out w]
 
     while { [gets $fh_in line] >= 0 } {
 	# Print the line to the file.
 	puts $fh_out $line
-	if { [regexp $match_regexp $line] } {
-	    # print out NEWLINE.
+
+	# If this line matches, then inject NEWLINE.
+	if { $match_regexp ne "" && [regexp $match_regexp $line] } {
+	    # Print out NEWLINE.
 	    puts $fh_out "r +\$${newline}"
 
-	    # Don't truncate the file, otherwise gdbreplay will
-	    # close the connection early and this might impact
-	    # what GDB does.  We want GDB to get a chance to
-	    # process the error.
-	    puts $fh_out "c q"
-	    puts $fh_out "w \$qTStatus#49"
-	    puts $fh_out "End of log"
+	    # Discard the line this just replaced.
+	    gets $fh_in line
 
-	    break
+	    if { $truncate } {
+		# Don't truncate the file, otherwise gdbreplay will
+		# close the connection early and this might impact
+		# what GDB does.  We want GDB to get a chance to
+		# process the error.
+		puts $fh_out "c q"
+		puts $fh_out "w \$qTStatus#49"
+		puts $fh_out "End of log"
+
+		break
+	    }
+
+	    # Clear MATCH_REGEXP so no further lines will match.
+	    set match_regexp ""
 	}
     }
 
     close $fh_out
     close $fh_in
+}
+
+# Return the line immediately after the first line in FILENAME that
+# matches MATCH_REGEXP.  If MATCH_REGEXP matches a packet sent from
+# GDB to gdbserver, then the line returned should be the reply packet.
+#
+# If anything goes wrong, e.g. MATCH_REGEXP doesn't match anything,
+# then an empty string is returned.
+
+proc get_reply_line { filename match_regexp } {
+    set fh_in [open $filename r]
+    set reply ""
+
+    while { [gets $fh_in line] >= 0 } {
+	if { [regexp $match_regexp $line] } {
+	    gets $fh_in reply
+	    break
+	}
+    }
+
+    close $fh_in
+
+    return $reply
 }

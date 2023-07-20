@@ -1,0 +1,146 @@
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+#
+# Starts a communication with gdbserver setting the remotelog file.
+# Modifies the remotelog with update_log proc, injects an error message
+# instead of the expected replay to the vMustReplyEmpty packet in order
+# to test GDB reacts to the error response properly. After the remotelog
+# modification, this test restarts GDB and starts communication with gdbreply
+# instead of the gdbserver using the remotelog.
+
+load_lib gdbserver-support.exp
+load_lib gdbreplay-support.exp
+
+require allow_gdbserver_tests
+require has_gdbreplay
+
+standard_testfile
+
+if { [build_executable "failed to prepare" $testfile $srcfile] } {
+    return
+}
+
+# Connect to gdbserver and run to a breakpoint in main.  Record the
+# remotelogfile into the REMOTELOG.
+proc_with_prefix record_initial_logfile { remotelog } {
+    clean_restart
+
+    # Make sure we're disconnected, in case we're testing with an
+    # extended-remote board, therefore already connected.
+    gdb_test "disconnect" ".*"
+
+    gdb_test_no_output "set sysroot" \
+	"setting sysroot before starting gdbserver"
+
+    # Start gdbserver.
+    set res [gdbserver_start "" "$::binfile a b c"]
+    set gdbserver_protocol [lindex $res 0]
+    set gdbserver_gdbport [lindex $res 1]
+
+    gdb_test_no_output "set remotelogfile $remotelog" \
+	"setup remotelogfile"
+
+    # Connect to gdbserver.
+    if {[gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport] != 0} {
+	unsupported "$testfile (couldn't connect to gdbserver)"
+	return
+    }
+
+    # If we're connecting as 'remote' then we can't use 'runto'.
+    gdb_breakpoint [gdb_get_line_number "Break here"]
+    gdb_continue_to_breakpoint "continuing to breakpoint"
+
+    gdb_test "show remote exec-file" \
+	"The remote exec-file is \"[string_to_regexp $::binfile]\"\\."
+    gdb_test "show args" \
+	"Argument list to give program being debugged when it is started is \"a b c\"\\."
+}
+
+proc update_log_file { src dst } {
+    # Get the reply to the qExecAndArgs packet.
+    set reply [get_reply_line $src "qExecAndArgs"]
+
+    # Remove the program name from the reply.
+    regsub "S;\[^;\]+;" $reply "S;;" reply
+
+    # Remove the leading "r $" as this is added back by update_log.
+    regsub "^r \\\$" $reply "" reply
+
+    # Write the new reply line into the modified log file.
+    update_log $src $dst "qExecAndArgs" $reply false
+}
+
+# Rerun REMOTELOG using gdbreplay.  The log file has been modified so
+# that the qExecAndArgs packet reply no longer includes the program
+# name, this will look like 'S;;args;'.  As a result, GDB should no
+# longer overwrite and existing remote exec-file setting.
+#
+# When REMOTE_EXEC is true set a remote exec-file value and check this
+# is retained after connecting to gdbreplay.  When REMOTE_EXEC is
+# false, don't set a remote exec-file value, check that GDB shows the
+# remote exec-file as unset after connecting.
+proc_with_prefix replay_with_update_logfile { remotelog remote_exec } {
+    clean_restart
+
+    # Make sure we're disconnected, in case we're testing with an
+    # extended-remote board, therefore already connected.
+    gdb_test "disconnect" ".*"
+
+    gdb_test_no_output "set sysroot"
+
+    # If requested, set a remote exec-file.
+    if { $remote_exec } {
+	set fake_remote_exec "/xxx/yyy/zzz"
+	gdb_test_no_output "set remote exec-file $fake_remote_exec"
+	set exec_file_re \
+	    "The remote exec-file is \"[string_to_regexp $fake_remote_exec]\"\\."
+    } else {
+	set exec_file_re \
+	    "The remote exec-file is unset, the default remote executable will be used\\."
+    }
+
+    # Start gdbreplay.
+    set res [gdbreplay_start $remotelog]
+    set gdbserver_protocol [lindex $res 0]
+    set gdbserver_gdbport [lindex $res 1]
+
+    # Connect to gdbreplay.
+    gdb_assert {[gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport] == 0} \
+	"connect to gdbreplay"
+
+    # Same breakpoint and continue as when we recorded the log.
+    gdb_breakpoint [gdb_get_line_number "Break here"]
+    gdb_continue_to_breakpoint "continuing to breakpoint"
+
+    # Inspect GDB's state.  With the modified logfile the executable
+    # was passed back as an empty string, indicating that the
+    # executable should not be changed.
+    gdb_test "show remote exec-file" \
+	$exec_file_re
+    gdb_test "show args" \
+	"Argument list to give program being debugged when it is started is \"a b c\"\\."
+}
+
+# The replay log is placed in 'replay.log'.
+set remotelog [standard_output_file replay.log]
+set remotelog_modified [standard_output_file replay-modified.log]
+
+record_initial_logfile $remotelog
+
+update_log_file $remotelog $remotelog_modified
+
+foreach_with_prefix set_remote_exec { true false } {
+    replay_with_update_logfile $remotelog_modified $set_remote_exec
+}

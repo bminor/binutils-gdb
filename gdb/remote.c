@@ -406,6 +406,9 @@ enum {
      inferior arguments as a single string.  */
   PACKET_vRun_single_argument,
 
+  /* Support the qExecAndArgs packet.  */
+  PACKET_qExecAndArgs,
+
   PACKET_MAX
 };
 
@@ -853,6 +856,78 @@ struct remote_features
   /* The per-remote target array which stores a remote's packet
      configurations.  */
   packet_config m_protocol_packets[PACKET_MAX];
+};
+
+/* Data structure used to hold the results of the qExecAndArgs packet.  */
+
+struct remote_exec_and_args_info
+{
+  /* The result state reflects whether the packet is supported by the
+     remote target, and then which bits of state the remote target actually
+     returned to GDB .  */
+  enum class state
+  {
+    /* The remote does not support the qExecAndArgs packet.  GDB
+       should not make assumptions about the remote target's executable
+       and arguments.  */
+    UNKNOWN,
+
+    /* The remote does understand the qExecAndArgs, no executable
+       (and/or arguments) were set at the remote end.  If GDB wants the
+       remote to start an inferior it will need to provide this information.  */
+    UNSET,
+
+    /* The remote does understand the qExecAndArgs, an executable
+       and/or arguments were set at the remote end and this information is
+       held within this object.  */
+    SET
+  };
+
+  /* Create an empty instance, STATE should be state::UNKNOWN or
+     state::UNSET only.  */
+  explicit remote_exec_and_args_info (state state = state::UNKNOWN)
+    : m_state (state)
+  {
+    gdb_assert (m_state != state::SET);
+  }
+
+  /* Create an instance in state::SET, move EXEC and ARGS into this
+     instance.  */
+  explicit remote_exec_and_args_info (std::string &&exec, std::string &&args)
+    : m_state (state::SET),
+      m_exec (std::move (exec)),
+      m_args (std::move (args))
+  { /* Nothing.  */ }
+
+  /* Is this object in state::SET?  */
+  bool is_set () const
+  {
+    return m_state == state::SET;
+  }
+
+  /* Return the argument string.  Only call when is_set returns true.  */
+  const std::string &args () const
+  {
+    gdb_assert (m_state == state::SET);
+    return m_args;
+  }
+
+  /* Return the executable string.  Only call when is_set returns true.  */
+  const std::string &exec () const
+  {
+    gdb_assert (m_state == state::SET);
+    return m_exec;
+  }
+
+private:
+  /* The state of this instance.  */
+  state m_state = state::UNKNOWN;
+
+  /* The executable path returned from the remote target.  */
+  std::string m_exec;
+
+  /* The argument string returned from the remote target.  */
+  std::string m_args;
 };
 
 class remote_target : public process_stratum_target
@@ -1434,6 +1509,9 @@ public: /* Remote specific methods.  */
   remote_features m_features;
 
 private:
+
+  /* Fetch the executable filename and argument string from the remote.  */
+  remote_exec_and_args_info fetch_remote_executable_and_arguments ();
 
   bool start_remote_1 (int from_tty, int extended_p);
 
@@ -5157,6 +5235,93 @@ as_stop_reply_up (notif_event_up event)
   return stop_reply_up (stop_reply);
 }
 
+/* Read, decode, and return a hex-encoded string from *PTR.  Update *PTR to
+   point at the first character past the end of the string that was read
+   in.  */
+
+static std::string
+get_semicolon_delimited_hex_as_string (const char **ptr)
+{
+  const char *end = *ptr;
+
+  for (; *end != ';' && *end != '\0'; ++end)
+    ;
+
+  std::string str = hex2str (*ptr, (end - *ptr) / 2);
+  *ptr = end;
+  return str;
+}
+
+/* See declaration in class above.   */
+
+remote_exec_and_args_info
+remote_target::fetch_remote_executable_and_arguments ()
+{
+  /* Setup some constants.  This helps keep the return lines shorter in the
+     rest of this function.  */
+  constexpr remote_exec_and_args_info::state UNKNOWN
+    = remote_exec_and_args_info::state::UNKNOWN;
+  constexpr remote_exec_and_args_info::state UNSET
+    = remote_exec_and_args_info::state::UNSET;
+
+  if (m_features.packet_support (PACKET_qExecAndArgs) == PACKET_DISABLE)
+    return remote_exec_and_args_info (UNKNOWN);
+
+  struct remote_state *rs = get_remote_state ();
+
+  putpkt ("qExecAndArgs");
+  getpkt (&rs->buf, 0);
+
+  packet_result result
+    = m_features.packet_ok (rs->buf, PACKET_qExecAndArgs);
+  switch (result.status ())
+    {
+    case PACKET_ERROR:
+      warning (_("Remote error: %s"), result.err_msg ());
+      [[fallthrough]];
+    case PACKET_UNKNOWN:
+      return remote_exec_and_args_info (UNKNOWN);
+    case PACKET_OK:
+      break;
+    }
+
+  /* First character should be 'U', to indicate no information is set in
+     the server, or 'S' followed by the filename and arguments.  We treat
+     anything that is not a 'S' as if it were 'U'.  */
+  if (rs->buf[0] != 'S')
+    return remote_exec_and_args_info (UNSET);
+
+  if (rs->buf[1] != ';')
+    {
+      warning (_("missing first ';' in qExecAndArgs reply"));
+      return remote_exec_and_args_info (UNSET);
+    }
+
+  std::string filename, args;
+
+  try
+    {
+      const char *ptr = &rs->buf[2];
+      filename = get_semicolon_delimited_hex_as_string (&ptr);
+
+      /* PTR now points either at a semicolon, or at the end of the incoming
+	 buffer data.  If we are looking at a semicolon, then skip it.  */
+      if (*ptr == ';')
+	++ptr;
+
+      /* We'll collect the inferior arguments in ARGS.  */
+      args = get_semicolon_delimited_hex_as_string (&ptr);
+    }
+  catch (const gdb_exception_error &ex)
+    {
+      warning (_("unable to decode qExecAndArgs reply: %s"),
+	       ex.what ());
+      return remote_exec_and_args_info (UNKNOWN);
+    }
+
+  return remote_exec_and_args_info (std::move (filename), std::move (args));
+}
+
 /* Helper for remote_target::start_remote, start the remote connection and
    sync state.  Return true if everything goes OK, otherwise, return false.
    This function exists so that the scoped_restore created within it will
@@ -5240,6 +5405,29 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
       if ((m_features.packet_ok (rs->buf, PACKET_QStartNoAckMode)).status ()
 	  == PACKET_OK)
 	rs->noack_mode = 1;
+    }
+
+  remote_exec_and_args_info exec_and_args
+    = fetch_remote_executable_and_arguments ();
+
+  /* Update the inferior with the executable and argument string from the
+     target, these will be used when restarting the inferior, and also
+     allow the user to view this state.  */
+  if (exec_and_args.is_set ())
+    {
+      current_inferior ()->set_args (exec_and_args.args ());
+
+      if (!exec_and_args.exec ().empty ())
+	{
+	  const std::string &remote_exec = get_remote_exec_file ();
+	  if (!remote_exec.empty () && remote_exec != exec_and_args.exec ())
+	    warning (_("updating 'remote exec-file' to '%ps' to match "
+		       "remote target"),
+		     styled_string (file_name_style.style (),
+				    exec_and_args.exec ().c_str ()));
+	  set_pspace_remote_exec_file (current_program_space,
+				       exec_and_args.exec ());
+	}
     }
 
   if (extended_p)
@@ -16640,6 +16828,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (PACKET_vRun_single_argument,
 			 "single-inferior-argument-feature",
 			 "single-inferior-argument-feature", 0);
+
+  add_packet_config_cmd (PACKET_qExecAndArgs, "qExecAndArgs",
+			 "fetch-exec-and-args", 0);
 
   /* Assert that we've registered "set remote foo-packet" commands
      for all packet configs.  */

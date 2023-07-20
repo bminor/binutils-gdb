@@ -24670,6 +24670,12 @@ extended-remote}.  This should be set to a filename valid on the
 target system.  If it is not set, the target will use a default
 filename (e.g.@: the last program run).
 
+When connecting to a remote system, with @kbd{target extended-remote}
+or @kbd{target remote}, if the remote server supports the
+@code{qExecAndArgs} packet (@pxref{qExecAndArgs}), then the
+@kbd{remote exec-file} will be updated to reflect the executable
+currently running on the remote system.
+
 @item set remote interrupt-sequence
 @cindex interrupt remote programs
 @cindex select Ctrl-C, BREAK or BREAK-g
@@ -46193,6 +46199,45 @@ Reply:
 The remote server attached to an existing process.
 @item 0
 The remote server created a new process.
+@end table
+
+@cindex query executable, remote request
+@cindex query program arguments, remote request
+@cindex @samp{qExecAndArgs} packet
+@item qExecAndArgs
+@anchor{qExecAndArgs}
+Return the program filename and arguments string with which the remote
+server was started, if the remote server was started with such things.
+If the remote server was started without the filename of a program to
+execute, or without any arguments, then the reply indicates this.
+
+Reply:
+@table @samp
+@item U
+The program filename and arguments are unset.  If @value{GDBN} wants
+to start a new inferior, for example with @samp{vRun}, then it will
+need to provide the filename of a program to use.
+
+@item S;@var{prog};@var{args};
+@itemx S;;@var{args};
+The program filename provided to the remote server when it started was
+@var{prog}, which is a hex encoded string.  The complete argument
+string passed to the inferior when it started as @var{args}, this is
+also a hex encoded string.
+
+If no arguments were passed when the inferior started then @var{args}
+be an empty string.
+
+It is valid for @var{prog} to be the empty string, this indicates that
+the server has no program set, @value{GDBN} will need to supply a
+program name in order to start a new inferior.  It is valid to reply
+with an empty @var{prog} and non-empty @var{args}, @value{GDBN} will
+set the inferior arguments, but the user will need to supply a remote
+exec-file before an inferior can be started.
+
+The argument string @var{args} is passed directly to @value{GDBN} as
+if to the @kbd{set args} command.  And escaping required should be
+present in @var{args}, no changes are made by @value{GDBN}.
 @end table
 
 @item Qbtrace:bts

@@ -1,0 +1,261 @@
+# This testcase is part of GDB, the GNU debugger.
+
+# Copyright 2023 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test the qExecAndArgs packet, specifically, the argument fetching
+# component of the packet.
+
+# Skip test if target does not support argument passing.
+require {!target_info exists noargs}
+
+load_lib gdbserver-support.exp
+
+standard_testfile
+
+require allow_gdbserver_tests
+
+if {[build_executable "failed to build" $binfile $srcfile]} {
+    return
+}
+
+# Used as an override for extended_gdbserver_load_last_file in
+# configs/native-extended-gdbserver.exp, prevents the remote exec-file
+# from being set.
+proc do_nothing {} { return 0 }
+
+# Check the 'show args' output.  If PACKET is 'on' then we expect to
+# see the arguments 'a b c', otherwise we don't expect to see any
+# arguments.
+proc check_show_args { packet } {
+    if { $packet } {
+	set args_re "a b c"
+    } else {
+	set args_re ""
+    }
+
+    gdb_test "show args" \
+	"Argument list to give program being debugged when it is started is \"$args_re\"\\."
+}
+
+# Check the 'show remote exec-file' output.  PACKET is either 'on' or
+# 'off' and reflects whether the qExecAndArgs packet is turned on or
+# off.  FILENAME is what we expect to see included in the output, and
+# is converted to a regexp by this function.
+proc check_remote_exec_file { packet filename } {
+    if { $filename eq "" } {
+	set remote_exec_re \
+	    "The remote exec-file is unset, the default remote executable will be used\\."
+    } else {
+	set remote_exec_re \
+	    "The remote exec-file is \"[string_to_regexp $filename]\"\\."
+    }
+
+    gdb_test "show remote exec-file" $remote_exec_re
+}
+
+# Check the inferior has 4 arguments.  Arg 0 will be the program name,
+# while 1, 2, and 3 should be a, b, and c respectively.
+proc check_full_args {} {
+    set exec_filename ""
+    gdb_test "print argc" " = 4"
+    gdb_test_multiple "print argv\[0\]" "" {
+	-re -wrap " = $::hex \"(.*/${::testfile})\"" {
+	    set exec_filename $expect_out(1,string)
+	    pass $gdb_test_name
+	}
+    }
+    gdb_test "print argv\[1\]" " = $::hex \"a\""
+    gdb_test "print argv\[2\]" " = $::hex \"b\""
+    gdb_test "print argv\[3\]" " = $::hex \"c\""
+
+    return $exec_filename
+}
+
+# Close and cleanup gdbserver process.
+proc cleanup_gdbserver {} {
+    catch {
+	close -i $server_spawn_id
+	wait -nowait -i $server_spawn_id
+    }
+}
+
+# Check that GDB can fetch the arguments from the remote using the
+# qExecAndArgs packet.  When PACKET is 'on' we allow GDB to use the
+# packet, but when PACKET is 'off' we disable use of the qExecAndArgs
+# packet and ensure GDB falls back to the expected behaviour.
+proc_with_prefix test_exec_and_arg_fetch { packet } {
+    clean_restart $::testfile
+
+    # Make sure we're disconnected, in case we're testing with an
+    # extended-remote board, therefore already connected.
+    gdb_test "disconnect" ".*"
+
+    gdb_test "set remote fetch-exec-and-args ${packet}" \
+	"Support for the 'qExecAndArgs' packet on future remote targets is set to \"${packet}\"\\."
+
+    gdbserver_run "a b c"
+
+    gdb_breakpoint [gdb_get_line_number "Break here"]
+    gdb_continue_to_breakpoint "run to breakpoint"
+
+    # Look in the inferior to check the arguments were passed
+    # correctly.  We get back the name of the executable the inferior
+    # is running.  If PACKET is 'on' then we expect GDB to have
+    # automatically fetched this executable name from the remote.
+    set exec_filename [check_full_args]
+    if { !$packet } {
+	set exec_filename ""
+    }
+
+    # Check 'show args' to ensure GDB sees the correct arguments.
+    check_show_args $packet
+
+    # Check 'show remote exec-file' to ensure GDB sees the correct
+    # filename.
+    check_remote_exec_file $packet $exec_filename
+
+    # Below this point we rely on restarting the inferior, which
+    # relies on the extended-remote protocol.
+    if {[target_info gdb_protocol] ne "extended-remote"} {
+	cleanup_gdbserver
+	return
+    }
+
+    with_test_prefix "rerun" {
+	# Don't restart GDB, but re-run the inferior.
+	gdb_run_cmd
+	gdb_test "" \
+	    "Breakpoint $::decimal, main \\(\[^)\]+\\).*" \
+	    "rerun until breakpoint in main"
+
+	# If the packet is enabled then we expect the arguments to
+	# still be correct, otherwise, we should have defaulted back
+	# to no additional arguments.
+	if { $packet } {
+	    check_full_args
+	} else {
+	    gdb_test "print argc" " = 1"
+	}
+
+	# Check 'show args' to ensure GDB sees the correct arguments.
+	check_show_args ${packet}
+
+	# Check 'show remote exec-file' to ensure GDB sees the correct
+	# filename.
+	check_remote_exec_file $packet $exec_filename
+    }
+
+    cleanup_gdbserver
+}
+
+# With the extended-remote target it is possible to start gdbserver
+# without specifying an inferior to run.  In this case, gdbserver
+# should reply to the qExecAndArgs packet with a 'U' (for unset)
+# response.  GDB should not override any currently set remote
+# executable or inferior arguments.  The benefit of this is that a
+# user can set these values before connecting to gdbserver in this
+# case.
+proc_with_prefix test_exec_and_args_unset { packet } {
+    clean_restart
+
+    # Make sure we're disconnected, in case we're testing with an
+    # extended-remote board, therefore already connected.
+    gdb_test "disconnect" ".*"
+
+    # Enable or disable the qExecAndArgs packet.
+    gdb_test "set remote fetch-exec-and-args ${packet}" \
+	"Support for the 'qExecAndArgs' packet on future remote targets is set to \"${packet}\"\\."
+
+    # Setup a remote exec-file value, and some inferior arguments.
+    set fake_exec_name "/xxx/yyy/zzz"
+    set fake_args "1 2 3"
+    gdb_test_no_output "set remote exec-file $fake_exec_name"
+    gdb_test_no_output "set args $fake_args"
+
+    # Start gdbserver in extended-remote mode, don't specify an
+    # executable to start, or any inferior arguments.
+    set res [gdbserver_start "--multi" ""]
+    set gdbserver_protocol "extended-remote"
+    set gdbserver_gdbport [lindex $res 1]
+    gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport
+
+    # Check within GDB that connecting to the extended-remote target
+    # didn't clobber the remote exec-file or inferior arguments.
+    gdb_test "show remote exec-file" \
+	"The remote exec-file is \"[string_to_regexp $fake_exec_name]\"\\."
+    gdb_test "show args" \
+	"Argument list to give program being debugged when it is started is \"${fake_args}\"\\."
+
+    cleanup_gdbserver
+}
+
+# Start GDB and set 'remote exec-file' to some random file.  Then
+# start gdbserver with the name of the actual executable.  Connect to
+# gdbserver from GDB and check that GDB gives a warning about the
+# remove exec-file value having changed.
+proc_with_prefix test_remote_exec_warning {} {
+    clean_restart
+
+    gdb_test "disconnect" ".*"
+
+    # Set the file GDB is going to debug.  For extended-remote boards
+    # this also sets the remote exec-file.
+    gdb_file_cmd $::binfile
+
+    set invalid_remote_exec "/xxx/yyy/zzz"
+    gdb_test_no_output "set remote exec-file $invalid_remote_exec"
+    check_remote_exec_file on $invalid_remote_exec
+
+    # Start gdbserver.
+    set test "start gdbserver"
+    set target_exec [gdbserver_download_current_prog]
+    set target_exec_and_args "$target_exec a b c"
+    set catchres [catch {set res [gdbserver_start "" "$target_exec_and_args"]} errmsg]
+    if { $catchres != 0 } {
+	fail "$test: $errmsg"
+    } else {
+	pass "$test"
+    }
+
+    # And connect to gdbserver.  Check for the warning GDB emits when
+    # the remote exec-file is updated.
+    set gdbserver_protocol [lindex $res 0]
+    set gdbserver_gdbport [lindex $res 1]
+    set test "connect to gdbserver"
+    set extra_re "warning: updating 'remote exec-file' to '[string_to_regexp $target_exec]' to match remote target"
+    set res [gdb_target_cmd_ext $gdbserver_protocol $gdbserver_gdbport $extra_re]
+    if { $res == 0 } {
+	pass $test
+    } elseif { $res == 1 }  {
+	fail $test
+    } else {
+	unsupported $test
+    }
+
+    cleanup_gdbserver
+}
+
+# This override prevents the remote exec-file from being set when
+# using the extended-remote protocol.  This is harmless when using
+# other boards.
+with_override extended_gdbserver_load_last_file do_nothing {
+    foreach_with_prefix packet { on off } {
+	test_exec_and_args_unset $packet
+	test_exec_and_arg_fetch $packet
+    }
+
+    test_remote_exec_warning
+}

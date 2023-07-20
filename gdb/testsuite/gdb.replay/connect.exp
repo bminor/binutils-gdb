@@ -103,7 +103,7 @@ proc_with_prefix replay_with_mustreplyempty_error {} {
 
     # Modify the log file by changing the *response* to
     # the vMustReplayEmty packet to an error.
-    update_log $remotelog $output_file "vMustReplyEmpty" $newline
+    update_log $remotelog $output_file "vMustReplyEmpty" $newline true
 
     clean_restart $::testfile
     # Make sure we're disconnected, in case we're testing with an

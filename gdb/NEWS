@@ -23,6 +23,14 @@
   share them would usually lead to GDB crashing.  GDB now prevents
   this invalid sharing.
 
+* When connecting to a remote server, if the server supports the new
+  qExecAndArgs packet, then GDB will copy the argument string from the
+  server and update the 'args' setting, as if 'set args ...'  had been
+  used.  This means that the arguments are visible from GDB using
+  'show args', and that, if using the extended-remote protocol,
+  subsequent runs of the inferior will use the same arguments as the
+  first run.
+
 * New targets
 
 GNU/Linux/MicroBlaze (gdbserver) microblazeel-*linux*
@@ -51,6 +59,13 @@ single-inf-arg in qSupported
   arguments as a single string within the vRun packet.  The stub can
   reply with the single-inf-arg feature to indicate that it is able to
   accept arguments as a single string.
+
+* New remote packets
+
+qExecAndArgs
+  This packet returns the executable filename and argument string with
+  which the server was started.  If no such information was given to
+  the server then this is reflected in the reply.
 
 *** Changes in GDB 17
 
