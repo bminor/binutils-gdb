@@ -43,7 +43,7 @@ Dwarf::assemble ${asm_file} {
 		{DW_AT_endianity @DW_END_little}
 		{DW_AT_name "i7"}
 		{DW_AT_byte_size 2 DW_FORM_udata}
-		{DW_AT_bit_size 7 DW_FORM_udata}
+		{DW_AT_bit_size 7 DW_FORM_implicit_const}
 	    }
 
 	    DW_TAG_variable {

@@ -15420,20 +15420,25 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   if (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_INT)
     {
       attr = dwarf2_attr (die, DW_AT_bit_size, cu);
-      if (attr != nullptr && attr->as_unsigned () <= 8 * type->length ())
+      if (attr != nullptr && attr->form_is_constant ())
 	{
-	  unsigned real_bit_size = attr->as_unsigned ();
-	  attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
-	  /* Only use the attributes if they make sense together.  */
-	  if (attr == nullptr
-	      || (attr->as_unsigned () + real_bit_size
-		  <= 8 * type->length ()))
+	  unsigned real_bit_size = attr->constant_value (0);
+	  if (real_bit_size >= 0 && real_bit_size <= 8 * type->length ())
 	    {
-	      TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_size
-		= real_bit_size;
-	      if (attr != nullptr)
-		TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_offset
-		  = attr->as_unsigned ();
+	      attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
+	      /* Only use the attributes if they make sense together.  */
+	      if (attr == nullptr
+		  || (attr->form_is_constant ()
+		      && attr->constant_value (0) >= 0
+		      && (attr->constant_value (0) + real_bit_size
+			  <= 8 * type->length ())))
+		{
+		  TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_size
+		    = real_bit_size;
+		  if (attr != nullptr)
+		    TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_offset
+		      = attr->constant_value (0);
+		}
 	    }
 	}
     }

@@ -693,6 +693,7 @@ namespace eval Dwarf {
 		_op .ascii [_quote $value]
 	    }
 
+	    DW_FORM_implicit_const -
 	    DW_FORM_flag_present {
 		# We don't need to emit anything.
 	    }
@@ -917,6 +918,9 @@ namespace eval Dwarf {
 	    }
 	    _op .uleb128 $_constants($attr_name) $attr_name
 	    _op .uleb128 $_constants($attr_form) $attr_form_comment
+	    if {$attr_form eq "DW_FORM_implicit_const"} {
+		_op .sleb128 $attr_value "the constant"
+	    }
 	}
     }
 
