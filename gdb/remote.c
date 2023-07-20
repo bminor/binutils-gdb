@@ -1396,7 +1396,8 @@ public: /* Remote specific methods.  */
   void remote_kill_k ();
 
   void extended_remote_disable_randomization (int val);
-  int extended_remote_run (const std::string &args);
+  int extended_remote_run (const char *remote_exec_file,
+			   const std::string &args);
 
   void send_environment_packet (const char *action,
 				const char *packet,
@@ -10862,11 +10863,11 @@ remote_target::extended_remote_disable_randomization (int val)
 }
 
 int
-remote_target::extended_remote_run (const std::string &args)
+remote_target::extended_remote_run (const char *remote_exec_file,
+				    const std::string &args)
 {
   struct remote_state *rs = get_remote_state ();
   int len;
-  const char *remote_exec_file = get_remote_exec_file ();
 
   /* If the user has disabled vRun support, or we have detected that
      support is not available, do not try it.  */
@@ -11073,7 +11074,7 @@ Remote replied unexpectedly while setting startup-with-shell: %s"),
   extended_remote_set_inferior_cwd ();
 
   /* Now restart the remote server.  */
-  run_worked = extended_remote_run (args) != -1;
+  run_worked = extended_remote_run (remote_exec_file, args) != -1;
   if (!run_worked)
     {
       /* vRun was not supported.  Fail if we need it to do what the
