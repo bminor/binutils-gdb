@@ -123,6 +123,6 @@ int main (int argc, char **argv)
   testval.double_testval = 3.14159265358979323846; /* float_checkpoint */
   double_resultval    = double_func ();		
   main_test = 1;				/* double_checkpoint */
-  return 0;
-} /* end of main */
+  return 0;					/* end of main */
+}
 

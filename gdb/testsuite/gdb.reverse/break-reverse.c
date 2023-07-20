@@ -33,5 +33,5 @@ int main ()
 {
   xyz = 0;	/* break in main */
   foo ();
-  return (xyz == 2 ? 0 : 1);
-}		/* end of main */
+  return (xyz == 2 ? 0 : 1);	/* end of main */
+}
