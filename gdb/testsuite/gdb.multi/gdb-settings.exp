@@ -71,6 +71,7 @@ foreach_with_prefix inf $inferiors {
     gdb_test_no_output "set args inf${inf}-args"
     gdb_test_no_output "set cwd /inf${inf}-cwd"
     gdb_test_no_output "set inferior-tty /inf${inf}-tty"
+    gdb_test_no_output "set remote exec-file /inf${inf}-remote-exec"
 }
 
 # Check settings are still correct for each inferior.
@@ -88,6 +89,9 @@ foreach_with_prefix inf $inferiors {
     gdb_test "with inferior-tty tmp-value -- print 1" " = 1"
     gdb_test "show inferior-tty" "/inf${inf}-tty.*"
 
+    gdb_test "with remote exec-file tmp-value -- print 1" " = 1"
+    gdb_test "show remote exec-file" "/inf${inf}-remote-exec"
+
     # If the inferiors are running check $_gdb_setting_str and
     # $_gdb_setting return the correct values.
     if { $run } {
@@ -101,6 +105,11 @@ foreach_with_prefix inf $inferiors {
 	    "\"/inf${inf}-tty\""
 	gdb_test {print $_gdb_setting("inferior-tty")} \
 	    "\"/inf${inf}-tty\""
+
+	gdb_test {print $_gdb_setting_str("remote exec-file")} \
+	    "\"/inf${inf}-remote-exec\""
+	gdb_test {print $_gdb_setting("remote exec-file")} \
+	    "\"/inf${inf}-remote-exec\""
     }
 
     # Check the settings can be read from Python.
@@ -109,6 +118,8 @@ foreach_with_prefix inf $inferiors {
 	gdb_test "python print(gdb.parameter('cwd'))" "/inf${inf}-cwd"
 	gdb_test "python print(gdb.parameter('inferior-tty'))" \
 	    "/inf${inf}-tty"
+	gdb_test "python print(gdb.parameter('remote exec-file'))" \
+	    "/inf${inf}-remote-exec"
     }
 
     # Check the settings can be read from Guile.
@@ -119,5 +130,7 @@ foreach_with_prefix inf $inferiors {
 	    "/inf${inf}-cwd"
 	gdb_test "guile (print (parameter-value \"inferior-tty\"))" \
 	    "/inf${inf}-tty"
+	gdb_test "guile (print (parameter-value \"remote exec-file\"))" \
+	    "/inf${inf}-remote-exec"
     }
 }

@@ -1396,7 +1396,7 @@ public: /* Remote specific methods.  */
   void remote_kill_k ();
 
   void extended_remote_disable_randomization (int val);
-  int extended_remote_run (const char *remote_exec_file,
+  int extended_remote_run (const std::string &remote_exec_file,
 			   const std::string &args);
 
   void send_environment_packet (const char *action,
@@ -1525,14 +1525,7 @@ remote_register_is_expedited (int regnum)
 }
 
 /* Per-program-space data key.  */
-static const registry<program_space>::key<char, gdb::xfree_deleter<char>>
-  remote_pspace_data;
-
-/* The variable registered as the control variable used by the
-   remote exec-file commands.  While the remote exec-file setting is
-   per-program-space, the set/show machinery uses this as the
-   location of the remote exec-file value.  */
-static std::string remote_exec_file_var;
+static const registry<program_space>::key<std::string> remote_pspace_data;
 
 /* The size to align memory write packets, when practical.  The protocol
    does not guarantee any alignment, and gdb will generate short
@@ -1862,47 +1855,42 @@ remote_target::get_remote_state ()
 
 /* Fetch the remote exec-file from the current program space.  */
 
-static const char *
+static const std::string &
 get_remote_exec_file (void)
 {
-  char *remote_exec_file;
-
-  remote_exec_file = remote_pspace_data.get (current_program_space);
-  if (remote_exec_file == NULL)
-    return "";
-
-  return remote_exec_file;
+  const std::string *remote_exec_file
+    = remote_pspace_data.get (current_program_space);
+  if (remote_exec_file == nullptr)
+    remote_exec_file = remote_pspace_data.emplace (current_program_space);
+  return *remote_exec_file;
 }
 
 /* Set the remote exec file for PSPACE.  */
 
 static void
 set_pspace_remote_exec_file (struct program_space *pspace,
-			     const char *remote_exec_file)
+			     const std::string &filename)
 {
-  char *old_file = remote_pspace_data.get (pspace);
-
-  xfree (old_file);
-  remote_pspace_data.set (pspace, xstrdup (remote_exec_file));
+  remote_pspace_data.clear (pspace);
+  remote_pspace_data.emplace (pspace, filename);
 }
 
-/* The "set/show remote exec-file" set command hook.  */
+/* The "set remote exec-file" callback.  */
 
 static void
-set_remote_exec_file (const char *ignored, int from_tty,
-		      struct cmd_list_element *c)
+set_remote_exec_file_cb (const std::string &filename)
 {
   set_pspace_remote_exec_file (current_program_space,
-			       remote_exec_file_var.c_str ());
+			       filename);
 }
 
-/* The "set/show remote exec-file" show command hook.  */
+/* Implement the "show remote exec-file" command.  */
 
 static void
 show_remote_exec_file (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *cmd, const char *value)
 {
-  gdb_printf (file, "%s\n", get_remote_exec_file ());
+  gdb_printf (file, "%s\n", get_remote_exec_file ().c_str ());
 }
 
 static int
@@ -10863,7 +10851,7 @@ remote_target::extended_remote_disable_randomization (int val)
 }
 
 int
-remote_target::extended_remote_run (const char *remote_exec_file,
+remote_target::extended_remote_run (const std::string &remote_exec_file,
 				    const std::string &args)
 {
   struct remote_state *rs = get_remote_state ();
@@ -10877,10 +10865,11 @@ remote_target::extended_remote_run (const char *remote_exec_file,
   strcpy (rs->buf.data (), "vRun;");
   len = strlen (rs->buf.data ());
 
-  if (strlen (remote_exec_file) * 2 + len >= get_remote_packet_size ())
+  if (remote_exec_file.size () * 2 + len >= get_remote_packet_size ())
     error (_("Remote file name too long for run packet"));
-  len += 2 * bin2hex ((gdb_byte *) remote_exec_file, rs->buf.data () + len,
-		      strlen (remote_exec_file));
+  len += 2 * bin2hex ((gdb_byte *) remote_exec_file.data (),
+		      rs->buf.data () + len,
+		      remote_exec_file.size ());
 
   if (!args.empty ())
     {
@@ -10924,7 +10913,7 @@ remote_target::extended_remote_run (const char *remote_exec_file,
 		 "try \"set remote exec-file\"?"));
       else
 	error (_("Running \"%s\" on the remote target failed"),
-	       remote_exec_file);
+	       remote_exec_file.c_str ());
     default:
       gdb_assert_not_reached ("bad switch");
     }
@@ -11044,7 +11033,7 @@ extended_remote_target::create_inferior (const char *exec_file,
   int run_worked;
   char *stop_reply;
   struct remote_state *rs = get_remote_state ();
-  const char *remote_exec_file = get_remote_exec_file ();
+  const std::string &remote_exec_file = get_remote_exec_file ();
 
   /* If running asynchronously, register the target file descriptor
      with the event loop.  */
@@ -16664,10 +16653,11 @@ Transfer files to and from the remote target system."),
 	   &remote_cmdlist);
 
   add_setshow_string_noescape_cmd ("exec-file", class_files,
-				   &remote_exec_file_var, _("\
+				   _("\
 Set the remote pathname for \"run\"."), _("\
 Show the remote pathname for \"run\"."), NULL,
-				   set_remote_exec_file,
+				   set_remote_exec_file_cb,
+				   get_remote_exec_file,
 				   show_remote_exec_file,
 				   &remote_set_cmdlist,
 				   &remote_show_cmdlist);
