@@ -9716,6 +9716,9 @@ proc repeat_cmd_until { command current target \
 
     set count 0
     gdb_test_multiple "$command" "$test_name" {
+	-re "$target.*$gdb_prompt $" {
+	    pass "$test_name"
+	}
 	-re "$current.*$gdb_prompt $" {
 	    incr count
 	    if { $count < $max_steps } {
@@ -9724,9 +9727,6 @@ proc repeat_cmd_until { command current target \
 	    } else {
 		fail "$test_name"
 	    }
-	}
-	-re "$target.*$gdb_prompt $" {
-	    pass "$test_name"
 	}
     }
 }

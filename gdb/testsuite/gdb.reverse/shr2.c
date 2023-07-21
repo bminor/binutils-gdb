@@ -19,7 +19,8 @@
 
 int shr2(int x)
 {
-  return 2*x;
+  int y = 2*x;
+  return y;
 }
 
 int shr2_local(int x)
