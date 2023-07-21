@@ -274,12 +274,10 @@ Some types of the @code{gdb} module come with a textual representation
 (accessible through the @code{repr} or @code{str} functions).  These are
 offered for debugging purposes only, expect them to change over time.
 
-@findex gdb.PYTHONDIR
 @defvar gdb.PYTHONDIR
 A string containing the python directory (@pxref{Python}).
 @end defvar
 
-@findex gdb.execute
 @defun gdb.execute (command @r{[}, from_tty @r{[}, to_string@r{]]})
 Evaluate @var{command}, a string, as a @value{GDBN} CLI command.
 If a GDB exception happens while @var{command} runs, it is
@@ -299,7 +297,6 @@ return value is @code{None}.  If @var{to_string} is @code{True}, the
 and height, and its pagination will be disabled; @pxref{Screen Size}.
 @end defun
 
-@findex gdb.breakpoints
 @defun gdb.breakpoints ()
 Return a sequence holding all of @value{GDBN}'s breakpoints.
 @xref{Breakpoints In Python}, for more information.  In @value{GDBN}
@@ -325,7 +322,6 @@ of @code{gdb.Symtab} objects and will restrict the search to those
 functions only contained within the @code{gdb.Symtab} objects.
 @end defun
 
-@findex gdb.parameter
 @defun gdb.parameter (parameter)
 Return the value of a @value{GDBN} @var{parameter} given by its name,
 a string; the parameter name string may contain spaces if the parameter has a
@@ -338,14 +334,12 @@ parameter's value is converted to a Python value of the appropriate
 type, and returned.
 @end defun
 
-@findex gdb.set_parameter
 @defun gdb.set_parameter (name, value)
 Sets the gdb parameter @var{name} to @var{value}.  As with
 @code{gdb.parameter}, the parameter name string may contain spaces if
 the parameter has a multi-part name.
 @end defun
 
-@findex gdb.with_parameter
 @defun gdb.with_parameter (name, value)
 Create a Python context manager (for use with the Python
 @command{with} statement) that temporarily sets the gdb parameter
@@ -364,7 +358,6 @@ with gdb.with_parameter('language', 'pascal'):
 @end smallexample
 @end defun
 
-@findex gdb.history
 @defun gdb.history (number)
 Return a value from @value{GDBN}'s value history (@pxref{Value
 History}).  The @var{number} argument indicates which history element to return.
@@ -398,7 +391,6 @@ Return an integer indicating the number of values in @value{GDBN}'s
 value history (@pxref{Value History}).
 @end defun
 
-@findex gdb.convenience_variable
 @defun gdb.convenience_variable (name)
 Return the value of the convenience variable (@pxref{Convenience
 Vars}) named @var{name}.  @var{name} must be a string.  The name
@@ -407,7 +399,6 @@ variable in an expression.  If the convenience variable does not
 exist, then @code{None} is returned.
 @end defun
 
-@findex gdb.set_convenience_variable
 @defun gdb.set_convenience_variable (name, value)
 Set the value of the convenience variable (@pxref{Convenience Vars})
 named @var{name}.  @var{name} must be a string.  The name should not
@@ -418,7 +409,6 @@ variable is removed.  Otherwise, if @var{value} is not a
 using the @code{gdb.Value} constructor.
 @end defun
 
-@findex gdb.parse_and_eval
 @defun gdb.parse_and_eval (expression @r{[}, global_context@r{]})
 Parse @var{expression}, which must be a string, as an expression in
 the current language, evaluate it, and return the result as a
@@ -436,7 +426,6 @@ command's argument as an expression.  It is also useful simply to
 compute values.
 @end defun
 
-@findex gdb.find_pc_line
 @defun gdb.find_pc_line (pc)
 Return the @code{gdb.Symtab_and_line} object corresponding to the
 @var{pc} value.  @xref{Symbol Tables In Python}.  If an invalid
@@ -447,7 +436,6 @@ will be @code{None} and 0 respectively.  This is identical to
 historical compatibility.
 @end defun
 
-@findex gdb.post_event
 @defun gdb.post_event (event)
 Put @var{event}, a callable object taking no arguments, into
 @value{GDBN}'s internal event queue.  This callable will be invoked at
@@ -486,7 +474,6 @@ this.  For example:
 @end smallexample
 @end defun
 
-@findex gdb.write 
 @defun gdb.write (string @r{[}, stream@r{]})
 Print a string to @value{GDBN}'s paginated output stream.  The
 optional @var{stream} determines the stream to print to.  The default
@@ -515,7 +502,6 @@ call this function and will automatically direct the output to the
 relevant stream.
 @end defun
 
-@findex gdb.flush
 @defun gdb.flush (@r{[}, stream@r{]})
 Flush the buffer of a @value{GDBN} paginated stream so that the
 contents are displayed immediately.  @value{GDBN} will flush the
@@ -546,14 +532,12 @@ Flushing @code{sys.stdout} or @code{sys.stderr} will automatically
 call this function for the relevant stream.
 @end defun
 
-@findex gdb.target_charset
 @defun gdb.target_charset ()
 Return the name of the current target character set (@pxref{Character
 Sets}).  This differs from @code{gdb.parameter('target-charset')} in
 that @samp{auto} is never returned.
 @end defun
 
-@findex gdb.target_wide_charset
 @defun gdb.target_wide_charset ()
 Return the name of the current target wide character set
 (@pxref{Character Sets}).  This differs from
@@ -561,7 +545,6 @@ Return the name of the current target wide character set
 never returned.
 @end defun
 
-@findex gdb.host_charset
 @defun gdb.host_charset ()
 Return a string, the name of the current host character set
 (@pxref{Character Sets}).  This differs from
@@ -569,7 +552,6 @@ Return a string, the name of the current host character set
 returned.
 @end defun
 
-@findex gdb.solib_name
 @defun gdb.solib_name (address)
 Return the name of the shared library holding the given @var{address}
 as a string, or @code{None}.  This is identical to
@@ -577,7 +559,6 @@ as a string, or @code{None}.  This is identical to
 historical compatibility.
 @end defun
 
-@findex gdb.decode_line 
 @defun gdb.decode_line (@r{[}expression@r{]})
 Return locations of the line specified by @var{expression}, or of the
 current line if no argument was given.  This function returns a Python
@@ -1272,7 +1253,6 @@ This method does not return a value.
 The following type-related functions are available in the @code{gdb}
 module:
 
-@findex gdb.lookup_type
 @defun gdb.lookup_type (name @r{[}, block@r{]})
 This function looks up a type by its @var{name}, which must be a string.
 
@@ -1775,7 +1755,6 @@ If the result is not one of these types, an exception is raised.
 @value{GDBN} provides a function which can be used to look up the
 default pretty-printer for a @code{gdb.Value}:
 
-@findex gdb.default_visualizer
 @defun gdb.default_visualizer (value)
 This function takes a @code{gdb.Value} object as an argument.  If a
 pretty-printer for this value exists, then it is returned.  If no such
@@ -1787,7 +1766,6 @@ Normally, a pretty-printer can respect the user's print settings
 calling @code{Value.format_string} (@pxref{Values From Inferior}).
 However, these settings can also be queried directly:
 
-@findex gdb.print_options
 @defun gdb.print_options ()
 Return a dictionary whose keys are the valid keywords that can be
 given to @code{Value.format_string}, and whose values are the user's
@@ -1811,7 +1789,6 @@ smallest scope possible: that is prefer a specific objfile first, then
 a program space, and only register a printer globally as a last
 resort.
 
-@findex gdb.pretty_printers
 @defvar gdb.pretty_printers
 The Python list @code{gdb.pretty_printers} contains an array of
 functions or callable objects that have been registered via addition
@@ -3506,7 +3483,6 @@ particular frame (@pxref{Frames In Python}).
 @end defun
 
 @anchor{gdbpy_inferior_read_memory}
-@findex Inferior.read_memory
 @defun Inferior.read_memory (address, length)
 Read @var{length} addressable memory units from the inferior, starting
 at @var{address}.  Returns a @code{memoryview} object, which behaves
@@ -3514,7 +3490,6 @@ much like an array or a string.  It can be modified and given to the
 @code{Inferior.write_memory} function.
 @end defun
 
-@findex Inferior.write_memory
 @defun Inferior.write_memory (address, buffer @r{[}, length@r{]})
 Write the contents of @var{buffer} to the inferior, starting at
 @var{address}.  The @var{buffer} parameter must be a Python object
@@ -3524,7 +3499,6 @@ determines the number of addressable memory units from @var{buffer} to be
 written.
 @end defun
 
-@findex gdb.search_memory
 @defun Inferior.search_memory (address, length, pattern)
 Search a region of the inferior memory starting at @var{address} with
 the given @var{length} using the search pattern supplied in
@@ -3535,7 +3509,6 @@ containing the address where the pattern was found, or @code{None} if
 the pattern could not be found.
 @end defun
 
-@findex Inferior.thread_from_handle
 @findex Inferior.thread_from_thread_handle
 @defun Inferior.thread_from_handle (handle)
 Return the thread object corresponding to @var{handle}, a thread
@@ -3553,19 +3526,16 @@ from Python by using the following methods.  These methods only take
 effect when the inferior is started -- they will not affect an
 inferior that is already executing.
 
-@findex Inferior.clear_env
 @defun Inferior.clear_env ()
 Clear the current environment variables that will be passed to this
 inferior.
 @end defun
 
-@findex Inferior.set_env
 @defun Inferior.set_env (name, value)
 Set the environment variable @var{name} to have the indicated value.
 Both parameters must be strings.
 @end defun
 
-@findex Inferior.unset_env
 @defun Inferior.unset_env (name)
 Unset the environment variable @var{name}.  @var{name} must be a
 string.
@@ -3875,7 +3845,6 @@ controlled by @value{GDBN}, via objects of the @code{gdb.InferiorThread} class.
 The following thread-related functions are available in the @code{gdb}
 module:
 
-@findex gdb.selected_thread
 @defun gdb.selected_thread ()
 This function returns the thread object for the selected thread.  If there
 is no selected thread, this will return @code{None}.
@@ -4652,7 +4621,6 @@ Python, with the results being a Python object and not a
 specially-formatted string.  This is done with the
 @code{gdb.execute_mi} function.
 
-@findex gdb.execute_mi
 @defun gdb.execute_mi (command @r{[}, arg @r{]}@dots{})
 Invoke a @sc{gdb/mi} command.  @var{command} is the name of the
 command, a string.  The arguments, @var{arg}, are passed to the
@@ -4990,7 +4958,6 @@ about program spaces.
 The following progspace-related functions are available in the
 @code{gdb} module:
 
-@findex gdb.current_progspace
 @defun gdb.current_progspace ()
 This function returns the program space of the currently selected inferior.
 @xref{Inferiors Connections and Programs}.  This is identical to
@@ -4998,7 +4965,6 @@ This function returns the program space of the currently selected inferior.
 included for historical compatibility.
 @end defun
 
-@findex gdb.progspaces
 @defun gdb.progspaces ()
 Return a sequence of all the progspaces currently known to @value{GDBN}.
 @end defun
@@ -5031,14 +4997,12 @@ objects.  @xref{Frame Filter API}, for more information.
 
 A program space has the following methods:
 
-@findex Progspace.block_for_pc
 @defun Progspace.block_for_pc (pc)
 Return the innermost @code{gdb.Block} containing the given @var{pc}
 value.  If the block cannot be found for the @var{pc} value specified,
 the function will return @code{None}.
 @end defun
 
-@findex Progspace.find_pc_line
 @defun Progspace.find_pc_line (pc)
 Return the @code{gdb.Symtab_and_line} object corresponding to the
 @var{pc} value.  @xref{Symbol Tables In Python}.  If an invalid value
@@ -5047,7 +5011,6 @@ of @var{pc} is passed as an argument, then the @code{symtab} and
 object will be @code{None} and 0 respectively.
 @end defun
 
-@findex Progspace.is_valid
 @defun Progspace.is_valid ()
 Returns @code{True} if the @code{gdb.Progspace} object is valid,
 @code{False} if not.  A @code{gdb.Progspace} object can become invalid
@@ -5056,13 +5019,11 @@ inferior.  All other @code{gdb.Progspace} methods will throw an
 exception if it is invalid at the time the method is called.
 @end defun
 
-@findex Progspace.objfiles
 @defun Progspace.objfiles ()
 Return a sequence of all the objfiles referenced by this program
 space.  @xref{Objfiles In Python}.
 @end defun
 
-@findex Progspace.solib_name
 @defun Progspace.solib_name (address)
 Return the name of the shared library holding the given @var{address}
 as a string, or @code{None}.
@@ -5127,7 +5088,6 @@ separate debug info files (@pxref{Separate Debug Files}).
 The following objfile-related functions are available in the
 @code{gdb} module:
 
-@findex gdb.current_objfile
 @defun gdb.current_objfile ()
 When auto-loading a Python script (@pxref{Python Auto-loading}), @value{GDBN}
 sets the ``current objfile'' to the corresponding objfile.  This
@@ -5135,7 +5095,6 @@ function returns the current objfile.  If there is no current objfile,
 this function returns @code{None}.
 @end defun
 
-@findex gdb.objfiles
 @defun gdb.objfiles ()
 Return a sequence of objfiles referenced by the current program space.
 @xref{Objfiles In Python}, and @ref{Progspaces In Python}.  This is identical
@@ -5143,7 +5102,6 @@ to @code{gdb.selected_inferior().progspace.objfiles()} and is included for
 historical compatibility.
 @end defun
 
-@findex gdb.lookup_objfile
 @defun gdb.lookup_objfile (name @r{[}, by_build_id@r{]})
 Look up @var{name}, a file name or build ID, in the list of objfiles
 for the current program space (@pxref{Progspaces In Python}).
@@ -5312,12 +5270,10 @@ True
 
 The following frame-related functions are available in the @code{gdb} module:
 
-@findex gdb.selected_frame
 @defun gdb.selected_frame ()
 Return the selected frame object.  (@pxref{Selection,,Selecting a Frame}).
 @end defun
 
-@findex gdb.newest_frame
 @defun gdb.newest_frame ()
 Return the newest frame object for the selected thread.
 @end defun
@@ -5328,7 +5284,6 @@ frames, as expressed by the given @var{reason} code (an integer, see the
 @code{unwind_stop_reason} method further down in this section).
 @end defun
 
-@findex gdb.invalidate_cached_frames
 @defun gdb.invalidate_cached_frames
 @value{GDBN} internally keeps a cache of the frames that have been
 unwound.  This function invalidates this cache.
@@ -5595,7 +5550,6 @@ symbol = some_block['variable']  # symbol is of type gdb.Symbol
 The following block-related functions are available in the @code{gdb}
 module:
 
-@findex gdb.block_for_pc
 @defun gdb.block_for_pc (pc)
 Return the innermost @code{gdb.Block} containing the given @var{pc}
 value.  If the block cannot be found for the @var{pc} value specified,
@@ -5677,7 +5631,6 @@ Similarly, Python represents these symbols in @value{GDBN} with the
 The following symbol-related functions are available in the @code{gdb}
 module:
 
-@findex gdb.lookup_symbol
 @defun gdb.lookup_symbol (name @r{[}, block @r{[}, domain@r{]]})
 This function searches for a symbol by name.  The search scope can be
 restricted to the parameters defined in the optional domain and block
@@ -5701,7 +5654,6 @@ otherwise it is @code{False}.
 If the symbol is not found, the second element is @code{False}.
 @end defun
 
-@findex gdb.lookup_global_symbol
 @defun gdb.lookup_global_symbol (name @r{[}, domain@r{]})
 This function searches for a global symbol by name.
 The search scope can be restricted to by the domain argument.
@@ -5715,7 +5667,6 @@ The result is a @code{gdb.Symbol} object or @code{None} if the symbol
 is not found.
 @end defun
 
-@findex gdb.lookup_static_symbol
 @defun gdb.lookup_static_symbol (name @r{[}, domain@r{]})
 This function searches for a global symbol with static linkage by name.
 The search scope can be restricted to by the domain argument.
@@ -5743,7 +5694,6 @@ search all object files in the order they appear in the debug
 information.
 @end defun
 
-@findex gdb.lookup_static_symbols
 @defun gdb.lookup_static_symbols (name @r{[}, domain@r{]})
 Similar to @code{gdb.lookup_static_symbol}, this function searches for
 global symbols with static linkage by name, and optionally restricted
@@ -6620,7 +6570,6 @@ instruction in bytes.
 @end table
 @end defun
 
-@findex Architecture.integer_type
 @defun Architecture.integer_type (size @r{[}, signed@r{]})
 This function looks up an integer type by its @var{size}, and
 optionally whether or not it is signed.
@@ -6836,7 +6785,6 @@ This is equivalent to the @code{maintenance packet} command
 
 New TUI (@pxref{TUI}) windows can be implemented in Python.
 
-@findex gdb.register_window_type
 @defun gdb.register_window_type (name, factory)
 Because TUI windows are created and destroyed depending on the layout
 the user chooses, new window types are implemented by registering a
