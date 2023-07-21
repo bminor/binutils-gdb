@@ -16,13 +16,8 @@ arc-opc.c
 arm-dis.c
 avr-dis.c
 bfin-dis.c
-bpf-asm.c
-bpf-desc.c
-bpf-desc.h
 bpf-dis.c
-bpf-ibld.c
 bpf-opc.c
-bpf-opc.h
 cgen-asm.c
 cgen-bitset.c
 cgen-dis.c
