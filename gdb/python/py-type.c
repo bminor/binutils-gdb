@@ -1524,7 +1524,7 @@ static gdb_PyGetSetDef type_object_getset[] =
   { "is_scalar", typy_is_scalar, nullptr,
     "Is this a scalar type?", nullptr },
   { "is_signed", typy_is_signed, nullptr,
-    "Is this an signed type?", nullptr },
+    "Is this a signed type?", nullptr },
   { NULL }
 };
 
