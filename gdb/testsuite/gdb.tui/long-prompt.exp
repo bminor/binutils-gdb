@@ -101,29 +101,13 @@ with_test_prefix "prompt size == width" {
     #   16 (gdb) set prompt 123456789A123456789B123
     #   17 456789C123456789>
     #   18 123456789A123456789B123456789C123456789>
-    #   19
-    #   20 123456789A123456789B123456789C123456789>
-    #   21 set prompt (gdb)
-    #   22 (gdb)
-    #
-    # Note that it would be nice to get instead:
-    #
-    #   16 (gdb) set prompt 123456789A123456789B123
-    #   17 456789C123456789>
-    #   18 123456789A123456789B123456789C123456789>
     #   19 set prompt (gdb)
     #   20 (gdb)
-    #
-    # The extra newline is added by rl_on_new_line_with_prompt, which decides
-    # this as follows:
-    #  /* If the prompt length is a multiple of real_screenwidth, we don't know
-    #     whether the cursor is at the end of the last line, or already at the
-    #     beginning of the next line. Output a newline just to be safe. */
 
     gdb_assert { [Term::wait_for "^set prompt $gdb_prompt "] } \
 	"got prompt back"
 
-    gdb_assert { $Term::_cur_row == 22 }
+    gdb_assert { $Term::_cur_row == 20 }
 }
 
 with_test_prefix "prompt size == width - 1" {

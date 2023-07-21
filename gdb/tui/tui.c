@@ -271,11 +271,9 @@ tui_rl_next_keymap (int notused1, int notused2)
 static int
 tui_rl_startup_hook (void)
 {
-  rl_already_prompted = 1;
   if (tui_current_key_mode != TUI_COMMAND_MODE
       && !gdb_in_secondary_prompt_p (current_ui))
     tui_set_key_mode (TUI_SINGLE_KEY_MODE);
-  tui_redisplay_readline ();
   return 0;
 }
 
