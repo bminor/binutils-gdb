@@ -867,8 +867,6 @@ enum
   MOD_0F01_REG_3,
   MOD_0F01_REG_5,
   MOD_0F01_REG_7,
-  MOD_0F02,
-  MOD_0F03,
   MOD_0F12_PREFIX_0,
   MOD_0F16_PREFIX_0,
   MOD_0F18_REG_0,
@@ -2018,8 +2016,8 @@ static const struct dis386 dis386_twobyte[] = {
   /* 00 */
   { REG_TABLE (REG_0F00 ) },
   { REG_TABLE (REG_0F01 ) },
-  { MOD_TABLE (MOD_0F02) },
-  { MOD_TABLE (MOD_0F03) },
+  { "larS",		{ Gv, Sv }, 0 },
+  { "lslS",		{ Gv, Sv }, 0 },
   { Bad_Opcode },
   { "syscall",		{ XX }, 0 },
   { "clts",		{ XX }, 0 },
@@ -7893,16 +7891,6 @@ static const struct dis386 mod_table[][2] = {
     /* MOD_0F01_REG_7 */
     { "invlpg",		{ Mb }, 0 },
     { RM_TABLE (RM_0F01_REG_7_MOD_3) },
-  },
-  {
-    /* MOD_0F02 */
-    { "larS",		{ Gv, Mw }, 0 },
-    { "larS",		{ Gv, Ev }, 0 },
-  },
-  {
-    /* MOD_0F03 */
-    { "lslS",		{ Gv, Mw }, 0 },
-    { "lslS",		{ Gv, Ev }, 0 },
   },
   {
     /* MOD_0F12_PREFIX_0 */
