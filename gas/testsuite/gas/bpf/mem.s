@@ -26,3 +26,5 @@
         ldxsh %r2, [%r1+0x7eef]
         ldxsb %r2, [%r1+0x7eef]
         ldxsdw %r2, [%r1+0x7eef]
+	ldxdw %r2, [%r1+0]
+	ldindw %r3, 0

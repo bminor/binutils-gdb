@@ -32,3 +32,5 @@ Disassembly of section .text:
   a8:	89 12 ef 7e 00 00 00 00 	ldxsh %r2,\[%r1\+0x7eef\]
   b0:	91 12 ef 7e 00 00 00 00 	ldxsb %r2,\[%r1\+0x7eef\]
   b8:	99 12 ef 7e 00 00 00 00 	ldxsdw %r2,\[%r1\+0x7eef\]
+  c0:	79 12 00 00 00 00 00 00 	ldxdw %r2,\[%r1\+0x0\]
+  c8:	40 30 00 00 00 00 00 00 	ldindw %r3,0x0

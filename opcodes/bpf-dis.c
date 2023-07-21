@@ -215,7 +215,7 @@ print_insn_bpf (bfd_vma pc, disassemble_info *info)
                   if (p[1] == 'I')
                     (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
                                                   "%s",
-                                                  asm_obase != 10 || imm32 > 0 ? "+" : "");
+						  asm_obase != 10 || imm32 >= 0 ? "+" : "");
                   (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
                                                 asm_obase == 10 ? "%" PRIi32
                                                 : asm_obase == 8 ? "%" PRIo32
@@ -231,7 +231,7 @@ print_insn_bpf (bfd_vma pc, disassemble_info *info)
                   if (p[1] == 'o')
                     (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
                                                   "%s",
-                                                  asm_obase != 10 || offset16 > 0 ? "+" : "");
+						  asm_obase != 10 || offset16 >= 0 ? "+" : "");
                   if (asm_obase == 16 || asm_obase == 8)
                     (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
                                                   asm_obase == 8 ? "0%" PRIo16 : "0x%" PRIx16,
