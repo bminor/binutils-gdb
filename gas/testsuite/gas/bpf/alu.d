@@ -63,3 +63,6 @@ Disassembly of section .text:
  1a0:	dc 06 00 00 10 00 00 00 	endbe %r6,16
  1a8:	dc 05 00 00 20 00 00 00 	endbe %r5,32
  1b0:	dc 04 00 00 40 00 00 00 	endbe %r4,64
+ 1b8:	bf 21 08 00 00 00 00 00 	movs %r1,%r2,8
+ 1c0:	bf 21 10 00 00 00 00 00 	movs %r1,%r2,16
+ 1c8:	bf 21 20 00 00 00 00 00 	movs %r1,%r2,32

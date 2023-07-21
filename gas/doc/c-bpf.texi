@@ -259,6 +259,18 @@ ambiguity in the pseudoc syntax.
 @itemx rd = imm32
 Move the 64-bit value of @code{rs} in @code{rd}, or load @code{imm32}
 in @code{rd}.
+
+@item movs rd, rs, 8
+@itemx rd s= (i8) rs
+Move the sign-extended 8-bit value in @code{rs} to @code{rd}.
+
+@item movs rd, rs, 16
+@itemx rd s= (i16) rs
+Move the sign-extended 16-bit value in @code{rs} to @code{rd}.
+
+@item movs rd, rs, 32
+@itemx rd s= (i32) rs
+Move the sign-extended 32-bit value in @code{rs} to @code{rd}.
 @end table
 
 @subsection 32-bit arithmetic instructions
@@ -354,6 +366,18 @@ ambiguity in the pseudoc syntax.
 @itemx rd = imm32
 Move the 32-bit value of @code{rs} in @code{rd}, or load @code{imm32}
 in @code{rd}.
+
+@item mov32s rd, rs, 8
+@itemx rd s= (i8) rs
+Move the sign-extended 8-bit value in @code{rs} to @code{rd}.
+
+@item mov32s rd, rs, 16
+@itemx rd s= (i16) rs
+Move the sign-extended 16-bit value in @code{rs} to @code{rd}.
+
+@item mov32s rd, rs, 32
+@itemx rd s= (i32) rs
+Move the sign-extended 32-bit value in @code{rs} to @code{rd}.
 @end table
 
 @subsection Endianness conversion instructions

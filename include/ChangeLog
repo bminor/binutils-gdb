@@ -1,3 +1,11 @@
+2023-07-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* opcode/bpf.h (BPF_OFFSET16_MOVS8): Define.
+	(BPF_OFFSET16_MOVS16): Likewise.
+	(BPF_OFFSET16_MOVS32): Likewise.
+	(enum bpf_insn_id): Add entries for MOVS{8,16,32}R and
+	MOVS32{8,16,32}R.
+
 2023-07-03  Nick Clifton  <nickc@redhat.com>
 
 	2.41 Branch Point.

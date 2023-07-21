@@ -55,3 +55,6 @@
         endbe	%r6,16
         endbe	%r5,32
         endbe	%r4,64
+        movs    %r1,%r2,8
+        movs    %r1,%r2,16
+        movs    %r1,%r2,32
