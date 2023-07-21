@@ -18,6 +18,7 @@
 
 import gdb
 import gdb.types
+import itertools
 import re
 
 
@@ -285,11 +286,24 @@ class NoOpArrayPrinter:
     def __init__(self, ty, value):
         self.value = value
         (low, high) = ty.range()
-        self.low = low
-        self.high = high
+        # In Ada, an array can have an index type that is a
+        # non-contiguous enum.  In this case the indexing must be done
+        # by using the indices into the enum type, not the underlying
+        # integer values.
+        range_type = ty.fields()[0].type
+        if range_type.target().code == gdb.TYPE_CODE_ENUM:
+            e_values = range_type.target().fields()
+            # Drop any values before LOW.
+            e_values = itertools.dropwhile(lambda x: x.enumval < low, e_values)
+            # Drop any values after HIGH.
+            e_values = itertools.takewhile(lambda x: x.enumval <= high, e_values)
+            low = 0
+            high = len(list(e_values)) - 1
         # This is a convenience to the DAP code and perhaps other
         # users.
         self.num_children = high - low + 1
+        self.low = low
+        self.high = high
 
     def to_string(self):
         return ""
@@ -330,7 +344,13 @@ def make_visualizer(value):
         pass
     else:
         ty = value.type.strip_typedefs()
-        if ty.code == gdb.TYPE_CODE_ARRAY:
+        if ty.is_string_like:
+            result = gdb.printing.NoOpScalarPrinter(value)
+        elif ty.code == gdb.TYPE_CODE_ARRAY:
+            result = gdb.printing.NoOpArrayPrinter(ty, value)
+        elif ty.is_array_like:
+            value = value.to_array()
+            ty = value.type.strip_typedefs()
             result = gdb.printing.NoOpArrayPrinter(ty, value)
         elif ty.code in (gdb.TYPE_CODE_STRUCT, gdb.TYPE_CODE_UNION):
             result = gdb.printing.NoOpStructPrinter(ty, value)
