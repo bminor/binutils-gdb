@@ -209,11 +209,19 @@ gdb_test_multiple "stepi" "$test_message" {
 
 # stepi backward out of a function call
 
+set start_pc [get_hexadecimal_valueof "\$pc" 0 "getting PC at start of stepi backwards"]
+set step_count 0
 set stepi_location  [gdb_get_line_number "STEPI TEST" "$srcfile"]
 set test_message "reverse stepi from a function call"
 gdb_test_multiple "stepi" "$test_message" {
     -re "ARRIVED IN CALLEE.*$gdb_prompt $" {
-	fail "$test_message (start statement)"
+	incr step_count
+	if { [get_hexadecimal_valueof "\$pc" 0 "getting PC after $step_count steps"] == $start_pc } {
+	    fail "$test_message (start statement)"
+	} else {
+	    send_gdb "stepi\n"
+	    exp_continue
+	}
     }
     -re "ENTER CALLEE.*$gdb_prompt $" {
 	send_gdb "stepi\n" 
