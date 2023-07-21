@@ -1,5 +1,10 @@
 2023-07-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* bpf-opc.c (bpf_opcodes): Add entries for LDXS{B,W,H,DW}
+	instructions.
+
+2023-07-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* bpf-opc.c (bpf_opcodes): Add entries for MOVS{8,16,32}R and
 	MOVS32{8,16,32}R instructions.  and MOVS32I instructions.
 

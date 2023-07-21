@@ -28,3 +28,7 @@ Disassembly of section .text:
   88:	6a 01 ef 7e 44 33 22 11 	sth \[%r1\+0x7eef\],0x11223344
   90:	62 01 ef 7e 44 33 22 11 	stw \[%r1\+0x7eef\],0x11223344
   98:	7a 01 fe ff 44 33 22 11 	stdw \[%r1\+0xfffe\],0x11223344
+  a0:	81 12 ef 7e 00 00 00 00 	ldxsw %r2,\[%r1\+0x7eef\]
+  a8:	89 12 ef 7e 00 00 00 00 	ldxsh %r2,\[%r1\+0x7eef\]
+  b0:	91 12 ef 7e 00 00 00 00 	ldxsb %r2,\[%r1\+0x7eef\]
+  b8:	99 12 ef 7e 00 00 00 00 	ldxsdw %r2,\[%r1\+0x7eef\]

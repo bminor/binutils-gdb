@@ -483,6 +483,26 @@ Generic 16-bit load.
 Generic 8-bit load.
 @end table
 
+Signed load to register instructions:
+
+@table @code
+@item ldxsdw rd, [rs + offset16]
+@itemx rd = *(i64 *) (rs + offset16)
+Generic 64-bit signed load.
+
+@item ldxsw rd, [rs + offset16]
+@itemx rd = *(i32 *) (rs + offset16)
+Generic 32-bit signed load.
+
+@item ldxsh rd, [rs + offset16]
+@itemx rd = *(i16 *) (rs + offset16)
+Generic 16-bit signed load.
+
+@item ldxsb rd, [rs + offset16]
+@itemx rd = *(i8 *) (rs + offset16)
+Generic 8-bit signed load.
+@end table
+
 Store from register instructions:
 
 @table @code

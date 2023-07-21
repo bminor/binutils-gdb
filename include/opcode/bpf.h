@@ -112,6 +112,7 @@ typedef uint64_t bpf_insn_word;
 #define BPF_MODE_IND  ((uint64_t)0x40 << 56)
 #define BPF_MODE_MEM  ((uint64_t)0x60 << 56)
 #define BPF_MODE_ATOMIC ((uint64_t)0xc0 << 56)
+#define BPF_MODE_SMEM ((uint64_t)0x80 << 56)
 
 #define BPF_SIZE_W  ((uint64_t)0x00 << 56)
 #define BPF_SIZE_H  ((uint64_t)0x08 << 56)
@@ -186,6 +187,8 @@ enum bpf_insn_id
   BPF_INSN_LDINDB, BPF_INSN_LDINDH, BPF_INSN_LDINDW, BPF_INSN_LDINDDW,
   /* Generic load instructions (to register.)  */
   BPF_INSN_LDXB, BPF_INSN_LDXH, BPF_INSN_LDXW, BPF_INSN_LDXDW,
+  /* Generic signed load instructions.  */
+  BPF_INSN_LDXSB, BPF_INSN_LDXSH, BPF_INSN_LDXSW, BPF_INSN_LDXSDW,
   /* Generic store instructions (from register.)  */
   BPF_INSN_STXBR, BPF_INSN_STXHR, BPF_INSN_STXWR, BPF_INSN_STXDWR,
   BPF_INSN_STXBI, BPF_INSN_STXHI, BPF_INSN_STXWI, BPF_INSN_STXDWI,

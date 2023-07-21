@@ -217,6 +217,16 @@ const struct bpf_opcode bpf_opcodes[] =
   {BPF_INSN_LDXDW, "ldxdw%W%dr , [ %sr %o16 ]","%dr = * ( u64 * ) ( %sr %o16 )",
    BPF_V1, BPF_CODE, BPF_CLASS_LDX|BPF_SIZE_DW|BPF_MODE_MEM},
 
+  /* Generic signed load instructions (to register.)  */
+  {BPF_INSN_LDXSB, "ldxsb%W%dr , [ %sr %o16 ]", "%dr = * ( i8 * ) ( %sr %o16 )",
+   BPF_V4, BPF_CODE, BPF_CLASS_LDX|BPF_SIZE_B|BPF_MODE_SMEM},
+  {BPF_INSN_LDXSH, "ldxsh%W%dr , [ %sr %o16 ]", "%dr = * ( i16 * ) ( %sr %o16 )",
+   BPF_V4, BPF_CODE, BPF_CLASS_LDX|BPF_SIZE_H|BPF_MODE_SMEM},
+  {BPF_INSN_LDXSW, "ldxsw%W%dr , [ %sr %o16 ]", "%dr = * ( i32 * ) ( %sr %o16 )",
+   BPF_V4, BPF_CODE, BPF_CLASS_LDX|BPF_SIZE_W|BPF_MODE_SMEM},
+  {BPF_INSN_LDXSDW, "ldxsdw%W%dr , [ %sr %o16 ]","%dr = * ( i64 * ) ( %sr %o16 )",
+   BPF_V4, BPF_CODE, BPF_CLASS_LDX|BPF_SIZE_DW|BPF_MODE_SMEM},
+
   /* Generic store instructions (from register.)  */
   {BPF_INSN_STXBR, "stxb%W[ %dr %o16 ] , %sr", "* ( u8 * ) ( %dr %o16 ) = %sr",
    BPF_V1, BPF_CODE, BPF_CLASS_STX|BPF_SIZE_B|BPF_MODE_MEM},

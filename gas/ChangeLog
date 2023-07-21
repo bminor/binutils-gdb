@@ -1,5 +1,15 @@
 2023-07-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* testsuite/gas/bpf/mem.s: Add signed load instructions.
+	* testsuite/gas/bpf/mem-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/mem.d: Likewise.
+	* testsuite/gas/bpf/mem-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/mem-be.d: Likewise.
+	* doc/c-bpf.texi (BPF Instructions): Document the signed load
+	instructions.
+
+2023-07-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* testsuite/gas/bpf/alu.s: Test movs instructions.
 	* testsuite/gas/bpf/alu-pseudoc.s: Likewise.
 	* testsuite/gas/bpf/alu32.s: Likewise for movs32 instruction.
