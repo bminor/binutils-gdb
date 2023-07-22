@@ -17,21 +17,24 @@
 # syscall is active. But some active syscalls keep PC pointing to the SVC
 # instruction itself.
 
+# Require an architecture with the SVC instruction.
+require {is_any_target "aarch64*-*-*" "arm*-*-*"}
+
 # See if we have target board readnow.exp or similar.  We're using
 # --readnever, which is not allowed in combination with --readnow.
 require !readnow
 
 standard_testfile
 
-if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
-			  {debug pthreads}] } {
+if { [build_executable "failed to prepare" ${testfile} ${srcfile} \
+	  {debug pthreads}] } {
     return
 }
 
 save_vars { GDBFLAGS } {
     append GDBFLAGS " --readnever"
     if { [clean_restart ${binfile}] == -1 } {
-       return -1
+	return -1
     }
 }
 
