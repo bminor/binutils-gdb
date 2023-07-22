@@ -70,7 +70,7 @@ proc check_vfork_catchpoints {} {
   # Because setup_gdb uses 'return -code return' which would return to
   # our caller we need to wrap this call, spot when setup_gdb failed
   # (with return code 2), and then issue our own 'return -code return'.
-  set code [catch {setup_gdb $::testfile $::srcfile} string]
+  set code [catch {setup_gdb $::binfile $::srcfile} string]
   if { $code == 2 } {
     unsupported "vfork catchpoints"
     return -code return
