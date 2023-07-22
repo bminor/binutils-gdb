@@ -17,18 +17,15 @@
 # syscall is active. But some active syscalls keep PC pointing to the SVC
 # instruction itself.
 
+# See if we have target board readnow.exp or similar.  We're using
+# --readnever, which is not allowed in combination with --readnow.
+require !readnow
+
 standard_testfile
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
 			  {debug pthreads}] } {
     return
-}
-
-# See if we have target board readnow.exp or similar.
-if { [lsearch -exact $GDBFLAGS -readnow] != -1 \
-         || [lsearch -exact $GDBFLAGS --readnow] != -1 } {
-    untested "--readnever not allowed in combination with --readnow"
-    return -1
 }
 
 save_vars { GDBFLAGS } {
