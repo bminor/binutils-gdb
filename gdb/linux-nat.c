@@ -1550,7 +1550,7 @@ resume_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
 
       if (inf->vfork_child != NULL)
 	{
-	  linux_nat_debug_printf ("Not resuming %s (vfork parent)",
+	  linux_nat_debug_printf ("Not resuming sibling %s (vfork parent)",
 				  lp->ptid.to_string ().c_str ());
 	}
       else if (!lwp_status_pending_p (lp))
@@ -3359,12 +3359,7 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, const ptid_t wait_ptid)
 {
   inferior *inf = find_inferior_ptid (linux_target, lp->ptid);
 
-  if (inf->vfork_child != nullptr)
-    {
-      linux_nat_debug_printf ("NOT resuming LWP %s (vfork parent)",
-			      lp->ptid.to_string ().c_str ());
-    }
-  else if (!lp->stopped)
+  if (!lp->stopped)
     {
       linux_nat_debug_printf ("NOT resuming LWP %s, not stopped",
 			      lp->ptid.to_string ().c_str ());
@@ -3377,6 +3372,11 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, const ptid_t wait_ptid)
   else if (lwp_status_pending_p (lp))
     {
       linux_nat_debug_printf ("NOT resuming LWP %s, has pending status",
+			      lp->ptid.to_string ().c_str ());
+    }
+  else if (inf->vfork_child != nullptr)
+    {
+      linux_nat_debug_printf ("NOT resuming LWP %s (vfork parent)",
 			      lp->ptid.to_string ().c_str ());
     }
   else
