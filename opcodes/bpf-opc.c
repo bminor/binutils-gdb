@@ -303,6 +303,10 @@ const struct bpf_opcode bpf_opcodes[] =
   {BPF_INSN_JNEI, "jne%W%dr , %i32 , %d16", "if%w%dr != %i32%wgoto%w%d16",
    BPF_V1, BPF_CODE, BPF_CLASS_JMP|BPF_CODE_JNE|BPF_SRC_K},
 
+  /* 32-bit jump-always.  */
+  {BPF_INSN_JAL, "jal%W%d32", "gotol%w%d32",
+   BPF_V4, BPF_CODE, BPF_CLASS_JMP32|BPF_CODE_JA|BPF_SRC_K},
+
   /* 32-bit compare-and-jump instructions (reg OP reg).  */
   {BPF_INSN_JEQ32R, "jeq32%W%dr , %sr , %d16", "if%w%dw == %sw%wgoto%w%d16",
    BPF_V3, BPF_CODE, BPF_CLASS_JMP32|BPF_CODE_JEQ|BPF_SRC_X},

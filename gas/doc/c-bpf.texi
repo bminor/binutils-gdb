@@ -160,6 +160,9 @@ Signed 16-bit immediate representing an offset in bytes.
 @item disp16
 Signed 16-bit immediate representing a displacement to a target,
 measured in number of 64-bit words @emph{minus one}.
+@item disp32
+Signed 32-bit immediate representing a displacement to a target,
+measured in number of 64-bit words @emph{minus one}.
 @item imm32
 Signed 32-bit immediate.
 @item imm64
@@ -554,6 +557,10 @@ holds true.
 @item ja disp16
 @itemx goto disp16
 Jump-always.
+
+@item jal disp32
+@itemx gotol disp32
+Jump-always, long range.
 
 @item jeq rd, rs, disp16
 @itemx jeq rd, imm32, disp16

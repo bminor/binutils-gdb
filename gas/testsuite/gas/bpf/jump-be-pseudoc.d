@@ -30,3 +30,5 @@ Disassembly of section .text:
   98:	cd 34 00 00 00 00 00 00 	if r3s<r4 goto 0
   a0:	d5 30 00 01 00 00 00 03 	if r3s<=3 goto 1
   a8:	dd 34 00 00 00 00 00 00 	if r3s<=r4 goto 0
+  b0:	06 00 00 00 00 00 00 01 	gotol 1
+  b8:	06 00 00 00 00 00 00 00 	gotol 0

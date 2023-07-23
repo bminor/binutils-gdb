@@ -1,3 +1,8 @@
+2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* opcode/bpf.h (enum bpf_insn_id): Add entry BPF_INSN_JAL.
+	(enum bpf_insn_id): Remove spurious entry BPF_INSN_CALLI.
+
 2023-07-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* opcode/bpf.h (enum bpf_insn_id): Add entries for signed load

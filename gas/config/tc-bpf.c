@@ -33,6 +33,7 @@
 
 struct bpf_insn
 {
+  enum bpf_insn_id id;
   int size; /* Instruction size in bytes.  */
   bpf_insn_word opcode;
   uint8_t dst;
@@ -375,30 +376,35 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
          minus one.  */
       *valP = (((long) (*valP)) - 8) / 8;
       break;
+    case BFD_RELOC_BPF_DISPCALL32:
     case BFD_RELOC_BPF_DISP32:
-      /* eBPF supports two kind of CALL instructions: the so called
-         pseudo calls ("bpf to bpf") and external calls ("bpf to
-         kernel").
-
-         Both kind of calls use the same instruction (CALL).  However,
-         external calls are constructed by passing a constant argument
-         to the instruction, whereas pseudo calls result from
-         expressions involving symbols.  In practice, instructions
-         requiring a fixup are interpreted as pseudo-calls.  If we are
-         executing this code, this is a pseudo call.
-
-         The kernel expects for pseudo-calls to be annotated by having
-         BPF_PSEUDO_CALL in the SRC field of the instruction.  But
-         beware the infamous nibble-swapping of eBPF and take
-         endianness into account here.
-
-         Note that the CALL instruction has only one operand, so
-         this code is executed only once per instruction.  */
-      md_number_to_chars (where + 1, target_big_endian ? 0x01 : 0x10, 1);
-
       /* Convert from bytes to number of 64-bit words to the target,
          minus one.  */
       *valP = (((long) (*valP)) - 8) / 8;
+
+      if (fixP->fx_r_type == BFD_RELOC_BPF_DISPCALL32)
+        {
+          /* eBPF supports two kind of CALL instructions: the so
+             called pseudo calls ("bpf to bpf") and external calls
+             ("bpf to kernel").
+
+             Both kind of calls use the same instruction (CALL).
+             However, external calls are constructed by passing a
+             constant argument to the instruction, whereas pseudo
+             calls result from expressions involving symbols.  In
+             practice, instructions requiring a fixup are interpreted
+             as pseudo-calls.  If we are executing this code, this is
+             a pseudo call.
+
+             The kernel expects for pseudo-calls to be annotated by
+             having BPF_PSEUDO_CALL in the SRC field of the
+             instruction.  But beware the infamous nibble-swapping of
+             eBPF and take endianness into account here.
+
+             Note that the CALL instruction has only one operand, so
+             this code is executed only once per instruction.  */
+          md_number_to_chars (where + 1, target_big_endian ? 0x01 : 0x10, 1);
+        }
       break;
     case BFD_RELOC_16_PCREL:
       /* Convert from bytes to number of 64-bit words to the target,
@@ -434,6 +440,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
           md_number_to_chars (where + 2, (uint16_t) *valP, 2);
           break;
         case BFD_RELOC_BPF_DISP32:
+        case BFD_RELOC_BPF_DISPCALL32:
           md_number_to_chars (where + 4, (uint32_t) *valP, 4);
           break;
         case BFD_RELOC_16_PCREL:
@@ -852,6 +859,7 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
 
       return;
     }
+  insn.id = opcode->id;
   insn.opcode = opcode->opcode;
 
 #undef PARSE_ERROR
@@ -1044,8 +1052,12 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
             {
               reloc_howto_type *reloc_howto;
               int size;
+              unsigned int bfd_reloc
+                = (insn.id == BPF_INSN_CALL
+                   ? BFD_RELOC_BPF_DISPCALL32
+                   : BFD_RELOC_BPF_DISP32);
 
-              reloc_howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_BPF_DISP32);
+              reloc_howto = bfd_reloc_type_lookup (stdoutput, bfd_reloc);
               if (!reloc_howto)
                 abort ();
 
@@ -1053,7 +1065,7 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
 
               fix_new_exp (frag_now, this_frag - frag_now->fr_literal,
                            size, &insn.disp32, reloc_howto->pc_relative,
-                           BFD_RELOC_BPF_DISP32);
+                           bfd_reloc);
               break;
             }
           default:

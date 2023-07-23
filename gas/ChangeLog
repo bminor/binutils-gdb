@@ -1,3 +1,18 @@
+2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-bpf.c (struct bpf_insn): New field `id'.
+	(md_assemble): Save the ids of successfully parsed instructions
+	and use the new BFD_RELOC_BPF_DISPCALL32 whenever appropriate.
+	(md_apply_fix): Adapt to the new BFD reloc.
+	* testsuite/gas/bpf/jump.s: Test JAL.
+	* testsuite/gas/bpf/jump.d: Likewise.
+	* testsuite/gas/bpf/jump-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/jump-be.d: Likewise.
+	* testsuite/gas/bpf/jump-be-pseudoc.d: Likewise.
+	* doc/c-bpf.texi (BPF Instructions): Document new instruction
+	jal/gotol.
+	Document new operand type disp32.
+
 2023-07-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* testsuite/gas/bpf/mem.s: Add signed load instructions.

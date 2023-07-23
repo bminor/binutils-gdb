@@ -1,3 +1,9 @@
+2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* reloc.c: New reloc BFD_RELOC_BPF_DISPCALL32.
+	* elf64-bpf.c (bpf_reloc_type_lookup): Handle the new reloc.
+	* libbfd.h (bfd_reloc_code_real_names): Regenerate.
+
 2023-07-09  Fangrui Song  <maskray@google.com>
 
 	PR 30592
