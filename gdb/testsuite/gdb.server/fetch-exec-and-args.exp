@@ -56,8 +56,13 @@ proc check_show_args { packet } {
 # is converted to a regexp by this function.
 proc check_remote_exec_file { packet filename } {
     if { $filename eq "" } {
-	set remote_exec_re \
-	    "The remote exec-file is unset, the default remote executable will be used\\."
+	if { $packet } {
+	    set remote_exec_re \
+		"The remote exec-file is unset, the remote has no default executable set\\."
+	} else {
+	    set remote_exec_re \
+		"The remote exec-file is unset, the default remote executable will be used\\."
+	}
     } else {
 	set remote_exec_re \
 	    "The remote exec-file is \"[string_to_regexp $filename]\"\\."
@@ -248,14 +253,55 @@ proc_with_prefix test_remote_exec_warning {} {
     cleanup_gdbserver
 }
 
+# Start GDB.  When PACKET is 'off' disable the qExecAndArgs packet,
+# otherwise, when PACKET is 'on' enable the packet.
+#
+# Start gdbserver in extended-remote mode, but don't provide a
+# filename when starting gdbserver.
+#
+# Connect to the remote server, and check 'show remote exec-file'.
+proc_with_prefix test_server_with_no_exec { packet set_remote_exec } {
+    clean_restart
+
+    gdb_test "disconnect" ".*"
+
+    gdb_file_cmd $::binfile
+
+    gdb_test "set remote fetch-exec-and-args ${packet}" \
+	"Support for the 'qExecAndArgs' packet on future remote targets is set to \"${packet}\"\\."
+
+    # Start gdbserver.
+    set target_exec [gdbserver_download_current_prog]
+
+    if { $set_remote_exec } {
+	gdb_test_no_output "set remote exec-file $target_exec" \
+	    "set remote exec-file"
+	set expected_filename $target_exec
+    } else {
+	set expected_filename ""
+    }
+
+    gdbserver_start_extended
+
+    check_remote_exec_file $packet $expected_filename
+}
+
 # This override prevents the remote exec-file from being set when
 # using the extended-remote protocol.  This is harmless when using
 # other boards.
 with_override extended_gdbserver_load_last_file do_nothing {
-    foreach_with_prefix packet { on off } {
-	test_exec_and_args_unset $packet
-	test_exec_and_arg_fetch $packet
-    }
+    # This override stops GDB connecting to the gdbserver as soon as
+    # GDB is started when testing with the extended-remote protocol.
+    with_override gdbserver_start_multi do_nothing {
+	foreach_with_prefix packet { on off } {
+	    test_exec_and_args_unset $packet
+	    test_exec_and_arg_fetch $packet
 
-    test_remote_exec_warning
+	    foreach_with_prefix set_remote_exec { true false } {
+		test_server_with_no_exec $packet $set_remote_exec
+	    }
+	}
+
+	test_remote_exec_warning
+    }
 }
