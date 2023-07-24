@@ -1,3 +1,10 @@
+2023-07-24  Johannes Schauer Marin Rodrigues  <josch@debian.org>
+
+	* pe-dll.c (fill_edata): If inserting a timestamp, use the value
+	held in the SOURCE_DATE_EPOCH environment variable, if it is
+	defined.
+	* ld.texi (--insert-timestamp): Document change in behaviour.
+
 2023-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.

@@ -3571,6 +3571,11 @@ can be used to insert a zero value for the timestamp, this ensuring
 that binaries produced from identical sources will compare
 identically.
 
+If @option{--insert-timestamp} is active then the time inserted is
+either the time that the linking takes place or, if the
+@code{SOURCE_DATE_EPOCH} environment variable is defined, the number
+of seconds since Unix epoch as specified by that variable.
+
 @kindex --enable-reloc-section
 @item --enable-reloc-section
 @itemx --disable-reloc-section

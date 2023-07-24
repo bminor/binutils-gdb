@@ -1231,7 +1231,18 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
   memset (edata_d, 0, edata_sz);
 
   if (pe_data (abfd)->timestamp == -1)
-    H_PUT_32 (abfd, time (0), edata_d + 4);
+    {
+      time_t now;
+      char *source_date_epoch;
+
+      source_date_epoch = getenv ("SOURCE_DATE_EPOCH");
+      if (source_date_epoch)
+	now = (time_t) strtoll (source_date_epoch, NULL, 10);
+      else
+	now = time (NULL);
+
+      H_PUT_32 (abfd, now, edata_d + 4);
+    }
   else
     H_PUT_32 (abfd, pe_data (abfd)->timestamp, edata_d + 4);
 

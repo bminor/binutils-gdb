@@ -1,3 +1,8 @@
+2023-07-24  Johannes Schauer Marin Rodrigues  <josch@debian.org>
+
+	* doc/binutils.texi (objcopy): Document change in behaviour of
+	objcopy's --preserve-dates command line option.
+
 2023-07-09  Fangrui Song  <maskray@google.com>
 
 	PR 30592

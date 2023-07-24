@@ -1,3 +1,9 @@
+2023-07-24  Johannes Schauer Marin Rodrigues  <josch@debian.org>
+
+	* peXXigen.c (_bfd_XXi_only_swap_filehdr_out): If inserting a
+	timestamp, use the value held in the SOURCE_DATE_EPOCH environment
+	variable, if it is defined.
+
 2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* reloc.c: New reloc BFD_RELOC_BPF_DISPCALL32.

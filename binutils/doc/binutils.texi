@@ -1626,6 +1626,11 @@ commands.  If the input was '12345678' then the outputs would be
 Set the access and modification dates of the output file to be the same
 as those of the input file.
 
+This option also copies the date stored in a PE format file's header,
+unless the SOURCE_DATE_EPOCH environment variable is defined.  If it
+is defined then this variable will be used as the date stored in the
+header, interpreted as the number of seconds since the Unix epoch.
+
 @item -D
 @itemx --enable-deterministic-archives
 @cindex deterministic archives
