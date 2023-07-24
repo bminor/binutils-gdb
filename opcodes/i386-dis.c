@@ -530,6 +530,8 @@ fetch_error (const instr_info *ins)
 #define Nq { OP_R, q_mode }
 #define Ux { OP_R, x_mode }
 #define Uxmm { OP_R, xmm_mode }
+#define Rxmmq { OP_R, xmmq_mode }
+#define Rymm { OP_R, ymm_mode }
 #define Rtmm { OP_R, tmm_mode }
 #define EMCq { OP_EMC, q_mode }
 #define MXC { OP_MXC, 0 }
@@ -1062,6 +1064,9 @@ enum
   PREFIX_VEX_0F38B1_W_0,
   PREFIX_VEX_0F38D2_W_0,
   PREFIX_VEX_0F38D3_W_0,
+  PREFIX_VEX_0F38CB,
+  PREFIX_VEX_0F38CC,
+  PREFIX_VEX_0F38CD,
   PREFIX_VEX_0F38F5_L_0,
   PREFIX_VEX_0F38F6_L_0,
   PREFIX_VEX_0F38F7_L_0,
@@ -1304,6 +1309,9 @@ enum
   VEX_LEN_0F385C_X86_64,
   VEX_LEN_0F385E_X86_64,
   VEX_LEN_0F386C_X86_64,
+  VEX_LEN_0F38CB_P_3_W_0,
+  VEX_LEN_0F38CC_P_3_W_0,
+  VEX_LEN_0F38CD_P_3_W_0,
   VEX_LEN_0F38DB,
   VEX_LEN_0F38F2,
   VEX_LEN_0F38F3,
@@ -1471,6 +1479,9 @@ enum
   VEX_W_0F38B1,
   VEX_W_0F38B4,
   VEX_W_0F38B5,
+  VEX_W_0F38CB_P_3,
+  VEX_W_0F38CC_P_3,
+  VEX_W_0F38CD_P_3,
   VEX_W_0F38CF,
   VEX_W_0F38D2,
   VEX_W_0F38D3,
@@ -3926,6 +3937,30 @@ static const struct dis386 prefix_table[][4] = {
     { "vpdpwusds",	{ XM, Vex, EXx }, 0 },
   },
 
+  /* PREFIX_VEX_0F38CB */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { VEX_W_TABLE (VEX_W_0F38CB_P_3) },
+  },
+
+  /* PREFIX_VEX_0F38CC */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { VEX_W_TABLE (VEX_W_0F38CC_P_3) },
+  },
+
+  /* PREFIX_VEX_0F38CD */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { VEX_W_TABLE (VEX_W_0F38CD_P_3) },
+  },
+
   /* PREFIX_VEX_0F38F5_L_0 */
   {
     { "bzhiS",		{ Gdq, Edq, VexGdq }, 0 },
@@ -6378,9 +6413,9 @@ static const struct dis386 vex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_VEX_0F38CB) },
+    { PREFIX_TABLE (PREFIX_VEX_0F38CC) },
+    { PREFIX_TABLE (PREFIX_VEX_0F38CD) },
     { Bad_Opcode },
     { VEX_W_TABLE (VEX_W_0F38CF) },
     /* d0 */
@@ -6940,6 +6975,24 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_0F386C_X86_64 */
   {
     { VEX_W_TABLE (VEX_W_0F386C_X86_64_L_0) },
+  },
+
+  /* VEX_LEN_0F38CB_P_3_W_0 */
+  {
+    { Bad_Opcode },
+    { "vsha512rnds2", { XM, Vex, Rxmmq }, 0 },
+  },
+
+  /* VEX_LEN_0F38CC_P_3_W_0 */
+  {
+    { Bad_Opcode },
+    { "vsha512msg1", { XM, Rxmmq }, 0 },
+  },
+
+  /* VEX_LEN_0F38CD_P_3_W_0 */
+  {
+    { Bad_Opcode },
+    { "vsha512msg2", { XM, Rymm }, 0 },
   },
 
   /* VEX_LEN_0F38DB */
@@ -7611,6 +7664,18 @@ static const struct dis386 vex_w_table[][2] = {
     /* VEX_W_0F38B5 */
     { Bad_Opcode },
     { "%XVvpmadd52huq",	{ XM, Vex, EXx }, PREFIX_DATA },
+  },
+  {
+    /* VEX_W_0F38CB_P_3 */
+    { VEX_LEN_TABLE (VEX_LEN_0F38CB_P_3_W_0) },
+  },
+  {
+    /* VEX_W_0F38CC_P_3 */
+    { VEX_LEN_TABLE (VEX_LEN_0F38CC_P_3_W_0) },
+  },
+  {
+    /* VEX_W_0F38CD_P_3 */
+    { VEX_LEN_TABLE (VEX_LEN_0F38CD_P_3_W_0) },
   },
   {
     /* VEX_W_0F38CF */

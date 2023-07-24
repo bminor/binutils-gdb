@@ -2043,6 +2043,14 @@ sha256rnds2, 0xf38cb, SHA, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 sha256msg1, 0xf38cc, SHA, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 sha256msg2, 0xf38cd, SHA, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 
+// SHA512 instructions.
+
+vsha512rnds2, 0xf2cb, SHA512, Modrm|Vex256|Space0F38|VexVVVV|VexW0|NoSuf, { RegXMM, RegYMM, RegYMM }
+vsha512msg1, 0xf2cc, SHA512, Modrm|Vex256|Space0F38|VexW0|NoSuf, { RegXMM, RegYMM }
+vsha512msg2, 0xf2cd, SHA512, Modrm|Vex256|Space0F38|VexW0|NoSuf, { RegYMM, RegYMM }
+
+// SHA512 instructions end.
+
 // VPCLMULQDQ instructions
 
 vpclmulqdq, 0x6644, VPCLMULQDQ, Modrm|Vex256|Space0F3A|VexWIG|VexVVVV|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
