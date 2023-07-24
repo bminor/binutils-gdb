@@ -54,7 +54,7 @@ set obj [dap_check_request_and_response "set breakpoint by line number" \
 set line_bpno [dap_get_breakpoint_number $obj]
 
 # Check the new breakpoint event.
-set ok 0
+set ok 1
 foreach d [lindex $obj 1] {
     if {[dict get $d type] != "event"
 	|| [dict get $d event] != "breakpoint"} {
@@ -62,13 +62,14 @@ foreach d [lindex $obj 1] {
     }
     if {[dict get $d body reason] == "new"
 	&& [dict get $d body breakpoint verified] == "true"} {
-	set ok 1
-	pass "check new breakpoint event"
+	set ok 0
 	break
     }
 }
-if {!$ok} {
-    fail "check new breakpoint event"
+if {$ok} {
+    pass "check lack of new breakpoint event"
+} else {
+    fail "check lack of new breakpoint event"
 }
 
 # Check that there are breakpoint locations on each line between FIRST

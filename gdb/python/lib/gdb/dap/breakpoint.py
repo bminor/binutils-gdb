@@ -17,6 +17,8 @@ import gdb
 import os
 import re
 
+from contextlib import contextmanager
+
 # These are deprecated in 3.9, but required in older versions.
 from typing import Optional, Sequence
 
@@ -36,15 +38,32 @@ def _bp_modified(event):
     )
 
 
+# True when suppressing new breakpoint events.
+_suppress_bp = False
+
+
+@contextmanager
+def suppress_new_breakpoint_event():
+    """Return a new context manager that suppresses new breakpoint events."""
+    global _suppress_bp
+    _suppress_bp = True
+    try:
+        yield None
+    finally:
+        _suppress_bp = False
+
+
 @in_gdb_thread
 def _bp_created(event):
-    send_event(
-        "breakpoint",
-        {
-            "reason": "new",
-            "breakpoint": _breakpoint_descriptor(event),
-        },
-    )
+    global _suppress_bp
+    if not _suppress_bp:
+        send_event(
+            "breakpoint",
+            {
+                "reason": "new",
+                "breakpoint": _breakpoint_descriptor(event),
+            },
+        )
 
 
 @in_gdb_thread
@@ -141,7 +160,8 @@ def _set_breakpoints_callback(kind, specs, creator):
             if keyspec in saved_map:
                 bp = saved_map.pop(keyspec)
             else:
-                bp = creator(**spec)
+                with suppress_new_breakpoint_event():
+                    bp = creator(**spec)
 
             bp.condition = condition
             if hit_condition is None:
