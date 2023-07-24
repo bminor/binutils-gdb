@@ -24,3 +24,7 @@ Disassembly of section .text:
   68:	c3 12 1e ef 00 00 00 41 	afor32 \[%r1\+0x1eef\],%r2
   70:	db 12 1e ef 00 00 00 a1 	afxor \[%r1\+0x1eef\],%r2
   78:	c3 12 1e ef 00 00 00 a1 	afxor32 \[%r1\+0x1eef\],%r2
+  80:	db 12 00 04 00 00 00 f1 	acmp \[%r1\+0x4\],%r2
+  88:	c3 23 00 04 00 00 00 f1 	acmp32 \[%r2\+0x4\],%r3
+  90:	db 12 00 08 00 00 00 e1 	axchg \[%r1\+0x8\],%r2
+  98:	c3 13 00 08 00 00 00 e1 	axchg32 \[%r1\+0x8\],%r3

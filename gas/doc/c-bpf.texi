@@ -745,8 +745,26 @@ Jump if signed lesser or equal.
 
 @subsection Atomic instructions
 
-Atomic exchange-and-add instructions are provided in two flavors: one
-for swapping 64-bit quantities and another for 32-bit quantities.
+Atomic exchange instructions are provided in two flavors: one for
+compare-and-swap, one for unconditional exchange.
+
+@table @code
+@item acmp [rd + offset16], rs
+@itemx r0 = cmpxchg_64 (rd + offset16, r0, rs)
+Atomic compare-and-swap.  Compares value in @code{r0} to value
+addressed by @code{rd + offset16}.  On match, the value addressed by
+@code{rd + offset16} is replaced with the value in @code{rs}.
+Regardless, the value that was at @code{rd + offset16} is
+zero-extended and loaded into @code{r0}.
+
+@item axchg [rd + offset16], rs
+@itemx rs = xchg_64 (rd + offset16, rs)
+Atomic exchange.  Atomically exchanges the value in @code{rs} with
+the value addressed by @code{rd + offset16}.
+@end table
+
+@noindent
+The following instructions provide atomic arithmetic operations.
 
 @table @code
 @item aadd [rd + offset16], rs
@@ -798,8 +816,26 @@ Alias to @code{aadd}.
 
 @subsection 32-bit atomic instructions
 
-Atomic exchange-and-add instructions are provided in two flavors: one
-for swapping 32-bit quantities and another for 32-bit quantities.
+32-bit atomic exchange instructions are provided in two flavors: one
+for compare-and-swap, one for unconditional exchange.
+
+@table @code
+@item acmp32 [rd + offset16], rs
+@itemx w0 = cmpxchg32_32 (rd + offset16, w0, ws)
+Atomic compare-and-swap.  Compares value in @code{w0} to value
+addressed by @code{rd + offset16}.  On match, the value addressed by
+@code{rd + offset16} is replaced with the value in @code{ws}.
+Regardless, the value that was at @code{rd + offset16} is
+zero-extended and loaded into @code{w0}.
+
+@item axchg [rd + offset16], rs
+@itemx ws = xchg32_32 (rd + offset16, ws)
+Atomic exchange.  Atomically exchanges the value in @code{ws} with
+the value addressed by @code{rd + offset16}.
+@end table
+
+@noindent
+The following instructions provide 32-bit atomic arithmetic operations.
 
 @table @code
 @item aadd32 [rd + offset16], rs

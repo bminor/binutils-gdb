@@ -153,7 +153,7 @@ typedef uint64_t bpf_insn_word;
 #define BPF_IMM32_AFAND ((uint64_t)0x00000051)
 #define BPF_IMM32_AFXOR ((uint64_t)0x000000a1)
 #define BPF_IMM32_AXCHG ((uint64_t)0x000000e1)
-#define BPF_IMM32_ACMP  ((uint64_t)b0x000000f1)
+#define BPF_IMM32_ACMP  ((uint64_t)0x000000f1)
 
 /* Unique identifiers for BPF instructions.  */
 
@@ -225,6 +225,10 @@ enum bpf_insn_id
   BPF_INSN_AADD32, BPF_INSN_AOR32, BPF_INSN_AAND32, BPF_INSN_AXOR32,
   /* Atomic instructions with fetching (32-bit.)  */
   BPF_INSN_AFADD32, BPF_INSN_AFOR32, BPF_INSN_AFAND32, BPF_INSN_AFXOR32,
+  /* Atomic compare-and-swap, atomic exchange.  */
+  BPF_INSN_ACMP, BPF_INSN_AXCHG,
+  /* Atomic compare-and-swap, atomic exchange (32-bit).  */
+  BPF_INSN_ACMP32, BPF_INSN_AXCHG32,
   /* GNU simulator specific instruction.  */
   BPF_INSN_BRKPT,
 };

@@ -403,6 +403,18 @@ const struct bpf_opcode bpf_opcodes[] =
   {BPF_INSN_AFXOR32, "afxor32%W[ %dr %o16 ] , %sr", "%sw = atomic_fetch_xor ( ( u32 * ) ( %dr %o16 ) , %sw )",
    BPF_V3, BPF_CODE|BPF_IMM32, BPF_CLASS_STX|BPF_SIZE_W|BPF_MODE_ATOMIC|BPF_IMM32_AFXOR},
 
+  /* Atomic compare-and-swap, atomic exchange.  */
+  {BPF_INSN_ACMP, "acmp%W[ %dr %o16 ] , %sr", "r0 = cmpxchg_64 ( %dr %o16 , r0 , %sr )",
+   BPF_V3, BPF_CODE|BPF_IMM32, BPF_CLASS_STX|BPF_SIZE_DW|BPF_MODE_ATOMIC|BPF_IMM32_ACMP},
+  {BPF_INSN_AXCHG, "axchg%W[ %dr %o16 ] , %sr", "%sr = xchg_64 ( %dr %o16 , %sr )",
+   BPF_V3, BPF_CODE|BPF_IMM32, BPF_CLASS_STX|BPF_SIZE_DW|BPF_MODE_ATOMIC|BPF_IMM32_AXCHG},
+
+  /* Atomic compare-and-swap, atomic exchange (32-bit).  */
+  {BPF_INSN_ACMP32, "acmp32%W[ %dr %o16 ], %sr", "w0 = cmpxchg32_32 ( %dr %o16 , w0 , %sw )",
+   BPF_V3, BPF_CODE|BPF_IMM32, BPF_CLASS_STX|BPF_SIZE_W|BPF_MODE_ATOMIC|BPF_IMM32_ACMP},
+  {BPF_INSN_AXCHG32, "axchg32%W[ %dr %o16 ], %sr", "%sw = xchg32_32 ( %dr %o16 , %sw )",
+   BPF_V3, BPF_CODE|BPF_IMM32, BPF_CLASS_STX|BPF_SIZE_W|BPF_MODE_ATOMIC|BPF_IMM32_AXCHG},
+
   /* Old versions of aadd and aadd32.  */
   {BPF_INSN_AADD, "xadddw%W[ %dr %o16 ] , %sr", "* ( u64 * ) ( %dr %o16 ) += %sr",
    BPF_V1, BPF_CODE|BPF_IMM32, BPF_CLASS_STX|BPF_SIZE_DW|BPF_MODE_ATOMIC|BPF_IMM32_AADD},

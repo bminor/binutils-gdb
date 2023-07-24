@@ -26,3 +26,7 @@ Disassembly of section .text:
   78:	c3 12 1e ef 00 00 00 41 	w2=atomic_fetch_or\(\(u32\*\)\(r1\+0x1eef\),w2\)
   80:	db 12 1e ef 00 00 00 a1 	r2=atomic_fetch_xor\(\(u64\*\)\(r1\+0x1eef\),r2\)
   88:	c3 12 1e ef 00 00 00 a1 	w2=atomic_fetch_xor\(\(u32\*\)\(r1\+0x1eef\),w2\)
+  90:	db 12 00 04 00 00 00 f1 	r0=cmpxchg_64\(r1\+0x4,r0,r2\)
+  98:	c3 23 00 04 00 00 00 f1 	w0=cmpxchg32_32\(r2\+0x4,w0,w3\)
+  a0:	db 12 00 08 00 00 00 e1 	r2=xchg_64\(r1\+0x8,r2\)
+  a8:	c3 13 00 08 00 00 00 e1 	w3=xchg32_32\(r1\+0x8,w3\)
