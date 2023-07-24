@@ -2910,6 +2910,17 @@ vpdpbsuds, 0xf351, AVX_VNNI_INT8, Modrm|Vex|Space0F38|VexVVVV|VexW0|CheckOperand
 
 // AVX-VNNI-INT8 instructions end.
 
+// AVX-VNNI-INT16 instructions.
+
+vpdpwuud, 0xd2, AVX_VNNI_INT16, Modrm|Vex|Space0F38|VexVVVV|VexW0|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+vpdpwuuds, 0xd3, AVX_VNNI_INT16, Modrm|Vex|Space0F38|VexVVVV|VexW0|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+vpdpwusd, 0x66d2, AVX_VNNI_INT16, Modrm|Vex|Space0F38|VexVVVV|VexW0|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+vpdpwusds, 0x66d3, AVX_VNNI_INT16, Modrm|Vex|Space0F38|VexVVVV|VexW0|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+vpdpwsud, 0xf3d2, AVX_VNNI_INT16, Modrm|Vex|Space0F38|VexVVVV|VexW0|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+vpdpwsuds, 0xf3d3, AVX_VNNI_INT16, Modrm|Vex|Space0F38|VexVVVV|VexW0|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+
+// AVX-VNNI-INT16 instructions end.
+
 // AVX512_BITALG instructions
 
 vpopcnt<bw>, 0x6654, AVX512_BITALG, Modrm|Masking|Space0F38|<bw:vexw>|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }

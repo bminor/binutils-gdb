@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Intel AVX-VNNI-INT16 instructions.
+
 Changes in 2.41:
 
 * Add support for Intel FRED instructions.

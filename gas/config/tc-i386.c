@@ -1151,6 +1151,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (rmpquery, RMPQUERY, ANY_RMPQUERY, false),
   SUBARCH (fred, FRED, ANY_FRED, false),
   SUBARCH (lkgs, LKGS, ANY_LKGS, false),
+  SUBARCH (avx_vnni_int16, AVX_VNNI_INT16, ANY_AVX_VNNI_INT16, false),
 };
 
 #undef SUBARCH
