@@ -53,7 +53,7 @@ class FrameDecorator(object):
         self._base = base
 
     @staticmethod
-    def _is_limited_frame(frame):
+    def __is_limited_frame(frame):
         """Internal utility to determine if the frame is special or
         limited."""
         sal = frame.find_sal()
@@ -148,7 +148,7 @@ class FrameDecorator(object):
             return self._base.frame_args()
 
         frame = self.inferior_frame()
-        if self._is_limited_frame(frame):
+        if self.__is_limited_frame(frame):
             return None
 
         args = FrameVars(frame)
@@ -164,7 +164,7 @@ class FrameDecorator(object):
             return self._base.frame_locals()
 
         frame = self.inferior_frame()
-        if self._is_limited_frame(frame):
+        if self.__is_limited_frame(frame):
             return None
 
         args = FrameVars(frame)
@@ -179,7 +179,7 @@ class FrameDecorator(object):
             return self._base.line()
 
         frame = self.inferior_frame()
-        if self._is_limited_frame(frame):
+        if self.__is_limited_frame(frame):
             return None
 
         sal = frame.find_sal()
