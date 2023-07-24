@@ -337,6 +337,18 @@ const struct riscv_opcode riscv_opcodes[] =
 {"prefetch.i",  0, INSN_CLASS_ZICBOP, "Wif(s)", MATCH_PREFETCH_I, MASK_PREFETCH_I, match_opcode, 0 },
 {"prefetch.r",  0, INSN_CLASS_ZICBOP, "Wif(s)", MATCH_PREFETCH_R, MASK_PREFETCH_R, match_opcode, 0 },
 {"prefetch.w",  0, INSN_CLASS_ZICBOP, "Wif(s)", MATCH_PREFETCH_W, MASK_PREFETCH_W, match_opcode, 0 },
+{"ntl.p1",      0, INSN_CLASS_ZIHINTNTL_AND_C, "", MATCH_C_NTL_P1, MASK_C_NTL_P1, match_opcode, INSN_ALIAS },
+{"ntl.p1",      0, INSN_CLASS_ZIHINTNTL,       "", MATCH_NTL_P1, MASK_NTL_P1, match_opcode, 0 },
+{"ntl.pall",    0, INSN_CLASS_ZIHINTNTL_AND_C, "", MATCH_C_NTL_PALL, MASK_C_NTL_PALL, match_opcode, INSN_ALIAS },
+{"ntl.pall",    0, INSN_CLASS_ZIHINTNTL,       "", MATCH_NTL_PALL, MASK_NTL_PALL, match_opcode, 0 },
+{"ntl.s1",      0, INSN_CLASS_ZIHINTNTL_AND_C, "", MATCH_C_NTL_S1, MASK_C_NTL_S1, match_opcode, INSN_ALIAS },
+{"ntl.s1",      0, INSN_CLASS_ZIHINTNTL,       "", MATCH_NTL_S1, MASK_NTL_S1, match_opcode, 0 },
+{"ntl.all",     0, INSN_CLASS_ZIHINTNTL_AND_C, "", MATCH_C_NTL_ALL, MASK_C_NTL_ALL, match_opcode, INSN_ALIAS },
+{"ntl.all",     0, INSN_CLASS_ZIHINTNTL,       "", MATCH_NTL_ALL, MASK_NTL_ALL, match_opcode, 0 },
+{"c.ntl.p1",    0, INSN_CLASS_ZIHINTNTL_AND_C, "", MATCH_C_NTL_P1, MASK_C_NTL_P1, match_opcode, 0 },
+{"c.ntl.pall",  0, INSN_CLASS_ZIHINTNTL_AND_C, "", MATCH_C_NTL_PALL, MASK_C_NTL_PALL, match_opcode, 0 },
+{"c.ntl.s1",    0, INSN_CLASS_ZIHINTNTL_AND_C, "", MATCH_C_NTL_S1, MASK_C_NTL_S1, match_opcode, 0 },
+{"c.ntl.all",   0, INSN_CLASS_ZIHINTNTL_AND_C, "", MATCH_C_NTL_ALL, MASK_C_NTL_ALL, match_opcode, 0 },
 {"pause",       0, INSN_CLASS_ZIHINTPAUSE, "", MATCH_PAUSE, MASK_PAUSE, match_opcode, 0 },
 
 /* Basic RVI instructions and aliases.  */
