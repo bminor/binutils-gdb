@@ -1,3 +1,15 @@
+2023-07-24  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+	* elfnn-loongarch.c (RELOCATE_CALC_PC32_HI20): Redefined.
+	(RELOCATE_CALC_PC64_HI32): Redefined.
+
+	* elfxx-loongarch.c (reloc_bits_pcrel20_s2): Delete.
+	(reloc_bits_b16): Delete.
+	(reloc_bits_b21): Delete.
+	(reloc_bits_b26): Delete.
+	(reloc_sign_bits): New.
+
 2023-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* version.m4: Update version number to 2.40.90.
