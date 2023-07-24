@@ -1,5 +1,10 @@
 2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* doc/c-bpf.texi (BPF Instructions): The pseudoc syntax for MOVS*
+	doesn't use `s=' but `='.
+
+2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* doc/c-bpf.texi (BPF Instructions): Fix pseudoc syntax for MOVS*
 	and LDXS* instructions.
 	* testsuite/gas/bpf/mem-pseudoc.d: Likewise.

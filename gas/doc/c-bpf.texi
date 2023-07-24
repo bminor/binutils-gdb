@@ -264,15 +264,15 @@ Move the 64-bit value of @code{rs} in @code{rd}, or load @code{imm32}
 in @code{rd}.
 
 @item movs rd, rs, 8
-@itemx rd s= (s8) rs
+@itemx rd = (s8) rs
 Move the sign-extended 8-bit value in @code{rs} to @code{rd}.
 
 @item movs rd, rs, 16
-@itemx rd s= (s16) rs
+@itemx rd = (s16) rs
 Move the sign-extended 16-bit value in @code{rs} to @code{rd}.
 
 @item movs rd, rs, 32
-@itemx rd s= (s32) rs
+@itemx rd = (s32) rs
 Move the sign-extended 32-bit value in @code{rs} to @code{rd}.
 @end table
 
@@ -371,15 +371,15 @@ Move the 32-bit value of @code{rs} in @code{rd}, or load @code{imm32}
 in @code{rd}.
 
 @item mov32s rd, rs, 8
-@itemx rd s= (s8) rs
+@itemx rd = (s8) rs
 Move the sign-extended 8-bit value in @code{rs} to @code{rd}.
 
 @item mov32s rd, rs, 16
-@itemx rd s= (s16) rs
+@itemx rd = (s16) rs
 Move the sign-extended 16-bit value in @code{rs} to @code{rd}.
 
 @item mov32s rd, rs, 32
-@itemx rd s= (s32) rs
+@itemx rd = (s32) rs
 Move the sign-extended 32-bit value in @code{rs} to @code{rd}.
 @end table
 
