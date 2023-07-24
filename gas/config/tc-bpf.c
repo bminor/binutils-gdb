@@ -53,7 +53,7 @@ struct bpf_insn
   unsigned int has_imm64 : 1;
 };
 
-const char comment_chars[]        = ";";
+const char comment_chars[]        = ";#";
 const char line_comment_chars[]   = "#";
 const char line_separator_chars[] = "`";
 const char EXP_CHARS[]            = "eE";
