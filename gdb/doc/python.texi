@@ -1206,6 +1206,13 @@ print frame-arguments scalars} (@pxref{Print Settings}).
 @end table
 @end defun
 
+@defun Value.to_array ()
+If this value is array-like (@pxref{Type.is_array_like}), then this
+method converts it to an array, which is returned.  If this value is
+already an array, it is simply returned.  Otherwise, an exception is
+throw.
+@end defun
+
 @defun Value.string (@r{[}encoding@r{[}, errors@r{[}, length@r{]]]})
 If this @code{gdb.Value} represents a string, then this method
 converts the contents to a Python string.  Otherwise, this method will
@@ -1390,6 +1397,23 @@ otherwise this property is @code{False}.
 Attempting to read this property for a non-scalar type (a type for
 which @code{Type.is_scalar} is @code{False}), will raise a
 @code{ValueError}.
+@end defvar
+
+@defvar Type.is_array_like
+@anchor{Type.is_array_like}
+A boolean indicating whether this type is array-like.
+
+Some languages have array-like objects that are represented internally
+as structures.  For example, this is true for a Rust slice type, or
+for an Ada unconstrained array.  @value{GDBN} may know about these
+types.  This determination is done based on the language from which
+the type originated.
+@end defvar
+
+@defvar Type.is_string_like
+A boolean indicating whether this type is string-like.  Like
+@code{Type.is_array_like}, this is determined based on the originating
+language of the type.
 @end defvar
 
 The following methods are provided:

@@ -442,6 +442,59 @@ typy_is_signed (PyObject *self, void *closure)
     Py_RETURN_TRUE;
 }
 
+/* Return true if this type is array-like.  */
+
+static PyObject *
+typy_is_array_like (PyObject *self, void *closure)
+{
+  struct type *type = ((type_object *) self)->type;
+
+  try
+    {
+      type = check_typedef (type);
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  if (type->is_array_like ())
+    Py_RETURN_TRUE;
+  else
+    Py_RETURN_FALSE;
+}
+
+/* Return true if this type is string-like.  */
+
+static PyObject *
+typy_is_string_like (PyObject *self, void *closure)
+{
+  struct type *type = ((type_object *) self)->type;
+  bool result = false;
+
+  try
+    {
+      type = check_typedef (type);
+
+      const language_defn *lang = nullptr;
+      if (HAVE_GNAT_AUX_INFO (type))
+	lang = language_def (language_ada);
+      else if (HAVE_RUST_SPECIFIC (type))
+	lang = language_def (language_rust);
+      if (lang != nullptr)
+	result = lang->is_string_type_p (type);
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  if (result)
+    Py_RETURN_TRUE;
+  else
+    Py_RETURN_FALSE;
+}
+
 /* Return the type, stripped of typedefs. */
 static PyObject *
 typy_strip_typedefs (PyObject *self, PyObject *args)
@@ -1525,6 +1578,10 @@ static gdb_PyGetSetDef type_object_getset[] =
     "Is this a scalar type?", nullptr },
   { "is_signed", typy_is_signed, nullptr,
     "Is this a signed type?", nullptr },
+  { "is_array_like", typy_is_array_like, nullptr,
+    "Is this an array-like type?", nullptr },
+  { "is_string_like", typy_is_string_like, nullptr,
+    "Is this a string-like type?", nullptr },
   { NULL }
 };
 

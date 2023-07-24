@@ -330,6 +330,40 @@ valpy_rvalue_reference_value (PyObject *self, PyObject *args)
   return valpy_reference_value (self, args, TYPE_CODE_RVALUE_REF);
 }
 
+/* Implement Value.to_array.  */
+
+static PyObject *
+valpy_to_array (PyObject *self, PyObject *args)
+{
+  PyObject *result = nullptr;
+
+  try
+    {
+      struct value *val = ((value_object *) self)->value;
+      struct type *type = check_typedef (val->type ());
+
+      if (type->code () == TYPE_CODE_ARRAY)
+	{
+	  result = self;
+	  Py_INCREF (result);
+	}
+      else
+	{
+	  val = value_to_array (val);
+	  if (val == nullptr)
+	    PyErr_SetString (PyExc_TypeError, _("Value is not array-like."));
+	  else
+	    result = value_to_value_object (val);
+	}
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  return result;
+}
+
 /* Return a "const" qualified version of the value.  */
 
 static PyObject *
@@ -2152,6 +2186,9 @@ formatting options" },
   { "assign", (PyCFunction) valpy_assign, METH_VARARGS,
     "assign (VAL) -> None\n\
 Assign VAL to this value." },
+  { "to_array", valpy_to_array, METH_NOARGS,
+    "to_array () -> Value\n\
+Return value as an array, if possible." },
   {NULL}  /* Sentinel */
 };
 

@@ -269,6 +269,9 @@ info main
 
   ** gdb.Value now has the 'assign' method.
 
+  ** gdb.Value now has the 'to_array' method.  This converts an
+     array-like Value to an array.
+
   ** gdb.Progspace now has the new method "objfile_for_address".  This
      returns the gdb.Objfile, if any, that covers a given address.
 
@@ -277,6 +280,11 @@ info main
      the inferior-id (an integer).  If the Breakpoint object is not
      inferior specific, then this field contains None.  This field can
      be written too.
+
+  ** gdb.Type now has the "is_array_like" and "is_string_like"
+     methods.  These reflect GDB's internal idea of whether a type
+     might be array- or string-like, even if they do not have the
+     corresponding type code.
 
 *** Changes in GDB 13
 
