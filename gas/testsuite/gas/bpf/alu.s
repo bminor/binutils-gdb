@@ -58,3 +58,6 @@
         movs    %r1,%r2,8
         movs    %r1,%r2,16
         movs    %r1,%r2,32
+        bswap   %r1, 16
+        bswap   %r2, 32
+        bswap   %r3, 64

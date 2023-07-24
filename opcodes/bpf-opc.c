@@ -182,6 +182,14 @@ const struct bpf_opcode bpf_opcodes[] =
   {BPF_INSN_ENDBE64, "endbe%W%dr , 64", "%dr = be64%w%dr",
    BPF_V1, BPF_CODE|BPF_IMM32, BPF_CLASS_ALU|BPF_CODE_END|BPF_SRC_X|BPF_IMM32_END64},
 
+  /* Byte-swap instructions.  */
+  {BPF_INSN_BSWAP16, "bswap%W%dr , 16", "%dr%w=%wbswap16%w%dr",
+   BPF_V4, BPF_CODE|BPF_IMM32, BPF_CLASS_ALU64|BPF_CODE_END|BPF_SRC_K|BPF_IMM32_BSWAP16},
+  {BPF_INSN_BSWAP32, "bswap%W%dr , 32", "%dr%w=%wbswap32%w%dr",
+   BPF_V4, BPF_CODE|BPF_IMM32, BPF_CLASS_ALU64|BPF_CODE_END|BPF_SRC_K|BPF_IMM32_BSWAP32},
+  {BPF_INSN_BSWAP64, "bswap%W%dr , 64", "%dr%w=%wbswap64%w%dr",
+   BPF_V4, BPF_CODE|BPF_IMM32, BPF_CLASS_ALU64|BPF_CODE_END|BPF_SRC_K|BPF_IMM32_BSWAP64},
+
   /* 64-bit load instruction.  */
   {BPF_INSN_LDDW, "lddw%W%dr , %i64", "%dr = %i64%wll",
    BPF_V1, BPF_CODE, BPF_CLASS_LD|BPF_SIZE_DW|BPF_MODE_IMM},

@@ -66,3 +66,6 @@ Disassembly of section .text:
  1b8:	bf 21 08 00 00 00 00 00 	movs %r1,%r2,8
  1c0:	bf 21 10 00 00 00 00 00 	movs %r1,%r2,16
  1c8:	bf 21 20 00 00 00 00 00 	movs %r1,%r2,32
+ 1d0:	d7 01 00 00 10 00 00 00 	bswap %r1,16
+ 1d8:	d7 02 00 00 20 00 00 00 	bswap %r2,32
+ 1e0:	d7 03 00 00 40 00 00 00 	bswap %r3,64

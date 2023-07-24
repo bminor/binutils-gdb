@@ -404,6 +404,26 @@ Convert the 16-bit, 32-bit or 64-bit value in @code{rd} to big-endian
 and store it back in @code{rd}.
 @end table
 
+@subsection Byte swap instructions
+
+@table @code
+@item bswap rd, 16
+@itemx rd = bswap16 rd
+Swap the least-significant 16-bit word in @code{rd} with the
+most-significant 16-bit word.
+
+@item bswap rd, 32
+@itemx rd = bswap32 rd
+Swap the least-significant 32-bit word in @code{rd} with the
+most-significant 32-bit word.
+
+@item bswap rd, 64
+@itemx rd = bswap64 rd
+Swap the least-significant 64-bit word in @code{rd} with the
+most-significant 64-bit word.
+@end table
+
+
 @subsection 64-bit load and pseudo maps
 
 @table @code

@@ -1,5 +1,15 @@
 2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* doc/c-bpf.texi (BPF Instructions): Document BSWAP* instructions.
+	* testsuite/gas/bpf/alu.s: Test BSWAP{16,32,64} instructions.
+	* testsuite/gas/bpf/alu.d: Likewise.
+	* testsuite/gas/bpf/alu-be.d: Likewise.
+	* testsuite/gas/bpf/alu-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/alu-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/alu-be-pseudoc.d: Likewise.
+
+2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* doc/c-bpf.texi (BPF Instructions): The pseudoc syntax for MOVS*
 	doesn't use `s=' but `='.
 

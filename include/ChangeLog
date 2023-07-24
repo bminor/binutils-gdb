@@ -1,5 +1,12 @@
 2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* opcode/bpf.h (BPF_IMM32_BSWAP16): Define.
+	(BPF_IMM32_BSWAP32): Likewise.
+	(BPF_IMM32_BSWAP64): Likewise.
+	(enum bpf_insn_id): New entries BPF_INSN_BSWAP{16,32,64}.
+
+2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* opcode/bpf.h (enum bpf_insn_id): Add entry BPF_INSN_JAL.
 	(enum bpf_insn_id): Remove spurious entry BPF_INSN_CALLI.
 
