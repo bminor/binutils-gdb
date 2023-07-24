@@ -1,14 +1,14 @@
 # Serbian translation of gold.
 # Copyright © 2020 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2020–2023.
+# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2020-2023.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gold-2.39.90\n"
+"Project-Id-Version: gold-2.40.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-12-31 12:19+0000\n"
-"PO-Revision-Date: 2023-02-25 09:03+0100\n"
+"POT-Creation-Date: 2023-07-03 11:34+0100\n"
+"PO-Revision-Date: 2023-07-21 07:40+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <(nothing)>\n"
 "Language: sr\n"
@@ -61,7 +61,7 @@ msgstr "неисправан индекс назива табеле симбол
 msgid "symbol table name section has wrong type: %u"
 msgstr "одељак назива табеле симбола има погрешну врсту: %u"
 
-#: aarch64.cc:3832 arm.cc:10905 mips.cc:9608 powerpc.cc:2911 target.cc:94
+#: aarch64.cc:3832 arm.cc:10905 mips.cc:9608 powerpc.cc:2935 target.cc:94
 #, c-format
 msgid "%s: unsupported ELF file type %d"
 msgstr "%s: неподржана „ELF“ врста датотеке %d"
@@ -81,14 +81,14 @@ msgstr "** „PLT“"
 msgid "Stub is too far away, try a smaller value for '--stub-group-size'. The current value is 0x%lx."
 msgstr "Окрајак је предалеко, пробајте мању вредност за „--stub-group-size“. Тренутна вредност је 0×%lx."
 
-#: aarch64.cc:6016 arm.cc:8477 i386.cc:1772 mips.cc:12461 powerpc.cc:7837
+#: aarch64.cc:6016 arm.cc:8477 i386.cc:1772 mips.cc:12461 powerpc.cc:7845
 #: s390.cc:2185 s390.cc:2633 sparc.cc:2134 tilegx.cc:3137 tilegx.cc:3589
 #: x86_64.cc:3012 x86_64.cc:3459
 #, c-format
 msgid "%s: unsupported reloc %u against local symbol"
 msgstr "%s: неподржан премештај „%u“ наспрам локалног симбола"
 
-#: aarch64.cc:6057 powerpc.cc:7942 s390.cc:2259 sparc.cc:2230
+#: aarch64.cc:6057 powerpc.cc:7950 s390.cc:2259 sparc.cc:2230
 msgid "requires unsupported dynamic reloc; recompile with -fPIC"
 msgstr "захтева неподржани динамички премештај; поново преведите са „-fPIC“"
 
@@ -107,7 +107,7 @@ msgstr "%s: неподржан премештај „%u“ у пост неза�
 msgid "%s: unsupported TLSLE reloc %u in shared code."
 msgstr "%s: неподржан „TLSLE“ премештај „%u“ у дељеном коду."
 
-#: aarch64.cc:6373 arm.cc:8885 i386.cc:2127 mips.cc:12474 powerpc.cc:8777
+#: aarch64.cc:6373 arm.cc:8885 i386.cc:2127 mips.cc:12474 powerpc.cc:8785
 #: s390.cc:3064 s390.cc:3081 sparc.cc:2572 tilegx.cc:3605 tilegx.cc:4144
 #: x86_64.cc:3475 x86_64.cc:3979
 #, c-format
@@ -124,7 +124,7 @@ msgstr "%s: неподржана „TLSLE“ врста премештаја „
 msgid "%s: unsupported reloc type in global scan"
 msgstr "%s: неподржана врста премештаја у општем скенирању"
 
-#: aarch64.cc:6908 powerpc.cc:9913 s390.cc:4014 sparc.cc:3164 tilegx.cc:4211
+#: aarch64.cc:6908 powerpc.cc:9922 s390.cc:4014 sparc.cc:3164 tilegx.cc:4211
 #: x86_64.cc:4044
 #, c-format
 msgid "%s: unsupported REL reloc section"
@@ -135,7 +135,7 @@ msgstr "%s: неподжан „REL“ одељак премештаја"
 msgid "cannot relocate %s in object file"
 msgstr "не могу да преместим „%s“ у објектној датотеци"
 
-#: aarch64.cc:7344 i386.cc:2987 i386.cc:3753 mips.cc:10076 powerpc.cc:12258
+#: aarch64.cc:7344 i386.cc:2987 i386.cc:3753 mips.cc:10076 powerpc.cc:12279
 #: s390.cc:3465 sparc.cc:3695 tilegx.cc:4726 x86_64.cc:4537
 #, c-format
 msgid "unexpected reloc %u in object file"
@@ -390,7 +390,7 @@ msgstr "захтева неподржан динамички премештај 
 msgid "%s: unsupported TLS reloc %u for IFUNC symbol"
 msgstr "%s: неподржан „TLS“ премештај „%u“ за „IFUNC“ симбол"
 
-#: arm.cc:8643 i386.cc:1862 powerpc.cc:8246 s390.cc:2369 x86_64.cc:3216
+#: arm.cc:8643 i386.cc:1862 powerpc.cc:8254 s390.cc:2369 x86_64.cc:3216
 #, c-format
 msgid "section symbol %u has bad shndx %u"
 msgstr "симбол одељка „%u“ има лош „shndx %u“"
@@ -420,7 +420,7 @@ msgid "unable to provide V4BX reloc interworking fix up; the target profile does
 msgstr "не могу да обезбедим међурадну поправку „V4BX“ премештаја; циљни профил не подржава „BX“ инструкцију"
 
 #: arm.cc:10247 i386.cc:3019 i386.cc:3101 i386.cc:3166 i386.cc:3202
-#: i386.cc:3274 mips.cc:12296 powerpc.cc:12372 s390.cc:3471 s390.cc:3542
+#: i386.cc:3274 mips.cc:12296 powerpc.cc:12393 s390.cc:3471 s390.cc:3542
 #: s390.cc:3579 s390.cc:3601 s390.cc:3626 sparc.cc:3701 sparc.cc:3892
 #: sparc.cc:3953 sparc.cc:4060 tilegx.cc:4732 x86_64.cc:4558 x86_64.cc:4684
 #: x86_64.cc:4756 x86_64.cc:4790
@@ -1099,7 +1099,7 @@ msgstr "„TLS“ премештаји и SUN и GNU модела"
 msgid "unsupported reloc %u in object file"
 msgstr "неподржан премештај „%u“ у објектној датотеци"
 
-#: i386.cc:4036 powerpc.cc:9867 s390.cc:4886 x86_64.cc:5642
+#: i386.cc:4036 powerpc.cc:9876 s390.cc:4886 x86_64.cc:5642
 #, c-format
 msgid "failed to match split-stack sequence at section %u offset %0zx"
 msgstr "нисам успе да упоредим „split-stack“ низ на одељку „%u“ померај %0zx"
@@ -1252,80 +1252,80 @@ msgstr "%s: непозната врста својства програма „%
 msgid "unable to open --section-ordering-file file %s: %s"
 msgstr "не могу да отворим „--section-ordering-file“ датотеку „%s“: %s"
 
-#: layout.cc:3377
+#: layout.cc:3396
 msgid "one or more inputs require executable stack, but -z noexecstack was given"
 msgstr "један или више улаза захтева извршиви спремник, али је дато „-z noexecstack“"
 
-#: layout.cc:3450
+#: layout.cc:3469
 #, c-format
 msgid "--build-id=uuid failed: could not open /dev/urandom: %s"
 msgstr "„--build-id=uuid“ није успело: не могу да отворим „/dev/urandom“: %s"
 
-#: layout.cc:3457
+#: layout.cc:3476
 #, c-format
 msgid "/dev/urandom: read failed: %s"
 msgstr "/dev/urandom: читање није успело: %s"
 
-#: layout.cc:3459
+#: layout.cc:3478
 #, c-format
 msgid "/dev/urandom: expected %zu bytes, got %zd bytes"
 msgstr "/dev/urandom: очекивах %zu бајта, добих %zd"
 
-#: layout.cc:3471
+#: layout.cc:3490
 msgid "--build-id=uuid failed: could not load rpcrt4.dll"
 msgstr "„--build-id=uuid“ није успело: не могу да учитам „rpcrt4.dll“"
 
-#: layout.cc:3477
+#: layout.cc:3496
 msgid "--build-id=uuid failed: could not find UuidCreate"
 msgstr "„--build-id=uuid“ није успело: не могу да нађем „UuidCreate“"
 
-#: layout.cc:3479
+#: layout.cc:3498
 msgid "__build_id=uuid failed: call UuidCreate() failed"
 msgstr "„__build_id=uuid“ није успело: позив „UuidCreate()“ није успео"
 
-#: layout.cc:3501
+#: layout.cc:3520
 #, c-format
 msgid "--build-id argument '%s' not a valid hex number"
 msgstr "„--build-id“ аргумент „%s“ није исправан хексадецималан број"
 
-#: layout.cc:3507
+#: layout.cc:3526
 #, c-format
 msgid "unrecognized --build-id argument '%s'"
 msgstr "непознат „--build-id“ аргумент „%s“"
 
-#: layout.cc:3561
+#: layout.cc:3580
 #, c-format
 msgid "error: --package-metadata=%s does not contain valid JSON: %s\n"
 msgstr "грешка: „--package-metadata=%s“ не садржи исправан JSON: %s\n"
 
-#: layout.cc:4131
+#: layout.cc:4150
 #, c-format
 msgid "load segment overlap [0x%llx -> 0x%llx] and [0x%llx -> 0x%llx]"
 msgstr "преклапање учитавања подеока [0×%llx –> 0×%llx] и [0×%llx –> 0×%llx]"
 
-#: layout.cc:4292 output.cc:4549
+#: layout.cc:4311 output.cc:4549
 #, c-format
 msgid "out of patch space for section %s; relink with --incremental-full"
 msgstr "нема више закрпног простора за одељак „%s“; превежите са „--incremental-full“"
 
-#: layout.cc:4301 output.cc:4557
+#: layout.cc:4320 output.cc:4557
 #, c-format
 msgid "%s: section changed size; relink with --incremental-full"
 msgstr "%s: одељак је изменио величину; превежите са „--incremental-full“"
 
-#: layout.cc:4556
+#: layout.cc:4575
 msgid "out of patch space for symbol table; relink with --incremental-full"
 msgstr "нема више закрпног простора за табелу симбола; превежите са „--incremental-full“"
 
-#: layout.cc:4627
+#: layout.cc:4646
 msgid "out of patch space for section header table; relink with --incremental-full"
 msgstr "нема више закрпног простора за табелу заглавља симбола; превежите са „--incremental-full“"
 
-#: layout.cc:5373
+#: layout.cc:5397
 msgid "read-only segment has dynamic relocations"
 msgstr "одељак само за читање има динамичке премештаје"
 
-#: layout.cc:5376
+#: layout.cc:5400
 msgid "shared library text segment is not shareable"
 msgstr "део текста дељене библиотеке није дељив"
 
@@ -2029,7 +2029,7 @@ msgstr "Није подржано"
 msgid "Do not copy DT_NEEDED tags from shared libraries"
 msgstr "Не умножава „DT_NEEDED“ ознаке из дељених библиотека"
 
-#: options.h:689 options.h:1494
+#: options.h:689 options.h:1498
 msgid "Allow multiple definitions of symbols"
 msgstr "Допушта више дефиниција симбола"
 
@@ -2061,7 +2061,7 @@ msgstr "Користи „DT_NEEDED“ само за дељене библиот
 msgid "Use DT_NEEDED for all shared libraries"
 msgstr "Користи „DT_NEEDED“ за све дељене библиотеке"
 
-#: options.h:706 options.h:919 options.h:1385 options.h:1399
+#: options.h:706 options.h:923 options.h:1389 options.h:1403
 msgid "Ignored"
 msgstr "Занемарено"
 
@@ -2089,8 +2089,8 @@ msgstr "[=СТИЛ]"
 msgid "Chunk size for '--build-id=tree'"
 msgstr "Величина окрњка за „--build-id=tree“"
 
-#: options.h:727 options.h:732 options.h:1269 options.h:1278 options.h:1467
-#: options.h:1492 options.h:1525
+#: options.h:727 options.h:732 options.h:1273 options.h:1282 options.h:1471
+#: options.h:1496 options.h:1529
 msgid "SIZE"
 msgstr "ВЕЛИЧИНА"
 
@@ -2202,8 +2202,8 @@ msgstr "Не раскршћава C++ симболе у порукама дне�
 msgid "Write a dependency file listing all files read"
 msgstr "Записује датотеку зависности са списком свих читања датотека"
 
-#: options.h:814 options.h:830 options.h:982 options.h:1011 options.h:1088
-#: options.h:1204 options.h:1344 options.h:1376
+#: options.h:814 options.h:830 options.h:986 options.h:1015 options.h:1092
+#: options.h:1208 options.h:1348 options.h:1380
 msgid "FILE"
 msgstr "ДАТОТЕКА"
 
@@ -2243,8 +2243,8 @@ msgstr "(само „PowerPC“) Не етикетира окрајке пове
 msgid "Set program start address"
 msgstr "Поставља почетну адресу програма"
 
-#: options.h:839 options.h:1347 options.h:1349 options.h:1351 options.h:1354
-#: options.h:1356
+#: options.h:839 options.h:1351 options.h:1353 options.h:1355 options.h:1358
+#: options.h:1360
 msgid "ADDRESS"
 msgstr "АДРЕСА"
 
@@ -2265,1012 +2265,1020 @@ msgid "Disable use of DT_RUNPATH"
 msgstr "Онемогућава коришћење „DT_RUNPATH“"
 
 #: options.h:851
+msgid "Put the linker version string into the .comment section"
+msgstr "Ставља ниску издања свезивача у одељак „.comment“"
+
+#: options.h:852
+msgid "Put the linker version string into the .note.gnu.gold-version section"
+msgstr "Ставља ниску издања свезивача у одељак „.note.gnu.gold-version“"
+
+#: options.h:855
 msgid "(ARM only) Do not warn about objects with incompatible enum sizes"
 msgstr "(само „ARM“) Не упозорава о објектима са несагласним величинама набрајања"
 
-#: options.h:855
+#: options.h:859
 msgid "Exclude libraries from automatic export"
 msgstr "Искључује библиотеке из самосталног извоза"
 
-#: options.h:859
+#: options.h:863
 msgid "Export all dynamic symbols"
 msgstr "Извози све динамичке симболе"
 
-#: options.h:860
+#: options.h:864
 msgid "Do not export all dynamic symbols"
 msgstr "Не извози све динамичке симболе"
 
-#: options.h:863
+#: options.h:867
 msgid "Export SYMBOL to dynamic symbol table"
 msgstr "Извози „СИМБОЛ“ у динамичку табелу симбола"
 
-#: options.h:863 options.h:885 options.h:1003 options.h:1020 options.h:1361
-#: options.h:1430 options.h:1444
+#: options.h:867 options.h:889 options.h:1007 options.h:1024 options.h:1365
+#: options.h:1434 options.h:1448
 msgid "SYMBOL"
 msgstr "СИМБОЛ"
 
-#: options.h:866
+#: options.h:870
 msgid "Link big-endian objects."
 msgstr "Свезује објекте велике крајњости."
 
-#: options.h:868
+#: options.h:872
 msgid "Link little-endian objects."
 msgstr "Свезује објекте мале крајњости."
 
-#: options.h:873
+#: options.h:877
 msgid "Auxiliary filter for shared object symbol table"
 msgstr "Помоћни филтер за табелу симбола дељеног објекта"
 
-#: options.h:874 options.h:878
+#: options.h:878 options.h:882
 msgid "SHLIB"
 msgstr "ДБИБЛ"
 
-#: options.h:877
+#: options.h:881
 msgid "Filter for shared object symbol table"
 msgstr "Филтер за табелу симбола дељеног објекта"
 
-#: options.h:881
+#: options.h:885
 msgid "Treat warnings as errors"
 msgstr "Сматра упозорења грешкама"
 
-#: options.h:882
+#: options.h:886
 msgid "Do not treat warnings as errors"
 msgstr "Не сматра упозорења грешкама"
 
-#: options.h:885
+#: options.h:889
 msgid "Call SYMBOL at unload-time"
 msgstr "Позива „SYMBOL“ у време истовара"
 
-#: options.h:888
+#: options.h:892
 msgid "(ARM only) Fix binaries for ARM1176 erratum"
 msgstr "(само „ARM“) Поправља бинарне за „ARM1176“ грешкама"
 
-#: options.h:889
+#: options.h:893
 msgid "(ARM only) Do not fix binaries for ARM1176 erratum"
 msgstr "(само „ARM“) Не поправља бинарне за „ARM1176“ грешкама"
 
-#: options.h:892
+#: options.h:896
 msgid "(ARM only) Fix binaries for Cortex-A8 erratum"
 msgstr "(само „ARM“) Поправља бинарне за „Cortex-A8“ грешкама"
 
-#: options.h:893
+#: options.h:897
 msgid "(ARM only) Do not fix binaries for Cortex-A8 erratum"
 msgstr "(само „ARM“) Не поправља бинарне за „Cortex-A8“ грешкама"
 
-#: options.h:896
+#: options.h:900
 msgid "(AArch64 only) Fix Cortex-A53 erratum 843419"
 msgstr "(само „AArch64“) Поправља „Cortex-A53“ грешку 843419"
 
-#: options.h:897
+#: options.h:901
 msgid "(AArch64 only) Do not fix Cortex-A53 erratum 843419"
 msgstr "(само „AArch64“) Не поправља „Cortex-A53“ грешку 843419"
 
-#: options.h:900
+#: options.h:904
 msgid "(AArch64 only) Fix Cortex-A53 erratum 835769"
 msgstr "(само „AArch64“) Поправља „Cortex-A53“ грешку 835769"
 
-#: options.h:901
+#: options.h:905
 msgid "(AArch64 only) Do not fix Cortex-A53 erratum 835769"
 msgstr "(само „AArch64“) Не поправља „Cortex-A53“ грешку 835769"
 
-#: options.h:904
+#: options.h:908
 msgid "(ARM only) Rewrite BX rn as MOV pc, rn for ARMv4"
 msgstr "(само „ARM“) Поново пише „BX rn“ као „MOV pc“, „rn“ за „ARMv4“"
 
-#: options.h:908
+#: options.h:912
 msgid "(ARM only) Rewrite BX rn branch to ARMv4 interworking veneer"
 msgstr "(само „ARM“) Поново пише „BX rn“ грану у „ARMv4“ међурадну превлаку"
 
-#: options.h:913
+#: options.h:917
 msgid "Ignored for GCC linker option compatibility"
 msgstr "Занемарено зарад сагласности опције „GCC“ свезача"
 
-#: options.h:914
+#: options.h:918
 msgid "[gold,bfd]"
 msgstr "[gold,bfd]"
 
-#: options.h:922
+#: options.h:926
 msgid "Remove unused sections"
 msgstr "Уклања некоришћени одељак"
 
-#: options.h:923
+#: options.h:927
 msgid "Don't remove unused sections"
 msgstr "Не уклања некоришћени одељак"
 
-#: options.h:926
+#: options.h:930
 msgid "Generate .gdb_index section"
 msgstr "Ствара „.gdb_index“ одељак"
 
-#: options.h:927
+#: options.h:931
 msgid "Do not generate .gdb_index section"
 msgstr "Не ствара „.gdb_index“ одељак"
 
-#: options.h:930
+#: options.h:934
 msgid "Enable STB_GNU_UNIQUE symbol binding"
 msgstr "Омогућује увезивање „STB_GNU_UNIQUE“ симбола"
 
-#: options.h:931
+#: options.h:935
 msgid "Disable STB_GNU_UNIQUE symbol binding"
 msgstr "Онемогућује увезивање „STB_GNU_UNIQUE“ симбола"
 
-#: options.h:934
+#: options.h:938
 msgid "Generate shared library"
 msgstr "Ствара дељену библиотеку"
 
-#: options.h:939
+#: options.h:943
 msgid "Set shared library name"
 msgstr "Поставља назив дељене библиотеке"
 
-#: options.h:939 options.h:1179 options.h:1243
+#: options.h:943 options.h:1183 options.h:1247
 msgid "FILENAME"
 msgstr "ДАТОТЕКА"
 
-#: options.h:942
+#: options.h:946
 msgid "Min fraction of empty buckets in dynamic hash"
 msgstr "Најмањи одломак празног ведра у динамичком хешу"
 
-#: options.h:943
+#: options.h:947
 msgid "FRACTION"
 msgstr "ОДЛОМАК"
 
-#: options.h:946
+#: options.h:950
 msgid "Dynamic hash style"
 msgstr "Стил динамичког хеша"
 
-#: options.h:946
+#: options.h:950
 msgid "[sysv,gnu,both]"
 msgstr "[sysv,gnu,both]"
 
-#: options.h:952
+#: options.h:956
 msgid "Alias for -r"
 msgstr "Алијас за „-r“"
 
-#: options.h:955
+#: options.h:959
 msgid "Identical Code Folding. '--icf=safe' Folds ctors, dtors and functions whose pointers are definitely not taken"
 msgstr "Истоветно увијање кода. „--icf=safe“ увија „ctors“, „dtors“ и функције чији показивачи дефинитивно нису узети"
 
-#: options.h:962
+#: options.h:966
 msgid "Number of iterations of ICF (default 3)"
 msgstr "Број понављања „ICF“-а (основно је 3)"
 
-#: options.h:962 options.h:1263 options.h:1320 options.h:1322 options.h:1324
-#: options.h:1326
+#: options.h:966 options.h:1267 options.h:1324 options.h:1326 options.h:1328
+#: options.h:1330
 msgid "COUNT"
 msgstr "БРОЈ"
 
-#: options.h:965
+#: options.h:969
 msgid "Do an incremental link if possible; otherwise, do a full link and prepare output for incremental linking"
 msgstr "Прави повећавајућу везу ако је могуће; у супротном, прави пуну везу и припрема излаз за повећавајуће повезивање"
 
-#: options.h:970
+#: options.h:974
 msgid "Do a full link (default)"
 msgstr "Прави пуну везу (основно)"
 
-#: options.h:973
+#: options.h:977
 msgid "Do a full link and prepare output for incremental linking"
 msgstr "Прави пуну везу и спрема излаз за повећавајуће повезивање"
 
-#: options.h:977
+#: options.h:981
 msgid "Do an incremental link; exit if not possible"
 msgstr "Прави повећавајућу везу; излази ако није могуће"
 
-#: options.h:980
+#: options.h:984
 msgid "Set base file for incremental linking (default is output file)"
 msgstr "Поставља датотеку основе за повећавајуће свезивање (основно је излазна датотека)"
 
-#: options.h:985
+#: options.h:989
 msgid "Assume files changed"
 msgstr "Подразумева да су датотеке измењене"
 
-#: options.h:988
+#: options.h:992
 msgid "Assume files didn't change"
 msgstr "Подразумева да датотеке нису измењене"
 
-#: options.h:991
+#: options.h:995
 msgid "Use timestamps to check files (default)"
 msgstr "Користи временске ознаке за проверу датотеке (основно)"
 
-#: options.h:994
+#: options.h:998
 msgid "Assume startup files unchanged (files preceding this option)"
 msgstr "Подразумева да полазне датотеке нису измењене (датотеке које претходе овој опцији)"
 
-#: options.h:998
+#: options.h:1002
 msgid "Amount of extra space to allocate for patches (default 10)"
 msgstr "Износ додатног простора за доделу закрпама (основно је 10)"
 
-#: options.h:1000
+#: options.h:1004
 msgid "PERCENT"
 msgstr "ПРОЦЕНАТ"
 
-#: options.h:1003
+#: options.h:1007
 msgid "Call SYMBOL at load-time"
 msgstr "Позива „SYMBOL“ у време утовара"
 
-#: options.h:1006
+#: options.h:1010
 msgid "Set dynamic linker path"
 msgstr "ПОставља путању динамичког увезивача"
 
-#: options.h:1006
+#: options.h:1010
 msgid "PROGRAM"
 msgstr "ПРОГРАМ"
 
-#: options.h:1011
+#: options.h:1015
 msgid "Read only symbol values from FILE"
 msgstr "Чита само вредности симбола из ДАТОТЕКЕ"
 
-#: options.h:1016
+#: options.h:1020
 msgid "Keep files mapped across passes"
 msgstr "Задржава датотеке мапираним кроз пролазе"
 
-#: options.h:1017
+#: options.h:1021
 msgid "Release mapped files after each pass"
 msgstr "Издаје мапиране датотеке након сваког корака"
 
-#: options.h:1020
+#: options.h:1024
 msgid "Do not fold this symbol during ICF"
 msgstr "Не увија овај симбол за време „ICF“"
 
-#: options.h:1025
+#: options.h:1029
 msgid "Search for library LIBNAME"
 msgstr "Тражи библиотеку „LIBNAME“"
 
-#: options.h:1025
+#: options.h:1029
 msgid "LIBNAME"
 msgstr "БИБЛИОТЕКА"
 
-#: options.h:1028
+#: options.h:1032
 msgid "Generate unwind information for PLT"
 msgstr "Ствара развијене податке за „PLT“"
 
-#: options.h:1029
+#: options.h:1033
 msgid "Do not generate unwind information for PLT"
 msgstr "Не ствара развијене податке за „PLT“"
 
-#: options.h:1032
+#: options.h:1036
 msgid "Add directory to search path"
 msgstr "Додаје директоријум у путању претраге"
 
-#: options.h:1032 options.h:1218 options.h:1221 options.h:1225 options.h:1294
+#: options.h:1036 options.h:1222 options.h:1225 options.h:1229 options.h:1298
 msgid "DIR"
 msgstr "ДИР"
 
-#: options.h:1035
+#: options.h:1039
 msgid "(ARM only) Generate long PLT entries"
 msgstr "(само „ARM“) Ствара дуге „PLT“ уносе"
 
-#: options.h:1036
+#: options.h:1040
 msgid "(ARM only) Do not generate long PLT entries"
 msgstr "(само „ARM“) Не ствара дуге „PLT“ уносе"
 
-#: options.h:1041
+#: options.h:1045
 msgid "Set GNU linker emulation; obsolete"
 msgstr "Поставља емулацију GNU увезивача; застарело"
 
-#: options.h:1041
+#: options.h:1045
 msgid "EMULATION"
 msgstr "ЕМУЛАЦИЈА"
 
-#: options.h:1045
+#: options.h:1049
 msgid "Map whole files to memory"
 msgstr "Мапира целе датотеке у меморију"
 
-#: options.h:1046
+#: options.h:1050
 msgid "Map relevant file parts to memory"
 msgstr "Мапира релевантне делове датотеке у меморију"
 
-#: options.h:1049
+#: options.h:1053
 msgid "(ARM only) Merge exidx entries in debuginfo"
 msgstr "(само „ARM“) Стапа „exidx“ уносе у подацима прочишћавања"
 
-#: options.h:1050
+#: options.h:1054
 msgid "(ARM only) Do not merge exidx entries in debuginfo"
 msgstr "(само „ARM“) Не стапа „exidx“ уносе у подацима прочишћавања"
 
-#: options.h:1053
+#: options.h:1057
 msgid "Map the output file for writing"
 msgstr "Мапира излазну датотеку за писање"
 
-#: options.h:1054
+#: options.h:1058
 msgid "Do not map the output file for writing"
 msgstr "Не мапира излазну датотеку за писање"
 
-#: options.h:1057
+#: options.h:1061
 msgid "Write map file on standard output"
 msgstr "Пише мапирану датотеку на стандардни излаз"
 
-#: options.h:1059
+#: options.h:1063
 msgid "Write map file"
 msgstr "Пише мапирану датотеку"
 
-#: options.h:1060
+#: options.h:1064
 msgid "MAPFILENAME"
 msgstr "МАПИРАНА_ДАТОТЕКА"
 
-#: options.h:1065
+#: options.h:1069
 msgid "Do not page align data"
 msgstr "Не страничи податке поравнања"
 
-#: options.h:1067
+#: options.h:1071
 msgid "Do not page align data, do not make text readonly"
 msgstr "Не страничи податке поравнања, не чини текст само за читање"
 
-#: options.h:1068
+#: options.h:1072
 msgid "Page align data, make text readonly"
 msgstr "Страничи податке поравнања, чини текст само за читање"
 
-#: options.h:1071
+#: options.h:1075
 msgid "Use less memory and more disk I/O (included only for compatibility with GNU ld)"
 msgstr "Користи мање меморије и више У/И диска (укључено само зарад сагласности са ГНУ „ld“-ом)"
 
-#: options.h:1075 options.h:1469
+#: options.h:1079 options.h:1473
 msgid "Report undefined symbols (even with --shared)"
 msgstr "Исписује недефинисане симболе (чак и са „--shared“)"
 
-#: options.h:1079
+#: options.h:1083
 msgid "Create an output file even if errors occur"
 msgstr "Ствара излазну датотеку чак и ако дође до грешке"
 
-#: options.h:1082
+#: options.h:1086
 msgid "Only search directories specified on the command line"
 msgstr "Претражује само директоријуме наведене на линији наредби"
 
-#: options.h:1088
+#: options.h:1092
 msgid "Set output file name"
 msgstr "Поставља назив излазне датотеке"
 
-#: options.h:1091
+#: options.h:1095
 msgid "Set output format"
 msgstr "Поставља запис излаза"
 
-#: options.h:1091
+#: options.h:1095
 msgid "[binary]"
 msgstr "[бинарно]"
 
-#: options.h:1094
+#: options.h:1098
 msgid "Optimize output file size"
 msgstr "Оптимизује величину излазне датотеке"
 
-#: options.h:1094
+#: options.h:1098
 msgid "LEVEL"
 msgstr "НИВО"
 
-#: options.h:1097
+#: options.h:1101
 msgid "Orphan section handling"
 msgstr "Руковање напуштеним одељком"
 
-#: options.h:1097
+#: options.h:1101
 msgid "[place,discard,warn,error]"
 msgstr "[стави,одбаци,упозори,грешка]"
 
-#: options.h:1103
+#: options.h:1107
 msgid "Ignored for ARM compatibility"
 msgstr "Занемарено зарад „ARM“ сагласности"
 
-#: options.h:1106
+#: options.h:1110
 msgid "Generate package metadata note"
 msgstr "Ствара белешку метаподатака пакета"
 
-#: options.h:1107
+#: options.h:1111
 msgid "[=JSON]"
 msgstr "[=JSON]"
 
-#: options.h:1110 options.h:1113
+#: options.h:1114 options.h:1117
 msgid "Create a position independent executable"
 msgstr "Ствара положајно независну извршну"
 
-#: options.h:1111 options.h:1114
+#: options.h:1115 options.h:1118
 msgid "Do not create a position independent executable"
 msgstr "Не ствара положајно независну извршну"
 
-#: options.h:1118
+#: options.h:1122
 msgid "Force PIC sequences for ARM/Thumb interworking veneers"
 msgstr "Приморава „PIC“ низове за „ARM/Thumb“ међурадне превлаке"
 
-#: options.h:1122
+#: options.h:1126
 msgid "(ARM only) Ignore for backward compatibility"
 msgstr "(само „ARM“) Занемарено зарад повратне сагласности"
 
-#: options.h:1125
+#: options.h:1129
 msgid "(PowerPC only) Align PLT call stubs to fit cache lines"
 msgstr "(само „PowerPC“) Поравнава „PLT“ окрајке позива да испуни редове оставе"
 
-#: options.h:1126
+#: options.h:1130
 msgid "[=P2ALIGN]"
 msgstr "[=P2ALIGN]"
 
-#: options.h:1129
+#: options.h:1133
 msgid "(PowerPC64 only) Optimize calls to ELFv2 localentry:0 functions"
 msgstr "(само „PowerPC64“) Оптимизује позиве ка „ELFv2“ локалном уносу:0 функција"
 
-#: options.h:1130
+#: options.h:1134
 msgid "(PowerPC64 only) Don't optimize ELFv2 calls"
 msgstr "(само „PowerPC64“) Не оптимизује „ELFv2“ позиве"
 
-#: options.h:1133
+#: options.h:1137
 msgid "(PowerPC64 only) PLT call stubs should load r11"
 msgstr "(само „PowerPC64“) „PLT“ окрајци позива треба да учитају „r11“"
 
-#: options.h:1134
+#: options.h:1138
 msgid "(PowerPC64 only) PLT call stubs should not load r11"
 msgstr "(само „PowerPC64“) „PLT“ окрајци позива не треба да учитају „r11“"
 
-#: options.h:1137
+#: options.h:1141
 msgid "(PowerPC64 only) PLT call stubs with load-load barrier"
 msgstr "(само „PowerPC64“) „PLT“ окрајци позива са учитај-учитај баријером"
 
-#: options.h:1138
+#: options.h:1142
 msgid "(PowerPC64 only) PLT call stubs without barrier"
 msgstr "(само „PowerPC64“) „PLT“ окрајци позива без баријере"
 
-#: options.h:1142
+#: options.h:1146
 msgid "Load a plugin library"
 msgstr "Учитава библиотеку прикључка"
 
-#: options.h:1142 options.h:1147
+#: options.h:1146 options.h:1151
 msgid "PLUGIN"
 msgstr "ПРИКЉУЧАК"
 
-#: options.h:1144
+#: options.h:1148
 msgid "Pass an option to the plugin"
 msgstr "Прослеђује опцију прикључку"
 
-#: options.h:1144 options.h:1150
+#: options.h:1148 options.h:1154
 msgid "OPTION"
 msgstr "ОПЦИЈА"
 
-#: options.h:1147
+#: options.h:1151
 msgid "Load a plugin library (not supported)"
 msgstr "Учитава библиотеку прикључка (није подржано)"
 
-#: options.h:1149
+#: options.h:1153
 msgid "Pass an option to the plugin (not supported)"
 msgstr "Прослеђује опцију прикључку (није подржано)"
 
-#: options.h:1154
+#: options.h:1158
 msgid "Use posix_fallocate to reserve space in the output file"
 msgstr "Користи „posix_fallocate“ за резервисање простора у излазној датотеци"
 
-#: options.h:1155
+#: options.h:1159
 msgid "Use fallocate or ftruncate to reserve space"
 msgstr "Користи „fallocate“ или „ftruncate“ за резервисање простора"
 
-#: options.h:1158
+#: options.h:1162
 msgid "(PowerPC64 only) stubs use power10 insns"
 msgstr "(само „PowerPC64“) окрајци користе „power10“ улазне знаке"
 
-#: options.h:1159
+#: options.h:1163
 msgid "[=auto,no,yes]"
 msgstr "[=auto,no,yes]"
 
-#: options.h:1161
+#: options.h:1165
 msgid "(PowerPC64 only) stubs do not use power10 insns"
 msgstr "(само „PowerPC64“) окрајци не користе „power10“ улазне знаке"
 
-#: options.h:1164
+#: options.h:1168
 msgid "Preread archive symbols when multi-threaded"
 msgstr "Унапред прочита симболе архиве када су више-нитовани"
 
-#: options.h:1167
+#: options.h:1171
 msgid "List removed unused sections on stderr"
 msgstr "Исписује уклоњене некоришћене одељке на стандардну грешку"
 
-#: options.h:1168
+#: options.h:1172
 msgid "Do not list removed unused sections"
 msgstr "Не исписује уклоњене некоришћене одељке"
 
-#: options.h:1171
+#: options.h:1175
 msgid "List folded identical sections on stderr"
 msgstr "Исписује увијене истоветне одељке на стандардну грешку"
 
-#: options.h:1172
+#: options.h:1176
 msgid "Do not list folded identical sections"
 msgstr "Не исписује увијене истоветне одељке"
 
-#: options.h:1175
+#: options.h:1179
 msgid "Print default output format"
 msgstr "Исписује основни излазни запис"
 
-#: options.h:1178
+#: options.h:1182
 msgid "Print symbols defined and used for each input"
 msgstr "Исписује симболе дефинисане и коришћене за сваки улаз"
 
-#: options.h:1182
+#: options.h:1186
 msgid "Save the state of flags related to input files"
 msgstr "Чува стање заставица које се односе на улазне датотеке"
 
-#: options.h:1184
+#: options.h:1188
 msgid "Restore the state of flags related to input files"
 msgstr "Враћа стање заставица које се односе на улазне датотеке"
 
-#: options.h:1189
+#: options.h:1193
 msgid "Generate relocations in output"
 msgstr "Ствара премештаје на излазу"
 
-#: options.h:1192
+#: options.h:1196
 msgid "Ignored for SVR4 compatibility"
 msgstr "Занемарено зарад „SVR4“ сагласности"
 
-#: options.h:1197
+#: options.h:1201
 msgid "Generate relocatable output"
 msgstr "Ствара преместиви излаз"
 
-#: options.h:1200
+#: options.h:1204
 msgid "Relax branches on certain targets"
 msgstr "Опушта гране на одређеним метама"
 
-#: options.h:1201
+#: options.h:1205
 msgid "Do not relax branches"
 msgstr "Не опушта гране"
 
-#: options.h:1204
+#: options.h:1208
 msgid "keep only symbols listed in this file"
 msgstr "задржава само симболе исписане у овој датотеци"
 
-#: options.h:1207
+#: options.h:1211
 msgid "Put read-only non-executable sections in their own segment"
 msgstr "Ставља не-извршиве одељке само за читање у њихове сопствене подеоке"
 
-#: options.h:1208
+#: options.h:1212
 msgid "Do not put read-only non-executable sections in their own segment"
 msgstr "Не ставља не-извршиве одељке само за читање у њихове сопствене подеоке"
 
-#: options.h:1211
+#: options.h:1215
 msgid "Set offset between executable and read-only segments"
 msgstr "Поставља померај између извршних и само за читање подеока"
 
-#: options.h:1212
+#: options.h:1216
 msgid "OFFSET"
 msgstr "ПОМЕРАЈ"
 
-#: options.h:1218 options.h:1221
+#: options.h:1222 options.h:1225
 msgid "Add DIR to runtime search path"
 msgstr "Додаје ДИР у путању претраге времена извршења"
 
-#: options.h:1224
+#: options.h:1228
 msgid "Add DIR to link time shared library search path"
 msgstr "Додаје „DIR“ путањи претраге дељене библиотеке времена повезивања"
 
-#: options.h:1230
+#: options.h:1234
 msgid "Strip all symbols"
 msgstr "Празни све симболе"
 
-#: options.h:1232
+#: options.h:1236
 msgid "Strip debugging information"
 msgstr "Празни податке прочишћавања"
 
-#: options.h:1234
+#: options.h:1238
 msgid "Emit only debug line number information"
 msgstr "Емитује само податке броја реда прочишћавања"
 
-#: options.h:1236
+#: options.h:1240
 msgid "Strip debug symbols that are unused by gdb (at least versions <= 7.4)"
 msgstr "Празни симболе прочишћавања које не користи „gdb“ (најмање издање <= 7.4)"
 
-#: options.h:1239
+#: options.h:1243
 msgid "Strip LTO intermediate code sections"
 msgstr "Празни „LTO“ посредничке одељке кода"
 
-#: options.h:1242
+#: options.h:1246
 msgid "Layout sections in the order specified"
 msgstr "Одељцу сучеља по реду наведени"
 
-#: options.h:1246
+#: options.h:1250
 msgid "Set address of section"
 msgstr "Поставља адресу одељка"
 
-#: options.h:1246
+#: options.h:1250
 msgid "SECTION=ADDRESS"
 msgstr "ОДЕЉАК=АДРЕСА"
 
-#: options.h:1249
+#: options.h:1253
 msgid "(PowerPC only) Use new-style PLT"
 msgstr "(само „PowerPC“) Користи ново стилни „PLT“"
 
-#: options.h:1252
+#: options.h:1256
 msgid "Sort common symbols by alignment"
 msgstr "Ређа опште симболе поравнањем"
 
-#: options.h:1253
+#: options.h:1257
 msgid "[={ascending,descending}]"
 msgstr "[={растуће,опадајуће}]"
 
-#: options.h:1256
+#: options.h:1260
 msgid "Sort sections by name.  '--no-text-reorder' will override '--sort-section=name' for .text"
 msgstr "Ређа одељке по називу.  „--no-text-reorder“ ће преписати „--sort-section=name“ за „.text“"
 
-#: options.h:1258
+#: options.h:1262
 msgid "[none,name]"
 msgstr "[ништа,назив]"
 
-#: options.h:1262
+#: options.h:1266
 msgid "Dynamic tag slots to reserve (default 5)"
 msgstr "Утори динамичке ознаке за резервисање (основно је 5)"
 
-#: options.h:1266
+#: options.h:1270
 msgid "(ARM, PowerPC only) The maximum distance from instructions in a group of sections to their stubs. Negative values mean stubs are always after the group. 1 means use default size"
 msgstr "(само „ARM, PowerPC“) Највеће растојање од имструкција у групи одељака до њихових окрајака. Негативне вредности значе да су окрајци увек након групе. 1 значи коришћење основне величине"
 
-#: options.h:1272
+#: options.h:1276
 msgid "(PowerPC only) Allow a group of stubs to serve multiple output sections"
 msgstr "(само „PowerPC“) Допушта групи окрајака да служе више одељака излаза"
 
-#: options.h:1274
+#: options.h:1278
 msgid "(PowerPC only) Each output section has its own stubs"
 msgstr "(само „PowerPC“) Сваки одељак излаза има свој сопствени окрајак"
 
-#: options.h:1277
+#: options.h:1281
 msgid "Stack size when -fsplit-stack function calls non-split"
 msgstr "Величина спремника када „-fsplit-stack“ фунција позове „non-split“"
 
-#: options.h:1283
+#: options.h:1287
 msgid "Do not link against shared libraries"
 msgstr "Не увезује наспрам дељених библиотека"
 
-#: options.h:1286
+#: options.h:1290
 msgid "Start a library"
 msgstr "Покреће библиотеку"
 
-#: options.h:1288
+#: options.h:1292
 msgid "End a library "
 msgstr "Завршава библиотеку "
 
-#: options.h:1291
+#: options.h:1295
 msgid "Print resource usage statistics"
 msgstr "Исписује статистике коришћења ресурса"
 
-#: options.h:1294
+#: options.h:1298
 msgid "Set target system root directory"
 msgstr "Поставља корени директоријум циљног система"
 
-#: options.h:1299
+#: options.h:1303
 msgid "Print the name of each input file"
 msgstr "Исписује назив сваке улазне датотеке"
 
-#: options.h:1302
+#: options.h:1306
 msgid "(ARM only) Force R_ARM_TARGET1 type to R_ARM_ABS32"
 msgstr "(само „ARM“) Присиљава „R_ARM_TARGET1“ врсту на „R_ARM_ABS32“"
 
-#: options.h:1305
+#: options.h:1309
 msgid "(ARM only) Force R_ARM_TARGET1 type to R_ARM_REL32"
 msgstr "(само „ARM“) Присиљава „R_ARM_TARGET1“ врсту на „R_ARM_REL32“"
 
-#: options.h:1308
+#: options.h:1312
 msgid "(ARM only) Set R_ARM_TARGET2 relocation type"
 msgstr "(само „ARM“) Поставља „R_ARM_TARGET2“ врсту премештаја"
 
-#: options.h:1309
+#: options.h:1313
 msgid "[rel, abs, got-rel"
 msgstr "[rel, abs, got-rel"
 
-#: options.h:1313
+#: options.h:1317
 msgid "Enable text section reordering for GCC section names"
 msgstr "Омогућава преуређивање одељка текста за „GCC“ називе одељка"
 
-#: options.h:1314
+#: options.h:1318
 msgid "Disable text section reordering for GCC section names"
 msgstr "Онемогућава преуређивање одељка текста за „GCC“ називе одељка"
 
-#: options.h:1317
+#: options.h:1321
 msgid "Run the linker multi-threaded"
 msgstr "Покреће повезивача вишенитно"
 
-#: options.h:1318
+#: options.h:1322
 msgid "Do not run the linker multi-threaded"
 msgstr "Не покреће повезивача вишенитно"
 
-#: options.h:1320
+#: options.h:1324
 msgid "Number of threads to use"
 msgstr "Број нити за коришћење"
 
-#: options.h:1322
+#: options.h:1326
 msgid "Number of threads to use in initial pass"
 msgstr "Број нити за коришћење у почетном кораку"
 
-#: options.h:1324
+#: options.h:1328
 msgid "Number of threads to use in middle pass"
 msgstr "Број нити за коришћење у средњем кораку"
 
-#: options.h:1326
+#: options.h:1330
 msgid "Number of threads to use in final pass"
 msgstr "Број нити за коришћење у завршном кораку"
 
-#: options.h:1329
+#: options.h:1333
 msgid "(PowerPC/64 only) Optimize GD/LD/IE code to IE/LE"
 msgstr "(само „PowerPC/64“) Оптимизује „GD/LD/IE“ код у „IE/LE“"
 
-#: options.h:1330
+#: options.h:1334
 msgid "(PowerPC/64 only) Don'''t try to optimize TLS accesses"
 msgstr "(само „PowerPC/64“) Не покушава да оптимизује „TLS“ приступе"
 
-#: options.h:1332
+#: options.h:1336
 msgid "(PowerPC/64 only) Use a special __tls_get_addr call"
 msgstr "(само „PowerPC/64“) Користи „special __tls_get_addr“ позив"
 
-#: options.h:1333
+#: options.h:1337
 msgid "(PowerPC/64 only) Don't use a special __tls_get_addr call"
 msgstr "(само „PowerPC/64“) Не користи „special __tls_get_addr“ позив"
 
-#: options.h:1336
+#: options.h:1340
 msgid "(PowerPC64 only) Optimize TOC code sequences"
 msgstr "(само „PowerPC64“) Оптимизује низове „TOC“ кода"
 
-#: options.h:1337
+#: options.h:1341
 msgid "(PowerPC64 only) Don't optimize TOC code sequences"
 msgstr "(само „PowerPC64“) Не оптимизује низове „TOC“ кода"
 
-#: options.h:1340
+#: options.h:1344
 msgid "(PowerPC64 only) Sort TOC and GOT sections"
 msgstr "(само „PowerPC64“) Ређа „TOC“ и „GOT“ одељке"
 
-#: options.h:1341
+#: options.h:1345
 msgid "(PowerPC64 only) Don't sort TOC and GOT sections"
 msgstr "(само „PowerPC64“) Не ређа „TOC“ и „GOT“ одељке"
 
-#: options.h:1344
+#: options.h:1348
 msgid "Read linker script"
 msgstr "Чита скрипту повезивача"
 
-#: options.h:1347
+#: options.h:1351
 msgid "Set the address of the bss segment"
 msgstr "Поставља адресу „bss“ подеока"
 
-#: options.h:1349
+#: options.h:1353
 msgid "Set the address of the data segment"
 msgstr "Поставља адресу подеока података"
 
-#: options.h:1351 options.h:1353
+#: options.h:1355 options.h:1357
 msgid "Set the address of the text segment"
 msgstr "Поставља адресу подеока текста"
 
-#: options.h:1356
+#: options.h:1360
 msgid "Set the address of the rodata segment"
 msgstr "Поставља адресу подеока ро-података"
 
-#: options.h:1361
+#: options.h:1365
 msgid "Create undefined reference to SYMBOL"
 msgstr "Ствара недефинисане упуте на „SYMBOL“"
 
-#: options.h:1364
+#: options.h:1368
 msgid "How to handle unresolved symbols"
 msgstr "Како да ради неређеним симболима"
 
-#: options.h:1373
+#: options.h:1377
 msgid "Alias for --debug=files"
 msgstr "Алијас за „--debug=files“"
 
-#: options.h:1376
+#: options.h:1380
 msgid "Read version script"
 msgstr "Чита скрипту издања"
 
-#: options.h:1381
+#: options.h:1385
 msgid "Warn about duplicate common symbols"
 msgstr "Упозорава о удвострученим општим симболима"
 
-#: options.h:1382
+#: options.h:1386
 msgid "Do not warn about duplicate common symbols"
 msgstr "Не упозорава о удвострученим општим симболима"
 
-#: options.h:1388
+#: options.h:1392
 msgid "Warn when discarding version information"
 msgstr "Упозорава приликом одбацивања података издања"
 
-#: options.h:1389
+#: options.h:1393
 msgid "Do not warn when discarding version information"
 msgstr "Не упозорава приликом одбацивања података издања"
 
-#: options.h:1392
+#: options.h:1396
 msgid "Warn if the stack is executable"
 msgstr "Упозорава ако је спремник извршив"
 
-#: options.h:1393
+#: options.h:1397
 msgid "Do not warn if the stack is executable"
 msgstr "Не упозорава ако је спремник извршив"
 
-#: options.h:1396
+#: options.h:1400
 msgid "Don't warn about mismatched input files"
 msgstr "Не упозорава о неодговарајућим улазним датотекама"
 
-#: options.h:1402
+#: options.h:1406
 msgid "Warn when skipping an incompatible library"
 msgstr "Упозорава приликом прескакања несагласну библиотеку"
 
-#: options.h:1403
+#: options.h:1407
 msgid "Don't warn when skipping an incompatible library"
 msgstr "Не упозорава приликом прескакања несагласну библиотеку"
 
-#: options.h:1406
+#: options.h:1410
 msgid "Warn if text segment is not shareable"
 msgstr "Упозорава ако подеок текста није дељив"
 
-#: options.h:1407
+#: options.h:1411
 msgid "Do not warn if text segment is not shareable"
 msgstr "Не упозорава ако подеок текста није дељив"
 
-#: options.h:1410
+#: options.h:1414
 msgid "Report unresolved symbols as warnings"
 msgstr "Исписује нрешене симболе као упозорења"
 
-#: options.h:1414
+#: options.h:1418
 msgid "Report unresolved symbols as errors"
 msgstr "Исписује нрешене симболе као грешке"
 
-#: options.h:1418
+#: options.h:1422
 msgid "(ARM only) Do not warn about objects with incompatible wchar_t sizes"
 msgstr "(само „ARM“) Не упозорава о објектима са несагласним „wchar_t“ величинама"
 
-#: options.h:1422
+#: options.h:1426
 msgid "Convert unresolved symbols to weak references"
 msgstr "Претвара нерешене симболе у слабе упуте"
 
-#: options.h:1426
+#: options.h:1430
 msgid "Include all archive contents"
 msgstr "Укључује сав садржај архиве"
 
-#: options.h:1427
+#: options.h:1431
 msgid "Include only needed archive contents"
 msgstr "Укључује само потребан садржај архиве"
 
-#: options.h:1430
+#: options.h:1434
 msgid "Use wrapper functions for SYMBOL"
 msgstr "Користи функције умотавача за „SYMBOL“"
 
-#: options.h:1435
+#: options.h:1439
 msgid "Delete all local symbols"
 msgstr "Брише све локалне симболе"
 
-#: options.h:1437
+#: options.h:1441
 msgid "Delete all temporary local symbols"
 msgstr "Брише све привремене локалне симболе"
 
-#: options.h:1439
+#: options.h:1443
 msgid "Keep all local symbols"
 msgstr "Задржава све локалне симболе"
 
-#: options.h:1444
+#: options.h:1448
 msgid "Trace references to symbol"
 msgstr "Прави траг упуте до симбола"
 
-#: options.h:1447
+#: options.h:1451
 msgid "Allow unused version in script"
 msgstr "Допушта некоришћено издање у скрипти"
 
-#: options.h:1448
+#: options.h:1452
 msgid "Do not allow unused version in script"
 msgstr "Не допушта некоришћено издање у скрипти"
 
-#: options.h:1451
+#: options.h:1455
 msgid "Default search path for Solaris compatibility"
 msgstr "Подразумевана путања претраге зарад Соларис сагласности"
 
-#: options.h:1452
+#: options.h:1456
 msgid "PATH"
 msgstr "ПУТАЊА"
 
-#: options.h:1457
+#: options.h:1461
 msgid "Start a library search group"
 msgstr "Започиње групу претраге библиотеке"
 
-#: options.h:1459
+#: options.h:1463
 msgid "End a library search group"
 msgstr "Завршава групу претраге библиотеке"
 
-#: options.h:1464
+#: options.h:1468
 msgid "Sort dynamic relocs"
 msgstr "Ређа динамичке премештаје"
 
-#: options.h:1465
+#: options.h:1469
 msgid "Do not sort dynamic relocs"
 msgstr "Не ређа динамичке премештаје"
 
-#: options.h:1467
+#: options.h:1471
 msgid "Set common page size to SIZE"
 msgstr "Поставља општу величину странице на „ВЕЛИЧИНА“"
 
-#: options.h:1472
+#: options.h:1476
 msgid "Mark output as requiring executable stack"
 msgstr "Означава излаз као да захтева извршиви спремник"
 
-#: options.h:1474
+#: options.h:1478
 msgid "Make symbols in DSO available for subsequently loaded objects"
 msgstr "Чини симболе у „DSO“ доступним за накнадно учитане објекте"
 
-#: options.h:1477
+#: options.h:1481
 msgid "Mark DSO to be initialized first at runtime"
 msgstr "Означава „DSO“ да буде покренут први у време извршавања"
 
-#: options.h:1480
+#: options.h:1484
 msgid "Mark object to interpose all DSOs but executable"
 msgstr "Обележава објекат за уметање свих „DSO“-а осим извршног"
 
-#: options.h:1483
+#: options.h:1487
 msgid "Mark DSO to be loaded at most once, and only in the main namespace"
 msgstr "Означава да ДСО буде учитан највише једном и само у главном називном простору"
 
-#: options.h:1484
+#: options.h:1488
 msgid "Do not mark the DSO as one to be loaded only in the main namespace"
 msgstr "Не означава ДСО као онај који ће бити учитан само у главном називном простору"
 
-#: options.h:1486
+#: options.h:1490
 msgid "Mark object for lazy runtime binding"
 msgstr "Означава објекат за лењо увезивање времена извршавања"
 
-#: options.h:1489
+#: options.h:1493
 msgid "Mark object requiring immediate process"
 msgstr "Означава објекат да захтева тренутну обраду"
 
-#: options.h:1492
+#: options.h:1496
 msgid "Set maximum page size to SIZE"
 msgstr "Поставља највећу величину странице на „ВЕЛИЧИНА“"
 
-#: options.h:1500
+#: options.h:1504
 msgid "Do not create copy relocs"
 msgstr "Не ствара премештаје умношка"
 
-#: options.h:1502
+#: options.h:1506
 msgid "Mark object not to use default search paths"
 msgstr "Означава објекат да не користи основне путање претраге"
 
-#: options.h:1505
+#: options.h:1509
 msgid "Mark DSO non-deletable at runtime"
 msgstr "Означава „DSO“ необрисивиму време извршавања"
 
-#: options.h:1508
+#: options.h:1512
 msgid "Mark DSO not available to dlopen"
 msgstr "Означава „DSO“ недоступним за „dlopen“"
 
-#: options.h:1511
+#: options.h:1515
 msgid "Mark DSO not available to dldump"
 msgstr "Означава „DSO“ недоступним за „dldump“"
 
-#: options.h:1514
+#: options.h:1518
 msgid "Mark output as not requiring executable stack"
 msgstr "Означава излаз као да не захтева извршиви спремник"
 
-#: options.h:1516
+#: options.h:1520
 msgid "Mark object for immediate function binding"
 msgstr "Означава објекат за тренутно увезивање функције"
 
-#: options.h:1519
+#: options.h:1523
 msgid "Mark DSO to indicate that needs immediate $ORIGIN processing at runtime"
 msgstr "Означава „DSO“ да укаже да захтева тренутну „$ORIGIN“ обраду у време извршавања"
 
-#: options.h:1522
+#: options.h:1526
 msgid "Where possible mark variables read-only after relocation"
 msgstr "Где је то могуће означава променљиве само за читање након премештаја"
 
-#: options.h:1523
+#: options.h:1527
 msgid "Don't mark variables read-only after relocation"
 msgstr "Не означава променљиве само за читање након премештаја"
 
-#: options.h:1525
+#: options.h:1529
 msgid "Set PT_GNU_STACK segment p_memsz to SIZE"
 msgstr "Поставља „PT_GNU_STACK“ подеок „p_memsz“ на „ВЕЛИЧИНА“"
 
-#: options.h:1527
+#: options.h:1531
 msgid "ELF symbol visibility for synthesized __start_* and __stop_* symbols"
 msgstr "Видљивост ЕЛФ симбола за синтетизоване симболе „__start_*“ и „__stop_*“"
 
-#: options.h:1532
+#: options.h:1536
 msgid "Do not permit relocations in read-only segments"
 msgstr "Не допушта премештаје у подеоцима само за читање"
 
-#: options.h:1533 options.h:1535
+#: options.h:1537 options.h:1539
 msgid "Permit relocations in read-only segments"
 msgstr "Допушта премештаје у подеоцима само за читање"
 
-#: options.h:1538
+#: options.h:1542
 msgid "Move .text.unlikely sections to a separate segment."
 msgstr "Премешта „.text.unlikely“ одељке у одвојени подеок."
 
-#: options.h:1539
+#: options.h:1543
 msgid "Do not move .text.unlikely sections to a separate segment."
 msgstr "Не премешта „.text.unlikely“ одељке у одвојени подеок."
 
-#: options.h:1542
+#: options.h:1546
 msgid "Keep .text.hot, .text.startup, .text.exit and .text.unlikely as separate sections in the final binary."
 msgstr "Задржава „.text.hot“, „.text.startup“, „.text.exit“ и „.text.unlikely“ као одвојене одељке у крајњој извршној."
 
-#: options.h:1544
+#: options.h:1548
 msgid "Merge all .text.* prefix sections."
 msgstr "Стапа све „all .text.*“ одељке префикса."
 
@@ -3466,140 +3474,140 @@ msgstr "%s: грешка писања приликом стварања умно
 msgid "input files added by plug-ins in --incremental mode not supported yet"
 msgstr "улазне датотеке додате прикључцима у „--incremental“ режиму нису још подржане"
 
-#: powerpc.cc:1302
+#: powerpc.cc:1324
 msgid "missing expected __tls_get_addr call"
 msgstr "недостаје очекиван „__tls_get_addr“ позив"
 
-#: powerpc.cc:2292 powerpc.cc:2627
+#: powerpc.cc:2316 powerpc.cc:2651
 #, c-format
 msgid "%s: ABI version %d is not compatible with ABI version %d output"
 msgstr "%s: „ABI“ издање %d није сагласно са излазом „ABI“ издања %d"
 
-#: powerpc.cc:2326 powerpc.cc:2686
+#: powerpc.cc:2350 powerpc.cc:2710
 #, c-format
 msgid "%s: .opd invalid in abiv%d"
 msgstr "%s: „.opd“ није исправно у „abiv%d“"
 
-#: powerpc.cc:2404
+#: powerpc.cc:2428
 #, c-format
 msgid "%s: unexpected reloc type %u in .opd section"
 msgstr "%s: неочекивана врста премештаја „%u“ у „.opd“ одељку"
 
-#: powerpc.cc:2415
+#: powerpc.cc:2439
 #, c-format
 msgid "%s: .opd is not a regular array of opd entries"
 msgstr "%s: „.opd“ није регуларан низ уноса операнда"
 
-#: powerpc.cc:2555
+#: powerpc.cc:2579
 #, c-format
 msgid "%s: local symbol %d has invalid st_other for ABI version 1"
 msgstr "%s: локални симбол „%d“ има неисправан „st_other“ за „ABI“ издање 1"
 
-#: powerpc.cc:3290
+#: powerpc.cc:3314
 #, c-format
 msgid "%s:%s exceeds group size"
 msgstr "„%s:%s“ превазилази величину групе"
 
-#: powerpc.cc:3641
+#: powerpc.cc:3665
 #, c-format
 msgid "%s:%s: branch in non-executable section, no long branch stub for you"
 msgstr "%s:%s: грана у неизвршивом одељку, нема окрајка дуге гране за вас"
 
-#: powerpc.cc:3758
+#: powerpc.cc:3795
 #, c-format
 msgid "%s: stub group size is too large; retrying with %#x"
 msgstr "%s: величина групе окрајка је превелика; поново покушавам са „%#x“"
 
-#: powerpc.cc:5730
+#: powerpc.cc:5738
 msgid "** glink"
 msgstr "** g_веза"
 
-#: powerpc.cc:6395 powerpc.cc:7110
+#: powerpc.cc:6403 powerpc.cc:7118
 #, c-format
 msgid "linkage table error against `%s'"
 msgstr "грешка табеле повезивања наспрам „%s“"
 
-#: powerpc.cc:6398
+#: powerpc.cc:6406
 #, c-format
 msgid "linkage table error against `%s:[local %u]'"
 msgstr "грешка табеле повезивања наспрам „%s:[local %u]“"
 
-#: powerpc.cc:7237
+#: powerpc.cc:7245
 msgid "** save/restore"
 msgstr "** сачуај/поврати"
 
-#: powerpc.cc:8035
+#: powerpc.cc:8043
 #, c-format
 msgid "%s: unsupported reloc %u for IFUNC symbol"
 msgstr "%s: неподржан премештај „%u“ за „IFUNC“ симбол"
 
-#: powerpc.cc:8301 powerpc.cc:9087
+#: powerpc.cc:8309 powerpc.cc:9096
 #, c-format
 msgid "tocsave symbol %u has bad shndx %u"
 msgstr "симбол чувања табеле садржаја %u има лош „shndx %u“"
 
-#: powerpc.cc:8592 powerpc.cc:9424
+#: powerpc.cc:8600 powerpc.cc:9433
 #, c-format
 msgid "%s: toc optimization is not supported for %#08x instruction"
 msgstr "%s: оптимизација табеле садржаја није подржана за инструкцију „%#08x“"
 
-#: powerpc.cc:8658 powerpc.cc:9486
+#: powerpc.cc:8666 powerpc.cc:9495
 #, c-format
 msgid "%s: unsupported -mbss-plt code"
 msgstr "%s: неподржан „-mbss-plt“ код"
 
-#: powerpc.cc:9833
+#: powerpc.cc:9842
 #, c-format
 msgid "split-stack stack size overflow at section %u offset %0zx"
 msgstr "величина спремника „split-stack“ прекорачује на одељку %u померај %0zx"
 
-#: powerpc.cc:9904
+#: powerpc.cc:9913
 msgid "--plt-localentry is especially dangerous without ld.so support to detect ABI violations"
 msgstr "„--plt-localentry“ је нарочито опасно без „ld.so“ подршке за откривање „ABI“ преступа"
 
-#: powerpc.cc:9933
+#: powerpc.cc:9942
 msgid "--plt-localentry is incompatible with power10 pc-relative code"
 msgstr "„--plt-localentry“ је несагласно са „power10“ рачунарско-односним кодом"
 
-#: powerpc.cc:10228 powerpc.cc:10234
+#: powerpc.cc:10249 powerpc.cc:10255
 #, c-format
 msgid "%s uses hard float, %s uses soft float"
 msgstr "„%s“ користи хардверски покретни зарез, „%s“ користи софтверски покретни зарез"
 
-#: powerpc.cc:10240 powerpc.cc:10247
+#: powerpc.cc:10261 powerpc.cc:10268
 #, c-format
 msgid "%s uses double-precision hard float, %s uses single-precision hard float"
 msgstr "„%s“ користи хардверски покретни зарез двоструке тачности, „%s“ користи хардверски покретни зарез једне тачности"
 
-#: powerpc.cc:10267 powerpc.cc:10273
+#: powerpc.cc:10288 powerpc.cc:10294
 #, c-format
 msgid "%s uses 64-bit long double, %s uses 128-bit long double"
 msgstr "„%s“ користи 64-битни дуги дубл, „%s“ користи 128-битни дуги дубл"
 
-#: powerpc.cc:10279 powerpc.cc:10285
+#: powerpc.cc:10300 powerpc.cc:10306
 #, c-format
 msgid "%s uses IBM long double, %s uses IEEE long double"
 msgstr "„%s“ користи „IBM“ дуги дубл, „%s“ користи „IEEE“ дуги дубл"
 
-#: powerpc.cc:10339 powerpc.cc:10345
+#: powerpc.cc:10360 powerpc.cc:10366
 #, c-format
 msgid "%s uses AltiVec vector ABI, %s uses SPE vector ABI"
 msgstr "„%s“ користи „AltiVec“ вектор „ABI“, „%s“ користи „SPE“ вектор „ABI“"
 
-#: powerpc.cc:10374 powerpc.cc:10381
+#: powerpc.cc:10395 powerpc.cc:10402
 #, c-format
 msgid "%s uses r3/r4 for small structure returns, %s uses memory"
 msgstr "„%s“ користи „r3/r4“ за мале резултате структуре, „%s“ користи меморију"
 
-#: powerpc.cc:10951
+#: powerpc.cc:10972
 msgid "call lacks nop, can't restore toc; recompile with -fPIC"
 msgstr "позиву недостаје „nop“, не могу да вратим табелу садржаја; поново преведите са „-fPIC“"
 
-#: powerpc.cc:12403 s390.cc:3479
+#: powerpc.cc:12424 s390.cc:3479
 msgid "relocation overflow"
 msgstr "прекорачење премештаја"
 
-#: powerpc.cc:12405
+#: powerpc.cc:12426
 msgid "try relinking with a smaller --stub-group-size"
 msgstr "покушајте поново да повежете са мањом „--stub-group-size“"
 
@@ -4208,8 +4216,8 @@ msgstr "„TLS“ премештај наспрам неисправног уп�
 #. This output is intended to follow the GNU standards.
 #: version.cc:65
 #, c-format
-msgid "Copyright (C) 2022 Free Software Foundation, Inc.\n"
-msgstr "Ауторска права © 2022 Задужбина слободног софтвера, Доо.\n"
+msgid "Copyright (C) 2023 Free Software Foundation, Inc.\n"
+msgstr "Ауторска права © 2023. Фондација слободног софтвера, Доо.\n"
 
 #: version.cc:66
 #, c-format
