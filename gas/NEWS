@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Intel SM3 instructions.
+
 * Add support for Intel SHA512 instructions.
 
 * Add support for Intel AVX-VNNI-INT16 instructions.

@@ -501,6 +501,8 @@ if [gas_32_check] then {
     run_dump_test "sha512"
     run_dump_test "sha512-intel"
     run_list_test "sha512-inval"
+    run_dump_test "sm3"
+    run_dump_test "sm3-intel"
     run_list_test "sg"
     run_dump_test "clzero"
     run_dump_test "invlpgb"
