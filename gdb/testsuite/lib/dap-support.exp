@@ -239,40 +239,55 @@ proc _dap_initialize {name} {
 # Start gdb, send a DAP initialize request, and then a launch request
 # specifying FILE as the program to use for the inferior.  Returns the
 # empty string on failure, or the response object from the launch
-# request.  If specified, ARGS is a list of command-line arguments,
-# and ENV is a list of pairs of the form {VAR VALUE} that is used to
-# populate the inferior's environment.  After this is called, gdb will
-# be ready to accept breakpoint requests.  If STOP_AT_MAIN is nonzero,
-# pass "stopAtBeginningOfMainSubprogram" to the launch request.
-proc dap_launch {file {args {}} {env {}} {stop_at_main 0}} {
+# request.  If specified, ARGS is a dictionary of key-value pairs,
+# each passed to the launch request.  Valid keys are:
+# * arguments - value is a list of strings passed as command-line
+#   arguments to the inferior
+# * env - value is a list of pairs of the form {VAR VALUE} that is
+#   used to populate the inferior's environment.
+# * stop_at_main - value is ignored, the presence of this means that
+#   "stopAtBeginningOfMainSubprogram" will be passed to the launch
+#   request.
+#
+# After this proc is called, gdb will be ready to accept breakpoint
+# requests.
+proc dap_launch {file {args {}}} {
     if {[_dap_initialize "startup - initialize"] == ""} {
 	return ""
     }
     set params "o program"
     append params " [format {[%s]} [list s [standard_output_file $file]]]"
 
-    if {[llength $args] > 0} {
-	append params " args"
-	set arglist ""
-	foreach arg $args {
-	    append arglist " \[s [list $arg]\]"
-	}
-	append params " \[a $arglist\]"
-    }
+    foreach {key value} $args {
+	switch -exact -- $key {
+	    arguments {
+		append params " args"
+		set arglist ""
+		foreach arg $value {
+		    append arglist " \[s [list $arg]\]"
+		}
+		append params " \[a $arglist\]"
+	    }
 
-    if {[llength $env] > 0} {
-	append params " env"
-	set envlist ""
-	foreach pair $env {
-	    lassign $pair var value
-	    append envlist " $var"
-	    append envlist " [format {[%s]} [list s $value]]"
-	}
-	append params " \[o $envlist\]"
-    }
+	    env {
+		append params " env"
+		set envlist ""
+		foreach pair $value {
+		    lassign $pair var value
+		    append envlist " $var"
+		    append envlist " [format {[%s]} [list s $value]]"
+		}
+		append params " \[o $envlist\]"
+	    }
 
-    if {$stop_at_main} {
-	append params { stopAtBeginningOfMainSubprogram [l true]}
+	    stop_at_main {
+		append params { stopAtBeginningOfMainSubprogram [l true]}
+	    }
+
+	    default {
+		error "unrecognized parameter $key"
+	    }
+	}
     }
 
     return [dap_check_request_and_response "startup - launch" launch $params]

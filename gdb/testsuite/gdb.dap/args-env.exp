@@ -25,7 +25,7 @@ if {[build_executable ${testfile}.exp $testfile] == -1} {
     return
 }
 
-if {[dap_launch $testfile {a "b c"} {{DEI something}}] == ""} {
+if {[dap_launch $testfile arguments {a "b c"} env {{DEI something}}] == ""} {
     return
 }
 
