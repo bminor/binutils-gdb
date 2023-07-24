@@ -3066,6 +3066,12 @@ pconfig, 0x0f01c5, PCONFIG, NoSuf, {}
 
 // PCONFIG instruction end.
 
+// PBNDKB instruction.
+
+pbndkb, 0x0f01c7, PBNDKB|x64, NoSuf, {}
+
+// PBNDKB instruction end.
+
 // WAITPKG instructions.
 
 umonitor, 0xf30fae/6, WAITPKG, Modrm|AddrPrefixOpReg|NoSuf, { Reg16|Reg32|Reg64 }

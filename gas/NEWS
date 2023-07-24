@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Intel PBNDKB instructions.
+
 * Add support for Intel SM4 instructions.
 
 * Add support for Intel SM3 instructions.

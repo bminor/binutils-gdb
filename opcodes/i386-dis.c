@@ -921,6 +921,7 @@ enum
   PREFIX_90 = 0,
   PREFIX_0F00_REG_6_X86_64,
   PREFIX_0F01_REG_0_MOD_3_RM_6,
+  PREFIX_0F01_REG_0_MOD_3_RM_7,
   PREFIX_0F01_REG_1_RM_2,
   PREFIX_0F01_REG_1_RM_4,
   PREFIX_0F01_REG_1_RM_5,
@@ -1195,6 +1196,7 @@ enum
   X86_64_0F01_REG_0,
   X86_64_0F01_REG_0_MOD_3_RM_6_P_1,
   X86_64_0F01_REG_0_MOD_3_RM_6_P_3,
+  X86_64_0F01_REG_0_MOD_3_RM_7_P_0,
   X86_64_0F01_REG_1,
   X86_64_0F01_REG_1_RM_2_PREFIX_1,
   X86_64_0F01_REG_1_RM_2_PREFIX_3,
@@ -2907,6 +2909,11 @@ static const struct dis386 prefix_table[][4] = {
     { X86_64_TABLE (X86_64_0F01_REG_0_MOD_3_RM_6_P_3) },
   },
 
+  /* PREFIX_0F01_REG_0_MOD_3_RM_7 */
+  {
+    { X86_64_TABLE (X86_64_0F01_REG_0_MOD_3_RM_7_P_0) },
+  },
+
   /* PREFIX_0F01_REG_1_RM_2 */
   {
     { "clac",		{ Skip_MODRM }, 0 },
@@ -4189,6 +4196,12 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { Bad_Opcode },
     { "rdmsrlist",	{ Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0F01_REG_0_MOD_3_RM_7_P_0 */
+  {
+    { Bad_Opcode },
+    { "pbndkb",		{ Skip_MODRM }, 0 },
   },
 
   /* X86_64_0F01_REG_1 */
@@ -8167,6 +8180,7 @@ static const struct dis386 rm_table[][8] = {
     { "vmxoff",		{ Skip_MODRM }, 0 },
     { "pconfig",	{ Skip_MODRM }, 0 },
     { PREFIX_TABLE (PREFIX_0F01_REG_0_MOD_3_RM_6) },
+    { PREFIX_TABLE (PREFIX_0F01_REG_0_MOD_3_RM_7) },
   },
   {
     /* RM_0F01_REG_1 */

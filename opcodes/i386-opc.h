@@ -274,6 +274,8 @@ enum
   CpuWBNOINVD,
   /* PCONFIG instructions required */
   CpuPCONFIG,
+  /* PBNDKB instructions required.  */
+  CpuPBNDKB,
   /* WAITPKG instructions required */
   CpuWAITPKG,
   /* UINTR instructions required */
@@ -459,6 +461,7 @@ typedef union i386_cpu_flags
       unsigned int cpuvpclmulqdq:1;
       unsigned int cpuwbnoinvd:1;
       unsigned int cpupconfig:1;
+      unsigned int cpupbndkb:1;
       unsigned int cpuwaitpkg:1;
       unsigned int cpuuintr:1;
       unsigned int cpucldemote:1;
