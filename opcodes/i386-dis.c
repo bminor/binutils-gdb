@@ -3970,8 +3970,9 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0F38DA_W_0 */
   {
     { VEX_LEN_TABLE (VEX_LEN_0F38DA_W_0_P_0) },
-    { Bad_Opcode },
+    { "vsm4key4", { XM, Vex, EXx }, 0 },
     { VEX_LEN_TABLE (VEX_LEN_0F38DA_W_0_P_2) },
+    { "vsm4rnds4", { XM, Vex, EXx }, 0 },
   },
 
   /* PREFIX_VEX_0F38F5_L_0 */

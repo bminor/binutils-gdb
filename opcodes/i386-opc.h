@@ -179,6 +179,8 @@ enum
   CpuSHA512,
   /* SM3 instructions required.  */
   CpuSM3,
+  /* SM4 instructions required.  */
+  CpuSM4,
   /* CLFLUSHOPT instruction required */
   CpuClflushOpt,
   /* XSAVES/XRSTORS instruction required */
@@ -409,6 +411,7 @@ typedef union i386_cpu_flags
       unsigned int cpusha:1;
       unsigned int cpusha512:1;
       unsigned int cpusm3:1;
+      unsigned int cpusm4:1;
       unsigned int cpuclflushopt:1;
       unsigned int cpuxsaves:1;
       unsigned int cpuxsavec:1;

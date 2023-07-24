@@ -2058,6 +2058,13 @@ vsm3msg2, 0x66da, SM3, Modrm|Space0F38|Vex128|VexVVVV|VexW0|NoSuf, { RegXMM|Unsp
 
 // SM3 instructions end.
 
+// SM4 instructions.
+
+vsm4key4, 0xf3da, SM4, Modrm|Space0F38|Vex|VexVVVV|VexW0|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+vsm4rnds4, 0xf2da, SM4, Modrm|Space0F38|Vex|VexVVVV|VexW0|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+
+// SM4 instructions end.
+
 // VPCLMULQDQ instructions
 
 vpclmulqdq, 0x6644, VPCLMULQDQ, Modrm|Vex256|Space0F3A|VexWIG|VexVVVV|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
