@@ -248,6 +248,7 @@ proc _dap_initialize {name} {
 # * stop_at_main - value is ignored, the presence of this means that
 #   "stopAtBeginningOfMainSubprogram" will be passed to the launch
 #   request.
+# * cwd - value is the working directory to use.
 #
 # After this proc is called, gdb will be ready to accept breakpoint
 # requests.
@@ -282,6 +283,10 @@ proc dap_launch {file {args {}}} {
 
 	    stop_at_main {
 		append params { stopAtBeginningOfMainSubprogram [l true]}
+	    }
+
+	    cwd {
+		append envlist " cwd [format {[%s]} [list s $value]]"
 	    }
 
 	    default {

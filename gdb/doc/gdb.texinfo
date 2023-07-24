@@ -39069,6 +39069,14 @@ If provided, this should be an array of strings.  These strings are
 provided as command-line arguments to the inferior, as if by
 @code{set args}.  @xref{Arguments}.
 
+@item cwd
+If provided, this should be a string.  @value{GDBN} will change its
+working directory to this directory, as if by the @code{cd} command
+(@pxref{Working Directory}).  The launched program will inherit this
+as its working directory.  Note that change of directory happens
+before the @code{program} parameter is processed.  This will affect
+the result if @code{program} is a relative filename.
+
 @item env
 If provided, this should be an object.  Each key of the object will be
 used as the name of an environment variable; each value must be a
