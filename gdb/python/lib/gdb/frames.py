@@ -18,7 +18,7 @@
 
 import gdb
 from gdb.FrameIterator import FrameIterator
-from gdb.FrameDecorator import FrameDecorator
+from gdb.FrameDecorator import FrameDecorator, DAPFrameDecorator
 import itertools
 import collections
 
@@ -157,22 +157,26 @@ def _sort_list():
 
 
 # Internal function that implements frame_iterator and
-# execute_frame_filters.  If ALWAYS is True, then this will always
-# return an iterator.
-def _frame_iterator(frame, frame_low, frame_high, always):
+# execute_frame_filters.  If DAP_SEMANTICS is True, then this will
+# always return an iterator and will wrap frames in DAPFrameDecorator.
+def _frame_iterator(frame, frame_low, frame_high, dap_semantics):
     # Get a sorted list of frame filters.
     sorted_list = list(_sort_list())
 
     # Check to see if there are any frame-filters.  If not, just
     # return None and let default backtrace printing occur.
-    if not always and len(sorted_list) == 0:
+    if not dap_semantics and len(sorted_list) == 0:
         return None
 
     frame_iterator = FrameIterator(frame)
 
     # Apply a basic frame decorator to all gdb.Frames.  This unifies
     # the interface.
-    frame_iterator = map(FrameDecorator, frame_iterator)
+    if dap_semantics:
+        decorator = DAPFrameDecorator
+    else:
+        decorator = FrameDecorator
+    frame_iterator = map(decorator, frame_iterator)
 
     for ff in sorted_list:
         frame_iterator = ff.filter(frame_iterator)
@@ -214,7 +218,11 @@ def frame_iterator(frame, frame_low, frame_high):
     """Helper function that will execute the chain of frame filters.
     Each filter is executed in priority order.  After the execution
     completes, slice the iterator to frame_low - frame_high range.  An
-    iterator is always returned.
+    iterator is always returned.  The iterator will always yield
+    frame decorator objects, but note that these decorators have
+    slightly different semantics from the ordinary ones: they will
+    always return a fully-qualified 'filename' (if possible) and will
+    never substitute the objfile name.
 
     Arguments:
         frame: The initial frame.
