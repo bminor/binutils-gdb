@@ -55,6 +55,6 @@
 	r6 = be16 r6
 	r5 = be32 r5
 	r4 = be64 r4
-        r1 s= (i8) r2
-        r1 s= (i16) r2
-        r1 s= (i32) r2
+        r1 = (s8) r2
+        r1 = (s16) r2
+        r1 = (s32) r2

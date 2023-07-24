@@ -1,5 +1,19 @@
 2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* doc/c-bpf.texi (BPF Instructions): Fix pseudoc syntax for MOVS*
+	and LDXS* instructions.
+	* testsuite/gas/bpf/mem-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/mem-be-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/mem-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/alu-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/alu-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/alu-be-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/alu32-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/alu32-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/alu32-be-pseudoc.d: Likewise.
+
+2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* config/tc-bpf.c (struct bpf_insn): New field `id'.
 	(md_assemble): Save the ids of successfully parsed instructions
 	and use the new BFD_RELOC_BPF_DISPCALL32 whenever appropriate.

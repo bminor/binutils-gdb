@@ -1,3 +1,8 @@
+2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf-opc.c (bpf_opcodes): Fix pseudo-c syntax for MOVS* and LDXS*
+	instructions.
+
 2023-07-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf-opc.c (bpf_opcodes): Add entry for jal.
