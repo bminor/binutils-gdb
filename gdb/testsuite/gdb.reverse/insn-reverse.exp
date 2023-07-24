@@ -95,7 +95,9 @@ proc test { func testcase_nr } {
 
 	    if { $prev_insn_addr == $insn_addr } {
 		# Failed to make progress, might have run into SIGILL.
-		unsupported "no progress at: $expect_out(2,string)"
+		fail "no progress at: $expect_out(2,string)"
+		# Ignore the last instruction recorded
+		incr count -1
 		break
 	    }
 
