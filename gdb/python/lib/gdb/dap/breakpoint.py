@@ -353,10 +353,8 @@ def set_insn_breakpoints(
 
 @in_gdb_thread
 def _catch_exception(filterId, **args):
-    if filterId == "assert":
-        cmd = "-catch-assert"
-    elif filterId == "exception":
-        cmd = "-catch-exception"
+    if filterId in ("assert", "exception", "throw", "rethrow", "catch"):
+        cmd = "-catch-" + filterId
     else:
         raise Exception(f"Invalid exception filterID: {filterId}")
     result = gdb.execute_mi(cmd)
@@ -402,6 +400,21 @@ def _rewrite_exception_breakpoint(
         {
             "filter": "exception",
             "label": "Ada exceptions",
+            "supportsCondition": True,
+        },
+        {
+            "filter": "throw",
+            "label": "C++ exceptions, when thrown",
+            "supportsCondition": True,
+        },
+        {
+            "filter": "rethrow",
+            "label": "C++ exceptions, when re-thrown",
+            "supportsCondition": True,
+        },
+        {
+            "filter": "catch",
+            "label": "C++ exceptions, when caught",
             "supportsCondition": True,
         },
     ),
