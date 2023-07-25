@@ -34,6 +34,7 @@ if {[istarget bpf*-*-*]} {
     run_dump_test jump-pseudoc
     run_dump_test jump32
     run_dump_test jump32-pseudoc
+    run_dump_test atomic-v1
     run_dump_test atomic
     run_dump_test atomic-pseudoc
     run_dump_test indcall-1
@@ -55,6 +56,7 @@ if {[istarget bpf*-*-*]} {
     run_dump_test jump-be-pseudoc
     run_dump_test jump32-be
     run_dump_test jump32-be-pseudoc
+    run_dump_test atomic-v1-be
     run_dump_test atomic-be
     run_dump_test atomic-be-pseudoc
 }

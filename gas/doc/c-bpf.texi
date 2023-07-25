@@ -750,43 +750,41 @@ for swapping 64-bit quantities and another for 32-bit quantities.
 
 @table @code
 @item aadd [rd + offset16], rs
-@itemx *(u64 *)(rd + offset16) = rs
+@itemx lock *(u64 *)(rd + offset16) = rs
 Atomic add instruction.
 
 @item aor [rd + offset16], rs
-@itemx *(u64 *) (rd + offset16) |= rs
+@itemx lock *(u64 *) (rd + offset16) |= rs
 Atomic or instruction.
 
 @item aand [rd + offset16], rs
-@itemx *(u64 *) (rd + offset16) &= rs
+@itemx lock *(u64 *) (rd + offset16) &= rs
 Atomic and instruction.
 
 @item axor [rd + offset16], rs
-@itemx *(u64 *) (rd + offset16) ^= rs
-Atomic xor instruction
-@item xaddw [%d+offset16],%s
-Exchange-and-add a 32-bit value at the specified location.
+@itemx lock *(u64 *) (rd + offset16) ^= rs
+Atomic xor instruction.
 @end table
 
 @noindent
 The following variants perform fetching before the atomic operation.
 
 @table @code
-@item afadd [dr + offset16], rs
-@itemx ???
+@item afadd [rd + offset16], rs
+@itemx rs = atomic_fetch_add ((u64 *)(rd + offset16), rs)
 Atomic fetch-and-add instruction.
 
-@item afor [dr + offset16], rs
-@itemx ???
+@item afor [rd + offset16], rs
+@itemx rs = atomic_fetch_or ((u64 *)(rd + offset16), rs)
 Atomic fetch-and-or instruction.
 
-@item afand [dr + offset16], rs
-@itemx ???
+@item afand [rd + offset16], rs
+@itemx rs = atomic_fetch_and ((u64 *)(rd + offset16), rs)
 Atomic fetch-and-and instruction.
 
-@item afxor [dr + offset16], rs
-@itemx ???
-Atomic fetch-and-or instruction
+@item afxor [rd + offset16], rs
+@itemx rs = atomic_fetch_xor ((u64 *)(rd + offset16), rs)
+Atomic fetch-and-or instruction.
 @end table
 
 The above instructions were introduced in the V3 of the BPF
@@ -805,19 +803,19 @@ for swapping 32-bit quantities and another for 32-bit quantities.
 
 @table @code
 @item aadd32 [rd + offset16], rs
-@itemx *(u32 *)(rd + offset16) = rs
+@itemx lock *(u32 *)(rd + offset16) = rs
 Atomic add instruction.
 
 @item aor32 [rd + offset16], rs
-@itemx *(u32 *) (rd + offset16) |= rs
+@itemx lock *(u32 *) (rd + offset16) |= rs
 Atomic or instruction.
 
 @item aand32 [rd + offset16], rs
-@itemx *(u32 *) (rd + offset16) &= rs
+@itemx lock *(u32 *) (rd + offset16) &= rs
 Atomic and instruction.
 
 @item axor32 [rd + offset16], rs
-@itemx *(u32 *) (rd + offset16) ^= rs
+@itemx lock *(u32 *) (rd + offset16) ^= rs
 Atomic xor instruction
 @end table
 
@@ -826,19 +824,19 @@ The following variants perform fetching before the atomic operation.
 
 @table @code
 @item afadd32 [dr + offset16], rs
-@itemx ???
+@itemx ws = atomic_fetch_add ((u32 *)(rd + offset16), ws)
 Atomic fetch-and-add instruction.
 
 @item afor32 [dr + offset16], rs
-@itemx ???
+@itemx ws = atomic_fetch_or ((u32 *)(rd + offset16), ws)
 Atomic fetch-and-or instruction.
 
 @item afand32 [dr + offset16], rs
-@itemx ???
+@itemx ws = atomic_fetch_and ((u32 *)(rd + offset16), ws)
 Atomic fetch-and-and instruction.
 
 @item afxor32 [dr + offset16], rs
-@itemx ???
+@itemx ws = atomic_fetch_xor ((u32 *)(rd + offset16), ws)
 Atomic fetch-and-or instruction
 @end table
 
