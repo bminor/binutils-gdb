@@ -32,6 +32,7 @@ def _on_exit(event):
             "exitCode": code,
         },
     )
+    send_event("terminated")
 
 
 @in_gdb_thread

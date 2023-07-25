@@ -151,7 +151,7 @@ class Server:
         self.done = True
 
 
-def send_event(event, body):
+def send_event(event, body=None):
     """Send an event to the DAP client.
     EVENT is the name of the event, a string.
     BODY is the body of the event, an arbitrary object."""
