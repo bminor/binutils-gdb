@@ -65,9 +65,8 @@ aren't set, then assembler will check the default configure setting
 @item -mabi=ABI
 Selects the ABI, which is either "ilp32" or "lp64", optionally followed
 by "f", "d", or "q" to indicate single-precision, double-precision, or
-quad-precision floating-point calling convention, or none to indicate
-the soft-float calling convention.  Also, "ilp32" can optionally be followed
-by "e" to indicate the RVE ABI, which is always soft-float.
+quad-precision floating-point calling convention, or none or "e" to indicate
+the soft-float calling convention ("e" indicates a soft-float RVE ABI).
 
 @cindex @samp{-mrelax} option, RISC-V
 @item -mrelax
