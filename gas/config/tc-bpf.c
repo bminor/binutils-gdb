@@ -853,7 +853,7 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
       as_bad (_("unrecognized instruction `%s'"), str);
       if (errmsg != NULL)
         {
-          as_bad (errmsg);
+          as_bad ("%s", errmsg);
           free (errmsg);
         }
 
