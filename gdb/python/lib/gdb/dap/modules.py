@@ -36,11 +36,13 @@ def make_module(objf):
     """Return a Module representing the objfile OBJF.
 
     The objfile must pass the 'is_module' test."""
-    return {
+    result = {
         "id": module_id(objf),
         "name": objf.username,
-        "path": objf.filename,
     }
+    if objf.is_file:
+        result["path"] = objf.filename
+    return result
 
 
 @in_gdb_thread
