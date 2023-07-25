@@ -17,6 +17,7 @@ import gdb
 from .startup import in_gdb_thread
 from .server import client_bool_capability
 from abc import abstractmethod
+from contextlib import contextmanager
 
 
 # A list of all the variable references created during this pause.
@@ -32,6 +33,23 @@ def clear_vars(event):
 
 
 gdb.events.cont.connect(clear_vars)
+
+
+# A null context manager.  Python supplies one, starting in 3.7.
+@contextmanager
+def _null(**ignore):
+    yield
+
+
+@in_gdb_thread
+def apply_format(value_format):
+    """Temporarily apply the DAP ValueFormat.
+
+    This returns a new context manager that applies the given DAP
+    ValueFormat object globally, then restores gdb's state when finished."""
+    if value_format is not None and "hex" in value_format and value_format["hex"]:
+        return gdb.with_parameter("output-radix", 16)
+    return _null()
 
 
 class BaseReference:

@@ -22,60 +22,66 @@ from .modules import module_id
 from .server import request, capability
 from .startup import send_gdb_with_response, in_gdb_thread
 from .state import set_thread
+from .varref import apply_format
 
 
 # Helper function to compute a stack trace.
 @in_gdb_thread
-def _backtrace(thread_id, levels, startFrame):
-    set_thread(thread_id)
-    frames = []
-    if levels == 0:
-        # Zero means all remaining frames.
-        high = -1
-    else:
-        # frame_iterator uses an inclusive range, so subtract one.
-        high = startFrame + levels - 1
-    try:
-        frame_iter = frame_iterator(gdb.newest_frame(), startFrame, high)
-    except gdb.error:
-        frame_iter = ()
-    for current_frame in frame_iter:
-        pc = current_frame.address()
-        newframe = {
-            "id": frame_id(current_frame),
-            "name": current_frame.function(),
-            # This must always be supplied, but we will set it
-            # correctly later if that is possible.
-            "line": 0,
-            # GDB doesn't support columns.
-            "column": 0,
-            "instructionPointerReference": hex(pc),
-        }
-        objfile = gdb.current_progspace().objfile_for_address(pc)
-        if objfile is not None:
-            newframe["moduleId"] = module_id(objfile)
-        line = current_frame.line()
-        if line is not None:
-            newframe["line"] = line
-        filename = current_frame.filename()
-        if filename is not None:
-            newframe["source"] = {
-                "name": os.path.basename(filename),
-                "path": filename,
-                # We probably don't need this but it doesn't hurt
-                # to be explicit.
-                "sourceReference": 0,
+def _backtrace(thread_id, levels, startFrame, value_format):
+    with apply_format(value_format):
+        set_thread(thread_id)
+        frames = []
+        if levels == 0:
+            # Zero means all remaining frames.
+            high = -1
+        else:
+            # frame_iterator uses an inclusive range, so subtract one.
+            high = startFrame + levels - 1
+        try:
+            frame_iter = frame_iterator(gdb.newest_frame(), startFrame, high)
+        except gdb.error:
+            frame_iter = ()
+        for current_frame in frame_iter:
+            pc = current_frame.address()
+            newframe = {
+                "id": frame_id(current_frame),
+                "name": current_frame.function(),
+                # This must always be supplied, but we will set it
+                # correctly later if that is possible.
+                "line": 0,
+                # GDB doesn't support columns.
+                "column": 0,
+                "instructionPointerReference": hex(pc),
             }
-        frames.append(newframe)
-    # Note that we do not calculate totalFrames here.  Its absence
-    # tells the client that it may simply ask for frames until a
-    # response yields fewer frames than requested.
-    return {
-        "stackFrames": frames,
-    }
+            objfile = gdb.current_progspace().objfile_for_address(pc)
+            if objfile is not None:
+                newframe["moduleId"] = module_id(objfile)
+            line = current_frame.line()
+            if line is not None:
+                newframe["line"] = line
+            filename = current_frame.filename()
+            if filename is not None:
+                newframe["source"] = {
+                    "name": os.path.basename(filename),
+                    "path": filename,
+                    # We probably don't need this but it doesn't hurt
+                    # to be explicit.
+                    "sourceReference": 0,
+                }
+            frames.append(newframe)
+        # Note that we do not calculate totalFrames here.  Its absence
+        # tells the client that it may simply ask for frames until a
+        # response yields fewer frames than requested.
+        return {
+            "stackFrames": frames,
+        }
 
 
 @request("stackTrace")
 @capability("supportsDelayedStackTraceLoading")
-def stacktrace(*, levels: int = 0, startFrame: int = 0, threadId: int, **extra):
-    return send_gdb_with_response(lambda: _backtrace(threadId, levels, startFrame))
+def stacktrace(
+    *, levels: int = 0, startFrame: int = 0, threadId: int, format=None, **extra
+):
+    return send_gdb_with_response(
+        lambda: _backtrace(threadId, levels, startFrame, format)
+    )

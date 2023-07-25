@@ -48,6 +48,16 @@ set obj [dap_check_request_and_response "evaluate global" \
 dap_match_values "global value in function" [lindex $obj 0] \
     "body result" 23
 
+set obj [dap_check_request_and_response "evaluate global as hex" \
+	     evaluate {o expression [s global_variable] format [o hex [l true]]}]
+dap_match_values "global value in function as hex" [lindex $obj 0] \
+    "body result" 0x17
+
+set obj [dap_check_request_and_response "evaluate global in hover mode" \
+	     evaluate {o context [s hover] expression [s global_variable]}]
+dap_match_values "global value in hover mode" [lindex $obj 0] \
+    "body result" 23
+
 set obj [dap_request_and_response \
 	     evaluate {o context [s hover] expression [s increment()]}]
 gdb_assert {[dict get [lindex $obj 0] success] == "false"} \
