@@ -1945,13 +1945,6 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
   int xlen = *rps->xlen;
   bool no_conflict = true;
 
-  if (riscv_lookup_subset (rps->subset_list, "e", &subset)
-      && xlen > 32)
-    {
-      rps->error_handler
-	(_("rv%d does not support the `e' extension"), xlen);
-      no_conflict = false;
-    }
   if (riscv_subset_supports (rps, "e")
       && riscv_subset_supports (rps, "h"))
     {
