@@ -25,6 +25,44 @@ from .startup import send_gdb_with_response, in_gdb_thread, log_stack
 from .typecheck import type_check
 
 
+@in_gdb_thread
+def _bp_modified(event):
+    send_event(
+        "breakpoint",
+        {
+            "reason": "changed",
+            "breakpoint": _breakpoint_descriptor(event),
+        },
+    )
+
+
+@in_gdb_thread
+def _bp_created(event):
+    send_event(
+        "breakpoint",
+        {
+            "reason": "new",
+            "breakpoint": _breakpoint_descriptor(event),
+        },
+    )
+
+
+@in_gdb_thread
+def _bp_deleted(event):
+    send_event(
+        "breakpoint",
+        {
+            "reason": "removed",
+            "breakpoint": _breakpoint_descriptor(event),
+        },
+    )
+
+
+gdb.events.breakpoint_created.connect(_bp_created)
+gdb.events.breakpoint_modified.connect(_bp_modified)
+gdb.events.breakpoint_deleted.connect(_bp_deleted)
+
+
 # Map from the breakpoint "kind" (like "function") to a second map, of
 # breakpoints of that type.  The second map uses the breakpoint spec
 # as a key, and the gdb.Breakpoint itself as a value.  This is used to
@@ -34,7 +72,7 @@ breakpoint_map = {}
 
 
 @in_gdb_thread
-def breakpoint_descriptor(bp):
+def _breakpoint_descriptor(bp):
     "Return the Breakpoint object descriptor given a gdb Breakpoint."
     result = {
         "id": bp.number,
@@ -115,7 +153,7 @@ def _set_breakpoints_callback(kind, specs, creator):
 
             # Reaching this spot means success.
             breakpoint_map[kind][keyspec] = bp
-            result.append(breakpoint_descriptor(bp))
+            result.append(_breakpoint_descriptor(bp))
         # Exceptions other than gdb.error are possible here.
         except Exception as e:
             log_stack()

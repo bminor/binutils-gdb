@@ -18,7 +18,6 @@ import gdb
 
 from .server import send_event
 from .startup import in_gdb_thread, Invoker, log
-from .breakpoint import breakpoint_descriptor
 from .modules import is_module, make_module
 
 
@@ -31,28 +30,6 @@ def _on_exit(event):
         "exited",
         {
             "exitCode": code,
-        },
-    )
-
-
-@in_gdb_thread
-def _bp_modified(event):
-    send_event(
-        "breakpoint",
-        {
-            "reason": "changed",
-            "breakpoint": breakpoint_descriptor(event),
-        },
-    )
-
-
-@in_gdb_thread
-def _bp_created(event):
-    send_event(
-        "breakpoint",
-        {
-            "reason": "new",
-            "breakpoint": breakpoint_descriptor(event),
         },
     )
 
@@ -76,17 +53,6 @@ def _new_thread(event):
 @in_gdb_thread
 def _thread_exited(event):
     thread_event(event, "exited")
-
-
-@in_gdb_thread
-def _bp_deleted(event):
-    send_event(
-        "breakpoint",
-        {
-            "reason": "removed",
-            "breakpoint": breakpoint_descriptor(event),
-        },
-    )
 
 
 @in_gdb_thread
@@ -179,9 +145,6 @@ def _on_stop(event):
 
 gdb.events.stop.connect(_on_stop)
 gdb.events.exited.connect(_on_exit)
-gdb.events.breakpoint_created.connect(_bp_created)
-gdb.events.breakpoint_modified.connect(_bp_modified)
-gdb.events.breakpoint_deleted.connect(_bp_deleted)
 gdb.events.new_thread.connect(_new_thread)
 gdb.events.thread_exited.connect(_thread_exited)
 gdb.events.cont.connect(_cont)
