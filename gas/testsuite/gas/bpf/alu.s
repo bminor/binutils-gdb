@@ -48,7 +48,7 @@
         arsh	%r3, -666
         arsh	%r4, 0x7eadbeef
         arsh	%r5, %r6
-        neg     %r2, %r3
+        neg     %r2
 	endle	%r9,16
         endle	%r8,32
         endle	%r7,64

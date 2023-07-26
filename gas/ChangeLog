@@ -1,3 +1,20 @@
+2023-07-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/bpf/alu.s: The register neg instruction gets only
+	one argument.
+	* testsuite/gas/bpf/alu32-be-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/alu32-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/alu32-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/alu-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/alu-be-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/alu-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/alu-be.d: Likewise.
+	* testsuite/gas/bpf/alu.d: Likewise.
+	* testsuite/gas/bpf/alu32-be.d: Likewise.
+	* testsuite/gas/bpf/alu32.d: Likewise.
+	* testsuite/gas/bpf/alu32.s: Likewise.
+	* doc/c-bpf.texi (BPF Instructions): Update accordingly.
+
 2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* doc/c-bpf.texi (BPF Instructions): Document BSWAP* instructions.

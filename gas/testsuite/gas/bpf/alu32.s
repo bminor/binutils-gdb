@@ -48,7 +48,7 @@
         arsh32	%r3, -666
         arsh32	%r4, 0x7eadbeef
         arsh32	%r5, %r6
-        neg32	%r2, %r3
+        neg32	%r2
         movs32  %r1,%r2,8
         movs32  %r1,%r2,16
         movs32  %r1,%r2,32
