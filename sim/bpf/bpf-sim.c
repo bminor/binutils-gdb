@@ -728,7 +728,7 @@ execute (SIM_CPU *cpu, struct bpf_insn *insn)
       break;
     case BPF_INSN_NEGR:
       BPF_TRACE ("BPF_INSN_NEGR\n");
-      bpf_regs[insn->dst] = - (int64_t) bpf_regs[insn->src];
+      bpf_regs[insn->dst] = - (int64_t) bpf_regs[insn->dst];
       break;
     case BPF_INSN_NEGI:
       BPF_TRACE ("BPF_INSN_NEGI\n");
@@ -865,7 +865,7 @@ execute (SIM_CPU *cpu, struct bpf_insn *insn)
       break;
     case BPF_INSN_NEG32R:
       BPF_TRACE ("BPF_INSN_NEG32R\n");
-      bpf_regs[insn->dst] = (uint32_t) (- (int32_t) bpf_regs[insn->src]);
+      bpf_regs[insn->dst] = (uint32_t) (- (int32_t) bpf_regs[insn->dst]);
       break;
     case BPF_INSN_NEG32I:
       BPF_TRACE ("BPF_INSN_NEG32I\n");
