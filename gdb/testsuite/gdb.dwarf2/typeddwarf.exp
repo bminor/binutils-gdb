@@ -31,7 +31,6 @@ if { [is_x86_like_target] } {
 
 set opts {}
 lappend opts nodebug
-lappend opts additional_flags=-nostdlib
 lappend opts nopie
 
 if { [prepare_for_testing "failed to prepare" "${test}" ${sfile} $opts] } {
