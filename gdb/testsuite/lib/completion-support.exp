@@ -111,14 +111,10 @@ proc test_gdb_complete_tab_unique { input_line complete_line_re append_char_re }
 
     set test "tab complete \"$input_line\""
     send_gdb "$input_line\t"
-    set partial_complete [string_to_regexp $input_line]
     set res 1
     gdb_test_multiple "" "$test" {
 	-re "^$complete_line_re$append_char_re$" {
 	    pass "$test"
-	}
-	-re "$partial_complete\[^ \]+ $" {
-	    fail "$test"
 	}
 	timeout {
 	    fail "$test (timeout)"
@@ -190,21 +186,29 @@ proc test_gdb_complete_cmd_none { line } {
 
 # Test that completing LINE with the complete command completes to
 # COMPLETE_LINE_RE.
+# Returns 1 if the test passed, 0 if it failed, -1 if it timed out.
 
 proc test_gdb_complete_cmd_unique { input_line complete_line_re } {
     global gdb_prompt
 
+    set res 0
     set cmd "complete $input_line"
     set cmd_re [string_to_regexp $cmd]
     set test "cmd complete \"$input_line\""
     gdb_test_multiple $cmd $test {
 	-re "^$cmd_re\r\n$complete_line_re\r\n$gdb_prompt $" {
 	    pass $test
+	    set res 1
 	}
 	-re "$gdb_prompt $" {
 	    fail "$test"
 	}
+	timeout {
+	    fail "$test (timeout)"
+	    set res -1
+	}
     }
+    return $res
 }
 
 # Test that completing "CMD_PREFIX + COMPLETION_WORD" with the
@@ -263,12 +267,6 @@ proc test_gdb_complete_none { input_line } {
 
 proc test_gdb_complete_unique_re { input_line complete_line_re {append_char " "} {max_completions 0}} {
     set append_char_re [string_to_regexp $append_char]
-    if { [readline_is_used] } {
-	if { [test_gdb_complete_tab_unique $input_line $complete_line_re \
-		  $append_char_re] == -1 } {
-	    return -1
-	}
-    }
 
     # Trim COMPLETE LINE, for the case we're completing a command with leading
     # whitespace.  Leading command whitespace is discarded by GDB.
@@ -288,8 +286,22 @@ proc test_gdb_complete_unique_re { input_line complete_line_re {append_char " "}
 	    "\r\n$input_line_re $max_completion_reached_msg_re"
     }
 
-    test_gdb_complete_cmd_unique $input_line $expected_output_re
-    return 1
+    # First test completion with the command, then with tab.
+    # It is done in this order because cmd_complete knows when the output
+    # from GDB is over, so it can fail without requiring a timeout, which
+    # speeds up testing if necessary.
+
+    set test_result [test_gdb_complete_cmd_unique $input_line\
+		$expected_output_re]
+    if { $test_result != 1 } {
+	return $test_result
+    }
+
+    if { [readline_is_used] } {
+	set test_result [test_gdb_complete_tab_unique $input_line \
+		$complete_line_re $append_char_re]
+    }
+    return $test_result
 }
 
 # Like TEST_GDB_COMPLETE_UNIQUE_RE, but COMPLETE_LINE is a string, not
