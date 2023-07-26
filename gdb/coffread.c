@@ -1371,8 +1371,9 @@ coff_getfilename (union internal_auxent *aux_entry)
     }
   else
     {
-      strncpy (buffer, aux_entry->x_file.x_n.x_fname, FILNMLEN);
-      buffer[FILNMLEN] = '\0';
+      size_t x_fname_len = sizeof (aux_entry->x_file.x_n.x_fname);
+      strncpy (buffer, aux_entry->x_file.x_n.x_fname, x_fname_len);
+      buffer[x_fname_len] = '\0';
     }
   result = buffer;
 
