@@ -69,6 +69,12 @@ proc test_python_helper {} {
     gdb_breakpoint value_print qualified
     gdb_breakpoint c_print_type qualified
 
+    # With gdb build with -O2 -flto=auto and gcc 7.5.0, we can get the mangled
+    # names due to a problem in the debug info, so we work around this by less
+    # strict matching.
+    set fn_name_value_print "\[^\r\n\]*value_print\[^\r\n\]*"
+    set fn_name_c_print_type "\[^\r\n\]*c_print_type\[^\r\n\]*"
+
     # Disable all breakpoints until after we have loaded the test
     # binary into the inner GDB.
     gdb_test_no_output "disable breakpoints"
@@ -125,7 +131,7 @@ proc test_python_helper {} {
     # breakpoints we created..
     send_inferior "print 1\n"
     gdb_test -prompt $outer_prompt_re "" \
-	"Breakpoint $bkptno_numopt_re, value_print.*" \
+	"Breakpoint $bkptno_numopt_re, $fn_name_value_print.*" \
 	"hit breakpoint in outer gdb"
 
     # Now inspect the type of parameter VAL, this should trigger the
@@ -165,7 +171,7 @@ proc test_python_helper {} {
     # information.
     send_inferior "print global_c.m_val\n"
     gdb_test -prompt $outer_prompt_re "" \
-	"Breakpoint $bkptno_numopt_re, value_print.*" \
+	"Breakpoint $bkptno_numopt_re, $fn_name_value_print.*" \
 	"print integer from DWARF info"
 
     set answer [multi_line \
@@ -193,12 +199,8 @@ proc test_python_helper {} {
     send_inferior "ptype global_c\n"
     set test "hit breakpoint in outer gdb again"
     set in_outer_gdb 0
-    # With gdb build with -O2 -flto=auto and gcc 7.5.0, we get the mangled
-    # name of c_print_type due to a problem in the debug info, so we work
-    # around this by less strict matching.
-    set fn_name "\[^\r\n\]*c_print_type\[^\r\n\]*"
     gdb_test_multiple "" $test  -prompt $outer_prompt_re {
-	-re -wrap "Breakpoint $bkptno_numopt_re, $fn_name.*" {
+	-re -wrap "Breakpoint $bkptno_numopt_re, $fn_name_c_print_type.*" {
 	    pass $gdb_test_name
 	    set in_outer_gdb 1
 	}
