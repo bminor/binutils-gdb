@@ -663,6 +663,56 @@ rocm_solib_bfd_open (const char *pathname)
     error (_("`%s': ELF file HSA OS ABI version is not supported (%d)."),
 	   bfd_get_filename (abfd.get ()), osabiversion);
 
+  /* For GDB to be able to use this solib, the exact AMDGPU processor type
+     must be supported by both BFD and the amd-dbgapi library.  */
+  const unsigned char gfx_arch
+    = elf_elfheader (abfd)->e_flags & EF_AMDGPU_MACH ;
+  const bfd_arch_info_type *bfd_arch_info
+    = bfd_lookup_arch (bfd_arch_amdgcn, gfx_arch);
+
+  amd_dbgapi_architecture_id_t architecture_id;
+  amd_dbgapi_status_t dbgapi_query_arch
+    = amd_dbgapi_get_architecture (gfx_arch, &architecture_id);
+
+  if (dbgapi_query_arch != AMD_DBGAPI_STATUS_SUCCESS
+      || bfd_arch_info ==  nullptr)
+    {
+      if (dbgapi_query_arch != AMD_DBGAPI_STATUS_SUCCESS
+	  && bfd_arch_info ==  nullptr)
+	{
+	  /* Neither of the libraries knows about this arch, so we cannot
+	     provide a human readable name for it.  */
+	  error (_("'%s': AMDGCN architecture %#02x is not supported."),
+		 bfd_get_filename (abfd.get ()), gfx_arch);
+	}
+      else if (dbgapi_query_arch != AMD_DBGAPI_STATUS_SUCCESS)
+	{
+	  gdb_assert (bfd_arch_info != nullptr);
+	  error (_("'%s': AMDGCN architecture %s not supported by "
+		   "amd-dbgapi."),
+		 bfd_get_filename (abfd.get ()),
+		 bfd_arch_info->printable_name);
+	}
+      else
+	{
+	  gdb_assert (dbgapi_query_arch == AMD_DBGAPI_STATUS_SUCCESS);
+	  char *arch_name;
+	  if (amd_dbgapi_architecture_get_info
+	      (architecture_id, AMD_DBGAPI_ARCHITECTURE_INFO_NAME,
+	       sizeof (arch_name), &arch_name) != AMD_DBGAPI_STATUS_SUCCESS)
+	    error ("amd_dbgapi_architecture_get_info call failed for arch "
+		   "%#02x.", gfx_arch);
+	  gdb::unique_xmalloc_ptr<char> arch_name_cleaner (arch_name);
+
+	  error (_("'%s': AMDGCN architecture %s not supported."),
+		 bfd_get_filename (abfd.get ()),
+		 arch_name);
+	}
+    }
+
+  gdb_assert (gdbarch_from_bfd (abfd.get ()) != nullptr);
+  gdb_assert (is_amdgpu_arch (gdbarch_from_bfd (abfd.get ())));
+
   return abfd;
 }
 
