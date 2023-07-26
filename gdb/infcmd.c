@@ -1068,7 +1068,7 @@ jump_command (const char *arg, int from_tty)
     error_no_arg (_("starting address"));
 
   std::vector<symtab_and_line> sals
-    = decode_line_with_last_displayed (arg, DECODE_LINE_FUNFIRSTLINE);
+    = decode_line_with_current_source (arg, DECODE_LINE_FUNFIRSTLINE);
   if (sals.size () != 1)
     {
       /* If multiple sal-objects were found, try dropping those that aren't

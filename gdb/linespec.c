@@ -3220,7 +3220,8 @@ decode_line_with_current_source (const char *string, int flags)
   location_spec_up locspec = string_to_location_spec (&string,
 						      current_language);
   std::vector<symtab_and_line> sals
-    = decode_line_1 (locspec.get (), flags, NULL, cursal.symtab, cursal.line);
+    = decode_line_1 (locspec.get (), flags, cursal.pspace, cursal.symtab,
+		    cursal.line);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
