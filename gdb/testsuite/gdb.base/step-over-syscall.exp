@@ -127,13 +127,13 @@ proc setup { syscall } {
 
     gdb_test "break \*$syscall" "Breakpoint \[0-9\]* at .*"
 
-    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, (.* in |__libc_|)$syscall \\(\\).*" \
+    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, (.* in )?(__libc_)?$syscall \\(\\).*" \
 	"continue to $syscall (1st time)"
     # Hit the breakpoint on $syscall for the first time.  In this time,
     # we will let PLT resolution done, and the number single steps we will
     # do later will be reduced.
 
-    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, (.* in |__libc_|)$syscall \\(\\).*" \
+    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, (.* in )?(__libc_)?$syscall \\(\\).*" \
 	"continue to $syscall (2nd time)"
     # Hit the breakpoint on $syscall for the second time.  In this time,
     # the address of syscall insn and next insn of syscall are recorded.
@@ -264,7 +264,7 @@ proc step_over_syscall { syscall } {
 		return -1
 	    }
 
-	    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, (.* in |__libc_|)$syscall \\(\\).*" \
+	    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, (.* in )?(__libc_)?$syscall \\(\\).*" \
 		"continue to $syscall (3rd time)"
 
 	    # Hit the breakpoint on $syscall for the third time.  In this time, we'll set
@@ -332,7 +332,7 @@ proc break_cond_on_syscall { syscall follow_fork detach_on_fork } {
 	    return -1
 	}
 
-	gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, (.* in |__libc_|)$syscall \\(\\).*" \
+	gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, (.* in )?(__libc_)?$syscall \\(\\).*" \
 	    "continue to $syscall"
 	# Delete breakpoint syscall insns to avoid interference with other syscalls.
 	delete_breakpoints
