@@ -62,6 +62,41 @@ for {set i 0} {$i < 30} {incr i} {
   set test_flag_0 0
   set test_flag_1 0
   set test_flag 0
+
+  # List threads to force GDB to read the registers of all threads.
+  # This exercises a problem scenario originally observed on Windows,
+  # which can potentially affect any other target.  The observed
+  # problem was:
+  #
+  # 1 - Both threads A and B hit their watchpoint.
+  #
+  # 2 - The kernel reports the event for thread A, leaving the event
+  #     for thread B pending.
+  #
+  # 3 - Due to "info threads" (or some other reason), GDB reads the
+  #     registers of thread B (including debug registers).  At this
+  #     point, the read Dr6 (status register) indicates that the
+  #     thread hit a watchpoint, but GDB hasn't seen the corresponding
+  #     event yet.
+  #
+  # 4 - The user issues "continue".  In response, GDB core re-inserts
+  #     the watchpoints, and just prior to resumption, the Windows
+  #     backend writes the debug registers back to thread B.  The
+  #     problem is that the SetThreadContext call clears Dr6, no
+  #     matter what value we write to it, losing the watchpoint hit
+  #     status.  The thread is finally resumed.
+  #
+  # 5 - The kernel reports the pending watchpoint hit event for B
+  #     (EXCEPTION_SINGLE_STEP on Windows), which gets translated to a
+  #     SIGTRAP.
+  #
+  # 6 - GDB consults Dr6 to check if the SIGTRAP is explained by a
+  #     wathpoint hit, but finds Dr6==0.
+  #
+  # 7 - GDB reports a spurious SIGTRAP to the user.
+  #
+  gdb_test -nopass "info threads" ".*"
+
   gdb_test_multiple "continue" "threaded watch loop" {
     -re "(.*Hardware watchpoint.*)$gdb_prompt $" {
 	# At least one hardware watchpoint was hit.  Check if both were.
