@@ -77,6 +77,7 @@
 
 #if defined(TUI)
 # include "tui/tui.h"
+# include "tui/tui-io.h"
 #endif
 
 #ifndef O_NOCTTY
@@ -957,6 +958,11 @@ gdb_readline_wrapper_line (gdb::unique_xmalloc_ptr<char> &&line)
   /* Prevent operate-and-get-next from acting too early.  */
   saved_after_char_processing_hook = after_char_processing_hook;
   after_char_processing_hook = NULL;
+
+#if defined(TUI)
+  if (tui_active)
+    tui_inject_newline_into_command_window ();
+#endif
 
   /* Prevent parts of the prompt from being redisplayed if annotations
      are enabled, and readline's state getting out of sync.  We'll
