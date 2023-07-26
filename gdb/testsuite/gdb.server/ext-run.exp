@@ -30,43 +30,146 @@ if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
 # allow_xml_test must be called while gdb is not running.
 set do_xml_test [allow_xml_test]
 
-save_vars { GDBFLAGS } {
-    # If GDB and GDBserver are both running locally, set the sysroot to avoid
-    # reading files via the remote protocol.
-    if { ![is_remote host] && ![is_remote target] } {
-	set GDBFLAGS "$GDBFLAGS -ex \"set sysroot\""
+# This is used as an override function.
+proc do_nothing {} { return 0 }
+
+# Start an extended-remote gdbserver, connect to it, and then use
+# 'run' to start an inferior.
+#
+# If CLEAR_SYSROOT is true then the 'set sysroot' command is issued,
+# clearing the sysroot, otherwise the sysroot is left unchanged.
+#
+# If SET_REMOTE_EXEC is true then the 'set remote exec-file ...'
+# command is used to point GDB at the executable on the target (after
+# copying the executable over).  Otherwise, we rely on GDB and
+# gdbserver being able to see the same filesystem, remote exec-file is
+# not set, and GDB will just use the path to the executable.
+proc do_test { clear_sysroot set_remote_exec fetch_exec_and_args } {
+
+    # If we don't clear the sysroot, then the sysroot will remain as
+    # 'target:'.  In this case, if we don't 'set remote exec-file'
+    # then GDB will not be able to start a remote inferior.
+    if { !$clear_sysroot && !$set_remote_exec } {
+	return
     }
 
     clean_restart $::testfile
-}
 
-# Make sure we're disconnected, in case we're testing with an
-# extended-remote board, therefore already connected.
-gdb_test "disconnect" ".*"
+    # Disable, or enable, use of the qExecAndArgs packet.
+    gdb_test "set remote fetch-exec-and-args-packet ${fetch_exec_and_args}"
 
-set target_exec [gdbserver_download_current_prog]
-gdbserver_start_extended
+    # Make sure we're disconnected, in case we're testing with an
+    # extended-remote board, therefore already connected.
+    gdb_test "disconnect"
 
-gdb_test_no_output "set remote exec-file $target_exec" "set remote exec-file"
+    if { $clear_sysroot } {
+	gdb_test_no_output "set sysroot" \
+	    "clear sysroot"
+    } else {
+	set sysroot "UNKNOWN"
+	gdb_test_multiple "show sysroot" "" {
+	    -re -wrap "^The current system root is \"(\[^\r\n\]*)\"\\." {
+		set sysroot $expect_out(1,string)
+		pass $gdb_test_name
+	    }
+	}
 
-gdb_breakpoint main
-gdb_test "run" "Breakpoint.* main .*" "continue to main"
-
-if { [istarget *-*-linux*] } {
-    # On Linux, gdbserver can also report the list of processes.
-    # But only if xml support is compiled in.
-    if { $do_xml_test } {
-	# This is done in a way to avoid the timeout that can occur from
-	# applying .* regexp to large output.
-	gdb_test_lines "info os processes" "get process list" \
-	    "^pid +user +command.*\r\n1 +root +\[/a-z\]*(init|systemd|bash)"
+	if { $sysroot eq "" } {
+	    gdb_test_no_output "set sysroot target:"
+	} elseif { $sysroot ne "target:" } {
+	    unsupported "unexpected sysroot value"
+	    return
+	}
     }
-}
 
-gdb_test "kill" "" "kill" "Kill the program being debugged. .y or n. " "y"
+    gdbserver_start_extended
 
-gdb_load $binfile
-gdb_test "monitor help" "The following monitor commands.*" \
+    # Check the 'remote exec-file' setting before we (possibly) set it
+    # ourselves.
+    if { !$fetch_exec_and_args } {
+	set suffix "the default remote executable will be used"
+    } elseif { !$clear_sysroot} {
+	set suffix "the remote has no default executable set"
+    } else {
+	set file_re [string_to_regexp $::binfile]
+	set suffix "using automatic value \"$file_re\""
+    }
+    gdb_test "show remote exec-file" \
+	"The remote exec-file is unset, ${suffix}\\." \
+	"check remote exec-file is unset"
+
+    if { $set_remote_exec } {
+	set target_exec [gdbserver_download_current_prog]
+	gdb_test_no_output "set remote exec-file $target_exec" \
+	    "set remote exec-file"
+
+	# Check GDB reflect the value we just set.
+	set file_re [string_to_regexp $target_exec]
+	gdb_test "show remote exec-file" \
+	    "The remote exec-file is \"$file_re\"\\." \
+	    "check remote exec-file after set"
+    }
+
+    gdb_breakpoint main
+    gdb_test_multiple "run" "continue to main" {
+	-re -wrap "Breakpoint.* main .*" {
+	    pass $gdb_test_name
+	}
+	-re -wrap "Running the default executable on the remote target failed; try \"set remote exec-file\"." {
+
+	    # If 'set remote exec-file' has been used then we should
+	    # not get here.
+	    gdb_assert {!$set_remote_exec} \
+		"confirm remote exec-file is not set"
+
+	    if {!$fetch_exec_and_args} {
+		# We deliberately disabled GDB's ability to know that
+		# the remote doesn't have a default executable set (by
+		# disabling the qDefaultExecAndArgs packet).  We got
+		# the result we expected, but the inferior is not
+		# running, so we're done with this phase of testing.
+		pass $gdb_test_name
+		return
+	    }
+	}
+    }
+
+    if { [istarget *-*-linux*] } {
+	# On Linux, gdbserver can also report the list of processes.
+	# But only if xml support is compiled in.
+	if { $::do_xml_test } {
+	    # This is done in a way to avoid the timeout that can occur from
+	    # applying .* regexp to large output.
+	    gdb_test_lines "info os processes" "get process list" \
+		"^pid +user +command.*\r\n1 +root +\[/a-z\]*(init|systemd|bash)"
+	}
+    }
+
+    gdb_test "kill" "" "kill" "Kill the program being debugged. .y or n. " "y"
+
+    gdb_load $::binfile
+    gdb_test "monitor help" "The following monitor commands.*" \
         "load new file without any gdbserver inferior"
 
-gdb_test_no_output "monitor exit"
+    gdb_test_no_output "monitor exit"
+}
+
+set clear_sysroot_modes { false }
+set set_remote_exec_modes { true }
+if {![is_remote target] && ![is_remote host]} {
+    lappend set_remote_exec_modes false
+    lappend clear_sysroot_modes true
+}
+
+# This override prevents GDB from automatically setting the 'remote
+# exec-file' when using the extended-remote protocol.  If we want the
+# exec-file set, then this test takes care of it.
+with_override extended_gdbserver_load_last_file do_nothing {
+    foreach_with_prefix clear_sysroot $clear_sysroot_modes {
+	foreach_with_prefix set_remote_exec $set_remote_exec_modes {
+	    foreach_with_prefix fetch_exec_and_args { on off } {
+		do_test $clear_sysroot $set_remote_exec $fetch_exec_and_args
+	    }
+	}
+    }
+}

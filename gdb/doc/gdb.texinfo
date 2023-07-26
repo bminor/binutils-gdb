@@ -24666,7 +24666,9 @@ a remote hardware watchpoint.
 Select the file used for @code{run} with @code{target
 extended-remote}.  This should be set to a filename valid on the
 target system.  If it is not set, the target will use a default
-filename (e.g.@: the last program run).
+filename (e.g.@: the last program run, or a filename derived from the
+current executable if @value{GDBN} and the remote can see the same
+file system).
 
 When connecting to a remote system, with @kbd{target extended-remote}
 or @kbd{target remote}, if the remote server supports the

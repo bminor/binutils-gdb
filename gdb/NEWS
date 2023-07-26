@@ -35,6 +35,14 @@
 
 * Support for the binary file format dbx has been removed.
 
+* When connected to an extended-remote target GDB can now
+  automatically set the 'remote exec-file' in some cases.  GDB will
+  auto set the remote exec-file only if the remote wasn't started with
+  an executable, and the user hasn't used 'set remote exec-file' to
+  set an executable.  GDB will auto set the remote exec-file using the
+  current executable if the current executable has a 'target:' prefix,
+  or if the current executable is within the sysroot.
+
 * New targets
 
 GNU/Linux/MicroBlaze (gdbserver) microblazeel-*linux*

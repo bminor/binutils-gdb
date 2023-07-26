@@ -43,9 +43,11 @@
 #include "target-descriptions.h"
 #include "gdb_bfd.h"
 #include "gdbsupport/filestuff.h"
+#include "gdbsupport/pathstuff.h"
 #include "gdbsupport/rsp-low.h"
 #include "disasm.h"
 #include "location.h"
+#include "filenames.h"
 
 #include "gdbsupport/gdb_sys_time.h"
 
@@ -1555,7 +1557,48 @@ public:
 
   void post_attach (int) override;
   bool supports_disable_randomization () override;
+
+  /* Return the file name for the executable that GDB should ask the remote
+     target to use when starting an inferior.
+
+     EXEC_FILE is the string passed from GDB core, which is the file name
+     of the current executable, which can be NULL.
+
+     If the user has done 'set remote exec-file', or the remote told GDB
+     which executable to use via the 'qExecAndArgs' packet, then this is
+     the value returned by this function, EXEC_FILE is ignored.
+
+     But if there is no remote exec-file set, then we might be able to use
+     EXEC_FILE, or a variation of EXEC_FILE, as the 'remote exec-file'
+     setting.  This will depend on the value of EXEC_FILE and/or the
+     current gdb_sysroot setting.  In this case the file name derived from
+     EXEC_FILE is returned.
+
+     If neither approach comes up with a suitable file name to run then
+     the empty string is returned.  */
+
+  std::string get_exec_file_for_create_inferior (const char *exec_file);
 };
+
+/* Get a pointer to the current remote target.  If not connected to a
+   remote target, return NULL.  */
+
+static remote_target *
+get_current_remote_target ()
+{
+  target_ops *proc_target = current_inferior ()->process_target ();
+  return dynamic_cast<remote_target *> (proc_target);
+}
+
+/* Get a pointer to the current extended-remote target.  If not connected
+   to an extended-remote target, return NULL.  */
+
+static extended_remote_target *
+get_current_extended_remote_target ()
+{
+  target_ops *proc_target = current_inferior ()->process_target ();
+  return dynamic_cast<extended_remote_target *> (proc_target);
+}
 
 struct stop_reply : public notif_event
 {
@@ -2053,8 +2096,25 @@ show_remote_exec_file (struct ui_file *file, int from_tty,
     gdb_printf (file, _("The remote exec-file is unset, the default "
 			"remote executable will be used.\n"));
   else if (info.source == remote_exec_source::UNSET_VALUE)
-    gdb_printf (file, _("The remote exec-file is unset, the remote has "
-			"no default executable set.\n"));
+    {
+      std::string remote_exec_filename;
+      extended_remote_target *remote = get_current_extended_remote_target ();
+      if (remote != nullptr)
+	{
+	  const char *exec_file = current_program_space->exec_filename ();
+	  remote_exec_filename
+	    = remote->get_exec_file_for_create_inferior (exec_file);
+	}
+
+      if (!remote_exec_filename.empty ())
+	gdb_printf (file, _("The remote exec-file is unset, using "
+			    "automatic value \"%ps\".\n"),
+		    styled_string (file_name_style.style (),
+				   remote_exec_filename.c_str ()));
+      else
+	gdb_printf (file, _("The remote exec-file is unset, the remote has "
+			    "no default executable set.\n"));
+    }
   else
     gdb_printf (file, _("The remote exec-file is \"%ps\".\n"),
 		styled_string (file_name_style.style (),
@@ -2158,16 +2218,6 @@ remote_arch_state::remote_arch_state (struct gdbarch *gdbarch)
      little.  */
   if (this->sizeof_g_packet > ((this->remote_packet_size - 32) / 2))
     this->remote_packet_size = (this->sizeof_g_packet * 2 + 32);
-}
-
-/* Get a pointer to the current remote target.  If not connected to a
-   remote target, return NULL.  */
-
-static remote_target *
-get_current_remote_target ()
-{
-  target_ops *proc_target = current_inferior ()->process_target ();
-  return dynamic_cast<remote_target *> (proc_target);
 }
 
 /* Return the current allowed size of a remote packet.  This is
@@ -11326,6 +11376,86 @@ directory: %s"),
     }
 }
 
+/* See class declaration above.  */
+
+std::string
+extended_remote_target::get_exec_file_for_create_inferior
+  (const char *exec_file)
+{
+  const struct remote_per_progspace::exec_info &info
+    = get_remote_progspace_info (current_program_space).exec_info;
+
+  /* Historically, when the remote target started a new inferior GDB would
+     ignore the filename from GDB core (EXEC_FILE) and would use whatever
+     value the user had set in 'remote exec-file' (which we have in INFO).
+     Now we try to be smarter.
+
+     Obviously, if 'remote exec-file' has been set, then this should be
+     considered definitive.  But if 'remote exec-file' has not been set,
+     then, in some cases, we might be able to use EXEC_FILE, or a
+     derivative of EXEC_FILE.  Check for INFO.source being anything other
+     than ::UNSET_VALUE to see if we should use the 'remote exec-file'
+     value or not.
+
+     It can also happen that EXEC_FILE is NULL.  This is mostly a bit of an
+     edge case where GDB has attached to a running process, and couldn't
+     figure out the filename for the executable.  If the user then does
+     'run' we could end up with EXEC_FILE being NULL.  If this happens then
+     the only option is to use the 'remote exec-file' setting.
+
+     If INFO.source is ::VALUE_FROM_REMOTE or ::VALUE_FROM_GDB then there
+     is a value in 'remote exec-file', we should not do anything with
+     EXEC_FILE and just retain the 'remote exec-file' value.
+
+     If INFO.source is ::UNSET_VALUE then the user hasn't 'set remote
+     exec-file' value, and the remote target has specifically told us (via
+     the qExecAndArgs packet) that it has no default executable set.  In
+     this case, if GDB and the remote can see the same filesystem, we can
+     potentially use EXEC_FILE.
+
+     If INFO.source is ::DEFAULT_VALUE then the user hasn't set a 'remote
+     exec-file' value, but the remote target was unable to tell us (maybe
+     the qExecAndArgs packet isn't supported) if it has a default
+     executable set.  We might be tempted to treat this like the
+     ::UNSET_VALUE case, however, this could potentially break backward
+     compatibility in the case where the remote does have a default
+     executable set.  To maintain compatibility, we send over the 'remote
+     exec-file' setting, whatever it might be.  */
+  if (exec_file == nullptr
+      || info.source != remote_exec_source::UNSET_VALUE)
+    return info.filename;
+
+  /* If the user has set the main exec file to a file on the target then we
+     can just strip the target prefix and use that as the remote exec file
+     name.  */
+  if (is_target_filename (exec_file))
+    return exec_file + strlen (TARGET_SYSROOT_PREFIX);
+
+  /* If the target filesystem is local then the remote can see everything
+     GDB can see.  In this case the remote should be able to access
+     EXEC_FILE directly.  */
+  if (target_filesystem_is_local ())
+    return exec_file;
+
+  /* If the sysroot is not a target path, then GDB can see a copy of the
+     remote target's filesystem, or if sysroot is empty, then the remote
+     and GDB could be sharing a filesystem.
+
+     In either case, by removing the sysroot from the front of EXEC_FILE,
+     we can build a filename that the remote can see.  */
+  if (!is_target_filename (gdb_sysroot))
+    {
+      const char *in_sysroot_path = child_path (gdb_sysroot.c_str (),
+						exec_file);
+      if (in_sysroot_path != nullptr)
+	return path_join ("/", in_sysroot_path);
+    }
+
+  /* It appears that the remote is unable to make use of the main
+     executable file, we fall back to using 'remote exec-file'.  */
+  return info.filename;
+}
+
 /* In the extended protocol we want to be able to do things like
    "run" and have them basically work as expected.  So we need
    a special create_inferior function.  We support changing the
@@ -11340,7 +11470,9 @@ extended_remote_target::create_inferior (const char *exec_file,
   int run_worked;
   char *stop_reply;
   struct remote_state *rs = get_remote_state ();
-  const std::string &remote_exec_file = get_remote_exec_file ();
+
+  std::string remote_exec_file
+    = get_exec_file_for_create_inferior (exec_file);
 
   /* If running asynchronously, register the target file descriptor
      with the event loop.  */
