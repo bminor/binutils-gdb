@@ -48,6 +48,12 @@ imply zcd
 imply zcf
 imply zcmp
 
+imply shcounterenw
+imply shgatpa
+imply shtvala
+imply shvsatpa
+imply shvstvala
+imply shvstvecd
 imply h
 imply zhinx
 imply zhinxmin
@@ -86,6 +92,13 @@ imply smepmp
 imply ssaia
 imply sscsrind
 imply sscofpmf
+imply sscounterenw
 imply ssstateen
 imply sstc
+imply sstvala
+imply sstvecd
+imply ssu64xl
+
+imply svade
 imply svadu
+imply svbare

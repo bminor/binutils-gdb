@@ -10,6 +10,11 @@ All available -march extensions for RISC-V:
 	b                                       1.0
 	v                                       1.0
 	h                                       1.0
+	zic64b                                  1.0
+	ziccamoa                                1.0
+	ziccif                                  1.0
+	zicclsm                                 1.0
+	ziccrse                                 1.0
 	zicbom                                  1.0
 	zicbop                                  1.0
 	zicboz                                  1.0
@@ -21,6 +26,8 @@ All available -march extensions for RISC-V:
 	zihintpause                             2.0
 	zihpm                                   2.0
 	zmmul                                   1.0
+	za64rs                                  1.0
+	za128rs                                 1.0
 	zaamo                                   1.0
 	zabha                                   1.0
 	zacas                                   1.0
@@ -95,17 +102,30 @@ All available -march extensions for RISC-V:
 	zcf                                     1.0
 	zcd                                     1.0
 	zcmp                                    1.0
+	shcounterenw                            1.0
+	shgatpa                                 1.0
+	shtvala                                 1.0
+	shvsatpa                                1.0
+	shvstvala                               1.0
+	shvstvecd                               1.0
 	smaia                                   1.0
 	smcsrind                                1.0
 	smcntrpmf                               1.0
 	smepmp                                  1.0
 	smstateen                               1.0
 	ssaia                                   1.0
+	ssccptr                                 1.0
 	sscsrind                                1.0
 	sscofpmf                                1.0
+	sscounterenw                            1.0
 	ssstateen                               1.0
 	sstc                                    1.0
+	sstvala                                 1.0
+	sstvecd                                 1.0
+	ssu64xl                                 1.0
+	svade                                   1.0
 	svadu                                   1.0
+	svbare                                  1.0
 	svinval                                 1.0
 	svnapot                                 1.0
 	svpbmt                                  1.0
