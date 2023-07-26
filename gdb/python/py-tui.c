@@ -339,7 +339,8 @@ intrusive_list<gdbpy_tui_window_maker>
 gdbpy_tui_window_maker::~gdbpy_tui_window_maker ()
 {
   /* Remove this gdbpy_tui_window_maker from the global list.  */
-  m_window_maker_list.erase (m_window_maker_list.iterator_to (*this));
+  if (is_linked ())
+    m_window_maker_list.erase (m_window_maker_list.iterator_to (*this));
 
   if (m_constr != nullptr)
     {
