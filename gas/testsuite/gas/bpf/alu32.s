@@ -52,3 +52,4 @@
         movs32  %r1,%r2,8
         movs32  %r1,%r2,16
         movs32  %r1,%r2,32
+        neg32   %r1, 0xf00

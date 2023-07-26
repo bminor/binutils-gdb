@@ -61,3 +61,4 @@
         bswap   %r1, 16
         bswap   %r2, 32
         bswap   %r3, 64
+        neg     %r1, 0xf00

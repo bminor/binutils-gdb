@@ -60,3 +60,4 @@ Disassembly of section .text:
  188:	bc 21 08 00 00 00 00 00 	movs32 %r1,%r2,8
  190:	bc 21 10 00 00 00 00 00 	movs32 %r1,%r2,16
  198:	bc 21 20 00 00 00 00 00 	movs32 %r1,%r2,32
+ 1a0:	84 01 00 00 00 0f 00 00 	neg32 %r1,0xf00

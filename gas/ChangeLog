@@ -1,5 +1,19 @@
 2023-07-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* testsuite/gas/bpf/alu.s: Add test for NEGI and NEG32I.
+	* testsuite/gas/bpf/alu32.s: Likewise.
+	* testsuite/gas/bpf/alu-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/alu32-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/alu.d: Add expected results.
+	* testsuite/gas/bpf/alu-be.d: Likewise.
+	* testsuite/gas/bpf/alu-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/alu-be-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/alu32.d: Likewise.
+	* testsuite/gas/bpf/alu32-be.d: Likewise.
+	* testsuite/gas/bpf/alu32-be-pseudoc.d: Likewise.
+
+2023-07-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* testsuite/gas/bpf/alu.s: The register neg instruction gets only
 	one argument.
 	* testsuite/gas/bpf/alu32-be-pseudoc.d: Likewise.

@@ -60,3 +60,4 @@ Disassembly of section .text:
  188:	bc 21 08 00 00 00 00 00 	w1 = \(s8\) w2
  190:	bc 21 10 00 00 00 00 00 	w1 = \(s16\) w2
  198:	bc 21 20 00 00 00 00 00 	w1 = \(s32\) w2
+ 1a0:	b4 01 00 00 00 f1 ff ff 	w1=0xfffff100
