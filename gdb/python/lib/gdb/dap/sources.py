@@ -82,5 +82,27 @@ def _sources():
 
 @request("loadedSources")
 @capability("supportsLoadedSourcesRequest")
-def sources(**extra):
+def loaded_sources(**extra):
     return send_gdb_with_response(_sources)
+
+
+# This helper is needed because we must only access the globals here
+# from the gdb thread.
+@in_gdb_thread
+def _get_source(source):
+    filename = decode_source(source)
+    with open(filename) as f:
+        content = f.read()
+    return {
+        "content": content,
+    }
+
+
+@request("source")
+def source(*, source=None, sourceReference: int, **extra):
+    # The 'sourceReference' parameter is required by the spec, but is
+    # for backward compatibility, which I take to mean that the
+    # 'source' is preferred.
+    if source is None:
+        source = {"sourceReference": sourceReference}
+    return send_gdb_with_response(lambda: _get_source(source))
