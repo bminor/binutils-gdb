@@ -994,9 +994,17 @@ gdbpy_parse_and_eval (PyObject *self, PyObject *args, PyObject *kw)
   PyObject *result = nullptr;
   try
     {
-      gdbpy_allow_threads allow_threads;
       scoped_value_mark free_values;
-      struct value *val = parse_and_eval (expr_str, flags);
+      struct value *val;
+      {
+	/* Allow other Python threads to run while we're evaluating
+	   the expression.  This is important because the expression
+	   could involve inferior calls or otherwise be a lengthy
+	   calculation.  We take care here to re-acquire the GIL here
+	   before continuing with Python work.  */
+	gdbpy_allow_threads allow_threads;
+	val = parse_and_eval (expr_str, flags);
+      }
       result = value_to_value_object (val);
     }
   catch (const gdb_exception &except)
