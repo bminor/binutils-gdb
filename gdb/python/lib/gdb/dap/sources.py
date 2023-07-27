@@ -55,6 +55,22 @@ def make_source(fullname, filename):
 
 
 @in_gdb_thread
+def decode_source(source):
+    """Decode a Source object.
+
+    Finds and returns the filename of a given Source object."""
+    if "path" in source:
+        return source["path"]
+    if "sourceReference" not in source:
+        raise Exception("either 'path' or 'sourceReference' must appear in Source")
+    ref = source["sourceReference"]
+    global _id_map
+    if ref not in _id_map:
+        raise Exception("no sourceReference " + str(ref))
+    return _id_map[ref]["path"]
+
+
+@in_gdb_thread
 def _sources():
     result = []
     for elt in gdb.execute_mi("-file-list-exec-source-files")["files"]:
