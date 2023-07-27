@@ -18,7 +18,7 @@ import gdb
 # This is deprecated in 3.9, but required in older versions.
 from typing import Optional
 
-from .server import request
+from .server import capability, request
 from .startup import in_gdb_thread, send_gdb_with_response
 
 
@@ -32,7 +32,15 @@ def _find_lines(filename, start_line, end_line):
     return {"breakpoints": [{"line": x} for x in sorted(lines)]}
 
 
+# Note that the spec says that the arguments to this are optional.
+# However, calling this without arguments is nonsensical.  This is
+# discussed in:
+#   https://github.com/microsoft/debug-adapter-protocol/issues/266
+# This points out that fixing this would be an incompatibility but
+# goes on to propose "if arguments property is missing, debug adapters
+# should return an error".
 @request("breakpointLocations")
+@capability("supportsBreakpointLocationsRequest")
 def breakpoint_locations(*, source, line: int, endLine: Optional[int] = None, **extra):
     if endLine is None:
         endLine = line
