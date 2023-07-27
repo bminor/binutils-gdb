@@ -40,6 +40,9 @@ if {[istarget bpf*-*-*]} {
     run_dump_test indcall-1
     run_dump_test indcall-1-pseudoc
 
+    run_dump_test jump-relax-ja
+    run_dump_test jump-relax-jump
+
     # Big-endian BPF tests
     run_dump_test call-be
     run_dump_test exit-be
@@ -59,4 +62,7 @@ if {[istarget bpf*-*-*]} {
     run_dump_test atomic-v1-be
     run_dump_test atomic-be
     run_dump_test atomic-be-pseudoc
+
+    run_dump_test jump-relax-ja-be
+    run_dump_test jump-relax-jump-be
 }

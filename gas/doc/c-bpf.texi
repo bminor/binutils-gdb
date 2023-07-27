@@ -53,6 +53,10 @@ when assembling.  The BPF ISA versions supported are @option{v1} @option{v2}, @o
 The value @option{xbpf} can be specified to recognize extra
 instructions that are used by GCC for testing purposes.  But beware
 this is not valid BPF.
+
+@cindex @option{-mno-relax} command-line options, BPF
+@item -mno-relax
+This option tells the assembler to not relax instructions.
 @end table
 
 Note that if no endianness option is specified in the command line,

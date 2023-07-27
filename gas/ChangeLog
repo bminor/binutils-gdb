@@ -1,3 +1,39 @@
+2023-07-28  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	PR gas/30690
+	* config/tc-bpf.c (struct bpf_insn): Add fields is_relaxable and
+	relaxed_exp.
+	(enum options): Add OPTION_NO_RELAX.
+	(md_longopts): Likewise for -mno-relax.
+	(do_relax): New global.
+	(md_parse_option): Handle OPTION_NO_RELAX.
+	(RELAX_BRANCH_ENCODE): Define.
+	(RELAX_BRANCH_P): Likewise.
+	(RELAX_BRANCH_LENGTH): Likewise.
+	(RELAX_BRANCH_CONST): Likewise.
+	(RELAX_BRANCH_UNCOND): Likewise.
+	(relaxed_branch_length): New function.
+	(md_estimate_size_before_relax): Likewise.
+	(read_insn_word): Likewise.
+	(encode_int16): Likewise.
+	(encode_int32): Likewise.
+	(write_insn_bytes): Likewise.
+	(md_convert_frag): Likewise.
+	(encode_insn): Likewise.
+	(install_insn_fixups): Likewise.
+	(add_fixed_insn): Likewise.
+	(add_relaxed_insn): Likewise.
+	(md_assemble): Move instruction encoding logic to the above
+	new functions.
+	* testsuite/gas/bpf/jump-relax-ja.d: New test.
+	* testsuite/gas/bpf/jump-relax-ja-be.d: Likewise.
+	* testsuite/gas/bpf/jump-relax-ja.s: And corresponding source.
+	* testsuite/gas/bpf/jump-relax-jump.d: New test.
+	* testsuite/gas/bpf/jump-relax-jump-be.d: Likewise.
+	* testsuite/gas/bpf/jump-relax-jump.s: And corresponding source.
+	* testsuite/gas/bpf/bpf.exp: Run new tests.
+	* doc/c-bpf.texi (BPF Options): Document -mno-relax.
+
 2023-07-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* testsuite/gas/bpf/alu.s: Add test for NEGI and NEG32I.
