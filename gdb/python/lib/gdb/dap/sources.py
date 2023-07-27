@@ -19,16 +19,46 @@ from .server import request, capability
 from .startup import send_gdb_with_response, in_gdb_thread
 
 
+# The next available source reference ID.  Must be greater than 0.
+_next_source = 1
+
+# Map from full paths to Source dictionaries.
+_source_map = {}
+
+# Map from a source reference ID back to the same Source that is
+# stored in _source_map.
+_id_map = {}
+
+
+@in_gdb_thread
+def make_source(fullname, filename):
+    """Return the Source for a given file name.
+
+    FULLNAME is the full name.  This is used as the key.
+    FILENAME is the base name.
+    """
+    global _source_map
+    if fullname in _source_map:
+        result = _source_map[fullname]
+    else:
+        global _next_source
+        result = {
+            "name": filename,
+            "path": fullname,
+            "sourceReference": _next_source,
+        }
+        _source_map[fullname] = result
+        global _id_map
+        _id_map[_next_source] = result
+        _next_source += 1
+    return result
+
+
 @in_gdb_thread
 def _sources():
     result = []
     for elt in gdb.execute_mi("-file-list-exec-source-files")["files"]:
-        result.append(
-            {
-                "name": elt["file"],
-                "path": elt["fullname"],
-            }
-        )
+        result.append(make_source(elt["fullname"], elt["file"]))
     return {
         "sources": result,
     }

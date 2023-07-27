@@ -23,6 +23,7 @@ from contextlib import contextmanager
 from typing import Optional, Sequence
 
 from .server import request, capability, send_event
+from .sources import make_source
 from .startup import send_gdb_with_response, in_gdb_thread, log_stack
 from .typecheck import type_check
 
@@ -105,15 +106,10 @@ def _breakpoint_descriptor(bp):
         # multiple locations.  See
         # https://github.com/microsoft/debug-adapter-protocol/issues/13
         loc = bp.locations[0]
-        (basename, line) = loc.source
+        (filename, line) = loc.source
         result.update(
             {
-                "source": {
-                    "name": os.path.basename(basename),
-                    # We probably don't need this but it doesn't hurt to
-                    # be explicit.
-                    "sourceReference": 0,
-                },
+                "source": make_source(filename, os.path.basename(filename)),
                 "line": line,
                 "instructionReference": hex(loc.address),
             }

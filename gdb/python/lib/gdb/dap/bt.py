@@ -20,6 +20,7 @@ from gdb.frames import frame_iterator
 from .frames import frame_id
 from .modules import module_id
 from .server import request, capability
+from .sources import make_source
 from .startup import send_gdb_with_response, in_gdb_thread
 from .state import set_thread
 from .varref import apply_format
@@ -61,13 +62,7 @@ def _backtrace(thread_id, levels, startFrame, value_format):
                 newframe["line"] = line
             filename = current_frame.filename()
             if filename is not None:
-                newframe["source"] = {
-                    "name": os.path.basename(filename),
-                    "path": filename,
-                    # We probably don't need this but it doesn't hurt
-                    # to be explicit.
-                    "sourceReference": 0,
-                }
+                newframe["source"] = make_source(filename, os.path.basename(filename))
             frames.append(newframe)
         # Note that we do not calculate totalFrames here.  Its absence
         # tells the client that it may simply ask for frames until a
