@@ -52,6 +52,7 @@ with open("gdbarch-gen.h", "w") as f:
     print(copyright, file=f)
     print(file=f)
     print(file=f)
+    print(file=f)
     print("/* The following are pre-initialized by GDBARCH.  */", file=f)
 
     # Do Info components first.
@@ -120,6 +121,7 @@ with open("gdbarch-gen.h", "w") as f:
 
 with open("gdbarch.c", "w") as f:
     print(copyright, file=f)
+    print(file=f)
     print(file=f)
     print("/* Maintain the struct gdbarch object.  */", file=f)
     print(file=f)

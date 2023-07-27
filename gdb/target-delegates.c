@@ -4535,4 +4535,3 @@ debug_target::store_memtags (CORE_ADDR arg0, size_t arg1, const gdb::byte_vector
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }
-

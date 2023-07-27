@@ -49,5 +49,4 @@ def copyright(tool: str, description: str):
 
 /* To regenerate this file, run:
    ./{tool}
-*/
-"""
+*/"""

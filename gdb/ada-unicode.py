@@ -91,5 +91,6 @@ with open("ada-casefold.h", "w") as f:
         gdbcopyright.copyright("ada-unicode.py", "UTF-32 case-folding for GDB"),
         file=f,
     )
+    print("", file=f)
     for r in all_ranges:
         print(f"   {{{r[0]}, {r[1]}, {r[2]}, {r[3]}}},", file=f)

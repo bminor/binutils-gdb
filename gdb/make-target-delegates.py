@@ -199,6 +199,7 @@ def write_declaration(f: TextIO, name: str, return_type: str, argtypes: List[str
 
 # Write out a delegation function.
 def write_delegator(f: TextIO, name: str, return_type: str, argtypes: List[str]):
+    print("", file=f)
     names = write_function_header(
         f, False, "target_ops::" + name, return_type, argtypes
     )
@@ -208,7 +209,7 @@ def write_delegator(f: TextIO, name: str, return_type: str, argtypes: List[str])
     print("this->beneath ()->" + name + " (", file=f, end="")
     print(", ".join(names), file=f, end="")
     print(");", file=f)
-    print("}\n", file=f)
+    print("}", file=f)
 
 
 # Write out a default function.
@@ -220,6 +221,7 @@ def write_tdefault(
     return_type: str,
     argtypes: List[str],
 ):
+    print("", file=f)
     name = "dummy_target::" + name
     names = write_function_header(f, False, name, return_type, argtypes)
     if style == "FUNC":
@@ -238,7 +240,7 @@ def write_tdefault(
         pass
     else:
         raise RuntimeError("unrecognized style: " + style)
-    print("}\n", file=f)
+    print("}", file=f)
 
 
 def munge_type(typename: str):
@@ -263,6 +265,7 @@ def munge_type(typename: str):
 def write_debugmethod(
     f: TextIO, content: str, name: str, return_type: str, argtypes: List[str]
 ):
+    print("", file=f)
     debugname = "debug_target::" + name
     names = write_function_header(f, False, debugname, return_type, argtypes)
     if return_type != "void":
@@ -305,7 +308,7 @@ def write_debugmethod(
     if return_type != "void":
         print("  return result;", file=f)
 
-    print("}\n", file=f)
+    print("}", file=f)
 
 
 def print_class(
@@ -314,6 +317,7 @@ def print_class(
     delegators: List[str],
     entries: Dict[str, Entry],
 ):
+    print("", file=f)
     print("struct " + class_name + " : public target_ops", file=f)
     print("{", file=f)
     print("  const target_info &info () const override;", file=f)
@@ -326,7 +330,7 @@ def print_class(
         entry = entries[name]
         write_declaration(f, name, entry.return_type, entry.argtypes)
 
-    print("};\n", file=f)
+    print("};", file=f)
 
 
 delegators: List[str] = []
