@@ -233,7 +233,8 @@ proc _dap_initialize {name} {
     return [dap_check_request_and_response $name initialize \
 		{o clientID [s "gdb testsuite"] \
 		     supportsVariableType [l true] \
-		     supportsVariablePaging [l true]}]
+		     supportsVariablePaging [l true] \
+		     supportsMemoryReferences [l true]}]
 }
 
 # Start gdb, send a DAP initialize request, and then a launch request

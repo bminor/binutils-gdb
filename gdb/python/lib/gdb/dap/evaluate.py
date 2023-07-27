@@ -55,13 +55,6 @@ class _SetResult(VariableReference):
     def __init__(self, value):
         super().__init__(None, value, "value")
 
-    def to_object(self):
-        result = super().to_object()
-        # This is not specified in the setExpression result.
-        if "memoryReference" in result:
-            del result["memoryReference"]
-        return result
-
 
 # Helper function to perform an assignment.
 @in_gdb_thread

@@ -162,10 +162,13 @@ class VariableReference(BaseReference):
                 result["indexedVariables"] = num_children
             else:
                 result["namedVariables"] = num_children
-        if self.value.type.code == gdb.TYPE_CODE_PTR:
-            result["memoryReference"] = hex(int(self.value))
-        elif self.value.address is not None:
-            result["memoryReference"] = hex(int(self.value.address))
+        if client_bool_capability("supportsMemoryReferences"):
+            # https://github.com/microsoft/debug-adapter-protocol/issues/414
+            # changed DAP to allow memory references for any of the
+            # variable response requests, and to lift the restriction
+            # to pointer-to-function from Variable.
+            if self.value.type.strip_typedefs().code == gdb.TYPE_CODE_PTR:
+                result["memoryReference"] = hex(int(self.value))
         if client_bool_capability("supportsVariableType"):
             result["type"] = str(self.value.type)
         return result
