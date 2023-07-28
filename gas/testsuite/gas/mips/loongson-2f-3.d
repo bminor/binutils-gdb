@@ -6,7 +6,7 @@
 
 Disassembly of section .text:
 
-00000000 <.text>:
+0+000000 <.text>:
    0:	3c01cfff 	lui	\$1,0xcfff
    4:	3421ffff 	ori	\$1,\$1,0xffff
    8:	03c1f024 	and	\$30,\$30,\$1

@@ -8,7 +8,7 @@
 
 RELOCATION RECORDS FOR \[.eh_frame_entry\]:
 OFFSET +TYPE +VALUE
-00000000 R_MIPS_PC32       .text.*
+0+000000 R_MIPS_PC32       .text.*
 
 
 Contents of section .text:

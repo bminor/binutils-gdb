@@ -7,18 +7,18 @@
 
 RELOCATION RECORDS FOR \[.data.DW.ref.__gnu_compact_pr2\]:
 OFFSET +TYPE +VALUE
-00000000 R_MIPS_32         __gnu_compact_pr2
+0+000000 R_MIPS_32         __gnu_compact_pr2
 
 
 RELOCATION RECORDS FOR \[.gnu_extab\]:
 OFFSET +TYPE +VALUE
-00000001 R_MIPS_PC32       DW.ref.__gnu_compact_pr2
+0+000001 R_MIPS_PC32       DW.ref.__gnu_compact_pr2
 
 
 RELOCATION RECORDS FOR \[.eh_frame_entry\]:
 OFFSET +TYPE +VALUE
-00000000 R_MIPS_PC32       .text.*
-00000004 R_MIPS_PC32       .gnu_extab
+0+000000 R_MIPS_PC32       .text.*
+0+000004 R_MIPS_PC32       .gnu_extab
 
 
 Contents of section .group:
