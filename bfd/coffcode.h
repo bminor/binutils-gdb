@@ -3176,8 +3176,9 @@ coff_compute_section_file_positions (bfd * abfd)
 	     created and not just improve performances with gdb.
 	  */
 
-	  if ((!strcmp (current->name, _TEXT)
-	       || !strcmp (current->name, _DATA))
+	  if ((current->flags & SEC_LOAD) != 0
+	      && (!strcmp (current->name, _TEXT)
+		  || !strcmp (current->name, _DATA))
 	      && (previous == NULL || strcmp(previous->name, _TDATA)))
 	    {
 	      bfd_vma align = 4096;
@@ -3190,7 +3191,8 @@ coff_compute_section_file_positions (bfd * abfd)
 		sofar += align + vma_off - sofar_off;
 	    }
 #endif
-	  if (previous != NULL)
+	  if (previous != NULL
+	      && (previous->flags & SEC_LOAD) != 0)
 	    previous->size += sofar - old_sofar;
 	}
 

@@ -4161,13 +4161,25 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
       flags = check_new_section_flags (flags, obfd, bfd_section_name (isection));
     }
-  else if (strip_symbols == STRIP_NONDEBUG
-	   && (flags & (SEC_ALLOC | SEC_GROUP)) != 0
-	   && !is_nondebug_keep_contents_section (ibfd, isection))
+  else
     {
-      flagword clr = SEC_HAS_CONTENTS | SEC_LOAD | SEC_GROUP;
+      flagword clr = 0;
 
-      if (bfd_get_flavour (obfd) == bfd_target_elf_flavour)
+      /* For --extract-symbols where section sizes are zeroed, clear
+	 SEC_LOAD to indicate to coff_compute_section_file_positions that
+	 section sizes should not be adjusted for ALIGN_SECTIONS_IN_FILE.
+	 We don't want to clear SEC_HAS_CONTENTS as that will result
+	 in symbols being classified as 'B' by nm.  */
+      if (extract_symbol)
+	clr = SEC_LOAD;
+      /* If only keeping debug sections then we'll be keeping section
+	 sizes in headers but making the sections have no contents.  */
+      else if (strip_symbols == STRIP_NONDEBUG
+	       && (flags & (SEC_ALLOC | SEC_GROUP)) != 0
+	       && !is_nondebug_keep_contents_section (ibfd, isection))
+	clr = SEC_HAS_CONTENTS | SEC_LOAD | SEC_GROUP;
+
+      if (clr && bfd_get_flavour (obfd) == bfd_target_elf_flavour)
 	{
 	  /* PR 29532: Copy group sections intact as otherwise we end up with
 	     empty groups.  This prevents separate debug info files from
@@ -4175,7 +4187,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	     originally contained groups.  */
 	  if (flags & SEC_GROUP)
 	    clr = SEC_LOAD;
-	  else
+	  if ((clr & SEC_HAS_CONTENTS) != 0)
 	    make_nobits = true;
 
 	  /* Twiddle the input section flags so that it seems to
