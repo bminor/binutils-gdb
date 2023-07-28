@@ -6437,6 +6437,10 @@ proc default_gdb_init { test_file_name } {
     # tests.
     setenv TERM "dumb"
 
+    # This setting helps detect bugs in the Python code and doesn't
+    # seem to have a significant downside for the tests.
+    setenv PYTHONMALLOC malloc_debug
+
     # If DEBUGINFOD_URLS is set, gdb will try to download sources and
     # debug info for f.i. system libraries.  Prevent this.
     if { [is_remote host] } {
