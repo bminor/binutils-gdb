@@ -39,9 +39,9 @@ static std::vector<std::function<void ()>> runnables;
 
 static std::mutex runnable_mutex;
 
-/* The main thread.  */
+/* The main thread's thread id.  */
 
-static std::thread::id main_thread;
+static std::thread::id main_thread_id;
 
 #endif
 
@@ -100,7 +100,7 @@ bool
 is_main_thread ()
 {
 #if CXX_STD_THREAD
-  return std::this_thread::get_id () == main_thread;
+  return std::this_thread::get_id () == main_thread_id;
 #else
   return true;
 #endif
@@ -111,7 +111,7 @@ void
 _initialize_run_on_main_thread ()
 {
 #if CXX_STD_THREAD
-  main_thread = std::this_thread::get_id ();
+  main_thread_id = std::this_thread::get_id ();
 #endif
   runnable_event = make_serial_event ();
   add_file_handler (serial_event_fd (runnable_event), run_events, nullptr,
