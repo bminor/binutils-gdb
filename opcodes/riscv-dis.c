@@ -939,7 +939,7 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
     }
 
   /* We can not find the suitable mapping symbol above.  Therefore, we
-     look forwards and try to find it again, but don't go pass the start
+     look forwards and try to find it again, but don't go past the start
      of the section.  Otherwise a data section without mapping symbols
      can pick up a text mapping symbol of a preceeding section.  */
   if (!found)
