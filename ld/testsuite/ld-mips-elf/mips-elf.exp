@@ -499,10 +499,10 @@ if { $irix } {
     run_dump_test_n64 "elf-rel-xgot-n64" {{as -EB} {ld -EB}}
 }
 
-run_dump_test_n32 "relax-jalr-n32" {{as -EB} {ld -EB}}
-run_dump_test_n32 "relax-jalr-n32-shared" {{as -EB} {ld -EB}}
-run_dump_test_n64 "relax-jalr-n64" {{as -EB} {ld -EB}}
-run_dump_test_n64 "relax-jalr-n64-shared" {{as -EB} {ld -EB}}
+run_dump_test_n32 "relax-jalr-n32"
+run_dump_test_n32 "relax-jalr-n32-shared"
+run_dump_test_n64 "relax-jalr-n64"
+run_dump_test_n64 "relax-jalr-n64-shared"
 
 if { $linux_gnu } {
     run_dump_test_o32 "rel32-o32" {{as -EB} {ld -EB}}
