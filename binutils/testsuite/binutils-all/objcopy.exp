@@ -1269,7 +1269,8 @@ if [is_elf_format] {
     run_dump_test "strip-9"
     run_dump_test "strip-12"
 
-    if { [istarget "mips64*-*-openbsd*"] } {
+    if { [istarget "mips64*-*-openbsd*"] \
+	 || [istarget "mips64*-*-*-gnuabi64"] } {
 	set reloc_format mips64
     }
     # A relocation type not supported by any target

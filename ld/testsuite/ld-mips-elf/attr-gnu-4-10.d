@@ -3,7 +3,7 @@
 #as: -mpdr
 #ld: -r
 #readelf: -hA
-#notarget: mips64*-*-openbsd*
+#notarget: mips64*-*-openbsd* mips64*-*-*-gnuabi64
 
 ELF Header:
   Magic:   .*

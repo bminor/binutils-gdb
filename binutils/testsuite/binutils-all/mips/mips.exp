@@ -125,13 +125,23 @@ if {[istarget *-*-openbsd*] } {
     if [istarget *el-*-*] {
 	set abi_asflags(o32) -32
 	set abi_ldflags(o32) -melf32ltsmip
-	set abi_asflags(n64) "-march=from-abi -64"
-	set abi_ldflags(n64) -melf64ltsmip
+	if [istarget *-*-*-gnuabi64] {
+	    set abi_asflags(n32) "-march=from-abi -n32"
+	    set abi_ldflags(n32) -melf32ltsmipn32
+	} else {
+	    set abi_asflags(n64) "-march=from-abi -64"
+	    set abi_ldflags(n64) -melf64ltsmip
+	}
     } else {
 	set abi_asflags(o32) -32
 	set abi_ldflags(o32) -melf32btsmip
-	set abi_asflags(n64) "-march=from-abi -64"
-	set abi_ldflags(n64) -melf64btsmip
+	if [istarget *-*-*-gnuabi64] {
+	    set abi_asflags(n32) "-march=from-abi -n32"
+	    set abi_ldflags(n32) -melf32btsmipn32
+	} else {
+	    set abi_asflags(n64) "-march=from-abi -64"
+	    set abi_ldflags(n64) -melf64btsmip
+	}
     }
     set irixemul 0
 } elseif {[istarget *-*-linux*] } {
