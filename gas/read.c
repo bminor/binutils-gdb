@@ -1751,7 +1751,7 @@ s_comm_internal (int param,
       ignore_rest_of_line ();
       goto out;
     }
-  else if (temp != size || !exp.X_unsigned)
+  else if (temp != size || (!exp.X_unsigned && exp.X_add_number < 0))
     {
       as_warn (_("size (%ld) out of range, ignored"), (long) temp);
       ignore_rest_of_line ();
@@ -2541,7 +2541,7 @@ parse_align (int align_bytes)
   if (exp.X_op == O_absent)
     goto no_align;
 
-  if (!exp.X_unsigned)
+  if (!exp.X_unsigned && exp.X_add_number < 0)
     {
       as_warn (_("alignment negative; 0 assumed"));
       align = 0;

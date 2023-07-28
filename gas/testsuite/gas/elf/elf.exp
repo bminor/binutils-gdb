@@ -345,8 +345,16 @@ if { [is_elf_format] } then {
 
     # hpux has a non-standard common directive.
     if { ![istarget "*-*-hpux*"] } then {
-	run_dump_test "common3a"
-	run_dump_test "common3b"
+	switch -glob $target_triplet {
+	    ia64-*-* {
+		run_dump_test "common3a" { { as "--defsym lcomm_align=1" } }
+		run_dump_test "common3b" { { as "--defsym lcomm_align=1" } }
+	    }
+	    default {
+		run_dump_test "common3a"
+		run_dump_test "common3b"
+	    }
+	}
 	run_dump_test "common4a"
 	run_dump_test "common4b"
 	run_dump_test "common5a"
