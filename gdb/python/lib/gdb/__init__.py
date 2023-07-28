@@ -271,11 +271,11 @@ def blocked_signals():
         return
 
     to_block = {signal.SIGCHLD, signal.SIGINT, signal.SIGALRM, signal.SIGWINCH}
-    signal.pthread_sigmask(signal.SIG_BLOCK, to_block)
+    old_mask = signal.pthread_sigmask(signal.SIG_BLOCK, to_block)
     try:
         yield None
     finally:
-        signal.pthread_sigmask(signal.SIG_UNBLOCK, to_block)
+        signal.pthread_sigmask(signal.SIG_SETMASK, old_mask)
 
 
 class Thread(threading.Thread):
