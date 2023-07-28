@@ -1,5 +1,6 @@
 #source: attr-gnu-4-1.s
 #source: attr-gnu-4-0.s
+#as: -mpdr
 #ld: -r
 #readelf: -hA
 
