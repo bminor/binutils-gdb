@@ -30,5 +30,7 @@ Disassembly of section .text:
 
   44:	08000000 	j	0x0
 			44: R_MIPS_26	external_label
+#?.*R_MIPS_NONE.*
+#?.*R_MIPS_NONE.*
   48:	00000000 	nop
   4c:	00000000 	nop

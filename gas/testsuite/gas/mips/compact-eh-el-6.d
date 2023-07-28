@@ -9,7 +9,11 @@
 RELOCATION RECORDS FOR \[.eh_frame_entry\]:
 OFFSET +TYPE +VALUE
 0+000000 R_MIPS_PC32       .text.*
+#?.*R_MIPS_NONE.*
+#?.*R_MIPS_NONE.*
 0+000004 R_MIPS_PC32       .gnu_extab
+#?.*R_MIPS_NONE.*
+#?.*R_MIPS_NONE.*
 
 
 Contents of section .text:
