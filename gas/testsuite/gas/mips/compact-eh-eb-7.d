@@ -2,6 +2,7 @@
 #name: Compact EH EB #7 with personality id and fallback FDE
 #source: compact-eh-7.s
 #as: -EB -mno-pdr
+#notarget: mips64*-*-openbsd*
 
 .*:     file format.*
 
