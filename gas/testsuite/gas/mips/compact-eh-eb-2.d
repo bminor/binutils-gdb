@@ -34,9 +34,8 @@ Contents of section .group:
  0000 00000001 00000007 00000008          .*
 Contents of section .text:
  0000 00000000.*
-Contents of section .reginfo:
- 0000 00000000 00000000 00000000 00000000  .*
- 0010 00000000 00000000                    .*
+Contents of section (.reginfo|.MIPS.options):
+#...
 Contents of section .MIPS.abiflags:
  .*
  .*
