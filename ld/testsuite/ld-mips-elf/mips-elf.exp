@@ -155,13 +155,23 @@ if {[istarget *-*-openbsd*] } {
     if [istarget *el-*-*] {
 	set abi_asflags(o32) -32
 	set abi_ldflags(o32) -melf32ltsmip
-	set abi_asflags(n64) "-march=from-abi -64"
-	set abi_ldflags(n64) -melf64ltsmip
+	if [istarget *-*-*-gnuabi64] {
+	    set abi_asflags(n32) "-march=from-abi -n32"
+	    set abi_ldflags(n32) -melf32ltsmipn32
+	} else {
+	    set abi_asflags(n64) "-march=from-abi -64"
+	    set abi_ldflags(n64) -melf64ltsmip
+	}
     } else {
 	set abi_asflags(o32) -32
 	set abi_ldflags(o32) -melf32btsmip
-	set abi_asflags(n64) "-march=from-abi -64"
-	set abi_ldflags(n64) -melf64btsmip
+	if [istarget *-*-*-gnuabi64] {
+	    set abi_asflags(n32) "-march=from-abi -n32"
+	    set abi_ldflags(n32) -melf32btsmipn32
+	} else {
+	    set abi_asflags(n64) "-march=from-abi -64"
+	    set abi_ldflags(n64) -melf64btsmip
+	}
     }
     set irixemul 0
 } elseif {[istarget *-*-linux*] } {
@@ -811,7 +821,8 @@ if { $linux_gnu } {
     run_dump_test "got-page-1"
     run_dump_test_n32 "got-page-2"
     run_dump_test_n64 "dyn-sec64" noarch
-    run_dump_test "got-page-3"
+    run_dump_test_o32 "got-page-3"
+    run_dump_test_n32 "got-page-3" [list [list name (n32)]]
     if $has_abi(o32) {
 	run_ld_link_tests [subst {
 	    {"GOT page 4 (one file)"

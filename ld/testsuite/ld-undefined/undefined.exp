@@ -206,7 +206,8 @@ if { ![is_elf_format] || ![check_shared_lib_support]} then {
     # triplets, and S+core targets using an extra R_SCORE_NONE
     # relocation, so adjust for that.
     switch -glob $target_triplet {
-	"mips64*-*-openbsd*" {
+	"mips64*-*-openbsd*" -
+	"mips64*-*-*-gnuabi64" {
 	    set none_count 6
 	    set reloc_count 4
 	}
