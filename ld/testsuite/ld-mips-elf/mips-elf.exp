@@ -1669,3 +1669,24 @@ run_dump_test_n64 "global-local-symtab-sort-n64${tmips}"
 run_dump_test_o32 "global-local-symtab-final-o32"
 run_dump_test_n32 "global-local-symtab-final-n32"
 run_dump_test_n64 "global-local-symtab-final-n64"
+
+# Section ordering tests.
+foreach { abi } $abis {
+    set ps2 [expr \
+	({$abi} == {"n32"} && [istarget "mips64*el-ps2-elf*"]) ? {"p"} : {""}]
+    run_ld_link_tests [list \
+	[list \
+	    "MIPS section ordering test 1 ($abi)" \
+	    "$abi_ldflags($abi) -r" "" \
+	    "$abi_asflags($abi) -mpdr" \
+	    [list sections.s] \
+	    [list "readelf -WS sections-1-${abi}${tmips}${ps2}.rd"] \
+	    "sections-1-${abi}.o"] \
+	[list \
+	    "MIPS section ordering test 2 ($abi)" \
+	    "$abi_ldflags($abi) -e 0" "" \
+	    "$abi_asflags($abi) -mpdr" \
+	    [list sections.s] \
+	    [list "readelf -WS sections-2-${abi}${tmips}${ps2}.rd"] \
+	    "sections-2-${abi}"]]
+}
