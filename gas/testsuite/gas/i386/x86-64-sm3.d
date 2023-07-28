@@ -25,3 +25,4 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*c4 c3 51 de f6 7b\s+vsm3rnds2 \$0x7b,%xmm14,%xmm5,%xmm6
 \s*[a-f0-9]+:\s*c4 a3 01 de b4 f5 00 00 00 10 7b\s+vsm3rnds2 \$0x7b,0x10000000\(%rbp,%r14,8\),%xmm15,%xmm6
 \s*[a-f0-9]+:\s*c4 c3 01 de 31 7b\s+vsm3rnds2 \$0x7b,\(%r9\),%xmm15,%xmm6
+#pass
