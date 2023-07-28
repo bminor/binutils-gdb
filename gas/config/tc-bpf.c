@@ -535,8 +535,6 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
      at this point.  */
   if (RELAX_BRANCH_CONST (fragp->fr_subtype))
     {
-      /* XXX this loses the 32-bit value if the constant was
-         overflown! */
       disp_to_target = fragp->fr_offset;
       disp_is_known = 1;
     }
