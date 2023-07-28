@@ -856,7 +856,8 @@ if { $linux_gnu } {
 	     "got-page-7b.so"}
 	}]
     }
-    run_dump_test "got-dump-1"
+    run_dump_test_o32 "got-dump-1"
+    run_dump_test_n32 "got-dump-1" [list [list name (n32)]]
     run_dump_test_n64 "got-dump-2" noarch
     run_dump_test "reloc-estimate-1"
 }
