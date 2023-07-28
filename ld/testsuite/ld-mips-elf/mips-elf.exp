@@ -1047,7 +1047,8 @@ if { $has_abi(o32) } {
     run_ld_link_tests $mips16_intermix_test
 }
 
-run_dump_test "mips16-local-stubs-1"
+run_dump_test_o32 "mips16-local-stubs-1"
+run_dump_test_n32 "mips16-local-stubs-1" [list [list name (n32)]]
 
 set mips16_fp_stub_test [list \
     [list "Floating-point stub for mips16 functions" \
