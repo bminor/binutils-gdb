@@ -1,3 +1,13 @@
+2023-07-30  Nick Clifton  <nickc@redhat.com>
+
+	This is the 2.41 release.
+	* configure: Regenerate.
+	* po/ld.pot: Regenerate.
+
+	modified:   opcodes/configure
+	modified:   opcodes/po/opcodes.pot
+	modified:   src-release.sh
+
 2023-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.

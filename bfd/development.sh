@@ -19,4 +19,4 @@
 development=true
 
 # Indicate whether this is a release branch.
-experimental=true
+experimental=false

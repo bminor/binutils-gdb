@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2023-07-03 11:31+0100\n"
+"POT-Creation-Date: 2023-07-30 15:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -69,7 +69,7 @@ msgstr ""
 
 #. Unknown relocation.
 #: aoutx.h:4400 coff-alpha.c:601 coff-alpha.c:1521 coff-mips.c:356
-#: coff-rs6000.c:3029 coff-sh.c:504 coff-tic4x.c:184 coff-tic54x.c:262
+#: coff-rs6000.c:3048 coff-sh.c:504 coff-tic4x.c:184 coff-tic54x.c:262
 #: elf-hppa.h:798 elf-hppa.h:826 elf-m10200.c:226 elf-m10300.c:813
 #: elf32-arc.c:532 elf32-arm.c:1985 elf32-avr.c:962 elf32-bfin.c:1063
 #: elf32-bfin.c:4686 elf32-cr16.c:654 elf32-cr16.c:684 elf32-cris.c:467
@@ -95,7 +95,7 @@ msgstr ""
 #: elf64-ia64-vms.c:3426 elf64-mips.c:3965 elf64-mips.c:3981 elf64-mmix.c:1264
 #: elf64-nfp.c:151 elf64-ppc.c:1031 elf64-ppc.c:1385 elf64-ppc.c:1394
 #: elf64-s390.c:328 elf64-s390.c:378 elf64-x86-64.c:269 elfn32-mips.c:3799
-#: elfxx-ia64.c:324 elfxx-loongarch.c:1574 elfxx-riscv.c:980 elfxx-sparc.c:589
+#: elfxx-ia64.c:324 elfxx-loongarch.c:1568 elfxx-riscv.c:980 elfxx-sparc.c:589
 #: elfxx-sparc.c:639 elfxx-tilegx.c:907 elfxx-tilegx.c:947
 #: elfnn-aarch64.c:2215 elfnn-aarch64.c:2313 elfnn-ia64.c:214
 #: elfnn-ia64.c:3821
@@ -307,32 +307,32 @@ msgstr ""
 msgid "%pB: unsupported swap_aux_out for storage class %#x"
 msgstr ""
 
-#: coff-rs6000.c:3119
+#: coff-rs6000.c:3138
 #, c-format
 msgid "%pB: TOC reloc at %#<PRIx64> to symbol `%s' with no TOC entry"
 msgstr ""
 
-#: coff-rs6000.c:3243 coff64-rs6000.c:848
+#: coff-rs6000.c:3262 coff64-rs6000.c:848
 #, c-format
 msgid "Unable to find the stub entry targeting %s"
 msgstr ""
 
-#: coff-rs6000.c:3358
+#: coff-rs6000.c:3377
 #, c-format
 msgid "%pB: TLS relocation at 0x%<PRIx64> over non-TLS symbol %s (0x%x)\n"
 msgstr ""
 
-#: coff-rs6000.c:3371
+#: coff-rs6000.c:3390
 #, c-format
 msgid "%pB: TLS local relocation at 0x%<PRIx64> over imported symbol %s\n"
 msgstr ""
 
-#: coff-rs6000.c:3777
+#: coff-rs6000.c:3796
 #, c-format
 msgid "%pB: relocation (%d) at 0x%<PRIx64> has wrong r_rsize (0x%x)\n"
 msgstr ""
 
-#: coff-rs6000.c:4039 coff64-rs6000.c:2031
+#: coff-rs6000.c:4058 coff64-rs6000.c:2031
 #, c-format
 msgid "%pB: symbol `%s' has unrecognized smclas %d"
 msgstr ""
@@ -397,13 +397,13 @@ msgstr ""
 msgid "R_AMD64_IMAGEBASE with __ImageBase undefined"
 msgstr ""
 
-#: coff-z80.c:351 coff-z8k.c:214 elf32-nds32.c:13189 elfxx-mips.c:13513
+#: coff-z80.c:351 coff-z8k.c:214 elf32-nds32.c:13189 elfxx-mips.c:13515
 #: reloc.c:8495 reloc16.c:314
 #, c-format
 msgid "%X%P: %pB(%pA): relocation \"%pR\" goes out of range\n"
 msgstr ""
 
-#: coff-z80.c:477 coff-z8k.c:378 elfxx-mips.c:13523 reloc.c:8505
+#: coff-z80.c:477 coff-z8k.c:378 elfxx-mips.c:13525 reloc.c:8505
 #, c-format
 msgid "%X%P: %pB(%pA): relocation \"%pR\" is not supported\n"
 msgstr ""
@@ -938,7 +938,7 @@ msgstr ""
 #: elf32-moxie.c:292 elf32-msp430.c:1510 elf32-nds32.c:6097 elf32-or1k.c:1901
 #: elf32-score.c:2738 elf32-score7.c:2549 elf32-spu.c:5089
 #: elf32-tilepro.c:3376 elf32-v850.c:2298 elf32-visium.c:684
-#: elf32-xstormy16.c:934 elf64-mmix.c:1545 elfxx-mips.c:10651
+#: elf32-xstormy16.c:934 elf64-mmix.c:1545 elfxx-mips.c:10653
 #: elfxx-tilegx.c:3746
 msgid "internal error: unsupported relocation error"
 msgstr ""
@@ -1111,7 +1111,7 @@ msgstr ""
 msgid "%pB: invalid string offset %u >= %<PRIu64> for section `%s'"
 msgstr ""
 
-#: elf.c:517 elf32-arm.c:17730 elfnn-aarch64.c:8291 elfnn-loongarch.c:4391
+#: elf.c:517 elf32-arm.c:17730 elfnn-aarch64.c:8291 elfnn-loongarch.c:4430
 #, c-format
 msgid "%pB symbol number %lu references nonexistent SHT_SYMTAB_SHNDX section"
 msgstr ""
@@ -1558,7 +1558,7 @@ msgid ""
 msgstr ""
 
 #: elf32-arc.c:938 elf32-iq2000.c:844 elf32-m32c.c:889 elf32-m68hc1x.c:1390
-#: elf32-ppc.c:3856 elf64-sparc.c:737 elfxx-mips.c:15685
+#: elf32-ppc.c:3856 elf64-sparc.c:737 elfxx-mips.c:15687
 #, c-format
 msgid "%pB: uses different e_flags (%#x) fields than previous modules (%#x)"
 msgstr ""
@@ -2356,7 +2356,7 @@ msgstr ""
 #. Ignore init flag - it may not be set, despite the flags field containing valid data.
 #: elf32-bfin.c:4728 elf32-cris.c:3862 elf32-m68hc1x.c:1415 elf32-m68k.c:1265
 #: elf32-score.c:3987 elf32-score7.c:3794 elf32-vax.c:536 elf32-xgate.c:494
-#: elfxx-mips.c:16371
+#: elfxx-mips.c:16373
 #, c-format
 msgid "private flags = %lx:"
 msgstr ""
@@ -3774,12 +3774,12 @@ msgstr ""
 
 #: elf32-sh.c:5013
 #, c-format
-msgid "%X%C: relocation to \"%s\" references a different segment\n"
+msgid "%X%H: relocation to \"%s\" references a different segment\n"
 msgstr ""
 
 #: elf32-sh.c:5020
 #, c-format
-msgid "%C: warning: relocation to \"%s\" references a different segment\n"
+msgid "%H: warning: relocation to \"%s\" references a different segment\n"
 msgstr ""
 
 #: elf32-sh.c:5488 elf32-sh.c:5570
@@ -4036,7 +4036,7 @@ msgid "warning: %pB and %pB differ in whether code is compiled for DSBT"
 msgstr ""
 
 #: elf32-tilepro.c:3627 elfxx-tilegx.c:4017 elfxx-x86.c:2710
-#: elfnn-aarch64.c:9999 elfnn-loongarch.c:4317 elfnn-riscv.c:3458
+#: elfnn-aarch64.c:9999 elfnn-loongarch.c:4356 elfnn-riscv.c:3458
 #, c-format
 msgid "discarded output section: `%pA'"
 msgstr ""
@@ -4893,7 +4893,7 @@ msgid ""
 "%pB(%pA+%#<PRIx64>): misaligned symbol `%s' (%#<PRIx64>) for relocation %s"
 msgstr ""
 
-#: elf64-sparc.c:134 elfcode.h:1582
+#: elf64-sparc.c:134 elfcode.h:1593
 #, c-format
 msgid "%pB(%pA): relocation %d has invalid symbol index %ld"
 msgstr ""
@@ -5041,17 +5041,17 @@ msgstr ""
 msgid "warning: %pB has a corrupt string table index"
 msgstr ""
 
-#: elfcode.h:837
+#: elfcode.h:838
 #, c-format
 msgid "warning: %pB has a program header with invalid alignment"
 msgstr ""
 
-#: elfcode.h:1039
+#: elfcode.h:1050
 #, c-format
 msgid "%pB: %pA+%<PRIx64>: relocation addend %<PRIx64> too large"
 msgstr ""
 
-#: elfcode.h:1302
+#: elfcode.h:1313
 #, c-format
 msgid "%pB: version count (%<PRId64>) does not match symbol count (%ld)"
 msgstr ""
@@ -5418,28 +5418,27 @@ msgstr ""
 msgid "error: %pB: <corrupt AArch64 used size: 0x%x>"
 msgstr ""
 
-#: elfxx-loongarch.c:1590
+#: elfxx-loongarch.c:1584
 #, c-format
 msgid "%pB: unsupported relocation type %s"
 msgstr ""
 
-#: elfxx-loongarch.c:1619
+#: elfxx-loongarch.c:1613
 #, c-format
 msgid "%pB: unsupported bfd relocation type %#x"
 msgstr ""
 
-#: elfxx-loongarch.c:1638
+#: elfxx-loongarch.c:1632
 #, c-format
 msgid "%pB: unsupported relocation type name %s"
 msgstr ""
 
-#: elfxx-loongarch.c:1689
+#: elfxx-loongarch.c:1685
 #, c-format
 msgid "%pB: relocation %s right shift %d error 0x%lx"
 msgstr ""
 
-#: elfxx-loongarch.c:1699 elfxx-loongarch.c:1735 elfxx-loongarch.c:1770
-#: elfxx-loongarch.c:1807
+#: elfxx-loongarch.c:1699
 #, c-format
 msgid "%pB: relocation %s overflow 0x%lx"
 msgstr ""
@@ -5472,533 +5471,533 @@ msgstr ""
 msgid "%X%H: unsupported branch between ISA modes\n"
 msgstr ""
 
-#: elfxx-mips.c:7344
+#: elfxx-mips.c:7345
 #, c-format
 msgid ""
 "%pB: incorrect `.reginfo' section size; expected %<PRIu64>, got %<PRIu64>"
 msgstr ""
 
-#: elfxx-mips.c:7388
+#: elfxx-mips.c:7389
 #, c-format
 msgid "%pB: warning: bad `%s' option size %u smaller than its header"
 msgstr ""
 
-#: elfxx-mips.c:7624
+#: elfxx-mips.c:7625
 #, c-format
 msgid "%pB: warning: truncated `%s' option"
 msgstr ""
 
-#: elfxx-mips.c:8447 elfxx-mips.c:8573
+#: elfxx-mips.c:8449 elfxx-mips.c:8575
 #, c-format
 msgid ""
 "%pB: warning: cannot determine the target function for stub section `%s'"
 msgstr ""
 
-#: elfxx-mips.c:8705
+#: elfxx-mips.c:8707
 #, c-format
 msgid "%pB: malformed reloc detected for section %s"
 msgstr ""
 
-#: elfxx-mips.c:8805
+#: elfxx-mips.c:8807
 #, c-format
 msgid "%pB: GOT reloc at %#<PRIx64> not expected in executables"
 msgstr ""
 
-#: elfxx-mips.c:8945
+#: elfxx-mips.c:8947
 #, c-format
 msgid "%pB: CALL16 reloc at %#<PRIx64> not against global symbol"
 msgstr ""
 
-#: elfxx-mips.c:9248
+#: elfxx-mips.c:9250
 #, c-format
 msgid ""
 "%X%H: relocation %s against `%s' cannot be used when making a shared object; "
 "recompile with -fPIC\n"
 msgstr ""
 
-#: elfxx-mips.c:9374
+#: elfxx-mips.c:9376
 #, c-format
 msgid "IFUNC symbol %s in dynamic symbol table - IFUNCS are not supported"
 msgstr ""
 
-#: elfxx-mips.c:9377
+#: elfxx-mips.c:9379
 #, c-format
 msgid "non-dynamic symbol %s in dynamic symbol table"
 msgstr ""
 
-#: elfxx-mips.c:9597
+#: elfxx-mips.c:9599
 #, c-format
 msgid "non-dynamic relocations refer to dynamic symbol %s"
 msgstr ""
 
-#: elfxx-mips.c:10532
+#: elfxx-mips.c:10534
 #, c-format
 msgid ""
 "%pB: can't find matching LO16 reloc against `%s' for %s at %#<PRIx64> in "
 "section `%pA'"
 msgstr ""
 
-#: elfxx-mips.c:10672
+#: elfxx-mips.c:10674
 msgid ""
 "small-data section exceeds 64KB; lower small-data size limit (see option -G)"
 msgstr ""
 
-#: elfxx-mips.c:10691
+#: elfxx-mips.c:10693
 msgid "cannot convert a jump to JALX for a non-word-aligned address"
 msgstr ""
 
-#: elfxx-mips.c:10694
+#: elfxx-mips.c:10696
 msgid "jump to a non-word-aligned address"
 msgstr ""
 
-#: elfxx-mips.c:10695
+#: elfxx-mips.c:10697
 msgid "jump to a non-instruction-aligned address"
 msgstr ""
 
-#: elfxx-mips.c:10698
+#: elfxx-mips.c:10700
 msgid "cannot convert a branch to JALX for a non-word-aligned address"
 msgstr ""
 
-#: elfxx-mips.c:10700
+#: elfxx-mips.c:10702
 msgid "branch to a non-instruction-aligned address"
 msgstr ""
 
-#: elfxx-mips.c:10702
+#: elfxx-mips.c:10704
 msgid "PC-relative load from unaligned address"
 msgstr ""
 
-#: elfxx-mips.c:11002
+#: elfxx-mips.c:11004
 #, c-format
 msgid ""
 "%pB: `%pA' entry VMA of %#<PRIx64> outside the 32-bit range supported; "
 "consider using `-Ttext-segment=...'"
 msgstr ""
 
-#: elfxx-mips.c:11117 elfxx-mips.c:11704
+#: elfxx-mips.c:11119 elfxx-mips.c:11706
 #, c-format
 msgid "%pB: `%pA' offset of %<PRId64> from `%pA' beyond the range of ADDIUPC"
 msgstr ""
 
-#: elfxx-mips.c:11676
+#: elfxx-mips.c:11678
 #, c-format
 msgid ""
 "%pB: `%pA' start VMA of %#<PRIx64> outside the 32-bit range supported; "
 "consider using `-Ttext-segment=...'"
 msgstr ""
 
-#: elfxx-mips.c:13422 reloc.c:8417
+#: elfxx-mips.c:13424 reloc.c:8417
 #, c-format
 msgid "%X%P: %pB(%pA): error: relocation for offset %V has no value\n"
 msgstr ""
 
-#: elfxx-mips.c:13532 reloc.c:8514
+#: elfxx-mips.c:13534 reloc.c:8514
 #, c-format
 msgid "%X%P: %pB(%pA): relocation \"%pR\" returns an unrecognized value %x\n"
 msgstr ""
 
-#: elfxx-mips.c:14734
+#: elfxx-mips.c:14736
 #, c-format
 msgid "%pB: unknown architecture %s"
 msgstr ""
 
-#: elfxx-mips.c:15262
+#: elfxx-mips.c:15264
 #, c-format
 msgid "%pB: illegal section name `%pA'"
 msgstr ""
 
-#: elfxx-mips.c:15539
+#: elfxx-mips.c:15541
 #, c-format
 msgid "%pB: warning: linking abicalls files with non-abicalls files"
 msgstr ""
 
-#: elfxx-mips.c:15556
+#: elfxx-mips.c:15558
 #, c-format
 msgid "%pB: linking 32-bit code with 64-bit code"
 msgstr ""
 
-#: elfxx-mips.c:15588 elfxx-mips.c:15654 elfxx-mips.c:15669
+#: elfxx-mips.c:15590 elfxx-mips.c:15656 elfxx-mips.c:15671
 #, c-format
 msgid "%pB: linking %s module with previous %s modules"
 msgstr ""
 
-#: elfxx-mips.c:15612
+#: elfxx-mips.c:15614
 #, c-format
 msgid "%pB: ABI mismatch: linking %s module with previous %s modules"
 msgstr ""
 
-#: elfxx-mips.c:15637
+#: elfxx-mips.c:15639
 #, c-format
 msgid "%pB: ASE mismatch: linking %s module with previous %s modules"
 msgstr ""
 
-#: elfxx-mips.c:15771
+#: elfxx-mips.c:15773
 #, c-format
 msgid ""
 "warning: %pB uses unknown floating point ABI %d (set by %pB), %pB uses "
 "unknown floating point ABI %d"
 msgstr ""
 
-#: elfxx-mips.c:15777
+#: elfxx-mips.c:15779
 #, c-format
 msgid ""
 "warning: %pB uses unknown floating point ABI %d (set by %pB), %pB uses %s"
 msgstr ""
 
-#: elfxx-mips.c:15783
+#: elfxx-mips.c:15785
 #, c-format
 msgid ""
 "warning: %pB uses %s (set by %pB), %pB uses unknown floating point ABI %d"
 msgstr ""
 
-#: elfxx-mips.c:15797
+#: elfxx-mips.c:15799
 #, c-format
 msgid "warning: %pB uses %s (set by %pB), %pB uses %s"
 msgstr ""
 
-#: elfxx-mips.c:15816
+#: elfxx-mips.c:15818
 #, c-format
 msgid "warning: %pB uses %s (set by %pB), %pB uses unknown MSA ABI %d"
 msgstr ""
 
-#: elfxx-mips.c:15828
+#: elfxx-mips.c:15830
 #, c-format
 msgid "warning: %pB uses unknown MSA ABI %d (set by %pB), %pB uses %s"
 msgstr ""
 
-#: elfxx-mips.c:15837
+#: elfxx-mips.c:15839
 #, c-format
 msgid ""
 "warning: %pB uses unknown MSA ABI %d (set by %pB), %pB uses unknown MSA ABI %"
 "d"
 msgstr ""
 
-#: elfxx-mips.c:15899
+#: elfxx-mips.c:15901
 #, c-format
 msgid "%pB: endianness incompatible with that of the selected emulation"
 msgstr ""
 
-#: elfxx-mips.c:15913
+#: elfxx-mips.c:15915
 #, c-format
 msgid "%pB: ABI is incompatible with that of the selected emulation"
 msgstr ""
 
-#: elfxx-mips.c:15966
+#: elfxx-mips.c:15968
 #, c-format
 msgid "%pB: warning: inconsistent ISA between e_flags and .MIPS.abiflags"
 msgstr ""
 
-#: elfxx-mips.c:15971
+#: elfxx-mips.c:15973
 #, c-format
 msgid ""
 "%pB: warning: inconsistent FP ABI between .gnu.attributes and .MIPS.abiflags"
 msgstr ""
 
-#: elfxx-mips.c:15975
+#: elfxx-mips.c:15977
 #, c-format
 msgid "%pB: warning: inconsistent ASEs between e_flags and .MIPS.abiflags"
 msgstr ""
 
-#: elfxx-mips.c:15982
+#: elfxx-mips.c:15984
 #, c-format
 msgid ""
 "%pB: warning: inconsistent ISA extensions between e_flags and .MIPS.abiflags"
 msgstr ""
 
-#: elfxx-mips.c:15986
+#: elfxx-mips.c:15988
 #, c-format
 msgid ""
 "%pB: warning: unexpected flag in the flags2 field of .MIPS.abiflags (0x%lx)"
 msgstr ""
 
-#: elfxx-mips.c:16177
+#: elfxx-mips.c:16179
 msgid "-mips32r2 -mfp64 (12 callee-saved)"
 msgstr ""
 
-#: elfxx-mips.c:16239 elfxx-mips.c:16250
+#: elfxx-mips.c:16241 elfxx-mips.c:16252
 msgid "None"
 msgstr ""
 
-#: elfxx-mips.c:16241 elfxx-mips.c:16310
+#: elfxx-mips.c:16243 elfxx-mips.c:16312
 msgid "Unknown"
 msgstr ""
 
-#: elfxx-mips.c:16321
+#: elfxx-mips.c:16323
 #, c-format
 msgid "Hard or soft float\n"
 msgstr ""
 
-#: elfxx-mips.c:16324
+#: elfxx-mips.c:16326
 #, c-format
 msgid "Hard float (double precision)\n"
 msgstr ""
 
-#: elfxx-mips.c:16327
+#: elfxx-mips.c:16329
 #, c-format
 msgid "Hard float (single precision)\n"
 msgstr ""
 
-#: elfxx-mips.c:16330
+#: elfxx-mips.c:16332
 #, c-format
 msgid "Soft float\n"
 msgstr ""
 
-#: elfxx-mips.c:16333
+#: elfxx-mips.c:16335
 #, c-format
 msgid "Hard float (MIPS32r2 64-bit FPU 12 callee-saved)\n"
 msgstr ""
 
-#: elfxx-mips.c:16336
+#: elfxx-mips.c:16338
 #, c-format
 msgid "Hard float (32-bit CPU, Any FPU)\n"
 msgstr ""
 
-#: elfxx-mips.c:16339
+#: elfxx-mips.c:16341
 #, c-format
 msgid "Hard float (32-bit CPU, 64-bit FPU)\n"
 msgstr ""
 
-#: elfxx-mips.c:16342
+#: elfxx-mips.c:16344
 #, c-format
 msgid "Hard float compat (32-bit CPU, 64-bit FPU)\n"
 msgstr ""
 
-#: elfxx-mips.c:16374
+#: elfxx-mips.c:16376
 #, c-format
 msgid " [abi=O32]"
 msgstr ""
 
-#: elfxx-mips.c:16376
+#: elfxx-mips.c:16378
 #, c-format
 msgid " [abi=O64]"
 msgstr ""
 
-#: elfxx-mips.c:16378
+#: elfxx-mips.c:16380
 #, c-format
 msgid " [abi=EABI32]"
 msgstr ""
 
-#: elfxx-mips.c:16380
+#: elfxx-mips.c:16382
 #, c-format
 msgid " [abi=EABI64]"
 msgstr ""
 
-#: elfxx-mips.c:16382
+#: elfxx-mips.c:16384
 #, c-format
 msgid " [abi unknown]"
 msgstr ""
 
-#: elfxx-mips.c:16384
+#: elfxx-mips.c:16386
 #, c-format
 msgid " [abi=N32]"
 msgstr ""
 
-#: elfxx-mips.c:16386
+#: elfxx-mips.c:16388
 #, c-format
 msgid " [abi=64]"
 msgstr ""
 
-#: elfxx-mips.c:16388
+#: elfxx-mips.c:16390
 #, c-format
 msgid " [no abi set]"
 msgstr ""
 
-#: elfxx-mips.c:16413
+#: elfxx-mips.c:16415
 #, c-format
 msgid " [unknown ISA]"
 msgstr ""
 
-#: elfxx-mips.c:16433
+#: elfxx-mips.c:16435
 #, c-format
 msgid " [not 32bitmode]"
 msgstr ""
 
-#: elfxx-riscv.c:1657
+#: elfxx-riscv.c:1660
 #, c-format
 msgid "x ISA extension `%s' must be set with the versions"
 msgstr ""
 
-#: elfxx-riscv.c:1663
+#: elfxx-riscv.c:1666
 #, c-format
 msgid "cannot find default versions of the ISA extension `%s'"
 msgstr ""
 
-#: elfxx-riscv.c:1769
+#: elfxx-riscv.c:1772
 #, c-format
 msgid "%s: first ISA extension must be `e', `i' or `g'"
 msgstr ""
 
-#: elfxx-riscv.c:1793
+#: elfxx-riscv.c:1796
 #, c-format
 msgid "%s: unknown standard ISA extension or prefix class `%c'"
 msgstr ""
 
-#: elfxx-riscv.c:1829
+#: elfxx-riscv.c:1832
 #, c-format
 msgid "%s: invalid prefixed ISA extension `%s' ends with <number>p"
 msgstr ""
 
-#: elfxx-riscv.c:1853
+#: elfxx-riscv.c:1856
 #, c-format
 msgid "%s: unknown prefixed ISA extension `%s'"
 msgstr ""
 
-#: elfxx-riscv.c:1877
+#: elfxx-riscv.c:1880
 #, c-format
 msgid "%s: prefixed ISA extension must separate with _"
 msgstr ""
 
-#: elfxx-riscv.c:1931
+#: elfxx-riscv.c:1934
 #, c-format
 msgid "rv%d does not support the `e' extension"
 msgstr ""
 
-#: elfxx-riscv.c:1939
+#: elfxx-riscv.c:1942
 #, c-format
 msgid "rv%d does not support the `q' extension"
 msgstr ""
 
-#: elfxx-riscv.c:1946
+#: elfxx-riscv.c:1949
 msgid "`zfinx' is conflict with the `f/d/q/zfh/zfhmin' extension"
 msgstr ""
 
-#: elfxx-riscv.c:1967
+#: elfxx-riscv.c:1970
 msgid "zvl*b extensions need to enable either `v' or `zve' extension"
 msgstr ""
 
-#: elfxx-riscv.c:2029
+#: elfxx-riscv.c:2032
 #, c-format
 msgid "%s: ISA string cannot contain uppercase letters"
 msgstr ""
 
-#: elfxx-riscv.c:2057
+#: elfxx-riscv.c:2060
 #, c-format
 msgid "%s: ISA string must begin with rv32 or rv64"
 msgstr ""
 
-#: elfxx-riscv.c:2283
+#: elfxx-riscv.c:2286
 #, c-format
 msgid "invalid ISA extension ends with <number>p in .option arch `%s'"
 msgstr ""
 
-#: elfxx-riscv.c:2306
+#: elfxx-riscv.c:2309
 #, c-format
 msgid "unknown ISA extension `%s' in .option arch `%s'"
 msgstr ""
 
-#: elfxx-riscv.c:2317
+#: elfxx-riscv.c:2320
 #, c-format
 msgid "cannot + or - base extension `%s' in .option arch `%s'"
 msgstr ""
 
-#: elfxx-riscv.c:2525 elfxx-riscv.c:2727
+#: elfxx-riscv.c:2528 elfxx-riscv.c:2730
 msgid "internal: unreachable INSN_CLASS_*"
 msgstr ""
 
-#: elfxx-riscv.c:2558
+#: elfxx-riscv.c:2561
 msgid "m' or `zmmul"
 msgstr ""
 
-#: elfxx-riscv.c:2574
+#: elfxx-riscv.c:2577
 msgid "f' and `c"
 msgstr ""
 
-#: elfxx-riscv.c:2582
+#: elfxx-riscv.c:2585
 msgid "d' and `c"
 msgstr ""
 
-#: elfxx-riscv.c:2588
+#: elfxx-riscv.c:2591
 msgid "f' or `zfinx"
 msgstr ""
 
-#: elfxx-riscv.c:2590
+#: elfxx-riscv.c:2593
 msgid "d' or `zdinx"
 msgstr ""
 
-#: elfxx-riscv.c:2592
+#: elfxx-riscv.c:2595
 msgid "q' or `zqinx"
 msgstr ""
 
-#: elfxx-riscv.c:2594
+#: elfxx-riscv.c:2597
 msgid "zfh' or `zhinx"
 msgstr ""
 
-#: elfxx-riscv.c:2598
+#: elfxx-riscv.c:2601
 msgid "zfhmin' or `zhinxmin"
 msgstr ""
 
-#: elfxx-riscv.c:2609
+#: elfxx-riscv.c:2612
 msgid "zfhmin' and `d', or `zhinxmin' and `zdinx"
 msgstr ""
 
-#: elfxx-riscv.c:2620
+#: elfxx-riscv.c:2623
 msgid "zfhmin' and `q', or `zhinxmin' and `zqinx"
 msgstr ""
 
-#: elfxx-riscv.c:2626
+#: elfxx-riscv.c:2629
 msgid "d' and `zfa"
 msgstr ""
 
-#: elfxx-riscv.c:2634
+#: elfxx-riscv.c:2637
 msgid "q' and `zfa"
 msgstr ""
 
-#: elfxx-riscv.c:2642
+#: elfxx-riscv.c:2645
 msgid "zfh' and `zfa"
 msgstr ""
 
-#: elfxx-riscv.c:2662
+#: elfxx-riscv.c:2665
 msgid "zbb' or `zbkb"
 msgstr ""
 
-#: elfxx-riscv.c:2664
+#: elfxx-riscv.c:2667
 msgid "zbc' or `zbkc"
 msgstr ""
 
-#: elfxx-riscv.c:2672
+#: elfxx-riscv.c:2675
 msgid "zknd' or `zkne"
 msgstr ""
 
-#: elfxx-riscv.c:2678
+#: elfxx-riscv.c:2681
 msgid "v' or `zve64x' or `zve32x"
 msgstr ""
 
-#: elfxx-riscv.c:2680
+#: elfxx-riscv.c:2683
 msgid "v' or `zve64d' or `zve64f' or `zve32f"
 msgstr ""
 
-#: elfxx-riscv.c:2682
+#: elfxx-riscv.c:2685
 msgid "zvbb"
 msgstr ""
 
-#: elfxx-riscv.c:2684
+#: elfxx-riscv.c:2687
 msgid "zvbc"
 msgstr ""
 
-#: elfxx-riscv.c:2686
+#: elfxx-riscv.c:2689
 msgid "zvkg"
 msgstr ""
 
-#: elfxx-riscv.c:2688
+#: elfxx-riscv.c:2691
 msgid "zvkned"
 msgstr ""
 
-#: elfxx-riscv.c:2690
+#: elfxx-riscv.c:2693
 msgid "zvknha"
 msgstr ""
 
-#: elfxx-riscv.c:2692
+#: elfxx-riscv.c:2695
 msgid "zvknhb"
 msgstr ""
 
-#: elfxx-riscv.c:2694
+#: elfxx-riscv.c:2697
 msgid "zvksed"
 msgstr ""
 
-#: elfxx-riscv.c:2696
+#: elfxx-riscv.c:2699
 msgid "zvksh"
 msgstr ""
 
-#: elfxx-riscv.c:2700
+#: elfxx-riscv.c:2703
 msgid "h"
 msgstr ""
 
@@ -9101,7 +9100,7 @@ msgstr ""
 msgid "Internal error: unreachable."
 msgstr ""
 
-#: elfnn-loongarch.c:3809 elfnn-riscv.c:4766
+#: elfnn-loongarch.c:3848 elfnn-riscv.c:4766
 #, c-format
 msgid ""
 "%pB(%pA+%#<PRIx64>): %<PRId64> bytes required for alignment to %<PRId64>-"
