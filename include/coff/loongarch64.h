@@ -17,6 +17,9 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
+#ifndef COFF_LOONGARCH64_H
+#define COFF_LOONGARCH64_H
+
 #define COFFLOONGARCH64 1
 
 #define L_LNNO_SIZE 2
@@ -59,3 +62,5 @@ struct external_reloc
 
 #define RELOC struct external_reloc
 #define RELSZ 14
+
+#endif /* COFF_LOONGARCH64_H */

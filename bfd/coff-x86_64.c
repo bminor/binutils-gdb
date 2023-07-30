@@ -20,10 +20,6 @@
 
    Written by Kai Tietz, OneVision Software GmbH&CoKg.  */
 
-/* Note we have to make sure not to include headers twice.
-   Not all headers are wrapped in #ifdef guards, so we define
-   PEI_HEADERS to prevent double including here.  */
-#ifndef PEI_HEADERS
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
@@ -31,7 +27,6 @@
 #include "coff/internal.h"
 #include "libcoff.h"
 #include "libiberty.h"
-#endif
 
 #define BADMAG(x) AMD64BADMAG(x)
 

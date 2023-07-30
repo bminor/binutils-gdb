@@ -55,7 +55,6 @@
 { COFF_SECTION_NAME_PARTIAL_MATCH (".gnu.linkonce.wi."), \
   COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 0 }
 
-#define PEI_HEADERS
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"

@@ -58,10 +58,6 @@
 { COFF_SECTION_NAME_PARTIAL_MATCH (".gnu.linkonce.wi."), \
   COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 0 }
 
-/* Note we have to make sure not to include headers twice.
-   Not all headers are wrapped in #ifdef guards, so we define
-   PEI_HEADERS to prevent double including in coff-x86_64.c  */
-#define PEI_HEADERS
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"

@@ -23,10 +23,6 @@
 #define COFF_WITH_peLoongArch64
 #endif
 
-/* Note we have to make sure not to include headers twice.
-   Not all headers are wrapped in #ifdef guards, so we define
-   PEI_HEADERS to prevent double including here.  */
-#ifndef PEI_HEADERS
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
@@ -35,9 +31,6 @@
 #include "coff/pe.h"
 #include "libcoff.h"
 #include "libiberty.h"
-#endif
-
-#include "libcoff.h"
 
 /* The page size is a guess based on ELF.  */
 

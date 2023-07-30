@@ -19,6 +19,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#ifndef _LIBPEI_H
+#define _LIBPEI_H
 
 /* Most of this hacked by  Steve Chamberlain,
 			sac@cygnus.com
@@ -445,3 +447,4 @@ bool _bfd_peAArch64_print_ce_compressed_pdata (bfd *, void *);
 bool _bfd_peLoongArch64_print_ce_compressed_pdata (bfd *, void *);
 bool _bfd_pep_print_ce_compressed_pdata (bfd *, void *);
 
+#endif /* _LIBPEI_H */

@@ -20,7 +20,6 @@
 
    Written by Kai Tietz, OneVision Software GmbH&CoKg.  */
 
-#define PEI_HEADERS
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"

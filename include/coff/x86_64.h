@@ -20,6 +20,9 @@
    
    Written by Kai Tietz, OneVision Software GmbH&CoKg.  */
 
+#ifndef COFF_X86_64_H
+#define COFF_X86_64_H
+
 #define L_LNNO_SIZE 2
 #define INCLUDE_COMDAT_FIELDS_IN_AUXENT
 
@@ -105,3 +108,5 @@ struct external_reloc
 #define R_PCRBYTE	18
 #define R_PCRWORD	19
 #define R_PCRLONG	20
+
+#endif /* COFF_X86_64_H */
