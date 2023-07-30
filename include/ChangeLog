@@ -1,3 +1,9 @@
+2023-07-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* elf/bpf.h (EF_BPF_CPUVER): Define.
+	* opcode/bpf.h (BPF_XBPF): Change from 0xf to 0xff so it fits in
+	EF_BPF_CPUVER.
+
 2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* opcode/bpf.h (BPF_IMM32_BSWAP16): Define.

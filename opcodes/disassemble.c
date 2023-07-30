@@ -680,27 +680,7 @@ disassemble_init_for_target (struct disassemble_info * info)
 #endif
 #ifdef ARCH_bpf
     case bfd_arch_bpf:
-      /* XXX option for dialect  */
       info->created_styled_output = true;
-#if 0
-      info->endian_code = BFD_ENDIAN_LITTLE;
-      if (!info->private_data)
-	{
-	  info->private_data = cgen_bitset_create (ISA_MAX);
-	  if (info->endian == BFD_ENDIAN_BIG)
-	    {
-	      cgen_bitset_set (info->private_data, ISA_EBPFBE);
-	      if (info->mach == bfd_mach_xbpf)
-		cgen_bitset_set (info->private_data, ISA_XBPFBE);
-	    }
-	  else
-	    {
-	      cgen_bitset_set (info->private_data, ISA_EBPFLE);
-	      if (info->mach == bfd_mach_xbpf)
-		cgen_bitset_set (info->private_data, ISA_XBPFLE);
-	    }
-	}
-#endif
       break;
 #endif
 #ifdef ARCH_pru

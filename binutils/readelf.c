@@ -168,6 +168,7 @@
 #include "elf/xtensa.h"
 #include "elf/z80.h"
 #include "elf/loongarch.h"
+#include "elf/bpf.h"
 
 #include "getopt.h"
 #include "libiberty.h"
@@ -4189,6 +4190,11 @@ get_machine_flags (Filedata * filedata, unsigned e_flags, unsigned e_machine)
         case EM_OR1K:
           if (e_flags & EF_OR1K_NODELAY)
             strcat (buf, ", no delay");
+          break;
+
+        case EM_BPF:
+          sprintf (buf + strlen (buf), ", CPU Version: %u",
+                   e_flags & EF_BPF_CPUVER);
           break;
 
 	case EM_SPARCV9:

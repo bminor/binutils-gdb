@@ -53,3 +53,6 @@
 
 #define TC_EQUAL_IN_INSN(c, s) bpf_tc_equal_in_insn ((c), (s))
 extern bool bpf_tc_equal_in_insn (int, char *);
+
+#define elf_tc_final_processing bpf_elf_final_processing
+extern void bpf_elf_final_processing (void);

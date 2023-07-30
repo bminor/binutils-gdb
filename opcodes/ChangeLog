@@ -1,3 +1,10 @@
+2023-07-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf-dis.c: Initialize asm_bpf_version to -1.
+	(print_insn_bpf): Set BPF ISA version from the cpu version ELF
+	header flags if no explicit version set in the command line.
+	* disassemble.c (disassemble_init_for_target): Remove unused code.
+
 2023-07-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf-opc.c (bpf_opcodes): Fix BPF_INSN_NEGR to not use a src

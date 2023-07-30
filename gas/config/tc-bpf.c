@@ -1679,3 +1679,12 @@ bpf_tc_equal_in_insn (int c ATTRIBUTE_UNUSED, char *str ATTRIBUTE_UNUSED)
 
   return 0;
 }
+
+/* Some special processing for a BPF ELF file.  */
+
+void
+bpf_elf_final_processing (void)
+{
+  /* Annotate the BPF ISA version in the ELF flag bits.  */
+  elf_elfheader (stdoutput)->e_flags |= (isa_spec & EF_BPF_CPUVER);
+}

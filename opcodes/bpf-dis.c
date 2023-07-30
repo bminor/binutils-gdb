@@ -24,6 +24,8 @@
 #include "libiberty.h"
 #include "opintl.h"
 #include "opcode/bpf.h"
+#include "elf-bfd.h"
+#include "elf/bpf.h"
 
 #include <string.h>
 #include <inttypes.h>
@@ -42,7 +44,7 @@ enum bpf_dialect
 /* Global configuration for the disassembler.  */
 
 static enum bpf_dialect asm_dialect = BPF_DIALECT_NORMAL;
-static int asm_bpf_version = BPF_V4;
+static int asm_bpf_version = -1;
 static int asm_obase = 10;
 
 /* Print BPF specific command-line options.  */
@@ -139,6 +141,32 @@ print_insn_bpf (bfd_vma pc, disassemble_info *info)
       parse_bpf_dis_options (info->disassembler_options);
       /* Avoid repeteadly parsing the options.  */
       info->disassembler_options = NULL;
+    }
+
+  /* Determine what version of the BPF ISA to use when disassembling.
+     If the user didn't explicitly specify an ISA version, then derive
+     it from the CPU Version flag in the ELF header.  A CPU version of
+     0 in the header means "latest version".  */
+  if (asm_bpf_version == -1)
+    {
+      struct bfd *abfd = info->section->owner;
+      Elf_Internal_Ehdr *header = elf_elfheader (abfd);
+      int cpu_version = header->e_flags & EF_BPF_CPUVER;
+
+      switch (cpu_version)
+        {
+        case 0: asm_bpf_version = BPF_V4; break;
+        case 1: asm_bpf_version = BPF_V1; break;
+        case 2: asm_bpf_version = BPF_V2; break;
+        case 3: asm_bpf_version = BPF_V3; break;
+        case 4: asm_bpf_version = BPF_V4; break;
+        case 0xf: asm_bpf_version = BPF_XBPF; break;
+        default:
+          /* xgettext:c-format */
+          opcodes_error_handler (_("unknown BPF CPU version %u\n"),
+                                 cpu_version);
+          break;
+        }
     }
 
   /* Print eight bytes per line.  */

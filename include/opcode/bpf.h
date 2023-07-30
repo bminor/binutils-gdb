@@ -44,7 +44,7 @@ typedef uint64_t bpf_insn_word;
 #define BPF_V2 0x2
 #define BPF_V3 0x3
 #define BPF_V4 0x4
-#define BPF_XBPF 0xff
+#define BPF_XBPF 0xf
 
 /* Masks for the several instruction fields in a BPF instruction.
    These assume big-endian BPF instructions.  */

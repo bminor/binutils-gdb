@@ -1,3 +1,8 @@
+2023-07-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* readelf.c (get_machine_flags): Recognize and pretty print BPF
+	machine flags.
+
 2023-07-24  Johannes Schauer Marin Rodrigues  <josch@debian.org>
 
 	* doc/binutils.texi (objcopy): Document change in behaviour of
