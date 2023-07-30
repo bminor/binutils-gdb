@@ -242,16 +242,20 @@ How to create the release.
       patch files (.reg .orig *~) left over.
 
          cd <branch>
+         git pull	 
 	 git clean -fdx
+	 cd <builds>
+	 make
 
   21. a. Update the release number in bfd/version.m4 on the release
          branch to a whole new minor version number, without a point
-         value.  Eg "2.40.90" becomes "2.41".  NB/ Not: "2.41.00"
+         value.  Eg "2.41.90" becomes "2.42".  NB/ Not: "2.42.00"
 
       b. Change bfd/development.sh to set all values to "false".
 
       c. Regenerate the configure and makefiles.  And *info* files.
 
+            cd <build-configured-with-enable-maintainer-mode>
             make all-gas all-ld all-binutils all-gprof all-gold all-gprofng all-libctf
 	    make info
 
@@ -273,7 +277,7 @@ How to create the release.
 	 need to agree to have it there.
 	
       e. Add ChangeLog entries for all of the updates and add a
-         "this-is-the-2.41-release" comment and commit.
+         "this-is-the-2.42-release" comment and commit.
 
 	   git add .
            git commit
@@ -340,14 +344,15 @@ How to create the release.
 	[optional: add "-u XXXXX" to sign with a gpg key]
 	enter a tag message such as: "Official GNU Binutils 2.4x release"
 
-	    git tag -a binutils-2_41 -u DD9E3C4F      <=== Be careful to get the tag right
+	    git tag -a <TAG>         -u <Your Key>
+	    git tag -a binutils-2_42 -u DD9E3C4F      <=== Be careful to get the tag right
 
         NB/ If you do sign the binaries make sure to use a key
 	that has been published with the FSF.
 
         Then push the release:
 	
-	    git push origin binutils-2_41
+	    git push origin binutils-2_42
 
         If you get an error message along the lines of:
 	  "Invalid revision range ..."
@@ -355,7 +360,7 @@ How to create the release.
 
   27.  Upload the tarballs to ftp.gnu.org.
 
-          for A in bz2 gz lz xz ; do gnupload --to ftp.gnu.org:binutils binutils-2.41.tar.$A ; done
+          gnupload --to ftp.gnu.org:binutils binutils-2.42.tar.*
 
         Be prepared to provide the password for the key, if you
 	signed the binaries.
@@ -383,7 +388,7 @@ How to create the release.
   29. Update web pages.  For sourceware.org:
 
       Create a new documentation folder on the sourceware.org web
-      pages as /sourceware/www/sourceware/htdocs/binutils/docs-2.3x.
+      pages as /sourceware/www/sourceware/htdocs/binutils/docs-2.4x.
 
        sftp sourceware.org
          cd /sourceware/www/sourceware/htdocs/binutils
@@ -392,9 +397,9 @@ How to create the release.
 	 mkdir as
 	 mkdir bfd
 	 mkdir binutils
-	 mkdir gprof
+	 mkdir gprof      [NB/ gprofng is not needed]
 	 mkdir ld
-	 cd ../docs-2.3(x-1)
+	 cd ../docs-2.4(x-1)
 	 get index.html
 
       Update the (local copy of the) index.html file to point to the
@@ -426,7 +431,7 @@ How to create the release.
 	 put bfd.pdf
 	 
 	 cd binutils
-	 lcd ../../binutils/binutils      <=== NB/ Path not like others
+	 lcd ../../binutils/binutils_html      <=== NB/ Path not like others
 	 put *
 	 cd ..
 	 lcd ../doc                       <=== Also not like the others
@@ -487,7 +492,7 @@ Hi FSF Webmasters,
 https://www.gnu.org/software/binutils/binutils.html
 
   be updated to indicate that there is now a newer version available
-  (2.3x).  I have already updated the related page on the sourceware
+  (2.4x).  I have already updated the related page on the sourceware
   website so this might be useful as a template:
 
 https://sourceware.org/binutils/
@@ -550,7 +555,7 @@ Cheers
       date suffix keeps the version lower than the trunk version.
       Regenerate files.  Commit these changes.
 
-  33. Email the binutils list telling everyone that the 2.34 branch
+  33. Email the binutils list telling everyone that the 2.4x branch
       is now open for business as usual and that patches no longer
       need special approval.
 
@@ -558,7 +563,7 @@ Cheers
       any pending obsolete targets into the definitely obsolete
       section.  Create a changelog entry and commit.
 
-
+  Sit back and relax, you are all done.
 --------------------------------------------------------------------------
 How to perform a POINT release.
 --------------------------------------------------------------------------
