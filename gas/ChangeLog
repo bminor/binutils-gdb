@@ -1,3 +1,28 @@
+2023-07-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-bpf.c (signed_overflow): Copy function from
+	tc-aarch64.c.
+	(encode_insn): Check for overflow in constant immediates.
+	(add_relaxed_insn): Pass relax argument to encode_insn.
+	(add_fixed_insn): Likewise.
+	* testsuite/gas/bpf/disp16-overflow.d: New file.
+	* testsuite/gas/bpf/disp16-overflow.s: Likewise.
+	* testsuite/gas/bpf/disp16-overflow.l: Likewise.
+	* testsuite/gas/bpf/disp32-overflow.d: Likewise.
+	* testsuite/gas/bpf/disp32-overflow.s: Likewise.
+	* testsuite/gas/bpf/disp32-overflow.l: Likewise.
+	* testsuite/gas/bpf/imm32-overflow.d: Likewise.
+	* testsuite/gas/bpf/imm32-overflow.s: Likewise.
+	* testsuite/gas/bpf/imm32-overflow.l: Likewise.
+	* testsuite/gas/bpf/offset16-overflow.d: Likewise.
+	* testsuite/gas/bpf/offset16-overflow.s: Likewise.
+	* testsuite/gas/bpf/offset16-overflow.l: Likewise.
+	* testsuite/gas/bpf/disp16-overflow-relax.d: Likewise.
+	* testsuite/gas/bpf/disp16-overflow-relax.l: Likewise.
+	* testsuite/gas/bpf/disp16-overflow-relax.s: Likewise.
+	* testsuite/gas/bpf/jump-relax-jump-be.d: New file.
+	* testsuite/gas/bpf/bpf.exp: Run new tests.
+
 2023-07-28  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	PR gas/30690

@@ -65,4 +65,11 @@ if {[istarget bpf*-*-*]} {
 
     run_dump_test jump-relax-ja-be
     run_dump_test jump-relax-jump-be
+
+    # Overflow tests
+    run_dump_test offset16-overflow
+    run_dump_test disp16-overflow
+    run_dump_test disp16-overflow-relax
+    run_dump_test disp32-overflow
+    run_dump_test imm32-overflow
 }

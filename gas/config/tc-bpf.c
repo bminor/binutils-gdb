@@ -272,6 +272,20 @@ md_section_align (segT segment, valueT size)
   return ((size + (1 << align) - 1) & -(1 << align));
 }
 
+/* Return non-zero if the indicated VALUE has overflowed the maximum
+   range expressible by an signed number with the indicated number of
+   BITS.  */
+
+static bool
+signed_overflow (offsetT value, unsigned bits)
+{
+  offsetT lim;
+  if (bits >= sizeof (offsetT) * 8)
+    return false;
+  lim = (offsetT) 1 << (bits - 1);
+  return (value < -lim || value >= lim);
+}
+
 
 /* Functions concerning relocs.  */
 
@@ -548,6 +562,11 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
       disp_to_target = (val - 8) / 8;
       disp_is_known = 1;
     }
+
+  /* The displacement should fit in a signed 32-bit number.  */
+  if (disp_is_known && signed_overflow (disp_to_target, 32))
+    as_bad_where (fragp->fr_file, fragp->fr_line,
+                  _("signed instruction operand out of range, shall fit in 32 bits"));
 
   /* Now relax particular jump instructions.  */
   if (code == BPF_CODE_JA)
@@ -835,7 +854,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
    immediates are encoded as zeroes.  */
 
 static void
-encode_insn (struct bpf_insn *insn, char *bytes)
+encode_insn (struct bpf_insn *insn, char *bytes, int relaxed)
 {
   uint8_t src, dst;
 
@@ -889,16 +908,44 @@ encode_insn (struct bpf_insn *insn, char *bytes)
   /* Now the immediates that are known to be constant.  */
 
   if (insn->has_imm32 && insn->imm32.X_op == O_constant)
-    encode_int32 (insn->imm32.X_add_number, bytes + 4);
+    {
+      int64_t imm = insn->imm32.X_add_number;
+
+      if (signed_overflow (imm, 32))
+        as_bad (_("signed immediate out of range, shall fit in 32 bits"));
+      else
+        encode_int32 (insn->imm32.X_add_number, bytes + 4);        
+    }
 
   if (insn->has_disp32 && insn->disp32.X_op == O_constant)
-    encode_int32 (insn->disp32.X_add_number, bytes + 4);
+    {
+      int64_t disp = insn->disp32.X_add_number;
+
+      if (signed_overflow (disp, 32))
+        as_bad (_("signed pc-relative offset out of range, shall fit in 32 bits"));
+      else
+        encode_int32 (insn->disp32.X_add_number, bytes + 4);
+    }
 
   if (insn->has_offset16 && insn->offset16.X_op == O_constant)
-    encode_int16 (insn->offset16.X_add_number, bytes + 2);
+    {
+      int64_t offset = insn->offset16.X_add_number;
+
+      if (signed_overflow (offset, 16))
+        as_bad (_("signed pc-relative offset out of range, shall fit in 16 bits"));
+      else
+        encode_int16 (insn->offset16.X_add_number, bytes + 2);
+    }
 
   if (insn->has_disp16 && insn->disp16.X_op == O_constant)
-    encode_int16 (insn->disp16.X_add_number, bytes + 2);
+    {
+      int64_t disp = insn->disp16.X_add_number;
+
+      if (!relaxed && signed_overflow (disp, 16))
+        as_bad (_("signed pc-relative offset out of range, shall fit in 16 bits"));
+      else
+        encode_int16 (insn->disp16.X_add_number, bytes + 2);
+    }
 
   if (insn->has_imm64 && insn->imm64.X_op == O_constant)
     {
@@ -1105,7 +1152,7 @@ add_fixed_insn (struct bpf_insn *insn)
 
   /* First encode the known parts of the instruction, including
      opcodes and constant immediates, and write them to the frag.  */
-  encode_insn (insn, bytes);
+  encode_insn (insn, bytes, 0 /* relax */);
   for (i = 0; i < insn->size; ++i)
     md_number_to_chars (this_frag + i, (valueT) bytes[i], 1);
 
@@ -1136,7 +1183,7 @@ add_relaxed_insn (struct bpf_insn *insn, expressionS *exp)
 
   /* First encode the known parts of the instruction, including
      opcodes and constant immediates, and write them to the frag.  */
-  encode_insn (insn, bytes);
+  encode_insn (insn, bytes, 1 /* relax */);
   for (i = 0; i < insn->size; ++i)
     md_number_to_chars (this_frag + i, (valueT) bytes[i], 1);
 
@@ -1555,7 +1602,7 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
 #undef PARSE_ERROR
 
   /* Generate the frags and fixups for the parsed instruction.  */
-  if (do_relax && insn.is_relaxable)
+  if (do_relax && isa_spec >= BPF_V4 && insn.is_relaxable)
     {
       expressionS *relaxable_exp = NULL;
 
