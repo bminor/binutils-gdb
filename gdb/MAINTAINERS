@@ -149,12 +149,9 @@ future, if there are, a reference to the list will be included here.
 The current global maintainers are (in alphabetical order):
 
 Pedro Alves                     pedro@palves.net
-Joel Brobecker			brobecker@adacore.com
 Kevin Buettner			kevinb@redhat.com
 Andrew Burgess			aburgess@redhat.com
-Doug Evans			dje@google.com
 Simon Marchi			simon.marchi@polymtl.ca
-Yao Qi				qiyao@sourceware.org
 Tom Tromey			tom@tromey.com
 Tom de Vries			tdevries@suse.de
 Ulrich Weigand			Ulrich.Weigand@de.ibm.com
@@ -371,7 +368,6 @@ Core: Generic components used by all of GDB
 linespec		Keith Seitz             keiths@redhat.com
 
 language support
-  Ada			Joel Brobecker		brobecker@adacore.com
   D			Iain Buclaw		ibuclaw@gdcproject.org
   Rust			Tom Tromey		tom@tromey.com
 shared libs		Kevin Buettner		kevinb@redhat.com
@@ -433,7 +429,6 @@ ARM			Richard Earnshaw	rearnsha@arm.com
 Blackfin		Mike Frysinger		vapier@gentoo.org
 CRIS			Hans-Peter Nilsson	hp@axis.com
 IA64			Jeff Johnston		jjohnstn@redhat.com
-MIPS			Joel Brobecker		brobecker@adacore.com
 PowerPC			Kevin Buettner		kevinb@redhat.com
 S390			Ulrich Weigand		uweigand@de.ibm.com
 djgpp			DJ Delorie		dj@delorie.com
@@ -775,6 +770,9 @@ Theodore A. Roth (avr)				troth@openavr.org
 Stephane Carrez (m68hc11-elf, tui)		Stephane.Carrez@gmail.com
 Alfred M. Szmidt (GNU Hurd)			ams@gnu.org
 Stan Shebs (Global)				stanshebs@google.com
+Joel Brobecker (Global, Ada)			brobecker@adacore.com
+Doug Evans (Global)				dje@google.com
+Yao Qi (Global)					qiyao@sourceware.org
 
 
 Folks that have been caught up in a paper trail:
