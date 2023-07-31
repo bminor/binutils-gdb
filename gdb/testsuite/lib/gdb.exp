@@ -71,6 +71,14 @@ proc set_sanitizer_default { env_var var_id val } {
 set_sanitizer_default TSAN_OPTIONS suppressions \
     $srcdir/../tsan-suppressions.txt
 
+# When using ThreadSanitizer we may run into the case that a race is detected,
+# but we see the full stack trace only for one of the two accesses, and the
+# other one is showing "failed to restore the stack".
+# Try to prevent this by setting history_size to the maximum (7) by default.
+# See also the ThreadSanitizer docs (
+# https://github.com/google/sanitizers/wiki/ThreadSanitizerFlags ).
+set_sanitizer_default TSAN_OPTIONS history_size 7
+
 # If GDB is built with ASAN (and because there are leaks), it will output a
 # leak report when exiting as well as exit with a non-zero (failure) status.
 # This can affect tests that are sensitive to what GDB prints on stderr or its
