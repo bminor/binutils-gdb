@@ -4663,4 +4663,6 @@ elf_loongarch64_hash_symbol (struct elf_link_hash_entry *h)
 #define elf_backend_hash_symbol elf_loongarch64_hash_symbol
 #define bfd_elfNN_bfd_relax_section loongarch_elf_relax_section
 
+#define elf_backend_dtrel_excludes_plt 1
+
 #include "elfNN-target.h"
