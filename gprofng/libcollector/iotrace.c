@@ -1030,8 +1030,9 @@ gprofng_open64 (int(real_open64) (const char *, int, ...),
   }
 
 DCL_FUNC_VER (DCL_OPEN64, open64_2_2, open64@GLIBC_2.2)
+#if !defined(__USE_LARGEFILE64)
 DCL_OPEN64 (open64)
-
+#endif
 
 #define F_ERROR_ARG     0
 #define F_INT_ARG       1
@@ -2989,8 +2990,9 @@ DCL_FUNC_VER (DCL_FGETPOS64, fgetpos64_2_17, fgetpos64@GLIBC_2.17)
 DCL_FUNC_VER (DCL_FGETPOS64, fgetpos64_2_2_5, fgetpos64@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_FGETPOS64, fgetpos64_2_2, fgetpos64@GLIBC_2.2)
 DCL_FUNC_VER (DCL_FGETPOS64, fgetpos64_2_1, fgetpos64@GLIBC_2.1)
+#if !defined(__USE_LARGEFILE64)
 DCL_FGETPOS64 (fgetpos64)
-
+#endif
 /*------------------------------------------------------------- fsetpos */
 static int
 gprofng_fsetpos (int(real_fsetpos) (FILE *, const fpos_t *),
@@ -3087,8 +3089,9 @@ DCL_FUNC_VER (DCL_FSETPOS64, fsetpos64_2_17, fsetpos64@GLIBC_2.17)
 DCL_FUNC_VER (DCL_FSETPOS64, fsetpos64_2_2_5, fsetpos64@GLIBC_2.2.5)
 DCL_FUNC_VER (DCL_FSETPOS64, fsetpos64_2_2, fsetpos64@GLIBC_2.2)
 DCL_FUNC_VER (DCL_FSETPOS64, fsetpos64_2_1, fsetpos64@GLIBC_2.1)
+#if !defined(__USE_LARGEFILE64)
 DCL_FSETPOS64 (fsetpos64)
-
+#endif
 /*------------------------------------------------------------- fsync */
 int
 fsync (int fildes)
