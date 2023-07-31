@@ -36,9 +36,17 @@ if ![runto_main] {
     return -1
 }
 
-gdb_breakpoint 37 "last of main"
 
-gdb_continue_to_breakpoint "continue to breakpoint"
+gdb_breakpoint [gdb_get_line_number "In thread" ${testfile}.c]
+gdb_breakpoint [gdb_get_line_number "Done" ${testfile}.c]
+
+# gdbserver does not notify new threads on creation.  In order for
+# this test to even see that the threads are created, we have to
+# arrange to stop when they are running.
+gdb_continue_to_breakpoint "continue to first in-thread breakpoint"
+gdb_continue_to_breakpoint "continue to second in-thread breakpoint"
+
+gdb_continue_to_breakpoint "continue to end breakpoint"
 
 gdb_test "python print(threadOneExit)" \
 	 ".*event type: thread-exited. global num: 2.*"

@@ -24,14 +24,14 @@ pthread_t thread3_id;
 
 void* do_thread (void* d)
 {
-  return NULL;
+  return NULL;			/* In thread */
 }
 
 int main (void)
 {
   pthread_create (&thread2_id, NULL, do_thread, NULL);
-  pthread_join (thread2_id, NULL);
   pthread_create (&thread3_id, NULL, do_thread, NULL);
+  pthread_join (thread2_id, NULL);
   pthread_join (thread3_id, NULL);
-  return 12;
+  return 12;			/* Done */
 }
