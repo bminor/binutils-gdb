@@ -1,3 +1,9 @@
+2023-07-31  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	PR 30705
+	* bpf-dis.c (print_insn_bpf): Check that info->section->owner is
+	actually available before using it.
+
 2023-07-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf-dis.c: Initialize asm_bpf_version to -1.

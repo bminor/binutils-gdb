@@ -147,7 +147,7 @@ print_insn_bpf (bfd_vma pc, disassemble_info *info)
      If the user didn't explicitly specify an ISA version, then derive
      it from the CPU Version flag in the ELF header.  A CPU version of
      0 in the header means "latest version".  */
-  if (asm_bpf_version == -1)
+  if (asm_bpf_version == -1 && info->section && info->section->owner)
     {
       struct bfd *abfd = info->section->owner;
       Elf_Internal_Ehdr *header = elf_elfheader (abfd);
