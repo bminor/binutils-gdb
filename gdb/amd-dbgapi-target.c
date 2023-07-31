@@ -148,7 +148,7 @@ struct amd_dbgapi_inferior_info
 };
 
 static amd_dbgapi_event_id_t process_event_queue
-  (amd_dbgapi_process_id_t process_id = AMD_DBGAPI_PROCESS_NONE,
+  (amd_dbgapi_process_id_t process_id,
    amd_dbgapi_event_kind_t until_event_kind = AMD_DBGAPI_EVENT_KIND_NONE);
 
 static const target_info amd_dbgapi_target_info = {
@@ -1255,8 +1255,10 @@ amd_dbgapi_target::wait (ptid_t ptid, struct target_waitstatus *ws,
   std::tie (event_ptid, gpu_waitstatus) = consume_one_event (ptid.pid ());
   if (event_ptid == minus_one_ptid)
     {
-      /* Drain the events from the amd_dbgapi and preserve the ordering.  */
-      process_event_queue ();
+      /* Drain the events for the current inferior from the amd_dbgapi and
+	 preserve the ordering.  */
+      auto info = get_amd_dbgapi_inferior_info (current_inferior ());
+      process_event_queue (info->process_id, AMD_DBGAPI_EVENT_KIND_NONE);
 
       std::tie (event_ptid, gpu_waitstatus) = consume_one_event (ptid.pid ());
       if (event_ptid == minus_one_ptid)
