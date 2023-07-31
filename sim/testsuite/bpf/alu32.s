@@ -58,7 +58,7 @@ main:
     lsh32       %r1, 4          ; r1 <<= 4 (r1 = 0xf0)
     mov32       %r2, 24         ; r2 = 24
     lsh32       %r1, %r2
-    fail_ne32   %r1, 0xf0000000
+    fail_ne32   %r1, -268435456 ; 0xf0000000
 
     ;; rsh (right logical shift)
     rsh32       %r1, 2
@@ -67,7 +67,7 @@ main:
 
     ;; arsh (right arithmetic shift)
     arsh32      %r1, 1
-    or32        %r1, 0x80000000
+    or32        %r1, -2147483648 ; 0x80000000
     mov32       %r2, 3
     arsh32      %r1, %r2
     fail_ne     %r1, 0x00000000F0000003
@@ -92,7 +92,7 @@ main:
     ;; xor
     xor32       %r1, %r2
     fail_ne32   %r1, 4
-    xor32       %r1, 0xF000000F
+    xor32       %r1, -268435441 ; 0xF000000F
     fail_ne     %r1, 0xF000000B ; Note: check for (bad) sign-extend
     xor32       %r1, %r1
     fail_ne     %r1, 0

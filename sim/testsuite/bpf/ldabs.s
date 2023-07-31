@@ -34,13 +34,13 @@ main:
     ;; Write the value 0x7eadbeef into memory at 0x2004
     ;; i.e. offset 4 within the data buffer pointed to by
     ;; ((struct sk_buff *)r6)->data
-    stw         [%r6+0x1004], 0xdeadbeef
+    stw         [%r6+0x1004], 0x0eadbeef
 
     ;; Now load data[4] into r0 using the ldabsw instruction
     ldabsw      0x4
 
     ;; ...and compare to what we expect
-    fail_ne32   %r0, 0xdeadbeef
+    fail_ne32   %r0, 0x0eadbeef
 
     ;; Repeat for a half-word (2-bytes)
     sth         [%r6+0x1008], 0x1234
@@ -62,10 +62,10 @@ main:
 
     ;; Now, we do the same for the indirect loads
     mov         %r7, 0x100
-    stw         [%r6+0x1100], 0xfeedbeef
+    stw         [%r6+0x1100], 0x0eedbeef
 
     ldindw      %r7, 0x0
-    fail_ne32   %r0, 0xfeedbeef
+    fail_ne32   %r0, 0x0eedbeef
 
     ;; half-word
     sth         [%r6+0x1104], 0x6789

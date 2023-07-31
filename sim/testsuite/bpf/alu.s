@@ -59,7 +59,7 @@ main:
     fail_ne     %r2, 0x0000000050000000
 
     ;; or
-    or          %r2, 0xdeadbeef
+    or          %r2, -559038737         ; 0xdeadbeef
     fail_ne     %r2, 0xffffffffdeadbeef ; 0xdeadbeef gets sign extended
     lddw        %r1, 0xdead00000000beef
     lddw        %r2, 0x0000123456780000
@@ -67,7 +67,7 @@ main:
     fail_ne     %r1, 0xdead12345678beef
 
     ;; lsh
-    mov         %r1, 0xdeadbeef
+    mov         %r1, -559038737         ; 0xdeadbeef
     lsh         %r1, 11
     fail_ne     %r1, 0xfffffef56df77800 ; because deadbeef gets sign ext.
     mov         %r2, 21

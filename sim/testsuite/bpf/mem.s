@@ -20,7 +20,7 @@ main:
 
     stb         [%r2+16], 0x5a
     sth         [%r2+18], 0xcafe
-    stw         [%r2+20], 0xbeefface
+    stw         [%r2+20], -1091568946 ; 0xbeefface
     stdw        [%r2+24], 0x7eadbeef
 
     ldxb        %r1, [%r2+16]

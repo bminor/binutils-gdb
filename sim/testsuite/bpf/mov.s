@@ -30,7 +30,7 @@ main:
     mov         %r2, -1
     fail_ne     %r2, 0xffffffffffffffff
 
-    mov         %r3, 0x80000000
+    mov         %r3, -2147483648 ; 0x80000000
 
     ;; should NOT sign extend
     mov32       %r4, %r3
