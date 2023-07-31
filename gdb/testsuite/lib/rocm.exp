@@ -166,3 +166,23 @@ proc with_rocm_gpu_lock { body } {
 	return -code $code $result
     }
 }
+
+# Return true if all the devices support debugging multiple processes
+# using the GPU.
+
+proc hip_devices_support_debug_multi_process {} {
+    set unsupported_targets \
+	{gfx900 gfx906 gfx908 gfx1010 gfx1011 gfx1012 gfx1030 gfx1031 gfx1032}
+
+    set targets [hcc_amdgpu_targets]
+    if { [llength $targets] == 0 } {
+	return 0
+    }
+
+    foreach target $targets {
+	if { [lsearch -exact $unsupported_targets $target] != -1 } {
+	    return 0
+	}
+    }
+    return 1
+}
