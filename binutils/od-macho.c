@@ -23,6 +23,7 @@
 #include <stddef.h>
 #include <time.h>
 #include "safe-ctype.h"
+#include "libiberty.h"
 #include "bfd.h"
 #include "objdump.h"
 #include "bucomm.h"
