@@ -1420,7 +1420,7 @@ print_frame (const frame_print_options &fp_opts,
       {
 	const char *lib
 	  = solib_name_from_address (get_frame_program_space (frame),
-				     get_frame_pc (frame));
+				     get_frame_address_in_block (frame));
 
 	if (lib)
 	  {
