@@ -1536,7 +1536,7 @@ Optional Features:
   --enable-separate-code  enable -z separate-code in ELF linker by default
   --enable-warn-execstack enable warnings when creating an executable stack
   --enable-warn-rwx-segments
-                          enable warnings when creating segements with RWX
+                          enable warnings when creating segments with RWX
                           permissions
   --enable-default-execstack
                           create an executable stack if an input file is
