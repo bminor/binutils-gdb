@@ -44,6 +44,13 @@ lassign [dap_wait_for_event_and_check "stopped at function breakpoint" stopped \
 	    "body hitBreakpointIds" $fn_bpno] unused objs
 
 # The bug was that this request would fail.
-dap_check_request_and_response "backtrace" stackTrace {o threadId [i 1]}
+set obj [dap_check_request_and_response "backtrace" \
+	     stackTrace {o threadId [i 1]}]
+set frames [dict get [lindex $obj 0] body stackFrames]
+
+gdb_assert {[llength $frames] == 3} "three frames"
+
+gdb_assert {[dict get [lindex $frames 1] name] == "no_debug_info"} \
+    "name of no-debug frame"
 
 dap_shutdown

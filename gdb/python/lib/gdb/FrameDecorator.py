@@ -75,17 +75,10 @@ class _FrameDecoratorBase(object):
         elif frame.type() == gdb.SIGTRAMP_FRAME:
             return "<signal handler called>"
 
-        func = frame.function()
-
-        # If we cannot determine the function name, return the
-        # address.  If GDB detects an integer value from this function
-        # it will attempt to find the function name from minimal
-        # symbols via its own internal functions.
-        if func is None:
-            pc = frame.pc()
-            return pc
-
-        return str(func)
+        func = frame.name()
+        if not isinstance(func, str):
+            func = "???"
+        return func
 
     def address(self):
         """Return the address of the frame's pc"""
