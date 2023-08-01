@@ -41,7 +41,7 @@ TEXI2DVI = texi2dvi -I "$(srcdir)/%D%" -I %D% -I "$(srcdir)/../libiberty" \
 
 %D%/asconfig.texi: %D%/$(CONFIG).texi %D%/$(am__dirstamp)
 	$(AM_V_at)rm -f %D%/asconfig.texi
-	$(AM_V_GEN)cp -p $(srcdir)/%D%/$(CONFIG).texi %D%/asconfig.texi
+	$(AM_V_GEN)cp $(srcdir)/%D%/$(CONFIG).texi %D%/asconfig.texi && touch -m -r $(srcdir)/%D%/$(CONFIG).texi %D%/asconfig.texi
 	$(AM_V_at)chmod u+w %D%/asconfig.texi
 
 CPU_DOCS = \
