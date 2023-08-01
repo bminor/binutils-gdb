@@ -299,7 +299,11 @@ How to create the release.
       DEVO_SUPPORT variable in the src-release.sh script.  If they are
       needed then add them.
 
-      Create the release tarballs:
+      PARANOIA: Check that there are no pending commits:
+
+             git status
+	   
+      Then create the release tarballs:
   
             ./src-release.sh -b -g -l -x binutils
 
