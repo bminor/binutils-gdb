@@ -21,6 +21,7 @@
 fragment <<EOF
 
 /* --- \begin{pdp11.em} */
+#include "libiberty.h"
 #include "getopt.h"
 
 static void

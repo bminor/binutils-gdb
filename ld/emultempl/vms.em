@@ -22,6 +22,7 @@
 # This file is sourced from generic.em.
 
 fragment <<EOF
+#include "libiberty.h"
 #include "getopt.h"
 
 static void

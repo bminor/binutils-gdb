@@ -27,6 +27,7 @@
 #define DONTDECLARE_MALLOC
 
 #include "sysdep.h"
+#include "libiberty.h"
 #include "bfd.h"
 #include "bfdlink.h"
 #include "ctf-api.h"
@@ -58,6 +59,8 @@ static char *error_names[ERROR_NAME_MAX];
 static int error_index;
 #define PUSH_ERROR(x) if (error_index < ERROR_NAME_MAX) error_names[error_index] = x; error_index++;
 #define POP_ERROR()   error_index--;
+
+static void yyerror (const char *);
 %}
 %union {
   bfd_vma integer;
@@ -1506,9 +1509,8 @@ opt_semicolon:
 	;
 
 %%
-void
-yyerror(arg)
-     const char *arg;
+static void
+yyerror (const char *arg)
 {
   if (ldfile_assumed_script)
     einfo (_("%P:%s: file format not recognized; treating as linker script\n"),

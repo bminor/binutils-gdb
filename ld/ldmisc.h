@@ -27,10 +27,6 @@ extern void minfo (const char *, ...);
 extern void info_msg (const char *, ...);
 extern void lfinfo (FILE *, const char *, ...);
 extern void info_assert (const char *, unsigned int);
-extern void yyerror (const char *);
-extern void *xmalloc (size_t);
-extern void *xrealloc (void *, size_t);
-extern void xexit (int);
 
 #define ASSERT(x) \
 do { if (!(x)) info_assert(__FILE__,__LINE__); } while (0)
