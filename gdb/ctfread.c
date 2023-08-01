@@ -80,7 +80,7 @@
 #include "complaints.h"
 #include "block.h"
 #include "ctfread.h"
-#include "psympriv.h"
+#include "psymtab.h"
 
 #if ENABLE_LIBCTF
 

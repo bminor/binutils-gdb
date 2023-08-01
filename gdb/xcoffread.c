@@ -46,7 +46,7 @@
 #include "stabsread.h"
 #include "expression.h"
 #include "complaints.h"
-#include "psympriv.h"
+#include "psymtab.h"
 #include "dwarf2/sect-names.h"
 #include "dwarf2/public.h"
 

@@ -1438,7 +1438,6 @@ HFILES_NO_SRCDIR = \
 	progspace.h \
 	progspace-and-thread.h \
 	prologue-value.h \
-	psympriv.h \
 	psymtab.h \
 	ravenscar-thread.h \
 	record.h \

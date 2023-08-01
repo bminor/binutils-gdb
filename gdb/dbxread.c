@@ -49,7 +49,7 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "c-lang.h"
-#include "psympriv.h"
+#include "psymtab.h"
 #include "block.h"
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not
