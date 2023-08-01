@@ -2463,7 +2463,12 @@ linux_process_target::resume_stopped_resumed_lwps (thread_info *thread)
       int step = 0;
 
       if (thread->last_resume_kind == resume_step)
-	step = maybe_hw_step (thread);
+	{
+	  if (supports_software_single_step ())
+	    install_software_single_step_breakpoints (lp);
+
+	  step = maybe_hw_step (thread);
+	}
 
       threads_debug_printf ("resuming stopped-resumed LWP %s at %s: step=%d",
 			    target_pid_to_str (ptid_of (thread)).c_str (),
