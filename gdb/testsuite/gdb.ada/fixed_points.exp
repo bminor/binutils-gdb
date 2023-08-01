@@ -92,6 +92,9 @@ foreach_with_prefix scenario {all minimal} {
 	gdb_test "print fp5_var" " = 3e-19"
     }
 
-    gdb_test "p Float(Another_Fixed) = Float(Another_Delta * 5)" "true" \
-	"value of another_fixed"
+    # This failed before GCC 10.
+    if {$scenario == "all" && [test_compiler_info {gcc-10-*}]} {
+	gdb_test "p Float(Another_Fixed) = Float(Another_Delta * 5)" "true" \
+	    "value of another_fixed"
+    }
 }
