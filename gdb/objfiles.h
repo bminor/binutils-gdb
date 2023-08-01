@@ -27,7 +27,6 @@
 #include "progspace.h"
 #include "registry.h"
 #include "gdb_bfd.h"
-#include "psymtab.h"
 #include <atomic>
 #include <bitset>
 #include <vector>

@@ -25,7 +25,6 @@
 #include "symtab.h"
 #include "source.h"
 #include "objfiles.h"
-#include "psymtab.h"
 #include "solib.h"
 #include "solist.h"
 #include "gdbsupport/gdb_regex.h"

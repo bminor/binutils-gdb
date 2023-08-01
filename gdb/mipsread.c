@@ -39,8 +39,6 @@
 #include "elf/internal.h"
 #include "elf/mips.h"
 
-#include "psymtab.h"
-
 static void
 read_alphacoff_dynamic_symtab (minimal_symbol_reader &,
 			       struct objfile *objfile);

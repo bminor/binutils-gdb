@@ -168,6 +168,8 @@ extern void end_stabs (void);
 
 extern void finish_global_stabs (struct objfile *objfile);
 
+class psymtab_storage;
+
 /* Functions exported by dbxread.c.  These are not in stabsread.c because
    they are only used by some stabs readers.  */
 

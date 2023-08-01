@@ -40,7 +40,6 @@
 
 #include "coff-pe-read.h"
 
-#include "psymtab.h"
 #include "build-id.h"
 
 /* The objfile we are currently reading.  */

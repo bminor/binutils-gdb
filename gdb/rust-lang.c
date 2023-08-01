@@ -29,7 +29,6 @@
 #include "gdbarch.h"
 #include "infcall.h"
 #include "objfiles.h"
-#include "psymtab.h"
 #include "rust-lang.h"
 #include "typeprint.h"
 #include "valprint.h"

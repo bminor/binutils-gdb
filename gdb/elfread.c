@@ -30,7 +30,6 @@
 #include "objfiles.h"
 #include "stabsread.h"
 #include "demangle.h"
-#include "psympriv.h"
 #include "filenames.h"
 #include "probe.h"
 #include "arch-utils.h"
