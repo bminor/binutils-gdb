@@ -21,4 +21,10 @@
  	stb [%r1+0x7eef], 0x11223344
  	sth [%r1+0x7eef], 0x11223344
  	stw [%r1+0x7eef], 0x11223344
- 	stdw [%r1+-2], 0x11223344
+ 	stdw [%r1-2], 0x11223344
+        ldxsw %r2, [%r1+0x7eef]
+        ldxsh %r2, [%r1+0x7eef]
+        ldxsb %r2, [%r1+0x7eef]
+        ldxsdw %r2, [%r1+0x7eef]
+	ldxdw %r2, [%r1+0]
+	ldindw %r3, 0

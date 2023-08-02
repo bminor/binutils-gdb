@@ -242,7 +242,7 @@ issue_discarded_error(
 	  relinfo, shndx, offset,
 	  _("relocation refers to local symbol \"%s\" [%u], "
 	    "which is defined in a discarded section"),
-	  object->get_symbol_name(r_sym), r_sym);
+	  object->get_symbol_name(r_sym).c_str(), r_sym);
     }
   else
     {
@@ -264,7 +264,7 @@ issue_discarded_error(
 							  &key_symndx);
       if (key_symndx != 0)
 	gold_info(_("  section group signature: \"%s\""),
-		  object->get_symbol_name(key_symndx));
+		  object->get_symbol_name(key_symndx).c_str());
       if (kept_obj != NULL)
 	gold_info(_("  prevailing definition is from %s"),
 		  kept_obj->name().c_str());

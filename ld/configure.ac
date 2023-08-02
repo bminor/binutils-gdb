@@ -228,7 +228,7 @@ esac])
 ac_default_ld_warn_rwx_segments=unset
 AC_ARG_ENABLE(warn-rwx-segments,
 	      AS_HELP_STRING([--enable-warn-rwx-segments],
-	      [enable warnings when creating segements with RWX permissions]),
+	      [enable warnings when creating segments with RWX permissions]),
 [case "${enableval}" in
   yes) ac_default_ld_warn_rwx_segments=1 ;;
   no)  ac_default_ld_warn_rwx_segments=0 ;;

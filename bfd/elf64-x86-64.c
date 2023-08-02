@@ -5281,6 +5281,39 @@ elf_x86_64_merge_symbol (struct elf_link_hash_entry *h,
   return true;
 }
 
+static bool
+elf_x86_64_section_flags (const Elf_Internal_Shdr *hdr)
+{
+  if ((hdr->sh_flags & SHF_X86_64_LARGE) != 0)
+    hdr->bfd_section->flags |= SEC_ELF_LARGE;
+
+  return true;
+}
+
+static bool
+elf_x86_64_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
+			  Elf_Internal_Shdr *hdr, asection *sec)
+{
+  if (sec->flags & SEC_ELF_LARGE)
+    hdr->sh_flags |= SHF_X86_64_LARGE;
+
+  return true;
+}
+
+static bool
+elf_x86_64_copy_private_section_data (bfd *ibfd, asection *isec,
+				      bfd *obfd, asection *osec)
+{
+  if (!_bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec))
+    return false;
+
+  /* objcopy --set-section-flags without "large" drops SHF_X86_64_LARGE.  */
+  if (ibfd != obfd)
+    elf_section_flags (osec) &= ~SHF_X86_64_LARGE;
+
+  return true;
+}
+
 static int
 elf_x86_64_additional_program_headers (bfd *abfd,
 				       struct bfd_link_info *info ATTRIBUTE_UNUSED)
@@ -5408,6 +5441,8 @@ elf_x86_64_special_sections[]=
 
 #define elf_info_to_howto		    elf_x86_64_info_to_howto
 
+#define bfd_elf64_bfd_copy_private_section_data \
+  elf_x86_64_copy_private_section_data
 #define bfd_elf64_bfd_reloc_type_lookup	    elf_x86_64_reloc_type_lookup
 #define bfd_elf64_bfd_reloc_name_lookup \
   elf_x86_64_reloc_name_lookup
@@ -5448,6 +5483,8 @@ elf_x86_64_special_sections[]=
   elf_x86_64_merge_symbol
 #define elf_backend_special_sections \
   elf_x86_64_special_sections
+#define elf_backend_section_flags	    elf_x86_64_section_flags
+#define elf_backend_fake_sections	    elf_x86_64_fake_sections
 #define elf_backend_additional_program_headers \
   elf_x86_64_additional_program_headers
 #define elf_backend_setup_gnu_properties \
@@ -5564,6 +5601,8 @@ elf64_x86_64_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUS
 #undef	ELF_TARGET_OS
 #undef	ELF_OSABI
 
+#define bfd_elf32_bfd_copy_private_section_data \
+  elf_x86_64_copy_private_section_data
 #define bfd_elf32_bfd_reloc_type_lookup	\
   elf_x86_64_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup \

@@ -1574,7 +1574,8 @@ fixup8 (expressionS *oper, int mode, int opmode)
 	{
 	  static char trap_id_warn_once = 0;
 
-	  as_bad (_("Trap id `%ld' is out of range."), oper->X_add_number);
+	  as_bad (_("Trap id `%" PRId64 "' is out of range."),
+		  (int64_t) oper->X_add_number);
 	  if (trap_id_warn_once == 0)
 	    {
 	      trap_id_warn_once = 1;
@@ -1585,7 +1586,8 @@ fixup8 (expressionS *oper, int mode, int opmode)
       if (!(mode & M6812_OP_TRAP_ID)
 	  && !check_range (oper->X_add_number, mode))
 	{
-	  as_bad (_("Operand out of 8-bit range: `%ld'."), oper->X_add_number);
+	  as_bad (_("Operand out of 8-bit range: `%" PRId64 "'."),
+		  (int64_t) oper->X_add_number);
 	}
       number_to_chars_bigendian (f, oper->X_add_number & 0x0FF, 1);
     }
@@ -1641,8 +1643,8 @@ fixup16 (expressionS *oper, int mode, int opmode ATTRIBUTE_UNUSED)
     {
       if (!check_range (oper->X_add_number, mode))
 	{
-	  as_bad (_("Operand out of 16-bit range: `%ld'."),
-		  oper->X_add_number);
+	  as_bad (_("Operand out of 16-bit range: `%" PRId64 "'."),
+		  (int64_t) oper->X_add_number);
 	}
       number_to_chars_bigendian (f, oper->X_add_number & 0x0FFFF, 2);
     }
@@ -1689,8 +1691,8 @@ fixup24 (expressionS *oper, int mode, int opmode ATTRIBUTE_UNUSED)
     {
       if (!check_range (oper->X_add_number, mode))
 	{
-	  as_bad (_("Operand out of 16-bit range: `%ld'."),
-		  oper->X_add_number);
+	  as_bad (_("Operand out of 16-bit range: `%" PRId64 "'."),
+		  (int64_t) oper->X_add_number);
 	}
       number_to_chars_bigendian (f, oper->X_add_number & 0x0FFFFFF, 3);
     }
@@ -1736,8 +1738,8 @@ fixup8_xg (expressionS *oper, int mode, int opmode)
      else
         {
 	  if (!(check_range (oper->X_add_number, mode)))
-	    as_bad (_("Operand out of 8-bit range: `%ld'."),
-		    oper->X_add_number);
+	    as_bad (_("Operand out of 8-bit range: `%" PRId64 "'."),
+		    (int64_t) oper->X_add_number);
           number_to_chars_bigendian (f, oper->X_add_number & 0x0FF, 1);
         }
     }

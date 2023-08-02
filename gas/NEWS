@@ -1,5 +1,15 @@
 -*- text -*-
 
+* Add support for Intel PBNDKB instructions.
+
+* Add support for Intel SM4 instructions.
+
+* Add support for Intel SM3 instructions.
+
+* Add support for Intel SHA512 instructions.
+
+* Add support for Intel AVX-VNNI-INT16 instructions.
+
 Changes in 2.41:
 
 * Add support for Intel FRED instructions.

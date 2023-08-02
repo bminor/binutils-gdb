@@ -1711,10 +1711,12 @@ reloc_sign_bits (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
     {
     case R_LARCH_SOP_POP_32_S_0_10_10_16_S2:
     case R_LARCH_B26:
-      /* Perform insn bits field.  25:16>>16, 15:0<<10.  */
+      /* Perform insn bits field. 15:0<<10, 25:16>>16.  */
       val = ((val & 0xffff) << 10) | ((val >> 16) & 0x3ff);
       break;
+    case R_LARCH_SOP_POP_32_S_0_5_10_16_S2:
     case R_LARCH_B21:
+      /* Perform insn bits field. 15:0<<10, 20:16>>16.  */
       val = ((val & 0xffff) << 10) | ((val >> 16) & 0x1f);
       break;
     default:

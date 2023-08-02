@@ -162,4 +162,8 @@ Disassembly of section .text:
  +[a-f0-9]+:	62 .*	vporq  \(%eax\)\{1to2\},%xmm2,%xmm3
  +[a-f0-9]+:	62 .*	vpxord \(%eax\)\{1to4\},%xmm2,%xmm3
  +[a-f0-9]+:	62 .*	vpxorq \(%eax\)\{1to4\},%ymm2,%ymm3
+ +[a-f0-9]+:	66 .*	pcmpeqq %xmm2,%xmm2
+ +[a-f0-9]+:	c4 .*	vpcmpeqq %xmm2,%xmm2,%xmm0
+ +[a-f0-9]+:	c4 .*	vpcmpeqq %ymm2,%ymm2,%ymm0
+ +[a-f0-9]+:	c4 .*	vpbroadcastq %xmm2,%xmm0
 #pass

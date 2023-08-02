@@ -2291,25 +2291,25 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	 We are only prepared to turn a few of the operands into
 	 relocs.  */
       fixP->fx_offset = value;
-      if (operand->bits == 12 && operand->shift == 20)
+      if (operand->bits == 12 && operand->shift == 20 && !fixP->fx_pcrel)
 	{
 	  fixP->fx_size = 2;
 	  fixP->fx_where += 2;
 	  fixP->fx_r_type = BFD_RELOC_390_12;
 	}
-      else if (operand->bits == 12 && operand->shift == 36)
+      else if (operand->bits == 12 && operand->shift == 36 && !fixP->fx_pcrel)
 	{
 	  fixP->fx_size = 2;
 	  fixP->fx_where += 4;
 	  fixP->fx_r_type = BFD_RELOC_390_12;
 	}
-      else if (operand->bits == 20 && operand->shift == 20)
+      else if (operand->bits == 20 && operand->shift == 20 && !fixP->fx_pcrel)
 	{
 	  fixP->fx_size = 4;
 	  fixP->fx_where += 2;
 	  fixP->fx_r_type = BFD_RELOC_390_20;
 	}
-      else if (operand->bits == 8 && operand->shift == 8)
+      else if (operand->bits == 8 && operand->shift == 8 && !fixP->fx_pcrel)
 	{
 	  fixP->fx_size = 1;
 	  fixP->fx_where += 1;
@@ -2331,6 +2331,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  if (operand->flags & S390_OPERAND_PCREL)
 	    {
 	      fixP->fx_r_type = BFD_RELOC_390_PC16DBL;
+	      fixP->fx_offset += 2;
+	      fixP->fx_pcrel_adjust = 2;
+	    }
+	  else if (fixP->fx_pcrel)
+	    {
+	      fixP->fx_r_type = BFD_RELOC_16_PCREL;
 	      fixP->fx_offset += 2;
 	      fixP->fx_pcrel_adjust = 2;
 	    }

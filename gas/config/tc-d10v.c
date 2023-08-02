@@ -1391,8 +1391,8 @@ find_opcode (struct d10v_opcode *opcode, expressionS myops[])
 	      || myops[i].X_add_number == OPERAND_CONTROL + 12
 	      || myops[i].X_add_number == OPERAND_CONTROL + 13
 	      || myops[i].X_add_number == OPERAND_CONTROL + 15))
-	as_warn (_("cr%ld is a reserved control register"),
-		 myops[i].X_add_number - OPERAND_CONTROL);
+	as_warn (_("cr%d is a reserved control register"),
+		 (int) myops[i].X_add_number - OPERAND_CONTROL);
     }
   return opcode;
 }

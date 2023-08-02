@@ -22,4 +22,6 @@
         if r3 s< r4 goto 1f
 1:      if r3 s<= 3 goto 1f
         if r3 s<= r4 goto 1f
+1:      gotol 1f
+        gotol 1f
 1:

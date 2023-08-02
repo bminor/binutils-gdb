@@ -156,6 +156,7 @@ SECTIONS
 
   ${RELOCATING+_edata = .;}
   ${RELOCATING+PROVIDE (edata = .);}
+  ${RELOCATING+. = ALIGN(ALIGNOF(NEXT_SECTION));}
   ${RELOCATING+__bss_start = .;}
   .sbss    ${RELOCATING-0} : { *(.sbss)${RELOCATING+ *(.scommon)} } ${RELOCATING+ >DATA}
   .bss     ${RELOCATING-0} :

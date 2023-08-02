@@ -1,7 +1,6 @@
-#as: --EB
+#as: -EB -mdialect=normal
 #source: jump.s
-#source: jump-pseudoc.s
-#objdump: -dr
+#objdump: -dr -M dec
 #name: eBPF JUMP instructions, big endian
 
 .*: +file format .*bpf.*
@@ -31,3 +30,5 @@ Disassembly of section .text:
   98:	cd 34 00 00 00 00 00 00 	jslt %r3,%r4,0
   a0:	d5 30 00 01 00 00 00 03 	jsle %r3,3,1
   a8:	dd 34 00 00 00 00 00 00 	jsle %r3,%r4,0
+  b0:	06 00 00 00 00 00 00 01 	jal 1
+  b8:	06 00 00 00 00 00 00 00 	jal 0

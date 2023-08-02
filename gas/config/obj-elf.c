@@ -1088,8 +1088,9 @@ obj_elf_attach_to_group (int dummy ATTRIBUTE_UNUSED)
 
   if (elf_group_name (now_seg))
     {
-      as_warn (_("section %s already has a group (%s)"),
-	       bfd_section_name (now_seg), elf_group_name (now_seg));
+      if (strcmp (elf_group_name (now_seg), gname) != 0)
+	as_warn (_("section %s already has a group (%s)"),
+		 bfd_section_name (now_seg), elf_group_name (now_seg));
       return;
     }
 

@@ -103,7 +103,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	60 +	pusha
 [ 	]*[a-f0-9]+:	61 +	popa
 [ 	]*[a-f0-9]+:	62 90 90 90 90 90 +	bound  edx,QWORD PTR \[eax-0x6f6f6f70\]
-[ 	]*[a-f0-9]+:	63 90 90 90 90 90 +	arpl   WORD PTR \[eax-0x6f6f6f70\],dx
+[ 	]*[a-f0-9]+:	63 90 90 90 90 90 +	arpl   WORD PTR \[eax-0x6f6f6f70\],edx
 [ 	]*[a-f0-9]+:	68 90 90 90 90 +	push   0x90909090
 [ 	]*[a-f0-9]+:	69 90 90 90 90 90 90 90 90 90 	imul   edx,DWORD PTR \[eax-0x6f6f6f70\],0x90909090
 [ 	]*[a-f0-9]+:	6a 90 +	push   0xffffff90

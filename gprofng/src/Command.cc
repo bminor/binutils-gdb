@@ -40,7 +40,7 @@ const char *Command::DEFAULT_METRICS = "ei.user:name";  // if no .rc files read
 const char *Command::DEFAULT_SORT    = "e.user:name";   // if no .rc files read
 
 static char *fhdr, *cchdr, *lahdr, *iohdr, *sdhdr, *lsthdr, *lohdr;
-static char *methdr, *othdr, *mischdr, *deflthdr;
+static char *methdr, *othdr, *mischdr, *deflthdr, *andeflthdr;
 static char *selhdr, *filthdr, *outhdr, *exphdr, *obj_allhdr;
 static char *unsuphdr, *indxobjhdr;
 static char *helphdr, *rahdr, *ddhdr, *typehdr, *typehdr2;
@@ -176,6 +176,15 @@ static Cmdtable cmd_lst[] = {   // list of commands
   { DMETRICS, "dmetrics", NULL, "metric_spec", 1, &desc[DMETRICS]},
   { DSORT, "dsort", NULL, "metric_spec", 1, &desc[DSORT]},
   { EN_DESC, "en_desc", NULL, "{on|off|=<regex>}", 1, &desc[EN_DESC]},
+
+  { NO_CMD, "", NULL, NULL, 0, &andeflthdr},
+  { TLMODE, "tlmode", NULL, "tl_mode", 1, &desc[TLMODE]},
+  { TLDATA, "tldata", NULL, "tl_data", 1, &desc[TLDATA]},
+  { TABS, "tabs", NULL, "tablist", 1, &desc[TABS]},
+  { CALLFLAME, "callflame", NULL, NULL, 0, &desc[CALLFLAME]},
+  { TIMELINE, "timeline", NULL, NULL, 0, &desc[TIMELINE]},
+  { DUALSOURCE, "dsrc", NULL, NULL, 0, &desc[DUALSOURCE]},
+  { SOURCEDISAM, "srcdis", NULL, NULL, 0, &desc[SOURCEDISAM]},
 
   { NO_CMD, "", NULL, NULL, 0, &mischdr},
   { DUMMY_CMD, "<type>", NULL, NULL, 0, &typehdr},
@@ -554,6 +563,7 @@ Command::init_desc ()
   mischdr = GTXT ("\nMiscellaneous commands:");
   exphdr = GTXT ("\nCommands for experiments (scripts and interactive mode only):");
   deflthdr = GTXT ("\nDefault-setting commands:");
+  andeflthdr = GTXT ("\nDefault-setting commands that only affect gprofng GUI");
   selhdr = GTXT ("\nCommands controlling old-style filters/selection:");
   filthdr = GTXT ("\nCommands controlling filters:");
   indxobjhdr = GTXT ("\nCommands controlling the index objects:");

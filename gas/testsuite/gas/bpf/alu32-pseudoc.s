@@ -1,16 +1,16 @@
 # Tests for the ALU eBPF pseudo-C instructions
         .text
-	W2 += 666
-	W3 += -666
-	W4 += 2125315823
-	W5 += w6
-	W2 -= 666
-	W3 -= -666
-	W4 -= 2125315823
-	W5 -= w6
-	W2 *= 666
-	W3 *= -666
-	W4 *= 2125315823
+	w2 += 666
+	w3 += -666
+	w4 += 2125315823
+	w5 += w6
+	w2 -= 666
+	w3 -= -666
+	w4 -= 2125315823
+	w5 -= w6
+	w2 *= 666
+	w3 *= -666
+	w4 *= 2125315823
 	w5 *= w6
 	w2 /= 666
 	w3 /= -666
@@ -48,10 +48,11 @@
 	w3 s>>= -666
 	w4 s>>= 2125315823
 	w5 s>>= w6
-	w2 = -w2
-	r9 = le16 r9
-	r8 = le32 r8
-	r7 = le64 r7
-	r6 = be16 r6
-	r5 = be32 r5
-	r4 = be64 r4
+	w2 = - w2
+        w1 = (s8) w2
+        w1 = (s16) w2
+        w1 = (s32) w2
+        ;; Note that the next instruction gets processed by the GAS
+        ;; preprocessor into w1 =-0xf00, which parses into a %dw = %i32
+        ;; instruction instead of a neg :/
+	w1 = - 0xf00

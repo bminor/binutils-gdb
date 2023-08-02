@@ -129,4 +129,6 @@ addpath $expts:.
 # Add controls for specific load objects
 #  object_hide <Unknown>
 
-# version "@(#)er.rc 1.62 11/10/31"
+# gprofng GUI tabs
+tabs dsrc:function:timeline:processes:threads:ctree:callflame:src:dis:leaks:ioactivity:ifreq:callers-callees:header
+

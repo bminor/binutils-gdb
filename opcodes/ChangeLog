@@ -1,8 +1,49 @@
-2023-07-30  Nick Clifton  <nickc@redhat.com>
+2023-07-31  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
-	This is the 2.41 release.
-	* configure: Regenerate.
-	* po/opcodes.pot: Regenerate.
+	PR 30705
+	* bpf-dis.c (print_insn_bpf): Check that info->section->owner is
+	actually available before using it.
+
+2023-07-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf-dis.c: Initialize asm_bpf_version to -1.
+	(print_insn_bpf): Set BPF ISA version from the cpu version ELF
+	header flags if no explicit version set in the command line.
+	* disassemble.c (disassemble_init_for_target): Remove unused code.
+
+2023-07-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf-opc.c (bpf_opcodes): Fix BPF_INSN_NEGR to not use a src
+	register.
+
+2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf-opc.c (bpf_opcodes): Add entries for the BSWAP*
+	instructions.
+
+2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf-opc.c (bpf_opcodes): Fix pseudo-c syntax for MOVS* and LDXS*
+	instructions.
+
+2023-07-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf-opc.c (bpf_opcodes): Add entry for jal.
+
+2023-07-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf-opc.c (bpf_opcodes): Add entries for LDXS{B,W,H,DW}
+	instructions.
+
+2023-07-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf-opc.c (bpf_opcodes): Add entries for MOVS{8,16,32}R and
+	MOVS32{8,16,32}R instructions.  and MOVS32I instructions.
+
+2023-07-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* Makefile.am (TARGET64_LIBOPCODES_CFILES): Add missing bpf-dis.c
+	* Makefile.in: Regenerate.
 
 2023-07-03  Nick Clifton  <nickc@redhat.com>
 

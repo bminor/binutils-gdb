@@ -101,7 +101,7 @@ Disassembly of section .text:
  123:	60 [ 	]*pusha
  124:	61 [ 	]*popa
  125:	62 90 90 90 90 90 [ 	]*bound  %edx,-0x6f6f6f70\(%eax\)
- 12b:	63 90 90 90 90 90 [ 	]*arpl   %dx,-0x6f6f6f70\(%eax\)
+ 12b:	63 90 90 90 90 90 [ 	]*arpl   %edx,-0x6f6f6f70\(%eax\)
  131:	68 90 90 90 90 [ 	]*push   \$0x90909090
  136:	69 90 90 90 90 90 90 90 90 90 [ 	]*imul   \$0x90909090,-0x6f6f6f70\(%eax\),%edx
  140:	6a 90 [ 	]*push   \$0xffffff90

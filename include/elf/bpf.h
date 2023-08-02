@@ -34,6 +34,12 @@ START_RELOC_NUMBERS (elf_bpf_reloc_type)
  * It is kept in this file to remind that the value is already taken. */
   RELOC_NUMBER (R_BPF_64_NODYLD32, 		4)
   RELOC_NUMBER (R_BPF_64_32,      		10)
+  RELOC_NUMBER (R_BPF_GNU_64_16,                256)
 END_RELOC_NUMBERS (R_BPF_max)
+
+/* Processor specific flags for the ELF header e_flags field.  */
+
+/* Version of the BPF ISA used in the file.  */
+#define EF_BPF_CPUVER 0x0000000f
 
 #endif /* _ELF_BPF_H  */

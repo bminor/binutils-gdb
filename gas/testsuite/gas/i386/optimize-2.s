@@ -180,3 +180,9 @@ _start:
 	vporq		(%eax){1to2}, %xmm2, %xmm3
 	vpxord		(%eax){1to4}, %xmm2, %xmm3
 	vpxorq		(%eax){1to4}, %ymm2, %ymm3
+
+	pcmpeqq		%xmm2, %xmm2
+	vpcmpeqq	%xmm2, %xmm2, %xmm0
+	vpcmpeqq	%ymm2, %ymm2, %ymm0
+
+	vpbroadcastq	%xmm2, %xmm0

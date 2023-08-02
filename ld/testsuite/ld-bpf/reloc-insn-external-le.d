@@ -1,7 +1,7 @@
-#as: --EL
+#as: -EL -mdialect=normal
 #source: reloc-data.s
 #source: reloc-insn-external.s
-#objdump: -dr
+#objdump: -dr -M hex
 #ld: -Tdata=0x20 -EL
 #name: reloc insn external LE
 

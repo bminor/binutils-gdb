@@ -221,3 +221,14 @@ _start:
 	vporq		(%rax){1to2}, %xmm2, %xmm3
 	vpxord		(%rax){1to4}, %xmm2, %xmm3
 	vpxorq		(%rax){1to4}, %ymm2, %ymm3
+
+	pcmpeqq		%xmm2, %xmm2
+	vpcmpeqq	%xmm2, %xmm2, %xmm0
+	vpcmpeqq	%ymm2, %ymm2, %ymm0
+
+	pcmpeqq		%xmm12, %xmm12
+	vpcmpeqq	%xmm12, %xmm12, %xmm0
+	vpcmpeqq	%ymm12, %ymm12, %ymm0
+
+	vpbroadcastq	%xmm2, %xmm0
+	vpbroadcastq	%xmm12, %xmm0
