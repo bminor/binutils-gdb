@@ -580,12 +580,7 @@ static char *
 format_dec (long number, char *outbuffer, int signedp)
 {
   last_immediate = number;
-  if (signedp)
-    sprintf (outbuffer, "%ld", number);
-  else
-    sprintf (outbuffer, "%lu", (unsigned long) number);
-
-  return outbuffer + strlen (outbuffer);
+  return outbuffer + sprintf (outbuffer, signedp ? "%ld" : "%lu", number);
 }
 
 /* Format the name of the general register regno into outbuffer.  */
