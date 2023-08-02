@@ -1202,17 +1202,21 @@ stab_method_type (void *p, bool domainp, int argcount,
     len += strlen (args[i]);
 
   buf = xmalloc (len);
-
-  sprintf (buf, "#%s,%s", domain, return_type);
+  char *out = buf;
+  *out++ = '#';
+  out = stpcpy (out, domain);
+  *out++ = ',';
+  out = stpcpy (out, return_type);
   free (domain);
   free (return_type);
   for (i = 0; i < argcount; i++)
     {
-      strcat (buf, ",");
-      strcat (buf, args[i]);
+      *out++ = ',';
+      out = stpcpy (out, args[i]);
       free (args[i]);
     }
-  strcat (buf, ";");
+  *out++ = ';';
+  *out = 0;
 
   free (args);
 
