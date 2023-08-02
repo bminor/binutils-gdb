@@ -8979,16 +8979,15 @@ static void
 xtensa_add_config_info (void)
 {
   asection *info_sec;
-  char *data, *p;
+  char data[100];
+  char *p;
   int sz;
 
   info_sec = subseg_new (".xtensa.info", 0);
   bfd_set_section_flags (info_sec, SEC_HAS_CONTENTS | SEC_READONLY);
 
-  data = XNEWVEC (char, 100);
-  sprintf (data, "USE_ABSOLUTE_LITERALS=%d\nABI=%d\n",
-	   XSHAL_USE_ABSOLUTE_LITERALS, xtensa_abi_choice ());
-  sz = strlen (data) + 1;
+  sz = 1 + sprintf (data, "USE_ABSOLUTE_LITERALS=%d\nABI=%d\n",
+		    XSHAL_USE_ABSOLUTE_LITERALS, xtensa_abi_choice ());
 
   /* Add enough null terminators to pad to a word boundary.  */
   do
@@ -9015,8 +9014,6 @@ xtensa_add_config_info (void)
   /* Finally, write the descriptor.  */
   p = frag_more (sz);
   memcpy (p, data, sz);
-
-  free (data);
 }
 
 
