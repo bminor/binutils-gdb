@@ -159,6 +159,7 @@ static file_ptr linetab_offset;
 static file_ptr linetab_size;
 
 static char *stringtab = NULL;
+static long stringtab_length = 0;
 
 extern void stabsread_clear_cache (void);
 
@@ -1303,6 +1304,7 @@ init_stringtab (bfd *abfd, file_ptr offset, gdb::unique_xmalloc_ptr<char> *stora
   /* This is in target format (probably not very useful, and not
      currently used), not host format.  */
   memcpy (stringtab, lengthbuf, sizeof lengthbuf);
+  stringtab_length = length;
   if (length == sizeof length)	/* Empty table -- just the count.  */
     return 0;
 
@@ -1322,8 +1324,9 @@ getsymname (struct internal_syment *symbol_entry)
 
   if (symbol_entry->_n._n_n._n_zeroes == 0)
     {
-      /* FIXME: Probably should be detecting corrupt symbol files by
-	 seeing whether offset points to within the stringtab.  */
+      if (symbol_entry->_n._n_n._n_offset > stringtab_length)
+	error (_("COFF Error: string table offset (%ld) outside string table (length %ld)"),
+	       symbol_entry->_n._n_n._n_offset, stringtab_length);
       result = stringtab + symbol_entry->_n._n_n._n_offset;
     }
   else
