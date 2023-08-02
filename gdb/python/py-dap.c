@@ -91,8 +91,11 @@ void _initialize_py_interp ();
 void
 _initialize_py_interp ()
 {
+  /* The dap code uses module typing, available starting python 3.5.  */
+#if PY_VERSION_HEX >= 0x03050000
   interp_factory_register ("dap", [] (const char *name) -> interp *
     {
       return new dap_interp (name);
     });
+#endif
 }

@@ -1533,6 +1533,26 @@ proc gdb_test { args } {
     return [gdb_test_multiple $command $message {*}$opts $user_code]
 }
 
+# Return 1 if python version used is at least MAJOR.MINOR
+proc python_version_at_least { major minor } {
+    set python_script {print (sys.version_info\[0\], sys.version_info\[1\])}
+
+    set res [remote_exec host $::GDB \
+		 "$::INTERNAL_GDBFLAGS -batch -ex \"python $python_script\""]
+    if { [lindex $res 0] != 0 } {
+	error "Couldn't get python version"
+    }
+
+    set python_version [lindex $res 1]
+    set python_version [string trim $python_version]
+
+    regexp {^([0-9]+) ([0-9]+)$} $python_version \
+	dummy python_version_major python_version_minor
+
+    return [version_compare [list $major $minor] \
+		<= [list $python_version_major $python_version_minor]]
+}
+
 # Return 1 if tcl version used is at least MAJOR.MINOR
 proc tcl_version_at_least { major minor } {
     global tcl_version
@@ -2583,6 +2603,11 @@ gdb_caching_proc with_system_readline {} {
 
 gdb_caching_proc allow_dap_tests {} {
     if { ![allow_python_tests] } {
+	return 0
+    }
+
+    # The dap code uses module typing, available starting python 3.5.
+    if { ![python_version_at_least 3 5] } {
 	return 0
     }
 
