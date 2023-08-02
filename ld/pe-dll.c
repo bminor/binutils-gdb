@@ -3340,21 +3340,19 @@ pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *linfo)
 					       false, false, false);
 		  if (blhe)
 		    is_undef = (blhe->type == bfd_link_hash_undefined);
+
+		  if (is_cdecl && (!blhe || !is_undef))
+		    {
+		      blhe = pe_find_cdecl_alias_match (linfo, name + 6);
+		      include_jmp_stub = true;
+		      if (blhe)
+			is_undef = (blhe->type == bfd_link_hash_undefined);
+		    }
 		}
 	      else
 		{
 		  include_jmp_stub = true;
 		  is_undef = (blhe->type == bfd_link_hash_undefined);
-		}
-
-	      if (is_cdecl
-		  && (!blhe || (blhe && blhe->type != bfd_link_hash_undefined)))
-		{
-		  sprintf (name, "%s%s",U (""), imp[i].internal_name);
-		  blhe = pe_find_cdecl_alias_match (linfo, name);
-		  include_jmp_stub = true;
-		  if (blhe)
-		    is_undef = (blhe->type == bfd_link_hash_undefined);
 		}
 
 	      free (name);

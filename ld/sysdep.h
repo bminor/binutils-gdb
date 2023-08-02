@@ -92,6 +92,10 @@
 extern char **environ;
 #endif
 
+#if !HAVE_DECL_STPCPY
+extern char *stpcpy (char *__dest, const char *__src);
+#endif
+
 #define POISON_BFD_BOOLEAN 1
 
 #endif /* ! defined (LD_SYSDEP_H) */

@@ -524,10 +524,13 @@ ldelf_search_needed (const char *path, struct dt_needed *n, int force,
 		      else
 			{
 			  char * current_dir = getpwd ();
-
-			  freeme = xmalloc (strlen (replacement)
-					    + strlen (current_dir) + 2);
-			  sprintf (freeme, "%s/%s", current_dir, replacement);
+			  size_t cdir_len = strlen (current_dir);
+			  size_t rep_len = strlen (replacement);
+			  freeme = xmalloc (cdir_len + rep_len + 2);
+			  memcpy (freeme, current_dir, cdir_len);
+			  freeme[cdir_len] = '/';
+			  memcpy (freeme + cdir_len + 1,
+				  replacement, rep_len + 1);
 			}
 
 		      replacement = freeme;

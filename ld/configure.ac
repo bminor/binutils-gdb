@@ -371,7 +371,7 @@ AC_CHECK_FUNCS(close glob lseek mkstemp open realpath waitpid)
 
 BFD_BINARY_FOPEN
 
-AC_CHECK_DECLS([asprintf, environ])
+AC_CHECK_DECLS([asprintf, environ, stpcpy])
 
 AC_FUNC_MMAP
 

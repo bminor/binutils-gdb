@@ -490,15 +490,14 @@ elf_xtensa_before_allocation (void)
   if (info_sec)
     {
       int xtensa_info_size;
-      char *data;
+      char data[100];
 
       info_sec->flags &= ~SEC_EXCLUDE;
       info_sec->flags |= SEC_IN_MEMORY;
 
-      data = xmalloc (100);
-      sprintf (data, "USE_ABSOLUTE_LITERALS=%d\nABI=%d\n",
-	       XSHAL_USE_ABSOLUTE_LITERALS, xtensa_abi_choice ());
-      xtensa_info_size = strlen (data) + 1;
+      xtensa_info_size
+	= 1 + sprintf (data, "USE_ABSOLUTE_LITERALS=%d\nABI=%d\n",
+		       XSHAL_USE_ABSOLUTE_LITERALS, xtensa_abi_choice ());
 
       /* Add enough null terminators to pad to a word boundary.  */
       do
@@ -512,7 +511,6 @@ elf_xtensa_before_allocation (void)
       bfd_put_32 (info_sec->owner, XTINFO_TYPE, info_sec->contents + 8);
       memcpy (info_sec->contents + 12, XTINFO_NAME, XTINFO_NAMESZ);
       memcpy (info_sec->contents + 12 + XTINFO_NAMESZ, data, xtensa_info_size);
-      free (data);
     }
 
   /* Enable relaxation by default if the "--no-relax" option was not
