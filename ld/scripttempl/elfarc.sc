@@ -365,7 +365,6 @@ cat <<EOF
   ${OTHER_SDATA_SECTIONS}
   ${RELOCATING+_edata = .;}
   ${RELOCATING+PROVIDE (edata = .);}
-  ${RELOCATING+. = ALIGN(ALIGNOF(NEXT_SECTION));}
   ${RELOCATING+__bss_start = .;}
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   ${SBSS}

@@ -252,8 +252,6 @@ vax_find_call (Sym *parent, bfd_vma p_lowpc, bfd_vma p_highpc)
 			  (unsigned long) p_highpc));
   for (pc = p_lowpc; pc < p_highpc; pc += length)
     {
-      unsigned char *operand;
-
       length = 1;
       instructp = ((unsigned char *) core_text_space
 		   + pc - core_text_sect->vma);
@@ -265,10 +263,7 @@ vax_find_call (Sym *parent, bfd_vma p_lowpc, bfd_vma p_highpc)
 	   */
 	  DBG (CALLDEBUG,
 	       printf ("[findcall]\t0x%lx:calls", (unsigned long) pc));
-	  if (pc - core_text_sect->vma + length >= core_text_sect->size)
-	    goto botched;
-	  operand = instructp + length;
-	  firstmode = vax_operandmode (operand);
+	  firstmode = vax_operandmode (instructp + length);
 	  switch (firstmode)
 	    {
 	    case literal:
@@ -277,11 +272,8 @@ vax_find_call (Sym *parent, bfd_vma p_lowpc, bfd_vma p_highpc)
 	    default:
 	      goto botched;
 	    }
-	  length += vax_operandlength (operand);
-	  if (pc - core_text_sect->vma + length >= core_text_sect->size)
-	    goto botched;
-	  operand = instructp + length;
-	  mode = vax_operandmode (operand);
+	  length += vax_operandlength (instructp + length);
+	  mode = vax_operandmode (instructp + length);
 	  DBG (CALLDEBUG,
 	       printf ("\tfirst operand is %s", vax_operandname (firstmode));
 	       printf ("\tsecond operand is %s\n", vax_operandname (mode)));
@@ -302,10 +294,8 @@ vax_find_call (Sym *parent, bfd_vma p_lowpc, bfd_vma p_highpc)
 	       *      [are there others that we miss?,
 	       *       e.g. arrays of pointers to functions???]
 	       */
-	      length += vax_operandlength (operand);
-	      if (pc - core_text_sect->vma + length > core_text_sect->size)
-		goto botched;
 	      arc_add (parent, &indirectchild, (unsigned long) 0);
+	      length += vax_operandlength (instructp + length);
 	      continue;
 	    case byterel:
 	    case wordrel:
@@ -315,10 +305,7 @@ vax_find_call (Sym *parent, bfd_vma p_lowpc, bfd_vma p_highpc)
 	       *      check that this is the address of
 	       *      a function.
 	       */
-	      length += vax_operandlength (operand);
-	      if (pc - core_text_sect->vma + length > core_text_sect->size)
-		goto botched;
-	      destpc = pc + vax_offset (operand);
+	      destpc = pc + vax_offset (instructp + length);
 	      if (hist_check_address (destpc))
 		{
 		  child = sym_lookup (&symtab, destpc);
@@ -337,6 +324,7 @@ vax_find_call (Sym *parent, bfd_vma p_lowpc, bfd_vma p_highpc)
 		           *    a hit
 		           */
 		          arc_add (parent, child, (unsigned long) 0);
+		          length += vax_operandlength (instructp + length);
 		          continue;
 		        }
 		    }

@@ -28,7 +28,6 @@ fragment <<EOF
 #define TARGET_IS_${EMULATION_NAME}
 
 #include "sysdep.h"
-#include "libiberty.h"
 #include "bfd.h"
 #include "bfdlink.h"
 #include "ctf-api.h"

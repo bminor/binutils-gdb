@@ -175,12 +175,6 @@ enum
   CpuSMAP,
   /* SHA instructions required.  */
   CpuSHA,
-  /* SHA512 instructions required.  */
-  CpuSHA512,
-  /* SM3 instructions required.  */
-  CpuSM3,
-  /* SM4 instructions required.  */
-  CpuSM4,
   /* CLFLUSHOPT instruction required */
   CpuClflushOpt,
   /* XSAVES/XRSTORS instruction required */
@@ -225,8 +219,6 @@ enum
   CpuAVX_IFMA,
   /* Intel AVX VNNI-INT8 Instructions support required.  */
   CpuAVX_VNNI_INT8,
-  /* Intel AVX VNNI-INT16 Instructions support required.  */
-  CpuAVX_VNNI_INT16,
   /* Intel CMPccXADD instructions support required.  */
   CpuCMPCCXADD,
   /* Intel WRMSRNS Instructions support required */
@@ -274,8 +266,6 @@ enum
   CpuWBNOINVD,
   /* PCONFIG instructions required */
   CpuPCONFIG,
-  /* PBNDKB instructions required.  */
-  CpuPBNDKB,
   /* WAITPKG instructions required */
   CpuWAITPKG,
   /* UINTR instructions required */
@@ -411,9 +401,6 @@ typedef union i386_cpu_flags
       unsigned int cpuprfchw:1;
       unsigned int cpusmap:1;
       unsigned int cpusha:1;
-      unsigned int cpusha512:1;
-      unsigned int cpusm3:1;
-      unsigned int cpusm4:1;
       unsigned int cpuclflushopt:1;
       unsigned int cpuxsaves:1;
       unsigned int cpuxsavec:1;
@@ -436,7 +423,6 @@ typedef union i386_cpu_flags
       unsigned int cpuprefetchi:1;
       unsigned int cpuavx_ifma:1;
       unsigned int cpuavx_vnni_int8:1;
-      unsigned int cpuavx_vnni_int16:1;
       unsigned int cpucmpccxadd:1;
       unsigned int cpuwrmsrns:1;
       unsigned int cpumsrlist:1;
@@ -461,7 +447,6 @@ typedef union i386_cpu_flags
       unsigned int cpuvpclmulqdq:1;
       unsigned int cpuwbnoinvd:1;
       unsigned int cpupconfig:1;
-      unsigned int cpupbndkb:1;
       unsigned int cpuwaitpkg:1;
       unsigned int cpuuintr:1;
       unsigned int cpucldemote:1;

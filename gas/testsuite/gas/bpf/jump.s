@@ -22,6 +22,4 @@
         jslt %r3,%r4,1f
 1:      jsle %r3,3,1f
         jsle %r3,%r4,1f
-1:      jal 1f
-        jal 1f
-1:
+1:      

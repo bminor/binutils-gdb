@@ -1,6 +1,6 @@
-#as: -EB -mdialect=normal
+#as: --EB
 #source: call.s
-#objdump: -dr -M dec
+#objdump: -dr
 #name: eBPF CALL instruction, big endian
 
 .*: +file format .*bpf.*

@@ -1,168 +1,20 @@
-2023-07-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+2023-07-30  Nick Clifton  <nickc@redhat.com>
 
-	* config/tc-bpf.h (elf_tc_final_processing): Define.
-	* config/tc-bpf.c (bpf_elf_final_processing): New function.
+	This is the 2.41 release.
+	* configure: Regenerate.
+	* po/gas.pot: Regenerate.
 
-2023-07-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
-
-	* config/tc-bpf.c (signed_overflow): Copy function from
-	tc-aarch64.c.
-	(encode_insn): Check for overflow in constant immediates.
-	(add_relaxed_insn): Pass relax argument to encode_insn.
-	(add_fixed_insn): Likewise.
-	* testsuite/gas/bpf/disp16-overflow.d: New file.
-	* testsuite/gas/bpf/disp16-overflow.s: Likewise.
-	* testsuite/gas/bpf/disp16-overflow.l: Likewise.
-	* testsuite/gas/bpf/disp32-overflow.d: Likewise.
-	* testsuite/gas/bpf/disp32-overflow.s: Likewise.
-	* testsuite/gas/bpf/disp32-overflow.l: Likewise.
-	* testsuite/gas/bpf/imm32-overflow.d: Likewise.
-	* testsuite/gas/bpf/imm32-overflow.s: Likewise.
-	* testsuite/gas/bpf/imm32-overflow.l: Likewise.
-	* testsuite/gas/bpf/offset16-overflow.d: Likewise.
-	* testsuite/gas/bpf/offset16-overflow.s: Likewise.
-	* testsuite/gas/bpf/offset16-overflow.l: Likewise.
-	* testsuite/gas/bpf/disp16-overflow-relax.d: Likewise.
-	* testsuite/gas/bpf/disp16-overflow-relax.l: Likewise.
-	* testsuite/gas/bpf/disp16-overflow-relax.s: Likewise.
-	* testsuite/gas/bpf/jump-relax-jump-be.d: New file.
-	* testsuite/gas/bpf/bpf.exp: Run new tests.
-
-2023-07-28  Jose E. Marchesi  <jose.marchesi@oracle.com>
-
-	PR gas/30690
-	* config/tc-bpf.c (struct bpf_insn): Add fields is_relaxable and
-	relaxed_exp.
-	(enum options): Add OPTION_NO_RELAX.
-	(md_longopts): Likewise for -mno-relax.
-	(do_relax): New global.
-	(md_parse_option): Handle OPTION_NO_RELAX.
-	(RELAX_BRANCH_ENCODE): Define.
-	(RELAX_BRANCH_P): Likewise.
-	(RELAX_BRANCH_LENGTH): Likewise.
-	(RELAX_BRANCH_CONST): Likewise.
-	(RELAX_BRANCH_UNCOND): Likewise.
-	(relaxed_branch_length): New function.
-	(md_estimate_size_before_relax): Likewise.
-	(read_insn_word): Likewise.
-	(encode_int16): Likewise.
-	(encode_int32): Likewise.
-	(write_insn_bytes): Likewise.
-	(md_convert_frag): Likewise.
-	(encode_insn): Likewise.
-	(install_insn_fixups): Likewise.
-	(add_fixed_insn): Likewise.
-	(add_relaxed_insn): Likewise.
-	(md_assemble): Move instruction encoding logic to the above
-	new functions.
-	* testsuite/gas/bpf/jump-relax-ja.d: New test.
-	* testsuite/gas/bpf/jump-relax-ja-be.d: Likewise.
-	* testsuite/gas/bpf/jump-relax-ja.s: And corresponding source.
-	* testsuite/gas/bpf/jump-relax-jump.d: New test.
-	* testsuite/gas/bpf/jump-relax-jump-be.d: Likewise.
-	* testsuite/gas/bpf/jump-relax-jump.s: And corresponding source.
-	* testsuite/gas/bpf/bpf.exp: Run new tests.
-	* doc/c-bpf.texi (BPF Options): Document -mno-relax.
-
-2023-07-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
-
-	* testsuite/gas/bpf/alu.s: Add test for NEGI and NEG32I.
-	* testsuite/gas/bpf/alu32.s: Likewise.
-	* testsuite/gas/bpf/alu-pseudoc.s: Likewise.
-	* testsuite/gas/bpf/alu32-pseudoc.s: Likewise.
-	* testsuite/gas/bpf/alu.d: Add expected results.
-	* testsuite/gas/bpf/alu-be.d: Likewise.
-	* testsuite/gas/bpf/alu-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/alu-be-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/alu32.d: Likewise.
-	* testsuite/gas/bpf/alu32-be.d: Likewise.
-	* testsuite/gas/bpf/alu32-be-pseudoc.d: Likewise.
-
-2023-07-26  Jose E. Marchesi  <jose.marchesi@oracle.com>
-
-	* testsuite/gas/bpf/alu.s: The register neg instruction gets only
-	one argument.
-	* testsuite/gas/bpf/alu32-be-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/alu32-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/alu32-pseudoc.s: Likewise.
-	* testsuite/gas/bpf/alu-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/alu-be-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/alu-pseudoc.s: Likewise.
-	* testsuite/gas/bpf/alu-be.d: Likewise.
-	* testsuite/gas/bpf/alu.d: Likewise.
-	* testsuite/gas/bpf/alu32-be.d: Likewise.
-	* testsuite/gas/bpf/alu32.d: Likewise.
-	* testsuite/gas/bpf/alu32.s: Likewise.
-	* doc/c-bpf.texi (BPF Instructions): Update accordingly.
-
-2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
-
-	* doc/c-bpf.texi (BPF Instructions): Document BSWAP* instructions.
-	* testsuite/gas/bpf/alu.s: Test BSWAP{16,32,64} instructions.
-	* testsuite/gas/bpf/alu.d: Likewise.
-	* testsuite/gas/bpf/alu-be.d: Likewise.
-	* testsuite/gas/bpf/alu-pseudoc.s: Likewise.
-	* testsuite/gas/bpf/alu-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/alu-be-pseudoc.d: Likewise.
-
-2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
-
-	* doc/c-bpf.texi (BPF Instructions): The pseudoc syntax for MOVS*
-	doesn't use `s=' but `='.
-
-2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
-
-	* doc/c-bpf.texi (BPF Instructions): Fix pseudoc syntax for MOVS*
-	and LDXS* instructions.
-	* testsuite/gas/bpf/mem-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/mem-be-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/mem-pseudoc.s: Likewise.
-	* testsuite/gas/bpf/alu-pseudoc.s: Likewise.
-	* testsuite/gas/bpf/alu-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/alu-be-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/alu32-pseudoc.s: Likewise.
-	* testsuite/gas/bpf/alu32-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/alu32-be-pseudoc.d: Likewise.
-
-2023-07-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
-
-	* config/tc-bpf.c (struct bpf_insn): New field `id'.
-	(md_assemble): Save the ids of successfully parsed instructions
-	and use the new BFD_RELOC_BPF_DISPCALL32 whenever appropriate.
-	(md_apply_fix): Adapt to the new BFD reloc.
-	* testsuite/gas/bpf/jump.s: Test JAL.
-	* testsuite/gas/bpf/jump.d: Likewise.
-	* testsuite/gas/bpf/jump-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/jump-be.d: Likewise.
-	* testsuite/gas/bpf/jump-be-pseudoc.d: Likewise.
-	* doc/c-bpf.texi (BPF Instructions): Document new instruction
-	jal/gotol.
-	Document new operand type disp32.
-
-2023-07-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
-
-	* testsuite/gas/bpf/mem.s: Add signed load instructions.
-	* testsuite/gas/bpf/mem-pseudoc.s: Likewise.
-	* testsuite/gas/bpf/mem.d: Likewise.
-	* testsuite/gas/bpf/mem-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/mem-be.d: Likewise.
-	* doc/c-bpf.texi (BPF Instructions): Document the signed load
-	instructions.
-
-2023-07-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
-
-	* testsuite/gas/bpf/alu.s: Test movs instructions.
-	* testsuite/gas/bpf/alu-pseudoc.s: Likewise.
-	* testsuite/gas/bpf/alu32.s: Likewise for movs32 instruction.
-	* testsuite/gas/bpf/alu32-pseudoc.s: Likewise.
-	* testsuite/gas/bpf/alu.d: Add expected results.
-	* testsuite/gas/bpf/alu32.d: Likewise.
-	* testsuite/gas/bpf/alu-be.d: Likewise.
-	* testsuite/gas/bpf/alu32-be.d: Likewise.
-	* testsuite/gas/bpf/alu-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/alu32-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/alu-be-pseudoc.d: Likewise.
-	* testsuite/gas/bpf/alu32-be-pseudoc.d: Likewise.
+	modified:   gold/po/gold.pot
+	modified:   gprof/configure
+	modified:   gprofng/configure
+	modified:   gprofng/doc/version.texi
+	modified:   gprofng/libcollector/configure
+	modified:   ld/configure
+	modified:   ld/po/ld.pot
+	modified:   libiberty/functions.texi
+	modified:   opcodes/configure
+	modified:   opcodes/po/opcodes.pot
+	modified:   src-release.sh
 
 2023-07-03  Nick Clifton  <nickc@redhat.com>
 

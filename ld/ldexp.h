@@ -133,8 +133,6 @@ enum relro_enum {
   exp_seg_relro_end,
 };
 
-struct lang_output_section_statement_struct;
-
 typedef struct {
   enum phase_enum phase;
 
@@ -178,16 +176,9 @@ struct ldexp_control {
   etree_value_type result;
   bfd_vma dot;
 
-  /* Current dot and section passed to ldexp folder.  SECTION will be
-     bfd_abs_section for expressions outside of an output section
-     statement.  */
+  /* Current dot and section passed to ldexp folder.  */
   bfd_vma *dotp;
   asection *section;
-
-  /* Last output section statement.  For expressions within an output
-     section statement, this will be the current output section
-     statement being processed.  */
-  struct lang_output_section_statement_struct *last_os;
 
   /* State machine and results for DATASEG.  */
   seg_align_type dataseg;
@@ -220,10 +211,9 @@ etree_type *exp_bigintop
 etree_type *exp_relop
   (asection *, bfd_vma);
 void exp_fold_tree
-  (etree_type *, struct lang_output_section_statement_struct *,
-   asection *, bfd_vma *);
+  (etree_type *, asection *, bfd_vma *);
 void exp_fold_tree_no_dot
-  (etree_type *, struct lang_output_section_statement_struct *);
+  (etree_type *);
 etree_type *exp_binop
   (int, etree_type *, etree_type *);
 etree_type *exp_trinop
@@ -243,9 +233,9 @@ etree_type *exp_assert
 void exp_print_tree
   (etree_type *);
 bfd_vma exp_get_vma
-  (etree_type *, struct lang_output_section_statement_struct *, bfd_vma, char *);
+  (etree_type *, bfd_vma, char *);
 int exp_get_power
-  (etree_type *, struct lang_output_section_statement_struct *, char *);
+  (etree_type *, char *);
 fill_type *exp_get_fill
   (etree_type *, fill_type *, char *);
 bfd_vma exp_get_abs_int

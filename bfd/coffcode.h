@@ -3176,9 +3176,8 @@ coff_compute_section_file_positions (bfd * abfd)
 	     created and not just improve performances with gdb.
 	  */
 
-	  if ((current->flags & SEC_LOAD) != 0
-	      && (!strcmp (current->name, _TEXT)
-		  || !strcmp (current->name, _DATA))
+	  if ((!strcmp (current->name, _TEXT)
+	       || !strcmp (current->name, _DATA))
 	      && (previous == NULL || strcmp(previous->name, _TDATA)))
 	    {
 	      bfd_vma align = 4096;
@@ -3191,8 +3190,7 @@ coff_compute_section_file_positions (bfd * abfd)
 		sofar += align + vma_off - sofar_off;
 	    }
 #endif
-	  if (previous != NULL
-	      && (previous->flags & SEC_LOAD) != 0)
+	  if (previous != NULL)
 	    previous->size += sofar - old_sofar;
 	}
 
@@ -4697,7 +4695,7 @@ coff_slurp_symbol_table (bfd * abfd)
 #endif
 #ifdef RS6000COFF_C
 	    case C_HIDEXT:
-#ifndef AIX_WEAK_SUPPORT
+#if ! defined _AIX52 && ! defined AIX_WEAK_SUPPORT
 	    case C_AIX_WEAKEXT:
 #endif
 #endif
@@ -5023,7 +5021,7 @@ coff_classify_symbol (bfd *abfd,
 #endif
 #ifdef RS6000COFF_C
     case C_HIDEXT:
-#ifndef AIX_WEAK_SUPPORT
+#if ! defined _AIX52 && ! defined AIX_WEAK_SUPPORT
     case C_AIX_WEAKEXT:
 #endif
 #endif

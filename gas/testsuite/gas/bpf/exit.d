@@ -1,5 +1,5 @@
-#as: -EL -mdialect=normal
-#objdump: -dr -M hex
+#as: --EL
+#objdump: -dr
 #name: eBPF EXIT instruction
 
 .*: +file format .*bpf.*

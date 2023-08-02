@@ -1028,11 +1028,7 @@ proc keep_debug_symbols_for_elf_relocatable { prog flags test } {
 	    {[^a-zA-Z]+([a-zA-Z0-9_\.]+)[ \t]+([A-Z]+)[ \t]+[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ [0-9]+[ \t]+([A-Z]*)[ \t]+[0-9]+(.*)} \
 	    $got all name type flag rest] } {
 	if { $type != "NOTE" && [regexp {[AG]} $flag] } {
-	    # PR 30699: Some debug sections can be in a group, so
-	    # exclude sections whose name includes "debug_"
-	    if { ! [regexp {debug_} $name] } {
-		lappend non_debug_sections $name
-	    }
+	    lappend non_debug_sections $name
 	}
 	set got $rest
     }
@@ -1090,7 +1086,6 @@ switch [copy_setup] {
 	untested $test5
 	if [is_elf_format] {
 	    untested $test6
-	    untested $test7
 	}
     }
     "3" {

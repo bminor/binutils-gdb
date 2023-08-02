@@ -4992,4 +4992,3 @@ sparc_cfi_emit_pcrel_expr (expressionS *exp, unsigned int nbytes)
   emit_expr_with_reloc (exp, nbytes, "disp");
   sparc_no_align_cons = 0;
 }
-

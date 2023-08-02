@@ -1,5 +1,5 @@
-#as: -EL -mdialect=normal
-#objdump: -dr -M dec
+#as: --EL
+#objdump: -dr
 #name: eBPF CALL instruction
 
 .*: +file format .*bpf.*

@@ -34,10 +34,6 @@ How to perform a release.
      directories and the top level Makefile and configure files.  Also
      consider updating the toplevel libtool files.
 
--------------------------------------------------
-How to create the release branch.
--------------------------------------------------
-
 Approx time to complete from here: 2 hours ....
 
   2.5 If you have not built from the sources recently then now is the
@@ -56,8 +52,8 @@ Approx time to complete from here: 2 hours ....
 
   4. Create the release branch using:
 
-	git branch binutils-2_42-branch
-        git push origin binutils-2_42-branch
+	git branch binutils-2_41-branch
+        git push origin binutils-2_41-branch
 
      If you get a message like:
      
@@ -89,8 +85,8 @@ Approx time to complete from here: 2 hours ....
      ask Joel Brobecker <brobecker AT adacore DOT com>.
 
   7. Rename the current HEAD version entry in Bugzilla, and create a
-     new one.  E.g. rename "2.42 (HEAD)" to 2.42, and create
-     "2.43 (HEAD)":
+     new one.  E.g. rename "2.41 (HEAD)" to 2.41, and create
+     "2.42 (HEAD)":
      
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
@@ -103,13 +99,13 @@ Approx time to complete from here: 2 hours ....
      and the version number on the MAINLINE should be set to 2.41.50 -
      ie half way to 2.42 release.
 
-     So the BRANCH bfd/version.m4 has:
+     So the branch bfd/version.m4 has:
      
-       m4_define([BFD_VERSION], [2.41.90])
+       m4_define([BFD_VERSION], [2.40.90])
        
-     and the MAINLINE has:
+     and the mainline has:
 
-       m4_define([BFD_VERSION], [2.42.50])
+       m4_define([BFD_VERSION], [2.41.50])
 
      Regenerate various files on both branch and HEAD by configuring
      with "--enable-maintainer-mode --enable-gold --enable-shared" and then building
@@ -141,21 +137,21 @@ Approx time to complete from here: 2 hours ....
           xz -9 binutils-<release>.tar
 
           eg:
-	    touch -d 2024-01-01 binutils-2.41.90/gas/doc/.dirstamp
-	    tar rvf binutils-2.41.90.tar binutils-2.41.90/gas/doc/.dirstamp
-            rm binutils-2.41.90.tar.xz
-            xz -9 binutils-2.41.90.tar
+	    touch -d 2023-06-01 binutils-2.40.90/gas/doc/.dirstamp
+	    tar rvf binutils-2.40.90.tar binutils-2.40.90/gas/doc/.ditstamp
+            rm binutils-2.40.90.tar.xz
+            xz -9 binutils-2.40.90.tar
 	    
 	 ...END OF FIXME   
 
      c. Build a test target using this tarball.
 
-           cp binutils-2.41.90.tar.xz /dev/shm
+           cp binutils-2.40.90.tar.xz /dev/shm
 	   pushd /dev/shm
-	   tar xvf binutils-2.41.90.tar.xz
+	   tar xvf binutils-2.40.90.tar.xz
 	   mkdir build
 	   cd build
-	   ../binutils-2.41.90/configure --quiet --enable-gold
+	   ../binutils-2.40.90/configure --quiet --enable-gold
 	   make
 	   popd
 
@@ -177,11 +173,11 @@ Approx time to complete from here: 2 hours ....
 ------------------------------------------------------------------------
 Dear Translation Project
 
-  The 2.42 release branch has been created for the GNU Binutils project.
+  The 2.40 release branch has been created for the GNU Binutils project.
 
   A snapshot of the branch sources can be found here:
 
-    https://sourceware.org/pub/binutils/snapshots/binutils-2.41.90.tar.xz
+    https://sourceware.org/pub/binutils/snapshots/binutils-2.39.90.tar.xz
 
   We hope to make the official release of the sources on the <DATE>
   although that could change if there are important bugs that need to
@@ -192,7 +188,7 @@ Dear Translation Project
       binutils mailing list.  Set a date for when the release will
       actually happen.  Something like:
       
-
+------------------------------------------------------------------------
 Hi Everyone, 
 
   The <NEW_VERSION> branch has now been created:
@@ -223,39 +219,25 @@ Hi Everyone,
       architectures...
 
 ==============================================================================
-==============================================================================
 
-For the next few weeks, monitor the mailing list for new translations
-and respond to any requests to have patches applied to the branch.
+When the time comes to actually make the release....
 
-==============================================================================
-==============================================================================
-
-Then, a couple of weeks later ...
-
--------------------------------------------------
-How to create the release.
--------------------------------------------------
 
   20. Make sure that the branch sources still build, test and install 
       correctly.  Make sure that the sources are clean, without any
       patch files (.reg .orig *~) left over.
 
          cd <branch>
-         git pull	 
 	 git clean -fdx
-	 cd <builds>
-	 make
 
   21. a. Update the release number in bfd/version.m4 on the release
          branch to a whole new minor version number, without a point
-         value.  Eg "2.41.90" becomes "2.42".  NB/ Not: "2.42.00"
+         value.  Eg "2.40.90" becomes "2.41".  NB/ Not: "2.41.00"
 
       b. Change bfd/development.sh to set all values to "false".
 
       c. Regenerate the configure and makefiles.  And *info* files.
 
-            cd <build-configured-with-enable-maintainer-mode>
             make all-gas all-ld all-binutils all-gprof all-gold all-gprofng all-libctf
 	    make info
 
@@ -277,7 +259,7 @@ How to create the release.
 	 need to agree to have it there.
 	
       e. Add ChangeLog entries for all of the updates and add a
-         "this-is-the-2.42-release" comment and commit.
+         "this-is-the-2.41-release" comment and commit.
 
 	   git add .
            git commit
@@ -299,11 +281,7 @@ How to create the release.
       DEVO_SUPPORT variable in the src-release.sh script.  If they are
       needed then add them.
 
-      PARANOIA: Check that there are no pending commits:
-
-             git status
-	   
-      Then create the release tarballs:
+      Create the release tarballs:
   
             ./src-release.sh -b -g -l -x binutils
 
@@ -348,15 +326,14 @@ How to create the release.
 	[optional: add "-u XXXXX" to sign with a gpg key]
 	enter a tag message such as: "Official GNU Binutils 2.4x release"
 
-	    git tag -a <TAG>         -u <Your Key>
-	    git tag -a binutils-2_42 -u DD9E3C4F      <=== Be careful to get the tag right
+	    git tag -a binutils-2_41 -u DD9E3C4F      <=== Be careful to get the tag right
 
         NB/ If you do sign the binaries make sure to use a key
 	that has been published with the FSF.
 
         Then push the release:
 	
-	    git push origin binutils-2_42
+	    git push origin binutils-2_41
 
         If you get an error message along the lines of:
 	  "Invalid revision range ..."
@@ -364,7 +341,7 @@ How to create the release.
 
   27.  Upload the tarballs to ftp.gnu.org.
 
-          gnupload --to ftp.gnu.org:binutils binutils-2.42.tar.*
+          for A in bz2 gz lz xz ; do gnupload --to ftp.gnu.org:binutils binutils-2.41.tar.$A ; done
 
         Be prepared to provide the password for the key, if you
 	signed the binaries.
@@ -392,7 +369,7 @@ How to create the release.
   29. Update web pages.  For sourceware.org:
 
       Create a new documentation folder on the sourceware.org web
-      pages as /sourceware/www/sourceware/htdocs/binutils/docs-2.4x.
+      pages as /sourceware/www/sourceware/htdocs/binutils/docs-2.3x.
 
        sftp sourceware.org
          cd /sourceware/www/sourceware/htdocs/binutils
@@ -401,9 +378,9 @@ How to create the release.
 	 mkdir as
 	 mkdir bfd
 	 mkdir binutils
-	 mkdir gprof      [NB/ gprofng is not needed]
+	 mkdir gprof
 	 mkdir ld
-	 cd ../docs-2.4(x-1)
+	 cd ../docs-2.3(x-1)
 	 get index.html
 
       Update the (local copy of the) index.html file to point to the
@@ -435,7 +412,7 @@ How to create the release.
 	 put bfd.pdf
 	 
 	 cd binutils
-	 lcd ../../binutils/binutils_html      <=== NB/ Path not like others
+	 lcd ../../binutils/binutils      <=== NB/ Path not like others
 	 put *
 	 cd ..
 	 lcd ../doc                       <=== Also not like the others
@@ -496,7 +473,7 @@ Hi FSF Webmasters,
 https://www.gnu.org/software/binutils/binutils.html
 
   be updated to indicate that there is now a newer version available
-  (2.4x).  I have already updated the related page on the sourceware
+  (2.3x).  I have already updated the related page on the sourceware
   website so this might be useful as a template:
 
 https://sourceware.org/binutils/
@@ -559,7 +536,7 @@ Cheers
       date suffix keeps the version lower than the trunk version.
       Regenerate files.  Commit these changes.
 
-  33. Email the binutils list telling everyone that the 2.4x branch
+  33. Email the binutils list telling everyone that the 2.34 branch
       is now open for business as usual and that patches no longer
       need special approval.
 
@@ -567,7 +544,7 @@ Cheers
       any pending obsolete targets into the definitely obsolete
       section.  Create a changelog entry and commit.
 
-  Sit back and relax, you are all done.
+
 --------------------------------------------------------------------------
 How to perform a POINT release.
 --------------------------------------------------------------------------

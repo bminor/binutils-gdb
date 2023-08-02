@@ -1538,7 +1538,7 @@ elfNN_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 /* Allocate space in .plt, .got and associated reloc sections for
    ifunc dynamic relocs.  */
 
-static int
+static bool
 elfNN_allocate_local_ifunc_dynrelocs (void **slot, void *inf)
 {
   struct elf_link_hash_entry *h = (struct elf_link_hash_entry *) *slot;
@@ -1700,7 +1700,7 @@ loongarch_elf_size_dynamic_sections (bfd *output_bfd,
 
   /* Allocate .plt and .got entries, and space for local ifunc symbols.  */
   htab_traverse (htab->loc_hash_table,
-		 elfNN_allocate_local_ifunc_dynrelocs, info);
+		 (void *) elfNN_allocate_local_ifunc_dynrelocs, info);
 
   /* Don't allocate .got.plt section if there are no PLT.  */
   if (htab->elf.sgotplt && htab->elf.sgotplt->size == GOTPLT_HEADER_SIZE
@@ -4040,6 +4040,12 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
 {
   struct loongarch_elf_link_hash_table *htab = loongarch_elf_hash_table (info);
   const struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
+  asection *rela_dyn = bfd_get_section_by_name (output_bfd, ".rela.dyn");
+  struct bfd_link_order *lo = NULL;
+  Elf_Internal_Rela *slot = NULL, *last_slot = NULL;
+
+  if (rela_dyn)
+    lo = rela_dyn->map_head.link_order;
 
   if (h->plt.offset != MINUS_ONE)
     {
@@ -4049,6 +4055,7 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
       uint32_t plt_entry[PLT_ENTRY_INSNS];
       bfd_byte *loc;
       Elf_Internal_Rela rela;
+      asection *rela_sec = NULL;
 
       if (htab->elf.splt)
 	{
@@ -4106,7 +4113,26 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
 			       + h->root.u.def.section->output_section->vma
 			       + h->root.u.def.section->output_offset);
 
-	  loongarch_elf_append_rela (output_bfd, relplt, &rela);
+	  /* Find the space after dyn sort.  */
+	  while (slot == last_slot || slot->r_offset != 0)
+	    {
+	      if (slot != last_slot)
+		{
+		  slot++;
+		  continue;
+		}
+
+	      BFD_ASSERT (lo != NULL);
+	      rela_sec = lo->u.indirect.section;
+	      lo = lo->next;
+
+	      slot = (Elf_Internal_Rela *)rela_sec->contents;
+	      last_slot = (Elf_Internal_Rela *)(rela_sec->contents +
+						rela_sec->size);
+	    }
+
+	  bed->s->swap_reloca_out (output_bfd, &rela, (bfd_byte *)slot);
+	  rela_sec->reloc_count++;
 	}
       else
 	{
@@ -4273,40 +4299,13 @@ loongarch_finish_dyn (bfd *output_bfd, struct bfd_link_info *info, bfd *dynobj,
 /* Finish up local dynamic symbol handling.  We set the contents of
    various dynamic sections here.  */
 
-static int
+static bool
 elfNN_loongarch_finish_local_dynamic_symbol (void **slot, void *inf)
 {
   struct elf_link_hash_entry *h = (struct elf_link_hash_entry *) *slot;
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
 
   return loongarch_elf_finish_dynamic_symbol (info->output_bfd, info, h, NULL);
-}
-
-/* Value of struct elf_backend_data->elf_backend_output_arch_local_syms,
-   this function is called before elf_link_sort_relocs.
-   So relocation R_LARCH_IRELATIVE for local ifunc can be append to
-   .rela.dyn (.rela.got) by loongarch_elf_append_rela.  */
-
-static bool
-elf_loongarch_output_arch_local_syms
-  (bfd *output_bfd ATTRIBUTE_UNUSED,
-   struct bfd_link_info *info,
-   void *flaginfo ATTRIBUTE_UNUSED,
-   int (*func) (void *, const char *,
-		Elf_Internal_Sym *,
-		asection *,
-		struct elf_link_hash_entry *) ATTRIBUTE_UNUSED)
-{
-  struct loongarch_elf_link_hash_table *htab = loongarch_elf_hash_table (info);
-  if (htab == NULL)
-    return false;
-
-  /* Fill PLT and GOT entries for local STT_GNU_IFUNC symbols.  */
-  htab_traverse (htab->loc_hash_table,
-		 elfNN_loongarch_finish_local_dynamic_symbol,
-		 info);
-
-  return true;
 }
 
 static bool
@@ -4386,6 +4385,10 @@ loongarch_elf_finish_dynamic_sections (bfd *output_bfd,
 
       elf_section_data (output_section)->this_hdr.sh_entsize = GOT_ENTRY_SIZE;
     }
+
+  /* Fill PLT and GOT entries for local STT_GNU_IFUNC symbols.  */
+  htab_traverse (htab->loc_hash_table,
+		 (void *) elfNN_loongarch_finish_local_dynamic_symbol, info);
 
   return true;
 }
@@ -4651,8 +4654,6 @@ elf_loongarch64_hash_symbol (struct elf_link_hash_entry *h)
 #define elf_backend_size_dynamic_sections loongarch_elf_size_dynamic_sections
 #define elf_backend_relocate_section loongarch_elf_relocate_section
 #define elf_backend_finish_dynamic_symbol loongarch_elf_finish_dynamic_symbol
-#define elf_backend_output_arch_local_syms \
-  elf_loongarch_output_arch_local_syms
 #define elf_backend_finish_dynamic_sections				   \
   loongarch_elf_finish_dynamic_sections
 #define elf_backend_object_p loongarch_elf_object_p

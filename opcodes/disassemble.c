@@ -108,6 +108,23 @@
 #include "m32c-desc.h"
 #endif
 
+#ifdef ARCH_bpf
+/* XXX this should be including bpf-desc.h instead of this hackery,
+   but at the moment it is not possible to include several CGEN
+   generated *-desc.h files simultaneously.  To be fixed in
+   CGEN...  */
+
+# ifdef ARCH_m32c
+enum epbf_isa_attr
+{
+  ISA_EBPFLE, ISA_EBPFBE, ISA_XBPFLE, ISA_XBPFBE, ISA_EBPFMAX
+};
+# else
+#  include "bpf-desc.h"
+#  define ISA_EBPFMAX ISA_MAX
+# endif
+#endif /* ARCH_bpf */
+
 disassembler_ftype
 disassembler (enum bfd_architecture a,
 	      bool big ATTRIBUTE_UNUSED,
@@ -577,9 +594,7 @@ disassembler_usage (FILE *stream ATTRIBUTE_UNUSED)
 #ifdef ARCH_loongarch
   print_loongarch_disassembler_options (stream);
 #endif
-#ifdef ARCH_bpf
-  print_bpf_disassembler_options (stream);
-#endif
+
   return;
 }
 
@@ -680,7 +695,23 @@ disassemble_init_for_target (struct disassemble_info * info)
 #endif
 #ifdef ARCH_bpf
     case bfd_arch_bpf:
-      info->created_styled_output = true;
+      info->endian_code = BFD_ENDIAN_LITTLE;
+      if (!info->private_data)
+	{
+	  info->private_data = cgen_bitset_create (ISA_MAX);
+	  if (info->endian == BFD_ENDIAN_BIG)
+	    {
+	      cgen_bitset_set (info->private_data, ISA_EBPFBE);
+	      if (info->mach == bfd_mach_xbpf)
+		cgen_bitset_set (info->private_data, ISA_XBPFBE);
+	    }
+	  else
+	    {
+	      cgen_bitset_set (info->private_data, ISA_EBPFLE);
+	      if (info->mach == bfd_mach_xbpf)
+		cgen_bitset_set (info->private_data, ISA_XBPFLE);
+	    }
+	}
       break;
 #endif
 #ifdef ARCH_pru
@@ -737,10 +768,13 @@ disassemble_free_target (struct disassemble_info *info)
     default:
       return;
 
+#ifdef ARCH_bpf
+    case bfd_arch_bpf:
+#endif
 #ifdef ARCH_m32c
     case bfd_arch_m32c:
 #endif
-#if defined ARCH_m32c
+#if defined ARCH_bpf || defined ARCH_m32c
       if (info->private_data)
 	{
 	  CGEN_BITSET *mask = info->private_data;

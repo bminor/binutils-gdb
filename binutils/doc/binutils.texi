@@ -1626,11 +1626,6 @@ commands.  If the input was '12345678' then the outputs would be
 Set the access and modification dates of the output file to be the same
 as those of the input file.
 
-This option also copies the date stored in a PE format file's header,
-unless the SOURCE_DATE_EPOCH environment variable is defined.  If it
-is defined then this variable will be used as the date stored in the
-header, interpreted as the number of seconds since the Unix epoch.
-
 @item -D
 @itemx --enable-deterministic-archives
 @cindex deterministic archives
@@ -1750,14 +1745,13 @@ Set the flags for any sections matching @var{sectionpattern}.  The
 @var{flags} argument is a comma separated string of flag names.  The
 recognized names are @samp{alloc}, @samp{contents}, @samp{load},
 @samp{noload}, @samp{readonly}, @samp{code}, @samp{data}, @samp{rom},
-@samp{exclude}, @samp{share}, @samp{debug}, and @samp{large}.
-You can set the @samp{contents} flag for a section which does not have
-contents, but it is not meaningful to clear the @samp{contents} flag of a
-section which does have contents--just remove the section instead.  Not all
-flags are meaningful for all object file formats.  In particular the
-@samp{share} flag is only meaningful for COFF format files and not for ELF
-format files.  The ELF x86-64 specific flag @samp{large} corresponds to
-SHF_X86_64_LARGE.
+@samp{exclude}, @samp{share}, and @samp{debug}.  You can set the
+@samp{contents} flag for a section which does not have contents, but it
+is not meaningful to clear the @samp{contents} flag of a section which
+does have contents--just remove the section instead.  Not all flags are
+meaningful for all object file formats.  In particular the
+@samp{share} flag is only meaningful for COFF format files and not for
+ELF format files.
 
 @item --set-section-alignment @var{sectionpattern}=@var{align}
 Set the alignment for any sections matching @var{sectionpattern}.

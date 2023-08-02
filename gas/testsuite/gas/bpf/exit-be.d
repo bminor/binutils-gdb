@@ -1,6 +1,6 @@
-#as: -EB -mdialect=normal
+#as: --EB
 #source: exit.s
-#objdump: -dr -M hex
+#objdump: -dr
 #name: eBPF EXIT instruction, big endian
 
 .*: +file format .*bpf.*

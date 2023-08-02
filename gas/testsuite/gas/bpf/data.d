@@ -1,4 +1,4 @@
-#as: -EL -mdialect=normal
+#as: --EL
 #objdump: -s -j .data
 #name: eBPF data directives
 

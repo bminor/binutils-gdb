@@ -1,7 +1,7 @@
 #as: --EL
 #source: call-2.s
 #source: bar.s
-#objdump: -dr -M dec
+#objdump: -dr
 #ld: -EL
 #name: CALL with disp32 reloc and addend
 

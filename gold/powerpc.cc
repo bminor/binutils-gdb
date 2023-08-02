@@ -12420,24 +12420,17 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	       && gsym->is_undefined()
 	       && is_branch_reloc<size>(r_type))))
     {
-      std::string name;
-      if (gsym)
-	name = gsym->demangled_name();
-      else
-	name = relinfo->object->get_symbol_name(r_sym);
       if (os->flags() & elfcpp::SHF_ALLOC)
 	{
 	  gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
-				 _("reloc type %u overflow against '%s'"),
-				 r_type, name.c_str());
+				 _("relocation overflow"));
 	  if (has_stub_value)
 	    gold_info(_("try relinking with a smaller --stub-group-size"));
 	}
       else
 	{
 	  gold_warning_at_location(relinfo, relnum, rela.get_r_offset(),
-				   _("reloc type %u overflow against '%s'"),
-				   r_type, name.c_str());
+				   _("relocation overflow"));
 	  gold_info(_("debug info may be unreliable, compile with -gdwarf64"));
 	}
     }

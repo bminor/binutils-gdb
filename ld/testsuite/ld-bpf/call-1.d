@@ -1,7 +1,7 @@
-#as: --EL -mdialect=normal
+#as: --EL
 #source: foo.s
 #source: bar.s
-#objdump: -dr -M dec
+#objdump: -dr
 #ld: -EL
 #name: CALL with 64_32 reloc
 

@@ -1,26 +1,7 @@
-2023-07-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+2023-07-30  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c (get_machine_flags): Recognize and pretty print BPF
-	machine flags.
-
-2023-07-24  Johannes Schauer Marin Rodrigues  <josch@debian.org>
-
-	* doc/binutils.texi (objcopy): Document change in behaviour of
-	objcopy's --preserve-dates command line option.
-
-2023-07-09  Fangrui Song  <maskray@google.com>
-
-	PR 30592
-	* NEWS: Mention the new feature for objcopy.
-	* doc/binutils.texi: Mention "large".
-	* objcopy.c (parse_flags): Parse "large".
-	(check_new_section_flags): Error if "large" is used with a
-	non-x86-64 ELF target.
-	* testsuite/binutils-all/x86-64/large-sections.d: New.
-	* testsuite/binutils-all/x86-64/large-sections.s: New.
-	* testsuite/binutils-all/x86-64/large-sections-i386.d: New.
-	* testsuite/binutils-all/x86-64/large-sections-2.d: New.
-	* testsuite/binutils-all/x86-64/large-sections-2-x32.d: New.
+	This is the 2.41 release.
+	* configure: Regenerate.
 
 2023-07-03  Nick Clifton  <nickc@redhat.com>
 
