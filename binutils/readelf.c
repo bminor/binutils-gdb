@@ -3001,8 +3001,8 @@ get_machine_name (unsigned e_machine)
     }
 }
 
-static void
-decode_ARC_machine_flags (unsigned e_flags, unsigned e_machine, char buf[])
+static char *
+decode_ARC_machine_flags (char *out, unsigned e_flags, unsigned e_machine)
 {
   /* ARC has two machine types EM_ARC_COMPACT and EM_ARC_COMPACT2.  Some
      other compilers don't specify an architecture type in the e_flags, and
@@ -3021,21 +3021,21 @@ decode_ARC_machine_flags (unsigned e_flags, unsigned e_machine, char buf[])
     {
       /* We only expect these to occur for EM_ARC_COMPACT2.  */
     case EF_ARC_CPU_ARCV2EM:
-      strcat (buf, ", ARC EM");
+      out = stpcpy (out, ", ARC EM");
       break;
     case EF_ARC_CPU_ARCV2HS:
-      strcat (buf, ", ARC HS");
+      out = stpcpy (out, ", ARC HS");
       break;
 
       /* We only expect these to occur for EM_ARC_COMPACT.  */
     case E_ARC_MACH_ARC600:
-      strcat (buf, ", ARC600");
+      out = stpcpy (out, ", ARC600");
       break;
     case E_ARC_MACH_ARC601:
-      strcat (buf, ", ARC601");
+      out = stpcpy (out, ", ARC601");
       break;
     case E_ARC_MACH_ARC700:
-      strcat (buf, ", ARC700");
+      out = stpcpy (out, ", ARC700");
       break;
 
       /* The only times we should end up here are (a) A corrupt ELF, (b) A
@@ -3044,35 +3044,36 @@ decode_ARC_machine_flags (unsigned e_flags, unsigned e_machine, char buf[])
          set the architecture in the e_flags.  */
     default:
       if (e_machine == EM_ARC_COMPACT)
-        strcat (buf, ", Unknown ARCompact");
+	out = stpcpy (out, ", Unknown ARCompact");
       else
-        strcat (buf, ", Unknown ARC");
+	out = stpcpy (out, ", Unknown ARC");
       break;
     }
 
   switch (e_flags & EF_ARC_OSABI_MSK)
     {
     case E_ARC_OSABI_ORIG:
-      strcat (buf, ", (ABI:legacy)");
+      out = stpcpy (out, ", (ABI:legacy)");
       break;
     case E_ARC_OSABI_V2:
-      strcat (buf, ", (ABI:v2)");
+      out = stpcpy (out, ", (ABI:v2)");
       break;
       /* Only upstream 3.9+ kernels will support ARCv2 ISA.  */
     case E_ARC_OSABI_V3:
-      strcat (buf, ", v3 no-legacy-syscalls ABI");
+      out = stpcpy (out, ", v3 no-legacy-syscalls ABI");
       break;
     case E_ARC_OSABI_V4:
-      strcat (buf, ", v4 ABI");
+      out = stpcpy (out, ", v4 ABI");
       break;
     default:
-      strcat (buf, ", unrecognised ARC OSABI flag");
+      out = stpcpy (out, ", unrecognised ARC OSABI flag");
       break;
     }
+  return out;
 }
 
-static void
-decode_ARM_machine_flags (unsigned e_flags, char buf[])
+static char *
+decode_ARM_machine_flags (char *out, unsigned e_flags)
 {
   unsigned eabi;
   bool unknown = false;
@@ -3083,13 +3084,13 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
   /* Handle "generic" ARM flags.  */
   if (e_flags & EF_ARM_RELEXEC)
     {
-      strcat (buf, ", relocatable executable");
+      out = stpcpy (out, ", relocatable executable");
       e_flags &= ~ EF_ARM_RELEXEC;
     }
 
   if (e_flags & EF_ARM_PIC)
     {
-      strcat (buf, ", position independent");
+      out = stpcpy (out, ", position independent");
       e_flags &= ~ EF_ARM_PIC;
     }
 
@@ -3097,13 +3098,13 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
   switch (eabi)
     {
     default:
-      strcat (buf, ", <unrecognized EABI>");
+      out = stpcpy (out, ", <unrecognized EABI>");
       if (e_flags)
 	unknown = true;
       break;
 
     case EF_ARM_EABI_VER1:
-      strcat (buf, ", Version1 EABI");
+      out = stpcpy (out, ", Version1 EABI");
       while (e_flags)
 	{
 	  unsigned flag;
@@ -3115,7 +3116,7 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
 	  switch (flag)
 	    {
 	    case EF_ARM_SYMSARESORTED: /* Conflicts with EF_ARM_INTERWORK.  */
-	      strcat (buf, ", sorted symbol tables");
+	      out = stpcpy (out, ", sorted symbol tables");
 	      break;
 
 	    default:
@@ -3126,7 +3127,7 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
       break;
 
     case EF_ARM_EABI_VER2:
-      strcat (buf, ", Version2 EABI");
+      out = stpcpy (out, ", Version2 EABI");
       while (e_flags)
 	{
 	  unsigned flag;
@@ -3138,15 +3139,15 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
 	  switch (flag)
 	    {
 	    case EF_ARM_SYMSARESORTED: /* Conflicts with EF_ARM_INTERWORK.  */
-	      strcat (buf, ", sorted symbol tables");
+	      out = stpcpy (out, ", sorted symbol tables");
 	      break;
 
 	    case EF_ARM_DYNSYMSUSESEGIDX:
-	      strcat (buf, ", dynamic symbols use segment index");
+	      out = stpcpy (out, ", dynamic symbols use segment index");
 	      break;
 
 	    case EF_ARM_MAPSYMSFIRST:
-	      strcat (buf, ", mapping symbols precede others");
+	      out = stpcpy (out, ", mapping symbols precede others");
 	      break;
 
 	    default:
@@ -3157,11 +3158,11 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
       break;
 
     case EF_ARM_EABI_VER3:
-      strcat (buf, ", Version3 EABI");
+      out = stpcpy (out, ", Version3 EABI");
       break;
 
     case EF_ARM_EABI_VER4:
-      strcat (buf, ", Version4 EABI");
+      out = stpcpy (out, ", Version4 EABI");
       while (e_flags)
 	{
 	  unsigned flag;
@@ -3173,11 +3174,11 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
 	  switch (flag)
 	    {
 	    case EF_ARM_BE8:
-	      strcat (buf, ", BE8");
+	      out = stpcpy (out, ", BE8");
 	      break;
 
 	    case EF_ARM_LE8:
-	      strcat (buf, ", LE8");
+	      out = stpcpy (out, ", LE8");
 	      break;
 
 	    default:
@@ -3188,7 +3189,7 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
       break;
 
     case EF_ARM_EABI_VER5:
-      strcat (buf, ", Version5 EABI");
+      out = stpcpy (out, ", Version5 EABI");
       while (e_flags)
 	{
 	  unsigned flag;
@@ -3200,19 +3201,19 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
 	  switch (flag)
 	    {
 	    case EF_ARM_BE8:
-	      strcat (buf, ", BE8");
+	      out = stpcpy (out, ", BE8");
 	      break;
 
 	    case EF_ARM_LE8:
-	      strcat (buf, ", LE8");
+	      out = stpcpy (out, ", LE8");
 	      break;
 
 	    case EF_ARM_ABI_FLOAT_SOFT: /* Conflicts with EF_ARM_SOFT_FLOAT.  */
-	      strcat (buf, ", soft-float ABI");
+	      out = stpcpy (out, ", soft-float ABI");
 	      break;
 
 	    case EF_ARM_ABI_FLOAT_HARD: /* Conflicts with EF_ARM_VFP_FLOAT.  */
-	      strcat (buf, ", hard-float ABI");
+	      out = stpcpy (out, ", hard-float ABI");
 	      break;
 
 	    default:
@@ -3223,7 +3224,7 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
       break;
 
     case EF_ARM_EABI_UNKNOWN:
-      strcat (buf, ", GNU EABI");
+      out = stpcpy (out, ", GNU EABI");
       while (e_flags)
 	{
 	  unsigned flag;
@@ -3235,43 +3236,43 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
 	  switch (flag)
 	    {
 	    case EF_ARM_INTERWORK:
-	      strcat (buf, ", interworking enabled");
+	      out = stpcpy (out, ", interworking enabled");
 	      break;
 
 	    case EF_ARM_APCS_26:
-	      strcat (buf, ", uses APCS/26");
+	      out = stpcpy (out, ", uses APCS/26");
 	      break;
 
 	    case EF_ARM_APCS_FLOAT:
-	      strcat (buf, ", uses APCS/float");
+	      out = stpcpy (out, ", uses APCS/float");
 	      break;
 
 	    case EF_ARM_PIC:
-	      strcat (buf, ", position independent");
+	      out = stpcpy (out, ", position independent");
 	      break;
 
 	    case EF_ARM_ALIGN8:
-	      strcat (buf, ", 8 bit structure alignment");
+	      out = stpcpy (out, ", 8 bit structure alignment");
 	      break;
 
 	    case EF_ARM_NEW_ABI:
-	      strcat (buf, ", uses new ABI");
+	      out = stpcpy (out, ", uses new ABI");
 	      break;
 
 	    case EF_ARM_OLD_ABI:
-	      strcat (buf, ", uses old ABI");
+	      out = stpcpy (out, ", uses old ABI");
 	      break;
 
 	    case EF_ARM_SOFT_FLOAT:
-	      strcat (buf, ", software FP");
+	      out = stpcpy (out, ", software FP");
 	      break;
 
 	    case EF_ARM_VFP_FLOAT:
-	      strcat (buf, ", VFP");
+	      out = stpcpy (out, ", VFP");
 	      break;
 
 	    case EF_ARM_MAVERICK_FLOAT:
-	      strcat (buf, ", Maverick FP");
+	      out = stpcpy (out, ", Maverick FP");
 	      break;
 
 	    default:
@@ -3282,89 +3283,585 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
     }
 
   if (unknown)
-    strcat (buf,_(", <unknown>"));
+    out = stpcpy (out,_(", <unknown>"));
+  return out;
 }
 
-static void
-decode_AVR_machine_flags (unsigned e_flags, char buf[], size_t size)
+static char *
+decode_AVR_machine_flags (char *out, unsigned e_flags)
 {
-  --size; /* Leave space for null terminator.  */
-
   switch (e_flags & EF_AVR_MACH)
     {
     case E_AVR_MACH_AVR1:
-      strncat (buf, ", avr:1", size);
+      out = stpcpy (out, ", avr:1");
       break;
     case E_AVR_MACH_AVR2:
-      strncat (buf, ", avr:2", size);
+      out = stpcpy (out, ", avr:2");
       break;
     case E_AVR_MACH_AVR25:
-      strncat (buf, ", avr:25", size);
+      out = stpcpy (out, ", avr:25");
       break;
     case E_AVR_MACH_AVR3:
-      strncat (buf, ", avr:3", size);
+      out = stpcpy (out, ", avr:3");
       break;
     case E_AVR_MACH_AVR31:
-      strncat (buf, ", avr:31", size);
+      out = stpcpy (out, ", avr:31");
       break;
     case E_AVR_MACH_AVR35:
-      strncat (buf, ", avr:35", size);
+      out = stpcpy (out, ", avr:35");
       break;
     case E_AVR_MACH_AVR4:
-      strncat (buf, ", avr:4", size);
+      out = stpcpy (out, ", avr:4");
       break;
     case E_AVR_MACH_AVR5:
-      strncat (buf, ", avr:5", size);
+      out = stpcpy (out, ", avr:5");
       break;
     case E_AVR_MACH_AVR51:
-      strncat (buf, ", avr:51", size);
+      out = stpcpy (out, ", avr:51");
       break;
     case E_AVR_MACH_AVR6:
-      strncat (buf, ", avr:6", size);
+      out = stpcpy (out, ", avr:6");
       break;
     case E_AVR_MACH_AVRTINY:
-      strncat (buf, ", avr:100", size);
+      out = stpcpy (out, ", avr:100");
       break;
     case E_AVR_MACH_XMEGA1:
-      strncat (buf, ", avr:101", size);
+      out = stpcpy (out, ", avr:101");
       break;
     case E_AVR_MACH_XMEGA2:
-      strncat (buf, ", avr:102", size);
+      out = stpcpy (out, ", avr:102");
       break;
     case E_AVR_MACH_XMEGA3:
-      strncat (buf, ", avr:103", size);
+      out = stpcpy (out, ", avr:103");
       break;
     case E_AVR_MACH_XMEGA4:
-      strncat (buf, ", avr:104", size);
+      out = stpcpy (out, ", avr:104");
       break;
     case E_AVR_MACH_XMEGA5:
-      strncat (buf, ", avr:105", size);
+      out = stpcpy (out, ", avr:105");
       break;
     case E_AVR_MACH_XMEGA6:
-      strncat (buf, ", avr:106", size);
+      out = stpcpy (out, ", avr:106");
       break;
     case E_AVR_MACH_XMEGA7:
-      strncat (buf, ", avr:107", size);
+      out = stpcpy (out, ", avr:107");
       break;
     default:
-      strncat (buf, ", avr:<unknown>", size);
+      out = stpcpy (out, ", avr:<unknown>");
       break;
     }
 
-  size -= strlen (buf);
   if (e_flags & EF_AVR_LINKRELAX_PREPARED)
-    strncat (buf, ", link-relax", size);
+    out = stpcpy (out, ", link-relax");
+  return out;
 }
 
-static void
-decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
+static char *
+decode_BLACKFIN_machine_flags (char *out, unsigned e_flags)
+{
+  if (e_flags & EF_BFIN_PIC)
+    out = stpcpy (out, ", PIC");
+
+  if (e_flags & EF_BFIN_FDPIC)
+    out = stpcpy (out, ", FDPIC");
+
+  if (e_flags & EF_BFIN_CODE_IN_L1)
+    out = stpcpy (out, ", code in L1");
+
+  if (e_flags & EF_BFIN_DATA_IN_L1)
+    out = stpcpy (out, ", data in L1");
+  return out;
+}
+
+static char *
+decode_FRV_machine_flags (char *out, unsigned e_flags)
+{
+  switch (e_flags & EF_FRV_CPU_MASK)
+    {
+    case EF_FRV_CPU_GENERIC:
+      break;
+
+    default:
+      out = stpcpy (out, ", fr???");
+      break;
+
+    case EF_FRV_CPU_FR300:
+      out = stpcpy (out, ", fr300");
+      break;
+
+    case EF_FRV_CPU_FR400:
+      out = stpcpy (out, ", fr400");
+      break;
+    case EF_FRV_CPU_FR405:
+      out = stpcpy (out, ", fr405");
+      break;
+
+    case EF_FRV_CPU_FR450:
+      out = stpcpy (out, ", fr450");
+      break;
+
+    case EF_FRV_CPU_FR500:
+      out = stpcpy (out, ", fr500");
+      break;
+    case EF_FRV_CPU_FR550:
+      out = stpcpy (out, ", fr550");
+      break;
+
+    case EF_FRV_CPU_SIMPLE:
+      out = stpcpy (out, ", simple");
+      break;
+    case EF_FRV_CPU_TOMCAT:
+      out = stpcpy (out, ", tomcat");
+      break;
+    }
+  return out;
+}
+
+static char *
+decode_IA64_machine_flags (char *out, unsigned e_flags, Filedata *filedata)
+{
+  if ((e_flags & EF_IA_64_ABI64))
+    out = stpcpy (out, ", 64-bit");
+  else
+    out = stpcpy (out, ", 32-bit");
+  if ((e_flags & EF_IA_64_REDUCEDFP))
+    out = stpcpy (out, ", reduced fp model");
+  if ((e_flags & EF_IA_64_NOFUNCDESC_CONS_GP))
+    out = stpcpy (out, ", no function descriptors, constant gp");
+  else if ((e_flags & EF_IA_64_CONS_GP))
+    out = stpcpy (out, ", constant gp");
+  if ((e_flags & EF_IA_64_ABSOLUTE))
+    out = stpcpy (out, ", absolute");
+  if (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_OPENVMS)
+    {
+      if ((e_flags & EF_IA_64_VMS_LINKAGES))
+	out = stpcpy (out, ", vms_linkages");
+      switch ((e_flags & EF_IA_64_VMS_COMCOD))
+	{
+	case EF_IA_64_VMS_COMCOD_SUCCESS:
+	  break;
+	case EF_IA_64_VMS_COMCOD_WARNING:
+	  out = stpcpy (out, ", warning");
+	  break;
+	case EF_IA_64_VMS_COMCOD_ERROR:
+	  out = stpcpy (out, ", error");
+	  break;
+	case EF_IA_64_VMS_COMCOD_ABORT:
+	  out = stpcpy (out, ", abort");
+	  break;
+	default:
+	  warn (_("Unrecognised IA64 VMS Command Code: %x\n"),
+		e_flags & EF_IA_64_VMS_COMCOD);
+	  out = stpcpy (out, ", <unknown>");
+	}
+    }
+  return out;
+}
+
+static char *
+decode_LOONGARCH_machine_flags (char *out, unsigned int e_flags)
+{
+  if (EF_LOONGARCH_IS_SOFT_FLOAT (e_flags))
+    out = stpcpy (out, ", SOFT-FLOAT");
+  else if (EF_LOONGARCH_IS_SINGLE_FLOAT (e_flags))
+    out = stpcpy (out, ", SINGLE-FLOAT");
+  else if (EF_LOONGARCH_IS_DOUBLE_FLOAT (e_flags))
+    out = stpcpy (out, ", DOUBLE-FLOAT");
+
+  if (EF_LOONGARCH_IS_OBJ_V0 (e_flags))
+    out = stpcpy (out, ", OBJ-v0");
+  else if (EF_LOONGARCH_IS_OBJ_V1 (e_flags))
+    out = stpcpy (out, ", OBJ-v1");
+  return out;
+}
+
+static char *
+decode_M68K_machine_flags (char *out, unsigned int e_flags)
+{
+  if ((e_flags & EF_M68K_ARCH_MASK) == EF_M68K_M68000)
+    out = stpcpy (out, ", m68000");
+  else if ((e_flags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32)
+    out = stpcpy (out, ", cpu32");
+  else if ((e_flags & EF_M68K_ARCH_MASK) == EF_M68K_FIDO)
+    out = stpcpy (out, ", fido_a");
+  else
+    {
+      char const *isa = _("unknown");
+      char const *mac = _("unknown mac");
+      char const *additional = NULL;
+
+      switch (e_flags & EF_M68K_CF_ISA_MASK)
+	{
+	case EF_M68K_CF_ISA_A_NODIV:
+	  isa = "A";
+	  additional = ", nodiv";
+	  break;
+	case EF_M68K_CF_ISA_A:
+	  isa = "A";
+	  break;
+	case EF_M68K_CF_ISA_A_PLUS:
+	  isa = "A+";
+	  break;
+	case EF_M68K_CF_ISA_B_NOUSP:
+	  isa = "B";
+	  additional = ", nousp";
+	  break;
+	case EF_M68K_CF_ISA_B:
+	  isa = "B";
+	  break;
+	case EF_M68K_CF_ISA_C:
+	  isa = "C";
+	  break;
+	case EF_M68K_CF_ISA_C_NODIV:
+	  isa = "C";
+	  additional = ", nodiv";
+	  break;
+	}
+      out = stpcpy (out, ", cf, isa ");
+      out = stpcpy (out, isa);
+      if (additional)
+	out = stpcpy (out, additional);
+      if (e_flags & EF_M68K_CF_FLOAT)
+	out = stpcpy (out, ", float");
+      switch (e_flags & EF_M68K_CF_MAC_MASK)
+	{
+	case 0:
+	  mac = NULL;
+	  break;
+	case EF_M68K_CF_MAC:
+	  mac = "mac";
+	  break;
+	case EF_M68K_CF_EMAC:
+	  mac = "emac";
+	  break;
+	case EF_M68K_CF_EMAC_B:
+	  mac = "emac_b";
+	  break;
+	}
+      if (mac)
+	{
+	  out = stpcpy (out, ", ");
+	  out = stpcpy (out, mac);
+	}
+    }
+  return out;
+}
+
+static char *
+decode_MeP_machine_flags (char *out, unsigned int e_flags)
+{
+  switch (e_flags & EF_MEP_CPU_MASK)
+    {
+    case EF_MEP_CPU_MEP:
+      out = stpcpy (out, ", generic MeP");
+      break;
+    case EF_MEP_CPU_C2:
+      out = stpcpy (out, ", MeP C2");
+      break;
+    case EF_MEP_CPU_C3:
+      out = stpcpy (out, ", MeP C3");
+      break;
+    case EF_MEP_CPU_C4:
+      out = stpcpy (out, ", MeP C4");
+      break;
+    case EF_MEP_CPU_C5:
+      out = stpcpy (out, ", MeP C5");
+      break;
+    case EF_MEP_CPU_H1:
+      out = stpcpy (out, ", MeP H1");
+      break;
+    default:
+      out = stpcpy (out, _(", <unknown MeP cpu type>"));
+      break;
+    }
+
+  switch (e_flags & EF_MEP_COP_MASK)
+    {
+    case EF_MEP_COP_NONE:
+      break;
+    case EF_MEP_COP_AVC:
+      out = stpcpy (out, ", AVC coprocessor");
+      break;
+    case EF_MEP_COP_AVC2:
+      out = stpcpy (out, ", AVC2 coprocessor");
+      break;
+    case EF_MEP_COP_FMAX:
+      out = stpcpy (out, ", FMAX coprocessor");
+      break;
+    case EF_MEP_COP_IVC2:
+      out = stpcpy (out, ", IVC2 coprocessor");
+      break;
+    default:
+      out = stpcpy (out, _("<unknown MeP copro type>"));
+      break;
+    }
+
+  if (e_flags & EF_MEP_LIBRARY)
+    out = stpcpy (out, ", Built for Library");
+
+  if (e_flags & EF_MEP_INDEX_MASK)
+    out += sprintf (out, ", Configuration Index: %#x",
+		    e_flags & EF_MEP_INDEX_MASK);
+
+  if (e_flags & ~ EF_MEP_ALL_FLAGS)
+    out += sprintf (out, _(", unknown flags bits: %#x"),
+		    e_flags & ~ EF_MEP_ALL_FLAGS);
+  return out;
+}
+
+static char *
+decode_MIPS_machine_flags (char *out, unsigned int e_flags)
+{
+  if (e_flags & EF_MIPS_NOREORDER)
+    out = stpcpy (out, ", noreorder");
+
+  if (e_flags & EF_MIPS_PIC)
+    out = stpcpy (out, ", pic");
+
+  if (e_flags & EF_MIPS_CPIC)
+    out = stpcpy (out, ", cpic");
+
+  if (e_flags & EF_MIPS_UCODE)
+    out = stpcpy (out, ", ugen_reserved");
+
+  if (e_flags & EF_MIPS_ABI2)
+    out = stpcpy (out, ", abi2");
+
+  if (e_flags & EF_MIPS_OPTIONS_FIRST)
+    out = stpcpy (out, ", odk first");
+
+  if (e_flags & EF_MIPS_32BITMODE)
+    out = stpcpy (out, ", 32bitmode");
+
+  if (e_flags & EF_MIPS_NAN2008)
+    out = stpcpy (out, ", nan2008");
+
+  if (e_flags & EF_MIPS_FP64)
+    out = stpcpy (out, ", fp64");
+
+  switch ((e_flags & EF_MIPS_MACH))
+    {
+    case E_MIPS_MACH_3900:
+      out = stpcpy (out, ", 3900");
+      break;
+    case E_MIPS_MACH_4010:
+      out = stpcpy (out, ", 4010");
+      break;
+    case E_MIPS_MACH_4100:
+      out = stpcpy (out, ", 4100");
+      break;
+    case E_MIPS_MACH_4111:
+      out = stpcpy (out, ", 4111");
+      break;
+    case E_MIPS_MACH_4120:
+      out = stpcpy (out, ", 4120");
+      break;
+    case E_MIPS_MACH_4650:
+      out = stpcpy (out, ", 4650");
+      break;
+    case E_MIPS_MACH_5400:
+      out = stpcpy (out, ", 5400");
+      break;
+    case E_MIPS_MACH_5500:
+      out = stpcpy (out, ", 5500");
+      break;
+    case E_MIPS_MACH_5900:
+      out = stpcpy (out, ", 5900");
+      break;
+    case E_MIPS_MACH_SB1:
+      out = stpcpy (out, ", sb1");
+      break;
+    case E_MIPS_MACH_9000:
+      out = stpcpy (out, ", 9000");
+      break;
+    case E_MIPS_MACH_LS2E:
+      out = stpcpy (out, ", loongson-2e");
+      break;
+    case E_MIPS_MACH_LS2F:
+      out = stpcpy (out, ", loongson-2f");
+      break;
+    case E_MIPS_MACH_GS464:
+      out = stpcpy (out, ", gs464");
+      break;
+    case E_MIPS_MACH_GS464E:
+      out = stpcpy (out, ", gs464e");
+      break;
+    case E_MIPS_MACH_GS264E:
+      out = stpcpy (out, ", gs264e");
+      break;
+    case E_MIPS_MACH_OCTEON:
+      out = stpcpy (out, ", octeon");
+      break;
+    case E_MIPS_MACH_OCTEON2:
+      out = stpcpy (out, ", octeon2");
+      break;
+    case E_MIPS_MACH_OCTEON3:
+      out = stpcpy (out, ", octeon3");
+      break;
+    case E_MIPS_MACH_XLR:
+      out = stpcpy (out, ", xlr");
+      break;
+    case E_MIPS_MACH_IAMR2:
+      out = stpcpy (out, ", interaptiv-mr2");
+      break;
+    case E_MIPS_MACH_ALLEGREX:
+      out = stpcpy (out, ", allegrex");
+      break;
+    case 0:
+      /* We simply ignore the field in this case to avoid confusion:
+	 MIPS ELF does not specify EF_MIPS_MACH, it is a GNU
+	 extension.  */
+      break;
+    default:
+      out = stpcpy (out, _(", unknown CPU"));
+      break;
+    }
+
+  switch ((e_flags & EF_MIPS_ABI))
+    {
+    case E_MIPS_ABI_O32:
+      out = stpcpy (out, ", o32");
+      break;
+    case E_MIPS_ABI_O64:
+      out = stpcpy (out, ", o64");
+      break;
+    case E_MIPS_ABI_EABI32:
+      out = stpcpy (out, ", eabi32");
+      break;
+    case E_MIPS_ABI_EABI64:
+      out = stpcpy (out, ", eabi64");
+      break;
+    case 0:
+      /* We simply ignore the field in this case to avoid confusion:
+	 MIPS ELF does not specify EF_MIPS_ABI, it is a GNU extension.
+	 This means it is likely to be an o32 file, but not for
+	 sure.  */
+      break;
+    default:
+      out = stpcpy (out, _(", unknown ABI"));
+      break;
+    }
+
+  if (e_flags & EF_MIPS_ARCH_ASE_MDMX)
+    out = stpcpy (out, ", mdmx");
+
+  if (e_flags & EF_MIPS_ARCH_ASE_M16)
+    out = stpcpy (out, ", mips16");
+
+  if (e_flags & EF_MIPS_ARCH_ASE_MICROMIPS)
+    out = stpcpy (out, ", micromips");
+
+  switch ((e_flags & EF_MIPS_ARCH))
+    {
+    case E_MIPS_ARCH_1:
+      out = stpcpy (out, ", mips1");
+      break;
+    case E_MIPS_ARCH_2:
+      out = stpcpy (out, ", mips2");
+      break;
+    case E_MIPS_ARCH_3:
+      out = stpcpy (out, ", mips3");
+      break;
+    case E_MIPS_ARCH_4:
+      out = stpcpy (out, ", mips4");
+      break;
+    case E_MIPS_ARCH_5:
+      out = stpcpy (out, ", mips5");
+      break;
+    case E_MIPS_ARCH_32:
+      out = stpcpy (out, ", mips32");
+      break;
+    case E_MIPS_ARCH_32R2:
+      out = stpcpy (out, ", mips32r2");
+      break;
+    case E_MIPS_ARCH_32R6:
+      out = stpcpy (out, ", mips32r6");
+      break;
+    case E_MIPS_ARCH_64:
+      out = stpcpy (out, ", mips64");
+      break;
+    case E_MIPS_ARCH_64R2:
+      out = stpcpy (out, ", mips64r2");
+      break;
+    case E_MIPS_ARCH_64R6:
+      out = stpcpy (out, ", mips64r6");
+      break;
+    default:
+      out = stpcpy (out, _(", unknown ISA"));
+      break;
+    }
+  return out;
+}
+
+static char *
+decode_MSP430_machine_flags (char *out, unsigned e_flags)
+{
+  out = stpcpy (out, _(": architecture variant: "));
+  switch (e_flags & EF_MSP430_MACH)
+    {
+    case E_MSP430_MACH_MSP430x11:
+      out = stpcpy (out, "MSP430x11");
+      break;
+    case E_MSP430_MACH_MSP430x11x1:
+      out = stpcpy (out, "MSP430x11x1 ");
+      break;
+    case E_MSP430_MACH_MSP430x12:
+      out = stpcpy (out, "MSP430x12");
+      break;
+    case E_MSP430_MACH_MSP430x13:
+      out = stpcpy (out, "MSP430x13");
+      break;
+    case E_MSP430_MACH_MSP430x14:
+      out = stpcpy (out, "MSP430x14");
+      break;
+    case E_MSP430_MACH_MSP430x15:
+      out = stpcpy (out, "MSP430x15");
+      break;
+    case E_MSP430_MACH_MSP430x16:
+      out = stpcpy (out, "MSP430x16");
+      break;
+    case E_MSP430_MACH_MSP430x31:
+      out = stpcpy (out, "MSP430x31");
+      break;
+    case E_MSP430_MACH_MSP430x32:
+      out = stpcpy (out, "MSP430x32");
+      break;
+    case E_MSP430_MACH_MSP430x33:
+      out = stpcpy (out, "MSP430x33");
+      break;
+    case E_MSP430_MACH_MSP430x41:
+      out = stpcpy (out, "MSP430x41");
+      break;
+    case E_MSP430_MACH_MSP430x42:
+      out = stpcpy (out, "MSP430x42");
+      break;
+    case E_MSP430_MACH_MSP430x43:
+      out = stpcpy (out, "MSP430x43");
+      break;
+    case E_MSP430_MACH_MSP430x44:
+      out = stpcpy (out, "MSP430x44");
+      break;
+    case E_MSP430_MACH_MSP430X  :
+      out = stpcpy (out, "MSP430X");
+      break;
+    default:
+      out = stpcpy (out, _(": unknown"));
+      break;
+    }
+
+  if (e_flags & ~ EF_MSP430_MACH)
+    out = stpcpy (out, _(": unknown extra flag bits also present"));
+  return out;
+}
+
+static char *
+decode_NDS32_machine_flags (char *out, unsigned e_flags)
 {
   unsigned abi;
   unsigned arch;
   unsigned config;
   unsigned version;
   bool has_fpu = false;
-  unsigned int r = 0;
 
   static const char *ABI_STRINGS[] =
   {
@@ -3395,8 +3892,6 @@ decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
   config = EF_NDS_INST & e_flags;
   version = EF_NDS32_ELF_VERSION & e_flags;
 
-  memset (buf, 0, size);
-
   switch (abi)
     {
     case E_NDS_ABI_V0:
@@ -3406,11 +3901,11 @@ decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
     case E_NDS_ABI_AABI:
     case E_NDS_ABI_V2FP_PLUS:
       /* In case there are holes in the array.  */
-      r += snprintf (buf + r, size - r, ", %s", ABI_STRINGS[abi >> EF_NDS_ABI_SHIFT]);
+      out += sprintf (out, ", %s", ABI_STRINGS[abi >> EF_NDS_ABI_SHIFT]);
       break;
 
     default:
-      r += snprintf (buf + r, size - r, ", <unrecognized ABI>");
+      out = stpcpy (out, ", <unrecognized ABI>");
       break;
     }
 
@@ -3419,21 +3914,21 @@ decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
     case E_NDS32_ELF_VER_1_2:
     case E_NDS32_ELF_VER_1_3:
     case E_NDS32_ELF_VER_1_4:
-      r += snprintf (buf + r, size - r, ", %s", VER_STRINGS[version >> EF_NDS32_ELF_VERSION_SHIFT]);
+      out += sprintf (out, ", %s", VER_STRINGS[version >> EF_NDS32_ELF_VERSION_SHIFT]);
       break;
 
     default:
-      r += snprintf (buf + r, size - r, ", <unrecognized ELF version number>");
+      out = stpcpy (out, ", <unrecognized ELF version number>");
       break;
     }
 
   if (E_NDS_ABI_V0 == abi)
     {
       /* OLD ABI; only used in N1213HC, has performance extension 1.  */
-      r += snprintf (buf + r, size - r, ", Andes Star v1.0, N1213HC, MAC, PERF1");
+      out = stpcpy (out, ", Andes Star v1.0, N1213HC, MAC, PERF1");
       if (arch == E_NDS_ARCH_STAR_V1_0)
-	r += snprintf (buf + r, size -r, ", 16b"); /* has 16-bit instructions */
-      return;
+	out = stpcpy (out, ", 16b"); /* has 16-bit instructions */
+      return out;
     }
 
   switch (arch)
@@ -3442,78 +3937,78 @@ decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
     case E_NDS_ARCH_STAR_V2_0:
     case E_NDS_ARCH_STAR_V3_0:
     case E_NDS_ARCH_STAR_V3_M:
-      r += snprintf (buf + r, size - r, ", %s", ARCH_STRINGS[arch >> EF_NDS_ARCH_SHIFT]);
+      out += sprintf (out, ", %s", ARCH_STRINGS[arch >> EF_NDS_ARCH_SHIFT]);
       break;
 
     default:
-      r += snprintf (buf + r, size - r, ", <unrecognized architecture>");
+      out = stpcpy (out, ", <unrecognized architecture>");
       /* ARCH version determines how the e_flags are interpreted.
 	 If it is unknown, we cannot proceed.  */
-      return;
+      return out;
     }
 
   /* Newer ABI; Now handle architecture specific flags.  */
   if (arch == E_NDS_ARCH_STAR_V1_0)
     {
       if (config & E_NDS32_HAS_MFUSR_PC_INST)
-	r += snprintf (buf + r, size -r, ", MFUSR_PC");
+	out = stpcpy (out, ", MFUSR_PC");
 
       if (!(config & E_NDS32_HAS_NO_MAC_INST))
-	r += snprintf (buf + r, size -r, ", MAC");
+	out = stpcpy (out, ", MAC");
 
       if (config & E_NDS32_HAS_DIV_INST)
-	r += snprintf (buf + r, size -r, ", DIV");
+	out = stpcpy (out, ", DIV");
 
       if (config & E_NDS32_HAS_16BIT_INST)
-	r += snprintf (buf + r, size -r, ", 16b");
+	out = stpcpy (out, ", 16b");
     }
   else
     {
       if (config & E_NDS32_HAS_MFUSR_PC_INST)
 	{
 	  if (version <= E_NDS32_ELF_VER_1_3)
-	    r += snprintf (buf + r, size -r, ", [B8]");
+	    out = stpcpy (out, ", [B8]");
 	  else
-	    r += snprintf (buf + r, size -r, ", EX9");
+	    out = stpcpy (out, ", EX9");
 	}
 
       if (config & E_NDS32_HAS_MAC_DX_INST)
-	r += snprintf (buf + r, size -r, ", MAC_DX");
+	out = stpcpy (out, ", MAC_DX");
 
       if (config & E_NDS32_HAS_DIV_DX_INST)
-	r += snprintf (buf + r, size -r, ", DIV_DX");
+	out = stpcpy (out, ", DIV_DX");
 
       if (config & E_NDS32_HAS_16BIT_INST)
 	{
 	  if (version <= E_NDS32_ELF_VER_1_3)
-	    r += snprintf (buf + r, size -r, ", 16b");
+	    out = stpcpy (out, ", 16b");
 	  else
-	    r += snprintf (buf + r, size -r, ", IFC");
+	    out = stpcpy (out, ", IFC");
 	}
     }
 
   if (config & E_NDS32_HAS_EXT_INST)
-    r += snprintf (buf + r, size -r, ", PERF1");
+    out = stpcpy (out, ", PERF1");
 
   if (config & E_NDS32_HAS_EXT2_INST)
-    r += snprintf (buf + r, size -r, ", PERF2");
+    out = stpcpy (out, ", PERF2");
 
   if (config & E_NDS32_HAS_FPU_INST)
     {
       has_fpu = true;
-      r += snprintf (buf + r, size -r, ", FPU_SP");
+      out = stpcpy (out, ", FPU_SP");
     }
 
   if (config & E_NDS32_HAS_FPU_DP_INST)
     {
       has_fpu = true;
-      r += snprintf (buf + r, size -r, ", FPU_DP");
+      out = stpcpy (out, ", FPU_DP");
     }
 
   if (config & E_NDS32_HAS_FPU_MAC_INST)
     {
       has_fpu = true;
-      r += snprintf (buf + r, size -r, ", FPU_MAC");
+      out = stpcpy (out, ", FPU_MAC");
     }
 
   if (has_fpu)
@@ -3521,47 +4016,404 @@ decode_NDS32_machine_flags (unsigned e_flags, char buf[], size_t size)
       switch ((config & E_NDS32_FPU_REG_CONF) >> E_NDS32_FPU_REG_CONF_SHIFT)
 	{
 	case E_NDS32_FPU_REG_8SP_4DP:
-	  r += snprintf (buf + r, size -r, ", FPU_REG:8/4");
+	  out = stpcpy (out, ", FPU_REG:8/4");
 	  break;
 	case E_NDS32_FPU_REG_16SP_8DP:
-	  r += snprintf (buf + r, size -r, ", FPU_REG:16/8");
+	  out = stpcpy (out, ", FPU_REG:16/8");
 	  break;
 	case E_NDS32_FPU_REG_32SP_16DP:
-	  r += snprintf (buf + r, size -r, ", FPU_REG:32/16");
+	  out = stpcpy (out, ", FPU_REG:32/16");
 	  break;
 	case E_NDS32_FPU_REG_32SP_32DP:
-	  r += snprintf (buf + r, size -r, ", FPU_REG:32/32");
+	  out = stpcpy (out, ", FPU_REG:32/32");
 	  break;
 	}
     }
 
   if (config & E_NDS32_HAS_AUDIO_INST)
-    r += snprintf (buf + r, size -r, ", AUDIO");
+    out = stpcpy (out, ", AUDIO");
 
   if (config & E_NDS32_HAS_STRING_INST)
-    r += snprintf (buf + r, size -r, ", STR");
+    out = stpcpy (out, ", STR");
 
   if (config & E_NDS32_HAS_REDUCED_REGS)
-    r += snprintf (buf + r, size -r, ", 16REG");
+    out = stpcpy (out, ", 16REG");
 
   if (config & E_NDS32_HAS_VIDEO_INST)
     {
       if (version <= E_NDS32_ELF_VER_1_3)
-	r += snprintf (buf + r, size -r, ", VIDEO");
+	out = stpcpy (out, ", VIDEO");
       else
-	r += snprintf (buf + r, size -r, ", SATURATION");
+	out = stpcpy (out, ", SATURATION");
     }
 
   if (config & E_NDS32_HAS_ENCRIPT_INST)
-    r += snprintf (buf + r, size -r, ", ENCRP");
+    out = stpcpy (out, ", ENCRP");
 
   if (config & E_NDS32_HAS_L2C_INST)
-    r += snprintf (buf + r, size -r, ", L2C");
+    out = stpcpy (out, ", L2C");
+
+  return out;
 }
 
-static void
-decode_AMDGPU_machine_flags (Filedata *filedata, unsigned int e_flags,
-			     char *buf)
+static char *
+decode_PARISC_machine_flags (char *out, unsigned e_flags)
+{
+  switch (e_flags & EF_PARISC_ARCH)
+    {
+    case EFA_PARISC_1_0:
+      out = stpcpy (out, ", PA-RISC 1.0");
+      break;
+    case EFA_PARISC_1_1:
+      out = stpcpy (out, ", PA-RISC 1.1");
+      break;
+    case EFA_PARISC_2_0:
+      out = stpcpy (out, ", PA-RISC 2.0");
+      break;
+    default:
+      break;
+    }
+  if (e_flags & EF_PARISC_TRAPNIL)
+    out = stpcpy (out, ", trapnil");
+  if (e_flags & EF_PARISC_EXT)
+    out = stpcpy (out, ", ext");
+  if (e_flags & EF_PARISC_LSB)
+    out = stpcpy (out, ", lsb");
+  if (e_flags & EF_PARISC_WIDE)
+    out = stpcpy (out, ", wide");
+  if (e_flags & EF_PARISC_NO_KABP)
+    out = stpcpy (out, ", no kabp");
+  if (e_flags & EF_PARISC_LAZYSWAP)
+    out = stpcpy (out, ", lazyswap");
+  return out;
+}
+
+static char *
+decode_RISCV_machine_flags (char *out, unsigned e_flags)
+{
+  if (e_flags & EF_RISCV_RVC)
+    out = stpcpy (out, ", RVC");
+
+  if (e_flags & EF_RISCV_RVE)
+    out = stpcpy (out, ", RVE");
+
+  if (e_flags & EF_RISCV_TSO)
+    out = stpcpy (out, ", TSO");
+
+  switch (e_flags & EF_RISCV_FLOAT_ABI)
+    {
+    case EF_RISCV_FLOAT_ABI_SOFT:
+      out = stpcpy (out, ", soft-float ABI");
+      break;
+
+    case EF_RISCV_FLOAT_ABI_SINGLE:
+      out = stpcpy (out, ", single-float ABI");
+      break;
+
+    case EF_RISCV_FLOAT_ABI_DOUBLE:
+      out = stpcpy (out, ", double-float ABI");
+      break;
+
+    case EF_RISCV_FLOAT_ABI_QUAD:
+      out = stpcpy (out, ", quad-float ABI");
+      break;
+    }
+  return out;
+}
+
+static char *
+decode_RL78_machine_flags (char *out, unsigned e_flags)
+{
+  switch (e_flags & E_FLAG_RL78_CPU_MASK)
+    {
+    case E_FLAG_RL78_ANY_CPU:
+      break;
+    case E_FLAG_RL78_G10:
+      out = stpcpy (out, ", G10");
+      break;
+    case E_FLAG_RL78_G13:
+      out = stpcpy (out, ", G13");
+      break;
+    case E_FLAG_RL78_G14:
+      out = stpcpy (out, ", G14");
+      break;
+    }
+  if (e_flags & E_FLAG_RL78_64BIT_DOUBLES)
+    out = stpcpy (out, ", 64-bit doubles");
+  return out;
+}
+
+static char *
+decode_RX_machine_flags (char *out, unsigned e_flags)
+{
+  if (e_flags & E_FLAG_RX_64BIT_DOUBLES)
+    out = stpcpy (out, ", 64-bit doubles");
+  if (e_flags & E_FLAG_RX_DSP)
+    out = stpcpy (out, ", dsp");
+  if (e_flags & E_FLAG_RX_PID)
+    out = stpcpy (out, ", pid");
+  if (e_flags & E_FLAG_RX_ABI)
+    out = stpcpy (out, ", RX ABI");
+  if (e_flags & E_FLAG_RX_SINSNS_SET)
+    out = stpcpy (out, (e_flags & E_FLAG_RX_SINSNS_YES
+			? ", uses String instructions"
+			: ", bans String instructions"));
+  if (e_flags & E_FLAG_RX_V2)
+    out = stpcpy (out, ", V2");
+  if (e_flags & E_FLAG_RX_V3)
+    out = stpcpy (out, ", V3");
+  return out;
+}
+
+static char *
+decode_SH_machine_flags (char *out, unsigned e_flags)
+{
+  switch ((e_flags & EF_SH_MACH_MASK))
+    {
+    case EF_SH1:
+      out = stpcpy (out, ", sh1");
+      break;
+    case EF_SH2:
+      out = stpcpy (out, ", sh2");
+      break;
+    case EF_SH3:
+      out = stpcpy (out, ", sh3");
+      break;
+    case EF_SH_DSP:
+      out = stpcpy (out, ", sh-dsp");
+      break;
+    case EF_SH3_DSP:
+      out = stpcpy (out, ", sh3-dsp");
+      break;
+    case EF_SH4AL_DSP:
+      out = stpcpy (out, ", sh4al-dsp");
+      break;
+    case EF_SH3E:
+      out = stpcpy (out, ", sh3e");
+      break;
+    case EF_SH4:
+      out = stpcpy (out, ", sh4");
+      break;
+    case EF_SH5:
+      out = stpcpy (out, ", sh5");
+      break;
+    case EF_SH2E:
+      out = stpcpy (out, ", sh2e");
+      break;
+    case EF_SH4A:
+      out = stpcpy (out, ", sh4a");
+      break;
+    case EF_SH2A:
+      out = stpcpy (out, ", sh2a");
+      break;
+    case EF_SH4_NOFPU:
+      out = stpcpy (out, ", sh4-nofpu");
+      break;
+    case EF_SH4A_NOFPU:
+      out = stpcpy (out, ", sh4a-nofpu");
+      break;
+    case EF_SH2A_NOFPU:
+      out = stpcpy (out, ", sh2a-nofpu");
+      break;
+    case EF_SH3_NOMMU:
+      out = stpcpy (out, ", sh3-nommu");
+      break;
+    case EF_SH4_NOMMU_NOFPU:
+      out = stpcpy (out, ", sh4-nommu-nofpu");
+      break;
+    case EF_SH2A_SH4_NOFPU:
+      out = stpcpy (out, ", sh2a-nofpu-or-sh4-nommu-nofpu");
+      break;
+    case EF_SH2A_SH3_NOFPU:
+      out = stpcpy (out, ", sh2a-nofpu-or-sh3-nommu");
+      break;
+    case EF_SH2A_SH4:
+      out = stpcpy (out, ", sh2a-or-sh4");
+      break;
+    case EF_SH2A_SH3E:
+      out = stpcpy (out, ", sh2a-or-sh3e");
+      break;
+    default:
+      out = stpcpy (out, _(", unknown ISA"));
+      break;
+    }
+
+  if (e_flags & EF_SH_PIC)
+    out = stpcpy (out, ", pic");
+
+  if (e_flags & EF_SH_FDPIC)
+    out = stpcpy (out, ", fdpic");
+  return out;
+}
+
+static char *
+decode_SPARC_machine_flags (char *out, unsigned e_flags)
+{
+  if (e_flags & EF_SPARC_32PLUS)
+    out = stpcpy (out, ", v8+");
+
+  if (e_flags & EF_SPARC_SUN_US1)
+    out = stpcpy (out, ", ultrasparcI");
+
+  if (e_flags & EF_SPARC_SUN_US3)
+    out = stpcpy (out, ", ultrasparcIII");
+
+  if (e_flags & EF_SPARC_HAL_R1)
+    out = stpcpy (out, ", halr1");
+
+  if (e_flags & EF_SPARC_LEDATA)
+    out = stpcpy (out, ", ledata");
+
+  if ((e_flags & EF_SPARCV9_MM) == EF_SPARCV9_TSO)
+    out = stpcpy (out, ", tso");
+
+  if ((e_flags & EF_SPARCV9_MM) == EF_SPARCV9_PSO)
+    out = stpcpy (out, ", pso");
+
+  if ((e_flags & EF_SPARCV9_MM) == EF_SPARCV9_RMO)
+    out = stpcpy (out, ", rmo");
+  return out;
+}
+
+static char *
+decode_V800_machine_flags (char *out, unsigned int e_flags)
+{
+  if ((e_flags & EF_RH850_ABI) == EF_RH850_ABI)
+    out = stpcpy (out, ", RH850 ABI");
+
+  if (e_flags & EF_V800_850E3)
+    out = stpcpy (out, ", V3 architecture");
+
+  if ((e_flags & (EF_RH850_FPU_DOUBLE | EF_RH850_FPU_SINGLE)) == 0)
+    out = stpcpy (out, ", FPU not used");
+
+  if ((e_flags & (EF_RH850_REGMODE22 | EF_RH850_REGMODE32)) == 0)
+    out = stpcpy (out, ", regmode: COMMON");
+
+  if ((e_flags & (EF_RH850_GP_FIX | EF_RH850_GP_NOFIX)) == 0)
+    out = stpcpy (out, ", r4 not used");
+
+  if ((e_flags & (EF_RH850_EP_FIX | EF_RH850_EP_NOFIX)) == 0)
+    out = stpcpy (out, ", r30 not used");
+
+  if ((e_flags & (EF_RH850_TP_FIX | EF_RH850_TP_NOFIX)) == 0)
+    out = stpcpy (out, ", r5 not used");
+
+  if ((e_flags & (EF_RH850_REG2_RESERVE | EF_RH850_REG2_NORESERVE)) == 0)
+    out = stpcpy (out, ", r2 not used");
+
+  for (e_flags &= 0xFFFF; e_flags; e_flags &= ~ (e_flags & - e_flags))
+    {
+      switch (e_flags & - e_flags)
+	{
+	case EF_RH850_FPU_DOUBLE:
+	  out = stpcpy (out, ", double precision FPU");
+	  break;
+	case EF_RH850_FPU_SINGLE:
+	  out = stpcpy (out, ", single precision FPU");
+	  break;
+	case EF_RH850_REGMODE22:
+	  out = stpcpy (out, ", regmode:22");
+	  break;
+	case EF_RH850_REGMODE32:
+	  out = stpcpy (out, ", regmode:23");
+	  break;
+	case EF_RH850_GP_FIX:
+	  out = stpcpy (out, ", r4 fixed");
+	  break;
+	case EF_RH850_GP_NOFIX:
+	  out = stpcpy (out, ", r4 free");
+	  break;
+	case EF_RH850_EP_FIX:
+	  out = stpcpy (out, ", r30 fixed");
+	  break;
+	case EF_RH850_EP_NOFIX:
+	  out = stpcpy (out, ", r30 free");
+	  break;
+	case EF_RH850_TP_FIX:
+	  out = stpcpy (out, ", r5 fixed");
+	  break;
+	case EF_RH850_TP_NOFIX:
+	  out = stpcpy (out, ", r5 free");
+	  break;
+	case EF_RH850_REG2_RESERVE:
+	  out = stpcpy (out, ", r2 fixed");
+	  break;
+	case EF_RH850_REG2_NORESERVE:
+	  out = stpcpy (out, ", r2 free");
+	  break;
+	default:
+	  break;
+	}
+    }
+  return out;
+}
+
+static char *
+decode_V850_machine_flags (char *out, unsigned int e_flags)
+{
+  switch (e_flags & EF_V850_ARCH)
+    {
+    case E_V850E3V5_ARCH:
+      out = stpcpy (out, ", v850e3v5");
+      break;
+    case E_V850E2V3_ARCH:
+      out = stpcpy (out, ", v850e2v3");
+      break;
+    case E_V850E2_ARCH:
+      out = stpcpy (out, ", v850e2");
+      break;
+    case E_V850E1_ARCH:
+      out = stpcpy (out, ", v850e1");
+      break;
+    case E_V850E_ARCH:
+      out = stpcpy (out, ", v850e");
+      break;
+    case E_V850_ARCH:
+      out = stpcpy (out, ", v850");
+      break;
+    default:
+      out = stpcpy (out, _(", unknown v850 architecture variant"));
+      break;
+    }
+  return out;
+}
+
+static char *
+decode_Z80_machine_flags (char *out, unsigned int e_flags)
+{
+  switch (e_flags & EF_Z80_MACH_MSK)
+    {
+    case EF_Z80_MACH_Z80:
+      out = stpcpy (out, ", Z80");
+      break;
+    case EF_Z80_MACH_Z180:
+      out = stpcpy (out, ", Z180");
+      break;
+    case EF_Z80_MACH_R800:
+      out = stpcpy (out, ", R800");
+      break;
+    case EF_Z80_MACH_EZ80_Z80:
+      out = stpcpy (out, ", EZ80");
+      break;
+    case EF_Z80_MACH_EZ80_ADL:
+      out = stpcpy (out, ", EZ80, ADL");
+      break;
+    case EF_Z80_MACH_GBZ80:
+      out = stpcpy (out, ", GBZ80");
+      break;
+    case EF_Z80_MACH_Z80N:
+      out = stpcpy (out, ", Z80N");
+      break;
+    default:
+      out = stpcpy (out, _(", unknown"));
+      break;
+    }
+  return out;
+}
+
+static char *
+decode_AMDGPU_machine_flags (char *out, unsigned int e_flags, Filedata *filedata)
 {
   unsigned char *e_ident = filedata->file_header.e_ident;
   unsigned char osabi = e_ident[EI_OSABI];
@@ -3575,13 +4427,13 @@ decode_AMDGPU_machine_flags (Filedata *filedata, unsigned int e_flags,
      of writing, they use the same flags as HSA v3, so the code below uses that
      assumption.  */
   if (osabi == ELFOSABI_AMDGPU_HSA && abiversion < ELFABIVERSION_AMDGPU_HSA_V3)
-    return;
+    return out;
 
   mach = e_flags & EF_AMDGPU_MACH;
   switch (mach)
     {
 #define AMDGPU_CASE(code, string) \
-  case code: strcat (buf, ", " string); break;
+  case code: out = stpcpy (out, ", " string); break;
     AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX600, "gfx600")
     AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX601, "gfx601")
     AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX700, "gfx700")
@@ -3617,12 +4469,11 @@ decode_AMDGPU_machine_flags (Filedata *filedata, unsigned int e_flags,
     AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX1013, "gfx1013")
     AMDGPU_CASE (EF_AMDGPU_MACH_AMDGCN_GFX1036, "gfx1036")
     default:
-      sprintf (buf, _(", <unknown AMDGPU GPU type: %#x>"), mach);
+      out += sprintf (out, _(", <unknown AMDGPU GPU type: %#x>"), mach);
       break;
 #undef AMDGPU_CASE
     }
 
-  buf += strlen (buf);
   e_flags &= ~EF_AMDGPU_MACH;
 
   if ((osabi == ELFOSABI_AMDGPU_HSA
@@ -3632,15 +4483,13 @@ decode_AMDGPU_machine_flags (Filedata *filedata, unsigned int e_flags,
       /* For HSA v3 and other OS ABIs.  */
       if (e_flags & EF_AMDGPU_FEATURE_XNACK_V3)
 	{
-	  strcat (buf, ", xnack on");
-	  buf += strlen (buf);
+	  out = stpcpy (out, ", xnack on");
 	  e_flags &= ~EF_AMDGPU_FEATURE_XNACK_V3;
 	}
 
       if (e_flags & EF_AMDGPU_FEATURE_SRAMECC_V3)
 	{
-	  strcat (buf, ", sramecc on");
-	  buf += strlen (buf);
+	  out = stpcpy (out, ", sramecc on");
 	  e_flags &= ~EF_AMDGPU_FEATURE_SRAMECC_V3;
 	}
     }
@@ -3656,23 +4505,22 @@ decode_AMDGPU_machine_flags (Filedata *filedata, unsigned int e_flags,
 	  break;
 
 	case EF_AMDGPU_FEATURE_XNACK_ANY_V4:
-	  strcat (buf, ", xnack any");
+	  out = stpcpy (out, ", xnack any");
 	  break;
 
 	case EF_AMDGPU_FEATURE_XNACK_OFF_V4:
-	  strcat (buf, ", xnack off");
+	  out = stpcpy (out, ", xnack off");
 	  break;
 
 	case EF_AMDGPU_FEATURE_XNACK_ON_V4:
-	  strcat (buf, ", xnack on");
+	  out = stpcpy (out, ", xnack on");
 	  break;
 
 	default:
-	  sprintf (buf, _(", <unknown xnack value: %#x>"), xnack);
+	  out += sprintf (out, _(", <unknown xnack value: %#x>"), xnack);
 	  break;
 	}
 
-      buf += strlen (buf);
       e_flags &= ~EF_AMDGPU_FEATURE_XNACK_V4;
 
       sramecc = e_flags & EF_AMDGPU_FEATURE_SRAMECC_V4;
@@ -3682,34 +4530,35 @@ decode_AMDGPU_machine_flags (Filedata *filedata, unsigned int e_flags,
 	  break;
 
 	case EF_AMDGPU_FEATURE_SRAMECC_ANY_V4:
-	  strcat (buf, ", sramecc any");
+	  out = stpcpy (out, ", sramecc any");
 	  break;
 
 	case EF_AMDGPU_FEATURE_SRAMECC_OFF_V4:
-	  strcat (buf, ", sramecc off");
+	  out = stpcpy (out, ", sramecc off");
 	  break;
 
 	case EF_AMDGPU_FEATURE_SRAMECC_ON_V4:
-	  strcat (buf, ", sramecc on");
+	  out = stpcpy (out, ", sramecc on");
 	  break;
 
 	default:
-	  sprintf (buf, _(", <unknown sramecc value: %#x>"), sramecc);
+	  out += sprintf (out, _(", <unknown sramecc value: %#x>"), sramecc);
 	  break;
 	}
 
-      buf += strlen (buf);
       e_flags &= ~EF_AMDGPU_FEATURE_SRAMECC_V4;
     }
 
   if (e_flags != 0)
-    sprintf (buf, _(", unknown flags bits: %#x"), e_flags);
+    out += sprintf (out, _(", unknown flags bits: %#x"), e_flags);
+  return out;
 }
 
 static char *
 get_machine_flags (Filedata * filedata, unsigned e_flags, unsigned e_machine)
 {
   static char buf[1024];
+  char *out = buf;
 
   buf[0] = '\0';
 
@@ -3721,696 +4570,182 @@ get_machine_flags (Filedata * filedata, unsigned e_flags, unsigned e_machine)
 	  break;
 
 	case EM_ARC_COMPACT3:
-	  strcat (buf, ", HS5x");
+	  out = stpcpy (out, ", HS5x");
 	  break;
 
 	case EM_ARC_COMPACT3_64:
-	  strcat (buf, ", HS6x");
+	  out = stpcpy (out, ", HS6x");
 	  break;
 
 	case EM_ARC_COMPACT2:
 	case EM_ARC_COMPACT:
-          decode_ARC_machine_flags (e_flags, e_machine, buf);
-          break;
-
-	case EM_ARM:
-	  decode_ARM_machine_flags (e_flags, buf);
+	  out = decode_ARC_machine_flags (out, e_flags, e_machine);
 	  break;
 
-        case EM_AVR:
-          decode_AVR_machine_flags (e_flags, buf, sizeof buf);
-          break;
+	case EM_ARM:
+	  out = decode_ARM_machine_flags (out, e_flags);
+	  break;
+
+	case EM_AVR:
+	  out = decode_AVR_machine_flags (out, e_flags);
+	  break;
 
 	case EM_BLACKFIN:
-	  if (e_flags & EF_BFIN_PIC)
-	    strcat (buf, ", PIC");
-
-	  if (e_flags & EF_BFIN_FDPIC)
-	    strcat (buf, ", FDPIC");
-
-	  if (e_flags & EF_BFIN_CODE_IN_L1)
-	    strcat (buf, ", code in L1");
-
-	  if (e_flags & EF_BFIN_DATA_IN_L1)
-	    strcat (buf, ", data in L1");
-
+	  out = decode_BLACKFIN_machine_flags (out, e_flags);
 	  break;
 
 	case EM_CYGNUS_FRV:
-	  switch (e_flags & EF_FRV_CPU_MASK)
-	    {
-	    case EF_FRV_CPU_GENERIC:
-	      break;
-
-	    default:
-	      strcat (buf, ", fr???");
-	      break;
-
-	    case EF_FRV_CPU_FR300:
-	      strcat (buf, ", fr300");
-	      break;
-
-	    case EF_FRV_CPU_FR400:
-	      strcat (buf, ", fr400");
-	      break;
-	    case EF_FRV_CPU_FR405:
-	      strcat (buf, ", fr405");
-	      break;
-
-	    case EF_FRV_CPU_FR450:
-	      strcat (buf, ", fr450");
-	      break;
-
-	    case EF_FRV_CPU_FR500:
-	      strcat (buf, ", fr500");
-	      break;
-	    case EF_FRV_CPU_FR550:
-	      strcat (buf, ", fr550");
-	      break;
-
-	    case EF_FRV_CPU_SIMPLE:
-	      strcat (buf, ", simple");
-	      break;
-	    case EF_FRV_CPU_TOMCAT:
-	      strcat (buf, ", tomcat");
-	      break;
-	    }
+	  out = decode_FRV_machine_flags (out, e_flags);
 	  break;
 
 	case EM_68K:
-	  if ((e_flags & EF_M68K_ARCH_MASK) == EF_M68K_M68000)
-	    strcat (buf, ", m68000");
-	  else if ((e_flags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32)
-	    strcat (buf, ", cpu32");
-	  else if ((e_flags & EF_M68K_ARCH_MASK) == EF_M68K_FIDO)
-	    strcat (buf, ", fido_a");
-	  else
-	    {
-	      char const * isa = _("unknown");
-	      char const * mac = _("unknown mac");
-	      char const * additional = NULL;
-
-	      switch (e_flags & EF_M68K_CF_ISA_MASK)
-		{
-		case EF_M68K_CF_ISA_A_NODIV:
-		  isa = "A";
-		  additional = ", nodiv";
-		  break;
-		case EF_M68K_CF_ISA_A:
-		  isa = "A";
-		  break;
-		case EF_M68K_CF_ISA_A_PLUS:
-		  isa = "A+";
-		  break;
-		case EF_M68K_CF_ISA_B_NOUSP:
-		  isa = "B";
-		  additional = ", nousp";
-		  break;
-		case EF_M68K_CF_ISA_B:
-		  isa = "B";
-		  break;
-		case EF_M68K_CF_ISA_C:
-		  isa = "C";
-		  break;
-		case EF_M68K_CF_ISA_C_NODIV:
-		  isa = "C";
-		  additional = ", nodiv";
-		  break;
-		}
-	      strcat (buf, ", cf, isa ");
-	      strcat (buf, isa);
-	      if (additional)
-		strcat (buf, additional);
-	      if (e_flags & EF_M68K_CF_FLOAT)
-		strcat (buf, ", float");
-	      switch (e_flags & EF_M68K_CF_MAC_MASK)
-		{
-		case 0:
-		  mac = NULL;
-		  break;
-		case EF_M68K_CF_MAC:
-		  mac = "mac";
-		  break;
-		case EF_M68K_CF_EMAC:
-		  mac = "emac";
-		  break;
-		case EF_M68K_CF_EMAC_B:
-		  mac = "emac_b";
-		  break;
-		}
-	      if (mac)
-		{
-		  strcat (buf, ", ");
-		  strcat (buf, mac);
-		}
-	    }
+	  out = decode_M68K_machine_flags (out, e_flags);
 	  break;
 
 	case EM_AMDGPU:
-	  decode_AMDGPU_machine_flags (filedata, e_flags, buf);
+	  out = decode_AMDGPU_machine_flags (out, e_flags, filedata);
 	  break;
 
 	case EM_CYGNUS_MEP:
-	  switch (e_flags & EF_MEP_CPU_MASK)
-	    {
-	    case EF_MEP_CPU_MEP: strcat (buf, ", generic MeP"); break;
-	    case EF_MEP_CPU_C2: strcat (buf, ", MeP C2"); break;
-	    case EF_MEP_CPU_C3: strcat (buf, ", MeP C3"); break;
-	    case EF_MEP_CPU_C4: strcat (buf, ", MeP C4"); break;
-	    case EF_MEP_CPU_C5: strcat (buf, ", MeP C5"); break;
-	    case EF_MEP_CPU_H1: strcat (buf, ", MeP H1"); break;
-	    default: strcat (buf, _(", <unknown MeP cpu type>")); break;
-	    }
-
-	  switch (e_flags & EF_MEP_COP_MASK)
-	    {
-	    case EF_MEP_COP_NONE: break;
-	    case EF_MEP_COP_AVC: strcat (buf, ", AVC coprocessor"); break;
-	    case EF_MEP_COP_AVC2: strcat (buf, ", AVC2 coprocessor"); break;
-	    case EF_MEP_COP_FMAX: strcat (buf, ", FMAX coprocessor"); break;
-	    case EF_MEP_COP_IVC2: strcat (buf, ", IVC2 coprocessor"); break;
-	    default: strcat (buf, _("<unknown MeP copro type>")); break;
-	    }
-
-	  if (e_flags & EF_MEP_LIBRARY)
-	    strcat (buf, ", Built for Library");
-
-	  if (e_flags & EF_MEP_INDEX_MASK)
-	    sprintf (buf + strlen (buf), ", Configuration Index: %#x",
-		     e_flags & EF_MEP_INDEX_MASK);
-
-	  if (e_flags & ~ EF_MEP_ALL_FLAGS)
-	    sprintf (buf + strlen (buf), _(", unknown flags bits: %#x"),
-		     e_flags & ~ EF_MEP_ALL_FLAGS);
+	  out = decode_MeP_machine_flags (out, e_flags);
 	  break;
 
 	case EM_PPC:
 	  if (e_flags & EF_PPC_EMB)
-	    strcat (buf, ", emb");
+	    out = stpcpy (out, ", emb");
 
 	  if (e_flags & EF_PPC_RELOCATABLE)
-	    strcat (buf, _(", relocatable"));
+	    out = stpcpy (out, _(", relocatable"));
 
 	  if (e_flags & EF_PPC_RELOCATABLE_LIB)
-	    strcat (buf, _(", relocatable-lib"));
+	    out = stpcpy (out, _(", relocatable-lib"));
 	  break;
 
 	case EM_PPC64:
 	  if (e_flags & EF_PPC64_ABI)
-	    {
-	      char abi[] = ", abiv0";
-
-	      abi[6] += e_flags & EF_PPC64_ABI;
-	      strcat (buf, abi);
-	    }
+	    out += sprintf (out, ", abiv%d", e_flags & EF_PPC64_ABI);
 	  break;
 
 	case EM_V800:
-	  if ((e_flags & EF_RH850_ABI) == EF_RH850_ABI)
-	    strcat (buf, ", RH850 ABI");
-
-	  if (e_flags & EF_V800_850E3)
-	    strcat (buf, ", V3 architecture");
-
-	  if ((e_flags & (EF_RH850_FPU_DOUBLE | EF_RH850_FPU_SINGLE)) == 0)
-	    strcat (buf, ", FPU not used");
-
-	  if ((e_flags & (EF_RH850_REGMODE22 | EF_RH850_REGMODE32)) == 0)
-	    strcat (buf, ", regmode: COMMON");
-
-	  if ((e_flags & (EF_RH850_GP_FIX | EF_RH850_GP_NOFIX)) == 0)
-	    strcat (buf, ", r4 not used");
-
-	  if ((e_flags & (EF_RH850_EP_FIX | EF_RH850_EP_NOFIX)) == 0)
-	    strcat (buf, ", r30 not used");
-
-	  if ((e_flags & (EF_RH850_TP_FIX | EF_RH850_TP_NOFIX)) == 0)
-	    strcat (buf, ", r5 not used");
-
-	  if ((e_flags & (EF_RH850_REG2_RESERVE | EF_RH850_REG2_NORESERVE)) == 0)
-	    strcat (buf, ", r2 not used");
-
-	  for (e_flags &= 0xFFFF; e_flags; e_flags &= ~ (e_flags & - e_flags))
-	    {
-	      switch (e_flags & - e_flags)
-		{
-		case EF_RH850_FPU_DOUBLE: strcat (buf, ", double precision FPU"); break;
-		case EF_RH850_FPU_SINGLE: strcat (buf, ", single precision FPU"); break;
-		case EF_RH850_REGMODE22: strcat (buf, ", regmode:22"); break;
-		case EF_RH850_REGMODE32: strcat (buf, ", regmode:23"); break;
-		case EF_RH850_GP_FIX: strcat (buf, ", r4 fixed"); break;
-		case EF_RH850_GP_NOFIX: strcat (buf, ", r4 free"); break;
-		case EF_RH850_EP_FIX: strcat (buf, ", r30 fixed"); break;
-		case EF_RH850_EP_NOFIX: strcat (buf, ", r30 free"); break;
-		case EF_RH850_TP_FIX: strcat (buf, ", r5 fixed"); break;
-		case EF_RH850_TP_NOFIX: strcat (buf, ", r5 free"); break;
-		case EF_RH850_REG2_RESERVE: strcat (buf, ", r2 fixed"); break;
-		case EF_RH850_REG2_NORESERVE: strcat (buf, ", r2 free"); break;
-		default: break;
-		}
-	    }
+	  out = decode_V800_machine_flags (out, e_flags);
 	  break;
 
 	case EM_V850:
 	case EM_CYGNUS_V850:
-	  switch (e_flags & EF_V850_ARCH)
-	    {
-	    case E_V850E3V5_ARCH:
-	      strcat (buf, ", v850e3v5");
-	      break;
-	    case E_V850E2V3_ARCH:
-	      strcat (buf, ", v850e2v3");
-	      break;
-	    case E_V850E2_ARCH:
-	      strcat (buf, ", v850e2");
-	      break;
-            case E_V850E1_ARCH:
-              strcat (buf, ", v850e1");
-	      break;
-	    case E_V850E_ARCH:
-	      strcat (buf, ", v850e");
-	      break;
-	    case E_V850_ARCH:
-	      strcat (buf, ", v850");
-	      break;
-	    default:
-	      strcat (buf, _(", unknown v850 architecture variant"));
-	      break;
-	    }
+	  out = decode_V850_machine_flags (out, e_flags);
 	  break;
 
 	case EM_M32R:
 	case EM_CYGNUS_M32R:
 	  if ((e_flags & EF_M32R_ARCH) == E_M32R_ARCH)
-	    strcat (buf, ", m32r");
+	    out = stpcpy (out, ", m32r");
 	  break;
 
 	case EM_MIPS:
 	case EM_MIPS_RS3_LE:
-	  if (e_flags & EF_MIPS_NOREORDER)
-	    strcat (buf, ", noreorder");
-
-	  if (e_flags & EF_MIPS_PIC)
-	    strcat (buf, ", pic");
-
-	  if (e_flags & EF_MIPS_CPIC)
-	    strcat (buf, ", cpic");
-
-	  if (e_flags & EF_MIPS_UCODE)
-	    strcat (buf, ", ugen_reserved");
-
-	  if (e_flags & EF_MIPS_ABI2)
-	    strcat (buf, ", abi2");
-
-	  if (e_flags & EF_MIPS_OPTIONS_FIRST)
-	    strcat (buf, ", odk first");
-
-	  if (e_flags & EF_MIPS_32BITMODE)
-	    strcat (buf, ", 32bitmode");
-
-	  if (e_flags & EF_MIPS_NAN2008)
-	    strcat (buf, ", nan2008");
-
-	  if (e_flags & EF_MIPS_FP64)
-	    strcat (buf, ", fp64");
-
-	  switch ((e_flags & EF_MIPS_MACH))
-	    {
-	    case E_MIPS_MACH_3900: strcat (buf, ", 3900"); break;
-	    case E_MIPS_MACH_4010: strcat (buf, ", 4010"); break;
-	    case E_MIPS_MACH_4100: strcat (buf, ", 4100"); break;
-	    case E_MIPS_MACH_4111: strcat (buf, ", 4111"); break;
-	    case E_MIPS_MACH_4120: strcat (buf, ", 4120"); break;
-	    case E_MIPS_MACH_4650: strcat (buf, ", 4650"); break;
-	    case E_MIPS_MACH_5400: strcat (buf, ", 5400"); break;
-	    case E_MIPS_MACH_5500: strcat (buf, ", 5500"); break;
-	    case E_MIPS_MACH_5900: strcat (buf, ", 5900"); break;
-	    case E_MIPS_MACH_SB1:  strcat (buf, ", sb1");  break;
-	    case E_MIPS_MACH_9000: strcat (buf, ", 9000"); break;
-  	    case E_MIPS_MACH_LS2E: strcat (buf, ", loongson-2e"); break;
-  	    case E_MIPS_MACH_LS2F: strcat (buf, ", loongson-2f"); break;
-	    case E_MIPS_MACH_GS464: strcat (buf, ", gs464"); break;
-	    case E_MIPS_MACH_GS464E: strcat (buf, ", gs464e"); break;
-	    case E_MIPS_MACH_GS264E: strcat (buf, ", gs264e"); break;
-	    case E_MIPS_MACH_OCTEON: strcat (buf, ", octeon"); break;
-	    case E_MIPS_MACH_OCTEON2: strcat (buf, ", octeon2"); break;
-	    case E_MIPS_MACH_OCTEON3: strcat (buf, ", octeon3"); break;
-	    case E_MIPS_MACH_XLR:  strcat (buf, ", xlr"); break;
-	    case E_MIPS_MACH_IAMR2:  strcat (buf, ", interaptiv-mr2"); break;
-	    case E_MIPS_MACH_ALLEGREX: strcat(buf, ", allegrex"); break;
-	    case 0:
-	    /* We simply ignore the field in this case to avoid confusion:
-	       MIPS ELF does not specify EF_MIPS_MACH, it is a GNU
-	       extension.  */
-	      break;
-	    default: strcat (buf, _(", unknown CPU")); break;
-	    }
-
-	  switch ((e_flags & EF_MIPS_ABI))
-	    {
-	    case E_MIPS_ABI_O32: strcat (buf, ", o32"); break;
-	    case E_MIPS_ABI_O64: strcat (buf, ", o64"); break;
-	    case E_MIPS_ABI_EABI32: strcat (buf, ", eabi32"); break;
-	    case E_MIPS_ABI_EABI64: strcat (buf, ", eabi64"); break;
-	    case 0:
-	    /* We simply ignore the field in this case to avoid confusion:
-	       MIPS ELF does not specify EF_MIPS_ABI, it is a GNU extension.
-	       This means it is likely to be an o32 file, but not for
-	       sure.  */
-	      break;
-	    default: strcat (buf, _(", unknown ABI")); break;
-	    }
-
-	  if (e_flags & EF_MIPS_ARCH_ASE_MDMX)
-	    strcat (buf, ", mdmx");
-
-	  if (e_flags & EF_MIPS_ARCH_ASE_M16)
-	    strcat (buf, ", mips16");
-
-	  if (e_flags & EF_MIPS_ARCH_ASE_MICROMIPS)
-	    strcat (buf, ", micromips");
-
-	  switch ((e_flags & EF_MIPS_ARCH))
-	    {
-	    case E_MIPS_ARCH_1: strcat (buf, ", mips1"); break;
-	    case E_MIPS_ARCH_2: strcat (buf, ", mips2"); break;
-	    case E_MIPS_ARCH_3: strcat (buf, ", mips3"); break;
-	    case E_MIPS_ARCH_4: strcat (buf, ", mips4"); break;
-	    case E_MIPS_ARCH_5: strcat (buf, ", mips5"); break;
-	    case E_MIPS_ARCH_32: strcat (buf, ", mips32"); break;
-	    case E_MIPS_ARCH_32R2: strcat (buf, ", mips32r2"); break;
-	    case E_MIPS_ARCH_32R6: strcat (buf, ", mips32r6"); break;
-	    case E_MIPS_ARCH_64: strcat (buf, ", mips64"); break;
-	    case E_MIPS_ARCH_64R2: strcat (buf, ", mips64r2"); break;
-	    case E_MIPS_ARCH_64R6: strcat (buf, ", mips64r6"); break;
-	    default: strcat (buf, _(", unknown ISA")); break;
-	    }
+	  out = decode_MIPS_machine_flags (out, e_flags);
 	  break;
 
 	case EM_NDS32:
-	  decode_NDS32_machine_flags (e_flags, buf, sizeof buf);
+	  out = decode_NDS32_machine_flags (out, e_flags);
 	  break;
 
 	case EM_NFP:
 	  switch (EF_NFP_MACH (e_flags))
 	    {
 	    case E_NFP_MACH_3200:
-	      strcat (buf, ", NFP-32xx");
+	      out = stpcpy (out, ", NFP-32xx");
 	      break;
 	    case E_NFP_MACH_6000:
-	      strcat (buf, ", NFP-6xxx");
+	      out = stpcpy (out, ", NFP-6xxx");
 	      break;
 	    }
 	  break;
 
 	case EM_RISCV:
-	  if (e_flags & EF_RISCV_RVC)
-	    strcat (buf, ", RVC");
-
-	  if (e_flags & EF_RISCV_RVE)
-	    strcat (buf, ", RVE");
-
-	  if (e_flags & EF_RISCV_TSO)
-	    strcat (buf, ", TSO");
-
-	  switch (e_flags & EF_RISCV_FLOAT_ABI)
-	    {
-	    case EF_RISCV_FLOAT_ABI_SOFT:
-	      strcat (buf, ", soft-float ABI");
-	      break;
-
-	    case EF_RISCV_FLOAT_ABI_SINGLE:
-	      strcat (buf, ", single-float ABI");
-	      break;
-
-	    case EF_RISCV_FLOAT_ABI_DOUBLE:
-	      strcat (buf, ", double-float ABI");
-	      break;
-
-	    case EF_RISCV_FLOAT_ABI_QUAD:
-	      strcat (buf, ", quad-float ABI");
-	      break;
-	    }
+	  out = decode_RISCV_machine_flags (out, e_flags);
 	  break;
 
 	case EM_SH:
-	  switch ((e_flags & EF_SH_MACH_MASK))
-	    {
-	    case EF_SH1: strcat (buf, ", sh1"); break;
-	    case EF_SH2: strcat (buf, ", sh2"); break;
-	    case EF_SH3: strcat (buf, ", sh3"); break;
-	    case EF_SH_DSP: strcat (buf, ", sh-dsp"); break;
-	    case EF_SH3_DSP: strcat (buf, ", sh3-dsp"); break;
-	    case EF_SH4AL_DSP: strcat (buf, ", sh4al-dsp"); break;
-	    case EF_SH3E: strcat (buf, ", sh3e"); break;
-	    case EF_SH4: strcat (buf, ", sh4"); break;
-	    case EF_SH5: strcat (buf, ", sh5"); break;
-	    case EF_SH2E: strcat (buf, ", sh2e"); break;
-	    case EF_SH4A: strcat (buf, ", sh4a"); break;
-	    case EF_SH2A: strcat (buf, ", sh2a"); break;
-	    case EF_SH4_NOFPU: strcat (buf, ", sh4-nofpu"); break;
-	    case EF_SH4A_NOFPU: strcat (buf, ", sh4a-nofpu"); break;
-	    case EF_SH2A_NOFPU: strcat (buf, ", sh2a-nofpu"); break;
-	    case EF_SH3_NOMMU: strcat (buf, ", sh3-nommu"); break;
-	    case EF_SH4_NOMMU_NOFPU: strcat (buf, ", sh4-nommu-nofpu"); break;
-	    case EF_SH2A_SH4_NOFPU: strcat (buf, ", sh2a-nofpu-or-sh4-nommu-nofpu"); break;
-	    case EF_SH2A_SH3_NOFPU: strcat (buf, ", sh2a-nofpu-or-sh3-nommu"); break;
-	    case EF_SH2A_SH4: strcat (buf, ", sh2a-or-sh4"); break;
-	    case EF_SH2A_SH3E: strcat (buf, ", sh2a-or-sh3e"); break;
-	    default: strcat (buf, _(", unknown ISA")); break;
-	    }
-
-	  if (e_flags & EF_SH_PIC)
-	    strcat (buf, ", pic");
-
-	  if (e_flags & EF_SH_FDPIC)
-	    strcat (buf, ", fdpic");
+	  out = decode_SH_machine_flags (out, e_flags);
 	  break;
 
-        case EM_OR1K:
-          if (e_flags & EF_OR1K_NODELAY)
-            strcat (buf, ", no delay");
-          break;
+	case EM_OR1K:
+	  if (e_flags & EF_OR1K_NODELAY)
+	    out = stpcpy (out, ", no delay");
+	  break;
 
-        case EM_BPF:
-          sprintf (buf + strlen (buf), ", CPU Version: %u",
-                   e_flags & EF_BPF_CPUVER);
-          break;
+	case EM_BPF:
+	  out += sprintf (out, ", CPU Version: %u", e_flags & EF_BPF_CPUVER);
+	  break;
 
 	case EM_SPARCV9:
-	  if (e_flags & EF_SPARC_32PLUS)
-	    strcat (buf, ", v8+");
-
-	  if (e_flags & EF_SPARC_SUN_US1)
-	    strcat (buf, ", ultrasparcI");
-
-	  if (e_flags & EF_SPARC_SUN_US3)
-	    strcat (buf, ", ultrasparcIII");
-
-	  if (e_flags & EF_SPARC_HAL_R1)
-	    strcat (buf, ", halr1");
-
-	  if (e_flags & EF_SPARC_LEDATA)
-	    strcat (buf, ", ledata");
-
-	  if ((e_flags & EF_SPARCV9_MM) == EF_SPARCV9_TSO)
-	    strcat (buf, ", tso");
-
-	  if ((e_flags & EF_SPARCV9_MM) == EF_SPARCV9_PSO)
-	    strcat (buf, ", pso");
-
-	  if ((e_flags & EF_SPARCV9_MM) == EF_SPARCV9_RMO)
-	    strcat (buf, ", rmo");
+	  out = decode_SPARC_machine_flags (out, e_flags);
 	  break;
 
 	case EM_PARISC:
-	  switch (e_flags & EF_PARISC_ARCH)
-	    {
-	    case EFA_PARISC_1_0:
-	      strcpy (buf, ", PA-RISC 1.0");
-	      break;
-	    case EFA_PARISC_1_1:
-	      strcpy (buf, ", PA-RISC 1.1");
-	      break;
-	    case EFA_PARISC_2_0:
-	      strcpy (buf, ", PA-RISC 2.0");
-	      break;
-	    default:
-	      break;
-	    }
-	  if (e_flags & EF_PARISC_TRAPNIL)
-	    strcat (buf, ", trapnil");
-	  if (e_flags & EF_PARISC_EXT)
-	    strcat (buf, ", ext");
-	  if (e_flags & EF_PARISC_LSB)
-	    strcat (buf, ", lsb");
-	  if (e_flags & EF_PARISC_WIDE)
-	    strcat (buf, ", wide");
-	  if (e_flags & EF_PARISC_NO_KABP)
-	    strcat (buf, ", no kabp");
-	  if (e_flags & EF_PARISC_LAZYSWAP)
-	    strcat (buf, ", lazyswap");
+	  out = decode_PARISC_machine_flags (out, e_flags);
 	  break;
 
 	case EM_PJ:
 	case EM_PJ_OLD:
 	  if ((e_flags & EF_PICOJAVA_NEWCALLS) == EF_PICOJAVA_NEWCALLS)
-	    strcat (buf, ", new calling convention");
+	    out = stpcpy (out, ", new calling convention");
 
 	  if ((e_flags & EF_PICOJAVA_GNUCALLS) == EF_PICOJAVA_GNUCALLS)
-	    strcat (buf, ", gnu calling convention");
+	    out = stpcpy (out, ", gnu calling convention");
 	  break;
 
 	case EM_IA_64:
-	  if ((e_flags & EF_IA_64_ABI64))
-	    strcat (buf, ", 64-bit");
-	  else
-	    strcat (buf, ", 32-bit");
-	  if ((e_flags & EF_IA_64_REDUCEDFP))
-	    strcat (buf, ", reduced fp model");
-	  if ((e_flags & EF_IA_64_NOFUNCDESC_CONS_GP))
-	    strcat (buf, ", no function descriptors, constant gp");
-	  else if ((e_flags & EF_IA_64_CONS_GP))
-	    strcat (buf, ", constant gp");
-	  if ((e_flags & EF_IA_64_ABSOLUTE))
-	    strcat (buf, ", absolute");
-          if (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_OPENVMS)
-            {
-              if ((e_flags & EF_IA_64_VMS_LINKAGES))
-                strcat (buf, ", vms_linkages");
-              switch ((e_flags & EF_IA_64_VMS_COMCOD))
-                {
-                case EF_IA_64_VMS_COMCOD_SUCCESS:
-                  break;
-                case EF_IA_64_VMS_COMCOD_WARNING:
-                  strcat (buf, ", warning");
-                  break;
-                case EF_IA_64_VMS_COMCOD_ERROR:
-                  strcat (buf, ", error");
-                  break;
-                case EF_IA_64_VMS_COMCOD_ABORT:
-                  strcat (buf, ", abort");
-                  break;
-                default:
-		  warn (_("Unrecognised IA64 VMS Command Code: %x\n"),
-			e_flags & EF_IA_64_VMS_COMCOD);
-		  strcat (buf, ", <unknown>");
-                }
-            }
+	  out = decode_IA64_machine_flags (out, e_flags, filedata);
 	  break;
 
 	case EM_VAX:
 	  if ((e_flags & EF_VAX_NONPIC))
-	    strcat (buf, ", non-PIC");
+	    out = stpcpy (out, ", non-PIC");
 	  if ((e_flags & EF_VAX_DFLOAT))
-	    strcat (buf, ", D-Float");
+	    out = stpcpy (out, ", D-Float");
 	  if ((e_flags & EF_VAX_GFLOAT))
-	    strcat (buf, ", G-Float");
+	    out = stpcpy (out, ", G-Float");
 	  break;
 
-        case EM_VISIUM:
+	case EM_VISIUM:
 	  if (e_flags & EF_VISIUM_ARCH_MCM)
-	    strcat (buf, ", mcm");
+	    out = stpcpy (out, ", mcm");
 	  else if (e_flags & EF_VISIUM_ARCH_MCM24)
-	    strcat (buf, ", mcm24");
+	    out = stpcpy (out, ", mcm24");
 	  if (e_flags & EF_VISIUM_ARCH_GR6)
-	    strcat (buf, ", gr6");
+	    out = stpcpy (out, ", gr6");
 	  break;
 
 	case EM_RL78:
-	  switch (e_flags & E_FLAG_RL78_CPU_MASK)
-	    {
-	    case E_FLAG_RL78_ANY_CPU: break;
-	    case E_FLAG_RL78_G10: strcat (buf, ", G10"); break;
-	    case E_FLAG_RL78_G13: strcat (buf, ", G13"); break;
-	    case E_FLAG_RL78_G14: strcat (buf, ", G14"); break;
-	    }
-	  if (e_flags & E_FLAG_RL78_64BIT_DOUBLES)
-	    strcat (buf, ", 64-bit doubles");
+	  out = decode_RL78_machine_flags (out, e_flags);
 	  break;
 
 	case EM_RX:
-	  if (e_flags & E_FLAG_RX_64BIT_DOUBLES)
-	    strcat (buf, ", 64-bit doubles");
-	  if (e_flags & E_FLAG_RX_DSP)
-	    strcat (buf, ", dsp");
-	  if (e_flags & E_FLAG_RX_PID)
-	    strcat (buf, ", pid");
-	  if (e_flags & E_FLAG_RX_ABI)
-	    strcat (buf, ", RX ABI");
-	  if (e_flags & E_FLAG_RX_SINSNS_SET)
-	    strcat (buf, e_flags & E_FLAG_RX_SINSNS_YES
-		    ? ", uses String instructions" : ", bans String instructions");
-	  if (e_flags & E_FLAG_RX_V2)
-	    strcat (buf, ", V2");
-	  if (e_flags & E_FLAG_RX_V3)
-	    strcat (buf, ", V3");
+	  out = decode_RX_machine_flags (out, e_flags);
 	  break;
 
 	case EM_S390:
 	  if (e_flags & EF_S390_HIGH_GPRS)
-	    strcat (buf, ", highgprs");
+	    out = stpcpy (out, ", highgprs");
 	  break;
 
 	case EM_TI_C6000:
 	  if ((e_flags & EF_C6000_REL))
-	    strcat (buf, ", relocatable module");
+	    out = stpcpy (out, ", relocatable module");
 	  break;
 
 	case EM_MSP430:
-	  strcat (buf, _(": architecture variant: "));
-	  switch (e_flags & EF_MSP430_MACH)
-	    {
-	    case E_MSP430_MACH_MSP430x11: strcat (buf, "MSP430x11"); break;
-	    case E_MSP430_MACH_MSP430x11x1 : strcat (buf, "MSP430x11x1 "); break;
-	    case E_MSP430_MACH_MSP430x12: strcat (buf, "MSP430x12"); break;
-	    case E_MSP430_MACH_MSP430x13: strcat (buf, "MSP430x13"); break;
-	    case E_MSP430_MACH_MSP430x14: strcat (buf, "MSP430x14"); break;
-	    case E_MSP430_MACH_MSP430x15: strcat (buf, "MSP430x15"); break;
-	    case E_MSP430_MACH_MSP430x16: strcat (buf, "MSP430x16"); break;
-	    case E_MSP430_MACH_MSP430x31: strcat (buf, "MSP430x31"); break;
-	    case E_MSP430_MACH_MSP430x32: strcat (buf, "MSP430x32"); break;
-	    case E_MSP430_MACH_MSP430x33: strcat (buf, "MSP430x33"); break;
-	    case E_MSP430_MACH_MSP430x41: strcat (buf, "MSP430x41"); break;
-	    case E_MSP430_MACH_MSP430x42: strcat (buf, "MSP430x42"); break;
-	    case E_MSP430_MACH_MSP430x43: strcat (buf, "MSP430x43"); break;
-	    case E_MSP430_MACH_MSP430x44: strcat (buf, "MSP430x44"); break;
-	    case E_MSP430_MACH_MSP430X  : strcat (buf, "MSP430X"); break;
-	    default:
-	      strcat (buf, _(": unknown")); break;
-	    }
-
-	  if (e_flags & ~ EF_MSP430_MACH)
-	    strcat (buf, _(": unknown extra flag bits also present"));
+	  out = decode_MSP430_machine_flags (out, e_flags);
 	  break;
 
 	case EM_Z80:
-	  switch (e_flags & EF_Z80_MACH_MSK)
-	    {
-	    case EF_Z80_MACH_Z80: strcat (buf, ", Z80"); break;
-	    case EF_Z80_MACH_Z180: strcat (buf, ", Z180"); break;
-	    case EF_Z80_MACH_R800: strcat (buf, ", R800"); break;
-	    case EF_Z80_MACH_EZ80_Z80: strcat (buf, ", EZ80"); break;
-	    case EF_Z80_MACH_EZ80_ADL: strcat (buf, ", EZ80, ADL"); break;
-	    case EF_Z80_MACH_GBZ80: strcat (buf, ", GBZ80"); break;
-	    case EF_Z80_MACH_Z80N: strcat (buf, ", Z80N"); break;
-	    default:
-	      strcat (buf, _(", unknown")); break;
-	    }
+	  out = decode_Z80_machine_flags (out, e_flags);
 	  break;
+
 	case EM_LOONGARCH:
-	  if (EF_LOONGARCH_IS_SOFT_FLOAT (e_flags))
-	    strcat (buf, ", SOFT-FLOAT");
-	  else if (EF_LOONGARCH_IS_SINGLE_FLOAT (e_flags))
-	    strcat (buf, ", SINGLE-FLOAT");
-	  else if (EF_LOONGARCH_IS_DOUBLE_FLOAT (e_flags))
-	    strcat (buf, ", DOUBLE-FLOAT");
-
-	  if (EF_LOONGARCH_IS_OBJ_V0 (e_flags))
-	    strcat (buf, ", OBJ-v0");
-	  else if (EF_LOONGARCH_IS_OBJ_V1 (e_flags))
-	    strcat (buf, ", OBJ-v1");
-
+	  out = decode_LOONGARCH_machine_flags (out, e_flags);
 	  break;
 	}
     }
@@ -6885,11 +7220,8 @@ get_elf_section_flags (Filedata * filedata, uint64_t sh_flags)
     };
 
   if (do_section_details)
-    {
-      sprintf (buff, "[%*.*lx]: ",
-	       field_size, field_size, (unsigned long) sh_flags);
-      p += field_size + 4;
-    }
+    p += sprintf (p, "[%*.*lx]: ",
+		  field_size, field_size, (unsigned long) sh_flags);
 
   while (sh_flags)
     {
@@ -7085,10 +7417,9 @@ get_elf_section_flags (Filedata * filedata, uint64_t sh_flags)
     {
       if (os_flags)
 	{
-	  size -= 5 + field_size;
 	  if (p != buff + field_size + 4)
 	    {
-	      if (size < (2 + 1))
+	      if (size < 2 + 5 + field_size + 1)
 		{
 		  warn (_("Internal error: not enough buffer room for section flag info"));
 		  return _("<unknown>");
@@ -7097,16 +7428,15 @@ get_elf_section_flags (Filedata * filedata, uint64_t sh_flags)
 	      *p++ = ',';
 	      *p++ = ' ';
 	    }
-	  sprintf (p, "OS (%*.*lx)", field_size, field_size,
-		   (unsigned long) os_flags);
-	  p += 5 + field_size;
+	  size -= 5 + field_size;
+	  p += sprintf (p, "OS (%*.*lx)", field_size, field_size,
+			(unsigned long) os_flags);
 	}
       if (proc_flags)
 	{
-	  size -= 7 + field_size;
 	  if (p != buff + field_size + 4)
 	    {
-	      if (size < (2 + 1))
+	      if (size < 2 + 7 + field_size + 1)
 		{
 		  warn (_("Internal error: not enough buffer room for section flag info"));
 		  return _("<unknown>");
@@ -7115,16 +7445,15 @@ get_elf_section_flags (Filedata * filedata, uint64_t sh_flags)
 	      *p++ = ',';
 	      *p++ = ' ';
 	    }
-	  sprintf (p, "PROC (%*.*lx)", field_size, field_size,
-		   (unsigned long) proc_flags);
-	  p += 7 + field_size;
+	  size -= 7 + field_size;
+	  p += sprintf (p, "PROC (%*.*lx)", field_size, field_size,
+			(unsigned long) proc_flags);
 	}
       if (unknown_flags)
 	{
-	  size -= 10 + field_size;
 	  if (p != buff + field_size + 4)
 	    {
-	      if (size < (2 + 1))
+	      if (size < 2 + 10 + field_size + 1)
 		{
 		  warn (_("Internal error: not enough buffer room for section flag info"));
 		  return _("<unknown>");
@@ -7133,9 +7462,9 @@ get_elf_section_flags (Filedata * filedata, uint64_t sh_flags)
 	      *p++ = ',';
 	      *p++ = ' ';
 	    }
-	  sprintf (p, _("UNKNOWN (%*.*lx)"), field_size, field_size,
-		   (unsigned long) unknown_flags);
-	  p += 10 + field_size;
+	  size -= 10 + field_size;
+	  p += sprintf (p, _("UNKNOWN (%*.*lx)"), field_size, field_size,
+			(unsigned long) unknown_flags);
 	}
     }
 
