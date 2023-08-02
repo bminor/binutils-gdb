@@ -441,29 +441,23 @@ read_rc_file (const char *filename, const char *preprocessor,
     {
       char *edit, *dir;
 
-      if (filename[0] == '/'
-	  || filename[0] == '\\'
-	  || filename[1] == ':')
-        /* Absolute path.  */
-	edit = dir = xstrdup (filename);
-      else
+      edit = dir = xmalloc (strlen (filename) + 3);
+      if (filename[0] != '/'
+	  && filename[0] != '\\'
+	  && filename[1] != ':')
 	{
 	  /* Relative path.  */
-	  edit = dir = xmalloc (strlen (filename) + 3);
-	  sprintf (dir, "./%s", filename);
+	  *edit++ = '.';
+	  *edit++ = '/';
 	}
+      edit = stpcpy (edit, filename);
 
       /* Walk dir backwards stopping at the first directory separator.  */
-      edit += strlen (dir);
       while (edit > dir && (edit[-1] != '\\' && edit[-1] != '/'))
-	{
-	  --edit;
-	  edit[0] = 0;
-	}
+	--edit;
 
       /* Cut off trailing slash.  */
-      --edit;
-      edit[0] = 0;
+      *--edit = 0;
 
       /* Convert all back slashes to forward slashes.  */
       while ((edit = strchr (dir, '\\')) != NULL)
