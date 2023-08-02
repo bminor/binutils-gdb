@@ -541,13 +541,14 @@ display_utf8 (const unsigned char * in, char * out, unsigned int * consumed)
 
     case unicode_invalid:
     case unicode_hex:
-      out += sprintf (out, "%c", unicode_display == unicode_hex ? '<' : '{');
-      out += sprintf (out, "0x");
+      *out++ = unicode_display == unicode_hex ? '<' : '{';
+      *out++ = '0';
+      *out++ = 'x';
       for (j = 0; j < nchars; j++)
 	out += sprintf (out, "%02x", in [j]);
-      out += sprintf (out, "%c", unicode_display == unicode_hex ? '>' : '}');
+      *out++ = unicode_display == unicode_hex ? '>' : '}';
       break;
-      
+
     case unicode_highlight:
       if (isatty (1))
 	out += sprintf (out, "\x1B[31;47m"); /* Red.  */
@@ -557,7 +558,7 @@ display_utf8 (const unsigned char * in, char * out, unsigned int * consumed)
 	{
 	case 2:
 	  out += sprintf (out, "\\u%02x%02x",
-		  ((in[0] & 0x1c) >> 2), 
+		  ((in[0] & 0x1c) >> 2),
 		  ((in[0] & 0x03) << 6) | (in[1] & 0x3f));
 	  break;
 
@@ -579,7 +580,7 @@ display_utf8 (const unsigned char * in, char * out, unsigned int * consumed)
 	}
 
       if (unicode_display == unicode_highlight && isatty (1))
-	out += sprintf (out, "\033[0m"); /* Default colour.  */
+	out += sprintf (out, "\x1B[0m"); /* Default colour.  */
       break;
 
     default:
@@ -633,11 +634,15 @@ convert_utf8 (const char * in)
 
   /* Copy the input, translating as needed.  */
   in = original;
-  if (buffer_len < (strlen (in) * 9))
+  /* For 2 char unicode, max out is 12 (colour escapes) + 6, ie. 9 per in
+     For hex, max out is 8 for 2 char unicode, ie. 4 per in.
+     3 and 4 char unicode produce less output for input.  */
+  size_t max_needed = strlen (in) * 9 + 1;
+  if (buffer_len < max_needed)
     {
-      free ((void *) buffer);
-      buffer_len = strlen (in) * 9;
-      buffer = xmalloc (buffer_len + 1);
+      buffer_len = max_needed;
+      free (buffer);
+      buffer = xmalloc (buffer_len);
     }
 
   out = buffer;
@@ -657,8 +662,8 @@ convert_utf8 (const char * in)
 	{
 	  unsigned int num_consumed;
 
-	  out += display_utf8 ((const unsigned char *)(in - 1), out, & num_consumed);
-	  in += num_consumed - 1;
+	  out += display_utf8 ((const unsigned char *) --in, out, &num_consumed);
+	  in += num_consumed;
 	}
       else
 	*out++ = c;
