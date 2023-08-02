@@ -19,10 +19,17 @@
 #include "defs.h"
 #include "main.h"
 #include "interps.h"
+#include "run-on-main-thread.h"
 
 int
 main (int argc, char **argv)
 {
+  /* The first call to is_main_thread () should be from the main thread.
+     If this is the first call, then that requirement is fulfilled here.
+     If this is not the first call, then this verifies that the first call
+     fulfilled that requirement.  */
+  gdb_assert (is_main_thread ());
+
   struct captured_main_args args;
 
   memset (&args, 0, sizeof args);
