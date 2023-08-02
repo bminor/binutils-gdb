@@ -27828,7 +27828,10 @@ create_unwind_entry (int have_data)
       if (unwind.personality_index == 0)
 	{
 	  if (unwind.opcode_count > 3)
-	    as_bad (_("too many unwind opcodes for personality routine 0"));
+	    {
+	      as_bad (_("too many unwind opcodes for personality routine 0"));
+	      return 1;
+	    }
 
 	  if (!have_data)
 	    {
@@ -27869,7 +27872,10 @@ create_unwind_entry (int have_data)
 
   size = (size + 3) >> 2;
   if (size > 0xff)
-    as_bad (_("too many unwind opcodes"));
+    {
+      as_bad (_("too many unwind opcodes"));
+      return 1;
+    }
 
   frag_align (2, 0, 0);
   record_alignment (now_seg, 2);
