@@ -352,7 +352,7 @@ def _catch_exception(filterId, **args):
     if filterId in ("assert", "exception", "throw", "rethrow", "catch"):
         cmd = "-catch-" + filterId
     else:
-        raise Exception(f"Invalid exception filterID: {filterId}")
+        raise Exception("Invalid exception filterID: " + str(filterId))
     result = gdb.execute_mi(cmd)
     # A little lame that there's no more direct way.
     for bp in gdb.breakpoints():
