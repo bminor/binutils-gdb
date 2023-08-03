@@ -233,7 +233,7 @@ coff_swap_scnhdr_in (bfd * abfd, void * ext, void * in)
     {
       scnhdr_int->s_vaddr += pe_data (abfd)->pe_opthdr.ImageBase;
       /* Do not cut upper 32-bits for 64-bit vma.  */
-#if !defined(COFF_WITH_pex64) && !defined(COFF_WITH_peAArch64) && !defined(COFF_WITH_peLoongArch64)
+#if !defined(COFF_WITH_pex64) && !defined(COFF_WITH_peAArch64) && !defined(COFF_WITH_peLoongArch64) && !defined(COFF_WITH_peRiscV64)
       scnhdr_int->s_vaddr &= 0xffffffff;
 #endif
     }
@@ -767,6 +767,16 @@ static const jump_table jtab[] =
 
 #endif
 
+#ifdef RISCV64MAGIC
+  /* We don't currently support jumping to DLLs, so if
+     someone does try emit a runtime trap.  Through EBREAK.  */
+  { RISCV64MAGIC,
+    { 0x73, 0x00, 0x10, 0x00 },
+    4, 0
+  },
+
+#endif
+
   { 0, { 0 }, 0, 0 }
 };
 
@@ -924,7 +934,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
 	/* See PR 20907 for a reproducer.  */
 	goto error_return;
 
-#if defined(COFF_WITH_pex64) || defined(COFF_WITH_peAArch64) || defined(COFF_WITH_peLoongArch64)
+#if defined(COFF_WITH_pex64) || defined(COFF_WITH_peAArch64) || defined(COFF_WITH_peLoongArch64) || defined (COFF_WITH_peRiscV64)
       ((unsigned int *) id4->contents)[0] = ordinal;
       ((unsigned int *) id4->contents)[1] = 0x80000000;
       ((unsigned int *) id5->contents)[0] = ordinal;
@@ -1242,6 +1252,12 @@ pe_ILF_object_p (bfd * abfd)
     case IMAGE_FILE_MACHINE_LOONGARCH64:
 #ifdef LOONGARCH64MAGIC
       magic = LOONGARCH64MAGIC;
+#endif
+      break;
+
+    case IMAGE_FILE_MACHINE_RISCV64:
+#ifdef RISCV64MAGIC
+      magic = RISCV64MAGIC;
 #endif
       break;
 

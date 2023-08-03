@@ -156,6 +156,8 @@
 #define IMAGE_FILE_MACHINE_R10000            0x0168
 #define IMAGE_FILE_MACHINE_R3000             0x0162
 #define IMAGE_FILE_MACHINE_R4000             0x0166
+#define IMAGE_FILE_MACHINE_RISCV32           0x5032
+#define IMAGE_FILE_MACHINE_RISCV64           0x5064
 #define IMAGE_FILE_MACHINE_SH3               0x01a2
 #define IMAGE_FILE_MACHINE_SH3DSP            0x01a3
 #define IMAGE_FILE_MACHINE_SH3E              0x01a4

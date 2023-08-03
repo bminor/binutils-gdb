@@ -12,6 +12,7 @@
 /pex64igen.c
 /pe-aarch64igen.c
 /pe-loongarch64igen.c
+/pe-riscv64igen.c
 /stmp-bfd-h
 /targmatch.h
 

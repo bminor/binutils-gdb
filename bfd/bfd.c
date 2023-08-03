@@ -2111,6 +2111,7 @@ bfd_get_sign_extend_vma (bfd *abfd)
       || strcmp (name, "pe-arm-wince-little") == 0
       || strcmp (name, "pei-arm-wince-little") == 0
       || strcmp (name, "pei-loongarch64") == 0
+      || strcmp (name, "pei-riscv64-little") == 0
       || strcmp (name, "aixcoff-rs6000") == 0
       || strcmp (name, "aix5coff64-rs6000") == 0)
     return 1;
