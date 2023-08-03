@@ -27,7 +27,7 @@
 #include "opcode/ft32.h"
 #include "disassemble.h"
 
-extern const ft32_opc_info_t ft32_opc_info[128];
+extern const ft32_opc_info_t ft32_opc_info[];
 
 static fprintf_ftype fpr;
 static void *stream;
