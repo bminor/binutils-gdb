@@ -186,9 +186,9 @@ look_for_prog (const char *progname, const char *prefix, int end_prefix)
 		 + strlen (EXECUTABLE_SUFFIX)
 #endif
 		 + 10);
-  strcpy (cmd, prefix);
+  memcpy (cmd, prefix, end_prefix);
 
-  sprintf (cmd + end_prefix, "%s", progname);
+  strcpy (cmd + end_prefix, progname);
 
   if (strchr (cmd, '/') != NULL)
     {

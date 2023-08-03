@@ -383,9 +383,9 @@ look_for_default (char *cmd, const char *prefix, int end_prefix,
   struct stat s;
   const char *fnquotes = (filename_need_quotes (filename) ? "\"" : "");
 
-  strcpy (cmd, prefix);
+  memcpy (cmd, prefix, end_prefix);
 
-  sprintf (cmd + end_prefix, "%s", DEFAULT_PREPROCESSOR_CMD);
+  char *out = stpcpy (cmd + end_prefix, DEFAULT_PREPROCESSOR_CMD);
 
   if (
 #if defined (__DJGPP__) || defined (__CYGWIN__) || defined (_WIN32)
@@ -409,13 +409,13 @@ look_for_default (char *cmd, const char *prefix, int end_prefix,
 
   if (filename_need_quotes (cmd))
     {
-      char *cmd_copy = xmalloc (strlen (cmd));
-      strcpy (cmd_copy, cmd);
-      sprintf (cmd, "\"%s\"", cmd_copy);
-      free (cmd_copy);
+      memmove (cmd + 1, cmd, out - cmd);
+      cmd[0] = '"';
+      out++;
+      *out++ = '"';
     }
 
-  sprintf (cmd + strlen (cmd), " %s %s %s%s%s",
+  sprintf (out, " %s %s %s%s%s",
 	   DEFAULT_PREPROCESSOR_ARGS, preprocargs, fnquotes, filename, fnquotes);
 
   if (verbose)

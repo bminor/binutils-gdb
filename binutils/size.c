@@ -441,11 +441,9 @@ size_number (bfd_size_type num)
 {
   char buffer[40];
 
-  sprintf (buffer, (radix == decimal ? "%" PRIu64
-		    : radix == octal ? "0%" PRIo64 : "0x%" PRIx64),
-	   (uint64_t) num);
-
-  return strlen (buffer);
+  return sprintf (buffer, (radix == decimal ? "%" PRIu64
+			   : radix == octal ? "0%" PRIo64 : "0x%" PRIx64),
+		  (uint64_t) num);
 }
 
 static void

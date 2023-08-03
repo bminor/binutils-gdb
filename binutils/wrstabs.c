@@ -678,27 +678,29 @@ stab_int_type (void *p, unsigned int size, bool unsignedp)
 
       cache[size - 1] = tindex;
 
-      sprintf (buf, "%ld=r%ld;", tindex, tindex);
+      int len = sprintf (buf, "%ld=r%ld;", tindex, tindex);
       if (unsignedp)
 	{
-	  strcat (buf, "0;");
+	  strcpy (buf + len, "0;");
+	  len += 2;
 	  if (size < sizeof (long))
-	    sprintf (buf + strlen (buf), "%ld;", ((long) 1 << (size * 8)) - 1);
+	    sprintf (buf + len, "%ld;", ((long) 1 << (size * 8)) - 1);
 	  else if (size == sizeof (long))
-	    strcat (buf, "-1;");
+	    strcpy (buf + len, "-1;");
 	  else if (size == 8)
-	    strcat (buf, "01777777777777777777777;");
+	    strcpy (buf + len, "01777777777777777777777;");
 	  else
 	    abort ();
 	}
       else
 	{
 	  if (size <= sizeof (long))
-	    sprintf (buf + strlen (buf), "%ld;%ld;",
+	    sprintf (buf + len, "%ld;%ld;",
 		     (long) - ((unsigned long) 1 << (size * 8 - 1)),
 		     (long) (((unsigned long) 1 << (size * 8 - 1)) - 1));
 	  else if (size == 8)
-	    strcat (buf, "01000000000000000000000;0777777777777777777777;");
+	    strcpy (buf + len,
+		    "01000000000000000000000;0777777777777777777777;");
 	  else
 	    abort ();
 	}
@@ -828,19 +830,19 @@ stab_enum_type (void *p, const char *tag, const char **names,
     len += strlen (*pn) + 22;
 
   buf = xmalloc (len);
-
+  char *out = buf;
   if (tag == NULL)
-    strcpy (buf, "e");
+    out = stpcpy (out, "e");
   else
     {
       tindex = info->type_index;
       ++info->type_index;
-      sprintf (buf, "%s:T%ld=e", tag, tindex);
+      out += sprintf (out, "%s:T%ld=e", tag, tindex);
     }
 
   for (pn = names, pv = vals; *pn != NULL; pn++, pv++)
-    sprintf (buf + strlen (buf), "%s:%ld,", *pn, (long) *pv);
-  strcat (buf, ";");
+    out += sprintf (out, "%s:%ld,", *pn, (long) *pv);
+  strcpy (out, ";");
 
   if (tag == NULL)
     {
@@ -1031,12 +1033,9 @@ stab_array_type (void *p, bfd_signed_vma low, bfd_signed_vma high,
   element = stab_pop_type (info);
 
   buf = xmalloc (strlen (range) + strlen (element) + 70);
-
+  char *out = buf;
   if (! stringp)
-    {
-      tindex = 0;
-      *buf = '\0';
-    }
+    tindex = 0;
   else
     {
       /* We need to define a type in order to include the string
@@ -1044,10 +1043,10 @@ stab_array_type (void *p, bfd_signed_vma low, bfd_signed_vma high,
       tindex = info->type_index;
       ++info->type_index;
       definition = true;
-      sprintf (buf, "%ld=@S;", tindex);
+      out += sprintf (out, "%ld=@S;", tindex);
     }
 
-  sprintf (buf + strlen (buf), "ar%s;%ld;%ld;%s",
+  sprintf (out, "ar%s;%ld;%ld;%s",
 	   range, (long) low, (long) high, element);
   free (range);
   free (element);
@@ -1073,12 +1072,9 @@ stab_set_type (void *p, bool bitstringp)
 
   s = stab_pop_type (info);
   buf = xmalloc (strlen (s) + 26);
-
+  char *out = buf;
   if (! bitstringp)
-    {
-      *buf = '\0';
-      tindex = 0;
-    }
+    tindex = 0;
   else
     {
       /* We need to define a type in order to include the string
@@ -1086,10 +1082,10 @@ stab_set_type (void *p, bool bitstringp)
       tindex = info->type_index;
       ++info->type_index;
       definition = true;
-      sprintf (buf, "%ld=@S;", tindex);
+      out += sprintf (out, "%ld=@S;", tindex);
     }
 
-  sprintf (buf + strlen (buf), "S%s", s);
+  sprintf (out, "S%s", s);
   free (s);
 
   return stab_push_string (info, buf, tindex, definition, 0);
@@ -1304,11 +1300,11 @@ stab_start_struct_type (void *p, const char *tag, unsigned int id,
   long tindex;
   bool definition;
   char buf[40];
+  char *out = buf;
 
   if (id == 0)
     {
       tindex = 0;
-      *buf = '\0';
       definition = false;
     }
   else
@@ -1317,11 +1313,11 @@ stab_start_struct_type (void *p, const char *tag, unsigned int id,
 				     &size);
       if (tindex < 0)
 	return false;
-      sprintf (buf, "%ld=", tindex);
+      out += sprintf (out, "%ld=", tindex);
       definition = true;
     }
 
-  sprintf (buf + strlen (buf), "%c%u",
+  sprintf (out, "%c%u",
 	   structp ? 's' : 'u',
 	   size);
 
@@ -1699,19 +1695,21 @@ stab_class_method_var (struct stab_write_handle *info, const char *physname,
   else
     typec = '*';
 
+  size_t cur_len = strlen (info->type_stack->methods);
   info->type_stack->methods =
-    xrealloc (info->type_stack->methods,
-	      (strlen (info->type_stack->methods) + strlen (type)
-	       + strlen (physname) + (contextp ? strlen (context) : 0) + 40));
+    xrealloc (info->type_stack->methods, (cur_len
+					  + strlen (type)
+					  + strlen (physname)
+					  + (contextp ? strlen (context) : 0)
+					  + 40));
 
-  sprintf (info->type_stack->methods + strlen (info->type_stack->methods),
-	   "%s:%s;%c%c%c", type, physname, visc, qualc, typec);
+  char *out = info->type_stack->methods + cur_len;
+  out += sprintf (out, "%s:%s;%c%c%c", type, physname, visc, qualc, typec);
   free (type);
 
   if (contextp)
     {
-      sprintf (info->type_stack->methods + strlen (info->type_stack->methods),
-	       "%ld;%s;", (long) voffset, context);
+      sprintf (out, "%ld;%s;", (long) voffset, context);
       free (context);
     }
 
@@ -1800,36 +1798,36 @@ stab_end_class_type (void *p)
 
   buf = xmalloc (len);
 
-  strcpy (buf, info->type_stack->string);
+  char *out = stpcpy (buf, info->type_stack->string);
 
   if (info->type_stack->baseclasses != NULL)
     {
-      sprintf (buf + strlen (buf), "!%u,", i);
+      out += sprintf (out, "!%u,", i);
       for (i = 0; info->type_stack->baseclasses[i] != NULL; i++)
 	{
-	  strcat (buf, info->type_stack->baseclasses[i]);
+	  out = stpcpy (out, info->type_stack->baseclasses[i]);
 	  free (info->type_stack->baseclasses[i]);
 	}
       free (info->type_stack->baseclasses);
       info->type_stack->baseclasses = NULL;
     }
 
-  strcat (buf, info->type_stack->fields);
+  out = stpcpy (out, info->type_stack->fields);
   free (info->type_stack->fields);
   info->type_stack->fields = NULL;
 
   if (info->type_stack->methods != NULL)
     {
-      strcat (buf, info->type_stack->methods);
+      out = stpcpy (out, info->type_stack->methods);
       free (info->type_stack->methods);
       info->type_stack->methods = NULL;
     }
 
-  strcat (buf, ";");
+  out = stpcpy (out, ";");
 
   if (info->type_stack->vtable != NULL)
     {
-      strcat (buf, info->type_stack->vtable);
+      out = stpcpy (out, info->type_stack->vtable);
       free (info->type_stack->vtable);
       info->type_stack->vtable = NULL;
     }

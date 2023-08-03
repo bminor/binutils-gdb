@@ -746,12 +746,14 @@ write_bin (void)
       nd = convert_unicode_to_ACP (n->lang->sval);
 
       /* Prepare filename for binary output.  */
-      filename = xmalloc (strlen (nd) + 4 + 1 + strlen (mcset_mc_basename) + 1 + strlen (mcset_rc_dir));
-      strcpy (filename, mcset_rc_dir);
+      filename = xmalloc (strlen (nd) + 4 + 1 + strlen (mcset_mc_basename)
+			  + 1 + strlen (mcset_rc_dir));
+      char *out = filename;
+      out = stpcpy (out, mcset_rc_dir);
       if (mcset_prefix_bin)
-	sprintf (filename + strlen (filename), "%s_", mcset_mc_basename);
-      strcat (filename, nd);
-      strcat (filename, ".bin");
+	out += sprintf (out, "%s_", mcset_mc_basename);
+      out = stpcpy (out, nd);
+      out = stpcpy (out, ".bin");
 
       /* Write message file.  */
       windmc_write_bin (filename, &mc_nodes_lang[i], (c - i));
