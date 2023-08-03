@@ -46,11 +46,11 @@ proc run_gp_collect_app { subExpCnt F_opt } {
     return -code break
   }
 
-  set output [run_native_host_cmd "find $tdir -name '*x1.er' | wc -l"]
+  set output [run_native_host_cmd "find $tdir -name '*_x?.er' | wc -l"]
   set subExp [lindex $output 1]
   if { $subExp != $subExpCnt } then {
     set out [lindex $output 1]
-    send_log "Test failed for -F $F_opt. subExp=$subExp. Shold be $subExpCnt\n"
+    send_log "Test failed for -F $F_opt. subExp=$subExp. Should be $subExpCnt\n"
     fail $tdir
     return -code break
   }
