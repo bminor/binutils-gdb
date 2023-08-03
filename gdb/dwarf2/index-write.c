@@ -1128,8 +1128,6 @@ write_cooked_index (cooked_index *table,
 		    const cu_index_map &cu_index_htab,
 		    struct mapped_symtab *symtab)
 {
-  const char *main_for_ada = main_name ();
-
   for (const cooked_index_entry *entry : table->all_entries ())
     {
       const auto it = cu_index_htab.find (entry->per_cu);
@@ -1139,25 +1137,12 @@ write_cooked_index (cooked_index *table,
 
       if (entry->per_cu->lang () == language_ada)
 	{
-	  /* We want to ensure that the Ada main function's name
-	     appears verbatim in the index.  However, this name will
-	     be of the form "_ada_mumble", and will be rewritten by
-	     ada_decode.  So, recognize it specially here and add it
-	     to the index by hand.  */
-	  if (entry->tag == DW_TAG_subprogram
-	      && strcmp (main_for_ada, name) == 0)
-	    {
-	      /* Leave it alone.  */
-	    }
-	  else
-	    {
-	      /* In order for the index to work when read back into
-		 gdb, it has to use the encoded name, with any
-		 suffixes stripped.  */
-	      std::string encoded = ada_encode (name, false);
-	      name = obstack_strdup (&symtab->m_string_obstack,
-				     encoded.c_str ());
-	    }
+	  /* In order for the index to work when read back into
+	     gdb, it has to use the encoded name, with any
+	     suffixes stripped.  */
+	  std::string encoded = ada_encode (name, false);
+	  name = obstack_strdup (&symtab->m_string_obstack,
+				 encoded.c_str ());
 	}
       else if (entry->per_cu->lang () == language_cplus
 	       && (entry->flags & IS_LINKAGE) != 0)
