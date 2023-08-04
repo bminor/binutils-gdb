@@ -100,14 +100,14 @@ typedef std::unique_ptr<dwarf2_per_cu_data, dwarf2_per_cu_data_deleter>
 struct dwarf2_per_cu_data
 {
   dwarf2_per_cu_data ()
-    : queued (false),
-      is_debug_types (false),
+    : is_debug_types (false),
       is_dwz (false),
       reading_dwo_directly (false),
       tu_read (false),
       m_header_read_in (false),
       mark (false),
       files_read (false),
+      queued (false),
       scanned (false)
   {
   }
@@ -126,10 +126,6 @@ private:
   unsigned char m_dwarf_version = 0;
 
 public:
-  /* Flag indicating this compilation unit will be read in before
-     any of the current compilation units are processed.  */
-  unsigned int queued : 1;
-
   /* Non-zero if this CU is from .debug_types.
      Struct dwarf2_per_cu_data is contained in struct signatured_type iff
      this is non-zero.  */
@@ -175,6 +171,10 @@ public:
   /* If addresses have been read for this CU (usually from
      .debug_aranges), then this flag is set.  */
   packed<bool, 1> addresses_seen = false;
+
+  /* Flag indicating this compilation unit will be read in before
+     any of the current compilation units are processed.  */
+  packed<bool, 1> queued;
 
 private:
   /* The unit type of this CU.  */
