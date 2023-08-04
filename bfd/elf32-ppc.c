@@ -5126,13 +5126,12 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  && eh->has_addr16_lo
 	  && htab->params->pic_fixup > 0))
     {
-      unsigned int need;
-
       /* Make sure this symbol is output as a dynamic symbol.  */
       if (!ensure_undef_dynamic (info, &eh->elf))
 	return false;
 
-      need = 0;
+      unsigned int need = got_entries_needed (eh->tls_mask);
+      unsigned int rel_need = need * sizeof (Elf32_External_Rela) / 4;
       if ((eh->tls_mask & (TLS_TLS | TLS_LD)) == (TLS_TLS | TLS_LD))
 	{
 	  if (SYMBOL_REFERENCES_LOCAL (info, &eh->elf))
@@ -5141,9 +5140,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	       a local dynamic reloc against a non-local symbol.  */
 	    htab->tlsld_got.refcount += 1;
 	  else
-	    need += 8;
+	    {
+	      need += 8;
+	      rel_need += sizeof (Elf32_External_Rela);
+	    }
 	}
-      need += got_entries_needed (eh->tls_mask);
       if (need == 0)
 	eh->elf.got.offset = (bfd_vma) -1;
       else
@@ -5161,13 +5162,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    {
 	      asection *rsec;
 
-	      need *= sizeof (Elf32_External_Rela) / 4;
-	      if ((eh->tls_mask & (TLS_TLS | TLS_LD)) == (TLS_TLS | TLS_LD))
-		need -= sizeof (Elf32_External_Rela);
 	      rsec = htab->elf.srelgot;
 	      if (eh->elf.type == STT_GNU_IFUNC)
 		rsec = htab->elf.irelplt;
-	      rsec->size += need;
+	      rsec->size += rel_need;
 	    }
 	}
     }
