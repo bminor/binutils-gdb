@@ -37,6 +37,7 @@
 
 struct dwarf2_per_cu_data;
 struct dwarf2_per_bfd;
+struct index_cache_store_context;
 
 /* Flags that describe an entry in the index.  */
 enum cooked_index_flag_enum : unsigned char
@@ -435,7 +436,8 @@ public:
 private:
 
   /* Maybe write the index to the index cache.  */
-  void maybe_write_index (dwarf2_per_bfd *per_bfd);
+  void maybe_write_index (dwarf2_per_bfd *per_bfd,
+			  const index_cache_store_context &);
 
   /* The vector of cooked_index objects.  This is stored because the
      entries are stored on the obstacks in those objects.  */

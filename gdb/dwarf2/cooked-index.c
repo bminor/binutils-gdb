@@ -460,12 +460,15 @@ cooked_index::cooked_index (vec_type &&vec)
 void
 cooked_index::start_writing_index (dwarf2_per_bfd *per_bfd)
 {
+  index_cache_store_context ctx (global_index_cache);
+
   /* This must be set after all the finalization tasks have been
      started, because it may call 'wait'.  */
   m_write_future
-    = gdb::thread_pool::g_thread_pool->post_task ([this, per_bfd] ()
+    = gdb::thread_pool::g_thread_pool->post_task ([this, per_bfd,
+						   ctx = std::move (ctx)] ()
 	{
-	  maybe_write_index (per_bfd);
+	  maybe_write_index (per_bfd, ctx);
 	});
 }
 
@@ -629,13 +632,14 @@ cooked_index::dump (gdbarch *arch) const
 }
 
 void
-cooked_index::maybe_write_index (dwarf2_per_bfd *per_bfd)
+cooked_index::maybe_write_index (dwarf2_per_bfd *per_bfd,
+				 const index_cache_store_context &ctx)
 {
   /* Wait for finalization.  */
   wait ();
 
   /* (maybe) store an index in the cache.  */
-  global_index_cache.store (per_bfd);
+  global_index_cache.store (per_bfd, ctx);
 }
 
 /* Wait for all the index cache entries to be written before gdb
