@@ -42,7 +42,7 @@ if {[dap_launch $testfile] == ""} {
     return
 }
 
-set obj [dap_check_request_and_response "set breakpoint on two functions" \
+set obj [dap_check_request_and_response "set breakpoint on stop function" \
 	     setFunctionBreakpoints \
 	     {o breakpoints [a [o name [s stop]]]}]
 set fn_bpno [dap_get_breakpoint_number $obj]
@@ -53,7 +53,7 @@ dap_wait_for_event_and_check "stopped at function breakpoint" stopped \
     "body reason" breakpoint \
     "body hitBreakpointIds" $fn_bpno
 
-dap_check_request_and_response "continue to next stop" continue \
+dap_check_request_and_response "continue to second stop" continue \
     {o threadId [i 1]}
 
 
@@ -77,5 +77,16 @@ set bt [lindex [dap_check_request_and_response "backtrace" stackTrace \
 set frame_id [dict get [lindex [dict get $bt body stackFrames] 1] moduleId]
 
 gdb_assert {[string match *$libname* $frame_id]} "module.id in stack trace"
+
+
+dap_check_request_and_response "continue to third stop" continue \
+    {o threadId [i 1]}
+
+dap_wait_for_event_and_check "module removed event" module \
+    "body reason" removed
+
+dap_wait_for_event_and_check "third stop at function breakpoint" stopped \
+    "body reason" breakpoint \
+    "body hitBreakpointIds" $fn_bpno
 
 dap_shutdown

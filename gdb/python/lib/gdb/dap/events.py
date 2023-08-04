@@ -68,6 +68,18 @@ def _new_objfile(event):
         )
 
 
+@in_gdb_thread
+def _objfile_removed(event):
+    if is_module(event.objfile):
+        send_event(
+            "module",
+            {
+                "reason": "removed",
+                "module": make_module(event.objfile),
+            },
+        )
+
+
 _suppress_cont = False
 
 
@@ -150,3 +162,4 @@ gdb.events.new_thread.connect(_new_thread)
 gdb.events.thread_exited.connect(_thread_exited)
 gdb.events.cont.connect(_cont)
 gdb.events.new_objfile.connect(_new_objfile)
+gdb.events.free_objfile.connect(_objfile_removed)

@@ -36,5 +36,8 @@ main (void)
   func = (int (*)(void (*) (void))) dlsym (handle, "call_me");
   func (stop);
 
+  dlclose (handle);
+  stop ();
+
   return 0;
 }
