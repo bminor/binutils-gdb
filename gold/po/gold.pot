@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2023-07-03 11:34+0100\n"
+"POT-Creation-Date: 2023-07-30 14:36+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3656,12 +3656,16 @@ msgstr ""
 msgid "call lacks nop, can't restore toc; recompile with -fPIC"
 msgstr ""
 
-#: powerpc.cc:12424 s390.cc:3479
+#: powerpc.cc:12426 powerpc.cc:12433 s390.cc:3479
 msgid "relocation overflow"
 msgstr ""
 
-#: powerpc.cc:12426
+#: powerpc.cc:12428
 msgid "try relinking with a smaller --stub-group-size"
+msgstr ""
+
+#: powerpc.cc:12434
+msgid "debug info may be unreliable, compile with -gdwarf64"
 msgstr ""
 
 #: readsyms.cc:285

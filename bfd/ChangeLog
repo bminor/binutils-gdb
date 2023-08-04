@@ -1,3 +1,11 @@
+2023-07-30  Nick Clifton  <nickc@redhat.com>
+
+	This is the 2.41 release.
+	* configure: Regenerate.
+	* development.sh: Set variables to false.
+	* po/bfd.pot: Regenerate.
+	* version.m4: Set version number to 2.41.
+
 2023-07-24  Nick Clifton  <nickc@redhat.com>
 
 	Import from mainline:
