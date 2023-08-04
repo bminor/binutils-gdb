@@ -661,15 +661,6 @@ apply_varobj_pretty_printer (PyObject *printer_obj,
 gdbpy_ref<>
 gdbpy_get_varobj_pretty_printer (struct value *value)
 {
-  try
-    {
-      value = value->copy ();
-    }
-  catch (const gdb_exception &except)
-    {
-      GDB_PY_HANDLE_EXCEPTION (except);
-    }
-
   gdbpy_ref<> val_obj (value_to_value_object (value));
   if (val_obj == NULL)
     return NULL;
