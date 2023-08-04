@@ -104,10 +104,10 @@ struct dwarf2_per_cu_data
       is_dwz (false),
       reading_dwo_directly (false),
       tu_read (false),
-      m_header_read_in (false),
       mark (false),
       files_read (false),
       queued (false),
+      m_header_read_in (false),
       scanned (false)
   {
   }
@@ -150,12 +150,6 @@ public:
      This flag is only valid if is_debug_types is true.  */
   unsigned int tu_read : 1;
 
-  /* True if HEADER has been read in.
-
-     Don't access this field directly.  It should be private, but we can't make
-     it private at the moment.  */
-  mutable bool m_header_read_in : 1;
-
   /* A temporary mark bit used when iterating over all CUs in
      expand_symtabs_matching.  */
   unsigned int mark : 1;
@@ -175,6 +169,12 @@ public:
   /* Flag indicating this compilation unit will be read in before
      any of the current compilation units are processed.  */
   packed<bool, 1> queued;
+
+  /* True if HEADER has been read in.
+
+     Don't access this field directly.  It should be private, but we can't make
+     it private at the moment.  */
+  mutable packed<bool, 1> m_header_read_in;
 
 private:
   /* The unit type of this CU.  */
