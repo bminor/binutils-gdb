@@ -144,37 +144,7 @@ public:
 
   struct block_symbol lookup_symbol_nonlocal
 	(const char *name, const struct block *block,
-	 const domain_enum domain) const override
-  {
-    struct block_symbol result = {};
-
-    const char *scope = block == nullptr ? "" : block->scope ();
-    symbol_lookup_debug_printf
-      ("rust_lookup_symbol_non_local (%s, %s (scope %s), %s)",
-       name, host_address_to_string (block), scope,
-       domain_name (domain));
-
-    /* Look up bare names in the block's scope.  */
-    std::string scopedname;
-    if (name[cp_find_first_component (name)] == '\0')
-      {
-	if (scope[0] != '\0')
-	  {
-	    scopedname = std::string (scope) + "::" + name;
-	    name = scopedname.c_str ();
-	  }
-	else
-	  name = NULL;
-      }
-
-    if (name != NULL)
-      {
-	result = lookup_symbol_in_static_block (name, block, domain);
-	if (result.symbol == NULL)
-	  result = lookup_global_symbol (name, block, domain);
-      }
-    return result;
-  }
+	 const domain_enum domain) const override;
 
   /* See language.h.  */
 
