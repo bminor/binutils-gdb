@@ -6935,6 +6935,23 @@ is_insn_dq_form (unsigned int insn)
 	      && (insn & 3) == 1));
 }
 
+static bool
+swap_reloc_out (bfd *obfd, Elf_Internal_Rela *rel, bfd_byte *loc, asection *s)
+{
+  if ((size_t) (loc - s->contents) >= s->size)
+    return false;
+  bfd_elf32_swap_reloca_out (obfd, rel, loc);
+  return true;
+}
+
+static bool
+count_and_swap_reloc_out (bfd *obfd, Elf_Internal_Rela *rel, asection *s)
+{
+  bfd_byte *loc = s->contents;
+  loc += s->reloc_count++ * sizeof (Elf32_External_Rela);
+  return swap_reloc_out (obfd, rel, loc, s);
+}
+
 /* The RELOCATE_SECTION function is called by the ELF backend linker
    to handle the relocations for a section.
 
@@ -7806,7 +7823,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 				: sym->st_shndx != SHN_ABS)))
 		      {
 			asection *rsec = htab->elf.srelgot;
-			bfd_byte * loc;
 
 			if (ifunc != NULL)
 			  {
@@ -7825,11 +7841,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			    outrel.r_info = ELF32_R_INFO (indx, R_PPC_DTPMOD32);
 			    if (tls_ty == (TLS_TLS | TLS_GD))
 			      {
-				loc = rsec->contents;
-				loc += (rsec->reloc_count++
-					* sizeof (Elf32_External_Rela));
-				bfd_elf32_swap_reloca_out (output_bfd,
-							   &outrel, loc);
+				BFD_ASSERT (count_and_swap_reloc_out (output_bfd,
+								      &outrel,
+								      rsec));
 				outrel.r_offset += 4;
 				outrel.r_info
 				  = ELF32_R_INFO (indx, R_PPC_DTPREL32);
@@ -7856,10 +7870,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 				  outrel.r_addend -= htab->elf.tls_sec->vma;
 			      }
 			  }
-			loc = rsec->contents;
-			loc += (rsec->reloc_count++
-				* sizeof (Elf32_External_Rela));
-			bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
+			BFD_ASSERT (count_and_swap_reloc_out (output_bfd,
+							      &outrel, rsec));
 		      }
 
 		    /* Init the .got section contents if we're not
@@ -8089,7 +8101,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		 && h->dyn_relocs != NULL))
 	    {
 	      int skip;
-	      bfd_byte *loc;
 	      asection *sreloc;
 	      long indx = 0;
 
@@ -8221,9 +8232,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      if (sreloc == NULL)
 		return false;
 
-	      loc = sreloc->contents;
-	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
-	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
+	      BFD_ASSERT (count_and_swap_reloc_out (output_bfd, &outrel,
+						    sreloc));
 
 	      if (skip == -1)
 		goto copy_reloc;
@@ -9573,7 +9583,8 @@ write_global_sym_plt (struct elf_link_hash_entry *h, void *inf)
 		    rela.r_info = ELF32_R_INFO (htab->elf.hgot->indx,
 						R_PPC_ADDR16_HA);
 		    rela.r_addend = got_offset;
-		    bfd_elf32_swap_reloca_out (info->output_bfd, &rela, loc);
+		    BFD_ASSERT (swap_reloc_out (info->output_bfd, &rela, loc,
+						htab->srelplt2));
 		    loc += sizeof (Elf32_External_Rela);
 
 		    /* Provide the @l relocation for the second instruction.  */
@@ -9583,7 +9594,8 @@ write_global_sym_plt (struct elf_link_hash_entry *h, void *inf)
 		    rela.r_info = ELF32_R_INFO (htab->elf.hgot->indx,
 						R_PPC_ADDR16_LO);
 		    rela.r_addend = got_offset;
-		    bfd_elf32_swap_reloca_out (info->output_bfd, &rela, loc);
+		    BFD_ASSERT (swap_reloc_out (info->output_bfd, &rela, loc,
+						htab->srelplt2));
 		    loc += sizeof (Elf32_External_Rela);
 
 		    /* Provide a relocation for the GOT entry corresponding to this
@@ -9594,7 +9606,8 @@ write_global_sym_plt (struct elf_link_hash_entry *h, void *inf)
 		    rela.r_info = ELF32_R_INFO (htab->elf.hplt->indx,
 						R_PPC_ADDR32);
 		    rela.r_addend = ent->plt.offset + 16;
-		    bfd_elf32_swap_reloca_out (info->output_bfd, &rela, loc);
+		    BFD_ASSERT (swap_reloc_out (info->output_bfd, &rela, loc,
+						htab->srelplt2));
 		  }
 
 		/* VxWorks uses non-standard semantics for R_PPC_JMP_SLOT.
@@ -9676,7 +9689,8 @@ write_global_sym_plt (struct elf_link_hash_entry *h, void *inf)
 		    if (h->type == STT_GNU_IFUNC && is_static_defined (h))
 		      htab->maybe_local_ifunc_resolver = 1;
 		  }
-		bfd_elf32_swap_reloca_out (info->output_bfd, &rela, loc);
+		BFD_ASSERT (swap_reloc_out (info->output_bfd, &rela,
+					    loc, relplt));
 	      }
 	    doneone = true;
 	  }
@@ -9793,9 +9807,8 @@ ppc_finish_symbols (struct bfd_link_info *info)
 				 + plt->output_offset
 				 + plt->output_section->vma);
 		rela.r_addend = val;
-		loc = relplt->contents + (relplt->reloc_count++
-					  * sizeof (Elf32_External_Rela));
-		bfd_elf32_swap_reloca_out (info->output_bfd, &rela, loc);
+		BFD_ASSERT (count_and_swap_reloc_out (info->output_bfd, &rela,
+						      relplt));
 
 		p = (unsigned char *) htab->glink->contents + ent->glink_offset;
 		write_glink_stub (NULL, ent, htab->elf.iplt, p, info);
@@ -9879,7 +9892,6 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
     {
       asection *s;
       Elf_Internal_Rela rela;
-      bfd_byte *loc;
 
       /* This symbols needs a copy reloc.  Set it up.  */
 
@@ -9900,8 +9912,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
       rela.r_offset = SYM_VAL (h);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_PPC_COPY);
       rela.r_addend = 0;
-      loc = s->contents + s->reloc_count++ * sizeof (Elf32_External_Rela);
-      bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
+      BFD_ASSERT (count_and_swap_reloc_out (output_bfd, &rela, s));
     }
 
 #ifdef DEBUG
@@ -10105,7 +10116,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 			   + 2);
 	  rela.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_PPC_ADDR16_HA);
 	  rela.r_addend = 0;
-	  bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
+	  BFD_ASSERT (swap_reloc_out (output_bfd, &rela, loc, htab->srelplt2));
 	  loc += sizeof (Elf32_External_Rela);
 
 	  /* Output the @l relocation for the second instruction.  */
@@ -10114,7 +10125,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 			   + 6);
 	  rela.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_PPC_ADDR16_LO);
 	  rela.r_addend = 0;
-	  bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
+	  BFD_ASSERT (swap_reloc_out (output_bfd, &rela, loc, htab->srelplt2));
 	  loc += sizeof (Elf32_External_Rela);
 
 	  /* Fix up the remaining relocations.  They may have the wrong
