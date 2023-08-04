@@ -748,7 +748,7 @@ targets except the x86/x86_64, but a configure time option can be used to
 override this.
 
 @item -D
-Enable denugging in target specific backends, if supported.  Otherwise ignored.
+Enable debugging in target specific backends, if supported.  Otherwise ignored.
 Even if ignored, this option is accepted for script compatibility with calls to
 other assemblers.
 
