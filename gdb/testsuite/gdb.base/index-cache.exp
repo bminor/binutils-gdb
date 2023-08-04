@@ -152,6 +152,9 @@ proc_with_prefix test_cache_disabled { cache_dir test_prefix } {
 	    # Trigger expansion of symtab not containing main.
 	    gdb_test "ptype foo" "^type = int \\(void\\)"
 
+	    # Look for non-existent function.
+	    gdb_test "ptype foobar" "^No symbol \"foobar\" in current context\\."
+
 	    check_cache_stats 0 0
 	}
     }
@@ -199,6 +202,9 @@ proc_with_prefix test_cache_enabled_miss { cache_dir } {
 	# Trigger expansion of symtab not containing main.
 	gdb_test "ptype foo" "^type = int \\(void\\)"
 
+	# Look for non-existent function.
+	gdb_test "ptype foobar" "^No symbol \"foobar\" in current context\\."
+
 	if { $expecting_index_cache_use } {
 	    check_cache_stats 0 1
 	} else {
@@ -233,6 +239,9 @@ proc_with_prefix test_cache_enabled_hit { cache_dir } {
 
 	# Trigger expansion of symtab not containing main.
 	gdb_test "ptype foo" "^type = int \\(void\\)"
+
+	# Look for non-existent function.
+	gdb_test "ptype foobar" "^No symbol \"foobar\" in current context\\."
 
 	if { $expecting_index_cache_use } {
 	    check_cache_stats 1 0
