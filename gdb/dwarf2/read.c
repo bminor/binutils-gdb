@@ -12681,7 +12681,14 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   type = type_allocator (objfile).new_type ();
-  INIT_CPLUS_SPECIFIC (type);
+  if (cu->lang () == language_rust)
+    {
+      /* This is currently only needed for types that might be
+	 slices.  */
+      INIT_RUST_SPECIFIC (type);
+    }
+  else
+    INIT_CPLUS_SPECIFIC (type);
 
   name = dwarf2_name (die, cu);
   if (name != NULL)

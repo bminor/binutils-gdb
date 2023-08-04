@@ -501,6 +501,7 @@ enum type_specific_kind
   TYPE_SPECIFIC_NONE,
   TYPE_SPECIFIC_CPLUS_STUFF,
   TYPE_SPECIFIC_GNAT_STUFF,
+  TYPE_SPECIFIC_RUST_STUFF,
   TYPE_SPECIFIC_FLOATFORMAT,
   /* Note: This is used by TYPE_CODE_FUNC and TYPE_CODE_METHOD.  */
   TYPE_SPECIFIC_FUNC,
@@ -856,7 +857,7 @@ struct main_type
   /* * A discriminant telling us which field of the type_specific
      union is being used for this type, if any.  */
 
-  ENUM_BITFIELD(type_specific_kind) type_specific_field : 3;
+  ENUM_BITFIELD(type_specific_kind) type_specific_field : 4;
 
   /* * Number of fields described for this type.  This field appears
      at this location because it packs nicely here.  */
@@ -1832,6 +1833,14 @@ extern void allocate_gnat_aux_type (struct type *);
   (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_GNAT_STUFF	\
     || (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_NONE	\
 	&& (type)->is_fixed_instance ()))
+
+/* Currently there isn't any associated data -- this is just a
+   marker.  */
+#define INIT_RUST_SPECIFIC(type) \
+  TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_RUST_STUFF
+
+#define HAVE_RUST_SPECIFIC(type) \
+  (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_RUST_STUFF)
 
 #define INIT_FUNC_SPECIFIC(type)					       \
   (TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FUNC,			       \

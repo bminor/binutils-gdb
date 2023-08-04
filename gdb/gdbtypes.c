@@ -5383,6 +5383,10 @@ recursive_dump_type (struct type *type, int spaces)
       print_gnat_stuff (type, spaces);
       break;
 
+    case TYPE_SPECIFIC_RUST_STUFF:
+      gdb_printf ("%*srust\n", spaces, "");
+      break;
+
     case TYPE_SPECIFIC_FLOATFORMAT:
       gdb_printf ("%*sfloatformat ", spaces, "");
       if (TYPE_FLOATFORMAT (type) == NULL
@@ -5622,6 +5626,9 @@ copy_type_recursive (struct type *type, htab_t copied_types)
       break;
     case TYPE_SPECIFIC_GNAT_STUFF:
       INIT_GNAT_SPECIFIC (new_type);
+      break;
+    case TYPE_SPECIFIC_RUST_STUFF:
+      INIT_RUST_SPECIFIC (new_type);
       break;
     case TYPE_SPECIFIC_SELF_TYPE:
       set_type_self_type (new_type,
