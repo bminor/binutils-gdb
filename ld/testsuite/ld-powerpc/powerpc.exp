@@ -522,5 +522,6 @@ run_dump_test "non-contiguous-powerpc"
 
 run_dump_test "tprel32"
 run_dump_test "tprelbad"
+run_dump_test tls32ldgd
 
 run_dump_test "undefweak"
