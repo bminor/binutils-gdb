@@ -460,7 +460,7 @@ cooked_index::cooked_index (vec_type &&vec)
 void
 cooked_index::start_writing_index (dwarf2_per_bfd *per_bfd)
 {
-  index_cache_store_context ctx (global_index_cache);
+  index_cache_store_context ctx (global_index_cache, per_bfd);
 
   /* This must be set after all the finalization tasks have been
      started, because it may call 'wait'.  */

@@ -42,17 +42,24 @@ struct index_cache_store_context
 {
   friend class index_cache;
 
-  explicit index_cache_store_context (const index_cache &ic);
+  index_cache_store_context (const index_cache &ic, dwarf2_per_bfd *per_bfd);
 
 private:
   /* Captured value of enabled ().  */
   bool m_enabled;
+
+  /* Captured value of build id.  */
+  std::string build_id_str;
+
+  /* Captured value of dwz build id.  */
+  gdb::optional<std::string> dwz_build_id_str;
 };
 
 /* Class to manage the access to the DWARF index cache.  */
 
 class index_cache
 {
+  friend struct index_cache_store_context;
 public:
   /* Change the directory used to save/load index files.  */
   void set_directory (std::string dir);
