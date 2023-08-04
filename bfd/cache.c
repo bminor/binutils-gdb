@@ -546,7 +546,9 @@ SYNOPSIS
 
 DESCRIPTION
 	Remove all BFDs from the cache. If the attached file is open,
-	then close it too.
+	then close it too.  Note - despite its name this function will
+	close a BFD even if it is not marked as being cacheable, ie
+	even if bfd_get_cacheable() returns false.
 
 	<<FALSE>> is returned if closing one of the file fails, <<TRUE>> is
 	returned if all is well.
@@ -558,7 +560,16 @@ bfd_cache_close_all (void)
   bool ret = true;
 
   while (bfd_last_cache != NULL)
-    ret &= bfd_cache_close (bfd_last_cache);
+    {
+      bfd *prev_bfd_last_cache = bfd_last_cache;
+
+      ret &= bfd_cache_close (bfd_last_cache);
+
+      /* Stop a potential infinite loop should bfd_cache_close()
+	 not update bfd_last_cache.  */
+      if (bfd_last_cache == prev_bfd_last_cache)
+	break;
+    }
 
   return ret;
 }
