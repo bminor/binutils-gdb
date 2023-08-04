@@ -16,9 +16,9 @@
 # This test checks that the index-cache feature generates the expected files at
 # the expected location.
 
-standard_testfile
+standard_testfile .c -2.c
 
-if { [build_executable "failed to prepare" $testfile $srcfile \
+if { [build_executable "failed to prepare" $testfile [list $srcfile $srcfile2] \
 	  {debug ldflags=-Wl,--build-id}] } {
     return
 }
@@ -147,6 +147,12 @@ proc_with_prefix test_cache_disabled { cache_dir test_prefix } {
 	    gdb_assert "$nfiles_created == 0" "no files were created"
 
 	    check_cache_stats 0 0
+
+	    # Trigger expansion of symtab containing main, if not already done.
+	    gdb_test "ptype main" "^type = int \\(void\\)"
+
+	    # Trigger expansion of symtab not containing main.
+	    gdb_test "ptype foo" "^type = int \\(void\\)"
 	}
     }
 }
@@ -192,6 +198,12 @@ proc_with_prefix test_cache_enabled_miss { cache_dir } {
 	} else {
 	    check_cache_stats 0 0
 	}
+
+	# Trigger expansion of symtab containing main, if not already done.
+	gdb_test "ptype main" "^type = int \\(void\\)"
+
+	# Trigger expansion of symtab not containing main.
+	gdb_test "ptype foo" "^type = int \\(void\\)"
     }
 }
 
@@ -221,6 +233,12 @@ proc_with_prefix test_cache_enabled_hit { cache_dir } {
 	} else {
 	    check_cache_stats 0 0
 	}
+
+	# Trigger expansion of symtab containing main, if not already done.
+	gdb_test "ptype main" "^type = int \\(void\\)"
+
+	# Trigger expansion of symtab not containing main.
+	gdb_test "ptype foo" "^type = int \\(void\\)"
     }
 }
 
