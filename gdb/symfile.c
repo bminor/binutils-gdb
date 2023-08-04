@@ -1762,9 +1762,6 @@ symfile_bfd_open (const char *name)
     error (_("`%s': can't open to read symbols: %s."), name,
 	   bfd_errmsg (bfd_get_error ()));
 
-  if (!gdb_bfd_has_target_filename (sym_bfd.get ()))
-    bfd_set_cacheable (sym_bfd.get (), 1);
-
   if (!bfd_check_format (sym_bfd.get (), bfd_object))
     error (_("`%s': can't read symbols: %s."), name,
 	   bfd_errmsg (bfd_get_error ()));

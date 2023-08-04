@@ -430,9 +430,6 @@ solib_bfd_fopen (const char *pathname, int fd)
 {
   gdb_bfd_ref_ptr abfd (gdb_bfd_open (pathname, gnutarget, fd));
 
-  if (abfd != NULL && !gdb_bfd_has_target_filename (abfd.get ()))
-    bfd_set_cacheable (abfd.get (), 1);
-
   if (abfd == NULL)
     {
       /* Arrange to free PATHNAME when the error is thrown.  */

@@ -447,8 +447,6 @@ macho_add_oso_symfile (oso_el *oso, const gdb_bfd_ref_ptr &abfd,
       return;
     }
 
-  bfd_set_cacheable (abfd.get (), 1);
-
   /* Read symbols table.  */
   storage = bfd_get_symtab_upper_bound (abfd.get ());
   symbol_table = (asymbol **) xmalloc (storage);

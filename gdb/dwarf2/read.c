@@ -9184,7 +9184,6 @@ try_open_dwop_file (dwarf2_per_objfile *per_objfile,
 					 gnutarget, desc));
   if (sym_bfd == NULL)
     return NULL;
-  bfd_set_cacheable (sym_bfd.get (), 1);
 
   if (!bfd_check_format (sym_bfd.get (), bfd_object))
     return NULL;
