@@ -65,6 +65,10 @@ proc ls_host { dir } {
 # values.
 
 proc check_cache_stats { expected_hits expected_misses } {
+    # This test wants to check the cache, so make sure it has completed
+    # its work.
+    gdb_test_no_output "maintenance wait-for-index-cache"
+
     set re [multi_line \
 	"  Cache hits .this session.: $expected_hits" \
 	"Cache misses .this session.: $expected_misses" \
@@ -83,10 +87,6 @@ proc run_test_with_flags { cache_dir cache_enabled code } {
 	set GDBFLAGS "$GDBFLAGS -iex \"set index-cache enabled $cache_enabled\""
 
 	clean_restart ${testfile}
-
-	# The tests generally want to check the cache, so make sure it
-	# has completed its work.
-	gdb_test_no_output "maintenance wait-for-index-cache"
 
 	uplevel 1 $code
     }
@@ -146,13 +146,13 @@ proc_with_prefix test_cache_disabled { cache_dir test_prefix } {
 	    set nfiles_created [expr [llength $files_after] - [llength $files_before]]
 	    gdb_assert "$nfiles_created == 0" "no files were created"
 
-	    check_cache_stats 0 0
-
 	    # Trigger expansion of symtab containing main, if not already done.
 	    gdb_test "ptype main" "^type = int \\(void\\)"
 
 	    # Trigger expansion of symtab not containing main.
 	    gdb_test "ptype foo" "^type = int \\(void\\)"
+
+	    check_cache_stats 0 0
 	}
     }
 }
@@ -193,17 +193,17 @@ proc_with_prefix test_cache_enabled_miss { cache_dir } {
 
 	remote_exec host rm "-f $cache_dir/$expected_created_file"
 
-	if { $expecting_index_cache_use } {
-	    check_cache_stats 0 1
-	} else {
-	    check_cache_stats 0 0
-	}
-
 	# Trigger expansion of symtab containing main, if not already done.
 	gdb_test "ptype main" "^type = int \\(void\\)"
 
 	# Trigger expansion of symtab not containing main.
 	gdb_test "ptype foo" "^type = int \\(void\\)"
+
+	if { $expecting_index_cache_use } {
+	    check_cache_stats 0 1
+	} else {
+	    check_cache_stats 0 0
+	}
     }
 }
 
@@ -228,17 +228,17 @@ proc_with_prefix test_cache_enabled_hit { cache_dir } {
 	set nfiles_created [expr [llength $files_after] - [llength $files_before]]
 	gdb_assert "$nfiles_created == 0" "no files were created"
 
-	if { $expecting_index_cache_use } {
-	    check_cache_stats 1 0
-	} else {
-	    check_cache_stats 0 0
-	}
-
 	# Trigger expansion of symtab containing main, if not already done.
 	gdb_test "ptype main" "^type = int \\(void\\)"
 
 	# Trigger expansion of symtab not containing main.
 	gdb_test "ptype foo" "^type = int \\(void\\)"
+
+	if { $expecting_index_cache_use } {
+	    check_cache_stats 1 0
+	} else {
+	    check_cache_stats 0 0
+	}
     }
 }
 
