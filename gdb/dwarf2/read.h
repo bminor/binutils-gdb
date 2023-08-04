@@ -104,10 +104,10 @@ struct dwarf2_per_cu_data
       is_dwz (false),
       reading_dwo_directly (false),
       tu_read (false),
-      mark (false),
       files_read (false),
       queued (false),
       m_header_read_in (false),
+      mark (false),
       scanned (false)
   {
   }
@@ -150,10 +150,6 @@ public:
      This flag is only valid if is_debug_types is true.  */
   unsigned int tu_read : 1;
 
-  /* A temporary mark bit used when iterating over all CUs in
-     expand_symtabs_matching.  */
-  unsigned int mark : 1;
-
   /* True if we've tried to read the file table.  There will be no
      point in trying to read it again next time.  */
   bool files_read : 1;
@@ -175,6 +171,10 @@ public:
      Don't access this field directly.  It should be private, but we can't make
      it private at the moment.  */
   mutable packed<bool, 1> m_header_read_in;
+
+  /* A temporary mark bit used when iterating over all CUs in
+     expand_symtabs_matching.  */
+  packed<unsigned int, 1> mark;
 
 private:
   /* The unit type of this CU.  */
