@@ -3715,7 +3715,7 @@ is about to be removed from @value{GDBN}.  One reason this can happen
 is when the inferior calls @code{dlclose}.
 @code{gdb.FreeObjFileEvent} has one attribute:
 
-@defvar NewObjFileEvent.objfile
+@defvar FreeObjFileEvent.objfile
 A reference to the object file (@code{gdb.Objfile}) which will be unloaded.
 @xref{Objfiles In Python}, for details of the @code{gdb.Objfile} object.
 @end defvar
