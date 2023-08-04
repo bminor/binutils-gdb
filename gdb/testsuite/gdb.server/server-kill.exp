@@ -97,7 +97,7 @@ proc_with_prefix test_tstatus {} {
 
     # Force GDB to talk with GDBserver, so that we can get the
     # "connection closed" error.
-    gdb_test "tstatus" {Remote connection closed|Remote communication error\.  Target disconnected\.: Connection reset by peer\.}
+    gdb_test "tstatus" {Remote connection closed|Remote communication error\.  Target disconnected: Connection reset by peer\.}
 }
 
 # Test unwinding with no debug/unwind info, right after the connection

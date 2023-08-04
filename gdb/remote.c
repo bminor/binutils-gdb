@@ -9648,7 +9648,7 @@ remote_target::readchar (int timeout)
       /* no return */
     case SERIAL_ERROR:
       unpush_and_perror (this, _("Remote communication error.  "
-				 "Target disconnected."));
+				 "Target disconnected"));
       /* no return */
     case SERIAL_TIMEOUT:
       break;
@@ -9677,7 +9677,7 @@ remote_target::remote_serial_write (const char *str, int len)
   if (serial_write (rs->remote_desc, str, len))
     {
       unpush_and_perror (this, _("Remote communication error.  "
-				 "Target disconnected."));
+				 "Target disconnected"));
     }
 
   if (rs->got_ctrlc_during_io)
