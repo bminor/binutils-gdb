@@ -153,10 +153,10 @@ rust_tuple_struct_type_p (struct type *type)
   return type->num_fields () > 0 && rust_underscore_fields (type);
 }
 
-/* Return true if TYPE is a slice type, otherwise false.  */
+/* See rust-lang.h.  */
 
-static bool
-rust_slice_type_p (struct type *type)
+bool
+rust_slice_type_p (const struct type *type)
 {
   if (type->code () == TYPE_CODE_STRUCT
       && type->name () != NULL
@@ -319,6 +319,30 @@ static const struct generic_val_print_decorations rust_decorations =
   "]"
 };
 
+/* See rust-lang.h.  */
+
+struct value *
+rust_slice_to_array (struct value *val)
+{
+  struct type *type = check_typedef (val->type ());
+  /* This must have been checked by the caller.  */
+  gdb_assert (rust_slice_type_p (type));
+
+  struct value *base = value_struct_elt (&val, {}, "data_ptr", NULL,
+					 "slice");
+  struct value *len = value_struct_elt (&val, {}, "length", NULL, "slice");
+  LONGEST llen = value_as_long (len);
+
+  struct type *elt_type = base->type ()->target_type ();
+  struct type *array_type = lookup_array_range_type (elt_type, 0,
+						     llen - 1);
+  struct value *array = value::allocate_lazy (array_type);
+  array->set_lval (lval_memory);
+  array->set_address (value_as_address (base));
+
+  return array;
+}
+
 /* Helper function to print a slice.  */
 
 static void
@@ -345,12 +369,7 @@ rust_val_print_slice (struct value *val, struct ui_file *stream, int recurse,
 	gdb_printf (stream, "[]");
       else
 	{
-	  struct type *elt_type = base->type ()->target_type ();
-	  struct type *array_type = lookup_array_range_type (elt_type, 0,
-							     llen - 1);
-	  struct value *array = value::allocate_lazy (array_type);
-	  array->set_lval (lval_memory);
-	  array->set_address (value_as_address (base));
+	  struct value *array = rust_slice_to_array (val);
 	  array->fetch_lazy ();
 	  generic_value_print (array, stream, recurse, options,
 			       &rust_decorations);
