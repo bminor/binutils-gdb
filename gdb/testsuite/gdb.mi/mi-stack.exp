@@ -65,9 +65,10 @@ proc test_stack_frame_listing {} {
 	"234\\^error,msg=\"-stack-list-frames: Usage.*FRAME_LOW FRAME_HIGH.*\"" \
 	"stack frame listing wrong"
 
-    mi_gdb_test "235-stack-info-frame" \
-	"235\\^done,frame=\{level=\"0\",addr=\"$hex\",func=\"callee4\",file=\".*${srcfile}\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$callee4_begin\",arch=\"$any\"\}" \
-	"selected frame listing"
+    mi_info_frame "selected frame listing" \
+	-level 0 -addr $hex -func callee4 -file ".*${srcfile}" \
+	-fullname "${fullname_syntax}${srcfile}" -line $callee4_begin \
+	-arch $any
 
     mi_gdb_test "236-stack-list-frames 1 300" \
 	"236\\^done,stack=\\\[frame=\{level=\"1\",addr=\"$hex\",func=\"callee3\",.*\},frame=\{level=\"2\",addr=\"$hex\",func=\"callee2\",.*\},frame=\{level=\"3\",addr=\"$hex\",func=\"callee1\",.*\}\\\]" \

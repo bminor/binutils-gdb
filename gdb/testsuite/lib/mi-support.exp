@@ -2636,6 +2636,57 @@ proc mi_make_breakpoint_1 {attr_list thread inferior cond evaluated-by \
     return $result
 }
 
+# Construct a regexp to match against a frame description as returned by
+# -stack-info-frame.  Take a list of name value pairs.  Valid names are
+# -level, -addr, -func, -file, -fullname, line, and -arch, each takes a
+# regexp which is matched against the corresponding field in the
+# -stack-info-frame output.
+
+proc mi_make_info_frame_regexp {args} {
+    parse_args [list [list level "$::decimal"] [list addr "$::hex"] \
+		    {func .*} {file .*} {fullname .*} \
+		    [list line "$::decimal"] {arch .*}]
+
+    set attr_list {}
+    foreach attr {level addr func file fullname line arch} {
+	lappend attr_list $attr [set $attr]
+    }
+
+    set result "frame=\\\{"
+    append result [mi_build_kv_pairs $attr_list]
+    append result "\\\}"
+    return $result
+}
+
+# Run the -stack-info-frame command and match the result, return true if the
+# test passes, otherwise, return false.
+#
+# TEST is the name used for this test.
+#
+# ARGS is an optional list of name value pairs, the names -frame and -thread
+# if present, expect a decimal argument and control the frame and thread for
+# which -stack-info-frame is run.  If -frame is not given then the
+# -stack-info-frame will operate on the current frame.  If -thread is not
+# given then -stack-info-frame will operate on the current thread.
+#
+# The remaining arguments are passed to mi_make_frame_regexp and are used to
+# build the regexp for matching against the -stack-info-frame output.
+
+proc mi_info_frame { test args } {
+    parse_args {{frame ""} {thread ""}}
+
+    set re [eval mi_make_info_frame_regexp $args]
+
+    set cmd "235-stack-info-frame"
+    if {$frame ne ""} {
+	append cmd " --frame ${frame}"
+    }
+    if {$thread ne ""} {
+	append cmd " --thread ${thread}"
+    }
+
+    return [mi_gdb_test $cmd "235\\^done,$re" $test]
+}
 
 # Construct a breakpoint regexp, for a breakpoint with multiple
 # locations.  This may be used to test the output of -break-insert,
