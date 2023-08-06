@@ -53,6 +53,14 @@ EXTERNAL
 .    both_direction = 3
 .  };
 .
+.enum bfd_last_io
+.  {
+.    bfd_io_seek = 0,
+.    bfd_io_read = 1,
+.    bfd_io_write = 2,
+.    bfd_io_force = 3
+.  };
+.
 .enum bfd_plugin_format
 .  {
 .    bfd_plugin_unknown = 0,
@@ -207,6 +215,20 @@ CODE_FRAGMENT
 .
 .  {* The direction with which the BFD was opened.  *}
 .  ENUM_BITFIELD (bfd_direction) direction : 2;
+.
+.  {* POSIX.1-2017 (IEEE Std 1003.1) says of fopen : "When a file is
+.     opened with update mode ('+' as the second or third character in
+.     the mode argument), both input and output may be performed on
+.     the associated stream.  However, the application shall ensure
+.     that output is not directly followed by input without an
+.     intervening call to fflush() or to a file positioning function
+.     (fseek(), fsetpos(), or rewind()), and input is not directly
+.     followed by output without an intervening call to a file
+.     positioning function, unless the input operation encounters
+.     end-of-file."
+.     This field tracks the last IO operation, so that bfd can insert
+.     a seek when IO direction changes.  *}
+.  ENUM_BITFIELD (bfd_last_io) last_io : 2;
 .
 .  {* Is the file descriptor being cached?  That is, can it be closed as
 .     needed, and re-opened when accessed later?  *}
