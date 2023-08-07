@@ -131,16 +131,6 @@ const float riscv_fli_numval[32] =
   0x1p+3, 0x1p+4, 0x1p+7, 0x1p+8, 0x1p+15, 0x1p+16, 0x0p+0, 0x0p+0
 };
 
-/* The order of overloaded instructions matters.  Label arguments and
-   register arguments look the same. Instructions that can have either
-   for arguments must apear in the correct order in this table for the
-   assembler to pick the right one. In other words, entries with
-   immediate operands must apear after the same instruction with
-   registers.
-
-   Because of the lookup algorithm used, entries with the same opcode
-   name must be contiguous.  */
-
 #define MASK_RS1 (OP_MASK_RS1 << OP_SH_RS1)
 #define MASK_RS2 (OP_MASK_RS2 << OP_SH_RS2)
 #define MASK_RD (OP_MASK_RD << OP_SH_RD)
@@ -328,6 +318,16 @@ match_th_load_pair(const struct riscv_opcode *op,
 
   return rd1 != rd2 && rd1 != rs && rd2 != rs && match_opcode (op, insn);
 }
+
+/* The order of overloaded instructions matters.  Label arguments and
+   register arguments look the same. Instructions that can have either
+   for arguments must apear in the correct order in this table for the
+   assembler to pick the right one. In other words, entries with
+   immediate operands must apear after the same instruction with
+   registers.
+
+   Because of the lookup algorithm used, entries with the same opcode
+   name must be contiguous.  */
 
 const struct riscv_opcode riscv_opcodes[] =
 {
