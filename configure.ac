@@ -23,8 +23,8 @@ m4_include(config/acx.m4)
 m4_include(config/override.m4)
 m4_include(config/proginstall.m4)
 m4_include(config/elf.m4)
-m4_include(config/gcc-plugin.m4)
 m4_include(config/ax_cxx_compile_stdcxx.m4)
+m4_include(config/gcc-plugin.m4)
 m4_include([libtool.m4])
 m4_include([ltoptions.m4])
 m4_include([ltsugar.m4])
@@ -349,7 +349,7 @@ case "${ENABLE_GOLD}" in
       *-*-elf* | *-*-sysv4* | *-*-unixware* | *-*-eabi* | hppa*64*-*-hpux* \
       | *-*-linux* | *-*-gnu* | frv-*-uclinux* | *-*-irix5* | *-*-irix6* \
       | *-*-netbsd* | *-*-openbsd* | *-*-freebsd* | *-*-dragonfly* \
-      | *-*-solaris2* | *-*-nto* | *-*-nacl*)
+      | *-*-solaris2* | *-*-nto* | *-*-nacl* | *-*-haiku*)
         case "${target}" in
           *-*-linux*aout* | *-*-linux*oldld*)
             ;;
