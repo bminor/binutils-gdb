@@ -2634,7 +2634,7 @@ read_program_headers_from_bfd (bfd *abfd)
 
   gdb::byte_vector buf (phdrs_size);
   if (bfd_seek (abfd, ehdr->e_phoff, SEEK_SET) != 0
-      || bfd_bread (buf.data (), phdrs_size, abfd) != phdrs_size)
+      || bfd_read (buf.data (), phdrs_size, abfd) != phdrs_size)
     return {};
 
   return buf;

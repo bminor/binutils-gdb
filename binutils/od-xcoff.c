@@ -455,7 +455,7 @@ dump_xcoff32_aout_header (bfd *abfd, struct xcoff_dump *data)
               (int)sizeof (auxhdr));
       sz = sizeof (auxhdr);
     }
-  if (bfd_bread (&auxhdr, sz, abfd) != sz)
+  if (bfd_read (&auxhdr, sz, abfd) != sz)
     {
       non_fatal (_("cannot read auxhdr"));
       return;
@@ -542,7 +542,7 @@ dump_xcoff32_sections_header (bfd *abfd, struct xcoff_dump *data)
       struct external_scnhdr scn;
       unsigned int flags;
 
-      if (bfd_bread (&scn, sizeof (scn), abfd) != sizeof (scn))
+      if (bfd_read (&scn, sizeof (scn), abfd) != sizeof (scn))
         {
           non_fatal (_("cannot read section header"));
           return;
@@ -597,7 +597,7 @@ xcoff32_read_sections (bfd *abfd, struct xcoff_dump *data)
       struct external_scnhdr scn;
       struct xcoff32_section *s = &data->sects[i];
 
-      if (bfd_bread (&scn, sizeof (scn), abfd) != sizeof (scn))
+      if (bfd_read (&scn, sizeof (scn), abfd) != sizeof (scn))
         {
           non_fatal (_("cannot read section header"));
           free (data->sects);
@@ -644,7 +644,7 @@ xcoff32_read_symbols (bfd *abfd, struct xcoff_dump *data)
 
   /* Read string table.  */
   if (bfd_seek (abfd, stptr, SEEK_SET) != 0
-      || bfd_bread (&stsz_arr, sizeof (stsz_arr), abfd) != sizeof (stsz_arr))
+      || bfd_read (&stsz_arr, sizeof (stsz_arr), abfd) != sizeof (stsz_arr))
     {
       non_fatal (_("cannot read strings table length"));
       data->strings_size = 0;
@@ -659,7 +659,7 @@ xcoff32_read_symbols (bfd *abfd, struct xcoff_dump *data)
           data->strings = xmalloc (data->strings_size);
 
           memcpy (data->strings, stsz_arr, sizeof (stsz_arr));
-          if (bfd_bread (data->strings + sizeof (stsz_arr), remsz, abfd)
+          if (bfd_read (data->strings + sizeof (stsz_arr), remsz, abfd)
               != remsz)
             {
               non_fatal (_("cannot read strings table"));
@@ -683,7 +683,7 @@ xcoff32_read_symbols (bfd *abfd, struct xcoff_dump *data)
       int j;
       union xcoff32_symbol *s = &data->syms[i];
 
-      if (bfd_bread (&sym, sizeof (sym), abfd) != sizeof (sym))
+      if (bfd_read (&sym, sizeof (sym), abfd) != sizeof (sym))
         {
           non_fatal (_("cannot read symbol entry"));
           goto clean;
@@ -716,7 +716,7 @@ xcoff32_read_symbols (bfd *abfd, struct xcoff_dump *data)
 
       for (j = 0; j < s->sym.numaux; j++, i++)
         {
-           if (bfd_bread (&s[j + 1].aux,
+           if (bfd_read (&s[j + 1].aux,
                           sizeof (union external_auxent), abfd)
                != sizeof (union external_auxent))
             {
@@ -948,7 +948,7 @@ dump_xcoff32_relocs (bfd *abfd, struct xcoff_dump *data)
           unsigned char rsize;
           unsigned int symndx;
 
-          if (bfd_bread (&rel, sizeof (rel), abfd) != sizeof (rel))
+          if (bfd_read (&rel, sizeof (rel), abfd) != sizeof (rel))
             {
               non_fatal (_("cannot read relocation entry"));
               return;
@@ -1003,7 +1003,7 @@ dump_xcoff32_lineno (bfd *abfd, struct xcoff_dump *data)
           struct external_lineno ln;
           unsigned int no;
 
-          if (bfd_bread (&ln, sizeof (ln), abfd) != sizeof (ln))
+          if (bfd_read (&ln, sizeof (ln), abfd) != sizeof (ln))
             {
               non_fatal (_("cannot read line number entry"));
               return;
@@ -1638,7 +1638,7 @@ xcoff_dump_obj (bfd *abfd)
 
   /* Read file header.  */
   if (bfd_seek (abfd, 0, SEEK_SET) != 0
-      || bfd_bread (&fhdr, sizeof (fhdr), abfd) != sizeof (fhdr))
+      || bfd_read (&fhdr, sizeof (fhdr), abfd) != sizeof (fhdr))
     {
       non_fatal (_("cannot read header"));
       return;
@@ -1735,7 +1735,7 @@ dump_dumpx_core (bfd *abfd, struct external_core_dumpx *hdr)
 
       ldr = xmalloc (len);
       if (bfd_seek (abfd, off, SEEK_SET) != 0
-	  || bfd_bread (ldr, len, abfd) != len)
+	  || bfd_read (ldr, len, abfd) != len)
 	non_fatal (_("cannot read loader info table"));
       else
 	{
@@ -1784,7 +1784,7 @@ xcoff_dump_core (bfd *abfd)
 
   /* Read file header.  */
   if (bfd_seek (abfd, 0, SEEK_SET) != 0
-      || bfd_bread (&hdr, sizeof (hdr), abfd) != sizeof (hdr))
+      || bfd_read (&hdr, sizeof (hdr), abfd) != sizeof (hdr))
     {
       non_fatal (_("cannot core read header"));
       return;

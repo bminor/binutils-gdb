@@ -802,7 +802,7 @@ _bfd_vms_get_object_record (bfd *abfd)
   /* Skip alignment byte if the current position is odd.  */
   if (PRIV (recrd.file_format) == FF_FOREIGN && (bfd_tell (abfd) & 1))
     {
-      if (bfd_bread (PRIV (recrd.buf), 1, abfd) != 1)
+      if (bfd_read (PRIV (recrd.buf), 1, abfd) != 1)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
 	  return -1;
@@ -810,7 +810,7 @@ _bfd_vms_get_object_record (bfd *abfd)
     }
 
   /* Read the record header  */
-  if (bfd_bread (PRIV (recrd.buf), test_len, abfd) != test_len)
+  if (bfd_read (PRIV (recrd.buf), test_len, abfd) != test_len)
     {
       bfd_set_error (bfd_error_file_truncated);
       return -1;
@@ -880,7 +880,7 @@ vms_get_remaining_object_record (bfd *abfd, unsigned int read_so_far)
 
   vms_debug2 ((8, "vms_get_remaining_obj_record: to_read %d\n", to_read));
 
-  if (bfd_bread (PRIV (recrd.buf) + read_so_far, to_read, abfd) != to_read)
+  if (bfd_read (PRIV (recrd.buf) + read_so_far, to_read, abfd) != to_read)
     {
       bfd_set_error (bfd_error_file_truncated);
       return 0;
@@ -2803,7 +2803,7 @@ alpha_vms_object_p (bfd *abfd)
       return NULL;
     }
 
-  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET))
+  if (bfd_seek (abfd, 0, SEEK_SET))
     goto error_ret;
 
   /* The first challenge with VMS is to discover the kind of the file.
@@ -2848,7 +2848,7 @@ alpha_vms_object_p (bfd *abfd)
       if (PRIV (recrd.rec_size) < sizeof (struct vms_eihd))
 	goto err_wrong_format;
 
-      if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET))
+      if (bfd_seek (abfd, 0, SEEK_SET))
 	goto error_ret;
 
       free (PRIV (recrd.buf));
@@ -3426,7 +3426,7 @@ alpha_vms_write_exec (bfd *abfd)
 
   /* Write first block.  */
   bfd_putl32 (lnkflags, eihd.lnkflags);
-  if (bfd_bwrite (&eihd, sizeof (eihd), abfd) != sizeof (eihd))
+  if (bfd_write (&eihd, sizeof (eihd), abfd) != sizeof (eihd))
     return false;
 
   /* Write remaining eisd.  */
@@ -3447,7 +3447,7 @@ alpha_vms_write_exec (bfd *abfd)
 	      || (next_eisd->file_pos / VMS_BLOCK_SIZE
 		  != eisd->file_pos / VMS_BLOCK_SIZE))
 	    {
-	      if (bfd_bwrite (blk, sizeof (blk), abfd) != sizeof (blk))
+	      if (bfd_write (blk, sizeof (blk), abfd) != sizeof (blk))
 		return false;
 
 	      memset (blk, 0xff, sizeof (blk));
@@ -3465,7 +3465,7 @@ alpha_vms_write_exec (bfd *abfd)
       if (sec->size == 0 || !(sec->flags & SEC_HAS_CONTENTS)
 	  || sec->contents == NULL)
 	continue;
-      if (bfd_bwrite (sec->contents, sec->size, abfd) != sec->size)
+      if (bfd_write (sec->contents, sec->size, abfd) != sec->size)
 	return false;
 
       /* Pad.  */
@@ -3473,7 +3473,7 @@ alpha_vms_write_exec (bfd *abfd)
       if (len != VMS_BLOCK_SIZE)
 	{
 	  memset (blk, 0, len);
-	  if (bfd_bwrite (blk, len, abfd) != len)
+	  if (bfd_write (blk, len, abfd) != len)
 	    return false;
 	}
     }
@@ -6885,7 +6885,7 @@ evax_bfd_print_eobj (struct bfd *abfd, FILE *file)
       unsigned char buf[6];
 
       hdr_size = has_records ? 6 : 4;
-      if (bfd_bread (buf, hdr_size, abfd) != hdr_size)
+      if (bfd_read (buf, hdr_size, abfd) != hdr_size)
 	{
 	  fprintf (file, _("cannot read GST record header\n"));
 	  return;
@@ -6944,7 +6944,7 @@ evax_bfd_print_eobj (struct bfd *abfd, FILE *file)
 
       memcpy (rec, buf + (has_records ? 2 : 0), hdr_size);
 
-      if (bfd_bread (rec + hdr_size, pad_len - hdr_size, abfd)
+      if (bfd_read (rec + hdr_size, pad_len - hdr_size, abfd)
 	  != pad_len - hdr_size)
 	{
 	  fprintf (file, _("cannot read GST record\n"));
@@ -7471,7 +7471,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
       unsigned int type;
       unsigned char *buf;
 
-      if (bfd_bread (&dsth, sizeof (dsth), abfd) != sizeof (dsth))
+      if (bfd_read (&dsth, sizeof (dsth), abfd) != sizeof (dsth))
 	{
 	  fprintf (file, _("cannot read DST header\n"));
 	  return;
@@ -8033,8 +8033,8 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
   unsigned int eiaf_size = 0;
   unsigned int eihvn_off;
 
-  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET)
-      || bfd_bread (&eihd, sizeof (eihd), abfd) != sizeof (eihd))
+  if (bfd_seek (abfd, 0, SEEK_SET)
+      || bfd_read (&eihd, sizeof (eihd), abfd) != sizeof (eihd))
     {
       fprintf (file, _("cannot read EIHD\n"));
       return;
@@ -8161,8 +8161,8 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
       unsigned int j;
 
       fprintf (file, _("system version array information:\n"));
-      if (bfd_seek (abfd, (file_ptr) eihvn_off, SEEK_SET)
-	  || bfd_bread (&eihvn, sizeof (eihvn), abfd) != sizeof (eihvn))
+      if (bfd_seek (abfd, eihvn_off, SEEK_SET)
+	  || bfd_read (&eihvn, sizeof (eihvn), abfd) != sizeof (eihvn))
 	{
 	  fprintf (file, _("cannot read EIHVN header\n"));
 	  return;
@@ -8172,7 +8172,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
 	if (mask & (1u << j))
 	  {
 	    struct vms_eihvn_subversion ver;
-	    if (bfd_bread (&ver, sizeof (ver), abfd) != sizeof (ver))
+	    if (bfd_read (&ver, sizeof (ver), abfd) != sizeof (ver))
 	      {
 		fprintf (file, _("cannot read EIHVN version\n"));
 		return;
@@ -8254,8 +8254,8 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
     {
       struct vms_eiha eiha;
 
-      if (bfd_seek (abfd, (file_ptr) eiha_off, SEEK_SET)
-	  || bfd_bread (&eiha, sizeof (eiha), abfd) != sizeof (eiha))
+      if (bfd_seek (abfd, eiha_off, SEEK_SET)
+	  || bfd_read (&eiha, sizeof (eiha), abfd) != sizeof (eiha))
 	{
 	  fprintf (file, _("cannot read EIHA\n"));
 	  return;
@@ -8287,8 +8287,8 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
     {
       struct vms_eihi eihi;
 
-      if (bfd_seek (abfd, (file_ptr) eihi_off, SEEK_SET)
-	  || bfd_bread (&eihi, sizeof (eihi), abfd) != sizeof (eihi))
+      if (bfd_seek (abfd, eihi_off, SEEK_SET)
+	  || bfd_read (&eihi, sizeof (eihi), abfd) != sizeof (eihi))
 	{
 	  fprintf (file, _("cannot read EIHI\n"));
 	  return;
@@ -8312,8 +8312,8 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
     {
       struct vms_eihs eihs;
 
-      if (bfd_seek (abfd, (file_ptr) eihs_off, SEEK_SET)
-	  || bfd_bread (&eihs, sizeof (eihs), abfd) != sizeof (eihs))
+      if (bfd_seek (abfd, eihs_off, SEEK_SET)
+	  || bfd_read (&eihs, sizeof (eihs), abfd) != sizeof (eihs))
 	{
 	  fprintf (file, _("cannot read EIHS\n"));
 	  return;
@@ -8345,8 +8345,8 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
 
       while (1)
 	{
-	  if (bfd_seek (abfd, (file_ptr) eisd_off, SEEK_SET)
-	      || bfd_bread (&eisd, sizeof (eisd), abfd) != sizeof (eisd))
+	  if (bfd_seek (abfd, eisd_off, SEEK_SET)
+	      || bfd_read (&eisd, sizeof (eisd), abfd) != sizeof (eisd))
 	    {
 	      fprintf (file, _("cannot read EISD\n"));
 	      return;
@@ -8461,7 +8461,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
 	  struct vms_dmt_header dmth;
 	  unsigned int count;
 
-	  if (bfd_bread (&dmth, sizeof (dmth), abfd) != sizeof (dmth))
+	  if (bfd_read (&dmth, sizeof (dmth), abfd) != sizeof (dmth))
 	    {
 	      fprintf (file, _("cannot read DMT header\n"));
 	      return;
@@ -8477,7 +8477,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
 	    {
 	      struct vms_dmt_psect dmtp;
 
-	      if (bfd_bread (&dmtp, sizeof (dmtp), abfd) != sizeof (dmtp))
+	      if (bfd_read (&dmtp, sizeof (dmtp), abfd) != sizeof (dmtp))
 		{
 		  fprintf (file, _("cannot read DMT psect\n"));
 		  return;

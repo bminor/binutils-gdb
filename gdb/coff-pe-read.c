@@ -259,7 +259,7 @@ pe_get16 (bfd *abfd, int where)
   unsigned char b[2];
 
   bfd_seek (abfd, (file_ptr) where, SEEK_SET);
-  bfd_bread (b, (bfd_size_type) 2, abfd);
+  bfd_read (b, (bfd_size_type) 2, abfd);
   return b[0] + (b[1] << 8);
 }
 
@@ -269,7 +269,7 @@ pe_get32 (bfd *abfd, int where)
   unsigned char b[4];
 
   bfd_seek (abfd, (file_ptr) where, SEEK_SET);
-  bfd_bread (b, (bfd_size_type) 4, abfd);
+  bfd_read (b, (bfd_size_type) 4, abfd);
   return b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
 }
 
@@ -379,7 +379,7 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
       unsigned long fptr = pe_get32 (dll, secptr1 + 20);
 
       bfd_seek (dll, (file_ptr) secptr1, SEEK_SET);
-      bfd_bread (sname, (bfd_size_type) sizeof (sname), dll);
+      bfd_read (sname, (bfd_size_type) sizeof (sname), dll);
 
       if ((strcmp (sname, ".edata") == 0)
 	  || (vaddr <= export_opthdrrva && export_opthdrrva < vaddr + vsize))
@@ -429,7 +429,7 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
       asection *section;
 
       bfd_seek (dll, (file_ptr) secptr1 + 0, SEEK_SET);
-      bfd_bread (sec_name, (bfd_size_type) SCNNMLEN, dll);
+      bfd_read (sec_name, (bfd_size_type) SCNNMLEN, dll);
       sec_name[SCNNMLEN] = '\0';
 
       sectix = read_pe_section_index (sec_name);
@@ -469,7 +469,7 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
   expdata = expdata_storage.data ();
 
   bfd_seek (dll, (file_ptr) expptr, SEEK_SET);
-  bfd_bread (expdata, (bfd_size_type) export_size, dll);
+  bfd_read (expdata, (bfd_size_type) export_size, dll);
   erva = expdata - export_rva;
 
   nexp = pe_as32 (expdata + 24);
@@ -639,7 +639,7 @@ pe_text_section_offset (struct bfd *abfd)
       unsigned long vaddr = pe_get32 (abfd, secptr1 + 12);
 
       bfd_seek (abfd, (file_ptr) secptr1, SEEK_SET);
-      bfd_bread (sname, (bfd_size_type) SCNNMLEN, abfd);
+      bfd_read (sname, (bfd_size_type) SCNNMLEN, abfd);
       sname[SCNNMLEN] = '\0';
       if (strcmp (sname, ".text") == 0)
 	return vaddr;

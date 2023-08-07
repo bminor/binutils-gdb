@@ -62,7 +62,7 @@ netbsd_core_file_p (bfd *abfd)
   struct coreseg coreseg;
   size_t amt = sizeof core;
 
-  val = bfd_bread (&core, amt, abfd);
+  val = bfd_read (&core, amt, abfd);
   if (val != sizeof core)
     {
       /* Too small to be a core file.  */
@@ -93,7 +93,7 @@ netbsd_core_file_p (bfd *abfd)
       if (bfd_seek (abfd, offset, SEEK_SET) != 0)
 	goto punt;
 
-      val = bfd_bread (&coreseg, sizeof coreseg, abfd);
+      val = bfd_read (&coreseg, sizeof coreseg, abfd);
       if (val != sizeof coreseg)
 	{
 	  bfd_set_error (bfd_error_file_truncated);

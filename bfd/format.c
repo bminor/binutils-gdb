@@ -359,7 +359,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   /* If the target type was explicitly specified, just check that target.  */
   if (!abfd->target_defaulted)
     {
-      if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)	/* rewind! */
+      if (bfd_seek (abfd, 0, SEEK_SET) != 0)	/* rewind! */
 	goto err_ret;
 
       cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
@@ -425,7 +425,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       /* Change BFD's target temporarily.  */
       abfd->xvec = *target;
 
-      if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+      if (bfd_seek (abfd, 0, SEEK_SET) != 0)
 	goto err_ret;
 
       cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
@@ -573,7 +573,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	{
 	  bfd_reinit (abfd, initial_section_id, &preserve, cleanup);
 	  bfd_release (abfd, preserve.marker);
-	  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+	  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
 	    goto err_ret;
 	  cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
 	  BFD_ASSERT (cleanup != NULL);

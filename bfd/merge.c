@@ -545,7 +545,7 @@ sec_merge_emit (bfd *abfd, struct sec_merge_sec_info *secinfo,
 	      memcpy (contents + offset, pad, len);
 	      offset += len;
 	    }
-	  else if (bfd_bwrite (pad, len, abfd) != len)
+	  else if (bfd_write (pad, len, abfd) != len)
 	    goto err;
 	  off += len;
 	}
@@ -558,7 +558,7 @@ sec_merge_emit (bfd *abfd, struct sec_merge_sec_info *secinfo,
 	  memcpy (contents + offset, str, len);
 	  offset += len;
 	}
-      else if (bfd_bwrite (str, len, abfd) != len)
+      else if (bfd_write (str, len, abfd) != len)
 	goto err;
 
       off += len;
@@ -572,7 +572,7 @@ sec_merge_emit (bfd *abfd, struct sec_merge_sec_info *secinfo,
       BFD_ASSERT (off <= pad_len);
       if (contents)
 	memcpy (contents + offset, pad, off);
-      else if (bfd_bwrite (pad, off, abfd) != off)
+      else if (bfd_write (pad, off, abfd) != off)
 	goto err;
     }
 

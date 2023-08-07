@@ -1460,7 +1460,7 @@ ecoff_write_symhdr (bfd *abfd,
     goto error_return;
 
   (*swap->swap_hdr_out) (abfd, symhdr, buff);
-  if (bfd_bwrite (buff, swap->external_hdr_size, abfd)
+  if (bfd_write (buff, swap->external_hdr_size, abfd)
       != swap->external_hdr_size)
     goto error_return;
 
@@ -1492,9 +1492,8 @@ bfd_ecoff_write_debug (bfd *abfd,
   BFD_ASSERT (symhdr->offset == 0				\
 	      || (bfd_vma) bfd_tell (abfd) == symhdr->offset);	\
   if (symhdr->count != 0					\
-      && bfd_bwrite (debug->ptr,				\
-		     (bfd_size_type) size * symhdr->count,	\
-		     abfd) != size * symhdr->count)		\
+      && bfd_write (debug->ptr, size * symhdr->count,		\
+		    abfd) != size * symhdr->count)		\
     return false;
 
   WRITE (line, cbLine, sizeof (unsigned char), cbLineOffset);
@@ -1502,8 +1501,7 @@ bfd_ecoff_write_debug (bfd *abfd,
   WRITE (external_pdr, ipdMax, swap->external_pdr_size, cbPdOffset);
   WRITE (external_sym, isymMax, swap->external_sym_size, cbSymOffset);
   WRITE (external_opt, ioptMax, swap->external_opt_size, cbOptOffset);
-  WRITE (external_aux, iauxMax, (bfd_size_type) sizeof (union aux_ext),
-	 cbAuxOffset);
+  WRITE (external_aux, iauxMax, sizeof (union aux_ext), cbAuxOffset);
   WRITE (ss, issMax, sizeof (char), cbSsOffset);
   WRITE (ssext, issExtMax, sizeof (char), cbSsExtOffset);
   WRITE (external_fdr, ifdMax, swap->external_fdr_size, cbFdOffset);
@@ -1524,23 +1522,21 @@ ecoff_write_shuffle (bfd *abfd,
 		     void * space)
 {
   struct shuffle *l;
-  unsigned long total;
+  size_t total;
 
   total = 0;
-  for (l = shuffle; l != (struct shuffle *) NULL; l = l->next)
+  for (l = shuffle; l != NULL; l = l->next)
     {
       if (! l->filep)
 	{
-	  if (bfd_bwrite (l->u.memory, (bfd_size_type) l->size, abfd)
-	      != l->size)
+	  if (bfd_write (l->u.memory, l->size, abfd) != l->size)
 	    return false;
 	}
       else
 	{
 	  if (bfd_seek (l->u.file.input_bfd, l->u.file.offset, SEEK_SET) != 0
-	      || bfd_bread (space, (bfd_size_type) l->size,
-			   l->u.file.input_bfd) != l->size
-	      || bfd_bwrite (space, (bfd_size_type) l->size, abfd) != l->size)
+	      || bfd_read (space, l->size, l->u.file.input_bfd) != l->size
+	      || bfd_write (space, l->size, abfd) != l->size)
 	    return false;
 	}
       total += l->size;
@@ -1548,15 +1544,15 @@ ecoff_write_shuffle (bfd *abfd,
 
   if ((total & (swap->debug_align - 1)) != 0)
     {
-      unsigned int i;
+      size_t i;
       bfd_byte *s;
 
       i = swap->debug_align - (total & (swap->debug_align - 1));
-      s = (bfd_byte *) bfd_zmalloc ((bfd_size_type) i);
+      s = bfd_zmalloc (i);
       if (s == NULL && i != 0)
 	return false;
 
-      if (bfd_bwrite (s, (bfd_size_type) i, abfd) != i)
+      if (bfd_write (s, i, abfd) != i)
 	{
 	  free (s);
 	  return false;
@@ -1611,36 +1607,34 @@ bfd_ecoff_write_accumulated_debug (void * handle,
       bfd_byte null;
       struct string_hash_entry *sh;
 
-      BFD_ASSERT (ainfo->ss == (struct shuffle *) NULL);
+      BFD_ASSERT (ainfo->ss == NULL);
       null = 0;
-      if (bfd_bwrite (&null, (bfd_size_type) 1, abfd) != 1)
+      if (bfd_write (&null, 1, abfd) != 1)
 	goto error_return;
       total = 1;
       BFD_ASSERT (ainfo->ss_hash == NULL || ainfo->ss_hash->val == 1);
-      for (sh = ainfo->ss_hash;
-	   sh != (struct string_hash_entry *) NULL;
-	   sh = sh->next)
+      for (sh = ainfo->ss_hash; sh != NULL; sh = sh->next)
 	{
 	  size_t len;
 
 	  len = strlen (sh->root.string);
 	  amt = len + 1;
-	  if (bfd_bwrite (sh->root.string, amt, abfd) != amt)
+	  if (bfd_write (sh->root.string, amt, abfd) != amt)
 	    goto error_return;
 	  total += len + 1;
 	}
 
       if ((total & (swap->debug_align - 1)) != 0)
 	{
-	  unsigned int i;
+	  size_t i;
 	  bfd_byte *s;
 
 	  i = swap->debug_align - (total & (swap->debug_align - 1));
-	  s = (bfd_byte *) bfd_zmalloc ((bfd_size_type) i);
+	  s = bfd_zmalloc (i);
 	  if (s == NULL && i != 0)
 	    goto error_return;
 
-	  if (bfd_bwrite (s, (bfd_size_type) i, abfd) != i)
+	  if (bfd_write (s, i, abfd) != i)
 	    {
 	      free (s);
 	      goto error_return;
@@ -1652,20 +1646,20 @@ bfd_ecoff_write_accumulated_debug (void * handle,
   /* The external strings and symbol are not converted over to using
      shuffles.  FIXME: They probably should be.  */
   amt = debug->symbolic_header.issExtMax;
-  if (amt != 0 && bfd_bwrite (debug->ssext, amt, abfd) != amt)
+  if (amt != 0 && bfd_write (debug->ssext, amt, abfd) != amt)
     goto error_return;
   if ((debug->symbolic_header.issExtMax & (swap->debug_align - 1)) != 0)
     {
-      unsigned int i;
+      size_t i;
       bfd_byte *s;
 
       i = (swap->debug_align
 	   - (debug->symbolic_header.issExtMax & (swap->debug_align - 1)));
-      s = (bfd_byte *) bfd_zmalloc ((bfd_size_type) i);
+      s = bfd_zmalloc (i);
       if (s == NULL && i != 0)
 	goto error_return;
 
-      if (bfd_bwrite (s, (bfd_size_type) i, abfd) != i)
+      if (bfd_write (s, i, abfd) != i)
 	{
 	  free (s);
 	  goto error_return;
@@ -1682,7 +1676,7 @@ bfd_ecoff_write_accumulated_debug (void * handle,
 		  == (bfd_vma) bfd_tell (abfd)));
 
   amt = debug->symbolic_header.iextMax * swap->external_ext_size;
-  if (amt != 0 && bfd_bwrite (debug->external_ext, amt, abfd) != amt)
+  if (amt != 0 && bfd_write (debug->external_ext, amt, abfd) != amt)
     goto error_return;
 
   free (space);
@@ -2520,8 +2514,7 @@ ecoff_collect_shuffle (struct shuffle *l, bfd_byte *buff)
       else
 	{
 	  if (bfd_seek (l->u.file.input_bfd, l->u.file.offset, SEEK_SET) != 0
-	      || (bfd_bread (buff, (bfd_size_type) l->size, l->u.file.input_bfd)
-		  != l->size))
+	      || bfd_read (buff, l->size, l->u.file.input_bfd) != l->size)
 	    return false;
 	}
       buff += l->size;

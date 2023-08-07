@@ -890,7 +890,7 @@ _bfd_alloc_and_read (bfd *abfd, bfd_size_type asize, bfd_size_type rsize)
   mem = bfd_alloc (abfd, asize);
   if (mem != NULL)
     {
-      if (bfd_bread (mem, rsize, abfd) == rsize)
+      if (bfd_read (mem, rsize, abfd) == rsize)
 	return mem;
       bfd_release (abfd, mem);
     }
@@ -913,7 +913,7 @@ _bfd_malloc_and_read (bfd *abfd, bfd_size_type asize, bfd_size_type rsize)
   mem = bfd_malloc (asize);
   if (mem != NULL)
     {
-      if (bfd_bread (mem, rsize, abfd) == rsize)
+      if (bfd_read (mem, rsize, abfd) == rsize)
 	return mem;
       free (mem);
     }

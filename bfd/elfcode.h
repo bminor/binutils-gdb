@@ -529,7 +529,7 @@ elf_object_p (bfd *abfd)
 
   /* Read in the ELF header in external format.  */
 
-  if (bfd_bread (&x_ehdr, sizeof (x_ehdr), abfd) != sizeof (x_ehdr))
+  if (bfd_read (&x_ehdr, sizeof (x_ehdr), abfd) != sizeof (x_ehdr))
     {
       if (bfd_get_error () != bfd_error_system_call)
 	goto got_wrong_format_error;
@@ -642,7 +642,7 @@ elf_object_p (bfd *abfd)
 
       /* Read the first section header at index 0, and convert to internal
 	 form.  */
-      if (bfd_bread (&x_shdr, sizeof x_shdr, abfd) != sizeof (x_shdr))
+      if (bfd_read (&x_shdr, sizeof x_shdr, abfd) != sizeof (x_shdr))
 	goto got_no_match;
       elf_swap_shdr_in (abfd, &x_shdr, &i_shdr);
 
@@ -688,7 +688,7 @@ elf_object_p (bfd *abfd)
 
 	  if (bfd_seek (abfd, where, SEEK_SET) != 0)
 	    goto got_no_match;
-	  if (bfd_bread (&x_shdr, sizeof x_shdr, abfd) != sizeof (x_shdr))
+	  if (bfd_read (&x_shdr, sizeof x_shdr, abfd) != sizeof (x_shdr))
 	    goto got_no_match;
 
 	  /* Back to where we were.  */
@@ -730,7 +730,7 @@ elf_object_p (bfd *abfd)
 	 to internal form.  */
       for (shindex = 1; shindex < i_ehdrp->e_shnum; shindex++)
 	{
-	  if (bfd_bread (&x_shdr, sizeof x_shdr, abfd) != sizeof (x_shdr))
+	  if (bfd_read (&x_shdr, sizeof x_shdr, abfd) != sizeof (x_shdr))
 	    goto got_no_match;
 	  elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
 
@@ -817,7 +817,7 @@ elf_object_p (bfd *abfd)
 	= (Elf_Internal_Phdr *) bfd_alloc (abfd, amt);
       if (elf_tdata (abfd)->phdr == NULL)
 	goto got_no_match;
-      if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_phoff, SEEK_SET) != 0)
+      if (bfd_seek (abfd, i_ehdrp->e_phoff, SEEK_SET) != 0)
 	goto got_no_match;
       bool eu_strip_broken_phdrs = false;
       i_phdr = elf_tdata (abfd)->phdr;
@@ -825,7 +825,7 @@ elf_object_p (bfd *abfd)
 	{
 	  Elf_External_Phdr x_phdr;
 
-	  if (bfd_bread (&x_phdr, sizeof x_phdr, abfd) != sizeof x_phdr)
+	  if (bfd_read (&x_phdr, sizeof x_phdr, abfd) != sizeof x_phdr)
 	    goto got_no_match;
 	  elf_swap_phdr_in (abfd, &x_phdr, i_phdr);
 	  /* Too much code in BFD relies on alignment being a power of
@@ -1082,7 +1082,7 @@ elf_write_out_phdrs (bfd *abfd,
       Elf_External_Phdr extphdr;
 
       elf_swap_phdr_out (abfd, phdr, &extphdr);
-      if (bfd_bwrite (&extphdr, sizeof (Elf_External_Phdr), abfd)
+      if (bfd_write (&extphdr, sizeof (Elf_External_Phdr), abfd)
 	  != sizeof (Elf_External_Phdr))
 	return -1;
       phdr++;
@@ -1112,8 +1112,8 @@ elf_write_shdrs_and_ehdr (bfd *abfd)
 #endif
   elf_swap_ehdr_out (abfd, i_ehdrp, &x_ehdr);
   amt = sizeof (x_ehdr);
-  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
-      || bfd_bwrite (&x_ehdr, amt, abfd) != amt)
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0
+      || bfd_write (&x_ehdr, amt, abfd) != amt)
     return false;
 
   if ((abfd->flags & BFD_NO_SECTION_HEADER) != 0)
@@ -1146,8 +1146,8 @@ elf_write_shdrs_and_ehdr (bfd *abfd)
       elf_swap_shdr_out (abfd, *i_shdrp, x_shdrp + count);
     }
   amt = (bfd_size_type) i_ehdrp->e_shnum * sizeof (*x_shdrp);
-  if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0
-      || bfd_bwrite (x_shdrp, amt, abfd) != amt)
+  if (bfd_seek (abfd, i_ehdrp->e_shoff, SEEK_SET) != 0
+      || bfd_write (x_shdrp, amt, abfd) != amt)
     return false;
 
   /* need to dump the string table too...  */

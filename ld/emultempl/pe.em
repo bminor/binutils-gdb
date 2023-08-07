@@ -1355,7 +1355,7 @@ pecoff_checksum_contents (bfd *abfd,
       if (bfd_seek (abfd, filepos, SEEK_SET) != 0)
 	return 0;
 
-      status = bfd_bread (&b, (bfd_size_type) 1, abfd);
+      status = bfd_read (&b, 1, abfd);
       if (status < 1)
 	{
 	  break;
@@ -1446,7 +1446,7 @@ write_build_id (bfd *abfd)
   if (bfd_seek (abfd, asec->filepos + link_order->offset, SEEK_SET) != 0)
     return 0;
 
-  if (bfd_bwrite (contents, sizeof (*ext), abfd) != sizeof (*ext))
+  if (bfd_write (contents, sizeof (*ext), abfd) != sizeof (*ext))
     return 0;
 
 #ifdef PDB_H

@@ -2374,7 +2374,7 @@ tic54x_mlib (int ignore ATTRIBUTE_UNUSED)
       FILE *ftmp;
 
       /* We're not sure how big it is, but it will be smaller than "size".  */
-      size = bfd_bread (buf, size, mbfd);
+      size = bfd_read (buf, size, mbfd);
 
       /* Write to a temporary file, then use s_include to include it
 	 a bit of a hack.  */

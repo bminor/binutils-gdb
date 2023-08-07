@@ -292,7 +292,7 @@ bfd_get_file_window (bfd *abfd,
   i->refcount = 1;
   if (bfd_seek (abfd, offset, SEEK_SET) != 0)
     goto free_and_fail;
-  i->size = bfd_bread (i->data, size, abfd);
+  i->size = bfd_read (i->data, size, abfd);
   if (i->size != size)
     goto free_and_fail;
   i->mapped = 0;

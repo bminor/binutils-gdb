@@ -1641,7 +1641,7 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
 	}
 
       if (bfd_seek (ibfd, asec->filepos, SEEK_SET) != 0
-	  || (bfd_bread (buffer, length, ibfd) != length))
+	  || (bfd_read (buffer, length, ibfd) != length))
 	{
 	  /* xgettext:c-format */
 	  error_message = _("unable to read in %s section from %pB");

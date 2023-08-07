@@ -661,7 +661,7 @@ load_and_dump (bfd *abfd, ufile_ptr off, unsigned int len,
   buf = xmalloc (len);
 
   if (bfd_seek (abfd, off, SEEK_SET) == 0
-      && bfd_bread (buf, len, abfd) == len)
+      && bfd_read (buf, len, abfd) == len)
     dump (abfd, buf, len, off);
   else
     return false;
@@ -1045,7 +1045,7 @@ dump_thread (bfd *abfd, bfd_mach_o_load_command *cmd)
           char *buf = xmalloc (flavour->size);
 
           if (bfd_seek (abfd, flavour->offset, SEEK_SET) == 0
-              && bfd_bread (buf, flavour->size, abfd) == flavour->size)
+              && bfd_read (buf, flavour->size, abfd) == flavour->size)
             (*bed->_bfd_mach_o_print_thread)(abfd, flavour, stdout, buf);
 
           free (buf);
@@ -1248,7 +1248,7 @@ dump_code_signature (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
   unsigned int off;
 
   if (bfd_seek (abfd, cmd->dataoff, SEEK_SET) != 0
-      || bfd_bread (buf, cmd->datasize, abfd) != cmd->datasize)
+      || bfd_read (buf, cmd->datasize, abfd) != cmd->datasize)
     {
       non_fatal (_("cannot read code signature data"));
       free (buf);
@@ -1276,7 +1276,7 @@ dump_segment_split_info (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
   bfd_vma addr = 0;
 
   if (bfd_seek (abfd, cmd->dataoff, SEEK_SET) != 0
-      || bfd_bread (buf, cmd->datasize, abfd) != cmd->datasize)
+      || bfd_read (buf, cmd->datasize, abfd) != cmd->datasize)
     {
       non_fatal (_("cannot read segment split info"));
       free (buf);
@@ -1323,7 +1323,7 @@ dump_function_starts (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
   bfd_vma addr;
 
   if (bfd_seek (abfd, cmd->dataoff, SEEK_SET) != 0
-      || bfd_bread (buf, cmd->datasize, abfd) != cmd->datasize)
+      || bfd_read (buf, cmd->datasize, abfd) != cmd->datasize)
     {
       non_fatal (_("cannot read function starts"));
       free (buf);
@@ -1387,7 +1387,7 @@ dump_data_in_code (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
 
   buf = xmalloc (cmd->datasize);
   if (bfd_seek (abfd, cmd->dataoff, SEEK_SET) != 0
-      || bfd_bread (buf, cmd->datasize, abfd) != cmd->datasize)
+      || bfd_read (buf, cmd->datasize, abfd) != cmd->datasize)
     {
       non_fatal (_("cannot read data_in_code"));
       free (buf);
@@ -1425,7 +1425,7 @@ dump_twolevel_hints (bfd *abfd, bfd_mach_o_twolevel_hints_command *cmd)
 
   buf = xmalloc (sz);
   if (bfd_seek (abfd, cmd->offset, SEEK_SET) != 0
-      || bfd_bread (buf, sz, abfd) != sz)
+      || bfd_read (buf, sz, abfd) != sz)
     {
       non_fatal (_("cannot read twolevel hints"));
       free (buf);
@@ -1493,7 +1493,7 @@ dump_build_version (bfd *abfd, bfd_mach_o_load_command *cmd)
 
   tools = xmalloc (tools_len);
   if (bfd_seek (abfd, tools_offset, SEEK_SET) != 0
-      || bfd_bread (tools, tools_len, abfd) != tools_len)
+      || bfd_read (tools, tools_len, abfd) != tools_len)
     {
       non_fatal (_("cannot read build tools"));
       free (tools);

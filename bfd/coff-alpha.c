@@ -2030,9 +2030,9 @@ alpha_ecoff_read_ar_hdr (bfd *abfd)
 
       /* This is a compressed file.  We must set the size correctly.
 	 The size is the eight bytes after the dummy file header.  */
-      if (bfd_seek (abfd, (file_ptr) FILHSZ, SEEK_CUR) != 0
-	  || bfd_bread (ab, (bfd_size_type) 8, abfd) != 8
-	  || bfd_seek (abfd, (file_ptr) (- (FILHSZ + 8)), SEEK_CUR) != 0)
+      if (bfd_seek (abfd, FILHSZ, SEEK_CUR) != 0
+	  || bfd_read (ab, 8, abfd) != 8
+	  || bfd_seek (abfd, -(FILHSZ + 8), SEEK_CUR) != 0)
 	{
 	  free (ret);
 	  return NULL;
@@ -2077,18 +2077,18 @@ alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos,
     return nbfd;
 
   /* We must uncompress this element.  We do this by copying it into a
-     memory buffer, and making bfd_bread and bfd_seek use that buffer.
+     memory buffer, and making bfd_read and bfd_seek use that buffer.
      This can use a lot of memory, but it's simpler than getting a
      temporary file, making that work with the file descriptor caching
      code, and making sure that it is deleted at all appropriate
      times.  It can be changed if it ever becomes important.  */
 
   /* The compressed file starts with a dummy ECOFF file header.  */
-  if (bfd_seek (nbfd, (file_ptr) FILHSZ, SEEK_SET) != 0)
+  if (bfd_seek (nbfd, FILHSZ, SEEK_SET) != 0)
     goto error_return;
 
   /* The next eight bytes are the real file size.  */
-  if (bfd_bread (ab, (bfd_size_type) 8, nbfd) != 8)
+  if (bfd_read (ab, 8, nbfd) != 8)
     goto error_return;
   size = H_GET_64 (nbfd, ab);
 
@@ -2115,7 +2115,7 @@ alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos,
       left = size;
 
       /* I don't know what the next eight bytes are for.  */
-      if (bfd_bread (ab, (bfd_size_type) 8, nbfd) != 8)
+      if (bfd_read (ab, 8, nbfd) != 8)
 	goto error_return;
 
       /* This is the uncompression algorithm.  It's a simple
@@ -2126,7 +2126,7 @@ alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos,
 	 next eight bytes in the output stream.  */
       memset (dict, 0, sizeof dict);
       h = 0;
-      while (bfd_bread (&b, (bfd_size_type) 1, nbfd) == 1)
+      while (bfd_read (&b, 1, nbfd) == 1)
 	{
 	  unsigned int i;
 
@@ -2138,7 +2138,7 @@ alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos,
 		n = dict[h];
 	      else
 		{
-		  if (bfd_bread (&n, 1, nbfd) != 1)
+		  if (bfd_read (&n, 1, nbfd) != 1)
 		    goto error_return;
 		  dict[h] = n;
 		}

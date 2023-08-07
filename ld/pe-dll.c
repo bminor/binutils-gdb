@@ -3423,8 +3423,8 @@ pe_get16 (bfd *abfd, int where)
 {
   unsigned char b[2];
 
-  bfd_seek (abfd, (file_ptr) where, SEEK_SET);
-  bfd_bread (b, (bfd_size_type) 2, abfd);
+  bfd_seek (abfd, where, SEEK_SET);
+  bfd_read (b, 2, abfd);
   return b[0] + (b[1] << 8);
 }
 
@@ -3433,8 +3433,8 @@ pe_get32 (bfd *abfd, int where)
 {
   unsigned char b[4];
 
-  bfd_seek (abfd, (file_ptr) where, SEEK_SET);
-  bfd_bread (b, (bfd_size_type) 4, abfd);
+  bfd_seek (abfd, where, SEEK_SET);
+  bfd_read (b, 4, abfd);
   return b[0] + (b[1] << 8) + (b[2] << 16) + ((unsigned) b[3] << 24);
 }
 
@@ -3524,8 +3524,8 @@ pe_implied_import_dll (const char *filename)
       bfd_vma vsize = pe_get32 (dll, secptr1 + 16);
       bfd_vma fptr = pe_get32 (dll, secptr1 + 20);
 
-      bfd_seek (dll, (file_ptr) secptr1, SEEK_SET);
-      bfd_bread (sname, (bfd_size_type) 8, dll);
+      bfd_seek (dll, secptr1, SEEK_SET);
+      bfd_read (sname, 8, dll);
 
       if (vaddr <= export_rva && vaddr + vsize > export_rva)
 	{
@@ -3547,8 +3547,8 @@ pe_implied_import_dll (const char *filename)
       char sec_name[9];
 
       sec_name[8] = '\0';
-      bfd_seek (dll, (file_ptr) secptr1 + 0, SEEK_SET);
-      bfd_bread (sec_name, (bfd_size_type) 8, dll);
+      bfd_seek (dll, secptr1 + 0, SEEK_SET);
+      bfd_read (sec_name, 8, dll);
 
       if (strcmp(sec_name,".data") == 0)
 	{
@@ -3583,8 +3583,8 @@ pe_implied_import_dll (const char *filename)
     }
 
   expdata = xmalloc (export_size);
-  bfd_seek (dll, (file_ptr) expptr, SEEK_SET);
-  bfd_bread (expdata, (bfd_size_type) export_size, dll);
+  bfd_seek (dll, expptr, SEEK_SET);
+  bfd_read (expdata, export_size, dll);
   erva = (char *) expdata - export_rva;
 
   if (pe_def_file == 0)

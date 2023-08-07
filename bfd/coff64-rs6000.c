@@ -1829,8 +1829,7 @@ xcoff64_slurp_armap (bfd *abfd)
     return false;
 
   /* The symbol table starts with a normal archive header.  */
-  if (bfd_bread (&hdr, (bfd_size_type) SIZEOF_AR_HDR_BIG, abfd)
-      != SIZEOF_AR_HDR_BIG)
+  if (bfd_read (&hdr, SIZEOF_AR_HDR_BIG, abfd) != SIZEOF_AR_HDR_BIG)
     return false;
 
   /* Skip the name (normally empty).  */
@@ -1907,7 +1906,7 @@ xcoff64_archive_p (bfd *abfd)
   struct xcoff_ar_file_hdr_big hdr;
   size_t amt = SXCOFFARMAG;
 
-  if (bfd_bread (magic, amt, abfd) != amt)
+  if (bfd_read (magic, amt, abfd) != amt)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -1925,7 +1924,7 @@ xcoff64_archive_p (bfd *abfd)
 
   /* Now read the rest of the file header.  */
   amt = SIZEOF_AR_FILE_HDR_BIG - SXCOFFARMAG;
-  if (bfd_bread (&hdr.memoff, amt, abfd) != amt)
+  if (bfd_read (&hdr.memoff, amt, abfd) != amt)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -2384,15 +2383,15 @@ xcoff64_generate_rtinit (bfd *abfd, const char *init, const char *fini,
   filehdr.f_symptr = data_scnhdr.s_relptr + data_scnhdr.s_nreloc * RELSZ;
 
   bfd_coff_swap_filehdr_out (abfd, &filehdr, filehdr_ext);
-  bfd_bwrite (filehdr_ext, FILHSZ, abfd);
+  bfd_write (filehdr_ext, FILHSZ, abfd);
   bfd_coff_swap_scnhdr_out (abfd, &text_scnhdr, &scnhdr_ext[SCNHSZ * 0]);
   bfd_coff_swap_scnhdr_out (abfd, &data_scnhdr, &scnhdr_ext[SCNHSZ * 1]);
   bfd_coff_swap_scnhdr_out (abfd, &bss_scnhdr, &scnhdr_ext[SCNHSZ * 2]);
-  bfd_bwrite (scnhdr_ext, 3 * SCNHSZ, abfd);
-  bfd_bwrite (data_buffer, data_buffer_size, abfd);
-  bfd_bwrite (reloc_ext, data_scnhdr.s_nreloc * RELSZ, abfd);
-  bfd_bwrite (syment_ext, filehdr.f_nsyms * SYMESZ, abfd);
-  bfd_bwrite (string_table, string_table_size, abfd);
+  bfd_write (scnhdr_ext, 3 * SCNHSZ, abfd);
+  bfd_write (data_buffer, data_buffer_size, abfd);
+  bfd_write (reloc_ext, data_scnhdr.s_nreloc * RELSZ, abfd);
+  bfd_write (syment_ext, filehdr.f_nsyms * SYMESZ, abfd);
+  bfd_write (string_table, string_table_size, abfd);
 
   free (data_buffer);
   data_buffer = NULL;

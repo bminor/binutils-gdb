@@ -290,13 +290,13 @@ read_hdr (bfd *abfd, CoreHdr *core)
 {
   bfd_size_type size;
 
-  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
     return false;
 
   /* Read the leading portion that old and new core dump structures have in
      common.  */
   size = CORE_COMMONSZ;
-  if (bfd_bread (core, size, abfd) != size)
+  if (bfd_read (core, size, abfd) != size)
     return false;
 
   /* Read the trailing portion of the structure.  */
@@ -307,7 +307,7 @@ read_hdr (bfd *abfd, CoreHdr *core)
     size = sizeof (core->old);
 #endif
   size -= CORE_COMMONSZ;
-  return bfd_bread ((char *) core + CORE_COMMONSZ, size, abfd) == size;
+  return bfd_read ((char *) core + CORE_COMMONSZ, size, abfd) == size;
 }
 
 static asection *
@@ -621,7 +621,7 @@ rs6000coff_core_p (bfd *abfd)
       {
 	if (bfd_seek (abfd, c_loader, SEEK_SET) != 0)
 	  goto fail;
-	if (bfd_bread (&ldinfo, size, abfd) != size)
+	if (bfd_read (&ldinfo, size, abfd) != size)
 	  goto fail;
 
 	if (proc64)
@@ -670,7 +670,7 @@ rs6000coff_core_p (bfd *abfd)
 #else
 	    size = sizeof (vminfo.new_dump);
 #endif
-	    if (bfd_bread (&vminfo, size, abfd) != size)
+	    if (bfd_read (&vminfo, size, abfd) != size)
 	      goto fail;
 
 	    if (CORE_NEW (core))
@@ -747,7 +747,7 @@ rs6000coff_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
 
   while (1)
     {
-      if (bfd_bread (s, (bfd_size_type) 1, core_bfd) != 1)
+      if (bfd_read (s, 1, core_bfd) != 1)
 	{
 	  free (path);
 	  return false;

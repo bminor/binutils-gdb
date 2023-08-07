@@ -780,7 +780,7 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
   while (curoffset <= limit_offset)
     {
       bfd_seek (abfd, curoffset, SEEK_SET);
-      bfd_bread (ext_lnno, linesz, abfd);
+      bfd_read (ext_lnno, linesz, abfd);
       bfd_coff_swap_lineno_in (abfd, ext_lnno, &int_lnno);
 
       /* Find the address this line represents.  */
@@ -1827,7 +1827,7 @@ init_stringtab (bfd *abfd, file_ptr offset, struct objfile *objfile)
     error (_("cannot seek to string table in %s: %s"),
 	   bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
 
-  val = bfd_bread ((char *) lengthbuf, sizeof lengthbuf, abfd);
+  val = bfd_read ((char *) lengthbuf, sizeof lengthbuf, abfd);
   length = bfd_h_get_32 (abfd, lengthbuf);
 
   /* If no string table is needed, then the file may end immediately
@@ -1848,7 +1848,7 @@ init_stringtab (bfd *abfd, file_ptr offset, struct objfile *objfile)
   if (length == sizeof lengthbuf)
     return;
 
-  val = bfd_bread (strtbl + sizeof lengthbuf, length - sizeof lengthbuf, abfd);
+  val = bfd_read (strtbl + sizeof lengthbuf, length - sizeof lengthbuf, abfd);
 
   if (val != length - sizeof lengthbuf)
     error (_("cannot read string table from %s: %s"),
@@ -2848,7 +2848,7 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
   info->symtbl = (char *) obstack_alloc (&objfile->objfile_obstack, size);
   info->symtbl_num_syms = num_symbols;
 
-  val = bfd_bread (info->symtbl, size, abfd);
+  val = bfd_read (info->symtbl, size, abfd);
   if (val != size)
     perror_with_name (_("reading symbol table"));
 

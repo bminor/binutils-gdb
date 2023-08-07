@@ -414,7 +414,7 @@ coff_object_p (bfd *abfd)
      aoutsz) in executables.  The bfd_coff_swap_aouthdr_in function
      expects this header to be aoutsz bytes in length, so we use that
      value in the call to bfd_alloc below.  But we must be careful to
-     only read in f_opthdr bytes in the call to bfd_bread.  We should
+     only read in f_opthdr bytes in the call to bfd_read.  We should
      also attempt to catch corrupt or non-COFF binaries with a strange
      value for f_opthdr.  */
   if (! bfd_coff_bad_format_hook (abfd, &internal_f)
@@ -638,7 +638,7 @@ _bfd_coff_read_internal_relocs (bfd *abfd,
     }
 
   if (bfd_seek (abfd, sec->rel_filepos, SEEK_SET) != 0
-      || bfd_bread (external_relocs, amt, abfd) != amt)
+      || bfd_read (external_relocs, amt, abfd) != amt)
     goto error_return;
 
   if (internal_relocs == NULL)
@@ -1152,7 +1152,7 @@ coff_write_symbol (bfd *abfd,
   if (!buf)
     return false;
   bfd_coff_swap_sym_out (abfd, &native->u.syment, buf);
-  if (bfd_bwrite (buf, symesz, abfd) != symesz)
+  if (bfd_write (buf, symesz, abfd) != symesz)
     return false;
   bfd_release (abfd, buf);
 
@@ -1182,7 +1182,7 @@ coff_write_symbol (bfd *abfd,
 				 type, n_sclass, (int) j,
 				 native->u.syment.n_numaux,
 				 buf);
-	  if (bfd_bwrite (buf, auxesz, abfd) != auxesz)
+	  if (bfd_write (buf, auxesz, abfd) != auxesz)
 	    return false;
 	}
       bfd_release (abfd, buf);
@@ -1475,8 +1475,7 @@ coff_write_symbols (bfd *abfd)
 #else
  #error Change H_PUT_32
 #endif
-    if (bfd_bwrite ((void *) buffer, (bfd_size_type) sizeof (buffer), abfd)
-	!= sizeof (buffer))
+    if (bfd_write (buffer, sizeof (buffer), abfd) != sizeof (buffer))
       return false;
 
     if (! _bfd_stringtab_emit (abfd, strtab))
@@ -1535,8 +1534,7 @@ coff_write_linenumbers (bfd *abfd)
 		      out.l_lnno = 0;
 		      out.l_addr.l_symndx = l->u.offset;
 		      bfd_coff_swap_lineno_out (abfd, &out, buff);
-		      if (bfd_bwrite (buff, (bfd_size_type) linesz, abfd)
-			  != linesz)
+		      if (bfd_write (buff, linesz, abfd) != linesz)
 			return false;
 		      l++;
 		      while (l->line_number)
@@ -1544,8 +1542,7 @@ coff_write_linenumbers (bfd *abfd)
 			  out.l_lnno = l->line_number;
 			  out.l_addr.l_symndx = l->u.offset;
 			  bfd_coff_swap_lineno_out (abfd, &out, buff);
-			  if (bfd_bwrite (buff, (bfd_size_type) linesz, abfd)
-			      != linesz)
+			  if (bfd_write (buff, linesz, abfd) != linesz)
 			    return false;
 			  l++;
 			}
@@ -1759,8 +1756,7 @@ _bfd_coff_read_string_table (bfd *abfd)
   if (bfd_seek (abfd, pos + size, SEEK_SET) != 0)
     return NULL;
 
-  if (bfd_bread (extstrsize, (bfd_size_type) sizeof extstrsize, abfd)
-      != sizeof extstrsize)
+  if (bfd_read (extstrsize, sizeof extstrsize, abfd) != sizeof extstrsize)
     {
       if (bfd_get_error () != bfd_error_file_truncated)
 	return NULL;
@@ -1798,7 +1794,7 @@ _bfd_coff_read_string_table (bfd *abfd)
      they are zero.  */
   memset (strings, 0, STRING_SIZE_SIZE);
 
-  if (bfd_bread (strings + STRING_SIZE_SIZE, strsize - STRING_SIZE_SIZE, abfd)
+  if (bfd_read (strings + STRING_SIZE_SIZE, strsize - STRING_SIZE_SIZE, abfd)
       != strsize - STRING_SIZE_SIZE)
     {
       free (strings);

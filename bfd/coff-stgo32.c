@@ -278,7 +278,7 @@ go32exe_check_format (bfd *abfd)
   bfd_set_error (bfd_error_system_call);
 
   /* Read in the stub file header, which is a DOS MZ executable.  */
-  if (bfd_bread (&filehdr_dos, DOS_HDR_SIZE, abfd) != DOS_HDR_SIZE)
+  if (bfd_read (&filehdr_dos, DOS_HDR_SIZE, abfd) != DOS_HDR_SIZE)
     goto fail;
 
   /* Make sure that this is an MZ executable.  */
@@ -303,7 +303,7 @@ go32exe_check_format (bfd *abfd)
   go32exe_temp_stub = bfd_malloc (stubsize);
   if (go32exe_temp_stub == NULL)
     goto fail;
-  if (bfd_bread (go32exe_temp_stub, stubsize, abfd) != stubsize)
+  if (bfd_read (go32exe_temp_stub, stubsize, abfd) != stubsize)
     goto fail;
   go32exe_temp_stub_size = stubsize;
 
@@ -351,7 +351,7 @@ go32exe_write_object_contents (bfd *abfd)
   abfd->origin = 0;
   if (bfd_seek (abfd, 0, SEEK_SET) != 0)
     return false;
-  if (bfd_bwrite (coff_data (abfd)->stub, stubsize, abfd) != stubsize)
+  if (bfd_write (coff_data (abfd)->stub, stubsize, abfd) != stubsize)
     return false;
 
   /* Seek back to where we were.  */

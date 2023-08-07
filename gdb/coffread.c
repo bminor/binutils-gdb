@@ -1224,14 +1224,14 @@ read_one_sym (struct coff_symbol *cs,
   bfd_size_type bytes;
 
   cs->c_symnum = symnum;
-  bytes = bfd_bread (temp_sym, local_symesz, nlist_bfd_global);
+  bytes = bfd_read (temp_sym, local_symesz, nlist_bfd_global);
   if (bytes != local_symesz)
     error (_("%s: error reading symbols"), objfile_name (coffread_objfile));
   bfd_coff_swap_sym_in (symfile_bfd, temp_sym, (char *) sym);
   cs->c_naux = sym->n_numaux & 0xff;
   if (cs->c_naux >= 1)
     {
-      bytes  = bfd_bread (temp_aux, local_auxesz, nlist_bfd_global);
+      bytes = bfd_read (temp_aux, local_auxesz, nlist_bfd_global);
       if (bytes != local_auxesz)
 	error (_("%s: error reading symbols"), objfile_name (coffread_objfile));
       bfd_coff_swap_aux_in (symfile_bfd, temp_aux,
@@ -1241,7 +1241,7 @@ read_one_sym (struct coff_symbol *cs,
 	 is important).  */
       for (i = 1; i < cs->c_naux; i++)
 	{
-	  bytes = bfd_bread (temp_aux, local_auxesz, nlist_bfd_global);
+	  bytes = bfd_read (temp_aux, local_auxesz, nlist_bfd_global);
 	  if (bytes != local_auxesz)
 	    error (_("%s: error reading symbols"),
 		   objfile_name (coffread_objfile));
@@ -1308,7 +1308,7 @@ init_stringtab (bfd *abfd, file_ptr offset, gdb::unique_xmalloc_ptr<char> *stora
   if (bfd_seek (abfd, offset, 0) < 0)
     return -1;
 
-  val = bfd_bread ((char *) lengthbuf, sizeof lengthbuf, abfd);
+  val = bfd_read ((char *) lengthbuf, sizeof lengthbuf, abfd);
   length = bfd_h_get_32 (symfile_bfd, lengthbuf);
 
   /* If no string table is needed, then the file may end immediately
@@ -1324,8 +1324,8 @@ init_stringtab (bfd *abfd, file_ptr offset, gdb::unique_xmalloc_ptr<char> *stora
   if (length == sizeof length)	/* Empty table -- just the count.  */
     return 0;
 
-  val = bfd_bread (stringtab + sizeof lengthbuf, 
-		   length - sizeof lengthbuf, abfd);
+  val = bfd_read (stringtab + sizeof lengthbuf,
+		  length - sizeof lengthbuf, abfd);
   if (val != length - sizeof lengthbuf || stringtab[length - 1] != '\0')
     return -1;
 
@@ -1409,7 +1409,7 @@ init_lineno (bfd *abfd, file_ptr offset, file_ptr size,
   storage->reset ((char *) xmalloc (size + local_linesz));
   linetab = storage->get ();
 
-  val = bfd_bread (storage->get (), size, abfd);
+  val = bfd_read (storage->get (), size, abfd);
   if (val != size)
     return -1;
 

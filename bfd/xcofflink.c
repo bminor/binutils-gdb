@@ -5441,7 +5441,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 		      pos = obj_sym_filepos (output_bfd);
 		      pos += flinfo->last_file_index * osymesz;
 		      if (bfd_seek (output_bfd, pos, SEEK_SET) != 0
-			  || (bfd_bwrite (outsym, osymesz, output_bfd)
+			  || (bfd_write (outsym, osymesz, output_bfd)
 			      != osymesz))
 			return false;
 		    }
@@ -5648,7 +5648,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 			  pos = enclosing->line_filepos;
 			  amt = linesz * enc_count;
 			  if (bfd_seek (input_bfd, pos, SEEK_SET) != 0
-			      || (bfd_bread (flinfo->linenos, amt, input_bfd)
+			      || (bfd_read (flinfo->linenos, amt, input_bfd)
 				  != amt))
 			    return false;
 			  oline = enclosing;
@@ -5680,8 +5680,8 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 			     + o->output_section->lineno_count * linesz);
 		      amt = linesz * *lineno_counts;
 		      if (bfd_seek (output_bfd, pos, SEEK_SET) != 0
-			  || bfd_bwrite (flinfo->linenos + linoff,
-					 amt, output_bfd) != amt)
+			  || bfd_write (flinfo->linenos + linoff, amt,
+					output_bfd) != amt)
 			return false;
 		      o->output_section->lineno_count += *lineno_counts;
 
@@ -5771,7 +5771,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
       file_ptr pos = obj_sym_filepos (output_bfd) + syment_base * osymesz;
       bfd_size_type amt = outsym - flinfo->outsyms;
       if (bfd_seek (output_bfd, pos, SEEK_SET) != 0
-	  || bfd_bwrite (flinfo->outsyms, amt, output_bfd) != amt)
+	  || bfd_write (flinfo->outsyms, amt, output_bfd) != amt)
 	return false;
 
       BFD_ASSERT ((obj_raw_syment_count (output_bfd)
@@ -6216,7 +6216,7 @@ xcoff_find_tc0 (bfd *output_bfd, struct xcoff_final_link_info *flinfo)
   pos += obj_raw_syment_count (output_bfd) * bfd_coff_symesz (output_bfd);
   size = 2 * bfd_coff_symesz (output_bfd);
   if (bfd_seek (output_bfd, pos, SEEK_SET) != 0
-      || bfd_bwrite (flinfo->outsyms, size, output_bfd) != size)
+      || bfd_write (flinfo->outsyms, size, output_bfd) != size)
     return false;
   obj_raw_syment_count (output_bfd) += 2;
 
@@ -6520,7 +6520,7 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
 		      * bfd_coff_symesz (output_bfd));
 	      amt = outsym - flinfo->outsyms;
 	      if (bfd_seek (output_bfd, pos, SEEK_SET) != 0
-		  || bfd_bwrite (flinfo->outsyms, amt, output_bfd) != amt)
+		  || bfd_write (flinfo->outsyms, amt, output_bfd) != amt)
 		return false;
 	      obj_raw_syment_count (output_bfd) +=
 		(outsym - flinfo->outsyms) / bfd_coff_symesz (output_bfd);
@@ -6780,7 +6780,7 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
   pos += obj_raw_syment_count (output_bfd) * bfd_coff_symesz (output_bfd);
   amt = outsym - flinfo->outsyms;
   if (bfd_seek (output_bfd, pos, SEEK_SET) != 0
-      || bfd_bwrite (flinfo->outsyms, amt, output_bfd) != amt)
+      || bfd_write (flinfo->outsyms, amt, output_bfd) != amt)
     return false;
   obj_raw_syment_count (output_bfd) +=
     (outsym - flinfo->outsyms) / bfd_coff_symesz (output_bfd);
@@ -7338,7 +7338,7 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 			     (void *) flinfo.outsyms);
       pos = obj_sym_filepos (abfd) + flinfo.last_file_index * symesz;
       if (bfd_seek (abfd, pos, SEEK_SET) != 0
-	  || bfd_bwrite (flinfo.outsyms, symesz, abfd) != symesz)
+	  || bfd_write (flinfo.outsyms, symesz, abfd) != symesz)
 	goto error_return;
     }
 
@@ -7431,7 +7431,7 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 
       rel_size = relsz * o->reloc_count;
       if (bfd_seek (abfd, o->rel_filepos, SEEK_SET) != 0
-	  || bfd_bwrite ((void *) external_relocs, rel_size, abfd) != rel_size)
+	  || bfd_write (external_relocs, rel_size, abfd) != rel_size)
 	goto error_return;
     }
 
@@ -7513,7 +7513,7 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 	    _bfd_stringtab_size (flinfo.strtab) + STRING_SIZE_SIZE,
 	    strbuf);
   amt = STRING_SIZE_SIZE;
-  if (bfd_bwrite (strbuf, amt, abfd) != amt)
+  if (bfd_write (strbuf, amt, abfd) != amt)
     goto error_return;
   if (! _bfd_stringtab_emit (abfd, flinfo.strtab))
     goto error_return;

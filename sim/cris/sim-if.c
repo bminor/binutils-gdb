@@ -262,7 +262,7 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
 		       (uint64_t) lma, (uint64_t) phdr[i].p_filesz);
 
       if (bfd_seek (abfd, phdr[i].p_offset, SEEK_SET) != 0
-	  || (bfd_bread (buf, phdr[i].p_filesz, abfd) != phdr[i].p_filesz))
+	  || (bfd_read (buf, phdr[i].p_filesz, abfd) != phdr[i].p_filesz))
 	{
 	  sim_io_eprintf (sd,
 			  "%s: could not read segment at 0x%" PRIx64 ", "
@@ -530,7 +530,7 @@ cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
 
       /* Read in the name.  */
       if (bfd_seek (abfd, phdr[i].p_offset, SEEK_SET) != 0
-	  || (bfd_bread (interp + strlen (simulator_sysroot), interplen, abfd)
+	  || (bfd_read (interp + strlen (simulator_sysroot), interplen, abfd)
 	      != interplen))
 	goto interpname_failed;
 

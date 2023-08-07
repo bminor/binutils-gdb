@@ -1119,8 +1119,8 @@ _bfd_stringtab_emit (bfd *abfd, struct bfd_strtab_hash *tab)
 	  bfd_byte buf[4];
 
 	  /* The output length includes the null byte.  */
-	  bfd_put_32 (abfd, (bfd_vma) len, buf);
-	  if (bfd_bwrite ((void *) buf, (bfd_size_type) 4, abfd) != 4)
+	  bfd_put_32 (abfd, len, buf);
+	  if (bfd_write (buf, 4, abfd) != 4)
 	    return false;
 	}
       else if (tab->length_field_size == 2)
@@ -1128,12 +1128,12 @@ _bfd_stringtab_emit (bfd *abfd, struct bfd_strtab_hash *tab)
 	  bfd_byte buf[2];
 
 	  /* The output length includes the null byte.  */
-	  bfd_put_16 (abfd, (bfd_vma) len, buf);
-	  if (bfd_bwrite ((void *) buf, (bfd_size_type) 2, abfd) != 2)
+	  bfd_put_16 (abfd, len, buf);
+	  if (bfd_write (buf, 2, abfd) != 2)
 	    return false;
 	}
 
-      if (bfd_bwrite ((void *) str, (bfd_size_type) len, abfd) != len)
+      if (bfd_write (str, len, abfd) != len)
 	return false;
     }
 

@@ -503,8 +503,8 @@ mmo_object_p (bfd *abfd)
   mmo_init ();
 
   if (bfd_stat (abfd, &statbuf) < 0
-      || bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
-      || bfd_bread (b, 4, abfd) != 4)
+      || bfd_seek (abfd, 0, SEEK_SET) != 0
+      || bfd_read (b, 4, abfd) != 4)
     goto bad_final;
 
   /* All mmo files are a multiple of four bytes long.
@@ -514,8 +514,8 @@ mmo_object_p (bfd *abfd)
     goto bad_format;
 
   /* Get the last 32-bit word.  */
-  if (bfd_seek (abfd, (file_ptr) statbuf.st_size - 4, SEEK_SET) != 0
-      || bfd_bread (b, 4, abfd) != 4)
+  if (bfd_seek (abfd, statbuf.st_size - 4, SEEK_SET) != 0
+      || bfd_read (b, 4, abfd) != 4)
     goto bad_final;
 
   /* Check if the file ends in a lop_end lopcode. */
@@ -789,7 +789,7 @@ mmo_write_tetra_raw (bfd *abfd, unsigned int value)
 
   bfd_put_32 (abfd, value, buf);
 
-  if (bfd_bwrite (buf, 4, abfd) != 4)
+  if (bfd_write (buf, 4, abfd) != 4)
     abfd->tdata.mmo_data->have_error = true;
 }
 
@@ -854,7 +854,7 @@ mmo_write_chunk (bfd *abfd, const bfd_byte *loc, unsigned int len)
 
       retval = (retval
 		&& ! mmop->have_error
-		&& 4 == bfd_bwrite (loc, 4, abfd));
+		&& 4 == bfd_write (loc, 4, abfd));
 
       loc += 4;
       len -= 4;
@@ -1032,7 +1032,7 @@ mmo_get_spec_section (bfd *abfd, int spec_data_number)
   orig_pos = bfd_tell (abfd);
 
   /* Read the length (in 32-bit words).  */
-  if (bfd_bread (buf, 4, abfd) != 4)
+  if (bfd_read (buf, 4, abfd) != 4)
     goto format_error;
 
   if (buf[0] == LOP)
@@ -1040,7 +1040,7 @@ mmo_get_spec_section (bfd *abfd, int spec_data_number)
       if (buf[1] != LOP_QUOTE)
 	goto format_error;
 
-      if (bfd_bread (buf, 4, abfd) != 4)
+      if (bfd_read (buf, 4, abfd) != 4)
 	goto format_error;
     }
 
@@ -1058,7 +1058,7 @@ mmo_get_spec_section (bfd *abfd, int spec_data_number)
 
   for (i = 0; i < secname_length / 4; i++)
     {
-      if (bfd_bread (secname + i * 4, 4, abfd) != 4)
+      if (bfd_read (secname + i * 4, 4, abfd) != 4)
 	goto format_error_free;
 
       if (secname[i * 4] == (char) LOP)
@@ -1066,7 +1066,7 @@ mmo_get_spec_section (bfd *abfd, int spec_data_number)
 	  /* A bit of overkill, but we handle char 0x98 in a section name,
 	     and recognize misparsing.  */
 	  if (secname[i * 4 + 1] != LOP_QUOTE
-	      || bfd_bread (secname + i * 4, 4, abfd) != 4)
+	      || bfd_read (secname + i * 4, 4, abfd) != 4)
 	    /* Whoops.  We thought this was a name, and now we found a
 	       non-lop_quote lopcode before we parsed the whole length of
 	       the name.  Signal end-of-file in the same manner.  */
@@ -1075,26 +1075,26 @@ mmo_get_spec_section (bfd *abfd, int spec_data_number)
     }
 
   /* Get the section flags.  */
-  if (bfd_bread (buf, 4, abfd) != 4
+  if (bfd_read (buf, 4, abfd) != 4
       || (buf[0] == LOP
-	  && (buf[1] != LOP_QUOTE || bfd_bread (buf, 4, abfd) != 4)))
+	  && (buf[1] != LOP_QUOTE || bfd_read (buf, 4, abfd) != 4)))
     goto format_error_free;
 
   flags = bfd_get_32 (abfd, buf);
 
   /* Get the section length.  */
-  if (bfd_bread (buf, 4, abfd) != 4
+  if (bfd_read (buf, 4, abfd) != 4
       || (buf[0] == LOP
-	  && (buf[1] != LOP_QUOTE || bfd_bread (buf, 4, abfd) != 4)))
+	  && (buf[1] != LOP_QUOTE || bfd_read (buf, 4, abfd) != 4)))
     goto format_error_free;
 
   section_length = (bfd_vma) bfd_get_32 (abfd, buf) << 32;
 
   /* That's the first, high-part.  Now get the low part.  */
 
-  if (bfd_bread (buf, 4, abfd) != 4
+  if (bfd_read (buf, 4, abfd) != 4
       || (buf[0] == LOP
-	  && (buf[1] != LOP_QUOTE || bfd_bread (buf, 4, abfd) != 4)))
+	  && (buf[1] != LOP_QUOTE || bfd_read (buf, 4, abfd) != 4)))
     goto format_error_free;
 
   section_length |= (bfd_vma) bfd_get_32 (abfd, buf);
@@ -1104,17 +1104,17 @@ mmo_get_spec_section (bfd *abfd, int spec_data_number)
     goto format_error_free;
 
   /* Get the section VMA.  */
-  if (bfd_bread (buf, 4, abfd) != 4
+  if (bfd_read (buf, 4, abfd) != 4
       || (buf[0] == LOP
-	  && (buf[1] != LOP_QUOTE || bfd_bread (buf, 4, abfd) != 4)))
+	  && (buf[1] != LOP_QUOTE || bfd_read (buf, 4, abfd) != 4)))
     goto format_error_free;
 
   section_vma = (bfd_vma) bfd_get_32 (abfd, buf) << 32;
 
   /* That's the first, high-part.  Now get the low part.  */
-  if (bfd_bread (buf, 4, abfd) != 4
+  if (bfd_read (buf, 4, abfd) != 4
       || (buf[0] == LOP
-	  && (buf[1] != LOP_QUOTE || bfd_bread (buf, 4, abfd) != 4)))
+	  && (buf[1] != LOP_QUOTE || bfd_read (buf, 4, abfd) != 4)))
     goto format_error_free;
 
   section_vma |= (bfd_vma) bfd_get_32 (abfd, buf);
@@ -1179,7 +1179,7 @@ mmo_get_byte (bfd *abfd)
   if (abfd->tdata.mmo_data->byte_no == 0)
     {
       if (!abfd->tdata.mmo_data->have_error
-	  && bfd_bread (abfd->tdata.mmo_data->buf, 4, abfd) != 4)
+	  && bfd_read (abfd->tdata.mmo_data->buf, 4, abfd) != 4)
 	abfd->tdata.mmo_data->have_error = true;
 
       /* A value somewhat safe against tripping on some inconsistency
@@ -1203,7 +1203,7 @@ mmo_write_byte (bfd *abfd, bfd_byte value)
   if ((abfd->tdata.mmo_data->byte_no % 4) == 0)
     {
       if (! abfd->tdata.mmo_data->have_error
-	  && bfd_bwrite (abfd->tdata.mmo_data->buf, 4, abfd) != 4)
+	  && bfd_write (abfd->tdata.mmo_data->buf, 4, abfd) != 4)
 	abfd->tdata.mmo_data->have_error = true;
     }
 }
@@ -1615,10 +1615,10 @@ mmo_scan (bfd *abfd)
   abfd->symcount = 0;
   memset (file_names, 0, sizeof (file_names));
 
-  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
     goto error_return;
 
-  while ((nbytes_read = bfd_bread (buf, 4, abfd)) == 4)
+  while ((nbytes_read = bfd_read (buf, 4, abfd)) == 4)
     {
       if (buf[0] == LOP)
 	{
@@ -1657,7 +1657,7 @@ mmo_scan (bfd *abfd)
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
-	      if (bfd_bread (buf, 4, abfd) != 4)
+	      if (bfd_read (buf, 4, abfd) != 4)
 		goto error_return;
 
 	      vma &= ~3;
@@ -1678,7 +1678,7 @@ mmo_scan (bfd *abfd)
 	      if (z == 1)
 		{
 		  /* Get a 32-bit value.  */
-		  if (bfd_bread (buf, 4, abfd) != 4)
+		  if (bfd_read (buf, 4, abfd) != 4)
 		    goto error_return;
 
 		  vma += bfd_get_32 (abfd, buf);
@@ -1686,7 +1686,7 @@ mmo_scan (bfd *abfd)
 	      else if (z == 2)
 		{
 		  /* Get a 64-bit value.  */
-		  if (bfd_bread (buf, 8, abfd) != 8)
+		  if (bfd_read (buf, 8, abfd) != 8)
 		    goto error_return;
 
 		  vma += bfd_get_64 (abfd, buf);
@@ -1729,7 +1729,7 @@ mmo_scan (bfd *abfd)
 		if (z == 1)
 		  {
 		    /* Get a 32-bit value.  */
-		    if (bfd_bread (buf, 4, abfd) != 4)
+		    if (bfd_read (buf, 4, abfd) != 4)
 		      goto error_return;
 
 		    p += bfd_get_32 (abfd, buf);
@@ -1737,7 +1737,7 @@ mmo_scan (bfd *abfd)
 		else if (z == 2)
 		  {
 		    /* Get a 64-bit value.  */
-		    if (bfd_bread (buf, 8, abfd) != 8)
+		    if (bfd_read (buf, 8, abfd) != 8)
 		      goto error_return;
 
 		    p += bfd_get_64 (abfd, buf);
@@ -1814,7 +1814,7 @@ mmo_scan (bfd *abfd)
 		  }
 
 		/* Get the next 32-bit value.  */
-		if (bfd_bread (buf, 4, abfd) != 4)
+		if (bfd_read (buf, 4, abfd) != 4)
 		  goto error_return;
 
 		delta = bfd_get_32 (abfd, buf);
@@ -1871,7 +1871,7 @@ mmo_scan (bfd *abfd)
 
 		  for (i = 0; i < z; i++)
 		    {
-		      if (bfd_bread (fname + i * 4, 4, abfd) != 4)
+		      if (bfd_read (fname + i * 4, 4, abfd) != 4)
 			{
 			  free (fname);
 			  goto error_return;
@@ -1933,12 +1933,12 @@ mmo_scan (bfd *abfd)
 		   creation time from the first 32-bit word with the time
 		   in seconds since era.  */
 		if (z >= 1
-		    && bfd_bread (abfd->tdata.mmo_data->created, 4,
+		    && bfd_read (abfd->tdata.mmo_data->created, 4,
 				 abfd) != 4)
 		  goto error_return;
 
 		for (i = 1; i < z; i++)
-		  if (bfd_bread (buf, 4, abfd) != 4)
+		  if (bfd_read (buf, 4, abfd) != 4)
 		    goto error_return;
 	      }
 	      break;
@@ -1955,7 +1955,7 @@ mmo_scan (bfd *abfd)
 
 		/* Read first octaword outside loop to simplify logic when
 		   excluding the Z == 255, octa == 0 case.  */
-		if (bfd_bread (buf, 8, abfd) != 8)
+		if (bfd_read (buf, 8, abfd) != 8)
 		  goto error_return;
 
 		first_octa = bfd_get_64 (abfd, buf);
@@ -1979,13 +1979,13 @@ mmo_scan (bfd *abfd)
 
 		    for (i = z + 1; i < 255; i++)
 		      {
-			if (bfd_bread (loc + (i - z) * 8, 8, abfd) != 8)
+			if (bfd_read (loc + (i - z) * 8, 8, abfd) != 8)
 			  goto error_return;
 		      }
 
 		    /* Read out the last octabyte, and use it to set the
 		       start address.  */
-		    if (bfd_bread (buf, 8, abfd) != 8)
+		    if (bfd_read (buf, 8, abfd) != 8)
 		      goto error_return;
 
 		    startaddr_octa = bfd_get_64 (abfd, buf);
@@ -2368,11 +2368,11 @@ mmo_internal_write_header (bfd *abfd)
 {
   const char lop_pre_bfd[] = { LOP, LOP_PRE, 1, 1};
 
-  if (bfd_bwrite (lop_pre_bfd, 4, abfd) != 4)
+  if (bfd_write (lop_pre_bfd, 4, abfd) != 4)
     return false;
 
   /* Copy creation time of original file.  */
-  if (bfd_bwrite (abfd->tdata.mmo_data->created, 4, abfd) != 4)
+  if (bfd_write (abfd->tdata.mmo_data->created, 4, abfd) != 4)
     return false;
 
   return true;
@@ -2394,7 +2394,7 @@ mmo_internal_write_post (bfd *abfd, int z, asection *sec)
     {
       bfd_byte *data = mmo_get_loc (sec, i * 8, 8);
 
-      if (bfd_bwrite (data, 8, abfd) != 8)
+      if (bfd_write (data, 8, abfd) != 8)
 	return false;
     }
 
@@ -2403,7 +2403,7 @@ mmo_internal_write_post (bfd *abfd, int z, asection *sec)
      Z == 255, don't assume DATA is valid.  */
   bfd_put_64 (abfd, bfd_get_start_address (abfd), buf);
 
-  return ! abfd->tdata.mmo_data->have_error && bfd_bwrite (buf, 8, abfd) == 8;
+  return ! abfd->tdata.mmo_data->have_error && bfd_write (buf, 8, abfd) == 8;
 }
 
 /* Translate to and from BFD flags.  This is to make sure that we don't
@@ -3144,7 +3144,7 @@ mmo_write_symbols_and_terminator (bfd *abfd)
 
   /* Put out the lop_stab mark.  */
   bfd_put_32 (abfd, (LOP << 24) | (LOP_STAB << 16), buf);
-  if (bfd_bwrite (buf, 4, abfd) != 4)
+  if (bfd_write (buf, 4, abfd) != 4)
     return false;
 
   /* Dump out symbols.  */
@@ -3174,12 +3174,12 @@ mmo_write_symbols_and_terminator (bfd *abfd)
 	      0, 4 - (abfd->tdata.mmo_data->byte_no % 4));
 
       if (abfd->tdata.mmo_data->have_error
-	  || bfd_bwrite (abfd->tdata.mmo_data->buf, 4, abfd) != 4)
+	  || bfd_write (abfd->tdata.mmo_data->buf, 4, abfd) != 4)
 	return false;
     }
 
   bfd_put_32 (abfd, (LOP << 24) | (LOP_END << 16) | trie_len, buf);
-  return bfd_bwrite (buf, 4, abfd) == 4;
+  return bfd_write (buf, 4, abfd) == 4;
 }
 
 /* Write section unless it is the register contents section.  For that, we

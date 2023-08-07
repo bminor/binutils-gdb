@@ -102,11 +102,11 @@ lynx_core_file_p (bfd *abfd)
 
   /* Get the pss entry from the core file */
 
-  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
     return NULL;
 
   amt = sizeof pss;
-  if (bfd_bread ((void *) &pss, amt, abfd) != amt)
+  if (bfd_read (&pss, amt, abfd) != amt)
     {
       /* Too small to be a core file */
       if (bfd_get_error () != bfd_error_system_call)

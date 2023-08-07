@@ -460,7 +460,7 @@ bfd_elf_get_elf_syms (bfd *ibfd,
     }
   if (extsym_buf == NULL
       || bfd_seek (ibfd, pos, SEEK_SET) != 0
-      || bfd_bread (extsym_buf, amt, ibfd) != amt)
+      || bfd_read (extsym_buf, amt, ibfd) != amt)
     {
       intsym_buf = NULL;
       goto out;
@@ -484,7 +484,7 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 	}
       if (extshndx_buf == NULL
 	  || bfd_seek (ibfd, pos, SEEK_SET) != 0
-	  || bfd_bread (extshndx_buf, amt, ibfd) != amt)
+	  || bfd_read (extshndx_buf, amt, ibfd) != amt)
 	{
 	  intsym_buf = NULL;
 	  goto out;
@@ -2133,8 +2133,7 @@ _bfd_elf_get_dynamic_symbols (bfd *abfd, Elf_Internal_Phdr *phdr,
 				 NULL);
       if (filepos == (file_ptr) -1
 	  || bfd_seek (abfd, filepos, SEEK_SET) != 0
-	  || (bfd_bread (nb, 2 * hash_ent_size, abfd)
-	      != (2 * hash_ent_size)))
+	  || bfd_read (nb, 2 * hash_ent_size, abfd) != 2 * hash_ent_size)
 	goto error_return;
 
       /* The number of dynamic symbol table entries equals the number
@@ -2163,7 +2162,7 @@ _bfd_elf_get_dynamic_symbols (bfd *abfd, Elf_Internal_Phdr *phdr,
 				 sizeof (nb), NULL);
       if (filepos == (file_ptr) -1
 	  || bfd_seek (abfd, filepos, SEEK_SET) != 0
-	  || bfd_bread (nb, sizeof (nb), abfd) != sizeof (nb))
+	  || bfd_read (nb, sizeof (nb), abfd) != sizeof (nb))
 	goto error_return;
 
       ngnubuckets = bfd_get_32 (abfd, nb);
@@ -2210,7 +2209,7 @@ _bfd_elf_get_dynamic_symbols (bfd *abfd, Elf_Internal_Phdr *phdr,
 
       do
 	{
-	  if (bfd_bread (nb, 4, abfd) != 4)
+	  if (bfd_read (nb, 4, abfd) != 4)
 	    goto error_return;
 	  ++maxchain;
 	  if (maxchain == 0)
@@ -7302,7 +7301,7 @@ _bfd_elf_write_object_contents (bfd *abfd)
 	  bfd_size_type amt = i_shdrp[count]->sh_size;
 
 	  if (bfd_seek (abfd, i_shdrp[count]->sh_offset, SEEK_SET) != 0
-	      || bfd_bwrite (i_shdrp[count]->contents, amt, abfd) != amt)
+	      || bfd_write (i_shdrp[count]->contents, amt, abfd) != amt)
 	    return false;
 	}
     }
@@ -13819,8 +13818,7 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *       abfd,
 	    }
 
 	  if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) != 0
-	      || (bfd_bread (native_relocs, hdr->sh_size, abfd)
-		  != hdr->sh_size))
+	      || bfd_read (native_relocs, hdr->sh_size, abfd) != hdr->sh_size)
 	    {
 	      free (native_relocs);
 	      /* The internal_relocs will be freed when

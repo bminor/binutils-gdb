@@ -1187,7 +1187,7 @@ pe_ILF_object_p (bfd * abfd)
 
   /* Upon entry the first six bytes of the ILF header have
      already been read.  Now read the rest of the header.  */
-  if (bfd_bread (buffer, (bfd_size_type) 14, abfd) != 14)
+  if (bfd_read (buffer, 14, abfd) != 14)
     return NULL;
 
   ptr = buffer;
@@ -1449,8 +1449,8 @@ pe_bfd_object_p (bfd * abfd)
 
   /* Detect if this a Microsoft Import Library Format element.  */
   /* First read the beginning of the header.  */
-  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
-      || bfd_bread (buffer, (bfd_size_type) 6, abfd) != 6)
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0
+      || bfd_read (buffer, 6, abfd) != 6)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -1462,9 +1462,8 @@ pe_bfd_object_p (bfd * abfd)
       && H_GET_16 (abfd, buffer + 4) == 0)
     return pe_ILF_object_p (abfd);
 
-  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
-      || bfd_bread (&dos_hdr, (bfd_size_type) sizeof (dos_hdr), abfd)
-	 != sizeof (dos_hdr))
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0
+      || bfd_read (&dos_hdr, sizeof (dos_hdr), abfd) != sizeof (dos_hdr))
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -1489,8 +1488,7 @@ pe_bfd_object_p (bfd * abfd)
 
   offset = H_GET_32 (abfd, dos_hdr.e_lfanew);
   if (bfd_seek (abfd, offset, SEEK_SET) != 0
-      || (bfd_bread (&image_hdr, (bfd_size_type) sizeof (image_hdr), abfd)
-	  != sizeof (image_hdr)))
+      || bfd_read (&image_hdr, sizeof (image_hdr), abfd) != sizeof (image_hdr))
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);

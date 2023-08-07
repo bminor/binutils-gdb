@@ -855,7 +855,7 @@ main (int argc, char **argv)
 
 	  /* Create a bfd to contain the dependencies.
 	     It inherits its type from arch, but we must set the type to
-	     "binary" otherwise bfd_bwrite() will fail.  After writing, we
+	     "binary" otherwise bfd_write() will fail.  After writing, we
 	     must set the type back to default otherwise adding it to the
 	     archive will fail.  */
 	  libdeps_bfd = bfd_create (LIBDEPS, arch);
@@ -871,7 +871,7 @@ main (int argc, char **argv)
 	  if (! bfd_make_writable (libdeps_bfd))
 	    fatal (_("Cannot make libdeps object writable."));
 
-	  if (bfd_bwrite (libdeps, reclen, libdeps_bfd) != reclen)
+	  if (bfd_write (libdeps, reclen, libdeps_bfd) != reclen)
 	    fatal (_("Cannot write libdeps record."));
 
 	  if (! bfd_make_readable (libdeps_bfd))
@@ -1078,7 +1078,7 @@ print_contents (bfd *abfd)
   if (verbose)
     printf ("\n<%s>\n\n", bfd_get_filename (abfd));
 
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
+  bfd_seek (abfd, 0, SEEK_SET);
 
   size = buf.st_size;
   while (ncopied < size)
@@ -1089,7 +1089,7 @@ print_contents (bfd *abfd)
       if (tocopy > BUFSIZE)
 	tocopy = BUFSIZE;
 
-      nread = bfd_bread (cbuf, tocopy, abfd);
+      nread = bfd_read (cbuf, tocopy, abfd);
       if (nread != tocopy)
 	/* xgettext:c-format */
 	fatal (_("%s is not a valid archive"),
@@ -1176,7 +1176,7 @@ extract_file (bfd *abfd)
     fatal (_("internal stat error on %s"), bfd_get_filename (abfd));
   size = buf.st_size;
 
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
+  bfd_seek (abfd, 0, SEEK_SET);
 
   output_file = NULL;
   if (size == 0)
@@ -1196,7 +1196,7 @@ extract_file (bfd *abfd)
 	  if (tocopy > BUFSIZE)
 	    tocopy = BUFSIZE;
 
-	  nread = bfd_bread (cbuf, tocopy, abfd);
+	  nread = bfd_read (cbuf, tocopy, abfd);
 	  if (nread != tocopy)
 	    /* xgettext:c-format */
 	    fatal (_("%s is not a valid archive"),

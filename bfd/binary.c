@@ -103,7 +103,7 @@ binary_get_section_contents (bfd *abfd,
 			     bfd_size_type count)
 {
   if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
-      || bfd_bread (location, count, abfd) != count)
+      || bfd_read (location, count, abfd) != count)
     return false;
   return true;
 }

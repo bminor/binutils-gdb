@@ -1961,7 +1961,7 @@ copy_unknown_object (bfd *ibfd, bfd *obfd)
       return false;
     }
 
-  if (bfd_seek (ibfd, (file_ptr) 0, SEEK_SET) != 0)
+  if (bfd_seek (ibfd, 0, SEEK_SET) != 0)
     {
       bfd_nonfatal (bfd_get_archive_filename (ibfd));
       return false;
@@ -1979,14 +1979,14 @@ copy_unknown_object (bfd *ibfd, bfd *obfd)
       else
 	tocopy = size;
 
-      if (bfd_bread (cbuf, tocopy, ibfd) != tocopy)
+      if (bfd_read (cbuf, tocopy, ibfd) != tocopy)
 	{
 	  bfd_nonfatal_message (NULL, ibfd, NULL, NULL);
 	  free (cbuf);
 	  return false;
 	}
 
-      if (bfd_bwrite (cbuf, tocopy, obfd) != tocopy)
+      if (bfd_write (cbuf, tocopy, obfd) != tocopy)
 	{
 	  bfd_nonfatal_message (NULL, obfd, NULL, NULL);
 	  free (cbuf);

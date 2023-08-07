@@ -149,7 +149,7 @@ rl78_load (bfd *prog, host_callback *callbacks, const char * const simname)
 	  continue;
 	}
 
-      if (bfd_bread (buf, size, prog) != size)
+      if (bfd_read (buf, size, prog) != size)
 	{
 	  fprintf (stderr, "%s: Failed to read %" PRIx64 " bytes\n",
 		   simname, (uint64_t) size);

@@ -80,7 +80,7 @@ osf_core_core_file_p (bfd *abfd)
   size_t amt;
 
   amt = sizeof core_header;
-  val = bfd_bread (& core_header, amt, abfd);
+  val = bfd_read (& core_header, amt, abfd);
   if (val != sizeof core_header)
     return NULL;
 
@@ -101,7 +101,7 @@ osf_core_core_file_p (bfd *abfd)
       flagword flags;
 
       amt = sizeof core_scnhdr;
-      val = bfd_bread (& core_scnhdr, amt, abfd);
+      val = bfd_read (& core_scnhdr, amt, abfd);
       if (val != sizeof core_scnhdr)
 	break;
 

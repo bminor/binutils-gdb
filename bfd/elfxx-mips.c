@@ -7355,7 +7355,7 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
 		    SEEK_SET) != 0)
 	return false;
       H_PUT_32 (abfd, elf_gp (abfd), buf);
-      if (bfd_bwrite (buf, 4, abfd) != 4)
+      if (bfd_write (buf, 4, abfd) != 4)
 	return false;
     }
 
@@ -7403,7 +7403,7 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
 			     SEEK_SET) != 0)
 		return false;
 	      H_PUT_64 (abfd, elf_gp (abfd), buf);
-	      if (bfd_bwrite (buf, 8, abfd) != 8)
+	      if (bfd_write (buf, 8, abfd) != 8)
 		return false;
 	    }
 	  else if (intopt.kind == ODK_REGINFO)
@@ -7418,7 +7418,7 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
 			    SEEK_SET) != 0)
 		return false;
 	      H_PUT_32 (abfd, elf_gp (abfd), buf);
-	      if (bfd_bwrite (buf, 4, abfd) != 4)
+	      if (bfd_write (buf, 4, abfd) != 4)
 		return false;
 	    }
 	  l += intopt.size;

@@ -838,7 +838,7 @@ get_file_crc (bfd *abfd, unsigned long *file_crc_return)
       gdb_byte buffer[8 * 1024];
       bfd_size_type count;
 
-      count = bfd_bread (buffer, sizeof (buffer), abfd);
+      count = bfd_read (buffer, sizeof (buffer), abfd);
       if (count == (bfd_size_type) -1)
 	{
 	  warning (_("Problem reading \"%s\" for CRC: %s"),

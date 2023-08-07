@@ -1138,7 +1138,7 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
     return NULL;
   if (length > 256)
     length = 256;
-  nread = bfd_bread (buffer, length, abfd);
+  nread = bfd_read (buffer, length, abfd);
   if (length != nread)
     return NULL;
 
@@ -1223,7 +1223,7 @@ _bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinf
   else
     memcpy (cvinfo70->PdbFileName, pdb, pdb_len + 1);
 
-  written = bfd_bwrite (buffer, size, abfd);
+  written = bfd_write (buffer, size, abfd);
 
   free (buffer);
 

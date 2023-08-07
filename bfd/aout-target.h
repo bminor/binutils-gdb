@@ -136,7 +136,7 @@ MY (object_p) (bfd *abfd)
   bfd_cleanup cleanup;
   size_t amt = EXEC_BYTES_SIZE;
 
-  if (bfd_bread ((void *) &exec_bytes, amt, abfd) != amt)
+  if (bfd_read (&exec_bytes, amt, abfd) != amt)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);

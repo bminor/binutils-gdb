@@ -1482,7 +1482,7 @@ write_build_id (bfd *abfd)
   position = i_shdr->sh_offset + asec->output_offset;
   size = asec->size;
   return (bfd_seek (abfd, position, SEEK_SET) == 0
-	  && bfd_bwrite (contents, size, abfd) == size);
+	  && bfd_write (contents, size, abfd) == size);
 }
 
 /* Make .note.gnu.build-id section, and set up elf_tdata->build_id.  */
@@ -1570,7 +1570,7 @@ write_package_metadata (bfd *abfd)
   position = i_shdr->sh_offset + asec->output_offset;
   size = asec->size;
   return (bfd_seek (abfd, position, SEEK_SET) == 0
-	  && bfd_bwrite (contents, size, abfd) == size);
+	  && bfd_write (contents, size, abfd) == size);
 }
 
 /* Make .note.package section.

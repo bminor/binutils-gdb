@@ -387,7 +387,7 @@ bfd_pef_scan_section (bfd *abfd, bfd_pef_section *section)
   unsigned char buf[28];
 
   bfd_seek (abfd, section->header_offset, SEEK_SET);
-  if (bfd_bread ((void *) buf, 28, abfd) != 28)
+  if (bfd_read (buf, 28, abfd) != 28)
     return -1;
 
   section->name_offset = bfd_h_get_32 (abfd, buf);
@@ -570,7 +570,7 @@ bfd_pef_read_header (bfd *abfd, bfd_pef_header *header)
 
   bfd_seek (abfd, 0, SEEK_SET);
 
-  if (bfd_bread ((void *) buf, 40, abfd) != 40)
+  if (bfd_read (buf, 40, abfd) != 40)
     return -1;
 
   header->tag1 = bfd_getb32 (buf);
@@ -1074,7 +1074,7 @@ bfd_pef_xlib_read_header (bfd *abfd, bfd_pef_xlib_header *header)
 
   bfd_seek (abfd, 0, SEEK_SET);
 
-  if (bfd_bread ((void *) buf, sizeof buf, abfd) != sizeof buf)
+  if (bfd_read (buf, sizeof buf, abfd) != sizeof buf)
     return -1;
 
   header->tag1 = bfd_getb32 (buf);

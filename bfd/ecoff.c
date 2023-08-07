@@ -2267,7 +2267,7 @@ _bfd_ecoff_set_section_contents (bfd *abfd,
 
   pos = section->filepos + offset;
   if (bfd_seek (abfd, pos, SEEK_SET) != 0
-      || bfd_bwrite (location, count, abfd) != count)
+      || bfd_write (location, count, abfd) != count)
     return false;
 
   return true;
@@ -2472,7 +2472,7 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
   }
 
   internal_f.f_nscns = 0;
-  if (bfd_seek (abfd, (file_ptr) (filhsz + aoutsz), SEEK_SET) != 0)
+  if (bfd_seek (abfd, filhsz + aoutsz, SEEK_SET) != 0)
     goto error_return;
 
   for (current = abfd->sections;
@@ -2527,7 +2527,7 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
 						 current->flags);
 
       if (bfd_coff_swap_scnhdr_out (abfd, (void *) &section, buff) == 0
-	  || bfd_bwrite (buff, scnhsz, abfd) != scnhsz)
+	  || bfd_write (buff, scnhsz, abfd) != scnhsz)
 	goto error_return;
 
       if ((section.s_flags & STYP_TEXT) != 0
@@ -2672,15 +2672,15 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
     }
 
   /* Write out the file header and the optional header.  */
-  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
     goto error_return;
 
   bfd_coff_swap_filehdr_out (abfd, (void *) &internal_f, buff);
-  if (bfd_bwrite (buff, filhsz, abfd) != filhsz)
+  if (bfd_write (buff, filhsz, abfd) != filhsz)
     goto error_return;
 
   bfd_coff_swap_aouthdr_out (abfd, (void *) &internal_a, buff);
-  if (bfd_bwrite (buff, aoutsz, abfd) != aoutsz)
+  if (bfd_write (buff, aoutsz, abfd) != aoutsz)
     goto error_return;
 
   /* Build the external symbol information.  This must be done before
@@ -2796,7 +2796,7 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
 	  if (bfd_seek (abfd, current->rel_filepos, SEEK_SET) != 0)
 	    goto error_return;
 	  amt = current->reloc_count * external_reloc_size;
-	  if (bfd_bwrite (reloc_buff, amt, abfd) != amt)
+	  if (bfd_write (reloc_buff, amt, abfd) != amt)
 	    goto error_return;
 	  bfd_release (abfd, reloc_buff);
 	  reloc_buff = NULL;
@@ -2822,15 +2822,13 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
     {
       char c;
 
-      if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
-		    SEEK_SET) != 0)
+      if (bfd_seek (abfd, ecoff_data (abfd)->sym_filepos - 1, SEEK_SET) != 0)
 	goto error_return;
-      if (bfd_bread (&c, (bfd_size_type) 1, abfd) == 0)
+      if (bfd_read (&c, 1, abfd) == 0)
 	c = 0;
-      if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
-		    SEEK_SET) != 0)
+      if (bfd_seek (abfd, ecoff_data (abfd)->sym_filepos - 1, SEEK_SET) != 0)
 	goto error_return;
-      if (bfd_bwrite (&c, (bfd_size_type) 1, abfd) != 1)
+      if (bfd_write (&c, 1, abfd) != 1)
 	goto error_return;
     }
 
@@ -2930,13 +2928,13 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
   bfd_size_type amt;
 
   /* Get the name of the first element.  */
-  i = bfd_bread ((void *) nextname, (bfd_size_type) 16, abfd);
+  i = bfd_read (nextname, 16, abfd);
   if (i == 0)
     return true;
   if (i != 16)
     return false;
 
-  if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
+  if (bfd_seek (abfd, -16, SEEK_CUR) != 0)
     return false;
 
   /* Irix 4.0.5F apparently can use either an ECOFF armap or a
@@ -3166,12 +3164,11 @@ _bfd_ecoff_write_armap (bfd *abfd,
    if (((char *) (&hdr))[i] == '\0')
      (((char *) (&hdr))[i]) = ' ';
 
-  if (bfd_bwrite ((void *) &hdr, (bfd_size_type) sizeof (struct ar_hdr), abfd)
-      != sizeof (struct ar_hdr))
+  if (bfd_write (&hdr, sizeof (struct ar_hdr), abfd) != sizeof (struct ar_hdr))
     return false;
 
   H_PUT_32 (abfd, hashsize, temp);
-  if (bfd_bwrite ((void *) temp, (bfd_size_type) 4, abfd) != 4)
+  if (bfd_write (temp, 4, abfd) != 4)
     return false;
 
   hashtable = (bfd_byte *) bfd_zalloc (abfd, symdefsize);
@@ -3220,21 +3217,21 @@ _bfd_ecoff_write_armap (bfd *abfd,
       H_PUT_32 (abfd, firstreal, (hashtable + hash * 8 + 4));
     }
 
-  if (bfd_bwrite ((void *) hashtable, symdefsize, abfd) != symdefsize)
+  if (bfd_write (hashtable, symdefsize, abfd) != symdefsize)
     return false;
 
   bfd_release (abfd, hashtable);
 
   /* Now write the strings.  */
   H_PUT_32 (abfd, stringsize, temp);
-  if (bfd_bwrite ((void *) temp, (bfd_size_type) 4, abfd) != 4)
+  if (bfd_write (temp, 4, abfd) != 4)
     return false;
   for (i = 0; i < orl_count; i++)
     {
       bfd_size_type len;
 
       len = strlen (*map[i].name) + 1;
-      if (bfd_bwrite ((void *) (*map[i].name), len, abfd) != len)
+      if (bfd_write (*map[i].name, len, abfd) != len)
 	return false;
     }
 
@@ -3242,7 +3239,7 @@ _bfd_ecoff_write_armap (bfd *abfd,
      bug-compatible for DECstation ar we use a null.  */
   if (padit)
     {
-      if (bfd_bwrite ("", (bfd_size_type) 1, abfd) != 1)
+      if (bfd_write ("", 1, abfd) != 1)
 	return false;
     }
 
@@ -3908,7 +3905,7 @@ ecoff_indirect_link_order (bfd *output_bfd,
       file_ptr pos = (output_section->rel_filepos
 		      + output_section->reloc_count * external_reloc_size);
       if (bfd_seek (output_bfd, pos, SEEK_SET) != 0
-	  || (bfd_bwrite (external_relocs, external_relocs_size, output_bfd)
+	  || (bfd_write (external_relocs, external_relocs_size, output_bfd)
 	      != external_relocs_size))
 	goto error_return;
       output_section->reloc_count += input_section->reloc_count;
@@ -4115,7 +4112,7 @@ ecoff_reloc_link_order (bfd *output_bfd,
   pos = (output_section->rel_filepos
 	 + output_section->reloc_count * external_reloc_size);
   ok = (bfd_seek (output_bfd, pos, SEEK_SET) == 0
-	&& (bfd_bwrite ((void *) rbuf, external_reloc_size, output_bfd)
+	&& (bfd_write (rbuf, external_reloc_size, output_bfd)
 	    == external_reloc_size));
 
   if (ok)

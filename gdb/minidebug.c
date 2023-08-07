@@ -95,7 +95,7 @@ lzma_open (struct bfd *nbfd, void *open_closure)
   offset = section->filepos + size - LZMA_STREAM_HEADER_SIZE;
   if (size < LZMA_STREAM_HEADER_SIZE
       || bfd_seek (section->owner, offset, SEEK_SET) != 0
-      || bfd_bread (footer, LZMA_STREAM_HEADER_SIZE, section->owner)
+      || bfd_read (footer, LZMA_STREAM_HEADER_SIZE, section->owner)
 	 != LZMA_STREAM_HEADER_SIZE
       || lzma_stream_footer_decode (&options, footer) != LZMA_OK
       || offset < options.backward_size)
@@ -109,7 +109,7 @@ lzma_open (struct bfd *nbfd, void *open_closure)
   index = NULL;
   pos = 0;
   if (bfd_seek (section->owner, offset, SEEK_SET) != 0
-      || bfd_bread (indexdata, options.backward_size, section->owner)
+      || bfd_read (indexdata, options.backward_size, section->owner)
 	 != options.backward_size
       || lzma_index_buffer_decode (&index, &memlimit, &gdb_lzma_allocator,
 				   indexdata, &pos, options.backward_size)
@@ -162,7 +162,7 @@ lzma_pread (struct bfd *nbfd, void *stream, void *buf, file_ptr nbytes,
 	  compressed = (gdb_byte *) xmalloc (iter.block.total_size);
 	  block_offset = section->filepos + iter.block.compressed_file_offset;
 	  if (bfd_seek (section->owner, block_offset, SEEK_SET) != 0
-	      || bfd_bread (compressed, iter.block.total_size, section->owner)
+	      || bfd_read (compressed, iter.block.total_size, section->owner)
 		 != iter.block.total_size)
 	    {
 	      xfree (compressed);

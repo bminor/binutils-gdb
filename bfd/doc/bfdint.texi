@@ -523,7 +523,7 @@ corresponds to an actual section in an actual BFD.
 Get the contents of a section.  This is called from
 @samp{bfd_get_section_contents}.  Most targets set this to
 @samp{_bfd_generic_get_section_contents}, which does a @samp{bfd_seek}
-based on the section's @samp{filepos} field and a @samp{bfd_bread}.  The
+based on the section's @samp{filepos} field and a @samp{bfd_read}.  The
 corresponding field in the target vector is named
 @samp{_bfd_get_section_contents}.
 
@@ -656,7 +656,7 @@ always uses extended name tables anyhow.  The corresponding field in the
 target vector is named @samp{_bfd_truncate_arname}.
 
 @item _write_armap
-Write out the archive symbol table using calls to @samp{bfd_bwrite}.
+Write out the archive symbol table using calls to @samp{bfd_write}.
 This is normally called from the archive @samp{write_contents} routine.
 The corresponding field in the target vector is named @samp{write_armap}
 (no leading underscore).

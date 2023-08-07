@@ -144,7 +144,7 @@ obj_aout_frob_file_before_fix (void)
 	  file_ptr pos = sec->filepos + *sizep;
 
 	  gas_assert (bfd_seek (stdoutput, pos - 1, SEEK_SET) == 0
-		      && bfd_bwrite (&b, 1, stdoutput) == 1);
+		      && bfd_write (&b, 1, stdoutput) == 1);
 	}
     }
 }

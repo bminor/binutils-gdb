@@ -2651,7 +2651,7 @@ elf_link_read_relocs_from_section (bfd *abfd,
     return false;
 
   /* Read the relocations.  */
-  if (bfd_bread (external_relocs, shdr->sh_size, abfd) != shdr->sh_size)
+  if (bfd_read (external_relocs, shdr->sh_size, abfd) != shdr->sh_size)
     return false;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -10188,7 +10188,7 @@ elf_link_swap_symbols_out (struct elf_final_link_info *flinfo)
   pos = hdr->sh_offset + hdr->sh_size;
   amt = bed->s->sizeof_sym * flinfo->output_bfd->symcount;
   if (bfd_seek (flinfo->output_bfd, pos, SEEK_SET) == 0
-      && bfd_bwrite (symbuf, amt, flinfo->output_bfd) == amt)
+      && bfd_write (symbuf, amt, flinfo->output_bfd) == amt)
     {
       hdr->sh_size += amt;
       ret = true;
@@ -13071,7 +13071,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 							       off, true);
 
 	      if (bfd_seek (abfd, symtab_shndx_hdr->sh_offset, SEEK_SET) != 0
-		  || (bfd_bwrite (flinfo.symshndxbuf, amt, abfd) != amt))
+		  || (bfd_write (flinfo.symshndxbuf, amt, abfd) != amt))
 		{
 		  ret = false;
 		  goto return_local_hash_table;

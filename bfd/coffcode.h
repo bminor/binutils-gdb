@@ -1888,9 +1888,9 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
       file_ptr oldpos = bfd_tell (abfd);
       bfd_size_type relsz = bfd_coff_relsz (abfd);
 
-      if (bfd_seek (abfd, (file_ptr) hdr->s_relptr, 0) != 0)
+      if (bfd_seek (abfd, hdr->s_relptr, 0) != 0)
 	return;
-      if (bfd_bread (& dst, relsz, abfd) != relsz)
+      if (bfd_read (& dst, relsz, abfd) != relsz)
 	return;
 
       bfd_coff_swap_reloc_in (abfd, &dst, &n);
@@ -1959,9 +1959,9 @@ coff_set_alignment_hook (bfd * abfd, asection * section, void * scnhdr)
       const file_ptr oldpos = bfd_tell (abfd);
       const bfd_size_type relsz = bfd_coff_relsz (abfd);
 
-      if (bfd_seek (abfd, (file_ptr) hdr->s_relptr, 0) != 0)
+      if (bfd_seek (abfd, hdr->s_relptr, 0) != 0)
 	return;
-      if (bfd_bread (& dst, relsz, abfd) != relsz)
+      if (bfd_read (& dst, relsz, abfd) != relsz)
 	return;
 
       bfd_coff_swap_reloc_in (abfd, &dst, &n);
@@ -2557,8 +2557,8 @@ coff_write_relocs (bfd * abfd, int first_undef)
 	  /* Add one to count *this* reloc (grr).  */
 	  n.r_vaddr = s->reloc_count + 1;
 	  coff_swap_reloc_out (abfd, &n, &dst);
-	  if (bfd_bwrite (& dst, (bfd_size_type) bfd_coff_relsz (abfd),
-			  abfd) != bfd_coff_relsz (abfd))
+	  if (bfd_write (&dst, bfd_coff_relsz (abfd), abfd)
+	      != bfd_coff_relsz (abfd))
 	    return false;
 	}
 #endif
@@ -2650,8 +2650,8 @@ coff_write_relocs (bfd * abfd, int first_undef)
 #endif
 	  coff_swap_reloc_out (abfd, &n, &dst);
 
-	  if (bfd_bwrite (& dst, (bfd_size_type) bfd_coff_relsz (abfd),
-			 abfd) != bfd_coff_relsz (abfd))
+	  if (bfd_write (&dst, bfd_coff_relsz (abfd), abfd)
+	      != bfd_coff_relsz (abfd))
 	    return false;
 	}
 
@@ -3271,7 +3271,7 @@ coff_compute_section_file_positions (bfd * abfd)
 
       b = 0;
       if (bfd_seek (abfd, sofar - 1, SEEK_SET) != 0
-	  || bfd_bwrite (&b, (bfd_size_type) 1, abfd) != 1)
+	  || bfd_write (&b, 1, abfd) != 1)
 	return false;
     }
 
@@ -3295,7 +3295,7 @@ coff_read_word (bfd *abfd, unsigned int *value, unsigned int *pelength)
   unsigned char b[2];
   int status;
 
-  status = bfd_bread (b, (bfd_size_type) 2, abfd);
+  status = bfd_read (b, 2, abfd);
   if (status < 1)
     {
       *value = 0;
@@ -3371,7 +3371,7 @@ coff_compute_checksum (bfd *abfd, unsigned int *pelength)
       if (bfd_seek (abfd, filepos, SEEK_SET) != 0)
 	return 0;
 
-      buf_size = bfd_bread (buf, COFF_CHECKSUM_BUFFER_SIZE, abfd);
+      buf_size = bfd_read (buf, COFF_CHECKSUM_BUFFER_SIZE, abfd);
       cur_buf_size = buf_size;
       cur_buf = buf;
 
@@ -3411,7 +3411,7 @@ coff_apply_checksum (bfd *abfd)
     return false;
 
   checksum = 0;
-  bfd_bwrite (&checksum, (bfd_size_type) 4, abfd);
+  bfd_write (&checksum, 4, abfd);
 
   if (bfd_seek (abfd, peheader, SEEK_SET) != 0)
     return false;
@@ -3423,7 +3423,7 @@ coff_apply_checksum (bfd *abfd)
   if (bfd_seek (abfd, peheader + 0x58, SEEK_SET) != 0)
     return false;
 
-  bfd_bwrite (&checksum, (bfd_size_type) 4, abfd);
+  bfd_write (&checksum, 4, abfd);
 
   return true;
 }
@@ -3750,7 +3750,7 @@ coff_write_object_contents (bfd * abfd)
 	  bfd_size_type amt = bfd_coff_scnhsz (abfd);
 
 	  if (bfd_coff_swap_scnhdr_out (abfd, &section, &buff) == 0
-	      || bfd_bwrite (& buff, amt, abfd) != amt)
+	      || bfd_write (& buff, amt, abfd) != amt)
 	    return false;
 	}
 
@@ -3876,7 +3876,7 @@ coff_write_object_contents (bfd * abfd)
 	  scnhdr.s_flags = STYP_OVRFLO;
 	  amt = bfd_coff_scnhsz (abfd);
 	  if (bfd_coff_swap_scnhdr_out (abfd, &scnhdr, &buff) == 0
-	      || bfd_bwrite (& buff, amt, abfd) != amt)
+	      || bfd_write (& buff, amt, abfd) != amt)
 	    return false;
 	}
     }
@@ -3893,7 +3893,7 @@ coff_write_object_contents (bfd * abfd)
       bfd_byte *b = bfd_zmalloc (fill_size);
       if (b)
 	{
-	  bfd_bwrite (b, fill_size, abfd);
+	  bfd_write (b, fill_size, abfd);
 	  free (b);
 	}
     }
@@ -4232,7 +4232,7 @@ coff_write_object_contents (bfd * abfd)
 #endif
 
   /* Now write header.  */
-  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
     return false;
 
   {
@@ -4244,7 +4244,7 @@ coff_write_object_contents (bfd * abfd)
       return false;
 
     bfd_coff_swap_filehdr_out (abfd, & internal_f, buff);
-    amount = bfd_bwrite (buff, amount, abfd);
+    amount = bfd_write (buff, amount, abfd);
 
     free (buff);
 
@@ -4264,7 +4264,7 @@ coff_write_object_contents (bfd * abfd)
 	return false;
 
       coff_swap_aouthdr_out (abfd, & internal_a, buff);
-      amount = bfd_bwrite (buff, amount, abfd);
+      amount = bfd_write (buff, amount, abfd);
 
       free (buff);
 
@@ -4289,7 +4289,7 @@ coff_write_object_contents (bfd * abfd)
 	size = bfd_coff_aoutsz (abfd);
       else
 	size = SMALL_AOUTSZ;
-      if (bfd_bwrite (& buff, (bfd_size_type) size, abfd) != size)
+      if (bfd_write (&buff, size, abfd) != size)
 	return false;
     }
 #endif
@@ -4362,7 +4362,7 @@ coff_set_section_contents (bfd * abfd,
   if (count == 0)
     return true;
 
-  return bfd_bwrite (location, count, abfd) == count;
+  return bfd_write (location, count, abfd) == count;
 }
 
 static void *

@@ -2117,7 +2117,7 @@ setup_sections (bfd *abfd,
 		    SEEK_SET) != 0)
 	goto error_return;
       amt = sizeof ext_space;
-      if (bfd_bread (&ext_space, amt, abfd) != amt)
+      if (bfd_read (&ext_space, amt, abfd) != amt)
 	goto error_return;
 
       som_swap_space_dictionary_in (&ext_space, &space);
@@ -2159,7 +2159,7 @@ setup_sections (bfd *abfd,
 		    SEEK_SET) != 0)
 	goto error_return;
       amt = sizeof ext_subspace;
-      if (bfd_bread (&ext_subspace, amt, abfd) != amt)
+      if (bfd_read (&ext_subspace, amt, abfd) != amt)
 	goto error_return;
       /* Seek back to the start of the subspaces for loop below.  */
       if (bfd_seek (abfd,
@@ -2191,7 +2191,7 @@ setup_sections (bfd *abfd,
 
 	  /* Read in the next subspace.  */
 	  amt = sizeof ext_subspace;
-	  if (bfd_bread (&ext_subspace, amt, abfd) != amt)
+	  if (bfd_read (&ext_subspace, amt, abfd) != amt)
 	    goto error_return;
 
 	  som_swap_subspace_dictionary_in (&ext_subspace, &subspace);
@@ -2396,7 +2396,7 @@ som_object_p (bfd *abfd)
 #define ENTRY_SIZE sizeof (struct som_external_som_entry)
 
   amt = sizeof (struct som_external_header);
-  if (bfd_bread (&ext_file_hdr, amt, abfd) != amt)
+  if (bfd_read (&ext_file_hdr, amt, abfd) != amt)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -2427,7 +2427,7 @@ som_object_p (bfd *abfd)
     case EXECLIBMAGIC:
       /* Read the lst header and determine where the SOM directory begins.  */
 
-      if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+      if (bfd_seek (abfd, 0, SEEK_SET) != 0)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_wrong_format);
@@ -2435,7 +2435,7 @@ som_object_p (bfd *abfd)
 	}
 
       amt = sizeof (struct som_external_lst_header);
-      if (bfd_bread (&ext_lst_header, amt, abfd) != amt)
+      if (bfd_read (&ext_lst_header, amt, abfd) != amt)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_wrong_format);
@@ -2452,7 +2452,7 @@ som_object_p (bfd *abfd)
 	}
 
       amt = ENTRY_SIZE;
-      if (bfd_bread (&ext_som_entry, amt, abfd) != amt)
+      if (bfd_read (&ext_som_entry, amt, abfd) != amt)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_wrong_format);
@@ -2470,7 +2470,7 @@ som_object_p (bfd *abfd)
 
       /* And finally, re-read the som header.  */
       amt = sizeof (struct som_external_header);
-      if (bfd_bread (&ext_file_hdr, amt, abfd) != amt)
+      if (bfd_read (&ext_file_hdr, amt, abfd) != amt)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_wrong_format);
@@ -2505,7 +2505,7 @@ som_object_p (bfd *abfd)
       if (aux_hdr_ptr == NULL)
 	return NULL;
       amt = sizeof (struct som_external_exec_auxhdr);
-      if (bfd_bread (&ext_exec_auxhdr, amt, abfd) != amt)
+      if (bfd_read (&ext_exec_auxhdr, amt, abfd) != amt)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_wrong_format);
@@ -3039,7 +3039,7 @@ som_write_fixups (bfd *abfd,
 	      if (p - tmp_space + 512 > SOM_TMP_BUFSIZE)
 		{
 		  amt = p - tmp_space;
-		  if (bfd_bwrite ((void *) tmp_space, amt, abfd) != amt)
+		  if (bfd_write (tmp_space, amt, abfd) != amt)
 		    return false;
 
 		  p = tmp_space;
@@ -3290,7 +3290,7 @@ som_write_fixups (bfd *abfd,
 
 	  /* Scribble out the relocations.  */
 	  amt = p - tmp_space;
-	  if (bfd_bwrite ((void *) tmp_space, amt, abfd) != amt)
+	  if (bfd_write (tmp_space, amt, abfd) != amt)
 	    return false;
 	  p = tmp_space;
 
@@ -3326,7 +3326,7 @@ som_write_space_strings (bfd *abfd,
 
   /* Seek to the start of the space strings in preparation for writing
      them out.  */
-  if (bfd_seek (abfd, (file_ptr) current_offset, SEEK_SET) != 0)
+  if (bfd_seek (abfd, current_offset, SEEK_SET) != 0)
     return false;
 
   /* Walk through all the spaces and subspaces (order is not important)
@@ -3351,7 +3351,7 @@ som_write_space_strings (bfd *abfd,
 	{
 	  /* Flush buffer before refilling or reallocating.  */
 	  amt = p - tmp_space;
-	  if (bfd_bwrite ((void *) &tmp_space[0], amt, abfd) != amt)
+	  if (bfd_write (&tmp_space[0], amt, abfd) != amt)
 	    return false;
 
 	  /* Reallocate if now empty buffer still too small.  */
@@ -3405,7 +3405,7 @@ som_write_space_strings (bfd *abfd,
   /* Done with the space/subspace strings.  Write out any information
      contained in a partial block.  */
   amt = p - tmp_space;
-  res = bfd_bwrite ((void *) &tmp_space[0], amt, abfd);
+  res = bfd_write (&tmp_space[0], amt, abfd);
   free (tmp_space);
   if (res != amt)
     return false;
@@ -3445,7 +3445,7 @@ som_write_symbol_strings (bfd *abfd,
 
   /* Seek to the start of the space strings in preparation for writing
      them out.  */
-  if (bfd_seek (abfd, (file_ptr) current_offset, SEEK_SET) != 0)
+  if (bfd_seek (abfd, current_offset, SEEK_SET) != 0)
     return false;
 
   if (compilation_unit)
@@ -3482,7 +3482,7 @@ som_write_symbol_strings (bfd *abfd,
 	    {
 	      /* Flush buffer before refilling or reallocating.  */
 	      amt = p - tmp_space;
-	      if (bfd_bwrite ((void *) &tmp_space[0], amt, abfd) != amt)
+	      if (bfd_write (tmp_space, amt, abfd) != amt)
 		return false;
 
 	      /* Reallocate if now empty buffer still too small.  */
@@ -3537,7 +3537,7 @@ som_write_symbol_strings (bfd *abfd,
 	{
 	  /* Flush buffer before refilling or reallocating.  */
 	  amt = p - tmp_space;
-	  if (bfd_bwrite ((void *) &tmp_space[0], amt, abfd) != amt)
+	  if (bfd_write (tmp_space, amt, abfd) != amt)
 	    return false;
 
 	  /* Reallocate if now empty buffer still too small.  */
@@ -3581,7 +3581,7 @@ som_write_symbol_strings (bfd *abfd,
 
   /* Scribble out any partial block.  */
   amt = p - tmp_space;
-  res = bfd_bwrite ((void *) &tmp_space[0], amt, abfd);
+  res = bfd_write (tmp_space, amt, abfd);
   free (tmp_space);
   if (res != amt)
     return false;
@@ -3639,7 +3639,7 @@ som_begin_writing (bfd *abfd)
       struct som_external_string_auxhdr ext_string_auxhdr;
       bfd_size_type len;
 
-      if (bfd_seek (abfd, (file_ptr) current_offset, SEEK_SET) != 0)
+      if (bfd_seek (abfd, current_offset, SEEK_SET) != 0)
 	return false;
 
       /* Write the aux_id structure and the string length.  */
@@ -3648,15 +3648,14 @@ som_begin_writing (bfd *abfd)
       current_offset += len;
       som_swap_string_auxhdr_out
 	(obj_som_version_hdr (abfd), &ext_string_auxhdr);
-      if (bfd_bwrite (&ext_string_auxhdr, len, abfd) != len)
+      if (bfd_write (&ext_string_auxhdr, len, abfd) != len)
 	return false;
 
       /* Write the version string.  */
       len = obj_som_version_hdr (abfd)->header_id.length - 4;
       obj_som_file_hdr (abfd)->aux_header_size += len;
       current_offset += len;
-      if (bfd_bwrite ((void *) obj_som_version_hdr (abfd)->string, len, abfd)
-	  != len)
+      if (bfd_write (obj_som_version_hdr (abfd)->string, len, abfd) != len)
 	return false;
     }
 
@@ -3665,7 +3664,7 @@ som_begin_writing (bfd *abfd)
       struct som_external_string_auxhdr ext_string_auxhdr;
       bfd_size_type len;
 
-      if (bfd_seek (abfd, (file_ptr) current_offset, SEEK_SET) != 0)
+      if (bfd_seek (abfd, current_offset, SEEK_SET) != 0)
 	return false;
 
       /* Write the aux_id structure and the string length.  */
@@ -3674,15 +3673,14 @@ som_begin_writing (bfd *abfd)
       current_offset += len;
       som_swap_string_auxhdr_out
 	(obj_som_copyright_hdr (abfd), &ext_string_auxhdr);
-      if (bfd_bwrite (&ext_string_auxhdr, len, abfd) != len)
+      if (bfd_write (&ext_string_auxhdr, len, abfd) != len)
 	return false;
 
       /* Write the copyright string.  */
       len = obj_som_copyright_hdr (abfd)->header_id.length - 4;
       obj_som_file_hdr (abfd)->aux_header_size += len;
       current_offset += len;
-      if (bfd_bwrite ((void *) obj_som_copyright_hdr (abfd)->string, len, abfd)
-	  != len)
+      if (bfd_write (obj_som_copyright_hdr (abfd)->string, len, abfd) != len)
 	return false;
     }
 
@@ -3929,9 +3927,9 @@ som_begin_writing (bfd *abfd)
      zeros are filled in.  Ugh.  */
   if (abfd->flags & (EXEC_P | DYNAMIC))
     current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);
-  if (bfd_seek (abfd, (file_ptr) current_offset - 1, SEEK_SET) != 0)
+  if (bfd_seek (abfd, current_offset - 1, SEEK_SET) != 0)
     return false;
-  if (bfd_bwrite ((void *) "", (bfd_size_type) 1, abfd) != 1)
+  if (bfd_write ("", 1, abfd) != 1)
     return false;
 
   obj_som_file_hdr (abfd)->unloadable_sp_size
@@ -4098,7 +4096,7 @@ som_finish_writing (bfd *abfd)
 	  som_swap_subspace_dictionary_record_out
 	    (som_section_data (subsection)->subspace_dict, &ext_subspace_dict);
 	  amt = sizeof (struct som_subspace_dictionary_record);
-	  if (bfd_bwrite (&ext_subspace_dict, amt, abfd) != amt)
+	  if (bfd_write (&ext_subspace_dict, amt, abfd) != amt)
 	    return false;
 	}
       /* Goto the next section.  */
@@ -4156,7 +4154,7 @@ som_finish_writing (bfd *abfd)
 	  som_swap_subspace_dictionary_record_out
 	    (som_section_data (subsection)->subspace_dict, &ext_subspace_dict);
 	  amt = sizeof (struct som_subspace_dictionary_record);
-	  if (bfd_bwrite (&ext_subspace_dict, amt, abfd) != amt)
+	  if (bfd_write (&ext_subspace_dict, amt, abfd) != amt)
 	    return false;
 	}
       /* Goto the next section.  */
@@ -4185,7 +4183,7 @@ som_finish_writing (bfd *abfd)
       som_swap_space_dictionary_out (som_section_data (section)->space_dict,
 				     &ext_space_dict);
       amt = sizeof (struct som_external_space_dictionary_record);
-      if (bfd_bwrite (&ext_space_dict, amt, abfd) != amt)
+      if (bfd_write (&ext_space_dict, amt, abfd) != amt)
 	return false;
 
       /* Goto the next section.  */
@@ -4205,7 +4203,7 @@ som_finish_writing (bfd *abfd)
 	(obj_som_compilation_unit (abfd), &ext_comp_unit);
 
       amt = sizeof (struct som_external_compilation_unit);
-      if (bfd_bwrite (&ext_comp_unit, amt, abfd) != amt)
+      if (bfd_write (&ext_comp_unit, amt, abfd) != amt)
 	return false;
     }
 
@@ -4227,10 +4225,10 @@ som_finish_writing (bfd *abfd)
 
   /* Only thing left to do is write out the file header.  It is always
      at location zero.  Seek there and write it.  */
-  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
     return false;
   amt = sizeof (struct som_external_header);
-  if (bfd_bwrite (&ext_header, amt, abfd) != amt)
+  if (bfd_write (&ext_header, amt, abfd) != amt)
     return false;
 
   /* Now write the exec header.  */
@@ -4272,7 +4270,7 @@ som_finish_writing (bfd *abfd)
 	return false;
 
       amt = sizeof (ext_exec_header);
-      if (bfd_bwrite (&ext_exec_header, amt, abfd) != amt)
+      if (bfd_write (&ext_exec_header, amt, abfd) != amt)
 	return false;
     }
   return true;
@@ -4518,7 +4516,7 @@ som_build_and_write_symbol_table (bfd *abfd)
 
   symtab_size = num_syms;
   symtab_size *= sizeof (struct som_external_symbol_dictionary_record);
-  if (bfd_bwrite ((void *) som_symtab, symtab_size, abfd) != symtab_size)
+  if (bfd_write (som_symtab, symtab_size, abfd) != symtab_size)
     goto error_return;
 
   free (som_symtab);
@@ -5727,9 +5725,9 @@ som_get_section_contents (bfd *abfd,
 {
   if (count == 0 || ((section->flags & SEC_HAS_CONTENTS) == 0))
     return true;
-  if ((bfd_size_type) (offset+count) > section->size
-      || bfd_seek (abfd, (file_ptr) (section->filepos + offset), SEEK_SET) != 0
-      || bfd_bread (location, count, abfd) != count)
+  if ((bfd_size_type) (offset + count) > section->size
+      || bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
+      || bfd_read (location, count, abfd) != count)
     return false; /* On error.  */
   return true;
 }
@@ -5764,7 +5762,7 @@ som_set_section_contents (bfd *abfd,
   if (bfd_seek (abfd, offset, SEEK_SET) != 0)
     return false;
 
-  if (bfd_bwrite (location, count, abfd) != count)
+  if (bfd_write (location, count, abfd) != count)
     return false;
   return true;
 }
@@ -5973,7 +5971,7 @@ som_bfd_count_ar_symbols (bfd *abfd,
 
       /* Read in this symbol and update the counter.  */
       amt = sizeof (ext_lst_symbol);
-      if (bfd_bread ((void *) &ext_lst_symbol, amt, abfd) != amt)
+      if (bfd_read (&ext_lst_symbol, amt, abfd) != amt)
 	goto error_return;
 
       (*count)++;
@@ -6001,7 +5999,7 @@ som_bfd_count_ar_symbols (bfd *abfd,
 
 	  /* Read the symbol in and update the counter.  */
 	  amt = sizeof (ext_lst_symbol);
-	  if (bfd_bread ((void *) &ext_lst_symbol, amt, abfd) != amt)
+	  if (bfd_read (&ext_lst_symbol, amt, abfd) != amt)
 	    goto error_return;
 
 	  (*count)++;
@@ -6082,7 +6080,7 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
 	goto error_return;
 
       amt = sizeof (lst_symbol);
-      if (bfd_bread ((void *) &lst_symbol, amt, abfd) != amt)
+      if (bfd_read (&lst_symbol, amt, abfd) != amt)
 	goto error_return;
 
       /* Get the name of the symbol, first get the length which is stored
@@ -6096,7 +6094,7 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
 			   + bfd_getb32 (lst_symbol.name) - 4), SEEK_SET) != 0)
 	goto error_return;
 
-      if (bfd_bread (&ext_len, (bfd_size_type) 4, abfd) != 4)
+      if (bfd_read (&ext_len, 4, abfd) != 4)
 	goto error_return;
       len = bfd_getb32 (ext_len);
 
@@ -6139,7 +6137,7 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
 	    goto error_return;
 
 	  amt = sizeof (lst_symbol);
-	  if (bfd_bread ((void *) &lst_symbol, amt, abfd) != amt)
+	  if (bfd_read (&lst_symbol, amt, abfd) != amt)
 	    goto error_return;
 
 	  /* Seek to the name length & string and read them in.  */
@@ -6147,7 +6145,7 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
 			+ bfd_getb32 (lst_symbol.name) - 4, SEEK_SET) != 0)
 	    goto error_return;
 
-	  if (bfd_bread (&ext_len, (bfd_size_type) 4, abfd) != 4)
+	  if (bfd_read (&ext_len, 4, abfd) != 4)
 	    goto error_return;
 	  len = bfd_getb32 (ext_len);
 
@@ -6202,7 +6200,7 @@ som_slurp_armap (bfd *abfd)
   struct artdata *ardata = bfd_ardata (abfd);
   char nextname[17];
   size_t amt = 16;
-  int i = bfd_bread ((void *) nextname, amt, abfd);
+  int i = bfd_read (nextname, amt, abfd);
 
   /* Special cases.  */
   if (i == 0)
@@ -6210,7 +6208,7 @@ som_slurp_armap (bfd *abfd)
   if (i != 16)
     return false;
 
-  if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
+  if (bfd_seek (abfd, -16, SEEK_CUR) != 0)
     return false;
 
   /* For archives without .o files there is no symbol table.  */
@@ -6222,7 +6220,7 @@ som_slurp_armap (bfd *abfd)
 
   /* Read in and sanity check the archive header.  */
   amt = sizeof (struct ar_hdr);
-  if (bfd_bread ((void *) &ar_header, amt, abfd) != amt)
+  if (bfd_read (&ar_header, amt, abfd) != amt)
     return false;
 
   if (strncmp (ar_header.ar_fmag, ARFMAG, 2))
@@ -6246,7 +6244,7 @@ som_slurp_armap (bfd *abfd)
   /* Read in the library symbol table.  We'll make heavy use of this
      in just a minute.  */
   amt = sizeof (struct som_external_lst_header);
-  if (bfd_bread ((void *) &ext_lst_header, amt, abfd) != amt)
+  if (bfd_read (&ext_lst_header, amt, abfd) != amt)
     return false;
 
   som_swap_lst_header_in (&ext_lst_header, &lst_header);
@@ -6617,22 +6615,22 @@ som_bfd_ar_write_symbol_stuff (bfd *abfd,
 
   /* Now scribble out the hash table.  */
   amt = (size_t) hash_size * 4;
-  if (bfd_bwrite ((void *) hash_table, amt, abfd) != amt)
+  if (bfd_write (hash_table, amt, abfd) != amt)
     goto error_return;
 
   /* Then the SOM dictionary.  */
   amt = (size_t) module_count * sizeof (struct som_external_som_entry);
-  if (bfd_bwrite ((void *) som_dict, amt, abfd) != amt)
+  if (bfd_write (som_dict, amt, abfd) != amt)
     goto error_return;
 
   /* The library symbols.  */
   amt = (size_t) nsyms * sizeof (struct som_external_lst_symbol_record);
-  if (bfd_bwrite ((void *) lst_syms, amt, abfd) != amt)
+  if (bfd_write (lst_syms, amt, abfd) != amt)
     goto error_return;
 
   /* And finally the strings.  */
   amt = string_size;
-  if (bfd_bwrite ((void *) strings, amt, abfd) != amt)
+  if (bfd_write (strings, amt, abfd) != amt)
     goto error_return;
 
   free (hash_table);
@@ -6773,12 +6771,12 @@ som_write_armap (bfd *abfd,
 
   /* Scribble out the ar header.  */
   amt = sizeof (struct ar_hdr);
-  if (bfd_bwrite ((void *) &hdr, amt, abfd) != amt)
+  if (bfd_write (&hdr, amt, abfd) != amt)
     return false;
 
   /* Now scribble out the lst header.  */
   amt = sizeof (struct som_external_lst_header);
-  if (bfd_bwrite ((void *) &lst, amt, abfd) != amt)
+  if (bfd_write (&lst, amt, abfd) != amt)
     return false;
 
   /* Build and write the armap.  */

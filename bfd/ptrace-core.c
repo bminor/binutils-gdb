@@ -64,7 +64,7 @@ ptrace_unix_core_file_p (bfd *abfd)
   size_t amt;
   flagword flags;
 
-  val = bfd_bread ((void *)&u, (bfd_size_type) sizeof u, abfd);
+  val = bfd_read (&u, sizeof u, abfd);
   if (val != sizeof u || u.pt_magic != _BCS_PTRACE_MAGIC
       || u.pt_rev != _BCS_PTRACE_REV)
     {

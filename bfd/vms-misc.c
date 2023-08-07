@@ -289,14 +289,14 @@ _bfd_vms_output_end (bfd *abfd, struct vms_rec_wr *recwr)
      converted to variable length (VAR) format.  VAR format has a length
      word first which must be explicitly output in UDF format.  */
   /* So, first the length word.  */
-  bfd_bwrite (recwr->buf + 2, 2, abfd);
+  bfd_write (recwr->buf + 2, 2, abfd);
 
   /* Align.  */
   if (recwr->size & 1)
     recwr->buf[recwr->size++] = 0;
 
   /* Then the record.  */
-  bfd_bwrite (recwr->buf, (size_t) recwr->size, abfd);
+  bfd_write (recwr->buf, (size_t) recwr->size, abfd);
 
   recwr->size = 0;
 }

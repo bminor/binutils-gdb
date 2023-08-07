@@ -153,7 +153,7 @@ rx_load (bfd *prog, host_callback *callback)
 	  fprintf (stderr, "Failed to seek to offset %lx\n", (long) offset);
 	  continue;
 	}
-      if (bfd_bread (buf, size, prog) != size)
+      if (bfd_read (buf, size, prog) != size)
 	{
 	  fprintf (stderr, "Failed to read %" PRIx64 " bytes\n",
 		   (uint64_t) size);

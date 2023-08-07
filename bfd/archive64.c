@@ -52,13 +52,13 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
   ardata->symdefs = NULL;
 
   /* Get the name of the first element.  */
-  i = bfd_bread (nextname, 16, abfd);
+  i = bfd_read (nextname, 16, abfd);
   if (i == 0)
     return true;
   if (i != 16)
     return false;
 
-  if (bfd_seek (abfd, (file_ptr) - 16, SEEK_CUR) != 0)
+  if (bfd_seek (abfd, -16, SEEK_CUR) != 0)
     return false;
 
   /* Archives with traditional armaps are still permitted.  */
@@ -84,7 +84,7 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
       return false;
     }
 
-  if (bfd_bread (int_buf, 8, abfd) != 8)
+  if (bfd_read (int_buf, 8, abfd) != 8)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_malformed_archive);
@@ -118,7 +118,7 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
 
   raw_armap = (bfd_byte *) _bfd_alloc_and_read (abfd, ptrsize, ptrsize);
   if (raw_armap == NULL
-      || bfd_bread (stringbase, stringsize, abfd) != stringsize)
+      || bfd_read (stringbase, stringsize, abfd) != stringsize)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_malformed_archive);
@@ -196,12 +196,12 @@ _bfd_archive_64_bit_write_armap (bfd *arch,
 
   /* Write the ar header for this item and the number of symbols */
 
-  if (bfd_bwrite (&hdr, sizeof (struct ar_hdr), arch)
+  if (bfd_write (&hdr, sizeof (struct ar_hdr), arch)
       != sizeof (struct ar_hdr))
     return false;
 
   bfd_putb64 ((bfd_vma) symbol_count, buf);
-  if (bfd_bwrite (buf, 8, arch) != 8)
+  if (bfd_write (buf, 8, arch) != 8)
     return false;
 
   /* Two passes, first write the file offsets for each symbol -
@@ -222,7 +222,7 @@ _bfd_archive_64_bit_write_armap (bfd *arch,
 	   count++)
 	{
 	  bfd_putb64 ((bfd_vma) archive_member_file_ptr, buf);
-	  if (bfd_bwrite (buf, 8, arch) != 8)
+	  if (bfd_write (buf, 8, arch) != 8)
 	    return false;
 	}
 
@@ -239,7 +239,7 @@ _bfd_archive_64_bit_write_armap (bfd *arch,
     {
       size_t len = strlen (*map[count].name) + 1;
 
-      if (bfd_bwrite (*map[count].name, len, arch) != len)
+      if (bfd_write (*map[count].name, len, arch) != len)
 	return false;
     }
 
@@ -247,7 +247,7 @@ _bfd_archive_64_bit_write_armap (bfd *arch,
      However, the Irix 6.2 tools do not appear to do this.  */
   while (padding != 0)
     {
-      if (bfd_bwrite ("", 1, arch) != 1)
+      if (bfd_write ("", 1, arch) != 1)
 	return false;
       --padding;
     }

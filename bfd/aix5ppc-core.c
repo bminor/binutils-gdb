@@ -67,7 +67,7 @@ xcoff64_core_p (bfd *abfd)
     goto xcoff64_core_p_error;
 
   if (sizeof (struct core_dumpxx)
-      != bfd_bread (&core, sizeof (struct core_dumpxx), abfd))
+      != bfd_read (&core, sizeof (struct core_dumpxx), abfd))
     goto xcoff64_core_p_error;
 
   if (bfd_stat (abfd, &statbuf) < 0)
@@ -199,7 +199,7 @@ xcoff64_core_p (bfd *abfd)
 	return NULL;
 
       if (sizeof (struct __ld_info64) !=
-	  bfd_bread (&ldinfo, sizeof (struct __ld_info64), abfd))
+	  bfd_read (&ldinfo, sizeof (struct __ld_info64), abfd))
 	return NULL;
 
       if (ldinfo.ldinfo_core)
@@ -227,7 +227,7 @@ xcoff64_core_p (bfd *abfd)
 
       for (i = 0; i < core.c_vmregions; i++)
 	if (sizeof (struct vm_infox) !=
-	    bfd_bread (&vminfo, sizeof (struct vm_infox), abfd))
+	    bfd_read (&vminfo, sizeof (struct vm_infox), abfd))
 	  return NULL;
 
       if (vminfo.vminfo_offset)
@@ -273,7 +273,7 @@ xcoff64_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
     return return_value;
 
   if (sizeof (struct core_dumpxx) !=
-      bfd_bread (&core, sizeof (struct core_dumpxx), core_bfd))
+      bfd_read (&core, sizeof (struct core_dumpxx), core_bfd))
     return return_value;
 
   if (bfd_seek (core_bfd, core.c_loader, SEEK_SET) != 0)
@@ -288,7 +288,7 @@ xcoff64_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
 
   while (1)
     {
-      if (bfd_bread (s, 1, core_bfd) != 1)
+      if (bfd_read (s, 1, core_bfd) != 1)
 	goto xcoff64_core_file_matches_executable_p_end_1;
 
       if (*s == '\0')

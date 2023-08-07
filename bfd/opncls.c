@@ -1005,7 +1005,7 @@ bfd_make_writable (bfd *abfd)
   if (bim == NULL)
     return false;	/* bfd_error already set.  */
   abfd->iostream = bim;
-  /* bfd_bwrite will grow these as needed.  */
+  /* bfd_write will grow these as needed.  */
   bim->size = 0;
   bim->buffer = 0;
 

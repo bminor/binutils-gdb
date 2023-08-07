@@ -2722,9 +2722,9 @@ bfd_vma bfd_emul_get_commonpagesize (const char *);
 char *bfd_demangle (bfd *, const char *, int);
 
 /* Extracted from bfdio.c.  */
-bfd_size_type bfd_bread (void *, bfd_size_type, bfd *);
+bfd_size_type bfd_read (void *, bfd_size_type, bfd *);
 
-bfd_size_type bfd_bwrite (const void *, bfd_size_type, bfd *);
+bfd_size_type bfd_write (const void *, bfd_size_type, bfd *);
 
 file_ptr bfd_tell (bfd *);
 

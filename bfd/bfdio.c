@@ -231,10 +231,10 @@ DESCRIPTION
 
 /*
 FUNCTION
-	bfd_bread
+	bfd_read
 
 SYNOPSIS
-	bfd_size_type bfd_bread (void *, bfd_size_type, bfd *);
+	bfd_size_type bfd_read (void *, bfd_size_type, bfd *);
 
 DESCRIPTION
 	Attempt to read SIZE bytes from ABFD's iostream to PTR.
@@ -242,7 +242,7 @@ DESCRIPTION
 */
 
 bfd_size_type
-bfd_bread (void *ptr, bfd_size_type size, bfd *abfd)
+bfd_read (void *ptr, bfd_size_type size, bfd *abfd)
 {
   file_ptr nread;
   bfd *element_bfd = abfd;
@@ -296,10 +296,10 @@ bfd_bread (void *ptr, bfd_size_type size, bfd *abfd)
 
 /*
 FUNCTION
-	bfd_bwrite
+	bfd_write
 
 SYNOPSIS
-	bfd_size_type bfd_bwrite (const void *, bfd_size_type, bfd *);
+	bfd_size_type bfd_write (const void *, bfd_size_type, bfd *);
 
 DESCRIPTION
 	Attempt to write SIZE bytes to ABFD's iostream from PTR.
@@ -307,7 +307,7 @@ DESCRIPTION
 */
 
 bfd_size_type
-bfd_bwrite (const void *ptr, bfd_size_type size, bfd *abfd)
+bfd_write (const void *ptr, bfd_size_type size, bfd *abfd)
 {
   file_ptr nwrote;
 

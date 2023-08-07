@@ -4703,7 +4703,7 @@ elf64_vms_write_shdrs_and_ehdr (bfd *abfd)
   bfd_putl64 (elf_ia64_vms_tdata (abfd)->needed_count, needed_count);
 
   if (bfd_seek (abfd, sizeof (Elf64_External_Ehdr), SEEK_SET) != 0
-      || bfd_bwrite (needed_count, 8, abfd) != 8)
+      || bfd_write (needed_count, 8, abfd) != 8)
     return false;
 
   return true;
@@ -4724,7 +4724,7 @@ elf64_vms_close_and_cleanup (bfd *abfd)
 	  uint64_t pad = 0;
 
 	  bfd_seek (abfd, isize, SEEK_SET);
-	  bfd_bwrite (&pad, ishort, abfd);
+	  bfd_write (&pad, ishort, abfd);
 	}
     }
 
