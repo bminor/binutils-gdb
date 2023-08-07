@@ -604,7 +604,7 @@ run_cc_link_tests [list \
     ] \
     [list \
 	"Build libpr23169a.so" \
-	"-shared" \
+	"-shared -Wl,-z,lazy" \
 	"-fPIC -O2 -g" \
 	{ pr23169a.c } \
 	{} \
@@ -751,7 +751,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run pr23169b" \
-	"-pie -Wl,--no-as-needed tmpdir/libpr23169a.so" \
+	"-pie -Wl,--no-as-needed,-z,lazy tmpdir/libpr23169a.so" \
 	"" \
 	{ pr23169b.c pr23169c.c } \
 	"pr23169b" \
