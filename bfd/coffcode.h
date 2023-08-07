@@ -3411,7 +3411,8 @@ coff_apply_checksum (bfd *abfd)
     return false;
 
   checksum = 0;
-  bfd_write (&checksum, 4, abfd);
+  if (bfd_write (&checksum, 4, abfd) != 4)
+    return false;
 
   if (bfd_seek (abfd, peheader, SEEK_SET) != 0)
     return false;
@@ -3423,9 +3424,7 @@ coff_apply_checksum (bfd *abfd)
   if (bfd_seek (abfd, peheader + 0x58, SEEK_SET) != 0)
     return false;
 
-  bfd_write (&checksum, 4, abfd);
-
-  return true;
+  return bfd_write (&checksum, 4, abfd) == 4;
 }
 
 #endif /* COFF_IMAGE_WITH_PE */
@@ -3885,16 +3884,28 @@ coff_write_object_contents (bfd * abfd)
 
 #if defined (COFF_GO32_EXE) || defined (COFF_GO32)
   /* Pad section headers.  */
-  if ((abfd->flags & EXEC_P) && abfd->sections != NULL)
+  if ((abfd->flags & EXEC_P) != 0)
     {
-      file_ptr cur_ptr = scn_base
-			 + abfd->section_count * bfd_coff_scnhsz (abfd);
-      long fill_size = (abfd->sections->filepos - cur_ptr);
-      bfd_byte *b = bfd_zmalloc (fill_size);
-      if (b)
+      asection *s = abfd->sections;
+      while (s != NULL && s->filepos == 0)
+	s = s->next;
+      if (s != NULL)
 	{
-	  bfd_write (b, fill_size, abfd);
-	  free (b);
+	  file_ptr cur_ptr
+	    = scn_base + abfd->section_count * bfd_coff_scnhsz (abfd);
+	  file_ptr fill_size = s->filepos - cur_ptr;
+	  if (fill_size > 0)
+	    {
+	      bfd_byte *b = bfd_zmalloc (fill_size);
+	      if (!b)
+		return false;
+	      if (bfd_write (b, fill_size, abfd) != (ufile_ptr) fill_size)
+		{
+		  free (b);
+		  return false;
+		}
+	      free (b);
+	    }
 	}
     }
 #endif

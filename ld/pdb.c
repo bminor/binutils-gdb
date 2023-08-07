@@ -4185,10 +4185,9 @@ create_section_contrib_substream (bfd *abfd, void **data, uint32_t *size)
 
   for (unsigned int i = 0; i < abfd->section_count; i++)
     {
-      bfd_seek (abfd, offset, SEEK_SET);
-
-      if (bfd_read (sect_flags + (i * sizeof (uint32_t)), sizeof (uint32_t),
-		     abfd) != sizeof (uint32_t))
+      if (bfd_seek (abfd, offset, SEEK_SET) != 0
+	  || bfd_read (sect_flags + (i * sizeof (uint32_t)), sizeof (uint32_t),
+		       abfd) != sizeof (uint32_t))
 	{
 	  free (*data);
 	  free (sect_flags);
@@ -4993,7 +4992,8 @@ create_section_header_stream (bfd *pdb, bfd *abfd, uint16_t *num)
 
   scn_base = bfd_coff_filhsz (abfd) + bfd_coff_aoutsz (abfd);
 
-  bfd_seek (abfd, scn_base, SEEK_SET);
+  if (bfd_seek (abfd, scn_base, SEEK_SET) != 0)
+    return false;
 
   len = section_count * sizeof (struct external_scnhdr);
   buf = xmalloc (len);

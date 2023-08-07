@@ -234,7 +234,8 @@ FUNCTION
 	bfd_read
 
 SYNOPSIS
-	bfd_size_type bfd_read (void *, bfd_size_type, bfd *);
+	bfd_size_type bfd_read (void *, bfd_size_type, bfd *)
+				ATTRIBUTE_WARN_UNUSED_RESULT;
 
 DESCRIPTION
 	Attempt to read SIZE bytes from ABFD's iostream to PTR.
@@ -299,7 +300,8 @@ FUNCTION
 	bfd_write
 
 SYNOPSIS
-	bfd_size_type bfd_write (const void *, bfd_size_type, bfd *);
+	bfd_size_type bfd_write (const void *, bfd_size_type, bfd *)
+				ATTRIBUTE_WARN_UNUSED_RESULT;
 
 DESCRIPTION
 	Attempt to write SIZE bytes to ABFD's iostream from PTR.
@@ -347,7 +349,7 @@ FUNCTION
 	bfd_tell
 
 SYNOPSIS
-	file_ptr bfd_tell (bfd *);
+	file_ptr bfd_tell (bfd *) ATTRIBUTE_WARN_UNUSED_RESULT;
 
 DESCRIPTION
 	Return ABFD's iostream file position.
@@ -404,7 +406,7 @@ FUNCTION
 	bfd_stat
 
 SYNOPSIS
-	int bfd_stat (bfd *, struct stat *);
+	int bfd_stat (bfd *, struct stat *) ATTRIBUTE_WARN_UNUSED_RESULT;
 
 DESCRIPTION
 	Call fstat on ABFD's iostream.  Return 0 on success, and a
@@ -437,7 +439,7 @@ FUNCTION
 	bfd_seek
 
 SYNOPSIS
-	int bfd_seek (bfd *, file_ptr, int);
+	int bfd_seek (bfd *, file_ptr, int) ATTRIBUTE_WARN_UNUSED_RESULT;
 
 DESCRIPTION
 	Call fseek on ABFD's iostream.  Return 0 on success, and a
@@ -638,7 +640,8 @@ FUNCTION
 SYNOPSIS
 	void *bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
 			int prot, int flags, file_ptr offset,
-			void **map_addr, bfd_size_type *map_len);
+			void **map_addr, bfd_size_type *map_len)
+			ATTRIBUTE_WARN_UNUSED_RESULT;
 
 DESCRIPTION
 	Return mmap()ed region of the file, if possible and implemented.

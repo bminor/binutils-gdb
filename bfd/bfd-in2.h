@@ -2722,17 +2722,19 @@ bfd_vma bfd_emul_get_commonpagesize (const char *);
 char *bfd_demangle (bfd *, const char *, int);
 
 /* Extracted from bfdio.c.  */
-bfd_size_type bfd_read (void *, bfd_size_type, bfd *);
+bfd_size_type bfd_read (void *, bfd_size_type, bfd *)
+ATTRIBUTE_WARN_UNUSED_RESULT;
 
-bfd_size_type bfd_write (const void *, bfd_size_type, bfd *);
+bfd_size_type bfd_write (const void *, bfd_size_type, bfd *)
+ATTRIBUTE_WARN_UNUSED_RESULT;
 
-file_ptr bfd_tell (bfd *);
+file_ptr bfd_tell (bfd *) ATTRIBUTE_WARN_UNUSED_RESULT;
 
 int bfd_flush (bfd *);
 
-int bfd_stat (bfd *, struct stat *);
+int bfd_stat (bfd *, struct stat *) ATTRIBUTE_WARN_UNUSED_RESULT;
 
-int bfd_seek (bfd *, file_ptr, int);
+int bfd_seek (bfd *, file_ptr, int) ATTRIBUTE_WARN_UNUSED_RESULT;
 
 long bfd_get_mtime (bfd *abfd);
 
@@ -2742,7 +2744,8 @@ ufile_ptr bfd_get_file_size (bfd *abfd);
 
 void *bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
     int prot, int flags, file_ptr offset,
-    void **map_addr, bfd_size_type *map_len);
+    void **map_addr, bfd_size_type *map_len)
+ATTRIBUTE_WARN_UNUSED_RESULT;
 
 /* Extracted from bfdwin.c.  */
 struct _bfd_window_internal;

@@ -2232,7 +2232,10 @@ xcoff64_generate_rtinit (bfd *abfd, const char *init, const char *fini,
 
   string_table = (bfd_byte *) bfd_zmalloc (string_table_size);
   if (string_table == NULL)
-    return false;
+    {
+      free (data_buffer);
+      return false;
+    }
 
   val = string_table_size;
   bfd_put_32 (abfd, val, &string_table[0]);
@@ -2383,20 +2386,23 @@ xcoff64_generate_rtinit (bfd *abfd, const char *init, const char *fini,
   filehdr.f_symptr = data_scnhdr.s_relptr + data_scnhdr.s_nreloc * RELSZ;
 
   bfd_coff_swap_filehdr_out (abfd, &filehdr, filehdr_ext);
-  bfd_write (filehdr_ext, FILHSZ, abfd);
   bfd_coff_swap_scnhdr_out (abfd, &text_scnhdr, &scnhdr_ext[SCNHSZ * 0]);
   bfd_coff_swap_scnhdr_out (abfd, &data_scnhdr, &scnhdr_ext[SCNHSZ * 1]);
   bfd_coff_swap_scnhdr_out (abfd, &bss_scnhdr, &scnhdr_ext[SCNHSZ * 2]);
-  bfd_write (scnhdr_ext, 3 * SCNHSZ, abfd);
-  bfd_write (data_buffer, data_buffer_size, abfd);
-  bfd_write (reloc_ext, data_scnhdr.s_nreloc * RELSZ, abfd);
-  bfd_write (syment_ext, filehdr.f_nsyms * SYMESZ, abfd);
-  bfd_write (string_table, string_table_size, abfd);
+  bool ret = true;
+  if (bfd_write (filehdr_ext, FILHSZ, abfd) != FILHSZ
+      || bfd_write (scnhdr_ext, 3 * SCNHSZ, abfd) != 3 * SCNHSZ
+      || bfd_write (data_buffer, data_buffer_size, abfd) != data_buffer_size
+      || (bfd_write (reloc_ext, data_scnhdr.s_nreloc * RELSZ, abfd)
+	  != data_scnhdr.s_nreloc * RELSZ)
+      || (bfd_write (syment_ext, filehdr.f_nsyms * SYMESZ, abfd)
+	  != (bfd_size_type) filehdr.f_nsyms * SYMESZ)
+      || bfd_write (string_table, string_table_size, abfd) != string_table_size)
+    ret = false;
 
+  free (string_table);
   free (data_buffer);
-  data_buffer = NULL;
-
-  return true;
+  return ret;
 }
 
 /* The typical dynamic reloc.  */

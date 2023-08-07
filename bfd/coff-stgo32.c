@@ -299,7 +299,8 @@ go32exe_check_format (bfd *abfd)
   /* Save now the stub to be used later.  Put the stub data to a temporary
      location first as tdata still does not exist.  It may not even
      be ever created if we are just checking the file format of ABFD.  */
-  bfd_seek (abfd, 0, SEEK_SET);
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
+    goto fail;
   go32exe_temp_stub = bfd_malloc (stubsize);
   if (go32exe_temp_stub == NULL)
     goto fail;

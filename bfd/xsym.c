@@ -2207,8 +2207,8 @@ bfd_sym_scan (bfd *abfd, bfd_sym_version version, bfd_sym_data_struct *mdata)
   mdata->sbfd = abfd;
   mdata->version = version;
 
-  bfd_seek (abfd, 0, SEEK_SET);
-  if (bfd_sym_read_header (abfd, &mdata->header, mdata->version) != 0)
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0
+      || bfd_sym_read_header (abfd, &mdata->header, mdata->version) != 0)
     return -1;
 
   mdata->name_table = bfd_sym_read_name_table (abfd, &mdata->header);
@@ -2236,8 +2236,8 @@ bfd_sym_object_p (bfd *abfd)
   bfd_sym_version version = -1;
   bfd_sym_data_struct *mdata;
 
-  bfd_seek (abfd, 0, SEEK_SET);
-  if (bfd_sym_read_version (abfd, &version) != 0)
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0
+      || bfd_sym_read_version (abfd, &version) != 0)
     goto wrong;
 
   mdata = (bfd_sym_data_struct *) bfd_alloc (abfd, sizeof (*mdata));

@@ -124,7 +124,7 @@ extern void   _bfd_vms_output_begin (struct vms_rec_wr *, int);
 extern void   _bfd_vms_output_alignment (struct vms_rec_wr *, int);
 extern void   _bfd_vms_output_begin_subrec (struct vms_rec_wr *, int);
 extern void   _bfd_vms_output_end_subrec (struct vms_rec_wr *);
-extern void   _bfd_vms_output_end (bfd *, struct vms_rec_wr *);
+extern bool   _bfd_vms_output_end (bfd *, struct vms_rec_wr *);
 extern int    _bfd_vms_output_check (struct vms_rec_wr *, int);
 extern void   _bfd_vms_output_byte (struct vms_rec_wr *, unsigned);
 extern void   _bfd_vms_output_short (struct vms_rec_wr *, unsigned);

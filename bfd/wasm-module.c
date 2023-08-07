@@ -548,8 +548,8 @@ wasm_compute_custom_section_file_position (bfd *abfd,
 	}
       while (nl);
 
-      bfd_seek (abfd, fs->pos, SEEK_SET);
-      if (! wasm_write_uleb128 (abfd, 0)
+      if (bfd_seek (abfd, fs->pos, SEEK_SET) != 0
+	  || ! wasm_write_uleb128 (abfd, 0)
 	  || ! wasm_write_uleb128 (abfd, payload_len)
 	  || ! wasm_write_uleb128 (abfd, name_len)
 	  || bfd_write (name, name_len, abfd) != name_len)
@@ -586,9 +586,8 @@ wasm_compute_section_file_positions (bfd *abfd)
   struct compute_section_arg fs;
   unsigned int i;
 
-  bfd_seek (abfd, (bfd_vma) 0, SEEK_SET);
-
-  if (bfd_write (magic, sizeof (magic), abfd) != (sizeof magic)
+  if (bfd_seek (abfd, (bfd_vma) 0, SEEK_SET) != 0
+      || bfd_write (magic, sizeof (magic), abfd) != (sizeof magic)
       || bfd_write (vers, sizeof (vers), abfd) != sizeof (vers))
     return false;
 
