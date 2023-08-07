@@ -962,7 +962,8 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 # We need this for automake to use YLWRAP.
 EXTRA_ld_new_SOURCES = deffilep.y ldlex.l
 # Allow dependency tracking to work for these files, too.
-EXTRA_ld_new_SOURCES += ldelf.c ldelfgen.c pdb.c pep-dll.c pe-dll.c
+EXTRA_ld_new_SOURCES += ldelf.c ldelfgen.c pdb.c pep-dll.c pe-dll.c \
+	 pep-dll-aarch64.c pep-dll-x86_64.c
 
 ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c plugin.c \

@@ -1014,8 +1014,8 @@ GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 
 # Dependency tracking for the generated emulation files.
 EXTRA_ld_new_SOURCES = deffilep.y ldlex.l ldelf.c ldelfgen.c pdb.c \
-	pep-dll.c pe-dll.c $(ALL_EMULATION_SOURCES) \
-	$(ALL_64_EMULATION_SOURCES)
+	pep-dll.c pe-dll.c pep-dll-aarch64.c pep-dll-x86_64.c \
+	$(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES)
 ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c plugin.c \
 	ldbuildid.c
@@ -1588,6 +1588,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mri.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pe-dll.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pep-dll-aarch64.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pep-dll-x86_64.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pep-dll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Po@am__quote@
 
