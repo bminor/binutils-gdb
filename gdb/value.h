@@ -1319,6 +1319,10 @@ extern struct value *value_repeat (struct value *arg1, int count);
 
 extern struct value *value_subscript (struct value *array, LONGEST index);
 
+/* Assuming VAL is array-like (see type::is_array_like), return an
+   array form of VAL.  */
+extern struct value *value_to_array (struct value *val);
+
 extern struct value *value_bitstring_subscript (struct type *type,
 						struct value *bitstring,
 						LONGEST index);

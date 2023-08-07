@@ -43,6 +43,8 @@
 #include "f-lang.h"
 #include <algorithm>
 #include "gmp-utils.h"
+#include "rust-lang.h"
+#include "ada-lang.h"
 
 /* The value of an invalid conversion badness.  */
 #define INVALID_CONVERSION 100
@@ -5945,6 +5947,20 @@ type::copy_fields (std::vector<struct field> &src)
   size_t size = nfields * sizeof (*this->fields ());
   memcpy (this->fields (), src.data (), size);
 }
+
+bool
+type::is_array_like ()
+{
+  if (code () == TYPE_CODE_ARRAY)
+    return true;
+  if (HAVE_GNAT_AUX_INFO (this))
+    return (ada_is_constrained_packed_array_type (this)
+	    || ada_is_array_descriptor_type (this));
+  if (HAVE_RUST_SPECIFIC (this))
+    return rust_slice_type_p (this);
+  return false;
+}
+
 
 
 static const registry<gdbarch>::key<struct builtin_type> gdbtypes_data;

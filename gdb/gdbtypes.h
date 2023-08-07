@@ -1430,6 +1430,11 @@ struct type
     return this->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (this);
   }
 
+  /* Return true if this type is "array-like".  This includes arrays,
+     but also some forms of structure type that are recognized as
+     representations of arrays by the type's language.  */
+  bool is_array_like ();
+
   /* * Type that is a pointer to this type.
      NULL if no such pointer-to type is known yet.
      The debugger may add the address of such a type
