@@ -1949,6 +1949,13 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
 	(_("rv%d does not support the `e' extension"), xlen);
       no_conflict = false;
     }
+  if (riscv_subset_supports (rps, "e")
+      && riscv_subset_supports (rps, "h"))
+    {
+      rps->error_handler
+	(_("rv%de does not support the `h' extension"), xlen);
+      no_conflict = false;
+    }
   if (riscv_lookup_subset (rps->subset_list, "q", &subset)
       && (subset->major_version < 2 || (subset->major_version == 2
 					&& subset->minor_version < 2))
