@@ -222,7 +222,12 @@ proc rip_test { reg test_start_label test_end_label signal_modes } {
 	    # If we use 'signal' to send the signal GDB doesn't actually do
 	    # the displaced step, but instead just delivers the signal.
 	    set inferior_pid [get_inferior_pid]
-	    remote_exec target "kill -ALRM $inferior_pid"
+	    # Ensure that $inferior_pid refers to a single process.
+	    gdb_assert {[expr $inferior_pid > 0]} \
+		"check for a sane inferior pid"
+	    if {$inferior_pid > 0} {
+		remote_exec target "kill -ALRM $inferior_pid"
+	    }
 	}
 
 	gdb_test "continue" \
