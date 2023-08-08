@@ -466,7 +466,12 @@ cooked_index::start_writing_index (dwarf2_per_bfd *per_bfd)
      started, because it may call 'wait'.  */
   m_write_future
     = gdb::thread_pool::g_thread_pool->post_task ([this, per_bfd,
-						   ctx = std::move (ctx)] ()
+#if __cplusplus >= 201402L
+						   ctx = std::move (ctx)
+#else
+						   ctx
+#endif
+						   ] ()
 	{
 	  maybe_write_index (per_bfd, ctx);
 	});
