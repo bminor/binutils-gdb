@@ -563,11 +563,20 @@ call_thread_fsm::should_stop (struct thread_info *thread)
 	 registers are restored to what they were before the
 	 call..  */
       return_value = get_call_return_value (&return_meta_info);
+    }
 
-      /* Break out of wait_sync_command_done.  This is similar to the
-	 async_enable_stdin call in normal_stop (which we don't call),
-	 however, in this case we only change the WAITING_UI.  This is
-	 enough for wait_sync_command_done.  */
+  /* We are always going to stop this thread, but we might not be planning
+     to call call normal_stop, which is only done if should_notify_stop
+     returns true.
+
+     As normal_stop is responsible for calling async_enable_stdin, which
+     would break us out of wait_sync_command_done, then, if we don't plan
+     to call normal_stop, we should call async_enable_stdin here instead.
+
+     Unlike normal_stop, we only call async_enable_stdin on WAITING_UI, but
+     that is sufficient for wait_sync_command_done.  */
+  if (!this->should_notify_stop ())
+    {
       scoped_restore save_ui = make_scoped_restore (&current_ui, waiting_ui);
       gdb_assert (current_ui->prompt_state == PROMPT_BLOCKED);
       async_enable_stdin ();
@@ -581,10 +590,28 @@ call_thread_fsm::should_stop (struct thread_info *thread)
 bool
 call_thread_fsm::should_notify_stop ()
 {
+  INFCALL_SCOPED_DEBUG_ENTER_EXIT;
+
   if (finished_p ())
     {
       /* Infcall succeeded.  Be silent and proceed with evaluating the
 	 expression.  */
+      infcall_debug_printf ("inferior call has finished, don't notify");
+      return false;
+    }
+
+  infcall_debug_printf ("inferior call didn't complete fully");
+
+  if (stopped_by_random_signal && unwind_on_signal_p)
+    {
+      infcall_debug_printf ("unwind-on-signal is on, don't notify");
+      return false;
+    }
+
+  if (stop_stack_dummy == STOP_STD_TERMINATE
+      && unwind_on_terminating_exception_p)
+    {
+      infcall_debug_printf ("unwind-on-terminating-exception is on, don't notify");
       return false;
     }
 
@@ -1512,6 +1539,11 @@ When the function is done executing, GDB will silently stop."),
 	    {
 	      /* The user wants the context restored.  */
 
+	      /* Capture details of the signal so we can include them in
+		 the error message.  Calling dummy_frame_pop will restore
+		 the previous stop signal details.  */
+	      gdb_signal stop_signal = call_thread->stop_signal ();
+
 	      /* We must get back to the frame we were before the
 		 dummy call.  */
 	      dummy_frame_pop (dummy_id, call_thread.get ());
@@ -1523,11 +1555,13 @@ When the function is done executing, GDB will silently stop."),
 	      /* FIXME: Insert a bunch of wrap_here; name can be very
 		 long if it's a C++ name with arguments and stuff.  */
 	      error (_("\
-The program being debugged was signaled while in a function called from GDB.\n\
-GDB has restored the context to what it was before the call.\n\
-To change this behavior use \"set unwindonsignal off\".\n\
-Evaluation of the expression containing the function\n\
-(%s) will be abandoned."),
+The program being debugged received signal %s, %s\n\
+while in a function called from GDB.  GDB has restored the context\n\
+to what it was before the call.  To change this behavior use\n\
+\"set unwindonsignal off\".  Evaluation of the expression containing\n\
+the function (%s) will be abandoned."),
+		     gdb_signal_to_name (stop_signal),
+		     gdb_signal_to_string (stop_signal),
 		     name.c_str ());
 	    }
 	  else

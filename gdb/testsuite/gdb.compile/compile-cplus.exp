@@ -133,7 +133,12 @@ gdb_test "info sym $infcall_pc" "\r\nNo symbol matches .*" "info sym not found"
 
 gdb_test_no_output "set unwindonsignal on"
 gdb_test "compile code *(volatile int *) 0 = 0;" \
-    "The program being debugged was signaled while in a function called from GDB\\.\r\nGDB has restored the context to what it was before the call\\.\r\n.*" \
+    [multi_line \
+	 "The program being debugged received signal SIGSEGV, Segmentation fault" \
+	 "while in a function called from GDB\\.  GDB has restored the context" \
+	 "to what it was before the call\\.  To change this behavior use" \
+	 "\"set unwindonsignal off\"\\.  Evaluation of the expression containing" \
+	 "the function \\(_gdb_expr\\(__gdb_regs\\*\\)\\) will be abandoned\\."] \
     "compile code segfault second"
 
 # C++ Specific tests.
@@ -304,7 +309,12 @@ gdb_test "p globalvar" " = -76" "expect -76"
 
 gdb_test_no_output "set debug compile on"
 gdb_test "compile code static const int readonly = 1; *(int *) &readonly = 2;" \
-    "The program being debugged was signaled while in a function called from GDB\\.\r\nGDB has restored the context to what it was before the call\\.\r\n.*"
+    [multi_line \
+	 "The program being debugged received signal SIGSEGV, Segmentation fault" \
+	 "while in a function called from GDB\\.  GDB has restored the context" \
+	 "to what it was before the call\\.  To change this behavior use" \
+	 "\"set unwindonsignal off\"\\.  Evaluation of the expression containing" \
+	 "the function \\(_gdb_expr\\(__gdb_regs\\*\\)\\) will be abandoned\\."]
 gdb_test_no_output "set debug compile off"
 
 

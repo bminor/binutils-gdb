@@ -45,7 +45,12 @@ gdb_test "show unwindonsignal" \
 # Call function (causing the program to get a signal), and see if gdb handles
 # it properly.
 if {[gdb_test "call gen_signal ()"  \
-	 "\[\r\n\]*The program being debugged was signaled.*" \
+	 [multi_line \
+	      "The program being debugged received signal SIGABRT, Aborted" \
+	      "while in a function called from GDB\\.  GDB has restored the context" \
+	      "to what it was before the call\\.  To change this behavior use" \
+	      "\"set unwindonsignal off\"\\.  Evaluation of the expression containing" \
+	      "the function \\(gen_signal\\) will be abandoned\\."] \
 	 "unwindonsignal, inferior function call signaled"] != 0} {
     return 0
 }
