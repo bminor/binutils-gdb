@@ -384,13 +384,13 @@ const struct bpf_opcode bpf_opcodes[] =
    BPF_V3, BPF_CODE|BPF_IMM32, BPF_CLASS_STX|BPF_SIZE_DW|BPF_MODE_ATOMIC|BPF_IMM32_AFXOR},
 
   /* Atomic instructions (32-bit.) */
-  {BPF_INSN_AADD32, "aadd32%W[ %dr %o16 ] , %sr", "lock%w* ( u32 * ) ( %dr %o16 ) += %sr",
+  {BPF_INSN_AADD32, "aadd32%W[ %dr %o16 ] , %sr", "lock%w* ( u32 * ) ( %dr %o16 ) += %sw",
    BPF_V3, BPF_CODE|BPF_IMM32, BPF_CLASS_STX|BPF_SIZE_W|BPF_MODE_ATOMIC|BPF_IMM32_AADD},
-  {BPF_INSN_AOR32, "aor32%W[ %dr %o16 ] , %sr", "lock%w* ( u32 * ) ( %dr %o16 ) |= %sr",
+  {BPF_INSN_AOR32, "aor32%W[ %dr %o16 ] , %sr", "lock%w* ( u32 * ) ( %dr %o16 ) |= %sw",
    BPF_V3, BPF_CODE|BPF_IMM32, BPF_CLASS_STX|BPF_SIZE_W|BPF_MODE_ATOMIC|BPF_IMM32_AOR},
-  {BPF_INSN_AAND32, "aand32%W[ %dr %o16 ] , %sr", "lock%w* ( u32 * ) ( %dr %o16 ) &= %sr",
+  {BPF_INSN_AAND32, "aand32%W[ %dr %o16 ] , %sr", "lock%w* ( u32 * ) ( %dr %o16 ) &= %sw",
    BPF_V3, BPF_CODE|BPF_IMM32, BPF_CLASS_STX|BPF_SIZE_W|BPF_MODE_ATOMIC|BPF_IMM32_AAND},
-  {BPF_INSN_AXOR32, "axor32%W[ %dr %o16 ] , %sr", "lock%w* ( u32 * ) ( %dr %o16 ) ^= %sr",
+  {BPF_INSN_AXOR32, "axor32%W[ %dr %o16 ] , %sr", "lock%w* ( u32 * ) ( %dr %o16 ) ^= %sw",
    BPF_V3, BPF_CODE|BPF_IMM32, BPF_CLASS_STX|BPF_SIZE_W|BPF_MODE_ATOMIC|BPF_IMM32_AXOR},
 
   /* Atomic instructions with fetching (32-bit.) */
