@@ -711,8 +711,6 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 
       /* FIXME: dubious.  Why can't we use something normal like
 	 bfd_get_section_contents?  */
-      bfd_seek (abfd, abfd->where, 0);
-
       stabstrsize = bfd_section_size (info->stabstrsect);
 
       coffstab_build_psymtabs (objfile,
@@ -806,22 +804,6 @@ coff_symtab_read (minimal_symbol_reader &reader,
   struct minimal_symbol *msym;
 
   scoped_free_pendings free_pending;
-
-  /* Work around a stdio bug in SunOS4.1.1 (this makes me nervous....
-     it's hard to know I've really worked around it.  The fix should
-     be harmless, anyway).  The symptom of the bug is that the first
-     fread (in read_one_sym), will (in my example) actually get data
-     from file offset 268, when the fseek was to 264 (and ftell shows
-     264).  This causes all hell to break loose.  I was unable to
-     reproduce this on a short test program which operated on the same
-     file, performing (I think) the same sequence of operations.
-
-     It stopped happening when I put in this (former) rewind().
-
-     FIXME: Find out if this has been reported to Sun, whether it has
-     been fixed in a later release, etc.  */
-
-  bfd_seek (objfile->obfd.get (), 0, 0);
 
   /* Position to read the symbol table.  */
   val = bfd_seek (objfile->obfd.get (), symtab_offset, 0);
@@ -1308,12 +1290,13 @@ init_stringtab (bfd *abfd, file_ptr offset, gdb::unique_xmalloc_ptr<char> *stora
   if (bfd_seek (abfd, offset, 0) < 0)
     return -1;
 
-  val = bfd_read ((char *) lengthbuf, sizeof lengthbuf, abfd);
-  length = bfd_h_get_32 (symfile_bfd, lengthbuf);
-
+  val = bfd_read (lengthbuf, sizeof lengthbuf, abfd);
   /* If no string table is needed, then the file may end immediately
      after the symbols.  Just return with `stringtab' set to null.  */
-  if (val != sizeof lengthbuf || length < sizeof lengthbuf)
+  if (val != sizeof lengthbuf)
+    return 0;
+  length = bfd_h_get_32 (symfile_bfd, lengthbuf);
+  if (length < sizeof lengthbuf)
     return 0;
 
   storage->reset ((char *) xmalloc (length));

@@ -809,7 +809,8 @@ stabs_seek (int sym_offset)
       symbuf_left -= sym_offset;
     }
   else
-    bfd_seek (symfile_bfd, sym_offset, SEEK_CUR);
+    if (bfd_seek (symfile_bfd, sym_offset, SEEK_CUR) != 0)
+      perror_with_name (bfd_get_filename (symfile_bfd));
 }
 
 #define INTERNALIZE_SYMBOL(intern, extern, abfd)			\
@@ -2155,8 +2156,8 @@ dbx_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
       symbol_size = SYMBOL_SIZE (pst);
 
       /* Read in this file's symbols.  */
-      bfd_seek (objfile->obfd.get (), SYMBOL_OFFSET (pst), SEEK_SET);
-      read_ofile_symtab (objfile, pst);
+      if (bfd_seek (objfile->obfd.get (), SYMBOL_OFFSET (pst), SEEK_SET) == 0)
+	read_ofile_symtab (objfile, pst);
     }
 
   pst->readin = true;

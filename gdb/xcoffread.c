@@ -779,8 +779,9 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
 
   while (curoffset <= limit_offset)
     {
-      bfd_seek (abfd, curoffset, SEEK_SET);
-      bfd_read (ext_lnno, linesz, abfd);
+      if (bfd_seek (abfd, curoffset, SEEK_SET) != 0
+	  || bfd_read (ext_lnno, linesz, abfd) != linesz)
+	return;
       bfd_coff_swap_lineno_in (abfd, ext_lnno, &int_lnno);
 
       /* Find the address this line represents.  */
