@@ -100,7 +100,8 @@ Application::get_realpath (const char *_name)
 	    {
 	      if (path != s)
 		{
-		  char *nm = dbe_sprintf (NTXT ("%.*s/%s"), (int) (path - s - 1), path, _name);
+		  char *nm = dbe_sprintf (NTXT ("%.*s/%s"), (int) (s - path),
+				   path, _name);
 		  exe_name = realpath (nm, NULL);
 		  free (nm);
 		  if (exe_name)

@@ -261,7 +261,7 @@ collect::check_executable (char *target_name)
     {
       // not found, look on path
       char *exe_name = get_realpath (target_name);
-      if (access (exe_name, X_OK) == 0)
+      if (access (exe_name, X_OK) != 0)
 	{
 	  // target can't be located
 	  // one last attempt: append .class to name, and see if we can find it
@@ -293,13 +293,8 @@ collect::check_executable (char *target_name)
     return EXEC_OK;
   // do not by pass checking architectural match
   collect::Exec_status exec_stat = check_executable_arch (elf);
-  if (exec_stat != EXEC_OK)
-    {
-      delete elf;
-      return exec_stat;
-    }
   delete elf;
-  return EXEC_OK;
+  return exec_stat;
 }
 
 collect::Exec_status
