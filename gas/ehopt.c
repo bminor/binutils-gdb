@@ -386,7 +386,7 @@ check_eh_frame (expressionS *exp, unsigned int *pnbytes)
 	{
 	  /* This might be a DW_CFA_advance_loc4.  Record the frag and the
 	     position within the frag, so that we can change it later.  */
-	  frag_grow (1);
+	  frag_grow (1 + 4);
 	  d->state = state_saw_loc4;
 	  d->loc4_frag = frag_now;
 	  d->loc4_fix = frag_now_fix ();
