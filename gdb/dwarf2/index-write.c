@@ -1302,7 +1302,7 @@ write_debug_names (dwarf2_per_bfd *per_bfd, cooked_index *table,
     }
 
    /* Verify that all units are represented.  */
-  gdb_assert (counter == per_bfd->all_units.size ());
+  gdb_assert (counter == per_bfd->all_comp_units.size ());
   gdb_assert (types_counter == per_bfd->all_type_units.size ());
 
   for (const cooked_index_entry *entry : table->all_entries ())
