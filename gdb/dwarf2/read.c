@@ -16477,7 +16477,9 @@ cooked_indexer::recurse (cutu_reader *reader,
 
   if (parent_entry != nullptr)
     {
-      CORE_ADDR start = form_addr (parent_entry->die_offset,
+      /* Both start and end are inclusive, so use both "+ 1" and "- 1" to
+	 limit the range to the children of parent_entry.  */
+      CORE_ADDR start = form_addr (parent_entry->die_offset + 1,
 				   reader->cu->per_cu->is_dwz);
       CORE_ADDR end = form_addr (sect_offset (info_ptr - 1 - reader->buffer),
 				 reader->cu->per_cu->is_dwz);

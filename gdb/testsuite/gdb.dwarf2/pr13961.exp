@@ -34,3 +34,13 @@ gdb_test "break -q main" "Breakpoint.*at.*"
 
 # If we get this far gdb didn't crash.
 pass $testfile
+
+# Regression test for PR symtab/30739.
+gdb_test_multiple "maint print objfiles $binfile" "no foo::foo" {
+    -re -wrap "\r\n *qualified: *foo::foo\r\n.*" {
+	fail $gdb_test_name
+    }
+    -re -wrap "" {
+	pass $gdb_test_name
+    }
+}
