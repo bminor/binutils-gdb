@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2023 Free Software Foundation, Inc.
+Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -17,7 +17,8 @@ This file is part of the GNU simulators.
    License for more details.
 
    You should have received a copy of the GNU General Public License along
-   with this program; if not, see <http://www.gnu.org/licenses/>.
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -26,6 +27,8 @@ This file is part of the GNU simulators.
 
 #include "sim-main.h"
 #include "sim-assert.h"
+#include "cgen-mem.h"
+#include "cgen-ops.h"
 
 /* The instruction descriptor array.
    This is computed at runtime.  Space for it is not malloc'd to save a
@@ -7302,7 +7305,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     SI f_label16;
 
     f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
-    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (pc));
+    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) * (4))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_hint) = f_hint;
@@ -7328,7 +7331,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     SI f_label16;
 
     f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
-    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (pc));
+    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) * (4))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_hint) = f_hint;
@@ -7350,7 +7353,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_ICCi_2 = EXTRACT_LSB0_UINT (insn, 32, 26, 2);
     f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
-    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (pc));
+    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) * (4))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_ICCi_2) = f_ICCi_2;
@@ -7378,7 +7381,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     SI f_label16;
 
     f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
-    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (pc));
+    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) * (4))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_hint) = f_hint;
@@ -7404,7 +7407,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     SI f_label16;
 
     f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
-    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (pc));
+    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) * (4))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_hint) = f_hint;
@@ -7426,7 +7429,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FCCi_2 = EXTRACT_LSB0_UINT (insn, 32, 26, 2);
     f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
-    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (pc));
+    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) * (4))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_FCCi_2) = f_FCCi_2;
@@ -7936,7 +7939,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     f_labelH6 = EXTRACT_LSB0_SINT (insn, 32, 30, 6);
     f_labelL18 = EXTRACT_LSB0_UINT (insn, 32, 17, 18);
 {
-  f_label24 = ((((((((f_labelH6) << (18))) | (f_labelL18))) << (2))) + (pc));
+  f_label24 = ((((((((f_labelH6) * (((1) << (18))))) | (f_labelL18))) * (4))) + (pc));
 }
 
   /* Record the fields for the semantic handler.  */
@@ -9919,7 +9922,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     f_u12_h = EXTRACT_LSB0_SINT (insn, 32, 17, 6);
     f_u12_l = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
 {
-  f_u12 = ((((f_u12_h) << (6))) | (f_u12_l));
+  f_u12 = ((((f_u12_h) * (64))) | (f_u12_l));
 }
 
   /* Record the fields for the semantic handler.  */
@@ -9952,7 +9955,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     f_u12_h = EXTRACT_LSB0_SINT (insn, 32, 17, 6);
     f_u12_l = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
 {
-  f_u12 = ((((f_u12_h) << (6))) | (f_u12_l));
+  f_u12 = ((((f_u12_h) * (64))) | (f_u12_l));
 }
 
   /* Record the fields for the semantic handler.  */
@@ -9985,7 +9988,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     f_u12_h = EXTRACT_LSB0_SINT (insn, 32, 17, 6);
     f_u12_l = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
 {
-  f_u12 = ((((f_u12_h) << (6))) | (f_u12_l));
+  f_u12 = ((((f_u12_h) * (64))) | (f_u12_l));
 }
 
   /* Record the fields for the semantic handler.  */

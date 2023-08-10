@@ -27,6 +27,8 @@ This file is part of the GNU simulators.
 
 #include "sim-main.h"
 #include "sim-assert.h"
+#include "cgen-mem.h"
+#include "cgen-ops.h"
 
 /* The instruction descriptor array.
    This is computed at runtime.  Space for it is not malloc'd to save a
@@ -240,7 +242,7 @@ or1k32bf_init_idesc_table (SIM_CPU *cpu)
     init_idesc (cpu, id, t);
 
   /* Now fill in the values for the chosen cpu.  */
-  for (t = or1k32bf_insn_sem, tend = t + sizeof (or1k32bf_insn_sem) / sizeof (*t);
+  for (t = or1k32bf_insn_sem, tend = t + ARRAY_SIZE (or1k32bf_insn_sem);
        t != tend; ++t)
     {
       init_idesc (cpu, & table[t->index], t);
@@ -1918,7 +1920,7 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
 #define FLD(f) abuf->fields.sfmt_l_j.f
     USI f_disp26;
 
-    f_disp26 = ((((EXTRACT_LSB0_SINT (insn, 32, 25, 26)) << (2))) + (pc));
+    f_disp26 = ((((EXTRACT_LSB0_SINT (insn, 32, 25, 26)) * (4))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_disp26) = f_disp26;
@@ -1937,7 +1939,7 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
     USI f_disp21;
 
     f_r1 = EXTRACT_LSB0_UINT (insn, 32, 25, 5);
-    f_disp21 = ((((EXTRACT_LSB0_SINT (insn, 32, 20, 21)) + (((SI) (pc) >> (13))))) << (13));
+    f_disp21 = ((((EXTRACT_LSB0_SINT (insn, 32, 20, 21)) + (((SI) (pc) >> (13))))) * (8192));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_r1) = f_r1;
@@ -1955,7 +1957,7 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
 #define FLD(f) abuf->fields.sfmt_l_j.f
     USI f_disp26;
 
-    f_disp26 = ((((EXTRACT_LSB0_SINT (insn, 32, 25, 26)) << (2))) + (pc));
+    f_disp26 = ((((EXTRACT_LSB0_SINT (insn, 32, 25, 26)) * (4))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_disp26) = f_disp26;
@@ -2006,7 +2008,7 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
 #define FLD(f) abuf->fields.sfmt_l_j.f
     USI f_disp26;
 
-    f_disp26 = ((((EXTRACT_LSB0_SINT (insn, 32, 25, 26)) << (2))) + (pc));
+    f_disp26 = ((((EXTRACT_LSB0_SINT (insn, 32, 25, 26)) * (4))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_disp26) = f_disp26;

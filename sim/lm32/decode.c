@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2023 Free Software Foundation, Inc.
+Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -17,7 +17,8 @@ This file is part of the GNU simulators.
    License for more details.
 
    You should have received a copy of the GNU General Public License along
-   with this program; if not, see <http://www.gnu.org/licenses/>.
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -26,6 +27,8 @@ This file is part of the GNU simulators.
 
 #include "sim-main.h"
 #include "sim-assert.h"
+#include "cgen-mem.h"
+#include "cgen-ops.h"
 
 /* The instruction descriptor array.
    This is computed at runtime.  Space for it is not malloc'd to save a
@@ -474,7 +477,7 @@ lm32bf_decode (SIM_CPU *current_cpu, IADDR pc,
 #define FLD(f) abuf->fields.sfmt_bi.f
     SI f_call;
 
-    f_call = ((pc) + (((SI) (((EXTRACT_LSB0_SINT (insn, 32, 25, 26)) << (6))) >> (4))));
+    f_call = ((pc) + (((((((((EXTRACT_LSB0_SINT (insn, 32, 25, 26)) & (67108863))) << (2))) ^ (134217728))) - (134217728))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_call) = f_call;
@@ -495,7 +498,7 @@ lm32bf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_r0 = EXTRACT_LSB0_UINT (insn, 32, 25, 5);
     f_r1 = EXTRACT_LSB0_UINT (insn, 32, 20, 5);
-    f_branch = ((pc) + (((SI) (((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (16))) >> (14))));
+    f_branch = ((pc) + (((((((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) & (65535))) << (2))) ^ (131072))) - (131072))));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_r0) = f_r0;
@@ -531,7 +534,7 @@ lm32bf_decode (SIM_CPU *current_cpu, IADDR pc,
 #define FLD(f) abuf->fields.sfmt_bi.f
     SI f_call;
 
-    f_call = ((pc) + (((SI) (((EXTRACT_LSB0_SINT (insn, 32, 25, 26)) << (6))) >> (4))));
+    f_call = ((pc) + (((((((((EXTRACT_LSB0_SINT (insn, 32, 25, 26)) & (67108863))) << (2))) ^ (134217728))) - (134217728))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_call) = f_call;

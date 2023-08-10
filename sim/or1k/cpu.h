@@ -4647,7 +4647,7 @@ struct scache {
 #define EXTRACT_IFMT_L_J_CODE \
   length = 4; \
   f_opcode = EXTRACT_LSB0_UINT (insn, 32, 31, 6); \
-  f_disp26 = ((((EXTRACT_LSB0_SINT (insn, 32, 25, 26)) << (2))) + (pc)); \
+  f_disp26 = ((((EXTRACT_LSB0_SINT (insn, 32, 25, 26)) * (4))) + (pc)); \
 
 #define EXTRACT_IFMT_L_ADRP_VARS \
   UINT f_opcode; \
@@ -4658,7 +4658,7 @@ struct scache {
   length = 4; \
   f_opcode = EXTRACT_LSB0_UINT (insn, 32, 31, 6); \
   f_r1 = EXTRACT_LSB0_UINT (insn, 32, 25, 5); \
-  f_disp21 = ((((EXTRACT_LSB0_SINT (insn, 32, 20, 21)) + (((SI) (pc) >> (13))))) << (13)); \
+  f_disp21 = ((((EXTRACT_LSB0_SINT (insn, 32, 20, 21)) + (((SI) (pc) >> (13))))) * (8192)); \
 
 #define EXTRACT_IFMT_L_JR_VARS \
   UINT f_opcode; \
