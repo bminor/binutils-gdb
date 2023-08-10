@@ -15475,6 +15475,9 @@ $as_echo "$sim_assert" >&6; }
 cgen_maint=no
 cgen=guile
 cgendir='$(srcdir)/../../cgen'
+if test -r ${srcdir}/../cgen/iformat.scm; then
+    cgendir='$(srcdir)/../cgen'
+fi
 # Check whether --enable-cgen-maint was given.
 if test "${enable_cgen_maint+set}" = set; then :
   enableval=$enable_cgen_maint; case "${enableval}" in

@@ -112,7 +112,10 @@ if test $bfd_cv_func_sigsetjmp = yes; then
 fi
 
 cgen_maint=no
-cgendir='$(srcdir)/../cgen'
+cgendir='$(srcdir)/../../cgen'
+if test -r ${srcdir}/../cgen/iformat.scm; then
+    cgendir='$(srcdir)/../cgen'
+fi
 
 AC_ARG_ENABLE(cgen-maint,
 [  --enable-cgen-maint[=dir]    build cgen generated files],

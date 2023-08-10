@@ -5030,17 +5030,17 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_cris_TRUE@cris/cgen-arch:
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)mach=crisv10,crisv32 FLAGS="with-scache with-profile=fn"; $(CGEN_GEN_ARCH)
-@SIM_ENABLE_ARCH_cris_TRUE@cris/arch.h cris/arch.c cris/cpuall.h: @CGEN_MAINT@ cris/cgen-arch
+@SIM_ENABLE_ARCH_cris_TRUE@$(srcdir)/cris/arch.h $(srcdir)/cris/arch.c $(srcdir)/cris/cpuall.h: @CGEN_MAINT@ cris/cgen-arch
 
 @SIM_ENABLE_ARCH_cris_TRUE@cris/cgen-cpu-decode-v10f:
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)cpu=crisv10f mach=crisv10 SUFFIX=v10 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $(srcdir)/cris/semv10-switch.c $(srcdir)/cris/semcrisv10f-switch.c
-@SIM_ENABLE_ARCH_cris_TRUE@cris/cpuv10.h cris/cpuv10.c cris/semcrisv10f-switch.c cris/modelv10.c cris/decodev10.c cris/decodev10.h: @CGEN_MAINT@ cris/cgen-cpu-decode-v10f
+@SIM_ENABLE_ARCH_cris_TRUE@$(srcdir)/cris/cpuv10.h $(srcdir)/cris/cpuv10.c $(srcdir)/cris/semcrisv10f-switch.c $(srcdir)/cris/modelv10.c $(srcdir)/cris/decodev10.c $(srcdir)/cris/decodev10.h: @CGEN_MAINT@ cris/cgen-cpu-decode-v10f
 
 @SIM_ENABLE_ARCH_cris_TRUE@cris/cgen-cpu-decode-v32f:
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)cpu=crisv32f mach=crisv32 SUFFIX=v32 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $(srcdir)/cris/semv32-switch.c $(srcdir)/cris/semcrisv32f-switch.c
-@SIM_ENABLE_ARCH_cris_TRUE@cris/cpuv32.h cris/cpuv32.c cris/semcrisv32f-switch.c cris/modelv32.c cris/decodev32.c cris/decodev32.h: @CGEN_MAINT@ cris/cgen-cpu-decode-v32f
+@SIM_ENABLE_ARCH_cris_TRUE@$(srcdir)/cris/cpuv32.h $(srcdir)/cris/cpuv32.c $(srcdir)/cris/semcrisv32f-switch.c %$(srcdir)/cris/modelv32.c $(srcdir)/cris/decodev32.c $(srcdir)/cris/decodev32.h: @CGEN_MAINT@ cris/cgen-cpu-decode-v32f
 @SIM_ENABLE_ARCH_d10v_TRUE@$(d10v_libsim_a_OBJECTS) $(d10v_libsim_a_LIBADD): d10v/hw-config.h
 
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v/modules.o: d10v/modules.c
@@ -5109,11 +5109,11 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_frv_TRUE@frv/cgen-arch:
 @SIM_ENABLE_ARCH_frv_TRUE@	$(AM_V_GEN)mach=all FLAGS="with-scache"; $(CGEN_GEN_ARCH)
-@SIM_ENABLE_ARCH_frv_TRUE@frv/arch.h frv/arch.c frv/cpuall.h: @CGEN_MAINT@ frv/cgen-arch
+@SIM_ENABLE_ARCH_frv_TRUE@$(srcdir)/frv/arch.h $(srcdir)/frv/arch.c $(srcdir)/frv/cpuall.h: @CGEN_MAINT@ frv/cgen-arch
 
 @SIM_ENABLE_ARCH_frv_TRUE@frv/cgen-cpu-decode:
 @SIM_ENABLE_ARCH_frv_TRUE@	$(AM_V_GEN)cpu=frvbf mach=frv,fr550,fr500,fr450,fr400,tomcat,simple FLAGS="with-scache with-profile=fn with-generic-write with-parallel-only" EXTRAFILES="$(CGEN_CPU_SEM)"; $(CGEN_GEN_CPU_DECODE)
-@SIM_ENABLE_ARCH_frv_TRUE@frv/cpu.h frv/sem.c frv/model.c frv/decode.c frv/decode.h: @CGEN_MAINT@ frv/cgen-cpu-decode
+@SIM_ENABLE_ARCH_frv_TRUE@$(srcdir)/frv/cpu.h $(srcdir)/frv/sem.c $(srcdir)/frv/model.c $(srcdir)/frv/decode.c $(srcdir)/frv/decode.h: @CGEN_MAINT@ frv/cgen-cpu-decode
 @SIM_ENABLE_ARCH_ft32_TRUE@$(ft32_libsim_a_OBJECTS) $(ft32_libsim_a_LIBADD): ft32/hw-config.h
 
 @SIM_ENABLE_ARCH_ft32_TRUE@ft32/modules.o: ft32/modules.c
@@ -5149,11 +5149,11 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/cgen-arch:
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_GEN)mach=iq2000 FLAGS="with-scache with-profile=fn"; $(CGEN_GEN_ARCH)
-@SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/arch.h iq2000/arch.c iq2000/cpuall.h: @CGEN_MAINT@ iq2000/cgen-arch
+@SIM_ENABLE_ARCH_iq2000_TRUE@$(srcdir)/iq2000/arch.h $(srcdir)/iq2000/arch.c $(srcdir)/iq2000/cpuall.h: @CGEN_MAINT@ iq2000/cgen-arch
 
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/cgen-cpu-decode:
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_GEN)cpu=iq2000bf mach=iq2000 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
-@SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/cpu.h iq2000/sem.c iq2000/sem-switch.c iq2000/model.c iq2000/decode.c iq2000/decode.h: @CGEN_MAINT@ iq2000/cgen-cpu-decode
+@SIM_ENABLE_ARCH_iq2000_TRUE@$(srcdir)/iq2000/cpu.h $(srcdir)/iq2000/sem.c $(srcdir)/iq2000/sem-switch.c $(srcdir)/iq2000/model.c $(srcdir)/iq2000/decode.c $(srcdir)/iq2000/decode.h: @CGEN_MAINT@ iq2000/cgen-cpu-decode
 @SIM_ENABLE_ARCH_lm32_TRUE@$(lm32_libsim_a_OBJECTS) $(lm32_libsim_a_LIBADD): lm32/hw-config.h
 
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/modules.o: lm32/modules.c
@@ -5177,11 +5177,11 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/cgen-arch:
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_GEN)mach=all FLAGS="with-scache with-profile=fn"; $(CGEN_GEN_ARCH)
-@SIM_ENABLE_ARCH_lm32_TRUE@lm32/arch.h lm32/arch.c lm32/cpuall.h: @CGEN_MAINT@ lm32/cgen-arch
+@SIM_ENABLE_ARCH_lm32_TRUE@$(srcdir)/lm32/arch.h $(srcdir)/lm32/arch.c $(srcdir)/lm32/cpuall.h: @CGEN_MAINT@ lm32/cgen-arch
 
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/cgen-cpu-decode:
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_GEN)cpu=lm32bf mach=lm32 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
-@SIM_ENABLE_ARCH_lm32_TRUE@lm32/cpu.h lm32/sem.c lm32/sem-switch.c lm32/model.c lm32/decode.c lm32/decode.h: @CGEN_MAINT@ lm32/cgen-cpu-decode
+@SIM_ENABLE_ARCH_lm32_TRUE@$(srcdir)/lm32/cpu.h $(srcdir)/lm32/sem.c $(srcdir)/lm32/sem-switch.c $(srcdir)/lm32/model.c $(srcdir)/lm32/decode.c $(srcdir)/lm32/decode.h: @CGEN_MAINT@ lm32/cgen-cpu-decode
 @SIM_ENABLE_ARCH_m32c_TRUE@$(m32c_libsim_a_OBJECTS) $(m32c_libsim_a_LIBADD): m32c/hw-config.h
 
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c/modules.o: m32c/modules.c
@@ -5249,19 +5249,19 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/cgen-arch:
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)mach=all FLAGS="with-scache with-profile=fn"; $(CGEN_GEN_ARCH)
-@SIM_ENABLE_ARCH_m32r_TRUE@m32r/arch.h m32r/arch.c m32r/cpuall.h: @CGEN_MAINT@ m32r/cgen-arch
+@SIM_ENABLE_ARCH_m32r_TRUE@$(srcdir)/m32r/arch.h $(srcdir)/m32r/arch.c $(srcdir)/m32r/cpuall.h: @CGEN_MAINT@ m32r/cgen-arch
 
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/cgen-cpu-decode:
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)cpu=m32rbf mach=m32r FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
-@SIM_ENABLE_ARCH_m32r_TRUE@m32r/cpu.h m32r/sem.c m32r/sem-switch.c m32r/model.c m32r/decode.c m32r/decode.h: @CGEN_MAINT@ m32r/cgen-cpu-decode
+@SIM_ENABLE_ARCH_m32r_TRUE@$(srcdir)/m32r/cpu.h $(srcdir)/m32r/sem.c $(srcdir)/m32r/sem-switch.c $(srcdir)/m32r/model.c $(srcdir)/m32r/decode.c $(srcdir)/m32r/decode.h: @CGEN_MAINT@ m32r/cgen-cpu-decode
 
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/cgen-cpu-decode-x:
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)cpu=m32rxf mach=m32rx SUFFIX=x FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
-@SIM_ENABLE_ARCH_m32r_TRUE@m32r/cpux.h m32r/semx-switch.c m32r/modelx.c m32r/decodex.c m32r/decodex.h: @CGEN_MAINT@ m32r/cgen-cpu-decode-x
+@SIM_ENABLE_ARCH_m32r_TRUE@$(srcdir)/m32r/cpux.h $(srcdir)/m32r/semx-switch.c $(srcdir)/m32r/modelx.c $(srcdir)/m32r/decodex.c $(srcdir)/m32r/decodex.h: @CGEN_MAINT@ m32r/cgen-cpu-decode-x
 
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/cgen-cpu-decode-2:
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)cpu=m32r2f mach=m32r2 SUFFIX=2 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
-@SIM_ENABLE_ARCH_m32r_TRUE@m32r/cpu2.h m32r/sem2-switch.c m32r/model2.c m32r/decode2.c m32r/decode2.h: @CGEN_MAINT@ m32r/cgen-cpu-decode-2
+@SIM_ENABLE_ARCH_m32r_TRUE@$(srcdir)/m32r/cpu2.h $(srcdir)/m32r/sem2-switch.c $(srcdir)/m32r/model2.c $(srcdir)/m32r/decode2.c $(srcdir)/m32r/decode2.h: @CGEN_MAINT@ m32r/cgen-cpu-decode-2
 @SIM_ENABLE_ARCH_m68hc11_TRUE@$(m68hc11_libsim_a_OBJECTS) $(m68hc11_libsim_a_LIBADD): m68hc11/hw-config.h
 
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/modules.o: m68hc11/modules.c
@@ -5585,11 +5585,11 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/cgen-arch:
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_GEN)mach=or32,or32nd FLAGS="with-scache"; $(CGEN_GEN_ARCH)
-@SIM_ENABLE_ARCH_or1k_TRUE@or1k/arch.h or1k/arch.c or1k/cpuall.h: @CGEN_MAINT@ or1k/cgen-arch
+@SIM_ENABLE_ARCH_or1k_TRUE@$(srcdir)/or1k/arch.h $(srcdir)/or1k/arch.c $(srcdir)/or1k/cpuall.h: @CGEN_MAINT@ or1k/cgen-arch
 
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/cgen-cpu-decode:
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_GEN)cpu=or1k32bf mach=or32,or32nd FLAGS="with-scache" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
-@SIM_ENABLE_ARCH_or1k_TRUE@or1k/cpu.h or1k/cpu.c or1k/model.c or1k/sem.c or1k/sem-switch.c or1k/decode.c or1k/decode.h: @CGEN_MAINT@ or1k/cgen-cpu-decode
+@SIM_ENABLE_ARCH_or1k_TRUE@$(srcdir)/or1k/cpu.h $(srcdir)/or1k/cpu.c $(srcdir)/or1k/model.c $(srcdir)/or1k/sem.c $(srcdir)/or1k/sem-switch.c $(srcdir)/or1k/decode.c $(srcdir)/or1k/decode.h: @CGEN_MAINT@ or1k/cgen-cpu-decode
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/libsim.a: common/libcommon.a
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 

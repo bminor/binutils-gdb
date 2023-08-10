@@ -115,14 +115,14 @@ MOSTLYCLEANFILES += $(%C%_BUILD_OUTPUTS)
 
 %D%/cgen-arch:
 	$(AM_V_GEN)mach=crisv10,crisv32 FLAGS="with-scache with-profile=fn"; $(CGEN_GEN_ARCH)
-%D%/arch.h %D%/arch.c %D%/cpuall.h: @CGEN_MAINT@ %D%/cgen-arch
+$(srcdir)/%D%/arch.h $(srcdir)/%D%/arch.c $(srcdir)/%D%/cpuall.h: @CGEN_MAINT@ %D%/cgen-arch
 
 %D%/cgen-cpu-decode-v10f:
 	$(AM_V_GEN)cpu=crisv10f mach=crisv10 SUFFIX=v10 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
 	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $(srcdir)/%D%/semv10-switch.c $(srcdir)/%D%/semcrisv10f-switch.c
-%D%/cpuv10.h %D%/cpuv10.c %D%/semcrisv10f-switch.c %D%/modelv10.c %D%/decodev10.c %D%/decodev10.h: @CGEN_MAINT@ %D%/cgen-cpu-decode-v10f
+$(srcdir)/%D%/cpuv10.h $(srcdir)/%D%/cpuv10.c $(srcdir)/%D%/semcrisv10f-switch.c $(srcdir)/%D%/modelv10.c $(srcdir)/%D%/decodev10.c $(srcdir)/%D%/decodev10.h: @CGEN_MAINT@ %D%/cgen-cpu-decode-v10f
 
 %D%/cgen-cpu-decode-v32f:
 	$(AM_V_GEN)cpu=crisv32f mach=crisv32 SUFFIX=v32 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
 	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $(srcdir)/%D%/semv32-switch.c $(srcdir)/%D%/semcrisv32f-switch.c
-%D%/cpuv32.h %D%/cpuv32.c %D%/semcrisv32f-switch.c %D%/modelv32.c %D%/decodev32.c %D%/decodev32.h: @CGEN_MAINT@ %D%/cgen-cpu-decode-v32f
+$(srcdir)/%D%/cpuv32.h $(srcdir)/%D%/cpuv32.c $(srcdir)/%D%/semcrisv32f-switch.c %$(srcdir)/%D%/modelv32.c $(srcdir)/%D%/decodev32.c $(srcdir)/%D%/decodev32.h: @CGEN_MAINT@ %D%/cgen-cpu-decode-v32f

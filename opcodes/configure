@@ -12251,7 +12251,10 @@ $as_echo "#define HAVE_SIGSETJMP 1" >>confdefs.h
 fi
 
 cgen_maint=no
-cgendir='$(srcdir)/../cgen'
+cgendir='$(srcdir)/../../cgen'
+if test -r ${srcdir}/../cgen/iformat.scm; then
+    cgendir='$(srcdir)/../cgen'
+fi
 
 # Check whether --enable-cgen-maint was given.
 if test "${enable_cgen_maint+set}" = set; then :

@@ -143,16 +143,16 @@ MOSTLYCLEANFILES += $(%C%_BUILD_OUTPUTS)
 
 %D%/cgen-arch:
 	$(AM_V_GEN)mach=all FLAGS="with-scache with-profile=fn"; $(CGEN_GEN_ARCH)
-%D%/arch.h %D%/arch.c %D%/cpuall.h: @CGEN_MAINT@ %D%/cgen-arch
+$(srcdir)/%D%/arch.h $(srcdir)/%D%/arch.c $(srcdir)/%D%/cpuall.h: @CGEN_MAINT@ %D%/cgen-arch
 
 %D%/cgen-cpu-decode:
 	$(AM_V_GEN)cpu=m32rbf mach=m32r FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
-%D%/cpu.h %D%/sem.c %D%/sem-switch.c %D%/model.c %D%/decode.c %D%/decode.h: @CGEN_MAINT@ %D%/cgen-cpu-decode
+$(srcdir)/%D%/cpu.h $(srcdir)/%D%/sem.c $(srcdir)/%D%/sem-switch.c $(srcdir)/%D%/model.c $(srcdir)/%D%/decode.c $(srcdir)/%D%/decode.h: @CGEN_MAINT@ %D%/cgen-cpu-decode
 
 %D%/cgen-cpu-decode-x:
 	$(AM_V_GEN)cpu=m32rxf mach=m32rx SUFFIX=x FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
-%D%/cpux.h %D%/semx-switch.c %D%/modelx.c %D%/decodex.c %D%/decodex.h: @CGEN_MAINT@ %D%/cgen-cpu-decode-x
+$(srcdir)/%D%/cpux.h $(srcdir)/%D%/semx-switch.c $(srcdir)/%D%/modelx.c $(srcdir)/%D%/decodex.c $(srcdir)/%D%/decodex.h: @CGEN_MAINT@ %D%/cgen-cpu-decode-x
 
 %D%/cgen-cpu-decode-2:
 	$(AM_V_GEN)cpu=m32r2f mach=m32r2 SUFFIX=2 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
-%D%/cpu2.h %D%/sem2-switch.c %D%/model2.c %D%/decode2.c %D%/decode2.h: @CGEN_MAINT@ %D%/cgen-cpu-decode-2
+$(srcdir)/%D%/cpu2.h $(srcdir)/%D%/sem2-switch.c $(srcdir)/%D%/model2.c $(srcdir)/%D%/decode2.c $(srcdir)/%D%/decode2.h: @CGEN_MAINT@ %D%/cgen-cpu-decode-2
