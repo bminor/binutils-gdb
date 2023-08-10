@@ -10,6 +10,8 @@
 
 * Add support for Intel AVX-VNNI-INT16 instructions.
 
+* Add support for Cortex-A520 for AArch64.
+
 Changes in 2.41:
 
 * Add support for Intel FRED instructions.

@@ -10227,6 +10227,10 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
                   | AARCH64_FEATURE_MEMTAG
                   | AARCH64_FEATURE_SVE2_BITPERM),
    "Cortex-A510"},
+  {"cortex-a520", AARCH64_FEATURE (AARCH64_ARCH_V9_2,
+                  AARCH64_FEATURE_MEMTAG
+                  | AARCH64_FEATURE_SVE2_BITPERM),
+   "Cortex-A520"},
   {"cortex-a710", AARCH64_FEATURE (AARCH64_ARCH_V9,
                   AARCH64_FEATURE_BFLOAT16
                   | AARCH64_FEATURE_I8MM

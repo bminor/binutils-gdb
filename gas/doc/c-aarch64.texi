@@ -72,6 +72,7 @@ on the target processor.  The following processor names are recognized:
 @code{cortex-a78ae},
 @code{cortex-a78c},
 @code{cortex-a510},
+@code{cortex-a520},
 @code{cortex-a710},
 @code{ares},
 @code{exynos-m1},
