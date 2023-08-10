@@ -118,7 +118,7 @@ get_compile_context (const char *fe_libcc, const char *fe_context,
     error (_("The loaded version of GCC does not support the required version "
 	     "of the API."));
 
-  return std::unique_ptr<compile_instance> (new INSTTYPE (context));
+  return gdb::make_unique<INSTTYPE> (context);
 }
 
 /* A C-language implementation of get_compile_context.  */

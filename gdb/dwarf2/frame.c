@@ -2126,7 +2126,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
   struct gdbarch *gdbarch = objfile->arch ();
 
   /* Build a minimal decoding of the DWARF2 compilation unit.  */
-  std::unique_ptr<comp_unit> unit (new comp_unit (objfile));
+  auto unit = gdb::make_unique<comp_unit> (objfile);
 
   if (objfile->separate_debug_objfile_backlink == NULL)
     {

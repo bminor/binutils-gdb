@@ -428,7 +428,7 @@ test_addrmap ()
 
   /* Create mutable addrmap.  */
   auto_obstack temp_obstack;
-  std::unique_ptr<struct addrmap_mutable> map (new addrmap_mutable);
+  auto map = gdb::make_unique<struct addrmap_mutable> ();
   SELF_CHECK (map != nullptr);
 
   /* Check initial state.  */

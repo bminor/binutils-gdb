@@ -170,7 +170,5 @@ py_varobj_get_iterator (struct varobj *var, PyObject *printer,
       error (_("Could not get children iterator"));
     }
 
-  return std::unique_ptr<varobj_iter> (new py_varobj_iter (var,
-							   std::move (iter),
-							   opts));
+  return gdb::make_unique<py_varobj_iter> (var, std::move (iter), opts);
 }

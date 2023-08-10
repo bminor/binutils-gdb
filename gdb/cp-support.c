@@ -674,7 +674,7 @@ mangled_name_to_comp (const char *mangled_name, int options,
 					      options, memory);
       if (ret)
 	{
-	  std::unique_ptr<demangle_parse_info> info (new demangle_parse_info);
+	  auto info = gdb::make_unique<demangle_parse_info> ();
 	  info->tree = ret;
 	  *demangled_p = NULL;
 	  return info;

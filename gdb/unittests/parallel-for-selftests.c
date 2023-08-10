@@ -160,7 +160,7 @@ TEST (int n_threads)
 	      {
 		if (start == end)
 		  any_empty_tasks = true;
-		return std::unique_ptr<int> (new int (end - start));
+		return gdb::make_unique<int> (end - start);
 	      });
   SELF_CHECK (!any_empty_tasks);
   SELF_CHECK (std::all_of (intresults.begin (),
@@ -178,7 +178,7 @@ TEST (int n_threads)
 	      {
 		if (start == end)
 		  any_empty_tasks = true;
-		return std::unique_ptr<int> (new int (end - start));
+		return gdb::make_unique<int> (end - start);
 	      },
 	    task_size_one);
   SELF_CHECK (!any_empty_tasks);
