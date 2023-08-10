@@ -565,6 +565,8 @@ cooked_index::get_main () const
 void
 cooked_index::dump (gdbarch *arch) const
 {
+  auto_obstack temp_storage;
+
   /* Ensure the index is done building.  */
   this->wait ();
 
@@ -579,6 +581,7 @@ cooked_index::dump (gdbarch *arch) const
       gdb_printf ("    [%zu] ((cooked_index_entry *) %p)\n", i++, entry);
       gdb_printf ("    name:       %s\n", entry->name);
       gdb_printf ("    canonical:  %s\n", entry->canonical);
+      gdb_printf ("    qualified:  %s\n", entry->full_name (&temp_storage, false));
       gdb_printf ("    DWARF tag:  %s\n", dwarf_tag_name (entry->tag));
       gdb_printf ("    flags:      %s\n", to_string (entry->flags).c_str ());
       gdb_printf ("    DIE offset: 0x%" PRIx64 "\n",
