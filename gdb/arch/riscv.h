@@ -47,9 +47,10 @@ struct riscv_gdbarch_features
   int flen = 0;
 
   /* The size of the v-registers in bytes.  The value 0 indicates a target
-     with no vector registers.  The minimum value for a standard compliant
-     target should be 16, but GDB doesn't currently mind, and will accept
-     any vector size.  */
+     with no vector registers.  The minimum value for a 'V'-extension compliant
+     target should be 16 and 4 for an embedded subset compliant target (with
+     'Zve32*' extension), but GDB doesn't currently mind, and will accept any
+     vector size.  */
   int vlen = 0;
 
   /* When true this target is RV32E.  */
