@@ -1672,6 +1672,51 @@ operand_type_equal (const union i386_operand_type *x,
     }
 }
 
+static INLINE bool
+is_cpu (const insn_template *t, enum i386_cpu cpu)
+{
+  switch (cpu)
+    {
+    case Cpu287:      return t->cpu.bitfield.cpu287;
+    case Cpu387:      return t->cpu.bitfield.cpu387;
+    case Cpu3dnow:    return t->cpu.bitfield.cpu3dnow;
+    case Cpu3dnowA:   return t->cpu.bitfield.cpu3dnowa;
+    case CpuAVX:      return t->cpu.bitfield.cpuavx;
+    case CpuHLE:      return t->cpu.bitfield.cpuhle;
+    case CpuAVX512F:  return t->cpu.bitfield.cpuavx512f;
+    case CpuAVX512VL: return t->cpu.bitfield.cpuavx512vl;
+    case Cpu64:       return t->cpu.bitfield.cpu64;
+    case CpuNo64:     return t->cpu.bitfield.cpuno64;
+    default:
+      gas_assert (cpu < CpuAttrEnums);
+    }
+  return t->cpu.bitfield.isa == cpu + 1u;
+}
+
+static i386_cpu_flags cpu_flags_from_attr (i386_cpu_attr a)
+{
+  const unsigned int bps = sizeof (a.array[0]) * CHAR_BIT;
+  i386_cpu_flags f = { .array[0] = 0 };
+
+  switch (ARRAY_SIZE(a.array))
+    {
+    case 1:
+      f.array[CpuAttrEnums / bps]
+        |= (a.array[0] >> CpuIsaBits) << (CpuAttrEnums % bps);
+      if (CpuAttrEnums % bps > CpuIsaBits)
+	f.array[CpuAttrEnums / bps + 1]
+	  = (a.array[0] >> CpuIsaBits) >> (bps - CpuAttrEnums % bps);
+      break;
+    default:
+      abort ();
+    }
+
+  if (a.bitfield.isa)
+    f.array[(a.bitfield.isa - 1) / bps] |= 1u << ((a.bitfield.isa - 1) % bps);
+
+  return f;
+}
+
 static INLINE int
 cpu_flags_all_zero (const union i386_cpu_flags *x)
 {
@@ -1731,10 +1776,10 @@ cpu_flags_equal (const union i386_cpu_flags *x,
 }
 
 static INLINE int
-cpu_flags_check_cpu64 (i386_cpu_flags f)
+cpu_flags_check_cpu64 (i386_cpu_attr a)
 {
-  return !((flag_code == CODE_64BIT && f.bitfield.cpuno64)
-	   || (flag_code != CODE_64BIT && f.bitfield.cpu64));
+  return !((flag_code == CODE_64BIT && a.bitfield.cpuno64)
+	   || (flag_code != CODE_64BIT && a.bitfield.cpu64));
 }
 
 static INLINE i386_cpu_flags
@@ -1828,8 +1873,8 @@ static const i386_cpu_flags avx512 = CPU_ANY_AVX512F_FLAGS;
 static int
 cpu_flags_match (const insn_template *t)
 {
-  i386_cpu_flags x = t->cpu_flags;
-  int match = cpu_flags_check_cpu64 (x) ? CPU_FLAGS_64BIT_MATCH : 0;
+  i386_cpu_flags x = cpu_flags_from_attr (t->cpu);
+  int match = cpu_flags_check_cpu64 (t->cpu) ? CPU_FLAGS_64BIT_MATCH : 0;
 
   x.bitfield.cpu64 = 0;
   x.bitfield.cpuno64 = 0;
@@ -2171,7 +2216,7 @@ operand_size_match (const insn_template *t)
 
       /* For FMA4 and XOP insns VEX.W controls just the first two
 	 register operands.  */
-      if (t->cpu_flags.bitfield.cpufma4 || t->cpu_flags.bitfield.cpuxop)
+      if (is_cpu (t, CpuFMA4) || is_cpu (t, CpuXOP))
 	given = j < 2 ? 1 - j : j;
 
       if (t->operand_types[j].bitfield.class == Reg
@@ -4416,7 +4461,7 @@ optimize_encoding (void)
 		   && is_evex_encoding (&i.tm)
 		   && (i.vec_encoding != vex_encoding_evex
 		       || cpu_arch_isa_flags.bitfield.cpuavx512vl
-		       || i.tm.cpu_flags.bitfield.cpuavx512vl
+		       || is_cpu (&i.tm, CpuAVX512VL)
 		       || (i.tm.operand_types[2].bitfield.zmmword
 			   && i.types[2].bitfield.ymmword))))
 	   && i.tm.opcode_space == SPACE_0F
@@ -5222,7 +5267,7 @@ md_assemble (char *line)
 	 bypass the logic below when easily possible.  */
       && t->opcode_space >= SPACE_0F
       && t->opcode_space <= SPACE_0F3A
-      && !i.tm.cpu_flags.bitfield.cpusse4a
+      && !is_cpu (&i.tm, CpuSSE4a)
       && !is_any_vex_encoding (t))
     {
       bool simd = false;
@@ -5309,7 +5354,7 @@ md_assemble (char *line)
   if (i.notrack_prefix && i.tm.opcode_modifier.prefixok != PrefixNoTrack)
     as_bad (_("expecting indirect branch instruction after `notrack'"));
 
-  if (i.tm.cpu_flags.bitfield.cpumpx)
+  if (is_cpu (&i.tm, CpuMPX))
     {
       if (flag_code == CODE_64BIT && i.prefix[ADDR_PREFIX])
 	as_bad (_("32-bit address isn't allowed in 64-bit MPX instructions."));
@@ -5361,7 +5406,7 @@ md_assemble (char *line)
     return;
 
   /* Check if IP-relative addressing requirements can be satisfied.  */
-  if (i.tm.cpu_flags.bitfield.cpuprefetchi
+  if (is_cpu (&i.tm, CpuPREFETCHI)
       && !(i.base_reg && i.base_reg->reg_num == RegIP))
     as_warn (_("'%s' only supports RIP-relative address"), insn_name (&i.tm));
 
@@ -5624,7 +5669,7 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	  && current_templates
 	  && current_templates->start->opcode_modifier.isprefix)
 	{
-	  if (!cpu_flags_check_cpu64 (current_templates->start->cpu_flags))
+	  if (!cpu_flags_check_cpu64 (current_templates->start->cpu))
 	    {
 	      as_bad ((flag_code != CODE_64BIT
 		       ? _("`%s' is only supported in 64-bit mode")
@@ -5702,13 +5747,13 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 		case PREFIX_EXIST:
 		  return NULL;
 		case PREFIX_DS:
-		  if (current_templates->start->cpu_flags.bitfield.cpuibt)
+		  if (is_cpu (current_templates->start, CpuIBT))
 		    i.notrack_prefix = insn_name (current_templates->start);
 		  break;
 		case PREFIX_REP:
-		  if (current_templates->start->cpu_flags.bitfield.cpuhle)
+		  if (is_cpu (current_templates->start, CpuHLE))
 		    i.hle_prefix = insn_name (current_templates->start);
-		  else if (current_templates->start->cpu_flags.bitfield.cpumpx)
+		  else if (is_cpu (current_templates->start, CpuMPX))
 		    i.bnd_prefix = insn_name (current_templates->start);
 		  else
 		    i.rep_prefix = insn_name (current_templates->start);
@@ -6379,9 +6424,9 @@ check_VecOperands (const insn_template *t)
      operand size is YMMword or XMMword.  Since this function runs after
      template matching, there's no need to check for YMMword/XMMword in
      the template.  */
-  cpu = cpu_flags_and (t->cpu_flags, avx512);
+  cpu = cpu_flags_and (cpu_flags_from_attr (t->cpu), avx512);
   if (!cpu_flags_all_zero (&cpu)
-      && !t->cpu_flags.bitfield.cpuavx512vl
+      && !is_cpu (t, CpuAVX512VL)
       && !cpu_arch_flags.bitfield.cpuavx512vl)
     {
       for (op = 0; op < t->operands; ++op)
@@ -6398,8 +6443,7 @@ check_VecOperands (const insn_template *t)
 
   /* Somewhat similarly, templates specifying both AVX and AVX2 are
      requiring AVX2 support if the actual operand size is YMMword.  */
-  if (t->cpu_flags.bitfield.cpuavx
-      && t->cpu_flags.bitfield.cpuavx2
+  if (is_cpu (t, CpuAVX) && is_cpu (t, CpuAVX2)
       && !cpu_arch_flags.bitfield.cpuavx2)
     {
       for (op = 0; op < t->operands; ++op)
@@ -6675,7 +6719,7 @@ check_VecOperands (const insn_template *t)
     }
 
   /* Check the special Imm4 cases; must be the first operand.  */
-  if (t->cpu_flags.bitfield.cpuxop && t->operands == 5)
+  if (is_cpu (t, CpuXOP) && t->operands == 5)
     {
       if (i.op[0].imms->X_op != O_constant
 	  || !fits_in_imm4 (i.op[0].imms->X_add_number))
@@ -7143,8 +7187,8 @@ match_template (char mnem_suffix)
 	      if (!(size_match & MATCH_REVERSE))
 		continue;
 	      /* Try reversing direction of operands.  */
-	      j = t->cpu_flags.bitfield.cpufma4
-		  || t->cpu_flags.bitfield.cpuxop ? 1 : i.operands - 1;
+	      j = is_cpu (t, CpuFMA4)
+		  || is_cpu (t, CpuXOP) ? 1 : i.operands - 1;
 	      overlap0 = operand_type_and (i.types[0], operand_types[j]);
 	      overlap1 = operand_type_and (i.types[j], operand_types[0]);
 	      overlap2 = operand_type_and (i.types[1], operand_types[1]);
@@ -7178,8 +7222,7 @@ match_template (char mnem_suffix)
 		      && (intel_syntax || intel_mnemonic))
 		    found_reverse_match |= Opcode_FloatR;
 		}
-	      else if (t->cpu_flags.bitfield.cpufma4
-		       || t->cpu_flags.bitfield.cpuxop)
+	      else if (is_cpu (t, CpuFMA4) || is_cpu (t, CpuXOP))
 		{
 		  found_reverse_match = Opcode_VexW;
 		  goto check_operands_345;
@@ -7399,7 +7442,7 @@ process_suffix (void)
 		 && (i.tm.base_opcode | 8) == 0xbe)
 		|| (i.tm.opcode_space == SPACE_BASE
 		    && i.tm.base_opcode == 0x63
-		    && i.tm.cpu_flags.bitfield.cpu64);
+		    && is_cpu (&i.tm, Cpu64));
 
       /* movsx/movzx want only their source operand considered here, for the
 	 ambiguity checking below.  The suffix will be replaced afterwards
@@ -9401,7 +9444,7 @@ maybe_fused_with_jcc_p (enum mf_cmp_kind* mf_cmp_p)
     }
 
   /* inc, dec without inc/dec m.   */
-  if ((i.tm.cpu_flags.bitfield.cpuno64
+  if ((is_cpu (&i.tm, CpuNo64)
        && (i.tm.base_opcode | 0xf) == 0x4f)
       || ((i.tm.base_opcode | 1) == 0xff
 	  && i.tm.extension_opcode <= 0x1))
@@ -9449,7 +9492,7 @@ add_branch_prefix_frag_p (void)
   if (!align_branch_power
       || !align_branch_prefix_size
       || now_seg == absolute_section
-      || i.tm.cpu_flags.bitfield.cpupadlock
+      || is_cpu (&i.tm, CpuPadLock)
       || !cpu_arch_flags.bitfield.cpui386)
     return 0;
 
@@ -9577,14 +9620,14 @@ output_insn (void)
   if (IS_ELF && x86_used_note && now_seg != absolute_section)
     {
       if ((i.xstate & xstate_tmm) == xstate_tmm
-	  || i.tm.cpu_flags.bitfield.cpuamx_tile)
+	  || is_cpu (&i.tm, CpuAMX_TILE))
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_TMM;
 
-      if (i.tm.cpu_flags.bitfield.cpu8087
-	  || i.tm.cpu_flags.bitfield.cpu287
-	  || i.tm.cpu_flags.bitfield.cpu387
-	  || i.tm.cpu_flags.bitfield.cpu687
-	  || i.tm.cpu_flags.bitfield.cpufisttp)
+      if (is_cpu (&i.tm, Cpu8087)
+	  || is_cpu (&i.tm, Cpu287)
+	  || is_cpu (&i.tm, Cpu387)
+	  || is_cpu (&i.tm, Cpu687)
+	  || is_cpu (&i.tm, CpuFISTTP))
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_X87;
 
       if ((i.xstate & xstate_mmx)
@@ -9603,16 +9646,16 @@ output_insn (void)
 	}
 
       /* vzeroall / vzeroupper */
-      if (i.tm.base_opcode == 0x77 && i.tm.cpu_flags.bitfield.cpuavx)
+      if (i.tm.base_opcode == 0x77 && is_cpu (&i.tm, CpuAVX))
 	i.xstate |= xstate_ymm;
 
       if ((i.xstate & xstate_xmm)
 	  /* ldmxcsr / stmxcsr / vldmxcsr / vstmxcsr */
 	  || (i.tm.base_opcode == 0xae
-	      && (i.tm.cpu_flags.bitfield.cpusse
-		  || i.tm.cpu_flags.bitfield.cpuavx))
-	  || i.tm.cpu_flags.bitfield.cpuwidekl
-	  || i.tm.cpu_flags.bitfield.cpukl)
+	      && (is_cpu (&i.tm, CpuSSE)
+		  || is_cpu (&i.tm, CpuAVX)))
+	  || is_cpu (&i.tm, CpuWideKL)
+	  || is_cpu (&i.tm, CpuKL))
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XMM;
 
       if ((i.xstate & xstate_ymm) == xstate_ymm)
@@ -9621,65 +9664,65 @@ output_insn (void)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_ZMM;
       if (i.mask.reg || (i.xstate & xstate_mask) == xstate_mask)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MASK;
-      if (i.tm.cpu_flags.bitfield.cpufxsr)
+      if (is_cpu (&i.tm, CpuFXSR))
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_FXSR;
-      if (i.tm.cpu_flags.bitfield.cpuxsave)
+      if (is_cpu (&i.tm, CpuXsave))
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVE;
-      if (i.tm.cpu_flags.bitfield.cpuxsaveopt)
+      if (is_cpu (&i.tm, CpuXsaveopt))
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVEOPT;
-      if (i.tm.cpu_flags.bitfield.cpuxsavec)
+      if (is_cpu (&i.tm, CpuXSAVEC))
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVEC;
 
       if (x86_feature_2_used
-	  || i.tm.cpu_flags.bitfield.cpucmov
-	  || i.tm.cpu_flags.bitfield.cpusyscall
+	  || is_cpu (&i.tm, CpuCMOV)
+	  || is_cpu (&i.tm, CpuSYSCALL)
 	  || i.tm.mnem_off == MN_cmpxchg8b)
 	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_BASELINE;
-      if (i.tm.cpu_flags.bitfield.cpusse3
-	  || i.tm.cpu_flags.bitfield.cpussse3
-	  || i.tm.cpu_flags.bitfield.cpusse4_1
-	  || i.tm.cpu_flags.bitfield.cpusse4_2
-	  || i.tm.cpu_flags.bitfield.cpucx16
-	  || i.tm.cpu_flags.bitfield.cpupopcnt
+      if (is_cpu (&i.tm, CpuSSE3)
+	  || is_cpu (&i.tm, CpuSSSE3)
+	  || is_cpu (&i.tm, CpuSSE4_1)
+	  || is_cpu (&i.tm, CpuSSE4_2)
+	  || is_cpu (&i.tm, CpuCX16)
+	  || is_cpu (&i.tm, CpuPOPCNT)
 	  /* LAHF-SAHF insns in 64-bit mode.  */
 	  || (flag_code == CODE_64BIT
 	      && (i.tm.base_opcode | 1) == 0x9f
 	      && i.tm.opcode_space == SPACE_BASE))
 	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V2;
-      if (i.tm.cpu_flags.bitfield.cpuavx
-	  || i.tm.cpu_flags.bitfield.cpuavx2
+      if (is_cpu (&i.tm, CpuAVX)
+	  || is_cpu (&i.tm, CpuAVX2)
 	  /* Any VEX encoded insns execpt for AVX512F, AVX512BW, AVX512DQ,
 	     XOP, FMA4, LPW, TBM, and AMX.  */
 	  || (i.tm.opcode_modifier.vex
-	      && !i.tm.cpu_flags.bitfield.cpuavx512f
-	      && !i.tm.cpu_flags.bitfield.cpuavx512bw
-	      && !i.tm.cpu_flags.bitfield.cpuavx512dq
-	      && !i.tm.cpu_flags.bitfield.cpuxop
-	      && !i.tm.cpu_flags.bitfield.cpufma4
-	      && !i.tm.cpu_flags.bitfield.cpulwp
-	      && !i.tm.cpu_flags.bitfield.cputbm
+	      && !is_cpu (&i.tm, CpuAVX512F)
+	      && !is_cpu (&i.tm, CpuAVX512BW)
+	      && !is_cpu (&i.tm, CpuAVX512DQ)
+	      && !is_cpu (&i.tm, CpuXOP)
+	      && !is_cpu (&i.tm, CpuFMA4)
+	      && !is_cpu (&i.tm, CpuLWP)
+	      && !is_cpu (&i.tm, CpuTBM)
 	      && !(x86_feature_2_used & GNU_PROPERTY_X86_FEATURE_2_TMM))
-	  || i.tm.cpu_flags.bitfield.cpuf16c
-	  || i.tm.cpu_flags.bitfield.cpufma
-	  || i.tm.cpu_flags.bitfield.cpulzcnt
-	  || i.tm.cpu_flags.bitfield.cpumovbe
-	  || i.tm.cpu_flags.bitfield.cpuxsaves
+	  || is_cpu (&i.tm, CpuF16C)
+	  || is_cpu (&i.tm, CpuFMA)
+	  || is_cpu (&i.tm, CpuLZCNT)
+	  || is_cpu (&i.tm, CpuMovbe)
+	  || is_cpu (&i.tm, CpuXSAVES)
 	  || (x86_feature_2_used
 	      & (GNU_PROPERTY_X86_FEATURE_2_XSAVE
 		 | GNU_PROPERTY_X86_FEATURE_2_XSAVEOPT
 		 | GNU_PROPERTY_X86_FEATURE_2_XSAVEC)) != 0)
 	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V3;
-      if (i.tm.cpu_flags.bitfield.cpuavx512f
-	  || i.tm.cpu_flags.bitfield.cpuavx512bw
-	  || i.tm.cpu_flags.bitfield.cpuavx512dq
-	  || i.tm.cpu_flags.bitfield.cpuavx512vl
+      if (is_cpu (&i.tm, CpuAVX512F)
+	  || is_cpu (&i.tm, CpuAVX512BW)
+	  || is_cpu (&i.tm, CpuAVX512DQ)
+	  || is_cpu (&i.tm, CpuAVX512VL)
 	  /* Any EVEX encoded insns except for AVX512ER, AVX512PF,
 	     AVX512-4FMAPS, and AVX512-4VNNIW.  */
 	  || (i.tm.opcode_modifier.evex
-	      && !i.tm.cpu_flags.bitfield.cpuavx512er
-	      && !i.tm.cpu_flags.bitfield.cpuavx512pf
-	      && !i.tm.cpu_flags.bitfield.cpuavx512_4fmaps
-	      && !i.tm.cpu_flags.bitfield.cpuavx512_4vnniw))
+	      && !is_cpu (&i.tm, CpuAVX512ER)
+	      && !is_cpu (&i.tm, CpuAVX512PF)
+	      && !is_cpu (&i.tm, CpuAVX512_4FMAPS)
+	      && !is_cpu (&i.tm, CpuAVX512_4VNNIW)))
 	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V4;
     }
 #endif
@@ -9824,7 +9867,7 @@ output_insn (void)
 	      add_prefix (0xf2);
 	      break;
 	    case PREFIX_0XF3:
-	      if (!i.tm.cpu_flags.bitfield.cpupadlock
+	      if (!is_cpu (&i.tm, CpuPadLock)
 		  || (i.prefix[REP_PREFIX] != 0xf3))
 		add_prefix (0xf3);
 	      break;
@@ -12127,7 +12170,7 @@ i386_addressing_mode (void)
   if (i.prefix[ADDR_PREFIX])
     addr_mode = flag_code == CODE_32BIT ? CODE_16BIT : CODE_32BIT;
   else if (flag_code == CODE_16BIT
-	   && current_templates->start->cpu_flags.bitfield.cpumpx
+	   && is_cpu (current_templates->start, CpuMPX)
 	   /* Avoid replacing the "16-bit addressing not allowed" diagnostic
 	      from md_assemble() by "is not a valid base/index expression"
 	      when there is a base and/or index.  */

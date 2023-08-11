@@ -26,7 +26,7 @@
 
 /* Position of cpu flags bitfiled.  */
 
-enum
+enum i386_cpu
 {
   /* i186 or better required */
   Cpu186 = 0,
@@ -52,10 +52,6 @@ enum
   CpuSYSCALL,
   /* Floating point support required */
   Cpu8087,
-  /* i287 support required */
-  Cpu287,
-  /* i387 support required */
-  Cpu387,
   /* i686 and floating point support required */
   Cpu687,
   /* SSE3 and floating point support required */
@@ -66,10 +62,6 @@ enum
   CpuSSE,
   /* SSE2 support required */
   CpuSSE2,
-  /* 3dnow! support required */
-  Cpu3dnow,
-  /* 3dnow! Extensions support required */
-  Cpu3dnowA,
   /* SSE3 support required */
   CpuSSE3,
   /* VIA PadLock required */
@@ -94,12 +86,8 @@ enum
   CpuSSE4_1,
   /* SSE4.2 support required */
   CpuSSE4_2,
-  /* AVX support required */
-  CpuAVX,
   /* AVX2 support required */
   CpuAVX2,
-  /* Intel AVX-512 Foundation Instructions support required */
-  CpuAVX512F,
   /* Intel AVX-512 Conflict Detection Instructions support required */
   CpuAVX512CD,
   /* Intel AVX-512 Exponential and Reciprocal Instructions support
@@ -107,8 +95,6 @@ enum
   CpuAVX512ER,
   /* Intel AVX-512 Prefetch Instructions support required */
   CpuAVX512PF,
-  /* Intel AVX-512 VL Instructions support required.  */
-  CpuAVX512VL,
   /* Intel AVX-512 DQ Instructions support required.  */
   CpuAVX512DQ,
   /* Intel AVX-512 BW Instructions support required.  */
@@ -153,8 +139,6 @@ enum
   CpuF16C,
   /* Intel BMI2 support required */
   CpuBMI2,
-  /* HLE support required */
-  CpuHLE,
   /* RTM support required */
   CpuRTM,
   /* INVPCID Instructions required */
@@ -313,12 +297,33 @@ enum
   /* RMPQUERY instruction required */
   CpuRMPQUERY,
 
-  /* NOTE: These last three items need to remain last and in this order. */
+  /* NOTE: These items, which can be combined with other ISA flags above, need
+     to remain second to last and in sync with CPU_FLAGS_COMMON. */
 
+  /* i287 support required */
+  Cpu287,
+  CpuAttrEnums = Cpu287,
+  /* i387 support required */
+  Cpu387,
+  /* 3dnow! support required */
+  Cpu3dnow,
+  /* 3dnow! Extensions support required */
+  Cpu3dnowA,
+  /* AVX support required */
+  CpuAVX,
+  /* HLE support required */
+  CpuHLE,
+  /* Intel AVX-512 Foundation Instructions support required */
+  CpuAVX512F,
+  /* Intel AVX-512 VL Instructions support required.  */
+  CpuAVX512VL,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
   CpuNo64,
+
+  /* NOTE: This item needs to remain last. */
+
   /* The last bitfield in i386_cpu_flags.  */
   CpuMax = CpuNo64
 };
@@ -328,9 +333,42 @@ enum
 #define CpuNumOfBits \
   (CpuNumOfUints * sizeof (unsigned int) * CHAR_BIT)
 
-/* If you get a compiler error for zero width of the unused field,
-   comment it out.  */
+#define CpuIsaBits 8
+#define CpuAttrNumOfUints \
+  ((CpuIsaBits + CpuMax - CpuAttrEnums) / sizeof (unsigned int) / CHAR_BIT + 1)
+#define CpuAttrNumOfBits \
+  (CpuAttrNumOfUints * sizeof (unsigned int) * CHAR_BIT)
+
+/* If you get a compiler error for zero width of an unused field,
+   comment the respective one out.  */
 #define CpuUnused	(CpuMax + 1)
+#define CpuAttrUnused	(CpuIsaBits + CpuMax + 1 - CpuAttrEnums)
+
+#define CPU_FLAGS_COMMON \
+      unsigned int cpu287:1, \
+		   cpu387:1, \
+		   cpu3dnow:1, \
+		   cpu3dnowa:1, \
+		   cpuavx:1, \
+		   cpuhle:1, \
+		   cpuavx512f:1, \
+		   cpuavx512vl:1, \
+      /* NOTE: These two fields need to remain last and in this order. */ \
+		   cpu64:1, \
+		   cpuno64:1
+
+typedef union i386_cpu_attr
+{
+  struct
+    {
+      unsigned int isa:CpuIsaBits;
+      CPU_FLAGS_COMMON;
+#ifdef CpuAttrUnused
+      unsigned int unused:(CpuAttrNumOfBits - CpuAttrUnused);
+#endif
+    } bitfield;
+  unsigned int array[CpuAttrNumOfUints];
+} i386_cpu_attr;
 
 /* We can check if an instruction is available with array instead
    of bitfield. */
@@ -350,15 +388,11 @@ typedef union i386_cpu_flags
       unsigned int cpunop:1;
       unsigned int cpusyscall:1;
       unsigned int cpu8087:1;
-      unsigned int cpu287:1;
-      unsigned int cpu387:1;
       unsigned int cpu687:1;
       unsigned int cpufisttp:1;
       unsigned int cpummx:1;
       unsigned int cpusse:1;
       unsigned int cpusse2:1;
-      unsigned int cpua3dnow:1;
-      unsigned int cpua3dnowa:1;
       unsigned int cpusse3:1;
       unsigned int cpupadlock:1;
       unsigned int cpusvme:1;
@@ -371,13 +405,10 @@ typedef union i386_cpu_flags
       unsigned int cpumonitor:1;
       unsigned int cpusse4_1:1;
       unsigned int cpusse4_2:1;
-      unsigned int cpuavx:1;
       unsigned int cpuavx2:1;
-      unsigned int cpuavx512f:1;
       unsigned int cpuavx512cd:1;
       unsigned int cpuavx512er:1;
       unsigned int cpuavx512pf:1;
-      unsigned int cpuavx512vl:1;
       unsigned int cpuavx512dq:1;
       unsigned int cpuavx512bw:1;
       unsigned int cpuiamcu:1;
@@ -400,7 +431,6 @@ typedef union i386_cpu_flags
       unsigned int cpurdrnd:1;
       unsigned int cpuf16c:1;
       unsigned int cpubmi2:1;
-      unsigned int cpuhle:1;
       unsigned int cpurtm:1;
       unsigned int cpuinvpcid:1;
       unsigned int cpuvmfunc:1;
@@ -480,9 +510,7 @@ typedef union i386_cpu_flags
       unsigned int cputlbsync:1;
       unsigned int cpusnp:1;
       unsigned int cpurmpquery:1;
-      /* NOTE: These last three fields need to remain last and in this order. */
-      unsigned int cpu64:1;
-      unsigned int cpuno64:1;
+      CPU_FLAGS_COMMON;
 #ifdef CpuUnused
       unsigned int unused:(CpuNumOfBits - CpuUnused);
 #endif
@@ -972,8 +1000,8 @@ typedef struct insn_template
      the same instruction */
   i386_opcode_modifier opcode_modifier;
 
-  /* cpu feature flags */
-  i386_cpu_flags cpu_flags;
+  /* cpu feature attributes */
+  i386_cpu_attr cpu;
 
   /* operand_types[i] describes the type of operand i.  This is made
      by OR'ing together all of the possible type masks.  (e.g.

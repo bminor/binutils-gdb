@@ -774,21 +774,41 @@ add_isa_dependencies (bitfield *flags, const char *f, int value,
 
 static void
 output_cpu_flags (FILE *table, bitfield *flags, unsigned int size,
-		  int macro, const char *comma, const char *indent)
+		  int macro, const char *comma, const char *indent, int lineno)
 {
-  unsigned int i;
+  unsigned int i = 0, j = 0;
 
   memset (&active_cpu_flags, 0, sizeof(active_cpu_flags));
 
   fprintf (table, "%s{ { ", indent);
 
-  for (i = 0; i < size - 1; i++)
+  if (!macro)
     {
-      if (((i + 1) % 20) != 0)
+      for (j = ~0u; i < CpuAttrEnums; i++)
+	{
+	  if (!flags[i].value)
+	    continue;
+
+	  if (j < ~0u)
+	    fail ("%s: %d: invalid combination of CPU identifiers\n",
+		  filename, lineno);
+	  j = i;
+	  active_cpu_flags.array[i / 32] |= 1U << (i % 32);
+	}
+
+	/* Write 0 to indicate "no associated flag".  */
+	fprintf (table, "%u, ", j + 1);
+
+	j = 1;
+    }
+
+  for (; i < size - 1; i++, j++)
+    {
+      if (((j + 1) % 20) != 0)
 	fprintf (table, "%d, ", flags[i].value);
       else
 	fprintf (table, "%d,", flags[i].value);
-      if (((i + 1) % 20) == 0)
+      if (((j + 1) % 20) == 0)
 	{
 	  /* We need \\ for macro.  */
 	  if (macro)
@@ -899,7 +919,7 @@ process_i386_cpu_flag (FILE *table, char *flag,
     }
 
   output_cpu_flags (table, flags, ARRAY_SIZE (flags), name != NULL,
-		    comma, indent);
+		    comma, indent, lineno);
 }
 
 static void
@@ -2071,6 +2091,16 @@ main (int argc, char **argv)
   c = CpuNumOfBits - CpuMax - 1;
   if (c)
     fail ("%d unused bits in i386_cpu_flags.\n", c);
+#endif
+
+  /* If this triggers, CpuIsaBits needs to be increased.  */
+  static_assert (CpuAttrEnums <= (1u << CpuIsaBits));
+
+  /* Check the unused bitfield in i386_cpu_attr.  */
+#ifndef CpuAttrUnused
+  c = CpuAttrNumOfBits - (CpuIsaBits + CpuMax + 1 - CpuAttrEnums);
+  if (c)
+    fail ("%d unused bits in i386_cpu_attr.\n", c);
 #endif
 
   static_assert (ARRAY_SIZE (opcode_modifiers) == Opcode_Modifier_Num);
