@@ -123,6 +123,7 @@ extern void tc_loongarch_parse_to_dw2regnum (expressionS *);
 
 extern void loongarch_pre_output_hook (void);
 #define md_pre_output_hook loongarch_pre_output_hook ()
+#define GAS_SORT_RELOCS 1
 
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 
