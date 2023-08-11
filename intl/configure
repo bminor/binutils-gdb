@@ -622,6 +622,8 @@ ac_unique_file="gettext.c"
 ac_header_list=
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+enable_host_pie
+enable_host_shared
 BISON3_NO
 BISON3_YES
 PICFLAG
@@ -727,6 +729,8 @@ with_included_gettext
 with_libintl_prefix
 with_libintl_type
 enable_maintainer_mode
+enable_host_shared
+enable_host_pie
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1351,6 +1355,8 @@ Optional Features:
   --disable-nls           do not use Native Language Support
   --disable-rpath         do not hardcode runtime library paths
   --enable-maintainer-mode enable rules only needed by maintainers
+  --enable-host-shared    build host code as shared libraries
+  --enable-host-pie       build host code as PIE
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -6857,6 +6863,9 @@ case "${host}" in
 	# sets the default TLS model and affects inlining.
 	PICFLAG=-fPIC
 	;;
+    loongarch*-*-*)
+	PICFLAG=-fpic
+	;;
     mips-sgi-irix6*)
 	# PIC is the default.
 	;;
@@ -6914,6 +6923,31 @@ $as_echo "$ac_prog_version" >&6; }
   fi
 fi
 
+
+
+# Enable --enable-host-shared.
+# Check whether --enable-host-shared was given.
+if test "${enable_host_shared+set}" = set; then :
+  enableval=$enable_host_shared;
+fi
+
+
+
+# Enable --enable-host-pie.
+# Check whether --enable-host-pie was given.
+if test "${enable_host_pie+set}" = set; then :
+  enableval=$enable_host_pie;
+fi
+
+
+
+if test x$enable_host_shared = xyes; then
+  PICFLAG=-fPIC
+elif test x$enable_host_pie = xyes; then
+  PICFLAG=-fPIE
+else
+  PICFLAG=
+fi
 
 
 ac_config_files="$ac_config_files Makefile config.intl"
