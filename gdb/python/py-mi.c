@@ -284,8 +284,8 @@ gdbpy_execute_mi_command (PyObject *self, PyObject *args, PyObject *kw)
   try
     {
       scoped_restore save_uiout = make_scoped_restore (&current_uiout, &uiout);
-      std::unique_ptr<struct mi_parse> parser
-	= mi_parse::make (std::move (mi_command), std::move (arg_strings));
+      auto parser = gdb::make_unique<mi_parse> (std::move (mi_command),
+						std::move (arg_strings));
       mi_execute_command (parser.get ());
     }
   catch (const gdb_exception &except)

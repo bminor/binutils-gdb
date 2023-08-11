@@ -41,24 +41,18 @@ enum mi_command_type
 
 struct mi_parse
   {
-    /* Attempts to parse CMD returning a ``struct mi_parse''.  If CMD is
+    /* Attempt to parse CMD creating a ``struct mi_parse''.  If CMD is
        invalid, an exception is thrown.  For an MI_COMMAND COMMAND, ARGS
        and OP are initialized.  Un-initialized fields are zero.  *TOKEN is
-       set to the token, even if an exception is thrown.  It can be
-       assigned to the TOKEN field of the resultant mi_parse object,
-       to be freed by mi_parse_free.  */
-
-    static std::unique_ptr<struct mi_parse> make (const char *cmd,
-						  std::string *token);
+       set to the token, even if an exception is thrown.  */
+    mi_parse (const char *cmd, std::string *token);
 
     /* Create an mi_parse object given the command name and a vector
        of arguments.  Unlike with the other constructor, here the
        arguments are treated "as is" -- no escape processing is
        done.  */
-
-    static std::unique_ptr<struct mi_parse> make
-	 (gdb::unique_xmalloc_ptr<char> command,
-	  std::vector<gdb::unique_xmalloc_ptr<char>> args);
+    mi_parse (gdb::unique_xmalloc_ptr<char> command,
+	      std::vector<gdb::unique_xmalloc_ptr<char>> args);
 
     ~mi_parse ();
 
@@ -90,8 +84,6 @@ struct mi_parse
     enum language language = language_unknown;
 
   private:
-
-    mi_parse () = default;
 
     /* Helper methods for parsing arguments.  Each takes the argument
        to be parsed.  It will either set a member of this object, or
