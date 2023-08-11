@@ -1325,4 +1325,17 @@
 #define	AT_SUN_BRAND_AUX3 2022
 #define	AT_SUN_CAP_HW2	2023	/* Extension of AT_SUN_CAP_HW1.  */
 
+/* CHERI auxv types.  */
+#define AT_CHERI_EXEC_RW_CAP	60
+#define AT_CHERI_EXEC_RX_CAP	61
+#define AT_CHERI_INTERP_RW_CAP	62
+#define AT_CHERI_INTERP_RX_CAP	63
+#define AT_CHERI_STACK_CAP	64
+#define AT_CHERI_SEAL_CAP	65
+#define AT_CHERI_CID_CAP	66
+#define AT_ARGC			80
+#define AT_ARGV			81
+#define AT_ENVC			82
+#define AT_ENVP			83
+
 #endif /* _ELF_COMMON_H */

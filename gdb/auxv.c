@@ -540,6 +540,28 @@ default_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
 	   AUXV_FORMAT_HEX);
       TAG (AT_SUN_CAP_HW2, _("Machine-dependent CPU capability hints 2"),
 	   AUXV_FORMAT_HEX);
+
+      /* CHERI-specific auxv entries.  */
+      TAG (AT_CHERI_EXEC_RW_CAP,
+	   _("The executable's RW region capability, if it exists"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_CHERI_EXEC_RX_CAP, _("The executable's RX capability"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_CHERI_INTERP_RW_CAP,
+	   _("The interpreter's RW region capability, if it exists"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_CHERI_INTERP_RX_CAP, _("The interpreter's RX region capability"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_CHERI_STACK_CAP, _("The stack capability"), AUXV_FORMAT_HEX);
+      TAG (AT_CHERI_SEAL_CAP, _("The root sealing capability"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_CHERI_CID_CAP, _("The root CID capability"), AUXV_FORMAT_HEX);
+      TAG (AT_ARGC, _("The number of initial arguments"), AUXV_FORMAT_DEC);
+      TAG (AT_ARGV, _("Capability to the initial arguments"), AUXV_FORMAT_HEX);
+      TAG (AT_ENVC, _("The number of initial environment variable entries"),
+	   AUXV_FORMAT_DEC);
+      TAG (AT_ENVP, _("Capability to the initial environment variables"),
+	   AUXV_FORMAT_HEX);
     }
 
   fprint_auxv_entry (file, name, description, format, type, val);
