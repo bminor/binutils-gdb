@@ -15684,15 +15684,6 @@ x86_64_section_letter (int letter, const char **ptr_msg)
   return -1;
 }
 
-bfd_vma
-x86_64_section_word (char *str, size_t len)
-{
-  if (len == 5 && flag_code == CODE_64BIT && startswith (str, "large"))
-    return SHF_X86_64_LARGE;
-
-  return -1;
-}
-
 static void
 handle_large_common (int small ATTRIBUTE_UNUSED)
 {

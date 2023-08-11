@@ -991,14 +991,6 @@ obj_elf_section_word (char *str, size_t len, int *type)
   if (len == 3 && startswith (str, "tls"))
     return SHF_TLS;
 
-#ifdef md_elf_section_word
-  {
-    bfd_vma md_attr = md_elf_section_word (str, len);
-    if (md_attr > 0)
-      return md_attr;
-  }
-#endif
-
   ret = obj_elf_section_type (str, len, false);
   if (ret != 0)
     *type = ret;
