@@ -615,8 +615,7 @@ pdc_read_data (pthdb_user_t user_current_pid, void *buf,
   /* This is needed to eliminate the dependency of current thread
      which is null so that thread reads the correct target memory.  */
   {
-    scoped_restore_current_inferior_for_memory save_inferior
-      (inf, ptid_t (user_current_pid));
+    scoped_restore_current_inferior_for_memory save_inferior (inf);
     status = target_read_memory (addr, (gdb_byte *) buf, len);
   }
   ret = status == 0 ? PDC_SUCCESS : PDC_FAILURE;
@@ -643,8 +642,7 @@ pdc_write_data (pthdb_user_t user_current_pid, void *buf,
 		user_current_pid, (long) buf, hex_string (addr), len);
 
   {
-    scoped_restore_current_inferior_for_memory save_inferior
-      (inf, ptid_t (user_current_pid));
+    scoped_restore_current_inferior_for_memory save_inferior (inf);
     status = target_write_memory (addr, (gdb_byte *) buf, len);
   }
 
