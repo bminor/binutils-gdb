@@ -73,6 +73,8 @@ extern void tc_loongarch_parse_to_dw2regnum (expressionS *);
    Here is the type 0, will fill andi insn later.  */
 #define NOP_OPCODE (0x00)
 
+#define GAS_SORT_RELOCS 1
+
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 
 #define HANDLE_ALIGN(fragp) loongarch_handle_align (fragp)
