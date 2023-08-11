@@ -17,7 +17,6 @@
 
 require {!target_info exists gdb,nofileio}
 
-
 standard_testfile
 
 if {[is_remote host]} {
@@ -75,6 +74,10 @@ gdb_test "continue" ".*" ""
 
 catch "system \"chmod -f -w [standard_output_file nowrt.fileio.test]\""
 
+# If the user is root, we will always have write permission.
+if { [root_user] } {
+    setup_xfail *-*-*
+}
 gdb_test continue \
 "Continuing\\..*open 5:.*EACCES$stop_msg" \
 "Open for write but no write permission returns EACCES"
@@ -239,6 +242,10 @@ gdb_test continue \
 # in that situation.
 if [ishost *cygwin*] {
     setup_xfail "*-*-*"
+}
+# If the user is root, we will always have write permission.
+if { [root_user] } {
+    setup_xfail *-*-*
 }
 gdb_test continue \
 "Continuing\\..*unlink 2:.*EACCES$stop_msg" \

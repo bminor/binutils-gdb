@@ -10230,5 +10230,25 @@ gdb_caching_proc have_system_header { file } {
     return [gdb_can_simple_compile have_system_header_$name $src object]
 }
 
+# Return 1 if the test is being run as root, 0 otherwise.
+
+gdb_caching_proc root_user {} {
+    # ID outputs to stdout, we have to use exec to capture it here.
+    set res [remote_exec target id]
+    set ret_val [lindex $res 0]
+    set output [lindex $res 1]
+
+    # If ret_val is not 0, we couldn't run `id` on the target for some
+    # reason.  Return that we are not root, so problems are easier to
+    # spot.
+    if { $ret_val != 0 } {
+        return 0
+    }
+
+    regexp -all ".*uid=(\[0-9\]+).*" $output dummy uid
+
+    return [expr $uid == 0]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
