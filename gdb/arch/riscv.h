@@ -90,7 +90,7 @@ struct riscv_gdbarch_features
 		       | (has_fcsr_reg ? 1 : 0) << 13
 		       | (xlen & 0x1f) << 5
 		       | (flen & 0x1f) << 0
-		       | (vlen & 0xfff) << 14);
+		       | (vlen & 0x3fff) << 14);
     return val;
   }
 };
