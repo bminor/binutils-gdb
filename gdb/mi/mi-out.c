@@ -336,17 +336,17 @@ mi_ui_out::~mi_ui_out ()
 
 /* See mi/mi-out.h.  */
 
-mi_ui_out *
+std::unique_ptr<mi_ui_out>
 mi_out_new (const char *mi_version)
 {
   if (streq (mi_version, INTERP_MI4) ||  streq (mi_version, INTERP_MI))
-    return new mi_ui_out (4);
+    return gdb::make_unique<mi_ui_out> (4);
 
   if (streq (mi_version, INTERP_MI3))
-    return new mi_ui_out (3);
+    return gdb::make_unique<mi_ui_out> (3);
 
   if (streq (mi_version, INTERP_MI2))
-    return new mi_ui_out (2);
+    return gdb::make_unique<mi_ui_out> (2);
 
   return nullptr;
 }

@@ -95,7 +95,7 @@ mi_interp::init (bool top_level)
   mi->log = mi->err;
   mi->targ = new mi_console_file (mi->raw_stdout, "@", '"');
   mi->event_channel = new mi_console_file (mi->raw_stdout, "=", 0);
-  mi->mi_uiout = mi_out_new (name ());
+  mi->mi_uiout = mi_out_new (name ()).release ();
   gdb_assert (mi->mi_uiout != nullptr);
   mi->cli_uiout = new cli_ui_out (mi->out);
 

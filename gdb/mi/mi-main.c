@@ -2206,7 +2206,7 @@ mi_load_progress (const char *section_name,
      which means uiout may not be correct.  Fix it for the duration
      of this function.  */
 
-  std::unique_ptr<ui_out> uiout (mi_out_new (current_interpreter ()->name ()));
+  auto uiout = mi_out_new (current_interpreter ()->name ());
   if (uiout == nullptr)
     return;
 

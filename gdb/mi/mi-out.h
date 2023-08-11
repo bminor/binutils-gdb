@@ -143,7 +143,7 @@ private:
    to one of the INTERP_MI* constants (see interps.h).
 
    Return nullptr if an invalid version is provided.  */
-mi_ui_out *mi_out_new (const char *mi_version);
+std::unique_ptr<mi_ui_out> mi_out_new (const char *mi_version);
 
 void mi_out_put (ui_out *uiout, struct ui_file *stream);
 void mi_out_rewind (ui_out *uiout);
