@@ -5788,14 +5788,17 @@ linux_process_target::get_auxv ()
 	}
       else if (n < block_size)
 	{
-	  /* We're done reading data.  */
+	  /* We're done reading data.  Shrink the vector to fit the right size
+	     of the auxv data.  */
 	  auxv.resize (auxv.size () - (block_size - n));
 	  done = true;
 	}
       else
 	{
+	  /* Enlarge the vector so we can fit another chunk of auxv data.  */
+	  size_t old_size = auxv.size ();
 	  auxv.resize (auxv.size () + block_size);
-	  ptr = auxv.data () + auxv.size ();
+	  ptr = auxv.data () + old_size;
 	}
     }
 
