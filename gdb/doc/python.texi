@@ -1404,9 +1404,6 @@ Return the fields of this type.  The behavior depends on the type code:
 For structure and union types, this method returns the fields.
 
 @item
-Range types have two fields, the minimum and maximum values.
-
-@item
 Enum types have one field per enum constant.
 
 @item
