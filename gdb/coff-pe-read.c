@@ -402,6 +402,7 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
       if (fail
 	  || bfd_seek (dll, secptr1, SEEK_SET) != 0
 	  || bfd_read (sname, sizeof (sname), dll) != sizeof (sname))
+	return maybe_print_debug_msg ();
 
       if ((strcmp (sname, ".edata") == 0)
 	  || (vaddr <= export_opthdrrva && export_opthdrrva < vaddr + vsize))
