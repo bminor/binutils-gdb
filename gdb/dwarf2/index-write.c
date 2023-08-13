@@ -294,7 +294,7 @@ symtab_index_entry::minimize ()
   auto from = std::unique (cu_indices.begin (), cu_indices.end ());
   cu_indices.erase (from, cu_indices.end ());
 
-  /* We don't want to enter a variable or type more than once, so
+  /* We don't want to enter a type more than once, so
      remove any such duplicates from the list as well.  When doing
      this, we want to keep the entry from the first CU -- but this is
      implicit due to the sort.  This choice is done because it's
@@ -304,8 +304,7 @@ symtab_index_entry::minimize ()
 			 [&] (offset_type val)
     {
       gdb_index_symbol_kind kind = GDB_INDEX_SYMBOL_KIND_VALUE (val);
-      if (kind != GDB_INDEX_SYMBOL_KIND_TYPE
-	  && kind != GDB_INDEX_SYMBOL_KIND_VARIABLE)
+      if (kind != GDB_INDEX_SYMBOL_KIND_TYPE)
 	return false;
 
       val &= ~GDB_INDEX_CU_MASK;
