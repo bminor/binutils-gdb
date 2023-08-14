@@ -81,6 +81,8 @@ public:
 
   void attach (const char *, int) override;
 
+  void mourn_inferior () override;
+
   void resume (ptid_t, int, enum gdb_signal) override;
 
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
@@ -91,6 +93,8 @@ public:
   bool supports_stopped_by_sw_breakpoint () override;
   bool stopped_by_sw_breakpoint () override;
 #endif
+
+  void follow_exec (inferior *, ptid_t, const char *) override;
 
 #ifdef TDP_RFPPWAIT
   void follow_fork (inferior *, ptid_t, target_waitkind, bool, bool) override;
@@ -134,6 +138,10 @@ protected:
 
 private:
   ptid_t wait_1 (ptid_t, struct target_waitstatus *, target_wait_flags);
+
+  void resume_one_process (ptid_t, int, enum gdb_signal);
+
+  void stop_process (inferior *);
 
   /* Helper routines for use in fetch_registers and store_registers in
      subclasses.  These routines fetch and store a single set of
@@ -246,22 +254,15 @@ private:
 
   bool have_pending_event (ptid_t filter);
 
-  /* Helper method called by the target wait method.  Check if there
-     is a pending event matching M_RESUME_PTID.  If there is a
-     matching event, the event is removed from the pending list and
-     returned.  */
+  /* Check if there is a pending event for a resumed process matching
+     FILTER.  If there is a matching event, the event is removed from
+     the pending list and returned.  */
 
-  gdb::optional<pending_event> take_pending_event ();
+  gdb::optional<pending_event> take_pending_event (ptid_t filter);
 
   /* List of pending events.  */
 
   std::list<pending_event> m_pending_events;
-
-  /* Filter for ptid's allowed to report events from wait.  Normally
-     set in resume, but also reset to minus_one_ptid in
-     create_inferior and attach.  */
-
-  ptid_t m_resume_ptid;
 };
 
 /* Fetch the signal information for PTID and store it in *SIGINFO.
