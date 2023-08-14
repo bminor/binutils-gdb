@@ -83,6 +83,8 @@ public:
 
   void detach (inferior *, int) override;
 
+  void kill () override;
+
   void mourn_inferior () override;
 
   void resume (ptid_t, int, enum gdb_signal) override;

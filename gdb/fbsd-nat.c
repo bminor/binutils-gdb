@@ -1140,6 +1140,31 @@ fbsd_is_child_pending (pid_t pid)
   return null_ptid;
 }
 
+/* Wait for a child of a fork to report its stop.  Returns the PTID of
+   the new child process.  */
+
+static ptid_t
+fbsd_wait_for_fork_child (pid_t pid)
+{
+  ptid_t ptid = fbsd_is_child_pending (pid);
+  if (ptid != null_ptid)
+    return ptid;
+
+  int status;
+  pid_t wpid = waitpid (pid, &status, 0);
+  if (wpid == -1)
+    perror_with_name (("waitpid"));
+
+  gdb_assert (wpid == pid);
+
+  struct ptrace_lwpinfo pl;
+  if (ptrace (PT_LWPINFO, wpid, (caddr_t) &pl, sizeof pl) == -1)
+    perror_with_name (("ptrace (PT_LWPINFO)"));
+
+  gdb_assert (pl.pl_flags & PL_FLAG_CHILD);
+  return ptid_t (wpid, pl.pl_lwpid);
+}
+
 #ifndef PTRACE_VFORK
 /* Record a pending vfork done event.  */
 
@@ -1447,23 +1472,7 @@ fbsd_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 #endif
 
 	      /* Make sure the other end of the fork is stopped too.  */
-	      child_ptid = fbsd_is_child_pending (child);
-	      if (child_ptid == null_ptid)
-		{
-		  int status;
-
-		  pid = waitpid (child, &status, 0);
-		  if (pid == -1)
-		    perror_with_name (("waitpid"));
-
-		  gdb_assert (pid == child);
-
-		  if (ptrace (PT_LWPINFO, child, (caddr_t) &pl, sizeof pl) == -1)
-		    perror_with_name (("ptrace (PT_LWPINFO)"));
-
-		  gdb_assert (pl.pl_flags & PL_FLAG_CHILD);
-		  child_ptid = ptid_t (child, pl.pl_lwpid);
-		}
+	      child_ptid = fbsd_wait_for_fork_child (child);
 
 	      /* Enable additional events on the child process.  */
 	      fbsd_enable_proc_events (child_ptid.pid ());
@@ -2103,6 +2112,56 @@ fbsd_nat_target::detach (inferior *inf, int from_tty)
 	perror_with_name (("ptrace (PT_DETACH)"));
 
   detach_success (inf);
+}
+
+/* Implement the "kill" target method.  */
+
+void
+fbsd_nat_target::kill ()
+{
+  pid_t pid = inferior_ptid.pid ();
+  if (pid == 0)
+    return;
+
+  inferior *inf = current_inferior ();
+  stop_process (inf);
+
+  if (detach_fork_children (inf)) {
+    /* No need to kill now.  */
+    target_mourn_inferior (inferior_ptid);
+
+    return;
+  }
+
+#ifdef TDP_RFPPWAIT
+  /* If there are any threads that have forked a new child but not yet
+     reported it because other threads reported events first, detach
+     from the children before killing the parent.  */
+  auto lambda = [] (const struct ptrace_lwpinfo &pl)
+  {
+    if (pl.pl_flags & PL_FLAG_FORKED)
+      {
+	pid_t child = pl.pl_child_pid;
+
+	/* If the child hasn't reported its stop yet, wait for it to
+	   stop.  */
+	fbsd_wait_for_fork_child (child);
+
+	/* Detach from the child.  */
+	(void) ptrace (PT_DETACH, child, (caddr_t) 1, 0);
+      }
+    return false;
+  };
+  iterate_other_ptrace_events (pid, gdb::make_function_view (lambda));
+#endif
+
+  if (ptrace (PT_KILL, pid, NULL, 0) == -1)
+	perror_with_name (("ptrace (PT_KILL)"));
+
+  int status;
+  waitpid (pid, &status, 0);
+
+  target_mourn_inferior (inferior_ptid);
 }
 
 void
