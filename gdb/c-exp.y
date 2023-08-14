@@ -3000,7 +3000,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 }
 
 /* An object of this type is pushed on a FIFO by the "outer" lexer.  */
-struct token_and_value
+struct c_token_and_value
 {
   int token;
   YYSTYPE value;
@@ -3008,7 +3008,7 @@ struct token_and_value
 
 /* A FIFO of tokens that have been read but not yet returned to the
    parser.  */
-static std::vector<token_and_value> token_fifo;
+static std::vector<c_token_and_value> token_fifo;
 
 /* Non-zero if the lexer should return tokens from the FIFO.  */
 static int popping;
@@ -3230,7 +3230,7 @@ classify_inner_name (struct parser_state *par_state,
 static int
 yylex (void)
 {
-  token_and_value current;
+  c_token_and_value current;
   int first_was_coloncolon, last_was_coloncolon;
   struct type *context_type = NULL;
   int last_to_examine, next_to_examine, checkpoint;
@@ -3306,7 +3306,7 @@ yylex (void)
 
   while (next_to_examine <= last_to_examine)
     {
-      token_and_value next;
+      c_token_and_value next;
 
       next = token_fifo[next_to_examine];
       ++next_to_examine;
