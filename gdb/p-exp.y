@@ -994,14 +994,14 @@ pop_current_type (void)
     }
 }
 
-struct token
+struct p_token
 {
   const char *oper;
   int token;
   enum exp_opcode opcode;
 };
 
-static const struct token tokentab3[] =
+static const struct p_token tokentab3[] =
   {
     {"shr", RSH, OP_NULL},
     {"shl", LSH, OP_NULL},
@@ -1014,7 +1014,7 @@ static const struct token tokentab3[] =
     {"xor", XOR, OP_NULL}
   };
 
-static const struct token tokentab2[] =
+static const struct p_token tokentab2[] =
   {
     {"or", OR, OP_NULL},
     {"<>", NOTEQUAL, OP_NULL},

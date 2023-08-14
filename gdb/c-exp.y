@@ -2447,7 +2447,7 @@ enum token_flag
 };
 DEF_ENUM_FLAGS_TYPE (enum token_flag, token_flags);
 
-struct token
+struct c_token
 {
   const char *oper;
   int token;
@@ -2455,7 +2455,7 @@ struct token
   token_flags flags;
 };
 
-static const struct token tokentab3[] =
+static const struct c_token tokentab3[] =
   {
     {">>=", ASSIGN_MODIFY, BINOP_RSH, 0},
     {"<<=", ASSIGN_MODIFY, BINOP_LSH, 0},
@@ -2463,7 +2463,7 @@ static const struct token tokentab3[] =
     {"...", DOTDOTDOT, OP_NULL, 0}
   };
 
-static const struct token tokentab2[] =
+static const struct c_token tokentab2[] =
   {
     {"+=", ASSIGN_MODIFY, BINOP_ADD, 0},
     {"-=", ASSIGN_MODIFY, BINOP_SUB, 0},
@@ -2494,7 +2494,7 @@ static const struct token tokentab2[] =
    multi-word type names (for example 'double' can appear in 'long
    double') need to be listed here.  type-specifiers that are only ever
    single word (like 'char') are handled by the classify_name function.  */
-static const struct token ident_tokens[] =
+static const struct c_token ident_tokens[] =
   {
     {"unsigned", UNSIGNED, OP_NULL, 0},
     {"template", TEMPLATE, OP_NULL, FLAG_CXX},

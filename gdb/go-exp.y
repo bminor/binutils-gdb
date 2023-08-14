@@ -898,14 +898,14 @@ parse_string_or_char (const char *tokptr, const char **outptr,
   return quote == '\'' ? CHAR : STRING;
 }
 
-struct token
+struct go_token
 {
   const char *oper;
   int token;
   enum exp_opcode opcode;
 };
 
-static const struct token tokentab3[] =
+static const struct go_token tokentab3[] =
   {
     {">>=", ASSIGN_MODIFY, BINOP_RSH},
     {"<<=", ASSIGN_MODIFY, BINOP_LSH},
@@ -913,7 +913,7 @@ static const struct token tokentab3[] =
     {"...", DOTDOTDOT, OP_NULL},
   };
 
-static const struct token tokentab2[] =
+static const struct go_token tokentab2[] =
   {
     {"+=", ASSIGN_MODIFY, BINOP_ADD},
     {"-=", ASSIGN_MODIFY, BINOP_SUB},
@@ -939,7 +939,7 @@ static const struct token tokentab2[] =
   };
 
 /* Identifier-like tokens.  */
-static const struct token ident_tokens[] =
+static const struct go_token ident_tokens[] =
   {
     {"true", TRUE_KEYWORD, OP_NULL},
     {"false", FALSE_KEYWORD, OP_NULL},

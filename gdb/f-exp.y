@@ -1219,7 +1219,7 @@ convert_to_kind_type (struct type *basetype, int kind)
   return nullptr;
 }
 
-struct token
+struct f_token
 {
   /* The string to match against.  */
   const char *oper;
@@ -1237,7 +1237,7 @@ struct token
 
 /* List of Fortran operators.  */
 
-static const struct token fortran_operators[] =
+static const struct f_token fortran_operators[] =
 {
   { ".and.", BOOL_AND, OP_NULL, false },
   { ".or.", BOOL_OR, OP_NULL, false },
@@ -1278,7 +1278,7 @@ static const struct f77_boolean_val boolean_values[]  =
   { ".false.", 0 }
 };
 
-static const struct token f_intrinsics[] =
+static const struct f_token f_intrinsics[] =
 {
   /* The following correspond to actual functions in Fortran and are case
      insensitive.  */
@@ -1300,7 +1300,7 @@ static const struct token f_intrinsics[] =
   { "sizeof", SIZEOF, OP_NULL, false },
 };
 
-static const token f_keywords[] =
+static const f_token f_keywords[] =
 {
   /* Historically these have always been lowercase only in GDB.  */
   { "character", CHARACTER, OP_NULL, true },
