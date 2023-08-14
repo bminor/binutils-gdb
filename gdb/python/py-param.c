@@ -44,8 +44,7 @@ enum param_types
   param_zuinteger,
   param_zuinteger_unlimited,
   param_enum,
-}
-param_types;
+};
 
 /* Translation from Python parameters to GDB variable types.  Keep in the
    same order as PARAM_TYPES due to C++'s lack of designated initializers.  */
