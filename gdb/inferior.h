@@ -633,7 +633,7 @@ public:
      attach or handling a fork child.  */
   bool in_initial_library_scan = false;
 
-  /* Private data used by the target vector implementation.  */
+  /* Private data used by the process_stratum target.  */
   std::unique_ptr<private_inferior> priv;
 
   /* HAS_EXIT_CODE is true if the inferior exited with an exit code.
