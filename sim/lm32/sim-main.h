@@ -56,4 +56,15 @@ extern SIM_CORE_SIGNAL_FN lm32_core_signal;
 lm32_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), \
 		  (TRANSFER), (ERROR))
 
+/* From traps.c.  */
+extern USI lm32bf_b_insn (SIM_CPU * current_cpu, USI r0, USI f_r0);
+extern USI lm32bf_divu_insn (SIM_CPU * current_cpu, IADDR pc, USI r0, USI r1, USI r2);
+extern USI lm32bf_modu_insn (SIM_CPU * current_cpu, IADDR pc, USI r0, USI r1, USI r2);
+extern void lm32bf_wcsr_insn (SIM_CPU * current_cpu, USI f_csr, USI r1);
+extern USI lm32bf_break_insn (SIM_CPU * current_cpu, IADDR pc);
+extern USI lm32bf_scall_insn (SIM_CPU * current_cpu, IADDR pc);
+
+/* From user.c.  */
+extern UINT lm32bf_user_insn (SIM_CPU * current_cpu, INT r0, INT r1, UINT imm);
+
 #endif /* SIM_MAIN_H */
