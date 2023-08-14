@@ -1837,6 +1837,268 @@ fbsd_nat_target::attach (const char *args, int from_tty)
   inf_ptrace_target::attach (args, from_tty);
 }
 
+/* If this thread has a pending fork event, there is a child process
+   GDB is attached to that the core of GDB doesn't know about.
+   Detach from it.  */
+
+void
+fbsd_nat_target::detach_fork_children (thread_info *tp)
+{
+  /* Check in thread_info::pending_waitstatus.  */
+  if (tp->has_pending_waitstatus ())
+    {
+      const target_waitstatus &ws = tp->pending_waitstatus ();
+
+      if (ws.kind () == TARGET_WAITKIND_VFORKED
+	  || ws.kind () == TARGET_WAITKIND_FORKED)
+	{
+	  pid_t pid = ws.child_ptid ().pid ();
+	  fbsd_nat_debug_printf ("detaching from child %d", pid);
+	  (void) ptrace (PT_DETACH, pid, (caddr_t) 1, 0);
+	}
+    }
+
+  /* Check in thread_info::pending_follow.  */
+  if (tp->pending_follow.kind () == TARGET_WAITKIND_VFORKED
+      || tp->pending_follow.kind () == TARGET_WAITKIND_FORKED)
+    {
+      pid_t pid = tp->pending_follow.child_ptid ().pid ();
+      fbsd_nat_debug_printf ("detaching from child %d", pid);
+      (void) ptrace (PT_DETACH, pid, (caddr_t) 1, 0);
+    }
+}
+
+/* Detach from any child processes associated with pending fork events
+   for a stopped process.  Returns true if the process has terminated
+   and false if it is still alive.  */
+
+bool
+fbsd_nat_target::detach_fork_children (inferior *inf)
+{
+  /* Detach any child processes associated with pending fork events in
+     threads belonging to this process.  */
+  for (thread_info *tp : inf->non_exited_threads ())
+    detach_fork_children (tp);
+
+  /* Unwind state associated with any pending events.  Reset
+     fbsd_inf->resumed_lwps so that take_pending_event will harvest
+     events.  */
+  fbsd_inferior *fbsd_inf = get_fbsd_inferior (inf);
+  ptid_t ptid = ptid_t (inf->pid);
+  fbsd_inf->resumed_lwps = ptid;
+
+  while (1)
+    {
+      gdb::optional<pending_event> event = take_pending_event (ptid);
+      if (!event.has_value ())
+	break;
+
+      switch (event->status.kind ())
+	{
+	case TARGET_WAITKIND_EXITED:
+	case TARGET_WAITKIND_SIGNALLED:
+	  return true;
+	case TARGET_WAITKIND_FORKED:
+	case TARGET_WAITKIND_VFORKED:
+	  {
+	    pid_t pid = event->status.child_ptid ().pid ();
+	    fbsd_nat_debug_printf ("detaching from child %d", pid);
+	    (void) ptrace (PT_DETACH, pid, (caddr_t) 1, 0);
+	  }
+	  break;
+	}
+    }
+  return false;
+}
+
+/* Scan all of the threads for a stopped process invoking the supplied
+   callback on the ptrace_lwpinfo object for threads other than the
+   thread which reported the current stop.  The callback can return
+   true to terminate the iteration early.  This function returns true
+   if the callback returned true, otherwise it returns false.  */
+
+typedef bool (ptrace_event_ftype) (const struct ptrace_lwpinfo &pl);
+
+static bool
+iterate_other_ptrace_events (pid_t pid,
+			     gdb::function_view<ptrace_event_ftype> callback)
+{
+  /* Fetch the LWP ID of the thread that just reported the last stop
+     and ignore that LWP in the following loop.  */
+  ptrace_lwpinfo pl;
+  if (ptrace (PT_LWPINFO, pid, (caddr_t) &pl, sizeof (pl)) != 0)
+    perror_with_name (("ptrace (PT_LWPINFO)"));
+  lwpid_t lwpid = pl.pl_lwpid;
+
+  int nlwps = ptrace (PT_GETNUMLWPS, pid, NULL, 0);
+  if (nlwps == -1)
+    perror_with_name (("ptrace (PT_GETLWPLIST)"));
+  if (nlwps == 1)
+    return false;
+
+  gdb::unique_xmalloc_ptr<lwpid_t[]> lwps (XCNEWVEC (lwpid_t, nlwps));
+
+  nlwps = ptrace (PT_GETLWPLIST, pid, (caddr_t) lwps.get (), nlwps);
+  if (nlwps == -1)
+    perror_with_name (("ptrace (PT_GETLWPLIST)"));
+
+  for (int i = 0; i < nlwps; i++)
+    {
+      if (lwps[i] == lwpid)
+	continue;
+
+      if (ptrace (PT_LWPINFO, lwps[i], (caddr_t) &pl, sizeof (pl)) != 0)
+	perror_with_name (("ptrace (PT_LWPINFO)"));
+
+      if (callback (pl))
+	return true;
+    }
+  return false;
+}
+
+/* True if there are any stopped threads with an interesting event.  */
+
+static bool
+pending_ptrace_events (inferior *inf)
+{
+  auto lambda = [] (const struct ptrace_lwpinfo &pl)
+  {
+#if defined(PT_LWP_EVENTS) && __FreeBSD_kernel_version < 1400090
+    if (pl.pl_flags == PL_FLAG_BORN)
+      return true;
+#endif
+#ifdef TDP_RFPPWAIT
+    if (pl.pl_flags & PL_FLAG_FORKED)
+      return true;
+#endif
+    if (pl.pl_event == PL_EVENT_SIGNAL)
+      {
+	if ((pl.pl_flags & PL_FLAG_SI) == 0)
+	  {
+	    /* Not sure which signal, assume it matters.  */
+	    return true;
+	  }
+	if (pl.pl_siginfo.si_signo == SIGTRAP)
+	  return true;
+      }
+    return false;
+  };
+  return iterate_other_ptrace_events (inf->pid,
+				      gdb::make_function_view (lambda));
+}
+
+void
+fbsd_nat_target::detach (inferior *inf, int from_tty)
+{
+  fbsd_nat_debug_start_end ("pid %d", inf->pid);
+
+  stop_process (inf);
+
+  remove_breakpoints_inf (inf);
+
+  if (detach_fork_children (inf)) {
+    /* No need to detach now.  */
+    target_announce_detach (from_tty);
+
+    detach_success (inf);
+    return;
+  }
+
+  /* If there are any pending events (SIGSTOP from stop_process or a
+     breakpoint hit that needs a PC fixup), drain events until the
+     process can be safely detached.  */
+  fbsd_inferior *fbsd_inf = get_fbsd_inferior (inf);
+  ptid_t ptid = ptid_t (inf->pid);
+  if (fbsd_inf->pending_sigstop || pending_ptrace_events (inf))
+    {
+      bool pending_sigstop = fbsd_inf->pending_sigstop;
+      int sig = 0;
+
+      if (pending_sigstop)
+	fbsd_nat_debug_printf ("waiting for SIGSTOP");
+
+      /* Force wait_1 to report the SIGSTOP instead of swallowing it.  */
+      fbsd_inf->pending_sigstop = false;
+
+      /* Report event for all threads from wait_1.  */
+      fbsd_inf->resumed_lwps = ptid;
+
+      do
+	{
+	  if (ptrace (PT_CONTINUE, inf->pid, (caddr_t) 1, sig) != 0)
+	    perror_with_name (("ptrace(PT_CONTINUE)"));
+
+	  target_waitstatus ws;
+	  ptid_t wptid = wait_1 (ptid, &ws, 0);
+
+	  switch (ws.kind ())
+	    {
+	    case TARGET_WAITKIND_EXITED:
+	    case TARGET_WAITKIND_SIGNALLED:
+	      /* No need to detach now.  */
+	      target_announce_detach (from_tty);
+
+	      detach_success (inf);
+	      return;
+	    case TARGET_WAITKIND_FORKED:
+	    case TARGET_WAITKIND_VFORKED:
+	      {
+		pid_t pid = ws.child_ptid ().pid ();
+		fbsd_nat_debug_printf ("detaching from child %d", pid);
+		(void) ptrace (PT_DETACH, pid, (caddr_t) 1, 0);
+		sig = 0;
+	      }
+	      break;
+	    case TARGET_WAITKIND_STOPPED:
+	      sig = gdb_signal_to_host (ws.sig ());
+	      switch (sig)
+		{
+		case SIGSTOP:
+		  if (pending_sigstop)
+		    {
+		      sig = 0;
+		      pending_sigstop = false;
+		    }
+		  break;
+		case SIGTRAP:
+#ifndef USE_SIGTRAP_SIGINFO
+		  {
+		    /* Update PC from software breakpoint hit.  */
+		    struct regcache *regcache = get_thread_regcache (this, wptid);
+		    struct gdbarch *gdbarch = regcache->arch ();
+		    int decr_pc = gdbarch_decr_pc_after_break (gdbarch);
+
+		    if (decr_pc != 0)
+		      {
+			CORE_ADDR pc;
+
+			pc = regcache_read_pc (regcache);
+			if (breakpoint_inserted_here_p (regcache->aspace (),
+							pc - decr_pc))
+			  {
+			    fbsd_nat_debug_printf ("adjusted PC for LWP %ld",
+						   wptid.lwp ());
+			    regcache_write_pc (regcache, pc - decr_pc);
+			  }
+		      }
+		  }
+#endif
+		  sig = 0;
+		  break;
+		}
+	    }
+	}
+      while (pending_sigstop || pending_ptrace_events (inf));
+    }
+
+  target_announce_detach (from_tty);
+
+  if (ptrace (PT_DETACH, inf->pid, (caddr_t) 1, 0) == -1)
+	perror_with_name (("ptrace (PT_DETACH)"));
+
+  detach_success (inf);
+}
+
 void
 fbsd_nat_target::mourn_inferior ()
 {

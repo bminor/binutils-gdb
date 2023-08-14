@@ -81,6 +81,8 @@ public:
 
   void attach (const char *, int) override;
 
+  void detach (inferior *, int) override;
+
   void mourn_inferior () override;
 
   void resume (ptid_t, int, enum gdb_signal) override;
@@ -263,6 +265,18 @@ private:
   /* List of pending events.  */
 
   std::list<pending_event> m_pending_events;
+
+  /* If this thread has a pending fork event, there is a child process
+     GDB is attached to that the core of GDB doesn't know about.
+     Detach from it.  */
+
+  void detach_fork_children (thread_info *tp);
+
+  /* Detach from any child processes associated with pending fork events
+     for a stopped process.  Returns true if the process has terminated
+     and false if it is still alive.  */
+
+  bool detach_fork_children (inferior *inf);
 };
 
 /* Fetch the signal information for PTID and store it in *SIGINFO.
