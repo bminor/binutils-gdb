@@ -24,14 +24,25 @@ pthread_t thread3_id;
 
 void* do_thread (void* d)
 {
+  if (d != NULL)
+    {
+      pthread_barrier_t *barrier = (pthread_barrier_t *) d;
+      pthread_barrier_wait (barrier);
+    }
+
   return NULL;			/* In thread */
 }
 
 int main (void)
 {
+  /* We want the threads to exit in a known order.  Use a barrier to ensure
+     the second thread doesn't exit until the first has been joined.  */
+  pthread_barrier_t barrier;
+  pthread_barrier_init (&barrier, NULL, 2);
   pthread_create (&thread2_id, NULL, do_thread, NULL);
-  pthread_create (&thread3_id, NULL, do_thread, NULL);
+  pthread_create (&thread3_id, NULL, do_thread, &barrier);
   pthread_join (thread2_id, NULL);
+  pthread_barrier_wait (&barrier);
   pthread_join (thread3_id, NULL);
   return 12;			/* Done */
 }
