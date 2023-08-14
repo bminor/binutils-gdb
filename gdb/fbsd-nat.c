@@ -1486,7 +1486,40 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   if (is_async_p ())
     async_file_flush ();
 
-  ptid_t wptid = wait_1 (ptid, ourstatus, target_options);
+  ptid_t wptid;
+  while (1)
+    {
+      wptid = wait_1 (ptid, ourstatus, target_options);
+
+      /* If no event was found, just return.  */
+      if (ourstatus->kind () == TARGET_WAITKIND_IGNORE
+	  || ourstatus->kind () == TARGET_WAITKIND_NO_RESUMED)
+	break;
+
+      /* If an event is reported for a thread or process while
+	 stepping some other thread, suspend the thread reporting the
+	 event and defer the event until it can be reported to the
+	 core.  */
+      if (!wptid.matches (m_resume_ptid))
+	{
+	  add_pending_event (wptid, *ourstatus);
+	  fbsd_nat_debug_printf ("deferring event [%s], [%s]",
+				 target_pid_to_str (wptid).c_str (),
+				 ourstatus->to_string ().c_str ());
+	  if (wptid.pid () == m_resume_ptid.pid ())
+	    {
+	      fbsd_nat_debug_printf ("suspending thread [%s]",
+				     target_pid_to_str (wptid).c_str ());
+	      if (ptrace (PT_SUSPEND, wptid.lwp (), NULL, 0) == -1)
+		perror_with_name (("ptrace (PT_SUSPEND)"));
+	      if (ptrace (PT_CONTINUE, wptid.pid (), (caddr_t) 1, 0) == -1)
+		perror_with_name (("ptrace (PT_CONTINUE)"));
+	    }
+	  continue;
+	}
+
+      break;
+    }
 
   /* If we are in async mode and found an event, there may still be
      another event pending.  Trigger the event pipe so that that the
