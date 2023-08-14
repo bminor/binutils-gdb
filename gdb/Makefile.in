@@ -2509,6 +2509,8 @@ po/$(PACKAGE).pot: force
 	     -e 's/\([ \t;,(]\)free$$/\1xfree/g' \
 	     -e '/^#line.*y.tab.c/d' \
 	     -e 's/YY_NULL/YY_NULLPTR/g' \
+	     -e "s/YYSTYPE/$(subst -,_,$*)_YYSTYPE/g" \
+	     -e "s/yyalloc/$(subst -,_,$*)_yyalloc/g" \
 	  < $@.tmp > $@.new && \
 	  rm -f $@.tmp && \
 	  mv $@.new $@
