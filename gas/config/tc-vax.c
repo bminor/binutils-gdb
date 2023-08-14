@@ -2185,10 +2185,10 @@ md_create_long_jump (char *ptr,
 {
   valueT offset;
 
-  /* account for 1 byte instruction, 1 byte of address specifier and
-     4 bytes of offset from PC */
+  /* Account for 1 byte instruction, 1 byte of address specifier and
+     4 bytes of offset from PC.  */
   offset = to_addr - (from_addr + 1 + 1 + 4);
-  *ptr++ = VAX_JMP;	     /* long jump */
+  *ptr++ = VAX_JMP;
   *ptr++ = VAX_PC_RELATIVE_MODE;
   md_number_to_chars (ptr, offset, 4);
 }
