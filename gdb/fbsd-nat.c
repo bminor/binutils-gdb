@@ -47,12 +47,46 @@
 #include "fbsd-nat.h"
 #include "fbsd-tdep.h"
 
-#include <list>
-
 #ifndef PT_GETREGSET
 #define	PT_GETREGSET	42	/* Get a target register set */
 #define	PT_SETREGSET	43	/* Set a target register set */
 #endif
+
+/* See fbsd-nat.h.  */
+
+void
+fbsd_nat_target::add_pending_event (const ptid_t &ptid,
+				    const target_waitstatus &status)
+{
+  gdb_assert (find_inferior_ptid (this, ptid) != nullptr);
+  m_pending_events.emplace_back (ptid, status);
+}
+
+/* See fbsd-nat.h.  */
+
+bool
+fbsd_nat_target::have_pending_event (ptid_t filter)
+{
+  for (const pending_event &event : m_pending_events)
+    if (event.ptid.matches (filter))
+      return true;
+  return false;
+}
+
+/* See fbsd-nat.h.  */
+
+gdb::optional<fbsd_nat_target::pending_event>
+fbsd_nat_target::take_pending_event ()
+{
+  for (auto it = m_pending_events.begin (); it != m_pending_events.end (); it++)
+    if (it->ptid.matches (m_resume_ptid))
+      {
+	pending_event event = *it;
+	m_pending_events.erase (it);
+	return event;
+      }
+  return {};
+}
 
 /* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */
@@ -1061,46 +1095,17 @@ fbsd_is_child_pending (pid_t pid)
 }
 
 #ifndef PTRACE_VFORK
-static std::forward_list<ptid_t> fbsd_pending_vfork_done;
-
 /* Record a pending vfork done event.  */
 
 static void
 fbsd_add_vfork_done (ptid_t pid)
 {
-  fbsd_pending_vfork_done.push_front (pid);
+  add_pending_event (ptid, target_waitstatus ().set_vfork_done ());
 
   /* If we're in async mode, need to tell the event loop there's
      something here to process.  */
   if (target_is_async_p ())
     async_file_mark ();
-}
-
-/* Check for a pending vfork done event for a specific PID.  */
-
-static int
-fbsd_is_vfork_done_pending (pid_t pid)
-{
-  for (auto it = fbsd_pending_vfork_done.begin ();
-       it != fbsd_pending_vfork_done.end (); it++)
-    if (it->pid () == pid)
-      return 1;
-  return 0;
-}
-
-/* Check for a pending vfork done event.  If one is found, remove it
-   from the list and return the PTID.  */
-
-static ptid_t
-fbsd_next_vfork_done (void)
-{
-  if (!fbsd_pending_vfork_done.empty ())
-    {
-      ptid_t ptid = fbsd_pending_vfork_done.front ();
-      fbsd_pending_vfork_done.pop_front ();
-      return ptid;
-    }
-  return null_ptid;
 }
 #endif
 #endif
@@ -1110,21 +1115,18 @@ fbsd_next_vfork_done (void)
 void
 fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 {
-#if defined(TDP_RFPPWAIT) && !defined(PTRACE_VFORK)
-  pid_t pid;
-
-  /* Don't PT_CONTINUE a process which has a pending vfork done event.  */
-  if (minus_one_ptid == ptid)
-    pid = inferior_ptid.pid ();
-  else
-    pid = ptid.pid ();
-  if (fbsd_is_vfork_done_pending (pid))
-    return;
-#endif
-
   fbsd_nat_debug_printf ("[%s], step %d, signo %d (%s)",
 			 target_pid_to_str (ptid).c_str (), step, signo,
 			 gdb_signal_to_name (signo));
+
+  /* Don't PT_CONTINUE a thread or process which has a pending event.  */
+  m_resume_ptid = ptid;
+  if (have_pending_event (ptid))
+    {
+      fbsd_nat_debug_printf ("found pending event");
+      return;
+    }
+
   if (ptid.lwp_p ())
     {
       /* If ptid is a specific LWP, suspend all other LWPs in the process.  */
@@ -1257,14 +1259,6 @@ fbsd_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   while (1)
     {
-#ifndef PTRACE_VFORK
-      wptid = fbsd_next_vfork_done ();
-      if (wptid != null_ptid)
-	{
-	  ourstatus->set_vfork_done ();
-	  return wptid;
-	}
-#endif
       wptid = inf_ptrace_target::wait (ptid, ourstatus, target_options);
       if (ourstatus->kind () == TARGET_WAITKIND_STOPPED)
 	{
@@ -1473,16 +1467,26 @@ ptid_t
 fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		       target_wait_flags target_options)
 {
-  ptid_t wptid;
-
   fbsd_nat_debug_printf ("[%s], [%s]", target_pid_to_str (ptid).c_str (),
 			 target_options_to_string (target_options).c_str ());
+
+  /* If there is a valid pending event, return it.  */
+  gdb::optional<pending_event> event = take_pending_event ();
+  if (event.has_value ())
+    {
+      fbsd_nat_debug_printf ("returning pending event [%s], [%s]",
+			     target_pid_to_str (event->ptid).c_str (),
+			     event->status.to_string ().c_str ());
+      gdb_assert (event->ptid.matches (ptid));
+      *ourstatus = event->status;
+      return event->ptid;
+    }
 
   /* Ensure any subsequent events trigger a new event in the loop.  */
   if (is_async_p ())
     async_file_flush ();
 
-  wptid = wait_1 (ptid, ourstatus, target_options);
+  ptid_t wptid = wait_1 (ptid, ourstatus, target_options);
 
   /* If we are in async mode and found an event, there may still be
      another event pending.  Trigger the event pipe so that that the
@@ -1585,7 +1589,21 @@ fbsd_nat_target::create_inferior (const char *exec_file,
     (disable_randomization);
 #endif
 
+  /* Expect a wait for the new process.  */
+  m_resume_ptid = minus_one_ptid;
+  fbsd_nat_debug_printf ("setting resume_ptid to [%s]",
+			 target_pid_to_str (m_resume_ptid).c_str ());
   inf_ptrace_target::create_inferior (exec_file, allargs, env, from_tty);
+}
+
+void
+fbsd_nat_target::attach (const char *args, int from_tty)
+{
+  /* Expect a wait for the new process.  */
+  m_resume_ptid = minus_one_ptid;
+  fbsd_nat_debug_printf ("setting resume_ptid to [%s]",
+			 target_pid_to_str (m_resume_ptid).c_str ());
+  inf_ptrace_target::attach (args, from_tty);
 }
 
 #ifdef TDP_RFPPWAIT

@@ -20,11 +20,14 @@
 #ifndef FBSD_NAT_H
 #define FBSD_NAT_H
 
+#include "gdbsupport/gdb_optional.h"
 #include "inf-ptrace.h"
 #include "regcache.h"
 #include "regset.h"
 #include <osreldate.h>
 #include <sys/proc.h>
+
+#include <list>
 
 /* FreeBSD kernels 11.3 and later report valid si_code values for
    SIGTRAP on all architectures.  Older FreeBSD kernels that supported
@@ -75,6 +78,8 @@ public:
 
   void create_inferior (const char *, const std::string &,
 			char **, int) override;
+
+  void attach (const char *, int) override;
 
   void resume (ptid_t, int, enum gdb_signal) override;
 
@@ -217,6 +222,46 @@ protected:
     return store_regset (regcache, regnum, note, regset, regbase, &regs,
 			 sizeof (regs));
   }
+
+private:
+  /* If an event is triggered asynchronously (fake vfork_done events)
+     or occurs when the core is not expecting it, a pending event is
+     created.  This event is then returned by a future call to the
+     target wait method.  */
+
+  struct pending_event
+  {
+    pending_event (const ptid_t &_ptid, const target_waitstatus &_status) :
+      ptid (_ptid), status (_status) {}
+
+    ptid_t ptid;
+    target_waitstatus status;
+  };
+
+  /* Add a new pending event to the list.  */
+
+  void add_pending_event (const ptid_t &ptid, const target_waitstatus &status);
+
+  /* Return true if there is a pending event matching FILTER.  */
+
+  bool have_pending_event (ptid_t filter);
+
+  /* Helper method called by the target wait method.  Check if there
+     is a pending event matching M_RESUME_PTID.  If there is a
+     matching event, the event is removed from the pending list and
+     returned.  */
+
+  gdb::optional<pending_event> take_pending_event ();
+
+  /* List of pending events.  */
+
+  std::list<pending_event> m_pending_events;
+
+  /* Filter for ptid's allowed to report events from wait.  Normally
+     set in resume, but also reset to minus_one_ptid in
+     create_inferior and attach.  */
+
+  ptid_t m_resume_ptid;
 };
 
 /* Fetch the signal information for PTID and store it in *SIGINFO.
