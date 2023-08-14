@@ -30,7 +30,7 @@
 
 /* Python parameter types as in PARM_CONSTANTS below.  */
 
-enum param_types
+enum py_param_types
 {
   param_boolean,
   param_auto_boolean,

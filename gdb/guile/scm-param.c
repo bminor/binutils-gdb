@@ -118,7 +118,7 @@ struct param_smob
 
 /* Guile parameter types as in PARAMETER_TYPES later on.  */
 
-enum param_types
+enum scm_param_types
 {
   param_boolean,
   param_auto_boolean,
@@ -134,7 +134,7 @@ enum param_types
 };
 
 /* Translation from Guile parameters to GDB variable types.  Keep in the
-   same order as PARAM_TYPES due to C++'s lack of designated initializers.  */
+   same order as SCM_PARAM_TYPES due to C++'s lack of designated initializers.  */
 
 static const struct
 {
@@ -202,7 +202,7 @@ static SCM initial_value_keyword;
 static SCM auto_keyword;
 
 static int pascm_is_valid (param_smob *);
-static const char *pascm_param_type_name (enum param_types type);
+static const char *pascm_param_type_name (enum scm_param_types type);
 static SCM pascm_param_value (const setting &var, int arg_pos,
 			      const char *func_name);
 
@@ -612,7 +612,7 @@ pascm_valid_parameter_type_p (int param_type)
 /* Return PARAM_TYPE as a string.  */
 
 static const char *
-pascm_param_type_name (enum param_types param_type)
+pascm_param_type_name (enum scm_param_types param_type)
 {
   int i;
 
@@ -1038,7 +1038,7 @@ gdbscm_make_parameter (SCM name_scm, SCM rest)
   p_smob->name = name;
   p_smob->cmd_class = (enum command_class) cmd_class;
   p_smob->pname
-    = pascm_param_type_name (static_cast<enum param_types> (param_type));
+    = pascm_param_type_name (static_cast<enum scm_param_types> (param_type));
   p_smob->type = param_to_var[param_type].type;
   p_smob->extra_literals = param_to_var[param_type].extra_literals;
   p_smob->doc = doc;
