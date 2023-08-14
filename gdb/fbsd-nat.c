@@ -843,7 +843,13 @@ fbsd_nat_target::thread_alive (ptid_t ptid)
 
       if (ptrace (PT_LWPINFO, ptid.lwp (), (caddr_t) &pl, sizeof pl)
 	  == -1)
-	return false;
+	{
+	  /* EBUSY means the associated process is running which means
+	     the LWP does exist and belongs to a running process.  */
+	  if (errno == EBUSY)
+	    return true;
+	  return false;
+	}
 #ifdef PL_FLAG_EXITED
       if (pl.pl_flags & PL_FLAG_EXITED)
 	return false;
