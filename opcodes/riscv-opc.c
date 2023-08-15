@@ -26,7 +26,7 @@
 
 /* Register names used by gas and objdump.  */
 
-const char * const riscv_gpr_names_numeric[NGPR] =
+const char riscv_gpr_names_numeric[NGPR][NRC] =
 {
   "x0",   "x1",   "x2",   "x3",   "x4",   "x5",   "x6",   "x7",
   "x8",   "x9",   "x10",  "x11",  "x12",  "x13",  "x14",  "x15",
@@ -34,7 +34,7 @@ const char * const riscv_gpr_names_numeric[NGPR] =
   "x24",  "x25",  "x26",  "x27",  "x28",  "x29",  "x30",  "x31"
 };
 
-const char * const riscv_gpr_names_abi[NGPR] =
+const char riscv_gpr_names_abi[NGPR][NRC] =
 {
   "zero", "ra",   "sp",   "gp",   "tp",   "t0",   "t1",   "t2",
   "s0",   "s1",   "a0",   "a1",   "a2",   "a3",   "a4",   "a5",
@@ -42,7 +42,7 @@ const char * const riscv_gpr_names_abi[NGPR] =
   "s8",   "s9",   "s10",  "s11",  "t3",   "t4",   "t5",   "t6"
 };
 
-const char * const riscv_fpr_names_numeric[NFPR] =
+const char riscv_fpr_names_numeric[NFPR][NRC] =
 {
   "f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7",
   "f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
@@ -50,7 +50,7 @@ const char * const riscv_fpr_names_numeric[NFPR] =
   "f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31"
 };
 
-const char * const riscv_fpr_names_abi[NFPR] =
+const char riscv_fpr_names_abi[NFPR][NRC] =
 {
   "ft0",  "ft1",  "ft2",  "ft3",  "ft4",  "ft5",  "ft6",  "ft7",
   "fs0",  "fs1",  "fa0",  "fa1",  "fa2",  "fa3",  "fa4",  "fa5",
@@ -72,7 +72,7 @@ const char * const riscv_pred_succ[16] =
 };
 
 /* RVV registers.  */
-const char * const riscv_vecr_names_numeric[NVECR] =
+const char riscv_vecr_names_numeric[NVECR][NRC] =
 {
   "v0",   "v1",   "v2",   "v3",   "v4",   "v5",   "v6",   "v7",
   "v8",   "v9",   "v10",  "v11",  "v12",  "v13",  "v14",  "v15",
@@ -81,7 +81,7 @@ const char * const riscv_vecr_names_numeric[NVECR] =
 };
 
 /* RVV mask registers.  */
-const char * const riscv_vecm_names_numeric[NVECM] =
+const char riscv_vecm_names_numeric[NVECM][NRC] =
 {
   "v0.t"
 };

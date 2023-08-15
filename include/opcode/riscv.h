@@ -354,7 +354,7 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 
 /* Extract the operand given by FIELD from integer INSN.  */
 #define EXTRACT_OPERAND(FIELD, INSN) \
-  EXTRACT_BITS ((INSN), OP_MASK_##FIELD, OP_SH_##FIELD)
+  ((unsigned int) EXTRACT_BITS ((INSN), OP_MASK_##FIELD, OP_SH_##FIELD))
 
 /* Extract an unsigned immediate operand on position s with n bits.  */
 #define EXTRACT_U_IMM(n, s, l) \
@@ -574,14 +574,16 @@ enum riscv_seg_mstate
   MAP_INSN,		/* Instructions.  */
 };
 
-extern const char * const riscv_gpr_names_numeric[NGPR];
-extern const char * const riscv_gpr_names_abi[NGPR];
-extern const char * const riscv_fpr_names_numeric[NFPR];
-extern const char * const riscv_fpr_names_abi[NFPR];
+#define NRC (4 + 1)     /* Max characters in register names, incl nul.  */
+
+extern const char riscv_gpr_names_numeric[NGPR][NRC];
+extern const char riscv_gpr_names_abi[NGPR][NRC];
+extern const char riscv_fpr_names_numeric[NFPR][NRC];
+extern const char riscv_fpr_names_abi[NFPR][NRC];
 extern const char * const riscv_rm[8];
 extern const char * const riscv_pred_succ[16];
-extern const char * const riscv_vecr_names_numeric[NVECR];
-extern const char * const riscv_vecm_names_numeric[NVECM];
+extern const char riscv_vecr_names_numeric[NVECR][NRC];
+extern const char riscv_vecm_names_numeric[NVECM][NRC];
 extern const char * const riscv_vsew[8];
 extern const char * const riscv_vlmul[8];
 extern const char * const riscv_vta[2];

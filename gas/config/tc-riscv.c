@@ -951,7 +951,7 @@ hash_reg_name (enum reg_class class, const char *name, unsigned n)
 }
 
 static void
-hash_reg_names (enum reg_class class, const char * const names[], unsigned n)
+hash_reg_names (enum reg_class class, const char names[][NRC], unsigned n)
 {
   unsigned i;
 

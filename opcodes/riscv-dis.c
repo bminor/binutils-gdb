@@ -69,8 +69,8 @@ static enum riscv_seg_mstate last_map_state = MAP_NONE;
 static asection *last_map_section = NULL;
 
 /* Register names as used by the disassembler.  */
-static const char * const *riscv_gpr_names;
-static const char * const *riscv_fpr_names;
+static const char (*riscv_gpr_names)[NRC];
+static const char (*riscv_fpr_names)[NRC];
 
 /* If set, disassemble as most general instruction.  */
 static bool no_aliases = false;
@@ -502,7 +502,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 
 	case 'y':
 	  print (info->stream, dis_style_immediate, "0x%x",
-		 (unsigned)EXTRACT_OPERAND (BS, l));
+		 EXTRACT_OPERAND (BS, l));
 	  break;
 
 	case 'z':
@@ -511,12 +511,12 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 
 	case '>':
 	  print (info->stream, dis_style_immediate, "0x%x",
-		 (unsigned)EXTRACT_OPERAND (SHAMT, l));
+		 EXTRACT_OPERAND (SHAMT, l));
 	  break;
 
 	case '<':
 	  print (info->stream, dis_style_immediate, "0x%x",
-		 (unsigned)EXTRACT_OPERAND (SHAMTW, l));
+		 EXTRACT_OPERAND (SHAMTW, l));
 	  break;
 
 	case 'S':
@@ -577,7 +577,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 
 	case 'Y':
 	  print (info->stream, dis_style_immediate, "0x%x",
-		 (unsigned) EXTRACT_OPERAND (RNUM, l));
+		 EXTRACT_OPERAND (RNUM, l));
 	  break;
 
 	case 'Z':
