@@ -279,7 +279,7 @@ const pseudo_typeS md_pseudo_table[] =
 /* Structure to hold information about predefined registers.  */
 struct pd_reg
   {
-    const char *name;
+    char name[6];
     unsigned short value;
     unsigned short flags;
   };
