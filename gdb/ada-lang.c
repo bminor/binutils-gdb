@@ -9575,9 +9575,16 @@ ada_name_association::assign (struct value *container,
 	{
 	  ada_var_value_operation *vvo
 	    = dynamic_cast<ada_var_value_operation *> (m_val.get ());
-	  if (vvo != nullptr)
+	  if (vvo == nullptr)
 	    error (_("Invalid record component association."));
 	  name = vvo->get_symbol ()->natural_name ();
+	  /* In this scenario, the user wrote (name => expr), but
+	     write_name_assoc found some fully-qualified name and
+	     substituted it.  This happens because, at parse time, the
+	     meaning of the expression isn't known; but here we know
+	     that just the base name was supplied and it refers to the
+	     name of a field.  */
+	  name = ada_unqualified_name (name);
 	}
 
       index = 0;
