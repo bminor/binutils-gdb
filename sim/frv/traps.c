@@ -747,7 +747,7 @@ frvbf_check_acc_range (SIM_CPU *current_cpu, SI regno)
   /* Only applicable to fr550 */
   SIM_DESC sd = CPU_STATE (current_cpu);
   if (STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr550)
-    return 0;
+    return 1;
 
   /* On the fr550, media insns in slots 0 and 2 can only access
      accumulators acc0-acc3. Insns in slots 1 and 3 can only access
