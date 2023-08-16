@@ -20,6 +20,7 @@
 
 #include "config.h"
 #include <unistd.h>     // isatty
+#include <errno.h>
 
 #include "gp-print.h"
 #include "ipcio.h"
@@ -55,7 +56,11 @@ reexec ()
 {
   if (dbeSession != NULL)
     dbeSession->unlink_tmp_files ();
-  execv (exe_name, new_argv);
+  execvp (exe_name, new_argv);
+  fprintf (stderr, GTXT ("Error: reexec() failed (%d: %s)\n"), errno,
+	   STR(strerror (errno)));
+  fflush (stderr);
+  exit (1);
 }
 
 /**
