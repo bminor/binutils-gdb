@@ -12,6 +12,8 @@
 
 * Add support for Cortex-A520 for AArch64.
 
+* Add support for Cortex-A720 for AArch64.
+
 Changes in 2.41:
 
 * Add support for Intel FRED instructions.
