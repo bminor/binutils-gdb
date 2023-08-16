@@ -57,6 +57,7 @@
 #include "cli/cli-utils.h"
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/byte-vector.h"
+#include "gdbsupport/selftest.h"
 #include <algorithm>
 #include "ada-exp.h"
 #include "charset.h"
@@ -1377,7 +1378,7 @@ ada_decode (const char *encoded, bool wrap, bool operators)
 	i -= 1;
       if (i > 1 && encoded[i] == '_' && encoded[i - 1] == '_')
 	len0 = i - 1;
-      else if (encoded[i] == '$')
+      else if (i >= 0 && encoded[i] == '$')
 	len0 = i;
     }
 
@@ -1573,6 +1574,18 @@ Suppress:
     decoded = '<' + std::string(encoded) + '>';
   return decoded;
 }
+
+#ifdef GDB_SELF_TEST
+
+static void
+ada_decode_tests ()
+{
+  /* This isn't valid, but used to cause a crash.  PR gdb/30639.  The
+     result does not really matter very much.  */
+  SELF_CHECK (ada_decode ("44") == "44");
+}
+
+#endif
 
 /* Table for keeping permanent unique copies of decoded names.  Once
    allocated, names in this table are never released.  While this is a
@@ -13984,4 +13997,8 @@ DWARF attribute."),
   gdb::observers::new_objfile.attach (ada_new_objfile_observer, "ada-lang");
   gdb::observers::free_objfile.attach (ada_free_objfile_observer, "ada-lang");
   gdb::observers::inferior_exit.attach (ada_inferior_exit, "ada-lang");
+
+#ifdef GDB_SELF_TEST
+  selftests::register_test ("ada-decode", ada_decode_tests);
+#endif
 }
