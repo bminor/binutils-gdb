@@ -41,6 +41,7 @@ proc is_elf_format {} {
 	 && ![istarget *-*-irix5*]
 	 && ![istarget *-*-irix6*]
 	 && ![istarget *-*-kaos*]
+   && ![istarget kvx-*-*]
 	 && ![istarget *-*-*linux*]
 	 && ![istarget *-*-lynxos*]
 	 && ![istarget *-*-nacl*]
@@ -255,6 +256,7 @@ proc supports_gnu_osabi {} {
     if { [istarget "arm*-*-*"]
 	 || [istarget "msp430-*-*"]
 	 || [istarget "hppa-unknown-elf"]
+	 || [istarget "kvx*-*-*"]
 	 || [istarget "visium-*-*"] } {
 	return 0
     }
@@ -370,6 +372,11 @@ proc check_shared_lib_support { } {
 proc check_pie_support { } {
     global pie_available_saved
     global ld
+
+    ## kvx-*-* does support -shared but not PIE.
+    if { [istarget "kvx*-*-*"] && ![istarget "kvx*-linux-*"] } {
+        set pie_available_saved 0
+    }
 
     if {![info exists pie_available_saved]} {
 	set ld_output [remote_exec host $ld "-pie"]

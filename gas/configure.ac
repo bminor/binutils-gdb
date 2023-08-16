@@ -475,6 +475,14 @@ changequote([,])dnl
       frv)
 	using_cgen=yes
 	;;
+      kvx)
+	for f in config/kvx-parse.o; do
+	  case " $extra_objects " in
+	    *" $f "*) ;;
+	    *) extra_objects="$extra_objects $f" ;;
+	  esac
+	done
+	;;
       m68k)
 	f=config/m68k-parse.o
 	case " $extra_objects " in

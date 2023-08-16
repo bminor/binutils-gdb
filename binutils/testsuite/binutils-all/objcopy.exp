@@ -693,6 +693,7 @@ proc copy_setup { } {
     }
 
     if { [istarget *-*-linux*]
+	 || [istarget kvx-*-*]
 	 || [istarget *-*-gnu*] } {
 	foreach i $gcc_gas_flag {
 	    set flags "additional_flags=$i $flags"

@@ -43,6 +43,7 @@
 @set I80386
 @set IA64
 @set IP2K
+@set KVX
 @set LM32
 @set M32C
 @set M32R

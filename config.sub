@@ -4,7 +4,7 @@
 
 # shellcheck disable=SC2006,SC2268 # see below for rationale
 
-timestamp='2023-06-23'
+timestamp='2023-06-26'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -145,7 +145,8 @@ case $1 in
 			nto-qnx* | linux-* | uclinux-uclibc* \
 			| uclinux-gnu* | kfreebsd*-gnu* | knetbsd*-gnu* | netbsd*-gnu* \
 			| netbsd*-eabi* | kopensolaris*-gnu* | cloudabi*-eabi* \
-			| storm-chaos* | os2-emx* | rtmk-nova* | managarm-*)
+			| storm-chaos* | os2-emx* | rtmk-nova* | managarm-* \
+			| windows-* )
 				basic_machine=$field1
 				basic_os=$maybe_os
 				;;
@@ -1205,6 +1206,7 @@ case $cpu-$vendor in
 			| i370 | i*86 | i860 | i960 | ia16 | ia64 \
 			| ip2k | iq2000 \
 			| k1om \
+			| kvx \
 			| le32 | le64 \
 			| lm32 \
 			| loongarch32 | loongarch64 \
@@ -1758,7 +1760,7 @@ case $os in
 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
 	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* | zephyr* \
-	     | fiwix* | mlibc* )
+	     | fiwix* | mlibc* | cos* | mbr* )
 		;;
 	# This one is extra strict with allowed versions
 	sco3.2v2 | sco3.2v[4-9]* | sco5v6*)
@@ -1766,7 +1768,7 @@ case $os in
 		;;
 	none)
 		;;
-	kernel* )
+	kernel* | msvc* )
 		# Restricted further below
 		;;
 	*)
@@ -1785,6 +1787,8 @@ case $kernel-$os in
 		;;
 	managarm-mlibc* | managarm-kernel* )
 		;;
+	windows*-gnu* | windows*-msvc*)
+		;;
 	-dietlibc* | -newlib* | -musl* | -relibc* | -uclibc* | -mlibc* )
 		# These are just libc implementations, not actual OSes, and thus
 		# require a kernel.
@@ -1797,6 +1801,10 @@ case $kernel-$os in
 		;;
 	*-kernel* )
 		echo "Invalid configuration '$1': '$kernel' does not support '$os'." 1>&2
+		exit 1
+		;;
+	*-msvc* )
+		echo "Invalid configuration '$1': '$os' needs 'windows'." 1>&2
 		exit 1
 		;;
 	kfreebsd*-gnu* | kopensolaris*-gnu*)

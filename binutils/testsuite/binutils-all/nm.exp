@@ -296,6 +296,7 @@ if [is_elf_format] {
     setup_xfail "*-*-hpux*"
     setup_xfail "mips*-*-*" "tx39*-*-*"
     setup_xfail "msp430*-*-*"
+    setup_xfail "kvx*-*-*"
     setup_xfail "visium*-*-*"
     setup_xfail "x86_64-*-cloudabi*"
 

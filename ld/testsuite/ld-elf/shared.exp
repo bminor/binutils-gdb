@@ -468,7 +468,7 @@ run_ld_link_tests [list \
 # These targets don't copy dynamic variables into .bss.
 setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*" *loongarch*-*-*
 # or don't have .data.rel.ro
-setup_xfail "hppa*64*-*-hpux*" "tic6x-*-*"
+setup_xfail "hppa*64*-*-hpux*" "tic6x-*-*" "kvx*-*-*"
 # or complain about relocs in read-only sections
 setup_xfail frv-*-* lm32-*-*
 run_ld_link_tests [list \
@@ -515,6 +515,7 @@ run_ld_link_tests {
 }
 
 if { [istarget *-*-linux*]
+     || [istarget kvx-*-*]
      || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {
     run_ld_link_tests {

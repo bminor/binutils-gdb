@@ -57,6 +57,7 @@
 #define ARCH_i386
 #define ARCH_ip2k
 #define ARCH_iq2000
+#define ARCH_kvx
 #define ARCH_lm32
 #define ARCH_m32c
 #define ARCH_m32r
@@ -237,6 +238,11 @@ disassembler (enum bfd_architecture a,
 #ifdef ARCH_fr30
     case bfd_arch_fr30:
       disassemble = print_insn_fr30;
+      break;
+#endif
+#ifdef ARCH_kvx
+    case bfd_arch_kvx:
+      disassemble = print_insn_kvx;
       break;
 #endif
 #ifdef ARCH_lm32
@@ -567,6 +573,9 @@ disassembler_usage (FILE *stream ATTRIBUTE_UNUSED)
 #endif
 #ifdef ARCH_i386
   print_i386_disassembler_options (stream);
+#endif
+#ifdef ARCH_kvx
+  print_kvx_disassembler_options (stream);
 #endif
 #ifdef ARCH_s390
   print_s390_disassembler_options (stream);

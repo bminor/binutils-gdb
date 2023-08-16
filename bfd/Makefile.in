@@ -468,6 +468,7 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -573,6 +574,7 @@ ALL_MACHINES = \
 	cpu-hppa.lo \
 	cpu-i386.lo \
 	cpu-iamcu.lo \
+	cpu-kvx.lo \
 	cpu-ia64.lo \
 	cpu-ip2k.lo \
 	cpu-iq2000.lo \
@@ -656,6 +658,7 @@ ALL_MACHINES_CFILES = \
 	cpu-hppa.c \
 	cpu-i386.c \
 	cpu-iamcu.c \
+	cpu-kvx.c \
 	cpu-ia64.c \
 	cpu-ip2k.c \
 	cpu-iq2000.c \
@@ -773,6 +776,8 @@ BFD32_BACKENDS = \
 	elfxx-x86.lo \
 	elf32-ip2k.lo \
 	elf32-iq2000.lo \
+	elf32-kvx.lo \
+	elfxx-kvx.lo \
 	elf32-lm32.lo \
 	elf32-m32c.lo \
 	elf32-m32r.lo \
@@ -908,6 +913,7 @@ BFD32_BACKENDS_CFILES = \
 	elfxx-x86.c \
 	elf32-ip2k.c \
 	elf32-iq2000.c \
+	elfxx-kvx.c \
 	elf32-lm32.c \
 	elf32-m32c.c \
 	elf32-m32r.c \
@@ -1013,6 +1019,8 @@ BFD64_BACKENDS = \
 	elf64-ia64.lo \
 	elf64-ia64-vms.lo \
 	elfxx-ia64.lo \
+	elfxx-kvx.lo \
+	elf64-kvx.lo \
 	elf32-loongarch.lo \
 	elf64-loongarch.lo \
 	elfxx-loongarch.lo \
@@ -1075,6 +1083,7 @@ BFD64_BACKENDS_CFILES = \
 	elfn32-mips.c \
 	elfxx-aarch64.c \
 	elfxx-ia64.c \
+	elfxx-kvx.c \
 	elfxx-loongarch.c \
 	elfxx-mips.c \
 	elfxx-riscv.c \
@@ -1137,6 +1146,7 @@ SOURCE_CFILES = \
 
 BUILD_CFILES = \
 	elf32-aarch64.c elf64-aarch64.c \
+	elf32-kvx.c elf64-kvx.c \
 	elf32-ia64.c elf64-ia64.c \
 	elf32-loongarch.c elf64-loongarch.c \
 	elf32-riscv.c elf64-riscv.c \
@@ -1483,6 +1493,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-iamcu.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-ip2k.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-iq2000.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-kvx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-lm32.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-loongarch.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-m10200.Plo@am__quote@
@@ -1577,6 +1588,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-ia64.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-ip2k.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-iq2000.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-kvx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-lm32.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-loongarch.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-m32c.Plo@am__quote@
@@ -1629,6 +1641,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-hppa.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-ia64-vms.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-ia64.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-kvx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-loongarch.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-mips.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-mmix.Plo@am__quote@
@@ -1644,6 +1657,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfn32-mips.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-aarch64.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-ia64.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-kvx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-loongarch.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-mips.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-riscv.Plo@am__quote@
@@ -2347,6 +2361,18 @@ elf32-ia64.c : elfnn-ia64.c
 elf64-ia64.c : elfnn-ia64.c
 	$(AM_V_at)echo "#line 1 \"elfnn-ia64.c\"" > $@
 	$(AM_V_GEN)$(SED) -e s/NN/64/g < $< >> $@
+
+elf32-kvx.c : elfnn-kvx.c
+	rm -f elf32-kvx.c
+	echo "#line 1 \"$(srcdir)/elfnn-kvx.c\"" > elf32-kvx.new
+	sed -e s/NN/32/g < $(srcdir)/elfnn-kvx.c >> elf32-kvx.new
+	mv -f elf32-kvx.new elf32-kvx.c
+
+elf64-kvx.c : elfnn-kvx.c
+	rm -f elf64-kvx.c
+	echo "#line 1 \"$(srcdir)/elfnn-kvx.c\"" > elf64-kvx.new
+	sed -e s/NN/64/g < $(srcdir)/elfnn-kvx.c >> elf64-kvx.new
+	mv -f elf64-kvx.new elf64-kvx.c
 
 elf32-loongarch.c : elfnn-loongarch.c
 	$(AM_V_at)echo "#line 1 \"elfnn-loongarch.c\"" > $@

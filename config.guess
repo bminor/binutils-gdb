@@ -1042,6 +1042,15 @@ EOF
     k1om:Linux:*:*)
 	GUESS=$UNAME_MACHINE-unknown-linux-$LIBC
 	;;
+    kvx:Linux:*:*)
+	GUESS=$UNAME_MACHINE-unknown-linux-$LIBC
+	;;
+    kvx:cos:*:*)
+	GUESS=$UNAME_MACHINE-unknown-cos
+	;;
+    kvx:mbr:*:*)
+	GUESS=$UNAME_MACHINE-unknown-mbr
+	;;
     loongarch32:Linux:*:* | loongarch64:Linux:*:*)
 	GUESS=$UNAME_MACHINE-unknown-linux-$LIBC
 	;;

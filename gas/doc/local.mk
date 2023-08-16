@@ -61,6 +61,7 @@ CPU_DOCS = \
 	%D%/c-hppa.texi \
 	%D%/c-i386.texi \
 	%D%/c-ip2k.texi \
+	%D%/c-kvx.texi \
 	%D%/c-lm32.texi \
 	%D%/c-m32c.texi \
 	%D%/c-m32r.texi \

@@ -199,6 +199,7 @@ proc target_defaults_to_execstack {} {
 	|| [istarget "arc*-*-*"]
 	|| [istarget "cris*-*-*"]
 	|| [istarget "ia64*-*-*"]
+	|| [istarget "kvx*-*-*"]
 	|| [istarget "loongarch*-*-*"]
 	|| [istarget "nios2*-*-*"]
 	|| [istarget "powerpc64*-*-*"]

@@ -237,6 +237,7 @@ ALL_EMULATION_SOURCES = \
 	eelf32ip2k.c \
 	eelf32iq10.c \
 	eelf32iq2000.c \
+	eelf32kvx.c \
 	eelf32lm32.c \
 	eelf32lm32fd.c \
 	eelf32lppc.c \
@@ -448,6 +449,8 @@ ALL_64_EMULATION_SOURCES = \
 	eelf64lriscv_lp64f.c \
 	eelf64ltsmip.c \
 	eelf64ltsmip_fbsd.c \
+	eelf64kvx.c \
+	eelf64kvx_linux.c \
 	eelf64mmix.c \
 	eelf64ppc.c \
 	eelf64ppc_fbsd.c \
@@ -735,6 +738,7 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32ip2k.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32iq10.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32iq2000.Pc@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32kvx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lm32.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lm32fd.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lppc.Pc@am__quote@
@@ -937,6 +941,8 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64hppa.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lppc.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lppc_fbsd.Pc@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64kvx.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64kvx_linux.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64loongarch.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lriscv.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lriscv_lp64.Pc@am__quote@

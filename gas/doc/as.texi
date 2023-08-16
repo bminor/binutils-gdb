@@ -8006,6 +8006,9 @@ subject, see the hardware manufacturer's manual.
 @ifset LM32
 * LM32-Dependent::              LM32 Dependent Features
 @end ifset
+@ifset KVX
+* KVX-Dependent::               KVX Dependent Features
+@end ifset
 @ifset M32C
 * M32C-Dependent::              M32C Dependent Features
 @end ifset
@@ -8229,6 +8232,10 @@ family.
 
 @ifset LOONGARCH
 @include c-loongarch.texi
+@end ifset
+
+@ifset KVX
+@include c-kvx.texi
 @end ifset
 
 @ifset M32C

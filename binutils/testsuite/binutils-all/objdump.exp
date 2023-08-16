@@ -482,6 +482,8 @@ if { ![is_elf_format]
 } else {
     if { [istarget "or1k*-*-*"] } then {
         set decodedline_testsrc $srcdir/$subdir/dw2-decodedline-1.S
+    } elseif { [istarget "kvx*-*-*"] } {
+        set decodedline_testsrc $srcdir/$subdir/dw2-decodedline-2.S
     } else {
         set decodedline_testsrc $srcdir/$subdir/dw2-decodedline.S
     }

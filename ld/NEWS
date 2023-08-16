@@ -2,6 +2,8 @@
 
 Changes in 2.41:
 
+* Add support for the KVX instruction set.
+
 * The linker now accepts a command line option of --remap-inputs
   <PATTERN>=<FILE> to relace any input file that matches <PATTERN> with
   <FILE>.  In addition the option --remap-inputs-file=<FILE> can be used to

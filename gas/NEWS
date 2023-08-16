@@ -16,6 +16,8 @@
 
 Changes in 2.41:
 
+* Add support for the KVX instruction set.
+
 * Add support for Intel FRED instructions.
 
 * Add support for Intel LKGS instructions.

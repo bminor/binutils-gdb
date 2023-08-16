@@ -239,6 +239,7 @@ if { [is_elf_format] } then {
          || [istarget "mips*-*-*"]
          || [istarget "msp*-*-*"]
 	 || [istarget "visium-*-*"]
+	 || [istarget "kvx*-*-*"]
 	 || ![supports_gnu_unique]
      } then {
 	# hppa64 has a non-standard common directive

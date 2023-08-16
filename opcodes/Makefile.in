@@ -558,6 +558,8 @@ TARGET32_LIBOPCODES_CFILES = \
 	iq2000-dis.c \
 	iq2000-ibld.c \
 	iq2000-opc.c \
+	kvx-opc.c \
+	kvx-dis.c \
 	lm32-asm.c \
 	lm32-desc.c \
 	lm32-dis.c \
@@ -931,6 +933,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iq2000-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iq2000-ibld.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iq2000-opc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kvx-dis.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kvx-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lm32-asm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lm32-desc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lm32-dis.Plo@am__quote@

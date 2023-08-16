@@ -121,6 +121,7 @@
 #include "elf/i960.h"
 #include "elf/ia64.h"
 #include "elf/ip2k.h"
+#include "elf/kvx.h"
 #include "elf/lm32.h"
 #include "elf/iq2000.h"
 #include "elf/m32c.h"
@@ -1084,6 +1085,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_IP2K:
     case EM_IP2K_OLD:
     case EM_IQ2000:
+    case EM_KVX:
     case EM_LATTICEMICO32:
     case EM_M32C_OLD:
     case EM_M32C:
@@ -1766,6 +1768,10 @@ dump_relocations (Filedata *filedata,
 	  break;
 	case EM_IA_64:
 	  rtype = elf_ia64_reloc_type (type);
+	  break;
+
+	case EM_KVX:
+	  rtype = elf_kvx_reloc_type (type);
 	  break;
 
 	case EM_CRIS:
@@ -4734,6 +4740,17 @@ get_machine_flags (Filedata * filedata, unsigned e_flags, unsigned e_machine)
 	case EM_TI_C6000:
 	  if ((e_flags & EF_C6000_REL))
 	    out = stpcpy (out, ", relocatable module");
+	  break;
+
+	case EM_KVX:
+	  if ((e_flags & (ELF_KVX_CORE_MAJOR_MASK | ELF_KVX_CORE_MINOR_MASK)) == ELF_KVX_CORE_KV3_1)
+	    strcat (buf, ", Kalray VLIW kv3-1");
+	  else if ((e_flags & (ELF_KVX_CORE_MAJOR_MASK | ELF_KVX_CORE_MINOR_MASK)) == ELF_KVX_CORE_KV3_2)
+	    strcat (buf, ", Kalray VLIW kv3-2");
+	  else if ((e_flags & (ELF_KVX_CORE_MAJOR_MASK | ELF_KVX_CORE_MINOR_MASK)) == ELF_KVX_CORE_KV4_1)
+	    strcat (buf, ", Kalray VLIW kv4-1");
+	  else
+	    strcat (buf, ", unknown KVX MPPA");
 	  break;
 
 	case EM_MSP430:
@@ -14720,6 +14737,8 @@ is_32bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
       return reloc_type == 2; /* R_IP2K_32.  */
     case EM_IQ2000:
       return reloc_type == 2; /* R_IQ2000_32.  */
+    case EM_KVX:
+      return reloc_type == 2; /* R_KVX_32.  */
     case EM_LATTICEMICO32:
       return reloc_type == 3; /* R_LM32_32.  */
     case EM_LOONGARCH:
@@ -14917,6 +14936,8 @@ is_32bit_pcrel_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_XTENSA_OLD:
     case EM_XTENSA:
       return reloc_type == 14; /* R_XTENSA_32_PCREL.  */
+    case EM_KVX:
+      return reloc_type == 7; /* R_KVX_32_PCREL */
     default:
       /* Do not abort or issue an error message here.  Not all targets use
 	 pc-relative 32-bit relocs in their DWARF debug information and we
@@ -14968,6 +14989,8 @@ is_64bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
       return reloc_type == 1; /* R_TILEGX_64.  */
     case EM_MIPS:
       return reloc_type == 18;	/* R_MIPS_64.  */
+    case EM_KVX:
+      return reloc_type == 3; /* R_KVX_64 */
     default:
       return false;
     }
@@ -15071,6 +15094,8 @@ is_16bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_CYGNUS_MN10300:
     case EM_MN10300:
       return reloc_type == 2; /* R_MN10300_16.  */
+    case EM_KVX:
+      return reloc_type == 1; /* R_KVX_16 */
     case EM_MSP430:
       if (uses_msp430x_relocs (filedata))
 	return reloc_type == 2; /* R_MSP430_ABS16.  */
@@ -15333,6 +15358,7 @@ is_none_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_FT32:    /* R_FT32_NONE.  */
     case EM_IA_64:   /* R_IA64_NONE.  */
     case EM_K1OM:    /* R_X86_64_NONE.  */
+    case EM_KVX:      /* R_KVX_NONE.  */
     case EM_L1OM:    /* R_X86_64_NONE.  */
     case EM_M32R:    /* R_M32R_NONE.  */
     case EM_MIPS:    /* R_MIPS_NONE.  */

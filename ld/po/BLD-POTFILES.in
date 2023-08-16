@@ -115,6 +115,7 @@ eelf32ft32.c
 eelf32ip2k.c
 eelf32iq10.c
 eelf32iq2000.c
+eelf32kvx.c
 eelf32l4300.c
 eelf32lm32.c
 eelf32lm32fd.c
@@ -185,6 +186,8 @@ eelf64briscv_lp64f.c
 eelf64btsmip.c
 eelf64btsmip_fbsd.c
 eelf64hppa.c
+eelf64kvx.c
+eelf64kvx_linux.c
 eelf64loongarch.c
 eelf64lppc.c
 eelf64lppc_fbsd.c

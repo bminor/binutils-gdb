@@ -7,6 +7,7 @@
 #skip: ia64-*-* mips*-*-freebsd* mips*-*-gnu* mips*-*-irix* mips*-*-kfreebsd*
 #skip: mips*-*-linux* mips*-*-netbsd* mips*-*-openbsd* mips*-*-sysv4* sh-*-pe
 #skip: tilegx*-*-* tilepro-*-* x86_64-*-cygwin x86_64-*-mingw* x86_64-*-pe*
+#skip: kvx*-*-*
 #xfail: alpha*-*-*ecoff
 #xfail: tic30-*-coff tic4x-*-* tic54x-*-* z8k-*-*
 #
@@ -24,6 +25,7 @@
 # tic54x doesn't support .p2align
 # tilegx aligns code to minimum 8 bytes.
 # tilepro aligns code to minimum 8 bytes.
+# kvx aligns code to minimum 8 bytes.
 # x86_64-pe aligns to 16 bytes
 # z8k-coff aligns to 2 bytes
 
