@@ -16375,9 +16375,15 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 							   new_info_ptr,
 							   &bytes_read);
 	  new_info_ptr += bytes_read;
-	  scan_attributes (scanning_per_cu, new_reader, new_info_ptr, new_info_ptr,
-			   new_abbrev, name, linkage_name, flags, nullptr,
-			   parent_entry, maybe_defer, true);
+
+	  if (new_reader->cu == reader->cu && new_info_ptr == watermark_ptr)
+	    {
+	      /* Self-reference, we're done.  */
+	    }
+	  else
+	    scan_attributes (scanning_per_cu, new_reader, new_info_ptr,
+			     new_info_ptr, new_abbrev, name, linkage_name,
+			     flags, nullptr, parent_entry, maybe_defer, true);
 	}
     }
 
@@ -17888,7 +17894,11 @@ dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
       if (!spec)
 	break;
 
+      struct die_info *prev_die = die;
       die = follow_die_ref (die, spec, &cu);
+      if (die == prev_die)
+	/* Self-reference, we're done.  */
+	break;
     }
 
   return NULL;
@@ -20539,6 +20549,12 @@ follow_die_ref (struct die_info *src_die, const struct attribute *attr,
   sect_offset sect_off = attr->get_ref_die_offset ();
   struct dwarf2_cu *cu = *ref_cu;
   struct die_info *die;
+
+  if (attr->form != DW_FORM_GNU_ref_alt && src_die->sect_off == sect_off)
+    {
+      /* Self-reference, we're done.  */
+      return src_die;
+    }
 
   die = follow_die_offset (sect_off,
 			   (attr->form == DW_FORM_GNU_ref_alt
