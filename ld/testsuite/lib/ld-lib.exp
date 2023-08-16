@@ -640,7 +640,7 @@ proc run_ld_link_tests { ldtests args } {
 		    remote_upload host "dump.out"
 
 		    if { [regexp_diff "dump.out" "$srcdir/$subdir/$dumpfile"] } then {
-			verbose "output is [file_contents "dump.out"]" 2
+			verbose -log "output is [file_contents "dump.out"]" 2
 			set failed 1
 			remote_file build delete "dump.out"
 			remote_file host delete "dump.out"
@@ -1067,7 +1067,7 @@ proc run_cc_link_tests { ldtests } {
 		    }
 
 		    if { [regexp_diff "dump.out" "$srcdir/$subdir/$dumpfile"] } then {
-			verbose "output is [file_contents "dump.out"]" 2
+			verbose -log "output is [file_contents "dump.out"]" 2
 			set failed 1
 			break
 		    }
