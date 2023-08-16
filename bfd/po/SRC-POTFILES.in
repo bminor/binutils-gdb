@@ -274,7 +274,6 @@ elfxx-sparc.h
 elfxx-tilegx.c
 elfxx-tilegx.h
 elfxx-x86.c
-elfxx-x86.c
 elfxx-x86.h
 format.c
 genlink.h

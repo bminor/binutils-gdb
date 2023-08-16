@@ -21,6 +21,8 @@ config/e-i386aout.c
 config/e-i386coff.c
 config/e-i386elf.c
 config/e-mipself.c
+config/kvx-parse.c
+config/kvx-parse.h
 config/obj-aout.c
 config/obj-aout.h
 config/obj-coff.c
@@ -87,6 +89,8 @@ config/tc-ip2k.c
 config/tc-ip2k.h
 config/tc-iq2000.c
 config/tc-iq2000.h
+config/tc-kvx.c
+config/tc-kvx.h
 config/tc-lm32.c
 config/tc-lm32.h
 config/tc-loongarch.c

@@ -176,8 +176,8 @@ am__objects_1 = app.$(OBJEXT) as.$(OBJEXT) atof-generic.$(OBJEXT) \
 am_as_new_OBJECTS = $(am__objects_1)
 am__dirstamp = $(am__leading_dot)dirstamp
 as_new_OBJECTS = $(am_as_new_OBJECTS)
-am__DEPENDENCIES_1 = ../bfd/libbfd.la ../libiberty/libiberty.a
-am__DEPENDENCIES_2 =
+am__DEPENDENCIES_1 =
+am__DEPENDENCIES_2 = ../bfd/libbfd.la ../libiberty/libiberty.a
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -185,7 +185,7 @@ am__v_lt_1 =
 am_itbl_test_OBJECTS = itbl-parse.$(OBJEXT) itbl-lex.$(OBJEXT)
 itbl_test_OBJECTS = $(am_itbl_test_OBJECTS)
 itbl_test_DEPENDENCIES = itbl-tops.@OBJEXT@ itbl-test.@OBJEXT@ \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_2)
 SCRIPTS = $(noinst_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -966,6 +966,7 @@ CPU_DOCS = \
 	doc/c-hppa.texi \
 	doc/c-i386.texi \
 	doc/c-ip2k.texi \
+	doc/c-kvx.texi \
 	doc/c-lm32.texi \
 	doc/c-m32c.texi \
 	doc/c-m32r.texi \

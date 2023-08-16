@@ -105,8 +105,8 @@ $(srcdir)/$(PACKAGE).pot: $(SRC-POTFILES) $(BLD-POTFILES)
 	  --join-existing \
 	  --msgid-bugs-address=https://sourceware.org/bugzilla/ \
 	  --files-from=$(srcdir)/BLD-POTFILES.in
-	rm -f $(srcdir)/$(PACKAGE).pot
-	mv $(PACKAGE).po $(srcdir)/$(PACKAGE).pot
+	sed -e '/^#:/s,$(top_srcdir)/,,g' < $(PACKAGE).po > $@-t
+	mv -f $@-t $@
 
 $(srcdir)/cat-id-tbl.c: stamp-cat-id; @:
 $(srcdir)/stamp-cat-id: $(PACKAGE).pot
