@@ -301,11 +301,10 @@ notify_inferior_disappeared (inferior *inf)
   gdb::observers::inferior_exit.notify (inf);
 }
 
-/* If SILENT then be quiet -- don't announce a inferior exit, or the
-   exit of its threads.  */
+/* See inferior.h.  */
 
-static void
-exit_inferior_1 (struct inferior *inf, int silent)
+void
+exit_inferior (struct inferior *inf)
 {
   inf->clear_thread_list ();
 
@@ -335,27 +334,15 @@ exit_inferior_1 (struct inferior *inf, int silent)
   reinit_frame_cache ();
 }
 
-void
-exit_inferior (inferior *inf)
-{
-  exit_inferior_1 (inf, 0);
-}
-
-void
-exit_inferior_silent (inferior *inf)
-{
-  exit_inferior_1 (inf, 1);
-}
-
 /* See inferior.h.  */
 
 void
 detach_inferior (inferior *inf)
 {
-  /* Save the pid, since exit_inferior_1 will reset it.  */
+  /* Save the pid, since exit_inferior will reset it.  */
   int pid = inf->pid;
 
-  exit_inferior_1 (inf, 0);
+  exit_inferior (inf);
 
   if (print_inferior_events)
     gdb_printf (_("[Inferior %d (%s) detached]\n"),

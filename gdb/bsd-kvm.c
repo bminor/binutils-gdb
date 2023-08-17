@@ -154,7 +154,7 @@ bsd_kvm_target::close ()
 
   bsd_kvm_corefile.clear ();
   switch_to_no_thread ();
-  exit_inferior_silent (current_inferior ());
+  exit_inferior (current_inferior ());
 }
 
 static LONGEST

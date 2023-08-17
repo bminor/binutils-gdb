@@ -616,7 +616,7 @@ tfile_target::close ()
   gdb_assert (trace_fd != -1);
 
   switch_to_no_thread ();	/* Avoid confusion from thread stuff.  */
-  exit_inferior_silent (current_inferior ());
+  exit_inferior (current_inferior ());
 
   ::close (trace_fd);
   trace_fd = -1;

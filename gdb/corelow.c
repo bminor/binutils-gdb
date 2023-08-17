@@ -328,7 +328,7 @@ core_target::clear_core ()
     {
       switch_to_no_thread ();    /* Avoid confusion from thread
 				    stuff.  */
-      exit_inferior_silent (current_inferior ());
+      exit_inferior (current_inferior ());
 
       /* Clear out solib state while the bfd is still open.  See
 	 comments in clear_solib in solib.c.  */

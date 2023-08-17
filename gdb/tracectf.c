@@ -1187,7 +1187,7 @@ ctf_target::close ()
   trace_dirname.reset ();
 
   switch_to_no_thread ();	/* Avoid confusion from thread stuff.  */
-  exit_inferior_silent (current_inferior ());
+  exit_inferior (current_inferior ());
 
   trace_reset_local_state ();
 }

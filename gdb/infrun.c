@@ -1328,7 +1328,7 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
       following_inferior = add_inferior_with_spaces ();
 
       swap_terminal_info (following_inferior, execing_inferior);
-      exit_inferior_silent (execing_inferior);
+      exit_inferior (execing_inferior);
 
       following_inferior->pid = pid;
     }
