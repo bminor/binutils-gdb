@@ -409,7 +409,7 @@ public:
     m_uiout->end (Type);
   }
 
-  DISABLE_COPY_AND_ASSIGN (ui_out_emit_type<Type>);
+  DISABLE_COPY_AND_ASSIGN (ui_out_emit_type);
 
 private:
 
