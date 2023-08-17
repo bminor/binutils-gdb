@@ -318,7 +318,6 @@ BFD32_BACKENDS = \
 	elf32-i386.lo \
 	elf32-ip2k.lo \
 	elf32-iq2000.lo \
-	elf32-kvx.lo \
 	elf32-lm32.lo \
 	elf32-m32c.lo \
 	elf32-m32r.lo \
@@ -359,7 +358,6 @@ BFD32_BACKENDS = \
 	elf32-z80.lo \
 	elf32.lo \
 	elflink.lo \
-	elfxx-kvx.lo \
 	elfxx-sparc.lo \
 	elfxx-tilegx.lo \
 	elfxx-x86.lo \
@@ -495,7 +493,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-z80.c \
 	elf32.c \
 	elflink.c \
-	elfxx-kvx.c \
 	elfxx-sparc.c \
 	elfxx-tilegx.c \
 	elfxx-x86.c \
@@ -549,6 +546,7 @@ BFD64_BACKENDS = \
 	coff64-rs6000.lo \
 	elf32-aarch64.lo \
 	elf32-ia64.lo \
+	elf32-kvx.lo \
 	elf32-loongarch.lo \
 	elf32-mips.lo \
 	elf32-riscv.lo \

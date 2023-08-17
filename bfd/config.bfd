@@ -804,14 +804,13 @@ case "${targ}" in
     targ_selvecs=kvx_elf32_vec
     want64=true
     ;;
-#endif
 
   kvx-*-*)
-    targ_defvec=kvx_elf32_vec
-#ifdef BFD64
-    targ64_selvecs=kvx_elf64_vec
-#endif
+    targ_defvec=kvx_elf64_vec
+    targ_selvecs="kvx_elf64_vec kvx_elf32_vec"
+    want64=true
     ;;
+#endif
 
   lm32-*-elf | lm32-*-rtems*)
     targ_defvec=lm32_elf32_vec

@@ -736,7 +736,7 @@ elfNN_kvx_stub_name (const asection *input_section,
 	snprintf (stub_name, len, "%08x_%s+%" PRIx64 "x",
 		  (unsigned int) input_section->id,
 		  hash->root.root.root.string,
-		  rel->r_addend);
+		  (uint64_t) rel->r_addend);
     }
   else
     {
@@ -747,7 +747,7 @@ elfNN_kvx_stub_name (const asection *input_section,
 		  (unsigned int) input_section->id,
 		  (unsigned int) sym_sec->id,
 		  (unsigned int) ELFNN_R_SYM (rel->r_info),
-		  rel->r_addend);
+		  (uint64_t) rel->r_addend);
     }
 
   return stub_name;
@@ -2568,11 +2568,11 @@ elfNN_kvx_relocate_section (bfd *output_bfd,
 	  (*_bfd_error_handler)
 	    ((sym_type == STT_TLS
 	      /* xgettext:c-format */
-	      ? _("%pB(%pA+%#lx): %s used with TLS symbol %s")
+	      ? _("%pB(%pA+%#" PRIx64 "): %s used with TLS symbol %s")
 	      /* xgettext:c-format */
-	      : _("%pB(%pA+%#lx): %s used with non-TLS symbol %s")),
+	      : _("%pB(%pA+%#" PRIx64 "): %s used with non-TLS symbol %s")),
 	     input_bfd,
-	     input_section, (long) rel->r_offset, howto->name, name);
+	     input_section, (uint64_t) rel->r_offset, howto->name, name);
 	}
 
       /* Original aarch64 has relaxation handling for TLS here. */
