@@ -214,7 +214,23 @@ private:
 };
 
 /* Target specific branch trace information.  */
-struct btrace_target_info;
+struct btrace_target_info
+{
+  btrace_target_info (ptid_t ptid) : ptid (ptid)
+    {}
+
+  btrace_target_info (ptid_t ptid, btrace_config conf)
+    : ptid (ptid), conf (conf)
+    {}
+
+  virtual ~btrace_target_info () = default;
+
+  /* The ptid of this thread.  */
+  ptid_t ptid {};
+
+  /* The obtained branch trace configuration.  */
+  btrace_config conf {};
+};
 
 /* Enumeration of btrace read types.  */
 

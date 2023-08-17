@@ -14423,15 +14423,6 @@ parse_xml_btrace_conf (struct btrace_config *conf, const char *xml)
 #endif  /* !defined (HAVE_LIBEXPAT) */
 }
 
-struct btrace_target_info
-{
-  /* The ptid of the traced thread.  */
-  ptid_t ptid;
-
-  /* The obtained branch trace configuration.  */
-  struct btrace_config conf;
-};
-
 /* Reset our idea of our target's btrace configuration.  */
 
 static void
@@ -14502,7 +14493,7 @@ remote_target::btrace_sync_conf (const btrace_config *conf)
 /* Read TP's btrace configuration from the target and store it into CONF.  */
 
 static void
-btrace_read_config (thread_info *tp, struct btrace_config *conf)
+btrace_read_config (thread_info *tp, btrace_config *conf)
 {
   /* target_read_stralloc relies on INFERIOR_PTID.  */
   scoped_restore_current_thread restore_thread;
@@ -14564,9 +14555,8 @@ remote_target::remote_btrace_maybe_reopen ()
 		      btrace_format_string (rs->btrace_config.format));
 	}
 
-      tp->btrace.target = XCNEW (struct btrace_target_info);
-      tp->btrace.target->ptid = tp->ptid;
-      tp->btrace.target->conf = rs->btrace_config;
+      tp->btrace.target
+	= new btrace_target_info { tp->ptid, rs->btrace_config };
     }
 }
 
@@ -14576,7 +14566,6 @@ struct btrace_target_info *
 remote_target::enable_btrace (thread_info *tp,
 			      const struct btrace_config *conf)
 {
-  struct btrace_target_info *tinfo = NULL;
   struct packet_config *packet = NULL;
   struct remote_state *rs = get_remote_state ();
   char *buf = rs->buf.data ();
@@ -14620,8 +14609,7 @@ remote_target::enable_btrace (thread_info *tp,
 	       target_pid_to_str (ptid).c_str ());
     }
 
-  tinfo = XCNEW (struct btrace_target_info);
-  tinfo->ptid = ptid;
+  btrace_target_info *tinfo = new btrace_target_info { ptid };
 
   /* If we fail to read the configuration, we lose some information, but the
      tracing itself is not impacted.  */
@@ -14667,7 +14655,7 @@ remote_target::disable_btrace (struct btrace_target_info *tinfo)
 	       target_pid_to_str (tinfo->ptid).c_str ());
     }
 
-  xfree (tinfo);
+  delete tinfo;
 }
 
 /* Teardown branch tracing.  */
@@ -14676,7 +14664,7 @@ void
 remote_target::teardown_btrace (struct btrace_target_info *tinfo)
 {
   /* We must not talk to the target during teardown.  */
-  xfree (tinfo);
+  delete tinfo;
 }
 
 /* Read the branch trace.  */
