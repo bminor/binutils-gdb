@@ -18,6 +18,10 @@
 #ifndef COMMON_DEFAULT_INIT_ALLOC_H
 #define COMMON_DEFAULT_INIT_ALLOC_H
 
+#if __cplusplus >= 202002L
+#include <memory_resource>
+#endif
+
 namespace gdb {
 
 /* An allocator that default constructs using default-initialization
@@ -29,7 +33,14 @@ namespace gdb {
    adapter that given an allocator A, overrides 'A::construct()'.  'A'
    defaults to std::allocator<T>.  */
 
-template<typename T, typename A = std::allocator<T>>
+template<typename T,
+	 typename A
+#if __cplusplus >= 202002L
+	 = std::pmr::polymorphic_allocator<T>
+#else
+	 = std::allocator<T>
+#endif
+	 >
 class default_init_allocator : public A
 {
 public:
