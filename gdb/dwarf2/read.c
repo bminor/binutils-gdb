@@ -19203,7 +19203,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      else
 		list_to_add = cu->list_in_scope;
 
-	      if (is_ada_import_or_export (cu, name, linkagename))
+	      if (list_to_add != nullptr
+		  && is_ada_import_or_export (cu, name, linkagename))
 		{
 		  /* This is a Pragma Export.  A Pragma Import won't
 		     be seen here, because it will not have a location
