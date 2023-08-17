@@ -2706,7 +2706,7 @@ static const char *test_symbols[] = {
   /* A UTF-8 name with multi-byte sequences to make sure that
      cp-name-parser understands this as a single identifier ("função"
      is "function" in PT).  */
-  u8"u8função",
+  (const char *)u8"u8função",
 
   /* Test a symbol name that ends with a 0xff character, which is a
      valid character in non-UTF-8 source character sets (e.g. Latin1
