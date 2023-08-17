@@ -393,12 +393,6 @@ extern void btrace_clear (struct thread_info *);
 /* Clear the branch trace for all threads when an object file goes away.  */
 extern void btrace_free_objfile (struct objfile *);
 
-/* Parse a branch trace xml document XML into DATA.  */
-extern void parse_xml_btrace (struct btrace_data *data, const char *xml);
-
-/* Parse a branch trace configuration xml document XML into CONF.  */
-extern void parse_xml_btrace_conf (struct btrace_config *conf, const char *xml);
-
 /* Dereference a branch trace instruction iterator.  Return a pointer to the
    instruction the iterator points to.
    May return NULL if the iterator points to a gap in the trace.  */
