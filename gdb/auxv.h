@@ -48,7 +48,7 @@ extern int svr4_auxv_parse (struct gdbarch *gdbarch, const gdb_byte **readptr,
 
 /* Read auxv data from the current inferior's target stack.  */
 
-extern gdb::optional<gdb::byte_vector> target_read_auxv ();
+extern const gdb::optional<gdb::byte_vector> &target_read_auxv ();
 
 /* Read auxv data from OPS.  */
 

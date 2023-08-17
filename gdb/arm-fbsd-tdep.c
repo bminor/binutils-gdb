@@ -244,7 +244,7 @@ arm_fbsd_read_description_auxv (const gdb::optional<gdb::byte_vector> &auxv,
 const struct target_desc *
 arm_fbsd_read_description_auxv (bool tls)
 {
-  gdb::optional<gdb::byte_vector> auxv = target_read_auxv ();
+  const gdb::optional<gdb::byte_vector> &auxv = target_read_auxv ();
   return arm_fbsd_read_description_auxv (auxv,
 					 current_inferior ()->top_target (),
 					 current_inferior ()->gdbarch,

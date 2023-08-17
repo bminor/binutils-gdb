@@ -354,7 +354,7 @@ invalidate_auxv_cache (void)
 
 /* See auxv.h.  */
 
-gdb::optional<gdb::byte_vector>
+const gdb::optional<gdb::byte_vector> &
 target_read_auxv ()
 {
   inferior *inf = current_inferior ();
@@ -410,7 +410,7 @@ target_auxv_search (const gdb::byte_vector &auxv, target_ops *ops,
 int
 target_auxv_search (CORE_ADDR match, CORE_ADDR *valp)
 {
-  gdb::optional<gdb::byte_vector> auxv = target_read_auxv ();
+  const gdb::optional<gdb::byte_vector> &auxv = target_read_auxv ();
 
   if (!auxv.has_value ())
     return -1;
@@ -564,7 +564,7 @@ fprint_target_auxv (struct ui_file *file)
   struct gdbarch *gdbarch = target_gdbarch ();
   CORE_ADDR type, val;
   int ents = 0;
-  gdb::optional<gdb::byte_vector> auxv = target_read_auxv ();
+  const gdb::optional<gdb::byte_vector> &auxv = target_read_auxv ();
 
   if (!auxv.has_value ())
     return -1;
