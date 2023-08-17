@@ -26,6 +26,8 @@
 #include <string>
 #include <functional>
 
+#include "gdbsupport/underlying.h"
+
 /* Reasons for calling throw_exceptions().  NOTE: all reason values
    must be different from zero.  enum value 0 is reserved for internal
    use as the return value from an initial setjmp().  */
@@ -200,7 +202,7 @@ struct hash<gdb_exception>
 {
   size_t operator() (const gdb_exception &exc) const
   {
-    size_t result = exc.reason + exc.error;
+    size_t result = to_underlying (exc.reason) + to_underlying (exc.error);
     if (exc.message != nullptr)
       result += std::hash<std::string> {} (*exc.message);
     return result;

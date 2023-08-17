@@ -10850,7 +10850,8 @@ remote_target::insert_watchpoint (CORE_ADDR addr, int len,
   char *p;
   enum Z_packet_type packet = watchpoint_to_Z_packet (type);
 
-  if (m_features.packet_support (PACKET_Z0 + packet) == PACKET_DISABLE)
+  if (m_features.packet_support ((to_underlying (PACKET_Z0)
+				  + to_underlying (packet))) == PACKET_DISABLE)
     return 1;
 
   /* Make sure the remote is pointing at the right process, if
@@ -10867,7 +10868,8 @@ remote_target::insert_watchpoint (CORE_ADDR addr, int len,
   putpkt (rs->buf);
   getpkt (&rs->buf, 0);
 
-  switch (m_features.packet_ok (rs->buf, PACKET_Z0 + packet))
+  switch (m_features.packet_ok (rs->buf, (to_underlying (PACKET_Z0)
+					  + to_underlying (packet))))
     {
     case PACKET_ERROR:
       return -1;
@@ -10898,7 +10900,8 @@ remote_target::remove_watchpoint (CORE_ADDR addr, int len,
   char *p;
   enum Z_packet_type packet = watchpoint_to_Z_packet (type);
 
-  if (m_features.packet_support (PACKET_Z0 + packet) == PACKET_DISABLE)
+  if (m_features.packet_support ((to_underlying (PACKET_Z0)
+				  + to_underlying (packet))) == PACKET_DISABLE)
     return -1;
 
   /* Make sure the remote is pointing at the right process, if
@@ -10914,7 +10917,8 @@ remote_target::remove_watchpoint (CORE_ADDR addr, int len,
   putpkt (rs->buf);
   getpkt (&rs->buf, 0);
 
-  switch (m_features.packet_ok (rs->buf, PACKET_Z0 + packet))
+  switch (m_features.packet_ok (rs->buf, (to_underlying (PACKET_Z0)
+					  + to_underlying (packet))))
     {
     case PACKET_ERROR:
     case PACKET_UNKNOWN:

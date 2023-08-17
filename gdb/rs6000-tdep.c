@@ -2495,7 +2495,8 @@ rs6000_register_name (struct gdbarch *gdbarch, int regno)
 
   /* Hide the upper halves of the cvs0~cvs31 registers.  */
   if (PPC_CVSR0_UPPER_REGNUM <= regno
-      && regno < PPC_CVSR0_UPPER_REGNUM + ppc_num_gprs)
+      && regno < (to_underlying (PPC_CVSR0_UPPER_REGNUM)
+		  + to_underlying (ppc_num_gprs)))
     return "";
 
   /* Check if the SPE pseudo registers are available.  */
