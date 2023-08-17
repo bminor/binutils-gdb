@@ -9,10 +9,6 @@
         ;; The following instruction has an undefined symbol as a
         ;; target.  It is not to be relaxed.
         ja undefined + 10
-        ;; The following instructions are relaxed to JAL instructions
-        ;; so they can fit their displacements.
-        ja -32769
-        ja 32768
         ;; The following instructions refer to a defined symbol that
         ;; is not on reach.  They shall be relaxed to a JAL.
         ja tail

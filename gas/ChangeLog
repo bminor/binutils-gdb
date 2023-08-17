@@ -1,3 +1,26 @@
+2023-08-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-bpf.c (check_immediate_overflow): New function.
+	(encode_insn): Use check_immediate_overflow.
+	(md_assemble): Do not relax instructions with
+	constant disp16 fields.
+	* doc/c-bpf.texi (BPF Instructions): Add note about how numerical
+	literal values are interpreted for instruction immediate operands.
+	* testsuite/gas/bpf/disp16-overflow.s: Adapt accordingly.
+	* testsuite/gas/bpf/jump-relax-jump.s: Likewise.
+	* testsuite/gas/bpf/jump-relax-jump.d: Likewise.
+	* testsuite/gas/bpf/jump-relax-jump-be.d: Likewise.
+	* testsuite/gas/bpf/jump-relax-ja.s: Likewise.
+	* testsuite/gas/bpf/jump-relax-ja.d: Likewise.
+	* testsuite/gas/bpf/jump-relax-ja-be.d: Likewise.
+	* testsuite/gas/bpf/disp16-overflow-relax.l: Likewise.
+	* testsuite/gas/bpf/imm32-overflow.s: Likewise.
+	* testsuite/gas/bpf/disp32-overflow.s: Likewise.
+	* testsuite/gas/bpf/disp16-overflow.l: Likewise.
+	* testsuite/gas/bpf/disp32-overflow.l: Likewise.
+	* testsuite/gas/bpf/imm32-overflow.l: Likewise.
+	* testsuite/gas/bpf/offset16-overflow.l: Likewise.
+
 2023-07-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config/tc-bpf.h (elf_tc_final_processing): Define.

@@ -286,6 +286,26 @@ signed_overflow (offsetT value, unsigned bits)
   return (value < -lim || value >= lim);
 }
 
+/* Return non-zero if the two's complement encoding of VALUE would
+   overflow an immediate field of width BITS bits.  */
+
+static bool
+immediate_overflow (int64_t value, unsigned bits)
+{
+  if (value < 0)
+    return signed_overflow (value, bits);
+  else
+    {
+      valueT lim;
+
+      if (bits >= sizeof (valueT) * 8)
+        return false;
+
+      lim = (valueT) 1 << bits;
+      return ((valueT) value >= lim);
+    }
+}
+
 
 /* Functions concerning relocs.  */
 
@@ -379,7 +399,7 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED, fixS *fixP)
 #define RELAX_BRANCH_UNCOND(i) (((i) & 1) != 0)
 
 
-/* Compute the length of a branch seuqence, and adjust the stored
+/* Compute the length of a branch sequence, and adjust the stored
    length accordingly.  If FRAG is NULL, the worst-case length is
    returned.  */
 
@@ -854,7 +874,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
    immediates are encoded as zeroes.  */
 
 static void
-encode_insn (struct bpf_insn *insn, char *bytes, int relaxed)
+encode_insn (struct bpf_insn *insn, char *bytes,
+             int relaxed ATTRIBUTE_UNUSED)
 {
   uint8_t src, dst;
 
@@ -911,8 +932,8 @@ encode_insn (struct bpf_insn *insn, char *bytes, int relaxed)
     {
       int64_t imm = insn->imm32.X_add_number;
 
-      if (signed_overflow (imm, 32))
-        as_bad (_("signed immediate out of range, shall fit in 32 bits"));
+      if (immediate_overflow (imm, 32))
+        as_bad (_("immediate out of range, shall fit in 32 bits"));
       else
         encode_int32 (insn->imm32.X_add_number, bytes + 4);        
     }
@@ -921,8 +942,8 @@ encode_insn (struct bpf_insn *insn, char *bytes, int relaxed)
     {
       int64_t disp = insn->disp32.X_add_number;
 
-      if (signed_overflow (disp, 32))
-        as_bad (_("signed pc-relative offset out of range, shall fit in 32 bits"));
+      if (immediate_overflow (disp, 32))
+        as_bad (_("pc-relative offset out of range, shall fit in 32 bits"));
       else
         encode_int32 (insn->disp32.X_add_number, bytes + 4);
     }
@@ -931,8 +952,8 @@ encode_insn (struct bpf_insn *insn, char *bytes, int relaxed)
     {
       int64_t offset = insn->offset16.X_add_number;
 
-      if (signed_overflow (offset, 16))
-        as_bad (_("signed pc-relative offset out of range, shall fit in 16 bits"));
+      if (immediate_overflow (offset, 16))
+        as_bad (_("pc-relative offset out of range, shall fit in 16 bits"));
       else
         encode_int16 (insn->offset16.X_add_number, bytes + 2);
     }
@@ -941,8 +962,8 @@ encode_insn (struct bpf_insn *insn, char *bytes, int relaxed)
     {
       int64_t disp = insn->disp16.X_add_number;
 
-      if (!relaxed && signed_overflow (disp, 16))
-        as_bad (_("signed pc-relative offset out of range, shall fit in 16 bits"));
+      if (immediate_overflow (disp, 16))
+        as_bad (_("pc-relative offset out of range, shall fit in 16 bits"));
       else
         encode_int16 (insn->disp16.X_add_number, bytes + 2);
     }
@@ -1517,7 +1538,7 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
                       break;
                     }
                   insn.has_disp16 = 1;
-                  insn.is_relaxable = 1;
+                  insn.is_relaxable = (insn.disp16.X_op != O_constant);
                   p += 4;
                 }
               else if (strncmp (p, "%d32", 4) == 0)

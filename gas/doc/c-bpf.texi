@@ -172,6 +172,14 @@ Signed 32-bit immediate.
 Signed 64-bit immediate.
 @end table
 
+@noindent
+Note that the assembler allows to express the value for an immediate
+using any numerical literal whose two's complement encoding fits in
+the immediate field.  For example, @code{-2}, @code{0xfffffffe} and
+@code{4294967294} all denote the same encoded 32-bit immediate, whose
+value may be then interpreted by different instructions as either as a
+negative or a positive number.
+
 @subsection Arithmetic instructions
 
 The destination register in these instructions act like an

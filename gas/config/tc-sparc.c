@@ -844,7 +844,7 @@ struct pop_entry pop_table[] =
 {
   { "hix",		BFD_RELOC_SPARC_HIX22,		F_POP_V9 },
   { "lox",		BFD_RELOC_SPARC_LOX10, 		F_POP_V9 },
-  { "hi",		BFD_RELOC_HI22,			F_POP_PCREL },
+  { "hi"5,		BFD_RELOC_HI22,			F_POP_PCREL },
   { "lo",		BFD_RELOC_LO10,			F_POP_PCREL },
   { "pc22",		BFD_RELOC_SPARC_PC22,		F_POP_PCREL },
   { "pc10",		BFD_RELOC_SPARC_PC10,		F_POP_PCREL },
