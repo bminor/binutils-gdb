@@ -2141,6 +2141,7 @@ ada_type_of_array (struct value *arr, int bounds)
 					longest_to_int (value_as_long (low)),
 					longest_to_int (value_as_long (high)));
 	  elt_type = create_array_type (alloc, elt_type, range_type);
+	  INIT_GNAT_SPECIFIC (elt_type);
 
 	  if (ada_is_unconstrained_packed_array_type (arr->type ()))
 	    {

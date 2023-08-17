@@ -28,6 +28,7 @@
 #include "expression.h"
 #include "cp-abi.h"
 #include "python.h"
+#include "ada-lang.h"
 
 #include "python-internal.h"
 
@@ -1096,6 +1097,8 @@ valpy_getitem (PyObject *self, PyObject *key)
 	      if (type->code () != TYPE_CODE_ARRAY
 		  && type->code () != TYPE_CODE_PTR)
 		  error (_("Cannot subscript requested type."));
+	      else if (ADA_TYPE_P (type))
+		res_val = ada_value_subscript (tmp, 1, &idx);
 	      else
 		res_val = value_subscript (tmp, value_as_long (idx));
 	    }
