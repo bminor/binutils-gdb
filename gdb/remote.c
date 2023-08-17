@@ -11609,7 +11609,7 @@ remote_target::search_memory (CORE_ADDR start_addr, ULONGEST search_space_len,
   int found;
   ULONGEST found_addr;
 
-  auto read_memory = [=] (CORE_ADDR addr, gdb_byte *result, size_t len)
+  auto read_memory = [this] (CORE_ADDR addr, gdb_byte *result, size_t len)
     {
       return (target_read (this, TARGET_OBJECT_MEMORY, NULL, result, addr, len)
 	      == len);

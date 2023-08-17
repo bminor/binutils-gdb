@@ -473,7 +473,7 @@ ravenscar_thread_target::update_thread_list ()
      (m_base_ptid) and the running thread, that may not have been included
      to system.tasking.debug's list yet.  */
 
-  iterate_over_live_ada_tasks ([=] (struct ada_task_info *task)
+  iterate_over_live_ada_tasks ([this] (struct ada_task_info *task)
 			       {
 				 this->add_thread (task);
 			       });

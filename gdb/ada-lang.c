@@ -10730,7 +10730,7 @@ ada_binop_addsub_operation::evaluate (struct type *expect_type,
   value *arg1 = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
   value *arg2 = std::get<2> (m_storage)->evaluate_with_coercion (exp, noside);
 
-  auto do_op = [=] (LONGEST x, LONGEST y)
+  auto do_op = [this] (LONGEST x, LONGEST y)
     {
       if (std::get<0> (m_storage) == BINOP_ADD)
 	return x + y;
