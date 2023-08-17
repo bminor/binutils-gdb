@@ -49,7 +49,7 @@ be a compile-time error.  */
 template<typename T>
 struct IsMemsettable
   : gdb::Or<std::is_void<T>,
-	    std::is_pod<T>>
+	    gdb::And<std::is_standard_layout<T>, std::is_trivial<T>>>
 {};
 
 template <typename T,

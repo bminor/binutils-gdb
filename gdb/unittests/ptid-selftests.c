@@ -29,7 +29,9 @@ namespace ptid {
    This is a requirement for as long as we have ptids embedded in
    structures allocated with malloc. */
 
-static_assert (std::is_pod<ptid_t>::value, "ptid_t is POD");
+static_assert (gdb::And<std::is_standard_layout<ptid_t>,
+			std::is_trivial<ptid_t>>::value,
+	       "ptid_t is POD");
 
 /* We want to avoid implicit conversion from int to ptid_t.  */
 
