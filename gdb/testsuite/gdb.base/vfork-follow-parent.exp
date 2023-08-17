@@ -30,7 +30,9 @@ if { [build_executable "compile $binfile3" $binfile3 $srcfile2] } {
     return -1
 }
 
-set remote_exec_prog [gdb_remote_download target $binfile3]
+if { [is_remote target] } {
+    gdb_remote_download target [standard_output_file $binfile3]
+}
 
 set opts [list debug additional_flags=-DTEST_EXIT]
 if { [build_executable "compile ${binfile}" ${binfile} ${srcfile} ${opts}] } {
