@@ -12250,13 +12250,13 @@ i386_index_check (const char *operand_string)
       /* Memory operands of string insns are special in that they only allow
 	 a single register (rDI, rSI, or rBX) as their memory address.  */
       const reg_entry *expected_reg;
-      static const char *di_si[][2] =
+      static const char di_si[][2][4] =
 	{
 	  { "esi", "edi" },
 	  { "si", "di" },
 	  { "rsi", "rdi" }
 	};
-      static const char *bx[] = { "ebx", "bx", "rbx" };
+      static const char bx[][4] = { "ebx", "bx", "rbx" };
 
       kind = "string address";
 
