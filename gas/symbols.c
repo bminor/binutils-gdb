@@ -2420,14 +2420,13 @@ S_IS_LOCAL (symbolS *s)
   if (s->flags.local_symbol)
     return 1;
 
-  flags = s->bsym->flags;
-
-  /* Sanity check.  */
-  if ((flags & BSF_LOCAL) && (flags & BSF_GLOBAL))
-    abort ();
+  if (S_IS_EXTERNAL (s))
+    return 0;
 
   if (bfd_asymbol_section (s->bsym) == reg_section)
     return 1;
+
+  flags = s->bsym->flags;
 
   if (flag_strip_local_absolute
       /* Keep BSF_FILE symbols in order to allow debuggers to identify
