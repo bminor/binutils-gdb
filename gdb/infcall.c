@@ -1233,7 +1233,7 @@ call_function_by_hand_dummy (struct value *function,
   if (return_method == return_method_hidden_param)
     {
       /* Add the new argument to the front of the argument list.  */
-      new_args.reserve (args.size ());
+      new_args.reserve (1 + args.size ());
       new_args.push_back
 	(value_from_pointer (lookup_pointer_type (values_type), struct_addr));
       new_args.insert (new_args.end (), args.begin (), args.end ());
