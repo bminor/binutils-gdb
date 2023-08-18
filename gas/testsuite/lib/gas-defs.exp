@@ -357,10 +357,6 @@ proc verbose_eval { expr { level 1 } } {
     if $verbose>$level then { eval verbose "$expr" $level }
 }
 
-if { [istarget loongarch*-*-*] } {
-    rename prune_warnings prune_warnings_other
-}
-
 # run_list_test NAME (optional): OPTS TESTNAME
 #
 # Assemble the file "NAME.s" with command line options OPTS and
