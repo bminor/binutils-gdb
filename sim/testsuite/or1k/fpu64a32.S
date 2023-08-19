@@ -98,7 +98,7 @@ start_tests:
 	 *  r14,r15  e  as double
 	 *  r16,r17  a long long
 	 */
-	l.ori	r11, r0, ha(anchor)
+	l.movhi	r11, ha(anchor)
 	l.addi	r11, r11, lo(anchor)
 	l.lwz	r12, 0(r11)
 	l.lwz	r13, 4(r11)

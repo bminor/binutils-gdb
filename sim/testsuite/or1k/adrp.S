@@ -17,9 +17,9 @@
 
 # mach: or1k
 # output: report(0x00002064);\n
-# output: report(0x00012138);\n
+# output: report(0x0001a008);\n
 # output: report(0x00002000);\n
-# output: report(0x00012000);\n
+# output: report(0x0001a000);\n
 # output: report(0x00002000);\n
 # output: report(0x00014000);\n
 # output: report(0x00000000);\n
@@ -32,6 +32,7 @@
 	.section .data
 	.org 0x10000
 	.align 4
+pad:	.quad 	0
 	.type   pi, @object
 	.size   pi, 4
 pi:
