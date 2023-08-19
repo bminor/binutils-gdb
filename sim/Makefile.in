@@ -5040,7 +5040,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_cris_TRUE@cris/cgen-cpu-decode-v32f:
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)cpu=crisv32f mach=crisv32 SUFFIX=v32 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $(srcdir)/cris/semv32-switch.c $(srcdir)/cris/semcrisv32f-switch.c
-@SIM_ENABLE_ARCH_cris_TRUE@$(srcdir)/cris/cpuv32.h $(srcdir)/cris/cpuv32.c $(srcdir)/cris/semcrisv32f-switch.c %$(srcdir)/cris/modelv32.c $(srcdir)/cris/decodev32.c $(srcdir)/cris/decodev32.h: @CGEN_MAINT@ cris/cgen-cpu-decode-v32f
+@SIM_ENABLE_ARCH_cris_TRUE@$(srcdir)/cris/cpuv32.h $(srcdir)/cris/cpuv32.c $(srcdir)/cris/semcrisv32f-switch.c $(srcdir)/cris/modelv32.c $(srcdir)/cris/decodev32.c $(srcdir)/cris/decodev32.h: @CGEN_MAINT@ cris/cgen-cpu-decode-v32f
 @SIM_ENABLE_ARCH_d10v_TRUE@$(d10v_libsim_a_OBJECTS) $(d10v_libsim_a_LIBADD): d10v/hw-config.h
 
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v/modules.o: d10v/modules.c

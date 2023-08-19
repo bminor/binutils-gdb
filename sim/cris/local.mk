@@ -125,4 +125,4 @@ $(srcdir)/%D%/cpuv10.h $(srcdir)/%D%/cpuv10.c $(srcdir)/%D%/semcrisv10f-switch.c
 %D%/cgen-cpu-decode-v32f:
 	$(AM_V_GEN)cpu=crisv32f mach=crisv32 SUFFIX=v32 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
 	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $(srcdir)/%D%/semv32-switch.c $(srcdir)/%D%/semcrisv32f-switch.c
-$(srcdir)/%D%/cpuv32.h $(srcdir)/%D%/cpuv32.c $(srcdir)/%D%/semcrisv32f-switch.c %$(srcdir)/%D%/modelv32.c $(srcdir)/%D%/decodev32.c $(srcdir)/%D%/decodev32.h: @CGEN_MAINT@ %D%/cgen-cpu-decode-v32f
+$(srcdir)/%D%/cpuv32.h $(srcdir)/%D%/cpuv32.c $(srcdir)/%D%/semcrisv32f-switch.c $(srcdir)/%D%/modelv32.c $(srcdir)/%D%/decodev32.c $(srcdir)/%D%/decodev32.h: @CGEN_MAINT@ %D%/cgen-cpu-decode-v32f
