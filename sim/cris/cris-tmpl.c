@@ -261,6 +261,9 @@ MY (make_thread_cpu_data) (SIM_CPU *current_cpu, void *context)
   return info;
 }
 
+/* Placate -Wmissing-prototypes when mloop.in isn't used.  */
+void MY (f_specific_init) (SIM_CPU *current_cpu);
+
 /* Hook function for per-cpu simulator initialization.  */
 
 void
@@ -276,6 +279,13 @@ MY (f_specific_init) (SIM_CPU *current_cpu)
 #endif
 }
 
+/* Placate -Wmissing-prototypes when mloop.in isn't used.  */
+int MY (XCONCAT3 (f_model_crisv,BASENUM, _u_stall))
+     (SIM_CPU *current_cpu ATTRIBUTE_UNUSED,
+      const IDESC *idesc,
+      int unit_num,
+      int referenced ATTRIBUTE_UNUSED);
+
 /* Model function for arbitrary single stall cycles.  */
 
 int
