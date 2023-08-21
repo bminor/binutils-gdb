@@ -801,13 +801,13 @@ case "${targ}" in
 #ifdef BFD64
   kvx-*-linux*)
     targ_defvec=kvx_elf64_vec
+    targ_selvecs=kvx_elf32_vec
     want64=true
     ;;
 #endif
 
   kvx-*-*)
     targ_defvec=kvx_elf32_vec
-    targ_selvecs="kvx_elf32_vec"
 #ifdef BFD64
     targ64_selvecs=kvx_elf64_vec
 #endif
