@@ -207,15 +207,9 @@ static struct kvx_dis_env env = {
   .kvx_max_dec_registers = 0
 };
 
-static bool
+static void
 kvx_dis_init (struct disassemble_info *info)
 {
-  if (info->arch != bfd_arch_kvx)
-    {
-      (*info->fprintf_func) (info->stream, "error: Unknown architecture\n");
-      return -1;
-    }
-
   env.kvx_arch_size = 32;
   switch (info->mach)
     {
@@ -224,6 +218,7 @@ kvx_dis_init (struct disassemble_info *info)
       /* fallthrough */
     case bfd_mach_kv3_1_usr:
     case bfd_mach_kv3_1:
+    default:
       env.opc_table = kvx_kv3_v1_optab;
       env.kvx_regfiles = kvx_kv3_v1_regfiles;
       env.kvx_registers = kvx_kv3_v1_registers;
@@ -252,26 +247,14 @@ kvx_dis_init (struct disassemble_info *info)
       env.kvx_modifiers = kvx_kv4_v1_modifiers;
       env.kvx_dec_registers = kvx_kv4_v1_dec_registers;
       break;
-
-    default:
-      /* Core not supported.  */
-      (*info->fprintf_func) (info->stream, "disassembling not supported for "
-			     "this KVX core! (core:%d)", (int) info->mach);
-      return -1;
     }
 
   env.kvx_max_dec_registers = env.kvx_regfiles[KVX_REGFILE_DEC_REGISTERS];
 
   if (info->disassembler_options)
-    {
-      parse_kvx_dis_options (info->disassembler_options);
+    parse_kvx_dis_options (info->disassembler_options);
 
-      /* To avoid repeated parsing of these options, we remove them here.  */
-      info->disassembler_options = NULL;
-    }
   env.initialized_p = 1;
-
-  return env.initialized_p;
 }
 
 static int
