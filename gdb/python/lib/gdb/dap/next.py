@@ -23,9 +23,10 @@ from .state import set_thread
 
 # Helper function to set the current thread and the scheduler-locking
 # mode.  Returns True if scheduler-locking was successfully set to
-# 'on', False in all other cases, including error.
+# 'on', False in all other cases, including error.  When SELECT is
+# True, also select that thread's newest frame.
 @in_gdb_thread
-def _handle_thread_step(thread_id, single_thread):
+def _handle_thread_step(thread_id, single_thread, select=False):
     # Ensure we're going to step the correct thread.
     set_thread(thread_id)
     if single_thread:
@@ -41,6 +42,10 @@ def _handle_thread_step(thread_id, single_thread):
         gdb.execute("set scheduler-locking " + arg, from_tty=True, to_string=True)
     except gdb.error:
         result = False
+    # Other DAP code may select a frame, and the "finish" command uses
+    # the selected frame.
+    if select:
+        gdb.newest_frame().select()
     return result
 
 
@@ -70,7 +75,7 @@ def step_in(
 
 @request("stepOut")
 def step_out(*, threadId: int, singleThread: bool = False):
-    send_gdb(lambda: _handle_thread_step(threadId, singleThread))
+    send_gdb(lambda: _handle_thread_step(threadId, singleThread, True))
     send_gdb(ExecutionInvoker("finish", StopKinds.STEP))
 
 

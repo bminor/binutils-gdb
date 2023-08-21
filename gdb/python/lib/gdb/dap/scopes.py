@@ -49,6 +49,10 @@ class _ScopeReference(BaseReference):
 
     @in_gdb_thread
     def fetch_one_child(self, idx):
+        # Make sure to select the frame first.  Ideally this would not
+        # be needed, but this is a way to set the current language
+        # properly so that language-dependent APIs will work.
+        self.inf_frame.select()
         # Here SYM will conform to the SymValueWrapper interface.
         sym = self.var_list[idx]
         name = str(sym.symbol())
