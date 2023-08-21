@@ -56,8 +56,7 @@ Disassembly of section .text:
  168:	c4 30 00 00 ff ff fd 66 	arsh32 %r3,0xfffffd66
  170:	c4 40 00 00 7e ad be ef 	arsh32 %r4,0x7eadbeef
  178:	cc 56 00 00 00 00 00 00 	arsh32 %r5,%r6
- 180:	8c 20 00 00 00 00 00 00 	neg32 %r2
+ 180:	84 20 00 00 00 00 00 00 	neg32 %r2
  188:	bc 12 00 08 00 00 00 00 	movs32 %r1,%r2,8
  190:	bc 12 00 10 00 00 00 00 	movs32 %r1,%r2,16
  198:	bc 12 00 20 00 00 00 00 	movs32 %r1,%r2,32
- 1a0:	84 10 00 00 00 00 0f 00 	neg32 %r1,0xf00

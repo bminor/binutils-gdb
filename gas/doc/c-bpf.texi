@@ -256,16 +256,8 @@ registers.
 64-bit right arithmetic shift, by @code{rs} or @code{imm32} bits.
 
 @item neg rd
-@itemx neg rd, imm32
 @itemx rd = - rd
-@itemx rd = - imm32
 64-bit arithmetic negation.
-
-Note that in the @code{rd = - imm32} syntax there must be at least
-one white space between @code{-} and @code{imm32}.  Otherwise the
-instruction is parsed as a @code{mov rd, imm32} instruction with a
-negative 32-bit immediate.  This is a consequence of a syntactic
-ambiguity in the pseudoc syntax.
 
 @item mov rd, rs
 @itemx mov rd, imm32
@@ -363,16 +355,8 @@ in the same instruction.
 32-bit right arithmetic shift, by @code{rs} or @code{imm32} bits.
 
 @item neg32 rd
-@itemx neg32 rd, imm32
 @itemx rd = - rd
-@itemx rd = - imm32
 32-bit arithmetic negation.
-
-Note that in the @code{rd = - imm32} syntax there must be at least
-one white space between @code{-} and @code{imm32}.  Otherwise the
-instruction is parsed as a @code{mov32 rd, imm32} instruction with a
-negative 32-bit immediate.  This is a consequence of a syntactic
-ambiguity in the pseudoc syntax.
 
 @item mov32 rd, rs
 @itemx mov32 rd, imm32

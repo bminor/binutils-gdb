@@ -56,7 +56,7 @@ Disassembly of section .text:
  168:	c7 03 00 00 66 fd ff ff 	arsh %r3,0xfffffd66
  170:	c7 04 00 00 ef be ad 7e 	arsh %r4,0x7eadbeef
  178:	cf 65 00 00 00 00 00 00 	arsh %r5,%r6
- 180:	8f 02 00 00 00 00 00 00 	neg %r2
+ 180:	87 02 00 00 00 00 00 00 	neg %r2
  188:	d4 09 00 00 10 00 00 00 	endle %r9,16
  190:	d4 08 00 00 20 00 00 00 	endle %r8,32
  198:	d4 07 00 00 40 00 00 00 	endle %r7,64
@@ -69,4 +69,3 @@ Disassembly of section .text:
  1d0:	d7 01 00 00 10 00 00 00 	bswap %r1,16
  1d8:	d7 02 00 00 20 00 00 00 	bswap %r2,32
  1e0:	d7 03 00 00 40 00 00 00 	bswap %r3,64
- 1e8:	87 01 00 00 00 0f 00 00 	neg %r1,0xf00
