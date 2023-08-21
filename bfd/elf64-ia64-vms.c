@@ -4713,7 +4713,8 @@ static bool
 elf64_vms_close_and_cleanup (bfd *abfd)
 {
   bool ret = true;
-  if (bfd_get_format (abfd) == bfd_object)
+  if (bfd_get_format (abfd) == bfd_object
+      && bfd_write_p (abfd))
     {
       long isize;
 

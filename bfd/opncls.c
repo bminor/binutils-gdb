@@ -920,13 +920,11 @@ bfd_close_all_done (bfd *abfd)
 {
   bool ret = BFD_SEND (abfd, _close_and_cleanup, (abfd));
 
-  if (ret && abfd->iovec != NULL)
-    {
-      ret = abfd->iovec->bclose (abfd) == 0;
+  if (abfd->iovec != NULL)
+    ret &= abfd->iovec->bclose (abfd) == 0;
 
-      if (ret)
-	_maybe_make_executable (abfd);
-    }
+  if (ret)
+    _maybe_make_executable (abfd);
 
   _bfd_delete_bfd (abfd);
   free (_bfd_error_buf);
