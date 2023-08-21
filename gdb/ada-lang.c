@@ -814,6 +814,13 @@ ada_main_name ()
       if (main_program_name_addr == 0)
 	error (_("Invalid address for Ada main program name."));
 
+      /* Force trust_readonly, because we always want to fetch this
+	 string from the executable, not from inferior memory.  If the
+	 user changes the exec-file and invokes "start", we want to
+	 pick the "main" from the new executable, not one that may
+	 come from the still-live inferior.  */
+      scoped_restore save_trust_readonly
+	= make_scoped_restore (&trust_readonly, true);
       main_program_name = target_read_string (main_program_name_addr, 1024);
       return main_program_name.get ();
     }

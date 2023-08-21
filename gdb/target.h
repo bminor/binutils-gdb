@@ -2477,6 +2477,10 @@ extern int remote_timeout;
 extern scoped_restore_tmpl<int>
     make_scoped_restore_show_memory_breakpoints (int show);
 
+/* True if we should trust readonly sections from the
+   executable when reading memory.  */
+extern bool trust_readonly;
+
 extern bool may_write_registers;
 extern bool may_write_memory;
 extern bool may_insert_breakpoints;
