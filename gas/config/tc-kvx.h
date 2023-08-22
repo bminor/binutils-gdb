@@ -37,6 +37,8 @@
 #define KVX_RA_REGNO (67)
 #define KVX_SP_REGNO (12)
 
+#define O_pseudo_fixup O_md1
+
 #define TOKEN_NAME(tok) \
   ((tok) <= 0 ? "unknown token" : env.tokens_names[(tok) - 1])
 

@@ -416,9 +416,17 @@ promote_token (struct token_s tok)
 	  input_line_pointer = ilp_save;
 	  long long new_class_id = tok.class_id;
 	  long long old_class_id = tok.class_id;
-	  while ((new_class_id = env.promote_immediate (old_class_id)) != old_class_id
-	      && ((exp.X_op == O_symbol && !has_relocation_of_size (str_hash_find (env.reloc_hash, TOKEN_NAME (new_class_id))))
-		|| (exp.X_op == 64 && !kvx_get_pseudo_func2 (exp.X_op_symbol, str_hash_find (env.reloc_hash, TOKEN_NAME (new_class_id))))))
+	  while (((new_class_id = env.promote_immediate (old_class_id))
+		  != old_class_id)
+		 && ((exp.X_op == O_symbol
+		      && !(has_relocation_of_size
+			   (str_hash_find (env.reloc_hash,
+					   TOKEN_NAME (new_class_id)))))
+		     || (exp.X_op == O_pseudo_fixup
+			 && !(kvx_get_pseudo_func2
+			      (exp.X_op_symbol,
+			       str_hash_find (env.reloc_hash,
+					      TOKEN_NAME (new_class_id)))))))
 	    old_class_id = new_class_id;
 	  return new_class_id;
 	}
@@ -500,7 +508,7 @@ get_token_class (struct token_s *token, struct token_classes *classes, int insn_
       /* If the symbol can be resolved easily takes it value now.  Otherwise it
          means that is either a symbol which will need a real relocation or an
          internal fixup (ie, a pseudo-function, or a computation on symbols).  */
-      if (exp.X_op != O_symbol && exp.X_op != 64)
+      if (exp.X_op != O_symbol && exp.X_op != O_pseudo_fixup)
 	{
 	  token->val = exp.X_add_number;
 	  token_val_p = 1;
@@ -511,22 +519,31 @@ get_token_class (struct token_s *token, struct token_classes *classes, int insn_
 
   if (class == classes->imm_classes)
     {
-      unsigned long long uval = token_val_p
-	? token->val
-	: strtoull (tok + (tok[0] == '-') + (tok[0] == '+'), NULL, 0);
+      unsigned long long uval
+	= (token_val_p
+	   ? token->val
+	   : strtoull (tok + (tok[0] == '-') + (tok[0] == '+'), NULL, 0));
       long long val = uval;
       long long pval = val < 0 ? -uval : uval;
       int neg_power2_p = val < 0 && !(uval & (uval - 1));
       unsigned len = pval ? 8 * sizeof (pval) - __builtin_clzll (pval) : 0;
-      for (; class[cur].class_id != -1
-	  && ((unsigned int) (class[cur].sz < 0 ? - class[cur].sz - !neg_power2_p : class[cur].sz) < len
-	      || (exp.X_op == O_symbol && !has_relocation_of_size (str_hash_find (env.reloc_hash, TOKEN_NAME (class[cur].class_id))))
-	      || (exp.X_op == 64 && !kvx_get_pseudo_func2 (exp.X_op_symbol, str_hash_find (env.reloc_hash, TOKEN_NAME (class[cur].class_id)))))
-	  ; ++cur)
-	;
+      while (class[cur].class_id != -1
+	     && ((unsigned) (class[cur].sz < 0
+			     ? -class[cur].sz - !neg_power2_p
+			     : class[cur].sz) < len
+		 || (exp.X_op == O_symbol
+		     && !(has_relocation_of_size
+			  (str_hash_find (env.reloc_hash,
+					  TOKEN_NAME (class[cur].class_id)))))
+		 || (exp.X_op == O_pseudo_fixup
+		     && !(kvx_get_pseudo_func2
+			  (exp.X_op_symbol,
+			   str_hash_find (env.reloc_hash,
+					  TOKEN_NAME (class[cur].class_id)))))))
+	++cur;
 
       token->val = uval;
-//      if (exp.X_op == 64)
+//      if (exp.X_op == O_pseudo_fixup)
 //	  token->val = (uintptr_t) !kvx_get_pseudo_func2 (exp.X_op_symbol, str_hash_find (env.reloc_hash, TOKEN_NAME (class[cur].class_id)));
       found = 1;
     }
@@ -757,8 +774,8 @@ parse_with_restarts (struct token_s tok, int jump_target, struct rule rules[],
       return NULL;
     }
 
-  printf_debug (1, "\nEntering rule: %d (Trying to match: (%s)[%d])\n", jump_target,
-		TOKEN_NAME (CLASS_ID (tok)), CLASS_ID (tok));
+  printf_debug (1, "\nEntering rule: %d (Trying to match: (%s)[%d])\n",
+		jump_target, TOKEN_NAME (CLASS_ID (tok)), CLASS_ID (tok));
 
   /* 1. Find a rule that can be used with the current token. */
   int i = 0;

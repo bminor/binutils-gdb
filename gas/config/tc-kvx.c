@@ -41,8 +41,6 @@
 
 static void supported_cores (char buf[], size_t buflen);
 
-#define O_pseudo_fixup (O_max + 1)
-
 #define NELEMS(a) ((int) (sizeof (a)/sizeof ((a)[0])))
 
 #define STREQ(x,y) !strcmp(((x) ? (x) : ""), ((y) ? (y) : ""))
@@ -495,11 +493,7 @@ insert_operand (struct kvxinsn *insn, struct kvx_operand *opdef,
 
   /* try to resolve the value */
 
-  /* The cast is used to silence GCC about the abuse done with the enum.
-     O_pseudo_fixup is not part of the enum, so enum checks raise an error.
-   */
-
-  switch ((int) tok->category)
+  switch (tok->category)
     {
     case CAT_REGISTER:
       op = S_GET_VALUE (str_hash_find (env.reg_hash, tok->tok));
