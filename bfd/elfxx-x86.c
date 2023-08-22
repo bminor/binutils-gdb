@@ -2771,11 +2771,12 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 	  break;
 
 	case DT_JMPREL:
-	  dyn.d_un.d_ptr = htab->elf.srelplt->output_section->vma;
+	  s = htab->elf.srelplt;
+	  dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	  break;
 
 	case DT_PLTRELSZ:
-	  s = htab->elf.srelplt->output_section;
+	  s = htab->elf.srelplt;
 	  dyn.d_un.d_val = s->size;
 	  break;
 

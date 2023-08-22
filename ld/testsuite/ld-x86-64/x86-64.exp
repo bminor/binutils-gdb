@@ -505,6 +505,7 @@ run_dump_test "dt-relr-1a"
 run_dump_test "dt-relr-1a-x32"
 run_dump_test "dt-relr-1b"
 run_dump_test "dt-relr-1b-x32"
+run_dump_test "pr30787"
 
 if { ![skip_sframe_tests] } {
     run_dump_test "sframe-simple-1"
