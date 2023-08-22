@@ -2578,8 +2578,8 @@ proc mi_make_breakpoint_loc {args} {
 
 # Bits shared between mi_make_breakpoint and mi_make_breakpoint_multi.
 
-proc mi_make_breakpoint_1 {attr_list thread cond evaluated-by times \
-			   ignore script original-location} {
+proc mi_make_breakpoint_1 {attr_list thread inferior cond evaluated-by \
+			   times ignore script original-location} {
     set result "bkpt=\\\{[mi_build_kv_pairs $attr_list]"
 
     # There are always exceptions.
@@ -2588,6 +2588,12 @@ proc mi_make_breakpoint_1 {attr_list thread cond evaluated-by times \
     if {[string length $thread] > 0} {
 	append result ","
 	append result [mi_build_kv_pairs [list "thread" $thread]]
+    }
+
+    # If INFERIOR is not present, do not output it.
+    if {[string length $inferior] > 0} {
+	append result ","
+	append result [mi_build_kv_pairs [list "inferior" $inferior]]
     }
 
     # If COND is not present, do not output it.
@@ -2667,15 +2673,9 @@ proc mi_make_breakpoint_multi {args} {
 
     lappend attr_list "addr" "<MULTIPLE>"
 
-    # Only include the inferior field if it was set.  This field is
-    # optional in the MI output.
-    if {$inferior ne ""} {
-	lappend attr_list "inferior" $inferior
-    }
-
     set result [mi_make_breakpoint_1 \
-		    $attr_list $thread $cond ${evaluated-by} $times \
-		    $ignore $script ${original-location}]
+		    $attr_list $thread $inferior $cond ${evaluated-by} \
+		    $times $ignore $script ${original-location}]
 
     append result ","
     append result [mi_build_kv_pairs [list "locations" $locations]]
@@ -2703,8 +2703,8 @@ proc mi_make_breakpoint_multi {args} {
 
 proc mi_make_breakpoint_pending {args} {
     parse_args {{number .*} {type .*} {disp .*} {enabled .*}
-	{pending .*} {original-location .*} {thread ""} {cond ""}
-	{script ""} {times .*}}
+	{pending .*} {original-location .*} {thread ""} {inferior ""}
+	{cond ""} {script ""} {times .*}}
 
     set attr_list {}
     foreach attr [list number type disp enabled] {
@@ -2721,8 +2721,8 @@ proc mi_make_breakpoint_pending {args} {
     set evaluated-by ""
 
     set result [mi_make_breakpoint_1 \
-		    $attr_list $thread $cond ${evaluated-by} $times \
-		    $ignore $script ${original-location}]
+		    $attr_list $thread $inferior $cond ${evaluated-by} \
+		    $times $ignore $script ${original-location}]
 
     append result "\\\}"
     return $result
@@ -2750,7 +2750,7 @@ proc mi_make_breakpoint {args} {
 	{func .*} {file .*} {fullname .*} {line .*}
 	{thread-groups \\\[.*\\\]} {times .*} {ignore 0}
 	{script ""} {original-location .*} {cond ""} {evaluated-by ""}
-	{thread ""}}
+	{thread ""} {inferior ""}}
 
     set attr_list {}
     foreach attr [list number type disp enabled addr func file \
@@ -2759,8 +2759,8 @@ proc mi_make_breakpoint {args} {
     }
 
     set result [mi_make_breakpoint_1 \
-		    $attr_list $thread $cond ${evaluated-by} $times \
-		    $ignore $script ${original-location}]
+		    $attr_list $thread $inferior $cond ${evaluated-by} \
+		    $times $ignore $script ${original-location}]
 
     append result "\\\}"
     return $result
