@@ -178,7 +178,7 @@ SIM_COMMON_LIBS = \
 ##
 
 ## If the local tree has a bundled copy of guile, use that.
-GUILE = $(or $(wildcard ../guile/libguile/guile),guile)
+GUILE = guile
 CGEN = "$(GUILE) -l $(cgendir)/guile.scm -s"
 CGENFLAGS = -v
 CGEN_CPU_DIR = $(cgendir)/cpu

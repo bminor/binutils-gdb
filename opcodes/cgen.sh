@@ -99,7 +99,6 @@ opcodes)
 
 	# Run CGEN.
 	${cgen} ${cgendir}/cgen-opc.scm \
-		-s ${cgendir} \
 		${cgenflags} \
 		-f "${options}" \
 		-m all \
@@ -182,7 +181,6 @@ desc)
 	rm -f ${tmp}-opc.h1 ${tmp}-opc.h
 
 	${cgen} ${cgendir}/cgen-opc.scm \
-		-s ${cgendir} \
 		${cgenflags} \
 		-OPC ${opcfile} \
 		-f "${archflags}" \

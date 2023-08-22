@@ -1871,7 +1871,7 @@ SIM_COMMON_LIBS = \
 	$(LIBGNU) \
 	$(LIBGNU_EXTRA_LIBS)
 
-GUILE = $(or $(wildcard ../guile/libguile/guile),guile)
+GUILE = guile
 CGEN = "$(GUILE) -l $(cgendir)/guile.scm -s"
 CGENFLAGS = -v
 CGEN_CPU_DIR = $(cgendir)/cpu
