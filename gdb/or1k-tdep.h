@@ -23,6 +23,9 @@
 #define TARGET_OR1K
 #endif
 
+/* Make cgen names unique to prevent ODR conflicts with other targets.  */
+#define GDB_CGEN_REMAP_PREFIX or1k
+#include "cgen-remap.h"
 #include "opcodes/or1k-desc.h"
 #include "opcodes/or1k-opc.h"
 

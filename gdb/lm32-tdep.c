@@ -32,9 +32,13 @@
 #include "regcache.h"
 #include "trad-frame.h"
 #include "reggroups.h"
-#include "opcodes/lm32-desc.h"
 #include <algorithm>
 #include "gdbarch.h"
+
+/* Make cgen names unique to prevent ODR conflicts with other targets.  */
+#define GDB_CGEN_REMAP_PREFIX lm32
+#include "cgen-remap.h"
+#include "opcodes/lm32-desc.h"
 
 /* Macros to extract fields from an instruction.  */
 #define LM32_OPCODE(insn)       ((insn >> 26) & 0x3f)
