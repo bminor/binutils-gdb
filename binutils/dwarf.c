@@ -4313,10 +4313,10 @@ display_formatted_table (unsigned char *data,
       printf (_("\n The %s is empty.\n"), table_name);
       return data;
     }
-  else if (data >= end)
+  else if (data >= end
+	   || data_count > (size_t) (end - data))
     {
-      warn (_("%s: Corrupt entry count - expected %#" PRIx64
-	      " but none found\n"), table_name, data_count);
+      warn (_("%s: Corrupt entry count %#" PRIx64 "\n"), table_name, data_count);
       return data;
     }
 
