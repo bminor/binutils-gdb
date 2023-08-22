@@ -1618,7 +1618,8 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 	  /* Ignore fake names invented by compiler; treat them all as
 	     the same name.  */
 	  if (*name == '~' || *name == '.' || *name == '$'
-	      || (*name == bfd_get_symbol_leading_char (input_bfd)
+	      || (*name
+		  && *name == bfd_get_symbol_leading_char (input_bfd)
 		  && (name[1] == '~' || name[1] == '.' || name[1] == '$')))
 	    name = "";
 

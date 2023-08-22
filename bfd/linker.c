@@ -544,7 +544,9 @@ bfd_wrapped_link_hash_lookup (bfd *abfd,
       char prefix = '\0';
 
       l = string;
-      if (*l == bfd_get_symbol_leading_char (abfd) || *l == info->wrap_char)
+      if (*l
+	  && (*l == bfd_get_symbol_leading_char (abfd)
+	      || *l == info->wrap_char))
 	{
 	  prefix = *l;
 	  ++l;
@@ -621,8 +623,9 @@ unwrap_hash_lookup (struct bfd_link_info *info,
 {
   const char *l = h->root.string;
 
-  if (*l == bfd_get_symbol_leading_char (input_bfd)
-      || *l == info->wrap_char)
+  if (*l
+      && (*l == bfd_get_symbol_leading_char (input_bfd)
+	  || *l == info->wrap_char))
     ++l;
 
   if (startswith (l, WRAP))
