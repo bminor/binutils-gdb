@@ -1574,7 +1574,7 @@ breakpoint_set_inferior (struct breakpoint *b, int inferior)
   int old_inferior = b->inferior;
   b->inferior = inferior;
   if (old_inferior != inferior)
-    gdb::observers::breakpoint_modified.notify (b);
+    notify_breakpoint_modified (b);
 }
 
 /* See breakpoint.h.  */
