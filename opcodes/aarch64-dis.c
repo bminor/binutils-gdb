@@ -3963,10 +3963,10 @@ select_aarch64_variant (unsigned mach)
   switch (mach)
     {
     case bfd_mach_aarch64_8R:
-      arch_variant = AARCH64_ARCH_V8_R;
+      arch_variant = AARCH64_ARCH_V8R;
       break;
     default:
-      arch_variant = AARCH64_ANY & ~(AARCH64_FEATURE_V8_R);
+      arch_variant = AARCH64_ANY & ~(AARCH64_FEATURE_V8R);
     }
 }
 

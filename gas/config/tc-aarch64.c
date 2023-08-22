@@ -40,7 +40,7 @@
 
 /* Types of processor to assemble for.  */
 #ifndef CPU_DEFAULT
-#define CPU_DEFAULT AARCH64_ARCH_V8
+#define CPU_DEFAULT AARCH64_ARCH_V8A
 #endif
 
 #define streq(a, b)	      (strcmp (a, b) == 0)
@@ -10157,62 +10157,62 @@ struct aarch64_cpu_option_table
    recognized by GCC.  */
 static const struct aarch64_cpu_option_table aarch64_cpus[] = {
   {"all", AARCH64_ANY, NULL},
-  {"cortex-a34", AARCH64_FEATURE (AARCH64_ARCH_V8,
+  {"cortex-a34", AARCH64_FEATURE (AARCH64_ARCH_V8A,
 				  AARCH64_FEATURE_CRC), "Cortex-A34"},
-  {"cortex-a35", AARCH64_FEATURE (AARCH64_ARCH_V8,
+  {"cortex-a35", AARCH64_FEATURE (AARCH64_ARCH_V8A,
 				  AARCH64_FEATURE_CRC), "Cortex-A35"},
-  {"cortex-a53", AARCH64_FEATURE (AARCH64_ARCH_V8,
+  {"cortex-a53", AARCH64_FEATURE (AARCH64_ARCH_V8A,
 				  AARCH64_FEATURE_CRC), "Cortex-A53"},
-  {"cortex-a57", AARCH64_FEATURE (AARCH64_ARCH_V8,
+  {"cortex-a57", AARCH64_FEATURE (AARCH64_ARCH_V8A,
 				  AARCH64_FEATURE_CRC), "Cortex-A57"},
-  {"cortex-a72", AARCH64_FEATURE (AARCH64_ARCH_V8,
+  {"cortex-a72", AARCH64_FEATURE (AARCH64_ARCH_V8A,
 				  AARCH64_FEATURE_CRC), "Cortex-A72"},
-  {"cortex-a73", AARCH64_FEATURE (AARCH64_ARCH_V8,
+  {"cortex-a73", AARCH64_FEATURE (AARCH64_ARCH_V8A,
 				  AARCH64_FEATURE_CRC), "Cortex-A73"},
-  {"cortex-a55", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"cortex-a55", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
 				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16 | AARCH64_FEATURE_DOTPROD),
 				  "Cortex-A55"},
-  {"cortex-a75", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"cortex-a75", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
 				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16 | AARCH64_FEATURE_DOTPROD),
 				  "Cortex-A75"},
-  {"cortex-a76", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"cortex-a76", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
 				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16 | AARCH64_FEATURE_DOTPROD),
 				  "Cortex-A76"},
-  {"cortex-a76ae", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"cortex-a76ae", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
 				    AARCH64_FEATURE_F16 | AARCH64_FEATURE_RCPC
 				    | AARCH64_FEATURE_DOTPROD
 				    | AARCH64_FEATURE_SSBS),
 				    "Cortex-A76AE"},
-  {"cortex-a77", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"cortex-a77", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
 				  AARCH64_FEATURE_F16 | AARCH64_FEATURE_RCPC
 				  | AARCH64_FEATURE_DOTPROD
 				  | AARCH64_FEATURE_SSBS),
 				  "Cortex-A77"},
-  {"cortex-a65", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"cortex-a65", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
 				  AARCH64_FEATURE_F16 | AARCH64_FEATURE_RCPC
 				  | AARCH64_FEATURE_DOTPROD
 				  | AARCH64_FEATURE_SSBS),
 				  "Cortex-A65"},
-  {"cortex-a65ae", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"cortex-a65ae", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
 				    AARCH64_FEATURE_F16 | AARCH64_FEATURE_RCPC
 				    | AARCH64_FEATURE_DOTPROD
 				    | AARCH64_FEATURE_SSBS),
 				    "Cortex-A65AE"},
-  {"cortex-a78", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"cortex-a78", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
                  AARCH64_FEATURE_F16
                  | AARCH64_FEATURE_RCPC
                  | AARCH64_FEATURE_DOTPROD
                  | AARCH64_FEATURE_SSBS
                  | AARCH64_FEATURE_PROFILE),
    "Cortex-A78"},
-  {"cortex-a78ae", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"cortex-a78ae", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
                    AARCH64_FEATURE_F16
                    | AARCH64_FEATURE_RCPC
                    | AARCH64_FEATURE_DOTPROD
                    | AARCH64_FEATURE_SSBS
                    | AARCH64_FEATURE_PROFILE),
    "Cortex-A78AE"},
-  {"cortex-a78c", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"cortex-a78c", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
                    AARCH64_FEATURE_DOTPROD
                    | AARCH64_FEATURE_F16
                    | AARCH64_FEATURE_FLAGM
@@ -10221,50 +10221,50 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
                    | AARCH64_FEATURE_RCPC
                    | AARCH64_FEATURE_SSBS),
    "Cortex-A78C"},
-  {"cortex-a510", AARCH64_FEATURE (AARCH64_ARCH_V9,
+  {"cortex-a510", AARCH64_FEATURE (AARCH64_ARCH_V9A,
                   AARCH64_FEATURE_BFLOAT16
                   | AARCH64_FEATURE_I8MM
                   | AARCH64_FEATURE_MEMTAG
                   | AARCH64_FEATURE_SVE2_BITPERM),
    "Cortex-A510"},
-  {"cortex-a520", AARCH64_FEATURE (AARCH64_ARCH_V9_2,
+  {"cortex-a520", AARCH64_FEATURE (AARCH64_ARCH_V9_2A,
                   AARCH64_FEATURE_MEMTAG
                   | AARCH64_FEATURE_SVE2_BITPERM),
    "Cortex-A520"},
-  {"cortex-a710", AARCH64_FEATURE (AARCH64_ARCH_V9,
+  {"cortex-a710", AARCH64_FEATURE (AARCH64_ARCH_V9A,
                   AARCH64_FEATURE_BFLOAT16
                   | AARCH64_FEATURE_I8MM
                   | AARCH64_FEATURE_MEMTAG
                   | AARCH64_FEATURE_SVE2_BITPERM),
    "Cortex-A710"},
-  {"cortex-a720", AARCH64_FEATURE (AARCH64_ARCH_V9_2,
+  {"cortex-a720", AARCH64_FEATURE (AARCH64_ARCH_V9_2A,
                   AARCH64_FEATURE_MEMTAG
 		  | AARCH64_FEATURE_PROFILE
                   | AARCH64_FEATURE_SVE2_BITPERM),
    "Cortex-A720"},
-  {"ares", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"ares", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
 				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16
 				  | AARCH64_FEATURE_DOTPROD
 				  | AARCH64_FEATURE_PROFILE),
 				  "Ares"},
-  {"exynos-m1", AARCH64_FEATURE (AARCH64_ARCH_V8,
+  {"exynos-m1", AARCH64_FEATURE (AARCH64_ARCH_V8A,
 				 AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
 				"Samsung Exynos M1"},
-  {"falkor", AARCH64_FEATURE (AARCH64_ARCH_V8,
+  {"falkor", AARCH64_FEATURE (AARCH64_ARCH_V8A,
 			      AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO
 			      | AARCH64_FEATURE_RDMA),
    "Qualcomm Falkor"},
-  {"neoverse-e1", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"neoverse-e1", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
 				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16
 				  | AARCH64_FEATURE_DOTPROD
 				  | AARCH64_FEATURE_SSBS),
 				  "Neoverse E1"},
-  {"neoverse-n1", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"neoverse-n1", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
 				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16
 				  | AARCH64_FEATURE_DOTPROD
 				  | AARCH64_FEATURE_PROFILE),
 				  "Neoverse N1"},
-  {"neoverse-n2", AARCH64_FEATURE (AARCH64_ARCH_V8_5,
+  {"neoverse-n2", AARCH64_FEATURE (AARCH64_ARCH_V8_5A,
 				   AARCH64_FEATURE_BFLOAT16
 				 | AARCH64_FEATURE_I8MM
 				 | AARCH64_FEATURE_F16
@@ -10274,7 +10274,7 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
 				 | AARCH64_FEATURE_MEMTAG
 				 | AARCH64_FEATURE_RNG),
 				 "Neoverse N2"},
-  {"neoverse-v1", AARCH64_FEATURE (AARCH64_ARCH_V8_4,
+  {"neoverse-v1", AARCH64_FEATURE (AARCH64_ARCH_V8_4A,
 			    AARCH64_FEATURE_PROFILE
 			  | AARCH64_FEATURE_CVADP
 			  | AARCH64_FEATURE_SVE
@@ -10283,41 +10283,41 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
 			  | AARCH64_FEATURE_F16
 			  | AARCH64_FEATURE_BFLOAT16
 			  | AARCH64_FEATURE_I8MM), "Neoverse V1"},
-  {"qdf24xx", AARCH64_FEATURE (AARCH64_ARCH_V8,
+  {"qdf24xx", AARCH64_FEATURE (AARCH64_ARCH_V8A,
 			       AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO
 			       | AARCH64_FEATURE_RDMA),
    "Qualcomm QDF24XX"},
-  {"saphira", AARCH64_FEATURE (AARCH64_ARCH_V8_4,
+  {"saphira", AARCH64_FEATURE (AARCH64_ARCH_V8_4A,
 			       AARCH64_FEATURE_CRYPTO | AARCH64_FEATURE_PROFILE),
    "Qualcomm Saphira"},
-  {"thunderx", AARCH64_FEATURE (AARCH64_ARCH_V8,
+  {"thunderx", AARCH64_FEATURE (AARCH64_ARCH_V8A,
 				AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
    "Cavium ThunderX"},
-  {"vulcan", AARCH64_FEATURE (AARCH64_ARCH_V8_1,
+  {"vulcan", AARCH64_FEATURE (AARCH64_ARCH_V8_1A,
 			      AARCH64_FEATURE_CRYPTO),
   "Broadcom Vulcan"},
   /* The 'xgene-1' name is an older name for 'xgene1', which was used
      in earlier releases and is superseded by 'xgene1' in all
      tools.  */
-  {"xgene-1", AARCH64_ARCH_V8, "APM X-Gene 1"},
-  {"xgene1", AARCH64_ARCH_V8, "APM X-Gene 1"},
-  {"xgene2", AARCH64_FEATURE (AARCH64_ARCH_V8,
+  {"xgene-1", AARCH64_ARCH_V8A, "APM X-Gene 1"},
+  {"xgene1", AARCH64_ARCH_V8A, "APM X-Gene 1"},
+  {"xgene2", AARCH64_FEATURE (AARCH64_ARCH_V8A,
 			      AARCH64_FEATURE_CRC), "APM X-Gene 2"},
-  {"cortex-r82", AARCH64_ARCH_V8_R, "Cortex-R82"},
-  {"cortex-x1", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+  {"cortex-r82", AARCH64_ARCH_V8R, "Cortex-R82"},
+  {"cortex-x1", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
                 AARCH64_FEATURE_F16
                 | AARCH64_FEATURE_RCPC
                 | AARCH64_FEATURE_DOTPROD
                 | AARCH64_FEATURE_SSBS
                 | AARCH64_FEATURE_PROFILE),
                 "Cortex-X1"},
-  {"cortex-x2", AARCH64_FEATURE (AARCH64_ARCH_V9,
+  {"cortex-x2", AARCH64_FEATURE (AARCH64_ARCH_V9A,
                 AARCH64_FEATURE_BFLOAT16
                 | AARCH64_FEATURE_I8MM
                 | AARCH64_FEATURE_MEMTAG
                 | AARCH64_FEATURE_SVE2_BITPERM),
                 "Cortex-X2"},
-  {"generic", AARCH64_ARCH_V8, NULL},
+  {"generic", AARCH64_ARCH_V8A, NULL},
 
   {NULL, AARCH64_ARCH_NONE, NULL}
 };
@@ -10332,20 +10332,20 @@ struct aarch64_arch_option_table
    recognized by GCC.  */
 static const struct aarch64_arch_option_table aarch64_archs[] = {
   {"all", AARCH64_ANY},
-  {"armv8-a", AARCH64_ARCH_V8},
-  {"armv8.1-a", AARCH64_ARCH_V8_1},
-  {"armv8.2-a", AARCH64_ARCH_V8_2},
-  {"armv8.3-a", AARCH64_ARCH_V8_3},
-  {"armv8.4-a", AARCH64_ARCH_V8_4},
-  {"armv8.5-a", AARCH64_ARCH_V8_5},
-  {"armv8.6-a", AARCH64_ARCH_V8_6},
-  {"armv8.7-a", AARCH64_ARCH_V8_7},
-  {"armv8.8-a", AARCH64_ARCH_V8_8},
-  {"armv8-r",	AARCH64_ARCH_V8_R},
-  {"armv9-a",	AARCH64_ARCH_V9},
-  {"armv9.1-a",	AARCH64_ARCH_V9_1},
-  {"armv9.2-a",	AARCH64_ARCH_V9_2},
-  {"armv9.3-a",	AARCH64_ARCH_V9_3},
+  {"armv8-a", AARCH64_ARCH_V8A},
+  {"armv8.1-a", AARCH64_ARCH_V8_1A},
+  {"armv8.2-a", AARCH64_ARCH_V8_2A},
+  {"armv8.3-a", AARCH64_ARCH_V8_3A},
+  {"armv8.4-a", AARCH64_ARCH_V8_4A},
+  {"armv8.5-a", AARCH64_ARCH_V8_5A},
+  {"armv8.6-a", AARCH64_ARCH_V8_6A},
+  {"armv8.7-a", AARCH64_ARCH_V8_7A},
+  {"armv8.8-a", AARCH64_ARCH_V8_8A},
+  {"armv8-r",	AARCH64_ARCH_V8R},
+  {"armv9-a",	AARCH64_ARCH_V9A},
+  {"armv9.1-a",	AARCH64_ARCH_V9_1A},
+  {"armv9.2-a",	AARCH64_ARCH_V9_2A},
+  {"armv9.3-a",	AARCH64_ARCH_V9_3A},
   {NULL, AARCH64_ARCH_NONE}
 };
 
