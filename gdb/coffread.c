@@ -64,8 +64,8 @@ static const registry<objfile>::key<coff_symfile_info> coff_objfile_data_key;
 
 /* Translate an external name string into a user-visible name.  */
 #define	EXTERNAL_NAME(string, abfd) \
-	(string[0] == bfd_get_symbol_leading_char (abfd) \
-	? string + 1 : string)
+  (*string && *string == bfd_get_symbol_leading_char (abfd)	\
+   ? string + 1 : string)
 
 /* To be an sdb debug type, type must have at least a basic or primary
    derived type.  Using this rather than checking against T_NULL is

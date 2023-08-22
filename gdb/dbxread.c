@@ -479,14 +479,15 @@ record_minimal_symbol (minimal_symbol_reader &reader,
 	 Record it as global even if it's local, not global, so
 	 lookup_minimal_symbol can find it.  We don't check symbol_leading_char
 	 because for SunOS4 it always is '_'.  */
-      if (name[8] == 'C' && strcmp ("__DYNAMIC", name) == 0)
+      if (strcmp ("__DYNAMIC", name) == 0)
 	ms_type = mst_data;
 
       /* Same with virtual function tables, both global and static.  */
       {
 	const char *tempstring = name;
 
-	if (tempstring[0] == bfd_get_symbol_leading_char (objfile->obfd.get ()))
+	if (*tempstring
+	    && *tempstring == bfd_get_symbol_leading_char (objfile->obfd.get ()))
 	  ++tempstring;
 	if (is_vtable_name (tempstring))
 	  ms_type = mst_data;
@@ -2254,7 +2255,8 @@ read_ofile_symtab (struct objfile *objfile, legacy_psymtab *pst)
 	    processing_gcc_compilation = 1;
 	  else if (strcmp (namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0)
 	    processing_gcc_compilation = 2;
-	  if (tempstring[0] == bfd_get_symbol_leading_char (symfile_bfd))
+	  if (*tempstring
+	      && *tempstring == bfd_get_symbol_leading_char (symfile_bfd))
 	    ++tempstring;
 	  if (startswith (tempstring, "__gnu_compiled"))
 	    processing_gcc_compilation = 2;

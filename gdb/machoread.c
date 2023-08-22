@@ -394,7 +394,8 @@ macho_resolve_oso_sym_with_minsym (struct objfile *main_objfile, asymbol *sym)
   struct bound_minimal_symbol msym;
   const char *name = sym->name;
 
-  if (name[0] == bfd_get_symbol_leading_char (main_objfile->obfd.get ()))
+  if (*name
+      && *name == bfd_get_symbol_leading_char (main_objfile->obfd.get ()))
     ++name;
   msym = lookup_minimal_symbol (name, NULL, main_objfile);
   if (msym.minsym == NULL)
