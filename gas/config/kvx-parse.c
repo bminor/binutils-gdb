@@ -515,9 +515,9 @@ get_token_class (struct token_s *token, struct token_classes *classes, int insn_
 	? token->val
 	: strtoull (tok + (tok[0] == '-') + (tok[0] == '+'), NULL, 0);
       long long val = uval;
-      long long pval = val < 0 ? -val : val;
-      int neg_power2_p = val < 0 && !(pval & (pval - 1));
-      unsigned int len = 8 * sizeof (pval) - __builtin_clzll (pval);
+      long long pval = val < 0 ? -uval : uval;
+      int neg_power2_p = val < 0 && !(uval & (uval - 1));
+      unsigned len = pval ? 8 * sizeof (pval) - __builtin_clzll (pval) : 0;
       for (; class[cur].class_id != -1
 	  && ((unsigned int) (class[cur].sz < 0 ? - class[cur].sz - !neg_power2_p : class[cur].sz) < len
 	      || (exp.X_op == O_symbol && !has_relocation_of_size (str_hash_find (env.reloc_hash, TOKEN_NAME (class[cur].class_id))))

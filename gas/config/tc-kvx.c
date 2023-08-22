@@ -49,7 +49,7 @@ static void supported_cores (char buf[], size_t buflen);
 #define STRNEQ(x,y,n) !strncmp(((x) ? (x) : ""), ((y) ? (y) : ""),(n))
 
 /* The PARALLEL_BIT is set to 0 when an instruction is the last of a bundle. */
-#define PARALLEL_BIT (1 << 31)
+#define PARALLEL_BIT (1u << 31)
 
 /*TB begin*/
 int size_type_function = 1;
