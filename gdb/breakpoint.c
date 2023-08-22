@@ -9242,9 +9242,6 @@ create_breakpoint (struct gdbarch *gdbarch,
       b->disposition = tempflag ? disp_del : disp_donttouch;
       b->condition_not_parsed = 1;
       b->enable_state = enabled ? bp_enabled : bp_disabled;
-      if ((type_wanted != bp_breakpoint
-	   && type_wanted != bp_hardware_breakpoint) || thread != -1)
-	b->pspace = current_program_space;
 
       if (b->type == bp_dprintf)
 	update_dprintf_command_list (b.get ());

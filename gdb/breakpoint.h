@@ -828,9 +828,21 @@ struct breakpoint : public intrusive_list_node<breakpoint>
      equals this.  */
   struct frame_id frame_id = null_frame_id;
 
-  /* The program space used to set the breakpoint.  This is only set
-     for breakpoints which are specific to a program space; for
-     non-thread-specific ordinary breakpoints this is NULL.  */
+  /* The program space used to set the breakpoint.  This is only set for
+     breakpoints that are not type bp_breakpoint or bp_hardware_breakpoint.
+     For thread or inferior specific breakpoints, the breakpoints are
+     managed via the thread and inferior member variables.  */
+
+  /* If not nullptr then this is the program space for which this
+     breakpoint was created.  All watchpoint and catchpoint sub-types set
+     this field, but not all of the code_breakpoint sub-types do;
+     generally, user created breakpoint types don't set this field, though
+     things might be more consistent if they did.
+
+     When this variable is nullptr then a breakpoint might be associated
+     with multiple program spaces, though you need to check the thread,
+     inferior and task variables to see if a breakpoint was created for a
+     specific thread, inferior, or Ada task respectively.  */
   program_space *pspace = NULL;
 
   /* The location specification we used to set the breakpoint.  */
