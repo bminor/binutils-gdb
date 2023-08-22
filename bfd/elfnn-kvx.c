@@ -670,14 +670,9 @@ kvx_relocate (unsigned int r_type, bfd *input_bfd, asection *input_section,
 	      bfd_vma offset, bfd_vma value)
 {
   reloc_howto_type *howto;
-  bfd_vma place;
 
   howto = elfNN_kvx_howto_from_type (input_bfd, r_type);
-  place = (input_section->output_section->vma + input_section->output_offset
-	   + offset);
-
   r_type = elfNN_kvx_bfd_reloc_from_type (input_bfd, r_type);
-  value = _bfd_kvx_elf_resolve_relocation (r_type, place, value, 0, false);
   return _bfd_kvx_elf_put_addend (input_bfd,
 				  input_section->contents + offset, r_type,
 				  howto, value);
@@ -2000,7 +1995,7 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
   unsigned long r_symndx;
   bfd_byte *hit_data = contents + rel->r_offset;
   bfd_vma place, off;
-  bfd_signed_vma signed_addend;
+  bfd_vma addend;
   struct elf_kvx_link_hash_table *globals;
   bool weak_undef_p;
   asection *base_got;
@@ -2030,8 +2025,8 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
 
   /* Get addend, accumulating the addend for consecutive relocs
      which refer to the same offset.  */
-  signed_addend = saved_addend ? *saved_addend : 0;
-  signed_addend += rel->r_addend;
+  addend = saved_addend ? *saved_addend : 0;
+  addend += rel->r_addend;
 
   weak_undef_p = (h ? h->root.type == bfd_link_hash_undefweak
 		  : bfd_is_und_section (sym_sec));
@@ -2078,7 +2073,7 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
 	  skip = false;
 	  relocate = false;
 
-	  outrel.r_addend = signed_addend;
+	  outrel.r_addend = addend;
 	  outrel.r_offset =
 	    _bfd_elf_section_offset (output_bfd, info, input_section,
 				     rel->r_offset);
@@ -2160,24 +2155,24 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
 	    return bfd_reloc_ok;
 
 	  rret = check_signed_overflow (complain_overflow_signed, bfd_r_type,
-					input_bfd, value + signed_addend);
+					input_bfd, value + addend);
 	  if (rret != bfd_reloc_ok)
 	    return rret;
 
 	  return _bfd_final_link_relocate (howto, input_bfd, input_section,
 					   contents, rel->r_offset, value,
-					   signed_addend);
+					   addend);
 	}
 
     skip_because_pic:
       rret = check_signed_overflow (complain_overflow_signed, bfd_r_type,
-				    input_bfd, value + signed_addend);
+				    input_bfd, value + addend);
       if (rret != bfd_reloc_ok)
 	return rret;
 
       return _bfd_final_link_relocate (howto, input_bfd, input_section,
 				       contents, rel->r_offset, value,
-				       signed_addend);
+				       addend);
       break;
 
     case BFD_RELOC_KVX_PCREL17:
@@ -2231,7 +2226,7 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
 		       + stub_entry->stub_sec->output_section->vma);
 	    /* We have redirected the destination to stub entry address,
 	       so ignore any addend record in the original rela entry.  */
-	    signed_addend = 0;
+	    addend = 0;
 	  }
       }
       *unresolved_reloc_p = false;
@@ -2250,7 +2245,7 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_KVX_S43_PCREL_EX6:
       return _bfd_final_link_relocate (howto, input_bfd, input_section,
 				       contents, rel->r_offset, value,
-				       signed_addend);
+				       addend);
       break;
 
     case BFD_RELOC_KVX_S37_TLS_LE_LO10:
@@ -2261,8 +2256,7 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_KVX_S43_TLS_LE_EX6:
       return _bfd_final_link_relocate (howto, input_bfd, input_section,
 				       contents, rel->r_offset,
-				       value - tpoff_base (info),
-				       signed_addend);
+				       value - tpoff_base (info), addend);
       break;
 
     case BFD_RELOC_KVX_S37_TLS_DTPOFF_LO10:
@@ -2273,8 +2267,7 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_KVX_S43_TLS_DTPOFF_EX6:
       return _bfd_final_link_relocate (howto, input_bfd, input_section,
 				       contents, rel->r_offset,
-				       value - dtpoff_base (info),
-				       signed_addend);
+				       value - dtpoff_base (info), addend);
 
     case BFD_RELOC_KVX_S37_TLS_GD_UP27:
     case BFD_RELOC_KVX_S37_TLS_GD_LO10:
@@ -2302,8 +2295,7 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
       value = symbol_got_offset (input_bfd, h, r_symndx);
 
       _bfd_final_link_relocate (howto, input_bfd, input_section,
-				contents, rel->r_offset, value,
-				signed_addend);
+				contents, rel->r_offset, value, addend);
       *unresolved_reloc_p = false;
       break;
 
@@ -2326,7 +2318,7 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
 
 	return _bfd_final_link_relocate (howto, input_bfd, input_section,
 					 contents, rel->r_offset, value,
-					 signed_addend);
+					 addend);
       }
       break;
 
@@ -2347,7 +2339,7 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
 	value -= basegot->output_section->vma + basegot->output_offset;
 	return _bfd_final_link_relocate (howto, input_bfd, input_section,
 					 contents, rel->r_offset, value,
-					 signed_addend);
+					 addend);
       }
       break;
 
@@ -2373,18 +2365,15 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
 	  printf("GOT_LO/HI for %s, value %x\n", h->root.root.string, value);
 #endif
 
-	  /* value = _bfd_kvx_elf_resolve_relocation (bfd_r_type, place, value, */
-	  /* 					       0, weak_undef_p); */
 	  return _bfd_final_link_relocate (howto, input_bfd, input_section,
 					   contents, rel->r_offset, value,
-					   signed_addend);
+					   addend);
 	}
       else
 	{
 #ifdef UGLY_DEBUG
 	  printf("GOT_LO/HI with h NULL, initial value %x\n", value);
 #endif
-	  bfd_vma addend = 0;
 	  struct elf_kvx_local_symbol *locals = elf_kvx_locals (input_bfd);
 
 	  if (locals == NULL)
@@ -2433,8 +2422,7 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
 	  value = got_entry_addr;
 
 	  return _bfd_final_link_relocate (howto, input_bfd, input_section,
-					   contents, rel->r_offset, off,
-					   addend);
+					   contents, rel->r_offset, off, 0);
 	}
       break;
 

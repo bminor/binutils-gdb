@@ -46,13 +46,12 @@ kvx_unsigned_overflow (bfd_vma value, unsigned int bits)
 static bfd_reloc_status_type
 kvx_signed_overflow (bfd_vma value, unsigned int bits)
 {
-  bfd_signed_vma svalue = (bfd_signed_vma) value;
-  bfd_signed_vma lim;
+  bfd_vma lim;
 
   if (bits >= sizeof (bfd_vma) * 8)
     return bfd_reloc_ok;
-  lim = (bfd_signed_vma) 1 << (bits - 1);
-  if (svalue < -lim || svalue >= lim)
+  lim = (bfd_vma) 1 << (bits - 1);
+  if (value + lim >= lim * 2)
     return bfd_reloc_overflow;
   return bfd_reloc_ok;
 }
@@ -148,14 +147,6 @@ _bfd_kvx_elf_put_addend (bfd *abfd,
     }
 
   return status;
-}
-
-bfd_vma
-_bfd_kvx_elf_resolve_relocation (bfd_reloc_code_real_type r_type ATTRIBUTE_UNUSED,
-        bfd_vma place ATTRIBUTE_UNUSED, bfd_vma value,
-        bfd_vma addend ATTRIBUTE_UNUSED, bool weak_undef_p ATTRIBUTE_UNUSED)
-{
-  return value;
 }
 
 bool

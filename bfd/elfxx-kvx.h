@@ -51,11 +51,6 @@ extern bfd_reloc_status_type
 _bfd_kvx_elf_put_addend (bfd *, bfd_byte *, bfd_reloc_code_real_type,
 			     reloc_howto_type *, bfd_signed_vma);
 
-bfd_vma
-_bfd_kvx_elf_resolve_relocation (bfd_reloc_code_real_type r_type,
-				bfd_vma place, bfd_vma value,
-				bfd_vma addend, bool weak_undef_p);
-
 bool
 kvx_elf32_init_stub_bfd (struct bfd_link_info *info,
 			bfd *stub_bfd);
