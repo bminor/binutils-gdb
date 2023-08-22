@@ -37,7 +37,8 @@
 #define KVX_RA_REGNO (67)
 #define KVX_SP_REGNO (12)
 
-#define TOKEN_NAME(tok) ((tok) == -1 ? "unknown token" : env.tokens_names[(tok) - 1])
+#define TOKEN_NAME(tok) \
+  ((tok) <= 0 ? "unknown token" : env.tokens_names[(tok) - 1])
 
 struct token_s {
   char *insn;
