@@ -40,7 +40,7 @@ ARGS_PART = r"(?P<args>\(.*\))"
 # We strip the indentation so here we only need the caret.
 INTRO_PART = r"^"
 
-POINTER_PART = r"\s*(\*)?\s*"
+POINTER_PART = r"\s*(\*|\&)?\s*"
 
 # Match a C++ symbol, including scope operators and template
 # parameters.  E.g., 'std::vector<something>'.
@@ -268,8 +268,6 @@ def write_debugmethod(
     print("", file=f)
     debugname = "debug_target::" + name
     names = write_function_header(f, False, debugname, return_type, argtypes)
-    if return_type != "void":
-        print("  " + return_type + " result;", file=f)
     print(
         '  gdb_printf (gdb_stdlog, "-> %s->'
         + name
@@ -278,9 +276,11 @@ def write_debugmethod(
     )
 
     # Delegate to the beneath target.
-    print("  ", file=f, end="")
     if return_type != "void":
-        print("result = ", file=f, end="")
+        print("  " + return_type + " result", file=f)
+        print("    = ", file=f, end="")
+    else:
+      print("  ", file=f, end="")
     print("this->beneath ()->" + name + " (", file=f, end="")
     print(", ".join(names), file=f, end="")
     print(");", file=f)
