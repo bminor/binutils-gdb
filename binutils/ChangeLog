@@ -1,3 +1,13 @@
+2023-08-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 30791
+	* dwarf.h (debug_info): Add range_versions field.
+	* dwarf.c (read_and_display_attr_value): When recording a range
+	arribute also ecord the dwarf version number.
+	(is_range_list_for_this_section): New function.
+	(display_debug_ranges): Only show debug ranges whose version is
+	suitable for the secction being displayed.
+
 2023-07-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* readelf.c (get_machine_flags): Recognize and pretty print BPF

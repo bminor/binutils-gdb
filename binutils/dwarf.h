@@ -189,6 +189,7 @@ typedef struct
 
   /* List of .debug_ranges offsets seen in this .debug_info.  */
   uint64_t *	 range_lists;
+  unsigned int * range_versions;
   unsigned int   num_range_lists;
   unsigned int   max_range_lists;
   uint64_t	 rnglists_base;
