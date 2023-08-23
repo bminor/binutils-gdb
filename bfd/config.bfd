@@ -807,7 +807,7 @@ case "${targ}" in
 
   kvx-*-*)
     targ_defvec=kvx_elf64_vec
-    targ_selvecs="kvx_elf64_vec kvx_elf32_vec"
+    targ_selvecs=kvx_elf32_vec
     want64=true
     ;;
 #endif
