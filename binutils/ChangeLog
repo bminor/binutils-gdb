@@ -1,6 +1,6 @@
 2023-08-23  Nick Clifton  <nickc@redhat.com>
 
-	PR 30791
+	PR 30781
 	* dwarf.h (debug_info): Add range_versions field.
 	* dwarf.c (read_and_display_attr_value): When recording a range
 	arribute also ecord the dwarf version number.
