@@ -539,7 +539,7 @@ struct decoded_insn
       CAT_IMMEDIATE,
     } type;
     /* The value of the operands.  */
-    unsigned long long val;
+    uint64_t val;
     /* If it is an immediate, its sign.  */
     int sign;
     /* If it is an immediate, is it pc relative.  */
@@ -593,20 +593,20 @@ decode_insn (bfd_vma memaddr, insn_t * insn, struct decoded_insn *res)
 	      int flags = op->format[i]->flags;
 	      int shift = op->format[i]->shift;
 	      int bias = op->format[i]->bias;
-	      unsigned long long value = 0;
+	      uint64_t value = 0;
 
 	      for (int bf_idx = 0; bf_idx < bf_nb; bf_idx++)
 		{
 		  int insn_idx = (int) bf[bf_idx].to_offset / 32;
 		  int to_offset = bf[bf_idx].to_offset % 32;
-		  unsigned long long encoded_value =
+		  uint64_t encoded_value =
 		    insn->syllables[insn_idx] >> to_offset;
 		  encoded_value &= (1LL << bf[bf_idx].size) - 1;
 		  value |= encoded_value << bf[bf_idx].from_offset;
 		}
 	      if (flags & kvxSIGNED)
 		{
-		  unsigned long long signbit = 1LL << (width - 1);
+		  uint64_t signbit = 1LL << (width - 1);
 		  value = (value ^ signbit) - signbit;
 		}
 	      value = (value << shift) + bias;
@@ -1126,13 +1126,13 @@ print_insn_kvx (bfd_vma memaddr, struct disassemble_info *info)
 		  {
 		    if (dec.operands[i].width <= 32)
 		      {
-			(*info->fprintf_func) (info->stream, "%d (0x%x)",
-					       (int) dec.operands[i].val,
-					       (int) dec.operands[i].val);
+			(*info->fprintf_func) (info->stream, "%" PRId32 " (0x%" PRIx32 ")",
+					       (int32_t) dec.operands[i].val,
+					       (int32_t) dec.operands[i].val);
 		      }
 		    else
 		      {
-			(*info->fprintf_func) (info->stream, "%lld (0x%llx)",
+			(*info->fprintf_func) (info->stream, "%" PRId64 " (0x%" PRIx64 ")",
 					       dec.operands[i].val,
 					       dec.operands[i].val);
 		      }
@@ -1141,18 +1141,18 @@ print_insn_kvx (bfd_vma memaddr, struct disassemble_info *info)
 		  {
 		    if (dec.operands[i].width <= 32)
 		      {
-			(*info->fprintf_func) (info->stream, "%u (0x%x)",
-					       (unsigned int) dec.operands[i].
+			(*info->fprintf_func) (info->stream, "%" PRIu32 " (0x%" PRIx32 ")",
+					       (uint32_t) dec.operands[i].
 					       val,
-					       (unsigned int) dec.operands[i].
+					       (uint32_t) dec.operands[i].
 					       val);
 		      }
 		    else
 		      {
-			(*info->fprintf_func) (info->stream, "%llu (0x%llx)",
-					       (unsigned long long) dec.
+			(*info->fprintf_func) (info->stream, "%" PRIu64 " (0x%" PRIx64 ")",
+					       (uint64_t) dec.
 					       operands[i].val,
-					       (unsigned long long) dec.
+					       (uint64_t) dec.
 					       operands[i].val);
 		      }
 		  }
@@ -1317,7 +1317,7 @@ decode_prologue_epilogue_bundle (bfd_vma memaddr,
 	  int flags = fmt->flags;
 	  int shift = fmt->shift;
 	  int bias = fmt->bias;
-	  unsigned long long encoded_value, value = 0;
+	  uint64_t encoded_value, value = 0;
 
 	  for (int bf_idx = 0; bf_idx < bf_nb; bf_idx++)
 	    {
@@ -1329,7 +1329,7 @@ decode_prologue_epilogue_bundle (bfd_vma memaddr,
 	    }
 	  if (flags & kvxSIGNED)
 	    {
-	      unsigned long long signbit = 1LL << (width - 1);
+	      uint64_t signbit = 1LL << (width - 1);
 	      value = (value ^ signbit) - signbit;
 	    }
 	  value = (value << shift) + bias;

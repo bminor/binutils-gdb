@@ -46,15 +46,15 @@ struct token_s {
   char *insn;
   int begin, end;
   int category;
-  long long class_id;
-  unsigned long long val;
+  int64_t class_id;
+  uint64_t val;
 };
 
 struct token_list
 {
   char *tok;
-  unsigned long long val;
-  long long class_id;
+  uint64_t val;
+  int64_t class_id;
   int category;
   int loc;
   struct token_list *next;
@@ -64,7 +64,7 @@ struct token_list
 
 struct token_class {
   const char ** class_values;
-  long long class_id;
+  int64_t class_id;
   int sz;
 };
 

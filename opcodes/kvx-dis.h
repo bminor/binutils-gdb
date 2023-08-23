@@ -45,7 +45,7 @@ enum kvx_prologue_epilogue_insn_type
 struct kvx_prologue_epilogue_insn
 {
   enum kvx_prologue_epilogue_insn_type insn_type;
-  unsigned long long immediate;
+  uint64_t immediate;
   int gpr_reg[3];
   int nb_gprs;
 };

@@ -396,10 +396,10 @@ print_token (struct token_s token, char *buf, int bufsz)
     buf[i] = 0;
 }
 
-static long long
+static int64_t
 promote_token (struct token_s tok)
 {
-  long long cur_class = tok.class_id & -tok.class_id;
+  int64_t cur_class = tok.class_id & -tok.class_id;
   switch (tok.category)
     {
       case CAT_REGISTER:
@@ -414,8 +414,8 @@ promote_token (struct token_s tok)
 	  input_line_pointer = tok.insn + tok.begin;
 	  expression (&exp);
 	  input_line_pointer = ilp_save;
-	  long long new_class_id = tok.class_id;
-	  long long old_class_id = tok.class_id;
+	  int64_t new_class_id = tok.class_id;
+	  int64_t old_class_id = tok.class_id;
 	  while (((new_class_id = env.promote_immediate (old_class_id))
 		  != old_class_id)
 		 && ((exp.X_op == O_symbol
@@ -451,7 +451,7 @@ is_insn (const struct token_s *token, struct token_class *classes)
   return res;
 }
 
-static long long
+static int64_t
 get_token_class (struct token_s *token, struct token_classes *classes, int insn_p, int modifier_p)
 {
   int cur = 0;
@@ -519,12 +519,12 @@ get_token_class (struct token_s *token, struct token_classes *classes, int insn_
 
   if (class == classes->imm_classes)
     {
-      unsigned long long uval
+      uint64_t uval
 	= (token_val_p
 	   ? token->val
 	   : strtoull (tok + (tok[0] == '-') + (tok[0] == '+'), NULL, 0));
-      long long val = uval;
-      long long pval = val < 0 ? -uval : uval;
+      int64_t val = uval;
+      int64_t pval = val < 0 ? -uval : uval;
       int neg_power2_p = val < 0 && !(uval & (uval - 1));
       unsigned len = pval ? 8 * sizeof (pval) - __builtin_clzll (pval) : 0;
       while (class[cur].class_id != -1
@@ -821,7 +821,7 @@ retry:;
     parse_with_restarts (tok, cur_rule[i].jump_target, rules, errs);
   /* While parsing fails but there is hope since the current token can be
      promoted.  */
-  while (!fst_part && tok.class_id != (long long) promote_token (tok))
+  while (!fst_part && tok.class_id != (int64_t) promote_token (tok))
     {
       free_token_list (fst_part);
       tok.class_id = promote_token (tok);
@@ -871,7 +871,7 @@ retry:;
 
   printf_debug (1, "snd_part: Trying to match: %s\n", TOKEN_NAME (CLASS_ID (tok)));
   struct token_list *snd_part = parse_with_restarts (tok, cur_rule[i].stack_it, rules, errs);
-  while (!snd_part && tok.class_id != (long long) promote_token (tok))
+  while (!snd_part && tok.class_id != (int64_t) promote_token (tok))
     {
       tok.class_id = promote_token (tok);
       printf_debug (1, ">> Restart with %s?\n", TOKEN_NAME (CLASS_ID (tok)));

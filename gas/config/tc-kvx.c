@@ -458,7 +458,7 @@ static int
 insert_operand (struct kvxinsn *insn, struct kvx_operand *opdef,
 		struct token_list *tok)
 {
-  unsigned long long op = 0;
+  uint64_t op = 0;
   struct kvx_bitfield *bfields = opdef->bfield;
   int bf_nb = opdef->bitfields;
   int immx_ready = 0;
@@ -570,7 +570,7 @@ insert_operand (struct kvxinsn *insn, struct kvx_operand *opdef,
 	      {
 		/* This is a immediate: either a regular immediate, or an
 		   immediate that was saved in a variable through `.equ'.  */
-		unsigned long long sval = (long long) tok->val;
+		uint64_t sval = (int64_t) tok->val;
 		op = opdef->flags & kvxSIGNED ? sval : tok->val;
 		op >>= opdef->shift;
 	      }
@@ -661,8 +661,8 @@ insert_operand (struct kvxinsn *insn, struct kvx_operand *opdef,
 
   for (int bf_idx = 0; bf_idx < bf_nb; bf_idx++)
     {
-      unsigned long long value =
-	((unsigned long long) op >> bfields[bf_idx].from_offset);
+      uint64_t value =
+	((uint64_t) op >> bfields[bf_idx].from_offset);
       int j = 0;
       int to_offset = bfields[bf_idx].to_offset;
       value &= (1LL << bfields[bf_idx].size) - 1;
