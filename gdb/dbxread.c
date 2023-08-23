@@ -486,7 +486,7 @@ record_minimal_symbol (minimal_symbol_reader &reader,
       {
 	const char *tempstring = name;
 
-	if (*tempstring
+	if (*tempstring != '\0'
 	    && *tempstring == bfd_get_symbol_leading_char (objfile->obfd.get ()))
 	  ++tempstring;
 	if (is_vtable_name (tempstring))
@@ -2255,7 +2255,7 @@ read_ofile_symtab (struct objfile *objfile, legacy_psymtab *pst)
 	    processing_gcc_compilation = 1;
 	  else if (strcmp (namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0)
 	    processing_gcc_compilation = 2;
-	  if (*tempstring
+	  if (*tempstring != '\0'
 	      && *tempstring == bfd_get_symbol_leading_char (symfile_bfd))
 	    ++tempstring;
 	  if (startswith (tempstring, "__gnu_compiled"))
