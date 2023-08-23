@@ -398,7 +398,7 @@ amd_dbgapi_target_breakpoint::re_set ()
 void
 amd_dbgapi_target_breakpoint::check_status (struct bpstat *bs)
 {
-  inferior *inf = current_inferior ();
+  struct inferior *inf = current_inferior ();
   amd_dbgapi_inferior_info *info = get_amd_dbgapi_inferior_info (inf);
   amd_dbgapi_status_t status;
 
