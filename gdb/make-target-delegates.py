@@ -280,7 +280,7 @@ def write_debugmethod(
         print("  " + return_type + " result", file=f)
         print("    = ", file=f, end="")
     else:
-      print("  ", file=f, end="")
+        print("  ", file=f, end="")
     print("this->beneath ()->" + name + " (", file=f, end="")
     print(", ".join(names), file=f, end="")
     print(");", file=f)
