@@ -2205,7 +2205,6 @@ void
 kvx_end (void)
 {
   int newflags;
-  Elf_Internal_Ehdr *i_ehdrp;
 
   if (!env.params.core_set)
     env.params.core = kvx_core_info->elf_core;
@@ -2217,10 +2216,6 @@ kvx_end (void)
     newflags |= ELF_KVX_ABI_64B_ADDR_BIT;
 
   bfd_set_private_flags (stdoutput, newflags);
-
-  i_ehdrp = elf_elfheader (stdoutput);
-  i_ehdrp->e_ident[EI_ABIVERSION] = env.params.abi;
-  i_ehdrp->e_ident[EI_OSABI] = env.params.osabi;
 
   cleanup ();
 
@@ -2277,7 +2272,10 @@ kvx_type (int start ATTRIBUTE_UNUSED)
     type = BSF_ELF_COMMON;
   else if (strcmp (typename, "gnu_unique_object") == 0
 	   || strcmp (typename, "STB_GNU_UNIQUE") == 0)
-    type = BSF_OBJECT | BSF_GNU_UNIQUE;
+    {
+      elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_unique;
+      type = BSF_OBJECT | BSF_GNU_UNIQUE;
+    }
   else if (strcmp (typename, "notype") == 0
 	   || strcmp (typename, "STT_NOTYPE") == 0)
     ;
