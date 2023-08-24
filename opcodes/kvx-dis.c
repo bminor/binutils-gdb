@@ -1056,7 +1056,7 @@ print_insn_kvx (bfd_vma memaddr, struct disassemble_info *info)
 	  wordcount++;
 	}
       while (kvx_has_parallel_bit (bundle_words[wordcount - 1])
-	     && wordcount < KVXMAXBUNDLEWORDS);
+	     && wordcount < KVXMAXBUNDLEWORDS - 1);
       invalid_bundle = kvx_reassemble_bundle (wordcount, &insncount);
     }
 
@@ -1238,7 +1238,7 @@ decode_prologue_epilogue_bundle (bfd_vma memaddr,
       nb_syl++;
     }
   while (kvx_has_parallel_bit (bundle_words[nb_syl - 1])
-	 && nb_syl < KVXMAXBUNDLEWORDS);
+	 && nb_syl < KVXMAXBUNDLEWORDS - 1);
   if (kvx_reassemble_bundle (nb_syl, &nb_insn))
     return -1;
 
