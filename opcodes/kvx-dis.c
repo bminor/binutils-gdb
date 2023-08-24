@@ -1075,7 +1075,8 @@ print_insn_kvx (bfd_vma memaddr, struct disassemble_info *info)
 
   /* Check for extension to right iff this is not the end of bundle.  */
 
-  struct decoded_insn dec = { 0 };
+  struct decoded_insn dec;
+  memset (&dec, 0, sizeof dec);
   if (!invalid_bundle && (found = decode_insn (memaddr, insn, &dec)))
     {
       int ch;
@@ -1248,7 +1249,8 @@ decode_prologue_epilogue_bundle (bfd_vma memaddr,
       insn_t *insn = &bundle_insn[idx_insn];
       int is_add = 0, is_get = 0, is_a_peb_insn = 0, is_copyd = 0;
 
-      struct decoded_insn dec = { 0 };
+      struct decoded_insn dec;
+      memset (&dec, 0, sizeof dec);
       if (!decode_insn (memaddr, insn, &dec))
 	continue;
 
