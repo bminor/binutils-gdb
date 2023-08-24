@@ -268,24 +268,13 @@ namespace {
 
 /* Interface to interact with a ROCm code object stream.  */
 
-struct rocm_code_object_stream
+struct rocm_code_object_stream : public gdb_bfd_iovec_base
 {
   DISABLE_COPY_AND_ASSIGN (rocm_code_object_stream);
 
-  /* Copy SIZE bytes from the underlying objfile storage starting at OFFSET
-     into the user provided buffer BUF.
+  int stat (bfd *abfd, struct stat *sb) final override;
 
-     Return the number of bytes actually copied (might be inferior to SIZE if
-     the end of the stream is reached).  */
-  virtual file_ptr read (void *buf, file_ptr size, file_ptr offset) = 0;
-
-  /* Retrieve file information in SB.
-
-     Return 0 on success.  On failure, set the appropriate bfd error number
-     (using bfd_set_error) and return -1.  */
-  int stat (struct stat *sb);
-
-  virtual ~rocm_code_object_stream () = default;
+  ~rocm_code_object_stream () override = default;
 
 protected:
   rocm_code_object_stream () = default;
@@ -298,7 +287,7 @@ protected:
 };
 
 int
-rocm_code_object_stream::stat (struct stat *sb)
+rocm_code_object_stream::stat (bfd *, struct stat *sb)
 {
   const LONGEST size = this->size ();
   if (size == -1)
@@ -319,7 +308,8 @@ struct rocm_code_object_stream_file final : rocm_code_object_stream
   rocm_code_object_stream_file (inferior *inf, int fd, ULONGEST offset,
 				ULONGEST size);
 
-  file_ptr read (void *buf, file_ptr size, file_ptr offset) override;
+  file_ptr read (bfd *abfd, void *buf, file_ptr size,
+		 file_ptr offset) override;
 
   LONGEST size () override;
 
@@ -348,7 +338,7 @@ rocm_code_object_stream_file::rocm_code_object_stream_file
 }
 
 file_ptr
-rocm_code_object_stream_file::read (void *buf, file_ptr size,
+rocm_code_object_stream_file::read (bfd *, void *buf, file_ptr size,
 				    file_ptr offset)
 {
   fileio_error target_errno;
@@ -423,7 +413,8 @@ struct rocm_code_object_stream_memory final : public rocm_code_object_stream
 
   rocm_code_object_stream_memory (gdb::byte_vector buffer);
 
-  file_ptr read (void *buf, file_ptr size, file_ptr offset) override;
+  file_ptr read (bfd *abfd, void *buf, file_ptr size,
+		 file_ptr offset) override;
 
 protected:
 
@@ -445,7 +436,7 @@ rocm_code_object_stream_memory::rocm_code_object_stream_memory
 }
 
 file_ptr
-rocm_code_object_stream_memory::read (void *buf, file_ptr size,
+rocm_code_object_stream_memory::read (bfd *, void *buf, file_ptr size,
 				      file_ptr offset)
 {
   if (size > m_objfile_image.size () - offset)
@@ -457,8 +448,8 @@ rocm_code_object_stream_memory::read (void *buf, file_ptr size,
 
 } /* anonymous namespace */
 
-static void *
-rocm_bfd_iovec_open (bfd *abfd, void *inferior_void)
+static gdb_bfd_iovec_base *
+rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
 {
   gdb::string_view uri (bfd_get_filename (abfd));
   gdb::string_view protocol_delim = "://";
@@ -522,7 +513,6 @@ rocm_bfd_iovec_open (bfd *abfd, void *inferior_void)
     {
       ULONGEST offset = 0;
       ULONGEST size = 0;
-      inferior *inferior = static_cast<struct inferior *> (inferior_void);
 
       auto try_strtoulst = [] (gdb::string_view v)
 	{
@@ -607,28 +597,6 @@ rocm_bfd_iovec_open (bfd *abfd, void *inferior_void)
     }
 }
 
-static int
-rocm_bfd_iovec_close (bfd *nbfd, void *data)
-{
-  delete static_cast<rocm_code_object_stream *> (data);
-
-  return 0;
-}
-
-static file_ptr
-rocm_bfd_iovec_pread (bfd *abfd, void *data, void *buf, file_ptr size,
-		      file_ptr offset)
-{
-  return static_cast<rocm_code_object_stream *> (data)->read (buf, size,
-							      offset);
-}
-
-static int
-rocm_bfd_iovec_stat (bfd *abfd, void *data, struct stat *sb)
-{
-  return static_cast<rocm_code_object_stream *> (data)->stat (sb);
-}
-
 static gdb_bfd_ref_ptr
 rocm_solib_bfd_open (const char *pathname)
 {
@@ -636,10 +604,12 @@ rocm_solib_bfd_open (const char *pathname)
   if (strstr (pathname, "://") == nullptr)
     return svr4_so_ops.bfd_open (pathname);
 
-  gdb_bfd_ref_ptr abfd
-    = gdb_bfd_openr_iovec (pathname, "elf64-amdgcn", rocm_bfd_iovec_open,
-			   current_inferior (), rocm_bfd_iovec_pread,
-			   rocm_bfd_iovec_close, rocm_bfd_iovec_stat);
+  auto open = [] (bfd *nbfd) -> gdb_bfd_iovec_base *
+  {
+    return rocm_bfd_iovec_open (nbfd, current_inferior ());
+  };
+
+  gdb_bfd_ref_ptr abfd = gdb_bfd_openr_iovec (pathname, "elf64-amdgcn", open);
 
   if (abfd == nullptr)
     error (_("Could not open `%s' as an executable file: %s"), pathname,
