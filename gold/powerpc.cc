@@ -3714,12 +3714,7 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
   unsigned int prev_brlt_size = 0;
   if (pass == 1)
     {
-      bool thread_safe
-	= this->abiversion() < 2 && parameters->options().plt_thread_safe();
-      if (size == 64
-	  && this->abiversion() < 2
-	  && !thread_safe
-	  && !parameters->options().user_set_plt_thread_safe())
+      if (size == 64 && this->abiversion() < 2)
 	{
 	  static const char* const thread_starter[] =
 	    {
@@ -3747,29 +3742,37 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
 	      /* libgo */
 	      "__go_go",
 	    };
+	  bool thread_safe = parameters->options().plt_thread_safe();
 
-	  if (parameters->options().shared())
-	    thread_safe = true;
-	  else
+	  if (!thread_safe
+	      && !parameters->options().user_set_plt_thread_safe())
 	    {
-	      for (unsigned int i = 0;
-		   i < sizeof(thread_starter) / sizeof(thread_starter[0]);
-		   i++)
+	      if (parameters->options().shared())
+		thread_safe = true;
+	      else
 		{
-		  Symbol* sym = symtab->lookup(thread_starter[i], NULL);
-		  thread_safe = (sym != NULL
-				 && sym->in_reg()
-				 && sym->in_real_elf());
-		  if (thread_safe)
-		    break;
+		  for (unsigned int i = 0;
+		       i < sizeof(thread_starter) / sizeof(thread_starter[0]);
+		       i++)
+		    {
+		      Symbol* sym = symtab->lookup(thread_starter[i], NULL);
+		      thread_safe = (sym != NULL
+				     && sym->in_reg()
+				     && sym->in_real_elf());
+		      if (thread_safe)
+			break;
+		    }
 		}
 	    }
+	  this->plt_thread_safe_ = thread_safe;
 	}
-      this->plt_thread_safe_ = thread_safe;
 
-      if (parameters->options().output_is_position_independent())
-	this->rela_dyn_size_
-	  = this->rela_dyn_section(layout)->current_data_size();
+      if (size == 64
+	  && parameters->options().output_is_position_independent())
+	{
+	  gold_assert (this->rela_dyn_);
+	  this->rela_dyn_size_ = this->rela_dyn_->current_data_size();
+	}
 
       this->stub_group_size_ = parameters->options().stub_group_size();
       bool no_size_errors = true;
