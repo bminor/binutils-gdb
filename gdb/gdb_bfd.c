@@ -909,6 +909,48 @@ gdb_bfd_openw (const char *filename, const char *target)
 
 gdb_bfd_ref_ptr
 gdb_bfd_openr_iovec (const char *filename, const char *target,
+		     gdb_iovec_opener_ftype open_fn)
+{
+  auto do_open = [] (bfd *nbfd, void *closure) -> void *
+  {
+    auto real_opener = static_cast<gdb_iovec_opener_ftype *> (closure);
+    return (*real_opener) (nbfd);
+  };
+
+  auto read_trampoline = [] (bfd *nbfd, void *stream, void *buf,
+			     file_ptr nbytes, file_ptr offset) -> file_ptr
+  {
+    gdb_bfd_iovec_base *obj = static_cast<gdb_bfd_iovec_base *> (stream);
+    return obj->read (nbfd, buf, nbytes, offset);
+  };
+
+  auto stat_trampoline = [] (struct bfd *abfd, void *stream,
+			     struct stat *sb) -> int
+  {
+    gdb_bfd_iovec_base *obj = static_cast<gdb_bfd_iovec_base *> (stream);
+    return obj->stat (abfd, sb);
+  };
+
+  auto close_trampoline = [] (struct bfd *nbfd, void *stream) -> int
+  {
+    gdb_bfd_iovec_base *obj = static_cast<gdb_bfd_iovec_base *> (stream);
+    delete obj;
+    /* Success.  */
+    return 0;
+  };
+
+  bfd *result = bfd_openr_iovec (filename, target,
+				 do_open, &open_fn,
+				 read_trampoline, close_trampoline,
+				 stat_trampoline);
+
+  return gdb_bfd_ref_ptr::new_reference (result);
+}
+
+/* See gdb_bfd.h.  */
+
+gdb_bfd_ref_ptr
+gdb_bfd_openr_iovec (const char *filename, const char *target,
 		     void *(*open_func) (struct bfd *nbfd,
 					 void *open_closure),
 		     void *open_closure,
