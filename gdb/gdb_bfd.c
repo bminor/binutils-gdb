@@ -226,10 +226,10 @@ struct target_buffer
      target memory.  */
   target_buffer (CORE_ADDR base, ULONGEST size)
     : m_base (base),
-      m_size (size)
+      m_size (size),
+      m_filename (xstrprintf ("<in-memory@%s>",
+			      core_addr_to_string_nz (m_base)))
   {
-    m_filename
-      = xstrprintf ("<in-memory@%s>", core_addr_to_string_nz (m_base));
   }
 
   /* Return the size of the in-memory BFD file.  */
