@@ -107,7 +107,7 @@ public:
   thread_info *thread_handle_to_thread_info (const gdb_byte *thread_handle,
 					     int handle_len,
 					     inferior *inf) override;
-  gdb::byte_vector thread_info_to_thread_handle (struct thread_info *) override;
+  gdb::array_view<const gdb_byte> thread_info_to_thread_handle (struct thread_info *) override;
 };
 
 static std::string libthread_db_search_path = LIBTHREAD_DB_SEARCH_PATH;
@@ -312,6 +312,7 @@ struct thread_db_thread_info : public private_thread_info
   /* Cached thread state.  */
   td_thrhandle_t th {};
   thread_t tid {};
+  gdb::optional<gdb::byte_vector> thread_handle;
 };
 
 static thread_db_thread_info *
@@ -1724,20 +1725,20 @@ thread_db_target::thread_handle_to_thread_info (const gdb_byte *thread_handle,
 
 /* Return the thread handle associated the thread_info pointer TP.  */
 
-gdb::byte_vector
+gdb::array_view<const gdb_byte>
 thread_db_target::thread_info_to_thread_handle (struct thread_info *tp)
 {
   thread_db_thread_info *priv = get_thread_db_thread_info (tp);
 
   if (priv == NULL)
-    return gdb::byte_vector ();
+    return {};
 
   int handle_size = sizeof (priv->tid);
-  gdb::byte_vector rv (handle_size);
+  priv->thread_handle.emplace (handle_size);
 
-  memcpy (rv.data (), &priv->tid, handle_size);
+  memcpy (priv->thread_handle->data (), &priv->tid, handle_size);
 
-  return rv;
+  return *priv->thread_handle;
 }
 
 /* Get the address of the thread local variable in load module LM which

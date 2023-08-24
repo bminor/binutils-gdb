@@ -291,8 +291,8 @@ thpy_thread_handle (PyObject *self, PyObject *args)
   thread_object *thread_obj = (thread_object *) self;
   THPY_REQUIRE_VALID (thread_obj);
 
-  gdb::byte_vector hv;
-  
+  gdb::array_view<const gdb_byte> hv;
+
   try
     {
       hv = target_thread_info_to_thread_handle (thread_obj->thread);

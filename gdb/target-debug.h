@@ -219,7 +219,7 @@ target_debug_print_size_t (size_t size)
 }
 
 static void
-target_debug_print_const_gdb_byte_vector_r (const gdb::byte_vector &vector)
+target_debug_print_gdb_array_view_const_gdb_byte (gdb::array_view<const gdb_byte> vector)
 {
   gdb_puts ("{", gdb_stdlog);
 
@@ -229,6 +229,12 @@ target_debug_print_const_gdb_byte_vector_r (const gdb::byte_vector &vector)
 		  phex_nz (vector[i], 1));
     }
   gdb_puts (" }", gdb_stdlog);
+}
+
+static void
+target_debug_print_const_gdb_byte_vector_r (const gdb::byte_vector &vector)
+{
+  target_debug_print_gdb_array_view_const_gdb_byte (vector);
 }
 
 static void

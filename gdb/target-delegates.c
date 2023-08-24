@@ -89,7 +89,7 @@ struct dummy_target : public target_ops
   const char *extra_thread_info (thread_info *arg0) override;
   const char *thread_name (thread_info *arg0) override;
   thread_info *thread_handle_to_thread_info (const gdb_byte *arg0, int arg1, inferior *arg2) override;
-  gdb::byte_vector thread_info_to_thread_handle (struct thread_info *arg0) override;
+  gdb::array_view<const_gdb_byte> thread_info_to_thread_handle (struct thread_info *arg0) override;
   void stop (ptid_t arg0) override;
   void interrupt () override;
   void pass_ctrlc () override;
@@ -263,7 +263,7 @@ struct debug_target : public target_ops
   const char *extra_thread_info (thread_info *arg0) override;
   const char *thread_name (thread_info *arg0) override;
   thread_info *thread_handle_to_thread_info (const gdb_byte *arg0, int arg1, inferior *arg2) override;
-  gdb::byte_vector thread_info_to_thread_handle (struct thread_info *arg0) override;
+  gdb::array_view<const_gdb_byte> thread_info_to_thread_handle (struct thread_info *arg0) override;
   void stop (ptid_t arg0) override;
   void interrupt () override;
   void pass_ctrlc () override;
@@ -1871,28 +1871,28 @@ debug_target::thread_handle_to_thread_info (const gdb_byte *arg0, int arg1, infe
   return result;
 }
 
-gdb::byte_vector
+gdb::array_view<const_gdb_byte>
 target_ops::thread_info_to_thread_handle (struct thread_info *arg0)
 {
   return this->beneath ()->thread_info_to_thread_handle (arg0);
 }
 
-gdb::byte_vector
+gdb::array_view<const_gdb_byte>
 dummy_target::thread_info_to_thread_handle (struct thread_info *arg0)
 {
-  return gdb::byte_vector ();
+  return gdb::array_view<const gdb_byte> ();
 }
 
-gdb::byte_vector
+gdb::array_view<const_gdb_byte>
 debug_target::thread_info_to_thread_handle (struct thread_info *arg0)
 {
   gdb_printf (gdb_stdlog, "-> %s->thread_info_to_thread_handle (...)\n", this->beneath ()->shortname ());
-  gdb::byte_vector result
+  gdb::array_view<const_gdb_byte> result
     = this->beneath ()->thread_info_to_thread_handle (arg0);
   gdb_printf (gdb_stdlog, "<- %s->thread_info_to_thread_handle (", this->beneath ()->shortname ());
   target_debug_print_struct_thread_info_p (arg0);
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_gdb_byte_vector (result);
+  target_debug_print_gdb_array_view_const_gdb_byte (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }

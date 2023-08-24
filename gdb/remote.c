@@ -784,8 +784,8 @@ public:
 					     int handle_len,
 					     inferior *inf) override;
 
-  gdb::byte_vector thread_info_to_thread_handle (struct thread_info *tp)
-						 override;
+  gdb::array_view<const gdb_byte> thread_info_to_thread_handle (struct thread_info *tp)
+    override;
 
   void stop (ptid_t) override;
 
@@ -14550,7 +14550,7 @@ remote_target::thread_handle_to_thread_info (const gdb_byte *thread_handle,
   return NULL;
 }
 
-gdb::byte_vector
+gdb::array_view<const gdb_byte>
 remote_target::thread_info_to_thread_handle (struct thread_info *tp)
 {
   remote_thread_info *priv = get_remote_thread_info (tp);
