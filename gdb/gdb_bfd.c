@@ -220,7 +220,7 @@ gdb_bfd_has_target_filename (struct bfd *abfd)
 /* For `gdb_bfd_open_from_target_memory`.  An object that manages the
    details of a BFD in target memory.  */
 
-struct target_buffer
+struct target_buffer : public gdb_bfd_iovec_base
 {
   /* Constructor.  BASE and SIZE define where the BFD can be found in
      target memory.  */
@@ -245,6 +245,11 @@ struct target_buffer
   const char *filename () const
   { return m_filename.get (); }
 
+  file_ptr read (bfd *abfd, void *buffer, file_ptr nbytes,
+		 file_ptr offset) override;
+
+  int stat (struct bfd *abfd, struct stat *sb) override;
+
 private:
   /* The base address of the in-memory BFD file.  */
   CORE_ADDR m_base;
@@ -256,47 +261,23 @@ private:
   gdb::unique_xmalloc_ptr<char> m_filename;
 };
 
-/* For `gdb_bfd_open_from_target_memory`.  Opening the file is a no-op.  */
-
-static void *
-mem_bfd_iovec_open (struct bfd *abfd, void *open_closure)
-{
-  return open_closure;
-}
-
-/* For `gdb_bfd_open_from_target_memory`.  Closing the file is just freeing the
-   base/size pair on our side.  */
-
-static int
-mem_bfd_iovec_close (struct bfd *abfd, void *stream)
-{
-  struct target_buffer *buffer = (target_buffer *) stream;
-  delete buffer;
-
-  /* Zero means success.  */
-  return 0;
-}
-
 /* For `gdb_bfd_open_from_target_memory`.  For reading the file, we just need to
    pass through to target_read_memory and fix up the arguments and return
    values.  */
 
-static file_ptr
-mem_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
+file_ptr
+target_buffer::read (struct bfd *abfd, void *buf,
 		     file_ptr nbytes, file_ptr offset)
 {
-  struct target_buffer *buffer = (struct target_buffer *) stream;
-
   /* If this read will read all of the file, limit it to just the rest.  */
-  if (offset + nbytes > buffer->size ())
-    nbytes = buffer->size () - offset;
+  if (offset + nbytes > size ())
+    nbytes = size () - offset;
 
   /* If there are no more bytes left, we've reached EOF.  */
   if (nbytes == 0)
     return 0;
 
-  int err
-    = target_read_memory (buffer->base () + offset, (gdb_byte *) buf, nbytes);
+  int err = target_read_memory (base () + offset, (gdb_byte *) buf, nbytes);
   if (err)
     return -1;
 
@@ -306,13 +287,11 @@ mem_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
 /* For `gdb_bfd_open_from_target_memory`.  For statting the file, we only
    support the st_size attribute.  */
 
-static int
-mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
+int
+target_buffer::stat (struct bfd *abfd, struct stat *sb)
 {
-  struct target_buffer *buffer = (struct target_buffer*) stream;
-
   memset (sb, 0, sizeof (struct stat));
-  sb->st_size = buffer->size ();
+  sb->st_size = size ();
   return 0;
 }
 
@@ -322,14 +301,14 @@ gdb_bfd_ref_ptr
 gdb_bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
 				 const char *target)
 {
-  struct target_buffer *buffer = new target_buffer (addr, size);
+  std::unique_ptr<target_buffer> buffer
+    = gdb::make_unique<target_buffer> (addr, size);
 
   return gdb_bfd_openr_iovec (buffer->filename (), target,
-			      mem_bfd_iovec_open,
-			      buffer,
-			      mem_bfd_iovec_pread,
-			      mem_bfd_iovec_close,
-			      mem_bfd_iovec_stat);
+			      [&] (bfd *nbfd)
+			      {
+				return buffer.release ();
+			      });
 }
 
 /* bfd_openr_iovec OPEN_CLOSURE data for gdb_bfd_open.  */
