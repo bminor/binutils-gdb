@@ -1,0 +1,233 @@
+# This testcase is part of GDB, the GNU debugger.
+
+# Copyright 2023 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This test case looks at GDB's ability to get correct backtraces for a
+# crashed inferior, recreating it from a live inferior, a corefile and
+# a gcore.
+
+
+# Check that the inferior has 7 threads, and return the number of threads (7).
+# We return the thread count so that, even if there is some error in the test,
+# the final log doesn't get flooded with failures.
+
+proc test_thread_count {} {
+    set thread_count 0
+
+    gdb_test_multiple "info threads" "getting thread count" -lbl {
+	-re "Thread" {
+	    incr thread_count
+	    exp_continue
+	}
+	-re "$::gdb_prompt " {
+	    gdb_assert {$thread_count == 7}
+	}
+    }
+
+    return $thread_count
+}
+
+# Use 'thread apply all backtrace' to check if all expected threads
+# are present, and stopped in the expected locations.  Set the global
+# TEST_LIST to be the a list of regexps expected to match all the
+# threads.  We generate it now so that the list is in the order that
+# GDB sees the threads.
+
+proc thread_apply_all {} {
+    global test_list
+
+    set test_list { }
+
+    set unwind_fail false
+
+    gdb_test_multiple "thread apply all backtrace" \
+	"Get thread information" -lbl {
+	    -re "#\[0-9\]+\\\?\\\?\[^\n\]*" {
+		set unwind_fail true
+		exp_continue
+	    }
+	    -re "\[^\n\]*syscall_task .location=SIGNAL_ALT_STACK\[^\n\]*" {
+		lappend test_list [multi_line ".*sleep.*" \
+					      ".*do_syscall_task .location=SIGNAL_ALT_STACK.*" \
+					      ".*signal_handler.*" \
+					      ".*signal handler called.*" \
+					      ".*pthread_kill.*" \
+					      ".*thread_function.*"]
+		exp_continue
+	    }
+	    -re "\[^\n\]*syscall_task .location=SIGNAL_HANDLER\[^\n\]*" {
+		lappend test_list [multi_line ".*sleep.*" \
+					      ".*do_syscall_task .location=SIGNAL_HANDLER.*" \
+					      ".*signal_handler.*" \
+					      ".*signal handler called.*" \
+					      ".*pthread_kill.*" \
+					      ".*thread_function.*"]
+		exp_continue
+	    }
+	    -re "\[^\n\]*syscall_task .location=NORMAL\[^\n\]*" {
+		lappend test_list [multi_line ".*sleep.*" \
+					      ".*do_syscall_task .location=NORMAL.*" \
+					      ".*thread_function.*"]
+		exp_continue
+	    }
+	    -re "\[^\n\]*spin_task .location=SIGNAL_ALT_STACK\[^\n\]*" {
+		lappend test_list [multi_line ".*do_spin_task .location=SIGNAL_ALT_STACK.*" \
+					      ".*signal_handler.*" \
+					      ".*signal handler called.*" \
+					      ".*pthread_kill.*" \
+					      ".*thread_function.*"]
+		exp_continue
+	    }
+	    -re "\[^\n\]*spin_task .location=SIGNAL_HANDLER\[^\n\]*" {
+		lappend test_list [multi_line ".*do_spin_task .location=SIGNAL_HANDLER.*" \
+					      ".*signal_handler.*" \
+					      ".*signal handler called.*" \
+					      ".*pthread_kill.*" \
+					      ".*thread_function.*"]
+		exp_continue
+	    }
+	    -re "\[^\n\]*spin_task .location=NORMAL\[^\n\]*" {
+		lappend test_list [multi_line ".*do_spin_task .location=NORMAL..*" \
+					      ".*thread_function.*"]
+		exp_continue
+	    }
+	    -re "\[^\n\]*main\[^\n\]*" {
+		lappend test_list ".*main.*"
+		exp_continue
+	    }
+	    -re "$::gdb_prompt " {
+		pass $gdb_test_name
+	    }
+    }
+
+    gdb_assert {$unwind_fail == false}
+}
+
+# Perform all the tests we're interested in.  They are:
+# * test if we have 7 threads
+# * Creating the list of backtraces for all threads seen
+# * testing if GDB recreated the full backtrace we expect for all threads
+
+proc do_full_test {} {
+    global test_list
+    set thread_count [test_thread_count]
+
+    thread_apply_all
+
+    gdb_assert {$thread_count == [llength $test_list]}
+
+    for {set i 0} {$i < $thread_count } {incr i} {
+	set thread_num [expr [llength $test_list] - $i]
+
+	gdb_test "thread apply $thread_num backtrace" [lindex $test_list $i]
+    }
+}
+
+# Do all preparation steps for running the corefile tests, then
+# call do_full_test to actually run the tests.
+
+proc_with_prefix test_live_inferior {} {
+    gdb_test "handle SIGUSR1 nostop print pass" \
+	".*SIGUSR1.*No.*Yes.*Yes.*User defined signal 1" \
+	"setup SIGUSR1"
+    gdb_test "handle SIGUSR2 nostop print pass" \
+	".*SIGUSR2.*No.*Yes.*Yes.*User defined signal 2" \
+	"setup SIGUSR2"
+
+    if {![runto_main]} {
+	return
+    }
+
+    gdb_breakpoint "breakpt"
+    gdb_continue_to_breakpoint "running to breakpoint" ".*"
+
+    do_full_test
+}
+
+# Do all preparation steps for running the corefile tests, then
+# call do_full_test to actually run the tests.
+
+proc_with_prefix test_corefile {} {
+    set corefile [core_find $::binfile]
+    if { $corefile == "" } {
+	untested "couldn't generate corefile"
+	return
+    }
+    set corefile [gdb_remote_download host $corefile]
+
+    gdb_test "core-file $corefile" \
+	     "" \
+	     "loading_corefile" \
+	     "A program is being debugged already\\\.  Kill it\\\? \\\(y or n\\\) " \
+	     "y"
+
+    do_full_test
+}
+
+# Do all preparation steps for running the gcore tests, then
+# call do_full_test to actually run the tests.
+
+proc_with_prefix test_gcore {} {
+
+    clean_restart "$::binfile"
+
+    gdb_test "handle SIGUSR1 nostop print pass" \
+	".*SIGUSR1.*No.*Yes.*Yes.*User defined signal 1" \
+	"setup SIGUSR1"
+    gdb_test "handle SIGUSR2 nostop print pass" \
+	".*SIGUSR2.*No.*Yes.*Yes.*User defined signal 2" \
+	"setup SIGUSR2"
+
+    if {![runto_main]} {
+	return -1
+    }
+    gdb_test "continue" ".*Segmentation fault.*" "continue to crash"
+
+    set gcore_name "${::binfile}.gcore"
+    set gcore_supported [gdb_gcore_cmd "$gcore_name" "saving gcore"]
+
+    if {!$gcore_supported} {
+	unsupported "couldn't generate gcore file"
+	return
+    }
+
+    set corefile [gdb_remote_download host $gcore_name]
+
+    gdb_test "core-file $corefile" \
+	     "" \
+	     "loading_corefile" \
+	     "A program is being debugged already\\\.  Kill it\\\? \\\(y or n\\\) " \
+	     "y"
+
+    do_full_test
+}
+
+standard_testfile
+
+if [prepare_for_testing "failed to prepare" $testfile $srcfile \
+    {debug pthreads}] {
+    return -1
+}
+
+clean_restart ${binfile}
+
+gdb_test_no_output "set backtrace limit unlimited"
+
+test_live_inferior
+
+test_corefile
+
+test_gcore
