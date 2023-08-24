@@ -311,30 +311,48 @@ gdb_bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
 			      });
 }
 
-/* bfd_openr_iovec OPEN_CLOSURE data for gdb_bfd_open.  */
-struct gdb_bfd_open_closure
+/* An object that manages the underlying stream for a BFD, using
+   target file I/O.  */
+
+struct target_fileio_stream : public gdb_bfd_iovec_base
 {
-  inferior *inf;
-  bool warn_if_slow;
+  target_fileio_stream (bfd *nbfd, int fd)
+    : m_bfd (nbfd),
+      m_fd (fd)
+  {
+  }
+
+  ~target_fileio_stream ();
+
+  file_ptr read (bfd *abfd, void *buffer, file_ptr nbytes,
+		 file_ptr offset) override;
+
+  int stat (struct bfd *abfd, struct stat *sb) override;
+
+private:
+
+  /* The BFD.  Saved for the destructor.  */
+  bfd *m_bfd;
+
+  /* The file descriptor.  */
+  int m_fd;
 };
 
-/* Wrapper for target_fileio_open suitable for passing as the
-   OPEN_FUNC argument to gdb_bfd_openr_iovec.  */
+/* Wrapper for target_fileio_open suitable for use as a helper
+   function for gdb_bfd_openr_iovec.  */
 
-static void *
-gdb_bfd_iovec_fileio_open (struct bfd *abfd, void *open_closure)
+static target_fileio_stream *
+gdb_bfd_iovec_fileio_open (struct bfd *abfd, inferior *inf, bool warn_if_slow)
 {
   const char *filename = bfd_get_filename (abfd);
   int fd;
   fileio_error target_errno;
-  int *stream;
-  gdb_bfd_open_closure *oclosure = (gdb_bfd_open_closure *) open_closure;
 
   gdb_assert (is_target_filename (filename));
 
-  fd = target_fileio_open (oclosure->inf,
+  fd = target_fileio_open (inf,
 			   filename + strlen (TARGET_SYSROOT_PREFIX),
-			   FILEIO_O_RDONLY, 0, oclosure->warn_if_slow,
+			   FILEIO_O_RDONLY, 0, warn_if_slow,
 			   &target_errno);
   if (fd == -1)
     {
@@ -343,19 +361,15 @@ gdb_bfd_iovec_fileio_open (struct bfd *abfd, void *open_closure)
       return NULL;
     }
 
-  stream = XCNEW (int);
-  *stream = fd;
-  return stream;
+  return new target_fileio_stream (abfd, fd);
 }
 
-/* Wrapper for target_fileio_pread suitable for passing as the
-   PREAD_FUNC argument to gdb_bfd_openr_iovec.  */
+/* Wrapper for target_fileio_pread.  */
 
-static file_ptr
-gdb_bfd_iovec_fileio_pread (struct bfd *abfd, void *stream, void *buf,
+file_ptr
+target_fileio_stream::read (struct bfd *abfd, void *buf,
 			    file_ptr nbytes, file_ptr offset)
 {
-  int fd = *(int *) stream;
   fileio_error target_errno;
   file_ptr pos, bytes;
 
@@ -364,7 +378,7 @@ gdb_bfd_iovec_fileio_pread (struct bfd *abfd, void *stream, void *buf,
     {
       QUIT;
 
-      bytes = target_fileio_pread (fd, (gdb_byte *) buf + pos,
+      bytes = target_fileio_pread (m_fd, (gdb_byte *) buf + pos,
 				   nbytes - pos, offset + pos,
 				   &target_errno);
       if (bytes == 0)
@@ -392,46 +406,35 @@ gdb_bfd_close_warning (const char *name, const char *reason)
   warning (_("cannot close \"%s\": %s"), name, reason);
 }
 
-/* Wrapper for target_fileio_close suitable for passing as the
-   CLOSE_FUNC argument to gdb_bfd_openr_iovec.  */
+/* Wrapper for target_fileio_close.  */
 
-static int
-gdb_bfd_iovec_fileio_close (struct bfd *abfd, void *stream)
+target_fileio_stream::~target_fileio_stream ()
 {
-  int fd = *(int *) stream;
   fileio_error target_errno;
-
-  xfree (stream);
 
   /* Ignore errors on close.  These may happen with remote
      targets if the connection has already been torn down.  */
   try
     {
-      target_fileio_close (fd, &target_errno);
+      target_fileio_close (m_fd, &target_errno);
     }
   catch (const gdb_exception &ex)
     {
       /* Also avoid crossing exceptions over bfd.  */
-      gdb_bfd_close_warning (bfd_get_filename (abfd),
+      gdb_bfd_close_warning (bfd_get_filename (m_bfd),
 			     ex.message->c_str ());
     }
-
-  /* Zero means success.  */
-  return 0;
 }
 
-/* Wrapper for target_fileio_fstat suitable for passing as the
-   STAT_FUNC argument to gdb_bfd_openr_iovec.  */
+/* Wrapper for target_fileio_fstat.  */
 
-static int
-gdb_bfd_iovec_fileio_fstat (struct bfd *abfd, void *stream,
-			    struct stat *sb)
+int
+target_fileio_stream::stat (struct bfd *abfd, struct stat *sb)
 {
-  int fd = *(int *) stream;
   fileio_error target_errno;
   int result;
 
-  result = target_fileio_fstat (fd, sb, &target_errno);
+  result = target_fileio_fstat (m_fd, sb, &target_errno);
   if (result == -1)
     {
       errno = fileio_error_to_host (target_errno);
@@ -482,13 +485,13 @@ gdb_bfd_open (const char *name, const char *target, int fd,
 	{
 	  gdb_assert (fd == -1);
 
-	  gdb_bfd_open_closure open_closure { current_inferior (), warn_if_slow };
-	  return gdb_bfd_openr_iovec (name, target,
-				      gdb_bfd_iovec_fileio_open,
-				      &open_closure,
-				      gdb_bfd_iovec_fileio_pread,
-				      gdb_bfd_iovec_fileio_close,
-				      gdb_bfd_iovec_fileio_fstat);
+	  auto open = [&] (bfd *nbfd) -> gdb_bfd_iovec_base *
+	  {
+	    return gdb_bfd_iovec_fileio_open (nbfd, current_inferior (),
+					      warn_if_slow);
+	  };
+
+	  return gdb_bfd_openr_iovec (name, target, open);
 	}
 
       name += strlen (TARGET_SYSROOT_PREFIX);
