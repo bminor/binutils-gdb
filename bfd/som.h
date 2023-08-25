@@ -81,7 +81,7 @@ typedef struct som_symbol
 
   /* During object file writing, the offset of the name of this symbol
      in the SOM string table.  */
-  int stringtab_offset;
+  unsigned int stringtab_offset;
 }
 som_symbol_type;
 

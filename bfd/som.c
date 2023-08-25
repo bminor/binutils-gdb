@@ -3304,22 +3304,89 @@ som_write_fixups (bfd *abfd,
   return true;
 }
 
+/* Write the length of STR followed by STR to P which points into
+   *BUF, a buffer of *BUFLEN size.  Track total size in *STRINGS_SIZE,
+   setting *STRX to the current offset for STR.  When STR can't fit in
+   *BUF, flush the buffer to ABFD, possibly reallocating.  Return the
+   next available location in *BUF, or NULL on error.  */
+
+static char *
+add_string (char *p, const char *str, bfd *abfd, char **buf, size_t *buflen,
+	    unsigned int *strings_size, unsigned int *strx)
+{
+  size_t length = strlen (str) + 1;
+  /* Each entry will take 4 bytes to hold the string length + the
+     string itself + null terminator + padding to a 4 byte boundary.  */
+  size_t needed = (4 + length + 3) & ~3;
+
+  /* If there is not enough room for the next entry, then dump the
+     current buffer contents now and maybe allocate a larger buffer.  */
+  if (p - *buf + needed > *buflen)
+    {
+      /* Flush buffer before refilling or reallocating.  */
+      size_t amt = p - *buf;
+      if (bfd_write (*buf, amt, abfd) != amt)
+	return NULL;
+
+      /* Reallocate if now empty buffer still too small.  */
+      if (needed > *buflen)
+	{
+	  /* Ensure a minimum growth factor to avoid O(n**2) space
+	     consumption for n strings.  The optimal minimum factor
+	     seems to be 2.  */
+	  if (*buflen * 2 < needed)
+	    *buflen = needed;
+	  else
+	    *buflen = *buflen * 2;
+	  free (*buf);
+	  *buf = bfd_malloc (*buflen);
+	  if (*buf == NULL)
+	    return NULL;
+	}
+
+      /* Reset to beginning of the (possibly new) buffer space.  */
+      p = *buf;
+    }
+
+  /* First element in a string table entry is the length of
+     the string.  This must always be 4 byte aligned.  This is
+     also an appropriate time to fill in the string index
+     field in the symbol table entry.  */
+  bfd_put_32 (abfd, length - 1, p);
+  *strings_size += 4;
+  p += 4;
+
+  *strx = *strings_size;
+
+  /* Next comes the string itself + a null terminator.  */
+  memcpy (p, str, length);
+  p += length;
+  *strings_size += length;
+
+  /* Always align up to the next word boundary.  */
+  if (length & 3)
+    {
+      length = 4 - (length & 3);
+      memset (p, 0, length);
+      *strings_size += length;
+      p += length;
+    }
+  return p;
+}
+
 /* Write out the space/subspace string table.  */
 
 static bool
 som_write_space_strings (bfd *abfd,
 			 unsigned long current_offset,
-			 unsigned int *string_sizep)
+			 unsigned int *strings_size)
 {
   /* Chunk of memory that we can use as buffer space, then throw
      away.  */
   size_t tmp_space_size = SOM_TMP_BUFSIZE;
   char *tmp_space = bfd_malloc (tmp_space_size);
   char *p = tmp_space;
-  unsigned int strings_size = 0;
   asection *section;
-  size_t amt;
-  bfd_size_type res;
 
   if (tmp_space == NULL)
     return false;
@@ -3331,86 +3398,32 @@ som_write_space_strings (bfd *abfd,
 
   /* Walk through all the spaces and subspaces (order is not important)
      building up and writing string table entries for their names.  */
+  *strings_size = 0;
   for (section = abfd->sections; section != NULL; section = section->next)
     {
-      size_t length;
+      unsigned int *strx;
 
       /* Only work with space/subspaces; avoid any other sections
 	 which might have been made (.text for example).  */
-      if (!som_is_space (section) && !som_is_subspace (section))
+      if (som_is_space (section))
+	strx = &som_section_data (section)->space_dict->name;
+      else if (som_is_subspace (section))
+	strx = &som_section_data (section)->subspace_dict->name;
+      else
 	continue;
 
-      /* Get the length of the space/subspace name.  */
-      length = strlen (section->name);
-
-      /* If there is not enough room for the next entry, then dump the
-	 current buffer contents now and maybe allocate a larger
-	 buffer.  Each entry will take 4 bytes to hold the string
-	 length + the string itself + null terminator.  */
-      if (p - tmp_space + 5 + length > tmp_space_size)
-	{
-	  /* Flush buffer before refilling or reallocating.  */
-	  amt = p - tmp_space;
-	  if (bfd_write (&tmp_space[0], amt, abfd) != amt)
-	    return false;
-
-	  /* Reallocate if now empty buffer still too small.  */
-	  if (5 + length > tmp_space_size)
-	    {
-	      /* Ensure a minimum growth factor to avoid O(n**2) space
-		 consumption for n strings.  The optimal minimum
-		 factor seems to be 2, as no other value can guarantee
-		 wasting less than 50% space.  (Note that we cannot
-		 deallocate space allocated by `alloca' without
-		 returning from this function.)  The same technique is
-		 used a few more times below when a buffer is
-		 reallocated.  */
-	      if (2 * tmp_space_size < length + 5)
-		tmp_space_size = length + 5;
-	      else
-		tmp_space_size = 2 * tmp_space_size;
-	      tmp_space = xrealloc (tmp_space, tmp_space_size);
-	    }
-
-	  /* Reset to beginning of the (possibly new) buffer space.  */
-	  p = tmp_space;
-	}
-
-      /* First element in a string table entry is the length of the
-	 string.  Alignment issues are already handled.  */
-      bfd_put_32 (abfd, (bfd_vma) length, p);
-      p += 4;
-      strings_size += 4;
-
-      /* Record the index in the space/subspace records.  */
-      if (som_is_space (section))
-	som_section_data (section)->space_dict->name = strings_size;
-      else
-	som_section_data (section)->subspace_dict->name = strings_size;
-
-      /* Next comes the string itself + a null terminator.  */
-      strcpy (p, section->name);
-      p += length + 1;
-      strings_size += length + 1;
-
-      /* Always align up to the next word boundary.  */
-      while (strings_size % 4)
-	{
-	  bfd_put_8 (abfd, 0, p);
-	  p++;
-	  strings_size++;
-	}
+      p = add_string (p, section->name, abfd, &tmp_space, &tmp_space_size,
+		      strings_size, strx);
+      if (p == NULL)
+	return false;
     }
 
   /* Done with the space/subspace strings.  Write out any information
      contained in a partial block.  */
-  amt = p - tmp_space;
-  res = bfd_write (&tmp_space[0], amt, abfd);
+  size_t amt = p - tmp_space;
+  bool ok = amt ? bfd_write (tmp_space, amt, abfd) == amt : true;
   free (tmp_space);
-  if (res != amt)
-    return false;
-  *string_sizep = strings_size;
-  return true;
+  return ok;
 }
 
 /* Write out the symbol string table.  */
@@ -3420,7 +3433,7 @@ som_write_symbol_strings (bfd *abfd,
 			  unsigned long current_offset,
 			  asymbol **syms,
 			  unsigned int num_syms,
-			  unsigned int *string_sizep,
+			  unsigned int *strings_size,
 			  struct som_compilation_unit *compilation_unit)
 {
   unsigned int i;
@@ -3429,9 +3442,6 @@ som_write_symbol_strings (bfd *abfd,
   size_t tmp_space_size = SOM_TMP_BUFSIZE;
   char *tmp_space = bfd_malloc (tmp_space_size);
   char *p = tmp_space;
-  unsigned int strings_size = 0;
-  size_t amt;
-  bfd_size_type res;
 
   if (tmp_space == NULL)
     return false;
@@ -3448,12 +3458,12 @@ som_write_symbol_strings (bfd *abfd,
   if (bfd_seek (abfd, current_offset, SEEK_SET) != 0)
     return false;
 
+  *strings_size = 0;
   if (compilation_unit)
     {
       for (i = 0; i < 4; i++)
 	{
 	  struct som_name_pt *name;
-	  size_t length;
 
 	  switch (i)
 	    {
@@ -3473,121 +3483,28 @@ som_write_symbol_strings (bfd *abfd,
 	      abort ();
 	    }
 
-	  length = strlen (name->name);
+	  p = add_string (p, name->name, abfd, &tmp_space, &tmp_space_size,
+			  strings_size, &name->strx);
 
-	  /* If there is not enough room for the next entry, then dump
-	     the current buffer contents now and maybe allocate a
-	     larger buffer.  */
-	  if (p - tmp_space + 5 + length > tmp_space_size)
-	    {
-	      /* Flush buffer before refilling or reallocating.  */
-	      amt = p - tmp_space;
-	      if (bfd_write (tmp_space, amt, abfd) != amt)
-		return false;
-
-	      /* Reallocate if now empty buffer still too small.  */
-	      if (5 + length > tmp_space_size)
-		{
-		  /* See alloca above for discussion of new size.  */
-		  if (2 * tmp_space_size < 5 + length)
-		    tmp_space_size = 5 + length;
-		  else
-		    tmp_space_size = 2 * tmp_space_size;
-		  tmp_space = xrealloc (tmp_space, tmp_space_size);
-		}
-
-	      /* Reset to beginning of the (possibly new) buffer
-		 space.  */
-	      p = tmp_space;
-	    }
-
-	  /* First element in a string table entry is the length of
-	     the string.  This must always be 4 byte aligned.  This is
-	     also an appropriate time to fill in the string index
-	     field in the symbol table entry.  */
-	  bfd_put_32 (abfd, (bfd_vma) length, p);
-	  strings_size += 4;
-	  p += 4;
-
-	  /* Next comes the string itself + a null terminator.  */
-	  strcpy (p, name->name);
-
-	  name->strx = strings_size;
-
-	  p += length + 1;
-	  strings_size += length + 1;
-
-	  /* Always align up to the next word boundary.  */
-	  while (strings_size % 4)
-	    {
-	      bfd_put_8 (abfd, 0, p);
-	      strings_size++;
-	      p++;
-	    }
+	  if (p == NULL)
+	    return false;
 	}
     }
 
   for (i = 0; i < num_syms; i++)
     {
-      size_t length = strlen (syms[i]->name);
-
-      /* If there is not enough room for the next entry, then dump the
-	 current buffer contents now and maybe allocate a larger buffer.  */
-     if (p - tmp_space + 5 + length > tmp_space_size)
-	{
-	  /* Flush buffer before refilling or reallocating.  */
-	  amt = p - tmp_space;
-	  if (bfd_write (tmp_space, amt, abfd) != amt)
-	    return false;
-
-	  /* Reallocate if now empty buffer still too small.  */
-	  if (5 + length > tmp_space_size)
-	    {
-	      /* See alloca above for discussion of new size.  */
-	      if (2 * tmp_space_size < 5 + length)
-		tmp_space_size = 5 + length;
-	      else
-		tmp_space_size = 2 * tmp_space_size;
-	      tmp_space = xrealloc (tmp_space, tmp_space_size);
-	    }
-
-	  /* Reset to beginning of the (possibly new) buffer space.  */
-	  p = tmp_space;
-	}
-
-      /* First element in a string table entry is the length of the
-	 string.  This must always be 4 byte aligned.  This is also
-	 an appropriate time to fill in the string index field in the
-	 symbol table entry.  */
-      bfd_put_32 (abfd, (bfd_vma) length, p);
-      strings_size += 4;
-      p += 4;
-
-      /* Next comes the string itself + a null terminator.  */
-      strcpy (p, syms[i]->name);
-
-      som_symbol_data (syms[i])->stringtab_offset = strings_size;
-      p += length + 1;
-      strings_size += length + 1;
-
-      /* Always align up to the next word boundary.  */
-      while (strings_size % 4)
-	{
-	  bfd_put_8 (abfd, 0, p);
-	  strings_size++;
-	  p++;
-	}
+      p = add_string (p, syms[i]->name, abfd, &tmp_space, &tmp_space_size,
+		      strings_size,
+		      &som_symbol_data (syms[i])->stringtab_offset);
+      if (p == NULL)
+	return false;
     }
 
   /* Scribble out any partial block.  */
-  amt = p - tmp_space;
-  res = bfd_write (tmp_space, amt, abfd);
+  size_t amt = p - tmp_space;
+  bool ok = amt ? bfd_write (tmp_space, amt, abfd) == amt : true;
   free (tmp_space);
-  if (res != amt)
-    return false;
-
-  *string_sizep = strings_size;
-  return true;
+  return ok;
 }
 
 /* Compute variable information to be placed in the SOM headers,
