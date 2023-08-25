@@ -649,7 +649,7 @@ ran_out_of_registers_for_arguments:
 
       if (argbytes)
 	{
-	  space += ((len - argbytes + 3) & -4);
+	  space += ((len - argbytes + wordsize -1) & -wordsize);
 	  jj = argno + 1;
 	}
       else
@@ -658,7 +658,7 @@ ran_out_of_registers_for_arguments:
       for (; jj < nargs; ++jj)
 	{
 	  struct value *val = args[jj];
-	  space += ((val->type ()->length ()) + 3) & -4;
+	  space += ((val->type ()->length () + wordsize -1) & -wordsize);
 	}
 
       /* Add location required for the rest of the parameters.  */
@@ -679,11 +679,11 @@ ran_out_of_registers_for_arguments:
 
       if (argbytes)
 	{
-	  write_memory (sp + 24 + (ii * 4),
+	  write_memory (sp + 6 * wordsize + (ii * wordsize),
 			arg->contents ().data () + argbytes,
 			len - argbytes);
 	  ++argno;
-	  ii += ((len - argbytes + 3) & -4) / 4;
+	  ii += ((len - argbytes + wordsize - 1) & -wordsize) / wordsize;
 	}
 
       /* Push the rest of the arguments into stack.  */
@@ -707,8 +707,20 @@ ran_out_of_registers_for_arguments:
 	      ++f_argno;
 	    }
 
-	  write_memory (sp + 24 + (ii * 4), arg->contents ().data (), len);
-	  ii += ((len + 3) & -4) / 4;
+	  if (type->code () == TYPE_CODE_INT
+	     || type->code () == TYPE_CODE_ENUM
+	     || type->code () == TYPE_CODE_BOOL
+	     || type->code () == TYPE_CODE_CHAR )
+	    {
+	      gdb_byte word[PPC_MAX_REGISTER_SIZE];
+	      memset (word, 0, PPC_MAX_REGISTER_SIZE);
+	      store_unsigned_integer (word, tdep->wordsize, byte_order,
+				      unpack_long (type, arg->contents ().data ()));
+	      write_memory (sp + 6 * wordsize + (ii * wordsize), word, PPC_MAX_REGISTER_SIZE);
+	    }
+	  else
+	    write_memory (sp + 6 * wordsize + (ii * wordsize), arg->contents ().data (), len);
+	  ii += ((len + wordsize -1) & -wordsize) / wordsize;
 	}
     }
 
