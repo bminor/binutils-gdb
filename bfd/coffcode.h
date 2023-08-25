@@ -5192,6 +5192,12 @@ SUBSUBSECTION
 	final-linked object.  See @code{CALC_ADDEND}.
 */
 
+#ifdef COFF_WITH_PE
+#define COFF_PE_ADDEND_BIAS(ptr) 0 /* Symbol value not stored in raw data.  */
+#else
+#define COFF_PE_ADDEND_BIAS(ptr) ((ptr)->value)
+#endif
+
 #ifndef CALC_ADDEND
 #define CALC_ADDEND(abfd, ptr, reloc, cache_ptr)		\
   {								\
@@ -5208,7 +5214,8 @@ SUBSUBSECTION
       cache_ptr->addend = 0;					\
     else if (ptr && bfd_asymbol_bfd (ptr) == abfd		\
 	     && ptr->section != NULL)				\
-      cache_ptr->addend = - (ptr->section->vma + ptr->value);	\
+      cache_ptr->addend = - (ptr->section->vma			\
+			     + COFF_PE_ADDEND_BIAS (ptr));	\
     else							\
       cache_ptr->addend = 0;					\
   }

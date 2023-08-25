@@ -544,7 +544,8 @@ sh_coff_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       cache_ptr->addend = 0;					\
     else if (ptr && bfd_asymbol_bfd (ptr) == abfd		\
 	     && ptr->section != (asection *) NULL)		\
-      cache_ptr->addend = - (ptr->section->vma + ptr->value);	\
+      cache_ptr->addend = - (ptr->section->vma			\
+			     + COFF_PE_ADDEND_BIAS (ptr));	\
     else							\
       cache_ptr->addend = 0;					\
     if ((reloc).r_type == R_SH_SWITCH8				\

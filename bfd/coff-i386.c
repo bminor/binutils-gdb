@@ -405,7 +405,8 @@ static reloc_howto_type howto_table[] =
       cache_ptr->addend = - coffsym->native->u.syment.n_value;	\
     else if (ptr && bfd_asymbol_bfd (ptr) == abfd		\
 	     && ptr->section != (asection *) NULL)		\
-      cache_ptr->addend = - (ptr->section->vma + ptr->value);	\
+      cache_ptr->addend = - (ptr->section->vma			\
+			     + COFF_PE_ADDEND_BIAS (ptr));	\
     else							\
       cache_ptr->addend = 0;					\
     if (ptr && reloc.r_type < NUM_HOWTOS			\
