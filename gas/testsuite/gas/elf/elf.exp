@@ -96,6 +96,7 @@ if { [is_elf_format] } then {
     }
     if {[istarget "rx-*-*"]} then {
 	set target_machine -rx
+	set dump_opts {{as -muse-conventional-section-names}}
     }
     if {[istarget "score-*-*"]} then {
 	set target_machine -score
@@ -142,7 +143,7 @@ if { [is_elf_format] } then {
     run_dump_test "group0a"
     run_dump_test "group0b"
     run_dump_test "group0c"
-    run_dump_test "group1a"
+    run_dump_test "group1a" $dump_opts
     run_dump_test "group1b"
     run_dump_test "group2"
     run_dump_test "group3"
@@ -154,7 +155,7 @@ if { [is_elf_format] } then {
 	hppa64*-*-hpux* { }
 	riscv*-*-* { }
 	default {
-	    run_dump_test "groupautoa"
+	    run_dump_test "groupautoa" $dump_opts
 	}
     }
     switch -glob $target_triplet {
@@ -211,7 +212,7 @@ if { [is_elf_format] } then {
 	run_elf_list_test "section2" "$target_machine" "$as_flags" "-s" ""
     }
     run_dump_test "section3"
-    run_dump_test "section4"
+    run_dump_test "section4" $dump_opts
     if {! [istarget "h8300-*-*"] && ! [istarget "rx-*-*"]} then {
 	# The h8300 port issues a warning message for
 	# new sections created without atrributes.
@@ -256,8 +257,8 @@ if { [is_elf_format] } then {
     run_dump_test "section7"
     run_dump_test "section8"
     run_dump_test "section9"
-    run_dump_test "section10"
-    run_dump_test "section11"
+    run_dump_test "section10" $dump_opts
+    run_dump_test "section11" $dump_opts
     run_dump_test "section12a"
     run_dump_test "section12b"
     run_dump_test "section13"
@@ -280,11 +281,7 @@ if { [is_elf_format] } then {
     run_dump_test "section27"
     run_dump_test "section28"
     run_dump_test "section29"
-    if { ![istarget "rx-*-*"] } then {
-	run_dump_test "section30"
-    } else {
-	run_dump_test "section30" {{as -muse-conventional-section-names}}
-    }
+    run_dump_test "section30" $dump_opts
     run_dump_test "sh-link-zero"
     run_dump_test "size"
     run_dump_test "dwarf2-1" $dump_opts
@@ -371,7 +368,7 @@ if { [is_elf_format] } then {
 
     run_dump_test "strtab"
 
-    run_dump_test "bignums"
+    run_dump_test "bignums" $dump_opts
     run_dump_test "section-symbol-redef"
     run_dump_test "pr27228"
 }
