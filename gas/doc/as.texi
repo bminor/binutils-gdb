@@ -6818,6 +6818,12 @@ section is a member of a section group
 section is used for thread-local-storage
 @item ?
 section is a member of the previously-current section's group, if any
+@item +
+section inherits attributes and (unless explicitly specified) type from the
+previously-current section, adding other attributes as specified
+@item -
+section inherits attributes and (unless explicitly specified) type from the
+previously-current section, removing other attributes as specified
 @item R
 retained section (apply SHF_GNU_RETAIN to prevent linker garbage
 collection, GNU ELF extension)
@@ -6838,6 +6844,12 @@ flags can be added to an already defined section.  The @code{.interp},
 section may have the executable (@code{x}) flag added.  Also note that the
 @code{.attach_to_group} directive can be used to add a section to a group even
 if the section was not originally declared to be part of that group.
+
+Note further that @code{+} and @code{-} need to come first and can only take
+the effect described here unless overridden by a target.  The attributes
+inherited are those in effect at the time the directive is processed.
+Attributes added later (see above) will not be inherited.  Using either
+together with @code{?} is undefined at this point.
 
 The optional @var{type} argument may contain one of the following constants:
 

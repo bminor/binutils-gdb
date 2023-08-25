@@ -280,6 +280,11 @@ if { [is_elf_format] } then {
     run_dump_test "section27"
     run_dump_test "section28"
     run_dump_test "section29"
+    if { ![istarget "rx-*-*"] } then {
+	run_dump_test "section30"
+    } else {
+	run_dump_test "section30" {{as -muse-conventional-section-names}}
+    }
     run_dump_test "sh-link-zero"
     run_dump_test "size"
     run_dump_test "dwarf2-1" $dump_opts

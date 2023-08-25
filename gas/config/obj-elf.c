@@ -822,10 +822,12 @@ obj_elf_change_section (const char *name,
 
 static bfd_vma
 obj_elf_parse_section_letters (char *str, size_t len,
-			       bool *is_clone, bfd_vma *gnu_attr)
+			       bool *is_clone, int *inherit, bfd_vma *gnu_attr)
 {
   bfd_vma attr = 0;
+
   *is_clone = false;
+  *inherit = 0;
 
   while (len > 0)
     {
@@ -923,6 +925,8 @@ obj_elf_parse_section_letters (char *str, size_t len,
 		  len -= (end - str);
 		  str = end;
 		}
+	      else if (!attr && !*gnu_attr && (*str == '+' || *str == '-'))
+		*inherit = *str == '+' ? 1 : -1;
 	      else
 		as_fatal ("%s", bad_msg);
 	  }
@@ -1171,6 +1175,7 @@ obj_elf_section (int push)
       if (*input_line_pointer == '"')
 	{
 	  bool is_clone;
+	  int inherit;
 
 	  beg = demand_copy_C_string (&dummy);
 	  if (beg == NULL)
@@ -1178,8 +1183,15 @@ obj_elf_section (int push)
 	      ignore_rest_of_line ();
 	      return;
 	    }
-	  attr |= obj_elf_parse_section_letters (beg, strlen (beg),
-						 &is_clone, &gnu_attr);
+	  attr = obj_elf_parse_section_letters (beg, strlen (beg), &is_clone,
+						&inherit, &gnu_attr);
+
+	  if (inherit > 0)
+	    attr |= elf_section_flags (now_seg);
+	  else if (inherit < 0)
+	    attr = elf_section_flags (now_seg) & ~attr;
+	  if (inherit)
+	    type = elf_section_type (now_seg);
 
 	  SKIP_WHITESPACE ();
 	  if (*input_line_pointer == ',')
@@ -1224,6 +1236,9 @@ obj_elf_section (int push)
 	    {
 	      ++input_line_pointer;
 	      SKIP_WHITESPACE ();
+	      if (inherit && *input_line_pointer == ','
+		  && (bfd_section_flags (now_seg) & SEC_MERGE) != 0)
+		goto fetch_entsize;
 	      entsize = get_absolute_expression ();
 	      SKIP_WHITESPACE ();
 	      if (entsize < 0)
@@ -1232,6 +1247,12 @@ obj_elf_section (int push)
 		  attr &= ~SHF_MERGE;
 		  entsize = 0;
 		}
+	    }
+	  else if ((attr & SHF_MERGE) != 0 && inherit
+		    && (bfd_section_flags (now_seg) & SEC_MERGE) != 0)
+	    {
+	    fetch_entsize:
+	      entsize = now_seg->entsize;
 	    }
 	  else if ((attr & SHF_MERGE) != 0)
 	    {
@@ -1248,6 +1269,9 @@ obj_elf_section (int push)
 		{
 		  linked_to_section_index = strtoul (input_line_pointer, & input_line_pointer, 0);
 		}
+	      else if (inherit && *input_line_pointer == ','
+		       && (elf_section_flags (now_seg) & SHF_LINK_ORDER) != 0)
+		goto fetch_linked_to;
 	      else
 		{
 		  char c;
@@ -1260,6 +1284,17 @@ obj_elf_section (int push)
 		    match.linked_to_symbol_name = xmemdup0 (beg, length);
 		}
 	    }
+	  else if ((attr & SHF_LINK_ORDER) != 0 && inherit
+		   && (elf_section_flags (now_seg) & SHF_LINK_ORDER) != 0)
+	    {
+	    fetch_linked_to:
+	      if (now_seg->map_head.linked_to_symbol_name)
+		match.linked_to_symbol_name =
+		  now_seg->map_head.linked_to_symbol_name;
+	      else
+		linked_to_section_index =
+		  elf_section_data (now_seg)->this_hdr.sh_link;
+	    }
 
 	  if ((attr & SHF_GROUP) != 0 && is_clone)
 	    {
@@ -1270,6 +1305,10 @@ obj_elf_section (int push)
 	  if ((attr & SHF_GROUP) != 0 && *input_line_pointer == ',')
 	    {
 	      ++input_line_pointer;
+	      SKIP_WHITESPACE ();
+	      if (inherit && *input_line_pointer == ','
+		  && (elf_section_flags (now_seg) & SHF_GROUP) != 0)
+		goto fetch_group;
 	      match.group_name = obj_elf_section_name ();
 	      if (match.group_name == NULL)
 		attr &= ~SHF_GROUP;
@@ -1285,6 +1324,14 @@ obj_elf_section (int push)
 		}
 	      else if (startswith (name, ".gnu.linkonce"))
 		linkonce = 1;
+	    }
+	  else if ((attr & SHF_GROUP) != 0 && inherit
+		   && (elf_section_flags (now_seg) & SHF_GROUP) != 0)
+	    {
+	    fetch_group:
+	      match.group_name = elf_group_name (now_seg);
+	      linkonce =
+	        (bfd_section_flags (now_seg) & SEC_LINK_ONCE) != 0;
 	    }
 	  else if ((attr & SHF_GROUP) != 0)
 	    {
