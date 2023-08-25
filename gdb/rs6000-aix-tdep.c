@@ -1391,7 +1391,9 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
        224.  */
     set_gdbarch_frame_red_zone_size (gdbarch, 224);
   else
-    set_gdbarch_frame_red_zone_size (gdbarch, 0);
+    /* In 64 bit mode the red zone should have 18 8 byte GPRS + 18 8 byte
+       FPRS making it 288 bytes.  This is 16 byte aligned as well.  */
+    set_gdbarch_frame_red_zone_size (gdbarch, 288);
 
   if (tdep->wordsize == 8)
     set_gdbarch_wchar_bit (gdbarch, 32);
