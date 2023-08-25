@@ -143,12 +143,6 @@ fi
 CUSTOMIZER_SCRIPT="${srcdir}/emulparams/${EMULATION_NAME}.sh"
 source_sh ${CUSTOMIZER_SCRIPT}
 
-if test -d ldscripts; then
-  true
-else
-  mkdir ldscripts
-fi
-
 # Set some flags for the emultempl scripts.  USE_LIBPATH will
 # be set for any libpath-using emulation; NATIVE will be set for a
 # libpath-using emulation where ${host} = ${target}.  NATIVE
