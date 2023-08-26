@@ -462,7 +462,6 @@ RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
-STRINGIFY = @STRINGIFY@
 STRIP = @STRIP@
 TARGET_SYSTEM_ROOT = @TARGET_SYSTEM_ROOT@
 TARGET_SYSTEM_ROOT_DEFINE = @TARGET_SYSTEM_ROOT_DEFINE@
@@ -1010,7 +1009,7 @@ BLD_POTFILES = $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES)
 @AMDEP_FALSE@GENDEPDIR = 
 @AMDEP_TRUE@GENDEPDIR = $(DEPDIR)
 GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh "${srcdir}" "${libdir}" "${prefix}" "${exec_prefix}" @host@ @target@ @target_alias@ "$(GENDEPDIR)" "${LIB_PATH}" "@EMULATION_LIBPATH@" "@NATIVE_LIB_DIRS@" @use_sysroot@ @enable_initfini_array@
-GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed ldscripts/stamp
+GEN_DEPENDS = $(srcdir)/genscripts.sh ldscripts/stamp
 
 # We need this for automake to use YLWRAP.
 # Allow dependency tracking to work for these files, too.
@@ -1075,7 +1074,7 @@ CLEANFILES = dep.sed DEP DEPA DEP1 DEP2 spu_ovl.s spu_ovl.@OBJEXT@ spu_icache.s 
 EXTRA_DIST = ldgram.c ldgram.h ldlex.c emultempl/spu_ovl.@OBJEXT@_c \
 	     emultempl/spu_icache.@OBJEXT@_c deffilep.c deffilep.h $(man_MANS)
 
-DISTCLEANFILES = site.exp development.exp enablings.exp site.bak stringify.sed
+DISTCLEANFILES = site.exp development.exp enablings.exp site.bak
 all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -2352,9 +2351,6 @@ ldemul-list.h: Makefile
 
 ldscripts/stamp:
 	$(AM_V_GEN)test -d $(@D) || mkdir $(@D); touch $@
-
-stringify.sed: ${srcdir}/emultempl/$(STRINGIFY)
-	$(AM_V_GEN)cp ${srcdir}/emultempl/$(STRINGIFY) stringify.sed
 
 @TDIRS@
 

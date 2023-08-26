@@ -392,25 +392,6 @@ fi
 AM_ZLIB
 AC_ZSTD
 
-# When converting linker scripts into strings for use in emulation
-# files, use astring.sed if the compiler supports ANSI string
-# concatenation, or ostring.sed otherwise.  This is to support the
-# broken Microsoft MSVC compiler, which limits the length of string
-# constants, while still supporting pre-ANSI compilers which do not
-# support string concatenation.
-AC_MSG_CHECKING([whether ANSI C string concatenation works])
-AC_CACHE_VAL(ld_cv_string_concatenation,
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [char *a = "a" "a";])],
-  ld_cv_string_concatenation=yes,
-  ld_cv_string_concatenation=no)])
-AC_MSG_RESULT($ld_cv_string_concatenation)
-if test "$ld_cv_string_concatenation" = "yes"; then
-  STRINGIFY=astring.sed
-else
-  STRINGIFY=ostring.sed
-fi
-AC_SUBST(STRINGIFY)
-
 # target-specific stuff:
 
 all_targets=

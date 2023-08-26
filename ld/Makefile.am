@@ -623,16 +623,13 @@ ldemul-list.h: Makefile
 ldscripts/stamp:
 	$(AM_V_GEN)test -d $(@D) || mkdir $(@D); touch $@
 
-stringify.sed: ${srcdir}/emultempl/$(STRINGIFY)
-	$(AM_V_GEN)cp ${srcdir}/emultempl/$(STRINGIFY) stringify.sed
-
 if AMDEP
   GENDEPDIR=$(DEPDIR)
 else
   GENDEPDIR=
 endif
 GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh "${srcdir}" "${libdir}" "${prefix}" "${exec_prefix}" @host@ @target@ @target_alias@ "$(GENDEPDIR)" "${LIB_PATH}" "@EMULATION_LIBPATH@" "@NATIVE_LIB_DIRS@" @use_sysroot@ @enable_initfini_array@
-GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed ldscripts/stamp
+GEN_DEPENDS = $(srcdir)/genscripts.sh ldscripts/stamp
 
 @TDIRS@
 
@@ -826,7 +823,7 @@ doc/ld/index.html: ld.texi $(ld_TEXINFOS)
 	$(AM_V_GEN)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
 	  --split=node -I$(srcdir) $(srcdir)/ld.texi -o doc/ld
 
-DISTCLEANFILES = site.exp development.exp enablings.exp site.bak stringify.sed
+DISTCLEANFILES = site.exp development.exp enablings.exp site.bak
 distclean-local:
 	rm -rf ldscripts
 
