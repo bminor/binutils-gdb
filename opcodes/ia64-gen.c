@@ -607,7 +607,8 @@ load_insn_classes (void)
     fail (_("can't find ia64-ic.tbl for reading\n"));
 
   /* Discard first line.  */
-  fgets (buf, sizeof(buf), fp);
+  if (fgets (buf, sizeof(buf), fp) == NULL)
+    return;
 
   while (!feof (fp))
     {
@@ -808,7 +809,8 @@ load_depfile (const char *filename, enum ia64_dependency_mode mode)
   if (fp == NULL)
     fail (_("can't find %s for reading\n"), filename);
 
-  fgets (buf, sizeof(buf), fp);
+  if (fgets (buf, sizeof(buf), fp) == NULL)
+    return;
   while (!feof (fp))
     {
       char *name, *tmp;

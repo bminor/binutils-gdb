@@ -1841,7 +1841,7 @@ process_i386_opcodes (FILE *table)
 	  fprintf (fp, "#define MN_%s ", str);
 	  free (str);
 	  str = mkident (next);
-	  fprintf (fp, "(MN_%s + %u)\n", str, l1 - l);
+	  fprintf (fp, "(MN_%s + %zu)\n", str, l1 - l);
 	}
       else
 	{
