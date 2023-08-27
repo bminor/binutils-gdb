@@ -867,22 +867,20 @@ fill_comdat_hash (bfd *abfd)
 {
   bfd_byte *esymstart, *esym, *esymend;
 
-  /* Unfortunately, the PE format stores essential information in
-     the symbol table, of all places.  We need to extract that
-     information now, so that objdump and the linker will know how
-     to handle the section without worrying about the symbols.  We
-     can't call slurp_symtab, because the linker doesn't want the
-     swapped symbols.  */
+  /* Unfortunately, the PE format stores essential information in the
+     symbol table, of all places.  We need to extract that information
+     now, so that objdump and the linker will know how to handle the
+     section without worrying about the symbols.  We can't call
+     slurp_symtab, because the linker doesn't want the swapped symbols.  */
 
   /* COMDAT sections are special.  The first symbol is the section
      symbol, which tells what kind of COMDAT section it is.  The
-     second symbol is the "comdat symbol" - the one with the
-     unique name.  GNU uses the section symbol for the unique
-     name; MS uses ".text" for every comdat section.  Sigh.  - DJ */
+     second symbol is the "comdat symbol" - the one with the unique
+     name.  GNU uses the section symbol for the unique name; MS uses
+     ".text" for every comdat section.  Sigh.  - DJ.  */
 
-  /* This is not mirrored in sec_to_styp_flags(), but there
-     doesn't seem to be a need to, either, and it would at best be
-     rather messy.  */
+  /* This is not mirrored in sec_to_styp_flags(), but there doesn't
+     seem to be a need to, either, and it would at best be rather messy.  */
 
   if (! _bfd_coff_get_external_symbols (abfd))
     return true;
@@ -900,28 +898,24 @@ fill_comdat_hash (bfd *abfd)
 
       bfd_coff_swap_sym_in (abfd, esym, &isym);
 
-      /* According to the MSVC documentation, the first
-	 TWO entries with the section # are both of
-	 interest to us.  The first one is the "section
-	 symbol" (section name).  The second is the comdat
-	 symbol name.  Here, we've found the first
-	 qualifying entry; we distinguish it from the
-	 second with a state flag.
+      /* According to the MSVC documentation, the first TWO entries
+	 with the section # are both of interest to us.  The first one
+	 is the "section symbol" (section name).  The second is the
+	 comdat symbol name.  Here, we've found the first qualifying
+	 entry; we distinguish it from the second with a state flag.
 
-	 In the case of gas-generated (at least until that
-	 is fixed) .o files, it isn't necessarily the
-	 second one.  It may be some other later symbol.
+	 In the case of gas-generated (at least until that is fixed)
+	 .o files, it isn't necessarily the second one.  It may be
+	 some other later symbol.
 
-	 Since gas also doesn't follow MS conventions and
-	 emits the section similar to .text$<name>, where
-	 <something> is the name we're looking for, we
-	 distinguish the two as follows:
+	 Since gas also doesn't follow MS conventions and emits the
+	 section similar to .text$<name>, where <something> is the
+	 name we're looking for, we distinguish the two as follows:
 
-	 If the section name is simply a section name (no
-	 $) we presume it's MS-generated, and look at
-	 precisely the second symbol for the comdat name.
-	 If the section name has a $, we assume it's
-	 gas-generated, and look for <something> (whatever
+	 If the section name is simply a section name (no $) we
+	 presume it's MS-generated, and look at precisely the second
+	 symbol for the comdat name.  If the section name has a $, we
+	 assume it's gas-generated, and look for <something> (whatever
 	 follows the $) as the comdat symbol.  */
 
       /* All 3 branches use this.  */
@@ -952,11 +946,11 @@ fill_comdat_hash (bfd *abfd)
 	  else
 	    {
 	      /* PR 17512: file: e2cfe54f.  */
-	      if (esym + bfd_coff_symesz (abfd) >= esymend)
+	      if (esym + isym.n_numaux * bfd_coff_symesz (abfd) >= esymend)
 		{
 		  /* xgettext:c-format */
-		  _bfd_error_handler (_ ("%pB: warning: no symbol for"
-					 " section '%s' found"),
+		  _bfd_error_handler (_("%pB: warning: no symbol for"
+					" section '%s' found"),
 				      abfd, symname);
 		  continue;
 		}
@@ -965,20 +959,16 @@ fill_comdat_hash (bfd *abfd)
 				    isym.n_numaux, &aux);
 	    }
 
-	  /* FIXME: Microsoft uses NODUPLICATES and
-	     ASSOCIATIVE, but gnu uses ANY and
-	     SAME_SIZE.  Unfortunately, gnu doesn't do
-	     the comdat symbols right.  So, until we can
-	     fix it to do the right thing, we are
-	     temporarily disabling comdats for the MS
-	     types (they're used in DLLs and C++, but we
-	     don't support *their* C++ libraries anyway
-	     - DJ.  */
+	  /* FIXME: Microsoft uses NODUPLICATES and ASSOCIATIVE, but
+	     gnu uses ANY and SAME_SIZE.  Unfortunately, gnu doesn't
+	     do the comdat symbols right.  So, until we can fix it to
+	     do the right thing, we are temporarily disabling comdats
+	     for the MS types (they're used in DLLs and C++, but we
+	     don't support *their* C++ libraries anyway - DJ.  */
 
-	  /* Cygwin does not follow the MS style, and
-	     uses ANY and SAME_SIZE where NODUPLICATES
-	     and ASSOCIATIVE should be used.  For
-	     Interix, we just do the right thing up
+	  /* Cygwin does not follow the MS style, and uses ANY and
+	     SAME_SIZE where NODUPLICATES and ASSOCIATIVE should be
+	     used.  For Interix, we just do the right thing up
 	     front.  */
 
 	  switch (aux.x_scn.x_comdat)
@@ -1004,13 +994,11 @@ fill_comdat_hash (bfd *abfd)
 	      sec_flags |= SEC_LINK_DUPLICATES_SAME_CONTENTS;
 	      break;
 
-	      /* debug$S gets this case; other
-		 implications ??? */
+	      /* debug$S gets this case; other implications ???  */
 
-	      /* There may be no symbol... we'll search
-		 the whole table... Is this the right
-		 place to play this game? Or should we do
-		 it when reading it in.  */
+	      /* There may be no symbol.  We'll search the whole
+		 table.  Is this the right place to play this game?
+		 Or should we do it when reading it in?  */
 	    case IMAGE_COMDAT_SELECT_ASSOCIATIVE:
 #ifdef STRICT_PE_FORMAT
 	      /* FIXME: This is not currently implemented.  */
@@ -1021,8 +1009,7 @@ fill_comdat_hash (bfd *abfd)
 	      break;
 
 	    default:  /* 0 means "no symbol" */
-	      /* debug$F gets this case; other
-		 implications ??? */
+	      /* debug$F gets this case; other implications ???  */
 	      sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
 	      break;
 	    }
@@ -1061,12 +1048,11 @@ fill_comdat_hash (bfd *abfd)
 		  continue;
 		}
 	    }
-	  /* MSVC mode: the lexically second symbol (or
-	     drop through from the above).  */
-	  /* This must the second symbol with the
-	     section #.  It is the actual symbol name.
-	     Intel puts the two adjacent, but Alpha (at
-	     least) spreads them out.  */
+	  /* MSVC mode: the lexically second symbol (or drop through
+	     from the above).  */
+	  /* This must the second symbol with the section #.  It is
+	     the actual symbol name.  Intel puts the two adjacent, but
+	     Alpha (at least) spreads them out.  */
 
 	  entry->comdat_symbol = (esym - esymstart) / bfd_coff_symesz (abfd);
 	  entry->comdat_name = bfd_strdup (symname);
@@ -1107,45 +1093,39 @@ handle_COMDAT (bfd *abfd, flagword *sec_flags, const char *name,
     = find_flags (pe_data (abfd)->comdat_hash, section->target_index);
   if (found != NULL)
     {
-
       struct internal_syment isym = found->isym;
 
-      /* If it isn't the stuff we're expecting, die;
-	 The MS documentation is vague, but it
-	 appears that the second entry serves BOTH
-	 as the comdat symbol and the defining
-	 symbol record (either C_STAT or C_EXT,
-	 possibly with an aux entry with debug
-	 information if it's a function.)  It
-	 appears the only way to find the second one
-	 is to count.  (On Intel, they appear to be
-	 adjacent, but on Alpha, they have been
-	 found separated.)
+      /* If it isn't the stuff we're expecting, die;  The MS
+	 documentation is vague, but it appears that the second entry
+	 serves BOTH as the comdat symbol and the defining symbol
+	 record (either C_STAT or C_EXT, possibly with an aux entry
+	 with debug information if it's a function.)  It appears the
+	 only way to find the second one is to count.  (On Intel, they
+	 appear to be adjacent, but on Alpha, they have been found
+	 separated.)
 
-	 Here, we think we've found the first one,
-	 but there's some checking we can do to be
-	 sure.  */
+	 Here, we think we've found the first one, but there's some
+	 checking we can do to be sure.  */
 
       if (! ((isym.n_sclass == C_STAT || isym.n_sclass == C_EXT)
 	     && BTYPE (isym.n_type) == T_NULL && isym.n_value == 0))
 	{
 	  /* Malformed input files can trigger this test.
 	     cf PR 21781.  */
-	  _bfd_error_handler (
-			      _ ("%pB: error: unexpected symbol '%s' in COMDAT section"), abfd,
-			      found->symname);
+	  _bfd_error_handler
+	    (_("%pB: error: unexpected symbol '%s' in COMDAT section"),
+	     abfd, found->symname);
 	  return false;
 	}
 
-      /* FIXME LATER: MSVC generates section names
-	 like .text for comdats.  Gas generates
-	 names like .text$foo__Fv (in the case of a
-	 function).  See comment above for more.  */
+      /* FIXME LATER: MSVC generates section names like .text for
+	 comdats.  Gas generates names like .text$foo__Fv (in the case
+	 of a function).  See comment above for more.  */
 
       if (isym.n_sclass == C_STAT && strcmp (name, found->symname) != 0)
 	/* xgettext:c-format */
-	_bfd_error_handler (_ ("%pB: warning: COMDAT symbol '%s'"
-			       " does not match section name '%s'"),
+	_bfd_error_handler (_("%pB: warning: COMDAT symbol '%s'"
+			      " does not match section name '%s'"),
 			    abfd, found->symname, name);
 
       if (found->comdat_symbol != -1)
