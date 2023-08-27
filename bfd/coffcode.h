@@ -853,6 +853,29 @@ styp_to_sec_flags (bfd *abfd,
 
 #else /* COFF_WITH_PE */
 
+static hashval_t
+comdat_hashf (const void *entry)
+{
+  const struct comdat_hash_entry *fe = entry;
+  return fe->target_index;
+}
+
+static int
+comdat_eqf (const void *e1, const void *e2)
+{
+  const struct comdat_hash_entry *fe1 = e1;
+  const struct comdat_hash_entry *fe2 = e2;
+  return fe1->target_index == fe2->target_index;
+}
+
+static void
+comdat_delf (void *ent)
+{
+  struct comdat_hash_entry *e = ent;
+  free (e->symname);
+  free (e);
+}
+
 static struct comdat_hash_entry *
 find_flags (htab_t comdat_hash, int target_index)
 {
@@ -1085,6 +1108,14 @@ static bool
 handle_COMDAT (bfd *abfd, flagword *sec_flags, const char *name,
 	       asection *section)
 {
+  if (pe_data (abfd)->comdat_hash == NULL)
+    {
+      pe_data (abfd)->comdat_hash = htab_create (10, comdat_hashf, comdat_eqf,
+						 comdat_delf);
+      if (pe_data (abfd)->comdat_hash == NULL)
+	return false;
+    }
+
   if (htab_elements (pe_data (abfd)->comdat_hash) == 0)
     if (! fill_comdat_hash (abfd))
       return false;
