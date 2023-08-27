@@ -285,6 +285,9 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* If the compiler supports a TLS storage class, define it to that here */
+#undef TLS
+
 /* Name of host specific header file to include in trad-core.c. */
 #undef TRAD_HEADER
 

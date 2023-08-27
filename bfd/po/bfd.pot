@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2023-11-07 17:27-0700\n"
+"POT-Creation-Date: 2023-11-07 17:40-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -138,115 +138,115 @@ msgstr ""
 msgid "Writing updated armap timestamp"
 msgstr ""
 
-#: bfd.c:738
+#: bfd.c:740
 msgid "no error"
 msgstr ""
 
-#: bfd.c:739
+#: bfd.c:741
 msgid "system call error"
 msgstr ""
 
-#: bfd.c:740
+#: bfd.c:742
 msgid "invalid bfd target"
 msgstr ""
 
-#: bfd.c:741
+#: bfd.c:743
 msgid "file in wrong format"
 msgstr ""
 
-#: bfd.c:742
+#: bfd.c:744
 msgid "archive object file in wrong format"
 msgstr ""
 
-#: bfd.c:743
+#: bfd.c:745
 msgid "invalid operation"
 msgstr ""
 
-#: bfd.c:744
+#: bfd.c:746
 msgid "memory exhausted"
 msgstr ""
 
-#: bfd.c:745
+#: bfd.c:747
 msgid "no symbols"
 msgstr ""
 
-#: bfd.c:746
+#: bfd.c:748
 msgid "archive has no index; run ranlib to add one"
 msgstr ""
 
-#: bfd.c:747
+#: bfd.c:749
 msgid "no more archived files"
 msgstr ""
 
-#: bfd.c:748
+#: bfd.c:750
 msgid "malformed archive"
 msgstr ""
 
-#: bfd.c:749
+#: bfd.c:751
 msgid "DSO missing from command line"
 msgstr ""
 
-#: bfd.c:750
+#: bfd.c:752
 msgid "file format not recognized"
 msgstr ""
 
-#: bfd.c:751
+#: bfd.c:753
 msgid "file format is ambiguous"
 msgstr ""
 
-#: bfd.c:752
+#: bfd.c:754
 msgid "section has no contents"
 msgstr ""
 
-#: bfd.c:753
+#: bfd.c:755
 msgid "nonrepresentable section on output"
 msgstr ""
 
-#: bfd.c:754
+#: bfd.c:756
 msgid "symbol needs debug section which does not exist"
 msgstr ""
 
-#: bfd.c:755
+#: bfd.c:757
 msgid "bad value"
 msgstr ""
 
-#: bfd.c:756
+#: bfd.c:758
 msgid "file truncated"
 msgstr ""
 
-#: bfd.c:757
+#: bfd.c:759
 msgid "file too big"
 msgstr ""
 
-#: bfd.c:758
+#: bfd.c:760
 msgid "sorry, cannot handle this file"
 msgstr ""
 
-#: bfd.c:759
+#: bfd.c:761
 #, c-format
 msgid "error reading %s: %s"
 msgstr ""
 
-#: bfd.c:760
+#: bfd.c:762
 msgid "#<invalid error code>"
 msgstr ""
 
-#: bfd.c:1890
+#: bfd.c:1892
 #, c-format
 msgid "BFD %s assertion fail %s:%d"
 msgstr ""
 
-#: bfd.c:1903
+#: bfd.c:1905
 #, c-format
 msgid "BFD %s internal error, aborting at %s:%d in %s\n"
 msgstr ""
 
-#: bfd.c:1908
+#: bfd.c:1910
 #, c-format
 msgid "BFD %s internal error, aborting at %s:%d\n"
 msgstr ""
 
-#: bfd.c:1910
+#: bfd.c:1912
 msgid "Please report this bug.\n"
 msgstr ""
 

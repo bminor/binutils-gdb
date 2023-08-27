@@ -691,6 +691,8 @@ SECTION
 	The easiest way to report a BFD error to the user is to
 	use <<bfd_perror>>.
 
+	The BFD error is thread-local.
+
 SUBSECTION
 	Type <<bfd_error_type>>
 
@@ -728,10 +730,10 @@ CODE_FRAGMENT
 .
 */
 
-static bfd_error_type bfd_error;
-static bfd_error_type input_error;
-static bfd *input_bfd;
-static char *_bfd_error_buf;
+static TLS bfd_error_type bfd_error;
+static TLS bfd_error_type input_error;
+static TLS bfd *input_bfd;
+static TLS char *_bfd_error_buf;
 
 const char *const bfd_errmsgs[] =
 {
@@ -920,7 +922,7 @@ DESCRIPTION
 	Primarily for error reporting, this function is like
 	libiberty's xasprintf except that it can return NULL on no
 	memory and the returned string should not be freed.  Uses a
-	single malloc'd buffer managed by libbfd, _bfd_error_buf.
+	thread-local malloc'd buffer managed by libbfd, _bfd_error_buf.
 	Be aware that a call to this function frees the result of any
 	previous call.  bfd_errmsg (bfd_error_on_input) also calls
 	this function.
