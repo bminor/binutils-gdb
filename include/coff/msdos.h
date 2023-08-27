@@ -48,7 +48,7 @@ struct external_DOS_hdr
   char e_oeminfo[2];		/* OEM information.  */
   char e_res2[10][2];		/* Reserved words, all 0x0.  */
   char e_lfanew[4];		/* File address of new exe header, usually 0x80.  */
-  char dos_message[16][4];	/* Other stuff, always follow DOS header.  */
+  char dos_message[64];		/* Other stuff, always follow DOS header.  */
 };
 
 /* The actual DOS header only includes up to the e_ovno field.  */

@@ -258,40 +258,28 @@ coff_swap_scnhdr_in (bfd * abfd, void * ext, void * in)
 static bool
 pe_mkobject (bfd * abfd)
 {
-  pe_data_type *pe;
-  size_t amt = sizeof (pe_data_type);
+  /* Some x86 code followed by an ascii string.  */
+  static const char default_dos_message[64] = {
+    0x0e, 0x1f, 0xba, 0x0e, 0x00, 0xb4, 0x09, 0xcd,
+    0x21, 0xb8, 0x01, 0x4c, 0xcd, 0x21, 0x54, 0x68,
+    0x69, 0x73, 0x20, 0x70, 0x72, 0x6f, 0x67, 0x72,
+    0x61, 0x6d, 0x20, 0x63, 0x61, 0x6e, 0x6e, 0x6f,
+    0x74, 0x20, 0x62, 0x65, 0x20, 0x72, 0x75, 0x6e,
+    0x20, 0x69, 0x6e, 0x20, 0x44, 0x4f, 0x53, 0x20,
+    0x6d, 0x6f, 0x64, 0x65, 0x2e, 0x0d, 0x0d, 0x0a,
+    0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-  abfd->tdata.pe_obj_data = (struct pe_tdata *) bfd_zalloc (abfd, amt);
-
-  if (abfd->tdata.pe_obj_data == 0)
+  pe_data_type *pe = bfd_zalloc (abfd, sizeof (*pe));
+  abfd->tdata.pe_obj_data = pe;
+  if (pe == NULL)
     return false;
-
-  pe = pe_data (abfd);
 
   pe->coff.pe = 1;
 
   /* in_reloc_p is architecture dependent.  */
   pe->in_reloc_p = in_reloc_p;
 
-  /* Default DOS message string.  */
-  pe->dos_message[0]  = 0x0eba1f0e;
-  pe->dos_message[1]  = 0xcd09b400;
-  pe->dos_message[2]  = 0x4c01b821;
-  pe->dos_message[3]  = 0x685421cd;
-  pe->dos_message[4]  = 0x70207369;
-  pe->dos_message[5]  = 0x72676f72;
-  pe->dos_message[6]  = 0x63206d61;
-  pe->dos_message[7]  = 0x6f6e6e61;
-  pe->dos_message[8]  = 0x65622074;
-  pe->dos_message[9]  = 0x6e757220;
-  pe->dos_message[10] = 0x206e6920;
-  pe->dos_message[11] = 0x20534f44;
-  pe->dos_message[12] = 0x65646f6d;
-  pe->dos_message[13] = 0x0a0d0d2e;
-  pe->dos_message[14] = 0x24;
-  pe->dos_message[15] = 0x0;
-
-  memset (& pe->pe_opthdr, 0, sizeof pe->pe_opthdr);
+  memcpy (pe->dos_message, default_dos_message, sizeof (pe->dos_message));
 
   bfd_coff_long_section_names (abfd)
     = coff_backend_info (abfd)->_bfd_coff_long_section_names;

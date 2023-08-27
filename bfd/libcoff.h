@@ -151,7 +151,7 @@ typedef struct pe_tdata
   int dll;
   int has_reloc_section;
   int dont_strip_reloc;
-  int dos_message[16];
+  char dos_message[64];
   /* The timestamp to insert into the output file.
      If the timestamp is -1 then the current time is used.  */
   int timestamp;

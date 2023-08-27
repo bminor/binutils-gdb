@@ -890,9 +890,8 @@ _bfd_XXi_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
 
   H_PUT_32 (abfd, filehdr_in->pe.e_lfanew, filehdr_out->e_lfanew);
 
-  for (idx = 0; idx < 16; idx++)
-    H_PUT_32 (abfd, filehdr_in->pe.dos_message[idx],
-	      filehdr_out->dos_message[idx]);
+  memcpy (filehdr_out->dos_message, filehdr_in->pe.dos_message,
+	  sizeof (filehdr_out->dos_message));
 
   /* Also put in the NT signature.  */
   H_PUT_32 (abfd, filehdr_in->pe.nt_signature, filehdr_out->nt_signature);
