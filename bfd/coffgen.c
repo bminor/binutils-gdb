@@ -284,18 +284,15 @@ make_a_section_from_file (bfd *abfd,
 void
 coff_object_cleanup (bfd *abfd)
 {
-  if (bfd_family_coff (abfd) && bfd_get_format (abfd) == bfd_object)
+  struct coff_tdata *td = coff_data (abfd);
+  if (td != NULL)
     {
-      struct coff_tdata *td = coff_data (abfd);
-      if (td != NULL)
-	{
-	  if (td->section_by_index)
-	    htab_delete (td->section_by_index);
-	  if (td->section_by_target_index)
-	    htab_delete (td->section_by_target_index);
-	  if (obj_pe (abfd) && pe_data (abfd)->comdat_hash)
-	    htab_delete (pe_data (abfd)->comdat_hash);
-	}
+      if (td->section_by_index)
+	htab_delete (td->section_by_index);
+      if (td->section_by_target_index)
+	htab_delete (td->section_by_target_index);
+      if (obj_pe (abfd) && pe_data (abfd)->comdat_hash)
+	htab_delete (pe_data (abfd)->comdat_hash);
     }
 }
 

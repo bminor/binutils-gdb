@@ -1180,6 +1180,8 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
 static void
 pe_ILF_cleanup (bfd *abfd)
 {
+  coff_object_cleanup (abfd);
+
   struct bfd_in_memory *bim = abfd->iostream;
   free (bim->buffer);
   free (bim);
