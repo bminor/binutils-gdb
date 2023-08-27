@@ -726,16 +726,12 @@ CODE_FRAGMENT
 .}
 .bfd_error_type;
 .
-INTERNAL
-.{* A buffer that is freed on bfd_close.  *}
-.extern char *_bfd_error_buf;
-.
 */
 
 static bfd_error_type bfd_error;
 static bfd_error_type input_error;
 static bfd *input_bfd;
-char *_bfd_error_buf;
+static char *_bfd_error_buf;
 
 const char *const bfd_errmsgs[] =
 {
@@ -823,8 +819,7 @@ bfd_set_input_error (bfd *input, bfd_error_type error_tag)
   /* This is an error that occurred during bfd_close when writing an
      archive, but on one of the input files.  */
   bfd_error = bfd_error_on_input;
-  free (_bfd_error_buf);
-  _bfd_error_buf = NULL;
+  _bfd_clear_error_data ();
   input_bfd = input;
   input_error = error_tag;
   if (input_error >= bfd_error_on_input)
@@ -894,6 +889,24 @@ bfd_perror (const char *message)
   else
     fprintf (stderr, "%s: %s\n", message, bfd_errmsg (bfd_get_error ()));
   fflush (stderr);
+}
+
+/*
+INTERNAL_FUNCTION
+	_bfd_clear_error_data
+
+SYNOPSIS
+	void _bfd_clear_error_data (void);
+
+DESCRIPTION
+	Free any data associated with the BFD error.
+*/
+
+void
+_bfd_clear_error_data (void)
+{
+  free (_bfd_error_buf);
+  _bfd_error_buf = NULL;
 }
 
 /*
@@ -1725,8 +1738,7 @@ bfd_init (void)
 {
   bfd_error = bfd_error_no_error;
   input_bfd = NULL;
-  free (_bfd_error_buf);
-  _bfd_error_buf = NULL;
+  _bfd_clear_error_data ();
   input_error = bfd_error_no_error;
   _bfd_error_program_name = NULL;
   _bfd_error_internal = error_handler_fprintf;

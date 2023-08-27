@@ -927,8 +927,7 @@ bfd_close_all_done (bfd *abfd)
     _maybe_make_executable (abfd);
 
   _bfd_delete_bfd (abfd);
-  free (_bfd_error_buf);
-  _bfd_error_buf = NULL;
+  _bfd_clear_error_data ();
 
   return ret;
 }
