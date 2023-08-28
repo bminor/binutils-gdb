@@ -572,7 +572,7 @@ static gdb_PyGetSetDef pspace_getset[] =
   { "__dict__", gdb_py_generic_dict, NULL,
     "The __dict__ for this progspace.", &pspace_object_type },
   { "filename", pspy_get_filename, NULL,
-    "The progspace's main filename, or None.", NULL },
+    "The filename of the progspace's main symbol file, or None.", nullptr },
   { "pretty_printers", pspy_get_printers, pspy_set_printers,
     "Pretty printers.", NULL },
   { "frame_filters", pspy_get_frame_filters, pspy_set_frame_filters,

@@ -5070,7 +5070,12 @@ Each progspace is represented by an instance of the @code{gdb.Progspace}
 class.
 
 @defvar Progspace.filename
-The file name of the progspace as a string.
+The file name, as a string, of the main symbol file (from which debug
+symbols have been loaded) for the progspace, e.g.@: the argument to
+the @kbd{symbol-file} or @kbd{file} commands.
+
+If there is no main symbol table currently loaded, then this attribute
+will be @code{None}.
 @end defvar
 
 @defvar Progspace.pretty_printers
