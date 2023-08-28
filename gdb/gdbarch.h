@@ -57,6 +57,7 @@ struct syscalls_info;
 struct thread_info;
 struct ui_out;
 struct inferior;
+struct x86_xsave_layout;
 
 #include "regcache.h"
 

@@ -898,6 +898,61 @@ static int xsave_pkeys_offset[] =
   (xsave + xsave_pkeys_offset[regnum - I387_PKRU_REGNUM (tdep)])
 
 
+/* See i387-tdep.h.  */
+
+bool
+i387_guess_xsave_layout (uint64_t xcr0, size_t xsave_size,
+			 x86_xsave_layout &layout)
+{
+  if (HAS_PKRU (xcr0) && xsave_size == 2696)
+    {
+      /* Intel CPUs supporting PKRU.  */
+      layout.avx_offset = 576;
+      layout.bndregs_offset = 960;
+      layout.bndcfg_offset = 1024;
+      layout.k_offset = 1088;
+      layout.zmm_h_offset = 1152;
+      layout.zmm_offset = 1664;
+      layout.pkru_offset = 2688;
+    }
+  else if (HAS_PKRU (xcr0) && xsave_size == 2440)
+    {
+      /* AMD CPUs supporting PKRU.  */
+      layout.avx_offset = 576;
+      layout.k_offset = 832;
+      layout.zmm_h_offset = 896;
+      layout.zmm_offset = 1408;
+      layout.pkru_offset = 2432;
+    }
+  else if (HAS_AVX512 (xcr0) && xsave_size == 2688)
+    {
+      /* Intel CPUs supporting AVX512.  */
+      layout.avx_offset = 576;
+      layout.bndregs_offset = 960;
+      layout.bndcfg_offset = 1024;
+      layout.k_offset = 1088;
+      layout.zmm_h_offset = 1152;
+      layout.zmm_offset = 1664;
+    }
+  else if (HAS_MPX (xcr0) && xsave_size == 1088)
+    {
+      /* Intel CPUs supporting MPX.  */
+      layout.avx_offset = 576;
+      layout.bndregs_offset = 960;
+      layout.bndcfg_offset = 1024;
+    }
+  else if (HAS_AVX (xcr0) && xsave_size == 832)
+    {
+      /* Intel and AMD CPUs supporting AVX.  */
+      layout.avx_offset = 576;
+    }
+  else
+    return false;
+
+  layout.sizeof_xsave = xsave_size;
+  return true;
+}
+
 /* Extract from XSAVE a bitset of the features that are available on the
    target, but which have not yet been enabled.  */
 

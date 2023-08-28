@@ -47,6 +47,7 @@
 #include "build-id.h"
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/scoped_fd.h"
+#include "gdbsupport/x86-xstate.h"
 #include "debuginfod-support.h"
 #include <unordered_map>
 #include <unordered_set>
@@ -108,6 +109,8 @@ public:
      core file notes.  */
   bool fetch_memtags (CORE_ADDR address, size_t len,
 		      gdb::byte_vector &tags, int type) override;
+
+  x86_xsave_layout fetch_x86_xsave_layout () override;
 
   /* A few helpers.  */
 
@@ -1385,6 +1388,24 @@ core_target::fetch_memtags (CORE_ADDR address, size_t len,
   }
 
   return false;
+}
+
+/* Implementation of the "fetch_x86_xsave_layout" target_ops method.  */
+
+x86_xsave_layout
+core_target::fetch_x86_xsave_layout ()
+{
+  if (m_core_gdbarch != nullptr &&
+      gdbarch_core_read_x86_xsave_layout_p (m_core_gdbarch))
+    {
+      x86_xsave_layout layout;
+      if (!gdbarch_core_read_x86_xsave_layout (m_core_gdbarch, layout))
+	return {};
+
+      return layout;
+    }
+
+  return {};
 }
 
 /* Get a pointer to the current core target.  If not connected to a

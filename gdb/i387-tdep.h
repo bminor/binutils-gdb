@@ -25,6 +25,7 @@ class frame_info_ptr;
 struct regcache;
 struct type;
 struct ui_file;
+struct x86_xsave_layout;
 
 /* Number of i387 floating point registers.  */
 #define I387_NUM_REGS	16
@@ -137,6 +138,13 @@ extern void i387_collect_fsave (const struct regcache *regcache, int regnum,
 
 extern void i387_supply_fxsave (struct regcache *regcache, int regnum,
 				const void *fxsave);
+
+/* Select an XSAVE layout based on the XCR0 bitmask and total XSAVE
+   extended state size.  Returns true if the bitmask and size matched
+   a known layout.  */
+
+extern bool i387_guess_xsave_layout (uint64_t xcr0, size_t xsave_size,
+				     x86_xsave_layout &layout);
 
 /* Similar to i387_supply_fxsave, but use XSAVE extended state.  */
 
