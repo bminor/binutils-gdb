@@ -51,6 +51,7 @@ struct x86_xsave_layout;
 #define I387_K0_REGNUM(tdep) ((tdep)->k0_regnum)
 #define I387_NUM_ZMMH_REGS(tdep) ((tdep)->num_zmm_regs)
 #define I387_ZMM0H_REGNUM(tdep) ((tdep)->zmm0h_regnum)
+#define I387_ZMM16H_REGNUM(tdep) ((tdep)->zmm0h_regnum + 16)
 #define I387_NUM_YMM_AVX512_REGS(tdep) ((tdep)->num_ymm_avx512_regs)
 #define I387_YMM16H_REGNUM(tdep) ((tdep)->ymm16h_regnum)
 
