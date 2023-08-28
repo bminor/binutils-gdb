@@ -28,6 +28,8 @@ void i387_fxsave_to_cache (struct regcache *regcache, const void *buf);
 void i387_cache_to_xsave (struct regcache *regcache, void *buf);
 void i387_xsave_to_cache (struct regcache *regcache, const void *buf);
 
-extern unsigned long long x86_xcr0;
+/* Set the XSAVE mask and fetch the XSAVE layout via CPUID.  */
+
+void i387_set_xsave_mask (uint64_t xcr0, int len);
 
 #endif /* GDBSERVER_I387_FP_H */

@@ -25,6 +25,7 @@
 #include "i387-fp.h"
 #include "x86-low.h"
 #include "gdbsupport/x86-xstate.h"
+#include "nat/x86-xstate.h"
 #include "nat/gdb_ptrace.h"
 
 #ifdef __x86_64__
@@ -873,6 +874,7 @@ x86_linux_read_description (void)
   int xcr0_features;
   int tid;
   static uint64_t xcr0;
+  static int xsave_len;
   struct regset_info *regset;
 
   tid = lwpid_of (current_thread);
@@ -907,8 +909,6 @@ x86_linux_read_description (void)
 
   if (!use_xml)
     {
-      x86_xcr0 = X86_XSTATE_SSE_MASK;
-
       /* Don't use XML.  */
 #ifdef __x86_64__
       if (machine == EM_X86_64)
@@ -938,11 +938,13 @@ x86_linux_read_description (void)
 	  xcr0 = xstateregs[(I386_LINUX_XSAVE_XCR0_OFFSET
 			     / sizeof (uint64_t))];
 
+	  xsave_len = x86_xsave_length ();
+
 	  /* Use PTRACE_GETREGSET if it is available.  */
 	  for (regset = x86_regsets;
 	       regset->fill_function != NULL; regset++)
 	    if (regset->get_request == PTRACE_GETREGSET)
-	      regset->size = X86_XSTATE_SIZE (xcr0);
+	      regset->size = xsave_len;
 	    else if (regset->type != GENERAL_REGS)
 	      regset->size = 0;
 	}
@@ -953,7 +955,7 @@ x86_linux_read_description (void)
 		   && (xcr0 & X86_XSTATE_ALL_MASK));
 
   if (xcr0_features)
-    x86_xcr0 = xcr0;
+    i387_set_xsave_mask (xcr0, xsave_len);
 
   if (machine == EM_X86_64)
     {

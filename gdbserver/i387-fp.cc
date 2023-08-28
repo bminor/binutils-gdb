@@ -19,11 +19,17 @@
 #include "server.h"
 #include "i387-fp.h"
 #include "gdbsupport/x86-xstate.h"
+#include "nat/x86-xstate.h"
+
+/* Default to SSE.  */
+static unsigned long long x86_xcr0 = X86_XSTATE_SSE_MASK;
 
 static const int num_mpx_bnd_registers = 4;
 static const int num_mpx_cfg_registers = 2;
 static const int num_avx512_k_registers = 8;
 static const int num_pkeys_registers = 1;
+
+static x86_xsave_layout xsave_layout;
 
 /* Note: These functions preserve the reserved bits in control registers.
    However, gdbserver promptly throws away that information.  */
@@ -974,5 +980,11 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
     }
 }
 
-/* Default to SSE.  */
-unsigned long long x86_xcr0 = X86_XSTATE_SSE_MASK;
+/* See i387-fp.h.  */
+
+void
+i387_set_xsave_mask (uint64_t xcr0, int len)
+{
+  x86_xcr0 = xcr0;
+  xsave_layout = x86_fetch_xsave_layout (xcr0, len);
+}
