@@ -832,6 +832,12 @@ target_store_memtags (CORE_ADDR address, size_t len,
   return current_inferior ()->top_target ()->store_memtags (address, len, tags, type);
 }
 
+x86_xsave_layout
+target_fetch_x86_xsave_layout ()
+{
+  return current_inferior ()->top_target ()->fetch_x86_xsave_layout ();
+}
+
 void
 target_log_command (const char *p)
 {

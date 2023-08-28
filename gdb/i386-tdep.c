@@ -8504,10 +8504,21 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int bnd0_regnum;
   int num_bnd_cooked;
 
+  x86_xsave_layout xsave_layout = target_fetch_x86_xsave_layout ();
+
   /* If there is already a candidate, use it.  */
-  arches = gdbarch_list_lookup_by_info (arches, &info);
-  if (arches != NULL)
-    return arches->gdbarch;
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      /* Check that the XSAVE layout of ARCHES matches the layout for
+	 the current target.  */
+      i386_gdbarch_tdep *other_tdep
+	= gdbarch_tdep<i386_gdbarch_tdep> (arches->gdbarch);
+
+      if (other_tdep->xsave_layout == xsave_layout)
+	return arches->gdbarch;
+    }
 
   /* Allocate space for the new architecture.  Assume i386 for now.  */
   gdbarch *gdbarch
@@ -8762,6 +8773,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       gdbarch_free (gdbarch);
       return NULL;
     }
+  tdep->xsave_layout = xsave_layout;
 
   num_bnd_cooked = (tdep->bnd0r_regnum > 0 ? I387_NUM_BND_REGS : 0);
 

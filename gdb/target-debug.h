@@ -242,4 +242,24 @@ target_debug_print_gdb_byte_vector_r (gdb::byte_vector &vector)
 {
   target_debug_print_const_gdb_byte_vector_r (vector);
 }
+
+static void
+target_debug_print_x86_xsave_layout (const x86_xsave_layout &layout)
+{
+  gdb_puts ("{", gdb_stdlog);
+  gdb_printf (gdb_stdlog, " sizeof_xsave=%d", layout.sizeof_xsave);
+#define POFFS(region)							\
+  if (layout.region##_offset != 0)					\
+    gdb_printf (gdb_stdlog, ", %s_offset=%d", #region,			\
+		layout.region##_offset)
+  POFFS(avx);
+  POFFS(bndregs);
+  POFFS(bndcfg);
+  POFFS(k);
+  POFFS(zmm_h);
+  POFFS(zmm);
+  POFFS(pkru);
+#undef POFFS
+  gdb_puts (" }", gdb_stdlog);
+}
 #endif /* TARGET_DEBUG_H */

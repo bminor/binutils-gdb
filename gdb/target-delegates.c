@@ -196,6 +196,7 @@ struct dummy_target : public target_ops
   bool supports_memory_tagging () override;
   bool fetch_memtags (CORE_ADDR arg0, size_t arg1, gdb::byte_vector &arg2, int arg3) override;
   bool store_memtags (CORE_ADDR arg0, size_t arg1, const gdb::byte_vector &arg2, int arg3) override;
+  x86_xsave_layout fetch_x86_xsave_layout () override;
 };
 
 struct debug_target : public target_ops
@@ -370,6 +371,7 @@ struct debug_target : public target_ops
   bool supports_memory_tagging () override;
   bool fetch_memtags (CORE_ADDR arg0, size_t arg1, gdb::byte_vector &arg2, int arg3) override;
   bool store_memtags (CORE_ADDR arg0, size_t arg1, const gdb::byte_vector &arg2, int arg3) override;
+  x86_xsave_layout fetch_x86_xsave_layout () override;
 };
 
 void
@@ -4532,6 +4534,31 @@ debug_target::store_memtags (CORE_ADDR arg0, size_t arg1, const gdb::byte_vector
   target_debug_print_int (arg3);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
+  gdb_puts ("\n", gdb_stdlog);
+  return result;
+}
+
+x86_xsave_layout
+target_ops::fetch_x86_xsave_layout ()
+{
+  return this->beneath ()->fetch_x86_xsave_layout ();
+}
+
+x86_xsave_layout
+dummy_target::fetch_x86_xsave_layout ()
+{
+  return x86_xsave_layout ();
+}
+
+x86_xsave_layout
+debug_target::fetch_x86_xsave_layout ()
+{
+  x86_xsave_layout result;
+  gdb_printf (gdb_stdlog, "-> %s->fetch_x86_xsave_layout (...)\n", this->beneath ()->shortname ());
+  result = this->beneath ()->fetch_x86_xsave_layout ();
+  gdb_printf (gdb_stdlog, "<- %s->fetch_x86_xsave_layout (", this->beneath ()->shortname ());
+  gdb_puts (") = ", gdb_stdlog);
+  target_debug_print_x86_xsave_layout (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }

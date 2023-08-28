@@ -86,6 +86,7 @@ typedef const gdb_byte const_gdb_byte;
 #include "disasm-flags.h"
 #include "tracepoint.h"
 #include "gdbsupport/fileio.h"
+#include "gdbsupport/x86-xstate.h"
 
 #include "gdbsupport/break-common.h" /* For enum target_hw_bp_type.  */
 
@@ -1325,6 +1326,10 @@ struct target_ops
     virtual bool store_memtags (CORE_ADDR address, size_t len,
 				const gdb::byte_vector &tags, int type)
       TARGET_DEFAULT_NORETURN (tcomplain ());
+
+    /* Return the x86 XSAVE extended state area layout.  */
+    virtual x86_xsave_layout fetch_x86_xsave_layout ()
+      TARGET_DEFAULT_RETURN (x86_xsave_layout ());
   };
 
 /* Deleter for std::unique_ptr.  See comments in
@@ -2304,6 +2309,8 @@ extern bool target_fetch_memtags (CORE_ADDR address, size_t len,
 
 extern bool target_store_memtags (CORE_ADDR address, size_t len,
 				  const gdb::byte_vector &tags, int type);
+
+extern x86_xsave_layout target_fetch_x86_xsave_layout ();
 
 /* Command logging facility.  */
 

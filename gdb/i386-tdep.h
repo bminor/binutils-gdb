@@ -23,6 +23,7 @@
 #include "gdbarch.h"
 #include "infrun.h"
 #include "expression.h"
+#include "gdbsupport/x86-xstate.h"
 
 class frame_info_ptr;
 struct gdbarch;
@@ -144,6 +145,9 @@ struct i386_gdbarch_tdep : gdbarch_tdep_base
 
   /* Offset of XCR0 in XSAVE extended state.  */
   int xsave_xcr0_offset = 0;
+
+  /* Layout of the XSAVE area extended region.  */
+  x86_xsave_layout xsave_layout;
 
   /* Register names.  */
   const char * const *register_names = nullptr;
