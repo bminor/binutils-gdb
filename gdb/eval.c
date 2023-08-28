@@ -2515,7 +2515,7 @@ array_operation::evaluate (struct type *expect_type,
       return set;
     }
 
-  value **argvec = XALLOCAVEC (struct value *, nargs);
+  std::vector<value *> argvec (nargs);
   for (tem = 0; tem < nargs; tem++)
     {
       /* Ensure that array expressions are coerced into pointer

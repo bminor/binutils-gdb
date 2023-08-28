@@ -1226,7 +1226,7 @@ inline struct value *value_string (const char *ptr, ssize_t count,
 }
 
 extern struct value *value_array (int lowbound, int highbound,
-				  struct value **elemvec);
+				  gdb::array_view<struct value *> elemvec);
 
 extern struct value *value_concat (struct value *arg1, struct value *arg2);
 

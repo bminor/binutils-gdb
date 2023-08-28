@@ -1692,7 +1692,8 @@ value_ind (struct value *arg1)
    don't currently enforce any restriction on their types).  */
 
 struct value *
-value_array (int lowbound, int highbound, struct value **elemvec)
+value_array (int lowbound, int highbound,
+	     gdb::array_view<struct value *> elemvec)
 {
   int nelem;
   int idx;
