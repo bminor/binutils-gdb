@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Check that gdb doesn't hang or segfault on reading a DIE with a
-# specification reference to itself.
+# specification/abstract_origin reference to itself.
 
 load_lib dwarf.exp
 
@@ -27,10 +27,24 @@ set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     cu {} {
 	compile_unit {{language @DW_LANG_C_plus_plus}} {
+	    # Check handling of self-referencing DIE.
 	    declare_labels c1
 	    c1: class_type {
 		{name c1}
 		{specification :$c1}
+	    }
+
+	    # Check handling of self-referencing child DIE.  Regression test
+	    # for PR30799.
+	    declare_labels f1 abstract_f1 f1_l
+	    abstract_f1: subprogram {}
+	    f1: subprogram {
+		{MACRO_AT_func {main}}
+		{abstract_origin :$abstract_f1}
+	    } {
+		f1_l: label {
+		    {abstract_origin :$f1_l}
+		}
 	    }
 	}
     }

@@ -9935,8 +9935,15 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	  if (attr == nullptr)
 	    break;
 
+	  die_info *prev_child_origin_die = child_origin_die;
 	  child_origin_die = follow_die_ref (child_origin_die, attr,
 					     &child_origin_cu);
+
+	  if (prev_child_origin_die == child_origin_die)
+	    {
+	      /* Handle DIE with self-reference.  */
+	      break;
+	    }
 	}
 
       /* If missing DW_AT_abstract_origin, try the corresponding child
