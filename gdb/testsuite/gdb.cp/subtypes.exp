@@ -33,23 +33,27 @@ if {[prepare_for_testing "failed to prepare" $testfile \
 gdb_test "ptype Outer::Inner::InnerInner" \
     "type = struct Outer::Inner::InnerInner.*"
 gdb_test "ptype Outer::Inner" "type = struct Outer::Inner.*"
-gdb_test "ptype main::Foo" "type = struct Foo.*"
-gdb_test "ptype main::Bar" "type = struct Bar.*"
-gdb_test "ptype main::Baz" "type = struct Baz.*"
+
+foreach s { Foo Bar Baz } {
+    gdb_test "ptype main::$s" "type = struct $s.*"
+}
+
 gdb_test "ptype Outer::Oenum" "type = enum class Outer::Oenum.*"
-gdb_test "ptype foobar<int>::Foo" "type = struct Foo.*"
-gdb_test "ptype foobar<int>::Bar" "type = struct Bar.*"
-gdb_test "ptype foobar<int>::Baz" "type = struct Baz.*"
-gdb_test "ptype foobar<char>::Foo" "type = struct Foo.*"
-gdb_test "ptype foobar<char>::Bar" "type = struct Bar.*"
-gdb_test "ptype foobar<char>::Baz" "type = struct Baz.*"
+
+foreach t { int char } {
+    foreach s { Foo Bar Baz } {
+	gdb_test "ptype foobar<$t>::$s" "type = struct $s.*"
+    }
+}
+
 gdb_breakpoint "Outer::Inner::doit" message
-gdb_breakpoint "main::Foo::doit" message
-gdb_breakpoint "main::Bar::doit" message
-gdb_breakpoint "main::Baz::doit" message
-gdb_breakpoint "foobar<int>(int)::Foo::doit" message
-gdb_breakpoint "foobar<int>(int)::Bar::doit" message
-gdb_breakpoint "foobar<int>(int)::Baz::doit" message
-gdb_breakpoint "foobar<char>(int)::Foo::doit" message
-gdb_breakpoint "foobar<char>(int)::Bar::doit" message
-gdb_breakpoint "foobar<char>(int)::Baz::doit" message
+
+foreach s { Foo Bar Baz } {
+    gdb_breakpoint "main::${s}::doit" message
+}
+
+foreach t { int char } {
+    foreach s { Foo Bar Baz } {
+	gdb_breakpoint "foobar<$t>(int)::${s}::doit" message
+    }
+}
