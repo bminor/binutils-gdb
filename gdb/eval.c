@@ -2464,14 +2464,13 @@ array_operation::evaluate (struct type *expect_type,
       if (!get_discrete_bounds (element_type, &low_bound, &high_bound))
 	error (_("(power)set type with unknown size"));
       memset (valaddr, '\0', type->length ());
-      int idx = 0;
-      for (int tem = 0; tem < nargs; tem++)
+      for (int idx = 0; idx < nargs; idx++)
 	{
 	  LONGEST range_low, range_high;
 	  struct type *range_low_type, *range_high_type;
 	  struct value *elem_val;
 
-	  elem_val = in_args[idx++]->evaluate (element_type, exp, noside);
+	  elem_val = in_args[idx]->evaluate (element_type, exp, noside);
 	  range_low_type = range_high_type = elem_val->type ();
 	  range_low = range_high = value_as_long (elem_val);
 
