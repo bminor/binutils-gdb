@@ -30,19 +30,43 @@ if {[prepare_for_testing "failed to prepare" $testfile \
     return -1
 }
 
+# Xfail for superfluous DW_TAG_lexical_block, gcc PR debug/55541.
+set have_xfail [expr [test_compiler_info gcc-*] && [gcc_major_version] < 5]
+
 gdb_test "ptype Outer::Inner::InnerInner" \
     "type = struct Outer::Inner::InnerInner.*"
 gdb_test "ptype Outer::Inner" "type = struct Outer::Inner.*"
 
 foreach s { Foo Bar Baz } {
-    gdb_test "ptype main::$s" "type = struct $s.*"
+    gdb_test_multiple "ptype main::$s" "" {
+	-re -wrap "type = struct $s.*" {
+	    pass $gdb_test_name
+	}
+	-re -wrap "No symbol \"$s\" in specified context\\." {
+	    if { $have_xfail } {
+		setup_xfail *-*-* gcc/55541
+	    }
+	    fail $gdb_test_name
+	}
+
+    }
 }
 
 gdb_test "ptype Outer::Oenum" "type = enum class Outer::Oenum.*"
 
 foreach t { int char } {
     foreach s { Foo Bar Baz } {
-	gdb_test "ptype foobar<$t>::$s" "type = struct $s.*"
+	gdb_test_multiple "ptype foobar<$t>::$s" "" {
+	    -re -wrap "type = struct $s.*" {
+		pass $gdb_test_name
+	    }
+	    -re -wrap "No symbol \"$s\" in specified context\\." {
+		if { $have_xfail } {
+		    setup_xfail *-*-* gcc/55541
+		}
+		fail $gdb_test_name
+	    }
+	}
     }
 }
 
