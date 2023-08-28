@@ -1213,10 +1213,9 @@ public: /* Remote specific methods.  */
 
   void skip_frame ();
   long read_frame (gdb::char_vector *buf_p);
-  void getpkt (gdb::char_vector *buf, int forever);
   int getpkt_or_notif_sane_1 (gdb::char_vector *buf, int forever,
 			      int expecting_notif, int *is_notif);
-  int getpkt_sane (gdb::char_vector *buf, int forever);
+  int getpkt (gdb::char_vector *buf, int forever);
   int getpkt_or_notif_sane (gdb::char_vector *buf, int forever,
 			    int *is_notif);
   int remote_vkill (int pid);
@@ -10048,23 +10047,6 @@ show_watchdog (struct ui_file *file, int from_tty,
    store it in *BUF.  Resize *BUF if necessary to hold the result.  If
    FOREVER, wait forever rather than timing out; this is used (in
    synchronous mode) to wait for a target that is is executing user
-   code to stop.  */
-/* FIXME: ezannoni 2000-02-01 this wrapper is necessary so that we
-   don't have to change all the calls to getpkt to deal with the
-   return value, because at the moment I don't know what the right
-   thing to do it for those.  */
-
-void
-remote_target::getpkt (gdb::char_vector *buf, int forever)
-{
-  getpkt_sane (buf, forever);
-}
-
-
-/* Read a packet from the remote machine, with error checking, and
-   store it in *BUF.  Resize *BUF if necessary to hold the result.  If
-   FOREVER, wait forever rather than timing out; this is used (in
-   synchronous mode) to wait for a target that is is executing user
    code to stop.  If FOREVER == 0, this function is allowed to time
    out gracefully and return an indication of this to the caller.
    Otherwise return the number of bytes read.  If EXPECTING_NOTIF,
@@ -10212,8 +10194,14 @@ remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
     }
 }
 
+/* Read a packet from the remote machine, with error checking, and
+   store it in *BUF.  Resize *BUF if necessary to hold the result.  If
+   FOREVER, wait forever rather than timing out; this is used (in
+   synchronous mode) to wait for a target that is is executing user
+   code to stop.  */
+
 int
-remote_target::getpkt_sane (gdb::char_vector *buf, int forever)
+remote_target::getpkt (gdb::char_vector *buf, int forever)
 {
   return getpkt_or_notif_sane_1 (buf, forever, 0, NULL);
 }
@@ -11289,7 +11277,7 @@ remote_target::remote_write_qxfer (const char *object_name,
     (writebuf, len, 1, (gdb_byte *) rs->buf.data () + i, &max_size, max_size);
 
   if (putpkt_binary (rs->buf.data (), i + buf_len) < 0
-      || getpkt_sane (&rs->buf, 0) < 0
+      || getpkt (&rs->buf, 0) < 0
       || m_features.packet_ok (rs->buf, which_packet) != PACKET_OK)
     return TARGET_XFER_E_IO;
 
@@ -11353,7 +11341,7 @@ remote_target::remote_read_qxfer (const char *object_name,
     return TARGET_XFER_E_IO;
 
   rs->buf[0] = '\0';
-  packet_len = getpkt_sane (&rs->buf, 0);
+  packet_len = getpkt (&rs->buf, 0);
   if (packet_len < 0
       || m_features.packet_ok (rs->buf, which_packet) != PACKET_OK)
     return TARGET_XFER_E_IO;
@@ -11658,7 +11646,7 @@ remote_target::search_memory (CORE_ADDR start_addr, ULONGEST search_space_len,
     error (_("Pattern is too large to transmit to remote target."));
 
   if (putpkt_binary (rs->buf.data (), i + escaped_pattern_len) < 0
-      || getpkt_sane (&rs->buf, 0) < 0
+      || getpkt (&rs->buf, 0) < 0
       || m_features.packet_ok (rs->buf, PACKET_qSearch_memory) != PACKET_OK)
     {
       /* The request may not have worked because the command is not
@@ -11722,7 +11710,7 @@ remote_target::rcmd (const char *command, struct ui_file *outbuf)
       /* XXX - see also remote_get_noisy_reply().  */
       QUIT;			/* Allow user to bail out with ^C.  */
       rs->buf[0] = '\0';
-      if (getpkt_sane (&rs->buf, 0) == -1)
+      if (getpkt (&rs->buf, 0) == -1)
 	{ 
 	  /* Timeout.  Continue to (try to) read responses.
 	     This is better than stopping with an error, assuming the stub
@@ -11833,7 +11821,7 @@ send_remote_packet (gdb::array_view<const char> &buf,
 
   remote->putpkt_binary (buf.data (), buf.size ());
   remote_state *rs = remote->get_remote_state ();
-  int bytes = remote->getpkt_sane (&rs->buf, 0);
+  int bytes = remote->getpkt (&rs->buf, 0);
 
   if (bytes < 0)
     error (_("error while fetching packet from remote target"));
@@ -12366,7 +12354,7 @@ remote_target::remote_hostio_send_command (int command_bytes, int which_packet,
     }
 
   putpkt_binary (rs->buf.data (), command_bytes);
-  bytes_read = getpkt_sane (&rs->buf, 0);
+  bytes_read = getpkt (&rs->buf, 0);
 
   /* If it timed out, something is wrong.  Don't try to parse the
      buffer.  */
