@@ -48,12 +48,44 @@ x86_cpuid (unsigned int __level,
   return __get_cpuid (__level, __eax, __ebx, __ecx, __edx);
 }
 
+/* Return cpuid data for requested cpuid level and sub-level, as found
+   in returned eax, ebx, ecx and edx registers.  The function checks
+   if cpuid is supported and returns 1 for valid cpuid information or
+   0 for unsupported cpuid level.  Pointers may be non-null.  */
+
+static __inline int
+x86_cpuid_count (unsigned int __level, unsigned int __sublevel,
+		 unsigned int *__eax, unsigned int *__ebx,
+		 unsigned int *__ecx, unsigned int *__edx)
+{
+  unsigned int __scratch;
+
+  if (__eax == nullptr)
+    __eax = &__scratch;
+  if (__ebx == nullptr)
+    __ebx = &__scratch;
+  if (__ecx == nullptr)
+    __ecx = &__scratch;
+  if (__edx == nullptr)
+    __edx = &__scratch;
+
+  return __get_cpuid_count (__level, __sublevel, __eax, __ebx, __ecx, __edx);
+}
+
 #else
 
 static __inline int
 x86_cpuid (unsigned int __level,
 	    unsigned int *__eax, unsigned int *__ebx,
 	    unsigned int *__ecx, unsigned int *__edx)
+{
+  return 0;
+}
+
+static __inline int
+x86_cpuid_count (unsigned int __level, unsigned int __sublevel,
+		 unsigned int *__eax, unsigned int *__ebx,
+		 unsigned int *__ecx, unsigned int *__edx)
 {
   return 0;
 }
