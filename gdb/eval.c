@@ -2397,11 +2397,10 @@ array_operation::evaluate (struct type *expect_type,
 			   struct expression *exp,
 			   enum noside noside)
 {
-  int tem;
   int tem2 = std::get<0> (m_storage);
   int tem3 = std::get<1> (m_storage);
   const std::vector<operation_up> &in_args = std::get<2> (m_storage);
-  int nargs = tem3 - tem2 + 1;
+  const int nargs = tem3 - tem2 + 1;
   struct type *type = expect_type ? check_typedef (expect_type) : nullptr;
 
   if (expect_type != nullptr
@@ -2429,7 +2428,7 @@ array_operation::evaluate (struct type *expect_type,
 	}
       index = low_bound;
       memset (array->contents_raw ().data (), 0, expect_type->length ());
-      for (tem = nargs; --nargs >= 0;)
+      for (int tem = 0; tem < nargs; ++tem)
 	{
 	  struct value *element;
 
@@ -2467,7 +2466,7 @@ array_operation::evaluate (struct type *expect_type,
 	error (_("(power)set type with unknown size"));
       memset (valaddr, '\0', type->length ());
       int idx = 0;
-      for (tem = 0; tem < nargs; tem++)
+      for (int tem = 0; tem < nargs; tem++)
 	{
 	  LONGEST range_low, range_high;
 	  struct type *range_low_type, *range_high_type;
@@ -2516,7 +2515,7 @@ array_operation::evaluate (struct type *expect_type,
     }
 
   std::vector<value *> argvec (nargs);
-  for (tem = 0; tem < nargs; tem++)
+  for (int tem = 0; tem < nargs; tem++)
     {
       /* Ensure that array expressions are coerced into pointer
 	 objects.  */
