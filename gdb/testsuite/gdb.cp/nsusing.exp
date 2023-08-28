@@ -122,14 +122,23 @@ if { [test_compiler_info {gcc-[0-3]-*}] ||
     return
 }
 
+# Xfail for incorrect decl_line on DW_TAG_imported_module,
+# gcc PR debug/108716.
+set have_gcc108716_xfail \
+    [expr [test_compiler_info gcc-*] && [gcc_major_version] < 13]
+
 gdb_test_multiple "print x" "print x, before using statement" {
     -re -wrap "No symbol .x. in current context.*" {
 	pass $gdb_test_name
     }
     -re -wrap "Reference to .x. is ambiguous.*" {
-	# GCC doesn't properly set the decl_line for namespaces, so GDB believes
-	# that the "using namespace M" line has already passed at this point.
-	xfail $gdb_test_name
+	if { $have_gcc108716_xfail } {
+	    # GCC doesn't properly set the decl_line for namespaces, so GDB
+	    # believes that the "using namespace M" line has already passed at
+	    # this point.
+	    setup_xfail *-*-* gcc/108716
+	}
+	fail $gdb_test_name
     }
 }
 gdb_test "next" ".*" "using namespace M"
@@ -138,7 +147,10 @@ gdb_test_multiple "print x" "print x, only using M" {
 	pass $gdb_test_name
     }
     -re -wrap "Reference to .x. is ambiguous.*" {
-	xfail $gdb_test_name
+	if { $have_gcc108716_xfail } {
+	    setup_xfail *-*-* gcc/108716
+	}
+	fail $gdb_test_name
     }
 }
 gdb_test "next" ".*" "using namespace N"
