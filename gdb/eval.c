@@ -2426,6 +2426,8 @@ array_operation::evaluate (struct type *expect_type,
 	  low_bound = 0;
 	  high_bound = (type->length () / element_size) - 1;
 	}
+      if (low_bound + nargs - 1 > high_bound)
+	error (_("Too many array elements"));
       index = low_bound;
       memset (array->contents_raw ().data (), 0, expect_type->length ());
       for (int tem = 0; tem < nargs; ++tem)
@@ -2436,9 +2438,6 @@ array_operation::evaluate (struct type *expect_type,
 							  exp, noside);
 	  if (element->type () != element_type)
 	    element = value_cast (element_type, element);
-	  if (index > high_bound)
-	    /* To avoid memory corruption.  */
-	    error (_("Too many array elements"));
 	  memcpy (array->contents_raw ().data ()
 		  + (index - low_bound) * element_size,
 		  element->contents ().data (),
