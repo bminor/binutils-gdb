@@ -81,6 +81,8 @@ struct i387_fxsave {
   unsigned char xmm_space[256];
 };
 
+gdb_static_assert (sizeof(i387_fxsave) == 416);
+
 struct i387_xsave : public i387_fxsave {
   unsigned char reserved1[48];
 
@@ -93,35 +95,56 @@ struct i387_xsave : public i387_fxsave {
   /* The XSTATE_BV bit vector.  */
   unsigned long long xstate_bv;
 
-  unsigned char reserved3[56];
+  /* The XCOMP_BV bit vector.  */
+  unsigned long long xcomp_bv;
 
-  /* Space for eight upper 128-bit YMM values, or 16 on x86-64.  */
-  unsigned char ymmh_space[256];
+  unsigned char reserved3[48];
 
-  unsigned char reserved4[128];
+  /* Byte 576.  End of registers with fixed position in XSAVE.
+     The position of other XSAVE registers will be calculated
+     from the appropriate CPUID calls.  */
 
-  /* Space for 4 bound registers values of 128 bits.  */
-  unsigned char mpx_bnd_space[64];
+private:
+  /* Base address of XSAVE data as an unsigned char *.  Used to derive
+     pointers to XSAVE state components in the extended state
+     area.  */
+  unsigned char *xsave ()
+  { return reinterpret_cast<unsigned char *> (this); }
 
-  /* Space for 2 MPX configuration registers of 64 bits
+public:
+  /* Memory address of eight upper 128-bit YMM values, or 16 on x86-64.  */
+  unsigned char *ymmh_space ()
+  { return xsave () + xsave_layout.avx_offset; }
+
+  /* Memory address of 4 bound registers values of 128 bits.  */
+  unsigned char *bndregs_space ()
+  { return xsave () + xsave_layout.bndregs_offset; }
+
+  /* Memory address of 2 MPX configuration registers of 64 bits
      plus reserved space.  */
-  unsigned char mpx_cfg_space[16];
+  unsigned char *bndcfg_space ()
+  { return xsave () + xsave_layout.bndcfg_offset; }
 
-  unsigned char reserved5[48];
+  /* Memory address of 8 OpMask register values of 64 bits.  */
+  unsigned char *k_space ()
+  { return xsave () + xsave_layout.k_offset; }
 
-  /* Space for 8 OpMask register values of 64 bits.  */
-  unsigned char k_space[64];
+  /* Memory address of 16 256-bit zmm0-15.  */
+  unsigned char *zmmh_space ()
+  { return xsave () + xsave_layout.zmm_h_offset; }
 
-  /* Space for 16 256-bit zmm0-15.  */
-  unsigned char zmmh_low_space[512];
+  /* Memory address of 16 512-bit zmm16-31 values.  */
+  unsigned char *zmm16_space ()
+  { return xsave () + xsave_layout.zmm_offset; }
 
-  /* Space for 16 512-bit zmm16-31 values.  */
-  unsigned char zmmh_high_space[1024];
-
-  /* Space for 1 32-bit PKRU register.  The HW XSTATE size for this feature is
-     actually 64 bits, but WRPKRU/RDPKRU instructions ignore upper 32 bits.  */
-  unsigned char pkru_space[8];
+  /* Memory address of 1 32-bit PKRU register.  The HW XSTATE size for this
+     feature is actually 64 bits, but WRPKRU/RDPKRU instructions ignore upper
+     32 bits.  */
+  unsigned char *pkru_space ()
+  { return xsave () + xsave_layout.pkru_offset; }
 };
+
+gdb_static_assert (sizeof(i387_xsave) == 576);
 
 void
 i387_cache_to_fsave (struct regcache *regcache, void *buf)
@@ -242,7 +265,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
   unsigned long long xstate_bv = 0;
   unsigned long long clear_bv = 0;
   char raw[64];
-  char *p;
+  unsigned char *p;
 
   /* Amd64 has 16 xmm regs; I386 has 8 xmm regs.  */
   int num_xmm_registers = amd64 ? 16 : 8;
@@ -282,40 +305,40 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 
       if ((clear_bv & X86_XSTATE_AVX))
 	for (i = 0; i < num_xmm_registers; i++)
-	  memset (((char *) &fp->ymmh_space[0]) + i * 16, 0, 16);
+	  memset (fp->ymmh_space () + i * 16, 0, 16);
 
       if ((clear_bv & X86_XSTATE_SSE) && (clear_bv & X86_XSTATE_AVX))
 	memset (((char *) &fp->mxcsr), 0, 4);
 
       if ((clear_bv & X86_XSTATE_BNDREGS))
 	for (i = 0; i < num_mpx_bnd_registers; i++)
-	  memset (((char *) &fp->mpx_bnd_space[0]) + i * 16, 0, 16);
+	  memset (fp->bndregs_space () + i * 16, 0, 16);
 
       if ((clear_bv & X86_XSTATE_BNDCFG))
 	for (i = 0; i < num_mpx_cfg_registers; i++)
-	  memset (((char *) &fp->mpx_cfg_space[0]) + i * 8, 0, 8);
+	  memset (fp->bndcfg_space () + i * 8, 0, 8);
 
       if ((clear_bv & X86_XSTATE_K))
 	for (i = 0; i < num_avx512_k_registers; i++)
-	  memset (((char *) &fp->k_space[0]) + i * 8, 0, 8);
+	  memset (fp->k_space () + i * 8, 0, 8);
 
       if ((clear_bv & X86_XSTATE_ZMM_H))
 	for (i = 0; i < num_avx512_zmmh_low_registers; i++)
-	  memset (((char *) &fp->zmmh_low_space[0]) + i * 32, 0, 32);
+	  memset (fp->zmmh_space () + i * 32, 0, 32);
 
       if ((clear_bv & X86_XSTATE_ZMM))
 	{
 	  for (i = 0; i < num_avx512_zmmh_high_registers; i++)
-	    memset (((char *) &fp->zmmh_high_space[0]) + 32 + i * 64, 0, 32);
+	    memset (fp->zmm16_space () + 32 + i * 64, 0, 32);
 	  for (i = 0; i < num_avx512_xmm_registers; i++)
-	    memset (((char *) &fp->zmmh_high_space[0]) + i * 64, 0, 16);
+	    memset (fp->zmm16_space () + i * 64, 0, 16);
 	  for (i = 0; i < num_avx512_ymmh_registers; i++)
-	    memset (((char *) &fp->zmmh_high_space[0]) + 16 + i * 64, 0, 16);
+	    memset (fp->zmm16_space () + 16 + i * 64, 0, 16);
 	}
 
       if ((clear_bv & X86_XSTATE_PKRU))
 	for (i = 0; i < num_pkeys_registers; i++)
-	  memset (((char *) &fp->pkru_space[0]) + i * 4, 0, 4);
+	  memset (fp->pkru_space () + i * 4, 0, 4);
     }
 
   /* Check if any x87 registers are changed.  */
@@ -326,7 +349,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
       for (i = 0; i < 8; i++)
 	{
 	  collect_register (regcache, i + st0_regnum, raw);
-	  p = ((char *) &fp->st_space[0]) + i * 16;
+	  p = fp->st_space + i * 16;
 	  if (memcmp (raw, p, 10))
 	    {
 	      xstate_bv |= X86_XSTATE_X87;
@@ -343,7 +366,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
       for (i = 0; i < num_xmm_registers; i++) 
 	{
 	  collect_register (regcache, i + xmm0_regnum, raw);
-	  p = ((char *) &fp->xmm_space[0]) + i * 16;
+	  p = fp->xmm_space + i * 16;
 	  if (memcmp (raw, p, 16))
 	    {
 	      xstate_bv |= X86_XSTATE_SSE;
@@ -360,7 +383,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
       for (i = 0; i < num_xmm_registers; i++) 
 	{
 	  collect_register (regcache, i + ymm0h_regnum, raw);
-	  p = ((char *) &fp->ymmh_space[0]) + i * 16;
+	  p = fp->ymmh_space () + i * 16;
 	  if (memcmp (raw, p, 16))
 	    {
 	      xstate_bv |= X86_XSTATE_AVX;
@@ -377,7 +400,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
       for (i = 0; i < num_mpx_bnd_registers; i++)
 	{
 	  collect_register (regcache, i + bnd0r_regnum, raw);
-	  p = ((char *) &fp->mpx_bnd_space[0]) + i * 16;
+	  p = fp->bndregs_space () + i * 16;
 	  if (memcmp (raw, p, 16))
 	    {
 	      xstate_bv |= X86_XSTATE_BNDREGS;
@@ -394,7 +417,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
       for (i = 0; i < num_mpx_cfg_registers; i++)
 	{
 	  collect_register (regcache, i + bndcfg_regnum, raw);
-	  p = ((char *) &fp->mpx_cfg_space[0]) + i * 8;
+	  p = fp->bndcfg_space () + i * 8;
 	  if (memcmp (raw, p, 8))
 	    {
 	      xstate_bv |= X86_XSTATE_BNDCFG;
@@ -411,7 +434,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
       for (i = 0; i < num_avx512_k_registers; i++)
 	{
 	  collect_register (regcache, i + k0_regnum, raw);
-	  p = ((char *) &fp->k_space[0]) + i * 8;
+	  p = fp->k_space () + i * 8;
 	  if (memcmp (raw, p, 8) != 0)
 	    {
 	      xstate_bv |= X86_XSTATE_K;
@@ -428,7 +451,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
       for (i = 0; i < num_avx512_zmmh_low_registers; i++)
 	{
 	  collect_register (regcache, i + zmm0h_regnum, raw);
-	  p = ((char *) &fp->zmmh_low_space[0]) + i * 32;
+	  p = fp->zmmh_space () + i * 32;
 	  if (memcmp (raw, p, 32) != 0)
 	    {
 	      xstate_bv |= X86_XSTATE_ZMM_H;
@@ -447,7 +470,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
       for (i = 0; i < num_avx512_zmmh_high_registers; i++)
 	{
 	  collect_register (regcache, i + zmm16h_regnum, raw);
-	  p = ((char *) &fp->zmmh_high_space[0]) + 32 + i * 64;
+	  p = fp->zmm16_space () + 32 + i * 64;
 	  if (memcmp (raw, p, 32) != 0)
 	    {
 	      xstate_bv |= X86_XSTATE_ZMM;
@@ -466,7 +489,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
       for (i = 0; i < num_avx512_xmm_registers; i++)
 	{
 	  collect_register (regcache, i + xmm_avx512_regnum, raw);
-	  p = ((char *) &fp->zmmh_high_space[0]) + i * 64;
+	  p = fp->zmm16_space () + i * 64;
 	  if (memcmp (raw, p, 16) != 0)
 	    {
 	      xstate_bv |= X86_XSTATE_ZMM;
@@ -485,7 +508,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
       for (i = 0; i < num_avx512_ymmh_registers; i++)
 	{
 	  collect_register (regcache, i + ymmh_avx512_regnum, raw);
-	  p = ((char *) &fp->zmmh_high_space[0]) + 16 + i * 64;
+	  p = fp->zmm16_space () + 16 + i * 64;
 	  if (memcmp (raw, p, 16) != 0)
 	    {
 	      xstate_bv |= X86_XSTATE_ZMM;
@@ -502,7 +525,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
       for (i = 0; i < num_pkeys_registers; i++)
 	{
 	  collect_register (regcache, i + pkru_regnum, raw);
-	  p = ((char *) &fp->pkru_space[0]) + i * 4;
+	  p = fp->pkru_space () + i * 4;
 	  if (memcmp (raw, p, 4) != 0)
 	    {
 	      xstate_bv |= X86_XSTATE_PKRU;
@@ -707,7 +730,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
   int i, top;
   unsigned long val;
   unsigned long long clear_bv;
-  gdb_byte *p;
+  unsigned char *p;
 
    /* Amd64 has 16 xmm regs; I386 has 8 xmm regs.  */
   int num_xmm_registers = amd64 ? 16 : 8;
@@ -768,7 +791,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
       else
 	{
-	  p = (gdb_byte *) &fp->ymmh_space[0];
+	  p = fp->ymmh_space ();
 	  for (i = 0; i < num_xmm_registers; i++)
 	    supply_register (regcache, i + ymm0h_regnum, p + i * 16);
 	}
@@ -786,7 +809,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
       else
 	{
-	  p = (gdb_byte *) &fp->mpx_bnd_space[0];
+	  p = fp->bndregs_space ();
 	  for (i = 0; i < num_mpx_bnd_registers; i++)
 	    supply_register (regcache, i + bnd0r_regnum, p + i * 16);
 	}
@@ -804,7 +827,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
       else
 	{
-	  p = (gdb_byte *) &fp->mpx_cfg_space[0];
+	  p = fp->bndcfg_space ();
 	  for (i = 0; i < num_mpx_cfg_registers; i++)
 	    supply_register (regcache, i + bndcfg_regnum, p + i * 8);
 	}
@@ -821,7 +844,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
       else
 	{
-	  p = (gdb_byte *) &fp->k_space[0];
+	  p = fp->k_space ();
 	  for (i = 0; i < num_avx512_k_registers; i++)
 	    supply_register (regcache, i + k0_regnum, p + i * 8);
 	}
@@ -838,7 +861,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
       else
 	{
-	  p = (gdb_byte *) &fp->zmmh_low_space[0];
+	  p = fp->zmmh_space ();
 	  for (i = 0; i < num_avx512_zmmh_low_registers; i++)
 	    supply_register (regcache, i + zmm0h_regnum, p + i * 32);
 	}
@@ -867,7 +890,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
       else
 	{
-	  p = (gdb_byte *) &fp->zmmh_high_space[0];
+	  p = fp->zmm16_space ();
 	  for (i = 0; i < num_avx512_zmmh_high_registers; i++)
 	    supply_register (regcache, i + zmm16h_regnum, p + 32 + i * 64);
 	  for (i = 0; i < num_avx512_ymmh_registers; i++)
@@ -888,7 +911,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	}
       else
 	{
-	  p = (gdb_byte *) &fp->pkru_space[0];
+	  p = fp->pkru_space ();
 	  for (i = 0; i < num_pkeys_registers; i++)
 	    supply_register (regcache, i + pkru_regnum, p + i * 4);
 	}
