@@ -18,13 +18,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "gdbcore.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
 #include "i386-fbsd-tdep.h"
-#include "gdbsupport/x86-xstate.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -241,41 +241,44 @@ static const struct tramp_frame i386_fbsd64_sigframe =
   i386_fbsd_sigframe_init
 };
 
-/* Get XSAVE extended state xcr0 from core dump.  */
+/* See i386-fbsd-tdep.h.  */
 
 uint64_t
-i386fbsd_core_read_xcr0 (bfd *abfd)
+i386_fbsd_core_read_xsave_info (bfd *abfd, x86_xsave_layout &layout)
 {
   asection *xstate = bfd_get_section_by_name (abfd, ".reg-xstate");
-  uint64_t xcr0;
+  if (xstate == nullptr)
+    return 0;
 
-  if (xstate)
+  /* Check extended state size.  */
+  size_t size = bfd_section_size (xstate);
+  if (size < X86_XSTATE_AVX_SIZE)
+    return 0;
+
+  char contents[8];
+  if (! bfd_get_section_contents (abfd, xstate, contents,
+				  I386_FBSD_XSAVE_XCR0_OFFSET, 8))
     {
-      size_t size = bfd_section_size (xstate);
-
-      /* Check extended state size.  */
-      if (size < X86_XSTATE_AVX_SIZE)
-	xcr0 = X86_XSTATE_SSE_MASK;
-      else
-	{
-	  char contents[8];
-
-	  if (! bfd_get_section_contents (abfd, xstate, contents,
-					  I386_FBSD_XSAVE_XCR0_OFFSET,
-					  8))
-	    {
-	      warning (_("Couldn't read `xcr0' bytes from "
-			 "`.reg-xstate' section in core file."));
-	      return X86_XSTATE_SSE_MASK;
-	    }
-
-	  xcr0 = bfd_get_64 (abfd, contents);
-	}
+      warning (_("Couldn't read `xcr0' bytes from "
+		 "`.reg-xstate' section in core file."));
+      return 0;
     }
-  else
-    xcr0 = X86_XSTATE_SSE_MASK;
+
+  uint64_t xcr0 = bfd_get_64 (abfd, contents);
+
+  if (!i387_guess_xsave_layout (xcr0, size, layout))
+    return 0;
 
   return xcr0;
+}
+
+/* See i386-fbsd-tdep.h.  */
+
+bool
+i386_fbsd_core_read_x86_xsave_layout (struct gdbarch *gdbarch,
+				      x86_xsave_layout &layout)
+{
+  return i386_fbsd_core_read_xsave_info (core_bfd, layout) != 0;
 }
 
 /* Implement the core_read_description gdbarch method.  */
@@ -285,7 +288,11 @@ i386fbsd_core_read_description (struct gdbarch *gdbarch,
 				struct target_ops *target,
 				bfd *abfd)
 {
-  return i386_target_description (i386fbsd_core_read_xcr0 (abfd), true);
+  x86_xsave_layout layout;
+  uint64_t xcr0 = i386_fbsd_core_read_xsave_info (abfd, layout);
+  if (xcr0 == 0)
+    xcr0 = X86_XSTATE_X87_MASK;
+  return i386_target_description (xcr0, true);
 }
 
 /* Similar to i386_supply_fpregset, but use XSAVE extended state.  */
@@ -335,9 +342,9 @@ i386fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
       I386_FBSD_SIZEOF_SEGBASES_REGSET, &i386_fbsd_segbases_regset,
       "segment bases", cb_data);
 
-  if (tdep->xcr0 & X86_XSTATE_AVX)
-    cb (".reg-xstate", X86_XSTATE_SIZE (tdep->xcr0),
-	X86_XSTATE_SIZE (tdep->xcr0), &i386fbsd_xstateregset,
+  if (tdep->xsave_layout.sizeof_xsave != 0)
+    cb (".reg-xstate", tdep->xsave_layout.sizeof_xsave,
+	tdep->xsave_layout.sizeof_xsave, &i386fbsd_xstateregset,
 	"XSAVE extended state", cb_data);
 }
 
@@ -386,6 +393,8 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_elf_init_abi (info, gdbarch);
 
   tdep->xsave_xcr0_offset = I386_FBSD_XSAVE_XCR0_OFFSET;
+  set_gdbarch_core_read_x86_xsave_layout
+    (gdbarch, i386_fbsd_core_read_x86_xsave_layout);
 
   /* Iterate over core file register note sections.  */
   set_gdbarch_iterate_over_regset_sections

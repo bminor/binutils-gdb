@@ -224,7 +224,12 @@ amd64fbsd_core_read_description (struct gdbarch *gdbarch,
 				 struct target_ops *target,
 				 bfd *abfd)
 {
-  return amd64_target_description (i386fbsd_core_read_xcr0 (abfd), true);
+  x86_xsave_layout layout;
+  uint64_t xcr0 = i386_fbsd_core_read_xsave_info (abfd, layout);
+  if (xcr0 == 0)
+    xcr0 = X86_XSTATE_SSE_MASK;
+
+  return amd64_target_description (xcr0, true);
 }
 
 /* Similar to amd64_supply_fpregset, but use XSAVE extended state.  */
@@ -271,8 +276,10 @@ amd64fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
   cb (".reg-x86-segbases", AMD64_FBSD_SIZEOF_SEGBASES_REGSET,
       AMD64_FBSD_SIZEOF_SEGBASES_REGSET, &amd64_fbsd_segbases_regset,
       "segment bases", cb_data);
-  cb (".reg-xstate", X86_XSTATE_SIZE (tdep->xcr0), X86_XSTATE_SIZE (tdep->xcr0),
-      &amd64fbsd_xstateregset, "XSAVE extended state", cb_data);
+  if (tdep->xsave_layout.sizeof_xsave != 0)
+    cb (".reg-xstate", tdep->xsave_layout.sizeof_xsave,
+	tdep->xsave_layout.sizeof_xsave, &amd64fbsd_xstateregset,
+	"XSAVE extended state", cb_data);
 }
 
 /* Implement the get_thread_local_address gdbarch method.  */
@@ -313,6 +320,8 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tramp_frame_prepend_unwinder (gdbarch, &amd64_fbsd_sigframe);
 
   tdep->xsave_xcr0_offset = I386_FBSD_XSAVE_XCR0_OFFSET;
+  set_gdbarch_core_read_x86_xsave_layout
+    (gdbarch, i386_fbsd_core_read_x86_xsave_layout);
 
   /* Iterate over core file register note sections.  */
   set_gdbarch_iterate_over_regset_sections
