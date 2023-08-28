@@ -16,6 +16,7 @@
 # This file is part of the gdb testsuite.
 
 require allow_cplus_tests
+require {have_compile_flag -std=c++17}
 
 standard_testfile .cc
 

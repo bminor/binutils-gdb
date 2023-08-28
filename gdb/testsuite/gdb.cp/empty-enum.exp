@@ -29,7 +29,11 @@
 
 standard_testfile .cc
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile]} {
+set opts {}
+lappend opts debug
+lappend opts additional_flags=-std=c++11
+
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile $opts]} {
     return -1
 }
 
@@ -44,5 +48,30 @@ gdb_continue_to_breakpoint "stop in breakpt"
 gdb_test "print arg1" " = 8"
 gdb_test "print arg2" " = 4"
 
-gdb_test "ptype arg1" "type = enum enum1 : unsigned int \\{\\}"
-gdb_test "ptype arg2" "type = enum class enum2 : unsigned char \\{\\}"
+
+# Xfail for missing DW_AT_type in DW_TAG_enumeration_type, gcc PR debug/16063.
+set have_xfail [expr [test_compiler_info gcc-*] && [gcc_major_version] < 5]
+
+gdb_test_multiple "ptype arg1" "" {
+    -re -wrap "type = enum enum1 : unsigned int \\{\\}" {
+	pass $gdb_test_name
+    }
+    -re -wrap "type = enum enum1 \\{\\}" {
+	if { $have_xfail } {
+	    setup_xfail *-*-* gcc/16063
+	}
+	fail $gdb_test_name
+    }
+}
+
+gdb_test_multiple "ptype arg2" "" {
+    -re -wrap "type = enum class enum2 : unsigned char \\{\\}" {
+	pass $gdb_test_name
+    }
+    -re -wrap "type = enum class enum2 \\{\\}" {
+	if { $have_xfail } {
+	    setup_xfail *-*-* gcc/16063
+	}
+	fail $gdb_test_name
+    }
+}

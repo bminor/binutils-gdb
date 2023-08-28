@@ -20,7 +20,11 @@
 
 standard_testfile .cc
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
+set opts {}
+lappend opts debug
+lappend opts additional_flags=-std=c++11
+
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile $opts] } {
     return -1
 }
 
