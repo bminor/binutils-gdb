@@ -37,7 +37,8 @@ static x86_xsave_layout xsave_layout;
 /* These structs should have the proper sizes and alignment on both
    i386 and x86-64 machines.  */
 
-struct i387_fsave {
+struct i387_fsave
+{
   /* All these are only sixteen bits, plus padding, except for fop (which
      is only eleven bits), and fooff / fioff (which are 32 bits each).  */
   unsigned short fctrl;
@@ -57,7 +58,8 @@ struct i387_fsave {
   unsigned char st_space[80];
 };
 
-struct i387_fxsave {
+struct i387_fxsave
+{
   /* All these are only sixteen bits, plus padding, except for fop (which
      is only eleven bits), and fooff / fioff (which are 32 bits each).  */
   unsigned short fctrl;
@@ -83,7 +85,8 @@ struct i387_fxsave {
 
 gdb_static_assert (sizeof(i387_fxsave) == 416);
 
-struct i387_xsave : public i387_fxsave {
+struct i387_xsave : public i387_fxsave
+{
   unsigned char reserved1[48];
 
   /* The extended control register 0 (the XFEATURE_ENABLED_MASK
