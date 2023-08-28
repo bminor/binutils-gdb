@@ -3929,6 +3929,39 @@ This is emitted when @value{GDBN} removes a connection
 The @code{gdb.TargetConnection} that is being removed.
 @end defvar
 
+@item events.executable_changed
+Emits @code{gdb.ExecutableChangedEvent} which indicates that the
+@code{gdb.Progspace.executable_filename} has changed.
+
+This event is emitted when either the value of
+@code{gdb.Progspace.executable_filename } has changed to name a
+different file, or the executable file named by
+@code{gdb.Progspace.executable_filename} has changed on disk, and
+@value{GDBN} has therefore reloaded it.
+
+@defvar ExecutableChangedEvent.progspace
+The @code{gdb.Progspace} in which the current executable has changed.
+The file name of the updated executable will be visible in
+@code{gdb.Progspace.executable_filename} (@pxref{Progspaces In Python}).
+@end defvar
+@defvar ExecutableChangedEvent.reload
+This attribute will be @code{True} if the value of
+@code{gdb.Progspace.executable_filename} didn't change, but the file
+it names changed on disk instead, and @value{GDBN} reloaded it.
+
+When this attribute is @code{False}, the value in
+@code{gdb.Progspace.executable_filename} was changed to name a
+different file.
+@end defvar
+
+Remember that @value{GDBN} tracks the executable file and the symbol
+file separately, these are visible as
+@code{gdb.Progspace.executable_filename} and
+@code{gdb.Progspace.filename} respectively.  When using the @kbd{file}
+command, @value{GDBN} updates both of these fields, but the executable
+file is updated first, so when this event is emitted, the executable
+filename will have changed, but the symbol filename might still hold
+its previous value.
 @end table
 
 @node Threads In Python

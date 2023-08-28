@@ -310,6 +310,11 @@ show tui mouse-events
      file name will have been partially resolved to an absolute file
      name.
 
+  ** A new executable_changed event registry is available.  This event
+     emits ExecutableChangedEvent objects, which have 'progspace' (a
+     gdb.Progspace) and 'reload' (a Boolean) attributes.  This event
+     is emitted when gdb.Progspace.executable_filename changes.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.
