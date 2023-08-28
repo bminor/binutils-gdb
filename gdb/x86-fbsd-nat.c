@@ -19,6 +19,9 @@
 
 #include "defs.h"
 #include "x86-fbsd-nat.h"
+#ifdef PT_GETXSTATE_INFO
+#include "nat/x86-xstate.h"
+#endif
 
 /* Implement the virtual fbsd_nat_target::low_new_fork method.  */
 
@@ -43,3 +46,21 @@ x86_fbsd_nat_target::low_new_fork (ptid_t parent, pid_t child)
   child_state = x86_debug_reg_state (child);
   *child_state = *parent_state;
 }
+
+#ifdef PT_GETXSTATE_INFO
+void
+x86_fbsd_nat_target::probe_xsave_layout (pid_t pid)
+{
+  if (m_xsave_probed)
+    return;
+
+  m_xsave_probed = true;
+
+  if (ptrace (PT_GETXSTATE_INFO, pid, (PTRACE_TYPE_ARG3) &m_xsave_info,
+	      sizeof (m_xsave_info)) != 0)
+    return;
+  if (m_xsave_info.xsave_len != 0)
+    m_xsave_layout = x86_fetch_xsave_layout (m_xsave_info.xsave_mask,
+					     m_xsave_info.xsave_len);
+}
+#endif
