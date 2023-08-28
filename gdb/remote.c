@@ -1214,7 +1214,7 @@ public: /* Remote specific methods.  */
   void skip_frame ();
   long read_frame (gdb::char_vector *buf_p);
   int getpkt_or_notif_sane_1 (gdb::char_vector *buf, int forever,
-			      int expecting_notif, int *is_notif);
+			      int *is_notif);
   int getpkt (gdb::char_vector *buf, int forever);
   int getpkt_or_notif_sane (gdb::char_vector *buf, int forever,
 			    int *is_notif);
@@ -10049,14 +10049,15 @@ show_watchdog (struct ui_file *file, int from_tty,
    synchronous mode) to wait for a target that is is executing user
    code to stop.  If FOREVER == 0, this function is allowed to time
    out gracefully and return an indication of this to the caller.
-   Otherwise return the number of bytes read.  If EXPECTING_NOTIF,
-   consider receiving a notification enough reason to return to the
-   caller.  *IS_NOTIF is an output boolean that indicates whether *BUF
-   holds a notification or not (a regular packet).  */
+   Otherwise return the number of bytes read.  If IS_NOTIF is not
+   NULL, then consider receiving a notification enough reason to
+   return to the caller.  In this case, *IS_NOTIF is an output boolean
+   that indicates whether *BUF holds a notification or not (a regular
+   packet).  */
 
 int
 remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
-				       int forever, int expecting_notif,
+				       int forever,
 				       int *is_notif)
 {
   struct remote_state *rs = get_remote_state ();
@@ -10069,7 +10070,7 @@ remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
 
   if (forever)
     timeout = watchdog > 0 ? watchdog : -1;
-  else if (expecting_notif)
+  else if (is_notif != nullptr)
     timeout = 0; /* There should already be a char in the buffer.  If
 		    not, bail out.  */
   else
@@ -10100,7 +10101,7 @@ remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
 
 	  if (c == SERIAL_TIMEOUT)
 	    {
-	      if (expecting_notif)
+	      if (is_notif != nullptr)
 		return -1; /* Don't complain, it's normal to not get
 			      anything in this case.  */
 
@@ -10188,7 +10189,7 @@ remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
 
 	  /* Notifications require no acknowledgement.  */
 
-	  if (expecting_notif)
+	  if (is_notif != nullptr)
 	    return val;
 	}
     }
@@ -10203,14 +10204,14 @@ remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
 int
 remote_target::getpkt (gdb::char_vector *buf, int forever)
 {
-  return getpkt_or_notif_sane_1 (buf, forever, 0, NULL);
+  return getpkt_or_notif_sane_1 (buf, forever, NULL);
 }
 
 int
 remote_target::getpkt_or_notif_sane (gdb::char_vector *buf, int forever,
 				     int *is_notif)
 {
-  return getpkt_or_notif_sane_1 (buf, forever, 1, is_notif);
+  return getpkt_or_notif_sane_1 (buf, forever, is_notif);
 }
 
 /* Kill any new fork children of inferior INF that haven't been
