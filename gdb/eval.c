@@ -2419,7 +2419,7 @@ array_operation::evaluate (struct type *expect_type,
       struct type *element_type = type->target_type ();
       struct value *array = value::allocate (expect_type);
       int element_size = check_typedef (element_type)->length ();
-      LONGEST low_bound, high_bound, index;
+      LONGEST low_bound, high_bound;
 
       if (!get_discrete_bounds (range_type, &low_bound, &high_bound))
 	{
@@ -2428,21 +2428,17 @@ array_operation::evaluate (struct type *expect_type,
 	}
       if (low_bound + nargs - 1 > high_bound)
 	error (_("Too many array elements"));
-      index = low_bound;
       memset (array->contents_raw ().data (), 0, expect_type->length ());
-      for (int tem = 0; tem < nargs; ++tem)
+      for (int idx = 0; idx < nargs; ++idx)
 	{
 	  struct value *element;
 
-	  element = in_args[index - low_bound]->evaluate (element_type,
-							  exp, noside);
+	  element = in_args[idx]->evaluate (element_type, exp, noside);
 	  if (element->type () != element_type)
 	    element = value_cast (element_type, element);
-	  memcpy (array->contents_raw ().data ()
-		  + (index - low_bound) * element_size,
+	  memcpy (array->contents_raw ().data () + idx * element_size,
 		  element->contents ().data (),
 		  element_size);
-	  index++;
 	}
       return array;
     }
