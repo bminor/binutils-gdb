@@ -81,29 +81,7 @@ struct i387_fxsave {
   unsigned char xmm_space[256];
 };
 
-struct i387_xsave {
-  /* All these are only sixteen bits, plus padding, except for fop (which
-     is only eleven bits), and fooff / fioff (which are 32 bits each).  */
-  unsigned short fctrl;
-  unsigned short fstat;
-  unsigned short ftag;
-  unsigned short fop;
-  unsigned int fioff;
-  unsigned short fiseg;
-  unsigned short pad1;
-  unsigned int fooff;
-  unsigned short foseg;
-  unsigned short pad12;
-
-  unsigned int mxcsr;
-  unsigned int mxcsr_mask;
-
-  /* Space for eight 80-bit FP values in 128-bit spaces.  */
-  unsigned char st_space[128];
-
-  /* Space for eight 128-bit XMM values, or 16 on x86-64.  */
-  unsigned char xmm_space[256];
-
+struct i387_xsave : public i387_fxsave {
   unsigned char reserved1[48];
 
   /* The extended control register 0 (the XFEATURE_ENABLED_MASK
@@ -725,7 +703,6 @@ void
 i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 {
   struct i387_xsave *fp = (struct i387_xsave *) buf;
-  struct i387_fxsave *fxp = (struct i387_fxsave *) buf;
   bool amd64 = register_size (regcache->tdesc, 0) == 8;
   int i, top;
   unsigned long val;
@@ -962,7 +939,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	{
 	  int tag;
 	  if (fp->ftag & (1 << i))
-	    tag = i387_ftag (fxp, (i + 8 - top) % 8);
+	    tag = i387_ftag (fp, (i + 8 - top) % 8);
 	  else
 	    tag = 3;
 	  val |= tag << (2 * i);
