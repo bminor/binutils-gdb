@@ -872,6 +872,7 @@ static void
 comdat_delf (void *ent)
 {
   struct comdat_hash_entry *e = ent;
+  free (e->comdat_name);
   free (e->symname);
   free (e);
 }
@@ -964,7 +965,7 @@ fill_comdat_hash (bfd *abfd)
 
       if (*slot == NULL)
 	{
-	  if (isym.n_numaux == 0)
+	  if (isym.n_numaux != 1)
 	    aux.x_scn.x_comdat = 0;
 	  else
 	    {
