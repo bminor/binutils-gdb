@@ -584,8 +584,7 @@ cooked_index::dump (gdbarch *arch) const
       gdb_printf ("    qualified:  %s\n", entry->full_name (&temp_storage, false));
       gdb_printf ("    DWARF tag:  %s\n", dwarf_tag_name (entry->tag));
       gdb_printf ("    flags:      %s\n", to_string (entry->flags).c_str ());
-      gdb_printf ("    DIE offset: 0x%" PRIx64 "\n",
-		  to_underlying (entry->die_offset));
+      gdb_printf ("    DIE offset: %s\n", sect_offset_str (entry->die_offset));
 
       if (entry->parent_entry != nullptr)
 	gdb_printf ("    parent:     ((cooked_index_entry *) %p) [%s]\n",
