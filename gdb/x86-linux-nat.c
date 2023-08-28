@@ -36,6 +36,7 @@
 #include "amd64-linux-tdep.h"
 #endif
 #include "gdbsupport/x86-xstate.h"
+#include "nat/x86-xstate.h"
 #include "nat/linux-btrace.h"
 #include "nat/linux-nat.h"
 #include "nat/x86-linux.h"
@@ -179,6 +180,8 @@ x86_linux_nat_target::read_description ()
 	  /* Get XCR0 from XSAVE extended state.  */
 	  xcr0 = xstateregs[(I386_LINUX_XSAVE_XCR0_OFFSET
 			     / sizeof (uint64_t))];
+
+	  m_xsave_layout = x86_fetch_xsave_layout (xcr0, x86_xsave_length ());
 	}
     }
 

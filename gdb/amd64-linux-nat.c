@@ -210,6 +210,7 @@ void
 amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
+  const i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
@@ -235,7 +236,7 @@ amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 
       if (have_ptrace_getregset == TRIBOOL_TRUE)
 	{
-	  char xstateregs[X86_XSTATE_MAX_SIZE];
+	  char xstateregs[tdep->xsave_layout.sizeof_xsave];
 	  struct iovec iov;
 
 	  /* Pre-4.14 kernels have a bug (fixed by commit 0852b374173b
@@ -270,6 +271,7 @@ void
 amd64_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
+  const i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
@@ -299,7 +301,7 @@ amd64_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 
       if (have_ptrace_getregset == TRIBOOL_TRUE)
 	{
-	  char xstateregs[X86_XSTATE_MAX_SIZE];
+	  char xstateregs[tdep->xsave_layout.sizeof_xsave];
 	  struct iovec iov;
 
 	  iov.iov_base = xstateregs;

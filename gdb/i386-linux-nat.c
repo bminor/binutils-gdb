@@ -330,7 +330,9 @@ store_fpregs (const struct regcache *regcache, int tid, int regno)
 static int
 fetch_xstateregs (struct regcache *regcache, int tid)
 {
-  char xstateregs[X86_XSTATE_MAX_SIZE];
+  struct gdbarch *gdbarch = regcache->arch ();
+  const i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
+  char xstateregs[tdep->xsave_layout.sizeof_xsave];
   struct iovec iov;
 
   if (have_ptrace_getregset != TRIBOOL_TRUE)
@@ -353,7 +355,9 @@ fetch_xstateregs (struct regcache *regcache, int tid)
 static int
 store_xstateregs (const struct regcache *regcache, int tid, int regno)
 {
-  char xstateregs[X86_XSTATE_MAX_SIZE];
+  struct gdbarch *gdbarch = regcache->arch ();
+  const i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
+  char xstateregs[tdep->xsave_layout.sizeof_xsave];
   struct iovec iov;
 
   if (have_ptrace_getregset != TRIBOOL_TRUE)
