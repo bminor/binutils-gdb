@@ -402,8 +402,8 @@ coff_swap_aux_in (bfd *abfd,
 		  void * ext1,
 		  int type,
 		  int in_class,
-		  int indx,
-		  int numaux,
+		  int indx ATTRIBUTE_UNUSED,
+		  int numaux ATTRIBUTE_UNUSED,
 		  void * in1)
 {
   AUXENT *ext = (AUXENT *) ext1;
@@ -426,14 +426,7 @@ coff_swap_aux_in (bfd *abfd,
 #if FILNMLEN != E_FILNMLEN
 #error we need to cope with truncating or extending FILNMLEN
 #else
-	  if (numaux > 1 && obj_pe (abfd))
-	    {
-	      if (indx == 0)
-		memcpy (in->x_file.x_n.x_fname, ext->x_file.x_fname,
-			numaux * sizeof (AUXENT));
-	    }
-	  else
-	    memcpy (in->x_file.x_n.x_fname, ext->x_file.x_fname, FILNMLEN);
+	  memcpy (in->x_file.x_n.x_fname, ext->x_file.x_fname, FILNMLEN);
 #endif
 	}
       goto end;

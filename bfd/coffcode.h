@@ -5813,8 +5813,8 @@ coff_bigobj_swap_aux_in (bfd *abfd,
 			 void * ext1,
 			 int type,
 			 int in_class,
-			 int indx,
-			 int numaux,
+			 int indx ATTRIBUTE_UNUSED,
+			 int numaux ATTRIBUTE_UNUSED,
 			 void * in1)
 {
   AUXENT_BIGOBJ *ext = (AUXENT_BIGOBJ *) ext1;
@@ -5826,14 +5826,7 @@ coff_bigobj_swap_aux_in (bfd *abfd,
   switch (in_class)
     {
     case C_FILE:
-      if (numaux > 1)
-	{
-	  if (indx == 0)
-	    memcpy (in->x_file.x_n.x_fname, ext->File.Name,
-		    numaux * sizeof (AUXENT_BIGOBJ));
-	}
-      else
-	memcpy (in->x_file.x_n.x_fname, ext->File.Name, sizeof (ext->File.Name));
+      memcpy (in->x_file.x_n.x_fname, ext->File.Name, sizeof (ext->File.Name));
       break;
 
     case C_STAT:
