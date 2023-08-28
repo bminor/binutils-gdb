@@ -1213,11 +1213,7 @@ public: /* Remote specific methods.  */
 
   void skip_frame ();
   long read_frame (gdb::char_vector *buf_p);
-  int getpkt_or_notif_sane_1 (gdb::char_vector *buf, bool forever,
-			      bool *is_notif);
-  int getpkt (gdb::char_vector *buf, bool forever);
-  int getpkt_or_notif_sane (gdb::char_vector *buf, bool forever,
-			    bool *is_notif);
+  int getpkt (gdb::char_vector *buf, bool forever, bool *is_notif = nullptr);
   int remote_vkill (int pid);
   void remote_kill_k ();
 
@@ -8297,7 +8293,7 @@ remote_target::wait_ns (ptid_t ptid, struct target_waitstatus *status,
   /* If in non-stop mode, get out of getpkt even if a
      notification is received.	*/
 
-  ret = getpkt_or_notif_sane (&rs->buf, false /* forever */, &is_notif);
+  ret = getpkt (&rs->buf, false /* forever */, &is_notif);
   while (1)
     {
       if (ret != -1 && !is_notif)
@@ -8336,7 +8332,7 @@ remote_target::wait_ns (ptid_t ptid, struct target_waitstatus *status,
 	}
 
       /* Otherwise do a blocking wait.  */
-      ret = getpkt_or_notif_sane (&rs->buf, true /* forever */, &is_notif);
+      ret = getpkt (&rs->buf, true /* forever */, &is_notif);
     }
 }
 
@@ -8391,7 +8387,7 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
 	 However, before we do that we need to ensure that the caller
 	 knows how to take the target into/out of async mode.  */
       bool is_notif;
-      int ret = getpkt_or_notif_sane (&rs->buf, forever, &is_notif);
+      int ret = getpkt (&rs->buf, forever, &is_notif);
 
       /* GDB gets a notification.  Return to core as this event is
 	 not interesting.  */
@@ -10056,9 +10052,7 @@ show_watchdog (struct ui_file *file, int from_tty,
    packet).  */
 
 int
-remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
-				       bool forever,
-				       bool *is_notif)
+remote_target::getpkt (gdb::char_vector *buf, bool forever, bool *is_notif)
 {
   struct remote_state *rs = get_remote_state ();
   int c;
@@ -10193,25 +10187,6 @@ remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
 	    return val;
 	}
     }
-}
-
-/* Read a packet from the remote machine, with error checking, and
-   store it in *BUF.  Resize *BUF if necessary to hold the result.  If
-   FOREVER, wait forever rather than timing out; this is used (in
-   synchronous mode) to wait for a target that is is executing user
-   code to stop.  */
-
-int
-remote_target::getpkt (gdb::char_vector *buf, bool forever)
-{
-  return getpkt_or_notif_sane_1 (buf, forever, NULL);
-}
-
-int
-remote_target::getpkt_or_notif_sane (gdb::char_vector *buf, bool forever,
-				     bool *is_notif)
-{
-  return getpkt_or_notif_sane_1 (buf, forever, is_notif);
 }
 
 /* Kill any new fork children of inferior INF that haven't been
