@@ -1616,7 +1616,10 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
 				  bfd *abfd)
 {
   /* Linux/x86-64.  */
-  uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
+  x86_xsave_layout layout;
+  uint64_t xcr0 = i386_linux_core_read_xsave_info (abfd, layout);
+  if (xcr0 == 0)
+    xcr0 = X86_XSTATE_SSE_MASK;
 
   return amd64_linux_read_description (xcr0 & X86_XSTATE_ALL_MASK,
 				       gdbarch_ptr_bit (gdbarch) == 32);
@@ -1661,8 +1664,10 @@ amd64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
   cb (".reg", 27 * 8, 27 * 8, &i386_gregset, NULL, cb_data);
   cb (".reg2", 512, 512, &amd64_fpregset, NULL, cb_data);
-  cb (".reg-xstate", X86_XSTATE_SIZE (tdep->xcr0), X86_XSTATE_SIZE (tdep->xcr0),
-      &amd64_linux_xstateregset, "XSAVE extended state", cb_data);
+  if (tdep->xsave_layout.sizeof_xsave != 0)
+    cb (".reg-xstate", tdep->xsave_layout.sizeof_xsave,
+	tdep->xsave_layout.sizeof_xsave, &amd64_linux_xstateregset,
+	"XSAVE extended state", cb_data);
 }
 
 /* The instruction sequences used in x86_64 machines for a
@@ -1804,6 +1809,8 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch,
   tdep->sc_num_regs = ARRAY_SIZE (amd64_linux_sc_reg_offset);
 
   tdep->xsave_xcr0_offset = I386_LINUX_XSAVE_XCR0_OFFSET;
+  set_gdbarch_core_read_x86_xsave_layout
+    (gdbarch, i386_linux_core_read_x86_xsave_layout);
 
   /* Add the %orig_rax register used for syscall restarting.  */
   set_gdbarch_write_pc (gdbarch, amd64_linux_write_pc);

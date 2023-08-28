@@ -638,41 +638,44 @@ static int i386_linux_sc_reg_offset[] =
   0 * 4				/* %gs */
 };
 
-/* Get XSAVE extended state xcr0 from core dump.  */
+/* See i386-linux-tdep.h.  */
 
 uint64_t
-i386_linux_core_read_xcr0 (bfd *abfd)
+i386_linux_core_read_xsave_info (bfd *abfd, x86_xsave_layout &layout)
 {
   asection *xstate = bfd_get_section_by_name (abfd, ".reg-xstate");
-  uint64_t xcr0;
+  if (xstate == nullptr)
+    return 0;
 
-  if (xstate)
+  /* Check extended state size.  */
+  size_t size = bfd_section_size (xstate);
+  if (size < X86_XSTATE_AVX_SIZE)
+    return 0;
+
+  char contents[8];
+  if (! bfd_get_section_contents (abfd, xstate, contents,
+				  I386_LINUX_XSAVE_XCR0_OFFSET, 8))
     {
-      size_t size = bfd_section_size (xstate);
-
-      /* Check extended state size.  */
-      if (size < X86_XSTATE_AVX_SIZE)
-	xcr0 = X86_XSTATE_SSE_MASK;
-      else
-	{
-	  char contents[8];
-
-	  if (! bfd_get_section_contents (abfd, xstate, contents,
-					  I386_LINUX_XSAVE_XCR0_OFFSET,
-					  8))
-	    {
-	      warning (_("Couldn't read `xcr0' bytes from "
-			 "`.reg-xstate' section in core file."));
-	      return 0;
-	    }
-
-	  xcr0 = bfd_get_64 (abfd, contents);
-	}
+      warning (_("Couldn't read `xcr0' bytes from "
+		 "`.reg-xstate' section in core file."));
+      return 0;
     }
-  else
-    xcr0 = 0;
+
+  uint64_t xcr0 = bfd_get_64 (abfd, contents);
+
+  if (!i387_guess_xsave_layout (xcr0, size, layout))
+    return 0;
 
   return xcr0;
+}
+
+/* See i386-linux-tdep.h.  */
+
+bool
+i386_linux_core_read_x86_xsave_layout (struct gdbarch *gdbarch,
+				       x86_xsave_layout &layout)
+{
+  return i386_linux_core_read_xsave_info (core_bfd, layout) != 0;
 }
 
 /* See i386-linux-tdep.h.  */
@@ -708,7 +711,8 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
 				  bfd *abfd)
 {
   /* Linux/i386.  */
-  uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
+  x86_xsave_layout layout;
+  uint64_t xcr0 = i386_linux_core_read_xsave_info (abfd, layout);
   const struct target_desc *tdesc = i386_linux_read_description (xcr0);
 
   if (tdesc != NULL)
@@ -767,9 +771,9 @@ i386_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
   cb (".reg", 68, 68, &i386_gregset, NULL, cb_data);
 
-  if (tdep->xcr0 & X86_XSTATE_AVX)
-    cb (".reg-xstate", X86_XSTATE_SIZE (tdep->xcr0),
-	X86_XSTATE_SIZE (tdep->xcr0), &i386_linux_xstateregset,
+  if (tdep->xsave_layout.sizeof_xsave != 0)
+    cb (".reg-xstate", tdep->xsave_layout.sizeof_xsave,
+	tdep->xsave_layout.sizeof_xsave, &i386_linux_xstateregset,
 	"XSAVE extended state", cb_data);
   else if (tdep->xcr0 & X86_XSTATE_SSE)
     cb (".reg-xfp", 512, 512, &i386_fpregset, "extended floating-point",
@@ -872,6 +876,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_num_regs = ARRAY_SIZE (i386_linux_sc_reg_offset);
 
   tdep->xsave_xcr0_offset = I386_LINUX_XSAVE_XCR0_OFFSET;
+  set_gdbarch_core_read_x86_xsave_layout
+    (gdbarch, i386_linux_core_read_x86_xsave_layout);
 
   set_gdbarch_process_record (gdbarch, i386_process_record);
   set_gdbarch_process_record_signal (gdbarch, i386_linux_record_signal);
