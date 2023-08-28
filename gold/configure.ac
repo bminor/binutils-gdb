@@ -193,6 +193,10 @@ for targ in $target $canon_targets; do
 	      -o "$targ_extra_big_endian" = "true"; then
 	      targ_32_big=yes
 	  fi
+	  if test "$targ_little_endian" = "true" \
+	      -o "$targ_extra_little_endian" = "true"; then
+	      targ_32_little=yes
+	  fi
 	  if test "$targ_big_endian" = "false" \
 	      -o "$targ_extra_big_endian" = "false"; then
 	      targ_32_little=yes
@@ -202,6 +206,10 @@ for targ in $target $canon_targets; do
 	  if test "$targ_big_endian" = "true" \
 	      -o "$targ_extra_big_endian" = "true"; then
 	      targ_64_big=yes
+	  fi
+	  if test "$targ_little_endian" = "true" \
+	      -o "$targ_extra_little_endian" = "true"; then
+	      targ_64_little=yes
 	  fi
 	  if test "$targ_big_endian" = "false" \
 	      -o "$targ_extra_big_endian" = "false"; then
