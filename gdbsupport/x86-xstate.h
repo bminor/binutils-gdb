@@ -99,11 +99,6 @@ constexpr bool operator!= (const x86_xsave_layout &lhs,
 
 #define X86_XSTATE_SSE_SIZE	576
 #define X86_XSTATE_AVX_SIZE	832
-#define X86_XSTATE_BNDREGS_SIZE	1024
-#define X86_XSTATE_BNDCFG_SIZE	1088
-#define X86_XSTATE_AVX512_SIZE	2688
-#define X86_XSTATE_PKRU_SIZE	2696
-#define X86_XSTATE_MAX_SIZE	2696
 
 
 /* In case one of the MPX XCR0 bits is set we consider we have MPX.  */
@@ -111,13 +106,6 @@ constexpr bool operator!= (const x86_xsave_layout &lhs,
 #define HAS_AVX(XCR0) (((XCR0) & X86_XSTATE_AVX) != 0)
 #define HAS_AVX512(XCR0) (((XCR0) & X86_XSTATE_AVX512) != 0)
 #define HAS_PKRU(XCR0) (((XCR0) & X86_XSTATE_PKRU) != 0)
-
-/* Get I386 XSAVE extended state size.  */
-#define X86_XSTATE_SIZE(XCR0) \
-    (HAS_PKRU (XCR0) ? X86_XSTATE_PKRU_SIZE : \
-     (HAS_AVX512 (XCR0) ? X86_XSTATE_AVX512_SIZE : \
-      (HAS_MPX (XCR0) ? X86_XSTATE_BNDCFG_SIZE : \
-       (HAS_AVX (XCR0) ? X86_XSTATE_AVX_SIZE : X86_XSTATE_SSE_SIZE))))
 
 /* Initial value for fctrl register, as defined in the X86 manual, and
    confirmed in the (Linux) kernel source.  When the x87 floating point
