@@ -1155,6 +1155,23 @@ string_operation::evaluate (struct type *expect_type,
   return value_string (str.c_str (), str.size (), type);
 }
 
+struct value *
+ternop_slice_operation::evaluate (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside)
+{
+  struct value *array
+    = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  struct value *low
+    = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  struct value *upper
+    = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+
+  int lowbound = value_as_long (low);
+  int upperbound = value_as_long (upper);
+  return value_slice (array, lowbound, upperbound - lowbound + 1);
+}
+
 } /* namespace expr */
 
 /* Helper function that implements the body of OP_OBJC_SELECTOR.  */
@@ -1167,18 +1184,6 @@ eval_op_objc_selector (struct type *expect_type, struct expression *exp,
   struct type *selector_type = builtin_type (exp->gdbarch)->builtin_data_ptr;
   return value_from_longest (selector_type,
 			     lookup_child_selector (exp->gdbarch, sel));
-}
-
-/* A helper function for TERNOP_SLICE.  */
-
-struct value *
-eval_op_ternop (struct type *expect_type, struct expression *exp,
-		enum noside noside,
-		struct value *array, struct value *low, struct value *upper)
-{
-  int lowbound = value_as_long (low);
-  int upperbound = value_as_long (upper);
-  return value_slice (array, lowbound, upperbound - lowbound + 1);
 }
 
 /* A helper function for STRUCTOP_STRUCT.  */
