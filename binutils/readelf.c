@@ -2801,7 +2801,7 @@ get_machine_name (unsigned e_machine)
     case EM_MMA:		return "Fujitsu Multimedia Accelerator";
     case EM_PCP:		return "Siemens PCP";
     case EM_NCPU:		return "Sony nCPU embedded RISC processor";
-    case EM_NDR1:		return "Denso NDR1 microprocesspr";
+    case EM_NDR1:		return "Denso NDR1 microprocessor";
     case EM_STARCORE:		return "Motorola Star*Core processor";
     case EM_ME16:		return "Toyota ME16 processor";
       /* 60 */
@@ -6147,7 +6147,7 @@ check_magic_number (Filedata * filedata, Elf_Internal_Ehdr * header)
   {
     { { 'B', 'C', 0xc0, 0xde }, 
       N_("This is a LLVM bitcode file - try using llvm-bcanalyzer\n"),
-      N_("This is a LLVM bitcode file - try extracing and then using llvm-bcanalyzer\n")
+      N_("This is a LLVM bitcode file - try extracting and then using llvm-bcanalyzer\n")
     },
     { { 'g', 'o', ' ', 'o' },
       N_("This is a GO binary file - try using 'go tool objdump' or 'go tool nm'\n"),
