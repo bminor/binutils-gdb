@@ -1344,7 +1344,7 @@ eval_op_rust_array (struct type *expect_type, struct expression *exp,
 
       for (i = 0; i < copies; ++i)
 	eltvec[i] = elt;
-      return value_array (0, copies - 1, eltvec);
+      return value_array (0, eltvec);
     }
   else
     {

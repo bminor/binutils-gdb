@@ -2515,7 +2515,7 @@ array_operation::evaluate (struct type *expect_type,
 	 objects.  */
       argvec[tem] = in_args[tem]->evaluate_with_coercion (exp, noside);
     }
-  return value_array (tem2, tem3, argvec);
+  return value_array (tem2, argvec);
 }
 
 value *
