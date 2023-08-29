@@ -9952,5 +9952,13 @@ proc have_host_locale { locale } {
     return [expr $idx != -1]
 }
 
+# Return 1 if we can use '#include <$file>' in source file.
+
+gdb_caching_proc have_system_header { file } {
+    set src "#include <$file>"
+    set name [string map { "/" "_sep_" } $file]
+    return [gdb_can_simple_compile have_system_header_$name $src object]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

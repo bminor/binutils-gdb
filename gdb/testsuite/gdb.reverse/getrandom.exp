@@ -20,6 +20,7 @@
 #
 
 require supports_reverse
+require {have_system_header sys/random.h}
 
 standard_testfile
 
