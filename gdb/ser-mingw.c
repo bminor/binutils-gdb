@@ -333,7 +333,11 @@ ser_windows_read_prim (struct serial *scb, size_t count)
     {
       if (GetLastError () != ERROR_IO_PENDING
 	  || !GetOverlappedResult (h, &ov, &bytes_read, TRUE))
-	bytes_read = -1;
+	{
+	  ULONGEST err = GetLastError ();
+	  CloseHandle (ov.hEvent);
+	  throw_winerror_with_name (_("error while reading"), err);
+	}
     }
 
   CloseHandle (ov.hEvent);
@@ -962,16 +966,16 @@ pipe_windows_read (struct serial *scb, size_t count)
   DWORD bytes_read;
 
   if (pipeline_out == INVALID_HANDLE_VALUE)
-    return -1;
+    error (_("could not find file number for pipe"));
 
   if (! PeekNamedPipe (pipeline_out, NULL, 0, NULL, &available, NULL))
-    return -1;
+    throw_winerror_with_name (_("could not peek into pipe"), GetLastError ());
 
   if (count > available)
     count = available;
 
   if (! ReadFile (pipeline_out, scb->buf, count, &bytes_read, NULL))
-    return -1;
+    throw_winerror_with_name (_("could not read from pipe"), GetLastError ());
 
   return bytes_read;
 }

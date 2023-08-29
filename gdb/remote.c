@@ -9779,22 +9779,6 @@ remote_target::flash_done ()
 /* Stuff for dealing with the packets which are part of this protocol.
    See comment at top of file for details.  */
 
-/* Close/unpush the remote target, and throw a TARGET_CLOSE_ERROR
-   error to higher layers.  Called when a serial error is detected.
-   The exception message is STRING, followed by a colon and a blank,
-   the system error message for errno at function entry and final dot
-   for output compatibility with throw_perror_with_name.  */
-
-static void
-unpush_and_perror (remote_target *target, const char *string)
-{
-  int saved_errno = errno;
-
-  remote_unpush_target (target);
-  throw_error (TARGET_CLOSE_ERROR, "%s: %s.", string,
-	       safe_strerror (saved_errno));
-}
-
 /* Read a single character from the remote end.  The current quit
    handler is overridden to avoid quitting in the middle of packet
    sequence, as that would break communication with the remote server.
@@ -9806,36 +9790,38 @@ remote_target::readchar (int timeout)
   int ch;
   struct remote_state *rs = get_remote_state ();
 
-  {
-    scoped_restore restore_quit_target
-      = make_scoped_restore (&curr_quit_handler_target, this);
-    scoped_restore restore_quit
-      = make_scoped_restore (&quit_handler, ::remote_serial_quit_handler);
+  try
+    {
+      scoped_restore restore_quit_target
+	= make_scoped_restore (&curr_quit_handler_target, this);
+      scoped_restore restore_quit
+	= make_scoped_restore (&quit_handler, ::remote_serial_quit_handler);
 
-    rs->got_ctrlc_during_io = 0;
+      rs->got_ctrlc_during_io = 0;
 
-    ch = serial_readchar (rs->remote_desc, timeout);
+      ch = serial_readchar (rs->remote_desc, timeout);
 
-    if (rs->got_ctrlc_during_io)
-      set_quit_flag ();
-  }
+      if (rs->got_ctrlc_during_io)
+	set_quit_flag ();
+    }
+  catch (const gdb_exception_error &ex)
+    {
+      remote_unpush_target (this);
+      throw_error (TARGET_CLOSE_ERROR,
+		   _("Remote communication error.  "
+		     "Target disconnected: %s"),
+		   ex.what ());
+    }
 
   if (ch >= 0)
     return ch;
 
-  switch ((enum serial_rc) ch)
+  if (ch == SERIAL_EOF)
     {
-    case SERIAL_EOF:
       remote_unpush_target (this);
       throw_error (TARGET_CLOSE_ERROR, _("Remote connection closed"));
-      /* no return */
-    case SERIAL_ERROR:
-      unpush_and_perror (this, _("Remote communication error.  "
-				 "Target disconnected"));
-      /* no return */
-    case SERIAL_TIMEOUT:
-      break;
     }
+
   return ch;
 }
 

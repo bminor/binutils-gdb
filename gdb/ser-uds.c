@@ -69,7 +69,10 @@ uds_close (struct serial *scb)
 static int
 uds_read_prim (struct serial *scb, size_t count)
 {
-  return recv (scb->fd, scb->buf, count, 0);
+  int result = recv (scb->fd, scb->buf, count, 0);
+  if (result == -1 && errno != EINTR)
+    perror_with_name ("error while reading");
+  return result;
 }
 
 static int

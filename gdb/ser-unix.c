@@ -574,7 +574,10 @@ when debugging using remote targets."),
 int
 ser_unix_read_prim (struct serial *scb, size_t count)
 {
-  return read (scb->fd, scb->buf, count);
+  int result = recv (scb->fd, scb->buf, count, 0);
+  if (result == -1 && errno != EINTR)
+    perror_with_name ("error while reading");
+  return result;
 }
 
 int

@@ -409,7 +409,10 @@ net_read_prim (struct serial *scb, size_t count)
   /* Need to cast to silence -Wpointer-sign on MinGW, as Winsock's
      'recv' takes 'char *' as second argument, while 'scb->buf' is
      'unsigned char *'.  */
-  return recv (scb->fd, (char *) scb->buf, count, 0);
+  int result = recv (scb->fd, (char *) scb->buf, count, 0);
+  if (result == -1 && errno != EINTR)
+    perror_with_name ("error while reading");
+  return result;
 }
 
 int
