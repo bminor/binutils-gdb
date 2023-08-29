@@ -22,6 +22,12 @@
 /* Always include the header for the cpu bit defines.  */
 #include "x86-gcc-cpuid.h"
 
+#ifndef __cplusplus
+/* This header file is also used in C code for some test-cases, so define
+   nullptr in C terms to avoid a compilation error.  */
+#define nullptr ((void *) 0)
+#endif
+
 #if defined(__i386__) || defined(__x86_64__)
 
 /* Return cpuid data for requested cpuid level, as found in returned
@@ -91,5 +97,11 @@ x86_cpuid_count (unsigned int __level, unsigned int __sublevel,
 }
 
 #endif /* i386 && x86_64 */
+
+#ifndef __cplusplus
+/* Avoid leaking this local definition beyond the scope of this header
+   file.  */
+#undef nullptr
+#endif
 
 #endif /* NAT_X86_CPUID_H */
