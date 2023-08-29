@@ -2397,10 +2397,9 @@ array_operation::evaluate (struct type *expect_type,
 			   struct expression *exp,
 			   enum noside noside)
 {
-  int tem2 = std::get<0> (m_storage);
-  int tem3 = std::get<1> (m_storage);
+  const int provided_low_bound = std::get<0> (m_storage);
   const std::vector<operation_up> &in_args = std::get<2> (m_storage);
-  const int nargs = tem3 - tem2 + 1;
+  const int nargs = std::get<1> (m_storage) - provided_low_bound + 1;
   struct type *type = expect_type ? check_typedef (expect_type) : nullptr;
 
   if (expect_type != nullptr
@@ -2515,7 +2514,7 @@ array_operation::evaluate (struct type *expect_type,
 	 objects.  */
       argvec[tem] = in_args[tem]->evaluate_with_coercion (exp, noside);
     }
-  return value_array (tem2, argvec);
+  return value_array (provided_low_bound, argvec);
 }
 
 value *
