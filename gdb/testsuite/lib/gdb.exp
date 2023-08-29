@@ -9936,6 +9936,8 @@ gdb_caching_proc host_locales { } {
 
     # Normalize items to lower-case.
     set l [lmap v $l { string tolower $v }]
+    # Normalize items to without dash.
+    set l [lmap v $l { string map { "-" "" } $v }]
 
     return $l
 }
