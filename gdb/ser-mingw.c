@@ -226,18 +226,19 @@ ser_windows_setparity (struct serial *scb, int parity)
   return (SetCommState (h, &state) != 0) ? 0 : -1;
 }
 
-static int
+static void
 ser_windows_setbaudrate (struct serial *scb, int rate)
 {
   HANDLE h = (HANDLE) _get_osfhandle (scb->fd);
   DCB state;
 
   if (GetCommState (h, &state) == 0)
-    return -1;
+    throw_winerror_with_name ("call to GetCommState failed", GetLastError ());
 
   state.BaudRate = rate;
 
-  return (SetCommState (h, &state) != 0) ? 0 : -1;
+  if (SetCommState (h, &state) == 0)
+    throw_winerror_with_name ("call to SetCommState failed", GetLastError ());
 }
 
 static void

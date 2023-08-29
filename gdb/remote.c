@@ -6082,7 +6082,11 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
 
   if (baud_rate != -1)
     {
-      if (serial_setbaudrate (rs->remote_desc, baud_rate))
+      try
+	{
+	  serial_setbaudrate (rs->remote_desc, baud_rate);
+	}
+      catch (const gdb_exception_error &)
 	{
 	  /* The requested speed could not be set.  Error out to
 	     top level after closing remote_desc.  Take care to
@@ -6090,7 +6094,7 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
 	     more than once.  */
 	  serial_close (rs->remote_desc);
 	  rs->remote_desc = NULL;
-	  perror_with_name (name);
+	  throw;
 	}
     }
 

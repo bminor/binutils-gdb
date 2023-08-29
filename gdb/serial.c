@@ -512,10 +512,10 @@ serial_print_tty_state (struct serial *scb,
   scb->ops->print_tty_state (scb, ttystate, stream);
 }
 
-int
+void
 serial_setbaudrate (struct serial *scb, int rate)
 {
-  return scb->ops->setbaudrate (scb, rate);
+  scb->ops->setbaudrate (scb, rate);
 }
 
 int

@@ -561,10 +561,10 @@ ser_base_print_tty_state (struct serial *scb,
   return;
 }
 
-int
+void
 ser_base_setbaudrate (struct serial *scb, int rate)
 {
-  return 0;			/* Never fails!  */
+  /* Never fails!  */
 }
 
 int

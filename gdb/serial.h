@@ -177,10 +177,10 @@ extern void serial_print_tty_state (struct serial *scb,
 				    serial_ttystate ttystate,
 				    struct ui_file *);
 
-/* Set the baudrate to the decimal value supplied.  Returns 0 for
-   success, -1 for failure.  */
+/* Set the baudrate to the decimal value supplied.  Throws exception
+   on error.  */
 
-extern int serial_setbaudrate (struct serial *scb, int rate);
+extern void serial_setbaudrate (struct serial *scb, int rate);
 
 /* Set the number of stop bits to the value specified.  Returns 0 for
    success, -1 for failure.  */
@@ -275,7 +275,7 @@ struct serial_ops
     int (*set_tty_state) (struct serial *, serial_ttystate);
     void (*print_tty_state) (struct serial *, serial_ttystate,
 			     struct ui_file *);
-    int (*setbaudrate) (struct serial *, int rate);
+    void (*setbaudrate) (struct serial *, int rate);
     int (*setstopbits) (struct serial *, int num);
     /* Set the value PARITY as parity setting for serial object.
        Return 0 in the case of success.  */
