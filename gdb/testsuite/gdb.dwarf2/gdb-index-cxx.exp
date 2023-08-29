@@ -17,8 +17,12 @@ load_lib dwarf.exp
 
 standard_testfile index.cc
 
+set opts {}
+lappend opts debug
+lappend opts additional_flags=-std=c++11
+
 if {[prepare_for_testing "failed to prepare" "${testfile}" \
-	 [list ${srcfile}]]} {
+	 [list ${srcfile}] $opts]} {
     return -1
 }
 

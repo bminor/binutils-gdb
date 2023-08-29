@@ -30,7 +30,7 @@ standard_testfile mixed-lang-stack.c mixed-lang-stack.cpp mixed-lang-stack.f90
 if {[prepare_for_testing_full "failed to prepare" \
 	 [list ${binfile} {debug f90 additional_flags=-lstdc++} \
 	      $srcfile {debug} \
-	      $srcfile2 {debug c++} \
+	      $srcfile2 {debug c++ additional_flags=-std=c++11} \
 	      $srcfile3 {debug f90}]]} {
     return -1
 }

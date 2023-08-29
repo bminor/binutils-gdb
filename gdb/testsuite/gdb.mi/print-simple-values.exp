@@ -25,7 +25,12 @@ set MIFLAGS "-i=mi"
 
 standard_testfile .cc
 
-if [build_executable "failed to prepare" $testfile $srcfile {debug c++}] {
+set opts {}
+lappend opts debug
+lappend opts c++
+lappend opts additional_flags=-std=c++11
+
+if [build_executable "failed to prepare" $testfile $srcfile $opts] {
     return -1
 }
 
