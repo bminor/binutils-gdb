@@ -20,6 +20,7 @@
 
 
 require {is_any_target i?86-*-* x86_64-*-*}
+require {have_compile_flag -mavx512f}
 
 standard_testfile
 
