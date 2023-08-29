@@ -34,6 +34,7 @@
 #include "symfile.h"
 #include "block.h"
 #include "filenames.h"
+#include "cli/cli-style.h"
 
 /* We need to save a pointer to the real symbol functions.
    Plus, the debug versions are malloc'd because we have to NULL out the
@@ -542,16 +543,18 @@ objfile::require_partial_symbols (bool verbose)
 	    {
 	      if (verbose && !printed)
 		{
-		  gdb_printf (_("Reading symbols from %s...\n"),
-			      objfile_name (this));
+		  gdb_printf (_("Reading symbols from %ps...\n"),
+			      styled_string (file_name_style.style (),
+					     objfile_name (this)));
 		  printed = true;
 		}
 	      iter->read_partial_symbols (this);
 	    }
 	}
       if (printed && !objfile_has_symbols (this))
-	gdb_printf (_("(No debugging symbols found in %s)\n"),
-		    objfile_name (this));
+	gdb_printf (_("(No debugging symbols found in %ps)\n"),
+		    styled_string (file_name_style.style (),
+				   objfile_name (this)));
     }
 }
 

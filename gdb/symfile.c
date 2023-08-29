@@ -2322,8 +2322,8 @@ add_symbol_file_command (const char *args, int from_tty)
      statements because hex_string returns a local static
      string.  */
 
-  gdb_printf (_("add symbol table from file \"%s\""),
-	      filename.get ());
+  gdb_printf (_("add symbol table from file \"%ps\""),
+	      styled_string (file_name_style.style (), filename.get ()));
   section_addr_info section_addrs;
   std::vector<sect_opt>::const_iterator it = sect_opts.begin ();
   if (!seen_addr)
@@ -2369,8 +2369,8 @@ add_symbol_file_command (const char *args, int from_tty)
   objf = symbol_file_add (filename.get (), add_flags, &section_addrs,
 			  flags);
   if (!objfile_has_symbols (objf) && objf->per_bfd->minimal_symbol_count <= 0)
-    warning (_("newly-added symbol file \"%s\" does not provide any symbols"),
-	     filename.get ());
+    warning (_("newly-added symbol file \"%ps\" does not provide any symbols"),
+	     styled_string (file_name_style.style (), filename.get ()));
 
   if (seen_offset)
     set_objfile_default_section_offset (objf, section_addrs, offset);
@@ -2494,8 +2494,9 @@ reread_symbols (int from_tty)
       new_modtime = new_statbuf.st_mtime;
       if (new_modtime != objfile->mtime)
 	{
-	  gdb_printf (_("`%s' has changed; re-reading symbols.\n"),
-		      objfile_name (objfile));
+	  gdb_printf (_("`%ps' has changed; re-reading symbols.\n"),
+		      styled_string (file_name_style.style (),
+				     objfile_name (objfile)));
 
 	  /* There are various functions like symbol_file_add,
 	     symfile_bfd_open, syms_from_objfile, etc., which might
