@@ -2489,9 +2489,9 @@ doc/chew.stamp: $(srcdir)/doc/chew.c doc/$(am__dirstamp)
 
 .PRECIOUS: doc/%.stamp
 doc/%.texi: doc/%.stamp ; @true
-doc/%.stamp: $(srcdir)/%.h $(srcdir)/doc/doc.str $(MKDOC) doc/$(am__dirstamp)
-	$(AM_V_GEN)$(REGEN_TEXI)
 doc/%.stamp: $(srcdir)/%.c $(srcdir)/doc/doc.str $(MKDOC) doc/$(am__dirstamp)
+	$(AM_V_GEN)$(REGEN_TEXI)
+doc/%.stamp: $(srcdir)/%.h $(srcdir)/doc/doc.str $(MKDOC) doc/$(am__dirstamp)
 	$(AM_V_GEN)$(REGEN_TEXI)
 
 # Avoid the %.stamp generating a builddir/bfd.texi that overrides the

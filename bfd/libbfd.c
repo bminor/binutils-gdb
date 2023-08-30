@@ -728,6 +728,13 @@ SYNOPSIS
 	void bfd_putl16 (bfd_vma, void *);
 	uint64_t bfd_get_bits (const void *, int, bool);
 	void bfd_put_bits (uint64_t, void *, int, bool);
+
+DESCRIPTION
+	Read and write integers in a particular endian order.  getb
+	and putb functions handle big-endian, getl and putl handle
+	little-endian.  bfd_get_bits and bfd_put_bits specify
+	big-endian by passing TRUE in the last parameter,
+	little-endian by passing FALSE.
 */
 
 bfd_vma

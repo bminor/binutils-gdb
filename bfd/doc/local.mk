@@ -111,9 +111,9 @@ REGEN_TEXI = \
 
 .PRECIOUS: %D%/%.stamp
 %D%/%.texi: %D%/%.stamp ; @true
-%D%/%.stamp: $(srcdir)/%.h $(srcdir)/%D%/doc.str $(MKDOC) %D%/$(am__dirstamp)
-	$(AM_V_GEN)$(REGEN_TEXI)
 %D%/%.stamp: $(srcdir)/%.c $(srcdir)/%D%/doc.str $(MKDOC) %D%/$(am__dirstamp)
+	$(AM_V_GEN)$(REGEN_TEXI)
+%D%/%.stamp: $(srcdir)/%.h $(srcdir)/%D%/doc.str $(MKDOC) %D%/$(am__dirstamp)
 	$(AM_V_GEN)$(REGEN_TEXI)
 
 # Avoid the %.stamp generating a builddir/bfd.texi that overrides the
