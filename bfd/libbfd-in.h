@@ -39,10 +39,6 @@
 extern "C" {
 #endif
 
-/* If you want to read and write large blocks, you might want to do it
-   in quanta of this amount */
-#define DEFAULT_BUFFERSIZE 8192
-
 /* Set a tdata field.  Can't use the other macros for this, since they
    do casts, and casting to the left of assignment isn't portable.  */
 #define set_tdata(bfd, v) ((bfd)->tdata.any = (v))

@@ -2261,7 +2261,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
 	  if (amt == VMS_BLOCK_SIZE - sz)
 	    {
 	      /* Copy the remaining.  */
-	      char buffer[DEFAULT_BUFFERSIZE];
+	      char buffer[8 * 1024];
 
 	      while (1)
 		{

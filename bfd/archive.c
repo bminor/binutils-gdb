@@ -2223,7 +2223,7 @@ _bfd_write_archive_contents (bfd *arch)
 	}
     }
 
-#define AR_WRITE_BUFFERSIZE (DEFAULT_BUFFERSIZE * 1024)
+#define AR_WRITE_BUFFERSIZE (8 * 1024 * 1024)
 
   /* FIXME: Find a way to test link_info.reduce_memory_overheads
      and change the buffer size.  */

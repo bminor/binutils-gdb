@@ -2019,20 +2019,20 @@ static bool
 do_copy (bfd *out_bfd, bfd *in_bfd)
 {
   bfd_size_type remaining;
-  bfd_byte buffer[DEFAULT_BUFFERSIZE];
+  bfd_byte buffer[8 * 1024];
 
   if (bfd_seek (in_bfd, 0, SEEK_SET) != 0)
     return false;
 
   remaining = arelt_size (in_bfd);
 
-  while (remaining >= DEFAULT_BUFFERSIZE)
+  while (remaining >= sizeof (buffer))
     {
-      if (bfd_read (buffer, DEFAULT_BUFFERSIZE, in_bfd) != DEFAULT_BUFFERSIZE
-	  || bfd_write (buffer, DEFAULT_BUFFERSIZE, out_bfd) != DEFAULT_BUFFERSIZE)
+      if (bfd_read (buffer, sizeof (buffer), in_bfd) != sizeof (buffer)
+	  || bfd_write (buffer, sizeof (buffer), out_bfd) != sizeof (buffer))
 	return false;
 
-      remaining -= DEFAULT_BUFFERSIZE;
+      remaining -= sizeof (buffer);
     }
 
   if (remaining)
