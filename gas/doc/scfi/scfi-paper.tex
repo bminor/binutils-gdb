@@ -1,0 +1,1012 @@
+\documentclass{article} \usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\usepackage[newfloat]{minted}
+\usepackage{xcolor}
+\usepackage{array}
+
+\title{Synthesizing Call Frame Information for hand-written assembly}
+\date{\today \\ V2}
+
+\author{Bhagat, Indu\\ \texttt{indu.bhagat@oracle.com} }
+
+\begin{document}
+
+\maketitle
+
+\abstract Call Frame Information (or CFI) is the information that accompanies
+executable ELF object code and is used to perform virtual stack unwinding or
+stack walking at any point of the execution of that code.  There are several
+formats available to encode CFI data in ELF files; DWARF Frame, EH Frame and
+SFrame are some of them.
+
+Compilers are able to generate the CFI annotations corresponding to the code
+they compile, completely and accurately.  However, there are scenarios where
+assembly language programs are written and maintained by hand; these programs
+can, occasionally, be large.  In hand-written assembly language
+programs, the CFI pseudo-ops are either added by hand or, what is more usual,
+completely absent. Annotating assembly language programs with CFI directives
+is an error-prone task, and maintaining them as the code evolves is time
+consuming.  Some applications like the Linux kernel avoid the problem of
+maintaining CFI annotations by using their own in-house tools to post-process
+compiled object codes: the call frame information (for stack tracing) is
+reverse-engineered from the binary.  These reverse-engineering solutions use
+knowledge about the ISA and the ABI to infer the stack frame structure from the
+instructions.  Although such a solution involving reverse-engineering of
+binaries works in practice\footnote{does have issues deciphering some control
+flow} for at least one architecture, it is neither scalable nor easy to
+maintain.
+
+In this paper, we propose to add support to the GNU assembler so that it can
+synthesize CFI information for the programs it assembles, even in the absence
+of CFI directives in the assembly sources.  We have started to implement this
+functionality in a prototype and it is already looking very promising. A very
+central concept of this proposal and implementation is that the GNU assembler
+now "understands" some of the machine instructions it assembles.  Before, the
+common assembler code would only see fragments provided by the backends; now,
+the backends can optionally provide additional information in the form of
+generic instructions; this new infrastructure can be used as a foundation of
+other interesting features in the assembler, such as certain optimizations,
+code property validation and program verification.
+
+\section{Introduction to DWARF CFI}
+
+The DWARF Call Frame Information, defined in the DWARF debugging standard
+\cite{DWARF5}, is typically used to convey stack unwind
+information, per PC, for the generated programs.  This information is used by
+debuggers, profilers, and many other program analysis tools to generate
+backtraces and also state recovery.
+
+Conceptually, DWARF CFI specifies how to recover the return address and
+callee-saved registers at each PC in a given function.  When
+available, the DWARF CFI information can be found in dedicated sections (e.g.
+\texttt{.debug\_frame} or \texttt{.eh\_frame}) in the object files.
+
+Figure \ref{dwarfframe} shows an excerpt from an \texttt{.eh\_frame} section.
+The excerpt corresponds to the DWARF CFI information for one function in the
+binary.  A simple \texttt{objdump -Wf}\footnote{On x86\_64} on your favorite
+binary will show the dump of the DWARF CFI contained in the \texttt{.eh\_frame}
+section.
+
+\begin{figure}
+\begin{minted}[frame=single,fontsize=\footnotesize]{nasm}
+  0000921c 0000000000000020 00009220 FDE cie=00000000 pc=000000000046451a..0000000000464559
+    DW_CFA_advance_loc: 5 to 000000000046451f
+    DW_CFA_def_cfa_offset: 16
+    DW_CFA_offset: r6 (rbp) at cfa-16
+    DW_CFA_advance_loc: 3 to 0000000000464522
+    DW_CFA_def_cfa_register: r6 (rbp)
+    DW_CFA_advance_loc: 3 to 0000000000464525
+    DW_CFA_offset: r12 (r12) at cfa-24
+    DW_CFA_offset: r3 (rbx) at cfa-32
+    DW_CFA_advance_loc: 51 to 0000000000464558
+    DW_CFA_def_cfa: r7 (rsp) ofs 8
+    DW_CFA_nop
+    DW_CFA_nop
+  \end{minted}
+  \caption{DWARF opcodes in an FDE in a sample \texttt{.eh\_frame} section}
+  \label{dwarfframe}
+\end{figure}
+
+The \texttt{DW\_CFA\_*} opcodes, in Figure \ref{dwarfframe}, are the DWARF CFI
+opcodes which when executed, help the unwinder or stack tracer recover the
+required register: \texttt{CFA} (Canonical Frame Address), \texttt{ra} (Return
+Address), or any of the callee-saved registers.  In aggregate (interpreted)
+form, the above bytecodes generate information equivalent to the following
+(dump generated using \texttt{objdump -WF}), as shown in Figure
+\ref{interpframe}. For deeper understanding of the DWARF CFI format, the
+readers are encouraged to peruse the DWARF debugging standard
+specification\cite{DWARF5}.
+
+The GNU assembler defines a set of CFI directives \cite{CFIPSEUDO}, which are
+used by the compiler to convey the call frame information.  Figure
+\ref{gnuascfidirectives} shows a simple example with x86\_64 assembly and its
+associated GNU AS CFI directives. With respect to support in the GNU toolchain,
+\texttt{gcc} is capable of generating accurate CFI annotations\footnote{The
+keyword 'CFI annotations' is used interchangeably in this paper to imply
+'GNU AS CFI directives'} for all code written in high-level language.
+The GNU assembler consumes these CFI annotations to then generate
+stack unwind information in the format chosen by the user (EH Frame, Debug Frame etc.).
+
+\begin{figure}
+\begin{minted}[frame=single,fontsize=\footnotesize]{nasm}
+  0000921c 0000000000000020 00009220 FDE cie=00000000 pc=000000000046451a..0000000000464559
+     LOC           CFA      rbx   rbp   r12   ra
+  000000000046451a rsp+8    u     u     u     c-8
+  000000000046451f rsp+16   u     c-16  u     c-8
+  0000000000464522 rbp+16   u     c-16  u     c-8
+  0000000000464525 rbp+16   c-32  c-16  c-24  c-8
+  0000000000464558 rsp+8    c-32  c-16  c-24  c-8
+  \end{minted}
+  \caption{Interpreted DWARF CFI from the FDE in Figure \ref{dwarfframe}}
+  \label{interpframe}
+\end{figure}
+
+\begin{figure}
+\begin{minted}[frame=single,fontsize=\footnotesize]{nasm}
+        .text
+        .globl  foo
+        .type   foo, @function
+foo:
+        .cfi_startproc
+        pushq   %rbp
+        .cfi_def_cfa_offset 16
+        .cfi_offset 6, -16
+        [...]
+        popq    %rbp
+        .cfi_def_cfa_offset 8
+        .cfi_restore 6
+        ret
+        .cfi_endproc
+.LFE0:
+        .size   foo, .-foo
+  \end{minted}
+  \caption{Using GNU AS CFI directives on x86\_64}
+  \label{gnuascfidirectives}
+\end{figure}
+
+These CFI pseudo-ops are also used by assembly-code programmers to convey stack
+unwind information for their hand-written asm code.  Manually adding CFI
+annotations to assembly programs needs additional expertise; human-errors are
+possible and indeed occur more often than one may like.  These errors, if
+present at the time of virtual stack unwind, lead to unfavorable outcomes:
+incorrect stacktraces, program state corruption or even a crash at an
+inopportune time.
+
+The motivation behind this work is to enhance the capabilities of the GNU
+Toolchain so that it can synthesize CFI for hand-written assembly and
+hence, alleviate the user of the task of writing CFI annotations by hand.
+We refer to this capability of Synthesizing CFI as \textbf{SCFI} in the
+rest of the document.
+
+\section{Synthesis of CFI (SCFI) for assembly}
+To design a solution for synthesis of CFI for assembly, one of the key
+question that needs to be resolved is:  
+
+\begin{center} \emph{\texttt{Q1:} Is it possible to synthesize CFI for any
+arbitrary asm out there?} \end{center}
+
+For this particular question, despite not being exactly the same, it is useful
+to think about the synthesis of CFI as the synthesis of the corresponding CFI
+directives, simply for sake of understanding. In other words, the question is:
+
+\textit{Given an assembly program, if the task is to "complete" it with CFI
+pseudo-ops whose evaluation would result in correct CFI for  the
+corresponding code, can we generate all the necessary CFI psuedo-ops that
+the user may have had to manually specify ?}
+
+Now, in essence, to automatically synthesize CFI, we have the following two
+sources of information available to us:
+
+\begin{enumerate}
+
+\item The assembly code
+\item Knowledge of the ABI and calling convention
+
+\end{enumerate}
+
+In order to answer this question, first lets note that there indeed exist some
+\texttt{.cfi\_*} directives which \emph{cannot} be synthesized by the assembler
+using only the information available in these sources.  This is because the
+above two sources of information are not sufficient in some cases.
+
+\subsection{Non-synthesizable GAS CFI directives}
+\label{nonsynthcfi}
+According to our understanding as of today, a complete list of CFI directives
+that we cannot synthesize by looking at the hand-written asm are as follows:
+
+\begin{enumerate}
+
+\item \texttt{.cfi\_signal\_frame} : This directive marks the current function
+as signal trampoline.
+
+\item \texttt{.cfi\_sections}: This directive is used to specify which
+section(s) should the CFI information be emitted to: \texttt{.eh\_frame}
+section, \texttt{.debug\_frame} section and/or \texttt{.sframe} section, etc.
+
+The default in the GNU assembler is \texttt{'.cfi\_sections .eh\_frame'} (if no
+\texttt{.cfi\_sections} is specified). Further, for generating the
+\texttt{.sframe} section, GAS also supports a command line option
+\texttt{--gsframe}.  Adding new command line options, like that for
+\texttt{.sframe} may provide a way to get user input, but it needs some careful
+thought: A user may want to specify a list of sections, like
+\texttt{'.cfi\_sections .eh\_frame, .debug\_frame'}.  Or, the user may choose
+\texttt{'.cfi\_sections .eh\_frame\_entry'} which is to generate Compact EH
+Frame.  Adding command line options does not seem scalable here.
+ 
+\item \texttt{.cfi\_label}:  This CFI directive allows to identify CFI data
+explicitly.   This allows alteration of stack unwind data, if needed, when the
+original code sequence in the function needs to be patched for some reason.
+See the original commit for more information \cite{CFILABELCOMMIT}.
+\texttt{glibc} has some uses of \texttt{.cfi\_label}, e.g., in
+sysdeps/arc/start.S and sysdeps/unix/sysv/linux/riscv/clone.S.
+
+\item \texttt{Others}: There are other CFI directives which also fall in the
+category of non-synthesizable CFI directives.  These include
+\texttt{.cfi\_personality}, \texttt{.cfi\_personality\_id}, \texttt{.cfi\_lsda}
+and \texttt{.cfi\_inline\_lsda}.  Although many of these directives are used
+for Compact EH Frame format, more careful thought is needed to holistically
+continue to support the existing GAS functionality.
+
+\end{enumerate}
+
+PS: On the \texttt{aarch64} side, there are special CFI directives for managing
+code using Pointer Authentication. E.g.,
+     \texttt{.cfi\_b\_key\_frame}\cite{CFIPSEUDOAARCH64}.  The
+latter \emph{should} be synthesizable by looking at whether it is the
+\texttt{paciasp}, or \texttt{pacibsp} instruction.
+
+\paragraph{Current Status:} The CFI directives mentioned in the
+above-list cannot be generated by the SCFI machinery as they need user-input.
+This has implications on the overall offering: note that not
+handling the user-specified \texttt{.cfi\_sections} implies that the proposed
+implementation will emit CFI to the default section -
+\texttt{.eh\_frame}.  Similarly, the other implications are easy to
+extrapolate.
+
+Adding a command line with good defaults and the appropriate arguments may help
+manage some of the above-mentioned directives, but clearly not all.  Some of
+the directives apply at a per-function granularity, so a command line option
+may not work out.
+
+\paragraph{Summary:} In summary, there indeed are some CFI directives which cannot be
+auto-generated; the user is the only entity that can specify them.  In the
+current proposal (and it's design and implementation), these CFI directives have
+been set aside for now.  They need to be accommodated after some more
+discussion.
+
+\subsection{High-level goal of the proposal}
+With that said, it is important now to define the goal at this point:
+
+\begin{center}
+\emph{Generating CFI for all compiler-generated asm is NOT the goal;}
+
+\emph{Generating CFI for most patterns found in practice in hand-written asm is the
+goal.}
+\end{center}
+
+When it comes to code generation, a compiler has more context than any other
+component in the toolchain.  The compiler may generate a variety of complex
+code patterns together with the accompanying CFI information accurately as it
+has the full context of the user-defined functions. Some compiler-generated
+asm, e.g., the usage of Dynamic Realigned Argument Pointer (DRAP) to realign
+stack may be tricky to comprehend for the assembler.  There are other code
+patterns like indirect jumps, jump tables, etc. (more on this in later
+sections) which cause difficulty for SCFI.  Hence, unless there is a
+requirement to handle compiler-generated code, it appears both non-trivial and
+not very practical to automatically generate CFI for compiler-generated code.
+
+In this proposal, we focus on synthesizing CFI for most hand-written asm.
+As we present the code examples in further sections, one may see that indeed
+there are some "restrictions" \footnote{mostly practical restrictions.  We aim
+to make the implementation as programmer-friendly as possible.} around the
+hand-written assembly so that GNU assembler can synthesize CFI.
+
+\subsection{New comand line option: \texttt{--scfi[=all,none]}}
+
+We propose to add a new command line option \texttt{--scfi[=all,none]} to the
+GNU assembler.  The default argument is \texttt{all}.  Hence, \texttt{--scfi}
+or \texttt{--scfi=all} instructs the assembler to synthesize CFI.  The CFI is
+then emitted in the sections corresponding to whatever format are specified when
+calling the assembler: \texttt{.eh\_frame} (default), \texttt{.sframe} (when
+invoked with \texttt{--gsframe}) etc.
+
+Moving forward, the assembler may want to support three operation modes with
+respect CFI synthesis:
+
+\begin{enumerate}
+
+\item \texttt{--scfi=none}: Do not synthesize any CFI.
+\item \texttt{--scfi=all}: Synthesize CFI info for the whole assembly unit
+(i.e. the .s file).  All user-provided CFI directives are ignored by GAS with
+this command line option \footnote{This needs more discussion as we still need
+a way to deal with those \texttt{.cfi\_*} directives which cannot be
+auto-generated. See section \ref{nonsynthcfi}.}.
+\item \texttt{--scfi=inline}: Synthesize CFI info only for inline assembly
+generated by the compiler.
+
+\paragraph{DISCUSS:} We should support a distinct option of
+\texttt{--scfi=inline} for inline asm, where the GNU assembler consumes (and
+not ignores) the compiler generated CFI for the code surrounding the inline
+asm.  In that mode, the SCFI implementation should process these
+compiler-generated CFI directives (instead of synthesizing them) in order to
+establish the right CFI unwind state before the inline asm block.
+
+\end{enumerate}
+
+Note that the assembler should be able to determine which parts of the assembly code
+is inlined by looking for comments generated by the compilers:
+
+\begin{verbatim}
+#APP
+[...]
+#NO\_APP
+\end{verbatim}
+
+\subsection{Background}
+\label{Background}
+In this section, we will take a look at some assembly language sequences along
+with their respective accompanying CFI assembler directives.  This should be
+helpful to then lay the background necessary to understand what is needed for
+synthesizing CFI automatically.  Most of the assembly code stubs shown in
+this document use \texttt{x86\_64} insns, but the concepts should be applicable
+equally well to other popular ISAs.
+
+\subsubsection{Knowing the stack usage}
+Clearly, knowing the stack usage is \emph{essential} for knowing the location
+of the register saves and for possibly validating the register restores
+\footnote{of the callee-saved registers}.  Walking through Figure
+\ref{calleesavedexample} will help understanding this requirement.
+
+Note how in Figure \ref{calleesavedexample}, the CFA at all times is
+\texttt{REG\_SP}-based.  This means, the stack size used by the function must be
+known at \emph{all times} to synthesize CFA location.  The example is what
+\textbf{static stack usage} pattern looks like.
+
+\begin{figure}
+\caption{Example to showcase CFI for callee-saved registers and static stack
+    usage}
+\label{calleesavedexample}
+\begin{minted}[linenos,frame=single,fontsize=\footnotesize]{nasm}
+	.text
+	.globl	foo
+	.type	foo, @function
+foo:
+	.cfi_startproc                  ## CFA = rsp -8
+	pushq	%r12
+	.cfi_def_cfa_offset 16          ## CFA = rsp -16
+	.cfi_offset 12, -16
+	pushq	%r13
+	.cfi_def_cfa_offset 24          ## CFA = rsp - 24
+	.cfi_offset 13, -24
+# The function may use callee-saved registers for its use, and may even
+# choose to spill them to stack if necessary.
+	addq    %rax, %r13
+	subq 	$8, %r13
+# These two pushq's of callee-saved regs must NOT generate
+# .cfi_offset.
+	pushq	%r13
+	.cfi_def_cfa_offset 32         ## CFA = rsp - 32
+	pushq	%rax
+	.cfi_def_cfa_offset 40         ## CFA = rsp = 40
+# Function manipulates %rsp to get rid of local stack usage.
+	addq	$16, %rsp
+	.cfi_def_cfa_offset 24        ## CFA = rsp - 24
+# The SCFI machinery must keep track of where the callee-saved registers
+# are on the stack.  It should generate a restore operation if the stack
+# offsets match.
+	popq	%r13
+	.cfi_restore 13
+	.cfi_def_cfa_offset 16        ## CFA = rsp - 16
+	popq	%r12
+	.cfi_restore 12
+	.cfi_def_cfa_offset 8        ## CFA = rsp - 8
+	ret
+	.cfi_endproc
+.LFE0:
+	.size	foo, .-foo
+\end{minted}
+\end{figure}
+
+Of course, some functions will need to perform \textbf{dynamic stack
+allocation}. In the case of programs written in a high-level language, the
+compiler will systematically fall back on the usage of frame-pointer
+register for tracking the CFA.  For the purpose of synthesizing the CFI, we
+assume that asm programmers will also follow a similar style.  Please see Figure
+\ref{dynamicstackusage} to help understand this code pattern.
+
+\begin{figure}
+\caption{Dynamic stack usage using frame-pointer register for tracking CFA}
+\label{dynamicstackusage}
+\begin{minted}[linenos,frame=single, fontsize=\footnotesize]{nasm}
+# Example to showcase switching between sp/fp based CFA.
+	.text
+	.globl	foo
+	.type	foo, @function
+foo:
+	.cfi_startproc               ## CFA = rsp - 8
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16           ## CFA = rsp - 16
+	movq    %rsp, %rbp
+	.cfi_def_cfa_register 6      ## CFA = rbp - 16
+# Begin %rsp manipulation for local stack usage (Dummy code)
+	addq    %rax, %rdi
+        movq    %rsp, %r12
+        addq    $4, %rbx
+        andq    $-16, %rax
+        subq    %rax, %rsp
+        movq    %rsp, %rdi
+        call    bar
+        movq    %r12, %rsp
+# End %rsp manipulation for local stack usage
+	mov	%rbp, %rsp
+	.cfi_def_cfa_register 7       ## CFA = rsp - 16
+	pop	%rbp
+	.cfi_restore 6
+	.cfi_def_cfa_offset 8         ## CFA = rsp - 8
+	ret
+	.cfi_endproc
+.LFE0:
+	.size	foo, .-foo
+\end{minted}
+\end{figure}
+
+\subsubsection{Identifying the \texttt{CFA}}
+\label{identifyingtheCFA}
+As shown in the example in Figure \ref{calleesavedexample}, when the function
+performs static stack allocation and when the \texttt{CFA} is defined as an
+offset to the \texttt{REG\_SP}, it is important that \texttt{REG\_SP}, a.k.a.,
+the stack usage is precisely known at all times.  Similarly, for the
+case of dynamic stack usage, at all times where the function uses
+\texttt{REG\_FP} based \texttt{CFA}, the precise changes to the value of
+the \texttt{REG\_FP} must be known.
+
+In other words, the precise changes to the register used as the base for
+identifying the \texttt{CFA}, referred to as the \texttt{CFA base register} in
+the rest of the document, must be known.  Now, the DWARF standard\cite{DWARF5} defines the
+\texttt{CFA} as follows:
+
+\emph{"The CFA column defines the rule which computes the Canonical Frame Address
+value; it may be either a register and a signed offset that are added together, or a
+DWARF expression that is evaluated."}
+
+Hence, for compiler-generated code, the CFA can even be a DWARF expression. For
+the pupose of SCFI, however, it makes sense to limit the \texttt{CFA} tracking to be
+register based only.  Hence,
+
+\begin{center}
+
+\emph{Rule 1: At all times in a function, the CFA value must be a register and a signed
+offset that are added together.}
+
+\end{center}
+
+Further, whether it is static or dynamic stack usage, it makes sense to limit
+the base-register for CFA tracking to two registers, without limiting the
+usefulness of the proposal.  Hence, for the purpose of synthesizing CFI,
+
+\begin{center}
+\emph{Rule 2: The SCFI machinery in GAS will only allow for two \texttt{CFA} base registers:}
+
+\begin{enumerate}
+\item \emph{The stack-pointer register (REG\_SP) itself, and}
+\item \emph{The frame-pointer register (REG\_FP)}
+\end{enumerate}
+
+\end{center}
+
+This implies that those functions using dynamic realigned argument pointer
+(DRAP) to realign stack are not currently supported.  More on DRAP and
+synthesizing CFI for functions which dynamically realign the stack later.
+That said, including the basic support for DRAP should be doable while adhering
+to the above-mentioned rules for the rest of the assembly code.
+
+\subsubsection{Control-flow matters}
+\label{sectioncfmatters}
+Some functions may have multiple points of return.  Each point of return may
+have its distinct epilogue.  To correctly synthesize CFI for such asm
+functions, it is important to take into account the control flow inside the
+function.
+
+PS: The complication here is that it \emph{may not} be possible to generate a
+precise control flow graph from assembly.  There is no way for us to know the
+branch targets of indirect jumps.
+
+\begin{figure}
+\caption{Control flow matters. Function with two return paths}
+\label{funcwithtworets}
+\begin{minted}[linenos,frame=single,fontsize=\footnotesize]{nasm}
+	.globl	main
+	.type	main, @function
+main:
+	.cfi_startproc            ## CFA = rsp - 8
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	.cfi_offset 3, -16        ## CFA = rsp - 16
+	movl	$.LC0, %esi
+	movl	$.LC1, %edi
+	call	fopen
+# Two return paths for
+# return ferror (f) || fclose (f) != 0;
+	movq	%rax, %rdi
+	movq	%rax, %rbx
+	call	ferror
+	movl	%eax, %edx
+	testl	%edx, %edx
+	je	.L7
+# Exit BB 1
+	popq	%rbx                 ## CFA = rsp - 8
+        .cfi_remember_state
+	.cfi_def_cfa_offset 8
+	.cfi_restore 3
+	ret
+.L7:
+# Exit BB 2
+	.cfi_restore_state           ## CFA = rsp - 16
+	movq	%rbx, %rdi
+	call	fclose
+	popq	%rbx                 ## CFA = rsp - 8
+	.cfi_def_cfa_offset 8
+	.cfi_restore 3
+	testl	%eax, %eax
+	setne	%al
+	movzbl	%al, %eax
+	ret
+	.cfi_endproc
+	.size	main, .-main
+\end{minted}
+\end{figure}
+
+Figure \ref{funcwithtworets} shows an example of a function with two possible
+return paths.  The compiler generates a set of \texttt{.cfi\_remember\_state}
+and \texttt{.cfi\_restore\_state} to tackle the problem of synthesizing CFI
+opcodes in wake of change of flow instructions, especially conditional
+branches.  The SCFI machinery must perform similarly to
+ensure correctness.
+
+\section{Design and Implementation}
+In this section, we will go over some key aspects of the design and
+implementation of the SCFI feature in GNU assembler.
+
+\subsection{Identifying the boundaries of asm functions}
+For synthesizing CFI, the GAS will firstly need to identify the beginning
+and end of an assembly function.  Stack unwind information follows closely the
+assembly code of the function and hence, by its nature, starts anew for each
+function.  Luckily, the existing GNU AS directives come to the rescue.
+
+The implementation in the GNU assembler relies on seeing the following two
+markers to identify the beginning and end of an assembly function.
+
+For generating SCFI, a function must begin with the following pseudo-op:
+
+\begin{center}
+\begin{verbatim}
+.type <func-name>, @function
+\end{verbatim}
+\end{center}
+
+Lastly, the function must end with the following pseudo-op:
+
+\begin{center}
+\begin{verbatim}
+.size <func-name>, -.<func-name>
+\end{verbatim}
+\end{center}
+
+\subsection{The GAS instruction: \texttt{ginsn}}
+We define a data structure called the \textbf{GAS instruction}, a.k.a., the
+\texttt{ginsn}.  This the fundamental token of information exchange about
+executable code from the targets to the target-independent component of the GNU
+assembler.
+
+The definition of \texttt{struct ginsn} is presented below, and is taken from
+the \texttt{ginsn.h} header file in gas source code. A \texttt{ginsn}, may need
+further enhancements when other targets choose to use the SCFI machinery.  At
+this time, a \texttt{ginsn} has two source operands and one destination
+operand.  Further details should be easy to find in the aforementioned header
+file.
+
+As noted in the code comments, there may be more than one \texttt{ginsn} per
+machine instruction.  This may be true for both \texttt{RISC} or \texttt{CISC}
+ISAs.
+
+At the moment, the \texttt{ginsn} format of instruction representation is
+lossy: Not all information from the target instruction is encoded into the
+\texttt{ginsn}.  Not all target instructions need to be translated into the
+corresponding set of \texttt{ginsn}\footnote{Fundamentally speaking, only
+the information strictly necessary for correctness of SCFI is brought the GAS
+  using the \texttt{ginsn} abstraction.}.  As and when more use-cases for
+\texttt{ginsn} are found, this status quo will shift.
+
+\begin{minted}[frame=single]{c}
+/* GAS generic instruction.
+
+   Generic instructions are used by GAS to abstract out the binary machine
+   instructions.  In other words, ginsn is a target/ABI independent internal
+   representation for GAS.  Note that, depending on the target, there may be
+   more than one ginsn per binary machine instruction.
+
+   ginsns can be used by GAS to perform validations, or even generate
+   additional information like, sythesizing CFI for hand-written asm.
+
+   FIXME - what back references should we keep - frag ? frchainS ?
+   */
+
+struct ginsn
+{
+  enum ginsn_type type;
+  /* GAS instructions are simple instructions with GINSN_NUM_SRC_OPNDS number
+     of source operands and one destination operand at this time.  */
+  struct ginsn_src src[GINSN_NUM_SRC_OPNDS];
+  struct ginsn_dst dst;
+  /* Additional information per instruction.  */
+  uint32_t flags;
+  /* Symbol.  For ginsn of type other than GINSN_TYPE_SYMBOL, this identifies
+     the end of the corresponding machine instruction in the .text segment.
+     These symbols are created anew by the targets and are not used elsewhere
+     in GAS.  These can be safely cleaned up when a ginsn is free'd.  */
+  symbolS *sym;
+  /* Location information for user-interfacing messaging.  */
+  const char *file;
+  unsigned int line;
+
+  /* Information needed for synthesizing CFI.  */
+  scfi_opS **scfi_ops;
+  uint32_t num_scfi_ops;
+
+  /* Flag to keep track of visited instructions for CFG creation.  */
+  bool visited;
+
+  ginsnS *next; /* A linked list.  */
+};
+\end{minted}
+
+\subsection{Target-specific functionality to generate \texttt{ginsn}}
+As noted earlier, for targets choosing SCFI, translating all machine
+instructions into their corresponding \texttt{ginsn} will be wasteful and above
+all, unnecessary.
+
+So the question then comes:
+
+\begin{center}
+\emph{Q2: What are the set of target instructions that are necessary to ensure the
+SCFI machinery generates correct CFI for the hand-written asm?}
+\end{center}
+
+To the best of our understanding so far, the following set of instructions are
+critical for ensuring synthesis of correct CFI\footnote{also verified via
+the SCFI implementation for \texttt{x86\_64}}:
+
+\begin{enumerate}
+\item All change of flow instructions, including all conditional and
+unconditional branches, call and return from functions.
+\item All register saves and unsaves to the stack.
+\item All instructions affecting the two registers that could potentially be
+used as the base register for CFA tracking.  Recall that we have limited the
+base-register for CFA tracking to \texttt{REG\_SP} and \texttt{REG\_FP}.
+\end{enumerate}
+
+\begin{center}
+\emph{Q3: What is the right time, in the GAS workflow, to translate a target
+instruction into it's corresponding set of \texttt{ginsn} ?}
+\end{center}
+
+Ideally, this should be done when the target instruction is a) fully known, and
+b) done with all the intended optimizations. Further, this process must be
+undertaken for each target instruction included in the answer to \emph{Q2}
+above.  This leaves us to choose some point after the target has successfully
+called \texttt{output\_insn ();} in the backend.
+
+\subsection{Fragments and fix-ups}
+The GAS abstraction of \texttt{fragment} forms the back-bone of much of the
+inner workings of GAS.  It is a concept which is used to identify a blob of
+data which eventually makes into an output section.  An important aspect of a
+\texttt{fragment}'s life-cycle is an operation called "fix-up".
+
+Unfortunately, as for the second requirement of "be done with all the intended
+optimizations", it is not always possible to guarantee that all the intended
+optimizations are done as some "fix-ups" may be performed by the backend later
+in time.  This remains an open issue, but one that, we think, should not impact
+the correctness of SCFI: Even if a backend may optimize the instruction
+patterns, the semantics of the target instruction will remain the same.
+
+\subsection{Algorithm for SCFI}
+To bring it all together, the following figure outlines the algorithm
+implemented in GNU assembler to synthesize CFI.
+
+\textbf{synth\_dw2cfi ()}: This function takes as an input the list of
+\texttt{ginsn}(s) generated per function.  The GAS target generates this list
+of \texttt{ginsn}(s), as it assmebles each machine instruction.
+
+To generate CFI, at least three passes per function are needed.  The
+first two passes ares over the list of \texttt{ginsn}, whereas the third pass
+is over the set of basic blocks in a the \texttt{gcfg}, the control flow graph.
+
+Here is the workflow with the three steps:
+\begin{enumerate}
+\item First, to create control flow graph via \textbf{build\_cfg ()},
+\item Second, forward pass to propagate the SCFI state per basic block (BB) via
+\textbf{forward\_flow\_scfi\_state ()},
+\item Third, backward pass to generate any \texttt{.cfi\_remember\_state} and
+\texttt{.cfi\_restore\_state}, if necessary.  This is done via \textbf{backward\_flow\_scfi\_state ()}.
+\end{enumerate}
+
+\textbf{forward\_flow\_scfi\_state ():} This function is the backbone of CFI
+generation as the bulk of the CFI are generated here.  This function also
+implements the rules specified earlier (See \textit{Rule 1} and \textit{Rule 2} in section
+\ref{identifyingtheCFA}).  Each \texttt{ginsn} is processed and the SCFI unwind
+state object is updated.   A snapshot of the SCFI unwind state object is
+kept at the entry and exit of each basic block for both functionality and
+implementing correctness checks (See how \textbf{cmp\_scfi\_state ()} is called when
+we land at already visited basic blocks)
+
+\textbf{backward\_flow\_scfi\_state ()\footnote{TBD: This routine needs more
+eyes and testing.  It works for generating a single set of remember/restore
+CFI, but there can be nested remember/restore}:} This function processes
+the set of basic blocks in reverse PC order.  With this backward traversal, one
+can find points of return from the function with differing SCFI unwind states.
+
+%\label{scfialgorithm}
+\begin{minted}[frame=single,fontsize=\footnotesize]{c}
+int synth_dw2cfi (ginsnS *ginsn):
+  gcfg = build_cfg (ginsn);
+  root_bb = get_rootbb_gcfg (gcfg);
+  init_cfi_state = scfi_state_new ();
+
+  /* Traverse the cfg and update the scfi_ops per ginsn.  */
+  ret = forward_flow_scfi_state (gcfg, entry_bb, init_state);
+  if (ret) handle_bad ();
+  /* Traverse the cfg in reverse IP order and generate .cfi_restore_state
+     and cfi_remember_state as necessary.  */
+  ret = backward_flow_scfi_state (gcfg);
+  if (ret) handle_bad ();
+  return ret;
+\end{minted}
+\begin{minted}[frame=single,fontsize=\footnotesize]{c}
+/* Recursively propagate STATE starting at BB of GCFG.  */
+int forward_flow_scfi_state (gcfg, bb, state):
+  if (bb->visited)
+    /* Check that the CFI state is the same as seen previously when landing
+       from another branch.  */
+       ret = cmp_scfi_state (state, bb->entry_state);
+       if (ret)
+           handle_bad ();
+           return ret;
+
+  /* Initialize the BB's SCFI state at entry with the given STATE object.  */
+  gbb->entry_state = scfi_state_init (state);
+
+  /* Perform symbolic execution of each ginsn in the gbb and update the
+     scfi_ops list of each ginsn.  */
+  bb_for_each_insn(gbb, ginsn)
+      ret = gen_scfi_ops (ginsn, state);
+      if (ret) goto fail;
+
+  /* Initialize the BB's SCFI state at exit with the updated STATE object.  */
+  gbb->exit_state = scfi_state_init (state);
+  gbb->visited = true;
+  /* Process the next BB in DFS order.  */
+  prev_bb = gbb;
+  if (gbb->num_out_gedges)
+      bb_for_each_edge(gbb, gedge)
+          gbb = gedge->dst_bb;
+	  /* For a BB already visited, the scfi_state at entry of BB must match
+	     the current STATE.  */
+          if (gbb->visited && cmp_scfi_state (gbb->entry_state, state))
+              goto fail;
+
+          if (!gedge->visited)
+              gedge->visited = true;
+
+              memcpy (state, prev_bb->exit_state, sizeof (scfi_stateS));
+              ret = forward_flow_scfi_state (gcfg, gbb, state);
+              if (ret) goto fail;
+  return 0;
+fail:
+  gedge->visited = true;
+
+  return 1;
+\end{minted}
+\begin{minted}[frame=single,fontsize=\footnotesize]{c}
+int backward_flow_scfi_state (gcfg):
+ gcfg_get_bbs_in_prog_order (gcfg, prog_order_bbs);
+
+  i = gcfg->num_gbbs - 1;
+  /* Traverse in reverse program order.  */
+  while (i > 0)
+      current_bb = prog_order_bbs[i];
+      prev_bb = prog_order_bbs[i-1];
+      if (cmp_scfi_state (prev_bb->exit_state, current_bb->entry_state))
+          /* Candidate for .cfi_restore_state found.  */
+          ginsn = bb_get_first_ginsn (current_bb);
+          scfi_op_add_cfi_restore_state (ginsn);
+          /* Memorize current_bb now to find location for its remember state
+             later.  */
+          restore_bbs[i] = current_bb;
+      else
+          bb_for_each_edge (current_bb, gedge)
+              dst_bb = gedge->dst_bb;
+              for (j = 0; j < gcfg->num_gbbs; j++)
+                if (restore_bbs[j] == dst_bb)
+                    ginsn = bb_get_last_ginsn (current_bb);
+                    scfi_op_add_cfi_remember_state (ginsn);
+                    /* Remove the memorised restore_bb from the list.  */
+                    restore_bbs[j] = NULL;
+                    break;
+      i--;
+
+  /* All .cfi_restore_state pseudo-ops must have a corresponding
+     .cfi_remember_state by now.  */
+  ret = check_restore_bbs_is_null_p (restore_bbs);
+
+  return ret;
+\end{minted}
+
+\subsection{SCFI warnings and errors in GAS}
+\label{scfidiagnostics}
+A set of warnings and errors have been added to the current SCFI
+implementation.  Every situation where GAS is not sure it will be able to
+synthesize valid CFI is treated as an error\footnote{as CFI synthesis is
+explicitly requested by the user via the command line}.  Following is a
+subset of the warnings and errors:
+
+\begin{enumerate}
+\item Warning: SCFI: asymetrical register restore
+\item Error: SCFI: usage of REG\_FP as scratch not supported
+\item Error: SCFI: unsupported stack manipulation pattern
+\end{enumerate}
+
+\section{Other Use-cases}
+The addition of the infrastructure for creation of \texttt{ginsn}, the control
+flow graph of \texttt{ginsn}, opens up the window to implement other useful
+features in GAS, apart from SCFI.
+
+\subsection{Validation of compiler generated CFI}
+One may wonder if this infrastructure can be used to automatically validate
+compiler generated CFI.  Recall that for correct SCFI, control flow
+matters (see section \ref{sectioncfmatters}).  Code stubs with indirect jumps,
+jump table etc. are expected for compiler generated assembly.  Further,
+there are practical restrictions around what assembly code is
+ingestible for SCFI (see \emph{Rule 1} and \emph{Rule 2}) in section
+\ref{identifyingtheCFA}).
+
+Even for cases when above-mentioned issues are non-existent, there,
+unfortunately, remain some practical differences between the CFI
+generated by compiler vs. those synthesized by the GNU assembler's SCFI
+machinery.  A naive comparison of the two is not possible; or at least such a
+task may be harder than desired.
+
+The following table shows a subset of cases where differences are seen.
+
+\begin{center}
+\begin{tabular}{ | m{5cm} | m{5cm}| m{3cm} |}
+  \hline
+  GCC generated & GNU AS generated & Comments \\
+  \hline
+  \begin{minted}[]{nasm}
+   popq    %rbx
+   .cfi_def_cfa_offset 8
+   .cfi_restore 3
+   \end{minted}
+   &
+  \begin{minted}[]{nasm}
+   popq    %rbx
+   .cfi_restore 3 
+   .cfi_def_cfa_offset 8
+   \end{minted}
+   &
+   Note the order of the two CFI pseudo-ops.
+   \\
+  \hline
+  \begin{minted}[]{nasm}
+        testl   %edx, %edx
+        je      .L7
+        popq    %rbx
+        .cfi_remember_state
+        .cfi_def_cfa_offset 8
+        ret
+.L7:
+        .cfi_restore_state
+        movq    %rbx, %rdi
+        call    fclose
+   \end{minted}
+   &
+   \begin{minted}[]{nasm}
+          testl   %edx, %edx
+        je      .L7
+        .cfi_remember_state
+        popq    %rbx
+        .cfi_restore 3
+        .cfi_def_cfa_offset 8
+        ret
+.L7:
+        .cfi_restore_state
+        movq    %rbx, %rdi
+        call    fclose
+   \end{minted}
+   & Sometimes, the compiler does not generate \texttt{.cfi\_restore} for insns
+   in epilogue.  Secondly, GNU AS generates generates the remember and restore
+   state ops at different instructions.
+   \\
+   \hline
+\end{tabular}
+\end{center}
+
+\subsection{Further validation of hand-written asm}
+The SCFI machinery is consumer of the set of \texttt{ginsn}.  In that sense,
+\texttt{ginsn} provide GAS with an abstraction to understand the
+instructions generated by the targets.  Using \texttt{ginsn}, GAS is now
+capable of sufficient context at each asm instruction.  As noted in section
+\ref{scfidiagnostics}, GAS can already issue some useful messaging to the user,
+  in the context of SCFI.
+
+Using the \texttt{ginsn} abstraction, it is possible to make GAS emit other
+useful diagnostics like\footnote{Surely, not an exhaustive set; reviewer inputs
+for other useful diagnostics appreciated}:
+
+\begin{enumerate}
+\item Missing CFI save for CFI restore
+\item Missing CFI restore for CFI save
+\item Missing user-defined label for conditional branch
+\item Unreachable code
+\end{enumerate}
+
+As you see, some of these warnings, especially the last two, are not SCFI
+related.  These, and more, are other use-cases of supporting the \texttt{ginsn}
+abstraction.
+
+\subsection{Limited program verification for BPF}
+Writing BPF programs so that they are accepted by the BPF verifier may turn out
+to be an iterative and cumbersome task.  Typically, a user will generate
+binary, check if verifier will accept it, and iterate over the process until
+the BPF verifier OKs it.
+
+Using the proposed GAS infrastructure, the BPF target can issue helpful diagnostics to the
+user around some of the restrictions enforced by the verifier:
+\begin{enumerate}
+\item (Static size) No larger than BPF\_MAXINSNS\footnote{currently set to 4096} insns.
+\item There must be no unreachable code.
+\item The assembler may also be able to alert the user if there exist some
+malformed jumps, specifially, jumps to an undefined target.
+\end{enumerate}
+
+It is important to note that the above-mentioned list is a subset of
+restrictions imposed by the BPF verifier.  Adding diagnostics for these in the
+BPF target will only reduce the pain, not eliminate it.
+
+\section{Next Steps and Future Work}
+
+Some of the identified tasks, not in order of priority or importance are:
+
+\begin{enumerate}
+
+\item Discuss and resolve the open questions around what should be done for
+those CFI directives cannot be synthesized by looking at the asm.
+
+\item Discuss, design and implement SCFI for handling inline asm. The current
+command line option of \texttt{--scfi=all} will ignore all compiler generated
+CFI for the function containing the inlined assembly.  Supporting a new
+argument like \texttt{--scfi=inline} requires that the compiler generated CFI
+be \emph{not} dropped for functions with inline assembly.
+
+\item Hardening of interfaces and design by adding one more architecture to the
+mix.  \texttt{aarch64} seems to be good candidate.  As noted earlier, the SCFI
+machinery has been implemented as a target-independent component in GAS.  So
+ensuring that the SCFI machinery works for more than one ISA will be extremely
+helpful.
+
+\item Testing with codebases with hand-written asm.  Especially one with
+hand-written CFI annotations for its asm, so that there is something to
+cross-check the synthesized CFI against.
+
+\item Add capability to synthesize CFI for functions using DRAP to
+realign stack.
+
+\item Ensure decoupled \texttt{ginsn} creation from SCFI.  As noted
+earlier, there are other use-cases for \texttt{ginsn} creation, like
+diagnostics for hand-written asm, specific validations, and even program
+verification for BPF.
+
+\end{enumerate}
+
+\section*{Acknowledgments} The author would like to thank all the
+reviewers for their feedback.
+
+\begin{thebibliography}{9}
+
+\bibitem{DWARF5} \emph{The DWARF Debugging Information Format Standard},
+Version 5, https://dwarfstd.org/dwarf5std.html
+
+\bibitem{CFIPSEUDO} \emph{CFI directives in GNU AS},
+  https://sourceware.org/binutils/docs/as/CFI-directives.html
+
+\bibitem{CFIPSEUDOAARCH64} \emph{AArch64 Machine Directives in GNU AS}
+https://sourceware.org/binutils/docs/as/AArch64-Directives.html
+
+\bibitem{CFILABELCOMMIT} \emph{binutils-gdb: gas: allow labeling of CFI
+    instructions}
+    https://sourceware.org/git/?p=binutils-gdb.git;a=commit;h=696025802ec3273fde5cbf82c215a3d795435c1a
+
+\end{thebibliography}
+
+\end{document}
