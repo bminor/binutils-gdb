@@ -3997,7 +3997,11 @@ process_debug_info (struct dwarf_section * section,
 		    }
 		}
 	      if (dwarf_start_die != 0 && level < saved_level)
-		return true;
+		{
+		  if (list != NULL)
+		    free_abbrev_list (list);
+		  return true;
+		}
 	      continue;
 	    }
 
@@ -4038,6 +4042,8 @@ process_debug_info (struct dwarf_section * section,
 		}
 	      warn (_("DIE at offset %#lx refers to abbreviation number %lu which does not exist\n"),
 		    die_offset, abbrev_number);
+	      if (list != NULL)
+		free_abbrev_list (list);
 	      return false;
 	    }
 
