@@ -3562,7 +3562,10 @@ free_debug_information (debug_info *ent)
       free (ent->have_frame_base);
     }
   if (ent->max_range_lists)
-    free (ent->range_lists);
+    {
+      free (ent->range_versions);
+      free (ent->range_lists);
+    }
 }
 
 /* Process the contents of a .debug_info section.
