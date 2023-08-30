@@ -2174,8 +2174,8 @@ const struct riscv_opcode riscv_opcodes[] =
 {"th.sync.s",        0, INSN_CLASS_XTHEADSYNC,  "",   MATCH_TH_SYNC_S,        MASK_TH_SYNC_S,        match_opcode, 0},
 
 /* Vendor-specific (Ventana Microsystems) XVentanaCondOps instructions */
-{"vt.maskc",    0, INSN_CLASS_XVENTANACONDOPS, "d,s,t", MATCH_VT_MASKC, MASK_VT_MASKC, match_opcode, 0 },
-{"vt.maskcn",   0, INSN_CLASS_XVENTANACONDOPS, "d,s,t", MATCH_VT_MASKCN, MASK_VT_MASKCN, match_opcode, 0 },
+{"vt.maskc",   64, INSN_CLASS_XVENTANACONDOPS, "d,s,t", MATCH_VT_MASKC, MASK_VT_MASKC, match_opcode, 0 },
+{"vt.maskcn",  64, INSN_CLASS_XVENTANACONDOPS, "d,s,t", MATCH_VT_MASKCN, MASK_VT_MASKCN, match_opcode, 0 },
 
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
