@@ -4151,6 +4151,7 @@ disassemble_data (bfd *abfd)
       non_fatal (_("can't disassemble for architecture %s\n"),
 		 bfd_printable_arch_mach (bfd_get_arch (abfd), 0));
       exit_status = 1;
+      free (sorted_syms);
       return;
     }
 
