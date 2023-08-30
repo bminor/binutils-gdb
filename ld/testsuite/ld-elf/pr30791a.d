@@ -1,0 +1,16 @@
+#source: pr30791a.s
+#source: pr30791b.s
+#ld: -r
+#readelf: -S --wide
+
+#...
+Section Headers:
+#...
+  \[[ 0-9]+\] __patchable_function_entries[ \t]+PROGBITS[ \t0-9a-f]+WAL.*
+#...
+  \[[ 0-9]+\] __patchable_function_entries[ \t]+PROGBITS[ \t0-9a-f]+WAL.*
+#...
+  \[[ 0-9]+\] __patchable_function_entries[ \t]+PROGBITS[ \t0-9a-f]+WAL.*
+#...
+  \[[ 0-9]+\] __patchable_function_entries[ \t]+PROGBITS[ \t0-9a-f]+WAL.*
+#pass

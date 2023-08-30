@@ -2080,9 +2080,14 @@ elf_orphan_compatible (asection *in, asection *out)
     return false;
   /* We can't merge with a member of an output section group or merge
      two sections with differing SHF_EXCLUDE or other processor and OS
-     specific flags when doing a relocatable link.  */
+     specific flags or with different SHF_LINK_ORDER when doing a
+     relocatable link.  */
   if (bfd_link_relocatable (&link_info)
       && (elf_next_in_group (out) != NULL
+	  || ((elf_section_flags (in) & SHF_LINK_ORDER) != 0
+	      && (elf_section_flags (out) & SHF_LINK_ORDER) != 0
+	      && (elf_linked_to_section (in)->output_section
+		  != elf_linked_to_section (out)->output_section))
 	  || ((elf_section_flags (out) ^ elf_section_flags (in))
 	      & (SHF_MASKPROC | SHF_MASKOS)) != 0))
     return false;
