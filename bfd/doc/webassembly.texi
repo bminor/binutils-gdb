@@ -27,7 +27,7 @@ in some malformed WebAssembly modules being treated as valid.
 * File layout::
 @end menu
 
-@node File layout
+@node File layout, WebAssembly
 @subsection File layout
 For a description of the WebAssembly file format, see
 @url{https://github.com/WebAssembly/design/blob/master/BinaryEncoding.md}.
