@@ -39,6 +39,6 @@ with_complaints 5 {
     gdb_test $cmd $re "$cmd without complaints"
 }
 
-gdb_test "maint print symbols -source $srcfile" \
+gdb_test "maint print symbols" \
     "typedef void decltype\\(nullptr\\); \r\n.*" \
     "decltype(nullptr) symbol"
