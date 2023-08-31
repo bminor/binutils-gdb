@@ -3207,7 +3207,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
   /* We need one extra slot, for the THIS pointer.  */
 
   argtypes = (struct field *)
-    TYPE_ALLOC (type, (argcount + 1) * sizeof (struct field));
+    TYPE_ZALLOC (type, (argcount + 1) * sizeof (struct field));
   p = argtypetext;
 
   /* Add THIS pointer for non-static methods.  */
@@ -3297,7 +3297,7 @@ allocate_cplus_struct_type (struct type *type)
 
   TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_CPLUS_STUFF;
   TYPE_RAW_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
-    TYPE_ALLOC (type, sizeof (struct cplus_struct_type));
+    TYPE_ZALLOC (type, sizeof (struct cplus_struct_type));
   *(TYPE_RAW_CPLUS_SPECIFIC (type)) = cplus_struct_default;
   set_type_vptr_fieldno (type, -1);
 }
@@ -3314,7 +3314,7 @@ allocate_gnat_aux_type (struct type *type)
 {
   TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_GNAT_STUFF;
   TYPE_GNAT_SPECIFIC (type) = (struct gnat_aux_type *)
-    TYPE_ALLOC (type, sizeof (struct gnat_aux_type));
+    TYPE_ZALLOC (type, sizeof (struct gnat_aux_type));
   *(TYPE_GNAT_SPECIFIC (type)) = gnat_aux_default;
 }
 
@@ -3454,6 +3454,8 @@ init_complex_type (const char *name, struct type *target_type)
     {
       if (name == nullptr && target_type->name () != nullptr)
 	{
+	  /* No zero-initialization required, initialized by strcpy/strcat
+	     below.  */
 	  char *new_name
 	    = (char *) TYPE_ALLOC (target_type,
 				   strlen (target_type->name ())

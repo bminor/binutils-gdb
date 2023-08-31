@@ -12376,8 +12376,8 @@ dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
 
   ALLOCATE_CPLUS_STRUCT_TYPE (type);
   TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
-    TYPE_ALLOC (type,
-		sizeof (struct fn_fieldlist) * fip->fnfieldlists.size ());
+    TYPE_ZALLOC (type,
+		 sizeof (struct fn_fieldlist) * fip->fnfieldlists.size ());
 
   for (int i = 0; i < fip->fnfieldlists.size (); i++)
     {
@@ -12386,6 +12386,8 @@ dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
 
       TYPE_FN_FIELDLIST_NAME (type, i) = nf.name;
       TYPE_FN_FIELDLIST_LENGTH (type, i) = nf.fnfields.size ();
+      /* No need to zero-initialize, initialization is done by the copy in
+	 the loop below.  */
       fn_flp->fn_fields = (struct fn_field *)
 	TYPE_ALLOC (type, sizeof (struct fn_field) * nf.fnfields.size ());
 
@@ -13088,6 +13090,8 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  int count = fi.typedef_field_list.size ();
 
 	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
+	  /* No zero-initialization is needed, the elements are initialized by
+	     the copy in the loop below.  */
 	  TYPE_TYPEDEF_FIELD_ARRAY (type)
 	    = ((struct decl_field *)
 	       TYPE_ALLOC (type,
@@ -13106,6 +13110,8 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  int count = fi.nested_types_list.size ();
 
 	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
+	  /* No zero-initialization is needed, the elements are initialized by
+	     the copy in the loop below.  */
 	  TYPE_NESTED_TYPES_ARRAY (type)
 	    = ((struct decl_field *)
 	       TYPE_ALLOC (type, sizeof (struct decl_field) * count));
