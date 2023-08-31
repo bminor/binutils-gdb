@@ -1923,10 +1923,9 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index)))
 
-#define FIELD_ARTIFICIAL(thisfld) ((thisfld).is_artificial ())
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
-#define TYPE_FIELD_ARTIFICIAL(thistype, n) FIELD_ARTIFICIAL((thistype)->field (n))
+#define TYPE_FIELD_ARTIFICIAL(thistype, n) ((thistype)->field (n).is_artificial ())
 #define TYPE_FIELD_BITSIZE(thistype, n) FIELD_BITSIZE((thistype)->field (n))
 #define TYPE_FIELD_PACKED(thistype, n) (FIELD_BITSIZE((thistype)->field (n))!=0)
 

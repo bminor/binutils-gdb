@@ -1213,7 +1213,7 @@ gdbscm_field_artificial_p (SCM self)
     = tyscm_get_field_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct field *field = tyscm_field_smob_to_field (f_smob);
 
-  return scm_from_bool (FIELD_ARTIFICIAL (*field));
+  return scm_from_bool (field->is_artificial ());
 }
 
 /* (field-baseclass? <gdb:field>) -> boolean

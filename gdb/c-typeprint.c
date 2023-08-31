@@ -286,7 +286,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 
       struct field arg = args[i];
       /* Skip any artificial arguments.  */
-      if (FIELD_ARTIFICIAL (arg))
+      if (arg.is_artificial ())
 	continue;
 
       if (printed_args > 0)

@@ -4243,7 +4243,7 @@ check_types_equal (struct type *type1, struct type *type2,
 	  const struct field *field1 = &type1->field (i);
 	  const struct field *field2 = &type2->field (i);
 
-	  if (FIELD_ARTIFICIAL (*field1) != FIELD_ARTIFICIAL (*field2)
+	  if (field1->is_artificial () != field2->is_artificial ()
 	      || FIELD_BITSIZE (*field1) != FIELD_BITSIZE (*field2)
 	      || field1->loc_kind () != field2->loc_kind ())
 	    return false;
