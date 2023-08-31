@@ -1034,7 +1034,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	t->set_code (type_code);
 	t->set_length (sh->value);
-	t->alloc_fields (nfields, false);
+	t->alloc_fields (nfields);
 
 	if (type_code == TYPE_CODE_ENUM)
 	  {
@@ -1195,7 +1195,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	      if (nparams > 0)
 		{
-		  ftype->alloc_fields (nparams, false);
+		  ftype->alloc_fields (nparams);
 
 		  iparams = 0;
 		  for (struct symbol *sym : block_iterator_range (cblock))

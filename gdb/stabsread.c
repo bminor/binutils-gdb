@@ -982,7 +982,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    }
 
 	  /* Allocate parameter information fields and fill them in.  */
-	  ftype->alloc_fields (nsemi, false);
+	  ftype->alloc_fields (nsemi);
 	  while (*p++ == ';')
 	    {
 	      struct type *ptype;

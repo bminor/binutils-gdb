@@ -2032,7 +2032,7 @@ coff_read_struct_type (int index, int length, int lastsym,
     }
   /* Now create the vector of fields, and record how big it is.  */
 
-  type->alloc_fields (nfields, false);
+  type->alloc_fields (nfields);
 
   /* Copy the saved-up fields into the field vector.  */
 
@@ -2110,7 +2110,7 @@ coff_read_enum_type (int index, int length, int lastsym,
   else /* Assume ints.  */
     type->set_length (gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT);
   type->set_code (TYPE_CODE_ENUM);
-  type->alloc_fields (nsyms, false);
+  type->alloc_fields (nsyms);
 
   /* Find the symbols for the values and put them into the type.
      The symbols can be found in the symlist that we put them on
