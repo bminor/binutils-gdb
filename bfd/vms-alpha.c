@@ -6972,6 +6972,7 @@ evax_bfd_print_eobj (struct bfd *abfd, FILE *file)
 	  != pad_len - hdr_size)
 	{
 	  fprintf (file, _("cannot read GST record\n"));
+	  free (rec);
 	  return;
 	}
 
@@ -6987,7 +6988,6 @@ evax_bfd_print_eobj (struct bfd *abfd, FILE *file)
 	  evax_bfd_print_eeom (file, rec, rec_len);
 	  free (rec);
 	  return;
-	  break;
 	case EOBJ__C_ETIR:
 	  evax_bfd_print_etir (file, "ETIR", rec, rec_len);
 	  break;
