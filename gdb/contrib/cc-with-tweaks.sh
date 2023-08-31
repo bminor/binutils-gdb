@@ -209,6 +209,24 @@ if [ "$want_index" = true ]; then
     [ $rc != 0 ] && exit $rc
 fi
 
+if [ "$want_dwz" = true ] || [ "$want_multi" = true ]; then
+    # Require dwz version with PR dwz/24468 fixed.
+    dwz_version_major_required=0
+    dwz_version_minor_required=13
+    dwz_version_line=$($DWZ --version 2>&1 | head -n 1)
+    dwz_version=${dwz_version_line//dwz version /}
+    dwz_version_major=${dwz_version//\.*/}
+    dwz_version_minor=${dwz_version//*\./}
+    if [ "$dwz_version_major" -lt "$dwz_version_major_required" ] \
+	   || { [ "$dwz_version_major" -eq "$dwz_version_major_required" ] \
+		    && [ "$dwz_version_minor" -lt "$dwz_version_minor_required" ]; }; then
+	detected="$dwz_version_major.$dwz_version_minor"
+	required="$dwz_version_major_required.$dwz_version_minor_required"
+	echo "$myname: dwz version $detected detected, version $required or higher required"
+	exit 1
+    fi
+fi
+
 if [ "$want_dwz" = true ]; then
     # Validate dwz's result by checking if the executable was modified.
     cp "$output_file" "${output_file}.copy"
