@@ -2117,6 +2117,9 @@ my_value_of_variable (struct varobj *var, enum varobj_display_formats format)
       if (var->dynamic->pretty_printer != NULL)
 	return varobj_value_get_print_value (var->value.get (), var->format,
 					     var);
+      else if (var->parent != nullptr && varobj_is_dynamic_p (var->parent))
+	return var->print_value;
+
       return (*var->root->lang_ops->value_of_variable) (var, format);
     }
   else
