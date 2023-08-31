@@ -3067,18 +3067,16 @@ read_baseclasses (struct stab_field_info *fip, const char **pp,
   /* Some stupid compilers have trouble with the following, so break
      it up into simpler expressions.  */
   TYPE_FIELD_VIRTUAL_BITS (type) = (B_TYPE *)
-    TYPE_ALLOC (type, B_BYTES (TYPE_N_BASECLASSES (type)));
+    TYPE_ZALLOC (type, B_BYTES (TYPE_N_BASECLASSES (type)));
 #else
   {
     int num_bytes = B_BYTES (TYPE_N_BASECLASSES (type));
     char *pointer;
 
-    pointer = (char *) TYPE_ALLOC (type, num_bytes);
+    pointer = (char *) TYPE_ZALLOC (type, num_bytes);
     TYPE_FIELD_VIRTUAL_BITS (type) = (B_TYPE *) pointer;
   }
 #endif /* 0 */
-
-  B_CLRALL (TYPE_FIELD_VIRTUAL_BITS (type), TYPE_N_BASECLASSES (type));
 
   for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
     {
@@ -3295,16 +3293,13 @@ attach_fields_to_type (struct stab_field_info *fip, struct type *type,
       ALLOCATE_CPLUS_STRUCT_TYPE (type);
 
       TYPE_FIELD_PRIVATE_BITS (type) =
-	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
-      B_CLRALL (TYPE_FIELD_PRIVATE_BITS (type), nfields);
+	(B_TYPE *) TYPE_ZALLOC (type, B_BYTES (nfields));
 
       TYPE_FIELD_PROTECTED_BITS (type) =
-	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
-      B_CLRALL (TYPE_FIELD_PROTECTED_BITS (type), nfields);
+	(B_TYPE *) TYPE_ZALLOC (type, B_BYTES (nfields));
 
       TYPE_FIELD_IGNORE_BITS (type) =
-	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
-      B_CLRALL (TYPE_FIELD_IGNORE_BITS (type), nfields);
+	(B_TYPE *) TYPE_ZALLOC (type, B_BYTES (nfields));
     }
 
   /* Copy the saved-up fields into the field vector.  Start from the

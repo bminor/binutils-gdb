@@ -12064,16 +12064,13 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
       ALLOCATE_CPLUS_STRUCT_TYPE (type);
 
       TYPE_FIELD_PRIVATE_BITS (type) =
-	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
-      B_CLRALL (TYPE_FIELD_PRIVATE_BITS (type), nfields);
+	(B_TYPE *) TYPE_ZALLOC (type, B_BYTES (nfields));
 
       TYPE_FIELD_PROTECTED_BITS (type) =
-	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
-      B_CLRALL (TYPE_FIELD_PROTECTED_BITS (type), nfields);
+	(B_TYPE *) TYPE_ZALLOC (type, B_BYTES (nfields));
 
       TYPE_FIELD_IGNORE_BITS (type) =
-	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
-      B_CLRALL (TYPE_FIELD_IGNORE_BITS (type), nfields);
+	(B_TYPE *) TYPE_ZALLOC (type, B_BYTES (nfields));
     }
 
   /* If the type has baseclasses, allocate and clear a bit vector for
@@ -12084,9 +12081,8 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
       unsigned char *pointer;
 
       ALLOCATE_CPLUS_STRUCT_TYPE (type);
-      pointer = (unsigned char *) TYPE_ALLOC (type, num_bytes);
+      pointer = (unsigned char *) TYPE_ZALLOC (type, num_bytes);
       TYPE_FIELD_VIRTUAL_BITS (type) = pointer;
-      B_CLRALL (TYPE_FIELD_VIRTUAL_BITS (type), fip->baseclasses.size ());
       TYPE_N_BASECLASSES (type) = fip->baseclasses.size ();
     }
 
