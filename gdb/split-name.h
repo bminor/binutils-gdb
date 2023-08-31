@@ -30,8 +30,9 @@ enum class split_style
   NONE,
   /* C++ style, with "::" and template parameter intelligence.  */
   CXX,
-  /* Split at ".".  Used by Ada, Go, D.  */
-  DOT,
+  /* Split at ".".  Used by Ada, Go, D.  This has a funny name to work
+     around a bug in Bison 2.3, which is used on macOS.  */
+  DOT_STYLE,
   /* Split at "__".  Used by Ada encoded names.  */
   UNDERSCORE,
 };

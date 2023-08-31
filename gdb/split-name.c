@@ -58,7 +58,7 @@ split_name (const char *name, split_style style)
 	}
       break;
 
-    case split_style::DOT:
+    case split_style::DOT_STYLE:
       /* D and Go-style names.  */
       for (const char *iter = strchr (name, '.');
 	   iter != nullptr;

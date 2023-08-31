@@ -305,7 +305,7 @@ class lookup_name_info final
 	break;
       case language_d:
       case language_go:
-	style = split_style::DOT;
+	style = split_style::DOT_STYLE;
 	break;
       }
     return ::split_name (language_lookup_name (lang), style);

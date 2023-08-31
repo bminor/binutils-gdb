@@ -267,7 +267,7 @@ cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
   if (canonical.empty ())
     return {};
   std::vector<gdb::string_view> names = split_name (canonical.c_str (),
-						    split_style::DOT);
+						    split_style::DOT_STYLE);
   gdb::string_view tail = names.back ();
   names.pop_back ();
 
