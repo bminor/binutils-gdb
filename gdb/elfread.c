@@ -219,13 +219,7 @@ record_minimal_symbol (minimal_symbol_reader &reader,
       || bfd_section == bfd_abs_section_ptr)
     section_index = gdb_bfd_section_index (objfile->obfd.get (), bfd_section);
 
-  struct minimal_symbol *result
-    = reader.record_full (name, copy_name, address, ms_type, section_index);
-  if ((objfile->flags & OBJF_MAINLINE) == 0
-      && (ms_type == mst_data || ms_type == mst_bss))
-    result->maybe_copied = 1;
-
-  return result;
+  return reader.record_full (name, copy_name, address, ms_type, section_index);
 }
 
 /* Read the symbol table of an ELF file.
@@ -1372,6 +1366,10 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
     {
       elfctf_build_psymtabs (objfile);
     }
+
+  /* Copy relocations are used by some ABIs using the ELF format, so
+     set the objfile flag indicating this fact.  */
+  objfile->object_format_has_copy_relocs = true;
 }
 
 /* Initialize anything that needs initializing when a completely new symbol

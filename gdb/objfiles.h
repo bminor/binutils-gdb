@@ -871,6 +871,17 @@ public:
      next time.  If an objfile does not have the symbols, it will
      never have them.  */
   bool skip_jit_symbol_lookup = false;
+
+  /* Flag which indicates, when true, that the object format
+     potentially supports copy relocations.  ABIs for some
+     architectures that use ELF have a copy relocation in which the
+     initialization for a global variable defined in a shared object
+     will be copied to memory allocated to the main program during
+     dynamic linking.  Therefore this flag will be set for ELF
+     objfiles.  Other object formats that use the same copy relocation
+     mechanism as ELF should set this flag too.  This flag is used in
+     conjunction with the minimal_symbol::maybe_copied method.  */
+  bool object_format_has_copy_relocs = false;
 };
 
 /* A deleter for objfile.  */

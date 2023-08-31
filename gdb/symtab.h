@@ -855,14 +855,6 @@ struct minimal_symbol : public general_symbol_info
      the object file format may not carry that piece of information.  */
   unsigned int m_has_size : 1;
 
-  /* For data symbols only, if this is set, then the symbol might be
-     subject to copy relocation.  In this case, a minimal symbol
-     matching the symbol's linkage name is first looked for in the
-     main objfile.  If found, then that address is used; otherwise the
-     address in this symbol is used.  */
-
-  unsigned maybe_copied : 1;
-
   /* Non-zero if this symbol ever had its demangled name set (even if
      it was set to NULL).  */
   unsigned int name_set : 1;
@@ -884,6 +876,15 @@ struct minimal_symbol : public general_symbol_info
   /* True if MSYMBOL is of some text type.  */
 
   bool text_p () const;
+
+  /* For data symbols only, given an objfile, if 'maybe_copied'
+     evaluates to 'true' for that objfile, then the symbol might be
+     subject to copy relocation.  In this case, a minimal symbol
+     matching the symbol's linkage name is first looked for in the
+     main objfile.  If found, then that address is used; otherwise the
+     address in this symbol is used.  */
+
+  bool maybe_copied (objfile *objfile) const;
 };
 
 #include "minsyms.h"
