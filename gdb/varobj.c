@@ -488,20 +488,7 @@ enum varobj_display_formats
 varobj_set_display_format (struct varobj *var,
 			   enum varobj_display_formats format)
 {
-  switch (format)
-    {
-    case FORMAT_NATURAL:
-    case FORMAT_BINARY:
-    case FORMAT_DECIMAL:
-    case FORMAT_HEXADECIMAL:
-    case FORMAT_OCTAL:
-    case FORMAT_ZHEXADECIMAL:
-      var->format = format;
-      break;
-
-    default:
-      var->format = variable_default_display (var);
-    }
+  var->format = format;
 
   if (varobj_value_is_changeable_p (var) 
       && var->value != nullptr && !var->value->lazy ())
