@@ -1154,7 +1154,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 			  stream, newshow, level + 4,
 			  language, &local_flags, &local_podata);
 
-	  if (!is_static && TYPE_FIELD_PACKED (type, i))
+	  if (!is_static && type->field (i).is_packed ())
 	    {
 	      /* It is a bitfield.  This code does not attempt
 		 to look at the bitpos and reconstruct filler,

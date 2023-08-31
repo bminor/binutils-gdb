@@ -522,7 +522,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 				 type->field (i).name (),
 				 stream, show - 1, level + 4, flags);
 	      if (!type->field (i).is_static ()
-		  && TYPE_FIELD_PACKED (type, i))
+		  && type->field (i).is_packed ())
 		{
 		  /* It is a bitfield.  This code does not attempt
 		     to look at the bitpos and reconstruct filler,

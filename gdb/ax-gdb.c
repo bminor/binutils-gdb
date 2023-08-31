@@ -1317,7 +1317,7 @@ gen_primitive_field (struct agent_expr *ax, struct axs_value *value,
 		     int offset, int fieldno, struct type *type)
 {
   /* Is this a bitfield?  */
-  if (TYPE_FIELD_PACKED (type, fieldno))
+  if (type->field (fieldno).is_packed ())
     gen_bitfield_ref (ax, value, type->field (fieldno).type (),
 		      (offset * TARGET_CHAR_BIT
 		       + type->field (fieldno).loc_bitpos ()),
@@ -1502,7 +1502,7 @@ gen_struct_elt_for_reference (struct agent_expr *ax, struct axs_value *value,
 		       fieldname);
 	      return 1;
 	    }
-	  if (TYPE_FIELD_PACKED (t, i))
+	  if (t->field (i).is_packed ())
 	    error (_("pointers to bitfield members not allowed"));
 
 	  /* FIXME we need a way to do "want_address" equivalent */	  

@@ -560,7 +560,7 @@ amd64_has_unaligned_fields (struct type *type)
 	  if (type->field (i).is_static ()
 	      || (type->field (i).bitsize () == 0
 		  && subtype->length () == 0)
-	      || TYPE_FIELD_PACKED (type, i))
+	      || type->field (i).is_packed ())
 	    continue;
 
 	  int bitpos = type->field (i).loc_bitpos ();

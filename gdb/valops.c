@@ -3581,7 +3581,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		v = value_addr (v);
 	      return v;
 	    }
-	  if (TYPE_FIELD_PACKED (t, i))
+	  if (t->field (i).is_packed ())
 	    error (_("pointers to bitfield members not allowed"));
 
 	  if (want_address)

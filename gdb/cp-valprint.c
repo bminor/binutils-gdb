@@ -259,7 +259,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	  annotate_field_value ();
 
 	  if (!type->field (i).is_static ()
-	      && TYPE_FIELD_PACKED (type, i))
+	      && type->field (i).is_packed ())
 	    {
 	      struct value *v;
 

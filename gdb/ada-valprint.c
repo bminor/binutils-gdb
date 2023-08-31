@@ -615,7 +615,7 @@ print_field_values (struct value *value, struct value *outer_value,
       gdb_puts (" => ", stream);
       annotate_field_value ();
 
-      if (TYPE_FIELD_PACKED (type, i))
+      if (type->field (i).is_packed ())
 	{
 	  /* Bitfields require special handling, especially due to byte
 	     order problems.  */

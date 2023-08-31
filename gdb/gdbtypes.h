@@ -584,6 +584,11 @@ struct field
     m_bitsize = bitsize;
   }
 
+  bool is_packed () const
+  {
+    return m_bitsize != 0;
+  }
+
   /* Return true if this field is static; false if not.  */
   bool is_static () const
   {
@@ -1932,8 +1937,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define BASETYPE_VIA_VIRTUAL(thistype, index) \
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index)))
-
-#define TYPE_FIELD_PACKED(thistype, n) (((thistype)->field (n).bitsize ())!=0)
 
 #define TYPE_FIELD_PRIVATE_BITS(thistype) \
   TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits
