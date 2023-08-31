@@ -584,7 +584,7 @@ compile_cplus_convert_struct_or_union_members
       const char *field_name = type->field (i).name ();
 
       if (TYPE_FIELD_IGNORE (type, i)
-	  || TYPE_FIELD_ARTIFICIAL (type, i))
+	  || type->field (i).is_artificial ())
 	continue;
 
       /* GDB records unnamed/anonymous fields with empty string names.  */
@@ -982,7 +982,7 @@ compile_cplus_convert_func (compile_cplus_instance *instance,
   int artificials = 0;
   for (int i = 0; i < type->num_fields (); ++i)
     {
-      if (strip_artificial && TYPE_FIELD_ARTIFICIAL (type, i))
+      if (strip_artificial && type->field (i).is_artificial ())
 	{
 	  --array.n_elements;
 	  ++artificials;

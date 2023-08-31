@@ -1932,7 +1932,7 @@ fortran_prepare_argument (struct expression *exp,
 
   bool is_artificial = ((arg_num >= func_type->num_fields ())
 			? true
-			: TYPE_FIELD_ARTIFICIAL (func_type, arg_num));
+			: func_type->field (arg_num).is_artificial ());
 
   /* If this is an artificial argument, then either, this is an argument
      beyond the end of the known arguments, or possibly, there are no known

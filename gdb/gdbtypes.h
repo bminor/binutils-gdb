@@ -1925,7 +1925,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
-#define TYPE_FIELD_ARTIFICIAL(thistype, n) ((thistype)->field (n).is_artificial ())
 #define TYPE_FIELD_BITSIZE(thistype, n) FIELD_BITSIZE((thistype)->field (n))
 #define TYPE_FIELD_PACKED(thistype, n) (FIELD_BITSIZE((thistype)->field (n))!=0)
 

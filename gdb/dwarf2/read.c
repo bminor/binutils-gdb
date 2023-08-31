@@ -7066,7 +7066,7 @@ dwarf2_compute_name (const char *name,
 		     artificial; there is no way to differentiate
 		     the two cases.  */
 		  if (type->num_fields () > 0
-		      && TYPE_FIELD_ARTIFICIAL (type, 0)
+		      && type->field (0).is_artificial ()
 		      && type->field (0).type ()->code () == TYPE_CODE_PTR
 		      && TYPE_CONST (type->field (0).type ()->target_type ()))
 		    buf.puts (" const");
@@ -12239,7 +12239,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 	 parameter for non-static member functions (which is the this
 	 pointer) as artificial.  We obtain this information from
 	 read_subroutine_type via TYPE_FIELD_ARTIFICIAL.  */
-      if (nparams == 0 || TYPE_FIELD_ARTIFICIAL (this_type, 0) == 0)
+      if (nparams == 0 || this_type->field (0).is_artificial () == 0)
 	fnp->voffset = VOFFSET_STATIC;
     }
   else
@@ -12328,7 +12328,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 		 we cannot actually find a base class context for the
 		 vtable!  */
 	      if (this_type->num_fields () == 0
-		  || !TYPE_FIELD_ARTIFICIAL (this_type, 0))
+		  || !this_type->field (0).is_artificial ())
 		{
 		  complaint (_("cannot determine context for virtual member "
 			       "function \"%s\" (offset %s)"),
@@ -14723,7 +14723,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 		 but not in the class specifications (GCC PR 43053).  */
 	      if (cu->lang () == language_cplus
 		  && !TYPE_CONST (arg_type)
-		  && TYPE_FIELD_ARTIFICIAL (ftype, iparams))
+		  && ftype->field (iparams).is_artificial ())
 		{
 		  int is_this = 0;
 		  struct dwarf2_cu *arg_cu = cu;

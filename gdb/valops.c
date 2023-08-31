@@ -3464,7 +3464,7 @@ compare_parameters (struct type *t1, struct type *t2, int skip_artificial)
 {
   int start = 0;
 
-  if (t1->num_fields () > 0 && TYPE_FIELD_ARTIFICIAL (t1, 0))
+  if (t1->num_fields () > 0 && t1->field (0).is_artificial ())
     ++start;
 
   /* If skipping artificial fields, find the first real field
@@ -3472,7 +3472,7 @@ compare_parameters (struct type *t1, struct type *t2, int skip_artificial)
   if (skip_artificial)
     {
       while (start < t1->num_fields ()
-	     && TYPE_FIELD_ARTIFICIAL (t1, start))
+	     && t1->field (start).is_artificial ())
 	++start;
     }
 

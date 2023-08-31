@@ -651,7 +651,7 @@ cplus_class_num_children (struct type *type, int children[3])
 	 table pointers are not specifically marked in the debug info,
 	 they should be artificial.  */
       if ((type == basetype && i == vptr_fieldno)
-	  || TYPE_FIELD_ARTIFICIAL (type, i))
+	  || type->field (i).is_artificial ())
 	continue;
 
       if (TYPE_FIELD_PROTECTED (type, i))
@@ -751,7 +751,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 	  while (index >= 0)
 	    {
 	      if ((type == basetype && type_index == vptr_fieldno)
-		  || TYPE_FIELD_ARTIFICIAL (type, type_index))
+		  || type->field (type_index).is_artificial ())
 		; /* ignore vptr */
 	      else if (match_accessibility (type, type_index, acc))
 		    --index;

@@ -5542,7 +5542,7 @@ copy_type_recursive (struct type *type, htab_t copied_types)
       for (i = 0; i < nfields; i++)
 	{
 	  new_type->field (i).set_is_artificial
-	    (TYPE_FIELD_ARTIFICIAL (type, i));
+	    (type->field (i).is_artificial ());
 	  TYPE_FIELD_BITSIZE (new_type, i) = TYPE_FIELD_BITSIZE (type, i);
 	  if (type->field (i).type ())
 	    new_type->field (i).set_type

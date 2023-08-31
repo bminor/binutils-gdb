@@ -535,7 +535,7 @@ c_type_print_args (struct type *type, struct ui_file *stream,
     {
       struct type *param_type;
 
-      if (TYPE_FIELD_ARTIFICIAL (type, i) && linkage_name)
+      if (type->field (i).is_artificial () && linkage_name)
 	continue;
 
       if (printed_any)
@@ -1102,7 +1102,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	     virtual table pointers are not specifically marked in
 	     the debug info, they should be artificial.  */
 	  if ((i == vptr_fieldno && type == basetype)
-	      || TYPE_FIELD_ARTIFICIAL (type, i))
+	      || type->field (i).is_artificial ())
 	    continue;
 
 	  if (need_access_label)

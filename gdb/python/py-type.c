@@ -197,7 +197,7 @@ convert_field (struct type *type, int field)
   if (PyObject_SetAttrString (result.get (), "name", arg.get ()) < 0)
     return NULL;
 
-  arg.reset (PyBool_FromLong (TYPE_FIELD_ARTIFICIAL (type, field)));
+  arg.reset (PyBool_FromLong (type->field (field).is_artificial ()));
   if (PyObject_SetAttrString (result.get (), "artificial", arg.get ()) < 0)
     return NULL;
 

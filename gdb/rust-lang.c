@@ -93,7 +93,7 @@ rust_enum_variant (struct type *type)
 {
   /* The active variant is simply the first non-artificial field.  */
   for (int i = 0; i < type->num_fields (); ++i)
-    if (!TYPE_FIELD_ARTIFICIAL (type, i))
+    if (!type->field (i).is_artificial ())
       return i;
 
   /* Perhaps we could get here by trying to print an Ada variant
@@ -724,7 +724,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
     {
       if (type->field (i).is_static ())
 	continue;
-      if (is_enum && TYPE_FIELD_ARTIFICIAL (type, i))
+      if (is_enum && type->field (i).is_artificial ())
 	continue;
       fields.push_back (i);
     }
@@ -741,7 +741,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
       QUIT;
 
       gdb_assert (!type->field (i).is_static ());
-      gdb_assert (! (is_enum && TYPE_FIELD_ARTIFICIAL (type, i)));
+      gdb_assert (! (is_enum && type->field (i).is_artificial ()));
 
       if (flags->print_offsets)
 	podata->update (type, i, stream);
