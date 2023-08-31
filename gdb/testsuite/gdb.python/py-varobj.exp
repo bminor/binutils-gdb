@@ -47,3 +47,15 @@ mi_gdb_test "-var-create tval * tval" \
 
 mi_gdb_test "-var-list-children --all-values tval" \
     ".*value=.*flicker.*"
+
+mi_gdb_test "-var-create test_ptr * test_ptr" \
+   "\\^done.*"
+
+mi_gdb_test "-var-evaluate-expression test_ptr" \
+   "\\^done,value=\"map\""
+mi_gdb_test "-var-set-visualizer test_ptr None" \
+    "\\^done.*"
+# mi_gdb_test "-var-update test_ptr" ".*"
+mi_gdb_test "-var-evaluate-expression test_ptr" \
+   "\\^done,value=\"$hex.*\"" \
+    "evaluate without visualizer"

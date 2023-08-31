@@ -1393,6 +1393,9 @@ varobj_set_visualizer (struct varobj *var, const char *visualizer)
   /* If there are any children now, wipe them.  */
   varobj_delete (var, 1 /* children only */);
   var->num_children = -1;
+
+  /* Also be sure to reset the print value.  */
+  varobj_set_display_format (var, var->format);
 #else
   error (_("Python support required"));
 #endif
@@ -2211,6 +2214,12 @@ varobj_value_get_print_value (struct value *value,
 	      if (PyObject_HasAttr (value_formatter, gdbpy_children_cst))
 		return "{...}";
 	    }
+	}
+      else
+	{
+	  /* If we've made it here, we don't want a pretty-printer --
+	     if we had one, it would already have been used.  */
+	  opts.raw = true;
 	}
     }
 #endif

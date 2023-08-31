@@ -12,6 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import gdb
 import gdb.printing
 
 
@@ -30,6 +31,7 @@ def str_lookup_function(val):
     lookup_tag = val.type.tag
     if lookup_tag == "test":
         return TestPrinter(val)
-
+    if val.type.code == gdb.TYPE_CODE_PTR and val.type.target().tag == "test":
+        return TestPrinter(val.dereference())
 
 gdb.printing.register_pretty_printer(None, str_lookup_function)

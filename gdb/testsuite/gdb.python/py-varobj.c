@@ -21,6 +21,8 @@ struct test {
 
 struct test tval = {23};
 
+struct test *test_ptr = &tval;
+
 int main () {
   return 0;
 }
