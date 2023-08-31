@@ -1317,12 +1317,12 @@ update_static_array_size (struct type *type)
       if (element_type->code () == TYPE_CODE_ARRAY
 	  && (stride != 0 || element_type->is_multi_dimensional ())
 	  && element_type->length () != 0
-	  && TYPE_FIELD_BITSIZE (element_type, 0) != 0
+	  && element_type->field (0).bitsize () != 0
 	  && get_array_bounds (element_type, &low_bound, &high_bound)
 	  && high_bound >= low_bound)
 	type->field (0).set_bitsize
 	  ((high_bound - low_bound + 1)
-	   * TYPE_FIELD_BITSIZE (element_type, 0));
+	   * element_type->field (0).bitsize ());
 
       return true;
     }
@@ -2330,7 +2330,7 @@ resolve_dynamic_array_or_string_1 (struct type *type,
 	}
     }
   else
-    bit_stride = TYPE_FIELD_BITSIZE (type, 0);
+    bit_stride = type->field (0).bitsize ();
 
   type_allocator alloc (type, type_allocator::SMASH);
   return create_array_type_with_stride (alloc, elt_type, range_type, NULL,
@@ -2550,7 +2550,7 @@ compute_variant_fields_inner (struct type *type,
 			    + (type->field (idx).loc_bitpos ()
 			       / TARGET_CHAR_BIT));
 
-	  LONGEST bitsize = TYPE_FIELD_BITSIZE (type, idx);
+	  LONGEST bitsize = type->field (idx).bitsize ();
 	  LONGEST size = bitsize / 8;
 	  if (size == 0)
 	    size = type->field (idx).type ()->length ();
@@ -2704,8 +2704,8 @@ resolve_dynamic_struct (struct type *type,
 		  == FIELD_LOC_KIND_BITPOS);
 
       new_bit_length = resolved_type->field (i).loc_bitpos ();
-      if (TYPE_FIELD_BITSIZE (resolved_type, i) != 0)
-	new_bit_length += TYPE_FIELD_BITSIZE (resolved_type, i);
+      if (resolved_type->field (i).bitsize () != 0)
+	new_bit_length += resolved_type->field (i).bitsize ();
       else
 	{
 	  struct type *real_type
@@ -5349,7 +5349,7 @@ recursive_dump_type (struct type *type, int spaces)
       else
 	gdb_printf ("%*s[%d] bitpos %s bitsize %d type ", spaces + 2, "",
 		    idx, plongest (type->field (idx).loc_bitpos ()),
-		    TYPE_FIELD_BITSIZE (type, idx));
+		    type->field (idx).bitsize ());
       gdb_printf ("%s name '%s' (%s)\n",
 		  host_address_to_string (type->field (idx).type ()),
 		  type->field (idx).name () != NULL
@@ -5543,7 +5543,7 @@ copy_type_recursive (struct type *type, htab_t copied_types)
 	{
 	  new_type->field (i).set_is_artificial
 	    (type->field (i).is_artificial ());
-	  new_type->field (i).set_bitsize (TYPE_FIELD_BITSIZE (type, i));
+	  new_type->field (i).set_bitsize (type->field (i).bitsize ());
 	  if (type->field (i).type ())
 	    new_type->field (i).set_type
 	      (copy_type_recursive (type->field (i).type (), copied_types));

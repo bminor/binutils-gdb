@@ -1161,8 +1161,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 		 unnamed fields.  This would lead to misleading
 		 results if the compiler does not put out fields
 		 for such things (I don't know what it does).  */
-	      gdb_printf (stream, " : %d",
-			  TYPE_FIELD_BITSIZE (type, i));
+	      gdb_printf (stream, " : %d", type->field (i).bitsize ());
 	    }
 	  gdb_printf (stream, ";\n");
 	}
@@ -1591,11 +1590,11 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 				language, &local_flags, podata);
 		gdb_printf (stream, " @%s",
 			    plongest (type->field (i).loc_bitpos ()));
-		if (TYPE_FIELD_BITSIZE (type, i) > 1)
+		if (type->field (i).bitsize () > 1)
 		  {
 		    gdb_printf (stream, "-%s",
 				plongest (type->field (i).loc_bitpos ()
-					  + TYPE_FIELD_BITSIZE (type, i)
+					  + type->field (i).bitsize ()
 					  - 1));
 		  }
 		gdb_printf (stream, ";\n");

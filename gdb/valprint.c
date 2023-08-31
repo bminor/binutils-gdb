@@ -1244,7 +1244,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 		 problematic place to notify the user of an internal error
 		 though.  Instead just fall through and print the field as an
 		 int.  */
-	      && TYPE_FIELD_BITSIZE (type, field) == 1)
+	      && type->field (field).bitsize () == 1)
 	    {
 	      if (val & ((ULONGEST)1 << type->field (field).loc_bitpos ()))
 		gdb_printf
@@ -1254,7 +1254,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 	    }
 	  else
 	    {
-	      unsigned field_len = TYPE_FIELD_BITSIZE (type, field);
+	      unsigned field_len = type->field (field).bitsize ();
 	      ULONGEST field_val = val >> type->field (field).loc_bitpos ();
 
 	      if (field_len < sizeof (ULONGEST) * TARGET_CHAR_BIT)

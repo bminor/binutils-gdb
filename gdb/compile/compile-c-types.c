@@ -106,7 +106,7 @@ convert_struct_or_union (compile_c_instance *context, struct type *type)
   for (i = 0; i < type->num_fields (); ++i)
     {
       gcc_type field_type;
-      unsigned long bitsize = TYPE_FIELD_BITSIZE (type, i);
+      unsigned long bitsize = type->field (i).bitsize ();
 
       field_type = context->convert_type (type->field (i).type ());
       if (bitsize == 0)

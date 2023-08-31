@@ -153,7 +153,7 @@ print_offset_data::update (struct type *type, unsigned int field_idx,
       || offset_bitpos % TARGET_CHAR_BIT != 0)
     {
       /* We're dealing with a bitfield.  Print the bit offset.  */
-      fieldsize_bit = TYPE_FIELD_BITSIZE (type, field_idx);
+      fieldsize_bit = type->field (field_idx).bitsize ();
 
       unsigned real_bitpos = bitpos + offset_bitpos;
 

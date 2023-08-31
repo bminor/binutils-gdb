@@ -272,7 +272,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		}
 	      else if (val->bits_synthetic_pointer
 		       (type->field (i).loc_bitpos (),
-			TYPE_FIELD_BITSIZE (type, i)))
+			type->field (i).bitsize ()))
 		{
 		  fputs_styled (_("<synthetic pointer>"),
 				metadata_style.style (), stream);

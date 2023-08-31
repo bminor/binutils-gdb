@@ -1933,7 +1933,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index)))
 
-#define TYPE_FIELD_BITSIZE(thistype, n) ((thistype)->field (n).bitsize ())
 #define TYPE_FIELD_PACKED(thistype, n) (((thistype)->field (n).bitsize ())!=0)
 
 #define TYPE_FIELD_PRIVATE_BITS(thistype) \

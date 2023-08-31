@@ -117,7 +117,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
   unsigned int things_printed = 0;
   unsigned len;
   struct type *elttype, *index_type;
-  unsigned long bitsize = TYPE_FIELD_BITSIZE (type, 0);
+  unsigned long bitsize = type->field (0).bitsize ();
   LONGEST low = 0;
 
   scoped_value_mark mark;
@@ -628,7 +628,7 @@ print_field_values (struct value *value, struct value *outer_value,
 	    {
 	      struct value *v;
 	      int bit_pos = type->field (i).loc_bitpos ();
-	      int bit_size = TYPE_FIELD_BITSIZE (type, i);
+	      int bit_size = type->field (i).bitsize ();
 	      struct value_print_options opts;
 
 	      v = ada_value_primitive_packed_val
@@ -883,7 +883,7 @@ ada_value_print_array (struct value *val, struct ui_file *stream, int recurse,
 
   if (val->entirely_optimized_out ())
     val_print_optimized_out (val, stream);
-  else if (TYPE_FIELD_BITSIZE (type, 0) > 0)
+  else if (type->field (0).bitsize () > 0)
     {
       const gdb_byte *valaddr = val->contents_for_printing ().data ();
       int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;

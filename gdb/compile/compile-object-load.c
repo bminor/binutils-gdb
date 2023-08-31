@@ -553,7 +553,7 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
     {
       const char *reg_name = regs_type->field (fieldno).name ();
       ULONGEST reg_bitpos = regs_type->field (fieldno).loc_bitpos ();
-      ULONGEST reg_bitsize = TYPE_FIELD_BITSIZE (regs_type, fieldno);
+      ULONGEST reg_bitsize = regs_type->field (fieldno).bitsize ();
       ULONGEST reg_offset;
       struct type *reg_type
 	= check_typedef (regs_type->field (fieldno).type ());

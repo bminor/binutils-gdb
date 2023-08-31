@@ -577,8 +577,7 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 		 unnamed fields.  This would lead to misleading
 		 results if the compiler does not put out fields
 		 for such things (I don't know what it does).  */
-	      gdb_printf (stream, " : %d",
-			  TYPE_FIELD_BITSIZE (type, i));
+	      gdb_printf (stream, " : %d", type->field (i).bitsize ());
 	    }
 	  gdb_printf (stream, ";\n");
 	}

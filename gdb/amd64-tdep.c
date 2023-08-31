@@ -558,7 +558,7 @@ amd64_has_unaligned_fields (struct type *type)
 	     empty structures), and bitfields (these are handled by
 	     the caller).  */
 	  if (type->field (i).is_static ()
-	      || (TYPE_FIELD_BITSIZE (type, i) == 0
+	      || (type->field (i).bitsize () == 0
 		  && subtype->length () == 0)
 	      || TYPE_FIELD_PACKED (type, i))
 	    continue;
@@ -594,7 +594,7 @@ amd64_classify_aggregate_field (struct type *type, int i,
 {
   struct type *subtype = check_typedef (type->field (i).type ());
   enum amd64_reg_class subclass[2];
-  int bitsize = TYPE_FIELD_BITSIZE (type, i);
+  int bitsize = type->field (i).bitsize ();
 
   if (bitsize == 0)
     bitsize = subtype->length () * 8;

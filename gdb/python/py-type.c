@@ -208,7 +208,7 @@ convert_field (struct type *type, int field)
   if (PyObject_SetAttrString (result.get (), "is_base_class", arg.get ()) < 0)
     return NULL;
 
-  arg = gdb_py_object_from_longest (TYPE_FIELD_BITSIZE (type, field));
+  arg = gdb_py_object_from_longest (type->field (field).bitsize ());
   if (arg == NULL)
     return NULL;
   if (PyObject_SetAttrString (result.get (), "bitsize", arg.get ()) < 0)

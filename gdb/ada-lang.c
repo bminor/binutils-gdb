@@ -1881,8 +1881,8 @@ fat_pntr_bounds_bitsize (struct type *type)
 {
   type = desc_base_type (type);
 
-  if (TYPE_FIELD_BITSIZE (type, 1) > 0)
-    return TYPE_FIELD_BITSIZE (type, 1);
+  if (type->field (1).bitsize () > 0)
+    return type->field (1).bitsize ();
   else
     return 8 * ada_check_typedef (type->field (1).type ())->length ();
 }
@@ -1947,8 +1947,8 @@ fat_pntr_data_bitsize (struct type *type)
 {
   type = desc_base_type (type);
 
-  if (TYPE_FIELD_BITSIZE (type, 0) > 0)
-    return TYPE_FIELD_BITSIZE (type, 0);
+  if (type->field (0).bitsize () > 0)
+    return type->field (0).bitsize ();
   else
     return TARGET_CHAR_BIT * type->field (0).type ()->length ();
 }
@@ -1986,8 +1986,8 @@ desc_bound_bitsize (struct type *type, int i, int which)
 {
   type = desc_base_type (type);
 
-  if (TYPE_FIELD_BITSIZE (type, 2 * i + which - 2) > 0)
-    return TYPE_FIELD_BITSIZE (type, 2 * i + which - 2);
+  if (type->field (2 * i + which - 2).bitsize () > 0)
+    return type->field (2 * i + which - 2).bitsize ();
   else
     return 8 * type->field (2 * i + which - 2).type ()->length ();
 }
@@ -2151,7 +2151,7 @@ ada_type_of_array (struct value *arr, int bounds)
 	      if (lo < hi)
 		{
 		  int array_bitsize =
-			(hi - lo + 1) * TYPE_FIELD_BITSIZE (elt_type, 0);
+			(hi - lo + 1) * elt_type->field (0).bitsize ();
 
 		  elt_type->set_length ((array_bitsize + 7) / 8);
 		}
@@ -2269,7 +2269,7 @@ ada_is_unconstrained_packed_array_type (struct type *type)
       if (type->code () == TYPE_CODE_TYPEDEF)
 	type = ada_typedef_target_type (type);
       /* Now we can see if the array elements are packed.  */
-      return TYPE_FIELD_BITSIZE (type, 0) > 0;
+      return type->field (0).bitsize () > 0;
     }
 
   return 0;
@@ -2283,7 +2283,7 @@ ada_is_any_packed_array_type (struct type *type)
 {
   return (ada_is_constrained_packed_array_type (type)
 	  || (type->code () == TYPE_CODE_ARRAY
-	      && TYPE_FIELD_BITSIZE (type, 0) % 8 != 0));
+	      && type->field (0).bitsize () % 8 != 0));
 }
 
 /* Given that TYPE encodes a packed array type (constrained or unconstrained),
@@ -2317,7 +2317,7 @@ decode_packed_array_bitsize (struct type *type)
 	 fetches the array type.  */
       type = type->field (0).type ()->target_type ();
       /* Now we can see if the array elements are packed.  */
-      return TYPE_FIELD_BITSIZE (type, 0);
+      return type->field (0).bitsize ();
     }
 
   if (sscanf (tail + sizeof ("___XP") - 1, "%ld", &bits) != 1)
@@ -2458,7 +2458,7 @@ recursively_update_array_bitsize (struct type *type)
   if (elt_type->code () == TYPE_CODE_ARRAY)
     {
       LONGEST elt_len = recursively_update_array_bitsize (elt_type);
-      LONGEST elt_bitsize = elt_len * TYPE_FIELD_BITSIZE (elt_type, 0);
+      LONGEST elt_bitsize = elt_len * elt_type->field (0).bitsize ();
       type->field (0).set_bitsize (elt_bitsize);
 
       type->set_length (((our_len * elt_bitsize + HOST_CHAR_BIT - 1)
@@ -2556,7 +2556,7 @@ value_subscript_packed (struct value *arr, int arity, struct value **ind)
   for (i = 0; i < arity; i += 1)
     {
       if (elt_type->code () != TYPE_CODE_ARRAY
-	  || TYPE_FIELD_BITSIZE (elt_type, 0) == 0)
+	  || elt_type->field (0).bitsize () == 0)
 	error
 	  (_("attempt to do packed indexing of "
 	     "something other than a packed array"));
@@ -2576,7 +2576,7 @@ value_subscript_packed (struct value *arr, int arity, struct value **ind)
 	  if (idx < lowerbound || idx > upperbound)
 	    lim_warning (_("packed array index %ld out of bounds"),
 			 (long) idx);
-	  bits = TYPE_FIELD_BITSIZE (elt_type, 0);
+	  bits = elt_type->field (0).bitsize ();
 	  elt_total_bit_offset += (idx - lowerbound) * bits;
 	  elt_type = ada_check_typedef (elt_type->target_type ());
 	}
@@ -2992,7 +2992,7 @@ ada_value_subscript (struct value *arr, int arity, struct value **ind)
 
   elt_type = ada_check_typedef (elt->type ());
   if (elt_type->code () == TYPE_CODE_ARRAY
-      && TYPE_FIELD_BITSIZE (elt_type, 0) > 0)
+      && elt_type->field (0).bitsize () > 0)
     return value_subscript_packed (elt, arity, ind);
 
   for (k = 0; k < arity; k += 1)
@@ -3049,7 +3049,7 @@ ada_value_ptr_subscript (struct value *arr, int arity, struct value **ind)
     = check_typedef (array_ind->enclosing_type ());
 
   if (type->code () == TYPE_CODE_ARRAY
-      && TYPE_FIELD_BITSIZE (type, 0) > 0)
+      && type->field (0).bitsize () > 0)
     return value_subscript_packed (array_ind, arity, ind);
 
   for (k = 0; k < arity; k += 1)
@@ -3084,7 +3084,7 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
   struct type *slice_type = create_array_type_with_stride
 			      (alloc, type0->target_type (), index_type,
 			       type0->dyn_prop (DYN_PROP_BYTE_STRIDE),
-			       TYPE_FIELD_BITSIZE (type0, 0));
+			       type0->field (0).bitsize ());
   int base_low =  ada_discrete_type_low_bound (type0->index_type ());
   gdb::optional<LONGEST> base_low_pos, low_pos;
   CORE_ADDR base;
@@ -3099,7 +3099,7 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
       base_low_pos = base_low;
     }
 
-  ULONGEST stride = TYPE_FIELD_BITSIZE (slice_type, 0) / 8;
+  ULONGEST stride = slice_type->field (0).bitsize () / 8;
   if (stride == 0)
     stride = type0->target_type ()->length ();
 
@@ -3119,7 +3119,7 @@ ada_value_slice (struct value *array, int low, int high)
   struct type *slice_type = create_array_type_with_stride
 			      (alloc, type->target_type (), index_type,
 			       type->dyn_prop (DYN_PROP_BYTE_STRIDE),
-			       TYPE_FIELD_BITSIZE (type, 0));
+			       type->field (0).bitsize ());
   gdb::optional<LONGEST> low_pos, high_pos;
 
 
@@ -6886,10 +6886,10 @@ ada_value_primitive_field (struct value *arg1, int offset, int fieldno,
   /* Handle packed fields.  It might be that the field is not packed
      relative to its containing structure, but the structure itself is
      packed; in this case we must take the bit-field path.  */
-  if (TYPE_FIELD_BITSIZE (arg_type, fieldno) != 0 || arg1->bitpos () != 0)
+  if (arg_type->field (fieldno).bitsize () != 0 || arg1->bitpos () != 0)
     {
       int bit_pos = arg_type->field (fieldno).loc_bitpos ();
-      int bit_size = TYPE_FIELD_BITSIZE (arg_type, fieldno);
+      int bit_size = arg_type->field (fieldno).bitsize ();
 
       return ada_value_primitive_packed_val (arg1,
 					     arg1->contents ().data (),
@@ -7018,7 +7018,7 @@ find_struct_field (const char *name, struct type *type, int offset,
 
       else if (name != NULL && field_name_match (t_field_name, name))
 	{
-	  int bit_size = TYPE_FIELD_BITSIZE (type, i);
+	  int bit_size = type->field (i).bitsize ();
 
 	  if (field_type_p != NULL)
 	    *field_type_p = type->field (i).type ();
@@ -7866,9 +7866,9 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	     would prevent us from printing this field appropriately.  */
 	  rtype->field (f).set_type (type->field (f).type ());
 	  rtype->field (f).set_name (type->field (f).name ());
-	  if (TYPE_FIELD_BITSIZE (type, f) > 0)
+	  if (type->field (f).bitsize () > 0)
 	    {
-	      fld_bit_len = TYPE_FIELD_BITSIZE (type, f);
+	      fld_bit_len = type->field (f).bitsize ();
 	      rtype->field (f).set_bitsize (fld_bit_len);
 	    }
 	  else
@@ -8409,9 +8409,9 @@ to_fixed_array_type (struct type *type0, struct value *dval,
 	 bitsize of the array elements needs to be set again, and the array
 	 length needs to be recomputed based on that bitsize.  */
       int len = result->length () / result->target_type ()->length ();
-      int elt_bitsize = TYPE_FIELD_BITSIZE (type0, 0);
+      int elt_bitsize = type0->field (0).bitsize ();
 
-      result->field (0).set_bitsize (TYPE_FIELD_BITSIZE (type0, 0));
+      result->field (0).set_bitsize (elt_bitsize);
       result->set_length (len * elt_bitsize / HOST_CHAR_BIT);
       if (result->length () * HOST_CHAR_BIT < len * elt_bitsize)
 	result->set_length (result->length () + 1);
@@ -11111,7 +11111,7 @@ ada_funcall_operation::evaluate (struct type *expect_type,
       (desc_base_type (callee->type ())))
     callee = ada_coerce_to_simple_array (callee);
   else if (callee->type ()->code () == TYPE_CODE_ARRAY
-	   && TYPE_FIELD_BITSIZE (callee->type (), 0) != 0)
+	   && callee->type ()->field (0).bitsize () != 0)
     /* This is a packed array that has already been fixed, and
        therefore already coerced to a simple array.  Nothing further
        to do.  */

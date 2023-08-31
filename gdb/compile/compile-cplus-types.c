@@ -642,7 +642,7 @@ compile_cplus_convert_struct_or_union_members
 	}
       else
 	{
-	  unsigned long bitsize = TYPE_FIELD_BITSIZE (type, i);
+	  unsigned long bitsize = type->field (i).bitsize ();
 	  enum gcc_cp_symbol_kind field_flags = GCC_CP_SYMBOL_FIELD
 	    | get_field_access_flag (type, i);
 

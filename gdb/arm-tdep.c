@@ -9109,7 +9109,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 		  /* Bitfields are not addressable.  If the field bitsize is 
 		     zero, then the field is not packed.  Hence it cannot be
 		     a bitfield or any other packed type.  */
-		  if (TYPE_FIELD_BITSIZE (type, i) == 0)
+		  if (type->field (i).bitsize () == 0)
 		    {
 		      nRc = 1;
 		      break;

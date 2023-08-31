@@ -1323,7 +1323,7 @@ gen_primitive_field (struct agent_expr *ax, struct axs_value *value,
 		       + type->field (fieldno).loc_bitpos ()),
 		      (offset * TARGET_CHAR_BIT
 		       + type->field (fieldno).loc_bitpos ()
-		       + TYPE_FIELD_BITSIZE (type, fieldno)));
+		       + type->field (fieldno).bitsize ()));
   else
     {
       gen_offset (ax, offset
