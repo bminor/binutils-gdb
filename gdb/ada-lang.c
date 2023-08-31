@@ -7772,9 +7772,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
   rtype = type_allocator (type).new_type ();
   rtype->set_code (TYPE_CODE_STRUCT);
   INIT_NONE_SPECIFIC (rtype);
-  rtype->set_num_fields (nfields);
-  rtype->set_fields
-   ((struct field *) TYPE_ZALLOC (rtype, nfields * sizeof (struct field)));
+  rtype->alloc_fields (nfields);
   rtype->set_name (ada_type_name (type));
   rtype->set_is_fixed_instance (true);
 
@@ -8024,14 +8022,8 @@ template_to_static_fixed_type (struct type *type0)
 	      type0->set_target_type (type);
 	      type->set_code (type0->code ());
 	      INIT_NONE_SPECIFIC (type);
-	      type->set_num_fields (nfields);
 
-	      field *fields =
-		((struct field *)
-		 TYPE_ALLOC (type, nfields * sizeof (struct field)));
-	      memcpy (fields, type0->fields (),
-		      sizeof (struct field) * nfields);
-	      type->set_fields (fields);
+	      type->copy_fields (type0);
 
 	      type->set_name (ada_type_name (type0));
 	      type->set_is_fixed_instance (true);
@@ -8077,12 +8069,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   rtype = type_allocator (type).new_type ();
   rtype->set_code (TYPE_CODE_STRUCT);
   INIT_NONE_SPECIFIC (rtype);
-  rtype->set_num_fields (nfields);
-
-  field *fields =
-    (struct field *) TYPE_ALLOC (rtype, nfields * sizeof (struct field));
-  memcpy (fields, type->fields (), sizeof (struct field) * nfields);
-  rtype->set_fields (fields);
+  rtype->copy_fields (type);
 
   rtype->set_name (ada_type_name (type));
   rtype->set_is_fixed_instance (true);

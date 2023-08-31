@@ -982,9 +982,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    }
 
 	  /* Allocate parameter information fields and fill them in.  */
-	  ftype->set_fields
-	    ((struct field *)
-	     TYPE_ALLOC (ftype, nsemi * sizeof (struct field)));
+	  ftype->alloc_fields (nsemi, false);
 	  while (*p++ == ';')
 	    {
 	      struct type *ptype;
@@ -1826,10 +1824,7 @@ again:
 	    && arg_types->type->code () == TYPE_CODE_VOID)
 	  num_args = 0;
 
-	func_type->set_fields
-	  ((struct field *) TYPE_ALLOC (func_type,
-					num_args * sizeof (struct field)));
-	memset (func_type->fields (), 0, num_args * sizeof (struct field));
+	func_type->alloc_fields (num_args);
 	{
 	  int i;
 	  struct type_list *t;
@@ -3295,11 +3290,7 @@ attach_fields_to_type (struct stab_field_info *fip, struct type *type,
      non-public fields.  Record the field count, allocate space for the
      array of fields, and create blank visibility bitfields if necessary.  */
 
-  type->set_num_fields (nfields);
-  type->set_fields
-    ((struct field *)
-     TYPE_ALLOC (type, sizeof (struct field) * nfields));
-  memset (type->fields (), 0, sizeof (struct field) * nfields);
+  type->alloc_fields (nfields);
 
   if (non_public_fields)
     {
@@ -3644,11 +3635,7 @@ read_enum_type (const char **pp, struct type *type,
   type->set_is_stub (false);
   if (unsigned_enum)
     type->set_is_unsigned (true);
-  type->set_num_fields (nsyms);
-  type->set_fields
-    ((struct field *)
-     TYPE_ALLOC (type, sizeof (struct field) * nsyms));
-  memset (type->fields (), 0, sizeof (struct field) * nsyms);
+  type->alloc_fields (nsyms);
 
   /* Find the symbols for the values and put them into the type.
      The symbols can be found in the symlist that we put them on

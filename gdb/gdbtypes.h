@@ -992,6 +992,14 @@ struct type
     this->main_type->flds_bnds.fields = fields;
   }
 
+  /* Allocate the fields array of this type, with NFIELDS elements.  If INIT,
+     zero-initialize the allocated memory.  */
+  void alloc_fields (unsigned int nfields, bool init = true);
+
+  /* Allocate the fields array of this type, and copy the fields from SRC.  */
+  void copy_fields (struct type *src);
+  void copy_fields (std::vector<struct field> &src);
+
   type *index_type () const
   {
     return this->field (0).type ();

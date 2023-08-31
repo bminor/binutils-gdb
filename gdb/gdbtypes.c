@@ -597,9 +597,7 @@ lookup_function_type_with_arguments (struct type *type,
 	fn->set_is_prototyped (true);
     }
 
-  fn->set_num_fields (nparams);
-  fn->set_fields
-    ((struct field *) TYPE_ZALLOC (fn, nparams * sizeof (struct field)));
+  fn->alloc_fields (nparams);
   for (i = 0; i < nparams; ++i)
     fn->field (i).set_type (param_types[i]);
 
@@ -1356,9 +1354,7 @@ create_array_type_with_stride (type_allocator &alloc,
   result_type->set_code (TYPE_CODE_ARRAY);
   result_type->set_target_type (element_type);
 
-  result_type->set_num_fields (1);
-  result_type->set_fields
-    ((struct field *) TYPE_ZALLOC (result_type, sizeof (struct field)));
+  result_type->alloc_fields (1);
   result_type->set_index_type (range_type);
   if (byte_stride_prop != NULL)
     result_type->add_dyn_prop (DYN_PROP_BYTE_STRIDE, *byte_stride_prop);
@@ -1442,9 +1438,7 @@ create_set_type (type_allocator &alloc, struct type *domain_type)
   struct type *result_type = alloc.new_type ();
 
   result_type->set_code (TYPE_CODE_SET);
-  result_type->set_num_fields (1);
-  result_type->set_fields
-    ((struct field *) TYPE_ZALLOC (result_type, sizeof (struct field)));
+  result_type->alloc_fields (1);
 
   if (!domain_type->is_stub ())
     {
@@ -2452,13 +2446,7 @@ resolve_dynamic_union (struct type *type,
   gdb_assert (type->code () == TYPE_CODE_UNION);
 
   resolved_type = copy_type (type);
-  resolved_type->set_fields
-    ((struct field *)
-     TYPE_ALLOC (resolved_type,
-		 resolved_type->num_fields () * sizeof (struct field)));
-  memcpy (resolved_type->fields (),
-	  type->fields (),
-	  resolved_type->num_fields () * sizeof (struct field));
+  resolved_type->copy_fields (type);
   for (i = 0; i < resolved_type->num_fields (); ++i)
     {
       struct type *t;
@@ -2618,12 +2606,10 @@ compute_variant_fields (struct type *type,
   for (const auto &part : parts)
     compute_variant_fields_inner (type, addr_stack, part, flags);
 
-  resolved_type->set_num_fields
-    (std::count (flags.begin (), flags.end (), true));
-  resolved_type->set_fields
-    ((struct field *)
-     TYPE_ALLOC (resolved_type,
-		 resolved_type->num_fields () * sizeof (struct field)));
+  unsigned int nfields = std::count (flags.begin (), flags.end (), true);
+  /* No need to zero-initialize the newly allocated fields, they'll be
+     initialized by the copy in the loop below.  */
+  resolved_type->alloc_fields (nfields, false);
 
   int out = 0;
   for (int i = 0; i < type->num_fields (); ++i)
@@ -2664,14 +2650,7 @@ resolve_dynamic_struct (struct type *type,
     }
   else
     {
-      resolved_type->set_fields
-	((struct field *)
-	 TYPE_ALLOC (resolved_type,
-		     resolved_type->num_fields () * sizeof (struct field)));
-      if (type->num_fields () > 0)
-	memcpy (resolved_type->fields (),
-		type->fields (),
-		resolved_type->num_fields () * sizeof (struct field));
+      resolved_type->copy_fields (type);
     }
 
   for (i = 0; i < resolved_type->num_fields (); ++i)
@@ -5556,9 +5535,7 @@ copy_type_recursive (struct type *type, htab_t copied_types)
       int i, nfields;
 
       nfields = type->num_fields ();
-      new_type->set_fields
-	((struct field *)
-	 TYPE_ZALLOC (new_type, nfields * sizeof (struct field)));
+      new_type->alloc_fields (type->num_fields ());
 
       for (i = 0; i < nfields; i++)
 	{
@@ -5703,10 +5680,9 @@ arch_flags_type (struct gdbarch *gdbarch, const char *name, int bit)
 
   type = type_allocator (gdbarch).new_type (TYPE_CODE_FLAGS, bit, name);
   type->set_is_unsigned (true);
-  type->set_num_fields (0);
   /* Pre-allocate enough space assuming every field is one bit.  */
-  type->set_fields
-    ((struct field *) TYPE_ZALLOC (type, bit * sizeof (struct field)));
+  type->alloc_fields (bit);
+  type->set_num_fields (0);
 
   return type;
 }
@@ -5912,6 +5888,55 @@ type::fixed_point_scaling_factor ()
   return type->fixed_point_info ().scaling_factor;
 }
 
+/* See gdbtypes.h.  */
+
+void
+type::alloc_fields (unsigned int nfields, bool init)
+{
+  this->set_num_fields (nfields);
+
+  if (nfields == 0)
+    {
+      this->main_type->flds_bnds.fields = nullptr;
+      return;
+    }
+
+  size_t size = nfields * sizeof (*this->fields ());
+  struct field *fields
+    = (struct field *) (init
+			? TYPE_ZALLOC (this, size)
+			: TYPE_ALLOC (this, size));
+
+  this->main_type->flds_bnds.fields = fields;
+}
+
+/* See gdbtypes.h.  */
+
+void
+type::copy_fields (struct type *src)
+{
+  unsigned int nfields = src->num_fields ();
+  alloc_fields (nfields, false);
+  if (nfields == 0)
+    return;
+
+  size_t size = nfields * sizeof (*this->fields ());
+  memcpy (this->fields (), src->fields (), size);
+}
+
+/* See gdbtypes.h.  */
+
+void
+type::copy_fields (std::vector<struct field> &src)
+{
+  unsigned int nfields = src.size ();
+  alloc_fields (nfields, false);
+  if (nfields == 0)
+    return;
+
+  size_t size = nfields * sizeof (*this->fields ());
+  memcpy (this->fields (), src.data (), size);
+}
 
 
 static const registry<gdbarch>::key<struct builtin_type> gdbtypes_data;

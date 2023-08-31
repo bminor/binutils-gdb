@@ -6054,11 +6054,9 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       /* Smash this type to be a structure type.  We have to do this
 	 because the type has already been recorded.  */
       type->set_code (TYPE_CODE_STRUCT);
-      type->set_num_fields (3);
       /* Save the field we care about.  */
       struct field saved_field = type->field (0);
-      type->set_fields
-	((struct field *) TYPE_ZALLOC (type, 3 * sizeof (struct field)));
+      type->alloc_fields (3);
 
       /* Put the discriminant at index 0.  */
       type->field (0).set_type (field_type);
@@ -12059,9 +12057,7 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 
   /* Record the field count, allocate space for the array of fields,
      and create blank accessibility bitfields if necessary.  */
-  type->set_num_fields (nfields);
-  type->set_fields
-    ((struct field *) TYPE_ZALLOC (type, sizeof (struct field) * nfields));
+  type->alloc_fields (nfields);
 
   if (fip->non_public_fields && cu->lang () != language_ada)
     {
@@ -12490,12 +12486,7 @@ rewrite_array_type (struct type *type)
      updated.  Either way we want to copy the type and update
      everything.  */
   struct type *copy = copy_type (type);
-  int nfields = copy->num_fields ();
-  field *new_fields
-    = ((struct field *) TYPE_ZALLOC (copy,
-				     nfields * sizeof (struct field)));
-  memcpy (new_fields, copy->fields (), nfields * sizeof (struct field));
-  copy->set_fields (new_fields);
+  copy->copy_fields (type);
   if (new_target != nullptr)
     copy->set_target_type (new_target);
 
@@ -13260,14 +13251,7 @@ update_enumeration_type_from_children (struct die_info *die,
     }
 
   if (!fields.empty ())
-    {
-      type->set_num_fields (fields.size ());
-      type->set_fields
-	((struct field *)
-	 TYPE_ALLOC (type, sizeof (struct field) * fields.size ()));
-      memcpy (type->fields (), fields.data (),
-	      sizeof (struct field) * fields.size ());
-    }
+    type->copy_fields (fields);
   else
     flag_enum = 0;
 
@@ -13636,12 +13620,7 @@ quirk_ada_thick_pointer (struct die_info *die, struct dwarf2_cu *cu,
   struct type *bounds = alloc.new_type ();
   bounds->set_code (TYPE_CODE_STRUCT);
 
-  bounds->set_num_fields (range_fields.size ());
-  bounds->set_fields
-    ((struct field *) TYPE_ALLOC (bounds, (bounds->num_fields ()
-					   * sizeof (struct field))));
-  memcpy (bounds->fields (), range_fields.data (),
-	  bounds->num_fields () * sizeof (struct field));
+  bounds->copy_fields (range_fields);
 
   int last_fieldno = range_fields.size () - 1;
   int bounds_size = (bounds->field (last_fieldno).loc_bitpos () / 8
@@ -13664,10 +13643,7 @@ quirk_ada_thick_pointer (struct die_info *die, struct dwarf2_cu *cu,
   struct type *result = type_allocator (objfile).new_type ();
   result->set_code (TYPE_CODE_STRUCT);
 
-  result->set_num_fields (2);
-  result->set_fields
-    ((struct field *) TYPE_ZALLOC (result, (result->num_fields ()
-					    * sizeof (struct field))));
+  result->alloc_fields (2);
 
   /* The names are chosen to coincide with what the compiler does with
      -fgnat-encodings=all, which the Ada code in gdb already
@@ -14709,9 +14685,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
 
       /* Allocate storage for parameters and fill them in.  */
-      ftype->set_num_fields (nparams);
-      ftype->set_fields
-	((struct field *) TYPE_ZALLOC (ftype, nparams * sizeof (struct field)));
+      ftype->alloc_fields (nparams);
 
       /* TYPE_FIELD_TYPE must never be NULL.  Pre-fill the array to ensure it
 	 even if we error out during the parameters reading below.  */

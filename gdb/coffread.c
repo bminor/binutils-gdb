@@ -1462,14 +1462,9 @@ patch_type (struct type *type, struct type *real_type)
 {
   struct type *target = type->target_type ();
   struct type *real_target = real_type->target_type ();
-  int field_size = real_target->num_fields () * sizeof (struct field);
 
   target->set_length (real_target->length ());
-  target->set_num_fields (real_target->num_fields ());
-
-  field *fields = (struct field *) TYPE_ALLOC (target, field_size);
-  memcpy (fields, real_target->fields (), field_size);
-  target->set_fields (fields);
+  target->copy_fields (real_target);
 
   if (real_target->name ())
     {
@@ -2037,9 +2032,7 @@ coff_read_struct_type (int index, int length, int lastsym,
     }
   /* Now create the vector of fields, and record how big it is.  */
 
-  type->set_num_fields (nfields);
-  type->set_fields
-    ((struct field *) TYPE_ALLOC (type, sizeof (struct field) * nfields));
+  type->alloc_fields (nfields, false);
 
   /* Copy the saved-up fields into the field vector.  */
 
@@ -2117,9 +2110,7 @@ coff_read_enum_type (int index, int length, int lastsym,
   else /* Assume ints.  */
     type->set_length (gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT);
   type->set_code (TYPE_CODE_ENUM);
-  type->set_num_fields (nsyms);
-  type->set_fields
-    ((struct field *) TYPE_ALLOC (type, sizeof (struct field) * nsyms));
+  type->alloc_fields (nsyms, false);
 
   /* Find the symbols for the values and put them into the type.
      The symbols can be found in the symlist that we put them on

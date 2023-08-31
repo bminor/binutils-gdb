@@ -757,10 +757,7 @@ amd_dbgapi_register_type_to_gdb_type (const amd_dbgapi_register_type &type,
 	     .new_type (TYPE_CODE_ENUM, enum_type.bit_size (),
 			enum_type.name ().c_str ()));
 
-	gdb_type->set_num_fields (enum_type.size ());
-	gdb_type->set_fields
-	  ((struct field *) TYPE_ZALLOC (gdb_type, (sizeof (struct field)
-						    * enum_type.size ())));
+	gdb_type->alloc_fields (enum_type.size ());
 	gdb_type->set_is_unsigned (true);
 
 	for (size_t i = 0; i < enum_type.size (); ++i)

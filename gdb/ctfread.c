@@ -346,9 +346,7 @@ attach_fields_to_type (struct ctf_field_info *fip, struct type *type)
     return;
 
   /* Record the field count, allocate space for the array of fields.  */
-  type->set_num_fields (nfields);
-  type->set_fields
-    ((struct field *) TYPE_ZALLOC (type, sizeof (struct field) * nfields));
+  type->alloc_fields (nfields);
 
   /* Copy the saved-up fields into the field vector.  */
   for (int i = 0; i < nfields; ++i)
@@ -715,8 +713,7 @@ read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
       if (ctf_func_type_args (fp, tid, argc, argv.data ()) == CTF_ERR)
 	return nullptr;
 
-      type->set_fields
-	((struct field *) TYPE_ZALLOC (type, argc * sizeof (struct field)));
+      type->alloc_fields (argc);
       struct type *void_type = builtin_type (of)->builtin_void;
       /* If failed to find the argument type, fill it with void_type.  */
       for (int iparam = 0; iparam < argc; iparam++)

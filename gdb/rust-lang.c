@@ -950,9 +950,7 @@ rust_composite_type (struct type *original,
   result->set_code (TYPE_CODE_STRUCT);
   result->set_name (name);
 
-  result->set_num_fields (nfields);
-  result->set_fields
-    ((struct field *) TYPE_ZALLOC (result, nfields * sizeof (struct field)));
+  result->alloc_fields (nfields);
 
   i = 0;
   bitpos = 0;
