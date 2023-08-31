@@ -267,7 +267,7 @@ buildsym_compunit::finish_block_internal
 	      ftype->set_num_fields (nparams);
 	      ftype->set_fields
 		((struct field *)
-		 TYPE_ALLOC (ftype, nparams * sizeof (struct field)));
+		 TYPE_ZALLOC (ftype, nparams * sizeof (struct field)));
 
 	      iparams = 0;
 	      /* Here we want to directly access the dictionary, because
