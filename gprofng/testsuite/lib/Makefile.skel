@@ -39,11 +39,6 @@ DISPLAY	    = $(GPROFNG) display text
 EXPERIMENT  = test.er
 DISPLAY_LOG = display.log
 
-export LD_LIBRARY_PATH := $(BUILDDIR)/src
-
-# Set GPROFNG_SYSCONFDIR to find out gprofng.rc:
-export GPROFNG_SYSCONFDIR := $(srcdir)/../../../src
-
 .PHONY: all collect compare clobber clean
 
 all: compare
