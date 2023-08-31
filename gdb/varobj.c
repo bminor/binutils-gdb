@@ -164,8 +164,6 @@ create_child_with_value (struct varobj *parent, int index,
 
 /* Utility routines */
 
-static enum varobj_display_formats variable_default_display (struct varobj *);
-
 static bool update_type_if_necessary (struct varobj *var,
 				      struct value *new_value);
 
@@ -336,7 +334,7 @@ varobj_create (const char *objname,
 	  return NULL;
 	}
 
-      var->format = variable_default_display (var.get ());
+      var->format = FORMAT_NATURAL;
       var->root->valid_block =
 	var->root->floating ? NULL : tracker.block ();
       var->root->global
@@ -1869,14 +1867,6 @@ varobj_get_value_type (const struct varobj *var)
   type = check_typedef (type);
 
   return type;
-}
-
-/* What is the default display for this variable? We assume that
-   everything is "natural".  Any exceptions?  */
-static enum varobj_display_formats
-variable_default_display (struct varobj *var)
-{
-  return FORMAT_NATURAL;
 }
 
 /*
