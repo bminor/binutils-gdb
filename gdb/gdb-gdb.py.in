@@ -172,7 +172,7 @@ class StructMainTypePrettyPrinter:
         """Return an image of the main_type field number FIELDNO."""
         f = self.val["flds_bnds"]["fields"][fieldno]
         label = "flds_bnds.fields[%d]:" % fieldno
-        if f["artificial"]:
+        if f["m_artificial"]:
             label += " (artificial)"
         fields = []
         fields.append("m_name = %s" % f["m_name"])

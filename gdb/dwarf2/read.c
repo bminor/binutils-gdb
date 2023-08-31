@@ -6060,7 +6060,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 
       /* Put the discriminant at index 0.  */
       type->field (0).set_type (field_type);
-      TYPE_FIELD_ARTIFICIAL (type, 0) = 1;
+      type->field (0).set_is_artificial (true);
       type->field (0).set_name ("<<discriminant>>");
       type->field (0).set_loc_bitpos (bit_offset);
 
@@ -6158,7 +6158,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 
       /* Install the discriminant at index 0 in the union.  */
       type->field (0) = *disr_field;
-      TYPE_FIELD_ARTIFICIAL (type, 0) = 1;
+      type->field (0).set_is_artificial (true);
       type->field (0).set_name ("<<discriminant>>");
 
       /* We need a way to find the correct discriminant given a
@@ -11743,7 +11743,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	 pointer or virtual base class pointer) to private.  */
       if (dwarf2_attr (die, DW_AT_artificial, cu))
 	{
-	  FIELD_ARTIFICIAL (*fp) = 1;
+	  fp->set_is_artificial (true);
 	  new_field->accessibility = DW_ACCESS_private;
 	  fip->non_public_fields = true;
 	}
@@ -13588,10 +13588,10 @@ quirk_ada_thick_pointer (struct die_info *die, struct dwarf2_cu *cu,
 	  struct field &upper = range_fields[range_fields.size () - 1];
 
 	  lower.set_type (underlying);
-	  FIELD_ARTIFICIAL (lower) = 1;
+	  lower.set_is_artificial (true);
 
 	  upper.set_type (underlying);
-	  FIELD_ARTIFICIAL (upper) = 1;
+	  upper.set_is_artificial (true);
 
 	  if (!recognize_bound_expression (child_die, DW_AT_lower_bound,
 					   &bounds_offset, &lower, cu)
@@ -14713,9 +14713,9 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 		 4.5 does not yet generate.  */
 	      attr = dwarf2_attr (child_die, DW_AT_artificial, cu);
 	      if (attr != nullptr)
-		TYPE_FIELD_ARTIFICIAL (ftype, iparams) = attr->as_boolean ();
+		ftype->field (iparams).set_is_artificial (attr->as_boolean ());
 	      else
-		TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
+		ftype->field (iparams).set_is_artificial (false);
 	      arg_type = die_type (child_die, cu);
 
 	      /* RealView does not mark THIS as const, which the testsuite

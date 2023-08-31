@@ -564,6 +564,16 @@ struct field
     m_name = name;
   }
 
+  bool is_artificial () const
+  {
+    return m_artificial;
+  }
+
+  void set_is_artificial (bool is_artificial)
+  {
+    m_artificial = is_artificial;
+  }
+
   /* Return true if this field is static; false if not.  */
   bool is_static () const
   {
@@ -650,7 +660,7 @@ struct field
      to the user.  For TYPE_CODE_RANGE it is set if the specific
      bound is not defined.  */
 
-  unsigned int artificial : 1;
+  unsigned int m_artificial : 1;
 
   /* * Discriminant for union field_location.  */
 
@@ -1913,7 +1923,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index)))
 
-#define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
+#define FIELD_ARTIFICIAL(thisfld) ((thisfld).is_artificial ())
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
 #define TYPE_FIELD_ARTIFICIAL(thistype, n) FIELD_ARTIFICIAL((thistype)->field (n))

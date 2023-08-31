@@ -277,7 +277,7 @@ buildsym_compunit::finish_block_internal
 		  if (sym->is_argument ())
 		    {
 		      ftype->field (iparams).set_type (sym->type ());
-		      TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
+		      ftype->field (iparams).set_is_artificial (false);
 		      iparams++;
 		    }
 		}
