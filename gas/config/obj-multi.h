@@ -153,9 +153,9 @@
 #define SEPARATE_STAB_SECTIONS \
 	((*this_format->separate_stab_sections) ())
 
-#define INIT_STAB_SECTION(S)				\
+#define INIT_STAB_SECTION(STAB, STR)			\
 	(this_format->init_stab_section			\
-	 ? (*this_format->init_stab_section) (S)	\
+	 ? (*this_format->init_stab_section) (STAB, STR) \
 	 : (void) 0)
 
 #define EMIT_SECTION_SYMBOLS (this_format->emit_section_symbols)

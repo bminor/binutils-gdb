@@ -1804,11 +1804,10 @@ coff_frob_section (segT sec)
 }
 
 void
-obj_coff_init_stab_section (segT seg)
+obj_coff_init_stab_section (segT stab ATTRIBUTE_UNUSED, segT stabstr)
 {
   const char *file;
   char *p;
-  char *stabstr_name;
   unsigned int stroff;
 
   /* Make space for this first symbol.  */
@@ -1816,8 +1815,7 @@ obj_coff_init_stab_section (segT seg)
   /* Zero it out.  */
   memset (p, 0, 12);
   file = as_where ((unsigned int *) NULL);
-  stabstr_name = concat (seg->name, "str", (char *) NULL);
-  stroff = get_stab_string_offset (file, stabstr_name, true);
+  stroff = get_stab_string_offset (file, stabstr);
   know (stroff == 1);
   md_number_to_chars (p, stroff, 4);
 }

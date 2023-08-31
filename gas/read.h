@@ -113,8 +113,7 @@ extern char original_case_string[];
 #endif
 
 extern void pop_insert (const pseudo_typeS *);
-extern unsigned int get_stab_string_offset
-  (const char *, const char *, bool);
+extern unsigned int get_stab_string_offset (const char *, segT);
 extern void aout_process_stab (int, const char *, int, int, int);
 extern char *demand_copy_string (int *lenP);
 extern char *demand_copy_C_string (int *len_pointer);

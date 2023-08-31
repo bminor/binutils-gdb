@@ -52,9 +52,6 @@ static void generate_asm_file (int, const char *);
    apply to assembler code assembled with -gstabs.  */
 static const char *current_function_label;
 
-/* Current stab section when SEPARATE_STAB_SECTIONS.  */
-static segT cached_sec;
-
 /* State used by generate_asm_file.  */
 static char *last_asm_file;
 static int file_label_count;
@@ -95,14 +92,12 @@ static int endfunc_label_count;
 #endif
 
 unsigned int
-get_stab_string_offset (const char *string, const char *stabstr_secname,
-			bool free_stabstr_secname)
+get_stab_string_offset (const char *string, segT stabstr)
 {
   unsigned int length;
   unsigned int retval;
   segT save_seg;
   subsegT save_subseg;
-  segT seg;
   char *p;
 
   if (! SEPARATE_STAB_SECTIONS)
@@ -113,19 +108,16 @@ get_stab_string_offset (const char *string, const char *stabstr_secname,
   save_seg = now_seg;
   save_subseg = now_subseg;
 
-  /* Create the stab string section, if it doesn't already exist.  */
-  seg = subseg_new (stabstr_secname, 0);
-  if (free_stabstr_secname && seg->name != stabstr_secname)
-    free ((char *) stabstr_secname);
+  subseg_set (stabstr, 0);
 
-  retval = seg_info (seg)->stabu.stab_string_size;
+  retval = seg_info (stabstr)->stabu.stab_string_size;
   if (retval <= 0)
     {
       /* Make sure the first string is empty.  */
       p = frag_more (1);
       *p = 0;
-      retval = seg_info (seg)->stabu.stab_string_size = 1;
-      bfd_set_section_flags (seg, SEC_READONLY | SEC_DEBUGGING);
+      retval = seg_info (stabstr)->stabu.stab_string_size = 1;
+      bfd_set_section_flags (stabstr, SEC_READONLY | SEC_DEBUGGING);
     }
 
   if (length > 0)
@@ -133,7 +125,7 @@ get_stab_string_offset (const char *string, const char *stabstr_secname,
       p = frag_more (length + 1);
       strcpy (p, string);
 
-      seg_info (seg)->stabu.stab_string_size += length + 1;
+      seg_info (stabstr)->stabu.stab_string_size += length + 1;
     }
   else
     retval = 0;
@@ -184,23 +176,71 @@ aout_process_stab (int what, const char *string, int type, int other, int desc)
 }
 #endif
 
+static bool
+eat_comma (int what)
+{
+  if (*input_line_pointer == ',')
+    {
+      input_line_pointer++;
+      return true;
+    }
+  as_warn (_(".stab%c: missing comma"), what);
+  ignore_rest_of_line ();
+  return false;
+}
+
 /* This can handle different kinds of stabs (s,n,d) and different
-   kinds of stab sections.  If STAB_SECNAME_OBSTACK_END is non-NULL,
-   then STAB_SECNAME and STABSTR_SECNAME will be freed if possible
-   before this function returns (the former by obstack_free).  */
+   kinds of stab sections.  If FREENAMES is true, then STAB_SECNAME
+   and STABSTR_SECNAME are allocated in that order on the notes
+   obstack and will be freed if possible.  */
 
 static void
 s_stab_generic (int what,
 		const char *stab_secname,
 		const char *stabstr_secname,
-		const char *stab_secname_obstack_end)
+		bool freenames)
 {
-  long longint;
   const char *string;
   char *saved_string_obstack_end;
   int type;
   int other;
   int desc;
+  segT stab, stabstr = NULL;
+  segT saved_seg = now_seg;
+  subsegT saved_subseg = now_subseg;
+  fragS *saved_frag = frag_now;
+  valueT dot = 0;
+
+  if (SEPARATE_STAB_SECTIONS)
+    /* Output the stab information in a separate section.  This is used
+       at least for COFF and ELF.  */
+    {
+      dot = frag_now_fix ();
+
+#ifdef md_flush_pending_output
+      md_flush_pending_output ();
+#endif
+      stab = subseg_new (stab_secname, 0);
+      stabstr = subseg_new (stabstr_secname, 0);
+
+      if (freenames
+	  && stab->name != stab_secname
+	  && stabstr->name != stabstr_secname)
+	obstack_free (&notes, stab_secname);
+
+      subseg_set (stab, 0);
+      if (!seg_info (stab)->hadone)
+	{
+	  bfd_set_section_flags (stab,
+				 SEC_READONLY | SEC_RELOC | SEC_DEBUGGING);
+#ifdef INIT_STAB_SECTION
+	  INIT_STAB_SECTION (stab, stabstr);
+#endif
+	  seg_info (stab)->hadone = 1;
+	}
+    }
+  else if (freenames)
+    obstack_free (&notes, stab_secname);
 
   /* The general format is:
      .stabs "STRING",TYPE,OTHER,DESC,VALUE
@@ -210,11 +250,9 @@ s_stab_generic (int what,
      any trailing whitespace.  The argument what is one of 's', 'n' or
      'd' indicating which type of .stab this is.  */
 
+  saved_string_obstack_end = NULL;
   if (what != 's')
-    {
-      string = "";
-      saved_string_obstack_end = 0;
-    }
+    string = "";
   else
     {
       int length;
@@ -224,38 +262,24 @@ s_stab_generic (int what,
 	{
 	  as_warn (_(".stab%c: missing string"), what);
 	  ignore_rest_of_line ();
-	  return;
+	  goto out;
 	}
       /* FIXME: We should probably find some other temporary storage
 	 for string, rather than leaking memory if someone else
 	 happens to use the notes obstack.  */
       saved_string_obstack_end = obstack_next_free (&notes);
       SKIP_WHITESPACE ();
-      if (*input_line_pointer == ',')
-	input_line_pointer++;
-      else
-	{
-	  as_warn (_(".stab%c: missing comma"), what);
-	  ignore_rest_of_line ();
-	  return;
-	}
+      if (!eat_comma (what))
+	goto out;
     }
 
-  if (get_absolute_expression_and_terminator (&longint) != ',')
-    {
-      as_warn (_(".stab%c: missing comma"), what);
-      ignore_rest_of_line ();
-      return;
-    }
-  type = longint;
+  type = get_absolute_expression ();
+  if (!eat_comma (what))
+    goto out;
 
-  if (get_absolute_expression_and_terminator (&longint) != ',')
-    {
-      as_warn (_(".stab%c: missing comma"), what);
-      ignore_rest_of_line ();
-      return;
-    }
-  other = longint;
+  other = get_absolute_expression ();
+  if (!eat_comma (what))
+    goto out;
 
   desc = get_absolute_expression ();
 
@@ -268,13 +292,8 @@ s_stab_generic (int what,
 
   if (what == 's' || what == 'n')
     {
-      if (*input_line_pointer != ',')
-	{
-	  as_warn (_(".stab%c: missing comma"), what);
-	  ignore_rest_of_line ();
-	  return;
-	}
-      input_line_pointer++;
+      if (!eat_comma (what))
+	goto out;
       SKIP_WHITESPACE ();
     }
 
@@ -322,54 +341,16 @@ s_stab_generic (int what,
     /* Output the stab information in a separate section.  This is used
        at least for COFF and ELF.  */
     {
-      segT saved_seg = now_seg;
-      subsegT saved_subseg = now_subseg;
-      fragS *saved_frag = frag_now;
-      valueT dot;
-      segT seg;
       unsigned int stroff;
       char *p;
 
-      dot = frag_now_fix ();
+      stroff = get_stab_string_offset (string, stabstr);
 
-#ifdef md_flush_pending_output
-      md_flush_pending_output ();
-#endif
-
-      if (cached_sec && strcmp (cached_sec->name, stab_secname) == 0)
-	{
-	  seg = cached_sec;
-	  subseg_set (seg, 0);
-	}
-      else
-	{
-	  seg = subseg_new (stab_secname, 0);
-	  cached_sec = seg;
-	}
-
-      if (! seg_info (seg)->hadone)
-	{
-	  bfd_set_section_flags (seg,
-				 SEC_READONLY | SEC_RELOC | SEC_DEBUGGING);
-#ifdef INIT_STAB_SECTION
-	  INIT_STAB_SECTION (seg);
-#endif
-	  seg_info (seg)->hadone = 1;
-	}
-
-      stroff = get_stab_string_offset (string, stabstr_secname,
-				       stab_secname_obstack_end != NULL);
-
-      /* Release the string, if nobody else has used the obstack.  */
-      if (saved_string_obstack_end != NULL
-	  && saved_string_obstack_end == obstack_next_free (&notes))
+      /* Release the string, if nobody else has used the obstack.
+	 This must be done before creating symbols below, which uses
+	 the notes obstack.  */
+      if (saved_string_obstack_end == obstack_next_free (&notes))
 	obstack_free (&notes, string);
-      /* Similarly for the section name.  This must be done before
-	 creating symbols below, which uses the notes obstack.  */
-      if (seg->name != stab_secname
-	  && stab_secname_obstack_end != NULL
-	  && stab_secname_obstack_end == obstack_next_free (&notes))
-	obstack_free (&notes, stab_secname);
 
       /* At least for now, stabs in a special stab section are always
 	 output as 12 byte blocks of information.  */
@@ -403,17 +384,9 @@ s_stab_generic (int what,
 #ifdef OBJ_PROCESS_STAB
       OBJ_PROCESS_STAB (what, string, type, other, desc);
 #endif
-
-      subseg_set (saved_seg, saved_subseg);
     }
   else
     {
-      if (stab_secname_obstack_end != NULL)
-	{
-	  free ((char *) stabstr_secname);
-	  if (stab_secname_obstack_end == obstack_next_free (&notes))
-	    obstack_free (&notes, stab_secname);
-	}
 #ifdef OBJ_PROCESS_STAB
       OBJ_PROCESS_STAB (what, string, type, other, desc);
 #else
@@ -422,6 +395,10 @@ s_stab_generic (int what,
     }
 
   demand_empty_rest_of_line ();
+ out:
+  if (saved_string_obstack_end == obstack_next_free (&notes))
+    obstack_free (&notes, string);
+  subseg_set (saved_seg, saved_subseg);
 }
 
 /* Regular stab directive.  */
@@ -429,7 +406,7 @@ s_stab_generic (int what,
 void
 s_stab (int what)
 {
-  s_stab_generic (what, STAB_SECTION_NAME, STAB_STRING_SECTION_NAME, NULL);
+  s_stab_generic (what, STAB_SECTION_NAME, STAB_STRING_SECTION_NAME, false);
 }
 
 /* "Extended stabs", used in Solaris only now.  */
@@ -438,25 +415,23 @@ void
 s_xstab (int what)
 {
   int length;
-  char *stab_secname, *stabstr_secname, *stab_secname_obstack_end;
+  char *stab_secname, *stabstr_secname;
 
   stab_secname = demand_copy_C_string (&length);
-  stab_secname_obstack_end = obstack_next_free (&notes);
   SKIP_WHITESPACE ();
   if (*input_line_pointer == ',')
-    input_line_pointer++;
+    {
+      input_line_pointer++;
+      /* To get the name of the stab string section, simply add
+	 "str" to the stab section name.  */
+      stabstr_secname = notes_concat (stab_secname, "str", (char *) NULL);
+      s_stab_generic (what, stab_secname, stabstr_secname, true);
+    }
   else
     {
       as_bad (_("comma missing in .xstabs"));
       ignore_rest_of_line ();
-      return;
     }
-
-  /* To get the name of the stab string section, simply add "str" to
-     the stab section name.  */
-  stabstr_secname = concat (stab_secname, "str", (char *) NULL);
-  s_stab_generic (what, stab_secname, stabstr_secname,
-		  stab_secname_obstack_end);
 }
 
 #ifdef S_SET_DESC
@@ -707,7 +682,6 @@ void
 stabs_begin (void)
 {
   current_function_label = NULL;
-  cached_sec = NULL;
   last_asm_file = NULL;
   file_label_count = 0;
   line_label_count = 0;

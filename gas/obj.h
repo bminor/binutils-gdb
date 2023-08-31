@@ -65,7 +65,7 @@ struct format_ops {
   void (*generate_asm_lineno) (void);
   void (*process_stab) (int, const char *, int, int, int);
   int (*separate_stab_sections) (void);
-  void (*init_stab_section) (segT);
+  void (*init_stab_section) (segT, segT);
   int (*sec_sym_ok_for_reloc) (asection *);
   void (*pop_insert) (void);
   /* For configurations using ECOFF_DEBUGGING, this callback is used.  */

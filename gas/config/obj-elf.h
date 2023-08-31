@@ -242,7 +242,7 @@ void elf_adjust_symtab (void);
 #ifndef SEPARATE_STAB_SECTIONS
 /* Avoid ifndef each separate macro setting by wrapping the whole of the
    stab group on the assumption that whoever sets SEPARATE_STAB_SECTIONS
-   caters to ECOFF_DEBUGGING and the right setting of INIT_STAB_SECTIONS
+   caters to ECOFF_DEBUGGING and the right setting of INIT_STAB_SECTION
    and OBJ_PROCESS_STAB too, without needing the tweaks below.  */
 
 /* Stabs go in a separate section.  */
@@ -250,8 +250,8 @@ void elf_adjust_symtab (void);
 
 /* We need 12 bytes at the start of the section to hold some initial
    information.  */
-extern void obj_elf_init_stab_section (segT);
-#define INIT_STAB_SECTION(seg) obj_elf_init_stab_section (seg)
+extern void obj_elf_init_stab_section (segT, segT);
+#define INIT_STAB_SECTION(stab, str) obj_elf_init_stab_section (stab, str)
 
 #ifdef ECOFF_DEBUGGING
 /* We smuggle stabs in ECOFF rather than using a separate section.
@@ -261,8 +261,8 @@ extern void obj_elf_init_stab_section (segT);
 #define SEPARATE_STAB_SECTIONS (!ECOFF_DEBUGGING)
 
 #undef  INIT_STAB_SECTION
-#define INIT_STAB_SECTION(seg) \
-  ((void) (ECOFF_DEBUGGING ? 0 : (obj_elf_init_stab_section (seg), 0)))
+#define INIT_STAB_SECTION(stab, str) \
+  ((void) (ECOFF_DEBUGGING ? 0 : (obj_elf_init_stab_section (stab, str), 0)))
 
 #undef OBJ_PROCESS_STAB
 #define OBJ_PROCESS_STAB(what, string, type, other, desc)		\

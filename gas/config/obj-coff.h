@@ -299,7 +299,7 @@ extern const pseudo_typeS coff_pseudo_table[];
 
 /* We need 12 bytes at the start of the section to hold some initial
    information.  */
-#define INIT_STAB_SECTION(seg) obj_coff_init_stab_section (seg)
+#define INIT_STAB_SECTION(stab, str) obj_coff_init_stab_section (stab, str)
 
 /* Store the number of relocations in the section aux entry.  */
 #ifdef OBJ_XCOFF
@@ -342,7 +342,7 @@ extern segT s_get_segment                (symbolS *);
 extern void tc_coff_symbol_emit_hook     (symbolS *);
 #endif
 extern void obj_coff_pe_handle_link_once (void);
-extern void obj_coff_init_stab_section   (segT);
+extern void obj_coff_init_stab_section   (segT, segT);
 extern void c_section_header             (struct internal_scnhdr *,
 					  char *, long, long, long, long,
 					  long, long, long, long);
