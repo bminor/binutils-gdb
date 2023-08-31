@@ -145,7 +145,7 @@ get_stab_string_offset (const char *string, const char *stabstr_secname,
 
 #ifdef AOUT_STABS
 #ifndef OBJ_PROCESS_STAB
-#define OBJ_PROCESS_STAB(SEG,W,S,T,O,D)	aout_process_stab(W,S,T,O,D)
+#define OBJ_PROCESS_STAB(W,S,T,O,D)	aout_process_stab(W,S,T,O,D)
 #endif
 
 /* Here instead of obj-aout.c because other formats use it too.  */
@@ -401,7 +401,7 @@ s_stab_generic (int what,
 	}
 
 #ifdef OBJ_PROCESS_STAB
-      OBJ_PROCESS_STAB (seg, what, string, type, other, desc);
+      OBJ_PROCESS_STAB (what, string, type, other, desc);
 #endif
 
       subseg_set (saved_seg, saved_subseg);
@@ -415,7 +415,7 @@ s_stab_generic (int what,
 	    obstack_free (&notes, stab_secname);
 	}
 #ifdef OBJ_PROCESS_STAB
-      OBJ_PROCESS_STAB (0, what, string, type, other, desc);
+      OBJ_PROCESS_STAB (what, string, type, other, desc);
 #else
       abort ();
 #endif

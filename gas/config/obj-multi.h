@@ -145,9 +145,9 @@
 	 ? (*this_format->copy_symbol_attributes) (d, s) \
 	 : (void) 0)
 
-#define OBJ_PROCESS_STAB(SEG,W,S,T,O,D)			\
+#define OBJ_PROCESS_STAB(W,S,T,O,D)			\
 	(this_format->process_stab			\
-	 ? (*this_format->process_stab) (SEG,W,S,T,O,D)	\
+	 ? (*this_format->process_stab) (W,S,T,O,D)	\
 	 : (void) 0)
 
 #define SEPARATE_STAB_SECTIONS \

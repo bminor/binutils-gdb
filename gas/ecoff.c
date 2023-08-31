@@ -3402,8 +3402,7 @@ ecoff_directive_weakext (int ignore ATTRIBUTE_UNUSED)
 	value		a numeric value or an address.  */
 
 void
-ecoff_stab (segT sec ATTRIBUTE_UNUSED,
-	    int what,
+ecoff_stab (int what,
 	    const char *string,
 	    int type,
 	    int other,

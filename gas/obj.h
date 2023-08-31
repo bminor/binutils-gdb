@@ -63,7 +63,7 @@ struct format_ops {
   void (*s_set_type) (symbolS *, int);
   void (*copy_symbol_attributes) (symbolS *, symbolS *);
   void (*generate_asm_lineno) (void);
-  void (*process_stab) (segT, int, const char *, int, int, int);
+  void (*process_stab) (int, const char *, int, int, int);
   int (*separate_stab_sections) (void);
   void (*init_stab_section) (segT);
   int (*sec_sym_ok_for_reloc) (asection *);

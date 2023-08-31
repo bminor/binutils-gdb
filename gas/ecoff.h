@@ -82,7 +82,7 @@ extern void ecoff_directive_type (int);
 extern void ecoff_directive_val (int);
 
 /* Handle stabs.  */
-extern void ecoff_stab (segT sec, int what, const char *string,
+extern void ecoff_stab (int what, const char *string,
 			int type, int other, int desc);
 
 /* Set the GP prologue size.  */

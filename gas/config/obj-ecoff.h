@@ -64,8 +64,8 @@ struct ecoff_sy_obj
 #define obj_app_file(name) ecoff_new_file (name)
 
 /* At the moment we don't want to do any stabs processing in read.c.  */
-#define OBJ_PROCESS_STAB(seg, what, string, type, other, desc) \
-  ecoff_stab ((seg), (what), (string), (type), (other), (desc))
+#define OBJ_PROCESS_STAB(what, string, type, other, desc) \
+  ecoff_stab ((what), (string), (type), (other), (desc))
 
 #define EMIT_SECTION_SYMBOLS		0
 #define obj_sec_sym_ok_for_reloc(SEC)	1

@@ -265,9 +265,9 @@ extern void obj_elf_init_stab_section (segT);
   ((void) (ECOFF_DEBUGGING ? 0 : (obj_elf_init_stab_section (seg), 0)))
 
 #undef OBJ_PROCESS_STAB
-#define OBJ_PROCESS_STAB(seg, what, string, type, other, desc)		\
+#define OBJ_PROCESS_STAB(what, string, type, other, desc)		\
   if (ECOFF_DEBUGGING)							\
-    ecoff_stab ((seg), (what), (string), (type), (other), (desc))
+    ecoff_stab ((what), (string), (type), (other), (desc))
 #endif /* ECOFF_DEBUGGING */
 
 #endif /* SEPARATE_STAB_SECTIONS not defined.  */

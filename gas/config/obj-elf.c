@@ -3114,8 +3114,7 @@ elf_generate_asm_lineno (void)
 }
 
 static void
-elf_process_stab (segT sec ATTRIBUTE_UNUSED,
-		  int what ATTRIBUTE_UNUSED,
+elf_process_stab (int what ATTRIBUTE_UNUSED,
 		  const char *string ATTRIBUTE_UNUSED,
 		  int type ATTRIBUTE_UNUSED,
 		  int other ATTRIBUTE_UNUSED,
@@ -3123,7 +3122,7 @@ elf_process_stab (segT sec ATTRIBUTE_UNUSED,
 {
 #ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
-    ecoff_stab (sec, what, string, type, other, desc);
+    ecoff_stab (what, string, type, other, desc);
 #endif
 }
 

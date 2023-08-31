@@ -248,8 +248,7 @@ obj_aout_sec_sym_ok_for_reloc (asection *sec ATTRIBUTE_UNUSED)
 }
 
 static void
-obj_aout_process_stab (segT seg ATTRIBUTE_UNUSED,
-		       int w,
+obj_aout_process_stab (int w,
 		       const char *s,
 		       int t,
 		       int o,

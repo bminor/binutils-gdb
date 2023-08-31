@@ -76,7 +76,7 @@ extern void obj_mach_o_frob_label (symbolS *);
 #define obj_frob_symbol(s, punt) punt = obj_mach_o_frob_symbol(s)
 extern int obj_mach_o_frob_symbol (struct symbol *);
 
-#define OBJ_PROCESS_STAB(SEG,W,S,T,O,D)	obj_mach_o_process_stab(W,S,T,O,D)
+#define OBJ_PROCESS_STAB(W,S,T,O,D)	obj_mach_o_process_stab(W,S,T,O,D)
 extern void obj_mach_o_process_stab (int, const char *,int, int, int);
 
 struct obj_mach_o_frag_data
