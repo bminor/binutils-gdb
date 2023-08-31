@@ -2693,9 +2693,7 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
     {
       ALLOCATE_CPLUS_STRUCT_TYPE (type);
       TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
-	TYPE_ALLOC (type, sizeof (struct fn_fieldlist) * nfn_fields);
-      memset (TYPE_FN_FIELDLISTS (type), 0,
-	      sizeof (struct fn_fieldlist) * nfn_fields);
+	TYPE_ZALLOC (type, sizeof (struct fn_fieldlist) * nfn_fields);
       TYPE_NFN_FIELDS (type) = nfn_fields;
     }
 
