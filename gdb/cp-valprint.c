@@ -752,13 +752,13 @@ test_print_fields (gdbarch *arch)
     {
       f = append_composite_type_field_raw (the_struct, "A", bool_type);
       f->set_loc_bitpos (1);
-      FIELD_BITSIZE (*f) = 1;
+      f->set_bitsize (1);
       f = append_composite_type_field_raw (the_struct, "B", uint8_type);
       f->set_loc_bitpos (3);
-      FIELD_BITSIZE (*f) = 3;
+      f->set_bitsize (3);
       f = append_composite_type_field_raw (the_struct, "C", bool_type);
       f->set_loc_bitpos (7);
-      FIELD_BITSIZE (*f) = 1;
+      f->set_bitsize (1);
     }
   /* According to the logic commented in "make_gdb_type_struct ()" of
    * target-descriptions.c, bit positions are numbered differently for
@@ -767,13 +767,13 @@ test_print_fields (gdbarch *arch)
     {
       f = append_composite_type_field_raw (the_struct, "A", bool_type);
       f->set_loc_bitpos (30);
-      FIELD_BITSIZE (*f) = 1;
+      f->set_bitsize (1);
       f = append_composite_type_field_raw (the_struct, "B", uint8_type);
       f->set_loc_bitpos (26);
-      FIELD_BITSIZE (*f) = 3;
+      f->set_bitsize (3);
       f = append_composite_type_field_raw (the_struct, "C", bool_type);
       f->set_loc_bitpos (24);
-      FIELD_BITSIZE (*f) = 1;
+      f->set_bitsize (1);
     }
 
   value *val = value::allocate (the_struct);

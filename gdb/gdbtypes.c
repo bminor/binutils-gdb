@@ -1320,9 +1320,9 @@ update_static_array_size (struct type *type)
 	  && TYPE_FIELD_BITSIZE (element_type, 0) != 0
 	  && get_array_bounds (element_type, &low_bound, &high_bound)
 	  && high_bound >= low_bound)
-	TYPE_FIELD_BITSIZE (type, 0)
-	  = ((high_bound - low_bound + 1)
-	     * TYPE_FIELD_BITSIZE (element_type, 0));
+	type->field (0).set_bitsize
+	  ((high_bound - low_bound + 1)
+	   * TYPE_FIELD_BITSIZE (element_type, 0));
 
       return true;
     }
@@ -1359,7 +1359,7 @@ create_array_type_with_stride (type_allocator &alloc,
   if (byte_stride_prop != NULL)
     result_type->add_dyn_prop (DYN_PROP_BYTE_STRIDE, *byte_stride_prop);
   else if (bit_stride > 0)
-    TYPE_FIELD_BITSIZE (result_type, 0) = bit_stride;
+    result_type->field (0).set_bitsize (bit_stride);
 
   if (!update_static_array_size (result_type))
     {
@@ -5543,7 +5543,7 @@ copy_type_recursive (struct type *type, htab_t copied_types)
 	{
 	  new_type->field (i).set_is_artificial
 	    (type->field (i).is_artificial ());
-	  TYPE_FIELD_BITSIZE (new_type, i) = TYPE_FIELD_BITSIZE (type, i);
+	  new_type->field (i).set_bitsize (TYPE_FIELD_BITSIZE (type, i));
 	  if (type->field (i).type ())
 	    new_type->field (i).set_type
 	      (copy_type_recursive (type->field (i).type (), copied_types));
@@ -5710,7 +5710,7 @@ append_flags_type_field (struct type *type, int start_bitpos, int nr_bits,
   type->field (field_nr).set_name (xstrdup (name));
   type->field (field_nr).set_type (field_type);
   type->field (field_nr).set_loc_bitpos (start_bitpos);
-  TYPE_FIELD_BITSIZE (type, field_nr) = nr_bits;
+  type->field (field_nr).set_bitsize (nr_bits);
 }
 
 /* Special version of append_flags_type_field to add a flag field.

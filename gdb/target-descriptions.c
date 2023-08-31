@@ -232,7 +232,7 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
 		fld->set_loc_bitpos (total_size - f.start - bitsize);
 	      else
 		fld->set_loc_bitpos (f.start);
-	      FIELD_BITSIZE (fld[0]) = bitsize;
+	      fld->set_bitsize (bitsize);
 	    }
 	  else
 	    {

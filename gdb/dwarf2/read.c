@@ -11675,13 +11675,9 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* Get bit size of field (zero if none).  */
       attr = dwarf2_attr (die, DW_AT_bit_size, cu);
       if (attr != nullptr)
-	{
-	  FIELD_BITSIZE (*fp) = attr->constant_value (0);
-	}
+	fp->set_bitsize (attr->constant_value (0));
       else
-	{
-	  FIELD_BITSIZE (*fp) = 0;
-	}
+	fp->set_bitsize (0);
 
       /* Get bit offset of field.  */
       handle_member_location (die, cu, fp);
@@ -11790,7 +11786,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
     {
       /* C++ base class field.  */
       handle_member_location (die, cu, fp);
-      FIELD_BITSIZE (*fp) = 0;
+      fp->set_bitsize (0);
       fp->set_type (die_type (die, cu));
       fp->set_name (fp->type ()->name ());
     }
@@ -13516,7 +13512,7 @@ recognize_bound_expression (struct die_info *die, enum dwarf_attribute name,
 
   field->set_loc_bitpos (8 * offset);
   if (size != field->type ()->length ())
-    FIELD_BITSIZE (*field) = 8 * size;
+    field->set_bitsize (8 * size);
 
   return true;
 }

@@ -2786,7 +2786,7 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
 	  return 0;
       }
       /* This field is unpacked.  */
-      FIELD_BITSIZE (fip->list->field) = 0;
+      fip->list->field.set_bitsize (0);
       fip->list->visibility = VISIBILITY_PRIVATE;
     }
   else
@@ -2864,7 +2864,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
 	stabs_general_complaint ("bad structure-type format");
 	return;
       }
-    FIELD_BITSIZE (fip->list->field) = read_huge_number (pp, ';', &nbits, 0);
+    fip->list->field.set_bitsize (read_huge_number (pp, ';', &nbits, 0));
     if (nbits != 0)
       {
 	stabs_general_complaint ("bad structure-type format");
@@ -2906,7 +2906,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
 	  && field_type->code () != TYPE_CODE_BOOL
 	  && field_type->code () != TYPE_CODE_ENUM)
 	{
-	  FIELD_BITSIZE (fip->list->field) = 0;
+	  fip->list->field.set_bitsize (0);
 	}
       if ((FIELD_BITSIZE (fip->list->field)
 	   == TARGET_CHAR_BIT * field_type->length ()
@@ -2917,7 +2917,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
 	  &&
 	  fip->list->field.loc_bitpos () % 8 == 0)
 	{
-	  FIELD_BITSIZE (fip->list->field) = 0;
+	  fip->list->field.set_bitsize (0);
 	}
     }
 }
@@ -3085,7 +3085,7 @@ read_baseclasses (struct stab_field_info *fip, const char **pp,
 
       newobj->next = fip->list;
       fip->list = newobj;
-      FIELD_BITSIZE (newobj->field) = 0;	/* This should be an unpacked
+      newobj->field.set_bitsize (0);	/* This should be an unpacked
 					   field!  */
 
       STABS_CONTINUE (pp, objfile);
@@ -3651,7 +3651,7 @@ read_enum_type (const char **pp, struct type *type,
 	  xsym->set_type (type);
 	  type->field (n).set_name (xsym->linkage_name ());
 	  type->field (n).set_loc_enumval (xsym->value_longest ());
-	  TYPE_FIELD_BITSIZE (type, n) = 0;
+	  type->field (n).set_bitsize (0);
 	}
       if (syms == osyms)
 	break;

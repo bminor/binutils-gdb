@@ -178,7 +178,7 @@ class StructMainTypePrettyPrinter:
         fields.append("m_name = %s" % f["m_name"])
         fields.append("m_type = %s" % f["m_type"])
         fields.append("m_loc_kind = %s" % f["m_loc_kind"])
-        fields.append("bitsize = %d" % f["bitsize"])
+        fields.append("bitsize = %d" % f["m_bitsize"])
         fields.append(self.struct_field_location_img(f))
         return label + "\n" + "  {" + ",\n   ".join(fields) + "}"
 
