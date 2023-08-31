@@ -1670,11 +1670,12 @@ struct type *
 lookup_unsigned_typename (const struct language_defn *language,
 			  const char *name)
 {
-  char *uns = (char *) alloca (strlen (name) + 10);
+  std::string uns;
+  uns.reserve (strlen (name) + strlen ("unsigned "));
+  uns = "unsigned ";
+  uns += name;
 
-  strcpy (uns, "unsigned ");
-  strcpy (uns + 9, name);
-  return lookup_typename (language, uns, NULL, 0);
+  return lookup_typename (language, uns.c_str (), NULL, 0);
 }
 
 struct type *
@@ -1760,16 +1761,14 @@ struct type *
 lookup_template_type (const char *name, struct type *type, 
 		      const struct block *block)
 {
-  struct symbol *sym;
-  char *nam = (char *) 
-    alloca (strlen (name) + strlen (type->name ()) + 4);
+  std::string nam;
+  nam.reserve (strlen (name) + strlen (type->name ()) + strlen ("< >"));
+  nam = name;
+  nam += "<";
+  nam += type->name ();
+  nam += " >"; /* FIXME, extra space still introduced in gcc?  */
 
-  strcpy (nam, name);
-  strcat (nam, "<");
-  strcat (nam, type->name ());
-  strcat (nam, " >");	/* FIXME, extra space still introduced in gcc?  */
-
-  sym = lookup_symbol (nam, block, VAR_DOMAIN, 0).symbol;
+  symbol *sym = lookup_symbol (nam.c_str (), block, VAR_DOMAIN, 0).symbol;
 
   if (sym == NULL)
     {
