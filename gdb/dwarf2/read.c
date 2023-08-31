@@ -11722,7 +11722,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 		}
 	      fp->set_loc_bitpos (fp->loc_bitpos ()
 				  + anonymous_size * bits_per_byte
-				  - bit_offset - FIELD_BITSIZE (*fp));
+				  - bit_offset - fp->bitsize ());
 	    }
 	}
 

@@ -2873,7 +2873,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
   }
 
   if (fip->list->field.loc_bitpos () == 0
-      && FIELD_BITSIZE (fip->list->field) == 0)
+      && fip->list->field.bitsize () == 0)
     {
       /* This can happen in two cases: (1) at least for gcc 2.4.5 or so,
 	 it is a field which has been optimized out.  The correct stab for
@@ -2908,11 +2908,11 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
 	{
 	  fip->list->field.set_bitsize (0);
 	}
-      if ((FIELD_BITSIZE (fip->list->field)
+      if ((fip->list->field.bitsize ()
 	   == TARGET_CHAR_BIT * field_type->length ()
 	   || (field_type->code () == TYPE_CODE_ENUM
-	       && FIELD_BITSIZE (fip->list->field)
-		  == gdbarch_int_bit (gdbarch))
+	       && (fip->list->field.bitsize ()
+		   == gdbarch_int_bit (gdbarch)))
 	  )
 	  &&
 	  fip->list->field.loc_bitpos () % 8 == 0)

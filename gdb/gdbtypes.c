@@ -4244,7 +4244,7 @@ check_types_equal (struct type *type1, struct type *type2,
 	  const struct field *field2 = &type2->field (i);
 
 	  if (field1->is_artificial () != field2->is_artificial ()
-	      || FIELD_BITSIZE (*field1) != FIELD_BITSIZE (*field2)
+	      || field1->bitsize () != field2->bitsize ()
 	      || field1->loc_kind () != field2->loc_kind ())
 	    return false;
 	  if (!compare_maybe_null_strings (field1->name (), field2->name ()))
