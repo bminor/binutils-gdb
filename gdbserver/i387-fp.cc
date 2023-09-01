@@ -469,7 +469,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	  if (memcmp (raw, p + 32, 32) != 0)
 	    {
 	      xstate_bv |= X86_XSTATE_ZMM;
-	      memcpy (p, raw, 32);
+	      memcpy (p + 32, raw, 32);
 	    }
 
 	  /* YMMH sub-register.  */
@@ -477,7 +477,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	  if (memcmp (raw, p + 16, 16) != 0)
 	    {
 	      xstate_bv |= X86_XSTATE_ZMM;
-	      memcpy (p, raw, 16);
+	      memcpy (p + 16, raw, 16);
 	    }
 
 	  /* XMM sub-register.  */
