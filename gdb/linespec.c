@@ -3446,14 +3446,9 @@ lookup_prefix_sym (struct linespec_state *state,
   for (const auto &elt : file_symtabs)
     {
       if (elt == nullptr)
-	{
-	  iterate_over_all_matching_symtabs (state, lookup_name,
-					     SEARCH_STRUCT_DOMAIN,
-					     NULL, false, collector);
-	  iterate_over_all_matching_symtabs (state, lookup_name,
-					     SEARCH_VFT,
-					     NULL, false, collector);
-	}
+	iterate_over_all_matching_symtabs (state, lookup_name,
+					   SEARCH_STRUCT_DOMAIN | SEARCH_VFT,
+					   NULL, false, collector);
       else
 	{
 	  /* Program spaces that are executing startup should have
@@ -3463,10 +3458,7 @@ lookup_prefix_sym (struct linespec_state *state,
 	  gdb_assert (!pspace->executing_startup);
 	  set_current_program_space (pspace);
 	  iterate_over_file_blocks (elt, lookup_name,
-				    SEARCH_STRUCT_DOMAIN,
-				    collector);
-	  iterate_over_file_blocks (elt, lookup_name,
-				    SEARCH_VFT,
+				    SEARCH_STRUCT_DOMAIN | SEARCH_VFT,
 				    collector);
 	}
     }
