@@ -84,7 +84,7 @@ if ![runto_main] {
 }
 
 set test "END with address 1 eliminated"
-gdb_test_multiple "maint info line-table $srcfile$" $test {
+gdb_test_multiple "maint info line-table \\b$srcfile$" $test {
     -re -wrap "END *0x0*1 *$hex *Y *\r\n.*" {
 	fail $gdb_test_name
     }

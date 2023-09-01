@@ -7312,6 +7312,11 @@ process_event_stop_test (struct execution_control_state *ecs)
   frame = get_current_frame ();
   gdbarch = get_frame_arch (frame);
 
+  /* Shorthand to make if statements smaller.  */
+  struct frame_id original_frame_id
+    = ecs->event_thread->control.step_frame_id;
+  struct frame_id curr_frame_id = get_frame_id (get_current_frame ());
+
   switch (what.main_action)
     {
     case BPSTAT_WHAT_SET_LONGJMP_RESUME:
@@ -8123,6 +8128,19 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  infrun_debug_printf ("stepped to a different frame, but "
 			       "it's not the start of a statement");
 	}
+    }
+  else if (execution_direction == EXEC_REVERSE
+	  && curr_frame_id != original_frame_id
+	  && original_frame_id.code_addr_p && curr_frame_id.code_addr_p
+	  && original_frame_id.code_addr == curr_frame_id.code_addr)
+    {
+      /* If we enter here, we're leaving a recursive function call.  In this
+	 situation, we shouldn't refresh the step information, because if we
+	 do, we'll lose the frame_id of when we started stepping, and this
+	 will make GDB not know we need to print frame information.  */
+      refresh_step_info = false;
+      infrun_debug_printf ("reverse stepping, left a recursive call, don't "
+			   "update step info so we remember we left a frame");
     }
 
   /* We aren't done stepping.
