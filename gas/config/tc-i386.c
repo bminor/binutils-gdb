@@ -2793,29 +2793,134 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
     bool no_cond_jump_promotion;
   } arch_stack_entry;
   static const arch_stack_entry *arch_stack_top;
+  char *s;
+  int e;
+  const char *string;
+  unsigned int j = 0;
+  i386_cpu_flags flags;
 
   SKIP_WHITESPACE ();
 
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+  if (is_end_of_line[(unsigned char) *input_line_pointer])
     {
-      char *s;
-      int e = get_symbol_name (&s);
-      const char *string = s;
-      unsigned int j = 0;
-      i386_cpu_flags flags;
+      as_bad (_("missing cpu architecture"));
+      input_line_pointer++;
+      return;
+    }
 
-      if (strcmp (string, "default") == 0)
+  e = get_symbol_name (&s);
+  string = s;
+
+  if (strcmp (string, "push") == 0)
+    {
+      arch_stack_entry *top = XNEW (arch_stack_entry);
+
+      top->name = cpu_arch_name;
+      if (cpu_sub_arch_name)
+	top->sub_name = xstrdup (cpu_sub_arch_name);
+      else
+	top->sub_name = NULL;
+      top->flags = cpu_arch_flags;
+      top->isa = cpu_arch_isa;
+      top->isa_flags = cpu_arch_isa_flags;
+      top->flag_code = flag_code;
+      top->stackop_size = stackop_size;
+      top->no_cond_jump_promotion = no_cond_jump_promotion;
+
+      top->prev = arch_stack_top;
+      arch_stack_top = top;
+
+      (void) restore_line_pointer (e);
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  if (strcmp (string, "pop") == 0)
+    {
+      const arch_stack_entry *top = arch_stack_top;
+
+      if (!top)
+	as_bad (_(".arch stack is empty"));
+      else if (top->flag_code != flag_code
+	       || top->stackop_size != stackop_size)
 	{
-	  if (strcmp (default_arch, "iamcu") == 0)
-	    string = default_arch;
+	  static const unsigned int bits[] = {
+	    [CODE_16BIT] = 16,
+	    [CODE_32BIT] = 32,
+	    [CODE_64BIT] = 64,
+	  };
+
+	  as_bad (_("this `.arch pop' requires `.code%u%s' to be in effect"),
+		  bits[top->flag_code],
+		  top->stackop_size == LONG_MNEM_SUFFIX ? "gcc" : "");
+	}
+      else
+	{
+	  arch_stack_top = top->prev;
+
+	  cpu_arch_name = top->name;
+	  free (cpu_sub_arch_name);
+	  cpu_sub_arch_name = top->sub_name;
+	  cpu_arch_flags = top->flags;
+	  cpu_arch_isa = top->isa;
+	  cpu_arch_isa_flags = top->isa_flags;
+	  no_cond_jump_promotion = top->no_cond_jump_promotion;
+
+	  XDELETE (top);
+	}
+
+      (void) restore_line_pointer (e);
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  if (strcmp (string, "default") == 0)
+    {
+      if (strcmp (default_arch, "iamcu") == 0)
+	string = default_arch;
+      else
+	{
+	  static const i386_cpu_flags cpu_unknown_flags = CPU_UNKNOWN_FLAGS;
+
+	  cpu_arch_name = NULL;
+	  free (cpu_sub_arch_name);
+	  cpu_sub_arch_name = NULL;
+	  cpu_arch_flags = cpu_unknown_flags;
+	  if (flag_code == CODE_64BIT)
+	    {
+	      cpu_arch_flags.bitfield.cpu64 = 1;
+	      cpu_arch_flags.bitfield.cpuno64 = 0;
+	    }
 	  else
 	    {
-	      static const i386_cpu_flags cpu_unknown_flags = CPU_UNKNOWN_FLAGS;
+	      cpu_arch_flags.bitfield.cpu64 = 0;
+	      cpu_arch_flags.bitfield.cpuno64 = 1;
+	    }
+	  cpu_arch_isa = PROCESSOR_UNKNOWN;
+	  cpu_arch_isa_flags = cpu_arch[flag_code == CODE_64BIT].enable;
+	  if (!cpu_arch_tune_set)
+	    {
+	      cpu_arch_tune = cpu_arch_isa;
+	      cpu_arch_tune_flags = cpu_arch_isa_flags;
+	    }
 
-	      cpu_arch_name = NULL;
+	  j = ARRAY_SIZE (cpu_arch) + 1;
+	}
+    }
+
+  for (; j < ARRAY_SIZE (cpu_arch); j++)
+    {
+      if (strcmp (string + (*string == '.'), cpu_arch[j].name) == 0
+	  && (*string == '.') == (cpu_arch[j].type == PROCESSOR_NONE))
+	{
+	  if (*string != '.')
+	    {
+	      check_cpu_arch_compatible (string, cpu_arch[j].enable);
+
+	      cpu_arch_name = cpu_arch[j].name;
 	      free (cpu_sub_arch_name);
 	      cpu_sub_arch_name = NULL;
-	      cpu_arch_flags = cpu_unknown_flags;
+	      cpu_arch_flags = cpu_arch[j].enable;
 	      if (flag_code == CODE_64BIT)
 		{
 		  cpu_arch_flags.bitfield.cpu64 = 1;
@@ -2826,173 +2931,71 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		  cpu_arch_flags.bitfield.cpu64 = 0;
 		  cpu_arch_flags.bitfield.cpuno64 = 1;
 		}
-	      cpu_arch_isa = PROCESSOR_UNKNOWN;
-	      cpu_arch_isa_flags = cpu_arch[flag_code == CODE_64BIT].enable;
+	      cpu_arch_isa = cpu_arch[j].type;
+	      cpu_arch_isa_flags = cpu_arch[j].enable;
 	      if (!cpu_arch_tune_set)
 		{
 		  cpu_arch_tune = cpu_arch_isa;
 		  cpu_arch_tune_flags = cpu_arch_isa_flags;
 		}
-
-	      j = ARRAY_SIZE (cpu_arch) + 1;
+	      pre_386_16bit_warned = false;
+	      break;
 	    }
-	}
-      else if (strcmp (string, "push") == 0)
-	{
-	  arch_stack_entry *top = XNEW (arch_stack_entry);
 
-	  top->name = cpu_arch_name;
-	  if (cpu_sub_arch_name)
-	    top->sub_name = xstrdup (cpu_sub_arch_name);
+	  if (cpu_flags_all_zero (&cpu_arch[j].enable))
+	    continue;
+
+	  flags = cpu_flags_or (cpu_arch_flags, cpu_arch[j].enable);
+
+	  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
+	    {
+	      extend_cpu_sub_arch_name (string + 1);
+	      cpu_arch_flags = flags;
+	      cpu_arch_isa_flags = flags;
+	    }
 	  else
-	    top->sub_name = NULL;
-	  top->flags = cpu_arch_flags;
-	  top->isa = cpu_arch_isa;
-	  top->isa_flags = cpu_arch_isa_flags;
-	  top->flag_code = flag_code;
-	  top->stackop_size = stackop_size;
-	  top->no_cond_jump_promotion = no_cond_jump_promotion;
-
-	  top->prev = arch_stack_top;
-	  arch_stack_top = top;
+	    cpu_arch_isa_flags
+	      = cpu_flags_or (cpu_arch_isa_flags, cpu_arch[j].enable);
 
 	  (void) restore_line_pointer (e);
 	  demand_empty_rest_of_line ();
 	  return;
 	}
-      else if (strcmp (string, "pop") == 0)
-	{
-	  const arch_stack_entry *top = arch_stack_top;
-
-	  if (!top)
-	    as_bad (_(".arch stack is empty"));
-	  else if (top->flag_code != flag_code
-		   || top->stackop_size != stackop_size)
-	    {
-	      static const unsigned int bits[] = {
-	        [CODE_16BIT] = 16,
-	        [CODE_32BIT] = 32,
-	        [CODE_64BIT] = 64,
-	      };
-
-	      as_bad (_("this `.arch pop' requires `.code%u%s' to be in effect"),
-		      bits[top->flag_code],
-		      top->stackop_size == LONG_MNEM_SUFFIX ? "gcc" : "");
-	    }
-	  else
-	    {
-	      arch_stack_top = top->prev;
-
-	      cpu_arch_name = top->name;
-	      free (cpu_sub_arch_name);
-	      cpu_sub_arch_name = top->sub_name;
-	      cpu_arch_flags = top->flags;
-	      cpu_arch_isa = top->isa;
-	      cpu_arch_isa_flags = top->isa_flags;
-	      no_cond_jump_promotion = top->no_cond_jump_promotion;
-
-	      XDELETE (top);
-	    }
-
-	  (void) restore_line_pointer (e);
-	  demand_empty_rest_of_line ();
-	  return;
-	}
-
-      for (; j < ARRAY_SIZE (cpu_arch); j++)
-	{
-	  if (strcmp (string + (*string == '.'), cpu_arch[j].name) == 0
-	     && (*string == '.') == (cpu_arch[j].type == PROCESSOR_NONE))
-	    {
-	      if (*string != '.')
-		{
-		  check_cpu_arch_compatible (string, cpu_arch[j].enable);
-
-		  cpu_arch_name = cpu_arch[j].name;
-		  free (cpu_sub_arch_name);
-		  cpu_sub_arch_name = NULL;
-		  cpu_arch_flags = cpu_arch[j].enable;
-		  if (flag_code == CODE_64BIT)
-		    {
-		      cpu_arch_flags.bitfield.cpu64 = 1;
-		      cpu_arch_flags.bitfield.cpuno64 = 0;
-		    }
-		  else
-		    {
-		      cpu_arch_flags.bitfield.cpu64 = 0;
-		      cpu_arch_flags.bitfield.cpuno64 = 1;
-		    }
-		  cpu_arch_isa = cpu_arch[j].type;
-		  cpu_arch_isa_flags = cpu_arch[j].enable;
-		  if (!cpu_arch_tune_set)
-		    {
-		      cpu_arch_tune = cpu_arch_isa;
-		      cpu_arch_tune_flags = cpu_arch_isa_flags;
-		    }
-		  pre_386_16bit_warned = false;
-		  break;
-		}
-
-	      if (cpu_flags_all_zero (&cpu_arch[j].enable))
-	        continue;
-
-	      flags = cpu_flags_or (cpu_arch_flags,
-				    cpu_arch[j].enable);
-
-	      if (!cpu_flags_equal (&flags, &cpu_arch_flags))
-		{
-		  extend_cpu_sub_arch_name (string + 1);
-		  cpu_arch_flags = flags;
-		  cpu_arch_isa_flags = flags;
-		}
-	      else
-		cpu_arch_isa_flags
-		  = cpu_flags_or (cpu_arch_isa_flags,
-				  cpu_arch[j].enable);
-	      (void) restore_line_pointer (e);
-	      demand_empty_rest_of_line ();
-	      return;
-	    }
-	}
-
-      if (startswith (string, ".no") && j >= ARRAY_SIZE (cpu_arch))
-	{
-	  /* Disable an ISA extension.  */
-	  for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
-	    if (cpu_arch[j].type == PROCESSOR_NONE
-	        && strcmp (string + 3, cpu_arch[j].name) == 0)
-	      {
-		flags = cpu_flags_and_not (cpu_arch_flags,
-					   cpu_arch[j].disable);
-		if (!cpu_flags_equal (&flags, &cpu_arch_flags))
-		  {
-		    extend_cpu_sub_arch_name (string + 1);
-		    cpu_arch_flags = flags;
-		    cpu_arch_isa_flags = flags;
-		  }
-		(void) restore_line_pointer (e);
-		demand_empty_rest_of_line ();
-		return;
-	      }
-	}
-
-      if (j == ARRAY_SIZE (cpu_arch))
-	as_bad (_("no such architecture: `%s'"), string);
-
-      *input_line_pointer = e;
     }
-  else
-    as_bad (_("missing cpu architecture"));
+
+  if (startswith (string, ".no") && j >= ARRAY_SIZE (cpu_arch))
+    {
+      /* Disable an ISA extension.  */
+      for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
+	if (cpu_arch[j].type == PROCESSOR_NONE
+	    && strcmp (string + 3, cpu_arch[j].name) == 0)
+	  {
+	    flags = cpu_flags_and_not (cpu_arch_flags, cpu_arch[j].disable);
+	    if (!cpu_flags_equal (&flags, &cpu_arch_flags))
+	      {
+		extend_cpu_sub_arch_name (string + 1);
+		cpu_arch_flags = flags;
+		cpu_arch_isa_flags = flags;
+	      }
+
+	    (void) restore_line_pointer (e);
+	    demand_empty_rest_of_line ();
+	    return;
+	  }
+    }
+
+  if (j == ARRAY_SIZE (cpu_arch))
+    as_bad (_("no such architecture: `%s'"), string);
+
+  *input_line_pointer = e;
 
   no_cond_jump_promotion = 0;
   if (*input_line_pointer == ','
       && !is_end_of_line[(unsigned char) input_line_pointer[1]])
     {
-      char *string;
-      char e;
-
       ++input_line_pointer;
-      e = get_symbol_name (&string);
+      e = get_symbol_name (&s);
+      string = s;
 
       if (strcmp (string, "nojumps") == 0)
 	no_cond_jump_promotion = 1;
