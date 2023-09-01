@@ -106,14 +106,18 @@ def _breakpoint_descriptor(bp):
         # multiple locations.  See
         # https://github.com/microsoft/debug-adapter-protocol/issues/13
         loc = bp.locations[0]
-        (filename, line) = loc.source
-        result.update(
-            {
-                "source": make_source(filename, os.path.basename(filename)),
-                "line": line,
-                "instructionReference": hex(loc.address),
-            }
-        )
+        if loc.source:
+            (filename, line) = loc.source
+            result.update(
+                {
+                    "source": make_source(filename, os.path.basename(filename)),
+                    "line": line,
+                }
+            )
+
+        if loc.address:
+            result["instructionReference"] = hex(loc.address),
+
         path = loc.fullname
         if path is not None:
             result["source"]["path"] = path

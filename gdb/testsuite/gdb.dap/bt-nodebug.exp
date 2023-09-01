@@ -53,4 +53,11 @@ gdb_assert {[llength $frames] == 3} "three frames"
 gdb_assert {[dict get [lindex $frames 1] name] == "no_debug_info"} \
     "name of no-debug frame"
 
+# Breakpoint can be set without source file information
+set obj [dap_check_request_and_response "set breakpoint on no_debug_info" \
+	    setFunctionBreakpoints \
+	    {o breakpoints [a [o name [s no_debug_info]]]}]
+set breakpoints [dict get [lindex $obj 0] body breakpoints]
+gdb_assert {[dict exists [lindex $breakpoints 0] instructionReference]} "breakpoint has instructionReference"
+
 dap_shutdown
