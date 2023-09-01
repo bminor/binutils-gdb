@@ -2676,26 +2676,6 @@ lookup_global_symbol (const char *name,
     return bs;
 }
 
-bool
-symbol_matches_domain (enum language symbol_language,
-		       domain_enum symbol_domain,
-		       domain_enum domain)
-{
-  /* For C++ "struct foo { ... }" also defines a typedef for "foo".
-     Similarly, any Ada type declaration implicitly defines a typedef.  */
-  if (symbol_language == language_cplus
-      || symbol_language == language_d
-      || symbol_language == language_ada
-      || symbol_language == language_rust)
-    {
-      if ((domain == VAR_DOMAIN || domain == STRUCT_DOMAIN)
-	  && symbol_domain == STRUCT_DOMAIN)
-	return true;
-    }
-  /* For all other languages, strict match is required.  */
-  return (symbol_domain == domain);
-}
-
 /* See symtab.h.  */
 
 bool
