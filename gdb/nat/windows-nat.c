@@ -206,8 +206,7 @@ windows_process_info::get_exec_module_filename (char *exe_name_ret,
     if (len == 0)
       {
 	unsigned err = (unsigned) GetLastError ();
-	error (_("Error getting executable filename (error %u): %s"),
-	       err, strwinerror (err));
+	throw_winerror_with_name (_("Error getting executable filename"), err);
       }
     if (cygwin_conv_path (CCP_WIN_W_TO_POSIX, pathbuf, exe_name_ret,
 			  exe_name_max_len) < 0)
@@ -219,8 +218,7 @@ windows_process_info::get_exec_module_filename (char *exe_name_ret,
   if (len == 0)
     {
       unsigned err = (unsigned) GetLastError ();
-      error (_("Error getting executable filename (error %u): %s"),
-	     err, strwinerror (err));
+      throw_winerror_with_name (_("Error getting executable filename"), err);
     }
 #endif
 

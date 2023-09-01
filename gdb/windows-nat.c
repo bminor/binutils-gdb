@@ -1346,9 +1346,9 @@ windows_nat_target::windows_continue (DWORD continue_status, int id,
     });
 
   if (err.has_value ())
-    error (_("Failed to resume program execution"
-	     " (ContinueDebugEvent failed, error %u: %s)"),
-	   *err, strwinerror (*err));
+    throw_winerror_with_name (_("Failed to resume program execution"
+				" - ContinueDebugEvent failed"),
+			      *err);
 
   return TRUE;
 }
@@ -1366,8 +1366,7 @@ windows_nat_target::fake_create_process ()
   else
     {
       unsigned err = (unsigned) GetLastError ();
-      error (_("OpenProcess call failed, GetLastError = %u: %s"),
-	     err, strwinerror (err));
+      throw_winerror_with_name (_("OpenProcess call failed"), err);
       /*  We can not debug anything in that case.  */
     }
   add_thread (ptid_t (windows_process.current_event.dwProcessId, 0,
@@ -2047,8 +2046,11 @@ windows_nat_target::attach (const char *args, int from_tty)
     });
 
   if (err.has_value ())
-    error (_("Can't attach to process %u (error %u: %s)"),
-	   (unsigned) pid, *err, strwinerror (*err));
+    {
+      std::string msg = string_printf (_("Can't attach to process %u"),
+				       (unsigned) pid);
+      throw_winerror_with_name (msg.c_str (), *err);
+    }
 
   DebugSetProcessKillOnExit (FALSE);
 
@@ -2085,9 +2087,12 @@ windows_nat_target::detach (inferior *inf, int from_tty)
     });
 
   if (err.has_value ())
-    error (_("Can't detach process %u (error %u: %s)"),
-	   (unsigned) windows_process.current_event.dwProcessId,
-	   *err, strwinerror (*err));
+    {
+      std::string msg
+	= string_printf (_("Can't detach process %u"),
+			 (unsigned) windows_process.current_event.dwProcessId);
+      throw_winerror_with_name (msg.c_str (), *err);
+    }
 
   target_announce_detach (from_tty);
 
@@ -2790,8 +2795,10 @@ windows_nat_target::create_inferior (const char *exec_file,
 #endif	/* !__CYGWIN__ */
 
   if (ret.has_value ())
-    error (_("Error creating process %s, (error %u: %s)"),
-	   exec_file, *ret, strwinerror (*ret));
+    {
+      std::string msg = _("Error creating process ") + std::string (exec_file);
+      throw_winerror_with_name (msg.c_str (), *ret);
+    }
 
 #ifdef __x86_64__
   BOOL wow64;

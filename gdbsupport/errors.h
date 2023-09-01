@@ -120,6 +120,13 @@ extern void flush_streams ();
 
 extern const char *strwinerror (ULONGEST error);
 
+/* Like perror_with_name, but for Windows errors.  Throw an exception
+   including STRING and the system text for the given error
+   number.  */
+
+extern void throw_winerror_with_name (const char *string, ULONGEST err)
+  ATTRIBUTE_NORETURN;
+
 #endif /* USE_WIN32API */
 
 #endif /* COMMON_ERRORS_H */

@@ -324,8 +324,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
   if (!IsWow64Process (proch, &wow64))
     {
       DWORD err = GetLastError ();
-      error ("Check if WOW64 process failed (error %d): %s\n",
-	     (int) err, strwinerror (err));
+      throw_winerror_with_name ("Check if WOW64 process failed", err);
     }
   windows_process.wow64_process = wow64;
 
@@ -579,8 +578,9 @@ win32_process_target::create_inferior (const char *program,
 
   if (!ret)
     {
-      error ("Error creating process \"%s %s\", (error %d): %s\n",
-	     program, args, (int) err, strwinerror (err));
+      std::string msg = string_printf (_("Error creating process \"%s %s\""),
+				       program, args);
+      throw_winerror_with_name (msg.c_str (), err);
     }
   else
     {
@@ -627,8 +627,7 @@ win32_process_target::attach (unsigned long pid)
     }
 
   err = GetLastError ();
-  error ("Attach to process failed (error %d): %s\n",
-	 (int) err, strwinerror (err));
+  throw_winerror_with_name ("Attach to process failed", err);
 }
 
 /* See nat/windows-nat.h.  */
