@@ -173,12 +173,10 @@ serial_for_fd (int fd)
 
 /* Create a new serial for OPS.  */
 
-static struct serial *
+static gdb::unique_xmalloc_ptr<struct serial>
 new_serial (const struct serial_ops *ops)
 {
-  struct serial *scb;
-
-  scb = XCNEW (struct serial);
+  gdb::unique_xmalloc_ptr<struct serial> scb (XCNEW (struct serial));
 
   scb->ops = ops;
 
@@ -221,7 +219,7 @@ serial_open (const char *name)
     }
 
   if (!ops)
-    return NULL;
+    error (_("could not find serial handler for '%s'"), name);
 
   return serial_open_ops_1 (ops, open_name);
 }
@@ -231,20 +229,14 @@ serial_open (const char *name)
 static struct serial *
 serial_open_ops_1 (const struct serial_ops *ops, const char *open_name)
 {
-  struct serial *scb;
-
-  scb = new_serial (ops);
+  gdb::unique_xmalloc_ptr<struct serial> scb = new_serial (ops);
 
   /* `...->open (...)' would get expanded by the open(2) syscall macro.  */
-  if ((*scb->ops->open) (scb, open_name))
-    {
-      xfree (scb);
-      return NULL;
-    }
+  (*scb->ops->open) (scb.get (), open_name);
 
   scb->name = open_name != NULL ? xstrdup (open_name) : NULL;
   scb->next = scb_base;
-  scb_base = scb;
+  scb_base = scb.get ();
 
   if (!serial_logfile.empty ())
     {
@@ -256,7 +248,7 @@ serial_open_ops_1 (const struct serial_ops *ops, const char *open_name)
       serial_logfp = file.release ();
     }
 
-  return scb;
+  return scb.release ();
 }
 
 /* See serial.h.  */
@@ -273,8 +265,6 @@ serial_open_ops (const struct serial_ops *ops)
 static struct serial *
 serial_fdopen_ops (const int fd, const struct serial_ops *ops)
 {
-  struct serial *scb;
-
   if (!ops)
     {
       ops = serial_interface_lookup ("terminal");
@@ -285,18 +275,18 @@ serial_fdopen_ops (const int fd, const struct serial_ops *ops)
   if (!ops)
     return NULL;
 
-  scb = new_serial (ops);
+  gdb::unique_xmalloc_ptr<struct serial> scb = new_serial (ops);
 
   scb->name = NULL;
   scb->next = scb_base;
-  scb_base = scb;
+  scb_base = scb.get ();
 
   if ((ops->fdopen) != NULL)
-    (*ops->fdopen) (scb, fd);
+    (*ops->fdopen) (scb.get (), fd);
   else
     scb->fd = fd;
 
-  return scb;
+  return scb.release ();
 }
 
 struct serial *

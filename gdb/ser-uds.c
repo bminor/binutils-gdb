@@ -30,36 +30,30 @@
 
 /* Open an AF_UNIX socket.  */
 
-static int
+static void
 uds_open (struct serial *scb, const char *name)
 {
   struct sockaddr_un addr;
 
   if (strlen (name) > UNIX_PATH_MAX - 1)
-    {
-      warning
-	(_("The socket name is too long.  It may be no longer than %s bytes."),
-	 pulongest (UNIX_PATH_MAX - 1L));
-      return -1;
-    }
+    error (_("The socket name is too long.  It may be no longer than %s bytes."),
+	   pulongest (UNIX_PATH_MAX - 1L));
 
   memset (&addr, 0, sizeof addr);
   addr.sun_family = AF_UNIX;
   strncpy (addr.sun_path, name, UNIX_PATH_MAX - 1);
 
-  int sock = socket (AF_UNIX, SOCK_STREAM, 0);
+  scb->fd = socket (AF_UNIX, SOCK_STREAM, 0);
+  if (scb->fd < 0)
+    perror_with_name (_("could not open socket"));
 
-  if (connect (sock, (struct sockaddr *) &addr,
+  if (connect (scb->fd, (struct sockaddr *) &addr,
 	       sizeof (struct sockaddr_un)) < 0)
     {
-      close (sock);
-      scb->fd = -1;
-      return -1;
+      int saved = errno;
+      close (scb->fd);
+      perror_with_name (_("could not connect to remote"), saved);
     }
-
-  scb->fd = sock;
-
-  return 0;
 }
 
 static void

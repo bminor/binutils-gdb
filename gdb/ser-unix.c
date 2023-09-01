@@ -50,7 +50,6 @@ show_serial_hwflow (struct ui_file *file, int from_tty,
 }
 #endif
 
-static int hardwire_open (struct serial *scb, const char *name);
 static void hardwire_raw (struct serial *scb);
 static int rate_to_code (int rate);
 static void hardwire_setbaudrate (struct serial *scb, int rate);
@@ -72,14 +71,12 @@ static int hardwire_setstopbits (struct serial *, int);
 
 /* Open up a real live device for serial I/O.  */
 
-static int
+static void
 hardwire_open (struct serial *scb, const char *name)
 {
   scb->fd = gdb_open_cloexec (name, O_RDWR, 0).release ();
   if (scb->fd < 0)
-    return -1;
-
-  return 0;
+    perror_with_name ("could not open device");
 }
 
 static int

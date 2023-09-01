@@ -6077,8 +6077,6 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
     rs->wait_forever_enabled_p = true;
 
   rs->remote_desc = remote_serial_open (name);
-  if (!rs->remote_desc)
-    perror_with_name (name);
 
   if (baud_rate != -1)
     {

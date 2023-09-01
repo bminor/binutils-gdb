@@ -48,7 +48,7 @@ struct serial_event_state
 
 /* Open a new serial event.  */
 
-static int
+static void
 serial_event_open (struct serial *scb, const char *name)
 {
   struct serial_event_state *state;
@@ -85,8 +85,6 @@ serial_event_open (struct serial *scb, const char *name)
     scb->fd = _open_osfhandle ((intptr_t) dummy_file, 0);
   }
 #endif
-
-  return 0;
 }
 
 static void

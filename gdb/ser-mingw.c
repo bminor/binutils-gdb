@@ -48,7 +48,7 @@ static CancelIo_ftype *CancelIo;
 
 /* Open up a real live device for serial I/O.  */
 
-static int
+static void
 ser_windows_open (struct serial *scb, const char *name)
 {
   HANDLE h;
@@ -59,22 +59,18 @@ ser_windows_open (struct serial *scb, const char *name)
 		  OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
   if (h == INVALID_HANDLE_VALUE)
     {
-      errno = ENOENT;
-      return -1;
+      std::string msg = string_printf(_("could not open file: %s"),
+				      name);
+      throw_winerror_with_name (msg.c_str (), GetLastError ());
     }
 
   scb->fd = _open_osfhandle ((intptr_t) h, O_RDWR);
   if (scb->fd < 0)
-    {
-      errno = ENOENT;
-      return -1;
-    }
+    error (_("could not get underlying file descriptor"));
 
   if (!SetCommMask (h, EV_RXCHAR))
-    {
-      errno = EINVAL;
-      return -1;
-    }
+    throw_winerror_with_name (_("error calling SetCommMask"),
+			      GetLastError ());
 
   timeouts.ReadIntervalTimeout = MAXDWORD;
   timeouts.ReadTotalTimeoutConstant = 0;
@@ -82,10 +78,8 @@ ser_windows_open (struct serial *scb, const char *name)
   timeouts.WriteTotalTimeoutConstant = 0;
   timeouts.WriteTotalTimeoutMultiplier = 0;
   if (!SetCommTimeouts (h, &timeouts))
-    {
-      errno = EINVAL;
-      return -1;
-    }
+    throw_winerror_with_name (_("error calling SetCommTimeouts"),
+			      GetLastError ());
 
   state = XCNEW (struct ser_windows_state);
   scb->state = state;
@@ -95,8 +89,6 @@ ser_windows_open (struct serial *scb, const char *name)
 
   /* Create a (currently unused) handle to record exceptions.  */
   state->except_event = CreateEvent (0, TRUE, FALSE, 0);
-
-  return 0;
 }
 
 /* Wait for the output to drain away, as opposed to flushing (discarding)
@@ -860,7 +852,7 @@ struct pipe_state_destroyer
 
 typedef std::unique_ptr<pipe_state, pipe_state_destroyer> pipe_state_up;
 
-static int
+static void
 pipe_windows_open (struct serial *scb, const char *name)
 {
   FILE *pex_stderr;
@@ -883,10 +875,10 @@ pipe_windows_open (struct serial *scb, const char *name)
 
   ps->pex = pex_init (PEX_USE_PIPES, "target remote pipe", NULL);
   if (! ps->pex)
-    return -1;
+    error (_("could not start pipeline"));
   ps->input = pex_input_pipe (ps->pex, 1);
   if (! ps->input)
-    return -1;
+    error (_("could not find input pipe"));
 
   {
     int err;
@@ -913,17 +905,15 @@ pipe_windows_open (struct serial *scb, const char *name)
 
   ps->output = pex_read_output (ps->pex, 1);
   if (! ps->output)
-    return -1;
+    error (_("could not find output pipe"));
   scb->fd = fileno (ps->output);
 
   pex_stderr = pex_read_err (ps->pex, 1);
   if (! pex_stderr)
-    return -1;
+    error (_("could not find error pipe"));
   scb->error_fd = fileno (pex_stderr);
 
   scb->state = ps.release ();
-
-  return 0;
 }
 
 static int
@@ -1191,15 +1181,12 @@ net_windows_done_wait_handle (struct serial *scb)
   stop_select_thread (&state->base);
 }
 
-static int
+static void
 net_windows_open (struct serial *scb, const char *name)
 {
   struct net_windows_state *state;
-  int ret;
 
-  ret = net_open (scb, name);
-  if (ret != 0)
-    return ret;
+  net_open (scb, name);
 
   state = XCNEW (struct net_windows_state);
   scb->state = state;
@@ -1210,8 +1197,6 @@ net_windows_open (struct serial *scb, const char *name)
 
   /* Start the thread.  */
   create_select_thread (net_windows_select_thread, scb, &state->base);
-
-  return 0;
 }
 
 
