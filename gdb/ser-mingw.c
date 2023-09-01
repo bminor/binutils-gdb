@@ -137,7 +137,7 @@ ser_windows_send_break (struct serial *scb)
   /* Delay for 250 milliseconds.  */
   Sleep (250);
 
-  if (ClearCommBreak (h))
+  if (ClearCommBreak (h) == 0)
     return -1;
 
   return 0;
