@@ -14119,7 +14119,7 @@ set_secondary_compatible_arch (bfd *abfd, int arch)
 
 static int
 tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
-		      int newtag, int secondary_compat)
+		      int newtag, int secondary_compat, const char* name_table[])
 {
 #define T(X) TAG_CPU_ARCH_##X
   int tagl, tagh, result;
@@ -14436,8 +14436,8 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
 
   if (result == -1)
     {
-      _bfd_error_handler (_("error: %pB: conflicting CPU architectures %d/%d"),
-			  ibfd, oldtag, newtag);
+      _bfd_error_handler (_("error: conflicting CPU architectures %s vs %s in %pB"),
+			  name_table[oldtag], name_table[newtag], ibfd);
       return -1;
     }
 
@@ -14632,7 +14632,8 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    arch_attr = tag_cpu_arch_combine (ibfd, out_attr[i].i,
 					      &secondary_compat_out,
 					      in_attr[i].i,
-					      secondary_compat);
+					      secondary_compat,
+					      name_table);
 
 	    /* Return with error if failed to merge.  */
 	    if (arch_attr == -1)
