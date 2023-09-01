@@ -12,9 +12,9 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+00029073[ 	]+csrw[ 	]+ustatus,t0
 [ 	]+[0-9a-f]+:[ 	]+0002a073[ 	]+csrs[ 	]+ustatus,t0
 [ 	]+[0-9a-f]+:[ 	]+0002b073[ 	]+csrc[ 	]+ustatus,t0
-[ 	]+[0-9a-f]+:[ 	]+000fd073[ 	]+csrw[ 	]+ustatus,31
-[ 	]+[0-9a-f]+:[ 	]+000fe073[ 	]+csrs[ 	]+ustatus,31
-[ 	]+[0-9a-f]+:[ 	]+000ff073[ 	]+csrc[ 	]+ustatus,31
+[ 	]+[0-9a-f]+:[ 	]+000fd073[ 	]+csrwi[ 	]+ustatus,31
+[ 	]+[0-9a-f]+:[ 	]+000fe073[ 	]+csrsi[ 	]+ustatus,31
+[ 	]+[0-9a-f]+:[ 	]+000ff073[ 	]+csrci[ 	]+ustatus,31
 [ 	]+[0-9a-f]+:[ 	]+c00022f3[ 	]+rdcycle[ 	]+t0
 [ 	]+[0-9a-f]+:[ 	]+c01022f3[ 	]+rdtime[ 	]+t0
 [ 	]+[0-9a-f]+:[ 	]+c02022f3[ 	]+rdinstret[ 	]+t0

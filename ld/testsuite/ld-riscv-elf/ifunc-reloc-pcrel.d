@@ -9,7 +9,7 @@ Disassembly of section .text:
 #...
 0+[0-9a-f]+ <bar>:
 .*:[ 	]+[0-9a-f]+[ 	]+auipc[ 	]+.*
-.*:[ 	]+[0-9a-f]+[ 	]+addi?[ 	]+.*<(\*ABS\*\+0x[0-9a-f]+@plt|foo@plt|.plt)>
+.*:[ 	]+[0-9a-f]+[ 	]+addi[ 	]+.*<(\*ABS\*\+0x[0-9a-f]+@plt|foo@plt|.plt)>
 .*:[ 	]+[0-9a-f]+[ 	]+auipc[ 	]+.*
 .*:[ 	]+[0-9a-f]+[ 	]+(lw|ld)[ 	]+.*<(\*ABS\*\+0x[0-9a-f]+@plt|foo@plt|.plt)>
 #...

@@ -8,7 +8,7 @@
 Disassembly of section .text:
 
 0+[0-9a-f]+ <_start>:
-.*:[ 	]+[0-9a-f]+[ 	]+add[ 	]+.*<gdata>
+.*:[ 	]+[0-9a-f]+[ 	]+addi[ 	]+.*<gdata>
 .*:[ 	]+[0-9a-f]+[ 	]+jal[ 	]+.*
 .*:[ 	]+[0-9a-f]+[ 	]+j[ 	]+.*
 .*:[ 	]+[0-9a-f]+[ 	]+nop

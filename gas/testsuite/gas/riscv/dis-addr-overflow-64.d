@@ -19,13 +19,13 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+ffffbeb7[ 	]+lui[  	]+t4,0xffffb
 [ 	]+[0-9a-f]+:[ 	]+000e8a67[ 	]+jalr[ 	]+s4,t4 # ffffffffffffb000 <addr_jalr_3>
 [ 	]+[0-9a-f]+:[ 	]+ffffaf37[ 	]+lui[  	]+t5,0xffffa
-[ 	]+[0-9a-f]+:[ 	]+ff0f0a93[ 	]+add[ 	]+s5,t5,-16 # ffffffffffff9ff0 <addr_loadaddr>
+[ 	]+[0-9a-f]+:[ 	]+ff0f0a93[ 	]+addi[ 	]+s5,t5,-16 # ffffffffffff9ff0 <addr_loadaddr>
 [ 	]+[0-9a-f]+:[ 	]+ffff9fb7[ 	]+lui[  	]+t6,0xffff9
-[ 	]+[0-9a-f]+:[ 	]+1fb1[ 	]+add[ 	]+t6,t6,-20 # ffffffffffff8fec <addr_loadaddr_c>
+[ 	]+[0-9a-f]+:[ 	]+1fb1[ 	]+addi[ 	]+t6,t6,-20 # ffffffffffff8fec <addr_loadaddr_c>
 [ 	]+[0-9a-f]+:[ 	]+ffff8b37[ 	]+lui[  	]+s6,0xffff8
-[ 	]+[0-9a-f]+:[ 	]+fe8b0b9b[ 	]+addw[ 	]+s7,s6,-24 # ffffffffffff7fe8 <addr_loadaddr_w>
+[ 	]+[0-9a-f]+:[ 	]+fe8b0b9b[ 	]+addiw[ 	]+s7,s6,-24 # ffffffffffff7fe8 <addr_loadaddr_w>
 [ 	]+[0-9a-f]+:[ 	]+ffff7c37[ 	]+lui[  	]+s8,0xffff7
-[ 	]+[0-9a-f]+:[ 	]+3c11[ 	]+addw[ 	]+s8,s8,-28 # ffffffffffff6fe4 <addr_loadaddr_w_c>
+[ 	]+[0-9a-f]+:[ 	]+3c11[ 	]+addiw[ 	]+s8,s8,-28 # ffffffffffff6fe4 <addr_loadaddr_w_c>
 [ 	]+[0-9a-f]+:[ 	]+4001a283[ 	]+lw[   	]+t0,1024\(gp\) # 600 <addr_rel_gp_pos>
 [ 	]+[0-9a-f]+:[ 	]+c001a303[ 	]+lw[   	]+t1,-1024\(gp\) # fffffffffffffe00 <addr_rel_gp_neg>
 [ 	]+[0-9a-f]+:[ 	]+10002383[ 	]+lw[   	]+t2,256\(zero\) # 100 <addr_rel_zero_pos>
