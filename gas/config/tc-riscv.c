@@ -1966,13 +1966,13 @@ vector_macro (struct riscv_cl_insn *ip)
 	  /* Masked.  Have vtemp to avoid overlap constraints.  */
 	  if (vd == vm)
 	    {
-	      macro_build (NULL, "vmslt.vx", "Vd,Vt,s", vtemp, vs2, vs1);
+	      macro_build (NULL, "vmslt.vx", "Vd,Vt,sVm", vtemp, vs2, vs1, -1);
 	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vm, vtemp);
 	    }
 	  else
 	    {
 	      /* Preserve the value of vd if not updating by vm.  */
-	      macro_build (NULL, "vmslt.vx", "Vd,Vt,s", vtemp, vs2, vs1);
+	      macro_build (NULL, "vmslt.vx", "Vd,Vt,sVm", vtemp, vs2, vs1, -1);
 	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vtemp, vm, vtemp);
 	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vd, vm);
 	      macro_build (NULL, "vmor.mm", "Vd,Vt,Vs", vd, vtemp, vd);
@@ -2001,13 +2001,13 @@ vector_macro (struct riscv_cl_insn *ip)
 	  /* Masked.  Have vtemp to avoid overlap constraints.  */
 	  if (vd == vm)
 	    {
-	      macro_build (NULL, "vmsltu.vx", "Vd,Vt,s", vtemp, vs2, vs1);
+	      macro_build (NULL, "vmsltu.vx", "Vd,Vt,sVm", vtemp, vs2, vs1, -1);
 	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vm, vtemp);
 	    }
 	  else
 	    {
 	      /* Preserve the value of vd if not updating by vm.  */
-	      macro_build (NULL, "vmsltu.vx", "Vd,Vt,s", vtemp, vs2, vs1);
+	      macro_build (NULL, "vmsltu.vx", "Vd,Vt,sVm", vtemp, vs2, vs1, -1);
 	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vtemp, vm, vtemp);
 	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vd, vm);
 	      macro_build (NULL, "vmor.mm", "Vd,Vt,Vs", vd, vtemp, vd);
