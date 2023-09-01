@@ -74,7 +74,7 @@ def step_in(
 
 
 @request("stepOut")
-def step_out(*, threadId: int, singleThread: bool = False):
+def step_out(*, threadId: int, singleThread: bool = False, **args):
     send_gdb(lambda: _handle_thread_step(threadId, singleThread, True))
     send_gdb(ExecutionInvoker("finish", StopKinds.STEP))
 

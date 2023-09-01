@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import inspect
 import json
 import queue
 import sys
@@ -165,6 +166,12 @@ def request(name):
 
     def wrap(func):
         global _commands
+        code = func.__code__
+        # We don't permit requests to have positional arguments.
+        assert code.co_posonlyargcount == 0
+        assert code.co_argcount == 0
+        # A request must have a **args parameter.
+        assert code.co_flags & inspect.CO_VARKEYWORDS
         # All requests must run in the DAP thread.
         # Also type-check the calls.
         func = in_dap_thread(type_check(func))
