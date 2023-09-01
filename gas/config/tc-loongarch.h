@@ -71,8 +71,16 @@ extern bool loongarch_frag_align_code (int);
    relaxation, so do not resolve such expressions in the assembler.  */
 #define md_allow_local_subtract(l,r,s) 0
 
-/* Values passed to md_apply_fix don't include symbol values.  */
-#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG) 1
+/* If subsy of BFD_RELOC32/64 and PC in same segment, and without relax
+   or PC at start of subsy or with relax but sub_symbol_segment not in
+   SEC_CODE, we generate 32/64_PCREL.  */
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG) \
+  (!((BFD_RELOC_32 || BFD_RELOC_64) \
+     &&(!LARCH_opts.relax \
+       || S_GET_VALUE (FIX->fx_subsy) \
+	  == FIX->fx_frag->fr_address + FIX->fx_where \
+       || (LARCH_opts.relax \
+	  && ((S_GET_SEGMENT (FIX->fx_subsy)->flags & SEC_CODE) == 0)))))
 
 #define TC_VALIDATE_FIX_SUB(FIX, SEG) 1
 #define DIFF_EXPR_OK 1

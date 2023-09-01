@@ -1195,7 +1195,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   static int64_t stack_top;
   static int last_reloc_is_sop_push_pcrel_1 = 0;
   int last_reloc_is_sop_push_pcrel = last_reloc_is_sop_push_pcrel_1;
-  segT sub_segment;
   last_reloc_is_sop_push_pcrel_1 = 0;
 
   char *buf = fixP->fx_frag->fr_literal + fixP->fx_where;
@@ -1273,16 +1272,19 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
        (use md_number_to_chars (buf, 0, fixP->fx_size)).  */
     case BFD_RELOC_64:
     case BFD_RELOC_32:
-      if (fixP->fx_r_type == BFD_RELOC_32
-	  && fixP->fx_addsy && fixP->fx_subsy
-	  && (sub_segment = S_GET_SEGMENT (fixP->fx_subsy))
-	  && strcmp (sub_segment->name, ".eh_frame") == 0
-	  && S_GET_VALUE (fixP->fx_subsy)
-	  == fixP->fx_frag->fr_address + fixP->fx_where)
+      if (fixP->fx_pcrel)
 	{
-	  fixP->fx_r_type = BFD_RELOC_LARCH_32_PCREL;
-	  fixP->fx_subsy = NULL;
-	  break;
+	  switch (fixP->fx_r_type)
+	    {
+	    case BFD_RELOC_64:
+	      fixP->fx_r_type = BFD_RELOC_LARCH_64_PCREL;
+	      break;
+	    case BFD_RELOC_32:
+	      fixP->fx_r_type = BFD_RELOC_LARCH_32_PCREL;
+	      break;
+	    default:
+	      break;
+	    }
 	}
 
       if (fixP->fx_addsy && fixP->fx_subsy)
