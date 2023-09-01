@@ -1563,7 +1563,7 @@ vmovntdqa, 0x662a, AVX|AVX2, Modrm|Vex|Space0F38|VexWIG|CheckOperandSize|NoSuf, 
 vmovntp<sd>, 0x<sd:ppfx>2b, AVX, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { RegXMM|RegYMM, Xmmword|Ymmword|Unspecified|BaseIndex }
 vmovq, 0xf37e, AVX, Load|Modrm|Vex=1|Space0F|VexWIG|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
 vmovq, 0x66d6, AVX, Modrm|Vex=1|Space0F|VexWIG|NoSuf, { RegXMM, Qword|Unspecified|BaseIndex|RegXMM }
-vmovq, 0x666e, AVX|x64, D|Modrm|Vex=1|Space0F|VexW=2|NoSuf|Size64, { Reg64|Unspecified|BaseIndex, RegXMM }
+vmovq, 0x666e, AVX|x64, D|Modrm|Vex=1|Space0F|VexW=2|NoSuf, { Reg64|Unspecified|BaseIndex, RegXMM }
 vmovs<sd>, 0x<sd:spfx>10, AVX, D|Modrm|VexLIG|Space0F|VexWIG|NoSuf, { <sd:elem>|Unspecified|BaseIndex, RegXMM }
 vmovs<sd>, 0x<sd:spfx>10, AVX, D|Modrm|VexLIG|Space0F|VexVVVV|VexWIG|NoSuf, { RegXMM, RegXMM, RegXMM }
 vmovshdup, 0xf316, AVX, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
