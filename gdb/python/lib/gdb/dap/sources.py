@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 import gdb
 
 from .server import request, capability
@@ -41,16 +43,20 @@ def make_source(fullname, filename):
     if fullname in _source_map:
         result = _source_map[fullname]
     else:
-        global _next_source
         result = {
             "name": filename,
             "path": fullname,
-            "sourceReference": _next_source,
         }
+
+        if not os.path.exists(fullname):
+            global _next_source
+            result["sourceReference"] = _next_source
+
+            global _id_map
+            _id_map[_next_source] = result
+            _next_source += 1
+
         _source_map[fullname] = result
-        global _id_map
-        _id_map[_next_source] = result
-        _next_source += 1
     return result
 
 

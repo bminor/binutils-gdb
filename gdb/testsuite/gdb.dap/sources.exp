@@ -30,20 +30,21 @@ if {[dap_launch $testfile stop_at_main 1] == ""} {
 }
 
 set obj [dap_check_request_and_response loadedSources loadedSources]
-set ref 0
+set path ""
 foreach src [dict get [lindex $obj 0] body sources] {
     if {[file tail [dict get $src name]] == "sources.c"} {
-	set ref [dict get $src sourceReference]
+	set path [dict get $src path]
     }	
 }
 
-if {$ref == 0} {
+if {$path == ""} {
     fail "sources.c in loadedSources"
 } else {
     pass "sources.c in loadedSources"
 
     set obj [dap_check_request_and_response "get source" source \
-		 [format {o sourceReference [i %d]} $ref]]
+		 [format {o source [o path [s %s]] \
+			    sourceReference [i 0]} $path]]
     set text [dict get [lindex $obj 0] body content]
     gdb_assert {[string first "Distinguishing comment" $text] != -1}
 }
