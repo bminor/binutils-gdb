@@ -107,8 +107,8 @@ enum i386_cpu
   CpuXsaveopt,
   /* AES support required */
   CpuAES,
-  /* PCLMUL support required */
-  CpuPCLMUL,
+  /* PCLMULQDQ support required */
+  CpuPCLMULQDQ,
   /* FMA support required */
   CpuFMA,
   /* FMA4 support required */
@@ -415,7 +415,7 @@ typedef union i386_cpu_flags
       unsigned int cpuxsave:1;
       unsigned int cpuxsaveopt:1;
       unsigned int cpuaes:1;
-      unsigned int cpupclmul:1;
+      unsigned int cpupclmulqdq:1;
       unsigned int cpufma:1;
       unsigned int cpufma4:1;
       unsigned int cpuxop:1;

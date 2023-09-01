@@ -1448,15 +1448,15 @@ vaesdeclast, 0x66df, VAES, Modrm|Vex256|Space0F38|VexVVVV|VexWIG|NoSuf, { RegYMM
 vaesenc, 0x66dc, VAES, Modrm|Vex256|Space0F38|VexVVVV|VexWIG|NoSuf, { RegYMM|Unspecified|BaseIndex, RegYMM, RegYMM }
 vaesenclast, 0x66dd, VAES, Modrm|Vex256|Space0F38|VexVVVV|VexWIG|NoSuf, { RegYMM|Unspecified|BaseIndex, RegYMM, RegYMM }
 
-// PCLMUL
+// PCLMULQDQ
 
 <pclmul:cpu:attr, $avx:AVX|:Vex128|VexW0|SSE2AVX|VexVVVV, $sse::>
 
-pclmulqdq<pclmul>, 0x660f3a44, <pclmul:cpu>PCLMUL, Modrm|<pclmul:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
-pclmullqlqdq<pclmul>, 0x660f3a44/0x00, <pclmul:cpu>PCLMUL, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pclmulhqlqdq<pclmul>, 0x660f3a44/0x01, <pclmul:cpu>PCLMUL, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pclmullqhqdq<pclmul>, 0x660f3a44/0x10, <pclmul:cpu>PCLMUL, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pclmulhqhqdq<pclmul>, 0x660f3a44/0x11, <pclmul:cpu>PCLMUL, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pclmulqdq<pclmul>, 0x660f3a44, <pclmul:cpu>PCLMULQDQ, Modrm|<pclmul:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
+pclmullqlqdq<pclmul>, 0x660f3a44/0x00, <pclmul:cpu>PCLMULQDQ, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pclmulhqlqdq<pclmul>, 0x660f3a44/0x01, <pclmul:cpu>PCLMULQDQ, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pclmullqhqdq<pclmul>, 0x660f3a44/0x10, <pclmul:cpu>PCLMULQDQ, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pclmulhqhqdq<pclmul>, 0x660f3a44/0x11, <pclmul:cpu>PCLMULQDQ, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
 
 // GFNI
 
@@ -1771,13 +1771,13 @@ vaesenclast, 0x66dd, AVX|AES, Modrm|Vex|Space0F38|VexVVVV|VexWIG|NoSuf, { Unspec
 vaesimc, 0x66db, AVX|AES, Modrm|Vex|Space0F38|VexWIG|NoSuf, { Unspecified|BaseIndex|RegXMM, RegXMM }
 vaeskeygenassist, 0x66df, AVX|AES, Modrm|Vex|Space0F3A|VexWIG|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM, RegXMM }
 
-// PCLMUL + AVX
+// PCLMULQDQ + AVX
 
-vpclmulqdq, 0x6644, AVX|PCLMUL, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vpclmullqlqdq, 0x6644/0x00, AVX|PCLMUL, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vpclmulhqlqdq, 0x6644/0x01, AVX|PCLMUL, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vpclmullqhqdq, 0x6644/0x10, AVX|PCLMUL, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vpclmulhqhqdq, 0x6644/0x11, AVX|PCLMUL, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
+vpclmulqdq, 0x6644, AVX|PCLMULQDQ, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
+vpclmullqlqdq, 0x6644/0x00, AVX|PCLMULQDQ, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
+vpclmulhqlqdq, 0x6644/0x01, AVX|PCLMULQDQ, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
+vpclmullqhqdq, 0x6644/0x10, AVX|PCLMULQDQ, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
+vpclmulhqhqdq, 0x6644/0x11, AVX|PCLMULQDQ, Modrm|Vex|Space0F3A|VexVVVV|VexWIG|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
 
 // GFNI + AVX
 

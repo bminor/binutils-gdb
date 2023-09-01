@@ -1053,8 +1053,8 @@ static const arch_entry cpu_arch[] =
   SUBARCH (xsavec, XSAVEC, ANY_XSAVEC, false),
   SUBARCH (xsaves, XSAVES, ANY_XSAVES, false),
   SUBARCH (aes, AES, ANY_AES, false),
-  SUBARCH (pclmul, PCLMUL, ANY_PCLMUL, false),
-  SUBARCH (clmul, PCLMUL, ANY_PCLMUL, true),
+  SUBARCH (pclmul, PCLMULQDQ, ANY_PCLMULQDQ, false),
+  SUBARCH (clmul, PCLMULQDQ, ANY_PCLMULQDQ, true),
   SUBARCH (fsgsbase, FSGSBASE, FSGSBASE, false),
   SUBARCH (rdrnd, RDRND, RDRND, false),
   SUBARCH (f16c, F16C, ANY_F16C, false),
@@ -1911,7 +1911,7 @@ cpu_flags_match (const insn_template *t)
 		      || (sse2avx && !i.prefix[DATA_PREFIX]))
 		  && (!x.bitfield.cpuaes || cpu.bitfield.cpuaes)
 		  && (!x.bitfield.cpugfni || cpu.bitfield.cpugfni)
-		  && (!x.bitfield.cpupclmul || cpu.bitfield.cpupclmul))
+		  && (!x.bitfield.cpupclmulqdq || cpu.bitfield.cpupclmulqdq))
 		match |= CPU_FLAGS_ARCH_MATCH;
 	    }
 	  else if (x.bitfield.cpuavx512f)
