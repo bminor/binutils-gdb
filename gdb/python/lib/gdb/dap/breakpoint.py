@@ -108,6 +108,9 @@ def _breakpoint_descriptor(bp):
         loc = bp.locations[0]
         if loc.source:
             (filename, line) = loc.source
+            if loc.fullname is not None:
+                filename = loc.fullname
+
             result.update(
                 {
                     "source": make_source(filename, os.path.basename(filename)),
@@ -118,9 +121,6 @@ def _breakpoint_descriptor(bp):
         if loc.address:
             result["instructionReference"] = hex(loc.address),
 
-        path = loc.fullname
-        if path is not None:
-            result["source"]["path"] = path
     return result
 
 
