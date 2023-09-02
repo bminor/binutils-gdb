@@ -342,7 +342,7 @@ objfile::expand_symtabs_for_function (const char *func_name)
 				   nullptr,
 				   (SEARCH_GLOBAL_BLOCK
 				    | SEARCH_STATIC_BLOCK),
-				   SEARCH_VFT);
+				   SEARCH_FUNCTION_DOMAIN);
 }
 
 void
