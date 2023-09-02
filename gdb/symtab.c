@@ -6435,7 +6435,8 @@ find_main_name (void)
      [&symbol_found_p, pspace] (objfile *obj)
        {
 	 language lang
-	   = obj->lookup_global_symbol_language ("main", SEARCH_VFT,
+	   = obj->lookup_global_symbol_language ("main",
+						 SEARCH_FUNCTION_DOMAIN,
 						 &symbol_found_p);
 	 if (symbol_found_p)
 	   {
