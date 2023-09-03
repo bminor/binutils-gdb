@@ -1,0 +1,47 @@
+/* Symbol domains  -*- c++ -*-
+
+   Copyright (C) 2023 Free Software Foundation, Inc.
+
+   This file is part of GDB.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+/* UNDEF_DOMAIN is used when a domain has not been discovered or
+   none of the following apply.  This usually indicates an error either
+   in the symbol information or in gdb's handling of symbols.  */
+
+DOMAIN (UNDEF)
+
+/* VAR_DOMAIN is the usual domain.  In C, this contains variables,
+   function names, typedef names and enum type values.  */
+
+DOMAIN (VAR)
+
+/* STRUCT_DOMAIN is used in C to hold struct, union and enum type names.
+   Thus, if `struct foo' is used in a C program, it produces a symbol named
+   `foo' in the STRUCT_DOMAIN.  */
+
+DOMAIN (STRUCT)
+
+/* MODULE_DOMAIN is used in Fortran to hold module type names.  */
+
+DOMAIN (MODULE)
+
+/* LABEL_DOMAIN may be used for names of labels (for gotos).  */
+
+DOMAIN (LABEL)
+
+/* Fortran common blocks.  Their naming must be separate from VAR_DOMAIN.
+   They also always use LOC_COMMON_BLOCK.  */
+DOMAIN (COMMON_BLOCK)

@@ -894,34 +894,9 @@ private:
 
 enum domain_enum
 {
-  /* UNDEF_DOMAIN is used when a domain has not been discovered or
-     none of the following apply.  This usually indicates an error either
-     in the symbol information or in gdb's handling of symbols.  */
-
-  UNDEF_DOMAIN,
-
-  /* VAR_DOMAIN is the usual domain.  In C, this contains variables,
-     function names, typedef names and enum type values.  */
-
-  VAR_DOMAIN,
-
-  /* STRUCT_DOMAIN is used in C to hold struct, union and enum type names.
-     Thus, if `struct foo' is used in a C program, it produces a symbol named
-     `foo' in the STRUCT_DOMAIN.  */
-
-  STRUCT_DOMAIN,
-
-  /* MODULE_DOMAIN is used in Fortran to hold module type names.  */
-
-  MODULE_DOMAIN,
-
-  /* LABEL_DOMAIN may be used for names of labels (for gotos).  */
-
-  LABEL_DOMAIN,
-
-  /* Fortran common blocks.  Their naming must be separate from VAR_DOMAIN.
-     They also always use LOC_COMMON_BLOCK.  */
-  COMMON_BLOCK_DOMAIN,
+#define DOMAIN(X) X ## _DOMAIN,
+#include "sym-domains.def"
+#undef DOMAIN
 };
 
 /* The number of bits in a symbol used to represent the domain.  */

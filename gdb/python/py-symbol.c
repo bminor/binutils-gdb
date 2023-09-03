@@ -670,20 +670,15 @@ gdbpy_initialize_symbols (void)
       || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_COMMON_BLOCK",
 				  LOC_COMMON_BLOCK) < 0
       || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_REGPARM_ADDR",
-				  LOC_REGPARM_ADDR) < 0
-      || PyModule_AddIntConstant (gdb_module, "SYMBOL_UNDEF_DOMAIN",
-				  UNDEF_DOMAIN) < 0
-      || PyModule_AddIntConstant (gdb_module, "SYMBOL_VAR_DOMAIN",
-				  VAR_DOMAIN) < 0
-      || PyModule_AddIntConstant (gdb_module, "SYMBOL_STRUCT_DOMAIN",
-				  STRUCT_DOMAIN) < 0
-      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LABEL_DOMAIN",
-				  LABEL_DOMAIN) < 0
-      || PyModule_AddIntConstant (gdb_module, "SYMBOL_MODULE_DOMAIN",
-				  MODULE_DOMAIN) < 0
-      || PyModule_AddIntConstant (gdb_module, "SYMBOL_COMMON_BLOCK_DOMAIN",
-				  COMMON_BLOCK_DOMAIN) < 0)
+				  LOC_REGPARM_ADDR) < 0)
     return -1;
+
+#define DOMAIN(X)							\
+  if (PyModule_AddIntConstant (gdb_module, "SYMBOL_" #X "_DOMAIN",	\
+			       X ## _DOMAIN) < 0)			\
+    return -1;
+#include "sym-domains.def"
+#undef DOMAIN
 
   /* These remain defined for compatibility, but as they were never
      correct, they are no longer documented.  Eventually we can remove

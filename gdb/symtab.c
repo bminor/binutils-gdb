@@ -305,12 +305,10 @@ domain_name (domain_enum e)
 {
   switch (e)
     {
-    case UNDEF_DOMAIN: return "UNDEF_DOMAIN";
-    case VAR_DOMAIN: return "VAR_DOMAIN";
-    case STRUCT_DOMAIN: return "STRUCT_DOMAIN";
-    case MODULE_DOMAIN: return "MODULE_DOMAIN";
-    case LABEL_DOMAIN: return "LABEL_DOMAIN";
-    case COMMON_BLOCK_DOMAIN: return "COMMON_BLOCK_DOMAIN";
+#define DOMAIN(X)				\
+      case X ## _DOMAIN: return #X "_DOMAIN";
+#include "sym-domains.def"
+#undef DOMAIN
     default: gdb_assert_not_reached ("bad domain_enum");
     }
 }

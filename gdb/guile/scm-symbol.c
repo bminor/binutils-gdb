@@ -693,15 +693,17 @@ static const scheme_integer_constant symbol_integer_constants[] =
   X (LOC_OPTIMIZED_OUT),
   X (LOC_COMPUTED),
   X (LOC_REGPARM_ADDR),
-
-  X (UNDEF_DOMAIN),
-  X (VAR_DOMAIN),
-  X (STRUCT_DOMAIN),
-  X (LABEL_DOMAIN),
-  X (VARIABLES_DOMAIN),
-  X (FUNCTIONS_DOMAIN),
-  X (TYPES_DOMAIN),
 #undef X
+
+#define DOMAIN(X) \
+  { "SYMBOL_" #X "_DOMAIN", X ## _DOMAIN },
+#include "sym-domains.def"
+#undef DOMAIN
+
+  /* These were never correct.  */
+  { "SYMBOL_VARIABLES_DOMAIN", VAR_DOMAIN },
+  { "SYMBOL_FUNCTIONS_DOMAIN", VAR_DOMAIN },
+  { "SYMBOL_TYPES_DOMAIN", VAR_DOMAIN },
 
   END_INTEGER_CONSTANTS
 };
