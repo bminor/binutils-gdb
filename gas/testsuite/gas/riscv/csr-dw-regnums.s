@@ -321,6 +321,11 @@ _start:
 	.cfi_offset mvienh, 3168
 	.cfi_offset mviph, 3172
 	.cfi_offset miph, 3408
+	# Smcntrpmf extension
+	.cfi_offset mcyclecfg, 3204
+	.cfi_offset minstretcfg, 3208
+	.cfi_offset mcyclecfgh, 7300
+	.cfi_offset minstretcfgh, 7304
 	# Smstateen extension
 	.cfi_offset mstateen0, 3120
 	.cfi_offset mstateen1, 3124
@@ -406,14 +411,14 @@ _start:
 	.cfi_offset sptbr, 1536		# aliases
 	.cfi_offset mbadaddr, 3340	# aliases
 	.cfi_offset mucounteren, 3200	# aliases
+	.cfi_offset mscounteren, 3204	# aliases
+	.cfi_offset mhcounteren, 3208	# aliases
 	.cfi_offset mbase, 3584
 	.cfi_offset mbound, 3588
 	.cfi_offset mibase, 3592
 	.cfi_offset mibound, 3596
 	.cfi_offset mdbase, 3600
 	.cfi_offset mdbound, 3604
-	.cfi_offset mscounteren, 3204
-	.cfi_offset mhcounteren, 3208
 	.cfi_offset ustatus, 0
 	.cfi_offset uie, 16
 	.cfi_offset utvec, 20

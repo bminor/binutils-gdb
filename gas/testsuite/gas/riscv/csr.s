@@ -350,6 +350,12 @@
 	csr mviph
 	csr miph
 
+	# Smcntrpmf extension
+	csr mcyclecfg
+	csr minstretcfg
+	csr mcyclecfgh
+	csr minstretcfgh
+
 	# Smstateen/Ssstateen extensions
 	csr mstateen0
 	csr mstateen1
@@ -440,14 +446,14 @@
 	csr sptbr		# 0x180 in 1.9.1, but the value is satp since 1.10
 	csr mbadaddr		# 0x343 in 1.9.1, but the value is mtval since 1.10
 	csr mucounteren		# 0x320 in 1.9.1, dropped in 1.10, but the value is mcountinhibit since 1.11
+	csr mscounteren		# 0x321 in 1.9.1, dropped in 1.10, but the value is mcyclecfg for Smcntrpmf extension
+	csr mhcounteren		# 0x322 in 1.9.1, dropped in 1.10, but the value is mcyclecfg for Smcntrpmf extension
 	csr mbase		# 0x380 in 1.9.1, dropped in 1.10
 	csr mbound		# 0x381 in 1.9.1, dropped in 1.10
 	csr mibase		# 0x382 in 1.9.1, dropped in 1.10
 	csr mibound		# 0x383 in 1.9.1, dropped in 1.10
 	csr mdbase		# 0x384 in 1.9.1, dropped in 1.10
 	csr mdbound		# 0x385 in 1.9.1, dropped in 1.10
-	csr mscounteren		# 0x321 in 1.9.1, dropped in 1.10
-	csr mhcounteren		# 0x322 in 1.9.1, dropped in 1.10
 	csr ustatus		# 0x0   in 1.9.1, dropped in 1.12
 	csr uie			# 0x4   in 1.9.1, dropped in 1.12
 	csr utvec		# 0x5   in 1.9.1, dropped in 1.12

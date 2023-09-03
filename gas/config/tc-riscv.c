@@ -74,6 +74,8 @@ enum riscv_csr_class
   CSR_CLASS_H_32,	/* hypervisor, rv32 only */
   CSR_CLASS_SMAIA,		/* Smaia */
   CSR_CLASS_SMAIA_32,		/* Smaia, rv32 only */
+  CSR_CLASS_SMCNTRPMF,		/* Smcntrpmf */
+  CSR_CLASS_SMCNTRPMF_32,	/* Smcntrpmf, rv32 only */
   CSR_CLASS_SMSTATEEN,		/* Smstateen only */
   CSR_CLASS_SMSTATEEN_32,	/* Smstateen RV32 only */
   CSR_CLASS_SSAIA,		/* Ssaia */
@@ -1051,6 +1053,13 @@ riscv_csr_address (const char *csr_name,
       /* Fall through.  */
     case CSR_CLASS_SMAIA:
       extension = "smaia";
+      break;
+    case CSR_CLASS_SMCNTRPMF_32:
+      is_rv32_only = true;
+      /* Fall through.  */
+    case CSR_CLASS_SMCNTRPMF:
+      need_check_version = true;
+      extension = "smcntrpmf";
       break;
     case CSR_CLASS_SMSTATEEN_32:
       is_rv32_only = true;

@@ -889,6 +889,30 @@
 .*Info: macro .*
 .*Warning: invalid CSR `miph', needs `smaia' extension
 .*Info: macro .*
+.*Warning: invalid CSR `mcyclecfg', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfg', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfg', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfg', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfgh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfgh', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfgh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `mcyclecfgh', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfgh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfgh', needs `smcntrpmf' extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfgh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `minstretcfgh', needs `smcntrpmf' extension
+.*Info: macro .*
 .*Warning: invalid CSR `mstateen0', needs `smstateen' extension
 .*Info: macro .*
 .*Warning: invalid CSR `mstateen0', needs `smstateen' extension
@@ -1507,6 +1531,14 @@
 .*Info: macro .*
 .*Warning: invalid CSR `mucounteren' for the privileged spec `1.10'
 .*Info: macro .*
+.*Warning: invalid CSR `mscounteren' for the privileged spec `1.10'
+.*Info: macro .*
+.*Warning: invalid CSR `mscounteren' for the privileged spec `1.10'
+.*Info: macro .*
+.*Warning: invalid CSR `mhcounteren' for the privileged spec `1.10'
+.*Info: macro .*
+.*Warning: invalid CSR `mhcounteren' for the privileged spec `1.10'
+.*Info: macro .*
 .*Warning: invalid CSR `mbase' for the privileged spec `1.10'
 .*Info: macro .*
 .*Warning: invalid CSR `mbase' for the privileged spec `1.10'
@@ -1530,14 +1562,6 @@
 .*Warning: invalid CSR `mdbound' for the privileged spec `1.10'
 .*Info: macro .*
 .*Warning: invalid CSR `mdbound' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `mscounteren' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `mscounteren' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `mhcounteren' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `mhcounteren' for the privileged spec `1.10'
 .*Info: macro .*
 .*Warning: invalid CSR `fflags', needs `f' extension
 .*Info: macro .*
