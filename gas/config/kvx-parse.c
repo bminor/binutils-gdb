@@ -525,7 +525,7 @@ get_token_class (struct token_s *token, struct token_classes *classes, int insn_
 	   : strtoull (tok + (tok[0] == '-') + (tok[0] == '+'), NULL, 0));
       int64_t val = uval;
       int64_t pval = val < 0 ? -uval : uval;
-      int neg_power2_p = val < 0 && !(uval & (uval - 1));
+      int neg_power2_p = val < 0 && !(pval & (pval - 1));
       unsigned len = pval ? 8 * sizeof (pval) - __builtin_clzll (pval) : 0;
       while (class[cur].class_id != -1
 	     && ((unsigned) (class[cur].sz < 0
