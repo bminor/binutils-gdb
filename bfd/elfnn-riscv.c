@@ -4690,6 +4690,96 @@ _bfd_riscv_relax_lui (bfd *abfd,
   return true;
 }
 
+/*
+
+summary
+0000000000000000 <some_label>:
+   0:   00000517                auipc   a0,0x0
+   4:   00053503                ld      a0,0(a0) # 0 <o_start>
+   8:   9512                    add     a0,a0,tp
+   a:   4108                    lw      a0,0(a0)
+   c:   8082                    ret
+
+Relocation section '.rela.text' at offset 0x1d8 contains 3 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000000000  000700000015 R_RISCV_TLS_GOT_H20  0000000000000000 ThreadVar + 0
+000000000004  000200000018 R_RISCV_PCREL_LO12_I 0000000000000000 .Lpcrel_hi0 + 0
+000000000004  000000000033 R_RISCV_RELAX                        0
+
+the goal is to convert auipc to lui and attach R_RISCV_TPREL_HI20
+and delete instruction assosiated with R_RISCV_PCREL_LO12_I {ld,lw}
+so that it mirrors relocations for le
+
+after this relaxation
+0000000000000000 <some_label>:
+   0:   00000517                lui     a0,0x0
+   8:   9512                    add     a0,a0,tp
+   a:   4108                    lw      a0,0(a0)
+   c:   8082                    ret
+
+the add and lw/ld after lui need to have tprel add and tprel_lo12i relocation which need to be emitted by compiler
+
+the lui add and lw to be taken care by _bfd_riscv_relax_tls_le
+
+*/
+static bool
+_bfd_riscv_relax_tls_ie_to_le (bfd *abfd,
+			 asection *sec,
+			 asection *sym_sec ATTRIBUTE_UNUSED,
+			 struct bfd_link_info *link_info,
+			 Elf_Internal_Rela *rel,
+			 bfd_vma symval,
+			 bfd_vma max_alignment ATTRIBUTE_UNUSED,
+			 bfd_vma reserve_size ATTRIBUTE_UNUSED,
+			 bool *again,
+			 riscv_pcgp_relocs *pcgp_relocs,
+			 bool undefined_weak ATTRIBUTE_UNUSED)
+{
+  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
+  bool ret = false;
+  if (RISCV_CONST_HIGH_PART (tpoff (link_info, symval)) != 0)
+    return true;
+
+  BFD_ASSERT (rel->r_offset + 4 <= sec->size);
+chek:
+  switch (ELFNN_R_TYPE (rel->r_info))
+    {
+ //_RISCV_TLS_GOT_HI20 relaxation
+    case R_RISCV_TLS_GOT_HI20:
+      //here we do converion from auipc -> lui because both are utype instructions
+     //attach R_RISCV_TPREL_HI20 relocation
+        if(VALID_UTYPE_IMM (RISCV_CONST_HIGH_PART (symval) ))
+	{
+		*again = true;
+		bfd_vma tolui = bfd_getl32(contents + rel->r_offset);
+		tolui = (tolui & ~MASK_AUIPC) | MATCH_LUI;
+		bfd_putl32 (tolui , contents + rel->r_offset);
+		rel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel->r_info) , R_RISCV_TPREL_HI20);
+		rel = rel + 1;
+ 	goto chek;
+	}
+        else
+        {
+		abort();
+        }
+        break;
+      //delete the lo12 assosiated with previous hi20 as its no longer required
+      case R_RISCV_PCREL_LO12_I:
+	*again = true;
+	ret = riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info,
+							pcgp_relocs, rel);
+	break;
+     case R_RISCV_PCREL_LO12_S:
+	*again = true;
+	ret = riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info,
+							pcgp_relocs, rel);
+	break;
+    default:
+	abort ();
+    }
+return ret;
+
+}
 /* Relax non-PIC TLS references to TP-relative references.  */
 
 static bool
@@ -4965,7 +5055,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
   bfd_vma max_alignment, reserve_size = 0;
   riscv_pcgp_relocs pcgp_relocs;
   static asection *first_section = NULL;
-
+  bool skip_reloc = false;
   *again = false;
 
   if (bfd_link_relocatable (info)
@@ -5015,7 +5105,6 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
       bfd_vma symval;
       char symtype;
       bool undefined_weak = false;
-
       relax_func = NULL;
       riscv_relax_delete_bytes = NULL;
       if (info->relax_pass == 0)
@@ -5027,6 +5116,8 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 		   || type == R_RISCV_LO12_I
 		   || type == R_RISCV_LO12_S)
 	    relax_func = _bfd_riscv_relax_lui;
+	  else if (type == R_RISCV_TLS_GOT_HI20)
+	    relax_func = _bfd_riscv_relax_tls_ie_to_le;
 	  else if (type == R_RISCV_TPREL_HI20
 		   || type == R_RISCV_TPREL_ADD
 		   || type == R_RISCV_TPREL_LO12_I
@@ -5042,7 +5133,8 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  riscv_relax_delete_bytes = _riscv_relax_delete_piecewise;
 
 	  /* Only relax this reloc if it is paired with R_RISCV_RELAX.  */
-	  if (i == sec->reloc_count - 1
+	  if(type == R_RISCV_TLS_GOT_HI20){}
+	  else if(i == sec->reloc_count - 1
 	      || ELFNN_R_TYPE ((rel + 1)->r_info) != R_RISCV_RELAX
 	      || rel->r_offset != (rel + 1)->r_offset)
 	    continue;
@@ -5114,7 +5206,6 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 
 	  indx = ELFNN_R_SYM (rel->r_info) - symtab_hdr->sh_info;
 	  h = elf_sym_hashes (abfd)[indx];
-
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
@@ -5142,7 +5233,31 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 		 need the more rigorous checking for this optimization.  */
 	      undefined_weak = true;
 	    }
-
+          /* conditions to check ie -> le relaxation */
+          if (relax_func == _bfd_riscv_relax_tls_ie_to_le )
+	    {
+              bool need_reloc = false;
+              int ind=0;
+              bool dyn = htab->elf.dynamic_sections_created;
+              RISCV_TLS_GD_IE_NEED_DYN_RELOC(info, dyn, h, ind, need_reloc);
+              /* dont relax ie -> le if the relocation requires us to make dynamic relocations or when there are weak definitions or when we are not creating exec*/
+              if(need_reloc || h->root.type == bfd_link_hash_undefweak || h->root.type == bfd_link_hash_defweak || !(bfd_link_executable (info)) )
+                {
+                 skip_reloc = true;
+                 continue;
+                }
+              /* skip relocs of TPREL_ADD  TPREL_LO12_ I/S and PCREL_LO12_ I/S
+                 assuming that compiler emits these relocs for ie and 
+                 first occurence of these relocs after TLS_GOT_HI20 is related to ie*/
+	    }
+	  if(skip_reloc && (relax_func == _bfd_riscv_relax_pc
+                            || relax_func == _bfd_riscv_relax_tls_le))
+	    {
+             /* reset skip_reloc on final inst related to ie*/
+	      if(type == R_RISCV_TPREL_LO12_I || type == R_RISCV_TPREL_LO12_S)
+		  skip_reloc = false;
+	      continue;
+	    }
 	  /* This line has to match the check in riscv_elf_relocate_section
 	     in the R_RISCV_CALL[_PLT] case.  */
 	  if (bfd_link_pic (info) && h->plt.offset != MINUS_ONE)
