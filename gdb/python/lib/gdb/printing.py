@@ -280,6 +280,20 @@ class NoOpScalarPrinter:
         return self.value.format_string(raw=True)
 
 
+class NoOpPointerReferencePrinter:
+    """A no-op pretty printer that wraps a pointer or reference."""
+
+    def __init__(self, value):
+        self.value = value
+        self.num_children = 1
+
+    def to_string(self):
+        return self.value.format_string(deref_refs=False)
+
+    def children(self):
+        yield "value", self.value.referenced_value()
+
+
 class NoOpArrayPrinter:
     """A no-op pretty printer that wraps an array value."""
 
@@ -354,6 +368,8 @@ def make_visualizer(value):
             result = gdb.printing.NoOpArrayPrinter(ty, value)
         elif ty.code in (gdb.TYPE_CODE_STRUCT, gdb.TYPE_CODE_UNION):
             result = gdb.printing.NoOpStructPrinter(ty, value)
+        elif ty.code in (gdb.TYPE_CODE_PTR, gdb.TYPE_CODE_REF, gdb.TYPE_CODE_RVALUE_REF):
+            result = NoOpPointerReferencePrinter(value)
         else:
             result = gdb.printing.NoOpScalarPrinter(value)
     return result
