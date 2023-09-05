@@ -332,7 +332,7 @@ gdb_release()
 }
 
 # Corresponding to the CVS "sim" module.
-SIM_SUPPORT_DIRS="bfd opcodes libiberty include intl gdb/version.in gdb/common/create-version.sh makefile.vms zlib"
+SIM_SUPPORT_DIRS="libsframe bfd opcodes libiberty libctf/swap.h include intl gdb/version.in gdb/common/create-version.sh makefile.vms zlib gnulib"
 sim_release()
 {
     compressors=$1
