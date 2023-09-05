@@ -273,7 +273,13 @@ def set_breakpoint(*, source, breakpoints: Sequence = (), **args):
     if "path" not in source:
         result = []
     else:
-        specs = [_rewrite_src_breakpoint(source=source, **bp) for bp in breakpoints]
+        # Setting 'source' in BP avoids any Python error if BP already
+        # has a 'source' parameter.  Setting this isn't in the spec,
+        # but it is better to be safe.  See PR dap/30820.
+        specs = []
+        for bp in breakpoints:
+            bp["source"] = source
+            specs.append(_rewrite_src_breakpoint(**bp))
         # Be sure to include the path in the key, so that we only
         # clear out breakpoints coming from this same source.
         key = "source:" + source["path"]
