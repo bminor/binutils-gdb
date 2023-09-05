@@ -568,6 +568,17 @@ struct language_defn
   /* Return true if TYPE is a string type.  */
   virtual bool is_string_type_p (struct type *type) const;
 
+  /* Return true if TYPE is array-like.  */
+  virtual bool is_array_like (struct type *type) const
+  { return false; }
+
+  /* Underlying implementation of value_to_array.  Return a value of
+     array type that corresponds to VAL.  The caller must ensure that
+     is_array_like is true for VAL's type.  Return nullptr if the type
+     cannot be handled.  */
+  virtual struct value *to_array (struct value *val) const
+  { return nullptr; }
+
   /* Return a string that is used by the 'set print max-depth' setting.
      When GDB replaces a struct or union (during value printing) that is
      "too deep" this string is displayed instead.  The default value here

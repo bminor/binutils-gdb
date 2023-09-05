@@ -13830,6 +13830,19 @@ public:
 
   /* See language.h.  */
 
+  bool is_array_like (struct type *type) const override
+  {
+    return (ada_is_constrained_packed_array_type (type)
+	    || ada_is_array_descriptor_type (type));
+  }
+
+  /* See language.h.  */
+
+  struct value *to_array (struct value *val) const override
+  { return ada_coerce_to_simple_array (val); }
+
+  /* See language.h.  */
+
   const char *struct_too_deep_ellipsis () const override
   { return "(...)"; }
 

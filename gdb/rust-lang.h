@@ -196,6 +196,16 @@ public:
 
   /* See language.h.  */
 
+  bool is_array_like (struct type *type) const override
+  { return rust_slice_type_p (type); }
+
+  /* See language.h.  */
+
+  struct value *to_array (struct value *val) const override
+  { return rust_slice_to_array (val); }
+
+  /* See language.h.  */
+
   bool range_checking_on_by_default () const override
   { return true; }
 
