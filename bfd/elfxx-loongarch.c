@@ -548,7 +548,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 0,					/* bitpos.  */
 	 complain_overflow_unsigned,		/* complain_on_overflow.  */
 	 bfd_elf_generic_reloc,			/* special_function.  */
-	 "R_LARCH_SOP_POP_32_S_U",		/* name.  */
+	 "R_LARCH_SOP_POP_32_U",		/* name.  */
 	 false,					/* partial_inplace.  */
 	 0xffffffff00000000,			/* src_mask */
 	 0x00000000ffffffff,			/* dst_mask */
