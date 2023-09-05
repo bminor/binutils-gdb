@@ -346,7 +346,8 @@ dbx_alloc_type (int typenums[2], struct objfile *objfile)
 
   if (typenums[0] == -1)
     {
-      return type_allocator (objfile).new_type ();
+      return type_allocator (objfile,
+			     get_current_subfile ()->language).new_type ();
     }
 
   type_addr = dbx_lookup_type (typenums, objfile);
@@ -356,7 +357,8 @@ dbx_alloc_type (int typenums[2], struct objfile *objfile)
      We will fill it in later if we find out how.  */
   if (*type_addr == 0)
     {
-      *type_addr = type_allocator (objfile).new_type ();
+      *type_addr = type_allocator (objfile,
+				   get_current_subfile ()->language).new_type ();
     }
 
   return (*type_addr);
@@ -372,7 +374,7 @@ dbx_init_float_type (struct objfile *objfile, int bits)
   struct type *type;
 
   format = gdbarch_floatformat_for_type (gdbarch, NULL, bits);
-  type_allocator alloc (objfile);
+  type_allocator alloc (objfile, get_current_subfile ()->language);
   if (format)
     type = init_float_type (alloc, bits, NULL, format);
   else
@@ -877,7 +879,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	    /* NULL terminate the string.  */
 	    string_local[ind] = 0;
-	    type_allocator alloc (objfile);
+	    type_allocator alloc (objfile, get_current_subfile ()->language);
 	    range_type
 	      = create_static_range_type (alloc,
 					  builtin_type (objfile)->builtin_int,
@@ -2014,7 +2016,7 @@ again:
     case 'S':			/* Set type */
       {
 	type1 = read_type (pp, objfile);
-	type_allocator alloc (objfile);
+	type_allocator alloc (objfile, get_current_subfile ()->language);
 	type = create_set_type (alloc, type1);
 	if (typenums[0] != -1)
 	  *dbx_lookup_type (typenums, objfile) = type;
@@ -2081,7 +2083,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
      TARGET_CHAR_BIT.  */
 #endif
 
-  type_allocator alloc (objfile);
+  type_allocator alloc (objfile, get_current_subfile ()->language);
   switch (-typenum)
     {
     case 1:
@@ -3536,7 +3538,7 @@ read_array_type (const char **pp, struct type *type,
       upper = -1;
     }
 
-  type_allocator alloc (objfile);
+  type_allocator alloc (objfile, get_current_subfile ()->language);
   range_type =
     create_static_range_type (alloc, index_type, lower, upper);
   type_allocator smash_alloc (type, type_allocator::SMASH);
@@ -3734,7 +3736,7 @@ read_sun_builtin_type (const char **pp, int typenums[2], struct objfile *objfile
   if (**pp == ';')
     ++(*pp);
 
-  type_allocator alloc (objfile);
+  type_allocator alloc (objfile, get_current_subfile ()->language);
   if (type_bits == 0)
     {
       struct type *type = alloc.new_type (TYPE_CODE_VOID,
@@ -4003,7 +4005,7 @@ read_range_type (const char **pp, int typenums[2], int type_size,
   if (n2bits == -1 || n3bits == -1)
     return error_type (pp, objfile);
 
-  type_allocator alloc (objfile);
+  type_allocator alloc (objfile, get_current_subfile ()->language);
 
   if (index_type)
     goto handle_true_range;

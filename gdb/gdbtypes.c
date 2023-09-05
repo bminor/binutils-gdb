@@ -217,6 +217,7 @@ type_allocator::new_type ()
   /* Alloc the structure and start off with all fields zeroed.  */
   struct type *type = OBSTACK_ZALLOC (obstack, struct type);
   TYPE_MAIN_TYPE (type) = OBSTACK_ZALLOC (obstack, struct main_type);
+  TYPE_MAIN_TYPE (type)->m_lang = m_lang;
 
   if (m_is_objfile)
     {
@@ -5385,10 +5386,6 @@ recursive_dump_type (struct type *type, int spaces)
       print_gnat_stuff (type, spaces);
       break;
 
-    case TYPE_SPECIFIC_RUST_STUFF:
-      gdb_printf ("%*srust\n", spaces, "");
-      break;
-
     case TYPE_SPECIFIC_FLOATFORMAT:
       gdb_printf ("%*sfloatformat ", spaces, "");
       if (TYPE_FLOATFORMAT (type) == NULL
@@ -5628,9 +5625,6 @@ copy_type_recursive (struct type *type, htab_t copied_types)
       break;
     case TYPE_SPECIFIC_GNAT_STUFF:
       INIT_GNAT_SPECIFIC (new_type);
-      break;
-    case TYPE_SPECIFIC_RUST_STUFF:
-      INIT_RUST_SPECIFIC (new_type);
       break;
     case TYPE_SPECIFIC_SELF_TYPE:
       set_type_self_type (new_type,
@@ -5948,17 +5942,24 @@ type::copy_fields (std::vector<struct field> &src)
   memcpy (this->fields (), src.data (), size);
 }
 
+/* See gdbtypes.h.  */
+
+bool
+type::is_string_like ()
+{
+  const language_defn *defn = language_def (this->language ());
+  return defn->is_string_type_p (this);
+}
+
+/* See gdbtypes.h.  */
+
 bool
 type::is_array_like ()
 {
   if (code () == TYPE_CODE_ARRAY)
     return true;
-  if (HAVE_GNAT_AUX_INFO (this))
-    return (ada_is_constrained_packed_array_type (this)
-	    || ada_is_array_descriptor_type (this));
-  if (HAVE_RUST_SPECIFIC (this))
-    return rust_slice_type_p (this);
-  return false;
+  const language_defn *defn = language_def (this->language ());
+  return defn->is_array_like (this);
 }
 
 

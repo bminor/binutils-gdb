@@ -370,7 +370,7 @@ ctf_init_float_type (struct objfile *objfile,
   const struct floatformat **format;
   struct type *type;
 
-  type_allocator alloc (objfile);
+  type_allocator alloc (objfile, language_c);
   format = gdbarch_floatformat_for_type (gdbarch, name_hint, bits);
   if (format != nullptr)
     type = init_float_type (alloc, bits, name, format);
@@ -553,7 +553,7 @@ read_base_type (struct ctf_context *ccp, ctf_id_t tid)
 		   ctf_errmsg (ctf_errno (fp)));
     }
 
-  type_allocator alloc (of);
+  type_allocator alloc (of, language_c);
   kind = ctf_type_kind (fp, tid);
   if (kind == CTF_K_INTEGER)
     {
@@ -629,7 +629,7 @@ read_structure_type (struct ctf_context *ccp, ctf_id_t tid)
   struct type *type;
   uint32_t kind;
 
-  type = type_allocator (of).new_type ();
+  type = type_allocator (of, language_c).new_type ();
 
   const char *name = ctf_type_name_raw (fp, tid);
   if (name != nullptr && strlen (name) != 0)
@@ -688,7 +688,7 @@ read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
   ctf_funcinfo_t cfi;
   uint32_t argc;
 
-  type = type_allocator (of).new_type ();
+  type = type_allocator (of, language_c).new_type ();
 
   type->set_code (TYPE_CODE_FUNC);
   if (ctf_func_type_info (fp, tid, &cfi) < 0)
@@ -739,7 +739,7 @@ read_enum_type (struct ctf_context *ccp, ctf_id_t tid)
   ctf_dict_t *fp = ccp->fp;
   struct type *type;
 
-  type = type_allocator (of).new_type ();
+  type = type_allocator (of, language_c).new_type ();
 
   const char *name = ctf_type_name_raw (fp, tid);
   if (name != nullptr && strlen (name) != 0)
@@ -828,7 +828,7 @@ read_array_type (struct ctf_context *ccp, ctf_id_t tid)
   if (idx_type == nullptr)
     idx_type = builtin_type (objfile)->builtin_int;
 
-  type_allocator alloc (objfile);
+  type_allocator alloc (objfile, language_c);
   range_type = create_static_range_type (alloc, idx_type, 0, ar.ctr_nelems - 1);
   type = create_array_type (alloc, element_type, range_type);
   if (ar.ctr_nelems <= 1)	/* Check if undefined upper bound.  */
@@ -928,7 +928,8 @@ read_typedef_type (struct ctf_context *ccp, ctf_id_t tid,
   struct type *this_type, *target_type;
 
   char *aname = obstack_strdup (&objfile->objfile_obstack, name);
-  this_type = type_allocator (objfile).new_type (TYPE_CODE_TYPEDEF, 0, aname);
+  this_type = type_allocator (objfile, language_c).new_type (TYPE_CODE_TYPEDEF,
+							     0, aname);
   set_tid_type (objfile, tid, this_type);
   target_type = fetch_tid_type (ccp, btid);
   if (target_type != this_type)
@@ -976,7 +977,7 @@ read_forward_type (struct ctf_context *ccp, ctf_id_t tid)
   struct type *type;
   uint32_t kind;
 
-  type = type_allocator (of).new_type ();
+  type = type_allocator (of, language_c).new_type ();
 
   const char *name = ctf_type_name_raw (fp, tid);
   if (name != nullptr && strlen (name) != 0)

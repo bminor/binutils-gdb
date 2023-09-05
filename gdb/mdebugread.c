@@ -1382,7 +1382,7 @@ basic_type (int bt, struct objfile *objfile)
   if (map_bt[bt])
     return map_bt[bt];
 
-  type_allocator alloc (objfile);
+  type_allocator alloc (objfile, get_current_subfile ()->language);
 
   switch (bt)
     {
@@ -1571,7 +1571,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	}
     }
 
-  type_allocator alloc (mdebugread_objfile);
+  type_allocator alloc (mdebugread_objfile, get_current_subfile ()->language);
 
   /* Move on to next aux.  */
   ax++;
@@ -4291,7 +4291,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
       rf = rn->rfd;
     }
 
-  type_allocator alloc (mdebugread_objfile);
+  type_allocator alloc (mdebugread_objfile, get_current_subfile ()->language);
 
   /* mips cc uses a rf of -1 for opaque struct definitions.
      Set TYPE_STUB for these types so that check_typedef will
@@ -4754,7 +4754,8 @@ new_type (char *name)
 {
   struct type *t;
 
-  t = type_allocator (mdebugread_objfile).new_type ();
+  t = type_allocator (mdebugread_objfile,
+		      get_current_subfile ()->language).new_type ();
   t->set_name (name);
   INIT_CPLUS_SPECIFIC (t);
   return t;

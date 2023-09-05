@@ -448,17 +448,19 @@ static PyObject *
 typy_is_array_like (PyObject *self, void *closure)
 {
   struct type *type = ((type_object *) self)->type;
+  bool result = false;
 
   try
     {
       type = check_typedef (type);
+      result = type->is_array_like ();
     }
   catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  if (type->is_array_like ())
+  if (result)
     Py_RETURN_TRUE;
   else
     Py_RETURN_FALSE;
@@ -475,14 +477,7 @@ typy_is_string_like (PyObject *self, void *closure)
   try
     {
       type = check_typedef (type);
-
-      const language_defn *lang = nullptr;
-      if (HAVE_GNAT_AUX_INFO (type))
-	lang = language_def (language_ada);
-      else if (HAVE_RUST_SPECIFIC (type))
-	lang = language_def (language_rust);
-      if (lang != nullptr)
-	result = lang->is_string_type_p (type);
+      result = type->is_string_like ();
     }
   catch (const gdb_exception &except)
     {

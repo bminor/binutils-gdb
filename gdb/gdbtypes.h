@@ -501,7 +501,6 @@ enum type_specific_kind
   TYPE_SPECIFIC_NONE,
   TYPE_SPECIFIC_CPLUS_STUFF,
   TYPE_SPECIFIC_GNAT_STUFF,
-  TYPE_SPECIFIC_RUST_STUFF,
   TYPE_SPECIFIC_FLOATFORMAT,
   /* Note: This is used by TYPE_CODE_FUNC and TYPE_CODE_METHOD.  */
   TYPE_SPECIFIC_FUNC,
@@ -857,7 +856,11 @@ struct main_type
   /* * A discriminant telling us which field of the type_specific
      union is being used for this type, if any.  */
 
-  ENUM_BITFIELD(type_specific_kind) type_specific_field : 4;
+  ENUM_BITFIELD(type_specific_kind) type_specific_field : 3;
+
+  /* The language for this type.  */
+
+  ENUM_BITFIELD(language) m_lang : LANGUAGE_BITS;
 
   /* * Number of fields described for this type.  This field appears
      at this location because it packs nicely here.  */
@@ -1430,10 +1433,18 @@ struct type
     return this->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (this);
   }
 
+  /* Return true if this type is "string-like", according to its
+     defining language.  */
+  bool is_string_like ();
+
   /* Return true if this type is "array-like".  This includes arrays,
      but also some forms of structure type that are recognized as
      representations of arrays by the type's language.  */
   bool is_array_like ();
+
+  /* Return the language that this type came from.  */
+  enum language language () const
+  { return main_type->m_lang; }
 
   /* * Type that is a pointer to this type.
      NULL if no such pointer-to type is known yet.
@@ -1839,14 +1850,6 @@ extern void allocate_gnat_aux_type (struct type *);
     || (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_NONE	\
 	&& (type)->is_fixed_instance ()))
 
-/* Currently there isn't any associated data -- this is just a
-   marker.  */
-#define INIT_RUST_SPECIFIC(type) \
-  TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_RUST_STUFF
-
-#define HAVE_RUST_SPECIFIC(type) \
-  (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_RUST_STUFF)
-
 #define INIT_FUNC_SPECIFIC(type)					       \
   (TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FUNC,			       \
    TYPE_MAIN_TYPE (type)->type_specific.func_stuff = (struct func_type *)      \
@@ -2242,14 +2245,16 @@ class type_allocator
 public:
 
   /* Create new types on OBJFILE.  */
-  explicit type_allocator (objfile *objfile)
-    : m_is_objfile (true)
+  type_allocator (objfile *objfile, enum language lang)
+    : m_is_objfile (true),
+      m_lang (lang)
   {
     m_data.objfile = objfile;
   }
 
   /* Create new types on GDBARCH.  */
   explicit type_allocator (gdbarch *gdbarch)
+    : m_lang (language_minimal)
   {
     m_data.gdbarch = gdbarch;
   }
@@ -2269,6 +2274,7 @@ public:
      is passed, overwrite TYPE.  */
   explicit type_allocator (struct type *type,
 			   type_allocator_kind kind = SAME)
+    : m_lang (type->language ())
   {
     if (kind == SAME)
       {
@@ -2289,7 +2295,8 @@ public:
 
   /* Create new types on the same obstack as TYPE.  */
   explicit type_allocator (const struct type *type)
-    : m_is_objfile (type->is_objfile_owned ())
+    : m_is_objfile (type->is_objfile_owned ()),
+      m_lang (type->language ())
   {
     if (type->is_objfile_owned ())
       m_data.objfile = type->objfile_owner ();
@@ -2326,6 +2333,8 @@ private:
   /* True if this allocator uses the type field above, indicating that
      the "allocation" should be done in-place.  */
   bool m_smash = false;
+  /* The language for types created by this allocator.  */
+  enum language m_lang;
 };
 
 /* Allocate a TYPE_CODE_INT type structure using ALLOC.  BIT is the

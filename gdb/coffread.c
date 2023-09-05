@@ -354,7 +354,7 @@ coff_alloc_type (int index)
      We will fill it in later if we find out how.  */
   if (type == NULL)
     {
-      type = type_allocator (coffread_objfile).new_type ();
+      type = type_allocator (coffread_objfile, language_c).new_type ();
       *type_addr = type;
     }
   return type;
@@ -1763,7 +1763,7 @@ decode_type (struct coff_symbol *cs, unsigned int c_type,
 
 	  base_type = decode_type (cs, new_c_type, aux, objfile);
 	  index_type = builtin_type (objfile)->builtin_int;
-	  type_allocator alloc (objfile);
+	  type_allocator alloc (objfile, language_c);
 	  range_type
 	    = create_static_range_type (alloc, index_type, 0, n - 1);
 	  type = create_array_type (alloc, base_type, range_type);

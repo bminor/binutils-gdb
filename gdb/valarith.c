@@ -262,10 +262,8 @@ value_to_array (struct value *val)
 
   if (type->is_array_like ())
     {
-      if (HAVE_GNAT_AUX_INFO (type))
-	return ada_coerce_to_simple_array (val);
-      if (HAVE_RUST_SPECIFIC (type))
-	return rust_slice_to_array (val);
+      const language_defn *defn = language_def (type->language ());
+      return defn->to_array (val);
     }
   return nullptr;
 }
