@@ -15090,9 +15090,10 @@ gnat_encoded_fixed_point_type_info (const char *name)
    it to guess the correct format if necessary.  */
 
 static struct type *
-dwarf2_init_float_type (struct objfile *objfile, int bits, const char *name,
+dwarf2_init_float_type (struct dwarf2_cu *cu, int bits, const char *name,
 			const char *name_hint, enum bfd_endian byte_order)
 {
+  struct objfile *objfile = cu->per_objfile->objfile;
   struct gdbarch *gdbarch = objfile->arch ();
   const struct floatformat **format;
   struct type *type;
@@ -15110,10 +15111,11 @@ dwarf2_init_float_type (struct objfile *objfile, int bits, const char *name,
 /* Allocate an integer type of size BITS and name NAME.  */
 
 static struct type *
-dwarf2_init_integer_type (struct dwarf2_cu *cu, struct objfile *objfile,
-			  int bits, int unsigned_p, const char *name)
+dwarf2_init_integer_type (struct dwarf2_cu *cu, int bits, int unsigned_p,
+			  const char *name)
 {
   struct type *type;
+  struct objfile *objfile = cu->per_objfile->objfile;
 
   /* Versions of Intel's C Compiler generate an integer type called "void"
      instead of using DW_TAG_unspecified_type.  This has been seen on
@@ -15167,10 +15169,10 @@ has_zero_over_zero_small_attribute (struct die_info *die,
    component.  */
 static struct type *
 dwarf2_init_complex_target_type (struct dwarf2_cu *cu,
-				 struct objfile *objfile,
 				 int bits, const char *name_hint,
 				 enum bfd_endian byte_order)
 {
+  struct objfile *objfile = cu->per_objfile->objfile;
   gdbarch *gdbarch = objfile->arch ();
   struct type *tt = nullptr;
 
@@ -15218,7 +15220,7 @@ dwarf2_init_complex_target_type (struct dwarf2_cu *cu,
     tt = nullptr;
 
   const char *name = (tt == nullptr) ? nullptr : tt->name ();
-  return dwarf2_init_float_type (objfile, bits, name, name_hint, byte_order);
+  return dwarf2_init_float_type (cu, bits, name, name_hint, byte_order);
 }
 
 /* Find a representation of a given base type and install
@@ -15321,7 +15323,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	type = init_boolean_type (alloc, bits, 1, name);
 	break;
       case DW_ATE_complex_float:
-	type = dwarf2_init_complex_target_type (cu, objfile, bits / 2, name,
+	type = dwarf2_init_complex_target_type (cu, bits / 2, name,
 						byte_order);
 	if (type->code () == TYPE_CODE_ERROR)
 	  {
@@ -15341,10 +15343,10 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	type = init_decfloat_type (alloc, bits, name);
 	break;
       case DW_ATE_float:
-	type = dwarf2_init_float_type (objfile, bits, name, name, byte_order);
+	type = dwarf2_init_float_type (cu, bits, name, name, byte_order);
 	break;
       case DW_ATE_signed:
-	type = dwarf2_init_integer_type (cu, objfile, bits, 0, name);
+	type = dwarf2_init_integer_type (cu, bits, 0, name);
 	break;
       case DW_ATE_unsigned:
 	if (cu->lang () == language_fortran
@@ -15352,7 +15354,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	    && startswith (name, "character("))
 	  type = init_character_type (alloc, bits, 1, name);
 	else
-	  type = dwarf2_init_integer_type (cu, objfile, bits, 1, name);
+	  type = dwarf2_init_integer_type (cu, bits, 1, name);
 	break;
       case DW_ATE_signed_char:
 	if (cu->lang () == language_ada
@@ -15361,7 +15363,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	    || cu->lang () == language_fortran)
 	  type = init_character_type (alloc, bits, 0, name);
 	else
-	  type = dwarf2_init_integer_type (cu, objfile, bits, 0, name);
+	  type = dwarf2_init_integer_type (cu, bits, 0, name);
 	break;
       case DW_ATE_unsigned_char:
 	if (cu->lang () == language_ada
@@ -15371,7 +15373,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	    || cu->lang () == language_rust)
 	  type = init_character_type (alloc, bits, 1, name);
 	else
-	  type = dwarf2_init_integer_type (cu, objfile, bits, 1, name);
+	  type = dwarf2_init_integer_type (cu, bits, 1, name);
 	break;
       case DW_ATE_UTF:
 	{
