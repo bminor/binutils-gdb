@@ -15380,11 +15380,11 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
 	break;
       case DW_ATE_signed_fixed:
-	type = init_fixed_point_type (objfile, bits, 0, name);
+	type = init_fixed_point_type (alloc, bits, 0, name);
 	finish_fixed_point_type (type, gnat_encoding_suffix, die, cu);
 	break;
       case DW_ATE_unsigned_fixed:
-	type = init_fixed_point_type (objfile, bits, 1, name);
+	type = init_fixed_point_type (alloc, bits, 1, name);
 	finish_fixed_point_type (type, gnat_encoding_suffix, die, cu);
 	break;
 

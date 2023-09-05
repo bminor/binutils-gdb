@@ -2379,7 +2379,7 @@ extern struct type *init_pointer_type (type_allocator &alloc, int bit,
 				       const char *name,
 				       struct type *target_type);
 
-extern struct type *init_fixed_point_type (struct objfile *, int, int,
+extern struct type *init_fixed_point_type (type_allocator &, int, int,
 					   const char *);
 
 /* Helper functions to construct a struct or record type.  An

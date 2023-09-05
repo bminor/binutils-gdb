@@ -3498,12 +3498,12 @@ init_pointer_type (type_allocator &alloc,
    NAME is the type name.  */
 
 struct type *
-init_fixed_point_type (struct objfile *objfile,
+init_fixed_point_type (type_allocator &alloc,
 		       int bit, int unsigned_p, const char *name)
 {
   struct type *t;
 
-  t = type_allocator (objfile).new_type (TYPE_CODE_FIXED_POINT, bit, name);
+  t = alloc.new_type (TYPE_CODE_FIXED_POINT, bit, name);
   if (unsigned_p)
     t->set_is_unsigned (true);
 
