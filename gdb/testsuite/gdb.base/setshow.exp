@@ -280,10 +280,21 @@ proc_with_prefix test_setshow_history {} {
 
     #get home directory path
     set HOME ""
+    set STRINGHOME ""
     set test "show environment HOME"
     gdb_test_multiple $test $test {
 	-re "\nHOME = (\[^\r\n\]*)\[\r\n\]+$::gdb_prompt $" {
 	    set HOME $expect_out(1,string)
+	    if { [ishost *-*-mingw*] } {
+		# STRINGHOME is how HOME prints with C string escapes.
+		# Specifically, all backslashes "\" in the pathname
+		# string have to be escaped as "\\".  If you have other
+		# weird characters in your HOME pathname that need
+		# escaping too, maybe you shouldn't do that.  :-P
+		regsub -all {\\} $HOME {\\\\} STRINGHOME
+	    } else {
+		set STRINGHOME $HOME
+	    }
 	    pass $test
 	}
     }
@@ -297,10 +308,10 @@ proc_with_prefix test_setshow_history {} {
 	"The filename in which to record the command history is \"[string_to_regexp $HOME]/foobar.baz\"..*" \
 	"show history filename (~/foobar.baz)"
     gdb_test "p \$_gdb_setting(\"history filename\")" \
-	" = \"[string_to_regexp $HOME]/foobar.baz\"" \
+	" = \"[string_to_regexp $STRINGHOME]/foobar.baz\"" \
 	"_gdb_setting history filename"
     gdb_test "p \$_gdb_setting_str(\"history filename\")" \
-	" = \"[string_to_regexp $HOME]/foobar.baz\"" \
+	" = \"[string_to_regexp $STRINGHOME]/foobar.baz\"" \
 	"_gdb_setting_str history filename"
 
     #get current working directory
