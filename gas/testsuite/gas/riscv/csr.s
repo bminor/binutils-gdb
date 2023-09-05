@@ -447,7 +447,7 @@
 	csr mbadaddr		# 0x343 in 1.9.1, but the value is mtval since 1.10
 	csr mucounteren		# 0x320 in 1.9.1, dropped in 1.10, but the value is mcountinhibit since 1.11
 	csr mscounteren		# 0x321 in 1.9.1, dropped in 1.10, but the value is mcyclecfg for Smcntrpmf extension
-	csr mhcounteren		# 0x322 in 1.9.1, dropped in 1.10, but the value is mcyclecfg for Smcntrpmf extension
+	csr mhcounteren		# 0x322 in 1.9.1, dropped in 1.10, but the value is minstretcfg for Smcntrpmf extension
 	csr mbase		# 0x380 in 1.9.1, dropped in 1.10
 	csr mbound		# 0x381 in 1.9.1, dropped in 1.10
 	csr mibase		# 0x382 in 1.9.1, dropped in 1.10
