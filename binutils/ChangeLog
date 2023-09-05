@@ -1,3 +1,28 @@
+2023-09-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 30684
+	* readelf.c (extra_sym_info): New variable.
+	(section_name_valid): Also check for filedata being NULL.
+	(section_name_print): Delete.
+	(section_index_real): New function.  Returns true if the given
+	section index references a real section.
+	(print_symbol): Rename to print_sumbol_name.
+	(printable_section_name): Use a rotating array of static buffers
+	for the return string.
+	(printable_section_name_from_index): Merge code from
+	dump_relocations and get_symbol_index_type into here.
+	(long_option_values): Add OPTION_NO_EXTRA_SYM_INFO.
+	(options): Add "extra-sym-info" and "no-extra-sym-info".
+	(usage): Mention new options.
+	(parse_args): Parse new options.
+	(get_symbol_index_type): Delete.
+	(print_dynamic_symbol_size): Rename to print_symbol_size.
+	(print_dynamic_symbol): Rename to print_symbol.
+	(print_symbol_table_heading): New function.
+	(process_symbol_table): Use new function.
+	* doc/binutils.texi: Document the new option.
+	* NEWS: Mention the new feature.
+
 2023-08-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 30781

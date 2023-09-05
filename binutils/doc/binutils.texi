@@ -4961,6 +4961,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{--quiet}]
         [@option{--recurse-limit}|@option{--no-recurse-limit}]
         [@option{-U} @var{method}|@option{--unicode=}@var{method}]
+        [@option{-X}|@option{--extra-sym-info}|@option{--no-extra-sym-info}]
         [@option{-n}|@option{--notes}]
         [@option{-r}|@option{--relocs}]
         [@option{-u}|@option{--unwind}]
@@ -5151,6 +5152,20 @@ unicode escape sequences but it will also highlighted them in red,
 assuming that colouring is supported by the output device.  The
 colouring is intended to draw attention to the presence of unicode
 sequences when they might not be expected.
+
+@item -X
+@itemx --extra-sym-info
+When displaying details of symbols, include extra information not
+normally presented.  Currently this just adds the name of the section
+referenced by the symbol's index field, if there is one.  In the
+future more information may be displayed when this option is enabled.
+
+Enabling this option effectively enables the @option{--wide} option as
+well, at least when displaying symbol information.
+
+@item --no-extra-sym-info
+Disables the effect of the @option{--extra-sym-info} option.  This
+is the default.
 
 @item -e
 @itemx --headers

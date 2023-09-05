@@ -248,6 +248,7 @@ static bool do_not_show_symbol_truncation = false;
 static bool do_demangle = false;	/* Pretty print C++ symbol names.  */
 static bool process_links = false;
 static bool dump_any_debugging = false;
+static bool extra_sym_info = false;
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
 static int sym_base = 0;
 
@@ -412,23 +413,25 @@ section_name (const Filedata *filedata, const Elf_Internal_Shdr *hdr)
 static inline bool
 section_name_valid (const Filedata *filedata, const Elf_Internal_Shdr *hdr)
 {
-  return (hdr != NULL
+  return (filedata != NULL
+	  && hdr != NULL
 	  && filedata->string_table != NULL
 	  && hdr->sh_name < filedata->string_table_length);
 }
 
-static inline const char *
-section_name_print (const Filedata *filedata, const Elf_Internal_Shdr *hdr)
-{
-  if (hdr == NULL)
-    return _("<none>");
-  if (filedata->string_table == NULL)
-    return _("<no-strings>");
-  if (hdr->sh_name >= filedata->string_table_length)
-    return _("<corrupt>");
-  return section_name (filedata, hdr);
-}
+/* Returns true if the given index is real/valid.  Note: "real" here
+   means "references a real section in the section header" and not
+   "is a valid section index as per the ELF standard".  */
 
+static inline bool
+section_index_real (const Filedata *filedata, unsigned int ndx)
+{
+  return (filedata != NULL
+	  && filedata->section_headers != NULL
+	  && ndx < filedata->file_header.e_shnum
+	  && ndx > 0);
+}
+ 
 #define DT_VERSIONTAGIDX(tag)	(DT_VERNEEDNUM - (tag))	/* Reverse order!  */
 
 static inline bool
@@ -612,7 +615,8 @@ print_vma (uint64_t vma, print_mode mode)
 /* Display a symbol on stdout.  Handles the display of control characters and
    multibye characters (assuming the host environment supports them).
 
-   Display at most abs(WIDTH) characters, truncating as necessary, unless do_wide is true.
+   Display at most abs(WIDTH) characters, truncating as necessary,
+   unless do_wide or extra_sym_info is true.
 
    If truncation will happen and do_not_show_symbol_truncation is FALSE then display
    abs(WIDTH) - 5 characters followed by "[...]".
@@ -623,7 +627,7 @@ print_vma (uint64_t vma, print_mode mode)
    Returns the number of emitted characters.  */
 
 static unsigned int
-print_symbol (signed int width, const char * symbol)
+print_symbol_name (signed int width, const char * symbol)
 {
   bool extra_padding = false;
   bool do_dots = false;
@@ -643,13 +647,14 @@ print_symbol (signed int width, const char * symbol)
   else if (width == 0)
     return 0;
 
-  if (do_wide)
+  if (do_wide || extra_sym_info)
     /* Set the remaining width to a very large value.
        This simplifies the code below.  */
     width_remaining = INT_MAX;
   else
     {
       width_remaining = width;
+
       if (! do_not_show_symbol_truncation
 	  && (int) strlen (symbol) > width)
 	{
@@ -876,12 +881,36 @@ print_symbol (signed int width, const char * symbol)
 static const char *
 printable_section_name (Filedata * filedata, const Elf_Internal_Shdr * sec)
 {
-#define MAX_PRINT_SEC_NAME_LEN 256
-  static char  sec_name_buf [MAX_PRINT_SEC_NAME_LEN + 1];
-  const char * name = section_name_print (filedata, sec);
-  char *       buf = sec_name_buf;
+#define NUM_SEC_NAME_BUFS       5
+#define MAX_PRINT_SEC_NAME_LEN  256
+  
+  static int   sec_name_buf_index = 0;
+  /* We use a rotating array of static buffers, so that multiple successive calls
+     to printable_section_name() will still work.  eg when used in a printf.  */
+  static char  sec_name_buf [NUM_SEC_NAME_BUFS][MAX_PRINT_SEC_NAME_LEN + 1];
+  
+  const char * name;
+  char *       buf;
+  char *       buf_start;
   char         c;
   unsigned int remaining = MAX_PRINT_SEC_NAME_LEN;
+
+  /* Validate the input parameters.  */
+  if (filedata == NULL)
+    return _("<internal error>");
+  if (sec == NULL)
+    return _("<none>");
+  if (filedata->string_table == NULL)
+    return _("<no-strings>");
+  if (sec->sh_name >= filedata->string_table_length)
+    return _("<corrupt>");
+
+  /* Select a buffer to use.  */
+  buf_start = buf = sec_name_buf[sec_name_buf_index];
+  if (++sec_name_buf_index >= NUM_SEC_NAME_BUFS)
+    sec_name_buf_index = 0;
+
+  name = section_name (filedata, sec);
 
   while ((c = * name ++) != 0)
     {
@@ -917,16 +946,101 @@ printable_section_name (Filedata * filedata, const Elf_Internal_Shdr * sec)
     }
 
   * buf = 0;
-  return sec_name_buf;
+  return buf_start;
+}
+
+/* Return TRUE if the current file is for IA-64 machine and OpenVMS ABI.
+   This OS has so many departures from the ELF standard that we test it at
+   many places.  */
+
+static inline bool
+is_ia64_vms (Filedata * filedata)
+{
+  return filedata->file_header.e_machine == EM_IA_64
+    && filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_OPENVMS;
 }
 
 static const char *
-printable_section_name_from_index (Filedata *filedata, size_t ndx)
+printable_section_name_from_index (Filedata *  filedata,
+				   size_t      ndx,
+				   bool *      is_special)
 {
-  if (ndx >= filedata->file_header.e_shnum)
-    return _("<corrupt>");
+  if (is_special != NULL)
+    * is_special = true;
 
-  return printable_section_name (filedata, filedata->section_headers + ndx);
+  switch (ndx)
+    {
+    case SHN_UNDEF:	return "UND";
+    case SHN_ABS:	return "ABS";
+    case SHN_COMMON:	return "COM";
+      break;
+    }
+
+  if (filedata != NULL)
+    {
+      switch (filedata->file_header.e_machine)
+	{
+	case EM_MIPS:
+	  if (ndx == SHN_MIPS_SCOMMON)
+	    return "SCOMMON";
+	  if (ndx == SHN_MIPS_SUNDEFINED)
+	    return "SUNDEF";
+	  break;
+
+	case EM_TI_C6000:
+	  if (ndx == SHN_TIC6X_SCOMMON)
+	    return "SCOM";
+	  break;
+
+	case EM_X86_64:
+	case EM_L1OM:
+	case EM_K1OM:
+	  if (ndx == SHN_X86_64_LCOMMON)
+	    return "LARGE_COM";
+	  break;
+
+	case EM_IA_64:
+	  if (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_HPUX
+	      && ndx == SHN_IA_64_ANSI_COMMON)
+	    return "ANSI_COM";
+
+	  if (is_ia64_vms (filedata) && ndx == SHN_IA_64_VMS_SYMVEC)
+	    return "VMS_SYMVEC";
+	  break;
+
+	default:
+	  break;
+	}
+
+      if (filedata->section_headers != NULL
+	  && ndx < filedata->file_header.e_shnum)
+	{
+	  const char * res;
+
+	  res = printable_section_name (filedata, filedata->section_headers + ndx);
+	  if (is_special != NULL)
+	    * is_special = (res[0] == '<');
+
+	  return res;
+	}
+    }
+
+  static char name_buf[40];
+  unsigned int short_ndx = (unsigned int) (ndx & 0xffff);
+
+  if (ndx >= SHN_LOPROC && ndx <= SHN_HIPROC)
+    sprintf (name_buf, "PRC[0x%04x]", short_ndx);
+  else if (ndx >= SHN_LOOS && ndx <= SHN_HIOS)
+    sprintf (name_buf, "OS [0x%04x]", short_ndx);
+  else if (ndx >= SHN_LORESERVE)
+    sprintf (name_buf, "RSV[0x%04x]", short_ndx);
+  else if (filedata->file_header.e_shnum != 0
+	   && ndx >= filedata->file_header.e_shnum)
+    sprintf (name_buf, _("BAD[0x%lx]"), (long) ndx);
+  else
+    sprintf (name_buf, "<section 0x%lx>", (long) ndx);
+
+  return name_buf;
 }
 
 /* Return a pointer to section NAME, or NULL if no such section exists.  */
@@ -1016,17 +1130,6 @@ find_section_in_set (Filedata * filedata, const char * name, unsigned int * set)
     }
 
   return find_section (filedata, name);
-}
-
-/* Return TRUE if the current file is for IA-64 machine and OpenVMS ABI.
-   This OS has so many departures from the ELF standard that we test it at
-   many places.  */
-
-static inline bool
-is_ia64_vms (Filedata * filedata)
-{
-  return filedata->file_header.e_machine == EM_IA_64
-    && filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_OPENVMS;
 }
 
 /* Guess the relocation size commonly used by the specific machines.  */
@@ -2011,7 +2114,7 @@ dump_relocations (Filedata *filedata,
 		  else
 		    name = strtab + psym->st_name;
 
-		  len = print_symbol (width, name);
+		  len = print_symbol_name (width, name);
 		  if (version_string)
 		    printf (sym_info == symbol_public ? "@@%s" : "@%s",
 			    version_string);
@@ -2027,47 +2130,12 @@ dump_relocations (Filedata *filedata,
 	      if (psym->st_name == 0)
 		{
 		  const char * sec_name = "<null>";
-		  char name_buf[40];
 
 		  if (ELF_ST_TYPE (psym->st_info) == STT_SECTION)
-		    {
-		      if (psym->st_shndx < filedata->file_header.e_shnum
-			  && filedata->section_headers != NULL)
-			sec_name = section_name_print (filedata,
-						       filedata->section_headers
-						       + psym->st_shndx);
-		      else if (psym->st_shndx == SHN_ABS)
-			sec_name = "ABS";
-		      else if (psym->st_shndx == SHN_COMMON)
-			sec_name = "COMMON";
-		      else if ((filedata->file_header.e_machine == EM_MIPS
-				&& psym->st_shndx == SHN_MIPS_SCOMMON)
-			       || (filedata->file_header.e_machine == EM_TI_C6000
-				   && psym->st_shndx == SHN_TIC6X_SCOMMON))
-			sec_name = "SCOMMON";
-		      else if (filedata->file_header.e_machine == EM_MIPS
-			       && psym->st_shndx == SHN_MIPS_SUNDEFINED)
-			sec_name = "SUNDEF";
-		      else if ((filedata->file_header.e_machine == EM_X86_64
-				|| filedata->file_header.e_machine == EM_L1OM
-				|| filedata->file_header.e_machine == EM_K1OM)
-			       && psym->st_shndx == SHN_X86_64_LCOMMON)
-			sec_name = "LARGE_COMMON";
-		      else if (filedata->file_header.e_machine == EM_IA_64
-			       && filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_HPUX
-			       && psym->st_shndx == SHN_IA_64_ANSI_COMMON)
-			sec_name = "ANSI_COM";
-		      else if (is_ia64_vms (filedata)
-			       && psym->st_shndx == SHN_IA_64_VMS_SYMVEC)
-			sec_name = "VMS_SYMVEC";
-		      else
-			{
-			  sprintf (name_buf, "<section 0x%x>",
-				   (unsigned int) psym->st_shndx);
-			  sec_name = name_buf;
-			}
-		    }
-		  print_symbol (22, sec_name);
+		    sec_name = printable_section_name_from_index
+		      (filedata, psym->st_shndx, NULL);
+
+		  print_symbol_name (22, sec_name);
 		}
 	      else if (strtab == NULL)
 		printf (_("<string table index: %3ld>"), psym->st_name);
@@ -2079,7 +2147,7 @@ dump_relocations (Filedata *filedata,
 		}
 	      else
 		{
-		  print_symbol (22, strtab + psym->st_name);
+		  print_symbol_name (22, strtab + psym->st_name);
 		  if (version_string)
 		    printf (sym_info == symbol_public ? "@@%s" : "@%s",
 			    version_string);
@@ -5484,6 +5552,7 @@ enum long_option_values
   OPTION_RECURSE_LIMIT,
   OPTION_NO_RECURSE_LIMIT,
   OPTION_NO_DEMANGLING,
+  OPTION_NO_EXTRA_SYM_INFO,
   OPTION_SYM_BASE
 };
 
@@ -5523,10 +5592,12 @@ static struct option options[] =
   {"version-info",     no_argument, 0, 'V'},
   {"version",	       no_argument, 0, 'v'},
   {"wide",	       no_argument, 0, 'W'},
+  {"extra-sym-info",   no_argument, 0, 'X'},
   {"hex-dump",	       required_argument, 0, 'x'},
   {"decompress",       no_argument, 0, 'z'},
 
   {"no-demangle",      no_argument, 0, OPTION_NO_DEMANGLING},
+  {"no-extra-sym-info",no_argument, 0, OPTION_NO_EXTRA_SYM_INFO},
   {"recurse-limit",    no_argument, NULL, OPTION_RECURSE_LIMIT},
   {"no-recurse-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
   {"no-recursion-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
@@ -5601,7 +5672,11 @@ usage (FILE * stream)
                           escape sequences, or treat them as invalid and display as\n\
                           \"{hex sequences}\"\n"));
   fprintf (stream, _("\
-  -n --notes             Display the core notes (if present)\n"));
+     -X --extra-sym-info Display extra information when showing symbols\n"));
+  fprintf (stream, _("\
+     --no-extra-sym-info Do not display extra information when showing symbols (default)\n"));		     
+  fprintf (stream, _("\
+  -n --notes             Display the contents of note sections (if present)\n"));
   fprintf (stream, _("\
   -r --relocs            Display the relocations (if present)\n"));
   fprintf (stream, _("\
@@ -5794,7 +5869,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
     usage (stderr);
 
   while ((c = getopt_long
-	  (argc, argv, "ACDHILNPR:STU:VWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
+	  (argc, argv, "ACDHILNPR:STU:VWXacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
     {
       switch (c)
 	{
@@ -5977,6 +6052,13 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	case OPTION_LTO_SYMS:
 	  do_lto_syms = true;
 	  break;
+	case 'X':
+	  extra_sym_info = true;
+	  break;
+	case OPTION_NO_EXTRA_SYM_INFO:
+	  extra_sym_info = false;
+	  break;
+	  
 #ifdef SUPPORT_DISASSEMBLY
 	case 'i':
 	  request_dump (dumpdata, DISASS_DUMP);
@@ -7652,7 +7734,7 @@ process_section_headers (Filedata * filedata)
        i < filedata->file_header.e_shnum;
        i++, section++)
     {
-      const char *name = section_name_print (filedata, section);
+      const char *name = printable_section_name (filedata, section);
 
       /* Run some sanity checks on the headers and
 	 possibly fill in some file data as well.  */
@@ -7999,7 +8081,7 @@ process_section_headers (Filedata * filedata)
       if (do_section_details)
 	printf ("%s\n      ", printable_section_name (filedata, section));
       else
-	print_symbol (-17, section_name_print (filedata, section));
+	print_symbol_name (-17, printable_section_name (filedata, section));
 
       printf (do_wide ? " %-15s " : " %-15.15s ",
 	      get_section_type_name (filedata, section->sh_type));
@@ -8424,9 +8506,9 @@ process_section_groups (Filedata * filedata)
 		  continue;
 		}
 
-	      group_name = section_name_print (filedata,
-					       filedata->section_headers
-					       + sym->st_shndx);
+	      group_name = printable_section_name (filedata,
+						   filedata->section_headers
+						   + sym->st_shndx);
 	      strtab_sec = NULL;
 	      free (strtab);
 	      strtab = NULL;
@@ -12530,7 +12612,7 @@ process_version_sections (Filedata * filedata)
 	    printf (_(" Addr: 0x%016" PRIx64), section->sh_addr);
 	    printf (_("  Offset: 0x%08" PRIx64 "  Link: %u (%s)\n"),
 		    section->sh_offset, section->sh_link,
-		    printable_section_name_from_index (filedata, section->sh_link));
+		    printable_section_name_from_index (filedata, section->sh_link, NULL));
 
 	    edefs = (Elf_External_Verdef *)
                 get_data (NULL, filedata, section->sh_offset, 1,section->sh_size,
@@ -12676,7 +12758,7 @@ process_version_sections (Filedata * filedata)
 	    printf (_(" Addr: 0x%016" PRIx64), section->sh_addr);
 	    printf (_("  Offset: 0x%08" PRIx64 "  Link: %u (%s)\n"),
 		    section->sh_offset, section->sh_link,
-		    printable_section_name_from_index (filedata, section->sh_link));
+		    printable_section_name_from_index (filedata, section->sh_link, NULL));
 
 	    eneed = (Elf_External_Verneed *) get_data (NULL, filedata,
                                                        section->sh_offset, 1,
@@ -13349,51 +13431,6 @@ get_symbol_other (Filedata * filedata, unsigned int other)
 }
 
 static const char *
-get_symbol_index_type (Filedata * filedata, unsigned int type)
-{
-  static char buff[32];
-
-  switch (type)
-    {
-    case SHN_UNDEF:	return "UND";
-    case SHN_ABS:	return "ABS";
-    case SHN_COMMON:	return "COM";
-    default:
-      if (type == SHN_IA_64_ANSI_COMMON
-	  && filedata->file_header.e_machine == EM_IA_64
-	  && filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_HPUX)
-	return "ANSI_COM";
-      else if ((filedata->file_header.e_machine == EM_X86_64
-		|| filedata->file_header.e_machine == EM_L1OM
-		|| filedata->file_header.e_machine == EM_K1OM)
-	       && type == SHN_X86_64_LCOMMON)
-	return "LARGE_COM";
-      else if ((type == SHN_MIPS_SCOMMON
-		&& filedata->file_header.e_machine == EM_MIPS)
-	       || (type == SHN_TIC6X_SCOMMON
-		   && filedata->file_header.e_machine == EM_TI_C6000))
-	return "SCOM";
-      else if (type == SHN_MIPS_SUNDEFINED
-	       && filedata->file_header.e_machine == EM_MIPS)
-	return "SUND";
-      else if (type >= SHN_LOPROC && type <= SHN_HIPROC)
-	sprintf (buff, "PRC[0x%04x]", type & 0xffff);
-      else if (type >= SHN_LOOS && type <= SHN_HIOS)
-	sprintf (buff, "OS [0x%04x]", type & 0xffff);
-      else if (type >= SHN_LORESERVE)
-	sprintf (buff, "RSV[0x%04x]", type & 0xffff);
-      else if (filedata->file_header.e_shnum != 0
-	       && type >= filedata->file_header.e_shnum)
-	sprintf (buff, _("bad section index[%3d]"), type);
-      else
-	sprintf (buff, "%3d", type);
-      break;
-    }
-
-  return buff;
-}
-
-static const char *
 get_symbol_version_string (Filedata *filedata,
 			   bool is_dynsym,
 			   const char *strtab,
@@ -13570,7 +13607,7 @@ get_symbol_version_string (Filedata *filedata,
 /* Display a symbol size on stdout.  Format is based on --sym-base setting.  */
 
 static unsigned int
-print_dynamic_symbol_size (uint64_t vma, int base)
+print_symbol_size (uint64_t vma, int base)
 {
   switch (base)
     {
@@ -13589,23 +13626,28 @@ print_dynamic_symbol_size (uint64_t vma, int base)
     }
 }
 
+/* Print information on a single symbol.  */
+
 static void
-print_dynamic_symbol (Filedata *filedata, uint64_t si,
-		      Elf_Internal_Sym *symtab,
-		      Elf_Internal_Shdr *section,
-		      char *strtab, size_t strtab_size)
+print_symbol (Filedata *           filedata,
+	      uint64_t             symbol_index,
+	      Elf_Internal_Sym *   symtab,
+	      Elf_Internal_Shdr *  section,
+	      char *               strtab,
+	      size_t               strtab_size)
 {
   const char *version_string;
   enum versioned_symbol_info sym_info;
   unsigned short vna_other;
-  bool is_valid;
   const char * sstr;
-  Elf_Internal_Sym *psym = symtab + si;
+  Elf_Internal_Sym *psym = symtab + symbol_index;
 
-  printf ("%6" PRId64 ": ", si);
+  /* FIXME: We should have a table of field widths,
+     rather than using hard coded constants.  */
+  printf ("%6" PRId64 ": ", symbol_index);
   print_vma (psym->st_value, LONG_HEX);
   putchar (' ');
-  print_dynamic_symbol_size (psym->st_size, sym_base);
+  print_symbol_size (psym->st_size, sym_base);
   printf (" %-7s", get_symbol_type (filedata, ELF_ST_TYPE (psym->st_info)));
   printf (" %-6s", get_symbol_binding (filedata, ELF_ST_BIND (psym->st_info)));
   if (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
@@ -13615,29 +13657,61 @@ print_dynamic_symbol (Filedata *filedata, uint64_t si,
       unsigned int vis = ELF_ST_VISIBILITY (psym->st_other);
 
       printf (" %-7s", get_symbol_visibility (vis));
+
       /* Check to see if any other bits in the st_other field are set.
-	 Note - displaying this information disrupts the layout of the
-	 table being generated, but for the moment this case is very rare.  */
+	 FIXME: Displaying this information here disrupts the layout
+	 of the table being generated.  */
       if (psym->st_other ^ vis)
 	printf (" [%s] ", get_symbol_other (filedata, psym->st_other ^ vis));
     }
-  printf (" %4s ", get_symbol_index_type (filedata, psym->st_shndx));
 
-  if (ELF_ST_TYPE (psym->st_info) == STT_SECTION
-      && psym->st_shndx < filedata->file_header.e_shnum
-      && filedata->section_headers != NULL
-      && psym->st_name == 0)
+  bool is_special;
+
+  sstr = printable_section_name_from_index (filedata, psym->st_shndx, & is_special);
+
+  /* Print the symbol's section index.  If the index is special
+     then print the index's name rather than its number.  */
+  if (is_special)
     {
-      is_valid
-	= section_name_valid (filedata,
-			      filedata->section_headers + psym->st_shndx);
-      sstr = is_valid ?
-	section_name_print (filedata,
-			    filedata->section_headers + psym->st_shndx)
-	: _("<corrupt>");
+      int printed;
+
+      /* Special case: If there are no section headers, and the printable
+	 name is "<section 0x...." then just display the section number
+	 as a decimal.  This happens when objcopy --strip -section-headers
+	 is used.  */
+      if (filedata->file_header.e_shnum == 0 && startswith (sstr, "<section"))
+	printed = printf (" %4d ", psym->st_shndx);
+      else
+	printed = printf (" %4s ", sstr);
+
+      if (extra_sym_info && printed < 16)
+	printf ("%*s", 16 - printed, "");
     }
   else
     {
+      printf (" %4u ", psym->st_shndx);
+
+      if (extra_sym_info)
+	{
+	  /* Display the section name referenced by the section index.  */
+	  int printed = printf ("(%s) ", sstr);
+	  if (printed < 10)
+	    printf ("%*s", 10 - printed, "");
+	}
+    }
+  
+  /* Get the symbol's name.  For section symbols without a
+     specific name use the (already computed) section name.  */
+  if (ELF_ST_TYPE (psym->st_info) == STT_SECTION
+      && section_index_real (filedata, psym->st_shndx)
+      && psym->st_name == 0)
+    {
+      ;
+    }
+  else
+    {
+      bool is_valid;
+
       is_valid = valid_symbol_name (strtab, strtab_size, psym->st_name);
       sstr = is_valid  ? strtab + psym->st_name : _("<corrupt>");
     }
@@ -13646,7 +13720,7 @@ print_dynamic_symbol (Filedata *filedata, uint64_t si,
     = get_symbol_version_string (filedata,
 				 (section == NULL
 				  || section->sh_type == SHT_DYNSYM),
-				 strtab, strtab_size, si,
+				 strtab, strtab_size, symbol_index,
 				 psym, &sym_info, &vna_other);
 
   int len_avail = 21;
@@ -13662,7 +13736,7 @@ print_dynamic_symbol (Filedata *filedata, uint64_t si,
 	len_avail -= 1;
     }
 
-  print_symbol (len_avail, sstr);
+  print_symbol_name (len_avail, sstr);
 
   if (version_string)
     {
@@ -13677,14 +13751,14 @@ print_dynamic_symbol (Filedata *filedata, uint64_t si,
 
   if (ELF_ST_BIND (psym->st_info) == STB_LOCAL
       && section != NULL
-      && si >= section->sh_info
+      && symbol_index >= section->sh_info
       /* Irix 5 and 6 MIPS binaries are known to ignore this requirement.  */
       && filedata->file_header.e_machine != EM_MIPS
       /* Solaris binaries have been found to violate this requirement as
 	 well.  Not sure if this is a bug or an ABI requirement.  */
       && filedata->file_header.e_ident[EI_OSABI] != ELFOSABI_SOLARIS)
     warn (_("local symbol %" PRIu64 " found at index >= %s's sh_info value of %u\n"),
-	  si, printable_section_name (filedata, section), section->sh_info);
+	  symbol_index, printable_section_name (filedata, section), section->sh_info);
 }
 
 static const char *
@@ -13881,7 +13955,7 @@ display_lto_symtab (Filedata *           filedata,
 		      slot,
 		      get_lto_sym_type (sym_type),
 		      sec_kind);
-	      print_symbol (6, (const char *) sym_name);
+	      print_symbol_name (6, (const char *) sym_name);
 	    }
 	  else
 	    {
@@ -13898,7 +13972,7 @@ display_lto_symtab (Filedata *           filedata,
 		  get_lto_visibility (visibility),
 		  size,
 		  slot);
-	  print_symbol (21, (const char *) sym_name);
+	  print_symbol_name (21, (const char *) sym_name);
 	}
       putchar ('\n');
     }
@@ -13947,6 +14021,57 @@ process_lto_symbol_tables (Filedata * filedata)
   return res;
 }
 
+static void
+print_symbol_table_heading (void)
+{
+  /* FIXME: We should store the size of each field in the display in a table and
+     then use the values inside print_symbol(), instead of that function using
+     hard coded constants.  */
+  if (is_32bit_elf)
+    {
+      if (extra_sym_info)
+	{
+	  printf (_("   Num:    Value  Size Type    Bind   Vis+Other  Ndx(SecName) Name [+ Version Info]\n"));
+	  /*         |--6-|: |--8---| |-5-| |--7--| |-6--| |--7--| |---8--| |----13.....| |...........  */
+	  /* eg:          5: 00000000    14 FUNC    LOCAL  DEFAULT            1 (.text)   get_sections  */
+	}
+      else if (do_wide)
+	{
+	  printf (_("   Num:    Value  Size Type    Bind   Vis      Ndx Name\n"));
+	  /*         |--6-|: |--8---| |-5-| |--7--| |-6--| |--7--| |-4| |...........  */
+	  /* eg:          5: 00000000    14 FUNC    LOCAL  DEFAULT      1 get_sections  */
+	}
+      else
+	{
+	  printf (_("   Num:    Value  Size Type    Bind   Vis      Ndx Name\n"));
+	  /*         |--6-|: |--8---| |-5-| |--7--| |-6--| |--7--| |-4| |------------29-------------|  */
+	  /* eg:          5: 00000000    14 FUNC    LOCAL  DEFAULT    1 get_sections  */
+	}
+    }
+  else
+    {
+      if (extra_sym_info)
+	{
+	  printf (_("   Num:    Value          Size Type    Bind   Vis+Other Ndx(SecName) Name [+ Version Info]\n"));
+	  /*         |--6-|: |------16------| |-5-| |--7--| |-6--| |--7--| |-------14---| |..... */
+	  /* eg:          2: 0000000000000000     0 FUNC    LOCAL  DEFAULT    1 (.text)   .very_long_function_name  */
+
+	}
+      else if (do_wide)
+	{
+	  printf (_("   Num:    Value          Size Type    Bind   Vis      Ndx Name\n"));
+	  /*         |--6-|: |------16------| |-5-| |--7--| |-6--| |--7--| |-4| |...........  */
+	  /* eg:          5: 0000000000000000    14 FUNC    LOCAL  DEFAULT    1  very_long_function_name  */
+	}
+      else
+	{
+	  printf (_("   Num:    Value          Size Type    Bind   Vis      Ndx Name\n"));
+	  /*         |--6-|: |------16------| |-5-| |--7--| |-6--| |--7--| |-4| |--------21---------|  */
+	  /* eg:          5: 0000000000000000    14 FUNC    LOCAL  DEFAULT    1 very_long_functi[...]  */
+	}
+    }
+}
+
 /* Dump the symbol table.  */
 
 static bool
@@ -13984,15 +14109,13 @@ process_symbol_table (Filedata * filedata)
 			    filedata->num_dynamic_syms),
 		  filedata->num_dynamic_syms);
 	}
-      if (is_32bit_elf)
-	printf (_("   Num:    Value  Size Type    Bind   Vis      Ndx Name\n"));
-      else
-	printf (_("   Num:    Value          Size Type    Bind   Vis      Ndx Name\n"));
+
+      print_symbol_table_heading ();
 
       for (si = 0; si < filedata->num_dynamic_syms; si++)
-	print_dynamic_symbol (filedata, si, filedata->dynamic_symbols, NULL,
-			      filedata->dynamic_strings,
-			      filedata->dynamic_strings_length);
+	print_symbol (filedata, si, filedata->dynamic_symbols, NULL,
+		      filedata->dynamic_strings,
+		      filedata->dynamic_strings_length);
     }
   else if ((do_dyn_syms || (do_syms && !do_using_dynamic))
 	   && filedata->section_headers != NULL)
@@ -14041,10 +14164,7 @@ process_symbol_table (Filedata * filedata)
 		    printable_section_name (filedata, section),
 		    num_syms);
 
-	  if (is_32bit_elf)
-	    printf (_("   Num:    Value  Size Type    Bind   Vis      Ndx Name\n"));
-	  else
-	    printf (_("   Num:    Value          Size Type    Bind   Vis      Ndx Name\n"));
+	  print_symbol_table_heading ();
 
 	  symtab = get_elf_symbols (filedata, section, & num_syms);
 	  if (symtab == NULL)
@@ -14068,8 +14188,8 @@ process_symbol_table (Filedata * filedata)
 	    }
 
 	  for (si = 0; si < num_syms; si++)
-	    print_dynamic_symbol (filedata, si, symtab, section,
-				  strtab, strtab_size);
+	    print_symbol (filedata, si, symtab, section,
+			  strtab, strtab_size);
 
 	  free (symtab);
 	  if (strtab != filedata->string_table)
@@ -14297,7 +14417,7 @@ process_syminfo (Filedata * filedata)
       if (i >= filedata->num_dynamic_syms)
 	printf (_("<corrupt index>"));
       else if (valid_dynamic_name (filedata, filedata->dynamic_symbols[i].st_name))
-	print_symbol (30, get_dynamic_name (filedata,
+	print_symbol_name (30, get_dynamic_name (filedata,
 					    filedata->dynamic_symbols[i].st_name));
       else
 	printf (_("<corrupt: %19ld>"), filedata->dynamic_symbols[i].st_name);
@@ -14317,7 +14437,7 @@ process_syminfo (Filedata * filedata)
 	      && valid_dynamic_name (filedata,
 				     filedata->dynamic_section[filedata->dynamic_syminfo[i].si_boundto].d_un.d_val))
 	    {
-	      print_symbol (10, get_dynamic_name (filedata,
+	      print_symbol_name (10, get_dynamic_name (filedata,
 						  filedata->dynamic_section[filedata->dynamic_syminfo[i].si_boundto].d_un.d_val));
 	      putchar (' ' );
 	    }
@@ -16215,7 +16335,7 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
 static ctf_sect_t *
 shdr_to_ctf_sect (ctf_sect_t *buf, Elf_Internal_Shdr *shdr, Filedata *filedata)
 {
-  buf->cts_name = section_name_print (filedata, shdr);
+  buf->cts_name = printable_section_name (filedata, shdr);
   buf->cts_size = shdr->sh_size;
   buf->cts_entsize = shdr->sh_entsize;
 
@@ -17046,7 +17166,7 @@ display_tag_value (signed int tag,
       putchar ('"');
       if (maxlen > 0)
 	{
-	  print_symbol ((int) maxlen, (const char *) p);
+	  print_symbol_name ((int) maxlen, (const char *) p);
 	  p += strnlen ((char *) p, maxlen) + 1;
 	}
       else
@@ -17471,7 +17591,7 @@ display_arm_attribute (unsigned char * p,
 		  {
 		    size_t maxlen = (end - p) - 1;
 
-		    print_symbol ((int) maxlen, (const char *) p);
+		    print_symbol_name ((int) maxlen, (const char *) p);
 		    p += strnlen ((char *) p, maxlen) + 1;
 		  }
 		else
@@ -17560,7 +17680,7 @@ display_gnu_attribute (unsigned char * p,
 	    {
 	      size_t maxlen = (end - p) - 1;
 
-	      print_symbol ((int) maxlen, (const char *) p);
+	      print_symbol_name ((int) maxlen, (const char *) p);
 	      p += strnlen ((char *) p, maxlen) + 1;
 	    }
 	  else
@@ -18153,7 +18273,7 @@ display_tic6x_attribute (unsigned char * p,
 	  {
 	    size_t maxlen = (end - p) - 1;
 
-	    print_symbol ((int) maxlen, (const char *) p);
+	    print_symbol_name ((int) maxlen, (const char *) p);
 	    p += strnlen ((char *) p, maxlen) + 1;
 	  }
 	else
@@ -18172,7 +18292,7 @@ display_tic6x_attribute (unsigned char * p,
 	  {
 	    size_t maxlen = (end - p) - 1;
 
-	    print_symbol ((int) maxlen, (const char *) p);
+	    print_symbol_name ((int) maxlen, (const char *) p);
 	    p += strnlen ((char *) p, maxlen) + 1;
 	  }
 	else
@@ -18291,7 +18411,7 @@ display_msp430_attribute (unsigned char * p,
 	    {
 	      size_t maxlen = (end - p) - 1;
 
-	      print_symbol ((int) maxlen, (const char *) p);
+	      print_symbol_name ((int) maxlen, (const char *) p);
 	      p += strnlen ((char *) p, maxlen) + 1;
 	    }
 	  else
@@ -18613,7 +18733,7 @@ process_attributes (Filedata * filedata,
 		}
 
 	      printf (_("Attribute Section: "));
-	      print_symbol (INT_MAX, (const char *) p);
+	      print_symbol_name (INT_MAX, (const char *) p);
 	      putchar ('\n');
 
 	      if (public_name && streq ((char *) p, public_name))
@@ -19180,7 +19300,7 @@ process_mips_specific (Filedata * filedata)
 
 	      printf ("%3zu: ", cnt);
 	      if (valid_dynamic_name (filedata, liblist.l_name))
-		print_symbol (20, get_dynamic_name (filedata, liblist.l_name));
+		print_symbol_name (20, get_dynamic_name (filedata, liblist.l_name));
 	      else
 		printf (_("<corrupt: %9ld>"), liblist.l_name);
 	      printf (" %s %#10lx %-7ld", timebuf, liblist.l_checksum,
@@ -19559,7 +19679,7 @@ process_mips_specific (Filedata * filedata)
 	      print_vma (psym->st_value, FULL_HEX);
 	      putchar (' ');
 	      if (valid_dynamic_name (filedata, psym->st_name))
-		print_symbol (25, get_dynamic_name (filedata, psym->st_name));
+		print_symbol_name (25, get_dynamic_name (filedata, psym->st_name));
 	      else
 		printf (_("<corrupt: %14ld>"), psym->st_name);
 	    }
@@ -19680,12 +19800,17 @@ process_mips_specific (Filedata * filedata)
 		  Elf_Internal_Sym * psym = filedata->dynamic_symbols + i;
 
 		  print_vma (psym->st_value, LONG_HEX);
-		  printf (" %-7s %3s ",
-			  get_symbol_type (filedata, ELF_ST_TYPE (psym->st_info)),
-			  get_symbol_index_type (filedata, psym->st_shndx));
+		  printf (" %-7s ", get_symbol_type (filedata, ELF_ST_TYPE (psym->st_info)));
+
+		  bool is_special;
+		  const char * s = printable_section_name_from_index (filedata, psym->st_shndx, & is_special);
+		  if (is_special)
+		    printf ("%3s ", s);
+		  else
+		    printf ("%3u ", psym->st_shndx);
 
 		  if (valid_dynamic_name (filedata, psym->st_name))
-		    print_symbol (sym_width,
+		    print_symbol_name (sym_width,
 				  get_dynamic_name (filedata, psym->st_name));
 		  else
 		    printf (_("<corrupt: %14ld>"), psym->st_name);
@@ -19771,9 +19896,9 @@ process_mips_specific (Filedata * filedata)
 	      print_vma (psym->st_value, LONG_HEX);
 	      printf (" %-7s %3s ",
 		      get_symbol_type (filedata, ELF_ST_TYPE (psym->st_info)),
-		      get_symbol_index_type (filedata, psym->st_shndx));
+		      printable_section_name_from_index (filedata, psym->st_shndx, NULL));
 	      if (valid_dynamic_name (filedata, psym->st_name))
-		print_symbol (sym_width,
+		print_symbol_name (sym_width,
 			      get_dynamic_name (filedata, psym->st_name));
 	      else
 		printf (_("<corrupt: %14ld>"), psym->st_name);
@@ -21774,7 +21899,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
   if (name == NULL || pnote->namesz < 2)
     {
       error (_("corrupt name field in GNU build attribute note: size = %ld\n"), pnote->namesz);
-      print_symbol (-20, _("  <corrupt name>"));
+      print_symbol_name (-20, _("  <corrupt name>"));
       return false;
     }
 
@@ -21789,7 +21914,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       if (pnote->namesz < 4)
 	{
 	  error (_("corrupt name field in GNU build attribute note: size = %ld\n"), pnote->namesz);
-	  print_symbol (-20, _("  <corrupt name>"));
+	  print_symbol_name (-20, _("  <corrupt name>"));
 	  return false;
 	}
 
@@ -21809,7 +21934,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       break;
     default:
       error (_("unrecognised attribute type in name field: %d\n"), name_type);
-      print_symbol (-20, _("<unknown name type>"));
+      print_symbol_name (-20, _("<unknown name type>"));
       return false;
     }
 
@@ -21963,7 +22088,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 
 	if (decoded != NULL)
 	  {
-	    print_symbol (-left, decoded);
+	    print_symbol_name (-left, decoded);
 	    left = 0;
 	  }
 	else if (val == 0)
@@ -21981,13 +22106,13 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
       }
       break;
     case GNU_BUILD_ATTRIBUTE_TYPE_STRING:
-      left -= print_symbol (- left, name);
+      left -= print_symbol_name (- left, name);
       break;
     case GNU_BUILD_ATTRIBUTE_TYPE_BOOL_TRUE:
-      left -= print_symbol (- left, "true");
+      left -= print_symbol_name (- left, "true");
       break;
     case GNU_BUILD_ATTRIBUTE_TYPE_BOOL_FALSE:
-      left -= print_symbol (- left, "false");
+      left -= print_symbol_name (- left, "false");
       break;
     }
 
@@ -22275,7 +22400,7 @@ process_note (Elf_Internal_Note *  pnote,
 	  || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC))
     print_gnu_build_attribute_name (pnote);
   else
-    print_symbol (-20, name);
+    print_symbol_name (-20, name);
 
   if (do_wide)
     printf (" 0x%08lx\t%s\t", pnote->descsz, nt);

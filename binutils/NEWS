@@ -1,5 +1,11 @@
 -*- text -*-
 
+* The readelf program has a new command line option --extra-sym-info which
+  extends the information displayed by the --symbols option.  When enabled
+  the display will include the name of the section referenced by a symbol's
+  index field (st_shndx).  In the future more information may also be displayed
+  when this option is enabled.
+
 * objcopy --set-section-flags now supports "large" to set SHF_X86_64_LARGE
   for ELF x86-64 objects.
 
