@@ -1,3 +1,17 @@
+2023-09-05  Roland McGrath  <mcgrathr@google.com>
+
+	The std::basic_string template type is only specified for
+	instantiations using character types.  Newer (LLVM) libc++
+	implementations no longer allow non-character integer types
+	to be used.
+	* output.cc: Include <uchar.h>.
+	(Output_section::add_merge_input_section): Use char16_t and
+	char32_t for 2- and 4-byte entry size, respectively.
+	* stringpool.cc: Include <uchar.h>.
+	(Stringpool_template): Explicitly instantiate for char16_t,
+	char32_t instead of uint16_t, uint32_t.
+	* merge.cc (Output_merge_string): Likewise.
+
 2023-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/gold.pot: Regenerate.

@@ -25,6 +25,7 @@
 #include <cstring>
 #include <algorithm>
 #include <vector>
+#include <uchar.h>
 
 #include "output.h"
 #include "parameters.h"
@@ -527,9 +528,9 @@ template
 class Stringpool_template<char>;
 
 template
-class Stringpool_template<uint16_t>;
+class Stringpool_template<char16_t>;
 
 template
-class Stringpool_template<uint32_t>;
+class Stringpool_template<char32_t>;
 
 } // End namespace gold.

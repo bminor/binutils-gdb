@@ -665,10 +665,10 @@ template
 class Output_merge_string<char>;
 
 template
-class Output_merge_string<uint16_t>;
+class Output_merge_string<char16_t>;
 
 template
-class Output_merge_string<uint32_t>;
+class Output_merge_string<char32_t>;
 
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
 template
