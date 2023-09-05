@@ -563,7 +563,6 @@ enum
   M_SEXTB,
   M_SEXTH,
   M_VMSGE,
-  M_VMSGEU,
   M_FLH,
   M_FSH,
   M_NUM_MACROS

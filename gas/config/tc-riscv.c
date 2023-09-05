@@ -1958,6 +1958,7 @@ vector_macro (struct riscv_cl_insn *ip)
   int vs2 = (ip->insn_opcode >> OP_SH_VS2) & OP_MASK_VS2;
   int vm = (ip->insn_opcode >> OP_SH_VMASK) & OP_MASK_VMASK;
   int vtemp = (ip->insn_opcode >> OP_SH_VFUNCT6) & OP_MASK_VFUNCT6;
+  const char *vmslt_vx = ip->insn_mo->match ? "vmsltu.vx" : "vmslt.vx";
   int mask = ip->insn_mo->mask;
 
   switch (mask)
@@ -1966,7 +1967,7 @@ vector_macro (struct riscv_cl_insn *ip)
       if (vm)
 	{
 	  /* Unmasked.  */
-	  macro_build (NULL, "vmslt.vx", "Vd,Vt,sVm", vd, vs2, vs1, -1);
+	  macro_build (NULL, vmslt_vx, "Vd,Vt,sVm", vd, vs2, vs1, -1);
 	  macro_build (NULL, "vmnand.mm", "Vd,Vt,Vs", vd, vd, vd);
 	  break;
 	}
@@ -1975,13 +1976,13 @@ vector_macro (struct riscv_cl_insn *ip)
 	  /* Masked.  Have vtemp to avoid overlap constraints.  */
 	  if (vd == vm)
 	    {
-	      macro_build (NULL, "vmslt.vx", "Vd,Vt,sVm", vtemp, vs2, vs1, -1);
+	      macro_build (NULL, vmslt_vx, "Vd,Vt,sVm", vtemp, vs2, vs1, -1);
 	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vm, vtemp);
 	    }
 	  else
 	    {
 	      /* Preserve the value of vd if not updating by vm.  */
-	      macro_build (NULL, "vmslt.vx", "Vd,Vt,sVm", vtemp, vs2, vs1, -1);
+	      macro_build (NULL, vmslt_vx, "Vd,Vt,sVm", vtemp, vs2, vs1, -1);
 	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vtemp, vm, vtemp);
 	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vd, vm);
 	      macro_build (NULL, "vmor.mm", "Vd,Vt,Vs", vd, vtemp, vd);
@@ -1990,42 +1991,7 @@ vector_macro (struct riscv_cl_insn *ip)
       else if (vd != vm)
 	{
 	  /* Masked.  This may cause the vd overlaps vs2, when LMUL > 1.  */
-	  macro_build (NULL, "vmslt.vx", "Vd,Vt,sVm", vd, vs2, vs1, vm);
-	  macro_build (NULL, "vmxor.mm", "Vd,Vt,Vs", vd, vd, vm);
-	}
-      else
-	as_bad (_("must provide temp if destination overlaps mask"));
-      break;
-
-    case M_VMSGEU:
-      if (vm)
-	{
-	  /* Unmasked.  */
-	  macro_build (NULL, "vmsltu.vx", "Vd,Vt,sVm", vd, vs2, vs1, -1);
-	  macro_build (NULL, "vmnand.mm", "Vd,Vt,Vs", vd, vd, vd);
-	  break;
-	}
-      if (vtemp != 0)
-	{
-	  /* Masked.  Have vtemp to avoid overlap constraints.  */
-	  if (vd == vm)
-	    {
-	      macro_build (NULL, "vmsltu.vx", "Vd,Vt,sVm", vtemp, vs2, vs1, -1);
-	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vm, vtemp);
-	    }
-	  else
-	    {
-	      /* Preserve the value of vd if not updating by vm.  */
-	      macro_build (NULL, "vmsltu.vx", "Vd,Vt,sVm", vtemp, vs2, vs1, -1);
-	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vtemp, vm, vtemp);
-	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vd, vm);
-	      macro_build (NULL, "vmor.mm", "Vd,Vt,Vs", vd, vtemp, vd);
-	    }
-	}
-      else if (vd != vm)
-	{
-	  /* Masked.  This may cause the vd overlaps vs2, when LMUL > 1.  */
-	  macro_build (NULL, "vmsltu.vx", "Vd,Vt,sVm", vd, vs2, vs1, vm);
+	  macro_build (NULL, vmslt_vx, "Vd,Vt,sVm", vd, vs2, vs1, vm);
 	  macro_build (NULL, "vmxor.mm", "Vd,Vt,Vs", vd, vd, vm);
 	}
       else
@@ -2180,7 +2146,6 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
       break;
 
     case M_VMSGE:
-    case M_VMSGEU:
       vector_macro (ip);
       break;
 
