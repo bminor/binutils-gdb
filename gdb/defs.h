@@ -410,20 +410,6 @@ enum info_proc_what
 extern unsigned input_radix;
 extern unsigned output_radix;
 
-/* * Possibilities for prettyformat parameters to routines which print
-   things.  Like enum language, this should be in value.h, but needs
-   to be here for the same reason.  FIXME:  If we can eliminate this
-   as an arg to LA_VAL_PRINT, then we can probably move it back to
-   value.h.  */
-
-enum val_prettyformat
-  {
-    Val_no_prettyformat = 0,
-    Val_prettyformat,
-    /* * Use the default setting which the user has specified.  */
-    Val_prettyformat_default
-  };
-
 /* * Optional native machine support.  Non-native (and possibly pure
    multi-arch) targets do not need a "nm.h" file.  This will be a
    symlink to one of the nm-*.h files, built by the `configure'

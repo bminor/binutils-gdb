@@ -22,6 +22,17 @@
 
 #include "cli/cli-option.h"
 
+/* Possibilities for prettyformat parameters to routines which print
+   things.  */
+
+enum val_prettyformat
+  {
+    Val_no_prettyformat = 0,
+    Val_prettyformat,
+    /* * Use the default setting which the user has specified.  */
+    Val_prettyformat_default
+  };
+
 /* This is used to pass formatting options to various value-printing
    functions.  */
 struct value_print_options
