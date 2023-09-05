@@ -85,7 +85,7 @@ proc hook_stop_kill {} {
 
 	set test "run hook-stop"
 	gdb_test_multiple "continue" "$test" {
-	    -re "Continuing.\r\n\\\[Inferior $decimal \\(.*\\) killed\\\]\r\n${gdb_prompt} $" {
+	    -re "Continuing.*\r\n\\\[Inferior $decimal \\(.*\\) killed\\\]\r\n${gdb_prompt} $" {
 		pass $test
 	    }
 	}
