@@ -15,6 +15,9 @@
 
 # Test GDB's early init file mechanism.
 
+# Test assumes host == build.
+require {!is_remote host}
+
 standard_testfile
 
 # Compile the test executable.

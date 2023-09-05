@@ -13,6 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# This test assumes host == build.
+require {!is_remote host}
+
 # GDB reads some environment variables on startup, make sure it behaves
 # correctly if these variables are defined but empty.
 
