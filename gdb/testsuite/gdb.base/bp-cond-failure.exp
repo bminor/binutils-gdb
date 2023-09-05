@@ -75,7 +75,7 @@ proc run_test { cond_eval access_type bpexpr nloc } {
 		 "Error in testing condition for breakpoint ${bp_num}.2:" \
 		 "Cannot access memory at address 0x0" \
 		 "" \
-		 "Breakpoint ${bp_num}.2, foo \\(c=49 ...\\) at \[^\r\n\]+:\[0-9\]+" \
+		 "(Thread \[^\r\n\]+ hit )?Breakpoint ${bp_num}.2, foo \\(c=49 ...\\) at \[^\r\n\]+:\[0-9\]+" \
 		 "${::decimal}\\s+\[^\r\n\]+ breakpoint here\\. \[^\r\n\]+"]
     } else {
 	gdb_test "continue" \
@@ -84,7 +84,7 @@ proc run_test { cond_eval access_type bpexpr nloc } {
 		 "Error in testing condition for breakpoint ${bp_num}:" \
 		 "Cannot access memory at address 0x0" \
 		 "" \
-		 "Breakpoint ${bp_num}, bar \\(\\) at \[^\r\n\]+:\[0-9\]+" \
+		 "(Thread \[^\r\n\]+ hit )?Breakpoint ${bp_num}, bar \\(\\) at \[^\r\n\]+:\[0-9\]+" \
 		 "${::decimal}\\s+\[^\r\n\]+ breakpoint here\\. \[^\r\n\]+"]
     }
 }
