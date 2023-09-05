@@ -35,6 +35,22 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "anno-sym"
     run_dump_test "pcala64"
     run_dump_test "tls-le"
+    run_dump_test "overflow_s_10_5"
+    run_dump_test "overflow_s_10_12"
+    run_dump_test "overflow_s_10_16"
+    run_dump_test "overflow_s_10_16_s2"
+    run_dump_test "overflow_s_0_5_10_16_s2"
+    run_dump_test "overflow_s_0_10_10_16_s2"
+    run_dump_test "overflow_s_5_20"
+    run_dump_test "overflow_u_10_12"
+    run_dump_test "overflow_u"
+    run_dump_test "underflow_s_10_5"
+    run_dump_test "underflow_s_10_12"
+    run_dump_test "underflow_s_10_16"
+    run_dump_test "underflow_s_10_16_s2"
+    run_dump_test "underflow_s_0_5_10_16_s2"
+    run_dump_test "underflow_s_0_10_10_16_s2"
+    run_dump_test "underflow_s_5_20"
 }
 
 if [istarget "loongarch32-*-*"] {
@@ -95,6 +111,16 @@ if [istarget "loongarch64-*-*"] {
 	      {} \
 	      "medium-call" \
 	  ] \
+	  [list \
+	      "abi1_max_imm" \
+	      "-e 0x0" "" \
+	      "" \
+	      {abi1_max_imm.s} \
+	      [list \
+		  [list objdump -D abi1_max_imm.dd] \
+	      ] \
+	      "abi1_max_imm" \
+	  ] \
       ]
 }
 
@@ -108,3 +134,16 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "desc-relax"
   }
 }
+
+run_dump_test "max_imm_b16"
+run_dump_test "max_imm_b21"
+run_dump_test "max_imm_b26"
+run_dump_test "max_imm_pcrel20"
+run_dump_test "overflow_b16"
+run_dump_test "overflow_b21"
+run_dump_test "overflow_b26"
+run_dump_test "overflow_pcrel20"
+run_dump_test "underflow_b16"
+run_dump_test "underflow_b21"
+run_dump_test "underflow_b26"
+run_dump_test "underflow_pcrel20"
