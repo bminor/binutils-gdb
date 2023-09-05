@@ -58,7 +58,7 @@ gdb_test "starti" \
     [multi_line \
 	 "warning: watchpoint $num downgraded to software watchpoint" \
 	 "" \
-	 "Program stopped\\." \
+	 "(Program|Thread \[^\r\n\]) stopped\\." \
 	 ".*"]
 
 # Watchpoint should now have downgraded to a s/w watchpoint.
