@@ -26794,6 +26794,49 @@ either not mapped or accessed with incompatible permissions.
 If a single instruction raises more than one signal, they will be
 reported one at a time each time the wavefront is continued.
 
+@subsubsection @acronym{AMD GPU} Memory Violation Reporting
+
+A wavefront can report memory violation events.  However, the program
+location at which they are reported may be after the machine instruction
+that caused them.  This can result in the reported source statement
+being incorrect.  The following commands can be used to control this
+behavior:
+
+@table @code
+
+@kindex set amdgpu precise-memory
+@cindex AMD GPU precise memory event reporting
+@item set amdgpu precise-memory @var{mode}
+Controls how @acronym{AMD GPU} devices detect memory violations, where
+@var{mode} can be:
+
+@table @code
+
+@item off
+The program location may not be immediately after the instruction that
+caused the memory violation.  This is the default.
+
+@item on
+Requests that the program location will be immediately after the
+instruction that caused a memory violation.  Enabling this mode may make
+the @acronym{AMD GPU} device execution significantly slower as it has to
+wait for each memory operation to complete before executing the next
+instruction.
+
+@end table
+
+The @code{amdgpu precise-memory} parameter is per-inferior.  When an
+inferior forks or execs, or the user uses the @code{clone-inferior} command,
+and an inferior is created as a result, the newly created inferior inherits
+the parameter value of the original inferior.
+
+@kindex show amdgpu precise-memory
+@cindex AMD GPU precise memory event reporting
+@item show amdgpu precise-memory
+Displays the currently requested AMD GPU precise memory setting.
+
+@end table
+
 @subsubsection @acronym{AMD GPU} Logging
 
 The @samp{set debug amd-dbgapi} command can be used
