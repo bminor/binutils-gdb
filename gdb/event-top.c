@@ -299,8 +299,8 @@ change_line_handler (int editing)
 
   /* Don't try enabling editing if the interpreter doesn't support it
      (e.g., MI).  */
-  if (!interp_supports_command_editing (top_level_interpreter ())
-      || !interp_supports_command_editing (command_interp ()))
+  if (!top_level_interpreter ()->supports_command_editing ()
+      || !command_interp ()->supports_command_editing ())
     return;
 
   if (editing)

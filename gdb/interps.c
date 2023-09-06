@@ -262,14 +262,6 @@ command_interp (void)
     return current_ui->current_interpreter;
 }
 
-/* See interp.h  */
-
-int
-interp_supports_command_editing (struct interp *interp)
-{
-  return interp->supports_command_editing ();
-}
-
 /* interp_exec - This executes COMMAND_STR in the current 
    interpreter.  */
 

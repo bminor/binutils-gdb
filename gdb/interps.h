@@ -257,10 +257,6 @@ extern struct interp *command_interp (void);
 
 extern void clear_interpreter_hooks (void);
 
-/* Returns true if INTERP supports using the readline library; false
-   if it uses GDB's own simplified form of readline.  */
-extern int interp_supports_command_editing (struct interp *interp);
-
 /* List the possible interpreters which could complete the given
    text.  */
 extern void interpreter_completer (struct cmd_list_element *ignore,
