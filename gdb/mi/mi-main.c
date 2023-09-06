@@ -78,7 +78,6 @@ static struct mi_timestamp *current_command_ts;
 
 static int do_timings = 0;
 
-const char *current_token;
 /* Few commands would like to know if options like --thread-group were
    explicitly specified.  This variable keeps the current parsed
    command including all option, and make it possible.  */
@@ -153,8 +152,8 @@ mi_cmd_gdb_exit (const char *command, const char *const *argv, int argc)
   if (mi != nullptr)
     {
       /* We have to print everything right here because we never return.  */
-      if (current_token)
-	gdb_puts (current_token, mi->raw_stdout);
+      if (mi->current_token)
+	gdb_puts (mi->current_token, mi->raw_stdout);
       gdb_puts ("^exit\n", mi->raw_stdout);
       mi_out_put (current_uiout, mi->raw_stdout);
       gdb_flush (mi->raw_stdout);
@@ -1814,8 +1813,8 @@ captured_mi_execute_command (struct mi_interp *mi, struct ui_out *uiout,
   if (do_timings)
     current_command_ts = context->cmd_start;
 
-  scoped_restore save_token = make_scoped_restore (&current_token,
-						   context->token.c_str ());
+  scoped_restore save_token
+    = make_scoped_restore (&mi->current_token, context->token.c_str ());
 
   mi->running_result_record_printed = 0;
   mi->mi_proceeded = 0;
@@ -1987,8 +1986,14 @@ mi_execute_command (mi_parse *context)
   if (context->op != MI_COMMAND)
     error (_("Command is not an MI command"));
 
-  scoped_restore save_token = make_scoped_restore (&current_token,
-						   context->token.c_str ());
+  mi_interp *mi = as_mi_interp (current_interpreter ());
+
+  /* The current interpreter may not be MI, for instance when using
+     the Python gdb.execute_mi function.  */
+  if (mi != nullptr)
+    scoped_restore save_token = make_scoped_restore (&mi->current_token,
+						     context->token.c_str ());
+
   scoped_restore save_debug = make_scoped_restore (&mi_debug_p, 0);
 
   mi_cmd_execute (context);
@@ -2220,8 +2225,8 @@ mi_load_progress (const char *section_name,
       xfree (previous_sect_name);
       previous_sect_name = xstrdup (section_name);
 
-      if (current_token)
-	gdb_puts (current_token, mi->raw_stdout);
+      if (mi->current_token)
+	gdb_puts (mi->current_token, mi->raw_stdout);
       gdb_puts ("+download", mi->raw_stdout);
       {
 	ui_out_emit_tuple tuple_emitter (uiout.get (), NULL);
@@ -2238,8 +2243,8 @@ mi_load_progress (const char *section_name,
   if (time_now - last_update > milliseconds (500))
     {
       last_update = time_now;
-      if (current_token)
-	gdb_puts (current_token, mi->raw_stdout);
+      if (mi->current_token)
+	gdb_puts (mi->current_token, mi->raw_stdout);
       gdb_puts ("+download", mi->raw_stdout);
       {
 	ui_out_emit_tuple tuple_emitter (uiout.get (), NULL);

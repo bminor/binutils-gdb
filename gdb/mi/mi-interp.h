@@ -102,6 +102,8 @@ public:
   /* Flag indicating that the target has proceeded since the last
      command was issued.  */
   int mi_proceeded;
+
+  const char *current_token;
 };
 
 /* Output the shared object attributes to UIOUT.  */

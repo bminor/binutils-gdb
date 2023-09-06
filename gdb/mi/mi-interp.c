@@ -675,7 +675,7 @@ mi_on_resume_1 (struct mi_interp *mi,
   if (!mi->running_result_record_printed && mi->mi_proceeded)
     {
       gdb_printf (mi->raw_stdout, "%s^running\n",
-		  current_token ? current_token : "");
+		  mi->current_token ? mi->current_token : "");
     }
 
   /* Backwards compatibility.  If doing a wildcard resume and there's

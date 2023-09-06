@@ -34,8 +34,6 @@ extern void mi_print_timing_maybe (struct ui_file *file);
 
 extern int mi_async_p (void);
 
-extern const char *current_token;
-
 struct mi_suppress_notification
 {
   /* Breakpoint notification suppressed?  */
