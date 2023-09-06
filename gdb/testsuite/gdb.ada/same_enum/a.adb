@@ -17,7 +17,7 @@ with Pck; use Pck;
 
 procedure A is
    FC : Color := Red;
-   SC : Color := Green;
+   SC : RGB_Color := Green;
 begin
    Do_Nothing (FC'Address);
    Do_Nothing (SC'Address);

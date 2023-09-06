@@ -32,4 +32,6 @@ clean_restart ${testfile}
 # it's because the two types are strongly related).
 gdb_test "print red" "= red"
 
-
+# Check that both types are in fact present.
+gdb_test "ptype Color " "^type = .*"
+gdb_test "ptype RGB_Color"  "^type = .*"
