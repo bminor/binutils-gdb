@@ -270,6 +270,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the 128-bit Atomic Instructions extension.  This implies @code{lse}.
 @item @code{rasv2} @tab N/A @tab Armv9.4-A or later
  @tab Enable the Reliability, Availability and Serviceability extension v2.
+@item @code{predres2} @tab ARMv8-A/Armv9-A @tab ARMv8.9-A/Armv9.4-A or later
+ @tab Enable Prediction instructions.
 @end multitable
 
 @node AArch64 Syntax

@@ -2518,6 +2518,8 @@ static const aarch64_feature_set aarch64_feature_sb =
   AARCH64_FEATURE (SB);
 static const aarch64_feature_set aarch64_feature_predres =
   AARCH64_FEATURE (PREDRES);
+static const aarch64_feature_set aarch64_feature_predres2 =
+  AARCH64_FEATURES (2, PREDRES, PREDRES2);
 static const aarch64_feature_set aarch64_feature_memtag =
   AARCH64_FEATURE (MEMTAG);
 static const aarch64_feature_set aarch64_feature_bfloat16 =
@@ -2608,6 +2610,7 @@ static const aarch64_feature_set aarch64_feature_gcs =
 #define FRINTTS		&aarch64_feature_frintts
 #define SB		&aarch64_feature_sb
 #define PREDRES		&aarch64_feature_predres
+#define PREDRES2	&aarch64_feature_predres2
 #define MEMTAG		&aarch64_feature_memtag
 #define TME		&aarch64_feature_tme
 #define SVE2		&aarch64_feature_sve2
@@ -2840,6 +2843,9 @@ static const aarch64_feature_set aarch64_feature_gcs =
   MOPS_SET_OP1_OP2_INSN (NAME, "t", OPCODE | 0x1000, MASK, ISA), \
   MOPS_SET_OP1_OP2_INSN (NAME, "n", OPCODE | 0x2000, MASK, ISA), \
   MOPS_SET_OP1_OP2_INSN (NAME, "tn", OPCODE | 0x3000, MASK, ISA)
+
+#define PREDRES2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, PREDRES2, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 const struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -4185,6 +4191,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   PREDRES_INSN ("cfp", 0xd50b7380, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
   PREDRES_INSN ("dvp", 0xd50b73a0, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
   PREDRES_INSN ("cpp", 0xd50b73e0, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
+  PREDRES2_INSN ("cosp", 0xd50b73c0, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
   /* Armv8.4-a flag setting instruction, However this encoding has an encoding clash with the msr
      below it.  Usually we can resolve this by setting an alias condition on the flags, however that
      depends on the disassembly masks to be able to quickly find the alias.  The problem is the

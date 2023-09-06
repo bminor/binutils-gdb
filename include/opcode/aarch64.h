@@ -197,6 +197,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_S2POE,
   /* Extension to Translation Control Registers.  */
   AARCH64_FEATURE_TCR2,
+  /* Speculation Prediction Restriction instructions.  */
+  AARCH64_FEATURE_PREDRES2,
   AARCH64_NUM_FEATURES
 };
 
@@ -276,7 +278,8 @@ enum aarch64_feature_bit {
 #define AARCH64_ARCH_V9_1A_FEATURES(X)	AARCH64_ARCH_V8_6A_FEATURES (X)
 #define AARCH64_ARCH_V9_2A_FEATURES(X)	AARCH64_ARCH_V8_7A_FEATURES (X)
 #define AARCH64_ARCH_V9_3A_FEATURES(X)	AARCH64_ARCH_V8_8A_FEATURES (X)
-#define AARCH64_ARCH_V9_4A_FEATURES(X)	AARCH64_ARCH_V8_9A_FEATURES (X)
+#define AARCH64_ARCH_V9_4A_FEATURES(X)	(AARCH64_ARCH_V8_9A_FEATURES (X) \
+					 | AARCH64_FEATBIT (X, PREDRES2))
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8A(X)	(AARCH64_FEATBIT (X, V8) \
