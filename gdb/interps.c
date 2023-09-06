@@ -262,16 +262,6 @@ command_interp (void)
     return current_ui->current_interpreter;
 }
 
-/* See interps.h.  */
-
-void
-interp_pre_command_loop (struct interp *interp)
-{
-  gdb_assert (interp != NULL);
-
-  interp->pre_command_loop ();
-}
-
 /* See interp.h  */
 
 int

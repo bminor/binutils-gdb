@@ -470,7 +470,7 @@ captured_command_loop ()
 
   /* Give the interpreter a chance to print a prompt, if necessary  */
   if (ui->prompt_state != PROMPT_BLOCKED)
-    interp_pre_command_loop (top_level_interpreter ());
+    top_level_interpreter ()->pre_command_loop ();
 
   /* Now it's time to start the event loop.  */
   start_event_loop ();

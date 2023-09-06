@@ -261,10 +261,6 @@ extern void clear_interpreter_hooks (void);
    if it uses GDB's own simplified form of readline.  */
 extern int interp_supports_command_editing (struct interp *interp);
 
-/* Called before starting an event loop, to give the interpreter a
-   chance to e.g., print a prompt.  */
-extern void interp_pre_command_loop (struct interp *interp);
-
 /* List the possible interpreters which could complete the given
    text.  */
 extern void interpreter_completer (struct cmd_list_element *ignore,

@@ -227,7 +227,7 @@ new_ui_command (const char *args, int from_tty)
 
     set_top_level_interpreter (interpreter_name);
 
-    interp_pre_command_loop (top_level_interpreter ());
+    top_level_interpreter ()->pre_command_loop ();
 
     /* Make sure the file is not closed.  */
     stream.release ();
