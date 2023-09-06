@@ -602,9 +602,12 @@ gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
 	{
 	  for (compunit_symtab *cust : objfile->compunits ())
 	    {
-	      const struct blockvector *bv;
+	      /* Skip included compunits to prevent including compunits from
+		 being searched twice.  */
+	      if (cust->user != nullptr)
+		continue;
 
-	      bv = cust->blockvector ();
+	      const struct blockvector *bv = cust->blockvector ();
 	      const struct block *block = bv->static_block ();
 
 	      if (block != nullptr)
