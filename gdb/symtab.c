@@ -575,6 +575,10 @@ iterate_over_some_symtabs (const char *name,
 
   for (cust = first; cust != NULL && cust != after_last; cust = cust->next)
     {
+      /* Skip included compunits.  */
+      if (cust->user != nullptr)
+	continue;
+
       for (symtab *s : cust->filetabs ())
 	{
 	  if (compare_filenames_for_search (s->filename, name))
