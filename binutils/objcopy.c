@@ -5129,6 +5129,11 @@ convert_efi_target (char **targ)
       /* Change aarch64 to aarch64-little.  */
       memcpy (pei + 4 + sizeof ("aarch64") - 1, "-little", sizeof ("-little"));
     }
+  else if (strcmp (efi + 4, "riscv64") == 0)
+    {
+      /* Change riscv64 to riscv64-little.  */
+      memcpy (pei + 4 + sizeof ("riscv64") - 1, "-little", sizeof ("-little"));
+    }
   *targ = pei;
   return subsys;
 }
