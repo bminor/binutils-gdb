@@ -262,7 +262,7 @@ s_stab_generic (int what,
 	{
 	  as_warn (_(".stab%c: missing string"), what);
 	  ignore_rest_of_line ();
-	  goto out;
+	  goto out2;
 	}
       /* FIXME: We should probably find some other temporary storage
 	 for string, rather than leaking memory if someone else
@@ -350,7 +350,10 @@ s_stab_generic (int what,
 	 This must be done before creating symbols below, which uses
 	 the notes obstack.  */
       if (saved_string_obstack_end == obstack_next_free (&notes))
-	obstack_free (&notes, string);
+	{
+	  obstack_free (&notes, string);
+	  saved_string_obstack_end = NULL;
+	}
 
       /* At least for now, stabs in a special stab section are always
 	 output as 12 byte blocks of information.  */
@@ -398,6 +401,7 @@ s_stab_generic (int what,
  out:
   if (saved_string_obstack_end == obstack_next_free (&notes))
     obstack_free (&notes, string);
+ out2:
   subseg_set (saved_seg, saved_subseg);
 }
 
