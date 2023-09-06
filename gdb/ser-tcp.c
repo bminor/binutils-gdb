@@ -419,14 +419,17 @@ net_write_prim (struct serial *scb, const void *buf, size_t count)
      UNIX systems it is generally "const void *".  The cast to "const
      char *" is OK everywhere, since in C++ any data pointer type can
      be implicitly converted to "const void *".  */
-  return send (scb->fd, (const char *) buf, count, 0);
+  int result = send (scb->fd, (const char *) buf, count, 0);
+  if (result == -1 && errno != EINTR)
+    perror_with_name ("error while writing");
+  return result;
 }
 
-int
+void
 ser_tcp_send_break (struct serial *scb)
 {
   /* Send telnet IAC and BREAK characters.  */
-  return (serial_write (scb, "\377\363", 2));
+  serial_write (scb, "\377\363", 2);
 }
 
 #ifndef USE_WIN32API

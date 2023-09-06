@@ -1264,6 +1264,7 @@ public: /* Remote specific methods.  */
   int readchar (int timeout);
 
   void remote_serial_write (const char *str, int len);
+  void remote_serial_send_break ();
 
   int putpkt (const char *buf);
   int putpkt_binary (const char *buf, int cnt);
@@ -4623,22 +4624,19 @@ remote_target::get_offsets ()
 void
 remote_target::send_interrupt_sequence ()
 {
-  struct remote_state *rs = get_remote_state ();
-
   if (interrupt_sequence_mode == interrupt_sequence_control_c)
     remote_serial_write ("\x03", 1);
   else if (interrupt_sequence_mode == interrupt_sequence_break)
-    serial_send_break (rs->remote_desc);
+    remote_serial_send_break ();
   else if (interrupt_sequence_mode == interrupt_sequence_break_g)
     {
-      serial_send_break (rs->remote_desc);
+      remote_serial_send_break ();
       remote_serial_write ("g", 1);
     }
   else
     internal_error (_("Invalid value for interrupt_sequence_mode: %s."),
 		    interrupt_sequence_mode);
 }
-
 
 /* If STOP_REPLY is a T stop reply, look for the "thread" register,
    and extract the PTID.  Returns NULL_PTID if not found.  */
@@ -9859,14 +9857,40 @@ remote_target::remote_serial_write (const char *str, int len)
 
   rs->got_ctrlc_during_io = 0;
 
-  if (serial_write (rs->remote_desc, str, len))
+  try
     {
-      unpush_and_perror (this, _("Remote communication error.  "
-				 "Target disconnected"));
+      serial_write (rs->remote_desc, str, len);
+    }
+  catch (const gdb_exception_error &ex)
+    {
+      remote_unpush_target (this);
+      throw_error (TARGET_CLOSE_ERROR,
+		   _("Remote communication error.  "
+		     "Target disconnected: %s"),
+		   ex.what ());
     }
 
   if (rs->got_ctrlc_during_io)
     set_quit_flag ();
+}
+
+void
+remote_target::remote_serial_send_break ()
+{
+  struct remote_state *rs = get_remote_state ();
+
+  try
+    {
+      serial_send_break (rs->remote_desc);
+    }
+  catch (const gdb_exception_error &ex)
+    {
+      remote_unpush_target (this);
+      throw_error (TARGET_CLOSE_ERROR,
+		   _("Remote communication error.  "
+		     "Target disconnected: %s"),
+		   ex.what ());
+    }
 }
 
 /* Return a string representing an escaped version of BUF, of len N.

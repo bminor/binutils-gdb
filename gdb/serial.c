@@ -399,7 +399,7 @@ serial_readchar (struct serial *scb, int timeout)
   return (ch);
 }
 
-int
+void
 serial_write (struct serial *scb, const void *buf, size_t count)
 {
   if (serial_logfp != NULL)
@@ -428,7 +428,7 @@ serial_write (struct serial *scb, const void *buf, size_t count)
       gdb_flush (gdb_stdlog);
     }
 
-  return (scb->ops->write (scb, buf, count));
+  scb->ops->write (scb, buf, count);
 }
 
 void
@@ -461,13 +461,13 @@ serial_flush_input (struct serial *scb)
   return scb->ops->flush_input (scb);
 }
 
-int
+void
 serial_send_break (struct serial *scb)
 {
   if (serial_logfp != NULL)
     serial_logchar (serial_logfp, 'w', SERIAL_BREAK, 0);
 
-  return (scb->ops->send_break (scb));
+  scb->ops->send_break (scb);
 }
 
 void

@@ -75,7 +75,10 @@ uds_read_prim (struct serial *scb, size_t count)
 static int
 uds_write_prim (struct serial *scb, const void *buf, size_t count)
 {
-  return send (scb->fd, buf, count, 0);
+  int result = send (scb->fd, buf, count, 0);
+  if (result == -1 && errno != EINTR)
+    perror_with_name ("error while writing");
+  return result;
 }
 
 /* The local socket ops.  */

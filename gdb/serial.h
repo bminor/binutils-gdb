@@ -119,10 +119,10 @@ enum serial_rc {
 
 extern int serial_readchar (struct serial *scb, int timeout);
 
-/* Write COUNT bytes from BUF to the port SCB.  Returns 0 for
-   success, non-zero for failure.  */
+/* Write COUNT bytes from BUF to the port SCB.  Throws exception on
+   error.  */
 
-extern int serial_write (struct serial *scb, const void *buf, size_t count);
+extern void serial_write (struct serial *scb, const void *buf, size_t count);
 
 /* Write a printf style string onto the serial port.  */
 
@@ -145,7 +145,7 @@ extern int serial_flush_input (struct serial *);
 
 /* Send a break between 0.25 and 0.5 seconds long.  */
 
-extern int serial_send_break (struct serial *scb);
+extern void serial_send_break (struct serial *scb);
 
 /* Turn the port into raw mode.  */
 
@@ -263,12 +263,12 @@ struct serial_ops
     void (*close) (struct serial *);
     int (*fdopen) (struct serial *, int fd);
     int (*readchar) (struct serial *, int timeout);
-    int (*write) (struct serial *, const void *buf, size_t count);
+    void (*write) (struct serial *, const void *buf, size_t count);
     /* Discard pending output */
     int (*flush_output) (struct serial *);
     /* Discard pending input */
     int (*flush_input) (struct serial *);
-    int (*send_break) (struct serial *);
+    void (*send_break) (struct serial *);
     void (*go_raw) (struct serial *);
     serial_ttystate (*get_tty_state) (struct serial *);
     serial_ttystate (*copy_tty_state) (struct serial *, serial_ttystate);

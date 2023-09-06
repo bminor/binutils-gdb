@@ -118,21 +118,21 @@ ser_windows_flush_input (struct serial *scb)
   return (PurgeComm (h, PURGE_RXCLEAR) != 0) ? 0 : -1;
 }
 
-static int
+static void
 ser_windows_send_break (struct serial *scb)
 {
   HANDLE h = (HANDLE) _get_osfhandle (scb->fd);
 
   if (SetCommBreak (h) == 0)
-    return -1;
+    throw_winerror_with_name ("error calling SetCommBreak",
+			      GetLastError ());
 
   /* Delay for 250 milliseconds.  */
   Sleep (250);
 
   if (ClearCommBreak (h) == 0)
-    return -1;
-
-  return 0;
+    throw_winerror_with_name ("error calling ClearCommBreak",
+			      GetLastError ());
 }
 
 static void
@@ -354,7 +354,7 @@ ser_windows_write_prim (struct serial *scb, const void *buf, size_t len)
     {
       if (GetLastError () != ERROR_IO_PENDING
 	  || !GetOverlappedResult (h, &ov, &bytes_written, TRUE))
-	bytes_written = -1;
+	throw_winerror_with_name ("error while writing", GetLastError ());
     }
 
   CloseHandle (ov.hEvent);
@@ -986,14 +986,14 @@ pipe_windows_write (struct serial *scb, const void *buf, size_t count)
 
   int pipeline_in_fd = fileno (ps->input);
   if (pipeline_in_fd < 0)
-    return -1;
+    error (_("could not find file number for pipe"));
 
   pipeline_in = (HANDLE) _get_osfhandle (pipeline_in_fd);
   if (pipeline_in == INVALID_HANDLE_VALUE)
-    return -1;
+    error (_("could not find handle for pipe"));
 
   if (! WriteFile (pipeline_in, buf, count, &written, NULL))
-    return -1;
+    throw_winerror_with_name (_("could not write to pipe"), GetLastError ());
 
   return written;
 }

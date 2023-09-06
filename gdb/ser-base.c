@@ -471,7 +471,7 @@ ser_base_readchar (struct serial *scb, int timeout)
   return generic_readchar (scb, timeout, do_ser_base_readchar);
 }
 
-int
+void
 ser_base_write (struct serial *scb, const void *buf, size_t count)
 {
   const char *str = (const char *) buf;
@@ -487,12 +487,11 @@ ser_base_write (struct serial *scb, const void *buf, size_t count)
 	{
 	  if (errno == EINTR)
 	    continue;
-	  return 1;
+	  perror_with_name ("error while writing");
 	}
       count -= cc;
       str += cc;
     }
-  return 0;
 }
 
 int
@@ -514,10 +513,9 @@ ser_base_flush_input (struct serial *scb)
     return SERIAL_ERROR;
 }
 
-int
+void
 ser_base_send_break (struct serial *scb)
 {
-  return 0;
 }
 
 int

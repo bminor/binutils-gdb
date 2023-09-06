@@ -66,7 +66,7 @@ static void hardwire_print_tty_state (struct serial *, serial_ttystate,
 static int hardwire_drain_output (struct serial *);
 static int hardwire_flush_output (struct serial *);
 static int hardwire_flush_input (struct serial *);
-static int hardwire_send_break (struct serial *);
+static void hardwire_send_break (struct serial *);
 static int hardwire_setstopbits (struct serial *, int);
 
 /* Open up a real live device for serial I/O.  */
@@ -182,10 +182,11 @@ hardwire_flush_input (struct serial *scb)
   return tcflush (scb->fd, TCIFLUSH);
 }
 
-static int
+static void
 hardwire_send_break (struct serial *scb)
 {
-  return tcsendbreak (scb->fd, 0);
+  if (tcsendbreak (scb->fd, 0) == -1)
+    perror_with_name ("sending break");
 }
 
 static void
@@ -579,5 +580,8 @@ ser_unix_read_prim (struct serial *scb, size_t count)
 int
 ser_unix_write_prim (struct serial *scb, const void *buf, size_t len)
 {
-  return write (scb->fd, buf, len);
+  int result = write (scb->fd, buf, len);
+  if (result == -1 && errno != EINTR)
+    perror_with_name ("error while writing");
+  return result;
 }
