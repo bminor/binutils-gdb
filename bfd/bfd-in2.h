@@ -2572,6 +2572,14 @@ unsigned int bfd_init (void);
 /* Value returned by bfd_init.  */
 #define BFD_INIT_MAGIC (sizeof (struct bfd_section))
 
+typedef bool (*bfd_lock_unlock_fn_type) (void *);
+bool bfd_thread_init
+   (bfd_lock_unlock_fn_type lock,
+    bfd_lock_unlock_fn_type unlock,
+    void *data);
+
+void bfd_thread_cleanup (void);
+
 long bfd_get_reloc_upper_bound (bfd *abfd, asection *sect);
 
 long bfd_canonicalize_reloc

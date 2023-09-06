@@ -231,22 +231,22 @@ msgstr ""
 msgid "#<invalid error code>"
 msgstr ""
 
-#: bfd.c:1892
+#: bfd.c:2019
 #, c-format
 msgid "BFD %s assertion fail %s:%d"
 msgstr ""
 
-#: bfd.c:1905
+#: bfd.c:2032
 #, c-format
 msgid "BFD %s internal error, aborting at %s:%d in %s\n"
 msgstr ""
 
-#: bfd.c:1910
+#: bfd.c:2037
 #, c-format
 msgid "BFD %s internal error, aborting at %s:%d\n"
 msgstr ""
 
-#: bfd.c:1912
+#: bfd.c:2039
 msgid "Please report this bug.\n"
 msgstr ""
 
@@ -265,7 +265,7 @@ msgstr ""
 msgid "warning: writing section `%pA' at huge (ie negative) file offset"
 msgstr ""
 
-#: cache.c:273
+#: cache.c:275
 #, c-format
 msgid "reopening %pB: %s"
 msgstr ""

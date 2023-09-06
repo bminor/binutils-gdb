@@ -81,6 +81,8 @@ _bfd_new_bfd (void)
   if (nbfd == NULL)
     return NULL;
 
+  if (!bfd_lock ())
+    return NULL;
   if (bfd_use_reserved_id)
     {
       nbfd->id = --bfd_reserved_id_counter;
@@ -88,6 +90,11 @@ _bfd_new_bfd (void)
     }
   else
     nbfd->id = bfd_id_counter++;
+  if (!bfd_unlock ())
+    {
+      free (nbfd);
+      return NULL;
+    }
 
   nbfd->memory = objalloc_create ();
   if (nbfd->memory == NULL)

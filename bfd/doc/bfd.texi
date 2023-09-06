@@ -199,6 +199,7 @@ IEEE-695.
 * typedef bfd::
 * Error reporting::
 * Initialization::
+* Threading::
 * Miscellaneous::
 * Memory Usage::
 * Sections::
