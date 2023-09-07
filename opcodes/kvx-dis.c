@@ -257,7 +257,7 @@ kvx_dis_init (struct disassemble_info *info)
   env.initialized_p = 1;
 }
 
-static int
+static bool
 kvx_reassemble_bundle (int wordcount, int *_insncount)
 {
 
@@ -272,22 +272,22 @@ kvx_reassemble_bundle (int wordcount, int *_insncount)
   int mau_taken = 0;
   int lsu_taken = 0;
 
-  int i;
-  unsigned int j;
-
-  struct instr_s instr[KVXMAXBUNDLEISSUE];
-  assert (KVXMAXBUNDLEISSUE >= BundleIssue__);
-  memset (instr, 0, sizeof (instr));
-
   if (debug)
     fprintf (stderr, "kvx_reassemble_bundle: wordcount = %d\n", wordcount);
 
-  if (wordcount == 0)
+  if (wordcount > KVXMAXBUNDLEWORDS)
     {
       if (debug)
-	fprintf (stderr, "wordcount == 0\n");
-      return 1;
+	fprintf (stderr, "bundle exceeds maximum size\n");
+      return false;
     }
+
+  struct instr_s instr[KVXMAXBUNDLEISSUE];
+  memset (instr, 0, sizeof (instr));
+  assert (KVXMAXBUNDLEISSUE >= BundleIssue__);
+
+  int i;
+  unsigned int j;
 
   for (i = 0; i < wordcount; i++)
     {
@@ -304,7 +304,7 @@ kvx_reassemble_bundle (int wordcount, int *_insncount)
 		    {
 		      if (debug)
 			fprintf (stderr, "Too many TCA instructions");
-		      return 1;
+		      return false;
 		    }
 		  if (debug)
 		    fprintf (stderr,
@@ -336,7 +336,7 @@ kvx_reassemble_bundle (int wordcount, int *_insncount)
 		    {
 		      if (debug)
 			fprintf (stderr, "Too many TCA instructions");
-		      return 1;
+		      return false;
 		    }
 		  if (debug)
 		    fprintf (stderr,
@@ -357,7 +357,7 @@ kvx_reassemble_bundle (int wordcount, int *_insncount)
 		    {
 		      if (debug)
 			fprintf (stderr, "Too many IMMX syllables");
-		      return 1;
+		      return false;
 		    }
 		  instr_p->immx[immx_count] = syllable;
 		  instr_p->immx_valid[immx_count] = 1;
@@ -425,7 +425,7 @@ kvx_reassemble_bundle (int wordcount, int *_insncount)
 	    {
 	      if (debug)
 		fprintf (stderr, "Too many ALU instructions");
-	      return 1;
+	      return false;
 	    }
 	  break;
 
@@ -434,7 +434,7 @@ kvx_reassemble_bundle (int wordcount, int *_insncount)
 	    {
 	      if (debug)
 		fprintf (stderr, "Too many MAU instructions");
-	      return 1;
+	      return false;
 	    }
 	  else
 	    {
@@ -453,7 +453,7 @@ kvx_reassemble_bundle (int wordcount, int *_insncount)
 	    {
 	      if (debug)
 		fprintf (stderr, "Too many LSU instructions");
-	      return 1;
+	      return false;
 	    }
 	  else
 	    {
@@ -466,21 +466,8 @@ kvx_reassemble_bundle (int wordcount, int *_insncount)
 	      lsu_taken = 1;
 	    }
 	}
-      if (!(kvx_has_parallel_bit (syllable)))
-	{
-	  if (debug)
-	    fprintf (stderr, "Stop! stop bit is set 0x%x\n", syllable);
-	  break;
-	}
       if (debug)
 	fprintf (stderr, "Continue %d < %d?\n", i, wordcount);
-
-    }
-  if (kvx_has_parallel_bit (bundle_words[i]))
-    {
-      if (debug)
-	fprintf (stderr, "bundle exceeds maximum size");
-      return 1;
     }
 
   /* Fill bundle_insn and count read syllables.  */
@@ -520,7 +507,7 @@ kvx_reassemble_bundle (int wordcount, int *_insncount)
     fprintf (stderr, "End => %d instructions\n", instr_idx);
 
   *_insncount = instr_idx;
-  return 0;
+  return true;
 }
 
 struct decoded_insn
@@ -1038,11 +1025,10 @@ print_insn_kvx (bfd_vma memaddr, struct disassemble_info *info)
      decentrifugate function.  */
   if (insnindex == 0)
     {
-      int wordcount = 0;
-      do
+      int wordcount;
+      for (wordcount = 0; wordcount < KVXMAXBUNDLEWORDS; wordcount++)
 	{
 	  int status;
-	  assert (wordcount < KVXMAXBUNDLEWORDS);
 	  status =
 	    (*info->read_memory_func) (memaddr + 4 * wordcount,
 				       (bfd_byte *) (bundle_words +
@@ -1053,11 +1039,11 @@ print_insn_kvx (bfd_vma memaddr, struct disassemble_info *info)
 					  info);
 	      return -1;
 	    }
-	  wordcount++;
+	  if (!kvx_has_parallel_bit (bundle_words[wordcount]))
+	    break;
 	}
-      while (kvx_has_parallel_bit (bundle_words[wordcount - 1])
-	     && wordcount < KVXMAXBUNDLEWORDS - 1);
-      invalid_bundle = kvx_reassemble_bundle (wordcount, &insncount);
+      wordcount++;
+      invalid_bundle = !kvx_reassemble_bundle (wordcount, &insncount);
     }
 
   assert (insnindex < KVXMAXBUNDLEISSUE);
@@ -1226,20 +1212,17 @@ decode_prologue_epilogue_bundle (bfd_vma memaddr,
     kvx_dis_init (info);
 
   /* Read the bundle.  */
-  nb_syl = 0;
-  do
+  for (nb_syl = 0; nb_syl < KVXMAXBUNDLEWORDS; nb_syl++)
     {
-      if (nb_syl >= KVXMAXBUNDLEWORDS)
-	return -1;
       if ((*info->read_memory_func) (memaddr + 4 * nb_syl,
 				     (bfd_byte *) &bundle_words[nb_syl], 4,
 				     info))
 	return -1;
-      nb_syl++;
+      if (!kvx_has_parallel_bit (bundle_words[nb_syl]))
+	break;
     }
-  while (kvx_has_parallel_bit (bundle_words[nb_syl - 1])
-	 && nb_syl < KVXMAXBUNDLEWORDS - 1);
-  if (kvx_reassemble_bundle (nb_syl, &nb_insn))
+  nb_syl++;
+  if (!kvx_reassemble_bundle (nb_syl, &nb_insn))
     return -1;
 
   /* Check for extension to right if this is not the end of bundle
