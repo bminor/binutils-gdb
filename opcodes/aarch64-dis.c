@@ -3846,6 +3846,12 @@ print_insn_aarch64_word (bfd_vma pc,
       break;
     case ERR_OK:
       user_friendly_fixup (&inst);
+      if (inst.opcode->iclass == condbranch
+	  || inst.opcode->iclass == testbranch
+	  || inst.opcode->iclass == compbranch)
+        info->insn_type = dis_condbranch;
+      else if (inst.opcode->iclass == branch_imm)
+        info->insn_type = dis_jsr;
       print_aarch64_insn (pc, &inst, word, info, errors);
       break;
     default:
