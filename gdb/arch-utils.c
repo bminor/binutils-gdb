@@ -1092,6 +1092,16 @@ default_read_core_file_mappings
 {
 }
 
+/* See arch-utils.h.  */
+bool
+default_use_target_description_from_corefile_notes (struct gdbarch *gdbarch,
+						    struct bfd *corefile_bfd)
+{
+  /* Always trust the corefile target description contained in the target
+     description note.  */
+  return true;
+}
+
 CORE_ADDR
 default_get_return_buf_addr (struct type *val_type, frame_info_ptr cur_frame)
 {

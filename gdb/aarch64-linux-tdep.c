@@ -2199,6 +2199,33 @@ aarch64_linux_decode_memtag_section (struct gdbarch *gdbarch,
   return tags;
 }
 
+/* AArch64 Linux implementation of the
+   gdbarch_use_target_description_from_corefile_notes hook.  */
+
+static bool
+aarch64_use_target_description_from_corefile_notes (gdbarch *gdbarch,
+						    bfd *obfd)
+{
+  /* Sanity check.  */
+  gdb_assert (obfd != nullptr);
+
+  /* If the corefile contains any SVE or SME register data, we don't want to
+     use the target description note, as it may be incorrect.
+
+     Currently the target description note contains a potentially incorrect
+     target description if the originating program changed the SVE or SME
+     vector lengths mid-execution.
+
+     Once we support per-thread target description notes in the corefiles, we
+     can always trust those notes whenever they are available.  */
+  if (bfd_get_section_by_name (obfd, ".reg-aarch-sve") != nullptr
+      || bfd_get_section_by_name (obfd, ".reg-aarch-za") != nullptr
+      || bfd_get_section_by_name (obfd, ".reg-aarch-zt") != nullptr)
+    return false;
+
+  return true;
+}
+
 static void
 aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -2469,6 +2496,12 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					    aarch64_displaced_step_hw_singlestep);
 
   set_gdbarch_gcc_target_options (gdbarch, aarch64_linux_gcc_target_options);
+
+  /* Hook to decide if the target description should be obtained from
+     corefile target description note(s) or inferred from the corefile
+     sections.  */
+  set_gdbarch_use_target_description_from_corefile_notes (gdbarch,
+			    aarch64_use_target_description_from_corefile_notes);
 }
 
 #if GDB_SELF_TEST

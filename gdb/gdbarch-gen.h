@@ -1717,3 +1717,13 @@ extern void set_gdbarch_get_pc_address_flags (struct gdbarch *gdbarch, gdbarch_g
 typedef void (gdbarch_read_core_file_mappings_ftype) (struct gdbarch *gdbarch, struct bfd *cbfd, read_core_file_mappings_pre_loop_ftype pre_loop_cb, read_core_file_mappings_loop_ftype loop_cb);
 extern void gdbarch_read_core_file_mappings (struct gdbarch *gdbarch, struct bfd *cbfd, read_core_file_mappings_pre_loop_ftype pre_loop_cb, read_core_file_mappings_loop_ftype loop_cb);
 extern void set_gdbarch_read_core_file_mappings (struct gdbarch *gdbarch, gdbarch_read_core_file_mappings_ftype *read_core_file_mappings);
+
+/* Return true if the target description for all threads should be read from the
+   target description core file note(s).  Return false if the target description
+   for all threads should be inferred from the core file contents/sections.
+
+   The corefile's bfd is passed through COREFILE_BFD. */
+
+typedef bool (gdbarch_use_target_description_from_corefile_notes_ftype) (struct gdbarch *gdbarch, struct bfd *corefile_bfd);
+extern bool gdbarch_use_target_description_from_corefile_notes (struct gdbarch *gdbarch, struct bfd *corefile_bfd);
+extern void set_gdbarch_use_target_description_from_corefile_notes (struct gdbarch *gdbarch, gdbarch_use_target_description_from_corefile_notes_ftype *use_target_description_from_corefile_notes);

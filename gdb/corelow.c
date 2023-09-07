@@ -1229,35 +1229,47 @@ core_target::thread_alive (ptid_t ptid)
 const struct target_desc *
 core_target::read_description ()
 {
-  /* If the core file contains a target description note then we will use
-     that in preference to anything else.  */
-  bfd_size_type tdesc_note_size = 0;
-  struct bfd_section *tdesc_note_section
-    = bfd_get_section_by_name (core_bfd, ".gdb-tdesc");
-  if (tdesc_note_section != nullptr)
-    tdesc_note_size = bfd_section_size (tdesc_note_section);
-  if (tdesc_note_size > 0)
+  /* First check whether the target wants us to use the corefile target
+     description notes.  */
+  if (gdbarch_use_target_description_from_corefile_notes (m_core_gdbarch,
+							  core_bfd))
     {
-      gdb::char_vector contents (tdesc_note_size + 1);
-      if (bfd_get_section_contents (core_bfd, tdesc_note_section,
-				    contents.data (), (file_ptr) 0,
-				    tdesc_note_size))
+      /* If the core file contains a target description note then go ahead and
+	 use that.  */
+      bfd_size_type tdesc_note_size = 0;
+      struct bfd_section *tdesc_note_section
+	= bfd_get_section_by_name (core_bfd, ".gdb-tdesc");
+      if (tdesc_note_section != nullptr)
+	tdesc_note_size = bfd_section_size (tdesc_note_section);
+      if (tdesc_note_size > 0)
 	{
-	  /* Ensure we have a null terminator.  */
-	  contents[tdesc_note_size] = '\0';
-	  const struct target_desc *result
-	    = string_read_description_xml (contents.data ());
-	  if (result != nullptr)
-	    return result;
+	  gdb::char_vector contents (tdesc_note_size + 1);
+	  if (bfd_get_section_contents (core_bfd, tdesc_note_section,
+					contents.data (), (file_ptr) 0,
+					tdesc_note_size))
+	    {
+	      /* Ensure we have a null terminator.  */
+	      contents[tdesc_note_size] = '\0';
+	      const struct target_desc *result
+		= string_read_description_xml (contents.data ());
+	      if (result != nullptr)
+		return result;
+	    }
 	}
     }
 
+  /* If the architecture provides a corefile target description hook, use
+     it now.  Even if the core file contains a target description in a note
+     section, it is not useful for targets that can potentially have distinct
+     descriptions for each thread.  One example is AArch64's SVE/SME
+     extensions that allow per-thread vector length changes, resulting in
+     registers with different sizes.  */
   if (m_core_gdbarch && gdbarch_core_read_description_p (m_core_gdbarch))
     {
       const struct target_desc *result;
 
       result = gdbarch_core_read_description (m_core_gdbarch, this, core_bfd);
-      if (result != NULL)
+      if (result != nullptr)
 	return result;
     }
 

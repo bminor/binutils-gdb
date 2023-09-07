@@ -2732,3 +2732,18 @@ Read core file mappings
     predefault="default_read_core_file_mappings",
     invalid=False,
 )
+
+Method(
+    comment="""
+Return true if the target description for all threads should be read from the
+target description core file note(s).  Return false if the target description
+for all threads should be inferred from the core file contents/sections.
+
+The corefile's bfd is passed through COREFILE_BFD.
+""",
+    type="bool",
+    name="use_target_description_from_corefile_notes",
+    params=[("struct bfd *", "corefile_bfd")],
+    predefault="default_use_target_description_from_corefile_notes",
+    invalid=False,
+)
