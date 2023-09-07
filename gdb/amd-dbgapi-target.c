@@ -1634,7 +1634,7 @@ amd_dbgapi_target::update_thread_list ()
 	    auto it = threads.find (tp->ptid.tid ());
 
 	    if (it == threads.end ())
-	      delete_thread (tp);
+	      delete_thread_silent (tp);
 	    else
 	      threads.erase (it);
 	  }
