@@ -275,7 +275,6 @@ void
 linux_proc_attach_tgid_threads (pid_t pid,
 				linux_proc_attach_lwp_func attach_lwp)
 {
-  DIR *dir;
   char pathname[128];
   int new_threads_found;
   int iterations;
@@ -284,7 +283,7 @@ linux_proc_attach_tgid_threads (pid_t pid,
     return;
 
   xsnprintf (pathname, sizeof (pathname), "/proc/%ld/task", (long) pid);
-  dir = opendir (pathname);
+  gdb_dir_up dir (opendir (pathname));
   if (dir == NULL)
     {
       warning (_("Could not open %s."), pathname);
@@ -300,7 +299,7 @@ linux_proc_attach_tgid_threads (pid_t pid,
       struct dirent *dp;
 
       new_threads_found = 0;
-      while ((dp = readdir (dir)) != NULL)
+      while ((dp = readdir (dir.get ())) != NULL)
 	{
 	  unsigned long lwp;
 
@@ -321,10 +320,8 @@ linux_proc_attach_tgid_threads (pid_t pid,
 	  iterations = -1;
 	}
 
-      rewinddir (dir);
+      rewinddir (dir.get ());
     }
-
-  closedir (dir);
 }
 
 /* See linux-procfs.h.  */
