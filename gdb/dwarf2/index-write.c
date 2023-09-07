@@ -1201,18 +1201,14 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
   data_buf types_cu_list;
 
   /* The CU list is already sorted, so we don't need to do additional
-     work here.  Also, the debug_types entries do not appear in
-     all_units, but only in their own hash table.  */
+     work here.  */
 
   int counter = 0;
-  int types_counter = 0;
   for (int i = 0; i < per_bfd->all_units.size (); ++i)
     {
       dwarf2_per_cu_data *per_cu = per_bfd->all_units[i].get ();
 
-      int &this_counter = per_cu->is_debug_types ? types_counter : counter;
-
-      const auto insertpair = cu_index_htab.emplace (per_cu, this_counter);
+      const auto insertpair = cu_index_htab.emplace (per_cu, counter);
       gdb_assert (insertpair.second);
 
       /* The all_units list contains CUs read from the objfile as well as
@@ -1234,7 +1230,7 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
       else
 	cu_list.append_uint (8, BFD_ENDIAN_LITTLE, per_cu->length ());
 
-      ++this_counter;
+      ++counter;
     }
 
   write_cooked_index (table, cu_index_htab, &symtab);
