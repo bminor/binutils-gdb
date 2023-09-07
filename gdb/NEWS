@@ -298,6 +298,11 @@ show tui mouse-events
      class, it signals to gdb that the printer may implement new
      pretty-printer methods.
 
+  ** New attribute Progspace.symbol_file.  This attribute holds the
+     gdb.Objfile that corresponds to Progspace.filename (when
+     Progspace.filename is not None), otherwise, this attribute is
+     itself None.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.

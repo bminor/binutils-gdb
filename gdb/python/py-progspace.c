@@ -111,6 +111,26 @@ pspy_get_filename (PyObject *self, void *closure)
   Py_RETURN_NONE;
 }
 
+/* Implement the gdb.Progspace.symbol_file attribute.  Retun the
+   gdb.Objfile corresponding to the currently loaded symbol-file, or None
+   if no symbol-file is loaded.  If the Progspace is invalid then raise an
+   exception.  */
+
+static PyObject *
+pspy_get_symbol_file (PyObject *self, void *closure)
+{
+  pspace_object *obj = (pspace_object *) self;
+
+  PSPY_REQUIRE_VALID (obj);
+
+  struct objfile *objfile = obj->pspace->symfile_object_file;
+
+  if (objfile != nullptr)
+    return objfile_to_objfile_object (objfile).release ();
+
+  Py_RETURN_NONE;
+}
+
 static void
 pspy_dealloc (PyObject *self)
 {
@@ -573,6 +593,9 @@ static gdb_PyGetSetDef pspace_getset[] =
     "The __dict__ for this progspace.", &pspace_object_type },
   { "filename", pspy_get_filename, NULL,
     "The filename of the progspace's main symbol file, or None.", nullptr },
+  { "symbol_file", pspy_get_symbol_file, nullptr,
+    "The gdb.Objfile for the progspace's main symbol file, or None.",
+    nullptr},
   { "pretty_printers", pspy_get_printers, pspy_set_printers,
     "Pretty printers.", NULL },
   { "frame_filters", pspy_get_frame_filters, pspy_set_frame_filters,
