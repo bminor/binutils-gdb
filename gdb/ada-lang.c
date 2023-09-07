@@ -204,6 +204,8 @@ static symbol_name_matcher_ftype *ada_get_symbol_name_matcher
 
 static int symbols_are_identical_enums
   (const std::vector<struct block_symbol> &syms);
+
+static int ada_identical_enum_types_p (struct type *type1, struct type *type2);
 
 
 /* The character set used for source files.  */
@@ -3801,11 +3803,24 @@ ada_resolve_enum (std::vector<struct block_symbol> &syms,
   gdb_assert (context_type->code () == TYPE_CODE_ENUM);
   context_type = ada_check_typedef (context_type);
 
+  /* We already know the name matches, so we're just looking for
+     an element of the correct enum type.  */
+  struct type *type1 = context_type;
   for (int i = 0; i < syms.size (); ++i)
     {
-      /* We already know the name matches, so we're just looking for
-	 an element of the correct enum type.  */
-      if (ada_check_typedef (syms[i].symbol->type ()) == context_type)
+      struct type *type2 = ada_check_typedef (syms[i].symbol->type ());
+      if (type1 == type2)
+	return i;
+    }
+
+  for (int i = 0; i < syms.size (); ++i)
+    {
+      struct type *type2 = ada_check_typedef (syms[i].symbol->type ());
+      if (type1->num_fields () != type2->num_fields ())
+	continue;
+      if (strcmp (type1->name (), type2->name ()) != 0)
+	continue;
+      if (ada_identical_enum_types_p (type1, type2))
 	return i;
     }
 
