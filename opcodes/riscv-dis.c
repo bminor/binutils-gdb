@@ -584,97 +584,102 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	  print (info->stream, dis_style_immediate, "%d", rs1);
 	  break;
 
-	case 'W': /* Various operands.  */
-	  {
-	    switch (*++oparg)
-	      {
-	      case 'i':
-		switch (*++oparg)
-		  {
-		  case 'f':
-		    print (info->stream, dis_style_address_offset, "%d",
-			   (int) EXTRACT_STYPE_IMM (l));
-		    break;
-		  default:
-		    goto undefined_modifier;
-		  }
-		  break;
-	      case 'f':
-		switch (*++oparg)
-		  {
-		  case 'v':
-		    if (riscv_fli_symval[rs1])
-		      print (info->stream, dis_style_text, "%s",
-			     riscv_fli_symval[rs1]);
-		    else
-		      print (info->stream, dis_style_immediate, "%a",
-			     riscv_fli_numval[rs1]);
-		    break;
-		  default:
-		    goto undefined_modifier;
-		  }
-		break;
-	      case 'c': /* Zcb extension 16 bits length instruction fields. */
-		switch (*++oparg)
-		  {
-		  case 'b':
-		    print (info->stream, dis_style_immediate, "%d",
-		      (int)EXTRACT_ZCB_BYTE_UIMM (l));
-		    break;
-		  case 'h':
-		    print (info->stream, dis_style_immediate, "%d",
-		      (int)EXTRACT_ZCB_HALFWORD_UIMM (l));
-		    break;
-		  default: break;
-		  }
-		break;
-	      default:
-		goto undefined_modifier;
-	      }
-	  }
-	  break;
-
-	case 'X': /* Integer immediate.  */
-	  {
-	    size_t n;
-	    size_t s;
-	    bool sign;
-
-	    switch (*++oparg)
-	      {
-		case 'l': /* Literal.  */
-		  oparg++;
-		  while (*oparg && *oparg != ',')
-		    {
-		      print (info->stream, dis_style_immediate, "%c", *oparg);
-		      oparg++;
-		    }
-		  oparg--;
-		  break;
-		case 's': /* 'XsN@S' ... N-bit signed immediate at bit S.  */
-		  sign = true;
-		  goto print_imm;
-		case 'u': /* 'XuN@S' ... N-bit unsigned immediate at bit S.  */
-		  sign = false;
-		  goto print_imm;
-		print_imm:
-		  n = strtol (oparg + 1, (char **)&oparg, 10);
-		  if (*oparg != '@')
-		    goto undefined_modifier;
-		  s = strtol (oparg + 1, (char **)&oparg, 10);
-		  oparg--;
-
-		  if (!sign)
-		    print (info->stream, dis_style_immediate, "%lu",
-			   (unsigned long)EXTRACT_U_IMM (n, s, l));
-		  else
-		    print (info->stream, dis_style_immediate, "%li",
-			   (signed long)EXTRACT_S_IMM (n, s, l));
+	case 'W': /* Various operands for standard z extensions.  */
+	  switch (*++oparg)
+	    {
+	    case 'i':
+	      switch (*++oparg)
+		{
+		case 'f':
+		  print (info->stream, dis_style_address_offset, "%d",
+			 (int) EXTRACT_STYPE_IMM (l));
 		  break;
 		default:
 		  goto undefined_modifier;
+		}
+	      break;
+	    case 'f':
+	      switch (*++oparg)
+		{
+		case 'v':
+		  if (riscv_fli_symval[rs1])
+		    print (info->stream, dis_style_text, "%s",
+			   riscv_fli_symval[rs1]);
+		  else
+		    print (info->stream, dis_style_immediate, "%a",
+			   riscv_fli_numval[rs1]);
+		  break;
+		default:
+		  goto undefined_modifier;
+		}
+	      break;
+	    case 'c': /* Zcb extension 16 bits length instruction fields. */
+	      switch (*++oparg)
+		{
+		case 'b':
+		  print (info->stream, dis_style_immediate, "%d",
+			 (int)EXTRACT_ZCB_BYTE_UIMM (l));
+		  break;
+		case 'h':
+		  print (info->stream, dis_style_immediate, "%d",
+			 (int)EXTRACT_ZCB_HALFWORD_UIMM (l));
+		  break;
+		default:
+		  goto undefined_modifier;
+		}
+	      break;
+	    default:
+	      goto undefined_modifier;
+	    }
+	  break;
+
+	case 'X': /* Vendor-specific operands.  */
+	  switch (*++oparg)
+	    {
+	    case 't': /* Vendor-specific (T-head) operands.  */
+	      {
+		size_t n;
+		size_t s;
+		bool sign;
+		switch (*++oparg)
+		  {
+		  case 'l': /* Integer immediate, literal.  */
+		    oparg++;
+		    while (*oparg && *oparg != ',')
+		      {
+			print (info->stream, dis_style_immediate, "%c", *oparg);
+			oparg++;
+		      }
+		    oparg--;
+		    break;
+		  case 's': /* Integer immediate, 'XsN@S' ... N-bit signed immediate at bit S.  */
+		    sign = true;
+		    goto print_imm;
+		  case 'u': /* Integer immediate, 'XuN@S' ... N-bit unsigned immediate at bit S.  */
+		    sign = false;
+		    goto print_imm;
+		  print_imm:
+		    n = strtol (oparg + 1, (char **)&oparg, 10);
+		    if (*oparg != '@')
+		      goto undefined_modifier;
+		    s = strtol (oparg + 1, (char **)&oparg, 10);
+		    oparg--;
+
+		    if (!sign)
+		      print (info->stream, dis_style_immediate, "%lu",
+			     (unsigned long)EXTRACT_U_IMM (n, s, l));
+		    else
+		      print (info->stream, dis_style_immediate, "%li",
+			     (signed long)EXTRACT_S_IMM (n, s, l));
+		    break;
+		  default:
+		    goto undefined_modifier;
+		  }
 	      }
-	  }
+	      break;
+	    default:
+	      goto undefined_modifier;
+	    }
 	  break;
 
 	default:
