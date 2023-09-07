@@ -202,6 +202,8 @@ static struct type *ada_find_any_type (const char *name);
 static symbol_name_matcher_ftype *ada_get_symbol_name_matcher
   (const lookup_name_info &lookup_name);
 
+static int symbols_are_identical_enums
+  (const std::vector<struct block_symbol> &syms);
 
 
 /* The character set used for source files.  */
@@ -3875,6 +3877,24 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
 	   && context_type->code () == TYPE_CODE_ENUM)
     i = ada_resolve_enum (candidates, sym->linkage_name (), context_type,
 			  parse_completion);
+  else if (context_type == nullptr
+	   && symbols_are_identical_enums (candidates))
+    {
+      /* If all the remaining symbols are identical enumerals, then
+	 just keep the first one and discard the rest.
+
+	 Unlike what we did previously, we do not discard any entry
+	 unless they are ALL identical.  This is because the symbol
+	 comparison is not a strict comparison, but rather a practical
+	 comparison.  If all symbols are considered identical, then
+	 we can just go ahead and use the first one and discard the rest.
+	 But if we cannot reduce the list to a single element, we have
+	 to ask the user to disambiguate anyways.  And if we have to
+	 present a multiple-choice menu, it's less confusing if the list
+	 isn't missing some choices that were identical and yet distinct.  */
+      candidates.resize (1);
+      i = 0;
+    }
   else if (deprocedure_p && !is_nonfunction (candidates))
     {
       i = ada_resolve_function
@@ -5091,21 +5111,6 @@ remove_extra_symbols (std::vector<struct block_symbol> &syms)
       else
 	i += 1;
     }
-
-  /* If all the remaining symbols are identical enumerals, then
-     just keep the first one and discard the rest.
-
-     Unlike what we did previously, we do not discard any entry
-     unless they are ALL identical.  This is because the symbol
-     comparison is not a strict comparison, but rather a practical
-     comparison.  If all symbols are considered identical, then
-     we can just go ahead and use the first one and discard the rest.
-     But if we cannot reduce the list to a single element, we have
-     to ask the user to disambiguate anyways.  And if we have to
-     present a multiple-choice menu, it's less confusing if the list
-     isn't missing some choices that were identical and yet distinct.  */
-  if (symbols_are_identical_enums (syms))
-    syms.resize (1);
 }
 
 /* Given a type that corresponds to a renaming entity, use the type name

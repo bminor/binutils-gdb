@@ -69,6 +69,8 @@ foreach_with_prefix scenario {all minimal} {
 
     gdb_test "print enum_with_gaps'enum_rep(lit3)" " = 13" \
 	"enum_rep"
+    gdb_test "print enum_subrange'enum_rep(lit3)" " = 13" \
+	"other enum_rep"
     gdb_test "print enum_with_gaps'enum_val(21)" " = lit4" \
 	"enum_val"
 }
