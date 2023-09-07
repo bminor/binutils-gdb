@@ -293,6 +293,11 @@ show tui mouse-events
      might be array- or string-like, even if they do not have the
      corresponding type code.
 
+  ** gdb.ValuePrinter is a new class that can be used as the base
+     class for the result of applying a pretty-printer.  As a base
+     class, it signals to gdb that the printer may implement new
+     pretty-printer methods.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.

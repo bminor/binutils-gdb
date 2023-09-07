@@ -1722,6 +1722,22 @@ A pretty-printer is just an object that holds a value and implements a
 specific interface, defined here.  An example output is provided
 (@pxref{Pretty Printing}).
 
+Because @value{GDBN} did not document extensibility for
+pretty-printers, by default @value{GDBN} will assume that only the
+basic pretty-printer methods may be available.  The basic methods are
+marked as such, below.
+
+To allow extensibility, @value{GDBN} provides the
+@code{gdb.ValuePrinter} base class.  This class does not provide any
+attributes or behavior, but instead serves as a tag that can be
+recognized by @value{GDBN}.  For such printers, @value{GDBN} reserves
+all attributes starting with a lower-case letter.  That is, in the
+future, @value{GDBN} may add a new method or attribute to the
+pretty-printer protocol, and @code{gdb.ValuePrinter}-based printers
+are expected to handle this gracefully.  A simple way to do this would
+be to use a leading underscore (or two, following the Python
+name-mangling scheme) to any attributes local to the implementation.
+
 @defun pretty_printer.children (self)
 @value{GDBN} will call this method on a pretty-printer to compute the
 children of the pretty-printer's value.
@@ -1732,8 +1748,8 @@ two elements.  The first element is the ``name'' of the child; the
 second element is the child's value.  The value can be any Python
 object which is convertible to a @value{GDBN} value.
 
-This method is optional.  If it does not exist, @value{GDBN} will act
-as though the value has no children.
+This is a basic method, and is optional.  If it does not exist,
+@value{GDBN} will act as though the value has no children.
 
 For efficiency, the @code{children} method should lazily compute its
 results.  This will let @value{GDBN} read as few elements as
@@ -1751,8 +1767,8 @@ formatting of a value.  The result will also be supplied to an MI
 consumer as a @samp{displayhint} attribute of the variable being
 printed.
 
-This method is optional.  If it does exist, this method must return a
-string or the special value @code{None}.
+This is a basic method, and is optional.  If it does exist, this
+method must return a string or the special value @code{None}.
 
 Some display hints are predefined by @value{GDBN}:
 
@@ -1783,6 +1799,8 @@ display rules.
 @defun pretty_printer.to_string (self)
 @value{GDBN} will call this method to display the string
 representation of the value passed to the object's constructor.
+
+This is a basic method, and is optional.
 
 When printing from the CLI, if the @code{to_string} method exists,
 then @value{GDBN} will prepend its result to the values returned by
@@ -1904,17 +1922,19 @@ if the type is supported, and the printer itself.
 
 Here is an example showing how a @code{std::string} printer might be
 written.  @xref{Pretty Printing API}, for details on the API this class
-must provide.
+must provide.  Note that this example uses the @code{gdb.ValuePrinter}
+base class, and is careful to use a leading underscore for its local
+state.
 
 @smallexample
-class StdStringPrinter(object):
+class StdStringPrinter(gdb.ValuePrinter):
     "Print a std::string"
 
     def __init__(self, val):
-        self.val = val
+        self.__val = val
 
     def to_string(self):
-        return self.val['_M_dataplus']['_M_p']
+        return self.__val['_M_dataplus']['_M_p']
 
     def display_hint(self):
         return 'string'
@@ -2005,25 +2025,25 @@ struct bar @{ struct foo x, y; @};
 Here are the printers:
 
 @smallexample
-class fooPrinter:
+class fooPrinter(gdb.ValuePrinter):
     """Print a foo object."""
 
     def __init__(self, val):
-        self.val = val
+        self.__val = val
 
     def to_string(self):
-        return ("a=<" + str(self.val["a"]) +
-                "> b=<" + str(self.val["b"]) + ">")
+        return ("a=<" + str(self.__val["a"]) +
+                "> b=<" + str(self.__val["b"]) + ">")
 
-class barPrinter:
+class barPrinter(gdb.ValuePrinter):
     """Print a bar object."""
 
     def __init__(self, val):
-        self.val = val
+        self.__val = val
 
     def to_string(self):
-        return ("x=<" + str(self.val["x"]) +
-                "> y=<" + str(self.val["y"]) + ">")
+        return ("x=<" + str(self.__val["x"]) +
+                "> y=<" + str(self.__val["y"]) + ">")
 @end smallexample
 
 This example doesn't need a lookup function, that is handled by the
