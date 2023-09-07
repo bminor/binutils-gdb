@@ -303,6 +303,13 @@ show tui mouse-events
      Progspace.filename is not None), otherwise, this attribute is
      itself None.
 
+  ** New attribute Progspace.executable_filename.  This attribute
+     holds a string containing a file name set by the "exec-file" or
+     "file" commands, or None if no executable file is set.  This
+     isn't the exact string passed by the user to these commands; the
+     file name will have been partially resolved to an absolute file
+     name.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.

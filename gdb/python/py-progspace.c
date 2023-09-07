@@ -131,6 +131,25 @@ pspy_get_symbol_file (PyObject *self, void *closure)
   Py_RETURN_NONE;
 }
 
+/* Implement the gdb.Progspace.executable_filename attribute.  Retun a
+   string containing the name of the current executable, or None if no
+   executable is currently set.  If the Progspace is invalid then raise an
+   exception.  */
+
+static PyObject *
+pspy_get_exec_file (PyObject *self, void *closure)
+{
+  pspace_object *obj = (pspace_object *) self;
+
+  PSPY_REQUIRE_VALID (obj);
+
+  const char *filename = obj->pspace->exec_filename.get ();
+  if (filename != nullptr)
+    return host_string_to_python_string (filename).release ();
+
+  Py_RETURN_NONE;
+}
+
 static void
 pspy_dealloc (PyObject *self)
 {
@@ -596,6 +615,8 @@ static gdb_PyGetSetDef pspace_getset[] =
   { "symbol_file", pspy_get_symbol_file, nullptr,
     "The gdb.Objfile for the progspace's main symbol file, or None.",
     nullptr},
+  { "executable_filename", pspy_get_exec_file, nullptr,
+    "The filename for the progspace's executable, or None.", nullptr},
   { "pretty_printers", pspy_get_printers, pspy_set_printers,
     "Pretty printers.", NULL },
   { "frame_filters", pspy_get_frame_filters, pspy_set_frame_filters,

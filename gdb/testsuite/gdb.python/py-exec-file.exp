@@ -1,0 +1,100 @@
+# Copyright (C) 2023 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+require allow_python_tests
+
+load_lib gdb-python.exp
+
+standard_testfile
+
+set binfile1 ${binfile}-a
+set binfile2 ${binfile}-b
+
+if {[build_executable "failed to prepare first executable" \
+	 $binfile1 $srcfile]} {
+    return -1
+}
+
+if {[build_executable "failed to prepare second executable" \
+	 $binfile2 $srcfile]} {
+    return -1
+}
+
+set binfile1 [gdb_remote_download host $binfile1]
+set binfile2 [gdb_remote_download host $binfile2]
+
+# Check that the executable_filename is set correctly after using the
+# 'file' command.
+with_test_prefix "using 'file' command" {
+    clean_restart
+
+    gdb_test "python print(gdb.current_progspace().executable_filename)" \
+	"None" \
+	"check executable_filename when no file is loaded"
+
+    gdb_test "file $binfile1" \
+	"Reading symbols from [string_to_regexp $binfile1]\\.\\.\\..*" \
+	"load first executable"
+    gdb_test "python print(gdb.current_progspace().executable_filename)" \
+	"[string_to_regexp $binfile1]" \
+	"check executable_filename when first executable is loaded"
+
+    gdb_test "file $binfile2" \
+	"Reading symbols from [string_to_regexp $binfile2]\\.\\.\\..*" \
+	"load second executable" \
+	"Load new symbol table from .*\? .y or n. " "y"
+    gdb_test "python print(gdb.current_progspace().executable_filename)" \
+	"[string_to_regexp $binfile2]" \
+	"check executable_filename when second executable is loaded"
+
+    gdb_unload
+    gdb_test "python print(gdb.current_progspace().executable_filename)" \
+	"None" \
+	"check executable_filename after unloading file"
+}
+
+# Check that the executable_filename is correctly set when we only set
+# the exec-file.
+with_test_prefix "using 'exec-file' command" {
+    clean_restart
+    gdb_test_no_output "exec-file $binfile1" \
+	"load first executable"
+    gdb_test "python print(gdb.current_progspace().executable_filename)" \
+	"[string_to_regexp $binfile1]" \
+	"check executable_filename when first executable is loaded"
+
+    gdb_test_no_output "exec-file $binfile2" \
+	"load second executable"
+    gdb_test "python print(gdb.current_progspace().executable_filename)" \
+	"[string_to_regexp $binfile2]" \
+	"check executable_filename when second executable is loaded"
+
+    gdb_test "exec-file" "No executable file now\\."
+    gdb_test "python print(gdb.current_progspace().executable_filename)" \
+	"None" \
+	"check executable_filename after unloading file"
+}
+
+# Check that setting the symbol-file doesn't cause the
+# executable_filename to be set.
+with_test_prefix "using 'symbol-file' command" {
+    clean_restart
+    gdb_test "symbol-file $binfile1" \
+	"Reading symbols from [string_to_regexp $binfile1]\\.\\.\\..*" \
+	"load first executable"
+    gdb_test "python print(gdb.current_progspace().executable_filename)" \
+	"None" \
+	"check executable_filename after setting symbol-file"
+}

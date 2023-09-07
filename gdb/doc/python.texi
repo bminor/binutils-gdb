@@ -5095,6 +5095,21 @@ If the @code{Progspace} is invalid, i.e.@:, when
 access this attribute will raise a @code{RuntimeError} exception.
 @end defvar
 
+@defvar Progspace.executable_filename
+The file name, as a string, of the executable file in use by this
+program space.  The executable file is the file that @value{GDBN} will
+invoke in order to start an inferior when using a native target.  The
+file name within this attribute is updated by the @kbd{exec-file} and
+@kbd{file} commands.
+
+If no executable is currently set within this @code{Progspace} then
+this attribute contains @code{None}.
+
+If the @code{Progspace} is invalid, i.e.@:, when
+@code{Progspace.is_valid()} returns @code{False}, then attempting to
+access this attribute will raise a @code{RuntimeError} exception.
+@end defvar
+
 @defvar Progspace.pretty_printers
 The @code{pretty_printers} attribute is a list of functions.  It is
 used to look up pretty-printers.  A @code{Value} is passed to each
