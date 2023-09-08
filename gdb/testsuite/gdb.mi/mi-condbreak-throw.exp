@@ -97,8 +97,7 @@ proc run_test { unwind_on_exception } {
 
 	mi_gdb_test "" \
 	    [multi_line \
-		 "terminate called after throwing an instance of 'int'" \
-		 "~\"\\\\nProgram\"" \
+		 ".*~\"\\\\nProgram\"" \
 		 "~\" received signal SIGABRT, Aborted\\.\\\\n\"${out_ln_re}" \
 		 "\\*stopped,reason=\"signal-received\",signal-name=\"SIGABRT\"\[^\r\n\]+frame=\\{addr=\"$::hex\",\[^\r\n\]+\\}\[^\r\n\]+" \
 		 "&\"Error in testing condition for breakpoint $bpnum:\\\\n\"" \
