@@ -100,6 +100,8 @@ static struct block_symbol
 			    enum block_enum block_index,
 			    const char *name, const domain_enum domain);
 
+static void set_main_name (const char *name, enum language lang);
+
 /* Type of the data stored on the program space.  */
 
 struct main_info
@@ -1694,6 +1696,11 @@ symtab_new_objfile_observer (struct objfile *objfile)
 {
   /* Ideally we'd use OBJFILE->pspace, but OBJFILE may be NULL.  */
   symbol_cache_flush (current_program_space);
+
+  /* When all objfiles have been removed (OBJFILE is nullptr), then forget
+     everything we know about the main function.  */
+  if (objfile == nullptr)
+    set_main_name (nullptr, language_unknown);
 }
 
 /* This module's 'free_objfile' observer.  */
@@ -6329,15 +6336,6 @@ main_language (void)
   return info->language_of_main;
 }
 
-/* Handle ``executable_changed'' events for the symtab module.  */
-
-static void
-symtab_observer_executable_changed (void)
-{
-  /* NAME_OF_MAIN may no longer be the same, so reset it for now.  */
-  set_main_name (NULL, language_unknown);
-}
-
 /* Return 1 if the supplied producer string matches the ARM RealView
    compiler (armcc).  */
 
@@ -7020,8 +7018,6 @@ the use of prologue scanners."),
 		     class_maintenance, 0, &maintenancelist);
   deprecate_cmd (c, "maintenancelist flush symbol-cache");
 
-  gdb::observers::executable_changed.attach (symtab_observer_executable_changed,
-					     "symtab");
   gdb::observers::new_objfile.attach (symtab_new_objfile_observer, "symtab");
   gdb::observers::free_objfile.attach (symtab_free_objfile_observer, "symtab");
 }
