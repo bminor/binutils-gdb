@@ -34,4 +34,5 @@ def str_lookup_function(val):
     if val.type.code == gdb.TYPE_CODE_PTR and val.type.target().tag == "test":
         return TestPrinter(val.dereference())
 
+
 gdb.printing.register_pretty_printer(None, str_lookup_function)
