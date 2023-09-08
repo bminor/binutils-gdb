@@ -160,6 +160,13 @@ foreach testname {ok mismatch fallback} {
 
 	gdb_load ${binfile}-${testname}
 
+	if { $testname == "mismatch" && [readnow] } {
+	    # Main is found in the minimal symbols.  When using readnow, a
+	    # failure to read the dwarf also causes the minimal symbols to be
+	    # unavailable.
+	    # Setup a kfail for "FAIL: gdb_breakpoint: set breakpoint at main".
+	    setup_kfail "symtab/26797" *-*-*
+	}
 	if {[runto_main]} {
 	    if {$testname == "mismatch"} {
 		gdb_test "print the_int" \
