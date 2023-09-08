@@ -46,9 +46,12 @@ proc write_just_debugaltlink {filename dwzname buildid} {
 
 	# Only the DWARF reader checks .gnu_debugaltlink, so make sure
 	# there is a bit of DWARF in here.
-	cu {} {
+	cu { label cu_start } {
 	    compile_unit {{language @DW_LANG_C}} {
 	    }
+	}
+	aranges {} cu_start {
+	    arange {} 0 0
 	}
     }
 }
@@ -65,7 +68,7 @@ proc write_dwarf_file {filename buildid {value 99}} {
 
 	build_id $buildid
 
-	cu {} {
+	cu { label cu_start } {
 	    compile_unit {{language @DW_LANG_C}} {
 		int_label2: base_type {
 		    {name int}
@@ -79,6 +82,10 @@ proc write_dwarf_file {filename buildid {value 99}} {
 		    {const_value $value data1}
 		}
 	    }
+	}
+
+	aranges {} cu_start {
+	    arange {} 0 0
 	}
     }
 }
