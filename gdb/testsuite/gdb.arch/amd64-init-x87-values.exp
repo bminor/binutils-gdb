@@ -99,7 +99,7 @@ proc_with_prefix check_x87_regs_around_init {} {
 				     "fstat" "0x3800" \
 				     "ftag" "0x3fff" \
 				     "fiseg" "0x0" \
-				     "fioff" $addr \
+				     "fioff" "($addr|0x0)" \
 				     "foseg" "0x0" \
 				     "fooff" "0x0" \
 				     "fop" "0x0" \
