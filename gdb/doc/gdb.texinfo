@@ -26096,7 +26096,7 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 
 @menu
 * AArch64::
-* i386::
+* x86::
 * Alpha::
 * MIPS::
 * HPPA::               HP PA architecture
@@ -26206,8 +26206,8 @@ information automatically from the core file, and will show one of the above
 messages depending on whether the synchronous or asynchronous mode is selected.
 @xref{Memory Tagging}. @xref{Memory}.
 
-@node i386
-@subsection x86 Architecture-specific Issues
+@node x86
+@subsection x86
 
 @table @code
 @item set struct-convention @var{mode}
