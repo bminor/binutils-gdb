@@ -1828,6 +1828,22 @@ are peformed in this method and nothing is printed.
 If the result is not one of these types, an exception is raised.
 @end defun
 
+@defun pretty_printer.num_children ()
+This is not a basic method, so @value{GDBN} will only ever call it for
+objects derived from @code{gdb.ValuePrinter}.
+
+If available, this method should return the number of children.
+@code{None} may be returned if the number can't readily be computed.
+@end defun
+
+@defun pretty_printer.child (n)
+This is not a basic method, so @value{GDBN} will only ever call it for
+objects derived from @code{gdb.ValuePrinter}.
+
+If available, this method should return the child value indicated by
+@var{n}.  Indices start at zero.
+@end defun
+
 @value{GDBN} provides a function which can be used to look up the
 default pretty-printer for a @code{gdb.Value}:
 

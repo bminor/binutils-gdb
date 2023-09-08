@@ -285,10 +285,15 @@ class NoOpPointerReferencePrinter(gdb.ValuePrinter):
 
     def __init__(self, value):
         self.__value = value
-        self.num_children = 1
 
     def to_string(self):
         return self.__value.format_string(deref_refs=False)
+
+    def num_children(self):
+        return 1
+
+    def child(self, i):
+        return "value", self.__value.referenced_value()
 
     def children(self):
         yield "value", self.__value.referenced_value()
@@ -313,9 +318,6 @@ class NoOpArrayPrinter(gdb.ValuePrinter):
             e_values = itertools.takewhile(lambda x: x.enumval <= high, e_values)
             low = 0
             high = len(list(e_values)) - 1
-        # This is a convenience to the DAP code and perhaps other
-        # users.
-        self.num_children = high - low + 1
         self.__low = low
         self.__high = high
 
@@ -324,6 +326,12 @@ class NoOpArrayPrinter(gdb.ValuePrinter):
 
     def display_hint(self):
         return "array"
+
+    def num_children(self):
+        return self.__high - self.__low + 1
+
+    def child(self, i):
+        return (self.__low + i, self.__value[self.__low + i])
 
     def children(self):
         for i in range(self.__low, self.__high + 1):
