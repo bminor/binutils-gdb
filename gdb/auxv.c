@@ -344,12 +344,14 @@ invalidate_auxv_cache_inf (struct inferior *inf)
   auxv_inferior_data.clear (inf);
 }
 
-/* Invalidate current inferior's auxv cache.  */
+/* Invalidate current inferior's auxv cache when all symbol table data is
+   cleared (indicated by OBJFILE being nullptr).  */
 
 static void
-invalidate_auxv_cache (void)
+auxv_new_objfile_observer (struct objfile *objfile)
 {
-  invalidate_auxv_cache_inf (current_inferior ());
+  if (objfile == nullptr)
+    invalidate_auxv_cache_inf (current_inferior ());
 }
 
 /* See auxv.h.  */
@@ -613,5 +615,5 @@ This is information provided by the operating system at program startup."));
   /* Observers used to invalidate the auxv cache when needed.  */
   gdb::observers::inferior_exit.attach (invalidate_auxv_cache_inf, "auxv");
   gdb::observers::inferior_appeared.attach (invalidate_auxv_cache_inf, "auxv");
-  gdb::observers::executable_changed.attach (invalidate_auxv_cache, "auxv");
+  gdb::observers::new_objfile.attach (auxv_new_objfile_observer, "auxv");
 }
