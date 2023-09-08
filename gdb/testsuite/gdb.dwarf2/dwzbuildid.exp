@@ -134,46 +134,46 @@ for {set i 2} {$i <= 8} {incr i} {
 # Copy a file into the .build-id place for the "fallback" test.
 file copy -force -- ${binfile}8.o $basedir/$ok_prefix/$ok_suffix2.debug
 
-# Link the executables.
-if {[gdb_compile [list ${binfile}1.o ${binfile}2.o] ${binfile}-ok \
-	 executable {}] != ""} {
-    return -1
-}
+proc do_test {} {
+    clean_restart
 
-if {[gdb_compile [list ${binfile}1.o ${binfile}4.o] ${binfile}-mismatch \
-	 executable {quiet}] != ""} {
-    return -1
-}
+    gdb_test_no_output "set debug-file-directory $::debugdir" \
+	"set debug-file-directory"
 
-if {[gdb_compile [list ${binfile}1.o ${binfile}6.o] ${binfile}-fallback \
-	 executable {}] != ""} {
-    return -1
-}
+    gdb_load ${::binfile}-${::testname}
 
-
-foreach testname {ok mismatch fallback} {
-    with_test_prefix $testname {
-	clean_restart
-
-	gdb_test_no_output "set debug-file-directory $debugdir" \
-	    "set debug-file-directory"
-
-	gdb_load ${binfile}-${testname}
-
-	if { $testname == "mismatch" && [readnow] } {
-	    # Main is found in the minimal symbols.  When using readnow, a
-	    # failure to read the dwarf also causes the minimal symbols to be
-	    # unavailable.
-	    # Setup a kfail for "FAIL: gdb_breakpoint: set breakpoint at main".
-	    setup_kfail "symtab/26797" *-*-*
-	}
-	if {[runto_main]} {
-	    if {$testname == "mismatch"} {
-		gdb_test "print the_int" \
-		    "(No symbol table is loaded|No symbol \"the_int\" in current context).*"
-	    } else {
-		gdb_test "print the_int" " = 99"
-	    }
-	}
+    if { $::testname == "mismatch" && [readnow] } {
+	# Main is found in the minimal symbols.  When using readnow, a
+	# failure to read the dwarf also causes the minimal symbols to be
+	# unavailable.
+	# Setup a kfail for "FAIL: gdb_breakpoint: set breakpoint at main".
+	setup_kfail "symtab/26797" *-*-*
     }
+    if {![runto_main]} {
+	return
+    }
+
+    if {$::testname == "mismatch"} {
+	gdb_test "print the_int" \
+	    "(No symbol table is loaded|No symbol \"the_int\" in current context).*"
+    } else {
+	gdb_test "print the_int" " = 99"
+    }
+}
+
+foreach_with_prefix testname { ok mismatch fallback } {
+    if { $testname == "ok" } {
+	set objs [list ${binfile}1.o ${binfile}2.o]
+    } elseif { $testname == "mismatch" } {
+	set objs [list ${binfile}1.o ${binfile}4.o]
+    } elseif { $testname == "fallback" } {
+	set objs [list ${binfile}1.o ${binfile}6.o]
+    }
+
+    if {[gdb_compile $objs ${binfile}-$testname executable {quiet}] != ""} {
+	unsupported "compilation failed"
+	continue
+    }
+
+    do_test
 }
