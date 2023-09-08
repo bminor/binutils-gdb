@@ -242,13 +242,6 @@ set_default_error (void)
 }
 
 static inline void
-set_expected_error (unsigned int flags)
-{
-  set_error (AARCH64_OPDE_SYNTAX_ERROR, NULL);
-  inst.parsing_error.data[0].i = flags;
-}
-
-static inline void
 set_syntax_error (const char *error)
 {
   set_error (AARCH64_OPDE_SYNTAX_ERROR, error);
