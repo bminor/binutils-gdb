@@ -31,6 +31,7 @@ struct inferior;
 struct process_stratum_target;
 struct target_ops;
 struct trace_state_variable;
+struct program_space;
 
 namespace gdb
 {
@@ -60,11 +61,18 @@ extern observable<enum gdb_signal /* siggnal */> signal_received;
 /* The target's register contents have changed.  */
 extern observable<struct target_ops */* target */> target_changed;
 
-/* The executable being debugged by GDB has changed: The user
-   decided to debug a different program, or the program he was
-   debugging has been modified since being loaded by the debugger
-   (by being recompiled, for instance).  */
-extern observable<> executable_changed;
+/* The executable being debugged by GDB in PSPACE has changed: The user
+   decided to debug a different program, or the program he was debugging
+   has been modified since being loaded by the debugger (by being
+   recompiled, for instance).  The path to the new executable can be found
+   by examining PSPACE->exec_filename.
+
+   When RELOAD is true the path to the executable hasn't changed, but the
+   file does appear to have changed, so GDB reloaded it, e.g. if the user
+   recompiled the executable.  when RELOAD is false then the path to the
+   executable has not changed.  */
+extern observable<struct program_space */* pspace */,
+		  bool /*reload */> executable_changed;
 
 /* gdb has just connected to an inferior.  For 'run', gdb calls this
    observer while the inferior is still stopped at the entry-point

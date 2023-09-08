@@ -501,7 +501,16 @@ exec_file_attach (const char *filename, int from_tty)
     }
 
   bfd_cache_close_all ();
-  gdb::observers::executable_changed.notify ();
+
+  /* Are are loading the same executable?  */
+  bfd *prev_bfd = exec_bfd_holder.get ();
+  bfd *curr_bfd = current_program_space->exec_bfd ();
+  bool reload_p = (((prev_bfd != nullptr) == (curr_bfd != nullptr))
+		   && (prev_bfd == nullptr
+		       || (strcmp (bfd_get_filename (prev_bfd),
+				   bfd_get_filename (curr_bfd)) == 0)));
+
+  gdb::observers::executable_changed.notify (current_program_space, reload_p);
 }
 
 /*  Process the first arg in ARGS as the new exec file.
