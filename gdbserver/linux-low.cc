@@ -1154,7 +1154,7 @@ attach_proc_task_lwp_callback (ptid_t ptid)
 	  std::string reason
 	    = linux_ptrace_attach_fail_reason_string (ptid, err);
 
-	  warning (_("Cannot attach to lwp %d: %s"), lwpid, reason.c_str ());
+	  error (_("Cannot attach to lwp %d: %s"), lwpid, reason.c_str ());
 	}
 
       return 1;
@@ -1207,7 +1207,18 @@ linux_process_target::attach (unsigned long pid)
      threads/LWPs, and those structures may well be corrupted.  Note
      that once thread_db is loaded, we'll still use it to list threads
      and associate pthread info with each LWP.  */
-  linux_proc_attach_tgid_threads (pid, attach_proc_task_lwp_callback);
+  try
+    {
+      linux_proc_attach_tgid_threads (pid, attach_proc_task_lwp_callback);
+    }
+  catch (const gdb_exception_error &)
+    {
+      /* Make sure we do not deliver the SIGSTOP to the process.  */
+      initial_thread->last_resume_kind = resume_continue;
+
+      this->detach (proc);
+      throw;
+    }
 
   /* GDB will shortly read the xml target description for this
      process, to figure out the process' architecture.  But the target
