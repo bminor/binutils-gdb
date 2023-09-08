@@ -1119,18 +1119,13 @@ symbol_file_add_with_addrs (const gdb_bfd_ref_ptr &abfd, const char *name,
      time.  */
   gdb_flush (gdb_stdout);
 
-  if (objfile->sf == NULL)
-    {
-      gdb::observers::new_objfile.notify (objfile);
-      return objfile;	/* No symbols.  */
-    }
-
-  finish_new_objfile (objfile, add_flags);
+  if (objfile->sf != nullptr)
+    finish_new_objfile (objfile, add_flags);
 
   gdb::observers::new_objfile.notify (objfile);
 
   bfd_cache_close_all ();
-  return (objfile);
+  return objfile;
 }
 
 /* Add BFD as a separate debug file for OBJFILE.  For NAME description
