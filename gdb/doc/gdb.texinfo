@@ -26310,6 +26310,25 @@ At this last step the value of bnd0 can be changed for investigation of bound
 violations caused along the execution of the call.  In order to know how to
 set the bound registers or bound table for the call consult the ABI.
 
+@subsubsection x87 registers
+
+@value{GDBN} provides access to the x87 state through the following registers:
+
+@itemize
+
+@item @code{$st0} to @code{st7}: @code{ST(0)} to @code{ST(7)} floating-point
+registers
+@item @code{$fctrl}: control word register (@code{FCW})
+@item @code{$fstat}: status word register (@code{FSW})
+@item @code{$ftag}: tag word (@code{FTW})
+@item @code{$fiseg}: last instruction pointer segment
+@item @code{$fioff}: last instruction pointer
+@item @code{$foseg}: last data pointer segment
+@item @code{$fooff}: last data pointer
+@item @code{$fop}: last opcode
+
+@end itemize
+
 @node Alpha
 @subsection Alpha
 
