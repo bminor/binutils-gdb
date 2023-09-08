@@ -90,11 +90,11 @@ if  { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile}1.o \
 
 # The values don't really matter, just whether they are equal.
 set ok_prefix 01
-set ok_suffix 0203040506
-set ok_suffix2 02030405ff
+set ok_suffix 02030405060708091011121314151617181920
+set ok_suffix2 020304050607080910111213141516171819ff
 set ok_buildid ${ok_prefix}${ok_suffix}
 set ok_buildid2 ${ok_prefix}${ok_suffix2}
-set bad_buildid ffffffffffff
+set bad_buildid [string repeat ff 20]
 
 set debugdir [standard_output_file {}]
 set basedir $debugdir/.build-id
