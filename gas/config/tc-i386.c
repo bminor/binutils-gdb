@@ -10806,6 +10806,29 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
   if (line > end && i.vec_encoding == vex_encoding_default)
     i.vec_encoding = evex ? vex_encoding_evex : vex_encoding_vex;
 
+  if (i.vec_encoding != vex_encoding_default)
+    {
+      /* Only address size and segment override prefixes are permitted with
+         VEX/XOP/EVEX encodings.  */
+      const unsigned char *p = i.prefix;
+
+      for (j = 0; j < ARRAY_SIZE (i.prefix); ++j, ++p)
+	{
+	  if (!*p)
+	    continue;
+
+	  switch (j)
+	    {
+	    case SEG_PREFIX:
+	    case ADDR_PREFIX:
+	      break;
+	    default:
+		  as_bad (_("illegal prefix used with VEX/XOP/EVEX"));
+		  goto bad;
+	    }
+	}
+    }
+
   if (line > end && *line == '.')
     {
       /* Length specifier (VEX.L, XOP.L, EVEX.L'L).  */
