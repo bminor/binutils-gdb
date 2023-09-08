@@ -414,21 +414,25 @@ promote_token (struct token_s tok)
 	  input_line_pointer = tok.insn + tok.begin;
 	  expression (&exp);
 	  input_line_pointer = ilp_save;
-	  int64_t new_class_id = tok.class_id;
-	  int64_t old_class_id = tok.class_id;
-	  while (((new_class_id = env.promote_immediate (old_class_id))
-		  != old_class_id)
-		 && ((exp.X_op == O_symbol
-		      && !(has_relocation_of_size
-			   (str_hash_find (env.reloc_hash,
-					   TOKEN_NAME (new_class_id)))))
-		     || (exp.X_op == O_pseudo_fixup
-			 && !(kvx_get_pseudo_func2
-			      (exp.X_op_symbol,
-			       str_hash_find (env.reloc_hash,
-					      TOKEN_NAME (new_class_id)))))))
-	    old_class_id = new_class_id;
-	  return new_class_id;
+	  uint64_t val = tok.val;
+	  uint64_t pval = ((int64_t) val) < 0 ? -val : val;
+	  int neg_power2_p = ((int64_t) val) < 0 && !(pval & (pval - 1));
+	  struct token_class *class = env.token_classes->imm_classes;
+	  unsigned len = pval ? 8 * sizeof (pval) - __builtin_clzll (pval) : 0;
+
+	  /* Find the imm class */
+	  int imm_idx = 0;
+	  for (imm_idx = 0 ; class[imm_idx].class_id ; ++imm_idx)
+	    if (class[imm_idx].class_id == tok.class_id)
+	      break;
+
+	  while (class[imm_idx + 1].class_id != -1
+	      && ((unsigned int) (class[imm_idx + 1].sz < 0 ? - class[imm_idx + 1].sz - !neg_power2_p : class[imm_idx + 1].sz) < len
+		 || (exp.X_op == O_symbol && !has_relocation_of_size (str_hash_find (env.reloc_hash, TOKEN_NAME (class[imm_idx + 1].class_id))))
+		 || (exp.X_op == 64 && !kvx_get_pseudo_func2 (exp.X_op_symbol, str_hash_find (env.reloc_hash, TOKEN_NAME (class[imm_idx + 1].class_id))))))
+	    imm_idx += 1;
+
+	  return class[imm_idx + 1].class_id == -1 ? class[imm_idx].class_id : class[imm_idx + 1].class_id;
 	}
       default:
 	return tok.class_id;
@@ -481,6 +485,7 @@ get_token_class (struct token_s *token, struct token_classes *classes, int insn_
       char *ilp_save = input_line_pointer;
       input_line_pointer = tok;
       expression (&exp);
+      token->end = token->begin + (input_line_pointer - tok);
       token->val = exp.X_add_number;
       token_val_p = 1;
       input_line_pointer = ilp_save;
@@ -585,6 +590,16 @@ read_token (struct token_s *tok)
   char *str = tok->insn;
   int *begin = &tok->begin;
   int *end = &tok->end;
+  int last_imm_p = 0;
+
+  /* Was the last previous token was an immediate?  */
+  for (int i = 1; *begin - i > 0; ++i)
+    {
+      if ('0' <= str[*begin - i] && str[*begin - i] <= '9')
+	last_imm_p = 1;
+      else if (str[*begin - i] != ' ' && str[*begin - i] != '\t')
+	break;
+    }
 
   /* Eat up all leading spaces.  */
   while (str[*begin] && (str[*begin] == ' ' || str[*begin] == '\n'))
@@ -608,7 +623,9 @@ read_token (struct token_s *tok)
 	return 1;
       }
 
-      if (str[*begin] == '.' && !(*begin > 0 && (str[*begin - 1] == ' ' || is_delim(str[*begin - 1]))))
+      if (str[*begin] == '.'
+	  && (!(*begin > 0 && (str[*begin - 1] == ' ' || is_delim(str[*begin - 1])))
+	    || last_imm_p))
 	modifier_p = 1;
 
       /* This is a modifier or a register */
@@ -669,11 +686,11 @@ print_token_list (struct token_list *lst)
   struct token_list *cur = lst;
   while (cur)
     {
-      printf_debug (1, "%s (%d : %s : %d) / ",
+      printf_debug (0, "%s (%llu : %s : %llu) / ",
 	      cur->tok, cur->val, TOKEN_NAME (cur->class_id), cur->loc);
       cur = cur->next;
     }
-  printf_debug (1, "\n");
+  printf_debug (0, "\n");
 }
 
 void
