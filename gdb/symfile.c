@@ -2684,10 +2684,6 @@ reread_symbols (int from_tty)
 	 clear_symtab_users above.  Notify the new files now.  */
       for (auto iter : new_objfiles)
 	gdb::observers::new_objfile.notify (iter);
-
-      /* At least one objfile has changed, so we can consider that
-	 the executable we're debugging has changed too.  */
-      gdb::observers::executable_changed.notify ();
     }
 }
 
