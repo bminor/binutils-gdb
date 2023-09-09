@@ -1083,7 +1083,7 @@ write_gdbindex_1 (FILE *out_file,
 {
   data_buf contents;
   const offset_type size_of_header = 6 * sizeof (offset_type);
-  offset_type total_len = size_of_header;
+  size_t total_len = size_of_header;
 
   /* The version number.  */
   contents.append_offset (8);
@@ -1109,6 +1109,13 @@ write_gdbindex_1 (FILE *out_file,
   total_len += constant_pool.size ();
 
   gdb_assert (contents.size () == size_of_header);
+
+  /* The maximum size of an index file is limited by the maximum value
+     capable of being represented by 'offset_type'.  Throw an error if
+     that length has been exceeded.  */
+  size_t max_size = ~(offset_type) 0;
+  if (total_len > max_size)
+    error (_("gdb-index maximum file size of %zu exceeded"), max_size);
 
   contents.file_write (out_file);
   cu_list.file_write (out_file);
