@@ -947,6 +947,37 @@ search_flags_matches (domain_search_flags flags, domain_enum domain)
   return (flags & to_search_flags (domain)) != 0;
 }
 
+/* Some helpers for Python and Guile to account for backward
+   compatibility.  Those exposed the domains for lookup as well as
+   checking attributes of a symbol, so special encoding and decoding
+   is needed to continue to support both uses.  Domain constants must
+   remain unchanged, so that comparing a symbol's domain against a
+   constant yields the correct result, so search symbols are
+   distinguished by adding a flag bit.  This way, either sort of
+   constant can be used for lookup.  */
+
+/* The flag bit.  */
+constexpr int SCRIPTING_SEARCH_FLAG = 0x8000;
+static_assert (SCRIPTING_SEARCH_FLAG > SEARCH_ALL);
+
+/* Convert a domain constant to a "scripting domain".  */
+static constexpr inline int
+to_scripting_domain (domain_enum val)
+{
+  return val;
+}
+
+/* Convert a search constant to a "scripting domain".  */
+static constexpr inline int
+to_scripting_domain (domain_search_flags val)
+{
+  return SCRIPTING_SEARCH_FLAG | (int) val;
+}
+
+/* Convert from a "scripting domain" constant back to search flags.
+   Throws an exception if VAL is not one of the allowable values.  */
+extern domain_search_flags from_scripting_domain (int val);
+
 /* An address-class says where to find the value of a symbol.  */
 
 enum address_class

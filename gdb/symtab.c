@@ -330,6 +330,48 @@ domain_name (domain_search_flags flags)
 
 /* See symtab.h.  */
 
+domain_search_flags
+from_scripting_domain (int val)
+{
+  if ((val & SCRIPTING_SEARCH_FLAG) == 0)
+    {
+      /* VAL should be one of the domain constants.  Verify this and
+	 convert it to a search constant.  */
+      switch (val)
+	{
+#define DOMAIN(X)					\
+	  case X ## _DOMAIN: break;
+#include "sym-domains.def"
+#undef DOMAIN
+	default:
+	  error (_("unrecognized domain constant"));
+	}
+      domain_search_flags result = to_search_flags ((domain_enum) val);
+      if (val == VAR_DOMAIN)
+	{
+	  /* This matches the historical practice.  */
+	  result |= SEARCH_TYPE_DOMAIN | SEARCH_FUNCTION_DOMAIN;
+	}
+      return result;
+    }
+  else
+    {
+      /* VAL is several search constants or'd together.  Verify
+	 this.  */
+      val &= ~SCRIPTING_SEARCH_FLAG;
+      int check = val;
+#define DOMAIN(X)				\
+      check &= ~ (int) SEARCH_ ## X ## _DOMAIN;
+#include "sym-domains.def"
+#undef DOMAIN
+      if (check != 0)
+	error (_("unrecognized domain constant"));
+      return (domain_search_flag) val;
+    }
+}
+
+/* See symtab.h.  */
+
 CORE_ADDR
 linetable_entry::pc (const struct objfile *objfile) const
 {
