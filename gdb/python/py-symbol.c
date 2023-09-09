@@ -686,20 +686,6 @@ gdbpy_initialize_symbols (void)
 #include "sym-domains.def"
 #undef DOMAIN
 
-  /* These remain defined for compatibility, but as they were never
-     correct, they are no longer documented.  Eventually we can remove
-     them.  These exist because at one time, enum search_domain and
-     enum domain_enum_tag were combined -- but different values were
-     used differently.  Here we try to give them values that will make
-     sense if they are passed to gdb.lookup_symbol.  */
-  if (PyModule_AddIntConstant (gdb_module, "SYMBOL_VARIABLES_DOMAIN",
-			       VAR_DOMAIN) < 0
-      || PyModule_AddIntConstant (gdb_module, "SYMBOL_FUNCTIONS_DOMAIN",
-				  VAR_DOMAIN) < 0
-      || PyModule_AddIntConstant (gdb_module, "SYMBOL_TYPES_DOMAIN",
-				  VAR_DOMAIN) < 0)
-    return -1;
-
   return gdb_pymodule_addobject (gdb_module, "Symbol",
 				 (PyObject *) &symbol_object_type);
 }
