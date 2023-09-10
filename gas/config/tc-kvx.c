@@ -1825,6 +1825,7 @@ md_apply_fix (fixS * fixP, valueT * valueP, segT segmentP ATTRIBUTE_UNUSED)
 		    fixP->fx_r_type);
 	}
     }
+  xfree (rel);
 }
 
 /*
