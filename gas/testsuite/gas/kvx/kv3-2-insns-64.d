@@ -17,27 +17,27 @@ Disassembly of section .text:
 
       20:	04 00 10 e1 00 00 80 07                         	abdd \$r4 = \$r4, -8589934592 \(0xfffffffe00000000\);;
 
-      28:	c5 0f 11 f1 ff ff ff 00                         	abdd.@ \$r4 = \$r5, 536870911 \(0x1fffffff\);;
+      28:	c5 0f 11 f1 ff ff ff 00                         	abdd \$r4 = \$r5, 536870911 \(0x1fffffff\).@;;
 
       30:	85 31 15 71                                     	abdhq \$r5 = \$r5, \$r6;;
 
-      34:	c6 3f 19 f1 ff ff ff 00                         	abdhq.@ \$r6 = \$r6, 536870911 \(0x1fffffff\);;
+      34:	c6 37 19 f1 ff ff ff 00                         	abdhq \$r6 = \$r6, 536870911 \(0x1fffffff\);;
 
       3c:	c7 a1 1e 73                                     	abdsbo \$r7 = \$r7, \$r7;;
 
-      40:	c8 a7 22 f3 ff ff ff 00                         	abdsbo \$r8 = \$r8, 536870911 \(0x1fffffff\);;
+      40:	c8 af 22 f3 ff ff ff 00                         	abdsbo \$r8 = \$r8, 536870911 \(0x1fffffff\).@;;
 
       48:	49 02 21 70                                     	abdsd \$r8 = \$r9, \$r9;;
 
-      4c:	ca 0f 25 f0 ff ff ff 00                         	abdsd.@ \$r9 = \$r10, 536870911 \(0x1fffffff\);;
+      4c:	ca 07 25 f0 ff ff ff 00                         	abdsd \$r9 = \$r10, 536870911 \(0x1fffffff\);;
 
       54:	ca 32 29 70                                     	abdshq \$r10 = \$r10, \$r11;;
 
-      58:	cb 37 2d f0 ff ff ff 00                         	abdshq \$r11 = \$r11, 536870911 \(0x1fffffff\);;
+      58:	cb 3f 2d f0 ff ff ff 00                         	abdshq \$r11 = \$r11, 536870911 \(0x1fffffff\).@;;
 
       60:	4c 23 31 70                                     	abdswp \$r12 = \$r12, \$r13;;
 
-      64:	ce 2f 35 f0 ff ff ff 00                         	abdswp.@ \$r13 = \$r14, 536870911 \(0x1fffffff\);;
+      64:	ce 27 35 f0 ff ff ff 00                         	abdswp \$r13 = \$r14, 536870911 \(0x1fffffff\);;
 
       6c:	cf 13 39 70                                     	abdsw \$r14 = \$r15, \$r15;;
 
@@ -45,19 +45,19 @@ Disassembly of section .text:
 
       78:	51 c4 42 7f                                     	abdubo \$r16 = \$r17, \$r17;;
 
-      7c:	d2 c7 46 ff ff ff ff 00                         	abdubo \$r17 = \$r18, 536870911 \(0x1fffffff\);;
+      7c:	d2 cf 46 ff ff ff ff 00                         	abdubo \$r17 = \$r18, 536870911 \(0x1fffffff\).@;;
 
       84:	d2 a4 49 7f                                     	abdud \$r18 = \$r18, \$r19;;
 
-      88:	d3 af 4d ff ff ff ff 00                         	abdud.@ \$r19 = \$r19, 536870911 \(0x1fffffff\);;
+      88:	d3 a7 4d ff ff ff ff 00                         	abdud \$r19 = \$r19, 536870911 \(0x1fffffff\);;
 
       90:	14 f5 51 7f                                     	abduhq \$r20 = \$r20, \$r20;;
 
-      94:	d5 f7 55 ff ff ff ff 00                         	abduhq \$r21 = \$r21, 536870911 \(0x1fffffff\);;
+      94:	d5 ff 55 ff ff ff ff 00                         	abduhq \$r21 = \$r21, 536870911 \(0x1fffffff\).@;;
 
       9c:	96 e5 55 7f                                     	abduwp \$r21 = \$r22, \$r22;;
 
-      a0:	d7 ef 59 ff ff ff ff 00                         	abduwp.@ \$r22 = \$r23, 536870911 \(0x1fffffff\);;
+      a0:	d7 e7 59 ff ff ff ff 00                         	abduwp \$r22 = \$r23, 536870911 \(0x1fffffff\);;
 
       a8:	17 b6 5d 7f                                     	abduw \$r23 = \$r23, \$r24;;
 
@@ -65,7 +65,7 @@ Disassembly of section .text:
 
       b4:	59 26 65 71                                     	abdwp \$r25 = \$r25, \$r25;;
 
-      b8:	da 27 69 f1 ff ff ff 00                         	abdwp \$r26 = \$r26, 536870911 \(0x1fffffff\);;
+      b8:	da 2f 69 f1 ff ff ff 00                         	abdwp \$r26 = \$r26, 536870911 \(0x1fffffff\).@;;
 
       c0:	db 16 69 71                                     	abdw \$r26 = \$r27, \$r27;;
 
@@ -113,7 +113,7 @@ Disassembly of section .text:
 
      160:	69 aa a2 70                                     	addbo \$r40 = \$r41, \$r41;;
 
-     164:	ea af a6 f0 ff ff ff 00                         	addbo.@ \$r41 = \$r42, 536870911 \(0x1fffffff\);;
+     164:	ea a7 a6 f0 ff ff ff 00                         	addbo \$r41 = \$r42, 536870911 \(0x1fffffff\);;
 
      16c:	ea 9a a9 7e                                     	addcd.i \$r42 = \$r42, \$r43;;
 
@@ -131,7 +131,7 @@ Disassembly of section .text:
 
      198:	30 00 c0 e2 00 00 80 07                         	addd \$r48 = \$r48, -8589934592 \(0xfffffffe00000000\);;
 
-     1a0:	f1 0f c1 f2 ff ff ff 00                         	addd.@ \$r48 = \$r49, 536870911 \(0x1fffffff\);;
+     1a0:	f1 0f c1 f2 ff ff ff 00                         	addd \$r48 = \$r49, 536870911 \(0x1fffffff\).@;;
 
      1a8:	b1 3c c5 72                                     	addhq \$r49 = \$r49, \$r50;;
 
@@ -145,7 +145,7 @@ Disassembly of section .text:
 
      1c0:	75 bd d6 7c                                     	addsbo \$r53 = \$r53, \$r53;;
 
-     1c4:	f6 bf da fc ff ff ff 00                         	addsbo.@ \$r54 = \$r54, 536870911 \(0x1fffffff\);;
+     1c4:	f6 bf da fc ff ff ff 00                         	addsbo \$r54 = \$r54, 536870911 \(0x1fffffff\).@;;
 
      1cc:	f7 4d d9 7c                                     	addsd \$r54 = \$r55, \$r55;;
 
@@ -153,7 +153,7 @@ Disassembly of section .text:
 
      1d8:	78 7e e1 7c                                     	addshq \$r56 = \$r56, \$r57;;
 
-     1dc:	f9 7f e5 fc ff ff ff 00                         	addshq.@ \$r57 = \$r57, 536870911 \(0x1fffffff\);;
+     1dc:	f9 7f e5 fc ff ff ff 00                         	addshq \$r57 = \$r57, 536870911 \(0x1fffffff\).@;;
 
      1e4:	ba 6e e9 7c                                     	addswp \$r58 = \$r58, \$r58;;
 
@@ -171,7 +171,7 @@ Disassembly of section .text:
 
      208:	3f b0 fe 7e                                     	addusbo \$r63 = \$r63, \$r0;;
 
-     20c:	c0 bf 02 fe ff ff ff 00                         	addusbo.@ \$r0 = \$r0, 536870911 \(0x1fffffff\);;
+     20c:	c0 bf 02 fe ff ff ff 00                         	addusbo \$r0 = \$r0, 536870911 \(0x1fffffff\).@;;
 
      214:	41 40 05 7e                                     	addusd \$r1 = \$r1, \$r1;;
 
@@ -179,7 +179,7 @@ Disassembly of section .text:
 
      220:	c3 70 09 7e                                     	addushq \$r2 = \$r3, \$r3;;
 
-     224:	c4 7f 0d fe ff ff ff 00                         	addushq.@ \$r3 = \$r4, 536870911 \(0x1fffffff\);;
+     224:	c4 7f 0d fe ff ff ff 00                         	addushq \$r3 = \$r4, 536870911 \(0x1fffffff\).@;;
 
      22c:	44 61 11 7e                                     	adduswp \$r4 = \$r4, \$r5;;
 
@@ -199,7 +199,7 @@ Disassembly of section .text:
 
      25c:	cb 22 2d 72                                     	addwp \$r11 = \$r11, \$r11;;
 
-     260:	cc 2f 31 f2 ff ff ff 00                         	addwp.@ \$r12 = \$r12, 536870911 \(0x1fffffff\);;
+     260:	cc 2f 31 f2 ff ff ff 00                         	addwp \$r12 = \$r12, 536870911 \(0x1fffffff\).@;;
 
      268:	8d 13 35 72                                     	addw \$r13 = \$r13, \$r14;;
 
@@ -213,7 +213,7 @@ Disassembly of section .text:
 
      284:	92 44 49 76                                     	addx16d \$r18 = \$r18, \$r18;;
 
-     288:	d3 4f 4d f6 ff ff ff 00                         	addx16d.@ \$r19 = \$r19, 536870911 \(0x1fffffff\);;
+     288:	d3 4f 4d f6 ff ff ff 00                         	addx16d \$r19 = \$r19, 536870911 \(0x1fffffff\).@;;
 
      290:	14 75 4d 76                                     	addx16hq \$r19 = \$r20, \$r20;;
 
@@ -229,7 +229,7 @@ Disassembly of section .text:
 
      2b4:	59 66 61 76                                     	addx16wp \$r24 = \$r25, \$r25;;
 
-     2b8:	da 6f 65 f6 ff ff ff 00                         	addx16wp.@ \$r25 = \$r26, 536870911 \(0x1fffffff\);;
+     2b8:	da 6f 65 f6 ff ff ff 00                         	addx16wp \$r25 = \$r26, 536870911 \(0x1fffffff\).@;;
 
      2c0:	da 56 69 76                                     	addx16w \$r26 = \$r26, \$r27;;
 
@@ -241,7 +241,7 @@ Disassembly of section .text:
 
      2d8:	9e 47 75 70                                     	addx2d \$r29 = \$r30, \$r30;;
 
-     2dc:	df 4f 79 f0 ff ff ff 00                         	addx2d.@ \$r30 = \$r31, 536870911 \(0x1fffffff\);;
+     2dc:	df 4f 79 f0 ff ff ff 00                         	addx2d \$r30 = \$r31, 536870911 \(0x1fffffff\).@;;
 
      2e4:	1f 78 7d 70                                     	addx2hq \$r31 = \$r31, \$r32;;
 
@@ -257,7 +257,7 @@ Disassembly of section .text:
 
      308:	64 69 91 70                                     	addx2wp \$r36 = \$r36, \$r37;;
 
-     30c:	e5 6f 95 f0 ff ff ff 00                         	addx2wp.@ \$r37 = \$r37, 536870911 \(0x1fffffff\);;
+     30c:	e5 6f 95 f0 ff ff ff 00                         	addx2wp \$r37 = \$r37, 536870911 \(0x1fffffff\).@;;
 
      314:	a6 59 99 70                                     	addx2w \$r38 = \$r38, \$r38;;
 
@@ -281,7 +281,7 @@ Disassembly of section .text:
 
      350:	ee bb ba 72                                     	addx4bo \$r46 = \$r46, \$r47;;
 
-     354:	ef bf be f2 ff ff ff 00                         	addx4bo.@ \$r47 = \$r47, 536870911 \(0x1fffffff\);;
+     354:	ef bf be f2 ff ff ff 00                         	addx4bo \$r47 = \$r47, 536870911 \(0x1fffffff\).@;;
 
      35c:	30 4c c1 72                                     	addx4d \$r48 = \$r48, \$r48;;
 
@@ -289,7 +289,7 @@ Disassembly of section .text:
 
      368:	b2 7c c5 72                                     	addx4hq \$r49 = \$r50, \$r50;;
 
-     36c:	f3 7f c9 f2 ff ff ff 00                         	addx4hq.@ \$r50 = \$r51, 536870911 \(0x1fffffff\);;
+     36c:	f3 7f c9 f2 ff ff ff 00                         	addx4hq \$r50 = \$r51, 536870911 \(0x1fffffff\).@;;
 
      374:	33 9d cd 72                                     	addx4uwd \$r51 = \$r51, \$r52;;
 
@@ -309,7 +309,7 @@ Disassembly of section .text:
 
      3a4:	ba 4e e9 7a                                     	addx64d \$r58 = \$r58, \$r58;;
 
-     3a8:	fb 4f ed fa ff ff ff 00                         	addx64d.@ \$r59 = \$r59, 536870911 \(0x1fffffff\);;
+     3a8:	fb 4f ed fa ff ff ff 00                         	addx64d \$r59 = \$r59, 536870911 \(0x1fffffff\).@;;
 
      3b0:	3c 9f ed 7a                                     	addx64uwd \$r59 = \$r60, \$r60;;
 
@@ -329,7 +329,7 @@ Disassembly of section .text:
 
      3e0:	c2 40 09 74                                     	addx8d \$r2 = \$r2, \$r3;;
 
-     3e4:	c3 4f 0d f4 ff ff ff 00                         	addx8d.@ \$r3 = \$r3, 536870911 \(0x1fffffff\);;
+     3e4:	c3 4f 0d f4 ff ff ff 00                         	addx8d \$r3 = \$r3, 536870911 \(0x1fffffff\).@;;
 
      3ec:	04 71 11 74                                     	addx8hq \$r4 = \$r4, \$r4;;
 
@@ -345,7 +345,7 @@ Disassembly of section .text:
 
      410:	49 62 25 74                                     	addx8wp \$r9 = \$r9, \$r9;;
 
-     414:	ca 6f 29 f4 ff ff ff 00                         	addx8wp.@ \$r10 = \$r10, 536870911 \(0x1fffffff\);;
+     414:	ca 6f 29 f4 ff ff ff 00                         	addx8wp \$r10 = \$r10, 536870911 \(0x1fffffff\).@;;
 
      41c:	cb 52 29 74                                     	addx8w \$r10 = \$r11, \$r11;;
 
@@ -395,7 +395,7 @@ Disassembly of section .text:
 
      4cc:	1c 00 70 e8 00 00 80 07                         	andd \$r28 = \$r28, -8589934592 \(0xfffffffe00000000\);;
 
-     4d4:	dd 0f 71 f8 ff ff ff 00                         	andd.@ \$r28 = \$r29, 536870911 \(0x1fffffff\);;
+     4d4:	dd ff 70 e8 ff ff 07 00                         	andd \$r28 = \$r29, 536870911 \(0x1fffffff\);;
 
      4dc:	dd ff 74 ee ff ff ff 87 ff ff ff 00             	andnd \$r29 = \$r29, 2305843009213693951 \(0x1fffffffffffffff\);;
 
@@ -405,7 +405,7 @@ Disassembly of section .text:
 
      4f0:	20 00 7c ee 00 00 80 07                         	andnd \$r31 = \$r32, -8589934592 \(0xfffffffe00000000\);;
 
-     4f8:	e0 0f 81 fe ff ff ff 00                         	andnd.@ \$r32 = \$r32, 536870911 \(0x1fffffff\);;
+     4f8:	e0 0f 81 fe ff ff ff 00                         	andnd \$r32 = \$r32, 536870911 \(0x1fffffff\).@;;
 
      500:	61 18 85 7e                                     	andnw \$r33 = \$r33, \$r33;;
 
@@ -443,7 +443,7 @@ Disassembly of section .text:
 
      568:	ad 9b b6 74                                     	avghq \$r45 = \$r45, \$r46;;
 
-     56c:	ee 9f ba f4 ff ff ff 00                         	avghq.@ \$r46 = \$r46, 536870911 \(0x1fffffff\);;
+     56c:	ee 9f ba f4 ff ff ff 00                         	avghq \$r46 = \$r46, 536870911 \(0x1fffffff\).@;;
 
      574:	ef fb be 75                                     	avgrbo \$r47 = \$r47, \$r47;;
 
@@ -451,7 +451,7 @@ Disassembly of section .text:
 
      580:	71 9c c2 75                                     	avgrhq \$r48 = \$r49, \$r49;;
 
-     584:	f2 9f c6 f5 ff ff ff 00                         	avgrhq.@ \$r49 = \$r50, 536870911 \(0x1fffffff\);;
+     584:	f2 9f c6 f5 ff ff ff 00                         	avgrhq \$r49 = \$r50, 536870911 \(0x1fffffff\).@;;
 
      58c:	f2 fc ca 77                                     	avgrubo \$r50 = \$r50, \$r51;;
 
@@ -459,7 +459,7 @@ Disassembly of section .text:
 
      598:	34 9d d2 77                                     	avgruhq \$r52 = \$r52, \$r52;;
 
-     59c:	f5 9f d6 f7 ff ff ff 00                         	avgruhq.@ \$r53 = \$r53, 536870911 \(0x1fffffff\);;
+     59c:	f5 9f d6 f7 ff ff ff 00                         	avgruhq \$r53 = \$r53, 536870911 \(0x1fffffff\).@;;
 
      5a4:	b6 8d d6 77                                     	avgruwp \$r53 = \$r54, \$r54;;
 
@@ -471,7 +471,7 @@ Disassembly of section .text:
 
      5bc:	79 8e e6 75                                     	avgrwp \$r57 = \$r57, \$r57;;
 
-     5c0:	fa 8f ea f5 ff ff ff 00                         	avgrwp.@ \$r58 = \$r58, 536870911 \(0x1fffffff\);;
+     5c0:	fa 8f ea f5 ff ff ff 00                         	avgrwp \$r58 = \$r58, 536870911 \(0x1fffffff\).@;;
 
      5c8:	fb 7e ea 75                                     	avgrw \$r58 = \$r59, \$r59;;
 
@@ -483,7 +483,7 @@ Disassembly of section .text:
 
      5e0:	be 9f fa 76                                     	avguhq \$r62 = \$r62, \$r62;;
 
-     5e4:	ff 9f fe f6 ff ff ff 00                         	avguhq.@ \$r63 = \$r63, 536870911 \(0x1fffffff\);;
+     5e4:	ff 9f fe f6 ff ff ff 00                         	avguhq \$r63 = \$r63, 536870911 \(0x1fffffff\).@;;
 
      5ec:	00 80 fe 76                                     	avguwp \$r63 = \$r0, \$r0;;
 
@@ -495,7 +495,7 @@ Disassembly of section .text:
 
      604:	c3 80 0e 74                                     	avgwp \$r3 = \$r3, \$r3;;
 
-     608:	c4 8f 12 f4 ff ff ff 00                         	avgwp.@ \$r4 = \$r4, 536870911 \(0x1fffffff\);;
+     608:	c4 8f 12 f4 ff ff ff 00                         	avgwp \$r4 = \$r4, 536870911 \(0x1fffffff\).@;;
 
      610:	45 71 12 74                                     	avgw \$r4 = \$r5, \$r5;;
 
@@ -573,7 +573,7 @@ Disassembly of section .text:
 
      6c8:	de f7 79 78                                     	compnhq.leu \$r30 = \$r30, \$r31;;
 
-     6cc:	df ff 7d f9 ff ff ff 00                         	compnhq.gtu.@ \$r31 = \$r31, 536870911 \(0x1fffffff\);;
+     6cc:	df ff 7d f9 ff ff ff 00                         	compnhq.gtu \$r31 = \$r31, 536870911 \(0x1fffffff\).@;;
 
      6d4:	20 e8 81 7a                                     	compnwp.all \$r32 = \$r32, \$r32;;
 
@@ -737,7 +737,7 @@ Disassembly of section .text:
 
      870:	0f 14 3f 7c                                     	fcompnhq.olt \$r15 = \$r15, \$r16;;
 
-     874:	d0 1f 43 fd ff ff ff 00                         	fcompnhq.uge.@ \$r16 = \$r16, 536870911 \(0x1fffffff\);;
+     874:	d0 1f 43 fd ff ff ff 00                         	fcompnhq.uge \$r16 = \$r16, 536870911 \(0x1fffffff\).@;;
 
      87c:	51 14 47 76                                     	fcompnwp.oge \$r17 = \$r17, \$r17;;
 
@@ -1243,7 +1243,7 @@ Disassembly of section .text:
 
      d9c:	78 ae e2 75                                     	maxbo \$r56 = \$r56, \$r57;;
 
-     da0:	f9 af e6 f5 ff ff ff 00                         	maxbo.@ \$r57 = \$r57, 536870911 \(0x1fffffff\);;
+     da0:	f9 af e6 f5 ff ff ff 00                         	maxbo \$r57 = \$r57, 536870911 \(0x1fffffff\).@;;
 
      da8:	fa ff e8 e5 ff ff ff 87 ff ff ff 00             	maxd \$r58 = \$r58, 2305843009213693951 \(0x1fffffffffffffff\);;
 
@@ -1253,11 +1253,11 @@ Disassembly of section .text:
 
      dbc:	3c 00 f0 e5 00 00 80 07                         	maxd \$r60 = \$r60, -8589934592 \(0xfffffffe00000000\);;
 
-     dc4:	fd 0f f5 f5 ff ff ff 00                         	maxd.@ \$r61 = \$r61, 536870911 \(0x1fffffff\);;
+     dc4:	fd ff f4 e5 ff ff 07 00                         	maxd \$r61 = \$r61, 536870911 \(0x1fffffff\);;
 
      dcc:	be 3f f5 75                                     	maxhq \$r61 = \$r62, \$r62;;
 
-     dd0:	ff 37 f9 f5 ff ff ff 00                         	maxhq \$r62 = \$r63, 536870911 \(0x1fffffff\);;
+     dd0:	ff 3f f9 f5 ff ff ff 00                         	maxhq \$r62 = \$r63, 536870911 \(0x1fffffff\).@;;
 
      dd8:	bf c0 ff 75                                     	maxrbod \$r63 = \$r63;;
 
@@ -1267,7 +1267,7 @@ Disassembly of section .text:
 
      de4:	81 a0 06 77                                     	maxubo \$r1 = \$r1, \$r2;;
 
-     de8:	c2 af 0a f7 ff ff ff 00                         	maxubo.@ \$r2 = \$r2, 536870911 \(0x1fffffff\);;
+     de8:	c2 a7 0a f7 ff ff ff 00                         	maxubo \$r2 = \$r2, 536870911 \(0x1fffffff\);;
 
      df0:	c3 ff 0c e7 ff ff ff 87 ff ff ff 00             	maxud \$r3 = \$r3, 2305843009213693951 \(0x1fffffffffffffff\);;
 
@@ -1277,7 +1277,7 @@ Disassembly of section .text:
 
      e04:	05 00 14 e7 00 00 80 07                         	maxud \$r5 = \$r5, -8589934592 \(0xfffffffe00000000\);;
 
-     e0c:	c6 0f 19 f7 ff ff ff 00                         	maxud.@ \$r6 = \$r6, 536870911 \(0x1fffffff\);;
+     e0c:	c6 0f 19 f7 ff ff ff 00                         	maxud \$r6 = \$r6, 536870911 \(0x1fffffff\).@;;
 
      e14:	c7 31 19 77                                     	maxuhq \$r6 = \$r7, \$r7;;
 
@@ -1291,7 +1291,7 @@ Disassembly of section .text:
 
      e2c:	ca 22 29 77                                     	maxuwp \$r10 = \$r10, \$r11;;
 
-     e30:	cb 2f 2d f7 ff ff ff 00                         	maxuwp.@ \$r11 = \$r11, 536870911 \(0x1fffffff\);;
+     e30:	cb 2f 2d f7 ff ff ff 00                         	maxuwp \$r11 = \$r11, 536870911 \(0x1fffffff\).@;;
 
      e38:	4c 13 31 77                                     	maxuw \$r12 = \$r12, \$r13;;
 
@@ -1311,7 +1311,7 @@ Disassembly of section .text:
 
      e64:	14 a5 4e 74                                     	minbo \$r19 = \$r20, \$r20;;
 
-     e68:	d5 af 52 f4 ff ff ff 00                         	minbo.@ \$r20 = \$r21, 536870911 \(0x1fffffff\);;
+     e68:	d5 af 52 f4 ff ff ff 00                         	minbo \$r20 = \$r21, 536870911 \(0x1fffffff\).@;;
 
      e70:	d5 ff 54 e4 ff ff ff 87 ff ff ff 00             	mind \$r21 = \$r21, 2305843009213693951 \(0x1fffffffffffffff\);;
 
@@ -1321,11 +1321,11 @@ Disassembly of section .text:
 
      e84:	18 00 5c e4 00 00 80 07                         	mind \$r23 = \$r24, -8589934592 \(0xfffffffe00000000\);;
 
-     e8c:	d8 0f 61 f4 ff ff ff 00                         	mind.@ \$r24 = \$r24, 536870911 \(0x1fffffff\);;
+     e8c:	d8 ff 60 e4 ff ff 07 00                         	mind \$r24 = \$r24, 536870911 \(0x1fffffff\);;
 
      e94:	59 36 65 74                                     	minhq \$r25 = \$r25, \$r25;;
 
-     e98:	da 37 69 f4 ff ff ff 00                         	minhq \$r26 = \$r26, 536870911 \(0x1fffffff\);;
+     e98:	da 3f 69 f4 ff ff ff 00                         	minhq \$r26 = \$r26, 536870911 \(0x1fffffff\).@;;
 
      ea0:	9b c0 6b 74                                     	minrbod \$r26 = \$r27;;
 
@@ -1335,7 +1335,7 @@ Disassembly of section .text:
 
      eac:	5d a7 72 76                                     	minubo \$r28 = \$r29, \$r29;;
 
-     eb0:	de af 76 f6 ff ff ff 00                         	minubo.@ \$r29 = \$r30, 536870911 \(0x1fffffff\);;
+     eb0:	de a7 76 f6 ff ff ff 00                         	minubo \$r29 = \$r30, 536870911 \(0x1fffffff\);;
 
      eb8:	de ff 78 e6 ff ff ff 87 ff ff ff 00             	minud \$r30 = \$r30, 2305843009213693951 \(0x1fffffffffffffff\);;
 
@@ -1345,7 +1345,7 @@ Disassembly of section .text:
 
      ecc:	21 00 80 e6 00 00 80 07                         	minud \$r32 = \$r33, -8589934592 \(0xfffffffe00000000\);;
 
-     ed4:	e1 0f 85 f6 ff ff ff 00                         	minud.@ \$r33 = \$r33, 536870911 \(0x1fffffff\);;
+     ed4:	e1 0f 85 f6 ff ff ff 00                         	minud \$r33 = \$r33, 536870911 \(0x1fffffff\).@;;
 
      edc:	a2 38 89 76                                     	minuhq \$r34 = \$r34, \$r34;;
 
@@ -1359,7 +1359,7 @@ Disassembly of section .text:
 
      ef4:	a6 29 95 76                                     	minuwp \$r37 = \$r38, \$r38;;
 
-     ef8:	e7 2f 99 f6 ff ff ff 00                         	minuwp.@ \$r38 = \$r39, 536870911 \(0x1fffffff\);;
+     ef8:	e7 2f 99 f6 ff ff ff 00                         	minuwp \$r38 = \$r39, 536870911 \(0x1fffffff\).@;;
 
      f00:	27 1a 9d 76                                     	minuw \$r39 = \$r39, \$r40;;
 
@@ -1495,7 +1495,7 @@ Disassembly of section .text:
 
     1048:	15 00 54 e9 00 00 80 07                         	nandd \$r21 = \$r21, -8589934592 \(0xfffffffe00000000\);;
 
-    1050:	d6 0f 59 f9 ff ff ff 00                         	nandd.@ \$r22 = \$r22, 536870911 \(0x1fffffff\);;
+    1050:	d6 0f 59 f9 ff ff ff 00                         	nandd \$r22 = \$r22, 536870911 \(0x1fffffff\).@;;
 
     1058:	d7 15 59 79                                     	nandw \$r22 = \$r23, \$r23;;
 
@@ -1533,7 +1533,7 @@ Disassembly of section .text:
 
     10c8:	22 00 88 eb 00 00 80 07                         	nord \$r34 = \$r34, -8589934592 \(0xfffffffe00000000\);;
 
-    10d0:	e3 0f 89 fb ff ff ff 00                         	nord.@ \$r34 = \$r35, 536870911 \(0x1fffffff\);;
+    10d0:	e3 ff 88 eb ff ff 07 00                         	nord \$r34 = \$r35, 536870911 \(0x1fffffff\);;
 
     10d8:	23 19 8d 7b                                     	norw \$r35 = \$r35, \$r36;;
 
@@ -1553,7 +1553,7 @@ Disassembly of section .text:
 
     1104:	29 00 a4 ed 00 00 80 07                         	nxord \$r41 = \$r41, -8589934592 \(0xfffffffe00000000\);;
 
-    110c:	ea 0f a9 fd ff ff ff 00                         	nxord.@ \$r42 = \$r42, 536870911 \(0x1fffffff\);;
+    110c:	ea 0f a9 fd ff ff ff 00                         	nxord \$r42 = \$r42, 536870911 \(0x1fffffff\).@;;
 
     1114:	eb 1a a9 7d                                     	nxorw \$r42 = \$r43, \$r43;;
 
@@ -1569,7 +1569,7 @@ Disassembly of section .text:
 
     1138:	2f 00 bc ea 00 00 80 07                         	ord \$r47 = \$r47, -8589934592 \(0xfffffffe00000000\);;
 
-    1140:	f0 0f c1 fa ff ff ff 00                         	ord.@ \$r48 = \$r48, 536870911 \(0x1fffffff\);;
+    1140:	f0 ff c0 ea ff ff 07 00                         	ord \$r48 = \$r48, 536870911 \(0x1fffffff\);;
 
     1148:	f1 ff c0 ef ff ff ff 87 ff ff ff 00             	ornd \$r48 = \$r49, 2305843009213693951 \(0x1fffffffffffffff\);;
 
@@ -1579,7 +1579,7 @@ Disassembly of section .text:
 
     115c:	33 00 cc ef 00 00 80 07                         	ornd \$r51 = \$r51, -8589934592 \(0xfffffffe00000000\);;
 
-    1164:	f4 0f cd ff ff ff ff 00                         	ornd.@ \$r51 = \$r52, 536870911 \(0x1fffffff\);;
+    1164:	f4 0f cd ff ff ff ff 00                         	ornd \$r51 = \$r52, 536870911 \(0x1fffffff\).@;;
 
     116c:	74 1d d1 7f                                     	ornw \$r52 = \$r52, \$r53;;
 
@@ -1633,7 +1633,7 @@ Disassembly of section .text:
 
     11e4:	04 a1 0e 71                                     	sbfbo \$r3 = \$r4, \$r4;;
 
-    11e8:	c5 af 12 f1 ff ff ff 00                         	sbfbo.@ \$r4 = \$r5, 536870911 \(0x1fffffff\);;
+    11e8:	c5 a7 12 f1 ff ff ff 00                         	sbfbo \$r4 = \$r5, 536870911 \(0x1fffffff\);;
 
     11f0:	85 91 15 7f                                     	sbfcd.i \$r5 = \$r5, \$r6;;
 
@@ -1651,7 +1651,7 @@ Disassembly of section .text:
 
     121c:	0b 00 2c e3 00 00 80 07                         	sbfd \$r11 = \$r11, -8589934592 \(0xfffffffe00000000\);;
 
-    1224:	cc 0f 2d f3 ff ff ff 00                         	sbfd.@ \$r11 = \$r12, 536870911 \(0x1fffffff\);;
+    1224:	cc 0f 2d f3 ff ff ff 00                         	sbfd \$r11 = \$r12, 536870911 \(0x1fffffff\).@;;
 
     122c:	4d 33 31 73                                     	sbfhq \$r12 = \$r13, \$r13;;
 
@@ -1659,7 +1659,7 @@ Disassembly of section .text:
 
     1238:	0f b4 3e 7d                                     	sbfsbo \$r15 = \$r15, \$r16;;
 
-    123c:	d0 bf 42 fd ff ff ff 00                         	sbfsbo.@ \$r16 = \$r16, 536870911 \(0x1fffffff\);;
+    123c:	d0 bf 42 fd ff ff ff 00                         	sbfsbo \$r16 = \$r16, 536870911 \(0x1fffffff\).@;;
 
     1244:	51 44 45 7d                                     	sbfsd \$r17 = \$r17, \$r17;;
 
@@ -1667,7 +1667,7 @@ Disassembly of section .text:
 
     1250:	d3 74 49 7d                                     	sbfshq \$r18 = \$r19, \$r19;;
 
-    1254:	d4 7f 4d fd ff ff ff 00                         	sbfshq.@ \$r19 = \$r20, 536870911 \(0x1fffffff\);;
+    1254:	d4 7f 4d fd ff ff ff 00                         	sbfshq \$r19 = \$r20, 536870911 \(0x1fffffff\).@;;
 
     125c:	54 65 51 7d                                     	sbfswp \$r20 = \$r20, \$r21;;
 
@@ -1679,7 +1679,7 @@ Disassembly of section .text:
 
     1274:	18 b6 5e 7f                                     	sbfusbo \$r23 = \$r24, \$r24;;
 
-    1278:	d9 bf 62 ff ff ff ff 00                         	sbfusbo.@ \$r24 = \$r25, 536870911 \(0x1fffffff\);;
+    1278:	d9 bf 62 ff ff ff ff 00                         	sbfusbo \$r24 = \$r25, 536870911 \(0x1fffffff\).@;;
 
     1280:	99 46 65 7f                                     	sbfusd \$r25 = \$r25, \$r26;;
 
@@ -1687,7 +1687,7 @@ Disassembly of section .text:
 
     128c:	db 76 6d 7f                                     	sbfushq \$r27 = \$r27, \$r27;;
 
-    1290:	dc 7f 71 ff ff ff ff 00                         	sbfushq.@ \$r28 = \$r28, 536870911 \(0x1fffffff\);;
+    1290:	dc 7f 71 ff ff ff ff 00                         	sbfushq \$r28 = \$r28, 536870911 \(0x1fffffff\).@;;
 
     1298:	5d 67 71 7f                                     	sbfuswp \$r28 = \$r29, \$r29;;
 
@@ -1707,7 +1707,7 @@ Disassembly of section .text:
 
     12c8:	23 29 8d 73                                     	sbfwp \$r35 = \$r35, \$r36;;
 
-    12cc:	e4 2f 91 f3 ff ff ff 00                         	sbfwp.@ \$r36 = \$r36, 536870911 \(0x1fffffff\);;
+    12cc:	e4 2f 91 f3 ff ff ff 00                         	sbfwp \$r36 = \$r36, 536870911 \(0x1fffffff\).@;;
 
     12d4:	65 19 95 73                                     	sbfw \$r37 = \$r37, \$r37;;
 
@@ -1721,7 +1721,7 @@ Disassembly of section .text:
 
     12f0:	69 4a a5 77                                     	sbfx16d \$r41 = \$r41, \$r41;;
 
-    12f4:	ea 4f a9 f7 ff ff ff 00                         	sbfx16d.@ \$r42 = \$r42, 536870911 \(0x1fffffff\);;
+    12f4:	ea 4f a9 f7 ff ff ff 00                         	sbfx16d \$r42 = \$r42, 536870911 \(0x1fffffff\).@;;
 
     12fc:	eb 7a a9 77                                     	sbfx16hq \$r42 = \$r43, \$r43;;
 
@@ -1737,7 +1737,7 @@ Disassembly of section .text:
 
     1320:	30 6c bd 77                                     	sbfx16wp \$r47 = \$r48, \$r48;;
 
-    1324:	f1 6f c1 f7 ff ff ff 00                         	sbfx16wp.@ \$r48 = \$r49, 536870911 \(0x1fffffff\);;
+    1324:	f1 6f c1 f7 ff ff ff 00                         	sbfx16wp \$r48 = \$r49, 536870911 \(0x1fffffff\).@;;
 
     132c:	b1 5c c5 77                                     	sbfx16w \$r49 = \$r49, \$r50;;
 
@@ -1749,7 +1749,7 @@ Disassembly of section .text:
 
     1344:	75 4d d1 71                                     	sbfx2d \$r52 = \$r53, \$r53;;
 
-    1348:	f6 4f d5 f1 ff ff ff 00                         	sbfx2d.@ \$r53 = \$r54, 536870911 \(0x1fffffff\);;
+    1348:	f6 4f d5 f1 ff ff ff 00                         	sbfx2d \$r53 = \$r54, 536870911 \(0x1fffffff\).@;;
 
     1350:	f6 7d d9 71                                     	sbfx2hq \$r54 = \$r54, \$r55;;
 
@@ -1765,7 +1765,7 @@ Disassembly of section .text:
 
     1374:	3b 6f ed 71                                     	sbfx2wp \$r59 = \$r59, \$r60;;
 
-    1378:	fc 6f f1 f1 ff ff ff 00                         	sbfx2wp.@ \$r60 = \$r60, 536870911 \(0x1fffffff\);;
+    1378:	fc 6f f1 f1 ff ff ff 00                         	sbfx2wp \$r60 = \$r60, 536870911 \(0x1fffffff\).@;;
 
     1380:	7d 5f f5 71                                     	sbfx2w \$r61 = \$r61, \$r61;;
 
@@ -1789,7 +1789,7 @@ Disassembly of section .text:
 
     13bc:	85 b1 16 73                                     	sbfx4bo \$r5 = \$r5, \$r6;;
 
-    13c0:	c6 bf 1a f3 ff ff ff 00                         	sbfx4bo.@ \$r6 = \$r6, 536870911 \(0x1fffffff\);;
+    13c0:	c6 bf 1a f3 ff ff ff 00                         	sbfx4bo \$r6 = \$r6, 536870911 \(0x1fffffff\).@;;
 
     13c8:	c7 41 1d 73                                     	sbfx4d \$r7 = \$r7, \$r7;;
 
@@ -1797,7 +1797,7 @@ Disassembly of section .text:
 
     13d4:	49 72 21 73                                     	sbfx4hq \$r8 = \$r9, \$r9;;
 
-    13d8:	ca 7f 25 f3 ff ff ff 00                         	sbfx4hq.@ \$r9 = \$r10, 536870911 \(0x1fffffff\);;
+    13d8:	ca 7f 25 f3 ff ff ff 00                         	sbfx4hq \$r9 = \$r10, 536870911 \(0x1fffffff\).@;;
 
     13e0:	ca 92 29 73                                     	sbfx4uwd \$r10 = \$r10, \$r11;;
 
@@ -1817,7 +1817,7 @@ Disassembly of section .text:
 
     1410:	d2 44 49 7b                                     	sbfx64d \$r18 = \$r18, \$r19;;
 
-    1414:	d3 4f 4d fb ff ff ff 00                         	sbfx64d.@ \$r19 = \$r19, 536870911 \(0x1fffffff\);;
+    1414:	d3 4f 4d fb ff ff ff 00                         	sbfx64d \$r19 = \$r19, 536870911 \(0x1fffffff\).@;;
 
     141c:	14 95 51 7b                                     	sbfx64uwd \$r20 = \$r20, \$r20;;
 
@@ -1837,7 +1837,7 @@ Disassembly of section .text:
 
     144c:	db 46 69 75                                     	sbfx8d \$r26 = \$r27, \$r27;;
 
-    1450:	dc 4f 6d f5 ff ff ff 00                         	sbfx8d.@ \$r27 = \$r28, 536870911 \(0x1fffffff\);;
+    1450:	dc 4f 6d f5 ff ff ff 00                         	sbfx8d \$r27 = \$r28, 536870911 \(0x1fffffff\).@;;
 
     1458:	5c 77 71 75                                     	sbfx8hq \$r28 = \$r28, \$r29;;
 
@@ -1853,7 +1853,7 @@ Disassembly of section .text:
 
     147c:	a1 68 85 75                                     	sbfx8wp \$r33 = \$r33, \$r34;;
 
-    1480:	e2 6f 89 f5 ff ff ff 00                         	sbfx8wp.@ \$r34 = \$r34, 536870911 \(0x1fffffff\);;
+    1480:	e2 6f 89 f5 ff ff ff 00                         	sbfx8wp \$r34 = \$r34, 536870911 \(0x1fffffff\).@;;
 
     1488:	e3 58 8d 75                                     	sbfx8w \$r35 = \$r35, \$r35;;
 
@@ -1867,7 +1867,7 @@ Disassembly of section .text:
 
     14a8:	27 00 9e ee 00 00 80 07                         	sbmm8 \$r39 = \$r39, -8589934592 \(0xfffffffe00000000\);;
 
-    14b0:	e8 0f 9e fe ff ff ff 00                         	sbmm8.@ \$r39 = \$r40, 536870911 \(0x1fffffff\);;
+    14b0:	e8 ff 9e ee ff ff 07 00                         	sbmm8 \$r39 = \$r40, 536870911 \(0x1fffffff\);;
 
     14b8:	e8 ff a2 ef ff ff ff 87 ff ff ff 00             	sbmmt8 \$r40 = \$r40, 2305843009213693951 \(0x1fffffffffffffff\);;
 
@@ -1877,7 +1877,7 @@ Disassembly of section .text:
 
     14cc:	2b 00 aa ef 00 00 80 07                         	sbmmt8 \$r42 = \$r43, -8589934592 \(0xfffffffe00000000\);;
 
-    14d4:	eb 0f ae ff ff ff ff 00                         	sbmmt8.@ \$r43 = \$r43, 536870911 \(0x1fffffff\);;
+    14d4:	eb 0f ae ff ff ff ff 00                         	sbmmt8 \$r43 = \$r43, 536870911 \(0x1fffffff\).@;;
 
     14dc:	2c eb b3 30                                     	sb \$r44\[\$r44\] = \$r44;;
 
@@ -2097,7 +2097,7 @@ Disassembly of section .text:
 
     1714:	be ff f9 7e                                     	stsuhq \$r62 = \$r62, \$r62;;
 
-    1718:	ff ff fd fe ff ff ff 00                         	stsuhq.@ \$r63 = \$r63, 536870911 \(0x1fffffff\);;
+    1718:	ff ff fd fe ff ff ff 00                         	stsuhq \$r63 = \$r63, 536870911 \(0x1fffffff\).@;;
 
     1720:	00 e0 fd 7e                                     	stsuwp \$r63 = \$r0, \$r0;;
 
@@ -2339,7 +2339,7 @@ Disassembly of section .text:
 
     199c:	2f 00 b8 ec 00 00 80 07                         	xord \$r46 = \$r47, -8589934592 \(0xfffffffe00000000\);;
 
-    19a4:	ef 0f bd fc ff ff ff 00                         	xord.@ \$r47 = \$r47, 536870911 \(0x1fffffff\);;
+    19a4:	ef 0f bd fc ff ff ff 00                         	xord \$r47 = \$r47, 536870911 \(0x1fffffff\).@;;
 
     19ac:	18 76 5f 07                                     	xorno \$a23 = \$a24, \$a24;;
 

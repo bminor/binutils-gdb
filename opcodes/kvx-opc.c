@@ -9035,12 +9035,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ABDD_registerW_registerZ_w032_double */
-    .as_op = "abdd.@",
+  { /* Opcode-kv3_v1-ABDD_registerW_registerZ_w032_splat32_double */
+    .as_op = "abdd",
     .codewords = {
       {
-        .opcode = 0xf4010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf4010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -9056,10 +9056,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ABDD_registerW_registerZ_w064_triple */
     .as_op = "abdd",
@@ -9113,7 +9114,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ABDHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ABDHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "abdhq",
     .codewords = {
       {
@@ -9131,14 +9132,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ABDWP_registerW_registerZ_registerY_simple */
     .as_op = "abdwp",
@@ -9161,7 +9162,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ABDWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ABDWP_registerW_registerZ_w032_splat32_double */
     .as_op = "abdwp",
     .codewords = {
       {
@@ -9179,14 +9180,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ABDW_registerW_registerZ_registerY_simple */
     .as_op = "abdw",
@@ -9784,12 +9785,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDD_registerW_registerZ_w032_double */
-    .as_op = "addd.@",
+  { /* Opcode-kv3_v1-ADDD_registerW_registerZ_w032_splat32_double */
+    .as_op = "addd",
     .codewords = {
       {
-        .opcode = 0xf1010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf1010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -9805,10 +9806,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDD_registerW_registerZ_w064_triple */
     .as_op = "addd",
@@ -9862,7 +9864,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDHCP.C_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDHCP.C_registerW_registerZ_w032_splat32_double */
     .as_op = "addhcp.c",
     .codewords = {
       {
@@ -9880,14 +9882,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDHQ_registerW_registerZ_registerY_simple */
     .as_op = "addhq",
@@ -9910,7 +9912,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addhq",
     .codewords = {
       {
@@ -9928,14 +9930,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDSD_registerW_registerZ_registerY_simple */
     .as_op = "addsd",
@@ -10057,7 +10059,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDSHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDSHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addshq",
     .codewords = {
       {
@@ -10075,14 +10077,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDSWP_registerW_registerZ_registerY_simple */
     .as_op = "addswp",
@@ -10105,7 +10107,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDSWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDSWP_registerW_registerZ_w032_splat32_double */
     .as_op = "addswp",
     .codewords = {
       {
@@ -10123,14 +10125,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDSW_registerW_registerZ_registerY_simple */
     .as_op = "addsw",
@@ -10200,7 +10202,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDUWD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDUWD_registerW_registerZ_w032_splat32_double */
     .as_op = "adduwd",
     .codewords = {
       {
@@ -10218,14 +10220,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDWC.C_registerW_registerZ_registerY_simple */
     .as_op = "addwc.c",
@@ -10248,7 +10250,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDWC.C_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDWC.C_registerW_registerZ_w032_splat32_double */
     .as_op = "addwc.c",
     .codewords = {
       {
@@ -10266,14 +10268,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDWD_registerW_registerZ_registerY_simple */
     .as_op = "addwd",
@@ -10296,7 +10298,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDWD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDWD_registerW_registerZ_w032_splat32_double */
     .as_op = "addwd",
     .codewords = {
       {
@@ -10314,14 +10316,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDWP_registerW_registerZ_registerY_simple */
     .as_op = "addwp",
@@ -10344,7 +10346,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDWP_registerW_registerZ_w032_splat32_double */
     .as_op = "addwp",
     .codewords = {
       {
@@ -10362,14 +10364,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDW_registerW_registerZ_registerY_simple */
     .as_op = "addw",
@@ -10460,7 +10462,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDX16D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDX16D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx16d",
     .codewords = {
       {
@@ -10478,14 +10480,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDX16HQ_registerW_registerZ_registerY_simple */
     .as_op = "addx16hq",
@@ -10508,7 +10510,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDX16HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDX16HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addx16hq",
     .codewords = {
       {
@@ -10526,14 +10528,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDX16UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx16uwd",
@@ -10650,7 +10652,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDX16WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDX16WP_registerW_registerZ_w032_splat32_double */
     .as_op = "addx16wp",
     .codewords = {
       {
@@ -10668,14 +10670,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDX16W_registerW_registerZ_registerY_simple */
     .as_op = "addx16w",
@@ -10745,7 +10747,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDX2D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDX2D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx2d",
     .codewords = {
       {
@@ -10763,14 +10765,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDX2HQ_registerW_registerZ_registerY_simple */
     .as_op = "addx2hq",
@@ -10793,7 +10795,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDX2HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDX2HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addx2hq",
     .codewords = {
       {
@@ -10811,14 +10813,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDX2UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx2uwd",
@@ -10935,7 +10937,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDX2WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDX2WP_registerW_registerZ_w032_splat32_double */
     .as_op = "addx2wp",
     .codewords = {
       {
@@ -10953,14 +10955,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDX2W_registerW_registerZ_registerY_simple */
     .as_op = "addx2w",
@@ -11030,7 +11032,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDX4D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDX4D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx4d",
     .codewords = {
       {
@@ -11048,14 +11050,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDX4HQ_registerW_registerZ_registerY_simple */
     .as_op = "addx4hq",
@@ -11078,7 +11080,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDX4HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDX4HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addx4hq",
     .codewords = {
       {
@@ -11096,14 +11098,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDX4UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx4uwd",
@@ -11220,7 +11222,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDX4WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDX4WP_registerW_registerZ_w032_splat32_double */
     .as_op = "addx4wp",
     .codewords = {
       {
@@ -11238,14 +11240,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDX4W_registerW_registerZ_registerY_simple */
     .as_op = "addx4w",
@@ -11315,7 +11317,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDX8D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDX8D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx8d",
     .codewords = {
       {
@@ -11333,14 +11335,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDX8HQ_registerW_registerZ_registerY_simple */
     .as_op = "addx8hq",
@@ -11363,7 +11365,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDX8HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDX8HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addx8hq",
     .codewords = {
       {
@@ -11381,14 +11383,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDX8UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx8uwd",
@@ -11505,7 +11507,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ADDX8WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-ADDX8WP_registerW_registerZ_w032_splat32_double */
     .as_op = "addx8wp",
     .codewords = {
       {
@@ -11523,14 +11525,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ADDX8W_registerW_registerZ_registerY_simple */
     .as_op = "addx8w",
@@ -12555,12 +12557,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ANDD_registerW_registerZ_w032_double */
-    .as_op = "andd.@",
+  { /* Opcode-kv3_v1-ANDD_registerW_registerZ_w032_splat32_double */
+    .as_op = "andd",
     .codewords = {
       {
-        .opcode = 0xf8010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf8010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -12576,10 +12578,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ANDD_registerW_registerZ_w064_triple */
     .as_op = "andd",
@@ -12680,12 +12683,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ANDND_registerW_registerZ_w032_double */
-    .as_op = "andnd.@",
+  { /* Opcode-kv3_v1-ANDND_registerW_registerZ_w032_splat32_double */
+    .as_op = "andnd",
     .codewords = {
       {
-        .opcode = 0xfe010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfe010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -12701,10 +12704,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ANDND_registerW_registerZ_w064_triple */
     .as_op = "andnd",
@@ -12894,7 +12898,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-AVGHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-AVGHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "avghq",
     .codewords = {
       {
@@ -12912,14 +12916,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-AVGRHQ_registerW_registerZ_registerY_simple */
     .as_op = "avgrhq",
@@ -12942,7 +12946,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-AVGRHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-AVGRHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "avgrhq",
     .codewords = {
       {
@@ -12960,14 +12964,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-AVGRUHQ_registerW_registerZ_registerY_simple */
     .as_op = "avgruhq",
@@ -12990,7 +12994,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-AVGRUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-AVGRUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "avgruhq",
     .codewords = {
       {
@@ -13008,14 +13012,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-AVGRUWP_registerW_registerZ_registerY_simple */
     .as_op = "avgruwp",
@@ -13038,7 +13042,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-AVGRUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-AVGRUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "avgruwp",
     .codewords = {
       {
@@ -13056,14 +13060,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-AVGRUW_registerW_registerZ_registerY_simple */
     .as_op = "avgruw",
@@ -13133,7 +13137,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-AVGRWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-AVGRWP_registerW_registerZ_w032_splat32_double */
     .as_op = "avgrwp",
     .codewords = {
       {
@@ -13151,14 +13155,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-AVGRW_registerW_registerZ_registerY_simple */
     .as_op = "avgrw",
@@ -13228,7 +13232,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-AVGUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-AVGUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "avguhq",
     .codewords = {
       {
@@ -13246,14 +13250,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-AVGUWP_registerW_registerZ_registerY_simple */
     .as_op = "avguwp",
@@ -13276,7 +13280,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-AVGUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-AVGUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "avguwp",
     .codewords = {
       {
@@ -13294,14 +13298,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-AVGUW_registerW_registerZ_registerY_simple */
     .as_op = "avguw",
@@ -13371,7 +13375,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-AVGWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-AVGWP_registerW_registerZ_w032_splat32_double */
     .as_op = "avgwp",
     .codewords = {
       {
@@ -13389,14 +13393,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-AVGW_registerW_registerZ_registerY_simple */
     .as_op = "avgw",
@@ -14178,7 +14182,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-COMPNHQ_comparison_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-COMPNHQ_comparison_registerW_registerZ_w032_splat32_double */
     .as_op = "compnhq",
     .codewords = {
       {
@@ -14197,14 +14201,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
       &kv3_v1_comparison_opnd,
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-COMPNWP_comparison_registerW_registerZ_registerY_simple */
     .as_op = "compnwp",
@@ -14228,7 +14232,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-COMPNWP_comparison_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-COMPNWP_comparison_registerW_registerZ_w032_splat32_double */
     .as_op = "compnwp",
     .codewords = {
       {
@@ -14247,14 +14251,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
       &kv3_v1_comparison_opnd,
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-COMPUWD_comparison_registerW_registerZ_registerY_simple */
     .as_op = "compuwd",
@@ -16720,7 +16724,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-FCOMPNHQ_floatcomp_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-FCOMPNHQ_floatcomp_registerW_registerZ_w032_splat32_double */
     .as_op = "fcompnhq",
     .codewords = {
       {
@@ -16739,14 +16743,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
       &kv3_v1_floatcomp_opnd,
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-FCOMPNWP_floatcomp_registerW_registerZ_registerY_simple */
     .as_op = "fcompnwp",
@@ -16770,7 +16774,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-FCOMPNWP_floatcomp_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-FCOMPNWP_floatcomp_registerW_registerZ_w032_splat32_double */
     .as_op = "fcompnwp",
     .codewords = {
       {
@@ -16789,14 +16793,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
       &kv3_v1_floatcomp_opnd,
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-FCOMPW_floatcomp_registerW_registerZ_registerY_simple */
     .as_op = "fcompw",
@@ -22083,7 +22087,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-LANDD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-LANDD_registerW_registerZ_w032_splat32_double */
     .as_op = "landd",
     .codewords = {
       {
@@ -22101,14 +22105,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-LANDHQ_registerW_registerZ_registerY_simple */
     .as_op = "landhq",
@@ -22131,7 +22135,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-LANDHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-LANDHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "landhq",
     .codewords = {
       {
@@ -22149,14 +22153,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-LANDWP_registerW_registerZ_registerY_simple */
     .as_op = "landwp",
@@ -22179,7 +22183,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-LANDWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-LANDWP_registerW_registerZ_w032_splat32_double */
     .as_op = "landwp",
     .codewords = {
       {
@@ -22197,14 +22201,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-LANDW_registerW_registerZ_registerY_simple */
     .as_op = "landw",
@@ -23224,7 +23228,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-LNANDD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-LNANDD_registerW_registerZ_w032_splat32_double */
     .as_op = "lnandd",
     .codewords = {
       {
@@ -23242,14 +23246,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-LNANDHQ_registerW_registerZ_registerY_simple */
     .as_op = "lnandhq",
@@ -23272,7 +23276,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-LNANDHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-LNANDHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "lnandhq",
     .codewords = {
       {
@@ -23290,14 +23294,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-LNANDWP_registerW_registerZ_registerY_simple */
     .as_op = "lnandwp",
@@ -23320,7 +23324,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-LNANDWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-LNANDWP_registerW_registerZ_w032_splat32_double */
     .as_op = "lnandwp",
     .codewords = {
       {
@@ -23338,14 +23342,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-LNANDW_registerW_registerZ_registerY_simple */
     .as_op = "lnandw",
@@ -23415,7 +23419,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-LNORD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-LNORD_registerW_registerZ_w032_splat32_double */
     .as_op = "lnord",
     .codewords = {
       {
@@ -23433,14 +23437,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-LNORHQ_registerW_registerZ_registerY_simple */
     .as_op = "lnorhq",
@@ -23463,7 +23467,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-LNORHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-LNORHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "lnorhq",
     .codewords = {
       {
@@ -23481,14 +23485,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-LNORWP_registerW_registerZ_registerY_simple */
     .as_op = "lnorwp",
@@ -23511,7 +23515,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-LNORWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-LNORWP_registerW_registerZ_w032_splat32_double */
     .as_op = "lnorwp",
     .codewords = {
       {
@@ -23529,14 +23533,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-LNORW_registerW_registerZ_registerY_simple */
     .as_op = "lnorw",
@@ -23626,7 +23630,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-LORD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-LORD_registerW_registerZ_w032_splat32_double */
     .as_op = "lord",
     .codewords = {
       {
@@ -23644,14 +23648,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-LORHQ_registerW_registerZ_registerY_simple */
     .as_op = "lorhq",
@@ -23674,7 +23678,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-LORHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-LORHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "lorhq",
     .codewords = {
       {
@@ -23692,14 +23696,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-LORWP_registerW_registerZ_registerY_simple */
     .as_op = "lorwp",
@@ -23722,7 +23726,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-LORWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-LORWP_registerW_registerZ_w032_splat32_double */
     .as_op = "lorwp",
     .codewords = {
       {
@@ -23740,14 +23744,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-LORW_registerW_registerZ_registerY_simple */
     .as_op = "lorw",
@@ -25706,12 +25710,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-MAXD_registerW_registerZ_w032_double */
-    .as_op = "maxd.@",
+  { /* Opcode-kv3_v1-MAXD_registerW_registerZ_w032_splat32_double */
+    .as_op = "maxd",
     .codewords = {
       {
-        .opcode = 0xf3010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf3010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -25727,10 +25731,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-MAXD_registerW_registerZ_w064_triple */
     .as_op = "maxd",
@@ -25784,7 +25789,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-MAXHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-MAXHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "maxhq",
     .codewords = {
       {
@@ -25802,14 +25807,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-MAXUD_registerW_registerZ_registerY_simple */
     .as_op = "maxud",
@@ -25879,12 +25884,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-MAXUD_registerW_registerZ_w032_double */
-    .as_op = "maxud.@",
+  { /* Opcode-kv3_v1-MAXUD_registerW_registerZ_w032_splat32_double */
+    .as_op = "maxud",
     .codewords = {
       {
-        .opcode = 0xf7010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf7010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -25900,10 +25905,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-MAXUD_registerW_registerZ_w064_triple */
     .as_op = "maxud",
@@ -25957,7 +25963,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-MAXUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-MAXUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "maxuhq",
     .codewords = {
       {
@@ -25975,14 +25981,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-MAXUWP_registerW_registerZ_registerY_simple */
     .as_op = "maxuwp",
@@ -26005,7 +26011,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-MAXUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-MAXUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "maxuwp",
     .codewords = {
       {
@@ -26023,14 +26029,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-MAXUW_registerW_registerZ_registerY_simple */
     .as_op = "maxuw",
@@ -26121,7 +26127,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-MAXWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-MAXWP_registerW_registerZ_w032_splat32_double */
     .as_op = "maxwp",
     .codewords = {
       {
@@ -26139,14 +26145,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-MAXW_registerW_registerZ_registerY_simple */
     .as_op = "maxw",
@@ -26284,12 +26290,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-MIND_registerW_registerZ_w032_double */
-    .as_op = "mind.@",
+  { /* Opcode-kv3_v1-MIND_registerW_registerZ_w032_splat32_double */
+    .as_op = "mind",
     .codewords = {
       {
-        .opcode = 0xf2010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf2010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -26305,10 +26311,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-MIND_registerW_registerZ_w064_triple */
     .as_op = "mind",
@@ -26362,7 +26369,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-MINHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-MINHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "minhq",
     .codewords = {
       {
@@ -26380,14 +26387,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-MINUD_registerW_registerZ_registerY_simple */
     .as_op = "minud",
@@ -26457,12 +26464,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-MINUD_registerW_registerZ_w032_double */
-    .as_op = "minud.@",
+  { /* Opcode-kv3_v1-MINUD_registerW_registerZ_w032_splat32_double */
+    .as_op = "minud",
     .codewords = {
       {
-        .opcode = 0xf6010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf6010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -26478,10 +26485,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-MINUD_registerW_registerZ_w064_triple */
     .as_op = "minud",
@@ -26535,7 +26543,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-MINUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-MINUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "minuhq",
     .codewords = {
       {
@@ -26553,14 +26561,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-MINUWP_registerW_registerZ_registerY_simple */
     .as_op = "minuwp",
@@ -26583,7 +26591,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-MINUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-MINUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "minuwp",
     .codewords = {
       {
@@ -26601,14 +26609,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-MINUW_registerW_registerZ_registerY_simple */
     .as_op = "minuw",
@@ -26699,7 +26707,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-MINWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-MINWP_registerW_registerZ_w032_splat32_double */
     .as_op = "minwp",
     .codewords = {
       {
@@ -26717,14 +26725,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-MINW_registerW_registerZ_registerY_simple */
     .as_op = "minw",
@@ -28783,12 +28791,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-NANDD_registerW_registerZ_w032_double */
-    .as_op = "nandd.@",
+  { /* Opcode-kv3_v1-NANDD_registerW_registerZ_w032_splat32_double */
+    .as_op = "nandd",
     .codewords = {
       {
-        .opcode = 0xf9010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf9010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -28804,10 +28812,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-NANDD_registerW_registerZ_w064_triple */
     .as_op = "nandd",
@@ -28994,12 +29003,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-NORD_registerW_registerZ_w032_double */
-    .as_op = "nord.@",
+  { /* Opcode-kv3_v1-NORD_registerW_registerZ_w032_splat32_double */
+    .as_op = "nord",
     .codewords = {
       {
-        .opcode = 0xfb010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfb010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -29015,10 +29024,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-NORD_registerW_registerZ_w064_triple */
     .as_op = "nord",
@@ -29187,12 +29197,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-NXORD_registerW_registerZ_w032_double */
-    .as_op = "nxord.@",
+  { /* Opcode-kv3_v1-NXORD_registerW_registerZ_w032_splat32_double */
+    .as_op = "nxord",
     .codewords = {
       {
-        .opcode = 0xfd010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfd010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -29208,10 +29218,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-NXORD_registerW_registerZ_w064_triple */
     .as_op = "nxord",
@@ -29380,12 +29391,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ORD_registerW_registerZ_w032_double */
-    .as_op = "ord.@",
+  { /* Opcode-kv3_v1-ORD_registerW_registerZ_w032_splat32_double */
+    .as_op = "ord",
     .codewords = {
       {
-        .opcode = 0xfa010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfa010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -29401,10 +29412,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ORD_registerW_registerZ_w064_triple */
     .as_op = "ord",
@@ -29505,12 +29517,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-ORND_registerW_registerZ_w032_double */
-    .as_op = "ornd.@",
+  { /* Opcode-kv3_v1-ORND_registerW_registerZ_w032_splat32_double */
+    .as_op = "ornd",
     .codewords = {
       {
-        .opcode = 0xff010800,
-        .mask = 0xff03f800,
+        .opcode = 0xff010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -29526,10 +29538,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-ORND_registerW_registerZ_w064_triple */
     .as_op = "ornd",
@@ -30241,12 +30254,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFD_registerW_registerZ_w032_double */
-    .as_op = "sbfd.@",
+  { /* Opcode-kv3_v1-SBFD_registerW_registerZ_w032_splat32_double */
+    .as_op = "sbfd",
     .codewords = {
       {
-        .opcode = 0xf5010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf5010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -30262,10 +30275,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFD_registerW_registerZ_w064_triple */
     .as_op = "sbfd",
@@ -30319,7 +30333,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFHCP.C_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFHCP.C_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfhcp.c",
     .codewords = {
       {
@@ -30337,14 +30351,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFHQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfhq",
@@ -30367,7 +30381,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfhq",
     .codewords = {
       {
@@ -30385,14 +30399,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFSD_registerW_registerZ_registerY_simple */
     .as_op = "sbfsd",
@@ -30514,7 +30528,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFSHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFSHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfshq",
     .codewords = {
       {
@@ -30532,14 +30546,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFSWP_registerW_registerZ_registerY_simple */
     .as_op = "sbfswp",
@@ -30562,7 +30576,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFSWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFSWP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfswp",
     .codewords = {
       {
@@ -30580,14 +30594,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFSW_registerW_registerZ_registerY_simple */
     .as_op = "sbfsw",
@@ -30657,7 +30671,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFUWD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFUWD_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfuwd",
     .codewords = {
       {
@@ -30675,14 +30689,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFWC.C_registerW_registerZ_registerY_simple */
     .as_op = "sbfwc.c",
@@ -30705,7 +30719,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFWC.C_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFWC.C_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfwc.c",
     .codewords = {
       {
@@ -30723,14 +30737,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfwd",
@@ -30753,7 +30767,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFWD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFWD_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfwd",
     .codewords = {
       {
@@ -30771,14 +30785,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFWP_registerW_registerZ_registerY_simple */
     .as_op = "sbfwp",
@@ -30801,7 +30815,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFWP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfwp",
     .codewords = {
       {
@@ -30819,14 +30833,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_TINY_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFW_registerW_registerZ_registerY_simple */
     .as_op = "sbfw",
@@ -30917,7 +30931,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFX16D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFX16D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx16d",
     .codewords = {
       {
@@ -30935,14 +30949,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFX16HQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfx16hq",
@@ -30965,7 +30979,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFX16HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFX16HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx16hq",
     .codewords = {
       {
@@ -30983,14 +30997,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFX16UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx16uwd",
@@ -31107,7 +31121,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFX16WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFX16WP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx16wp",
     .codewords = {
       {
@@ -31125,14 +31139,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFX16W_registerW_registerZ_registerY_simple */
     .as_op = "sbfx16w",
@@ -31202,7 +31216,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFX2D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFX2D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx2d",
     .codewords = {
       {
@@ -31220,14 +31234,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFX2HQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfx2hq",
@@ -31250,7 +31264,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFX2HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFX2HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx2hq",
     .codewords = {
       {
@@ -31268,14 +31282,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFX2UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx2uwd",
@@ -31392,7 +31406,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFX2WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFX2WP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx2wp",
     .codewords = {
       {
@@ -31410,14 +31424,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFX2W_registerW_registerZ_registerY_simple */
     .as_op = "sbfx2w",
@@ -31487,7 +31501,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFX4D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFX4D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx4d",
     .codewords = {
       {
@@ -31505,14 +31519,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFX4HQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfx4hq",
@@ -31535,7 +31549,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFX4HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFX4HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx4hq",
     .codewords = {
       {
@@ -31553,14 +31567,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFX4UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx4uwd",
@@ -31677,7 +31691,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFX4WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFX4WP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx4wp",
     .codewords = {
       {
@@ -31695,14 +31709,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFX4W_registerW_registerZ_registerY_simple */
     .as_op = "sbfx4w",
@@ -31772,7 +31786,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFX8D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFX8D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx8d",
     .codewords = {
       {
@@ -31790,14 +31804,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFX8HQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfx8hq",
@@ -31820,7 +31834,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFX8HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFX8HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx8hq",
     .codewords = {
       {
@@ -31838,14 +31852,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFX8UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx8uwd",
@@ -31962,7 +31976,7 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBFX8WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v1-SBFX8WP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx8wp",
     .codewords = {
       {
@@ -31980,14 +31994,14 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v1_LITE_X, ((int)0 << 8) | (int)Reservation_kv3_v1_ALU_LITE_X,
     .format = {
-      &kv3_v1_splat32_opnd,
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBFX8W_registerW_registerZ_registerY_simple */
     .as_op = "sbfx8w",
@@ -32104,12 +32118,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBMM8_registerW_registerZ_w032_double */
-    .as_op = "sbmm8.@",
+  { /* Opcode-kv3_v1-SBMM8_registerW_registerZ_w032_splat32_double */
+    .as_op = "sbmm8",
     .codewords = {
       {
-        .opcode = 0xfe020800,
-        .mask = 0xff03f800,
+        .opcode = 0xfe020000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -32125,10 +32139,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBMM8_registerW_registerZ_w064_triple */
     .as_op = "sbmm8",
@@ -32229,12 +32244,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-SBMMT8_registerW_registerZ_w032_double */
-    .as_op = "sbmmt8.@",
+  { /* Opcode-kv3_v1-SBMMT8_registerW_registerZ_w032_splat32_double */
+    .as_op = "sbmmt8",
     .codewords = {
       {
-        .opcode = 0xff020800,
-        .mask = 0xff03f800,
+        .opcode = 0xff020000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -32250,10 +32265,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-SBMMT8_registerW_registerZ_w064_triple */
     .as_op = "sbmmt8",
@@ -35311,12 +35327,12 @@ struct kvxopc kvx_kv3_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v1-XORD_registerW_registerZ_w032_double */
-    .as_op = "xord.@",
+  { /* Opcode-kv3_v1-XORD_registerW_registerZ_w032_splat32_double */
+    .as_op = "xord",
     .codewords = {
       {
-        .opcode = 0xfc010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfc010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -35332,10 +35348,11 @@ struct kvxopc kvx_kv3_v1_optab[] = {
       &kv3_v1_registerw_opnd,
       &kv3_v1_registerz_opnd,
       &kv3_v1_upper27_lower5_opnd,
+      &kv3_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v1-XORD_registerW_registerZ_w064_triple */
     .as_op = "xord",
@@ -45969,7 +45986,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ABDBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ABDBO_registerW_registerZ_w032_splat32_double */
     .as_op = "abdbo",
     .codewords = {
       {
@@ -45987,14 +46004,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ABDD_registerW_registerZ_registerY_simple */
     .as_op = "abdd",
@@ -46064,12 +46081,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ABDD_registerW_registerZ_w032_double */
-    .as_op = "abdd.@",
+  { /* Opcode-kv3_v2-ABDD_registerW_registerZ_w032_splat32_double */
+    .as_op = "abdd",
     .codewords = {
       {
-        .opcode = 0xf1010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf1010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -46085,10 +46102,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ABDD_registerW_registerZ_w064_triple */
     .as_op = "abdd",
@@ -46142,7 +46160,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ABDHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ABDHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "abdhq",
     .codewords = {
       {
@@ -46160,14 +46178,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ABDSBO_registerW_registerZ_registerY_simple */
     .as_op = "abdsbo",
@@ -46190,7 +46208,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ABDSBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ABDSBO_registerW_registerZ_w032_splat32_double */
     .as_op = "abdsbo",
     .codewords = {
       {
@@ -46208,14 +46226,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ABDSD_registerW_registerZ_registerY_simple */
     .as_op = "abdsd",
@@ -46238,7 +46256,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ABDSD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ABDSD_registerW_registerZ_w032_splat32_double */
     .as_op = "abdsd",
     .codewords = {
       {
@@ -46256,14 +46274,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ABDSHQ_registerW_registerZ_registerY_simple */
     .as_op = "abdshq",
@@ -46286,7 +46304,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ABDSHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ABDSHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "abdshq",
     .codewords = {
       {
@@ -46304,14 +46322,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ABDSWP_registerW_registerZ_registerY_simple */
     .as_op = "abdswp",
@@ -46334,7 +46352,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ABDSWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ABDSWP_registerW_registerZ_w032_splat32_double */
     .as_op = "abdswp",
     .codewords = {
       {
@@ -46352,14 +46370,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ABDSW_registerW_registerZ_registerY_simple */
     .as_op = "abdsw",
@@ -46429,7 +46447,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ABDUBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ABDUBO_registerW_registerZ_w032_splat32_double */
     .as_op = "abdubo",
     .codewords = {
       {
@@ -46447,14 +46465,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ABDUD_registerW_registerZ_registerY_simple */
     .as_op = "abdud",
@@ -46477,7 +46495,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ABDUD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ABDUD_registerW_registerZ_w032_splat32_double */
     .as_op = "abdud",
     .codewords = {
       {
@@ -46495,14 +46513,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ABDUHQ_registerW_registerZ_registerY_simple */
     .as_op = "abduhq",
@@ -46525,7 +46543,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ABDUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ABDUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "abduhq",
     .codewords = {
       {
@@ -46543,14 +46561,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ABDUWP_registerW_registerZ_registerY_simple */
     .as_op = "abduwp",
@@ -46573,7 +46591,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ABDUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ABDUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "abduwp",
     .codewords = {
       {
@@ -46591,14 +46609,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ABDUW_registerW_registerZ_registerY_simple */
     .as_op = "abduw",
@@ -46668,7 +46686,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ABDWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ABDWP_registerW_registerZ_w032_splat32_double */
     .as_op = "abdwp",
     .codewords = {
       {
@@ -46686,14 +46704,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ABDW_registerW_registerZ_registerY_simple */
     .as_op = "abdw",
@@ -47042,7 +47060,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDBO_registerW_registerZ_w032_splat32_double */
     .as_op = "addbo",
     .codewords = {
       {
@@ -47060,14 +47078,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDCD.I_registerW_registerZ_registerY_simple */
     .as_op = "addcd.i",
@@ -47231,12 +47249,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDD_registerW_registerZ_w032_double */
-    .as_op = "addd.@",
+  { /* Opcode-kv3_v2-ADDD_registerW_registerZ_w032_splat32_double */
+    .as_op = "addd",
     .codewords = {
       {
-        .opcode = 0xf2010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf2010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -47252,10 +47270,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDD_registerW_registerZ_w064_triple */
     .as_op = "addd",
@@ -47309,7 +47328,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addhq",
     .codewords = {
       {
@@ -47327,14 +47346,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDRBOD_registerW_registerZ_simple */
     .as_op = "addrbod",
@@ -47417,7 +47436,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDSBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDSBO_registerW_registerZ_w032_splat32_double */
     .as_op = "addsbo",
     .codewords = {
       {
@@ -47435,14 +47454,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDSD_registerW_registerZ_registerY_simple */
     .as_op = "addsd",
@@ -47465,7 +47484,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDSD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDSD_registerW_registerZ_w032_splat32_double */
     .as_op = "addsd",
     .codewords = {
       {
@@ -47483,14 +47502,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDSHQ_registerW_registerZ_registerY_simple */
     .as_op = "addshq",
@@ -47513,7 +47532,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDSHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDSHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addshq",
     .codewords = {
       {
@@ -47531,14 +47550,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDSWP_registerW_registerZ_registerY_simple */
     .as_op = "addswp",
@@ -47561,7 +47580,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDSWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDSWP_registerW_registerZ_w032_splat32_double */
     .as_op = "addswp",
     .codewords = {
       {
@@ -47579,14 +47598,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDSW_registerW_registerZ_registerY_simple */
     .as_op = "addsw",
@@ -47716,7 +47735,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDUSBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDUSBO_registerW_registerZ_w032_splat32_double */
     .as_op = "addusbo",
     .codewords = {
       {
@@ -47734,14 +47753,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDUSD_registerW_registerZ_registerY_simple */
     .as_op = "addusd",
@@ -47764,7 +47783,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDUSD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDUSD_registerW_registerZ_w032_splat32_double */
     .as_op = "addusd",
     .codewords = {
       {
@@ -47782,14 +47801,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDUSHQ_registerW_registerZ_registerY_simple */
     .as_op = "addushq",
@@ -47812,7 +47831,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDUSHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDUSHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addushq",
     .codewords = {
       {
@@ -47830,14 +47849,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDUSWP_registerW_registerZ_registerY_simple */
     .as_op = "adduswp",
@@ -47860,7 +47879,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDUSWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDUSWP_registerW_registerZ_w032_splat32_double */
     .as_op = "adduswp",
     .codewords = {
       {
@@ -47878,14 +47897,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDUSW_registerW_registerZ_registerY_simple */
     .as_op = "addusw",
@@ -48049,7 +48068,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDWP_registerW_registerZ_w032_splat32_double */
     .as_op = "addwp",
     .codewords = {
       {
@@ -48067,14 +48086,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDW_registerW_registerZ_registerY_simple */
     .as_op = "addw",
@@ -48165,7 +48184,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX16BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX16BO_registerW_registerZ_w032_splat32_double */
     .as_op = "addx16bo",
     .codewords = {
       {
@@ -48183,14 +48202,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX16D_registerW_registerZ_registerY_simple */
     .as_op = "addx16d",
@@ -48213,7 +48232,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX16D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX16D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx16d",
     .codewords = {
       {
@@ -48231,14 +48250,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX16HQ_registerW_registerZ_registerY_simple */
     .as_op = "addx16hq",
@@ -48261,7 +48280,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX16HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX16HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addx16hq",
     .codewords = {
       {
@@ -48279,14 +48298,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX16UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx16uwd",
@@ -48403,7 +48422,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX16WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX16WP_registerW_registerZ_w032_splat32_double */
     .as_op = "addx16wp",
     .codewords = {
       {
@@ -48421,14 +48440,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX16W_registerW_registerZ_registerY_simple */
     .as_op = "addx16w",
@@ -48498,7 +48517,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX2BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX2BO_registerW_registerZ_w032_splat32_double */
     .as_op = "addx2bo",
     .codewords = {
       {
@@ -48516,14 +48535,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX2D_registerW_registerZ_registerY_simple */
     .as_op = "addx2d",
@@ -48546,7 +48565,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX2D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX2D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx2d",
     .codewords = {
       {
@@ -48564,14 +48583,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX2HQ_registerW_registerZ_registerY_simple */
     .as_op = "addx2hq",
@@ -48594,7 +48613,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX2HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX2HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addx2hq",
     .codewords = {
       {
@@ -48612,14 +48631,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX2UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx2uwd",
@@ -48736,7 +48755,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX2WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX2WP_registerW_registerZ_w032_splat32_double */
     .as_op = "addx2wp",
     .codewords = {
       {
@@ -48754,14 +48773,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX2W_registerW_registerZ_registerY_simple */
     .as_op = "addx2w",
@@ -48831,7 +48850,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX32D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX32D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx32d",
     .codewords = {
       {
@@ -48849,14 +48868,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX32UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx32uwd",
@@ -49020,7 +49039,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX4BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX4BO_registerW_registerZ_w032_splat32_double */
     .as_op = "addx4bo",
     .codewords = {
       {
@@ -49038,14 +49057,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX4D_registerW_registerZ_registerY_simple */
     .as_op = "addx4d",
@@ -49068,7 +49087,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX4D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX4D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx4d",
     .codewords = {
       {
@@ -49086,14 +49105,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX4HQ_registerW_registerZ_registerY_simple */
     .as_op = "addx4hq",
@@ -49116,7 +49135,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX4HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX4HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addx4hq",
     .codewords = {
       {
@@ -49134,14 +49153,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX4UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx4uwd",
@@ -49258,7 +49277,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX4WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX4WP_registerW_registerZ_w032_splat32_double */
     .as_op = "addx4wp",
     .codewords = {
       {
@@ -49276,14 +49295,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX4W_registerW_registerZ_registerY_simple */
     .as_op = "addx4w",
@@ -49353,7 +49372,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX64D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX64D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx64d",
     .codewords = {
       {
@@ -49371,14 +49390,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX64UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx64uwd",
@@ -49542,7 +49561,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX8BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX8BO_registerW_registerZ_w032_splat32_double */
     .as_op = "addx8bo",
     .codewords = {
       {
@@ -49560,14 +49579,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX8D_registerW_registerZ_registerY_simple */
     .as_op = "addx8d",
@@ -49590,7 +49609,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX8D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX8D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx8d",
     .codewords = {
       {
@@ -49608,14 +49627,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX8HQ_registerW_registerZ_registerY_simple */
     .as_op = "addx8hq",
@@ -49638,7 +49657,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX8HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX8HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addx8hq",
     .codewords = {
       {
@@ -49656,14 +49675,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX8UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx8uwd",
@@ -49780,7 +49799,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ADDX8WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-ADDX8WP_registerW_registerZ_w032_splat32_double */
     .as_op = "addx8wp",
     .codewords = {
       {
@@ -49798,14 +49817,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ADDX8W_registerW_registerZ_registerY_simple */
     .as_op = "addx8w",
@@ -50402,12 +50421,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ANDD_registerW_registerZ_w032_double */
-    .as_op = "andd.@",
+  { /* Opcode-kv3_v2-ANDD_registerW_registerZ_w032_splat32_double */
+    .as_op = "andd",
     .codewords = {
       {
-        .opcode = 0xf8010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf8010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -50423,10 +50442,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ANDD_registerW_registerZ_w064_triple */
     .as_op = "andd",
@@ -50527,12 +50547,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ANDND_registerW_registerZ_w032_double */
-    .as_op = "andnd.@",
+  { /* Opcode-kv3_v2-ANDND_registerW_registerZ_w032_splat32_double */
+    .as_op = "andnd",
     .codewords = {
       {
-        .opcode = 0xfe010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfe010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -50548,10 +50568,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ANDND_registerW_registerZ_w064_triple */
     .as_op = "andnd",
@@ -50961,7 +50982,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-AVGBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-AVGBO_registerW_registerZ_w032_splat32_double */
     .as_op = "avgbo",
     .codewords = {
       {
@@ -50979,14 +51000,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-AVGHQ_registerW_registerZ_registerY_simple */
     .as_op = "avghq",
@@ -51009,7 +51030,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-AVGHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-AVGHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "avghq",
     .codewords = {
       {
@@ -51027,14 +51048,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-AVGRBO_registerW_registerZ_registerY_simple */
     .as_op = "avgrbo",
@@ -51057,7 +51078,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-AVGRBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-AVGRBO_registerW_registerZ_w032_splat32_double */
     .as_op = "avgrbo",
     .codewords = {
       {
@@ -51075,14 +51096,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-AVGRHQ_registerW_registerZ_registerY_simple */
     .as_op = "avgrhq",
@@ -51105,7 +51126,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-AVGRHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-AVGRHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "avgrhq",
     .codewords = {
       {
@@ -51123,14 +51144,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-AVGRUBO_registerW_registerZ_registerY_simple */
     .as_op = "avgrubo",
@@ -51153,7 +51174,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-AVGRUBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-AVGRUBO_registerW_registerZ_w032_splat32_double */
     .as_op = "avgrubo",
     .codewords = {
       {
@@ -51171,14 +51192,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-AVGRUHQ_registerW_registerZ_registerY_simple */
     .as_op = "avgruhq",
@@ -51201,7 +51222,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-AVGRUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-AVGRUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "avgruhq",
     .codewords = {
       {
@@ -51219,14 +51240,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-AVGRUWP_registerW_registerZ_registerY_simple */
     .as_op = "avgruwp",
@@ -51249,7 +51270,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-AVGRUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-AVGRUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "avgruwp",
     .codewords = {
       {
@@ -51267,14 +51288,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-AVGRUW_registerW_registerZ_registerY_simple */
     .as_op = "avgruw",
@@ -51344,7 +51365,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-AVGRWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-AVGRWP_registerW_registerZ_w032_splat32_double */
     .as_op = "avgrwp",
     .codewords = {
       {
@@ -51362,14 +51383,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-AVGRW_registerW_registerZ_registerY_simple */
     .as_op = "avgrw",
@@ -51439,7 +51460,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-AVGUBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-AVGUBO_registerW_registerZ_w032_splat32_double */
     .as_op = "avgubo",
     .codewords = {
       {
@@ -51457,14 +51478,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-AVGUHQ_registerW_registerZ_registerY_simple */
     .as_op = "avguhq",
@@ -51487,7 +51508,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-AVGUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-AVGUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "avguhq",
     .codewords = {
       {
@@ -51505,14 +51526,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-AVGUWP_registerW_registerZ_registerY_simple */
     .as_op = "avguwp",
@@ -51535,7 +51556,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-AVGUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-AVGUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "avguwp",
     .codewords = {
       {
@@ -51553,14 +51574,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-AVGUW_registerW_registerZ_registerY_simple */
     .as_op = "avguw",
@@ -51630,7 +51651,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-AVGWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-AVGWP_registerW_registerZ_w032_splat32_double */
     .as_op = "avgwp",
     .codewords = {
       {
@@ -51648,14 +51669,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-AVGW_registerW_registerZ_registerY_simple */
     .as_op = "avgw",
@@ -52400,7 +52421,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-COMPNBO_comparison_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-COMPNBO_comparison_registerW_registerZ_w032_splat32_double */
     .as_op = "compnbo",
     .codewords = {
       {
@@ -52419,14 +52440,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
       &kv3_v2_comparison_opnd,
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-COMPND_comparison_registerW_registerZ_registerY_simple */
     .as_op = "compnd",
@@ -52499,7 +52520,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-COMPNHQ_comparison_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-COMPNHQ_comparison_registerW_registerZ_w032_splat32_double */
     .as_op = "compnhq",
     .codewords = {
       {
@@ -52518,14 +52539,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
       &kv3_v2_comparison_opnd,
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-COMPNWP_comparison_registerW_registerZ_registerY_simple */
     .as_op = "compnwp",
@@ -52549,7 +52570,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-COMPNWP_comparison_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-COMPNWP_comparison_registerW_registerZ_w032_splat32_double */
     .as_op = "compnwp",
     .codewords = {
       {
@@ -52568,14 +52589,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
       &kv3_v2_comparison_opnd,
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-COMPNW_comparison_registerW_registerZ_registerY_simple */
     .as_op = "compnw",
@@ -54250,7 +54271,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-FCOMPNHQ_floatcomp_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-FCOMPNHQ_floatcomp_registerW_registerZ_w032_splat32_double */
     .as_op = "fcompnhq",
     .codewords = {
       {
@@ -54269,14 +54290,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
       &kv3_v2_floatcomp_opnd,
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-FCOMPNWP_floatcomp_registerW_registerZ_registerY_simple */
     .as_op = "fcompnwp",
@@ -54300,7 +54321,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-FCOMPNWP_floatcomp_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-FCOMPNWP_floatcomp_registerW_registerZ_w032_splat32_double */
     .as_op = "fcompnwp",
     .codewords = {
       {
@@ -54319,14 +54340,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
       &kv3_v2_floatcomp_opnd,
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-FCOMPNW_floatcomp_registerW_registerZ_registerY_simple */
     .as_op = "fcompnw",
@@ -60183,7 +60204,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MAXBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-MAXBO_registerW_registerZ_w032_splat32_double */
     .as_op = "maxbo",
     .codewords = {
       {
@@ -60201,14 +60222,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MAXD_registerW_registerZ_registerY_simple */
     .as_op = "maxd",
@@ -60278,12 +60299,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MAXD_registerW_registerZ_w032_double */
-    .as_op = "maxd.@",
+  { /* Opcode-kv3_v2-MAXD_registerW_registerZ_w032_splat32_double */
+    .as_op = "maxd",
     .codewords = {
       {
-        .opcode = 0xf5010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf5010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -60299,10 +60320,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MAXD_registerW_registerZ_w064_triple */
     .as_op = "maxd",
@@ -60356,7 +60378,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MAXHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-MAXHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "maxhq",
     .codewords = {
       {
@@ -60374,14 +60396,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MAXRBOD_registerW_registerZ_simple */
     .as_op = "maxrbod",
@@ -60464,7 +60486,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MAXUBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-MAXUBO_registerW_registerZ_w032_splat32_double */
     .as_op = "maxubo",
     .codewords = {
       {
@@ -60482,14 +60504,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MAXUD_registerW_registerZ_registerY_simple */
     .as_op = "maxud",
@@ -60559,12 +60581,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MAXUD_registerW_registerZ_w032_double */
-    .as_op = "maxud.@",
+  { /* Opcode-kv3_v2-MAXUD_registerW_registerZ_w032_splat32_double */
+    .as_op = "maxud",
     .codewords = {
       {
-        .opcode = 0xf7010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf7010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -60580,10 +60602,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MAXUD_registerW_registerZ_w064_triple */
     .as_op = "maxud",
@@ -60637,7 +60660,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MAXUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-MAXUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "maxuhq",
     .codewords = {
       {
@@ -60655,14 +60678,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MAXURBOD_registerW_registerZ_simple */
     .as_op = "maxurbod",
@@ -60745,7 +60768,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MAXUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-MAXUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "maxuwp",
     .codewords = {
       {
@@ -60763,14 +60786,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MAXUW_registerW_registerZ_registerY_simple */
     .as_op = "maxuw",
@@ -60861,7 +60884,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MAXWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-MAXWP_registerW_registerZ_w032_splat32_double */
     .as_op = "maxwp",
     .codewords = {
       {
@@ -60879,14 +60902,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MAXW_registerW_registerZ_registerY_simple */
     .as_op = "maxw",
@@ -60977,7 +61000,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MINBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-MINBO_registerW_registerZ_w032_splat32_double */
     .as_op = "minbo",
     .codewords = {
       {
@@ -60995,14 +61018,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MIND_registerW_registerZ_registerY_simple */
     .as_op = "mind",
@@ -61072,12 +61095,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MIND_registerW_registerZ_w032_double */
-    .as_op = "mind.@",
+  { /* Opcode-kv3_v2-MIND_registerW_registerZ_w032_splat32_double */
+    .as_op = "mind",
     .codewords = {
       {
-        .opcode = 0xf4010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf4010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -61093,10 +61116,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MIND_registerW_registerZ_w064_triple */
     .as_op = "mind",
@@ -61150,7 +61174,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MINHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-MINHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "minhq",
     .codewords = {
       {
@@ -61168,14 +61192,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MINRBOD_registerW_registerZ_simple */
     .as_op = "minrbod",
@@ -61258,7 +61282,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MINUBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-MINUBO_registerW_registerZ_w032_splat32_double */
     .as_op = "minubo",
     .codewords = {
       {
@@ -61276,14 +61300,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MINUD_registerW_registerZ_registerY_simple */
     .as_op = "minud",
@@ -61353,12 +61377,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MINUD_registerW_registerZ_w032_double */
-    .as_op = "minud.@",
+  { /* Opcode-kv3_v2-MINUD_registerW_registerZ_w032_splat32_double */
+    .as_op = "minud",
     .codewords = {
       {
-        .opcode = 0xf6010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf6010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -61374,10 +61398,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MINUD_registerW_registerZ_w064_triple */
     .as_op = "minud",
@@ -61431,7 +61456,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MINUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-MINUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "minuhq",
     .codewords = {
       {
@@ -61449,14 +61474,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MINURBOD_registerW_registerZ_simple */
     .as_op = "minurbod",
@@ -61539,7 +61564,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MINUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-MINUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "minuwp",
     .codewords = {
       {
@@ -61557,14 +61582,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MINUW_registerW_registerZ_registerY_simple */
     .as_op = "minuw",
@@ -61655,7 +61680,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-MINWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-MINWP_registerW_registerZ_w032_splat32_double */
     .as_op = "minwp",
     .codewords = {
       {
@@ -61673,14 +61698,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-MINW_registerW_registerZ_registerY_simple */
     .as_op = "minw",
@@ -63028,12 +63053,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-NANDD_registerW_registerZ_w032_double */
-    .as_op = "nandd.@",
+  { /* Opcode-kv3_v2-NANDD_registerW_registerZ_w032_splat32_double */
+    .as_op = "nandd",
     .codewords = {
       {
-        .opcode = 0xf9010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf9010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -63049,10 +63074,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-NANDD_registerW_registerZ_w064_triple */
     .as_op = "nandd",
@@ -63239,12 +63265,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-NORD_registerW_registerZ_w032_double */
-    .as_op = "nord.@",
+  { /* Opcode-kv3_v2-NORD_registerW_registerZ_w032_splat32_double */
+    .as_op = "nord",
     .codewords = {
       {
-        .opcode = 0xfb010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfb010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -63260,10 +63286,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-NORD_registerW_registerZ_w064_triple */
     .as_op = "nord",
@@ -63432,12 +63459,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-NXORD_registerW_registerZ_w032_double */
-    .as_op = "nxord.@",
+  { /* Opcode-kv3_v2-NXORD_registerW_registerZ_w032_splat32_double */
+    .as_op = "nxord",
     .codewords = {
       {
-        .opcode = 0xfd010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfd010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -63453,10 +63480,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-NXORD_registerW_registerZ_w064_triple */
     .as_op = "nxord",
@@ -63625,12 +63653,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ORD_registerW_registerZ_w032_double */
-    .as_op = "ord.@",
+  { /* Opcode-kv3_v2-ORD_registerW_registerZ_w032_splat32_double */
+    .as_op = "ord",
     .codewords = {
       {
-        .opcode = 0xfa010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfa010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -63646,10 +63674,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ORD_registerW_registerZ_w064_triple */
     .as_op = "ord",
@@ -63750,12 +63779,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-ORND_registerW_registerZ_w032_double */
-    .as_op = "ornd.@",
+  { /* Opcode-kv3_v2-ORND_registerW_registerZ_w032_splat32_double */
+    .as_op = "ornd",
     .codewords = {
       {
-        .opcode = 0xff010800,
-        .mask = 0xff03f800,
+        .opcode = 0xff010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -63771,10 +63800,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-ORND_registerW_registerZ_w064_triple */
     .as_op = "ornd",
@@ -64363,7 +64393,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFBO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfbo",
     .codewords = {
       {
@@ -64381,14 +64411,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFCD.I_registerW_registerZ_registerY_simple */
     .as_op = "sbfcd.i",
@@ -64552,12 +64582,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFD_registerW_registerZ_w032_double */
-    .as_op = "sbfd.@",
+  { /* Opcode-kv3_v2-SBFD_registerW_registerZ_w032_splat32_double */
+    .as_op = "sbfd",
     .codewords = {
       {
-        .opcode = 0xf3010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf3010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -64573,10 +64603,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFD_registerW_registerZ_w064_triple */
     .as_op = "sbfd",
@@ -64630,7 +64661,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfhq",
     .codewords = {
       {
@@ -64648,14 +64679,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFSBO_registerW_registerZ_registerY_simple */
     .as_op = "sbfsbo",
@@ -64678,7 +64709,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFSBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFSBO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfsbo",
     .codewords = {
       {
@@ -64696,14 +64727,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFSD_registerW_registerZ_registerY_simple */
     .as_op = "sbfsd",
@@ -64726,7 +64757,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFSD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFSD_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfsd",
     .codewords = {
       {
@@ -64744,14 +64775,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFSHQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfshq",
@@ -64774,7 +64805,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFSHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFSHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfshq",
     .codewords = {
       {
@@ -64792,14 +64823,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFSWP_registerW_registerZ_registerY_simple */
     .as_op = "sbfswp",
@@ -64822,7 +64853,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFSWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFSWP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfswp",
     .codewords = {
       {
@@ -64840,14 +64871,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFSW_registerW_registerZ_registerY_simple */
     .as_op = "sbfsw",
@@ -64917,7 +64948,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFUSBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFUSBO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfusbo",
     .codewords = {
       {
@@ -64935,14 +64966,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFUSD_registerW_registerZ_registerY_simple */
     .as_op = "sbfusd",
@@ -64965,7 +64996,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFUSD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFUSD_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfusd",
     .codewords = {
       {
@@ -64983,14 +65014,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFUSHQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfushq",
@@ -65013,7 +65044,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFUSHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFUSHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfushq",
     .codewords = {
       {
@@ -65031,14 +65062,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFUSWP_registerW_registerZ_registerY_simple */
     .as_op = "sbfuswp",
@@ -65061,7 +65092,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFUSWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFUSWP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfuswp",
     .codewords = {
       {
@@ -65079,14 +65110,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFUSW_registerW_registerZ_registerY_simple */
     .as_op = "sbfusw",
@@ -65250,7 +65281,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFWP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfwp",
     .codewords = {
       {
@@ -65268,14 +65299,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFW_registerW_registerZ_registerY_simple */
     .as_op = "sbfw",
@@ -65366,7 +65397,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX16BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX16BO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx16bo",
     .codewords = {
       {
@@ -65384,14 +65415,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX16D_registerW_registerZ_registerY_simple */
     .as_op = "sbfx16d",
@@ -65414,7 +65445,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX16D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX16D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx16d",
     .codewords = {
       {
@@ -65432,14 +65463,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX16HQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfx16hq",
@@ -65462,7 +65493,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX16HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX16HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx16hq",
     .codewords = {
       {
@@ -65480,14 +65511,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX16UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx16uwd",
@@ -65604,7 +65635,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX16WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX16WP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx16wp",
     .codewords = {
       {
@@ -65622,14 +65653,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX16W_registerW_registerZ_registerY_simple */
     .as_op = "sbfx16w",
@@ -65699,7 +65730,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX2BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX2BO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx2bo",
     .codewords = {
       {
@@ -65717,14 +65748,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX2D_registerW_registerZ_registerY_simple */
     .as_op = "sbfx2d",
@@ -65747,7 +65778,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX2D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX2D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx2d",
     .codewords = {
       {
@@ -65765,14 +65796,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX2HQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfx2hq",
@@ -65795,7 +65826,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX2HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX2HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx2hq",
     .codewords = {
       {
@@ -65813,14 +65844,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX2UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx2uwd",
@@ -65937,7 +65968,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX2WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX2WP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx2wp",
     .codewords = {
       {
@@ -65955,14 +65986,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX2W_registerW_registerZ_registerY_simple */
     .as_op = "sbfx2w",
@@ -66032,7 +66063,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX32D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX32D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx32d",
     .codewords = {
       {
@@ -66050,14 +66081,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX32UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx32uwd",
@@ -66221,7 +66252,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX4BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX4BO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx4bo",
     .codewords = {
       {
@@ -66239,14 +66270,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX4D_registerW_registerZ_registerY_simple */
     .as_op = "sbfx4d",
@@ -66269,7 +66300,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX4D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX4D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx4d",
     .codewords = {
       {
@@ -66287,14 +66318,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX4HQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfx4hq",
@@ -66317,7 +66348,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX4HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX4HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx4hq",
     .codewords = {
       {
@@ -66335,14 +66366,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX4UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx4uwd",
@@ -66459,7 +66490,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX4WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX4WP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx4wp",
     .codewords = {
       {
@@ -66477,14 +66508,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX4W_registerW_registerZ_registerY_simple */
     .as_op = "sbfx4w",
@@ -66554,7 +66585,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX64D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX64D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx64d",
     .codewords = {
       {
@@ -66572,14 +66603,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX64UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx64uwd",
@@ -66743,7 +66774,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX8BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX8BO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx8bo",
     .codewords = {
       {
@@ -66761,14 +66792,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX8D_registerW_registerZ_registerY_simple */
     .as_op = "sbfx8d",
@@ -66791,7 +66822,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX8D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX8D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx8d",
     .codewords = {
       {
@@ -66809,14 +66840,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX8HQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfx8hq",
@@ -66839,7 +66870,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX8HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX8HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx8hq",
     .codewords = {
       {
@@ -66857,14 +66888,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX8UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx8uwd",
@@ -66981,7 +67012,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBFX8WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-SBFX8WP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx8wp",
     .codewords = {
       {
@@ -66999,14 +67030,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBFX8W_registerW_registerZ_registerY_simple */
     .as_op = "sbfx8w",
@@ -67123,12 +67154,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBMM8_registerW_registerZ_w032_double */
-    .as_op = "sbmm8.@",
+  { /* Opcode-kv3_v2-SBMM8_registerW_registerZ_w032_splat32_double */
+    .as_op = "sbmm8",
     .codewords = {
       {
-        .opcode = 0xfe020800,
-        .mask = 0xff03f800,
+        .opcode = 0xfe020000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -67144,10 +67175,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBMM8_registerW_registerZ_w064_triple */
     .as_op = "sbmm8",
@@ -67248,12 +67280,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-SBMMT8_registerW_registerZ_w032_double */
-    .as_op = "sbmmt8.@",
+  { /* Opcode-kv3_v2-SBMMT8_registerW_registerZ_w032_splat32_double */
+    .as_op = "sbmmt8",
     .codewords = {
       {
-        .opcode = 0xff020800,
-        .mask = 0xff03f800,
+        .opcode = 0xff020000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -67269,10 +67301,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-SBMMT8_registerW_registerZ_w064_triple */
     .as_op = "sbmmt8",
@@ -69738,7 +69771,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-STSUD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-STSUD_registerW_registerZ_w032_splat32_double */
     .as_op = "stsud",
     .codewords = {
       {
@@ -69756,14 +69789,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-STSUHQ_registerW_registerZ_registerY_simple */
     .as_op = "stsuhq",
@@ -69786,7 +69819,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-STSUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-STSUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "stsuhq",
     .codewords = {
       {
@@ -69804,14 +69837,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-STSUWP_registerW_registerZ_registerY_simple */
     .as_op = "stsuwp",
@@ -69834,7 +69867,7 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-STSUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv3_v2-STSUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "stsuwp",
     .codewords = {
       {
@@ -69852,14 +69885,14 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv3_v2_TINY_X, ((int)0 << 8) | (int)Reservation_kv3_v2_ALU_TINY_X,
     .format = {
-      &kv3_v2_splat32_opnd,
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-STSUW_registerW_registerZ_registerY_simple */
     .as_op = "stsuw",
@@ -72485,12 +72518,12 @@ struct kvxopc kvx_kv3_v2_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv3_v2-XORD_registerW_registerZ_w032_double */
-    .as_op = "xord.@",
+  { /* Opcode-kv3_v2-XORD_registerW_registerZ_w032_splat32_double */
+    .as_op = "xord",
     .codewords = {
       {
-        .opcode = 0xfc010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfc010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -72506,10 +72539,11 @@ struct kvxopc kvx_kv3_v2_optab[] = {
       &kv3_v2_registerw_opnd,
       &kv3_v2_registerz_opnd,
       &kv3_v2_upper27_lower5_opnd,
+      &kv3_v2_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv3_v2-XORD_registerW_registerZ_w064_triple */
     .as_op = "xord",
@@ -83605,7 +83639,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ABDBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ABDBO_registerW_registerZ_w032_splat32_double */
     .as_op = "abdbo",
     .codewords = {
       {
@@ -83623,14 +83657,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ABDD_registerW_registerZ_registerY_simple */
     .as_op = "abdd",
@@ -83700,12 +83734,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ABDD_registerW_registerZ_w032_double */
-    .as_op = "abdd.@",
+  { /* Opcode-kv4_v1-ABDD_registerW_registerZ_w032_splat32_double */
+    .as_op = "abdd",
     .codewords = {
       {
-        .opcode = 0xf1010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf1010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -83721,10 +83755,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ABDD_registerW_registerZ_w064_triple */
     .as_op = "abdd",
@@ -83778,7 +83813,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ABDHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ABDHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "abdhq",
     .codewords = {
       {
@@ -83796,14 +83831,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ABDSBO_registerW_registerZ_registerY_simple */
     .as_op = "abdsbo",
@@ -83826,7 +83861,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ABDSBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ABDSBO_registerW_registerZ_w032_splat32_double */
     .as_op = "abdsbo",
     .codewords = {
       {
@@ -83844,14 +83879,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ABDSD_registerW_registerZ_registerY_simple */
     .as_op = "abdsd",
@@ -83874,7 +83909,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ABDSD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ABDSD_registerW_registerZ_w032_splat32_double */
     .as_op = "abdsd",
     .codewords = {
       {
@@ -83892,14 +83927,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ABDSHQ_registerW_registerZ_registerY_simple */
     .as_op = "abdshq",
@@ -83922,7 +83957,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ABDSHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ABDSHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "abdshq",
     .codewords = {
       {
@@ -83940,14 +83975,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ABDSWP_registerW_registerZ_registerY_simple */
     .as_op = "abdswp",
@@ -83970,7 +84005,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ABDSWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ABDSWP_registerW_registerZ_w032_splat32_double */
     .as_op = "abdswp",
     .codewords = {
       {
@@ -83988,14 +84023,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ABDSW_registerW_registerZ_registerY_simple */
     .as_op = "abdsw",
@@ -84065,7 +84100,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ABDUBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ABDUBO_registerW_registerZ_w032_splat32_double */
     .as_op = "abdubo",
     .codewords = {
       {
@@ -84083,14 +84118,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ABDUD_registerW_registerZ_registerY_simple */
     .as_op = "abdud",
@@ -84113,7 +84148,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ABDUD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ABDUD_registerW_registerZ_w032_splat32_double */
     .as_op = "abdud",
     .codewords = {
       {
@@ -84131,14 +84166,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ABDUHQ_registerW_registerZ_registerY_simple */
     .as_op = "abduhq",
@@ -84161,7 +84196,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ABDUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ABDUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "abduhq",
     .codewords = {
       {
@@ -84179,14 +84214,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ABDUWP_registerW_registerZ_registerY_simple */
     .as_op = "abduwp",
@@ -84209,7 +84244,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ABDUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ABDUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "abduwp",
     .codewords = {
       {
@@ -84227,14 +84262,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ABDUW_registerW_registerZ_registerY_simple */
     .as_op = "abduw",
@@ -84304,7 +84339,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ABDWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ABDWP_registerW_registerZ_w032_splat32_double */
     .as_op = "abdwp",
     .codewords = {
       {
@@ -84322,14 +84357,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ABDW_registerW_registerZ_registerY_simple */
     .as_op = "abdw",
@@ -84678,7 +84713,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDBO_registerW_registerZ_w032_splat32_double */
     .as_op = "addbo",
     .codewords = {
       {
@@ -84696,14 +84731,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDCD.I_registerW_registerZ_registerY_simple */
     .as_op = "addcd.i",
@@ -84867,12 +84902,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDD_registerW_registerZ_w032_double */
-    .as_op = "addd.@",
+  { /* Opcode-kv4_v1-ADDD_registerW_registerZ_w032_splat32_double */
+    .as_op = "addd",
     .codewords = {
       {
-        .opcode = 0xf2010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf2010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -84888,10 +84923,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDD_registerW_registerZ_w064_triple */
     .as_op = "addd",
@@ -84945,7 +84981,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addhq",
     .codewords = {
       {
@@ -84963,14 +84999,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDRBOD_registerW_registerZ_simple */
     .as_op = "addrbod",
@@ -85053,7 +85089,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDSBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDSBO_registerW_registerZ_w032_splat32_double */
     .as_op = "addsbo",
     .codewords = {
       {
@@ -85071,14 +85107,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDSD_registerW_registerZ_registerY_simple */
     .as_op = "addsd",
@@ -85101,7 +85137,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDSD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDSD_registerW_registerZ_w032_splat32_double */
     .as_op = "addsd",
     .codewords = {
       {
@@ -85119,14 +85155,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDSHQ_registerW_registerZ_registerY_simple */
     .as_op = "addshq",
@@ -85149,7 +85185,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDSHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDSHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addshq",
     .codewords = {
       {
@@ -85167,14 +85203,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDSWP_registerW_registerZ_registerY_simple */
     .as_op = "addswp",
@@ -85197,7 +85233,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDSWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDSWP_registerW_registerZ_w032_splat32_double */
     .as_op = "addswp",
     .codewords = {
       {
@@ -85215,14 +85251,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDSW_registerW_registerZ_registerY_simple */
     .as_op = "addsw",
@@ -85352,7 +85388,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDUSBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDUSBO_registerW_registerZ_w032_splat32_double */
     .as_op = "addusbo",
     .codewords = {
       {
@@ -85370,14 +85406,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDUSD_registerW_registerZ_registerY_simple */
     .as_op = "addusd",
@@ -85400,7 +85436,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDUSD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDUSD_registerW_registerZ_w032_splat32_double */
     .as_op = "addusd",
     .codewords = {
       {
@@ -85418,14 +85454,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDUSHQ_registerW_registerZ_registerY_simple */
     .as_op = "addushq",
@@ -85448,7 +85484,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDUSHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDUSHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addushq",
     .codewords = {
       {
@@ -85466,14 +85502,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDUSWP_registerW_registerZ_registerY_simple */
     .as_op = "adduswp",
@@ -85496,7 +85532,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDUSWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDUSWP_registerW_registerZ_w032_splat32_double */
     .as_op = "adduswp",
     .codewords = {
       {
@@ -85514,14 +85550,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDUSW_registerW_registerZ_registerY_simple */
     .as_op = "addusw",
@@ -85685,7 +85721,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDWP_registerW_registerZ_w032_splat32_double */
     .as_op = "addwp",
     .codewords = {
       {
@@ -85703,14 +85739,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDW_registerW_registerZ_registerY_simple */
     .as_op = "addw",
@@ -85801,7 +85837,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX16BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX16BO_registerW_registerZ_w032_splat32_double */
     .as_op = "addx16bo",
     .codewords = {
       {
@@ -85819,14 +85855,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX16D_registerW_registerZ_registerY_simple */
     .as_op = "addx16d",
@@ -85849,7 +85885,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX16D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX16D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx16d",
     .codewords = {
       {
@@ -85867,14 +85903,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX16HQ_registerW_registerZ_registerY_simple */
     .as_op = "addx16hq",
@@ -85897,7 +85933,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX16HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX16HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addx16hq",
     .codewords = {
       {
@@ -85915,14 +85951,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX16UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx16uwd",
@@ -86039,7 +86075,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX16WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX16WP_registerW_registerZ_w032_splat32_double */
     .as_op = "addx16wp",
     .codewords = {
       {
@@ -86057,14 +86093,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX16W_registerW_registerZ_registerY_simple */
     .as_op = "addx16w",
@@ -86134,7 +86170,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX2BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX2BO_registerW_registerZ_w032_splat32_double */
     .as_op = "addx2bo",
     .codewords = {
       {
@@ -86152,14 +86188,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX2D_registerW_registerZ_registerY_simple */
     .as_op = "addx2d",
@@ -86182,7 +86218,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX2D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX2D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx2d",
     .codewords = {
       {
@@ -86200,14 +86236,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX2HQ_registerW_registerZ_registerY_simple */
     .as_op = "addx2hq",
@@ -86230,7 +86266,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX2HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX2HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addx2hq",
     .codewords = {
       {
@@ -86248,14 +86284,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX2UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx2uwd",
@@ -86372,7 +86408,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX2WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX2WP_registerW_registerZ_w032_splat32_double */
     .as_op = "addx2wp",
     .codewords = {
       {
@@ -86390,14 +86426,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX2W_registerW_registerZ_registerY_simple */
     .as_op = "addx2w",
@@ -86467,7 +86503,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX32D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX32D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx32d",
     .codewords = {
       {
@@ -86485,14 +86521,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX32UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx32uwd",
@@ -86656,7 +86692,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX4BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX4BO_registerW_registerZ_w032_splat32_double */
     .as_op = "addx4bo",
     .codewords = {
       {
@@ -86674,14 +86710,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX4D_registerW_registerZ_registerY_simple */
     .as_op = "addx4d",
@@ -86704,7 +86740,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX4D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX4D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx4d",
     .codewords = {
       {
@@ -86722,14 +86758,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX4HQ_registerW_registerZ_registerY_simple */
     .as_op = "addx4hq",
@@ -86752,7 +86788,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX4HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX4HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addx4hq",
     .codewords = {
       {
@@ -86770,14 +86806,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX4UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx4uwd",
@@ -86894,7 +86930,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX4WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX4WP_registerW_registerZ_w032_splat32_double */
     .as_op = "addx4wp",
     .codewords = {
       {
@@ -86912,14 +86948,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX4W_registerW_registerZ_registerY_simple */
     .as_op = "addx4w",
@@ -86989,7 +87025,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX64D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX64D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx64d",
     .codewords = {
       {
@@ -87007,14 +87043,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX64UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx64uwd",
@@ -87178,7 +87214,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX8BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX8BO_registerW_registerZ_w032_splat32_double */
     .as_op = "addx8bo",
     .codewords = {
       {
@@ -87196,14 +87232,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX8D_registerW_registerZ_registerY_simple */
     .as_op = "addx8d",
@@ -87226,7 +87262,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX8D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX8D_registerW_registerZ_w032_splat32_double */
     .as_op = "addx8d",
     .codewords = {
       {
@@ -87244,14 +87280,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX8HQ_registerW_registerZ_registerY_simple */
     .as_op = "addx8hq",
@@ -87274,7 +87310,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX8HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX8HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "addx8hq",
     .codewords = {
       {
@@ -87292,14 +87328,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX8UWD_registerW_registerZ_registerY_simple */
     .as_op = "addx8uwd",
@@ -87416,7 +87452,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ADDX8WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-ADDX8WP_registerW_registerZ_w032_splat32_double */
     .as_op = "addx8wp",
     .codewords = {
       {
@@ -87434,14 +87470,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ADDX8W_registerW_registerZ_registerY_simple */
     .as_op = "addx8w",
@@ -88038,12 +88074,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ANDD_registerW_registerZ_w032_double */
-    .as_op = "andd.@",
+  { /* Opcode-kv4_v1-ANDD_registerW_registerZ_w032_splat32_double */
+    .as_op = "andd",
     .codewords = {
       {
-        .opcode = 0xf8010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf8010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -88059,10 +88095,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ANDD_registerW_registerZ_w064_triple */
     .as_op = "andd",
@@ -88163,12 +88200,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ANDND_registerW_registerZ_w032_double */
-    .as_op = "andnd.@",
+  { /* Opcode-kv4_v1-ANDND_registerW_registerZ_w032_splat32_double */
+    .as_op = "andnd",
     .codewords = {
       {
-        .opcode = 0xfe010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfe010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -88184,10 +88221,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ANDND_registerW_registerZ_w064_triple */
     .as_op = "andnd",
@@ -88597,7 +88635,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-AVGBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-AVGBO_registerW_registerZ_w032_splat32_double */
     .as_op = "avgbo",
     .codewords = {
       {
@@ -88615,14 +88653,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-AVGHQ_registerW_registerZ_registerY_simple */
     .as_op = "avghq",
@@ -88645,7 +88683,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-AVGHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-AVGHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "avghq",
     .codewords = {
       {
@@ -88663,14 +88701,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-AVGRBO_registerW_registerZ_registerY_simple */
     .as_op = "avgrbo",
@@ -88693,7 +88731,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-AVGRBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-AVGRBO_registerW_registerZ_w032_splat32_double */
     .as_op = "avgrbo",
     .codewords = {
       {
@@ -88711,14 +88749,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-AVGRHQ_registerW_registerZ_registerY_simple */
     .as_op = "avgrhq",
@@ -88741,7 +88779,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-AVGRHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-AVGRHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "avgrhq",
     .codewords = {
       {
@@ -88759,14 +88797,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-AVGRUBO_registerW_registerZ_registerY_simple */
     .as_op = "avgrubo",
@@ -88789,7 +88827,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-AVGRUBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-AVGRUBO_registerW_registerZ_w032_splat32_double */
     .as_op = "avgrubo",
     .codewords = {
       {
@@ -88807,14 +88845,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-AVGRUHQ_registerW_registerZ_registerY_simple */
     .as_op = "avgruhq",
@@ -88837,7 +88875,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-AVGRUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-AVGRUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "avgruhq",
     .codewords = {
       {
@@ -88855,14 +88893,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-AVGRUWP_registerW_registerZ_registerY_simple */
     .as_op = "avgruwp",
@@ -88885,7 +88923,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-AVGRUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-AVGRUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "avgruwp",
     .codewords = {
       {
@@ -88903,14 +88941,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-AVGRUW_registerW_registerZ_registerY_simple */
     .as_op = "avgruw",
@@ -88980,7 +89018,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-AVGRWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-AVGRWP_registerW_registerZ_w032_splat32_double */
     .as_op = "avgrwp",
     .codewords = {
       {
@@ -88998,14 +89036,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-AVGRW_registerW_registerZ_registerY_simple */
     .as_op = "avgrw",
@@ -89075,7 +89113,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-AVGUBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-AVGUBO_registerW_registerZ_w032_splat32_double */
     .as_op = "avgubo",
     .codewords = {
       {
@@ -89093,14 +89131,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-AVGUHQ_registerW_registerZ_registerY_simple */
     .as_op = "avguhq",
@@ -89123,7 +89161,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-AVGUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-AVGUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "avguhq",
     .codewords = {
       {
@@ -89141,14 +89179,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-AVGUWP_registerW_registerZ_registerY_simple */
     .as_op = "avguwp",
@@ -89171,7 +89209,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-AVGUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-AVGUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "avguwp",
     .codewords = {
       {
@@ -89189,14 +89227,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-AVGUW_registerW_registerZ_registerY_simple */
     .as_op = "avguw",
@@ -89266,7 +89304,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-AVGWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-AVGWP_registerW_registerZ_w032_splat32_double */
     .as_op = "avgwp",
     .codewords = {
       {
@@ -89284,14 +89322,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-AVGW_registerW_registerZ_registerY_simple */
     .as_op = "avgw",
@@ -90036,7 +90074,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-COMPNBO_comparison_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-COMPNBO_comparison_registerW_registerZ_w032_splat32_double */
     .as_op = "compnbo",
     .codewords = {
       {
@@ -90055,14 +90093,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
       &kv4_v1_comparison_opnd,
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-COMPND_comparison_registerW_registerZ_registerY_simple */
     .as_op = "compnd",
@@ -90135,7 +90173,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-COMPNHQ_comparison_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-COMPNHQ_comparison_registerW_registerZ_w032_splat32_double */
     .as_op = "compnhq",
     .codewords = {
       {
@@ -90154,14 +90192,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
       &kv4_v1_comparison_opnd,
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-COMPNWP_comparison_registerW_registerZ_registerY_simple */
     .as_op = "compnwp",
@@ -90185,7 +90223,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-COMPNWP_comparison_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-COMPNWP_comparison_registerW_registerZ_w032_splat32_double */
     .as_op = "compnwp",
     .codewords = {
       {
@@ -90204,14 +90242,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
       &kv4_v1_comparison_opnd,
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-COMPNW_comparison_registerW_registerZ_registerY_simple */
     .as_op = "compnw",
@@ -91886,7 +91924,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-FCOMPNHQ_floatcomp_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-FCOMPNHQ_floatcomp_registerW_registerZ_w032_splat32_double */
     .as_op = "fcompnhq",
     .codewords = {
       {
@@ -91905,14 +91943,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
       &kv4_v1_floatcomp_opnd,
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-FCOMPNWP_floatcomp_registerW_registerZ_registerY_simple */
     .as_op = "fcompnwp",
@@ -91936,7 +91974,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = "%s %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-FCOMPNWP_floatcomp_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-FCOMPNWP_floatcomp_registerW_registerZ_w032_splat32_double */
     .as_op = "fcompnwp",
     .codewords = {
       {
@@ -91955,14 +91993,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
       &kv4_v1_floatcomp_opnd,
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s%s %s = %s, %s",
+    .fmtstring = "%s %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-FCOMPNW_floatcomp_registerW_registerZ_registerY_simple */
     .as_op = "fcompnw",
@@ -97819,7 +97857,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MAXBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-MAXBO_registerW_registerZ_w032_splat32_double */
     .as_op = "maxbo",
     .codewords = {
       {
@@ -97837,14 +97875,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MAXD_registerW_registerZ_registerY_simple */
     .as_op = "maxd",
@@ -97914,12 +97952,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MAXD_registerW_registerZ_w032_double */
-    .as_op = "maxd.@",
+  { /* Opcode-kv4_v1-MAXD_registerW_registerZ_w032_splat32_double */
+    .as_op = "maxd",
     .codewords = {
       {
-        .opcode = 0xf5010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf5010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -97935,10 +97973,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MAXD_registerW_registerZ_w064_triple */
     .as_op = "maxd",
@@ -97992,7 +98031,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MAXHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-MAXHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "maxhq",
     .codewords = {
       {
@@ -98010,14 +98049,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MAXRBOD_registerW_registerZ_simple */
     .as_op = "maxrbod",
@@ -98100,7 +98139,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MAXUBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-MAXUBO_registerW_registerZ_w032_splat32_double */
     .as_op = "maxubo",
     .codewords = {
       {
@@ -98118,14 +98157,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MAXUD_registerW_registerZ_registerY_simple */
     .as_op = "maxud",
@@ -98195,12 +98234,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MAXUD_registerW_registerZ_w032_double */
-    .as_op = "maxud.@",
+  { /* Opcode-kv4_v1-MAXUD_registerW_registerZ_w032_splat32_double */
+    .as_op = "maxud",
     .codewords = {
       {
-        .opcode = 0xf7010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf7010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -98216,10 +98255,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MAXUD_registerW_registerZ_w064_triple */
     .as_op = "maxud",
@@ -98273,7 +98313,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MAXUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-MAXUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "maxuhq",
     .codewords = {
       {
@@ -98291,14 +98331,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MAXURBOD_registerW_registerZ_simple */
     .as_op = "maxurbod",
@@ -98381,7 +98421,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MAXUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-MAXUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "maxuwp",
     .codewords = {
       {
@@ -98399,14 +98439,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MAXUW_registerW_registerZ_registerY_simple */
     .as_op = "maxuw",
@@ -98497,7 +98537,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MAXWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-MAXWP_registerW_registerZ_w032_splat32_double */
     .as_op = "maxwp",
     .codewords = {
       {
@@ -98515,14 +98555,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MAXW_registerW_registerZ_registerY_simple */
     .as_op = "maxw",
@@ -98613,7 +98653,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MINBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-MINBO_registerW_registerZ_w032_splat32_double */
     .as_op = "minbo",
     .codewords = {
       {
@@ -98631,14 +98671,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MIND_registerW_registerZ_registerY_simple */
     .as_op = "mind",
@@ -98708,12 +98748,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MIND_registerW_registerZ_w032_double */
-    .as_op = "mind.@",
+  { /* Opcode-kv4_v1-MIND_registerW_registerZ_w032_splat32_double */
+    .as_op = "mind",
     .codewords = {
       {
-        .opcode = 0xf4010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf4010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -98729,10 +98769,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MIND_registerW_registerZ_w064_triple */
     .as_op = "mind",
@@ -98786,7 +98827,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MINHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-MINHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "minhq",
     .codewords = {
       {
@@ -98804,14 +98845,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MINRBOD_registerW_registerZ_simple */
     .as_op = "minrbod",
@@ -98894,7 +98935,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MINUBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-MINUBO_registerW_registerZ_w032_splat32_double */
     .as_op = "minubo",
     .codewords = {
       {
@@ -98912,14 +98953,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MINUD_registerW_registerZ_registerY_simple */
     .as_op = "minud",
@@ -98989,12 +99030,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MINUD_registerW_registerZ_w032_double */
-    .as_op = "minud.@",
+  { /* Opcode-kv4_v1-MINUD_registerW_registerZ_w032_splat32_double */
+    .as_op = "minud",
     .codewords = {
       {
-        .opcode = 0xf6010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf6010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -99010,10 +99051,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MINUD_registerW_registerZ_w064_triple */
     .as_op = "minud",
@@ -99067,7 +99109,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MINUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-MINUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "minuhq",
     .codewords = {
       {
@@ -99085,14 +99127,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MINURBOD_registerW_registerZ_simple */
     .as_op = "minurbod",
@@ -99175,7 +99217,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MINUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-MINUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "minuwp",
     .codewords = {
       {
@@ -99193,14 +99235,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MINUW_registerW_registerZ_registerY_simple */
     .as_op = "minuw",
@@ -99291,7 +99333,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-MINWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-MINWP_registerW_registerZ_w032_splat32_double */
     .as_op = "minwp",
     .codewords = {
       {
@@ -99309,14 +99351,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-MINW_registerW_registerZ_registerY_simple */
     .as_op = "minw",
@@ -100664,12 +100706,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-NANDD_registerW_registerZ_w032_double */
-    .as_op = "nandd.@",
+  { /* Opcode-kv4_v1-NANDD_registerW_registerZ_w032_splat32_double */
+    .as_op = "nandd",
     .codewords = {
       {
-        .opcode = 0xf9010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf9010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -100685,10 +100727,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-NANDD_registerW_registerZ_w064_triple */
     .as_op = "nandd",
@@ -100875,12 +100918,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-NORD_registerW_registerZ_w032_double */
-    .as_op = "nord.@",
+  { /* Opcode-kv4_v1-NORD_registerW_registerZ_w032_splat32_double */
+    .as_op = "nord",
     .codewords = {
       {
-        .opcode = 0xfb010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfb010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -100896,10 +100939,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-NORD_registerW_registerZ_w064_triple */
     .as_op = "nord",
@@ -101068,12 +101112,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-NXORD_registerW_registerZ_w032_double */
-    .as_op = "nxord.@",
+  { /* Opcode-kv4_v1-NXORD_registerW_registerZ_w032_splat32_double */
+    .as_op = "nxord",
     .codewords = {
       {
-        .opcode = 0xfd010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfd010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -101089,10 +101133,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-NXORD_registerW_registerZ_w064_triple */
     .as_op = "nxord",
@@ -101261,12 +101306,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ORD_registerW_registerZ_w032_double */
-    .as_op = "ord.@",
+  { /* Opcode-kv4_v1-ORD_registerW_registerZ_w032_splat32_double */
+    .as_op = "ord",
     .codewords = {
       {
-        .opcode = 0xfa010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfa010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -101282,10 +101327,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ORD_registerW_registerZ_w064_triple */
     .as_op = "ord",
@@ -101386,12 +101432,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-ORND_registerW_registerZ_w032_double */
-    .as_op = "ornd.@",
+  { /* Opcode-kv4_v1-ORND_registerW_registerZ_w032_splat32_double */
+    .as_op = "ornd",
     .codewords = {
       {
-        .opcode = 0xff010800,
-        .mask = 0xff03f800,
+        .opcode = 0xff010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -101407,10 +101453,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-ORND_registerW_registerZ_w064_triple */
     .as_op = "ornd",
@@ -101999,7 +102046,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFBO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfbo",
     .codewords = {
       {
@@ -102017,14 +102064,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFCD.I_registerW_registerZ_registerY_simple */
     .as_op = "sbfcd.i",
@@ -102188,12 +102235,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFD_registerW_registerZ_w032_double */
-    .as_op = "sbfd.@",
+  { /* Opcode-kv4_v1-SBFD_registerW_registerZ_w032_splat32_double */
+    .as_op = "sbfd",
     .codewords = {
       {
-        .opcode = 0xf3010800,
-        .mask = 0xff03f800,
+        .opcode = 0xf3010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -102209,10 +102256,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFD_registerW_registerZ_w064_triple */
     .as_op = "sbfd",
@@ -102266,7 +102314,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfhq",
     .codewords = {
       {
@@ -102284,14 +102332,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFSBO_registerW_registerZ_registerY_simple */
     .as_op = "sbfsbo",
@@ -102314,7 +102362,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFSBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFSBO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfsbo",
     .codewords = {
       {
@@ -102332,14 +102380,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFSD_registerW_registerZ_registerY_simple */
     .as_op = "sbfsd",
@@ -102362,7 +102410,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFSD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFSD_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfsd",
     .codewords = {
       {
@@ -102380,14 +102428,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFSHQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfshq",
@@ -102410,7 +102458,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFSHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFSHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfshq",
     .codewords = {
       {
@@ -102428,14 +102476,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFSWP_registerW_registerZ_registerY_simple */
     .as_op = "sbfswp",
@@ -102458,7 +102506,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFSWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFSWP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfswp",
     .codewords = {
       {
@@ -102476,14 +102524,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFSW_registerW_registerZ_registerY_simple */
     .as_op = "sbfsw",
@@ -102553,7 +102601,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFUSBO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFUSBO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfusbo",
     .codewords = {
       {
@@ -102571,14 +102619,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFUSD_registerW_registerZ_registerY_simple */
     .as_op = "sbfusd",
@@ -102601,7 +102649,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFUSD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFUSD_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfusd",
     .codewords = {
       {
@@ -102619,14 +102667,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFUSHQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfushq",
@@ -102649,7 +102697,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFUSHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFUSHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfushq",
     .codewords = {
       {
@@ -102667,14 +102715,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFUSWP_registerW_registerZ_registerY_simple */
     .as_op = "sbfuswp",
@@ -102697,7 +102745,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFUSWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFUSWP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfuswp",
     .codewords = {
       {
@@ -102715,14 +102763,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFUSW_registerW_registerZ_registerY_simple */
     .as_op = "sbfusw",
@@ -102886,7 +102934,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFWP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfwp",
     .codewords = {
       {
@@ -102904,14 +102952,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFW_registerW_registerZ_registerY_simple */
     .as_op = "sbfw",
@@ -103002,7 +103050,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX16BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX16BO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx16bo",
     .codewords = {
       {
@@ -103020,14 +103068,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX16D_registerW_registerZ_registerY_simple */
     .as_op = "sbfx16d",
@@ -103050,7 +103098,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX16D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX16D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx16d",
     .codewords = {
       {
@@ -103068,14 +103116,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX16HQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfx16hq",
@@ -103098,7 +103146,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX16HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX16HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx16hq",
     .codewords = {
       {
@@ -103116,14 +103164,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX16UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx16uwd",
@@ -103240,7 +103288,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX16WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX16WP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx16wp",
     .codewords = {
       {
@@ -103258,14 +103306,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX16W_registerW_registerZ_registerY_simple */
     .as_op = "sbfx16w",
@@ -103335,7 +103383,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX2BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX2BO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx2bo",
     .codewords = {
       {
@@ -103353,14 +103401,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX2D_registerW_registerZ_registerY_simple */
     .as_op = "sbfx2d",
@@ -103383,7 +103431,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX2D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX2D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx2d",
     .codewords = {
       {
@@ -103401,14 +103449,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX2HQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfx2hq",
@@ -103431,7 +103479,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX2HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX2HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx2hq",
     .codewords = {
       {
@@ -103449,14 +103497,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX2UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx2uwd",
@@ -103573,7 +103621,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX2WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX2WP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx2wp",
     .codewords = {
       {
@@ -103591,14 +103639,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX2W_registerW_registerZ_registerY_simple */
     .as_op = "sbfx2w",
@@ -103668,7 +103716,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX32D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX32D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx32d",
     .codewords = {
       {
@@ -103686,14 +103734,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX32UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx32uwd",
@@ -103857,7 +103905,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX4BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX4BO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx4bo",
     .codewords = {
       {
@@ -103875,14 +103923,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX4D_registerW_registerZ_registerY_simple */
     .as_op = "sbfx4d",
@@ -103905,7 +103953,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX4D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX4D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx4d",
     .codewords = {
       {
@@ -103923,14 +103971,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX4HQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfx4hq",
@@ -103953,7 +104001,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX4HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX4HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx4hq",
     .codewords = {
       {
@@ -103971,14 +104019,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX4UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx4uwd",
@@ -104095,7 +104143,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX4WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX4WP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx4wp",
     .codewords = {
       {
@@ -104113,14 +104161,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX4W_registerW_registerZ_registerY_simple */
     .as_op = "sbfx4w",
@@ -104190,7 +104238,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX64D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX64D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx64d",
     .codewords = {
       {
@@ -104208,14 +104256,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX64UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx64uwd",
@@ -104379,7 +104427,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX8BO_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX8BO_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx8bo",
     .codewords = {
       {
@@ -104397,14 +104445,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX8D_registerW_registerZ_registerY_simple */
     .as_op = "sbfx8d",
@@ -104427,7 +104475,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX8D_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX8D_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx8d",
     .codewords = {
       {
@@ -104445,14 +104493,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX8HQ_registerW_registerZ_registerY_simple */
     .as_op = "sbfx8hq",
@@ -104475,7 +104523,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX8HQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX8HQ_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx8hq",
     .codewords = {
       {
@@ -104493,14 +104541,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX8UWD_registerW_registerZ_registerY_simple */
     .as_op = "sbfx8uwd",
@@ -104617,7 +104665,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBFX8WP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-SBFX8WP_registerW_registerZ_w032_splat32_double */
     .as_op = "sbfx8wp",
     .codewords = {
       {
@@ -104635,14 +104683,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBFX8W_registerW_registerZ_registerY_simple */
     .as_op = "sbfx8w",
@@ -104759,12 +104807,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBMM8_registerW_registerZ_w032_double */
-    .as_op = "sbmm8.@",
+  { /* Opcode-kv4_v1-SBMM8_registerW_registerZ_w032_splat32_double */
+    .as_op = "sbmm8",
     .codewords = {
       {
-        .opcode = 0xfe020800,
-        .mask = 0xff03f800,
+        .opcode = 0xfe020000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -104780,10 +104828,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBMM8_registerW_registerZ_w064_triple */
     .as_op = "sbmm8",
@@ -104884,12 +104933,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-SBMMT8_registerW_registerZ_w032_double */
-    .as_op = "sbmmt8.@",
+  { /* Opcode-kv4_v1-SBMMT8_registerW_registerZ_w032_splat32_double */
+    .as_op = "sbmmt8",
     .codewords = {
       {
-        .opcode = 0xff020800,
-        .mask = 0xff03f800,
+        .opcode = 0xff020000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -104905,10 +104954,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-SBMMT8_registerW_registerZ_w064_triple */
     .as_op = "sbmmt8",
@@ -107374,7 +107424,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-STSUD_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-STSUD_registerW_registerZ_w032_splat32_double */
     .as_op = "stsud",
     .codewords = {
       {
@@ -107392,14 +107442,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-STSUHQ_registerW_registerZ_registerY_simple */
     .as_op = "stsuhq",
@@ -107422,7 +107472,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-STSUHQ_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-STSUHQ_registerW_registerZ_w032_splat32_double */
     .as_op = "stsuhq",
     .codewords = {
       {
@@ -107440,14 +107490,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-STSUWP_registerW_registerZ_registerY_simple */
     .as_op = "stsuwp",
@@ -107470,7 +107520,7 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-STSUWP_splat32_registerW_registerZ_w032_double */
+  { /* Opcode-kv4_v1-STSUWP_registerW_registerZ_w032_splat32_double */
     .as_op = "stsuwp",
     .codewords = {
       {
@@ -107488,14 +107538,14 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .coding_size = 64,
     .bundling = ((int)0 << 8) | (int)Bundling_kv4_v1_TINY_X, ((int)0 << 8) | (int)Reservation_kv4_v1_ALU_TINY_X,
     .format = {
-      &kv4_v1_splat32_opnd,
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = "%s %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-STSUW_registerW_registerZ_registerY_simple */
     .as_op = "stsuw",
@@ -110121,12 +110171,12 @@ struct kvxopc kvx_kv4_v1_optab[] = {
     .rclass = "",
     .fmtstring = " %s = %s, %s",
   },
-  { /* Opcode-kv4_v1-XORD_registerW_registerZ_w032_double */
-    .as_op = "xord.@",
+  { /* Opcode-kv4_v1-XORD_registerW_registerZ_w032_splat32_double */
+    .as_op = "xord",
     .codewords = {
       {
-        .opcode = 0xfc010800,
-        .mask = 0xff03f800,
+        .opcode = 0xfc010000,
+        .mask = 0xff03f000,
         .flags = kvxOPCODE_FLAG_MODE64|kvxOPCODE_FLAG_MODE32
       },
       {
@@ -110142,10 +110192,11 @@ struct kvxopc kvx_kv4_v1_optab[] = {
       &kv4_v1_registerw_opnd,
       &kv4_v1_registerz_opnd,
       &kv4_v1_upper27_lower5_opnd,
+      &kv4_v1_splat32_opnd,
       NULL
     },
     .rclass = "",
-    .fmtstring = " %s = %s, %s",
+    .fmtstring = " %s = %s, %s%s",
   },
   { /* Opcode-kv4_v1-XORD_registerW_registerZ_w064_triple */
     .as_op = "xord",

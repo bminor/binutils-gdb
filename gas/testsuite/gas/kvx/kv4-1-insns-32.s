@@ -5,7 +5,7 @@
 
 #	Option: '-m32'
 
-##	target-core:	kv3-2
+##	target-core:	kv4-1
 
 	.section .text
 
@@ -25,27 +25,27 @@ main:
 	;;
 	abdd $r4 = $r4r5.lo, -8589934592
 	;;
-	abdd.@ $r4r5r6r7.x = $r5, 536870911
+	abdd $r4r5r6r7.x = $r5, 536870911.@
 	;;
 	abdhq $r4r5.hi = $r4r5r6r7.y, $r6
 	;;
-	abdhq.@ $r6r7.lo = $r4r5r6r7.z, 536870911
+	abdhq $r6r7.lo = $r4r5r6r7.z, 536870911
 	;;
 	abdsbo $r7 = $r6r7.hi, $r4r5r6r7.t
 	;;
-	abdsbo $r8 = $r8r9.lo, 536870911
+	abdsbo $r8 = $r8r9.lo, 536870911.@
 	;;
 	abdsd $r8r9r10r11.x = $r9, $r8r9.hi
 	;;
-	abdsd.@ $r8r9r10r11.y = $r10, 536870911
+	abdsd $r8r9r10r11.y = $r10, 536870911
 	;;
 	abdshq $r10r11.lo = $r8r9r10r11.z, $r11
 	;;
-	abdshq $r10r11.hi = $r8r9r10r11.t, 536870911
+	abdshq $r10r11.hi = $r8r9r10r11.t, 536870911.@
 	;;
 	abdswp $r12 = $sp, $r13
 	;;
-	abdswp.@ $tp = $r14, 536870911
+	abdswp $tp = $r14, 536870911
 	;;
 	abdsw $fp = $r15, $rp
 	;;
@@ -53,19 +53,19 @@ main:
 	;;
 	abdubo $r16r17r18r19.x = $r17, $r16r17.hi
 	;;
-	abdubo $r16r17r18r19.y = $r18, 536870911
+	abdubo $r16r17r18r19.y = $r18, 536870911.@
 	;;
 	abdud $r18r19.lo = $r16r17r18r19.z, $r19
 	;;
-	abdud.@ $r18r19.hi = $r16r17r18r19.t, 536870911
+	abdud $r18r19.hi = $r16r17r18r19.t, 536870911
 	;;
 	abduhq $r20 = $r20r21.lo, $r20r21r22r23.x
 	;;
-	abduhq $r21 = $r20r21.hi, 536870911
+	abduhq $r21 = $r20r21.hi, 536870911.@
 	;;
 	abduwp $r20r21r22r23.y = $r22, $r22r23.lo
 	;;
-	abduwp.@ $r20r21r22r23.z = $r23, 536870911
+	abduwp $r20r21r22r23.z = $r23, 536870911
 	;;
 	abduw $r22r23.hi = $r20r21r22r23.t, $r24
 	;;
@@ -73,7 +73,7 @@ main:
 	;;
 	abdwp $r25 = $r24r25.hi, $r24r25r26r27.y
 	;;
-	abdwp $r26 = $r26r27.lo, 536870911
+	abdwp $r26 = $r26r27.lo, 536870911.@
 	;;
 	abdw $r24r25r26r27.z = $r27, $r26r27.hi
 	;;
@@ -121,7 +121,7 @@ main:
 	;;
 	addbo $r40r41r42r43.x = $r41, $r40r41.hi
 	;;
-	addbo.@ $r40r41r42r43.y = $r42, 536870911
+	addbo $r40r41r42r43.y = $r42, 536870911
 	;;
 	addcd.i $r42r43.lo = $r40r41r42r43.z, $r43
 	;;
@@ -139,7 +139,7 @@ main:
 	;;
 	addd $r48 = $r48r49.lo, -8589934592
 	;;
-	addd.@ $r48r49r50r51.x = $r49, 536870911
+	addd $r48r49r50r51.x = $r49, 536870911.@
 	;;
 	addhq $r48r49.hi = $r48r49r50r51.y, $r50
 	;;
@@ -153,7 +153,7 @@ main:
 	;;
 	addsbo $r53 = $r52r53.hi, $r52r53r54r55.y
 	;;
-	addsbo.@ $r54 = $r54r55.lo, 536870911
+	addsbo $r54 = $r54r55.lo, 536870911.@
 	;;
 	addsd $r52r53r54r55.z = $r55, $r54r55.hi
 	;;
@@ -161,7 +161,7 @@ main:
 	;;
 	addshq $r56r57.lo = $r56r57r58r59.x, $r57
 	;;
-	addshq.@ $r56r57.hi = $r56r57r58r59.y, 536870911
+	addshq $r56r57.hi = $r56r57r58r59.y, 536870911.@
 	;;
 	addswp $r58 = $r58r59.lo, $r56r57r58r59.z
 	;;
@@ -179,7 +179,7 @@ main:
 	;;
 	addusbo $r62r63.hi = $r60r61r62r63.t, $r0
 	;;
-	addusbo.@ $r0r1.lo = $r0r1r2r3.x, 536870911
+	addusbo $r0r1.lo = $r0r1r2r3.x, 536870911.@
 	;;
 	addusd $r1 = $r0r1.hi, $r0r1r2r3.y
 	;;
@@ -187,7 +187,7 @@ main:
 	;;
 	addushq $r0r1r2r3.z = $r3, $r2r3.hi
 	;;
-	addushq.@ $r0r1r2r3.t = $r4, 536870911
+	addushq $r0r1r2r3.t = $r4, 536870911.@
 	;;
 	adduswp $r4r5.lo = $r4r5r6r7.x, $r5
 	;;
@@ -207,7 +207,7 @@ main:
 	;;
 	addwp $r11 = $r10r11.hi, $r8r9r10r11.t
 	;;
-	addwp.@ $r12 = $sp, 536870911
+	addwp $r12 = $sp, 536870911.@
 	;;
 	addw $r13 = $tp, $r14
 	;;
@@ -221,7 +221,7 @@ main:
 	;;
 	addx16d $r18 = $r18r19.lo, $r16r17r18r19.z
 	;;
-	addx16d.@ $r19 = $r18r19.hi, 536870911
+	addx16d $r19 = $r18r19.hi, 536870911.@
 	;;
 	addx16hq $r16r17r18r19.t = $r20, $r20r21.lo
 	;;
@@ -237,7 +237,7 @@ main:
 	;;
 	addx16wp $r24r25r26r27.x = $r25, $r24r25.hi
 	;;
-	addx16wp.@ $r24r25r26r27.y = $r26, 536870911
+	addx16wp $r24r25r26r27.y = $r26, 536870911.@
 	;;
 	addx16w $r26r27.lo = $r24r25r26r27.z, $r27
 	;;
@@ -249,7 +249,7 @@ main:
 	;;
 	addx2d $r28r29r30r31.y = $r30, $r30r31.lo
 	;;
-	addx2d.@ $r28r29r30r31.z = $r31, 536870911
+	addx2d $r28r29r30r31.z = $r31, 536870911.@
 	;;
 	addx2hq $r30r31.hi = $r28r29r30r31.t, $r32
 	;;
@@ -265,7 +265,7 @@ main:
 	;;
 	addx2wp $r36r37.lo = $r36r37r38r39.x, $r37
 	;;
-	addx2wp.@ $r36r37.hi = $r36r37r38r39.y, 536870911
+	addx2wp $r36r37.hi = $r36r37r38r39.y, 536870911.@
 	;;
 	addx2w $r38 = $r38r39.lo, $r36r37r38r39.z
 	;;
@@ -289,7 +289,7 @@ main:
 	;;
 	addx4bo $r46r47.lo = $r44r45r46r47.z, $r47
 	;;
-	addx4bo.@ $r46r47.hi = $r44r45r46r47.t, 536870911
+	addx4bo $r46r47.hi = $r44r45r46r47.t, 536870911.@
 	;;
 	addx4d $r48 = $r48r49.lo, $r48r49r50r51.x
 	;;
@@ -297,7 +297,7 @@ main:
 	;;
 	addx4hq $r48r49r50r51.y = $r50, $r50r51.lo
 	;;
-	addx4hq.@ $r48r49r50r51.z = $r51, 536870911
+	addx4hq $r48r49r50r51.z = $r51, 536870911.@
 	;;
 	addx4uwd $r50r51.hi = $r48r49r50r51.t, $r52
 	;;
@@ -317,7 +317,7 @@ main:
 	;;
 	addx64d $r58 = $r58r59.lo, $r56r57r58r59.z
 	;;
-	addx64d.@ $r59 = $r58r59.hi, 536870911
+	addx64d $r59 = $r58r59.hi, 536870911.@
 	;;
 	addx64uwd $r56r57r58r59.t = $r60, $r60r61.lo
 	;;
@@ -337,7 +337,7 @@ main:
 	;;
 	addx8d $r2r3.lo = $r0r1r2r3.z, $r3
 	;;
-	addx8d.@ $r2r3.hi = $r0r1r2r3.t, 536870911
+	addx8d $r2r3.hi = $r0r1r2r3.t, 536870911.@
 	;;
 	addx8hq $r4 = $r4r5.lo, $r4r5r6r7.x
 	;;
@@ -353,7 +353,7 @@ main:
 	;;
 	addx8wp $r9 = $r8r9.hi, $r8r9r10r11.y
 	;;
-	addx8wp.@ $r10 = $r10r11.lo, 536870911
+	addx8wp $r10 = $r10r11.lo, 536870911.@
 	;;
 	addx8w $r8r9r10r11.z = $r11, $r10r11.hi
 	;;
@@ -403,7 +403,7 @@ main:
 	;;
 	andd $r28 = $r28r29.lo, -8589934592
 	;;
-	andd.@ $r28r29r30r31.x = $r29, 536870911
+	andd $r28r29r30r31.x = $r29, 536870911
 	;;
 	andnd $r28r29.hi = $r28r29r30r31.y, 2305843009213693951
 	;;
@@ -413,7 +413,7 @@ main:
 	;;
 	andnd $r28r29r30r31.t = $r32, -8589934592
 	;;
-	andnd.@ $r32r33.lo = $r32r33r34r35.x, 536870911
+	andnd $r32r33.lo = $r32r33r34r35.x, 536870911.@
 	;;
 	andnw $r33 = $r32r33.hi, $r32r33r34r35.y
 	;;
@@ -451,55 +451,63 @@ main:
 	;;
 	avghq $r44r45.hi = $r44r45r46r47.y, $r46
 	;;
-	avgrbo $r46r47.lo = $r44r45r46r47.z, $r47
+	avghq $r46r47.lo = $r44r45r46r47.z, 536870911.@
 	;;
-	avgrbo.@ $r46r47.hi = $r44r45r46r47.t, 536870911
+	avgrbo $r47 = $r46r47.hi, $r44r45r46r47.t
 	;;
-	avgrhq $r48 = $r48r49.lo, $r48r49r50r51.x
+	avgrbo $r48 = $r48r49.lo, 536870911
 	;;
-	avgrubo $r49 = $r48r49.hi, $r48r49r50r51.y
+	avgrhq $r48r49r50r51.x = $r49, $r48r49.hi
 	;;
-	avgrubo $r50 = $r50r51.lo, 536870911
+	avgrhq $r48r49r50r51.y = $r50, 536870911.@
 	;;
-	avgruhq $r48r49r50r51.z = $r51, $r50r51.hi
+	avgrubo $r50r51.lo = $r48r49r50r51.z, $r51
 	;;
-	avgruwp $r48r49r50r51.t = $r52, $r52r53.lo
+	avgrubo $r50r51.hi = $r48r49r50r51.t, 536870911
 	;;
-	avgruwp.@ $r52r53r54r55.x = $r53, 536870911
+	avgruhq $r52 = $r52r53.lo, $r52r53r54r55.x
 	;;
-	avgruw $r52r53.hi = $r52r53r54r55.y, $r54
+	avgruhq $r53 = $r52r53.hi, 536870911.@
 	;;
-	avgruw $r54r55.lo = $r52r53r54r55.z, 536870911
+	avgruwp $r52r53r54r55.y = $r54, $r54r55.lo
 	;;
-	avgrwp $r55 = $r54r55.hi, $r52r53r54r55.t
+	avgruwp $r52r53r54r55.z = $r55, 536870911
 	;;
-	avgrwp $r56 = $r56r57.lo, 536870911
+	avgruw $r54r55.hi = $r52r53r54r55.t, $r56
 	;;
-	avgrw $r56r57r58r59.x = $r57, $r56r57.hi
+	avgruw $r56r57.lo = $r56r57r58r59.x, 536870911
 	;;
-	avgrw $r56r57r58r59.y = $r58, 536870911
+	avgrwp $r57 = $r56r57.hi, $r56r57r58r59.y
 	;;
-	avgubo $r58r59.lo = $r56r57r58r59.z, $r59
+	avgrwp $r58 = $r58r59.lo, 536870911.@
 	;;
-	avgubo.@ $r58r59.hi = $r56r57r58r59.t, 536870911
+	avgrw $r56r57r58r59.z = $r59, $r58r59.hi
 	;;
-	avguhq $r60 = $r60r61.lo, $r60r61r62r63.x
+	avgrw $r56r57r58r59.t = $r60, 536870911
 	;;
-	avguwp $r61 = $r60r61.hi, $r60r61r62r63.y
+	avgubo $r60r61.lo = $r60r61r62r63.x, $r61
 	;;
-	avguwp $r62 = $r62r63.lo, 536870911
+	avgubo $r60r61.hi = $r60r61r62r63.y, 536870911
 	;;
-	avguw $r60r61r62r63.z = $r63, $r62r63.hi
+	avguhq $r62 = $r62r63.lo, $r60r61r62r63.z
 	;;
-	avguw $r60r61r62r63.t = $r0, 536870911
+	avguhq $r63 = $r62r63.hi, 536870911.@
 	;;
-	avgwp $r0r1.lo = $r0r1r2r3.x, $r1
+	avguwp $r60r61r62r63.t = $r0, $r0r1.lo
 	;;
-	avgwp.@ $r0r1.hi = $r0r1r2r3.y, 536870911
+	avguwp $r0r1r2r3.x = $r1, 536870911
 	;;
-	avgw $r2 = $r2r3.lo, $r0r1r2r3.z
+	avguw $r0r1.hi = $r0r1r2r3.y, $r2
 	;;
-	avgw $r3 = $r2r3.hi, 536870911
+	avguw $r2r3.lo = $r0r1r2r3.z, 536870911
+	;;
+	avgwp $r3 = $r2r3.hi, $r0r1r2r3.t
+	;;
+	avgwp $r4 = $r4r5.lo, 536870911.@
+	;;
+	avgw $r4r5r6r7.x = $r5, $r4r5.hi
+	;;
+	avgw $r4r5r6r7.y = $r6, 536870911
 	;;
 	await
 	;;
@@ -509,191 +517,191 @@ main:
 	;;
 	call -33554432
 	;;
-	cbsd $r0r1r2r3.t = $r4
+	cbsd $r6r7.lo = $r4r5r6r7.z
 	;;
-	cbswp $r4r5.lo = $r4r5r6r7.x
+	cbswp $r7 = $r6r7.hi
 	;;
-	cbsw $r5 = $r4r5.hi
+	cbsw $r4r5r6r7.t = $r8
 	;;
-	cb.dnez $r4r5r6r7.y? -32768
+	cb.dnez $r8r9.lo? -32768
 	;;
-	clrf $r6 = $r6r7.lo, 7, 7
+	clrf $r8r9r10r11.x = $r9, 7, 7
 	;;
-	clsd $r4r5r6r7.z = $r7
+	clsd $r8r9.hi = $r8r9r10r11.y
 	;;
-	clswp $r6r7.hi = $r4r5r6r7.t
+	clswp $r10 = $r10r11.lo
 	;;
-	clsw $r8 = $r8r9.lo
+	clsw $r8r9r10r11.z = $r11
 	;;
-	clzd $r8r9r10r11.x = $r9
+	clzd $r10r11.hi = $r8r9r10r11.t
 	;;
-	clzwp $r8r9.hi = $r8r9r10r11.y
+	clzwp $r12 = $sp
 	;;
-	clzw $r10 = $r10r11.lo
+	clzw $r13 = $tp
 	;;
-	cmovebo.nez $r8r9r10r11.z? $r11 = $r10r11.hi
+	cmovebo.nez $r14? $fp = $r15
 	;;
-	cmoved.deqz $r8r9r10r11.t? $r12 = 2305843009213693951
+	cmoved.deqz $rp? $r16 = 2305843009213693951
 	;;
-	cmoved.dltz $sp? $r13 = $tp
+	cmoved.dltz $r16r17.lo? $r16r17r18r19.x = $r17
 	;;
-	cmoved.dgez $r14? $fp = -64
+	cmoved.dgez $r16r17.hi? $r16r17r18r19.y = -64
 	;;
-	cmoved.dlez $r15? $rp = -8589934592
+	cmoved.dlez $r18? $r18r19.lo = -8589934592
 	;;
-	cmovehq.eqz $r16? $r16r17.lo = $r16r17r18r19.x
+	cmovehq.eqz $r16r17r18r19.z? $r19 = $r18r19.hi
 	;;
-	cmovewp.ltz $r17? $r16r17.hi = $r16r17r18r19.y
+	cmovewp.ltz $r16r17r18r19.t? $r20 = $r20r21.lo
 	;;
-	cmuldt $r8r9r10r11.lo = $r18, $r18r19.lo
+	cmuldt $r8r9r10r11.lo = $r20r21r22r23.x, $r21
 	;;
-	cmulghxdt $r10r11 = $r16r17r18r19.z, $r19
+	cmulghxdt $r10r11 = $r20r21.hi, $r20r21r22r23.y
 	;;
-	cmulglxdt $r8r9r10r11.hi = $r18r19.hi, $r16r17r18r19.t
+	cmulglxdt $r8r9r10r11.hi = $r22, $r22r23.lo
 	;;
-	cmulgmxdt $r12r13 = $r20, $r20r21.lo
+	cmulgmxdt $r12r13 = $r20r21r22r23.z, $r23
 	;;
-	cmulxdt $r12r13r14r15.lo = $r20r21r22r23.x, $r21
+	cmulxdt $r12r13r14r15.lo = $r22r23.hi, $r20r21r22r23.t
 	;;
-	compd.ne $r20r21.hi = $r20r21r22r23.y, 2305843009213693951
+	compd.ne $r24 = $r24r25.lo, 2305843009213693951
 	;;
-	compd.eq $r22 = $r22r23.lo, $r20r21r22r23.z
+	compd.eq $r24r25r26r27.x = $r25, $r24r25.hi
 	;;
-	compd.lt $r23 = $r22r23.hi, -64
+	compd.lt $r24r25r26r27.y = $r26, -64
 	;;
-	compd.ge $r20r21r22r23.t = $r24, -8589934592
+	compd.ge $r26r27.lo = $r24r25r26r27.z, -8589934592
 	;;
-	compnbo.le $r24r25.lo = $r24r25r26r27.x, $r25
+	compnbo.le $r27 = $r26r27.hi, $r24r25r26r27.t
 	;;
-	compnbo.gt $r24r25.hi = $r24r25r26r27.y, 536870911
+	compnbo.gt $r28 = $r28r29.lo, 536870911
 	;;
-	compnd.ltu $r26 = $r26r27.lo, $r24r25r26r27.z
+	compnd.ltu $r28r29r30r31.x = $r29, $r28r29.hi
 	;;
-	compnd.geu $r27 = $r26r27.hi, 536870911
+	compnd.geu $r28r29r30r31.y = $r30, 536870911
 	;;
-	compnhq.leu $r24r25r26r27.t = $r28, $r28r29.lo
+	compnhq.leu $r30r31.lo = $r28r29r30r31.z, $r31
 	;;
-	compnhq.gtu.@ $r28r29r30r31.x = $r29, 536870911
+	compnhq.gtu $r30r31.hi = $r28r29r30r31.t, 536870911.@
 	;;
-	compnwp.all $r28r29.hi = $r28r29r30r31.y, $r30
+	compnwp.all $r32 = $r32r33.lo, $r32r33r34r35.x
 	;;
-	compnwp.nall $r30r31.lo = $r28r29r30r31.z, 536870911
+	compnwp.nall $r33 = $r32r33.hi, 536870911
 	;;
-	compnw.any $r31 = $r30r31.hi, $r28r29r30r31.t
+	compnw.any $r32r33r34r35.y = $r34, $r34r35.lo
 	;;
-	compnw.none $r32 = $r32r33.lo, 536870911
+	compnw.none $r32r33r34r35.z = $r35, 536870911
 	;;
-	compuwd.ne $r32r33r34r35.x = $r33, $r32r33.hi
+	compuwd.ne $r34r35.hi = $r32r33r34r35.t, $r36
 	;;
-	compuwd.eq $r32r33r34r35.y = $r34, 536870911
+	compuwd.eq $r36r37.lo = $r36r37r38r39.x, 536870911
 	;;
-	compwd.lt $r34r35.lo = $r32r33r34r35.z, $r35
+	compwd.lt $r37 = $r36r37.hi, $r36r37r38r39.y
 	;;
-	compwd.ge $r34r35.hi = $r32r33r34r35.t, 536870911
+	compwd.ge $r38 = $r38r39.lo, 536870911
 	;;
-	compw.le $r36 = $r36r37.lo, $r36r37r38r39.x
+	compw.le $r36r37r38r39.z = $r39, $r38r39.hi
 	;;
-	compw.gt $r37 = $r36r37.hi, 536870911
+	compw.gt $r36r37r38r39.t = $r40, 536870911
 	;;
-	copyd $r36r37r38r39.y = $r38
+	copyd $r40r41.lo = $r40r41r42r43.x
 	;;
 	copyo $r12r13r14r15 = $r16r17r18r19
 	;;
-	copyq $r14r15 = $r38r39.lo, $r36r37r38r39.z
+	copyq $r14r15 = $r41, $r40r41.hi
 	;;
-	copyw $r39 = $r38r39.hi
+	copyw $r40r41r42r43.y = $r42
 	;;
-	crcbellw $r36r37r38r39.t = $r40, $r40r41.lo
+	crcbellw $r42r43.lo = $r40r41r42r43.z, $r43
 	;;
-	crcbellw $r40r41r42r43.x = $r41, 536870911
+	crcbellw $r42r43.hi = $r40r41r42r43.t, 536870911
 	;;
-	crcbelmw $r40r41.hi = $r40r41r42r43.y, $r42
+	crcbelmw $r44 = $r44r45.lo, $r44r45r46r47.x
 	;;
-	crcbelmw $r42r43.lo = $r40r41r42r43.z, 536870911
+	crcbelmw $r45 = $r44r45.hi, 536870911
 	;;
-	crclellw $r43 = $r42r43.hi, $r40r41r42r43.t
+	crclellw $r44r45r46r47.y = $r46, $r46r47.lo
 	;;
-	crclellw $r44 = $r44r45.lo, 536870911
+	crclellw $r44r45r46r47.z = $r47, 536870911
 	;;
-	crclelmw $r44r45r46r47.x = $r45, $r44r45.hi
+	crclelmw $r46r47.hi = $r44r45r46r47.t, $r48
 	;;
-	crclelmw $r44r45r46r47.y = $r46, 536870911
+	crclelmw $r48r49.lo = $r48r49r50r51.x, 536870911
 	;;
-	ctzd $r46r47.lo = $r44r45r46r47.z
+	ctzd $r49 = $r48r49.hi
 	;;
-	ctzwp $r47 = $r46r47.hi
+	ctzwp $r48r49r50r51.y = $r50
 	;;
-	ctzw $r44r45r46r47.t = $r48
+	ctzw $r50r51.lo = $r48r49r50r51.z
 	;;
 	d1inval
 	;;
-	dflushl $r48r49.lo[$r48r49r50r51.x]
+	dflushl $r51[$r50r51.hi]
 	;;
-	dflushl 2305843009213693951[$r49]
+	dflushl 2305843009213693951[$r48r49r50r51.t]
 	;;
-	dflushl -64[$r48r49.hi]
+	dflushl -64[$r52]
 	;;
-	dflushl -8589934592[$r48r49r50r51.y]
+	dflushl -8589934592[$r52r53.lo]
 	;;
-	dflushsw.l1 $r50, $r50r51.lo
+	dflushsw.l1 $r52r53r54r55.x, $r53
 	;;
-	dinvall.xs $r48r49r50r51.z[$r51]
+	dinvall.xs $r52r53.hi[$r52r53r54r55.y]
 	;;
-	dinvall 2305843009213693951[$r50r51.hi]
+	dinvall 2305843009213693951[$r54]
 	;;
-	dinvall -64[$r48r49r50r51.t]
+	dinvall -64[$r54r55.lo]
 	;;
-	dinvall -8589934592[$r52]
+	dinvall -8589934592[$r52r53r54r55.z]
 	;;
-	dinvalsw.l2 $r52r53.lo, $r52r53r54r55.x
+	dinvalsw.l2 $r55, $r54r55.hi
 	;;
 	dot2suwdp $r12r13r14r15.hi = $r16r17, $r16r17r18r19.lo
 	;;
-	dot2suwd $r53 = $r52r53.hi, $r52r53r54r55.y
+	dot2suwd $r52r53r54r55.t = $r56, $r56r57.lo
 	;;
 	dot2uwdp $r18r19 = $r16r17r18r19.hi, $r20r21
 	;;
-	dot2uwd $r54 = $r54r55.lo, $r52r53r54r55.z
+	dot2uwd $r56r57r58r59.x = $r57, $r56r57.hi
 	;;
 	dot2wdp $r20r21r22r23.lo = $r22r23, $r20r21r22r23.hi
 	;;
-	dot2wd $r55 = $r54r55.hi, $r52r53r54r55.t
+	dot2wd $r56r57r58r59.y = $r58, $r58r59.lo
 	;;
 	dot2wzp $r24r25 = $r24r25r26r27.lo, $r26r27
 	;;
-	dot2w $r56 = $r56r57.lo, $r56r57r58r59.x
+	dot2w $r56r57r58r59.z = $r59, $r58r59.hi
 	;;
-	dpurgel $r57[$r56r57.hi]
+	dpurgel $r56r57r58r59.t[$r60]
 	;;
-	dpurgel 2305843009213693951[$r56r57r58r59.y]
+	dpurgel 2305843009213693951[$r60r61.lo]
 	;;
-	dpurgel -64[$r58]
+	dpurgel -64[$r60r61r62r63.x]
 	;;
-	dpurgel -8589934592[$r58r59.lo]
+	dpurgel -8589934592[$r61]
 	;;
-	dpurgesw.l1 $r56r57r58r59.z, $r59
+	dpurgesw.l1 $r60r61.hi, $r60r61r62r63.y
 	;;
-	dtouchl.xs $r58r59.hi[$r56r57r58r59.t]
+	dtouchl.xs $r62[$r62r63.lo]
 	;;
-	dtouchl 2305843009213693951[$r60]
+	dtouchl 2305843009213693951[$r60r61r62r63.z]
 	;;
-	dtouchl -64[$r60r61.lo]
+	dtouchl -64[$r63]
 	;;
-	dtouchl -8589934592[$r60r61r62r63.x]
+	dtouchl -8589934592[$r62r63.hi]
 	;;
 	errop
 	;;
-	extfs $r61 = $r60r61.hi, 7, 7
+	extfs $r60r61r62r63.t = $r0, 7, 7
 	;;
-	extfz $r60r61r62r63.y = $r62, 7, 7
+	extfz $r0r1.lo = $r0r1r2r3.x, 7, 7
 	;;
-	fabsd $r62r63.lo = $r60r61r62r63.z
+	fabsd $r1 = $r0r1.hi
 	;;
-	fabshq $r63 = $r62r63.hi
+	fabshq $r0r1r2r3.y = $r2
 	;;
-	fabswp $r60r61r62r63.t = $r0
+	fabswp $r2r3.lo = $r0r1r2r3.z
 	;;
-	fabsw $r0r1.lo = $r0r1r2r3.x
+	fabsw $r3 = $r2r3.hi
 	;;
 	fadddc.c.rn $r24r25r26r27.hi = $r28r29, $r28r29r30r31.lo
 	;;
@@ -701,245 +709,245 @@ main:
 	;;
 	fadddp.rd $r32r33r34r35.lo = $r34r35, $r32r33r34r35.hi
 	;;
-	faddd.rz.s $r1 = $r0r1.hi, $r0r1r2r3.y
+	faddd.rz.s $r0r1r2r3.t = $r4, $r4r5.lo
 	;;
 	faddho.rna $r36r37 = $r36r37r38r39.lo, $r38r39
 	;;
-	faddhq.rnz.s $r2 = $r2r3.lo, $r0r1r2r3.z
+	faddhq.rnz.s $r4r5r6r7.x = $r5, $r4r5.hi
 	;;
-	faddwc.c.ro $r3 = $r2r3.hi, $r0r1r2r3.t
+	faddwc.c.ro $r4r5r6r7.y = $r6, $r6r7.lo
 	;;
 	faddwcp.c.s $r36r37r38r39.hi = $r40r41, $r40r41r42r43.lo
 	;;
 	faddwcp.rn $r42r43 = $r40r41r42r43.hi, $r44r45
 	;;
-	faddwc.ru.s $r4 = $r4r5.lo, $r4r5r6r7.x
+	faddwc.ru.s $r4r5r6r7.z = $r7, $r6r7.hi
 	;;
-	faddwp.rd $r5 = $r4r5.hi, $r4r5r6r7.y
+	faddwp.rd $r4r5r6r7.t = $r8, $r8r9.lo
 	;;
 	faddwq.rz.s $r44r45r46r47.lo = $r46r47, $r44r45r46r47.hi
 	;;
-	faddw.rna $r6 = $r6r7.lo, $r4r5r6r7.z
+	faddw.rna $r8r9r10r11.x = $r9, $r8r9.hi
 	;;
-	fcdivd.s $r7 = $r48r49
+	fcdivd.s $r8r9r10r11.y = $r48r49
 	;;
-	fcdivwp $r6r7.hi = $r48r49r50r51.lo
+	fcdivwp $r10 = $r48r49r50r51.lo
 	;;
-	fcdivw.s $r4r5r6r7.t = $r50r51
+	fcdivw.s $r10r11.lo = $r50r51
 	;;
-	fcompd.one $r8 = $r8r9.lo, $r8r9r10r11.x
+	fcompd.one $r8r9r10r11.z = $r11, $r10r11.hi
 	;;
-	fcompd.ueq $r9 = $r8r9.hi, 536870911
+	fcompd.ueq $r8r9r10r11.t = $r12, 536870911
 	;;
-	fcompnd.oeq $r8r9r10r11.y = $r10, $r10r11.lo
+	fcompnd.oeq $sp = $r13, $tp
 	;;
-	fcompnd.une $r8r9r10r11.z = $r11, 536870911
+	fcompnd.une $r14 = $fp, 536870911
 	;;
-	fcompnhq.olt $r10r11.hi = $r8r9r10r11.t, $r12
+	fcompnhq.olt $r15 = $rp, $r16
 	;;
-	fcompnhq.uge.@ $sp = $r13, 536870911
+	fcompnhq.uge $r16r17.lo = $r16r17r18r19.x, 536870911.@
 	;;
-	fcompnwp.oge $tp = $r14, $fp
+	fcompnwp.oge $r17 = $r16r17.hi, $r16r17r18r19.y
 	;;
-	fcompnwp.ult $r15 = $rp, 536870911
+	fcompnwp.ult $r18 = $r18r19.lo, 536870911
 	;;
-	fcompnw.one $r16 = $r16r17.lo, $r16r17r18r19.x
+	fcompnw.one $r16r17r18r19.z = $r19, $r18r19.hi
 	;;
-	fcompnw.ueq $r17 = $r16r17.hi, 536870911
+	fcompnw.ueq $r16r17r18r19.t = $r20, 536870911
 	;;
-	fcompw.oeq $r16r17r18r19.y = $r18, $r18r19.lo
+	fcompw.oeq $r20r21.lo = $r20r21r22r23.x, $r21
 	;;
-	fcompw.une $r16r17r18r19.z = $r19, 536870911
+	fcompw.une $r20r21.hi = $r20r21r22r23.y, 536870911
 	;;
 	fdot2wdp.rnz $r48r49r50r51.hi = $r52r53, $r52r53r54r55.lo
 	;;
-	fdot2wd.ro.s $r18r19.hi = $r16r17r18r19.t, $r20
+	fdot2wd.ro.s $r22 = $r22r23.lo, $r20r21r22r23.z
 	;;
 	fdot2wzp $r54r55 = $r52r53r54r55.hi, $r56r57
 	;;
-	fdot2w.rn.s $r20r21.lo = $r20r21r22r23.x, $r21
+	fdot2w.rn.s $r23 = $r22r23.hi, $r20r21r22r23.t
 	;;
 	fence
 	;;
-	ffdmaswp.ru $r20r21.hi = $r56r57r58r59.lo, $r58r59
+	ffdmaswp.ru $r24 = $r56r57r58r59.lo, $r58r59
 	;;
 	ffdmaswq.rd.s $r56r57r58r59.hi = $r20r21r22r23, $r24r25r26r27
 	;;
-	ffdmasw.rz $r20r21r22r23.y = $r22, $r22r23.lo
+	ffdmasw.rz $r24r25.lo = $r24r25r26r27.x, $r25
 	;;
-	ffdmawp.rna.s $r20r21r22r23.z = $r60r61, $r60r61r62r63.lo
+	ffdmawp.rna.s $r24r25.hi = $r60r61, $r60r61r62r63.lo
 	;;
 	ffdmawq.rnz $r62r63 = $r28r29r30r31, $r32r33r34r35
 	;;
-	ffdmaw.ro.s $r23 = $r22r23.hi, $r20r21r22r23.t
+	ffdmaw.ro.s $r24r25r26r27.y = $r26, $r26r27.lo
 	;;
-	ffdmdawp $r24 = $r60r61r62r63.hi, $r0r1
+	ffdmdawp $r24r25r26r27.z = $r60r61r62r63.hi, $r0r1
 	;;
 	ffdmdawq.rn.s $r0r1r2r3.lo = $r36r37r38r39, $r40r41r42r43
 	;;
-	ffdmdaw.ru $r24r25.lo = $r24r25r26r27.x, $r25
+	ffdmdaw.ru $r27 = $r26r27.hi, $r24r25r26r27.t
 	;;
-	ffdmdswp.rd.s $r24r25.hi = $r2r3, $r0r1r2r3.hi
+	ffdmdswp.rd.s $r28 = $r2r3, $r0r1r2r3.hi
 	;;
 	ffdmdswq.rz $r4r5 = $r44r45r46r47, $r48r49r50r51
 	;;
-	ffdmdsw.rna.s $r24r25r26r27.y = $r26, $r26r27.lo
+	ffdmdsw.rna.s $r28r29.lo = $r28r29r30r31.x, $r29
 	;;
-	ffdmsawp.rnz $r24r25r26r27.z = $r4r5r6r7.lo, $r6r7
+	ffdmsawp.rnz $r28r29.hi = $r4r5r6r7.lo, $r6r7
 	;;
 	ffdmsawq.ro.s $r4r5r6r7.hi = $r52r53r54r55, $r56r57r58r59
 	;;
-	ffdmsaw $r27 = $r26r27.hi, $r24r25r26r27.t
+	ffdmsaw $r28r29r30r31.y = $r30, $r30r31.lo
 	;;
-	ffdmswp.rn.s $r28 = $r8r9, $r8r9r10r11.lo
+	ffdmswp.rn.s $r28r29r30r31.z = $r8r9, $r8r9r10r11.lo
 	;;
 	ffdmswq.ru $r10r11 = $r60r61r62r63, $r0r1r2r3
 	;;
-	ffdmsw.rd.s $r28r29.lo = $r28r29r30r31.x, $r29
+	ffdmsw.rd.s $r31 = $r30r31.hi, $r28r29r30r31.t
 	;;
-	ffmad.rz $r28r29.hi = $r28r29r30r31.y, $r30
+	ffmad.rz $r32 = $r32r33.lo, $r32r33r34r35.x
 	;;
 	ffmaho.rna.s $r8r9r10r11.hi = $r12r13, $r12r13r14r15.lo
 	;;
-	ffmahq.rnz $r30r31.lo = $r28r29r30r31.z, $r31
+	ffmahq.rnz $r33 = $r32r33.hi, $r32r33r34r35.y
 	;;
-	ffmahwq.ro.s $r14r15 = $r30r31.hi, $r28r29r30r31.t
+	ffmahwq.ro.s $r14r15 = $r34, $r34r35.lo
 	;;
-	ffmahw $r32 = $r32r33.lo, $r32r33r34r35.x
+	ffmahw $r32r33r34r35.z = $r35, $r34r35.hi
 	;;
 	ffmawcp.rn.s $r12r13r14r15.hi = $r16r17, $r16r17r18r19.lo
 	;;
-	ffmawc.c.ru $r33 = $r32r33.hi, $r32r33r34r35.y
+	ffmawc.c.ru $r32r33r34r35.t = $r36, $r36r37.lo
 	;;
-	ffmawdp.rd.s $r18r19 = $r34, $r34r35.lo
+	ffmawdp.rd.s $r18r19 = $r36r37r38r39.x, $r37
 	;;
-	ffmawd.rz $r32r33r34r35.z = $r35, $r34r35.hi
+	ffmawd.rz $r36r37.hi = $r36r37r38r39.y, $r38
 	;;
-	ffmawp.rna.s $r32r33r34r35.t = $r36, $r36r37.lo
+	ffmawp.rna.s $r38r39.lo = $r36r37r38r39.z, $r39
 	;;
 	ffmawq.rnz $r16r17r18r19.hi = $r20r21, $r20r21r22r23.lo
 	;;
-	ffmaw.ro.s $r36r37r38r39.x = $r37, $r36r37.hi
+	ffmaw.ro.s $r38r39.hi = $r36r37r38r39.t, $r40
 	;;
-	ffmsd $r36r37r38r39.y = $r38, $r38r39.lo
+	ffmsd $r40r41.lo = $r40r41r42r43.x, $r41
 	;;
 	ffmsho.rn.s $r22r23 = $r20r21r22r23.hi, $r24r25
 	;;
-	ffmshq.ru $r36r37r38r39.z = $r39, $r38r39.hi
+	ffmshq.ru $r40r41.hi = $r40r41r42r43.y, $r42
 	;;
-	ffmshwq.rd.s $r24r25r26r27.lo = $r36r37r38r39.t, $r40
+	ffmshwq.rd.s $r24r25r26r27.lo = $r42r43.lo, $r40r41r42r43.z
 	;;
-	ffmshw.rz $r40r41.lo = $r40r41r42r43.x, $r41
+	ffmshw.rz $r43 = $r42r43.hi, $r40r41r42r43.t
 	;;
 	ffmswcp.rna.s $r26r27 = $r24r25r26r27.hi, $r28r29
 	;;
-	ffmswc.c.rnz $r40r41.hi = $r40r41r42r43.y, $r42
+	ffmswc.c.rnz $r44 = $r44r45.lo, $r44r45r46r47.x
 	;;
-	ffmswdp.ro.s $r28r29r30r31.lo = $r42r43.lo, $r40r41r42r43.z
+	ffmswdp.ro.s $r28r29r30r31.lo = $r45, $r44r45.hi
 	;;
-	ffmswd $r43 = $r42r43.hi, $r40r41r42r43.t
+	ffmswd $r44r45r46r47.y = $r46, $r46r47.lo
 	;;
-	ffmswp.rn.s $r44 = $r44r45.lo, $r44r45r46r47.x
+	ffmswp.rn.s $r44r45r46r47.z = $r47, $r46r47.hi
 	;;
 	ffmswq.ru $r30r31 = $r28r29r30r31.hi, $r32r33
 	;;
-	ffmsw.rd.s $r45 = $r44r45.hi, $r44r45r46r47.y
+	ffmsw.rd.s $r44r45r46r47.t = $r48, $r48r49.lo
 	;;
-	fixedd.rz $r46 = $r46r47.lo, 7
+	fixedd.rz $r48r49r50r51.x = $r49, 7
 	;;
-	fixedud.rna.s $r44r45r46r47.z = $r47, 7
+	fixedud.rna.s $r48r49.hi = $r48r49r50r51.y, 7
 	;;
-	fixeduwp.rnz $r46r47.hi = $r44r45r46r47.t, 7
+	fixeduwp.rnz $r50 = $r50r51.lo, 7
 	;;
-	fixeduw.ro.s $r48 = $r48r49.lo, 7
+	fixeduw.ro.s $r48r49r50r51.z = $r51, 7
 	;;
-	fixedwp $r48r49r50r51.x = $r49, 7
+	fixedwp $r50r51.hi = $r48r49r50r51.t, 7
 	;;
-	fixedw.rn.s $r48r49.hi = $r48r49r50r51.y, 7
+	fixedw.rn.s $r52 = $r52r53.lo, 7
 	;;
-	floatd.ru $r50 = $r50r51.lo, 7
+	floatd.ru $r52r53r54r55.x = $r53, 7
 	;;
-	floatud.rd.s $r48r49r50r51.z = $r51, 7
+	floatud.rd.s $r52r53.hi = $r52r53r54r55.y, 7
 	;;
-	floatuwp.rz $r50r51.hi = $r48r49r50r51.t, 7
+	floatuwp.rz $r54 = $r54r55.lo, 7
 	;;
-	floatuw.rna.s $r52 = $r52r53.lo, 7
+	floatuw.rna.s $r52r53r54r55.z = $r55, 7
 	;;
-	floatwp.rnz $r52r53r54r55.x = $r53, 7
+	floatwp.rnz $r54r55.hi = $r52r53r54r55.t, 7
 	;;
-	floatw.ro.s $r52r53.hi = $r52r53r54r55.y, 7
+	floatw.ro.s $r56 = $r56r57.lo, 7
 	;;
-	fmaxd $r54 = $r54r55.lo, $r52r53r54r55.z
+	fmaxd $r56r57r58r59.x = $r57, $r56r57.hi
 	;;
-	fmaxhq $r55 = $r54r55.hi, $r52r53r54r55.t
+	fmaxhq $r56r57r58r59.y = $r58, $r58r59.lo
 	;;
-	fmaxwp $r56 = $r56r57.lo, $r56r57r58r59.x
+	fmaxwp $r56r57r58r59.z = $r59, $r58r59.hi
 	;;
-	fmaxw $r57 = $r56r57.hi, $r56r57r58r59.y
+	fmaxw $r56r57r58r59.t = $r60, $r60r61.lo
 	;;
-	fmind $r58 = $r58r59.lo, $r56r57r58r59.z
+	fmind $r60r61r62r63.x = $r61, $r60r61.hi
 	;;
-	fminhq $r59 = $r58r59.hi, $r56r57r58r59.t
+	fminhq $r60r61r62r63.y = $r62, $r62r63.lo
 	;;
-	fminwp $r60 = $r60r61.lo, $r60r61r62r63.x
+	fminwp $r60r61r62r63.z = $r63, $r62r63.hi
 	;;
-	fminw $r61 = $r60r61.hi, $r60r61r62r63.y
+	fminw $r60r61r62r63.t = $r0, $r0r1.lo
 	;;
-	fmm212w $r32r33r34r35.lo = $r62, $r62r63.lo
+	fmm212w $r32r33r34r35.lo = $r0r1r2r3.x, $r1
 	;;
 	fmm222w.rn.s $r34r35 = $r32r33r34r35.hi, $r36r37
 	;;
-	fmma212w.ru $r36r37r38r39.lo = $r60r61r62r63.z, $r63
+	fmma212w.ru $r36r37r38r39.lo = $r0r1.hi, $r0r1r2r3.y
 	;;
 	fmma222w.tn.rd.s $r38r39 = $r36r37r38r39.hi, $r40r41
 	;;
-	fmms212w.rz $r40r41r42r43.lo = $r62r63.hi, $r60r61r62r63.t
+	fmms212w.rz $r40r41r42r43.lo = $r2, $r2r3.lo
 	;;
 	fmms222w.nt.rna.s $r42r43 = $r40r41r42r43.hi, $r44r45
 	;;
-	fmuld.rnz $r0 = $r0r1.lo, $r0r1r2r3.x
+	fmuld.rnz $r0r1r2r3.z = $r3, $r2r3.hi
 	;;
 	fmulho.ro.s $r44r45r46r47.lo = $r46r47, $r44r45r46r47.hi
 	;;
-	fmulhq $r1 = $r0r1.hi, $r0r1r2r3.y
+	fmulhq $r0r1r2r3.t = $r4, $r4r5.lo
 	;;
-	fmulhwq.rn.s $r48r49 = $r2, $r2r3.lo
+	fmulhwq.rn.s $r48r49 = $r4r5r6r7.x, $r5
 	;;
-	fmulhw.ru $r0r1r2r3.z = $r3, $r2r3.hi
+	fmulhw.ru $r4r5.hi = $r4r5r6r7.y, $r6
 	;;
 	fmulwcp.rd.s $r48r49r50r51.lo = $r50r51, $r48r49r50r51.hi
 	;;
-	fmulwc.c.rz $r0r1r2r3.t = $r4, $r4r5.lo
+	fmulwc.c.rz $r6r7.lo = $r4r5r6r7.z, $r7
 	;;
-	fmulwdp.rna.s $r52r53 = $r4r5r6r7.x, $r5
+	fmulwdp.rna.s $r52r53 = $r6r7.hi, $r4r5r6r7.t
 	;;
-	fmulwd.rnz $r4r5.hi = $r4r5r6r7.y, $r6
+	fmulwd.rnz $r8 = $r8r9.lo, $r8r9r10r11.x
 	;;
-	fmulwp.ro.s $r6r7.lo = $r4r5r6r7.z, $r7
+	fmulwp.ro.s $r9 = $r8r9.hi, $r8r9r10r11.y
 	;;
 	fmulwq $r52r53r54r55.lo = $r54r55, $r52r53r54r55.hi
 	;;
-	fmulw.rn.s $r6r7.hi = $r4r5r6r7.t, $r8
+	fmulw.rn.s $r10 = $r10r11.lo, $r8r9r10r11.z
 	;;
-	fnarrowdwp.ru $r8r9.lo = $r56r57
+	fnarrowdwp.ru $r11 = $r56r57
 	;;
-	fnarrowdw.rd.s $r8r9r10r11.x = $r9
+	fnarrowdw.rd.s $r10r11.hi = $r8r9r10r11.t
 	;;
-	fnarrowwhq.rz $r8r9.hi = $r56r57r58r59.lo
+	fnarrowwhq.rz $r12 = $r56r57r58r59.lo
 	;;
-	fnarrowwh.rna.s $r8r9r10r11.y = $r10
+	fnarrowwh.rna.s $sp = $r13
 	;;
-	fnegd $r10r11.lo = $r8r9r10r11.z
+	fnegd $tp = $r14
 	;;
-	fneghq $r11 = $r10r11.hi
+	fneghq $fp = $r15
 	;;
-	fnegwp $r8r9r10r11.t = $r12
+	fnegwp $rp = $r16
 	;;
-	fnegw $sp = $r13
+	fnegw $r16r17.lo = $r16r17r18r19.x
 	;;
-	frecw.rnz $tp = $r14
+	frecw.rnz $r17 = $r16r17.hi
 	;;
-	frsrw.ro.s $fp = $r15
+	frsrw.ro.s $r16r17r18r19.y = $r18
 	;;
 	fsbfdc.c $r58r59 = $r56r57r58r59.hi, $r60r61
 	;;
@@ -947,1195 +955,1195 @@ main:
 	;;
 	fsbfdp.ru $r0r1 = $r0r1r2r3.lo, $r2r3
 	;;
-	fsbfd.rd.s $rp = $r16, $r16r17.lo
+	fsbfd.rd.s $r18r19.lo = $r16r17r18r19.z, $r19
 	;;
 	fsbfho.rz $r0r1r2r3.hi = $r4r5, $r4r5r6r7.lo
 	;;
-	fsbfhq.rna.s $r16r17r18r19.x = $r17, $r16r17.hi
+	fsbfhq.rna.s $r18r19.hi = $r16r17r18r19.t, $r20
 	;;
-	fsbfwc.c.rnz $r16r17r18r19.y = $r18, $r18r19.lo
+	fsbfwc.c.rnz $r20r21.lo = $r20r21r22r23.x, $r21
 	;;
 	fsbfwcp.c.ro.s $r6r7 = $r4r5r6r7.hi, $r8r9
 	;;
 	fsbfwcp $r8r9r10r11.lo = $r10r11, $r8r9r10r11.hi
 	;;
-	fsbfwc.rn.s $r16r17r18r19.z = $r19, $r18r19.hi
+	fsbfwc.rn.s $r20r21.hi = $r20r21r22r23.y, $r22
 	;;
-	fsbfwp.ru $r16r17r18r19.t = $r20, $r20r21.lo
+	fsbfwp.ru $r22r23.lo = $r20r21r22r23.z, $r23
 	;;
 	fsbfwq.rd.s $r12r13 = $r12r13r14r15.lo, $r14r15
 	;;
-	fsbfw.rz $r20r21r22r23.x = $r21, $r20r21.hi
+	fsbfw.rz $r22r23.hi = $r20r21r22r23.t, $r24
 	;;
-	fsdivd.s $r20r21r22r23.y = $r12r13r14r15.hi
+	fsdivd.s $r24r25.lo = $r12r13r14r15.hi
 	;;
-	fsdivwp $r22 = $r16r17
+	fsdivwp $r24r25r26r27.x = $r16r17
 	;;
-	fsdivw.s $r22r23.lo = $r16r17r18r19.lo
+	fsdivw.s $r25 = $r16r17r18r19.lo
 	;;
-	fsrecd $r20r21r22r23.z = $r23
+	fsrecd $r24r25.hi = $r24r25r26r27.y
 	;;
-	fsrecwp.s $r22r23.hi = $r20r21r22r23.t
+	fsrecwp.s $r26 = $r26r27.lo
 	;;
-	fsrecw $r24 = $r24r25.lo
+	fsrecw $r24r25r26r27.z = $r27
 	;;
-	fsrsrd $r24r25r26r27.x = $r25
+	fsrsrd $r26r27.hi = $r24r25r26r27.t
 	;;
-	fsrsrwp $r24r25.hi = $r24r25r26r27.y
+	fsrsrwp $r28 = $r28r29.lo
 	;;
-	fsrsrw $r26 = $r26r27.lo
+	fsrsrw $r28r29r30r31.x = $r29
 	;;
-	fwidenlhwp.s $r24r25r26r27.z = $r27
+	fwidenlhwp.s $r28r29.hi = $r28r29r30r31.y
 	;;
-	fwidenlhw $r26r27.hi = $r24r25r26r27.t
+	fwidenlhw $r30 = $r30r31.lo
 	;;
-	fwidenlwd.s $r28 = $r28r29.lo
+	fwidenlwd.s $r28r29r30r31.z = $r31
 	;;
-	fwidenmhwp $r28r29r30r31.x = $r29
+	fwidenmhwp $r30r31.hi = $r28r29r30r31.t
 	;;
-	fwidenmhw.s $r28r29.hi = $r28r29r30r31.y
+	fwidenmhw.s $r32 = $r32r33.lo
 	;;
-	fwidenmwd $r30 = $r30r31.lo
+	fwidenmwd $r32r33r34r35.x = $r33
 	;;
-	get $r28r29r30r31.z = $pc
+	get $r32r33.hi = $pc
 	;;
-	get $r31 = $pc
+	get $r32r33r34r35.y = $pc
 	;;
 	goto -33554432
 	;;
-	i1invals $r30r31.hi[$r28r29r30r31.t]
+	i1invals $r34[$r34r35.lo]
 	;;
-	i1invals 2305843009213693951[$r32]
+	i1invals 2305843009213693951[$r32r33r34r35.z]
 	;;
-	i1invals -64[$r32r33.lo]
+	i1invals -64[$r35]
 	;;
-	i1invals -8589934592[$r32r33r34r35.x]
+	i1invals -8589934592[$r34r35.hi]
 	;;
 	i1inval
 	;;
-	icall $r33
+	icall $r32r33r34r35.t
 	;;
-	iget $r32r33.hi
+	iget $r36
 	;;
-	igoto $r32r33r34r35.y
+	igoto $r36r37.lo
 	;;
-	insf $r34 = $r34r35.lo, 7, 7
+	insf $r36r37r38r39.x = $r37, 7, 7
 	;;
-	landd $r32r33r34r35.z = $r35, $r34r35.hi
+	landd $r36r37.hi = $r36r37r38r39.y, $r38
 	;;
-	landw $r32r33r34r35.t = $r36, $r36r37.lo
+	landw $r38r39.lo = $r36r37r38r39.z, $r39
 	;;
-	landw $r36r37r38r39.x = $r37, 536870911
+	landw $r38r39.hi = $r36r37r38r39.t, 536870911
 	;;
-	lbs.xs $r36r37.hi = $r36r37r38r39.y[$r38]
+	lbs.xs $r40 = $r40r41.lo[$r40r41r42r43.x]
 	;;
-	lbs.s.dgtz $r38r39.lo? $r36r37r38r39.z = -1125899906842624[$r39]
+	lbs.s.dgtz $r41? $r40r41.hi = -1125899906842624[$r40r41r42r43.y]
 	;;
-	lbs.u.odd $r38r39.hi? $r36r37r38r39.t = -8388608[$r40]
+	lbs.u.odd $r42? $r42r43.lo = -8388608[$r40r41r42r43.z]
 	;;
-	lbs.us.even $r40r41.lo? $r40r41r42r43.x = [$r41]
+	lbs.us.even $r43? $r42r43.hi = [$r40r41r42r43.t]
 	;;
-	lbs $r40r41.hi = 2305843009213693951[$r40r41r42r43.y]
+	lbs $r44 = 2305843009213693951[$r44r45.lo]
 	;;
-	lbs.s $r42 = -64[$r42r43.lo]
+	lbs.s $r44r45r46r47.x = -64[$r45]
 	;;
-	lbs.u $r40r41r42r43.z = -8589934592[$r43]
+	lbs.u $r44r45.hi = -8589934592[$r44r45r46r47.y]
 	;;
-	lbz.us $r42r43.hi = $r40r41r42r43.t[$r44]
+	lbz.us $r46 = $r46r47.lo[$r44r45r46r47.z]
 	;;
-	lbz.wnez $r44r45.lo? $r44r45r46r47.x = -1125899906842624[$r45]
+	lbz.wnez $r47? $r46r47.hi = -1125899906842624[$r44r45r46r47.t]
 	;;
-	lbz.s.weqz $r44r45.hi? $r44r45r46r47.y = -8388608[$r46]
+	lbz.s.weqz $r48? $r48r49.lo = -8388608[$r48r49r50r51.x]
 	;;
-	lbz.u.wltz $r46r47.lo? $r44r45r46r47.z = [$r47]
+	lbz.u.wltz $r49? $r48r49.hi = [$r48r49r50r51.y]
 	;;
-	lbz.us $r46r47.hi = 2305843009213693951[$r44r45r46r47.t]
+	lbz.us $r50 = 2305843009213693951[$r50r51.lo]
 	;;
-	lbz $r48 = -64[$r48r49.lo]
+	lbz $r48r49r50r51.z = -64[$r51]
 	;;
-	lbz.s $r48r49r50r51.x = -8589934592[$r49]
+	lbz.s $r50r51.hi = -8589934592[$r48r49r50r51.t]
 	;;
-	ld.u.xs $r48r49.hi = $r48r49r50r51.y[$r50]
+	ld.u.xs $r52 = $r52r53.lo[$r52r53r54r55.x]
 	;;
-	ld.us.wgez $r50r51.lo? $r48r49r50r51.z = -1125899906842624[$r51]
+	ld.us.wgez $r53? $r52r53.hi = -1125899906842624[$r52r53r54r55.y]
 	;;
-	ld.wlez $r50r51.hi? $r48r49r50r51.t = -8388608[$r52]
+	ld.wlez $r54? $r54r55.lo = -8388608[$r52r53r54r55.z]
 	;;
-	ld.s.wgtz $r52r53.lo? $r52r53r54r55.x = [$r53]
+	ld.s.wgtz $r55? $r54r55.hi = [$r52r53r54r55.t]
 	;;
-	ld.u $r52r53.hi = 2305843009213693951[$r52r53r54r55.y]
+	ld.u $r56 = 2305843009213693951[$r56r57.lo]
 	;;
-	ld.us $r54 = -64[$r54r55.lo]
+	ld.us $r56r57r58r59.x = -64[$r57]
 	;;
-	ld $r52r53r54r55.z = -8589934592[$r55]
+	ld $r56r57.hi = -8589934592[$r56r57r58r59.y]
 	;;
-	lhs.s $r54r55.hi = $r52r53r54r55.t[$r56]
+	lhs.s $r58 = $r58r59.lo[$r56r57r58r59.z]
 	;;
-	lhs.u.dnez $r56r57.lo? $r56r57r58r59.x = -1125899906842624[$r57]
+	lhs.u.dnez $r59? $r58r59.hi = -1125899906842624[$r56r57r58r59.t]
 	;;
-	lhs.us.deqz $r56r57.hi? $r56r57r58r59.y = -8388608[$r58]
+	lhs.us.deqz $r60? $r60r61.lo = -8388608[$r60r61r62r63.x]
 	;;
-	lhs.dltz $r58r59.lo? $r56r57r58r59.z = [$r59]
+	lhs.dltz $r61? $r60r61.hi = [$r60r61r62r63.y]
 	;;
-	lhs.s $r58r59.hi = 2305843009213693951[$r56r57r58r59.t]
+	lhs.s $r62 = 2305843009213693951[$r62r63.lo]
 	;;
-	lhs.u $r60 = -64[$r60r61.lo]
+	lhs.u $r60r61r62r63.z = -64[$r63]
 	;;
-	lhs.us $r60r61r62r63.x = -8589934592[$r61]
+	lhs.us $r62r63.hi = -8589934592[$r60r61r62r63.t]
 	;;
-	lhz.xs $r60r61.hi = $r60r61r62r63.y[$r62]
+	lhz.xs $r0 = $r0r1.lo[$r0r1r2r3.x]
 	;;
-	lhz.s.dgez $r62r63.lo? $r60r61r62r63.z = -1125899906842624[$r63]
+	lhz.s.dgez $r1? $r0r1.hi = -1125899906842624[$r0r1r2r3.y]
 	;;
-	lhz.u.dlez $r62r63.hi? $r60r61r62r63.t = -8388608[$r0]
+	lhz.u.dlez $r2? $r2r3.lo = -8388608[$r0r1r2r3.z]
 	;;
-	lhz.us.dgtz $r0r1.lo? $r0r1r2r3.x = [$r1]
+	lhz.us.dgtz $r3? $r2r3.hi = [$r0r1r2r3.t]
 	;;
-	lhz $r0r1.hi = 2305843009213693951[$r0r1r2r3.y]
+	lhz $r4 = 2305843009213693951[$r4r5.lo]
 	;;
-	lhz.s $r2 = -64[$r2r3.lo]
+	lhz.s $r4r5r6r7.x = -64[$r5]
 	;;
-	lhz.u $r0r1r2r3.z = -8589934592[$r3]
+	lhz.u $r4r5.hi = -8589934592[$r4r5r6r7.y]
 	;;
-	lnandd $r2r3.hi = $r0r1r2r3.t, $r4
+	lnandd $r6 = $r6r7.lo, $r4r5r6r7.z
 	;;
-	lnandw $r4r5.lo = $r4r5r6r7.x, $r5
+	lnandw $r7 = $r6r7.hi, $r4r5r6r7.t
 	;;
-	lnandw $r4r5.hi = $r4r5r6r7.y, 536870911
+	lnandw $r8 = $r8r9.lo, 536870911
 	;;
-	lnord $r6 = $r6r7.lo, $r4r5r6r7.z
+	lnord $r8r9r10r11.x = $r9, $r8r9.hi
 	;;
-	lnorw $r7 = $r6r7.hi, $r4r5r6r7.t
+	lnorw $r8r9r10r11.y = $r10, $r10r11.lo
 	;;
-	lnorw $r8 = $r8r9.lo, 536870911
+	lnorw $r8r9r10r11.z = $r11, 536870911
 	;;
-	loopdo $r8r9r10r11.x, -32768
+	loopdo $r10r11.hi, -32768
 	;;
-	lord $r9 = $r8r9.hi, $r8r9r10r11.y
+	lord $r8r9r10r11.t = $r12, $sp
 	;;
-	lorw $r10 = $r10r11.lo, $r8r9r10r11.z
+	lorw $r13 = $tp, $r14
 	;;
-	lorw $r11 = $r10r11.hi, 536870911
+	lorw $fp = $r15, 536870911
 	;;
-	lo.us $r4r5r6r7 = $r8r9r10r11.t[$r12]
+	lo.us $r4r5r6r7 = $rp[$r16]
 	;;
-	lo.u0 $sp? $r8r9r10r11 = -1125899906842624[$r13]
+	lo.u0 $r16r17.lo? $r8r9r10r11 = -1125899906842624[$r16r17r18r19.x]
 	;;
-	lo.s.u1 $tp? $r12r13r14r15 = -8388608[$r14]
+	lo.s.u1 $r17? $r12r13r14r15 = -8388608[$r16r17.hi]
 	;;
-	lo.u.u2 $fp? $r16r17r18r19 = [$r15]
+	lo.u.u2 $r16r17r18r19.y? $r16r17r18r19 = [$r18]
 	;;
-	lo.us.odd $rp? $r20r21r22r23 = -1125899906842624[$r16]
+	lo.us.odd $r18r19.lo? $r20r21r22r23 = -1125899906842624[$r16r17r18r19.z]
 	;;
-	lo.even $r16r17.lo? $r24r25r26r27 = -8388608[$r16r17r18r19.x]
+	lo.even $r19? $r24r25r26r27 = -8388608[$r18r19.hi]
 	;;
-	lo.s.wnez $r17? $r28r29r30r31 = [$r16r17.hi]
+	lo.s.wnez $r16r17r18r19.t? $r28r29r30r31 = [$r20]
 	;;
-	lo.u $r32r33r34r35 = 2305843009213693951[$r16r17r18r19.y]
+	lo.u $r32r33r34r35 = 2305843009213693951[$r20r21.lo]
 	;;
-	lo.us $r36r37r38r39 = -64[$r18]
+	lo.us $r36r37r38r39 = -64[$r20r21r22r23.x]
 	;;
-	lo $r40r41r42r43 = -8589934592[$r18r19.lo]
+	lo $r40r41r42r43 = -8589934592[$r21]
 	;;
-	lq.s.xs $r18r19 = $r16r17r18r19.z[$r19]
+	lq.s.xs $r18r19 = $r20r21.hi[$r20r21r22r23.y]
 	;;
-	lq.u.weqz $r18r19.hi? $r16r17r18r19.hi = -1125899906842624[$r16r17r18r19.t]
+	lq.u.weqz $r22? $r16r17r18r19.hi = -1125899906842624[$r22r23.lo]
 	;;
-	lq.us.wltz $r20? $r20r21 = -8388608[$r20r21.lo]
+	lq.us.wltz $r20r21r22r23.z? $r20r21 = -8388608[$r23]
 	;;
-	lq.wgez $r20r21r22r23.x? $r20r21r22r23.lo = [$r21]
+	lq.wgez $r22r23.hi? $r20r21r22r23.lo = [$r20r21r22r23.t]
 	;;
-	lq.s $r22r23 = 2305843009213693951[$r20r21.hi]
+	lq.s $r22r23 = 2305843009213693951[$r24]
 	;;
-	lq.u $r20r21r22r23.hi = -64[$r20r21r22r23.y]
+	lq.u $r20r21r22r23.hi = -64[$r24r25.lo]
 	;;
-	lq.us $r24r25 = -8589934592[$r22]
+	lq.us $r24r25 = -8589934592[$r24r25r26r27.x]
 	;;
-	lws $r22r23.lo = $r20r21r22r23.z[$r23]
+	lws $r25 = $r24r25.hi[$r24r25r26r27.y]
 	;;
-	lws.s.wlez $r22r23.hi? $r20r21r22r23.t = -1125899906842624[$r24]
+	lws.s.wlez $r26? $r26r27.lo = -1125899906842624[$r24r25r26r27.z]
 	;;
-	lws.u.wgtz $r24r25.lo? $r24r25r26r27.x = -8388608[$r25]
+	lws.u.wgtz $r27? $r26r27.hi = -8388608[$r24r25r26r27.t]
 	;;
-	lws.us.dnez $r24r25.hi? $r24r25r26r27.y = [$r26]
+	lws.us.dnez $r28? $r28r29.lo = [$r28r29r30r31.x]
 	;;
-	lws $r26r27.lo = 2305843009213693951[$r24r25r26r27.z]
+	lws $r29 = 2305843009213693951[$r28r29.hi]
 	;;
-	lws.s $r27 = -64[$r26r27.hi]
+	lws.s $r28r29r30r31.y = -64[$r30]
 	;;
-	lws.u $r24r25r26r27.t = -8589934592[$r28]
+	lws.u $r30r31.lo = -8589934592[$r28r29r30r31.z]
 	;;
-	lwz.us.xs $r28r29.lo = $r28r29r30r31.x[$r29]
+	lwz.us.xs $r31 = $r30r31.hi[$r28r29r30r31.t]
 	;;
-	lwz.deqz $r28r29.hi? $r28r29r30r31.y = -1125899906842624[$r30]
+	lwz.deqz $r32? $r32r33.lo = -1125899906842624[$r32r33r34r35.x]
 	;;
-	lwz.s.dltz $r30r31.lo? $r28r29r30r31.z = -8388608[$r31]
+	lwz.s.dltz $r33? $r32r33.hi = -8388608[$r32r33r34r35.y]
 	;;
-	lwz.u.dgez $r30r31.hi? $r28r29r30r31.t = [$r32]
+	lwz.u.dgez $r34? $r34r35.lo = [$r32r33r34r35.z]
 	;;
-	lwz.us $r32r33.lo = 2305843009213693951[$r32r33r34r35.x]
+	lwz.us $r35 = 2305843009213693951[$r34r35.hi]
 	;;
-	lwz $r33 = -64[$r32r33.hi]
+	lwz $r32r33r34r35.t = -64[$r36]
 	;;
-	lwz.s $r32r33r34r35.y = -8589934592[$r34]
+	lwz.s $r36r37.lo = -8589934592[$r36r37r38r39.x]
 	;;
-	madddt $r24r25r26r27.lo = $r34r35.lo, $r32r33r34r35.z
+	madddt $r24r25r26r27.lo = $r37, $r36r37.hi
 	;;
-	maddd $r35 = $r34r35.hi, $r32r33r34r35.t
+	maddd $r36r37r38r39.y = $r38, $r38r39.lo
 	;;
-	maddd $r36 = $r36r37.lo, 536870911
+	maddd $r36r37r38r39.z = $r39, 536870911
 	;;
-	maddhq $r36r37r38r39.x = $r37, $r36r37.hi
+	maddhq $r38r39.hi = $r36r37r38r39.t, $r40
 	;;
-	maddhq $r36r37r38r39.y = $r38, 536870911
+	maddhq $r40r41.lo = $r40r41r42r43.x, 536870911
 	;;
-	maddhwq $r26r27 = $r38r39.lo, $r36r37r38r39.z
+	maddhwq $r26r27 = $r41, $r40r41.hi
 	;;
 	maddmwq $r24r25r26r27.hi = $r28r29, $r28r29r30r31.lo
 	;;
-	maddsudt $r30r31 = $r39, $r38r39.hi
+	maddsudt $r30r31 = $r40r41r42r43.y, $r42
 	;;
-	maddsuhwq $r28r29r30r31.hi = $r36r37r38r39.t, $r40
+	maddsuhwq $r28r29r30r31.hi = $r42r43.lo, $r40r41r42r43.z
 	;;
 	maddsumwq $r32r33 = $r32r33r34r35.lo, $r34r35
 	;;
-	maddsuwdp $r32r33r34r35.hi = $r40r41.lo, $r40r41r42r43.x
+	maddsuwdp $r32r33r34r35.hi = $r43, $r42r43.hi
 	;;
-	maddsuwd $r41 = $r40r41.hi, $r40r41r42r43.y
+	maddsuwd $r40r41r42r43.t = $r44, $r44r45.lo
 	;;
-	maddsuwd $r42 = $r42r43.lo, 536870911
+	maddsuwd $r44r45r46r47.x = $r45, 536870911
 	;;
-	maddudt $r36r37 = $r40r41r42r43.z, $r43
+	maddudt $r36r37 = $r44r45.hi, $r44r45r46r47.y
 	;;
-	madduhwq $r36r37r38r39.lo = $r42r43.hi, $r40r41r42r43.t
+	madduhwq $r36r37r38r39.lo = $r46, $r46r47.lo
 	;;
 	maddumwq $r38r39 = $r36r37r38r39.hi, $r40r41
 	;;
-	madduwdp $r40r41r42r43.lo = $r44, $r44r45.lo
+	madduwdp $r40r41r42r43.lo = $r44r45r46r47.z, $r47
 	;;
-	madduwd $r44r45r46r47.x = $r45, $r44r45.hi
+	madduwd $r46r47.hi = $r44r45r46r47.t, $r48
 	;;
-	madduwd $r44r45r46r47.y = $r46, 536870911
+	madduwd $r48r49.lo = $r48r49r50r51.x, 536870911
 	;;
-	madduzdt $r42r43 = $r46r47.lo, $r44r45r46r47.z
+	madduzdt $r42r43 = $r49, $r48r49.hi
 	;;
-	maddwdp $r40r41r42r43.hi = $r47, $r46r47.hi
+	maddwdp $r40r41r42r43.hi = $r48r49r50r51.y, $r50
 	;;
-	maddwd $r44r45r46r47.t = $r48, $r48r49.lo
+	maddwd $r50r51.lo = $r48r49r50r51.z, $r51
 	;;
-	maddwd $r48r49r50r51.x = $r49, 536870911
+	maddwd $r50r51.hi = $r48r49r50r51.t, 536870911
 	;;
-	maddwp $r48r49.hi = $r48r49r50r51.y, $r50
+	maddwp $r52 = $r52r53.lo, $r52r53r54r55.x
 	;;
-	maddwp $r50r51.lo = $r48r49r50r51.z, 536870911
+	maddwp $r53 = $r52r53.hi, 536870911
 	;;
 	maddwq $r44r45 = $r44r45r46r47.lo, $r46r47
 	;;
-	maddw $r51 = $r50r51.hi, $r48r49r50r51.t
+	maddw $r52r53r54r55.y = $r54, $r54r55.lo
 	;;
-	maddw $r52 = $r52r53.lo, 536870911
+	maddw $r52r53r54r55.z = $r55, 536870911
 	;;
-	make $r52r53r54r55.x = 2305843009213693951
+	make $r54r55.hi = 2305843009213693951
 	;;
-	make $r53 = -549755813888
+	make $r52r53r54r55.t = -549755813888
 	;;
-	make $r52r53.hi = -4096
+	make $r56 = -4096
 	;;
-	maxbo $r52r53r54r55.y = $r54, $r54r55.lo
+	maxbo $r56r57.lo = $r56r57r58r59.x, $r57
 	;;
-	maxbo.@ $r52r53r54r55.z = $r55, 536870911
+	maxbo $r56r57.hi = $r56r57r58r59.y, 536870911.@
 	;;
-	maxd $r54r55.hi = $r52r53r54r55.t, 2305843009213693951
+	maxd $r58 = $r58r59.lo, 2305843009213693951
 	;;
-	maxd $r56 = $r56r57.lo, $r56r57r58r59.x
+	maxd $r56r57r58r59.z = $r59, $r58r59.hi
 	;;
-	maxd $r57 = $r56r57.hi, -64
+	maxd $r56r57r58r59.t = $r60, -64
 	;;
-	maxd $r56r57r58r59.y = $r58, -8589934592
+	maxd $r60r61.lo = $r60r61r62r63.x, -8589934592
 	;;
-	maxd.@ $r58r59.lo = $r56r57r58r59.z, 536870911
+	maxd $r61 = $r60r61.hi, 536870911
 	;;
-	maxhq $r59 = $r58r59.hi, $r56r57r58r59.t
+	maxhq $r60r61r62r63.y = $r62, $r62r63.lo
 	;;
-	maxhq $r60 = $r60r61.lo, 536870911
+	maxhq $r60r61r62r63.z = $r63, 536870911.@
 	;;
-	maxrbod $r60r61r62r63.x = $r61
+	maxrbod $r62r63.hi = $r60r61r62r63.t
 	;;
-	maxrhqd $r60r61.hi = $r60r61r62r63.y
+	maxrhqd $r0 = $r0r1.lo
 	;;
-	maxrwpd $r62 = $r62r63.lo
+	maxrwpd $r0r1r2r3.x = $r1
 	;;
-	maxubo $r60r61r62r63.z = $r63, $r62r63.hi
+	maxubo $r0r1.hi = $r0r1r2r3.y, $r2
 	;;
-	maxubo.@ $r60r61r62r63.t = $r0, 536870911
+	maxubo $r2r3.lo = $r0r1r2r3.z, 536870911
 	;;
-	maxud $r0r1.lo = $r0r1r2r3.x, 2305843009213693951
+	maxud $r3 = $r2r3.hi, 2305843009213693951
 	;;
-	maxud $r1 = $r0r1.hi, $r0r1r2r3.y
+	maxud $r0r1r2r3.t = $r4, $r4r5.lo
 	;;
-	maxud $r2 = $r2r3.lo, -64
+	maxud $r4r5r6r7.x = $r5, -64
 	;;
-	maxud $r0r1r2r3.z = $r3, -8589934592
+	maxud $r4r5.hi = $r4r5r6r7.y, -8589934592
 	;;
-	maxud.@ $r2r3.hi = $r0r1r2r3.t, 536870911
+	maxud $r6 = $r6r7.lo, 536870911.@
 	;;
-	maxuhq $r4 = $r4r5.lo, $r4r5r6r7.x
+	maxuhq $r4r5r6r7.z = $r7, $r6r7.hi
 	;;
-	maxuhq $r5 = $r4r5.hi, 536870911
+	maxuhq $r4r5r6r7.t = $r8, 536870911
 	;;
-	maxurbod $r4r5r6r7.y = $r6
+	maxurbod $r8r9.lo = $r8r9r10r11.x
 	;;
-	maxurhqd $r6r7.lo = $r4r5r6r7.z
+	maxurhqd $r9 = $r8r9.hi
 	;;
-	maxurwpd $r7 = $r6r7.hi
+	maxurwpd $r8r9r10r11.y = $r10
 	;;
-	maxuwp $r4r5r6r7.t = $r8, $r8r9.lo
+	maxuwp $r10r11.lo = $r8r9r10r11.z, $r11
 	;;
-	maxuwp.@ $r8r9r10r11.x = $r9, 536870911
+	maxuwp $r10r11.hi = $r8r9r10r11.t, 536870911.@
 	;;
-	maxuw $r8r9.hi = $r8r9r10r11.y, $r10
+	maxuw $r12 = $sp, $r13
 	;;
-	maxuw $r10r11.lo = $r8r9r10r11.z, -64
+	maxuw $tp = $r14, -64
 	;;
-	maxuw $r11 = $r10r11.hi, -8589934592
+	maxuw $fp = $r15, -8589934592
 	;;
-	maxwp $r8r9r10r11.t = $r12, $sp
+	maxwp $rp = $r16, $r16r17.lo
 	;;
-	maxwp $r13 = $tp, 536870911
+	maxwp $r16r17r18r19.x = $r17, 536870911
 	;;
-	maxw $r14 = $fp, $r15
+	maxw $r16r17.hi = $r16r17r18r19.y, $r18
 	;;
-	maxw $rp = $r16, -64
+	maxw $r18r19.lo = $r16r17r18r19.z, -64
 	;;
-	maxw $r16r17.lo = $r16r17r18r19.x, -8589934592
+	maxw $r19 = $r18r19.hi, -8589934592
 	;;
-	minbo $r17 = $r16r17.hi, $r16r17r18r19.y
+	minbo $r16r17r18r19.t = $r20, $r20r21.lo
 	;;
-	minbo.@ $r18 = $r18r19.lo, 536870911
+	minbo $r20r21r22r23.x = $r21, 536870911.@
 	;;
-	mind $r16r17r18r19.z = $r19, 2305843009213693951
+	mind $r20r21.hi = $r20r21r22r23.y, 2305843009213693951
 	;;
-	mind $r18r19.hi = $r16r17r18r19.t, $r20
+	mind $r22 = $r22r23.lo, $r20r21r22r23.z
 	;;
-	mind $r20r21.lo = $r20r21r22r23.x, -64
+	mind $r23 = $r22r23.hi, -64
 	;;
-	mind $r21 = $r20r21.hi, -8589934592
+	mind $r20r21r22r23.t = $r24, -8589934592
 	;;
-	mind.@ $r20r21r22r23.y = $r22, 536870911
+	mind $r24r25.lo = $r24r25r26r27.x, 536870911
 	;;
-	minhq $r22r23.lo = $r20r21r22r23.z, $r23
+	minhq $r25 = $r24r25.hi, $r24r25r26r27.y
 	;;
-	minhq $r22r23.hi = $r20r21r22r23.t, 536870911
+	minhq $r26 = $r26r27.lo, 536870911.@
 	;;
-	minrbod $r24 = $r24r25.lo
+	minrbod $r24r25r26r27.z = $r27
 	;;
-	minrhqd $r24r25r26r27.x = $r25
+	minrhqd $r26r27.hi = $r24r25r26r27.t
 	;;
-	minrwpd $r24r25.hi = $r24r25r26r27.y
+	minrwpd $r28 = $r28r29.lo
 	;;
-	minubo $r26 = $r26r27.lo, $r24r25r26r27.z
+	minubo $r28r29r30r31.x = $r29, $r28r29.hi
 	;;
-	minubo.@ $r27 = $r26r27.hi, 536870911
+	minubo $r28r29r30r31.y = $r30, 536870911
 	;;
-	minud $r24r25r26r27.t = $r28, 2305843009213693951
+	minud $r30r31.lo = $r28r29r30r31.z, 2305843009213693951
 	;;
-	minud $r28r29.lo = $r28r29r30r31.x, $r29
+	minud $r31 = $r30r31.hi, $r28r29r30r31.t
 	;;
-	minud $r28r29.hi = $r28r29r30r31.y, -64
+	minud $r32 = $r32r33.lo, -64
 	;;
-	minud $r30 = $r30r31.lo, -8589934592
+	minud $r32r33r34r35.x = $r33, -8589934592
 	;;
-	minud.@ $r28r29r30r31.z = $r31, 536870911
+	minud $r32r33.hi = $r32r33r34r35.y, 536870911.@
 	;;
-	minuhq $r30r31.hi = $r28r29r30r31.t, $r32
+	minuhq $r34 = $r34r35.lo, $r32r33r34r35.z
 	;;
-	minuhq $r32r33.lo = $r32r33r34r35.x, 536870911
+	minuhq $r35 = $r34r35.hi, 536870911
 	;;
-	minurbod $r33 = $r32r33.hi
+	minurbod $r32r33r34r35.t = $r36
 	;;
-	minurhqd $r32r33r34r35.y = $r34
+	minurhqd $r36r37.lo = $r36r37r38r39.x
 	;;
-	minurwpd $r34r35.lo = $r32r33r34r35.z
+	minurwpd $r37 = $r36r37.hi
 	;;
-	minuwp $r35 = $r34r35.hi, $r32r33r34r35.t
+	minuwp $r36r37r38r39.y = $r38, $r38r39.lo
 	;;
-	minuwp.@ $r36 = $r36r37.lo, 536870911
+	minuwp $r36r37r38r39.z = $r39, 536870911.@
 	;;
-	minuw $r36r37r38r39.x = $r37, $r36r37.hi
+	minuw $r38r39.hi = $r36r37r38r39.t, $r40
 	;;
-	minuw $r36r37r38r39.y = $r38, -64
+	minuw $r40r41.lo = $r40r41r42r43.x, -64
 	;;
-	minuw $r38r39.lo = $r36r37r38r39.z, -8589934592
+	minuw $r41 = $r40r41.hi, -8589934592
 	;;
-	minwp $r39 = $r38r39.hi, $r36r37r38r39.t
+	minwp $r40r41r42r43.y = $r42, $r42r43.lo
 	;;
-	minwp $r40 = $r40r41.lo, 536870911
+	minwp $r40r41r42r43.z = $r43, 536870911
 	;;
-	minw $r40r41r42r43.x = $r41, $r40r41.hi
+	minw $r42r43.hi = $r40r41r42r43.t, $r44
 	;;
-	minw $r40r41r42r43.y = $r42, -64
+	minw $r44r45.lo = $r44r45r46r47.x, -64
 	;;
-	minw $r42r43.lo = $r40r41r42r43.z, -8589934592
+	minw $r45 = $r44r45.hi, -8589934592
 	;;
-	mm212w $r44r45r46r47.hi = $r43, $r42r43.hi
+	mm212w $r44r45r46r47.hi = $r44r45r46r47.y, $r46
 	;;
-	mma212w $r48r49 = $r40r41r42r43.t, $r44
+	mma212w $r48r49 = $r46r47.lo, $r44r45r46r47.z
 	;;
-	mms212w $r48r49r50r51.lo = $r44r45.lo, $r44r45r46r47.x
+	mms212w $r48r49r50r51.lo = $r47, $r46r47.hi
 	;;
-	msbfdt $r50r51 = $r45, $r44r45.hi
+	msbfdt $r50r51 = $r44r45r46r47.t, $r48
 	;;
-	msbfd $r44r45r46r47.y = $r46, $r46r47.lo
+	msbfd $r48r49.lo = $r48r49r50r51.x, $r49
 	;;
-	msbfhq $r44r45r46r47.z = $r47, $r46r47.hi
+	msbfhq $r48r49.hi = $r48r49r50r51.y, $r50
 	;;
-	msbfhwq $r48r49r50r51.hi = $r44r45r46r47.t, $r48
+	msbfhwq $r48r49r50r51.hi = $r50r51.lo, $r48r49r50r51.z
 	;;
 	msbfmwq $r52r53 = $r52r53r54r55.lo, $r54r55
 	;;
-	msbfsudt $r52r53r54r55.hi = $r48r49.lo, $r48r49r50r51.x
+	msbfsudt $r52r53r54r55.hi = $r51, $r50r51.hi
 	;;
-	msbfsuhwq $r56r57 = $r49, $r48r49.hi
+	msbfsuhwq $r56r57 = $r48r49r50r51.t, $r52
 	;;
 	msbfsumwq $r56r57r58r59.lo = $r58r59, $r56r57r58r59.hi
 	;;
-	msbfsuwdp $r60r61 = $r48r49r50r51.y, $r50
+	msbfsuwdp $r60r61 = $r52r53.lo, $r52r53r54r55.x
 	;;
-	msbfsuwd $r50r51.lo = $r48r49r50r51.z, $r51
+	msbfsuwd $r53 = $r52r53.hi, $r52r53r54r55.y
 	;;
-	msbfsuwd $r50r51.hi = $r48r49r50r51.t, 536870911
+	msbfsuwd $r54 = $r54r55.lo, 536870911
 	;;
-	msbfudt $r60r61r62r63.lo = $r52, $r52r53.lo
+	msbfudt $r60r61r62r63.lo = $r52r53r54r55.z, $r55
 	;;
-	msbfuhwq $r62r63 = $r52r53r54r55.x, $r53
+	msbfuhwq $r62r63 = $r54r55.hi, $r52r53r54r55.t
 	;;
 	msbfumwq $r60r61r62r63.hi = $r0r1, $r0r1r2r3.lo
 	;;
-	msbfuwdp $r2r3 = $r52r53.hi, $r52r53r54r55.y
+	msbfuwdp $r2r3 = $r56, $r56r57.lo
 	;;
-	msbfuwd $r54 = $r54r55.lo, $r52r53r54r55.z
+	msbfuwd $r56r57r58r59.x = $r57, $r56r57.hi
 	;;
-	msbfuwd $r55 = $r54r55.hi, 536870911
+	msbfuwd $r56r57r58r59.y = $r58, 536870911
 	;;
-	msbfuzdt $r0r1r2r3.hi = $r52r53r54r55.t, $r56
+	msbfuzdt $r0r1r2r3.hi = $r58r59.lo, $r56r57r58r59.z
 	;;
-	msbfwdp $r4r5 = $r56r57.lo, $r56r57r58r59.x
+	msbfwdp $r4r5 = $r59, $r58r59.hi
 	;;
-	msbfwd $r57 = $r56r57.hi, $r56r57r58r59.y
+	msbfwd $r56r57r58r59.t = $r60, $r60r61.lo
 	;;
-	msbfwd $r58 = $r58r59.lo, 536870911
+	msbfwd $r60r61r62r63.x = $r61, 536870911
 	;;
-	msbfwp $r56r57r58r59.z = $r59, $r58r59.hi
+	msbfwp $r60r61.hi = $r60r61r62r63.y, $r62
 	;;
 	msbfwq $r4r5r6r7.lo = $r6r7, $r4r5r6r7.hi
 	;;
-	msbfw $r56r57r58r59.t = $r60, $r60r61.lo
+	msbfw $r62r63.lo = $r60r61r62r63.z, $r63
 	;;
-	msbfw $r60r61r62r63.x = $r61, 536870911
+	msbfw $r62r63.hi = $r60r61r62r63.t, 536870911
 	;;
-	muldt $r8r9 = $r60r61.hi, $r60r61r62r63.y
+	muldt $r8r9 = $r0, $r0r1.lo
 	;;
-	muld $r62 = $r62r63.lo, $r60r61r62r63.z
+	muld $r0r1r2r3.x = $r1, $r0r1.hi
 	;;
-	muld $r63 = $r62r63.hi, 536870911
+	muld $r0r1r2r3.y = $r2, 536870911
 	;;
-	mulhq $r60r61r62r63.t = $r0, $r0r1.lo
+	mulhq $r2r3.lo = $r0r1r2r3.z, $r3
 	;;
-	mulhq $r0r1r2r3.x = $r1, 536870911
+	mulhq $r2r3.hi = $r0r1r2r3.t, 536870911
 	;;
-	mulhwq $r8r9r10r11.lo = $r0r1.hi, $r0r1r2r3.y
+	mulhwq $r8r9r10r11.lo = $r4, $r4r5.lo
 	;;
 	mulmwq $r10r11 = $r8r9r10r11.hi, $r12r13
 	;;
-	mulsudt $r12r13r14r15.lo = $r2, $r2r3.lo
+	mulsudt $r12r13r14r15.lo = $r4r5r6r7.x, $r5
 	;;
-	mulsuhwq $r14r15 = $r0r1r2r3.z, $r3
+	mulsuhwq $r14r15 = $r4r5.hi, $r4r5r6r7.y
 	;;
 	mulsumwq $r12r13r14r15.hi = $r16r17, $r16r17r18r19.lo
 	;;
-	mulsuwdp $r18r19 = $r2r3.hi, $r0r1r2r3.t
+	mulsuwdp $r18r19 = $r6, $r6r7.lo
 	;;
-	mulsuwd $r4 = $r4r5.lo, $r4r5r6r7.x
+	mulsuwd $r4r5r6r7.z = $r7, $r6r7.hi
 	;;
-	mulsuwd $r5 = $r4r5.hi, 536870911
+	mulsuwd $r4r5r6r7.t = $r8, 536870911
 	;;
-	muludt $r16r17r18r19.hi = $r4r5r6r7.y, $r6
+	muludt $r16r17r18r19.hi = $r8r9.lo, $r8r9r10r11.x
 	;;
-	muluhwq $r20r21 = $r6r7.lo, $r4r5r6r7.z
+	muluhwq $r20r21 = $r9, $r8r9.hi
 	;;
 	mulumwq $r20r21r22r23.lo = $r22r23, $r20r21r22r23.hi
 	;;
-	muluwdp $r24r25 = $r7, $r6r7.hi
+	muluwdp $r24r25 = $r8r9r10r11.y, $r10
 	;;
-	muluwd $r4r5r6r7.t = $r8, $r8r9.lo
+	muluwd $r10r11.lo = $r8r9r10r11.z, $r11
 	;;
-	muluwd $r8r9r10r11.x = $r9, 536870911
+	muluwd $r10r11.hi = $r8r9r10r11.t, 536870911
 	;;
-	mulwdp $r24r25r26r27.lo = $r8r9.hi, $r8r9r10r11.y
+	mulwdp $r24r25r26r27.lo = $r12, $sp
 	;;
-	mulwd $r10 = $r10r11.lo, $r8r9r10r11.z
+	mulwd $r13 = $tp, $r14
 	;;
-	mulwd $r11 = $r10r11.hi, 536870911
+	mulwd $fp = $r15, 536870911
 	;;
-	mulwp $r8r9r10r11.t = $r12, $sp
+	mulwp $rp = $r16, $r16r17.lo
 	;;
-	mulwp $r13 = $tp, 536870911
+	mulwp $r16r17r18r19.x = $r17, 536870911
 	;;
 	mulwq $r26r27 = $r24r25r26r27.hi, $r28r29
 	;;
-	mulw $r14 = $fp, $r15
+	mulw $r16r17.hi = $r16r17r18r19.y, $r18
 	;;
-	mulw $rp = $r16, 536870911
+	mulw $r18r19.lo = $r16r17r18r19.z, 536870911
 	;;
-	nandd $r16r17.lo = $r16r17r18r19.x, 2305843009213693951
+	nandd $r19 = $r18r19.hi, 2305843009213693951
 	;;
-	nandd $r17 = $r16r17.hi, $r16r17r18r19.y
+	nandd $r16r17r18r19.t = $r20, $r20r21.lo
 	;;
-	nandd $r18 = $r18r19.lo, -64
+	nandd $r20r21r22r23.x = $r21, -64
 	;;
-	nandd $r16r17r18r19.z = $r19, -8589934592
+	nandd $r20r21.hi = $r20r21r22r23.y, -8589934592
 	;;
-	nandd.@ $r18r19.hi = $r16r17r18r19.t, 536870911
+	nandd $r22 = $r22r23.lo, 536870911.@
 	;;
-	nandw $r20 = $r20r21.lo, $r20r21r22r23.x
+	nandw $r20r21r22r23.z = $r23, $r22r23.hi
 	;;
-	nandw $r21 = $r20r21.hi, -64
+	nandw $r20r21r22r23.t = $r24, -64
 	;;
-	nandw $r20r21r22r23.y = $r22, -8589934592
+	nandw $r24r25.lo = $r24r25r26r27.x, -8589934592
 	;;
-	negbo $r22r23.lo = $r20r21r22r23.z
+	negbo $r25 = $r24r25.hi
 	;;
-	negd $r23 = $r22r23.hi
+	negd $r24r25r26r27.y = $r26
 	;;
-	neghq $r20r21r22r23.t = $r24
+	neghq $r26r27.lo = $r24r25r26r27.z
 	;;
-	negsbo $r24r25.lo = $r24r25r26r27.x
+	negsbo $r27 = $r26r27.hi
 	;;
-	negsd $r25 = $r24r25.hi
+	negsd $r24r25r26r27.t = $r28
 	;;
-	negshq $r24r25r26r27.y = $r26
+	negshq $r28r29.lo = $r28r29r30r31.x
 	;;
-	negswp $r26r27.lo = $r24r25r26r27.z
+	negswp $r29 = $r28r29.hi
 	;;
-	negsw $r27 = $r26r27.hi
+	negsw $r28r29r30r31.y = $r30
 	;;
-	negwp $r24r25r26r27.t = $r28
+	negwp $r30r31.lo = $r28r29r30r31.z
 	;;
-	negw $r28r29.lo = $r28r29r30r31.x
+	negw $r31 = $r30r31.hi
 	;;
 	nop
 	;;
-	nord $r29 = $r28r29.hi, 2305843009213693951
+	nord $r28r29r30r31.t = $r32, 2305843009213693951
 	;;
-	nord $r28r29r30r31.y = $r30, $r30r31.lo
+	nord $r32r33.lo = $r32r33r34r35.x, $r33
 	;;
-	nord $r28r29r30r31.z = $r31, -64
+	nord $r32r33.hi = $r32r33r34r35.y, -64
 	;;
-	nord $r30r31.hi = $r28r29r30r31.t, -8589934592
+	nord $r34 = $r34r35.lo, -8589934592
 	;;
-	nord.@ $r32 = $r32r33.lo, 536870911
+	nord $r32r33r34r35.z = $r35, 536870911
 	;;
-	norw $r32r33r34r35.x = $r33, $r32r33.hi
+	norw $r34r35.hi = $r32r33r34r35.t, $r36
 	;;
-	norw $r32r33r34r35.y = $r34, -64
+	norw $r36r37.lo = $r36r37r38r39.x, -64
 	;;
-	norw $r34r35.lo = $r32r33r34r35.z, -8589934592
+	norw $r37 = $r36r37.hi, -8589934592
 	;;
-	notd $r35 = $r34r35.hi
+	notd $r36r37r38r39.y = $r38
 	;;
-	notw $r32r33r34r35.t = $r36
+	notw $r38r39.lo = $r36r37r38r39.z
 	;;
-	nxord $r36r37.lo = $r36r37r38r39.x, 2305843009213693951
+	nxord $r39 = $r38r39.hi, 2305843009213693951
 	;;
-	nxord $r37 = $r36r37.hi, $r36r37r38r39.y
+	nxord $r36r37r38r39.t = $r40, $r40r41.lo
 	;;
-	nxord $r38 = $r38r39.lo, -64
+	nxord $r40r41r42r43.x = $r41, -64
 	;;
-	nxord $r36r37r38r39.z = $r39, -8589934592
+	nxord $r40r41.hi = $r40r41r42r43.y, -8589934592
 	;;
-	nxord.@ $r38r39.hi = $r36r37r38r39.t, 536870911
+	nxord $r42 = $r42r43.lo, 536870911.@
 	;;
-	nxorw $r40 = $r40r41.lo, $r40r41r42r43.x
+	nxorw $r40r41r42r43.z = $r43, $r42r43.hi
 	;;
-	nxorw $r41 = $r40r41.hi, -64
+	nxorw $r40r41r42r43.t = $r44, -64
 	;;
-	nxorw $r40r41r42r43.y = $r42, -8589934592
+	nxorw $r44r45.lo = $r44r45r46r47.x, -8589934592
 	;;
-	ord $r42r43.lo = $r40r41r42r43.z, 2305843009213693951
+	ord $r45 = $r44r45.hi, 2305843009213693951
 	;;
-	ord $r43 = $r42r43.hi, $r40r41r42r43.t
+	ord $r44r45r46r47.y = $r46, $r46r47.lo
 	;;
-	ord $r44 = $r44r45.lo, -64
+	ord $r44r45r46r47.z = $r47, -64
 	;;
-	ord $r44r45r46r47.x = $r45, -8589934592
+	ord $r46r47.hi = $r44r45r46r47.t, -8589934592
 	;;
-	ord.@ $r44r45.hi = $r44r45r46r47.y, 536870911
+	ord $r48 = $r48r49.lo, 536870911
 	;;
-	ornd $r46 = $r46r47.lo, 2305843009213693951
+	ornd $r48r49r50r51.x = $r49, 2305843009213693951
 	;;
-	ornd $r44r45r46r47.z = $r47, $r46r47.hi
+	ornd $r48r49.hi = $r48r49r50r51.y, $r50
 	;;
-	ornd $r44r45r46r47.t = $r48, -64
+	ornd $r50r51.lo = $r48r49r50r51.z, -64
 	;;
-	ornd $r48r49.lo = $r48r49r50r51.x, -8589934592
+	ornd $r51 = $r50r51.hi, -8589934592
 	;;
-	ornd.@ $r49 = $r48r49.hi, 536870911
+	ornd $r48r49r50r51.t = $r52, 536870911.@
 	;;
-	ornw $r48r49r50r51.y = $r50, $r50r51.lo
+	ornw $r52r53.lo = $r52r53r54r55.x, $r53
 	;;
-	ornw $r48r49r50r51.z = $r51, -64
+	ornw $r52r53.hi = $r52r53r54r55.y, -64
 	;;
-	ornw $r50r51.hi = $r48r49r50r51.t, -8589934592
+	ornw $r54 = $r54r55.lo, -8589934592
 	;;
-	orrbod $r52 = $r52r53.lo
+	orrbod $r52r53r54r55.z = $r55
 	;;
-	orrhqd $r52r53r54r55.x = $r53
+	orrhqd $r54r55.hi = $r52r53r54r55.t
 	;;
-	orrwpd $r52r53.hi = $r52r53r54r55.y
+	orrwpd $r56 = $r56r57.lo
 	;;
-	orw $r54 = $r54r55.lo, $r52r53r54r55.z
+	orw $r56r57r58r59.x = $r57, $r56r57.hi
 	;;
-	orw $r55 = $r54r55.hi, -64
+	orw $r56r57r58r59.y = $r58, -64
 	;;
-	orw $r52r53r54r55.t = $r56, -8589934592
+	orw $r58r59.lo = $r56r57r58r59.z, -8589934592
 	;;
-	pcrel $r56r57.lo = 2305843009213693951
+	pcrel $r59 = 2305843009213693951
 	;;
-	pcrel $r56r57r58r59.x = -549755813888
+	pcrel $r58r59.hi = -549755813888
 	;;
-	pcrel $r57 = -4096
+	pcrel $r56r57r58r59.t = -4096
 	;;
 	ret
 	;;
 	rfe
 	;;
-	rolwps $r56r57.hi = $r56r57r58r59.y, $r58
+	rolwps $r60 = $r60r61.lo, $r60r61r62r63.x
 	;;
-	rolwps $r58r59.lo = $r56r57r58r59.z, 7
+	rolwps $r61 = $r60r61.hi, 7
 	;;
-	rolw $r59 = $r58r59.hi, $r56r57r58r59.t
+	rolw $r60r61r62r63.y = $r62, $r62r63.lo
 	;;
-	rolw $r60 = $r60r61.lo, 7
+	rolw $r60r61r62r63.z = $r63, 7
 	;;
-	rorwps $r60r61r62r63.x = $r61, $r60r61.hi
+	rorwps $r62r63.hi = $r60r61r62r63.t, $r0
 	;;
-	rorwps $r60r61r62r63.y = $r62, 7
+	rorwps $r0r1.lo = $r0r1r2r3.x, 7
 	;;
-	rorw $r62r63.lo = $r60r61r62r63.z, $r63
+	rorw $r1 = $r0r1.hi, $r0r1r2r3.y
 	;;
-	rorw $r62r63.hi = $r60r61r62r63.t, 7
+	rorw $r2 = $r2r3.lo, 7
 	;;
-	rswap $r0 = $mmc
+	rswap $r0r1r2r3.z = $mmc
 	;;
-	rswap $r0r1.lo = $s0
+	rswap $r3 = $s0
 	;;
-	rswap $r0r1r2r3.x = $pc
+	rswap $r2r3.hi = $pc
 	;;
-	sbfbo $r1 = $r0r1.hi, $r0r1r2r3.y
+	sbfbo $r0r1r2r3.t = $r4, $r4r5.lo
 	;;
-	sbfbo.@ $r2 = $r2r3.lo, 536870911
+	sbfbo $r4r5r6r7.x = $r5, 536870911
 	;;
-	sbfcd.i $r0r1r2r3.z = $r3, $r2r3.hi
+	sbfcd.i $r4r5.hi = $r4r5r6r7.y, $r6
 	;;
-	sbfcd.i $r0r1r2r3.t = $r4, 536870911
+	sbfcd.i $r6r7.lo = $r4r5r6r7.z, 536870911
 	;;
-	sbfcd $r4r5.lo = $r4r5r6r7.x, $r5
+	sbfcd $r7 = $r6r7.hi, $r4r5r6r7.t
 	;;
-	sbfcd $r4r5.hi = $r4r5r6r7.y, 536870911
+	sbfcd $r8 = $r8r9.lo, 536870911
 	;;
-	sbfd $r6 = $r6r7.lo, 2305843009213693951
+	sbfd $r8r9r10r11.x = $r9, 2305843009213693951
 	;;
-	sbfd $r4r5r6r7.z = $r7, $r6r7.hi
+	sbfd $r8r9.hi = $r8r9r10r11.y, $r10
 	;;
-	sbfd $r4r5r6r7.t = $r8, -64
+	sbfd $r10r11.lo = $r8r9r10r11.z, -64
 	;;
-	sbfd $r8r9.lo = $r8r9r10r11.x, -8589934592
+	sbfd $r11 = $r10r11.hi, -8589934592
 	;;
-	sbfd.@ $r9 = $r8r9.hi, 536870911
+	sbfd $r8r9r10r11.t = $r12, 536870911.@
 	;;
-	sbfhq $r8r9r10r11.y = $r10, $r10r11.lo
+	sbfhq $sp = $r13, $tp
 	;;
-	sbfhq $r8r9r10r11.z = $r11, 536870911
+	sbfhq $r14 = $fp, 536870911
 	;;
-	sbfsbo $r10r11.hi = $r8r9r10r11.t, $r12
+	sbfsbo $r15 = $rp, $r16
 	;;
-	sbfsbo.@ $sp = $r13, 536870911
+	sbfsbo $r16r17.lo = $r16r17r18r19.x, 536870911.@
 	;;
-	sbfsd $tp = $r14, $fp
+	sbfsd $r17 = $r16r17.hi, $r16r17r18r19.y
 	;;
-	sbfsd $r15 = $rp, 536870911
+	sbfsd $r18 = $r18r19.lo, 536870911
 	;;
-	sbfshq $r16 = $r16r17.lo, $r16r17r18r19.x
+	sbfshq $r16r17r18r19.z = $r19, $r18r19.hi
 	;;
-	sbfshq.@ $r17 = $r16r17.hi, 536870911
+	sbfshq $r16r17r18r19.t = $r20, 536870911.@
 	;;
-	sbfswp $r16r17r18r19.y = $r18, $r18r19.lo
+	sbfswp $r20r21.lo = $r20r21r22r23.x, $r21
 	;;
-	sbfswp $r16r17r18r19.z = $r19, 536870911
+	sbfswp $r20r21.hi = $r20r21r22r23.y, 536870911
 	;;
-	sbfsw $r18r19.hi = $r16r17r18r19.t, $r20
+	sbfsw $r22 = $r22r23.lo, $r20r21r22r23.z
 	;;
-	sbfsw $r20r21.lo = $r20r21r22r23.x, 536870911
+	sbfsw $r23 = $r22r23.hi, 536870911
 	;;
-	sbfusbo $r21 = $r20r21.hi, $r20r21r22r23.y
+	sbfusbo $r20r21r22r23.t = $r24, $r24r25.lo
 	;;
-	sbfusbo.@ $r22 = $r22r23.lo, 536870911
+	sbfusbo $r24r25r26r27.x = $r25, 536870911.@
 	;;
-	sbfusd $r20r21r22r23.z = $r23, $r22r23.hi
+	sbfusd $r24r25.hi = $r24r25r26r27.y, $r26
 	;;
-	sbfusd $r20r21r22r23.t = $r24, 536870911
+	sbfusd $r26r27.lo = $r24r25r26r27.z, 536870911
 	;;
-	sbfushq $r24r25.lo = $r24r25r26r27.x, $r25
+	sbfushq $r27 = $r26r27.hi, $r24r25r26r27.t
 	;;
-	sbfushq.@ $r24r25.hi = $r24r25r26r27.y, 536870911
+	sbfushq $r28 = $r28r29.lo, 536870911.@
 	;;
-	sbfuswp $r26 = $r26r27.lo, $r24r25r26r27.z
+	sbfuswp $r28r29r30r31.x = $r29, $r28r29.hi
 	;;
-	sbfuswp $r27 = $r26r27.hi, 536870911
+	sbfuswp $r28r29r30r31.y = $r30, 536870911
 	;;
-	sbfusw $r24r25r26r27.t = $r28, $r28r29.lo
+	sbfusw $r30r31.lo = $r28r29r30r31.z, $r31
 	;;
-	sbfusw $r28r29r30r31.x = $r29, 536870911
+	sbfusw $r30r31.hi = $r28r29r30r31.t, 536870911
 	;;
-	sbfuwd $r28r29.hi = $r28r29r30r31.y, $r30
+	sbfuwd $r32 = $r32r33.lo, $r32r33r34r35.x
 	;;
-	sbfuwd $r30r31.lo = $r28r29r30r31.z, 536870911
+	sbfuwd $r33 = $r32r33.hi, 536870911
 	;;
-	sbfwd $r31 = $r30r31.hi, $r28r29r30r31.t
+	sbfwd $r32r33r34r35.y = $r34, $r34r35.lo
 	;;
-	sbfwd $r32 = $r32r33.lo, 536870911
+	sbfwd $r32r33r34r35.z = $r35, 536870911
 	;;
-	sbfwp $r32r33r34r35.x = $r33, $r32r33.hi
+	sbfwp $r34r35.hi = $r32r33r34r35.t, $r36
 	;;
-	sbfwp.@ $r32r33r34r35.y = $r34, 536870911
+	sbfwp $r36r37.lo = $r36r37r38r39.x, 536870911.@
 	;;
-	sbfw $r34r35.lo = $r32r33r34r35.z, $r35
+	sbfw $r37 = $r36r37.hi, $r36r37r38r39.y
 	;;
-	sbfw $r34r35.hi = $r32r33r34r35.t, -64
+	sbfw $r38 = $r38r39.lo, -64
 	;;
-	sbfw $r36 = $r36r37.lo, -8589934592
+	sbfw $r36r37r38r39.z = $r39, -8589934592
 	;;
-	sbfx16bo $r36r37r38r39.x = $r37, $r36r37.hi
+	sbfx16bo $r38r39.hi = $r36r37r38r39.t, $r40
 	;;
-	sbfx16bo $r36r37r38r39.y = $r38, 536870911
+	sbfx16bo $r40r41.lo = $r40r41r42r43.x, 536870911
 	;;
-	sbfx16d $r38r39.lo = $r36r37r38r39.z, $r39
+	sbfx16d $r41 = $r40r41.hi, $r40r41r42r43.y
 	;;
-	sbfx16d.@ $r38r39.hi = $r36r37r38r39.t, 536870911
+	sbfx16d $r42 = $r42r43.lo, 536870911.@
 	;;
-	sbfx16hq $r40 = $r40r41.lo, $r40r41r42r43.x
+	sbfx16hq $r40r41r42r43.z = $r43, $r42r43.hi
 	;;
-	sbfx16hq $r41 = $r40r41.hi, 536870911
+	sbfx16hq $r40r41r42r43.t = $r44, 536870911
 	;;
-	sbfx16uwd $r40r41r42r43.y = $r42, $r42r43.lo
+	sbfx16uwd $r44r45.lo = $r44r45r46r47.x, $r45
 	;;
-	sbfx16uwd $r40r41r42r43.z = $r43, 536870911
+	sbfx16uwd $r44r45.hi = $r44r45r46r47.y, 536870911
 	;;
-	sbfx16wd $r42r43.hi = $r40r41r42r43.t, $r44
+	sbfx16wd $r46 = $r46r47.lo, $r44r45r46r47.z
 	;;
-	sbfx16wd $r44r45.lo = $r44r45r46r47.x, 536870911
+	sbfx16wd $r47 = $r46r47.hi, 536870911
 	;;
-	sbfx16wp $r45 = $r44r45.hi, $r44r45r46r47.y
+	sbfx16wp $r44r45r46r47.t = $r48, $r48r49.lo
 	;;
-	sbfx16wp.@ $r46 = $r46r47.lo, 536870911
+	sbfx16wp $r48r49r50r51.x = $r49, 536870911.@
 	;;
-	sbfx16w $r44r45r46r47.z = $r47, $r46r47.hi
+	sbfx16w $r48r49.hi = $r48r49r50r51.y, $r50
 	;;
-	sbfx16w $r44r45r46r47.t = $r48, 536870911
+	sbfx16w $r50r51.lo = $r48r49r50r51.z, 536870911
 	;;
-	sbfx2bo $r48r49.lo = $r48r49r50r51.x, $r49
+	sbfx2bo $r51 = $r50r51.hi, $r48r49r50r51.t
 	;;
-	sbfx2bo $r48r49.hi = $r48r49r50r51.y, 536870911
+	sbfx2bo $r52 = $r52r53.lo, 536870911
 	;;
-	sbfx2d $r50 = $r50r51.lo, $r48r49r50r51.z
+	sbfx2d $r52r53r54r55.x = $r53, $r52r53.hi
 	;;
-	sbfx2d.@ $r51 = $r50r51.hi, 536870911
+	sbfx2d $r52r53r54r55.y = $r54, 536870911.@
 	;;
-	sbfx2hq $r48r49r50r51.t = $r52, $r52r53.lo
+	sbfx2hq $r54r55.lo = $r52r53r54r55.z, $r55
 	;;
-	sbfx2hq $r52r53r54r55.x = $r53, 536870911
+	sbfx2hq $r54r55.hi = $r52r53r54r55.t, 536870911
 	;;
-	sbfx2uwd $r52r53.hi = $r52r53r54r55.y, $r54
+	sbfx2uwd $r56 = $r56r57.lo, $r56r57r58r59.x
 	;;
-	sbfx2uwd $r54r55.lo = $r52r53r54r55.z, 536870911
+	sbfx2uwd $r57 = $r56r57.hi, 536870911
 	;;
-	sbfx2wd $r55 = $r54r55.hi, $r52r53r54r55.t
+	sbfx2wd $r56r57r58r59.y = $r58, $r58r59.lo
 	;;
-	sbfx2wd $r56 = $r56r57.lo, 536870911
+	sbfx2wd $r56r57r58r59.z = $r59, 536870911
 	;;
-	sbfx2wp $r56r57r58r59.x = $r57, $r56r57.hi
+	sbfx2wp $r58r59.hi = $r56r57r58r59.t, $r60
 	;;
-	sbfx2wp.@ $r56r57r58r59.y = $r58, 536870911
+	sbfx2wp $r60r61.lo = $r60r61r62r63.x, 536870911.@
 	;;
-	sbfx2w $r58r59.lo = $r56r57r58r59.z, $r59
+	sbfx2w $r61 = $r60r61.hi, $r60r61r62r63.y
 	;;
-	sbfx2w $r58r59.hi = $r56r57r58r59.t, 536870911
+	sbfx2w $r62 = $r62r63.lo, 536870911
 	;;
-	sbfx32d $r60 = $r60r61.lo, $r60r61r62r63.x
+	sbfx32d $r60r61r62r63.z = $r63, $r62r63.hi
 	;;
-	sbfx32d $r61 = $r60r61.hi, 536870911
+	sbfx32d $r60r61r62r63.t = $r0, 536870911
 	;;
-	sbfx32uwd $r60r61r62r63.y = $r62, $r62r63.lo
+	sbfx32uwd $r0r1.lo = $r0r1r2r3.x, $r1
 	;;
-	sbfx32uwd $r60r61r62r63.z = $r63, 536870911
+	sbfx32uwd $r0r1.hi = $r0r1r2r3.y, 536870911
 	;;
-	sbfx32wd $r62r63.hi = $r60r61r62r63.t, $r0
+	sbfx32wd $r2 = $r2r3.lo, $r0r1r2r3.z
 	;;
-	sbfx32wd $r0r1.lo = $r0r1r2r3.x, 536870911
+	sbfx32wd $r3 = $r2r3.hi, 536870911
 	;;
-	sbfx32w $r1 = $r0r1.hi, $r0r1r2r3.y
+	sbfx32w $r0r1r2r3.t = $r4, $r4r5.lo
 	;;
-	sbfx32w $r2 = $r2r3.lo, 536870911
+	sbfx32w $r4r5r6r7.x = $r5, 536870911
 	;;
-	sbfx4bo $r0r1r2r3.z = $r3, $r2r3.hi
+	sbfx4bo $r4r5.hi = $r4r5r6r7.y, $r6
 	;;
-	sbfx4bo.@ $r0r1r2r3.t = $r4, 536870911
+	sbfx4bo $r6r7.lo = $r4r5r6r7.z, 536870911.@
 	;;
-	sbfx4d $r4r5.lo = $r4r5r6r7.x, $r5
+	sbfx4d $r7 = $r6r7.hi, $r4r5r6r7.t
 	;;
-	sbfx4d $r4r5.hi = $r4r5r6r7.y, 536870911
+	sbfx4d $r8 = $r8r9.lo, 536870911
 	;;
-	sbfx4hq $r6 = $r6r7.lo, $r4r5r6r7.z
+	sbfx4hq $r8r9r10r11.x = $r9, $r8r9.hi
 	;;
-	sbfx4hq.@ $r7 = $r6r7.hi, 536870911
+	sbfx4hq $r8r9r10r11.y = $r10, 536870911.@
 	;;
-	sbfx4uwd $r4r5r6r7.t = $r8, $r8r9.lo
+	sbfx4uwd $r10r11.lo = $r8r9r10r11.z, $r11
 	;;
-	sbfx4uwd $r8r9r10r11.x = $r9, 536870911
+	sbfx4uwd $r10r11.hi = $r8r9r10r11.t, 536870911
 	;;
-	sbfx4wd $r8r9.hi = $r8r9r10r11.y, $r10
+	sbfx4wd $r12 = $sp, $r13
 	;;
-	sbfx4wd $r10r11.lo = $r8r9r10r11.z, 536870911
+	sbfx4wd $tp = $r14, 536870911
 	;;
-	sbfx4wp $r11 = $r10r11.hi, $r8r9r10r11.t
+	sbfx4wp $fp = $r15, $rp
 	;;
-	sbfx4wp $r12 = $sp, 536870911
+	sbfx4wp $r16 = $r16r17.lo, 536870911
 	;;
-	sbfx4w $r13 = $tp, $r14
+	sbfx4w $r16r17r18r19.x = $r17, $r16r17.hi
 	;;
-	sbfx4w $fp = $r15, 536870911
+	sbfx4w $r16r17r18r19.y = $r18, 536870911
 	;;
-	sbfx64d $rp = $r16, $r16r17.lo
+	sbfx64d $r18r19.lo = $r16r17r18r19.z, $r19
 	;;
-	sbfx64d.@ $r16r17r18r19.x = $r17, 536870911
+	sbfx64d $r18r19.hi = $r16r17r18r19.t, 536870911.@
 	;;
-	sbfx64uwd $r16r17.hi = $r16r17r18r19.y, $r18
+	sbfx64uwd $r20 = $r20r21.lo, $r20r21r22r23.x
 	;;
-	sbfx64uwd $r18r19.lo = $r16r17r18r19.z, 536870911
+	sbfx64uwd $r21 = $r20r21.hi, 536870911
 	;;
-	sbfx64wd $r19 = $r18r19.hi, $r16r17r18r19.t
+	sbfx64wd $r20r21r22r23.y = $r22, $r22r23.lo
 	;;
-	sbfx64wd $r20 = $r20r21.lo, 536870911
+	sbfx64wd $r20r21r22r23.z = $r23, 536870911
 	;;
-	sbfx64w $r20r21r22r23.x = $r21, $r20r21.hi
+	sbfx64w $r22r23.hi = $r20r21r22r23.t, $r24
 	;;
-	sbfx64w $r20r21r22r23.y = $r22, 536870911
+	sbfx64w $r24r25.lo = $r24r25r26r27.x, 536870911
 	;;
-	sbfx8bo $r22r23.lo = $r20r21r22r23.z, $r23
+	sbfx8bo $r25 = $r24r25.hi, $r24r25r26r27.y
 	;;
-	sbfx8bo $r22r23.hi = $r20r21r22r23.t, 536870911
+	sbfx8bo $r26 = $r26r27.lo, 536870911
 	;;
-	sbfx8d $r24 = $r24r25.lo, $r24r25r26r27.x
+	sbfx8d $r24r25r26r27.z = $r27, $r26r27.hi
 	;;
-	sbfx8d.@ $r25 = $r24r25.hi, 536870911
+	sbfx8d $r24r25r26r27.t = $r28, 536870911.@
 	;;
-	sbfx8hq $r24r25r26r27.y = $r26, $r26r27.lo
+	sbfx8hq $r28r29.lo = $r28r29r30r31.x, $r29
 	;;
-	sbfx8hq $r24r25r26r27.z = $r27, 536870911
+	sbfx8hq $r28r29.hi = $r28r29r30r31.y, 536870911
 	;;
-	sbfx8uwd $r26r27.hi = $r24r25r26r27.t, $r28
+	sbfx8uwd $r30 = $r30r31.lo, $r28r29r30r31.z
 	;;
-	sbfx8uwd $r28r29.lo = $r28r29r30r31.x, 536870911
+	sbfx8uwd $r31 = $r30r31.hi, 536870911
 	;;
-	sbfx8wd $r29 = $r28r29.hi, $r28r29r30r31.y
+	sbfx8wd $r28r29r30r31.t = $r32, $r32r33.lo
 	;;
-	sbfx8wd $r30 = $r30r31.lo, 536870911
+	sbfx8wd $r32r33r34r35.x = $r33, 536870911
 	;;
-	sbfx8wp $r28r29r30r31.z = $r31, $r30r31.hi
+	sbfx8wp $r32r33.hi = $r32r33r34r35.y, $r34
 	;;
-	sbfx8wp.@ $r28r29r30r31.t = $r32, 536870911
+	sbfx8wp $r34r35.lo = $r32r33r34r35.z, 536870911.@
 	;;
-	sbfx8w $r32r33.lo = $r32r33r34r35.x, $r33
+	sbfx8w $r35 = $r34r35.hi, $r32r33r34r35.t
 	;;
-	sbfx8w $r32r33.hi = $r32r33r34r35.y, 536870911
+	sbfx8w $r36 = $r36r37.lo, 536870911
 	;;
-	sbmm8 $r34 = $r34r35.lo, 2305843009213693951
+	sbmm8 $r36r37r38r39.x = $r37, 2305843009213693951
 	;;
-	sbmm8 $r32r33r34r35.z = $r35, $r34r35.hi
+	sbmm8 $r36r37.hi = $r36r37r38r39.y, $r38
 	;;
-	sbmm8 $r32r33r34r35.t = $r36, -64
+	sbmm8 $r38r39.lo = $r36r37r38r39.z, -64
 	;;
-	sbmm8 $r36r37.lo = $r36r37r38r39.x, -8589934592
+	sbmm8 $r39 = $r38r39.hi, -8589934592
 	;;
-	sbmm8.@ $r37 = $r36r37.hi, 536870911
+	sbmm8 $r36r37r38r39.t = $r40, 536870911
 	;;
-	sbmmt8 $r36r37r38r39.y = $r38, 2305843009213693951
+	sbmmt8 $r40r41.lo = $r40r41r42r43.x, 2305843009213693951
 	;;
-	sbmmt8 $r38r39.lo = $r36r37r38r39.z, $r39
+	sbmmt8 $r41 = $r40r41.hi, $r40r41r42r43.y
 	;;
-	sbmmt8 $r38r39.hi = $r36r37r38r39.t, -64
+	sbmmt8 $r42 = $r42r43.lo, -64
 	;;
-	sbmmt8 $r40 = $r40r41.lo, -8589934592
+	sbmmt8 $r40r41r42r43.z = $r43, -8589934592
 	;;
-	sbmmt8.@ $r40r41r42r43.x = $r41, 536870911
+	sbmmt8 $r42r43.hi = $r40r41r42r43.t, 536870911.@
 	;;
-	sb $r40r41.hi[$r40r41r42r43.y] = $r42
+	sb $r44[$r44r45.lo] = $r44r45r46r47.x
 	;;
-	sb 2305843009213693951[$r42r43.lo] = $r40r41r42r43.z
+	sb 2305843009213693951[$r45] = $r44r45.hi
 	;;
-	sb.dlez $r43? -1125899906842624[$r42r43.hi] = $r40r41r42r43.t
+	sb.dlez $r44r45r46r47.y? -1125899906842624[$r46] = $r46r47.lo
 	;;
-	sb.dgtz $r44? -8388608[$r44r45.lo] = $r44r45r46r47.x
+	sb.dgtz $r44r45r46r47.z? -8388608[$r47] = $r46r47.hi
 	;;
-	sb.odd $r45? [$r44r45.hi] = $r44r45r46r47.y
+	sb.odd $r44r45r46r47.t? [$r48] = $r48r49.lo
 	;;
-	sb -64[$r46] = $r46r47.lo
+	sb -64[$r48r49r50r51.x] = $r49
 	;;
-	sb -8589934592[$r44r45r46r47.z] = $r47
+	sb -8589934592[$r48r49.hi] = $r48r49r50r51.y
 	;;
-	scall $r46r47.hi
+	scall $r50
 	;;
 	scall 511
 	;;
-	sd.xs $r44r45r46r47.t[$r48] = $r48r49.lo
+	sd.xs $r50r51.lo[$r48r49r50r51.z] = $r51
 	;;
-	sd 2305843009213693951[$r48r49r50r51.x] = $r49
+	sd 2305843009213693951[$r50r51.hi] = $r48r49r50r51.t
 	;;
-	sd.even $r48r49.hi? -1125899906842624[$r48r49r50r51.y] = $r50
+	sd.even $r52? -1125899906842624[$r52r53.lo] = $r52r53r54r55.x
 	;;
-	sd.wnez $r50r51.lo? -8388608[$r48r49r50r51.z] = $r51
+	sd.wnez $r53? -8388608[$r52r53.hi] = $r52r53r54r55.y
 	;;
-	sd.weqz $r50r51.hi? [$r48r49r50r51.t] = $r52
+	sd.weqz $r54? [$r54r55.lo] = $r52r53r54r55.z
 	;;
-	sd -64[$r52r53.lo] = $r52r53r54r55.x
+	sd -64[$r55] = $r54r55.hi
 	;;
-	sd -8589934592[$r53] = $r52r53.hi
+	sd -8589934592[$r52r53r54r55.t] = $r56
 	;;
-	set $s28 = $r52r53r54r55.y
+	set $s28 = $r56r57.lo
 	;;
-	set $ra = $r54
+	set $ra = $r56r57r58r59.x
 	;;
-	set $ps = $r54r55.lo
+	set $ps = $r57
 	;;
-	set $ps = $r52r53r54r55.z
+	set $ps = $r56r57.hi
 	;;
-	sh $r55[$r54r55.hi] = $r52r53r54r55.t
+	sh $r56r57r58r59.y[$r58] = $r58r59.lo
 	;;
-	sh 2305843009213693951[$r56] = $r56r57.lo
+	sh 2305843009213693951[$r56r57r58r59.z] = $r59
 	;;
-	sh.wltz $r56r57r58r59.x? -1125899906842624[$r57] = $r56r57.hi
+	sh.wltz $r58r59.hi? -1125899906842624[$r56r57r58r59.t] = $r60
 	;;
-	sh.wgez $r56r57r58r59.y? -8388608[$r58] = $r58r59.lo
+	sh.wgez $r60r61.lo? -8388608[$r60r61r62r63.x] = $r61
 	;;
-	sh.wlez $r56r57r58r59.z? [$r59] = $r58r59.hi
+	sh.wlez $r60r61.hi? [$r60r61r62r63.y] = $r62
 	;;
-	sh -64[$r56r57r58r59.t] = $r60
+	sh -64[$r62r63.lo] = $r60r61r62r63.z
 	;;
-	sh -8589934592[$r60r61.lo] = $r60r61r62r63.x
+	sh -8589934592[$r63] = $r62r63.hi
 	;;
 	sleep
 	;;
-	sllbos $r61 = $r60r61.hi, $r60r61r62r63.y
+	sllbos $r60r61r62r63.t = $r0, $r0r1.lo
 	;;
-	sllbos $r62 = $r62r63.lo, 7
+	sllbos $r0r1r2r3.x = $r1, 7
 	;;
-	slld $r60r61r62r63.z = $r63, $r62r63.hi
+	slld $r0r1.hi = $r0r1r2r3.y, $r2
 	;;
-	slld $r60r61r62r63.t = $r0, 7
+	slld $r2r3.lo = $r0r1r2r3.z, 7
 	;;
-	sllhqs $r0r1.lo = $r0r1r2r3.x, $r1
+	sllhqs $r3 = $r2r3.hi, $r0r1r2r3.t
 	;;
-	sllhqs $r0r1.hi = $r0r1r2r3.y, 7
+	sllhqs $r4 = $r4r5.lo, 7
 	;;
-	sllwps $r2 = $r2r3.lo, $r0r1r2r3.z
+	sllwps $r4r5r6r7.x = $r5, $r4r5.hi
 	;;
-	sllwps $r3 = $r2r3.hi, 7
+	sllwps $r4r5r6r7.y = $r6, 7
 	;;
-	sllw $r0r1r2r3.t = $r4, $r4r5.lo
+	sllw $r6r7.lo = $r4r5r6r7.z, $r7
 	;;
-	sllw $r4r5r6r7.x = $r5, 7
+	sllw $r6r7.hi = $r4r5r6r7.t, 7
 	;;
-	slsbos $r4r5.hi = $r4r5r6r7.y, $r6
+	slsbos $r8 = $r8r9.lo, $r8r9r10r11.x
 	;;
-	slsbos $r6r7.lo = $r4r5r6r7.z, 7
+	slsbos $r9 = $r8r9.hi, 7
 	;;
-	slsd $r7 = $r6r7.hi, $r4r5r6r7.t
+	slsd $r8r9r10r11.y = $r10, $r10r11.lo
 	;;
-	slsd $r8 = $r8r9.lo, 7
+	slsd $r8r9r10r11.z = $r11, 7
 	;;
-	slshqs $r8r9r10r11.x = $r9, $r8r9.hi
+	slshqs $r10r11.hi = $r8r9r10r11.t, $r12
 	;;
-	slshqs $r8r9r10r11.y = $r10, 7
+	slshqs $sp = $r13, 7
 	;;
-	slswps $r10r11.lo = $r8r9r10r11.z, $r11
+	slswps $tp = $r14, $fp
 	;;
-	slswps $r10r11.hi = $r8r9r10r11.t, 7
+	slswps $r15 = $rp, 7
 	;;
-	slsw $r12 = $sp, $r13
+	slsw $r16 = $r16r17.lo, $r16r17r18r19.x
 	;;
-	slsw $tp = $r14, 7
+	slsw $r17 = $r16r17.hi, 7
 	;;
-	slusbos $fp = $r15, $rp
+	slusbos $r16r17r18r19.y = $r18, $r18r19.lo
 	;;
-	slusbos $r16 = $r16r17.lo, 7
+	slusbos $r16r17r18r19.z = $r19, 7
 	;;
-	slusd $r16r17r18r19.x = $r17, $r16r17.hi
+	slusd $r18r19.hi = $r16r17r18r19.t, $r20
 	;;
-	slusd $r16r17r18r19.y = $r18, 7
+	slusd $r20r21.lo = $r20r21r22r23.x, 7
 	;;
-	slushqs $r18r19.lo = $r16r17r18r19.z, $r19
+	slushqs $r21 = $r20r21.hi, $r20r21r22r23.y
 	;;
-	slushqs $r18r19.hi = $r16r17r18r19.t, 7
+	slushqs $r22 = $r22r23.lo, 7
 	;;
-	sluswps $r20 = $r20r21.lo, $r20r21r22r23.x
+	sluswps $r20r21r22r23.z = $r23, $r22r23.hi
 	;;
-	sluswps $r21 = $r20r21.hi, 7
+	sluswps $r20r21r22r23.t = $r24, 7
 	;;
-	slusw $r20r21r22r23.y = $r22, $r22r23.lo
+	slusw $r24r25.lo = $r24r25r26r27.x, $r25
 	;;
-	slusw $r20r21r22r23.z = $r23, 7
+	slusw $r24r25.hi = $r24r25r26r27.y, 7
 	;;
-	so.xs $r22r23.hi[$r20r21r22r23.t] = $r44r45r46r47
+	so.xs $r26[$r26r27.lo] = $r44r45r46r47
 	;;
-	so 2305843009213693951[$r24] = $r48r49r50r51
+	so 2305843009213693951[$r24r25r26r27.z] = $r48r49r50r51
 	;;
-	so.u3 $r24r25.lo? -1125899906842624[$r24r25r26r27.x] = $r52r53r54r55
+	so.u3 $r27? -1125899906842624[$r26r27.hi] = $r52r53r54r55
 	;;
-	so.mt $r25? -8388608[$r24r25.hi] = $r56r57r58r59
+	so.mt $r24r25r26r27.t? -8388608[$r28] = $r56r57r58r59
 	;;
-	so.mf $r24r25r26r27.y? [$r26] = $r60r61r62r63
+	so.mf $r28r29.lo? [$r28r29r30r31.x] = $r60r61r62r63
 	;;
-	so.wgtz $r26r27.lo? -1125899906842624[$r24r25r26r27.z] = $r0r1r2r3
+	so.wgtz $r29? -1125899906842624[$r28r29.hi] = $r0r1r2r3
 	;;
-	so.dnez $r27? -8388608[$r26r27.hi] = $r4r5r6r7
+	so.dnez $r28r29r30r31.y? -8388608[$r30] = $r4r5r6r7
 	;;
-	so.deqz $r24r25r26r27.t? [$r28] = $r8r9r10r11
+	so.deqz $r30r31.lo? [$r28r29r30r31.z] = $r8r9r10r11
 	;;
-	so -64[$r28r29.lo] = $r12r13r14r15
+	so -64[$r31] = $r12r13r14r15
 	;;
-	so -8589934592[$r28r29r30r31.x] = $r16r17r18r19
+	so -8589934592[$r30r31.hi] = $r16r17r18r19
 	;;
-	sq $r29[$r28r29.hi] = $r28r29r30r31.lo
+	sq $r28r29r30r31.t[$r32] = $r28r29r30r31.lo
 	;;
-	sq 2305843009213693951[$r28r29r30r31.y] = $r30r31
+	sq 2305843009213693951[$r32r33.lo] = $r30r31
 	;;
-	sq.dltz $r30? -1125899906842624[$r30r31.lo] = $r28r29r30r31.hi
+	sq.dltz $r32r33r34r35.x? -1125899906842624[$r33] = $r28r29r30r31.hi
 	;;
-	sq.dgez $r28r29r30r31.z? -8388608[$r31] = $r32r33
+	sq.dgez $r32r33.hi? -8388608[$r32r33r34r35.y] = $r32r33
 	;;
-	sq.dlez $r30r31.hi? [$r28r29r30r31.t] = $r32r33r34r35.lo
+	sq.dlez $r34? [$r34r35.lo] = $r32r33r34r35.lo
 	;;
-	sq -64[$r32] = $r34r35
+	sq -64[$r32r33r34r35.z] = $r34r35
 	;;
-	sq -8589934592[$r32r33.lo] = $r32r33r34r35.hi
+	sq -8589934592[$r35] = $r32r33r34r35.hi
 	;;
-	srabos $r32r33r34r35.x = $r33, $r32r33.hi
+	srabos $r34r35.hi = $r32r33r34r35.t, $r36
 	;;
-	srabos $r32r33r34r35.y = $r34, 7
+	srabos $r36r37.lo = $r36r37r38r39.x, 7
 	;;
-	srad $r34r35.lo = $r32r33r34r35.z, $r35
+	srad $r37 = $r36r37.hi, $r36r37r38r39.y
 	;;
-	srad $r34r35.hi = $r32r33r34r35.t, 7
+	srad $r38 = $r38r39.lo, 7
 	;;
-	srahqs $r36 = $r36r37.lo, $r36r37r38r39.x
+	srahqs $r36r37r38r39.z = $r39, $r38r39.hi
 	;;
-	srahqs $r37 = $r36r37.hi, 7
+	srahqs $r36r37r38r39.t = $r40, 7
 	;;
-	srawps $r36r37r38r39.y = $r38, $r38r39.lo
+	srawps $r40r41.lo = $r40r41r42r43.x, $r41
 	;;
-	srawps $r36r37r38r39.z = $r39, 7
+	srawps $r40r41.hi = $r40r41r42r43.y, 7
 	;;
-	sraw $r38r39.hi = $r36r37r38r39.t, $r40
+	sraw $r42 = $r42r43.lo, $r40r41r42r43.z
 	;;
-	sraw $r40r41.lo = $r40r41r42r43.x, 7
+	sraw $r43 = $r42r43.hi, 7
 	;;
-	srlbos $r41 = $r40r41.hi, $r40r41r42r43.y
+	srlbos $r40r41r42r43.t = $r44, $r44r45.lo
 	;;
-	srlbos $r42 = $r42r43.lo, 7
+	srlbos $r44r45r46r47.x = $r45, 7
 	;;
-	srld $r40r41r42r43.z = $r43, $r42r43.hi
+	srld $r44r45.hi = $r44r45r46r47.y, $r46
 	;;
-	srld $r40r41r42r43.t = $r44, 7
+	srld $r46r47.lo = $r44r45r46r47.z, 7
 	;;
-	srlhqs $r44r45.lo = $r44r45r46r47.x, $r45
+	srlhqs $r47 = $r46r47.hi, $r44r45r46r47.t
 	;;
-	srlhqs $r44r45.hi = $r44r45r46r47.y, 7
+	srlhqs $r48 = $r48r49.lo, 7
 	;;
-	srlwps $r46 = $r46r47.lo, $r44r45r46r47.z
+	srlwps $r48r49r50r51.x = $r49, $r48r49.hi
 	;;
-	srlwps $r47 = $r46r47.hi, 7
+	srlwps $r48r49r50r51.y = $r50, 7
 	;;
-	srlw $r44r45r46r47.t = $r48, $r48r49.lo
+	srlw $r50r51.lo = $r48r49r50r51.z, $r51
 	;;
-	srlw $r48r49r50r51.x = $r49, 7
+	srlw $r50r51.hi = $r48r49r50r51.t, 7
 	;;
-	srsbos $r48r49.hi = $r48r49r50r51.y, $r50
+	srsbos $r52 = $r52r53.lo, $r52r53r54r55.x
 	;;
-	srsbos $r50r51.lo = $r48r49r50r51.z, 7
+	srsbos $r53 = $r52r53.hi, 7
 	;;
-	srsd $r51 = $r50r51.hi, $r48r49r50r51.t
+	srsd $r52r53r54r55.y = $r54, $r54r55.lo
 	;;
-	srsd $r52 = $r52r53.lo, 7
+	srsd $r52r53r54r55.z = $r55, 7
 	;;
-	srshqs $r52r53r54r55.x = $r53, $r52r53.hi
+	srshqs $r54r55.hi = $r52r53r54r55.t, $r56
 	;;
-	srshqs $r52r53r54r55.y = $r54, 7
+	srshqs $r56r57.lo = $r56r57r58r59.x, 7
 	;;
-	srswps $r54r55.lo = $r52r53r54r55.z, $r55
+	srswps $r57 = $r56r57.hi, $r56r57r58r59.y
 	;;
-	srswps $r54r55.hi = $r52r53r54r55.t, 7
+	srswps $r58 = $r58r59.lo, 7
 	;;
-	srsw $r56 = $r56r57.lo, $r56r57r58r59.x
+	srsw $r56r57r58r59.z = $r59, $r58r59.hi
 	;;
-	srsw $r57 = $r56r57.hi, 7
+	srsw $r56r57r58r59.t = $r60, 7
 	;;
 	stop
 	;;
-	stsud $r56r57r58r59.y = $r58, $r58r59.lo
+	stsud $r60r61.lo = $r60r61r62r63.x, $r61
 	;;
-	stsud $r56r57r58r59.z = $r59, 536870911
+	stsud $r60r61.hi = $r60r61r62r63.y, 536870911
 	;;
-	stsuhq $r58r59.hi = $r56r57r58r59.t, $r60
+	stsuhq $r62 = $r62r63.lo, $r60r61r62r63.z
 	;;
-	stsuhq.@ $r60r61.lo = $r60r61r62r63.x, 536870911
+	stsuhq $r63 = $r62r63.hi, 536870911.@
 	;;
-	stsuwp $r61 = $r60r61.hi, $r60r61r62r63.y
+	stsuwp $r60r61r62r63.t = $r0, $r0r1.lo
 	;;
-	stsuwp $r62 = $r62r63.lo, 536870911
+	stsuwp $r0r1r2r3.x = $r1, 536870911
 	;;
-	stsuw $r60r61r62r63.z = $r63, $r62r63.hi
+	stsuw $r0r1.hi = $r0r1r2r3.y, $r2
 	;;
-	stsuw $r60r61r62r63.t = $r0, 536870911
+	stsuw $r2r3.lo = $r0r1r2r3.z, 536870911
 	;;
-	sw.xs $r0r1.lo[$r0r1r2r3.x] = $r1
+	sw.xs $r3[$r2r3.hi] = $r0r1r2r3.t
 	;;
-	sw 2305843009213693951[$r0r1.hi] = $r0r1r2r3.y
+	sw 2305843009213693951[$r4] = $r4r5.lo
 	;;
-	sw.dgtz $r2? -1125899906842624[$r2r3.lo] = $r0r1r2r3.z
+	sw.dgtz $r4r5r6r7.x? -1125899906842624[$r5] = $r4r5.hi
 	;;
-	sw.odd $r3? -8388608[$r2r3.hi] = $r0r1r2r3.t
+	sw.odd $r4r5r6r7.y? -8388608[$r6] = $r6r7.lo
 	;;
-	sw.even $r4? [$r4r5.lo] = $r4r5r6r7.x
+	sw.even $r4r5r6r7.z? [$r7] = $r6r7.hi
 	;;
-	sw -64[$r5] = $r4r5.hi
+	sw -64[$r4r5r6r7.t] = $r8
 	;;
-	sw -8589934592[$r4r5r6r7.y] = $r6
+	sw -8589934592[$r8r9.lo] = $r8r9r10r11.x
 	;;
-	sxbd $r6r7.lo = $r4r5r6r7.z
+	sxbd $r9 = $r8r9.hi
 	;;
-	sxhd $r7 = $r6r7.hi
+	sxhd $r8r9r10r11.y = $r10
 	;;
-	sxlbhq $r4r5r6r7.t = $r8
+	sxlbhq $r10r11.lo = $r8r9r10r11.z
 	;;
-	sxlhwp $r8r9.lo = $r8r9r10r11.x
+	sxlhwp $r11 = $r10r11.hi
 	;;
-	sxmbhq $r9 = $r8r9.hi
+	sxmbhq $r8r9r10r11.t = $r12
 	;;
-	sxmhwp $r8r9r10r11.y = $r10
+	sxmhwp $sp = $r13
 	;;
-	sxwd $r10r11.lo = $r8r9r10r11.z
+	sxwd $tp = $r14
 	;;
-	syncgroup $r11
+	syncgroup $fp
 	;;
 	tlbdinval
 	;;
@@ -2147,43 +2155,43 @@ main:
 	;;
 	tlbwrite
 	;;
-	waitit $r10r11.hi
+	waitit $r15
 	;;
-	wfxl $ps, $r8r9r10r11.t
+	wfxl $ps, $rp
 	;;
-	wfxl $pcr, $r12
+	wfxl $pcr, $r16
 	;;
-	wfxl $s1, $sp
+	wfxl $s1, $r16r17.lo
 	;;
-	wfxm $s1, $r13
+	wfxm $s1, $r16r17r18r19.x
 	;;
-	wfxm $s2, $tp
+	wfxm $s2, $r17
 	;;
-	wfxm $pcr, $r14
+	wfxm $pcr, $r16r17.hi
 	;;
-	xaccesso $r20r21r22r23 = $a0..a1, $fp
+	xaccesso $r20r21r22r23 = $a0..a1, $r16r17r18r19.y
 	;;
-	xaccesso $r24r25r26r27 = $a0..a3, $r15
+	xaccesso $r24r25r26r27 = $a0..a3, $r18
 	;;
-	xaccesso $r28r29r30r31 = $a0..a7, $rp
+	xaccesso $r28r29r30r31 = $a0..a7, $r18r19.lo
 	;;
-	xaccesso $r32r33r34r35 = $a0..a15, $r16
+	xaccesso $r32r33r34r35 = $a0..a15, $r16r17r18r19.z
 	;;
-	xaccesso $r36r37r38r39 = $a0..a31, $r16r17.lo
+	xaccesso $r36r37r38r39 = $a0..a31, $r19
 	;;
-	xaccesso $r40r41r42r43 = $a0..a63, $r16r17r18r19.x
+	xaccesso $r40r41r42r43 = $a0..a63, $r18r19.hi
 	;;
-	xaligno $a0 = $a2..a3, $r17
+	xaligno $a0 = $a2..a3, $r16r17r18r19.t
 	;;
-	xaligno $a0a1.lo = $a4..a7, $r16r17.hi
+	xaligno $a0a1.lo = $a4..a7, $r20
 	;;
-	xaligno $a0a1a2a3.x = $a8..a15, $r16r17r18r19.y
+	xaligno $a0a1a2a3.x = $a8..a15, $r20r21.lo
 	;;
-	xaligno $a1 = $a16..a31, $r18
+	xaligno $a1 = $a16..a31, $r20r21r22r23.x
 	;;
-	xaligno $a0a1.hi = $a32..a63, $r18r19.lo
+	xaligno $a0a1.hi = $a32..a63, $r21
 	;;
-	xaligno $a0a1a2a3.y = $a0..a63, $r16r17r18r19.z
+	xaligno $a0a1a2a3.y = $a0..a63, $r20r21.hi
 	;;
 	xandno $a2 = $a2a3.lo, $a0a1a2a3.z
 	;;
@@ -2207,71 +2215,71 @@ main:
 	;;
 	xfnarrow44wh.ro.s $a8a9.lo = $a6a7
 	;;
-	xfscalewo $a8a9a10a11.x = $a9, $r19
+	xfscalewo $a8a9a10a11.x = $a9, $r20r21r22r23.y
 	;;
-	xlo.u.q0 $a8a9a10a11 = $r18r19.hi[$r16r17r18r19.t]
+	xlo.u.q0 $a8a9a10a11 = $r22[$r22r23.lo]
 	;;
-	xlo.us.xs $a8a9.hi = $r20[$r20r21.lo]
+	xlo.us.xs $a8a9.hi = $r20r21r22r23.z[$r23]
 	;;
-	xlo.dnez.q1 $r20r21r22r23.x? $a12a13a14a15 = -1125899906842624[$r21]
+	xlo.dnez.q1 $r22r23.hi? $a12a13a14a15 = -1125899906842624[$r20r21r22r23.t]
 	;;
-	xlo.s.deqz.q2 $r20r21.hi? $a16a17a18a19 = -8388608[$r20r21r22r23.y]
+	xlo.s.deqz.q2 $r24? $a16a17a18a19 = -8388608[$r24r25.lo]
 	;;
-	xlo.u.wnez.q3 $r22? $a20a21a22a23 = [$r22r23.lo]
+	xlo.u.wnez.q3 $r24r25r26r27.x? $a20a21a22a23 = [$r25]
 	;;
-	xlo.us.weqz $r20r21r22r23.z? $a8a9a10a11.y = -1125899906842624[$r23]
+	xlo.us.weqz $r24r25.hi? $a8a9a10a11.y = -1125899906842624[$r24r25r26r27.y]
 	;;
-	xlo.mt $r22r23.hi? $a10 = -8388608[$r20r21r22r23.t]
+	xlo.mt $r26? $a10 = -8388608[$r26r27.lo]
 	;;
-	xlo.s.mf $r24? $a10a11.lo = [$r24r25.lo]
+	xlo.s.mf $r24r25r26r27.z? $a10a11.lo = [$r27]
 	;;
-	xlo.u $a4..a5, $r24r25r26r27.x = -1125899906842624[$r25]
+	xlo.u $a4..a5, $r26r27.hi = -1125899906842624[$r24r25r26r27.t]
 	;;
-	xlo.us.q $a6..a7, $r24r25.hi = -8388608[$r24r25r26r27.y]
+	xlo.us.q $a6..a7, $r28 = -8388608[$r28r29.lo]
 	;;
-	xlo.d $a8..a9, $r26 = [$r26r27.lo]
+	xlo.d $a8..a9, $r28r29r30r31.x = [$r29]
 	;;
-	xlo.s.w $a8..a11, $r24r25r26r27.z = -1125899906842624[$r27]
+	xlo.s.w $a8..a11, $r28r29.hi = -1125899906842624[$r28r29r30r31.y]
 	;;
-	xlo.u.h $a12..a15, $r26r27.hi = -8388608[$r24r25r26r27.t]
+	xlo.u.h $a12..a15, $r30 = -8388608[$r30r31.lo]
 	;;
-	xlo.us.b $a16..a19, $r28 = [$r28r29.lo]
+	xlo.us.b $a16..a19, $r28r29r30r31.z = [$r31]
 	;;
-	xlo $a16..a23, $r28r29r30r31.x = -1125899906842624[$r29]
+	xlo $a16..a23, $r30r31.hi = -1125899906842624[$r28r29r30r31.t]
 	;;
-	xlo.s.q $a24..a31, $r28r29.hi = -8388608[$r28r29r30r31.y]
+	xlo.s.q $a24..a31, $r32 = -8388608[$r32r33.lo]
 	;;
-	xlo.u.d $a32..a39, $r30 = [$r30r31.lo]
+	xlo.u.d $a32..a39, $r32r33r34r35.x = [$r33]
 	;;
-	xlo.us.w $a32..a47, $r28r29r30r31.z = -1125899906842624[$r31]
+	xlo.us.w $a32..a47, $r32r33.hi = -1125899906842624[$r32r33r34r35.y]
 	;;
-	xlo.h $a48..a63, $r30r31.hi = -8388608[$r28r29r30r31.t]
+	xlo.h $a48..a63, $r34 = -8388608[$r34r35.lo]
 	;;
-	xlo.s.b $a0..a15, $r32 = [$r32r33.lo]
+	xlo.s.b $a0..a15, $r32r33r34r35.z = [$r35]
 	;;
-	xlo.u $a0..a31, $r32r33r34r35.x = -1125899906842624[$r33]
+	xlo.u $a0..a31, $r34r35.hi = -1125899906842624[$r32r33r34r35.t]
 	;;
-	xlo.us.q $a32..a63, $r32r33.hi = -8388608[$r32r33r34r35.y]
+	xlo.us.q $a32..a63, $r36 = -8388608[$r36r37.lo]
 	;;
-	xlo.d $a0..a31, $r34 = [$r34r35.lo]
+	xlo.d $a0..a31, $r36r37r38r39.x = [$r37]
 	;;
-	xlo.s.w $a0..a63, $r32r33r34r35.z = -1125899906842624[$r35]
+	xlo.s.w $a0..a63, $r36r37.hi = -1125899906842624[$r36r37r38r39.y]
 	;;
-	xlo.u.h $a0..a63, $r34r35.hi = -8388608[$r32r33r34r35.t]
+	xlo.u.h $a0..a63, $r38 = -8388608[$r38r39.lo]
 	;;
-	xlo.us.b $a0..a63, $r36 = [$r36r37.lo]
+	xlo.us.b $a0..a63, $r36r37r38r39.z = [$r39]
 	;;
-	xlo.q0 $a24a25a26a27 = 2305843009213693951[$r36r37r38r39.x]
+	xlo.q0 $a24a25a26a27 = 2305843009213693951[$r38r39.hi]
 	;;
-	xlo.s.q1 $a28a29a30a31 = -64[$r37]
+	xlo.s.q1 $a28a29a30a31 = -64[$r36r37r38r39.t]
 	;;
-	xlo.u.q2 $a32a33a34a35 = -8589934592[$r36r37.hi]
+	xlo.u.q2 $a32a33a34a35 = -8589934592[$r40]
 	;;
-	xlo.us $a8a9a10a11.z = 2305843009213693951[$r36r37r38r39.y]
+	xlo.us $a8a9a10a11.z = 2305843009213693951[$r40r41.lo]
 	;;
-	xlo $a11 = -64[$r38]
+	xlo $a11 = -64[$r40r41r42r43.x]
 	;;
-	xlo.s $a10a11.hi = -8589934592[$r38r39.lo]
+	xlo.s $a10a11.hi = -8589934592[$r41]
 	;;
 	xmadd44bw0 $a4a5a6a7.hi = $a8a9a10a11.t, $a12
 	;;
@@ -2303,23 +2311,23 @@ main:
 	;;
 	xmmaus484bw $a28a29 = $a16a17a18a19.z, $a19
 	;;
-	xmovefd $r36r37r38r39.z = $a0_x
+	xmovefd $r40r41.hi = $a0_x
 	;;
 	xmovefo $r44r45r46r47 = $a18a19.hi
 	;;
 	xmovefq $r36r37 = $a0_lo
 	;;
-	xmovetd $a0_t = $r39
+	xmovetd $a0_t = $r40r41r42r43.y
 	;;
-	xmovetd $a0_x = $r38r39.hi
+	xmovetd $a0_x = $r42
 	;;
-	xmovetd $a0_y = $r36r37r38r39.t
+	xmovetd $a0_y = $r42r43.lo
 	;;
-	xmovetd $a0_z = $r40
+	xmovetd $a0_z = $r40r41r42r43.z
 	;;
-	xmovetq $a0_lo = $r40r41.lo, $r40r41r42r43.x
+	xmovetq $a0_lo = $r43, $r42r43.hi
 	;;
-	xmovetq $a0_hi = $r41, $r40r41.hi
+	xmovetq $a0_hi = $r40r41r42r43.t, $r44
 	;;
 	xmsbfifwo.ru $a16a17a18a19.t = $a20, $a20a21.lo
 	;;
@@ -2331,31 +2339,31 @@ main:
 	;;
 	xnxoro $a20a21a22a23.z = $a23, $a22a23.hi
 	;;
-	xord $r40r41r42r43.y = $r42, 2305843009213693951
+	xord $r44r45.lo = $r44r45r46r47.x, 2305843009213693951
 	;;
-	xord $r42r43.lo = $r40r41r42r43.z, $r43
+	xord $r45 = $r44r45.hi, $r44r45r46r47.y
 	;;
-	xord $r42r43.hi = $r40r41r42r43.t, -64
+	xord $r46 = $r46r47.lo, -64
 	;;
-	xord $r44 = $r44r45.lo, -8589934592
+	xord $r44r45r46r47.z = $r47, -8589934592
 	;;
-	xord.@ $r44r45r46r47.x = $r45, 536870911
+	xord $r46r47.hi = $r44r45r46r47.t, 536870911.@
 	;;
 	xorno $a20a21a22a23.t = $a24, $a24a25.lo
 	;;
 	xoro $a24a25a26a27.x = $a25, $a24a25.hi
 	;;
-	xorrbod $r44r45.hi = $r44r45r46r47.y
+	xorrbod $r48 = $r48r49.lo
 	;;
-	xorrhqd $r46 = $r46r47.lo
+	xorrhqd $r48r49r50r51.x = $r49
 	;;
-	xorrwpd $r44r45r46r47.z = $r47
+	xorrwpd $r48r49.hi = $r48r49r50r51.y
 	;;
-	xorw $r46r47.hi = $r44r45r46r47.t, $r48
+	xorw $r50 = $r50r51.lo, $r48r49r50r51.z
 	;;
-	xorw $r48r49.lo = $r48r49r50r51.x, -64
+	xorw $r51 = $r50r51.hi, -64
 	;;
-	xorw $r49 = $r48r49.hi, -8589934592
+	xorw $r48r49r50r51.t = $r52, -8589934592
 	;;
 	xrecvo.f $a24a25a26a27.y
 	;;
@@ -2367,19 +2375,19 @@ main:
 	;;
 	xsendrecvo.f.b $a28a29.lo, $a28a29a30a31.x
 	;;
-	xso $r48r49r50r51.y[$r50] = $a29
+	xso $r52r53.lo[$r52r53r54r55.x] = $a29
 	;;
-	xso 2305843009213693951[$r50r51.lo] = $a28a29.hi
+	xso 2305843009213693951[$r53] = $a28a29.hi
 	;;
-	xso.mtc $r48r49r50r51.z? -1125899906842624[$r51] = $a28a29a30a31.y
+	xso.mtc $r52r53.hi? -1125899906842624[$r52r53r54r55.y] = $a28a29a30a31.y
 	;;
-	xso.mfc $r50r51.hi? -8388608[$r48r49r50r51.t] = $a30
+	xso.mfc $r54? -8388608[$r54r55.lo] = $a30
 	;;
-	xso.dnez $r52? [$r52r53.lo] = $a30a31.lo
+	xso.dnez $r52r53r54r55.z? [$r55] = $a30a31.lo
 	;;
-	xso -64[$r52r53r54r55.x] = $a28a29a30a31.z
+	xso -64[$r54r55.hi] = $a28a29a30a31.z
 	;;
-	xso -8589934592[$r53] = $a31
+	xso -8589934592[$r52r53r54r55.t] = $a31
 	;;
 	xsplatdo $a30a31.hi = 2305843009213693951
 	;;
@@ -2399,19 +2407,19 @@ main:
 	;;
 	xzx48bw $a56a57a58a59 = $a32a33a34a35.z
 	;;
-	zxbd $r52r53.hi = $r52r53r54r55.y
+	zxbd $r56 = $r56r57.lo
 	;;
-	zxhd $r54 = $r54r55.lo
+	zxhd $r56r57r58r59.x = $r57
 	;;
-	zxlbhq $r52r53r54r55.z = $r55
+	zxlbhq $r56r57.hi = $r56r57r58r59.y
 	;;
-	zxlhwp $r54r55.hi = $r52r53r54r55.t
+	zxlhwp $r58 = $r58r59.lo
 	;;
-	zxmbhq $r56 = $r56r57.lo
+	zxmbhq $r56r57r58r59.z = $r59
 	;;
-	zxmhwp $r56r57r58r59.x = $r57
+	zxmhwp $r58r59.hi = $r56r57r58r59.t
 	;;
-	zxwd $r56r57.hi = $r56r57r58r59.y
+	zxwd $r60 = $r60r61.lo
 	;;
 	.endp	main
 	.section .text
