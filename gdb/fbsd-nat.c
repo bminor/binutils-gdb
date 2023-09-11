@@ -1205,8 +1205,6 @@ fbsd_nat_target::resume_one_process (ptid_t ptid, int step,
 
   for (thread_info *tp : inf->non_exited_threads ())
     {
-      int request;
-
       /* If ptid is a specific LWP, suspend all other LWPs in the
 	 process, otherwise resume all LWPs in the process..  */
       if (!ptid.lwp_p() || tp->ptid.lwp () == ptid.lwp ())
@@ -1694,9 +1692,9 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  || ourstatus->kind () == TARGET_WAITKIND_NO_RESUMED)
 	break;
 
-      inferior *inf = find_inferior_ptid (this, wptid);
-      gdb_assert (inf != nullptr);
-      fbsd_inferior *fbsd_inf = get_fbsd_inferior (inf);
+      inferior *winf = find_inferior_ptid (this, wptid);
+      gdb_assert (winf != nullptr);
+      fbsd_inferior *fbsd_inf = get_fbsd_inferior (winf);
       gdb_assert (fbsd_inf != nullptr);
       gdb_assert (fbsd_inf->resumed_lwps != null_ptid);
       gdb_assert (fbsd_inf->running_lwps > 0);
@@ -2094,6 +2092,9 @@ fbsd_nat_target::detach (inferior *inf, int from_tty)
 			  }
 		      }
 		  }
+#else
+		  /* pacify gcc  */
+		  wptid = (void) null_ptid;
 #endif
 		  sig = 0;
 		  break;
