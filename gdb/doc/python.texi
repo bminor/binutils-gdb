@@ -247,12 +247,14 @@ Some care must be taken when writing Python code to run in
 
 @itemize @bullet
 @item
-@value{GDBN} install handlers for @code{SIGCHLD} and @code{SIGINT}.
+@value{GDBN} installs handlers for @code{SIGCHLD} and @code{SIGINT}.
 Python code must not override these, or even change the options using
 @code{sigaction}.  If your program changes the handling of these
 signals, @value{GDBN} will most likely stop working correctly.  Note
 that it is unfortunately common for GUI toolkits to install a
-@code{SIGCHLD} handler.
+@code{SIGCHLD} handler.  When creating a new Python thread, you can
+use @code{gdb.block_signals} or @code{gdb.Thread} to handle this
+correctly; see @ref{Threading in GDB}.
 
 @item
 @value{GDBN} takes care to mark its internal file descriptors as
