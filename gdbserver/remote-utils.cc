@@ -1068,7 +1068,6 @@ prepare_resume_reply (char *buf, ptid_t ptid, const target_waitstatus &status)
     case TARGET_WAITKIND_SYSCALL_ENTRY:
     case TARGET_WAITKIND_SYSCALL_RETURN:
       {
-	const char **regp;
 	struct regcache *regcache;
 	char *buf_start = buf;
 
@@ -1155,8 +1154,6 @@ prepare_resume_reply (char *buf, ptid_t ptid, const target_waitstatus &status)
 
 	switch_to_thread (the_target, ptid);
 
-	regp = current_target_desc ()->expedite_regs;
-
 	regcache = get_thread_regcache (current_thread, 1);
 
 	if (the_target->stopped_by_watchpoint ())
@@ -1188,11 +1185,11 @@ prepare_resume_reply (char *buf, ptid_t ptid, const target_waitstatus &status)
 	    buf += strlen (buf);
 	  }
 
-	while (*regp)
-	  {
-	    buf = outreg (regcache, find_regno (regcache->tdesc, *regp), buf);
-	    regp ++;
-	  }
+	/* Handle the expedited registers.  */
+	for (const std::string &expedited_reg :
+	     current_target_desc ()->expedite_regs)
+	  buf = outreg (regcache, find_regno (regcache->tdesc,
+					      expedited_reg.c_str ()), buf);
 	*buf = '\0';
 
 	/* Formerly, if the debugger had not used any thread features
