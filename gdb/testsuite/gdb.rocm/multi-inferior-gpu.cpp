@@ -62,7 +62,7 @@ parent (int argc, char **argv)
       if (pid == 0)
 	{
 	  /* Exec to force the child to re-initialize the ROCm runtime.  */
-	  if (execl (argv[0], argv[0], n) == -1)
+	  if (execl (argv[0], argv[0], n, nullptr) == -1)
 	    {
 	      perror ("Failed to exec");
 	      return -1;
