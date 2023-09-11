@@ -157,9 +157,8 @@ private:
   tid_type m_tid;
 };
 
-/* Functor to hash a ptid.  */
-
-struct hash_ptid
+template<>
+struct std::hash<ptid_t>
 {
   size_t operator() (const ptid_t &ptid) const
   {

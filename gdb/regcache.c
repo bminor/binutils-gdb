@@ -329,7 +329,7 @@ reg_buffer::assert_regnum (int regnum) const
    regcaches, associated to different gdbarches).  */
 
 using ptid_regcache_map
-  = std::unordered_multimap<ptid_t, regcache_up, hash_ptid>;
+  = std::unordered_multimap<ptid_t, regcache_up>;
 
 /* Type holding regcaches for a given pid.  */
 
