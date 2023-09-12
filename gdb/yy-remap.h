@@ -85,6 +85,7 @@
 #define yystacksize	GDB_YY_REMAP (yystacksize)
 #define yyvs		GDB_YY_REMAP (yyvs)
 #define yyvsp		GDB_YY_REMAP (yyvsp)
+#define YYSTACKDATA	GDB_YY_REMAP (YYSTACKDATA)
 
 /* The following are common to all parsers.  */
 
