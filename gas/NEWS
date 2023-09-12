@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for 128-bit Atomic Instructions (LSE128) for AArch64.
+
 * Add support for Guarded Control Stack (GCS) for AArch64.
 
 * Add support for AArch64 Check Feature Status Extension (CHK).
