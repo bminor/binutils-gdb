@@ -82,8 +82,8 @@ list of options, invoke the subdirectory `configure', like:
    (Take note of how this differs from the invocation used to actually
 configure the build tree.)
 
-   GDB requires a C++11 compiler.  If you do not have a
-C++11 compiler for your system, you may be able to download and install
+   GDB requires a C++17 compiler.  If you do not have a
+C++17 compiler for your system, you may be able to download and install
 the GNU CC compiler.  It is available via anonymous FTP from the
 directory `ftp://ftp.gnu.org/pub/gnu/gcc'.  GDB also requires an ISO
 C standard library.  The GDB remote server, GDBserver, builds with some

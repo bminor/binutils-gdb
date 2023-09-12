@@ -41,9 +41,9 @@ AC_PROG_RANLIB
 AC_USE_SYSTEM_EXTENSIONS
 ACX_LARGEFILE
 
-# We require a C++11 compiler.  Check if one is available, and if
+# We require a C++17 compiler.  Check if one is available, and if
 # necessary, set CXX_DIALECT to some -std=xxx switch.
-AX_CXX_COMPILE_STDCXX(11, , mandatory)
+AX_CXX_COMPILE_STDCXX(17, , mandatory)
 
 dnl Set up for gettext.
 ZW_GNU_GETTEXT_SISTER_DIR

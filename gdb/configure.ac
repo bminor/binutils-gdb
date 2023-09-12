@@ -53,9 +53,9 @@ LT_INIT
 # link tests in the configure script.
 LT_OUTPUT
 
-# We require a C++11 compiler.  Check if one is available, and if
+# We require a C++17 compiler.  Check if one is available, and if
 # necessary, set CXX_DIALECT to some -std=xxx switch.
-AX_CXX_COMPILE_STDCXX(11, , mandatory)
+AX_CXX_COMPILE_STDCXX(17, , mandatory)
 
 # Dependency checking.
 ZW_CREATE_DEPDIR

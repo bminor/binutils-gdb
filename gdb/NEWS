@@ -3,6 +3,9 @@
 
 *** Changes since GDB 14
 
+* Building GDB and GDBserver now requires a C++17 compiler.
+  For example, GCC 9 or later.
+
 * GDB index now contains information about the main function.  This speeds up
   startup when it is being used for some large binaries.
 

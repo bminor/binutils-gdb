@@ -46,9 +46,9 @@ AC_PROG_RANLIB
 
 AC_ARG_PROGRAM
 
-# We require a C++11 compiler.  Check if one is available, and if
+# We require a C++17 compiler.  Check if one is available, and if
 # necessary, set CXX_DIALECT to some -std=xxx switch.
-AX_CXX_COMPILE_STDCXX(11, , mandatory)
+AX_CXX_COMPILE_STDCXX(17, , mandatory)
 
 AC_HEADER_STDC
 
