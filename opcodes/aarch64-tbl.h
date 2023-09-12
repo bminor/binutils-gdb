@@ -6113,6 +6113,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   CSSC_INSN ("smin", 0x1ac06800, 0x7fe0fc00, OP3 (Rd, Rn, Rm), QL_I3SAMER, F_SF),
   CSSC_INSN ("umin", 0x1ac06c00, 0x7fe0fc00, OP3 (Rd, Rn, Rm), QL_I3SAMER, F_SF),
 
+  /* FEAT_CLRBHB part of the hint space and available without special
+     command-line flags.  */
+  CORE_INSN ("clrbhb", 0xd50322df, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
+
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };
 

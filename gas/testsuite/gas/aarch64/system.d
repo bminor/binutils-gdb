@@ -14,7 +14,7 @@ Disassembly of section \.text:
 .*:	d503207f 	wfi
 .*:	d503209f 	sev
 .*:	d50320bf 	sevl
-.*:	d50322df 	clearbhb
+.*:	d50322df 	clrbhb
 .*:	d503201f 	nop
 .*:	d503203f 	yield
 .*:	d503205f 	wfe
@@ -37,7 +37,7 @@ Disassembly of section \.text:
 .*:	d503227f 	(hint	#0x13|gcsb	dsync)
 .*:	d503229f 	(hint	#0x14|csdb)
 .*:	d50322bf 	hint	#0x15
-.*:	d50322df 	(hint	#0x16|clearbhb)
+.*:	d50322df 	(hint	#0x16|clrbhb)
 .*:	d50322ff 	hint	#0x17
 .*:	d503231f 	(hint	#0x18|paciaz)
 .*:	d503233f 	(hint	#0x19|paciasp)

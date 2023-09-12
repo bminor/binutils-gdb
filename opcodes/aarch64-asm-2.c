@@ -426,6 +426,7 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1200:	/* movz */
       value = 1200;	/* --> movz.  */
       break;
+    case 3193:	/* clrbhb */
     case 1276:	/* autibsp */
     case 1275:	/* autibz */
     case 1274:	/* autiasp */

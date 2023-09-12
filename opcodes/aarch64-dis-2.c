@@ -31321,7 +31321,7 @@ aarch64_find_alias_opcode (const aarch64_opcode *opcode)
     case 1136: value = 1185; break;	/* lduminl --> stuminl.  */
     case 1198: value = 1199; break;	/* movn --> mov.  */
     case 1200: value = 1201; break;	/* movz --> mov.  */
-    case 1215: value = 1276; break;	/* hint --> autibsp.  */
+    case 1215: value = 3193; break;	/* hint --> clrbhb.  */
     case 1235: value = 1239; break;	/* dsb --> pssbb.  */
     case 1236: value = 1236; break;	/* dsb --> dsb.  */
     case 1254: value = 1264; break;	/* sys --> cosp.  */
@@ -31481,6 +31481,7 @@ aarch64_find_next_alias_opcode (const aarch64_opcode *opcode)
     case 1185: value = 1136; break;	/* stuminl --> lduminl.  */
     case 1199: value = 1198; break;	/* mov --> movn.  */
     case 1201: value = 1200; break;	/* mov --> movz.  */
+    case 3193: value = 1276; break;	/* clrbhb --> autibsp.  */
     case 1276: value = 1275; break;	/* autibsp --> autibz.  */
     case 1275: value = 1274; break;	/* autibz --> autiasp.  */
     case 1274: value = 1273; break;	/* autiasp --> autiaz.  */
