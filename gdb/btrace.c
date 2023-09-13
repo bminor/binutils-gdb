@@ -2746,6 +2746,19 @@ pt_print_packet (const struct pt_packet *packet)
 		  packet->payload.ptw.ip ? (" ip") : (""));
       break;
 #endif /* defined (LIBIPT_VERSION >= 0x200)  */
+
+#if (LIBIPT_VERSION >= 0x201)
+    case ppt_cfe:
+      gdb_printf (("cfe %u: 0x%x%s"), packet->payload.cfe.type,
+		  packet->payload.cfe.vector,
+		  packet->payload.cfe.ip ? (" ip") : (""));
+      break;
+
+    case ppt_evd:
+      gdb_printf (("evd %u: 0x%" PRIx64 ""), packet->payload.evd.type,
+		  packet->payload.evd.payload);
+      break;
+#endif /* defined (LIBIPT_VERSION >= 0x201)  */
     }
 }
 
