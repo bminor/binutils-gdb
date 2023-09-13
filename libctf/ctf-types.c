@@ -426,7 +426,7 @@ ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
   if (!i)
     {
       if ((i = ctf_next_create ()) == NULL)
-	return ctf_set_errno (fp, ENOMEM);
+	return ctf_set_typed_errno (fp, ENOMEM);
 
       i->cu.ctn_fp = fp;
       i->ctn_type = 1;
@@ -435,10 +435,10 @@ ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
     }
 
   if ((void (*) (void)) ctf_type_next != i->ctn_iter_fun)
-    return (ctf_set_errno (fp, ECTF_NEXT_WRONGFUN));
+    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFUN));
 
   if (fp != i->cu.ctn_fp)
-    return (ctf_set_errno (fp, ECTF_NEXT_WRONGFP));
+    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
 
   while (i->ctn_type <= fp->ctf_typemax)
     {
@@ -456,7 +456,7 @@ ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
     }
   ctf_next_destroy (i);
   *it = NULL;
-  return ctf_set_errno (fp, ECTF_NEXT_END);
+  return ctf_set_typed_errno (fp, ECTF_NEXT_END);
 }
 
 /* Iterate over every variable in the given CTF dict, in arbitrary order.
@@ -494,12 +494,12 @@ ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
   ctf_next_t *i = *it;
 
   if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parent == NULL))
-    return (ctf_set_errno (fp, ECTF_NOPARENT));
+    return (ctf_set_typed_errno (fp, ECTF_NOPARENT));
 
   if (!i)
     {
       if ((i = ctf_next_create ()) == NULL)
-	return ctf_set_errno (fp, ENOMEM);
+	return ctf_set_typed_errno (fp, ENOMEM);
 
       i->cu.ctn_fp = fp;
       i->ctn_iter_fun = (void (*) (void)) ctf_variable_next;
@@ -509,10 +509,10 @@ ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
     }
 
   if ((void (*) (void)) ctf_variable_next != i->ctn_iter_fun)
-    return (ctf_set_errno (fp, ECTF_NEXT_WRONGFUN));
+    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFUN));
 
   if (fp != i->cu.ctn_fp)
-    return (ctf_set_errno (fp, ECTF_NEXT_WRONGFP));
+    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
 
   if (!(fp->ctf_flags & LCTF_RDWR))
     {
@@ -538,7 +538,7 @@ ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
  end_iter:
   ctf_next_destroy (i);
   *it = NULL;
-  return ctf_set_errno (fp, ECTF_NEXT_END);
+  return ctf_set_typed_errno (fp, ECTF_NEXT_END);
 }
 
 /* Follow a given type through the graph for TYPEDEF, VOLATILE, CONST, and
@@ -560,7 +560,7 @@ ctf_type_resolve (ctf_dict_t *fp, ctf_id_t type)
   const ctf_type_t *tp;
 
   if (type == 0)
-    return (ctf_set_errno (ofp, ECTF_NONREPRESENTABLE));
+    return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
 
   while ((tp = ctf_lookup_by_id (&fp, type)) != NULL)
     {
@@ -575,18 +575,18 @@ ctf_type_resolve (ctf_dict_t *fp, ctf_id_t type)
 	    {
 	      ctf_err_warn (ofp, 0, ECTF_CORRUPT, _("type %lx cycle detected"),
 			    otype);
-	      return (ctf_set_errno (ofp, ECTF_CORRUPT));
+	      return (ctf_set_typed_errno (ofp, ECTF_CORRUPT));
 	    }
 	  prev = type;
 	  type = tp->ctt_type;
 	  break;
 	case CTF_K_UNKNOWN:
-	  return (ctf_set_errno (ofp, ECTF_NONREPRESENTABLE));
+	  return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
 	default:
 	  return type;
 	}
       if (type == 0)
-	return (ctf_set_errno (ofp, ECTF_NONREPRESENTABLE));
+	return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
     }
 
   return CTF_ERR;		/* errno is set for us.  */
@@ -612,7 +612,7 @@ ctf_type_resolve_unsliced (ctf_dict_t *fp, ctf_id_t type)
       ctf_id_t ret;
 
       if ((ret = ctf_type_reference (fp, type)) == CTF_ERR)
-	return (ctf_set_errno (ofp, ctf_errno (fp)));
+	return (ctf_set_typed_errno (ofp, ctf_errno (fp)));
       return ret;
     }
   return type;
@@ -854,7 +854,7 @@ ctf_type_lname (ctf_dict_t *fp, ctf_id_t type, char *buf, size_t len)
   size_t slen;
 
   if (str == NULL)
-    return CTF_ERR;			/* errno is set for us.  */
+    return -1;			/* errno is set for us.  */
 
   slen = strlen (str);
   snprintf (buf, len, "%s", str);
@@ -1139,7 +1139,7 @@ ctf_type_reference (ctf_dict_t *fp, ctf_id_t type)
 	return sp->cts_type;
       }
     default:
-      return (ctf_set_errno (ofp, ECTF_NOTREF));
+      return (ctf_set_typed_errno (ofp, ECTF_NOTREF));
     }
 }
 
@@ -1164,15 +1164,15 @@ ctf_type_pointer (ctf_dict_t *fp, ctf_id_t type)
     return (LCTF_INDEX_TO_TYPE (fp, ntype, (fp->ctf_flags & LCTF_CHILD)));
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
-    return (ctf_set_errno (ofp, ECTF_NOTYPE));
+    return (ctf_set_typed_errno (ofp, ECTF_NOTYPE));
 
   if (ctf_lookup_by_id (&fp, type) == NULL)
-    return (ctf_set_errno (ofp, ECTF_NOTYPE));
+    return (ctf_set_typed_errno (ofp, ECTF_NOTYPE));
 
   if ((ntype = fp->ctf_ptrtab[LCTF_TYPE_TO_INDEX (fp, type)]) != 0)
     return (LCTF_INDEX_TO_TYPE (fp, ntype, (fp->ctf_flags & LCTF_CHILD)));
 
-  return (ctf_set_errno (ofp, ECTF_NOTYPE));
+  return (ctf_set_typed_errno (ofp, ECTF_NOTYPE));
 }
 
 /* Return the encoding for the specified INTEGER, FLOAT, or ENUM.  */
@@ -1535,10 +1535,7 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int *valp)
     return -1;			/* errno is set for us.  */
 
   if (LCTF_INFO_KIND (fp, tp->ctt_info) != CTF_K_ENUM)
-    {
-      (void) ctf_set_errno (ofp, ECTF_NOTENUM);
-      return -1;
-    }
+    return ctf_set_errno (ofp, ECTF_NOTENUM);
 
   ctf_get_ctt_size (fp, tp, NULL, &increment);
 
@@ -1557,8 +1554,7 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int *valp)
 	}
     }
 
-  ctf_set_errno (ofp, ECTF_NOENUMNAM);
-  return -1;
+  return ctf_set_errno (ofp, ECTF_NOENUMNAM);
 }
 
 /* Given a type ID relating to a function type, return info on return types and

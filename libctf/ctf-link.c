@@ -243,8 +243,7 @@ ctf_link_lazy_open (ctf_dict_t *fp, ctf_link_input_t *input)
 #else
   ctf_err_warn (fp, 0, ECTF_NEEDSBFD, _("cannot open %s lazily"),
 		input->clin_filename);
-  ctf_set_errno (fp, ECTF_NEEDSBFD);
-  return -1;
+  return ctf_set_errno (fp, ECTF_NEEDSBFD);
 #endif
 
   /* Having no CTF sections is not an error.  We just don't need to do
@@ -257,8 +256,7 @@ ctf_link_lazy_open (ctf_dict_t *fp, ctf_link_input_t *input)
 
       ctf_err_warn (fp, 0, err, _("opening CTF %s failed"),
 		    input->clin_filename);
-      ctf_set_errno (fp, err);
-      return -1;
+      return ctf_set_errno (fp, err);
     }
 
   if ((count = ctf_archive_count (input->clin_arc)) == 0)
@@ -680,8 +678,7 @@ ctf_link_deduplicating_count_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
     {
       ctf_err_warn (fp, 0, err, _("iteration error counting deduplicating "
 				  "CTF link inputs"));
-      ctf_set_errno (fp, err);
-      return -1;
+      return ctf_set_errno (fp, err);
     }
 
   if (!count)
@@ -1355,8 +1352,7 @@ ctf_link_empty_outputs (ctf_dict_t *fp)
     {
       fp->ctf_flags &= ~LCTF_LINKING;
       ctf_err_warn (fp, 1, err, _("iteration error removing old outputs"));
-      ctf_set_errno (fp, err);
-      return -1;
+      return ctf_set_errno (fp, err);
     }
   return 0;
 }
@@ -1536,8 +1532,7 @@ ctf_link (ctf_dict_t *fp, int flags)
 	{
 	  fp->ctf_flags &= ~LCTF_LINKING;
 	  ctf_err_warn (fp, 1, err, _("iteration error creating empty CUs"));
-	  ctf_set_errno (fp, err);
-	  return -1;
+	  return ctf_set_errno (fp, err);
 	}
     }
 

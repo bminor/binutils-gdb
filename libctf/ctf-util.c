@@ -255,16 +255,6 @@ ctf_set_open_errno (int *errp, int error)
   return NULL;
 }
 
-/* Store the specified error code into the CTF dict, and then return CTF_ERR /
-   -1 for the benefit of the caller. */
-
-unsigned long
-ctf_set_errno (ctf_dict_t *fp, int err)
-{
-  fp->ctf_errno = err;
-  return CTF_ERR;
-}
-
 /* Create a ctf_next_t.  */
 
 ctf_next_t *
