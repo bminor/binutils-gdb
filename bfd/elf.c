@@ -3659,6 +3659,8 @@ _bfd_elf_init_reloc_shdr (bfd *abfd,
 
   BFD_ASSERT (reldata->hdr == NULL);
   rel_hdr = bfd_zalloc (abfd, sizeof (*rel_hdr));
+  if (rel_hdr == NULL)
+    return false;
   reldata->hdr = rel_hdr;
 
   if (delay_st_name_p)
