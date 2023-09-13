@@ -116,6 +116,7 @@ _bfd_elf_strtab_init (void)
 		  bfd_malloc (table->alloced * amt));
   if (table->array == NULL)
     {
+      bfd_hash_table_free (&table->table);
       free (table);
       return NULL;
     }

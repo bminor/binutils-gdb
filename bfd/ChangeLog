@@ -1,3 +1,8 @@
+2023-09-13  Alan Modra  <amodra@gmail.com>
+
+	* elf-strtab.c (_bfd_elf_strtab_init): In the event of memory
+	allocation failure, make sure that the hash table is freed.
+
 2023-08-30  Tom Tromey  <tom@tromey.com>
 
 	PR binutils/30703
