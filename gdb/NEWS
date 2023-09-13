@@ -32,6 +32,12 @@ maintenance check psymtabs
 maintenance check symtabs
   Renamed from maintenance check-symtabs
 
+set riscv numeric-register-names on|off
+show riscv numeric-register-names
+  Controls whether GDB refers to risc-v registers by their numeric names
+  (e.g 'x1') or their abi names (e.g. 'ra').
+  Defaults to 'off', matching the old behaviour (abi names).
+
 * Python API
 
   ** New class gdb.Color for dealing with colors.

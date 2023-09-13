@@ -134,6 +134,11 @@ static const char *riscv_feature_name_vector = "org.gnu.gdb.riscv.vector";
 /* The current set of options to be passed to the disassembler.  */
 static std::string riscv_disassembler_options;
 
+/* When true, prefer to show register names in their numeric form (eg. x28).
+   When false, show them in their abi form (eg. t3).  */
+
+static bool numeric_register_names = false;
+
 /* Cached information about a frame.  */
 
 struct riscv_unwind_cache
@@ -226,11 +231,9 @@ struct riscv_register_feature
 
     /* Look in FEATURE for a register with a name from this classes names
        list.  If the register is found then register its number with
-       TDESC_DATA and add all its aliases to the ALIASES list.
-       PREFER_FIRST_NAME_P is used when deciding which aliases to create.  */
+       TDESC_DATA and add all its aliases to the ALIASES list.  */
     bool check (struct tdesc_arch_data *tdesc_data,
 		const struct tdesc_feature *feature,
-		bool prefer_first_name_p,
 		std::vector<riscv_pending_register_alias> *aliases) const;
   };
 
@@ -265,7 +268,6 @@ bool
 riscv_register_feature::register_info::check
 	(struct tdesc_arch_data *tdesc_data,
 	 const struct tdesc_feature *feature,
-	 bool prefer_first_name_p,
 	 std::vector<riscv_pending_register_alias> *aliases) const
 {
   for (const char *name : this->names)
@@ -276,16 +278,11 @@ riscv_register_feature::register_info::check
 	{
 	  /* We know that the target description mentions this
 	     register.  In RISCV_REGISTER_NAME we ensure that GDB
-	     always uses the first name for each register, so here we
-	     add aliases for all of the remaining names.  */
-	  int start_index = prefer_first_name_p ? 1 : 0;
-	  for (int i = start_index; i < this->names.size (); ++i)
-	    {
-	      const char *alias = this->names[i];
-	      if (alias == name && !prefer_first_name_p)
-		continue;
-	      aliases->emplace_back (alias, (void *) &this->regnum);
-	    }
+	     always refers to the register by its user-configured name.
+	     Here, we add aliases for all possible names, so that
+	     the user can refer to the register by any of them.  */
+	  for (const char *alias : this->names)
+	    aliases->emplace_back (alias, (void *) &this->regnum);
 	  return true;
 	}
     }
@@ -342,6 +339,8 @@ struct riscv_xreg_feature : public riscv_register_feature
   const char *register_name (int regnum) const
   {
     gdb_assert (regnum >= RISCV_ZERO_REGNUM && regnum <= m_registers.size ());
+    if (numeric_register_names && (regnum <= RISCV_ZERO_REGNUM + 31))
+      return m_registers[regnum].names[1];
     return m_registers[regnum].names[0];
   }
 
@@ -360,7 +359,7 @@ struct riscv_xreg_feature : public riscv_register_feature
     bool seen_an_optional_reg_p = false;
     for (const auto &reg : m_registers)
       {
-	bool found = reg.check (tdesc_data, feature_cpu, true, aliases);
+	bool found = reg.check (tdesc_data, feature_cpu, aliases);
 
 	bool is_optional_reg_p = (reg.regnum >= RISCV_ZERO_REGNUM + 16
 				  && reg.regnum < RISCV_ZERO_REGNUM + 32);
@@ -444,6 +443,8 @@ struct riscv_freg_feature : public riscv_register_feature
     gdb_assert (regnum >= RISCV_FIRST_FP_REGNUM
 		&& regnum <= RISCV_LAST_FP_REGNUM);
     regnum -= RISCV_FIRST_FP_REGNUM;
+    if (numeric_register_names && (regnum <= 31))
+      return m_registers[regnum].names[1];
     return m_registers[regnum].names[0];
   }
 
@@ -469,7 +470,7 @@ struct riscv_freg_feature : public riscv_register_feature
        are missing this is not fatal.  */
     for (const auto &reg : m_registers)
       {
-	bool found = reg.check (tdesc_data, feature_fpu, true, aliases);
+	bool found = reg.check (tdesc_data, feature_fpu, aliases);
 
 	bool is_ctrl_reg_p = reg.regnum > RISCV_LAST_FP_REGNUM;
 
@@ -543,7 +544,7 @@ struct riscv_virtual_feature : public riscv_register_feature
     /* We don't check the return value from the call to check here, all the
        registers in this feature are optional.  */
     for (const auto &reg : m_registers)
-      reg.check (tdesc_data, feature_virtual, true, aliases);
+      reg.check (tdesc_data, feature_virtual, aliases);
 
     return true;
   }
@@ -583,7 +584,7 @@ struct riscv_csr_feature : public riscv_register_feature
     /* We don't check the return value from the call to check here, all the
        registers in this feature are optional.  */
     for (const auto &reg : m_registers)
-      reg.check (tdesc_data, feature_csr, true, aliases);
+      reg.check (tdesc_data, feature_csr, aliases);
 
     return true;
   }
@@ -683,7 +684,7 @@ struct riscv_vector_feature : public riscv_register_feature
     /* Check all of the vector registers are present.  */
     for (const auto &reg : m_registers)
       {
-	if (!reg.check (tdesc_data, feature_vector, true, aliases))
+	if (!reg.check (tdesc_data, feature_vector, aliases))
 	  return false;
       }
 
@@ -734,6 +735,18 @@ show_use_compressed_breakpoints (struct ui_file *file, int from_tty,
   gdb_printf (file,
 	      _("Debugger's use of compressed breakpoints is set "
 		"to %s.\n"), value);
+}
+
+/* The show callback for 'show riscv numeric-register-names'.  */
+
+static void
+show_numeric_register_names (struct ui_file *file, int from_tty,
+			     struct cmd_list_element *c,
+			     const char *value)
+{
+  gdb_printf (file,
+	      _("Displaying registers with their numeric names is %s.\n"),
+	      value);
 }
 
 /* The set and show lists for 'set riscv' and 'show riscv' prefixes.  */
@@ -918,17 +931,18 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
   if (name[0] == '\0')
     return name;
 
-  /* We want GDB to use the ABI names for registers even if the target
-     gives us a target description with the architectural name.  For
-     example we want to see 'ra' instead of 'x1' whatever the target
-     description called it.  */
+  /* We want GDB to use the user-configured names for registers even
+     if the target gives us a target description with something different.
+     For example, we want to see 'ra' if numeric_register_names is false,
+     or 'x1' if numeric_register_names is true - regardless of what the
+     target description called it.  */
   if (regnum >= RISCV_ZERO_REGNUM && regnum < RISCV_FIRST_FP_REGNUM)
     return riscv_xreg_feature.register_name (regnum);
 
-  /* Like with the x-regs we prefer the abi names for the floating point
-     registers.  If the target doesn't have floating point registers then
-     the tdesc_register_name call above should have returned an empty
-     string.  */
+  /* Like with the x-regs we refer to the user configuration for the
+     floating point register names.  If the target doesn't have floating
+     point registers then the tdesc_register_name call above should have
+     returned an empty string.  */
   if (regnum >= RISCV_FIRST_FP_REGNUM && regnum <= RISCV_LAST_FP_REGNUM)
     {
       gdb_assert (riscv_has_fp_regs (gdbarch));
@@ -4836,4 +4850,19 @@ this option can be used."),
 				show_use_compressed_breakpoints,
 				&setriscvcmdlist,
 				&showriscvcmdlist);
+
+  add_setshow_boolean_cmd ("numeric-register-names", no_class,
+			  &numeric_register_names,
+			  _("\
+Set displaying registers with numeric names instead of abi names."), _("\
+Show whether registers are displayed with numeric names instead of abi names."),
+			  _("\
+When enabled, registers will be shown with their numeric names (such as x28)\n\
+instead of their abi names (such as t0).\n\
+Also consider using the 'set disassembler-options numeric' command for the\n\
+equivalent change in the disassembler output."),
+			  NULL,
+			  show_numeric_register_names,
+			  &setriscvcmdlist,
+			  &showriscvcmdlist);
 }

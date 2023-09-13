@@ -26465,6 +26465,7 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 * Sparc64::
 * S12Z::
 * AMD GPU::            @acronym{AMD GPU} architectures
+* RISC-V::
 @end menu
 
 @node AArch64
@@ -27427,6 +27428,29 @@ available for all architectures even for wavefronts created when @value{GDBN}
 was not attached.
 
 @end enumerate
+
+
+@node RISC-V
+@subsection RISC-V
+@cindex RISC-V support
+
+When @value{GDBN} is debugging a RISC-V architecture, it provides the
+following special commands:
+
+@table @code
+@item set riscv numeric-register-names @r{[}on@r{|}off@r{]}
+@kindex set riscv numeric-register-names
+This command controls whether @value{GDBN} displays RISC-V register names using
+their numeric or abi names.  When @samp{on}, @value{GDBN} displays registers
+by their numeric names (e.g. @samp{x1}).  When @samp{off}, @value{GDBN}
+displays registers by their abi names (e.g. @samp{ra}).  The default is
+@samp{off}.
+
+@item show riscv numeric-register-names
+Show whether @value{GDBN} will refer to registers by their numeric names.
+
+@end table
+
 
 @node Controlling GDB
 @chapter Controlling @value{GDBN}
