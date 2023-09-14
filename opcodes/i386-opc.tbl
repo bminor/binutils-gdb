@@ -1475,7 +1475,7 @@ gf2p8mulb<gfni>, 0x660f38cf, <gfni:cpu>GFNI, Modrm|<gfni:w0>|NoSuf, { RegXMM|Uns
     true_us:1f:C>
 
 // <Vxy> is used for VEX instructions with x/y suffixes.
-<Vxy:vex:syntax:dst, +
+<Vxy:vex:syntax:src, +
     $i:Vex:IntelSyntax:RegXMM|RegYMM|Unspecified|BaseIndex, +
     $a:Vex:ATTSyntax:RegXMM|RegYMM, +
     x:Vex128:ATTSyntax:RegXMM|Unspecified|BaseIndex, +
@@ -1500,8 +1500,8 @@ vcomis<sd>, 0x<sd:ppfx>2f, AVX, Modrm|VexLIG|Space0F|VexWIG|NoSuf, { <sd:elem>|U
 vcvtdq2pd, 0xf3e6, AVX, Modrm|Vex128|Space0F|VexWIG|NoSuf, { RegXMM|Qword|Unspecified|BaseIndex, RegXMM }
 vcvtdq2pd, 0xf3e6, AVX, Modrm|Vex256|Space0F|VexWIG|NoSuf, { RegXMM|Unspecified|BaseIndex, RegYMM }
 vcvtdq2ps, 0x5b, AVX, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
-vcvtpd2dq<Vxy>, 0xf2e6, AVX, Modrm|<Vxy:vex>|Space0F|VexWIG|NoSuf|<Vxy:syntax>, { <Vxy:dst>, RegXMM }
-vcvtpd2ps<Vxy>, 0x665a, AVX, Modrm|<Vxy:vex>|Space0F|VexWIG|NoSuf|<Vxy:syntax>, { <Vxy:dst>, RegXMM }
+vcvtpd2dq<Vxy>, 0xf2e6, AVX, Modrm|<Vxy:vex>|Space0F|VexWIG|NoSuf|<Vxy:syntax>, { <Vxy:src>, RegXMM }
+vcvtpd2ps<Vxy>, 0x665a, AVX, Modrm|<Vxy:vex>|Space0F|VexWIG|NoSuf|<Vxy:syntax>, { <Vxy:src>, RegXMM }
 vcvtps2dq, 0x665b, AVX, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
 vcvtps2pd, 0x5a, AVX, Modrm|Vex128|Space0F|VexWIG|NoSuf, { RegXMM|Qword|Unspecified|BaseIndex, RegXMM }
 vcvtps2pd, 0x5a, AVX, Modrm|Vex256|Space0F|VexWIG|NoSuf, { RegXMM|Unspecified|BaseIndex, RegYMM }
@@ -1510,7 +1510,7 @@ vcvtsd2ss, 0xf25a, AVX, Modrm|Vex=3|Space0F|VexVVVV|VexWIG|NoSuf, { Qword|Unspec
 vcvtsi2s<sd>, 0x<sd:spfx>2a, AVX, Modrm|VexLIG|Space0F|VexVVVV|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|ATTSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM, RegXMM }
 vcvtsi2s<sd>, 0x<sd:spfx>2a, AVX, Modrm|VexLIG|Space0F|VexVVVV|No_bSuf|No_wSuf|No_sSuf|IntelSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM, RegXMM }
 vcvtss2sd, 0xf35a, AVX, Modrm|Vex=3|Space0F|VexVVVV|VexWIG|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vcvttpd2dq<Vxy>, 0x66e6, AVX, Modrm|<Vxy:vex>|Space0F|VexWIG|NoSuf|<Vxy:syntax>, { <Vxy:dst>, RegXMM }
+vcvttpd2dq<Vxy>, 0x66e6, AVX, Modrm|<Vxy:vex>|Space0F|VexWIG|NoSuf|<Vxy:syntax>, { <Vxy:src>, RegXMM }
 vcvttps2dq, 0xf35b, AVX, Modrm|Vex|Space0F|VexWIG|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
 vcvtts<sd>2si, 0x<sd:spfx>2c, AVX, Modrm|VexLIG|Space0F|No_bSuf|No_wSuf|No_sSuf, { <sd:elem>|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
 vdivp<sd>, 0x<sd:ppfx>5e, AVX, Modrm|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
@@ -3118,7 +3118,7 @@ vcvtneebf162ps, 0xf3b0, AVX_NE_CONVERT, Modrm|Vex|Space0F38|VexW0|CheckOperandSi
 vcvtneeph2ps, 0x66b0, AVX_NE_CONVERT, Modrm|Vex|Space0F38|VexW0|CheckOperandSize|NoSuf, { Xmmword|Ymmword|Unspecified|BaseIndex, RegXMM|RegYMM }
 vcvtneobf162ps, 0xf2b0, AVX_NE_CONVERT, Modrm|Vex|Space0F38|VexW0|CheckOperandSize|NoSuf, { Xmmword|Ymmword|Unspecified|BaseIndex, RegXMM|RegYMM }
 vcvtneoph2ps, 0xb0, AVX_NE_CONVERT, Modrm|Vex|Space0F38|VexW0|CheckOperandSize|NoSuf, { Xmmword|Ymmword|Unspecified|BaseIndex, RegXMM|RegYMM }
-vcvtneps2bf16<Vxy>, 0xf372, AVX_NE_CONVERT, Modrm|<Vxy:vex>|Space0F38|VexW0|NoSuf|<Vxy:syntax>, { <Vxy:dst>, RegXMM }
+vcvtneps2bf16<Vxy>, 0xf372, AVX_NE_CONVERT, Modrm|<Vxy:vex>|Space0F38|VexW0|NoSuf|<Vxy:syntax>, { <Vxy:src>, RegXMM }
 
 // AVX-NE-CONVERT instructions end.
 
