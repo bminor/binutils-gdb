@@ -10548,7 +10548,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  std::vector<unrelocated_addr> addresses;
 	  dwarf2_ranges_read_low_addrs (ranges_offset, target_cu,
 					target_die->tag, addresses);
-	  unrelocated_addr *saved = XOBNEWVAR (&objfile->objfile_obstack,
+	  unrelocated_addr *saved = XOBNEWVEC (&objfile->objfile_obstack,
 					       unrelocated_addr,
 					       addresses.size ());
 	  std::copy (addresses.begin (), addresses.end (), saved);
