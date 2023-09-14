@@ -236,7 +236,7 @@ void ui_out_table::append_header (int width, ui_align alignment,
     internal_error (_("table header must be specified after table_begin and "
 		      "before table_body."));
 
-  auto header = gdb::make_unique<ui_out_hdr> (m_headers.size () + 1,
+  auto header = std::make_unique<ui_out_hdr> (m_headers.size () + 1,
 					      width, alignment,
 					      col_name, col_hdr);
 
@@ -328,7 +328,7 @@ ui_out::current_level () const
 void
 ui_out::push_level (ui_out_type type)
 {
-  auto level = gdb::make_unique<ui_out_level> (type);
+  auto level = std::make_unique<ui_out_level> (type);
 
   m_levels.push_back (std::move (level));
 }

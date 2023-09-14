@@ -45,6 +45,7 @@
 #include "cp-support.h"
 #include "c-support.h"
 #include "parser-defs.h"
+#include <memory>
 
 #define GDB_YY_REMAP_PREFIX cpname
 #include "yy-remap.h"
@@ -2038,7 +2039,7 @@ cp_demangled_name_to_comp (const char *demangled_name,
 
   state.demangle_info = allocate_info ();
 
-  auto result = gdb::make_unique<demangle_parse_info> ();
+  auto result = std::make_unique<demangle_parse_info> ();
   result->info = state.demangle_info;
 
   if (yyparse (&state))

@@ -18,6 +18,7 @@
 #include "varobj.h"
 #include "varobj-iter.h"
 #include "valprint.h"
+#include <memory>
 
 /* A dynamic varobj iterator "class" for python pretty-printed
    varobjs.  This inherits struct varobj_iter.  */
@@ -170,5 +171,5 @@ py_varobj_get_iterator (struct varobj *var, PyObject *printer,
       error (_("Could not get children iterator"));
     }
 
-  return gdb::make_unique<py_varobj_iter> (var, std::move (iter), opts);
+  return std::make_unique<py_varobj_iter> (var, std::move (iter), opts);
 }

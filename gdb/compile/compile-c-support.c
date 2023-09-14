@@ -30,6 +30,7 @@
 #include "gdbsupport/gdb-dlfcn.h"
 #include "gdbsupport/preprocessor.h"
 #include "gdbarch.h"
+#include <memory>
 
 /* See compile-internal.h.  */
 
@@ -118,7 +119,7 @@ get_compile_context (const char *fe_libcc, const char *fe_context,
     error (_("The loaded version of GCC does not support the required version "
 	     "of the API."));
 
-  return gdb::make_unique<INSTTYPE> (context);
+  return std::make_unique<INSTTYPE> (context);
 }
 
 /* A C-language implementation of get_compile_context.  */

@@ -27,6 +27,7 @@
 #include "defs.h"
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/parallel-for.h"
+#include <memory>
 
 #if CXX_STD_THREAD
 
@@ -160,7 +161,7 @@ TEST (int n_threads)
 	      {
 		if (start == end)
 		  any_empty_tasks = true;
-		return gdb::make_unique<int> (end - start);
+		return std::make_unique<int> (end - start);
 	      });
   SELF_CHECK (!any_empty_tasks);
   SELF_CHECK (std::all_of (intresults.begin (),
@@ -178,7 +179,7 @@ TEST (int n_threads)
 	      {
 		if (start == end)
 		  any_empty_tasks = true;
-		return gdb::make_unique<int> (end - start);
+		return std::make_unique<int> (end - start);
 	      },
 	    task_size_one);
   SELF_CHECK (!any_empty_tasks);

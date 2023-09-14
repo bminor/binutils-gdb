@@ -63,6 +63,7 @@
 #include <algorithm>
 #include <set>
 #include <map>
+#include <memory>
 
 enum
   {
@@ -1933,7 +1934,7 @@ mi_execute_command (const char *cmd, int from_tty)
     = gdb::checked_static_cast<mi_interp *> (command_interp ());
   try
     {
-      command = gdb::make_unique<mi_parse> (cmd, &token);
+      command = std::make_unique<mi_parse> (cmd, &token);
     }
   catch (const gdb_exception &exception)
     {

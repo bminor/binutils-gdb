@@ -44,6 +44,7 @@
 #include "run-on-main-thread.h"
 #include "typeprint.h"
 #include "inferior.h"
+#include <memory>
 
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right
@@ -675,7 +676,7 @@ mangled_name_to_comp (const char *mangled_name, int options,
 					      options, memory);
       if (ret)
 	{
-	  auto info = gdb::make_unique<demangle_parse_info> ();
+	  auto info = std::make_unique<demangle_parse_info> ();
 	  info->tree = ret;
 	  *demangled_p = NULL;
 	  return info;

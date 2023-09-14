@@ -27,6 +27,7 @@
 #include "mi/mi-parse.h"
 #include "mi/mi-console.h"
 #include "mi/mi-interp.h"
+#include <memory>
 
 /* A ui_out subclass that creates a Python object based on the data
    that is passed in.  */
@@ -290,7 +291,7 @@ gdbpy_execute_mi_command (PyObject *self, PyObject *args, PyObject *kw)
   try
     {
       scoped_restore save_uiout = make_scoped_restore (&current_uiout, &uiout);
-      auto parser = gdb::make_unique<mi_parse> (std::move (mi_command),
+      auto parser = std::make_unique<mi_parse> (std::move (mi_command),
 						std::move (arg_strings));
       mi_execute_command (parser.get ());
     }

@@ -45,6 +45,7 @@
 #include "gmp-utils.h"
 #include "rust-lang.h"
 #include "ada-lang.h"
+#include <memory>
 
 /* The value of an invalid conversion badness.  */
 #define INVALID_CONVERSION 100
@@ -5833,7 +5834,7 @@ static const struct registry<objfile>::key<fixed_point_type_storage>
 void
 allocate_fixed_point_type_info (struct type *type)
 {
-  auto up = gdb::make_unique<fixed_point_type_info> ();
+  auto up = std::make_unique<fixed_point_type_info> ();
   fixed_point_type_info *info;
 
   if (type->is_objfile_owned ())
