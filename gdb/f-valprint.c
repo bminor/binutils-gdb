@@ -266,6 +266,10 @@ public:
     if (m_options->repeat_count_threshold < UINT_MAX
 	&& elt_type_prev != nullptr)
       {
+	/* When printing large arrays this spot is called frequently, so clean
+	   up temporary values asap to prevent allocating a large amount of
+	   them.  */
+	scoped_value_mark free_values;
 	struct value *e_val = value_from_component (m_val, elt_type, elt_off);
 	struct value *e_prev = value_from_component (m_val, elt_type,
 						     elt_off_prev);

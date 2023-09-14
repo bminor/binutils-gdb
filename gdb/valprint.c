@@ -2021,6 +2021,10 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 
 	  while (rep1 < len)
 	    {
+	      /* When printing large arrays this spot is called frequently, so
+		 clean up temporary values asap to prevent allocating a large
+		 amount of them.  */
+	      scoped_value_mark free_values_inner;
 	      struct value *rep_elt
 		= val->from_component_bitsize (elttype,
 					       rep1 * bit_stride,
