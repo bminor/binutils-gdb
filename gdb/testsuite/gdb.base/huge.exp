@@ -23,29 +23,44 @@ require {!target_info exists gdb,skip_huge_test}
 
 standard_testfile .c
 
-for { set size [expr 2 * 1024 * 1024] } { $size > 10 } { set size [expr $size / 2] } {
-  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
-	    executable [list debug "additional_flags=-DCRASH_GDB=$size"]] \
-      == "" } break
+set max [expr 2 * 1024 * 1024]
+set min 16
+
+set opts {}
+lappend opts debug
+
+set compilation_succeeded 0
+for { set size $max } { $size >= $min } { set size [expr $size / 2] } {
+    set try_opts [concat $opts [list additional_flags=-DCRASH_GDB=$size]]
+    if { [build_executable $testfile.exp $testfile $srcfile $try_opts] == -1 } {
+	continue
+    }
+
+    set compilation_succeeded 1
+    break
 }
-if { $size < 10 } {
-     untested "size less than 10"
-     return -1
-}
+require {expr $compilation_succeeded}
 
 # Start with a fresh gdb.
-
 clean_restart ${binfile}
 
-set prev_timeout $timeout
-set timeout 30
+save_vars { timeout } {
+    set timeout 30
 
-if {![runto_main]} {
-    return -1
+    if {![runto_main]} {
+	return -1
+    }
+
+    gdb_test_no_output "set max-value-size unlimited"
+
+    set re \
+	[list \
+	     [string_to_regexp $] \
+	     $decimal \
+	     " = " \
+	     [string_to_regexp "{0 <repeats "] \
+	     $decimal \
+	     [string_to_regexp " times>}"]]
+    set re [join $re ""]
+    gdb_test "print a" $re "print a very large data object"
 }
-
-gdb_test_no_output "set max-value-size unlimited"
-
-gdb_test "print a" ".1 = .0 .repeats \[0123456789\]+ times.." "print a very large data object"
-
-set timeout $prev_timeout
