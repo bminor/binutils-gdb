@@ -1,4 +1,4 @@
-#as: -I${srcdir}/$subdir
+#as: --divide -I${srcdir}/$subdir
 #objdump: -dw
 #name: AVX10.1/256 (part 5)
 

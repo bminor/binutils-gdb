@@ -213,6 +213,9 @@ accept various extension mnemonics.  For example,
 @code{sm4},
 @code{pbndkb},
 @code{avx10.1},
+@code{avx10.1/512},
+@code{avx10.1/256},
+@code{avx10.1/128},
 @code{amx_int8},
 @code{amx_bf16},
 @code{amx_fp16},
@@ -267,7 +270,11 @@ accept various extension mnemonics.  For example,
 @code{svme} and
 @code{padlock}.
 Note that these extension mnemonics can be prefixed with @code{no} to revoke
-the respective (and any dependent) functionality.
+the respective (and any dependent) functionality.  Note further that the
+suffixes permitted on @code{-march=avx10.<N>} enforce a vector length
+restriction, i.e. despite these otherwise being "enabling" options, using
+these suffixes will disable all insns with wider vector or mask register
+operands.
 
 When the @code{.arch} directive is used with @option{-march}, the
 @code{.arch} directive will take precedent.
@@ -1673,6 +1680,12 @@ an unconditional jump to the target.
 
 Note that the sub-architecture specifiers (starting with a dot) can be prefixed
 with @code{no} to revoke the respective (and any dependent) functionality.
+Note further that @samp{.avx10.<N>} can be suffixed with a vector length
+restriction (@samp{/256} or @samp{/128}, with @samp{/512} simply restoring the
+default).  Despite these otherwise being "enabling" specifiers, using these
+suffixes will disable all insns with wider vector or mask register operands.
+On SVR4-derived platforms, the separator character @samp{/} can be replaced by
+@samp{:}.
 
 Following the CPU architecture (but not a sub-architecture, which are those
 starting with a dot), you may specify @samp{jumps} or @samp{nojumps} to

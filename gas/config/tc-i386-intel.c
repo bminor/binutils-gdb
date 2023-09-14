@@ -768,10 +768,20 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  break;
 
 	case O_ymmword_ptr:
+	  if (vector_size < VSZ256)
+	    {
+	      as_bad (_("256-bit operands disabled"));
+	      return 0;
+	    }
 	  i.types[this_operand].bitfield.ymmword = 1;
 	  break;
 
 	case O_zmmword_ptr:
+	  if (vector_size < VSZ512)
+	    {
+	      as_bad (_("512-bit operands disabled"));
+	      return 0;
+	    }
 	  i.types[this_operand].bitfield.zmmword = 1;
 	  break;
 

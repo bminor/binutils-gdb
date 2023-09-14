@@ -131,6 +131,7 @@ typedef struct
   unsigned int len:8;		/* arch string length */
   bool skip:1;			/* show_arch should skip this. */
   enum processor_type type;	/* arch type */
+  enum { vsz_none, vsz_set, vsz_reset } vsz; /* vector size control */
   i386_cpu_flags enable;		/* cpu feature enable flags */
   i386_cpu_flags disable;	/* cpu feature disable flags */
 }
@@ -841,6 +842,10 @@ static unsigned int sse2avx;
 /* Encode aligned vector move as unaligned vector move.  */
 static unsigned int use_unaligned_vector_move;
 
+/* Maximum permitted vector size. */
+#define VSZ_DEFAULT VSZ512
+static unsigned int vector_size = VSZ_DEFAULT;
+
 /* Encode scalar AVX instructions with specific vector length.  */
 static enum
   {
@@ -969,11 +974,14 @@ const relax_typeS md_relax_table[] =
 };
 
 #define ARCH(n, t, f, s) \
-  { STRING_COMMA_LEN (#n), s, PROCESSOR_ ## t, CPU_ ## f ## _FLAGS, \
+  { STRING_COMMA_LEN (#n), s, PROCESSOR_ ## t, vsz_none, CPU_ ## f ## _FLAGS, \
     CPU_NONE_FLAGS }
 #define SUBARCH(n, e, d, s) \
-  { STRING_COMMA_LEN (#n), s, PROCESSOR_NONE, CPU_ ## e ## _FLAGS, \
+  { STRING_COMMA_LEN (#n), s, PROCESSOR_NONE, vsz_none, CPU_ ## e ## _FLAGS, \
     CPU_ ## d ## _FLAGS }
+#define VECARCH(n, e, d, v) \
+  { STRING_COMMA_LEN (#n), false, PROCESSOR_NONE, vsz_ ## v, \
+    CPU_ ## e ## _FLAGS, CPU_ ## d ## _FLAGS }
 
 static const arch_entry cpu_arch[] =
 {
@@ -1035,15 +1043,15 @@ static const arch_entry cpu_arch[] =
   SUBARCH (sse4.1, SSE4_1, ANY_SSE4_1, false),
   SUBARCH (sse4.2, SSE4_2, ANY_SSE4_2, false),
   SUBARCH (sse4, SSE4_2, ANY_SSE4_1, false),
-  SUBARCH (avx, AVX, ANY_AVX, false),
-  SUBARCH (avx2, AVX2, ANY_AVX2, false),
-  SUBARCH (avx512f, AVX512F, ANY_AVX512F, false),
-  SUBARCH (avx512cd, AVX512CD, ANY_AVX512CD, false),
-  SUBARCH (avx512er, AVX512ER, ANY_AVX512ER, false),
-  SUBARCH (avx512pf, AVX512PF, ANY_AVX512PF, false),
-  SUBARCH (avx512dq, AVX512DQ, ANY_AVX512DQ, false),
-  SUBARCH (avx512bw, AVX512BW, ANY_AVX512BW, false),
-  SUBARCH (avx512vl, AVX512VL, ANY_AVX512VL, false),
+  VECARCH (avx, AVX, ANY_AVX, reset),
+  VECARCH (avx2, AVX2, ANY_AVX2, reset),
+  VECARCH (avx512f, AVX512F, ANY_AVX512F, reset),
+  VECARCH (avx512cd, AVX512CD, ANY_AVX512CD, reset),
+  VECARCH (avx512er, AVX512ER, ANY_AVX512ER, reset),
+  VECARCH (avx512pf, AVX512PF, ANY_AVX512PF, reset),
+  VECARCH (avx512dq, AVX512DQ, ANY_AVX512DQ, reset),
+  VECARCH (avx512bw, AVX512BW, ANY_AVX512BW, reset),
+  VECARCH (avx512vl, AVX512VL, ANY_AVX512VL, reset),
   SUBARCH (monitor, MONITOR, MONITOR, false),
   SUBARCH (vmx, VMX, ANY_VMX, false),
   SUBARCH (vmfunc, VMFUNC, ANY_VMFUNC, false),
@@ -1095,15 +1103,15 @@ static const arch_entry cpu_arch[] =
   SUBARCH (prefetchwt1, PREFETCHWT1, PREFETCHWT1, false),
   SUBARCH (se1, SE1, SE1, false),
   SUBARCH (clwb, CLWB, CLWB, false),
-  SUBARCH (avx512ifma, AVX512IFMA, ANY_AVX512IFMA, false),
-  SUBARCH (avx512vbmi, AVX512VBMI, ANY_AVX512VBMI, false),
-  SUBARCH (avx512_4fmaps, AVX512_4FMAPS, ANY_AVX512_4FMAPS, false),
-  SUBARCH (avx512_4vnniw, AVX512_4VNNIW, ANY_AVX512_4VNNIW, false),
-  SUBARCH (avx512_vpopcntdq, AVX512_VPOPCNTDQ, ANY_AVX512_VPOPCNTDQ, false),
-  SUBARCH (avx512_vbmi2, AVX512_VBMI2, ANY_AVX512_VBMI2, false),
-  SUBARCH (avx512_vnni, AVX512_VNNI, ANY_AVX512_VNNI, false),
-  SUBARCH (avx512_bitalg, AVX512_BITALG, ANY_AVX512_BITALG, false),
-  SUBARCH (avx_vnni, AVX_VNNI, ANY_AVX_VNNI, false),
+  VECARCH (avx512ifma, AVX512IFMA, ANY_AVX512IFMA, reset),
+  VECARCH (avx512vbmi, AVX512VBMI, ANY_AVX512VBMI, reset),
+  VECARCH (avx512_4fmaps, AVX512_4FMAPS, ANY_AVX512_4FMAPS, reset),
+  VECARCH (avx512_4vnniw, AVX512_4VNNIW, ANY_AVX512_4VNNIW, reset),
+  VECARCH (avx512_vpopcntdq, AVX512_VPOPCNTDQ, ANY_AVX512_VPOPCNTDQ, reset),
+  VECARCH (avx512_vbmi2, AVX512_VBMI2, ANY_AVX512_VBMI2, reset),
+  VECARCH (avx512_vnni, AVX512_VNNI, ANY_AVX512_VNNI, reset),
+  VECARCH (avx512_bitalg, AVX512_BITALG, ANY_AVX512_BITALG, reset),
+  VECARCH (avx_vnni, AVX_VNNI, ANY_AVX_VNNI, reset),
   SUBARCH (clzero, CLZERO, CLZERO, false),
   SUBARCH (mwaitx, MWAITX, MWAITX, false),
   SUBARCH (ospke, OSPKE, ANY_OSPKE, false),
@@ -1112,8 +1120,8 @@ static const arch_entry cpu_arch[] =
   SUBARCH (ibt, IBT, IBT, false),
   SUBARCH (shstk, SHSTK, SHSTK, false),
   SUBARCH (gfni, GFNI, ANY_GFNI, false),
-  SUBARCH (vaes, VAES, ANY_VAES, false),
-  SUBARCH (vpclmulqdq, VPCLMULQDQ, ANY_VPCLMULQDQ, false),
+  VECARCH (vaes, VAES, ANY_VAES, reset),
+  VECARCH (vpclmulqdq, VPCLMULQDQ, ANY_VPCLMULQDQ, reset),
   SUBARCH (wbnoinvd, WBNOINVD, WBNOINVD, false),
   SUBARCH (pconfig, PCONFIG, PCONFIG, false),
   SUBARCH (waitpkg, WAITPKG, WAITPKG, false),
@@ -1125,9 +1133,9 @@ static const arch_entry cpu_arch[] =
   SUBARCH (amx_tile, AMX_TILE, ANY_AMX_TILE, false),
   SUBARCH (movdiri, MOVDIRI, MOVDIRI, false),
   SUBARCH (movdir64b, MOVDIR64B, MOVDIR64B, false),
-  SUBARCH (avx512_bf16, AVX512_BF16, ANY_AVX512_BF16, false),
-  SUBARCH (avx512_vp2intersect, AVX512_VP2INTERSECT,
-	   ANY_AVX512_VP2INTERSECT, false),
+  VECARCH (avx512_bf16, AVX512_BF16, ANY_AVX512_BF16, reset),
+  VECARCH (avx512_vp2intersect, AVX512_VP2INTERSECT,
+	   ANY_AVX512_VP2INTERSECT, reset),
   SUBARCH (tdx, TDX, TDX, false),
   SUBARCH (enqcmd, ENQCMD, ENQCMD, false),
   SUBARCH (serialize, SERIALIZE, SERIALIZE, false),
@@ -1139,24 +1147,24 @@ static const arch_entry cpu_arch[] =
   SUBARCH (widekl, WIDEKL, ANY_WIDEKL, false),
   SUBARCH (uintr, UINTR, UINTR, false),
   SUBARCH (hreset, HRESET, HRESET, false),
-  SUBARCH (avx512_fp16, AVX512_FP16, ANY_AVX512_FP16, false),
+  VECARCH (avx512_fp16, AVX512_FP16, ANY_AVX512_FP16, reset),
   SUBARCH (prefetchi, PREFETCHI, PREFETCHI, false),
-  SUBARCH (avx_ifma, AVX_IFMA, ANY_AVX_IFMA, false),
-  SUBARCH (avx_vnni_int8, AVX_VNNI_INT8, ANY_AVX_VNNI_INT8, false),
+  VECARCH (avx_ifma, AVX_IFMA, ANY_AVX_IFMA, reset),
+  VECARCH (avx_vnni_int8, AVX_VNNI_INT8, ANY_AVX_VNNI_INT8, reset),
   SUBARCH (cmpccxadd, CMPCCXADD, CMPCCXADD, false),
   SUBARCH (wrmsrns, WRMSRNS, WRMSRNS, false),
   SUBARCH (msrlist, MSRLIST, MSRLIST, false),
-  SUBARCH (avx_ne_convert, AVX_NE_CONVERT, ANY_AVX_NE_CONVERT, false),
+  VECARCH (avx_ne_convert, AVX_NE_CONVERT, ANY_AVX_NE_CONVERT, reset),
   SUBARCH (rao_int, RAO_INT, RAO_INT, false),
   SUBARCH (rmpquery, RMPQUERY, ANY_RMPQUERY, false),
   SUBARCH (fred, FRED, ANY_FRED, false),
   SUBARCH (lkgs, LKGS, ANY_LKGS, false),
-  SUBARCH (avx_vnni_int16, AVX_VNNI_INT16, ANY_AVX_VNNI_INT16, false),
-  SUBARCH (sha512, SHA512, ANY_SHA512, false),
-  SUBARCH (sm3, SM3, ANY_SM3, false),
-  SUBARCH (sm4, SM4, ANY_SM4, false),
+  VECARCH (avx_vnni_int16, AVX_VNNI_INT16, ANY_AVX_VNNI_INT16, reset),
+  VECARCH (sha512, SHA512, ANY_SHA512, reset),
+  VECARCH (sm3, SM3, ANY_SM3, reset),
+  VECARCH (sm4, SM4, ANY_SM4, reset),
   SUBARCH (pbndkb, PBNDKB, PBNDKB, false),
-  SUBARCH (avx10.1, AVX10_1, ANY_AVX512F, false),
+  VECARCH (avx10.1, AVX10_1, ANY_AVX512F, set),
 };
 
 #undef SUBARCH
@@ -2790,6 +2798,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
     i386_cpu_flags isa_flags;
     enum processor_type isa;
     enum flag_code flag_code;
+    unsigned int vector_size;
     char stackop_size;
     bool no_cond_jump_promotion;
   } arch_stack_entry;
@@ -2825,6 +2834,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
       top->isa = cpu_arch_isa;
       top->isa_flags = cpu_arch_isa_flags;
       top->flag_code = flag_code;
+      top->vector_size = vector_size;
       top->stackop_size = stackop_size;
       top->no_cond_jump_promotion = no_cond_jump_promotion;
 
@@ -2865,6 +2875,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	  cpu_arch_flags = top->flags;
 	  cpu_arch_isa = top->isa;
 	  cpu_arch_isa_flags = top->isa_flags;
+	  vector_size = top->vector_size;
 	  no_cond_jump_promotion = top->no_cond_jump_promotion;
 
 	  XDELETE (top);
@@ -2905,6 +2916,8 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	      cpu_arch_tune_flags = cpu_arch_isa_flags;
 	    }
 
+	  vector_size = VSZ_DEFAULT;
+
 	  j = ARRAY_SIZE (cpu_arch) + 1;
 	}
     }
@@ -2939,6 +2952,9 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		  cpu_arch_tune = cpu_arch_isa;
 		  cpu_arch_tune_flags = cpu_arch_isa_flags;
 		}
+
+	      vector_size = VSZ_DEFAULT;
+
 	      pre_386_16bit_warned = false;
 	      break;
 	    }
@@ -2959,6 +2975,38 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	      = cpu_flags_or (cpu_arch_isa_flags, cpu_arch[j].enable);
 
 	  (void) restore_line_pointer (e);
+
+	  switch (cpu_arch[j].vsz)
+	    {
+	    default:
+	      break;
+
+	    case vsz_set:
+#ifdef SVR4_COMMENT_CHARS
+	      if (*input_line_pointer == ':' || *input_line_pointer == '/')
+#else
+	      if (*input_line_pointer == '/')
+#endif
+		{
+		  ++input_line_pointer;
+		  switch (get_absolute_expression ())
+		    {
+		    case 512: vector_size = VSZ512; break;
+		    case 256: vector_size = VSZ256; break;
+		    case 128: vector_size = VSZ128; break;
+		    default:
+		      as_bad (_("Unrecognized vector size specifier"));
+		      ignore_rest_of_line ();
+		      return;
+		    }
+		  break;
+		}
+		/* Fall through.  */
+	    case vsz_reset:
+	      vector_size = VSZ_DEFAULT;
+	      break;
+	    }
+
 	  demand_empty_rest_of_line ();
 	  return;
 	}
@@ -2978,6 +3026,9 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		cpu_arch_flags = flags;
 		cpu_arch_isa_flags = flags;
 	      }
+
+	    if (cpu_arch[j].vsz == vsz_set)
+	      vector_size = VSZ_DEFAULT;
 
 	    (void) restore_line_pointer (e);
 	    demand_empty_rest_of_line ();
@@ -5431,9 +5482,11 @@ md_assemble (char *line)
 	case RegSIMD:
 	  if (i.tm.operand_types[j].bitfield.tmmword)
 	    i.xstate |= xstate_tmm;
-	  else if (i.tm.operand_types[j].bitfield.zmmword)
+	  else if (i.tm.operand_types[j].bitfield.zmmword
+		   && vector_size >= VSZ512)
 	    i.xstate |= xstate_zmm;
-	  else if (i.tm.operand_types[j].bitfield.ymmword)
+	  else if (i.tm.operand_types[j].bitfield.ymmword
+		   && vector_size >= VSZ256)
 	    i.xstate |= xstate_ymm;
 	  else if (i.tm.operand_types[j].bitfield.xmmword)
 	    i.xstate |= xstate_xmm;
@@ -6606,9 +6659,13 @@ check_VecOperands (const insn_template *t)
 	  type.bitfield.xmmword = 1;
 	  break;
 	case 32:
+	  if (vector_size < VSZ256)
+	    goto bad_broadcast;
 	  type.bitfield.ymmword = 1;
 	  break;
 	case 64:
+	  if (vector_size < VSZ512)
+	    goto bad_broadcast;
 	  type.bitfield.zmmword = 1;
 	  break;
 	default:
@@ -6815,6 +6872,19 @@ static int
 VEX_check_encoding (const insn_template *t)
 {
   if (i.vec_encoding == vex_encoding_error)
+    {
+      i.error = unsupported;
+      return 1;
+    }
+
+  /* Vector size restrictions.  */
+  if ((vector_size < VSZ512
+       && (t->opcode_modifier.evex == EVEX512
+	   || t->opcode_modifier.vsz >= VSZ512))
+      || (vector_size < VSZ256
+	  && (t->opcode_modifier.evex == EVEX256
+	      || t->opcode_modifier.vex == VEX256
+	      || t->opcode_modifier.vsz >= VSZ256)))
     {
       i.error = unsupported;
       return 1;
@@ -7608,8 +7678,27 @@ process_suffix (void)
 
 	  for (op = 0; op < i.tm.operands; ++op)
 	    {
-	      if (is_evex_encoding (&i.tm)
-		  && !cpu_arch_flags.bitfield.cpuavx512vl)
+	      if (vector_size < VSZ512)
+		{
+		  i.tm.operand_types[op].bitfield.zmmword = 0;
+		  if (vector_size < VSZ256)
+		    {
+		      i.tm.operand_types[op].bitfield.ymmword = 0;
+		      if (i.tm.operand_types[op].bitfield.xmmword
+			  && (i.tm.opcode_modifier.evex == EVEXDYN
+			      || (!i.tm.opcode_modifier.evex
+				  && is_evex_encoding (&i.tm))))
+			i.tm.opcode_modifier.evex = EVEX128;
+		    }
+		  else if (i.tm.operand_types[op].bitfield.ymmword
+			   && !i.tm.operand_types[op].bitfield.xmmword
+			   && (i.tm.opcode_modifier.evex == EVEXDYN
+			       || (!i.tm.opcode_modifier.evex
+				   && is_evex_encoding (&i.tm))))
+		    i.tm.opcode_modifier.evex = EVEX256;
+		}
+	      else if (is_evex_encoding (&i.tm)
+		       && !cpu_arch_flags.bitfield.cpuavx512vl)
 		{
 		  if (i.tm.operand_types[op].bitfield.ymmword)
 		    i.tm.operand_types[op].bitfield.xmmword = 0;
@@ -13880,6 +13969,12 @@ static bool check_register (const reg_entry *r)
 	}
     }
 
+  if (vector_size < VSZ512 && r->reg_type.bitfield.zmmword)
+    return false;
+
+  if (vector_size < VSZ256 && r->reg_type.bitfield.ymmword)
+    return false;
+
   if (r->reg_type.bitfield.tmmword
       && (!cpu_arch_flags.bitfield.cpuamx_tile
           || flag_code != CODE_64BIT))
@@ -14378,13 +14473,21 @@ md_parse_option (int c, const char *arg)
 	arch++;
       do
 	{
+	  char *vsz;
+
 	  if (*arch == '.')
 	    as_fatal (_("invalid -march= option: `%s'"), arg);
 	  next = strchr (arch, '+');
 	  if (next)
 	    *next++ = '\0';
+	  vsz = strchr (arch, '/');
+	  if (vsz)
+	    *vsz++ = '\0';
 	  for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
 	    {
+	      if (vsz && cpu_arch[j].vsz != vsz_set)
+		continue;
+
 	      if (arch == saved && cpu_arch[j].type != PROCESSOR_NONE
 	          && strcmp (arch, cpu_arch[j].name) == 0)
 		{
@@ -14403,6 +14506,7 @@ md_parse_option (int c, const char *arg)
 		      cpu_arch_tune = cpu_arch_isa;
 		      cpu_arch_tune_flags = cpu_arch_isa_flags;
 		    }
+		  vector_size = VSZ_DEFAULT;
 		  break;
 		}
 	      else if (cpu_arch[j].type == PROCESSOR_NONE
@@ -14425,6 +14529,37 @@ md_parse_option (int c, const char *arg)
 		    cpu_arch_isa_flags
 		      = cpu_flags_or (cpu_arch_isa_flags,
 				      cpu_arch[j].enable);
+
+		  switch (cpu_arch[j].vsz)
+		    {
+		    default:
+		      break;
+
+		    case vsz_set:
+		      if (vsz)
+			{
+			  char *end;
+			  unsigned long val = strtoul (vsz, &end, 0);
+
+			  if (*end)
+			    val = 0;
+			  switch (val)
+			    {
+			    case 512: vector_size = VSZ512; break;
+			    case 256: vector_size = VSZ256; break;
+			    case 128: vector_size = VSZ128; break;
+			    default:
+			      as_warn (_("Unrecognized vector size specifier ignored"));
+			      break;
+			    }
+			  break;
+			}
+			/* Fall through.  */
+		    case vsz_reset:
+		      vector_size = VSZ_DEFAULT;
+		      break;
+		    }
+
 		  break;
 		}
 	    }
@@ -14446,6 +14581,8 @@ md_parse_option (int c, const char *arg)
 			cpu_arch_flags = flags;
 			cpu_arch_isa_flags = flags;
 		      }
+		    if (cpu_arch[j].vsz == vsz_set)
+		      vector_size = VSZ_DEFAULT;
 		    break;
 		  }
 	    }

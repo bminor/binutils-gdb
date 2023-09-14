@@ -464,6 +464,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (StaticRounding),
   BITFIELD (SAE),
   BITFIELD (Disp8MemShift),
+  BITFIELD (Vsz),
   BITFIELD (Optimize),
   BITFIELD (ATTMnemonic),
   BITFIELD (ATTSyntax),
