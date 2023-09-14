@@ -8,7 +8,7 @@
 
 Disassembly of section \.text:
 
-00000000 <_start>:
+00000000 <vbmi>:
 [ 	]*[a-f0-9]+:[ 	]*62 f2 55 48 8d f4[ 	]*vpermb zmm6,zmm5,zmm4
 [ 	]*[a-f0-9]+:[ 	]*62 f2 55 4f 8d f4[ 	]*vpermb zmm6\{k7\},zmm5,zmm4
 [ 	]*[a-f0-9]+:[ 	]*62 f2 55 cf 8d f4[ 	]*vpermb zmm6\{k7\}\{z\},zmm5,zmm4

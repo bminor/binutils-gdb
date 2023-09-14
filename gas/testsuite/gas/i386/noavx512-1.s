@@ -1,7 +1,7 @@
 # Test .arch .noavx512XX
 	.text
 
-	.irp isa, default, .noavx512bw, .noavx512cd, .noavx512dq, .noavx512er, .noavx512ifma, .noavx512pf, .noavx512vbmi, .noavx512f
+	.irp isa, default, .noavx512bw, .noavx512cd, .noavx512dq, .noavx512er, .noavx512ifma, .noavx512pf, .noavx512vbmi, .noavx512f, .noavx10.1
 
 	.arch default
 	.arch \isa

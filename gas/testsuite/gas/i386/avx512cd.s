@@ -2,7 +2,7 @@
 
 	.allow_index_reg
 	.text
-_start:
+cd:
 
 	vpconflictd	%zmm5, %zmm6	 # AVX512CD
 	vpconflictd	%zmm5, %zmm6{%k7}	 # AVX512CD

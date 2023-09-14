@@ -8,7 +8,7 @@
 
 Disassembly of section \.text:
 
-00000000 <_start>:
+00000000 <vnni>:
 [ 	]*[a-f0-9]+:[ 	]*62 f2 75 48 52 e3[ 	]*vpdpwssd zmm4,zmm1,zmm3
 [ 	]*[a-f0-9]+:[ 	]*62 f2 75 49 52 e3[ 	]*vpdpwssd zmm4\{k1\},zmm1,zmm3
 [ 	]*[a-f0-9]+:[ 	]*62 f2 75 c9 52 e3[ 	]*vpdpwssd zmm4\{k1\}\{z\},zmm1,zmm3

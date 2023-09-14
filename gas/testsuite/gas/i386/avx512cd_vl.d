@@ -8,7 +8,7 @@
 
 Disassembly of section \.text:
 
-00000000 <_start>:
+00000000 <cd>:
 [ 	]*[a-f0-9]+:[ 	]*62 f2 7d 0f c4 f5[ 	]*vpconflictd %xmm5,%xmm6\{%k7\}
 [ 	]*[a-f0-9]+:[ 	]*62 f2 7d 8f c4 f5[ 	]*vpconflictd %xmm5,%xmm6\{%k7\}\{z\}
 [ 	]*[a-f0-9]+:[ 	]*62 f2 7d 0f c4 31[ 	]*vpconflictd \(%ecx\),%xmm6\{%k7\}

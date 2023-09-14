@@ -2,7 +2,7 @@
 
 	.allow_index_reg
 	.text
-_start:
+vbmi2:
 	vpcompressb	%xmm6, -123456(%esp,%esi,8){%k7}	 # AVX512{VBMI2,VL}
 	vpcompressb	%xmm6, 126(%edx){%k7}	 # AVX512{VBMI2,VL} Disp8
 	vpcompressb	%ymm6, -123456(%esp,%esi,8){%k7}	 # AVX512{VBMI2,VL}

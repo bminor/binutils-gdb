@@ -8,7 +8,7 @@
 
 Disassembly of section \.text:
 
-00000000 <_start>:
+00000000 <ifma>:
 [ 	]*[a-f0-9]+:[ 	]*62 f2 d5 0f b4 f4[ 	]*vpmadd52luq xmm6\{k7\},xmm5,xmm4
 [ 	]*[a-f0-9]+:[ 	]*62 f2 d5 8f b4 f4[ 	]*vpmadd52luq xmm6\{k7\}\{z\},xmm5,xmm4
 [ 	]*[a-f0-9]+:[ 	]*62 f2 d5 0f b4 31[ 	]*vpmadd52luq xmm6\{k7\},xmm5,XMMWORD PTR \[ecx\]

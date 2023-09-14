@@ -2,7 +2,7 @@
 
 	.allow_index_reg
 	.text
-_start:
+vnni:
 	vpdpwssd	%zmm3, %zmm1, %zmm4	 # AVX512VNNI
 	vpdpwssd	%zmm3, %zmm1, %zmm4{%k1}	 # AVX512VNNI
 	vpdpwssd	%zmm3, %zmm1, %zmm4{%k1}{z}	 # AVX512VNNI

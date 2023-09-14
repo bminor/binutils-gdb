@@ -2,7 +2,7 @@
 
 	.allow_index_reg
 	.text
-_start:
+bf16:
 	vcvtne2ps2bf16	%ymm4, %ymm5, %ymm6	 #AVX512{BF16,VL}
 	vcvtne2ps2bf16	%xmm4, %xmm5, %xmm6	 #AVX512{BF16,VL}
 	vcvtne2ps2bf16	0x10000000(%esp, %esi, 8), %ymm5, %ymm6{%k7}	 #AVX512{BF16,VL} MASK_ENABLING

@@ -8,7 +8,7 @@
 
 Disassembly of section \.text:
 
-00000000 <_start>:
+00000000 <vpopcnt>:
 [ 	]*[a-f0-9]+:[ 	]*62 f2 7d 48 55 f5[ 	]*vpopcntd %zmm5,%zmm6
 [ 	]*[a-f0-9]+:[ 	]*62 f2 7d 4f 55 f5[ 	]*vpopcntd %zmm5,%zmm6\{%k7\}
 [ 	]*[a-f0-9]+:[ 	]*62 f2 7d cf 55 f5[ 	]*vpopcntd %zmm5,%zmm6\{%k7\}\{z\}

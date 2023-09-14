@@ -7,7 +7,7 @@
 
 Disassembly of section .text:
 
-0+ <_start>:
+0+ <cd>:
 [ 	]*[a-f0-9]+:	62 f2 7d 48 c4 f5    	vpconflictd %zmm5,%zmm6
 [ 	]*[a-f0-9]+:	62 f2 7d 4f c4 f5    	vpconflictd %zmm5,%zmm6\{%k7\}
 [ 	]*[a-f0-9]+:	62 f2 7d cf c4 f5    	vpconflictd %zmm5,%zmm6\{%k7\}\{z\}

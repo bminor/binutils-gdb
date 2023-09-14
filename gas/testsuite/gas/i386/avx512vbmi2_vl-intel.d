@@ -8,7 +8,7 @@
 
 Disassembly of section \.text:
 
-00000000 <_start>:
+00000000 <vbmi2>:
 [ 	]*[a-f0-9]+:[ 	]*62 f2 7d 0f 63 b4 f4 c0 1d fe ff[ 	]*vpcompressb XMMWORD PTR \[esp\+esi\*8-0x1e240\]\{k7\},xmm6
 [ 	]*[a-f0-9]+:[ 	]*62 f2 7d 0f 63 72 7e[ 	]*vpcompressb XMMWORD PTR \[edx\+0x7e\]\{k7\},xmm6
 [ 	]*[a-f0-9]+:[ 	]*62 f2 7d 2f 63 b4 f4 c0 1d fe ff[ 	]*vpcompressb YMMWORD PTR \[esp\+esi\*8-0x1e240\]\{k7\},ymm6

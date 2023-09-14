@@ -2,7 +2,7 @@
 
 	.allow_index_reg
 	.text
-_start:
+ifma:
 	vpmadd52luq	%xmm4, %xmm5, %xmm6{%k7}	 # AVX512{IFMA,VL}
 	vpmadd52luq	%xmm4, %xmm5, %xmm6{%k7}{z}	 # AVX512{IFMA,VL}
 	vpmadd52luq	(%ecx), %xmm5, %xmm6{%k7}	 # AVX512{IFMA,VL}

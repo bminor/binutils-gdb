@@ -39,6 +39,26 @@
 .*:25: Error: .*not supported.*
 .*:26: Error: .*not supported.*
 .*:27: Error: .*not supported.*
+.*:8: Error: .*bad register name.*
+.*:9: Error: .*unknown vector operation.*
+.*:10: Error: .*unknown vector operation.*
+.*:11: Error: .*not supported.*
+.*:12: Error: .*not supported.*
+.*:13: Error: .*not supported.*
+.*:14: Error: .*not supported.*
+.*:15: Error: .*not supported.*
+.*:16: Error: .*not supported.*
+.*:17: Error: .*not supported.*
+.*:18: Error: .*bad register name.*
+.*:19: Error: .*unknown vector operation.*
+.*:20: Error: .*unknown vector operation.*
+.*:21: Error: .*bad register name.*
+.*:22: Error: .*unknown vector operation.*
+.*:23: Error: .*unknown vector operation.*
+.*:24: Error: .*not supported.*
+.*:25: Error: .*not supported.*
+.*:26: Error: .*not supported.*
+.*:27: Error: .*not supported.*
 #...
 [ 	]*[0-9]+[ 	]+\# Test \.arch \.noavx512XX
 [ 	]*[0-9]+[ 	]+\.text
@@ -380,6 +400,29 @@
 #...
 [ 	]*[0-9]+[ 	]+>  \.arch default
 [ 	]*[0-9]+[ 	]+>  \.arch \.noavx512f
+[ 	]*[0-9]+[ 	]+>  vpabsb %zmm5,%zmm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vpabsb %xmm5,%xmm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vpabsb %ymm5,%ymm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vpconflictd %zmm5,%zmm6
+[ 	]*[0-9]+[ 	]+>  vpconflictd %xmm5,%xmm6
+[ 	]*[0-9]+[ 	]+>  vpconflictd %ymm5,%ymm6
+[ 	]*[0-9]+[ 	]+>  vcvtpd2qq \(%ecx\),%zmm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vcvtpd2qq \(%ecx\),%xmm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vcvtpd2qq \(%ecx\),%ymm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vexp2ps %zmm5,%zmm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vaddpd %zmm4,%zmm5,%zmm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vaddpd %xmm4,%xmm5,%xmm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vaddpd %ymm4,%ymm5,%ymm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vpmadd52luq %zmm4,%zmm5,%zmm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vpmadd52luq %xmm4,%xmm5,%xmm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vpmadd52luq %ymm4,%ymm5,%ymm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vgatherpf0dpd 23\(%ebp,%ymm7,8\)\{%k1\}
+[ 	]*[0-9]+[ 	]+>  vpermb %zmm4,%zmm5,%zmm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vpermb %xmm4,%xmm5,%xmm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vpermb %ymm4,%ymm5,%ymm6\{%k7\}
+#...
+[ 	]*[0-9]+[ 	]+>  \.arch default
+[ 	]*[0-9]+[ 	]+>  \.arch \.noavx10\.1
 [ 	]*[0-9]+[ 	]+>  vpabsb %zmm5,%zmm6\{%k7\}
 [ 	]*[0-9]+[ 	]+>  vpabsb %xmm5,%xmm6\{%k7\}
 [ 	]*[0-9]+[ 	]+>  vpabsb %ymm5,%ymm6\{%k7\}
