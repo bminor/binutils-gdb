@@ -67,6 +67,10 @@ gdb_caching_proc allow_hipcc_tests {} {
 	return {0 "remote debugging"}
     }
 
+    if {![istarget "*-linux*"]} {
+	return {0 "target platform is not Linux"}
+    }
+
     # Ensure that GDB is built with amd-dbgapi support.
     set output [remote_exec host $::GDB "$::INTERNAL_GDBFLAGS --configuration"]
     if { [string first "--with-amd-dbgapi" $output] == -1 } {
