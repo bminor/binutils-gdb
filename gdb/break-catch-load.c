@@ -230,7 +230,7 @@ add_solib_catchpoint (const char *arg, bool is_load, bool is_temp, bool enabled)
   if (*arg == '\0')
     arg = nullptr;
 
-  auto c = gdb::make_unique<solib_catchpoint> (gdbarch, is_temp, nullptr,
+  auto c = std::make_unique<solib_catchpoint> (gdbarch, is_temp, nullptr,
 					       is_load, arg);
 
   c->enable_state = enabled ? bp_enabled : bp_disabled;

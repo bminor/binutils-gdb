@@ -4372,7 +4372,7 @@ allocate_type_unit_groups_table ()
 static std::unique_ptr<type_unit_group>
 create_type_unit_group (struct dwarf2_cu *cu, sect_offset line_offset_struct)
 {
-  auto tu_group = gdb::make_unique<type_unit_group> ();
+  auto tu_group = std::make_unique<type_unit_group> ();
 
   tu_group->hash.dwo_unit = cu->dwo_unit;
   tu_group->hash.line_sect_off = line_offset_struct;

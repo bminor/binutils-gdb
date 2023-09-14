@@ -828,7 +828,7 @@ dwarf2_read_gdb_index
   if (main_index_contents.empty ())
     return 0;
 
-  auto map = gdb::make_unique<mapped_gdb_index> ();
+  auto map = std::make_unique<mapped_gdb_index> ();
   if (!read_gdb_index_from_buffer (objfile_name (objfile),
 				   use_deprecated_index_sections,
 				   main_index_contents, map.get (), &cu_list,

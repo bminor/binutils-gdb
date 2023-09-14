@@ -594,7 +594,7 @@ dsbt_current_sos (void)
 	    }
 
 	  shobj *sop = new shobj;
-	  auto li = gdb::make_unique<lm_info_dsbt> ();
+	  auto li = std::make_unique<lm_info_dsbt> ();
 	  li->map = loadmap;
 	  /* Fetch the name.  */
 	  addr = extract_unsigned_integer (lm_buf.l_name,

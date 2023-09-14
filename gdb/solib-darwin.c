@@ -274,7 +274,7 @@ darwin_current_sos ()
       /* Create and fill the new struct shobj element.  */
       shobj *newobj = new shobj;
 
-      auto li = gdb::make_unique<lm_info_darwin> ();
+      auto li = std::make_unique<lm_info_darwin> ();
 
       newobj->so_name = file_path.get ();
       newobj->so_original_name = newobj->so_name;

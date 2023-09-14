@@ -2038,7 +2038,7 @@ cp_demangled_name_to_comp (const char *demangled_name,
 
   state.demangle_info = allocate_info ();
 
-  auto result = gdb::make_unique<demangle_parse_info> ();
+  auto result = std::make_unique<demangle_parse_info> ();
   result->info = state.demangle_info;
 
   if (yyparse (&state))

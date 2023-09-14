@@ -303,7 +303,7 @@ gdb_bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
 				 const char *target)
 {
   std::unique_ptr<target_buffer> buffer
-    = gdb::make_unique<target_buffer> (addr, size);
+    = std::make_unique<target_buffer> (addr, size);
 
   return gdb_bfd_openr_iovec (buffer->filename (), target,
 			      [&] (bfd *nbfd)

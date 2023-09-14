@@ -464,7 +464,7 @@ create_cus_from_debug_names (dwarf2_per_bfd *per_bfd,
 bool
 dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 {
-  auto map = gdb::make_unique<mapped_debug_names> ();
+  auto map = std::make_unique<mapped_debug_names> ();
   mapped_debug_names dwz_map;
   struct objfile *objfile = per_objfile->objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;

@@ -468,7 +468,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
     error (_("BTS support has been disabled for the target cpu."));
 
   std::unique_ptr<linux_btrace_target_info> tinfo
-    { gdb::make_unique<linux_btrace_target_info> (ptid) };
+    { std::make_unique<linux_btrace_target_info> (ptid) };
 
   tinfo->conf.format = BTRACE_FORMAT_BTS;
 
@@ -617,7 +617,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
     pid = ptid.pid ();
 
   std::unique_ptr<linux_btrace_target_info> tinfo
-    { gdb::make_unique<linux_btrace_target_info> (ptid) };
+    { std::make_unique<linux_btrace_target_info> (ptid) };
 
   tinfo->conf.format = BTRACE_FORMAT_PT;
 

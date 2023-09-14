@@ -259,7 +259,7 @@ varobj_create (const char *objname,
 	       const char *expression, CORE_ADDR frame, enum varobj_type type)
 {
   /* Fill out a varobj structure for the (root) variable being constructed.  */
-  auto var = gdb::make_unique<varobj> (new varobj_root);
+  auto var = std::make_unique<varobj> (new varobj_root);
 
   if (expression != NULL)
     {

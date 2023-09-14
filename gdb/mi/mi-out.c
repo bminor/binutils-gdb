@@ -340,13 +340,13 @@ std::unique_ptr<mi_ui_out>
 mi_out_new (const char *mi_version)
 {
   if (streq (mi_version, INTERP_MI4) ||  streq (mi_version, INTERP_MI))
-    return gdb::make_unique<mi_ui_out> (4);
+    return std::make_unique<mi_ui_out> (4);
 
   if (streq (mi_version, INTERP_MI3))
-    return gdb::make_unique<mi_ui_out> (3);
+    return std::make_unique<mi_ui_out> (3);
 
   if (streq (mi_version, INTERP_MI2))
-    return gdb::make_unique<mi_ui_out> (2);
+    return std::make_unique<mi_ui_out> (2);
 
   return nullptr;
 }

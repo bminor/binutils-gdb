@@ -212,7 +212,7 @@ so_list_from_rocm_sos (const std::vector<rocm_so> &sos)
   for (const rocm_so &so : sos)
     {
       struct shobj *newobj = new struct shobj;
-      newobj->lm_info = gdb::make_unique<lm_info_svr4> (*so.lm_info);
+      newobj->lm_info = std::make_unique<lm_info_svr4> (*so.lm_info);
 
       newobj->so_name = so.name;
       newobj->so_original_name = so.unique_name;
@@ -725,7 +725,7 @@ rocm_update_solib_list ()
 
       gdb::unique_xmalloc_ptr<char> uri_bytes_holder (uri_bytes);
 
-      lm_info_svr4_up li = gdb::make_unique<lm_info_svr4> ();
+      lm_info_svr4_up li = std::make_unique<lm_info_svr4> ();
       li->l_addr = l_addr;
 
       /* Generate a unique name so that code objects with the same URI but

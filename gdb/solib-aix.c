@@ -484,7 +484,7 @@ solib_aix_current_sos ()
 
       new_solib->so_original_name = so_name;
       new_solib->so_name = so_name;
-      new_solib->lm_info = gdb::make_unique<lm_info_aix> (info);
+      new_solib->lm_info = std::make_unique<lm_info_aix> (info);
 
       /* Add it to the list.  */
       sos.push_back (*new_solib);

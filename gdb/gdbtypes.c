@@ -5833,7 +5833,7 @@ static const struct registry<objfile>::key<fixed_point_type_storage>
 void
 allocate_fixed_point_type_info (struct type *type)
 {
-  auto up = gdb::make_unique<fixed_point_type_info> ();
+  auto up = std::make_unique<fixed_point_type_info> ();
   fixed_point_type_info *info;
 
   if (type->is_objfile_owned ())

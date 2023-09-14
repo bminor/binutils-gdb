@@ -213,7 +213,7 @@ lm_info_read (CORE_ADDR lm_addr)
       type *ptr_type
 	= builtin_type (current_inferior ()->arch ())->builtin_data_ptr;
 
-      lm_info = gdb::make_unique<lm_info_svr4> ();
+      lm_info = std::make_unique<lm_info_svr4> ();
       lm_info->lm_addr = lm_addr;
 
       lm_info->l_addr_inferior = extract_typed_address (&lm[lmo->l_addr_offset],
@@ -1001,7 +1001,7 @@ so_list_from_svr4_sos (const std::vector<svr4_so> &sos)
 
       newobj->so_name = so.name;
       newobj->so_original_name = so.name;
-      newobj->lm_info = gdb::make_unique<lm_info_svr4> (*so.lm_info);
+      newobj->lm_info = std::make_unique<lm_info_svr4> (*so.lm_info);
 
       dst.push_back (*newobj);
     }
@@ -1032,7 +1032,7 @@ library_list_start_library (struct gdb_xml_parser *parser,
   ULONGEST *l_ldp
     = (ULONGEST *) xml_find_attribute (attributes, "l_ld")->value.get ();
 
-  lm_info_svr4_up li = gdb::make_unique<lm_info_svr4> ();
+  lm_info_svr4_up li = std::make_unique<lm_info_svr4> ();
   li->lm_addr = *lmp;
   li->l_addr_inferior = *l_addrp;
   li->l_ld = *l_ldp;
@@ -1190,7 +1190,7 @@ svr4_default_sos (svr4_info *info)
     return {};
 
   shobj *newobj = new shobj;
-  auto li = gdb::make_unique<lm_info_svr4> ();
+  auto li = std::make_unique<lm_info_svr4> ();
 
   /* Nothing will ever check the other fields if we set l_addr_p.  */
   li->l_addr = li->l_addr_inferior = info->debug_loader_offset;

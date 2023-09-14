@@ -377,7 +377,7 @@ frv_current_sos ()
 	    }
 
 	  shobj *sop = new shobj;
-	  auto li = gdb::make_unique<lm_info_frv> ();
+	  auto li = std::make_unique<lm_info_frv> ();
 	  li->map = loadmap;
 	  li->got_value = got_addr;
 	  li->lm_addr = lm_addr;
