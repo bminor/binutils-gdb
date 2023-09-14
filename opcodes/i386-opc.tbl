@@ -1441,13 +1441,6 @@ aesenclast<aes>, 0x660f38dd, <aes:cpu>AES, Modrm|<aes:attr>|<aes:vvvv>|NoSuf, { 
 aesimc<aes>, 0x660f38db, <aes:cpu>AES, Modrm|<aes:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 aeskeygenassist<aes>, 0x660f3adf, <aes:cpu>AES, Modrm|<aes:attr>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 
-// VAES
-
-vaesdec, 0x66de, VAES, Modrm|Vex256|Space0F38|VexVVVV|VexWIG|NoSuf, { RegYMM|Unspecified|BaseIndex, RegYMM, RegYMM }
-vaesdeclast, 0x66df, VAES, Modrm|Vex256|Space0F38|VexVVVV|VexWIG|NoSuf, { RegYMM|Unspecified|BaseIndex, RegYMM, RegYMM }
-vaesenc, 0x66dc, VAES, Modrm|Vex256|Space0F38|VexVVVV|VexWIG|NoSuf, { RegYMM|Unspecified|BaseIndex, RegYMM, RegYMM }
-vaesenclast, 0x66dd, VAES, Modrm|Vex256|Space0F38|VexVVVV|VexWIG|NoSuf, { RegYMM|Unspecified|BaseIndex, RegYMM, RegYMM }
-
 // PCLMULQDQ
 
 <pclmul:cpu:attr, $avx:AVX|:Vex128|VexW0|SSE2AVX|VexVVVV, $sse::>
@@ -2065,13 +2058,22 @@ vsm4rnds4, 0xf2da, SM4, Modrm|Space0F38|Vex|VexVVVV|VexW0|CheckOperandSize|NoSuf
 
 // SM4 instructions end.
 
+// VAES
+
+vaesdec, 0x66de, VAES, Modrm|Vex|Space0F38|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+vaesdeclast, 0x66df, VAES, Modrm|Vex|Space0F38|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+vaesenc, 0x66dc, VAES, Modrm|Vex|Space0F38|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+vaesenclast, 0x66dd, VAES, Modrm|Vex|Space0F38|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+
+// VAES instructions end
+
 // VPCLMULQDQ instructions
 
-vpclmulqdq, 0x6644, VPCLMULQDQ, Modrm|Vex256|Space0F3A|VexWIG|VexVVVV|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
-vpclmullqlqdq, 0x6644/0x00, VPCLMULQDQ, Modrm|Vex256|Space0F3A|VexWIG|VexVVVV|NoSuf|ImmExt, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
-vpclmulhqlqdq, 0x6644/0x01, VPCLMULQDQ, Modrm|Vex256|Space0F3A|VexWIG|VexVVVV|NoSuf|ImmExt, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
-vpclmullqhqdq, 0x6644/0x10, VPCLMULQDQ, Modrm|Vex256|Space0F3A|VexWIG|VexVVVV|NoSuf|ImmExt, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
-vpclmulhqhqdq, 0x6644/0x11, VPCLMULQDQ, Modrm|Vex256|Space0F3A|VexWIG|VexVVVV|NoSuf|ImmExt, { Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
+vpclmulqdq, 0x6644, VPCLMULQDQ, Modrm|Vex|Space0F3A|VexWIG|VexVVVV|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vpclmullqlqdq, 0x6644/0x00, VPCLMULQDQ, Modrm|Vex|Space0F3A|VexWIG|VexVVVV|CheckOperandSize|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vpclmulhqlqdq, 0x6644/0x01, VPCLMULQDQ, Modrm|Vex|Space0F3A|VexWIG|VexVVVV|CheckOperandSize|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vpclmullqhqdq, 0x6644/0x10, VPCLMULQDQ, Modrm|Vex|Space0F3A|VexWIG|VexVVVV|CheckOperandSize|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vpclmulhqhqdq, 0x6644/0x11, VPCLMULQDQ, Modrm|Vex|Space0F3A|VexWIG|VexVVVV|CheckOperandSize|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 
 // VPCLMULQDQ instructions end
 
