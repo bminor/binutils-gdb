@@ -69,10 +69,7 @@ proc run_style_tests { } {
     global testfile srcfile hex binfile
     global currently_disabled_style decimal hex
 
-    save_vars { env(TERM) } {
-	# We need an ANSI-capable terminal to get the output.
-	setenv TERM ansi
-
+    with_ansi_styling_terminal {
 	# Restart GDB with the correct TERM variable setting, this
 	# means that GDB will enable styling.
 	clean_restart_and_disable "restart 1" ${binfile}
@@ -319,9 +316,10 @@ proc run_style_tests { } {
 # Python pygments module is not available, so, when we disable
 # disassembler styling, we should always see a change in output.
 proc test_disable_disassembler_styling { } {
-    save_vars { env(TERM) } {
+    save_vars { env(TERM) env(NO_COLOR) } {
 	# We need an ANSI-capable terminal to get the output.
 	setenv TERM ansi
+	setenv NO_COLOR ""
 
 	# Restart GDB with the correct TERM variable setting, this
 	# means that GDB will enable styling.
@@ -427,9 +425,10 @@ proc test_disassembler_error_handling { } {
 	return
     }
 
-    save_vars { env(TERM) } {
+    save_vars { env(TERM) env(NO_COLOR) } {
 	# We need an ANSI-capable terminal to get the output.
 	setenv TERM ansi
+	setenv NO_COLOR ""
 
 	# Restart GDB with the correct TERM variable setting, this
 	# means that GDB will enable styling.

@@ -654,6 +654,10 @@ captured_main_1 (struct captured_main_args *context)
   int save_auto_load;
   int ret = 1;
 
+  const char *no_color = getenv ("NO_COLOR");
+  if (no_color != nullptr && *no_color != '\0')
+    cli_styling = false;
+
 #ifdef HAVE_USEFUL_SBRK
   /* Set this before constructing scoped_command_stats.  */
   lim_at_start = (char *) sbrk (0);

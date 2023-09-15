@@ -99,9 +99,7 @@ proc check_gdb_startups_up_quietly { message } {
     }
 }
 
-save_vars { env(TERM) } {
-    # We need an ANSI-capable terminal to get the output.
-    setenv TERM ansi
+with_ansi_styling_terminal {
 
     # Start GDB and confirm that the version string is styled.
     save_vars { INTERNAL_GDBFLAGS env(HOME) env(XDG_CONFIG_HOME) } {

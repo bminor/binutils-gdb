@@ -3,6 +3,10 @@
 
 *** Changes since GDB 13
 
+* GDB now recognizes the NO_COLOR environment variable and disables
+  styling according to the spec.  See https://no-color.org/.
+  Styling can be re-enabled with "set style enabled on".
+
 * The AArch64 'org.gnu.gdb.aarch64.pauth' Pointer Authentication feature string
   has been deprecated in favor of the 'org.gnu.gdb.aarch64.pauth_v2' feature
   string.

@@ -20,13 +20,11 @@ load_lib gdb-python.exp
 
 standard_testfile
 
-save_vars { env(TERM) } {
+with_ansi_styling_terminal {
     # We need an ANSI-capable terminal to get the output, additionally
     # we need to set LC_ALL so GDB knows the terminal is UTF-8
     # capable, otherwise we'll get a UnicodeEncodeError trying to
     # encode the output.
-    setenv TERM ansi
-
     if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 	return -1
     }

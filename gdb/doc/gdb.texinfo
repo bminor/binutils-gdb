@@ -27272,6 +27272,9 @@ and styles can also be disabled entirely.
 Enable or disable all styling.  The default is host-dependent, with
 most hosts defaulting to @samp{on}.
 
+If the @env{NO_COLOR} environment variable is set to a non-empty
+value, then @value{GDBN} will change this to @samp{off} at startup.
+
 @item show style enabled
 Show the current state of styling.
 

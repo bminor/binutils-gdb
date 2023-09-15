@@ -97,10 +97,7 @@ proc test_python_settings { exp_state } {
     gdb_exit
 }
 
-save_vars { env(TERM) } {
-    # We need an ANSI-capable terminal to get the output.
-    setenv TERM ansi
-
+with_ansi_styling_terminal {
     # Check the features are off by default.
     test_python_settings "off"
 

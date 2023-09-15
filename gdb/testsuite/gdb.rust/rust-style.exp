@@ -19,10 +19,7 @@ load_lib rust-support.exp
 require allow_rust_tests
 require {can_compile rust}
 
-save_vars { env(TERM) } {
-    # We need an ANSI-capable terminal to get the output.
-    setenv TERM ansi
-
+with_ansi_styling_terminal {
     standard_testfile .rs
     if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
 	     {debug rust}]} {

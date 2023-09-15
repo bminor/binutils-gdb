@@ -23,10 +23,7 @@
 
 standard_testfile
 
-save_vars { env(TERM) } {
-    # We need an ANSI-capable terminal to get the output.
-    setenv TERM ansi
-
+with_ansi_styling_terminal {
     if { [prepare_for_testing "failed to prepare" \
 	    ${testfile} ${srcfile}] } {
 	return

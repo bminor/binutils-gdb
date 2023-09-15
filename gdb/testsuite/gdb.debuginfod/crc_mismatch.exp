@@ -71,10 +71,7 @@ if {[build_executable crc_mismatch.exp crc_mismatch-2 crc_mismatch-2.c debug] !=
     # Do the same thing again, but this time check that the styling is
     # correct.
     with_test_prefix "check styling" {
-	save_vars { env(TERM) } {
-	    # We need an ANSI-capable terminal to get styled output.
-	    setenv TERM ansi
-
+	with_ansi_styling_terminal {
 	    clean_restart
 
 	    set debug_file_re [style "${escapedobjdirsubdir}/crc_mismatch-2\\.debug" file]

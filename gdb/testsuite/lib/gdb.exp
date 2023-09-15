@@ -6468,7 +6468,7 @@ proc default_gdb_init { test_file_name } {
 
     # This disables style output, which would interfere with many
     # tests.
-    setenv TERM "dumb"
+    setenv NO_COLOR sorry
 
     # This setting helps detect bugs in the Python code and doesn't
     # seem to have a significant downside for the tests.
@@ -9236,6 +9236,25 @@ proc with_override { name override body } {
     }
 
     return $result
+}
+
+# Run BODY after setting the TERM environment variable to 'ansi', and
+# unsetting the NO_COLOR environment variable.
+proc with_ansi_styling_terminal { body } {
+    save_vars { ::env(TERM) ::env(NO_COLOR) } {
+	# Set environment variables to allow styling.
+	setenv TERM ansi
+	unset -nocomplain ::env(NO_COLOR)
+
+	set code [catch {uplevel 1 $body} result]
+    }
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
 }
 
 # Setup tuiterm.exp environment.  To be used in test-cases instead of

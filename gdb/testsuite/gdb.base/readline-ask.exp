@@ -21,6 +21,8 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {debug}] 
     return -1
 }
 
+setenv TERM dumb
+
 # INPUTRC gets reset for the next testfile.
 setenv INPUTRC $inputrc
 clean_restart ${binfile}

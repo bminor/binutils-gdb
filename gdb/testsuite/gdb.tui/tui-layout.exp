@@ -44,13 +44,17 @@ proc test_layout_or_focus {layout_name terminal execution} {
 
     set dumb_terminal [string equal $terminal "dumb"]
 
-    if {$dumb_terminal} {
-	clean_restart $binfile
-    } else {
-	Term::clean_restart 24 80 $binfile
-	if {![Term::prepare_for_tui]} {
-	    unsupported "TUI not supported"
-	    return
+    global env
+    save_vars { env(TERM) } {
+	setenv TERM $terminal
+	if {$dumb_terminal} {
+	    clean_restart $binfile
+	} else {
+	    Term::clean_restart 24 80 $binfile
+	    if {![Term::prepare_for_tui]} {
+		unsupported "TUI not supported"
+		return
+	    }
 	}
     }
 

@@ -844,8 +844,9 @@ namespace eval Term {
     # BODY.
     proc with_tuiterm {rows cols body} {
 	global env stty_init
-	save_vars {env(TERM) stty_init} {
+	save_vars {env(TERM) env(NO_COLOR) stty_init} {
 	    setenv TERM ansi
+	    setenv NO_COLOR ""
 	    _setup $rows $cols
 
 	    uplevel $body

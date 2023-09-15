@@ -1184,11 +1184,10 @@ with_test_prefix "format_string" {
   # Perform C Tests.
   if { [build_inferior "${binfile}" "c"] == 0 } {
     with_test_prefix "lang_c" {
-      save_vars { env(TERM) } {
+      with_ansi_styling_terminal {
 	# We run all of these tests in an environment where styling
 	# could work, but we only expect the final call to
 	# test_styling to actually produce any styled output.
-	setenv TERM ansi
 	set current_lang "c"
 	prepare_gdb "${binfile}"
 	test_all_common

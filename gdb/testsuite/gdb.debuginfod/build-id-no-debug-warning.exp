@@ -98,10 +98,7 @@ gdb_test "file ${build_id_debug_file}" \
 # Do the same thing again, but this time check that the styling is
 # correct.
 with_test_prefix "check styling" {
-    save_vars { env(TERM) } {
-	# We need an ANSI-capable terminal to get styled output.
-	setenv TERM ansi
-
+    with_ansi_styling_terminal {
 	clean_restart
 
 	gdb_test_no_output "set debug-file-directory ${debug_file_directory}" \
