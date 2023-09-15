@@ -890,12 +890,11 @@ gdbscm_breakpoint_expression (SCM self)
 {
   breakpoint_smob *bp_smob
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
-  struct watchpoint *wp;
 
   if (!is_watchpoint (bp_smob->bp))
     return SCM_BOOL_F;
 
-  wp = (struct watchpoint *) bp_smob->bp;
+  watchpoint *wp = gdb::checked_static_cast<watchpoint *> (bp_smob->bp);
 
   const char *str = wp->exp_string.get ();
   if (! str)

@@ -549,14 +549,13 @@ bppy_get_expression (PyObject *self, void *closure)
 {
   const char *str;
   gdbpy_breakpoint_object *obj = (gdbpy_breakpoint_object *) self;
-  struct watchpoint *wp;
 
   BPPY_REQUIRE_VALID (obj);
 
   if (!is_watchpoint (obj->bp))
     Py_RETURN_NONE;
 
-  wp = (struct watchpoint *) obj->bp;
+  watchpoint *wp = gdb::checked_static_cast<watchpoint *> (obj->bp);
 
   str = wp->exp_string.get ();
   if (! str)
