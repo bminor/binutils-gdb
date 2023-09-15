@@ -12203,7 +12203,7 @@ ada_catchpoint::allocate_location ()
 bool
 ada_catchpoint::should_stop_exception (const struct bp_location *bl) const
 {
-  struct ada_catchpoint *c = (struct ada_catchpoint *) bl->owner;
+  ada_catchpoint *c = gdb::checked_static_cast<ada_catchpoint *> (bl->owner);
   const struct ada_catchpoint_location *ada_loc
     = (const struct ada_catchpoint_location *) bl;
   bool stop;

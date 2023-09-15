@@ -480,10 +480,10 @@ catch_syscall_enabled (void)
 static bool
 catching_syscall_number_1 (struct breakpoint *b, int syscall_number)
 {
-
   if (is_syscall_catchpoint_enabled (b))
     {
-      struct syscall_catchpoint *c = (struct syscall_catchpoint *) b;
+      syscall_catchpoint *c
+	= gdb::checked_static_cast<syscall_catchpoint *> (b);
 
       if (!c->syscalls_to_be_caught.empty ())
 	{

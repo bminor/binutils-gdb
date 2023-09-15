@@ -103,7 +103,8 @@ signal_to_name_or_int (enum gdb_signal sig)
 int
 signal_catchpoint::insert_location (struct bp_location *bl)
 {
-  struct signal_catchpoint *c = (struct signal_catchpoint *) bl->owner;
+  signal_catchpoint *c
+    = gdb::checked_static_cast<signal_catchpoint *> (bl->owner);
 
   if (!c->signals_to_be_caught.empty ())
     {
@@ -130,7 +131,8 @@ int
 signal_catchpoint::remove_location (struct bp_location *bl,
 				    enum remove_bp_reason reason)
 {
-  struct signal_catchpoint *c = (struct signal_catchpoint *) bl->owner;
+  signal_catchpoint *c
+    = gdb::checked_static_cast<signal_catchpoint *> (bl->owner);
 
   if (!c->signals_to_be_caught.empty ())
     {
@@ -165,8 +167,8 @@ signal_catchpoint::breakpoint_hit (const struct bp_location *bl,
 				   CORE_ADDR bp_addr,
 				   const target_waitstatus &ws)
 {
-  const struct signal_catchpoint *c
-    = (const struct signal_catchpoint *) bl->owner;
+  const signal_catchpoint *c
+    = gdb::checked_static_cast<const signal_catchpoint *> (bl->owner);
   gdb_signal signal_number;
 
   if (ws.kind () != TARGET_WAITKIND_STOPPED)
