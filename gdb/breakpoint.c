@@ -6170,10 +6170,12 @@ bpstat_run_callbacks (bpstat *bs_head)
 	  handle_jit_event (bs->bp_location_at->address);
 	  break;
 	case bp_gnu_ifunc_resolver:
-	  gnu_ifunc_resolver_stop ((code_breakpoint *) b);
+	  gnu_ifunc_resolver_stop
+	    (gdb::checked_static_cast<code_breakpoint *> (b));
 	  break;
 	case bp_gnu_ifunc_resolver_return:
-	  gnu_ifunc_resolver_return_stop ((code_breakpoint *) b);
+	  gnu_ifunc_resolver_return_stop
+	    (gdb::checked_static_cast<code_breakpoint *> (b));
 	  break;
 	}
     }

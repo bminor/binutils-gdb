@@ -1033,7 +1033,7 @@ elf_gnu_ifunc_resolver_return_stop (code_breakpoint *b)
 			    "gnu-indirect-function breakpoint type %d"),
 			  (int) b->type);
 	}
-      b = (code_breakpoint *) b_next;
+      b = gdb::checked_static_cast<code_breakpoint *> (b_next);
     }
   gdb_assert (b->type == bp_gnu_ifunc_resolver);
   gdb_assert (b->has_single_location ());
