@@ -2928,6 +2928,24 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	    {
 	      check_cpu_arch_compatible (string, cpu_arch[j].enable);
 
+	      if (flag_code == CODE_64BIT && !cpu_arch[j].enable.bitfield.cpulm )
+		{
+		  as_bad (_("64bit mode not supported on `%s'."),
+			  cpu_arch[j].name);
+		  (void) restore_line_pointer (e);
+		  ignore_rest_of_line ();
+		  return;
+		}
+
+	      if (flag_code == CODE_32BIT && !cpu_arch[j].enable.bitfield.cpui386)
+		{
+		  as_bad (_("32bit mode not supported on `%s'."),
+			  cpu_arch[j].name);
+		  (void) restore_line_pointer (e);
+		  ignore_rest_of_line ();
+		  return;
+		}
+
 	      cpu_arch_name = cpu_arch[j].name;
 	      free (cpu_sub_arch_name);
 	      cpu_sub_arch_name = NULL;
