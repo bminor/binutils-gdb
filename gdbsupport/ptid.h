@@ -157,8 +157,10 @@ private:
   tid_type m_tid;
 };
 
+namespace std
+{
 template<>
-struct std::hash<ptid_t>
+struct hash<ptid_t>
 {
   size_t operator() (const ptid_t &ptid) const
   {
@@ -169,6 +171,7 @@ struct std::hash<ptid_t>
 	    + long_hash (ptid.tid ()));
   }
 };
+}
 
 /* The null or zero ptid, often used to indicate no process. */
 
