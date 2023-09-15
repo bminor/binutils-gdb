@@ -143,7 +143,7 @@ struct dummy_target : public target_ops
   void trace_set_readonly_regions () override;
   void trace_start () override;
   int get_trace_status (struct trace_status *arg0) override;
-  void get_tracepoint_status (struct breakpoint *arg0, struct uploaded_tp *arg1) override;
+  void get_tracepoint_status (tracepoint *arg0, struct uploaded_tp *arg1) override;
   void trace_stop () override;
   int trace_find (enum trace_find_type arg0, int arg1, CORE_ADDR arg2, CORE_ADDR arg3, int *arg4) override;
   bool get_trace_state_variable_value (int arg0, LONGEST *arg1) override;
@@ -318,7 +318,7 @@ struct debug_target : public target_ops
   void trace_set_readonly_regions () override;
   void trace_start () override;
   int get_trace_status (struct trace_status *arg0) override;
-  void get_tracepoint_status (struct breakpoint *arg0, struct uploaded_tp *arg1) override;
+  void get_tracepoint_status (tracepoint *arg0, struct uploaded_tp *arg1) override;
   void trace_stop () override;
   int trace_find (enum trace_find_type arg0, int arg1, CORE_ADDR arg2, CORE_ADDR arg3, int *arg4) override;
   bool get_trace_state_variable_value (int arg0, LONGEST *arg1) override;
@@ -3216,24 +3216,24 @@ debug_target::get_trace_status (struct trace_status *arg0)
 }
 
 void
-target_ops::get_tracepoint_status (struct breakpoint *arg0, struct uploaded_tp *arg1)
+target_ops::get_tracepoint_status (tracepoint *arg0, struct uploaded_tp *arg1)
 {
   this->beneath ()->get_tracepoint_status (arg0, arg1);
 }
 
 void
-dummy_target::get_tracepoint_status (struct breakpoint *arg0, struct uploaded_tp *arg1)
+dummy_target::get_tracepoint_status (tracepoint *arg0, struct uploaded_tp *arg1)
 {
   tcomplain ();
 }
 
 void
-debug_target::get_tracepoint_status (struct breakpoint *arg0, struct uploaded_tp *arg1)
+debug_target::get_tracepoint_status (tracepoint *arg0, struct uploaded_tp *arg1)
 {
   gdb_printf (gdb_stdlog, "-> %s->get_tracepoint_status (...)\n", this->beneath ()->shortname ());
   this->beneath ()->get_tracepoint_status (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->get_tracepoint_status (", this->beneath ()->shortname ());
-  target_debug_print_struct_breakpoint_p (arg0);
+  target_debug_print_tracepoint_p (arg0);
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_struct_uploaded_tp_p (arg1);
   gdb_puts (")\n", gdb_stdlog);
@@ -4553,9 +4553,9 @@ dummy_target::fetch_x86_xsave_layout ()
 x86_xsave_layout
 debug_target::fetch_x86_xsave_layout ()
 {
-  x86_xsave_layout result;
   gdb_printf (gdb_stdlog, "-> %s->fetch_x86_xsave_layout (...)\n", this->beneath ()->shortname ());
-  result = this->beneath ()->fetch_x86_xsave_layout ();
+  x86_xsave_layout result
+    = this->beneath ()->fetch_x86_xsave_layout ();
   gdb_printf (gdb_stdlog, "<- %s->fetch_x86_xsave_layout (", this->beneath ()->shortname ());
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_x86_xsave_layout (result);

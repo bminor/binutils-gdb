@@ -667,7 +667,7 @@ target_get_trace_status (trace_status *ts)
 }
 
 void
-target_get_tracepoint_status (breakpoint *tp, uploaded_tp *utp)
+target_get_tracepoint_status (tracepoint *tp, uploaded_tp *utp)
 {
   return current_inferior ()->top_target ()->get_tracepoint_status (tp, utp);
 }

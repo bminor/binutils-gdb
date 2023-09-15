@@ -352,7 +352,7 @@ extern void encode_actions_rsp (struct bp_location *tloc,
 				std::vector<std::string> *tdp_actions,
 				std::vector<std::string> *stepping_actions);
 
-extern void validate_actionline (const char *, struct breakpoint *);
+extern void validate_actionline (const char *, tracepoint *);
 extern void validate_trace_state_variable_name (const char *name);
 
 extern struct trace_state_variable *find_trace_state_variable (const char *name);
@@ -367,7 +367,7 @@ extern int encode_source_string (int num, ULONGEST addr,
 
 extern void parse_trace_status (const char *line, struct trace_status *ts);
 
-extern void parse_tracepoint_status (const char *p, struct breakpoint *tp,
+extern void parse_tracepoint_status (const char *p, tracepoint *tp,
 				     struct uploaded_tp *utp);
 
 extern void parse_tracepoint_definition (const char *line,

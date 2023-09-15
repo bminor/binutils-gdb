@@ -911,7 +911,7 @@ public:
 
   int get_trace_status (struct trace_status *ts) override;
 
-  void get_tracepoint_status (struct breakpoint *tp, struct uploaded_tp *utp)
+  void get_tracepoint_status (tracepoint *tp, struct uploaded_tp *utp)
     override;
 
   void trace_stop () override;
@@ -13256,7 +13256,7 @@ remote_target::download_tracepoint (struct bp_location *loc)
   std::vector<std::string> stepping_actions;
   char *pkt;
   struct breakpoint *b = loc->owner;
-  struct tracepoint *t = (struct tracepoint *) b;
+  tracepoint *t = gdb::checked_static_cast<tracepoint *> (b);
   struct remote_state *rs = get_remote_state ();
   int ret;
   const char *err_msg = _("Tracepoint packet too large for target.");
@@ -13675,12 +13675,11 @@ remote_target::get_trace_status (struct trace_status *ts)
 }
 
 void
-remote_target::get_tracepoint_status (struct breakpoint *bp,
+remote_target::get_tracepoint_status (tracepoint *tp,
 				      struct uploaded_tp *utp)
 {
   struct remote_state *rs = get_remote_state ();
   char *reply;
-  struct tracepoint *tp = (struct tracepoint *) bp;
   size_t size = get_remote_packet_size ();
 
   if (tp)
@@ -13700,7 +13699,7 @@ remote_target::get_tracepoint_status (struct breakpoint *bp,
 	  if (reply && *reply)
 	    {
 	      if (*reply == 'V')
-		parse_tracepoint_status (reply + 1, bp, utp);
+		parse_tracepoint_status (reply + 1, tp, utp);
 	    }
 	}
     }
@@ -13715,7 +13714,7 @@ remote_target::get_tracepoint_status (struct breakpoint *bp,
       if (reply && *reply)
 	{
 	  if (*reply == 'V')
-	    parse_tracepoint_status (reply + 1, bp, utp);
+	    parse_tracepoint_status (reply + 1, tp, utp);
 	}
     }
 }

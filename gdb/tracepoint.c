@@ -157,7 +157,7 @@ static std::string trace_stop_notes;
 
 struct collection_list;
 
-static counted_command_line all_tracepoint_actions (struct breakpoint *);
+static counted_command_line all_tracepoint_actions (tracepoint *);
 
 static struct trace_status trace_status;
 
@@ -626,12 +626,11 @@ finalize_tracepoint_aexpr (struct agent_expr *aexpr)
 
 /* worker function */
 void
-validate_actionline (const char *line, struct breakpoint *b)
+validate_actionline (const char *line, tracepoint *t)
 {
   struct cmd_list_element *c;
   const char *tmp_p;
   const char *p;
-  struct tracepoint *t = (struct tracepoint *) b;
 
   /* If EOF is typed, *line is NULL.  */
   if (line == NULL)
@@ -1479,7 +1478,8 @@ encode_actions (struct bp_location *tloc,
   gdbarch_virtual_frame_pointer (tloc->gdbarch,
 				 tloc->address, &frame_reg, &frame_offset);
 
-  counted_command_line actions = all_tracepoint_actions (tloc->owner);
+  tracepoint *t = gdb::checked_static_cast<tracepoint *> (tloc->owner);
+  counted_command_line actions = all_tracepoint_actions (t);
   encode_actions_1 (actions.get (), tloc, frame_reg, frame_offset,
 		    tracepoint_list, stepping_list);
   encode_actions_1 (breakpoint_commands (tloc->owner), tloc,
@@ -1884,8 +1884,11 @@ tstatus_command (const char *args, int from_tty)
 		(long int) (ts->stop_time % 1000000));
 
   /* Now report any per-tracepoint status available.  */
-  for (breakpoint &t : all_tracepoints ())
-    target_get_tracepoint_status (&t, NULL);
+  for (breakpoint &b : all_tracepoints ())
+    {
+      tracepoint *t = gdb::checked_static_cast<tracepoint *> (&b);
+      target_get_tracepoint_status (t, nullptr);
+    }
 }
 
 /* Report the trace status to uiout, in a way suitable for MI, and not
@@ -2751,7 +2754,7 @@ get_traceframe_location (int *stepping_frame_p)
 /* Return the default collect actions of a tracepoint T.  */
 
 static counted_command_line
-all_tracepoint_actions (struct breakpoint *t)
+all_tracepoint_actions (tracepoint *t)
 {
   counted_command_line actions (nullptr, command_lines_deleter ());
 
@@ -2794,7 +2797,8 @@ tdump_command (const char *args, int from_tty)
 
   select_frame (get_current_frame ());
 
-  counted_command_line actions = all_tracepoint_actions (loc->owner);
+  tracepoint *t = gdb::checked_static_cast<tracepoint *> (loc->owner);
+  counted_command_line actions = all_tracepoint_actions (t);
 
   trace_dump_actions (actions.get (), 0, stepping_frame, from_tty);
   trace_dump_actions (breakpoint_commands (loc->owner), 0, stepping_frame,
@@ -3059,7 +3063,7 @@ merge_uploaded_tracepoints (struct uploaded_tp **uploaded_tps)
 
 	  /* Mark this location as already inserted.  */
 	  loc->inserted = 1;
-	  t = (struct tracepoint *) loc->owner;
+	  t = gdb::checked_static_cast<tracepoint *> (loc->owner);
 	  gdb_printf (_("Assuming tracepoint %d is same "
 			"as target's tracepoint %d at %s.\n"),
 		      loc->owner->number, utp->number,
@@ -3368,11 +3372,10 @@ Status line: '%s'\n"), p, line);
 }
 
 void
-parse_tracepoint_status (const char *p, struct breakpoint *bp,
+parse_tracepoint_status (const char *p, tracepoint *tp,
 			 struct uploaded_tp *utp)
 {
   ULONGEST uval;
-  struct tracepoint *tp = (struct tracepoint *) bp;
 
   p = unpack_varlen_hex (p, &uval);
   if (tp)

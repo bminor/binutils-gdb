@@ -585,11 +585,14 @@ mi_cmd_break_commands (const char *command, const char *const *argv, int argc)
       };
 
   if (is_tracepoint (b))
-    break_command = read_command_lines_1 (reader, 1,
-					  [=] (const char *line)
+    {
+      tracepoint *t = gdb::checked_static_cast<tracepoint *> (b);
+      break_command = read_command_lines_1 (reader, 1,
+					    [=] (const char *line)
 					    {
-					      validate_actionline (line, b);
+					      validate_actionline (line, t);
 					    });
+    }
   else
     break_command = read_command_lines_1 (reader, 1, 0);
 

@@ -67,7 +67,7 @@ class tfile_target final : public tracefile_target
   bool get_trace_state_variable_value (int tsv, LONGEST *val) override;
   traceframe_info_up traceframe_info () override;
 
-  void get_tracepoint_status (struct breakpoint *tp,
+  void get_tracepoint_status (tracepoint *tp,
 			      struct uploaded_tp *utp) override;
 };
 
@@ -633,7 +633,7 @@ tfile_target::files_info ()
 }
 
 void
-tfile_target::get_tracepoint_status (struct breakpoint *tp, struct uploaded_tp *utp)
+tfile_target::get_tracepoint_status (tracepoint *tp, struct uploaded_tp *utp)
 {
   /* Other bits of trace status were collected as part of opening the
      trace files, so nothing to do here.  */

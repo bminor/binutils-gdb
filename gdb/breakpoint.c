@@ -1433,7 +1433,7 @@ validate_commands_for_breakpoint (struct breakpoint *b,
 {
   if (is_tracepoint (b))
     {
-      struct tracepoint *t = (struct tracepoint *) b;
+      tracepoint *t = gdb::checked_static_cast<tracepoint *> (b);
       struct command_line *c;
       struct command_line *while_stepping = 0;
 
@@ -1471,7 +1471,7 @@ validate_commands_for_breakpoint (struct breakpoint *b,
 		while_stepping = c;
 	    }
 
-	  validate_actionline (c->line, b);
+	  validate_actionline (c->line, t);
 	}
       if (while_stepping)
 	{
@@ -1645,7 +1645,9 @@ commands_command_1 (const char *arg, int from_tty,
 
 	       auto do_validate = [=] (const char *line)
 				  {
-				    validate_actionline (line, b);
+				    tracepoint *t
+				      = gdb::checked_static_cast<tracepoint *> (b);
+				    validate_actionline (line, t);
 				  };
 	       gdb::function_view<void (const char *)> validator;
 	       if (is_tracepoint (b))
@@ -6757,7 +6759,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 
   if (!part_of_multiple && is_tracepoint (b))
     {
-      struct tracepoint *tp = (struct tracepoint *) b;
+      tracepoint *tp = gdb::checked_static_cast<tracepoint *> (b);
 
       if (tp->traceframe_usage)
 	{
@@ -6789,7 +6791,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 
   if (is_tracepoint (b))
     {
-      struct tracepoint *t = (struct tracepoint *) b;
+      tracepoint *t = gdb::checked_static_cast<tracepoint *> (b);
 
       if (!part_of_multiple && t->pass_count)
 	{
@@ -8654,7 +8656,7 @@ code_breakpoint::code_breakpoint (struct gdbarch *gdbarch_,
   if (type == bp_static_tracepoint
       || type == bp_static_marker_tracepoint)
     {
-      auto *t = gdb::checked_static_cast<struct tracepoint *> (this);
+      auto *t = gdb::checked_static_cast<tracepoint *> (this);
       struct static_tracepoint_marker marker;
 
       if (strace_marker_p (this))
@@ -12817,9 +12819,8 @@ ambiguous_names_p (const bp_location_range &locs)
    precisely because it confuses tools).  */
 
 static struct symtab_and_line
-update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
+update_static_tracepoint (tracepoint *tp, struct symtab_and_line sal)
 {
-  struct tracepoint *tp = (struct tracepoint *) b;
   struct static_tracepoint_marker marker;
   CORE_ADDR pc;
 
@@ -12831,7 +12832,7 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
     {
       if (tp->static_trace_marker_id != marker.str_id)
 	warning (_("static tracepoint %d changed probed marker from %s to %s"),
-		 b->number, tp->static_trace_marker_id.c_str (),
+		 tp->number, tp->static_trace_marker_id.c_str (),
 		 marker.str_id.c_str ());
 
       tp->static_trace_marker_id = std::move (marker.str_id);
@@ -12862,7 +12863,7 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 
 	  warning (_("marker for static tracepoint %d (%s) not "
 		     "found at previous line number"),
-		   b->number, tp->static_trace_marker_id.c_str ());
+		   tp->number, tp->static_trace_marker_id.c_str ());
 
 	  symtab_and_line sal2 = find_pc_line (tpmarker->address, 0);
 	  sym = find_pc_sect_function (tpmarker->address, NULL);
@@ -12888,17 +12889,17 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 	  uiout->field_signed ("line", sal2.line);
 	  uiout->text ("\n");
 
-	  b->first_loc ().line_number = sal2.line;
-	  b->first_loc ().symtab = sym != NULL ? sal2.symtab : NULL;
+	  tp->first_loc ().line_number = sal2.line;
+	  tp->first_loc ().symtab = sym != NULL ? sal2.symtab : NULL;
 
 	  std::unique_ptr<explicit_location_spec> els
 	    (new explicit_location_spec ());
 	  els->source_filename
 	    = xstrdup (symtab_to_filename_for_display (sal2.symtab));
-	  els->line_offset.offset = b->first_loc ().line_number;
+	  els->line_offset.offset = tp->first_loc ().line_number;
 	  els->line_offset.sign = LINE_OFFSET_NONE;
 
-	  b->locspec = std::move (els);
+	  tp->locspec = std::move (els);
 
 	  /* Might be nice to check if function changed, and warn if
 	     so.  */
@@ -13159,7 +13160,10 @@ code_breakpoint::location_spec_to_sals (location_spec *locspec,
 	}
 
       if (type == bp_static_tracepoint)
-	sals[0] = update_static_tracepoint (this, sals[0]);
+	{
+	  tracepoint *t = gdb::checked_static_cast<tracepoint *> (this);
+	  sals[0] = update_static_tracepoint (t, sals[0]);
+	}
 
       *found = 1;
     }
