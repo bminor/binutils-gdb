@@ -14,6 +14,7 @@
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package body Pck is
+   subtype Small_Int is Integer range 0 .. 7;
    type My_Int is range -2147483648 .. 2147483647;
 
 #if CRASHGDB = 16
@@ -74,6 +75,11 @@ package body Pck is
    type My_Int_Array is
      array (Index) of My_Int;
    Arr : My_Int_Array := (others => 0);
+
+   type My_Packed_Array is array (Index) of Small_Int;
+   pragma Pack (My_Packed_Array);
+
+   Packed_Arr : My_Packed_Array := (others => 0);
 
    procedure Foo is
    begin

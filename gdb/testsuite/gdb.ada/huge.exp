@@ -48,45 +48,47 @@ for { set size $max } { $size >= $min } { set size [expr $size / 2] } {
 }
 require {expr $compilation_succeeded}
 
-clean_restart ${testfile}
+foreach_with_prefix varname {Arr Packed_Arr} {
+    clean_restart ${testfile}
 
-save_vars { timeout } {
-    set timeout 30
+    save_vars { timeout } {
+	set timeout 30
 
-    if {![runto "foo"]} {
-	return
-    }
-
-    gdb_test_no_output "set max-value-size unlimited"
-    gdb_test_no_output "maint set per-command space on"
-    set re1 \
-	[list \
-	     [string_to_regexp $] \
-	     $decimal \
-	     " = " \
-	     [string_to_regexp "(0 <repeats "] \
-	     $decimal \
-	     [string_to_regexp " times>)"]]
-    set re2 \
-	[list \
-	     "Space used: $decimal" \
-	     [string_to_regexp " (+"] \
-	     "($decimal) for this command" \
-	     [string_to_regexp ")"]]
-    set re [multi_line [join $re1 ""]  [join $re2 ""]]
-    set space_used -1
-    gdb_test_multiple "print Arr" "print a very large data object" {
-	-re -wrap $re {
-	    set space_used $expect_out(1,string)
-	    pass $gdb_test_name
+	if {![runto "foo"]} {
+	    return
 	}
-    }
 
-    set test "not too much space used"
-    if { $space_used == -1 } {
-	unsupported $test
-    } else {
-	# At 56 passes with and without the fix, so use 55.
-	gdb_assert {$space_used < [expr 55 * 4 * $size] } $test
+	gdb_test_no_output "set max-value-size unlimited"
+	gdb_test_no_output "maint set per-command space on"
+	set re1 \
+	    [list \
+		 [string_to_regexp $] \
+		 $decimal \
+		 " = " \
+		 [string_to_regexp "(0 <repeats "] \
+		 $decimal \
+		 [string_to_regexp " times>)"]]
+	set re2 \
+	    [list \
+		 "Space used: $decimal" \
+		 [string_to_regexp " (+"] \
+		 "($decimal) for this command" \
+		 [string_to_regexp ")"]]
+	set re [multi_line [join $re1 ""]  [join $re2 ""]]
+	set space_used -1
+	gdb_test_multiple "print $varname" "print a very large data object" {
+	    -re -wrap $re {
+		set space_used $expect_out(1,string)
+		pass $gdb_test_name
+	    }
+	}
+
+	set test "not too much space used"
+	if { $space_used == -1 } {
+	    unsupported $test
+	} else {
+	    # At 56 passes with and without the fix, so use 55.
+	    gdb_assert {$space_used < [expr 55 * 4 * $size] } $test
+	}
     }
 }

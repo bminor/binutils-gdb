@@ -150,6 +150,11 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 
   while (i < len && things_printed < options->print_max)
     {
+      /* Both this outer loop and the inner loop that checks for
+	 duplicates may allocate many values.  To avoid using too much
+	 memory, both spots release values as they work.  */
+      scoped_value_mark outer_free_values;
+
       struct value *v0, *v1;
       int i0;
 
@@ -180,6 +185,9 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 					   bitsize, elttype);
       while (1)
 	{
+	  /* Make sure to free any values in the inner loop.  */
+	  scoped_value_mark free_values;
+
 	  i += 1;
 	  if (i >= len)
 	    break;
