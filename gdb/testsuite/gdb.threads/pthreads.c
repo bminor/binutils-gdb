@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <string.h>
 
 static int verbose = 0;
 
@@ -102,6 +103,14 @@ foo (int a, int b, int c)
     printf ("a=%d\n", a);
 }
 
+/* Similar to perror, but use ERR instead of errno.  */
+
+static void
+print_error (const char *ctx, int err)
+{
+  fprintf (stderr, "%s: %s (%d)\n", ctx, strerror (err), err);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -110,38 +119,43 @@ main (int argc, char **argv)
   int t = 0;
   void (*xxx) ();
   pthread_attr_t attr;
+  int res;
 
   if (verbose)
     printf ("pid = %d\n", getpid ());
 
   foo (1, 2, 3);
 
-  if (pthread_attr_init (&attr))
+  res = pthread_attr_init (&attr);
+  if (res != 0)
     {
-      perror ("pthread_attr_init 1");
+      print_error ("pthread_attr_init 1", res);
       exit (1);
     }
 
 #ifdef PTHREAD_SCOPE_SYSTEM
-  if (pthread_attr_setscope (&attr, PTHREAD_SCOPE_SYSTEM))
+  res = pthread_attr_setscope (&attr, PTHREAD_SCOPE_SYSTEM);
+  if (res != 0)
     {
-      perror ("pthread_attr_setscope 1");
+      print_error ("pthread_attr_setscope 1", res);
       exit (1);
     }
 #endif
 
-  if (pthread_create (&tid1, &attr, thread1, (void *) 0xfeedface))
+  res = pthread_create (&tid1, &attr, thread1, (void *) 0xfeedface);
+  if (res != 0)
     {
-      perror ("pthread_create 1");
+      print_error ("pthread_create 1", res);
       exit (1);
     }
   if (verbose)
     printf ("Made thread %ld\n", (long) tid1);
   sleep (1);
 
-  if (pthread_create (&tid2, NULL, thread2, (void *) 0xdeadbeef))
+  res = pthread_create (&tid2, NULL, thread2, (void *) 0xdeadbeef);
+  if (res != 0)
     {
-      perror ("pthread_create 2");
+      print_error ("pthread_create 2", res);
       exit (1);
     }
   if (verbose)
