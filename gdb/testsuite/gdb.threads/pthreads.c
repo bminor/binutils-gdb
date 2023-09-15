@@ -35,7 +35,8 @@ common_routine (int arg)
   static int hits;
   static int full_coverage;
 
-  if (verbose) printf("common_routine (%d)\n", arg);
+  if (verbose)
+    printf ("common_routine (%d)\n", arg);
   hits++;
   switch (arg)
     {
@@ -59,13 +60,15 @@ thread1 (void *arg)
   int i;
   int z = 0;
 
-  if (verbose) printf ("thread1 (%0lx) ; pid = %d\n", (long) arg, getpid ());
-  for (i=1; i <= 10000000; i++)
+  if (verbose)
+    printf ("thread1 (%0lx) ; pid = %d\n", (long) arg, getpid ());
+  for (i = 1; i <= 10000000; i++)
     {
-      if (verbose) printf("thread1 %ld\n", (long) pthread_self ());
+      if (verbose)
+	printf ("thread1 %ld\n", (long) pthread_self ());
       z += i;
       common_routine (1);
-      sleep(1);
+      sleep (1);
     }
   return (void *) 0;
 }
@@ -76,15 +79,17 @@ thread2 (void * arg)
   int i;
   int k = 0;
 
-  if (verbose) printf ("thread2 (%0lx) ; pid = %d\n", (long) arg, getpid ());
-  for (i=1; i <= 10000000; i++)
+  if (verbose)
+    printf ("thread2 (%0lx) ; pid = %d\n", (long) arg, getpid ());
+  for (i = 1; i <= 10000000; i++)
     {
-      if (verbose) printf("thread2 %ld\n", (long) pthread_self ());
+      if (verbose)
+	printf ("thread2 %ld\n", (long) pthread_self ());
       k += i;
       common_routine (2);
-      sleep(1);
+      sleep (1);
     }
-  sleep(100);
+  sleep (100);
   return (void *) 0;
 }
 
@@ -93,7 +98,8 @@ foo (int a, int b, int c)
 {
   int d, e, f;
 
-  if (verbose) printf("a=%d\n", a);
+  if (verbose)
+    printf ("a=%d\n", a);
 }
 
 int
@@ -105,7 +111,8 @@ main (int argc, char **argv)
   void (*xxx) ();
   pthread_attr_t attr;
 
-  if (verbose) printf ("pid = %d\n", getpid());
+  if (verbose)
+    printf ("pid = %d\n", getpid ());
 
   foo (1, 2, 3);
 
@@ -128,7 +135,8 @@ main (int argc, char **argv)
       perror ("pthread_create 1");
       exit (1);
     }
-  if (verbose) printf ("Made thread %ld\n", (long) tid1);
+  if (verbose)
+    printf ("Made thread %ld\n", (long) tid1);
   sleep (1);
 
   if (pthread_create (&tid2, NULL, thread2, (void *) 0xdeadbeef))
@@ -136,18 +144,19 @@ main (int argc, char **argv)
       perror ("pthread_create 2");
       exit (1);
     }
-  if (verbose) printf("Made thread %ld\n", (long) tid2);
+  if (verbose)
+    printf ("Made thread %ld\n", (long) tid2);
 
   sleep (1);
 
   for (j = 1; j <= 10000000; j++)
     {
-      if (verbose) printf("top %ld\n", (long) pthread_self ());
+      if (verbose)
+	printf ("top %ld\n", (long) pthread_self ());
       common_routine (0);
-      sleep(1);
+      sleep (1);
       t += j;
     }
   
-  exit(0);
+  exit (0);
 }
-
