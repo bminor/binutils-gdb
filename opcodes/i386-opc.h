@@ -147,8 +147,6 @@ enum i386_cpu
   CpuVMFUNC,
   /* Intel MPX Instructions required  */
   CpuMPX,
-  /* 64bit support available, used by -march= in assembler.  */
-  CpuLM,
   /* RDRSEED instruction required.  */
   CpuRDSEED,
   /* Multi-presisionn add-carry instructions are required.  */
@@ -309,6 +307,8 @@ enum i386_cpu
   Cpu3dnow,
   /* 3dnow! Extensions support required */
   Cpu3dnowA,
+  /* 64bit support required  */
+  Cpu64,
   /* AVX support required */
   CpuAVX,
   /* HLE support required */
@@ -317,8 +317,6 @@ enum i386_cpu
   CpuAVX512F,
   /* Intel AVX-512 VL Instructions support required.  */
   CpuAVX512VL,
-  /* 64bit support required  */
-  Cpu64,
   /* Not supported in the 64bit mode  */
   CpuNo64,
 
@@ -349,12 +347,12 @@ enum i386_cpu
 		   cpu387:1, \
 		   cpu3dnow:1, \
 		   cpu3dnowa:1, \
+		   cpu64:1, \
 		   cpuavx:1, \
 		   cpuhle:1, \
 		   cpuavx512f:1, \
 		   cpuavx512vl:1, \
-      /* NOTE: These two fields need to remain last and in this order. */ \
-		   cpu64:1, \
+      /* NOTE: This field needs to remain last. */ \
 		   cpuno64:1
 
 typedef union i386_cpu_attr
@@ -435,7 +433,6 @@ typedef union i386_cpu_flags
       unsigned int cpuinvpcid:1;
       unsigned int cpuvmfunc:1;
       unsigned int cpumpx:1;
-      unsigned int cpulm:1;
       unsigned int cpurdseed:1;
       unsigned int cpuadx:1;
       unsigned int cpuprfchw:1;

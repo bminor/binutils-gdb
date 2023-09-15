@@ -2612,7 +2612,7 @@ update_code_flag (int value, int check)
 {
   PRINTF_LIKE ((*as_error)) = check ? as_fatal : as_bad;
 
-  if (value == CODE_64BIT && !cpu_arch_flags.bitfield.cpulm )
+  if (value == CODE_64BIT && !cpu_arch_flags.bitfield.cpu64 )
     {
       as_error (_("64bit mode not supported on `%s'."),
 		cpu_arch_name ? cpu_arch_name : default_arch);
@@ -2907,7 +2907,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	    {
 	      check_cpu_arch_compatible (string, cpu_arch[j].enable);
 
-	      if (flag_code == CODE_64BIT && !cpu_arch[j].enable.bitfield.cpulm )
+	      if (flag_code == CODE_64BIT && !cpu_arch[j].enable.bitfield.cpu64 )
 		{
 		  as_bad (_("64bit mode not supported on `%s'."),
 			  cpu_arch[j].name);
@@ -13986,7 +13986,7 @@ static bool check_register (const reg_entry *r)
     }
 
   if (((r->reg_flags & (RegRex64 | RegRex)) || r->reg_type.bitfield.qword)
-      && (!cpu_arch_flags.bitfield.cpulm
+      && (!cpu_arch_flags.bitfield.cpu64
 	  || r->reg_type.bitfield.class != RegCR
 	  || dot_insn ())
       && flag_code != CODE_64BIT)

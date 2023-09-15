@@ -262,7 +262,7 @@ static const dependency isa_dependencies[] =
 };
 
 /* This array is populated as process_i386_initializers() walks cpu_flags[].  */
-static unsigned char isa_reverse_deps[Cpu64][Cpu64];
+static unsigned char isa_reverse_deps[CpuMax][CpuMax];
 
 typedef struct bitfield
 {
@@ -325,7 +325,6 @@ static bitfield cpu_flags[] =
   BITFIELD (LWP),
   BITFIELD (BMI),
   BITFIELD (TBM),
-  BITFIELD (LM),
   BITFIELD (Movbe),
   BITFIELD (CX16),
   BITFIELD (LAHF_SAHF),
@@ -726,7 +725,10 @@ add_isa_dependencies (bitfield *flags, const char *f, int value,
       *strchr (str, ':') = '\0';
       isa = str;
     }
-  for (i = 0; i < Cpu64; ++i)
+  /* isa_dependencies[] prefers "LM" over "64".  */
+  else if (!strcmp (f, "LM"))
+    isa = "64";
+  for (i = 0; i < CpuMax; ++i)
     if (strcasecmp (flags[i].name, isa) == 0)
       {
 	flags[i].value = value;
@@ -872,10 +874,10 @@ process_i386_cpu_flag (FILE *table, char *flag,
       else
 	next = flag + 1;
 
-      /* First we turn on everything except for cpu64, cpuno64, and - if
+      /* First we turn on everything except for cpuno64 and - if
          present - the padding field.  */
       for (i = 0; i < ARRAY_SIZE (flags); i++)
-	if (flags[i].position < Cpu64)
+	if (flags[i].position < CpuNo64)
 	  flags[i].value = 1;
 
       /* Turn off selective bits.  */
@@ -1968,7 +1970,7 @@ process_i386_initializers (void)
 
   process_copyright (fp);
 
-  for (i = 0; i < Cpu64; i++)
+  for (i = 0; i < CpuMax; i++)
     process_i386_cpu_flag (fp, "0", cpu_flags[i].name, "", "  ", -1, i);
 
   for (i = 0; i < ARRAY_SIZE (isa_dependencies); i++)
