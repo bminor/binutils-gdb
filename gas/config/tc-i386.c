@@ -2609,7 +2609,21 @@ add_prefix (unsigned int prefix)
 static void
 update_code_flag (int value, int check)
 {
-  PRINTF_LIKE ((*as_error));
+  PRINTF_LIKE ((*as_error)) = check ? as_fatal : as_bad;
+
+  if (value == CODE_64BIT && !cpu_arch_flags.bitfield.cpulm )
+    {
+      as_error (_("64bit mode not supported on `%s'."),
+		cpu_arch_name ? cpu_arch_name : default_arch);
+      return;
+    }
+
+  if (value == CODE_32BIT && !cpu_arch_flags.bitfield.cpui386)
+    {
+      as_error (_("32bit mode not supported on `%s'."),
+		cpu_arch_name ? cpu_arch_name : default_arch);
+      return;
+    }
 
   flag_code = (enum flag_code) value;
   if (flag_code == CODE_64BIT)
@@ -2622,24 +2636,7 @@ update_code_flag (int value, int check)
       cpu_arch_flags.bitfield.cpu64 = 0;
       cpu_arch_flags.bitfield.cpuno64 = 1;
     }
-  if (value == CODE_64BIT && !cpu_arch_flags.bitfield.cpulm )
-    {
-      if (check)
-	as_error = as_fatal;
-      else
-	as_error = as_bad;
-      (*as_error) (_("64bit mode not supported on `%s'."),
-		   cpu_arch_name ? cpu_arch_name : default_arch);
-    }
-  if (value == CODE_32BIT && !cpu_arch_flags.bitfield.cpui386)
-    {
-      if (check)
-	as_error = as_fatal;
-      else
-	as_error = as_bad;
-      (*as_error) (_("32bit mode not supported on `%s'."),
-		   cpu_arch_name ? cpu_arch_name : default_arch);
-    }
+
   stackop_size = '\0';
 }
 
