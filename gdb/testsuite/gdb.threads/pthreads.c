@@ -27,8 +27,7 @@
 static int verbose = 0;
 
 static void
-common_routine (arg)
-     int arg;
+common_routine (int arg)
 {
   static int from_thread1;
   static int from_thread2;
@@ -90,8 +89,7 @@ thread2 (void * arg)
 }
 
 void
-foo (a, b, c)
-     int a, b, c;
+foo (int a, int b, int c)
 {
   int d, e, f;
 
@@ -99,9 +97,7 @@ foo (a, b, c)
 }
 
 int
-main(argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   pthread_t tid1, tid2;
   int j;
