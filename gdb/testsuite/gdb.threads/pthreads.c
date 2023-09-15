@@ -24,6 +24,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
 static int verbose = 0;
 
@@ -135,7 +136,7 @@ main (int argc, char **argv)
 
 #ifdef PTHREAD_SCOPE_SYSTEM
   res = pthread_attr_setscope (&attr, PTHREAD_SCOPE_SYSTEM);
-  if (res != 0)
+  if (res != 0 && res != ENOTSUP)
     {
       print_error ("pthread_attr_setscope 1", res);
       exit (1);
