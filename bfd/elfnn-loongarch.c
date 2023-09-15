@@ -1368,6 +1368,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
+      if (discarded_section (p->sec))
+	continue;
       asection *sreloc = elf_section_data (p->sec)->sreloc;
       sreloc->size += p->count * sizeof (ElfNN_External_Rela);
     }
