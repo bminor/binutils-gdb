@@ -190,11 +190,6 @@ with_test_prefix "exec changes on disk" {
 
     runto_main
 
-    # There is currently an issue where the executable_changed event
-    # will trigger twice during an inferior restart.  This should be
-    # fixed in the next commit, at which point this kfail can be
-    # removed.
-    setup_kfail "????" *-*-*
     check_exec_change [string_to_regexp $binfile1] True \
 	"check executable_changed state after exec changed on disk"
 }

@@ -2457,10 +2457,14 @@ remove_symbol_file_command (const char *args, int from_tty)
 void
 reread_symbols (int from_tty)
 {
-  long new_modtime;
-  struct stat new_statbuf;
-  int res;
   std::vector<struct objfile *> new_objfiles;
+
+  /* Check to see if the executable has changed, and if so reopen it.  The
+     executable might not be in the list of objfiles (if the user set
+     different values for 'exec-file' and 'symbol-file'), and even if it
+     is, then we use a separate timestamp (within the program_space) to
+     indicate when the executable was last reloaded.  */
+  reopen_exec_file ();
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
@@ -2475,6 +2479,8 @@ reread_symbols (int from_tty)
 	 `ar', often called a `static library' on most systems, though
 	 a `shared library' on AIX is also an archive), then you should
 	 stat on the archive name, not member name.  */
+      int res;
+      struct stat new_statbuf;
       if (objfile->obfd->my_archive)
 	res = stat (bfd_get_filename (objfile->obfd->my_archive), &new_statbuf);
       else
@@ -2486,7 +2492,7 @@ reread_symbols (int from_tty)
 		      objfile_name (objfile));
 	  continue;
 	}
-      new_modtime = new_statbuf.st_mtime;
+      time_t new_modtime = new_statbuf.st_mtime;
       if (new_modtime != objfile->mtime)
 	{
 	  gdb_printf (_("`%ps' has changed; re-reading symbols.\n"),
@@ -2507,15 +2513,6 @@ reread_symbols (int from_tty)
 
 	  /* We need to do this whenever any symbols go away.  */
 	  clear_symtab_users_cleanup defer_clear_users (0);
-
-	  if (current_program_space->exec_bfd () != NULL
-	      && filename_cmp (bfd_get_filename (objfile->obfd.get ()),
-			       bfd_get_filename (current_program_space->exec_bfd ())) == 0)
-	    {
-	      /* Reload EXEC_BFD without asking anything.  */
-
-	      exec_file_attach (bfd_get_filename (objfile->obfd.get ()), 0);
-	    }
 
 	  /* Keep the calls order approx. the same as in free_objfile.  */
 
