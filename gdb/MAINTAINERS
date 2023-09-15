@@ -240,6 +240,9 @@ the native maintainer when resolving ABI issues.
 
 	alpha		--target=alpha-elf ,-Werror
 
+	amdgpu		--target=amdgcn*-*-*
+			Lancelot Six		lancelot.six@amd.com
+
 	arc		--target=arc-elf
 			Shahab Vahedi		shahab@synopsys.com
 
