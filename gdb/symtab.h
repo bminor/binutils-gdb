@@ -2479,7 +2479,7 @@ extern symbol *find_function_alias_target (bound_minimal_symbol msymbol);
    the following structs is returned.  */
 struct symbol_search
 {
-  symbol_search (int block_, struct symbol *symbol_)
+  symbol_search (block_enum block_, struct symbol *symbol_)
     : block (block_),
       symbol (symbol_)
   {
@@ -2487,7 +2487,7 @@ struct symbol_search
     msymbol.objfile = nullptr;
   }
 
-  symbol_search (int block_, struct minimal_symbol *minsym,
+  symbol_search (block_enum block_, struct minimal_symbol *minsym,
 		 struct objfile *objfile)
     : block (block_),
       symbol (nullptr)
@@ -2506,9 +2506,9 @@ struct symbol_search
     return compare_search_syms (*this, other) == 0;
   }
 
-  /* The block in which the match was found.  Could be, for example,
-     STATIC_BLOCK or GLOBAL_BLOCK.  */
-  int block;
+  /* The block in which the match was found.  Either STATIC_BLOCK or
+     GLOBAL_BLOCK.  */
+  block_enum block;
 
   /* Information describing what was found.
 
