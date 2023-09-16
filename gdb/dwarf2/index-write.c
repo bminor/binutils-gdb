@@ -137,7 +137,7 @@ public:
   }
 
   /* Return the size of the buffer.  */
-  size_t size () const
+  virtual size_t size () const
   {
     return m_vec.size ();
   }
@@ -1083,7 +1083,7 @@ write_gdbindex_1 (FILE *out_file,
 {
   data_buf contents;
   const offset_type size_of_header = 6 * sizeof (offset_type);
-  size_t total_len = size_of_header;
+  uint64_t total_len = size_of_header;
 
   /* The version number.  */
   contents.append_offset (8);
@@ -1116,6 +1116,9 @@ write_gdbindex_1 (FILE *out_file,
   size_t max_size = ~(offset_type) 0;
   if (total_len > max_size)
     error (_("gdb-index maximum file size of %zu exceeded"), max_size);
+
+  if (out_file == nullptr)
+    return;
 
   contents.file_write (out_file);
   cu_list.file_write (out_file);
@@ -1537,10 +1540,87 @@ save_gdb_index_command (const char *arg, int from_tty)
     }
 }
 
+#if GDB_SELF_TEST
+#include "gdbsupport/selftest.h"
+
+namespace selftests {
+
+class pretend_data_buf : public data_buf
+{
+public:
+  /* Set the pretend size.  */
+  void set_pretend_size (size_t s) {
+    m_pretend_size = s;
+  }
+
+  /* Override size method of data_buf, returning the pretend size instead.  */
+  size_t size () const override {
+    return m_pretend_size;
+  }
+
+private:
+  size_t m_pretend_size = 0;
+};
+
+static void
+gdb_index ()
+{
+  pretend_data_buf cu_list;
+  pretend_data_buf types_cu_list;
+  pretend_data_buf addr_vec;
+  pretend_data_buf symtab_vec;
+  pretend_data_buf constant_pool;
+
+  const size_t size_of_header = 6 * sizeof (offset_type);
+
+  /* Test that an overly large index will throw an error.  */
+  symtab_vec.set_pretend_size (~(offset_type)0 - size_of_header);
+  constant_pool.set_pretend_size (1);
+
+  bool saw_exception = false;
+  try
+    {
+      write_gdbindex_1 (nullptr, cu_list, types_cu_list, addr_vec,
+			symtab_vec, constant_pool);
+    }
+  catch (const gdb_exception_error &e)
+    {
+      SELF_CHECK (e.reason == RETURN_ERROR);
+      SELF_CHECK (e.error == GENERIC_ERROR);
+      SELF_CHECK (e.message->find (_("gdb-index maximum file size of"))
+		  != std::string::npos);
+      SELF_CHECK (e.message->find (_("exceeded")) != std::string::npos);
+      saw_exception = true;
+    }
+  SELF_CHECK (saw_exception);
+
+  /* Test that the largest possible index will not throw an error.  */
+  constant_pool.set_pretend_size (0);
+
+  saw_exception = false;
+  try
+    {
+      write_gdbindex_1 (nullptr, cu_list, types_cu_list, addr_vec,
+			symtab_vec, constant_pool);
+    }
+  catch (const gdb_exception_error &e)
+    {
+      saw_exception = true;
+    }
+  SELF_CHECK (!saw_exception);
+}
+
+} /* selftests namespace.  */
+#endif
+
 void _initialize_dwarf_index_write ();
 void
 _initialize_dwarf_index_write ()
 {
+#if GDB_SELF_TEST
+  selftests::register_test ("gdb_index", selftests::gdb_index);
+#endif
+
   cmd_list_element *c = add_cmd ("gdb-index", class_files,
 				 save_gdb_index_command, _("\
 Save a gdb-index file.\n\
