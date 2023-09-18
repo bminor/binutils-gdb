@@ -342,8 +342,6 @@ private:
   int m_traceframe_number;
 };
 
-void free_actions (struct breakpoint *);
-
 extern const char *decode_agent_options (const char *exp, int *trace_string);
 
 extern void encode_actions (struct bp_location *tloc,
