@@ -340,7 +340,7 @@ static struct loongarch_opcode loongarch_macro_opcodes[] =
   { 0, 0, "la.tls.gd",	"r,l",	  INSN_LA_TLS_GD64,		0 },
   { 0, 0, "la.tls.gd",	"r,l",	  INSN_LA_TLS_GD64_LARGE_ABS,	0 },
   { 0, 0, "la.tls.gd",	"r,r,l",  INSN_LA_TLS_GD64_LARGE_PCREL,	0 },
-
+  { 0, 0, "pcaddi",	"r,la",	  "pcaddi %1, %%pcrel_20(%2)",	&LARCH_opts.ase_ilp32, 0, 0 },
   { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 

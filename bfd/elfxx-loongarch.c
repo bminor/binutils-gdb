@@ -1415,7 +1415,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 NULL,					/* adjust_reloc_bits.  */
 	 NULL),					/* larch_reloc_type_name.  */
 
-  /* pcala_hi20 + pcala_lo12 relaxed to pcrel20_s2.  */
+  /* For pcaddi and pcala_hi20 + pcala_lo12 can relax to pcrel_20.  */
   LOONGARCH_HOWTO (R_LARCH_PCREL20_S2,		/* type (103).  */
 	 2,					/* rightshift.  */
 	 4,					/* size.  */
@@ -1431,7 +1431,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 false,					/* pcrel_offset.  */
 	 BFD_RELOC_LARCH_PCREL20_S2,		/* bfd_reloc_code_real_type.  */
 	 reloc_sign_bits,			/* adjust_reloc_bits.  */
-	 NULL),					/* larch_reloc_type_name.  */
+	 "pcrel_20"),				/* larch_reloc_type_name.  */
 
   /* Canonical Frame Address.  */
   LOONGARCH_HOWTO (R_LARCH_CFA,			/* type (104).  */
