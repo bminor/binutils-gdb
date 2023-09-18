@@ -1,3 +1,8 @@
+2023-09-18  Jacob Navia  <jacob@jacob.remcomp.fr>
+
+	* config/tc-riscv.c (riscv_ip_hardcode): Fully initialise the
+	allocated riscv_opcode structure.
+
 2023-08-17  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config/tc-bpf.c (check_immediate_overflow): New function.

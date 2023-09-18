@@ -3718,7 +3718,7 @@ riscv_ip_hardcode (char *str,
   if (*input_line_pointer != '\0')
     return _("unrecognized values");
 
-  insn = XNEW (struct riscv_opcode);
+  insn = XCNEW (struct riscv_opcode);
   insn->match = values[num - 1];
   create_insn (ip, insn);
   unsigned int bytes = riscv_insn_length (insn->match);
