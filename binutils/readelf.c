@@ -13853,7 +13853,7 @@ display_lto_symtab (Filedata *           filedata,
     return false;
 
   /* Look for extended data for the symbol table.  */
-  Elf_Internal_Shdr * ext;
+  Elf_Internal_Shdr * ext = NULL;
   void * ext_data_orig = NULL;
   char * ext_data = NULL;
   char * ext_data_end = NULL;
