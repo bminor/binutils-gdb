@@ -9212,9 +9212,9 @@ Same as using with no arguments.
 Print lines just before the lines last printed.
 
 @item list .
-Print the lines surrounding the location that is where the inferior
-is stopped.  If the inferior is not running, print around the main
-function instead.
+Print the lines surrounding the point of execution within the
+currently selected frame.  If the inferior is not running, print lines
+around the start of the main function instead.
 @end table
 
 @cindex @code{list}, how many lines to display

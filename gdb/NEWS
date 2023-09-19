@@ -90,8 +90,9 @@
   expression parser.
 
 * The 'list' command now accepts '.' as an argument, which tells GDB to
-  print the location where the inferior is stopped.  If the inferior hasn't
-  started yet, the command will print around the main function.
+  print the location around the point of execution within the current frame.
+  If the inferior hasn't started yet, the command will print around the
+  beginning of the 'main' function.
 
 * Using the 'list' command with no arguments in a situation where the
   command would attempt to list past the end of the file now warns the

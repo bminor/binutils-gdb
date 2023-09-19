@@ -402,18 +402,15 @@ proc test_list_invalid_args {} {
 
 proc test_list_current_location {} {
     global binfile
-    # If the first "list" command that GDB runs is "list ." GDB may be
-    # unable to recognize that the inferior isn't running, so we should
-    # reload the inferior to test that condition.
-    clean_restart
+    # Reload the inferior to test "list ." before the inferior is started.
     gdb_file_cmd ${binfile}
 
-    # Ensure that we are printing 10 lines
+    # Ensure that we are printing 10 lines.
     if {![set_listsize 10]} {
 	return
     }
 
-    # First guarantee that GDB prints around the main function correctly
+    # First guarantee that GDB prints around the main function correctly.
     gdb_test "list ." \
 	"1.*\r\n2\[ \t\]+\r\n3\[ \t\]+int main \[)(\]+.*5\[ \t\]+int x;.*" \
 	"list . with inferior not running"
@@ -423,17 +420,22 @@ proc test_list_current_location {} {
 	return
     }
 
-    # Walk forward some lines
+    # Walk forward some lines.
     gdb_test "until 15" ".*15.*foo.*"
 
     # Test that the correct location is printed and that
     # using just "list" will print the following lines.
-    gdb_test "list ." ".*" "list current line after starting"
-    gdb_test "list" ".*" "confirm we are printing the following lines"
+    gdb_test "list ." "10\[ \t\]+foo \(.*\);.*19\[ \t\]+foo \(.*\);" \
+	"list current line after starting"
+    gdb_test "list" "20\[ \t\]+foo \(.*\);.*29\[ \t\]+foo \(.*\);" \
+	"confirm we are printing the following lines"
 
     # Test that list . will reset to current location
-    gdb_test "list ." ".*" "list around current line again"
-    gdb_test " " ".*" "testing repeated invocations with GDB's auto-repeat"
+    # and that an empty line lists the following lines.
+    gdb_test "list ." "10\[ \t\]+foo \(.*\);.*19\[ \t\]+foo \(.*\);" \
+	"list around current line again"
+    gdb_test " " "20\[ \t\]+foo \(.*\);.*29\[ \t\]+foo \(.*\);" \
+	"testing repeated invocations with GDB's auto-repeat"
 }
 
 clean_restart

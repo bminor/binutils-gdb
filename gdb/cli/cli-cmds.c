@@ -1272,10 +1272,10 @@ list_command (const char *arg, int from_tty)
 	  print_source_lines (cursal.symtab, range, 0);
 	}
 
-      /* "l ." lists the default location again.  */
+      /* "list ." lists the default location again.  */
       else if (arg[0] == '.')
 	{
-	  try
+	  if (target_has_stack ())
 	    {
 	      /* Find the current line by getting the PC of the currently
 		 selected frame, and finding the line associated to it.  */
@@ -1283,19 +1283,19 @@ list_command (const char *arg, int from_tty)
 	      CORE_ADDR curr_pc = get_frame_pc (frame);
 	      cursal = find_pc_line (curr_pc, 0);
 	    }
-	  catch (const gdb_exception &e)
+	  else
 	    {
-	      /* If there was an exception above, it means the inferior
-		 is not running, so reset the current source location to
-		 the default.  */
+	      /* The inferior is not running, so reset the current source
+		 location to the default (usually the main function).  */
 	      clear_current_source_symtab_and_line ();
 	      set_default_source_symtab_and_line ();
 	      cursal = get_current_source_symtab_and_line ();
 	    }
 	  list_around_line (arg, cursal);
-	  /* Advance argument so just pressing "enter" after using "list ."
+	  /* Set the repeat args so just pressing "enter" after using "list ."
 	     will print the following lines instead of the same lines again. */
-	  arg++;
+	  if (from_tty)
+	    set_repeat_arguments ("");
 	}
 
       return;
@@ -2805,9 +2805,9 @@ and send its output to SHELL_COMMAND."));
     = add_com ("list", class_files, list_command, _("\
 List specified function or line.\n\
 With no argument, lists ten more lines after or around previous listing.\n\
-\"list .\" lists ten lines arond where the inferior is stopped.\n\
 \"list +\" lists the ten lines following a previous ten-line listing.\n\
 \"list -\" lists the ten lines before a previous ten-line listing.\n\
+\"list .\" lists ten lines around the point of execution in the current frame.\n\
 One argument specifies a line, and ten lines are listed around that line.\n\
 Two arguments with comma between specify starting and ending lines to list.\n\
 Lines can be specified in these ways:\n\
