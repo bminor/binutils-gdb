@@ -274,21 +274,21 @@ proc check_qcs {} {
     set number "\[0-9]\+"
 
     # Check -c (continue) and -s (silently continue) flags.
-    gdb_test "thread apply 2-3 p notfound" \
+    gdb_test "thread apply $::thread1_id $::thread2_id p notfound" \
 	[multi_line \
 	     "" \
-	     "Thread 2 ${any}" \
+	     "Thread $::thread1_id ${any}" \
 	     "No symbol \\\"notfound\\\" in current context." \
 	    ] \
 	"run a failing command that aborts thread apply"
 
-    gdb_test "thread apply 2-3 -c p notfound" \
+    gdb_test "thread apply $::thread1_id $::thread2_id -c p notfound" \
 	[multi_line \
 	     "" \
-	     "Thread 2 ${any}" \
+	     "Thread $::thread1_id ${any}" \
 	     "No symbol \\\"notfound\\\" in current context." \
 	     "" \
-	     "Thread 3 ${any}" \
+	     "Thread $::thread2_id ${any}" \
 	     "No symbol \\\"notfound\\\" in current context." \
 	    ] \
 	"run a failing command, -c to continue"
@@ -302,11 +302,11 @@ proc check_qcs {} {
 		gdb_test $cmd \
 		    [multi_line \
 			 "" \
-			 "Thread 3 ${any}" \
+			 "Thread $::thread2_id ${any}" \
 			 "#${number}${ws}${any} in thread2 ${any}" \
 			 "\\\$\[0-9]+ = ${number}${any}" \
 			 "" \
-			 "Thread 2 ${any}" \
+			 "Thread $::thread1_id ${any}" \
 			 "#${number}${ws}${any} in thread1 ${any}" \
 			 "\\\$\[0-9]+ = ${number}${any}" \
 			] \
