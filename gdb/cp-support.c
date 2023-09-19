@@ -1498,9 +1498,9 @@ cp_lookup_rtti_type (const char *name, const struct block *block)
   struct symbol * rtti_sym;
   struct type * rtti_type;
 
-  /* Use VAR_DOMAIN here as NAME may be a typedef.  PR 18141, 18417.
-     Classes "live" in both STRUCT_DOMAIN and VAR_DOMAIN.  */
-  rtti_sym = lookup_symbol (name, block, SEARCH_VFT, NULL).symbol;
+  rtti_sym = lookup_symbol (name, block,
+			    SEARCH_TYPE_DOMAIN | SEARCH_STRUCT_DOMAIN,
+			    nullptr).symbol;
 
   if (rtti_sym == NULL)
     {
