@@ -130,3 +130,13 @@ GDB_PY_DEFINE_EVENT_TYPE (executable_changed,
 			  "ExecutableChangedEvent",
 			  "GDB executable changed event",
 			  event_object_type);
+
+GDB_PY_DEFINE_EVENT_TYPE (new_progspace,
+			  "NewProgspaceEvent",
+			  "GDB new Progspace event object",
+			  event_object_type);
+
+GDB_PY_DEFINE_EVENT_TYPE (free_progspace,
+			  "FreeProgspaceEvent",
+			  "GDB free Progspace event object",
+			  event_object_type);

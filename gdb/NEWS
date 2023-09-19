@@ -319,6 +319,13 @@ show tui mouse-events
      gdb.Progspace) and 'reload' (a Boolean) attributes.  This event
      is emitted when gdb.Progspace.executable_filename changes.
 
+  ** New event registries gdb.events.new_progspace and
+     gdb.events.free_progspace, these emit NewProgspaceEvent and
+     FreeProgspaceEvent event types respectively.  Both of these event
+     types have a single 'progspace' attribute, which is the
+     gdb.Progspace that is either being added to GDB, or removed from
+     GDB.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.

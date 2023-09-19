@@ -643,10 +643,73 @@ gdbpy_executable_changed (struct program_space *pspace, bool reload_p)
       gdbpy_print_stack ();
 }
 
+/* Helper function to emit NewProgspaceEvent (when ADDING_P is true) or
+   FreeProgspaceEvent events (when ADDING_P is false).  */
+
+static void
+gdbpy_program_space_event (program_space *pspace, bool adding_p)
+{
+  if (!gdb_python_initialized)
+    return;
+
+  gdbpy_enter enter_py;
+
+  eventregistry_object *registry;
+  PyTypeObject *event_type;
+  if (adding_p)
+    {
+      registry = gdb_py_events.new_progspace;
+      event_type = &new_progspace_event_object_type;
+    }
+  else
+    {
+      registry = gdb_py_events.free_progspace;
+      event_type = &free_progspace_event_object_type;
+    }
+
+  if (evregpy_no_listeners_p (registry))
+    return;
+
+  gdbpy_ref<> pspace_obj = pspace_to_pspace_object (pspace);
+  if (pspace_obj == nullptr)
+    {
+      gdbpy_print_stack ();
+      return;
+    }
+
+  gdbpy_ref<> event = create_event_object (event_type);
+  if (event == nullptr
+      || evpy_add_attribute (event.get (), "progspace",
+			     pspace_obj.get ()) < 0
+      || evpy_emit_event (event.get (), registry) < 0)
+    gdbpy_print_stack ();
+}
+
+/* Emit a NewProgspaceEvent to indicate PSPACE has been created.  */
+
+static void
+gdbpy_new_program_space_event (program_space *pspace)
+{
+  gdbpy_program_space_event (pspace, true);
+}
+
+/* Emit a FreeProgspaceEvent to indicate PSPACE is just about to be removed
+   from GDB.  */
+
+static void
+gdbpy_free_program_space_event (program_space *pspace)
+{
+  gdbpy_program_space_event (pspace, false);
+}
+
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_pspace (void)
 {
   gdb::observers::executable_changed.attach (gdbpy_executable_changed,
+					     "py-progspace");
+  gdb::observers::new_program_space.attach (gdbpy_new_program_space_event,
+					    "py-progspace");
+  gdb::observers::free_program_space.attach (gdbpy_free_program_space_event,
 					     "py-progspace");
 
   if (PyType_Ready (&pspace_object_type) < 0)

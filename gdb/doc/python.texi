@@ -3962,6 +3962,35 @@ command, @value{GDBN} updates both of these fields, but the executable
 file is updated first, so when this event is emitted, the executable
 filename will have changed, but the symbol filename might still hold
 its previous value.
+
+@item events.new_progspace
+This is emitted when @value{GDBN} adds a new program space
+(@pxref{Progspaces In Python,,Program Spaces In Python}).  The event
+is of type @code{gdb.NewProgspaceEvent}, and has a single read-only
+attribute:
+
+@defvar NewProgspaceEvent.progspace
+The @code{gdb.Progspace} that was added to @value{GDBN}.
+@end defvar
+
+No @code{NewProgspaceEvent} is emitted for the very first program
+space, which is assigned to the first inferior.  This first program
+space is created within @value{GDBN} before any Python scripts are
+sourced.
+
+@item events.free_progspace
+This is emitted when @value{GDBN} removes a program space
+(@pxref{Progspaces In Python,,Program Spaces In Python}), for example
+as a result of the @kbd{remove-inferiors} command
+(@pxref{remove_inferiors_cli,,@kbd{remove-inferiors}}).  The event is
+of type @code{gdb.FreeProgspaceEvent}, and has a single read-only
+attribute:
+
+@defvar FreeProgspaceEvent.progspace
+The @code{gdb.Progspace} that is about to be removed from
+@value{GDBN}.
+@end defvar
+
 @end table
 
 @node Threads In Python
