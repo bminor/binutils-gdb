@@ -268,14 +268,19 @@ cp_search_static_and_baseclasses (const char *name,
   const char *nested = name + prefix_len + 2;
 
   /* Lookup the scope symbol.  If none is found, there is nothing more
-     that can be done.  SCOPE could be a namespace, so always look in
-     VAR_DOMAIN.  This works for classes too because of
-     symbol_matches_domain (which should be replaced with something
-     else, but it's what we have today).  */
-  block_symbol scope_sym = lookup_symbol_in_static_block (scope.c_str (),
-							  block, SEARCH_VFT);
+     that can be done.  SCOPE could be a namespace, a class, or even a
+     function.  This code is also used by Fortran, so modules are
+     included in the search as well.  */
+  block_symbol scope_sym
+    = lookup_symbol_in_static_block (scope.c_str (), block,
+				     SEARCH_TYPE_DOMAIN
+				     | SEARCH_FUNCTION_DOMAIN
+				     | SEARCH_MODULE_DOMAIN);
   if (scope_sym.symbol == NULL)
-    scope_sym = lookup_global_symbol (scope.c_str (), block, SEARCH_VFT);
+    scope_sym = lookup_global_symbol (scope.c_str (), block,
+				      SEARCH_TYPE_DOMAIN
+				      | SEARCH_FUNCTION_DOMAIN
+				      | SEARCH_MODULE_DOMAIN);
   if (scope_sym.symbol == NULL)
     return {};
 
