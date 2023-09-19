@@ -1655,9 +1655,9 @@ lookup_typename (const struct language_defn *language,
 {
   struct symbol *sym;
 
-  sym = lookup_symbol_in_language (name, block, SEARCH_VFT,
+  sym = lookup_symbol_in_language (name, block, SEARCH_TYPE_DOMAIN,
 				   language->la_language, NULL).symbol;
-  if (sym != NULL && sym->aclass () == LOC_TYPEDEF)
+  if (sym != nullptr)
     {
       struct type *type = sym->type ();
       /* Ensure the length of TYPE is valid.  */
