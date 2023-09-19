@@ -20626,8 +20626,10 @@ mips_md_finish (void)
 	    }
 	}
 
-      bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU,
-				Tag_GNU_MIPS_ABI_FP, fpabi);
+      if (!bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU,
+				     Tag_GNU_MIPS_ABI_FP, fpabi))
+	as_fatal (_("error adding attribute: %s"),
+		  bfd_errmsg (bfd_get_error ()));
     }
 }
 

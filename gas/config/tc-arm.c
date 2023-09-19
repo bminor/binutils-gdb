@@ -32984,7 +32984,9 @@ aeabi_set_attribute_int (int tag, int value)
   if (tag < 1
       || tag >= NUM_KNOWN_OBJ_ATTRIBUTES
       || !attributes_set_explicitly[tag])
-    bfd_elf_add_proc_attr_int (stdoutput, tag, value);
+    if (!bfd_elf_add_proc_attr_int (stdoutput, tag, value))
+      as_fatal (_("error adding attribute: %s"),
+		bfd_errmsg (bfd_get_error ()));
 }
 
 static void
@@ -32993,7 +32995,9 @@ aeabi_set_attribute_string (int tag, const char *value)
   if (tag < 1
       || tag >= NUM_KNOWN_OBJ_ATTRIBUTES
       || !attributes_set_explicitly[tag])
-    bfd_elf_add_proc_attr_string (stdoutput, tag, value);
+    if (!bfd_elf_add_proc_attr_string (stdoutput, tag, value))
+      as_fatal (_("error adding attribute: %s"),
+		bfd_errmsg (bfd_get_error ()));
 }
 
 /* Return whether features in the *NEEDED feature set are available via

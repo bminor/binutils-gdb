@@ -4902,7 +4902,9 @@ riscv_write_out_attrs (void)
 
   /* Re-write architecture elf attribute.  */
   arch_str = riscv_rps_as.subset_list->arch_str;
-  bfd_elf_add_proc_attr_string (stdoutput, Tag_RISCV_arch, arch_str);
+  if (!bfd_elf_add_proc_attr_string (stdoutput, Tag_RISCV_arch, arch_str))
+    as_fatal (_("error adding attribute: %s"),
+	      bfd_errmsg (bfd_get_error ()));
 
   /* For the file without any instruction, we don't set the default_priv_spec
      according to the privileged elf attributes since the md_assemble isn't
@@ -4937,9 +4939,14 @@ riscv_write_out_attrs (void)
   versions[i] = number;
 
   /* Re-write privileged elf attributes.  */
-  bfd_elf_add_proc_attr_int (stdoutput, Tag_RISCV_priv_spec, versions[0]);
-  bfd_elf_add_proc_attr_int (stdoutput, Tag_RISCV_priv_spec_minor, versions[1]);
-  bfd_elf_add_proc_attr_int (stdoutput, Tag_RISCV_priv_spec_revision, versions[2]);
+  if (!bfd_elf_add_proc_attr_int (stdoutput, Tag_RISCV_priv_spec,
+				  versions[0])
+      || !bfd_elf_add_proc_attr_int (stdoutput, Tag_RISCV_priv_spec_minor,
+				     versions[1])
+      || !bfd_elf_add_proc_attr_int (stdoutput, Tag_RISCV_priv_spec_revision,
+				     versions[2]))
+    as_fatal (_("error adding attribute: %s"),
+	      bfd_errmsg (bfd_get_error ()));
 }
 
 /* Add the default contents for the .riscv.attributes section.  */

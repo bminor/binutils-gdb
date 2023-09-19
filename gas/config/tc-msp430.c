@@ -5130,24 +5130,27 @@ msp430_md_finish (void)
   /* We have already emitted an error if any of the following attributes
      disagree with the attributes in the input assembly file.  See
      msp430_object_attribute.  */
-  bfd_elf_add_proc_attr_int (stdoutput, OFBA_MSPABI_Tag_ISA,
-			     target_is_430x () ? OFBA_MSPABI_Val_ISA_MSP430X
-			     : OFBA_MSPABI_Val_ISA_MSP430);
-
-  bfd_elf_add_proc_attr_int (stdoutput, OFBA_MSPABI_Tag_Code_Model,
-			     large_model ? OFBA_MSPABI_Val_Code_Model_LARGE
-			     : OFBA_MSPABI_Val_Code_Model_SMALL);
-
-  bfd_elf_add_proc_attr_int (stdoutput, OFBA_MSPABI_Tag_Data_Model,
-			     large_model ? OFBA_MSPABI_Val_Code_Model_LARGE
-			     : OFBA_MSPABI_Val_Code_Model_SMALL);
-
+  if (!bfd_elf_add_proc_attr_int (stdoutput, OFBA_MSPABI_Tag_ISA,
+				  target_is_430x ()
+				  ? OFBA_MSPABI_Val_ISA_MSP430X
+				  : OFBA_MSPABI_Val_ISA_MSP430)
+      || !bfd_elf_add_proc_attr_int (stdoutput, OFBA_MSPABI_Tag_Code_Model,
+				     large_model
+				     ? OFBA_MSPABI_Val_Code_Model_LARGE
+				     : OFBA_MSPABI_Val_Code_Model_SMALL)
+      || !bfd_elf_add_proc_attr_int (stdoutput, OFBA_MSPABI_Tag_Data_Model,
+				     large_model
+				     ? OFBA_MSPABI_Val_Code_Model_LARGE
+				     : OFBA_MSPABI_Val_Code_Model_SMALL)
   /* The data region GNU attribute is ignored for the small memory model.  */
-  if (large_model)
-    bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU,
-			      Tag_GNU_MSP430_Data_Region, lower_data_region_only
-			      ? Val_GNU_MSP430_Data_Region_Lower
-			      : Val_GNU_MSP430_Data_Region_Any);
+      || (large_model
+	  && !bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU,
+					Tag_GNU_MSP430_Data_Region,
+					lower_data_region_only
+					? Val_GNU_MSP430_Data_Region_Lower
+					: Val_GNU_MSP430_Data_Region_Any)))
+    as_fatal (_("error adding attribute: %s"),
+	      bfd_errmsg (bfd_get_error ()));
 }
 
 /* Returns FALSE if there is a msp430 specific reason why the

@@ -2100,20 +2100,24 @@ obj_elf_vendor_attribute (int vendor)
     }
 
   record_attribute (vendor, tag);
+  bool ok = false;
   switch (type & 3)
     {
     case 3:
-      bfd_elf_add_obj_attr_int_string (stdoutput, vendor, tag, i, s);
+      ok = bfd_elf_add_obj_attr_int_string (stdoutput, vendor, tag, i, s);
       break;
     case 2:
-      bfd_elf_add_obj_attr_string (stdoutput, vendor, tag, s);
+      ok = bfd_elf_add_obj_attr_string (stdoutput, vendor, tag, s);
       break;
     case 1:
-      bfd_elf_add_obj_attr_int (stdoutput, vendor, tag, i);
+      ok = bfd_elf_add_obj_attr_int (stdoutput, vendor, tag, i);
       break;
     default:
       abort ();
     }
+  if (!ok)
+    as_fatal (_("error adding attribute: %s"),
+	      bfd_errmsg (bfd_get_error ()));
 
   demand_empty_rest_of_line ();
   return tag;

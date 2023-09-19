@@ -3009,14 +3009,16 @@ extern bfd *_bfd_elf64_bfd_from_remote_memory
 extern bfd_vma bfd_elf_obj_attr_size (bfd *);
 extern void bfd_elf_set_obj_attr_contents (bfd *, bfd_byte *, bfd_vma);
 extern int bfd_elf_get_obj_attr_int (bfd *, int, unsigned int);
-extern void bfd_elf_add_obj_attr_int (bfd *, int, unsigned int, unsigned int);
+extern obj_attribute *bfd_elf_add_obj_attr_int
+  (bfd *, int, unsigned int, unsigned int);
 #define bfd_elf_add_proc_attr_int(BFD, TAG, VALUE) \
   bfd_elf_add_obj_attr_int ((BFD), OBJ_ATTR_PROC, (TAG), (VALUE))
-extern void bfd_elf_add_obj_attr_string (bfd *, int, unsigned int, const char *);
+extern obj_attribute *bfd_elf_add_obj_attr_string
+  (bfd *, int, unsigned int, const char *);
 #define bfd_elf_add_proc_attr_string(BFD, TAG, VALUE) \
   bfd_elf_add_obj_attr_string ((BFD), OBJ_ATTR_PROC, (TAG), (VALUE))
-extern void bfd_elf_add_obj_attr_int_string (bfd *, int, unsigned int,
-					     unsigned int, const char *);
+extern obj_attribute *bfd_elf_add_obj_attr_int_string
+  (bfd *, int, unsigned int, unsigned int, const char *);
 #define bfd_elf_add_proc_attr_int_string(BFD, TAG, INTVAL, STRVAL) \
   bfd_elf_add_obj_attr_int_string ((BFD), OBJ_ATTR_PROC, (TAG), \
 				   (INTVAL), (STRVAL))

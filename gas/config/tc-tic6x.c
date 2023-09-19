@@ -4381,7 +4381,9 @@ tic6x_set_attribute_int (int tag, int value)
       || tag >= NUM_KNOWN_OBJ_ATTRIBUTES)
     abort ();
   if (!tic6x_attributes_set_explicitly[tag])
-    bfd_elf_add_proc_attr_int (stdoutput, tag, value);
+    if (!bfd_elf_add_proc_attr_int (stdoutput, tag, value))
+      as_fatal (_("error adding attribute: %s"),
+		bfd_errmsg (bfd_get_error ()));
 }
 
 /* Set object attributes deduced from the input file and command line

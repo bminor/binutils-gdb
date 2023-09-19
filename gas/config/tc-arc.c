@@ -4941,7 +4941,9 @@ arc_set_attribute_int (int tag, int value)
   if (tag < 1
       || tag >= NUM_KNOWN_OBJ_ATTRIBUTES
       || !attributes_set_explicitly[tag])
-    bfd_elf_add_proc_attr_int (stdoutput, tag, value);
+    if (!bfd_elf_add_proc_attr_int (stdoutput, tag, value))
+      as_fatal (_("error adding attribute: %s"),
+		bfd_errmsg (bfd_get_error ()));
 }
 
 static void
@@ -4950,7 +4952,9 @@ arc_set_attribute_string (int tag, const char *value)
   if (tag < 1
       || tag >= NUM_KNOWN_OBJ_ATTRIBUTES
       || !attributes_set_explicitly[tag])
-    bfd_elf_add_proc_attr_string (stdoutput, tag, value);
+    if (!bfd_elf_add_proc_attr_string (stdoutput, tag, value))
+      as_fatal (_("error adding attribute: %s"),
+		bfd_errmsg (bfd_get_error ()));
 }
 
 /* Allocate and concatenate two strings.  s1 can be NULL but not
@@ -5020,7 +5024,9 @@ arc_set_public_attributes (void)
       && (base != bfd_elf_get_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
 					    Tag_ARC_CPU_base)))
     as_warn (_("Overwrite explicitly set Tag_ARC_CPU_base"));
-  bfd_elf_add_proc_attr_int (stdoutput, Tag_ARC_CPU_base, base);
+  if (!bfd_elf_add_proc_attr_int (stdoutput, Tag_ARC_CPU_base, base))
+    as_fatal (_("error adding attribute: %s"),
+	      bfd_errmsg (bfd_get_error ()));
 
   /* Tag_ARC_ABI_osver.  */
   if (attributes_set_explicitly[Tag_ARC_ABI_osver])
@@ -5069,7 +5075,9 @@ arc_set_public_attributes (void)
     {
       as_warn (_("Overwrite explicitly set Tag_ARC_ABI_rf16 to full "
 		 "register file"));
-      bfd_elf_add_proc_attr_int (stdoutput, Tag_ARC_ABI_rf16, 0);
+      if (!bfd_elf_add_proc_attr_int (stdoutput, Tag_ARC_ABI_rf16, 0))
+	as_fatal (_("error adding attribute: %s"),
+		  bfd_errmsg (bfd_get_error ()));
     }
 }
 

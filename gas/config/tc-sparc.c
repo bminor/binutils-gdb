@@ -1125,10 +1125,14 @@ sparc_md_finish (void)
   hwcaps = hwcap_seen & U0xffffffff;
   hwcaps2 = hwcap_seen >> 32;
 
-  if (hwcaps)
-    bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU, Tag_GNU_Sparc_HWCAPS, hwcaps);
-  if (hwcaps2)
-    bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU, Tag_GNU_Sparc_HWCAPS2, hwcaps2);
+  if ((hwcaps
+       && !bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU,
+				     Tag_GNU_Sparc_HWCAPS, hwcaps))
+      || (hwcaps2
+	  && !bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU,
+					Tag_GNU_Sparc_HWCAPS2, hwcaps2)))
+    as_fatal (_("error adding attribute: %s"),
+	      bfd_errmsg (bfd_get_error ()));
 #endif
 }
 
