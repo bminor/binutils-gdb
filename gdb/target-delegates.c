@@ -464,7 +464,7 @@ debug_target::resume (ptid_t arg0, int arg1, enum gdb_signal arg2)
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_step (arg1);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_enum_gdb_signal (arg2);
+  target_debug_print_gdb_signal (arg2);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -509,7 +509,7 @@ debug_target::wait (ptid_t arg0, struct target_waitstatus *arg1, target_wait_fla
   gdb_printf (gdb_stdlog, "<- %s->wait (", this->beneath ()->shortname ());
   target_debug_print_ptid_t (arg0);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_struct_target_waitstatus_p (arg1);
+  target_debug_print_target_waitstatus_p (arg1);
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_target_wait_flags (arg2);
   gdb_puts (") = ", gdb_stdlog);
@@ -535,7 +535,7 @@ debug_target::fetch_registers (struct regcache *arg0, int arg1)
   gdb_printf (gdb_stdlog, "-> %s->fetch_registers (...)\n", this->beneath ()->shortname ());
   this->beneath ()->fetch_registers (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->fetch_registers (", this->beneath ()->shortname ());
-  target_debug_print_struct_regcache_p (arg0);
+  target_debug_print_regcache_p (arg0);
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_int (arg1);
   gdb_puts (")\n", gdb_stdlog);
@@ -559,7 +559,7 @@ debug_target::store_registers (struct regcache *arg0, int arg1)
   gdb_printf (gdb_stdlog, "-> %s->store_registers (...)\n", this->beneath ()->shortname ());
   this->beneath ()->store_registers (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->store_registers (", this->beneath ()->shortname ());
-  target_debug_print_struct_regcache_p (arg0);
+  target_debug_print_regcache_p (arg0);
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_int (arg1);
   gdb_puts (")\n", gdb_stdlog);
@@ -583,7 +583,7 @@ debug_target::prepare_to_store (struct regcache *arg0)
   gdb_printf (gdb_stdlog, "-> %s->prepare_to_store (...)\n", this->beneath ()->shortname ());
   this->beneath ()->prepare_to_store (arg0);
   gdb_printf (gdb_stdlog, "<- %s->prepare_to_store (", this->beneath ()->shortname ());
-  target_debug_print_struct_regcache_p (arg0);
+  target_debug_print_regcache_p (arg0);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -626,9 +626,9 @@ debug_target::insert_breakpoint (struct gdbarch *arg0, struct bp_target_info *ar
   int result
     = this->beneath ()->insert_breakpoint (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->insert_breakpoint (", this->beneath ()->shortname ());
-  target_debug_print_struct_gdbarch_p (arg0);
+  target_debug_print_gdbarch_p (arg0);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_struct_bp_target_info_p (arg1);
+  target_debug_print_bp_target_info_p (arg1);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -654,11 +654,11 @@ debug_target::remove_breakpoint (struct gdbarch *arg0, struct bp_target_info *ar
   int result
     = this->beneath ()->remove_breakpoint (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->remove_breakpoint (", this->beneath ()->shortname ());
-  target_debug_print_struct_gdbarch_p (arg0);
+  target_debug_print_gdbarch_p (arg0);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_struct_bp_target_info_p (arg1);
+  target_debug_print_bp_target_info_p (arg1);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_enum_remove_bp_reason (arg2);
+  target_debug_print_remove_bp_reason (arg2);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -784,7 +784,7 @@ debug_target::can_use_hw_breakpoint (enum bptype arg0, int arg1, int arg2)
   int result
     = this->beneath ()->can_use_hw_breakpoint (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->can_use_hw_breakpoint (", this->beneath ()->shortname ());
-  target_debug_print_enum_bptype (arg0);
+  target_debug_print_bptype (arg0);
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_int (arg1);
   gdb_puts (", ", gdb_stdlog);
@@ -839,9 +839,9 @@ debug_target::insert_hw_breakpoint (struct gdbarch *arg0, struct bp_target_info 
   int result
     = this->beneath ()->insert_hw_breakpoint (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->insert_hw_breakpoint (", this->beneath ()->shortname ());
-  target_debug_print_struct_gdbarch_p (arg0);
+  target_debug_print_gdbarch_p (arg0);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_struct_bp_target_info_p (arg1);
+  target_debug_print_bp_target_info_p (arg1);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -867,9 +867,9 @@ debug_target::remove_hw_breakpoint (struct gdbarch *arg0, struct bp_target_info 
   int result
     = this->beneath ()->remove_hw_breakpoint (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->remove_hw_breakpoint (", this->beneath ()->shortname ());
-  target_debug_print_struct_gdbarch_p (arg0);
+  target_debug_print_gdbarch_p (arg0);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_struct_bp_target_info_p (arg1);
+  target_debug_print_bp_target_info_p (arg1);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -899,9 +899,9 @@ debug_target::remove_watchpoint (CORE_ADDR arg0, int arg1, enum target_hw_bp_typ
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_int (arg1);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_enum_target_hw_bp_type (arg2);
+  target_debug_print_target_hw_bp_type (arg2);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_struct_expression_p (arg3);
+  target_debug_print_expression_p (arg3);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -931,9 +931,9 @@ debug_target::insert_watchpoint (CORE_ADDR arg0, int arg1, enum target_hw_bp_typ
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_int (arg1);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_enum_target_hw_bp_type (arg2);
+  target_debug_print_target_hw_bp_type (arg2);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_struct_expression_p (arg3);
+  target_debug_print_expression_p (arg3);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -963,7 +963,7 @@ debug_target::insert_mask_watchpoint (CORE_ADDR arg0, CORE_ADDR arg1, enum targe
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_CORE_ADDR (arg1);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_enum_target_hw_bp_type (arg2);
+  target_debug_print_target_hw_bp_type (arg2);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -993,7 +993,7 @@ debug_target::remove_mask_watchpoint (CORE_ADDR arg0, CORE_ADDR arg1, enum targe
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_CORE_ADDR (arg1);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_enum_target_hw_bp_type (arg2);
+  target_debug_print_target_hw_bp_type (arg2);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1159,7 +1159,7 @@ debug_target::can_accel_watchpoint_condition (CORE_ADDR arg0, int arg1, int arg2
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_int (arg2);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_struct_expression_p (arg3);
+  target_debug_print_expression_p (arg3);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1892,7 +1892,7 @@ debug_target::thread_info_to_thread_handle (struct thread_info *arg0)
   gdb::array_view<const_gdb_byte> result
     = this->beneath ()->thread_info_to_thread_handle (arg0);
   gdb_printf (gdb_stdlog, "<- %s->thread_info_to_thread_handle (", this->beneath ()->shortname ());
-  target_debug_print_struct_thread_info_p (arg0);
+  target_debug_print_thread_info_p (arg0);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_gdb_array_view_const_gdb_byte (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1981,7 +1981,7 @@ debug_target::rcmd (const char *arg0, struct ui_file *arg1)
   gdb_printf (gdb_stdlog, "<- %s->rcmd (", this->beneath ()->shortname ());
   target_debug_print_const_char_p (arg0);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_struct_ui_file_p (arg1);
+  target_debug_print_ui_file_p (arg1);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -2457,7 +2457,7 @@ debug_target::xfer_partial (enum target_object arg0, const char *arg1, gdb_byte 
   enum target_xfer_status result
     = this->beneath ()->xfer_partial (arg0, arg1, arg2, arg3, arg4, arg5, arg6);
   gdb_printf (gdb_stdlog, "<- %s->xfer_partial (", this->beneath ()->shortname ());
-  target_debug_print_enum_target_object (arg0);
+  target_debug_print_target_object (arg0);
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_const_char_p (arg1);
   gdb_puts (", ", gdb_stdlog);
@@ -2471,7 +2471,7 @@ debug_target::xfer_partial (enum target_object arg0, const char *arg1, gdb_byte 
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_ULONGEST_p (arg6);
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_enum_target_xfer_status (result);
+  target_debug_print_target_xfer_status (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }
@@ -2591,7 +2591,7 @@ debug_target::read_description ()
     = this->beneath ()->read_description ();
   gdb_printf (gdb_stdlog, "<- %s->read_description (", this->beneath ()->shortname ());
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_const_struct_target_desc_p (result);
+  target_debug_print_const_target_desc_p (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }
@@ -2735,7 +2735,7 @@ debug_target::execution_direction ()
     = this->beneath ()->execution_direction ();
   gdb_printf (gdb_stdlog, "<- %s->execution_direction (", this->beneath ()->shortname ());
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_enum_exec_direction_kind (result);
+  target_debug_print_exec_direction_kind (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }
@@ -2957,7 +2957,7 @@ debug_target::thread_architecture (ptid_t arg0)
   gdb_printf (gdb_stdlog, "<- %s->thread_architecture (", this->beneath ()->shortname ());
   target_debug_print_ptid_t (arg0);
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_struct_gdbarch_p (result);
+  target_debug_print_gdbarch_p (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }
@@ -2983,7 +2983,7 @@ debug_target::thread_address_space (ptid_t arg0)
   gdb_printf (gdb_stdlog, "<- %s->thread_address_space (", this->beneath ()->shortname ());
   target_debug_print_ptid_t (arg0);
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_struct_address_space_p (result);
+  target_debug_print_address_space_p (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }
@@ -3052,7 +3052,7 @@ debug_target::download_tracepoint (struct bp_location *arg0)
   gdb_printf (gdb_stdlog, "-> %s->download_tracepoint (...)\n", this->beneath ()->shortname ());
   this->beneath ()->download_tracepoint (arg0);
   gdb_printf (gdb_stdlog, "<- %s->download_tracepoint (", this->beneath ()->shortname ());
-  target_debug_print_struct_bp_location_p (arg0);
+  target_debug_print_bp_location_p (arg0);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3121,7 +3121,7 @@ debug_target::enable_tracepoint (struct bp_location *arg0)
   gdb_printf (gdb_stdlog, "-> %s->enable_tracepoint (...)\n", this->beneath ()->shortname ());
   this->beneath ()->enable_tracepoint (arg0);
   gdb_printf (gdb_stdlog, "<- %s->enable_tracepoint (", this->beneath ()->shortname ());
-  target_debug_print_struct_bp_location_p (arg0);
+  target_debug_print_bp_location_p (arg0);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3143,7 +3143,7 @@ debug_target::disable_tracepoint (struct bp_location *arg0)
   gdb_printf (gdb_stdlog, "-> %s->disable_tracepoint (...)\n", this->beneath ()->shortname ());
   this->beneath ()->disable_tracepoint (arg0);
   gdb_printf (gdb_stdlog, "<- %s->disable_tracepoint (", this->beneath ()->shortname ());
-  target_debug_print_struct_bp_location_p (arg0);
+  target_debug_print_bp_location_p (arg0);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3208,7 +3208,7 @@ debug_target::get_trace_status (struct trace_status *arg0)
   int result
     = this->beneath ()->get_trace_status (arg0);
   gdb_printf (gdb_stdlog, "<- %s->get_trace_status (", this->beneath ()->shortname ());
-  target_debug_print_struct_trace_status_p (arg0);
+  target_debug_print_trace_status_p (arg0);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3235,7 +3235,7 @@ debug_target::get_tracepoint_status (tracepoint *arg0, struct uploaded_tp *arg1)
   gdb_printf (gdb_stdlog, "<- %s->get_tracepoint_status (", this->beneath ()->shortname ());
   target_debug_print_tracepoint_p (arg0);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_struct_uploaded_tp_p (arg1);
+  target_debug_print_uploaded_tp_p (arg1);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3279,7 +3279,7 @@ debug_target::trace_find (enum trace_find_type arg0, int arg1, CORE_ADDR arg2, C
   int result
     = this->beneath ()->trace_find (arg0, arg1, arg2, arg3, arg4);
   gdb_printf (gdb_stdlog, "<- %s->trace_find (", this->beneath ()->shortname ());
-  target_debug_print_enum_trace_find_type (arg0);
+  target_debug_print_trace_find_type (arg0);
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_int (arg1);
   gdb_puts (", ", gdb_stdlog);
@@ -3367,7 +3367,7 @@ debug_target::upload_tracepoints (struct uploaded_tp **arg0)
   int result
     = this->beneath ()->upload_tracepoints (arg0);
   gdb_printf (gdb_stdlog, "<- %s->upload_tracepoints (", this->beneath ()->shortname ());
-  target_debug_print_struct_uploaded_tp_pp (arg0);
+  target_debug_print_uploaded_tp_pp (arg0);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3393,7 +3393,7 @@ debug_target::upload_trace_state_variables (struct uploaded_tsv **arg0)
   int result
     = this->beneath ()->upload_trace_state_variables (arg0);
   gdb_printf (gdb_stdlog, "<- %s->upload_trace_state_variables (", this->beneath ()->shortname ());
-  target_debug_print_struct_uploaded_tsv_pp (arg0);
+  target_debug_print_uploaded_tsv_pp (arg0);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3803,9 +3803,9 @@ debug_target::enable_btrace (thread_info *arg0, const struct btrace_config *arg1
   gdb_printf (gdb_stdlog, "<- %s->enable_btrace (", this->beneath ()->shortname ());
   target_debug_print_thread_info_p (arg0);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_const_struct_btrace_config_p (arg1);
+  target_debug_print_const_btrace_config_p (arg1);
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_struct_btrace_target_info_p (result);
+  target_debug_print_btrace_target_info_p (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }
@@ -3828,7 +3828,7 @@ debug_target::disable_btrace (struct btrace_target_info *arg0)
   gdb_printf (gdb_stdlog, "-> %s->disable_btrace (...)\n", this->beneath ()->shortname ());
   this->beneath ()->disable_btrace (arg0);
   gdb_printf (gdb_stdlog, "<- %s->disable_btrace (", this->beneath ()->shortname ());
-  target_debug_print_struct_btrace_target_info_p (arg0);
+  target_debug_print_btrace_target_info_p (arg0);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3850,7 +3850,7 @@ debug_target::teardown_btrace (struct btrace_target_info *arg0)
   gdb_printf (gdb_stdlog, "-> %s->teardown_btrace (...)\n", this->beneath ()->shortname ());
   this->beneath ()->teardown_btrace (arg0);
   gdb_printf (gdb_stdlog, "<- %s->teardown_btrace (", this->beneath ()->shortname ());
-  target_debug_print_struct_btrace_target_info_p (arg0);
+  target_debug_print_btrace_target_info_p (arg0);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3873,13 +3873,13 @@ debug_target::read_btrace (struct btrace_data *arg0, struct btrace_target_info *
   enum btrace_error result
     = this->beneath ()->read_btrace (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->read_btrace (", this->beneath ()->shortname ());
-  target_debug_print_struct_btrace_data_p (arg0);
+  target_debug_print_btrace_data_p (arg0);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_struct_btrace_target_info_p (arg1);
+  target_debug_print_btrace_target_info_p (arg1);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_enum_btrace_read_type (arg2);
+  target_debug_print_btrace_read_type (arg2);
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_enum_btrace_error (result);
+  target_debug_print_btrace_error (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }
@@ -3903,9 +3903,9 @@ debug_target::btrace_conf (const struct btrace_target_info *arg0)
   const struct btrace_config * result
     = this->beneath ()->btrace_conf (arg0);
   gdb_printf (gdb_stdlog, "<- %s->btrace_conf (", this->beneath ()->shortname ());
-  target_debug_print_const_struct_btrace_target_info_p (arg0);
+  target_debug_print_const_btrace_target_info_p (arg0);
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_const_struct_btrace_config_p (result);
+  target_debug_print_const_btrace_config_p (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }
@@ -3931,7 +3931,7 @@ debug_target::record_method (ptid_t arg0)
   gdb_printf (gdb_stdlog, "<- %s->record_method (", this->beneath ()->shortname ());
   target_debug_print_ptid_t (arg0);
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_enum_record_method (result);
+  target_debug_print_record_method (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }
@@ -4379,7 +4379,7 @@ debug_target::get_unwinder ()
     = this->beneath ()->get_unwinder ();
   gdb_printf (gdb_stdlog, "<- %s->get_unwinder (", this->beneath ()->shortname ());
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_const_struct_frame_unwind_p (result);
+  target_debug_print_const_frame_unwind_p (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }
@@ -4404,7 +4404,7 @@ debug_target::get_tailcall_unwinder ()
     = this->beneath ()->get_tailcall_unwinder ();
   gdb_printf (gdb_stdlog, "<- %s->get_tailcall_unwinder (", this->beneath ()->shortname ());
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_const_struct_frame_unwind_p (result);
+  target_debug_print_const_frame_unwind_p (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }

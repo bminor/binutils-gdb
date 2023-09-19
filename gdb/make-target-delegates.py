@@ -248,6 +248,9 @@ def munge_type(typename: str):
     if m:
         return m.group("arg")
     typename = typename.rstrip()
+    # There's no reason to have these keywords in the name, and their
+    # presence makes it harder to change styles.
+    typename = re.sub("\\b(struct|enum|class|union) ", "", typename)
     typename = re.sub("[ ()<>:]", "_", typename)
     typename = re.sub("[*]", "p", typename)
     typename = re.sub("&", "r", typename)

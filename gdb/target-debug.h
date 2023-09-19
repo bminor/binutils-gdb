@@ -44,7 +44,7 @@
 #define target_debug_do_print(E)			\
   gdb_puts ((E), gdb_stdlog);
 
-#define target_debug_print_enum_target_object(X)	\
+#define target_debug_print_target_object(X)	\
   target_debug_do_print (plongest (X))
 #define target_debug_print_CORE_ADDR(X)		\
   target_debug_do_print (core_addr_to_string (X))
@@ -58,19 +58,19 @@
   target_debug_do_print ((X) ? "true" : "false")
 #define target_debug_print_long(X)		\
   target_debug_do_print (plongest (X))
-#define target_debug_print_enum_target_xfer_status(X)	\
+#define target_debug_print_target_xfer_status(X)	\
   target_debug_do_print (plongest (X))
-#define target_debug_print_enum_exec_direction_kind(X)	\
+#define target_debug_print_exec_direction_kind(X)	\
   target_debug_do_print (plongest (X))
-#define target_debug_print_enum_trace_find_type(X)	\
+#define target_debug_print_trace_find_type(X)	\
   target_debug_do_print (plongest (X))
-#define target_debug_print_enum_btrace_read_type(X)	\
+#define target_debug_print_btrace_read_type(X)	\
   target_debug_do_print (plongest (X))
-#define target_debug_print_enum_btrace_error(X) \
+#define target_debug_print_btrace_error(X) \
   target_debug_do_print (plongest (X))
 #define target_debug_print_ptid_t(X)		\
   target_debug_do_print (plongest (X.pid ()))
-#define target_debug_print_struct_gdbarch_p(X)	\
+#define target_debug_print_gdbarch_p(X)	\
   target_debug_do_print (gdbarch_bfd_arch_info (X)->printable_name)
 #define target_debug_print_const_gdb_byte_p(X)	\
   target_debug_do_print (host_address_to_string (X))
@@ -78,7 +78,7 @@
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_const_gdb_byte_pp(X)	\
   target_debug_do_print (host_address_to_string (*(X)))
-#define target_debug_print_enum_gdb_signal(X)	\
+#define target_debug_print_gdb_signal(X)	\
   target_debug_do_print (gdb_signal_to_name (X))
 #define target_debug_print_ULONGEST(X)		\
   target_debug_do_print (hex_string (X))
@@ -88,21 +88,21 @@
   target_debug_do_print (phex (X, 0))
 #define target_debug_print_LONGEST_p(X)		\
   target_debug_do_print (phex (*(X), 0))
-#define target_debug_print_struct_address_space_p(X)	\
+#define target_debug_print_address_space_p(X)	\
   target_debug_do_print (plongest ((X)->num ()))
-#define target_debug_print_struct_bp_target_info_p(X)	\
+#define target_debug_print_bp_target_info_p(X)	\
   target_debug_do_print (core_addr_to_string ((X)->placed_address))
-#define target_debug_print_struct_expression_p(X)	\
+#define target_debug_print_expression_p(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_CORE_ADDR_p(X)	\
   target_debug_do_print (core_addr_to_string (*(X)))
 #define target_debug_print_int_p(X)		\
   target_debug_do_print (plongest (*(X)))
-#define target_debug_print_struct_regcache_p(X) \
+#define target_debug_print_regcache_p(X) \
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_struct_thread_info_p(X)	\
+#define target_debug_print_thread_info_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_struct_ui_file_p(X)	\
+#define target_debug_print_ui_file_p(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_const_target_section_table_p(X)	\
   target_debug_do_print (host_address_to_string (X))
@@ -116,45 +116,45 @@
   target_debug_do_print (host_address_to_string (X.data ()))
 #define target_debug_print_std_vector_static_tracepoint_marker(X)	\
   target_debug_do_print (host_address_to_string (X.data ()))
-#define target_debug_print_const_struct_target_desc_p(X)	\
+#define target_debug_print_const_target_desc_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_struct_bp_location_p(X)	\
+#define target_debug_print_bp_location_p(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_const_trace_state_variable_r(X)	\
   target_debug_do_print (host_address_to_string (&X))
-#define target_debug_print_struct_trace_status_p(X)	\
+#define target_debug_print_trace_status_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_struct_breakpoint_p(X)	\
+#define target_debug_print_breakpoint_p(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_tracepoint_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_struct_uploaded_tp_p(X)	\
+#define target_debug_print_uploaded_tp_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_struct_uploaded_tp_pp(X)	\
+#define target_debug_print_uploaded_tp_pp(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_struct_uploaded_tsv_pp(X)	\
+#define target_debug_print_uploaded_tsv_pp(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_static_tracepoint_marker_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_struct_btrace_target_info_p(X)	\
+#define target_debug_print_btrace_target_info_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_const_struct_frame_unwind_p(X)	\
+#define target_debug_print_const_frame_unwind_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_struct_btrace_data_p(X)	\
+#define target_debug_print_btrace_data_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_enum_record_method(X)	\
+#define target_debug_print_record_method(X)	\
   target_debug_do_print (plongest (X))
-#define target_debug_print_const_struct_btrace_config_p(X)	\
+#define target_debug_print_const_btrace_config_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_const_struct_btrace_target_info_p(X)	\
+#define target_debug_print_const_btrace_target_info_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_enum_target_hw_bp_type(X) \
+#define target_debug_print_target_hw_bp_type(X) \
   target_debug_do_print (plongest (X))
-#define target_debug_print_enum_bptype(X) \
+#define target_debug_print_bptype(X) \
   target_debug_do_print (plongest (X))
-#define target_debug_print_struct_inferior_p(X)	\
+#define target_debug_print_inferior_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_enum_remove_bp_reason(X) \
+#define target_debug_print_remove_bp_reason(X) \
   target_debug_do_print (plongest (X))
 #define target_debug_print_gdb_disassembly_flags(X) \
   target_debug_do_print (plongest (X))
@@ -162,8 +162,6 @@
   target_debug_do_print (host_address_to_string (X.get ()))
 #define target_debug_print_gdb_array_view_const_int(X)	\
   target_debug_do_print (host_address_to_string (X.data ()))
-#define target_debug_print_inferior_p(inf) \
-  target_debug_do_print (host_address_to_string (inf))
 #define target_debug_print_record_print_flags(X) \
   target_debug_do_print (plongest (X))
 #define target_debug_print_thread_control_capabilities(X) \
@@ -180,7 +178,7 @@
   target_debug_do_print (pulongest (X))
 
 static void
-target_debug_print_struct_target_waitstatus_p (struct target_waitstatus *status)
+target_debug_print_target_waitstatus_p (struct target_waitstatus *status)
 {
   gdb_puts (status->to_string ().c_str (), gdb_stdlog);
 }
