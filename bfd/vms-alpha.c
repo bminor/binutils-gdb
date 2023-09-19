@@ -1628,7 +1628,7 @@ image_write (bfd *abfd, unsigned char *ptr, unsigned int size)
 
 #if VMS_DEBUG
   _bfd_vms_debug (8, "image_write from (%p, %d) to (%ld)\n", ptr, size,
-		  (long) off));
+		  (long) off);
 #endif
 
   if (PRIV (image_section)->contents != NULL)
