@@ -1563,7 +1563,7 @@ rust_structop::evaluate_funcall (struct type *expect_type,
 
   const struct block *block = get_selected_block (0);
   struct block_symbol sym = lookup_symbol (name.c_str (), block,
-					   SEARCH_VFT,
+					   SEARCH_FUNCTION_DOMAIN,
 					   nullptr);
   if (sym.symbol == NULL)
     error (_("Could not find function named '%s'"), name.c_str ());
