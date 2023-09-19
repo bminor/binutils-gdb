@@ -2560,13 +2560,9 @@ inside_main_func (frame_info_ptr this_frame)
 	 symbol with the name of the main function.  In this case we should
 	 search the full symbols to see if we can find a match.  */
       struct block_symbol bs = lookup_symbol (name, nullptr,
-					      SEARCH_VFT, nullptr);
+					      SEARCH_FUNCTION_DOMAIN, nullptr);
 
-      /* We might have found some unrelated symbol.  For example, the
-	 Rust compiler can emit both a subprogram and a namespace with
-	 the same name in the same scope; and due to how gdb's symbol
-	 tables currently work, we can't request the one we'd
-	 prefer.  */
+      /* This lookup should always yield a block-valued symbol.  */
       if (bs.symbol != nullptr && bs.symbol->aclass () == LOC_BLOCK)
 	{
 	  const struct block *block = bs.symbol->value_block ();
