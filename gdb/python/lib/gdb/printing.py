@@ -368,7 +368,11 @@ def make_visualizer(value):
             result = gdb.printing.NoOpArrayPrinter(ty, value)
         elif ty.code in (gdb.TYPE_CODE_STRUCT, gdb.TYPE_CODE_UNION):
             result = gdb.printing.NoOpStructPrinter(ty, value)
-        elif ty.code in (gdb.TYPE_CODE_PTR, gdb.TYPE_CODE_REF, gdb.TYPE_CODE_RVALUE_REF):
+        elif ty.code in (
+            gdb.TYPE_CODE_PTR,
+            gdb.TYPE_CODE_REF,
+            gdb.TYPE_CODE_RVALUE_REF,
+        ):
             result = NoOpPointerReferencePrinter(value)
         else:
             result = gdb.printing.NoOpScalarPrinter(value)
