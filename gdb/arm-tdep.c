@@ -8915,6 +8915,9 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
+  while (type->code () == TYPE_CODE_RANGE)
+    type = check_typedef (type->target_type ());
+
   if (TYPE_CODE_FLT == type->code ())
     {
       switch (tdep->fp_model)
