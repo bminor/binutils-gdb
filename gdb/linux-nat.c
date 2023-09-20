@@ -39,13 +39,13 @@
 #include "inf-child.h"
 #include "inf-ptrace.h"
 #include "auxv.h"
-#include <sys/procfs.h>		/* for elf_gregset etc.  */
-#include "elf-bfd.h"		/* for elfcore_write_* */
-#include "gregset.h"		/* for gregset */
-#include "gdbcore.h"		/* for get_exec_file */
-#include <ctype.h>		/* for isdigit */
-#include <sys/stat.h>		/* for struct stat */
-#include <fcntl.h>		/* for O_RDONLY */
+#include <sys/procfs.h>
+#include "elf-bfd.h"
+#include "gregset.h"
+#include "gdbcore.h"
+#include <ctype.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "inf-loop.h"
 #include "gdbsupport/event-loop.h"
 #include "event-top.h"

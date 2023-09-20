@@ -19,7 +19,7 @@
 #ifndef AX_GDB_H
 #define AX_GDB_H
 
-#include "ax.h"  /* For agent_expr_up.  */
+#include "ax.h"
 
 struct expression;
 

@@ -34,7 +34,7 @@
 #include "demangle.h"
 #include "inferior.h"
 #include "source.h"
-#include "filenames.h"		/* for FILENAME_CMP */
+#include "filenames.h"
 #include "objc-lang.h"
 #include "d-lang.h"
 #include "ada-lang.h"

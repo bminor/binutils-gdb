@@ -26,10 +26,10 @@
 #include "objfiles.h"
 #include "gdbtypes.h"
 #include "complaints.h"
-#include "expression.h"		/* For "enum exp_opcode" used by...  */
-#include "filenames.h"		/* For DOSish file names.  */
+#include "expression.h"
+#include "filenames.h"
 #include "macrotab.h"
-#include "demangle.h"		/* Needed by SYMBOL_INIT_DEMANGLED_NAME.  */
+#include "demangle.h"
 #include "block.h"
 #include "cp-support.h"
 #include "dictionary.h"

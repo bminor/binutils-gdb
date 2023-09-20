@@ -41,7 +41,7 @@
 
 #include "objfiles.h"
 
-#include "solib.h"              /* Support for shared libraries.  */
+#include "solib.h"
 #include "solib-svr4.h"
 #include "dis-asm.h"
 

@@ -30,9 +30,9 @@
 
 #include <sys/types.h>
 #include <sys/procfs.h>
-#include <sys/proc.h>	/* for struct proc */
-#include <sys/user.h>	/* for struct user */
-#include <fcntl.h>	/* for O_RDWR etc.  */
+#include <sys/proc.h>
+#include <sys/user.h>
+#include <fcntl.h>
 #include "gdbsupport/gdb_wait.h"
 
 #include "proc-utils.h"

@@ -33,7 +33,7 @@
 #include <fcntl.h>
 #include "gdbsupport/gdb_sys_time.h"
 #ifdef __CYGWIN__
-#include <sys/cygwin.h>		/* For cygwin_conv_path.  */
+#include <sys/cygwin.h>
 #endif
 #include <signal.h>
 

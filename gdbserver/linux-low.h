@@ -28,7 +28,7 @@
 
 /* Included for ptrace type definitions.  */
 #include "nat/linux-ptrace.h"
-#include "target/waitstatus.h" /* For enum target_stop_reason.  */
+#include "target/waitstatus.h"
 #include "tracepoint.h"
 
 #include <list>

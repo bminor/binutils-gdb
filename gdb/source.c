@@ -37,7 +37,7 @@
 #include "annotate.h"
 #include "gdbtypes.h"
 #include "linespec.h"
-#include "filenames.h"		/* for DOSish file names */
+#include "filenames.h"
 #include "completer.h"
 #include "ui-out.h"
 #include "readline/tilde.h"

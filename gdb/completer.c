@@ -20,7 +20,7 @@
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
-#include "filenames.h"		/* For DOSish file names.  */
+#include "filenames.h"
 #include "language.h"
 #include "gdbsupport/gdb_signals.h"
 #include "target.h"

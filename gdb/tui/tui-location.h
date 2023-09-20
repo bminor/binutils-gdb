@@ -20,7 +20,7 @@
 
 #include "tui/tui.h"
 #include "tui/tui.h"
-#include "gdb_curses.h"	/* For WINDOW.  */
+#include "gdb_curses.h"
 #include "observable.h"
 
 /* Class used to track the current location that the TUI is displaying.  An

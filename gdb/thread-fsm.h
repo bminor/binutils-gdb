@@ -19,7 +19,7 @@
 #ifndef THREAD_FSM_H
 #define THREAD_FSM_H
 
-#include "mi/mi-common.h" /* For enum async_reply_reason.  */
+#include "mi/mi-common.h"
 
 struct return_value_info;
 struct thread_fsm_ops;

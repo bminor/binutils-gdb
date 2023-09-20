@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "top.h"		/* For quit_force ().  */
+#include "top.h"
 #include "charset.h"
 #include "value.h"
 #include "python-internal.h"

@@ -21,7 +21,7 @@
 #ifndef GDBSERVER_TARGET_H
 #define GDBSERVER_TARGET_H
 
-#include <sys/types.h> /* for mode_t */
+#include <sys/types.h>
 #include "target/target.h"
 #include "target/resume.h"
 #include "target/wait.h"

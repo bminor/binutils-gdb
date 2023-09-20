@@ -33,9 +33,9 @@
 #include "gdb-demangle.h"
 #include "valprint.h"
 #include "annotate.h"
-#include "symfile.h"		/* for overlay functions */
-#include "objfiles.h"		/* ditto */
-#include "completer.h"		/* for completion functions */
+#include "symfile.h"
+#include "objfiles.h"
+#include "completer.h"
 #include "ui-out.h"
 #include "block.h"
 #include "disasm.h"

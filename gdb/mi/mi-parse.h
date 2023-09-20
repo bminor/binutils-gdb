@@ -22,7 +22,7 @@
 
 #include "gdbsupport/run-time-clock.h"
 #include <chrono>
-#include "mi-cmds.h"  /* For enum print_values.  */
+#include "mi-cmds.h"
 
 /* MI parser */
 

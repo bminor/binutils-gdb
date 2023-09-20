@@ -25,7 +25,7 @@
 #include "infrun.h"
 #include "target.h"
 #include "gdbcore.h"
-#include "elf-bfd.h"		/* for elfcore_write_* */
+#include "elf-bfd.h"
 #include "gdbcmd.h"
 #include "gdbthread.h"
 #include "regcache.h"
@@ -66,11 +66,11 @@
    interface.  */
 
 #include <sys/types.h>
-#include <dirent.h>	/* opendir/readdir, for listing the LWP's */
+#include <dirent.h>
 
-#include <fcntl.h>	/* for O_RDONLY */
-#include <unistd.h>	/* for "X_OK" */
-#include <sys/stat.h>	/* for struct stat */
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 /* Note: procfs-utils.h must be included after the above system header
    files, because it redefines various system calls using macros.

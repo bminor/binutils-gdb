@@ -21,7 +21,7 @@
 #include "frame.h"
 #include "target.h"
 #include "value.h"
-#include "inferior.h"	/* for inferior_ptid */
+#include "inferior.h"
 #include "regcache.h"
 #include "user-regs.h"
 #include "gdbsupport/gdb_obstack.h"

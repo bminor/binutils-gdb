@@ -18,7 +18,7 @@
 
 #include "defs.h"
 #include "gdbsupport/gdb_obstack.h"
-#include "bfd.h"		/* Binary File Description.  */
+#include "bfd.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"

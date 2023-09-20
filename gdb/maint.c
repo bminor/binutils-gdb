@@ -32,7 +32,7 @@
 #include "gdbtypes.h"
 #include "demangle.h"
 #include "gdbcore.h"
-#include "expression.h"		/* For language.h */
+#include "expression.h"
 #include "language.h"
 #include "symfile.h"
 #include "objfiles.h"

@@ -21,7 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "expression.h"		/* For language.h */
+#include "expression.h"
 #include "language.h"
 #include "ui-out.h"
 #include "gdbsupport/format.h"

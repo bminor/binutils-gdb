@@ -27,7 +27,7 @@
    list of sequential control-flow blocks, one such list per thread.  */
 
 #include "gdbsupport/btrace-common.h"
-#include "target/waitstatus.h" /* For enum target_stop_reason.  */
+#include "target/waitstatus.h"
 #include "gdbsupport/enum-flags.h"
 
 #if defined (HAVE_LIBIPT)

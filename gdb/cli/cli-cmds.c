@@ -21,17 +21,17 @@
 #include "arch-utils.h"
 #include "readline/tilde.h"
 #include "completer.h"
-#include "target.h"	/* For baud_rate, remote_debug and remote_timeout.  */
-#include "gdbsupport/gdb_wait.h"	/* For shell escape implementation.  */
+#include "target.h"
+#include "gdbsupport/gdb_wait.h"
 #include "gdbcmd.h"
-#include "gdbsupport/gdb_regex.h"	/* Used by apropos_command.  */
+#include "gdbsupport/gdb_regex.h"
 #include "gdb_vfork.h"
 #include "linespec.h"
 #include "expression.h"
 #include "frame.h"
 #include "value.h"
 #include "language.h"
-#include "filenames.h"	/* For DOSish file names.  */
+#include "filenames.h"
 #include "objfiles.h"
 #include "source.h"
 #include "disasm.h"
@@ -59,7 +59,7 @@
 #include "gdbsupport/gdb_tilde_expand.h"
 
 #ifdef TUI
-#include "tui/tui.h"	/* For tui_active et.al.  */
+#include "tui/tui.h"
 #endif
 
 #include <fcntl.h>

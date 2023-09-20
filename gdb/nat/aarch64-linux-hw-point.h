@@ -19,7 +19,7 @@
 #ifndef NAT_AARCH64_LINUX_HW_POINT_H
 #define NAT_AARCH64_LINUX_HW_POINT_H
 
-#include "gdbsupport/break-common.h" /* For enum target_hw_bp_type.  */
+#include "gdbsupport/break-common.h"
 
 #include "nat/aarch64-hw-point.h"
 

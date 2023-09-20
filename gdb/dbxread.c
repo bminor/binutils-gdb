@@ -37,8 +37,8 @@
 #include "symtab.h"
 #include "breakpoint.h"
 #include "target.h"
-#include "gdbcore.h"		/* for bfd stuff */
-#include "libaout.h"		/* FIXME Secret internal BFD stuff for a.out */
+#include "gdbcore.h"
+#include "libaout.h"
 #include "filenames.h"
 #include "objfiles.h"
 #include "buildsym-legacy.h"
@@ -52,8 +52,7 @@
 #include "psymtab.h"
 #include "block.h"
 #include "aout/aout64.h"
-#include "aout/stab_gnu.h"	/* We always use GNU stabs, not
-				   native, now.  */
+#include "aout/stab_gnu.h"
 
 
 /* Key for dbx-associated data.  */

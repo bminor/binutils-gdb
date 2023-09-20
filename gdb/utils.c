@@ -56,7 +56,7 @@
 #include "main.h"
 #include "solist.h"
 
-#include "inferior.h"		/* for signed_pointer_to_address */
+#include "inferior.h"
 
 #include "gdb_curses.h"
 

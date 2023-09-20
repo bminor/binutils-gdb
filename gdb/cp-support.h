@@ -22,8 +22,6 @@
 #ifndef CP_SUPPORT_H
 #define CP_SUPPORT_H
 
-/* We need this for 'domain_enum', alas...  */
-
 #include "symtab.h"
 #include "gdbsupport/gdb_vecs.h"
 #include "gdbsupport/gdb_obstack.h"

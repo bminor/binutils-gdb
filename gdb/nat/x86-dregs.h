@@ -33,7 +33,7 @@
    (32 bytes on 64 bit hosts).  */
 
 
-#include "gdbsupport/break-common.h" /* target_hw_bp_type */
+#include "gdbsupport/break-common.h"
 
 /* Low-level function vector.  */
 

@@ -20,7 +20,7 @@
 #ifndef EXTENSION_H
 #define EXTENSION_H
 
-#include "mi/mi-cmds.h" /* For PRINT_NO_VALUES, etc.  */
+#include "mi/mi-cmds.h"
 #include "gdbsupport/array-view.h"
 #include "gdbsupport/gdb_optional.h"
 

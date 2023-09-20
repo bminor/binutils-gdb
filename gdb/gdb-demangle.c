@@ -24,7 +24,7 @@
    to a styles of demangling, and GDB specific.  */
 
 #include "defs.h"
-#include "cli/cli-utils.h" /* for skip_to_space */
+#include "cli/cli-utils.h"
 #include "command.h"
 #include "gdbcmd.h"
 #include "demangle.h"

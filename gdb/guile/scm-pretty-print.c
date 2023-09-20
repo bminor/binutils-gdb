@@ -21,9 +21,9 @@
    conventions, et.al.  */
 
 #include "defs.h"
-#include "top.h"		/* For quit_force().  */
+#include "top.h"
 #include "charset.h"
-#include "symtab.h" /* Needed by language.h.  */
+#include "symtab.h"
 #include "language.h"
 #include "objfiles.h"
 #include "value.h"

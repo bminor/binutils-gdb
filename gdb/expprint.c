@@ -24,7 +24,7 @@
 #include "value.h"
 #include "language.h"
 #include "parser-defs.h"
-#include "user-regs.h"		/* For user_reg_map_regnum_to_name.  */
+#include "user-regs.h"
 #include "target.h"
 #include "block.h"
 #include "objfiles.h"

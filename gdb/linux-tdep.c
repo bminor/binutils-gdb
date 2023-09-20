@@ -27,7 +27,7 @@
 #include "regcache.h"
 #include "regset.h"
 #include "elf/common.h"
-#include "elf-bfd.h"            /* for elfcore_write_* */
+#include "elf-bfd.h"
 #include "inferior.h"
 #include "cli/cli-utils.h"
 #include "arch-utils.h"

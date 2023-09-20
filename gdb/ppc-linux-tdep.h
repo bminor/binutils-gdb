@@ -20,7 +20,7 @@
 #ifndef PPC_LINUX_TDEP_H
 #define PPC_LINUX_TDEP_H
 
-#include "ppc-tdep.h"  /* For PPC_NUM_REGS.  */
+#include "ppc-tdep.h"
 
 struct regset;
 

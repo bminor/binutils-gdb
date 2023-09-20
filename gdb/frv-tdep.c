@@ -42,7 +42,7 @@
 /* Make cgen names unique to prevent ODR conflicts with other targets.  */
 #define GDB_CGEN_REMAP_PREFIX frv
 #include "cgen-remap.h"
-#include "opcodes/frv-desc.h"	/* for the H_SPR_... enums */
+#include "opcodes/frv-desc.h"
 
 struct frv_unwind_cache		/* was struct frame_extra_info */
   {

@@ -36,7 +36,7 @@
 #include "interps.h"
 #include "gdbsupport/event-loop.h"
 #include "event-top.h"
-#include "gdbcore.h"		/* For write_memory().  */
+#include "gdbcore.h"
 #include "value.h"
 #include "regcache.h"
 #include "frame.h"

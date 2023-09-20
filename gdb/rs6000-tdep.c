@@ -43,8 +43,8 @@
 #include "record-full.h"
 #include "auxv.h"
 
-#include "coff/internal.h"	/* for libcoff.h */
-#include "libcoff.h"		/* for xcoff_data */
+#include "coff/internal.h"
+#include "libcoff.h"
 #include "coff/xcoff.h"
 #include "libxcoff.h"
 

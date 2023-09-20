@@ -41,7 +41,7 @@
 #include "language.h"
 #include "parser-defs.h"
 #include "gdbcmd.h"
-#include "symfile.h"		/* for overlay functions */
+#include "symfile.h"
 #include "inferior.h"
 #include "target-float.h"
 #include "block.h"

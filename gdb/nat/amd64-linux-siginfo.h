@@ -20,7 +20,7 @@
 #ifndef NAT_AMD64_LINUX_SIGINFO_H
 #define NAT_AMD64_LINUX_SIGINFO_H
 
-#include <signal.h>  /* For siginfo_t.  */
+#include <signal.h>
 
 /* When GDB is built as a 64-bit application on Linux, the
    PTRACE_GETSIGINFO data is always presented in 64-bit layout.  Since

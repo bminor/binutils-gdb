@@ -21,7 +21,7 @@
 #include "arch-utils.h"
 #include <signal.h>
 #include <fcntl.h>
-#include "frame.h"		/* required by inferior.h */
+#include "frame.h"
 #include "inferior.h"
 #include "infrun.h"
 #include "symtab.h"

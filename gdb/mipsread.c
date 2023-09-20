@@ -33,8 +33,8 @@
 #include "coff/sym.h"
 #include "coff/internal.h"
 #include "coff/ecoff.h"
-#include "libcoff.h"		/* Private BFD COFF information.  */
-#include "libecoff.h"		/* Private BFD ECOFF information.  */
+#include "libcoff.h"
+#include "libecoff.h"
 #include "elf/common.h"
 #include "elf/internal.h"
 #include "elf/mips.h"

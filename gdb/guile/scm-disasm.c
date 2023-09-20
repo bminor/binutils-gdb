@@ -25,7 +25,7 @@
 #include "disasm.h"
 #include "dis-asm.h"
 #include "gdbarch.h"
-#include "gdbcore.h" /* Why is memory_error here? */
+#include "gdbcore.h"
 #include "guile-internal.h"
 
 static SCM port_keyword;

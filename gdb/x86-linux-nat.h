@@ -20,7 +20,7 @@
 #ifndef X86_LINUX_NAT_H
 #define X86_LINUX_NAT_H 1
 
-#include "gdb_proc_service.h"  /* For ps_err_e.  */
+#include "gdb_proc_service.h"
 #include "linux-nat.h"
 #include "gdbsupport/x86-xstate.h"
 #include "x86-nat.h"

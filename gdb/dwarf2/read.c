@@ -54,7 +54,7 @@
 #include "dwarf2.h"
 #include "demangle.h"
 #include "gdb-demangle.h"
-#include "filenames.h"	/* for DOSish file names */
+#include "filenames.h"
 #include "language.h"
 #include "complaints.h"
 #include "dwarf2/expr.h"
@@ -69,7 +69,7 @@
 #include "c-lang.h"
 #include "go-lang.h"
 #include "valprint.h"
-#include "gdbcore.h" /* for gnutarget */
+#include "gdbcore.h"
 #include "gdb/gdb-index.h"
 #include "gdb_bfd.h"
 #include "f-lang.h"

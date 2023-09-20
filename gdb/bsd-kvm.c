@@ -28,7 +28,7 @@
 #include "process-stratum-target.h"
 #include "value.h"
 #include "gdbcore.h"
-#include "inferior.h"          /* for get_exec_file */
+#include "inferior.h"
 #include "gdbthread.h"
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/gdb_tilde_expand.h"

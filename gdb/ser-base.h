@@ -20,7 +20,7 @@
 #ifndef SER_BASE_H
 #define SER_BASE_H
 
-#include "serial.h"  /* For serial_ttystate.  */
+#include "serial.h"
 
 struct serial;
 struct ui_file;

@@ -32,7 +32,7 @@
 #include "expression.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "aout/stab_gnu.h"	/* We always use GNU stabs, not native.  */
+#include "aout/stab_gnu.h"
 #include "libaout.h"
 #include "aout/aout64.h"
 #include "gdb-stabs.h"

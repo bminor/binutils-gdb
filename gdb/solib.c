@@ -38,7 +38,7 @@
 #include "completer.h"
 #include "elf/external.h"
 #include "elf/common.h"
-#include "filenames.h"		/* for DOSish file names */
+#include "filenames.h"
 #include "exec.h"
 #include "solist.h"
 #include "observable.h"

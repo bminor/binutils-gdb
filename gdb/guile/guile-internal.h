@@ -29,7 +29,7 @@
 #include "symtab.h"
 #include "libguile.h"
 #include "objfiles.h"
-#include "top.h"		/* For quit_force().  */
+#include "top.h"
 
 struct block;
 struct frame_info;

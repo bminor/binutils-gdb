@@ -168,7 +168,7 @@ static volatile int mem_err = 0;
 int gdb_m32r_vector = -1;
 
 #if 0
-#include "syscall.h"		/* for SYS_exit, SYS_write etc. */
+#include "syscall.h"
 #endif
 
 /* Global entry points:

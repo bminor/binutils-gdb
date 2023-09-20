@@ -21,7 +21,7 @@
    conventions, et.al.  */
 
 #include "defs.h"
-#include "top.h"		/* For quit_force().  */
+#include "top.h"
 #include "arch-utils.h"
 #include "value.h"
 #include "gdbtypes.h"

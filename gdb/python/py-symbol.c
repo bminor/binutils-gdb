@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "top.h"		/* For force_quit ().  */
+#include "top.h"
 #include "block.h"
 #include "frame.h"
 #include "symtab.h"

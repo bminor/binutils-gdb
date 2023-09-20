@@ -19,7 +19,7 @@
 
 #include "defs.h"
 
-#include <ctype.h>		/* XXX for isupper ().  */
+#include <ctype.h>
 
 #include "frame.h"
 #include "language.h"
@@ -27,7 +27,7 @@
 #include "infrun.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include "dis-asm.h"		/* For register styles.  */
+#include "dis-asm.h"
 #include "disasm.h"
 #include "regcache.h"
 #include "reggroups.h"

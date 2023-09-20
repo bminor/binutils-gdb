@@ -31,7 +31,7 @@
 #include <algorithm>
 
 #include "coff/internal.h"
-#include "libcoff.h"		/* FIXME, internal data from BFD */
+#include "libcoff.h"
 #include "coff/xcoff.h"
 #include "libxcoff.h"
 #include "coff/rs6000.h"

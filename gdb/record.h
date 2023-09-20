@@ -20,7 +20,7 @@
 #ifndef RECORD_H
 #define RECORD_H
 
-#include "target/waitstatus.h" /* For enum target_stop_reason.  */
+#include "target/waitstatus.h"
 #include "gdbsupport/enum-flags.h"
 
 struct address_space;

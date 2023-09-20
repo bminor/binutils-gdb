@@ -25,7 +25,7 @@
 #include "target.h"
 #include "frame.h"
 #include "gdbthread.h"
-#include "language.h"		/* For CAST_IS_CONVERSION.  */
+#include "language.h"
 #include "cp-abi.h"
 #include "infcall.h"
 #include "objc-lang.h"

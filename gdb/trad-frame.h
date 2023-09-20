@@ -20,7 +20,7 @@
 #ifndef TRAD_FRAME_H
 #define TRAD_FRAME_H
 
-#include "frame.h"		/* For "struct frame_id".  */
+#include "frame.h"
 
 class frame_info_ptr;
 struct regcache_map_entry;

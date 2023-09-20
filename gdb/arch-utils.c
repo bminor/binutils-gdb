@@ -21,7 +21,7 @@
 
 #include "arch-utils.h"
 #include "gdbcmd.h"
-#include "inferior.h"		/* enum CALL_DUMMY_LOCATION et al.  */
+#include "inferior.h"
 #include "infrun.h"
 #include "regcache.h"
 #include "sim-regno.h"

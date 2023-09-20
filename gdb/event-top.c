@@ -30,11 +30,11 @@
 #include "event-top.h"
 #include "interps.h"
 #include <signal.h>
-#include "cli/cli-script.h"     /* for reset_command_nest_depth */
+#include "cli/cli-script.h"
 #include "main.h"
 #include "gdbthread.h"
 #include "observable.h"
-#include "gdbcmd.h"		/* for dont_repeat() */
+#include "gdbcmd.h"
 #include "annotate.h"
 #include "maint.h"
 #include "ser-event.h"

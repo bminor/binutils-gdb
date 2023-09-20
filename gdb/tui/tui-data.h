@@ -23,7 +23,7 @@
 #define TUI_TUI_DATA_H
 
 #include "tui/tui.h"
-#include "gdb_curses.h"	/* For WINDOW.  */
+#include "gdb_curses.h"
 #include "observable.h"
 
 /* A deleter that calls delwin.  */

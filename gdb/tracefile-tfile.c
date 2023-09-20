@@ -21,7 +21,7 @@
 #include "tracefile.h"
 #include "readline/tilde.h"
 #include "gdbsupport/filestuff.h"
-#include "gdbsupport/rsp-low.h" /* bin2hex */
+#include "gdbsupport/rsp-low.h"
 #include "regcache.h"
 #include "inferior.h"
 #include "gdbthread.h"

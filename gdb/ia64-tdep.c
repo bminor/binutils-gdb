@@ -31,7 +31,7 @@
 #include "target-float.h"
 #include "value.h"
 #include "objfiles.h"
-#include "elf/common.h"		/* for DT_PLTGOT value */
+#include "elf/common.h"
 #include "elf-bfd.h"
 #include "dis-asm.h"
 #include "infcall.h"
@@ -40,7 +40,7 @@
 #include "cp-abi.h"
 
 #ifdef HAVE_LIBUNWIND_IA64_H
-#include "elf/ia64.h"           /* for PT_IA_64_UNWIND value */
+#include "elf/ia64.h"
 #include "ia64-libunwind-tdep.h"
 
 /* Note: KERNEL_START is supposed to be an address which is not going

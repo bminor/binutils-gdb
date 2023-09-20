@@ -21,7 +21,7 @@
 #include "defs.h"
 #include "elf-none-tdep.h"
 #include "regset.h"
-#include "elf-bfd.h"            /* for elfcore_write_* */
+#include "elf-bfd.h"
 #include "inferior.h"
 #include "regcache.h"
 #include "gdbarch.h"

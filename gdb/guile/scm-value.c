@@ -21,13 +21,13 @@
    conventions, et.al.  */
 
 #include "defs.h"
-#include "top.h"		/* For quit_force().  */
+#include "top.h"
 #include "arch-utils.h"
 #include "charset.h"
 #include "cp-abi.h"
 #include "target-float.h"
 #include "infcall.h"
-#include "symtab.h" /* Needed by language.h.  */
+#include "symtab.h"
 #include "language.h"
 #include "valprint.h"
 #include "value.h"

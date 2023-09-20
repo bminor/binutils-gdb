@@ -27,8 +27,8 @@
 #include "gdbsupport/gdb_obstack.h"
 #include <ctype.h>
 
-#include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
-#include "libcoff.h"		/* FIXME secret internal data from BFD */
+#include "coff/internal.h"
+#include "libcoff.h"
 #include "objfiles.h"
 #include "buildsym-legacy.h"
 #include "stabsread.h"

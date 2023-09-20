@@ -25,7 +25,7 @@
 #include "charset.h"
 #include "cp-abi.h"
 #include "target-float.h"
-#include "symtab.h" /* Needed by language.h.  */
+#include "symtab.h"
 #include "language.h"
 #include "valprint.h"
 #include "value.h"

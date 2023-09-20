@@ -30,10 +30,10 @@
 #include <sys/types.h>
 
 #ifdef HAVE_SYS_FILIO_H
-#include <sys/filio.h>  /* For FIONBIO.  */
+#include <sys/filio.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>  /* For FIONBIO.  */
+#include <sys/ioctl.h>
 #endif
 
 #include "gdbsupport/gdb_sys_time.h"

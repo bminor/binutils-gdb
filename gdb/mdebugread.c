@@ -60,11 +60,11 @@
 
 #include "bfd.h"
 
-#include "coff/ecoff.h"		/* COFF-like aspects of ecoff files.  */
+#include "coff/ecoff.h"
 
-#include "libaout.h"		/* Private BFD a.out information.  */
+#include "libaout.h"
 #include "aout/aout64.h"
-#include "aout/stab_gnu.h"	/* STABS information.  */
+#include "aout/stab_gnu.h"
 
 #include "expression.h"
 

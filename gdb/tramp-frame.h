@@ -20,7 +20,7 @@
 #ifndef TRAMP_FRAME_H
 #define TRAMP_FRAME_H
 
-#include "frame.h"		/* For "enum frame_type".  */
+#include "frame.h"
 
 class frame_info_ptr;
 struct trad_frame_cache;

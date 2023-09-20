@@ -20,7 +20,7 @@
 #ifndef MDEBUGREAD_H
 #define MDEBUGREAD_H
 
-#include "coff/sym.h"		/* Needed for PDR below.  */
+#include "coff/sym.h"
 #include "coff/symconst.h"
 
 /* Specific information about a procedure.  Architectures (ab)uses

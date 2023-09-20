@@ -20,7 +20,7 @@
 #if !defined (VALUE_H)
 #define VALUE_H 1
 
-#include "frame.h"		/* For struct frame_id.  */
+#include "frame.h"
 #include "extension.h"
 #include "gdbsupport/gdb_ref_ptr.h"
 #include "gmp-utils.h"

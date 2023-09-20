@@ -43,8 +43,8 @@ struct inferior;
    make-target-delegates.py to parse.  */
 typedef const gdb_byte const_gdb_byte;
 
-#include "infrun.h" /* For enum exec_direction_kind.  */
-#include "breakpoint.h" /* For enum bptype.  */
+#include "infrun.h"
+#include "breakpoint.h"
 #include "gdbsupport/scoped_restore.h"
 #include "gdbsupport/refcounted-object.h"
 #include "target-section.h"
@@ -88,7 +88,7 @@ typedef const gdb_byte const_gdb_byte;
 #include "gdbsupport/fileio.h"
 #include "gdbsupport/x86-xstate.h"
 
-#include "gdbsupport/break-common.h" /* For enum target_hw_bp_type.  */
+#include "gdbsupport/break-common.h"
 
 enum strata
   {
