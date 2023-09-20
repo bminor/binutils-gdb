@@ -119,7 +119,7 @@ def _breakpoint_descriptor(bp):
             )
 
         if loc.address:
-            result["instructionReference"] = hex(loc.address),
+            result["instructionReference"] = hex(loc.address)
 
     return result
 
