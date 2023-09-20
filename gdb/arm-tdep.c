@@ -9170,16 +9170,28 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	   || type->code () == TYPE_CODE_BOOL
 	   || type->code () == TYPE_CODE_PTR
 	   || TYPE_IS_REFERENCE (type)
-	   || type->code () == TYPE_CODE_ENUM)
+	   || type->code () == TYPE_CODE_ENUM
+	   || is_fixed_point_type (type))
     {
       if (type->length () <= 4)
 	{
 	  /* Values of one word or less are zero/sign-extended and
 	     returned in r0.  */
 	  bfd_byte tmpbuf[ARM_INT_REGISTER_SIZE];
-	  LONGEST val = unpack_long (type, valbuf);
 
-	  store_signed_integer (tmpbuf, ARM_INT_REGISTER_SIZE, byte_order, val);
+	  if (is_fixed_point_type (type))
+	    {
+	      gdb_mpz unscaled;
+	      unscaled.read (gdb::make_array_view (valbuf, type->length ()),
+			     byte_order, type->is_unsigned ());
+	      unscaled.write (gdb::make_array_view (tmpbuf, sizeof (tmpbuf)),
+			      byte_order, type->is_unsigned ());
+	    }
+	  else
+	    {
+	      LONGEST val = unpack_long (type, valbuf);
+	      store_signed_integer (tmpbuf, ARM_INT_REGISTER_SIZE, byte_order, val);
+	    }
 	  regs->cooked_write (ARM_A1_REGNUM, tmpbuf);
 	}
       else
