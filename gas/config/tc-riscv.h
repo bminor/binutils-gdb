@@ -104,6 +104,14 @@ extern void riscv_md_end (void);
 #define TC_FORCE_RELOCATION_LOCAL(FIX) 1
 #define DIFF_EXPR_OK 1
 
+struct riscv_fix
+{
+  int source_macro;
+};
+
+#define TC_FIX_TYPE struct riscv_fix
+#define TC_INIT_FIX_DATA(FIX) (FIX)->tc_fix_data.source_macro = -1
+
 extern void riscv_pop_insert (void);
 #define md_pop_insert()		riscv_pop_insert ()
 

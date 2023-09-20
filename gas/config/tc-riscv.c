@@ -59,6 +59,9 @@ struct riscv_cl_insn
   fixS *fixp;
 };
 
+/* The identifier of the assembler macro we are expanding, if any. */
+static int source_macro = -1;
+
 /* All RISC-V CSR belong to one of these classes.  */
 enum riscv_csr_class
 {
@@ -1749,6 +1752,7 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
 				  address_expr, false, reloc_type);
 
 	  ip->fixp->fx_tcbit = riscv_opts.relax;
+	  ip->fixp->tc_fix_data.source_macro = source_macro;
 	}
     }
 
@@ -2103,6 +2107,8 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
   int rs2 = (ip->insn_opcode >> OP_SH_RS2) & OP_MASK_RS2;
   int mask = ip->insn_mo->mask;
 
+  source_macro = mask;
+
   switch (mask)
     {
     case M_LI:
@@ -2178,6 +2184,8 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
       as_bad (_("internal: macro %s not implemented"), ip->insn_mo->name);
       break;
     }
+
+  source_macro = -1;
 }
 
 static const struct percent_op_match percent_op_utype[] =
@@ -4139,6 +4147,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       break;
 
     case BFD_RELOC_RISCV_GOT_HI20:
+      /* R_RISCV_GOT_HI20 and the following R_RISCV_LO12_I are relaxable
+	 only if it is created as a result of la or lga assembler macros. */
+      if (fixP->tc_fix_data.source_macro == M_LA
+	  || fixP->tc_fix_data.source_macro == M_LGA)
+	relaxable = true;
+      break;
+
     case BFD_RELOC_RISCV_ADD8:
     case BFD_RELOC_RISCV_ADD16:
     case BFD_RELOC_RISCV_ADD32:
