@@ -9777,29 +9777,22 @@ arm_neon_quad_read (struct gdbarch *gdbarch, readable_regcache *regcache,
 {
   char name_buf[4];
   gdb_byte reg_buf[8];
-  int offset, double_regnum;
+  int double_regnum;
   enum register_status status;
 
   xsnprintf (name_buf, sizeof (name_buf), "d%d", regnum << 1);
   double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
 					       strlen (name_buf));
 
-  /* d0 is always the least significant half of q0.  */
-  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-    offset = 8;
-  else
-    offset = 0;
-
   status = regcache->raw_read (double_regnum, reg_buf);
   if (status != REG_VALID)
     return status;
-  memcpy (buf + offset, reg_buf, 8);
+  memcpy (buf, reg_buf, 8);
 
-  offset = 8 - offset;
   status = regcache->raw_read (double_regnum + 1, reg_buf);
   if (status != REG_VALID)
     return status;
-  memcpy (buf + offset, reg_buf, 8);
+  memcpy (buf + 8, reg_buf, 8);
 
   return REG_VALID;
 }
@@ -9874,21 +9867,14 @@ arm_neon_quad_write (struct gdbarch *gdbarch, struct regcache *regcache,
 		     int regnum, const gdb_byte *buf)
 {
   char name_buf[4];
-  int offset, double_regnum;
+  int double_regnum;
 
   xsnprintf (name_buf, sizeof (name_buf), "d%d", regnum << 1);
   double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
 					       strlen (name_buf));
 
-  /* d0 is always the least significant half of q0.  */
-  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-    offset = 8;
-  else
-    offset = 0;
-
-  regcache->raw_write (double_regnum, buf + offset);
-  offset = 8 - offset;
-  regcache->raw_write (double_regnum + 1, buf + offset);
+  regcache->raw_write (double_regnum, buf);
+  regcache->raw_write (double_regnum + 1, buf + 8);
 }
 
 /* Store the contents of BUF to the MVE pseudo register REGNUM.  */
