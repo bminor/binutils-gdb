@@ -48,6 +48,7 @@ struct dwz_file
   struct dwarf2_section_info macro {};
   struct dwarf2_section_info gdb_index {};
   struct dwarf2_section_info debug_names {};
+  struct dwarf2_section_info types {};
 
   /* The dwz's BFD.  */
   gdb_bfd_ref_ptr dwz_bfd;

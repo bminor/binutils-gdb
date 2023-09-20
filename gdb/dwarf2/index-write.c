@@ -1221,6 +1221,9 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
       const auto insertpair = cu_index_htab.emplace (per_cu, counter);
       gdb_assert (insertpair.second);
 
+      /* See enhancement PR symtab/30838.  */
+      gdb_assert (!(per_cu->is_dwz && per_cu->is_debug_types));
+
       /* The all_units list contains CUs read from the objfile as well as
 	 from the eventual dwz file.  We need to place the entry in the
 	 corresponding index.  */

@@ -5314,6 +5314,12 @@ create_all_units (dwarf2_per_objfile *per_objfile)
       dwz->line.read (objfile);
       read_comp_units_from_section (per_objfile, &dwz->info, &dwz->abbrev, 1,
 				    types_htab, rcuh_kind::COMPILE);
+
+      if (!dwz->types.empty ())
+	{
+	  /* See enhancement PR symtab/30838.  */
+	  error (_("Dwarf Error: .debug_types section not supported in dwz file"));
+	}
     }
 
   per_objfile->per_bfd->signatured_types = std::move (types_htab);
