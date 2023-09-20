@@ -4824,9 +4824,6 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      /* The argument is being passed in a general purpose
 		 register.  */
-	      if (byte_order == BFD_ENDIAN_BIG)
-		regval <<= (ARM_INT_REGISTER_SIZE - partial_len) * 8;
-
 	      arm_debug_printf ("arg %d in %s = 0x%s", argnum,
 				gdbarch_register_name (gdbarch, argreg),
 				phex (regval, ARM_INT_REGISTER_SIZE));
