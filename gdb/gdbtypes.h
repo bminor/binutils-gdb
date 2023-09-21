@@ -66,15 +66,6 @@ struct dwarf2_per_cu_data;
 struct dwarf2_per_objfile;
 struct dwarf2_property_baton;
 
-/* Some macros for char-based bitfields.  */
-
-#define B_SET(a,x)	((a)[(x)>>3] |= (1 << ((x)&7)))
-#define B_CLR(a,x)	((a)[(x)>>3] &= ~(1 << ((x)&7)))
-#define B_TST(a,x)	((a)[(x)>>3] & (1 << ((x)&7)))
-#define B_TYPE		unsigned char
-#define	B_BYTES(x)	( 1 + ((x)>>3) )
-#define	B_CLRALL(a,x)	memset ((a), 0, B_BYTES(x))
-
 /* * Different kinds of data types are distinguished by the `code'
    field.  */
 
