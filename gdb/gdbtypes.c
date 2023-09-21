@@ -5289,12 +5289,23 @@ recursive_dump_type (struct type *type, int spaces)
 	gdb_printf ("%*s[%d] bitpos %s bitsize %d type ", spaces + 2, "",
 		    idx, plongest (type->field (idx).loc_bitpos ()),
 		    type->field (idx).bitsize ());
-      gdb_printf ("%s name '%s' (%s)\n",
+      gdb_printf ("%s name '%s' (%s)",
 		  host_address_to_string (type->field (idx).type ()),
 		  type->field (idx).name () != NULL
 		  ? type->field (idx).name ()
 		  : "<NULL>",
 		  host_address_to_string (type->field (idx).name ()));
+      if (TYPE_FIELD_VIRTUAL (type, idx))
+	gdb_printf (" virtual");
+
+      if (TYPE_FIELD_PRIVATE (type, idx))
+	gdb_printf (" private");
+      else if (TYPE_FIELD_PROTECTED (type, idx))
+	gdb_printf (" protected");
+      else if (TYPE_FIELD_IGNORE (type, idx))
+	gdb_printf (" ignored");
+
+      gdb_printf ("\n");
       if (type->field (idx).type () != NULL)
 	{
 	  recursive_dump_type (type->field (idx).type (), spaces + 4);
