@@ -669,19 +669,17 @@ cplus_name_of_variable (const struct varobj *parent)
   return c_name_of_variable (parent);
 }
 
-enum accessibility { private_field, protected_field, public_field };
-
 /* Check if field INDEX of TYPE has the specified accessibility.
    Return 0 if so and 1 otherwise.  */
 
 static int 
 match_accessibility (struct type *type, int index, enum accessibility acc)
 {
-  if (acc == private_field && TYPE_FIELD_PRIVATE (type, index))
+  if (acc == accessibility::PRIVATE && TYPE_FIELD_PRIVATE (type, index))
     return 1;
-  else if (acc == protected_field && TYPE_FIELD_PROTECTED (type, index))
+  else if (acc == accessibility::PROTECTED && TYPE_FIELD_PROTECTED (type, index))
     return 1;
-  else if (acc == public_field && !TYPE_FIELD_PRIVATE (type, index)
+  else if (acc == accessibility::PUBLIC && !TYPE_FIELD_PRIVATE (type, index)
 	   && !TYPE_FIELD_PROTECTED (type, index))
     return 1;
   else
@@ -737,16 +735,16 @@ cplus_describe_child (const struct varobj *parent, int index,
 	     have the access control we are looking for to properly
 	     find the indexed field.  */
 	  int type_index = TYPE_N_BASECLASSES (type);
-	  enum accessibility acc = public_field;
+	  enum accessibility acc = accessibility::PUBLIC;
 	  int vptr_fieldno;
 	  struct type *basetype = NULL;
 	  const char *field_name;
 
 	  vptr_fieldno = get_vptr_fieldno (type, &basetype);
 	  if (parent->name == "private")
-	    acc = private_field;
+	    acc = accessibility::PRIVATE;
 	  else if (parent->name == "protected")
-	    acc = protected_field;
+	    acc = accessibility::PROTECTED;
 
 	  while (index >= 0)
 	    {

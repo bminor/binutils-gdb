@@ -4883,25 +4883,6 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 
 /* End of functions for overload resolution.  */
 
-/* Routines to pretty-print types.  */
-
-static void
-print_bit_vector (B_TYPE *bits, int nbits)
-{
-  int bitno;
-
-  for (bitno = 0; bitno < nbits; bitno++)
-    {
-      if ((bitno % 8) == 0)
-	{
-	  gdb_puts (" ");
-	}
-      if (B_TST (bits, bitno))
-	gdb_printf (("1"));
-      else
-	gdb_printf (("0"));
-    }
-}
 
 /* Note the first arg should be the "this" pointer, we may not want to
    include it since we may get into a infinitely recursive
@@ -5004,40 +4985,6 @@ print_cplus_stuff (struct type *type, int spaces)
 	      TYPE_N_BASECLASSES (type));
   gdb_printf ("%*snfn_fields %d\n", spaces, "",
 	      TYPE_NFN_FIELDS (type));
-  if (TYPE_N_BASECLASSES (type) > 0)
-    {
-      gdb_printf
-	("%*svirtual_field_bits (%d bits at *%s)",
-	 spaces, "", TYPE_N_BASECLASSES (type),
-	 host_address_to_string (TYPE_FIELD_VIRTUAL_BITS (type)));
-
-      print_bit_vector (TYPE_FIELD_VIRTUAL_BITS (type),
-			TYPE_N_BASECLASSES (type));
-      gdb_puts ("\n");
-    }
-  if (type->num_fields () > 0)
-    {
-      if (TYPE_FIELD_PRIVATE_BITS (type) != NULL)
-	{
-	  gdb_printf
-	    ("%*sprivate_field_bits (%d bits at *%s)",
-	     spaces, "", type->num_fields (),
-	     host_address_to_string (TYPE_FIELD_PRIVATE_BITS (type)));
-	  print_bit_vector (TYPE_FIELD_PRIVATE_BITS (type),
-			    type->num_fields ());
-	  gdb_puts ("\n");
-	}
-      if (TYPE_FIELD_PROTECTED_BITS (type) != NULL)
-	{
-	  gdb_printf
-	    ("%*sprotected_field_bits (%d bits at *%s",
-	     spaces, "", type->num_fields (),
-	     host_address_to_string (TYPE_FIELD_PROTECTED_BITS (type)));
-	  print_bit_vector (TYPE_FIELD_PROTECTED_BITS (type),
-			    type->num_fields ());
-	  gdb_puts ("\n");
-	}
-    }
   if (TYPE_NFN_FIELDS (type) > 0)
     {
       dump_fn_fieldlists (type, spaces);

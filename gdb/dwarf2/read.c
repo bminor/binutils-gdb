@@ -673,8 +673,6 @@ struct variant_part_builder
 
 struct nextfield
 {
-  int accessibility = 0;
-  int virtuality = 0;
   /* Variant parts need to find the discriminant, which is a DIE
      reference.  We track the section offset of each field to make
      this link.  */
@@ -696,9 +694,6 @@ struct field_info
   /* List of data member and baseclasses fields.  */
   std::vector<struct nextfield> fields;
   std::vector<struct nextfield> baseclasses;
-
-  /* Set if the accessibility of one of the fields is not public.  */
-  bool non_public_fields = false;
 
   /* Member function fieldlist array, contains name of possibly overloaded
      member function, number of overloaded member functions and a pointer
@@ -11516,15 +11511,23 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 
   new_field->offset = die->sect_off;
 
-  new_field->accessibility = dwarf2_access_attribute (die, cu);
-  if (new_field->accessibility != DW_ACCESS_public)
-    fip->non_public_fields = true;
+  switch (dwarf2_access_attribute (die, cu))
+    {
+    case DW_ACCESS_public:
+      break;
+    case DW_ACCESS_private:
+      new_field->field.set_accessibility (accessibility::PRIVATE);
+      break;
+    case DW_ACCESS_protected:
+      new_field->field.set_accessibility (accessibility::PROTECTED);
+      break;
+    default:
+      gdb_assert_not_reached ("invalid accessibility");
+    }
 
   attr = dwarf2_attr (die, DW_AT_virtuality, cu);
-  if (attr != nullptr)
-    new_field->virtuality = attr->as_virtuality ();
-  else
-    new_field->virtuality = DW_VIRTUALITY_none;
+  if (attr != nullptr && attr->as_virtuality ())
+    new_field->field.set_virtual ();
 
   fp = &new_field->field;
 
@@ -11618,8 +11621,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       if (dwarf2_attr (die, DW_AT_artificial, cu))
 	{
 	  fp->set_is_artificial (true);
-	  new_field->accessibility = DW_ACCESS_private;
-	  fip->non_public_fields = true;
+	  fp->set_accessibility (accessibility::PRIVATE);
 	}
     }
   else if (die->tag == DW_TAG_member || die->tag == DW_TAG_variable)
@@ -11933,30 +11935,9 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
      and create blank accessibility bitfields if necessary.  */
   type->alloc_fields (nfields);
 
-  if (fip->non_public_fields && cu->lang () != language_ada)
-    {
-      ALLOCATE_CPLUS_STRUCT_TYPE (type);
-
-      TYPE_FIELD_PRIVATE_BITS (type) =
-	(B_TYPE *) TYPE_ZALLOC (type, B_BYTES (nfields));
-
-      TYPE_FIELD_PROTECTED_BITS (type) =
-	(B_TYPE *) TYPE_ZALLOC (type, B_BYTES (nfields));
-
-      TYPE_FIELD_IGNORE_BITS (type) =
-	(B_TYPE *) TYPE_ZALLOC (type, B_BYTES (nfields));
-    }
-
-  /* If the type has baseclasses, allocate and clear a bit vector for
-     TYPE_FIELD_VIRTUAL_BITS.  */
   if (!fip->baseclasses.empty () && cu->lang () != language_ada)
     {
-      int num_bytes = B_BYTES (fip->baseclasses.size ());
-      unsigned char *pointer;
-
       ALLOCATE_CPLUS_STRUCT_TYPE (type);
-      pointer = (unsigned char *) TYPE_ZALLOC (type, num_bytes);
-      TYPE_FIELD_VIRTUAL_BITS (type) = pointer;
       TYPE_N_BASECLASSES (type) = fip->baseclasses.size ();
     }
 
@@ -11971,41 +11952,6 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 	   : fip->fields[i - fip->baseclasses.size ()]);
 
       type->field (i) = field.field;
-      switch (field.accessibility)
-	{
-	case DW_ACCESS_private:
-	  if (cu->lang () != language_ada)
-	    SET_TYPE_FIELD_PRIVATE (type, i);
-	  break;
-
-	case DW_ACCESS_protected:
-	  if (cu->lang () != language_ada)
-	    SET_TYPE_FIELD_PROTECTED (type, i);
-	  break;
-
-	case DW_ACCESS_public:
-	  break;
-
-	default:
-	  /* Unknown accessibility.  Complain and treat it as public.  */
-	  {
-	    complaint (_("unsupported accessibility %d"),
-		       field.accessibility);
-	  }
-	  break;
-	}
-      if (i < fip->baseclasses.size ())
-	{
-	  switch (field.virtuality)
-	    {
-	    case DW_VIRTUALITY_virtual:
-	    case DW_VIRTUALITY_pure_virtual:
-	      if (cu->lang () == language_ada)
-		error (_("unexpected virtuality in component of Ada type"));
-	      SET_TYPE_FIELD_VIRTUAL (type, i);
-	      break;
-	    }
-	}
     }
 }
 

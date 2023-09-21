@@ -542,6 +542,16 @@ union field_location
   struct dwarf2_locexpr_baton *dwarf_block;
 };
 
+/* Accessibility of a member.  */
+enum class accessibility : unsigned
+{
+  /* It's important that this be 0 so that fields default to
+     public.  */
+  PUBLIC = 0,
+  PROTECTED = 1,
+  PRIVATE = 2,
+};
+
 struct field
 {
   struct type *type () const
@@ -668,6 +678,41 @@ struct field
     m_loc.dwarf_block = dwarf_block;
   }
 
+  /* Set the field's accessibility.  */
+  void set_accessibility (accessibility acc)
+  { m_accessibility = acc; }
+
+  /* Fetch the field's accessibility.  */
+  enum accessibility accessibility () const
+  { return m_accessibility; }
+
+  /* True if this field is 'private'.  */
+  bool is_private () const
+  { return m_accessibility == accessibility::PRIVATE; }
+
+  /* True if this field is 'protected'.  */
+  bool is_protected () const
+  { return m_accessibility == accessibility::PROTECTED; }
+
+  /* True if this field is 'virtual'.  */
+  bool is_virtual () const
+  { return m_virtual; }
+
+  /* Set the field's "virtual" flag.  */
+  void set_virtual ()
+  { m_virtual = true; }
+
+  /* True if this field is 'ignored'.  */
+  bool is_ignored () const
+  { return m_ignored; }
+
+  /* Set the field's "ignored" flag.  Note that the 'ignored' bit is
+     deprecated.  It was used by some unknown stabs generator, and has
+     been replaced by the optimized-out approach -- however, it
+     remains because the stabs reader was never updated.  */
+  void set_ignored ()
+  { m_ignored = true; }
+
   union field_location m_loc;
 
   /* * For a function or member type, this is 1 if the argument is
@@ -676,6 +721,13 @@ struct field
      bound is not defined.  */
 
   unsigned int m_artificial : 1;
+
+  /* Accessibility of the field.  */
+  ENUM_BITFIELD (accessibility) m_accessibility : 2;
+  /* Whether the field is 'virtual'.  */
+  bool m_virtual : 1;
+  /* Whether the field is 'ignored'.  */
+  bool m_ignored : 1;
 
   /* * Discriminant for union field_location.  */
 
@@ -1672,42 +1724,6 @@ struct cplus_struct_type
 
     struct type *vptr_basetype;
 
-    /* * For derived classes, the number of base classes is given by
-       n_baseclasses and virtual_field_bits is a bit vector containing
-       one bit per base class.  If the base class is virtual, the
-       corresponding bit will be set.
-       I.E, given:
-
-       class A{};
-       class B{};
-       class C : public B, public virtual A {};
-
-       B is a baseclass of C; A is a virtual baseclass for C.
-       This is a C++ 2.0 language feature.  */
-
-    B_TYPE *virtual_field_bits;
-
-    /* * For classes with private fields, the number of fields is
-       given by nfields and private_field_bits is a bit vector
-       containing one bit per field.
-
-       If the field is private, the corresponding bit will be set.  */
-
-    B_TYPE *private_field_bits;
-
-    /* * For classes with protected fields, the number of fields is
-       given by nfields and protected_field_bits is a bit vector
-       containing one bit per field.
-
-       If the field is private, the corresponding bit will be set.  */
-
-    B_TYPE *protected_field_bits;
-
-    /* * For classes with fields to be ignored, either this is
-       optimized out or this field has length 0.  */
-
-    B_TYPE *ignore_field_bits;
-
     /* * For classes, structures, and unions, a description of each
        field, which consists of an overloaded name, followed by the
        types of arguments that the method expects, and then the name
@@ -1952,37 +1968,16 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_CPLUS_DYNAMIC(thistype) TYPE_CPLUS_SPECIFIC (thistype)->is_dynamic
 
 #define BASETYPE_VIA_VIRTUAL(thistype, index) \
-  (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
-    : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index)))
+  ((thistype)->field (index).is_virtual ())
 
-#define TYPE_FIELD_PRIVATE_BITS(thistype) \
-  TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits
-#define TYPE_FIELD_PROTECTED_BITS(thistype) \
-  TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits
-#define TYPE_FIELD_IGNORE_BITS(thistype) \
-  TYPE_CPLUS_SPECIFIC(thistype)->ignore_field_bits
-#define TYPE_FIELD_VIRTUAL_BITS(thistype) \
-  TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits
-#define SET_TYPE_FIELD_PRIVATE(thistype, n) \
-  B_SET (TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits, (n))
-#define SET_TYPE_FIELD_PROTECTED(thistype, n) \
-  B_SET (TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits, (n))
-#define SET_TYPE_FIELD_IGNORE(thistype, n) \
-  B_SET (TYPE_CPLUS_SPECIFIC(thistype)->ignore_field_bits, (n))
-#define SET_TYPE_FIELD_VIRTUAL(thistype, n) \
-  B_SET (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (n))
 #define TYPE_FIELD_PRIVATE(thistype, n) \
-  (TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits == NULL ? 0 \
-    : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits, (n)))
+  ((thistype)->field (n).is_private ())
 #define TYPE_FIELD_PROTECTED(thistype, n) \
-  (TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits == NULL ? 0 \
-    : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits, (n)))
+  ((thistype)->field (n).is_protected ())
 #define TYPE_FIELD_IGNORE(thistype, n) \
-  (TYPE_CPLUS_SPECIFIC(thistype)->ignore_field_bits == NULL ? 0 \
-    : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->ignore_field_bits, (n)))
+  ((thistype)->field (n).is_ignored ())
 #define TYPE_FIELD_VIRTUAL(thistype, n) \
-  (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
-    : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (n)))
+  ((thistype)->field (n).is_virtual ())
 
 #define TYPE_FN_FIELDLISTS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists
 #define TYPE_FN_FIELDLIST(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists[n]
