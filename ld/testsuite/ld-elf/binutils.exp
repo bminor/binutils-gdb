@@ -95,7 +95,6 @@ proc binutils_test { prog_name ld_options test {test_name ""} {readelf_options "
 			      || [istarget "mips*-*-*"] \
 			      || [istarget "nios2*-*-*"] \
 			      || [istarget "or1k-*-*"] \
-			      || [istarget "riscv*-*-*"] \
 			      || [istarget "sh*-*-*"] \
 			      || [istarget "x86_64-*-rdos*"])]
 	# Check if GNU_RELRO segment is generated.
