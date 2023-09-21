@@ -686,6 +686,10 @@ struct field
   enum accessibility accessibility () const
   { return m_accessibility; }
 
+  /* True if this field is 'public'.  */
+  bool is_public () const
+  { return m_accessibility == accessibility::PUBLIC; }
+
   /* True if this field is 'private'.  */
   bool is_private () const
   { return m_accessibility == accessibility::PRIVATE; }
@@ -1964,7 +1968,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_BASECLASS_NAME(thistype,index) (thistype->field (index).name ())
 #define TYPE_BASECLASS_BITPOS(thistype,index) (thistype->field (index).loc_bitpos ())
 #define BASETYPE_VIA_PUBLIC(thistype, index) \
-  ((!TYPE_FIELD_PRIVATE(thistype, index)) && (!TYPE_FIELD_PROTECTED(thistype, index)))
+  ((thistype)->field (index).is_public ())
 #define TYPE_CPLUS_DYNAMIC(thistype) TYPE_CPLUS_SPECIFIC (thistype)->is_dynamic
 
 #define BASETYPE_VIA_VIRTUAL(thistype, index) \
