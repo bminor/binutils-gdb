@@ -911,31 +911,25 @@ need_access_label_p (struct type *type)
 {
   if (type->is_declared_class ())
     {
-      QUIT;
       for (int i = TYPE_N_BASECLASSES (type); i < type->num_fields (); i++)
 	if (!TYPE_FIELD_PRIVATE (type, i))
 	  return true;
-      QUIT;
       for (int j = 0; j < TYPE_NFN_FIELDS (type); j++)
 	for (int i = 0; i < TYPE_FN_FIELDLIST_LENGTH (type, j); i++)
 	  if (!TYPE_FN_FIELD_PRIVATE (TYPE_FN_FIELDLIST1 (type,
 							  j), i))
 	    return true;
-      QUIT;
       for (int i = 0; i < TYPE_TYPEDEF_FIELD_COUNT (type); ++i)
 	if (!TYPE_TYPEDEF_FIELD_PRIVATE (type, i))
 	  return true;
     }
   else
     {
-      QUIT;
       for (int i = TYPE_N_BASECLASSES (type); i < type->num_fields (); i++)
 	if (TYPE_FIELD_PRIVATE (type, i) || TYPE_FIELD_PROTECTED (type, i))
 	  return true;
-      QUIT;
       for (int j = 0; j < TYPE_NFN_FIELDS (type); j++)
 	{
-	  QUIT;
 	  for (int i = 0; i < TYPE_FN_FIELDLIST_LENGTH (type, j); i++)
 	    if (TYPE_FN_FIELD_PROTECTED (TYPE_FN_FIELDLIST1 (type,
 							     j), i)
@@ -944,7 +938,6 @@ need_access_label_p (struct type *type)
 					  i))
 	      return true;
 	}
-      QUIT;
       for (int i = 0; i < TYPE_TYPEDEF_FIELD_COUNT (type); ++i)
 	if (TYPE_TYPEDEF_FIELD_PROTECTED (type, i)
 	    || TYPE_TYPEDEF_FIELD_PRIVATE (type, i))
