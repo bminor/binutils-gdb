@@ -743,7 +743,10 @@ try_open (const char *name, bool *sysrooted)
   result = fopen (name, "r");
 
   if (result != NULL)
-    *sysrooted = is_sysrooted_pathname (name);
+    {
+      *sysrooted = is_sysrooted_pathname (name);
+      track_dependency_files (name);
+    }
 
   if (verbose)
     {
@@ -924,8 +927,6 @@ ldfile_open_command_file_1 (const char *name, enum script_open_style open_how)
       einfo (_("%F%P: cannot open linker script file %s: %E\n"), name);
       return;
     }
-
-  track_dependency_files (name);
 
   lex_push_file (ldlex_input_stack, name, sysrooted);
 
