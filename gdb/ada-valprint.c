@@ -627,7 +627,7 @@ print_field_values (struct value *value, struct value *outer_value,
 	{
 	  /* Bitfields require special handling, especially due to byte
 	     order problems.  */
-	  if (HAVE_CPLUS_STRUCT (type) && TYPE_FIELD_IGNORE (type, i))
+	  if (type->field (i).is_ignored ())
 	    {
 	      fputs_styled (_("<optimized out or zero length>"),
 			    metadata_style.style (), stream);

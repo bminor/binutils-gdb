@@ -1974,15 +1974,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define BASETYPE_VIA_VIRTUAL(thistype, index) \
   ((thistype)->field (index).is_virtual ())
 
-#define TYPE_FIELD_PRIVATE(thistype, n) \
-  ((thistype)->field (n).is_private ())
-#define TYPE_FIELD_PROTECTED(thistype, n) \
-  ((thistype)->field (n).is_protected ())
-#define TYPE_FIELD_IGNORE(thistype, n) \
-  ((thistype)->field (n).is_ignored ())
-#define TYPE_FIELD_VIRTUAL(thistype, n) \
-  ((thistype)->field (n).is_virtual ())
-
 #define TYPE_FN_FIELDLISTS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists
 #define TYPE_FN_FIELDLIST(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists[n]
 #define TYPE_FN_FIELDLIST1(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists[n].fn_fields

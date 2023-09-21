@@ -5229,33 +5229,34 @@ recursive_dump_type (struct type *type, int spaces)
   gdb_printf ("%s\n", host_address_to_string (type->fields ()));
   for (idx = 0; idx < type->num_fields (); idx++)
     {
+      field &fld = type->field (idx);
       if (type->code () == TYPE_CODE_ENUM)
 	gdb_printf ("%*s[%d] enumval %s type ", spaces + 2, "",
-		    idx, plongest (type->field (idx).loc_enumval ()));
+		    idx, plongest (fld.loc_enumval ()));
       else
 	gdb_printf ("%*s[%d] bitpos %s bitsize %d type ", spaces + 2, "",
-		    idx, plongest (type->field (idx).loc_bitpos ()),
-		    type->field (idx).bitsize ());
+		    idx, plongest (fld.loc_bitpos ()),
+		    fld.bitsize ());
       gdb_printf ("%s name '%s' (%s)",
-		  host_address_to_string (type->field (idx).type ()),
-		  type->field (idx).name () != NULL
-		  ? type->field (idx).name ()
+		  host_address_to_string (fld.type ()),
+		  fld.name () != NULL
+		  ? fld.name ()
 		  : "<NULL>",
-		  host_address_to_string (type->field (idx).name ()));
-      if (TYPE_FIELD_VIRTUAL (type, idx))
+		  host_address_to_string (fld.name ()));
+      if (fld.is_virtual ())
 	gdb_printf (" virtual");
 
-      if (TYPE_FIELD_PRIVATE (type, idx))
+      if (fld.is_private ())
 	gdb_printf (" private");
-      else if (TYPE_FIELD_PROTECTED (type, idx))
+      else if (fld.is_protected ())
 	gdb_printf (" protected");
-      else if (TYPE_FIELD_IGNORE (type, idx))
+      else if (fld.is_ignored ())
 	gdb_printf (" ignored");
 
       gdb_printf ("\n");
-      if (type->field (idx).type () != NULL)
+      if (fld.type () != NULL)
 	{
-	  recursive_dump_type (type->field (idx).type (), spaces + 4);
+	  recursive_dump_type (fld.type (), spaces + 4);
 	}
     }
   if (type->code () == TYPE_CODE_RANGE)

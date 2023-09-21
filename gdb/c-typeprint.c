@@ -238,7 +238,7 @@ cp_type_print_derivation_info (struct ui_file *stream,
       gdb_puts (i == 0 ? ": " : ", ", stream);
       gdb_printf (stream, "%s%s ",
 		  BASETYPE_VIA_PUBLIC (type, i)
-		  ? "public" : (TYPE_FIELD_PROTECTED (type, i)
+		  ? "public" : (type->field (i).is_protected ()
 				? "protected" : "private"),
 		  BASETYPE_VIA_VIRTUAL (type, i) ? " virtual" : "");
       name = TYPE_BASECLASS (type, i)->name ();
@@ -912,7 +912,7 @@ need_access_label_p (struct type *type)
   if (type->is_declared_class ())
     {
       for (int i = TYPE_N_BASECLASSES (type); i < type->num_fields (); i++)
-	if (!TYPE_FIELD_PRIVATE (type, i))
+	if (!type->field (i).is_private ())
 	  return true;
       for (int j = 0; j < TYPE_NFN_FIELDS (type); j++)
 	for (int i = 0; i < TYPE_FN_FIELDLIST_LENGTH (type, j); i++)
@@ -926,7 +926,7 @@ need_access_label_p (struct type *type)
   else
     {
       for (int i = TYPE_N_BASECLASSES (type); i < type->num_fields (); i++)
-	if (TYPE_FIELD_PRIVATE (type, i) || TYPE_FIELD_PROTECTED (type, i))
+	if (!type->field (i).is_public ())
 	  return true;
       for (int j = 0; j < TYPE_NFN_FIELDS (type); j++)
 	{
@@ -1102,8 +1102,8 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	    {
 	      section_type = output_access_specifier
 		(stream, section_type, level,
-		 TYPE_FIELD_PROTECTED (type, i),
-		 TYPE_FIELD_PRIVATE (type, i), flags);
+		 type->field (i).is_protected (),
+		 type->field (i).is_private (), flags);
 	    }
 
 	  bool is_static = type->field (i).is_static ();

@@ -73,9 +73,10 @@ compile_cplus_instance::decl_name (const char *natural)
 static enum gcc_cp_symbol_kind
 get_field_access_flag (const struct type *type, int num)
 {
-  if (TYPE_FIELD_PROTECTED (type, num))
+  field &fld = type->field (num);
+  if (fld.is_protected ())
     return GCC_CP_ACCESS_PROTECTED;
-  else if (TYPE_FIELD_PRIVATE (type, num))
+  else if (fld.is_private ())
     return GCC_CP_ACCESS_PRIVATE;
 
   /* GDB assumes everything else is public.  */
@@ -583,7 +584,7 @@ compile_cplus_convert_struct_or_union_members
     {
       const char *field_name = type->field (i).name ();
 
-      if (TYPE_FIELD_IGNORE (type, i)
+      if (type->field (i).is_ignored ()
 	  || type->field (i).is_artificial ())
 	continue;
 

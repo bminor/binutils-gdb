@@ -486,7 +486,9 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 
 	      if (HAVE_CPLUS_STRUCT (type))
 		{
-		  if (TYPE_FIELD_PROTECTED (type, i))
+		  field &fld = type->field (i);
+
+		  if (fld.is_protected ())
 		    {
 		      if (section_type != s_protected)
 			{
@@ -495,7 +497,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 				      level + 2, "");
 			}
 		    }
-		  else if (TYPE_FIELD_PRIVATE (type, i))
+		  else if (fld.is_private ())
 		    {
 		      if (section_type != s_private)
 			{
