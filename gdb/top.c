@@ -647,12 +647,12 @@ execute_fn_to_string (std::string &res, std::function<void(void)> fn,
   catch (...)
     {
       /* Finally.  */
-      res = std::move (str_file.string ());
+      res = str_file.release ();
       throw;
     }
 
   /* And finally.  */
-  res = std::move (str_file.string ());
+  res = str_file.release ();
 }
 
 /* See gdbcmd.h.  */

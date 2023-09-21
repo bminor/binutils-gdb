@@ -7581,7 +7581,7 @@ bp_location::to_string () const
   string_file stb;
   ui_out_redirect_pop redir (current_uiout, &stb);
   print_breakpoint_location (this->owner, this);
-  return stb.string ();
+  return stb.release ();
 }
 
 /* Decrement reference count.  If the reference count reaches 0,
