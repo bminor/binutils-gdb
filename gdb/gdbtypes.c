@@ -5099,6 +5099,23 @@ dump_dynamic_prop (dynamic_prop const& prop)
     }
 }
 
+/* Return a string that represents a type code.  */
+static const char *
+type_code_name (type_code code)
+{
+  switch (code)
+    {
+#define OP(X) case X: return # X;
+#include "type-codes.def"
+#undef OP
+
+    case TYPE_CODE_UNDEF:
+      return "TYPE_CODE_UNDEF";
+    }
+
+  gdb_assert_not_reached ("unhandled type_code");
+}
+
 void
 recursive_dump_type (struct type *type, int spaces)
 {
@@ -5136,87 +5153,7 @@ recursive_dump_type (struct type *type, int spaces)
 	      type->name () ? type->name () : "<NULL>",
 	      host_address_to_string (type->name ()));
   gdb_printf ("%*scode 0x%x ", spaces, "", type->code ());
-  switch (type->code ())
-    {
-    case TYPE_CODE_UNDEF:
-      gdb_printf ("(TYPE_CODE_UNDEF)");
-      break;
-    case TYPE_CODE_PTR:
-      gdb_printf ("(TYPE_CODE_PTR)");
-      break;
-    case TYPE_CODE_ARRAY:
-      gdb_printf ("(TYPE_CODE_ARRAY)");
-      break;
-    case TYPE_CODE_STRUCT:
-      gdb_printf ("(TYPE_CODE_STRUCT)");
-      break;
-    case TYPE_CODE_UNION:
-      gdb_printf ("(TYPE_CODE_UNION)");
-      break;
-    case TYPE_CODE_ENUM:
-      gdb_printf ("(TYPE_CODE_ENUM)");
-      break;
-    case TYPE_CODE_FLAGS:
-      gdb_printf ("(TYPE_CODE_FLAGS)");
-      break;
-    case TYPE_CODE_FUNC:
-      gdb_printf ("(TYPE_CODE_FUNC)");
-      break;
-    case TYPE_CODE_INT:
-      gdb_printf ("(TYPE_CODE_INT)");
-      break;
-    case TYPE_CODE_FLT:
-      gdb_printf ("(TYPE_CODE_FLT)");
-      break;
-    case TYPE_CODE_VOID:
-      gdb_printf ("(TYPE_CODE_VOID)");
-      break;
-    case TYPE_CODE_SET:
-      gdb_printf ("(TYPE_CODE_SET)");
-      break;
-    case TYPE_CODE_RANGE:
-      gdb_printf ("(TYPE_CODE_RANGE)");
-      break;
-    case TYPE_CODE_STRING:
-      gdb_printf ("(TYPE_CODE_STRING)");
-      break;
-    case TYPE_CODE_ERROR:
-      gdb_printf ("(TYPE_CODE_ERROR)");
-      break;
-    case TYPE_CODE_MEMBERPTR:
-      gdb_printf ("(TYPE_CODE_MEMBERPTR)");
-      break;
-    case TYPE_CODE_METHODPTR:
-      gdb_printf ("(TYPE_CODE_METHODPTR)");
-      break;
-    case TYPE_CODE_METHOD:
-      gdb_printf ("(TYPE_CODE_METHOD)");
-      break;
-    case TYPE_CODE_REF:
-      gdb_printf ("(TYPE_CODE_REF)");
-      break;
-    case TYPE_CODE_CHAR:
-      gdb_printf ("(TYPE_CODE_CHAR)");
-      break;
-    case TYPE_CODE_BOOL:
-      gdb_printf ("(TYPE_CODE_BOOL)");
-      break;
-    case TYPE_CODE_COMPLEX:
-      gdb_printf ("(TYPE_CODE_COMPLEX)");
-      break;
-    case TYPE_CODE_TYPEDEF:
-      gdb_printf ("(TYPE_CODE_TYPEDEF)");
-      break;
-    case TYPE_CODE_NAMESPACE:
-      gdb_printf ("(TYPE_CODE_NAMESPACE)");
-      break;
-    case TYPE_CODE_FIXED_POINT:
-      gdb_printf ("(TYPE_CODE_FIXED_POINT)");
-      break;
-    default:
-      gdb_printf ("(UNKNOWN TYPE CODE)");
-      break;
-    }
+  gdb_printf ("(%s)", type_code_name (type->code ()));
   gdb_puts ("\n");
   gdb_printf ("%*slength %s\n", spaces, "",
 	      pulongest (type->length ()));
