@@ -414,7 +414,7 @@
   <syscall name="__mq_timedsend50" number="432"/>
   <syscall name="__mq_timedreceive50" number="433"/>
   <syscall name="compat_60__lwp_park" number="434"/>
-  <syscall name="__kevent50" number="435"/>
+  <syscall name="compat_100___kevent50" number="435"/>
   <syscall name="__pselect50" number="436"/>
   <syscall name="__pollts50" number="437"/>
   <syscall name="__aio_suspend50" number="438"/>
@@ -478,4 +478,9 @@
   <syscall name="__acl_aclcheck_file" number="497"/>
   <syscall name="__acl_aclcheck_fd" number="498"/>
   <syscall name="lpathconf" number="499"/>
+  <syscall name="memfd_create" number="500"/>
+  <syscall name="__kevent100" number="501"/>
+  <syscall name="epoll_create1" number="502"/>
+  <syscall name="epoll_ctl" number="503"/>
+  <syscall name="epoll_pwait2" number="504"/>
 </syscalls_info>
