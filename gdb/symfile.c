@@ -2475,20 +2475,32 @@ reread_symbols (int from_tty)
       if (objfile->separate_debug_objfile_backlink)
 	continue;
 
-      /* If this object is from an archive (what you usually create with
-	 `ar', often called a `static library' on most systems, though
-	 a `shared library' on AIX is also an archive), then you should
-	 stat on the archive name, not member name.  */
-      const char *filename;
-      if (objfile->obfd->my_archive)
-	filename = bfd_get_filename (objfile->obfd->my_archive);
-      else
-	filename = objfile_name (objfile);
+      /* When a in-memory BFD is initially created, it's mtime (as
+	 returned by bfd_get_mtime) is the creation time of the BFD.
+	 However, we call bfd_stat here as we want to see if the
+	 underlying file has changed, and in this case an in-memory BFD
+	 will return an st_mtime of zero, so it appears that the in-memory
+	 file has changed, which isn't what we want here -- this code is
+	 about reloading BFDs that changed on disk.
+
+	 Just skip any in-memory BFD.  */
+      if (objfile->obfd.get ()->flags & BFD_IN_MEMORY)
+	continue;
 
       struct stat new_statbuf;
-      int res = stat (filename, &new_statbuf);
+      int res = bfd_stat (objfile->obfd.get (), &new_statbuf);
       if (res != 0)
 	{
+	  /* If this object is from an archive (what you usually create
+	     with `ar', often called a `static library' on most systems,
+	     though a `shared library' on AIX is also an archive), then you
+	     should stat on the archive name, not member name.  */
+	  const char *filename;
+	  if (objfile->obfd->my_archive)
+	    filename = bfd_get_filename (objfile->obfd->my_archive);
+	  else
+	    filename = objfile_name (objfile);
+
 	  warning (_("`%ps' has disappeared; keeping its symbols."),
 		   styled_string (file_name_style.style (), filename));
 	  continue;
