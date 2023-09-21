@@ -125,7 +125,8 @@ proc _dap_send_request {command {obj {}}} {
 }
 
 # Read a JSON response from gdb.  This will return a dict on
-# success, or throw an exception on error.
+# success, or throw an exception on error.  On success, the global
+# "last_ton" will be set to the TON form of the result.
 proc _dap_read_json {} {
     set length ""
     gdb_expect {
@@ -171,16 +172,19 @@ proc _dap_read_json {} {
 	incr length -$this_len
     }
 
-    set ton [ton::json2ton $json]
-    return [namespace eval ton::2dict $ton]
+    global last_ton
+    set last_ton [ton::json2ton $json]
+    return [namespace eval ton::2dict $last_ton]
 }
 
 # Read a sequence of JSON objects from gdb, until a response object is
 # seen.  If the response object has the request sequence number NUM,
 # and is for command CMD, return a list of two elements: the response
 # object and a list of any preceding events, in the order they were
-# emitted.  The objects are dicts.  If a response object is seen but has
-# the wrong sequence number or command, throw an exception
+# emitted.  The objects are dicts.  If a response object is seen but
+# has the wrong sequence number or command, throw an exception If a
+# response is seen, this leaves the global "last_ton" set to the TON
+# for the response.
 
 proc _dap_read_response {cmd num} {
     set result {}
