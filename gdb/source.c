@@ -594,7 +594,8 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 	      print_sys_errmsg (name, save_errno);
 	    }
 	  else if ((st.st_mode & S_IFMT) != S_IFDIR)
-	    warning (_("%s is not a directory."), name);
+	    warning (_("%ps is not a directory."),
+		     styled_string (file_name_style.style (), name));
 	}
 
     append:
