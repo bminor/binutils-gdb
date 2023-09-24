@@ -7403,9 +7403,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 
 	if (init_frame)
 	  {
-	    struct frame_id current_id
-	      = get_frame_id (get_current_frame ());
-	    if (current_id == ecs->event_thread->initiating_frame)
+	    if (curr_frame_id == ecs->event_thread->initiating_frame)
 	      {
 		/* Case 2.  Fall through.  */
 	      }
@@ -7578,7 +7576,7 @@ process_event_stop_test (struct execution_control_state *ecs)
   if (pc_in_thread_step_range (ecs->event_thread->stop_pc (),
 			       ecs->event_thread)
       && (execution_direction != EXEC_REVERSE
-	  || get_frame_id (frame) == ecs->event_thread->control.step_frame_id))
+	  || curr_frame_id == original_frame_id))
     {
       infrun_debug_printf
 	("stepping inside range [%s-%s]",
@@ -8021,8 +8019,7 @@ process_event_stop_test (struct execution_control_state *ecs)
      frame machinery detected some skipped call sites, we have entered
      a new inline function.  */
 
-  if ((get_frame_id (get_current_frame ())
-       == ecs->event_thread->control.step_frame_id)
+  if ((curr_frame_id == original_frame_id)
       && inline_skipped_frames (ecs->event_thread))
     {
       infrun_debug_printf ("stepped into inlined function");
@@ -8070,10 +8067,8 @@ process_event_stop_test (struct execution_control_state *ecs)
      through a more inlined call beyond its call site.  */
 
   if (get_frame_type (get_current_frame ()) == INLINE_FRAME
-      && (get_frame_id (get_current_frame ())
-	  != ecs->event_thread->control.step_frame_id)
-      && stepped_in_from (get_current_frame (),
-			  ecs->event_thread->control.step_frame_id))
+      && (curr_frame_id != original_frame_id)
+      && stepped_in_from (get_current_frame (), original_frame_id))
     {
       infrun_debug_printf ("stepping through inlined function");
 
@@ -8103,8 +8098,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  end_stepping_range (ecs);
 	  return;
 	}
-      else if (get_frame_id (get_current_frame ())
-	       == ecs->event_thread->control.step_frame_id)
+      else if (curr_frame_id == original_frame_id)
 	{
 	  /* We are not at the start of a statement, and we have not changed
 	     frame.
