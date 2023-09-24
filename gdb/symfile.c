@@ -2489,9 +2489,8 @@ reread_symbols (int from_tty)
       int res = stat (filename, &new_statbuf);
       if (res != 0)
 	{
-	  /* FIXME, should use print_sys_errmsg but it's not filtered.  */
-	  gdb_printf (_("`%ps' has disappeared; keeping its symbols.\n"),
-		      styled_string (file_name_style.style (), filename));
+	  warning (_("`%ps' has disappeared; keeping its symbols."),
+		   styled_string (file_name_style.style (), filename));
 	  continue;
 	}
       time_t new_modtime = new_statbuf.st_mtime;

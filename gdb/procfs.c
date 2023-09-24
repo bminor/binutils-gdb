@@ -46,6 +46,7 @@
 #include "gdbsupport/scoped_fd.h"
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/buildargv.h"
+#include "cli/cli-style.h"
 
 /* This module provides the interface between GDB and the
    /proc file system, which is used on many versions of Unix
@@ -558,7 +559,7 @@ enum { NOKILL, KILL };
 static void
 dead_procinfo (procinfo *pi, const char *msg, int kill_p)
 {
-  print_sys_errmsg (pi->pathname, errno);
+  warning_filename_and_errno (pi->pathname, errno);
   if (kill_p == KILL)
     kill (pi->pid, SIGKILL);
 
@@ -594,18 +595,20 @@ static void
 proc_warn (procinfo *pi, const char *func, int line)
 {
   int saved_errno = errno;
-  std::string errmsg
-    = string_printf ("procfs: %s line %d, %s", func, line, pi->pathname);
-  print_sys_errmsg (errmsg.c_str (), saved_errno);
+  warning ("procfs: %s line %d, %ps: %s",
+	   func, line, styled_string (file_name_style.style (),
+				      pi->pathname),
+	   safe_strerror (saved_errno));
 }
 
 static void
 proc_error (procinfo *pi, const char *func, int line)
 {
   int saved_errno = errno;
-  std::string errmsg
-    = string_printf ("procfs: %s line %d, %s", func, line, pi->pathname);
-  perror_with_name (errmsg.c_str (), saved_errno);
+  error ("procfs: %s line %d, %ps: %s",
+	 func, line, styled_string (file_name_style.style (),
+				    pi->pathname),
+	 safe_strerror (saved_errno));
 }
 
 /* Updates the status struct in the procinfo.  There is a 'valid'

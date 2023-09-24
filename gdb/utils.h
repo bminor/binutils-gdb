@@ -275,7 +275,13 @@ extern void fprintf_symbol (struct ui_file *, const char *,
 
 extern void perror_warning_with_name (const char *string);
 
-extern void print_sys_errmsg (const char *, int);
+/* Issue a warning formatted as '<filename>: <explanation>', where
+   <filename> is FILENAME with filename styling applied.  As such, don't
+   pass anything more than a filename in this string.  The <explanation>
+   is a string returned from calling safe_strerror(SAVED_ERRNO).  */
+
+extern void warning_filename_and_errno (const char *filename,
+					int saved_errno);
 
 /* Warnings and error messages.  */
 

@@ -392,7 +392,7 @@ proc test_catch_syscall_fail_nodatadir {} {
 	# Make sure GDB doesn't load the syscalls xml from the system
 	# data directory.
 	gdb_test "set data-directory /the/path/to/nowhere" \
-	    "Warning: /the/path/to/nowhere: .*"
+	    "warning: /the/path/to/nowhere: .*"
 
 	# Testing to see if we receive a warning when calling "catch
 	# syscall" without XML support (without datadir).
@@ -658,7 +658,7 @@ proc do_syscall_tests_without_xml {} {
     # Make sure GDB doesn't load the syscalls xml from the system data
     # directory.
     gdb_test "set data-directory /the/path/to/nowhere" \
-	"Warning: /the/path/to/nowhere: .*"
+	"warning: /the/path/to/nowhere: .*"
 
     # Let's test if we can catch syscalls without XML support.
     # We should succeed, but GDB is not supposed to print syscall names.

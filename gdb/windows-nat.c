@@ -2625,7 +2625,7 @@ windows_nat_target::create_inferior (const char *exec_file,
       tty = open (inferior_tty.c_str (), O_RDWR | O_NOCTTY);
       if (tty < 0)
 	{
-	  print_sys_errmsg (inferior_tty.c_str (), errno);
+	  warning_filename_and_errno (inferior_tty.c_str (), errno);
 	  ostdin = ostdout = ostderr = -1;
 	}
       else

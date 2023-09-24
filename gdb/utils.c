@@ -619,14 +619,13 @@ perror_warning_with_name (const char *string)
   warning (_("%s"), combined.c_str ());
 }
 
-/* Print the system error message for ERRCODE, and also mention STRING
-   as the file name for which the error was encountered.  */
+/* See utils.h.  */
 
 void
-print_sys_errmsg (const char *string, int errcode)
+warning_filename_and_errno (const char *filename, int saved_errno)
 {
-  const char *err = safe_strerror (errcode);
-  gdb_printf (gdb_stderr, "%s: %s.\n", string, err);
+  warning (_("%ps: %s"), styled_string (file_name_style.style (), filename),
+	   safe_strerror (saved_errno));
 }
 
 /* Control C eventually causes this to be called, at a convenient time.  */

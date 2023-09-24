@@ -115,12 +115,7 @@ set_gdb_data_directory (const char *new_datadir)
   struct stat st;
 
   if (stat (new_datadir, &st) < 0)
-    {
-      int save_errno = errno;
-
-      gdb_printf (gdb_stderr, "Warning: ");
-      print_sys_errmsg (new_datadir, save_errno);
-    }
+    warning_filename_and_errno (new_datadir, errno);
   else if (!S_ISDIR (st.st_mode))
     warning (_("%ps is not a directory."),
 	     styled_string (file_name_style.style (), new_datadir));

@@ -766,7 +766,8 @@ check_syscall (const char *msg, int result)
 {
   if (result < 0)
     {
-      print_sys_errmsg (msg, errno);
+      gdb_printf (gdb_stderr, "%s:%s.\n", msg,
+		  safe_strerror (errno));
       _exit (1);
     }
 }

@@ -587,12 +587,7 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 	     a directory/etc, then having them in the path should be
 	     harmless.  */
 	  if (stat (name, &st) < 0)
-	    {
-	      int save_errno = errno;
-
-	      gdb_printf (gdb_stderr, "Warning: ");
-	      print_sys_errmsg (name, save_errno);
-	    }
+	    warning_filename_and_errno (name, errno);
 	  else if ((st.st_mode & S_IFMT) != S_IFDIR)
 	    warning (_("%ps is not a directory."),
 		     styled_string (file_name_style.style (), name));
@@ -1341,11 +1336,9 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
       if (!(flags & PRINT_SOURCE_LINES_NOERROR))
 	{
 	  const char *filename = symtab_to_filename_for_display (s);
-	  int len = strlen (filename) + 100;
-	  char *name = (char *) alloca (len);
-
-	  xsnprintf (name, len, "%d\t%s", line, filename);
-	  print_sys_errmsg (name, errcode);
+	  warning (_("%d\t%ps: %s"), line,
+		   styled_string (file_name_style.style (), filename),
+		   safe_strerror (errcode));
 	}
       else
 	{
