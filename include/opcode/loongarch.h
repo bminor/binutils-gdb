@@ -29,6 +29,18 @@ extern "C"
 #endif
 
   #define LARCH_NOP 0x03400000
+  #define LARCH_B 0x50000000
+  /* BCEQZ/BCNEZ.  */
+  #define LARCH_FLOAT_BRANCH 0x48000000
+  #define LARCH_BRANCH_OPCODE_MASK 0xfc000000
+  #define LARCH_BRANCH_INVERT_BIT 0x04000000
+  #define LARCH_FLOAT_BRANCH_INVERT_BIT 0x00000100
+
+  #define ENCODE_BRANCH16_IMM(x) (((x) >> 2) << 10)
+
+  #define OUT_OF_RANGE(value, bits, align)	\
+    ((value) < (-(1 << ((bits) - 1) << align)) 	\
+      || (value) > ((((1 << ((bits) - 1)) - 1) << align)))
 
   typedef uint32_t insn_t;
 

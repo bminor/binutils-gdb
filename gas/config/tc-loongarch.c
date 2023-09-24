@@ -106,6 +106,16 @@ const char *md_shortopts = "O::g::G:";
 
 static const char default_arch[] = DEFAULT_ARCH;
 
+/* The lowest 4-bit is the bytes of instructions.  */
+#define RELAX_BRANCH_16 0xc0000014
+#define RELAX_BRANCH_21 0xc0000024
+#define RELAX_BRANCH_26 0xc0000048
+
+#define RELAX_BRANCH(x) \
+  (((x) & 0xf0000000) == 0xc0000000)
+#define RELAX_BRANCH_ENCODE(x) \
+  (BFD_RELOC_LARCH_B16 == (x) ? RELAX_BRANCH_16 : RELAX_BRANCH_21)
+
 enum options
 {
   OPTION_IGNORE = OPTION_MD_BASE,
@@ -953,11 +963,22 @@ append_fixed_insn (struct loongarch_cl_insn *insn)
   move_insn (insn, frag_now, f - frag_now->fr_literal);
 }
 
+/* Add instructions based on the worst-case scenario firstly.  */
+static void
+append_relaxed_branch_insn (struct loongarch_cl_insn *insn, int max_chars,
+	    int var, relax_substateT subtype, symbolS *symbol, offsetT offset)
+{
+  frag_grow (max_chars);
+  move_insn (insn, frag_now, frag_more (0) - frag_now->fr_literal);
+  frag_var (rs_machine_dependent, max_chars, var,
+	    subtype, symbol, offset, NULL);
+}
+
 static void
 append_fixp_and_insn (struct loongarch_cl_insn *ip)
 {
   reloc_howto_type *howto;
-  bfd_reloc_code_real_type reloc_type;
+  bfd_reloc_code_real_type r_type;
   struct reloc_info *reloc_info = ip->reloc_info;
   size_t i;
 
@@ -965,14 +986,40 @@ append_fixp_and_insn (struct loongarch_cl_insn *ip)
 
   for (i = 0; i < ip->reloc_num; i++)
     {
-      reloc_type = reloc_info[i].type;
-      howto = bfd_reloc_type_lookup (stdoutput, reloc_type);
-      if (howto == NULL)
-	as_fatal (_("no HOWTO loong relocation number %d"), reloc_type);
+      r_type = reloc_info[i].type;
 
-      ip->fixp[i] =
-	fix_new_exp (ip->frag, ip->where, bfd_get_reloc_size (howto),
-		     &reloc_info[i].value, FALSE, reloc_type);
+      if (r_type != BFD_RELOC_UNUSED)
+	{
+
+	  gas_assert (&(reloc_info[i].value));
+	  if (BFD_RELOC_LARCH_B16 == r_type || BFD_RELOC_LARCH_B21 == r_type)
+	    {
+	      int min_bytes = 4; /* One branch instruction.  */
+	      unsigned max_bytes = 8; /* Branch and jump instructions.  */
+
+	      if (now_seg == absolute_section)
+		{
+		  as_bad (_("relaxable branches not supported in absolute section"));
+		  return;
+		}
+
+	      append_relaxed_branch_insn (ip, max_bytes, min_bytes,
+					  RELAX_BRANCH_ENCODE (r_type),
+					  reloc_info[i].value.X_add_symbol,
+					  reloc_info[i].value.X_add_number);
+	      return;
+	    }
+	  else
+	    {
+	      howto = bfd_reloc_type_lookup (stdoutput, r_type);
+	      if (howto == NULL)
+		as_fatal (_("no HOWTO loong relocation number %d"), r_type);
+
+	      ip->fixp[i] = fix_new_exp (ip->frag, ip->where,
+					 bfd_get_reloc_size (howto),
+					 &reloc_info[i].value, FALSE, r_type);
+	    }
+	}
     }
 
   if (ip->insn_length < ip->relax_max_length)
@@ -1488,14 +1535,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 }
 
 int
-loongarch_relax_frag (asection *sec ATTRIBUTE_UNUSED,
-		      fragS *fragp ATTRIBUTE_UNUSED,
-		      long stretch ATTRIBUTE_UNUSED)
-{
-  return 0;
-}
-
-int
 md_estimate_size_before_relax (fragS *fragp ATTRIBUTE_UNUSED,
 			       asection *segtype ATTRIBUTE_UNUSED)
 {
@@ -1524,30 +1563,6 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     }
 
   return reloc;
-}
-
-/* Convert a machine dependent frag.  */
-void
-md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec ATTRIBUTE_UNUSED,
-		 fragS *fragp)
-{
-  expressionS exp;
-  exp.X_op = O_symbol;
-  exp.X_add_symbol = fragp->fr_symbol;
-  exp.X_add_number = fragp->fr_offset;
-  bfd_byte *buf = (bfd_byte *)fragp->fr_literal + fragp->fr_fix;
-
-  fixS *fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
-				4, &exp, false, fragp->fr_subtype);
-  buf += 4;
-
-  fixp->fx_file = fragp->fr_file;
-  fixp->fx_line = fragp->fr_line;
-  fragp->fr_fix += fragp->fr_var;
-
-  gas_assert (fragp->fr_next == NULL
-	      || (fragp->fr_next->fr_address - fragp->fr_address
-		  == fragp->fr_fix));
 }
 
 /* Standard calling conventions leave the CFA at SP on entry.  */
@@ -1774,4 +1789,143 @@ void
 loongarch_elf_final_processing (void)
 {
   elf_elfheader (stdoutput)->e_flags = LARCH_opts.ase_abi;
+}
+
+/* Compute the length of a branch sequence, and adjust the stored length
+   accordingly.  If FRAGP is NULL, the worst-case length is returned.  */
+static unsigned
+loongarch_relaxed_branch_length (fragS *fragp, asection *sec, int update)
+{
+  int length = 4;
+
+  if (!fragp)
+    return 8;
+
+  if (fragp->fr_symbol != NULL
+      && S_IS_DEFINED (fragp->fr_symbol)
+      && !S_IS_WEAK (fragp->fr_symbol)
+      && sec == S_GET_SEGMENT (fragp->fr_symbol))
+    {
+      offsetT val = S_GET_VALUE (fragp->fr_symbol) + fragp->fr_offset;
+
+      val -= fragp->fr_address + fragp->fr_fix;
+
+      if (RELAX_BRANCH_16 == fragp->fr_subtype
+	  && OUT_OF_RANGE (val, 16, 2))
+	{
+	  length = 8;
+	  if (update)
+	    fragp->fr_subtype = RELAX_BRANCH_26;
+	}
+
+      if (RELAX_BRANCH_21 == fragp->fr_subtype
+	  && OUT_OF_RANGE (val, 21, 2))
+	{
+	  length = 8;
+	  if (update)
+	    fragp->fr_subtype = RELAX_BRANCH_26;
+	}
+
+      if (RELAX_BRANCH_26 == fragp->fr_subtype)
+	length = 8;
+    }
+
+  return length;
+}
+
+int
+loongarch_relax_frag (asection *sec ATTRIBUTE_UNUSED,
+		      fragS *fragp ATTRIBUTE_UNUSED,
+		      long stretch ATTRIBUTE_UNUSED)
+{
+  if (RELAX_BRANCH (fragp->fr_subtype))
+    {
+      offsetT old_var = fragp->fr_var;
+      fragp->fr_var = loongarch_relaxed_branch_length (fragp, sec, true);
+      return fragp->fr_var - old_var;
+    }
+  return 0;
+}
+
+/* Expand far branches to multi-instruction sequences.
+   Branch instructions:
+   beq, bne, blt, bgt, bltz, bgtz, ble, bge, blez, bgez
+   bltu, bgtu, bleu, bgeu
+   beqz, bnez, bceqz, bcnez.  */
+
+static void
+loongarch_convert_frag_branch (fragS *fragp)
+{
+  bfd_byte *buf;
+  expressionS exp;
+  fixS *fixp;
+  insn_t insn;
+
+  buf = (bfd_byte *)fragp->fr_literal + fragp->fr_fix;
+
+  exp.X_op = O_symbol;
+  exp.X_add_symbol = fragp->fr_symbol;
+  exp.X_add_number = fragp->fr_offset;
+
+  gas_assert ((fragp->fr_subtype & 0xf) == fragp->fr_var);
+
+  /* blt $t0, $t1, .L1
+     nop
+     change to:
+     bge $t0, $t1, .L2
+     b .L1
+   .L2:
+     nop  */
+  switch (fragp->fr_subtype)
+    {
+    case RELAX_BRANCH_26:
+      insn = bfd_getl32 (buf);
+      /* Invert the branch condition.  */
+      if (LARCH_FLOAT_BRANCH == (insn & LARCH_BRANCH_OPCODE_MASK))
+	insn ^= LARCH_FLOAT_BRANCH_INVERT_BIT;
+      else
+	insn ^= LARCH_BRANCH_INVERT_BIT;
+      insn |= ENCODE_BRANCH16_IMM (8);  /* Set target to PC + 8.  */
+      bfd_putl32 (insn, buf);
+      buf += 4;
+
+      /* Add the B instruction and jump to the original target.  */
+      bfd_putl32 (LARCH_B, buf);
+      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
+			  4, &exp, false, BFD_RELOC_LARCH_B26);
+      buf += 4;
+      break;
+    case RELAX_BRANCH_21:
+      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
+			  4, &exp, false, BFD_RELOC_LARCH_B21);
+      buf += 4;
+      break;
+    case RELAX_BRANCH_16:
+      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
+			  4, &exp, false, BFD_RELOC_LARCH_B16);
+      buf += 4;
+      break;
+
+    default:
+      abort();
+    }
+
+  fixp->fx_file = fragp->fr_file;
+  fixp->fx_line = fragp->fr_line;
+
+  gas_assert (buf == (bfd_byte *)fragp->fr_literal
+	      + fragp->fr_fix + fragp->fr_var);
+
+  fragp->fr_fix += fragp->fr_var;
+}
+
+/* Relax a machine dependent frag.  This returns the amount by which
+   the current size of the frag should change.  */
+
+void
+md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec ATTRIBUTE_UNUSED,
+		 fragS *fragp)
+{
+  gas_assert (RELAX_BRANCH (fragp->fr_subtype));
+  loongarch_convert_frag_branch (fragp);
 }
