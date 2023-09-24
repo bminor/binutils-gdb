@@ -255,8 +255,6 @@ typedef struct procinfo {
   int threads_valid: 1;
 } procinfo;
 
-static char errmsg[128];	/* shared error msg buffer */
-
 /* Function prototypes for procinfo module: */
 
 static procinfo *find_procinfo_or_die (int pid, int tid);
@@ -595,17 +593,19 @@ static void proc_resume (procinfo *pi, ptid_t scope_ptid,
 static void
 proc_warn (procinfo *pi, const char *func, int line)
 {
-  xsnprintf (errmsg, sizeof (errmsg), "procfs: %s line %d, %s",
-	     func, line, pi->pathname);
-  print_sys_errmsg (errmsg, errno);
+  int saved_errno = errno;
+  std::string errmsg
+    = string_printf ("procfs: %s line %d, %s", func, line, pi->pathname);
+  print_sys_errmsg (errmsg.c_str (), saved_errno);
 }
 
 static void
 proc_error (procinfo *pi, const char *func, int line)
 {
-  xsnprintf (errmsg, sizeof (errmsg), "procfs: %s line %d, %s",
-	     func, line, pi->pathname);
-  perror_with_name (errmsg);
+  int saved_errno = errno;
+  std::string errmsg
+    = string_printf ("procfs: %s line %d, %s", func, line, pi->pathname);
+  perror_with_name (errmsg.c_str (), saved_errno);
 }
 
 /* Updates the status struct in the procinfo.  There is a 'valid'
@@ -1805,11 +1805,12 @@ do_attach (ptid_t ptid)
 
   if (!open_procinfo_files (pi, FD_CTL))
     {
-      gdb_printf (gdb_stderr, "procfs:%d -- ", __LINE__);
-      xsnprintf (errmsg, sizeof (errmsg),
-		 "do_attach: couldn't open /proc file for process %d",
-		 ptid.pid ());
-      dead_procinfo (pi, errmsg, NOKILL);
+      int saved_errno = errno;
+      std::string errmsg
+	= string_printf ("procfs:%d -- do_attach: couldn't open /proc "
+			 "file for process %d", __LINE__, ptid.pid ());
+      errno = saved_errno;
+      dead_procinfo (pi, errmsg.c_str (), NOKILL);
     }
 
   /* Stop the process (if it isn't already stopped).  */
