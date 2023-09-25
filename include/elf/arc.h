@@ -50,6 +50,7 @@ END_RELOC_NUMBERS (R_ARC_max)
 #define E_ARC_MACH_ARC700	0x00000003
 #define EF_ARC_CPU_ARCV2EM      0x00000005
 #define EF_ARC_CPU_ARCV2HS      0x00000006
+#define EF_ARC_CPU_ARC64	0x00000007
 
 /* ARC Linux specific ABIs.  */
 #define E_ARC_OSABI_ORIG	0x00000000   /* MUST be 0 for back-compat.  */

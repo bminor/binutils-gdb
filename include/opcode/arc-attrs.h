@@ -37,8 +37,8 @@ const struct feature_type
 }  FEATURE_LIST_NAME [] =
   {
     { BTSCN,    ARC_OPCODE_ARCALL,   "BITSCAN",  "bit-scan" },
-    { CD,       ARC_OPCODE_ARCV2,    "CD",       "code-density" },
-    { DIV,      ARC_OPCODE_ARCV2,    "DIV_REM",  "div/rem" },
+    { CD,       ARC_OPCODE_ARCVx,    "CD",       "code-density" },
+    { DIV,      ARC_OPCODE_ARCVx,    "DIV_REM",  "div/rem" },
     { DP,       ARC_OPCODE_ARCv2HS,  "FPUD",     "double-precision FPU" },
     { DPA,      ARC_OPCODE_ARCv2EM,  "FPUDA",    "double assist FP" },
     { DPX,      ARC_OPCODE_ARCFPX,   "DPFP",     "double-precision FPX" },
