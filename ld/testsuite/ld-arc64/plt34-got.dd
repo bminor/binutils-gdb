@@ -1,0 +1,9 @@
+[^:]+:\s+file format elf64-.*arc64
+
+
+Disassembly of section .text:
+
+^[0-9a-f]+ <__start>:
+^\s*[0-9a-f]+:\s+78e0\s+nop_s$
+^\s*[0-9a-f]+:\s+[0-9a-f]+\s[0-9a-f]+\s+bl\s+[\-0-9]+\s+;[0-9a-f]+\s+<\.plt\+0x[0-9a-f]+>$
+^\s*[0-9a-f]+:\s+7be0\s[0-9a-f]+\s[0-9a-f]+\s+bl_s\s+[\-\d]+@s32\s+;[0-9a-f]+\s+<\.plt\+0x[0-9a-f]+>$

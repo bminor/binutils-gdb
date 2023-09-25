@@ -1,0 +1,29 @@
+# an exemplary output
+#
+# test_static.exe:     file format elf64-littlearc64
+#
+#
+# Disassembly of section .text:
+#
+# 0000000000001000 <__start>:
+#     1000:	78e0                	nop_s
+#     1002:	2731 ff0e 0000 7000 	ldl	r14,[pcl,28672@s32]	;8000 <.got>
+# 			1006: R_ARC_GOTPC32	foo
+#     100a:	2731 ff0f 0000 7000 	ldl	r15,[pcl,28672@s32]	;8008 <.got+0x8>
+# 			100e: R_ARC_GOTPC32	bar
+#     1012:	78e0                	nop_s
+#     1014:	0000 0000           	b	0	;1014 <__start+0x14>
+
+[^:]+:\s+file format elf.*-.*arc64
+
+
+Disassembly of section .text:
+
+^[0-9a-f]+.*:
+\s*[0-9a-f]+:\s+[0-9a-f\s]+nop_s
+\s*[0-9a-f]+:\s+[0-9a-f\s]+ldl\s+r14,.*
+\s*[0-9a-f]+:\s+R_ARC_GOTPC32\s+foo
+\s*[0-9a-f]+:\s+[0-9a-f\s]+ldl\s+r15,.*
+\s*[0-9a-f]+:\s+R_ARC_GOTPC32\s+bar
+\s*[0-9a-f]+:\s+[0-9a-f\s]+nop_s
+\s*[0-9a-f]+:.*
