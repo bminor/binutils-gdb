@@ -6,7 +6,7 @@
 Disassembly of section .text:
 0x[0-9a-f]+ 2900 0080           	asl	r0,r1,r2
 0x[0-9a-f]+ 2b00 371a           	asl	gp,fp,sp
-0x[0-9a-f]+ 2e00 37dd           	asl	ilink,r30,blink
+0x[0-9a-f]+ 2e00 37dd           	asl	ilink1,ilink2,blink
 0x[0-9a-f]+ 2940 0000           	asl	r0,r1,0
 0x[0-9a-f]+ 2e00 7080 0000 0000 	asl	r0,0,r2
 0x[0-9a-f]+ 2900 00be           	asl	0,r1,r2
@@ -30,8 +30,8 @@ Disassembly of section .text:
 0x[0-9a-f]+ 2ac0 2503           	asl.p	r18,r18,r20
 0x[0-9a-f]+ 2dc0 25c3           	asl.p	r21,r21,r23
 0x[0-9a-f]+ 28c0 3684           	asl.n	r24,r24,gp
-0x[0-9a-f]+ 2bc0 3744           	asl.n	fp,fp,ilink
-0x[0-9a-f]+ 2ec0 37c5           	asl.c	r30,r30,blink
+0x[0-9a-f]+ 2bc0 3744           	asl.n	fp,fp,ilink1
+0x[0-9a-f]+ 2ec0 37c5           	asl.c	ilink2,ilink2,blink
 0x[0-9a-f]+ 2bc0 00c5           	asl.c	r3,r3,r3
 0x[0-9a-f]+ 2bc0 0205           	asl.c	r3,r3,r8
 0x[0-9a-f]+ 2bc0 0106           	asl.nc	r3,r3,r4

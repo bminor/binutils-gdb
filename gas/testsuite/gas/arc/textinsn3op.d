@@ -1,3 +1,4 @@
+#as: -mcpu=arc700
 #objdump: -dr
 
 .*: +file format .*arc.*
@@ -8,7 +9,7 @@ Disassembly of section .text:
 [0-9a-f]+ <.text>:
    0:	3930 0080           	myinsn	r0,r1,r2
    4:	3b30 371a           	myinsn	gp,fp,sp
-   8:	3e30 37dd           	myinsn	ilink,r30,blink
+   8:	3e30 37dd           	myinsn	ilink1,ilink2,blink
    c:	3970 0000           	myinsn	r0,r1,0
   10:	3e30 7080 0000 0000 	myinsn	r0,0,r2
   18:	3930 00be           	myinsn	0,r1,r2
@@ -32,8 +33,8 @@ Disassembly of section .text:
   84:	3af0 2503           	myinsn.p	r18,r18,r20
   88:	3df0 25c3           	myinsn.p	r21,r21,r23
   8c:	38f0 3684           	myinsn.n	r24,r24,gp
-  90:	3bf0 3744           	myinsn.n	fp,fp,ilink
-  94:	3ef0 37c5           	myinsn.c	r30,r30,blink
+  90:	3bf0 3744           	myinsn.n	fp,fp,ilink1
+  94:	3ef0 37c5           	myinsn.c	ilink2,ilink2,blink
   98:	3bf0 00c5           	myinsn.c	r3,r3,r3
   9c:	3bf0 0205           	myinsn.c	r3,r3,r8
   a0:	3bf0 0106           	myinsn.nc	r3,r3,r4

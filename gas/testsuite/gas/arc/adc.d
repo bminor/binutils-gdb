@@ -6,7 +6,7 @@
 Disassembly of section .text:
 0x[0-9a-f]+ 2101 0080           	adc	r0,r1,r2
 0x[0-9a-f]+ 2301 371a           	adc	gp,fp,sp
-0x[0-9a-f]+ 2601 37dd           	adc	ilink,r30,blink
+0x[0-9a-f]+ 2601 37dd           	adc	ilink1,ilink2,blink
 0x[0-9a-f]+ 2141 0000           	adc	r0,r1,0
 0x[0-9a-f]+ 2601 7080 0000 0000 	adc	r0,0,r2
 0x[0-9a-f]+ 2101 00be           	adc	0,r1,r2
@@ -30,8 +30,8 @@ Disassembly of section .text:
 0x[0-9a-f]+ 22c1 2503           	adc.p	r18,r18,r20
 0x[0-9a-f]+ 25c1 25c3           	adc.p	r21,r21,r23
 0x[0-9a-f]+ 20c1 3684           	adc.n	r24,r24,gp
-0x[0-9a-f]+ 23c1 3744           	adc.n	fp,fp,ilink
-0x[0-9a-f]+ 26c1 37c5           	adc.c	r30,r30,blink
+0x[0-9a-f]+ 23c1 3744           	adc.n	fp,fp,ilink1
+0x[0-9a-f]+ 26c1 37c5           	adc.c	ilink2,ilink2,blink
 0x[0-9a-f]+ 23c1 00c5           	adc.c	r3,r3,r3
 0x[0-9a-f]+ 23c1 0205           	adc.c	r3,r3,r8
 0x[0-9a-f]+ 23c1 0106           	adc.nc	r3,r3,r4

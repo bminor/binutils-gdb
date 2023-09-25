@@ -17,6 +17,6 @@
 # ARC base instruction set
 
 # ARC library extensions
-if [istarget arc*-*-*] then {
+if [istarget arc-*-*] then {
      run_dump_tests [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 }

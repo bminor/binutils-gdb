@@ -15,8 +15,7 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  
 
 # Test assembler warnings.
-
-if [istarget arc*-*-*] {
+if [istarget arc-*-*] {
     load_lib gas-dg.exp
     dg-init
     dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/*warn*.s $srcdir/$subdir/*err.s]] "" ""

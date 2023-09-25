@@ -18,7 +18,7 @@ Disassembly of section .text:
   24:	4878 ffff           	movh\.cl	r3,0xffff
   28:	49cf 0906           	movbi	r14,r14,0x6,0x8,0x4
   2c:	4aff 0174           	movbi\.f	r23,r23,0x14,0xb,0x1
-  30:	4bcf 864a           	movbi\.cl	r30,0xa,0x12,0x2
+  30:	4bcf 864a           	movbi\.cl	ilink2,0xa,0x12,0x2
   34:	48df 8c09           	movbi\.f\.cl	r6,0x9,0,0x8
   38:	4843 a845           	decode1	r0,r0,r2,0x5,0xb
   3c:	4853 a845           	decode1\.f	r0,r0,r2,0x5,0xb

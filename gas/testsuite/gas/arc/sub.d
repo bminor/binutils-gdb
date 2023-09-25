@@ -6,7 +6,7 @@
 Disassembly of section .text:
 0x[0-9a-f]+ 2102 0080           	sub	r0,r1,r2
 0x[0-9a-f]+ 2302 371a           	sub	gp,fp,sp
-0x[0-9a-f]+ 2602 37dd           	sub	ilink,r30,blink
+0x[0-9a-f]+ 2602 37dd           	sub	ilink1,ilink2,blink
 0x[0-9a-f]+ 2142 0000           	sub	r0,r1,0
 0x[0-9a-f]+ 2602 7080 0000 0000 	sub	r0,0,r2
 0x[0-9a-f]+ 2102 00be           	sub	0,r1,r2
@@ -30,8 +30,8 @@ Disassembly of section .text:
 0x[0-9a-f]+ 22c2 2503           	sub.p	r18,r18,r20
 0x[0-9a-f]+ 25c2 25c3           	sub.p	r21,r21,r23
 0x[0-9a-f]+ 20c2 3684           	sub.n	r24,r24,gp
-0x[0-9a-f]+ 23c2 3744           	sub.n	fp,fp,ilink
-0x[0-9a-f]+ 26c2 37c5           	sub.c	r30,r30,blink
+0x[0-9a-f]+ 23c2 3744           	sub.n	fp,fp,ilink1
+0x[0-9a-f]+ 26c2 37c5           	sub.c	ilink2,ilink2,blink
 0x[0-9a-f]+ 23c2 00c5           	sub.c	r3,r3,r3
 0x[0-9a-f]+ 23c2 0205           	sub.c	r3,r3,r8
 0x[0-9a-f]+ 23c2 0106           	sub.nc	r3,r3,r4

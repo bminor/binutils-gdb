@@ -6,7 +6,7 @@
 Disassembly of section .text:
 0x[0-9a-f]+ 2106 0080           	bic	r0,r1,r2
 0x[0-9a-f]+ 2306 371a           	bic	gp,fp,sp
-0x[0-9a-f]+ 2606 37dd           	bic	ilink,r30,blink
+0x[0-9a-f]+ 2606 37dd           	bic	ilink1,ilink2,blink
 0x[0-9a-f]+ 2146 0000           	bic	r0,r1,0
 0x[0-9a-f]+ 2606 7080 0000 0000 	bic	r0,0,r2
 0x[0-9a-f]+ 2106 00be           	bic	0,r1,r2
@@ -30,8 +30,8 @@ Disassembly of section .text:
 0x[0-9a-f]+ 22c6 2503           	bic.p	r18,r18,r20
 0x[0-9a-f]+ 25c6 25c3           	bic.p	r21,r21,r23
 0x[0-9a-f]+ 20c6 3684           	bic.n	r24,r24,gp
-0x[0-9a-f]+ 23c6 3744           	bic.n	fp,fp,ilink
-0x[0-9a-f]+ 26c6 37c5           	bic.c	r30,r30,blink
+0x[0-9a-f]+ 23c6 3744           	bic.n	fp,fp,ilink1
+0x[0-9a-f]+ 26c6 37c5           	bic.c	ilink2,ilink2,blink
 0x[0-9a-f]+ 23c6 00c5           	bic.c	r3,r3,r3
 0x[0-9a-f]+ 23c6 0205           	bic.c	r3,r3,r8
 0x[0-9a-f]+ 23c6 0106           	bic.nc	r3,r3,r4

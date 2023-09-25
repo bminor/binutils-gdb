@@ -6,7 +6,7 @@
 Disassembly of section .text:
 0x[0-9a-f]+ 2107 0080           	xor	r0,r1,r2
 0x[0-9a-f]+ 2307 371a           	xor	gp,fp,sp
-0x[0-9a-f]+ 2607 37dd           	xor	ilink,r30,blink
+0x[0-9a-f]+ 2607 37dd           	xor	ilink1,ilink2,blink
 0x[0-9a-f]+ 2147 0000           	xor	r0,r1,0
 0x[0-9a-f]+ 2607 7080 0000 0000 	xor	r0,0,r2
 0x[0-9a-f]+ 2107 00be           	xor	0,r1,r2
@@ -30,8 +30,8 @@ Disassembly of section .text:
 0x[0-9a-f]+ 22c7 2503           	xor.p	r18,r18,r20
 0x[0-9a-f]+ 25c7 25c3           	xor.p	r21,r21,r23
 0x[0-9a-f]+ 20c7 3684           	xor.n	r24,r24,gp
-0x[0-9a-f]+ 23c7 3744           	xor.n	fp,fp,ilink
-0x[0-9a-f]+ 26c7 37c5           	xor.c	r30,r30,blink
+0x[0-9a-f]+ 23c7 3744           	xor.n	fp,fp,ilink1
+0x[0-9a-f]+ 26c7 37c5           	xor.c	ilink2,ilink2,blink
 0x[0-9a-f]+ 23c7 00c5           	xor.c	r3,r3,r3
 0x[0-9a-f]+ 23c7 0205           	xor.c	r3,r3,r8
 0x[0-9a-f]+ 23c7 0106           	xor.nc	r3,r3,r4

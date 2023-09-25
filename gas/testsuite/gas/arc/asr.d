@@ -6,7 +6,7 @@
 Disassembly of section .text:
 0x[0-9a-f]+ 2902 0080           	asr	r0,r1,r2
 0x[0-9a-f]+ 2b02 371a           	asr	gp,fp,sp
-0x[0-9a-f]+ 2e02 37dd           	asr	ilink,r30,blink
+0x[0-9a-f]+ 2e02 37dd           	asr	ilink1,ilink2,blink
 0x[0-9a-f]+ 2942 0000           	asr	r0,r1,0
 0x[0-9a-f]+ 2e02 7080 0000 0000 	asr	r0,0,r2
 0x[0-9a-f]+ 2902 00be           	asr	0,r1,r2
@@ -30,8 +30,8 @@ Disassembly of section .text:
 0x[0-9a-f]+ 2ac2 2503           	asr.p	r18,r18,r20
 0x[0-9a-f]+ 2dc2 25c3           	asr.p	r21,r21,r23
 0x[0-9a-f]+ 28c2 3684           	asr.n	r24,r24,gp
-0x[0-9a-f]+ 2bc2 3744           	asr.n	fp,fp,ilink
-0x[0-9a-f]+ 2ec2 37c5           	asr.c	r30,r30,blink
+0x[0-9a-f]+ 2bc2 3744           	asr.n	fp,fp,ilink1
+0x[0-9a-f]+ 2ec2 37c5           	asr.c	ilink2,ilink2,blink
 0x[0-9a-f]+ 2bc2 00c5           	asr.c	r3,r3,r3
 0x[0-9a-f]+ 2bc2 0205           	asr.c	r3,r3,r8
 0x[0-9a-f]+ 2bc2 0106           	asr.nc	r3,r3,r4
