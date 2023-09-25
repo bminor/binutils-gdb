@@ -153,10 +153,27 @@ alpha*-*-*vms*)		targ_emul=alphavms
 			;;
 am33_2.0-*-linux*)	targ_emul=elf32am33lin # mn10300 variant
 			;;
-arc*-*-elf*)		targ_emul=arcelf
+arc-*-elf* | arc[be]*-*-elf*)	targ_emul=arcelf
 			targ_extra_emuls="arclinux arclinux_nps arcv2elf arcv2elfx"
 			;;
-arc*-*-linux*)		case "${with_cpu}" in
+arc64-*-elf*)		targ_emul=arc64elf64
+			targ_extra_emuls="arc64elf32 arc64linux64 arc64linux32"
+			targ_extra_libpath=$targ_extra_emuls
+			;;
+arc32-*-elf*)		targ_emul=arc64elf32
+			targ_extra_emuls="arc64linux32 arc64elf64 arc64linux64"
+			targ_extra_libpath=$targ_extra_emuls
+			;;
+arc64-*-linux*)		targ_emul=arc64linux64
+			targ_extra_emuls="arc64elf64 arc64elf32 arc64linux32"
+			targ_extra_libpath=$targ_extra_emuls
+			;;
+arc32-*-linux*)		targ_emul=arc64linux32
+			targ_extra_emuls="arc64elf32 arc64elf64 arc64linux64"
+			targ_extra_libpath=$targ_extra_emuls
+			;;
+arc-*-linux* | arc[eb]*-linux*)
+			case "${with_cpu}" in
 			nps400)	targ_emul=arclinux_nps
 				targ_extra_emuls=arclinux
 				;;

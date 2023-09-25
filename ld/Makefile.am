@@ -391,6 +391,10 @@ ALL_64_EMULATION_SOURCES = \
 	eaarch64nto.c \
 	eaarch64pe.c \
 	earm64pe.c \
+	earc64elf32.c \
+	earc64elf64.c \
+	earc64linux32.c \
+	earc64linux64.c \
 	eelf32_x86_64.c \
 	eelf32b4300.c \
 	eelf32bmip.c \
