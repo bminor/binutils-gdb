@@ -139,12 +139,12 @@ gcore_elf_build_thread_register_notes
 /* See gcore-elf.h.  */
 
 void
-gcore_elf_make_tdesc_note (bfd *obfd,
+gcore_elf_make_tdesc_note (struct gdbarch *gdbarch, bfd *obfd,
 			   gdb::unique_xmalloc_ptr<char> *note_data,
 			   int *note_size)
 {
   /* Append the target description to the core file.  */
-  const struct target_desc *tdesc = gdbarch_target_desc (target_gdbarch ());
+  const struct target_desc *tdesc = gdbarch_target_desc (gdbarch);
   const char *tdesc_xml
     = tdesc == nullptr ? nullptr : tdesc_get_features_xml (tdesc);
   if (tdesc_xml != nullptr && *tdesc_xml != '\0')

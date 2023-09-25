@@ -773,8 +773,12 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 	return NULL;
     }
 
-  /* Include the target description when possible.  */
-  gcore_elf_make_tdesc_note (obfd, &note_data, note_size);
+  /* Include the target description when possible.  Some architectures
+     allow for per-thread gdbarch so we should really be emitting a tdesc
+     per-thread, however, we don't currently support reading in a
+     per-thread tdesc, so just emit the tdesc for the signalled thread.  */
+  gdbarch = target_thread_architecture (signalled_thr->ptid);
+  gcore_elf_make_tdesc_note (gdbarch, obfd, &note_data, note_size);
 
   return note_data;
 }
