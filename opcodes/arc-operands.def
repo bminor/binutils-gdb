@@ -1,0 +1,502 @@
+/* ARC operands defintions.
+   Copyright (C) 2023 Free Software Foundation, Inc.
+
+   Contributed by Claudiu Zissulescu (claziss@synopsys.com)
+   Refactored by Cupertino Miranda (cmiranda@synopsys.com)
+
+   This file is part of libopcodes.
+
+   This library is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
+
+   It is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software Foundation,
+   Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+
+
+/* 
+ * ARC_OPERAND(NAME, BITS, SHIFT, RELO, FLAGS, FUN)
+ *
+ * BITS => The number of bits in the operand.
+ * SHIFT => How far the operand is left shifted in the instruction.
+ * RELO => The default relocation type for this operand.
+ * FLAGS =>  One bit syntax flags.
+ * FUN => Insertion function.  This is used by the assembler.
+*/
+
+ARC_OPERAND(IGNORED, 0, 0, 0,  ARC_OPERAND_IGNORE | ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, 0, 0)
+
+/* The plain integer register fields.  Used by 32 bit instructions.  */
+ARC_OPERAND(RA, 6, 0, 0, ARC_OPERAND_IR, 0, 0)
+ARC_OPERAND(RA_CHK, 6, 0, 0, ARC_OPERAND_IR, insert_ra_chk, 0)
+ARC_OPERAND(RB, 6, 12, 0, ARC_OPERAND_IR, insert_rb, extract_rb)
+ARC_OPERAND(RB_CHK, 6, 12, 0, ARC_OPERAND_IR, insert_rb_chk, extract_rb)
+ARC_OPERAND(RBB_S, 6, 12, 0, ARC_OPERAND_IR, insert_rbb, extract_rbb)
+ARC_OPERAND(RC, 6, 6, 0, ARC_OPERAND_IR, 0, 0)
+ARC_OPERAND(RC_CHK, 6, 6, 0, ARC_OPERAND_IR, 0, 0)
+ARC_OPERAND(RBdup, 6, 12, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, insert_rb, extract_rb)
+
+ARC_OPERAND(RAD, 6, 0, 0,  ARC_OPERAND_IR | ARC_OPERAND_TRUNCATE, insert_rad, 0)
+ARC_OPERAND(RAD_CHK, 6, 0, 0,  ARC_OPERAND_IR | ARC_OPERAND_TRUNCATE, insert_rad, 0)
+ARC_OPERAND(RCD, 6, 6, 0,  ARC_OPERAND_IR | ARC_OPERAND_TRUNCATE, insert_rcd, 0)
+ARC_OPERAND(RBD, 6, 6, 0,  ARC_OPERAND_IR | ARC_OPERAND_TRUNCATE, insert_rbd, extract_rb)
+ARC_OPERAND(RBDdup, 6, 12, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE | ARC_OPERAND_TRUNCATE, insert_rbd, extract_rb)
+
+/* The plain integer register fields.  Used by short instructions.  */
+ARC_OPERAND(RA16, 4, 0, 0, ARC_OPERAND_IR, insert_ras, extract_ras)
+ARC_OPERAND(RA_S, 4, 0, 0, ARC_OPERAND_IR, insert_ras, extract_ras)
+ARC_OPERAND(RB16, 4, 8, 0, ARC_OPERAND_IR, insert_rbs, extract_rbs)
+ARC_OPERAND(RB_S, 4, 8, 0, ARC_OPERAND_IR, insert_rbs, extract_rbs)
+ARC_OPERAND(RB16dup, 4, 8, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, insert_rbs, extract_rbs)
+ARC_OPERAND(RB_Sdup, 4, 8, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, insert_rbs, extract_rbs)
+ARC_OPERAND(RC16, 4, 5, 0, ARC_OPERAND_IR, insert_rcs, extract_rcs)
+ARC_OPERAND(RC_S, 4, 5, 0, ARC_OPERAND_IR, insert_rcs, extract_rcs)
+
+/* 6bit register field 'h' used	by V1 cpus.  */
+ARC_OPERAND(R6H, 6, 5, 0, ARC_OPERAND_IR, insert_rhv1, extract_rhv1)
+/* 5bit register field 'h' used	by V2 cpus.  */
+ARC_OPERAND(R5H, 5, 5, 0, ARC_OPERAND_IR, insert_rhv2, extract_rhv2)
+ARC_OPERAND(RH_S, 5, 5, 0, ARC_OPERAND_IR, insert_rhv2, extract_rhv2)
+ARC_OPERAND(R5Hdup, 5, 5, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, insert_rhv2, extract_rhv2)
+ARC_OPERAND(RH_Sdup, 5, 5, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, insert_rhv2, extract_rhv2)
+
+ARC_OPERAND(RG, 5, 5, 0, ARC_OPERAND_IR, insert_g_s, extract_g_s)
+ARC_OPERAND(G_S, 5, 5, 0, ARC_OPERAND_IR, insert_g_s, extract_g_s)
+
+/* Fix registers.  */
+ARC_OPERAND(R0, 0, 0, 0, ARC_OPERAND_IR, insert_r0, extract_r0)
+ARC_OPERAND(R0_S, 0, 0, 0, ARC_OPERAND_IR, insert_r0, extract_r0)
+ARC_OPERAND(R1, 1, 0, 0, ARC_OPERAND_IR, insert_r1, extract_r1)
+ARC_OPERAND(R1_S, 1, 0, 0, ARC_OPERAND_IR, insert_r1, extract_r1)
+ARC_OPERAND(R2, 2, 0, 0, ARC_OPERAND_IR, insert_r2, extract_r2)
+ARC_OPERAND(R2_S, 2, 0, 0, ARC_OPERAND_IR, insert_r2, extract_r2)
+ARC_OPERAND(R3, 2, 0, 0, ARC_OPERAND_IR, insert_r3, extract_r3)
+ARC_OPERAND(R3_S, 2, 0, 0, ARC_OPERAND_IR, insert_r3, extract_r3)
+ARC_OPERAND(RSP, 5, 0, 0, ARC_OPERAND_IR, insert_sp, extract_sp)
+ARC_OPERAND(SP_S, 5, 0, 0, ARC_OPERAND_IR, insert_sp, extract_sp)
+ARC_OPERAND(SPdup, 5, 0, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, insert_sp, extract_sp)
+ARC_OPERAND(SP_Sdup, 5, 0, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, insert_sp, extract_sp)
+ARC_OPERAND(GP, 5, 0, 0, ARC_OPERAND_IR, insert_gp, extract_gp)
+ARC_OPERAND(GP_S, 5, 0, 0, ARC_OPERAND_IR, insert_gp, extract_gp)
+
+ARC_OPERAND(PCL_S, 1, 0, 0,  ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_pcl, extract_pcl)
+
+ARC_OPERAND(BLINK, 5, 0, 0, ARC_OPERAND_IR, insert_blink, extract_blink)
+ARC_OPERAND(BLINK_S, 5, 0, 0, ARC_OPERAND_IR, insert_blink, extract_blink)
+
+ARC_OPERAND(ILINK1, 5, 0, 0, ARC_OPERAND_IR, insert_ilink1, extract_ilink1)
+ARC_OPERAND(ILINK2, 5, 0, 0, ARC_OPERAND_IR, insert_ilink2, extract_ilink2)
+
+  /* Long immediate.  */
+ARC_OPERAND(LIMM, 32, 0, BFD_RELOC_ARC_32_ME, ARC_OPERAND_LIMM, insert_limm, 0)
+ARC_OPERAND(LIMM_S, 32, 0, BFD_RELOC_ARC_32_ME, ARC_OPERAND_LIMM, insert_limm, 0)
+ARC_OPERAND(LO32, 32, 0, BFD_RELOC_ARC_LO32_ME, ARC_OPERAND_LIMM, insert_limm, 0)
+ARC_OPERAND(HI32, 32, 0, BFD_RELOC_ARC_HI32_ME, ARC_OPERAND_LIMM, insert_limm, 0)
+ARC_OPERAND(LIMM34, 34, 0, BFD_RELOC_ARC_PCLO32_ME_2,  ARC_OPERAND_LIMM | ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_limm, 0)
+ARC_OPERAND(XIMM_S, 32, 0, BFD_RELOC_ARC_LO32_ME,  ARC_OPERAND_LIMM | ARC_OPERAND_SIGNED, insert_limm, 0)
+ARC_OPERAND(XIMM, 32, 0, BFD_RELOC_ARC_LO32_ME,  ARC_OPERAND_LIMM | ARC_OPERAND_SIGNED, insert_limm, 0)
+ARC_OPERAND(LIMMdup, 32, 0, 0,  ARC_OPERAND_LIMM | ARC_OPERAND_DUPLICATE, insert_limm, 0)
+ARC_OPERAND(XIMMdup, 32, 0, 0,  ARC_OPERAND_LIMM | ARC_OPERAND_DUPLICATE | ARC_OPERAND_SIGNED, insert_limm, 0)
+
+  /* Special operands.  */
+ARC_OPERAND(ZA, 0, 0, 0, ARC_OPERAND_UNSIGNED, insert_za, 0)
+ARC_OPERAND(ZB, 0, 0, 0, ARC_OPERAND_UNSIGNED, insert_za, 0)
+ARC_OPERAND(ZA_S, 0, 0, 0, ARC_OPERAND_UNSIGNED, insert_za, 0)
+ARC_OPERAND(ZB_S, 0, 0, 0, ARC_OPERAND_UNSIGNED, insert_za, 0)
+ARC_OPERAND(ZC_S, 0, 0, 0, ARC_OPERAND_UNSIGNED, insert_za, 0)
+
+ARC_OPERAND(RRANGE_EL, 4, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK | ARC_OPERAND_TRUNCATE, insert_rrange, extract_rrange)
+ARC_OPERAND(R13_EL, 1, 0, 0,  ARC_OPERAND_IR | ARC_OPERAND_IGNORE | ARC_OPERAND_NCHK, insert_r13el, extract_rrange)
+ARC_OPERAND(FP_EL, 1, 0, 0,  ARC_OPERAND_IR | ARC_OPERAND_IGNORE | ARC_OPERAND_NCHK, insert_fpel, extract_fpel)
+ARC_OPERAND(BLINK_EL, 1, 0, 0,  ARC_OPERAND_IR | ARC_OPERAND_IGNORE | ARC_OPERAND_NCHK, insert_blinkel, extract_blinkel)
+ARC_OPERAND(PCL_EL, 1, 0, 0,  ARC_OPERAND_IR | ARC_OPERAND_IGNORE | ARC_OPERAND_NCHK, insert_pclel, extract_pclel)
+
+  /* Fake operand to handle the T flag.  */
+ARC_OPERAND(BRAKET, 0, 0, 0,  ARC_OPERAND_FAKE | ARC_OPERAND_BRAKET, 0, 0)
+ARC_OPERAND(BRAKETdup, 0, 0, 0,  ARC_OPERAND_FAKE | ARC_OPERAND_BRAKET, 0, 0)
+
+  /* Fake operand to handle the T flag.  */
+ARC_OPERAND(FKT_T, 1, 3, 0, ARC_OPERAND_FAKE, insert_Ybit, 0)
+  /* Fake operand to handle the T flag.  */
+ARC_OPERAND(FKT_NT, 1, 3, 0, ARC_OPERAND_FAKE, insert_NYbit, 0)
+
+  /* UIMM6_20 mask = 00000000000000000000111111000000.  */
+ARC_OPERAND(UIMM6_20, 6, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm6_20, extract_uimm6_20)
+
+  /* Exactly like the above but used by relaxation.  */
+ARC_OPERAND(UIMM6_20R, 6, 0, -UIMM6_20R,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_PCREL, insert_uimm6_20, extract_uimm6_20)
+
+  /* SIMM12_20 mask = 00000000000000000000111111222222.  */
+ARC_OPERAND(SIMM12_20, 12, 0, 0, ARC_OPERAND_SIGNED, insert_simm12_20, extract_simm12_20)
+
+  /* Exactly like the above but used by relaxation.  */
+ARC_OPERAND(SIMM12_20R, 12, 0, -SIMM12_20R,  ARC_OPERAND_SIGNED | ARC_OPERAND_PCREL, insert_simm12_20, extract_simm12_20)
+
+  /* UIMM12_20 mask = 00000000000000000000111111222222.  */
+ARC_OPERAND(UIMM12_20, 12, 0, 0, ARC_OPERAND_UNSIGNED, insert_simm12_20, extract_uimm12_20)
+
+  /* SIMM3_5_S mask = 0000011100000000.  */
+ARC_OPERAND(SIMM3_5_S, 3, 0, 0,  ARC_OPERAND_SIGNED | ARC_OPERAND_NCHK, insert_simm3s, extract_simm3s)
+
+  /* UIMM7_A32_11_S mask = 0000000000011111.  */
+ARC_OPERAND(UIMM7_A32_11_S, 7, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_IGNORE, insert_uimm7_a32_11_s, extract_uimm7_a32_11_s)
+
+  /* The same as above but used by relaxation.  */
+ARC_OPERAND(UIMM7_A32_11R_S, 7, 0, -UIMM7_A32_11R_S,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_IGNORE | ARC_OPERAND_PCREL, insert_uimm7_a32_11_s, extract_uimm7_a32_11_s)
+
+ARC_OPERAND(UIMM9_A32_11_S, 9, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_IGNORE, insert_uimm9_a32_11_s, extract_uimm9_a32_11_s)
+
+  /* UIMM7_9_S mask = 0000000001111111.  */
+ARC_OPERAND(UIMM7_9_S, 7, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm7_9_s, extract_uimm7_9_s)
+
+  /* UIMM3_13_S mask = 0000000000000111.  */
+ARC_OPERAND(UIMM3_13_S, 3, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm3_13_s, extract_uimm3_13_s)
+
+  /* Exactly like the above but used for relaxation.  */
+ARC_OPERAND(UIMM3_13R_S, 3, 0, -UIMM3_13R_S,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_PCREL, insert_uimm3_13_s, extract_uimm3_13_s)
+
+  /* SIMM11_A32_7_S mask = 0000000111111111.  */
+ARC_OPERAND(SIMM11_A32_7_S, 11, 0, BFD_RELOC_ARC_SDA16_LD2,  ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE, insert_simm11_a32_7_s, extract_simm11_a32_7_s)
+
+  /* UIMM6_13_S mask = 0000000002220111.  */
+ARC_OPERAND(UIMM6_13_S, 6, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm6_13_s, extract_uimm6_13_s)
+  /* UIMM5_11_S mask = 0000000000011111.  */
+ARC_OPERAND(UIMM5_11_S, 5, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_IGNORE, insert_uimm5_11_s, extract_uimm5_11_s)
+
+  /* SIMM9_A16_8 mask = 00000000111111102000000000000000.  */
+ARC_OPERAND(SIMM9_A16_8, 9, 0, BFD_RELOC_ARC_S9H_PCREL,  ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED16 | ARC_OPERAND_PCREL | ARC_OPERAND_TRUNCATE, insert_simm9_a16_8, extract_simm9_a16_8)
+
+  /* UIMM6_8 mask = 00000000000000000000111111000000.	 */
+ARC_OPERAND(UIMM6_8, 6, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm6_8, extract_uimm6_8)
+
+  /* SIMM21_A16_5 mask = 00000111111111102222222222000000.  */
+ARC_OPERAND(SIMM21_A16_5, 21, 0, BFD_RELOC_ARC_S21H_PCREL,  ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED16 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_simm21_a16_5, extract_simm21_a16_5)
+
+  /* SIMM25_A16_5 mask = 00000111111111102222222222003333.  */
+ARC_OPERAND(SIMM25_A16_5, 25, 0, BFD_RELOC_ARC_S25H_PCREL,  ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED16 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_simm25_a16_5, extract_simm25_a16_5)
+
+  /* SIMM10_A16_7_S mask = 0000000111111111.  */
+ARC_OPERAND(SIMM10_A16_7_S, 10, 0, BFD_RELOC_ARC_S10H_PCREL,  ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED16 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_simm10_a16_7_s, extract_simm10_a16_7_s)
+
+ARC_OPERAND(SIMM10_A16_7_Sbis, 10, 0, -SIMM10_A16_7_Sbis,  ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED16 | ARC_OPERAND_TRUNCATE, insert_simm10_a16_7_s, extract_simm10_a16_7_s)
+
+  /* SIMM7_A16_10_S mask = 0000000000111111.  */
+ARC_OPERAND(SIMM7_A16_10_S, 7, 0, BFD_RELOC_ARC_S7H_PCREL,  ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED16 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_simm7_a16_10_s, extract_simm7_a16_10_s)
+
+  /* SIMM21_A32_5 mask = 00000111111111002222222222000000.  */
+ARC_OPERAND(SIMM21_A32_5, 21, 0, BFD_RELOC_ARC_S21W_PCREL,  ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_simm21_a32_5, extract_simm21_a32_5)
+
+  /* SIMM25_A32_5 mask = 00000111111111002222222222003333.  */
+ARC_OPERAND(SIMM25_A32_5, 25, 0, BFD_RELOC_ARC_S25W_PCREL,  ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_simm25_a32_5, extract_simm25_a32_5)
+
+  /* SIMM13_A32_5_S mask = 0000011111111111.  */
+ARC_OPERAND(SIMM13_A32_5_S, 13, 0, BFD_RELOC_ARC_S13_PCREL,  ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_simm13_a32_5_s, extract_simm13_a32_5_s)
+
+  /* SIMM8_A16_9_S mask = 0000000001111111.  */
+ARC_OPERAND(SIMM8_A16_9_S, 8, 0, BFD_RELOC_ARC_S8H_PCREL,  ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED16 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_simm8_a16_9_s, extract_simm8_a16_9_s)
+
+/* UIMM10_6_S_JLIOFF mask = 0000001111111111.  */
+ARC_OPERAND(UIMM10_6_S_JLIOFF, 12, 0, BFD_RELOC_ARC_JLI_SECTOFF,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE, insert_uimm10_6_s, extract_uimm10_6_s)
+
+  /* UIMM3_23 mask = 00000000000000000000000111000000.  */
+ARC_OPERAND(UIMM3_23, 3, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm3_23, extract_uimm3_23)
+
+  /* UIMM10_6_S mask = 0000001111111111.  */
+ARC_OPERAND(UIMM10_6_S, 10, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm10_6_s, extract_uimm10_6_s)
+
+ARC_OPERAND(UIMM10_13_S, 10, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm10_13_s, extract_uimm10_13_s)
+
+  /* UIMM6_11_S mask = 0000002200011110.  */
+ARC_OPERAND(UIMM6_11_S, 6, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm6_11_s, extract_uimm6_11_s)
+
+  /* SIMM9_8 mask = 00000000111111112000000000000000.	 */
+ARC_OPERAND(SIMM9_8, 9, 0, BFD_RELOC_ARC_SDA_LDST,  ARC_OPERAND_SIGNED | ARC_OPERAND_IGNORE, insert_simm9_8, extract_simm9_8)
+
+  /* The same as above but used by relaxation.  */
+ARC_OPERAND(SIMM9_8R, 9, 0, -SIMM9_8R,  ARC_OPERAND_SIGNED | ARC_OPERAND_IGNORE | ARC_OPERAND_PCREL, insert_simm9_8, extract_simm9_8)
+
+  /* UIMM10_A32_8_S mask = 0000000011111111.  */
+ARC_OPERAND(UIMM10_A32_8_S, 10, 0, -UIMM10_A32_8_S,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_uimm10_a32_8_s, extract_uimm10_a32_8_s)
+
+  /* SIMM9_7_S mask = 0000000111111111.  */
+ARC_OPERAND(SIMM9_7_S, 9, 0, BFD_RELOC_ARC_SDA16_LD, ARC_OPERAND_SIGNED, insert_simm9_7_s, extract_simm9_7_s)
+
+  /* UIMM6_A16_11_S mask = 0000000000011111.  */
+ARC_OPERAND(UIMM6_A16_11_S, 6, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_ALIGNED16 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_IGNORE, insert_uimm6_a16_11_s, extract_uimm6_a16_11_s)
+
+  /* UIMM5_A32_11_S mask = 0000020000011000.  */
+ARC_OPERAND(UIMM5_A32_11_S, 5, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_IGNORE, insert_uimm5_a32_11_s, extract_uimm5_a32_11_s)
+
+  /* SIMM11_A32_13_S mask = 0000022222200111.	 */
+ARC_OPERAND(SIMM11_A32_13_S, 11, 0, BFD_RELOC_ARC_SDA16_ST2,  ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED32 | ARC_OPERAND_TRUNCATE, insert_simm11_a32_13_s, extract_simm11_a32_13_s)
+
+  /* UIMM7_13_S mask = 0000000022220111.  */
+ARC_OPERAND(UIMM7_13_S, 7, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm7_13_s, extract_uimm7_13_s)
+
+  /* UIMM6_A16_21 mask = 00000000000000000000011111000000.  */
+ARC_OPERAND(UIMM6_A16_21, 6, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_ALIGNED16 | ARC_OPERAND_TRUNCATE, insert_uimm6_a16_21, extract_uimm6_a16_21)
+
+  /* UIMM7_11_S mask = 0000022200011110.  */
+ARC_OPERAND(UIMM7_11_S, 7, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm7_11_s, extract_uimm7_11_s)
+
+  /* UIMM7_A16_20 mask = 00000000000000000000111111000000.  */
+ARC_OPERAND(UIMM7_A16_20, 7, 0, -UIMM7_A16_20,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_ALIGNED16 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_uimm7_a16_20, extract_uimm7_a16_20)
+
+  /* SIMM13_A16_20 mask = 00000000000000000000111111222222.  */
+ARC_OPERAND(SIMM13_A16_20, 13, 0, BFD_RELOC_ARC_S13H_PCREL,  ARC_OPERAND_SIGNED | ARC_OPERAND_ALIGNED16 | ARC_OPERAND_TRUNCATE | ARC_OPERAND_PCREL, insert_simm13_a16_20, extract_simm13_a16_20)
+
+  /* UIMM8_8_S mask = 0000000011111111.  */
+ARC_OPERAND(UIMM8_8_S, 8, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm8_8_s, extract_uimm8_8_s)
+
+  /* The same as above but used for relaxation.  */
+ARC_OPERAND(UIMM8_8R_S, 8, 0, -UIMM8_8R_S,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_PCREL, insert_uimm8_8_s, extract_uimm8_8_s)
+
+  /* W6 mask = 00000000000000000000111111000000.  */
+ARC_OPERAND(W6, 6, 0, 0, ARC_OPERAND_SIGNED, insert_w6, extract_w6)
+
+  /* UIMM6_5_S mask = 0000011111100000.  */
+ARC_OPERAND(UIMM6_5_S, 6, 0, 0, ARC_OPERAND_UNSIGNED, insert_uimm6_5_s, extract_uimm6_5_s)
+
+  /* ARC NPS400 Support: See comment near head of file.  */
+ARC_OPERAND(NPS_R_DST_3B, 3, 24, 0,  ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_24_dst, extract_nps_3bit_reg_at_24_dst)
+
+ARC_OPERAND(NPS_R_SRC1_3B, 3, 24, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_24_dst, extract_nps_3bit_reg_at_24_dst)
+
+ARC_OPERAND(NPS_R_SRC2_3B, 3, 21, 0,  ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_21_src2, extract_nps_3bit_reg_at_21_src2)
+
+ARC_OPERAND(NPS_R_DST, 6, 21, 0, ARC_OPERAND_IR, NULL, NULL)
+
+ARC_OPERAND(NPS_R_SRC1, 6, 21, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, NULL, NULL)
+
+ARC_OPERAND(NPS_BITOP_DST_POS, 5, 5, 0, ARC_OPERAND_UNSIGNED, 0, 0)
+
+ARC_OPERAND(NPS_BITOP_SRC_POS, 5, 0, 0, ARC_OPERAND_UNSIGNED, 0, 0)
+
+ARC_OPERAND(NPS_BITOP_SIZE, 5, 10, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bitop_size, extract_nps_bitop_size)
+
+ARC_OPERAND(NPS_BITOP_DST_POS_SZ, 5, 0, 0, ARC_OPERAND_UNSIGNED, insert_nps_dst_pos_and_size, extract_nps_dst_pos_and_size)
+
+ARC_OPERAND(NPS_BITOP_SIZE_2B, 0, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bitop_size_2b, extract_nps_bitop_size_2b)
+
+ARC_OPERAND(NPS_BITOP_UIMM8, 8, 0, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_uimm8, extract_nps_bitop_uimm8)
+
+ARC_OPERAND(NPS_UIMM16, 16, 0, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_SIMM16, 16, 0, 0, ARC_OPERAND_SIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_RFLT_UIMM6, 6, 6, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_rflt_uimm6, extract_nps_rflt_uimm6)
+
+ARC_OPERAND(NPS_XLDST_UIMM16, 16, 0, BFD_RELOC_ARC_NPS_CMEM16,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_cmem_uimm16, extract_nps_cmem_uimm16)
+
+ARC_OPERAND(NPS_SRC2_POS, 0, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_src2_pos, extract_nps_src2_pos)
+
+ARC_OPERAND(NPS_SRC1_POS, 0, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_src1_pos, extract_nps_src1_pos)
+
+ARC_OPERAND(NPS_ADDB_SIZE, 0, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_addb_size, extract_nps_addb_size)
+
+ARC_OPERAND(NPS_ANDB_SIZE, 0, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_andb_size, extract_nps_andb_size)
+
+ARC_OPERAND(NPS_FXORB_SIZE, 0, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_fxorb_size, extract_nps_fxorb_size)
+
+ARC_OPERAND(NPS_WXORB_SIZE, 0, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_wxorb_size, extract_nps_wxorb_size)
+
+ARC_OPERAND(NPS_R_XLDST, 6, 5, 0, ARC_OPERAND_IR, NULL, NULL)
+
+ARC_OPERAND(NPS_DIV_UIMM4, 4, 5, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_QCMP_SIZE, 0, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_qcmp_size, extract_nps_qcmp_size)
+
+ARC_OPERAND(NPS_QCMP_M1, 1, 14, 0, ARC_OPERAND_UNSIGNED, NULL, extract_nps_qcmp_m1)
+
+ARC_OPERAND(NPS_QCMP_M2, 1, 15, 0, ARC_OPERAND_UNSIGNED, NULL, extract_nps_qcmp_m2)
+
+ARC_OPERAND(NPS_QCMP_M3, 4, 5, 0, ARC_OPERAND_UNSIGNED, NULL, extract_nps_qcmp_m3)
+
+ARC_OPERAND(NPS_CALC_ENTRY_SIZE, 0, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_calc_entry_size, extract_nps_calc_entry_size)
+
+ARC_OPERAND(NPS_R_DST_3B_SHORT, 3, 8, 0,  ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_8_dst, extract_nps_3bit_reg_at_8_dst)
+
+ARC_OPERAND(NPS_R_SRC1_3B_SHORT, 3, 8, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_8_dst, extract_nps_3bit_reg_at_8_dst)
+
+ARC_OPERAND(NPS_R_SRC2_3B_SHORT, 3, 5, 0,  ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_5_src2, extract_nps_3bit_reg_at_5_src2)
+
+ARC_OPERAND(NPS_BITOP_SIZE2, 5, 25, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bitop2_size, extract_nps_bitop2_size)
+
+ARC_OPERAND(NPS_BITOP_SIZE1, 5, 20, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bitop1_size, extract_nps_bitop1_size)
+
+ARC_OPERAND(NPS_BITOP_DST_POS3_POS4, 5, 0, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_dst_pos3_pos4, extract_nps_bitop_dst_pos3_pos4)
+
+ARC_OPERAND(NPS_BITOP_DST_POS4, 5, 42, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_BITOP_DST_POS3, 5, 37, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_BITOP_DST_POS2, 5, 15, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_BITOP_DST_POS1, 5, 10, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_BITOP_SRC_POS4, 5, 32, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_BITOP_SRC_POS3, 5, 20, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_BITOP_SRC_POS2, 5, 5, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_BITOP_SRC_POS1, 5, 0, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_BITOP_MOD4, 2, 0, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_mod4, extract_nps_bitop_mod4)
+
+ARC_OPERAND(NPS_BITOP_MOD3, 2, 29, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_BITOP_MOD2, 2, 27, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_BITOP_MOD1, 2, 25, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_BITOP_INS_EXT, 5, 20, 0, ARC_OPERAND_UNSIGNED, insert_nps_bitop_ins_ext, extract_nps_bitop_ins_ext)
+
+ARC_OPERAND(NPS_FIELD_START_POS, 3, 3, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_FIELD_SIZE, 3, 6, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_field_size, extract_nps_field_size)
+
+ARC_OPERAND(NPS_SHIFT_FACTOR, 3, 9, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_shift_factor, extract_nps_shift_factor)
+
+ARC_OPERAND(NPS_BITS_TO_SCRAMBLE, 3, 12, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bits_to_scramble, extract_nps_bits_to_scramble)
+
+ARC_OPERAND(NPS_SRC2_POS_5B, 5, 5, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_BDLEN_MAX_LEN, 8, 5, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bdlen_max_len, extract_nps_bdlen_max_len)
+
+ARC_OPERAND(NPS_MIN_HOFS, 4, 6, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_min_hofs, extract_nps_min_hofs)
+
+ARC_OPERAND(NPS_PSBC, 1, 11, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_DPI_DST, 5, 11, 0, ARC_OPERAND_IR, NULL, NULL)
+
+  /* NPS_DPI_SRC1_3B is similar to NPS_R_SRC1_3B
+     but doesn't duplicate an operand.  */
+ARC_OPERAND(NPS_DPI_SRC1_3B, 3, 24, 0,  ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_24_dst, extract_nps_3bit_reg_at_24_dst)
+
+ARC_OPERAND(NPS_HASH_WIDTH, 5, 6, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_hash_width, extract_nps_hash_width)
+
+ARC_OPERAND(NPS_HASH_PERM, 3, 2, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_HASH_NONLINEAR, 1, 5, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_HASH_BASEMAT, 2, 0, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_HASH_LEN, 3, 2, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_hash_len, extract_nps_hash_len)
+
+ARC_OPERAND(NPS_HASH_OFS, 2, 0, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_HASH_BASEMAT2, 1, 5, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_E4BY_INDEX0, 3, 8, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_E4BY_INDEX1, 3, 5, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_E4BY_INDEX2, 3, 2, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_E4BY_INDEX3, 2, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_index3, extract_nps_index3)
+
+ARC_OPERAND(COLON, 0, 0, 0,  ARC_OPERAND_COLON | ARC_OPERAND_FAKE, NULL, NULL)
+
+ARC_OPERAND(NPS_BD, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_bd, extract_nps_bd)
+
+ARC_OPERAND(NPS_JID, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_jid, extract_nps_jid)
+
+ARC_OPERAND(NPS_LBD, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_lbd, extract_nps_lbd)
+
+ARC_OPERAND(NPS_MBD, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_mbd, extract_nps_mbd)
+
+ARC_OPERAND(NPS_SD, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_sd, extract_nps_sd)
+
+ARC_OPERAND(NPS_SM, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_sm, extract_nps_sm)
+
+ARC_OPERAND(NPS_XA, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_xa, extract_nps_xa)
+
+ARC_OPERAND(NPS_XD, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_xd, extract_nps_xd)
+
+ARC_OPERAND(NPS_CD, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_cd, extract_nps_cd)
+
+ARC_OPERAND(NPS_CBD, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_cbd, extract_nps_cbd)
+
+ARC_OPERAND(NPS_CJID, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_cjid, extract_nps_cjid)
+
+ARC_OPERAND(NPS_CLBD, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_clbd, extract_nps_clbd)
+
+ARC_OPERAND(NPS_CM, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_cm, extract_nps_cm)
+
+ARC_OPERAND(NPS_CSD, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_csd, extract_nps_csd)
+
+ARC_OPERAND(NPS_CXA, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_cxa, extract_nps_cxa)
+
+ARC_OPERAND(NPS_CXD, 0, 0, 0,  ARC_OPERAND_ADDRTYPE | ARC_OPERAND_NCHK, insert_nps_cxd, extract_nps_cxd)
+
+ARC_OPERAND(NPS_BD_TYPE, 1, 10, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_BMU_NUM, 3, 0, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_bd_num_buff, extract_nps_bd_num_buff)
+
+ARC_OPERAND(NPS_PMU_NXT_DST, 4, 6, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_WHASH_SIZE, 6, 6, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_size_16bit, extract_nps_size_16bit)
+
+ARC_OPERAND(NPS_PMU_NUM_JOB, 2, 6, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_pmu_num_job, extract_nps_pmu_num_job)
+
+ARC_OPERAND(NPS_DMA_IMM_ENTRY, 3, 2, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_imm_entry, extract_nps_imm_entry)
+
+ARC_OPERAND(NPS_DMA_IMM_OFFSET, 4, 10, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_imm_offset, extract_nps_imm_offset)
+
+ARC_OPERAND(NPS_MISC_IMM_SIZE, 7, 0, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_MISC_IMM_OFFSET, 5, 8, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_misc_imm_offset, extract_nps_misc_imm_offset)
+
+ARC_OPERAND(NPS_R_DST_3B_48, 3, 40, 0,  ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_40_dst, extract_nps_3bit_reg_at_40_dst)
+
+ARC_OPERAND(NPS_R_SRC1_3B_48, 3, 40, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_40_dst, extract_nps_3bit_reg_at_40_dst)
+
+ARC_OPERAND(NPS_R_SRC2_3B_48, 3, 37, 0,  ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_37_src2, extract_nps_3bit_reg_at_37_src2)
+
+ARC_OPERAND(NPS_R_DST_3B_64, 3, 56, 0,  ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_56_dst, extract_nps_3bit_reg_at_56_dst)
+
+ARC_OPERAND(NPS_R_SRC1_3B_64, 3, 56, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_56_dst, extract_nps_3bit_reg_at_56_dst)
+
+ARC_OPERAND(NPS_R_SRC2_3B_64, 3, 53, 0,  ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_3bit_reg_at_53_src2, extract_nps_3bit_reg_at_53_src2)
+
+ARC_OPERAND(NPS_RA_64, 6, 53, 0, ARC_OPERAND_IR, NULL, NULL)
+
+ARC_OPERAND(NPS_RB_64, 5, 48, 0, ARC_OPERAND_IR, NULL, NULL)
+
+ARC_OPERAND(NPS_RBdup_64, 5, 43, 0,  ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE, NULL, NULL)
+
+ARC_OPERAND(NPS_RBdouble_64, 10, 43, 0,  ARC_OPERAND_IR | ARC_OPERAND_NCHK, insert_nps_rbdouble_64, extract_nps_rbdouble_64)
+
+ARC_OPERAND(NPS_RC_64, 5, 43, 0, ARC_OPERAND_IR, NULL, NULL)
+
+ARC_OPERAND(NPS_UIMM16_0_64, 16, 0, 0, ARC_OPERAND_UNSIGNED, NULL, NULL)
+
+ARC_OPERAND(NPS_PROTO_SIZE, 6, 16, 0,  ARC_OPERAND_UNSIGNED | ARC_OPERAND_NCHK, insert_nps_proto_size, extract_nps_proto_size)
+
+  /* ARC64's floating point registers.  */
+ARC_OPERAND(FA, 5, 6, 0,  ARC_OPERAND_IR | ARC_OPERAND_FP, 0, 0)
+ARC_OPERAND(FB, 5, 0, 0,  ARC_OPERAND_IR | ARC_OPERAND_FP, 0, 0)
+ARC_OPERAND(FC, 5, 0, 0,  ARC_OPERAND_IR | ARC_OPERAND_FP, insert_fs2, extract_fs2)
+ARC_OPERAND(FD, 5, 19, 0,  ARC_OPERAND_IR | ARC_OPERAND_FP, 0, 0)
+
+  /* Double 128 registers, the same like above but only the odd ones
+     allowed.  */
+ARC_OPERAND(FDA, 5, 6, 0,  ARC_OPERAND_IR | ARC_OPERAND_FP | ARC_OPERAND_TRUNCATE, 0, 0)
+ARC_OPERAND(FDB, 5, 0, 0,  ARC_OPERAND_IR | ARC_OPERAND_FP | ARC_OPERAND_TRUNCATE, 0, 0)
+ARC_OPERAND(FDC, 5, 0, 0,  ARC_OPERAND_IR | ARC_OPERAND_FP | ARC_OPERAND_TRUNCATE, insert_fs2, extract_fs2)
+ARC_OPERAND(FDD, 5, 19, 0,  ARC_OPERAND_IR | ARC_OPERAND_FP | ARC_OPERAND_TRUNCATE, 0, 0)
+
+  /* 5bit integer registers used by fp instructions.  */
+ARC_OPERAND(FRD, 5, 6, 0, ARC_OPERAND_IR, 0, 0)
+ARC_OPERAND(FRB, 5, 0, 0, ARC_OPERAND_IR, insert_fs2, extract_fs2)
+
+  /* 5bit unsigned immediate used by vfext and vfins.  */
+ARC_OPERAND(UIMM5_FP, 5, 0, 0, ARC_OPERAND_UNSIGNED, insert_fs2, extract_fs2)

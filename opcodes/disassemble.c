@@ -38,6 +38,7 @@
 #define ARCH_tilegx
 #endif
 #define ARCH_arc
+#define ARCH_arc64
 #define ARCH_arm
 #define ARCH_avr
 #define ARCH_bfin
@@ -133,6 +134,11 @@ disassembler (enum bfd_architecture a,
 #endif
 #ifdef ARCH_arc
     case bfd_arch_arc:
+      disassemble = arc_get_disassembler (abfd);
+      break;
+#endif
+#ifdef ARCH_arc64
+    case bfd_arch_arc64:
       disassemble = arc_get_disassembler (abfd);
       break;
 #endif

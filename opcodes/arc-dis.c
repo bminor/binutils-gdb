@@ -60,7 +60,7 @@ struct arc_disassemble_info
   /* Instruction length w/o limm field.  */
   unsigned insn_len;
 
-  /* TRUE if we have limm.  */
+  /* true if we have limm.  */
   bool limm_p;
 
   /* LIMM value, if exists.  */
@@ -85,12 +85,35 @@ static const char * const regnames[64] =
   "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
   "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
   "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
-  "r24", "r25", "gp", "fp", "sp", "ilink", "r30", "blink",
+  "r24", "r25", "r26", "fp", "sp", "ilink", "r30", "blink",
 
   "r32", "r33", "r34", "r35", "r36", "r37", "r38", "r39",
   "r40", "r41", "r42", "r43", "r44", "r45", "r46", "r47",
   "r48", "r49", "r50", "r51", "r52", "r53", "r54", "r55",
   "r56", "r57", "r58", "r59", "lp_count", "reserved", "LIMM", "pcl"
+};
+
+typedef struct regmod
+{
+  const unsigned int index;
+  const unsigned int isa;
+  const char *rname;
+} regmod_t;
+
+static regmod_t regmods[] =
+{
+  { 26, ARC_OPCODE_ARCV1 | ARC_OPCODE_ARCV2, "gp" },
+  { 29, ARC_OPCODE_ARCV1, "ilink1" },
+  { 30, ARC_OPCODE_ARCV1, "ilink2" },
+  { 0, ARC_OPCODE_NONE, 0 }
+};
+
+static const char * const fpnames[32] =
+{
+  "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
+  "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
+  "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
+  "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31"
 };
 
 static const char * const addrtypenames[ARC_NUM_ADDRTYPES] =
@@ -126,7 +149,6 @@ static unsigned enforced_isa_mask = ARC_OPCODE_NONE;
 static bool print_hex = false;
 
 /* Macros section.  */
-
 #ifdef DEBUG
 # define pr_debug(fmt, args...) fprintf (stderr, fmt, ##args)
 #else
@@ -140,7 +162,28 @@ static bool print_hex = false;
 #define BITS(word,s,e)  (((word) >> (s)) & ((1ull << ((e) - (s)) << 1) - 1))
 #define OPCODE_32BIT_INSN(word)	(BITS ((word), 27, 31))
 
+#define REG_PCL    63
+#define REG_LIMM   62
+#define REG_LIMM_S 30
+#define REG_U32    62
+#define REG_S32    60
+
 /* Functions implementation.  */
+
+static const char *
+getregname (unsigned int index, unsigned int isa_mask)
+{
+  regmod_t *iregmods = regmods;
+  while (iregmods->rname)
+    {
+      if (index == iregmods->index
+	  && (isa_mask & iregmods->isa))
+	return iregmods->rname;
+      iregmods ++;
+    }
+
+  return regnames[index % 64];
+}
 
 /* Initialize private data.  */
 static bool
@@ -170,7 +213,7 @@ add_to_decodelist (insn_class_t     insn_class,
   decodelist = t;
 }
 
-/* Return TRUE if we need to skip the opcode from being
+/* Return true if we need to skip the opcode from being
    disassembled.  */
 
 static bool
@@ -277,7 +320,7 @@ find_format_from_table (struct disassemble_info *info,
       if (arc_opcode_len (opcode) != (int) insn_len)
 	continue;
 
-      if ((insn & opcode->mask) != opcode->opcode)
+      if ((insn & opcode->mask) != (opcode->mask & opcode->opcode))
 	continue;
 
       *has_limm = false;
@@ -285,7 +328,7 @@ find_format_from_table (struct disassemble_info *info,
       /* Possible candidate, check the operands.  */
       for (opidx = opcode->operands; *opidx; opidx++)
 	{
-	  int value, limmind;
+	  int value, slimmind;
 	  const struct arc_operand *operand = &arc_operands[*opidx];
 
 	  if (operand->flags & ARC_OPERAND_FAKE)
@@ -296,19 +339,19 @@ find_format_from_table (struct disassemble_info *info,
 	  else
 	    value = (insn >> operand->shift) & ((1ull << operand->bits) - 1);
 
-	  /* Check for LIMM indicator.  If it is there, then make sure
-	     we pick the right format.  */
-	  limmind = (isa_mask & ARC_OPCODE_ARCV2) ? 0x1E : 0x3E;
+	  /* Check for (short) LIMM indicator.  If it is there, then
+	     make sure we pick the right format.  */
+	  slimmind = (isa_mask & ARC_OPCODE_ARCVx) ?  REG_LIMM_S : REG_LIMM;
 	  if (operand->flags & ARC_OPERAND_IR
 	      && !(operand->flags & ARC_OPERAND_LIMM))
-	    {
-	      if ((value == 0x3E && insn_len == 4)
-		  || (value == limmind && insn_len == 2))
-		{
-		  invalid = true;
-		  break;
-		}
-	    }
+	    if ((value == REG_LIMM && insn_len == 4)
+		|| (value == slimmind && insn_len == 2)
+		|| (isa_mask & ARC_OPCODE_ARC64
+		    && (value == REG_S32) && (insn_len == 4)))
+	      {
+		invalid = true;
+		break;
+	      }
 
 	  if (operand->flags & ARC_OPERAND_LIMM
 	      && !(operand->flags & ARC_OPERAND_DUPLICATE))
@@ -338,11 +381,15 @@ find_format_from_table (struct disassemble_info *info,
 
 	  for (flgopridx = cl_flags->flags; *flgopridx; ++flgopridx)
 	    {
+	      bool tmp = false;
 	      const struct arc_flag_operand *flg_operand =
 		&arc_flag_operands[*flgopridx];
 
-	      value = (insn >> flg_operand->shift)
-		& ((1 << flg_operand->bits) - 1);
+	      if (cl_flags->extract)
+		value = (*cl_flags->extract)(insn, &tmp);
+	      else
+		value = (insn >> flg_operand->shift)
+		  & ((1 << flg_operand->bits) - 1);
 	      if (value == flg_operand->code)
 		foundA = 1;
 	      if (value)
@@ -396,15 +443,15 @@ find_format_from_table (struct disassemble_info *info,
    the found opcode requires a LIMM then the LIMM value will be loaded into a
    field of ITER.
 
-   This function returns TRUE in almost all cases, FALSE is reserved to
+   This function returns true in almost all cases, false is reserved to
    indicate an error (failing to find an opcode is not an error) a returned
-   result of FALSE would indicate that the disassembler can't continue.
+   result of false would indicate that the disassembler can't continue.
 
-   If no matching opcode is found then the returned result will be TRUE, the
+   If no matching opcode is found then the returned result will be true, the
    value placed into OPCODE_RESULT will be NULL, ITER will be undefined, and
    INSN_LEN will be unchanged.
 
-   If a matching opcode is found, then the returned result will be TRUE, the
+   If a matching opcode is found, then the returned result will be true, the
    opcode pointer is placed into OPCODE_RESULT, INSN_LEN will be increased by
    4 if the instruction requires a LIMM, and the LIMM value will have been
    loaded into a field of ITER.  Finally, ITER will have been initialised so
@@ -421,10 +468,13 @@ find_format (bfd_vma                       memaddr,
              struct arc_operand_iterator * iter)
 {
   const struct arc_opcode *opcode = NULL;
+  const struct arc_opcode *opcodeList = NULL;
   bool needs_limm = false;
   const extInstruction_t *einsn, *i;
   unsigned limm = 0;
   struct arc_disassemble_info *arc_infop = info->private_data;
+
+  opcodeList = arc_opcodes;
 
   /* First, try the extension instructions.  */
   if (*insn_len == 4)
@@ -452,7 +502,7 @@ find_format (bfd_vma                       memaddr,
 
   /* Then, try finding the first match in the opcode table.  */
   if (opcode == NULL)
-    opcode = find_format_from_table (info, arc_opcodes, insn, *insn_len,
+    opcode = find_format_from_table (info, opcodeList, insn, *insn_len,
 				     isa_mask, &needs_limm, true);
 
   if (opcode != NULL && needs_limm)
@@ -542,8 +592,14 @@ print_flags (const struct arc_opcode *opcode,
 	  if (!flg_operand->favail)
 	    continue;
 
-	  value = (insn[0] >> flg_operand->shift)
-	    & ((1 << flg_operand->bits) - 1);
+	  if (cl_flags->extract)
+	    {
+	      bool tmp = false;
+	      value = (*cl_flags->extract)(insn[0], &tmp);
+	    }
+	  else
+	    value = (insn[0] >> flg_operand->shift)
+	      & ((1 << flg_operand->bits) - 1);
 	  if (value == flg_operand->code)
 	    {
 	       /* FIXME!: print correctly nt/t flag.  */
@@ -646,34 +702,59 @@ arc_insn_length (bfd_byte msb, bfd_byte lsb, struct disassemble_info *info)
 {
   bfd_byte major_opcode = msb >> 3;
 
-  switch (info->mach)
+  switch (info->arch)
     {
-    case bfd_mach_arc_arc700:
-      /* The nps400 extension set requires this special casing of the
-	 instruction length calculation.  Right now this is not causing any
-	 problems as none of the known extensions overlap in opcode space,
-	 but, if they ever do then we might need to start carrying
-	 information around in the elf about which extensions are in use.  */
-      if (major_opcode == 0xb)
-        {
-          bfd_byte minor_opcode = lsb & 0x1f;
+    case bfd_arch_arc:
+      switch (info->mach)
+	{
+	case bfd_mach_arc_arc700:
+	  /* The nps400 extension set requires this special casing of
+	     the instruction length calculation.  Right now this is
+	     not causing any problems as none of the known extensions
+	     overlap in opcode space, but, if they ever do then we
+	     might need to start carrying information around in the
+	     elf about which extensions are in use.  */
+	  if (major_opcode == 0xb)
+	    {
+	      bfd_byte minor_opcode = lsb & 0x1f;
 
-	  if (minor_opcode < 4)
-	    return 6;
-	  else if (minor_opcode == 0x10 || minor_opcode == 0x11)
-	    return 8;
-        }
-      if (major_opcode == 0xa)
-        {
-          return 8;
-        }
-      /* Fall through.  */
-    case bfd_mach_arc_arc600:
-      return (major_opcode > 0xb) ? 2 : 4;
+	      if (minor_opcode < 4)
+		return 6;
+	      else if (minor_opcode == 0x10 || minor_opcode == 0x11)
+		return 8;
+	    }
+	  if (major_opcode == 0xa)
+	    {
+	      return 8;
+	    }
+	  /* Fall through.  */
+	case bfd_mach_arc_arc600:
+	  return (major_opcode > 0xb) ? 2 : 4;
+	  break;
+
+	case bfd_mach_arc_arcv2:
+	  return (major_opcode > 0x7) ? 2 : 4;
+	  break;
+
+	default:
+	  return 0;
+	}
       break;
 
-    case bfd_mach_arc_arcv2:
-      return (major_opcode > 0x7) ? 2 : 4;
+    case bfd_arch_arc64:
+      switch (info->mach)
+	{
+	case bfd_mach_arcv3_32:
+	case bfd_mach_arcv3_64:
+	  if (major_opcode == 0x0b
+	      || major_opcode == 0x0d
+	      || major_opcode == 0x1c)
+	    return 4;
+	  return (major_opcode > 0x7) ? 2 : 4;
+
+	default:
+	  return 0;
+	}
       break;
 
     default:
@@ -723,8 +804,8 @@ extract_operand_value (const struct arc_operand *operand,
   return value;
 }
 
-/* Find the next operand, and the operands value from ITER.  Return TRUE if
-   there is another operand, otherwise return FALSE.  If there is an
+/* Find the next operand, and the operands value from ITER.  Return true if
+   there is another operand, otherwise return false.  If there is an
    operand returned then the operand is placed into OPERAND, and the value
    into VALUE.  If there is no operand returned then OPERAND and VALUE are
    unchanged.  */
@@ -808,14 +889,18 @@ parse_option (const char *option)
 }
 
 #define ARC_CPU_TYPE_A6xx(NAME,EXTRA)			\
-  { #NAME, ARC_OPCODE_ARC600, "ARC600" }
+  { #NAME, ARC_OPCODE_ARC600, "ARC600" },
 #define ARC_CPU_TYPE_A7xx(NAME,EXTRA)			\
-  { #NAME, ARC_OPCODE_ARC700, "ARC700" }
+  { #NAME, ARC_OPCODE_ARC700, "ARC700" },
 #define ARC_CPU_TYPE_AV2EM(NAME,EXTRA)			\
-  { #NAME,  ARC_OPCODE_ARCv2EM, "ARC EM" }
+  { #NAME,  ARC_OPCODE_ARCv2EM, "ARC EM" },
 #define ARC_CPU_TYPE_AV2HS(NAME,EXTRA)			\
-  { #NAME,  ARC_OPCODE_ARCv2HS, "ARC HS" }
-#define ARC_CPU_TYPE_NONE				\
+  { #NAME,  ARC_OPCODE_ARCv2HS, "ARC HS" },
+#define ARC_CPU_TYPE_A64x(NAME,EXTRA)			\
+  { #NAME,  ARC_OPCODE_ARC64, "ARC64" },
+#define ARC_CPU_TYPE_A32x(NAME,EXTRA)			\
+  { #NAME,  ARC_OPCODE_ARC64, "ARC32" },
+#define ARC_CPU_TYPE_NONE			\
   { 0, 0, 0 }
 
 /* A table of CPU names and opcode sets.  */
@@ -950,7 +1035,8 @@ print_insn_arc (bfd_vma memaddr,
   bool open_braket;
   int size;
   const struct arc_operand *operand;
-  int value, vpcl;
+  int value;
+  bfd_vma vpcl;
   struct arc_operand_iterator iter;
   struct arc_disassemble_info *arc_infop;
   bool rpcl = false, rset = false;
@@ -978,25 +1064,54 @@ print_insn_arc (bfd_vma memaddr,
       if (info->section && info->section->owner)
 	header = elf_elfheader (info->section->owner);
 
-      switch (info->mach)
+      switch (info->arch)
 	{
-	case bfd_mach_arc_arc700:
-	  isa_mask = ARC_OPCODE_ARC700;
+	case bfd_arch_arc:
+	  switch (info->mach)
+	    {
+	    case bfd_mach_arc_arc700:
+	      isa_mask = ARC_OPCODE_ARC700;
+	      break;
+
+	    case bfd_mach_arc_arc600:
+	      isa_mask = ARC_OPCODE_ARC600;
+	      break;
+
+	    case bfd_mach_arc_arcv2:
+	    default:
+	      isa_mask = ARC_OPCODE_ARCv2EM;
+	      /* TODO: Perhaps remove definition of header since it is
+		 only used at this location.  */
+	      if (header != NULL
+		  && (header->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_ARCV2HS)
+		isa_mask = ARC_OPCODE_ARCv2HS;
+	      break;
+	    }
 	  break;
 
-	case bfd_mach_arc_arc600:
-	  isa_mask = ARC_OPCODE_ARC600;
+	case bfd_arch_arc64:
+	  switch (info->mach)
+	    {
+	    case bfd_mach_arcv3_64:
+	      isa_mask = ARC_OPCODE_ARC64;
+	      break;
+
+	    case bfd_mach_arcv3_32:
+	      isa_mask = ARC_OPCODE_ARC32;
+	      break;
+
+	    default:
+	      /* xgettext:c-format */
+	      opcodes_error_handler (_("unrecognised arc64 disassembler \
+variant"));
+	      return -1;
+	    }
 	  break;
 
-	case bfd_mach_arc_arcv2:
 	default:
-	  isa_mask = ARC_OPCODE_ARCv2EM;
-	  /* TODO: Perhaps remove definition of header since it is only used at
-	     this location.  */
-	  if (header != NULL
-	      && (header->e_flags & EF_ARC_MACH_MSK) == EF_ARC_CPU_ARCV2HS)
-	    isa_mask = ARC_OPCODE_ARCv2HS;
-	  break;
+	  /* xgettext:c-format */
+	  opcodes_error_handler (_("unrecognised disassembler architecture"));
+	  return -1;
 	}
     }
   else
@@ -1289,8 +1404,10 @@ print_insn_arc (bfd_vma memaddr,
 	  rpcl = true;
 	  vpcl = value;
 	  rset = true;
-
-	  info->target = (bfd_vma) (memaddr & ~3) + value;
+	  if ((operand->flags & ARC_OPERAND_LIMM)
+	      && (operand->flags & ARC_OPERAND_ALIGNED32))
+	    vpcl <<= 2;
+	  info->target = (bfd_vma) (memaddr & ~3) + vpcl;
 	}
       else if (!(operand->flags & ARC_OPERAND_IR))
 	{
@@ -1303,10 +1420,15 @@ print_insn_arc (bfd_vma memaddr,
 	{
 	  const char *rname;
 
-	  assert (value >=0 && value < 64);
+	  assert (value >= 0 && value < 64);
 	  rname = arcExtMap_coreRegName (value);
 	  if (!rname)
-	    rname = regnames[value];
+	    {
+	      if (operand->flags & ARC_OPERAND_FP)
+		rname = fpnames[value & 0x1f];
+	      else
+		rname = getregname (value, isa_mask);
+	    }
 	  (*info->fprintf_styled_func) (info->stream, dis_style_register,
 					"%s", rname);
 
@@ -1316,8 +1438,10 @@ print_insn_arc (bfd_vma memaddr,
 	      if ((value & 0x01) == 0)
 		{
 		  rname = arcExtMap_coreRegName (value + 1);
-		  if (!rname)
-		    rname = regnames[value + 1];
+		  if (operand->flags & ARC_OPERAND_FP)
+		    rname = fpnames[(value + 1) & 0x1f];
+		  else
+		    rname = getregname (value + 1, isa_mask);
 		}
 	      else
 		rname = _("\nWarning: illegal use of double register "
@@ -1325,7 +1449,7 @@ print_insn_arc (bfd_vma memaddr,
 	      (*info->fprintf_styled_func) (info->stream, dis_style_register,
 					    "%s", rname);
 	    }
-	  if (value == 63)
+	  if (value == REG_PCL)
 	    rpcl = true;
 	  else
 	    rpcl = false;
@@ -1339,8 +1463,12 @@ print_insn_arc (bfd_vma memaddr,
 					  "%s", rname);
 	  else
 	    {
-	      (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
-					    "%#x", value);
+	      if (operand->flags & ARC_OPERAND_SIGNED)
+		(*info->fprintf_styled_func) (info->stream, dis_style_immediate,
+					      "%d@s32", value);
+	      else
+		(*info->fprintf_styled_func) (info->stream, dis_style_immediate,
+					      "%#x", value);
 	      if (info->insn_type == dis_branch
 		  || info->insn_type == dis_jsr)
 		info->target = (bfd_vma) value;
@@ -1418,7 +1546,7 @@ print_insn_arc (bfd_vma memaddr,
 	    = ARC_OPERAND_KIND_LIMM;
 	  /* It is not important to have exactly the LIMM indicator
 	     here.  */
-	  arc_infop->operands[arc_infop->operands_count].value = 63;
+	  arc_infop->operands[arc_infop->operands_count].value = REG_PCL;
 	}
       else
 	{

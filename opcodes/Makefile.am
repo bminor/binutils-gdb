@@ -116,6 +116,7 @@ TARGET32_LIBOPCODES_CFILES = \
 	arc-dis.c \
 	arc-ext.c \
 	arc-opc.c \
+	arc64-opc.c \
 	arm-dis.c \
 	avr-dis.c \
 	bfin-dis.c \

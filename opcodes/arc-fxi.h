@@ -1318,3 +1318,63 @@ extract_uimm6_axx_ (unsigned long long insn ATTRIBUTE_UNUSED,
   return value;
 }
 #endif /* EXTRACT_UIMM6_AXX_ */
+
+/* mask  = 0000022000011111.  */
+#ifndef INSERT_UIMM9_A32_11_S
+#define INSERT_UIMM9_A32_11_S
+ATTRIBUTE_UNUSED static unsigned long long
+insert_uimm9_a32_11_s (unsigned long long insn ATTRIBUTE_UNUSED,
+		       long long int value ATTRIBUTE_UNUSED,
+		       const char **errmsg ATTRIBUTE_UNUSED)
+{
+  if (value & 0x03)
+    *errmsg = "Target address is not 32bit aligned.";
+
+  insn |= ((value >> 2) & 0x001f) << 0;
+  insn |= ((value >> 7) & 0x0003) << 9;
+  return insn;
+}
+#endif /* INSERT_UIMM9_A32_11_S.  */
+
+#ifndef EXTRACT_UIMM9_A32_11_S
+#define EXTRACT_UIMM9_A32_11_S
+ATTRIBUTE_UNUSED static long long int
+extract_uimm9_a32_11_s (unsigned long long insn ATTRIBUTE_UNUSED,
+			bool *invalid ATTRIBUTE_UNUSED)
+{
+  unsigned value = 0;
+  value |= ((insn >> 0) & 0x001f) << 2;
+  value |= ((insn >> 9) & 0x0003) << 7;
+
+  return value;
+}
+#endif /* EXTRACT_UIMM9_A32_11_S.  */
+
+/* mask  = 0000022222220111.  */
+#ifndef INSERT_UIMM10_13_S
+#define INSERT_UIMM10_13_S
+ATTRIBUTE_UNUSED static unsigned long long
+insert_uimm10_13_s (unsigned long long insn ATTRIBUTE_UNUSED,
+		    long long int value ATTRIBUTE_UNUSED,
+		    const char **errmsg ATTRIBUTE_UNUSED)
+{
+  insn |= ((value >> 0) & 0x0007) << 0;
+  insn |= ((value >> 3) & 0x007f) << 4;
+
+  return insn;
+}
+#endif /* INSERT_UIMM10_13_S.  */
+
+#ifndef EXTRACT_UIMM10_13_S
+#define EXTRACT_UIMM10_13_S
+ATTRIBUTE_UNUSED static long long int
+extract_uimm10_13_s (unsigned long long insn ATTRIBUTE_UNUSED,
+		     bool *invalid ATTRIBUTE_UNUSED)
+{
+  unsigned value = 0;
+  value |= ((insn >> 0) & 0x0007) << 0;
+  value |= ((insn >> 4) & 0x007f) << 3;
+
+  return value;
+}
+#endif /* EXTRACT_UIMM10_13_S.  */
