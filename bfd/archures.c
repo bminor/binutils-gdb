@@ -361,9 +361,6 @@ DESCRIPTION
 .#define bfd_mach_arc_arc601	4
 .#define bfd_mach_arc_arc700	3
 .#define bfd_mach_arc_arcv2	5
-.  bfd_arch_arc64,     {* ARCv3 32/64 Cores.  *}
-.#define bfd_mach_arcv3_64	1
-.#define bfd_mach_arcv3_32	2
 . bfd_arch_m32c,       {* Renesas M16C/M32C.  *}
 .#define bfd_mach_m16c		0x75
 .#define bfd_mach_m32c		0x78
@@ -635,7 +632,6 @@ extern const bfd_arch_info_type bfd_aarch64_arch;
 extern const bfd_arch_info_type bfd_alpha_arch;
 extern const bfd_arch_info_type bfd_amdgcn_arch;
 extern const bfd_arch_info_type bfd_arc_arch;
-extern const bfd_arch_info_type bfd_arc64_arch;
 extern const bfd_arch_info_type bfd_arm_arch;
 extern const bfd_arch_info_type bfd_avr_arch;
 extern const bfd_arch_info_type bfd_bfin_arch;
@@ -725,7 +721,6 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_alpha_arch,
     &bfd_amdgcn_arch,
     &bfd_arc_arch,
-    &bfd_arc64_arch,
     &bfd_arm_arch,
     &bfd_avr_arch,
     &bfd_bfin_arch,
