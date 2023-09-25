@@ -1,7 +1,5 @@
 -*- text -*-
 
-* Add support for ARCv3 32/64 instruction set architecture.
-
 * Add support for Intel AVX10.1.
 
 * Add support for Intel PBNDKB instructions.
