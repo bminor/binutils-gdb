@@ -12100,6 +12100,18 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 	;;
+      arc64)
+	# Set for which architecture we compile
+
+$as_echo "#define TARGET_ARCv3_64 1" >>confdefs.h
+
+	;;
+      arc32)
+	# Set for which architecture we compile
+
+$as_echo "#define TARGET_ARCv3_32 1" >>confdefs.h
+
+	;;
     esac
 
     if test ${this_target} = $target ; then
@@ -12523,7 +12535,7 @@ $as_echo "#define NDS32_DEFAULT_ZOL_EXT 1" >>confdefs.h
 $as_echo "$enable_zol_ext" >&6; }
 	;;
 
-      aarch64 | i386 | s390 | sparc)
+      aarch64 | i386 | s390 | sparc | arc)
 	if test $this_target = $target ; then
 
 cat >>confdefs.h <<_ACEOF

@@ -34,7 +34,11 @@
 
 /* This macro is the BFD architecture to pass to
    `bfd_set_arch_mach'.  */
-#define TARGET_ARCH bfd_arch_arc
+#if defined (TARGET_ARCv3_64) || defined (TARGET_ARCv3_32)
+# define TARGET_ARCH bfd_arch_arc64
+#else
+# define TARGET_ARCH bfd_arch_arc
+#endif
 
 /* The `extsym - .' expressions can be emitted using PC-relative
    relocs.  */
@@ -48,28 +52,33 @@
 #undef  BIG_ENDIAN
 #define BIG_ENDIAN      4321
 
-#ifdef TARGET_BYTES_BIG_ENDIAN
-
-# define DEFAULT_TARGET_FORMAT  "elf32-bigarc"
-# define DEFAULT_BYTE_ORDER     BIG_ENDIAN
-
-#else
+#ifndef TARGET_BYTES_BIG_ENDIAN
 /* You should define this macro to be non-zero if the target is big
    endian, and zero if the target is little endian.  */
-# define TARGET_BYTES_BIG_ENDIAN 0
+#define TARGET_BYTES_BIG_ENDIAN 0
+#endif
 
-# define DEFAULT_TARGET_FORMAT  "elf32-littlearc"
+#ifdef TARGET_ARCv3_64
+# define DEFAULT_TARGET_FORMAT  "elf64-littlearc64"
 # define DEFAULT_BYTE_ORDER     LITTLE_ENDIAN
-
+#elif defined (TARGET_ARCv3_32)
+# define DEFAULT_TARGET_FORMAT  "elf64-littlearc32"
+# define DEFAULT_BYTE_ORDER     LITTLE_ENDIAN
+#else
+# if TARGET_BYTES_BIG_ENDIAN == 1
+#  define DEFAULT_TARGET_FORMAT  "elf32-bigarc"
+#  define DEFAULT_BYTE_ORDER     BIG_ENDIAN
+# else
+#  define DEFAULT_TARGET_FORMAT  "elf32-littlearc"
+#  define DEFAULT_BYTE_ORDER     LITTLE_ENDIAN
 #endif /* TARGET_BYTES_BIG_ENDIAN.  */
 
-/* The endianness of the target format may change based on command
-   line arguments.  */
-extern const char *arc_target_format;
+#endif /* TARGET_ARCv3_64.  */
 
 /* This macro is the BFD target name to use when creating the output
    file.  This will normally depend upon the `OBJ_FMT' macro.  */
-#define TARGET_FORMAT arc_target_format
+#define TARGET_FORMAT arc_target_format()
+extern const char *arc_target_format (void);
 
 /* `md_short_jump_size'
    `md_long_jump_size'
@@ -103,9 +112,6 @@ extern const char *arc_target_format;
    fixp->fx_frag->fr_address.  */
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
 
-/* [ ] is index operator.  */
-#define NEED_INDEX_OPERATOR
-
 #define MAX_MEM_FOR_RS_ALIGN_CODE (1+2)
 
 /* HANDLE_ALIGN called after all the assembly has been done,
@@ -131,6 +137,7 @@ extern const char *arc_target_format;
 #define TC_VALIDATE_FIX(FIXP,SEG,SKIP)				     \
   if ((FIXP->fx_r_type == BFD_RELOC_ARC_GOTPC32			     \
        || FIXP->fx_r_type == BFD_RELOC_ARC_PLT32		     \
+       || FIXP->fx_r_type == BFD_RELOC_ARC_PLT34		     \
        || FIXP->fx_r_type == BFD_RELOC_ARC_S25W_PCREL_PLT	     \
        || FIXP->fx_r_type == BFD_RELOC_ARC_S25H_PCREL_PLT	     \
        || FIXP->fx_r_type == BFD_RELOC_ARC_S21W_PCREL_PLT	     \
@@ -236,6 +243,11 @@ struct arc_flags
 
   /* Pointer to arc flags.  */
   const struct arc_flag_operand *flgp;
+
+  /* Pointer to insert function.  */
+  unsigned long long (*insert) (unsigned long long instruction,
+				long long int op,
+				const char **errmsg);
 };
 
 extern const relax_typeS md_relax_table[];

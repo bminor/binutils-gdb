@@ -237,6 +237,12 @@
 /* Target alias. */
 #undef TARGET_ALIAS
 
+/* Using ARCv3/32 architecture. */
+#undef TARGET_ARCv3_32
+
+/* Using ARCv3/64 architecture. */
+#undef TARGET_ARCv3_64
+
 /* Define as 1 if big endian. */
 #undef TARGET_BYTES_BIG_ENDIAN
 

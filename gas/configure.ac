@@ -235,6 +235,14 @@ for this_target in $target $canon_targets ; do
 	AC_DEFINE_UNQUOTED(DEFAULT_CRIS_ARCH, $arch,
 			   [Default CRIS architecture.])
 	;;
+      arc64)
+	# Set for which architecture we compile
+	AC_DEFINE(TARGET_ARCv3_64, 1, [Using ARCv3/64 architecture.])
+	;;
+      arc32)
+	# Set for which architecture we compile
+	AC_DEFINE(TARGET_ARCv3_32, 1, [Using ARCv3/32 architecture.])
+	;;
     esac
 
     if test ${this_target} = $target ; then
@@ -606,7 +614,7 @@ changequote([,])dnl
 	AC_MSG_RESULT($enable_zol_ext)
 	;;
 
-      aarch64 | i386 | s390 | sparc)
+      aarch64 | i386 | s390 | sparc | arc)
 	if test $this_target = $target ; then
 	  AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}", [Default architecture.])
 	fi
