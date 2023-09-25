@@ -419,8 +419,10 @@ do
     aout0_be_vec)		 tb="$tb aout0.lo aout32.lo" ;;
     aout64_vec)			 tb="$tb demo64.lo aout64.lo"; target_size=64 ;;
     aout_vec)			 tb="$tb host-aout.lo aout32.lo" ;;
-    arc_elf32_be_vec)		 tb="$tb elf32-arc.lo elf32.lo $elf" ;;
-    arc_elf32_le_vec)		 tb="$tb elf32-arc.lo elf32.lo $elf" ;;
+    arc_elf32_be_vec)		 tb="$tb arc-plt.lo elf32-arc.lo elf32.lo $elf" ;;
+    arc_elf32_le_vec)		 tb="$tb arc-plt.lo elf32-arc.lo elf32.lo $elf" ;;
+    arc64_elf64_le_vec)		 tb="$tb arc-plt.lo elf64-arc64.lo elf64.lo $elf"; target_size=64 ;;
+    arc64_elf32_le_vec)		 tb="$tb arc-plt.lo elf32-arc64.lo elf32.lo $elf"; target_size=64 ;;
     arm_elf32_be_vec)		 tb="$tb elf32-arm.lo elf32.lo elf-nacl.lo elf-vxworks.lo $elf" ;;
     arm_elf32_le_vec)		 tb="$tb elf32-arm.lo elf32.lo elf-nacl.lo elf-vxworks.lo $elf" ;;
     arm_elf32_fdpic_be_vec)	 tb="$tb elf32-arm.lo elf32.lo elf-nacl.lo elf-vxworks.lo $elf" ;;

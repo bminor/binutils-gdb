@@ -1617,6 +1617,9 @@ enum bfd_architecture
 #define bfd_mach_arc_arc601    4
 #define bfd_mach_arc_arc700    3
 #define bfd_mach_arc_arcv2     5
+  bfd_arch_arc64,     /* ARCv3 32/64 Cores.  */
+#define bfd_mach_arcv3_64      1
+#define bfd_mach_arcv3_32      2
  bfd_arch_m32c,       /* Renesas M16C/M32C.  */
 #define bfd_mach_m16c          0x75
 #define bfd_mach_m32c          0x78
@@ -4383,6 +4386,7 @@ pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_ARC_16,
   BFD_RELOC_ARC_24,
   BFD_RELOC_ARC_32,
+  BFD_RELOC_ARC_64,
   BFD_RELOC_ARC_N8,
   BFD_RELOC_ARC_N16,
   BFD_RELOC_ARC_N24,
@@ -4447,6 +4451,27 @@ pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_ARC_S21H_PCREL_PLT,
   BFD_RELOC_ARC_NPS_CMEM16,
   BFD_RELOC_ARC_JLI_SECTOFF,
+  BFD_RELOC_ARC_S7H_PCREL,
+  BFD_RELOC_ARC_S8H_PCREL,
+  BFD_RELOC_ARC_S9H_PCREL,
+  BFD_RELOC_ARC_S10H_PCREL,
+  BFD_RELOC_ARC_S13H_PCREL,
+  BFD_RELOC_ARC_ALIGN,
+  BFD_RELOC_ARC_ADD8,
+  BFD_RELOC_ARC_ADD16,
+  BFD_RELOC_ARC_SUB8,
+  BFD_RELOC_ARC_SUB16,
+  BFD_RELOC_ARC_SUB32,
+  BFD_RELOC_ARC_LO32,
+  BFD_RELOC_ARC_HI32,
+  BFD_RELOC_ARC_LO32_ME,
+  BFD_RELOC_ARC_HI32_ME,
+  BFD_RELOC_ARC_N64,
+  BFD_RELOC_ARC_SDA_LDST3,
+  BFD_RELOC_ARC_NLO32,
+  BFD_RELOC_ARC_NLO32_ME,
+  BFD_RELOC_ARC_PCLO32_ME_2,
+  BFD_RELOC_ARC_PLT34,
 
 /* ADI Blackfin 16 bit immediate absolute reloc.  */
   BFD_RELOC_BFIN_16_IMM,

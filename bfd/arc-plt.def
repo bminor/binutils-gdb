@@ -1,4 +1,4 @@
-/* Arc V2 Related PLT entries.
+/* Arc V2/V3 Related PLT entries.
    Copyright (C) 2016-2023 Free Software Foundation, Inc.
    Contributed by Cupertino Miranda (cmiranda@synopsys.com).
 
@@ -19,15 +19,72 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-PLT_TYPE_START (ELF_ARCV2_PIC)
-  PLT_ENTRY (0x2730, 0x7f8b, 0x0000, 0x0000) /* ld %r11, [pcl,0] : 0 to be replaced by _DYNAMIC@GOTPC+4 */
-  PLT_ENTRY (0x2730, 0x7f8a, 0x0000, 0x0000) /* ld %r10, [pcl,0] : 0 to be replaced by _DYNAMIC@GOTPC+8 */
-  PLT_ENTRY (0x2020, 0x0280)		    /* j [%r10] */
-  PLT_ENTRY (0x0,0x0,0x0,0x0,0x0,0x0)	    /* padding */
 
-  PLT_ELEM (0x2730, 0x7f8c, 0x0000, 0x0000) /* ld %r12, [%pc,func@got] */
-  PLT_ELEM (0x2021, 0x0300)		   /* j.d [%r12] */
-  PLT_ELEM (0x240a, 0x1fc0)		   /* mov %r12, %pcl */
+PLT_TYPE_START (ELF_ARCV3_PIC)
+/*
+  -- at .got.plt + 0 should be the address of .dynamic
+  ldl r11, [pcl, 0] .got.plt + 8
+  ldl r10, [pcl, 0] .got.plt + 16
+  j [r10]
+  padding
+
+  2e:   2731 ff0b 0000 0000     ldl     r11,[pcl,0@s32] ;2c <main+0x2c>
+                        32: R_ARC_GOTPC32       f_var
+  36:   2731 ff0a 0000 0000     ldl     r10,[pcl,0@s32] ;34 <main+0x34>
+                        3a: R_ARC_GOTPC32       f_var
+  3e:   2020 0280               j       [r10]
+*/
+
+/* ldl %r11, [pcl,0] : 0 to be replaced by _DYNAMIC@GOTPC+4.  */
+  PLT_ENTRY (0x2731, 0xff0b, 0x0000, 0x0000)
+/* ldl %r10, [pcl,0] : 0 to be replaced by _DYNAMIC@GOTPC+8.  */
+  PLT_ENTRY (0x2731, 0xff0a, 0x0000, 0x0000)
+/* j [%r10].  */
+  PLT_ENTRY (0x2020, 0x0280)
+/* padding.  */
+  PLT_ENTRY (0x0, 0x0, 0x0, 0x0, 0x0,0x0)
+
+/*
+  ldl r12, [pcl, 0]    -- at .got.plt + 0 should be the address of .dynamic
+
+  46:   2731 ff0c 0000 0000     ldl     r12,[pcl,0@s32] ;44 <main+0x44>
+                        4a: R_ARC_GOTPC32       f_var
+  4e:   2021 0300               j.d     [r12]
+  52:   5c0a 1fc0               movl     r12,pcl
+*/
+
+/* ld %r12, [%pc,func@got].  */
+  PLT_ELEM (0x2731, 0xff0c, 0x0000, 0x0000)
+/* j.d [%r12].  */
+  PLT_ELEM (0x2021, 0x0300)
+/* movl %r12, %pcl.  */
+  PLT_ELEM (0x5c0a, 0x1fc0)
+
+  ENTRY_RELOC (4, 32, 0xFFFFFFFF, SGOT | RELATIVE_INSN_32 | MIDDLE_ENDIAN, 8)
+  ENTRY_RELOC (12, 32, 0xFFFFFFFF, SGOT | RELATIVE_INSN_32 | MIDDLE_ENDIAN, 16)
+  ENTRY_RELOC (20, 32, 0xFFFFFFFF, SGOT, 0)
+
+  ELEM_RELOC (4, 32, 0xFFFFFFFF, SGOT | RELATIVE_INSN_32 | MIDDLE_ENDIAN, 0)
+
+PLT_TYPE_END (ELF_ARCV3_PIC)
+
+
+PLT_TYPE_START (ELF_ARCV2_PIC)
+/* ld %r11, [pcl,0] : 0 to be replaced by _DYNAMIC@GOTPC+4.  */
+  PLT_ENTRY (0x2730, 0x7f8b, 0x0000, 0x0000)
+/* ld %r10, [pcl,0] : 0 to be replaced by _DYNAMIC@GOTPC+8.  */
+  PLT_ENTRY (0x2730, 0x7f8a, 0x0000, 0x0000)
+/* j [%r10].  */
+  PLT_ENTRY (0x2020, 0x0280)
+/* padding.  */
+  PLT_ENTRY (0x0,0x0,0x0,0x0,0x0,0x0)
+
+ /* ld %r12, [%pc,func@got].  */
+  PLT_ELEM (0x2730, 0x7f8c, 0x0000, 0x0000)
+/* j.d [%r12].  */
+  PLT_ELEM (0x2021, 0x0300)
+/* mov %r12, %pcl.  */
+  PLT_ELEM (0x240a, 0x1fc0)
 
   ENTRY_RELOC (4, 32, 0xFFFFFFFF, SGOT | RELATIVE_INSN_32 | MIDDLE_ENDIAN, 4)
   ENTRY_RELOC (12, 32, 0xFFFFFFFF, SGOT | RELATIVE_INSN_32 | MIDDLE_ENDIAN, 8)
@@ -38,14 +95,18 @@ PLT_TYPE_START (ELF_ARCV2_PIC)
 PLT_TYPE_END (ELF_ARCV2_PIC)
 
 PLT_TYPE_START (ELF_ARCV2_ABS)
-  PLT_ENTRY (0x1600,0x700b,0x0000,0x0000)  /* ld %r11, [0] */
-  PLT_ENTRY (0x1600,0x700a,0x0000,0x0000)  /* ld %r10, [0] */
-  PLT_ENTRY (0x2020,0x0280)		  /* j [%r10] */
-  PLT_ENTRY (0x0,0x0,0x0,0x0,0x0,0x0)	  /* padding */
+/* ld %r11, [0].  */
+  PLT_ENTRY (0x1600,0x700b,0x0000,0x0000)
+/* ld %r10, [0].  */
+  PLT_ENTRY (0x1600,0x700a,0x0000,0x0000)
+/* j [%r10].  */
+  PLT_ENTRY (0x2020,0x0280)
+/* padding.  */
+  PLT_ENTRY (0x0,0x0,0x0,0x0,0x0,0x0)
 
-  PLT_ELEM (0x2730, 0x7f8c, 0x0000, 0x0000) /* ld %r12, [%pcl,func@gotpc] */
-  PLT_ELEM (0x2021,0x0300)		   /* j.d [%r12] */
-  PLT_ELEM (0x240a,0x1fc0)		   /* mov %r12, %pcl */
+  PLT_ELEM (0x2730, 0x7f8c, 0x0000, 0x0000) /* ld %r12, [%pcl,func@gotpc].  */
+  PLT_ELEM (0x2021,0x0300)		    /* j.d [%r12].  */
+  PLT_ELEM (0x240a,0x1fc0)		    /* mov %r12, %pcl.  */
 
   ENTRY_RELOC (4, 32, 0xFFFFFFFF, SGOT | MIDDLE_ENDIAN, 4)
   ENTRY_RELOC (12, 32, 0xFFFFFFFF, SGOT | MIDDLE_ENDIAN, 8)
@@ -59,14 +120,18 @@ PLT_TYPE_END (ELF_ARCV2_ABS)
 /* Non Arc V2 Related PLT entries.  */
 
 PLT_TYPE_START (ELF_ARC_PIC)
-  PLT_ENTRY (0x2730,0x7f8b,0x0000,0x0000) /* ld %r11, [pcl,0] : 0 to be replaced by _DYNAMIC@GOTPC+4 */
-  PLT_ENTRY (0x2730,0x7f8a,0x0000,0x0000) /* ld %r10, [pcl,0] : 0 to be replaced by -DYNAMIC@GOTPC+8  */
-  PLT_ENTRY (0x2020,0x0280)		 /* j [%r10] */
-  PLT_ENTRY (0x0,0x0)			 /* padding */
+/* ld %r11, [pcl,0] : 0 to be replaced by _DYNAMIC@GOTPC+4.  */
+  PLT_ENTRY (0x2730,0x7f8b,0x0000,0x0000)
+/* ld %r10, [pcl,0] : 0 to be replaced by -DYNAMIC@GOTPC+8.  */
+  PLT_ENTRY (0x2730,0x7f8a,0x0000,0x0000)
+/* j [%r10].  */
+  PLT_ENTRY (0x2020,0x0280)
+/* padding.  */
+  PLT_ENTRY (0x0,0x0)
 
-  PLT_ELEM (0x2730,0x7f8c,0x0000,0x0000)  /* ld %r12, [%pc,func@got]   */
-  PLT_ELEM (0x7c20)			 /* j_s.d [%r12]	      */
-  PLT_ELEM (0x74ef)			 /* mov_s %r12, %pcl          */
+  PLT_ELEM (0x2730,0x7f8c,0x0000,0x0000)  /* ld %r12, [%pc,func@got].  */
+  PLT_ELEM (0x7c20)			  /* j_s.d [%r12].  */
+  PLT_ELEM (0x74ef)			  /* mov_s %r12, %pcl.  */
 
   ENTRY_RELOC (4, 32, 0xFFFFFFFF, SGOT | RELATIVE_INSN_32 | MIDDLE_ENDIAN, 4)
   ENTRY_RELOC (12, 32, 0xFFFFFFFF, SGOT | RELATIVE_INSN_32 | MIDDLE_ENDIAN, 8)
@@ -77,13 +142,13 @@ PLT_TYPE_START (ELF_ARC_PIC)
 PLT_TYPE_END (ELF_ARC_PIC)
 
 PLT_TYPE_START (ELF_ARC_ABS)
-  PLT_ENTRY (0x1600,0x700b,0x0000,0x0000) /* ld %r11, [0] */
-  PLT_ENTRY (0x1600,0x700a,0x0000,0x0000) /* ld %r10, [0] */
-  PLT_ENTRY (0x2020,0x0280)		 /* j [%r10] */
-  PLT_ENTRY (0x0,0x0)			 /* padding */
+  PLT_ENTRY (0x1600,0x700b,0x0000,0x0000) /* ld %r11, [0].  */
+  PLT_ENTRY (0x1600,0x700a,0x0000,0x0000) /* ld %r10, [0].  */
+  PLT_ENTRY (0x2020,0x0280)		  /* j [%r10].  */
+  PLT_ENTRY (0x0,0x0)			  /* padding.  */
 
-  PLT_ELEM (0x2730,0x7f8c,0x0000,0x0000) /* ld %r12, [%pc,func@gotpc] */
-  PLT_ELEM (0x7c20,0x74ef)		/* mov_s %r12, %pcl          */
+  PLT_ELEM (0x2730,0x7f8c,0x0000,0x0000) /* ld %r12, [%pc,func@gotpc].  */
+  PLT_ELEM (0x7c20,0x74ef)		 /* mov_s %r12, %pcl.  */
 
   ENTRY_RELOC (4, 32, 0xFFFFFFFF, SGOT | MIDDLE_ENDIAN, 4)
   ENTRY_RELOC (12, 32, 0xFFFFFFFF, SGOT | MIDDLE_ENDIAN, 8)

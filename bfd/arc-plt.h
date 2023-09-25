@@ -22,6 +22,9 @@
 #ifndef ARC_PLT_H
 #define ARC_PLT_H
 
+#include "sysdep.h"
+#include "bfd.h"
+
 /* Instructions appear in memory as a sequence of half-words (16 bit);
    individual half-words are represented on the target in target byte order.
    We use 'unsigned short' on the host to represent the PLT templates,
@@ -92,97 +95,20 @@ struct plt_version_t
 };
 
 #define PLT_TYPE_START(NAME) \
-  const insn_hword NAME##_plt_entry[] = {
-#define PLT_TYPE_END(NAME) };
-#define PLT_ENTRY(...) __VA_ARGS__,
-#define PLT_ELEM(...)
-#define ENTRY_RELOC(...)
-#define ELEM_RELOC(...)
-
-#include "arc-plt.def"
-
-#undef PLT_TYPE_START
-#undef PLT_TYPE_END
-#undef PLT_ENTRY
-#undef PLT_ELEM
-#undef ENTRY_RELOC
-#undef ELEM_RELOC
-
-#define PLT_TYPE_START(NAME) \
-  const struct plt_reloc NAME##_plt_entry_relocs[] = {
-#define PLT_TYPE_END(NAME) \
-    {0, 0, 0, LAST_RELOC, 0} \
-  };
-#define PLT_ENTRY(...)
-#define PLT_ELEM(...)
-#define ENTRY_RELOC(...) { __VA_ARGS__ },
-#define ELEM_RELOC(...)
-
-#include "arc-plt.def"
-
-#undef PLT_TYPE_START
-#undef PLT_TYPE_END
-#undef PLT_ENTRY
-#undef PLT_ELEM
-#undef ENTRY_RELOC
-#undef ELEM_RELOC
+  extern const insn_hword NAME##_plt_entry[]; \
+  extern const struct plt_reloc NAME##_plt_entry_relocs[]; \
+  extern const insn_hword NAME##_plt_elem[]; \
+  extern const struct plt_reloc NAME##_plt_elem_relocs[];
 
 
-#define PLT_TYPE_START(NAME) \
-  const insn_hword NAME##_plt_elem[] = {
-#define PLT_TYPE_END(NAME) };
-#define PLT_ENTRY(...)
-#define PLT_ELEM(...) __VA_ARGS__,
-#define ENTRY_RELOC(...)
-#define ELEM_RELOC(...)
-
-#include "arc-plt.def"
-
-#undef PLT_TYPE_START
-#undef PLT_TYPE_END
-#undef PLT_ENTRY
-#undef PLT_ELEM
-#undef ENTRY_RELOC
-#undef ELEM_RELOC
-
-#define PLT_TYPE_START(NAME) \
-  const struct plt_reloc NAME##_plt_elem_relocs[] = {
-#define PLT_TYPE_END(NAME) \
-    {0, 0, 0, LAST_RELOC, 0} \
-  };
-#define PLT_ENTRY(...)
-#define PLT_ELEM(...)
-#define ENTRY_RELOC(...)
-#define ELEM_RELOC(...) { __VA_ARGS__ },
-
-#include "arc-plt.def"
-
-#undef PLT_TYPE_START
-#undef PLT_TYPE_END
-#undef PLT_ENTRY
-#undef PLT_ELEM
-#undef ENTRY_RELOC
-#undef ELEM_RELOC
-
-
-#define PLT_TYPE_START(NAME) \
-  { \
-    .entry = &NAME##_plt_entry, \
-    .entry_size = sizeof (NAME##_plt_entry), \
-    .elem = &NAME##_plt_elem, \
-    .elem_size = sizeof (NAME##_plt_elem),  \
-    .entry_relocs = NAME##_plt_entry_relocs, \
-    .elem_relocs = NAME##_plt_elem_relocs
-#define PLT_TYPE_END(NAME) },
+#define PLT_TYPE_END(NAME)
 #define PLT_ENTRY(...)
 #define PLT_ELEM(...)
 #define ENTRY_RELOC(...)
 #define ELEM_RELOC(...)
-const struct plt_version_t plt_versions[PLT_MAX] = {
 
 #include "arc-plt.def"
 
-};
 #undef PLT_TYPE_START
 #undef PLT_TYPE_END
 #undef PLT_ENTRY
@@ -190,5 +116,6 @@ const struct plt_version_t plt_versions[PLT_MAX] = {
 #undef ENTRY_RELOC
 #undef ELEM_RELOC
 
+extern struct plt_version_t plt_versions[PLT_MAX];
 
-#endif /* ARC_PLT_H */
+#endif
