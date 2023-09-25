@@ -67,9 +67,9 @@ static debug_info *debug_information = NULL;
    DWO object files.  We use these structures to record these links.  */
 typedef enum dwo_type
 {
- DWO_NAME,
- DWO_DIR,
- DWO_ID
+  DWO_NAME,
+  DWO_DIR,
+  DWO_ID
 } dwo_type;
 
 typedef struct dwo_info
@@ -717,7 +717,7 @@ fetch_indexed_addr (uint64_t offset, uint32_t num_bytes)
 }
 
 /* Fetch a value from a debug section that has been indexed by
-   something in another section (eg DW_FORM_loclistx or DW_FORM_rnglistx).
+   something in another section.
    Returns -1 if the value could not be found.  */
 
 static uint64_t
@@ -770,6 +770,47 @@ fetch_indexed_value (uint64_t idx,
     }
 
   return byte_get (section->start + offset, pointer_size);
+}
+
+/* Like fetch_indexed_value() but specifically for resolving DW_FORM_rnglistx and DW_FORM_loclistx.
+
+   The memory layout is: base_address points at a table of offsets, relative to the section start.
+   The table of offsets contains the offsets of objects of interest relative to the table of offsets.
+   IDX is the index of the desired object in said table of offsets.
+
+   This returns the offset of the desired object relative to the section start or -1 upon failure.  */
+
+static uint64_t
+fetch_indexed_offset (uint64_t                         idx,
+		      enum dwarf_section_display_enum  sec_enum,
+		      uint64_t                         base_address,
+		      uint64_t                         offset_size)
+{
+  struct dwarf_section *section = &debug_displays [sec_enum].section;
+
+  if (section->start == NULL)
+    {
+      warn (_("Unable to locate %s section\n"), section->uncompressed_name);
+      return -1;
+    }
+
+  if (section->size < 4)
+    {
+      warn (_("Section %s is too small to contain an value indexed from another section!\n"),
+	    section->name);
+      return -1;
+    }
+
+  base_address += idx * offset_size;
+
+  if (base_address + offset_size > section->size)
+    {
+      warn (_("Offset of %#" PRIx64 " is too big for section %s\n"),
+	    base_address, section->name);
+      return -1;
+    }
+  
+  return base_address + byte_get (section->start + base_address, offset_size);
 }
 
 /* FIXME:  There are better and more efficient ways to handle
@@ -2749,7 +2790,7 @@ read_and_display_attr_value (unsigned long attribute,
 	    {
 	      if (dwo)
 		{
-		  idx = fetch_indexed_value (uvalue, rnglists_dwo, 0);
+		  idx = fetch_indexed_value (uvalue, rnglists, 0);
 		  if (idx != (uint64_t) -1)
 		    idx += (offset_size == 8) ? 20 : 12;
 		}
@@ -2761,7 +2802,7 @@ read_and_display_attr_value (unsigned long attribute,
 		    base = debug_info_p->rnglists_base;
 		  /* We do not have a cached value this time, so we perform the
 		     computation manually.  */
-		  idx = fetch_indexed_value (uvalue, rnglists, base);
+		  idx = fetch_indexed_offset (uvalue, rnglists, base, debug_info_p->offset_size);
 		  if (idx != (uint64_t) -1)
 		    idx += base;
 		}
@@ -2821,22 +2862,9 @@ read_and_display_attr_value (unsigned long attribute,
 	  debug_info_p->loclists_base = uvalue;
 	  break;
 
-	case DW_AT_rnglists_base:
-	  if (debug_info_p->rnglists_base)
-	    warn (_("CU @ %#" PRIx64 " has multiple rnglists_base values "
-		    "(%#" PRIx64 " and %#" PRIx64 ")"),
-		  debug_info_p->cu_offset,
-		  debug_info_p->rnglists_base, uvalue);
-	  svalue = uvalue;
-	  if (svalue < 0)
-	    {
-	      warn (_("CU @ %#" PRIx64 " has has a negative rnglists_base "
-		      "value of %#" PRIx64 " - treating as zero"),
-		    debug_info_p->cu_offset, svalue);
-	      uvalue = 0;
-	    }
-	  debug_info_p->rnglists_base = uvalue;
-	  break;
+ 	case DW_AT_rnglists_base:
+	  /* Assignment to debug_info_p->rnglists_base is now elsewhere.  */
+ 	  break;
 
 	case DW_AT_str_offsets_base:
 	  if (debug_info_p->str_offsets_base)
@@ -2942,12 +2970,19 @@ read_and_display_attr_value (unsigned long attribute,
 
 	case DW_AT_low_pc:
 	  if (need_base_address)
-	    debug_info_p->base_address = uvalue;
+	    {
+	      if (form == DW_FORM_addrx)
+		uvalue = fetch_indexed_addr (debug_info_p->addr_base + uvalue * pointer_size,
+					     pointer_size);
+
+	      debug_info_p->base_address = uvalue;
+	    }
 	  break;
 
 	case DW_AT_GNU_addr_base:
 	case DW_AT_addr_base:
 	  debug_info_p->addr_base = uvalue;
+	  /* Retrieved elsewhere so that it is in place by the time we read low_pc.  */
 	  break;
 
 	case DW_AT_GNU_ranges_base:
@@ -2970,17 +3005,15 @@ read_and_display_attr_value (unsigned long attribute,
 		  debug_info_p->range_lists = (uint64_t *)
 		    xcrealloc (debug_info_p->range_lists,
 			       lmax, sizeof (*debug_info_p->range_lists));
-		  debug_info_p->range_versions = (unsigned int *)
-		    xcrealloc (debug_info_p->range_versions,
-			       lmax, sizeof (*debug_info_p->range_versions));
 		  debug_info_p->max_range_lists = lmax;
 		}
 
 	      if (form == DW_FORM_rnglistx)
-		uvalue = fetch_indexed_value (uvalue, rnglists, 0);
+		uvalue = fetch_indexed_offset (uvalue, rnglists,
+					       debug_info_p->rnglists_base,
+					       debug_info_p->offset_size);
 
 	      debug_info_p->range_lists [num] = uvalue;
-	      debug_info_p->range_versions [num] = dwarf_version;
 	      debug_info_p->num_range_lists++;
 	    }
 	  break;
@@ -3563,8 +3596,161 @@ free_debug_information (debug_info *ent)
     }
   if (ent->max_range_lists)
     {
-      free (ent->range_versions);
       free (ent->range_lists);
+    }
+}
+
+/* For look-ahead in attributes.  When you want to scan a DIE for one specific
+   attribute and ignore the rest.  */
+
+static unsigned char *
+skip_attribute (unsigned long    form,
+		unsigned char *  data,
+		unsigned char *  end,
+		uint64_t         pointer_size,
+		uint64_t         offset_size,
+		int              dwarf_version)
+{
+  uint64_t temp;
+  int64_t stemp;
+
+  switch (form)
+    {
+    case DW_FORM_ref_addr:
+      data += dwarf_version == 2 ? pointer_size : offset_size;
+      break;
+    case DW_FORM_addr:
+      data += pointer_size;
+      break;
+    case DW_FORM_strp_sup:
+    case DW_FORM_strp:
+    case DW_FORM_line_strp:
+    case DW_FORM_sec_offset:
+    case DW_FORM_GNU_ref_alt:
+    case DW_FORM_GNU_strp_alt:
+      data += offset_size;
+      break;
+    case DW_FORM_ref1:
+    case DW_FORM_flag:
+    case DW_FORM_data1:
+    case DW_FORM_strx1:
+    case DW_FORM_addrx1:      
+      data += 1;
+      break;
+    case DW_FORM_ref2:
+    case DW_FORM_data2:
+    case DW_FORM_strx2:
+    case DW_FORM_addrx2:      
+      data += 2;
+      break;
+    case DW_FORM_strx3:
+    case DW_FORM_addrx3:      
+      data += 3;
+      break;
+    case DW_FORM_ref_sup4:
+    case DW_FORM_ref4:
+    case DW_FORM_data4:
+    case DW_FORM_strx4:
+    case DW_FORM_addrx4:
+      data += 4;
+      break;
+    case DW_FORM_ref_sup8:
+    case DW_FORM_ref8:
+    case DW_FORM_data8:
+    case DW_FORM_ref_sig8:
+      data += 8;
+      break;
+    case DW_FORM_data16:      
+      data += 16;
+      break;
+    case DW_FORM_sdata:
+      READ_SLEB (stemp, data, end);
+      break;
+    case DW_FORM_GNU_str_index:
+    case DW_FORM_strx:
+    case DW_FORM_ref_udata:
+    case DW_FORM_udata:
+    case DW_FORM_GNU_addr_index:
+    case DW_FORM_addrx:
+    case DW_FORM_loclistx:
+    case DW_FORM_rnglistx:
+      READ_ULEB (temp, data, end);
+      break;
+
+    case DW_FORM_indirect:
+      while (form == DW_FORM_indirect)
+        READ_ULEB (form, data, end);
+      return skip_attribute (form, data, end, pointer_size, offset_size, dwarf_version);
+
+    case DW_FORM_string:
+      data += strnlen ((char *) data, end - data);    
+      break;
+    case DW_FORM_block:
+    case DW_FORM_exprloc:
+      READ_ULEB (temp, data, end);
+      data += temp;
+      break;
+    case DW_FORM_block1:
+      SAFE_BYTE_GET_AND_INC (temp, data, 1, end);
+      data += temp;
+      break;
+    case DW_FORM_block2:
+      SAFE_BYTE_GET_AND_INC (temp, data, 2, end);
+      data += temp;
+      break;
+    case DW_FORM_block4:
+      SAFE_BYTE_GET_AND_INC (temp, data, 4, end);
+      data += temp;
+      break;
+    case DW_FORM_implicit_const:
+    case DW_FORM_flag_present:
+      break;
+    default:
+      warn (_("Unexpected form in top DIE\n"));
+      break;
+    }
+  return data;
+}
+
+static void
+read_bases (abbrev_entry *   entry,
+	    unsigned char *  data,
+	    unsigned char *  end,
+	    int64_t          pointer_size,
+	    uint64_t         offset_size,
+	    int              dwarf_version,
+	    debug_info *     debug_info_p)
+{
+  abbrev_attr *attr;
+
+  for (attr = entry->first_attr;
+       attr && attr->attribute;
+       attr = attr->next)
+    {
+      uint64_t uvalue;
+
+      if (attr->attribute == DW_AT_rnglists_base)
+	{
+	  if (attr->form == DW_FORM_sec_offset)
+	    {
+	      SAFE_BYTE_GET_AND_INC (uvalue, data, offset_size, end);
+	      debug_info_p->rnglists_base = uvalue;
+	    }
+	  else
+	    warn (_("Unexpected form of DW_AT_rnglists_base in the top DIE\n"));
+	}
+      else if(attr->attribute == DW_AT_addr_base || attr->attribute == DW_AT_GNU_addr_base)
+	{
+	  if (attr->form == DW_FORM_sec_offset)
+	    {
+	      SAFE_BYTE_GET_AND_INC (uvalue, data, offset_size, end);
+	      debug_info_p->addr_base = uvalue;
+	    }
+	  else
+	    warn (_("Unexpected form of DW_AT_addr_base in the top DIE\n"));
+	}
+      else
+	data = skip_attribute(attr->form, data, end, pointer_size, offset_size, dwarf_version);
     }
 }
 
@@ -4075,6 +4261,34 @@ process_debug_info (struct dwarf_section * section,
 	  assert (!debug_info_p
 		  || (debug_info_p->num_loc_offsets
 		      == debug_info_p->num_loc_views));
+
+	  /* Look ahead so that the values of DW_AT_rnglists_base, DW_AT_[GNU_]addr_base
+	     are available before attributes that reference them are parsed in the same DIE.
+	     Only needed for the top DIE on DWARFv5+.
+	     No simiar treatment for loclists_base because there should be no loclist
+	     attributes in top DIE.  */
+	  if (compunit.cu_version >= 5 && level == 0)
+	    {
+	      int64_t stemp;
+
+	      read_bases (entry,
+			  tags,
+			  start,
+			  compunit.cu_pointer_size,
+			  offset_size,
+			  compunit.cu_version,
+			  debug_info_p);
+
+	      /* This check was in place before, keep it.  */
+	      stemp = debug_info_p->rnglists_base;
+	      if (stemp < 0)
+		{
+		  warn (_("CU @ %#" PRIx64 " has has a negative rnglists_base "
+			  "value of %#" PRIx64 " - treating as zero"),
+			debug_info_p->cu_offset, stemp);
+		  debug_info_p->rnglists_base = 0;
+		}
+	    }
 
 	  for (attr = entry->first_attr;
 	       attr && attr->attribute;
@@ -8040,15 +8254,9 @@ display_debug_rnglists_list (unsigned char * start,
 			     unsigned int    pointer_size,
 			     uint64_t        offset,
 			     uint64_t        base_address,
-			     unsigned int    offset_size)
+			     uint64_t        addr_base)
 {
   unsigned char *next = start;
-  unsigned int debug_addr_section_hdr_len;
-
-  if (offset_size == 4)
-    debug_addr_section_hdr_len = 8;
-  else
-    debug_addr_section_hdr_len = 16;
 
   while (1)
     {
@@ -8078,24 +8286,24 @@ display_debug_rnglists_list (unsigned char * start,
 	  READ_ULEB (base_address, start, finish);
 	  print_hex (base_address, pointer_size);
 	  printf (_("(base address index) "));
-	  base_address = fetch_indexed_addr ((base_address * pointer_size)
-			                     + debug_addr_section_hdr_len, pointer_size);
+	  base_address = fetch_indexed_addr ((base_address * pointer_size) + addr_base,
+					     pointer_size);
 	  print_hex (base_address, pointer_size);
 	  printf (_("(base address)\n"));
 	  break;
 	case DW_RLE_startx_endx:
 	  READ_ULEB (begin, start, finish);
 	  READ_ULEB (end, start, finish);
-	  begin = fetch_indexed_addr ((begin * pointer_size)
-			              + debug_addr_section_hdr_len, pointer_size);
-	  end   = fetch_indexed_addr ((begin * pointer_size)
-			              + debug_addr_section_hdr_len, pointer_size);
+	  begin = fetch_indexed_addr ((begin * pointer_size) + addr_base,
+				      pointer_size);
+	  end   = fetch_indexed_addr ((begin * pointer_size) + addr_base,
+				      pointer_size);
 	  break;
 	case DW_RLE_startx_length:
 	  READ_ULEB (begin, start, finish);
 	  READ_ULEB (length, start, finish);
-	  begin = fetch_indexed_addr ((begin * pointer_size)
-			              + debug_addr_section_hdr_len, pointer_size);
+	  begin = fetch_indexed_addr ((begin * pointer_size) + addr_base,
+				      pointer_size);
 	  end = begin + length;
 	  break;
 	case DW_RLE_offset_pair:
@@ -8149,123 +8357,95 @@ display_debug_rnglists_list (unsigned char * start,
 }
 
 static int
-display_debug_rnglists (struct dwarf_section *section)
+display_debug_rnglists_unit_header (struct dwarf_section *  section,
+				    uint64_t *              unit_offset,
+				    unsigned char *         poffset_size)
 {
-  unsigned char *start = section->start;
-  unsigned char *finish = start + section->size;
+  uint64_t        start_offset = *unit_offset;
+  unsigned char * p = section->start + start_offset;
+  unsigned char * finish = section->start + section->size;
+  uint64_t        initial_length;
+  unsigned char   segment_selector_size;
+  unsigned int    offset_entry_count;
+  unsigned int    i;
+  unsigned short  version;
+  unsigned char   address_size = 0;
+  unsigned char   offset_size;
 
-  while (start < finish)
+  /* Get and check the length of the block.  */
+  SAFE_BYTE_GET_AND_INC (initial_length, p, 4, finish);
+
+  if (initial_length == 0xffffffff)
     {
-      unsigned char *table_start;
-      uint64_t offset = start - section->start;
-      unsigned char *end;
-      uint64_t initial_length;
-      unsigned char segment_selector_size;
-      unsigned int offset_entry_count;
-      unsigned int i;
-      unsigned short version;
-      unsigned char address_size = 0;
-      unsigned char offset_size;
+      /* This section is 64-bit DWARF 3.  */
+      SAFE_BYTE_GET_AND_INC (initial_length, p, 8, finish);
+      *poffset_size = offset_size = 8;
+    }
+  else
+    *poffset_size = offset_size = 4;
 
-      /* Get and check the length of the block.  */
-      SAFE_BYTE_GET_AND_INC (initial_length, start, 4, finish);
-
-      if (initial_length == 0xffffffff)
-	{
-	  /* This section is 64-bit DWARF 3.  */
-	  SAFE_BYTE_GET_AND_INC (initial_length, start, 8, finish);
-	  offset_size = 8;
-	}
+  if (initial_length > (size_t) (finish - p))
+    {
+      /* If the length field has a relocation against it, then we should
+	 not complain if it is inaccurate (and probably negative).
+	 It is copied from .debug_line handling code.  */
+      if (reloc_at (section, (p - section->start) - offset_size))
+	initial_length = finish - p;
       else
-	offset_size = 4;
-
-      if (initial_length > (size_t) (finish - start))
 	{
-	  /* If the length field has a relocation against it, then we should
-	     not complain if it is inaccurate (and probably negative).
-	     It is copied from .debug_line handling code.  */
-	  if (reloc_at (section, (start - section->start) - offset_size))
-	    initial_length = finish - start;
-	  else
-	    {
-	      warn (_("The length field (%#" PRIx64
-		      ") in the debug_rnglists header is wrong"
-		      " - the section is too small\n"),
-		    initial_length);
-	      return 0;
-	    }
-	}
-
-      end = start + initial_length;
-
-      /* Get the other fields in the header.  */
-      SAFE_BYTE_GET_AND_INC (version, start, 2, finish);
-      SAFE_BYTE_GET_AND_INC (address_size, start, 1, finish);
-      SAFE_BYTE_GET_AND_INC (segment_selector_size, start, 1, finish);
-      SAFE_BYTE_GET_AND_INC (offset_entry_count, start, 4, finish);
-
-      printf (_(" Table at Offset: %#" PRIx64 ":\n"), offset);
-      printf (_("  Length:          %#" PRIx64 "\n"), initial_length);
-      printf (_("  DWARF version:   %u\n"), version);
-      printf (_("  Address size:    %u\n"), address_size);
-      printf (_("  Segment size:    %u\n"), segment_selector_size);
-      printf (_("  Offset entries:  %u\n"), offset_entry_count);
-
-      /* Check the fields.  */
-      if (segment_selector_size != 0)
-	{
-	  warn (_("The %s section contains "
-		  "unsupported segment selector size: %d.\n"),
-		section->name, segment_selector_size);
+	  warn (_("The length field (%#" PRIx64
+		  ") in the debug_rnglists header is wrong"
+		  " - the section is too small\n"),
+		initial_length);
 	  return 0;
 	}
+    }
 
-      if (version < 5)
-	{
-	  warn (_("Only DWARF version 5+ debug_rnglists info "
-		  "is currently supported.\n"));
-	  return 0;
-	}
+  /* Report the next unit offset to the caller.  */
+  *unit_offset = (p - section->start) + initial_length;
 
-      table_start = start;
+  /* Get the other fields in the header.  */
+  SAFE_BYTE_GET_AND_INC (version, p, 2, finish);
+  SAFE_BYTE_GET_AND_INC (address_size, p, 1, finish);
+  SAFE_BYTE_GET_AND_INC (segment_selector_size, p, 1, finish);
+  SAFE_BYTE_GET_AND_INC (offset_entry_count, p, 4, finish);
 
-      if (offset_entry_count != 0)
-	{
-	  printf (_("\n   Offsets starting at %#tx:\n"),
-		  start - section->start);
+  printf (_(" Table at Offset: %#" PRIx64 ":\n"), start_offset);
+  printf (_("  Length:          %#" PRIx64 "\n"), initial_length);
+  printf (_("  DWARF version:   %u\n"), version);
+  printf (_("  Address size:    %u\n"), address_size);
+  printf (_("  Segment size:    %u\n"), segment_selector_size);
+  printf (_("  Offset entries:  %u\n"), offset_entry_count);
 
-	  for (i = 0; i < offset_entry_count; i++)
-	    {
-	      uint64_t entry;
+  /* Check the fields.  */
+  if (segment_selector_size != 0)
+    {
+      warn (_("The %s section contains "
+	      "unsupported segment selector size: %d.\n"),
+	    section->name, segment_selector_size);
+      return 0;
+    }
 
-	      SAFE_BYTE_GET_AND_INC (entry, start, offset_size, finish);
-	      printf (_("    [%6u] %#" PRIx64 "\n"), i, entry);
-	    }
-	}
-      else
-	offset_entry_count = 1;
+  if (version < 5)
+    {
+      warn (_("Only DWARF version 5+ debug_rnglists info "
+	      "is currently supported.\n"));
+      return 0;
+    }
+
+  if (offset_entry_count != 0)
+    {
+      printf (_("\n   Offsets starting at %#tx:\n"), p - section->start);
 
       for (i = 0; i < offset_entry_count; i++)
 	{
-	  uint64_t indx = start - table_start;
+	  uint64_t entry;
 
-	  offset = start - section->start;
-	  printf (_("\n  Offset: %#" PRIx64 ", Index: %#" PRIx64 "\n"),
-		  offset, indx);
-	  printf (_("    Offset   Begin    End\n"));
-	  start = display_debug_rnglists_list
-	    (start, end, address_size, offset, 0, offset_size);
-	  if (start >= end)
-	    break;
+	  SAFE_BYTE_GET_AND_INC (entry, p, offset_size, finish);
+	  printf (_("    [%6u] %#" PRIx64 "\n"), i, entry);
 	}
-
-      start = end;
-
-      if (start < finish)
-	putchar ('\n');
     }
 
-  putchar ('\n');
   return 1;
 }
 
@@ -8294,9 +8474,9 @@ display_debug_ranges (struct dwarf_section *section,
   struct range_entry *range_entries;
   struct range_entry *range_entry_fill;
   bool is_rnglists = strstr (section->name, "debug_rnglists") != NULL;
-  /* Initialize it due to a false compiler warning.  */
-  unsigned char address_size = 0;
   uint64_t last_offset = 0;
+  uint64_t next_rnglists_cu_offset = 0;
+  unsigned char offset_size;
 
   if (bytes == 0)
     {
@@ -8306,9 +8486,6 @@ display_debug_ranges (struct dwarf_section *section,
 
   introduce (section, false);
   
-  if (is_rnglists)
-    return display_debug_rnglists (section);
-
   if (load_debug_info (file) == 0)
     {
       warn (_("Unable to load/parse the .debug_info section, so cannot interpret the %s section.\n"),
@@ -8318,7 +8495,8 @@ display_debug_ranges (struct dwarf_section *section,
 
   num_range_list = 0;
   for (i = 0; i < num_debug_info_entries; i++)
-    num_range_list += debug_information [i].num_range_lists;
+    if (is_range_list_for_this_section (is_rnglists, debug_information [i].dwarf_version))
+      num_range_list += debug_information [i].num_range_lists;
 
   if (num_range_list == 0)
     {
@@ -8328,9 +8506,7 @@ display_debug_ranges (struct dwarf_section *section,
       return 1;
     }
 
-  range_entries = (struct range_entry *)
-      xmalloc (sizeof (*range_entries) * num_range_list);
-  range_entry_fill = range_entries;
+  range_entry_fill = range_entries = XNEWVEC (struct range_entry, num_range_list);
 
   for (i = 0; i < num_debug_info_entries; i++)
     {
@@ -8339,7 +8515,7 @@ display_debug_ranges (struct dwarf_section *section,
 
       for (j = 0; j < debug_info_p->num_range_lists; j++)
 	{
-	  if (is_range_list_for_this_section (is_rnglists, debug_info_p->range_versions[j]))
+	  if (is_range_list_for_this_section (is_rnglists, debug_info_p->dwarf_version))
 	    {
 	      range_entry_fill->ranges_offset = debug_info_p->range_lists[j];
 	      range_entry_fill->debug_info_p = debug_info_p;
@@ -8348,6 +8524,8 @@ display_debug_ranges (struct dwarf_section *section,
 	}
     }
 
+  assert (range_entry_fill >= range_entries);
+  assert (num_range_list >= (unsigned int)(range_entry_fill - range_entries));
   num_range_list = range_entry_fill - range_entries;
   qsort (range_entries, num_range_list, sizeof (*range_entries),
 	 range_entry_compar);
@@ -8357,7 +8535,8 @@ display_debug_ranges (struct dwarf_section *section,
 	  section->name, range_entries[0].ranges_offset);
 
   putchar ('\n');
-  printf (_("    Offset   Begin    End\n"));
+  if (!is_rnglists)
+    printf (_("    Offset   Begin    End\n"));
 
   for (i = 0; i < num_range_list; i++)
     {
@@ -8368,7 +8547,7 @@ display_debug_ranges (struct dwarf_section *section,
       unsigned char *next;
       uint64_t base_address;
 
-      pointer_size = (is_rnglists ? address_size : debug_info_p->pointer_size);
+      pointer_size = debug_info_p->pointer_size;
       offset = range_entry->ranges_offset;
       base_address = debug_info_p->base_address;
 
@@ -8387,7 +8566,15 @@ display_debug_ranges (struct dwarf_section *section,
 	  continue;
 	}
 
-      next = section_begin + offset + debug_info_p->rnglists_base;
+      /* If we've moved on to the next compile unit in the rnglists section - dump the unit header(s).  */
+      if (is_rnglists && next_rnglists_cu_offset < offset)
+	{
+	  while (next_rnglists_cu_offset < offset)
+	    display_debug_rnglists_unit_header (section, &next_rnglists_cu_offset, &offset_size);
+	  printf (_("    Offset   Begin    End\n"));
+	}
+
+      next = section_begin + offset; /* Offset is from the section start, the base has already been added.  */
       
       /* If multiple DWARF entities reference the same range then we will
 	 have multiple entries in the `range_entries' list for the same
@@ -8415,9 +8602,19 @@ display_debug_ranges (struct dwarf_section *section,
       start = next;
       last_start = next;
 
-      display_debug_ranges_list
-	(start, finish, pointer_size, offset, base_address);
+      if (is_rnglists)
+        display_debug_rnglists_list
+	  (start, finish, pointer_size, offset, base_address, debug_info_p->addr_base);
+      else
+        display_debug_ranges_list
+	  (start, finish, pointer_size, offset, base_address);
     }
+
+  /* Display trailing empty (or unreferenced) compile units, if any.  */
+  if (is_rnglists)
+    while (next_rnglists_cu_offset < section->size)
+      display_debug_rnglists_unit_header (section, &next_rnglists_cu_offset, &offset_size);
+
   putchar ('\n');
 
   free (range_entries);

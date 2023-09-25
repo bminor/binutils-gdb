@@ -1,3 +1,17 @@
+2023-09-25  Vsevolod Alekseyev  <sevaa@sprynet.com>
+
+	PR 30792
+	* dwarf.h (struct debug_info): Remove range_versions field.
+	* dwarf.c (fetch_indexed_offset): New function.
+	(read_and_display_attr_value): Use it for DW_FORM_rnglistx.
+	Remove code to initialise range_versions.
+	(skip_attribute): New function.
+	(read_bases): Read and reccord all range and address bases in a CU.
+	(process_debug_info): Call read_bases.
+	(display_debug_rnglists): Rename to display_debug_rnglists_unit_header
+	and only display the range list header information.
+	(display_debug_ranges): Adjust.
+
 2023-09-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 30684
