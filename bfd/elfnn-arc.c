@@ -32,8 +32,8 @@
 
 #include "arc-plt.h"
 
-#define FEATURE_LIST_NAME bfdNN_feature_list
-#define CONFLICT_LIST bfdNN_conflict_list
+#define FEATURE_LIST_NAME bfdNN_ARCAA_feature_list
+#define CONFLICT_LIST bfdNN_ARCAA_conflict_list
 #include "opcode/arc-attrs.h"
 
 /* Possible ARC architectures.  */
@@ -3006,7 +3006,7 @@ arc_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 /* We use this so we can override certain functions
    (though currently we don't).  */
 
-const struct elf_size_info arc_elfNN_size_info =
+const struct elf_size_info ARCAA_elfNN_size_info =
   {
    sizeof (ElfNN_External_Ehdr),
    sizeof (ElfNN_External_Phdr),
@@ -3541,7 +3541,11 @@ arc_elf_relax_section (bfd *abfd, asection *sec,
 
 #define TARGET_LITTLE_SYM   arcAA_elfNN_le_vec
 #define TARGET_LITTLE_NAME  "elfNN-littlearcAA"
-#define TARGET_BIG_SYM	    arc_elfNN_be_vec
+
+#if (ARCH_TYPE == ARC) && (ARCH_SIZE == 32)
+# define TARGET_BIG_SYM	    arc_elfNN_be_vec
+#endif
+
 #define TARGET_BIG_NAME     "elfNN-bigarc"
 #define ELF_ARCH	    ARC_BFD_ARCH
 #define ELF_TARGET_ID	    ARC_ELF_DATA
@@ -3567,7 +3571,7 @@ arc_elf_relax_section (bfd *abfd, asection *sec,
 #define bfd_elfNN_bfd_copy_private_bfd_data     arc_elf_copy_private_bfd_data
 #define bfd_elfNN_bfd_relax_section		arc_elf_relax_section
 
-#define elf_backend_size_info		     arc_elfNN_size_info
+#define elf_backend_size_info		     ARCAA_elfNN_size_info
 
 #define elf_info_to_howto_rel		     arc_info_to_howto_rel
 #define elf_backend_object_p		     arc_elf_object_p
