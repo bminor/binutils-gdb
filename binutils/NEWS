@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add support for ARCv3 32/64 bit architecture.  Improve ARC disassembly
+  output by supporting ARC ISA variation specific register names.
+
 * The readelf program has a new command line option --extra-sym-info which
   extends the information displayed by the --symbols option.  When enabled
   the display will include the name of the section referenced by a symbol's
