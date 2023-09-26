@@ -3453,12 +3453,12 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	  /* It is likely that output sections are in the same order
 	     as the input sections, but do not assume that this is
 	     the case.  */
-	  if (merged->sec->output_section != osec)
+	  if (merged->sec->output_section != osec || merged->sec->index != osec->index)
 	    {
 	      for (merged = merged_note_sections;
 		   merged != NULL;
 		   merged = merged->next)
-		if (merged->sec->output_section == osec)
+		if (merged->sec->output_section == osec && merged->sec->index == osec->index)
 		  break;
 
 	      if (merged == NULL)
