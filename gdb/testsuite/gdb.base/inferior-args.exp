@@ -29,7 +29,7 @@ proc do_test { method } {
     global binfile hex
 
     # The second arg is an empty string on purpose.
-    set inferior_args { "first arg" "" "third-arg" }
+    set inferior_args { "first arg" "" "third-arg" "'" "\"" " " }
 
     clean_restart $binfile
 
@@ -109,11 +109,14 @@ proc do_test { method } {
     }
 
     # Now that we are stopped at main, inspect argc/argv.
-    gdb_test "print argc" " = 4"
+    gdb_test "print argc" " = 7"
     gdb_test "print argv\[0\]" " = $hex \".*\""
     gdb_test "print argv\[1\]" " = $hex \"first arg\""
     gdb_test "print argv\[2\]" " = $hex \"\""
     gdb_test "print argv\[3\]" " = $hex \"third-arg\""
+    gdb_test "print argv\[4\]" " = $hex \"'\""
+    gdb_test "print argv\[5\]" " = $hex \"\\\\\"\""
+    gdb_test "print argv\[6\]" " = $hex \" \""
 }
 
 foreach_with_prefix method { "start" "starti" "run" "set args" } {

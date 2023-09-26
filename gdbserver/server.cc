@@ -3011,12 +3011,6 @@ handle_v_run (char *own_buf)
 		  need_quote = 1;
 		  break;
 
-		case '\'':
-		  /* Quote single quote.  */
-		  *tmp_full_arg = '\\';
-		  ++tmp_full_arg;
-		  break;
-
 		default:
 		  break;
 		}
