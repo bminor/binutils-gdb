@@ -38,11 +38,6 @@
 #include "dw2gencfi.h"
 #include "dwarf2dbg.h"
 
-/* Types of processor to assemble for.  */
-#ifndef CPU_DEFAULT
-#define CPU_DEFAULT AARCH64_ARCH_V8A
-#endif
-
 #define streq(a, b)	      (strcmp (a, b) == 0)
 
 #define END_OF_INSN '\0'
@@ -56,7 +51,7 @@ static const aarch64_feature_set *mcpu_cpu_opt = NULL;
 static const aarch64_feature_set *march_cpu_opt = NULL;
 
 /* Constants for known architecture features.  */
-static const aarch64_feature_set cpu_default = CPU_DEFAULT;
+static const aarch64_feature_set cpu_default = AARCH64_ARCH_FEATURES (V8A);
 
 /* Currently active instruction sequence.  */
 static aarch64_instr_sequence *insn_sequence = NULL;
@@ -4894,7 +4889,8 @@ parse_sys_reg (char **str, htab_t sys_regs,
 		  "name '%s'"), buf);
       if (!pstatefield_p
 	  && !aarch64_sys_ins_reg_supported_p (cpu_variant, o->name,
-					       o->value, o->flags, o->features))
+					       o->value, o->flags,
+					       &o->features))
 	as_bad (_("selected processor does not support system register "
 		  "name '%s'"), buf);
       if (aarch64_sys_reg_deprecated_p (o->flags))
@@ -6527,11 +6523,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
   clear_error ();
   skip_whitespace (str);
 
-  if (AARCH64_CPU_HAS_FEATURE (*opcode->avariant, AARCH64_FEATURE_SME2))
+  if (AARCH64_CPU_HAS_FEATURE (*opcode->avariant, SME2))
     imm_reg_type = REG_TYPE_R_ZR_SP_BHSDQ_VZP_PN;
-  else if (AARCH64_CPU_HAS_ANY_FEATURES (*opcode->avariant,
-					 AARCH64_FEATURE_SVE
-					 | AARCH64_FEATURE_SVE2))
+  else if (AARCH64_CPU_HAS_FEATURE (*opcode->avariant, SVE)
+	   || AARCH64_CPU_HAS_FEATURE (*opcode->avariant, SVE2))
     imm_reg_type = REG_TYPE_R_ZR_SP_BHSDQ_VZP;
   else
     imm_reg_type = REG_TYPE_R_ZR_BHSDQ_V;
@@ -10149,170 +10144,80 @@ struct aarch64_cpu_option_table
 /* This list should, at a minimum, contain all the cpu names
    recognized by GCC.  */
 static const struct aarch64_cpu_option_table aarch64_cpus[] = {
-  {"all", AARCH64_ANY, NULL},
-  {"cortex-a34", AARCH64_FEATURE (AARCH64_ARCH_V8A,
-				  AARCH64_FEATURE_CRC), "Cortex-A34"},
-  {"cortex-a35", AARCH64_FEATURE (AARCH64_ARCH_V8A,
-				  AARCH64_FEATURE_CRC), "Cortex-A35"},
-  {"cortex-a53", AARCH64_FEATURE (AARCH64_ARCH_V8A,
-				  AARCH64_FEATURE_CRC), "Cortex-A53"},
-  {"cortex-a57", AARCH64_FEATURE (AARCH64_ARCH_V8A,
-				  AARCH64_FEATURE_CRC), "Cortex-A57"},
-  {"cortex-a72", AARCH64_FEATURE (AARCH64_ARCH_V8A,
-				  AARCH64_FEATURE_CRC), "Cortex-A72"},
-  {"cortex-a73", AARCH64_FEATURE (AARCH64_ARCH_V8A,
-				  AARCH64_FEATURE_CRC), "Cortex-A73"},
-  {"cortex-a55", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16 | AARCH64_FEATURE_DOTPROD),
+  {"all",		AARCH64_ALL_FEATURES, NULL},
+  {"cortex-a34",	AARCH64_CPU_FEATURES (V8A, 1, CRC), "Cortex-A34"},
+  {"cortex-a35",	AARCH64_CPU_FEATURES (V8A, 1, CRC), "Cortex-A35"},
+  {"cortex-a53",	AARCH64_CPU_FEATURES (V8A, 1, CRC), "Cortex-A53"},
+  {"cortex-a57",	AARCH64_CPU_FEATURES (V8A, 1, CRC), "Cortex-A57"},
+  {"cortex-a72",	AARCH64_CPU_FEATURES (V8A, 1, CRC), "Cortex-A72"},
+  {"cortex-a73",	AARCH64_CPU_FEATURES (V8A, 1, CRC), "Cortex-A73"},
+  {"cortex-a55",	AARCH64_CPU_FEATURES (V8_2A, 3, RCPC, F16, DOTPROD),
 				  "Cortex-A55"},
-  {"cortex-a75", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16 | AARCH64_FEATURE_DOTPROD),
+  {"cortex-a75",	AARCH64_CPU_FEATURES (V8_2A, 3, RCPC, F16, DOTPROD),
 				  "Cortex-A75"},
-  {"cortex-a76", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16 | AARCH64_FEATURE_DOTPROD),
+  {"cortex-a76",	AARCH64_CPU_FEATURES (V8_2A, 3, RCPC, F16, DOTPROD),
 				  "Cortex-A76"},
-  {"cortex-a76ae", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-				    AARCH64_FEATURE_F16 | AARCH64_FEATURE_RCPC
-				    | AARCH64_FEATURE_DOTPROD
-				    | AARCH64_FEATURE_SSBS),
-				    "Cortex-A76AE"},
-  {"cortex-a77", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-				  AARCH64_FEATURE_F16 | AARCH64_FEATURE_RCPC
-				  | AARCH64_FEATURE_DOTPROD
-				  | AARCH64_FEATURE_SSBS),
-				  "Cortex-A77"},
-  {"cortex-a65", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-				  AARCH64_FEATURE_F16 | AARCH64_FEATURE_RCPC
-				  | AARCH64_FEATURE_DOTPROD
-				  | AARCH64_FEATURE_SSBS),
-				  "Cortex-A65"},
-  {"cortex-a65ae", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-				    AARCH64_FEATURE_F16 | AARCH64_FEATURE_RCPC
-				    | AARCH64_FEATURE_DOTPROD
-				    | AARCH64_FEATURE_SSBS),
-				    "Cortex-A65AE"},
-  {"cortex-a78", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-                 AARCH64_FEATURE_F16
-                 | AARCH64_FEATURE_RCPC
-                 | AARCH64_FEATURE_DOTPROD
-                 | AARCH64_FEATURE_SSBS
-                 | AARCH64_FEATURE_PROFILE),
-   "Cortex-A78"},
-  {"cortex-a78ae", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-                   AARCH64_FEATURE_F16
-                   | AARCH64_FEATURE_RCPC
-                   | AARCH64_FEATURE_DOTPROD
-                   | AARCH64_FEATURE_SSBS
-                   | AARCH64_FEATURE_PROFILE),
-   "Cortex-A78AE"},
-  {"cortex-a78c", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-                   AARCH64_FEATURE_DOTPROD
-                   | AARCH64_FEATURE_F16
-                   | AARCH64_FEATURE_FLAGM
-                   | AARCH64_FEATURE_PAC
-                   | AARCH64_FEATURE_PROFILE
-                   | AARCH64_FEATURE_RCPC
-                   | AARCH64_FEATURE_SSBS),
-   "Cortex-A78C"},
-  {"cortex-a510", AARCH64_FEATURE (AARCH64_ARCH_V9A,
-                  AARCH64_FEATURE_BFLOAT16
-                  | AARCH64_FEATURE_I8MM
-                  | AARCH64_FEATURE_MEMTAG
-                  | AARCH64_FEATURE_SVE2_BITPERM),
-   "Cortex-A510"},
-  {"cortex-a520", AARCH64_FEATURE (AARCH64_ARCH_V9_2A,
-                  AARCH64_FEATURE_MEMTAG
-                  | AARCH64_FEATURE_SVE2_BITPERM),
-   "Cortex-A520"},
-  {"cortex-a710", AARCH64_FEATURE (AARCH64_ARCH_V9A,
-                  AARCH64_FEATURE_BFLOAT16
-                  | AARCH64_FEATURE_I8MM
-                  | AARCH64_FEATURE_MEMTAG
-                  | AARCH64_FEATURE_SVE2_BITPERM),
-   "Cortex-A710"},
-  {"cortex-a720", AARCH64_FEATURE (AARCH64_ARCH_V9_2A,
-                  AARCH64_FEATURE_MEMTAG
-		  | AARCH64_FEATURE_PROFILE
-                  | AARCH64_FEATURE_SVE2_BITPERM),
-   "Cortex-A720"},
-  {"ares", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16
-				  | AARCH64_FEATURE_DOTPROD
-				  | AARCH64_FEATURE_PROFILE),
-				  "Ares"},
-  {"exynos-m1", AARCH64_FEATURE (AARCH64_ARCH_V8A,
-				 AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
-				"Samsung Exynos M1"},
-  {"falkor", AARCH64_FEATURE (AARCH64_ARCH_V8A,
-			      AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO
-			      | AARCH64_FEATURE_RDMA),
-   "Qualcomm Falkor"},
-  {"neoverse-e1", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16
-				  | AARCH64_FEATURE_DOTPROD
-				  | AARCH64_FEATURE_SSBS),
-				  "Neoverse E1"},
-  {"neoverse-n1", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16
-				  | AARCH64_FEATURE_DOTPROD
-				  | AARCH64_FEATURE_PROFILE),
-				  "Neoverse N1"},
-  {"neoverse-n2", AARCH64_FEATURE (AARCH64_ARCH_V8_5A,
-				   AARCH64_FEATURE_BFLOAT16
-				 | AARCH64_FEATURE_I8MM
-				 | AARCH64_FEATURE_F16
-				 | AARCH64_FEATURE_SVE
-				 | AARCH64_FEATURE_SVE2
-				 | AARCH64_FEATURE_SVE2_BITPERM
-				 | AARCH64_FEATURE_MEMTAG
-				 | AARCH64_FEATURE_RNG),
-				 "Neoverse N2"},
-  {"neoverse-v1", AARCH64_FEATURE (AARCH64_ARCH_V8_4A,
-			    AARCH64_FEATURE_PROFILE
-			  | AARCH64_FEATURE_CVADP
-			  | AARCH64_FEATURE_SVE
-			  | AARCH64_FEATURE_SSBS
-			  | AARCH64_FEATURE_RNG
-			  | AARCH64_FEATURE_F16
-			  | AARCH64_FEATURE_BFLOAT16
-			  | AARCH64_FEATURE_I8MM), "Neoverse V1"},
-  {"qdf24xx", AARCH64_FEATURE (AARCH64_ARCH_V8A,
-			       AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO
-			       | AARCH64_FEATURE_RDMA),
-   "Qualcomm QDF24XX"},
-  {"saphira", AARCH64_FEATURE (AARCH64_ARCH_V8_4A,
-			       AARCH64_FEATURE_CRYPTO | AARCH64_FEATURE_PROFILE),
-   "Qualcomm Saphira"},
-  {"thunderx", AARCH64_FEATURE (AARCH64_ARCH_V8A,
-				AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
-   "Cavium ThunderX"},
-  {"vulcan", AARCH64_FEATURE (AARCH64_ARCH_V8_1A,
-			      AARCH64_FEATURE_CRYPTO),
-  "Broadcom Vulcan"},
+  {"cortex-a76ae",	AARCH64_CPU_FEATURES (V8_2A, 4, F16, RCPC, DOTPROD,
+					      SSBS), "Cortex-A76AE"},
+  {"cortex-a77",	AARCH64_CPU_FEATURES (V8_2A, 4, F16, RCPC, DOTPROD,
+					      SSBS), "Cortex-A77"},
+  {"cortex-a65",	AARCH64_CPU_FEATURES (V8_2A, 4, F16, RCPC, DOTPROD,
+					      SSBS), "Cortex-A65"},
+  {"cortex-a65ae",	AARCH64_CPU_FEATURES (V8_2A, 4, F16, RCPC, DOTPROD,
+					      SSBS), "Cortex-A65AE"},
+  {"cortex-a78",	AARCH64_CPU_FEATURES (V8_2A, 5, F16, RCPC, DOTPROD,
+					      SSBS, PROFILE), "Cortex-A78"},
+  {"cortex-a78ae",	AARCH64_CPU_FEATURES (V8_2A, 5, F16, RCPC, DOTPROD,
+					      SSBS, PROFILE), "Cortex-A78AE"},
+  {"cortex-a78c",	AARCH64_CPU_FEATURES (V8_2A, 7, DOTPROD, F16, FLAGM,
+					      PAC, PROFILE, RCPC, SSBS),
+			"Cortex-A78C"},
+  {"cortex-a510",	AARCH64_CPU_FEATURES (V9A, 4, BFLOAT16, I8MM, MEMTAG,
+					      SVE2_BITPERM), "Cortex-A510"},
+  {"cortex-a520",	AARCH64_CPU_FEATURES (V9_2A, 2, MEMTAG, SVE2_BITPERM),
+			"Cortex-A520"},
+  {"cortex-a710",	AARCH64_CPU_FEATURES (V9A, 4, BFLOAT16, I8MM, MEMTAG,
+					      SVE2_BITPERM), "Cortex-A710"},
+  {"cortex-a720",	AARCH64_CPU_FEATURES (V9_2A, 3, MEMTAG, PROFILE,
+					      SVE2_BITPERM), "Cortex-A720"},
+  {"ares",		AARCH64_CPU_FEATURES (V8_2A, 4, RCPC, F16, DOTPROD,
+					      PROFILE), "Ares"},
+  {"exynos-m1",		AARCH64_CPU_FEATURES (V8A, 3, CRC, SHA2, AES),
+			"Samsung Exynos M1"},
+  {"falkor",		AARCH64_CPU_FEATURES (V8A, 4, CRC, SHA2, AES, RDMA),
+			"Qualcomm Falkor"},
+  {"neoverse-e1",	AARCH64_CPU_FEATURES (V8_2A, 4, RCPC, F16, DOTPROD,
+					      SSBS), "Neoverse E1"},
+  {"neoverse-n1",	AARCH64_CPU_FEATURES (V8_2A, 4, RCPC, F16, DOTPROD,
+					      PROFILE), "Neoverse N1"},
+  {"neoverse-n2",	AARCH64_CPU_FEATURES (V8_5A, 8, BFLOAT16, I8MM, F16,
+					      SVE, SVE2, SVE2_BITPERM, MEMTAG,
+					      RNG), "Neoverse N2"},
+  {"neoverse-v1",	AARCH64_CPU_FEATURES (V8_4A, 8, PROFILE, CVADP, SVE,
+					      SSBS, RNG, F16, BFLOAT16, I8MM),
+			"Neoverse V1"},
+  {"qdf24xx",		AARCH64_CPU_FEATURES (V8A, 4, CRC, SHA2, AES, RDMA),
+			"Qualcomm QDF24XX"},
+  {"saphira",		AARCH64_CPU_FEATURES (V8_4A, 3, SHA2, AES, PROFILE),
+			"Qualcomm Saphira"},
+  {"thunderx",		AARCH64_CPU_FEATURES (V8A, 3, CRC, SHA2, AES),
+			"Cavium ThunderX"},
+  {"vulcan",		AARCH64_CPU_FEATURES (V8_1A, 2, SHA2, AES),
+			"Broadcom Vulcan"},
   /* The 'xgene-1' name is an older name for 'xgene1', which was used
      in earlier releases and is superseded by 'xgene1' in all
      tools.  */
-  {"xgene-1", AARCH64_ARCH_V8A, "APM X-Gene 1"},
-  {"xgene1", AARCH64_ARCH_V8A, "APM X-Gene 1"},
-  {"xgene2", AARCH64_FEATURE (AARCH64_ARCH_V8A,
-			      AARCH64_FEATURE_CRC), "APM X-Gene 2"},
-  {"cortex-r82", AARCH64_ARCH_V8R, "Cortex-R82"},
-  {"cortex-x1", AARCH64_FEATURE (AARCH64_ARCH_V8_2A,
-                AARCH64_FEATURE_F16
-                | AARCH64_FEATURE_RCPC
-                | AARCH64_FEATURE_DOTPROD
-                | AARCH64_FEATURE_SSBS
-                | AARCH64_FEATURE_PROFILE),
-                "Cortex-X1"},
-  {"cortex-x2", AARCH64_FEATURE (AARCH64_ARCH_V9A,
-                AARCH64_FEATURE_BFLOAT16
-                | AARCH64_FEATURE_I8MM
-                | AARCH64_FEATURE_MEMTAG
-                | AARCH64_FEATURE_SVE2_BITPERM),
-                "Cortex-X2"},
-  {"generic", AARCH64_ARCH_V8A, NULL},
+  {"xgene-1",		AARCH64_ARCH_FEATURES (V8A), "APM X-Gene 1"},
+  {"xgene1",		AARCH64_ARCH_FEATURES (V8A), "APM X-Gene 1"},
+  {"xgene2",		AARCH64_CPU_FEATURES (V8A, 1, CRC), "APM X-Gene 2"},
+  {"cortex-r82",	AARCH64_ARCH_FEATURES (V8R), "Cortex-R82"},
+  {"cortex-x1",		AARCH64_CPU_FEATURES (V8_2A, 5, F16, RCPC, DOTPROD,
+					      SSBS, PROFILE), "Cortex-X1"},
+  {"cortex-x2",		AARCH64_CPU_FEATURES (V9A, 4, BFLOAT16, I8MM, MEMTAG,
+					      SVE2_BITPERM), "Cortex-X2"},
+  {"generic",		AARCH64_ARCH_FEATURES (V8A), NULL},
 
-  {NULL, AARCH64_ARCH_NONE, NULL}
+  {NULL,		AARCH64_NO_FEATURES, NULL}
 };
 
 struct aarch64_arch_option_table
@@ -10324,22 +10229,22 @@ struct aarch64_arch_option_table
 /* This list should, at a minimum, contain all the architecture names
    recognized by GCC.  */
 static const struct aarch64_arch_option_table aarch64_archs[] = {
-  {"all", AARCH64_ANY},
-  {"armv8-a", AARCH64_ARCH_V8A},
-  {"armv8.1-a", AARCH64_ARCH_V8_1A},
-  {"armv8.2-a", AARCH64_ARCH_V8_2A},
-  {"armv8.3-a", AARCH64_ARCH_V8_3A},
-  {"armv8.4-a", AARCH64_ARCH_V8_4A},
-  {"armv8.5-a", AARCH64_ARCH_V8_5A},
-  {"armv8.6-a", AARCH64_ARCH_V8_6A},
-  {"armv8.7-a", AARCH64_ARCH_V8_7A},
-  {"armv8.8-a", AARCH64_ARCH_V8_8A},
-  {"armv8-r",	AARCH64_ARCH_V8R},
-  {"armv9-a",	AARCH64_ARCH_V9A},
-  {"armv9.1-a",	AARCH64_ARCH_V9_1A},
-  {"armv9.2-a",	AARCH64_ARCH_V9_2A},
-  {"armv9.3-a",	AARCH64_ARCH_V9_3A},
-  {NULL, AARCH64_ARCH_NONE}
+  {"all", AARCH64_ALL_FEATURES},
+  {"armv8-a", AARCH64_ARCH_FEATURES (V8A)},
+  {"armv8.1-a", AARCH64_ARCH_FEATURES (V8_1A)},
+  {"armv8.2-a", AARCH64_ARCH_FEATURES (V8_2A)},
+  {"armv8.3-a", AARCH64_ARCH_FEATURES (V8_3A)},
+  {"armv8.4-a", AARCH64_ARCH_FEATURES (V8_4A)},
+  {"armv8.5-a", AARCH64_ARCH_FEATURES (V8_5A)},
+  {"armv8.6-a", AARCH64_ARCH_FEATURES (V8_6A)},
+  {"armv8.7-a", AARCH64_ARCH_FEATURES (V8_7A)},
+  {"armv8.8-a", AARCH64_ARCH_FEATURES (V8_8A)},
+  {"armv8-r",	AARCH64_ARCH_FEATURES (V8R)},
+  {"armv9-a",	AARCH64_ARCH_FEATURES (V9A)},
+  {"armv9.1-a",	AARCH64_ARCH_FEATURES (V9_1A)},
+  {"armv9.2-a",	AARCH64_ARCH_FEATURES (V9_2A)},
+  {"armv9.3-a",	AARCH64_ARCH_FEATURES (V9_3A)},
+  {NULL, AARCH64_NO_FEATURES}
 };
 
 /* ISA extensions.  */
@@ -10351,106 +10256,61 @@ struct aarch64_option_cpu_value_table
 };
 
 static const struct aarch64_option_cpu_value_table aarch64_features[] = {
-  {"crc",		AARCH64_FEATURE (AARCH64_FEATURE_CRC, 0),
-			AARCH64_ARCH_NONE},
-  {"crypto",		AARCH64_FEATURE (AARCH64_FEATURE_CRYPTO, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
-  {"fp",		AARCH64_FEATURE (AARCH64_FEATURE_FP, 0),
-			AARCH64_ARCH_NONE},
-  {"lse",		AARCH64_FEATURE (AARCH64_FEATURE_LSE, 0),
-			AARCH64_ARCH_NONE},
-  {"simd",		AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_FP, 0)},
-  {"pan",		AARCH64_FEATURE (AARCH64_FEATURE_PAN, 0),
-			AARCH64_ARCH_NONE},
-  {"lor",		AARCH64_FEATURE (AARCH64_FEATURE_LOR, 0),
-			AARCH64_ARCH_NONE},
-  {"ras",		AARCH64_FEATURE (AARCH64_FEATURE_RAS, 0),
-			AARCH64_ARCH_NONE},
-  {"rdma",		AARCH64_FEATURE (AARCH64_FEATURE_RDMA, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
-  {"fp16",		AARCH64_FEATURE (AARCH64_FEATURE_F16, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_FP, 0)},
-  {"fp16fml",		AARCH64_FEATURE (AARCH64_FEATURE_F16_FML, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_F16, 0)},
-  {"profile",		AARCH64_FEATURE (AARCH64_FEATURE_PROFILE, 0),
-			AARCH64_ARCH_NONE},
-  {"sve",		AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_COMPNUM, 0)},
-  {"tme",		AARCH64_FEATURE (AARCH64_FEATURE_TME, 0),
-			AARCH64_ARCH_NONE},
-  {"compnum",		AARCH64_FEATURE (AARCH64_FEATURE_COMPNUM, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_F16
-					 | AARCH64_FEATURE_SIMD, 0)},
-  {"rcpc",		AARCH64_FEATURE (AARCH64_FEATURE_RCPC, 0),
-			AARCH64_ARCH_NONE},
-  {"dotprod",		AARCH64_FEATURE (AARCH64_FEATURE_DOTPROD, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
-  {"sha2",		AARCH64_FEATURE (AARCH64_FEATURE_SHA2, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_FP, 0)},
-  {"sb",		AARCH64_FEATURE (AARCH64_FEATURE_SB, 0),
-			AARCH64_ARCH_NONE},
-  {"predres",		AARCH64_FEATURE (AARCH64_FEATURE_PREDRES, 0),
-			AARCH64_ARCH_NONE},
-  {"aes",		AARCH64_FEATURE (AARCH64_FEATURE_AES, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
-  {"sm4",		AARCH64_FEATURE (AARCH64_FEATURE_SM4, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
-  {"sha3",		AARCH64_FEATURE (AARCH64_FEATURE_SHA3, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SHA2, 0)},
-  {"rng",		AARCH64_FEATURE (AARCH64_FEATURE_RNG, 0),
-			AARCH64_ARCH_NONE},
-  {"ssbs",		AARCH64_FEATURE (AARCH64_FEATURE_SSBS, 0),
-			AARCH64_ARCH_NONE},
-  {"memtag",		AARCH64_FEATURE (AARCH64_FEATURE_MEMTAG, 0),
-			AARCH64_ARCH_NONE},
-  {"sve2",		AARCH64_FEATURE (AARCH64_FEATURE_SVE2, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0)},
-  {"sve2-sm4",		AARCH64_FEATURE (AARCH64_FEATURE_SVE2_SM4, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SVE2
-					 | AARCH64_FEATURE_SM4, 0)},
-  {"sve2-aes",		AARCH64_FEATURE (AARCH64_FEATURE_SVE2_AES, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SVE2
-					 | AARCH64_FEATURE_AES, 0)},
-  {"sve2-sha3",		AARCH64_FEATURE (AARCH64_FEATURE_SVE2_SHA3, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SVE2
-					 | AARCH64_FEATURE_SHA3, 0)},
-  {"sve2-bitperm",	AARCH64_FEATURE (AARCH64_FEATURE_SVE2_BITPERM, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SVE2, 0)},
-  {"sme",		AARCH64_FEATURE (AARCH64_FEATURE_SME, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SVE2
-					 | AARCH64_FEATURE_BFLOAT16, 0)},
-  {"sme-f64",		AARCH64_FEATURE (AARCH64_FEATURE_SME_F64F64, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SME, 0)},
-  {"sme-f64f64",	AARCH64_FEATURE (AARCH64_FEATURE_SME_F64F64, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SME, 0)},
-  {"sme-i64",		AARCH64_FEATURE (AARCH64_FEATURE_SME_I16I64, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SME, 0)},
-  {"sme-i16i64",	AARCH64_FEATURE (AARCH64_FEATURE_SME_I16I64, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SME, 0)},
-  {"sme2",		AARCH64_FEATURE (AARCH64_FEATURE_SME2, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SME, 0)},
-  {"bf16",		AARCH64_FEATURE (AARCH64_FEATURE_BFLOAT16, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_FP, 0)},
-  {"i8mm",		AARCH64_FEATURE (AARCH64_FEATURE_I8MM, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SIMD, 0)},
-  {"f32mm",		AARCH64_FEATURE (AARCH64_FEATURE_F32MM, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0)},
-  {"f64mm",		AARCH64_FEATURE (AARCH64_FEATURE_F64MM, 0),
-			AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0)},
-  {"ls64",		AARCH64_FEATURE (AARCH64_FEATURE_LS64, 0),
-			AARCH64_ARCH_NONE},
-  {"flagm",		AARCH64_FEATURE (AARCH64_FEATURE_FLAGM, 0),
-			AARCH64_ARCH_NONE},
-  {"pauth",		AARCH64_FEATURE (AARCH64_FEATURE_PAC, 0),
-			AARCH64_ARCH_NONE},
-  {"mops",		AARCH64_FEATURE (AARCH64_FEATURE_MOPS, 0),
-			AARCH64_ARCH_NONE},
-  {"hbc",		AARCH64_FEATURE (AARCH64_FEATURE_HBC, 0),
-			AARCH64_ARCH_NONE},
-  {"cssc",		AARCH64_FEATURE (AARCH64_FEATURE_CSSC, 0),
-			AARCH64_ARCH_NONE},
-  {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
+  {"crc",		AARCH64_FEATURE (CRC), AARCH64_NO_FEATURES},
+  {"crypto",		AARCH64_FEATURES (2, AES, SHA2),
+			AARCH64_FEATURE (SIMD)},
+  {"fp",		AARCH64_FEATURE (FP), AARCH64_NO_FEATURES},
+  {"lse",		AARCH64_FEATURE (LSE), AARCH64_NO_FEATURES},
+  {"simd",		AARCH64_FEATURE (SIMD), AARCH64_FEATURE (FP)},
+  {"pan",		AARCH64_FEATURE (PAN), AARCH64_NO_FEATURES},
+  {"lor",		AARCH64_FEATURE (LOR), AARCH64_NO_FEATURES},
+  {"ras",		AARCH64_FEATURE (RAS), AARCH64_NO_FEATURES},
+  {"rdma",		AARCH64_FEATURE (RDMA), AARCH64_FEATURE (SIMD)},
+  {"fp16",		AARCH64_FEATURE (F16), AARCH64_FEATURE (FP)},
+  {"fp16fml",		AARCH64_FEATURE (F16_FML), AARCH64_FEATURE (F16)},
+  {"profile",		AARCH64_FEATURE (PROFILE), AARCH64_NO_FEATURES},
+  {"sve",		AARCH64_FEATURE (SVE), AARCH64_FEATURE (COMPNUM)},
+  {"tme",		AARCH64_FEATURE (TME), AARCH64_NO_FEATURES},
+  {"compnum",		AARCH64_FEATURE (COMPNUM),
+			AARCH64_FEATURES (2, F16, SIMD)},
+  {"rcpc",		AARCH64_FEATURE (RCPC), AARCH64_NO_FEATURES},
+  {"dotprod",		AARCH64_FEATURE (DOTPROD), AARCH64_FEATURE (SIMD)},
+  {"sha2",		AARCH64_FEATURE (SHA2), AARCH64_FEATURE (FP)},
+  {"sb",		AARCH64_FEATURE (SB), AARCH64_NO_FEATURES},
+  {"predres",		AARCH64_FEATURE (PREDRES), AARCH64_NO_FEATURES},
+  {"aes",		AARCH64_FEATURE (AES), AARCH64_FEATURE (SIMD)},
+  {"sm4",		AARCH64_FEATURE (SM4), AARCH64_FEATURE (SIMD)},
+  {"sha3",		AARCH64_FEATURE (SHA3), AARCH64_FEATURE (SHA2)},
+  {"rng",		AARCH64_FEATURE (RNG), AARCH64_NO_FEATURES},
+  {"ssbs",		AARCH64_FEATURE (SSBS), AARCH64_NO_FEATURES},
+  {"memtag",		AARCH64_FEATURE (MEMTAG), AARCH64_NO_FEATURES},
+  {"sve2",		AARCH64_FEATURE (SVE2), AARCH64_FEATURE (SVE)},
+  {"sve2-sm4",		AARCH64_FEATURE (SVE2_SM4),
+			AARCH64_FEATURES (2, SVE2, SM4)},
+  {"sve2-aes",		AARCH64_FEATURE (SVE2_AES),
+			AARCH64_FEATURES (2, SVE2, AES)},
+  {"sve2-sha3",		AARCH64_FEATURE (SVE2_SHA3),
+			AARCH64_FEATURES (2, SVE2, SHA3)},
+  {"sve2-bitperm",	AARCH64_FEATURE (SVE2_BITPERM),
+			AARCH64_FEATURE (SVE2)},
+  {"sme",		AARCH64_FEATURE (SME),
+			AARCH64_FEATURES (2, SVE2, BFLOAT16)},
+  {"sme-f64",		AARCH64_FEATURE (SME_F64F64), AARCH64_FEATURE (SME)},
+  {"sme-f64f64",	AARCH64_FEATURE (SME_F64F64), AARCH64_FEATURE (SME)},
+  {"sme-i64",		AARCH64_FEATURE (SME_I16I64), AARCH64_FEATURE (SME)},
+  {"sme-i16i64",	AARCH64_FEATURE (SME_I16I64), AARCH64_FEATURE (SME)},
+  {"sme2",		AARCH64_FEATURE (SME2), AARCH64_FEATURE (SME)},
+  {"bf16",		AARCH64_FEATURE (BFLOAT16), AARCH64_FEATURE (FP)},
+  {"i8mm",		AARCH64_FEATURE (I8MM), AARCH64_FEATURE (SIMD)},
+  {"f32mm",		AARCH64_FEATURE (F32MM), AARCH64_FEATURE (SVE)},
+  {"f64mm",		AARCH64_FEATURE (F64MM), AARCH64_FEATURE (SVE)},
+  {"ls64",		AARCH64_FEATURE (LS64), AARCH64_NO_FEATURES},
+  {"flagm",		AARCH64_FEATURE (FLAGM), AARCH64_NO_FEATURES},
+  {"pauth",		AARCH64_FEATURE (PAC), AARCH64_NO_FEATURES},
+  {"mops",		AARCH64_FEATURE (MOPS), AARCH64_NO_FEATURES},
+  {"hbc",		AARCH64_FEATURE (HBC), AARCH64_NO_FEATURES},
+  {"cssc",		AARCH64_FEATURE (CSSC), AARCH64_NO_FEATURES},
+  {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 
 struct aarch64_long_option_table
@@ -10466,14 +10326,15 @@ static aarch64_feature_set
 aarch64_feature_disable_set (aarch64_feature_set set)
 {
   const struct aarch64_option_cpu_value_table *opt;
-  aarch64_feature_set prev = 0;
+  aarch64_feature_set prev = AARCH64_NO_FEATURES;
 
-  while (prev != set) {
-    prev = set;
-    for (opt = aarch64_features; opt->name != NULL; opt++)
-      if (AARCH64_CPU_HAS_ANY_FEATURES (opt->require, set))
-        AARCH64_MERGE_FEATURE_SETS (set, set, opt->value);
-  }
+  while (!AARCH64_CPU_HAS_ALL_FEATURES (prev, set))
+    {
+      prev = set;
+      for (opt = aarch64_features; opt->name != NULL; opt++)
+	if (AARCH64_CPU_HAS_ANY_FEATURES (opt->require, set))
+	  AARCH64_MERGE_FEATURE_SETS (set, set, opt->value);
+    }
   return set;
 }
 
@@ -10482,14 +10343,15 @@ static aarch64_feature_set
 aarch64_feature_enable_set (aarch64_feature_set set)
 {
   const struct aarch64_option_cpu_value_table *opt;
-  aarch64_feature_set prev = 0;
+  aarch64_feature_set prev = AARCH64_NO_FEATURES;
 
-  while (prev != set) {
-    prev = set;
-    for (opt = aarch64_features; opt->name != NULL; opt++)
-      if (AARCH64_CPU_HAS_FEATURE (set, opt->value))
-        AARCH64_MERGE_FEATURE_SETS (set, set, opt->require);
-  }
+  while (!AARCH64_CPU_HAS_ALL_FEATURES (prev, set))
+    {
+      prev = set;
+      for (opt = aarch64_features; opt->name != NULL; opt++)
+	if (AARCH64_CPU_HAS_ALL_FEATURES (set, opt->value))
+	  AARCH64_MERGE_FEATURE_SETS (set, set, opt->require);
+    }
   return set;
 }
 
@@ -10571,7 +10433,7 @@ aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
 	    else
 	      {
 		set = aarch64_feature_disable_set (opt->value);
-		AARCH64_CLEAR_FEATURE (*ext_set, *ext_set, set);
+		AARCH64_CLEAR_FEATURES (*ext_set, *ext_set, set);
 	      }
 	    break;
 	  }

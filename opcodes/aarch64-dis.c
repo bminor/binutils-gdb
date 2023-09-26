@@ -3008,7 +3008,7 @@ determine_disassembling_preference (struct aarch64_inst *inst,
 	  continue;
 	}
 
-      if (!AARCH64_CPU_HAS_FEATURE (arch_variant, *alias->avariant))
+      if (!AARCH64_CPU_HAS_ALL_FEATURES (arch_variant, *alias->avariant))
 	{
 	  DEBUG_TRACE ("skip %s: we're missing features", alias->name);
 	  continue;
@@ -3969,10 +3969,11 @@ select_aarch64_variant (unsigned mach)
   switch (mach)
     {
     case bfd_mach_aarch64_8R:
-      arch_variant = AARCH64_ARCH_V8R;
+      AARCH64_SET_FEATURE (arch_variant, AARCH64_ARCH_V8R);
       break;
     default:
-      arch_variant = AARCH64_ANY & ~(AARCH64_FEATURE_V8R);
+      arch_variant = (aarch64_feature_set) AARCH64_ALL_FEATURES;
+      AARCH64_CLEAR_FEATURE (arch_variant, arch_variant, V8R);
     }
 }
 

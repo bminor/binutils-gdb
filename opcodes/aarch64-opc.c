@@ -4501,7 +4501,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	  bool exact_match
 	    = (!(sr->flags & (F_REG_READ | F_REG_WRITE))
 	    || (sr->flags & opnd->sysreg.flags) == opnd->sysreg.flags)
-	    && AARCH64_CPU_HAS_FEATURE (features, sr->features);
+	    && AARCH64_CPU_HAS_ALL_FEATURES (features, sr->features);
 
 	  /* Try and find an exact match, But if that fails, return the first
 	     partial match that was found.  */
@@ -4674,17 +4674,14 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 #define C14 14
 #define C15 15
 
-#define SYSREG(name, encoding, flags, features) \
-  { name, encoding, flags, features }
-
-#define SR_CORE(n,e,f) SYSREG (n,e,f,0)
+#define SR_CORE(n,e,f) {n,e,f,AARCH64_NO_FEATURES}
 
 #define SR_FEAT(n,e,f,feat) \
-  SYSREG ((n), (e), (f) | F_ARCHEXT, AARCH64_FEATURE_##feat)
+  { (n), (e), (f) | F_ARCHEXT, AARCH64_FEATURE (feat) }
 
 #define SR_FEAT2(n,e,f,fe1,fe2) \
-  SYSREG ((n), (e), (f) | F_ARCHEXT, \
-	  AARCH64_FEATURE_##fe1 | AARCH64_FEATURE_##fe2)
+  { (n), (e), (f) | F_ARCHEXT, \
+    AARCH64_FEATURES (2, fe1, fe2) }
 
 #define SR_V8_1_A(n,e,f) SR_FEAT2(n,e,f,V8A,V8_1A)
 #define SR_V8_4_A(n,e,f) SR_FEAT2(n,e,f,V8A,V8_4A)
@@ -5736,7 +5733,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_V8_8A ("allint",            CPENC (3,0,C4,C3,0),    0),
   SR_V8_8A ("icc_nmiar1_el1",    CPENC (3,0,C12,C9,5),   F_REG_READ),
 
-  { 0, CPENC (0,0,0,0,0), 0, 0 }
+  { 0, CPENC (0,0,0,0,0), 0, AARCH64_NO_FEATURES }
 };
 
 bool
@@ -5769,7 +5766,7 @@ const aarch64_sys_reg aarch64_pstatefields [] =
   SR_SME  ("svcrsmza",	  0x1b, PSTATE_ENCODE_CRM_AND_IMM(0x6,0x1)
 				| F_REG_MAX_VALUE (1)),
   SR_V8_8A ("allint",	  0x08,	F_REG_MAX_VALUE (1)),
-  { 0,	  CPENC (0,0,0,0,0), 0, 0 },
+  { 0,	  CPENC (0,0,0,0,0), 0, AARCH64_NO_FEATURES },
 };
 
 bool
@@ -5954,13 +5951,13 @@ aarch64_sys_ins_reg_has_xt (const aarch64_sys_ins_reg *sys_ins_reg)
 
 extern bool
 aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
-		 const char *reg_name,
-                 aarch64_insn reg_value,
-                 uint32_t reg_flags,
-                 aarch64_feature_set reg_features)
+				 const char *reg_name,
+				 aarch64_insn reg_value,
+				 uint32_t reg_flags,
+				 const aarch64_feature_set *reg_features)
 {
   /* Armv8-R has no EL3.  */
-  if (AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8R))
+  if (AARCH64_CPU_HAS_FEATURE (features, V8R))
     {
       const char *suffix = strrchr (reg_name, '_');
       if (suffix && !strcmp (suffix, "_el3"))
@@ -5971,7 +5968,7 @@ aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
     return true;
 
   if (reg_features
-      && AARCH64_CPU_HAS_ALL_FEATURES (features, reg_features))
+      && AARCH64_CPU_HAS_ALL_FEATURES (features, *reg_features))
     return true;
 
   /* ARMv8.4 TLB instructions.  */
@@ -6021,17 +6018,17 @@ aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
        || reg_value == CPENS (6, C8, C2, 5)
        || reg_value == CPENS (6, C8, C5, 1)
        || reg_value == CPENS (6, C8, C5, 5))
-      && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_4A))
+      && AARCH64_CPU_HAS_FEATURE (features, V8_4A))
     return true;
 
   /* DC CVAP.  Values are from aarch64_sys_regs_dc.  */
   if (reg_value == CPENS (3, C7, C12, 1)
-      && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2A))
+      && AARCH64_CPU_HAS_FEATURE (features, V8_2A))
     return true;
 
   /* DC CVADP.  Values are from aarch64_sys_regs_dc.  */
   if (reg_value == CPENS (3, C7, C13, 1)
-      && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_CVADP))
+      && AARCH64_CPU_HAS_FEATURE (features, CVADP))
     return true;
 
   /* DC <dc_op> for ARMv8.5-A Memory Tagging Extension.  */
@@ -6053,18 +6050,18 @@ aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
        || reg_value == CPENS (3, C7, C13, 5)
        || reg_value == CPENS (3, C7, C14, 5)
        || reg_value == CPENS (3, C7, C4, 4))
-      && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_MEMTAG))
+      && AARCH64_CPU_HAS_FEATURE (features, MEMTAG))
     return true;
 
   /* AT S1E1RP, AT S1E1WP.  Values are from aarch64_sys_regs_at.  */
   if ((reg_value == CPENS (0, C7, C9, 0)
        || reg_value == CPENS (0, C7, C9, 1))
-      && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2A))
+      && AARCH64_CPU_HAS_FEATURE (features, V8_2A))
     return true;
 
   /* CFP/DVP/CPP RCTX : Value are from aarch64_sys_regs_sr. */
   if (reg_value == CPENS (3, C7, C3, 0)
-      && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_PREDRES))
+      && AARCH64_CPU_HAS_FEATURE (features, PREDRES))
     return true;
 
   return false;
@@ -6372,8 +6369,8 @@ verify_constraints (const struct aarch64_inst *inst,
 	  /* Check to see if the MOVPRFX SVE instruction is followed by an SVE
 	     instruction for better error messages.  */
 	  if (!opcode->avariant
-	      || !(*opcode->avariant &
-		   (AARCH64_FEATURE_SVE | AARCH64_FEATURE_SVE2)))
+	      || (!AARCH64_CPU_HAS_FEATURE (*opcode->avariant, SVE)
+		  && !AARCH64_CPU_HAS_FEATURE (*opcode->avariant, SVE2)))
 	    {
 	      mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
 	      mismatch_detail->error = _("SVE instruction expected after "
@@ -6614,7 +6611,8 @@ aarch64_sve_dupm_mov_immediate_p (uint64_t uvalue, int esize)
    supports the instruction described by INST.  */
 
 bool
-aarch64_cpu_supports_inst_p (uint64_t cpu_variant, aarch64_inst *inst)
+aarch64_cpu_supports_inst_p (aarch64_feature_set cpu_variant,
+			     aarch64_inst *inst)
 {
   if (!inst->opcode->avariant
       || !AARCH64_CPU_HAS_ALL_FEATURES (cpu_variant, *inst->opcode->avariant))
@@ -6622,14 +6620,12 @@ aarch64_cpu_supports_inst_p (uint64_t cpu_variant, aarch64_inst *inst)
 
   if (inst->opcode->iclass == sme_fp_sd
       && inst->operands[0].qualifier == AARCH64_OPND_QLF_S_D
-      && !AARCH64_CPU_HAS_ALL_FEATURES (cpu_variant,
-					AARCH64_FEATURE_SME_F64F64))
+      && !AARCH64_CPU_HAS_FEATURE (cpu_variant, SME_F64F64))
     return false;
 
   if (inst->opcode->iclass == sme_int_sd
       && inst->operands[0].qualifier == AARCH64_OPND_QLF_S_D
-      && !AARCH64_CPU_HAS_ALL_FEATURES (cpu_variant,
-					AARCH64_FEATURE_SME_I16I64))
+      && !AARCH64_CPU_HAS_FEATURE (cpu_variant, SME_I16I64))
     return false;
 
   return true;
