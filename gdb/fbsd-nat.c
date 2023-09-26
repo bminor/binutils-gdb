@@ -2094,7 +2094,7 @@ fbsd_nat_target::detach (inferior *inf, int from_tty)
 		  }
 #else
 		  /* pacify gcc  */
-		  wptid = (void) null_ptid;
+		  (void) wptid;
 #endif
 		  sig = 0;
 		  break;
