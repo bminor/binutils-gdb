@@ -158,7 +158,11 @@ enum aarch64_feature_bit {
   /* Common Short Sequence Compression instructions.  */
   AARCH64_FEATURE_CSSC,
   /* SME2.  */
-  AARCH64_FEATURE_SME2
+  AARCH64_FEATURE_SME2,
+  DUMMY1,
+  DUMMY2,
+  DUMMY3,
+  AARCH64_NUM_FEATURES
 };
 
 /* These macros take an initial argument X that gives the index into
@@ -257,50 +261,61 @@ enum aarch64_feature_bit {
 #define AARCH64_ARCH_NONE(X)	0
 
 /* CPU-specific features.  */
-typedef unsigned long long aarch64_feature_set;
+typedef struct {
+  uint64_t flags[(AARCH64_NUM_FEATURES + 63) / 64];
+} aarch64_feature_set;
 
 #define AARCH64_CPU_HAS_FEATURE(CPU,FEAT)	\
-  ((~(CPU) & AARCH64_FEATBIT (0, FEAT)) == 0)
+  ((~(CPU).flags[0] & AARCH64_FEATBIT (0, FEAT)) == 0		\
+   && (~(CPU).flags[1] & AARCH64_FEATBIT (1, FEAT)) == 0)
 
 #define AARCH64_CPU_HAS_ALL_FEATURES(CPU,FEAT)	\
-  ((~(CPU) & (FEAT)) == 0)
+  ((~(CPU).flags[0] & (FEAT).flags[0]) == 0	\
+   && (~(CPU).flags[1] & (FEAT).flags[1]) == 0)
 
 #define AARCH64_CPU_HAS_ANY_FEATURES(CPU,FEAT)	\
-  (((CPU) & (FEAT)) != 0)
+  (((CPU).flags[0] & (FEAT).flags[0]) != 0	\
+   || ((CPU).flags[1] & (FEAT).flags[1]) != 0)
 
 #define AARCH64_SET_FEATURE(DEST, FEAT) \
-  ((DEST) = FEAT (0))
+  ((DEST).flags[0] = FEAT (0),		\
+   (DEST).flags[1] = FEAT (1))
 
 #define AARCH64_CLEAR_FEATURE(DEST, SRC, FEAT)		\
-  ((DEST) = (SRC) & ~AARCH64_FEATBIT (0, FEAT))
+  ((DEST).flags[0] = (SRC).flags[0] & ~AARCH64_FEATBIT (0, FEAT), \
+   (DEST).flags[1] = (SRC).flags[1] & ~AARCH64_FEATBIT (1, FEAT))
 
-#define AARCH64_MERGE_FEATURE_SETS(TARG,F1,F2)	\
-  do						\
-    {						\
-      (TARG) = (F1) | (F2);			\
-    }						\
+#define AARCH64_MERGE_FEATURE_SETS(TARG,F1,F2)		\
+  do							\
+    {							\
+      (TARG).flags[0] = (F1).flags[0] | (F2).flags[0];	\
+      (TARG).flags[1] = (F1).flags[1] | (F2).flags[1];	\
+    }							\
   while (0)
 
-#define AARCH64_CLEAR_FEATURES(TARG,F1,F2)	\
-  do						\
-    { 						\
-      (TARG) = (F1) &~ (F2);			\
-    }						\
+#define AARCH64_CLEAR_FEATURES(TARG,F1,F2)		\
+  do							\
+    {							\
+      (TARG).flags[0] = (F1).flags[0] &~ (F2).flags[0];	\
+      (TARG).flags[1] = (F1).flags[1] &~ (F2).flags[1];	\
+    }							\
   while (0)
 
 /* aarch64_feature_set initializers for no features and all features,
    respectively.  */
-#define AARCH64_NO_FEATURES 0
-#define AARCH64_ALL_FEATURES -1
+#define AARCH64_NO_FEATURES { { 0, 0 } }
+#define AARCH64_ALL_FEATURES { { -1, -1 } }
 
 /* An aarch64_feature_set initializer for a single feature,
    AARCH64_FEATURE_<FEAT>.  */
-#define AARCH64_FEATURE(FEAT) AARCH64_FEATBIT (0, FEAT)
+#define AARCH64_FEATURE(FEAT) \
+  { { AARCH64_FEATBIT (0, FEAT), AARCH64_FEATBIT (1, FEAT) } }
 
 /* An aarch64_feature_set initializer for a specific architecture version,
    including all the features that are enabled by default for that architecture
    version.  */
-#define AARCH64_ARCH_FEATURES(ARCH) AARCH64_ARCH_##ARCH (0)
+#define AARCH64_ARCH_FEATURES(ARCH) \
+  { { AARCH64_ARCH_##ARCH (0), AARCH64_ARCH_##ARCH (1) } }
 
 /* Used by AARCH64_CPU_FEATURES.  */
 #define AARCH64_OR_FEATURES_1(X, ARCH, F1) \
@@ -325,7 +340,8 @@ typedef unsigned long long aarch64_feature_set;
 /* An aarch64_feature_set initializer for a CPU that implements architecture
    version ARCH, and additionally provides the N features listed in "...".  */
 #define AARCH64_CPU_FEATURES(ARCH, N, ...)			\
-  AARCH64_OR_FEATURES_##N (0, ARCH, __VA_ARGS__)
+  { { AARCH64_OR_FEATURES_##N (0, ARCH, __VA_ARGS__),		\
+      AARCH64_OR_FEATURES_##N (1, ARCH, __VA_ARGS__) } }
 
 /* An aarch64_feature_set initializer for the N features listed in "...".  */
 #define AARCH64_FEATURES(N, ...) \
