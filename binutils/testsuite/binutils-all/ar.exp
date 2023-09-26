@@ -598,7 +598,7 @@ proc replacing_non_deterministic_member { } {
     # Since this archive is non-deterministic, we do not know what the
     # user or group ids will be, so we have to use */* to match them.
     set got [binutils_run $AR "tvO $archive"]
-    if ![string match "rw-r--r-- */* *${newer_length} *bintest.${obj} 0x*" $got] {
+    if ![string match "\[rw-\]* */* *${newer_length} *bintest.${obj} 0x*" $got] {
 	fail "$testname (wrong size, expected: $newer_length)"
 	return
     }
@@ -672,7 +672,7 @@ proc replacing_sde_deterministic_member { } {
     # Since this archive has fixed source dates, but non-deterministic
     # uid and gid values we have to use */* to match them.
     set got [binutils_run $AR "tvO $archive"]
-    if ![string match "rw-r--r-- */* *${older_length} *bintest.${obj} 0x*" $got] {
+    if ![string match "\[rw-\]* */* *${older_length} *bintest.${obj} 0x*" $got] {
 	fail "$testname (wrong size, expected: $older_length)"
 	unsetenv SOURCE_DATE_EPOCH
 	return

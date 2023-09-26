@@ -1,3 +1,8 @@
+2023-09-26  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/binutils-all/ar.exp: Remove assumption of the setting
+	of umask when creating test archive files.
+
 2023-09-25  Vsevolod Alekseyev  <sevaa@sprynet.com>
 
 	PR 30792
