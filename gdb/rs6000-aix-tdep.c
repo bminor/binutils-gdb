@@ -1025,7 +1025,11 @@ rs6000_software_single_step (struct regcache *regcache)
   if (!next_pcs.empty ())
     return next_pcs;
   
-  breaks[0] = loc + PPC_INSN_SIZE;
+  /* Here 0xfc000000 is the opcode mask to detect a P10 prefix instruction.  */
+  if ((insn & 0xfc000000) == 1 << 26)
+    breaks[0] = loc + 2 * PPC_INSN_SIZE;
+  else
+    breaks[0] = loc + PPC_INSN_SIZE;
   opcode = insn >> 26;
   breaks[1] = branch_dest (regcache, opcode, insn, loc, breaks[0]);
 
