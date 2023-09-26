@@ -367,15 +367,15 @@ def make_visualizer(value):
     else:
         ty = value.type.strip_typedefs()
         if ty.is_string_like:
-            result = gdb.printing.NoOpScalarPrinter(value)
+            result = NoOpScalarPrinter(value)
         elif ty.code == gdb.TYPE_CODE_ARRAY:
-            result = gdb.printing.NoOpArrayPrinter(ty, value)
+            result = NoOpArrayPrinter(ty, value)
         elif ty.is_array_like:
             value = value.to_array()
             ty = value.type.strip_typedefs()
-            result = gdb.printing.NoOpArrayPrinter(ty, value)
+            result = NoOpArrayPrinter(ty, value)
         elif ty.code in (gdb.TYPE_CODE_STRUCT, gdb.TYPE_CODE_UNION):
-            result = gdb.printing.NoOpStructPrinter(ty, value)
+            result = NoOpStructPrinter(ty, value)
         elif ty.code in (
             gdb.TYPE_CODE_PTR,
             gdb.TYPE_CODE_REF,
@@ -383,7 +383,7 @@ def make_visualizer(value):
         ):
             result = NoOpPointerReferencePrinter(value)
         else:
-            result = gdb.printing.NoOpScalarPrinter(value)
+            result = NoOpScalarPrinter(value)
     return result
 
 
