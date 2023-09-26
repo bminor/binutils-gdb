@@ -168,7 +168,11 @@ def request(name):
         global _commands
         code = func.__code__
         # We don't permit requests to have positional arguments.
-        assert code.co_posonlyargcount == 0
+        try:
+            assert code.co_posonlyargcount == 0
+        except AttributeError:
+            # Attribute co_posonlyargcount is supported starting python 3.8.
+            pass
         assert code.co_argcount == 0
         # A request must have a **args parameter.
         assert code.co_flags & inspect.CO_VARKEYWORDS
