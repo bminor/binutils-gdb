@@ -2758,6 +2758,8 @@ void *bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
     void **map_addr, bfd_size_type *map_len)
 ATTRIBUTE_WARN_UNUSED_RESULT;
 
+time_t bfd_get_current_time (time_t now);
+
 /* Extracted from bfdwin.c.  */
 struct _bfd_window_internal;
 

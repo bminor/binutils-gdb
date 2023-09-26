@@ -807,7 +807,7 @@ main (int argc, char **argv)
 	fatal (_("`u' is only meaningful with the `r' option."));
 
       if (newer_only && deterministic > 0)
-        fatal (_("`u' is not meaningful with the `D' option."));
+        non_fatal (_("`u' is not meaningful with the `D' option - replacement will always happen."));
 
       if (newer_only && deterministic < 0 && DEFAULT_AR_DETERMINISTIC)
         non_fatal (_("\
@@ -1482,6 +1482,7 @@ replace_members (bfd *arch, char **files_to_move, bool quick)
 		  && current->arelt_data != NULL)
 		{
 		  bool replaced;
+
 		  if (newer_only)
 		    {
 		      struct stat fsbuf, asbuf;
@@ -1492,12 +1493,33 @@ replace_members (bfd *arch, char **files_to_move, bool quick)
 			    bfd_fatal (*files_to_move);
 			  goto next_file;
 			}
+
 		      if (bfd_stat_arch_elt (current, &asbuf) != 0)
 			/* xgettext:c-format */
 			fatal (_("internal stat error on %s"),
 			       bfd_get_filename (current));
 
 		      if (fsbuf.st_mtime <= asbuf.st_mtime)
+			/* A note about deterministic timestamps:  In an
+			   archive created in a determistic manner the
+			   individual elements will either have a timestamp
+			   of 0 or SOURCE_DATE_EPOCH, depending upon the
+			   method used.  This will be the value retrieved
+			   by bfd_stat_arch_elt().
+
+			   The timestamp in fsbuf.st_mtime however will
+			   definitely be greater than 0, and it is unlikely
+			   to be less than SOURCE_DATE_EPOCH.  (FIXME:
+			   should we test for this case case and issue an
+			   error message ?)
+
+			   So in either case fsbuf.st_mtime > asbuf.st_time
+			   and hence the incoming file will replace the
+			   current file.  Which is what should be expected to
+			   happen.  Deterministic archives have no real sense
+			   of the time/date when their elements were created,
+			   and so any updates to the archive should always
+			   result in replaced files.  */
 			goto next_file;
 		    }
 

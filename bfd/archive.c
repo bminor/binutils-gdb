@@ -1893,7 +1893,7 @@ bfd_ar_hdr_from_filesystem (bfd *abfd, const char *filename, bfd *member)
     {
       /* Assume we just "made" the member, and fake it.  */
       struct bfd_in_memory *bim = (struct bfd_in_memory *) member->iostream;
-      time (&status.st_mtime);
+      status.st_mtime = bfd_get_current_time (0);
       status.st_uid = getuid ();
       status.st_gid = getgid ();
       status.st_mode = 0644;
@@ -1903,6 +1903,15 @@ bfd_ar_hdr_from_filesystem (bfd *abfd, const char *filename, bfd *member)
     {
       bfd_set_error (bfd_error_system_call);
       return NULL;
+    }
+  else
+    {
+      /* The call to stat() above has filled in the st_mtime field
+	 with the real time that the object was modified.  But if
+	 we are trying to generate deterministic archives based upon
+	 the SOURCE_DATE_EPOCH environment variable then we want to
+	 override that.  */
+      status.st_mtime = bfd_get_current_time (status.st_mtime);
     }
 
   /* If the caller requested that the BFD generate deterministic output,
@@ -2529,8 +2538,13 @@ _bfd_bsd_write_armap (bfd *arch,
       struct stat statbuf;
 
       if (stat (bfd_get_filename (arch), &statbuf) == 0)
-	bfd_ardata (arch)->armap_timestamp = (statbuf.st_mtime
-					      + ARMAP_TIME_OFFSET);
+	{
+	  /* If asked, replace the time with a deterministic value. */
+	  statbuf.st_mtime = bfd_get_current_time (statbuf.st_mtime);
+
+	  bfd_ardata (arch)->armap_timestamp = (statbuf.st_mtime
+						+ ARMAP_TIME_OFFSET);
+	}
       uid = getuid();
       gid = getgid();
     }
@@ -2617,7 +2631,8 @@ _bfd_bsd_write_armap (bfd *arch,
 }
 
 /* At the end of archive file handling, update the timestamp in the
-   file, so the linker will accept it.
+   file, so older linkers will accept it.  (This does not apply to
+   ld.bfd or ld.gold).
 
    Return TRUE if the timestamp was OK, or an unusual problem happened.
    Return FALSE if we updated the timestamp.  */
@@ -2642,10 +2657,17 @@ _bfd_archive_bsd_update_armap_timestamp (bfd *arch)
       /* Can't read mod time for some reason.  */
       return true;
     }
+
   if (((long) archstat.st_mtime) <= bfd_ardata (arch)->armap_timestamp)
     /* OK by the linker's rules.  */
     return true;
 
+  if (getenv ("SOURCE_DATE_EPOCH") != NULL
+      && bfd_ardata (arch)->armap_timestamp == bfd_get_current_time (0) + ARMAP_TIME_OFFSET)
+    /* If the archive's timestamp has been set to SOURCE_DATE_EPOCH
+       then leave it as-is.  */
+    return true;
+  
   /* Update the timestamp.  */
   bfd_ardata (arch)->armap_timestamp = archstat.st_mtime + ARMAP_TIME_OFFSET;
 

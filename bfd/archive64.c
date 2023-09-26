@@ -186,8 +186,16 @@ _bfd_archive_64_bit_write_armap (bfd *arch,
   memcpy (hdr.ar_name, "/SYM64/", strlen ("/SYM64/"));
   if (!_bfd_ar_sizepad (hdr.ar_size, sizeof (hdr.ar_size), mapsize))
     return false;
-  _bfd_ar_spacepad (hdr.ar_date, sizeof (hdr.ar_date), "%ld",
-		    time (NULL));
+
+  time_t date;
+
+  if (arch->flags & BFD_DETERMINISTIC_OUTPUT)
+    date = 0;
+  else
+    date = bfd_get_current_time (0);
+
+  _bfd_ar_spacepad (hdr.ar_date, sizeof (hdr.ar_date), "%ld", (long) date);
+  
   /* This, at least, is what Intel coff sets the values to.: */
   _bfd_ar_spacepad (hdr.ar_uid, sizeof (hdr.ar_uid), "%ld", 0);
   _bfd_ar_spacepad (hdr.ar_gid, sizeof (hdr.ar_gid), "%ld", 0);

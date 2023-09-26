@@ -467,6 +467,225 @@ proc deterministic_archive { } {
     pass $testname
 }
 
+# Test replacing a member of a deterministic archive.
+
+proc replacing_deterministic_member { } {
+    global AR
+    global AS
+    global NM
+    global srcdir
+    global subdir
+    global obj
+
+    set testname "replacing deterministic member"
+
+    if [is_remote host] {
+	# The kind of filename trickery that we are about to
+	#  play is hard to do if we have to operate remotely.
+	unsupported $testname
+	return
+    }
+
+    file mkdir tmpdir/ar
+    
+    if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}] {
+	unsupported $testname
+	return
+    }
+
+    # Wait a second and then build a second object file - with the same name
+    # as the first, but in a different directory.
+    sleep 1
+    if ![binutils_assemble $srcdir/$subdir/copytest.s tmpdir/ar/bintest.${obj}] {
+	unsupported $testname
+	return
+    }
+
+    set archive tmpdir/artest.a
+    set older_objfile tmpdir/bintest.${obj}
+    set newer_objfile tmpdir/ar/bintest.${obj}
+    set older_length [file size $older_objfile]
+    # set newer_length [file size $newer_objfile]
+    
+    remote_file build delete tmpdir/artest.a
+
+    # Build the archive with the *newer* object file.
+    
+    set got [binutils_run $AR "rcD $archive ${newer_objfile}"]
+    if ![string match "" $got] {
+	fail "$testname: (could not build archive)"
+	return
+    }
+
+    # Now replace the newer file with the older one.  On a normal
+    # archive this will not work, but one created to be deterministic
+    # should always replace its members.
+    
+    set got [binutils_run $AR "ruD $archive $older_objfile"]
+    # The archiver will warn that 'u' and 'D' do not work together
+    if ![string match "*not meaningful*" $got] {
+	fail "$testname: (failed to replace file)"
+	return
+    }
+
+    set got [binutils_run $AR "tvO $archive"]
+    if ![string match "rw-r--r-- 0/0 *${older_length} *bintest.${obj} 0x*" $got] {
+	fail "$testname (wrong size, expected: $older_length)"
+	return
+    }
+
+    pass $testname
+}
+
+# Test replacing a member of a non-deterministic archive.
+
+proc replacing_non_deterministic_member { } {
+    global AR
+    global AS
+    global NM
+    global srcdir
+    global subdir
+    global obj
+
+    set testname "replacing non-deterministic member"
+
+    if [is_remote host] {
+	# The kind of filename trickery that we are about to
+	#  play is hard to do if we have to operate remotely.
+	unsupported $testname
+	return
+    }
+
+    file mkdir tmpdir/ar
+    
+    if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}] {
+	unsupported $testname
+	return
+    }
+
+    # Wait a second and then build a second object file - with the same name
+    # as the first, but in a different directory.
+    sleep 1
+    if ![binutils_assemble $srcdir/$subdir/copytest.s tmpdir/ar/bintest.${obj}] {
+	unsupported $testname
+	return
+    }
+
+    set archive tmpdir/artest.a
+    set older_objfile tmpdir/bintest.${obj}
+    set newer_objfile tmpdir/ar/bintest.${obj}
+    # set older_length [file size $older_objfile]
+    set newer_length [file size $newer_objfile]
+    
+    remote_file build delete tmpdir/artest.a
+
+    # Build the archive with the *newer* object file.
+    
+    set got [binutils_run $AR "rc $archive ${newer_objfile}"]
+    if ![string match "" $got] {
+	fail "$testname: (could not build archive)"
+	return
+    }
+
+    # Now try to replace the newer file with the older one.  This should not work.
+    
+    set got [binutils_run $AR "ru $archive $older_objfile"]
+    if ![string match "" $got] {
+	fail "$testname: (failed to replace file)"
+	return
+    }
+
+    # Since this archive is non-deterministic, we do not know what the
+    # user or group ids will be, so we have to use */* to match them.
+    set got [binutils_run $AR "tvO $archive"]
+    if ![string match "rw-r--r-- */* *${newer_length} *bintest.${obj} 0x*" $got] {
+	fail "$testname (wrong size, expected: $newer_length)"
+	return
+    }
+
+    pass $testname
+}
+
+# Test replacing a member of deterministic archive created by using SOURCE_DATE_EPOCH.
+
+proc replacing_sde_deterministic_member { } {
+    global AR
+    global AS
+    global NM
+    global srcdir
+    global subdir
+    global obj
+
+    set testname "replacing SOURCE_DATE_EPOCH deterministic member"
+
+    if [is_remote host] {
+	# The kind of filename trickery that we are about to
+	#  play is hard to do if we have to operate remotely.
+	unsupported $testname
+	return
+    }
+
+    file mkdir tmpdir/ar
+    
+    if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}] {
+	unsupported $testname
+	return
+    }
+
+    # Wait a second and then build a second object file - with the same name
+    # as the first, but in a different directory.
+    sleep 1
+    if ![binutils_assemble $srcdir/$subdir/copytest.s tmpdir/ar/bintest.${obj}] {
+	unsupported $testname
+	return
+    }
+
+    set archive tmpdir/artest.a
+    set older_objfile tmpdir/bintest.${obj}
+    set newer_objfile tmpdir/ar/bintest.${obj}
+    set older_length [file size $older_objfile]
+    # set newer_length [file size $newer_objfile]
+    
+    remote_file build delete tmpdir/artest.a
+
+    # Build the archive with the *newer* object file.
+    setenv SOURCE_DATE_EPOCH "1000"
+    
+    set got [binutils_run $AR "rc $archive ${newer_objfile}"]
+    if ![string match "" $got] {
+	fail "$testname: (could not build archive)"
+	unsetenv SOURCE_DATE_EPOCH
+	return
+    }
+
+    # Now replace the newer file with the older one.  On a normal
+    # archive this will not work, but one created to be deterministic
+    # should always replace its members.
+    
+    set got [binutils_run $AR "ru $archive $older_objfile"]
+    if ![string match "" $got] {
+	fail "$testname: (failed to replace file)"
+	unsetenv SOURCE_DATE_EPOCH
+	return
+    }
+
+    # Since this archive has fixed source dates, but non-deterministic
+    # uid and gid values we have to use */* to match them.
+    set got [binutils_run $AR "tvO $archive"]
+    if ![string match "rw-r--r-- */* *${older_length} *bintest.${obj} 0x*" $got] {
+	fail "$testname (wrong size, expected: $older_length)"
+	unsetenv SOURCE_DATE_EPOCH
+	return
+    }
+
+    # FIXME - it would be nice if we could check to see that the time & date
+    # in the archive listing matches SOURCE_DATE_EPOCH.
+
+    unsetenv SOURCE_DATE_EPOCH
+    pass $testname
+}
+
+
 proc unique_symbol { } {
     global AR
     global AS
@@ -797,6 +1016,9 @@ if { [file exists $base_dir/bfdtest1] && [file exists $base_dir/bfdtest2] } {
 symbol_table
 argument_parsing
 deterministic_archive
+replacing_deterministic_member
+replacing_non_deterministic_member
+replacing_sde_deterministic_member
 delete_an_element
 move_an_element
 empty_archive

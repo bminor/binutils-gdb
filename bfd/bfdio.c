@@ -828,3 +828,47 @@ const struct bfd_iovec _bfd_memory_iovec =
   &memory_bread, &memory_bwrite, &memory_btell, &memory_bseek,
   &memory_bclose, &memory_bflush, &memory_bstat, &memory_bmmap
 };
+
+/*
+FUNCTION
+	bfd_get_current_time
+
+SYNOPSIS
+	time_t bfd_get_current_time (time_t now);
+
+DESCRIPTION
+	Returns the current time.
+
+	If the environment variable SOURCE_DATE_EPOCH is defined
+	then this is parsed and its value is returned.  Otherwise
+	if the paramter NOW is non-zero, then that is returned.
+	Otherwise the result of the system call "time(NULL)" is
+	returned.
+*/
+
+time_t
+bfd_get_current_time (time_t now)
+{
+  char *source_date_epoch;
+  unsigned long long epoch;
+
+  /* FIXME: We could probably cache this lookup,
+     and the parsing of its value below.  */
+  source_date_epoch = getenv ("SOURCE_DATE_EPOCH");
+
+  if (source_date_epoch == NULL)
+    {
+      if (now)
+	return now;
+      return time (NULL);
+    }
+
+  epoch = strtoull (source_date_epoch, NULL, 0);
+
+  /* If epoch == 0 then something is wrong with SOURCE_DATE_EPOCH,
+     but we do not have an easy way to report it.  Since the presence
+     of the environment variable implies that the user wants
+     deterministic behaviour we just accept the 0 value.  */
+
+  return (time_t) epoch;
+}

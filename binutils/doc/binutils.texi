@@ -521,6 +521,10 @@ operation @samp{r} (replace).  In particular, the combination @samp{qu} is
 not allowed, since checking the timestamps would lose any speed
 advantage from the operation @samp{q}.
 
+Note - if an archive has been created in a deterministic manner, eg
+via the use of the @option{D} modifier, then replacement will always
+happen and the @option{u} modifier will be ineffective.
+
 @item U
 @cindex deterministic archives
 @kindex --enable-deterministic-archives
