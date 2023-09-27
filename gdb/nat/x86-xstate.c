@@ -42,11 +42,11 @@ xsave_feature_offset (uint64_t xcr0, int feature)
 int
 x86_xsave_length ()
 {
-  uint32_t ecx;
+  uint32_t ebx;
 
-  if (!x86_cpuid_count (0xd, 0, nullptr, nullptr, &ecx, nullptr))
+  if (!x86_cpuid_count (0xd, 0, nullptr, &ebx, nullptr, nullptr))
     return 0;
-  return ecx;
+  return ebx;
 }
 
 /* See x86-xstate.h.  */
