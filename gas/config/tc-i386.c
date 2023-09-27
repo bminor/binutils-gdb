@@ -6214,7 +6214,12 @@ optimize_imm (void)
     }
   else if ((flag_code == CODE_16BIT) ^ (i.prefix[DATA_PREFIX] != 0))
     guess_suffix = WORD_MNEM_SUFFIX;
-  else if (flag_code != CODE_64BIT || !(i.prefix[REX_PREFIX] & REX_W))
+  else if (flag_code != CODE_64BIT
+	   || (!(i.prefix[REX_PREFIX] & REX_W)
+	       /* A more generic (but also more involved) way of dealing
+		  with the special case(s) would be to go look for
+		  DefaultSize attributes on any of the templates.  */
+	       && current_templates->start->mnem_off != MN_push))
     guess_suffix = LONG_MNEM_SUFFIX;
 
   for (op = i.operands; --op >= 0;)
