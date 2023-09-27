@@ -1467,9 +1467,9 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 	      relocation += addend;
 	      relocation -= dtprel_base(info);
 	      bfd_put_16 (input_bfd, (relocation >> 16) & 0xffff,
-			  contents + offset + 2);
+			  contents + offset + endian);
 	      bfd_put_16 (input_bfd, relocation & 0xffff,
-			  contents + offset + 2 + INST_WORD_SIZE);
+			  contents + offset + endian + INST_WORD_SIZE);
 	      break;
 	    case (int) R_MICROBLAZE_TEXTREL_64:
 	    case (int) R_MICROBLAZE_TEXTREL_32_LO:
