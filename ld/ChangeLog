@@ -1,3 +1,9 @@
+2023-09-27  Hsinyuan Xavier  <TheLastLin@hotmail.com>
+
+	PR 30875
+	* ldlang.c (get_os_init_flag): New function.
+	(exp_init_os, map_input_to_output_sections): Use it.
+
 2023-07-24  Johannes Schauer Marin Rodrigues  <josch@debian.org>
 
 	* pe-dll.c (fill_edata): If inserting a timestamp, use the value
