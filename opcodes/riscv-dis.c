@@ -869,7 +869,21 @@ riscv_get_map_state (int n,
     {
       *state = MAP_INSN;
       riscv_release_subset_list (&riscv_subsets);
-      riscv_parse_subset (&riscv_rps_dis, name + 2);
+
+      /* ISA mapping string may be numbered, suffixed with '.n'. Do not
+	 consider this as part of the ISA string.  */
+      char *suffix = strchr (name, '.');
+      if (suffix)
+	{
+	  int suffix_index = (int)(suffix - name);
+	  char *name_substr = xmalloc (suffix_index + 1);
+	  strncpy (name_substr, name, suffix_index);
+	  name_substr[suffix_index] = '\0';
+	  riscv_parse_subset (&riscv_rps_dis, name_substr + 2);
+	  free (name_substr);
+	}
+      else
+	riscv_parse_subset (&riscv_rps_dis, name + 2);
     }
   else
     return false;
