@@ -33,8 +33,8 @@ enum microblaze_instr
   /* 'or/and/xor' are C++ keywords.  */
   microblaze_or, microblaze_and, microblaze_xor,
   andn, pcmpbf, pcmpbc, pcmpeq, pcmpne, sra, src, srl, sext8, sext16,
-  wic, wdc, wdcclear, wdcflush, mts, mfs, mbar, br, brd,
-  brld, bra, brad, brald, microblaze_brk, beq, beqd, bne, bned, blt,
+  wic, wdc, wdcclear, wdcextclear, wdcflush, wdcextflush, mts, mfs, mbar, br,
+  brd, brld, bra, brad, brald, microblaze_brk, beq, beqd, bne, bned, blt,
   bltd, ble, bled, bgt, bgtd, bge, bged, ori, andi, xori, andni,
   imm, rtsd, rtid, rtbd, rted, bri, brid, brlid, brai, braid, bralid,
   brki, beqi, beqid, bnei, bneid, blti, bltid, blei, bleid, bgti,
