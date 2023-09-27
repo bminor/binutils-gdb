@@ -1926,6 +1926,8 @@ cpu_flags_match (const insn_template *t)
 		{
 		  x.bitfield.cpuavx512f = 0;
 		  x.bitfield.cpuavx512vl = 0;
+		  if (x.bitfield.cpufma && !cpu.bitfield.cpufma)
+		    x.bitfield.cpuavx = 0;
 		}
 	    }
 	}
@@ -1949,6 +1951,8 @@ cpu_flags_match (const insn_template *t)
 	      if ((need_evex_encoding ()
 		   ? cpu.bitfield.cpuavx512f
 		   : cpu.bitfield.cpuavx)
+		  && (!x.bitfield.cpufma || cpu.bitfield.cpufma
+		      || cpu_arch_flags.bitfield.cpuavx512f)
 		  && (!x.bitfield.cpugfni || cpu.bitfield.cpugfni)
 		  && (!x.bitfield.cpuvaes || cpu.bitfield.cpuvaes)
 		  && (!x.bitfield.cpuvpclmulqdq || cpu.bitfield.cpuvpclmulqdq))

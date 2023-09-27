@@ -1802,16 +1802,21 @@ vcvtps2ph, 0x661d, F16C, Modrm|Vex=2|Space0F3A|VexW=1|NoSuf, { Imm8, RegYMM, Uns
 
 <fma:opc, 132:10, 213:20, 231:30>
 
-vfmadd<fma>p<sd>, 0x6688 | 0x<fma:opc>, FMA, Modrm|Vex|Space0F38|VexVVVV|<sd:vexw>|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vfmadd<fma>s<sd>, 0x6689 | 0x<fma:opc>, FMA, Modrm|VexLIG|Space0F38|VexVVVV|<sd:vexw>|NoSuf, { <sd:elem>|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vfmaddsub<fma>p<sd>, 0x6686 | 0x<fma:opc>, FMA, Modrm|Vex|Space0F38|VexVVVV|<sd:vexw>|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vfmsub<fma>p<sd>, 0x668a | 0x<fma:opc>, FMA, Modrm|Vex|Space0F38|VexVVVV|<sd:vexw>|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vfmsub<fma>s<sd>, 0x668b | 0x<fma:opc>, FMA, Modrm|VexLIG|Space0F38|VexVVVV|<sd:vexw>|NoSuf, { <sd:elem>|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vfmsubadd<fma>p<sd>, 0x6687 | 0x<fma:opc>, FMA, Modrm|Vex|Space0F38|VexVVVV|<sd:vexw>|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vfnmadd<fma>p<sd>, 0x668c | 0x<fma:opc>, FMA, Modrm|Vex|Space0F38|VexVVVV|<sd:vexw>|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vfnmadd<fma>s<sd>, 0x668d | 0x<fma:opc>, FMA, Modrm|VexLIG|Space0F38|VexVVVV|<sd:vexw>|NoSuf, { <sd:elem>|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vfnmsub<fma>p<sd>, 0x668e | 0x<fma:opc>, FMA, Modrm|Vex|Space0F38|VexVVVV|<sd:vexw>|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vfnmsub<fma>s<sd>, 0x668f | 0x<fma:opc>, FMA, Modrm|VexLIG|Space0F38|VexVVVV|<sd:vexw>|NoSuf, { <sd:elem>|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
+<sdh:cpu:cpudq:fma:ppfx:spfx:pfx:spc1:spc2:opc:vex:vexlig:vexw:elem, +
+    s:AVX512F:AVX512DQ:FMA|AVX|AVX512F::f3:66:Space0F:Space0F38:0:Vex|EVexDYN:VexLIG|EVexLIG:VexW0:Dword, +
+    d:AVX512F:AVX512DQ:FMA|AVX|AVX512F:66:f2:66:Space0F:Space0F38:1:Vex|EVexDYN:VexLIG|EVexLIG:VexW1:Qword, +
+    h:AVX512_FP16:AVX512_FP16:AVX512_FP16::f3::EVexMap5:EVexMap6:0::EVexLIG:VexW0:Word>
+
+vfmadd<fma>p<sdh>, 0x6688 | 0x<fma:opc>, <sdh:fma>, Modrm|<sdh:vex>|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vfmadd<fma>s<sdh>, 0x6689 | 0x<fma:opc>, <sdh:fma>, Modrm|<sdh:vexlig>|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Disp8MemShift|NoSuf|StaticRounding|SAE, { RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
+vfmaddsub<fma>p<sdh>, 0x6686 | 0x<fma:opc>, <sdh:fma>, Modrm|<sdh:vex>|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vfmsub<fma>p<sdh>, 0x668a | 0x<fma:opc>, <sdh:fma>, Modrm|<sdh:vex>|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vfmsub<fma>s<sdh>, 0x668b | 0x<fma:opc>, <sdh:fma>, Modrm|<sdh:vexlig>|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Disp8MemShift|NoSuf|StaticRounding|SAE, { RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
+vfmsubadd<fma>p<sdh>, 0x6687 | 0x<fma:opc>, <sdh:fma>, Modrm|<sdh:vex>|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vfnmadd<fma>p<sdh>, 0x668c | 0x<fma:opc>, <sdh:fma>, Modrm|<sdh:vex>|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vfnmadd<fma>s<sdh>, 0x668d | 0x<fma:opc>, <sdh:fma>, Modrm|<sdh:vexlig>|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Disp8MemShift|NoSuf|StaticRounding|SAE, { RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
+vfnmsub<fma>p<sdh>, 0x668e | 0x<fma:opc>, <sdh:fma>, Modrm|<sdh:vex>|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vfnmsub<fma>s<sdh>, 0x668f | 0x<fma:opc>, <sdh:fma>, Modrm|<sdh:vexlig>|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Disp8MemShift|NoSuf|StaticRounding|SAE, { RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
 
 // HLE prefixes
 
@@ -2087,11 +2092,6 @@ vpclmulhqhqdq, 0x6644/0x11, VPCLMULQDQ|AVX|AVX512F, Modrm|Space0F3A|Vex|EVexDYN|
 
 // AVX512F instructions.
 
-<sdh:cpu:cpudq:ppfx:spfx:pfx:spc1:spc2:opc:vexw:elem, +
-    s:AVX512F:AVX512DQ::f3:66:Space0F:Space0F38:0:VexW0:Dword, +
-    d:AVX512F:AVX512DQ:66:f2:66:Space0F:Space0F38:1:VexW1:Qword, +
-    h:AVX512_FP16:AVX512_FP16::f3::EVexMap5:EVexMap6:0:VexW0:Word>
-
 // <Exy> is used for EVEX instructions with x/y suffixes.
 <Exy:vl:attr:sr:sae:src:dst, +
     $z::EVex512|Disp8MemShift=6:StaticRounding|SAE:SAE:RegZMM|Unspecified|BaseIndex:RegYMM, +
@@ -2254,17 +2254,6 @@ vgetmants<sdh>, 0x<sdh:pfx>27, <sdh:cpu>, Modrm|EVexLIG|Masking|Space0F3A|VexVVV
 
 vrndscalep<sdh>, 0x<sdh:pfx>08 | <sdh:opc>, <sdh:cpu>, Modrm|Masking|Space0F3A|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|SAE, { Imm8, RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
 vrndscales<sdh>, 0x<sdh:pfx>0a | <sdh:opc>, <sdh:cpu>, Modrm|EVexLIG|Masking|Space0F3A|VexVVVV|<sdh:vexw>|Disp8MemShift|NoSuf|SAE, { Imm8, RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
-
-vfmadd<fma>p<sdh>, 0x6688 | 0x<fma:opc>, <sdh:cpu>, Modrm|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vfmadd<fma>s<sdh>, 0x6689 | 0x<fma:opc>, <sdh:cpu>, Modrm|EVexLIG|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Disp8MemShift|NoSuf|StaticRounding|SAE, { RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
-vfmaddsub<fma>p<sdh>, 0x6686 | 0x<fma:opc>, <sdh:cpu>, Modrm|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vfmsub<fma>p<sdh>, 0x668a | 0x<fma:opc>, <sdh:cpu>, Modrm|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vfmsub<fma>s<sdh>, 0x668b | 0x<fma:opc>, <sdh:cpu>, Modrm|EVexLIG|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Disp8MemShift|NoSuf|StaticRounding|SAE, { RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
-vfmsubadd<fma>p<sdh>, 0x6687 | 0x<fma:opc>, <sdh:cpu>, Modrm|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vfnmadd<fma>p<sdh>, 0x668c | 0x<fma:opc>, <sdh:cpu>, Modrm|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vfnmadd<fma>s<sdh>, 0x668d | 0x<fma:opc>, <sdh:cpu>, Modrm|EVexLIG|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Disp8MemShift|NoSuf|StaticRounding|SAE, { RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
-vfnmsub<fma>p<sdh>, 0x668e | 0x<fma:opc>, <sdh:cpu>, Modrm|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vfnmsub<fma>s<sdh>, 0x668f | 0x<fma:opc>, <sdh:cpu>, Modrm|EVexLIG|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Disp8MemShift|NoSuf|StaticRounding|SAE, { RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
 
 vscalefp<sdh>, 0x662c, <sdh:cpu>, Modrm|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 vscalefs<sdh>, 0x662d, <sdh:cpu>, Modrm|EVexLIG|Masking|<sdh:spc2>|VexVVVV|<sdh:vexw>|Disp8MemShift|NoSuf|StaticRounding|SAE, { RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
