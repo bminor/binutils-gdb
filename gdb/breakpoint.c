@@ -8018,7 +8018,7 @@ disable_breakpoints_in_shlibs (void)
    disabled ones can just stay disabled.  */
 
 static void
-disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
+disable_breakpoints_in_unloaded_shlib (program_space *pspace, so_list *solib)
 {
   bool disabled_shlib_breaks = false;
 
@@ -8027,7 +8027,7 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
       /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
       struct breakpoint *b = loc->owner;
 
-      if (solib->pspace == loc->pspace
+      if (pspace == loc->pspace
 	  && !loc->shlib_disabled
 	  && (((b->type == bp_breakpoint
 		|| b->type == bp_jit_event

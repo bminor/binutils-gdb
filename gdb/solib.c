@@ -763,10 +763,10 @@ notify_solib_loaded (so_list *so)
 /* Notify interpreters and observers that solib SO has been unloaded.  */
 
 static void
-notify_solib_unloaded (so_list *so)
+notify_solib_unloaded (program_space *pspace, so_list *so)
 {
   interps_notify_solib_unloaded (so);
-  gdb::observers::solib_unloaded.notify (so);
+  gdb::observers::solib_unloaded.notify (pspace, so);
 }
 
 /* See solib.h.  */
@@ -869,7 +869,7 @@ update_solib_list (int from_tty)
 	{
 	  /* Notify any observer that the shared object has been
 	     unloaded before we remove it from GDB's tables.  */
-	  notify_solib_unloaded (gdb);
+	  notify_solib_unloaded (current_program_space, gdb);
 
 	  current_program_space->deleted_solibs.push_back (gdb->so_name);
 
@@ -905,8 +905,6 @@ update_solib_list (int from_tty)
       /* Fill in the rest of each of the `struct so_list' nodes.  */
       for (i = inferior; i; i = i->next)
 	{
-
-	  i->pspace = current_program_space;
 	  current_program_space->added_solibs.push_back (i);
 
 	  try
@@ -1237,7 +1235,7 @@ clear_solib (void)
       struct so_list *so = current_program_space->so_list;
 
       current_program_space->so_list = so->next;
-      notify_solib_unloaded (so);
+      notify_solib_unloaded (current_program_space, so);
       current_program_space->remove_target_sections (so);
       free_so (so);
     }

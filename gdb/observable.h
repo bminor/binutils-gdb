@@ -101,10 +101,11 @@ extern observable<inferior */* parent_inf */, inferior */* child_inf */,
    haven't been loaded yet.  */
 extern observable<struct so_list */* solib */> solib_loaded;
 
-/* The shared library specified by SOLIB has been unloaded.  Note
-   that when gdb calls this observer, the library's symbols have not
+/* The shared library SOLIB has been unloaded from program space PSPACE.
+   Note  when gdb calls this observer, the library's symbols have not
    been unloaded yet, and thus are still available.  */
-extern observable<struct so_list */* solib */> solib_unloaded;
+extern observable<struct program_space */* pspace */, struct so_list */* solib */>
+  solib_unloaded;
 
 /* The symbol file specified by OBJFILE has been loaded.  Called
    with OBJFILE equal to NULL to indicate previously loaded symbol

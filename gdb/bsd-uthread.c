@@ -294,7 +294,7 @@ bsd_uthread_solib_loaded (struct so_list *so)
 }
 
 static void
-bsd_uthread_solib_unloaded (struct so_list *so)
+bsd_uthread_solib_unloaded (program_space *pspace, so_list *so)
 {
   if (!bsd_uthread_solib_name)
     return;
