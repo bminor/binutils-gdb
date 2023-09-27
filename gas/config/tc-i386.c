@@ -11546,8 +11546,9 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	  ? i.broadcast.type || i.broadcast.bytes
 	    || i.rounding.type != rc_none
 	    || i.mask.reg
-	  : (i.broadcast.type || i.broadcast.bytes)
-	    && i.rounding.type != rc_none))
+	  : (i.mem_operands && i.rounding.type != rc_none)
+	    || ((i.broadcast.type || i.broadcast.bytes)
+		&& !(i.flags[i.broadcast.operand] & Operand_Mem))))
     {
       as_bad (_("conflicting .insn operands"));
       goto done;
