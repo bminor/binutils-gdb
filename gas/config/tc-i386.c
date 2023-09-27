@@ -2808,13 +2808,41 @@ check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
 }
 
 static void
-extend_cpu_sub_arch_name (const char *name)
+extend_cpu_sub_arch_name (const char *pfx, const char *name)
 {
   if (cpu_sub_arch_name)
     cpu_sub_arch_name = reconcat (cpu_sub_arch_name, cpu_sub_arch_name,
-				  ".", name, (const char *) NULL);
+				  pfx, name, (const char *) NULL);
   else
-    cpu_sub_arch_name = concat (".", name, (const char *) NULL);
+    cpu_sub_arch_name = concat (pfx, name, (const char *) NULL);
+}
+
+static void isa_enable (unsigned int idx)
+{
+  i386_cpu_flags flags = cpu_flags_or (cpu_arch_flags, cpu_arch[idx].enable);
+
+  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
+    {
+      extend_cpu_sub_arch_name (".", cpu_arch[idx].name);
+      cpu_arch_flags = flags;
+    }
+
+  cpu_arch_isa_flags = cpu_flags_or (cpu_arch_isa_flags, cpu_arch[idx].enable);
+}
+
+static void isa_disable (unsigned int idx)
+{
+  i386_cpu_flags flags
+    = cpu_flags_and_not (cpu_arch_flags, cpu_arch[idx].disable);
+
+  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
+    {
+      extend_cpu_sub_arch_name (".no", cpu_arch[idx].name);
+      cpu_arch_flags = flags;
+    }
+
+  cpu_arch_isa_flags
+    = cpu_flags_and_not (cpu_arch_isa_flags, cpu_arch[idx].disable);
 }
 
 static void
@@ -2838,7 +2866,6 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
   int e;
   const char *string;
   unsigned int j = 0;
-  i386_cpu_flags flags;
 
   SKIP_WHITESPACE ();
 
@@ -2991,17 +3018,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	  if (cpu_flags_all_zero (&cpu_arch[j].enable))
 	    continue;
 
-	  flags = cpu_flags_or (cpu_arch_flags, cpu_arch[j].enable);
-
-	  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
-	    {
-	      extend_cpu_sub_arch_name (string + 1);
-	      cpu_arch_flags = flags;
-	      cpu_arch_isa_flags = flags;
-	    }
-	  else
-	    cpu_arch_isa_flags
-	      = cpu_flags_or (cpu_arch_isa_flags, cpu_arch[j].enable);
+	  isa_enable (j);
 
 	  (void) restore_line_pointer (e);
 
@@ -3048,13 +3065,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	if (cpu_arch[j].type == PROCESSOR_NONE
 	    && strcmp (string + 3, cpu_arch[j].name) == 0)
 	  {
-	    flags = cpu_flags_and_not (cpu_arch_flags, cpu_arch[j].disable);
-	    if (!cpu_flags_equal (&flags, &cpu_arch_flags))
-	      {
-		extend_cpu_sub_arch_name (string + 1);
-		cpu_arch_flags = flags;
-		cpu_arch_isa_flags = flags;
-	      }
+	    isa_disable (j);
 
 	    if (cpu_arch[j].vsz == vsz_set)
 	      vector_size = VSZ_DEFAULT;
@@ -14611,21 +14622,7 @@ md_parse_option (int c, const char *arg)
 		       && !cpu_flags_all_zero (&cpu_arch[j].enable))
 		{
 		  /* ISA extension.  */
-		  i386_cpu_flags flags;
-
-		  flags = cpu_flags_or (cpu_arch_flags,
-					cpu_arch[j].enable);
-
-		  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
-		    {
-		      extend_cpu_sub_arch_name (arch);
-		      cpu_arch_flags = flags;
-		      cpu_arch_isa_flags = flags;
-		    }
-		  else
-		    cpu_arch_isa_flags
-		      = cpu_flags_or (cpu_arch_isa_flags,
-				      cpu_arch[j].enable);
+		  isa_enable (j);
 
 		  switch (cpu_arch[j].vsz)
 		    {
@@ -14668,16 +14665,7 @@ md_parse_option (int c, const char *arg)
 		if (cpu_arch[j].type == PROCESSOR_NONE
 		    && strcmp (arch + 2, cpu_arch[j].name) == 0)
 		  {
-		    i386_cpu_flags flags;
-
-		    flags = cpu_flags_and_not (cpu_arch_flags,
-					       cpu_arch[j].disable);
-		    if (!cpu_flags_equal (&flags, &cpu_arch_flags))
-		      {
-			extend_cpu_sub_arch_name (arch);
-			cpu_arch_flags = flags;
-			cpu_arch_isa_flags = flags;
-		      }
+		    isa_disable (j);
 		    if (cpu_arch[j].vsz == vsz_set)
 		      vector_size = VSZ_DEFAULT;
 		    break;
