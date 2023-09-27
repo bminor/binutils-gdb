@@ -1,3 +1,9 @@
+2023-09-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 30885
+	* elfcode.h (elf_slurp_symbol_table): Compute the symcount for non
+	dynamic symbols in the same way as _bfd_elf_get_symtab_upper_bound.
+
 2023-09-13  Jacob Navia  <jacob@jacob.remcomp.fr>
 
 	* elf.c (_bfd_elf_init_reloc_shdr): Don't segfault on alloc fail.

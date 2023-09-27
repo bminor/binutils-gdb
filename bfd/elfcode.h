@@ -1255,11 +1255,13 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bool dynamic)
      symbols.  We actually use all the ELF symbols, so there will be no
      space left over at the end.  When we have all the symbols, we
      build the caller's pointer vector.  */
+  ebd = get_elf_backend_data (abfd);
 
   if (! dynamic)
     {
       hdr = &elf_tdata (abfd)->symtab_hdr;
       verhdr = NULL;
+      symcount = hdr->sh_size / ebd->s->sizeof_sym;
     }
   else
     {
@@ -1278,12 +1280,13 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bool dynamic)
 	  if (!_bfd_elf_slurp_version_tables (abfd, false))
 	    return -1;
 	}
+
+      symcount = elf_tdata (abfd)->dt_symtab_count;
     }
 
-  ebd = get_elf_backend_data (abfd);
-  symcount = elf_tdata (abfd)->dt_symtab_count;
   if (symcount == 0)
     symcount = hdr->sh_size / sizeof (Elf_External_Sym);
+
   if (symcount == 0)
     sym = symbase = NULL;
   else
