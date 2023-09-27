@@ -2997,33 +2997,16 @@ handle_v_run (char *own_buf)
 	  /* These are pointers used to navigate the strings above.  */
 	  char *tmp_arg = arg;
 	  char *tmp_full_arg = full_arg;
-	  int need_quote = 0;
 
 	  hex2bin (p, (gdb_byte *) arg, len);
 	  arg[len] = '\0';
 
 	  while (*tmp_arg != '\0')
 	    {
-	      switch (*tmp_arg)
-		{
-		case '\n':
-		  /* Quote \n.  */
-		  *tmp_full_arg = '\'';
-		  ++tmp_full_arg;
-		  need_quote = 1;
-		  break;
-
-		default:
-		  break;
-		}
-
 	      *tmp_full_arg = *tmp_arg;
 	      ++tmp_full_arg;
 	      ++tmp_arg;
 	    }
-
-	  if (need_quote)
-	    *tmp_full_arg++ = '\'';
 
 	  /* Finish FULL_ARG and push it into the vector containing
 	     the argv.  */
