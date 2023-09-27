@@ -816,9 +816,6 @@ static int cpu_arch_tune_set = 0;
 /* Cpu we are generating instructions for.  */
 enum processor_type cpu_arch_tune = PROCESSOR_UNKNOWN;
 
-/* CPU feature flags of cpu we are generating instructions for.  */
-static i386_cpu_flags cpu_arch_tune_flags;
-
 /* CPU instruction set architecture used.  */
 enum processor_type cpu_arch_isa = PROCESSOR_UNKNOWN;
 
@@ -2959,10 +2956,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	  cpu_arch_isa = PROCESSOR_UNKNOWN;
 	  cpu_arch_isa_flags = cpu_arch[flag_code == CODE_64BIT].enable;
 	  if (!cpu_arch_tune_set)
-	    {
-	      cpu_arch_tune = cpu_arch_isa;
-	      cpu_arch_tune_flags = cpu_arch_isa_flags;
-	    }
+	    cpu_arch_tune = PROCESSOR_UNKNOWN;
 
 	  vector_size = VSZ_DEFAULT;
 
@@ -3004,10 +2998,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	      cpu_arch_isa = cpu_arch[j].type;
 	      cpu_arch_isa_flags = cpu_arch[j].enable;
 	      if (!cpu_arch_tune_set)
-		{
-		  cpu_arch_tune = cpu_arch_isa;
-		  cpu_arch_tune_flags = cpu_arch_isa_flags;
-		}
+		cpu_arch_tune = cpu_arch_isa;
 
 	      vector_size = VSZ_DEFAULT;
 
@@ -14610,10 +14601,7 @@ md_parse_option (int c, const char *arg)
 		  cpu_arch_isa = cpu_arch[j].type;
 		  cpu_arch_isa_flags = cpu_arch[j].enable;
 		  if (!cpu_arch_tune_set)
-		    {
-		      cpu_arch_tune = cpu_arch_isa;
-		      cpu_arch_tune_flags = cpu_arch_isa_flags;
-		    }
+		    cpu_arch_tune = cpu_arch_isa;
 		  vector_size = VSZ_DEFAULT;
 		  break;
 		}
@@ -14691,7 +14679,6 @@ md_parse_option (int c, const char *arg)
 	    {
 	      cpu_arch_tune_set = 1;
 	      cpu_arch_tune = cpu_arch [j].type;
-	      cpu_arch_tune_flags = cpu_arch[j].enable;
 	      break;
 	    }
 	}
@@ -15297,10 +15284,7 @@ i386_target_format (void)
 	  cpu_arch_isa = PROCESSOR_IAMCU;
 	  cpu_arch_isa_flags = iamcu_flags;
 	  if (!cpu_arch_tune_set)
-	    {
-	      cpu_arch_tune = cpu_arch_isa;
-	      cpu_arch_tune_flags = cpu_arch_isa_flags;
-	    }
+	    cpu_arch_tune = PROCESSOR_IAMCU;
 	}
       else if (cpu_arch_isa != PROCESSOR_IAMCU)
 	as_fatal (_("Intel MCU doesn't support `%s' architecture"),
@@ -15311,8 +15295,6 @@ i386_target_format (void)
 
   if (cpu_flags_all_zero (&cpu_arch_isa_flags))
     cpu_arch_isa_flags = cpu_arch[flag_code == CODE_64BIT].enable;
-  if (cpu_flags_all_zero (&cpu_arch_tune_flags))
-    cpu_arch_tune_flags = cpu_arch[flag_code == CODE_64BIT].enable;
 
   switch (OUTPUT_FLAVOR)
     {
