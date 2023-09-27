@@ -11809,7 +11809,13 @@ $as_echo "no" >&6; }
 	fi
 fi
 
-# Handle optional debuginfod support
+# Handle optional debuginfod support as well as optional section
+# downloading support.
+#
+# Define HAVE_LIBDEBUGINFOD if libdebuginfod is found with version >= 0.179.
+#
+# Define HAVE_LIBDEBUGINFOD_FIND_SECTION if libdebuginfod is found with
+# version >= 0.188.
 
 # Check whether --with-debuginfod was given.
 if test "${with_debuginfod+set}" = set; then :
@@ -11824,6 +11830,106 @@ $as_echo_n "checking whether to use debuginfod... " >&6; }
 $as_echo "$with_debuginfod" >&6; }
 
 if test "x$with_debuginfod" != xno; then
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libdebuginfod >= 0.188" >&5
+$as_echo_n "checking for libdebuginfod >= 0.188... " >&6; }
+
+if test -n "$DEBUGINFOD_CFLAGS"; then
+    pkg_cv_DEBUGINFOD_CFLAGS="$DEBUGINFOD_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libdebuginfod >= 0.188\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libdebuginfod >= 0.188") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_DEBUGINFOD_CFLAGS=`$PKG_CONFIG --cflags "libdebuginfod >= 0.188" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$DEBUGINFOD_LIBS"; then
+    pkg_cv_DEBUGINFOD_LIBS="$DEBUGINFOD_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libdebuginfod >= 0.188\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libdebuginfod >= 0.188") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_DEBUGINFOD_LIBS=`$PKG_CONFIG --libs "libdebuginfod >= 0.188" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+if test $pkg_failed = no; then
+  pkg_save_LDFLAGS="$LDFLAGS"
+  LDFLAGS="$LDFLAGS $pkg_cv_DEBUGINFOD_LIBS"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+else
+  pkg_failed=yes
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$pkg_save_LDFLAGS
+fi
+
+
+
+if test $pkg_failed = yes; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        DEBUGINFOD_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libdebuginfod >= 0.188" 2>&1`
+        else
+	        DEBUGINFOD_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libdebuginfod >= 0.188" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$DEBUGINFOD_PKG_ERRORS" >&5
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: libdebuginfod is missing or some features may be unavailable." >&5
+$as_echo "$as_me: WARNING: libdebuginfod is missing or some features may be unavailable." >&2;}
+elif test $pkg_failed = untried; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: libdebuginfod is missing or some features may be unavailable." >&5
+$as_echo "$as_me: WARNING: libdebuginfod is missing or some features may be unavailable." >&2;}
+else
+	DEBUGINFOD_CFLAGS=$pkg_cv_DEBUGINFOD_CFLAGS
+	DEBUGINFOD_LIBS=$pkg_cv_DEBUGINFOD_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_LIBDEBUGINFOD_FIND_SECTION 1" >>confdefs.h
+
+fi
+
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libdebuginfod >= 0.179" >&5

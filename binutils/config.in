@@ -94,6 +94,9 @@
 /* Define to 1 if debuginfod is enabled. */
 #undef HAVE_LIBDEBUGINFOD
 
+/* Define to 1 if debuginfod section downloading is supported. */
+#undef HAVE_LIBDEBUGINFOD_FIND_SECTION
+
 /* Define if mbstate_t exists in wchar.h. */
 #undef HAVE_MBSTATE_T
 
