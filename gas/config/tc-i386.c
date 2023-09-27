@@ -255,6 +255,7 @@ enum i386_error
     no_default_mask,
     unsupported_rc_sae,
     invalid_register_operand,
+    internal_error,
   };
 
 struct _i386_insn
@@ -5363,6 +5364,9 @@ md_assemble (char *line)
 	case invalid_register_operand:
 	  err_msg = _("invalid register operand");
 	  break;
+	case internal_error:
+	  err_msg = _("internal error");
+	  break;
 	}
       as_bad (_("%s for `%s'"), err_msg,
 	      pass1_mnem ? pass1_mnem : insn_name (current_templates->start));
@@ -7455,6 +7459,33 @@ match_template (char mnem_suffix)
 	{
 	  specific_error = progress (i.error);
 	  continue;
+	}
+
+      /* Check whether to use the shorter VEX encoding for certain insns where
+	 the EVEX enconding comes first in the table.  This requires the respective
+	 AVX-* feature to be explicitly enabled.  */
+      if (t == current_templates->start
+	  && t->opcode_modifier.disp8memshift
+	  && !t->opcode_modifier.vex
+	  && !need_evex_encoding ()
+	  && t + 1 < current_templates->end
+	  && t[1].opcode_modifier.vex)
+	{
+	  i386_cpu_flags cpu;
+	  unsigned int memshift = i.memshift;
+
+	  i.memshift = 0;
+	  cpu = cpu_flags_and (cpu_flags_from_attr (t[1].cpu), cpu_arch_isa_flags);
+	  if (!cpu_flags_all_zero (&cpu)
+	      && (!i.types[0].bitfield.disp8
+		  || !operand_type_check (i.types[0], disp)
+		  || i.op[0].disps->X_op != O_constant
+		  || fits_in_disp8 (i.op[0].disps->X_add_number)))
+	    {
+	      specific_error = progress (internal_error);
+	      continue;
+	    }
+	  i.memshift = memshift;
 	}
 
       /* We've found a match; break out of loop.  */

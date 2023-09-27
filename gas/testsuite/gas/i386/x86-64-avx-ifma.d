@@ -29,6 +29,6 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:[ 	]*c4 c2 dd b4 d4[ 	]*\{vex\} vpmadd52luq %ymm12,%ymm4,%ymm2
 [ 	]*[a-f0-9]+:[ 	]*c4 e2 dd b4 11[ 	]*\{vex\} vpmadd52luq \(%rcx\),%ymm4,%ymm2
 [ 	]*[a-f0-9]+:[ 	]*62 b2 dd 28 b4 d6[ 	]*vpmadd52luq %ymm22,%ymm4,%ymm2
-[ 	]*[a-f0-9]+:[ 	]*62 d2 dd 08 b5 d4[ 	]*vpmadd52huq %xmm12,%xmm4,%xmm2
-[ 	]*[a-f0-9]+:[ 	]*62 d2 dd 28 b5 d4[ 	]*vpmadd52huq %ymm12,%ymm4,%ymm2
+[ 	]*[a-f0-9]+:[ 	]*c4 c2 d9 b5 d4[ 	]*\{vex\} vpmadd52huq %xmm12,%xmm4,%xmm2
+[ 	]*[a-f0-9]+:[ 	]*c4 c2 dd b5 d4[ 	]*\{vex\} vpmadd52huq %ymm12,%ymm4,%ymm2
 #pass

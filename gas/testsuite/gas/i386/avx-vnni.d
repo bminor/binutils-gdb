@@ -38,6 +38,6 @@ Disassembly of section .text:
  +[a-f0-9]+:	c4 e2 79 50 c0       	\{vex\} vpdpbusd %xmm0,%xmm0,%xmm0
  +[a-f0-9]+:	c4 e2 7d 50 c0       	\{vex\} vpdpbusd %ymm0,%ymm0,%ymm0
  +[a-f0-9]+:	c4 e2 79 50 c0       	\{vex\} vpdpbusd %xmm0,%xmm0,%xmm0
- +[a-f0-9]+:	62 f2 5d 08 50 d2    	vpdpbusd %xmm2,%xmm4,%xmm2
+ +[a-f0-9]+:	c4 e2 59 50 d2       	\{vex\} vpdpbusd %xmm2,%xmm4,%xmm2
  +[a-f0-9]+:	c4 e2 59 50 91 f0 07 00 00 	\{vex\} vpdpbusd 0x7f0\(%ecx\),%xmm4,%xmm2
 #pass
