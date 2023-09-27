@@ -1944,7 +1944,17 @@ cpu_flags_match (const insn_template *t)
       cpu = cpu_flags_and (x, cpu);
       if (!cpu_flags_all_zero (&cpu))
 	{
-	  if (x.bitfield.cpuavx)
+	  if (t->cpu.bitfield.cpuavx && t->cpu.bitfield.cpuavx512f)
+	    {
+	      if ((need_evex_encoding ()
+		   ? cpu.bitfield.cpuavx512f
+		   : cpu.bitfield.cpuavx)
+		  && (!x.bitfield.cpugfni || cpu.bitfield.cpugfni)
+		  && (!x.bitfield.cpuvaes || cpu.bitfield.cpuvaes)
+		  && (!x.bitfield.cpuvpclmulqdq || cpu.bitfield.cpuvpclmulqdq))
+		match |= CPU_FLAGS_ARCH_MATCH;
+	    }
+	  else if (x.bitfield.cpuavx)
 	    {
 	      /* We need to check a few extra flags with AVX.  */
 	      if (cpu.bitfield.cpuavx
@@ -1961,9 +1971,7 @@ cpu_flags_match (const insn_template *t)
 	    {
 	      /* We need to check a few extra flags with AVX512F.  */
 	      if (cpu.bitfield.cpuavx512f
-		  && (!x.bitfield.cpugfni || cpu.bitfield.cpugfni)
-		  && (!x.bitfield.cpuvaes || cpu.bitfield.cpuvaes)
-		  && (!x.bitfield.cpuvpclmulqdq || cpu.bitfield.cpuvpclmulqdq))
+		  && (!x.bitfield.cpugfni || cpu.bitfield.cpugfni))
 		match |= CPU_FLAGS_ARCH_MATCH;
 	    }
 	  else

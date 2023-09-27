@@ -2068,20 +2068,20 @@ vsm4rnds4, 0xf2da, SM4, Modrm|Space0F38|Vex|VexVVVV|VexW0|CheckOperandSize|NoSuf
 
 // VAES
 
-vaesdec, 0x66de, VAES, Modrm|Vex|Space0F38|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
-vaesdeclast, 0x66df, VAES, Modrm|Vex|Space0F38|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
-vaesenc, 0x66dc, VAES, Modrm|Vex|Space0F38|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
-vaesenclast, 0x66dd, VAES, Modrm|Vex|Space0F38|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+vaesdec, 0x66de, VAES|AVX|AVX512F, Modrm|Vex|EVexDYN|Space0F38|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vaesdeclast, 0x66df, VAES|AVX|AVX512F, Modrm|Vex|EVexDYN|Space0F38|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vaesenc, 0x66dc, VAES|AVX|AVX512F, Modrm|Vex|EVexDYN|Space0F38|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vaesenclast, 0x66dd, VAES|AVX|AVX512F, Modrm|Vex|EVexDYN|Space0F38|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 
 // VAES instructions end
 
 // VPCLMULQDQ instructions
 
-vpclmulqdq, 0x6644, VPCLMULQDQ, Modrm|Vex|Space0F3A|VexWIG|VexVVVV|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vpclmullqlqdq, 0x6644/0x00, VPCLMULQDQ, Modrm|Vex|Space0F3A|VexWIG|VexVVVV|CheckOperandSize|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vpclmulhqlqdq, 0x6644/0x01, VPCLMULQDQ, Modrm|Vex|Space0F3A|VexWIG|VexVVVV|CheckOperandSize|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vpclmullqhqdq, 0x6644/0x10, VPCLMULQDQ, Modrm|Vex|Space0F3A|VexWIG|VexVVVV|CheckOperandSize|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vpclmulhqhqdq, 0x6644/0x11, VPCLMULQDQ, Modrm|Vex|Space0F3A|VexWIG|VexVVVV|CheckOperandSize|NoSuf|ImmExt, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vpclmulqdq, 0x6644, VPCLMULQDQ|AVX|AVX512F, Modrm|Space0F3A|Vex|EVexDYN|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vpclmullqlqdq, 0x6644/0x00, VPCLMULQDQ|AVX|AVX512F, Modrm|Space0F3A|Vex|EVexDYN|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vpclmulhqlqdq, 0x6644/0x01, VPCLMULQDQ|AVX|AVX512F, Modrm|Space0F3A|Vex|EVexDYN|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vpclmullqhqdq, 0x6644/0x10, VPCLMULQDQ|AVX|AVX512F, Modrm|Space0F3A|Vex|EVexDYN|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vpclmulhqhqdq, 0x6644/0x11, VPCLMULQDQ|AVX|AVX512F, Modrm|Space0F3A|Vex|EVexDYN|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 
 // VPCLMULQDQ instructions end
 
@@ -2931,25 +2931,6 @@ vgf2p8affineinvqb, 0x66cf, GFNI|AVX512F, Modrm|Masking|Space0F3A|VexVVVV|VexW1|B
 vgf2p8affineqb, 0x66ce, GFNI|AVX512F, Modrm|Masking|Space0F3A|VexVVVV|VexW1|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 
 // AVX512 + GFNI instructions end
-
-// AVX512 + VAES instructions
-
-vaesdec, 0x66de, VAES|AVX512F, Modrm|Space0F38|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vaesdeclast, 0x66df, VAES|AVX512F, Modrm|Space0F38|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vaesenc, 0x66dc, VAES|AVX512F, Modrm|Space0F38|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vaesenclast, 0x66dd, VAES|AVX512F, Modrm|Space0F38|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-
-// AVX512 + VAES instructions end
-
-// AVX512 + VPCLMULQDQ instructions
-
-vpclmulqdq, 0x6644, VPCLMULQDQ|AVX512F, Modrm|Space0F3A|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vpclmullqlqdq, 0x6644/0x00, VPCLMULQDQ|AVX512F, Modrm|Space0F3A|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vpclmulhqlqdq, 0x6644/0x01, VPCLMULQDQ|AVX512F, Modrm|Space0F3A|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vpclmullqhqdq, 0x6644/0x10, VPCLMULQDQ|AVX512F, Modrm|Space0F3A|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-vpclmulhqhqdq, 0x6644/0x11, VPCLMULQDQ|AVX512F, Modrm|Space0F3A|VexWIG|VexVVVV|Disp8ShiftVL|CheckOperandSize|NoSuf|ImmExt, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
-
-// AVX512 + VPCLMULQDQ instructions end
 
 // INVLPGB instructions
 
