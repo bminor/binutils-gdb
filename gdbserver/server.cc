@@ -2969,7 +2969,9 @@ handle_v_run (char *own_buf)
   char *new_program_name = NULL;
   int i;
 
-  for (i = 0, p = own_buf + strlen ("vRun;"); *p; p = next_p, ++i)
+  for (i = 0, p = own_buf + strlen ("vRun;");
+       /* Exit condition is at the end of the loop.  */;
+       p = next_p + 1, ++i)
     {
       next_p = strchr (p, ';');
       if (next_p == NULL)
@@ -3032,8 +3034,8 @@ handle_v_run (char *own_buf)
 	    new_argv.push_back (full_arg);
 	  xfree (arg);
 	}
-      if (*next_p)
-	next_p++;
+      if (*next_p == '\0')
+	break;
     }
 
   if (new_program_name == NULL)
