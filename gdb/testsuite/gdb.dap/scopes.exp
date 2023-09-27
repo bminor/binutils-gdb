@@ -52,6 +52,13 @@ set scopes [dap_check_request_and_response "get scopes" scopes \
 		[format {o frameId [i %d]} $frame_id]]
 set scopes [dict get [lindex $scopes 0] body scopes]
 
+# Request the scopes twice, and verify that the results are identical.
+# GDB previously had a bug where it would return new scopes each time.
+set scopes2 [dap_check_request_and_response "get scopes again" scopes \
+		 [format {o frameId [i %d]} $frame_id]]
+set scopes2 [dict get [lindex $scopes2 0] body scopes]
+gdb_assert {$scopes2 == $scopes} "identical scopes requests yield same body"
+
 gdb_assert {[llength $scopes] == 2} "two scopes"
 
 lassign $scopes scope reg_scope

@@ -21,6 +21,21 @@ from .server import request
 from .varref import BaseReference
 
 
+# Map DAP frame IDs to scopes.  This ensures that scopes are re-used.
+frame_to_scope = {}
+
+
+# When the inferior is re-started, we erase all scope references.  See
+# the section "Lifetime of Objects References" in the spec.
+@in_gdb_thread
+def clear_scopes(event):
+    global frame_to_scope
+    frame_to_scope = {}
+
+
+gdb.events.cont.connect(clear_scopes)
+
+
 class _ScopeReference(BaseReference):
     def __init__(self, name, hint, frame, var_list):
         super().__init__(name)
@@ -83,15 +98,20 @@ class _RegisterReference(_ScopeReference):
 # Helper function to create a DAP scopes for a given frame ID.
 @in_gdb_thread
 def _get_scope(id):
-    frame = frame_for_id(id)
-    scopes = []
-    args = frame.frame_args()
-    if args:
-        scopes.append(_ScopeReference("Arguments", "arguments", frame, args))
-    locs = frame.frame_locals()
-    if locs:
-        scopes.append(_ScopeReference("Locals", "locals", frame, locs))
-    scopes.append(_RegisterReference("Registers", frame))
+    global frame_to_scope
+    if id in frame_to_scope:
+        scopes = frame_to_scope[id]
+    else:
+        frame = frame_for_id(id)
+        scopes = []
+        args = frame.frame_args()
+        if args:
+            scopes.append(_ScopeReference("Arguments", "arguments", frame, args))
+        locs = frame.frame_locals()
+        if locs:
+            scopes.append(_ScopeReference("Locals", "locals", frame, locs))
+        scopes.append(_RegisterReference("Registers", frame))
+        frame_to_scope[id] = scopes
     return [x.to_object() for x in scopes]
 
 
