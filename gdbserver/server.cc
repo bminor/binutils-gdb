@@ -2989,33 +2989,19 @@ handle_v_run (char *own_buf)
 	}
       else
 	{
+	  /* The length of the decoded argument.  */
 	  size_t len = (next_p - p) / 2;
-	  /* ARG is the unquoted argument received via the RSP.  */
+
+	  /* Buffer to decode the argument into.  */
 	  char *arg = (char *) xmalloc (len + 1);
-	  /* FULL_ARGS will contain the quoted version of ARG.  */
-	  char *full_arg = (char *) xmalloc ((len + 1) * 2);
-	  /* These are pointers used to navigate the strings above.  */
-	  char *tmp_arg = arg;
-	  char *tmp_full_arg = full_arg;
 
 	  hex2bin (p, (gdb_byte *) arg, len);
 	  arg[len] = '\0';
 
-	  while (*tmp_arg != '\0')
-	    {
-	      *tmp_full_arg = *tmp_arg;
-	      ++tmp_full_arg;
-	      ++tmp_arg;
-	    }
-
-	  /* Finish FULL_ARG and push it into the vector containing
-	     the argv.  */
-	  *tmp_full_arg = '\0';
 	  if (i == 0)
-	    new_program_name = full_arg;
+	    new_program_name = arg;
 	  else
-	    new_argv.push_back (full_arg);
-	  xfree (arg);
+	    new_argv.push_back (arg);
 	}
       if (*next_p == '\0')
 	break;
