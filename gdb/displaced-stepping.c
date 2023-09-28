@@ -277,7 +277,8 @@ displaced_step_buffers::copy_insn_closure_by_addr (CORE_ADDR addr)
 {
   for (const displaced_step_buffer &buffer : m_buffers)
     {
-      if (addr == buffer.addr)
+      /* Make sure we have active buffers to compare to.  */
+      if (buffer.current_thread != nullptr && addr == buffer.addr)
       {
 	/* The closure information should always be available. */
 	gdb_assert (buffer.copy_insn_closure.get () != nullptr);
