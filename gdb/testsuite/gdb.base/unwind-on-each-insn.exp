@@ -17,6 +17,7 @@ standard_testfile .c -foo.c
 
 set srcfile_flags {debug}
 set srcfile2_flags {nodebug}
+set ldflags {debug}
 
 # Make sure that we don't use .eh_frame info, by not generating it,
 # using -fno-asynchronous-unwind-tables, if supported.

@@ -24,7 +24,7 @@
 # value, can be calculated correctly.
 
 if {[prepare_for_testing_full "failed to prepare" \
-	 [list ${testfile} {debug} \
+	 [list ${testfile} $ldflags \
 	      $srcfile $srcfile_flags $srcfile2 $srcfile2_flags]]} {
     return -1
 }

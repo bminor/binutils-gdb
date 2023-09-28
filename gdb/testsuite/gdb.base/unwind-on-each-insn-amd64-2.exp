@@ -17,8 +17,15 @@
 
 require is_x86_64_m64_target
 
-set srcfile_flags {debug}
-set srcfile2_flags {nodebug}
+set srcfile_flags {}
+lappend srcfile_flags debug
+lappend srcfile_flags nopie
+
+set srcfile2_flags {}
+lappend srcfile2_flags nodebug
+lappend srcfile_flags nopie
+
+set ldflags $srcfile_flags
 
 if [info exists COMPILE] {
     # Make sure that we use .eh_frame info, by generating it

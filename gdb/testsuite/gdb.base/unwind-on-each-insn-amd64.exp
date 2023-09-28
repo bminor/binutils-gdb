@@ -17,8 +17,12 @@
 
 require is_x86_64_m64_target
 
-set srcfile_flags {debug}
-set srcfile2_flags {debug}
+set srcfile_flags {}
+lappend srcfile_flags debug
+lappend srcfile_flags nopie
+
+set srcfile2_flags $srcfile_flags
+set ldflags $srcfile_flags
 
 if [info exists COMPILE] {
     standard_testfile unwind-on-each-insn.c unwind-on-each-insn-foo.c
