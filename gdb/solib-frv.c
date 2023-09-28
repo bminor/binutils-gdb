@@ -18,16 +18,12 @@
 
 
 #include "defs.h"
-#include "inferior.h"
 #include "gdbcore.h"
 #include "solib.h"
 #include "solist.h"
 #include "frv-tdep.h"
 #include "objfiles.h"
 #include "symtab.h"
-#include "language.h"
-#include "command.h"
-#include "gdbcmd.h"
 #include "elf/frv.h"
 #include "gdb_bfd.h"
 

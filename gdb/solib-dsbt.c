@@ -24,12 +24,11 @@
 #include "solist.h"
 #include "objfiles.h"
 #include "symtab.h"
-#include "language.h"
 #include "command.h"
-#include "gdbcmd.h"
-#include "elf-bfd.h"
 #include "gdb_bfd.h"
 #include "solib-dsbt.h"
+#include "elf/common.h"
+#include "cli/cli-cmds.h"
 
 #define GOT_MODULE_OFFSET 4
 

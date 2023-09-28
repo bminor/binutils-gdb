@@ -21,13 +21,10 @@
 #include "solist.h"
 #include "inferior.h"
 #include "gdb_bfd.h"
-#include "gdbcore.h"
 #include "objfiles.h"
 #include "symtab.h"
 #include "xcoffread.h"
 #include "observable.h"
-#include "gdbcmd.h"
-#include "gdbsupport/scope-exit.h"
 
 /* Our private data in struct so_list.  */
 

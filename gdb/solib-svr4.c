@@ -32,7 +32,6 @@
 #include "inferior.h"
 #include "infrun.h"
 #include "regcache.h"
-#include "gdbthread.h"
 #include "observable.h"
 
 #include "solist.h"

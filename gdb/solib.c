@@ -19,7 +19,6 @@
 
 #include "defs.h"
 
-#include <sys/types.h>
 #include <fcntl.h>
 #include "symtab.h"
 #include "bfd.h"
@@ -30,12 +29,9 @@
 #include "command.h"
 #include "target.h"
 #include "frame.h"
-#include "gdbsupport/gdb_regex.h"
 #include "inferior.h"
 #include "gdbsupport/environ.h"
-#include "language.h"
-#include "gdbcmd.h"
-#include "completer.h"
+#include "cli/cli-cmds.h"
 #include "elf/external.h"
 #include "elf/common.h"
 #include "filenames.h"
@@ -43,7 +39,6 @@
 #include "solist.h"
 #include "observable.h"
 #include "readline/tilde.h"
-#include "remote.h"
 #include "solib.h"
 #include "interps.h"
 #include "filesystem.h"
@@ -53,7 +48,6 @@
 #include "debuginfod-support.h"
 #include "source.h"
 #include "cli/cli-style.h"
-#include "solib-target.h"
 
 /* See solib.h.  */
 

@@ -20,7 +20,6 @@
 #ifndef SOLIB_DSBT_H
 #define SOLIB_DSBT_H
 
-struct objfile;
 struct target_so_ops;
 
 extern const struct target_so_ops dsbt_so_ops;

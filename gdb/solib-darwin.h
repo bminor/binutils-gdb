@@ -20,7 +20,6 @@
 #ifndef SOLIB_DARWIN_H
 #define SOLIB_DARWIN_H
 
-struct objfile;
 struct target_so_ops;
 
 extern const struct target_so_ops darwin_so_ops;

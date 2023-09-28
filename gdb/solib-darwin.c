@@ -19,26 +19,17 @@
 
 #include "defs.h"
 
-#include "symtab.h"
 #include "bfd.h"
-#include "symfile.h"
 #include "objfiles.h"
 #include "gdbcore.h"
 #include "target.h"
 #include "inferior.h"
 #include "regcache.h"
-#include "gdbthread.h"
 #include "gdb_bfd.h"
 
 #include "solist.h"
-#include "solib.h"
-#include "solib-svr4.h"
 #include "solib-darwin.h"
 
-#include "bfd-target.h"
-#include "elf-bfd.h"
-#include "exec.h"
-#include "auxv.h"
 #include "mach-o.h"
 #include "mach-o/external.h"
 
