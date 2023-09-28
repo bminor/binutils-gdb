@@ -41,6 +41,8 @@
 #include "objfiles.h"
 #include "cli/cli-style.h"
 #include "tui/tui-location.h"
+#include "gdbsupport/selftest.h"
+#include "inferior.h"
 
 #include "gdb_curses.h"
 
@@ -203,6 +205,8 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 	 instruction fails to disassemble we will take the address of the
 	 previous instruction that did disassemble as the result.  */
       tui_disassemble (gdbarch, asm_lines, pc, max_lines + 1);
+      if (asm_lines.empty ())
+	return pc;
       new_low = asm_lines.back ().addr;
     }
   else
@@ -244,6 +248,8 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 
 	  /* Disassemble forward.  */
 	  next_addr = tui_disassemble (gdbarch, asm_lines, new_low, max_lines);
+	  if (asm_lines.empty ())
+	    break;
 	  last_addr = asm_lines.back ().addr;
 
 	  /* If disassembling from the current value of NEW_LOW reached PC
@@ -521,4 +527,37 @@ tui_disasm_window::display_start_addr (struct gdbarch **gdbarch_p,
 {
   *gdbarch_p = m_gdbarch;
   *addr_p = m_start_line_or_addr.u.addr;
+}
+
+#if GDB_SELF_TEST
+namespace selftests {
+namespace tui {
+namespace disasm {
+
+static void
+run_tests ()
+{
+  if (current_inferior () != nullptr)
+    {
+      struct gdbarch *gdbarch = current_inferior ()->gdbarch;
+
+      /* Check that tui_find_disassembly_address robustly handles the case of
+	 being passed a PC for which gdb_print_insn throws a MEMORY_ERROR.  */
+      SELF_CHECK (tui_find_disassembly_address (gdbarch, 0, 1) == 0);
+      SELF_CHECK (tui_find_disassembly_address (gdbarch, 0, -1) == 0);
+    }
+}
+
+} /* namespace disasm */
+} /* namespace tui */
+} /* namespace selftests */
+#endif /* GDB_SELF_TEST */
+
+void _initialize_tui_disasm ();
+void
+_initialize_tui_disasm ()
+{
+#if GDB_SELF_TEST
+  selftests::register_test ("tui-disasm", selftests::tui::disasm::run_tests);
+#endif
 }
