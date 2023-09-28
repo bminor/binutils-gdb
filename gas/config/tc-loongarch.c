@@ -120,6 +120,7 @@ enum options
   OPTION_LA_GLOBAL_WITH_ABS,
   OPTION_RELAX,
   OPTION_NO_RELAX,
+  OPTION_THIN_ADD_SUB,
 
   OPTION_END_OF_ENUM,
 };
@@ -136,6 +137,7 @@ struct option md_longopts[] =
 
   { "mrelax", no_argument, NULL, OPTION_RELAX },
   { "mno-relax", no_argument, NULL, OPTION_NO_RELAX },
+  { "mthin-add-sub", no_argument, NULL, OPTION_THIN_ADD_SUB},
 
   { NULL, no_argument, NULL, 0 }
 };
@@ -212,6 +214,10 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_NO_RELAX:
       LARCH_opts.relax = 0;
+      break;
+
+    case OPTION_THIN_ADD_SUB:
+      LARCH_opts.thin_add_sub = 1;
       break;
 
     case OPTION_IGNORE:
@@ -1195,6 +1201,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   static int64_t stack_top;
   static int last_reloc_is_sop_push_pcrel_1 = 0;
   int last_reloc_is_sop_push_pcrel = last_reloc_is_sop_push_pcrel_1;
+  segT sub_segment;
   last_reloc_is_sop_push_pcrel_1 = 0;
 
   char *buf = fixP->fx_frag->fr_literal + fixP->fx_where;
@@ -1285,6 +1292,23 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	    default:
 	      break;
 	    }
+	}
+
+      /* If symbol in .eh_frame the address may be adjusted, and contents of
+	 .eh_frame will be adjusted, so use pc-relative relocation for FDE
+	 initial location.
+	 The Option of mthin-add-sub does not affect the generation of
+	 R_LARCH_32_PCREL relocation in .eh_frame.  */
+      if (fixP->fx_r_type == BFD_RELOC_32
+	  && fixP->fx_addsy && fixP->fx_subsy
+	  && (sub_segment = S_GET_SEGMENT (fixP->fx_subsy))
+	  && strcmp (sub_segment->name, ".eh_frame") == 0
+	  && S_GET_VALUE (fixP->fx_subsy)
+	  == fixP->fx_frag->fr_address + fixP->fx_where)
+	{
+	  fixP->fx_r_type = BFD_RELOC_LARCH_32_PCREL;
+	  fixP->fx_subsy = NULL;
+	  break;
 	}
 
       if (fixP->fx_addsy && fixP->fx_subsy)
@@ -1589,6 +1613,11 @@ md_show_usage (FILE *stream)
 {
   fprintf (stream, _("LARCH options:\n"));
   /* FIXME */
+  fprintf (stream, _("\
+  -mthin-add-sub	  Convert a pair of R_LARCH_ADD32/64 and R_LARCH_SUB32/64 to\n\
+			  R_LARCH_32/64_PCREL as much as possible\n\
+			  The option does not affect the generation of R_LARCH_32_PCREL\n\
+			  relocations in .eh_frame\n"));
 }
 
 static void

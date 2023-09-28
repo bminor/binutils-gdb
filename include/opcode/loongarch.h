@@ -236,6 +236,7 @@ dec2 : [1-9][0-9]?
 #define ase_gabs	isa.use_la_global_with_abs
 
     int relax;
+    int thin_add_sub;
   } LARCH_opts;
 
   extern size_t loongarch_insn_length (insn_t insn);
