@@ -1,4 +1,4 @@
-#as: -mno-relax
+#as: -mthin-add-sub -mno-relax
 #objdump: -Dr
 
 .*:[    ]+file format .*
@@ -10,20 +10,17 @@ Disassembly of section .text:
 [ 	]+...
 [ 	]+0:[ 	]+R_LARCH_32_PCREL[ 	]+.L3
 [ 	]+4:[ 	]+R_LARCH_32_PCREL[ 	]+.L3\+0x4
-
-0*00000008[ ]+<.L2>:
-[ 	]+...
 [ 	]+8:[ 	]+R_LARCH_64_PCREL[ 	]+.L3
 [ 	]+10:[ 	]+R_LARCH_64_PCREL[ 	]+.L3\+0x8
 
 Disassembly[ 	]+of[ 	]+section[ 	]+sx:
 
-0*00000000[ ]+<.L3>:
+0*00000000[ 	]+<.L3>:
 [ 	]+0:[ 	]+fffffff4[ 	]+.word[ 	]+0xfffffff4
 [ 	]+4:[ 	]+fffffff4[ 	]+.word[ 	]+0xfffffff4
 [ 	]+8:[ 	]+ffffffff[ 	]+.word[ 	]+0xffffffff
 
-0*0000000c[ ]+<.L4>:
+0*0000000c[ 	]+<.L4>:
 [ 	]+...
 [ 	]+c:[ 	]+R_LARCH_ADD32[ 	]+.L4
 [ 	]+c:[ 	]+R_LARCH_SUB32[ 	]+.L5
@@ -32,25 +29,25 @@ Disassembly[ 	]+of[ 	]+section[ 	]+sx:
 
 Disassembly[ 	]+of[ 	]+section[ 	]+sy:
 
-0*00000000[ ]+<.L5>:
+0*00000000[ 	]+<.L5>:
 [ 	]+...
 [ 	]+0:[ 	]+R_LARCH_32_PCREL[ 	]+.L1
-[ 	]+4:[ 	]+R_LARCH_32_PCREL[ 	]+.L2\+0x4
+[ 	]+4:[ 	]+R_LARCH_32_PCREL[ 	]+.L3\+0x4
 [ 	]+8:[ 	]+R_LARCH_64_PCREL[ 	]+.L1\+0x8
-[ 	]+10:[ 	]+R_LARCH_64_PCREL[ 	]+.L2\+0x10
+[ 	]+10:[ 	]+R_LARCH_64_PCREL[ 	]+.L3\+0x10
 
 Disassembly[ 	]+of[ 	]+section[ 	]+sz:
 
-0*00000000[ ]+<sz>:
+0*00000000[ 	]+<sz>:
 [ 	]+0:[ 	]+fffffff8[ 	]+.word[ 	]+0xfffffff8
 [ 	]+4:[ 	]+fffffff4[ 	]+.word[ 	]+0xfffffff4
 [ 	]+8:[ 	]+00000000[ 	]+.word[ 	]+0x00000000
-[ 	]+8:[ 	]+R_LARCH_ADD32[ 	]+.L2
-[ 	]+8:[ 	]+R_LARCH_SUB32[ 	]+.L3
+[ 	]+8:[ 	]+R_LARCH_ADD32[ 	]+.L3
+[ 	]+8:[ 	]+R_LARCH_SUB32[ 	]+.L5
 [ 	]+c:[ 	]+fffffff8[ 	]+.word[ 	]+0xfffffff8
 [ 	]+10:[ 	]+ffffffff[ 	]+.word[ 	]+0xffffffff
 [ 	]+14:[ 	]+fffffff4[ 	]+.word[ 	]+0xfffffff4
 [ 	]+18:[ 	]+ffffffff[ 	]+.word[ 	]+0xffffffff
 [ 	]+...
-[ 	]+1c:[ 	]+R_LARCH_ADD64[ 	]+.L2
-[ 	]+1c:[ 	]+R_LARCH_SUB64[ 	]+.L3
+[ 	]+1c:[ 	]+R_LARCH_ADD64[ 	]+.L3
+[ 	]+1c:[ 	]+R_LARCH_SUB64[ 	]+.L5
