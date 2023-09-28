@@ -1,3 +1,8 @@
+2023-09-28  Frederic Cambus  <fred@statdns.com>
+
+	* readelf.c (get_segment_type): Handle PT_OPENBSD_NOBTCFI segment
+	type.
+
 2023-09-26  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/binutils-all/ar.exp: Remove assumption of the setting

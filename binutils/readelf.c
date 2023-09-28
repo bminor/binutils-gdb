@@ -5082,6 +5082,7 @@ get_segment_type (Filedata * filedata, unsigned long p_type)
     case PT_OPENBSD_MUTABLE: return "OPENBSD_MUTABLE";
     case PT_OPENBSD_RANDOMIZE: return "OPENBSD_RANDOMIZE";
     case PT_OPENBSD_WXNEEDED: return "OPENBSD_WXNEEDED";
+    case PT_OPENBSD_NOBTCFI: return "OPENBSD_NOBTCFI";
     case PT_OPENBSD_BOOTDATA: return "OPENBSD_BOOTDATA";
 
     default:
