@@ -2039,7 +2039,8 @@ struct elf_obj_tdata
   size_t dt_symtab_count;
   size_t dt_verdef_count;
   size_t dt_verneed_count;
-  char *dt_strtab;
+  char * dt_strtab;
+  size_t dt_strsz;
   elf_section_list * symtab_shndx_list;
   bfd_vma gp;				/* The gp value */
   unsigned int gp_size;			/* The gp size */

@@ -1,3 +1,14 @@
+2023-09-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 30886
+	* elf-bfd.h (struct elf_obj_tdata): Add dt_strsz field.
+	* elf.c (_bfd_elf_get_dynamic_symbols): Add a NUL byte at the end
+	of the string table.
+	Initialise the dt_strsz field.
+	(_bfd_elf_slurp_version_tables): Only free the contents if they
+	were malloc'ed.
+	Add checks before setting string pointers in the dt_strtab buffer.
+
 2023-09-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 30885
