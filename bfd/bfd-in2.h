@@ -7460,6 +7460,7 @@ enum bfd_reloc_code_real
   BFD_RELOC_LARCH_ADD_ULEB128,
   BFD_RELOC_LARCH_SUB_ULEB128,
   BFD_RELOC_LARCH_64_PCREL,
+  BFD_RELOC_LARCH_CALL36,
   BFD_RELOC_UNUSED
 };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;

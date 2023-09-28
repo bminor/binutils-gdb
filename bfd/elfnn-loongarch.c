@@ -780,6 +780,7 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_LARCH_B16:
 	case R_LARCH_B21:
 	case R_LARCH_B26:
+	case R_LARCH_CALL36:
 	  if (h != NULL)
 	    {
 	      h->needs_plt = 1;
@@ -1884,20 +1885,24 @@ loongarch_check_offset (const Elf_Internal_Rela *rel,
     ret;					      \
    })
 
+/* Write immediate to instructions.  */
+
 static bfd_reloc_status_type
 loongarch_reloc_rewrite_imm_insn (const Elf_Internal_Rela *rel,
 				  const asection *input_section ATTRIBUTE_UNUSED,
 				  reloc_howto_type *howto, bfd *input_bfd,
 				  bfd_byte *contents, bfd_vma reloc_val)
 {
-  int bits = bfd_get_reloc_size (howto) * 8;
-  uint32_t insn = bfd_get (bits, input_bfd, contents + rel->r_offset);
-
+  /* Adjust the immediate based on alignment and
+     its position in the instruction.  */
   if (!loongarch_adjust_reloc_bitsfield (input_bfd, howto, &reloc_val))
     return bfd_reloc_overflow;
 
-  insn = (insn & (uint32_t)howto->src_mask)
-    | ((insn & (~(uint32_t)howto->dst_mask)) | reloc_val);
+  int bits = bfd_get_reloc_size (howto) * 8;
+  uint64_t insn = bfd_get (bits, input_bfd, contents + rel->r_offset);
+
+  /* Write immediate to instruction.  */
+  insn = (insn & ~howto->dst_mask) | (reloc_val & howto->dst_mask);
 
   bfd_put (bits, input_bfd, insn, contents + rel->r_offset);
 
@@ -2120,6 +2125,7 @@ perform_relocation (const Elf_Internal_Rela *rel, asection *input_section,
     case R_LARCH_TLS_GD_PC_HI20:
     case R_LARCH_TLS_GD_HI20:
     case R_LARCH_PCREL20_S2:
+    case R_LARCH_CALL36:
       r = loongarch_check_offset (rel, input_section);
       if (r != bfd_reloc_ok)
 	break;
@@ -3127,9 +3133,10 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  break;
 
 	/* New reloc types.  */
+	case R_LARCH_B16:
 	case R_LARCH_B21:
 	case R_LARCH_B26:
-	case R_LARCH_B16:
+	case R_LARCH_CALL36:
 	  unresolved_reloc = false;
 	  if (is_undefweak)
 	    {

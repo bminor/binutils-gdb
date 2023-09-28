@@ -682,7 +682,7 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 		      esc_ch1, esc_ch2, bit_field, arg);
 
 	  if (ip->reloc_info[0].type >= BFD_RELOC_LARCH_B16
-	      && ip->reloc_info[0].type < BFD_RELOC_LARCH_64_PCREL)
+	      && ip->reloc_info[0].type < BFD_RELOC_UNUSED)
 	    {
 	      /* As we compact stack-relocs, it is no need for pop operation.
 		 But break out until here in order to check the imm field.
@@ -956,6 +956,10 @@ move_insn (struct loongarch_cl_insn *insn, fragS *frag, long where)
 static void
 append_fixed_insn (struct loongarch_cl_insn *insn)
 {
+  /* Ensure the jirl is emitted to the same frag as the pcaddu18i.  */
+  if (BFD_RELOC_LARCH_CALL36 == insn->reloc_info[0].type)
+    frag_grow (8);
+
   char *f = frag_more (insn->insn_length);
   move_insn (insn, frag_now, f - frag_now->fr_literal);
 }

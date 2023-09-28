@@ -251,6 +251,8 @@ RELOC_NUMBER (R_LARCH_SUB_ULEB128, 108)
 
 RELOC_NUMBER (R_LARCH_64_PCREL, 109)
 
+RELOC_NUMBER (R_LARCH_CALL36, 110)
+
 END_RELOC_NUMBERS (R_LARCH_count)
 
 /* Processor specific flags for the ELF header e_flags field.  */

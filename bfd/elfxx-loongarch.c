@@ -1547,6 +1547,24 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 NULL,					/* adjust_reloc_bits */
 	 NULL),					/* larch_reloc_type_name */
 
+  /* Used for medium code model function call pcaddu18i+jirl,
+     these two instructions must adjacent.  */
+  LOONGARCH_HOWTO (R_LARCH_CALL36,		/* type (110).  */
+	 2,					/* rightshift.  */
+	 8,					/* size.  */
+	 36,					/* bitsize.  */
+	 true,					/* pc_relative.  */
+	 0,					/* bitpos.  */
+	 complain_overflow_signed,		/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,			/* special_function.  */
+	 "R_LARCH_CALL36",			/* name.  */
+	 false,					/* partial_inplace.  */
+	 0,					/* src_mask.  */
+	 0x03fffc0001ffffe0,			/* dst_mask.  */
+	 false,					/* pcrel_offset.  */
+	 BFD_RELOC_LARCH_CALL36,		/* bfd_reloc_code_real_type.  */
+	 reloc_sign_bits,			/* adjust_reloc_bits.  */
+	 "call36"),				/* larch_reloc_type_name.  */
 };
 
 reloc_howto_type *
@@ -1725,6 +1743,12 @@ reloc_sign_bits (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
     case R_LARCH_B21:
       /* Perform insn bits field. 15:0<<10, 20:16>>16.  */
       val = ((val & 0xffff) << 10) | ((val >> 16) & 0x1f);
+      break;
+    case R_LARCH_CALL36:
+      /* 0x8000: If low 16-bit immediate greater than 0x7fff,
+	 it become to a negative number due to sign-extended,
+	 so the high part need to add 0x8000.  */
+      val = (((val + 0x8000) >> 16) << 5) | (((val & 0xffff) << 10) << 32);
       break;
     default:
       val <<= howto->bitpos;

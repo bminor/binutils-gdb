@@ -55,4 +55,16 @@ if [istarget "loongarch64-*-*"] {
 	      "64_pcrel" \
 	  ] \
       ]
+
+  run_ld_link_tests \
+      [list \
+	  [list \
+	      "medium code model call" \
+	      "-e 0x0" "" \
+	      "" \
+	      {medium-call.s} \
+	      {} \
+	      "medium-call" \
+	  ] \
+      ]
 }
