@@ -439,7 +439,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @end ifset
 @ifset MICROBLAZE
 @emph{Target MICROBLAZE options:}
-@c MicroBlaze has no machine-dependent assembler options.
+   [@b{-mlittle-endian}] [@b{-mbig-endian}]
 @end ifset
 @ifset MIPS
 
