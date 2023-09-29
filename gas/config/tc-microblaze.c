@@ -755,7 +755,7 @@ parse_imm (char * s, expressionS * e, offsetT min, offsetT max)
       if ((e->X_add_number >> 31) == 1)
 	e->X_add_number |= -((addressT) (1U << 31));
 
-      if (e->X_add_number < min || e->X_add_number > max)
+      if ((int)e->X_add_number < min || (int)e->X_add_number > max)
 	{
 	  as_fatal (_("operand must be absolute in range %lx..%lx, not %lx"),
 		    (long) min, (long) max, (long) e->X_add_number);
