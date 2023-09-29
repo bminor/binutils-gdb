@@ -9482,7 +9482,9 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bool default_imported_symver)
 		  = elf_tdata (abfd)->dt_strtab + iverneed->vn_file;
 	      else
 		iverneed->vn_filename = NULL;
-	    }	
+	    }
+	  else if (hdr == NULL)
+	    goto error_return_bad_verref;
 	  else
 	    iverneed->vn_filename
 	      = bfd_elf_string_from_elf_section (abfd, hdr->sh_link,
@@ -9525,6 +9527,8 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bool default_imported_symver)
 		  else
 		    ivernaux->vna_nodename = NULL;
 		}
+	      else if (hdr == NULL)
+		goto error_return_bad_verref;
 	      else
 		ivernaux->vna_nodename
 		  = bfd_elf_string_from_elf_section (abfd, hdr->sh_link,
@@ -9555,7 +9559,7 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bool default_imported_symver)
 	  iverneed->vn_nextref = NULL;
 	  if (iverneed->vn_next == 0)
 	    break;
-	  if (i + 1 < hdr->sh_info)
+	  if (hdr != NULL && (i + 1 < hdr->sh_info))
 	    iverneed->vn_nextref = iverneed + 1;
 
 	  if (iverneed->vn_next

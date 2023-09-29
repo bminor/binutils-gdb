@@ -1,3 +1,9 @@
+2023-09-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 30906
+	* elf.c (_bfd_elf_slurp_version_tables): Test that the verref
+	section header has been initialised before using it.
+
 2023-09-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 30886
