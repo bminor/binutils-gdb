@@ -53,8 +53,6 @@
   currently selected target.  If no remote target is selected, the default
   configuration for future connections is shown.
 
-* MI version 1 has been removed.
-
 * GDB has initial built-in support for the Debugger Adapter Protocol.
   This support requires that GDB be built with Python scripting
   enabled.
@@ -124,6 +122,16 @@
   'inferior' keyword with either the 'thread' or 'task' keywords when
   creating a breakpoint.
 
+* New convenience function "$_shell", to execute a shell command and
+  return the result.  This lets you run shell commands in expressions.
+  Some examples:
+
+   (gdb) p $_shell("true")
+   $1 = 0
+   (gdb) p $_shell("false")
+   $2 = 1
+   (gdb) break func if $_shell("some command") == 0
+
 * Configure changes
 
 --additional-debug-dirs=PATHs
@@ -165,17 +173,9 @@ show tui mouse-events
   Python extensions.  When off, mouse clicks are handled by the terminal,
   enabling terminal-native text selection.
 
-* New convenience function "$_shell", to execute a shell command and
-  return the result.  This lets you run shell commands in expressions.
-  Some examples:
-
-   (gdb) p $_shell("true")
-   $1 = 0
-   (gdb) p $_shell("false")
-   $2 = 1
-   (gdb) break func if $_shell("some command") == 0
-
 * MI changes
+
+** MI version 1 has been removed.
 
 ** mi now reports 'no-history' as a stop reason when hitting the end of the
    reverse execution history.
