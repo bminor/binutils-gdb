@@ -1087,7 +1087,7 @@ ppc_displaced_step_prepare  (gdbarch *arch, thread_info *thread,
     {
       /* Figure out where the displaced step buffer is.  */
       CORE_ADDR disp_step_buf_addr
-	= displaced_step_at_entry_point (thread->inf->gdbarch);
+	= displaced_step_at_entry_point (thread->inf->arch ());
 
       per_inferior->disp_step_buf.emplace (disp_step_buf_addr);
     }

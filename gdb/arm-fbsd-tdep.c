@@ -247,7 +247,7 @@ arm_fbsd_read_description_auxv (bool tls)
   const gdb::optional<gdb::byte_vector> &auxv = target_read_auxv ();
   return arm_fbsd_read_description_auxv (auxv,
 					 current_inferior ()->top_target (),
-					 current_inferior ()->gdbarch,
+					 current_inferior ()->arch (),
 					 tls);
 }
 

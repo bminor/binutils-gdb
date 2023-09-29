@@ -539,7 +539,7 @@ run_tests ()
 {
   if (current_inferior () != nullptr)
     {
-      struct gdbarch *gdbarch = current_inferior ()->gdbarch;
+      gdbarch *gdbarch = current_inferior ()->arch ();
 
       /* Check that tui_find_disassembly_address robustly handles the case of
 	 being passed a PC for which gdb_print_insn throws a MEMORY_ERROR.  */

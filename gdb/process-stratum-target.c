@@ -45,7 +45,7 @@ process_stratum_target::thread_architecture (ptid_t ptid)
 {
   inferior *inf = find_inferior_ptid (this, ptid);
   gdb_assert (inf != NULL);
-  return inf->gdbarch;
+  return inf->arch ();
 }
 
 bool

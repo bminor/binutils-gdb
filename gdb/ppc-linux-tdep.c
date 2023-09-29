@@ -2080,7 +2080,7 @@ ppc_linux_displaced_step_prepare  (gdbarch *arch, thread_info *thread,
     {
       /* Figure out where the displaced step buffer is.  */
       CORE_ADDR disp_step_buf_addr
-	= linux_displaced_step_location (thread->inf->gdbarch);
+	= linux_displaced_step_location (thread->inf->arch ());
 
       per_inferior->disp_step_buf.emplace (disp_step_buf_addr);
     }

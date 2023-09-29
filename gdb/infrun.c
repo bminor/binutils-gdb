@@ -505,7 +505,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
 	  child_inf->attach_flag = parent_inf->attach_flag;
 	  copy_terminal_info (child_inf, parent_inf);
-	  child_inf->gdbarch = parent_inf->gdbarch;
+	  child_inf->set_arch (parent_inf->arch ());
 	  child_inf->tdesc_info = parent_inf->tdesc_info;
 
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
@@ -580,7 +580,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
       child_inf->attach_flag = parent_inf->attach_flag;
       copy_terminal_info (child_inf, parent_inf);
-      child_inf->gdbarch = parent_inf->gdbarch;
+      child_inf->set_arch (parent_inf->arch ());
       child_inf->tdesc_info = parent_inf->tdesc_info;
 
       if (has_vforked)
@@ -5821,7 +5821,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	}
       else
 	{
-	  struct gdbarch *gdbarch = current_inferior ()->gdbarch;
+	  struct gdbarch *gdbarch = current_inferior ()->arch ();
 
 	  if (gdbarch_gdb_signal_to_target_p (gdbarch))
 	    {
@@ -9847,7 +9847,7 @@ namespace selftests
 static void
 infrun_thread_ptid_changed ()
 {
-  gdbarch *arch = current_inferior ()->gdbarch;
+  gdbarch *arch = current_inferior ()->arch ();
 
   /* The thread which inferior_ptid represents changes ptid.  */
   {

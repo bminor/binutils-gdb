@@ -2615,7 +2615,7 @@ linux_displaced_step_prepare (gdbarch *arch, thread_info *thread,
       /* Figure out the location of the buffers.  They are contiguous, starting
 	 at DISP_STEP_BUF_ADDR.  They are all of size BUF_LEN.  */
       CORE_ADDR disp_step_buf_addr
-	= linux_displaced_step_location (thread->inf->gdbarch);
+	= linux_displaced_step_location (thread->inf->arch ());
       int buf_len = gdbarch_displaced_step_buffer_length (arch);
 
       linux_gdbarch_data *gdbarch_data = get_linux_gdbarch_data (arch);
@@ -2701,7 +2701,7 @@ linux_get_hwcap ()
 {
   return linux_get_hwcap (target_read_auxv (),
 			  current_inferior ()->top_target (),
-			  current_inferior ()->gdbarch);
+			  current_inferior ()->arch ());
 }
 
 /* See linux-tdep.h.  */
@@ -2720,7 +2720,7 @@ linux_get_hwcap2 ()
 {
   return linux_get_hwcap2 (target_read_auxv (),
 			   current_inferior ()->top_target (),
-			   current_inferior ()->gdbarch);
+			   current_inferior ()->arch ());
 }
 
 /* Display whether the gcore command is using the

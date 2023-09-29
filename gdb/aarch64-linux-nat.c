@@ -1005,24 +1005,24 @@ aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
   /* If this is a 32-bit architecture, then this is ARM, not AArch64.
      There's no SVE vectors here, so just return the inferior
      architecture.  */
-  if (gdbarch_bfd_arch_info (inf->gdbarch)->bits_per_word == 32)
-    return inf->gdbarch;
+  if (gdbarch_bfd_arch_info (inf->arch ())->bits_per_word == 32)
+    return inf->arch ();
 
   /* Only return the inferior's gdbarch if both vq and svq match the ones in
      the tdep.  */
   aarch64_gdbarch_tdep *tdep
-    = gdbarch_tdep<aarch64_gdbarch_tdep> (inf->gdbarch);
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (inf->arch ());
   uint64_t vq = aarch64_sve_get_vq (ptid.lwp ());
   uint64_t svq = aarch64_za_get_svq (ptid.lwp ());
   if (vq == tdep->vq && svq == tdep->sme_svq)
-    return inf->gdbarch;
+    return inf->arch ();
 
   /* We reach here if any vector length for the thread is different from its
      value at process start.  Lookup gdbarch via info (potentially creating a
      new one) by using a target description that corresponds to the new vq/svq
      value and the current architecture features.  */
 
-  const struct target_desc *tdesc = gdbarch_target_desc (inf->gdbarch);
+  const struct target_desc *tdesc = gdbarch_target_desc (inf->arch ());
   aarch64_features features = aarch64_features_from_target_desc (tdesc);
   features.vq = vq;
   features.svq = svq;

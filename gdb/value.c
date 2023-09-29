@@ -4222,7 +4222,7 @@ test_insert_into_bit_range_vector ()
 static void
 test_value_copy ()
 {
-  type *type = builtin_type (current_inferior ()->gdbarch)->builtin_int;
+  type *type = builtin_type (current_inferior ()->arch ())->builtin_int;
 
   /* Verify that we can copy an entirely optimized out value, that may not have
      its contents allocated.  */

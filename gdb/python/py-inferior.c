@@ -788,7 +788,7 @@ infpy_architecture (PyObject *self, PyObject *args)
 
   INFPY_REQUIRE_VALID (inf);
 
-  return gdbarch_to_arch_object (inf->inferior->gdbarch);
+  return gdbarch_to_arch_object (inf->inferior->arch ());
 }
 
 /* Implement repr() for gdb.Inferior.  */

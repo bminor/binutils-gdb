@@ -51,7 +51,7 @@ static void
 test_user_created_frame ()
 {
   scoped_mock_context<test_target_ops> mock_context
-    (current_inferior ()->gdbarch);
+    (current_inferior ()->arch ());
   frame_info_ptr frame = create_new_frame (0x1234, 0x5678);
 
   validate_user_created_frame (get_frame_id (frame));

@@ -773,7 +773,7 @@ rocm_update_solib_list ()
       rocm_solib_ops.handle_event = rocm_solib_handle_event;
 
       /* Engage the ROCm so_ops.  */
-      set_gdbarch_so_ops (current_inferior ()->gdbarch, &rocm_solib_ops);
+      set_gdbarch_so_ops (current_inferior ()->arch (), &rocm_solib_ops);
     }
 }
 

@@ -7161,7 +7161,7 @@ remote_target::remote_stop_ns (ptid_t ptid)
 	    sr->ptid = tp->ptid;
 	    sr->rs = rs;
 	    sr->ws.set_stopped (GDB_SIGNAL_0);
-	    sr->arch = tp->inf->gdbarch;
+	    sr->arch = tp->inf->arch ();
 	    sr->stop_reason = TARGET_STOPPED_BY_NO_REASON;
 	    sr->watch_data_address = 0;
 	    sr->core = 0;
@@ -7899,7 +7899,7 @@ Packet: '%s'\n"),
 			  continue;
 			}
 
-		      event->arch = inf->gdbarch;
+		      event->arch = inf->arch ();
 		      rsa = event->rs->get_remote_arch_state (event->arch);
 		    }
 

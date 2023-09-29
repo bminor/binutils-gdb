@@ -1627,7 +1627,7 @@ get_thread_arch_aspace_regcache_and_check (inferior *inf_for_target_calls,
   /* We currently only test with a single gdbarch.  Any gdbarch will do, so use
      the current inferior's gdbarch.  Also use the current inferior's address
      space.  */
-  gdbarch *arch = inf_for_target_calls->gdbarch;
+  gdbarch *arch = inf_for_target_calls->arch ();
   address_space *aspace = inf_for_target_calls->aspace;
   regcache *regcache = get_thread_arch_aspace_regcache (inf_for_target_calls,
 							ptid, arch, aspace);
@@ -1645,8 +1645,8 @@ struct regcache_test_data
 {
   regcache_test_data ()
       /* The specific arch doesn't matter.  */
-    : test_ctx_1 (current_inferior ()->gdbarch),
-      test_ctx_2 (current_inferior ()->gdbarch)
+    : test_ctx_1 (current_inferior ()->arch ()),
+      test_ctx_2 (current_inferior ()->arch ())
   {
     /* Ensure the regcaches container is empty at the start.  */
     registers_changed ();
@@ -2094,7 +2094,7 @@ regcache_thread_ptid_changed ()
   registers_changed ();
 
   /* Any arch will do.  */
-  gdbarch *arch = current_inferior ()->gdbarch;
+  gdbarch *arch = current_inferior ()->arch ();
 
   /* Prepare two targets with one thread each, with the same ptid.  */
   scoped_mock_context<test_target_ops> target1 (arch);

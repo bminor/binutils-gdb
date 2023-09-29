@@ -430,7 +430,7 @@ amd_dbgapi_target_breakpoint::check_status (struct bpstat *bs)
 
   if (it == info->breakpoint_map.end ())
     error (_("Could not find breakpoint_id for breakpoint at %s"),
-	   paddress (inf->gdbarch, bs->bp_location_at->address));
+	   paddress (inf->arch (), bs->bp_location_at->address));
 
   amd_dbgapi_breakpoint_id_t breakpoint_id { it->first };
   amd_dbgapi_breakpoint_action_t action;
@@ -443,7 +443,7 @@ amd_dbgapi_target_breakpoint::check_status (struct bpstat *bs)
   if (status != AMD_DBGAPI_STATUS_SUCCESS)
     error (_("amd_dbgapi_report_breakpoint_hit failed for breakpoint %ld "
 	     "at %s (%s)"),
-	   breakpoint_id.handle, paddress (inf->gdbarch, bs->bp_location_at->address),
+	   breakpoint_id.handle, paddress (inf->arch (), bs->bp_location_at->address),
 	   get_status_string (status));
 
   if (action == AMD_DBGAPI_BREAKPOINT_ACTION_RESUME)

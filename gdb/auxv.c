@@ -418,7 +418,7 @@ target_auxv_search (CORE_ADDR match, CORE_ADDR *valp)
     return -1;
 
   return target_auxv_search (*auxv, current_inferior ()->top_target (),
-			     current_inferior ()->gdbarch, match, valp);
+			     current_inferior ()->arch (), match, valp);
 }
 
 /* Print the description of a single AUXV entry on the specified file.  */
@@ -580,7 +580,7 @@ fprint_target_auxv (struct ui_file *file)
   size_t len = auxv->size ();
 
   while (parse_auxv (current_inferior ()->top_target (),
-		     current_inferior ()->gdbarch,
+		     current_inferior ()->arch (),
 		     &ptr, data + len, &type, &val) > 0)
     {
       gdbarch_print_auxv_entry (gdbarch, file, type, val);

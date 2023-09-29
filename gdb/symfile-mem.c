@@ -162,7 +162,7 @@ add_vsyscall_page (inferior *inf)
 {
   struct mem_range vsyscall_range;
 
-  if (gdbarch_vsyscall_range (inf->gdbarch, &vsyscall_range))
+  if (gdbarch_vsyscall_range (inf->arch (), &vsyscall_range))
     {
       struct bfd *bfd;
 

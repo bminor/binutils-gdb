@@ -1159,7 +1159,7 @@ jit_inferior_init (inferior *inf)
   struct jit_descriptor descriptor;
   struct jit_code_entry cur_entry;
   CORE_ADDR cur_entry_addr;
-  struct gdbarch *gdbarch = inf->gdbarch;
+  struct gdbarch *gdbarch = inf->arch ();
   program_space *pspace = inf->pspace;
 
   jit_debug_printf ("called");

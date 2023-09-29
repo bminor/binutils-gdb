@@ -1375,7 +1375,7 @@ gdbpy_format_address (PyObject *self, PyObject *args, PyObject *kw)
       /* Grab both of these from the current inferior, and its associated
 	 default architecture.  */
       pspace = current_inferior ()->pspace;
-      gdbarch = current_inferior ()->gdbarch;
+      gdbarch = current_inferior ()->arch ();
     }
   else if (arch_obj == nullptr || pspace_obj == nullptr)
     {
