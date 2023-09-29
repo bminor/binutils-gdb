@@ -2467,14 +2467,14 @@ gnu_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
   if (writebuf != NULL)
     {
       inf_debug (gnu_current_inf, "writing %s[%s] <-- %s",
-		 paddress (target_gdbarch (), memaddr), pulongest (len),
+		 paddress (current_inferior ()->arch (), memaddr), pulongest (len),
 		 host_address_to_string (writebuf));
       res = gnu_write_inferior (task, memaddr, writebuf, len);
     }
   else
     {
       inf_debug (gnu_current_inf, "reading %s[%s] --> %s",
-		 paddress (target_gdbarch (), memaddr), pulongest (len),
+		 paddress (current_inferior ()->arch (), memaddr), pulongest (len),
 		 host_address_to_string (readbuf));
       res = gnu_read_inferior (task, memaddr, readbuf, len);
     }
@@ -2529,7 +2529,7 @@ gnu_xfer_auxv (gdb_byte *readbuf, const gdb_byte *writebuf,
   auxv[1].a_un.a_val = 0;
 
   inf_debug (gnu_current_inf, "reading auxv %s[%s] --> %s",
-	     paddress (target_gdbarch (), memaddr), pulongest (len),
+	     paddress (current_inferior ()->arch (), memaddr), pulongest (len),
 	     host_address_to_string (readbuf));
 
   if (memaddr + len > sizeof (auxv))

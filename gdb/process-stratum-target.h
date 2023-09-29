@@ -55,7 +55,8 @@ public:
      space.  */
   struct address_space *thread_address_space (ptid_t ptid) override;
 
-  /* This default implementation always returns target_gdbarch ().  */
+  /* This default implementation always returns the current inferior's
+     gdbarch.  */
   struct gdbarch *thread_architecture (ptid_t ptid) override;
 
   /* Default implementations for process_stratum targets.  Return true

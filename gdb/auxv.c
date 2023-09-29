@@ -83,7 +83,8 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
 {
   struct bound_minimal_symbol msym;
   CORE_ADDR data_address, pointer_address;
-  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  gdbarch *arch = current_inferior ()->arch ();
+  type *ptr_type = builtin_type (arch)->builtin_data_ptr;
   size_t ptr_size = ptr_type->length ();
   size_t auxv_pair_size = 2 * ptr_size;
   gdb_byte *ptr_buf = (gdb_byte *) alloca (ptr_size);
@@ -284,7 +285,7 @@ int
 default_auxv_parse (struct target_ops *ops, const gdb_byte **readptr,
 		    const gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
   struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
   const int sizeof_auxv_type = ptr_type->length ();
 
@@ -428,6 +429,7 @@ fprint_auxv_entry (struct ui_file *file, const char *name,
 		   const char *description, enum auxv_format format,
 		   CORE_ADDR type, CORE_ADDR val)
 {
+  gdbarch *arch = current_inferior ()->arch ();
   gdb_printf (file, ("%-4s %-20s %-30s "),
 	      plongest (type), name, description);
   switch (format)
@@ -436,7 +438,7 @@ fprint_auxv_entry (struct ui_file *file, const char *name,
       gdb_printf (file, ("%s\n"), plongest (val));
       break;
     case AUXV_FORMAT_HEX:
-      gdb_printf (file, ("%s\n"), paddress (target_gdbarch (), val));
+      gdb_printf (file, ("%s\n"), paddress (arch, val));
       break;
     case AUXV_FORMAT_STR:
       {
@@ -444,8 +446,8 @@ fprint_auxv_entry (struct ui_file *file, const char *name,
 
 	get_user_print_options (&opts);
 	if (opts.addressprint)
-	  gdb_printf (file, ("%s "), paddress (target_gdbarch (), val));
-	val_print_string (builtin_type (target_gdbarch ())->builtin_char,
+	  gdb_printf (file, ("%s "), paddress (arch, val));
+	val_print_string (builtin_type (arch)->builtin_char,
 			  NULL, val, -1, file, &opts);
 	gdb_printf (file, ("\n"));
       }
@@ -567,7 +569,7 @@ default_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
 static int
 fprint_target_auxv (struct ui_file *file)
 {
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
   CORE_ADDR type, val;
   int ents = 0;
   const gdb::optional<gdb::byte_vector> &auxv = target_read_auxv ();
@@ -579,9 +581,8 @@ fprint_target_auxv (struct ui_file *file)
   const gdb_byte *ptr = data;
   size_t len = auxv->size ();
 
-  while (parse_auxv (current_inferior ()->top_target (),
-		     current_inferior ()->arch (),
-		     &ptr, data + len, &type, &val) > 0)
+  while (parse_auxv (current_inferior ()->top_target (), gdbarch, &ptr,
+		     data + len, &type, &val) > 0)
     {
       gdbarch_print_auxv_entry (gdbarch, file, type, val);
       ++ents;

@@ -359,7 +359,7 @@ static std::vector<int>
 catch_syscall_split_args (const char *arg)
 {
   std::vector<int> result;
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
 
   while (*arg != '\0')
     {

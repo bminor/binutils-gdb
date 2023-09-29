@@ -115,7 +115,7 @@ microblaze_register_type (struct gdbarch *gdbarch, int regnum)
 static unsigned long
 microblaze_fetch_instruction (CORE_ADDR pc)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   gdb_byte buf[4];
 
   /* If we can't read the instruction at PC, return zero.  */

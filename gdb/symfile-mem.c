@@ -184,7 +184,7 @@ add_vsyscall_page (inferior *inf)
 	}
 
       std::string name = string_printf ("system-supplied DSO at %s",
-					paddress (target_gdbarch (),
+					paddress (current_inferior ()->arch (),
 						  vsyscall_range.start));
       try
 	{

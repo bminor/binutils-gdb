@@ -451,8 +451,8 @@ display_one_tib (ptid_t ptid)
   gdb_byte *index;
   CORE_ADDR thread_local_base;
   ULONGEST i, val, max, max_name, size, tib_size;
-  ULONGEST sizeof_ptr = gdbarch_ptr_bit (target_gdbarch ());
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  ULONGEST sizeof_ptr = gdbarch_ptr_bit (current_inferior ()->arch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
 
   if (sizeof_ptr == 64)
     {
@@ -490,13 +490,13 @@ display_one_tib (ptid_t ptid)
       gdb_printf (_("Unable to read thread information "
 		    "block for %s at address %s\n"),
 		  target_pid_to_str (ptid).c_str (), 
-		  paddress (target_gdbarch (), thread_local_base));
+		  paddress (current_inferior ()->arch (), thread_local_base));
       return -1;
     }
 
   gdb_printf (_("Thread Information Block %s at %s\n"),
 	      target_pid_to_str (ptid).c_str (),
-	      paddress (target_gdbarch (), thread_local_base));
+	      paddress (current_inferior ()->arch (), thread_local_base));
 
   index = (gdb_byte *) tib;
 
@@ -872,7 +872,7 @@ windows_solib_create_inferior_hook (int from_tty)
 
   /* Find base address of main executable in
      TIB->process_environment_block->image_base_address.  */
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int ptr_bytes;
   int peb_offset;  /* Offset of process_environment_block in TIB.  */

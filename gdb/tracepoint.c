@@ -1097,10 +1097,10 @@ collection_list::collection_list ()
   : m_strace_data (false)
 {
   int max_remote_regno = 0;
-  for (int i = 0; i < gdbarch_num_regs (target_gdbarch ()); i++)
+  for (int i = 0; i < gdbarch_num_regs (current_inferior ()->arch ()); i++)
     {
       int remote_regno = (gdbarch_remote_register_number
-			  (target_gdbarch (), i));
+			  (current_inferior ()->arch (), i));
 
       if (remote_regno >= 0 && remote_regno > max_remote_regno)
 	max_remote_regno = remote_regno;
@@ -1173,7 +1173,7 @@ collection_list::stringify ()
 	{
 	  gdb_printf ("(%d, %s, %ld)\n", 
 		      m_memranges[i].type,
-		      paddress (target_gdbarch (),
+		      paddress (current_inferior ()->arch (),
 				m_memranges[i].start),
 		      (long) (m_memranges[i].end
 			      - m_memranges[i].start));
@@ -1281,14 +1281,15 @@ encode_actions_1 (struct command_line *action,
 	    {			/* Repeat over a comma-separated list.  */
 	      QUIT;		/* Allow user to bail out with ^C.  */
 	      action_exp = skip_spaces (action_exp);
+	      gdbarch *arch = current_inferior ()->arch ();
 
 	      if (0 == strncasecmp ("$reg", action_exp, 4))
 		{
-		  for (i = 0; i < gdbarch_num_regs (target_gdbarch ());
+		  for (i = 0; i < gdbarch_num_regs (arch);
 		       i++)
 		    {
 		      int remote_regno = (gdbarch_remote_register_number
-					  (target_gdbarch (), i));
+					  (arch, i));
 
 		      /* Ignore arch regnos without a corresponding
 			 remote regno.  This can happen for regnos not
@@ -1300,7 +1301,7 @@ encode_actions_1 (struct command_line *action,
 		}
 	      else if (0 == strncasecmp ("$arg", action_exp, 4))
 		{
-		  collect->add_local_symbols (target_gdbarch (),
+		  collect->add_local_symbols (arch,
 					      tloc->address,
 					      frame_reg,
 					      frame_offset,
@@ -1310,7 +1311,7 @@ encode_actions_1 (struct command_line *action,
 		}
 	      else if (0 == strncasecmp ("$loc", action_exp, 4))
 		{
-		  collect->add_local_symbols (target_gdbarch (),
+		  collect->add_local_symbols (arch,
 					      tloc->address,
 					      frame_reg,
 					      frame_offset,
@@ -1322,8 +1323,7 @@ encode_actions_1 (struct command_line *action,
 		{
 		  agent_expr_up aexpr
 		    = gen_trace_for_return_address (tloc->address,
-						    target_gdbarch (),
-						    trace_string);
+						    arch, trace_string);
 
 		  finalize_tracepoint_aexpr (aexpr.get ());
 
@@ -1356,15 +1356,14 @@ encode_actions_1 (struct command_line *action,
 			     (exp->op.get ()));
 			const char *name = regop->get_name ();
 
-			i = user_reg_map_name_to_regnum (target_gdbarch (),
+			i = user_reg_map_name_to_regnum (arch,
 							 name, strlen (name));
 			if (i == -1)
 			  internal_error (_("Register $%s not available"),
 					  name);
 			if (info_verbose)
 			  gdb_printf ("OP_REGISTER: ");
-			collect->add_local_register (target_gdbarch (),
-						     i, tloc->address);
+			collect->add_local_register (arch, i, tloc->address);
 			break;
 		      }
 
@@ -1379,7 +1378,7 @@ encode_actions_1 (struct command_line *action,
 			struct type *type = memop->get_type ();
 			/* Initialize the TYPE_LENGTH if it is a typedef.  */
 			check_typedef (type);
-			collect->add_memrange (target_gdbarch (),
+			collect->add_memrange (arch,
 					       memrange_absolute, addr,
 					       type->length (),
 					       tloc->address);
@@ -1397,7 +1396,7 @@ encode_actions_1 (struct command_line *action,
 			const char *name = sym->natural_name ();
 
 			collect->collect_symbol (sym,
-						 target_gdbarch (),
+						 arch,
 						 frame_reg,
 						 frame_offset,
 						 tloc->address,
@@ -3553,7 +3552,7 @@ parse_static_tracepoint_marker_definition (const char *line, const char **pp,
   p = unpack_varlen_hex (p, &addr);
   p++;  /* skip a colon */
 
-  marker->gdbarch = target_gdbarch ();
+  marker->gdbarch = current_inferior ()->arch ();
   marker->address = (CORE_ADDR) addr;
 
   endp = strchr (p, ':');
@@ -3706,7 +3705,7 @@ info_static_tracepoint_markers_command (const char *arg, int from_tty)
   uiout->table_header (40, ui_left, "marker-id", "ID");
 
   uiout->table_header (3, ui_left, "enabled", "Enb");
-  if (gdbarch_addr_bit (target_gdbarch ()) <= 32)
+  if (gdbarch_addr_bit (current_inferior ()->arch ()) <= 32)
     uiout->table_header (10, ui_left, "addr", "Address");
   else
     uiout->table_header (18, ui_left, "addr", "Address");

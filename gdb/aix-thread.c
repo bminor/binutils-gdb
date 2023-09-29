@@ -1054,7 +1054,7 @@ pd_enable (inferior *inf)
     return;
 
   /* Check application word size.  */
-  data->arch64 = register_size (target_gdbarch (), 0) == 8;
+  data->arch64 = register_size (current_inferior ()->arch (), 0) == 8;
 
   /* Check whether the application is pthreaded.  */
   stub_name = NULL;
@@ -1069,7 +1069,8 @@ pd_enable (inferior *inf)
   if (ms.minsym == NULL)
     return;
   data->pd_brk_addr = ms.value_address ();
-  if (!create_thread_event_breakpoint (target_gdbarch (), data->pd_brk_addr))
+  if (!create_thread_event_breakpoint (current_inferior ()->arch (),
+				       data->pd_brk_addr))
     return;
 
   /* Prepare for thread debugging.  */

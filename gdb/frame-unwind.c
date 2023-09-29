@@ -29,6 +29,7 @@
 #include "gdbarch.h"
 #include "dwarf2/frame-tailcall.h"
 #include "cli/cli-cmds.h"
+#include "inferior.h"
 
 struct frame_unwind_table_entry
 {
@@ -344,7 +345,7 @@ frame_unwind_got_address (frame_info_ptr frame, int regnum,
 static void
 maintenance_info_frame_unwinders (const char *args, int from_tty)
 {
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
   struct frame_unwind_table *table = get_frame_unwind_table (gdbarch);
 
   ui_out *uiout = current_uiout;

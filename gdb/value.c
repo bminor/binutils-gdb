@@ -2515,7 +2515,7 @@ value::from_xmethod (xmethod_worker_up &&worker)
 {
   struct value *v;
 
-  v = value::allocate (builtin_type (target_gdbarch ())->xmethod);
+  v = value::allocate (builtin_type (current_inferior ()->arch ())->xmethod);
   v->m_lval = lval_xcallable;
   v->m_location.xm_worker = worker.release ();
   v->m_modifiable = false;

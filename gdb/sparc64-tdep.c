@@ -345,7 +345,7 @@ adi_read_versions (CORE_ADDR vaddr, size_t size, gdb_byte *tags)
     {
       adi_stat_t ast = get_adi_info (inferior_ptid.pid ());
       error(_("Address at %s is not in ADI maps"),
-	    paddress (target_gdbarch (), vaddr * ast.blksize));
+	    paddress (current_inferior ()->arch (), vaddr * ast.blksize));
     }
 
   fileio_error target_errno;
@@ -366,7 +366,7 @@ adi_write_versions (CORE_ADDR vaddr, size_t size, unsigned char *tags)
     {
       adi_stat_t ast = get_adi_info (inferior_ptid.pid ());
       error(_("Address at %s is not in ADI maps"),
-	    paddress (target_gdbarch (), vaddr * ast.blksize));
+	    paddress (current_inferior ()->arch (), vaddr * ast.blksize));
     }
 
   fileio_error target_errno;
@@ -388,7 +388,8 @@ adi_print_versions (CORE_ADDR vaddr, size_t cnt, gdb_byte *tags)
     {
       QUIT;
       gdb_printf ("%s:\t",
-		  paddress (target_gdbarch (), vaddr * adi_stat.blksize));
+		  paddress (current_inferior ()->arch (),
+			    vaddr * adi_stat.blksize));
       for (int i = maxelts; i > 0 && cnt > 0; i--, cnt--)
 	{
 	  if (tags[v_idx] == 0xff)    /* no version tag */
@@ -416,7 +417,8 @@ do_examine (CORE_ADDR start, int bcnt)
   if (read_cnt == -1)
     error (_("No ADI information"));
   else if (read_cnt < cnt)
-    error(_("No ADI information at %s"), paddress (target_gdbarch (), vaddr));
+    error(_("No ADI information at %s"),
+	  paddress (current_inferior ()->arch (), vaddr));
 
   adi_print_versions (vstart, cnt, buf.data ());
 }
@@ -434,8 +436,8 @@ do_assign (CORE_ADDR start, size_t bcnt, int version)
   if (set_cnt == -1)
     error (_("No ADI information"));
   else if (set_cnt < cnt)
-    error(_("No ADI information at %s"), paddress (target_gdbarch (), vaddr));
-
+    error(_("No ADI information at %s"),
+	  paddress (current_inferior ()->arch (), vaddr));
 }
 
 /* ADI examine version tag command.

@@ -35,6 +35,7 @@
 #include "dwarf2/frame.h"
 #include "reggroups.h"
 #include "gdbarch.h"
+#include "inferior.h"
 
 #include "elf/rl78.h"
 #include "elf-bfd.h"
@@ -897,7 +898,7 @@ check_for_saved (void *result_untyped, pv_t addr, CORE_ADDR size,
   if (value.kind == pvk_register
       && value.k == 0
       && pv_is_register (addr, RL78_SP_REGNUM)
-      && size == register_size (target_gdbarch (), value.reg))
+      && size == register_size (current_inferior ()->arch (), value.reg))
     result->reg_offset[value.reg] = addr.k;
 }
 
@@ -922,7 +923,8 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
       result->reg_offset[rn] = 1;
     }
 
-  pv_area stack (RL78_SP_REGNUM, gdbarch_addr_bit (target_gdbarch ()));
+  pv_area stack (RL78_SP_REGNUM,
+		 gdbarch_addr_bit (current_inferior ()->arch ()));
 
   /* The call instruction has saved the return address on the stack.  */
   reg[RL78_SP_REGNUM] = pv_add_constant (reg[RL78_SP_REGNUM], -4);

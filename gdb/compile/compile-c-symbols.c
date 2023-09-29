@@ -30,8 +30,8 @@
 #include "exceptions.h"
 #include "gdbtypes.h"
 #include "dwarf2/loc.h"
+#include "inferior.h"
 
-
 
 /* Compute the name of the pointer representing a local symbol's
    address.  */
@@ -95,7 +95,7 @@ convert_one_symbol (compile_c_instance *context,
 	  kind = GCC_C_SYMBOL_FUNCTION;
 	  addr = sym.symbol->value_block ()->entry_pc ();
 	  if (is_global && sym.symbol->type ()->is_gnu_ifunc ())
-	    addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
+	    addr = gnu_ifunc_resolve_addr (current_inferior ()->arch (), addr);
 	  break;
 
 	case LOC_CONST:
@@ -286,7 +286,7 @@ convert_symbol_bmsym (compile_c_instance *context,
     case mst_text_gnu_ifunc:
       type = builtin_type (objfile)->nodebug_text_gnu_ifunc_symbol;
       kind = GCC_C_SYMBOL_FUNCTION;
-      addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
+      addr = gnu_ifunc_resolve_addr (current_inferior ()->arch (), addr);
       break;
 
     case mst_data:
@@ -407,7 +407,8 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 			identifier);
 	  result = sym->value_block ()->entry_pc ();
 	  if (sym->type ()->is_gnu_ifunc ())
-	    result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
+	    result = gnu_ifunc_resolve_addr (current_inferior ()->arch (),
+					     result);
 	  found = 1;
 	}
       else
@@ -424,7 +425,8 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 			    identifier);
 	      result = msym.value_address ();
 	      if (msym.minsym->type () == mst_text_gnu_ifunc)
-		result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
+		result = gnu_ifunc_resolve_addr (current_inferior ()->arch (),
+						 result);
 	      found = 1;
 	    }
 	}

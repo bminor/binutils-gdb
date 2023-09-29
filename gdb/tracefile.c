@@ -25,6 +25,7 @@
 #include "gdbsupport/byte-vector.h"
 #include "gdbarch.h"
 #include "gdbsupport/buildargv.h"
+#include "inferior.h"
 
 /* Helper macros.  */
 
@@ -71,7 +72,7 @@ trace_save (const char *filename, struct trace_file_writer *writer,
   ULONGEST offset = 0;
 #define MAX_TRACE_UPLOAD 2000
   gdb::byte_vector buf (std::max (MAX_TRACE_UPLOAD, trace_regblock_size));
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
 
   /* If the target is to save the data to a file on its own, then just
      send the command and be done with it.  */

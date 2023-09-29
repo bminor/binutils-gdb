@@ -2920,7 +2920,7 @@ windows_xfer_shared_libraries (struct target_ops *ops,
     windows_xfer_shared_library (so.name.c_str (),
 				 (CORE_ADDR) (uintptr_t) so.load_addr,
 				 &so.text_offset,
-				 target_gdbarch (), &obstack);
+				 current_inferior ()->arch (), &obstack);
   obstack_grow_str0 (&obstack, "</library-list>\n");
 
   buf = (const char *) obstack_finish (&obstack);

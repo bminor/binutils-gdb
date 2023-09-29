@@ -27,6 +27,7 @@
 #include "frame-base.h"
 #include "frame-unwind.h"
 #include "gdbcore.h"
+#include "inferior.h"
 #include "reggroups.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
@@ -490,7 +491,7 @@ arc_insn_get_branch_target (const struct arc_instruction &insn)
 static void
 arc_insn_dump (const struct arc_instruction &insn)
 {
-  struct gdbarch *gdbarch = target_gdbarch ();
+  struct gdbarch *gdbarch = current_inferior ()->arch ();
 
   arc_print ("Dumping arc_instruction at %s\n",
 	     paddress (gdbarch, insn.address));
@@ -2441,7 +2442,7 @@ dump_arc_instruction_command (const char *args, int from_tty)
 
   CORE_ADDR address = value_as_address (val);
   struct arc_instruction insn;
-  struct gdb_non_printing_memory_disassembler dis (target_gdbarch ());
+  gdb_non_printing_memory_disassembler dis (current_inferior ()->arch ());
   arc_insn_decode (address, dis.disasm_info (), arc_delayed_print_insn, &insn);
   arc_insn_dump (insn);
 }

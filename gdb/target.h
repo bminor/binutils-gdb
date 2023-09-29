@@ -934,7 +934,7 @@ struct target_ops
        the target is currently stopped at.  The architecture information is
        used to perform decr_pc_after_break adjustment, and also to determine
        the frame architecture of the innermost frame.  ptrace operations need to
-       operate according to target_gdbarch ().  */
+       operate according to the current inferior's gdbarch.  */
     virtual struct gdbarch *thread_architecture (ptid_t)
       TARGET_DEFAULT_RETURN (NULL);
 

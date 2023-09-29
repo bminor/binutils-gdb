@@ -29,6 +29,7 @@
 #include "cli/cli-utils.h"
 #include <algorithm>
 #include "gdbarch.h"
+#include "inferior.h"
 
 static std::vector<mem_region> user_mem_region_list, target_mem_region_list;
 static std::vector<mem_region> *mem_region_list = &target_mem_region_list;
@@ -354,10 +355,10 @@ info_mem_command (const char *args, int from_tty)
   gdb_printf ("Num ");
   gdb_printf ("Enb ");
   gdb_printf ("Low Addr   ");
-  if (gdbarch_addr_bit (target_gdbarch ()) > 32)
+  if (gdbarch_addr_bit (current_inferior ()->arch ()) > 32)
     gdb_printf ("        ");
   gdb_printf ("High Addr  ");
-  if (gdbarch_addr_bit (target_gdbarch ()) > 32)
+  if (gdbarch_addr_bit (current_inferior ()->arch ()) > 32)
     gdb_printf ("        ");
   gdb_printf ("Attrs ");
   gdb_printf ("\n");
@@ -369,14 +370,14 @@ info_mem_command (const char *args, int from_tty)
       gdb_printf ("%-3d %-3c\t",
 		  m.number,
 		  m.enabled_p ? 'y' : 'n');
-      if (gdbarch_addr_bit (target_gdbarch ()) <= 32)
+      if (gdbarch_addr_bit (current_inferior ()->arch ()) <= 32)
 	tmp = hex_string_custom (m.lo, 8);
       else
 	tmp = hex_string_custom (m.lo, 16);
       
       gdb_printf ("%s ", tmp);
 
-      if (gdbarch_addr_bit (target_gdbarch ()) <= 32)
+      if (gdbarch_addr_bit (current_inferior ()->arch ()) <= 32)
 	{
 	  if (m.hi == 0)
 	    tmp = "0x100000000";

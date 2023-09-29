@@ -72,21 +72,6 @@ struct gdbarch_tdep_base
 
 using gdbarch_tdep_up = std::unique_ptr<gdbarch_tdep_base>;
 
-/* The architecture associated with the inferior through the
-   connection to the target.
-
-   The architecture vector provides some information that is really a
-   property of the inferior, accessed through a particular target:
-   ptrace operations; the layout of certain RSP packets; the solib_ops
-   vector; etc.  To differentiate architecture accesses to
-   per-inferior/target properties from
-   per-thread/per-frame/per-objfile properties, accesses to
-   per-inferior/target properties should be made through this
-   gdbarch.  */
-
-/* This is a convenience wrapper for 'current_inferior ()->gdbarch'.  */
-extern struct gdbarch *target_gdbarch (void);
-
 /* Callback type for the 'iterate_over_objfiles_in_search_order'
    gdbarch  method.  */
 

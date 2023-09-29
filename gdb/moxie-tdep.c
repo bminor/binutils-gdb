@@ -279,7 +279,7 @@ moxie_process_readu (CORE_ADDR addr, gdb_byte *buf,
 	gdb_printf (gdb_stderr,
 		    _("Process record: error reading memory at "
 		      "addr 0x%s len = %d.\n"),
-		    paddress (target_gdbarch (), addr), length);
+		    paddress (current_inferior ()->arch  (), addr), length);
       return -1;
     }
 
@@ -628,7 +628,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   if (record_debug > 1)
     gdb_printf (gdb_stdlog, "Process record: moxie_process_record "
 		"addr = 0x%s\n",
-		paddress (target_gdbarch (), addr));
+		paddress (current_inferior ()->arch  (), addr));
 
   inst = (uint16_t) moxie_process_readu (addr, buf, 2, byte_order);
 

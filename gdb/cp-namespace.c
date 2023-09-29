@@ -32,6 +32,7 @@
 #include "buildsym.h"
 #include "language.h"
 #include "namespace.h"
+#include "inferior.h"
 #include <map>
 #include <string>
 #include <string.h>
@@ -196,7 +197,7 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
       struct gdbarch *gdbarch;
 
       if (block == NULL)
-	gdbarch = target_gdbarch ();
+	gdbarch = current_inferior ()->arch ();
       else
 	gdbarch = block->gdbarch ();
       sym.symbol

@@ -28,6 +28,7 @@
 #include "block.h"
 #include "py-event.h"
 #include "observable.h"
+#include "inferior.h"
 
 struct pspace_object
 {
@@ -69,11 +70,11 @@ struct pspace_deleter
        this is one time when the current program space and current inferior
        are not in sync: All inferiors that use PSPACE may no longer exist.
        We don't need to do much here, and since "there is always an inferior"
-       using target_gdbarch suffices.
+       using the current inferior's arch suffices.
        Note: We cannot call get_current_arch because it may try to access
        the target, which may involve accessing data in the pspace currently
        being deleted.  */
-    struct gdbarch *arch = target_gdbarch ();
+    gdbarch *arch = current_inferior ()->arch ();
 
     gdbpy_enter enter_py (arch);
     gdbpy_ref<pspace_object> object (obj);

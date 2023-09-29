@@ -570,9 +570,10 @@ darwin_debug_regions (task_t task, mach_vm_address_t address, int max)
 
       if (print)
 	{
+	  gdbarch *arch = current_inferior ()->arch ();
 	  gdb_printf (_("%s-%s %s/%s  %s %s %s"),
-		      paddress (target_gdbarch (), prev_address),
-		      paddress (target_gdbarch (), prev_address + prev_size),
+		      paddress (arch, prev_address),
+		      paddress (arch, prev_address + prev_size),
 		      unparse_protection (prev_info.protection),
 		      unparse_protection (prev_info.max_protection),
 		      unparse_inheritance (prev_info.inheritance),
@@ -618,7 +619,7 @@ darwin_debug_regions_recurse (task_t task)
 
   ui_out_emit_table table_emitter (uiout, 9, -1, "regions");
 
-  if (gdbarch_addr_bit (target_gdbarch ()) <= 32)
+  if (gdbarch_addr_bit (current_inferior ()->arch ()) <= 32)
     {
       uiout->table_header (10, ui_left, "start", "Start");
       uiout->table_header (10, ui_left, "end", "End");
@@ -654,9 +655,10 @@ darwin_debug_regions_recurse (task_t task)
 
       {
 	ui_out_emit_tuple tuple_emitter (uiout, "regions-row");
+	gdbarch *arch = current_inferior ()->arch ();
 
-	uiout->field_core_addr ("start", target_gdbarch (), r_start);
-	uiout->field_core_addr ("end", target_gdbarch (), r_start + r_size);
+	uiout->field_core_addr ("start", arch, r_start);
+	uiout->field_core_addr ("end", arch, r_start + r_size);
 	uiout->field_string ("min-prot",
 			     unparse_protection (r_info.protection));
 	uiout->field_string ("max-prot",

@@ -576,7 +576,8 @@ dcache_print_line (DCACHE *dcache, int index)
   db = (struct dcache_block *) n->value;
 
   gdb_printf (_("Line %d: address %s [%d hits]\n"),
-	      index, paddress (target_gdbarch (), db->addr), db->refs);
+	      index, paddress (current_inferior ()->arch (), db->addr),
+	      db->refs);
 
   for (j = 0; j < dcache->line_size; j++)
     {
@@ -636,7 +637,8 @@ dcache_info_1 (DCACHE *dcache, const char *exp)
       struct dcache_block *db = (struct dcache_block *) n->value;
 
       gdb_printf (_("Line %d: address %s [%d hits]\n"),
-		  i, paddress (target_gdbarch (), db->addr), db->refs);
+		  i, paddress (current_inferior ()->arch (), db->addr),
+		  db->refs);
       i++;
       refcount += db->refs;
 

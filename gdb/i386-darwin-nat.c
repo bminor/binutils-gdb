@@ -475,7 +475,7 @@ i386_darwin_dr_get_control (void)
 void
 darwin_check_osabi (darwin_inferior *inf, thread_t thread)
 {
-  if (gdbarch_osabi (target_gdbarch ()) == GDB_OSABI_UNKNOWN)
+  if (gdbarch_osabi (current_inferior ()->arch ()) == GDB_OSABI_UNKNOWN)
     {
       /* Attaching to a process.  Let's figure out what kind it is.  */
       x86_thread_state_t gp_regs;
@@ -492,7 +492,7 @@ darwin_check_osabi (darwin_inferior *inf, thread_t thread)
 
       gdbarch_info info;
       gdbarch_info_fill (&info);
-      info.byte_order = gdbarch_byte_order (target_gdbarch ());
+      info.byte_order = gdbarch_byte_order (current_inferior ()->arch ());
       info.osabi = GDB_OSABI_DARWIN;
       if (gp_regs.tsh.flavor == x86_THREAD_STATE64)
 	info.bfd_arch_info = bfd_lookup_arch (bfd_arch_i386,
@@ -516,7 +516,7 @@ darwin_check_osabi (darwin_inferior *inf, thread_t thread)
 static int
 i386_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   static const gdb_byte darwin_syscall[] = { 0xcd, 0x80 }; /* int 0x80 */
   gdb_byte buf[sizeof (darwin_syscall)];
 
@@ -549,7 +549,7 @@ i386_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
 static int
 amd64_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   static const gdb_byte darwin_syscall[] = { 0x0f, 0x05 }; /* syscall */
   gdb_byte buf[sizeof (darwin_syscall)];
 

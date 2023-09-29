@@ -275,8 +275,9 @@ nto_procfs_target::open (const char *arg, int from_tty)
 	  else
 	    {
 	      if (sysinfo->type !=
-		  nto_map_arch_to_cputype (gdbarch_bfd_arch_info
-					   (target_gdbarch ())->arch_name))
+		  nto_map_arch_to_cputype
+		    (gdbarch_bfd_arch_info
+		     (current_inferior ()->arch ())->arch_name))
 		error (_("Invalid target CPU."));
 	    }
 	}

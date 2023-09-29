@@ -107,7 +107,7 @@ python_on_resume (ptid_t ptid)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (target_gdbarch ());
+  gdbpy_enter enter_py (current_inferior ()->arch ());
 
   if (emit_continue_event (ptid) < 0)
     gdbpy_print_stack ();
@@ -119,7 +119,7 @@ python_on_resume (ptid_t ptid)
 static void
 python_on_inferior_call_pre (ptid_t thread, CORE_ADDR address)
 {
-  gdbpy_enter enter_py (target_gdbarch ());
+  gdbpy_enter enter_py (current_inferior ()->arch ());
 
   if (emit_inferior_call_event (INFERIOR_CALL_PRE, thread, address) < 0)
     gdbpy_print_stack ();
@@ -131,7 +131,7 @@ python_on_inferior_call_pre (ptid_t thread, CORE_ADDR address)
 static void
 python_on_inferior_call_post (ptid_t thread, CORE_ADDR address)
 {
-  gdbpy_enter enter_py (target_gdbarch ());
+  gdbpy_enter enter_py (current_inferior ()->arch ());
 
   if (emit_inferior_call_event (INFERIOR_CALL_POST, thread, address) < 0)
     gdbpy_print_stack ();
@@ -144,7 +144,7 @@ python_on_inferior_call_post (ptid_t thread, CORE_ADDR address)
 static void
 python_on_memory_change (struct inferior *inferior, CORE_ADDR addr, ssize_t len, const bfd_byte *data)
 {
-  gdbpy_enter enter_py (target_gdbarch ());
+  gdbpy_enter enter_py (current_inferior ()->arch ());
 
   if (emit_memory_changed_event (addr, len) < 0)
     gdbpy_print_stack ();
@@ -157,7 +157,7 @@ python_on_memory_change (struct inferior *inferior, CORE_ADDR addr, ssize_t len,
 static void
 python_on_register_change (frame_info_ptr frame, int regnum)
 {
-  gdbpy_enter enter_py (target_gdbarch ());
+  gdbpy_enter enter_py (current_inferior ()->arch ());
 
   if (emit_register_changed_event (frame, regnum) < 0)
     gdbpy_print_stack ();
@@ -171,7 +171,7 @@ python_inferior_exit (struct inferior *inf)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (target_gdbarch ());
+  gdbpy_enter enter_py (current_inferior ()->arch ());
 
   if (inf->has_exit_code)
     exit_code = &inf->exit_code;
@@ -202,7 +202,7 @@ python_all_objfiles_removed (program_space *pspace)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (target_gdbarch ());
+  gdbpy_enter enter_py (current_inferior ()->arch ());
 
   if (emit_clear_objfiles_event (pspace) < 0)
     gdbpy_print_stack ();

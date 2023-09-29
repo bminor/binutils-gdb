@@ -793,7 +793,7 @@ btrace_insn_history (struct ui_out *uiout,
 
   flags |= DISASSEMBLY_SPECULATIVE;
 
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
   btrace_line_range last_lines = btrace_mk_line_range (NULL, 0, 0);
 
   ui_out_emit_list list_emitter (uiout, "asm_insns");

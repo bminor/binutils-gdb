@@ -26,6 +26,7 @@
 #include "symtab.h"
 #include "elf/frv.h"
 #include "gdb_bfd.h"
+#include "inferior.h"
 
 /* FR-V pointers are four bytes wide.  */
 enum { FRV_PTR_SIZE = 4 };
@@ -89,7 +90,7 @@ struct int_elf32_fdpic_loadmap {
 static struct int_elf32_fdpic_loadmap *
 fetch_loadmap (CORE_ADDR ldmaddr)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   struct ext_elf32_fdpic_loadmap ext_ldmbuf_partial;
   struct ext_elf32_fdpic_loadmap *ext_ldmbuf;
   struct int_elf32_fdpic_loadmap *int_ldmbuf;
@@ -262,7 +263,7 @@ static CORE_ADDR main_lm_addr = 0;
 static CORE_ADDR
 lm_base (void)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   struct bound_minimal_symbol got_sym;
   CORE_ADDR addr;
   gdb_byte buf[FRV_PTR_SIZE];
@@ -308,7 +309,7 @@ lm_base (void)
 static struct so_list *
 frv_current_sos (void)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   CORE_ADDR lm_addr, mgot;
   struct so_list *sos_head = NULL;
   struct so_list **sos_next_ptr = &sos_head;
@@ -495,7 +496,7 @@ static int enable_break2_done = 0;
 static int
 enable_break2 (void)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   asection *interp_sect;
 
   if (enable_break2_done)
@@ -548,7 +549,7 @@ enable_break2 (void)
 	  return 0;
 	}
 
-      status = frv_fdpic_loadmap_addresses (target_gdbarch (),
+      status = frv_fdpic_loadmap_addresses (current_inferior ()->arch (),
 					    &interp_loadmap_addr, 0);
       if (status < 0)
 	{
@@ -665,7 +666,7 @@ enable_break2 (void)
       remove_solib_event_breakpoints ();
 
       /* Now (finally!) create the solib breakpoint.  */
-      create_solib_event_breakpoint (target_gdbarch (), addr);
+      create_solib_event_breakpoint (current_inferior ()->arch (), addr);
 
       enable_break2_done = 1;
 
@@ -709,7 +710,7 @@ enable_break (void)
       return 0;
     }
 
-  create_solib_event_breakpoint (target_gdbarch (), entry_point);
+  create_solib_event_breakpoint (current_inferior ()->arch (), entry_point);
 
   solib_debug_printf ("solib event breakpoint placed at entry point: %s",
 		      hex_string_custom (entry_point, 8));
@@ -724,7 +725,7 @@ frv_relocate_main_executable (void)
   struct int_elf32_fdpic_loadmap *ldm;
   int changed;
 
-  status = frv_fdpic_loadmap_addresses (target_gdbarch (),
+  status = frv_fdpic_loadmap_addresses (current_inferior ()->arch (),
 					&interp_addr, &exec_addr);
 
   if (status < 0 || (exec_addr == 0 && interp_addr == 0))
@@ -943,7 +944,7 @@ find_canonical_descriptor_in_load_object
   (CORE_ADDR entry_point, CORE_ADDR got_value, const char *name, bfd *abfd,
    lm_info_frv *lm)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   arelent *rel;
   unsigned int i;
   CORE_ADDR addr = 0;

@@ -427,7 +427,7 @@ bpfinishpy_handle_stop (struct bpstat *bs, int print_frame)
 static void
 bpfinishpy_handle_exit (struct inferior *inf)
 {
-  gdbpy_enter enter_py (target_gdbarch ());
+  gdbpy_enter enter_py (current_inferior ()->arch ());
 
   for (breakpoint &bp : all_breakpoints_safe ())
     bpfinishpy_detect_out_scope_cb (&bp, nullptr, true);

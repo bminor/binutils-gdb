@@ -1183,12 +1183,13 @@ show_mask_address (struct ui_file *file, int from_tty,
   const char *additional_text = "";
   if (mask_address_var == AUTO_BOOLEAN_AUTO)
     {
-      if (gdbarch_bfd_arch_info (target_gdbarch ())->arch != bfd_arch_mips)
+      if (gdbarch_bfd_arch_info (current_inferior ()->arch ())->arch
+	  != bfd_arch_mips)
 	additional_text = _(" (current architecture is not MIPS)");
       else
 	{
 	  mips_gdbarch_tdep *tdep
-	    = gdbarch_tdep<mips_gdbarch_tdep> (target_gdbarch ());
+	    = gdbarch_tdep<mips_gdbarch_tdep> (current_inferior ()->arch  ());
 
 	  if (mips_mask_address_p (tdep))
 	    additional_text = _(" (currently \"on\")");
@@ -6926,7 +6927,8 @@ show_mipsfpu_command (const char *args, int from_tty)
 {
   const char *fpu;
 
-  if (gdbarch_bfd_arch_info (target_gdbarch ())->arch != bfd_arch_mips)
+  if (gdbarch_bfd_arch_info (current_inferior ()->arch ())->arch
+      != bfd_arch_mips)
     {
       gdb_printf
 	("The MIPS floating-point coprocessor is unknown "
@@ -6934,7 +6936,7 @@ show_mipsfpu_command (const char *args, int from_tty)
       return;
     }
 
-  switch (mips_get_fpu_type (target_gdbarch ()))
+  switch (mips_get_fpu_type (current_inferior ()->arch  ()))
     {
     case MIPS_FPU_SINGLE:
       fpu = "single-precision";
@@ -8850,7 +8852,8 @@ show_mips_abi (struct ui_file *file,
 	       struct cmd_list_element *ignored_cmd,
 	       const char *ignored_value)
 {
-  if (gdbarch_bfd_arch_info (target_gdbarch ())->arch != bfd_arch_mips)
+  if (gdbarch_bfd_arch_info (current_inferior ()->arch  ())->arch
+      != bfd_arch_mips)
     gdb_printf
       (file, 
        "The MIPS ABI is unknown because the current architecture "
@@ -8858,7 +8861,7 @@ show_mips_abi (struct ui_file *file,
   else
     {
       enum mips_abi global_abi = global_mips_abi ();
-      enum mips_abi actual_abi = mips_abi (target_gdbarch ());
+      enum mips_abi actual_abi = mips_abi (current_inferior ()->arch ());
       const char *actual_abi_str = mips_abi_strings[actual_abi];
 
       if (global_abi == MIPS_ABI_UNKNOWN)

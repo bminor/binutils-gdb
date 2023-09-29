@@ -25,6 +25,7 @@
 #include "d-lang.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbarch.h"
+#include "inferior.h"
 
 /* This returns the length of first component of NAME, which should be
    the demangled name of a D variable/function/method/etc.
@@ -92,7 +93,7 @@ d_lookup_symbol (const struct language_defn *langdef,
       struct gdbarch *gdbarch;
 
       if (block == NULL)
-	gdbarch = target_gdbarch ();
+	gdbarch = current_inferior ()->arch ();
       else
 	gdbarch = block->gdbarch ();
       sym.symbol

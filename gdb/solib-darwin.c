@@ -105,8 +105,9 @@ static void
 darwin_load_image_infos (struct darwin_info *info)
 {
   gdb_byte buf[24];
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
+  type *ptr_type
+    = builtin_type (current_inferior ()->arch ())->builtin_data_ptr;
   int len;
 
   /* If the structure address is not known, don't continue.  */
@@ -216,7 +217,8 @@ open_symbol_file_object (int from_tty)
 static struct so_list *
 darwin_current_sos (void)
 {
-  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  type *ptr_type
+    = builtin_type (current_inferior ()->arch ())->builtin_data_ptr;
   enum bfd_endian byte_order = type_byte_order (ptr_type);
   int ptr_len = ptr_type->length ();
   unsigned int image_info_size;
@@ -299,7 +301,7 @@ darwin_current_sos (void)
 static CORE_ADDR
 darwin_validate_exec_header (CORE_ADDR load_addr)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   struct mach_o_header_external hdr;
   unsigned long hdr_val;
 
@@ -329,7 +331,8 @@ darwin_validate_exec_header (CORE_ADDR load_addr)
 static CORE_ADDR
 darwin_read_exec_load_addr_from_dyld (struct darwin_info *info)
 {
-  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  type *ptr_type
+    = builtin_type (current_inferior ()->arch ())->builtin_data_ptr;
   int ptr_len = ptr_type->length ();
   unsigned int image_info_size = ptr_len * 3;
   int i;
@@ -359,7 +362,7 @@ darwin_read_exec_load_addr_from_dyld (struct darwin_info *info)
 static CORE_ADDR
 darwin_read_exec_load_addr_at_init (struct darwin_info *info)
 {
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int addr_size = gdbarch_addr_bit (gdbarch) / 8;
   ULONGEST load_ptr_addr;
@@ -432,8 +435,9 @@ darwin_get_dyld_bfd ()
   if (dyld_bfd != NULL)
     {
       gdb_bfd_ref_ptr sub
-	(gdb_bfd_mach_o_fat_extract (dyld_bfd.get (), bfd_object,
-				     gdbarch_bfd_arch_info (target_gdbarch ())));
+	(gdb_bfd_mach_o_fat_extract
+	   (dyld_bfd.get (), bfd_object,
+	    gdbarch_bfd_arch_info (current_inferior ()->arch ())));
       dyld_bfd = sub;
     }
   return dyld_bfd;
@@ -475,7 +479,8 @@ darwin_solib_read_all_image_info_addr (struct darwin_info *info)
 {
   gdb_byte buf[8];
   LONGEST len;
-  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  type *ptr_type
+    = builtin_type (current_inferior ()->arch ())->builtin_data_ptr;
 
   /* Sanity check.  */
   if (ptr_type->length () > sizeof (buf))
@@ -592,7 +597,7 @@ darwin_solib_create_inferior_hook (int from_tty)
   /* Add the breakpoint which is hit by dyld when the list of solib is
      modified.  */
   if (notifier != 0)
-    create_solib_event_breakpoint (target_gdbarch (), notifier);
+    create_solib_event_breakpoint (current_inferior ()->arch (), notifier);
 }
 
 static void
@@ -652,8 +657,9 @@ darwin_bfd_open (const char *pathname)
   gdb_bfd_ref_ptr abfd (solib_bfd_fopen (found_pathname.get (), found_file));
 
   gdb_bfd_ref_ptr res
-    (gdb_bfd_mach_o_fat_extract (abfd.get (), bfd_object,
-				 gdbarch_bfd_arch_info (target_gdbarch ())));
+    (gdb_bfd_mach_o_fat_extract
+       (abfd.get (), bfd_object,
+	gdbarch_bfd_arch_info (current_inferior ()->arch ())));
   if (res == NULL)
     error (_("`%s': not a shared-library: %s"),
 	   bfd_get_filename (abfd.get ()), bfd_errmsg (bfd_get_error ()));

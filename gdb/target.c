@@ -1281,7 +1281,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 {
   volatile CORE_ADDR addr = 0;
   struct target_ops *target = current_inferior ()->top_target ();
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
 
   /* If OBJFILE is a separate debug object file, look for the
      original object file.  */
@@ -1631,7 +1631,8 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
   if (len == 0)
     return TARGET_XFER_EOF;
 
-  memaddr = gdbarch_remove_non_address_bits (target_gdbarch (), memaddr);
+  memaddr = gdbarch_remove_non_address_bits (current_inferior ()->arch (),
+					     memaddr);
 
   /* Fill in READBUF with breakpoint shadows, or WRITEBUF with
      breakpoint insns, thus hiding out from higher layers whether
@@ -1803,8 +1804,9 @@ target_read_uint32 (CORE_ADDR memaddr, uint32_t *result)
   r = target_read_memory (memaddr, buf, sizeof buf);
   if (r != 0)
     return r;
-  *result = extract_unsigned_integer (buf, sizeof buf,
-				      gdbarch_byte_order (target_gdbarch ()));
+  *result = extract_unsigned_integer
+	      (buf, sizeof buf,
+	       gdbarch_byte_order (current_inferior ()->arch ()));
   return 0;
 }
 
@@ -1981,7 +1983,8 @@ target_read (struct target_ops *ops,
       || object == TARGET_OBJECT_STACK_MEMORY
       || object == TARGET_OBJECT_CODE_MEMORY
       || object == TARGET_OBJECT_RAW_MEMORY)
-    unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
+    unit_size = gdbarch_addressable_memory_unit_size
+		  (current_inferior ()->arch ());
 
   while (xfered_total < len)
     {
@@ -2140,7 +2143,8 @@ read_memory_robust (struct target_ops *ops,
 		    const ULONGEST offset, const LONGEST len)
 {
   std::vector<memory_read_result> result;
-  int unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
+  int unit_size
+    = gdbarch_addressable_memory_unit_size (current_inferior ()->arch ());
 
   LONGEST xfered_total = 0;
   while (xfered_total < len)
@@ -2215,7 +2219,8 @@ target_write_with_progress (struct target_ops *ops,
       || object == TARGET_OBJECT_STACK_MEMORY
       || object == TARGET_OBJECT_CODE_MEMORY
       || object == TARGET_OBJECT_RAW_MEMORY)
-    unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
+    unit_size = gdbarch_addressable_memory_unit_size
+		  (current_inferior ()->arch ());
 
   /* Give the progress callback a chance to set up.  */
   if (progress)
@@ -2468,7 +2473,7 @@ target_pre_inferior (int from_tty)
   /* In some OSs, the shared library list is the same/global/shared
      across inferiors.  If code is shared between processes, so are
      memory regions and features.  */
-  if (!gdbarch_has_global_solist (target_gdbarch ()))
+  if (!gdbarch_has_global_solist (current_inferior ()->arch ()))
     {
       no_shared_libraries (NULL, from_tty);
 
@@ -2539,10 +2544,9 @@ target_detach (inferior *inf, int from_tty)
   ptid_t save_pid_ptid = ptid_t (inf->pid);
 
   /* As long as some to_detach implementations rely on the current_inferior
-     (either directly, or indirectly, like through target_gdbarch or by
-     reading memory), INF needs to be the current inferior.  When that
-     requirement will become no longer true, then we can remove this
-     assertion.  */
+     (either directly, or indirectly, like through reading memory), INF needs
+     to be the current inferior.  When that requirement will become no longer
+     true, then we can remove this assertion.  */
   gdb_assert (inf == current_inferior ());
 
   prepare_for_detach ();
@@ -3582,7 +3586,8 @@ static int
 default_region_ok_for_hw_watchpoint (struct target_ops *self,
 				     CORE_ADDR addr, int len)
 {
-  return (len <= gdbarch_ptr_bit (target_gdbarch ()) / TARGET_CHAR_BIT);
+  gdbarch *arch = current_inferior ()->arch ();
+  return (len <= gdbarch_ptr_bit (arch) / TARGET_CHAR_BIT);
 }
 
 static int
@@ -4284,7 +4289,7 @@ flash_erase_command (const char *cmd, int from_tty)
 {
   /* Used to communicate termination of flash operations to the target.  */
   bool found_flash_region = false;
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
 
   std::vector<mem_region> mem_regions = target_memory_map ();
 

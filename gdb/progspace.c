@@ -58,7 +58,8 @@ address_space::address_space ()
 struct address_space *
 maybe_new_address_space (void)
 {
-  int shared_aspace = gdbarch_has_shared_address_space (target_gdbarch ());
+  int shared_aspace
+    = gdbarch_has_shared_address_space (current_inferior ()->arch ());
 
   if (shared_aspace)
     {
@@ -121,7 +122,7 @@ program_space::~program_space ()
   /* Defer breakpoint re-set because we don't want to create new
      locations for this pspace which we're tearing down.  */
   clear_symtab_users (SYMFILE_DEFER_BP_RESET);
-  if (!gdbarch_has_shared_address_space (target_gdbarch ()))
+  if (!gdbarch_has_shared_address_space (current_inferior ()->arch ()))
     delete this->aspace;
 }
 
@@ -402,7 +403,8 @@ maintenance_info_program_spaces_command (const char *args, int from_tty)
 void
 update_address_spaces (void)
 {
-  int shared_aspace = gdbarch_has_shared_address_space (target_gdbarch ());
+  int shared_aspace
+    = gdbarch_has_shared_address_space (current_inferior ()->arch ());
 
   init_address_spaces ();
 
@@ -422,7 +424,7 @@ update_address_spaces (void)
       }
 
   for (inferior *inf : all_inferiors ())
-    if (gdbarch_has_global_solist (target_gdbarch ()))
+    if (gdbarch_has_global_solist (current_inferior ()->arch ()))
       inf->aspace = maybe_new_address_space ();
     else
       inf->aspace = inf->pspace->aspace;

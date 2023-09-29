@@ -43,6 +43,7 @@
 #include "event-top.h"
 #include "run-on-main-thread.h"
 #include "typeprint.h"
+#include "inferior.h"
 
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right
@@ -1467,7 +1468,7 @@ add_symbol_overload_list_qualified (const char *func_name,
   struct objfile *current_objfile = block ? block->objfile () : nullptr;
 
   gdbarch_iterate_over_objfiles_in_search_order
-    (current_objfile ? current_objfile->arch () : target_gdbarch (),
+    (current_objfile ? current_objfile->arch () : current_inferior ()->arch (),
      [func_name, surrounding_static_block, &overload_list]
      (struct objfile *obj)
        {

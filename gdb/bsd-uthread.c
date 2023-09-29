@@ -125,7 +125,7 @@ bsd_uthread_set_collect_uthread (struct gdbarch *gdbarch,
 static void
 bsd_uthread_check_magic (CORE_ADDR addr)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   ULONGEST magic = read_memory_unsigned_integer (addr, 4, byte_order);
 
   if (magic != BSD_UTHREAD_PTHREAD_MAGIC)
@@ -169,7 +169,7 @@ bsd_uthread_lookup_address (const char *name, struct objfile *objfile)
 static int
 bsd_uthread_lookup_offset (const char *name, struct objfile *objfile)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   CORE_ADDR addr;
 
   addr = bsd_uthread_lookup_address (name, objfile);
@@ -182,7 +182,8 @@ bsd_uthread_lookup_offset (const char *name, struct objfile *objfile)
 static CORE_ADDR
 bsd_uthread_read_memory_address (CORE_ADDR addr)
 {
-  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  type *ptr_type
+    = builtin_type (current_inferior ()->arch ())->builtin_data_ptr;
   return read_memory_typed_address (addr, ptr_type);
 }
 
@@ -193,7 +194,7 @@ bsd_uthread_read_memory_address (CORE_ADDR addr)
 static int
 bsd_uthread_activate (struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
   struct bsd_uthread_ops *ops = get_bsd_uthread (gdbarch);
 
   /* Skip if the thread stratum has already been activated.  */
@@ -374,7 +375,7 @@ ptid_t
 bsd_uthread_target::wait (ptid_t ptid, struct target_waitstatus *status,
 			  target_wait_flags options)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   CORE_ADDR addr;
   process_stratum_target *beneath
     = as_process_stratum_target (this->beneath ());
@@ -432,7 +433,7 @@ bsd_uthread_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 bool
 bsd_uthread_target::thread_alive (ptid_t ptid)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   CORE_ADDR addr = ptid.tid ();
 
   if (addr != 0)
@@ -513,7 +514,7 @@ static const char * const bsd_uthread_state[] =
 const char *
 bsd_uthread_target::extra_thread_info (thread_info *info)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   CORE_ADDR addr = info->ptid.tid ();
 
   if (addr != 0)

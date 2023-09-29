@@ -726,13 +726,13 @@ mi_interp::on_target_resumed (ptid_t ptid)
 void
 mi_output_solib_attribs (ui_out *uiout, struct so_list *solib)
 {
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
 
   uiout->field_string ("id", solib->so_original_name);
   uiout->field_string ("target-name", solib->so_original_name);
   uiout->field_string ("host-name", solib->so_name);
   uiout->field_signed ("symbols-loaded", solib->symbols_loaded);
-  if (!gdbarch_has_global_solist (target_gdbarch ()))
+  if (!gdbarch_has_global_solist (current_inferior ()->arch ()))
       uiout->field_fmt ("thread-group", "i%d", current_inferior ()->num);
 
   ui_out_emit_list list_emitter (uiout, "ranges");
@@ -776,7 +776,7 @@ mi_interp::on_solib_unloaded (so_list *solib)
   uiout->field_string ("id", solib->so_original_name);
   uiout->field_string ("target-name", solib->so_original_name);
   uiout->field_string ("host-name", solib->so_name);
-  if (!gdbarch_has_global_solist (target_gdbarch ()))
+  if (!gdbarch_has_global_solist (current_inferior ()->arch ()))
     uiout->field_fmt ("thread-group", "i%d", current_inferior ()->num);
 
   gdb_flush (this->event_channel);
@@ -821,7 +821,7 @@ mi_interp::on_memory_changed (inferior *inferior, CORE_ADDR memaddr,
   ui_out_redirect_pop redir (mi_uiout, this->event_channel);
 
   mi_uiout->field_fmt ("thread-group", "i%d", inferior->num);
-  mi_uiout->field_core_addr ("addr", target_gdbarch (), memaddr);
+  mi_uiout->field_core_addr ("addr", current_inferior ()->arch (), memaddr);
   mi_uiout->field_string ("len", hex_string (len));
 
   /* Append 'type=code' into notification if MEMADDR falls in the range of

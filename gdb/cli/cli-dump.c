@@ -33,6 +33,7 @@
 #include "gdbsupport/filestuff.h"
 #include "gdbsupport/byte-vector.h"
 #include "gdbarch.h"
+#include "inferior.h"
 
 static gdb::unique_xmalloc_ptr<char>
 scan_expression (const char **cmd, const char *def)
@@ -426,10 +427,10 @@ restore_one_section (bfd *ibfd, asection *isec,
 
   if (load_offset != 0 || load_start != 0 || load_end != 0)
     gdb_printf (" into memory (%s to %s)\n",
-		paddress (target_gdbarch (),
+		paddress (current_inferior ()->arch (),
 			  (unsigned long) sec_start
 			  + sec_offset + load_offset),
-		paddress (target_gdbarch (),
+		paddress (current_inferior ()->arch (),
 			  (unsigned long) sec_start + sec_offset
 			  + load_offset + sec_load_count));
   else

@@ -287,7 +287,7 @@ post_create_inferior (int from_tty)
 
 	  /* If the solist is global across processes, there's no need to
 	     refetch it here.  */
-	  if (!gdbarch_has_global_solist (target_gdbarch ()))
+	  if (!gdbarch_has_global_solist (current_inferior ()->arch ()))
 	    solib_add (nullptr, 0, auto_solib_add);
 	}
     }
@@ -2015,7 +2015,7 @@ info_program_command (const char *args, int from_tty)
 
   target_files_info ();
   gdb_printf (_("Program stopped at %s.\n"),
-	      paddress (target_gdbarch (), tp->stop_pc ()));
+	      paddress (current_inferior ()->arch (), tp->stop_pc ()));
   if (tp->control.stop_step)
     gdb_printf (_("It stopped after being stepped.\n"));
   else if (stat != 0)
@@ -2661,7 +2661,7 @@ attach_command (const char *args, int from_tty)
 
   scoped_disable_commit_resumed disable_commit_resumed ("attaching");
 
-  if (gdbarch_has_global_solist (target_gdbarch ()))
+  if (gdbarch_has_global_solist (current_inferior ()->arch ()))
     /* Don't complain if all processes share the same symbol
        space.  */
     ;
@@ -2873,7 +2873,7 @@ detach_command (const char *args, int from_tty)
 
   /* If the solist is global across inferiors, don't clear it when we
      detach from a single inferior.  */
-  if (!gdbarch_has_global_solist (target_gdbarch ()))
+  if (!gdbarch_has_global_solist (current_inferior ()->arch ()))
     no_shared_libraries (nullptr, from_tty);
 
   if (deprecated_detach_hook)

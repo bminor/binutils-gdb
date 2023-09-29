@@ -640,14 +640,14 @@ record_full_arch_list_add_mem (CORE_ADDR addr, int len)
     gdb_printf (gdb_stdlog,
 		"Process record: add mem addr = %s len = %d to "
 		"record list.\n",
-		paddress (target_gdbarch (), addr), len);
+		paddress (current_inferior ()->arch (), addr), len);
 
   if (!addr)	/* FIXME: Why?  Some arch must permit it...  */
     return 0;
 
   rec = record_full_mem_alloc (addr, len);
 
-  if (record_read_memory (target_gdbarch (), addr,
+  if (record_read_memory (current_inferior ()->arch (), addr,
 			  record_full_get_loc (rec), len))
     {
       record_full_mem_release (rec);
@@ -945,7 +945,7 @@ record_full_open_1 (const char *name, int from_tty)
     error (_("Process record target can't debug inferior in non-stop mode "
 	     "(non-stop)."));
 
-  if (!gdbarch_process_record_p (target_gdbarch ()))
+  if (!gdbarch_process_record_p (current_inferior ()->arch ()))
     error (_("Process record: the current architecture doesn't support "
 	     "record function."));
 
@@ -1650,7 +1650,7 @@ record_full_target::xfer_partial (enum target_object object,
 	  if (!query (_("Because GDB is in replay mode, writing to memory "
 			"will make the execution log unusable from this "
 			"point onward.  Write memory at address %s?"),
-		       paddress (target_gdbarch (), offset)))
+		       paddress (current_inferior ()->arch (), offset)))
 	    error (_("Process record canceled the operation."));
 
 	  /* Destroy the record from here forward.  */
@@ -2810,6 +2810,8 @@ maintenance_print_record_instruction (const char *args, int from_tty)
     }
   gdb_assert (to_print != nullptr);
 
+  gdbarch *arch = current_inferior ()->arch ();
+
   /* Go back to the start of the instruction.  */
   while (to_print->prev != nullptr && to_print->prev->type != record_full_end)
     to_print = to_print->prev;
@@ -2825,14 +2827,12 @@ maintenance_print_record_instruction (const char *args, int from_tty)
 	{
 	  case record_full_reg:
 	    {
-	      type *regtype = gdbarch_register_type (target_gdbarch (),
-						     to_print->u.reg.num);
+	      type *regtype = gdbarch_register_type (arch, to_print->u.reg.num);
 	      value *val
 		  = value_from_contents (regtype,
 					 record_full_get_loc (to_print));
 	      gdb_printf ("Register %s changed: ",
-			  gdbarch_register_name (target_gdbarch (),
-						 to_print->u.reg.num));
+			  gdbarch_register_name (arch, to_print->u.reg.num));
 	      struct value_print_options opts;
 	      get_user_print_options (&opts);
 	      opts.raw = true;
@@ -2845,8 +2845,7 @@ maintenance_print_record_instruction (const char *args, int from_tty)
 	      gdb_byte *b = record_full_get_loc (to_print);
 	      gdb_printf ("%d bytes of memory at address %s changed from:",
 			  to_print->u.mem.len,
-			  print_core_address (target_gdbarch (),
-					      to_print->u.mem.addr));
+			  print_core_address (arch, to_print->u.mem.addr));
 	      for (int i = 0; i < to_print->u.mem.len; i++)
 		gdb_printf (" %02x", b[i]);
 	      gdb_printf ("\n");

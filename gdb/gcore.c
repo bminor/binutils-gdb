@@ -71,16 +71,16 @@ write_gcore_file_1 (bfd *obfd)
   gdb::unique_xmalloc_ptr<char> note_data;
   int note_size = 0;
   asection *note_sec = NULL;
+  gdbarch *arch = current_inferior ()->arch ();
 
   /* An external target method must build the notes section.  */
   /* FIXME: uweigand/2011-10-06: All architectures that support core file
      generation should be converted to gdbarch_make_corefile_notes; at that
      point, the target vector method can be removed.  */
-  if (!gdbarch_make_corefile_notes_p (target_gdbarch ()))
+  if (!gdbarch_make_corefile_notes_p (arch))
     note_data = target_make_corefile_notes (obfd, &note_size);
   else
-    note_data = gdbarch_make_corefile_notes (target_gdbarch (), obfd,
-					     &note_size);
+    note_data = gdbarch_make_corefile_notes (arch, obfd, &note_size);
 
   if (note_data == NULL || note_size == 0)
     error (_("Target does not support core file generation."));
@@ -166,7 +166,8 @@ gcore_command (const char *args, int from_tty)
 static enum bfd_architecture
 default_gcore_arch (void)
 {
-  const struct bfd_arch_info *bfdarch = gdbarch_bfd_arch_info (target_gdbarch ());
+  const bfd_arch_info *bfdarch
+    = gdbarch_bfd_arch_info (current_inferior ()->arch ());
 
   if (bfdarch != NULL)
     return bfdarch->arch;
@@ -179,9 +180,10 @@ default_gcore_arch (void)
 static const char *
 default_gcore_target (void)
 {
+  gdbarch *arch = current_inferior ()->arch ();
   /* The gdbarch may define a target to use for core files.  */
-  if (gdbarch_gcore_bfd_target_p (target_gdbarch ()))
-    return gdbarch_gcore_bfd_target (target_gdbarch ());
+  if (gdbarch_gcore_bfd_target_p (arch))
+    return gdbarch_gcore_bfd_target (arch);
 
   /* Otherwise, try to fall back to the exec target.  This will probably
      not work for non-ELF targets.  */
@@ -394,10 +396,9 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
   if (read == 0 && write == 0 && exec == 0 && modified == 0)
     {
       if (info_verbose)
-	{
-	  gdb_printf ("Ignore segment, %s bytes at %s\n",
-		      plongest (size), paddress (target_gdbarch (), vaddr));
-	}
+	gdb_printf ("Ignore segment, %s bytes at %s\n",
+		    plongest (size), paddress (current_inferior ()->arch (),
+		    vaddr));
 
       return 0;
     }
@@ -453,10 +454,9 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
     }
 
   if (info_verbose)
-    {
-      gdb_printf ("Save segment, %s bytes at %s\n",
-		  plongest (size), paddress (target_gdbarch (), vaddr));
-    }
+    gdb_printf ("Save segment, %s bytes at %s\n",
+		plongest (size), paddress (current_inferior ()->arch (),
+		vaddr));
 
   bfd_set_section_size (osec, size);
   bfd_set_section_vma (osec, vaddr);
@@ -486,8 +486,9 @@ gcore_create_memtag_section_callback (CORE_ADDR vaddr, unsigned long size,
   /* Ask the architecture to create a memory tag section for this particular
      memory map entry.  It will be populated with contents later, as we can't
      start writing the contents before we have all the sections sorted out.  */
+  gdbarch *arch = current_inferior ()->arch ();
   asection *memtag_section
-    = gdbarch_create_memtag_section (target_gdbarch (), obfd, vaddr, size);
+    = gdbarch_create_memtag_section (arch, obfd, vaddr, size);
 
   if (memtag_section == nullptr)
     {
@@ -501,7 +502,7 @@ gcore_create_memtag_section_callback (CORE_ADDR vaddr, unsigned long size,
       gdb_printf (gdb_stdout, "Saved memory tag segment, %s bytes "
 			      "at %s\n",
 		  plongest (bfd_section_size (memtag_section)),
-		  paddress (target_gdbarch (), vaddr));
+		  paddress (arch, vaddr));
     }
 
   return 0;
@@ -594,7 +595,8 @@ gcore_copy_callback (bfd *obfd, asection *osec)
 	  warning (_("Memory read failed for corefile "
 		     "section, %s bytes at %s."),
 		   plongest (size),
-		   paddress (target_gdbarch (), bfd_section_vma (osec)));
+		   paddress (current_inferior ()->arch (),
+			     bfd_section_vma (osec)));
 	  break;
 	}
       if (!bfd_set_section_contents (obfd, osec, memhunk.data (),
@@ -620,7 +622,7 @@ gcore_copy_memtag_section_callback (bfd *obfd, asection *osec)
     return;
 
   /* Fill the section with memory tag contents.  */
-  if (!gdbarch_fill_memtag_section (target_gdbarch (), osec))
+  if (!gdbarch_fill_memtag_section (current_inferior ()->arch (), osec))
     error (_("Failed to fill memory tag section for core file."));
 }
 
@@ -628,18 +630,17 @@ static int
 gcore_memory_sections (bfd *obfd)
 {
   /* Try gdbarch method first, then fall back to target method.  */
-  if (!gdbarch_find_memory_regions_p (target_gdbarch ())
-      || gdbarch_find_memory_regions (target_gdbarch (),
-				      gcore_create_callback, obfd) != 0)
+  gdbarch *arch = current_inferior ()->arch ();
+  if (!gdbarch_find_memory_regions_p (arch)
+      || gdbarch_find_memory_regions (arch, gcore_create_callback, obfd) != 0)
     {
       if (target_find_memory_regions (gcore_create_callback, obfd) != 0)
 	return 0;			/* FIXME: error return/msg?  */
     }
 
   /* Take care of dumping memory tags, if there are any.  */
-  if (!gdbarch_find_memory_regions_p (target_gdbarch ())
-      || gdbarch_find_memory_regions (target_gdbarch (),
-				      gcore_create_memtag_section_callback,
+  if (!gdbarch_find_memory_regions_p (arch)
+      || gdbarch_find_memory_regions (arch, gcore_create_memtag_section_callback,
 				      obfd) != 0)
     {
       if (target_find_memory_regions (gcore_create_memtag_section_callback,

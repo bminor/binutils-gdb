@@ -34,6 +34,7 @@
 #include "cp-support.h"
 #include "gdbcmd.h"
 #include "compile-c.h"
+#include "inferior.h"
 
 /* Convert a given symbol, SYM, to the compiler's representation.
    INSTANCE is the compiler instance.  IS_GLOBAL is true if the
@@ -89,7 +90,8 @@ convert_one_symbol (compile_cplus_instance *instance,
 	    kind = GCC_CP_SYMBOL_FUNCTION;
 	    addr = sym.symbol->value_block()->start ();
 	    if (is_global && sym.symbol->type ()->is_gnu_ifunc ())
-	      addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
+	      addr = gnu_ifunc_resolve_addr (current_inferior ()->arch (),
+					     addr);
 	  }
 	  break;
 
@@ -300,7 +302,7 @@ convert_symbol_bmsym (compile_cplus_instance *instance,
 	 function return type cannot be function  */
       type = builtin_type (objfile)->nodebug_text_symbol;
       kind = GCC_CP_SYMBOL_FUNCTION;
-      addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
+      addr = gnu_ifunc_resolve_addr (current_inferior ()->arch (), addr);
       break;
 
     case mst_data:
@@ -445,7 +447,8 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 			identifier);
 	  result = sym->value_block ()->start ();
 	  if (sym->type ()->is_gnu_ifunc ())
-	    result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
+	    result = gnu_ifunc_resolve_addr (current_inferior ()->arch (),
+					     result);
 	  found = 1;
 	}
       else
@@ -462,7 +465,8 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 			    identifier);
 	      result = msym.value_address ();
 	      if (msym.minsym->type () == mst_text_gnu_ifunc)
-		result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
+		result = gnu_ifunc_resolve_addr (current_inferior ()->arch (),
+						 result);
 	      found = 1;
 	    }
 	}

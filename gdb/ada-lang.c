@@ -4914,7 +4914,7 @@ ada_lookup_simple_minsym (const char *name, struct objfile *objfile)
     = ada_get_symbol_name_matcher (lookup_name);
 
   gdbarch_iterate_over_objfiles_in_search_order
-    (objfile != NULL ? objfile->arch () : target_gdbarch (),
+    (objfile != NULL ? objfile->arch () : current_inferior ()->arch (),
      [&result, lookup_name, match_name] (struct objfile *obj)
        {
 	 for (minimal_symbol *msymbol : obj->msymbols ())
@@ -6448,7 +6448,8 @@ ada_tag_value_at_base_address (struct value *obj)
 
   struct type *offset_type
     = language_lookup_primitive_type (language_def (language_ada),
-				      target_gdbarch(), "storage_offset");
+				      current_inferior ()->arch (),
+				      "storage_offset");
   ptr_type = lookup_pointer_type (offset_type);
   val = value_cast (ptr_type, tag);
   if (!val)
@@ -13766,7 +13767,7 @@ public:
 	struct gdbarch *gdbarch;
 
 	if (block == NULL)
-	  gdbarch = target_gdbarch ();
+	  gdbarch = current_inferior ()->arch ();
 	else
 	  gdbarch = block->gdbarch ();
 	sym.symbol

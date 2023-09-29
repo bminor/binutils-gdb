@@ -33,6 +33,7 @@
 #include "valprint.h"
 #include "cli/cli-style.h"
 #include "objfiles.h"
+#include "inferior.h"
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
@@ -59,7 +60,8 @@ show_use_libopcodes_styling  (struct ui_file *file, int from_tty,
 			      struct cmd_list_element *c,
 			      const char *value)
 {
-  gdb_non_printing_memory_disassembler dis (target_gdbarch ());
+  gdbarch *arch = current_inferior ()->arch ();
+  gdb_non_printing_memory_disassembler dis (arch);
   bool supported = dis.disasm_info ()->created_styled_output;
 
   if (supported || !use_libopcodes_styling)
@@ -71,7 +73,7 @@ show_use_libopcodes_styling  (struct ui_file *file, int from_tty,
 	 turned on!  */
       gdb_printf (file, _("Use of libopcodes styling support is \"off\""
 			  " (not supported on architecture \"%s\")\n"),
-		  gdbarch_bfd_arch_info (target_gdbarch ())->printable_name);
+		  gdbarch_bfd_arch_info (arch)->printable_name);
     }
 }
 
@@ -81,7 +83,8 @@ static void
 set_use_libopcodes_styling (const char *args, int from_tty,
 			    struct cmd_list_element *c)
 {
-  gdb_non_printing_memory_disassembler dis (target_gdbarch ());
+  gdbarch *arch = current_inferior ()->arch ();
+  gdb_non_printing_memory_disassembler dis (arch);
   bool supported = dis.disasm_info ()->created_styled_output;
 
   /* If the current architecture doesn't support libopcodes styling then we
@@ -93,7 +96,7 @@ set_use_libopcodes_styling (const char *args, int from_tty,
     {
       use_libopcodes_styling_option = use_libopcodes_styling;
       error (_("Use of libopcodes styling not supported on architecture \"%s\"."),
-	     gdbarch_bfd_arch_info (target_gdbarch ())->printable_name);
+	     gdbarch_bfd_arch_info (arch)->printable_name);
     }
   else
     use_libopcodes_styling = use_libopcodes_styling_option;

@@ -836,8 +836,8 @@ ps_err_e
 ps_get_thread_area (struct ps_prochandle *ph,
 		    lwpid_t lwpid, int idx, void **base)
 {
-  int is_64bit_p
-    = (gdbarch_bfd_arch_info (target_gdbarch ())->bits_per_word == 64);
+  gdbarch *arch = current_inferior ()->arch ();
+  int is_64bit_p = (gdbarch_bfd_arch_info (arch)->bits_per_word == 64);
 
   return aarch64_ps_get_thread_area (ph, lwpid, idx, base, is_64bit_p);
 }

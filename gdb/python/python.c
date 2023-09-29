@@ -254,7 +254,7 @@ gdbpy_enter::get_gdbarch ()
 void
 gdbpy_enter::finalize ()
 {
-  python_gdbarch = target_gdbarch ();
+  python_gdbarch = current_inferior ()->arch ();
 }
 
 /* A helper class to save and restore the GIL, but without touching

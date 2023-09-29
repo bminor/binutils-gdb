@@ -77,7 +77,7 @@
 #ifndef ARCH3264
 # define ARCH64() 0
 #else
-# define ARCH64() (register_size (target_gdbarch (), 0) == 8)
+# define ARCH64() (register_size (current_inferior ()->arch (), 0) == 8)
 #endif
 
 class rs6000_nat_target final : public inf_ptrace_target
@@ -1040,7 +1040,8 @@ rs6000_nat_target::xfer_shared_libraries
     return TARGET_XFER_E_IO;
 
   gdb::byte_vector ldi_buf = rs6000_ptrace_ldinfo (inferior_ptid);
-  result = rs6000_aix_ld_info_to_xml (target_gdbarch (), ldi_buf.data (),
+  result = rs6000_aix_ld_info_to_xml (current_inferior ()->arch (),
+				      ldi_buf.data (),
 				      readbuf, offset, len, 1);
 
   if (result == 0)

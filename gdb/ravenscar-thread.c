@@ -383,7 +383,7 @@ get_running_thread_id (int cpu)
   gdb_byte *buf;
   CORE_ADDR object_addr;
   struct type *builtin_type_void_data_ptr
-    = builtin_type (target_gdbarch ())->builtin_data_ptr;
+    = builtin_type (current_inferior ()->arch ())->builtin_data_ptr;
 
   if (!object_msym.minsym)
     return 0;
@@ -648,7 +648,8 @@ ravenscar_thread_target::get_fpu_state (struct regcache *regcache,
   if (fpu_context.minsym == nullptr)
     return NO_FP_REGISTERS;
 
-  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  type *ptr_type
+    = builtin_type (current_inferior ()->arch ())->builtin_data_ptr;
   ptr_type = lookup_pointer_type (ptr_type);
   value *val = value_from_pointer (ptr_type, fpu_context.value_address ());
 
@@ -874,7 +875,7 @@ ravenscar_inferior_created (inferior *inf)
   const char *err_msg;
 
   if (!ravenscar_task_support
-      || gdbarch_ravenscar_ops (target_gdbarch ()) == NULL
+      || gdbarch_ravenscar_ops (current_inferior ()->arch ()) == NULL
       || !has_ravenscar_runtime ())
     return;
 

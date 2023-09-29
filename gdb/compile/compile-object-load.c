@@ -52,7 +52,8 @@ munmap_list::~munmap_list ()
     {
       try
 	{
-	  gdbarch_infcall_munmap (target_gdbarch (), item.addr, item.size);
+	  gdbarch_infcall_munmap (current_inferior ()->arch (),
+				  item.addr, item.size);
 	}
       catch (const gdb_exception_error &ex)
 	{
@@ -130,7 +131,7 @@ setup_sections_data::setup_one_section (asection *sect)
 		    "module \"%s\" section \"%s\" size %s prot %u\n",
 		    bfd_get_filename (m_bfd),
 		    bfd_section_name (sect),
-		    paddress (target_gdbarch (),
+		    paddress (current_inferior ()->arch (),
 			      bfd_section_size (sect)),
 		    prot);
     }
@@ -145,14 +146,14 @@ setup_sections_data::setup_one_section (asection *sect)
 
       if (m_last_size != 0)
 	{
-	  addr = gdbarch_infcall_mmap (target_gdbarch (), m_last_size,
-				       m_last_prot);
+	  addr = gdbarch_infcall_mmap (current_inferior ()->arch (),
+				       m_last_size, m_last_prot);
 	  munmap_list.add (addr, m_last_size);
 	  if (compile_debug)
 	    gdb_printf (gdb_stdlog,
 			"allocated %s bytes at %s prot %u\n",
-			paddress (target_gdbarch (), m_last_size),
-			paddress (target_gdbarch (), addr),
+			paddress (current_inferior ()->arch (), m_last_size),
+			paddress (current_inferior ()->arch (), addr),
 			m_last_prot);
 	}
       else
@@ -161,8 +162,8 @@ setup_sections_data::setup_one_section (asection *sect)
       if ((addr & (m_last_max_alignment - 1)) != 0)
 	error (_("Inferior compiled module address %s "
 		 "is not aligned to BFD required %s."),
-	       paddress (target_gdbarch (), addr),
-	       paddress (target_gdbarch (), m_last_max_alignment));
+	       paddress (current_inferior ()->arch (), addr),
+	       paddress (current_inferior ()->arch (), m_last_max_alignment));
 
       for (sect_iter = m_last_section_first; sect_iter != sect;
 	   sect_iter = sect_iter->next)
@@ -387,8 +388,8 @@ copy_sections (bfd *abfd, asection *sect, void *data)
     error (_("Cannot write compiled module \"%s\" section \"%s\" "
 	     "to inferior memory range %s-%s."),
 	   bfd_get_filename (abfd), bfd_section_name (sect),
-	   paddress (target_gdbarch (), inferior_addr),
-	   paddress (target_gdbarch (),
+	   paddress (current_inferior ()->arch (), inferior_addr),
+	   paddress (current_inferior ()->arch (),
 		     inferior_addr + bfd_section_size (sect)));
 }
 
@@ -546,7 +547,7 @@ get_regs_type (struct symbol *func_sym, struct objfile *objfile)
 static void
 store_regs (struct type *regs_type, CORE_ADDR regs_base)
 {
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
   int fieldno;
 
   for (fieldno = 0; fieldno < regs_type->num_fields (); fieldno++)
@@ -666,16 +667,19 @@ compile_object_load (const compile_file_names &file_names,
     {
     case COMPILE_I_SIMPLE_SCOPE:
       expect_parameters = 1;
-      expect_return_type = builtin_type (target_gdbarch ())->builtin_void;
+      expect_return_type
+	= builtin_type (current_inferior ()->arch ())->builtin_void;
       break;
     case COMPILE_I_RAW_SCOPE:
       expect_parameters = 0;
-      expect_return_type = builtin_type (target_gdbarch ())->builtin_void;
+      expect_return_type
+	= builtin_type (current_inferior ()->arch ())->builtin_void;
       break;
     case COMPILE_I_PRINT_ADDRESS_SCOPE:
     case COMPILE_I_PRINT_VALUE_SCOPE:
       expect_parameters = 2;
-      expect_return_type = builtin_type (target_gdbarch ())->builtin_void;
+      expect_return_type
+	= builtin_type (current_inferior ()->arch ())->builtin_void;
       break;
     default:
       internal_error (_("invalid scope %d"), scope);
@@ -759,7 +763,7 @@ compile_object_load (const compile_file_names &file_names,
 	    gdb_printf (gdb_stdlog,
 			"Connecting ELF symbol \"%s\" to the .toc section (%s)\n",
 			sym->name,
-			paddress (target_gdbarch (), sym->value));
+			paddress (current_inferior ()->arch (), sym->value));
 	  continue;
 	}
 
@@ -775,17 +779,17 @@ compile_object_load (const compile_file_names &file_names,
 	    gdb_printf (gdb_stdlog,
 			"ELF mst_text symbol \"%s\" relocated to %s\n",
 			sym->name,
-			paddress (target_gdbarch (), sym->value));
+			paddress (current_inferior ()->arch (), sym->value));
 	  break;
 	case mst_text_gnu_ifunc:
-	  sym->value = gnu_ifunc_resolve_addr (target_gdbarch (),
+	  sym->value = gnu_ifunc_resolve_addr (current_inferior ()->arch (),
 					       bmsym.value_address ());
 	  if (compile_debug)
 	    gdb_printf (gdb_stdlog,
 			"ELF mst_text_gnu_ifunc symbol \"%s\" "
 			"relocated to %s\n",
 			sym->name,
-			paddress (target_gdbarch (), sym->value));
+			paddress (current_inferior ()->arch (), sym->value));
 	  break;
 	default:
 	  warning (_("Could not find symbol \"%s\" "
@@ -805,7 +809,7 @@ compile_object_load (const compile_file_names &file_names,
   else
     {
       /* Use read-only non-executable memory protection.  */
-      regs_addr = gdbarch_infcall_mmap (target_gdbarch (),
+      regs_addr = gdbarch_infcall_mmap (current_inferior ()->arch (),
 					regs_type->length (),
 					GDB_MMAP_PROT_READ);
       gdb_assert (regs_addr != 0);
@@ -813,9 +817,9 @@ compile_object_load (const compile_file_names &file_names,
       if (compile_debug)
 	gdb_printf (gdb_stdlog,
 		    "allocated %s bytes at %s for registers\n",
-		    paddress (target_gdbarch (),
+		    paddress (current_inferior ()->arch (),
 			      regs_type->length ()),
-		    paddress (target_gdbarch (), regs_addr));
+		    paddress (current_inferior ()->arch (), regs_addr));
       store_regs (regs_type, regs_addr);
     }
 
@@ -826,7 +830,7 @@ compile_object_load (const compile_file_names &file_names,
       if (out_value_type == NULL)
 	return NULL;
       check_typedef (out_value_type);
-      out_value_addr = gdbarch_infcall_mmap (target_gdbarch (),
+      out_value_addr = gdbarch_infcall_mmap (current_inferior ()->arch (),
 					     out_value_type->length (),
 					     (GDB_MMAP_PROT_READ
 					      | GDB_MMAP_PROT_WRITE));
@@ -836,9 +840,9 @@ compile_object_load (const compile_file_names &file_names,
       if (compile_debug)
 	gdb_printf (gdb_stdlog,
 		    "allocated %s bytes at %s for printed value\n",
-		    paddress (target_gdbarch (),
+		    paddress (current_inferior ()->arch (),
 			      out_value_type->length ()),
-		    paddress (target_gdbarch (), out_value_addr));
+		    paddress (current_inferior ()->arch (), out_value_addr));
     }
 
   compile_module_up retval (new struct compile_module);

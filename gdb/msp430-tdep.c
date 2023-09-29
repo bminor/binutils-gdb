@@ -35,6 +35,7 @@
 #include "dwarf2/frame.h"
 #include "reggroups.h"
 #include "gdbarch.h"
+#include "inferior.h"
 
 #include "elf/msp430.h"
 #include "opcode/msp430-decode.h"
@@ -328,7 +329,7 @@ check_for_saved (void *result_untyped, pv_t addr, CORE_ADDR size, pv_t value)
   if (value.kind == pvk_register
       && value.k == 0
       && pv_is_register (addr, MSP430_SP_REGNUM)
-      && size == register_size (target_gdbarch (), value.reg))
+      && size == register_size (current_inferior ()->arch  (), value.reg))
     result->reg_offset[value.reg] = addr.k;
 }
 

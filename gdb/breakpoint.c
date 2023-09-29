@@ -597,7 +597,7 @@ show_debug_breakpoint (struct ui_file *file, int from_tty,
 int
 breakpoints_should_be_inserted_now (void)
 {
-  if (gdbarch_has_global_breakpoints (target_gdbarch ()))
+  if (gdbarch_has_global_breakpoints (current_inferior ()->arch ()))
     {
       /* If breakpoints are global, they should be inserted even if no
 	 thread under gdb's control is running, or even if there are
@@ -3224,7 +3224,7 @@ update_inserted_breakpoint_locations (void)
 	 to select an inferior to insert breakpoint to.  In fact, even
 	 if we aren't attached to any process yet, we should still
 	 insert breakpoints.  */
-      if (!gdbarch_has_global_breakpoints (target_gdbarch ())
+      if (!gdbarch_has_global_breakpoints (current_inferior ()->arch ())
 	  && (inferior_ptid == null_ptid || !target_has_execution ()))
 	continue;
 
@@ -3284,7 +3284,7 @@ insert_breakpoint_locations (void)
 	 to select an inferior to insert breakpoint to.  In fact, even
 	 if we aren't attached to any process yet, we should still
 	 insert breakpoints.  */
-      if (!gdbarch_has_global_breakpoints (target_gdbarch ())
+      if (!gdbarch_has_global_breakpoints (current_inferior ()->arch ())
 	  && (inferior_ptid == null_ptid || !target_has_execution ()))
 	continue;
 
@@ -4243,7 +4243,7 @@ breakpoint_init_inferior (enum inf_context context)
 
   /* If breakpoint locations are shared across processes, then there's
      nothing to do.  */
-  if (gdbarch_has_global_breakpoints (target_gdbarch ()))
+  if (gdbarch_has_global_breakpoints (current_inferior ()->arch ()))
     return;
 
   mark_breakpoints_out ();
@@ -6615,7 +6615,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       /* For backward compatibility, don't display inferiors in CLI unless
 	 there are several.  Always display for MI. */
       if (allflag
-	  || (!gdbarch_has_global_breakpoints (target_gdbarch ())
+	  || (!gdbarch_has_global_breakpoints (current_inferior ()->arch ())
 	      && (program_spaces.size () > 1
 		  || number_of_inferiors () > 1)
 	      /* LOC is for existing B, it cannot be in
@@ -7299,7 +7299,7 @@ int
 breakpoint_address_match (const address_space *aspace1, CORE_ADDR addr1,
 			  const address_space *aspace2, CORE_ADDR addr2)
 {
-  return ((gdbarch_has_global_breakpoints (target_gdbarch ())
+  return ((gdbarch_has_global_breakpoints (current_inferior ()->arch ())
 	   || aspace1 == aspace2)
 	  && addr1 == addr2);
 }
@@ -7315,7 +7315,7 @@ breakpoint_address_match_range (const address_space *aspace1,
 				int len1, const address_space *aspace2,
 				CORE_ADDR addr2)
 {
-  return ((gdbarch_has_global_breakpoints (target_gdbarch ())
+  return ((gdbarch_has_global_breakpoints (current_inferior ()->arch ())
 	   || aspace1 == aspace2)
 	  && addr2 >= addr1 && addr2 < addr1 + len1);
 }
@@ -7349,7 +7349,7 @@ breakpoint_location_address_range_overlap (struct bp_location *bl,
 					   const address_space *aspace,
 					   CORE_ADDR addr, int len)
 {
-  if (gdbarch_has_global_breakpoints (target_gdbarch ())
+  if (gdbarch_has_global_breakpoints (current_inferior ()->arch ())
       || bl->pspace->aspace == aspace)
     {
       int bl_len = bl->length != 0 ? bl->length : 1;

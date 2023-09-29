@@ -1058,11 +1058,10 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
   switch_to_thread (tp);
 
   struct btrace_thread_info *btinfo;
-  struct gdbarch *gdbarch;
   unsigned int blk;
   int level;
 
-  gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
   btinfo = &tp->btrace;
   blk = btrace->blocks->size ();
 

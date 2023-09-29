@@ -34,7 +34,7 @@ ia64_vms_find_proc_info_x (unw_addr_space_t as, unw_word_t ip,
 			   unw_proc_info_t *pi,
 			   int need_unwind_info, void *arg)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   gdb_byte buf[32];
   const char *annex = core_addr_to_string (ip);
   LONGEST res;

@@ -39,6 +39,7 @@
 #include "linux-tdep.h"
 #include "xml-syscall.h"
 #include "gdbsupport/gdb_signals.h"
+#include "inferior.h"
 
 #include "features/mips-linux.c"
 #include "features/mips-dsp-linux.c"
@@ -599,8 +600,8 @@ mips_linux_in_dynsym_stub (CORE_ADDR pc)
 {
   gdb_byte buf[28], *p;
   ULONGEST insn, insn1;
-  int n64 = (mips_abi (target_gdbarch ()) == MIPS_ABI_N64);
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  int n64 = (mips_abi (current_inferior ()->arch ()) == MIPS_ABI_N64);
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
 
   if (in_mips_stubs_section (pc))
     return 1;

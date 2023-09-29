@@ -55,6 +55,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include "gdbsupport/gdb-safe-ctype.h"
 #include "gdbsupport/rsp-low.h"
+#include "inferior.h"
 
 /* Chain containing all defined memory-tag subcommands.  */
 
@@ -1132,7 +1133,7 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	    = value_from_ulongest (builtin_type (gdbarch)->builtin_data_ptr,
 				   tag_laddr);
 
-	  if (gdbarch_tagged_address_p (target_gdbarch (), v_addr))
+	  if (gdbarch_tagged_address_p (current_inferior ()->arch  (), v_addr))
 	    {
 	      /* Fetch the allocation tag.  */
 	      struct value *tag
@@ -1287,7 +1288,7 @@ should_validate_memtags (struct value *value)
     return false;
 
   /* We do.  Check whether it includes any tags.  */
-  return gdbarch_tagged_address_p (target_gdbarch (), value);
+  return gdbarch_tagged_address_p (current_inferior ()->arch  (), value);
 }
 
 /* Helper for parsing arguments for print_command_1.  */
@@ -1342,21 +1343,20 @@ print_command_1 (const char *args, int voidprint)
 	{
 	  try
 	    {
+	      gdbarch *arch = current_inferior ()->arch ();
+
 	      if (should_validate_memtags (val)
-		  && !gdbarch_memtag_matches_p (target_gdbarch (), val))
+		  && !gdbarch_memtag_matches_p (arch, val))
 		{
 		  /* Fetch the logical tag.  */
 		  struct value *tag
-		    = gdbarch_get_memtag (target_gdbarch (), val,
-					  memtag_type::logical);
-		  std::string ltag
-		    = gdbarch_memtag_to_string (target_gdbarch (), tag);
+		    = gdbarch_get_memtag (arch, val, memtag_type::logical);
+		  std::string ltag = gdbarch_memtag_to_string (arch, tag);
 
 		  /* Fetch the allocation tag.  */
-		  tag = gdbarch_get_memtag (target_gdbarch (), val,
+		  tag = gdbarch_get_memtag (arch, val,
 					    memtag_type::allocation);
-		  std::string atag
-		    = gdbarch_memtag_to_string (target_gdbarch (), tag);
+		  std::string atag = gdbarch_memtag_to_string (arch, tag);
 
 		  gdb_printf (_("Logical tag (%s) does not match the "
 				"allocation tag (%s).\n"),
@@ -2977,7 +2977,7 @@ static void
 show_addr_not_tagged (CORE_ADDR address)
 {
   error (_("Address %s not in a region mapped with a memory tagging flag."),
-	 paddress (target_gdbarch (), address));
+	 paddress (current_inferior ()->arch (), address));
 }
 
 /* Convenience function for error checking in memory-tag commands.  */
@@ -3010,18 +3010,18 @@ memory_tag_print_tag_command (const char *args, enum memtag_type tag_type)
   value_print_options print_opts;
 
   struct value *val = process_print_command_args (args, &print_opts, true);
+  gdbarch *arch = current_inferior ()->arch ();
 
   /* If the address is not in a region memory mapped with a memory tagging
      flag, it is no use trying to access/manipulate its allocation tag.
 
      It is OK to manipulate the logical tag though.  */
   if (tag_type == memtag_type::allocation
-      && !gdbarch_tagged_address_p (target_gdbarch (), val))
+      && !gdbarch_tagged_address_p (arch, val))
     show_addr_not_tagged (value_as_address (val));
 
-  struct value *tag_value
-    = gdbarch_get_memtag (target_gdbarch (), val, tag_type);
-  std::string tag = gdbarch_memtag_to_string (target_gdbarch (), tag_value);
+  value *tag_value = gdbarch_get_memtag (arch, val, tag_type);
+  std::string tag = gdbarch_memtag_to_string (arch, tag_value);
 
   if (tag.empty ())
     gdb_printf (_("%s tag unavailable.\n"),
@@ -3099,6 +3099,7 @@ memory_tag_with_logical_tag_command (const char *args, int from_tty)
   gdb::byte_vector tags;
   struct value *val;
   value_print_options print_opts;
+  gdbarch *arch = current_inferior ()->arch ();
 
   /* Parse the input.  */
   parse_with_logical_tag_input (args, &val, tags, &print_opts);
@@ -3116,12 +3117,11 @@ memory_tag_with_logical_tag_command (const char *args, int from_tty)
      length.  */
 
   /* Cast to (void *).  */
-  val = value_cast (builtin_type (target_gdbarch ())->builtin_data_ptr,
+  val = value_cast (builtin_type (current_inferior ()->arch ())->builtin_data_ptr,
 		    val);
 
   /* Length doesn't matter for a logical tag.  Pass 0.  */
-  if (!gdbarch_set_memtags (target_gdbarch (), val, 0, tags,
-			    memtag_type::logical))
+  if (!gdbarch_set_memtags (arch, val, 0, tags,  memtag_type::logical))
     gdb_printf (_("Could not update the logical tag data.\n"));
   else
     {
@@ -3174,7 +3174,7 @@ parse_set_allocation_tag_input (const char *args, struct value **val,
 
   /* If the address is not in a region memory mapped with a memory tagging
      flag, it is no use trying to access/manipulate its allocation tag.  */
-  if (!gdbarch_tagged_address_p (target_gdbarch (), *val))
+  if (!gdbarch_tagged_address_p (current_inferior ()->arch (), *val))
     show_addr_not_tagged (value_as_address (*val));
 }
 
@@ -3197,7 +3197,7 @@ memory_tag_set_allocation_tag_command (const char *args, int from_tty)
   /* Parse the input.  */
   parse_set_allocation_tag_input (args, &val, &length, tags);
 
-  if (!gdbarch_set_memtags (target_gdbarch (), val, length, tags,
+  if (!gdbarch_set_memtags (current_inferior ()->arch (), val, length, tags,
 			    memtag_type::allocation))
     gdb_printf (_("Could not update the allocation tag(s).\n"));
   else
@@ -3220,41 +3220,39 @@ memory_tag_check_command (const char *args, int from_tty)
   value_print_options print_opts;
 
   struct value *val = process_print_command_args (args, &print_opts, true);
+  gdbarch *arch = current_inferior ()->arch ();
 
   /* If the address is not in a region memory mapped with a memory tagging
      flag, it is no use trying to access/manipulate its allocation tag.  */
-  if (!gdbarch_tagged_address_p (target_gdbarch (), val))
+  if (!gdbarch_tagged_address_p (arch, val))
     show_addr_not_tagged (value_as_address (val));
 
   CORE_ADDR addr = value_as_address (val);
 
   /* Check if the tag is valid.  */
-  if (!gdbarch_memtag_matches_p (target_gdbarch (), val))
+  if (!gdbarch_memtag_matches_p (arch, val))
     {
-      struct value *tag
-	= gdbarch_get_memtag (target_gdbarch (), val, memtag_type::logical);
-      std::string ltag
-	= gdbarch_memtag_to_string (target_gdbarch (), tag);
+      value *tag = gdbarch_get_memtag (arch, val, memtag_type::logical);
+      std::string ltag = gdbarch_memtag_to_string (arch, tag);
 
-      tag = gdbarch_get_memtag (target_gdbarch (), val,
-				memtag_type::allocation);
-      std::string atag
-	= gdbarch_memtag_to_string (target_gdbarch (), tag);
+      tag = gdbarch_get_memtag (arch, val, memtag_type::allocation);
+      std::string atag = gdbarch_memtag_to_string (arch, tag);
 
       gdb_printf (_("Logical tag (%s) does not match"
 		    " the allocation tag (%s) for address %s.\n"),
 		  ltag.c_str (), atag.c_str (),
-		  paddress (target_gdbarch (), addr));
+		  paddress (current_inferior ()->arch (), addr));
     }
   else
     {
       struct value *tag
-	= gdbarch_get_memtag (target_gdbarch (), val, memtag_type::logical);
+	= gdbarch_get_memtag (current_inferior ()->arch (), val,
+			      memtag_type::logical);
       std::string ltag
-	= gdbarch_memtag_to_string (target_gdbarch (), tag);
+	= gdbarch_memtag_to_string (current_inferior ()->arch (), tag);
 
       gdb_printf (_("Memory tags for address %s match (%s).\n"),
-		  paddress (target_gdbarch (), addr), ltag.c_str ());
+		  paddress (current_inferior ()->arch (), addr), ltag.c_str ());
     }
 }
 

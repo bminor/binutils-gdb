@@ -609,7 +609,7 @@ gdbarch_update_p (struct gdbarch_info info)
 
   /* If it is the same old architecture, accept the request (but don't
      swap anything).  */
-  if (new_gdbarch == target_gdbarch ())
+  if (new_gdbarch == current_inferior ()->arch ())
     {
       if (gdbarch_debug)
 	gdb_printf (gdb_stdlog, "gdbarch_update_p: "
@@ -850,7 +850,7 @@ get_current_arch (void)
   if (has_stack_frames ())
     return get_frame_arch (get_selected_frame (NULL));
   else
-    return target_gdbarch ();
+    return current_inferior ()->arch ();
 }
 
 int
@@ -1488,14 +1488,6 @@ bool
 gdbarch_initialized_p (gdbarch *arch)
 {
   return arch->initialized_p;
-}
-
-/* Return the current inferior's arch.  */
-
-struct gdbarch *
-target_gdbarch (void)
-{
-  return current_inferior ()->arch ();
 }
 
 void _initialize_gdbarch_utils ();

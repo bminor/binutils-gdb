@@ -1920,7 +1920,7 @@ ppc_linux_nat_target::auxv_parse (const gdb_byte **readptr,
 
   int sizeof_auxv_field = ppc_linux_target_wordsize (tid);
 
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   const gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)

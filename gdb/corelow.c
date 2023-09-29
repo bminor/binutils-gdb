@@ -1365,7 +1365,7 @@ bool
 core_target::fetch_memtags (CORE_ADDR address, size_t len,
 			    gdb::byte_vector &tags, int type)
 {
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
 
   /* Make sure we have a way to decode the memory tag notes.  */
   if (!gdbarch_decode_memtag_section_p (gdbarch))

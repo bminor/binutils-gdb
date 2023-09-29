@@ -369,9 +369,9 @@ struct packet_reg
   long regnum; /* GDB's internal register number.  */
   LONGEST pnum; /* Remote protocol register number.  */
   int in_g_packet; /* Always part of G packet.  */
-  /* long size in bytes;  == register_size (target_gdbarch (), regnum);
+  /* long size in bytes;  == register_size (arch, regnum);
      at present.  */
-  /* char *name; == gdbarch_register_name (target_gdbarch (), regnum);
+  /* char *name; == gdbarch_register_name (arch, regnum);
      at present.  */
 };
 
@@ -1584,7 +1584,8 @@ remote_target::remote_get_noisy_reply ()
 
 	  try
 	    {
-	      gdbarch_relocate_instruction (target_gdbarch (), &to, from);
+	      gdbarch_relocate_instruction (current_inferior ()->arch (),
+					    &to, from);
 	      relocated = 1;
 	    }
 	  catch (const gdb_exception &ex)
@@ -1657,7 +1658,7 @@ remote_target::get_remote_state ()
      function which calls getpkt also needs to be mindful of changes
      to rs->buf, but this call limits the number of places which run
      into trouble.  */
-  m_remote_state.get_remote_arch_state (target_gdbarch ());
+  m_remote_state.get_remote_arch_state (current_inferior ()->arch ());
 
   return &m_remote_state;
 }
@@ -1823,7 +1824,8 @@ long
 remote_target::get_remote_packet_size ()
 {
   struct remote_state *rs = get_remote_state ();
-  remote_arch_state *rsa = rs->get_remote_arch_state (target_gdbarch ());
+  remote_arch_state *rsa
+    = rs->get_remote_arch_state (current_inferior ()->arch ());
 
   if (rs->explicit_packet_size)
     return rs->explicit_packet_size;
@@ -1975,7 +1977,8 @@ long
 remote_target::get_memory_packet_size (struct memory_packet_config *config)
 {
   struct remote_state *rs = get_remote_state ();
-  remote_arch_state *rsa = rs->get_remote_arch_state (target_gdbarch ());
+  remote_arch_state *rsa
+    = rs->get_remote_arch_state (current_inferior ()->arch ());
 
   long what_they_get;
   if (config->fixed_p)
@@ -2665,7 +2668,7 @@ remote_target::remote_add_inferior (bool fake_pid_p, int pid, int attached,
   if (attached == -1)
     attached = remote_query_attached (pid);
 
-  if (gdbarch_has_global_solist (target_gdbarch ()))
+  if (gdbarch_has_global_solist (current_inferior ()->arch ()))
     {
       /* If the target shares code across all inferiors, then every
 	 attach adds a new inferior.  */
@@ -5012,7 +5015,7 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
 
   /* On OSs where the list of libraries is global to all
      processes, we fetch them early.  */
-  if (gdbarch_has_global_solist (target_gdbarch ()))
+  if (gdbarch_has_global_solist (current_inferior ()->arch ()))
     solib_add (NULL, from_tty, auto_solib_add);
 
   if (target_is_non_stop_p ())
@@ -5138,7 +5141,7 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
 	 supported for non-stop; it could be, but it is tricky if
 	 there are no stopped threads when we connect.  */
       if (remote_read_description_p (this)
-	  && gdbarch_target_desc (target_gdbarch ()) == NULL)
+	  && gdbarch_target_desc (current_inferior ()->arch ()) == NULL)
 	{
 	  target_clear_description ();
 	  target_find_description ();
@@ -5343,13 +5346,14 @@ remote_target::remote_check_symbols ()
 		   &reply[8]);
       else
 	{
-	  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
+	  int addr_size = gdbarch_addr_bit (current_inferior ()->arch ()) / 8;
 	  CORE_ADDR sym_addr = sym.value_address ();
 
 	  /* If this is a function address, return the start of code
 	     instead of any data function descriptor.  */
 	  sym_addr = gdbarch_convert_from_func_ptr_addr
-	    (target_gdbarch (), sym_addr, current_inferior ()->top_target ());
+	    (current_inferior ()->arch (), sym_addr,
+	     current_inferior ()->top_target ());
 
 	  xsnprintf (msg.data (), get_remote_packet_size (), "qSymbol:%s:%s",
 		     phex_nz (sym_addr, addr_size), &reply[8]);
@@ -6143,7 +6147,7 @@ remote_target::remote_detach_1 (inferior *inf, int from_tty)
 
   target_announce_detach (from_tty);
 
-  if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
+  if (!gdbarch_has_global_breakpoints (current_inferior ()->arch ()))
     {
       /* If we're in breakpoints-always-inserted mode, or the inferior
 	 is running, we have to remove breakpoints before detaching.
@@ -6504,7 +6508,7 @@ remote_target::append_resumption (char *p, char *endp,
 
       if (tp->control.may_range_step)
 	{
-	  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
+	  int addr_size = gdbarch_addr_bit (current_inferior ()->arch ()) / 8;
 
 	  p += xsnprintf (p, endp - p, ";r%s,%s",
 			  phex_nz (tp->control.step_range_start,
@@ -9024,7 +9028,7 @@ remote_address_masked (CORE_ADDR addr)
 
   /* If "remoteaddresssize" was not set, default to target address size.  */
   if (!address_size)
-    address_size = gdbarch_addr_bit (target_gdbarch ());
+    address_size = gdbarch_addr_bit (current_inferior ()->arch ());
 
   if (address_size > 0
       && address_size < (sizeof (ULONGEST) * 8))
@@ -9537,7 +9541,7 @@ static const int remote_flash_timeout = 1000;
 void
 remote_target::flash_erase (ULONGEST address, LONGEST length)
 {
-  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
+  int addr_size = gdbarch_addr_bit (current_inferior ()->arch ()) / 8;
   enum packet_result ret;
   scoped_restore restore_timeout
     = make_scoped_restore (&remote_timeout, remote_flash_timeout);
@@ -10709,7 +10713,7 @@ remote_target::insert_breakpoint (struct gdbarch *gdbarch,
 
       /* Make sure the remote is pointing at the right process, if
 	 necessary.  */
-      if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
+      if (!gdbarch_has_global_breakpoints (current_inferior ()->arch ()))
 	set_general_process ();
 
       rs = get_remote_state ();
@@ -10767,7 +10771,7 @@ remote_target::remove_breakpoint (struct gdbarch *gdbarch,
 
       /* Make sure the remote is pointing at the right process, if
 	 necessary.  */
-      if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
+      if (!gdbarch_has_global_breakpoints (current_inferior ()->arch ()))
 	set_general_process ();
 
       *(p++) = 'z';
@@ -10821,7 +10825,7 @@ remote_target::insert_watchpoint (CORE_ADDR addr, int len,
 
   /* Make sure the remote is pointing at the right process, if
      necessary.  */
-  if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
+  if (!gdbarch_has_global_breakpoints (current_inferior ()->arch ()))
     set_general_process ();
 
   xsnprintf (rs->buf.data (), endbuf - rs->buf.data (), "Z%x,", packet);
@@ -10871,7 +10875,7 @@ remote_target::remove_watchpoint (CORE_ADDR addr, int len,
 
   /* Make sure the remote is pointing at the right process, if
      necessary.  */
-  if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
+  if (!gdbarch_has_global_breakpoints (current_inferior ()->arch ()))
     set_general_process ();
 
   xsnprintf (rs->buf.data (), endbuf - rs->buf.data (), "z%x,", packet);
@@ -11021,7 +11025,7 @@ remote_target::insert_hw_breakpoint (struct gdbarch *gdbarch,
 
   /* Make sure the remote is pointing at the right process, if
      necessary.  */
-  if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
+  if (!gdbarch_has_global_breakpoints (current_inferior ()->arch ()))
     set_general_process ();
 
   rs = get_remote_state ();
@@ -11078,7 +11082,7 @@ remote_target::remove_hw_breakpoint (struct gdbarch *gdbarch,
 
   /* Make sure the remote is pointing at the right process, if
      necessary.  */
-  if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
+  if (!gdbarch_has_global_breakpoints (current_inferior ()->arch ()))
     set_general_process ();
 
   *(p++) = 'z';
@@ -11202,12 +11206,12 @@ compare_sections_command (const char *args, int from_tty)
 
       if (res == -1)
 	error (_("target memory fault, section %s, range %s -- %s"), sectname,
-	       paddress (target_gdbarch (), lma),
-	       paddress (target_gdbarch (), lma + size));
+	       paddress (current_inferior ()->arch (), lma),
+	       paddress (current_inferior ()->arch (), lma + size));
 
       gdb_printf ("Section %s, range %s -- %s: ", sectname,
-		  paddress (target_gdbarch (), lma),
-		  paddress (target_gdbarch (), lma + size));
+		  paddress (current_inferior ()->arch (), lma),
+		  paddress (current_inferior ()->arch (), lma + size));
       if (res)
 	gdb_printf ("matched.\n");
       else
@@ -11365,7 +11369,8 @@ remote_target::xfer_partial (enum target_object object,
   int i;
   char *p2;
   char query_type;
-  int unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
+  int unit_size
+    = gdbarch_addressable_memory_unit_size (current_inferior ()->arch ());
 
   set_remote_traceframe ();
   set_general_thread (inferior_ptid);
@@ -11561,7 +11566,7 @@ remote_target::search_memory (CORE_ADDR start_addr, ULONGEST search_space_len,
 			      const gdb_byte *pattern, ULONGEST pattern_len,
 			      CORE_ADDR *found_addrp)
 {
-  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
+  int addr_size = gdbarch_addr_bit (current_inferior ()->arch ()) / 8;
   struct remote_state *rs = get_remote_state ();
   int max_size = get_memory_write_packet_size ();
 
@@ -12151,7 +12156,7 @@ register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
 static bool
 remote_read_description_p (struct target_ops *target)
 {
-  struct remote_g_packet_data *data = get_g_packet_data (target_gdbarch ());
+  remote_g_packet_data *data = get_g_packet_data (current_inferior ()->arch ());
 
   return !data->guesses.empty ();
 }
@@ -12159,7 +12164,7 @@ remote_read_description_p (struct target_ops *target)
 const struct target_desc *
 remote_target::read_description ()
 {
-  struct remote_g_packet_data *data = get_g_packet_data (target_gdbarch ());
+  remote_g_packet_data *data = get_g_packet_data (current_inferior ()->arch ());
 
   /* Do not try this during initial connection, when we do not know
      whether there is a running but stopped thread.  */
@@ -13637,7 +13642,7 @@ remote_target::get_trace_status (struct trace_status *ts)
 
   /* FIXME we need to get register block size some other way.  */
   trace_regblock_size
-    = rs->get_remote_arch_state (target_gdbarch ())->sizeof_g_packet;
+    = rs->get_remote_arch_state (current_inferior ()->arch ())->sizeof_g_packet;
 
   putpkt ("qTStatus");
 
@@ -15142,7 +15147,7 @@ static void
 create_fetch_memtags_request (gdb::char_vector &packet, CORE_ADDR address,
 			      size_t len, int type)
 {
-  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
+  int addr_size = gdbarch_addr_bit (current_inferior ()->arch ()) / 8;
 
   std::string request = string_printf ("qMemTags:%s,%s:%s",
 				       phex_nz (address, addr_size),
@@ -15176,7 +15181,7 @@ create_store_memtags_request (gdb::char_vector &packet, CORE_ADDR address,
 			      size_t len, int type,
 			      const gdb::byte_vector &tags)
 {
-  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
+  int addr_size = gdbarch_addr_bit (current_inferior ()->arch ()) / 8;
 
   /* Put together the main packet, address and length.  */
   std::string request = string_printf ("QMemTags:%s,%s:%s:",

@@ -2448,8 +2448,9 @@ status_callback (struct lwp_info *lp)
 	{
 	  linux_nat_debug_printf ("PC of %s changed.  was=%s, now=%s",
 				  lp->ptid.to_string ().c_str (),
-				  paddress (target_gdbarch (), lp->stop_pc),
-				  paddress (target_gdbarch (), pc));
+				  paddress (current_inferior ()->arch (),
+					    lp->stop_pc),
+				  paddress (current_inferior ()->arch (), pc));
 	  discard = 1;
 	}
 
@@ -2458,7 +2459,8 @@ status_callback (struct lwp_info *lp)
 	{
 	  linux_nat_debug_printf ("previous breakpoint of %s, at %s gone",
 				  lp->ptid.to_string ().c_str (),
-				  paddress (target_gdbarch (), lp->stop_pc));
+				  paddress (current_inferior ()->arch (),
+					    lp->stop_pc));
 
 	  discard = 1;
 	}
@@ -3725,7 +3727,7 @@ linux_nat_target::xfer_partial (enum target_object object,
 	 by linux_proc_xfer_partial.
 
 	 Compare ADDR_BIT first to avoid a compiler warning on shift overflow.  */
-      int addr_bit = gdbarch_addr_bit (target_gdbarch ());
+      int addr_bit = gdbarch_addr_bit (current_inferior ()->arch ());
 
       if (addr_bit < (sizeof (ULONGEST) * HOST_CHAR_BIT))
 	offset &= ((ULONGEST) 1 << addr_bit) - 1;

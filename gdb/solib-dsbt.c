@@ -197,14 +197,16 @@ dsbt_print_loadmap (struct int_elf32_dsbt_loadmap *map)
 
       for (i = 0; i < map->nsegs; i++)
 	gdb_printf ("%s:%s -> %s:%s\n",
-		    print_core_address (target_gdbarch (),
+		    print_core_address (current_inferior ()->arch (),
 					map->segs[i].p_vaddr),
-		    print_core_address (target_gdbarch (),
-					map->segs[i].p_vaddr
-					+ map->segs[i].p_memsz),
-		    print_core_address (target_gdbarch (), map->segs[i].addr),
-		    print_core_address (target_gdbarch (), map->segs[i].addr
-					+ map->segs[i].p_memsz));
+		    print_core_address (current_inferior ()->arch (),
+					(map->segs[i].p_vaddr
+					 + map->segs[i].p_memsz)),
+		    print_core_address (current_inferior ()->arch (),
+					map->segs[i].addr),
+		    print_core_address (current_inferior ()->arch (),
+					(map->segs[i].addr
+					 + map->segs[i].p_memsz)));
     }
 }
 
@@ -213,7 +215,7 @@ dsbt_print_loadmap (struct int_elf32_dsbt_loadmap *map)
 static struct int_elf32_dsbt_loadmap *
 decode_loadmap (const gdb_byte *buf)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   const struct ext_elf32_dsbt_loadmap *ext_ldmbuf;
   struct int_elf32_dsbt_loadmap *int_ldmbuf;
 
@@ -313,7 +315,7 @@ dsbt_get_initial_loadmaps (void)
 static struct int_elf32_dsbt_loadmap *
 fetch_loadmap (CORE_ADDR ldmaddr)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   struct ext_elf32_dsbt_loadmap ext_ldmbuf_partial;
   struct ext_elf32_dsbt_loadmap *ext_ldmbuf;
   struct int_elf32_dsbt_loadmap *int_ldmbuf;
@@ -436,7 +438,7 @@ displacement_from_map (struct int_elf32_dsbt_loadmap *map,
 static CORE_ADDR
 lm_base (void)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   struct bound_minimal_symbol got_sym;
   CORE_ADDR addr;
   gdb_byte buf[TIC6X_PTR_SIZE];
@@ -518,7 +520,7 @@ lm_base (void)
 static struct so_list *
 dsbt_current_sos (void)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   CORE_ADDR lm_addr;
   struct so_list *sos_head = NULL;
   struct so_list **sos_next_ptr = &sos_head;
@@ -771,7 +773,7 @@ enable_break (void)
 			hex_string_custom (addr, 8));
 
 	  /* Now (finally!) create the solib breakpoint.  */
-	  create_solib_event_breakpoint (target_gdbarch (), addr);
+	  create_solib_event_breakpoint (current_inferior ()->arch (), addr);
 
 	  ret = 1;
 	}

@@ -2460,7 +2460,7 @@ language_defn::lookup_symbol_nonlocal (const char *name,
       struct gdbarch *gdbarch;
 
       if (block == NULL)
-	gdbarch = target_gdbarch ();
+	gdbarch = current_inferior ()->arch ();
       else
 	gdbarch = block->gdbarch ();
       result.symbol = language_lookup_primitive_type_as_symbol (this,
@@ -2582,7 +2582,7 @@ lookup_global_or_static_symbol (const char *name,
   /* Do a global search (of global blocks, heh).  */
   if (result.symbol == NULL)
     gdbarch_iterate_over_objfiles_in_search_order
-      (objfile != NULL ? objfile->arch () : target_gdbarch (),
+      (objfile != NULL ? objfile->arch () : current_inferior ()->arch (),
        [&result, block_index, name, domain] (struct objfile *objfile_iter)
 	 {
 	   result = lookup_symbol_in_objfile (objfile_iter, block_index,
@@ -6296,7 +6296,7 @@ find_main_name (void)
   /* Try to find language for main in psymtabs.  */
   bool symbol_found_p = false;
   gdbarch_iterate_over_objfiles_in_search_order
-    (target_gdbarch (),
+    (current_inferior ()->arch (),
      [&symbol_found_p, pspace] (objfile *obj)
        {
 	 language lang

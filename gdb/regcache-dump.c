@@ -24,6 +24,7 @@
 #include "reggroups.h"
 #include "target.h"
 #include "gdbarch.h"
+#include "inferior.h"
 
 /* Dump registers from regcache, used for dumping raw registers and
    cooked registers.  */
@@ -234,7 +235,7 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
   if (target_has_registers ())
     gdbarch = get_current_regcache ()->arch ();
   else
-    gdbarch = target_gdbarch ();
+    gdbarch = current_inferior ()->arch ();
 
   switch (what_to_dump)
     {
@@ -260,8 +261,7 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
 	    /* For the benefit of "maint print registers" & co when
 	       debugging an executable, allow dumping a regcache even when
 	       there is no thread selected / no registers.  */
-	    dump.reset (new register_dump_reg_buffer (target_gdbarch (),
-						      dump_pseudo));
+	    dump.reset (new register_dump_reg_buffer (gdbarch, dump_pseudo));
 	  }
       }
       break;

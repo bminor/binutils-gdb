@@ -1053,7 +1053,7 @@ gdbsim_xfer_memory (struct target_ops *target,
 		"memaddr %s, len %s\n",
 		host_address_to_string (readbuf),
 		host_address_to_string (writebuf),
-		paddress (target_gdbarch (), memaddr),
+		paddress (current_inferior ()->arch (), memaddr),
 		pulongest (len));
 
   if (writebuf)

@@ -5300,7 +5300,8 @@ handle_one (const wait_one_event &event)
 
 	  infrun_debug_printf ("saved stop_pc=%s for %s "
 			       "(currently_stepping=%d)",
-			       paddress (target_gdbarch (), t->stop_pc ()),
+			       paddress (current_inferior ()->arch (),
+					 t->stop_pc ()),
 			       t->ptid.to_string ().c_str (),
 			       currently_stepping (t));
 	}
@@ -6334,7 +6335,8 @@ finish_step_over (struct execution_control_state *ecs)
 
 	  infrun_debug_printf ("saved stop_pc=%s for %s "
 			       "(currently_stepping=%d)",
-			       paddress (target_gdbarch (), tp->stop_pc ()),
+			       paddress (current_inferior ()->arch (),
+					 tp->stop_pc ()),
 			       tp->ptid.to_string ().c_str (),
 			       currently_stepping (tp));
 
@@ -8018,8 +8020,9 @@ keep_going_stepped_thread (struct thread_info *tp)
       ptid_t resume_ptid;
 
       infrun_debug_printf ("expected thread advanced also (%s -> %s)",
-			   paddress (target_gdbarch (), tp->prev_pc),
-			   paddress (target_gdbarch (), tp->stop_pc ()));
+			   paddress (current_inferior ()->arch (), tp->prev_pc),
+			   paddress (current_inferior ()->arch (),
+				     tp->stop_pc ()));
 
       /* Clear the info of the previous step-over, as it's no longer
 	 valid (if the thread was trying to step over a breakpoint, it

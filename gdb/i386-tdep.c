@@ -3451,7 +3451,8 @@ i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
 	    result_value->mark_bytes_unavailable (0, 16);
 	  else
 	    {
-	      enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+	      bfd_endian byte_order
+		= gdbarch_byte_order (current_inferior ()->arch ());
 	      LONGEST upper, lower;
 	      int size = builtin_type (gdbarch)->builtin_data_ptr->length ();
 
@@ -3635,7 +3636,8 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 	{
 	  ULONGEST upper, lower;
 	  int size = builtin_type (gdbarch)->builtin_data_ptr->length ();
-	  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+	  bfd_endian byte_order
+	    = gdbarch_byte_order (current_inferior ()->arch ());
 
 	  /* New values from input value.  */
 	  regnum -= tdep->bnd0_regnum;

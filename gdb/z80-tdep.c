@@ -778,7 +778,7 @@ z80_software_single_step (struct regcache *regcache)
   int size;
   const struct z80_insn_info *info;
   std::vector<CORE_ADDR> ret (1);
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
 
   regcache->cooked_read (Z80_PC_REGNUM, &addr);
   read_memory (addr, buf, sizeof(buf));

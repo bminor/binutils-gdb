@@ -111,7 +111,7 @@ show_solib_search_path (struct ui_file *file, int from_tty,
 static gdb::unique_xmalloc_ptr<char>
 solib_find_1 (const char *in_pathname, int *fd, bool is_solib)
 {
-  const struct target_so_ops *ops = gdbarch_so_ops (target_gdbarch ());
+  const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
   int found_file = -1;
   gdb::unique_xmalloc_ptr<char> temp_pathname;
   const char *fskind = effective_target_file_system_kind ();
@@ -384,7 +384,7 @@ gdb::unique_xmalloc_ptr<char>
 solib_find (const char *in_pathname, int *fd)
 {
   const char *solib_symbols_extension
-    = gdbarch_solib_symbols_extension (target_gdbarch ());
+    = gdbarch_solib_symbols_extension (current_inferior ()->arch ());
 
   /* If solib_symbols_extension is set, replace the file's
      extension.  */
@@ -464,7 +464,7 @@ solib_bfd_open (const char *pathname)
 	   bfd_get_filename (abfd.get ()), bfd_errmsg (bfd_get_error ()));
 
   /* Check bfd arch.  */
-  b = gdbarch_bfd_arch_info (target_gdbarch ());
+  b = gdbarch_bfd_arch_info (current_inferior ()->arch ());
   if (!b->compatible (b, bfd_get_arch_info (abfd.get ())))
     error (_("`%s': Shared library architecture %s is not compatible "
 	     "with target architecture %s."), bfd_get_filename (abfd.get ()),
@@ -539,7 +539,7 @@ get_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd, const char *soname)
 static int
 solib_map_sections (struct so_list *so)
 {
-  const struct target_so_ops *ops = gdbarch_so_ops (target_gdbarch ());
+  const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
   gdb::unique_xmalloc_ptr<char> filename (tilde_expand (so->so_name));
   gdb_bfd_ref_ptr abfd (ops->bfd_open (filename.get ()));
@@ -633,7 +633,7 @@ solib_map_sections (struct so_list *so)
 static void
 clear_so (struct so_list *so)
 {
-  const struct target_so_ops *ops = gdbarch_so_ops (target_gdbarch ());
+  const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
   delete so->sections;
   so->sections = NULL;
@@ -670,7 +670,7 @@ clear_so (struct so_list *so)
 void
 free_so (struct so_list *so)
 {
-  const struct target_so_ops *ops = gdbarch_so_ops (target_gdbarch ());
+  const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
   clear_so (so);
   ops->free_so (so);
@@ -774,7 +774,7 @@ notify_solib_unloaded (program_space *pspace, so_list *so)
 void
 update_solib_list (int from_tty)
 {
-  const struct target_so_ops *ops = gdbarch_so_ops (target_gdbarch ());
+  const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
   struct so_list *inferior = ops->current_sos();
   struct so_list *gdb, **gdb_link;
 
@@ -1077,7 +1077,7 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
   bool so_missing_debug_info = false;
   int addr_width;
   int nr_libs;
-  struct gdbarch *gdbarch = target_gdbarch ();
+  gdbarch *gdbarch = current_inferior ()->arch ();
   struct ui_out *uiout = current_uiout;
 
   if (pattern)
@@ -1213,7 +1213,7 @@ solib_name_from_address (struct program_space *pspace, CORE_ADDR address)
 bool
 solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
 {
-  const struct target_so_ops *ops = gdbarch_so_ops (target_gdbarch ());
+  const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
   if (ops->keep_data_in_core)
     return ops->keep_data_in_core (vaddr, size) != 0;
@@ -1226,7 +1226,7 @@ solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
 void
 clear_solib (void)
 {
-  const struct target_so_ops *ops = gdbarch_so_ops (target_gdbarch ());
+  const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
   disable_breakpoints_in_shlibs ();
 
@@ -1251,7 +1251,7 @@ clear_solib (void)
 void
 solib_create_inferior_hook (int from_tty)
 {
-  const struct target_so_ops *ops = gdbarch_so_ops (target_gdbarch ());
+  const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
   ops->solib_create_inferior_hook (from_tty);
 }
@@ -1261,7 +1261,7 @@ solib_create_inferior_hook (int from_tty)
 bool
 in_solib_dynsym_resolve_code (CORE_ADDR pc)
 {
-  const struct target_so_ops *ops = gdbarch_so_ops (target_gdbarch ());
+  const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
   return ops->in_dynsym_resolve_code (pc) != 0;
 }
@@ -1297,7 +1297,7 @@ no_shared_libraries (const char *ignored, int from_tty)
 void
 update_solib_breakpoints (void)
 {
-  const struct target_so_ops *ops = gdbarch_so_ops (target_gdbarch ());
+  const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
   if (ops->update_breakpoints != NULL)
     ops->update_breakpoints ();
@@ -1308,7 +1308,7 @@ update_solib_breakpoints (void)
 void
 handle_solib_event (void)
 {
-  const struct target_so_ops *ops = gdbarch_so_ops (target_gdbarch ());
+  const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
   if (ops->handle_event != NULL)
     ops->handle_event ();
@@ -1392,11 +1392,9 @@ static void
 reload_shared_libraries (const char *ignored, int from_tty,
 			 struct cmd_list_element *e)
 {
-  const struct target_so_ops *ops;
-
   reload_shared_libraries_1 (from_tty);
 
-  ops = gdbarch_so_ops (target_gdbarch ());
+  const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
   /* Creating inferior hooks here has two purposes.  First, if we reload 
      shared libraries then the address of solib breakpoint we've computed
@@ -1506,7 +1504,7 @@ gdb_bfd_lookup_symbol_from_symtab
 
 	  if (match_sym (sym))
 	    {
-	      struct gdbarch *gdbarch = target_gdbarch ();
+	      gdbarch *gdbarch = current_inferior ()->arch ();
 	      symaddr = sym->value;
 
 	      /* Some ELF targets fiddle with addresses of symbols they
@@ -1622,7 +1620,8 @@ gdb_bfd_scan_elf_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr,
 	    gdb_byte ptr_buf[8];
 	    CORE_ADDR ptr_addr_1;
 
-	    ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+	    ptr_type
+	      = builtin_type (current_inferior ()->arch ())->builtin_data_ptr;
 	    ptr_addr_1 = dyn_addr + (buf - bufstart) + arch_size / 8;
 	    if (target_read_memory (ptr_addr_1, ptr_buf, arch_size / 8) == 0)
 	      dyn_ptr = extract_typed_address (ptr_buf, ptr_type);

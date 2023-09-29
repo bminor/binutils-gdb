@@ -1229,7 +1229,8 @@ jit_inferior_execd_hook (inferior *exec_inf, inferior *follow_inf)
 void
 jit_breakpoint_re_set (void)
 {
-  jit_breakpoint_re_set_internal (target_gdbarch (), current_program_space);
+  jit_breakpoint_re_set_internal (current_inferior ()->arch (),
+				  current_program_space);
 }
 
 /* This function cleans up any code entries left over when the

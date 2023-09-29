@@ -188,7 +188,8 @@ memory_error (enum target_xfer_status err, CORE_ADDR memaddr)
   enum errors exception = GDB_NO_ERROR;
 
   /* Build error string.  */
-  std::string str = memory_error_message (err, target_gdbarch (), memaddr);
+  std::string str
+    = memory_error_message (err, current_inferior ()->arch (), memaddr);
 
   /* Choose the right error to throw.  */
   switch (err)

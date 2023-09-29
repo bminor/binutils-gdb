@@ -1959,7 +1959,8 @@ load_progress (ULONGEST bytes, void *untyped_arg)
       current_uiout->message ("Loading section %s, size %s lma %s\n",
 			      args->section_name,
 			      hex_string (args->section_size),
-			      paddress (target_gdbarch (), args->lma));
+			      paddress (current_inferior ()->arch (),
+					args->lma));
       return;
     }
 
@@ -1976,10 +1977,10 @@ load_progress (ULONGEST bytes, void *untyped_arg)
 
       if (target_read_memory (args->lma, check.data (), bytes) != 0)
 	error (_("Download verify read failed at %s"),
-	       paddress (target_gdbarch (), args->lma));
+	       paddress (current_inferior ()->arch (), args->lma));
       if (memcmp (args->buffer, check.data (), bytes) != 0)
 	error (_("Download verify compare failed at %s"),
-	       paddress (target_gdbarch (), args->lma));
+	       paddress (current_inferior ()->arch (), args->lma));
     }
   totals->data_count += bytes;
   args->lma += bytes;
@@ -2091,9 +2092,9 @@ generic_load (const char *args, int from_tty)
   steady_clock::time_point end_time = steady_clock::now ();
 
   CORE_ADDR entry = bfd_get_start_address (loadfile_bfd.get ());
-  entry = gdbarch_addr_bits_remove (target_gdbarch (), entry);
+  entry = gdbarch_addr_bits_remove (current_inferior ()->arch (), entry);
   uiout->text ("Start address ");
-  uiout->field_core_addr ("address", target_gdbarch (), entry);
+  uiout->field_core_addr ("address", current_inferior ()->arch (), entry);
   uiout->text (", load size ");
   uiout->field_unsigned ("load-size", total_progress.data_count);
   uiout->text ("\n");

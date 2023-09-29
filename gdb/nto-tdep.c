@@ -102,14 +102,15 @@ nto_find_and_open_solib (const char *solib, unsigned o_flags,
   "%s/lib:%s/usr/lib:%s/usr/photon/lib:%s/usr/photon/dll:%s/lib/dll"
 
   nto_root = nto_target ();
-  if (strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name, "i386") == 0)
+  gdbarch *gdbarch = current_inferior ()->arch ();
+  if (strcmp (gdbarch_bfd_arch_info (gdbarch)->arch_name, "i386") == 0)
     {
       arch = "x86";
       endian = "";
     }
-  else if (strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name,
+  else if (strcmp (gdbarch_bfd_arch_info (gdbarch)->arch_name,
 		   "rs6000") == 0
-	   || strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name,
+	   || strcmp (gdbarch_bfd_arch_info (gdbarch)->arch_name,
 		   "powerpc") == 0)
     {
       arch = "ppc";
@@ -117,8 +118,8 @@ nto_find_and_open_solib (const char *solib, unsigned o_flags,
     }
   else
     {
-      arch = gdbarch_bfd_arch_info (target_gdbarch ())->arch_name;
-      endian = gdbarch_byte_order (target_gdbarch ())
+      arch = gdbarch_bfd_arch_info (gdbarch)->arch_name;
+      endian = gdbarch_byte_order (gdbarch)
 	       == BFD_ENDIAN_BIG ? "be" : "le";
     }
 
@@ -162,14 +163,15 @@ nto_init_solib_absolute_prefix (void)
   const char *arch;
 
   nto_root = nto_target ();
-  if (strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name, "i386") == 0)
+  gdbarch *gdbarch = current_inferior ()->arch ();
+  if (strcmp (gdbarch_bfd_arch_info (gdbarch)->arch_name, "i386") == 0)
     {
       arch = "x86";
       endian = "";
     }
-  else if (strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name,
+  else if (strcmp (gdbarch_bfd_arch_info (gdbarch)->arch_name,
 		   "rs6000") == 0
-	   || strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name,
+	   || strcmp (gdbarch_bfd_arch_info (gdbarch)->arch_name,
 		   "powerpc") == 0)
     {
       arch = "ppc";
@@ -177,8 +179,8 @@ nto_init_solib_absolute_prefix (void)
     }
   else
     {
-      arch = gdbarch_bfd_arch_info (target_gdbarch ())->arch_name;
-      endian = gdbarch_byte_order (target_gdbarch ())
+      arch = gdbarch_bfd_arch_info (gdbarch)->arch_name;
+      endian = gdbarch_byte_order (gdbarch)
 	       == BFD_ENDIAN_BIG ? "be" : "le";
     }
 
@@ -253,12 +255,13 @@ lm_addr (struct so_list *so)
 static CORE_ADDR
 nto_truncate_ptr (CORE_ADDR addr)
 {
-  if (gdbarch_ptr_bit (target_gdbarch ()) == sizeof (CORE_ADDR) * 8)
+  gdbarch *gdbarch = current_inferior ()->arch ();
+  if (gdbarch_ptr_bit (gdbarch) == sizeof (CORE_ADDR) * 8)
     /* We don't need to truncate anything, and the bit twiddling below
        will fail due to overflow problems.  */
     return addr;
   else
-    return addr & (((CORE_ADDR) 1 << gdbarch_ptr_bit (target_gdbarch ())) - 1);
+    return addr & (((CORE_ADDR) 1 << gdbarch_ptr_bit (gdbarch)) - 1);
 }
 
 static Elf_Internal_Phdr *
@@ -455,7 +458,7 @@ nto_read_auxv_from_initial_stack (CORE_ADDR initial_stack, gdb_byte *readbuf,
   if (target_read_memory (initial_stack + data_ofs, targ32, 4) != 0)
     return 0;
 
-  byte_order = gdbarch_byte_order (target_gdbarch ());
+  byte_order = gdbarch_byte_order (current_inferior ()->arch ());
 
   anint = extract_unsigned_integer (targ32, sizeof (targ32), byte_order);
 

@@ -36,6 +36,7 @@
 #include "remote.h"
 #include "target-descriptions.h"
 #include "gdbarch.h"
+#include "inferior.h"
 
 #include "elf/rx.h"
 #include "elf-bfd.h"
@@ -142,7 +143,7 @@ check_for_saved (void *result_untyped, pv_t addr, CORE_ADDR size, pv_t value)
   if (value.kind == pvk_register
       && value.k == 0
       && pv_is_register (addr, RX_SP_REGNUM)
-      && size == register_size (target_gdbarch (), value.reg))
+      && size == register_size (current_inferior ()->arch (), value.reg))
     result->reg_offset[value.reg] = addr.k;
 }
 
@@ -198,7 +199,7 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       result->reg_offset[rn] = 1;
     }
 
-  pv_area stack (RX_SP_REGNUM, gdbarch_addr_bit (target_gdbarch ()));
+  pv_area stack (RX_SP_REGNUM, gdbarch_addr_bit (current_inferior ()->arch ()));
 
   if (frame_type == RX_FRAME_TYPE_FAST_INTERRUPT)
     {

@@ -302,7 +302,7 @@ recpy_bt_insn_decoded (PyObject *self, void *closure)
 
   try
     {
-      gdb_print_insn (target_gdbarch (), insn->pc, &strfile, NULL);
+      gdb_print_insn (current_inferior ()->arch (), insn->pc, &strfile, NULL);
     }
   catch (const gdb_exception &except)
     {

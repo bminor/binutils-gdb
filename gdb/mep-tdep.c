@@ -263,7 +263,7 @@ me_module_register_set (CONFIG_ATTR me_module,
        specifically excluding the generic coprocessor register sets.  */
 
   mep_gdbarch_tdep *tdep
-    = gdbarch_tdep<mep_gdbarch_tdep> (target_gdbarch ());
+    = gdbarch_tdep<mep_gdbarch_tdep> (current_inferior ()->arch ());
   CGEN_CPU_DESC desc = tdep->cpu_desc;
   const CGEN_HW_ENTRY *hw;
 
@@ -859,7 +859,7 @@ current_me_module (void)
   else
     {
       mep_gdbarch_tdep *tdep
-	= gdbarch_tdep<mep_gdbarch_tdep> (target_gdbarch ());
+	= gdbarch_tdep<mep_gdbarch_tdep> (current_inferior ()->arch ());
       return tdep->me_module;
     }
 }

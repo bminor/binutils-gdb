@@ -25,6 +25,7 @@
 #include "build-id.h"
 #include "symtab.h"
 #include "python.h"
+#include "inferior.h"
 
 struct objfile_object
 {
@@ -618,7 +619,7 @@ gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw)
   struct objfile *objfile = nullptr;
   if (by_build_id)
     gdbarch_iterate_over_objfiles_in_search_order
-      (target_gdbarch (),
+      (current_inferior ()->arch (),
        [&objfile, name] (struct objfile *obj)
 	 {
 	   /* Don't return separate debug files.  */
@@ -641,7 +642,7 @@ gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw)
 	 }, gdbpy_current_objfile);
   else
     gdbarch_iterate_over_objfiles_in_search_order
-      (target_gdbarch (),
+      (current_inferior ()->arch (),
        [&objfile, name] (struct objfile *obj)
 	 {
 	   /* Don't return separate debug files.  */

@@ -30,6 +30,7 @@
 #include "value.h"
 #include "gdbarch.h"
 #include "rust-exp.h"
+#include "inferior.h"
 
 using namespace expr;
 
@@ -2309,8 +2310,8 @@ static void
 rust_lex_tests (void)
 {
   /* Set up dummy "parser", so that rust_type works.  */
-  struct parser_state ps (language_def (language_rust), target_gdbarch (),
-			  nullptr, 0, 0, nullptr, 0, nullptr);
+  parser_state ps (language_def (language_rust), current_inferior ()->arch (),
+		   nullptr, 0, 0, nullptr, 0, nullptr);
   rust_parser parser (&ps);
 
   rust_lex_test_one (&parser, "", 0);
