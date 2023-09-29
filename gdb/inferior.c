@@ -180,7 +180,10 @@ inferior::set_arch (gdbarch *arch)
   gdb_assert (gdbarch_initialized_p (arch));
   m_gdbarch = arch;
   gdb::observers::architecture_changed.notify (this, arch);
-  registers_changed ();
+
+  process_stratum_target *proc_target = this->process_target ();
+  if (proc_target != nullptr)
+    registers_changed_ptid (proc_target, ptid_t (this->pid));
 }
 
 void
