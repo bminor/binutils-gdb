@@ -625,7 +625,8 @@ gdbarch_update_p (struct gdbarch_info info)
 		"New architecture %s (%s) selected\n",
 		host_address_to_string (new_gdbarch),
 		gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
-  set_target_gdbarch (new_gdbarch);
+
+  current_inferior ()->set_arch (new_gdbarch);
 
   return 1;
 }
@@ -657,7 +658,8 @@ set_gdbarch_from_file (bfd *abfd)
 
   if (gdbarch == NULL)
     error (_("Architecture of file not recognized."));
-  set_target_gdbarch (gdbarch);
+
+  current_inferior ()->set_arch (gdbarch);
 }
 
 /* Initialize the current architecture.  Update the ``set
@@ -1222,7 +1224,6 @@ gdbarch_obstack_strdup (struct gdbarch *arch, const char *string)
   return obstack_strdup (&arch->obstack, string);
 }
 
-
 /* Free a gdbarch struct.  This should never happen in normal
    operation --- once you've created a gdbarch, you keep it around.
    However, if an architecture's init function encounters an error
@@ -1481,17 +1482,12 @@ gdbarch_find_by_info (struct gdbarch_info info)
   return new_gdbarch;
 }
 
-/* Make the specified architecture current.  */
+/* See gdbarch.h.  */
 
-void
-set_target_gdbarch (struct gdbarch *new_gdbarch)
+bool
+gdbarch_initialized_p (gdbarch *arch)
 {
-  gdb_assert (new_gdbarch != NULL);
-  gdb_assert (new_gdbarch->initialized_p);
-  current_inferior ()->set_arch (new_gdbarch);
-  gdb::observers::architecture_changed.notify (current_inferior (),
-					       new_gdbarch);
-  registers_changed ();
+  return arch->initialized_p;
 }
 
 /* Return the current inferior's arch.  */

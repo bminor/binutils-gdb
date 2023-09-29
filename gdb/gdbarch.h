@@ -278,6 +278,9 @@ extern void gdbarch_register (enum bfd_architecture architecture,
 			      gdbarch_dump_tdep_ftype *dump_tdep = nullptr,
 			      gdbarch_supports_arch_info_ftype *supports_arch_info = nullptr);
 
+/* Return true if ARCH is initialized.  */
+
+bool gdbarch_initialized_p (gdbarch *arch);
 
 /* Return a vector of the valid architecture names.  Since architectures are
    registered during the _initialize phase this function only returns useful
@@ -354,12 +357,6 @@ extern int gdbarch_update_p (struct gdbarch_info info);
    architecture was found.  */
 
 extern struct gdbarch *gdbarch_find_by_info (struct gdbarch_info info);
-
-
-/* Helper function.  Set the target gdbarch to "gdbarch".  */
-
-extern void set_target_gdbarch (struct gdbarch *gdbarch);
-
 
 /* A registry adaptor for gdbarch.  This arranges to store the
    registry in the gdbarch.  */

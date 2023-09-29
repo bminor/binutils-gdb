@@ -554,8 +554,7 @@ public:
   }
 
   /* Set this inferior's arch.  */
-  void set_arch (gdbarch *arch)
-  { m_gdbarch = arch; }
+  void set_arch (gdbarch *arch);
 
   /* Get this inferior's arch.  */
   gdbarch *arch ()

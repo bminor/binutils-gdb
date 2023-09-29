@@ -174,6 +174,16 @@ inferior::set_args (gdb::array_view<char * const> args)
 }
 
 void
+inferior::set_arch (gdbarch *arch)
+{
+  gdb_assert (arch != nullptr);
+  gdb_assert (gdbarch_initialized_p (arch));
+  m_gdbarch = arch;
+  gdb::observers::architecture_changed.notify (this, arch);
+  registers_changed ();
+}
+
+void
 inferior::add_continuation (std::function<void ()> &&cont)
 {
   m_continuations.emplace_front (std::move (cont));
