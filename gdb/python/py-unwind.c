@@ -945,7 +945,7 @@ static const registry<gdbarch>::key<pyuw_gdbarch_data_type> pyuw_gdbarch_data;
    intermediary.  */
 
 static void
-pyuw_on_new_gdbarch (struct gdbarch *newarch)
+pyuw_on_new_gdbarch (inferior *inf, gdbarch *newarch)
 {
   struct pyuw_gdbarch_data_type *data = pyuw_gdbarch_data.get (newarch);
   if (data == nullptr)

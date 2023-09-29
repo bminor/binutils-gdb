@@ -1489,7 +1489,8 @@ set_target_gdbarch (struct gdbarch *new_gdbarch)
   gdb_assert (new_gdbarch != NULL);
   gdb_assert (new_gdbarch->initialized_p);
   current_inferior ()->set_arch (new_gdbarch);
-  gdb::observers::architecture_changed.notify (new_gdbarch);
+  gdb::observers::architecture_changed.notify (current_inferior (),
+					       new_gdbarch);
   registers_changed ();
 }
 
