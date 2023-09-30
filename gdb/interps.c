@@ -358,15 +358,15 @@ current_interpreter (void)
 /* Helper interps_notify_* functions.  Call METHOD on the top-level interpreter
    of all UIs.  */
 
-template <typename ...Args>
+template <typename MethodType, typename ...Args>
 void
-interps_notify (void (interp::*method) (Args...), Args... args)
+interps_notify (MethodType method, Args&&... args)
 {
   SWITCH_THRU_ALL_UIS ()
     {
       interp *tli = top_level_interpreter ();
       if (tli != nullptr)
-	(tli->*method) (args...);
+	(tli->*method) (std::forward<Args> (args)...);
     }
 }
 
