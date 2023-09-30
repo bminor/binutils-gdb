@@ -275,19 +275,19 @@ static const char * const bsd_uthread_solib_names[] =
 };
 
 static void
-bsd_uthread_solib_loaded (struct so_list *so)
+bsd_uthread_solib_loaded (so_list &so)
 {
   const char * const *names = bsd_uthread_solib_names;
 
   for (names = bsd_uthread_solib_names; *names; names++)
     {
-      if (startswith (so->so_original_name, *names))
+      if (startswith (so.so_original_name, *names))
 	{
 	  solib_read_symbols (so, 0);
 
-	  if (bsd_uthread_activate (so->objfile))
+	  if (bsd_uthread_activate (so.objfile))
 	    {
-	      bsd_uthread_solib_name = so->so_original_name;
+	      bsd_uthread_solib_name = so.so_original_name;
 	      return;
 	    }
 	}
@@ -295,12 +295,12 @@ bsd_uthread_solib_loaded (struct so_list *so)
 }
 
 static void
-bsd_uthread_solib_unloaded (program_space *pspace, so_list *so)
+bsd_uthread_solib_unloaded (program_space *pspace, const so_list &so)
 {
   if (!bsd_uthread_solib_name)
     return;
 
-  if (strcmp (so->so_original_name, bsd_uthread_solib_name) == 0)
+  if (strcmp (so.so_original_name, bsd_uthread_solib_name) == 0)
     bsd_uthread_deactivate ();
 }
 

@@ -311,13 +311,12 @@ solib_aix_bss_data_overlap (bfd *abfd)
 /* Implement the "relocate_section_addresses" target_so_ops method.  */
 
 static void
-solib_aix_relocate_section_addresses (struct so_list *so,
-				      struct target_section *sec)
+solib_aix_relocate_section_addresses (so_list &so, target_section *sec)
 {
   struct bfd_section *bfd_sect = sec->the_bfd_section;
   bfd *abfd = bfd_sect->owner;
   const char *section_name = bfd_section_name (bfd_sect);
-  lm_info_aix *info = (lm_info_aix *) so->lm_info;
+  lm_info_aix *info = (lm_info_aix *) so.lm_info;
 
   if (strcmp (section_name, ".text") == 0)
     {
@@ -364,11 +363,11 @@ solib_aix_relocate_section_addresses (struct so_list *so,
 /* Implement the "free_so" target_so_ops method.  */
 
 static void
-solib_aix_free_so (struct so_list *so)
+solib_aix_free_so (so_list &so)
 {
-  lm_info_aix *li = (lm_info_aix *) so->lm_info;
+  lm_info_aix *li = (lm_info_aix *) so.lm_info;
 
-  solib_debug_printf ("%s", so->so_name);
+  solib_debug_printf ("%s", so.so_name);
 
   delete li;
 }

@@ -8018,7 +8018,8 @@ disable_breakpoints_in_shlibs (void)
    disabled ones can just stay disabled.  */
 
 static void
-disable_breakpoints_in_unloaded_shlib (program_space *pspace, so_list *solib)
+disable_breakpoints_in_unloaded_shlib (program_space *pspace,
+				       const so_list &solib)
 {
   bool disabled_shlib_breaks = false;
 
@@ -8051,7 +8052,7 @@ disable_breakpoints_in_unloaded_shlib (program_space *pspace, so_list *solib)
 	      target_terminal::ours_for_output ();
 	      warning (_("Temporarily disabling breakpoints "
 			 "for unloaded shared library \"%s\""),
-		       solib->so_name);
+		       solib.so_name);
 	    }
 	  disabled_shlib_breaks = true;
 	}

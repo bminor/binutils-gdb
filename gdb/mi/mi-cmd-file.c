@@ -171,6 +171,6 @@ mi_cmd_file_list_shared_libraries (const char *command,
 	continue;
 
       ui_out_emit_tuple tuple_emitter (uiout, NULL);
-      mi_output_solib_attribs (uiout, so);
+      mi_output_solib_attribs (uiout, *so);
     }
 }

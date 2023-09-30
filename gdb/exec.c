@@ -599,7 +599,7 @@ build_section_table (struct bfd *some_bfd)
    current set of target sections.  */
 
 void
-program_space::add_target_sections (void *owner,
+program_space::add_target_sections (const void *owner,
 				    const target_section_table &sections)
 {
   if (!sections.empty ())
@@ -651,7 +651,7 @@ program_space::add_target_sections (struct objfile *objfile)
    OWNER must be the same value passed to add_target_sections.  */
 
 void
-program_space::remove_target_sections (void *owner)
+program_space::remove_target_sections (const void *owner)
 {
   gdb_assert (owner != NULL);
 

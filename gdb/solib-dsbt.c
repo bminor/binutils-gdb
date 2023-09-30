@@ -881,19 +881,18 @@ dsbt_clear_solib (program_space *pspace)
 }
 
 static void
-dsbt_free_so (struct so_list *so)
+dsbt_free_so (so_list &so)
 {
-  lm_info_dsbt *li = (lm_info_dsbt *) so->lm_info;
+  lm_info_dsbt *li = (lm_info_dsbt *) so.lm_info;
 
   delete li;
 }
 
 static void
-dsbt_relocate_section_addresses (struct so_list *so,
-				 struct target_section *sec)
+dsbt_relocate_section_addresses (so_list &so, target_section *sec)
 {
   int seg;
-  lm_info_dsbt *li = (lm_info_dsbt *) so->lm_info;
+  lm_info_dsbt *li = (lm_info_dsbt *) so.lm_info;
   int_elf32_dsbt_loadmap *map = li->map;
 
   for (seg = 0; seg < map->nsegs; seg++)

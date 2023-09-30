@@ -608,9 +608,9 @@ darwin_clear_solib (program_space *pspace)
 }
 
 static void
-darwin_free_so (struct so_list *so)
+darwin_free_so (so_list &so)
 {
-  lm_info_darwin *li = (lm_info_darwin *) so->lm_info;
+  lm_info_darwin *li = (lm_info_darwin *) so.lm_info;
 
   delete li;
 }
@@ -619,25 +619,24 @@ darwin_free_so (struct so_list *so)
    Relocate these VMAs according to solib info.  */
 
 static void
-darwin_relocate_section_addresses (struct so_list *so,
-				   struct target_section *sec)
+darwin_relocate_section_addresses (so_list &so, target_section *sec)
 {
-  lm_info_darwin *li = (lm_info_darwin *) so->lm_info;
+  lm_info_darwin *li = (lm_info_darwin *) so.lm_info;
 
   sec->addr += li->lm_addr;
   sec->endaddr += li->lm_addr;
 
   /* Best effort to set addr_high/addr_low.  This is used only by
      'info sharedlibary'.  */
-  if (so->addr_high == 0)
+  if (so.addr_high == 0)
     {
-      so->addr_low = sec->addr;
-      so->addr_high = sec->endaddr;
+      so.addr_low = sec->addr;
+      so.addr_high = sec->endaddr;
     }
-  if (sec->endaddr > so->addr_high)
-    so->addr_high = sec->endaddr;
-  if (sec->addr < so->addr_low)
-    so->addr_low = sec->addr;
+  if (sec->endaddr > so.addr_high)
+    so.addr_high = sec->endaddr;
+  if (sec->addr < so.addr_low)
+    so.addr_low = sec->addr;
 }
 
 static gdb_bfd_ref_ptr

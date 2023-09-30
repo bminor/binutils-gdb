@@ -724,28 +724,28 @@ mi_interp::on_target_resumed (ptid_t ptid)
 /* See mi-interp.h.  */
 
 void
-mi_output_solib_attribs (ui_out *uiout, struct so_list *solib)
+mi_output_solib_attribs (ui_out *uiout, const so_list &solib)
 {
   gdbarch *gdbarch = current_inferior ()->arch ();
 
-  uiout->field_string ("id", solib->so_original_name);
-  uiout->field_string ("target-name", solib->so_original_name);
-  uiout->field_string ("host-name", solib->so_name);
-  uiout->field_signed ("symbols-loaded", solib->symbols_loaded);
+  uiout->field_string ("id", solib.so_original_name);
+  uiout->field_string ("target-name", solib.so_original_name);
+  uiout->field_string ("host-name", solib.so_name);
+  uiout->field_signed ("symbols-loaded", solib.symbols_loaded);
   if (!gdbarch_has_global_solist (current_inferior ()->arch ()))
       uiout->field_fmt ("thread-group", "i%d", current_inferior ()->num);
 
   ui_out_emit_list list_emitter (uiout, "ranges");
   ui_out_emit_tuple tuple_emitter (uiout, NULL);
-  if (solib->addr_high != 0)
+  if (solib.addr_high != 0)
     {
-      uiout->field_core_addr ("from", gdbarch, solib->addr_low);
-      uiout->field_core_addr ("to", gdbarch, solib->addr_high);
+      uiout->field_core_addr ("from", gdbarch, solib.addr_low);
+      uiout->field_core_addr ("to", gdbarch, solib.addr_high);
     }
 }
 
 void
-mi_interp::on_solib_loaded (so_list *solib)
+mi_interp::on_solib_loaded (const so_list &solib)
 {
   ui_out *uiout = this->interp_ui_out ();
 
@@ -762,7 +762,7 @@ mi_interp::on_solib_loaded (so_list *solib)
 }
 
 void
-mi_interp::on_solib_unloaded (so_list *solib)
+mi_interp::on_solib_unloaded (const so_list &solib)
 {
   ui_out *uiout = this->interp_ui_out ();
 
@@ -773,9 +773,9 @@ mi_interp::on_solib_unloaded (so_list *solib)
 
   ui_out_redirect_pop redir (uiout, this->event_channel);
 
-  uiout->field_string ("id", solib->so_original_name);
-  uiout->field_string ("target-name", solib->so_original_name);
-  uiout->field_string ("host-name", solib->so_name);
+  uiout->field_string ("id", solib.so_original_name);
+  uiout->field_string ("target-name", solib.so_original_name);
+  uiout->field_string ("host-name", solib.so_name);
   if (!gdbarch_has_global_solist (current_inferior ()->arch ()))
     uiout->field_fmt ("thread-group", "i%d", current_inferior ()->num);
 

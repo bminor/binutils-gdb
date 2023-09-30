@@ -48,7 +48,7 @@ struct target_section
      and used by remove_target_sections.
      For example, for executables it is a pointer to exec_bfd and
      for shlibs it is the so_list pointer.  */
-  void *owner;
+  const void *owner;
 };
 
 /* Holds an array of target sections.  */

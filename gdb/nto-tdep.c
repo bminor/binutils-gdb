@@ -245,9 +245,9 @@ nto_parse_redirection (char *pargv[], const char **pin, const char **pout,
 }
 
 static CORE_ADDR
-lm_addr (struct so_list *so)
+lm_addr (const so_list &so)
 {
-  lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
+  const lm_info_svr4 *li = (const lm_info_svr4 *) so.lm_info;
 
   return li->l_addr;
 }
@@ -283,7 +283,7 @@ find_load_phdr (bfd *abfd)
 }
 
 void
-nto_relocate_section_addresses (struct so_list *so, struct target_section *sec)
+nto_relocate_section_addresses (so_list &so, target_section *sec)
 {
   /* Neutrino treats the l_addr base address field in link.h as different than
      the base address in the System V ABI and so the offset needs to be

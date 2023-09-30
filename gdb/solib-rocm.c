@@ -153,7 +153,7 @@ rocm_free_solib_list (struct solib_info *info)
     {
       struct so_list *next = info->solib_list->next;
 
-      free_so (info->solib_list);
+      free_so (*info->solib_list);
       info->solib_list = next;
     }
 
@@ -177,16 +177,16 @@ get_solib_info (inferior *inf)
 /* Relocate section addresses.  */
 
 static void
-rocm_solib_relocate_section_addresses (struct so_list *so,
+rocm_solib_relocate_section_addresses (so_list &so,
 				       struct target_section *sec)
 {
-  if (!is_amdgpu_arch (gdbarch_from_bfd (so->abfd)))
+  if (!is_amdgpu_arch (gdbarch_from_bfd (so.abfd)))
     {
       svr4_so_ops.relocate_section_addresses (so, sec);
       return;
     }
 
-  lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
+  lm_info_svr4 *li = (lm_info_svr4 *) so.lm_info;
   sec->addr = sec->addr + li->l_addr;
   sec->endaddr = sec->endaddr + li->l_addr;
 }

@@ -282,9 +282,9 @@ solib_target_solib_create_inferior_hook (int from_tty)
 }
 
 static void
-solib_target_free_so (struct so_list *so)
+solib_target_free_so (so_list &so)
 {
-  lm_info_target *li = (lm_info_target *) so->lm_info;
+  lm_info_target *li = (lm_info_target *) so.lm_info;
 
   gdb_assert (li->name.empty ());
 
@@ -292,17 +292,16 @@ solib_target_free_so (struct so_list *so)
 }
 
 static void
-solib_target_relocate_section_addresses (struct so_list *so,
-					 struct target_section *sec)
+solib_target_relocate_section_addresses (so_list &so, target_section *sec)
 {
   CORE_ADDR offset;
-  lm_info_target *li = (lm_info_target *) so->lm_info;
+  lm_info_target *li = (lm_info_target *) so.lm_info;
 
   /* Build the offset table only once per object file.  We can not do
      it any earlier, since we need to open the file first.  */
   if (li->offsets.empty ())
     {
-      int num_sections = gdb_bfd_count_sections (so->abfd);
+      int num_sections = gdb_bfd_count_sections (so.abfd);
 
       li->offsets.assign (num_sections, 0);
 
@@ -312,7 +311,7 @@ solib_target_relocate_section_addresses (struct so_list *so,
 	  asection *sect;
 	  int num_alloc_sections = 0;
 
-	  for (i = 0, sect = so->abfd->sections;
+	  for (i = 0, sect = so.abfd->sections;
 	       sect != NULL;
 	       i++, sect = sect->next)
 	    if ((bfd_section_flags (sect) & SEC_ALLOC))
@@ -321,15 +320,15 @@ solib_target_relocate_section_addresses (struct so_list *so,
 	  if (num_alloc_sections != li->section_bases.size ())
 	    warning (_("\
 Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
-		     so->so_name);
+		     so.so_name);
 	  else
 	    {
 	      int bases_index = 0;
 	      int found_range = 0;
 
-	      so->addr_low = ~(CORE_ADDR) 0;
-	      so->addr_high = 0;
-	      for (i = 0, sect = so->abfd->sections;
+	      so.addr_low = ~(CORE_ADDR) 0;
+	      so.addr_high = 0;
+	      for (i = 0, sect = so.abfd->sections;
 		   sect != NULL;
 		   i++, sect = sect->next)
 		{
@@ -342,40 +341,40 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 		      low = li->section_bases[i];
 		      high = low + bfd_section_size (sect) - 1;
 
-		      if (low < so->addr_low)
-			so->addr_low = low;
-		      if (high > so->addr_high)
-			so->addr_high = high;
-		      gdb_assert (so->addr_low <= so->addr_high);
+		      if (low < so.addr_low)
+			so.addr_low = low;
+		      if (high > so.addr_high)
+			so.addr_high = high;
+		      gdb_assert (so.addr_low <= so.addr_high);
 		      found_range = 1;
 		    }
 		  li->offsets[i] = li->section_bases[bases_index];
 		  bases_index++;
 		}
 	      if (!found_range)
-		so->addr_low = so->addr_high = 0;
-	      gdb_assert (so->addr_low <= so->addr_high);
+		so.addr_low = so.addr_high = 0;
+	      gdb_assert (so.addr_low <= so.addr_high);
 	    }
 	}
       else if (!li->segment_bases.empty ())
 	{
 	  symfile_segment_data_up data
-	    = get_symfile_segment_data (so->abfd);
+	    = get_symfile_segment_data (so.abfd);
 
 	  if (data == NULL)
 	    warning (_("\
-Could not relocate shared library \"%s\": no segments"), so->so_name);
+Could not relocate shared library \"%s\": no segments"), so.so_name);
 	  else
 	    {
 	      ULONGEST orig_delta;
 	      int i;
 
-	      if (!symfile_map_offsets_to_segments (so->abfd, data.get (),
+	      if (!symfile_map_offsets_to_segments (so.abfd, data.get (),
 						    li->offsets,
 						    li->segment_bases.size (),
 						    li->segment_bases.data ()))
 		warning (_("\
-Could not relocate shared library \"%s\": bad offsets"), so->so_name);
+Could not relocate shared library \"%s\": bad offsets"), so.so_name);
 
 	      /* Find the range of addresses to report for this library in
 		 "info sharedlibrary".  Report any consecutive segments
@@ -397,11 +396,11 @@ Could not relocate shared library \"%s\": bad offsets"), so->so_name);
 		    break;
 		}
 
-	      so->addr_low = li->segment_bases[0];
-	      so->addr_high = (data->segments[i - 1].base
+	      so.addr_low = li->segment_bases[0];
+	      so.addr_high = (data->segments[i - 1].base
 			       + data->segments[i - 1].size
 			       + orig_delta);
-	      gdb_assert (so->addr_low <= so->addr_high);
+	      gdb_assert (so.addr_low <= so.addr_high);
 	    }
 	}
     }

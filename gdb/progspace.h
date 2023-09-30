@@ -286,11 +286,11 @@ struct program_space
   bool empty ();
 
   /* Remove all target sections owned by OWNER.  */
-  void remove_target_sections (void *owner);
+  void remove_target_sections (const void *owner);
 
   /* Add the sections array defined by SECTIONS to the
      current set of target sections.  */
-  void add_target_sections (void *owner,
+  void add_target_sections (const void *owner,
 			    const target_section_table &sections);
 
   /* Add the sections of OBJFILE to the current set of target

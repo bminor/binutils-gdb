@@ -84,17 +84,16 @@ struct target_so_ops
 {
   /* Adjust the section binding addresses by the base address at
      which the object was actually mapped.  */
-  void (*relocate_section_addresses) (struct so_list *so,
-				      struct target_section *);
+  void (*relocate_section_addresses) (so_list &so, target_section *);
 
   /* Free the link map info and any other private data structures
      associated with a so_list entry.  */
-  void (*free_so) (struct so_list *so);
+  void (*free_so) (so_list &so);
 
   /* Reset private data structures associated with SO.
      This is called when SO is about to be reloaded.
      It is also called before free_so when SO is about to be freed.  */
-  void (*clear_so) (struct so_list *so);
+  void (*clear_so) (const so_list &so);
 
   /* Free private data structures associated to PSPACE.  This method
      should not free resources associated to individual so_list entries,
@@ -137,7 +136,7 @@ struct target_so_ops
      if they represent the same library.
      Falls back to using strcmp on so_original_name field when set
      to NULL.  */
-  int (*same) (struct so_list *gdb, struct so_list *inferior);
+  int (*same) (const so_list &gdb, const so_list &inferior);
 
   /* Return whether a region of memory must be kept in a core file
      for shared libraries loaded before "gcore" is used to be
@@ -164,14 +163,14 @@ struct target_so_ops
 using so_list_range = next_range<so_list>;
 
 /* Free the memory associated with a (so_list *).  */
-void free_so (struct so_list *so);
+void free_so (so_list &so);
 
 /* A deleter that calls free_so.  */
 struct so_deleter
 {
   void operator() (struct so_list *so) const
   {
-    free_so (so);
+    free_so (*so);
   }
 };
 

@@ -173,16 +173,16 @@ svr4_same_1 (const char *gdb_so_name, const char *inferior_so_name)
 }
 
 static int
-svr4_same (struct so_list *gdb, struct so_list *inferior)
+svr4_same (const so_list &gdb, const so_list &inferior)
 {
-  if (!svr4_same_1 (gdb->so_original_name, inferior->so_original_name))
+  if (!svr4_same_1 (gdb.so_original_name, inferior.so_original_name))
     return false;
 
   /* There may be different instances of the same library, in different
      namespaces.  Each instance, however, must have been loaded at a
      different address so its relocation offset would be different.  */
-  const lm_info_svr4 *lmg = (const lm_info_svr4 *) gdb->lm_info;
-  const lm_info_svr4 *lmi = (const lm_info_svr4 *) inferior->lm_info;
+  const lm_info_svr4 *lmg = (const lm_info_svr4 *) gdb.lm_info;
+  const lm_info_svr4 *lmi = (const lm_info_svr4 *) inferior.lm_info;
 
   return (lmg->l_addr_inferior == lmi->l_addr_inferior);
 }
@@ -229,9 +229,9 @@ has_lm_dynamic_from_link_map (void)
 }
 
 static CORE_ADDR
-lm_addr_check (const struct so_list *so, bfd *abfd)
+lm_addr_check (const so_list &so, bfd *abfd)
 {
-  lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
+  lm_info_svr4 *li = (lm_info_svr4 *) so.lm_info;
 
   if (!li->l_addr_p)
     {
@@ -306,7 +306,7 @@ lm_addr_check (const struct so_list *so, bfd *abfd)
 		gdb_printf (_("Using PIC (Position Independent Code) "
 			      "prelink displacement %s for \"%s\".\n"),
 			    paddress (current_inferior ()->arch (), l_addr),
-			    so->so_name);
+			    so.so_name);
 	    }
 	  else
 	    {
@@ -321,7 +321,7 @@ lm_addr_check (const struct so_list *so, bfd *abfd)
 
 	      warning (_(".dynamic section for \"%s\" "
 			 "is not at the expected address "
-			 "(wrong library or version mismatch?)"), so->so_name);
+			 "(wrong library or version mismatch?)"), so.so_name);
 	    }
 	}
 
@@ -979,9 +979,9 @@ svr4_free_objfile_observer (struct objfile *objfile)
 /* Implementation for target_so_ops.free_so.  */
 
 static void
-svr4_free_so (struct so_list *so)
+svr4_free_so (so_list &so)
 {
-  lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
+  lm_info_svr4 *li = (lm_info_svr4 *) so.lm_info;
 
   delete li;
 }
@@ -989,9 +989,9 @@ svr4_free_so (struct so_list *so)
 /* Implement target_so_ops.clear_so.  */
 
 static void
-svr4_clear_so (struct so_list *so)
+svr4_clear_so (const so_list &so)
 {
-  lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
+  lm_info_svr4 *li = (lm_info_svr4 *) so.lm_info;
 
   if (li != NULL)
     li->l_addr_p = 0;
@@ -1006,7 +1006,7 @@ svr4_free_library_list (so_list *list)
     {
       struct so_list *next = list->next;
 
-      free_so (list);
+      free_so (*list);
       list = next;
     }
 }
@@ -1581,7 +1581,7 @@ svr4_current_sos (void)
 	  if (address_in_mem_range (li->l_ld, &vsyscall_range))
 	    {
 	      *sop = so->next;
-	      free_so (so);
+	      free_so (*so);
 	      break;
 	    }
 
@@ -2471,7 +2471,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	    {
 	      load_addr_found = 1;
 	      loader_found_in_list = 1;
-	      load_addr = lm_addr_check (so, tmp_bfd.get ());
+	      load_addr = lm_addr_check (*so, tmp_bfd.get ());
 	      break;
 	    }
 	}
@@ -3214,8 +3214,7 @@ svr4_truncate_ptr (CORE_ADDR addr)
 
 
 static void
-svr4_relocate_section_addresses (struct so_list *so,
-				 struct target_section *sec)
+svr4_relocate_section_addresses (so_list &so, target_section *sec)
 {
   bfd *abfd = sec->the_bfd_section->owner;
 
@@ -3396,7 +3395,7 @@ find_debug_base_for_solib (so_list *solib)
       so_list *solist = tuple.second;
 
       for (; solist != nullptr; solist = solist->next)
-	if (svr4_same (solib, solist))
+	if (svr4_same (*solib, *solist))
 	  return debug_base;
     }
 
