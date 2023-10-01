@@ -30,4 +30,5 @@ if [istarget loongarch*-*-*] {
       }
     }
 
+  run_list_test "align"
 }

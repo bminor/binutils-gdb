@@ -436,18 +436,6 @@ loongarch_mach (void)
 
 static const expressionS const_0 = { .X_op = O_constant, .X_add_number = 0 };
 
-static void
-s_loongarch_align (int arg)
-{
-  const char *t = input_line_pointer;
-  while (!is_end_of_line[(unsigned char) *t] && *t != ',')
-    ++t;
-  if (*t == ',')
-    s_align_ptwo (arg);
-  else
-    s_align_ptwo (0);
-}
-
 /* Handle the .dtprelword and .dtpreldword pseudo-ops.  They generate
    a 32-bit or 64-bit DTP-relative relocation (BYTES says which) for
    use in DWARF debug information.  */
@@ -479,7 +467,6 @@ s_dtprel (int bytes)
 
 static const pseudo_typeS loongarch_pseudo_table[] =
 {
-  { "align", s_loongarch_align, -4 },
   { "dword", cons, 8 },
   { "word", cons, 4 },
   { "half", cons, 2 },
