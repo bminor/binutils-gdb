@@ -511,9 +511,6 @@ AC_CHECK_LIB(m, main)
 # Some systems (e.g. Solaris) have `gethostbyname' in libnsl.
 AC_SEARCH_LIBS(gethostbyname, nsl)
 
-# Some systems (e.g. Solaris) have `socketpair' in libsocket.
-AC_SEARCH_LIBS(socketpair, socket)
-
 # Link in zlib/zstd if we can.  This allows us to read compressed debug
 # sections.
 AM_ZLIB
@@ -1349,9 +1346,9 @@ AC_C_BIGENDIAN
 # ------------------------------ #
 
 AC_CHECK_FUNCS([getuid getgid \
-		pipe pread pread64 pwrite resize_term \
+		pread pread64 pwrite resize_term \
 		getpgid setsid \
-		sigaction sigsetmask socketpair \
+		sigsetmask \
 		ttrace wresize setlocale iconvlist libiconvlist btowc \
 		setrlimit getrlimit posix_madvise waitpid \
 		use_default_colors])
