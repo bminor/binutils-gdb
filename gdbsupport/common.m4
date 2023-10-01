@@ -51,6 +51,8 @@ AC_DEFUN([GDB_AC_COMMON], [
 
   AC_FUNC_MMAP
   AC_FUNC_FORK
+  # Some systems (e.g. Solaris) have `socketpair' in libsocket.
+  AC_SEARCH_LIBS(socketpair, socket)
   AC_CHECK_FUNCS([fdwalk getrlimit pipe pipe2 poll socketpair sigaction \
 		  ptrace64 sbrk setns sigaltstack sigprocmask \
 		  setpgid setpgrp getrusage getauxval sigtimedwait])
