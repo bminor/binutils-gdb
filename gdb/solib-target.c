@@ -282,12 +282,6 @@ solib_target_solib_create_inferior_hook (int from_tty)
 }
 
 static void
-solib_target_clear_solib (void)
-{
-  /* Nothing needed.  */
-}
-
-static void
 solib_target_free_so (struct so_list *so)
 {
   lm_info_target *li = (lm_info_target *) so->lm_info;
@@ -440,7 +434,7 @@ const struct target_so_ops solib_target_so_ops =
   solib_target_relocate_section_addresses,
   solib_target_free_so,
   nullptr,
-  solib_target_clear_solib,
+  nullptr,
   solib_target_solib_create_inferior_hook,
   solib_target_current_sos,
   solib_target_open_symbol_file_object,

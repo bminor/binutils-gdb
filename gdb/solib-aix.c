@@ -373,14 +373,6 @@ solib_aix_free_so (struct so_list *so)
   delete li;
 }
 
-/* Implement the "clear_solib" target_so_ops method.  */
-
-static void
-solib_aix_clear_solib (void)
-{
-  /* Nothing needed.  */
-}
-
 /* Compute and return the OBJFILE's section_offset array, using
    the associated loader info (INFO).  */
 
@@ -715,7 +707,7 @@ const struct target_so_ops solib_aix_so_ops =
   solib_aix_relocate_section_addresses,
   solib_aix_free_so,
   nullptr,
-  solib_aix_clear_solib,
+  nullptr,
   solib_aix_solib_create_inferior_hook,
   solib_aix_current_sos,
   solib_aix_open_symbol_file_object,
