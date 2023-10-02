@@ -143,11 +143,4 @@ extern void set_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd,
 				      const char *soname,
 				      const bfd_build_id *build_id);
 
-/* If SONAME had a build-id associated with it in ABFD's registry by a
-   previous call to set_cbfd_soname_build_id then return the build-id
-   as a NULL-terminated hex string.  */
-
-extern gdb::unique_xmalloc_ptr<char> get_cbfd_soname_build_id
-  (gdb_bfd_ref_ptr abfd, const char *soname);
-
 #endif /* SOLIB_H */

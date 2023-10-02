@@ -503,9 +503,11 @@ set_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd,
   (*mapptr)[soname] = build_id_to_string (build_id);
 }
 
-/* See solib.h.  */
+/* If SONAME had a build-id associated with it in ABFD's registry by a
+   previous call to set_cbfd_soname_build_id then return the build-id
+   as a NULL-terminated hex string.  */
 
-gdb::unique_xmalloc_ptr<char>
+static gdb::unique_xmalloc_ptr<char>
 get_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd, const char *soname)
 {
   if (abfd.get () == nullptr || soname == nullptr)
