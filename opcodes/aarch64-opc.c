@@ -4507,6 +4507,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	     partial match that was found.  */
 	  if (aarch64_sys_regs[i].value == opnd->sysreg.value
 	      && ! aarch64_sys_reg_deprecated_p (aarch64_sys_regs[i].flags)
+	      && ! aarch64_sys_reg_alias_p (aarch64_sys_regs[i].flags)
 	      && (name == NULL || exact_match))
 	    {
 	      name = aarch64_sys_regs[i].name;
@@ -5320,7 +5321,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_CORE ("trceventctl0r", CPENC (2,1,C0,C8,0),  0),
   SR_CORE ("trceventctl1r", CPENC (2,1,C0,C9,0),  0),
   SR_CORE ("trcextinselr0", CPENC (2,1,C0,C8,4),  0),
-  SR_CORE ("trcextinselr",  CPENC (2,1,C0,C8,4),  0),
+  SR_CORE ("trcextinselr",  CPENC (2,1,C0,C8,4),  F_REG_ALIAS),
   SR_CORE ("trcextinselr1", CPENC (2,1,C0,C9,4),  0),
   SR_CORE ("trcextinselr2", CPENC (2,1,C0,C10,4), 0),
   SR_CORE ("trcextinselr3", CPENC (2,1,C0,C11,4), 0),
@@ -5740,6 +5741,12 @@ bool
 aarch64_sys_reg_deprecated_p (const uint32_t reg_flags)
 {
   return (reg_flags & F_DEPRECATED) != 0;
+}
+
+bool
+aarch64_sys_reg_alias_p (const uint32_t reg_flags)
+{
+  return (reg_flags & F_REG_ALIAS) != 0;
 }
 
 /* The CPENC below is fairly misleading, the fields

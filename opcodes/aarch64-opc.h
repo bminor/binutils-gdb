@@ -292,6 +292,9 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 #undef F_REG_IN_CRM
 #define F_REG_IN_CRM	(1 << 5)  /* Register extra encoding in CRm.  */
 
+#undef F_REG_ALIAS
+#define F_REG_ALIAS	(1 << 6)  /* Register name aliases another.  */
+
 /* PSTATE field name for the MSR instruction this is encoded in "op1:op2:CRm".
    Part of CRm can be used to encode <pstatefield>. E.g. CRm[3:1] for SME.
    In order to set/get full PSTATE field name use flag F_REG_IN_CRM and below
