@@ -19,11 +19,14 @@
 import gdb
 import gdb.events
 
+
 def new_progspace(event):
     print("NewProgspaceEvent: %s" % str(event.progspace))
 
+
 def free_progspace(event):
     print("FreeProgspaceEvent: %s" % str(event.progspace))
+
 
 gdb.events.new_progspace.connect(new_progspace)
 gdb.events.free_progspace.connect(free_progspace)
