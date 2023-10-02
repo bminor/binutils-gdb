@@ -806,7 +806,7 @@ frv_solib_create_inferior_hook (int from_tty)
 }
 
 static void
-frv_clear_solib (void)
+frv_clear_solib (program_space *pspace)
 {
   lm_base_cache = 0;
   enable_break2_done = 0;

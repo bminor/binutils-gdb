@@ -3178,11 +3178,9 @@ svr4_solib_create_inferior_hook (int from_tty)
 }
 
 static void
-svr4_clear_solib (void)
+svr4_clear_solib (program_space *pspace)
 {
-  struct svr4_info *info;
-
-  info = get_svr4_info (current_program_space);
+  svr4_info *info = get_svr4_info (pspace);
   info->debug_base = 0;
   info->debug_loader_offset_p = 0;
   info->debug_loader_offset = 0;

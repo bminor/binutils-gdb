@@ -1241,7 +1241,7 @@ clear_solib (void)
     }
 
   if (ops->clear_solib != nullptr)
-    ops->clear_solib ();
+    ops->clear_solib (current_program_space);
 }
 
 /* Shared library startup support.  When GDB starts up the inferior,
@@ -1411,7 +1411,7 @@ reload_shared_libraries (const char *ignored, int from_tty,
       /* Reset or free private data structures not associated with
 	 so_list entries.  */
       if (ops->clear_solib != nullptr)
-	ops->clear_solib ();
+	ops->clear_solib (current_program_space);
 
       /* Remove any previous solib event breakpoint.  This is usually
 	 done in common code, at breakpoint_init_inferior time, but

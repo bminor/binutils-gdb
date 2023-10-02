@@ -96,9 +96,10 @@ struct target_so_ops
      It is also called before free_so when SO is about to be freed.  */
   void (*clear_so) (struct so_list *so);
 
-  /* Reset or free private data structures not associated with
-     so_list entries.  */
-  void (*clear_solib) (void);
+  /* Free private data structures associated to PSPACE.  This method
+     should not free resources associated to individual so_list entries,
+     those are cleared by the clear_so method.  */
+  void (*clear_solib) (program_space *pspace);
 
   /* Target dependent code to run after child process fork.  */
   void (*solib_create_inferior_hook) (int from_tty);

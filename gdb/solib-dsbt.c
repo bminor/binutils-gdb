@@ -166,19 +166,17 @@ struct dsbt_info
 /* Per-program-space data key.  */
 static const registry<program_space>::key<dsbt_info> solib_dsbt_pspace_data;
 
-/* Get the current dsbt data.  If none is found yet, add it now.  This
+/* Get the dsbt solib data for PSPACE.  If none is found yet, add it now.  This
    function always returns a valid object.  */
 
-static struct dsbt_info *
-get_dsbt_info (void)
+static dsbt_info *
+get_dsbt_info (program_space *pspace)
 {
-  struct dsbt_info *info;
-
-  info = solib_dsbt_pspace_data.get (current_program_space);
-  if (info != NULL)
+  dsbt_info *info = solib_dsbt_pspace_data.get (pspace);
+  if (info != nullptr)
     return info;
 
-  return solib_dsbt_pspace_data.emplace (current_program_space);
+  return solib_dsbt_pspace_data.emplace (pspace);
 }
 
 
@@ -270,9 +268,6 @@ decode_loadmap (const gdb_byte *buf)
   return int_ldmbuf;
 }
 
-
-static struct dsbt_info *get_dsbt_info (void);
-
 /* Interrogate the Linux kernel to find out where the program was loaded.
    There are two load maps; one for the executable and one for the
    interpreter (only in the case of a dynamically linked executable).  */
@@ -280,7 +275,7 @@ static struct dsbt_info *get_dsbt_info (void);
 static void
 dsbt_get_initial_loadmaps (void)
 {
-  struct dsbt_info *info = get_dsbt_info ();
+  dsbt_info *info = get_dsbt_info (current_program_space);
   gdb::optional<gdb::byte_vector> buf
     = target_read_alloc (current_inferior ()->top_target (),
 			 TARGET_OBJECT_FDPIC, "exec");
@@ -442,7 +437,7 @@ lm_base (void)
   struct bound_minimal_symbol got_sym;
   CORE_ADDR addr;
   gdb_byte buf[TIC6X_PTR_SIZE];
-  struct dsbt_info *info = get_dsbt_info ();
+  dsbt_info *info = get_dsbt_info (current_program_space);
 
   /* One of our assumptions is that the main executable has been relocated.
      Bail out if this has not happened.  (Note that post_create_inferior
@@ -524,7 +519,7 @@ dsbt_current_sos (void)
   CORE_ADDR lm_addr;
   struct so_list *sos_head = NULL;
   struct so_list **sos_next_ptr = &sos_head;
-  struct dsbt_info *info = get_dsbt_info ();
+  dsbt_info *info = get_dsbt_info (current_program_space);
 
   /* Make sure that the main executable has been relocated.  This is
      required in order to find the address of the global offset table,
@@ -645,7 +640,7 @@ dsbt_current_sos (void)
 static int
 dsbt_in_dynsym_resolve_code (CORE_ADDR pc)
 {
-  struct dsbt_info *info = get_dsbt_info ();
+  dsbt_info *info = get_dsbt_info (current_program_space);
 
   return ((pc >= info->interp_text_sect_low && pc < info->interp_text_sect_high)
 	  || (pc >= info->interp_plt_sect_low && pc < info->interp_plt_sect_high)
@@ -675,7 +670,6 @@ static int
 enable_break (void)
 {
   asection *interp_sect;
-  struct dsbt_info *info;
 
   if (current_program_space->exec_bfd () == NULL)
     return 0;
@@ -683,7 +677,7 @@ enable_break (void)
   if (!target_has_execution ())
     return 0;
 
-  info = get_dsbt_info ();
+  dsbt_info *info = get_dsbt_info (current_program_space);
 
   info->interp_text_sect_low = 0;
   info->interp_text_sect_high = 0;
@@ -803,7 +797,7 @@ dsbt_relocate_main_executable (void)
 {
   struct int_elf32_dsbt_loadmap *ldm;
   int changed;
-  struct dsbt_info *info = get_dsbt_info ();
+  dsbt_info *info = get_dsbt_info (current_program_space);
 
   dsbt_get_initial_loadmaps ();
   ldm = info->exec_loadmap;
@@ -875,9 +869,9 @@ dsbt_solib_create_inferior_hook (int from_tty)
 }
 
 static void
-dsbt_clear_solib (void)
+dsbt_clear_solib (program_space *pspace)
 {
-  struct dsbt_info *info = get_dsbt_info ();
+  dsbt_info *info = get_dsbt_info (pspace);
 
   info->lm_base_cache = 0;
   info->main_lm_addr = 0;

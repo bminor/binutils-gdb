@@ -75,19 +75,17 @@ struct darwin_info
 static const registry<program_space>::key<darwin_info>
   solib_darwin_pspace_data;
 
-/* Get the current darwin data.  If none is found yet, add it now.  This
+/* Get the darwin solib data for PSPACE.  If none is found yet, add it now.  This
    function always returns a valid object.  */
 
-static struct darwin_info *
-get_darwin_info (void)
+static darwin_info *
+get_darwin_info (program_space *pspace)
 {
-  struct darwin_info *info;
-
-  info = solib_darwin_pspace_data.get (current_program_space);
-  if (info != NULL)
+  darwin_info *info = solib_darwin_pspace_data.get (pspace);
+  if (info != nullptr)
     return info;
 
-  return solib_darwin_pspace_data.emplace (current_program_space);
+  return solib_darwin_pspace_data.emplace (pspace);
 }
 
 /* Return non-zero if the version in dyld_all_image is known.  */
@@ -225,7 +223,7 @@ darwin_current_sos (void)
   struct so_list *head = NULL;
   struct so_list *tail = NULL;
   int i;
-  struct darwin_info *info = get_darwin_info ();
+  darwin_info *info = get_darwin_info (current_program_space);
 
   /* Be sure image infos are loaded.  */
   darwin_load_image_infos (info);
@@ -506,7 +504,7 @@ darwin_solib_create_inferior_hook (int from_tty)
   if (!target_has_execution ())
     return;
 
-  struct darwin_info *info = get_darwin_info ();
+  darwin_info *info = get_darwin_info (current_program_space);
   CORE_ADDR load_addr;
 
   info->all_image_addr = 0;
@@ -601,9 +599,9 @@ darwin_solib_create_inferior_hook (int from_tty)
 }
 
 static void
-darwin_clear_solib (void)
+darwin_clear_solib (program_space *pspace)
 {
-  struct darwin_info *info = get_darwin_info ();
+  darwin_info *info = get_darwin_info (pspace);
 
   info->all_image_addr = 0;
   info->all_image.version = 0;
