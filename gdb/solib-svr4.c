@@ -1021,9 +1021,7 @@ svr4_copy_library_list (struct so_list *src)
 
   while (src != NULL)
     {
-      struct so_list *newobj;
-
-      newobj = XNEW (struct so_list);
+      so_list *newobj = new so_list;
       memcpy (newobj, src, sizeof (struct so_list));
 
       lm_info_svr4 *src_li = (lm_info_svr4 *) src->lm_info;
@@ -1061,9 +1059,8 @@ library_list_start_library (struct gdb_xml_parser *parser,
     = (ULONGEST *) xml_find_attribute (attributes, "l_addr")->value.get ();
   ULONGEST *l_ldp
     = (ULONGEST *) xml_find_attribute (attributes, "l_ld")->value.get ();
-  struct so_list *new_elem;
 
-  new_elem = XCNEW (struct so_list);
+  so_list *new_elem = new so_list;
   lm_info_svr4 *li = new lm_info_svr4;
   new_elem->lm_info = li;
   li->lm_addr = *lmp;
@@ -1246,12 +1243,10 @@ svr4_current_sos_via_xfer_libraries (struct svr4_library_list *list,
 static struct so_list *
 svr4_default_sos (svr4_info *info)
 {
-  struct so_list *newobj;
-
   if (!info->debug_loader_offset_p)
     return NULL;
 
-  newobj = XCNEW (struct so_list);
+  so_list *newobj = new so_list;
   lm_info_svr4 *li = new lm_info_svr4;
   newobj->lm_info = li;
 
@@ -1283,7 +1278,7 @@ svr4_read_so_list (svr4_info *info, CORE_ADDR lm, CORE_ADDR prev_lm,
 
   for (; lm != 0; prev_lm = lm, lm = next_lm)
     {
-      so_list_up newobj (XCNEW (struct so_list));
+      so_list_up newobj (new so_list);
 
       lm_info_svr4 *li = lm_info_read (lm).release ();
       newobj->lm_info = li;

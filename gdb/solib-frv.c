@@ -363,7 +363,6 @@ frv_current_sos (void)
       if (got_addr != mgot)
 	{
 	  struct int_elf32_fdpic_loadmap *loadmap;
-	  struct so_list *sop;
 	  CORE_ADDR addr;
 
 	  /* Fetch the load map address.  */
@@ -378,7 +377,7 @@ frv_current_sos (void)
 	      break;
 	    }
 
-	  sop = XCNEW (struct so_list);
+	  so_list *sop = new so_list;
 	  lm_info_frv *li = new lm_info_frv;
 	  sop->lm_info = li;
 	  li->map = loadmap;

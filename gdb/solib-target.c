@@ -230,7 +230,7 @@ solib_target_parse_libraries (const char *library)
 static struct so_list *
 solib_target_current_sos (void)
 {
-  struct so_list *new_solib, *start = NULL, *last = NULL;
+  so_list *start = NULL, *last = NULL;
 
   /* Fetch the list of shared libraries.  */
   gdb::optional<gdb::char_vector> library_document
@@ -249,7 +249,7 @@ solib_target_current_sos (void)
   /* Build a struct so_list for each entry on the list.  */
   for (auto &&info : library_list)
     {
-      new_solib = XCNEW (struct so_list);
+      so_list *new_solib = new so_list;
       strncpy (new_solib->so_name, info->name.c_str (),
 	       SO_NAME_MAX_PATH_SIZE - 1);
       new_solib->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';

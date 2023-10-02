@@ -273,7 +273,7 @@ darwin_current_sos (void)
 	break;
 
       /* Create and fill the new so_list element.  */
-      gdb::unique_xmalloc_ptr<struct so_list> newobj (XCNEW (struct so_list));
+      so_list *newobj = new so_list;
 
       lm_info_darwin *li = new lm_info_darwin;
       newobj->lm_info = li;
@@ -284,10 +284,11 @@ darwin_current_sos (void)
       li->lm_addr = load_addr;
 
       if (head == NULL)
-	head = newobj.get ();
+	head = newobj;
       else
-	tail->next = newobj.get ();
-      tail = newobj.release ();
+	tail->next = newobj;
+
+      tail = newobj;
     }
 
   return head;

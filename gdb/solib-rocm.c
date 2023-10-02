@@ -217,9 +217,7 @@ rocm_solib_copy_list (const so_list *src)
 
   while (src != nullptr)
     {
-      struct so_list *newobj;
-
-      newobj = XNEW (struct so_list);
+      so_list *newobj = new so_list;
       memcpy (newobj, src, sizeof (struct so_list));
 
       lm_info_svr4 *src_li = (lm_info_svr4 *) src->lm_info;
@@ -738,7 +736,7 @@ rocm_update_solib_list ()
       if (status != AMD_DBGAPI_STATUS_SUCCESS)
 	continue;
 
-      struct so_list *so = XCNEW (struct so_list);
+      so_list *so = new so_list;
       lm_info_svr4 *li = new lm_info_svr4;
       li->l_addr = l_addr;
       so->lm_info = li;

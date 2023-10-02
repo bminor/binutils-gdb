@@ -37,23 +37,23 @@ struct so_list
      dynamic linker's tables in the inferior, and are initialized by
      current_sos.  */
 
-  struct so_list *next;	/* next structure in linked list */
+  struct so_list *next = nullptr;	/* next structure in linked list */
 
   /* A pointer to target specific link map information.  Often this
      will be a copy of struct link_map from the user process, but
      it need not be; it can be any collection of data needed to
      traverse the dynamic linker's data structures.  */
-  lm_info_base *lm_info;
+  lm_info_base *lm_info = nullptr;
 
   /* Shared object file name, exactly as it appears in the
      inferior's link map.  This may be a relative path, or something
      which needs to be looked up in LD_LIBRARY_PATH, etc.  We use it
      to tell which entries in the inferior's dynamic linker's link
      map we've already loaded.  */
-  char so_original_name[SO_NAME_MAX_PATH_SIZE];
+  char so_original_name[SO_NAME_MAX_PATH_SIZE] {};
 
   /* Shared object file name, expanded to something GDB can open.  */
-  char so_name[SO_NAME_MAX_PATH_SIZE];
+  char so_name[SO_NAME_MAX_PATH_SIZE] {};
 
   /* The following fields of the structure are built from
      information gathered from the shared object file itself, and
@@ -61,15 +61,15 @@ struct so_list
 
      current_sos must initialize these fields to 0.  */
 
-  bfd *abfd;
-  char symbols_loaded;	/* flag: symbols read in yet?  */
+  bfd *abfd = nullptr;
+  char symbols_loaded = 0;	/* flag: symbols read in yet?  */
 
   /* objfile with symbols for a loaded library.  Target memory is read from
      ABFD.  OBJFILE may be NULL either before symbols have been loaded, if
      the file cannot be found or after the command "nosharedlibrary".  */
-  struct objfile *objfile;
+  struct objfile *objfile = nullptr;
 
-  target_section_table *sections;
+  target_section_table *sections = nullptr;
 
   /* Record the range of addresses belonging to this shared library.
      There may not be just one (e.g. if two segments are relocated
@@ -77,7 +77,7 @@ struct so_list
      the MI command "-file-list-shared-libraries".  The latter has a format
      that supports outputting multiple segments once the related code
      supports them.  */
-  CORE_ADDR addr_low, addr_high;
+  CORE_ADDR addr_low = 0, addr_high = 0;
 };
 
 struct target_so_ops
