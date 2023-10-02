@@ -113,6 +113,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define EXTRACT_ZCB_HALFWORD_UIMM(x) \
   (RV_X(x, 5, 1) << 1)
 /* Vendor-specific (CORE-V) extract macros.  */
+#define EXTRACT_CV_IS2_UIMM5(x) \
+  (RV_X(x, 20, 5))
 #define EXTRACT_CV_IS3_UIMM5(x) \
   (RV_X(x, 25, 5))
 
@@ -167,6 +169,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define ENCODE_ZCB_HALFWORD_UIMM(x) \
   (RV_X(x, 1, 1) << 5)
 /* Vendor-specific (CORE-V) encode macros.  */
+#define ENCODE_CV_IS2_UIMM5(x) \
+  (RV_X(x, 0, 5) << 20)
 #define ENCODE_CV_IS3_UIMM5(x) \
   (RV_X(x, 0, 5) << 25)
 
@@ -450,6 +454,7 @@ enum riscv_insn_class
   INSN_CLASS_ZICBOZ,
   INSN_CLASS_H,
   INSN_CLASS_XCVMAC,
+  INSN_CLASS_XCVALU,
   INSN_CLASS_XTHEADBA,
   INSN_CLASS_XTHEADBB,
   INSN_CLASS_XTHEADBS,

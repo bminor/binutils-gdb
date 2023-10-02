@@ -749,6 +749,11 @@ The Xcvmac extension provides instructions for multiply-accumulate operations.
 
 It is documented in @url{https://docs.openhwgroup.org/projects/cv32e40p-user-manual/en/latest/instruction_set_extensions.html}
 
+@item Xcvalu
+The Xcvalu extension provides instructions for general ALU operations.
+
+It is documented in @url{https://docs.openhwgroup.org/projects/cv32e40p-user-manual/en/latest/instruction_set_extensions.html}
+
 @item XTheadBa
 The XTheadBa extension provides instructions for address calculations.
 
