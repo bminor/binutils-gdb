@@ -1,3 +1,8 @@
+2023-10-02  Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c (_bfd_XXi_only_swap_filehdr_out): Use
+	bfd_get_current_time when filing in the timestamp.
+
 2023-09-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 30906

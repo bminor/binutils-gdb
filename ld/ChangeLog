@@ -1,3 +1,8 @@
+2023-10-02  Nick Clifton  <nickc@redhat.com>
+
+	* pe-dll.c (fill_edata): Use bfd_get_current_time when filling in
+	the timestamp.
+
 2023-09-27  Hsinyuan Xavier  <TheLastLin@hotmail.com>
 
 	PR 30875

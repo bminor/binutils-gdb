@@ -839,17 +839,7 @@ _bfd_XXi_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
      option was chosen.  */
   if ((pe_data (abfd)->timestamp) == -1)
     {
-      time_t now;
-      char *source_date_epoch;
-
-      /* If the SOURCE_DATE_EPOCH environment variable is
-	 defined then use that as the time, otherwise use
-	 the current time.  */
-      source_date_epoch = getenv ("SOURCE_DATE_EPOCH");
-      if (source_date_epoch)
-	now = (time_t) strtoll (source_date_epoch, NULL, 10);
-      else
-	now = time (NULL);
+      time_t now = bfd_get_current_time (0);
       H_PUT_32 (abfd, now, filehdr_out->f_timdat);
     }
   else

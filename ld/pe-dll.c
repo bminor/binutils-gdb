@@ -1232,15 +1232,7 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 
   if (pe_data (abfd)->timestamp == -1)
     {
-      time_t now;
-      char *source_date_epoch;
-
-      source_date_epoch = getenv ("SOURCE_DATE_EPOCH");
-      if (source_date_epoch)
-	now = (time_t) strtoll (source_date_epoch, NULL, 10);
-      else
-	now = time (NULL);
-
+      time_t now = bfd_get_current_time (0);
       H_PUT_32 (abfd, now, edata_d + 4);
     }
   else
