@@ -196,7 +196,7 @@ struct ext_link_map
 
 /* Link map info to include in an allocated so_list entry.  */
 
-struct lm_info_frv : public lm_info
+struct lm_info_frv final : public lm_info
 {
   ~lm_info_frv ()
   {
@@ -816,14 +816,6 @@ frv_clear_solib (program_space *pspace)
 }
 
 static void
-frv_free_so (so_list &so)
-{
-  lm_info_frv *li = (lm_info_frv *) so.lm_info;
-
-  delete li;
-}
-
-static void
 frv_relocate_section_addresses (so_list &so, target_section *sec)
 {
   int seg;
@@ -1089,7 +1081,6 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
 const struct target_so_ops frv_so_ops =
 {
   frv_relocate_section_addresses,
-  frv_free_so,
   nullptr,
   frv_clear_solib,
   frv_solib_create_inferior_hook,

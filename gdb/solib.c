@@ -658,6 +658,8 @@ clear_so (so_list &so)
     ops->clear_so (so);
 }
 
+lm_info::~lm_info () = default;
+
 /* Free the storage associated with the `struct so_list' object SO.
    If we have opened a BFD for SO, close it.
 
@@ -672,11 +674,8 @@ clear_so (so_list &so)
 void
 free_so (so_list &so)
 {
-  const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
-
   clear_so (so);
-  ops->free_so (so);
-
+  delete so.lm_info;
   delete &so;
 }
 

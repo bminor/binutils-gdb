@@ -123,7 +123,7 @@ struct dbst_ext_link_map
 
 /* Link map info to include in an allocated so_list entry */
 
-struct lm_info_dsbt : public lm_info
+struct lm_info_dsbt final : public lm_info
 {
   ~lm_info_dsbt ()
   {
@@ -880,14 +880,6 @@ dsbt_clear_solib (program_space *pspace)
 }
 
 static void
-dsbt_free_so (so_list &so)
-{
-  lm_info_dsbt *li = (lm_info_dsbt *) so.lm_info;
-
-  delete li;
-}
-
-static void
 dsbt_relocate_section_addresses (so_list &so, target_section *sec)
 {
   int seg;
@@ -917,7 +909,6 @@ show_dsbt_debug (struct ui_file *file, int from_tty,
 const struct target_so_ops dsbt_so_ops =
 {
   dsbt_relocate_section_addresses,
-  dsbt_free_so,
   nullptr,
   dsbt_clear_solib,
   dsbt_solib_create_inferior_hook,

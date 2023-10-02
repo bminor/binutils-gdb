@@ -976,16 +976,6 @@ svr4_free_objfile_observer (struct objfile *objfile)
   probes_table_remove_objfile_probes (objfile);
 }
 
-/* Implementation for target_so_ops.free_so.  */
-
-static void
-svr4_free_so (so_list &so)
-{
-  lm_info_svr4 *li = (lm_info_svr4 *) so.lm_info;
-
-  delete li;
-}
-
 /* Implement target_so_ops.clear_so.  */
 
 static void
@@ -3465,7 +3455,6 @@ svr4_iterate_over_objfiles_in_search_order
 const struct target_so_ops svr4_so_ops =
 {
   svr4_relocate_section_addresses,
-  svr4_free_so,
   svr4_clear_so,
   svr4_clear_solib,
   svr4_solib_create_inferior_hook,

@@ -28,7 +28,7 @@
 
 /* Our private data in struct so_list.  */
 
-struct lm_info_aix : public lm_info
+struct lm_info_aix final : public lm_info
 {
   /* The name of the file mapped by the loader.  Apart from the entry
      for the main executable, this is usually a shared library (which,
@@ -358,18 +358,6 @@ solib_aix_relocate_section_addresses (so_list &so, target_section *sec)
       sec->addr = bfd_section_vma (bfd_sect);
       sec->endaddr = sec->addr + bfd_section_size (bfd_sect);
     }
-}
-
-/* Implement the "free_so" target_so_ops method.  */
-
-static void
-solib_aix_free_so (so_list &so)
-{
-  lm_info_aix *li = (lm_info_aix *) so.lm_info;
-
-  solib_debug_printf ("%s", so.so_name);
-
-  delete li;
 }
 
 /* Compute and return the OBJFILE's section_offset array, using
@@ -704,7 +692,6 @@ solib_aix_normal_stop_observer (struct bpstat *unused_1, int unused_2)
 const struct target_so_ops solib_aix_so_ops =
 {
   solib_aix_relocate_section_addresses,
-  solib_aix_free_so,
   nullptr,
   nullptr,
   solib_aix_solib_create_inferior_hook,

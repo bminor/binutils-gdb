@@ -135,7 +135,7 @@ darwin_load_image_infos (struct darwin_info *info)
 
 /* Link map info to include in an allocated so_list entry.  */
 
-struct lm_info_darwin : public lm_info
+struct lm_info_darwin final : public lm_info
 {
   /* The target location of lm.  */
   CORE_ADDR lm_addr = 0;
@@ -608,14 +608,6 @@ darwin_clear_solib (program_space *pspace)
   info->all_image.version = 0;
 }
 
-static void
-darwin_free_so (so_list &so)
-{
-  lm_info_darwin *li = (lm_info_darwin *) so.lm_info;
-
-  delete li;
-}
-
 /* The section table is built from bfd sections using bfd VMAs.
    Relocate these VMAs according to solib info.  */
 
@@ -673,7 +665,6 @@ darwin_bfd_open (const char *pathname)
 const struct target_so_ops darwin_so_ops =
 {
   darwin_relocate_section_addresses,
-  darwin_free_so,
   nullptr,
   darwin_clear_solib,
   darwin_solib_create_inferior_hook,

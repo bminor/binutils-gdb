@@ -28,7 +28,7 @@
 #include "inferior.h"
 
 /* Private data for each loaded library.  */
-struct lm_info_target : public lm_info
+struct lm_info_target final : public lm_info
 {
   /* The library's name.  The name is normally kept in the struct
      so_list; it is only here during XML parsing.  */
@@ -282,16 +282,6 @@ solib_target_solib_create_inferior_hook (int from_tty)
 }
 
 static void
-solib_target_free_so (so_list &so)
-{
-  lm_info_target *li = (lm_info_target *) so.lm_info;
-
-  gdb_assert (li->name.empty ());
-
-  delete li;
-}
-
-static void
 solib_target_relocate_section_addresses (so_list &so, target_section *sec)
 {
   CORE_ADDR offset;
@@ -431,7 +421,6 @@ solib_target_in_dynsym_resolve_code (CORE_ADDR pc)
 const struct target_so_ops solib_target_so_ops =
 {
   solib_target_relocate_section_addresses,
-  solib_target_free_so,
   nullptr,
   nullptr,
   solib_target_solib_create_inferior_hook,

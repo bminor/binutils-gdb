@@ -29,6 +29,9 @@
 
 struct lm_info
 {
+  lm_info () = default;
+  lm_info (const lm_info &) = default;
+  virtual ~lm_info () = 0;
 };
 
 struct so_list
@@ -86,13 +89,9 @@ struct target_so_ops
      which the object was actually mapped.  */
   void (*relocate_section_addresses) (so_list &so, target_section *);
 
-  /* Free the link map info and any other private data structures
-     associated with a so_list entry.  */
-  void (*free_so) (so_list &so);
-
   /* Reset private data structures associated with SO.
      This is called when SO is about to be reloaded.
-     It is also called before free_so when SO is about to be freed.  */
+     It is also called when SO is about to be freed.  */
   void (*clear_so) (const so_list &so);
 
   /* Free private data structures associated to PSPACE.  This method
