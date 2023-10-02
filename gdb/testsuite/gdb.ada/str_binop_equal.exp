@@ -31,8 +31,24 @@ runto "foo_p211_061.adb:$bp_location"
 gdb_test "print my_str = my_str" \
          " = true"
 
-gdb_test "print my_str = \"ABCD\"" \
-         " = true"
+set kfail_re \
+    [multi_line \
+	 [string_to_regexp {Symbol: ada.strings.maps."="}] \
+	 ".*" \
+	 "\\$$decimal = false"]
+
+gdb_test_no_output "set debug expr 1"
+
+gdb_test_multiple {print my_str = "ABCD"} "" {
+    -re -wrap " = true" {
+	pass $gdb_test_name
+    }
+    -re -wrap $kfail_re {
+	kfail ada/30908 $gdb_test_name
+    }
+}
+
+gdb_test "set debug expr 0"
 
 gdb_test "print my_str = \"EFGH\"" \
          " = false"
