@@ -4999,6 +4999,7 @@ riscv_insert_uleb128_fixes (bfd *abfd ATTRIBUTE_UNUSED,
       exp_dup->X_add_symbol = exp->X_op_symbol;
       fix_new_exp (fragP, fragP->fr_fix, 0,
 		   exp_dup, 0, BFD_RELOC_RISCV_SUB_ULEB128);
+      free ((void *) exp_dup);
     }
 }
 

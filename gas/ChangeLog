@@ -1,3 +1,9 @@
+2023-10-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 30861
+	* config/tc-riscv.c (riscv_insert_uleb128_fixes): Release
+	duplicated memory.
+
 2023-09-18  Jacob Navia  <jacob@jacob.remcomp.fr>
 
 	* config/tc-riscv.c (riscv_ip_hardcode): Fully initialise the
