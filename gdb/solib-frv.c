@@ -196,7 +196,7 @@ struct ext_link_map
 
 /* Link map info to include in an allocated so_list entry.  */
 
-struct lm_info_frv : public lm_info_base
+struct lm_info_frv : public lm_info
 {
   ~lm_info_frv ()
   {

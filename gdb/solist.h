@@ -27,7 +27,7 @@
 
 /* Base class for target-specific link map information.  */
 
-struct lm_info_base
+struct lm_info
 {
 };
 
@@ -43,7 +43,7 @@ struct so_list
      will be a copy of struct link_map from the user process, but
      it need not be; it can be any collection of data needed to
      traverse the dynamic linker's data structures.  */
-  lm_info_base *lm_info = nullptr;
+  struct lm_info *lm_info = nullptr;
 
   /* Shared object file name, exactly as it appears in the
      inferior's link map.  This may be a relative path, or something

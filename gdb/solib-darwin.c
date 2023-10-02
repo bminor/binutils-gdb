@@ -135,7 +135,7 @@ darwin_load_image_infos (struct darwin_info *info)
 
 /* Link map info to include in an allocated so_list entry.  */
 
-struct lm_info_darwin : public lm_info_base
+struct lm_info_darwin : public lm_info
 {
   /* The target location of lm.  */
   CORE_ADDR lm_addr = 0;

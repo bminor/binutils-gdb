@@ -28,7 +28,7 @@
 #include "inferior.h"
 
 /* Private data for each loaded library.  */
-struct lm_info_target : public lm_info_base
+struct lm_info_target : public lm_info
 {
   /* The library's name.  The name is normally kept in the struct
      so_list; it is only here during XML parsing.  */

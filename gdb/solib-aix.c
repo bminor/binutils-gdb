@@ -28,7 +28,7 @@
 
 /* Our private data in struct so_list.  */
 
-struct lm_info_aix : public lm_info_base
+struct lm_info_aix : public lm_info
 {
   /* The name of the file mapped by the loader.  Apart from the entry
      for the main executable, this is usually a shared library (which,

@@ -29,7 +29,7 @@ extern const struct target_so_ops svr4_so_ops;
 
 /* Link map info to include in an allocated so_list entry.  */
 
-struct lm_info_svr4 : public lm_info_base
+struct lm_info_svr4 : public lm_info
 {
   /* Amount by which addresses in the binary should be relocated to
      match the inferior.  The direct inferior value is L_ADDR_INFERIOR.
