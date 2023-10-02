@@ -114,7 +114,7 @@ proc jit_test_reread {standalone change_addr} {
 			     "get address of __jit_debug_descriptor"]
 
 	gdb_test "maint info breakpoints" \
-	    "jit events     keep y   $hex <__jit_debug_register_code>.*" \
+	    "jit events\[ \]+keep y   $hex <__jit_debug_register_code>.*" \
 	    "maint info breakpoints shows jit breakpoint"
     }
 
@@ -149,7 +149,7 @@ proc jit_test_reread {standalone change_addr} {
 	# This used to crash in the JIT-in-shared-library case:
 	# https://sourceware.org/bugzilla/show_bug.cgi?id=11094
 	gdb_test "maint info breakpoints" \
-	    "jit events     keep y   $hex <__jit_debug_register_code>.*" \
+	    "jit events\[ \]+keep y   $hex <__jit_debug_register_code>.*" \
 	    "maint info breakpoints shows jit breakpoint"
     }
 
