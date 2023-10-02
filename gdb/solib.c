@@ -623,39 +623,32 @@ solib_map_sections (so_list &so)
   return 1;
 }
 
-/* Free symbol-file related contents of SO and reset for possible reloading
-   of SO.  If we have opened a BFD for SO, close it.  If we have placed SO's
-   sections in some target's section table, the caller is responsible for
-   removing them.
+/* See solist.h.  */
 
-   This function doesn't mess with objfiles at all.  If there is an
-   objfile associated with SO that needs to be removed, the caller is
-   responsible for taking care of that.  */
-
-static void
-clear_so (so_list &so)
+void
+so_list::clear ()
 {
   const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
-  delete so.sections;
-  so.sections = NULL;
+  delete this->sections;
+  this->sections = nullptr;
 
-  gdb_bfd_unref (so.abfd);
-  so.abfd = NULL;
+  gdb_bfd_unref (this->abfd);
+  this->abfd = nullptr;
 
   /* Our caller closed the objfile, possibly via objfile_purge_solibs.  */
-  so.symbols_loaded = 0;
-  so.objfile = NULL;
+  this->symbols_loaded = 0;
+  this->objfile = nullptr;
 
-  so.addr_low = so.addr_high = 0;
+  this->addr_low = this->addr_high = 0;
 
   /* Restore the target-supplied file name.  SO_NAME may be the path
      of the symbol file.  */
-  strcpy (so.so_name, so.so_original_name);
+  strcpy (this->so_name, this->so_original_name);
 
   /* Do the same for target-specific data.  */
   if (ops->clear_so != NULL)
-    ops->clear_so (so);
+    ops->clear_so (*this);
 }
 
 lm_info::~lm_info () = default;
@@ -674,7 +667,7 @@ lm_info::~lm_info () = default;
 void
 free_so (so_list &so)
 {
-  clear_so (so);
+  so.clear ();
   delete &so;
 }
 
@@ -1358,7 +1351,7 @@ reload_shared_libraries_1 (int from_tty)
 	      && !solib_used (so))
 	    so->objfile->unlink ();
 	  current_program_space->remove_target_sections (so);
-	  clear_so (*so);
+	  so->clear ();
 	}
 
       /* If this shared library is now associated with a new symbol

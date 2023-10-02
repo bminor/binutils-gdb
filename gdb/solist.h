@@ -38,6 +38,16 @@ using lm_info_up = std::unique_ptr<lm_info>;
 
 struct so_list
 {
+  /* Free symbol-file related contents of SO and reset for possible reloading
+     of SO.  If we have opened a BFD for SO, close it.  If we have placed SO's
+     sections in some target's section table, the caller is responsible for
+     removing them.
+
+     This function doesn't mess with objfiles at all.  If there is an
+     objfile associated with SO that needs to be removed, the caller is
+     responsible for taking care of that.  */
+  void clear () ;
+
   /* The following fields of the structure come directly from the
      dynamic linker's tables in the inferior, and are initialized by
      current_sos.  */
