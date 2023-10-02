@@ -31,6 +31,10 @@
 static cmd_list_element *set_debuginfod_prefix_list;
 static cmd_list_element *show_debuginfod_prefix_list;
 
+/* maint set/show debuginfod commands.  */
+static cmd_list_element *maint_set_debuginfod_cmdlist;
+static cmd_list_element *maint_show_debuginfod_cmdlist;
+
 static const char debuginfod_on[] = "on";
 static const char debuginfod_off[] = "off";
 static const char debuginfod_ask[] = "ask";
@@ -48,6 +52,14 @@ static const char *debuginfod_enabled =
   debuginfod_ask;
 #else
   debuginfod_off;
+#endif
+
+/* Controls whether ELF/DWARF section downloading is enabled.  */
+static bool debuginfod_download_sections =
+#if defined(HAVE_LIBDEBUGINFOD_FIND_SECTION)
+  true;
+#else
+  false;
 #endif
 
 static unsigned int debuginfod_verbose = 1;
@@ -435,7 +447,7 @@ debuginfod_section_query (const unsigned char *build_id,
   return scoped_fd (-ENOSYS);
 #else
 
-  if (!debuginfod_is_enabled ())
+  if (!debuginfod_download_sections || !debuginfod_is_enabled ())
     return scoped_fd (-ENOSYS);
 
   debuginfod_client *c = get_debuginfod_client ();
@@ -561,6 +573,28 @@ show_debuginfod_verbose_command (ui_file *file, int from_tty,
 	      value);
 }
 
+/* Set callback for "maint set debuginfod download-sections".  */
+
+static void
+maint_set_debuginfod_download_sections (bool value)
+{
+#if !defined(HAVE_LIBDEBUGINFOD_FIND_SECTION)
+  if (value)
+    error (_("Support for section downloading is not compiled into GDB. " \
+"Defaulting to \"off\"."));
+#endif
+
+  debuginfod_download_sections = value;
+}
+
+/* Get callback for "maint set debuginfod download-sections".  */
+
+static bool
+maint_get_debuginfod_download_sections ()
+{
+  return debuginfod_download_sections;
+}
+
 /* Register debuginfod commands.  */
 
 void _initialize_debuginfod ();
@@ -579,8 +613,10 @@ _initialize_debuginfod ()
 			_("Set whether to use debuginfod."),
 			_("Show whether to use debuginfod."),
 			_("\
-When on, enable the use of debuginfod to download missing debug info and\n\
-source files."),
+When set to \"on\", enable the use of debuginfod to download missing\n\
+debug info and source files.  GDB may also download components of debug\n\
+info instead of entire files.  \"off\" disables the use of debuginfod.\n\
+When set to \"ask\", prompt whether to enable or disable debuginfod." ),
 			set_debuginfod_enabled,
 			get_debuginfod_enabled,
 			show_debuginfod_enabled,
@@ -611,4 +647,25 @@ query.\nTo disable, set to zero.  Verbose output is displayed by default."),
 			     show_debuginfod_verbose_command,
 			     &set_debuginfod_prefix_list,
 			     &show_debuginfod_prefix_list);
+
+  /* maint set/show debuginfod.  */
+  add_setshow_prefix_cmd ("debuginfod", class_maintenance,
+			  _("Set debuginfod specific variables."),
+			  _("Show debuginfod specific variables."),
+			  &maint_set_debuginfod_cmdlist,
+			  &maint_show_debuginfod_cmdlist,
+			  &maintenance_set_cmdlist, &maintenance_show_cmdlist);
+
+  /* maint set/show debuginfod download-sections.  */
+  add_setshow_boolean_cmd ("download-sections", class_maintenance, _("\
+Set whether debuginfod may download individual ELF/DWARF sections."), _("\
+Show whether debuginfod may download individual ELF/DWARF sections."), _("\
+When enabled, debuginfod may attempt to download individual ELF/DWARF \
+sections from debug info files.\nIf disabled, only whole debug info files \
+may be downloaded."),
+			   maint_set_debuginfod_download_sections,
+			   maint_get_debuginfod_download_sections,
+			   nullptr,
+			   &maint_set_debuginfod_cmdlist,
+			   &maint_show_debuginfod_cmdlist);
 }

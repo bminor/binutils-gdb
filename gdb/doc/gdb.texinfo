@@ -41062,6 +41062,17 @@ Create a core file? (y or n) @kbd{n}
 (@value{GDBP})
 @end smallexample
 
+@kindex maint set debuginfod download-sections
+@kindex maint show debuginfod download-sections
+@cindex debuginfod, maintenance commands
+@item maint set debuginfod download-sections
+@itemx maint set debuginfod download-sections @r{[}on|off@r{]}
+@itemx maint show debuginfod download-sections
+Controls whether @value{GDBN} will attempt to download individual
+ELF/DWARF sections from @code{debuginfod}.  If disabled, only
+whole debug info files will be downloaded; this could result
+in @value{GDBN} downloading larger amounts of data.
+
 @cindex @value{GDBN} internal error
 @cindex internal errors, control of @value{GDBN} behavior
 @cindex demangler crashes
@@ -49572,8 +49583,12 @@ regarding @code{debuginfod}.
 @item set debuginfod enabled
 @itemx set debuginfod enabled on
 @cindex enable debuginfod
-@value{GDBN} will attempt to query @code{debuginfod} servers when missing debug
-info or source files.
+@value{GDBN} may query @code{debuginfod} servers for missing debug info and
+source files.  @value{GDBN} may also download individual ELF/DWARF sections
+such as @code{.gdb_index} to help reduce the total amount of data downloaded
+from @code{debuginfod} servers; this can be controlled by @w{@code{maint
+set debuginfod download-sections}} (@pxref{Maintenance Commands, maint set
+debuginfod download-sections}).
 
 @item set debuginfod enabled off
 @value{GDBN} will not attempt to query @code{debuginfod} servers when missing
