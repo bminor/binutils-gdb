@@ -351,7 +351,16 @@ static void
 auxv_new_objfile_observer (struct objfile *objfile)
 {
   if (objfile == nullptr)
-    invalidate_auxv_cache_inf (current_inferior ());
+    {
+      /* When OBJFILE is nullptr, this indicates that all symbol files have
+	 been unloaded from the current program space.  Discard cached auxv
+	 information from any inferior within the effected program space.  */
+      for (inferior *inf : all_inferiors ())
+	{
+	  if (inf->pspace == current_program_space)
+	    invalidate_auxv_cache_inf (inf);
+	}
+    }
 }
 
 /* See auxv.h.  */
