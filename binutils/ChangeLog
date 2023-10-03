@@ -1,3 +1,11 @@
+2023-10-02  Vsevolod Alekseyev  <sevaa@sprynet.com>
+
+	PR 29267
+	* dwarf.c (fetch_indexed_value): Delete.
+	(fetch_indexed_offset): Correct base address calculation.
+	(read_and_display_attr_value): Replace uses of fetch_indexed_value
+	with fetch_indexed_offset.
+
 2023-09-28  Frederic Cambus  <fred@statdns.com>
 
 	* readelf.c (get_segment_type): Handle PT_OPENBSD_NOBTCFI segment

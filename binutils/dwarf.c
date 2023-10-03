@@ -716,65 +716,10 @@ fetch_indexed_addr (uint64_t offset, uint32_t num_bytes)
   return byte_get (section->start + offset, num_bytes);
 }
 
-/* Fetch a value from a debug section that has been indexed by
-   something in another section.
-   Returns -1 if the value could not be found.  */
+/* This is for resolving DW_FORM_rnglistx and DW_FORM_loclistx.
 
-static uint64_t
-fetch_indexed_value (uint64_t idx,
-		     enum dwarf_section_display_enum sec_enum,
-		     uint64_t base_address)
-{
-  struct dwarf_section *section = &debug_displays [sec_enum].section;
-
-  if (section->start == NULL)
-    {
-      warn (_("Unable to locate %s section\n"), section->uncompressed_name);
-      return -1;
-    }
-
-  if (section->size < 4)
-    {
-      warn (_("Section %s is too small to contain an value indexed from another section!\n"),
-	    section->name);
-      return -1;
-    }
-
-  uint32_t pointer_size, bias;
-
-  if (byte_get (section->start, 4) == 0xffffffff)
-    {
-      pointer_size = 8;
-      bias = 20;
-    }
-  else
-    {
-      pointer_size = 4;
-      bias = 12;
-    }
-
-  uint64_t offset = idx * pointer_size;
-
-  /* Offsets are biased by the size of the section header
-     or base address.  */
-  if (base_address)
-    offset += base_address;
-  else
-    offset += bias;
-
-  if (offset + pointer_size > section->size)
-    {
-      warn (_("Offset into section %s too big: %#" PRIx64 "\n"),
-	    section->name, offset);
-      return -1;
-    }
-
-  return byte_get (section->start + offset, pointer_size);
-}
-
-/* Like fetch_indexed_value() but specifically for resolving DW_FORM_rnglistx and DW_FORM_loclistx.
-
-   The memory layout is: base_address points at a table of offsets, relative to the section start.
+   The memory layout is: base_address (taken from the CU's top DIE) points at a table of offsets,
+   relative to the section start.
    The table of offsets contains the offsets of objects of interest relative to the table of offsets.
    IDX is the index of the desired object in said table of offsets.
 
@@ -786,6 +731,7 @@ fetch_indexed_offset (uint64_t                         idx,
 		      uint64_t                         base_address,
 		      uint64_t                         offset_size)
 {
+  uint64_t offset_of_offset = base_address + idx * offset_size;
   struct dwarf_section *section = &debug_displays [sec_enum].section;
 
   if (section->start == NULL)
@@ -801,16 +747,14 @@ fetch_indexed_offset (uint64_t                         idx,
       return -1;
     }
 
-  base_address += idx * offset_size;
-
-  if (base_address + offset_size > section->size)
+  if (offset_of_offset + offset_size >= section->size)
     {
       warn (_("Offset of %#" PRIx64 " is too big for section %s\n"),
-	    base_address, section->name);
+	    offset_of_offset, section->name);
       return -1;
     }
   
-  return base_address + byte_get (section->start + base_address, offset_size);
+  return base_address + byte_get (section->start + offset_of_offset, offset_size);
 }
 
 /* FIXME:  There are better and more efficient ways to handle
@@ -2762,18 +2706,23 @@ read_and_display_attr_value (unsigned long attribute,
 	    {
 	      if (dwo)
 		{
-		  idx = fetch_indexed_value (uvalue, loclists_dwo, 0);
+		  idx = fetch_indexed_offset (uvalue, loclists_dwo,
+					      debug_info_p->loclists_base,
+					      debug_info_p->offset_size);
 		  if (idx != (uint64_t) -1)
 		    idx += (offset_size == 8) ? 20 : 12;
 		}
 	      else if (debug_info_p == NULL || dwarf_version > 4)
 		{
-		  idx = fetch_indexed_value (uvalue, loclists, 0);
+		  idx = fetch_indexed_offset (uvalue, loclists,
+					      debug_info_p->loclists_base,
+					      debug_info_p->offset_size);
 		}
 	      else
 		{
 		  /* We want to compute:
-		       idx = fetch_indexed_value (uvalue, loclists, debug_info_p->loclists_base);
+		       idx = fetch_indexed_value (uvalue, loclists,
+		                             debug_info_p->loclists_base);
 		       idx += debug_info_p->loclists_base;
 		      Fortunately we already have that sum cached in the
 		      loc_offsets array.  */
@@ -2790,9 +2739,9 @@ read_and_display_attr_value (unsigned long attribute,
 	    {
 	      if (dwo)
 		{
-		  idx = fetch_indexed_value (uvalue, rnglists, 0);
-		  if (idx != (uint64_t) -1)
-		    idx += (offset_size == 8) ? 20 : 12;
+		  idx = fetch_indexed_offset (uvalue, rnglists,
+					      debug_info_p->rnglists_base,
+					      debug_info_p->offset_size);
 		}
 	      else
 		{
@@ -2800,11 +2749,8 @@ read_and_display_attr_value (unsigned long attribute,
 		    base = 0;
 		  else
 		    base = debug_info_p->rnglists_base;
-		  /* We do not have a cached value this time, so we perform the
-		     computation manually.  */
-		  idx = fetch_indexed_offset (uvalue, rnglists, base, debug_info_p->offset_size);
-		  if (idx != (uint64_t) -1)
-		    idx += base;
+		  idx = fetch_indexed_offset (uvalue, rnglists, base,
+					      debug_info_p->offset_size);
 		}
 	    }
 	  else
@@ -2927,7 +2873,9 @@ read_and_display_attr_value (unsigned long attribute,
 		  debug_info_p->max_loc_offsets = lmax;
 		}
 	      if (form == DW_FORM_loclistx)
-		uvalue = fetch_indexed_value (num, loclists, debug_info_p->loclists_base);
+		uvalue = fetch_indexed_offset (num, loclists,
+					       debug_info_p->loclists_base,
+					       debug_info_p->offset_size);
 	      else if (this_set != NULL)
 		uvalue += this_set->section_offsets [DW_SECT_LOC];
 
@@ -2972,7 +2920,8 @@ read_and_display_attr_value (unsigned long attribute,
 	  if (need_base_address)
 	    {
 	      if (form == DW_FORM_addrx)
-		uvalue = fetch_indexed_addr (debug_info_p->addr_base + uvalue * pointer_size,
+		uvalue = fetch_indexed_addr (debug_info_p->addr_base
+					     + uvalue * pointer_size,
 					     pointer_size);
 
 	      debug_info_p->base_address = uvalue;
@@ -2982,7 +2931,8 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_AT_GNU_addr_base:
 	case DW_AT_addr_base:
 	  debug_info_p->addr_base = uvalue;
-	  /* Retrieved elsewhere so that it is in place by the time we read low_pc.  */
+	  /* Retrieved elsewhere so that it is in
+	     place by the time we read low_pc.  */
 	  break;
 
 	case DW_AT_GNU_ranges_base:
@@ -3024,7 +2974,8 @@ read_and_display_attr_value (unsigned long attribute,
 	    switch (form)
 	      {
 	      case DW_FORM_strp:
-		add_dwo_name ((const char *) fetch_indirect_string (uvalue), cu_offset);
+		add_dwo_name ((const char *) fetch_indirect_string (uvalue),
+			      cu_offset);
 		break;
 	      case DW_FORM_GNU_strp_alt:
 		add_dwo_name ((const char *) fetch_alt_indirect_string (uvalue), cu_offset);
@@ -3035,7 +2986,8 @@ read_and_display_attr_value (unsigned long attribute,
 	      case DW_FORM_strx2:
 	      case DW_FORM_strx3:
 	      case DW_FORM_strx4:
-		add_dwo_name (fetch_indexed_string (uvalue, this_set, offset_size, false,
+		add_dwo_name (fetch_indexed_string (uvalue, this_set,
+						    offset_size, false,
 						    debug_info_p->str_offsets_base),
 			      cu_offset);
 		break;
