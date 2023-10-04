@@ -425,7 +425,10 @@ public:
   }
 
   void mark_async_event_handler ()
-  { ::mark_async_event_handler (m_async_event_handler_token); }
+  {
+    gdb_assert (this->is_async_p ());
+    ::mark_async_event_handler (m_async_event_handler_token);
+  }
 
   void clear_async_event_handler ()
   { ::clear_async_event_handler (m_async_event_handler_token); }
