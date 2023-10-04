@@ -296,6 +296,32 @@ gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,
   encoding->reset (lazy->encoding ? xstrdup (lazy->encoding) : NULL);
 }
 
+/* __str__ for LazyString.  */
+
+static PyObject *
+stpy_str (PyObject *self)
+{
+  lazy_string_object *str = (lazy_string_object *) self;
+
+  struct value_print_options opts;
+  get_user_print_options (&opts);
+  opts.addressprint = false;
+
+  string_file stream;
+  try
+    {
+      struct type *type = stpy_lazy_string_elt_type (str);
+      val_print_string (type, str->encoding, str->address, str->length,
+			&stream, &opts);
+    }
+  catch (const gdb_exception &exc)
+    {
+      GDB_PY_HANDLE_EXCEPTION (exc);
+    }
+
+  return host_string_to_python_string (stream.c_str ()).release ();
+}
+
 GDBPY_INITIALIZE_FILE (gdbpy_initialize_lazy_string);
 
 
@@ -331,7 +357,7 @@ PyTypeObject lazy_string_object_type = {
   0,				  /*tp_as_mapping*/
   0,				  /*tp_hash */
   0,				  /*tp_call*/
-  0,				  /*tp_str*/
+  stpy_str,			  /*tp_str*/
   0,				  /*tp_getattro*/
   0,				  /*tp_setattro*/
   0,				  /*tp_as_buffer*/

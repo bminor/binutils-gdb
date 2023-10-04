@@ -173,7 +173,7 @@ class VariableReference(BaseReference):
 
     def to_object(self):
         result = super().to_object()
-        result[self.result_name] = self.printer.to_string()
+        result[self.result_name] = str(self.printer.to_string())
         num_children = self.child_count()
         if num_children is not None:
             if (
