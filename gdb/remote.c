@@ -413,6 +413,32 @@ public:
   /* Get the remote arch state for GDBARCH.  */
   struct remote_arch_state *get_remote_arch_state (struct gdbarch *gdbarch);
 
+  void create_async_event_handler ()
+  {
+    gdb_assert (m_async_event_handler_token == nullptr);
+    m_async_event_handler_token
+      = ::create_async_event_handler ([] (gdb_client_data data)
+				      {
+					inferior_event_handler (INF_REG_EVENT);
+				      },
+				      nullptr, "remote");
+  }
+
+  void mark_async_event_handler ()
+  { ::mark_async_event_handler (m_async_event_handler_token); }
+
+  void clear_async_event_handler ()
+  { ::clear_async_event_handler (m_async_event_handler_token); }
+
+  bool async_event_handler_marked () const
+  { return ::async_event_handler_marked (m_async_event_handler_token); }
+
+  void delete_async_event_handler ()
+  {
+    if (m_async_event_handler_token != nullptr)
+      ::delete_async_event_handler (&m_async_event_handler_token);
+  }
+
 public: /* data */
 
   /* A buffer to use for incoming packets, and its current size.  The
@@ -540,10 +566,6 @@ public: /* data */
      immediately, so queue is not needed for them.  */
   std::vector<stop_reply_up> stop_reply_queue;
 
-  /* Asynchronous signal handle registered as event loop source for
-     when we have pending events ready to be passed to the core.  */
-  struct async_event_handler *remote_async_inferior_event_token = nullptr;
-
   /* FIXME: cagney/1999-09-23: Even though getpkt was called with
      ``forever'' still use the normal timeout mechanism.  This is
      currently used by the ASYNC code to guarentee that target reads
@@ -554,6 +576,10 @@ public: /* data */
   bool wait_forever_enabled_p = true;
 
 private:
+  /* Asynchronous signal handle registered as event loop source for
+     when we have pending events ready to be passed to the core.  */
+  async_event_handler *m_async_event_handler_token = nullptr;
+
   /* Mapping of remote protocol data for each gdbarch.  Usually there
      is only one entry here, though we may see more with stubs that
      support multi-process.  */
@@ -1383,8 +1409,6 @@ static void show_remote_protocol_packet_cmd (struct ui_file *file,
 					     const char *value);
 
 static ptid_t read_ptid (const char *buf, const char **obuf);
-
-static void remote_async_inferior_event_handler (gdb_client_data);
 
 static bool remote_read_description_p (struct target_ops *target);
 
@@ -4392,8 +4416,7 @@ remote_target::~remote_target ()
      everything of this target.  */
   discard_pending_stop_replies_in_queue ();
 
-  if (rs->remote_async_inferior_event_token)
-    delete_async_event_handler (&rs->remote_async_inferior_event_token);
+  rs->delete_async_event_handler ();
 
   delete rs->notif_state;
 }
@@ -5993,9 +6016,8 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
   current_inferior ()->push_target (std::move (target_holder));
 
   /* Register extra event sources in the event loop.  */
-  rs->remote_async_inferior_event_token
-    = create_async_event_handler (remote_async_inferior_event_handler, nullptr,
-				  "remote");
+  rs->create_async_event_handler ();
+
   rs->notif_state = remote_notif_state_allocate (remote);
 
   /* Reset the target state; these things will be queried either by
@@ -7090,7 +7112,7 @@ remote_target::has_pending_events ()
     {
       remote_state *rs = get_remote_state ();
 
-      if (async_event_handler_marked (rs->remote_async_inferior_event_token))
+      if (rs->async_event_handler_marked ())
 	return true;
 
       /* Note that BUFCNT can be negative, indicating sticky
@@ -7424,7 +7446,7 @@ remote_notif_stop_can_get_pending_events (remote_target *remote,
      may exit and we have no chance to process them back in
      remote_wait_ns.  */
   remote_state *rs = remote->get_remote_state ();
-  mark_async_event_handler (rs->remote_async_inferior_event_token);
+  rs->mark_async_event_handler ();
   return 0;
 }
 
@@ -7632,7 +7654,7 @@ remote_target::queued_stop_reply (ptid_t ptid)
   if (!rs->stop_reply_queue.empty () && target_can_async_p ())
     {
       /* There's still at least an event left.  */
-      mark_async_event_handler (rs->remote_async_inferior_event_token);
+      rs->mark_async_event_handler ();
     }
 
   return r;
@@ -7659,7 +7681,7 @@ remote_target::push_stop_reply (struct stop_reply *new_event)
      enabled, and there are events in this queue, we will mark the event
      token at that point, see remote_target::async.  */
   if (target_is_async_p ())
-    mark_async_event_handler (rs->remote_async_inferior_event_token);
+    rs->mark_async_event_handler ();
 }
 
 /* Returns true if we have a stop reply for PTID.  */
@@ -8519,10 +8541,9 @@ remote_target::wait (ptid_t ptid, struct target_waitstatus *status,
      we'll mark it again at the end if needed.  If the target is not in
      async mode then the async token should not be marked.  */
   if (target_is_async_p ())
-    clear_async_event_handler (rs->remote_async_inferior_event_token);
+    rs->clear_async_event_handler ();
   else
-    gdb_assert (!async_event_handler_marked
-		(rs->remote_async_inferior_event_token));
+    gdb_assert (!rs->async_event_handler_marked ());
 
   ptid_t event_ptid;
 
@@ -8537,7 +8558,7 @@ remote_target::wait (ptid_t ptid, struct target_waitstatus *status,
 	 notifications, then tell the event loop to call us again.  */
       if (!rs->stop_reply_queue.empty ()
 	  || rs->notif_state->pending_event[notif_client_stop.id] != nullptr)
-	mark_async_event_handler (rs->remote_async_inferior_event_token);
+	rs->mark_async_event_handler ();
     }
 
   return event_ptid;
@@ -14863,12 +14884,6 @@ remote_async_serial_handler (struct serial *scb, void *context)
   inferior_event_handler (INF_REG_EVENT);
 }
 
-static void
-remote_async_inferior_event_handler (gdb_client_data data)
-{
-  inferior_event_handler (INF_REG_EVENT);
-}
-
 int
 remote_target::async_wait_fd ()
 {
@@ -14888,7 +14903,8 @@ remote_target::async (bool enable)
       /* If there are pending events in the stop reply queue tell the
 	 event loop to process them.  */
       if (!rs->stop_reply_queue.empty ())
-	mark_async_event_handler (rs->remote_async_inferior_event_token);
+	rs->mark_async_event_handler ();
+
       /* For simplicity, below we clear the pending events token
 	 without remembering whether it is marked, so here we always
 	 mark it.  If there's actually no pending notification to
@@ -14903,7 +14919,8 @@ remote_target::async (bool enable)
       /* If the core is disabling async, it doesn't want to be
 	 disturbed with target events.  Clear all async event sources
 	 too.  */
-      clear_async_event_handler (rs->remote_async_inferior_event_token);
+      rs->clear_async_event_handler ();
+
       if (target_is_non_stop_p ())
 	clear_async_event_handler (rs->notif_state->get_pending_events_token);
     }
