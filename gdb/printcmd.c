@@ -2355,12 +2355,7 @@ disable_display_command (const char *args, int from_tty)
 static void
 clear_dangling_display_expressions (struct objfile *objfile)
 {
-  struct program_space *pspace;
-
-  /* With no symbol file we cannot have a block or expression from it.  */
-  if (objfile == NULL)
-    return;
-  pspace = objfile->pspace;
+  program_space *pspace = objfile->pspace;
   if (objfile->separate_debug_objfile_backlink)
     {
       objfile = objfile->separate_debug_objfile_backlink;
