@@ -56,8 +56,9 @@ extern void auto_load_objfile_script (struct objfile *objfile,
 				      const struct extension_language_defn *);
 extern void load_auto_scripts_for_objfile (struct objfile *objfile);
 extern char auto_load_info_scripts_pattern_nl[];
-extern void auto_load_info_scripts (const char *pattern, int from_tty,
-				    const struct extension_language_defn *);
+extern void auto_load_info_scripts (program_space *pspace, const char *pattern,
+				    int from_tty,
+				    const extension_language_defn *);
 
 extern struct cmd_list_element **auto_load_set_cmdlist_get (void);
 extern struct cmd_list_element **auto_load_show_cmdlist_get (void);

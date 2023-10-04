@@ -706,12 +706,9 @@ maybe_add_script_text (struct auto_load_pspace_info *pspace_info,
 /* Clear the table of loaded section scripts.  */
 
 static void
-clear_section_scripts (void)
+clear_section_scripts (program_space *pspace)
 {
-  struct program_space *pspace = current_program_space;
-  struct auto_load_pspace_info *info;
-
-  info = auto_load_pspace_data.get (pspace);
+  auto_load_pspace_info *info = auto_load_pspace_data.get (pspace);
   if (info != NULL && info->loaded_script_files != NULL)
     auto_load_pspace_data.clear (pspace);
 }
@@ -1175,7 +1172,7 @@ auto_load_new_objfile (struct objfile *objfile)
   if (!objfile)
     {
       /* OBJFILE is NULL when loading a new "main" symbol-file.  */
-      clear_section_scripts ();
+      clear_section_scripts (current_program_space);
       return;
     }
 
@@ -1262,15 +1259,14 @@ print_scripts (const std::vector<loaded_script *> &scripts)
    PATTERN.  FROM_TTY is the usual GDB boolean for user interactivity.  */
 
 void
-auto_load_info_scripts (const char *pattern, int from_tty,
-			const struct extension_language_defn *language)
+auto_load_info_scripts (program_space *pspace, const char *pattern,
+			int from_tty, const extension_language_defn *language)
 {
   struct ui_out *uiout = current_uiout;
-  struct auto_load_pspace_info *pspace_info;
 
   dont_repeat ();
 
-  pspace_info = get_auto_load_pspace_data (current_program_space);
+  auto_load_pspace_info *pspace_info = get_auto_load_pspace_data (pspace);
 
   if (pattern && *pattern)
     {
@@ -1347,7 +1343,8 @@ auto_load_info_scripts (const char *pattern, int from_tty,
 static void
 info_auto_load_gdb_scripts (const char *pattern, int from_tty)
 {
-  auto_load_info_scripts (pattern, from_tty, &extension_language_gdb);
+  auto_load_info_scripts (current_program_space, pattern, from_tty,
+			  &extension_language_gdb);
 }
 
 /* Implement 'info auto-load local-gdbinit'.  */

@@ -54,7 +54,8 @@ gdbscm_auto_load_enabled (const struct extension_language_defn *extlang)
 static void
 info_auto_load_guile_scripts (const char *pattern, int from_tty)
 {
-  auto_load_info_scripts (pattern, from_tty, &extension_language_guile);
+  auto_load_info_scripts (current_program_space, pattern, from_tty,
+			  &extension_language_guile);
 }
 
 void
