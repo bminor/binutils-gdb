@@ -3749,7 +3749,7 @@ static void
 symfile_free_objfile (struct objfile *objfile)
 {
   /* Remove the target sections owned by this objfile.  */
-  current_program_space->remove_target_sections (objfile);
+  objfile->pspace->remove_target_sections (objfile);
 }
 
 /* Wrapper around the quick_symbol_functions expand_symtabs_matching "method".

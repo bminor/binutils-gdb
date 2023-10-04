@@ -1739,7 +1739,7 @@ remove_user_added_objfile (struct objfile *objfile)
 {
   if (objfile != 0 && objfile->flags & OBJF_USERLOADED)
     {
-      for (struct so_list *so : current_program_space->solibs ())
+      for (struct so_list *so : objfile->pspace->solibs ())
 	if (so->objfile == objfile)
 	  so->objfile = NULL;
     }
