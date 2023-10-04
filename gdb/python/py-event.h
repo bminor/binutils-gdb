@@ -78,7 +78,7 @@ extern gdbpy_ref<> create_thread_event_object (PyTypeObject *py_type,
 
 extern int emit_new_objfile_event (struct objfile *objfile);
 extern int emit_free_objfile_event (struct objfile *objfile);
-extern int emit_clear_objfiles_event (void);
+extern int emit_clear_objfiles_event (program_space *pspace);
 
 extern void evpy_dealloc (PyObject *self);
 extern int evpy_add_attribute (PyObject *event,

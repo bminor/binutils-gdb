@@ -196,7 +196,7 @@ python_new_objfile (struct objfile *objfile)
 
   if (objfile == NULL)
     {
-      if (emit_clear_objfiles_event () < 0)
+      if (emit_clear_objfiles_event (current_program_space) < 0)
 	gdbpy_print_stack ();
     }
   else
