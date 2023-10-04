@@ -1278,13 +1278,12 @@ thread_db_new_objfile (struct objfile *objfile)
   /* This observer must always be called with inferior_ptid set
      correctly.  */
 
-  if (objfile != NULL
-      /* libpthread with separate debug info has its debug info file already
+  if (/* libpthread with separate debug info has its debug info file already
 	 loaded (and notified without successful thread_db initialization)
 	 the time gdb::observers::new_objfile.notify is called for the library itself.
 	 Static executables have their separate debug info loaded already
 	 before the inferior has started.  */
-      && objfile->separate_debug_objfile_backlink == NULL
+      objfile->separate_debug_objfile_backlink == NULL
       /* Only check for thread_db if we loaded libpthread,
 	 or if this is the main symbol file.
 	 We need to check OBJF_MAINLINE to handle the case of debugging

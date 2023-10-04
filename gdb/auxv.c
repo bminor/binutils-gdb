@@ -344,23 +344,14 @@ invalidate_auxv_cache_inf (struct inferior *inf)
   auxv_inferior_data.clear (inf);
 }
 
-/* Invalidate current inferior's auxv cache when all symbol table data is
-   cleared (indicated by OBJFILE being nullptr).  */
+/* Invalidate the auxv cache for all inferiors using PSPACE.  */
 
 static void
-auxv_new_objfile_observer (struct objfile *objfile)
+auxv_all_objfiles_removed (program_space *pspace)
 {
-  if (objfile == nullptr)
-    {
-      /* When OBJFILE is nullptr, this indicates that all symbol files have
-	 been unloaded from the current program space.  Discard cached auxv
-	 information from any inferior within the effected program space.  */
-      for (inferior *inf : all_inferiors ())
-	{
-	  if (inf->pspace == current_program_space)
-	    invalidate_auxv_cache_inf (inf);
-	}
-    }
+  for (inferior *inf : all_inferiors ())
+    if (inf->pspace == current_program_space)
+      invalidate_auxv_cache_inf (inf);
 }
 
 /* See auxv.h.  */
@@ -624,5 +615,6 @@ This is information provided by the operating system at program startup."));
   /* Observers used to invalidate the auxv cache when needed.  */
   gdb::observers::inferior_exit.attach (invalidate_auxv_cache_inf, "auxv");
   gdb::observers::inferior_appeared.attach (invalidate_auxv_cache_inf, "auxv");
-  gdb::observers::new_objfile.attach (auxv_new_objfile_observer, "auxv");
+  gdb::observers::all_objfiles_removed.attach (auxv_all_objfiles_removed,
+					       "auxv");
 }

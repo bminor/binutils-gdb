@@ -2543,7 +2543,7 @@ arm_exidx_new_objfile (struct objfile *objfile)
   LONGEST i;
 
   /* If we've already touched this file, do nothing.  */
-  if (!objfile || arm_exidx_data_key.get (objfile->obfd.get ()) != NULL)
+  if (arm_exidx_data_key.get (objfile->obfd.get ()) != nullptr)
     return;
 
   /* Read contents of exception table and index.  */

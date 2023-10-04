@@ -42,6 +42,7 @@ DEFINE_OBSERVABLE (inferior_forked);
 DEFINE_OBSERVABLE (solib_loaded);
 DEFINE_OBSERVABLE (solib_unloaded);
 DEFINE_OBSERVABLE (new_objfile);
+DEFINE_OBSERVABLE (all_objfiles_removed);
 DEFINE_OBSERVABLE (free_objfile);
 DEFINE_OBSERVABLE (new_thread);
 DEFINE_OBSERVABLE (thread_exit);

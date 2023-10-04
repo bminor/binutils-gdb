@@ -668,8 +668,7 @@ check_for_thread_db (void)
 static void
 sol_thread_new_objfile (struct objfile *objfile)
 {
-  if (objfile != NULL)
-    check_for_thread_db ();
+  check_for_thread_db ();
 }
 
 /* Clean up after the inferior dies.  */

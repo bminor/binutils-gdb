@@ -13884,7 +13884,7 @@ static struct cmd_list_element *show_ada_list;
 static void
 ada_new_objfile_observer (struct objfile *objfile)
 {
-  ada_clear_symbol_cache (current_program_space);
+  ada_clear_symbol_cache (objfile->pspace);
 }
 
 /* This module's 'free_objfile' observer.  */
@@ -13892,7 +13892,7 @@ ada_new_objfile_observer (struct objfile *objfile)
 static void
 ada_free_objfile_observer (struct objfile *objfile)
 {
-  ada_clear_symbol_cache (current_program_space);
+  ada_clear_symbol_cache (objfile->pspace);
 }
 
 /* Charsets known to GNAT.  */
@@ -14025,6 +14025,8 @@ DWARF attribute."),
 
   /* The ada-lang observers.  */
   gdb::observers::new_objfile.attach (ada_new_objfile_observer, "ada-lang");
+  gdb::observers::all_objfiles_removed.attach (ada_clear_symbol_cache,
+					       "ada-lang");
   gdb::observers::free_objfile.attach (ada_free_objfile_observer, "ada-lang");
   gdb::observers::inferior_exit.attach (ada_inferior_exit, "ada-lang");
 

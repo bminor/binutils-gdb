@@ -1138,7 +1138,11 @@ auto_load_section_scripts (struct objfile *objfile, const char *section_name)
     }
 }
 
-/* Load any auto-loaded scripts for OBJFILE.  */
+/* Load any auto-loaded scripts for OBJFILE.
+
+   Two flavors of auto-loaded scripts are supported.
+   1) based on the path to the objfile
+   2) from .debug_gdb_scripts section  */
 
 void
 load_auto_scripts_for_objfile (struct objfile *objfile)
@@ -1158,25 +1162,6 @@ load_auto_scripts_for_objfile (struct objfile *objfile)
 
   /* Load any scripts mentioned in AUTO_SECTION_NAME (.debug_gdb_scripts).  */
   auto_load_section_scripts (objfile, AUTO_SECTION_NAME);
-}
-
-/* This is a new_objfile observer callback to auto-load scripts.
-
-   Two flavors of auto-loaded scripts are supported.
-   1) based on the path to the objfile
-   2) from .debug_gdb_scripts section  */
-
-static void
-auto_load_new_objfile (struct objfile *objfile)
-{
-  if (!objfile)
-    {
-      /* OBJFILE is NULL when loading a new "main" symbol-file.  */
-      clear_section_scripts (current_program_space);
-      return;
-    }
-
-  load_auto_scripts_for_objfile (objfile);
 }
 
 /* Collect scripts to be printed in a vec.  */
@@ -1531,9 +1516,11 @@ _initialize_auto_load ()
     python_name_help, guile_name_help;
   const char *suffix;
 
-  gdb::observers::new_objfile.attach (auto_load_new_objfile,
+  gdb::observers::new_objfile.attach (load_auto_scripts_for_objfile,
 				      auto_load_new_objfile_observer_token,
 				      "auto-load");
+  gdb::observers::all_objfiles_removed.attach (clear_section_scripts,
+					       "auto-load");
   add_setshow_boolean_cmd ("gdb-scripts", class_support,
 			   &auto_load_gdb_scripts, _("\
 Enable or disable auto-loading of canned sequences of commands scripts."), _("\

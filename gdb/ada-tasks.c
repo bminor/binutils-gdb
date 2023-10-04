@@ -1469,36 +1469,29 @@ ada_tasks_normal_stop_observer (struct bpstat *unused_args, int unused_args2)
   ada_task_list_changed (current_inferior ());
 }
 
-/* A routine to be called when the objfiles have changed.  */
+/* Clear data associated to PSPACE and all inferiors using that program
+   space.  */
 
 static void
-ada_tasks_new_objfile_observer (struct objfile *objfile)
+ada_tasks_clear_pspace_data (program_space *pspace)
 {
-  /* Invalidate the relevant data in our program-space data.  */
-
-  if (objfile == NULL)
-    {
-      /* All objfiles are being cleared, so we should clear all
-	 our caches for all program spaces.  */
-      for (struct program_space *pspace : program_spaces)
-	ada_tasks_invalidate_pspace_data (pspace);
-    }
-  else
-    {
-      /* The associated program-space data might have changed after
-	 this objfile was added.  Invalidate all cached data.  */
-      ada_tasks_invalidate_pspace_data (objfile->pspace);
-    }
+  /* The associated program-space data might have changed after
+     this objfile was added.  Invalidate all cached data.  */
+  ada_tasks_invalidate_pspace_data (pspace);
 
   /* Invalidate the per-inferior cache for all inferiors using
-     this objfile (or, in other words, for all inferiors who have
-     the same program-space as the objfile's program space).
-     If all objfiles are being cleared (OBJFILE is NULL), then
-     clear the caches for all inferiors.  */
-
+     this program space.  */
   for (inferior *inf : all_inferiors ())
-    if (objfile == NULL || inf->pspace == objfile->pspace)
+    if (inf->pspace == pspace)
       ada_tasks_invalidate_inferior_data (inf);
+}
+
+/* Called when a new objfile was added.  */
+
+static void
+ada_tasks_new_objfile_observer (objfile *objfile)
+{
+  ada_tasks_clear_pspace_data (objfile->pspace);
 }
 
 /* The qcs command line flags for the "task apply" commands.  Keep
@@ -1667,6 +1660,8 @@ _initialize_tasks ()
 				      "ada-tasks");
   gdb::observers::new_objfile.attach (ada_tasks_new_objfile_observer,
 				      "ada-tasks");
+  gdb::observers::all_objfiles_removed.attach (ada_tasks_clear_pspace_data,
+					       "ada-tasks");
 
   static struct cmd_list_element *task_cmd_list;
   static struct cmd_list_element *task_apply_list;

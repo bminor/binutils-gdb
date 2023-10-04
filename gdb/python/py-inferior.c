@@ -190,20 +190,22 @@ python_new_objfile (struct objfile *objfile)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (objfile != NULL
-			? objfile->arch ()
-			: target_gdbarch ());
+  gdbpy_enter enter_py (objfile->arch ());
 
-  if (objfile == NULL)
-    {
-      if (emit_clear_objfiles_event (current_program_space) < 0)
-	gdbpy_print_stack ();
-    }
-  else
-    {
-      if (emit_new_objfile_event (objfile) < 0)
-	gdbpy_print_stack ();
-    }
+  if (emit_new_objfile_event (objfile) < 0)
+    gdbpy_print_stack ();
+}
+
+static void
+python_all_objfiles_removed (program_space *pspace)
+{
+  if (!gdb_python_initialized)
+    return;
+
+  gdbpy_enter enter_py (target_gdbarch ());
+
+  if (emit_clear_objfiles_event (pspace) < 0)
+    gdbpy_print_stack ();
 }
 
 /* Emit a Python event when an objfile is about to be removed.  */
@@ -1020,6 +1022,8 @@ gdbpy_initialize_inferior (void)
   gdb::observers::new_objfile.attach
     (python_new_objfile, "py-inferior",
      { &auto_load_new_objfile_observer_token });
+  gdb::observers::all_objfiles_removed.attach (python_all_objfiles_removed,
+					       "py-inferior");
   gdb::observers::free_objfile.attach (python_free_objfile, "py-inferior");
   gdb::observers::inferior_added.attach (python_new_inferior, "py-inferior");
   gdb::observers::inferior_removed.attach (python_inferior_deleted,

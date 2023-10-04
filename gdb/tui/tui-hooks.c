@@ -49,12 +49,19 @@
 
 #include "gdb_curses.h"
 
-static void
-tui_new_objfile_hook (struct objfile* objfile)
+static void tui_on_objfiles_changed ()
 {
   if (tui_active)
     tui_display_main ();
 }
+
+static void
+tui_new_objfile_hook (struct objfile* objfile)
+{ tui_on_objfiles_changed (); }
+
+static void
+tui_all_objfiles_removed (program_space *pspace)
+{ tui_on_objfiles_changed (); }
 
 /* Prevent recursion of deprecated_register_changed_hook().  */
 static bool tui_refreshing_registers = false;
@@ -283,4 +290,6 @@ _initialize_tui_hooks ()
 {
   /* Install the permanent hooks.  */
   gdb::observers::new_objfile.attach (tui_new_objfile_hook, "tui-hooks");
+  gdb::observers::all_objfiles_removed.attach (tui_all_objfiles_removed,
+					       "tui-hooks");
 }

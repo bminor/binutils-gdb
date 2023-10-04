@@ -65,7 +65,7 @@ set_can_use_agent (const char *args, int from_tty, struct cmd_list_element *c)
 static void
 agent_new_objfile (struct objfile *objfile)
 {
-  if (objfile == NULL || agent_loaded_p ())
+  if (agent_loaded_p ())
     return;
 
   if (can_use_agent == can_use_agent_off)

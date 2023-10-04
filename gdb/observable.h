@@ -107,10 +107,11 @@ extern observable<struct so_list */* solib */> solib_loaded;
 extern observable<struct program_space */* pspace */, struct so_list */* solib */>
   solib_unloaded;
 
-/* The symbol file specified by OBJFILE has been loaded.  Called
-   with OBJFILE equal to NULL to indicate previously loaded symbol
-   table data has now been invalidated.  */
+/* The symbol file specified by OBJFILE has been loaded.  */
 extern observable<struct objfile */* objfile */> new_objfile;
+
+/*  All objfiles from PSPACE were removed.  */
+extern observable<program_space */* pspace */> all_objfiles_removed;
 
 /* The object file specified by OBJFILE is about to be freed.  */
 extern observable<struct objfile */* objfile */> free_objfile;

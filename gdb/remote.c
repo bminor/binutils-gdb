@@ -14963,14 +14963,12 @@ show_remote_cmd (const char *args, int from_tty)
       }
 }
 
+/* Some change happened in PSPACE's objfile list (obfiles added or removed),
+   offer all inferiors using that program space a change to look up symbols.  */
 
-/* Function to be called whenever a new objfile (shlib) is detected.  */
 static void
-remote_new_objfile (struct objfile *objfile)
+remote_objfile_changed_check_symbols (program_space *pspace)
 {
-  /* The objfile change happened in that program space.  */
-  program_space *pspace = current_program_space;
-
   /* The affected program space is possibly shared by multiple inferiors.
      Consider sending a qSymbol packet for each of the inferiors using that
      program space.  */
@@ -15017,6 +15015,14 @@ remote_new_objfile (struct objfile *objfile)
 	  remote->remote_check_symbols ();
 	}
   }
+}
+
+/* Function to be called whenever a new objfile (shlib) is detected.  */
+
+static void
+remote_new_objfile (struct objfile *objfile)
+{
+  remote_objfile_changed_check_symbols (objfile->pspace);
 }
 
 /* Pull all the tracepoints defined on the target and create local
@@ -15333,6 +15339,8 @@ _initialize_remote ()
 
   /* Hook into new objfile notification.  */
   gdb::observers::new_objfile.attach (remote_new_objfile, "remote");
+  gdb::observers::all_objfiles_removed.attach
+    (remote_objfile_changed_check_symbols, "remote");
 
 #if 0
   init_remote_threadtests ();

@@ -1109,14 +1109,13 @@ pd_disable (inferior *inf)
 
 /* new_objfile observer callback.
 
-   If OBJFILE is non-null, check whether a threaded application is
-   being debugged, and if so, prepare for thread debugging.  */
+   Check whether a threaded application is being debugged, and if so, prepare
+   for thread debugging.  */
 
 static void
 new_objfile (struct objfile *objfile)
 {
-  if (objfile)
-    pd_enable (current_inferior ());
+  pd_enable (current_inferior ());
 }
 
 /* Attach to process specified by ARGS.  */

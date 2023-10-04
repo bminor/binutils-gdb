@@ -1695,13 +1695,18 @@ maintenance_print_symbol_cache_statistics (const char *args, int from_tty)
 static void
 symtab_new_objfile_observer (struct objfile *objfile)
 {
-  /* Ideally we'd use OBJFILE->pspace, but OBJFILE may be NULL.  */
-  symbol_cache_flush (current_program_space);
+  symbol_cache_flush (objfile->pspace);
+}
 
-  /* When all objfiles have been removed (OBJFILE is nullptr), then forget
-     everything we know about the main function.  */
-  if (objfile == nullptr)
-    set_main_name (current_program_space, nullptr, language_unknown);
+/* This module's 'all_objfiles_removed' observer.  */
+
+static void
+symtab_all_objfiles_removed (program_space *pspace)
+{
+  symbol_cache_flush (pspace);
+
+  /* Forget everything we know about the main function.  */
+  set_main_name (pspace, nullptr, language_unknown);
 }
 
 /* This module's 'free_objfile' observer.  */
@@ -7022,5 +7027,7 @@ the use of prologue scanners."),
   deprecate_cmd (c, "maintenancelist flush symbol-cache");
 
   gdb::observers::new_objfile.attach (symtab_new_objfile_observer, "symtab");
+  gdb::observers::all_objfiles_removed.attach (symtab_all_objfiles_removed,
+					       "symtab");
   gdb::observers::free_objfile.attach (symtab_free_objfile_observer, "symtab");
 }

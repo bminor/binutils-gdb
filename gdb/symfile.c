@@ -2915,7 +2915,7 @@ clear_symtab_users (symfile_add_flags add_flags)
   clear_displays ();
   clear_last_displayed_sal ();
   clear_pc_function_cache ();
-  gdb::observers::new_objfile.notify (NULL);
+  gdb::observers::all_objfiles_removed.notify (current_program_space);
 
   /* Now that the various caches have been cleared, we can re_set
      our breakpoints without risking it using stale data.  */
