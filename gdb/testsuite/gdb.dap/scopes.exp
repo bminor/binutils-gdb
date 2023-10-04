@@ -125,8 +125,27 @@ gdb_assert {[llength $deivals] == 2} "dei has two members"
 
 set num [dict get $reg_scope variablesReference]
 # The request succeeding is sufficient.
-dap_check_request_and_response "fetch first register" \
-    "variables" \
-    [format {o variablesReference [i %d] count [i 1]} $num]
+set val [dap_check_request_and_response "fetch first register" \
+	     "variables" \
+	     [format {o variablesReference [i %d] count [i 1]} $num]]
+
+# Try setting the value to something else.
+set val [dict get [lindex $val 0] body variables]
+set name [dict get [lindex $val 0] name]
+set val [dict get [lindex $val 0] value]
+# Just make sure it is different from the original value.
+set val [expr {$val ^ 7}]
+
+# setVariable isn't implemented yet, so use the register name.  Note
+# that we sneak the "$" into the name, written in a slightly funny way
+# to work around apparent TON limitations.
+set response [dap_check_request_and_response "set first register" \
+		  setExpression \
+		  [format {o expression [s \$%s] value [s %d] frameId [i %d]} \
+		       $name $val $frame_id]]
+set response [lindex $response 0]
+
+gdb_assert {[dict get $response body value] == $val} \
+    "setting register yields updated value"
 
 dap_shutdown
