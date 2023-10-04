@@ -358,6 +358,8 @@ show tui mouse-events
      gdb.Progspace that is either being added to GDB, or removed from
      GDB.
 
+  ** gdb.LazyString now implements the __str__ method.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.
