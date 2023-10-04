@@ -4673,9 +4673,9 @@ make_array_descriptor (struct type *type, struct value *arr)
 /* Clear all entries from the symbol cache.  */
 
 static void
-ada_clear_symbol_cache ()
+ada_clear_symbol_cache (program_space *pspace)
 {
-  ada_pspace_data_handle.clear (current_program_space);
+  ada_pspace_data_handle.clear (pspace);
 }
 
 /* Search the symbol cache for an entry matching NAME and DOMAIN.
@@ -13884,7 +13884,7 @@ static struct cmd_list_element *show_ada_list;
 static void
 ada_new_objfile_observer (struct objfile *objfile)
 {
-  ada_clear_symbol_cache ();
+  ada_clear_symbol_cache (current_program_space);
 }
 
 /* This module's 'free_objfile' observer.  */
@@ -13892,7 +13892,7 @@ ada_new_objfile_observer (struct objfile *objfile)
 static void
 ada_free_objfile_observer (struct objfile *objfile)
 {
-  ada_clear_symbol_cache ();
+  ada_clear_symbol_cache (current_program_space);
 }
 
 /* Charsets known to GNAT.  */
