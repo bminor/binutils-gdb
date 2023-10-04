@@ -788,7 +788,7 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
       /* Add this script to the hash table too so
 	 "info auto-load ${lang}-scripts" can print it.  */
       pspace_info
-	= get_auto_load_pspace_data_for_loading (current_program_space);
+	= get_auto_load_pspace_data_for_loading (objfile->pspace);
       maybe_add_script_file (pspace_info, is_safe, debugfile, debugfile,
 			     language);
 
@@ -1052,12 +1052,10 @@ static void
 source_section_scripts (struct objfile *objfile, const char *section_name,
 			const char *start, const char *end)
 {
-  const char *p;
-  struct auto_load_pspace_info *pspace_info;
+  auto_load_pspace_info *pspace_info
+    = get_auto_load_pspace_data_for_loading (objfile->pspace);
 
-  pspace_info = get_auto_load_pspace_data_for_loading (current_program_space);
-
-  for (p = start; p < end; ++p)
+  for (const char *p = start; p < end; ++p)
     {
       const char *entry;
       const struct extension_language_defn *language;
