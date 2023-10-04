@@ -405,6 +405,8 @@ const struct op_code_struct
   {"clz",       INST_TYPE_RD_R1, INST_NO_OFFSET, NO_DELAY_SLOT, IMMVAL_MASK_NON_SPECIAL, 0x900000E0, OPCODE_MASK_H34,  clz,       special_inst },
   {"mbar",      INST_TYPE_IMM5,  INST_PC_OFFSET, NO_DELAY_SLOT, IMMVAL_MASK_NON_SPECIAL, 0xB8020004, OPCODE_MASK_HN,   mbar,      special_inst },
   {"sleep",     INST_TYPE_NONE,  INST_PC_OFFSET, NO_DELAY_SLOT, IMMVAL_MASK_NON_SPECIAL, 0xBA020004, OPCODE_MASK_HN,   invalid_inst, special_inst }, /* translates to mbar 16.  */
+  {"hibernate", INST_TYPE_NONE,  INST_PC_OFFSET, NO_DELAY_SLOT, IMMVAL_MASK_NON_SPECIAL, 0xB9020004, OPCODE_MASK_HN,   invalid_inst, special_inst }, /* translates to mbar 8.   */
+  {"suspend",   INST_TYPE_NONE,  INST_PC_OFFSET, NO_DELAY_SLOT, IMMVAL_MASK_NON_SPECIAL, 0xBB020004, OPCODE_MASK_HN,   invalid_inst, special_inst }, /* translates to mbar 24.  */
   {"swapb",     INST_TYPE_RD_R1, INST_NO_OFFSET, NO_DELAY_SLOT, IMMVAL_MASK_NON_SPECIAL, 0x900001E0, OPCODE_MASK_H4,   swapb,     arithmetic_inst },
   {"swaph",     INST_TYPE_RD_R1, INST_NO_OFFSET, NO_DELAY_SLOT, IMMVAL_MASK_NON_SPECIAL, 0x900001E2, OPCODE_MASK_H4,   swaph,     arithmetic_inst },
   {"", 0, 0, 0, 0, 0, 0, 0, 0},

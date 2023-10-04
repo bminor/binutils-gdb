@@ -27,7 +27,7 @@ enum microblaze_instr
 {
   add, rsub, addc, rsubc, addk, rsubk, addkc, rsubkc, clz, cmp, cmpu,
   addi, rsubi, addic, rsubic, addik, rsubik, addikc, rsubikc, mul,
-  mulh, mulhu, mulhsu,swapb,swaph,
+  mulh, mulhu, mulhsu, swapb, swaph,
   idiv, idivu, bsll, bsra, bsrl, get, put, nget, nput, cget, cput,
   ncget, ncput, muli, bslli, bsrai, bsrli, mului,
   /* 'or/and/xor' are C++ keywords.  */
@@ -59,6 +59,9 @@ enum microblaze_instr
   aputd, taputd, caputd, tcaputd, naputd, tnaputd, ncaputd, tncaputd,
   eagetd, teagetd, ecagetd, tecagetd, neagetd, tneagetd, necagetd, tnecagetd,
   eaputd, teaputd, ecaputd, tecaputd, neaputd, tneaputd, necaputd, tnecaputd,
+  /* 'sleep' is a Posix symbol.  */
+  microblaze_sleep,
+  hibernate, suspend,
   invalid_inst
 };
 
