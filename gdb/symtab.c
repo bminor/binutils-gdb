@@ -100,7 +100,8 @@ static struct block_symbol
 			    enum block_enum block_index,
 			    const char *name, const domain_enum domain);
 
-static void set_main_name (const char *name, enum language lang);
+static void set_main_name (program_space *pspace, const char *name,
+			   language lang);
 
 /* Type of the data stored on the program space.  */
 
@@ -1700,7 +1701,7 @@ symtab_new_objfile_observer (struct objfile *objfile)
   /* When all objfiles have been removed (OBJFILE is nullptr), then forget
      everything we know about the main function.  */
   if (objfile == nullptr)
-    set_main_name (nullptr, language_unknown);
+    set_main_name (current_program_space, nullptr, language_unknown);
 }
 
 /* This module's 'free_objfile' observer.  */
@@ -6178,10 +6179,10 @@ make_source_files_completion_list (const char *text, const char *word)
    the object has not yet been created, create it and fill in some
    default values.  */
 
-static struct main_info *
-get_main_info (void)
+static main_info *
+get_main_info (program_space *pspace)
 {
-  struct main_info *info = main_progspace_key.get (current_program_space);
+  main_info *info = main_progspace_key.get (pspace);
 
   if (info == NULL)
     {
@@ -6191,16 +6192,16 @@ get_main_info (void)
 	 gdb returned "main" as the name even if no function named
 	 "main" was defined the program; and this approach lets us
 	 keep compatibility.  */
-      info = main_progspace_key.emplace (current_program_space);
+      info = main_progspace_key.emplace (pspace);
     }
 
   return info;
 }
 
 static void
-set_main_name (const char *name, enum language lang)
+set_main_name (program_space *pspace, const char *name, enum language lang)
 {
-  struct main_info *info = get_main_info ();
+  main_info *info = get_main_info (pspace);
 
   if (!info->name_of_main.empty ())
     {
@@ -6221,6 +6222,7 @@ static void
 find_main_name (void)
 {
   const char *new_main_name;
+  program_space *pspace = current_program_space;
 
   /* First check the objfiles to see whether a debuginfo reader has
      picked up the appropriate main name.  Historically the main name
@@ -6232,7 +6234,8 @@ find_main_name (void)
     {
       if (objfile->per_bfd->name_of_main != NULL)
 	{
-	  set_main_name (objfile->per_bfd->name_of_main,
+	  set_main_name (pspace,
+			 objfile->per_bfd->name_of_main,
 			 objfile->per_bfd->language_of_main);
 	  return;
 	}
@@ -6257,28 +6260,28 @@ find_main_name (void)
   new_main_name = ada_main_name ();
   if (new_main_name != NULL)
     {
-      set_main_name (new_main_name, language_ada);
+      set_main_name (pspace, new_main_name, language_ada);
       return;
     }
 
   new_main_name = d_main_name ();
   if (new_main_name != NULL)
     {
-      set_main_name (new_main_name, language_d);
+      set_main_name (pspace, new_main_name, language_d);
       return;
     }
 
   new_main_name = go_main_name ();
   if (new_main_name != NULL)
     {
-      set_main_name (new_main_name, language_go);
+      set_main_name (pspace, new_main_name, language_go);
       return;
     }
 
   new_main_name = pascal_main_name ();
   if (new_main_name != NULL)
     {
-      set_main_name (new_main_name, language_pascal);
+      set_main_name (pspace, new_main_name, language_pascal);
       return;
     }
 
@@ -6289,14 +6292,14 @@ find_main_name (void)
   bool symbol_found_p = false;
   gdbarch_iterate_over_objfiles_in_search_order
     (target_gdbarch (),
-     [&symbol_found_p] (objfile *obj)
+     [&symbol_found_p, pspace] (objfile *obj)
        {
 	 language lang
 	   = obj->lookup_global_symbol_language ("main", VAR_DOMAIN,
 						 &symbol_found_p);
 	 if (symbol_found_p)
 	   {
-	     set_main_name ("main", lang);
+	     set_main_name (pspace, "main", lang);
 	     return 1;
 	   }
 
@@ -6306,7 +6309,7 @@ find_main_name (void)
   if (symbol_found_p)
     return;
 
-  set_main_name ("main", language_unknown);
+  set_main_name (pspace, "main", language_unknown);
 }
 
 /* See symtab.h.  */
@@ -6314,7 +6317,7 @@ find_main_name (void)
 const char *
 main_name ()
 {
-  struct main_info *info = get_main_info ();
+  main_info *info = get_main_info (current_program_space);
 
   if (info->name_of_main.empty ())
     find_main_name ();
@@ -6328,7 +6331,7 @@ main_name ()
 enum language
 main_language (void)
 {
-  struct main_info *info = get_main_info ();
+  main_info *info = get_main_info (current_program_space);
 
   if (info->name_of_main.empty ())
     find_main_name ();
