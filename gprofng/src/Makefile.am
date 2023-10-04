@@ -117,12 +117,25 @@ AM_CFLAGS = $(GPROFNG_CFLAGS) $(PTHREAD_CFLAGS) \
 	$(GPROFNG_NO_SWITCH_CFLAGS)
 AM_CXXFLAGS = $(AM_CFLAGS)
 
-QLParser.tab.cc QLParser.tab.hh: QLParser.yy
+# bison generates two files QLParser.tab.cc, QLParser.tab.hh.
+# we don't know which file will be newer.
+# Make QLParser.tab.cc always newer than QLParser.tab.hh.
+QLParser.tab.hh: QLParser.yy
+	if test "$(BISON)" = ":"; then \
+	  echo "fatal: Building gprofng requires bison 3.0.4 or later."; \
+	  exit 1; \
+	fi; \
 	$(BISON) $^
 
-BUILT_SOURCES = QLParser.tab.hh
-EXTRA_DIST = QLParser.yy
+QLParser.tab.cc: QLParser.tab.hh
+	touch $@
 
+BUILT_SOURCES = QLParser.tab.cc QLParser.tab.hh
+EXTRA_DIST = QLParser.tab.cc QLParser.tab.hh QLParser.yy
+
+# info and diststuff are needed for src-release.sh:
+info: $(BUILT_SOURCES)
+diststuff: info
 
 lib_LTLIBRARIES = $(LIBGPROFNG)
 libgprofng_la_SOURCES = $(CCSOURCES) $(CSOURCES)
