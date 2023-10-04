@@ -2959,6 +2959,46 @@ handle_v_attach (char *own_buf)
     write_enn (own_buf);
 }
 
+/* Decode an argument from the vRun packet buffer.  PTR points to the
+   first hex-encoded character in the buffer, and LEN is the number of
+   characters to read from the packet buffer.
+
+   If the argument decoding is successful, return a buffer containing the
+   decoded argument, including a null terminator at the end.
+
+   If the argument decoding fails for any reason, return nullptr.  */
+
+static gdb::unique_xmalloc_ptr<char>
+decode_v_run_arg (const char *ptr, size_t len)
+{
+  /* Two hex characters are required for each decoded byte.  */
+  if (len % 2 != 0)
+    return nullptr;
+
+  /* The length in bytes needed for the decoded argument.  */
+  len /= 2;
+
+  /* Buffer to decode the argument into.  The '+ 1' is for the null
+     terminator we will add.  */
+  char *arg = (char *) xmalloc (len + 1);
+
+  /* Decode the argument from the packet and add a null terminator.  We do
+     this within a try block as invalid characters within the PTR buffer
+     will cause hex2bin to throw an exception.  Our caller relies on us
+     returning nullptr in order to clean up some memory allocations.  */
+  try
+    {
+      hex2bin (ptr, (gdb_byte *) arg, len);
+      arg[len] = '\0';
+    }
+  catch (const gdb_exception_error &exception)
+    {
+      return nullptr;
+    }
+
+  return gdb::unique_xmalloc_ptr<char> (arg);
+}
+
 /* Run a new program.  */
 static void
 handle_v_run (char *own_buf)
@@ -2966,7 +3006,7 @@ handle_v_run (char *own_buf)
   client_state &cs = get_client_state ();
   char *p, *next_p;
   std::vector<char *> new_argv;
-  char *new_program_name = NULL;
+  gdb::unique_xmalloc_ptr<char> new_program_name;
   int i;
 
   for (i = 0, p = own_buf + strlen ("vRun;");
@@ -2980,7 +3020,7 @@ handle_v_run (char *own_buf)
       if (i == 0 && p == next_p)
 	{
 	  /* No program specified.  */
-	  new_program_name = NULL;
+	  gdb_assert (new_program_name == nullptr);
 	}
       else if (p == next_p)
 	{
@@ -2989,29 +3029,31 @@ handle_v_run (char *own_buf)
 	}
       else
 	{
-	  /* The length of the decoded argument.  */
-	  size_t len = (next_p - p) / 2;
+	  /* The length of the argument string in the packet.  */
+	  size_t len = next_p - p;
 
-	  /* Buffer to decode the argument into.  */
-	  char *arg = (char *) xmalloc (len + 1);
-
-	  hex2bin (p, (gdb_byte *) arg, len);
-	  arg[len] = '\0';
+	  gdb::unique_xmalloc_ptr<char> arg = decode_v_run_arg (p, len);
+	  if (arg == nullptr)
+	    {
+	      write_enn (own_buf);
+	      free_vector_argv (new_argv);
+	      return;
+	    }
 
 	  if (i == 0)
-	    new_program_name = arg;
+	    new_program_name = std::move (arg);
 	  else
-	    new_argv.push_back (arg);
+	    new_argv.push_back (arg.release ());
 	}
       if (*next_p == '\0')
 	break;
     }
 
-  if (new_program_name == NULL)
+  if (new_program_name == nullptr)
     {
       /* GDB didn't specify a program to run.  Use the program from the
 	 last run with the new argument list.  */
-      if (program_path.get () == NULL)
+      if (program_path.get () == nullptr)
 	{
 	  write_enn (own_buf);
 	  free_vector_argv (new_argv);
@@ -3019,7 +3061,7 @@ handle_v_run (char *own_buf)
 	}
     }
   else
-    program_path.set (new_program_name);
+    program_path.set (new_program_name.get ());
 
   /* Free the old argv and install the new one.  */
   free_vector_argv (program_args);
