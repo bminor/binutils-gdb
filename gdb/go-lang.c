@@ -233,16 +233,28 @@ unpack_mangled_go_symbol (const char *mangled_name,
      libgo_.*: used by gccgo's runtime
 
      Thus we don't support -fgo-prefix (except as used by the runtime).  */
-  if (!startswith (mangled_name, "go.")
-      && !startswith (mangled_name, "libgo_"))
+  bool v3;
+  if (startswith (mangled_name, "go_0"))
+    /* V3 mangling detected, see
+       https://go-review.googlesource.com/c/gofrontend/+/271726 .  */
+    v3 = true;
+  else if (startswith (mangled_name, "go.")
+	   || startswith (mangled_name, "libgo_"))
+    v3 = false;
+  else
     return NULL;
 
   /* Quick check for whether a search may be fruitful.  */
   /* Ignore anything with @plt, etc. in it.  */
   if (strchr (mangled_name, '@') != NULL)
     return NULL;
+
   /* It must have at least two dots.  */
-  first_dot = strchr (mangled_name, '.');
+  if (v3)
+    first_dot = strchr (mangled_name, '0');
+  else
+    first_dot = strchr (mangled_name, '.');
+
   if (first_dot == NULL)
     return NULL;
   /* Treat "foo.bar" as unmangled.  It can collide with lots of other
@@ -262,6 +274,18 @@ unpack_mangled_go_symbol (const char *mangled_name,
 
   gdb::unique_xmalloc_ptr<char> result = make_unique_xstrdup (mangled_name);
   buf = result.get ();
+
+  if (v3)
+    {
+      /* Replace "go_0" with "\0go.".  */
+      buf[0] = '\0';
+      buf[1] = 'g';
+      buf[2] = 'o';
+      buf[3] = '.';
+
+      /* Skip the '\0'.  */
+      buf++;
+    }
 
   /* Search backwards looking for "N<digit(s)>".  */
   p = buf + len;
