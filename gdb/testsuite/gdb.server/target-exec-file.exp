@@ -52,12 +52,41 @@ set target_exec [gdb_remote_download target $binfile]
 # prompt us if this is the right thing to do.
 gdb_test_no_output "set confirm off"
 
+if { [allow_python_tests] } {
+    # Register an event handler for the executable changed event.
+    # This handler just copies the event into a global Python object.
+    gdb_test_multiline "Add connection_removed event" \
+	"python" "" \
+	"global_exec_changed_event = None" "" \
+	"def executable_changed(event):" "" \
+	"   global global_exec_changed_event" "" \
+	"   global_exec_changed_event = event" "" \
+	"gdb.events.executable_changed.connect (executable_changed)" "" \
+	"end" ""
+}
+
 # Start gdbserver, but always in extended-remote mode, and then
 # connect to it from GDB.
 set res [gdbserver_start "--multi" $target_exec]
 set gdbserver_protocol "extended-remote"
 set gdbserver_gdbport [lindex $res 1]
 gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport
+
+if { [allow_python_tests] } {
+    # When connecting to a remote target, if the user has not told GDB
+    # which executable to use, then GDB will figure out an executable
+    # from the remote target.
+    #
+    # As a result we expect to have seen an executable changed event.
+    with_test_prefix "after connecting" {
+	gdb_test "python print(global_exec_changed_event)" \
+	    "<gdb.ExecutableChangedEvent object at $hex>"
+	gdb_test "python print(global_exec_changed_event.progspace.executable_filename)" \
+	    [string_to_regexp target:$target_exec]
+	gdb_test "python print(global_exec_changed_event.reload)" "False"
+	gdb_test_no_output "python global_exec_changed_event = None"
+    }
+}
 
 # Issue a 'file' command and parse the output.  We look for a couple
 # of specific things to ensure that we are correctly reading the exec
@@ -103,6 +132,20 @@ gdb_assert { $saw_read_of_remote_exec } \
 
 gdb_assert { $saw_read_of_syms_from_exec } \
     "symbols were read from remote exec file"
+
+if { [allow_python_tests] } {
+    # The 'file' command forces GDB to always load the executable,
+    # even if the same filename is used.  In this case, as the
+    # filename is the same, this will show as a reload event.
+    with_test_prefix "after 'file' command" {
+	gdb_test "python print(global_exec_changed_event)" \
+	    "<gdb.ExecutableChangedEvent object at $hex>"
+	gdb_test "python print(global_exec_changed_event.progspace.executable_filename)" \
+	    [string_to_regexp target:$target_exec]
+	gdb_test "python print(global_exec_changed_event.reload)" "True"
+	gdb_test_no_output "python global_exec_changed_event = None"
+    }
+}
 
 # Start the inferior (with the 'start' command), use TESTNAME for any
 # pass/fail calls.  EXPECT_REREAD should be true or false and
@@ -155,9 +198,23 @@ proc start_inferior { testname expect_reread } {
 # see the symbols re-read now.
 start_inferior "start inferior the first time" false
 
+if { [allow_python_tests] } {
+    # The executable hasn't changed.
+    with_test_prefix "after starting inferior for the first time" {
+	gdb_test "python print(global_exec_changed_event)" "None"
+    }
+}
+
 # Re-start the inferior.  The executable is unchanged so we should not
 # see the symbol file being re-read.
 start_inferior "start inferior a second time" false
+
+if { [allow_python_tests] } {
+    # The executable still hasn't changed.
+    with_test_prefix "after starting inferior for the second time" {
+	gdb_test "python print(global_exec_changed_event)" "None"
+    }
+}
 
 # Delay for a short while so, when we touch the exec, we know the
 # timestamp will change.
@@ -172,3 +229,16 @@ if { $status != 0 } {
 # Start the inferior again, we expect to see the symbols being re-read
 # from the remote file.
 start_inferior "start inferior a third time" true
+
+if { [allow_python_tests] } {
+    # The executable has now changed on disk.  This will be a reload
+    # event.
+    with_test_prefix "after starting inferior for the third time" {
+	gdb_test "python print(global_exec_changed_event)" \
+	    "<gdb.ExecutableChangedEvent object at $hex>"
+	gdb_test "python print(global_exec_changed_event.progspace.executable_filename)" \
+	    [string_to_regexp target:$target_exec]
+	gdb_test "python print(global_exec_changed_event.reload)" "True"
+	gdb_test_no_output "python global_exec_changed_event = None"
+    }
+}

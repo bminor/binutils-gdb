@@ -105,21 +105,24 @@ specify_exec_file_hook (void (*hook) (const char *))
 void
 reopen_exec_file (void)
 {
-  int res;
-  struct stat st;
+  bfd *exec_bfd = current_program_space->exec_bfd ();
 
   /* Don't do anything if there isn't an exec file.  */
-  if (current_program_space->exec_bfd () == NULL)
+  if (exec_bfd == nullptr)
     return;
 
+  /* The main executable can't be an in-memory BFD object.  If it was then
+     the use of bfd_stat below would not work as expected.  */
+  gdb_assert ((exec_bfd->flags & BFD_IN_MEMORY) == 0);
+
   /* If the timestamp of the exec file has changed, reopen it.  */
-  std::string filename = bfd_get_filename (current_program_space->exec_bfd ());
-  res = stat (filename.c_str (), &st);
+  struct stat st;
+  int res = bfd_stat (exec_bfd, &st);
 
   if (res == 0
-      && current_program_space->ebfd_mtime
+      && current_program_space->ebfd_mtime != 0
       && current_program_space->ebfd_mtime != st.st_mtime)
-    exec_file_attach (filename.c_str (), 0);
+    exec_file_attach (bfd_get_filename (exec_bfd), 0);
 }
 
 /* If we have both a core file and an exec file,
