@@ -1,4 +1,11 @@
-2023-10-05  A. Wilcox  <awilfox@adelielinux.org>
+2023-10-05  A. Wilcox  <awilfox@adelielinux.org>w
+
+	PR 30925
+	PR 22001
+	* testsuite/ld-i386/i386.exp: Skip the pr22001 test with TEXTREL
+	relocations enabled on configurations using the MUSL library.
+
+2023-10-05  A. Wilcox  <awilfox@adelielinux.org>w
 
 	PR 30924
 	* testsuite/ld-elfvers/vers.exp (objdump_emptyverstuff): Handle

@@ -1319,6 +1319,21 @@ if { [isnative]
 	] \
     ]
 
+    # The musl C library does not support TEXTRELs.
+    if { ![istarget i?86-*-musl] } {
+	run_ld_link_exec_tests [list \
+	    [list \
+		"Run pr22001-1" \
+		"$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed,-z,notext tmpdir/pr22001-1.so" \
+		"-Wa,-mx86-used-note=yes" \
+		{ pr22001-1b.c } \
+		"pr22001-1" \
+		"pass.out" \
+		"$NOPIE_CFLAGS" \
+	    ] \
+	]
+    }
+
     run_ld_link_exec_tests [list \
 	[list \
 	    "Run weakundef1 without PIE" \
@@ -1329,16 +1344,7 @@ if { [isnative]
 	    "pass.out" \
 	    "$NOPIE_CFLAGS" \
 	] \
-	[list \
-	    "Run pr22001-1" \
-	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed,-z,notext tmpdir/pr22001-1.so" \
-	    "-Wa,-mx86-used-note=yes" \
-	    { pr22001-1b.c } \
-	    "pr22001-1" \
-	    "pass.out" \
-	    "$NOPIE_CFLAGS" \
-	] \
-	[list \
+ 	[list \
 	    "Run pr22001-1 (PIE 1)" \
 	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
 	    "-Wa,-mx86-used-note=yes" \
