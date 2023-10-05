@@ -74,7 +74,8 @@ processors[] =
   { bfd_mach_aarch64,	  "cortex-a65ae"    },
   { bfd_mach_aarch64,	  "cortex-a76ae"    },
   { bfd_mach_aarch64,	  "cortex-a77"	    },
-  { bfd_mach_aarch64,	  "cortex-a720"	    }
+  { bfd_mach_aarch64,	  "cortex-a720"	    },
+  { bfd_mach_aarch64,     "cortex-x4"       },
 };
 
 static bool
