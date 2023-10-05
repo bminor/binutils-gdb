@@ -2227,7 +2227,7 @@ _bfd_elf_get_dynamic_symbols (bfd *abfd, Elf_Internal_Phdr *phdr,
 	goto error_return;
 
       gnuchains = get_hash_table_data (abfd, maxchain, 4, filesize);
-      if (gnubuckets == NULL)
+      if (gnuchains == NULL)
 	goto error_return;
       ngnuchains = maxchain;
 

@@ -1,3 +1,9 @@
+2023-10-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 30904
+	* elf.c (_bfd_elf_get_dynamic_symbols): Fix typo when checking to
+	see if the gnuchains array has been successfully created.
+
 2023-10-02  Nick Clifton  <nickc@redhat.com>
 
 	* peXXigen.c (_bfd_XXi_only_swap_filehdr_out): Use
