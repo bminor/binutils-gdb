@@ -26,3 +26,4 @@ if { ![istarget "aarch64*-*-nto*"] } {
 
 run_dump_test "nto-stack-note-1"
 run_dump_test "nto-stack-note-2"
+run_dump_test "nto-stack-note-3"

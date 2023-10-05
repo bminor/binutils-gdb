@@ -39,31 +39,20 @@ struct nto_stack_note
   unsigned char execstack[4];
 };
 
-/* Generate the QNT_STACK .note section.  */
-static void
-nto_add_note_section (void) {
+static asection*
+nto_create_QNX_note_section(int type)
+{
   asection *note_sec;
   flagword flags;
   Elf_External_Note *e_note;
-  bfd_size_type size, h_size;
-  struct nto_stack_note *n_note;
-
-  /* Don't create a note if the stack size isn't provided.  */
-  if (link_info.stacksize <= 0)
-    return;
+  bfd_size_type size;
 
   /* As ${ARCH}elf.em is imported and ${ARCH}_elf_create_output_section_statements
      is called before this function, stub_file should already be defined.  */
   if (!stub_file)
     {
       einfo (_("%F%P: cannot create .note section in stub BFD.\n"));
-      return;
-    }
-
-  if (nto_lazy_stack && !link_info.stacksize)
-    {
-      einfo (_("%F%P: error: --lazy-stack must follow -zstack-size=<size>\n"));
-      return;
+      return NULL;
     }
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_HAS_CONTENTS
@@ -72,12 +61,11 @@ nto_add_note_section (void) {
   if (! note_sec)
     {
       einfo (_("%F%P: failed to create .note section\n"));
-      return;
+      return NULL;
     }
 
   size = offsetof (Elf_External_Note, name[sizeof "QNX"]);
   size = (size + 3) & -(bfd_size_type) 4;
-  h_size = size;
   size += sizeof (struct nto_stack_note);
   note_sec->size = size;
 
@@ -86,31 +74,100 @@ nto_add_note_section (void) {
   e_note = (Elf_External_Note *) note_sec->contents;
   bfd_h_put_32 (stub_file->the_bfd, sizeof "QNX", &e_note->namesz);
   bfd_h_put_32 (stub_file->the_bfd, sizeof (struct nto_stack_note), &e_note->descsz);
-  bfd_h_put_32 (stub_file->the_bfd, QNT_STACK, &e_note->type);
+  bfd_h_put_32 (stub_file->the_bfd, type, &e_note->type);
   memcpy (e_note->name, "QNX", sizeof "QNX");
 
+  return note_sec;
+}
 
-  /* Generate .note content.*/
-  n_note = (struct nto_stack_note *) (note_sec->contents + h_size);
-  bfd_h_put_32 (stub_file->the_bfd, link_info.stacksize, &n_note->stacksize);
+/* Lookup for a section holding a QNX note or create a new section.  */
+static asection*
+nto_lookup_QNX_note_section(int type)
+{
+  asection *stack_note_sec = NULL;
+  bfd *abfd;
+  for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)
+    {
+      Elf_External_Note *e_note;
+      asection *sec;
 
-  if (nto_lazy_stack)
-    bfd_h_put_32 (stub_file->the_bfd, 4096, &n_note->stackalloc);
+      /* QNX notes are held under a note section simply named ".note".  */
+      sec = bfd_get_section_by_name (abfd, ".note");
+      if (!sec)
+	continue;
+
+      /* Verify that this is a QNX note of the expected type.  */
+      sec->contents = bfd_malloc(sec->size);
+      if (!bfd_get_section_contents (sec->owner, sec, sec->contents, (file_ptr) 0,
+				     sec->size))
+	einfo (_("%F%P: %pB: can't read contents of section .note: %E\n"),
+	       sec->owner);
+
+      e_note = (Elf_External_Note *) sec->contents;
+      if (! strcmp("QNX", e_note->name) && *e_note->type == type)
+	{
+	  stack_note_sec = sec;
+	  /* Allow modification of this .note content.  */
+	  stack_note_sec->flags |= SEC_IN_MEMORY;
+	  break;
+	}
+    }
+
+  if (stack_note_sec)
+    return stack_note_sec;
   else
-    bfd_h_put_32 (stub_file->the_bfd, link_info.stacksize, &n_note->stackalloc);
-
-  if (link_info.execstack != link_info.noexecstack && link_info.execstack)
-    bfd_h_put_32 (stub_file->the_bfd, 0, &n_note->execstack);
-  else
-    bfd_h_put_32 (stub_file->the_bfd, 1, &n_note->execstack);
+    return nto_create_QNX_note_section(type);
 
 }
 
+/* Generate the QNX stack .note section.  */
 static void
-nto_create_output_section_statements (void)
+nto_add_note_section (void) {
+  asection *note_sec;
+  struct nto_stack_note *n_note;
+  bfd_size_type h_size;
+  bool is_update = false;
+
+  /* Don't create a note if none of the stack parameter have to be modified.  */
+  if (link_info.stacksize <= 0 && (link_info.execstack == link_info.noexecstack))
+    return;
+
+  if (nto_lazy_stack && !link_info.stacksize)
+    {
+      einfo (_("%F%P: error: --lazy-stack must follow -zstack-size=<size>\n"));
+      return;
+    }
+
+  note_sec = nto_lookup_QNX_note_section(QNT_STACK);
+  if (! note_sec)
+    return;
+
+  /* Update QNX stack note content.  */
+  h_size = note_sec->size - sizeof(struct nto_stack_note);
+  n_note = (struct nto_stack_note *) (note_sec->contents + h_size);
+  is_update = note_sec->owner != stub_file->the_bfd;
+
+  if (link_info.stacksize > 0)
+    bfd_h_put_32 (note_sec->owner, link_info.stacksize, &n_note->stacksize);
+  else if (!is_update)
+    bfd_h_put_32 (note_sec->owner, 0, &n_note->stacksize);
+
+  if (nto_lazy_stack || (!is_update && link_info.stacksize <= 0))
+    bfd_h_put_32 (note_sec->owner, 4096, &n_note->stackalloc);
+  else if (link_info.stacksize > 0)
+    bfd_h_put_32 (note_sec->owner, link_info.stacksize, &n_note->stackalloc);
+
+  if (link_info.execstack)
+    bfd_h_put_32 (note_sec->owner, 0, &n_note->execstack);
+  else if (!is_update || link_info.noexecstack)
+    bfd_h_put_32 (note_sec->owner, 1, &n_note->execstack);
+}
+
+static void
+nto_after_open (void)
 {
-  ${ARCH}_elf_create_output_section_statements ();
   nto_add_note_section();
+  gld${EMULATION_NAME}_after_open ();
 }
 
 EOF
@@ -160,4 +217,4 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 # Put these extra Neutrino routines in ld_${EMULATION_NAME}_emulation
 #
 
-LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=nto_create_output_section_statements
+LDEMUL_AFTER_OPEN=nto_after_open
