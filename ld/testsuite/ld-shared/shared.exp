@@ -226,6 +226,7 @@ if ![ld_compile "$CC_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.
 	setup_xfail "*-*-solaris2*"
 	setup_xfail "ia64-*-linux*"
 	setup_xfail "alpha*-*-linux*"
+	setup_xfail "powerpc-*-linux-musl"
 	setup_xfail "powerpc64*-*-*"
 	if { ![istarget hppa*64*-*-linux*] } {
 	    setup_xfail "hppa*-*-linux*"
@@ -307,6 +308,7 @@ if ![ld_compile "$CC_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdi
 	    setup_xfail "*-*-solaris2*"
 	    setup_xfail "ia64-*-linux*"
 	    setup_xfail "alpha*-*-linux*"
+	    setup_xfail "powerpc-*-linux-musl"
 	    setup_xfail "powerpc64*-*-*"
 	    if { ![istarget hppa*64*-*-linux*] } {
 		setup_xfail "hppa*-*-linux*"
