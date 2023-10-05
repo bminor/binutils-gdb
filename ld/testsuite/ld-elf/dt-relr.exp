@@ -23,6 +23,10 @@ if { ![supports_dt_relr] } {
     return
 }
 
+if { [istarget *-*-musl*] } {
+    return
+}
+
 run_cc_link_tests [list \
     [list \
 	"Build dt-relr-glibc-1a.so" \

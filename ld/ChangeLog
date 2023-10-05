@@ -1,5 +1,10 @@
 2023-10-05  A. Wilcox  <awilfox@adelielinux.org>w
 
+	PR 30917
+	* testsuite/ld-elf/dt-relr.exp: Skip for MUSL targets.
+
+2023-10-05  A. Wilcox  <awilfox@adelielinux.org>w
+
 	PR 30918
 	* testsuite/ld-shared/shared.exp: Add XFAILs for tests that fail
 	with the MUSL library.
