@@ -1,6 +1,13 @@
+2023-10-05  Neal frager  <neal.frager@amd.com>
+
+	* microblaze-opcm.h (struct op_code_struct): Tidy and remove
+	redundant entries.
+	* microblaze-opc.h (MAX_OPCODES): Increase to 300.
+	(op_code_struct): Add address extension instructions.
+
 2023-10-04  Neal frager  <neal.frager@amd.com>
 
-	* opcodes/microblaze-opc.h (struct op_code_struct): Add hiberante
+	* microblaze-opc.h (struct op_code_struct): Add hiberante
 	and suspend entries.
 	* microblaze-opcm.h (enum microblaze_instr): Add microblaze_sleep,
 	hibernate, suspend entries.

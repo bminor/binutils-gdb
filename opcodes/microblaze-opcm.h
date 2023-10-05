@@ -33,13 +33,13 @@ enum microblaze_instr
   /* 'or/and/xor' are C++ keywords.  */
   microblaze_or, microblaze_and, microblaze_xor,
   andn, pcmpbf, pcmpbc, pcmpeq, pcmpne, sra, src, srl, sext8, sext16,
-  wic, wdc, wdcclear, wdcextclear, wdcflush, wdcextflush, mts, mfs, mbar, br,
-  brd, brld, bra, brad, brald, microblaze_brk, beq, beqd, bne, bned, blt,
-  bltd, ble, bled, bgt, bgtd, bge, bged, ori, andi, xori, andni,
+  wic, wdc, wdcclear, wdcextclear, wdcflush, wdcextflush, wdcclearea, mts, mtse,
+  mfs, mfse, mbar, br, brd, brld, bra, brad, brald, microblaze_brk, beq, beqd,
+  bne, bned, blt, bltd, ble, bled, bgt, bgtd, bge, bged, ori, andi, xori, andni,
   imm, rtsd, rtid, rtbd, rted, bri, brid, brlid, brai, braid, bralid,
   brki, beqi, beqid, bnei, bneid, blti, bltid, blei, bleid, bgti,
-  bgtid, bgei, bgeid, lbu, lbur, lhu, lhur, lw, lwr, lwx, sb, sbr, sh,
-  shr, sw, swr, swx, lbui, lhui, lwi,
+  bgtid, bgei, bgeid, lbu, lbuea, lbur, lhu, lhuea, lhur, lw, lwea, lwr, lwx,
+  sb, sbea, sbr, sh, shea, shr, sw, swea, swr, swx, lbui, lhui, lwi,
   sbi, shi, swi, msrset, msrclr, tuqula, mbi_fadd, frsub, mbi_fmul, mbi_fdiv,
   fcmp_lt, fcmp_eq, fcmp_le, fcmp_gt, fcmp_ne, fcmp_ge, fcmp_un, flt,
   /* 'fsqrt' is a glibc:math.h symbol.  */
@@ -59,9 +59,6 @@ enum microblaze_instr
   aputd, taputd, caputd, tcaputd, naputd, tnaputd, ncaputd, tncaputd,
   eagetd, teagetd, ecagetd, tecagetd, neagetd, tneagetd, necagetd, tnecagetd,
   eaputd, teaputd, ecaputd, tecaputd, neaputd, tneaputd, necaputd, tnecaputd,
-  /* 'sleep' is a Posix symbol.  */
-  microblaze_sleep,
-  hibernate, suspend,
   invalid_inst
 };
 
