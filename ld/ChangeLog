@@ -1,29 +1,35 @@
-2023-10-05  A. Wilcox  <awilfox@adelielinux.org>w
+2023-10-05  A. Wilcox  <awilfox@adelielinux.org>
+
+	PR 30905
+	* testsuite/ld-elf/pr28158.rd: Adjust regexp to allow for section
+	indicies larger than 9.
+
+2023-10-05  A. Wilcox  <awilfox@adelielinux.org>
 
 	PR 30917
 	* testsuite/ld-elf/dt-relr.exp: Skip for MUSL targets.
 
-2023-10-05  A. Wilcox  <awilfox@adelielinux.org>w
+2023-10-05  A. Wilcox  <awilfox@adelielinux.org>
 
 	PR 30918
 	* testsuite/ld-shared/shared.exp: Add XFAILs for tests that fail
 	with the MUSL library.
 
-2023-10-05  A. Wilcox  <awilfox@adelielinux.org>w
+2023-10-05  A. Wilcox  <awilfox@adelielinux.org>
 
 	PR 30923
 	* testsuite/ld-arm/thumb-plt-got.d: Skip test for configurations
 	using the MUSL library.
 	* testsuite/ld-arm/thumb-plt.d: Likewise.
 
-2023-10-05  A. Wilcox  <awilfox@adelielinux.org>w
+2023-10-05  A. Wilcox  <awilfox@adelielinux.org>
 
 	PR 30925
 	PR 22001
 	* testsuite/ld-i386/i386.exp: Skip the pr22001 test with TEXTREL
 	relocations enabled on configurations using the MUSL library.
 
-2023-10-05  A. Wilcox  <awilfox@adelielinux.org>w
+2023-10-05  A. Wilcox  <awilfox@adelielinux.org>
 
 	PR 30924
 	* testsuite/ld-elfvers/vers.exp (objdump_emptyverstuff): Handle
