@@ -16,7 +16,8 @@
 import gdb
 from .startup import in_gdb_thread
 from .server import client_bool_capability
-from abc import abstractmethod
+from abc import ABC, abstractmethod
+from collections import defaultdict
 from contextlib import contextmanager
 
 
@@ -52,7 +53,7 @@ def apply_format(value_format):
     return _null()
 
 
-class BaseReference:
+class BaseReference(ABC):
     """Represent a variable or a scope.
 
     This class is just a base class, some methods must be implemented in
@@ -72,7 +73,7 @@ class BaseReference:
         all_variables.append(self)
         self.ref = len(all_variables)
         self.name = name
-        self.children = None
+        self.reset_children()
 
     @in_gdb_thread
     def to_object(self):
@@ -80,16 +81,27 @@ class BaseReference:
 
         The resulting object is a starting point that can be filled in
         further.  See the Scope or Variable types in the spec"""
-        result = {
-            "variablesReference": self.ref,
-        }
+        result = {"variablesReference": self.ref if self.has_children() else 0}
         if self.name is not None:
             result["name"] = str(self.name)
         return result
 
-    def no_children(self):
-        """Call this to declare that this variable or scope has no children."""
-        self.ref = 0
+    @abstractmethod
+    def has_children(self):
+        """Return True if this object has children."""
+        return False
+
+    def reset_children(self):
+        """Reset any cached information about the children of this object."""
+        # A list of all the children.  Each child is a BaseReference
+        # of some kind.
+        self.children = None
+        # Map from the name of a child to a BaseReference.
+        self.by_name = {}
+        # Keep track of how many duplicates there are of a given name,
+        # so that unique names can be generated.  Map from base name
+        # to a count.
+        self.name_counts = defaultdict(lambda: 1)
 
     @abstractmethod
     def fetch_one_child(self, index):
@@ -105,23 +117,55 @@ class BaseReference:
         """Return the number of children of this variable."""
         return
 
+    # Helper method to compute the final name for a child whose base
+    # name is given.  Updates the name_counts map.  This is used to
+    # handle shadowing -- in DAP, the adapter is responsible for
+    # making sure that all the variables in a a given container have
+    # unique names.  See
+    # https://github.com/microsoft/debug-adapter-protocol/issues/141
+    # and
+    # https://github.com/microsoft/debug-adapter-protocol/issues/149
+    def _compute_name(self, name):
+        if name in self.by_name:
+            self.name_counts[name] += 1
+            # In theory there's no safe way to compute a name, because
+            # a pretty-printer might already be generating names of
+            # that form.  In practice I think we should not worry too
+            # much.
+            name = name + " #" + str(self.name_counts[name])
+        return name
+
     @in_gdb_thread
     def fetch_children(self, start, count):
         """Fetch children of this variable.
 
         START is the starting index.
-        COUNT is the number to return, with 0 meaning return all."""
+        COUNT is the number to return, with 0 meaning return all.
+        Returns an iterable of some kind."""
         if count == 0:
             count = self.child_count()
         if self.children is None:
             self.children = [None] * self.child_count()
-        result = []
         for idx in range(start, start + count):
             if self.children[idx] is None:
                 (name, value) = self.fetch_one_child(idx)
-                self.children[idx] = VariableReference(name, value)
-            result.append(self.children[idx])
-        return result
+                name = self._compute_name(name)
+                var = VariableReference(name, value)
+                self.children[idx] = var
+                self.by_name[name] = var
+            yield self.children[idx]
+
+    @in_gdb_thread
+    def find_child_by_name(self, name):
+        """Find a child of this variable, given its name.
+
+        Returns the value of the child, or throws if not found."""
+        # A lookup by name can only be done using names previously
+        # provided to the client, so we can simply rely on the by-name
+        # map here.
+        if name in self.by_name:
+            return self.by_name[name]
+        raise Exception("no variable named '" + name + "'")
 
 
 class VariableReference(BaseReference):
@@ -135,16 +179,27 @@ class VariableReference(BaseReference):
         RESULT_NAME can be used to change how the simple string result
         is emitted in the result dictionary."""
         super().__init__(name)
-        self.value = value
-        self.printer = gdb.printing.make_visualizer(value)
         self.result_name = result_name
-        # We cache all the children we create.
+        self.value = value
+        self._update_value()
+
+    # Internal method to update local data when the value changes.
+    def _update_value(self):
+        self.reset_children()
+        self.printer = gdb.printing.make_visualizer(self.value)
         self.child_cache = None
-        if not hasattr(self.printer, "children"):
-            self.no_children()
-            self.count = None
-        else:
+        if self.has_children():
             self.count = -1
+        else:
+            self.count = None
+
+    def assign(self, value):
+        """Assign VALUE to this object and update."""
+        self.value.assign(value)
+        self._update_value()
+
+    def has_children(self):
+        return hasattr(self.printer, "children")
 
     def cache_children(self):
         if self.child_cache is None:

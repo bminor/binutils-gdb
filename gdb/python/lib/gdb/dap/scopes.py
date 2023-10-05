@@ -59,6 +59,9 @@ class _ScopeReference(BaseReference):
             # FIXME construct a Source object
         return result
 
+    def has_children(self):
+        return True
+
     def child_count(self):
         return len(self.var_list)
 

@@ -141,3 +141,24 @@ def set_expression(
     return send_gdb_with_response(
         lambda: _set_expression(expression, value, frameId, format)
     )
+
+
+# Helper function to perform an assignment.
+@in_gdb_thread
+def _set_variable(ref, name, value, value_format):
+    with apply_format(value_format):
+        var = find_variable(ref)
+        lhs = var.find_child_by_name(name)
+        rhs = gdb.parse_and_eval(value)
+        lhs.assign(rhs)
+        return lhs.to_object()
+
+
+@capability("supportsSetVariable")
+@request("setVariable")
+def set_variable(
+    *, variablesReference: int, name: str, value: str, format=None, **args
+):
+    return send_gdb_with_response(
+        lambda: _set_variable(variablesReference, name, value, format)
+    )
