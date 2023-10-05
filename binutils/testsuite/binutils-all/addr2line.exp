@@ -20,7 +20,8 @@ set dot ""
 set exe [exeext]
 
 # powerpc64 function symbols are on descriptors rather than code.
-if [istarget powerpc64-*-*] {
+# MUSL uses the ELFv2 ABI for PowerPC, so the problem does not apply there.
+if { [istarget powerpc64-*-*] && ![istarget powerpc64-*-musl] } {
     set opts --synthetic
     set dot {\.}
 }

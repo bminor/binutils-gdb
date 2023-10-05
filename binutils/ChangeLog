@@ -1,3 +1,9 @@
+2023-10-05  A. Wilcox  <awilfox@adelielinux.org>w
+
+	PR 30916
+	* testsuite/binutils-all/addr2line.exp: Do not use PowerPC
+	specific options when working with a MUSL target.
+
 2023-10-02  Vsevolod Alekseyev  <sevaa@sprynet.com>
 
 	PR 29267
