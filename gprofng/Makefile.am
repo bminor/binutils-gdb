@@ -51,12 +51,12 @@ AM_MAKEFLAGS = \
 	GPROFNG_CFLAGS="$(GPROFNG_CFLAGS)" \
 	GPROFNG_CPPFLAGS="$(GPROFNG_CPPFLAGS)"
 
-if TCL_TRY
 .PHONY: check-small check-extra check-install
 
 check-DEJAGNU: check-small
 
 check-small check-extra check-install: site.exp development.exp
+if TCL_TRY
 	srcroot=`cd $(srcdir) && pwd`; export srcroot; \
 	LC_ALL=C; export LC_ALL; \
 	EXPECT=$(EXPECT); export EXPECT; \
@@ -74,6 +74,7 @@ check-small check-extra check-install: site.exp development.exp
 		BUILDDIR="$(abs_top_builddir)" $(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
+endif
 
 development.exp: $(BFDDIR)/development.sh
 	$(EGREP) "(development|experimental)=" $(BFDDIR)/development.sh  \
@@ -85,5 +86,5 @@ CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 EXTRA_DEJAGNU_SITE_CONFIG = development.exp
 
 DISTCLEANFILES = site.exp development.exp
-endif
+
 
