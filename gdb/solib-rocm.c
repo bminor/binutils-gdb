@@ -126,14 +126,26 @@ rocm_solib_fd_cache::close (int fd, fileio_error *target_errno)
 
 /* ROCm-specific inferior data.  */
 
+struct rocm_so
+{
+  rocm_so (const char *name, std::string unique_name, lm_info_svr4_up lm_info)
+    : name (name),
+      unique_name (std::move (unique_name)),
+      lm_info (std::move (lm_info))
+  {}
+
+  std::string name, unique_name;
+  lm_info_svr4_up lm_info;
+};
+
 struct solib_info
 {
   explicit solib_info (inferior *inf)
-    : solib_list (nullptr), fd_cache (inf)
+    : fd_cache (inf)
   {};
 
   /* List of code objects loaded into the inferior.  */
-  so_list *solib_list;
+  std::vector<rocm_so> solib_list;
 
   /* Cache of opened FD in the inferior.  */
   rocm_solib_fd_cache fd_cache;
@@ -143,23 +155,6 @@ struct solib_info
 static const registry<inferior>::key<solib_info> rocm_solib_data;
 
 static target_so_ops rocm_solib_ops;
-
-/* Free the solib linked list.  */
-
-static void
-rocm_free_solib_list (struct solib_info *info)
-{
-  while (info->solib_list != nullptr)
-    {
-      struct so_list *next = info->solib_list->next;
-
-      free_so (*info->solib_list);
-      info->solib_list = next;
-    }
-
-  info->solib_list = nullptr;
-}
-
 
 /* Fetch the solib_info data for INF.  */
 
@@ -207,27 +202,29 @@ rocm_solib_handle_event ()
   rocm_update_solib_list ();
 }
 
-/* Make a deep copy of the solib linked list.  */
+/* Create so_list objects from rocm_so objects in SOS.  */
 
 static so_list *
-rocm_solib_copy_list (const so_list *src)
+so_list_from_rocm_sos (const std::vector<rocm_so> &sos)
 {
   struct so_list *dst = nullptr;
   struct so_list **link = &dst;
 
-  while (src != nullptr)
+  for (const rocm_so &so : sos)
     {
       so_list *newobj = new so_list;
-      memcpy (newobj, src, sizeof (struct so_list));
+      newobj->lm_info = new lm_info_svr4 (*so.lm_info);
 
-      auto *src_li = gdb::checked_static_cast<lm_info_svr4 *> (src->lm_info);
-      newobj->lm_info = new lm_info_svr4 (*src_li);
+      strncpy (newobj->so_name, so.name.c_str (), sizeof (newobj->so_name));
+      newobj->so_name[sizeof (newobj->so_name) - 1] = '\0';
+
+      strncpy (newobj->so_original_name, so.unique_name.c_str (),
+	       sizeof (newobj->so_original_name));
+      newobj->so_original_name[sizeof (newobj->so_original_name) - 1] = '\0';
 
       newobj->next = nullptr;
       *link = newobj;
       link = &newobj->next;
-
-      src = src->next;
     }
 
   return dst;
@@ -243,21 +240,21 @@ rocm_solib_current_sos ()
   so_list *head = svr4_so_ops.current_sos ();
 
   /* Then, the device-side shared library list.  */
-  so_list *list = get_solib_info (current_inferior ())->solib_list;
+  std::vector<rocm_so> &dev_sos = get_solib_info (current_inferior ())->solib_list;
 
-  if (list == nullptr)
+  if (dev_sos.empty ())
     return head;
 
-  list = rocm_solib_copy_list (list);
+  so_list *dev_so_list = so_list_from_rocm_sos (dev_sos);
 
   if (head == nullptr)
-    return list;
+    return dev_so_list;
 
   /* Append our libraries to the end of the list.  */
   so_list *tail;
   for (tail = head; tail->next; tail = tail->next)
     /* Nothing.  */;
-  tail->next = list;
+  tail->next = dev_so_list;
 
   return head;
 }
@@ -687,7 +684,7 @@ rocm_solib_bfd_open (const char *pathname)
 static void
 rocm_solib_create_inferior_hook (int from_tty)
 {
-  rocm_free_solib_list (get_solib_info (current_inferior ()));
+  get_solib_info (current_inferior ())->solib_list.clear ();
 
   svr4_so_ops.solib_create_inferior_hook (from_tty);
 }
@@ -703,8 +700,8 @@ rocm_update_solib_list ()
 
   solib_info *info = get_solib_info (inf);
 
-  rocm_free_solib_list (info);
-  struct so_list **link = &info->solib_list;
+  info->solib_list.clear ();
+  std::vector<rocm_so> &sos = info->solib_list;
 
   amd_dbgapi_code_object_id_t *code_object_list;
   size_t count;
@@ -736,24 +733,18 @@ rocm_update_solib_list ()
       if (status != AMD_DBGAPI_STATUS_SUCCESS)
 	continue;
 
-      so_list *so = new so_list;
-      lm_info_svr4 *li = new lm_info_svr4;
+      gdb::unique_xmalloc_ptr<char> uri_bytes_holder (uri_bytes);
+
+      lm_info_svr4_up li = gdb::make_unique<lm_info_svr4> ();
       li->l_addr = l_addr;
-      so->lm_info = li;
 
-      strncpy (so->so_name, uri_bytes, sizeof (so->so_name));
-      so->so_name[sizeof (so->so_name) - 1] = '\0';
-      xfree (uri_bytes);
-
-      /* Make so_original_name unique so that code objects with the same URI
-	 but different load addresses are seen by gdb core as different shared
+      /* Generate a unique name so that code objects with the same URI but
+	 different load addresses are seen by gdb core as different shared
 	 objects.  */
-      xsnprintf (so->so_original_name, sizeof (so->so_original_name),
-		 "code_object_%ld", code_object_list[i].handle);
+      std::string unique_name
+	= string_printf ("code_object_%ld", code_object_list[i].handle);
 
-      so->next = nullptr;
-      *link = so;
-      link = &so->next;
+      sos.emplace_back (uri_bytes, std::move (unique_name), std::move (li));
     }
 
   xfree (code_object_list);
@@ -778,7 +769,8 @@ rocm_update_solib_list ()
 static void
 rocm_solib_target_inferior_created (inferior *inf)
 {
-  rocm_free_solib_list (get_solib_info (inf));
+  get_solib_info (inf)->solib_list.clear ();
+
   rocm_update_solib_list ();
 
   /* Force GDB to reload the solibs.  */
