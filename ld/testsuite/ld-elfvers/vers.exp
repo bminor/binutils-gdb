@@ -215,12 +215,14 @@ proc objdump_emptyverstuff { objdump object } {
 # this probably means that there is version information in libc, so we
 # can't really perform this test.
 	return 1
+    } else { if { [string match "*Version? EABI*" $exec_output] } then {
+# there is EABI Version information in the private flags of the binary.
+	return 1
     } else {
 	verbose -log "$exec_output"
 	verbose -log "objdump_emptyverstuff: did not expect any output from objdump"
 	return 0
-    } }
-
+    } } }
 }
 
 #

@@ -1,3 +1,9 @@
+2023-10-05  A. Wilcox  <awilfox@adelielinux.org>
+
+	PR 30924
+	* testsuite/ld-elfvers/vers.exp (objdump_emptyverstuff): Handle
+	EABI version information in objdump's output.
+
 2023-10-02  Nick Clifton  <nickc@redhat.com>
 
 	* pe-dll.c (fill_edata): Use bfd_get_current_time when filling in
