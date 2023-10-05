@@ -1,5 +1,12 @@
 2023-10-05  A. Wilcox  <awilfox@adelielinux.org>w
 
+	PR 30923
+	* testsuite/ld-arm/thumb-plt-got.d: Skip test for configurations
+	using the MUSL library.
+	* testsuite/ld-arm/thumb-plt.d: Likewise.
+
+2023-10-05  A. Wilcox  <awilfox@adelielinux.org>w
+
 	PR 30925
 	PR 22001
 	* testsuite/ld-i386/i386.exp: Skip the pr22001 test with TEXTREL
