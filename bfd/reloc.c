@@ -6695,6 +6695,12 @@ ENUMDOC
   This is a 32 bit reloc for the microblaze to handle
   expressions of the form "Symbol Op Symbol"
 ENUM
+  BFD_RELOC_MICROBLAZE_32_NONE
+ENUMDOC
+  This is a 32 bit reloc that stores the 32 bit pc relative
+  value in two words (with an imm instruction).  No relocation is
+  done here - only used for relaxing
+ENUM
   BFD_RELOC_MICROBLAZE_64_NONE
 ENUMDOC
   This is a 64 bit reloc that stores the 32 bit pc relative

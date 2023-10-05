@@ -29,7 +29,7 @@ enum microblaze_instr
   addi, rsubi, addic, rsubic, addik, rsubik, addikc, rsubikc, mul,
   mulh, mulhu, mulhsu, swapb, swaph,
   idiv, idivu, bsll, bsra, bsrl, get, put, nget, nput, cget, cput,
-  ncget, ncput, muli, bslli, bsrai, bsrli, mului,
+  ncget, ncput, muli, bslli, bsrai, bsrli, bsefi, bsifi, mului,
   /* 'or/and/xor' are C++ keywords.  */
   microblaze_or, microblaze_and, microblaze_xor,
   andn, pcmpbf, pcmpbc, pcmpeq, pcmpne, sra, src, srl, sext8, sext16,
@@ -130,6 +130,7 @@ enum microblaze_instr_type
 #define RB_LOW  11 /* Low bit for RB.  */
 #define IMM_LOW  0 /* Low bit for immediate.  */
 #define IMM_MBAR 21 /* low bit for mbar instruction.  */
+#define IMM_WIDTH_LOW 6 /* Low bit for immediate width */
 
 #define RD_MASK 0x03E00000
 #define RA_MASK 0x001F0000
@@ -141,6 +142,9 @@ enum microblaze_instr_type
 
 /* Imm mask for mbar.  */
 #define IMM5_MBAR_MASK 0x03E00000
+
+/* Imm mask for extract/insert width. */
+#define IMM5_WIDTH_MASK 0x000007C0
 
 /* FSL imm mask for get, put instructions.  */
 #define  RFSL_MASK 0x000000F

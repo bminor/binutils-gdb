@@ -175,6 +175,21 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
 	  false),		/* PC relative offset?  */
 
    /* This reloc does nothing.	Used for relaxation.  */
+   HOWTO (R_MICROBLAZE_32_NONE,	/* Type.  */
+	  0,			/* Rightshift.  */
+	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  32,			/* Bitsize.  */
+	  true,			/* PC_relative.  */
+	  0,			/* Bitpos.  */
+	  complain_overflow_bitfield,  /* Complain on overflow.  */
+	  NULL,                  /* Special Function.  */
+	  "R_MICROBLAZE_32_NONE",/* Name.  */
+	  false,		/* Partial Inplace.  */
+	  0,			/* Source Mask.  */
+	  0,			/* Dest Mask.  */
+	  false),		/* PC relative offset?  */
+
+   /* This reloc does nothing.	Used for relaxation.  */
    HOWTO (R_MICROBLAZE_64_NONE,	/* Type.  */
 	  0,			/* Rightshift.  */
 	  0,			/* Size.  */
@@ -559,6 +574,9 @@ microblaze_elf_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
     {
     case BFD_RELOC_NONE:
       microblaze_reloc = R_MICROBLAZE_NONE;
+      break;
+    case BFD_RELOC_MICROBLAZE_32_NONE:
+      microblaze_reloc = R_MICROBLAZE_32_NONE;
       break;
     case BFD_RELOC_MICROBLAZE_64_NONE:
       microblaze_reloc = R_MICROBLAZE_64_NONE;
@@ -1954,14 +1972,22 @@ microblaze_elf_relax_section (bfd *abfd,
 		}
 	      break;
 	    case R_MICROBLAZE_NONE:
+	    case R_MICROBLAZE_32_NONE:
 	      {
 		/* This was a PC-relative instruction that was
 		   completely resolved.  */
 		size_t sfix, efix;
+		unsigned int val;
 		bfd_vma target_address;
 		target_address = irel->r_addend + irel->r_offset;
 		sfix = calc_fixup (irel->r_offset, 0, sec);
 		efix = calc_fixup (target_address, 0, sec);
+
+		/* Validate the in-band val.  */
+		val = bfd_get_32 (abfd, contents + irel->r_offset);
+		if (val != irel->r_addend && ELF32_R_TYPE (irel->r_info) == R_MICROBLAZE_32_NONE) {
+		    fprintf(stderr, "%d: CORRUPT relax reloc %x %lx\n", __LINE__, val, irel->r_addend);
+		}
 		irel->r_addend -= (efix - sfix);
 		/* Should use HOWTO.  */
 		microblaze_bfd_write_imm_value_32 (abfd, contents + irel->r_offset,
@@ -2009,6 +2035,49 @@ microblaze_elf_relax_section (bfd *abfd,
 	  irelscanend = irelocs + o->reloc_count;
 	  for (irelscan = irelocs; irelscan < irelscanend; irelscan++)
 	    {
+	      if (ELF32_R_TYPE (irelscan->r_info) == (int) R_MICROBLAZE_32_NONE)
+		{
+		  unsigned int val;
+
+		  isym = isymbuf + ELF32_R_SYM (irelscan->r_info);
+
+		  /* hax: We only do the following fixup for debug location lists.  */
+		  if (strcmp(".debug_loc", o->name))
+		    continue;
+
+		  /* This was a PC-relative instruction that was completely resolved.  */
+		  if (ocontents == NULL)
+		    {
+		      if (elf_section_data (o)->this_hdr.contents != NULL)
+			  ocontents = elf_section_data (o)->this_hdr.contents;
+		      else
+			{
+			  /* We always cache the section contents.
+			     Perhaps, if info->keep_memory is FALSE, we
+			     should free them, if we are permitted to.  */
+
+			  if (o->rawsize == 0)
+			      o->rawsize = o->size;
+			  ocontents = (bfd_byte *) bfd_malloc (o->rawsize);
+			  if (ocontents == NULL)
+			      goto error_return;
+			  if (!bfd_get_section_contents (abfd, o, ocontents,
+							 (file_ptr) 0,
+							 o->rawsize))
+			      goto error_return;
+			  elf_section_data (o)->this_hdr.contents = ocontents;
+			}
+		    }
+
+		  val = bfd_get_32 (abfd, ocontents + irelscan->r_offset);
+		  if (val != irelscan->r_addend) {
+			fprintf(stderr, "%d: CORRUPT relax reloc! %x %lx\n", __LINE__, val, irelscan->r_addend);
+		  }
+
+		  irelscan->r_addend -= calc_fixup (irelscan->r_addend, 0, sec);
+		  microblaze_bfd_write_imm_value_32 (abfd, ocontents + irelscan->r_offset,
+						     irelscan->r_addend);
+	      }
 	      if (ELF32_R_TYPE (irelscan->r_info) == (int) R_MICROBLAZE_32)
 		{
 		  isym = isymbuf + ELF32_R_SYM (irelscan->r_info);
@@ -2033,7 +2102,7 @@ microblaze_elf_relax_section (bfd *abfd,
 				goto error_return;
 			      if (!bfd_get_section_contents (abfd, o, ocontents,
 							     (file_ptr) 0,
-							     o->rawsize))
+							      o->rawsize))
 				goto error_return;
 			      elf_section_data (o)->this_hdr.contents = ocontents;
 			    }
@@ -2068,7 +2137,7 @@ microblaze_elf_relax_section (bfd *abfd,
 			      elf_section_data (o)->this_hdr.contents = ocontents;
 			    }
 			}
-		      irelscan->r_addend -= calc_fixup (irel->r_addend
+		      irelscan->r_addend -= calc_fixup (irelscan->r_addend
 							+ isym->st_value,
 							0,
 							sec);
