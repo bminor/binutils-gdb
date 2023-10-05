@@ -90,8 +90,12 @@ riscv_target::low_arch_setup ()
     = riscv_linux_read_features (lwpid_of (current_thread));
   target_desc_up tdesc = riscv_create_target_description (features);
 
-  if (!tdesc->expedite_regs)
-    init_target_desc (tdesc.get (), expedite_regs);
+  if (tdesc->expedite_regs.empty ())
+    {
+      init_target_desc (tdesc.get (), expedite_regs);
+      gdb_assert (!tdesc->expedite_regs.empty ());
+    }
+
   current_process ()->tdesc = tdesc.release ();
 }
 

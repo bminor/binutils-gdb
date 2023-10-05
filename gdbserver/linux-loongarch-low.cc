@@ -84,8 +84,11 @@ loongarch_target::low_arch_setup ()
   features.xlen = sizeof (elf_greg_t);
   tdesc = loongarch_create_target_description (features);
 
-  if (!tdesc->expedite_regs)
-    init_target_desc (tdesc.get (), expedite_regs);
+  if (tdesc->expedite_regs.empty ())
+    {
+      init_target_desc (tdesc.get (), expedite_regs);
+      gdb_assert (!tdesc->expedite_regs.empty ());
+    }
   current_process ()->tdesc = tdesc.release ();
 }
 

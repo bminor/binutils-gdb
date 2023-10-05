@@ -132,8 +132,11 @@ csky_target::low_arch_setup ()
   static const char *expedite_regs[] = { "r14", "pc", NULL };
   target_desc_up tdesc = csky_create_target_description ();
 
-  if (!tdesc->expedite_regs)
-    init_target_desc (tdesc.get (), expedite_regs);
+  if (tdesc->expedite_regs.empty ())
+    {
+      init_target_desc (tdesc.get (), expedite_regs);
+      gdb_assert (!tdesc->expedite_regs.empty ());
+    }
 
   current_process ()->tdesc = tdesc.release ();
 
