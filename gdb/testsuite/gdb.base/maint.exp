@@ -386,11 +386,11 @@ gdb_test "maint" \
 set saw_srcfile 0
 gdb_test_multiple "maint info line-table" \
     "maint info line-table w/o a file name" {
-    -re "symtab: \[^\n\r\]+${srcfile} \\(\\(struct symtab \\*\\) $hex\\)\r\nlinetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+REL-ADDRESS\[ \t\]+UNREL-ADDRESS\[^\r\n\]*" {
+    -re "symtab: \[^\n\r\]+${srcfile} \\(\\(struct symtab \\*\\) $hex\\)\r\nlinetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+REL-ADDRESS\[ \t\]+UNREL-ADDRESS\[^\r\n\]*\r\n" {
 	set saw_srcfile 1
 	exp_continue
     }
-    -re "symtab: \[^\n\r\]+ \\(\\(struct symtab \\*\\) $hex\\)\r\nlinetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+REL-ADDRESS\[ \t\]+UNREL-ADDRESS\[^\r\n\]*" {
+    -re "symtab: \[^\n\r\]+ \\(\\(struct symtab \\*\\) $hex\\)\r\nlinetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+REL-ADDRESS\[ \t\]+UNREL-ADDRESS\[^\r\n\]*\r\n" {
 	# Match each symtab to avoid overflowing expect's buffer.
 	exp_continue
     }
