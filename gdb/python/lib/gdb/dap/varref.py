@@ -199,9 +199,14 @@ class VariableReference(BaseReference):
         if isinstance(self.printer, gdb.ValuePrinter) and hasattr(
             self.printer, "child"
         ):
-            return self.printer.child(idx)
+            (name, val) = self.printer.child(idx)
         else:
-            return self.cache_children()[idx]
+            (name, val) = self.cache_children()[idx]
+        # A pretty-printer can return something other than a
+        # gdb.Value, but it must be convertible.
+        if not isinstance(val, gdb.Value):
+            val = gdb.Value(val)
+        return (name, val)
 
 
 @in_gdb_thread
