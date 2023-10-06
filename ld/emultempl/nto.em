@@ -86,6 +86,7 @@ nto_lookup_QNX_note_section(int type)
 {
   asection *stack_note_sec = NULL;
   bfd *abfd;
+  bool duplicated_notes_detected = false;
   for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)
     {
       Elf_External_Note *e_note;
@@ -106,10 +107,23 @@ nto_lookup_QNX_note_section(int type)
       e_note = (Elf_External_Note *) sec->contents;
       if (! strcmp("QNX", e_note->name) && *e_note->type == type)
 	{
-	  stack_note_sec = sec;
-	  /* Allow modification of this .note content.  */
-	  stack_note_sec->flags |= SEC_IN_MEMORY;
-	  break;
+	  if (stack_note_sec)
+	    {
+	      if (!duplicated_notes_detected)
+		{
+		  einfo (_("%P: %pB: warning: duplicated QNX stack .note detected\n"),
+			 stack_note_sec->owner);
+		  duplicated_notes_detected = true;
+		}
+	      einfo (_("%P: %pB: warning: duplicated QNX stack .note detected\n"),
+		     sec->owner);
+	    }
+	  else
+	    {
+	      stack_note_sec = sec;
+	      /* Allow modification of this .note content.  */
+	      stack_note_sec->flags |= SEC_IN_MEMORY;
+	    }
 	}
     }
 
