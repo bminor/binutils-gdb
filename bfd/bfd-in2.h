@@ -2790,6 +2790,8 @@ bool bfd_cache_close (bfd *abfd);
 
 bool bfd_cache_close_all (void);
 
+unsigned bfd_cache_size (void);
+
 /* Extracted from compress.c.  */
 /* Types of compressed DWARF debug sections.  */
 enum compressed_debug_section_type

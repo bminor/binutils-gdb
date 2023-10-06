@@ -576,6 +576,23 @@ bfd_cache_close_all (void)
 }
 
 /*
+FUNCTION
+	bfd_cache_size
+
+SYNOPSIS
+	unsigned bfd_cache_size (void);
+
+DESCRIPTION
+	Return the number of open files in the cache.
+*/
+
+unsigned
+bfd_cache_size (void)
+{
+  return open_files;
+}
+
+/*
 INTERNAL_FUNCTION
 	bfd_open_file
 
