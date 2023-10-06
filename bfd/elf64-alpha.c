@@ -1982,9 +1982,9 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		{
 		  info->flags |= DF_TEXTREL;
 		  info->callbacks->minfo
-		    (_("%pB: dynamic relocation against `%pT' in "
+		    (_("%pB: dynamic relocation against a local symbol in "
 		       "read-only section `%pA'\n"),
-		     sec->owner, h->root.root.root.string, sec);
+		     sec->owner, sec);
 		}
 	    }
 	}
