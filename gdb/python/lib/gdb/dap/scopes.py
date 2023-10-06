@@ -36,6 +36,29 @@ def clear_scopes(event):
 gdb.events.cont.connect(clear_scopes)
 
 
+# A helper function to compute the value of a symbol.  SYM is either a
+# gdb.Symbol, or an object implementing the SymValueWrapper interface.
+# FRAME is a frame wrapper, as produced by a frame filter.  Returns a
+# tuple of the form (NAME, VALUE), where NAME is the symbol's name and
+# VALUE is a gdb.Value.
+@in_gdb_thread
+def symbol_value(sym, frame):
+    inf_frame = frame.inferior_frame()
+    # Make sure to select the frame first.  Ideally this would not
+    # be needed, but this is a way to set the current language
+    # properly so that language-dependent APIs will work.
+    inf_frame.select()
+    name = str(sym.symbol())
+    val = sym.value()
+    if val is None:
+        # No synthetic value, so must read the symbol value
+        # ourselves.
+        val = sym.symbol().value(inf_frame)
+    elif not isinstance(val, gdb.Value):
+        val = gdb.Value(val)
+    return (name, val)
+
+
 class _ScopeReference(BaseReference):
     def __init__(self, name, hint, frame, var_list):
         super().__init__(name)
@@ -67,21 +90,7 @@ class _ScopeReference(BaseReference):
 
     @in_gdb_thread
     def fetch_one_child(self, idx):
-        # Make sure to select the frame first.  Ideally this would not
-        # be needed, but this is a way to set the current language
-        # properly so that language-dependent APIs will work.
-        self.inf_frame.select()
-        # Here SYM will conform to the SymValueWrapper interface.
-        sym = self.var_list[idx]
-        name = str(sym.symbol())
-        val = sym.value()
-        if val is None:
-            # No synthetic value, so must read the symbol value
-            # ourselves.
-            val = sym.symbol().value(self.inf_frame)
-        elif not isinstance(val, gdb.Value):
-            val = gdb.Value(val)
-        return (name, val)
+        return symbol_value(self.var_list[idx], self.frame)
 
 
 class _RegisterReference(_ScopeReference):
