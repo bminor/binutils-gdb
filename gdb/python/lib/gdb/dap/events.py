@@ -44,8 +44,43 @@ def _on_exit(event):
     send_event("terminated")
 
 
+# When None, a "process" event has already been sent.  When a string,
+# it is the "startMethod" for that event.
+_process_event_kind = None
+
+
+@in_gdb_thread
+def send_process_event_once():
+    global _process_event_kind
+    if _process_event_kind is not None:
+        inf = gdb.selected_inferior()
+        is_local = inf.connection.type == "native"
+        data = {
+            "isLocalProcess": is_local,
+            "startMethod": _process_event_kind,
+            # Could emit 'pointerSize' here too if we cared to.
+        }
+        if inf.progspace.filename:
+            data["name"] = inf.progspace.filename
+        if is_local:
+            data["systemProcessId"] = inf.pid
+        send_event("process", data)
+        _process_event_kind = None
+
+
+@in_gdb_thread
+def expect_process(reason):
+    """Indicate that DAP is starting or attaching to a process.
+
+    REASON is the "startMethod" to include in the "process" event.
+    """
+    global _process_event_kind
+    _process_event_kind = reason
+
+
 @in_gdb_thread
 def thread_event(event, reason):
+    send_process_event_once()
     send_event(
         "thread",
         {
@@ -81,6 +116,7 @@ def _new_objfile(event):
 
 @in_gdb_thread
 def _objfile_removed(event):
+    send_process_event_once()
     if is_module(event.objfile):
         send_event(
             "module",

@@ -42,6 +42,8 @@ dap_check_request_and_response "set conditional breakpoint" \
 	 [list s $srcfile] $line]
 
 dap_check_request_and_response "start inferior" configurationDone
+dap_wait_for_event_and_check "process event generated" process \
+    "body startMethod" process
 dap_wait_for_event_and_check "inferior started" thread "body reason" started
 
 set resp [lindex [dap_request_and_response evaluate {o expression [s 23]}] \

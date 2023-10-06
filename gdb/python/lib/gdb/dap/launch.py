@@ -18,7 +18,7 @@ import gdb
 # These are deprecated in 3.9, but required in older versions.
 from typing import Mapping, Optional, Sequence
 
-from .events import exec_and_expect_stop
+from .events import exec_and_expect_stop, expect_process
 from .server import request, capability
 from .startup import in_gdb_thread, exec_and_log
 
@@ -75,6 +75,7 @@ def attach(*, pid: Optional[int] = None, target: Optional[str] = None, **args):
         cmd = "target remote " + target
     else:
         raise Exception("attach requires either 'pid' or 'target'")
+    expect_process("attach")
     exec_and_log(cmd)
 
 
@@ -83,6 +84,7 @@ def attach(*, pid: Optional[int] = None, target: Optional[str] = None, **args):
 def config_done(**args):
     global _program
     if _program is not None:
+        expect_process("process")
         # Suppress the continue event, but don't set any particular
         # expected stop.
         exec_and_expect_stop("run", None)
