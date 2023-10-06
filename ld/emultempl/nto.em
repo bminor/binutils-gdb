@@ -128,15 +128,15 @@ nto_add_note_section (void) {
   bfd_size_type h_size;
   bool is_update = false;
 
-  /* Don't create a note if none of the stack parameter have to be modified.  */
-  if (link_info.stacksize <= 0 && (link_info.execstack == link_info.noexecstack))
-    return;
-
   if (nto_lazy_stack && !link_info.stacksize)
     {
       einfo (_("%F%P: error: --lazy-stack must follow -zstack-size=<size>\n"));
       return;
     }
+
+  /* Don't create a note if none of the stack parameter have to be modified.  */
+  if (link_info.stacksize <= 0 && (link_info.execstack == link_info.noexecstack))
+    return;
 
   note_sec = nto_lookup_QNX_note_section(QNT_STACK);
   if (! note_sec)
