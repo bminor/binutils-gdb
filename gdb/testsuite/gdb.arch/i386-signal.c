@@ -45,7 +45,11 @@ asm(".text\n"
     "    .align 8\n"
     "    .globl setup\n"
     "setup:\n"
+#if IS_AMD64_REGS_TARGET
+    "    pushq $sigframe\n"
+#else
     "    push $sigframe\n"
+#endif
     "    jmp func\n"
     "\n"
     "    .cfi_startproc\n"

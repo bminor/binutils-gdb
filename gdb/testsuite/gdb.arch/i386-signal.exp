@@ -19,8 +19,13 @@ require {is_any_target "i?86-*-*" "x86_64-*-*"}
 
 standard_testfile
 
+set opts {}
+lappend opts debug
+lappend opts nopie
+lappend opts additional_flags=-DIS_AMD64_REGS_TARGET=[is_amd64_regs_target]
+
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
-	  executable { debug nopie }] != "" } {
+	  executable $opts] != "" } {
     untested "failed to compile"
     return -1
 }
