@@ -277,9 +277,8 @@ darwin_current_sos (void)
 
       auto li = gdb::make_unique<lm_info_darwin> ();
 
-      strncpy (newobj->so_name, file_path.get (), SO_NAME_MAX_PATH_SIZE - 1);
-      newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-      strcpy (newobj->so_original_name, newobj->so_name);
+      newobj->so_name = file_path.get ();
+      newobj->so_original_name = newobj->so_name;
       li->lm_addr = load_addr;
 
       newobj->lm_info = std::move (li);

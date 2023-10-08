@@ -250,16 +250,10 @@ solib_target_current_sos (void)
   for (lm_info_target_up &info : library_list)
     {
       so_list *new_solib = new so_list;
-      strncpy (new_solib->so_name, info->name.c_str (),
-	       SO_NAME_MAX_PATH_SIZE - 1);
-      new_solib->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-      strncpy (new_solib->so_original_name, info->name.c_str (),
-	       SO_NAME_MAX_PATH_SIZE - 1);
-      new_solib->so_original_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
 
-      /* We no longer need this copy of the name.  */
-      info->name.clear ();
-
+      /* We don't need a copy of the name in INFO anymore.  */
+      new_solib->so_name = std::move (info->name);
+      new_solib->so_original_name = new_solib->so_name;
       new_solib->lm_info = std::move (info);
 
       /* Add it to the list.  */
@@ -310,7 +304,7 @@ solib_target_relocate_section_addresses (so_list &so, target_section *sec)
 	  if (num_alloc_sections != li->section_bases.size ())
 	    warning (_("\
 Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
-		     so.so_name);
+		     so.so_name.c_str ());
 	  else
 	    {
 	      int bases_index = 0;
@@ -353,7 +347,7 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 
 	  if (data == NULL)
 	    warning (_("\
-Could not relocate shared library \"%s\": no segments"), so.so_name);
+Could not relocate shared library \"%s\": no segments"), so.so_name.c_str ());
 	  else
 	    {
 	      ULONGEST orig_delta;
@@ -364,7 +358,7 @@ Could not relocate shared library \"%s\": no segments"), so.so_name);
 						    li->segment_bases.size (),
 						    li->segment_bases.data ()))
 		warning (_("\
-Could not relocate shared library \"%s\": bad offsets"), so.so_name);
+Could not relocate shared library \"%s\": bad offsets"), so.so_name.c_str ());
 
 	      /* Find the range of addresses to report for this library in
 		 "info sharedlibrary".  Report any consecutive segments

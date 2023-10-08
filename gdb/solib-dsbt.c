@@ -612,9 +612,8 @@ dsbt_current_sos (void)
 		gdb_printf (gdb_stdlog, "current_sos: name = %s\n",
 			    name_buf.get ());
 
-	      strncpy (sop->so_name, name_buf.get (), SO_NAME_MAX_PATH_SIZE - 1);
-	      sop->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-	      strcpy (sop->so_original_name, sop->so_name);
+	      sop->so_name = name_buf.get ();
+	      sop->so_original_name = sop->so_name;
 	    }
 
 	  sop->lm_info = std::move (li);

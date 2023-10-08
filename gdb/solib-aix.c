@@ -482,11 +482,9 @@ solib_aix_current_sos (void)
 	 so_name = string_printf ("%s(%s)", info.filename.c_str (),
 				  info.member_name.c_str ());
 	}
-      strncpy (new_solib->so_original_name, so_name.c_str (),
-	       SO_NAME_MAX_PATH_SIZE - 1);
-      new_solib->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-      memcpy (new_solib->so_name, new_solib->so_original_name,
-	      SO_NAME_MAX_PATH_SIZE);
+
+      new_solib->so_original_name = so_name;
+      new_solib->so_name = so_name;
       new_solib->lm_info = gdb::make_unique<lm_info_aix> (info);
 
       /* Add it to the list.  */

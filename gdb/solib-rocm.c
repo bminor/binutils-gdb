@@ -215,12 +215,8 @@ so_list_from_rocm_sos (const std::vector<rocm_so> &sos)
       so_list *newobj = new so_list;
       newobj->lm_info = gdb::make_unique<lm_info_svr4> (*so.lm_info);
 
-      strncpy (newobj->so_name, so.name.c_str (), sizeof (newobj->so_name));
-      newobj->so_name[sizeof (newobj->so_name) - 1] = '\0';
-
-      strncpy (newobj->so_original_name, so.unique_name.c_str (),
-	       sizeof (newobj->so_original_name));
-      newobj->so_original_name[sizeof (newobj->so_original_name) - 1] = '\0';
+      newobj->so_name = so.name;
+      newobj->so_original_name = so.unique_name;
 
       newobj->next = nullptr;
       *link = newobj;

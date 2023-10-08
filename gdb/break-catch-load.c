@@ -120,7 +120,7 @@ solib_catchpoint::check_status (struct bpstat *bs)
       for (so_list *iter : current_program_space->added_solibs)
 	{
 	  if (!regex
-	      || compiled->exec (iter->so_name, 0, NULL, 0) == 0)
+	      || compiled->exec (iter->so_name.c_str (), 0, nullptr, 0) == 0)
 	    return;
 	}
     }

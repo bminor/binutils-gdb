@@ -8052,7 +8052,7 @@ disable_breakpoints_in_unloaded_shlib (program_space *pspace,
 	      target_terminal::ours_for_output ();
 	      warning (_("Temporarily disabling breakpoints "
 			 "for unloaded shared library \"%s\""),
-		       solib.so_name);
+		       solib.so_name.c_str ());
 	    }
 	  disabled_shlib_breaks = true;
 	}

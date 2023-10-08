@@ -193,8 +193,8 @@ svr4_same (const so_list &gdb, const so_list &inferior)
   auto *lmi
     = gdb::checked_static_cast<const lm_info_svr4 *> (inferior.lm_info.get ());
 
-  return svr4_same (gdb.so_original_name, inferior.so_original_name,
-		    *lmg, *lmi);
+  return svr4_same (gdb.so_original_name.c_str (),
+		    inferior.so_original_name.c_str (), *lmg, *lmi);
 }
 
 static lm_info_svr4_up
@@ -316,7 +316,7 @@ lm_addr_check (const so_list &so, bfd *abfd)
 		gdb_printf (_("Using PIC (Position Independent Code) "
 			      "prelink displacement %s for \"%s\".\n"),
 			    paddress (current_inferior ()->arch (), l_addr),
-			    so.so_name);
+			    so.so_name.c_str ());
 	    }
 	  else
 	    {
@@ -331,7 +331,8 @@ lm_addr_check (const so_list &so, bfd *abfd)
 
 	      warning (_(".dynamic section for \"%s\" "
 			 "is not at the expected address "
-			 "(wrong library or version mismatch?)"), so.so_name);
+			 "(wrong library or version mismatch?)"),
+			 so.so_name.c_str ());
 	    }
 	}
 
@@ -999,10 +1000,8 @@ so_list_from_svr4_sos (const std::vector<svr4_so> &sos)
     {
       so_list *newobj = new so_list;
 
-      strncpy (newobj->so_name, so.name.c_str (),
-	       sizeof (newobj->so_name) - 1);
-      newobj->so_name[sizeof (newobj->so_name) - 1] = 0;
-      strcpy (newobj->so_original_name, newobj->so_name);
+      newobj->so_name = so.name;
+      newobj->so_original_name = so.name;
       newobj->lm_info = gdb::make_unique<lm_info_svr4> (*so.lm_info);
 
       newobj->next = NULL;
@@ -1201,10 +1200,8 @@ svr4_default_sos (svr4_info *info)
   li->l_addr_p = 1;
 
   newobj->lm_info = std::move (li);
-
-  strncpy (newobj->so_name, info->debug_loader_name, SO_NAME_MAX_PATH_SIZE - 1);
-  newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-  strcpy (newobj->so_original_name, newobj->so_name);
+  newobj->so_name = info->debug_loader_name;
+  newobj->so_original_name = newobj->so_name;
 
   return newobj;
 }
@@ -2374,7 +2371,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	 address from the shared library table.  */
       for (struct so_list *so : current_program_space->solibs ())
 	{
-	  if (svr4_same_1 (interp_name, so->so_original_name))
+	  if (svr4_same_1 (interp_name, so->so_original_name.c_str ()))
 	    {
 	      load_addr_found = 1;
 	      loader_found_in_list = 1;
@@ -3305,7 +3302,7 @@ find_debug_base_for_solib (so_list *solib)
       const std::vector<svr4_so> &sos = tuple.second;
 
       for (const svr4_so &so : sos)
-	if (svr4_same (solib->so_original_name, so.name.c_str (),
+	if (svr4_same (solib->so_original_name.c_str (), so.name.c_str (),
 		       *lm_info, *so.lm_info))
 	  return debug_base;
     }
