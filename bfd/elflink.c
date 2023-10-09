@@ -13710,7 +13710,7 @@ elf_gc_mark_debug_section (asection *sec ATTRIBUTE_UNUSED,
       /* Return the local debug definition section.  */
       asection *isec = bfd_section_from_elf_index (sec->owner,
 						   sym->st_shndx);
-      if ((isec->flags & SEC_DEBUGGING) != 0)
+      if (isec != NULL && (isec->flags & SEC_DEBUGGING) != 0)
 	return isec;
     }
 

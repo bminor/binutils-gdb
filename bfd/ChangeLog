@@ -1,3 +1,9 @@
+2023-10-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 30949
+	* elflink.c (elf_gc_mark_debug_section): Check for
+	bfd_section_from_elf_index returning a NULL pointer.
+
 2023-10-06  Nick Clifton  <nickc@redhat.com>
 
 	PR 30940
