@@ -1,5 +1,9 @@
 2023-10-09  Nick Clifton  <nickc@redhat.com>
 
+	PR 30950
+	* elf32-i386.c (elf_i386_convert_load_reloc): Check for
+	elf_x86_hash_table returning a NULL pointer.
+
 	PR 30949
 	* elflink.c (elf_gc_mark_debug_section): Check for
 	bfd_section_from_elf_index returning a NULL pointer.

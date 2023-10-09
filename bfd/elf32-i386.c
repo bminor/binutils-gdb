@@ -1241,6 +1241,12 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
     return true;
 
   htab = elf_x86_hash_table (link_info, I386_ELF_DATA);
+  if (htab == NULL || ! is_x86_elf (abfd, htab))
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return false;
+    }
+
   is_pic = bfd_link_pic (link_info);
 
   r_type = *r_type_p;
