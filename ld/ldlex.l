@@ -668,7 +668,7 @@ static int
 yy_input (char *buf, int max_size)
 {
   int result = 0;
-  if (YY_CURRENT_BUFFER->yy_input_file)
+  if (YY_CURRENT_BUFFER != NULL && YY_CURRENT_BUFFER->yy_input_file)
     {
       if (yyin)
 	{

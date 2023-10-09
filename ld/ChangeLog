@@ -1,5 +1,8 @@
 2023-10-09  Nick Clifton  <nickc@redhat.com>
 
+	PR 30951
+	* ldlex.l (yy_input): Check for YY_CURRENT_BUFFER being NULL.
+
 	PR 30954
 	* ldlang.c (map_input_to_output_sections): Check that os is non
 	NULL before using it.
