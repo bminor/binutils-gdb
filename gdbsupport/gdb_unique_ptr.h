@@ -88,7 +88,7 @@ make_unique_xstrndup (const char *str, size_t n)
   return gdb::unique_xmalloc_ptr<char> (xstrndup (str, n));
 }
 
-/* An overload of operator+= fo adding gdb::unique_xmalloc_ptr<char> to a
+/* An overload of operator+= for adding gdb::unique_xmalloc_ptr<char> to a
    std::string.  */
 
 static inline std::string &
