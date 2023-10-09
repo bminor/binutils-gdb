@@ -4198,6 +4198,9 @@ map_input_to_output_sections
 					os);
 	  break;
 	case lang_data_statement_enum:
+	  if (os == NULL)
+	    /* This should never happen.  */
+	    FAIL ();
 	  /* Make sure that any sections mentioned in the expression
 	     are initialized.  */
 	  exp_init_os (s->data_statement.exp);
