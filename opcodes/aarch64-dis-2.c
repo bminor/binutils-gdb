@@ -31324,7 +31324,7 @@ aarch64_find_alias_opcode (const aarch64_opcode *opcode)
     case 1215: value = 3193; break;	/* hint --> clrbhb.  */
     case 1235: value = 1239; break;	/* dsb --> pssbb.  */
     case 1236: value = 1236; break;	/* dsb --> dsb.  */
-    case 1254: value = 1264; break;	/* sys --> cosp.  */
+    case 1254: value = 3194; break;	/* sys --> trcit.  */
     case 1259: value = 1259; break;	/* wfet --> wfet.  */
     case 1260: value = 1260; break;	/* wfit --> wfit.  */
     case 1325: value = 2078; break;	/* and --> bic.  */
@@ -31511,6 +31511,7 @@ aarch64_find_next_alias_opcode (const aarch64_opcode *opcode)
     case 1239: value = 1238; break;	/* pssbb --> ssbb.  */
     case 1238: value = 1237; break;	/* ssbb --> dfb.  */
     case 1237: value = 1235; break;	/* dfb --> dsb.  */
+    case 3194: value = 1264; break;	/* trcit --> cosp.  */
     case 1264: value = 1263; break;	/* cosp --> cpp.  */
     case 1263: value = 1262; break;	/* cpp --> dvp.  */
     case 1262: value = 1261; break;	/* dvp --> cfp.  */

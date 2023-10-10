@@ -2580,6 +2580,8 @@ static const aarch64_feature_set aarch64_feature_chk =
   AARCH64_FEATURE (CHK);
 static const aarch64_feature_set aarch64_feature_gcs =
   AARCH64_FEATURE (GCS);
+static const aarch64_feature_set aarch64_feature_ite =
+  AARCH64_FEATURE (ITE);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2642,6 +2644,7 @@ static const aarch64_feature_set aarch64_feature_gcs =
 #define CSSC	  &aarch64_feature_cssc
 #define CHK	  &aarch64_feature_chk
 #define GCS	  &aarch64_feature_gcs
+#define ITE	  &aarch64_feature_ite
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2846,6 +2849,9 @@ static const aarch64_feature_set aarch64_feature_gcs =
 
 #define PREDRES2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, PREDRES2, OPS, QUALS, FLAGS, 0, 0, NULL }
+
+#define ITE_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, ITE, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 const struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -4673,7 +4679,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSN ("ldff1sw", 0xc540a000, 0xffe0e000, sve_misc, 0, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RZ), OP_SVE_DZD, F_OD(1), 0),
   _SVE_INSN ("ldff1sw", 0xc560a000, 0xffe0e000, sve_misc, 0, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RZ_LSL2), OP_SVE_DZD, F_OD(1), 0),
   _SVE_INSN ("ldff1sw", 0xc520a000, 0xffe0e000, sve_misc, 0, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_ZI_U5x4), OP_SVE_DZD, F_OD(1), 0),
-  
+
   _SVE_INSN ("ldff1w", 0x85006000, 0xffa0e000, sve_misc, 0, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RZ_XTW_22), OP_SVE_SZS, F_OD(1), 0),
   _SVE_INSN ("ldff1w", 0x85206000, 0xffa0e000, sve_misc, 0, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RZ_XTW2_22), OP_SVE_SZS, F_OD(1), 0),
   _SVE_INSN ("ldff1w", 0xa5406000, 0xffe0e000, sve_misc, 0, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_RR_LSL2), OP_SVE_SZU, F_OD(1), 0),
@@ -6116,6 +6122,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   /* FEAT_CLRBHB part of the hint space and available without special
      command-line flags.  */
   CORE_INSN ("clrbhb", 0xd50322df, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
+
+  ITE_INSN ("trcit", 0xd50b72e0, 0xffffffe0, ic_system, OP1 (Rt), QL_I1X, F_ALIAS),
 
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };

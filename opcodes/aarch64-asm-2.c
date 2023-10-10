@@ -465,6 +465,7 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1236:	/* dsb */
       value = 1236;	/* --> dsb.  */
       break;
+    case 3194:	/* trcit */
     case 1264:	/* cosp */
     case 1263:	/* cpp */
     case 1262:	/* dvp */

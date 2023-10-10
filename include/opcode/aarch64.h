@@ -199,6 +199,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_TCR2,
   /* Speculation Prediction Restriction instructions.  */
   AARCH64_FEATURE_PREDRES2,
+  /* Instrumentation Extension.  */
+  AARCH64_FEATURE_ITE,
   AARCH64_NUM_FEATURES
 };
 

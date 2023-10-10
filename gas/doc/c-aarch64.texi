@@ -272,6 +272,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the Reliability, Availability and Serviceability extension v2.
 @item @code{predres2} @tab ARMv8-A/Armv9-A @tab ARMv8.9-A/Armv9.4-A or later
  @tab Enable Prediction instructions.
+@item @code{ite} @tab N/A @tab no
+ @tab Enable TRCIT instruction.
 @end multitable
 
 @node AArch64 Syntax
