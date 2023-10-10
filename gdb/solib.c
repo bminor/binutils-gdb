@@ -592,11 +592,9 @@ solib_map_sections (so_list &so)
     error (_("Shared library file name is too long."));
   strcpy (so.so_name, bfd_get_filename (so.abfd));
 
-  if (so.sections == nullptr)
-    so.sections = new std::vector<target_section>;
-  *so.sections = build_section_table (so.abfd);
+  so.sections = build_section_table (so.abfd);
 
-  for (target_section &p : *so.sections)
+  for (target_section &p : so.sections)
     {
       /* Relocate the section binding addresses as recorded in the shared
 	 object's file by the base address to which the object was actually
@@ -618,7 +616,7 @@ solib_map_sections (so_list &so)
      section tables.  Do this immediately after mapping the object so
      that later nodes in the list can query this object, as is needed
      in solib-osf.c.  */
-  current_program_space->add_target_sections (&so, *so.sections);
+  current_program_space->add_target_sections (&so, so.sections);
 
   return 1;
 }
@@ -630,8 +628,7 @@ so_list::clear ()
 {
   const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
-  delete this->sections;
-  this->sections = nullptr;
+  this->sections.clear ();
 
   gdb_bfd_unref (this->abfd);
   this->abfd = nullptr;
@@ -708,7 +705,7 @@ solib_read_symbols (so_list &so, symfile_add_flags flags)
 	  if (so.objfile == NULL)
 	    {
 	      section_addr_info sap
-		= build_section_addr_info_from_section_table (*so.sections);
+		= build_section_addr_info_from_section_table (so.sections);
 	      gdb_bfd_ref_ptr tmp_bfd
 		(gdb_bfd_ref_ptr::new_reference (so.abfd));
 	      so.objfile = symbol_file_add_from_bfd (tmp_bfd, so.so_name,
@@ -1168,10 +1165,7 @@ bool
 solib_contains_address_p (const so_list &solib,
 			  CORE_ADDR address)
 {
-  if (solib.sections == nullptr)
-    return false;
-
-  for (target_section &p : *solib.sections)
+  for (const target_section &p : solib.sections)
     if (p.addr <= address && address < p.endaddr)
       return true;
 
