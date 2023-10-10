@@ -664,7 +664,6 @@ lm_info::~lm_info () = default;
 void
 free_so (so_list &so)
 {
-  so.clear ();
   delete &so;
 }
 
