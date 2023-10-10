@@ -1340,7 +1340,7 @@ static const registry<program_space>::key<char, gdb::xfree_deleter<char>>
 
 /* The variable registered as the control variable used by the
    remote exec-file commands.  While the remote exec-file setting is
-   per-program-space, the set/show machinery uses this as the 
+   per-program-space, the set/show machinery uses this as the
    location of the remote exec-file value.  */
 static std::string remote_exec_file_var;
 
@@ -8578,8 +8578,7 @@ remote_target::fetch_register_using_p (struct regcache *regcache,
       return 0;
     case PACKET_ERROR:
       error (_("Could not fetch register \"%s\"; remote failure reply '%s'"),
-	     gdbarch_register_name (regcache->arch (), 
-				    reg->regnum), 
+	     gdbarch_register_name (regcache->arch (), reg->regnum),
 	     buf);
     }
 
@@ -8925,7 +8924,7 @@ remote_target::store_registers_using_G (const struct regcache *regcache)
   putpkt (rs->buf);
   getpkt (&rs->buf);
   if (packet_check_result (rs->buf) == PACKET_ERROR)
-    error (_("Could not write registers; remote failure reply '%s'"), 
+    error (_("Could not write registers; remote failure reply '%s'"),
 	   rs->buf.data ());
 }
 
@@ -11241,20 +11240,20 @@ remote_target::remote_write_qxfer (const char *object_name,
   int i, buf_len;
   ULONGEST n;
   struct remote_state *rs = get_remote_state ();
-  int max_size = get_memory_write_packet_size (); 
+  int max_size = get_memory_write_packet_size ();
 
   if (m_features.packet_support (which_packet) == PACKET_DISABLE)
     return TARGET_XFER_E_IO;
 
   /* Insert header.  */
-  i = snprintf (rs->buf.data (), max_size, 
+  i = snprintf (rs->buf.data (), max_size,
 		"qXfer:%s:write:%s:%s:",
 		object_name, annex ? annex : "",
 		phex_nz (offset, sizeof offset));
   max_size -= (i + 1);
 
   /* Escape as much data as fits into rs->buf.  */
-  buf_len = remote_escape_output 
+  buf_len = remote_escape_output
     (writebuf, len, 1, (gdb_byte *) rs->buf.data () + i, &max_size, max_size);
 
   if (putpkt_binary (rs->buf.data (), i + buf_len) < 0
@@ -11611,7 +11610,7 @@ remote_target::search_memory (CORE_ADDR start_addr, ULONGEST search_space_len,
   set_general_process ();
 
   /* Insert header.  */
-  i = snprintf (rs->buf.data (), max_size, 
+  i = snprintf (rs->buf.data (), max_size,
 		"qSearch:memory:%s;%s;",
 		phex_nz (start_addr, addr_size),
 		phex_nz (search_space_len, sizeof (search_space_len)));
@@ -11693,7 +11692,7 @@ remote_target::rcmd (const char *command, struct ui_file *outbuf)
       QUIT;			/* Allow user to bail out with ^C.  */
       rs->buf[0] = '\0';
       if (getpkt (&rs->buf) == -1)
-	{ 
+	{
 	  /* Timeout.  Continue to (try to) read responses.
 	     This is better than stopping with an error, assuming the stub
 	     is still executing the (long) monitor command.
@@ -15034,7 +15033,7 @@ remote_new_objfile (struct objfile *objfile)
    data structures representing them.  We don't want to create real
    tracepoints yet, we don't want to mess up the user's existing
    collection.  */
-  
+
 int
 remote_target::upload_tracepoints (struct uploaded_tp **utpp)
 {
