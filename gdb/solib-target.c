@@ -50,7 +50,7 @@ struct lm_info_target final : public lm_info
   section_offsets offsets;
 };
 
-typedef std::vector<std::unique_ptr<lm_info_target>> lm_info_vector;
+using lm_info_target_up = std::unique_ptr<lm_info_target>;
 
 #if !defined(HAVE_LIBEXPAT)
 
@@ -81,7 +81,7 @@ library_list_start_segment (struct gdb_xml_parser *parser,
 			    void *user_data,
 			    std::vector<gdb_xml_value> &attributes)
 {
-  lm_info_vector *list = (lm_info_vector *) user_data;
+  auto *list = (std::vector<lm_info_target_up> *) user_data;
   lm_info_target *last = list->back ().get ();
   ULONGEST *address_p
     = (ULONGEST *) xml_find_attribute (attributes, "address")->value.get ();
@@ -100,7 +100,7 @@ library_list_start_section (struct gdb_xml_parser *parser,
 			    void *user_data,
 			    std::vector<gdb_xml_value> &attributes)
 {
-  lm_info_vector *list = (lm_info_vector *) user_data;
+  auto *list = (std::vector<lm_info_target_up> *) user_data;
   lm_info_target *last = list->back ().get ();
   ULONGEST *address_p
     = (ULONGEST *) xml_find_attribute (attributes, "address")->value.get ();
@@ -121,7 +121,7 @@ library_list_start_library (struct gdb_xml_parser *parser,
 			    void *user_data,
 			    std::vector<gdb_xml_value> &attributes)
 {
-  lm_info_vector *list = (lm_info_vector *) user_data;
+  auto *list = (std::vector<lm_info_target_up> *) user_data;
   lm_info_target *item = new lm_info_target;
   item->name
     = (const char *) xml_find_attribute (attributes, "name")->value.get ();
@@ -134,7 +134,7 @@ library_list_end_library (struct gdb_xml_parser *parser,
 			  const struct gdb_xml_element *element,
 			  void *user_data, const char *body_text)
 {
-  lm_info_vector *list = (lm_info_vector *) user_data;
+  auto *list = (std::vector<lm_info_target_up> *) user_data;
   lm_info_target *lm_info = list->back ().get ();
 
   if (lm_info->segment_bases.empty () && lm_info->section_bases.empty ())
@@ -210,10 +210,10 @@ static const struct gdb_xml_element library_list_elements[] = {
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
-static lm_info_vector
+static std::vector<lm_info_target_up>
 solib_target_parse_libraries (const char *library)
 {
-  lm_info_vector result;
+  std::vector<lm_info_target_up> result;
 
   if (gdb_xml_parse_quick (_("target library list"), "library-list.dtd",
 			   library_list_elements, library, &result) == 0)
@@ -240,14 +240,14 @@ solib_target_current_sos (void)
     return NULL;
 
   /* Parse the list.  */
-  lm_info_vector library_list
+  std::vector<lm_info_target_up> library_list
     = solib_target_parse_libraries (library_document->data ());
 
   if (library_list.empty ())
     return NULL;
 
   /* Build a struct so_list for each entry on the list.  */
-  for (auto &&info : library_list)
+  for (lm_info_target_up &info : library_list)
     {
       so_list *new_solib = new so_list;
       strncpy (new_solib->so_name, info->name.c_str (),
