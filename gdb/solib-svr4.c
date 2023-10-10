@@ -50,7 +50,6 @@
 static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
 static int svr4_have_link_map_offsets (void);
 static void svr4_relocate_main_executable (void);
-static void svr4_free_library_list (so_list *solist);
 static void probes_table_remove_objfile_probes (struct objfile *objfile);
 static void svr4_iterate_over_objfiles_in_search_order
   (gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb,
@@ -172,26 +171,35 @@ svr4_same_1 (const char *gdb_so_name, const char *inferior_so_name)
   return 0;
 }
 
-static int
-svr4_same (const so_list &gdb, const so_list &inferior)
+static bool
+svr4_same (const char *gdb_name, const char *inferior_name,
+	   const lm_info_svr4 &gdb_lm_info,
+	   const lm_info_svr4 &inferior_lm_info)
 {
-  if (!svr4_same_1 (gdb.so_original_name, inferior.so_original_name))
+  if (!svr4_same_1 (gdb_name, inferior_name))
     return false;
 
   /* There may be different instances of the same library, in different
      namespaces.  Each instance, however, must have been loaded at a
      different address so its relocation offset would be different.  */
+  return gdb_lm_info.l_addr_inferior == inferior_lm_info.l_addr_inferior;
+}
+
+static int
+svr4_same (const so_list &gdb, const so_list &inferior)
+{
   auto *lmg = gdb::checked_static_cast<const lm_info_svr4 *> (gdb.lm_info);
   auto *lmi = gdb::checked_static_cast<const lm_info_svr4 *> (inferior.lm_info);
 
-  return (lmg->l_addr_inferior == lmi->l_addr_inferior);
+  return svr4_same (gdb.so_original_name, inferior.so_original_name,
+		    *lmg, *lmi);
 }
 
-static std::unique_ptr<lm_info_svr4>
+static lm_info_svr4_up
 lm_info_read (CORE_ADDR lm_addr)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-  std::unique_ptr<lm_info_svr4> lm_info;
+  lm_info_svr4_up lm_info;
 
   gdb::byte_vector lm (lmo->link_map_size);
 
@@ -203,7 +211,7 @@ lm_info_read (CORE_ADDR lm_addr)
       type *ptr_type
 	= builtin_type (current_inferior ()->arch ())->builtin_data_ptr;
 
-      lm_info.reset (new lm_info_svr4);
+      lm_info = gdb::make_unique<lm_info_svr4> ();
       lm_info->lm_addr = lm_addr;
 
       lm_info->l_addr_inferior = extract_typed_address (&lm[lmo->l_addr_offset],
@@ -333,13 +341,20 @@ lm_addr_check (const so_list &so, bfd *abfd)
   return li->l_addr;
 }
 
+struct svr4_so
+{
+  svr4_so (const char *name, lm_info_svr4_up lm_info)
+    : name (name), lm_info (std::move (lm_info))
+  {}
+
+  std::string name;
+  lm_info_svr4_up lm_info;
+};
+
 /* Per pspace SVR4 specific data.  */
 
 struct svr4_info
 {
-  svr4_info () = default;
-  ~svr4_info ();
-
   /* Base of dynamic linker structures in default namespace.  */
   CORE_ADDR debug_base = 0;
 
@@ -385,7 +400,7 @@ struct svr4_info
 
      The special entry zero is reserved for a linear list to support
      gdbstubs that do not support namespaces.  */
-  std::map<CORE_ADDR, so_list *> solib_lists;
+  std::map<CORE_ADDR, std::vector<svr4_so>> solib_lists;
 };
 
 /* Per-program-space data key.  */
@@ -405,23 +420,6 @@ static void
 free_probes_table (struct svr4_info *info)
 {
   info->probes_table.reset (nullptr);
-}
-
-/* Free the solib lists for all namespaces.  */
-
-static void
-free_solib_lists (svr4_info *info)
-{
-  for (const std::pair<CORE_ADDR, so_list *> tuple
-	 : info->solib_lists)
-    svr4_free_library_list (tuple.second);
-
-  info->solib_lists.clear ();
-}
-
-svr4_info::~svr4_info ()
-{
-  free_solib_lists (this);
 }
 
 /* Get the svr4 data for program space PSPACE.  If none is found yet, add it now.
@@ -955,7 +953,7 @@ struct svr4_library_list
 {
   /* The tail pointer of the current namespace.  This is internal to XML
      parsing.  */
-  so_list **tailp;
+  std::vector<svr4_so> *cur_list;
 
   /* Inferior address of struct link_map used for the main executable.  It is
      NULL if not known.  */
@@ -965,7 +963,7 @@ struct svr4_library_list
      not include any default sos.
 
      See comment on struct svr4_info.solib_lists.  */
-  std::map<CORE_ADDR, so_list *> solib_lists;
+  std::map<CORE_ADDR, std::vector<svr4_so>> solib_lists;
 };
 
 /* This module's 'free_objfile' observer.  */
@@ -987,41 +985,27 @@ svr4_clear_so (const so_list &so)
     li->l_addr_p = 0;
 }
 
-/* Free so_list built so far.  */
+/* Create the so_list objects equivalent to the svr4_sos in SOS.  */
 
-static void
-svr4_free_library_list (so_list *list)
-{
-  while (list != NULL)
-    {
-      struct so_list *next = list->next;
-
-      free_so (*list);
-      list = next;
-    }
-}
-
-/* Copy library list.  */
-
-static struct so_list *
-svr4_copy_library_list (struct so_list *src)
+static so_list *
+so_list_from_svr4_sos (const std::vector<svr4_so> &sos)
 {
   struct so_list *dst = NULL;
   struct so_list **link = &dst;
 
-  while (src != NULL)
+  for (const svr4_so &so : sos)
     {
       so_list *newobj = new so_list;
-      memcpy (newobj, src, sizeof (struct so_list));
 
-      auto *src_li = gdb::checked_static_cast<lm_info_svr4 *> (src->lm_info);
-      newobj->lm_info = new lm_info_svr4 (*src_li);
+      strncpy (newobj->so_name, so.name.c_str (),
+	       sizeof (newobj->so_name) - 1);
+      newobj->so_name[sizeof (newobj->so_name) - 1] = 0;
+      strcpy (newobj->so_original_name, newobj->so_name);
+      newobj->lm_info = new lm_info_svr4 (*so.lm_info);
 
       newobj->next = NULL;
       *link = newobj;
       link = &newobj->next;
-
-      src = src->next;
     }
 
   return dst;
@@ -1050,48 +1034,25 @@ library_list_start_library (struct gdb_xml_parser *parser,
   ULONGEST *l_ldp
     = (ULONGEST *) xml_find_attribute (attributes, "l_ld")->value.get ();
 
-  so_list *new_elem = new so_list;
-  lm_info_svr4 *li = new lm_info_svr4;
-  new_elem->lm_info = li;
+  lm_info_svr4_up li = gdb::make_unique<lm_info_svr4> ();
   li->lm_addr = *lmp;
   li->l_addr_inferior = *l_addrp;
   li->l_ld = *l_ldp;
 
-  strncpy (new_elem->so_name, name, sizeof (new_elem->so_name) - 1);
-  new_elem->so_name[sizeof (new_elem->so_name) - 1] = 0;
-  strcpy (new_elem->so_original_name, new_elem->so_name);
+  std::vector<svr4_so> *solist;
 
   /* Older versions did not supply lmid.  Put the element into the flat
      list of the special namespace zero in that case.  */
   gdb_xml_value *at_lmid = xml_find_attribute (attributes, "lmid");
   if (at_lmid == nullptr)
-    {
-      *list->tailp = new_elem;
-      list->tailp = &new_elem->next;
-    }
+    solist = list->cur_list;
   else
     {
       ULONGEST lmid = *(ULONGEST *) at_lmid->value.get ();
-
-      /* Ensure that the element is actually initialized.  */
-      if (list->solib_lists.find (lmid) == list->solib_lists.end ())
-	list->solib_lists[lmid] = nullptr;
-
-      so_list **psolist = &list->solib_lists[lmid];
-      so_list **pnext = psolist;
-
-      /* Walk to the end of the list if we have one.  */
-      so_list *solist = *psolist;
-      if (solist != nullptr)
-	{
-	  for (; solist->next != nullptr; solist = solist->next)
-	    /* Nothing.  */;
-
-	  pnext = &solist->next;
-	}
-
-      *pnext = new_elem;
+      solist = &list->solib_lists[lmid];
     }
+
+  solist->emplace_back (name, std::move (li));
 }
 
 /* Handle the start of a <library-list-svr4> element.  */
@@ -1117,9 +1078,7 @@ svr4_library_list_start_list (struct gdb_xml_parser *parser,
 
   /* Older gdbserver do not support namespaces.  We use the special
      namespace zero for a linear list of libraries.  */
-  so_list **solist = &list->solib_lists[0];
-  *solist = nullptr;
-  list->tailp = solist;
+  list->cur_list = &list->solib_lists[0];
 }
 
 /* The allowed elements and attributes for an XML library list.
@@ -1169,13 +1128,9 @@ static int
 svr4_parse_libraries (const char *document, struct svr4_library_list *list)
 {
   auto cleanup = make_scope_exit ([list] ()
-    {
-      for (const std::pair<CORE_ADDR, so_list *> tuple
-	     : list->solib_lists)
-	svr4_free_library_list (tuple.second);
-    });
+    {  list->solib_lists.clear (); });
 
-  list->tailp = nullptr;
+  list->cur_list = nullptr;
   list->main_lm = 0;
   list->solib_lists.clear ();
   if (gdb_xml_parse_quick (_("target library list"), "library-list-svr4.dtd",
@@ -1253,25 +1208,21 @@ svr4_default_sos (svr4_info *info)
 
 /* Read the whole inferior libraries chain starting at address LM.
    Expect the first entry in the chain's previous entry to be PREV_LM.
-   Add the entries to the tail referenced by LINK_PTR_PTR.  Ignore the
-   first entry if IGNORE_FIRST and set global MAIN_LM_ADDR according
-   to it.  Returns nonzero upon success.  If zero is returned the
-   entries stored to LINK_PTR_PTR are still valid although they may
+   Add the entries to SOS.  Ignore the first entry if IGNORE_FIRST and set
+   global MAIN_LM_ADDR according to it.  Returns nonzero upon success.  If zero
+   is returned the entries stored to LINK_PTR_PTR are still valid although they may
    represent only part of the inferior library list.  */
 
 static int
 svr4_read_so_list (svr4_info *info, CORE_ADDR lm, CORE_ADDR prev_lm,
-		   struct so_list ***link_ptr_ptr, int ignore_first)
+		   std::vector<svr4_so> &sos, int ignore_first)
 {
   CORE_ADDR first_l_name = 0;
   CORE_ADDR next_lm;
 
   for (; lm != 0; prev_lm = lm, lm = next_lm)
     {
-      so_list_up newobj (new so_list);
-
-      lm_info_svr4 *li = lm_info_read (lm).release ();
-      newobj->lm_info = li;
+      lm_info_svr4_up li = lm_info_read (lm);
       if (li == NULL)
 	return 0;
 
@@ -1298,9 +1249,9 @@ svr4_read_so_list (svr4_info *info, CORE_ADDR lm, CORE_ADDR prev_lm,
 	}
 
       /* Extract this shared object's name.  */
-      gdb::unique_xmalloc_ptr<char> buffer
+      gdb::unique_xmalloc_ptr<char> name
 	= target_read_string (li->l_name, SO_NAME_MAX_PATH_SIZE - 1);
-      if (buffer == nullptr)
+      if (name == nullptr)
 	{
 	  /* If this entry's l_name address matches that of the
 	     inferior executable, then this is not a normal shared
@@ -1311,19 +1262,12 @@ svr4_read_so_list (svr4_info *info, CORE_ADDR lm, CORE_ADDR prev_lm,
 	  continue;
 	}
 
-      strncpy (newobj->so_name, buffer.get (), SO_NAME_MAX_PATH_SIZE - 1);
-      newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-      strcpy (newobj->so_original_name, newobj->so_name);
-
       /* If this entry has no name, or its name matches the name
 	 for the main executable, don't include it in the list.  */
-      if (! newobj->so_name[0] || match_main (newobj->so_name))
+      if (*name == '\0' || match_main (name.get ()))
 	continue;
 
-      newobj->next = 0;
-      /* Don't free it now.  */
-      **link_ptr_ptr = newobj.release ();
-      *link_ptr_ptr = &(**link_ptr_ptr)->next;
+      sos.emplace_back (name.get (), std::move (li));
     }
 
   return 1;
@@ -1342,7 +1286,7 @@ svr4_current_sos_direct (struct svr4_info *info)
   struct svr4_library_list library_list;
 
   /* Remove any old libraries.  We're going to read them back in again.  */
-  free_solib_lists (info);
+  info->solib_lists.clear ();
 
   /* Fall back to manual examination of the target if the packet is not
      supported or gdbserver failed to find DT_DEBUG.  gdb.server/solib-list.exp
@@ -1362,10 +1306,10 @@ svr4_current_sos_direct (struct svr4_info *info)
       /* Remove an empty special zero namespace so we know that when there
 	 is one, it is actually used, and we have a flat list without
 	 namespace information.  */
-      if ((library_list.solib_lists.find (0)
-	   != library_list.solib_lists.end ())
-	  && (library_list.solib_lists[0] == nullptr))
-	library_list.solib_lists.erase (0);
+      auto it_0 = library_list.solib_lists.find (0);
+      if (it_0 != library_list.solib_lists.end ()
+	  && it_0->second.empty ())
+	library_list.solib_lists.erase (it_0);
 
       /* Replace the (empty) solib_lists in INFO with the one generated
 	 from the target.  We don't want to copy it on assignment and then
@@ -1391,9 +1335,7 @@ svr4_current_sos_direct (struct svr4_info *info)
     ignore_first = true;
 
   auto cleanup = make_scope_exit ([info] ()
-    {
-      free_solib_lists (info);
-    });
+    { info->solib_lists.clear (); });
 
   /* Collect the sos in each namespace.  */
   CORE_ADDR debug_base = info->debug_base;
@@ -1403,12 +1345,8 @@ svr4_current_sos_direct (struct svr4_info *info)
       /* Walk the inferior's link map list, and build our so_list list.  */
       lm = solib_svr4_r_map (debug_base);
       if (lm != 0)
-	{
-	  so_list **sos = &info->solib_lists[debug_base];
-	  *sos = nullptr;
-
-	  svr4_read_so_list (info, lm, 0, &sos, ignore_first);
-	}
+	svr4_read_so_list (info, lm, 0, info->solib_lists[debug_base],
+			   ignore_first);
     }
 
   /* On Solaris, the dynamic linker is not in the normal list of
@@ -1425,11 +1363,8 @@ svr4_current_sos_direct (struct svr4_info *info)
     {
       /* Add the dynamic linker's namespace unless we already did.  */
       if (info->solib_lists.find (debug_base) == info->solib_lists.end ())
-	{
-	  so_list **sos = &info->solib_lists[debug_base];
-	  *sos = nullptr;
-	  svr4_read_so_list (info, debug_base, 0, &sos, 0);
-	}
+	svr4_read_so_list (info, debug_base, 0, info->solib_lists[debug_base],
+			   0);
     }
 
   cleanup.release ();
@@ -1440,19 +1375,18 @@ svr4_current_sos_direct (struct svr4_info *info)
 static so_list *
 svr4_collect_probes_sos (svr4_info *info)
 {
-  so_list *sos = nullptr;
-  so_list **pnext = &sos;
+  so_list *res = nullptr;
+  so_list **pnext = &res;
 
-  for (const std::pair<CORE_ADDR, so_list *> tuple
-	 : info->solib_lists)
+  for (const auto &tuple : info->solib_lists)
     {
-      so_list *solist = tuple.second;
+      const std::vector<svr4_so> &sos = tuple.second;
 
       /* Allow the linker to report empty namespaces.  */
-      if (solist == nullptr)
+      if (sos.empty ())
 	continue;
 
-      *pnext = svr4_copy_library_list (solist);
+      *pnext = so_list_from_svr4_sos (sos);
 
       /* Update PNEXT to point to the next member of the last element.  */
       gdb_assert (*pnext != nullptr);
@@ -1466,7 +1400,7 @@ svr4_collect_probes_sos (svr4_info *info)
 	}
     }
 
-  return sos;
+  return res;
 }
 
 /* Implement the main part of the "current_sos" target_so_ops
@@ -1853,16 +1787,10 @@ solist_update_incremental (svr4_info *info, CORE_ADDR debug_base,
   if (info->solib_lists.find (0) != info->solib_lists.end ())
     return 0;
 
-  /* Ensure that the element is actually initialized.  */
-  if (info->solib_lists.find (debug_base) == info->solib_lists.end ())
-    info->solib_lists[debug_base] = nullptr;
-
-  so_list **psolist = &info->solib_lists[debug_base];
-  so_list **pnext = nullptr;
-  so_list *solist = *psolist;
+  std::vector<svr4_so> &solist = info->solib_lists[debug_base];
   CORE_ADDR prev_lm;
 
-  if (solist == nullptr)
+  if (solist.empty ())
     {
       /* svr4_current_sos_direct contains logic to handle a number of
 	 special cases relating to the first elements of the list in
@@ -1872,18 +1800,9 @@ solist_update_incremental (svr4_info *info, CORE_ADDR debug_base,
 	return 0;
 
       prev_lm = 0;
-      pnext = psolist;
     }
   else
-    {
-      /* Walk to the end of the list.  */
-      for (; solist->next != nullptr; solist = solist->next)
-	/* Nothing.  */;
-
-      auto *li = gdb::checked_static_cast<lm_info_svr4 *> (solist->lm_info);
-      prev_lm = li->lm_addr;
-      pnext = &solist->next;
-    }
+    prev_lm = solist.back ().lm_info->lm_addr;
 
   /* Read the new objects.  */
   if (info->using_xfer)
@@ -1905,24 +1824,23 @@ solist_update_incremental (svr4_info *info, CORE_ADDR debug_base,
 
 	 We expect gdbserver to provide updates for the namespace that
 	 contains LM, which would be this namespace...  */
-      so_list *sos = nullptr;
-      if (library_list.solib_lists.find (debug_base)
-	  != library_list.solib_lists.end ())
-	std::swap (sos, library_list.solib_lists[debug_base]);
-      if (sos == nullptr)
+      std::vector<svr4_so> sos;
+      auto it_debug_base = library_list.solib_lists.find (debug_base);
+      if (it_debug_base != library_list.solib_lists.end ())
+	std::swap (sos, it_debug_base->second);
+      else
 	{
 	  /* ...or for the special zero namespace for earlier versions...  */
-	  if (library_list.solib_lists.find (0)
-	      != library_list.solib_lists.end ())
-	    std::swap (sos, library_list.solib_lists[0]);
+	  auto it_0 = library_list.solib_lists.find (0);
+	  if (it_0 != library_list.solib_lists.end ())
+	    std::swap (sos, it_0->second);
 	}
 
       /* ...but nothing else.  */
-      for (const std::pair<CORE_ADDR, so_list *> tuple
-	     : library_list.solib_lists)
-	gdb_assert (tuple.second == nullptr);
+      for (const auto &tuple : library_list.solib_lists)
+	gdb_assert (tuple.second.empty ());
 
-      *pnext = sos;
+      std::move (sos.begin (), sos.end (), std::back_inserter (solist));
     }
   else
     {
@@ -1930,7 +1848,7 @@ solist_update_incremental (svr4_info *info, CORE_ADDR debug_base,
 	 above check and deferral to solist_update_full ensures
 	 that this call to svr4_read_so_list will never see the
 	 first element.  */
-      if (!svr4_read_so_list (info, lm, prev_lm, &pnext, 0))
+      if (!svr4_read_so_list (info, lm, prev_lm, solist, 0))
 	return 0;
     }
 
@@ -1948,7 +1866,7 @@ disable_probes_interface (svr4_info *info)
 	     "Reverting to original interface."));
 
   free_probes_table (info);
-  free_solib_lists (info);
+  info->solib_lists.clear ();
 }
 
 /* Update the solib list as appropriate when using the
@@ -3145,7 +3063,7 @@ svr4_solib_create_inferior_hook (int from_tty)
 
   /* Clear the probes-based interface's state.  */
   free_probes_table (info);
-  free_solib_lists (info);
+  info->solib_lists.clear ();
 
   /* Relocate the main executable if necessary.  */
   svr4_relocate_main_executable ();
@@ -3373,14 +3291,17 @@ find_debug_base_for_solib (so_list *solib)
 
   svr4_info *info = get_svr4_info (current_program_space);
   gdb_assert (info != nullptr);
-  for (const std::pair<CORE_ADDR, so_list *> tuple
-	 : info->solib_lists)
+
+  const lm_info_svr4 *lm_info = (const lm_info_svr4 *) solib->lm_info;
+
+  for (const auto &tuple : info->solib_lists)
     {
       CORE_ADDR debug_base = tuple.first;
-      so_list *solist = tuple.second;
+      const std::vector<svr4_so> &sos = tuple.second;
 
-      for (; solist != nullptr; solist = solist->next)
-	if (svr4_same (*solib, *solist))
+      for (const svr4_so &so : sos)
+	if (svr4_same (solib->so_original_name, so.name.c_str (),
+		       *lm_info, *so.lm_info))
 	  return debug_base;
     }
 

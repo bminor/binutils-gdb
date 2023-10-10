@@ -48,6 +48,8 @@ struct lm_info_svr4 final : public lm_info
   CORE_ADDR l_ld = 0, l_next = 0, l_prev = 0, l_name = 0;
 };
 
+using lm_info_svr4_up = std::unique_ptr<lm_info_svr4>;
+
 /* Critical offsets and sizes which describe struct r_debug and
    struct link_map on SVR4-like targets.  All offsets and sizes are
    in bytes unless otherwise specified.  */
