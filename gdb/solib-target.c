@@ -260,7 +260,7 @@ solib_target_current_sos (void)
       /* We no longer need this copy of the name.  */
       info->name.clear ();
 
-      new_solib->lm_info = info.release ();
+      new_solib->lm_info = std::move (info);
 
       /* Add it to the list.  */
       if (!start)
@@ -285,7 +285,7 @@ static void
 solib_target_relocate_section_addresses (so_list &so, target_section *sec)
 {
   CORE_ADDR offset;
-  auto *li = gdb::checked_static_cast<lm_info_target *> (so.lm_info);
+  auto *li = gdb::checked_static_cast<lm_info_target *> (so.lm_info.get ());
 
   /* Build the offset table only once per object file.  We can not do
      it any earlier, since we need to open the file first.  */

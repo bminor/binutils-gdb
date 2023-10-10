@@ -188,8 +188,10 @@ svr4_same (const char *gdb_name, const char *inferior_name,
 static int
 svr4_same (const so_list &gdb, const so_list &inferior)
 {
-  auto *lmg = gdb::checked_static_cast<const lm_info_svr4 *> (gdb.lm_info);
-  auto *lmi = gdb::checked_static_cast<const lm_info_svr4 *> (inferior.lm_info);
+  auto *lmg
+    = gdb::checked_static_cast<const lm_info_svr4 *> (gdb.lm_info.get ());
+  auto *lmi
+    = gdb::checked_static_cast<const lm_info_svr4 *> (inferior.lm_info.get ());
 
   return svr4_same (gdb.so_original_name, inferior.so_original_name,
 		    *lmg, *lmi);
@@ -239,7 +241,7 @@ has_lm_dynamic_from_link_map (void)
 static CORE_ADDR
 lm_addr_check (const so_list &so, bfd *abfd)
 {
-  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info);
+  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info.get ());
 
   if (!li->l_addr_p)
     {
@@ -979,7 +981,7 @@ svr4_free_objfile_observer (struct objfile *objfile)
 static void
 svr4_clear_so (const so_list &so)
 {
-  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info);
+  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info.get ());
 
   if (li != NULL)
     li->l_addr_p = 0;
@@ -1001,7 +1003,7 @@ so_list_from_svr4_sos (const std::vector<svr4_so> &sos)
 	       sizeof (newobj->so_name) - 1);
       newobj->so_name[sizeof (newobj->so_name) - 1] = 0;
       strcpy (newobj->so_original_name, newobj->so_name);
-      newobj->lm_info = new lm_info_svr4 (*so.lm_info);
+      newobj->lm_info = gdb::make_unique<lm_info_svr4> (*so.lm_info);
 
       newobj->next = NULL;
       *link = newobj;
@@ -1192,12 +1194,13 @@ svr4_default_sos (svr4_info *info)
     return NULL;
 
   so_list *newobj = new so_list;
-  lm_info_svr4 *li = new lm_info_svr4;
-  newobj->lm_info = li;
+  auto li = gdb::make_unique<lm_info_svr4> ();
 
   /* Nothing will ever check the other fields if we set l_addr_p.  */
   li->l_addr = li->l_addr_inferior = info->debug_loader_offset;
   li->l_addr_p = 1;
+
+  newobj->lm_info = std::move (li);
 
   strncpy (newobj->so_name, info->debug_loader_name, SO_NAME_MAX_PATH_SIZE - 1);
   newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
@@ -1495,7 +1498,7 @@ svr4_current_sos (void)
 		[ 9] .dynamic DYNAMIC ffffffffff700580 000580 0000f0
 	  */
 
-	  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so->lm_info);
+	  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so->lm_info.get ());
 
 	  if (address_in_mem_range (li->l_ld, &vsyscall_range))
 	    {
@@ -1531,7 +1534,8 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
   for (struct so_list *so : current_program_space->solibs ())
     if (so->objfile == objfile)
       {
-	auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so->lm_info);
+	auto *li
+	  = gdb::checked_static_cast<lm_info_svr4 *> (so->lm_info.get ());
 
 	return li->lm_addr;
       }
@@ -3292,7 +3296,8 @@ find_debug_base_for_solib (so_list *solib)
   svr4_info *info = get_svr4_info (current_program_space);
   gdb_assert (info != nullptr);
 
-  const lm_info_svr4 *lm_info = (const lm_info_svr4 *) solib->lm_info;
+  auto *lm_info
+    = gdb::checked_static_cast<const lm_info_svr4 *> (solib->lm_info.get ());
 
   for (const auto &tuple : info->solib_lists)
     {

@@ -675,7 +675,6 @@ void
 free_so (so_list &so)
 {
   clear_so (so);
-  delete so.lm_info;
   delete &so;
 }
 

@@ -316,7 +316,7 @@ solib_aix_relocate_section_addresses (so_list &so, target_section *sec)
   struct bfd_section *bfd_sect = sec->the_bfd_section;
   bfd *abfd = bfd_sect->owner;
   const char *section_name = bfd_section_name (bfd_sect);
-  auto *info = gdb::checked_static_cast<lm_info_aix *> (so.lm_info);
+  auto *info = gdb::checked_static_cast<lm_info_aix *> (so.lm_info.get ());
 
   if (strcmp (section_name, ".text") == 0)
     {
@@ -487,7 +487,7 @@ solib_aix_current_sos (void)
       new_solib->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
       memcpy (new_solib->so_name, new_solib->so_original_name,
 	      SO_NAME_MAX_PATH_SIZE);
-      new_solib->lm_info = new lm_info_aix (info);
+      new_solib->lm_info = gdb::make_unique<lm_info_aix> (info);
 
       /* Add it to the list.  */
       if (!start)

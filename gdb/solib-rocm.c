@@ -181,7 +181,7 @@ rocm_solib_relocate_section_addresses (so_list &so,
       return;
     }
 
-  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info);
+  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info.get ());
   sec->addr = sec->addr + li->l_addr;
   sec->endaddr = sec->endaddr + li->l_addr;
 }
@@ -213,7 +213,7 @@ so_list_from_rocm_sos (const std::vector<rocm_so> &sos)
   for (const rocm_so &so : sos)
     {
       so_list *newobj = new so_list;
-      newobj->lm_info = new lm_info_svr4 (*so.lm_info);
+      newobj->lm_info = gdb::make_unique<lm_info_svr4> (*so.lm_info);
 
       strncpy (newobj->so_name, so.name.c_str (), sizeof (newobj->so_name));
       newobj->so_name[sizeof (newobj->so_name) - 1] = '\0';

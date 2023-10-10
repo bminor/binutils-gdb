@@ -378,8 +378,7 @@ frv_current_sos (void)
 	    }
 
 	  so_list *sop = new so_list;
-	  lm_info_frv *li = new lm_info_frv;
-	  sop->lm_info = li;
+	  auto li = gdb::make_unique<lm_info_frv> ();
 	  li->map = loadmap;
 	  li->got_value = got_addr;
 	  li->lm_addr = lm_addr;
@@ -401,6 +400,8 @@ frv_current_sos (void)
 	      sop->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
 	      strcpy (sop->so_original_name, sop->so_name);
 	    }
+
+	  sop->lm_info = std::move (li);
 
 	  *sos_next_ptr = sop;
 	  sos_next_ptr = &sop->next;
@@ -819,7 +820,7 @@ static void
 frv_relocate_section_addresses (so_list &so, target_section *sec)
 {
   int seg;
-  auto *li = gdb::checked_static_cast<lm_info_frv *> (so.lm_info);
+  auto *li = gdb::checked_static_cast<lm_info_frv *> (so.lm_info.get ());
   int_elf32_fdpic_loadmap *map = li->map;
 
   for (seg = 0; seg < map->nsegs; seg++)
@@ -860,7 +861,7 @@ frv_fdpic_find_global_pointer (CORE_ADDR addr)
   for (struct so_list *so : current_program_space->solibs ())
     {
       int seg;
-      auto *li = gdb::checked_static_cast<lm_info_frv *> (so->lm_info);
+      auto *li = gdb::checked_static_cast<lm_info_frv *> (so->lm_info.get ());
       int_elf32_fdpic_loadmap *map = li->map;
 
       for (seg = 0; seg < map->nsegs; seg++)
@@ -916,7 +917,7 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
     {
       for (struct so_list *so : current_program_space->solibs ())
 	{
-	  auto *li = gdb::checked_static_cast<lm_info_frv *> (so->lm_info);
+	  auto *li = gdb::checked_static_cast<lm_info_frv *> (so->lm_info.get ());
 
 	  addr = find_canonical_descriptor_in_load_object
 		   (entry_point, got_value, name, so->abfd, li);
@@ -1068,7 +1069,7 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
      of shared libraries.  */
   for (struct so_list *so : current_program_space->solibs ())
     {
-      auto *li = gdb::checked_static_cast<lm_info_frv *> (so->lm_info);
+      auto *li = gdb::checked_static_cast<lm_info_frv *> (so->lm_info.get ());
 
       if (so->objfile == objfile)
 	return li->lm_addr;

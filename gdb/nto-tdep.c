@@ -247,7 +247,7 @@ nto_parse_redirection (char *pargv[], const char **pin, const char **pout,
 static CORE_ADDR
 lm_addr (const so_list &so)
 {
-  auto *li = gdb::checked_static_cast<const lm_info_svr4 *> (so.lm_info);
+  auto *li = gdb::checked_static_cast<const lm_info_svr4 *> (so.lm_info.get ());
 
   return li->l_addr;
 }

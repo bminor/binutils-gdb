@@ -595,8 +595,7 @@ dsbt_current_sos (void)
 	    }
 
 	  so_list *sop = new so_list;
-	  lm_info_dsbt *li = new lm_info_dsbt;
-	  sop->lm_info = li;
+	  auto li = gdb::make_unique<lm_info_dsbt> ();
 	  li->map = loadmap;
 	  /* Fetch the name.  */
 	  addr = extract_unsigned_integer (lm_buf.l_name,
@@ -617,6 +616,8 @@ dsbt_current_sos (void)
 	      sop->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
 	      strcpy (sop->so_original_name, sop->so_name);
 	    }
+
+	  sop->lm_info = std::move (li);
 
 	  *sos_next_ptr = sop;
 	  sos_next_ptr = &sop->next;
@@ -883,7 +884,7 @@ static void
 dsbt_relocate_section_addresses (so_list &so, target_section *sec)
 {
   int seg;
-  auto *li = gdb::checked_static_cast<lm_info_dsbt *> (so.lm_info);
+  auto *li = gdb::checked_static_cast<lm_info_dsbt *> (so.lm_info.get ());
   int_elf32_dsbt_loadmap *map = li->map;
 
   for (seg = 0; seg < map->nsegs; seg++)
