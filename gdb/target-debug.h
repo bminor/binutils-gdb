@@ -104,8 +104,8 @@
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_ui_file_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_const_target_section_table_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
+#define target_debug_print_const_std_vector_target_section_p(X) \
+  target_debug_do_print (host_address_to_string (X->data ()))
 #define target_debug_print_void_p(X) \
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_find_memory_region_ftype(X) \

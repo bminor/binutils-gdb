@@ -50,7 +50,7 @@ public:
 		  ULONGEST offset, ULONGEST len,
 		  ULONGEST *xfered_len) override;
 
-  const target_section_table *get_section_table () override;
+  const std::vector<target_section> *get_section_table () override;
 
 private:
   /* The BFD we're wrapping.  */
@@ -59,7 +59,7 @@ private:
   /* The section table build from the ALLOC sections in BFD.  Note
      that we can't rely on extracting the BFD from a random section in
      the table, since the table can be legitimately empty.  */
-  target_section_table m_table;
+  std::vector<target_section> m_table;
 };
 
 target_xfer_status
@@ -82,7 +82,7 @@ target_bfd::xfer_partial (target_object object,
     }
 }
 
-const target_section_table *
+const std::vector<target_section> *
 target_bfd::get_section_table ()
 {
   return &m_table;

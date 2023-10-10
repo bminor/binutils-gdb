@@ -9446,7 +9446,8 @@ remote_target::remote_xfer_live_readonly_partial (gdb_byte *readbuf,
     {
       ULONGEST memend = memaddr + len;
 
-      const target_section_table *table = target_get_section_table (this);
+      const std::vector<target_section> *table
+	= target_get_section_table (this);
       for (const target_section &p : *table)
 	{
 	  if (memaddr >= p.addr)

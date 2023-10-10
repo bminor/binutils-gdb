@@ -291,7 +291,7 @@ struct program_space
   /* Add the sections array defined by SECTIONS to the
      current set of target sections.  */
   void add_target_sections (const void *owner,
-			    const target_section_table &sections);
+			    const std::vector<target_section> &sections);
 
   /* Add the sections of OBJFILE to the current set of target
      sections.  They are given OBJFILE as the "owner".  */
@@ -304,7 +304,7 @@ struct program_space
   }
 
   /* Return a reference to the M_TARGET_SECTIONS table.  */
-  target_section_table &target_sections ()
+  std::vector<target_section> &target_sections ()
   {
     return m_target_sections;
   }
@@ -380,7 +380,7 @@ struct program_space
 private:
   /* The set of target sections matching the sections mapped into
      this program space.  Managed by both exec_ops and solib.c.  */
-  target_section_table m_target_sections;
+  std::vector<target_section> m_target_sections;
 };
 
 /* An address space.  It is used for comparing if

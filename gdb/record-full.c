@@ -173,7 +173,7 @@ struct record_full_core_buf_entry
 
 /* Record buf with core target.  */
 static detached_regcache *record_full_core_regbuf = NULL;
-static target_section_table record_full_core_sections;
+static std::vector<target_section> record_full_core_sections;
 static struct record_full_core_buf_entry *record_full_core_buf_list = NULL;
 
 /* The following variables are used for managing the linked list that

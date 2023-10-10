@@ -142,11 +142,11 @@ private: /* per-core data */
      shared library bfds.  The core bfd sections are an implementation
      detail of the core target, just like ptrace is for unix child
      targets.  */
-  target_section_table m_core_section_table;
+  std::vector<target_section> m_core_section_table;
 
   /* File-backed address space mappings: some core files include
      information about memory mapped files.  */
-  target_section_table m_core_file_mappings;
+  std::vector<target_section> m_core_file_mappings;
 
   /* Unavailable mappings.  These correspond to pathnames which either
      weren't found or could not be opened.  Knowing these addresses can
@@ -197,8 +197,7 @@ core_target::core_target ()
   build_file_mappings ();
 }
 
-/* Construct the target_section_table for file-backed mappings if
-   they exist.
+/* Construct the table for file-backed mappings if they exist.
 
    For each unique path in the note, we'll open a BFD with a bfd
    target of "binary".  This is an unstructured bfd target upon which

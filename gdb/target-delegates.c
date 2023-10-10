@@ -96,7 +96,7 @@ struct dummy_target : public target_ops
   void rcmd (const char *arg0, struct ui_file *arg1) override;
   const char *pid_to_exec_file (int arg0) override;
   void log_command (const char *arg0) override;
-  const target_section_table *get_section_table () override;
+  const std::vector<target_section> *get_section_table () override;
   thread_control_capabilities get_thread_control_capabilities () override;
   bool attach_no_wait () override;
   bool can_async_p () override;
@@ -271,7 +271,7 @@ struct debug_target : public target_ops
   void rcmd (const char *arg0, struct ui_file *arg1) override;
   const char *pid_to_exec_file (int arg0) override;
   void log_command (const char *arg0) override;
-  const target_section_table *get_section_table () override;
+  const std::vector<target_section> *get_section_table () override;
   thread_control_capabilities get_thread_control_capabilities () override;
   bool attach_no_wait () override;
   bool can_async_p () override;
@@ -2032,27 +2032,27 @@ debug_target::log_command (const char *arg0)
   gdb_puts (")\n", gdb_stdlog);
 }
 
-const target_section_table *
+const std::vector<target_section> *
 target_ops::get_section_table ()
 {
   return this->beneath ()->get_section_table ();
 }
 
-const target_section_table *
+const std::vector<target_section> *
 dummy_target::get_section_table ()
 {
   return default_get_section_table ();
 }
 
-const target_section_table *
+const std::vector<target_section> *
 debug_target::get_section_table ()
 {
   gdb_printf (gdb_stdlog, "-> %s->get_section_table (...)\n", this->beneath ()->shortname ());
-  const target_section_table * result
+  const std::vector<target_section> * result
     = this->beneath ()->get_section_table ();
   gdb_printf (gdb_stdlog, "<- %s->get_section_table (", this->beneath ()->shortname ());
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_const_target_section_table_p (result);
+  target_debug_print_const_std_vector_target_section_p (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }

@@ -51,8 +51,4 @@ struct target_section
   const void *owner;
 };
 
-/* Holds an array of target sections.  */
-
-using target_section_table = std::vector<target_section>;
-
 #endif /* GDB_TARGET_SECTION_H */

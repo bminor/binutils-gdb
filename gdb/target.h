@@ -698,7 +698,7 @@ struct target_ops
       TARGET_DEFAULT_RETURN (NULL);
     virtual void log_command (const char *)
       TARGET_DEFAULT_IGNORE ();
-    virtual const target_section_table *get_section_table ()
+    virtual const std::vector<target_section> *get_section_table ()
       TARGET_DEFAULT_RETURN (default_get_section_table ());
 
     /* Provide default values for all "must have" methods.  */
@@ -2401,12 +2401,12 @@ const struct target_section *target_section_by_addr (struct target_ops *target,
 /* Return the target section table this target (or the targets
    beneath) currently manipulate.  */
 
-extern const target_section_table *target_get_section_table
+extern const std::vector<target_section> *target_get_section_table
   (struct target_ops *target);
 
 /* Default implementation of get_section_table for dummy_target.  */
 
-extern const target_section_table *default_get_section_table ();
+extern const std::vector<target_section> *default_get_section_table ();
 
 /* From mem-break.c */
 

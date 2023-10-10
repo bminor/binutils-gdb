@@ -593,7 +593,7 @@ solib_map_sections (so_list &so)
   strcpy (so.so_name, bfd_get_filename (so.abfd));
 
   if (so.sections == nullptr)
-    so.sections = new target_section_table;
+    so.sections = new std::vector<target_section>;
   *so.sections = build_section_table (so.abfd);
 
   for (target_section &p : *so.sections)

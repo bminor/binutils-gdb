@@ -470,7 +470,7 @@ maintenance_info_target_sections (const char *arg, int from_tty)
 {
   bfd *abfd = nullptr;
   int digits = 0;
-  const target_section_table *table
+  const std::vector<target_section> *table
     = target_get_section_table (current_inferior ()->top_target ());
   if (table == nullptr)
     return;

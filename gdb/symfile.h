@@ -257,7 +257,7 @@ extern std::string find_separate_debug_file_by_debuglink
    existing section table.  */
 
 extern section_addr_info
-    build_section_addr_info_from_section_table (const target_section_table &table);
+    build_section_addr_info_from_section_table (const std::vector<target_section> &table);
 
 			/*   Variables   */
 

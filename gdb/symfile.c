@@ -216,7 +216,7 @@ find_lowest_section (asection *sect, asection **lowest)
    an existing section table.  */
 
 section_addr_info
-build_section_addr_info_from_section_table (const target_section_table &table)
+build_section_addr_info_from_section_table (const std::vector<target_section> &table)
 {
   section_addr_info sap;
 

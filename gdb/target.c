@@ -1347,7 +1347,7 @@ target_xfer_status_to_string (enum target_xfer_status status)
 };
 
 
-const target_section_table *
+const std::vector<target_section> *
 target_get_section_table (struct target_ops *target)
 {
   return target->get_section_table ();
@@ -1358,7 +1358,7 @@ target_get_section_table (struct target_ops *target)
 const struct target_section *
 target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
 {
-  const target_section_table *table = target_get_section_table (target);
+  const std::vector<target_section> *table = target_get_section_table (target);
 
   if (table == NULL)
     return NULL;
@@ -1373,7 +1373,7 @@ target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
 
 /* See target.h.  */
 
-const target_section_table *
+const std::vector<target_section> *
 default_get_section_table ()
 {
   return &current_program_space->target_sections ();
@@ -1507,7 +1507,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 
       if (pc_in_unmapped_range (memaddr, section))
 	{
-	  const target_section_table *table = target_get_section_table (ops);
+	  const std::vector<target_section> *table = target_get_section_table (ops);
 	  const char *section_name = section->the_bfd_section->name;
 
 	  memaddr = overlay_mapped_address (memaddr, section);
@@ -1531,7 +1531,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
       if (secp != NULL
 	  && (bfd_section_flags (secp->the_bfd_section) & SEC_READONLY))
 	{
-	  const target_section_table *table = target_get_section_table (ops);
+	  const std::vector<target_section> *table = target_get_section_table (ops);
 	  return section_table_xfer_memory_partial (readbuf, writebuf,
 						    memaddr, len, xfered_len,
 						    *table);

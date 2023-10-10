@@ -479,8 +479,8 @@ exec_file_attach (const char *filename, int from_tty)
 		 gdb_bfd_errmsg (bfd_get_error (), matching).c_str ());
 	}
 
-	  target_section_table sections
-	  = build_section_table (current_program_space->exec_bfd ());
+      std::vector<target_section> sections
+	= build_section_table (current_program_space->exec_bfd ());
 
       current_program_space->ebfd_mtime
 	= bfd_get_mtime (current_program_space->exec_bfd ());
@@ -568,10 +568,10 @@ file_command (const char *arg, int from_tty)
 
 /* Builds a section table, given args BFD, TABLE.  */
 
-target_section_table
+std::vector<target_section>
 build_section_table (struct bfd *some_bfd)
 {
-  target_section_table table;
+  std::vector<target_section> table;
 
   for (asection *asect : gdb_bfd_sections (some_bfd))
     {
@@ -600,7 +600,7 @@ build_section_table (struct bfd *some_bfd)
 
 void
 program_space::add_target_sections (const void *owner,
-				    const target_section_table &sections)
+				    const std::vector<target_section> &sections)
 {
   if (!sections.empty ())
     {
@@ -745,7 +745,7 @@ exec_read_partial_read_only (gdb_byte *readbuf, ULONGEST offset,
 
 static std::vector<mem_range>
 section_table_available_memory (CORE_ADDR memaddr, ULONGEST len,
-				const target_section_table &sections)
+				const std::vector<target_section> &sections)
 {
   std::vector<mem_range> memory;
 
@@ -779,7 +779,7 @@ enum target_xfer_status
 section_table_read_available_memory (gdb_byte *readbuf, ULONGEST offset,
 				     ULONGEST len, ULONGEST *xfered_len)
 {
-  const target_section_table *table
+  const std::vector<target_section> *table
     = target_get_section_table (current_inferior ()->top_target ());
   std::vector<mem_range> available_memory
     = section_table_available_memory (offset, len, *table);
@@ -819,7 +819,7 @@ enum target_xfer_status
 section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 				   ULONGEST offset, ULONGEST len,
 				   ULONGEST *xfered_len,
-				   const target_section_table &sections,
+				   const std::vector<target_section> &sections,
 				   gdb::function_view<bool
 				     (const struct target_section *)> match_cb)
 {
@@ -895,7 +895,7 @@ exec_target::xfer_partial (enum target_object object,
 			   const gdb_byte *writebuf,
 			   ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
-  const target_section_table *table = target_get_section_table (this);
+  const std::vector<target_section> *table = target_get_section_table (this);
 
   if (object == TARGET_OBJECT_MEMORY)
     return section_table_xfer_memory_partial (readbuf, writebuf,
@@ -907,7 +907,7 @@ exec_target::xfer_partial (enum target_object object,
 
 
 void
-print_section_info (const target_section_table *t, bfd *abfd)
+print_section_info (const std::vector<target_section> *t, bfd *abfd)
 {
   struct gdbarch *gdbarch = gdbarch_from_bfd (abfd);
   /* FIXME: 16 is not wide enough when gdbarch_addr_bit > 64.  */
