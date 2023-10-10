@@ -499,6 +499,11 @@ extern PyObject *gdbpy_execute_mi_command (PyObject *self, PyObject *args,
 
 extern void serialize_mi_results (PyObject *results);
 
+/* Implementation of the gdb.notify_mi function.  */
+
+extern PyObject *gdbpy_notify_mi (PyObject *self, PyObject *args,
+				  PyObject *kw);
+
 /* Convert Python object OBJ to a program_space pointer.  OBJ must be a
    gdb.Progspace reference.  Return nullptr if the gdb.Progspace is not
    valid (see gdb.Progspace.is_valid), otherwise return the program_space

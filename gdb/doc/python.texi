@@ -211,6 +211,7 @@ optional arguments while skipping others.  Example:
 * Recordings In Python::        Accessing recordings from Python.
 * CLI Commands In Python::      Implementing new CLI commands in Python.
 * GDB/MI Commands In Python::   Implementing new @sc{gdb/mi} commands in Python.
+* GDB/MI Notifications In Python:: Implementing new @sc{gdb/mi} notifications in Python.
 * Parameters In Python::        Adding new @value{GDBN} parameters.
 * Functions In Python::         Writing new convenience functions.
 * Progspaces In Python::        Program spaces.
@@ -4802,6 +4803,50 @@ Here is how this works using the commands from the example above:
 @{'list': ['abc', 'def', 'ghi']@}
 (@value{GDBP}) python print(gdb.execute_mi("-echo-string", "abc", "def", "ghi"))
 @{'string': 'abc, def, ghi'@}
+@end smallexample
+
+@node GDB/MI Notifications In Python
+@subsubsection @sc{gdb/mi} Notifications In Python
+
+@cindex MI notifications in python
+@cindex notifications in python, GDB/MI
+@cindex python notifications, GDB/MI
+
+It is possible to emit @sc{gdb/mi} notifications from
+Python.  Use the @code{gdb.notify_mi} function to do that.
+
+@defun gdb.notify_mi (name @r{[}, data@r{]})
+Emit a @sc{gdb/mi} asynchronous notification.  @var{name} is the name of the
+notification, consisting of alphanumeric characters and a hyphen (@code{-}).
+@var{data} is any additional data to be emitted with the notification, passed
+as a Python dictionary. This argument is optional. The dictionary is converted
+to a @sc{gdb/mi} @var{result} records (@pxref{GDB/MI Output Syntax}) the same way
+as result of Python MI command (@pxref{GDB/MI Commands In Python}).
+
+If @var{data} is @code{None} then no additional values are emitted.
+@end defun
+
+While using existing notification names (@pxref{GDB/MI Async Records}) with
+@code{gdb.notify_mi} is allowed, users are encouraged to prefix user-defined
+notification with a hyphen (@code{-}) to avoid possible conflict.
+@value{GDBN} will never introduce notification starting with hyphen.
+
+Here is how to emit @code{=-connection-removed} whenever a connection to remote
+GDB server is closed (@pxref{Connections In Python}):
+
+@smallexample
+def notify_connection_removed(event):
+    data = @{"id": event.connection.num, "type": event.connection.type@}
+    gdb.notify_mi("-connection-removed", data)
+
+
+gdb.events.connection_removed.connect(notify_connection_removed)
+@end smallexample
+
+Then, each time a connection is closed, there will be a notification on MI channel:
+
+@smallexample
+=-connection-removed,id="1",type="remote"
 @end smallexample
 
 @node Parameters In Python

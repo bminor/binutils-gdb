@@ -2669,6 +2669,10 @@ Return the name of the currently selected language." },
     "print_options () -> dict\n\
 Return the current print options." },
 
+  { "notify_mi", (PyCFunction) gdbpy_notify_mi,
+    METH_VARARGS | METH_KEYWORDS,
+    "notify_mi (name, data) -> None\n\
+Output async record to MI channels if any." },
   {NULL, NULL, 0, NULL}
 };
 

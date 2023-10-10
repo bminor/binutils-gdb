@@ -19,8 +19,14 @@
 
 #include "defs.h"
 #include "python-internal.h"
+#include "utils.h"
+#include "ui.h"
 #include "ui-out.h"
+#include "interps.h"
+#include "target.h"
 #include "mi/mi-parse.h"
+#include "mi/mi-console.h"
+#include "mi/mi-interp.h"
 
 /* A ui_out subclass that creates a Python object based on the data
    that is passed in.  */
@@ -454,4 +460,72 @@ serialize_mi_results (PyObject *results)
 	(py_object_to_mi_key (key));
       serialize_mi_result_1 (value, key_string.get ());
     }
+}
+
+/* See python-internal.h.  */
+
+PyObject *
+gdbpy_notify_mi (PyObject *self, PyObject *args, PyObject *kwargs)
+{
+  static const char *keywords[] = { "name", "data", nullptr };
+  char *name = nullptr;
+  PyObject *data = Py_None;
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "s|O", keywords,
+					&name, &data))
+    return nullptr;
+
+  /* Validate notification name.  */
+  const int name_len = strlen (name);
+  if (name_len == 0)
+    {
+      PyErr_SetString (PyExc_ValueError, _("MI notification name is empty."));
+      return nullptr;
+    }
+  for (int i = 0; i < name_len; i++)
+    {
+      if (!isalnum (name[i]) && name[i] != '-')
+	{
+	  PyErr_Format
+	    (PyExc_ValueError,
+	     _("MI notification name contains invalid character: %c."),
+	     name[i]);
+	  return nullptr;
+	}
+    }
+
+  /* Validate additional data.  */
+  if (!(data == Py_None || PyDict_Check (data)))
+    {
+      PyErr_Format
+	(PyExc_ValueError,
+	 _("MI notification data must be either None or a dictionary, not %s"),
+	 Py_TYPE (data)->tp_name);
+      return nullptr;
+    }
+
+  SWITCH_THRU_ALL_UIS ()
+    {
+      struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
+
+      if (mi == nullptr)
+	continue;
+
+      target_terminal::scoped_restore_terminal_state term_state;
+      target_terminal::ours_for_output ();
+
+      gdb_printf (mi->event_channel, "%s", name);
+      if (data != Py_None)
+	{
+	  ui_out *mi_uiout = mi->interp_ui_out ();
+	  ui_out_redirect_pop redir (mi_uiout, mi->event_channel);
+	  scoped_restore restore_uiout
+	    = make_scoped_restore (&current_uiout, mi_uiout);
+
+	  serialize_mi_results (data);
+	}
+      gdb_flush (mi->event_channel);
+    }
+
+  Py_RETURN_NONE;
 }
