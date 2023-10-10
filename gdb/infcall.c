@@ -1388,6 +1388,13 @@ call_function_by_hand_dummy (struct value *function,
 
     gdb::observers::inferior_call_post.notify (call_thread_ptid, funaddr);
 
+
+    /* As the inferior call failed, we are about to throw an error, which
+       will be caught and printed somewhere else in GDB.  We want new threads
+       to be printed before the error message, otherwise it looks odd; the
+       threads appear after GDB has reported a stop.  */
+    update_thread_list ();
+
     if (call_thread->state != THREAD_EXITED)
       {
 	/* The FSM should still be the same.  */
