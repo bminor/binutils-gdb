@@ -650,24 +650,6 @@ so_list::clear ()
 
 lm_info::~lm_info () = default;
 
-/* Free the storage associated with the `struct so_list' object SO.
-   If we have opened a BFD for SO, close it.
-
-   The caller is responsible for removing SO from whatever list it is
-   a member of.  If we have placed SO's sections in some target's
-   section table, the caller is responsible for removing them.
-
-   This function doesn't mess with objfiles at all.  If there is an
-   objfile associated with SO that needs to be removed, the caller is
-   responsible for taking care of that.  */
-
-void
-free_so (so_list &so)
-{
-  delete &so;
-}
-
-
 /* Read in symbols for shared object SO.  If SYMFILE_VERBOSE is set in FLAGS,
    be chatty about it.  Return true if any symbols were actually loaded.  */
 
@@ -845,7 +827,7 @@ update_solib_list (int from_tty)
       if (inferior_iter != inferior.end ())
 	{
 	  inferior.erase (inferior_iter);
-	  free_so (*inferior_iter);
+	  delete &*inferior_iter;
 	  ++gdb_iter;
 	}
 
@@ -871,7 +853,7 @@ update_solib_list (int from_tty)
 	     sections from so.abfd; remove them.  */
 	  current_program_space->remove_target_sections (&*gdb_iter);
 
-	  free_so (*gdb_iter);
+	  delete &*gdb_iter;
 	  gdb_iter = gdb_iter_next;
 	}
     }
@@ -1215,7 +1197,7 @@ clear_solib (void)
     {
       notify_solib_unloaded (current_program_space, *so);
       current_program_space->remove_target_sections (&so);
-      free_so (*so);
+      delete so;
     });
 
 

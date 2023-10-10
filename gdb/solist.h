@@ -169,20 +169,8 @@ struct target_so_ops
   void (*handle_event) (void);
 };
 
-/* Free the memory associated with a (so_list *).  */
-void free_so (so_list &so);
-
-/* A deleter that calls free_so.  */
-struct so_deleter
-{
-  void operator() (struct so_list *so) const
-  {
-    free_so (*so);
-  }
-};
-
 /* A unique pointer to a so_list.  */
-typedef std::unique_ptr<so_list, so_deleter> so_list_up;
+using so_list_up = std::unique_ptr<so_list>;
 
 /* Find main executable binary file.  */
 extern gdb::unique_xmalloc_ptr<char> exec_file_find (const char *in_pathname,

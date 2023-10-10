@@ -1478,7 +1478,7 @@ svr4_current_sos ()
 	  if (address_in_mem_range (li->l_ld, &vsyscall_range))
 	    {
 	      auto next = sos.erase (so);
-	      free_so (*so);
+	      delete &*so;
 	      so = next;
 	      break;
 	    }
