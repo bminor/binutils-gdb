@@ -175,7 +175,7 @@ static void
 rocm_solib_relocate_section_addresses (so_list &so,
 				       struct target_section *sec)
 {
-  if (!is_amdgpu_arch (gdbarch_from_bfd (so.abfd)))
+  if (!is_amdgpu_arch (gdbarch_from_bfd (so.abfd.get ())))
     {
       svr4_so_ops.relocate_section_addresses (so, sec);
       return;

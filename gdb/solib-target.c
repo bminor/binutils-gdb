@@ -291,7 +291,7 @@ solib_target_relocate_section_addresses (so_list &so, target_section *sec)
      it any earlier, since we need to open the file first.  */
   if (li->offsets.empty ())
     {
-      int num_sections = gdb_bfd_count_sections (so.abfd);
+      int num_sections = gdb_bfd_count_sections (so.abfd.get ());
 
       li->offsets.assign (num_sections, 0);
 
@@ -349,7 +349,7 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
       else if (!li->segment_bases.empty ())
 	{
 	  symfile_segment_data_up data
-	    = get_symfile_segment_data (so.abfd);
+	    = get_symfile_segment_data (so.abfd.get ());
 
 	  if (data == NULL)
 	    warning (_("\
@@ -359,7 +359,7 @@ Could not relocate shared library \"%s\": no segments"), so.so_name);
 	      ULONGEST orig_delta;
 	      int i;
 
-	      if (!symfile_map_offsets_to_segments (so.abfd, data.get (),
+	      if (!symfile_map_offsets_to_segments (so.abfd.get (), data.get (),
 						    li->offsets,
 						    li->segment_bases.size (),
 						    li->segment_bases.data ()))

@@ -580,7 +580,7 @@ solib_map_sections (so_list &so)
     return 0;
 
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
-  so.abfd = abfd.release ();
+  so.abfd = std::move (abfd);
 
   /* Copy the full path name into so_name, allowing symbol_file_add
      to find it later.  This also affects the =library-loaded GDB/MI
@@ -588,11 +588,11 @@ solib_map_sections (so_list &so)
      the library's host-side path.  If we let the target dictate
      that objfile's path, and the target is different from the host,
      GDB/MI will not provide the correct host-side path.  */
-  if (strlen (bfd_get_filename (so.abfd)) >= SO_NAME_MAX_PATH_SIZE)
+  if (strlen (bfd_get_filename (so.abfd.get ())) >= SO_NAME_MAX_PATH_SIZE)
     error (_("Shared library file name is too long."));
-  strcpy (so.so_name, bfd_get_filename (so.abfd));
+  strcpy (so.so_name, bfd_get_filename (so.abfd.get ()));
 
-  so.sections = build_section_table (so.abfd);
+  so.sections = build_section_table (so.abfd.get ());
 
   for (target_section &p : so.sections)
     {
@@ -629,8 +629,6 @@ so_list::clear ()
   const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
   this->sections.clear ();
-
-  gdb_bfd_unref (this->abfd);
   this->abfd = nullptr;
 
   /* Our caller closed the objfile, possibly via objfile_purge_solibs.  */
@@ -706,8 +704,7 @@ solib_read_symbols (so_list &so, symfile_add_flags flags)
 	    {
 	      section_addr_info sap
 		= build_section_addr_info_from_section_table (so.sections);
-	      gdb_bfd_ref_ptr tmp_bfd
-		(gdb_bfd_ref_ptr::new_reference (so.abfd));
+	      gdb_bfd_ref_ptr tmp_bfd = so.abfd;
 	      so.objfile = symbol_file_add_from_bfd (tmp_bfd, so.so_name,
 						      flags, &sap,
 						      OBJF_SHARED, NULL);

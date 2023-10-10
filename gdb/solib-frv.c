@@ -920,7 +920,7 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
 	  auto *li = gdb::checked_static_cast<lm_info_frv *> (so->lm_info.get ());
 
 	  addr = find_canonical_descriptor_in_load_object
-		   (entry_point, got_value, name, so->abfd, li);
+		   (entry_point, got_value, name, so->abfd.get (), li);
 
 	  if (addr != 0)
 	    break;

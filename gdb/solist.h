@@ -76,7 +76,7 @@ struct so_list
 
      current_sos must initialize these fields to 0.  */
 
-  bfd *abfd = nullptr;
+  gdb_bfd_ref_ptr abfd;
   char symbols_loaded = 0;	/* flag: symbols read in yet?  */
 
   /* objfile with symbols for a loaded library.  Target memory is read from
