@@ -486,6 +486,19 @@ struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
 extern PyObject *gdbpy_execute_mi_command (PyObject *self, PyObject *args,
 					   PyObject *kw);
 
+/* Serialize RESULTS and print it in MI format to the current_uiout.
+
+   This function handles the top-level results passed as a dictionary.
+   The caller is responsible for ensuring that.  The values within this
+   dictionary can be a wider range of types.  Handling the values of the top-level
+   dictionary is done by serialize_mi_result_1, see that function for more
+   details.
+
+   If anything goes wrong while parsing and printing the MI output then an
+   error is thrown.  */
+
+extern void serialize_mi_results (PyObject *results);
+
 /* Convert Python object OBJ to a program_space pointer.  OBJ must be a
    gdb.Progspace reference.  Return nullptr if the gdb.Progspace is not
    valid (see gdb.Progspace.is_valid), otherwise return the program_space
