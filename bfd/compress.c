@@ -558,7 +558,7 @@ decompress_contents (bool is_zstd, bfd_byte *compressed_buffer,
    field was allocated using bfd_malloc() or equivalent.
 
    Return the uncompressed size if the full section contents is
-   compressed successfully.  Otherwise return 0.  */
+   compressed successfully.  Otherwise return (bfd_size_type) -1.  */
 
 static bfd_size_type
 bfd_compress_section_contents (bfd *abfd, sec_ptr sec)
@@ -610,7 +610,7 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec)
 	  buffer_size = uncompressed_size;
 	  buffer = bfd_malloc (buffer_size);
 	  if (buffer == NULL)
-	    return 0;
+	    return (bfd_size_type) -1;
 
 	  if (!decompress_contents (ch_type == ch_compress_zstd,
 				    input_buffer + orig_header_size,
@@ -618,7 +618,7 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec)
 	    {
 	      bfd_set_error (bfd_error_bad_value);
 	      free (buffer);
-	      return 0;
+	      return (bfd_size_type) -1;
 	    }
 	  free (input_buffer);
 	  bfd_set_section_alignment (sec, uncompressed_alignment_pow);
@@ -636,7 +636,7 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec)
   buffer_size = compressed_size;
   buffer = bfd_alloc (abfd, buffer_size);
   if (buffer == NULL)
-    return 0;
+    return (bfd_size_type) -1;
 
   if (update)
     {
@@ -659,7 +659,7 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec)
 	    {
 	      bfd_release (abfd, buffer);
 	      bfd_set_error (bfd_error_bad_value);
-	      return 0;
+	      return (bfd_size_type) -1;
 	    }
 #endif
 	}
@@ -669,7 +669,7 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec)
 	{
 	  bfd_release (abfd, buffer);
 	  bfd_set_error (bfd_error_bad_value);
-	  return 0;
+	  return (bfd_size_type) -1;
 	}
 
       compressed_size += new_header_size;
@@ -1087,7 +1087,7 @@ bfd_init_section_compress_status (bfd *abfd, sec_ptr sec)
     }
 
   sec->contents = uncompressed_buffer;
-  if (bfd_compress_section_contents (abfd, sec) == 0)
+  if (bfd_compress_section_contents (abfd, sec) == (bfd_size_type) -1)
     {
       free (sec->contents);
       sec->contents = NULL;
@@ -1130,7 +1130,7 @@ bfd_compress_section (bfd *abfd, sec_ptr sec, bfd_byte *uncompressed_buffer)
     }
 
   sec->contents = uncompressed_buffer;
-  if (bfd_compress_section_contents (abfd, sec) == 0)
+  if (bfd_compress_section_contents (abfd, sec) == (bfd_size_type) -1)
     {
       free (sec->contents);
       sec->contents = NULL;
