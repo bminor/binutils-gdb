@@ -3,6 +3,9 @@
 
 *** Changes since GDB 14
 
+* GDB index now contains information about the main function. This speeds up
+  startup when it is being used for some large binaries.
+
 *** Changes in GDB 14
 
 * GDB now supports the AArch64 Scalable Matrix Extension 2 (SME2), which

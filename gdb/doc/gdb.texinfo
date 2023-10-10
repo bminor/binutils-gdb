@@ -49663,13 +49663,14 @@ unless otherwise noted:
 
 @enumerate
 @item
-The version number, currently 8.  Versions 1, 2 and 3 are obsolete.
+The version number, currently 9.  Versions 1, 2 and 3 are obsolete.
 Version 4 uses a different hashing function from versions 5 and 6.
 Version 6 includes symbols for inlined functions, whereas versions 4
 and 5 do not.  Version 7 adds attributes to the CU indices in the
 symbol table.  Version 8 specifies that symbols from DWARF type units
 (@samp{DW_TAG_type_unit}) refer to the type unit's symbol table and not the
-compilation unit (@samp{DW_TAG_comp_unit}) using the type.
+compilation unit (@samp{DW_TAG_comp_unit}) using the type.  Version 9 adds
+the name and the language of the main function to the index.
 
 @value{GDBN} will only read version 4, 5, or 6 indices
 by specifying @code{set use-deprecated-index-sections on}.
@@ -49689,6 +49690,9 @@ The offset, from the start of the file, of the address area.
 
 @item
 The offset, from the start of the file, of the symbol table.
+
+@item
+The offset, from the start of the file, of the shortcut table.
 
 @item
 The offset, from the start of the file, of the constant pool.
@@ -49765,6 +49769,21 @@ The names of C@t{++} symbols in the hash table are canonicalized.  We
 don't currently have a simple description of the canonicalization
 algorithm; if you intend to create new index sections, you must read
 the code.
+
+@item The shortcut table
+This is a data structure with the following fields:
+
+@table @asis
+@item Language of main
+An @code{offset_type} value indicating the language of the main function as a
+@code{DW_LANG_} constant.  This value will be zero if main function information
+is not present.
+
+@item Name of main
+An @code{offset_type} value indicating the offset of the main function's name
+in the constant pool.  This value must be ignored if the value for the language
+of main is zero.
+@end table
 
 @item
 The constant pool.  This is simply a bunch of bytes.  It is organized

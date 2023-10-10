@@ -245,6 +245,14 @@ public:
      functions above.  */
   std::vector <dwarf2_per_cu_data *> *imported_symtabs = nullptr;
 
+  /* The original DW_LANG_* value of the CU, as provided to us by
+   * DW_AT_language. It is interesting to keep this value around in cases where
+   * we can't use the values from the language enum, as the mapping to them is
+   * lossy, and, while that is usually fine, things like the index have an
+   * understandable bias towards not exposing internal GDB structures to the
+   * outside world, and so prefer to use DWARF constants in their stead. */
+  dwarf_source_language dw_lang;
+
   /* Return true of IMPORTED_SYMTABS is empty or not yet allocated.  */
   bool imported_symtabs_empty () const
   {
@@ -763,6 +771,10 @@ private:
   std::unordered_map<dwarf2_per_cu_data *,
 		     std::unique_ptr<dwarf2_cu>> m_dwarf2_cus;
 };
+
+/* Converts DWARF language names to GDB language names. */
+
+enum language dwarf_lang_to_enum_language (unsigned int lang);
 
 /* Get the dwarf2_per_objfile associated to OBJFILE.  */
 

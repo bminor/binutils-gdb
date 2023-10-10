@@ -17796,7 +17796,9 @@ leb128_size (const gdb_byte *buf)
     }
 }
 
-static enum language
+/* Converts DWARF language names to GDB language names. */
+
+enum language
 dwarf_lang_to_enum_language (unsigned int lang)
 {
   enum language language;
@@ -21725,6 +21727,7 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
   /* Set the language we're debugging.  */
   attr = dwarf2_attr (comp_unit_die, DW_AT_language, cu);
   enum language lang;
+  dwarf_source_language dw_lang = (dwarf_source_language)0;
   if (cu->producer != nullptr
       && strstr (cu->producer, "IBM XL C for OpenCL") != NULL)
     {
@@ -21733,18 +21736,24 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
 	 language detection we fall back to the DW_AT_producer
 	 string.  */
       lang = language_opencl;
+      dw_lang = DW_LANG_OpenCL;
     }
   else if (cu->producer != nullptr
 	   && strstr (cu->producer, "GNU Go ") != NULL)
     {
       /* Similar hack for Go.  */
       lang = language_go;
+      dw_lang = DW_LANG_Go;
     }
   else if (attr != nullptr)
-    lang = dwarf_lang_to_enum_language (attr->constant_value (0));
+    {
+      lang = dwarf_lang_to_enum_language (attr->constant_value (0));
+      dw_lang = (dwarf_source_language)attr->constant_value (0);
+    }
   else
     lang = pretend_language;
 
+  cu->per_cu->dw_lang = dw_lang;
   cu->language_defn = language_def (lang);
 
   switch (comp_unit_die->tag)
