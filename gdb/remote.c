@@ -439,6 +439,20 @@ public:
       ::delete_async_event_handler (&m_async_event_handler_token);
   }
 
+  bool is_async_p () const
+  {
+    /* We're async whenever the serial device is.  */
+    gdb_assert (this->remote_desc != nullptr);
+    return serial_is_async_p (this->remote_desc);
+  }
+
+  bool can_async_p () const
+  {
+    /* We can async whenever the serial device can.  */
+    gdb_assert (this->remote_desc != nullptr);
+    return serial_can_async_p (this->remote_desc);
+  }
+
 public: /* data */
 
   /* A buffer to use for incoming packets, and its current size.  The
@@ -14858,16 +14872,14 @@ remote_target::can_async_p ()
   gdb_assert (target_async_permitted);
 
   /* We're async whenever the serial device can.  */
-  struct remote_state *rs = get_remote_state ();
-  return serial_can_async_p (rs->remote_desc);
+  return get_remote_state ()->can_async_p ();
 }
 
 bool
 remote_target::is_async_p ()
 {
   /* We're async whenever the serial device is.  */
-  struct remote_state *rs = get_remote_state ();
-  return serial_is_async_p (rs->remote_desc);
+  return get_remote_state ()->is_async_p ();
 }
 
 /* Pass the SERIAL event on and up to the client.  One day this code
