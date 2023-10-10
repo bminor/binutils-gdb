@@ -186,7 +186,7 @@ rocm_solib_relocate_section_addresses (so_list &so,
       return;
     }
 
-  lm_info_svr4 *li = (lm_info_svr4 *) so.lm_info;
+  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info);
   sec->addr = sec->addr + li->l_addr;
   sec->endaddr = sec->endaddr + li->l_addr;
 }
@@ -220,7 +220,7 @@ rocm_solib_copy_list (const so_list *src)
       so_list *newobj = new so_list;
       memcpy (newobj, src, sizeof (struct so_list));
 
-      lm_info_svr4 *src_li = (lm_info_svr4 *) src->lm_info;
+      auto *src_li = gdb::checked_static_cast<lm_info_svr4 *> (src->lm_info);
       newobj->lm_info = new lm_info_svr4 (*src_li);
 
       newobj->next = nullptr;

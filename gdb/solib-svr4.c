@@ -181,8 +181,8 @@ svr4_same (const so_list &gdb, const so_list &inferior)
   /* There may be different instances of the same library, in different
      namespaces.  Each instance, however, must have been loaded at a
      different address so its relocation offset would be different.  */
-  const lm_info_svr4 *lmg = (const lm_info_svr4 *) gdb.lm_info;
-  const lm_info_svr4 *lmi = (const lm_info_svr4 *) inferior.lm_info;
+  auto *lmg = gdb::checked_static_cast<const lm_info_svr4 *> (gdb.lm_info);
+  auto *lmi = gdb::checked_static_cast<const lm_info_svr4 *> (inferior.lm_info);
 
   return (lmg->l_addr_inferior == lmi->l_addr_inferior);
 }
@@ -231,7 +231,7 @@ has_lm_dynamic_from_link_map (void)
 static CORE_ADDR
 lm_addr_check (const so_list &so, bfd *abfd)
 {
-  lm_info_svr4 *li = (lm_info_svr4 *) so.lm_info;
+  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info);
 
   if (!li->l_addr_p)
     {
@@ -981,7 +981,7 @@ svr4_free_objfile_observer (struct objfile *objfile)
 static void
 svr4_clear_so (const so_list &so)
 {
-  lm_info_svr4 *li = (lm_info_svr4 *) so.lm_info;
+  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info);
 
   if (li != NULL)
     li->l_addr_p = 0;
@@ -1014,7 +1014,7 @@ svr4_copy_library_list (struct so_list *src)
       so_list *newobj = new so_list;
       memcpy (newobj, src, sizeof (struct so_list));
 
-      lm_info_svr4 *src_li = (lm_info_svr4 *) src->lm_info;
+      auto *src_li = gdb::checked_static_cast<lm_info_svr4 *> (src->lm_info);
       newobj->lm_info = new lm_info_svr4 (*src_li);
 
       newobj->next = NULL;
@@ -1561,7 +1561,7 @@ svr4_current_sos (void)
 		[ 9] .dynamic DYNAMIC ffffffffff700580 000580 0000f0
 	  */
 
-	  lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
+	  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so->lm_info);
 
 	  if (address_in_mem_range (li->l_ld, &vsyscall_range))
 	    {
@@ -1597,7 +1597,7 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
   for (struct so_list *so : current_program_space->solibs ())
     if (so->objfile == objfile)
       {
-	lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
+	auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so->lm_info);
 
 	return li->lm_addr;
       }
@@ -1880,7 +1880,7 @@ solist_update_incremental (svr4_info *info, CORE_ADDR debug_base,
       for (; solist->next != nullptr; solist = solist->next)
 	/* Nothing.  */;
 
-      lm_info_svr4 *li = (lm_info_svr4 *) solist->lm_info;
+      auto *li = gdb::checked_static_cast<lm_info_svr4 *> (solist->lm_info);
       prev_lm = li->lm_addr;
       pnext = &solist->next;
     }

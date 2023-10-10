@@ -316,7 +316,7 @@ solib_aix_relocate_section_addresses (so_list &so, target_section *sec)
   struct bfd_section *bfd_sect = sec->the_bfd_section;
   bfd *abfd = bfd_sect->owner;
   const char *section_name = bfd_section_name (bfd_sect);
-  lm_info_aix *info = (lm_info_aix *) so.lm_info;
+  auto *info = gdb::checked_static_cast<lm_info_aix *> (so.lm_info);
 
   if (strcmp (section_name, ".text") == 0)
     {

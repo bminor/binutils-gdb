@@ -819,7 +819,7 @@ static void
 frv_relocate_section_addresses (so_list &so, target_section *sec)
 {
   int seg;
-  lm_info_frv *li = (lm_info_frv *) so.lm_info;
+  auto *li = gdb::checked_static_cast<lm_info_frv *> (so.lm_info);
   int_elf32_fdpic_loadmap *map = li->map;
 
   for (seg = 0; seg < map->nsegs; seg++)
@@ -860,7 +860,7 @@ frv_fdpic_find_global_pointer (CORE_ADDR addr)
   for (struct so_list *so : current_program_space->solibs ())
     {
       int seg;
-      lm_info_frv *li = (lm_info_frv *) so->lm_info;
+      auto *li = gdb::checked_static_cast<lm_info_frv *> (so->lm_info);
       int_elf32_fdpic_loadmap *map = li->map;
 
       for (seg = 0; seg < map->nsegs; seg++)
@@ -916,7 +916,7 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
     {
       for (struct so_list *so : current_program_space->solibs ())
 	{
-	  lm_info_frv *li = (lm_info_frv *) so->lm_info;
+	  auto *li = gdb::checked_static_cast<lm_info_frv *> (so->lm_info);
 
 	  addr = find_canonical_descriptor_in_load_object
 		   (entry_point, got_value, name, so->abfd, li);
@@ -1068,7 +1068,7 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
      of shared libraries.  */
   for (struct so_list *so : current_program_space->solibs ())
     {
-      lm_info_frv *li = (lm_info_frv *) so->lm_info;
+      auto *li = gdb::checked_static_cast<lm_info_frv *> (so->lm_info);
 
       if (so->objfile == objfile)
 	return li->lm_addr;

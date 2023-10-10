@@ -883,7 +883,7 @@ static void
 dsbt_relocate_section_addresses (so_list &so, target_section *sec)
 {
   int seg;
-  lm_info_dsbt *li = (lm_info_dsbt *) so.lm_info;
+  auto *li = gdb::checked_static_cast<lm_info_dsbt *> (so.lm_info);
   int_elf32_dsbt_loadmap *map = li->map;
 
   for (seg = 0; seg < map->nsegs; seg++)

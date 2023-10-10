@@ -614,7 +614,7 @@ darwin_clear_solib (program_space *pspace)
 static void
 darwin_relocate_section_addresses (so_list &so, target_section *sec)
 {
-  lm_info_darwin *li = (lm_info_darwin *) so.lm_info;
+  auto *li = gdb::checked_static_cast<lm_info_darwin *> (so.lm_info);
 
   sec->addr += li->lm_addr;
   sec->endaddr += li->lm_addr;

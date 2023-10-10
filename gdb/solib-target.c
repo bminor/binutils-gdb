@@ -285,7 +285,7 @@ static void
 solib_target_relocate_section_addresses (so_list &so, target_section *sec)
 {
   CORE_ADDR offset;
-  lm_info_target *li = (lm_info_target *) so.lm_info;
+  auto *li = gdb::checked_static_cast<lm_info_target *> (so.lm_info);
 
   /* Build the offset table only once per object file.  We can not do
      it any earlier, since we need to open the file first.  */
