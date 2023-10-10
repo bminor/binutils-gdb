@@ -2342,6 +2342,72 @@ display_discr_list (unsigned long form,
     printf (")(unsigned)");
 }
 
+static void
+display_lang (uint64_t uvalue)
+{
+  switch (uvalue)
+    {
+      /* Ordered by the numeric value of these constants.  */
+    case DW_LANG_C89:			printf ("ANSI C"); break;
+    case DW_LANG_C:			printf ("non-ANSI C"); break;
+    case DW_LANG_Ada83:			printf ("Ada"); break;
+    case DW_LANG_C_plus_plus:		printf ("C++"); break;
+    case DW_LANG_Cobol74:		printf ("Cobol 74"); break;
+    case DW_LANG_Cobol85:		printf ("Cobol 85"); break;
+    case DW_LANG_Fortran77:		printf ("FORTRAN 77"); break;
+    case DW_LANG_Fortran90:		printf ("Fortran 90"); break;
+    case DW_LANG_Pascal83:		printf ("ANSI Pascal"); break;
+    case DW_LANG_Modula2:		printf ("Modula 2"); break;
+
+      /* DWARF 2.1 values.	*/
+    case DW_LANG_Java:			printf ("Java"); break;
+    case DW_LANG_C99:			printf ("ANSI C99"); break;
+    case DW_LANG_Ada95:			printf ("ADA 95"); break;
+    case DW_LANG_Fortran95:		printf ("Fortran 95"); break;
+
+      /* DWARF 3 values.  */
+    case DW_LANG_PLI:			printf ("PLI"); break;
+    case DW_LANG_ObjC:			printf ("Objective C"); break;
+    case DW_LANG_ObjC_plus_plus:	printf ("Objective C++"); break;
+    case DW_LANG_UPC:			printf ("Unified Parallel C"); break;
+    case DW_LANG_D:			printf ("D"); break;
+
+      /* DWARF 4 values.  */
+    case DW_LANG_Python:		printf ("Python"); break;
+
+      /* DWARF 5 values.  */
+    case DW_LANG_OpenCL:		printf ("OpenCL"); break;
+    case DW_LANG_Go:			printf ("Go"); break;
+    case DW_LANG_Modula3:		printf ("Modula 3"); break;
+    case DW_LANG_Haskell:		printf ("Haskell"); break;
+    case DW_LANG_C_plus_plus_03:	printf ("C++03"); break;
+    case DW_LANG_C_plus_plus_11:	printf ("C++11"); break;
+    case DW_LANG_OCaml:			printf ("OCaml"); break;
+    case DW_LANG_Rust:			printf ("Rust"); break;
+    case DW_LANG_C11:			printf ("C11"); break;
+    case DW_LANG_Swift:			printf ("Swift"); break;
+    case DW_LANG_Julia:			printf ("Julia"); break;
+    case DW_LANG_Dylan:			printf ("Dylan"); break;
+    case DW_LANG_C_plus_plus_14:	printf ("C++14"); break;
+    case DW_LANG_Fortran03:		printf ("Fortran 03"); break;
+    case DW_LANG_Fortran08:		printf ("Fortran 08"); break;
+    case DW_LANG_RenderScript:		printf ("RenderScript"); break;
+
+      /* MIPS extension.  */
+    case DW_LANG_Mips_Assembler:	printf ("MIPS assembler"); break;
+
+      /* UPC extension.  */
+    case DW_LANG_Upc:			printf ("Unified Parallel C"); break;
+
+    default:
+      if (uvalue >= DW_LANG_lo_user && uvalue <= DW_LANG_hi_user)
+	printf (_("implementation defined: %#" PRIx64 ""), uvalue);
+      else
+	printf (_("unknown: %#" PRIx64 ""), uvalue);
+      break;
+    }
+}
+
 static unsigned char *
 read_and_display_attr_value (unsigned long attribute,
 			     unsigned long form,
@@ -3110,61 +3176,9 @@ read_and_display_attr_value (unsigned long attribute,
       break;
 
     case DW_AT_language:
-      printf ("\t");
-      switch (uvalue)
-	{
-	  /* Ordered by the numeric value of these constants.  */
-	case DW_LANG_C89:		printf ("(ANSI C)"); break;
-	case DW_LANG_C:			printf ("(non-ANSI C)"); break;
-	case DW_LANG_Ada83:		printf ("(Ada)"); break;
-	case DW_LANG_C_plus_plus:	printf ("(C++)"); break;
-	case DW_LANG_Cobol74:		printf ("(Cobol 74)"); break;
-	case DW_LANG_Cobol85:		printf ("(Cobol 85)"); break;
-	case DW_LANG_Fortran77:		printf ("(FORTRAN 77)"); break;
-	case DW_LANG_Fortran90:		printf ("(Fortran 90)"); break;
-	case DW_LANG_Pascal83:		printf ("(ANSI Pascal)"); break;
-	case DW_LANG_Modula2:		printf ("(Modula 2)"); break;
-	  /* DWARF 2.1 values.	*/
-	case DW_LANG_Java:		printf ("(Java)"); break;
-	case DW_LANG_C99:		printf ("(ANSI C99)"); break;
-	case DW_LANG_Ada95:		printf ("(ADA 95)"); break;
-	case DW_LANG_Fortran95:		printf ("(Fortran 95)"); break;
-	  /* DWARF 3 values.  */
-	case DW_LANG_PLI:		printf ("(PLI)"); break;
-	case DW_LANG_ObjC:		printf ("(Objective C)"); break;
-	case DW_LANG_ObjC_plus_plus:	printf ("(Objective C++)"); break;
-	case DW_LANG_UPC:		printf ("(Unified Parallel C)"); break;
-	case DW_LANG_D:			printf ("(D)"); break;
-	  /* DWARF 4 values.  */
-	case DW_LANG_Python:		printf ("(Python)"); break;
-	  /* DWARF 5 values.  */
-	case DW_LANG_OpenCL:		printf ("(OpenCL)"); break;
-	case DW_LANG_Go:		printf ("(Go)"); break;
-	case DW_LANG_Modula3:		printf ("(Modula 3)"); break;
-	case DW_LANG_Haskell:		printf ("(Haskell)"); break;
-	case DW_LANG_C_plus_plus_03:	printf ("(C++03)"); break;
-	case DW_LANG_C_plus_plus_11:	printf ("(C++11)"); break;
-	case DW_LANG_OCaml:		printf ("(OCaml)"); break;
-	case DW_LANG_Rust:		printf ("(Rust)"); break;
-	case DW_LANG_C11:		printf ("(C11)"); break;
-	case DW_LANG_Swift:		printf ("(Swift)"); break;
-	case DW_LANG_Julia:		printf ("(Julia)"); break;
-	case DW_LANG_Dylan:		printf ("(Dylan)"); break;
-	case DW_LANG_C_plus_plus_14:	printf ("(C++14)"); break;
-	case DW_LANG_Fortran03:		printf ("(Fortran 03)"); break;
-	case DW_LANG_Fortran08:		printf ("(Fortran 08)"); break;
-	case DW_LANG_RenderScript:	printf ("(RenderScript)"); break;
-	  /* MIPS extension.  */
-	case DW_LANG_Mips_Assembler:	printf ("(MIPS assembler)"); break;
-	  /* UPC extension.  */
-	case DW_LANG_Upc:		printf ("(Unified Parallel C)"); break;
-	default:
-	  if (uvalue >= DW_LANG_lo_user && uvalue <= DW_LANG_hi_user)
-	    printf (_("(implementation defined: %#" PRIx64 ")"), uvalue);
-	  else
-	    printf (_("(unknown: %#" PRIx64 ")"), uvalue);
-	  break;
-	}
+      printf ("\t(");
+      display_lang (uvalue);
+      printf (")");
       break;
 
     case DW_AT_encoding:
@@ -10738,29 +10752,31 @@ display_gdb_index (struct dwarf_section *section,
   unsigned char *start = section->start;
   uint32_t version;
   uint32_t cu_list_offset, tu_list_offset;
-  uint32_t address_table_offset, symbol_table_offset, constant_pool_offset;
+  uint32_t address_table_offset, symbol_table_offset, constant_pool_offset,
+    shortcut_table_offset;
   unsigned int cu_list_elements, tu_list_elements;
   unsigned int address_table_elements, symbol_table_slots;
   unsigned char *cu_list, *tu_list;
-  unsigned char *address_table, *symbol_table, *constant_pool;
+  unsigned char *address_table, *symbol_table, *shortcut_table, *constant_pool;
   unsigned int i;
 
   /* The documentation for the format of this file is in gdb/dwarf2read.c.  */
 
   introduce (section, false);
 
-  if (section->size < 6 * sizeof (uint32_t))
+  version = section->size < 4 ? 0 : byte_get_little_endian (start, 4);
+  size_t header_size = (version < 9 ? 6 : 7) * sizeof (uint32_t);
+  if (section->size < header_size)
     {
       warn (_("Truncated header in the %s section.\n"), section->name);
       return 0;
     }
 
-  version = byte_get_little_endian (start, 4);
   printf (_("Version %lu\n"), (unsigned long) version);
 
   /* Prior versions are obsolete, and future versions may not be
      backwards compatible.  */
-  if (version < 3 || version > 8)
+  if (version < 3 || version > 9)
     {
       warn (_("Unsupported version %lu.\n"), (unsigned long) version);
       return 0;
@@ -10782,17 +10798,23 @@ display_gdb_index (struct dwarf_section *section,
   tu_list_offset = byte_get_little_endian (start + 8, 4);
   address_table_offset = byte_get_little_endian (start + 12, 4);
   symbol_table_offset = byte_get_little_endian (start + 16, 4);
-  constant_pool_offset = byte_get_little_endian (start + 20, 4);
+  shortcut_table_offset = byte_get_little_endian (start + 20, 4);
+  if (version < 9)
+    constant_pool_offset = shortcut_table_offset;
+  else
+    constant_pool_offset = byte_get_little_endian (start + 24, 4);
 
   if (cu_list_offset > section->size
       || tu_list_offset > section->size
       || address_table_offset > section->size
       || symbol_table_offset > section->size
+      || shortcut_table_offset > section->size
       || constant_pool_offset > section->size
       || tu_list_offset < cu_list_offset
       || address_table_offset < tu_list_offset
       || symbol_table_offset < address_table_offset
-      || constant_pool_offset < symbol_table_offset)
+      || shortcut_table_offset < symbol_table_offset
+      || constant_pool_offset < shortcut_table_offset)
     {
       warn (_("Corrupt header in the %s section.\n"), section->name);
       return 0;
@@ -10801,12 +10823,13 @@ display_gdb_index (struct dwarf_section *section,
   cu_list_elements = (tu_list_offset - cu_list_offset) / 16;
   tu_list_elements = (address_table_offset - tu_list_offset) / 24;
   address_table_elements = (symbol_table_offset - address_table_offset) / 20;
-  symbol_table_slots = (constant_pool_offset - symbol_table_offset) / 8;
+  symbol_table_slots = (shortcut_table_offset - symbol_table_offset) / 8;
 
   cu_list = start + cu_list_offset;
   tu_list = start + tu_list_offset;
   address_table = start + address_table_offset;
   symbol_table = start + symbol_table_offset;
+  shortcut_table = start + shortcut_table_offset;
   constant_pool = start + constant_pool_offset;
 
   printf (_("\nCU table:\n"));
@@ -10916,6 +10939,33 @@ display_gdb_index (struct dwarf_section *section,
 	  if (num_cus <= 1)
 	    printf ("\n");
 	}
+    }
+
+  if (version >= 9)
+    {
+      printf (_("\nShortcut table:\n"));
+
+      if (shortcut_table_offset + 8 > constant_pool_offset)
+	{
+	  warn (_("Corrupt shortcut table in the %s section.\n"), section->name);
+	  return 0;
+	}
+
+      uint32_t lang = byte_get_little_endian (shortcut_table, 4);
+      printf (_("Language of main: "));
+      display_lang (lang);
+      printf ("\n");
+
+      uint32_t name_offset = byte_get_little_endian (shortcut_table + 4, 4);
+      printf (_("Name of main: "));
+      if (name_offset >= section->size - constant_pool_offset)
+	{
+	  printf (_("<corrupt offset: %x>\n"), name_offset);
+	  warn (_("Corrupt name offset of 0x%x found for name of main\n"),
+		name_offset);
+	}
+      else
+	printf ("%s\n", constant_pool + name_offset);
     }
 
   return 1;

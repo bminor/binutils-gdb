@@ -1,3 +1,9 @@
+2023-10-10  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf.c (display_lang): New function, factored out of ...
+	(read_and_display_attr_value): ... here.
+	(display_gdb_index): Handle v9 .gdb_index.
+
 2023-10-05  A. Wilcox  <awilfox@adelielinux.org>w
 
 	PR 30916
