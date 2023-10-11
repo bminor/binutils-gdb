@@ -95,8 +95,8 @@ proc extended_gdbserver_load_last_file {} {
 if { [info procs extended_gdbserver_gdb_file_cmd] == "" } {
     rename gdb_file_cmd extended_gdbserver_gdb_file_cmd
 }
-proc gdb_file_cmd { arg } {
-    if [extended_gdbserver_gdb_file_cmd $arg] {
+proc gdb_file_cmd { arg {kill_flag 1} } {
+    if [extended_gdbserver_gdb_file_cmd $arg $kill_flag] {
 	return -1
     }
     return [extended_gdbserver_load_last_file]

@@ -50,12 +50,8 @@ foreach_with_prefix scenario {kill no-kill} {
 
     gdb_test_no_output "set confirm off"
 
-    if {$scenario == "kill"} {
-	gdb_test "kill" "Inferior $decimal .*killed.*"
-    }
-
-    gdb_test "file $binfile2" "Reading symbols from .*" \
-	"switch to second executable"
+    set result [gdb_file_cmd $binfile2 [expr {$scenario == "kill"}]]
+    gdb_assert {$result == 0} "switch to second executable"
 
     # Start the program a second time, GDB should land in procedure
     # Second this time.

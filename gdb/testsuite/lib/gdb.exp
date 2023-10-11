@@ -2146,6 +2146,9 @@ proc default_gdb_exit {} {
 # Load a file into the debugger.
 # The return value is 0 for success, -1 for failure.
 #
+# ARG is the file name.
+# KILL_FLAG, if given, indicates whether a "kill" command should be used.
+#
 # This procedure also set the global variable GDB_FILE_CMD_DEBUG_INFO
 # to one of these values:
 #
@@ -2165,7 +2168,7 @@ proc default_gdb_exit {} {
 # TODO: gdb.base/sepdebug.exp and gdb.stabs/weird.exp might be able to use
 # this if they can get more information set.
 
-proc gdb_file_cmd { arg } {
+proc gdb_file_cmd { arg {kill_flag 1} } {
     global gdb_prompt
     global GDB
     global last_loaded_file
@@ -2194,15 +2197,17 @@ proc gdb_file_cmd { arg } {
     # The file command used to kill the remote target.  For the benefit
     # of the testsuite, preserve this behavior.  Mark as optional so it doesn't
     # get written to the stdin log.
-    send_gdb "kill\n" optional
-    gdb_expect 120 {
-	-re "Kill the program being debugged. .y or n. $" {
-	    send_gdb "y\n" answer
-	    verbose "\t\tKilling previous program being debugged"
-	    exp_continue
-	}
-	-re "$gdb_prompt $" {
-	    # OK.
+    if {$kill_flag} {
+	send_gdb "kill\n" optional
+	gdb_expect 120 {
+	    -re "Kill the program being debugged. .y or n. $" {
+		send_gdb "y\n" answer
+		verbose "\t\tKilling previous program being debugged"
+		exp_continue
+	    }
+	    -re "$gdb_prompt $" {
+		# OK.
+	    }
 	}
     }
 
