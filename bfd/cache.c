@@ -67,11 +67,11 @@ enum cache_flag {
 /* The maximum number of files which the cache will keep open at
    one time.  When needed call bfd_cache_max_open to initialize.  */
 
-static int max_open_files = 0;
+static unsigned max_open_files = 0;
 
 /* Set max_open_files, if not already set, to 12.5% of the allowed open
    file descriptors, but at least 10, and return the value.  */
-static int
+static unsigned
 bfd_cache_max_open (void)
 {
   if (max_open_files == 0)
@@ -115,7 +115,7 @@ bfd_cache_max_open (void)
 
 /* The number of BFD files we have open.  */
 
-static int open_files;
+static unsigned open_files;
 
 /* Zero, or a pointer to the topmost BFD on the chain.  This is
    used by the <<bfd_cache_lookup>> macro in @file{libbfd.h} to
@@ -176,6 +176,7 @@ bfd_cache_delete (bfd *abfd)
   snip (abfd);
 
   abfd->iostream = NULL;
+  BFD_ASSERT (open_files > 0);
   --open_files;
   abfd->flags |= BFD_CLOSED_BY_CACHE;
 
