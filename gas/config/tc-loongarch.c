@@ -1234,7 +1234,7 @@ static void fix_reloc_insn (fixS *fixP, bfd_vma reloc_val, char *buf)
   insn = bfd_getl32 (buf);
 
   if (!loongarch_adjust_reloc_bitsfield (NULL, howto, &reloc_val))
-    as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
+    as_bad_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
 
   insn = (insn & (insn_t)howto->src_mask)
     | ((insn & (~(insn_t)howto->dst_mask)) | reloc_val);

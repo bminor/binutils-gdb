@@ -1682,9 +1682,14 @@ reloc_sign_bits (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
   if (howto->rightshift
       && (val & ((((bfd_signed_vma) 1) << howto->rightshift) - 1)))
     {
-      (*_bfd_error_handler) (_("%pB: relocation %s right shift %d error 0x%lx"),
-			     abfd, howto->name, howto->rightshift, (long) val);
-      bfd_set_error (bfd_error_bad_value);
+      /* The as passes NULL casued internal error, so it can not use _bfd_error_handler
+	 output details, ld is not affected.  */
+      if (abfd != NULL)
+	{
+	  (*_bfd_error_handler) (_("%pB: relocation %s right shift %d error 0x%lx"),
+				 abfd, howto->name, howto->rightshift, (long) val);
+	  bfd_set_error (bfd_error_bad_value);
+	}
       return false;
     }
 
@@ -1696,9 +1701,14 @@ reloc_sign_bits (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
      high part: from sign bit to highest bit.  */
   if ((val & ~mask) && ((val & ~mask) != ~mask))
     {
-      (*_bfd_error_handler) (_("%pB: relocation %s overflow 0x%lx"),
-			     abfd, howto->name, (long) val);
-      bfd_set_error (bfd_error_bad_value);
+      /* The as passes NULL casued internal error, so it can not use _bfd_error_handler
+	 output details, ld is not affected.  */
+      if (abfd != NULL)
+	{
+	  (*_bfd_error_handler) (_("%pB: relocation %s overflow 0x%lx"),
+				 abfd, howto->name, (long) val);
+	  bfd_set_error (bfd_error_bad_value);
+	}
       return false;
     }
 
