@@ -641,8 +641,8 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	      {
 		long tmp;
 		tmp = gr[RD];
-		tmp <<= 24;
-		tmp >>= 24;
+		tmp <<= (sizeof (tmp) * 8) - 8;
+		tmp >>= (sizeof (tmp) * 8) - 8;
 		gr[RD] = tmp;
 	      }
 	      break;
@@ -653,8 +653,8 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	      {
 		long tmp;
 		tmp = gr[RD];
-		tmp <<= 16;
-		tmp >>= 16;
+		tmp <<= (sizeof (tmp) * 8) - 16;
+		tmp >>= (sizeof (tmp) * 8) - 16;
 		gr[RD] = tmp;
 	      }
 	      break;
