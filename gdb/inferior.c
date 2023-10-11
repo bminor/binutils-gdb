@@ -179,7 +179,6 @@ inferior::set_arch (gdbarch *arch)
   gdb_assert (arch != nullptr);
   gdb_assert (gdbarch_initialized_p (arch));
   m_gdbarch = arch;
-  gdb::observers::architecture_changed.notify (this, arch);
 
   process_stratum_target *proc_target = this->process_target ();
   if (proc_target != nullptr)

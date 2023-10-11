@@ -153,10 +153,9 @@ extern observable<struct breakpoint */* b */> breakpoint_deleted;
    is the modified breakpoint.  */
 extern observable<struct breakpoint */* b */> breakpoint_modified;
 
-/* INF's architecture has changed.  The argument NEWARCH is a
-   pointer to the new architecture.  */
-extern observable<inferior */* inf */, struct gdbarch */* newarch */>
-  architecture_changed;
+/* GDB has instantiated a new architecture, NEWARCH is a pointer to the new
+   architecture.  */
+extern observable<struct gdbarch */* newarch */> new_architecture;
 
 /* The thread's ptid has changed.  The OLD_PTID parameter specifies
    the old value, and NEW_PTID specifies the new value.  */

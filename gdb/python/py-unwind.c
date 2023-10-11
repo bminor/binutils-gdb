@@ -945,7 +945,7 @@ static const registry<gdbarch>::key<pyuw_gdbarch_data_type> pyuw_gdbarch_data;
    intermediary.  */
 
 static void
-pyuw_on_new_gdbarch (inferior *inf, gdbarch *newarch)
+pyuw_on_new_gdbarch (gdbarch *newarch)
 {
   struct pyuw_gdbarch_data_type *data = pyuw_gdbarch_data.get (newarch);
   if (data == nullptr)
@@ -974,8 +974,7 @@ pyuw_on_new_gdbarch (inferior *inf, gdbarch *newarch)
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_unwind (void)
 {
-  gdb::observers::architecture_changed.attach (pyuw_on_new_gdbarch,
-					       "py-unwind");
+  gdb::observers::new_architecture.attach (pyuw_on_new_gdbarch, "py-unwind");
 
   if (PyType_Ready (&pending_frame_object_type) < 0)
     return -1;

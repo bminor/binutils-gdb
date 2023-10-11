@@ -1479,6 +1479,8 @@ gdbarch_find_by_info (struct gdbarch_info info)
   if (gdbarch_debug)
     gdbarch_dump (new_gdbarch, gdb_stdlog);
 
+  gdb::observers::new_architecture.notify (new_gdbarch);
+
   return new_gdbarch;
 }
 
