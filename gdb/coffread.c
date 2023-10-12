@@ -725,7 +725,9 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
     }
 
   /* Try to add separate debug file if no symbols table found.   */
-  if (!objfile->has_partial_symbols ())
+  else if (!objfile->has_partial_symbols ()
+	   && objfile->separate_debug_objfile == NULL
+	   && objfile->separate_debug_objfile_backlink == NULL)
     {
       deferred_warnings warnings;
       std::string debugfile
