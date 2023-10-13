@@ -301,8 +301,8 @@ struct user_za_header {
 
 /* Offset from the start of struct user_za_header to the register data */
 #define ZA_PT_ZA_OFFSET						  \
-	((sizeof (struct user_za_header) + (__SVE_VQ_BYTES - 1))  \
-		/ __SVE_VQ_BYTES * __SVE_VQ_BYTES)
+	((sizeof (struct user_za_header) + (SVE_VQ_BYTES - 1))  \
+		/ SVE_VQ_BYTES * SVE_VQ_BYTES)
 
 /* The payload starts at offset ZA_PT_ZA_OFFSET, and is of size
    ZA_PT_ZA_SIZE(vq, flags).
@@ -317,9 +317,9 @@ struct user_za_header {
    systems: see sigcontext.h for more explanation.  */
 
 #define ZA_PT_ZAV_OFFSET(vq, n)				\
-	(ZA_PT_ZA_OFFSET + ((vq * __SVE_VQ_BYTES) * n))
+	(ZA_PT_ZA_OFFSET + ((vq * SVE_VQ_BYTES) * n))
 
-#define ZA_PT_ZA_SIZE(vq) ((vq * __SVE_VQ_BYTES) * (vq * __SVE_VQ_BYTES))
+#define ZA_PT_ZA_SIZE(vq) ((vq * SVE_VQ_BYTES) * (vq * SVE_VQ_BYTES))
 
 #define ZA_PT_SIZE(vq)			      \
 	(ZA_PT_ZA_OFFSET + ZA_PT_ZA_SIZE(vq))
