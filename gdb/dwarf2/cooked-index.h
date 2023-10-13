@@ -25,7 +25,7 @@
 #include "symtab.h"
 #include "hashtab.h"
 #include "dwarf2/index-common.h"
-#include "gdbsupport/gdb_string_view.h"
+#include <string_view>
 #include "quick-symbol.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "addrmap.h"

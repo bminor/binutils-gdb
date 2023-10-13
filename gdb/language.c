@@ -641,7 +641,7 @@ default_symbol_name_matcher (const char *symbol_search_name,
 			     const lookup_name_info &lookup_name,
 			     completion_match_result *comp_match_res)
 {
-  gdb::string_view name = lookup_name.name ();
+  std::string_view name = lookup_name.name ();
   completion_match_for_lcd *match_for_lcd
     = (comp_match_res != NULL ? &comp_match_res->match_for_lcd : NULL);
   strncmp_iw_mode mode = (lookup_name.completion_mode ()

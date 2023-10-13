@@ -237,7 +237,7 @@ struct amd_dbgapi_register_type_flags : public amd_dbgapi_register_type
   using container_type = std::vector<field>;
   using const_iterator_type = container_type::const_iterator;
 
-  amd_dbgapi_register_type_flags (unsigned int bit_size, gdb::string_view name)
+  amd_dbgapi_register_type_flags (unsigned int bit_size, std::string_view name)
     : amd_dbgapi_register_type (kind::FLAGS,
 				make_lookup_name (bit_size, name)),
       m_bit_size (bit_size),
@@ -270,7 +270,7 @@ struct amd_dbgapi_register_type_flags : public amd_dbgapi_register_type
   const std::string &name () const
   { return m_name; }
 
-  static std::string make_lookup_name (int bits, gdb::string_view name)
+  static std::string make_lookup_name (int bits, std::string_view name)
   {
     std::string res = string_printf ("flags%d_t ", bits);
     res.append (name.data (), name.size ());
@@ -297,7 +297,7 @@ struct amd_dbgapi_register_type_enum : public amd_dbgapi_register_type
   using container_type = std::vector<enumerator>;
   using const_iterator_type = container_type::const_iterator;
 
-  amd_dbgapi_register_type_enum (gdb::string_view name)
+  amd_dbgapi_register_type_enum (std::string_view name)
     : amd_dbgapi_register_type (kind::ENUM, make_lookup_name (name)),
       m_name (name.data (), name.length ())
   {}
@@ -326,7 +326,7 @@ struct amd_dbgapi_register_type_enum : public amd_dbgapi_register_type
   const std::string &name () const
   { return m_name; }
 
-  static std::string make_lookup_name (gdb::string_view name)
+  static std::string make_lookup_name (std::string_view name)
   {
     std::string res = "enum ";
     res.append (name.data (), name.length ());
@@ -349,7 +349,7 @@ using amd_dbgapi_register_type_map
 /* Parse S as a ULONGEST, raise an error on overflow.  */
 
 static ULONGEST
-try_strtoulst (gdb::string_view s)
+try_strtoulst (std::string_view s)
 {
   errno = 0;
   ULONGEST value = strtoulst (s.data (), nullptr, 0);
@@ -365,7 +365,7 @@ try_strtoulst (gdb::string_view s)
 #define WSOPT "[ \t]*"
 
 static const amd_dbgapi_register_type &
-parse_amd_dbgapi_register_type (gdb::string_view type_name,
+parse_amd_dbgapi_register_type (std::string_view type_name,
 				amd_dbgapi_register_type_map &type_map);
 
 
@@ -373,7 +373,7 @@ parse_amd_dbgapi_register_type (gdb::string_view type_name,
 
 static void
 parse_amd_dbgapi_register_type_enum_fields
-  (amd_dbgapi_register_type_enum &enum_type, gdb::string_view fields)
+  (amd_dbgapi_register_type_enum &enum_type, std::string_view fields)
 {
   compiled_regex regex (/* name */
 			"^(" IDENTIFIER ")"
@@ -394,8 +394,8 @@ parse_amd_dbgapi_register_type_enum_fields
       auto sv_from_match = [fields] (const regmatch_t &m)
 	{ return fields.substr (m.rm_so, m.rm_eo - m.rm_so); };
 
-      gdb::string_view name = sv_from_match (matches[1]);
-      gdb::string_view value_str = sv_from_match (matches[2]);
+      std::string_view name = sv_from_match (matches[1]);
+      std::string_view value_str = sv_from_match (matches[2]);
       ULONGEST value = try_strtoulst (value_str);
 
       if (value > std::numeric_limits<uint32_t>::max ())
@@ -412,7 +412,7 @@ parse_amd_dbgapi_register_type_enum_fields
 static void
 parse_amd_dbgapi_register_type_flags_fields
   (amd_dbgapi_register_type_flags &flags_type,
-   int bits, gdb::string_view name, gdb::string_view fields,
+   int bits, std::string_view name, std::string_view fields,
    amd_dbgapi_register_type_map &type_map)
 {
   gdb_assert (bits == 32 || bits == 64);
@@ -439,9 +439,9 @@ parse_amd_dbgapi_register_type_flags_fields
       auto sv_from_match = [fields] (const regmatch_t &m)
 	{ return fields.substr (m.rm_so, m.rm_eo - m.rm_so); };
 
-      gdb::string_view field_type_str = sv_from_match (matches[1]);
-      gdb::string_view field_name = sv_from_match (matches[3]);
-      gdb::string_view pos_begin_str = sv_from_match (matches[4]);
+      std::string_view field_type_str = sv_from_match (matches[1]);
+      std::string_view field_name = sv_from_match (matches[3]);
+      std::string_view pos_begin_str = sv_from_match (matches[4]);
       ULONGEST pos_begin = try_strtoulst (pos_begin_str);
 
       if (field_type_str == "bool")
@@ -452,7 +452,7 @@ parse_amd_dbgapi_register_type_flags_fields
 	  if (matches[5].rm_so == -1)
 	    error (_("Missing end bit position"));
 
-	  gdb::string_view pos_end_str = sv_from_match (matches[5]);
+	  std::string_view pos_end_str = sv_from_match (matches[5]);
 	  ULONGEST pos_end = try_strtoulst (pos_end_str.substr (1));
 	  const amd_dbgapi_register_type &field_type
 	    = parse_amd_dbgapi_register_type (field_type_str, type_map);
@@ -467,7 +467,7 @@ parse_amd_dbgapi_register_type_flags_fields
 /* parse_amd_dbgapi_register_type helper for scalars.  */
 
 static const amd_dbgapi_register_type &
-parse_amd_dbgapi_register_type_scalar (gdb::string_view name,
+parse_amd_dbgapi_register_type_scalar (std::string_view name,
 				       amd_dbgapi_register_type_map &type_map)
 {
   std::string name_str = gdb::to_string (name);
@@ -513,24 +513,24 @@ parse_amd_dbgapi_register_type_scalar (gdb::string_view name,
    details about the format.  */
 
 static const amd_dbgapi_register_type &
-parse_amd_dbgapi_register_type (gdb::string_view type_str,
+parse_amd_dbgapi_register_type (std::string_view type_str,
 				amd_dbgapi_register_type_map &type_map)
 {
   size_t pos_open_bracket = type_str.find_last_of ('[');
   auto sv_from_match = [type_str] (const regmatch_t &m)
     { return type_str.substr (m.rm_so, m.rm_eo - m.rm_so); };
 
-  if (pos_open_bracket != gdb::string_view::npos)
+  if (pos_open_bracket != std::string_view::npos)
     {
       /* Vector types.  */
-      gdb::string_view element_type_str
+      std::string_view element_type_str
 	= type_str.substr (0, pos_open_bracket);
       const amd_dbgapi_register_type &element_type
 	= parse_amd_dbgapi_register_type (element_type_str, type_map);
 
       size_t pos_close_bracket = type_str.find_last_of (']');
-      gdb_assert (pos_close_bracket != gdb::string_view::npos);
-      gdb::string_view count_str_view
+      gdb_assert (pos_close_bracket != std::string_view::npos);
+      std::string_view count_str_view
 	= type_str.substr (pos_open_bracket + 1,
 			    pos_close_bracket - pos_open_bracket);
       std::string count_str = gdb::to_string (count_str_view);
@@ -567,9 +567,9 @@ parse_amd_dbgapi_register_type (gdb::string_view type_str,
       if (res == REG_NOMATCH)
 	error (_("Failed to parse flags type string"));
 
-      gdb::string_view flags_keyword = sv_from_match (matches[1]);
+      std::string_view flags_keyword = sv_from_match (matches[1]);
       unsigned int bit_size = flags_keyword == "flags32_t" ? 32 : 64;
-      gdb::string_view name = sv_from_match (matches[2]);
+      std::string_view name = sv_from_match (matches[2]);
       std::string lookup_name
 	= amd_dbgapi_register_type_flags::make_lookup_name (bit_size, name);
       auto existing_type_it = type_map.find (lookup_name);
@@ -596,7 +596,7 @@ parse_amd_dbgapi_register_type (gdb::string_view type_str,
 
 	  amd_dbgapi_register_type_flags_up flags_type
 	    (new amd_dbgapi_register_type_flags (bit_size, name));
-	  gdb::string_view fields_without_braces = sv_from_match (matches[4]);
+	  std::string_view fields_without_braces = sv_from_match (matches[4]);
 
 	  parse_amd_dbgapi_register_type_flags_fields
 	    (*flags_type, bit_size, name, fields_without_braces, type_map);
@@ -620,7 +620,7 @@ parse_amd_dbgapi_register_type (gdb::string_view type_str,
       if (res == REG_NOMATCH)
 	error (_("Failed to parse flags type string"));
 
-      gdb::string_view name = sv_from_match (matches[1]);
+      std::string_view name = sv_from_match (matches[1]);
 
       std::string lookup_name
 	= amd_dbgapi_register_type_enum::make_lookup_name (name);
@@ -648,7 +648,7 @@ parse_amd_dbgapi_register_type (gdb::string_view type_str,
 
 	  amd_dbgapi_register_type_enum_up enum_type
 	    (new amd_dbgapi_register_type_enum (name));
-	  gdb::string_view fields_without_braces = sv_from_match (matches[3]);
+	  std::string_view fields_without_braces = sv_from_match (matches[3]);
 
 	  parse_amd_dbgapi_register_type_enum_fields
 	    (*enum_type, fields_without_braces);

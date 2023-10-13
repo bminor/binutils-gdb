@@ -16884,7 +16884,7 @@ cooked_index_functions::expand_symtabs_matching
 
   for (enum language lang : unique_styles)
     {
-      std::vector<gdb::string_view> name_vec
+      std::vector<std::string_view> name_vec
 	= lookup_name_without_params.split_name (lang);
       std::string last_name = gdb::to_string (name_vec.back ());
 

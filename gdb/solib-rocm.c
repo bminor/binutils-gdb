@@ -451,8 +451,8 @@ rocm_code_object_stream_memory::read (bfd *, void *buf, file_ptr size,
 static gdb_bfd_iovec_base *
 rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
 {
-  gdb::string_view uri (bfd_get_filename (abfd));
-  gdb::string_view protocol_delim = "://";
+  std::string_view uri (bfd_get_filename (abfd));
+  std::string_view protocol_delim = "://";
   size_t protocol_end = uri.find (protocol_delim);
   std::string protocol = gdb::to_string (uri.substr (0, protocol_end));
   protocol_end += protocol_delim.length ();
@@ -460,7 +460,7 @@ rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
   std::transform (protocol.begin (), protocol.end (), protocol.begin (),
 		  [] (unsigned char c) { return std::tolower (c); });
 
-  gdb::string_view path;
+  std::string_view path;
   size_t path_end = uri.find_first_of ("#?", protocol_end);
   if (path_end != std::string::npos)
     path = uri.substr (protocol_end, path_end++ - protocol_end);
@@ -476,7 +476,7 @@ rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
 	&& std::isxdigit (path[i + 1])
 	&& std::isxdigit (path[i + 2]))
       {
-	gdb::string_view hex_digits = path.substr (i + 1, 2);
+	std::string_view hex_digits = path.substr (i + 1, 2);
 	decoded_path += std::stoi (gdb::to_string (hex_digits), 0, 16);
 	i += 2;
       }
@@ -484,7 +484,7 @@ rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
       decoded_path += path[i];
 
   /* Tokenize the query/fragment.  */
-  std::vector<gdb::string_view> tokens;
+  std::vector<std::string_view> tokens;
   size_t pos, last = path_end;
   while ((pos = uri.find ('&', last)) != std::string::npos)
     {
@@ -496,15 +496,15 @@ rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
     tokens.emplace_back (uri.substr (last));
 
   /* Create a tag-value map from the tokenized query/fragment.  */
-  std::unordered_map<gdb::string_view, gdb::string_view,
+  std::unordered_map<std::string_view, std::string_view,
 		     gdb::string_view_hash> params;
-  for (gdb::string_view token : tokens)
+  for (std::string_view token : tokens)
     {
       size_t delim = token.find ('=');
       if (delim != std::string::npos)
 	{
-	  gdb::string_view tag = token.substr (0, delim);
-	  gdb::string_view val = token.substr (delim + 1);
+	  std::string_view tag = token.substr (0, delim);
+	  std::string_view val = token.substr (delim + 1);
 	  params.emplace (tag, val);
 	}
     }
@@ -514,7 +514,7 @@ rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
       ULONGEST offset = 0;
       ULONGEST size = 0;
 
-      auto try_strtoulst = [] (gdb::string_view v)
+      auto try_strtoulst = [] (std::string_view v)
 	{
 	  errno = 0;
 	  ULONGEST value = strtoulst (v.data (), nullptr, 0);

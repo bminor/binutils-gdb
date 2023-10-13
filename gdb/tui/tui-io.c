@@ -1197,7 +1197,7 @@ tui_getc_1 (FILE *fp)
 	 Compare keyname instead.  */
       if (ch >= KEY_MAX)
 	{
-	  auto name = gdb::string_view (keyname (ch));
+	  auto name = std::string_view (keyname (ch));
 
 	  /* The following sequences are hardcoded in readline as
 	     well.  */

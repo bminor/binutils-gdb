@@ -23,10 +23,10 @@
 
 /* See split-name.h.  */
 
-std::vector<gdb::string_view>
+std::vector<std::string_view>
 split_name (const char *name, split_style style)
 {
-  std::vector<gdb::string_view> result;
+  std::vector<std::string_view> result;
   unsigned int previous_len = 0;
 
   switch (style)

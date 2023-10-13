@@ -118,7 +118,7 @@ class minimal_symbol_reader
      SECTION - the symbol's section
   */
 
-  struct minimal_symbol *record_full (gdb::string_view name,
+  struct minimal_symbol *record_full (std::string_view name,
 				      bool copy_name,
 				      unrelocated_addr address,
 				      enum minimal_symbol_type ms_type,

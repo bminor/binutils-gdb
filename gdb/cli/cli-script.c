@@ -35,7 +35,7 @@
 #include "extension.h"
 #include "interps.h"
 #include "compile/compile.h"
-#include "gdbsupport/gdb_string_view.h"
+#include <string_view>
 #include "python/python.h"
 #include "guile/guile.h"
 
@@ -103,7 +103,7 @@ private:
   std::string m_command_line;
 
   /* The arguments.  Each element points inside M_COMMAND_LINE.  */
-  std::vector<gdb::string_view> m_args;
+  std::vector<std::string_view> m_args;
 };
 
 /* The stack of arguments passed to user defined functions.  We need a

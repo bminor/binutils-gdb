@@ -457,13 +457,13 @@ struct mapping
 {
   ULONGEST addr;
   ULONGEST endaddr;
-  gdb::string_view permissions;
+  std::string_view permissions;
   ULONGEST offset;
-  gdb::string_view device;
+  std::string_view device;
   ULONGEST inode;
 
   /* This field is guaranteed to be NULL-terminated, hence it is not a
-     gdb::string_view.  */
+     std::string_view.  */
   const char *filename;
 };
 
@@ -1384,7 +1384,7 @@ parse_smaps_data (const char *data,
 
       /* Decode permissions.  */
       auto has_perm = [&m] (char c)
-	{ return m.permissions.find (c) != gdb::string_view::npos; };
+	{ return m.permissions.find (c) != std::string_view::npos; };
       read = has_perm ('r');
       write = has_perm ('w');
       exec = has_perm ('x');

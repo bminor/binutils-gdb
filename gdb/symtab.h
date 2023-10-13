@@ -31,7 +31,7 @@
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/function-view.h"
 #include <optional>
-#include "gdbsupport/gdb_string_view.h"
+#include <string_view>
 #include "gdbsupport/next-iterator.h"
 #include "gdbsupport/iterator-range.h"
 #include "completer.h"
@@ -126,11 +126,11 @@ class ada_lookup_name_info final
 
   /* A wrapper for ::split_name that handles some Ada-specific
      peculiarities.  */
-  std::vector<gdb::string_view> split_name () const
+  std::vector<std::string_view> split_name () const
   {
     if (m_verbatim_p || m_standard_p)
       {
-	std::vector<gdb::string_view> result;
+	std::vector<std::string_view> result;
 	if (m_standard_p)
 	  result.emplace_back ("standard");
 	result.emplace_back (m_encoded_name);
@@ -238,7 +238,7 @@ class lookup_name_info final
   /* Getters.  See description of each corresponding field.  */
   symbol_name_match_type match_type () const { return m_match_type; }
   bool completion_mode () const { return m_completion_mode; }
-  gdb::string_view name () const { return m_name; }
+  std::string_view name () const { return m_name; }
   const bool ignore_parameters () const { return m_ignore_parameters; }
 
   /* Like the "name" method but guarantees that the returned string is
@@ -292,7 +292,7 @@ class lookup_name_info final
 
   /* A wrapper for ::split_name (see split-name.h) that splits this
      name, and that handles any language-specific peculiarities.  */  
-  std::vector<gdb::string_view> split_name (language lang) const
+  std::vector<std::string_view> split_name (language lang) const
   {
     if (lang == language_ada)
       return ada ().split_name ();
@@ -356,7 +356,7 @@ private:
   symbol_name_match_type m_match_type;
   bool m_completion_mode;
   bool m_ignore_parameters;
-  gdb::string_view m_name;
+  std::string_view m_name;
 
   /* Language-specific info.  These fields are filled lazily the first
      time a lookup is done in the corresponding language.  They're
@@ -509,7 +509,7 @@ struct general_symbol_info
   /* Set the linkage and natural names of a symbol, by demangling
      the linkage name.  If linkage_name may not be nullterminated,
      copy_name must be set to true.  */
-  void compute_and_set_names (gdb::string_view linkage_name, bool copy_name,
+  void compute_and_set_names (std::string_view linkage_name, bool copy_name,
 			      struct objfile_per_bfd_storage *per_bfd,
 			      std::optional<hashval_t> hash
 				= std::optional<hashval_t> ());

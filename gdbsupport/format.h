@@ -20,7 +20,7 @@
 #ifndef COMMON_FORMAT_H
 #define COMMON_FORMAT_H
 
-#include "gdbsupport/gdb_string_view.h"
+#include <string_view>
 
 #if defined(__MINGW32__) && !defined(PRINTF_HAS_LONG_LONG)
 # define USE_PRINTF_I64 1
@@ -61,7 +61,7 @@ struct format_piece
   bool operator== (const format_piece &other) const
   {
     return (this->argclass == other.argclass
-	    && gdb::string_view (this->string) == other.string);
+	    && std::string_view (this->string) == other.string);
   }
 
   const char *string;

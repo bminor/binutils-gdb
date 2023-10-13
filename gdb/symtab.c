@@ -70,7 +70,7 @@
 #include "filename-seen-cache.h"
 #include "arch-utils.h"
 #include <algorithm>
-#include "gdbsupport/gdb_string_view.h"
+#include <string_view>
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/common-utils.h"
 
@@ -828,10 +828,10 @@ general_symbol_info::set_language (enum language language,
 /* Objects of this type are stored in the demangled name hash table.  */
 struct demangled_name_entry
 {
-  demangled_name_entry (gdb::string_view mangled_name)
+  demangled_name_entry (std::string_view mangled_name)
     : mangled (mangled_name) {}
 
-  gdb::string_view mangled;
+  std::string_view mangled;
   enum language language;
   gdb::unique_xmalloc_ptr<char> demangled;
 };
@@ -940,7 +940,7 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
    so the pointer can be discarded after calling this function.  */
 
 void
-general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
+general_symbol_info::compute_and_set_names (std::string_view linkage_name,
 					    bool copy_name,
 					    objfile_per_bfd_storage *per_bfd,
 					    std::optional<hashval_t> hash)
@@ -991,14 +991,14 @@ general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
       /* A 0-terminated copy of the linkage name.  Callers must set COPY_NAME
 	 to true if the string might not be nullterminated.  We have to make
 	 this copy because demangling needs a nullterminated string.  */
-      gdb::string_view linkage_name_copy;
+      std::string_view linkage_name_copy;
       if (copy_name)
 	{
 	  char *alloc_name = (char *) alloca (linkage_name.length () + 1);
 	  memcpy (alloc_name, linkage_name.data (), linkage_name.length ());
 	  alloc_name[linkage_name.length ()] = '\0';
 
-	  linkage_name_copy = gdb::string_view (alloc_name,
+	  linkage_name_copy = std::string_view (alloc_name,
 						linkage_name.length ());
 	}
       else
@@ -1038,7 +1038,7 @@ general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
 	  memcpy (mangled_ptr, linkage_name.data (), linkage_name.length ());
 	  mangled_ptr [linkage_name.length ()] = '\0';
 	  new (*slot) demangled_name_entry
-	    (gdb::string_view (mangled_ptr, linkage_name.length ()));
+	    (std::string_view (mangled_ptr, linkage_name.length ()));
 	}
       (*slot)->demangled = std::move (demangled_name);
       (*slot)->language = language ();

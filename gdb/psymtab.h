@@ -21,7 +21,7 @@
 #define PSYMTAB_H
 
 #include "objfiles.h"
-#include "gdbsupport/gdb_string_view.h"
+#include <string_view>
 #include "gdbsupport/gdb_obstack.h"
 #include "symfile.h"
 #include "gdbsupport/next-iterator.h"
@@ -346,7 +346,7 @@ struct partial_symtab
      LANGUAGE is the language from which the symbol originates.  This will
      influence, amongst other things, how the symbol name is demangled. */
 
-  void add_psymbol (gdb::string_view name,
+  void add_psymbol (std::string_view name,
 		    bool copy_name, domain_enum domain,
 		    enum address_class theclass,
 		    short section,
