@@ -19,7 +19,7 @@
 #ifndef COMMON_FILTERED_ITERATOR_H
 #define COMMON_FILTERED_ITERATOR_H
 
-#include "gdbsupport/invoke-result.h"
+#include <type_traits>
 
 /* A filtered iterator.  This wraps BaseIterator and automatically
    skips elements that FilterFunc filters out.  Requires that
@@ -56,7 +56,7 @@ public:
     : filtered_iterator (static_cast<const filtered_iterator &> (other))
   {}
 
-  typename gdb::invoke_result<decltype(&BaseIterator::operator*),
+  typename std::invoke_result<decltype(&BaseIterator::operator*),
 			      BaseIterator>::type
     operator* () const
   { return *m_it; }
