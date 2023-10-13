@@ -504,7 +504,7 @@ mkdir_recursive (const char *dir)
 
 /* See gdbsupport/filestuff.h.  */
 
-gdb::optional<std::string>
+std::optional<std::string>
 read_text_file_to_string (const char *path)
 {
   gdb_file_up file = gdb_fopen_cloexec (path, "r");

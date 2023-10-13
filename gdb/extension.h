@@ -22,7 +22,7 @@
 
 #include "mi/mi-cmds.h"
 #include "gdbsupport/array-view.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 
 struct breakpoint;
 struct command_line;
@@ -316,7 +316,7 @@ extern void get_matching_xmethod_workers
    either a colorized (using ANSI terminal escapes) version of the
    source code, or an empty value if colorizing could not be done.  */
 
-extern gdb::optional<std::string> ext_lang_colorize
+extern std::optional<std::string> ext_lang_colorize
   (const std::string &filename, const std::string &contents);
 
 /* Try to colorize a single line of disassembler output, CONTENT for
@@ -324,7 +324,7 @@ extern gdb::optional<std::string> ext_lang_colorize
    escapes) version of CONTENT, or an empty value if colorizing could not
    be done.  */
 
-extern gdb::optional<std::string> ext_lang_colorize_disasm
+extern std::optional<std::string> ext_lang_colorize_disasm
   (const std::string &content, gdbarch *gdbarch);
 
 /* Calls extension_language_ops::print_insn for each extension language,
@@ -334,7 +334,7 @@ extern gdb::optional<std::string> ext_lang_colorize_disasm
    All arguments are forwarded to extension_language_ops::print_insn, see
    that function for a full description.  */
 
-extern gdb::optional<int> ext_lang_print_insn
+extern std::optional<int> ext_lang_print_insn
   (struct gdbarch *gdbarch, CORE_ADDR address, struct disassemble_info *info);
 
 #if GDB_SELF_TEST

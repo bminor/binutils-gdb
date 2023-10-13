@@ -915,7 +915,7 @@ public:
 		     const char *filename,
 		     fileio_error *target_errno) override;
 
-  gdb::optional<std::string>
+  std::optional<std::string>
     fileio_readlink (struct inferior *inf,
 		     const char *filename,
 		     fileio_error *target_errno) override;
@@ -4074,7 +4074,7 @@ remote_target::remote_get_threads_with_qxfer (threads_listing_context *context)
 #if defined(HAVE_LIBEXPAT)
   if (m_features.packet_support (PACKET_qXfer_threads) == PACKET_ENABLE)
     {
-      gdb::optional<gdb::char_vector> xml
+      std::optional<gdb::char_vector> xml
 	= target_read_stralloc (this, TARGET_OBJECT_THREADS, NULL);
 
       if (xml && (*xml)[0] != '\0')
@@ -11767,7 +11767,7 @@ std::vector<mem_region>
 remote_target::memory_map ()
 {
   std::vector<mem_region> result;
-  gdb::optional<gdb::char_vector> text
+  std::optional<gdb::char_vector> text
     = target_read_stralloc (current_inferior ()->top_target (),
 			    TARGET_OBJECT_MEMORY_MAP, NULL);
 
@@ -12732,7 +12732,7 @@ remote_target::fileio_unlink (struct inferior *inf, const char *filename,
 
 /* Implementation of to_fileio_readlink.  */
 
-gdb::optional<std::string>
+std::optional<std::string>
 remote_target::fileio_readlink (struct inferior *inf, const char *filename,
 				fileio_error *remote_errno)
 {
@@ -13999,7 +13999,7 @@ remote_target::set_circular_trace_buffer (int val)
 traceframe_info_up
 remote_target::traceframe_info ()
 {
-  gdb::optional<gdb::char_vector> text
+  std::optional<gdb::char_vector> text
     = target_read_stralloc (current_inferior ()->top_target (),
 			    TARGET_OBJECT_TRACEFRAME_INFO,
 			    NULL);
@@ -14540,7 +14540,7 @@ btrace_read_config (thread_info *tp, btrace_config *conf)
   scoped_restore_current_thread restore_thread;
   switch_to_thread (tp);
 
-  gdb::optional<gdb::char_vector> xml
+  std::optional<gdb::char_vector> xml
     = target_read_stralloc (current_inferior ()->top_target (),
 			    TARGET_OBJECT_BTRACE_CONF, "");
   if (xml)
@@ -14740,7 +14740,7 @@ remote_target::read_btrace (struct btrace_data *btrace,
 		      (unsigned int) type);
     }
 
-  gdb::optional<gdb::char_vector> xml
+  std::optional<gdb::char_vector> xml
     = target_read_stralloc (current_inferior ()->top_target (),
 			    TARGET_OBJECT_BTRACE, annex);
   if (!xml)
@@ -14780,7 +14780,7 @@ remote_target::load (const char *name, int from_tty)
 const char *
 remote_target::pid_to_exec_file (int pid)
 {
-  static gdb::optional<gdb::char_vector> filename;
+  static std::optional<gdb::char_vector> filename;
   char *annex = NULL;
 
   if (m_features.packet_support (PACKET_qXfer_exec_file) != PACKET_ENABLE)

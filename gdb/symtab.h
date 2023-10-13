@@ -30,7 +30,7 @@
 #include "gdbsupport/gdb_regex.h"
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/function-view.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "gdbsupport/gdb_string_view.h"
 #include "gdbsupport/next-iterator.h"
 #include "gdbsupport/iterator-range.h"
@@ -364,10 +364,10 @@ private:
      around by const reference (see intro), and they're conceptually
      "cache" that can always be reconstructed from the non-mutable
      fields.  */
-  mutable gdb::optional<ada_lookup_name_info> m_ada;
-  mutable gdb::optional<demangle_for_lookup_info> m_cplus;
-  mutable gdb::optional<demangle_for_lookup_info> m_d;
-  mutable gdb::optional<demangle_for_lookup_info> m_go;
+  mutable std::optional<ada_lookup_name_info> m_ada;
+  mutable std::optional<demangle_for_lookup_info> m_cplus;
+  mutable std::optional<demangle_for_lookup_info> m_d;
+  mutable std::optional<demangle_for_lookup_info> m_go;
 
   /* The demangled hashes.  Stored in an array with one entry for each
      possible language.  The second array records whether we've
@@ -511,8 +511,8 @@ struct general_symbol_info
      copy_name must be set to true.  */
   void compute_and_set_names (gdb::string_view linkage_name, bool copy_name,
 			      struct objfile_per_bfd_storage *per_bfd,
-			      gdb::optional<hashval_t> hash
-				= gdb::optional<hashval_t> ());
+			      std::optional<hashval_t> hash
+				= std::optional<hashval_t> ());
 
   CORE_ADDR value_address () const
   {
@@ -2601,7 +2601,7 @@ private:
      true if any msymbols were seen that we should later consider adding to
      the results list.  */
   bool expand_symtabs (objfile *objfile,
-		       const gdb::optional<compiled_regex> &preg) const;
+		       const std::optional<compiled_regex> &preg) const;
 
   /* Add symbols from symtabs in OBJFILE that match PREG, and TREG, and are
      of type M_KIND, to the results set RESULTS_SET.  Return false if we
@@ -2610,8 +2610,8 @@ private:
      Returning true does not indicate that any results were added, just
      that we didn't _not_ add a result due to reaching MAX_SEARCH_RESULTS.  */
   bool add_matching_symbols (objfile *objfile,
-			     const gdb::optional<compiled_regex> &preg,
-			     const gdb::optional<compiled_regex> &treg,
+			     const std::optional<compiled_regex> &preg,
+			     const std::optional<compiled_regex> &treg,
 			     std::set<symbol_search> *result_set) const;
 
   /* Add msymbols from OBJFILE that match PREG and M_KIND, to the results
@@ -2621,7 +2621,7 @@ private:
      does not indicate that any results were added, just that we didn't
      _not_ add a result due to reaching MAX_SEARCH_RESULTS.  */
   bool add_matching_msymbols (objfile *objfile,
-			      const gdb::optional<compiled_regex> &preg,
+			      const std::optional<compiled_regex> &preg,
 			      std::vector<symbol_search> *results) const;
 
   /* Return true if MSYMBOL is of type KIND.  */
@@ -2910,7 +2910,7 @@ private:
 
   /* A compiled version of M_REGEXP.  This object is only given a value if
      M_REGEXP is not nullptr and is not the empty string.  */
-  gdb::optional<compiled_regex> m_c_regexp;
+  std::optional<compiled_regex> m_c_regexp;
 };
 
 /* Perform the core of the 'info sources' command.

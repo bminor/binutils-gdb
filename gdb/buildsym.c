@@ -643,7 +643,7 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
      anyway.  */
   if (line == 0)
     {
-      gdb::optional<int> last_line;
+      std::optional<int> last_line;
 
       while (!subfile->line_vector_entries.empty ())
 	{

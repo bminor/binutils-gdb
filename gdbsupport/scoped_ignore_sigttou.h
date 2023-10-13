@@ -26,7 +26,7 @@
 #ifdef SIGTTOU
 
 /* Simple wrapper that allows lazy initialization / destruction of T.
-   Slightly more efficient than gdb::optional, because it doesn't
+   Slightly more efficient than std::optional, because it doesn't
    carry storage to track whether the object has been initialized.  */
 template<typename T>
 class lazy_init

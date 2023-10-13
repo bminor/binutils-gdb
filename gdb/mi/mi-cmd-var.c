@@ -30,7 +30,7 @@
 #include "mi-getopt.h"
 #include "gdbthread.h"
 #include "mi-parse.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "inferior.h"
 
 static void varobj_update_one (struct varobj *var,

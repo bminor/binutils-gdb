@@ -713,7 +713,7 @@ processAttribute (const char *str)
     if (strcasecmp (str, item.name) == 0)
       return item.code;
 
-  gdb::optional<int> found;
+  std::optional<int> found;
   for (const auto &item : attributes)
     if (subseqMatch (str, item.name))
       {

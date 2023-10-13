@@ -352,7 +352,7 @@ inf_child_target::fileio_unlink (struct inferior *inf, const char *filename,
 
 /* Implementation of to_fileio_readlink.  */
 
-gdb::optional<std::string>
+std::optional<std::string>
 inf_child_target::fileio_readlink (struct inferior *inf, const char *filename,
 				   fileio_error *target_errno)
 {

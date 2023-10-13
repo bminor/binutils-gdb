@@ -69,7 +69,7 @@ struct ia64_table_entry
   };
 
 static struct ia64_table_entry *ktab = NULL;
-static gdb::optional<gdb::byte_vector> ktab_buf;
+static std::optional<gdb::byte_vector> ktab_buf;
 
 #endif
 
@@ -2648,7 +2648,7 @@ ia64_access_mem (unw_addr_space_t as,
 }
 
 /* Call low-level function to access the kernel unwind table.  */
-static gdb::optional<gdb::byte_vector>
+static std::optional<gdb::byte_vector>
 getunwind_table ()
 {
   /* FIXME drow/2005-09-10: This code used to call

@@ -914,7 +914,7 @@ source_script_file (struct auto_load_pspace_info *pspace_info,
       return;
     }
 
-  gdb::optional<open_script> opened = find_and_open_script (file,
+  std::optional<open_script> opened = find_and_open_script (file,
 							    1 /*search_path*/);
 
   if (opened)

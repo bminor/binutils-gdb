@@ -1046,7 +1046,7 @@ has_static_range (const struct range_bounds *bounds)
 
 /* See gdbtypes.h.  */
 
-gdb::optional<LONGEST>
+std::optional<LONGEST>
 get_discrete_low_bound (struct type *type)
 {
   type = check_typedef (type);
@@ -1062,7 +1062,7 @@ get_discrete_low_bound (struct type *type)
 
 	if (type->target_type ()->code () == TYPE_CODE_ENUM)
 	  {
-	    gdb::optional<LONGEST> low_pos
+	    std::optional<LONGEST> low_pos
 	      = discrete_position (type->target_type (), low);
 
 	    if (low_pos.has_value ())
@@ -1113,7 +1113,7 @@ get_discrete_low_bound (struct type *type)
 
 /* See gdbtypes.h.  */
 
-gdb::optional<LONGEST>
+std::optional<LONGEST>
 get_discrete_high_bound (struct type *type)
 {
   type = check_typedef (type);
@@ -1129,7 +1129,7 @@ get_discrete_high_bound (struct type *type)
 
 	if (type->target_type ()->code () == TYPE_CODE_ENUM)
 	  {
-	    gdb::optional<LONGEST> high_pos
+	    std::optional<LONGEST> high_pos
 	      = discrete_position (type->target_type (), high);
 
 	    if (high_pos.has_value ())
@@ -1192,11 +1192,11 @@ get_discrete_high_bound (struct type *type)
 bool
 get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 {
-  gdb::optional<LONGEST> low = get_discrete_low_bound (type);
+  std::optional<LONGEST> low = get_discrete_low_bound (type);
   if (!low.has_value ())
     return false;
 
-  gdb::optional<LONGEST> high = get_discrete_high_bound (type);
+  std::optional<LONGEST> high = get_discrete_high_bound (type);
   if (!high.has_value ())
     return false;
 
@@ -1244,7 +1244,7 @@ get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
    in which case the value of POS is unmodified.
 */
 
-gdb::optional<LONGEST>
+std::optional<LONGEST>
 discrete_position (struct type *type, LONGEST val)
 {
   if (type->code () == TYPE_CODE_RANGE)
@@ -2535,7 +2535,7 @@ compute_variant_fields_inner (struct type *type,
 			      std::vector<bool> &flags)
 {
   /* Evaluate the discriminant.  */
-  gdb::optional<ULONGEST> discr_value;
+  std::optional<ULONGEST> discr_value;
   if (part.discriminant_index != -1)
     {
       int idx = part.discriminant_index;
@@ -2758,7 +2758,7 @@ resolve_dynamic_type_internal (struct type *type,
   if (!is_dynamic_type_internal (real_type, top_level))
     return type;
 
-  gdb::optional<CORE_ADDR> type_length;
+  std::optional<CORE_ADDR> type_length;
   prop = TYPE_DYNAMIC_LENGTH (type);
   if (prop != NULL
       && dwarf2_evaluate_property (prop, frame, addr_stack, &value))

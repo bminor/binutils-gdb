@@ -3098,7 +3098,7 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
 			       type0->dyn_prop (DYN_PROP_BYTE_STRIDE),
 			       type0->field (0).bitsize ());
   int base_low =  ada_discrete_type_low_bound (type0->index_type ());
-  gdb::optional<LONGEST> base_low_pos, low_pos;
+  std::optional<LONGEST> base_low_pos, low_pos;
   CORE_ADDR base;
 
   low_pos = discrete_position (base_index_type, low);
@@ -3132,7 +3132,7 @@ ada_value_slice (struct value *array, int low, int high)
 			      (alloc, type->target_type (), index_type,
 			       type->dyn_prop (DYN_PROP_BYTE_STRIDE),
 			       type->field (0).bitsize ());
-  gdb::optional<LONGEST> low_pos, high_pos;
+  std::optional<LONGEST> low_pos, high_pos;
 
 
   low_pos = discrete_position (base_index_type, low);
@@ -8792,7 +8792,7 @@ pos_atr (struct value *arg)
   if (!discrete_type_p (type))
     error (_("'POS only defined on discrete types"));
 
-  gdb::optional<LONGEST> result = discrete_position (type, value_as_long (val));
+  std::optional<LONGEST> result = discrete_position (type, value_as_long (val));
   if (!result.has_value ())
     error (_("enumeration value is invalid: can't find 'POS"));
 

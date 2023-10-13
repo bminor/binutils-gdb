@@ -1335,7 +1335,7 @@ windows_nat_target::windows_continue (DWORD continue_status, int id,
 	th->suspend ();
       }
 
-  gdb::optional<unsigned> err;
+  std::optional<unsigned> err;
   do_synchronously ([&] ()
     {
       if (!continue_last_debug_event (continue_status, debug_events))
@@ -1561,7 +1561,7 @@ windows_nat_target::get_windows_debug_event
   /* If there is a relevant pending stop, report it now.  See the
      comment by the definition of "pending_stops" for details on why
      this is needed.  */
-  gdb::optional<pending_stop> stop
+  std::optional<pending_stop> stop
     = windows_process.fetch_pending_stop (debug_events);
   if (stop.has_value ())
     {
@@ -2024,7 +2024,7 @@ windows_nat_target::attach (const char *args, int from_tty)
   windows_init_thread_list ();
   windows_process.saw_create = 0;
 
-  gdb::optional<unsigned> err;
+  std::optional<unsigned> err;
   do_synchronously ([&] ()
     {
       BOOL ok = DebugActiveProcess (pid);
@@ -2074,7 +2074,7 @@ windows_nat_target::detach (inferior *inf, int from_tty)
 {
   windows_continue (DBG_CONTINUE, -1, 0, true);
 
-  gdb::optional<unsigned> err;
+  std::optional<unsigned> err;
   do_synchronously ([&] ()
     {
       if (!DebugActiveProcessStop (windows_process.current_event.dwProcessId))
@@ -2533,7 +2533,7 @@ windows_nat_target::create_inferior (const char *exec_file,
 #endif	/* !__CYGWIN__ */
   const char *allargs = origallargs.c_str ();
   PROCESS_INFORMATION pi;
-  gdb::optional<unsigned> ret;
+  std::optional<unsigned> ret;
   DWORD flags = 0;
   const std::string &inferior_tty = current_inferior ()->tty ();
 

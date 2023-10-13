@@ -162,7 +162,7 @@ std::unique_ptr<osdata>
 get_osdata (const char *type)
 {
   std::unique_ptr<osdata> osdata;
-  gdb::optional<gdb::char_vector> xml = target_get_osdata (type);
+  std::optional<gdb::char_vector> xml = target_get_osdata (type);
 
   if (xml)
     {

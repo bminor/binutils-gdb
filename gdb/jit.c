@@ -76,7 +76,7 @@ maint_info_jit_cmd (const char *args, int from_tty)
   inferior *inf = current_inferior ();
   bool printed_header = false;
 
-  gdb::optional<ui_out_emit_table> table_emitter;
+  std::optional<ui_out_emit_table> table_emitter;
 
   /* Print a line for each JIT-ed objfile.  */
   for (objfile *obj : inf->pspace->objfiles ())

@@ -747,7 +747,7 @@ struct dwarf2_per_objfile
   dwarf2_cu *sym_cu = nullptr;
 
   /* CUs that are queued to be read.  */
-  gdb::optional<std::queue<dwarf2_queue_item>> queue;
+  std::optional<std::queue<dwarf2_queue_item>> queue;
 
 private:
   /* Hold the corresponding compunit_symtab for each CU or TU.  This

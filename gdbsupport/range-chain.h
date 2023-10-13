@@ -90,7 +90,7 @@ struct range_chain
     /* The current iterator into one of the vector ranges.  If no
        value then this (outer) iterator is at the end of the overall
        range.  */
-    gdb::optional<typename Range::iterator> m_current;
+    std::optional<typename Range::iterator> m_current;
     /* Vector of ranges.  */
     const std::vector<Range> &m_ranges;
   };

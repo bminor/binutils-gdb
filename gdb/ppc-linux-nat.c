@@ -464,7 +464,7 @@ private:
     };
 
   /* The interface option.  Initialized if has_value () returns true.  */
-  gdb::optional<enum debug_reg_interface> m_interface;
+  std::optional<enum debug_reg_interface> m_interface;
 
   /* The info returned by the kernel with PPC_PTRACE_GETHWDBGINFO.  Only
      valid if we determined that the interface is HWDEBUG.  */
@@ -485,7 +485,7 @@ struct ppc_linux_process_info
   /* The watchpoint value that GDB requested for this process.
 
      Only used when the interface is DEBUGREG.  */
-  gdb::optional<long> requested_wp_val;
+  std::optional<long> requested_wp_val;
 };
 
 struct ppc_linux_nat_target final : public linux_nat_target

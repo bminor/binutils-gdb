@@ -913,7 +913,7 @@ syms_from_objfile_1 (struct objfile *objfile,
 
   /* Make sure that partially constructed symbol tables will be cleaned up
      if an error occurs during symbol reading.  */
-  gdb::optional<clear_symtab_users_cleanup> defer_clear_users;
+  std::optional<clear_symtab_users_cleanup> defer_clear_users;
 
   objfile_up objfile_holder (objfile);
 

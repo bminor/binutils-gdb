@@ -215,7 +215,7 @@ arm_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 /* See arm-fbsd-tdep.h.  */
 
 const struct target_desc *
-arm_fbsd_read_description_auxv (const gdb::optional<gdb::byte_vector> &auxv,
+arm_fbsd_read_description_auxv (const std::optional<gdb::byte_vector> &auxv,
 				target_ops *target, gdbarch *gdbarch, bool tls)
 {
   CORE_ADDR arm_hwcap = 0;
@@ -244,7 +244,7 @@ arm_fbsd_read_description_auxv (const gdb::optional<gdb::byte_vector> &auxv,
 const struct target_desc *
 arm_fbsd_read_description_auxv (bool tls)
 {
-  const gdb::optional<gdb::byte_vector> &auxv = target_read_auxv ();
+  const std::optional<gdb::byte_vector> &auxv = target_read_auxv ();
   return arm_fbsd_read_description_auxv (auxv,
 					 current_inferior ()->top_target (),
 					 current_inferior ()->arch (),
@@ -260,7 +260,7 @@ arm_fbsd_core_read_description (struct gdbarch *gdbarch,
 {
   asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
 
-  gdb::optional<gdb::byte_vector> auxv = target_read_auxv_raw (target);
+  std::optional<gdb::byte_vector> auxv = target_read_auxv_raw (target);
   return arm_fbsd_read_description_auxv (auxv, target, gdbarch, tls != nullptr);
 }
 

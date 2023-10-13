@@ -444,7 +444,7 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 			  unsigned int offset_size,
 			  struct dwarf2_section_info *str_section,
 			  struct dwarf2_section_info *str_offsets_section,
-			  gdb::optional<ULONGEST> str_offsets_base,
+			  std::optional<ULONGEST> str_offsets_base,
 			  htab_t include_hash, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = per_objfile->objfile;
@@ -805,7 +805,7 @@ dwarf_decode_macros (dwarf2_per_objfile *per_objfile,
 		     const struct line_header *lh, unsigned int offset_size,
 		     unsigned int offset, struct dwarf2_section_info *str_section,
 		     struct dwarf2_section_info *str_offsets_section,
-		     gdb::optional<ULONGEST> str_offsets_base,
+		     std::optional<ULONGEST> str_offsets_base,
 		     int section_is_gnu, struct dwarf2_cu *cu)
 {
   bfd *abfd;

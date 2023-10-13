@@ -3615,7 +3615,7 @@ procfs_target::make_corefile_notes (bfd *obfd, int *note_size)
   proc_iterate_over_threads (pi, procfs_corefile_thread_callback,
 			     &thread_args);
 
-  gdb::optional<gdb::byte_vector> auxv =
+  std::optional<gdb::byte_vector> auxv =
     target_read_alloc (current_inferior ()->top_target (),
 		       TARGET_OBJECT_AUXV, NULL);
   if (auxv && !auxv->empty ())

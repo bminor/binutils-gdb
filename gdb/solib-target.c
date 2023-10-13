@@ -233,7 +233,7 @@ solib_target_current_sos (void)
   struct so_list *new_solib, *start = NULL, *last = NULL;
 
   /* Fetch the list of shared libraries.  */
-  gdb::optional<gdb::char_vector> library_document
+  std::optional<gdb::char_vector> library_document
     = target_read_stralloc (current_inferior ()->top_target (),
 			    TARGET_OBJECT_LIBRARIES, NULL);
   if (!library_document)

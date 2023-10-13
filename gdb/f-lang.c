@@ -306,7 +306,7 @@ protected:
 
   /* Set and reset to handle removing intermediate values from the
      value chain.  */
-  gdb::optional<scoped_value_mark> m_mark;
+  std::optional<scoped_value_mark> m_mark;
 };
 
 /* A class used by FORTRAN_VALUE_SUBARRAY when repacking Fortran array

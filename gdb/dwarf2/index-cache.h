@@ -52,7 +52,7 @@ private:
   std::string build_id_str;
 
   /* Captured value of dwz build id.  */
-  gdb::optional<std::string> dwz_build_id_str;
+  std::optional<std::string> dwz_build_id_str;
 };
 
 /* Class to manage the access to the DWARF index cache.  */

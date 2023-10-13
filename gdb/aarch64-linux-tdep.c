@@ -1609,7 +1609,7 @@ static const struct target_desc *
 aarch64_linux_core_read_description (struct gdbarch *gdbarch,
 				     struct target_ops *target, bfd *abfd)
 {
-  gdb::optional<gdb::byte_vector> auxv = target_read_auxv_raw (target);
+  std::optional<gdb::byte_vector> auxv = target_read_auxv_raw (target);
   CORE_ADDR hwcap = linux_get_hwcap (auxv, target, gdbarch);
   CORE_ADDR hwcap2 = linux_get_hwcap2 (auxv, target, gdbarch);
 
@@ -2427,7 +2427,7 @@ aarch64_linux_gcc_target_options (struct gdbarch *gdbarch)
 
    Return the allocation tag if successful and nullopt otherwise.  */
 
-static gdb::optional<CORE_ADDR>
+static std::optional<CORE_ADDR>
 aarch64_mte_get_atag (CORE_ADDR address)
 {
   gdb::byte_vector tags;
@@ -2481,7 +2481,7 @@ aarch64_linux_memtag_matches_p (struct gdbarch *gdbarch,
   CORE_ADDR addr = value_as_address (address);
 
   /* Fetch the allocation tag for ADDRESS.  */
-  gdb::optional<CORE_ADDR> atag
+  std::optional<CORE_ADDR> atag
     = aarch64_mte_get_atag (gdbarch_remove_non_address_bits (gdbarch, addr));
 
   if (!atag.has_value ())
@@ -2579,7 +2579,7 @@ aarch64_linux_get_memtag (struct gdbarch *gdbarch, struct value *address,
 
       /* Remove the top byte.  */
       addr = gdbarch_remove_non_address_bits (gdbarch, addr);
-      gdb::optional<CORE_ADDR> atag = aarch64_mte_get_atag (addr);
+      std::optional<CORE_ADDR> atag = aarch64_mte_get_atag (addr);
 
       if (!atag.has_value ())
 	return nullptr;
@@ -2651,7 +2651,7 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
       uiout->field_core_addr ("fault-addr", gdbarch, fault_addr);
       uiout->text ("\n");
 
-      gdb::optional<CORE_ADDR> atag
+      std::optional<CORE_ADDR> atag
 	= aarch64_mte_get_atag (gdbarch_remove_non_address_bits (gdbarch,
 								 fault_addr));
       gdb_byte ltag = aarch64_mte_get_ltag (fault_addr);

@@ -77,7 +77,7 @@
 #include "build-id.h"
 #include "namespace.h"
 #include "gdbsupport/function-view.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "gdbsupport/underlying.h"
 #include "gdbsupport/hash_enum.h"
 #include "filename-seen-cache.h"
@@ -4080,7 +4080,7 @@ read_cutu_die_from_dwo (dwarf2_cu *cu,
 /* Return the signature of the compile unit, if found. In DWARF 4 and before,
    the signature is in the DW_AT_GNU_dwo_id attribute. In DWARF 5 and later, the
    signature is part of the header.  */
-static gdb::optional<ULONGEST>
+static std::optional<ULONGEST>
 lookup_dwo_id (struct dwarf2_cu *cu, struct die_info* comp_unit_die)
 {
   if (cu->header.version >= 5)
@@ -4088,7 +4088,7 @@ lookup_dwo_id (struct dwarf2_cu *cu, struct die_info* comp_unit_die)
   struct attribute *attr;
   attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_id, cu);
   if (attr == nullptr || !attr->form_is_unsigned ())
-    return gdb::optional<ULONGEST> ();
+    return std::optional<ULONGEST> ();
   return attr->as_unsigned ();
 }
 
@@ -4121,7 +4121,7 @@ lookup_dwo_unit (dwarf2_cu *cu, die_info *comp_unit_die, const char *dwo_name)
     dwo_unit = lookup_dwo_type_unit (cu, dwo_name, comp_dir);
   else
     {
-      gdb::optional<ULONGEST> signature = lookup_dwo_id (cu, comp_unit_die);
+      std::optional<ULONGEST> signature = lookup_dwo_id (cu, comp_unit_die);
 
       if (!signature.has_value ())
 	error (_("Dwarf Error: missing dwo_id for dwo_name %s"
@@ -7981,7 +7981,7 @@ create_dwo_cu_reader (const struct die_reader_specs *reader,
   sect_offset sect_off = cu->per_cu->sect_off;
   struct dwarf2_section_info *section = cu->per_cu->section;
 
-  gdb::optional<ULONGEST> signature = lookup_dwo_id (cu, comp_unit_die);
+  std::optional<ULONGEST> signature = lookup_dwo_id (cu, comp_unit_die);
   if (!signature.has_value ())
     {
       complaint (_("Dwarf Error: debug entry at offset %s is missing"
@@ -10785,7 +10785,7 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
   struct objfile *objfile = per_objfile->objfile;
   bfd *obfd = objfile->obfd.get ();
   /* Base address selection entry.  */
-  gdb::optional<unrelocated_addr> base;
+  std::optional<unrelocated_addr> base;
   const gdb_byte *buffer;
   bool overflow = false;
   ULONGEST addr_index;
@@ -10991,7 +10991,7 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
   unsigned int addr_size = cu_header->addr_size;
   CORE_ADDR mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Base address selection entry.  */
-  gdb::optional<unrelocated_addr> base;
+  std::optional<unrelocated_addr> base;
   unsigned int dummy;
   const gdb_byte *buffer;
 
@@ -16187,8 +16187,8 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
   bool is_declaration = false;
   sect_offset origin_offset {};
 
-  gdb::optional<unrelocated_addr> low_pc;
-  gdb::optional<unrelocated_addr> high_pc;
+  std::optional<unrelocated_addr> low_pc;
+  std::optional<unrelocated_addr> high_pc;
   bool high_pc_relative = false;
 
   for (int i = 0; i < abbrev->num_attrs; ++i)
@@ -17565,7 +17565,7 @@ dwarf2_per_objfile::read_line_string (const gdb_byte *buf,
 
 static unrelocated_addr
 read_addr_index_1 (dwarf2_per_objfile *per_objfile, unsigned int addr_index,
-		   gdb::optional<ULONGEST> addr_base, int addr_size)
+		   std::optional<ULONGEST> addr_base, int addr_size)
 {
   struct objfile *objfile = per_objfile->objfile;
   bfd *abfd = objfile->obfd.get ();
@@ -17618,7 +17618,7 @@ dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu,
 			unsigned int addr_index)
 {
   struct dwarf2_cu *cu = per_objfile->get_cu (per_cu);
-  gdb::optional<ULONGEST> addr_base;
+  std::optional<ULONGEST> addr_base;
   int addr_size;
 
   /* We need addr_base and addr_size.
@@ -21389,7 +21389,7 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 
   struct dwarf2_section_info *str_offsets_section;
   struct dwarf2_section_info *str_section;
-  gdb::optional<ULONGEST> str_offsets_base;
+  std::optional<ULONGEST> str_offsets_base;
 
   if (cu->dwo_unit != nullptr)
     {

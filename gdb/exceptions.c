@@ -27,7 +27,7 @@
 #include "serial.h"
 #include "gdbthread.h"
 #include "ui.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 
 static void
 print_flush (void)
@@ -38,7 +38,7 @@ print_flush (void)
   if (deprecated_error_begin_hook)
     deprecated_error_begin_hook ();
 
-  gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
+  std::optional<target_terminal::scoped_restore_terminal_state> term_state;
   if (target_supports_terminal_ours ())
     {
       term_state.emplace ();

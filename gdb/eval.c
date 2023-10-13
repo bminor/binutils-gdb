@@ -102,7 +102,7 @@ expression::uses_objfile (struct objfile *objfile) const
 struct value *
 expression::evaluate (struct type *expect_type, enum noside noside)
 {
-  gdb::optional<enable_thread_stack_temporaries> stack_temporaries;
+  std::optional<enable_thread_stack_temporaries> stack_temporaries;
   if (target_has_execution () && inferior_ptid != null_ptid
       && language_defn->la_language == language_cplus
       && !thread_stack_temporaries_enabled_p (inferior_thread ()))

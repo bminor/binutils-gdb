@@ -650,10 +650,10 @@ find_signalled_thread (struct thread_info *info, void *data)
    the data is prefixed with a 32-bit integer size to match the format
    used in FreeBSD NT_PROCSTAT_* notes.  */
 
-static gdb::optional<gdb::byte_vector>
+static std::optional<gdb::byte_vector>
 fbsd_make_note_desc (enum target_object object, uint32_t structsize)
 {
-  gdb::optional<gdb::byte_vector> buf =
+  std::optional<gdb::byte_vector> buf =
     target_read_alloc (current_inferior ()->top_target (), object, NULL);
   if (!buf || buf->empty ())
     return {};
@@ -735,7 +735,7 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 
   /* Auxiliary vector.  */
   uint32_t structsize = gdbarch_ptr_bit (gdbarch) / 4; /* Elf_Auxinfo  */
-  gdb::optional<gdb::byte_vector> note_desc =
+  std::optional<gdb::byte_vector> note_desc =
     fbsd_make_note_desc (TARGET_OBJECT_AUXV, structsize);
   if (note_desc && !note_desc->empty ())
     {
@@ -2340,7 +2340,7 @@ fbsd_vdso_range (struct gdbarch *gdbarch, struct mem_range *range)
   else
     {
       /* Fetch the list of address space entries from the running target. */
-      gdb::optional<gdb::byte_vector> buf =
+      std::optional<gdb::byte_vector> buf =
 	target_read_alloc (current_inferior ()->top_target (),
 			   TARGET_OBJECT_FREEBSD_VMMAP, nullptr);
       if (!buf || buf->empty ())

@@ -4003,7 +4003,7 @@ linux_proc_xfer_memory_partial (int pid, gdb_byte *readbuf,
 static bool
 proc_mem_file_is_writable ()
 {
-  static gdb::optional<bool> writable;
+  static std::optional<bool> writable;
 
   if (writable.has_value ())
     return *writable;
@@ -4424,7 +4424,7 @@ linux_nat_target::fileio_open (struct inferior *inf, const char *filename,
 
 /* Implementation of to_fileio_readlink.  */
 
-gdb::optional<std::string>
+std::optional<std::string>
 linux_nat_target::fileio_readlink (struct inferior *inf, const char *filename,
 				   fileio_error *target_errno)
 {

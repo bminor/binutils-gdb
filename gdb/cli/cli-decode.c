@@ -24,7 +24,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-style.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 
 /* Prototypes for local functions.  */
 
@@ -2727,7 +2727,7 @@ cmd_func (struct cmd_list_element *cmd, const char *args, int from_tty)
 {
   if (!cmd->is_command_class_help ())
     {
-      gdb::optional<scoped_restore_tmpl<bool>> restore_suppress;
+      std::optional<scoped_restore_tmpl<bool>> restore_suppress;
 
       if (cmd->suppress_notification != NULL)
 	restore_suppress.emplace (cmd->suppress_notification, true);

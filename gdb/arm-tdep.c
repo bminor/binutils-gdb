@@ -302,7 +302,7 @@ struct arm_prologue_cache
   int framereg;
 
   /* True if the return address is signed, false otherwise.  */
-  gdb::optional<bool> ra_signed_state;
+  std::optional<bool> ra_signed_state;
 
   /* Saved register offsets.  */
   trad_frame_saved_reg *saved_regs;
@@ -1035,7 +1035,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
   while (start < limit)
     {
       unsigned short insn;
-      gdb::optional<bool> ra_signed_state;
+      std::optional<bool> ra_signed_state;
 
       insn = read_code_unsigned_integer (start, 2, byte_order_for_code);
 

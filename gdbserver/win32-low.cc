@@ -1019,7 +1019,7 @@ get_child_debug_event (DWORD *continue_status,
 
   windows_process.attaching = 0;
   {
-    gdb::optional<pending_stop> stop
+    std::optional<pending_stop> stop
       = windows_process.fetch_pending_stop (debug_threads);
     if (stop.has_value ())
       {

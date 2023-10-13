@@ -38,7 +38,7 @@ void iterate_over_block_local_vars (const struct block *block,
    information to print, otherwise the printing function should print
    the relevant information.  */
 
-void get_user_print_what_frame_info (gdb::optional<enum print_what> *what);
+void get_user_print_what_frame_info (std::optional<enum print_what> *what);
 
 /* Return true if we should display the address in addition to the location,
    because we are in the middle of a statement.  */

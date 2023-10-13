@@ -52,7 +52,7 @@
 #include "ui.h"
 #include "interps.h"
 #include "skip.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "source.h"
 #include "cli/cli-style.h"
 #include "dwarf2/loc.h"
@@ -2790,7 +2790,7 @@ notice_new_inferior (thread_info *thr, bool leave_running, int from_tty)
   enum attach_post_wait_mode mode
     = leave_running ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_NOTHING;
 
-  gdb::optional<scoped_restore_current_thread> restore_thread;
+  std::optional<scoped_restore_current_thread> restore_thread;
 
   if (inferior_ptid != null_ptid)
     restore_thread.emplace ();

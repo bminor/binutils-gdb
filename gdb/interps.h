@@ -123,7 +123,7 @@ public:
 
   /* Notify the interpreter that thread T has exited.  */
   virtual void on_thread_exited (thread_info *,
-				 gdb::optional<ULONGEST> exit_code,
+				 std::optional<ULONGEST> exit_code,
 				 int silent) {}
 
   /* Notify the interpreter that inferior INF was added.  */
@@ -292,7 +292,7 @@ extern void interps_notify_new_thread (thread_info *t);
 
 /* Notify all interpreters that thread T has exited.  */
 extern void interps_notify_thread_exited (thread_info *t,
-					  gdb::optional<ULONGEST> exit_code,
+					  std::optional<ULONGEST> exit_code,
 					  int silent);
 
 /* Notify all interpreters that inferior INF was added.  */

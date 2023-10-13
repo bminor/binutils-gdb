@@ -52,9 +52,9 @@
       obj.release ();  // Optional cancel if needed.
 
    forward_scope_exit is also handy when you would need to wrap a
-   scope_exit in a gdb::optional:
+   scope_exit in a std::optional:
 
-      gdb::optional<longjmp_breakpoint_cleanup> cleanup;
+      std::optional<longjmp_breakpoint_cleanup> cleanup;
       if (some condition)
 	cleanup.emplace (thread);
       ...
@@ -62,7 +62,7 @@
 	cleanup->release ();
 
    since with scope exit, you would have to know the scope_exit's
-   callable template type when you create the gdb::optional:
+   callable template type when you create the std::optional:
 
      gdb:optional<scope_exit<what goes here?>>
 

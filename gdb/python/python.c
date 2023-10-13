@@ -121,9 +121,9 @@ static void gdbpy_set_quit_flag (const struct extension_language_defn *);
 static int gdbpy_check_quit_flag (const struct extension_language_defn *);
 static enum ext_lang_rc gdbpy_before_prompt_hook
   (const struct extension_language_defn *, const char *current_gdb_prompt);
-static gdb::optional<std::string> gdbpy_colorize
+static std::optional<std::string> gdbpy_colorize
   (const std::string &filename, const std::string &contents);
-static gdb::optional<std::string> gdbpy_colorize_disasm
+static std::optional<std::string> gdbpy_colorize_disasm
   (const std::string &content, gdbarch *gdbarch);
 
 /* The interface between gdb proper and loading of python scripts.  */
@@ -1191,7 +1191,7 @@ gdbpy_before_prompt_hook (const struct extension_language_defn *extlang,
 
 /* This is the extension_language_ops.colorize "method".  */
 
-static gdb::optional<std::string>
+static std::optional<std::string>
 gdbpy_colorize (const std::string &filename, const std::string &contents)
 {
   if (!gdb_python_initialized)
@@ -1268,7 +1268,7 @@ gdbpy_colorize (const std::string &filename, const std::string &contents)
 
 /* This is the extension_language_ops.colorize_disasm "method".  */
 
-static gdb::optional<std::string>
+static std::optional<std::string>
 gdbpy_colorize_disasm (const std::string &content, gdbarch *gdbarch)
 {
   if (!gdb_python_initialized)

@@ -112,7 +112,7 @@ int register_size (const struct target_desc *tdesc, int n);
 
 /* No throw version of find_regno.  If NAME is not a known register, return
    an empty value.  */
-gdb::optional<int> find_regno_no_throw (const struct target_desc *tdesc,
+std::optional<int> find_regno_no_throw (const struct target_desc *tdesc,
 					const char *name);
 
 int find_regno (const struct target_desc *tdesc, const char *name);

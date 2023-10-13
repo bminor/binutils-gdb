@@ -103,7 +103,7 @@ public:
 		   int flags, int mode, int warn_if_slow,
 		   fileio_error *target_errno) override;
 
-  gdb::optional<std::string>
+  std::optional<std::string>
     fileio_readlink (struct inferior *inf,
 		     const char *filename,
 		     fileio_error *target_errno) override;

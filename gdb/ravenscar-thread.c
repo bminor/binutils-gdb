@@ -685,7 +685,7 @@ ravenscar_thread_target::fetch_registers (struct regcache *regcache,
       struct gdbarch *gdbarch = regcache->arch ();
       bool is_active = task_is_currently_active (ptid);
       struct ravenscar_arch_ops *arch_ops = gdbarch_ravenscar_ops (gdbarch);
-      gdb::optional<fpu_state> fp_state;
+      std::optional<fpu_state> fp_state;
 
       int low_reg = regnum == -1 ? 0 : regnum;
       int high_reg = regnum == -1 ? gdbarch_num_regs (gdbarch) : regnum + 1;
@@ -731,7 +731,7 @@ ravenscar_thread_target::store_registers (struct regcache *regcache,
       struct gdbarch *gdbarch = regcache->arch ();
       bool is_active = task_is_currently_active (ptid);
       struct ravenscar_arch_ops *arch_ops = gdbarch_ravenscar_ops (gdbarch);
-      gdb::optional<fpu_state> fp_state;
+      std::optional<fpu_state> fp_state;
 
       int low_reg = regnum == -1 ? 0 : regnum;
       int high_reg = regnum == -1 ? gdbarch_num_regs (gdbarch) : regnum + 1;

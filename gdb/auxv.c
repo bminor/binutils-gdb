@@ -331,7 +331,7 @@ parse_auxv (target_ops *ops, gdbarch *gdbarch, const gdb_byte **readptr,
     overhead of transfering data from a remote target to the local host.  */
 struct auxv_info
 {
-  gdb::optional<gdb::byte_vector> data;
+  std::optional<gdb::byte_vector> data;
 };
 
 /* Per-inferior data key for auxv.  */
@@ -357,7 +357,7 @@ auxv_all_objfiles_removed (program_space *pspace)
 
 /* See auxv.h.  */
 
-const gdb::optional<gdb::byte_vector> &
+const std::optional<gdb::byte_vector> &
 target_read_auxv ()
 {
   inferior *inf = current_inferior ();
@@ -374,7 +374,7 @@ target_read_auxv ()
 
 /* See auxv.h.  */
 
-gdb::optional<gdb::byte_vector>
+std::optional<gdb::byte_vector>
 target_read_auxv_raw (target_ops *ops)
 {
   return target_read_alloc (ops, TARGET_OBJECT_AUXV, NULL);
@@ -413,7 +413,7 @@ target_auxv_search (const gdb::byte_vector &auxv, target_ops *ops,
 int
 target_auxv_search (CORE_ADDR match, CORE_ADDR *valp)
 {
-  const gdb::optional<gdb::byte_vector> &auxv = target_read_auxv ();
+  const std::optional<gdb::byte_vector> &auxv = target_read_auxv ();
 
   if (!auxv.has_value ())
     return -1;
@@ -572,7 +572,7 @@ fprint_target_auxv (struct ui_file *file)
   gdbarch *gdbarch = current_inferior ()->arch ();
   CORE_ADDR type, val;
   int ents = 0;
-  const gdb::optional<gdb::byte_vector> &auxv = target_read_auxv ();
+  const std::optional<gdb::byte_vector> &auxv = target_read_auxv ();
 
   if (!auxv.has_value ())
     return -1;

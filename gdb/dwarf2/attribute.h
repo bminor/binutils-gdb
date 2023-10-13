@@ -29,7 +29,7 @@
 
 #include "dwarf2.h"
 #include "dwarf2/types.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 
 /* Blocks are a bunch of untyped bytes.  */
 struct dwarf_block

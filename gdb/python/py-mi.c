@@ -146,7 +146,7 @@ private:
 
   /* If an error occurred, this holds the exception information for
      use by the 'release' method.  */
-  gdb::optional<gdbpy_err_fetch> m_error;
+  std::optional<gdbpy_err_fetch> m_error;
 
   /* Return a reference to the object under construction.  */
   object_desc &current ()

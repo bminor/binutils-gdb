@@ -447,7 +447,7 @@ struct ppc_inferior_data
   /* This is an optional in case we add more fields to ppc_inferior_data, we
      don't want it instantiated as soon as we get the ppc_inferior_data for an
      inferior.  */
-  gdb::optional<displaced_step_buffers> disp_step_buf;
+  std::optional<displaced_step_buffers> disp_step_buf;
 };
 
 extern ppc_inferior_data * get_ppc_per_inferior (inferior *inf);

@@ -340,7 +340,7 @@ extern void switch_to_inferior_no_thread (inferior *inf);
 
    If the current inferior was changed, return an RAII object that will
    restore the original current context.  */
-extern gdb::optional<scoped_restore_current_thread> maybe_switch_inferior
+extern std::optional<scoped_restore_current_thread> maybe_switch_inferior
   (inferior *inf);
 
 /* Info about an inferior's target description.  There's one of these

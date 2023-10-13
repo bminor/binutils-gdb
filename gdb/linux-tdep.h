@@ -94,7 +94,7 @@ extern int linux_is_uclinux (void);
    parse auxv entries.
 
    On error, 0 is returned.  */
-extern CORE_ADDR linux_get_hwcap (const gdb::optional<gdb::byte_vector> &auxv,
+extern CORE_ADDR linux_get_hwcap (const std::optional<gdb::byte_vector> &auxv,
 				  struct target_ops *target, gdbarch *gdbarch);
 
 /* Same as the above, but obtain all the inputs from the current inferior.  */
@@ -105,7 +105,7 @@ extern CORE_ADDR linux_get_hwcap ();
    parse auxv entries.
 
    On error, 0 is returned.  */
-extern CORE_ADDR linux_get_hwcap2 (const gdb::optional<gdb::byte_vector> &auxv,
+extern CORE_ADDR linux_get_hwcap2 (const std::optional<gdb::byte_vector> &auxv,
 				   struct target_ops *target, gdbarch *gdbarch);
 
 /* Same as the above, but obtain all the inputs from the current inferior.  */

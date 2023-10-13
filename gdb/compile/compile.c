@@ -40,7 +40,7 @@
 #include "osabi.h"
 #include "gdbsupport/gdb_wait.h"
 #include "valprint.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "gdbsupport/gdb_unlinker.h"
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/scoped_ignore_signal.h"
@@ -768,7 +768,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 
   compile_file_names fnames = get_new_file_names ();
 
-  gdb::optional<gdb::unlinker> source_remover;
+  std::optional<gdb::unlinker> source_remover;
 
   {
     gdb_file_up src = gdb_fopen_cloexec (fnames.source_file (), "w");

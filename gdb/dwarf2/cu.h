@@ -22,7 +22,7 @@
 
 #include "buildsym.h"
 #include "dwarf2/comp-unit-head.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "language.h"
 
 /* Type used for delaying computation of method physnames.
@@ -101,7 +101,7 @@ struct dwarf2_cu
   struct comp_unit_head header;
 
   /* Base address of this compilation unit.  */
-  gdb::optional<unrelocated_addr> base_address;
+  std::optional<unrelocated_addr> base_address;
 
   /* The language we are debugging.  */
   const struct language_defn *language_defn = nullptr;
@@ -189,7 +189,7 @@ public:
 
   /* The DW_AT_addr_base (DW_AT_GNU_addr_base) attribute if present.
      Note this value comes from the Fission stub CU/TU's DIE.  */
-  gdb::optional<ULONGEST> addr_base;
+  std::optional<ULONGEST> addr_base;
 
   /* The DW_AT_GNU_ranges_base attribute, if present.
 
@@ -242,7 +242,7 @@ public:
      files, the value is implicitly zero.  For DWARF 5 version DWO files, the
      value is often implicit and is the size of the header of
      .debug_str_offsets section (8 or 4, depending on the address size).  */
-  gdb::optional<ULONGEST> str_offsets_base;
+  std::optional<ULONGEST> str_offsets_base;
 
   /* Mark used when releasing cached dies.  */
   bool m_mark : 1;

@@ -160,8 +160,8 @@ read_formatted_entries (dwarf2_per_objfile *per_objfile, bfd *abfd,
 	  ULONGEST form  = read_unsigned_leb128 (abfd, format, &bytes_read);
 	  format += bytes_read;
 
-	  gdb::optional<const char *> string;
-	  gdb::optional<unsigned int> uint;
+	  std::optional<const char *> string;
+	  std::optional<unsigned int> uint;
 
 	  switch (form)
 	    {

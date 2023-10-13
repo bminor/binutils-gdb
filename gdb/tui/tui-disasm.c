@@ -234,7 +234,7 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 	 promising starting point then we record it in this structure.  If
 	 the next address we try is not a suitable starting point then we
 	 will fall back to the address held here.  */
-      gdb::optional<CORE_ADDR> possible_new_low;
+      std::optional<CORE_ADDR> possible_new_low;
 
       /* The previous value of NEW_LOW so we know if the new value is
 	 different or not.  */

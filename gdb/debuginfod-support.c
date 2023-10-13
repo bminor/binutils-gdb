@@ -21,7 +21,7 @@
 #include <errno.h>
 #include "gdbsupport/scoped_fd.h"
 #include "debuginfod-support.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "cli/cli-cmds.h"
 #include "cli/cli-style.h"
 #include "cli-out.h"
@@ -320,7 +320,7 @@ debuginfod_source_query (const unsigned char *build_id,
 
   char *dname = nullptr;
   scoped_fd fd;
-  gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
+  std::optional<target_terminal::scoped_restore_terminal_state> term_state;
 
   {
     user_data data ("source file", srcpath);
@@ -366,7 +366,7 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 
   char *dname = nullptr;
   scoped_fd fd;
-  gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
+  std::optional<target_terminal::scoped_restore_terminal_state> term_state;
 
   {
     user_data data ("separate debug info for", filename);
@@ -409,7 +409,7 @@ debuginfod_exec_query (const unsigned char *build_id,
 
   char *dname = nullptr;
   scoped_fd fd;
-  gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
+  std::optional<target_terminal::scoped_restore_terminal_state> term_state;
 
   {
     user_data data ("executable for", filename);
@@ -458,7 +458,7 @@ debuginfod_section_query (const unsigned char *build_id,
   char *dname = nullptr;
   std::string desc = std::string ("section ") + section_name + " for";
   scoped_fd fd;
-  gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
+  std::optional<target_terminal::scoped_restore_terminal_state> term_state;
 
   {
     user_data data (desc.c_str (), filename);

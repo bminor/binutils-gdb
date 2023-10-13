@@ -150,14 +150,14 @@ value_subscript (struct value *array, LONGEST index)
       || tarray->code () == TYPE_CODE_STRING)
     {
       struct type *range_type = tarray->index_type ();
-      gdb::optional<LONGEST> lowerbound = get_discrete_low_bound (range_type);
+      std::optional<LONGEST> lowerbound = get_discrete_low_bound (range_type);
       if (!lowerbound.has_value ())
 	lowerbound = 0;
 
       if (array->lval () != lval_memory)
 	return value_subscripted_rvalue (array, index, *lowerbound);
 
-      gdb::optional<LONGEST> upperbound
+      std::optional<LONGEST> upperbound
 	= get_discrete_high_bound (range_type);
 
       if (!upperbound.has_value ())

@@ -312,7 +312,7 @@ struct thread_db_thread_info : public private_thread_info
   /* Cached thread state.  */
   td_thrhandle_t th {};
   thread_t tid {};
-  gdb::optional<gdb::byte_vector> thread_handle;
+  std::optional<gdb::byte_vector> thread_handle;
 };
 
 static thread_db_thread_info *

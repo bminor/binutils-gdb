@@ -30,7 +30,7 @@ extern void dwarf_decode_macros (dwarf2_per_objfile *per_objfile,
 				 unsigned int offset,
 				 dwarf2_section_info *str_section,
 				 dwarf2_section_info *str_offsets_section,
-				 gdb::optional<ULONGEST> str_offsets_base,
+				 std::optional<ULONGEST> str_offsets_base,
 				 int section_is_gnu, struct dwarf2_cu *cu);
 
 #endif /* GDB_DWARF2_MACRO_H */

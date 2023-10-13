@@ -31,7 +31,7 @@
 #define VERIFY SELF_CHECK
 
 /* Used to disable testing features not supported by
-   gdb::optional.  */
+   std::optional.  */
 #define GDB_OPTIONAL
 
 namespace selftests {
@@ -41,7 +41,7 @@ namespace optional {
    copied over from libstdc++'s testsuite.  To preserve the structure
    and help with comparison with the original tests, the file names
    have been preserved, and only minimal modification was done to have
-   them compile against gdb::optional instead of std::optional:
+   them compile against std::optional instead of std::optional:
 
      - std::optional->gdb:optional, etc.
      - ATTRIBUTE_UNUSED in a few places
