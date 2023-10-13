@@ -91,6 +91,21 @@ get_field_imm5_mbar (struct string_buf *buf, long instr)
 }
 
 static char *
+get_field_immw (struct string_buf *buf, long instr)
+{
+  char *p = strbuf (buf);
+
+  if (instr & 0x00004000)
+    sprintf (p, "%d", (short)(((instr & IMM5_WIDTH_MASK)
+				>> IMM_WIDTH_LOW))); /* bsefi */
+  else
+    sprintf (p, "%d", (short)(((instr & IMM5_WIDTH_MASK) >>
+				IMM_WIDTH_LOW) - ((instr & IMM5_MASK) >>
+				IMM_LOW) + 1)); /* bsifi */
+  return p;
+}
+
+static char *
 get_field_rfsl (struct string_buf *buf, long instr)
 {
   char *p = strbuf (buf);
@@ -426,6 +441,14 @@ print_insn_microblaze (bfd_vma memaddr, struct disassemble_info * info)
 	  break;
 	  /* For mbar 16 or sleep insn.  */
 	case INST_TYPE_NONE:
+	  break;
+	  /* For bit field insns.  */
+	case INST_TYPE_RD_R1_IMMW_IMMS:
+	  print_func (stream, "\t%s, %s, %s, %s",
+		      get_field_rd (&buf, inst),
+		      get_field_r1 (&buf, inst),
+		      get_field_immw (&buf, inst),
+		      get_field_imm5 (&buf, inst));
 	  break;
 	  /* For tuqula instruction */
 	case INST_TYPE_RD:
