@@ -482,7 +482,6 @@ SELFTESTS_SRCS = \
 	unittests/scoped_mmap-selftests.c \
 	unittests/scoped_restore-selftests.c \
 	unittests/search-memory-selftests.c \
-	unittests/string_view-selftests.c \
 	unittests/style-selftests.c \
 	unittests/tracepoint-selftests.c \
 	unittests/tui-selftests.c \
