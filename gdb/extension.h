@@ -337,6 +337,68 @@ extern gdb::optional<std::string> ext_lang_colorize_disasm
 extern gdb::optional<int> ext_lang_print_insn
   (struct gdbarch *gdbarch, CORE_ADDR address, struct disassemble_info *info);
 
+/* When GDB calls into an extension language because an objfile was
+   discovered for which GDB couldn't find any debug information, this
+   structure holds the result that the extension language returns.
+
+   There are three possible actions that might be returned by an extension;
+   first an extension can return a filename, this is the path to the file
+   containing the required debug  information.  The second possibility is
+   to return a flag indicating that GDB should check again for the missing
+   debug information, this would imply that the extension has installed
+   the debug information into a location where GDB can be expected to find
+   it.  And the third option is for the extension to just return a null
+   result, indication there is nothing the extension can do to provide the
+   missing debug information.  */
+struct ext_lang_missing_debuginfo_result
+{
+  /* Default result.  The extension was unable to provide the missing debug
+     info.  */
+  ext_lang_missing_debuginfo_result ()
+  { /* Nothing.  */ }
+
+  /* When TRY_AGAIN is true GDB should try searching again, the extension
+     may have installed the missing debug info into a suitable location.
+     When TRY_AGAIN is false this is equivalent to the default, no
+     argument, constructor.  */
+  ext_lang_missing_debuginfo_result (bool try_again)
+    : m_try_again (try_again)
+  { /* Nothing.  */ }
+
+  /* Look in FILENAME for the missing debug info.  */
+  ext_lang_missing_debuginfo_result (std::string &&filename)
+    : m_filename (std::move (filename))
+  { /* Nothing.  */ }
+
+  /* The filename where GDB can find the missing debuginfo.  This is empty
+     if the extension didn't suggest a file that can be used.  */
+  const std::string &
+  filename () const
+  {
+    return m_filename;
+  }
+
+  /* Returns true if GDB should look again for the debug information.  */
+  const bool
+  try_again () const
+  {
+    return m_try_again;
+  }
+
+private:
+  /* The filename where the missing debuginfo can now be found.  */
+  std::string m_filename;
+
+  /* When true GDB will search again for the debuginfo using its standard
+     techniques.  When false GDB will not search again.  */
+  bool m_try_again = false;
+};
+
+/* Called when GDB failed to find any debug information for OBJFILE.  */
+
+extern ext_lang_missing_debuginfo_result ext_lang_handle_missing_debuginfo
+  (struct objfile *objfile);
+
 #if GDB_SELF_TEST
 namespace selftests {
 extern void (*hook_set_active_ext_lang) ();

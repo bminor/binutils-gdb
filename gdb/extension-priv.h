@@ -279,6 +279,13 @@ struct extension_language_ops
   gdb::optional<int> (*print_insn) (struct gdbarch *gdbarch,
 				    CORE_ADDR address,
 				    struct disassemble_info *info);
+
+  /* Give extension languages a chance to deal with missing debug
+     information.  OBJFILE is the file for which GDB was unable to find
+     any debug information.  */
+  ext_lang_missing_debuginfo_result
+    (*handle_missing_debuginfo) (const struct extension_language_defn *,
+				 struct objfile *objfile);
 };
 
 /* State necessary to restore a signal handler to its previous value.  */

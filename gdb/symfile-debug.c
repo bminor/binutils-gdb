@@ -631,38 +631,88 @@ debuginfod_find_and_open_separate_symbol_file (struct objfile * objfile)
 bool
 objfile::find_and_add_separate_symbol_file (symfile_add_flags symfile_flags)
 {
-  bool has_dwarf = false;
+  bool has_dwarf2 = false;
 
-  deferred_warnings warnings;
-
-  gdb_bfd_ref_ptr debug_bfd;
-  std::string filename;
-
-  std::tie (debug_bfd, filename) = simple_find_and_open_separate_symbol_file
-    (this, find_separate_debug_file_by_buildid, &warnings);
-
-  if (debug_bfd == nullptr)
-    std::tie (debug_bfd, filename)
-      = simple_find_and_open_separate_symbol_file
-	  (this, find_separate_debug_file_by_debuglink, &warnings);
-
-  if (debug_bfd == nullptr)
-    std::tie (debug_bfd, filename)
-      = debuginfod_find_and_open_separate_symbol_file (this);
-
-  if (debug_bfd != nullptr)
+  /* Usually we only make a single pass when looking for separate debug
+     information.  However, it is possible for an extension language hook
+     to request that GDB make a second pass, in which case max_attempts
+     will be updated, and the loop restarted.  */
+  for (unsigned attempt = 0, max_attempts = 1;
+       attempt < max_attempts && !has_dwarf2;
+       ++attempt)
     {
-      symbol_file_add_separate (debug_bfd, filename.c_str (), symfile_flags,
-				this);
-      has_dwarf = true;
+      gdb_assert (max_attempts <= 2);
+
+      deferred_warnings warnings;
+      gdb_bfd_ref_ptr debug_bfd;
+      std::string filename;
+
+      std::tie (debug_bfd, filename)
+	= simple_find_and_open_separate_symbol_file
+	    (this, find_separate_debug_file_by_buildid, &warnings);
+
+      if (debug_bfd == nullptr)
+	std::tie (debug_bfd, filename)
+	  = simple_find_and_open_separate_symbol_file
+	      (this, find_separate_debug_file_by_debuglink, &warnings);
+
+      /* Only try debuginfod on the first attempt.  Sure, we could imagine
+	 an extension that somehow adds the required debug info to the
+	 debuginfod server but, at least for now, we don't support this
+	 scenario.  Better for the extension to return new debug info
+	 directly to GDB.  Plus, going to the debuginfod server might be
+	 slow, so that's a good argument for only doing this once.  */
+      if (debug_bfd == nullptr && attempt == 0)
+	std::tie (debug_bfd, filename)
+	  = debuginfod_find_and_open_separate_symbol_file (this);
+
+      if (debug_bfd != nullptr)
+	{
+	  /* We found a separate debug info symbol file.  If this is our
+	     first attempt then setting HAS_DWARF2 will cause us to break
+	     from the attempt loop.  */
+	  symbol_file_add_separate (debug_bfd, filename.c_str (),
+				    symfile_flags, this);
+	  has_dwarf2 = true;
+	}
+      else if (attempt == 0)
+	{
+	  /* Failed to find a separate debug info symbol file.  Call out to
+	     the extension languages.  The user might have registered an
+	     extension that can find the debug info for us, or maybe give
+	     the user a system specific message that guides them to finding
+	     the missing debug info.  */
+
+	  ext_lang_missing_debuginfo_result ext_result
+	    = ext_lang_handle_missing_debuginfo (this);
+	  if (!ext_result.filename ().empty ())
+	    {
+	      /* Extension found a suitable debug file for us.  */
+	      debug_bfd
+		= symfile_bfd_open_no_error (ext_result.filename ().c_str ());
+
+	      if (debug_bfd != nullptr)
+		{
+		  symbol_file_add_separate (debug_bfd,
+					    ext_result.filename ().c_str (),
+					    symfile_flags, this);
+		  has_dwarf2 = true;
+		}
+	    }
+	  else if (ext_result.try_again ())
+	    {
+	      max_attempts = 2;
+	      continue;
+	    }
+	}
+
+      /* If we still have not got a separate debug symbol file, then
+	 emit any warnings we've collected so far.  */
+      if (!has_dwarf2)
+	warnings.emit ();
     }
 
-  /* If we still have not got a separate debug symbol file, then
-     emit any warnings we've collected so far.  */
-  if (!has_dwarf)
-    warnings.emit ();
-
-  return has_dwarf;
+  return has_dwarf2;
 }
 
 
