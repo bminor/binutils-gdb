@@ -385,7 +385,7 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 
     case TYPE_CODE_ENUM:
       {
-	gdb::optional<LONGEST> posn = discrete_position (type, val);
+	std::optional<LONGEST> posn = discrete_position (type, val);
 	if (posn.has_value ())
 	  fputs_styled (ada_enum_name (type->field (*posn).name ()),
 			variable_name_style.style (), stream);
@@ -827,7 +827,7 @@ ada_val_print_enum (struct value *value, struct ui_file *stream, int recurse,
   int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;
 
   val = unpack_long (type, valaddr + offset_aligned);
-  gdb::optional<LONGEST> posn = discrete_position (type, val);
+  std::optional<LONGEST> posn = discrete_position (type, val);
   if (posn.has_value ())
     {
       const char *name = ada_enum_name (type->field (*posn).name ());

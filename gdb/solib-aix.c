@@ -65,7 +65,7 @@ struct solib_aix_inferior_data
      the same principles applied to shared libraries also apply
      to the main executable.  So it's simpler to keep it as part
      of this list.  */
-  gdb::optional<std::vector<lm_info_aix>> library_list;
+  std::optional<std::vector<lm_info_aix>> library_list;
 };
 
 /* Key to our per-inferior data.  */
@@ -91,7 +91,7 @@ get_solib_aix_inferior_data (struct inferior *inf)
 
 /* Dummy implementation if XML support is not compiled in.  */
 
-static gdb::optional<std::vector<lm_info_aix>>
+static std::optional<std::vector<lm_info_aix>>
 solib_aix_parse_libraries (const char *library)
 {
   static int have_warned;
@@ -201,7 +201,7 @@ static const struct gdb_xml_element library_list_elements[] =
 
    Return an empty option if the parsing failed.  */
 
-static gdb::optional<std::vector<lm_info_aix>>
+static std::optional<std::vector<lm_info_aix>>
 solib_aix_parse_libraries (const char *library)
 {
   std::vector<lm_info_aix> result;
@@ -225,7 +225,7 @@ solib_aix_parse_libraries (const char *library)
    is not NULL, then print a warning including WARNING_MSG and
    a description of the error.  */
 
-static gdb::optional<std::vector<lm_info_aix>> &
+static std::optional<std::vector<lm_info_aix>> &
 solib_aix_get_library_list (struct inferior *inf, const char *warning_msg)
 {
   struct solib_aix_inferior_data *data;
@@ -235,7 +235,7 @@ solib_aix_get_library_list (struct inferior *inf, const char *warning_msg)
   if (data->library_list.has_value ())
     return data->library_list;
 
-  gdb::optional<gdb::char_vector> library_document
+  std::optional<gdb::char_vector> library_document
     = target_read_stralloc (current_inferior ()->top_target (),
 			    TARGET_OBJECT_LIBRARIES_AIX,
 			    NULL);
@@ -421,7 +421,7 @@ solib_aix_solib_create_inferior_hook (int from_tty)
 
   /* We need to relocate the main executable...  */
 
-  gdb::optional<std::vector<lm_info_aix>> &library_list
+  std::optional<std::vector<lm_info_aix>> &library_list
     = solib_aix_get_library_list (current_inferior (), warning_msg);
   if (!library_list.has_value ())
     return;  /* Warning already printed.  */
@@ -448,7 +448,7 @@ solib_aix_solib_create_inferior_hook (int from_tty)
 static intrusive_list<shobj>
 solib_aix_current_sos ()
 {
-  gdb::optional<std::vector<lm_info_aix>> &library_list
+  std::optional<std::vector<lm_info_aix>> &library_list
     = solib_aix_get_library_list (current_inferior (), NULL);
   if (!library_list.has_value ())
     return {};

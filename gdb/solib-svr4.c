@@ -454,7 +454,7 @@ static int match_main (const char *);
    architecture size (32-bit or 64-bit) is returned to *P_ARCH_SIZE.  Likewise,
    the base address of the section is returned in *BASE_ADDR.  */
 
-static gdb::optional<gdb::byte_vector>
+static std::optional<gdb::byte_vector>
 read_program_header (int type, int *p_arch_size, CORE_ADDR *base_addr)
 {
   bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
@@ -587,7 +587,7 @@ read_program_header (int type, int *p_arch_size, CORE_ADDR *base_addr)
 
 
 /* Return program interpreter string.  */
-static gdb::optional<gdb::byte_vector>
+static std::optional<gdb::byte_vector>
 find_program_interpreter (void)
 {
   /* If we have a current exec_bfd, use its section table.  */
@@ -632,7 +632,7 @@ scan_dyntag_auxv (const int desired_dyntag, CORE_ADDR *ptr,
   CORE_ADDR base_addr;
 
   /* Read in .dynamic section.  */
-  gdb::optional<gdb::byte_vector> ph_data
+  std::optional<gdb::byte_vector> ph_data
     = read_program_header (PT_DYNAMIC, &arch_size, &base_addr);
   if (!ph_data)
     return 0;
@@ -1159,7 +1159,7 @@ svr4_current_sos_via_xfer_libraries (struct svr4_library_list *list,
   gdb_assert (annex == NULL || target_augmented_libraries_svr4_read ());
 
   /* Fetch the list of shared libraries.  */
-  gdb::optional<gdb::char_vector> svr4_library_document
+  std::optional<gdb::char_vector> svr4_library_document
     = target_read_stralloc (current_inferior ()->top_target (),
 			    TARGET_OBJECT_LIBRARIES_SVR4,
 			    annex);
@@ -2309,7 +2309,7 @@ enable_break (struct svr4_info *info, int from_tty)
 
   /* Find the program interpreter; if not found, warn the user and drop
      into the old breakpoint at symbol code.  */
-  gdb::optional<gdb::byte_vector> interp_name_holder
+  std::optional<gdb::byte_vector> interp_name_holder
     = find_program_interpreter ();
   if (interp_name_holder)
     {
@@ -2519,7 +2519,7 @@ enable_break (struct svr4_info *info, int from_tty)
 
 /* Read the ELF program headers from ABFD.  */
 
-static gdb::optional<gdb::byte_vector>
+static std::optional<gdb::byte_vector>
 read_program_headers_from_bfd (bfd *abfd)
 {
   Elf_Internal_Ehdr *ehdr = elf_elfheader (abfd);
@@ -2632,9 +2632,9 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	 really do not match.  */
       int arch_size;
 
-      gdb::optional<gdb::byte_vector> phdrs_target
+      std::optional<gdb::byte_vector> phdrs_target
 	= read_program_header (-1, &arch_size, NULL);
-      gdb::optional<gdb::byte_vector> phdrs_binary
+      std::optional<gdb::byte_vector> phdrs_binary
 	= read_program_headers_from_bfd (current_program_space->exec_bfd ());
       if (phdrs_target && phdrs_binary)
 	{

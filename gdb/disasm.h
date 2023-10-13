@@ -275,7 +275,7 @@ private:
      negative value (which indicates an error), then, if this variable has
      a value, we report a memory error to the user, otherwise, we report a
      non-memory error.  */
-  gdb::optional<CORE_ADDR> m_err_memaddr;
+  std::optional<CORE_ADDR> m_err_memaddr;
 
   /* The stream to which disassembler output will be written.  */
   ui_file *m_dest;

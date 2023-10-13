@@ -62,7 +62,7 @@
 #include "thread-fsm.h"
 #include "gdbsupport/enum-flags.h"
 #include "progspace-and-thread.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "arch-utils.h"
 #include "gdbsupport/scope-exit.h"
 #include "gdbsupport/forward-scope-exit.h"
@@ -713,7 +713,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
     {
       /* If FOLLOW_CHILD, we leave CHILD_INF as the current inferior
 	 (do not restore the parent as the current inferior).  */
-      gdb::optional<scoped_restore_current_thread> maybe_restore;
+      std::optional<scoped_restore_current_thread> maybe_restore;
 
       if (!follow_child && !sched_multi)
 	maybe_restore.emplace ();
@@ -4587,7 +4587,7 @@ fetch_inferior_event ()
        debugging.  If we're looking at traceframes while the target is
        running, we're going to need to get back to that mode after
        handling the event.  */
-    gdb::optional<scoped_restore_current_traceframe> maybe_restore_traceframe;
+    std::optional<scoped_restore_current_traceframe> maybe_restore_traceframe;
     if (non_stop)
       {
 	maybe_restore_traceframe.emplace ();
@@ -4960,7 +4960,7 @@ adjust_pc_after_break (struct thread_info *thread,
       || (target_is_non_stop_p ()
 	  && moribund_breakpoint_here_p (aspace, breakpoint_pc)))
     {
-      gdb::optional<scoped_restore_tmpl<int>> restore_operation_disable;
+      std::optional<scoped_restore_tmpl<int>> restore_operation_disable;
 
       if (record_full_is_used ())
 	restore_operation_disable.emplace
@@ -7109,7 +7109,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  decr_pc = gdbarch_decr_pc_after_break (gdbarch);
 	  if (decr_pc != 0)
 	    {
-	      gdb::optional<scoped_restore_tmpl<int>>
+	      std::optional<scoped_restore_tmpl<int>>
 		restore_operation_disable;
 
 	      if (record_full_is_used ())
@@ -9343,7 +9343,7 @@ normal_stop ()
 	   && last.kind () != TARGET_WAITKIND_THREAD_EXITED)
     finish_ptid = inferior_ptid;
 
-  gdb::optional<scoped_finish_thread_state> maybe_finish_thread_state;
+  std::optional<scoped_finish_thread_state> maybe_finish_thread_state;
   if (finish_ptid != null_ptid)
     {
       maybe_finish_thread_state.emplace

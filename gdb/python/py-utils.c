@@ -469,12 +469,12 @@ gdbpy_fix_doc_string_indentation (gdb::unique_xmalloc_ptr<char> doc)
      (user left a single stray space at the start of an otherwise blank
      line), we don't consider lines without content when updating the
      MIN_WHITESPACE value.  */
-  gdb::optional<int> min_whitespace;
+  std::optional<int> min_whitespace;
 
   /* The index into WS_INFO at which the processing of DOC can be
      considered "all done", that is, after this point there are no further
      lines with useful content and we should just stop.  */
-  gdb::optional<size_t> all_done_idx;
+  std::optional<size_t> all_done_idx;
 
   /* White-space information for each line in DOC.  */
   std::vector<line_whitespace> ws_info;

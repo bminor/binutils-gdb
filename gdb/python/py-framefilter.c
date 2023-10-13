@@ -32,7 +32,7 @@
 #include "demangle.h"
 #include "mi/mi-cmds.h"
 #include "python-internal.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "cli/cli-style.h"
 
 enum mi_print_types
@@ -322,7 +322,7 @@ py_print_single_arg (struct ui_out *out,
   else
     val = fv;
 
-  gdb::optional<ui_out_emit_tuple> maybe_tuple;
+  std::optional<ui_out_emit_tuple> maybe_tuple;
 
   /*  MI has varying rules for tuples, but generally if there is only
       one element in each item in the list, do not start a tuple.  The
@@ -562,7 +562,7 @@ enumerate_locals (PyObject *iter,
       struct symbol *sym;
       const struct block *sym_block;
       int local_indent = 8 + (8 * indent);
-      gdb::optional<ui_out_emit_tuple> tuple;
+      std::optional<ui_out_emit_tuple> tuple;
 
       gdbpy_ref<> item (PyIter_Next (iter));
       if (item == NULL)
@@ -773,7 +773,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
   get_user_print_options (&opts);
   if (print_frame_info)
     {
-      gdb::optional<enum print_what> user_frame_info_print_what;
+      std::optional<enum print_what> user_frame_info_print_what;
 
       get_user_print_what_frame_info (&user_frame_info_print_what);
       if (!out->is_mi_like_p () && user_frame_info_print_what.has_value ())
@@ -808,7 +808,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
       return EXT_LANG_BT_OK;
     }
 
-  gdb::optional<ui_out_emit_tuple> tuple;
+  std::optional<ui_out_emit_tuple> tuple;
 
   /* -stack-list-locals does not require a
      wrapping frame attribute.  */

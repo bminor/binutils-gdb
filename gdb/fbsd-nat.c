@@ -99,7 +99,7 @@ fbsd_nat_target::have_pending_event (ptid_t filter)
 
 /* See fbsd-nat.h.  */
 
-gdb::optional<fbsd_nat_target::pending_event>
+std::optional<fbsd_nat_target::pending_event>
 fbsd_nat_target::take_pending_event (ptid_t filter)
 {
   for (auto it = m_pending_events.begin (); it != m_pending_events.end (); it++)
@@ -1663,7 +1663,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 			 target_options_to_string (target_options).c_str ());
 
   /* If there is a valid pending event, return it.  */
-  gdb::optional<pending_event> event = take_pending_event (ptid);
+  std::optional<pending_event> event = take_pending_event (ptid);
   if (event.has_value ())
     {
       /* Stop any other inferiors currently running.  */
@@ -1899,7 +1899,7 @@ fbsd_nat_target::detach_fork_children (inferior *inf)
 
   while (1)
     {
-      gdb::optional<pending_event> event = take_pending_event (ptid);
+      std::optional<pending_event> event = take_pending_event (ptid);
       if (!event.has_value ())
 	break;
 

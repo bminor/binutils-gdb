@@ -66,7 +66,7 @@
 #include "parser-defs.h"
 #include "completer.h"
 #include "progspace-and-thread.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "filename-seen-cache.h"
 #include "arch-utils.h"
 #include <algorithm>
@@ -943,7 +943,7 @@ void
 general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
 					    bool copy_name,
 					    objfile_per_bfd_storage *per_bfd,
-					    gdb::optional<hashval_t> hash)
+					    std::optional<hashval_t> hash)
 {
   struct demangled_name_entry **slot;
 
@@ -3714,7 +3714,7 @@ skip_prologue_using_lineinfo (CORE_ADDR func_addr, struct symtab *symtab)
    the function starting at FUNC_ADDR which has prologue_end set to true if
    such entry exist, otherwise return an empty optional.  */
 
-static gdb::optional<CORE_ADDR>
+static std::optional<CORE_ADDR>
 skip_prologue_using_linetable (CORE_ADDR func_addr)
 {
   CORE_ADDR start_pc, end_pc;
@@ -3838,7 +3838,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
 	 be placed to skip the prologue.  */
       if (!ignore_prologue_end_flag && skip)
 	{
-	  gdb::optional<CORE_ADDR> linetable_pc
+	  std::optional<CORE_ADDR> linetable_pc
 	    = skip_prologue_using_linetable (pc);
 	  if (linetable_pc)
 	    {
@@ -4450,8 +4450,8 @@ info_sources_worker (struct ui_out *uiout,
   output_source_filename_data data (uiout, filter);
 
   ui_out_emit_list results_emitter (uiout, "files");
-  gdb::optional<ui_out_emit_tuple> output_tuple;
-  gdb::optional<ui_out_emit_list> sources_list;
+  std::optional<ui_out_emit_tuple> output_tuple;
+  std::optional<ui_out_emit_list> sources_list;
 
   gdb_assert (group_by_objfile || uiout->is_mi_like_p ());
 
@@ -4652,7 +4652,7 @@ global_symbol_searcher::is_suitable_msymbol
 
 bool
 global_symbol_searcher::expand_symtabs
-	(objfile *objfile, const gdb::optional<compiled_regex> &preg) const
+	(objfile *objfile, const std::optional<compiled_regex> &preg) const
 {
   enum search_domain kind = m_kind;
   bool found_msymbol = false;
@@ -4734,8 +4734,8 @@ global_symbol_searcher::expand_symtabs
 bool
 global_symbol_searcher::add_matching_symbols
 	(objfile *objfile,
-	 const gdb::optional<compiled_regex> &preg,
-	 const gdb::optional<compiled_regex> &treg,
+	 const std::optional<compiled_regex> &preg,
+	 const std::optional<compiled_regex> &treg,
 	 std::set<symbol_search> *result_set) const
 {
   enum search_domain kind = m_kind;
@@ -4813,7 +4813,7 @@ global_symbol_searcher::add_matching_symbols
 
 bool
 global_symbol_searcher::add_matching_msymbols
-	(objfile *objfile, const gdb::optional<compiled_regex> &preg,
+	(objfile *objfile, const std::optional<compiled_regex> &preg,
 	 std::vector<symbol_search> *results) const
 {
   enum search_domain kind = m_kind;
@@ -4860,8 +4860,8 @@ global_symbol_searcher::add_matching_msymbols
 std::vector<symbol_search>
 global_symbol_searcher::search () const
 {
-  gdb::optional<compiled_regex> preg;
-  gdb::optional<compiled_regex> treg;
+  std::optional<compiled_regex> preg;
+  std::optional<compiled_regex> treg;
 
   gdb_assert (m_kind != ALL_DOMAIN);
 

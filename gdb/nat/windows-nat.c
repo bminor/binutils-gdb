@@ -698,10 +698,10 @@ windows_process_info::matching_pending_stop (bool debug_events)
 
 /* See nat/windows-nat.h.  */
 
-gdb::optional<pending_stop>
+std::optional<pending_stop>
 windows_process_info::fetch_pending_stop (bool debug_events)
 {
-  gdb::optional<pending_stop> result;
+  std::optional<pending_stop> result;
   for (auto iter = pending_stops.begin ();
        iter != pending_stops.end ();
        ++iter)
@@ -818,7 +818,7 @@ create_process_wrapper (FUNC *do_create_process, const CHAR *image,
 	  InitializeProcThreadAttributeList (info_ex.lpAttributeList,
 					     1, 0, &size);
 
-	  gdb::optional<BOOL> return_value;
+	  std::optional<BOOL> return_value;
 	  DWORD attr_flags = relocate_aslr_flags;
 	  if (!UpdateProcThreadAttribute (info_ex.lpAttributeList, 0,
 					  mitigation_policy,

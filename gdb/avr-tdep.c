@@ -1566,7 +1566,7 @@ avr_io_reg_read_command (const char *args, int from_tty)
   unsigned int val;
 
   /* Find out how many io registers the target has.  */
-  gdb::optional<gdb::byte_vector> buf
+  std::optional<gdb::byte_vector> buf
     = target_read_alloc (current_inferior ()->top_target (),
 			 TARGET_OBJECT_AVR, "avr.io_reg");
 

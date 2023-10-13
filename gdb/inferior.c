@@ -728,10 +728,10 @@ switch_to_inferior_no_thread (inferior *inf)
 
 /* See regcache.h.  */
 
-gdb::optional<scoped_restore_current_thread>
+std::optional<scoped_restore_current_thread>
 maybe_switch_inferior (inferior *inf)
 {
-  gdb::optional<scoped_restore_current_thread> maybe_restore_thread;
+  std::optional<scoped_restore_current_thread> maybe_restore_thread;
   if (inf != current_inferior ())
     {
       maybe_restore_thread.emplace ();

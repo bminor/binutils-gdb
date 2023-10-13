@@ -939,10 +939,10 @@ xmethod_worker::get_result_type (value *object, gdb::array_view<value *> args)
 
 /* See extension.h.  */
 
-gdb::optional<std::string>
+std::optional<std::string>
 ext_lang_colorize (const std::string &filename, const std::string &contents)
 {
-  gdb::optional<std::string> result;
+  std::optional<std::string> result;
 
   for (const struct extension_language_defn *extlang : extension_languages)
     {
@@ -959,10 +959,10 @@ ext_lang_colorize (const std::string &filename, const std::string &contents)
 
 /* See extension.h.  */
 
-gdb::optional<std::string>
+std::optional<std::string>
 ext_lang_colorize_disasm (const std::string &content, gdbarch *gdbarch)
 {
-  gdb::optional<std::string> result;
+  std::optional<std::string> result;
 
   for (const struct extension_language_defn *extlang : extension_languages)
     {
@@ -979,7 +979,7 @@ ext_lang_colorize_disasm (const std::string &content, gdbarch *gdbarch)
 
 /* See extension.h.  */
 
-gdb::optional<int>
+std::optional<int>
 ext_lang_print_insn (struct gdbarch *gdbarch, CORE_ADDR address,
 		     struct disassemble_info *info)
 {
@@ -988,7 +988,7 @@ ext_lang_print_insn (struct gdbarch *gdbarch, CORE_ADDR address,
       if (extlang->ops == nullptr
 	  || extlang->ops->print_insn == nullptr)
 	continue;
-      gdb::optional<int> length
+      std::optional<int> length
 	= extlang->ops->print_insn (gdbarch, address, info);
       if (length.has_value ())
 	return length;

@@ -299,7 +299,7 @@ aarch64_fill_tlsregset (struct regcache *regcache, void *buf)
   collect_register (regcache, tls_regnum, tls_buf);
 
   /* Read TPIDR2, if it exists.  */
-  gdb::optional<int> regnum = find_regno_no_throw (regcache->tdesc, "tpidr2");
+  std::optional<int> regnum = find_regno_no_throw (regcache->tdesc, "tpidr2");
 
   if (regnum.has_value ())
     collect_register (regcache, *regnum, tls_buf + sizeof (uint64_t));
@@ -316,7 +316,7 @@ aarch64_store_tlsregset (struct regcache *regcache, const void *buf)
   supply_register (regcache, tls_regnum, tls_buf);
 
   /* Write TPIDR2, if it exists.  */
-  gdb::optional<int> regnum = find_regno_no_throw (regcache->tdesc, "tpidr2");
+  std::optional<int> regnum = find_regno_no_throw (regcache->tdesc, "tpidr2");
 
   if (regnum.has_value ())
     supply_register (regcache, *regnum, tls_buf + sizeof (uint64_t));

@@ -785,7 +785,7 @@ xinclude_start_include (struct gdb_xml_parser *parser,
     gdb_xml_error (parser, _("Maximum XInclude depth (%d) exceeded"),
 		   MAX_XINCLUDE_DEPTH);
 
-  gdb::optional<gdb::char_vector> text = data->fetcher (href);
+  std::optional<gdb::char_vector> text = data->fetcher (href);
   if (!text)
     gdb_xml_error (parser, _("Could not load XML document \"%s\""), href);
 
@@ -960,7 +960,7 @@ show_debug_xml (struct ui_file *file, int from_tty,
   gdb_printf (file, _("XML debugging is %s.\n"), value);
 }
 
-gdb::optional<gdb::char_vector>
+std::optional<gdb::char_vector>
 xml_fetch_content_from_file (const char *filename, const char *dirname)
 {
   gdb_file_up file;

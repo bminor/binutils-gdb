@@ -49,7 +49,7 @@
 #include "objfiles.h"
 #include "user-regs.h"
 #include <algorithm>
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "c-exp.h"
 
 static unsigned int expressiondebug = 0;
@@ -471,7 +471,7 @@ parse_expression (const char *string, innermost_block_tracker *tracker,
 expression_up
 parse_expression_with_language (const char *string, enum language lang)
 {
-  gdb::optional<scoped_restore_current_language> lang_saver;
+  std::optional<scoped_restore_current_language> lang_saver;
   if (current_language->la_language != lang)
     {
       lang_saver.emplace ();

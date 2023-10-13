@@ -113,9 +113,9 @@ static struct terminal_info *get_inflow_inferior_data (struct inferior *);
    we save our handlers in these two variables and set SIGINT and SIGQUIT
    to SIG_IGN.  */
 
-static gdb::optional<sighandler_t> sigint_ours;
+static std::optional<sighandler_t> sigint_ours;
 #ifdef SIGQUIT
-static gdb::optional<sighandler_t> sigquit_ours;
+static std::optional<sighandler_t> sigquit_ours;
 #endif
 
 /* The name of the tty (from the `tty' command) that we're giving to

@@ -85,7 +85,7 @@ public:
   int fileio_unlink (struct inferior *inf,
 		     const char *filename,
 		     fileio_error *target_errno) override;
-  gdb::optional<std::string> fileio_readlink (struct inferior *inf,
+  std::optional<std::string> fileio_readlink (struct inferior *inf,
 					      const char *filename,
 					      fileio_error *target_errno) override;
   bool use_agent (bool use) override;

@@ -233,7 +233,7 @@ annotate_thread_changed (void)
 
 static void
 annotate_thread_exited (thread_info *t,
-			gdb::optional<ULONGEST> exit_code,
+			std::optional<ULONGEST> exit_code,
 			bool /* silent */)
 {
   if (annotation_level > 1)

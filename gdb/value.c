@@ -826,7 +826,7 @@ exceeds_max_value_size (ULONGEST length)
 /* When this has a value, it is used to limit the number of array elements
    of an array that are loaded into memory when an array value is made
    non-lazy.  */
-static gdb::optional<int> array_length_limiting_element_count;
+static std::optional<int> array_length_limiting_element_count;
 
 /* See value.h.  */
 scoped_array_length_limiting::scoped_array_length_limiting (int elements)

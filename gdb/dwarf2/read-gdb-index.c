@@ -181,7 +181,7 @@ struct dw2_symtab_iterator
   dwarf2_per_objfile *per_objfile;
   /* If set, only look for symbols that match that block.  Valid values are
      GLOBAL_BLOCK and STATIC_BLOCK.  */
-  gdb::optional<block_enum> block_index;
+  std::optional<block_enum> block_index;
   /* The kind of symbol we're looking for.  */
   domain_enum domain;
   /* The list of CUs from the index entry of the symbol,
@@ -203,7 +203,7 @@ struct dw2_symtab_iterator
 static void
 dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
 		      dwarf2_per_objfile *per_objfile,
-		      gdb::optional<block_enum> block_index,
+		      std::optional<block_enum> block_index,
 		      domain_enum domain, offset_type namei,
 		      mapped_gdb_index &index)
 {

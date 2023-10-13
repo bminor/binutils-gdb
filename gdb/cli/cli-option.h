@@ -20,7 +20,7 @@
 #ifndef CLI_OPTION_H
 #define CLI_OPTION_H 1
 
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "gdbsupport/array-view.h"
 #include "completer.h"
 #include <string>

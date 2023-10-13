@@ -2231,7 +2231,7 @@ target_write (struct target_ops *ops,
    for details.  */
 
 template <typename T>
-gdb::optional<gdb::def_vector<T>>
+std::optional<gdb::def_vector<T>>
 target_read_alloc_1 (struct target_ops *ops, enum target_object object,
 		     const char *annex)
 {
@@ -2280,7 +2280,7 @@ target_read_alloc_1 (struct target_ops *ops, enum target_object object,
 
 /* See target.h  */
 
-gdb::optional<gdb::byte_vector>
+std::optional<gdb::byte_vector>
 target_read_alloc (struct target_ops *ops, enum target_object object,
 		   const char *annex)
 {
@@ -2289,11 +2289,11 @@ target_read_alloc (struct target_ops *ops, enum target_object object,
 
 /* See target.h.  */
 
-gdb::optional<gdb::char_vector>
+std::optional<gdb::char_vector>
 target_read_stralloc (struct target_ops *ops, enum target_object object,
 		      const char *annex)
 {
-  gdb::optional<gdb::char_vector> buf
+  std::optional<gdb::char_vector> buf
     = target_read_alloc_1<char> (ops, object, annex);
 
   if (!buf)
@@ -2977,7 +2977,7 @@ target_supports_multi_process (void)
 
 /* See target.h.  */
 
-gdb::optional<gdb::char_vector>
+std::optional<gdb::char_vector>
 target_get_osdata (const char *type)
 {
   struct target_ops *t;
@@ -3206,7 +3206,7 @@ target_ops::fileio_unlink (struct inferior *inf, const char *filename,
   return -1;
 }
 
-gdb::optional<std::string>
+std::optional<std::string>
 target_ops::fileio_readlink (struct inferior *inf, const char *filename,
 			     fileio_error *target_errno)
 {
@@ -3377,13 +3377,13 @@ target_fileio_unlink (struct inferior *inf, const char *filename,
 
 /* See target.h.  */
 
-gdb::optional<std::string>
+std::optional<std::string>
 target_fileio_readlink (struct inferior *inf, const char *filename,
 			fileio_error *target_errno)
 {
   for (target_ops *t = default_fileio_target (); t != NULL; t = t->beneath ())
     {
-      gdb::optional<std::string> ret
+      std::optional<std::string> ret
 	= t->fileio_readlink (inf, filename, target_errno);
 
       if (!ret.has_value () && *target_errno == FILEIO_ENOSYS)

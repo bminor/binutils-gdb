@@ -1025,7 +1025,7 @@ psymbol_functions::expand_symtabs_matching
   for (partial_symtab *ps : partial_symbols (objfile))
     ps->searched_flag = PST_NOT_SEARCHED;
 
-  gdb::optional<lookup_name_info> psym_lookup_name;
+  std::optional<lookup_name_info> psym_lookup_name;
   if (lookup_name != nullptr)
     psym_lookup_name = lookup_name->make_ignore_params ();
 

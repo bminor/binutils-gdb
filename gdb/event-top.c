@@ -706,7 +706,7 @@ void
 gdb_rl_deprep_term_function (void)
 {
 #ifdef RL_STATE_EOF
-  gdb::optional<scoped_restore_tmpl<int>> restore_eof_found;
+  std::optional<scoped_restore_tmpl<int>> restore_eof_found;
 
   if (RL_ISSTATE (RL_STATE_EOF))
     {

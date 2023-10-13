@@ -211,10 +211,10 @@ struct thread_suspend_state
 
      - If the thread is running, then this field has its value removed by
        calling stop_pc.reset() (see thread_info::set_executing()).
-       Attempting to read a gdb::optional with no value is undefined
+       Attempting to read a std::optional with no value is undefined
        behaviour and will trigger an assertion error when _GLIBCXX_DEBUG is
        defined, which should make error easier to track down.  */
-  gdb::optional<CORE_ADDR> stop_pc;
+  std::optional<CORE_ADDR> stop_pc;
 };
 
 /* Base class for target-specific thread data.  */
@@ -661,7 +661,7 @@ extern void delete_thread_silent (struct thread_info *thread);
    available.  If SILENT, then don't inform the CLI about the
    exit.  */
 extern void set_thread_exited (thread_info *tp,
-			       gdb::optional<ULONGEST> exit_code = {},
+			       std::optional<ULONGEST> exit_code = {},
 			       bool silent = false);
 
 /* Delete a step_resume_breakpoint from the thread database.  */
@@ -1058,7 +1058,7 @@ extern bool switch_to_thread_if_alive (thread_info *thr);
    exception if !FLAGS.SILENT and !FLAGS.CONT and CMD fails.  */
 
 extern void thread_try_catch_cmd (thread_info *thr,
-				  gdb::optional<int> ada_task,
+				  std::optional<int> ada_task,
 				  const char *cmd, int from_tty,
 				  const qcs_flags &flags);
 

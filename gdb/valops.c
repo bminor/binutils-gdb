@@ -52,7 +52,7 @@ static struct value *search_struct_field (const char *, struct value *,
 					  struct type *, int);
 
 static struct value *search_struct_method (const char *, struct value **,
-					   gdb::optional<gdb::array_view<value *>>,
+					   std::optional<gdb::array_view<value *>>,
 					   LONGEST, int *, struct type *);
 
 static int find_oload_champ_namespace (gdb::array_view<value *> args,
@@ -2196,7 +2196,7 @@ search_struct_field (const char *name, struct value *arg1,
 
 static struct value *
 search_struct_method (const char *name, struct value **arg1p,
-		      gdb::optional<gdb::array_view<value *>> args,
+		      std::optional<gdb::array_view<value *>> args,
 		      LONGEST offset, int *static_memfuncp,
 		      struct type *type)
 {
@@ -2332,7 +2332,7 @@ search_struct_method (const char *name, struct value **arg1p,
 
 struct value *
 value_struct_elt (struct value **argp,
-		  gdb::optional<gdb::array_view<value *>> args,
+		  std::optional<gdb::array_view<value *>> args,
 		  const char *name, int *static_memfuncp, const char *err)
 {
   struct type *t;

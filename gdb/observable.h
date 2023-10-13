@@ -123,7 +123,7 @@ extern observable<struct thread_info */* t */> new_thread;
    removing the thread from its tables without wanting to notify the
    CLI about it.  */
 extern observable<thread_info */* t */,
-		  gdb::optional<ULONGEST> /* exit_code */,
+		  std::optional<ULONGEST> /* exit_code */,
 		  bool /* silent */> thread_exit;
 
 /* An explicit stop request was issued to PTID.  If PTID equals

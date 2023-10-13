@@ -34,7 +34,7 @@
 #include "filenames.h"
 #include "fnmatch.h"
 #include "gdbsupport/gdb_regex.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include <list>
 #include "cli/cli-style.h"
 #include "gdbsupport/buildargv.h"
@@ -113,7 +113,7 @@ private: /* data */
   std::string m_function;
 
   /* If this is a function regexp, the compiled form.  */
-  gdb::optional<compiled_regex> m_compiled_function_regexp;
+  std::optional<compiled_regex> m_compiled_function_regexp;
 
   /* Enabled/disabled state.  */
   bool m_enabled = true;

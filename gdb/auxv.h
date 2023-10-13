@@ -48,11 +48,11 @@ extern int svr4_auxv_parse (struct gdbarch *gdbarch, const gdb_byte **readptr,
 
 /* Read auxv data from the current inferior's target stack.  */
 
-extern const gdb::optional<gdb::byte_vector> &target_read_auxv ();
+extern const std::optional<gdb::byte_vector> &target_read_auxv ();
 
 /* Read auxv data from OPS.  */
 
-extern gdb::optional<gdb::byte_vector> target_read_auxv_raw (target_ops *ops);
+extern std::optional<gdb::byte_vector> target_read_auxv_raw (target_ops *ops);
 
 /* Search AUXV for an entry with a_type matching MATCH.
 

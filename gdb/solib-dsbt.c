@@ -276,7 +276,7 @@ static void
 dsbt_get_initial_loadmaps (void)
 {
   dsbt_info *info = get_dsbt_info (current_program_space);
-  gdb::optional<gdb::byte_vector> buf
+  std::optional<gdb::byte_vector> buf
     = target_read_alloc (current_inferior ()->top_target (),
 			 TARGET_OBJECT_FDPIC, "exec");
 

@@ -819,7 +819,7 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_,
   };
 
   /* This is given a value only if we fix the size of the cmd window.  */
-  gdb::optional<old_size_info> old_cmd_info;
+  std::optional<old_size_info> old_cmd_info;
 
   std::vector<size_info> info (m_splits.size ());
 

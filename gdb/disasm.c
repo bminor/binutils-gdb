@@ -29,7 +29,7 @@
 #include "source.h"
 #include "gdbsupport/gdb-safe-ctype.h"
 #include <algorithm>
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "valprint.h"
 #include "cli/cli-style.h"
 #include "objfiles.h"
@@ -653,8 +653,8 @@ do_mixed_source_and_assembly_deprecated
 
   ui_out_emit_list asm_insns_list (uiout, "asm_insns");
 
-  gdb::optional<ui_out_emit_tuple> outer_tuple_emitter;
-  gdb::optional<ui_out_emit_list> inner_list_emitter;
+  std::optional<ui_out_emit_tuple> outer_tuple_emitter;
+  std::optional<ui_out_emit_list> inner_list_emitter;
 
   for (i = 0; i < newlines; i++)
     {
@@ -810,8 +810,8 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 
   ui_out_emit_list asm_insns_emitter (uiout, "asm_insns");
 
-  gdb::optional<ui_out_emit_tuple> tuple_emitter;
-  gdb::optional<ui_out_emit_list> list_emitter;
+  std::optional<ui_out_emit_tuple> tuple_emitter;
+  std::optional<ui_out_emit_list> list_emitter;
 
   last_symtab = NULL;
   last_line = 0;
@@ -1093,7 +1093,7 @@ gdb_print_insn_1 (struct gdbarch *gdbarch, CORE_ADDR vma,
 		  struct disassemble_info *info)
 {
   /* Call into the extension languages to do the disassembly.  */
-  gdb::optional<int> length = ext_lang_print_insn (gdbarch, vma, info);
+  std::optional<int> length = ext_lang_print_insn (gdbarch, vma, info);
   if (length.has_value ())
     return *length;
 
@@ -1125,7 +1125,7 @@ gdb_disassembler::print_insn (CORE_ADDR memaddr,
      this output.  */
   if (length > 0 && use_ext_lang_for_styling ())
     {
-      gdb::optional<std::string> ext_contents;
+      std::optional<std::string> ext_contents;
       ext_contents = ext_lang_colorize_disasm (m_buffer.string (), arch ());
       if (ext_contents.has_value ())
 	m_buffer = std::move (*ext_contents);

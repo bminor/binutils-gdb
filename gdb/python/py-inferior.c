@@ -364,7 +364,7 @@ add_thread_object (struct thread_info *tp)
 
 static void
 delete_thread_object (thread_info *tp,
-		      gdb::optional<ULONGEST> /* exit_code */,
+		      std::optional<ULONGEST> /* exit_code */,
 		      bool /* silent */)
 {
   if (!gdb_python_initialized)

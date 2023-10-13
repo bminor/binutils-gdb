@@ -655,12 +655,12 @@ show_script_ext_mode (struct ui_file *file, int from_tty,
    If SEARCH_PATH is non-zero, and the file isn't found in cwd,
    search for it in the source search path.  */
 
-gdb::optional<open_script>
+std::optional<open_script>
 find_and_open_script (const char *script_file, int search_path)
 {
   int fd;
   openp_flags search_flags = OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH;
-  gdb::optional<open_script> opened;
+  std::optional<open_script> opened;
 
   gdb::unique_xmalloc_ptr<char> file (tilde_expand (script_file));
 
@@ -742,7 +742,7 @@ source_script_with_search (const char *file, int from_tty, int search_path)
   if (file == NULL || *file == 0)
     error (_("source command requires file name of file to source."));
 
-  gdb::optional<open_script> opened = find_and_open_script (file, search_path);
+  std::optional<open_script> opened = find_and_open_script (file, search_path);
   if (!opened)
     {
       /* The script wasn't found, or was otherwise inaccessible.

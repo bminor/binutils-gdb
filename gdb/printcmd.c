@@ -52,7 +52,7 @@
 #include "gdbsupport/format.h"
 #include "source.h"
 #include "gdbsupport/byte-vector.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "gdbsupport/gdb-safe-ctype.h"
 #include "gdbsupport/rsp-low.h"
 #include "inferior.h"
@@ -435,7 +435,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
   /* Some cases below will unpack the value again.  In the biased
      range case, we want to avoid this, so we store the unpacked value
      here for possible use later.  */
-  gdb::optional<LONGEST> val_long;
+  std::optional<LONGEST> val_long;
   if ((is_fixed_point_type (type)
        && (options->format == 'o'
 	   || options->format == 'x'
@@ -2452,7 +2452,7 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
   struct type *wctype = lookup_typename (current_language,
 					 "wchar_t", NULL, 0);
   int wcwidth = wctype->length ();
-  gdb::optional<gdb::byte_vector> tem_str;
+  std::optional<gdb::byte_vector> tem_str;
 
   if (value->lval () == lval_internalvar
       && c_is_string_type_p (value->type ()))

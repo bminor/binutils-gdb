@@ -732,7 +732,7 @@ class gdbpy_enter
 
   /* An optional is used here because we don't want to call
      PyErr_Fetch too early.  */
-  gdb::optional<gdbpy_err_fetch> m_error;
+  std::optional<gdbpy_err_fetch> m_error;
 };
 
 /* Like gdbpy_enter, but takes a varobj.  This is a subclass just to
@@ -953,7 +953,7 @@ extern gdb::unique_xmalloc_ptr<char> gdbpy_fix_doc_string_indentation
 
    If no instruction can be disassembled then return an empty value.  */
 
-extern gdb::optional<int> gdbpy_print_insn (struct gdbarch *gdbarch,
+extern std::optional<int> gdbpy_print_insn (struct gdbarch *gdbarch,
 					    CORE_ADDR address,
 					    disassemble_info *info);
 

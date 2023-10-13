@@ -66,7 +66,7 @@ linux_common_core_of_thread (ptid_t ptid)
   sprintf (filename, "/proc/%lld/task/%lld/stat",
 	   (PID_T) ptid.pid (), (PID_T) ptid.lwp ());
 
-  gdb::optional<std::string> content = read_text_file_to_string (filename);
+  std::optional<std::string> content = read_text_file_to_string (filename);
   if (!content.has_value ())
     return -1;
 
@@ -257,10 +257,10 @@ get_cores_used_by_process (PID_T pid, int *cores, const int num_cores)
 
 /* get_core_array_size helper that uses /sys/devices/system/cpu/possible.  */
 
-static gdb::optional<size_t>
+static std::optional<size_t>
 get_core_array_size_using_sys_possible ()
 {
-  gdb::optional<std::string> possible
+  std::optional<std::string> possible
     = read_text_file_to_string ("/sys/devices/system/cpu/possible");
 
   if (!possible.has_value ())
@@ -310,7 +310,7 @@ get_core_array_size ()
      we are in a container that has access to a subset of the host's cores.
      It will return a size that considers all the CPU cores available to the
      host.  If that fails for some reason, fall back to sysconf.  */
-  gdb::optional<size_t> count = get_core_array_size_using_sys_possible ();
+  std::optional<size_t> count = get_core_array_size_using_sys_possible ();
   if (count.has_value ())
     return *count;
 

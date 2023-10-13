@@ -1295,7 +1295,7 @@ get_detach_signal (struct lwp_info *lp)
 
 /* If LP has a pending fork/vfork/clone status, return it.  */
 
-static gdb::optional<target_waitstatus>
+static std::optional<target_waitstatus>
 get_pending_child_status (lwp_info *lp)
 {
   LINUX_NAT_SCOPED_DEBUG_ENTER_EXIT;
@@ -1369,7 +1369,7 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
      event, there is a process/thread GDB is attached to that the core
      of GDB doesn't know about.  Detach from it.  */
 
-  gdb::optional<target_waitstatus> ws = get_pending_child_status (lp);
+  std::optional<target_waitstatus> ws = get_pending_child_status (lp);
   if (ws.has_value ())
     detach_one_pid (ws->child_ptid ().lwp (), 0);
 
@@ -3616,7 +3616,7 @@ kill_wait_callback (struct lwp_info *lp)
 static int
 kill_unfollowed_child_callback (lwp_info *lp)
 {
-  gdb::optional<target_waitstatus> ws = get_pending_child_status (lp);
+  std::optional<target_waitstatus> ws = get_pending_child_status (lp);
   if (ws.has_value ())
     {
       ptid_t child_ptid = ws->child_ptid ();
@@ -4074,7 +4074,7 @@ linux_proc_xfer_memory_partial (int pid, gdb_byte *readbuf,
 static bool
 proc_mem_file_is_writable ()
 {
-  static gdb::optional<bool> writable;
+  static std::optional<bool> writable;
 
   if (writable.has_value ())
     return *writable;
@@ -4463,7 +4463,7 @@ linux_nat_target::fileio_open (struct inferior *inf, const char *filename,
 
 /* Implementation of to_fileio_readlink.  */
 
-gdb::optional<std::string>
+std::optional<std::string>
 linux_nat_target::fileio_readlink (struct inferior *inf, const char *filename,
 				   fileio_error *target_errno)
 {

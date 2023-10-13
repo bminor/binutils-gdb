@@ -20,7 +20,7 @@
 #ifndef FBSD_NAT_H
 #define FBSD_NAT_H
 
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "inf-ptrace.h"
 #include "regcache.h"
 #include "regset.h"
@@ -262,7 +262,7 @@ private:
      FILTER.  If there is a matching event, the event is removed from
      the pending list and returned.  */
 
-  gdb::optional<pending_event> take_pending_event (ptid_t filter);
+  std::optional<pending_event> take_pending_event (ptid_t filter);
 
   /* List of pending events.  */
 

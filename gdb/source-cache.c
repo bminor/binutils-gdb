@@ -343,7 +343,7 @@ source_cache::ensure (struct symtab *s)
 
       if (!already_styled)
 	{
-	  gdb::optional<std::string> ext_contents;
+	  std::optional<std::string> ext_contents;
 	  ext_contents = ext_lang_colorize (fullname, contents);
 	  if (ext_contents.has_value ())
 	    {

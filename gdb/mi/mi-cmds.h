@@ -23,7 +23,7 @@
 #define MI_MI_CMDS_H
 
 #include "gdbsupport/function-view.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "mi/mi-main.h"
 
 enum print_values {
@@ -180,12 +180,12 @@ struct mi_command
 
   /* If this command was created with a suppress notifications pointer,
      then this function will set the suppress flag and return a
-     gdb::optional with its value set to an object that will restore the
+     std::optional with its value set to an object that will restore the
      previous value of the suppress notifications flag.
 
      If this command was created without a suppress notifications points,
-     then this function returns an empty gdb::optional.  */
-  gdb::optional<scoped_restore_tmpl<int>> do_suppress_notification () const;
+     then this function returns an empty std::optional.  */
+  std::optional<scoped_restore_tmpl<int>> do_suppress_notification () const;
 
 private:
 

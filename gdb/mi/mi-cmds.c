@@ -183,7 +183,7 @@ mi_command::mi_command (const char *name, int *suppress_notification)
 
 /* See mi-cmds.h.  */
 
-gdb::optional<scoped_restore_tmpl<int>>
+std::optional<scoped_restore_tmpl<int>>
 mi_command::do_suppress_notification () const
 {
   if (m_suppress_notification != nullptr)

@@ -131,7 +131,7 @@ private:
   /* The obstack where allocations are made.  This is lazily allocated
      so that we don't waste memory when there are no psymtabs.  */
 
-  gdb::optional<auto_obstack> m_obstack;
+  std::optional<auto_obstack> m_obstack;
 };
 
 /* A partial_symbol records the name, domain, and address class of

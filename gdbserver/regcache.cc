@@ -249,7 +249,7 @@ registers_from_string (struct regcache *regcache, char *buf)
 
 /* See regcache.h */
 
-gdb::optional<int>
+std::optional<int>
 find_regno_no_throw (const struct target_desc *tdesc, const char *name)
 {
   for (int i = 0; i < tdesc->reg_defs.size (); ++i)
@@ -263,7 +263,7 @@ find_regno_no_throw (const struct target_desc *tdesc, const char *name)
 int
 find_regno (const struct target_desc *tdesc, const char *name)
 {
-  gdb::optional<int> regnum = find_regno_no_throw (tdesc, name);
+  std::optional<int> regnum = find_regno_no_throw (tdesc, name);
 
   if (regnum.has_value ())
     return *regnum;

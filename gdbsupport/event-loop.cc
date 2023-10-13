@@ -33,7 +33,7 @@
 #include <sys/types.h>
 #include "gdbsupport/gdb_sys_time.h"
 #include "gdbsupport/gdb_select.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "gdbsupport/scope-exit.h"
 
 /* See event-loop.h.  */
@@ -246,7 +246,7 @@ gdb_do_one_event (int mstimeout)
      When the timeout is reached, events are not monitored again:
      they already have been checked in the loop above. */
 
-  gdb::optional<int> timer_id;
+  std::optional<int> timer_id;
 
   SCOPE_EXIT 
     {
@@ -258,7 +258,7 @@ gdb_do_one_event (int mstimeout)
     timer_id = create_timer (mstimeout,
 			     [] (gdb_client_data arg)
 			     {
-			       ((gdb::optional<int> *) arg)->reset ();
+			       ((std::optional<int> *) arg)->reset ();
 			     },
 			     &timer_id);
   return gdb_wait_for_event (1);

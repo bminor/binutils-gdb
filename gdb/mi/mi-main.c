@@ -52,7 +52,7 @@
 #include "extension.h"
 #include "gdbcmd.h"
 #include "observable.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "gdbsupport/byte-vector.h"
 
 #include <ctype.h>
@@ -2095,7 +2095,7 @@ mi_cmd_execute (struct mi_parse *parse)
 
   user_selected_context current_user_selected_context;
 
-  gdb::optional<scoped_restore_current_thread> thread_saver;
+  std::optional<scoped_restore_current_thread> thread_saver;
   if (parse->thread != -1)
     {
       thread_info *tp = find_thread_global_id (parse->thread);
@@ -2112,7 +2112,7 @@ mi_cmd_execute (struct mi_parse *parse)
       switch_to_thread (tp);
     }
 
-  gdb::optional<scoped_restore_selected_frame> frame_saver;
+  std::optional<scoped_restore_selected_frame> frame_saver;
   if (parse->frame != -1)
     {
       frame_info_ptr fid;
@@ -2130,7 +2130,7 @@ mi_cmd_execute (struct mi_parse *parse)
 	error (_("Invalid frame id: %d"), frame);
     }
 
-  gdb::optional<scoped_restore_current_language> lang_saver;
+  std::optional<scoped_restore_current_language> lang_saver;
   if (parse->language != language_unknown)
     {
       lang_saver.emplace ();
@@ -2141,7 +2141,7 @@ mi_cmd_execute (struct mi_parse *parse)
 
   gdb_assert (parse->cmd != nullptr);
 
-  gdb::optional<scoped_restore_tmpl<int>> restore_suppress_notification
+  std::optional<scoped_restore_tmpl<int>> restore_suppress_notification
     = parse->cmd->do_suppress_notification ();
 
   parse->cmd->invoke (parse);
@@ -2512,7 +2512,7 @@ print_variable_or_computed (const char *expression, enum print_values values)
   else
     val = expr->evaluate ();
 
-  gdb::optional<ui_out_emit_tuple> tuple_emitter;
+  std::optional<ui_out_emit_tuple> tuple_emitter;
   if (values != PRINT_NO_VALUES)
     tuple_emitter.emplace (uiout, nullptr);
   uiout->field_string ("name", expression);

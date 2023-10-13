@@ -314,7 +314,7 @@ syscall_parse_xml (const char *document, xml_fetch_another fetcher)
 static struct syscalls_info *
 xml_init_syscalls_info (const char *filename)
 {
-  gdb::optional<gdb::char_vector> full_file
+  std::optional<gdb::char_vector> full_file
     = xml_fetch_content_from_file (filename,
 				   const_cast<char *>(gdb_datadir.c_str ()));
   if (!full_file)

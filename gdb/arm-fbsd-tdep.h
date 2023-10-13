@@ -47,7 +47,7 @@ extern const struct regset arm_fbsd_tls_regset;
    AUXV.  */
 
 extern const struct target_desc *
-  arm_fbsd_read_description_auxv (const gdb::optional<gdb::byte_vector> &auxv,
+  arm_fbsd_read_description_auxv (const std::optional<gdb::byte_vector> &auxv,
 				  target_ops *target, gdbarch *gdbarch,
 				  bool tls);
 

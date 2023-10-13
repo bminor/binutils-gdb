@@ -82,7 +82,7 @@
 #include <algorithm>
 #include "progspace-and-thread.h"
 #include "gdbsupport/array-view.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "gdbsupport/common-utils.h"
 
 /* Prototypes for local functions.  */
@@ -2067,7 +2067,7 @@ update_watchpoint (struct watchpoint *b, bool reparse)
   if (b->disposition == disp_del_at_next_stop)
     return;
 
-  gdb::optional<scoped_restore_selected_frame> restore_frame;
+  std::optional<scoped_restore_selected_frame> restore_frame;
 
   /* Determine if the watchpoint is within scope.  */
   if (b->exp_valid_block == NULL)
@@ -3365,7 +3365,7 @@ remove_breakpoints (void)
 
 static void
 remove_threaded_breakpoints (thread_info *tp,
-			     gdb::optional<ULONGEST> /* exit_code */,
+			     std::optional<ULONGEST> /* exit_code */,
 			     int /* silent */)
 {
   for (breakpoint &b : all_breakpoints_safe ())
@@ -6776,8 +6776,8 @@ print_one_breakpoint_location (struct breakpoint *b,
 	(uiout->test_flags (fix_breakpoint_script_output)
 	 || fix_breakpoint_script_output_globally);
 
-      gdb::optional<ui_out_emit_tuple> tuple_emitter;
-      gdb::optional<ui_out_emit_list> list_emitter;
+      std::optional<ui_out_emit_tuple> tuple_emitter;
+      std::optional<ui_out_emit_list> list_emitter;
 
       if (use_fixed_output)
 	list_emitter.emplace (uiout, "script");
@@ -6850,7 +6850,8 @@ print_one_breakpoint (breakpoint *b, const bp_location **last_loc, int allflag)
     = (uiout->test_flags (fix_multi_location_breakpoint_output)
        || fix_multi_location_breakpoint_output_globally);
 
-  gdb::optional<ui_out_emit_tuple> bkpt_tuple_emitter (gdb::in_place, uiout, "bkpt");
+  std::optional<ui_out_emit_tuple> bkpt_tuple_emitter (std::in_place, uiout,
+						       "bkpt");
   bool printed = print_one_breakpoint_location (b, NULL, 0, last_loc,
 						allflag, false);
 
@@ -6885,7 +6886,7 @@ print_one_breakpoint (breakpoint *b, const bp_location **last_loc, int allflag)
 		      || !b->first_loc ().enabled
 		      || b->first_loc ().disabled_by_cond))))
 	{
-	  gdb::optional<ui_out_emit_list> locations_list;
+	  std::optional<ui_out_emit_list> locations_list;
 
 	  /* For MI version <= 2, keep the behavior where GDB outputs an invalid
 	     MI record.  For later versions, place breakpoint locations in a
@@ -9950,7 +9951,7 @@ watchpoint::print_it (const bpstat *bs) const
 
   string_file stb;
 
-  gdb::optional<ui_out_emit_tuple> tuple_emitter;
+  std::optional<ui_out_emit_tuple> tuple_emitter;
   switch (this->type)
     {
     case bp_watchpoint:
@@ -10928,7 +10929,7 @@ until_break_command (const char *arg, int from_tty, int anywhere)
 
   std::vector<breakpoint_up> breakpoints;
 
-  gdb::optional<delete_longjmp_breakpoint_cleanup> lj_deleter;
+  std::optional<delete_longjmp_breakpoint_cleanup> lj_deleter;
 
   if (frame_id_p (caller_frame_id))
     {

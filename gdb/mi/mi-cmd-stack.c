@@ -34,7 +34,7 @@
 #include "extension.h"
 #include <ctype.h>
 #include "mi-parse.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "gdbsupport/gdb-safe-ctype.h"
 #include "inferior.h"
 #include "observable.h"
@@ -515,7 +515,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 					     arg->val->type ()->length ()))))
     return;
 
-  gdb::optional<ui_out_emit_tuple> tuple_emitter;
+  std::optional<ui_out_emit_tuple> tuple_emitter;
   if (values != PRINT_NO_VALUES || what == all)
     tuple_emitter.emplace (uiout, nullptr);
 

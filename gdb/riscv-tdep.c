@@ -1676,7 +1676,7 @@ private:
      passed, is the value to place in rs1, otherwise rd is duplicated into
      rs1.  */
   void decode_ci_type_insn (enum opcode opcode, ULONGEST ival,
-			    gdb::optional<int> rs1_regnum = {})
+			    std::optional<int> rs1_regnum = {})
   {
     m_opcode = opcode;
     m_rd = decode_register_index (ival, OP_SH_CRS1S);

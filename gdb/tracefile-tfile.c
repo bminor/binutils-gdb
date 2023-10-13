@@ -305,7 +305,7 @@ tfile_write_tdesc (struct trace_file_writer *self)
   struct tfile_trace_file_writer *writer
     = (struct tfile_trace_file_writer *) self;
 
-  gdb::optional<std::string> tdesc
+  std::optional<std::string> tdesc
     = target_fetch_description_xml (current_inferior ()->top_target ());
 
   if (!tdesc)

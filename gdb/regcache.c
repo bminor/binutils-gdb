@@ -578,7 +578,7 @@ regcache::raw_update (int regnum)
 
   if (get_register_status (regnum) == REG_UNKNOWN)
     {
-      gdb::optional<scoped_restore_current_thread> maybe_restore_thread
+      std::optional<scoped_restore_current_thread> maybe_restore_thread
 	= maybe_switch_inferior (m_inf_for_target_calls);
 
       target_fetch_registers (this, regnum);
@@ -832,7 +832,7 @@ regcache::raw_write (int regnum, const gdb_byte *buf)
 		  m_descr->sizeof_register[regnum]) == 0))
     return;
 
-  gdb::optional<scoped_restore_current_thread> maybe_restore_thread
+  std::optional<scoped_restore_current_thread> maybe_restore_thread
     = maybe_switch_inferior (m_inf_for_target_calls);
 
   target_prepare_to_store (this);

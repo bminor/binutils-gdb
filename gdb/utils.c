@@ -68,7 +68,7 @@
 #include "gdbsupport/gdb_regex.h"
 #include "gdbsupport/job-control.h"
 #include "gdbsupport/selftest.h"
-#include "gdbsupport/gdb_optional.h"
+#include <optional>
 #include "cp-support.h"
 #include <algorithm>
 #include "gdbsupport/pathstuff.h"
@@ -143,7 +143,7 @@ vwarning (const char *string, va_list args)
     (*deprecated_warning_hook) (string, args);
   else
     {
-      gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
+      std::optional<target_terminal::scoped_restore_terminal_state> term_state;
       if (target_supports_terminal_ours ())
 	{
 	  term_state.emplace ();
@@ -375,7 +375,7 @@ internal_vproblem (struct internal_problem *problem,
     }
 
   /* Try to get the message out and at the start of a new line.  */
-  gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
+  std::optional<target_terminal::scoped_restore_terminal_state> term_state;
   if (target_supports_terminal_ours ())
     {
       term_state.emplace ();

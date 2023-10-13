@@ -524,7 +524,7 @@ public:
 
   /* The shared '.dwz' file, if one exists.  This is used when the
      original data was compressed using 'dwz -m'.  */
-  gdb::optional<std::unique_ptr<struct dwz_file>> dwz_file;
+  std::optional<std::unique_ptr<struct dwz_file>> dwz_file;
 
   /* Whether copy relocations are supported by this object format.  */
   bool can_copy;
@@ -743,7 +743,7 @@ struct dwarf2_per_objfile
   dwarf2_cu *sym_cu = nullptr;
 
   /* CUs that are queued to be read.  */
-  gdb::optional<std::queue<dwarf2_queue_item>> queue;
+  std::optional<std::queue<dwarf2_queue_item>> queue;
 
 private:
   /* Hold the corresponding compunit_symtab for each CU or TU.  This

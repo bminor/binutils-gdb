@@ -1474,7 +1474,7 @@ struct index_wip_file
      FILENAME_TEMP is unlinked, because on MS-Windows one cannot
      delete a file that is still open.  So, we wrap the unlinker in an
      optional and emplace it once we know the file name.  */
-  gdb::optional<gdb::unlinker> unlink_file;
+  std::optional<gdb::unlinker> unlink_file;
 
   gdb_file_up out_file;
 };
@@ -1497,7 +1497,7 @@ write_dwarf_index (dwarf2_per_bfd *per_bfd, const char *dir,
 			      ? INDEX5_SUFFIX : INDEX4_SUFFIX);
 
   index_wip_file objfile_index_wip (dir, basename, index_suffix);
-  gdb::optional<index_wip_file> dwz_index_wip;
+  std::optional<index_wip_file> dwz_index_wip;
 
   if (dwz_basename != NULL)
       dwz_index_wip.emplace (dir, dwz_basename, index_suffix);

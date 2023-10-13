@@ -732,7 +732,7 @@ arm_linux_core_read_description (struct gdbarch *gdbarch,
 				 struct target_ops *target,
 				 bfd *abfd)
 {
-  gdb::optional<gdb::byte_vector> auxv = target_read_auxv_raw (target);
+  std::optional<gdb::byte_vector> auxv = target_read_auxv_raw (target);
   CORE_ADDR arm_hwcap = linux_get_hwcap (auxv, target, gdbarch);
 
   if (arm_hwcap & HWCAP_VFP)

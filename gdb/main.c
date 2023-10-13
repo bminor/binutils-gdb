@@ -361,7 +361,7 @@ get_init_files (std::vector<std::string> *system_gdbinit,
 {
   /* Cache the file lookup object so we only actually search for the files
      once.  */
-  static gdb::optional<gdb_initfile_finder> init_files;
+  static std::optional<gdb_initfile_finder> init_files;
   if (!init_files.has_value ())
     init_files.emplace (GDBINIT, SYSTEM_GDBINIT, SYSTEM_GDBINIT_RELOCATABLE,
 			SYSTEM_GDBINIT_DIR, SYSTEM_GDBINIT_DIR_RELOCATABLE,
@@ -381,7 +381,7 @@ get_earlyinit_files (std::string *home_gdbearlyinit)
 {
   /* Cache the file lookup object so we only actually search for the files
      once.  */
-  static gdb::optional<gdb_initfile_finder> init_files;
+  static std::optional<gdb_initfile_finder> init_files;
   if (!init_files.has_value ())
     init_files.emplace (GDBEARLYINIT, nullptr, false, nullptr, false, false);
 

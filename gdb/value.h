@@ -1269,7 +1269,7 @@ extern struct value *value_neg (struct value *arg1);
 extern struct value *value_complement (struct value *arg1);
 
 extern struct value *value_struct_elt (struct value **argp,
-				       gdb::optional<gdb::array_view <value *>> args,
+				       std::optional<gdb::array_view <value *>> args,
 				       const char *name, int *static_memfuncp,
 				       const char *err);
 
@@ -1635,7 +1635,7 @@ struct scoped_array_length_limiting
 
 private:
   /* Used to hold the previous array value element limit.  */
-  gdb::optional<int> m_old_value;
+  std::optional<int> m_old_value;
 };
 
 #endif /* !defined (VALUE_H) */
