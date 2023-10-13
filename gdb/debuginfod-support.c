@@ -20,7 +20,6 @@
 #include "diagnostics.h"
 #include <errno.h>
 #include "gdbsupport/scoped_fd.h"
-#include "gdbsupport/gdb_string_view.h"
 #include "debuginfod-support.h"
 #include <optional>
 #include "cli/cli-cmds.h"
@@ -265,8 +264,7 @@ debuginfod_is_enabled ()
 	  gdb_printf
 	    (_("  <%ps>\n"),
 	     styled_string (file_name_style.style (),
-			    gdb::to_string (url_view.substr (0,
-							     off)).c_str ()));
+			    std::string (url_view.substr (0, off)).c_str ()));
 	  if (off == std::string_view::npos)
 	    break;
 	  url_view = url_view.substr (off);
