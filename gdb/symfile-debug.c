@@ -35,6 +35,8 @@
 #include "block.h"
 #include "filenames.h"
 #include "cli/cli-style.h"
+#include "build-id.h"
+#include "debuginfod-support.h"
 
 /* We need to save a pointer to the real symbol functions.
    Plus, the debug versions are malloc'd because we have to NULL out the
@@ -556,6 +558,70 @@ objfile::require_partial_symbols (bool verbose)
 		    styled_string (file_name_style.style (),
 				   objfile_name (this)));
     }
+}
+
+/* See objfiles.h.  */
+
+bool
+objfile::find_and_add_separate_symbol_file (symfile_add_flags symfile_flags)
+{
+  bool has_dwarf2 = true;
+
+  deferred_warnings warnings;
+
+  std::string debugfile
+    = find_separate_debug_file_by_buildid (this, &warnings);
+
+  if (debugfile.empty ())
+    debugfile = find_separate_debug_file_by_debuglink (this, &warnings);
+
+  if (!debugfile.empty ())
+    {
+      gdb_bfd_ref_ptr debug_bfd
+	(symfile_bfd_open_no_error (debugfile.c_str ()));
+
+      if (debug_bfd != nullptr)
+	symbol_file_add_separate (debug_bfd, debugfile.c_str (),
+				  symfile_flags, this);
+    }
+  else
+    {
+      has_dwarf2 = false;
+      const struct bfd_build_id *build_id
+	= build_id_bfd_get (this->obfd.get ());
+      const char *filename = bfd_get_filename (this->obfd.get ());
+
+      if (build_id != nullptr)
+	{
+	  gdb::unique_xmalloc_ptr<char> symfile_path;
+	  scoped_fd fd (debuginfod_debuginfo_query (build_id->data,
+						    build_id->size,
+						    filename,
+						    &symfile_path));
+
+	  if (fd.get () >= 0)
+	    {
+	      /* File successfully retrieved from server.  */
+	      gdb_bfd_ref_ptr debug_bfd
+		(symfile_bfd_open_no_error (symfile_path.get ()));
+
+	      if (debug_bfd != nullptr
+		  && build_id_verify (debug_bfd.get (), build_id->size,
+				      build_id->data))
+		{
+		  symbol_file_add_separate (debug_bfd, symfile_path.get (),
+					    symfile_flags, this);
+		  has_dwarf2 = true;
+		}
+	    }
+	}
+    }
+  /* If all the methods to collect the debuginfo failed, print the
+     warnings, this is a no-op if there are no warnings.  */
+  if (debugfile.empty () && !has_dwarf2)
+    warnings.emit ();
+
+  return has_dwarf2;
 }
 
 

@@ -40,8 +40,6 @@
 
 #include "coff-pe-read.h"
 
-#include "build-id.h"
-
 /* The objfile we are currently reading.  */
 
 static struct objfile *coffread_objfile;
@@ -729,26 +727,8 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	   && objfile->separate_debug_objfile == NULL
 	   && objfile->separate_debug_objfile_backlink == NULL)
     {
-      deferred_warnings warnings;
-      std::string debugfile
-	= find_separate_debug_file_by_buildid (objfile, &warnings);
-
-      if (debugfile.empty ())
-	debugfile
-	  = find_separate_debug_file_by_debuglink (objfile, &warnings);
-
-      if (!debugfile.empty ())
-	{
-	  gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (debugfile.c_str ()));
-
-	  symbol_file_add_separate (debug_bfd, debugfile.c_str (),
-				    symfile_flags, objfile);
-	}
-      /* If all the methods to collect the debuginfo failed, print any
-	 warnings that were collected, this is a no-op if there are no
-	 warnings.  */
-      if (debugfile.empty ())
-	warnings.emit ();
+      if (objfile->find_and_add_separate_symbol_file (symfile_flags))
+	gdb_assert (objfile->separate_debug_objfile != nullptr);
     }
 }
 

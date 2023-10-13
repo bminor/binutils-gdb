@@ -513,6 +513,16 @@ public:
 
   bool has_partial_symbols ();
 
+  /* Look for a separate debug symbol file for this objfile, make use of
+     build-id, debug-link, and debuginfod as necessary.  If a suitable
+     separate debug symbol file is found then it is loaded using a call to
+     symbol_file_add_separate (SYMFILE_FLAGS is passed through unmodified
+     to this call) and this function returns true.  If no suitable separate
+     debug symbol file is found and loaded then this function returns
+     false.  */
+
+  bool find_and_add_separate_symbol_file (symfile_add_flags symfile_flags);
+
   /* Return true if this objfile has any unexpanded symbols.  A return
      value of false indicates either, that this objfile has all its
      symbols fully expanded (i.e. fully read in), or that this objfile has

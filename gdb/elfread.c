@@ -41,14 +41,12 @@
 #include "regcache.h"
 #include "bcache.h"
 #include "gdb_bfd.h"
-#include "build-id.h"
 #include "location.h"
 #include "auxv.h"
 #include "mdebugread.h"
 #include "ctfread.h"
 #include "gdbsupport/gdb_string_view.h"
 #include "gdbsupport/scoped_fd.h"
-#include "debuginfod-support.h"
 #include "dwarf2/public.h"
 #include "cli/cli-cmds.h"
 
@@ -1218,59 +1216,10 @@ elf_symfile_read_dwarf2 (struct objfile *objfile,
 	   && objfile->separate_debug_objfile == NULL
 	   && objfile->separate_debug_objfile_backlink == NULL)
     {
-      deferred_warnings warnings;
-
-      std::string debugfile
-	= find_separate_debug_file_by_buildid (objfile, &warnings);
-
-      if (debugfile.empty ())
-	debugfile = find_separate_debug_file_by_debuglink (objfile, &warnings);
-
-      if (!debugfile.empty ())
-	{
-	  gdb_bfd_ref_ptr debug_bfd
-	    (symfile_bfd_open_no_error (debugfile.c_str ()));
-
-	  if (debug_bfd != nullptr)
-	    symbol_file_add_separate (debug_bfd, debugfile.c_str (),
-				      symfile_flags, objfile);
-	}
+      if (objfile->find_and_add_separate_symbol_file (symfile_flags))
+	gdb_assert (objfile->separate_debug_objfile != nullptr);
       else
-	{
-	  has_dwarf2 = false;
-	  const struct bfd_build_id *build_id
-	    = build_id_bfd_get (objfile->obfd.get ());
-	  const char *filename = bfd_get_filename (objfile->obfd.get ());
-
-	  if (build_id != nullptr)
-	    {
-	      gdb::unique_xmalloc_ptr<char> symfile_path;
-	      scoped_fd fd (debuginfod_debuginfo_query (build_id->data,
-							build_id->size,
-							filename,
-							&symfile_path));
-
-	      if (fd.get () >= 0)
-		{
-		  /* File successfully retrieved from server.  */
-		  gdb_bfd_ref_ptr debug_bfd
-		    (symfile_bfd_open_no_error (symfile_path.get ()));
-
-		  if (debug_bfd != nullptr
-		      && build_id_verify (debug_bfd.get (), build_id->size,
-					  build_id->data))
-		    {
-		      symbol_file_add_separate (debug_bfd, symfile_path.get (),
-						symfile_flags, objfile);
-		      has_dwarf2 = true;
-		    }
-		}
-	    }
-	}
-      /* If all the methods to collect the debuginfo failed, print the
-	 warnings, this is a no-op if there are no warnings.  */
-      if (debugfile.empty () && !has_dwarf2)
-	warnings.emit ();
+	has_dwarf2 = false;
     }
 
   return has_dwarf2;
