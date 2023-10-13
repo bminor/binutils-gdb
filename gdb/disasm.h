@@ -26,12 +26,6 @@ struct gdbarch;
 struct ui_out;
 struct ui_file;
 
-#if __cplusplus >= 201703L
-#define LIBOPCODE_CALLBACK_NOEXCEPT noexcept
-#else
-#define LIBOPCODE_CALLBACK_NOEXCEPT
-#endif
-
 /* A wrapper around a disassemble_info and a gdbarch.  This is the core
    set of data that all disassembler sub-classes will need.  This class
    doesn't actually implement the disassembling process, that is something
@@ -58,27 +52,18 @@ struct gdb_disassemble_info
 protected:
 
   /* Types for the function callbacks within m_di.  The actual function
-     signatures here are taken from include/dis-asm.h.  The noexcept macro
-     expands to 'noexcept' for C++17 and later, otherwise, it expands to
-     nothing.  This is because including noexcept was ignored for function
-     types before C++17, but both GCC and Clang warn that the noexcept
-     will become relevant when you switch to C++17, and this warning
-     causes the build to fail.  */
+     signatures here are taken from include/dis-asm.h.  */
   using read_memory_ftype
     = int (*) (bfd_vma, bfd_byte *, unsigned int, struct disassemble_info *)
-	LIBOPCODE_CALLBACK_NOEXCEPT;
+	noexcept;
   using memory_error_ftype
-    = void (*) (int, bfd_vma, struct disassemble_info *)
-	LIBOPCODE_CALLBACK_NOEXCEPT;
+    = void (*) (int, bfd_vma, struct disassemble_info *) noexcept;
   using print_address_ftype
-    = void (*) (bfd_vma, struct disassemble_info *)
-	LIBOPCODE_CALLBACK_NOEXCEPT;
+    = void (*) (bfd_vma, struct disassemble_info *) noexcept;
   using fprintf_ftype
-    = int (*) (void *, const char *, ...)
-	LIBOPCODE_CALLBACK_NOEXCEPT;
+    = int (*) (void *, const char *, ...) noexcept;
   using fprintf_styled_ftype
-    = int (*) (void *, enum disassembler_style, const char *, ...)
-	LIBOPCODE_CALLBACK_NOEXCEPT;
+    = int (*) (void *, enum disassembler_style, const char *, ...) noexcept;
 
   /* Constructor, many fields in m_di are initialized from GDBARCH.  The
      remaining arguments are function callbacks that are written into m_di.
