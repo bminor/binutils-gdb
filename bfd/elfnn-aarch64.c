@@ -3675,8 +3675,7 @@ group_sections (struct elf_aarch64_link_hash_table *htab,
 /* True if the inserted stub does not break BTI compatibility.  */
 
 static bool
-aarch64_bti_stub_p (bfd *input_bfd,
-		    struct elf_aarch64_stub_hash_entry *stub_entry)
+aarch64_bti_stub_p (struct elf_aarch64_stub_hash_entry *stub_entry)
 {
   /* Stubs without indirect branch are BTI compatible.  */
   if (stub_entry->stub_type != aarch64_stub_adrp_branch
@@ -3690,7 +3689,7 @@ aarch64_bti_stub_p (bfd *input_bfd,
   file_ptr off = stub_entry->target_value;
   bfd_size_type count = sizeof (loc);
 
-  if (!bfd_get_section_contents (input_bfd, section, loc, off, count))
+  if (!bfd_get_section_contents (section->owner, section, loc, off, count))
     return false;
 
   uint32_t insn = bfd_getl32 (loc);
@@ -4637,7 +4636,7 @@ _bfd_aarch64_add_call_stub_entries (bool *stub_changed, bfd *output_bfd,
 
 	      /* A stub with indirect jump may break BTI compatibility, so
 		 insert another stub with direct jump near the target then.  */
-	      if (need_bti && !aarch64_bti_stub_p (input_bfd, stub_entry))
+	      if (need_bti && !aarch64_bti_stub_p (stub_entry))
 		{
 		  stub_entry->double_stub = true;
 		  htab->has_double_stub = true;
