@@ -454,7 +454,7 @@ rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
   std::string_view uri (bfd_get_filename (abfd));
   std::string_view protocol_delim = "://";
   size_t protocol_end = uri.find (protocol_delim);
-  std::string protocol = gdb::to_string (uri.substr (0, protocol_end));
+  std::string protocol (uri.substr (0, protocol_end));
   protocol_end += protocol_delim.length ();
 
   std::transform (protocol.begin (), protocol.end (), protocol.begin (),
@@ -477,7 +477,7 @@ rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
 	&& std::isxdigit (path[i + 2]))
       {
 	std::string_view hex_digits = path.substr (i + 1, 2);
-	decoded_path += std::stoi (gdb::to_string (hex_digits), 0, 16);
+	decoded_path += std::stoi (std::string (hex_digits), 0, 16);
 	i += 2;
       }
     else
@@ -563,7 +563,7 @@ rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
 	  if (pid != inferior->pid)
 	    {
 	      warning (_("`%s': code object is from another inferior"),
-		       gdb::to_string (uri).c_str ());
+		       std::string (uri).c_str ());
 	      bfd_set_error (bfd_error_bad_value);
 	      return nullptr;
 	    }
@@ -580,7 +580,7 @@ rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
 	}
 
       warning (_("`%s': protocol not supported: %s"),
-	       gdb::to_string (uri).c_str (), protocol.c_str ());
+	       std::string (uri).c_str (), protocol.c_str ());
       bfd_set_error (bfd_error_bad_value);
       return nullptr;
     }

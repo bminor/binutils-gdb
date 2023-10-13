@@ -1040,7 +1040,7 @@ ada_fold_name (std::string_view name, bool throw_on_error = false)
   static std::string fold_storage;
 
   if (!name.empty () && name[0] == '\'')
-    fold_storage = gdb::to_string (name.substr (1, name.size () - 2));
+    fold_storage = name.substr (1, name.size () - 2);
   else
     {
       /* Why convert to UTF-32 and implement our own case-folding,
@@ -1081,12 +1081,12 @@ ada_fold_name (std::string_view name, bool throw_on_error = false)
 	      warned = true;
 	      warning (_("could not convert '%s' from the host encoding (%s) to UTF-32.\n"
 			 "This normally should not happen, please file a bug report."),
-		       gdb::to_string (name).c_str (), host_charset ());
+		       std::string (name).c_str (), host_charset ());
 	    }
 
 	  /* We don't try to recover from errors; just return the
 	     original string.  */
-	  fold_storage = gdb::to_string (name);
+	  fold_storage = name;
 	  return fold_storage.c_str ();
 	}
 
@@ -1135,12 +1135,12 @@ ada_fold_name (std::string_view name, bool throw_on_error = false)
 	      warned = true;
 	      warning (_("could not convert the lower-cased variant of '%s'\n"
 			 "from UTF-32 to the host encoding (%s)."),
-		       gdb::to_string (name).c_str (), host_charset ());
+		       std::string (name).c_str (), host_charset ());
 	    }
 
 	  /* We don't try to recover from errors; just return the
 	     original string.  */
-	  fold_storage = gdb::to_string (name);
+	  fold_storage = name;
 	}
     }
 
@@ -13255,11 +13255,9 @@ ada_lookup_name_info::ada_lookup_name_info (const lookup_name_info &lookup_name)
   if (!user_name.empty () && user_name[0] == '<')
     {
       if (user_name.back () == '>')
-	m_encoded_name
-	  = gdb::to_string (user_name.substr (1, user_name.size () - 2));
+	m_encoded_name = user_name.substr (1, user_name.size () - 2);
       else
-	m_encoded_name
-	  = gdb::to_string (user_name.substr (1, user_name.size () - 1));
+	m_encoded_name = user_name.substr (1, user_name.size () - 1);
       m_encoded_p = true;
       m_verbatim_p = true;
       m_wild_match_p = false;
@@ -13276,10 +13274,10 @@ ada_lookup_name_info::ada_lookup_name_info (const lookup_name_info &lookup_name)
 	  const char *folded = ada_fold_name (user_name);
 	  m_encoded_name = ada_encode_1 (folded, false);
 	  if (m_encoded_name.empty ())
-	    m_encoded_name = gdb::to_string (user_name);
+	    m_encoded_name = user_name;
 	}
       else
-	m_encoded_name = gdb::to_string (user_name);
+	m_encoded_name = user_name;
 
       /* Handle the 'package Standard' special case.  See description
 	 of m_standard_p.  */

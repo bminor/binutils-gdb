@@ -401,7 +401,7 @@ parse_amd_dbgapi_register_type_enum_fields
       if (value > std::numeric_limits<uint32_t>::max ())
 	enum_type.set_bit_size (64);
 
-      enum_type.add_enumerator (gdb::to_string (name), value);
+      enum_type.add_enumerator (std::string (name), value);
 
       fields = fields.substr (matches[0].rm_eo);
     }
@@ -445,7 +445,7 @@ parse_amd_dbgapi_register_type_flags_fields
       ULONGEST pos_begin = try_strtoulst (pos_begin_str);
 
       if (field_type_str == "bool")
-	flags_type.add_field (gdb::to_string (field_name), pos_begin, pos_begin,
+	flags_type.add_field (std::string (field_name), pos_begin, pos_begin,
 			      nullptr);
       else
 	{
@@ -456,7 +456,7 @@ parse_amd_dbgapi_register_type_flags_fields
 	  ULONGEST pos_end = try_strtoulst (pos_end_str.substr (1));
 	  const amd_dbgapi_register_type &field_type
 	    = parse_amd_dbgapi_register_type (field_type_str, type_map);
-	  flags_type.add_field (gdb::to_string (field_name), pos_begin, pos_end,
+	  flags_type.add_field (std::string (field_name), pos_begin, pos_end,
 				&field_type);
 	}
 
@@ -470,7 +470,7 @@ static const amd_dbgapi_register_type &
 parse_amd_dbgapi_register_type_scalar (std::string_view name,
 				       amd_dbgapi_register_type_map &type_map)
 {
-  std::string name_str = gdb::to_string (name);
+  std::string name_str (name);
   auto it = type_map.find (name_str);
   if (it != type_map.end ())
     {
@@ -533,7 +533,7 @@ parse_amd_dbgapi_register_type (std::string_view type_str,
       std::string_view count_str_view
 	= type_str.substr (pos_open_bracket + 1,
 			    pos_close_bracket - pos_open_bracket);
-      std::string count_str = gdb::to_string (count_str_view);
+      std::string count_str (count_str_view);
       unsigned int count = std::stoul (count_str);
 
       std::string lookup_name
@@ -579,7 +579,7 @@ parse_amd_dbgapi_register_type (std::string_view type_str,
 	  /* No braces, lookup existing type.  */
 	  if (existing_type_it == type_map.end ())
 	    error (_("reference to unknown type %s."),
-		   gdb::to_string (name).c_str ());
+		   std::string (name).c_str ());
 
 	  if (existing_type_it->second->kind ()
 	      != amd_dbgapi_register_type::kind::FLAGS)
@@ -592,7 +592,7 @@ parse_amd_dbgapi_register_type (std::string_view type_str,
 	  /* With braces, it's a definition.  */
 	  if (existing_type_it != type_map.end ())
 	    error (_("re-definition of type %s."),
-		   gdb::to_string (name).c_str ());
+		   std::string (name).c_str ());
 
 	  amd_dbgapi_register_type_flags_up flags_type
 	    (new amd_dbgapi_register_type_flags (bit_size, name));
@@ -631,7 +631,7 @@ parse_amd_dbgapi_register_type (std::string_view type_str,
 	  /* No braces, lookup existing type.  */
 	  if (existing_type_it == type_map.end ())
 	    error (_("reference to unknown type %s"),
-		   gdb::to_string (name).c_str ());
+		   std::string (name).c_str ());
 
 	  if (existing_type_it->second->kind ()
 	      != amd_dbgapi_register_type::kind::ENUM)
@@ -644,7 +644,7 @@ parse_amd_dbgapi_register_type (std::string_view type_str,
 	  /* With braces, it's a definition.  */
 	  if (existing_type_it != type_map.end ())
 	    error (_("re-definition of type %s"),
-		   gdb::to_string (name).c_str ());
+		   std::string (name).c_str ());
 
 	  amd_dbgapi_register_type_enum_up enum_type
 	    (new amd_dbgapi_register_type_enum (name));
