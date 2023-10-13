@@ -98,7 +98,7 @@ nto_lookup_QNX_note_section(int type)
 	continue;
 
       /* Verify that this is a QNX note of the expected type.  */
-      sec->contents = bfd_malloc(sec->size);
+      sec->contents = xmalloc(sec->size);
       if (!bfd_get_section_contents (sec->owner, sec, sec->contents, (file_ptr) 0,
 				     sec->size))
 	einfo (_("%F%P: %pB: can't read contents of section .note: %E\n"),
