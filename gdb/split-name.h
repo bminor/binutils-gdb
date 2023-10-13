@@ -20,7 +20,7 @@
 #ifndef GDB_SPLIT_NAME_H
 #define GDB_SPLIT_NAME_H
 
-#include "gdbsupport/gdb_string_view.h"
+#include <string_view>
 
 /* The available styles of name splitting.  */
 
@@ -40,7 +40,7 @@ enum class split_style
 /* Split NAME into components at module boundaries.  STYLE indicates
    which style of splitting to use.  */
 
-extern std::vector<gdb::string_view> split_name (const char *name,
+extern std::vector<std::string_view> split_name (const char *name,
 						 split_style style);
 
 #endif /* GDB_SPLIT_NAME_H */

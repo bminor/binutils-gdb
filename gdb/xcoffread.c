@@ -2500,7 +2500,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	    switch (p[1])
 	      {
 	      case 'S':
-		pst->add_psymbol (gdb::string_view (namestring,
+		pst->add_psymbol (std::string_view (namestring,
 						    p - namestring),
 				  true, VAR_DOMAIN, LOC_STATIC,
 				  SECT_OFF_DATA (objfile),
@@ -2513,7 +2513,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	      case 'G':
 		/* The addresses in these entries are reported to be
 		   wrong.  See the code that reads 'G's for symtabs.  */
-		pst->add_psymbol (gdb::string_view (namestring,
+		pst->add_psymbol (std::string_view (namestring,
 						    p - namestring),
 				  true, VAR_DOMAIN, LOC_STATIC,
 				  SECT_OFF_DATA (objfile),
@@ -2534,7 +2534,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		    || (p == namestring + 1
 			&& namestring[0] != ' '))
 		  {
-		    pst->add_psymbol (gdb::string_view (namestring,
+		    pst->add_psymbol (std::string_view (namestring,
 							p - namestring),
 				      true, STRUCT_DOMAIN, LOC_TYPEDEF, -1,
 				      psymbol_placement::STATIC,
@@ -2544,7 +2544,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		    if (p[2] == 't')
 		      {
 			/* Also a typedef with the same name.  */
-			pst->add_psymbol (gdb::string_view (namestring,
+			pst->add_psymbol (std::string_view (namestring,
 							    p - namestring),
 					  true, VAR_DOMAIN, LOC_TYPEDEF, -1,
 					  psymbol_placement::STATIC,
@@ -2559,7 +2559,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	      case 't':
 		if (p != namestring)	/* a name is there, not just :T...  */
 		  {
-		    pst->add_psymbol (gdb::string_view (namestring,
+		    pst->add_psymbol (std::string_view (namestring,
 							p - namestring),
 				      true, VAR_DOMAIN, LOC_TYPEDEF, -1,
 				      psymbol_placement::STATIC,
@@ -2624,7 +2624,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 			  ;
 			/* Note that the value doesn't matter for
 			   enum constants in psymtabs, just in symtabs.  */
-			pst->add_psymbol (gdb::string_view (p, q - p), true,
+			pst->add_psymbol (std::string_view (p, q - p), true,
 					  VAR_DOMAIN, LOC_CONST, -1,
 					  psymbol_placement::STATIC,
 					  unrelocated_addr (0),
@@ -2644,7 +2644,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 
 	      case 'c':
 		/* Constant, e.g. from "const" in Pascal.  */
-		pst->add_psymbol (gdb::string_view (namestring,
+		pst->add_psymbol (std::string_view (namestring,
 						    p - namestring),
 				  true, VAR_DOMAIN, LOC_CONST, -1,
 				  psymbol_placement::STATIC,
@@ -2659,7 +2659,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		    std::string name (namestring, (p - namestring));
 		    function_outside_compilation_unit_complaint (name.c_str ());
 		  }
-		pst->add_psymbol (gdb::string_view (namestring,
+		pst->add_psymbol (std::string_view (namestring,
 						    p - namestring),
 				  true, VAR_DOMAIN, LOC_BLOCK,
 				  SECT_OFF_TEXT (objfile),
@@ -2686,7 +2686,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 		if (startswith (namestring, "@FIX"))
 		  continue;
 
-		pst->add_psymbol (gdb::string_view (namestring,
+		pst->add_psymbol (std::string_view (namestring,
 						    p - namestring),
 				  true, VAR_DOMAIN, LOC_BLOCK,
 				  SECT_OFF_TEXT (objfile),

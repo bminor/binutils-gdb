@@ -20,6 +20,7 @@
 #include "diagnostics.h"
 #include <errno.h>
 #include "gdbsupport/scoped_fd.h"
+#include "gdbsupport/gdb_string_view.h"
 #include "debuginfod-support.h"
 #include <optional>
 #include "cli/cli-cmds.h"
@@ -246,11 +247,11 @@ debuginfod_is_enabled ()
       gdb_printf (_("\nThis GDB supports auto-downloading debuginfo " \
 		    "from the following URLs:\n"));
 
-      gdb::string_view url_view (urls);
+      std::string_view url_view (urls);
       while (true)
 	{
 	  size_t off = url_view.find_first_not_of (' ');
-	  if (off == gdb::string_view::npos)
+	  if (off == std::string_view::npos)
 	    break;
 	  url_view = url_view.substr (off);
 	  /* g++ 11.2.1 on s390x, g++ 11.3.1 on ppc64le and g++ 11 on
@@ -266,7 +267,7 @@ debuginfod_is_enabled ()
 	     styled_string (file_name_style.style (),
 			    gdb::to_string (url_view.substr (0,
 							     off)).c_str ()));
-	  if (off == gdb::string_view::npos)
+	  if (off == std::string_view::npos)
 	    break;
 	  url_view = url_view.substr (off);
 	}

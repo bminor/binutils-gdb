@@ -748,7 +748,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       if (new_name != nullptr)
 	sym->compute_and_set_names (new_name.get (), true, objfile->per_bfd);
       else
-	sym->compute_and_set_names (gdb::string_view (string, p - string), true,
+	sym->compute_and_set_names (std::string_view (string, p - string), true,
 				    objfile->per_bfd);
 
       if (sym->language () == language_cplus)

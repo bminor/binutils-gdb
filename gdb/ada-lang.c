@@ -58,6 +58,7 @@
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/selftest.h"
+#include "gdbsupport/gdb_string_view.h"
 #include <algorithm>
 #include "ada-exp.h"
 #include "charset.h"
@@ -1035,7 +1036,7 @@ find_case_fold_entry (uint32_t c)
    rather than emitting a warning.  Result good to next call.  */
 
 static const char *
-ada_fold_name (gdb::string_view name, bool throw_on_error = false)
+ada_fold_name (std::string_view name, bool throw_on_error = false)
 {
   static std::string fold_storage;
 
@@ -13250,7 +13251,7 @@ do_exact_match (const char *symbol_search_name,
 
 ada_lookup_name_info::ada_lookup_name_info (const lookup_name_info &lookup_name)
 {
-  gdb::string_view user_name = lookup_name.name ();
+  std::string_view user_name = lookup_name.name ();
 
   if (!user_name.empty () && user_name[0] == '<')
     {
@@ -13269,7 +13270,7 @@ ada_lookup_name_info::ada_lookup_name_info (const lookup_name_info &lookup_name)
     {
       m_verbatim_p = false;
 
-      m_encoded_p = user_name.find ("__") != gdb::string_view::npos;
+      m_encoded_p = user_name.find ("__") != std::string_view::npos;
 
       if (!m_encoded_p)
 	{
@@ -13326,7 +13327,7 @@ literal_symbol_name_matcher (const char *symbol_search_name,
 			     const lookup_name_info &lookup_name,
 			     completion_match_result *comp_match_res)
 {
-  gdb::string_view name_view = lookup_name.name ();
+  std::string_view name_view = lookup_name.name ();
 
   if (lookup_name.completion_mode ()
       ? (strncmp (symbol_search_name, name_view.data (),

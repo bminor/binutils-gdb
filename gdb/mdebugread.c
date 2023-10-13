@@ -3050,7 +3050,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		    switch (p[1])
 		      {
 		      case 'S':
-			pst->add_psymbol (gdb::string_view (namestring,
+			pst->add_psymbol (std::string_view (namestring,
 							    p - namestring),
 					  true, VAR_DOMAIN, LOC_STATIC,
 					  SECT_OFF_DATA (objfile),
@@ -3063,7 +3063,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			/* The addresses in these entries are reported
 			   to be wrong.  See the code that reads 'G's
 			   for symtabs.  */
-			pst->add_psymbol (gdb::string_view (namestring,
+			pst->add_psymbol (std::string_view (namestring,
 							    p - namestring),
 					  true, VAR_DOMAIN, LOC_STATIC,
 					  SECT_OFF_DATA (objfile),
@@ -3085,7 +3085,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 				&& namestring[0] != ' '))
 			  {
 			    pst->add_psymbol
-			      (gdb::string_view (namestring, p - namestring),
+			      (std::string_view (namestring, p - namestring),
 			       true, STRUCT_DOMAIN, LOC_TYPEDEF, -1,
 			       psymbol_placement::STATIC,
 			       unrelocated_addr (0),
@@ -3095,7 +3095,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			      {
 				/* Also a typedef with the same name.  */
 				pst->add_psymbol
-				  (gdb::string_view (namestring,
+				  (std::string_view (namestring,
 						     p - namestring),
 				   true, VAR_DOMAIN, LOC_TYPEDEF, -1,
 				   psymbol_placement::STATIC,
@@ -3111,7 +3111,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 						   just :T...  */
 			  {
 			    pst->add_psymbol
-			      (gdb::string_view (namestring,
+			      (std::string_view (namestring,
 						 p - namestring),
 			       true, VAR_DOMAIN, LOC_TYPEDEF, -1,
 			       psymbol_placement::STATIC,
@@ -3178,7 +3178,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 				/* Note that the value doesn't matter for
 				   enum constants in psymtabs, just in
 				   symtabs.  */
-				pst->add_psymbol (gdb::string_view (p,
+				pst->add_psymbol (std::string_view (p,
 								    q - p),
 						  true, VAR_DOMAIN,
 						  LOC_CONST, -1,
@@ -3199,7 +3199,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			continue;
 		      case 'c':
 			/* Constant, e.g. from "const" in Pascal.  */
-			pst->add_psymbol (gdb::string_view (namestring,
+			pst->add_psymbol (std::string_view (namestring,
 							    p - namestring),
 					  true, VAR_DOMAIN, LOC_CONST, -1,
 					  psymbol_placement::STATIC,
@@ -3215,7 +3215,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			    function_outside_compilation_unit_complaint
 			      (copy.c_str ());
 			  }
-			pst->add_psymbol (gdb::string_view (namestring,
+			pst->add_psymbol (std::string_view (namestring,
 							    p - namestring),
 					  true, VAR_DOMAIN, LOC_BLOCK,
 					  SECT_OFF_TEXT (objfile),
@@ -3236,7 +3236,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			    function_outside_compilation_unit_complaint
 			      (copy.c_str ());
 			  }
-			pst->add_psymbol (gdb::string_view (namestring,
+			pst->add_psymbol (std::string_view (namestring,
 							    p - namestring),
 					  true, VAR_DOMAIN, LOC_BLOCK,
 					  SECT_OFF_TEXT (objfile),

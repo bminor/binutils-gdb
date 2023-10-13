@@ -1208,7 +1208,7 @@ partial_symtab::add_psymbol (const partial_symbol &psymbol,
 /* See psymtab.h.  */
 
 void
-partial_symtab::add_psymbol (gdb::string_view name, bool copy_name,
+partial_symtab::add_psymbol (std::string_view name, bool copy_name,
 			     domain_enum domain,
 			     enum address_class theclass,
 			     short section,

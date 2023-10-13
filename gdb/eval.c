@@ -37,6 +37,7 @@
 #include "user-regs.h"
 #include "valprint.h"
 #include "gdbsupport/gdb_obstack.h"
+#include "gdbsupport/gdb_string_view.h"
 #include "objfiles.h"
 #include "typeprint.h"
 #include <ctype.h>

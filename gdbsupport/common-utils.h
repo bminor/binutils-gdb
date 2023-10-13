@@ -26,7 +26,7 @@
 #include "gdbsupport/gdb_unique_ptr.h"
 #include "gdbsupport/array-view.h"
 #include "poison.h"
-#include "gdb_string_view.h"
+#include <string_view>
 
 #if defined HAVE_LIBXXHASH
 #  include <xxhash.h>
@@ -94,7 +94,7 @@ extern const char *safe_strerror (int);
    true if the start of STRING matches PATTERN, false otherwise.  */
 
 static inline bool
-startswith (gdb::string_view string, gdb::string_view pattern)
+startswith (std::string_view string, std::string_view pattern)
 {
   return (string.length () >= pattern.length ()
 	  && strncmp (string.data (), pattern.data (), pattern.length ()) == 0);
@@ -228,7 +228,7 @@ fast_hash (const void *ptr, size_t len, unsigned int start_value = 0)
 namespace gdb
 {
 
-/* Hash type for gdb::string_view.
+/* Hash type for std::string_view.
 
    Even after we switch to C++17 and dump our string_view implementation, we
    might want to keep this hash implementation if it's faster than std::hash
@@ -236,7 +236,7 @@ namespace gdb
 
 struct string_view_hash
 {
-  std::size_t operator() (gdb::string_view view) const
+  std::size_t operator() (std::string_view view) const
   {  return fast_hash (view.data (), view.length ()); }
 };
 

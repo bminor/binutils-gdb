@@ -556,7 +556,7 @@ namespace gdb {
 namespace gdb {
 
 static inline std::string
-to_string(const gdb::string_view &view)
+to_string(const std::string_view &view)
 {
   return { view.data (), view.size () };
 }

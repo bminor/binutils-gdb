@@ -45,7 +45,7 @@
 #include "auxv.h"
 #include "mdebugread.h"
 #include "ctfread.h"
-#include "gdbsupport/gdb_string_view.h"
+#include <string_view>
 #include "gdbsupport/scoped_fd.h"
 #include "dwarf2/public.h"
 #include "cli/cli-cmds.h"
@@ -195,7 +195,7 @@ elf_locate_sections (asection *sectp, struct elfinfo *ei)
 
 static struct minimal_symbol *
 record_minimal_symbol (minimal_symbol_reader &reader,
-		       gdb::string_view name, bool copy_name,
+		       std::string_view name, bool copy_name,
 		       unrelocated_addr address,
 		       enum minimal_symbol_type ms_type,
 		       asection *bfd_section, struct objfile *objfile)
@@ -503,7 +503,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
 		  && !is_plt
 		  && (elf_sym->version & VERSYM_HIDDEN) == 0)
 		record_minimal_symbol (reader,
-				       gdb::string_view (sym->name, len),
+				       std::string_view (sym->name, len),
 				       true, unrelocated_addr (symaddr),
 				       ms_type, sym->section, objfile);
 	      else if (is_plt)
@@ -517,7 +517,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
 		      struct minimal_symbol *mtramp;
 
 		      mtramp = record_minimal_symbol
-			(reader, gdb::string_view (sym->name, len), true,
+			(reader, std::string_view (sym->name, len), true,
 			 unrelocated_addr (symaddr),
 			 mst_solib_trampoline, sym->section, objfile);
 		      if (mtramp)

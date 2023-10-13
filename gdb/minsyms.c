@@ -1170,7 +1170,7 @@ mst_str (minimal_symbol_type t)
 /* See minsyms.h.  */
 
 struct minimal_symbol *
-minimal_symbol_reader::record_full (gdb::string_view name,
+minimal_symbol_reader::record_full (std::string_view name,
 				    bool copy_name, unrelocated_addr address,
 				    enum minimal_symbol_type ms_type,
 				    int section)
@@ -1510,7 +1510,7 @@ minimal_symbol_reader::install ()
 	       {
 		 size_t idx = msym - msymbols;
 		 msym->compute_and_set_names
-		   (gdb::string_view (msym->linkage_name (),
+		   (std::string_view (msym->linkage_name (),
 				      hash_values[idx].name_length),
 		    false,
 		    m_objfile->per_bfd,
