@@ -1657,13 +1657,7 @@ gdb_demangle (const char *name, int options)
 	     we might be in a background thread.  Instead, arrange for
 	     the reporting to happen on the main thread.  */
 	  std::string copy = name;
-	  run_on_main_thread ([
-#if __cplusplus >= 201402L
-			       =, copy = std::move (copy)
-#else
-			       =
-#endif
-			       ] ()
+	  run_on_main_thread ([=, copy = std::move (copy)] ()
 	    {
 	      report_failed_demangle (copy.c_str (), core_dump_allowed,
 				      crash_signal);
