@@ -951,12 +951,4 @@ extern void finalize_all_units (dwarf2_per_bfd *per_bfd);
 
 extern htab_up create_quick_file_names_table (unsigned int nr_initial_entries);
 
-/* Read the address map data from DWARF-5 .debug_aranges, and use it
-   to populate given addrmap.  Returns true on success, false on
-   failure.  */
-
-extern bool read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
-				       dwarf2_section_info *section,
-				       addrmap *mutable_map);
-
 #endif /* DWARF2READ_H */

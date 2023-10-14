@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "read-debug-names.h"
+#include "dwarf2/aranges.h"
 
 #include "complaints.h"
 #include "cp-support.h"
