@@ -1586,6 +1586,7 @@ dwarf2_per_bfd::map_info_sections (struct objfile *objfile)
   ranges.read (objfile);
   rnglists.read (objfile);
   addr.read (objfile);
+  debug_aranges.read (objfile);
 
   for (auto &section : types)
     section.read (objfile);
@@ -1843,6 +1844,11 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 			   dwarf2_section_info *section,
 			   addrmap *mutable_map)
 {
+  /* Caller must ensure that the section has already been read.  */
+  gdb_assert (section->readin);
+  if (section->empty ())
+    return false;
+
   struct objfile *objfile = per_objfile->objfile;
   bfd *abfd = objfile->obfd.get ();
   struct gdbarch *gdbarch = objfile->arch ();
@@ -1870,13 +1876,8 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
     }
 
   std::set<sect_offset> debug_info_offset_seen;
-
-  section->read (objfile);
-
   const bfd_endian dwarf5_byte_order = gdbarch_byte_order (gdbarch);
-
   const gdb_byte *addr = section->buffer;
-
   while (addr < section->buffer + section->size)
     {
       const gdb_byte *const entry_addr = addr;
