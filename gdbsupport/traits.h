@@ -43,15 +43,6 @@
 
 namespace gdb {
 
-/* Pre C++14-safe (CWG 1558) version of C++17's std::void_t.  See
-   <http://en.cppreference.com/w/cpp/types/void_t>.  */
-
-template<typename... Ts>
-struct make_void { typedef void type; };
-
-template<typename... Ts>
-using void_t = typename make_void<Ts...>::type;
-
 /* Implementation of the detection idiom:
 
    - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4502.pdf
@@ -79,7 +70,7 @@ struct detector
 
 /* Implementation of the detection idiom (positive case).  */
 template<typename Default, template<typename...> class Op, typename... Args>
-struct detector<Default, void_t<Op<Args...>>, Op, Args...>
+struct detector<Default, std::void_t<Op<Args...>>, Op, Args...>
 {
   using value_t = std::true_type;
   using type = Op<Args...>;
