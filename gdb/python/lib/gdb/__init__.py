@@ -84,6 +84,8 @@ xmethods = []
 frame_filters = {}
 # Initial frame unwinders.
 frame_unwinders = []
+# Initial missing debug handlers.
+missing_debug_handlers = []
 
 
 def _execute_unwinders(pending_frame):
@@ -291,3 +293,42 @@ class Thread(threading.Thread):
         # threads.
         with blocked_signals():
             super().start()
+
+
+def _handle_missing_debuginfo(objfile):
+    """Internal function called from GDB to execute missing debug
+    handlers.
+
+    Run each of the currently registered, and enabled missing debug
+    handler objects for the current program space and then from the
+    global list.  Stop after the first handler that returns a result
+    other than None.
+
+    Arguments:
+        objfile: A gdb.Objfile for which GDB could not find any debug
+                 information.
+
+    Returns:
+        None: No debug information could be found for objfile.
+        False: A handler has done all it can with objfile, but no
+               debug information could be found.
+        True: Debug information might have been installed by a
+              handler, GDB should check again.
+        A string: This is the filename of a file containing the
+                  required debug information.
+    """
+    pspace = objfile.progspace
+
+    for handler in pspace.missing_debug_handlers:
+        if handler.enabled:
+            result = handler(objfile)
+            if result is not None:
+                return result
+
+    for handler in missing_debug_handlers:
+        if handler.enabled:
+            result = handler(objfile)
+            if result is not None:
+                return result
+
+    return None

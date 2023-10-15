@@ -16,6 +16,21 @@ disassemble
   command will now give an error.  Previously the 'b' flag would
   always override the 'r' flag.
 
+* New Commands
+
+info missing-debug-handler
+  List all the registered missing debug handlers.
+
+enable missing-debug-handler LOCUS HANDLER
+disable missing-debug-handler LOCUS HANDLER
+  Enable or disable a missing debug handler with a name matching the
+  regular expression HANDLER, in LOCUS.
+
+  LOCUS can be 'global' to operate on global missing debug handler,
+  'progspace' to operate on handlers within the current program space,
+  or can be a regular expression which is matched against the filename
+  of the primary executable in each program space.
+
 * Python API
 
   ** New function gdb.notify_mi(NAME, DATA), that emits custom
@@ -23,6 +38,17 @@ disassemble
 
   ** New read/write attribute gdb.Value.bytes that contains a bytes
      object holding the contents of this value.
+
+  ** New module gdb.missing_debug that facilitates dealing with
+     objfiles that are missing any debug information.
+
+  ** New function gdb.missing_debug.register_handler that can register
+     an instance of a sub-class of gdb.missing_debug.MissingDebugInfo
+     as a handler for objfiles that are missing debug information.
+
+  ** New class gdb.missing_debug.MissingDebugInfo which can be
+     sub-classed to create handlers for objfiles with missing debug
+     information.
 
 * New commands
 

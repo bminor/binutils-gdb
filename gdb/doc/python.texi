@@ -230,6 +230,7 @@ optional arguments while skipping others.  Example:
 * Connections In Python::       Python representation of connections.
 * TUI Windows In Python::       Implementing new TUI windows.
 * Disassembly In Python::       Instruction Disassembly In Python
+* Missing Debug Info In Python:: Handle missing debug info from Python.
 @end menu
 
 @node Basic Python
@@ -5252,6 +5253,12 @@ The @code{frame_filters} attribute is a dictionary of frame filter
 objects.  @xref{Frame Filter API}, for more information.
 @end defvar
 
+@defvar Progspace.missing_debug_handlers
+The @code{missing_debug_handlers} attribute is a list of the missing
+debug handler objects for this program space.  @xref{Missing Debug
+Info In Python}, for more information.
+@end defvar
+
 A program space has the following methods:
 
 @defun Progspace.block_for_pc (pc)
@@ -7818,6 +7825,139 @@ class NibbleSwapDisassembler(gdb.disassembler.Disassembler):
 
 gdb.disassembler.register_disassembler(NibbleSwapDisassembler())
 @end smallexample
+
+@node Missing Debug Info In Python
+@subsubsection Missing Debug Info In Python
+@cindex python, handle missing debug information
+
+When @value{GDBN} encounters a new objfile (@pxref{Objfiles In
+Python}), e.g.@: the primary executable, or any shared libraries used
+by the inferior, @value{GDBN} will attempt to load the corresponding
+debug information for that objfile.  The debug information might be
+found within the objfile itself, or within a separate objfile which
+@value{GDBN} will automatically locate and load.
+
+Sometimes though, @value{GDBN} might not find any debug information
+for an objfile, in this case the debugging experience will be
+restricted.
+
+If @value{GDBN} fails to locate any debug information for a particular
+objfile, there is an opportunity for a Python extension to step in.  A
+Python extension can potentially locate the missing debug information
+using some platform- or project-specific steps, and inform
+@value{GDBN} of its location.  Or a Python extension might provide
+some platform- or project-specific advice to the user about how to
+obtain the missing debug information.
+
+A missing debug information Python extension consists of a handler
+object which has the @code{name} and @code{enabled} attributes, and
+implements the @code{__call__} method.  When @value{GDBN} encounters
+an objfile for which it is unable to find any debug information, it
+invokes the @code{__call__} method.  Full details of how handlers are
+written can be found below.
+
+@subheading The @code{gdb.missing_debug} Module
+
+@value{GDBN} comes with a @code{gdb.missing_debug} module which
+contains the following class and global function:
+
+@deftp{class} gdb.missing_debug.MissingDebugHandler
+
+@code{MissingDebugHandler} is a base class from which user-created
+handlers can derive, though it is not required that handlers derive
+from this class, so long as any user created handler has the
+@code{name} and @code{enabled} attributes, and implements the
+@code{__call__} method.
+
+@defun MissingDebugHandler.__init__ (name)
+The @var{name} is a string used to reference this missing debug
+handler within some @value{GDBN} commands.  Valid names consist of the
+characters @code{[-_a-zA-Z0-9]}, creating a handler with an invalid
+name raises a @code{ValueError} exception.
+@end defun
+
+@defun MissingDebugHandler.__call__ (objfile)
+Sub-classes must override the @code{__call__} method.  The
+@var{objfile} argument will be a @code{gdb.Objfile}, this is the
+objfile for which @value{GDBN} was unable to find any debug
+information.
+
+The return value from the @code{__call__} method indicates what
+@value{GDBN} should do next.  The possible return values are:
+
+@itemize @bullet
+@item @code{None}
+
+This indicates that this handler could not help with @var{objfile},
+@value{GDBN} should call any other registered handlers.
+
+@item @code{True}
+
+This indicates that this handler has installed the debug information
+into a location where @value{GDBN} would normally expect to find it
+when looking for separate debug information files (@pxref{Separate
+Debug Files}).  @value{GDBN} will repeat the normal lookup process,
+which should now find the separate debug file.
+
+If @value{GDBN} still doesn't find the separate debug information file
+after this second attempt, then the Python missing debug information
+handlers are not invoked a second time, this prevents a badly behaved
+handler causing @value{GDBN} to get stuck in a loop.  @value{GDBN}
+will continue without any debug information for @var{objfile}.
+
+@item @code{False}
+
+This indicates that this handler has done everything that it intends
+to do with @var{objfile}, but no separate debug information can be
+found.  @value{GDBN} will not call any other registered handlers for
+@var{objfile}.  @value{GDBN} will continue without debugging
+information for @var{objfile}.
+
+@item A string
+
+The returned string should contain a filename.  @value{GDBN} will not
+call any further registered handlers, and will instead load the debug
+information from the file identified by the returned filename.
+@end itemize
+
+Invoking the @code{__call__} method from this base class will raise a
+@code{NotImplementedError} exception.
+@end defun
+
+@defvar MissingDebugHandler.name
+A read-only attribute which is a string, the name of this handler
+passed to the @code{__init__} method.
+@end defvar
+
+@defvar MissingDebugHandler.enabled
+A modifiable attribute containing a boolean; when @code{True}, the
+handler is enabled, and will be used by @value{GDBN}.  When
+@code{False}, the handler has been disabled, and will not be used.
+@end defvar
+@end deftp
+
+@defun gdb.missing_debug.register_handler (locus, handler, replace=@code{False})
+Register a new missing debug handler with @value{GDBN}.
+
+@var{handler} is an instance of a sub-class of
+@code{MissingDebugHandler}, or at least an instance of an object that
+has the same attributes and methods as @code{MissingDebugHandler}.
+
+@var{locus} specifies to which handler list to prepend @var{handler}.
+It can be either a @code{gdb.Progspace} (@pxref{Progspaces In Python})
+or @code{None}, in which case the handler is registered globally.  The
+newly registered @var{handler} will be called before any other handler
+from the same locus.  Two handlers in the same locus cannot have the
+same name, an attempt to add a handler with an already existing name
+raises an exception unless @var{replace} is @code{True}, in which case
+the old handler is deleted and the new handler is prepended to the
+selected handler list.
+
+@value{GDBN} first calls the handlers for the current program space,
+and then the globally registered handlers.  As soon as a handler
+returns a value other than @code{None}, no further handlers are called
+for this objfile.
+@end defun
 
 @node Python Auto-loading
 @subsection Python Auto-loading

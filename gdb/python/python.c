@@ -127,7 +127,9 @@ static enum ext_lang_rc gdbpy_before_prompt_hook
 static gdb::optional<std::string> gdbpy_colorize
   (const std::string &filename, const std::string &contents);
 static gdb::optional<std::string> gdbpy_colorize_disasm
-  (const std::string &content, gdbarch *gdbarch);
+(const std::string &content, gdbarch *gdbarch);
+static ext_lang_missing_debuginfo_result gdbpy_handle_missing_debuginfo
+  (const struct extension_language_defn *extlang, struct objfile *objfile);
 
 /* The interface between gdb proper and loading of python scripts.  */
 
@@ -173,6 +175,8 @@ static const struct extension_language_ops python_extension_ops =
   gdbpy_colorize_disasm,
 
   gdbpy_print_insn,
+
+  gdbpy_handle_missing_debuginfo
 };
 
 #endif /* HAVE_PYTHON */
@@ -1686,6 +1690,83 @@ gdbpy_get_current_objfile (PyObject *unused1, PyObject *unused2)
     Py_RETURN_NONE;
 
   return objfile_to_objfile_object (gdbpy_current_objfile).release ();
+}
+
+/* Implement the 'handle_missing_debuginfo' hook for Python.  GDB has
+   failed to find any debug information for OBJFILE.  The extension has a
+   chance to record this, or even install the required debug information.
+   See the description of ext_lang_missing_debuginfo_result in
+   extension-priv.h for details of the return value.  */
+
+static ext_lang_missing_debuginfo_result
+gdbpy_handle_missing_debuginfo (const struct extension_language_defn *extlang,
+				struct objfile *objfile)
+{
+  /* Early exit if Python is not initialised.  */
+  if (!gdb_python_initialized)
+    return {};
+
+  struct gdbarch *gdbarch = objfile->arch ();
+
+  gdbpy_enter enter_py (gdbarch);
+
+  /* Convert OBJFILE into the corresponding Python object.  */
+  gdbpy_ref<> pyo_objfile = objfile_to_objfile_object (objfile);
+  if (pyo_objfile == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  /* Lookup the helper function within the GDB module.  */
+  gdbpy_ref<> pyo_handler
+    (PyObject_GetAttrString (gdb_python_module, "_handle_missing_debuginfo"));
+  if (pyo_handler == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  /* Call the function, passing in the Python objfile object.  */
+  gdbpy_ref<> pyo_execute_ret
+    (PyObject_CallFunctionObjArgs (pyo_handler.get (), pyo_objfile.get (),
+				   nullptr));
+  if (pyo_execute_ret == nullptr)
+    {
+      /* If the handler is cancelled due to a Ctrl-C, then propagate
+	 the Ctrl-C as a GDB exception instead of swallowing it.  */
+      gdbpy_print_stack_or_quit ();
+      return {};
+    }
+
+  /* Parse the result, and convert it back to the C++ object.  */
+  if (pyo_execute_ret == Py_None)
+    return {};
+
+  if (PyBool_Check (pyo_execute_ret.get ()))
+    {
+      bool try_again = PyObject_IsTrue (pyo_execute_ret.get ());
+      return ext_lang_missing_debuginfo_result (try_again);
+    }
+
+  if (!gdbpy_is_string (pyo_execute_ret.get ()))
+    {
+      PyErr_SetString (PyExc_ValueError,
+		       "return value from _handle_missing_debuginfo should "
+		       "be None, a Bool, or a String");
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  gdb::unique_xmalloc_ptr<char> filename
+    = python_string_to_host_string (pyo_execute_ret.get ());
+  if (filename == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  return ext_lang_missing_debuginfo_result (std::string (filename.get ()));
 }
 
 /* Compute the list of active python type printers and store them in
