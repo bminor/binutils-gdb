@@ -153,18 +153,17 @@ public:
     : m_array (c.data ()), m_size (c.size ())
   {}
 
-  /* Observer methods.  Some of these can't be constexpr until we
-     require C++14.  */
-  /*constexpr14*/ T *data () noexcept { return m_array; }
+  /* Observer methods.  */
+  constexpr T *data () noexcept { return m_array; }
   constexpr const T *data () const noexcept { return m_array; }
 
-  /*constexpr14*/ T *begin () noexcept { return m_array; }
+  constexpr T *begin () noexcept { return m_array; }
   constexpr const T *begin () const noexcept { return m_array; }
 
-  /*constexpr14*/ T *end () noexcept { return m_array + m_size; }
+  constexpr T *end () noexcept { return m_array + m_size; }
   constexpr const T *end () const noexcept { return m_array + m_size; }
 
-  /*constexpr14*/ reference operator[] (size_t index) noexcept
+  constexpr reference operator[] (size_t index) noexcept
   {
 #if defined(_GLIBCXX_DEBUG)
     gdb_assert (index < m_size);
@@ -173,7 +172,7 @@ public:
   }
   constexpr const_reference operator[] (size_t index) const noexcept
   {
-#if defined(_GLIBCXX_DEBUG) && __cplusplus >= 201402L
+#if defined(_GLIBCXX_DEBUG)
     gdb_assert (index < m_size);
 #endif
     return m_array[index];
@@ -188,7 +187,7 @@ public:
   [[nodiscard]]
   constexpr array_view<T> slice (size_type start, size_type size) const noexcept
   {
-#if defined(_GLIBCXX_DEBUG) && __cplusplus >= 201402L
+#if defined(_GLIBCXX_DEBUG)
     gdb_assert (start + size <= m_size);
 #endif
     return {m_array + start, size};
@@ -199,7 +198,7 @@ public:
   [[nodiscard]]
   constexpr array_view<T> slice (size_type start) const noexcept
   {
-#if defined(_GLIBCXX_DEBUG) && __cplusplus >= 201402L
+#if defined(_GLIBCXX_DEBUG)
     gdb_assert (start <= m_size);
 #endif
     return {m_array + start, size () - start};
