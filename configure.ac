@@ -3076,6 +3076,11 @@ case " ${configdirs} " in
     configdirs="${configdirs} gnulib"
     ;;
 esac
+case " ${configdirs} " in
+  *\ sim\ *)
+    build_configdirs="${build_configdirs} gnulib"
+    ;;
+esac
 
 # Strip out unwanted targets.
 

@@ -1199,6 +1199,7 @@ all:
 all-build: maybe-all-build-libiberty
 all-build: maybe-all-build-bison
 all-build: maybe-all-build-flex
+all-build: maybe-all-build-gnulib
 all-build: maybe-all-build-m4
 all-build: maybe-all-build-texinfo
 all-build: maybe-all-build-fixincludes
@@ -3295,6 +3296,63 @@ all-build-flex: configure-build-flex
 	  $(MAKE) $(BASE_FLAGS_TO_PASS) $(EXTRA_BUILD_FLAGS)   \
 		$(TARGET-build-flex))
 @endif build-flex
+
+
+
+
+
+.PHONY: configure-build-gnulib maybe-configure-build-gnulib
+maybe-configure-build-gnulib:
+@if gcc-bootstrap
+configure-build-gnulib: stage_current
+@endif gcc-bootstrap
+@if build-gnulib
+maybe-configure-build-gnulib: configure-build-gnulib
+configure-build-gnulib: 
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	test ! -f $(BUILD_SUBDIR)/gnulib/Makefile || exit 0; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(BUILD_SUBDIR)/gnulib; \
+	$(BUILD_EXPORTS)  \
+	echo Configuring in $(BUILD_SUBDIR)/gnulib; \
+	cd "$(BUILD_SUBDIR)/gnulib" || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(BUILD_SUBDIR)/gnulib/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	module_srcdir=gnulib; \
+	rm -f no-such-file || : ; \
+	CONFIG_SITE=no-such-file $(SHELL) \
+	  $$s/$$module_srcdir/configure \
+	  --srcdir=$${topdir}/$$module_srcdir \
+	  $(BUILD_CONFIGARGS) --build=${build_alias} --host=${build_alias} \
+	  --target=${target_alias}  \
+	  || exit 1
+@endif build-gnulib
+
+
+
+
+
+.PHONY: all-build-gnulib maybe-all-build-gnulib
+maybe-all-build-gnulib:
+@if gcc-bootstrap
+all-build-gnulib: stage_current
+@endif gcc-bootstrap
+@if build-gnulib
+TARGET-build-gnulib=all
+maybe-all-build-gnulib: all-build-gnulib
+all-build-gnulib: configure-build-gnulib
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(BUILD_EXPORTS)  \
+	(cd $(BUILD_SUBDIR)/gnulib && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) $(EXTRA_BUILD_FLAGS)   \
+		$(TARGET-build-gnulib))
+@endif build-gnulib
 
 
 
@@ -66659,6 +66717,7 @@ install-sid: maybe-install-tcl
 install-strip-sid: maybe-install-strip-tcl
 install-sid: maybe-install-tk
 install-strip-sid: maybe-install-strip-tk
+configure-sim: maybe-all-build-gnulib
 configure-sim: maybe-all-gnulib
 configure-sim: maybe-all-readline
 all-fastjar: maybe-all-build-texinfo
