@@ -635,6 +635,8 @@ gl_LTLIBOBJS
 gl_LIBOBJS
 LTLIBOBJS
 LIBOBJS
+VAR_PREFIX
+BUILD_SUBDIR
 LN_S
 AM_BACKSLASH
 AM_DEFAULT_VERBOSITY
@@ -2219,6 +2221,7 @@ enable_threads
 enable_cross_guesses
 enable_dependency_tracking
 enable_silent_rules
+with_build_subdir
 '
       ac_precious_vars='build_alias
 host_alias
@@ -2865,6 +2868,12 @@ Optional Features:
                           speeds up one-time build
   --enable-silent-rules   less verbose build output (undo: "make V=1")
   --disable-silent-rules  verbose build output (undo: "make V=0")
+
+Optional Packages:
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-build-subdir=SUBDIR
+                          Configuring in a subdirectory for build
 
 Some influential environment variables:
   CC          C compiler command
@@ -13813,8 +13822,8 @@ rm -f core conftest.err conftest.$ac_objext \
         LIBS=$save_LIBS
         test $gl_pthread_api = yes && break
       done
-      echo "$as_me:13816: gl_pthread_api=$gl_pthread_api" >&5
-      echo "$as_me:13817: LIBPTHREAD=$LIBPTHREAD" >&5
+      echo "$as_me:13825: gl_pthread_api=$gl_pthread_api" >&5
+      echo "$as_me:13826: LIBPTHREAD=$LIBPTHREAD" >&5
 
       gl_pthread_in_glibc=no
       # On Linux with glibc >= 2.34, libc contains the fully functional
@@ -13839,7 +13848,7 @@ rm -f conftest*
 
           ;;
       esac
-      echo "$as_me:13842: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
+      echo "$as_me:13851: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
 
       # Test for libpthread by looking for pthread_kill. (Not pthread_self,
       # since it is defined as a macro on OSF/1.)
@@ -13993,7 +14002,7 @@ fi
 
         fi
       fi
-      echo "$as_me:13996: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
+      echo "$as_me:14005: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether POSIX threads API is available" >&5
 $as_echo_n "checking whether POSIX threads API is available... " >&6; }
@@ -17070,8 +17079,8 @@ rm -f core conftest.err conftest.$ac_objext \
         LIBS=$save_LIBS
         test $gl_pthread_api = yes && break
       done
-      echo "$as_me:17073: gl_pthread_api=$gl_pthread_api" >&5
-      echo "$as_me:17074: LIBPTHREAD=$LIBPTHREAD" >&5
+      echo "$as_me:17082: gl_pthread_api=$gl_pthread_api" >&5
+      echo "$as_me:17083: LIBPTHREAD=$LIBPTHREAD" >&5
 
       gl_pthread_in_glibc=no
       # On Linux with glibc >= 2.34, libc contains the fully functional
@@ -17096,7 +17105,7 @@ rm -f conftest*
 
           ;;
       esac
-      echo "$as_me:17099: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
+      echo "$as_me:17108: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
 
       # Test for libpthread by looking for pthread_kill. (Not pthread_self,
       # since it is defined as a macro on OSF/1.)
@@ -17250,7 +17259,7 @@ fi
 
         fi
       fi
-      echo "$as_me:17253: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
+      echo "$as_me:17262: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether POSIX threads API is available" >&5
 $as_echo_n "checking whether POSIX threads API is available... " >&6; }
@@ -17476,8 +17485,8 @@ rm -f core conftest.err conftest.$ac_objext \
         LIBS=$save_LIBS
         test $gl_pthread_api = yes && break
       done
-      echo "$as_me:17479: gl_pthread_api=$gl_pthread_api" >&5
-      echo "$as_me:17480: LIBPTHREAD=$LIBPTHREAD" >&5
+      echo "$as_me:17488: gl_pthread_api=$gl_pthread_api" >&5
+      echo "$as_me:17489: LIBPTHREAD=$LIBPTHREAD" >&5
 
       gl_pthread_in_glibc=no
       # On Linux with glibc >= 2.34, libc contains the fully functional
@@ -17502,7 +17511,7 @@ rm -f conftest*
 
           ;;
       esac
-      echo "$as_me:17505: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
+      echo "$as_me:17514: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
 
       # Test for libpthread by looking for pthread_kill. (Not pthread_self,
       # since it is defined as a macro on OSF/1.)
@@ -17656,7 +17665,7 @@ fi
 
         fi
       fi
-      echo "$as_me:17659: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
+      echo "$as_me:17668: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether POSIX threads API is available" >&5
 $as_echo_n "checking whether POSIX threads API is available... " >&6; }
@@ -36620,6 +36629,23 @@ fi
 # ---------------------- #
 # Checks for libraries.  #
 # ---------------------- #
+
+
+# Check whether --with-build-subdir was given.
+if test "${with_build_subdir+set}" = set; then :
+  withval=$with_build_subdir;
+fi
+
+
+VAR_PREFIX=
+BUILD_SUBDIR=
+if test -n "${with_build_subdir}"; then :
+    VAR_PREFIX="BUILD_"
+  BUILD_SUBDIR="${with_build_subdir}/"
+
+fi
+
+
 
 ac_config_files="$ac_config_files Makefile.gnulib.inc"
 

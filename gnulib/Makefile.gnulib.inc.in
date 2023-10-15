@@ -31,16 +31,20 @@
 #
 # INCGNU: A list of -I.... include paths that should be passed to the
 #        compiler, these are where the gnulib headers can be found.
+#
+# When building for --build, the variables will be prefixed with BUILD_.
 
 # Packages must define the relative path to gnulib's parent dir.
 ifndef GNULIB_PARENT_DIR
 $(error missing GNULIB_PARENT_DIR)
 endif
 
-LIBGNU = $(GNULIB_PARENT_DIR)/gnulib/import/libgnu.a
-LIBGNU_EXTRA_LIBS = @FREXPL_LIBM@ @FREXP_LIBM@ @INET_NTOP_LIB@ \
-                    @LIBTHREAD@ @LIB_GETLOGIN@ @LIB_GETRANDOM@ \
-                    @LIB_HARD_LOCALE@ @LIB_MBRTOWC@ \
-                    @LIB_SETLOCALE_NULL@ @LIBINTL@ @LIB_SELECT@ @LIBSOCKET@
-INCGNU = -I$(srcdir)/$(GNULIB_PARENT_DIR)/gnulib/import \
-         -I$(GNULIB_PARENT_DIR)/gnulib/import
+@VAR_PREFIX@LIBGNU = $(GNULIB_PARENT_DIR)/@BUILD_SUBDIR@gnulib/import/libgnu.a
+@VAR_PREFIX@LIBGNU_EXTRA_LIBS = \
+	@FREXPL_LIBM@ @FREXP_LIBM@ @INET_NTOP_LIB@ \
+	@LIBTHREAD@ @LIB_GETLOGIN@ @LIB_GETRANDOM@ \
+	@LIB_HARD_LOCALE@ @LIB_MBRTOWC@ \
+	@LIB_SETLOCALE_NULL@ @LIBINTL@ @LIB_SELECT@ @LIBSOCKET@
+@VAR_PREFIX@INCGNU = \
+	-I$(srcdir)/$(GNULIB_PARENT_DIR)/gnulib/import \
+	-I$(GNULIB_PARENT_DIR)/@BUILD_SUBDIR@gnulib/import

@@ -56,6 +56,18 @@ AC_CHECK_TOOL(AR, ar)
 # Checks for libraries.  #
 # ---------------------- #
 
+AC_ARG_WITH(build-subdir,
+  [AS_HELP_STRING([--with-build-subdir=SUBDIR], [Configuring in a subdirectory for build])])
+
+VAR_PREFIX=
+BUILD_SUBDIR=
+AS_IF([test -n "${with_build_subdir}"], [dnl
+  VAR_PREFIX="BUILD_"
+  BUILD_SUBDIR="${with_build_subdir}/"
+])
+AC_SUBST(BUILD_SUBDIR)
+AC_SUBST(VAR_PREFIX)
+
 AC_CONFIG_FILES(Makefile.gnulib.inc)
 
 AC_OUTPUT(Makefile import/Makefile,
