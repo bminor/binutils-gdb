@@ -267,7 +267,7 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 		    }
 		}
 
-		/* Fall through.  */
+		[[fallthrough]];
 
 	      default:
 		gdb_printf (stream,

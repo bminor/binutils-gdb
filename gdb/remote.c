@@ -8123,7 +8123,7 @@ Packet: '%s'\n"),
       if (event->ws.kind () != TARGET_WAITKIND_IGNORE)
 	break;
 
-      /* fall through */
+      [[fallthrough]];
     case 'S':		/* Old style status, just signal only.  */
       {
 	int sig;
@@ -8647,7 +8647,7 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
 	      putpkt (buf);
 	      break;
 	    }
-	  /* fallthrough */
+	  [[fallthrough]];
 	default:
 	  warning (_("Invalid remote reply: %s"), buf);
 	  break;
@@ -10002,7 +10002,7 @@ remote_target::putpkt_binary (const char *buf, int cnt)
 	      return 1;
 	    case '-':
 	      remote_debug_printf_nofunc ("Received Nak");
-	      /* FALLTHROUGH */
+	      [[fallthrough]];
 	    case SERIAL_TIMEOUT:
 	      tcount++;
 	      if (tcount > 3)

@@ -172,7 +172,7 @@ fetch_subexp_value (struct expression *exp,
 	case MEMORY_ERROR:
 	  if (!preserve_errors)
 	    break;
-	  /* Fall through.  */
+	  [[fallthrough]];
 	default:
 	  throw;
 	  break;

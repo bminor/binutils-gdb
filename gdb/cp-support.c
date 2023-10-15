@@ -531,7 +531,7 @@ replace_typedefs (struct demangle_parse_info *info,
 	{
 	case DEMANGLE_COMPONENT_ARGLIST:
 	  check_cv_qualifiers (ret_comp);
-	  /* Fall through */
+	  [[fallthrough]];
 
 	case DEMANGLE_COMPONENT_FUNCTION_TYPE:
 	case DEMANGLE_COMPONENT_TEMPLATE:

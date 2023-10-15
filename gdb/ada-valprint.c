@@ -89,7 +89,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
       break;
     case TYPE_CODE_UNDEF:
       index_type = NULL;
-      /* FALL THROUGH */
+      [[fallthrough]];
     default:
       if (low_bound == 1)
 	return 0;

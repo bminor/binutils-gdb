@@ -6011,7 +6011,7 @@ Do you want to stop the program?"),
 	  ir.addr -= 1;
 	  goto no_support;
 	}
-      /* FALLTHROUGH */
+      [[fallthrough]];
     case 0x0fb2:    /* lss Gv */
     case 0x0fb4:    /* lfs Gv */
     case 0x0fb5:    /* lgs Gv */
@@ -6248,7 +6248,7 @@ Do you want to stop the program?"),
 						  I386_SAVE_FPU_REGS))
 			    return -1;
 			}
-		      /* Fall through */
+		      [[fallthrough]];
 		    default:
 		      if (record_full_arch_list_add_mem (addr64, 2))
 			return -1;
@@ -6787,7 +6787,7 @@ Do you want to stop the program?"),
 	  ir.addr -= 1;
 	  goto no_support;
 	}
-      /* FALLTHROUGH */
+      [[fallthrough]];
     case 0xf5:    /* cmc */
     case 0xf8:    /* clc */
     case 0xf9:    /* stc */
@@ -7229,7 +7229,7 @@ Do you want to stop the program?"),
 	      else if (ir.rm == 1)
 		break;
 	    }
-	  /* Fall through.  */
+	  [[fallthrough]];
 	case 3:  /* lidt */
 	  if (ir.mod == 3)
 	    {

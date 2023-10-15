@@ -7600,7 +7600,7 @@ arm_decode_miscellaneous (struct gdbarch *gdbarch, uint32_t insn,
       else if (op == 0x3)
 	/* Not really supported.  */
 	return arm_copy_unmodified (gdbarch, insn, "smc", dsc);
-      /* Fall through.  */
+      [[fallthrough]];
 
     default:
       return arm_copy_undef (gdbarch, insn, dsc);

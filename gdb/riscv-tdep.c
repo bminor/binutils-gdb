@@ -3183,7 +3183,7 @@ riscv_arg_location (struct gdbarch *gdbarch,
 	  riscv_call_arg_struct (ainfo, cinfo);
 	  break;
 	}
-      /* FALLTHROUGH */
+      [[fallthrough]];
 
     default:
       riscv_call_arg_scalar_int (ainfo, cinfo);

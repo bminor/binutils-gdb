@@ -799,7 +799,7 @@ z80_software_single_step (struct regcache *regcache)
       break;
     case insn_jr_cc_d:
       opcode &= 030; /* JR NZ,d has cc equal to 040, but others 000 */
-      /* fall through */
+      [[fallthrough]];
     case insn_jp_cc_nn:
     case insn_call_cc_nn:
     case insn_ret_cc:

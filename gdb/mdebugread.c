@@ -2582,7 +2582,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	     those too.  */
 	  if (name[0] == '.')
 	    continue;
-	  /* Fall through.  */
+	  [[fallthrough]];
 	default:
 	  ms_type = mst_unknown;
 	  unknown_ext_complaint (name);
@@ -3430,7 +3430,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 					   mst_file_text,
 					   SECT_OFF_TEXT (objfile));
 
-		  /* FALLTHROUGH */
+		  [[fallthrough]];
 
 		case stProc:
 		  /* Ignore all parameter symbol records.  */
@@ -3666,7 +3666,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		default:
 		  unknown_ext_complaint (debug_info->ssext + psh->iss);
 		  /* Pretend it's global.  */
-		  /* Fall through.  */
+		  [[fallthrough]];
 		case stGlobal:
 		  /* Global common symbols are resolved by the runtime loader,
 		     ignore them.  */

@@ -1604,7 +1604,7 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
 					  sizeof "(anonymous namespace)" - 1);
 	  return NAME;
 	}
-	/* FALL THROUGH */
+	[[fallthrough]];
 
     case ')':
     case ',':
@@ -1641,7 +1641,7 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
 	  state->lexptr++;
 	  return '-';
 	}
-      /* FALL THRU.  */
+      [[fallthrough]];
 
     try_number:
     case '0':

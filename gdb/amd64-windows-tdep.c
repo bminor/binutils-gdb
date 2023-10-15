@@ -380,7 +380,7 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
 		break;
 	      }
 	  }
-	/* fall through */
+	[[fallthrough]];
       default:
 	/* All other values that are 1, 2, 4 or 8 bytes long are returned
 	   via RAX.  */

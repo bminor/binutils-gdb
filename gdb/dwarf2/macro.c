@@ -784,7 +784,7 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 	      /* We don't recognize any vendor extensions.  */
 	      break;
 	    }
-	  /* FALLTHROUGH */
+	  [[fallthrough]];
 
 	default:
 	  mac_ptr = skip_unknown_opcode (macinfo_type, opcode_definitions,
@@ -939,7 +939,7 @@ dwarf_decode_macros (dwarf2_per_objfile *per_objfile,
 	      read_direct_string (abfd, mac_ptr, &bytes_read);
 	      mac_ptr += bytes_read;
 	    }
-	  /* FALLTHROUGH */
+	  [[fallthrough]];
 
 	default:
 	  mac_ptr = skip_unknown_opcode (macinfo_type, opcode_definitions,

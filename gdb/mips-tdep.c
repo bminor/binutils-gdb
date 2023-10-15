@@ -3992,7 +3992,7 @@ mips_deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
 		       && (itype_rt (insn) & 0x2) == 0);
 	  if (is_branch) /* BC1ANY2F, BC1ANY2T, BC1ANY4F, BC1ANY4T */
 	    break;
-	/* Fall through.  */
+	  [[fallthrough]];
 	case 18: /* COP2 */
 	case 19: /* COP3 */
 	  is_branch = (itype_rs (insn) == 8); /* BCzF, BCzFL, BCzT, BCzTL */
@@ -4100,7 +4100,7 @@ micromips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
 		      || (insn & 0x3) != 0x1))
 				/* BC1ANY*: bits 010000 111xx xxx01 */
 		break;
-	      /* Fall through.  */
+	      [[fallthrough]];
 
 	    case 0x25: /* BEQ: bits 100101 */
 	    case 0x2d: /* BNE: bits 101101 */
@@ -4122,7 +4122,7 @@ micromips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
 				/* JALR, JALR.HB: 000000 000x111100 111100 */
 				/* JALRS, JALRS.HB: 000000 010x111100 111100 */
 		break;
-	      /* Fall through.  */
+	      [[fallthrough]];
 
 	    case 0x1d: /* JALS: bits 011101 */
 	    case 0x35: /* J: bits 110101 */

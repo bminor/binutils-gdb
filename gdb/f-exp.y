@@ -1503,7 +1503,7 @@ yylex (void)
       /* Might be a floating point number.  */
       if (pstate->lexptr[1] < '0' || pstate->lexptr[1] > '9')
 	goto symbol;		/* Nope, must be a symbol.  */
-      /* FALL THRU.  */
+      [[fallthrough]];
       
     case '0':
     case '1':
@@ -1571,7 +1571,7 @@ yylex (void)
 
     case '%':
       last_was_structop = true;
-      /* Fall through.  */
+      [[fallthrough]];
     case '+':
     case '-':
     case '*':

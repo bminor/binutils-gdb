@@ -1532,7 +1532,7 @@ process_xcoff_symbol (struct xcoff_symbol *cs, struct objfile *objfile)
 	default:
 	  complaint (_("Unexpected storage class: %d"),
 		     cs->c_sclass);
-	  /* FALLTHROUGH */
+	  [[fallthrough]];
 
 	case C_DECL:
 	case C_PSYM:
@@ -2359,7 +2359,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	    complaint (_("Storage class %d not recognized during scan"),
 		       sclass);
 	  }
-	  /* FALLTHROUGH */
+	  [[fallthrough]];
 
 	case C_FCN:
 	  /* C_FCN is .bf and .ef symbols.  I think it is sufficient

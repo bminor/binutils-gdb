@@ -3336,7 +3336,7 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
     {
     case TYPE_CODE_RANGE:
       num -= type->bounds ()->bias;
-      /* Fall through.  */
+      [[fallthrough]];
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
     case TYPE_CODE_ENUM:

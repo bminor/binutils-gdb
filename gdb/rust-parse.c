@@ -1386,7 +1386,7 @@ rust_parser::parse_binop (bool required)
 
 	case COMPOUND_ASSIGN:
 	  compound_assign_op = current_opcode;
-	  /* FALLTHROUGH */
+	  [[fallthrough]];
 	case '=':
 	  precedence = ASSIGN_PREC;
 	  lex ();
@@ -1831,7 +1831,7 @@ rust_parser::parse_path (bool for_expr)
       if (current_token != COLONCOLON)
 	return "self";
       lex ();
-      /* FALLTHROUGH */
+      [[fallthrough]];
     case KW_SUPER:
       while (current_token == KW_SUPER)
 	{

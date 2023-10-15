@@ -4309,7 +4309,7 @@ ppc_process_record_op4 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 39:		/* Vector Multiply-Sum Unsigned Halfword Saturate */
     case 41:		/* Vector Multiply-Sum Signed Halfword Saturate */
       record_full_arch_list_add_reg (regcache, PPC_VSCR_REGNUM);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 20:		/* Move To VSR Byte Mask Immediate opcode, b2 = 0,
 			   ignore bit 31 */
     case 21:		/* Move To VSR Byte Mask Immediate opcode, b2 = 1,
@@ -4375,7 +4375,7 @@ ppc_process_record_op4 (struct gdbarch *gdbarch, struct regcache *regcache,
 	  && vra != 7	/* Decimal Convert From National */
 	  && vra != 31)	/* Decimal Set Sign */
 	break;
-      /* Fall through.  */
+      [[fallthrough]];
 			/* 5.16 Decimal Integer Arithmetic Instructions */
     case 1:		/* Decimal Add Modulo */
     case 65:		/* Decimal Subtract Modulo */
@@ -4564,7 +4564,7 @@ ppc_process_record_op4 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 970:		/* Vector Convert To Signed Fixed-Point Word Saturate */
     case 906:		/* Vector Convert To Unsigned Fixed-Point Word Saturate */
       record_full_arch_list_add_reg (regcache, PPC_VSCR_REGNUM);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 12:		/* Vector Merge High Byte */
     case 14:		/* Vector Pack Unsigned Halfword Unsigned Modulo */
     case 76:		/* Vector Merge High Halfword */
@@ -4897,7 +4897,7 @@ ppc_process_record_op19 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 560:		/* Branch Conditional to Branch Target Address Register */
       if ((PPC_BO (insn) & 0x4) == 0)
 	record_full_arch_list_add_reg (regcache, tdep->ppc_ctr_regnum);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 528:		/* Branch Conditional to Count Register */
       if (PPC_LK (insn))
 	record_full_arch_list_add_reg (regcache, tdep->ppc_lr_regnum);
@@ -4988,7 +4988,7 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 491:		/* Divide Word */
       if (PPC_OE (insn))
 	record_full_arch_list_add_reg (regcache, tdep->ppc_xer_regnum);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 9:		/* Multiply High Doubleword Unsigned */
     case 11:		/* Multiply High Word Unsigned */
     case 73:		/* Multiply High Doubleword */
@@ -5080,7 +5080,7 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
       record_full_arch_list_add_reg (regcache, tdep->ppc_xer_regnum);
       record_full_arch_list_add_reg (regcache,
 				     tdep->ppc_gp0_regnum + PPC_RA (insn));
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 0:		/* Compare */
     case 32:		/* Compare logical */
     case 144:		/* Move To Condition Register Fields */
@@ -5103,7 +5103,7 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 373:		/* Load Word Algebraic with Update Indexed */
       record_full_arch_list_add_reg (regcache,
 				     tdep->ppc_gp0_regnum + PPC_RA (insn));
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 21:		/* Load Doubleword Indexed */
     case 52:		/* Load Byte And Reserve Indexed */
     case 116:		/* Load Halfword And Reserve Indexed */
@@ -5176,7 +5176,7 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 631:		/* Load Floating-Point Double with Update Indexed */
       record_full_arch_list_add_reg (regcache,
 				     tdep->ppc_gp0_regnum + PPC_RA (insn));
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 535:		/* Load Floating-Point Single Indexed */
     case 599:		/* Load Floating-Point Double Indexed */
     case 855:		/* Load Floating-Point as Integer Word Algebraic Indexed */
@@ -5272,7 +5272,7 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 759:		/* Store Floating-Point Double with Update Indexed */
       record_full_arch_list_add_reg (regcache,
 				     tdep->ppc_gp0_regnum + PPC_RA (insn));
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 135:		/* Store Vector Element Byte Indexed */
     case 167:		/* Store Vector Element Halfword Indexed */
     case 199:		/* Store Vector Element Word Indexed */
@@ -5566,7 +5566,7 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 878:		/* Transaction Abort Doubleword Conditional Immediate */
     case 910:		/* Transaction Abort */
       record_full_arch_list_add_reg (regcache, tdep->ppc_ps_regnum);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 718:		/* Transaction Check */
       record_full_arch_list_add_reg (regcache, tdep->ppc_cr_regnum);
       return 0;
@@ -5790,7 +5790,7 @@ ppc_process_record_op60_XX2 (struct gdbarch *gdbarch,
     case 24:	/* VSX Vector Convert Half-Precision format to
 		   Single-Precision format */
       record_full_arch_list_add_reg (regcache, tdep->ppc_fpscr_regnum);
-      /* Fall-through */
+      [[fallthrough]];
     case 0:	/* VSX Vector Extract Exponent Double-Precision */
     case 1:	/* VSX Vector Extract Significand Double-Precision */
     case 7:	/* VSX Vector Byte-Reverse Halfword */
@@ -5884,7 +5884,7 @@ ppc_process_record_op60 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 19:		/* VSX Scalar Compare Greater Than or Equal
 			   Double-Precision */
       record_full_arch_list_add_reg (regcache, tdep->ppc_fpscr_regnum);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 240:		/* VSX Vector Copy Sign Double-Precision */
     case 208:		/* VSX Vector Copy Sign Single-Precision */
     case 130:		/* VSX Logical AND */
@@ -6071,7 +6071,7 @@ ppc_process_record_op60 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 203:		/* VSX Vector Square Root Double-Precision */
     case 139:		/* VSX Vector Square Root Single-Precision */
       record_full_arch_list_add_reg (regcache, tdep->ppc_fpscr_regnum);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 345:		/* VSX Scalar Absolute Value Double-Precision */
     case 267:		/* VSX Scalar Convert Scalar Single-Precision to
 			   Vector Single-Precision format Non-signalling */
@@ -6094,7 +6094,7 @@ ppc_process_record_op60 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 298:		/* VSX Scalar Test Data Class Single-Precision */
     case 362:		/* VSX Scalar Test Data Class Double-Precision */
       record_full_arch_list_add_reg (regcache, tdep->ppc_fpscr_regnum);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 106:		/* VSX Scalar Test for software Square Root
 			   Double-Precision */
     case 234:		/* VSX Vector Test for software Square Root
@@ -6366,7 +6366,7 @@ ppc_process_record_op63 (struct gdbarch *gdbarch, struct regcache *regcache,
 	  case 22:	/* Move From FPSCR Control & set RN */
 	  case 23:	/* Move From FPSCR Control & set RN Immediate */
 	    record_full_arch_list_add_reg (regcache, tdep->ppc_fpscr_regnum);
-	    /* Fall through.  */
+	    [[fallthrough]];
 	  case 0:	/* Move From FPSCR */
 	  case 24:	/* Move From FPSCR Lightweight */
 	    if (PPC_FIELD (insn, 11, 5) == 0 && PPC_RC (insn))
@@ -6412,7 +6412,7 @@ ppc_process_record_op63 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 644:		/* VSX Scalar Compare Unordered Quad-Precision */
     case 708:		/* VSX Scalar Test Data Class Quad-Precision */
       record_full_arch_list_add_reg (regcache, tdep->ppc_fpscr_regnum);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 128:		/* Floating Test for software Divide */
     case 160:		/* Floating Test for software Square Root */
       record_full_arch_list_add_reg (regcache, tdep->ppc_cr_regnum);
@@ -6449,7 +6449,7 @@ ppc_process_record_op63 (struct gdbarch *gdbarch, struct regcache *regcache,
       }
 
       record_full_arch_list_add_reg (regcache, tdep->ppc_fpscr_regnum);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 68:		/* VSX Scalar Compare Equal Quad-Precision */
     case 196:		/* VSX Scalar Compare Greater Than or Equal
 			   Quad-Precision */
@@ -6457,7 +6457,7 @@ ppc_process_record_op63 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 676:		/* VSX Scalar Maximum Type-C Quad-Precision */
     case 740:		/* VSX Scalar Minimum Type-C Quad-Precision */
       record_full_arch_list_add_reg (regcache, tdep->ppc_fpscr_regnum);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 100:		/* VSX Scalar Copy Sign Quad-Precision */
     case 868:		/* VSX Scalar Insert Exponent Quad-Precision */
       ppc_record_vsr (regcache, tdep, PPC_VRT (insn) + 32);
@@ -6468,7 +6468,7 @@ ppc_process_record_op63 (struct gdbarch *gdbarch, struct regcache *regcache,
 	{
 	case 27:	/* VSX Scalar Square Root Quad-Precision */
 	  record_full_arch_list_add_reg (regcache, tdep->ppc_fpscr_regnum);
-	  /* FALL-THROUGH */
+	  [[fallthrough]];
 	case 0:		/* VSX Scalar Absolute Quad-Precision */
 	case 2:		/* VSX Scalar Extract Exponent Quad-Precision */
 	case 8:		/* VSX Scalar Negative Absolute Quad-Precision */
@@ -7233,10 +7233,10 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
     case 13:		/* Add Immediate Carrying and Record */
       record_full_arch_list_add_reg (regcache, tdep->ppc_cr_regnum);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 12:		/* Add Immediate Carrying */
       record_full_arch_list_add_reg (regcache, tdep->ppc_xer_regnum);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 14:		/* Add Immediate */
     case 15:		/* Add Immediate Shifted */
       record_full_arch_list_add_reg (regcache,
@@ -7246,7 +7246,7 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 16:		/* Branch Conditional */
       if ((PPC_BO (insn) & 0x4) == 0)
 	record_full_arch_list_add_reg (regcache, tdep->ppc_ctr_regnum);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 18:		/* Branch */
       if (PPC_LK (insn))
 	record_full_arch_list_add_reg (regcache, tdep->ppc_lr_regnum);
@@ -7275,7 +7275,7 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 28:		/* AND Immediate */
     case 29:		/* AND Immediate Shifted */
       record_full_arch_list_add_reg (regcache, tdep->ppc_cr_regnum);
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 24:		/* OR Immediate */
     case 25:		/* OR Immediate Shifted */
     case 26:		/* XOR Immediate */
@@ -7295,7 +7295,7 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 43:		/* Load Halfword Algebraic with Update */
       record_full_arch_list_add_reg (regcache,
 				     tdep->ppc_gp0_regnum + PPC_RA (insn));
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 32:		/* Load Word and Zero */
     case 34:		/* Load Byte and Zero */
     case 40:		/* Load Halfword and Zero */
@@ -7319,7 +7319,7 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 51:		/* Load Floating-Point Double with Update */
       record_full_arch_list_add_reg (regcache,
 				     tdep->ppc_gp0_regnum + PPC_RA (insn));
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 48:		/* Load Floating-Point Single */
     case 50:		/* Load Floating-Point Double */
       record_full_arch_list_add_reg (regcache,
@@ -7347,7 +7347,7 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 55:		/* Store Floating-Point Double with Update */
       record_full_arch_list_add_reg (regcache,
 				     tdep->ppc_gp0_regnum + PPC_RA (insn));
-      /* FALL-THROUGH */
+      [[fallthrough]];
     case 36:		/* Store Word */
     case 38:		/* Store Byte */
     case 44:		/* Store Halfword */

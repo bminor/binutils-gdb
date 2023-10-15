@@ -410,7 +410,7 @@ netbsd_process_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	case TARGET_WAITKIND_THREAD_CREATED:
 	case TARGET_WAITKIND_THREAD_EXITED:
 	  /* The core needlessly stops on these events.  */
-	  /* FALLTHROUGH */
+	  [[fallthrough]];
 	case TARGET_WAITKIND_SPURIOUS:
 	  /* Spurious events are unhandled by the gdbserver core.  */
 	  if (ptrace (PT_CONTINUE, current_process ()->pid, (void *) 1, 0)

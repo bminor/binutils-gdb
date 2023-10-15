@@ -114,7 +114,7 @@ go_language::value_print_inner (struct value *val, struct ui_file *stream,
 	      break;
 	    }
 	}
-	/* Fall through.  */
+	[[fallthrough]];
 
       default:
 	c_value_print_inner (val, stream, recurse, options);

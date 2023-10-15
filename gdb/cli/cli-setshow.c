@@ -379,7 +379,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
     case var_filename:
       if (*arg == '\0')
 	error_no_arg (_("filename to set it to."));
-      /* FALLTHROUGH */
+      [[fallthrough]];
     case var_optional_filename:
       {
 	char *val = NULL;

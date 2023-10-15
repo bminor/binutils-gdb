@@ -289,7 +289,7 @@ Invalid hardware breakpoint type %d in x86_length_and_rw_bits.\n"),
       case 8:
 	if (TARGET_HAS_DR_LEN_8)
 	  return (DR_LEN_8 | rw);
-	/* FALL THROUGH */
+	[[fallthrough]];
       default:
 	internal_error (_("\
 Invalid hardware breakpoint length %d in x86_length_and_rw_bits.\n"), len);

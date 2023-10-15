@@ -1641,7 +1641,7 @@ fbsd_nat_target::stop_process (inferior *inf)
       if (status.sig () == GDB_SIGNAL_STOP)
 	break;
 
-      /* FALLTHROUGH */
+      [[fallthrough]];
     default:
       /* Some other event has occurred.  Save the current
 	 event.  */

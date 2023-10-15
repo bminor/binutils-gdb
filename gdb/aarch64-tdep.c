@@ -1851,7 +1851,7 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
       if (arg_type->is_vector ())
 	return pass_in_v (gdbarch, regcache, info, arg_type->length (),
 			  arg->contents ().data ());
-      /* fall through.  */
+      [[fallthrough]];
 
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:

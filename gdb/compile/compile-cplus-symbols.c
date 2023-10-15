@@ -132,7 +132,7 @@ convert_one_symbol (compile_cplus_instance *instance,
 		     "be referenced from the current thread in "
 		     "compiled code."),
 		   sym.symbol->print_name ());
-	  /* FALLTHROUGH */
+	  [[fallthrough]];
 	case LOC_UNRESOLVED:
 	  /* 'symbol_name' cannot be used here as that one is used only for
 	     local variables from compile_dwarf_expr_to_c.

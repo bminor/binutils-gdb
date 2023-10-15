@@ -257,14 +257,14 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions,
 	  case 'u':
 	    if (seen_hash)
 	      bad = 1;
-	    /* FALLTHROUGH */
+	    [[fallthrough]];
 
 	  case 'o':
 	  case 'x':
 	  case 'X':
 	    if (seen_space || seen_plus)
 	      bad = 1;
-	  /* FALLTHROUGH */
+	  [[fallthrough]];
 
 	  case 'd':
 	  case 'i':

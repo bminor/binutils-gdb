@@ -134,8 +134,7 @@ btrace_data_append (struct btrace_data *dst,
 	case BTRACE_FORMAT_NONE:
 	  dst->format = BTRACE_FORMAT_BTS;
 	  dst->variant.bts.blocks = new std::vector<btrace_block>;
-
-	  /* Fall-through.  */
+	  [[fallthrough]];
 	case BTRACE_FORMAT_BTS:
 	  {
 	    unsigned int blk;
@@ -163,8 +162,7 @@ btrace_data_append (struct btrace_data *dst,
 	  dst->format = BTRACE_FORMAT_PT;
 	  dst->variant.pt.data = NULL;
 	  dst->variant.pt.size = 0;
-
-	  /* fall-through.  */
+	  [[fallthrough]];
 	case BTRACE_FORMAT_PT:
 	  {
 	    gdb_byte *data;

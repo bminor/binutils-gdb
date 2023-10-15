@@ -126,7 +126,7 @@ get_test_insn (struct gdbarch *gdbarch, size_t *len)
 	if (info->bits_per_address > sizeof (bfd_vma) * CHAR_BIT)
 	  return insn;
       }
-      /* fall through */
+      [[fallthrough]];
     default:
     generic_case:
       {

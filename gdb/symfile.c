@@ -3043,7 +3043,7 @@ section_is_mapped (struct obj_section *osect)
 	  if (osect->ovly_mapped == -1)
 	    gdbarch_overlay_update (gdbarch, osect);
 	}
-      /* fall thru */
+      [[fallthrough]];
     case ovly_on:		/* overlay debugging manual */
       return osect->ovly_mapped == 1;
     }

@@ -2806,7 +2806,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
     case N_NBSTS:
     case N_NBLCS:
       unknown_symtype_complaint (hex_string (type));
-      /* FALLTHROUGH */
+      [[fallthrough]];
 
     define_a_symbol:
       /* These symbol types don't need the address field relocated,

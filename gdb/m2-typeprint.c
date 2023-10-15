@@ -389,7 +389,7 @@ m2_get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 	      return 0;
 	    }
 	}
-      /* fall through */
+      [[fallthrough]];
     default:
       return get_discrete_bounds (type, lowp, highp);
     }

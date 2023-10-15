@@ -1473,7 +1473,7 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
     {
       case CTF_K_ENUM:
 	ctf_psymtab_add_enums (ccp, tid);
-	/* FALL THROUGH */
+	[[fallthrough]];
       case CTF_K_STRUCT:
       case CTF_K_UNION:
 	domain = STRUCT_DOMAIN;

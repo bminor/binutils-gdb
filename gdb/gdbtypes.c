@@ -1101,7 +1101,7 @@ get_discrete_low_bound (struct type *type)
       if (!type->is_unsigned ())
 	return -(1 << (type->length () * TARGET_CHAR_BIT - 1));
 
-      /* fall through */
+      [[fallthrough]];
     case TYPE_CODE_CHAR:
       return 0;
 
@@ -1171,7 +1171,7 @@ get_discrete_high_bound (struct type *type)
 	  return -low - 1;
 	}
 
-      /* fall through */
+      [[fallthrough]];
     case TYPE_CODE_CHAR:
       {
 	/* This round-about calculation is to avoid shifting by
@@ -4436,7 +4436,7 @@ rank_one_type_parm_ptr (struct type *parm, struct type *arg, struct value *value
 		return NS_INTEGER_POINTER_CONVERSION_BADNESS;
 	    }
 	}
-      /* fall through  */
+      [[fallthrough]];
     case TYPE_CODE_ENUM:
     case TYPE_CODE_FLAGS:
     case TYPE_CODE_CHAR:
@@ -4608,7 +4608,7 @@ rank_one_type_parm_char (struct type *parm, struct type *arg, struct value *valu
 	return INTEGER_CONVERSION_BADNESS;
       else if (arg->length () < parm->length ())
 	return INTEGER_PROMOTION_BADNESS;
-      /* fall through */
+      [[fallthrough]];
     case TYPE_CODE_CHAR:
       /* Deal with signed, unsigned, and plain chars for C++ and
 	 with int cases falling through from previous case.  */
@@ -4741,7 +4741,7 @@ rank_one_type_parm_struct (struct type *parm, struct type *arg, struct value *va
       rank.subrank = distance_to_ancestor (parm, arg, 0);
       if (rank.subrank >= 0)
 	return sum_ranks (BASE_CONVERSION_BADNESS, rank);
-      /* fall through */
+      [[fallthrough]];
     default:
       return INCOMPATIBLE_TYPE_BADNESS;
     }

@@ -1280,7 +1280,7 @@ value_assign (struct value *toval, struct value *fromval)
 	    break;
 	  }
       }
-      /* Fall through.  */
+      [[fallthrough]];
 
     default:
       error (_("Left operand of assignment is not an lvalue."));
@@ -2820,7 +2820,7 @@ find_overload_match (gdb::array_view<value *> args,
 		   case where a xmethod is better than the source
 		   method, except when the xmethod match quality is
 		   non-standard.  */
-		/* FALLTHROUGH */
+		[[fallthrough]];
 	      case 1: /* Src method and ext method are incompatible.  */
 		/* If ext method match is not standard, then let source method
 		   win.  Otherwise, fallthrough to let xmethod win.  */
@@ -2832,7 +2832,7 @@ find_overload_match (gdb::array_view<value *> args,
 		    method_match_quality = src_method_match_quality;
 		    break;
 		  }
-		/* FALLTHROUGH */
+		[[fallthrough]];
 	      case 2: /* Ext method is champion.  */
 		method_oload_champ = ext_method_oload_champ;
 		method_badness = ext_method_badness;

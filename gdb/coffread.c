@@ -896,7 +896,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	     backtraces, so filter them out (from phdm@macqel.be).  */
 	  if (within_function)
 	    break;
-	  /* Fall through.  */
+	  [[fallthrough]];
 	case C_STAT:
 	case C_THUMBLABEL:
 	case C_THUMBSTAT:
@@ -934,7 +934,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	       that look like this.  Ignore them.  */
 	    break;
 	  /* For static symbols that don't start with '.'...  */
-	  /* Fall through.  */
+	  [[fallthrough]];
 	case C_THUMBEXT:
 	case C_THUMBEXTFUNC:
 	case C_EXT:

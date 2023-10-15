@@ -4376,7 +4376,7 @@ ex:
 		    break;
 		  }
 		/* For other instructions... */
-		/* Fall through.  */
+		[[fallthrough]];
 	      default:
 		gdb_printf (gdb_stdlog, "Warning: Unknown KM* function %02x at %s.\n",
 			    (int)tmp, paddress (gdbarch, addr));
@@ -4685,7 +4685,7 @@ ex:
 		    break;
 		  }
 		/* For KLMD...  */
-		/* Fall through.  */
+		[[fallthrough]];
 	      default:
 		gdb_printf (gdb_stdlog, "Warning: Unknown KMAC function %02x at %s.\n",
 			    (int)tmp, paddress (gdbarch, addr));
@@ -6542,7 +6542,7 @@ ex:
 	      /* op3c */
 	      if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + inib[3]))
 		return -1;
-	      /* fallthru */
+	      [[fallthrough]];
 	    case 0x0c: /* CSST */
 	      /* op4 */
 	      if (record_full_arch_list_add_mem (oaddr2, 4))
@@ -6557,7 +6557,7 @@ ex:
 	      oaddr3 = s390_record_address_mask (gdbarch, regcache, oaddr3);
 	      if (record_full_arch_list_add_mem (oaddr3, 4))
 		return -1;
-	      /* fallthru */
+	      [[fallthrough]];
 	    case 0x10: /* CSDST */
 	      /* op6 */
 	      if (target_read_memory (oaddr2 + 0x68, buf, 8))
@@ -6573,7 +6573,7 @@ ex:
 	      oaddr3 = s390_record_address_mask (gdbarch, regcache, oaddr3);
 	      if (record_full_arch_list_add_mem (oaddr3, 4))
 		return -1;
-	      /* fallthru */
+	      [[fallthrough]];
 	    case 0x04: /* CS */
 CS:
 	      /* op1c */
@@ -6598,7 +6598,7 @@ CS:
 	      oaddr3 = s390_record_address_mask (gdbarch, regcache, oaddr3);
 	      if (record_full_arch_list_add_mem (oaddr3, 8))
 		return -1;
-	      /* fallthru */
+	      [[fallthrough]];
 	    case 0x11: /* CSDSTG */
 	      /* op6 */
 	      if (target_read_memory (oaddr2 + 0x68, buf, 8))
@@ -6607,7 +6607,7 @@ CS:
 	      oaddr3 = s390_record_address_mask (gdbarch, regcache, oaddr3);
 	      if (record_full_arch_list_add_mem (oaddr3, 8))
 		return -1;
-	      /* fallthru */
+	      [[fallthrough]];
 	    case 0x0d: /* CSSTG */
 CSSTG:
 	      /* op4 */
@@ -6617,7 +6617,7 @@ CSSTG:
 	      oaddr3 = s390_record_address_mask (gdbarch, regcache, oaddr3);
 	      if (record_full_arch_list_add_mem (oaddr3, 8))
 		return -1;
-	      /* fallthru */
+	      [[fallthrough]];
 	    case 0x05: /* CSG */
 	      /* op1c */
 	      if (record_full_arch_list_add_mem (oaddr2 + 0x08, 8))
@@ -6631,7 +6631,7 @@ CSSTG:
 	      /* op3c */
 	      if (s390_record_gpr_g (gdbarch, regcache, inib[3]))
 		return -1;
-	      /* fallthru */
+	      [[fallthrough]];
 	    case 0x0e: /* CSSTGR */
 	      /* op4 */
 	      if (record_full_arch_list_add_mem (oaddr2, 8))
@@ -6646,7 +6646,7 @@ CSSTG:
 	      oaddr3 = s390_record_address_mask (gdbarch, regcache, oaddr3);
 	      if (record_full_arch_list_add_mem (oaddr3, 8))
 		return -1;
-	      /* fallthru */
+	      [[fallthrough]];
 	    case 0x12: /* CSDSTGR */
 	      /* op6 */
 	      if (target_read_memory (oaddr2 + 0x68, buf, 8))
@@ -6662,7 +6662,7 @@ CSSTG:
 	      oaddr3 = s390_record_address_mask (gdbarch, regcache, oaddr3);
 	      if (record_full_arch_list_add_mem (oaddr3, 8))
 		return -1;
-	      /* fallthru */
+	      [[fallthrough]];
 	    case 0x06: /* CSGR */
 CSGR:
 	      /* op1c */
@@ -6687,7 +6687,7 @@ CSGR:
 	      oaddr3 = s390_record_address_mask (gdbarch, regcache, oaddr3);
 	      if (record_full_arch_list_add_mem (oaddr3, 16))
 		return -1;
-	      /* fallthru */
+	      [[fallthrough]];
 	    case 0x13: /* CSDSTX */
 	      /* op6 */
 	      if (target_read_memory (oaddr2 + 0x68, buf, 8))
@@ -6696,7 +6696,7 @@ CSGR:
 	      oaddr3 = s390_record_address_mask (gdbarch, regcache, oaddr3);
 	      if (record_full_arch_list_add_mem (oaddr3, 16))
 		return -1;
-	      /* fallthru */
+	      [[fallthrough]];
 	    case 0x0f: /* CSSTX */
 CSSTX:
 	      /* op4 */
@@ -6706,7 +6706,7 @@ CSSTX:
 	      oaddr3 = s390_record_address_mask (gdbarch, regcache, oaddr3);
 	      if (record_full_arch_list_add_mem (oaddr3, 16))
 		return -1;
-	      /* fallthru */
+	      [[fallthrough]];
 	    case 0x07: /* CSX */
 	      /* op1c */
 	      if (record_full_arch_list_add_mem (oaddr2 + 0x00, 16))

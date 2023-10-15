@@ -886,7 +886,7 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      break;
 	    }
 	}
-	/* Fall through.  */
+	[[fallthrough]];
       default:
 	error (_("Unknown msp430 isa"));
 	break;

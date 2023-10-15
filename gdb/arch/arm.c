@@ -153,7 +153,7 @@ arm_instruction_changes_pc (uint32_t this_instr)
 	    return 0;
 	  }
 	/* Data processing instruction.  */
-	/* Fall through.  */
+	[[fallthrough]];
 
       case 0x1:
 	if (bits (this_instr, 12, 15) == 15)

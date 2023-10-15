@@ -895,8 +895,7 @@ linux_read_pt (btrace_data_pt *btrace, linux_btrace_target_info *tinfo,
     case BTRACE_READ_NEW:
       if (!perf_event_new_data (&tinfo->pev))
 	return BTRACE_ERR_NONE;
-
-      /* Fall through.  */
+      [[fallthrough]];
     case BTRACE_READ_ALL:
       perf_event_read_all (&tinfo->pev, &btrace->data, &btrace->size);
       return BTRACE_ERR_NONE;

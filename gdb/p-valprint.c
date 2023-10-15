@@ -298,7 +298,7 @@ pascal_language::value_print_inner (struct value *val,
 	  gdb_printf (stream, "{...}");
 	  break;
 	}
-      /* Fall through.  */
+      [[fallthrough]];
     case TYPE_CODE_STRUCT:
       if (options->vtblprint && pascal_object_is_vtbl_ptr_type (type))
 	{

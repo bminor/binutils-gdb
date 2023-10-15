@@ -5508,7 +5508,7 @@ compare_names_with_case (const char *string1, const char *string2,
 	  else
 	    return 1;
 	}
-      /* FALLTHROUGH */
+      [[fallthrough]];
     default:
       if (*string2 == '(')
 	return strcmp_iw_ordered (string1, string2);

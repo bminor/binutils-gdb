@@ -1095,7 +1095,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    }
 	  break;
 	}
-      /* Fall through.  */
+      [[fallthrough]];
 
     case 'P':
       /* acc seems to use P to declare the prototypes of functions that
@@ -1106,7 +1106,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  sym->set_type (read_type (&p, objfile));
 	  goto process_prototype_types;
 	}
-      /*FALLTHROUGH */
+      [[fallthrough]];
 
     case 'R':
       /* Parameter which is in a register.  */
@@ -2494,7 +2494,7 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 	      complaint (_("member function type missing, got '%c'"),
 			 (*pp)[-1]);
 	      /* Normal member function.  */
-	      /* Fall through.  */
+	      [[fallthrough]];
 
 	    case '.':
 	      /* normal member function.  */

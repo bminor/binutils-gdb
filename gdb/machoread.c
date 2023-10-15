@@ -292,7 +292,7 @@ macho_symtab_read (minimal_symbol_reader &reader,
 		    case N_FUN:
 		      if (sym->name == NULL || sym->name[0] == 0)
 			break;
-		      /* Fall through.  */
+		      [[fallthrough]];
 		    case N_STSYM:
 		      /* Interesting symbol.  */
 		      nbr_syms++;

@@ -454,7 +454,7 @@ windows_process_info::handle_exception (struct target_waitstatus *ourstatus,
 	  break;
 	}
 #endif
-      /* FALLTHROUGH */
+      [[fallthrough]];
     case STATUS_WX86_BREAKPOINT:
       DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_BREAKPOINT");
       ourstatus->set_stopped (GDB_SIGNAL_TRAP);
@@ -493,7 +493,7 @@ windows_process_info::handle_exception (struct target_waitstatus *ourstatus,
 	  break;
 	}
 	/* treat improperly formed exception as unknown */
-	/* FALLTHROUGH */
+	[[fallthrough]];
     default:
       /* Treat unhandled first chance exceptions specially.  */
       if (current_event.u.Exception.dwFirstChance)

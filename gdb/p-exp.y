@@ -1159,7 +1159,7 @@ yylex (void)
 	  goto symbol;		/* Nope, must be a symbol.  */
 	}
 
-      /* FALL THRU.  */
+      [[fallthrough]];
 
     case '0':
     case '1':

@@ -652,7 +652,7 @@ list_args_or_locals (const frame_print_options &fp_opts,
 		case PRINT_SIMPLE_VALUES:
 		  if (!mi_simple_type_p (sym2->type ()))
 		    break;
-		  /* FALLTHROUGH */
+		  [[fallthrough]];
 
 		case PRINT_ALL_VALUES:
 		  if (sym->is_argument ())

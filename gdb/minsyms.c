@@ -140,7 +140,7 @@ msymbol_is_function (struct objfile *objfile, minimal_symbol *minsym,
       /* Ignore function symbol that is not a function entry.  */
       if (msymbol_is_cold_clone (minsym))
 	return false;
-      /* fallthru */
+      [[fallthrough]];
     default:
       if (func_address_p != NULL)
 	*func_address_p = msym_addr;

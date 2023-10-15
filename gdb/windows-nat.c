@@ -2291,14 +2291,14 @@ redir_open (const char *redir_string, int *inp, int *out, int *err)
     {
     case '0':
       fname++;
-      /* FALLTHROUGH */
+      [[fallthrough]];
     case '<':
       fd = inp;
       mode = O_RDONLY;
       break;
     case '1': case '2':
       fname++;
-      /* FALLTHROUGH */
+      [[fallthrough]];
     case '>':
       fd = (rc == '2') ? err : out;
       mode = O_WRONLY | O_CREAT;

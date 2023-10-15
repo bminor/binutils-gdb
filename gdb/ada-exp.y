@@ -1307,7 +1307,7 @@ write_object_renaming (struct parser_state *par_state,
 	break;
       case 'L':
 	slice_state = LOWER_BOUND;
-	/* FALLTHROUGH */
+	[[fallthrough]];
       case 'S':
 	renaming_expr += 1;
 	if (isdigit (*renaming_expr))

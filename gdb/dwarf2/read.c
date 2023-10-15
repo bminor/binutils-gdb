@@ -6489,7 +6489,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
 	  && die->parent != NULL
 	  && die->parent->tag == DW_TAG_subprogram)
 	cu->processing_has_namespace_info = true;
-      /* Fall through.  */
+      [[fallthrough]];
     case DW_TAG_inlined_subroutine:
       read_func_scope (die, cu);
       break;
@@ -6531,7 +6531,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
 	 instead.  */
       if (cu->lang () != language_ada)
 	break;
-      /* FALLTHROUGH */
+      [[fallthrough]];
     case DW_TAG_base_type:
     case DW_TAG_subrange_type:
     case DW_TAG_generic_subrange:
@@ -6559,7 +6559,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
 	break;
       /* The declaration is neither a global namespace nor a variable
 	 alias.  */
-      /* Fall through.  */
+      [[fallthrough]];
     case DW_TAG_imported_module:
       cu->processing_has_namespace_info = true;
       if (die->child != NULL && (die->tag == DW_TAG_imported_declaration
@@ -16433,7 +16433,7 @@ cooked_indexer::index_dies (cutu_reader *reader,
 	    case DW_TAG_module:
 	      if (this_entry == nullptr)
 		break;
-	      /* FALLTHROUGH */
+	      [[fallthrough]];
 	    case DW_TAG_namespace:
 	      /* We don't check THIS_ENTRY for a namespace, to handle
 		 the ancient G++ workaround pointed out above.  */
@@ -17140,7 +17140,7 @@ read_attribute_value (const struct die_reader_specs *reader,
 	  info_ptr += bytes_read;
 	  break;
 	}
-      /* FALLTHROUGH */
+      [[fallthrough]];
     case DW_FORM_line_strp:
       if (!cu->per_cu->is_dwz)
 	{
@@ -17150,7 +17150,7 @@ read_attribute_value (const struct die_reader_specs *reader,
 	  info_ptr += bytes_read;
 	  break;
 	}
-      /* FALLTHROUGH */
+      [[fallthrough]];
     case DW_FORM_GNU_strp_alt:
       {
 	dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd, true);
@@ -18963,7 +18963,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  break;
 	case DW_TAG_template_value_param:
 	  suppress_add = 1;
-	  /* Fall through.  */
+	  [[fallthrough]];
 	case DW_TAG_constant:
 	case DW_TAG_variable:
 	case DW_TAG_member:
@@ -19140,7 +19140,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  break;
 	case DW_TAG_template_type_param:
 	  suppress_add = 1;
-	  /* Fall through.  */
+	  [[fallthrough]];
 	case DW_TAG_class_type:
 	case DW_TAG_interface_type:
 	case DW_TAG_structure_type:
@@ -19194,7 +19194,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_unspecified_type:
 	  if (cu->lang () == language_ada)
 	    break;
-	  /* FALLTHROUGH */
+	  [[fallthrough]];
 	case DW_TAG_typedef:
 	case DW_TAG_array_type:
 	case DW_TAG_base_type:
@@ -19990,7 +19990,7 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 	      return parent_type->name ();
 	    return "";
 	  }
-	/* Fall through.  */
+	[[fallthrough]];
       default:
 	return determine_prefix (parent, cu);
       }
@@ -20174,7 +20174,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_template_value_param:
       if (attr_name == nullptr)
 	return unnamed_template_tag_name (die, cu);
-      /* FALLTHROUGH.  */
+      [[fallthrough]];
     case DW_TAG_class_type:
     case DW_TAG_interface_type:
     case DW_TAG_structure_type:
