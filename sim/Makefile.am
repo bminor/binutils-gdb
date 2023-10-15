@@ -20,6 +20,7 @@ ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
 
 GNULIB_PARENT_DIR = ..
 @am__include@ @am__quote@$(GNULIB_PARENT_DIR)/gnulib/Makefile.gnulib.inc@am__quote@
+@am__include@ @am__quote@$(GNULIB_PARENT_DIR)/build-$(build)/gnulib/Makefile.gnulib.inc@am__quote@
 
 srccom = $(srcdir)/common
 srcroot = $(srcdir)/..
@@ -66,11 +67,14 @@ AM_CPPFLAGS = \
 	$(AM_CPPFLAGS_$(subst -,_,$(@D)_$(@F)))
 
 AM_CPPFLAGS_FOR_BUILD = \
+	$(BUILD_INCGNU) \
+	-I../build-$(build) \
 	-I$(srcroot)/include \
 	$(SIM_HW_CFLAGS) \
 	$(SIM_INLINE)
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
+LIBS_FOR_BUILD = $(BUILD_LIBGNU) $(BUILD_LIBGNU_EXTRA_LIBS)
 
 ## Deps to add to the all-recursive target.  These are built before descending
 ## into any subdirs.

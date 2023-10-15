@@ -980,7 +980,8 @@ bpf_run_OBJECTS = $(am_bpf_run_OBJECTS)
 @SIM_ENABLE_ARCH_cr16_TRUE@	cr16/gencode.$(OBJEXT)
 cr16_gencode_OBJECTS = $(am_cr16_gencode_OBJECTS)
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16_gencode_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_cr16_TRUE@	cr16/cr16-opc.o
+@SIM_ENABLE_ARCH_cr16_TRUE@	cr16/cr16-opc.o \
+@SIM_ENABLE_ARCH_cr16_TRUE@	$(am__DEPENDENCIES_1)
 am_cr16_run_OBJECTS =
 cr16_run_OBJECTS = $(am_cr16_run_OBJECTS)
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16_run_DEPENDENCIES = cr16/nrun.o \
@@ -998,7 +999,8 @@ cris_rvdummy_OBJECTS = $(am_cris_rvdummy_OBJECTS)
 @SIM_ENABLE_ARCH_d10v_TRUE@	d10v/gencode.$(OBJEXT)
 d10v_gencode_OBJECTS = $(am_d10v_gencode_OBJECTS)
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v_gencode_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_d10v_TRUE@	d10v/d10v-opc.o
+@SIM_ENABLE_ARCH_d10v_TRUE@	d10v/d10v-opc.o \
+@SIM_ENABLE_ARCH_d10v_TRUE@	$(am__DEPENDENCIES_1)
 am_d10v_run_OBJECTS =
 d10v_run_OBJECTS = $(am_d10v_run_OBJECTS)
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v_run_DEPENDENCIES = d10v/nrun.o \
@@ -1040,7 +1042,7 @@ igen_gen_OBJECTS = $(am_igen_gen_OBJECTS)
 igen_gen_DEPENDENCIES = igen/gen-main.o igen/libigen.a
 am_igen_igen_OBJECTS = igen/igen.$(OBJEXT)
 igen_igen_OBJECTS = $(am_igen_igen_OBJECTS)
-igen_igen_DEPENDENCIES = igen/libigen.a
+igen_igen_DEPENDENCIES = igen/libigen.a $(am__DEPENDENCIES_1)
 am_igen_ld_cache_OBJECTS =
 igen_ld_cache_OBJECTS = $(am_igen_ld_cache_OBJECTS)
 igen_ld_cache_DEPENDENCIES = igen/ld-cache-main.o igen/libigen.a
@@ -1065,7 +1067,8 @@ lm32_run_OBJECTS = $(am_lm32_run_OBJECTS)
 @SIM_ENABLE_ARCH_m32c_TRUE@am_m32c_opc2c_OBJECTS =  \
 @SIM_ENABLE_ARCH_m32c_TRUE@	m32c/opc2c.$(OBJEXT)
 m32c_opc2c_OBJECTS = $(am_m32c_opc2c_OBJECTS)
-m32c_opc2c_LDADD = $(LDADD)
+@SIM_ENABLE_ARCH_m32c_TRUE@m32c_opc2c_DEPENDENCIES =  \
+@SIM_ENABLE_ARCH_m32c_TRUE@	$(am__DEPENDENCIES_1)
 am_m32c_run_OBJECTS =
 m32c_run_OBJECTS = $(am_m32c_run_OBJECTS)
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c_run_DEPENDENCIES = m32c/main.o \
@@ -1077,7 +1080,8 @@ m32r_run_OBJECTS = $(am_m32r_run_OBJECTS)
 @SIM_ENABLE_ARCH_m68hc11_TRUE@am_m68hc11_gencode_OBJECTS =  \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/gencode.$(OBJEXT)
 m68hc11_gencode_OBJECTS = $(am_m68hc11_gencode_OBJECTS)
-m68hc11_gencode_LDADD = $(LDADD)
+@SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_gencode_DEPENDENCIES =  \
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	$(am__DEPENDENCIES_1)
 am_m68hc11_run_OBJECTS =
 m68hc11_run_OBJECTS = $(am_m68hc11_run_OBJECTS)
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_run_DEPENDENCIES =  \
@@ -1159,7 +1163,8 @@ rx_run_OBJECTS = $(am_rx_run_OBJECTS)
 @SIM_ENABLE_ARCH_rx_TRUE@	$(am__DEPENDENCIES_4)
 @SIM_ENABLE_ARCH_sh_TRUE@am_sh_gencode_OBJECTS = sh/gencode.$(OBJEXT)
 sh_gencode_OBJECTS = $(am_sh_gencode_OBJECTS)
-sh_gencode_LDADD = $(LDADD)
+@SIM_ENABLE_ARCH_sh_TRUE@sh_gencode_DEPENDENCIES =  \
+@SIM_ENABLE_ARCH_sh_TRUE@	$(am__DEPENDENCIES_1)
 am_sh_run_OBJECTS =
 sh_run_OBJECTS = $(am_sh_run_OBJECTS)
 @SIM_ENABLE_ARCH_sh_TRUE@sh_run_DEPENDENCIES = sh/nrun.o sh/libsim.a \
@@ -1860,10 +1865,12 @@ AM_CPPFLAGS = $(INCGNU) -I$(srcroot) -I$(srcroot)/include -I../bfd \
 	-I.. -I$(@D) -I$(srcdir)/$(@D) $(SIM_HW_CFLAGS) $(SIM_INLINE) \
 	$(AM_CPPFLAGS_$(subst -,_,$(@D))) $(AM_CPPFLAGS_$(subst \
 	-,_,$(@D)_$(@F))) -I$(srcdir)/common -DSIM_TOPDIR_BUILD
-AM_CPPFLAGS_FOR_BUILD = -I$(srcroot)/include $(SIM_HW_CFLAGS) \
-	$(SIM_INLINE) -I$(srcdir)/common
+AM_CPPFLAGS_FOR_BUILD = $(BUILD_INCGNU) -I../build-$(build) \
+	-I$(srcroot)/include $(SIM_HW_CFLAGS) $(SIM_INLINE) \
+	-I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
+LIBS_FOR_BUILD = $(BUILD_LIBGNU) $(BUILD_LIBGNU_EXTRA_LIBS)
 SIM_ALL_RECURSIVE_DEPS = $(am__append_89)
 SIM_INSTALL_DATA_LOCAL_DEPS = 
 SIM_INSTALL_EXEC_LOCAL_DEPS = $(am__append_30)
@@ -2007,7 +2014,7 @@ igen_libigen_a_SOURCES = \
 	igen/gen.c
 
 igen_igen_SOURCES = igen/igen.c
-igen_igen_LDADD = igen/libigen.a
+igen_igen_LDADD = igen/libigen.a $(LIBS_FOR_BUILD)
 igen_filter_SOURCES = 
 igen_filter_LDADD = igen/filter-main.o igen/libigen.a
 igen_gen_SOURCES = 
@@ -2210,7 +2217,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_cr16_TRUE@	cr16/table.c
 
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16_gencode_SOURCES = cr16/gencode.c
-@SIM_ENABLE_ARCH_cr16_TRUE@cr16_gencode_LDADD = cr16/cr16-opc.o
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16_gencode_LDADD = cr16/cr16-opc.o $(LIBS_FOR_BUILD)
 @SIM_ENABLE_ARCH_cris_TRUE@AM_CFLAGS_cris_mloopv10f.o = $(SIM_CFLAG_WNO_UNUSED_BUT_SET_VARIABLE) \
 @SIM_ENABLE_ARCH_cris_TRUE@	$(SIM_CFLAG_WNO_SHADOW_LOCAL)
 @SIM_ENABLE_ARCH_cris_TRUE@AM_CFLAGS_cris_mloopv32f.o = $(SIM_CFLAG_WNO_UNUSED_BUT_SET_VARIABLE)
@@ -2286,7 +2293,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_d10v_TRUE@	d10v/table.c
 
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v_gencode_SOURCES = d10v/gencode.c
-@SIM_ENABLE_ARCH_d10v_TRUE@d10v_gencode_LDADD = d10v/d10v-opc.o
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v_gencode_LDADD = d10v/d10v-opc.o $(LIBS_FOR_BUILD)
 @SIM_ENABLE_ARCH_erc32_TRUE@READLINE_SRC = $(srcroot)/readline/readline
 @SIM_ENABLE_ARCH_erc32_TRUE@AM_CPPFLAGS_erc32 = $(READLINE_CFLAGS) \
 @SIM_ENABLE_ARCH_erc32_TRUE@	-DFAST_UART
@@ -2528,6 +2535,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_m32c_TRUE@	m32c/r8c.c
 
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c_opc2c_SOURCES = m32c/opc2c.c
+@SIM_ENABLE_ARCH_m32c_TRUE@m32c_opc2c_LDADD = $(LIBS_FOR_BUILD)
 
 # opc2c leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
 # leak detection while running it.
@@ -2625,6 +2633,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/m68hc12int.c
 
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_gencode_SOURCES = m68hc11/gencode.c
+@SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_gencode_LDADD = $(LIBS_FOR_BUILD)
 @SIM_ENABLE_ARCH_mcore_TRUE@nodist_mcore_libsim_a_SOURCES = \
 @SIM_ENABLE_ARCH_mcore_TRUE@	mcore/modules.c
 
@@ -3053,6 +3062,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/table.c
 
 @SIM_ENABLE_ARCH_sh_TRUE@sh_gencode_SOURCES = sh/gencode.c
+@SIM_ENABLE_ARCH_sh_TRUE@sh_gencode_LDADD = $(LIBS_FOR_BUILD)
 @SIM_ENABLE_ARCH_v850_TRUE@AM_CPPFLAGS_v850 = -DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31
 @SIM_ENABLE_ARCH_v850_TRUE@nodist_v850_libsim_a_SOURCES = \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/modules.c
@@ -4909,6 +4919,7 @@ uninstall-am: uninstall-armdocDATA uninstall-dtbDATA \
 .PRECIOUS: Makefile
 
 @am__include@ @am__quote@$(GNULIB_PARENT_DIR)/gnulib/Makefile.gnulib.inc@am__quote@
+@am__include@ @am__quote@$(GNULIB_PARENT_DIR)/build-$(build)/gnulib/Makefile.gnulib.inc@am__quote@
 
 # Generate target constants for newlib/libgloss from its source tree.
 # This file is shipped with distributions so we build in the source dir.

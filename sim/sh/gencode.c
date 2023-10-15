@@ -30,6 +30,9 @@
 
 */
 
+/* This must come before any other includes.  */
+#include "gnulib/config.h"
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>

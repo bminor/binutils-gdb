@@ -19,8 +19,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
 /* load the opcode stat structure */
+
+/* This must come before any other includes.  */
+#include "gnulib/config.h"
 
 #include "misc.h"
 #include "lf.h"

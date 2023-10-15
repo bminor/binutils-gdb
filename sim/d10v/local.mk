@@ -56,7 +56,7 @@ BUILT_SOURCES += %D%/simops.h
 %D%/modules.c: | $(%C%_BUILD_OUTPUTS)
 
 %C%_gencode_SOURCES = %D%/gencode.c
-%C%_gencode_LDADD = %D%/d10v-opc.o
+%C%_gencode_LDADD = %D%/d10v-opc.o $(LIBS_FOR_BUILD)
 
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 %D%/gencode$(EXEEXT): $(%C%_gencode_OBJECTS) $(%C%_gencode_DEPENDENCIES) %D%/$(am__dirstamp)

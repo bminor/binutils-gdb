@@ -1,3 +1,6 @@
+/* This must come before any other includes.  */
+#include "gnulib/config.h"
+
 #include <stdio.h>
 #include <ctype.h>
 #include <limits.h>

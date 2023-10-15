@@ -47,7 +47,7 @@ EXTRA_LIBRARIES += %D%/libigen.a
 	%D%/gen.c
 
 %C%_igen_SOURCES = %D%/igen.c
-%C%_igen_LDADD = %D%/libigen.a
+%C%_igen_LDADD = %D%/libigen.a $(LIBS_FOR_BUILD)
 
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 %D%/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA_igen_libigen_a_DEPENDENCIES) %D%/$(am__dirstamp)

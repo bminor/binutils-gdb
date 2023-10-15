@@ -61,6 +61,7 @@ noinst_PROGRAMS += %D%/run
 %D%/modules.c: | $(%C%_BUILD_OUTPUTS)
 
 %C%_opc2c_SOURCES = %D%/opc2c.c
+%C%_opc2c_LDADD = $(LIBS_FOR_BUILD)
 
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 %D%/opc2c$(EXEEXT): $(%C%_opc2c_OBJECTS) $(%C%_opc2c_DEPENDENCIES) %D%/$(am__dirstamp)
