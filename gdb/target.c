@@ -57,47 +57,13 @@
 
 static void generic_tls_error (void) ATTRIBUTE_NORETURN;
 
-static void default_terminal_info (struct target_ops *, const char *, int);
-
-static int default_watchpoint_addr_within_range (struct target_ops *,
-						 CORE_ADDR, CORE_ADDR, int);
-
-static int default_region_ok_for_hw_watchpoint (struct target_ops *,
-						CORE_ADDR, int);
-
 static void default_rcmd (struct target_ops *, const char *, struct ui_file *);
-
-static ptid_t default_get_ada_task_ptid (struct target_ops *self,
-					 long lwp, ULONGEST tid);
-
-static void default_mourn_inferior (struct target_ops *self);
-
-static int default_search_memory (struct target_ops *ops,
-				  CORE_ADDR start_addr,
-				  ULONGEST search_space_len,
-				  const gdb_byte *pattern,
-				  ULONGEST pattern_len,
-				  CORE_ADDR *found_addrp);
 
 static int default_verify_memory (struct target_ops *self,
 				  const gdb_byte *data,
 				  CORE_ADDR memaddr, ULONGEST size);
 
 static void tcomplain (void) ATTRIBUTE_NORETURN;
-
-static struct target_ops *find_default_run_target (const char *);
-
-static int dummy_find_memory_regions (struct target_ops *self,
-				      find_memory_region_ftype ignore1,
-				      void *ignore2);
-
-static gdb::unique_xmalloc_ptr<char> dummy_make_corefile_notes
-  (struct target_ops *self, bfd *ignore1, int *ignore2);
-
-static std::string default_pid_to_str (struct target_ops *ops, ptid_t ptid);
-
-static enum exec_direction_kind default_execution_direction
-    (struct target_ops *self);
 
 /* Mapping between target_info objects (which have address identity)
    and corresponding open/factory function/callback.  Each add_target
