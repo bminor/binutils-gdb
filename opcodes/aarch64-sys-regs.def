@@ -20,6 +20,10 @@
 
 /* Array of system registers and their associated arch features.
 
+   This file is also used by GCC.  Where necessary, any updates should
+   be made in Binutils and the updated file copied across to GCC, such
+   that the two projects are kept in sync at all times.
+
    Before using #include to read this file, define a macro:
 
      SYSREG (name, encoding, flags, features)
