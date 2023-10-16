@@ -11426,6 +11426,8 @@ check_producer (struct dwarf2_cu *cu)
     cu->producer_is_codewarrior = true;
   else if (producer_is_clang (cu->producer, &major, &minor))
     cu->producer_is_clang = true;
+  else if (startswith (cu->producer, "GNU AS 2.39.0"))
+    cu->producer_is_gas_2_39 = true;
   else
     {
       /* For other non-GCC compilers, expect their behavior is DWARF version
@@ -11459,6 +11461,15 @@ producer_is_codewarrior (struct dwarf2_cu *cu)
     check_producer (cu);
 
   return cu->producer_is_codewarrior;
+}
+
+static bool
+producer_is_gas_2_39 (struct dwarf2_cu *cu)
+{
+  if (!cu->checked_producer)
+    check_producer (cu);
+
+  return cu->producer_is_gas_2_39;
 }
 
 /* Return the accessibility of DIE, as given by DW_AT_accessibility.
@@ -14634,6 +14645,18 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
 
   type = die_type (die, cu);
+
+  if (type->code () == TYPE_CODE_VOID
+      && !type->is_stub ()
+      && die->child == nullptr
+      && producer_is_gas_2_39 (cu))
+    {
+      /* Work around PR gas/29517, pretend we have an DW_TAG_unspecified_type
+	 return type.  */
+      type = (type_allocator (cu->per_objfile->objfile, cu->lang ())
+	      .new_type (TYPE_CODE_VOID, 0, nullptr));
+      type->set_is_stub (true);
+    }
 
   /* The die_type call above may have already set the type for this DIE.  */
   ftype = get_die_type (die, cu);

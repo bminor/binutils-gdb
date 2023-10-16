@@ -18,8 +18,15 @@
 extern int foo (void);
 
 int
+bar (void)
+{
+  asm ("bar_label: .globl bar_label");
+  return 0;
+}
+
+int
 main (void)
 {
-  int res = foo ();
+  int res = foo () + bar ();
   return res;
 }
