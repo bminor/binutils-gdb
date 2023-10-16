@@ -4638,9 +4638,22 @@ _bfd_aarch64_add_call_stub_entries (bool *stub_changed, bfd *output_bfd,
 		 insert another stub with direct jump near the target then.  */
 	      if (need_bti && !aarch64_bti_stub_p (stub_entry))
 		{
+		  id_sec_bti = htab->stub_group[sym_sec->id].link_sec;
+
+		  /* If the stub with indirect jump and the BTI stub are in
+		     the same stub group: change the indirect jump stub into
+		     a BTI stub since a direct branch can reach the target.
+		     The BTI landing pad is still needed in case another
+		     stub indirectly jumps to it.  */
+		  if (id_sec_bti == id_sec)
+		    {
+		      stub_entry->stub_type = aarch64_stub_bti_direct_branch;
+		      goto skip_double_stub;
+		    }
+
 		  stub_entry->double_stub = true;
 		  htab->has_double_stub = true;
-		  id_sec_bti = htab->stub_group[sym_sec->id].link_sec;
+
 		  stub_name_bti =
 		    elfNN_aarch64_stub_name (id_sec_bti, sym_sec, hash, irela);
 		  if (!stub_name_bti)
@@ -4687,7 +4700,7 @@ _bfd_aarch64_add_call_stub_entries (bool *stub_changed, bfd *output_bfd,
 		  stub_entry->h = NULL;
 		  stub_entry->st_type = STT_FUNC;
 		}
-
+skip_double_stub:
 	      *stub_changed = true;
 	    }
 
