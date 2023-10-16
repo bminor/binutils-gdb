@@ -1,3 +1,9 @@
+2023-10-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 28910
+	* elf32-arm.c (elf32_arm_merge_private_bfd_data): Do not set
+	output flags if the input flags have not been set.
+
 2023-10-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 30950

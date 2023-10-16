@@ -20672,16 +20672,17 @@ elf32_arm_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
   if (!elf_flags_init (obfd))
     {
-      /* If the input is the default architecture and had the default
-	 flags then do not bother setting the flags for the output
-	 architecture, instead allow future merges to do this.  If no
-	 future merges ever set these flags then they will retain their
-	 uninitialised values, which surprise surprise, correspond
-	 to the default values.  */
-      if (bfd_get_arch_info (ibfd)->the_default
-	  && elf_elfheader (ibfd)->e_flags == 0)
-	return true;
+      /* If the input has no flags set, then do not set the output flags.
+	 This will allow future bfds to determine the desired output flags.
+	 If no input bfds have any flags set, then neither will the output bfd.
 
+	 Note - we used to restrict this test to when the input architecture
+	 variant was the default variant, but this does not allow for
+	 linker scripts which override the default.  See PR 28910 for an
+	 example.  */
+      if (in_flags == 0)
+	return true;
+      
       elf_flags_init (obfd) = true;
       elf_elfheader (obfd)->e_flags = in_flags;
 
