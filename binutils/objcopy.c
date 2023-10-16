@@ -2878,7 +2878,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	pe->pe_opthdr.SizeOfStackCommit = pe_stack_commit;
 
       if (pe_stack_reserve != (bfd_vma) -1)
-	pe->pe_opthdr.SizeOfStackCommit = pe_stack_reserve;
+	pe->pe_opthdr.SizeOfStackReserve = pe_stack_reserve;
 
       if (pe_subsystem != -1)
 	pe->pe_opthdr.Subsystem = pe_subsystem;
