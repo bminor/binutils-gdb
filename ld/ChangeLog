@@ -1,3 +1,10 @@
+2023-10-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 28910
+	* lexsup.c (ld_options): Require that the --architecture option is
+	given exactly two dashes, so that it does not become confused with
+	the -a option.
+
 2023-10-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 30951

@@ -105,7 +105,7 @@ static const struct ld_option ld_options[] =
     'a', N_("KEYWORD"), N_("Shared library control for HP/UX compatibility"),
     ONE_DASH },
   { {"architecture", required_argument, NULL, 'A'},
-    'A', N_("ARCH"), N_("Set architecture") , TWO_DASHES },
+    'A', N_("ARCH"), N_("Set architecture") , EXACTLY_TWO_DASHES },
   { {"format", required_argument, NULL, 'b'},
     'b', N_("TARGET"), N_("Specify target for following input files"),
     TWO_DASHES },
