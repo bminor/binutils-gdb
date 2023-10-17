@@ -602,7 +602,7 @@ ctf_type_resolve_unsliced (ctf_dict_t *fp, ctf_id_t type)
   const ctf_type_t *tp;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
-    return -1;
+    return CTF_ERR;
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
