@@ -252,7 +252,7 @@ source_cache::ensure (struct symtab *s)
 	      std::istringstream input (contents);
 	      std::ostringstream output;
 	      highlighter->highlight (input, output, lang_name, fullname);
-	      contents = output.str ();
+	      contents = std::move (output).str ();
 	      already_styled = true;
 	    }
 	  catch (...)
