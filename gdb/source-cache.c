@@ -281,7 +281,8 @@ source_cache::ensure (struct symtab *s)
       return false;
     }
 
-  if (source_styling && gdb_stdout->can_emit_style_escape ())
+  if (source_styling && gdb_stdout->can_emit_style_escape ()
+      && m_no_styling_files.count (fullname) == 0)
     {
       bool already_styled
 	= try_source_highlight (contents, s->language (), fullname);
@@ -291,7 +292,26 @@ source_cache::ensure (struct symtab *s)
 	  gdb::optional<std::string> ext_contents;
 	  ext_contents = ext_lang_colorize (fullname, contents);
 	  if (ext_contents.has_value ())
-	    contents = std::move (*ext_contents);
+	    {
+	      contents = std::move (*ext_contents);
+	      already_styled = true;
+	    }
+	}
+
+      if (!already_styled)
+	{
+	  /* Styling failed.  Styling can fail for instance for these
+	     reasons:
+	     - the language is not supported.
+	     - the language cannot not be auto-detected from the file name.
+	     - no stylers available.
+
+	     Since styling failed, don't try styling the file again after it
+	     drops from the cache.
+
+	     Note that clearing the source cache also clears
+	     m_no_styling_files.  */
+	  m_no_styling_files.insert (fullname);
 	}
     }
 
