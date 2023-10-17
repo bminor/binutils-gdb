@@ -5516,10 +5516,10 @@ expression.
 
 @kindex LINKER_VERSION
 @cindex LINKER_VERSION
-Inserts a string containing the version of the linker at the current
-point.  Note - by default this directive is disabled and will do
-nothing.  It only becomes active if the
-@option{--enable-linker-version} command line option is used.
+The @code{LINKER_VERSION} command inserts a string containing the
+version of the linker at the current point.  Note - by default this
+directive is disabled and will do nothing.  It only becomes active if
+the @option{--enable-linker-version} command line option is used.
 
 Built-in linker scripts for ELF based targets already include this
 directive in their @samp{.comment} section.
