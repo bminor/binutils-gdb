@@ -2325,7 +2325,7 @@ loongarch_reloc_is_fatal (struct bfd_link_info *info,
    addi.d $t0, $zero, lo12 (0x812)
       $t0 = 0xfffffffffffff812 (if lo12 > 0x7ff, because sign-extend,
       lo20 need to sub 0x1)
-   lu32i.d $t0, lo12 (0x71234)
+   lu32i.d $t0, lo20 (0x71234)
       $t0 = {0x71234, 0xfffff812}
 	  = 0x71234fffff812
    lu52i.d $t0, hi12 (0x0)
