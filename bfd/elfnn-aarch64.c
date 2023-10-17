@@ -4665,33 +4665,41 @@ _bfd_aarch64_add_call_stub_entries (bool *stub_changed, bfd *output_bfd,
 		  stub_entry_bti =
 		    aarch64_stub_hash_lookup (&htab->stub_hash_table,
 					      stub_name_bti, false, false);
-		  if (stub_entry_bti == NULL)
-		    stub_entry_bti =
-		      _bfd_aarch64_add_stub_entry_in_group (stub_name_bti,
-							    sym_sec, htab);
-		  if (stub_entry_bti == NULL)
+		  if (stub_entry_bti != NULL)
+		    BFD_ASSERT (stub_entry_bti->stub_type
+				== aarch64_stub_bti_direct_branch);
+		  else
 		    {
-		      free (stub_name);
-		      free (stub_name_bti);
-		      goto error_ret_free_internal;
-		    }
+		      stub_entry_bti =
+			_bfd_aarch64_add_stub_entry_in_group (stub_name_bti,
+							      sym_sec, htab);
+		      if (stub_entry_bti == NULL)
+			{
+			  free (stub_name);
+			  free (stub_name_bti);
+			  goto error_ret_free_internal;
+			}
 
-		  stub_entry_bti->target_value = sym_value + irela->r_addend;
-		  stub_entry_bti->target_section = sym_sec;
-		  stub_entry_bti->stub_type = aarch64_stub_bti_direct_branch;
-		  stub_entry_bti->h = hash;
-		  stub_entry_bti->st_type = st_type;
+		      stub_entry_bti->target_value =
+			sym_value + irela->r_addend;
+		      stub_entry_bti->target_section = sym_sec;
+		      stub_entry_bti->stub_type =
+			aarch64_stub_bti_direct_branch;
+		      stub_entry_bti->h = hash;
+		      stub_entry_bti->st_type = st_type;
 
-		  len = sizeof (BTI_STUB_ENTRY_NAME) + strlen (sym_name);
-		  stub_entry_bti->output_name = bfd_alloc (htab->stub_bfd, len);
-		  if (stub_entry_bti->output_name == NULL)
-		    {
-		      free (stub_name);
-		      free (stub_name_bti);
-		      goto error_ret_free_internal;
+		      len = sizeof (BTI_STUB_ENTRY_NAME) + strlen (sym_name);
+		      stub_entry_bti->output_name = bfd_alloc (htab->stub_bfd,
+							       len);
+		      if (stub_entry_bti->output_name == NULL)
+			{
+			  free (stub_name);
+			  free (stub_name_bti);
+			  goto error_ret_free_internal;
+			}
+		      snprintf (stub_entry_bti->output_name, len,
+				BTI_STUB_ENTRY_NAME, sym_name);
 		    }
-		  snprintf (stub_entry_bti->output_name, len,
-			    BTI_STUB_ENTRY_NAME, sym_name);
 
 		  /* Update the indirect call stub to target the BTI stub.  */
 		  stub_entry->target_value = 0;
