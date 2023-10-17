@@ -2315,7 +2315,7 @@
 #define MASK_C_NTL_S1 0xffff
 #define MATCH_C_NTL_ALL 0x9016
 #define MASK_C_NTL_ALL 0xffff
-/* Zawrs intructions.  */
+/* Zawrs instructions.  */
 #define MATCH_WRS_NTO 0x00d00073
 #define MASK_WRS_NTO 0xffffffff
 #define MATCH_WRS_STO 0x01d00073
