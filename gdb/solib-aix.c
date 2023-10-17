@@ -26,7 +26,7 @@
 #include "xcoffread.h"
 #include "observable.h"
 
-/* Our private data in struct so_list.  */
+/* Our private data in struct shobj.  */
 
 struct lm_info_aix final : public lm_info
 {
@@ -311,7 +311,7 @@ solib_aix_bss_data_overlap (bfd *abfd)
 /* Implement the "relocate_section_addresses" target_so_ops method.  */
 
 static void
-solib_aix_relocate_section_addresses (so_list &so, target_section *sec)
+solib_aix_relocate_section_addresses (shobj &so, target_section *sec)
 {
   struct bfd_section *bfd_sect = sec->the_bfd_section;
   bfd *abfd = bfd_sect->owner;
@@ -445,7 +445,7 @@ solib_aix_solib_create_inferior_hook (int from_tty)
 
 /* Implement the "current_sos" target_so_ops method.  */
 
-static intrusive_list<so_list>
+static intrusive_list<shobj>
 solib_aix_current_sos ()
 {
   gdb::optional<std::vector<lm_info_aix>> &library_list
@@ -453,14 +453,14 @@ solib_aix_current_sos ()
   if (!library_list.has_value ())
     return {};
 
-  intrusive_list<so_list> sos;
+  intrusive_list<shobj> sos;
 
-  /* Build a struct so_list for each entry on the list.
+  /* Build a struct shobj for each entry on the list.
      We skip the first entry, since this is the entry corresponding
      to the main executable, not a shared library.  */
   for (int ix = 1; ix < library_list->size (); ix++)
     {
-      so_list *new_solib = new so_list;
+      shobj *new_solib = new shobj;
       std::string so_name;
 
       lm_info_aix &info = (*library_list)[ix];

@@ -5046,7 +5046,7 @@ print_solib_event (bool is_catchpoint)
       current_uiout->text (_("  Inferior loaded "));
       ui_out_emit_list list_emitter (current_uiout, "added");
       bool first = true;
-      for (so_list *iter : current_program_space->added_solibs)
+      for (shobj *iter : current_program_space->added_solibs)
 	{
 	  if (!first)
 	    current_uiout->text ("    ");
@@ -8018,8 +8018,7 @@ disable_breakpoints_in_shlibs (void)
    disabled ones can just stay disabled.  */
 
 static void
-disable_breakpoints_in_unloaded_shlib (program_space *pspace,
-				       const so_list &solib)
+disable_breakpoints_in_unloaded_shlib (program_space *pspace, const shobj &solib)
 {
   bool disabled_shlib_breaks = false;
 

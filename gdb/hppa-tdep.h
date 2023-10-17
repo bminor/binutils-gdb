@@ -24,7 +24,7 @@
 
 struct trad_frame_saved_reg;
 struct objfile;
-struct so_list;
+struct shobj;
 
 /* Register numbers of various important registers.  */
 
@@ -114,7 +114,7 @@ struct hppa_gdbarch_tdep : gdbarch_tdep_base
 
   /* These are solib-dependent methods.  They are really HPUX only, but
      we don't have a HPUX-specific tdep vector at the moment.  */
-  CORE_ADDR (*solib_thread_start_addr) (struct so_list *so) = nullptr;
+  CORE_ADDR (*solib_thread_start_addr) (shobj *so) = nullptr;
   CORE_ADDR (*solib_get_got_by_pc) (CORE_ADDR addr) = nullptr;
   CORE_ADDR (*solib_get_solib_by_pc) (CORE_ADDR addr) = nullptr;
   CORE_ADDR (*solib_get_text_base) (struct objfile *objfile) = nullptr;

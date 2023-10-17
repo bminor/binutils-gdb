@@ -724,7 +724,7 @@ mi_interp::on_target_resumed (ptid_t ptid)
 /* See mi-interp.h.  */
 
 void
-mi_output_solib_attribs (ui_out *uiout, const so_list &solib)
+mi_output_solib_attribs (ui_out *uiout, const shobj &solib)
 {
   gdbarch *gdbarch = current_inferior ()->arch ();
 
@@ -745,7 +745,7 @@ mi_output_solib_attribs (ui_out *uiout, const so_list &solib)
 }
 
 void
-mi_interp::on_solib_loaded (const so_list &solib)
+mi_interp::on_solib_loaded (const shobj &solib)
 {
   ui_out *uiout = this->interp_ui_out ();
 
@@ -762,7 +762,7 @@ mi_interp::on_solib_loaded (const so_list &solib)
 }
 
 void
-mi_interp::on_solib_unloaded (const so_list &solib)
+mi_interp::on_solib_unloaded (const shobj &solib)
 {
   ui_out *uiout = this->interp_ui_out ();
 

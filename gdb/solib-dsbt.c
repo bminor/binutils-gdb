@@ -503,22 +503,22 @@ lm_base (void)
 }
 
 
-/* Build a list of `struct so_list' objects describing the shared
+/* Build a list of `struct shobj' objects describing the shared
    objects currently loaded in the inferior.  This list does not
    include an entry for the main executable file.
 
    Note that we only gather information directly available from the
    inferior --- we don't examine any of the shared library files
-   themselves.  The declaration of `struct so_list' says which fields
+   themselves.  The declaration of `struct shobj' says which fields
    we provide values for.  */
 
-static intrusive_list<so_list>
+static intrusive_list<shobj>
 dsbt_current_sos (void)
 {
   bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   CORE_ADDR lm_addr;
   dsbt_info *info = get_dsbt_info (current_program_space);
-  intrusive_list<so_list> sos;
+  intrusive_list<shobj> sos;
 
   /* Make sure that the main executable has been relocated.  This is
      required in order to find the address of the global offset table,
@@ -593,7 +593,7 @@ dsbt_current_sos (void)
 	      break;
 	    }
 
-	  so_list *sop = new so_list;
+	  shobj *sop = new shobj;
 	  auto li = gdb::make_unique<lm_info_dsbt> ();
 	  li->map = loadmap;
 	  /* Fetch the name.  */
@@ -876,7 +876,7 @@ dsbt_clear_solib (program_space *pspace)
 }
 
 static void
-dsbt_relocate_section_addresses (so_list &so, target_section *sec)
+dsbt_relocate_section_addresses (shobj &so, target_section *sec)
 {
   int seg;
   auto *li = gdb::checked_static_cast<lm_info_dsbt *> (so.lm_info.get ());

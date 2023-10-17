@@ -488,7 +488,7 @@ interps_notify_target_resumed (ptid_t ptid)
 /* See interps.h.  */
 
 void
-interps_notify_solib_loaded (const so_list &so)
+interps_notify_solib_loaded (const shobj &so)
 {
   interps_notify (&interp::on_solib_loaded, so);
 }
@@ -496,7 +496,7 @@ interps_notify_solib_loaded (const so_list &so)
 /* See interps.h.  */
 
 void
-interps_notify_solib_unloaded (const so_list &so)
+interps_notify_solib_unloaded (const shobj &so)
 {
   interps_notify (&interp::on_solib_unloaded, so);
 }

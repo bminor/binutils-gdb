@@ -31,7 +31,7 @@ struct ui;
 class completion_tracker;
 struct thread_info;
 struct inferior;
-struct so_list;
+struct shobj;
 struct trace_state_variable;
 
 typedef struct interp *(*interp_factory_func) (const char *name);
@@ -147,10 +147,10 @@ public:
   virtual void on_target_resumed (ptid_t ptid) {}
 
   /* Notify the interpreter that solib SO has been loaded.  */
-  virtual void on_solib_loaded (const so_list &so) {}
+  virtual void on_solib_loaded (const shobj &so) {}
 
   /* Notify the interpreter that solib SO has been unloaded.  */
-  virtual void on_solib_unloaded (const so_list &so) {}
+  virtual void on_solib_unloaded (const shobj &so) {}
 
   /* Notify the interpreter that a command it is executing is about to cause
      the inferior to proceed.  */
@@ -324,10 +324,10 @@ extern void interps_notify_record_changed (inferior *inf, int started,
 extern void interps_notify_target_resumed (ptid_t ptid);
 
 /* Notify all interpreters that solib SO has been loaded.  */
-extern void interps_notify_solib_loaded (const so_list &so);
+extern void interps_notify_solib_loaded (const shobj &so);
 
 /* Notify all interpreters that solib SO has been unloaded.  */
-extern void interps_notify_solib_unloaded (const so_list &so);
+extern void interps_notify_solib_unloaded (const shobj &so);
 
 /* Notify all interpreters that the selected traceframe changed.
 
