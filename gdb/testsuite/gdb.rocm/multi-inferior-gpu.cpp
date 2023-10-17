@@ -95,7 +95,7 @@ child (int argc, char **argv)
 
   CHECK (hipSetDevice (dev_number));
   kern<<<1, 1>>> ();
-  hipDeviceSynchronize ();
+  CHECK (hipDeviceSynchronize ());
   return 0;
 }
 
