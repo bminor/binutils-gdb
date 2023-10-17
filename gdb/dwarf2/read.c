@@ -21615,6 +21615,26 @@ dwarf2_per_cu_data::ref_addr_size () const
     return header->offset_size;
 }
 
+/* See read.h.  */
+
+void
+dwarf2_per_cu_data::set_lang (enum language lang,
+			      dwarf_source_language dw_lang)
+{
+  if (unit_type () == DW_UT_partial)
+    return;
+
+  /* Set if not set already.  */
+  packed<language, LANGUAGE_BYTES> new_value = lang;
+  packed<language, LANGUAGE_BYTES> old_value = m_lang.exchange (new_value);
+  /* If already set, verify that it's the same value.  */
+  gdb_assert (old_value == language_unknown || old_value == lang);
+
+  packed<dwarf_source_language, 2> new_dw = dw_lang;
+  packed<dwarf_source_language, 2> old_dw = m_dw_lang.exchange (new_dw);
+  gdb_assert (old_dw == 0 || old_dw == dw_lang);
+}
+
 /* A helper function for dwarf2_find_containing_comp_unit that returns
    the index of the result, and that searches a vector.  It will
    return a result even if the offset in question does not actually
@@ -21776,7 +21796,6 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
   else
     lang = pretend_language;
 
-  cu->per_cu->dw_lang = dw_lang;
   cu->language_defn = language_def (lang);
 
   switch (comp_unit_die->tag)
@@ -21796,7 +21815,7 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
 	     sect_offset_str (cu->per_cu->sect_off));
     }
 
-  cu->per_cu->set_lang (lang);
+  cu->per_cu->set_lang (lang, dw_lang);
 }
 
 /* See read.h.  */

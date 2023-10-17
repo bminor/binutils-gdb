@@ -1205,7 +1205,7 @@ write_shortcuts_table (cooked_index *table, data_buf &shortcuts,
 
   if (main_info != nullptr)
     {
-      dw_lang = main_info->per_cu->dw_lang;
+      dw_lang = main_info->per_cu->dw_lang ();
 
       if (dw_lang != 0)
 	{
