@@ -191,6 +191,59 @@ get_language_name (enum language lang)
 
 #endif /* HAVE_SOURCE_HIGHLIGHT */
 
+/* Try to highlight CONTENTS from file FULLNAME in language LANG using
+   the GNU source-higlight library.  Return true if highlighting
+   succeeded.  */
+
+static bool
+try_source_highlight (std::string &contents ATTRIBUTE_UNUSED,
+		      enum language lang ATTRIBUTE_UNUSED,
+		      const std::string &fullname ATTRIBUTE_UNUSED)
+{
+#ifdef HAVE_SOURCE_HIGHLIGHT
+  if (!use_gnu_source_highlight)
+    return false;
+
+  const char *lang_name = get_language_name (lang);
+  if (lang_name == nullptr)
+    return false;
+
+  /* The global source highlight object, or null if one was
+     never constructed.  This is stored here rather than in
+     the class so that we don't need to include anything or do
+     conditional compilation in source-cache.h.  */
+  static srchilite::SourceHighlight *highlighter;
+
+  bool styled = false;
+  try
+    {
+      if (highlighter == nullptr)
+	{
+	  highlighter = new srchilite::SourceHighlight ("esc.outlang");
+	  highlighter->setStyleFile ("esc.style");
+	}
+
+      std::istringstream input (contents);
+      std::ostringstream output;
+      highlighter->highlight (input, output, lang_name, fullname);
+      contents = std::move (output).str ();
+      styled = true;
+    }
+  catch (...)
+    {
+      /* Source Highlight will throw an exception if
+	 highlighting fails.  One possible reason it can fail
+	 is if the language is unknown -- which matters to gdb
+	 because Rust support wasn't added until after 3.1.8.
+	 Ignore exceptions here.  */
+    }
+
+  return styled;
+#else
+  return false;
+#endif /* HAVE_SOURCE_HIGHLIGHT */
+}
+
 /* See source-cache.h.  */
 
 bool
@@ -230,44 +283,10 @@ source_cache::ensure (struct symtab *s)
 
   if (source_styling && gdb_stdout->can_emit_style_escape ())
     {
-#ifdef HAVE_SOURCE_HIGHLIGHT
-      bool already_styled = false;
-      const char *lang_name = get_language_name (s->language ());
-      if (lang_name != nullptr && use_gnu_source_highlight)
-	{
-	  /* The global source highlight object, or null if one was
-	     never constructed.  This is stored here rather than in
-	     the class so that we don't need to include anything or do
-	     conditional compilation in source-cache.h.  */
-	  static srchilite::SourceHighlight *highlighter;
-
-	  try
-	    {
-	      if (highlighter == nullptr)
-		{
-		  highlighter = new srchilite::SourceHighlight ("esc.outlang");
-		  highlighter->setStyleFile ("esc.style");
-		}
-
-	      std::istringstream input (contents);
-	      std::ostringstream output;
-	      highlighter->highlight (input, output, lang_name, fullname);
-	      contents = std::move (output).str ();
-	      already_styled = true;
-	    }
-	  catch (...)
-	    {
-	      /* Source Highlight will throw an exception if
-		 highlighting fails.  One possible reason it can fail
-		 is if the language is unknown -- which matters to gdb
-		 because Rust support wasn't added until after 3.1.8.
-		 Ignore exceptions here and fall back to
-		 un-highlighted text. */
-	    }
-	}
+      bool already_styled
+	= try_source_highlight (contents, s->language (), fullname);
 
       if (!already_styled)
-#endif /* HAVE_SOURCE_HIGHLIGHT */
 	{
 	  gdb::optional<std::string> ext_contents;
 	  ext_contents = ext_lang_colorize (fullname, contents);
