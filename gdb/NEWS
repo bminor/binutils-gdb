@@ -11,6 +11,9 @@
   ** New function gdb.notify_mi(NAME, DATA), that emits custom
      GDB/MI async notification.
 
+  ** New read/write attribute gdb.Value.bytes that contains a bytes
+     object holding the contents of this value.
+
 *** Changes in GDB 14
 
 * GDB now supports the AArch64 Scalable Matrix Extension 2 (SME2), which

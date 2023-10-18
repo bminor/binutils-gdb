@@ -916,6 +916,21 @@ fetched when the value is needed, or when the @code{fetch_lazy}
 method is invoked.  
 @end defvar
 
+@defvar Value.bytes
+The value of this attribute is a @code{bytes} object containing the
+bytes that make up this @code{Value}'s complete value in little endian
+order.  If the complete contents of this value are not available then
+accessing this attribute will raise an exception.
+
+This attribute can also be assigned to.  The new value should be a
+buffer object (e.g.@: a @code{bytes} object), the length of the new
+buffer must exactly match the length of this @code{Value}'s type.  The
+bytes values in the new buffer should be in little endian order.
+
+As with @code{Value.assign} (@pxref{Value.assign}), if this value
+cannot be assigned to, then an exception will be thrown.
+@end defvar
+
 The following methods are provided:
 
 @defun Value.__init__ (val)
@@ -966,6 +981,7 @@ If @var{type} is @code{None} then this version of @code{__init__}
 behaves as though @var{type} was not passed at all.
 @end defun
 
+@anchor{Value.assign}
 @defun Value.assign (rhs)
 Assign @var{rhs} to this value, and return @code{None}.  If this value
 cannot be assigned to, or if the assignment is invalid for some reason

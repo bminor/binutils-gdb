@@ -63,6 +63,7 @@ struct value_object {
   PyObject *address;
   PyObject *type;
   PyObject *dynamic_type;
+  PyObject *content_bytes;
 };
 
 /* List of all values which are currently exposed to Python. It is
@@ -86,6 +87,7 @@ valpy_clear_value (value_object *self)
   Py_CLEAR (self->address);
   Py_CLEAR (self->type);
   Py_CLEAR (self->dynamic_type);
+  Py_CLEAR (self->content_bytes);
 }
 
 /* Called by the Python interpreter when deallocating a value object.  */
@@ -135,10 +137,14 @@ note_value (value_object *value_obj)
 /* Convert a python object OBJ with type TYPE to a gdb value.  The
    python object in question must conform to the python buffer
    protocol.  On success, return the converted value, otherwise
-   nullptr.  */
+   nullptr.  When REQUIRE_EXACT_SIZE_P is true the buffer OBJ must be the
+   exact length of TYPE.  When REQUIRE_EXACT_SIZE_P is false then the
+   buffer OBJ can be longer than TYPE, in which case only the least
+   significant bytes from the buffer are used.  */
 
 static struct value *
-convert_buffer_and_type_to_value (PyObject *obj, struct type *type)
+convert_buffer_and_type_to_value (PyObject *obj, struct type *type,
+				  bool require_exact_size_p)
 {
   Py_buffer_up buffer_up;
   Py_buffer py_buf;
@@ -157,7 +163,13 @@ convert_buffer_and_type_to_value (PyObject *obj, struct type *type)
       return nullptr;
     }
 
-  if (type->length () > py_buf.len)
+  if (require_exact_size_p && type->length () != py_buf.len)
+    {
+      PyErr_SetString (PyExc_ValueError,
+		       _("Size of type is not equal to that of buffer object."));
+      return nullptr;
+    }
+  else if (!require_exact_size_p && type->length () > py_buf.len)
     {
       PyErr_SetString (PyExc_ValueError,
 		       _("Size of type is larger than that of buffer object."));
@@ -196,7 +208,7 @@ valpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   if (type == nullptr)
     value = convert_value_from_python (val_obj);
   else
-    value = convert_buffer_and_type_to_value (val_obj, type);
+    value = convert_buffer_and_type_to_value (val_obj, type, false);
   if (value == nullptr)
     {
       gdb_assert (PyErr_Occurred ());
@@ -888,6 +900,35 @@ valpy_reinterpret_cast (PyObject *self, PyObject *args)
   return valpy_do_cast (self, args, UNOP_REINTERPRET_CAST);
 }
 
+/* Assign NEW_VALUE into SELF, handles 'struct value' reference counting,
+   and also clearing the bytes data cached within SELF.  Return true if
+   the assignment was successful, otherwise return false, in which case a
+   Python exception will be set.  */
+
+static bool
+valpy_assign_core (value_object *self, struct value *new_value)
+{
+  try
+    {
+      new_value = value_assign (self->value, new_value);
+
+      /* value_as_address returns a new value with the same location
+	 as the old one.  Ensure that this gdb.Value is updated to
+	 reflect the new value.  */
+      new_value->incref ();
+      self->value->decref ();
+      Py_CLEAR (self->content_bytes);
+      self->value = new_value;
+    }
+  catch (const gdb_exception &except)
+    {
+      gdbpy_convert_exception (except);
+      return false;
+    }
+
+  return true;
+}
+
 /* Implementation of the "assign" method.  */
 
 static PyObject *
@@ -902,21 +943,9 @@ valpy_assign (PyObject *self_obj, PyObject *args)
   if (val == nullptr)
     return nullptr;
 
-  try
-    {
-      value_object *self = (value_object *) self_obj;
-      value *new_value = value_assign (self->value, val);
-      /* value_as_address returns a new value with the same location
-	 as the old one.  Ensure that this gdb.Value is updated to
-	 reflect the new value.  */
-      new_value->incref ();
-      self->value->decref ();
-      self->value = new_value;
-    }
-  catch (const gdb_exception &except)
-    {
-      GDB_PY_HANDLE_EXCEPTION (except);
-    }
+  value_object *self = (value_object *) self_obj;
+  if (!valpy_assign_core (self, val))
+    return nullptr;
 
   Py_RETURN_NONE;
 }
@@ -1302,6 +1331,58 @@ valpy_get_is_lazy (PyObject *self, void *closure)
     Py_RETURN_TRUE;
 
   Py_RETURN_FALSE;
+}
+
+/* Get gdb.Value.bytes attribute.  */
+
+static PyObject *
+valpy_get_bytes (PyObject *self, void *closure)
+{
+  value_object *value_obj = (value_object *) self;
+  struct value *value = value_obj->value;
+
+  if (value_obj->content_bytes != nullptr)
+    {
+      Py_INCREF (value_obj->content_bytes);
+      return value_obj->content_bytes;
+    }
+
+  gdb::array_view<const gdb_byte> contents;
+  try
+    {
+      contents = value->contents ();
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  value_obj->content_bytes
+    =  PyBytes_FromStringAndSize ((const char *) contents.data (),
+				  contents.size ());
+  Py_XINCREF (value_obj->content_bytes);
+  return value_obj->content_bytes;
+}
+
+/* Set gdb.Value.bytes attribute.  */
+
+static int
+valpy_set_bytes (PyObject *self_obj, PyObject *new_value_obj, void *closure)
+{
+  value_object *self = (value_object *) self_obj;
+
+  /* Create a new value from the buffer NEW_VALUE_OBJ.  We pass true here
+     to indicate that NEW_VALUE_OBJ must match exactly the type length.  */
+  struct value *new_value
+    = convert_buffer_and_type_to_value (new_value_obj, self->value->type (),
+					true);
+  if (new_value == nullptr)
+    return -1;
+
+  if (!valpy_assign_core (self, new_value))
+    return -1;
+
+  return 0;
 }
 
 /* Implements gdb.Value.fetch_lazy ().  */
@@ -1865,6 +1946,7 @@ value_to_value_object (struct value *val)
       val_obj->address = NULL;
       val_obj->type = NULL;
       val_obj->dynamic_type = NULL;
+      val_obj->content_bytes = nullptr;
       note_value (val_obj);
     }
 
@@ -2152,6 +2234,8 @@ static gdb_PyGetSetDef value_object_getset[] = {
     "Boolean telling whether the value is lazy (not fetched yet\n\
 from the inferior).  A lazy value is fetched when needed, or when\n\
 the \"fetch_lazy()\" method is called.", NULL },
+  { "bytes", valpy_get_bytes, valpy_set_bytes,
+    "Return a bytearray containing the bytes of this value.", nullptr },
   {NULL}  /* Sentinel */
 };
 
