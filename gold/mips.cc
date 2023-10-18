@@ -4348,7 +4348,8 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
   {
     return (micromips_reloc(r_type)
             && r_type != elfcpp::R_MICROMIPS_PC7_S1
-            && r_type != elfcpp::R_MICROMIPS_PC10_S1);
+            && r_type != elfcpp::R_MICROMIPS_PC10_S1
+            && r_type != elfcpp::R_MICROMIPS_GPREL7_S2);
   }
 
  public:
@@ -4438,8 +4439,9 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
   //   little-endian system.
 
   // Similar to MIPS16, the two 16-bit halves in microMIPS must be swapped
-  // on a little-endian system.  This does not apply to R_MICROMIPS_PC7_S1
-  // and R_MICROMIPS_PC10_S1 relocs that apply to 16-bit instructions.
+  // on a little-endian system.  This does not apply to R_MICROMIPS_PC7_S1,
+  // R_MICROMIPS_PC10_S1 and R_MICROMIPS_GPREL7_S2 relocs that apply
+  // to 16-bit instructions.
 
   static void
   mips_reloc_unshuffle(unsigned char* view, unsigned int r_type,
@@ -5432,13 +5434,12 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
   }
 
   // R_MIPS_GPREL16, R_MIPS16_GPREL, R_MIPS_LITERAL, R_MICROMIPS_LITERAL
-  // R_MICROMIPS_GPREL7_S2, R_MICROMIPS_GPREL16
+  // R_MICROMIPS_GPREL16
   static inline typename This::Status
   relgprel(unsigned char* view, const Mips_relobj<size, big_endian>* object,
            const Symbol_value<size>* psymval, Mips_address gp,
            Mips_address addend_a, bool extract_addend, bool local,
-           unsigned int r_type, bool calculate_only,
-           Valtype* calculated_value)
+           bool calculate_only, Valtype* calculated_value)
   {
     Valtype32* wv = reinterpret_cast<Valtype32*>(view);
     Valtype32 val = elfcpp::Swap<32, big_endian>::readval(wv);
@@ -5446,10 +5447,7 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
     Valtype addend;
     if (extract_addend)
       {
-        if (r_type == elfcpp::R_MICROMIPS_GPREL7_S2)
-          addend = (val & 0x7f) << 2;
-        else
-          addend = val & 0xffff;
+	addend = val & 0xffff;
         // Only sign-extend the addend if it was extracted from the
         // instruction.  If the addend was separate, leave it alone,
         // otherwise we may lose significant bits.
@@ -5468,10 +5466,7 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
     if (local)
       x += object->gp_value();
 
-    if (r_type == elfcpp::R_MICROMIPS_GPREL7_S2)
-      val = Bits<32>::bit_select32(val, x, 0x7f);
-    else
-      val = Bits<32>::bit_select32(val, x, 0xffff);
+    val = Bits<32>::bit_select32(val, x, 0xffff);
 
     if (calculate_only)
       {
@@ -5483,9 +5478,52 @@ class Mips_relocate_functions : public Relocate_functions<size, big_endian>
 
     if (check_overflow<16>(x) == This::STATUS_OVERFLOW)
       {
-        gold_error(_("small-data section exceeds 64KB; lower small-data size "
-                     "limit (see option -G)"));
+	gold_error(_("small-data section too large;"
+		     " lower small-data size limit (see option -G)"));
         return This::STATUS_OVERFLOW;
+      }
+    return This::STATUS_OKAY;
+  }
+
+  // R_MICROMIPS_GPREL7_S2
+  static inline typename This::Status
+  relgprel7(unsigned char* view, const Mips_relobj<size, big_endian>* object,
+	    const Symbol_value<size>* psymval, Mips_address gp,
+	    Mips_address addend_a, bool extract_addend, bool local,
+	    bool calculate_only, Valtype* calculated_value)
+  {
+    Valtype16* wv = reinterpret_cast<Valtype16*>(view);
+    Valtype16 val = elfcpp::Swap<16, big_endian>::readval(wv);
+
+    Valtype addend;
+    if (extract_addend)
+      {
+	addend = (val & 0x7f) << 2;
+	addend = Bits<9>::sign_extend32(addend);
+      }
+    else
+      addend = addend_a;
+
+    Valtype x = psymval->value(object, addend) - gp;
+
+    if (local)
+      x += object->gp_value();
+
+    val = Bits<16>::bit_select32(val, x >> 2, 0x7f);
+
+    if (calculate_only)
+      {
+	*calculated_value = x;
+	return This::STATUS_OKAY;
+      }
+    else
+      elfcpp::Swap<16, big_endian>::writeval(wv, val);
+
+    if (check_overflow<9>(x) == This::STATUS_OVERFLOW)
+      {
+	gold_error(_("small-data section too large;"
+		     " lower small-data size limit (see option -G)"));
+	return This::STATUS_OVERFLOW;
       }
     return This::STATUS_OKAY;
   }
@@ -11938,12 +11976,20 @@ Target_mips<size, big_endian>::Relocate::relocate(
 
         case elfcpp::R_MIPS_GPREL16:
         case elfcpp::R_MIPS16_GPREL:
-        case elfcpp::R_MICROMIPS_GPREL7_S2:
         case elfcpp::R_MICROMIPS_GPREL16:
           reloc_status = Reloc_funcs::relgprel(view, object, psymval,
                                              target->adjusted_gp_value(object),
                                              r_addend, extract_addend,
-                                             gsym == NULL, r_types[i],
+                                             gsym == NULL,
+                                             this->calculate_only_,
+                                             &this->calculated_value_);
+          break;
+
+        case elfcpp::R_MICROMIPS_GPREL7_S2:
+          reloc_status = Reloc_funcs::relgprel7(view, object, psymval,
+                                             target->adjusted_gp_value(object),
+                                             r_addend, extract_addend,
+                                             gsym == NULL,
                                              this->calculate_only_,
                                              &this->calculated_value_);
           break;

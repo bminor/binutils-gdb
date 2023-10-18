@@ -2223,15 +2223,17 @@ micromips_reloc_p (unsigned int r_type)
 }
 
 /* Similar to MIPS16, the two 16-bit halves in microMIPS must be swapped
-   on a little-endian system.  This does not apply to R_MICROMIPS_PC7_S1
-   and R_MICROMIPS_PC10_S1 relocs that apply to 16-bit instructions.  */
+   on a little-endian system.  This does not apply to R_MICROMIPS_PC7_S1,
+   R_MICROMIPS_PC10_S1 and R_MICROMIPS_GPREL7_S2 relocs that apply to
+   16-bit instructions.  */
 
 static inline bool
 micromips_reloc_shuffle_p (unsigned int r_type)
 {
   return (micromips_reloc_p (r_type)
 	  && r_type != R_MICROMIPS_PC7_S1
-	  && r_type != R_MICROMIPS_PC10_S1);
+	  && r_type != R_MICROMIPS_PC10_S1
+	  && r_type != R_MICROMIPS_GPREL7_S2);
 }
 
 static inline bool
@@ -6255,21 +6257,24 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MIPS_GPREL16:
     case R_MICROMIPS_GPREL7_S2:
     case R_MICROMIPS_GPREL16:
-      /* Only sign-extend the addend if it was extracted from the
-	 instruction.  If the addend was separate, leave it alone,
-	 otherwise we may lose significant bits.  */
-      if (howto->partial_inplace)
-	addend = _bfd_mips_elf_sign_extend (addend, 16);
-      value = symbol + addend - gp;
-      /* If the symbol was local, any earlier relocatable links will
-	 have adjusted its addend with the gp offset, so compensate
-	 for that now.  Don't do it for symbols forced local in this
-	 link, though, since they won't have had the gp offset applied
-	 to them before.  */
-      if (was_local_p)
-	value += gp0;
-      if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
-	overflowed_p = mips_elf_overflow_p (value, 16);
+      {
+	int bits = howto->bitsize + howto->rightshift;
+	/* Only sign-extend the addend if it was extracted from the
+	   instruction.  If the addend was separate, leave it alone,
+	   otherwise we may lose significant bits.  */
+	if (howto->partial_inplace)
+	  addend = _bfd_mips_elf_sign_extend (addend, bits);
+	value = symbol + addend - gp;
+	/* If the symbol was local, any earlier relocatable links will
+	   have adjusted its addend with the gp offset, so compensate
+	   for that now.  Don't do it for symbols forced local in this
+	   link, though, since they won't have had the gp offset applied
+	   to them before.  */
+	if (was_local_p)
+	  value += gp0;
+	if (was_local_p || h->root.root.type != bfd_link_hash_undefweak)
+	  overflowed_p = mips_elf_overflow_p (value, bits);
+      }
       break;
 
     case R_MIPS16_GOT16:
@@ -10671,7 +10676,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  && (gprel16_reloc_p (howto->type)
 		      || literal_reloc_p (howto->type)))
 		{
-		  msg = _("small-data section exceeds 64KB;"
+		  msg = _("small-data section too large;"
 			  " lower small-data size limit (see option -G)");
 
 		  htab->small_data_overflow_reported = true;
