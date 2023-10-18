@@ -68,7 +68,7 @@ proc do_test {} {
 	foreach thread $stopped_gpu_threads {
 	    set infnumber [lindex [split $thread .] 0]
 	    gdb_test "thread $thread" "Switching to thread.*"
-	    gdb_test_multiple "continue $thread" "" {
+	    gdb_test_multiple "continue" "continue inferior $infnumber" {
 		-re "\\\[Inferior $infnumber \[^\n\r\]* exited normally\\]\r\n$::gdb_prompt " {
 		    pass $gdb_test_name
 		}
