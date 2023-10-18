@@ -1300,8 +1300,8 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
   data_buf shortcuts;
   write_shortcuts_table (table, shortcuts, constant_pool);
 
-  write_gdbindex_1(out_file, objfile_cu_list, types_cu_list, addr_vec,
-		   symtab_vec, constant_pool, shortcuts);
+  write_gdbindex_1 (out_file, objfile_cu_list, types_cu_list, addr_vec,
+		    symtab_vec, constant_pool, shortcuts);
 
   if (dwz_out_file != NULL)
     write_gdbindex_1 (dwz_out_file, dwz_cu_list, {}, {}, {}, {}, {});
@@ -1575,7 +1575,7 @@ save_gdb_index_command (const char *arg, int from_tty)
 				 _("Error while writing index for `%s': "),
 				 objfile_name (objfile));
 	    }
-	    }
+	}
 
     }
 }
