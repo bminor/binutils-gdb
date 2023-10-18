@@ -1,4 +1,4 @@
-#as: -march=rv32iq_zfa_zvfh
+#as: -march=rv32iq2p2_zfa_zvfh
 #objdump: -d
 
 .*:[ 	]+file format .*
