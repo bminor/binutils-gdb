@@ -135,7 +135,7 @@ foreach addr $symfile_addrs len $symfile_lengths {
 set count 1
 foreach addr $symfile_addrs len $symfile_lengths {
     # Drop any loading zeros from the symfile address.
-    set addr [format 0x%x $addr]
+    set start [format 0x%x $addr]
 
     # Calculate the end address.
     set end [format 0x%x [expr $addr + $len]]
