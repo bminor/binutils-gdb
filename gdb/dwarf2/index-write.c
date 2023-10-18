@@ -1196,12 +1196,12 @@ write_cooked_index (cooked_index *table,
 /* Write shortcut information. */
 
 static void
-write_shortcuts_table (cooked_index *table, data_buf& shortcuts,
-		       data_buf& cpool)
+write_shortcuts_table (cooked_index *table, data_buf &shortcuts,
+		       data_buf &cpool)
 {
   const auto main_info = table->get_main ();
   size_t main_name_offset = 0;
-  dwarf_source_language dw_lang = (dwarf_source_language)0;
+  dwarf_source_language dw_lang = (dwarf_source_language) 0;
 
   if (main_info != nullptr)
     {
@@ -1217,7 +1217,7 @@ write_shortcuts_table (cooked_index *table, data_buf& shortcuts,
 	}
     }
 
-  shortcuts.append_uint (4, BFD_ENDIAN_LITTLE, dw_lang);
+  shortcuts.append_offset (dw_lang);
   shortcuts.append_offset (main_name_offset);
 }
 

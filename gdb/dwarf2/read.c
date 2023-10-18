@@ -21750,7 +21750,7 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
   /* Set the language we're debugging.  */
   attr = dwarf2_attr (comp_unit_die, DW_AT_language, cu);
   enum language lang;
-  dwarf_source_language dw_lang = (dwarf_source_language)0;
+  dwarf_source_language dw_lang = (dwarf_source_language) 0;
   if (cu->producer != nullptr
       && strstr (cu->producer, "IBM XL C for OpenCL") != NULL)
     {
@@ -21771,7 +21771,7 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
   else if (attr != nullptr)
     {
       lang = dwarf_lang_to_enum_language (attr->constant_value (0));
-      dw_lang = (dwarf_source_language)attr->constant_value (0);
+      dw_lang = (dwarf_source_language) attr->constant_value (0);
     }
   else
     lang = pretend_language;

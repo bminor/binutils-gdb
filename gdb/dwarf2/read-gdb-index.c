@@ -777,10 +777,10 @@ static void
 set_main_name_from_gdb_index (dwarf2_per_objfile *per_objfile,
 			      mapped_gdb_index *index)
 {
-  const auto expected_size = 4 + sizeof (offset_type);
+  const auto expected_size = 2 * sizeof (offset_type);
   if (index->shortcut_table.size () < expected_size)
     /* The data in the section is not present, is corrupted or is in a version
-     * we don't know about. Regardless, we can't make use of it. */
+       we don't know about. Regardless, we can't make use of it. */
     return;
 
   auto ptr = index->shortcut_table.data ();
@@ -794,7 +794,7 @@ set_main_name_from_gdb_index (dwarf2_per_objfile *per_objfile,
   if (dw_lang == 0)
     {
       /* Don't bother if the language for the main symbol was not known or if
-       * there was no main symbol at all when the index was built. */
+	 there was no main symbol at all when the index was built. */
       return;
     }
   ptr += 4;
@@ -803,7 +803,7 @@ set_main_name_from_gdb_index (dwarf2_per_objfile *per_objfile,
   const auto name_offset = extract_unsigned_integer (ptr,
 						     sizeof (offset_type),
 						     BFD_ENDIAN_LITTLE);
-  const auto name = (const char*) (index->constant_pool.data () + name_offset);
+  const auto name = (const char *) (index->constant_pool.data () + name_offset);
 
   set_objfile_main_name (per_objfile->objfile, name, (enum language) lang);
 }
