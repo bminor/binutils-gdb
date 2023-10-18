@@ -3675,7 +3675,8 @@ group_sections (struct elf_aarch64_link_hash_table *htab,
 /* True if the inserted stub does not break BTI compatibility.  */
 
 static bool
-aarch64_bti_stub_p (struct elf_aarch64_stub_hash_entry *stub_entry)
+aarch64_bti_stub_p (struct bfd_link_info *info,
+		    struct elf_aarch64_stub_hash_entry *stub_entry)
 {
   /* Stubs without indirect branch are BTI compatible.  */
   if (stub_entry->stub_type != aarch64_stub_adrp_branch
@@ -3684,12 +3685,22 @@ aarch64_bti_stub_p (struct elf_aarch64_stub_hash_entry *stub_entry)
 
   /* Return true if the target instruction is compatible with BR x16.  */
 
+  struct elf_aarch64_link_hash_table *globals = elf_aarch64_hash_table (info);
   asection *section = stub_entry->target_section;
   bfd_byte loc[4];
   file_ptr off = stub_entry->target_value;
   bfd_size_type count = sizeof (loc);
 
-  if (!bfd_get_section_contents (section->owner, section, loc, off, count))
+  /* PLT code is not generated yet, so treat it specially.
+     Note: Checking elf_aarch64_obj_tdata.plt_type & PLT_BTI is not
+     enough because it only implies BTI in the PLT0 and tlsdesc PLT
+     entries. Normal PLT entries don't have BTI in a shared library
+     (because such PLT is normally not called indirectly and adding
+     the BTI when a stub targets a PLT would change the PLT layout
+     and it's too late for that here).  */
+  if (section == globals->root.splt)
+    memcpy (loc, globals->plt_entry, count);
+  else if (!bfd_get_section_contents (section->owner, section, loc, off, count))
     return false;
 
   uint32_t insn = bfd_getl32 (loc);
@@ -4636,7 +4647,7 @@ _bfd_aarch64_add_call_stub_entries (bool *stub_changed, bfd *output_bfd,
 
 	      /* A stub with indirect jump may break BTI compatibility, so
 		 insert another stub with direct jump near the target then.  */
-	      if (need_bti && !aarch64_bti_stub_p (stub_entry))
+	      if (need_bti && !aarch64_bti_stub_p (info, stub_entry))
 		{
 		  id_sec_bti = htab->stub_group[sym_sec->id].link_sec;
 
