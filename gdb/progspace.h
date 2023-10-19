@@ -28,6 +28,7 @@
 #include "solist.h"
 #include "gdbsupport/next-iterator.h"
 #include "gdbsupport/safe-iterator.h"
+#include "gdbsupport/intrusive_list.h"
 #include <list>
 #include <vector>
 
@@ -253,12 +254,9 @@ struct program_space
      is outside all objfiles in this progspace.  */
   struct objfile *objfile_for_address (CORE_ADDR address);
 
-  /* Return a range adapter for iterating over all the solibs in this
-     program space.  Use it like:
-
-     for (so_list *so : pspace->solibs ()) { ... }  */
-  so_list_range solibs () const
-  { return so_list_range (this->so_list); }
+  /* Return the list of  all the solibs in this program space.  */
+  intrusive_list<struct so_list> &solibs ()
+  { return so_list; }
 
   /* Close and clear exec_bfd.  If we end up with no target sections
      to read memory from, this unpushes the exec_ops target.  */
@@ -361,7 +359,7 @@ struct program_space
 
   /* List of shared objects mapped into this space.  Managed by
      solib.c.  */
-  struct so_list *so_list = NULL;
+  intrusive_list<struct so_list> so_list;
 
   /* Number of calls to solib_add.  */
   unsigned int solib_add_generation = 0;

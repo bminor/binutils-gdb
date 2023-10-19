@@ -954,7 +954,7 @@ open_symbol_file_object (int from_tty)
 
 struct svr4_library_list
 {
-  /* The tail pointer of the current namespace.  This is internal to XML
+  /* The so list for the current namespace.  This is internal to XML
      parsing.  */
   std::vector<svr4_so> *cur_list;
 
@@ -990,11 +990,10 @@ svr4_clear_so (const so_list &so)
 
 /* Create the so_list objects equivalent to the svr4_sos in SOS.  */
 
-static so_list *
+static intrusive_list<so_list>
 so_list_from_svr4_sos (const std::vector<svr4_so> &sos)
 {
-  struct so_list *dst = NULL;
-  struct so_list **link = &dst;
+  intrusive_list<so_list> dst;
 
   for (const svr4_so &so : sos)
     {
@@ -1004,9 +1003,7 @@ so_list_from_svr4_sos (const std::vector<svr4_so> &sos)
       newobj->so_original_name = so.name;
       newobj->lm_info = gdb::make_unique<lm_info_svr4> (*so.lm_info);
 
-      newobj->next = NULL;
-      *link = newobj;
-      link = &newobj->next;
+      dst.push_back (*newobj);
     }
 
   return dst;
@@ -1186,11 +1183,11 @@ svr4_current_sos_via_xfer_libraries (struct svr4_library_list *list,
 /* If no shared library information is available from the dynamic
    linker, build a fallback list from other sources.  */
 
-static struct so_list *
+static intrusive_list<so_list>
 svr4_default_sos (svr4_info *info)
 {
   if (!info->debug_loader_offset_p)
-    return NULL;
+    return {};
 
   so_list *newobj = new so_list;
   auto li = gdb::make_unique<lm_info_svr4> ();
@@ -1203,7 +1200,10 @@ svr4_default_sos (svr4_info *info)
   newobj->so_name = info->debug_loader_name;
   newobj->so_original_name = newobj->so_name;
 
-  return newobj;
+  intrusive_list<so_list> sos;
+  sos.push_back (*newobj);
+
+  return sos;
 }
 
 /* Read the whole inferior libraries chain starting at address LM.
@@ -1372,32 +1372,15 @@ svr4_current_sos_direct (struct svr4_info *info)
 
 /* Collect sos read and stored by the probes interface.  */
 
-static so_list *
+static intrusive_list<so_list>
 svr4_collect_probes_sos (svr4_info *info)
 {
-  so_list *res = nullptr;
-  so_list **pnext = &res;
+  intrusive_list<so_list> res;
 
   for (const auto &tuple : info->solib_lists)
     {
       const std::vector<svr4_so> &sos = tuple.second;
-
-      /* Allow the linker to report empty namespaces.  */
-      if (sos.empty ())
-	continue;
-
-      *pnext = so_list_from_svr4_sos (sos);
-
-      /* Update PNEXT to point to the next member of the last element.  */
-      gdb_assert (*pnext != nullptr);
-      for (;;)
-	{
-	  so_list *next = *pnext;
-	  if (next == nullptr)
-	    break;
-
-	  pnext = &next->next;
-	}
+      res.splice (so_list_from_svr4_sos (sos));
     }
 
   return res;
@@ -1406,10 +1389,10 @@ svr4_collect_probes_sos (svr4_info *info)
 /* Implement the main part of the "current_sos" target_so_ops
    method.  */
 
-static struct so_list *
+static intrusive_list<so_list>
 svr4_current_sos_1 (svr4_info *info)
 {
-  so_list *sos = nullptr;
+  intrusive_list<so_list> sos;
 
   /* If we're using the probes interface, we can use the cache as it will
      be maintained by probe update/reload actions.  */
@@ -1419,12 +1402,12 @@ svr4_current_sos_1 (svr4_info *info)
   /* If we're not using the probes interface or if we didn't cache
      anything, read the sos to fill the cache, then collect them from the
      cache.  */
-  if (sos == nullptr)
+  if (sos.empty ())
     {
       svr4_current_sos_direct (info);
 
       sos = svr4_collect_probes_sos (info);
-      if (sos == nullptr)
+      if (sos.empty ())
 	sos = svr4_default_sos (info);
     }
 
@@ -1433,11 +1416,11 @@ svr4_current_sos_1 (svr4_info *info)
 
 /* Implement the "current_sos" target_so_ops method.  */
 
-static struct so_list *
-svr4_current_sos (void)
+static intrusive_list<so_list>
+svr4_current_sos ()
 {
   svr4_info *info = get_svr4_info (current_program_space);
-  struct so_list *so_head = svr4_current_sos_1 (info);
+  intrusive_list<so_list> sos = svr4_current_sos_1 (info);
   struct mem_range vsyscall_range;
 
   /* Filter out the vDSO module, if present.  Its symbol file would
@@ -1446,13 +1429,8 @@ svr4_current_sos (void)
   if (gdbarch_vsyscall_range (current_inferior ()->arch (), &vsyscall_range)
       && vsyscall_range.length != 0)
     {
-      struct so_list **sop;
-
-      sop = &so_head;
-      while (*sop != NULL)
+      for (auto so = sos.begin (); so != sos.end (); )
 	{
-	  struct so_list *so = *sop;
-
 	  /* We can't simply match the vDSO by starting address alone,
 	     because lm_info->l_addr_inferior (and also l_addr) do not
 	     necessarily represent the real starting address of the
@@ -1499,16 +1477,17 @@ svr4_current_sos (void)
 
 	  if (address_in_mem_range (li->l_ld, &vsyscall_range))
 	    {
-	      *sop = so->next;
+	      auto next = sos.erase (so);
 	      free_so (*so);
+	      so = next;
 	      break;
 	    }
 
-	  sop = &so->next;
+	  ++so;
 	}
     }
 
-  return so_head;
+  return sos;
 }
 
 /* Get the address of the link_map for a given OBJFILE.  */
@@ -1528,11 +1507,11 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
 
   /* The other link map addresses may be found by examining the list
      of shared libraries.  */
-  for (struct so_list *so : current_program_space->solibs ())
-    if (so->objfile == objfile)
+  for (const so_list &so : current_program_space->solibs ())
+    if (so.objfile == objfile)
       {
 	auto *li
-	  = gdb::checked_static_cast<lm_info_svr4 *> (so->lm_info.get ());
+	  = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info.get ());
 
 	return li->lm_addr;
       }
@@ -2369,13 +2348,13 @@ enable_break (struct svr4_info *info, int from_tty)
 
       /* On a running target, we can get the dynamic linker's base
 	 address from the shared library table.  */
-      for (struct so_list *so : current_program_space->solibs ())
+      for (const so_list &so : current_program_space->solibs ())
 	{
-	  if (svr4_same_1 (interp_name, so->so_original_name.c_str ()))
+	  if (svr4_same_1 (interp_name, so.so_original_name.c_str ()))
 	    {
 	      load_addr_found = 1;
 	      loader_found_in_list = 1;
-	      load_addr = lm_addr_check (*so, tmp_bfd.get ());
+	      load_addr = lm_addr_check (so, tmp_bfd.get ());
 	      break;
 	    }
 	}
@@ -3259,7 +3238,7 @@ svr4_lp64_fetch_link_map_offsets (void)
 
 /* Return the DSO matching OBJFILE or nullptr if none can be found.  */
 
-static so_list *
+static const so_list *
 find_solib_for_objfile (struct objfile *objfile)
 {
   if (objfile == nullptr)
@@ -3270,9 +3249,9 @@ find_solib_for_objfile (struct objfile *objfile)
   if (objfile->separate_debug_objfile_backlink != nullptr)
     objfile = objfile->separate_debug_objfile_backlink;
 
-  for (so_list *so : current_program_space->solibs ())
-    if (so->objfile == objfile)
-      return so;
+  for (const so_list &so : current_program_space->solibs ())
+    if (so.objfile == objfile)
+      return &so;
 
   return nullptr;
 }
@@ -3285,7 +3264,7 @@ find_solib_for_objfile (struct objfile *objfile)
    right thing for the main executable.  */
 
 static CORE_ADDR
-find_debug_base_for_solib (so_list *solib)
+find_debug_base_for_solib (const so_list *solib)
 {
   if (solib == nullptr)
     return 0;
@@ -3346,7 +3325,7 @@ svr4_iterate_over_objfiles_in_search_order
   /* The linker namespace to iterate identified by the address of its
      r_debug object, defaulting to the initial namespace.  */
   CORE_ADDR initial = elf_locate_base ();
-  so_list *curr_solib = find_solib_for_objfile (current_objfile);
+  const so_list *curr_solib = find_solib_for_objfile (current_objfile);
   CORE_ADDR debug_base = find_debug_base_for_solib (curr_solib);
   if (debug_base == 0)
     debug_base = initial;
@@ -3361,7 +3340,7 @@ svr4_iterate_over_objfiles_in_search_order
 	 If we fail, e.g. for manually added symbol files or for the main
 	 executable, we assume that they were added to the initial
 	 namespace.  */
-      so_list *solib = find_solib_for_objfile (objfile);
+      const so_list *solib = find_solib_for_objfile (objfile);
       CORE_ADDR solib_base = find_debug_base_for_solib (solib);
       if (solib_base == 0)
 	solib_base = initial;

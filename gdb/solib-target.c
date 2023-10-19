@@ -227,24 +227,21 @@ solib_target_parse_libraries (const char *library)
 }
 #endif
 
-static struct so_list *
+static intrusive_list<so_list>
 solib_target_current_sos (void)
 {
-  so_list *start = NULL, *last = NULL;
+  intrusive_list<so_list> sos;
 
   /* Fetch the list of shared libraries.  */
   gdb::optional<gdb::char_vector> library_document
     = target_read_stralloc (current_inferior ()->top_target (),
 			    TARGET_OBJECT_LIBRARIES, NULL);
   if (!library_document)
-    return NULL;
+    return {};
 
   /* Parse the list.  */
   std::vector<lm_info_target_up> library_list
     = solib_target_parse_libraries (library_document->data ());
-
-  if (library_list.empty ())
-    return NULL;
 
   /* Build a struct so_list for each entry on the list.  */
   for (lm_info_target_up &info : library_list)
@@ -257,16 +254,10 @@ solib_target_current_sos (void)
       new_solib->lm_info = std::move (info);
 
       /* Add it to the list.  */
-      if (!start)
-	last = start = new_solib;
-      else
-	{
-	  last->next = new_solib;
-	  last = new_solib;
-	}
+      sos.push_back (*new_solib);
     }
 
-  return start;
+  return sos;
 }
 
 static void

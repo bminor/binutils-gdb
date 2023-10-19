@@ -212,32 +212,31 @@ open_symbol_file_object (int from_tty)
 
 /* Build a list of currently loaded shared objects.  See solib-svr4.c.  */
 
-static struct so_list *
-darwin_current_sos (void)
+static intrusive_list<so_list>
+darwin_current_sos ()
 {
   type *ptr_type
     = builtin_type (current_inferior ()->arch ())->builtin_data_ptr;
   enum bfd_endian byte_order = type_byte_order (ptr_type);
   int ptr_len = ptr_type->length ();
   unsigned int image_info_size;
-  struct so_list *head = NULL;
-  struct so_list *tail = NULL;
-  int i;
   darwin_info *info = get_darwin_info (current_program_space);
 
   /* Be sure image infos are loaded.  */
   darwin_load_image_infos (info);
 
   if (!darwin_dyld_version_ok (info))
-    return NULL;
+    return {};
 
   image_info_size = ptr_len * 3;
+
+  intrusive_list<so_list> sos;
 
   /* Read infos for each solib.
      The first entry was rumored to be the executable itself, but this is not
      true when a large number of shared libraries are used (table expanded ?).
      We now check all entries, but discard executable images.  */
-  for (i = 0; i < info->all_image.count; i++)
+  for (int i = 0; i < info->all_image.count; i++)
     {
       CORE_ADDR iinfo = info->all_image.info + i * image_info_size;
       gdb_byte buf[image_info_size];
@@ -282,16 +281,10 @@ darwin_current_sos (void)
       li->lm_addr = load_addr;
 
       newobj->lm_info = std::move (li);
-
-      if (head == NULL)
-	head = newobj;
-      else
-	tail->next = newobj;
-
-      tail = newobj;
+      sos.push_back (*newobj);
     }
 
-  return head;
+  return sos;
 }
 
 /* Check LOAD_ADDR points to a Mach-O executable header.  Return LOAD_ADDR

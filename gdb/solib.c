@@ -734,10 +734,10 @@ solib_read_symbols (so_list &so, symfile_add_flags flags)
    in the list of shared libraries.  Return false otherwise.  */
 
 static bool
-solib_used (const struct so_list *const known)
+solib_used (const so_list &known)
 {
-  for (const struct so_list *pivot : current_program_space->solibs ())
-    if (pivot != known && pivot->objfile == known->objfile)
+  for (const so_list &pivot : current_program_space->solibs ())
+    if (&pivot != &known && pivot.objfile == known.objfile)
       return true;
   return false;
 }
@@ -766,8 +766,6 @@ void
 update_solib_list (int from_tty)
 {
   const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
-  struct so_list *inferior = ops->current_sos();
-  struct so_list *gdb, **gdb_link;
 
   /* We can reach here due to changing solib-search-path or the
      sysroot, before having any inferior.  */
@@ -818,42 +816,38 @@ update_solib_list (int from_tty)
      the time we're done walking GDB's list, the inferior's list
      contains only the new shared objects, which we then add.  */
 
-  gdb = current_program_space->so_list;
-  gdb_link = &current_program_space->so_list;
-  while (gdb)
+  intrusive_list<so_list> inferior = ops->current_sos ();
+  intrusive_list<so_list>::iterator gdb_iter
+    = current_program_space->so_list.begin ();
+  while (gdb_iter != current_program_space->so_list.end ())
     {
-      struct so_list *i = inferior;
-      struct so_list **i_link = &inferior;
+      intrusive_list<so_list>::iterator inferior_iter = inferior.begin ();
 
       /* Check to see whether the shared object *gdb also appears in
 	 the inferior's current list.  */
-      while (i)
+      for (; inferior_iter != inferior.end (); ++inferior_iter)
 	{
 	  if (ops->same)
 	    {
-	      if (ops->same (*gdb, *i))
+	      if (ops->same (*gdb_iter, *inferior_iter))
 		break;
 	    }
 	  else
 	    {
-	      if (filename_cmp (gdb->so_original_name.c_str (),
-				i->so_original_name.c_str ()) == 0)
-		break;	      
+	      if (!filename_cmp (gdb_iter->so_original_name.c_str (),
+				 inferior_iter->so_original_name.c_str ()))
+		break;
 	    }
-
-	  i_link = &i->next;
-	  i = *i_link;
 	}
 
       /* If the shared object appears on the inferior's list too, then
 	 it's still loaded, so we don't need to do anything.  Delete
 	 it from the inferior's list, and leave it on GDB's list.  */
-      if (i)
+      if (inferior_iter != inferior.end ())
 	{
-	  *i_link = i->next;
-	  free_so (*i);
-	  gdb_link = &gdb->next;
-	  gdb = *gdb_link;
+	  inferior.erase (inferior_iter);
+	  free_so (*inferior_iter);
+	  ++gdb_iter;
 	}
 
       /* If it's not on the inferior's list, remove it from GDB's tables.  */
@@ -861,52 +855,49 @@ update_solib_list (int from_tty)
 	{
 	  /* Notify any observer that the shared object has been
 	     unloaded before we remove it from GDB's tables.  */
-	  notify_solib_unloaded (current_program_space, *gdb);
+	  notify_solib_unloaded (current_program_space, *gdb_iter);
 
-	  current_program_space->deleted_solibs.push_back (gdb->so_name);
+	  current_program_space->deleted_solibs.push_back (gdb_iter->so_name);
 
-	  *gdb_link = gdb->next;
+	  intrusive_list<so_list>::iterator gdb_iter_next
+	    = current_program_space->so_list.erase (gdb_iter);
 
 	  /* Unless the user loaded it explicitly, free SO's objfile.  */
-	  if (gdb->objfile && ! (gdb->objfile->flags & OBJF_USERLOADED)
-	      && !solib_used (gdb))
-	    gdb->objfile->unlink ();
+	  if (gdb_iter->objfile != nullptr
+	      && !(gdb_iter->objfile->flags & OBJF_USERLOADED)
+	      && !solib_used (*gdb_iter))
+	    gdb_iter->objfile->unlink ();
 
 	  /* Some targets' section tables might be referring to
 	     sections from so.abfd; remove them.  */
-	  current_program_space->remove_target_sections (gdb);
+	  current_program_space->remove_target_sections (&*gdb_iter);
 
-	  free_so (*gdb);
-	  gdb = *gdb_link;
+	  free_so (*gdb_iter);
+	  gdb_iter = gdb_iter_next;
 	}
     }
 
   /* Now the inferior's list contains only shared objects that don't
      appear in GDB's list --- those that are newly loaded.  Add them
      to GDB's shared object list.  */
-  if (inferior)
+  if (!inferior.empty ())
     {
       int not_found = 0;
       const char *not_found_filename = NULL;
 
-      struct so_list *i;
-
-      /* Add the new shared objects to GDB's list.  */
-      *gdb_link = inferior;
-
       /* Fill in the rest of each of the `struct so_list' nodes.  */
-      for (i = inferior; i; i = i->next)
+      for (so_list &new_so : inferior)
 	{
-	  current_program_space->added_solibs.push_back (i);
+	  current_program_space->added_solibs.push_back (&new_so);
 
 	  try
 	    {
 	      /* Fill in the rest of the `struct so_list' node.  */
-	      if (!solib_map_sections (*i))
+	      if (!solib_map_sections (new_so))
 		{
 		  not_found++;
 		  if (not_found_filename == NULL)
-		    not_found_filename = i->so_original_name.c_str ();
+		    not_found_filename = new_so.so_original_name.c_str ();
 		}
 	    }
 
@@ -919,8 +910,11 @@ update_solib_list (int from_tty)
 
 	  /* Notify any observer that the shared object has been
 	     loaded now that we've added it to GDB's tables.  */
-	  notify_solib_loaded (*i);
+	  notify_solib_loaded (new_so);
 	}
+
+      /* Add the new shared objects to GDB's list.  */
+      current_program_space->so_list.splice (std::move (inferior));
 
       /* If a library was not found, issue an appropriate warning
 	 message.  We have to use a single call to warning in case the
@@ -1015,8 +1009,8 @@ solib_add (const char *pattern, int from_tty, int readsyms)
     if (from_tty)
 	add_flags |= SYMFILE_VERBOSE;
 
-    for (struct so_list *gdb : current_program_space->solibs ())
-      if (! pattern || re_exec (gdb->so_name.c_str ()))
+    for (so_list &gdb : current_program_space->solibs ())
+      if (! pattern || re_exec (gdb.so_name.c_str ()))
 	{
 	  /* Normally, we would read the symbols from that library
 	     only if READSYMS is set.  However, we're making a small
@@ -1024,20 +1018,20 @@ solib_add (const char *pattern, int from_tty, int readsyms)
 	     need the library symbols to be loaded in order to provide
 	     thread support (x86-linux for instance).  */
 	  const int add_this_solib =
-	    (readsyms || libpthread_solib_p (*gdb));
+	    (readsyms || libpthread_solib_p (gdb));
 
 	  any_matches = true;
 	  if (add_this_solib)
 	    {
-	      if (gdb->symbols_loaded)
+	      if (gdb.symbols_loaded)
 		{
 		  /* If no pattern was given, be quiet for shared
 		     libraries we have already loaded.  */
 		  if (pattern && (from_tty || info_verbose))
 		    gdb_printf (_("Symbols already loaded for %s\n"),
-				gdb->so_name.c_str ());
+				gdb.so_name.c_str ());
 		}
-	      else if (solib_read_symbols (*gdb, add_flags))
+	      else if (solib_read_symbols (gdb, add_flags))
 		loaded_any_symbols = true;
 	    }
 	}
@@ -1089,11 +1083,11 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
      so we need to make two passes over the libs.  */
 
   nr_libs = 0;
-  for (struct so_list *so : current_program_space->solibs ())
+  for (const so_list &so : current_program_space->solibs ())
     {
-      if (!so->so_name.empty ())
+      if (!so.so_name.empty ())
 	{
-	  if (pattern && ! re_exec (so->so_name.c_str ()))
+	  if (pattern && ! re_exec (so.so_name.c_str ()))
 	    continue;
 	  ++nr_libs;
 	}
@@ -1110,20 +1104,20 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
 
     uiout->table_body ();
 
-    for (struct so_list *so : current_program_space->solibs ())
+    for (const so_list &so : current_program_space->solibs ())
       {
-	if (so->so_name.empty ())
+	if (so.so_name.empty ())
 	  continue;
 
-	if (pattern && ! re_exec (so->so_name.c_str ()))
+	if (pattern && ! re_exec (so.so_name.c_str ()))
 	  continue;
 
 	ui_out_emit_tuple tuple_emitter (uiout, "lib");
 
-	if (so->addr_high != 0)
+	if (so.addr_high != 0)
 	  {
-	    uiout->field_core_addr ("from", gdbarch, so->addr_low);
-	    uiout->field_core_addr ("to", gdbarch, so->addr_high);
+	    uiout->field_core_addr ("from", gdbarch, so.addr_low);
+	    uiout->field_core_addr ("to", gdbarch, so.addr_high);
 	  }
 	else
 	  {
@@ -1132,16 +1126,16 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
 	  }
 
 	if (! top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ()
-	    && so->symbols_loaded
-	    && !objfile_has_symbols (so->objfile))
+	    && so.symbols_loaded
+	    && !objfile_has_symbols (so.objfile))
 	  {
 	    so_missing_debug_info = true;
 	    uiout->field_string ("syms-read", "Yes (*)");
 	  }
 	else
-	  uiout->field_string ("syms-read", so->symbols_loaded ? "Yes" : "No");
+	  uiout->field_string ("syms-read", so.symbols_loaded ? "Yes" : "No");
 
-	uiout->field_string ("name", so->so_name, file_name_style.style ());
+	uiout->field_string ("name", so.so_name, file_name_style.style ());
 
 	uiout->text ("\n");
       }
@@ -1189,13 +1183,11 @@ solib_contains_address_p (const so_list &solib,
 const char *
 solib_name_from_address (struct program_space *pspace, CORE_ADDR address)
 {
-  struct so_list *so = NULL;
+  for (const so_list &so : pspace->so_list)
+    if (solib_contains_address_p (so, address))
+      return so.so_name.c_str ();
 
-  for (so = pspace->so_list; so; so = so->next)
-    if (solib_contains_address_p (*so, address))
-      return so->so_name.c_str ();
-
-  return (0);
+  return nullptr;
 }
 
 /* See solib.h.  */
@@ -1220,15 +1212,13 @@ clear_solib (void)
 
   disable_breakpoints_in_shlibs ();
 
-  while (current_program_space->so_list)
+  current_program_space->so_list.clear_and_dispose ([] (so_list *so)
     {
-      struct so_list *so = current_program_space->so_list;
-
-      current_program_space->so_list = so->next;
       notify_solib_unloaded (current_program_space, *so);
-      current_program_space->remove_target_sections (so);
+      current_program_space->remove_target_sections (&so);
       free_so (*so);
-    }
+    });
+
 
   if (ops->clear_solib != nullptr)
     ops->clear_solib (current_program_space);
@@ -1323,17 +1313,17 @@ reload_shared_libraries_1 (int from_tty)
   if (print_symbol_loading_p (from_tty, 0, 0))
     gdb_printf (_("Loading symbols for shared libraries.\n"));
 
-  for (struct so_list *so : current_program_space->solibs ())
+  for (so_list &so : current_program_space->solibs ())
     {
       const char *found_pathname = NULL;
-      bool was_loaded = so->symbols_loaded != 0;
+      bool was_loaded = so.symbols_loaded != 0;
       symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
 
       if (from_tty)
 	add_flags |= SYMFILE_VERBOSE;
 
       gdb::unique_xmalloc_ptr<char> filename
-	(tilde_expand (so->so_original_name.c_str ()));
+	(tilde_expand (so.so_original_name.c_str ()));
       gdb_bfd_ref_ptr abfd (solib_bfd_open (filename.get ()));
       if (abfd != NULL)
 	found_pathname = bfd_get_filename (abfd.get ());
@@ -1342,26 +1332,26 @@ reload_shared_libraries_1 (int from_tty)
 	 symbol file, close that.  */
       if ((found_pathname == NULL && was_loaded)
 	  || (found_pathname != NULL
-	      && filename_cmp (found_pathname, so->so_name.c_str ()) != 0))
+	      && filename_cmp (found_pathname, so.so_name.c_str ()) != 0))
 	{
-	  if (so->objfile && ! (so->objfile->flags & OBJF_USERLOADED)
+	  if (so.objfile && ! (so.objfile->flags & OBJF_USERLOADED)
 	      && !solib_used (so))
-	    so->objfile->unlink ();
-	  current_program_space->remove_target_sections (so);
-	  so->clear ();
+	    so.objfile->unlink ();
+	  current_program_space->remove_target_sections (&so);
+	  so.clear ();
 	}
 
       /* If this shared library is now associated with a new symbol
 	 file, open it.  */
       if (found_pathname != NULL
 	  && (!was_loaded
-	      || filename_cmp (found_pathname, so->so_name.c_str ()) != 0))
+	      || filename_cmp (found_pathname, so.so_name.c_str ()) != 0))
 	{
 	  bool got_error = false;
 
 	  try
 	    {
-	      solib_map_sections (*so);
+	      solib_map_sections (so);
 	    }
 
 	  catch (const gdb_exception_error &e)
@@ -1373,8 +1363,8 @@ reload_shared_libraries_1 (int from_tty)
 	    }
 
 	    if (!got_error
-		&& (auto_solib_add || was_loaded || libpthread_solib_p (*so)))
-	      solib_read_symbols (*so, add_flags);
+		&& (auto_solib_add || was_loaded || libpthread_solib_p (so)))
+	      solib_read_symbols (so, add_flags);
 	}
     }
 }
@@ -1730,9 +1720,9 @@ remove_user_added_objfile (struct objfile *objfile)
 {
   if (objfile != 0 && objfile->flags & OBJF_USERLOADED)
     {
-      for (struct so_list *so : objfile->pspace->solibs ())
-	if (so->objfile == objfile)
-	  so->objfile = NULL;
+      for (so_list &so : objfile->pspace->solibs ())
+	if (so.objfile == objfile)
+	  so.objfile = nullptr;
     }
 }
 

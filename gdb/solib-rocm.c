@@ -204,11 +204,10 @@ rocm_solib_handle_event ()
 
 /* Create so_list objects from rocm_so objects in SOS.  */
 
-static so_list *
+static intrusive_list<so_list>
 so_list_from_rocm_sos (const std::vector<rocm_so> &sos)
 {
-  struct so_list *dst = nullptr;
-  struct so_list **link = &dst;
+  intrusive_list<so_list> dst;
 
   for (const rocm_so &so : sos)
     {
@@ -218,9 +217,7 @@ so_list_from_rocm_sos (const std::vector<rocm_so> &sos)
       newobj->so_name = so.name;
       newobj->so_original_name = so.unique_name;
 
-      newobj->next = nullptr;
-      *link = newobj;
-      link = &newobj->next;
+      dst.push_back (*newobj);
     }
 
   return dst;
@@ -229,30 +226,27 @@ so_list_from_rocm_sos (const std::vector<rocm_so> &sos)
 /* Build a list of `struct so_list' objects describing the shared
    objects currently loaded in the inferior.  */
 
-static struct so_list *
+static intrusive_list<so_list>
 rocm_solib_current_sos ()
 {
   /* First, retrieve the host-side shared library list.  */
-  so_list *head = svr4_so_ops.current_sos ();
+  intrusive_list<so_list> sos = svr4_so_ops.current_sos ();
 
   /* Then, the device-side shared library list.  */
   std::vector<rocm_so> &dev_sos = get_solib_info (current_inferior ())->solib_list;
 
   if (dev_sos.empty ())
-    return head;
+    return sos;
 
-  so_list *dev_so_list = so_list_from_rocm_sos (dev_sos);
+  intrusive_list<so_list> dev_so_list = so_list_from_rocm_sos (dev_sos);
 
-  if (head == nullptr)
+  if (sos.empty ())
     return dev_so_list;
 
   /* Append our libraries to the end of the list.  */
-  so_list *tail;
-  for (tail = head; tail->next; tail = tail->next)
-    /* Nothing.  */;
-  tail->next = dev_so_list;
+  sos.splice (std::move (dev_so_list));
 
-  return head;
+  return sos;
 }
 
 namespace {

@@ -132,8 +132,8 @@ void
 program_space::free_all_objfiles ()
 {
   /* Any objfile reference would become stale.  */
-  for (struct so_list *so : current_program_space->solibs ())
-    gdb_assert (so->objfile == NULL);
+  for (const struct so_list &so : current_program_space->solibs ())
+    gdb_assert (so.objfile == NULL);
 
   while (!objfiles_list.empty ())
     objfiles_list.front ()->unlink ();

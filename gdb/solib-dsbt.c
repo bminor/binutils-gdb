@@ -512,14 +512,13 @@ lm_base (void)
    themselves.  The declaration of `struct so_list' says which fields
    we provide values for.  */
 
-static struct so_list *
+static intrusive_list<so_list>
 dsbt_current_sos (void)
 {
   bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   CORE_ADDR lm_addr;
-  struct so_list *sos_head = NULL;
-  struct so_list **sos_next_ptr = &sos_head;
   dsbt_info *info = get_dsbt_info (current_program_space);
+  intrusive_list<so_list> sos;
 
   /* Make sure that the main executable has been relocated.  This is
      required in order to find the address of the global offset table,
@@ -616,10 +615,7 @@ dsbt_current_sos (void)
 	      sop->so_original_name = sop->so_name;
 	    }
 
-	  sop->lm_info = std::move (li);
-
-	  *sos_next_ptr = sop;
-	  sos_next_ptr = &sop->next;
+	  sos.push_back (*sop);
 	}
       else
 	{
@@ -630,7 +626,7 @@ dsbt_current_sos (void)
 					  sizeof (lm_buf.l_next), byte_order);
     }
 
-  return sos_head;
+  return sos;
 }
 
 /* Return 1 if PC lies in the dynamic symbol resolution code of the

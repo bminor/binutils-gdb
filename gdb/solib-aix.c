@@ -445,21 +445,20 @@ solib_aix_solib_create_inferior_hook (int from_tty)
 
 /* Implement the "current_sos" target_so_ops method.  */
 
-static struct so_list *
-solib_aix_current_sos (void)
+static intrusive_list<so_list>
+solib_aix_current_sos ()
 {
-  struct so_list *start = NULL, *last = NULL;
-  int ix;
-
   gdb::optional<std::vector<lm_info_aix>> &library_list
     = solib_aix_get_library_list (current_inferior (), NULL);
   if (!library_list.has_value ())
-    return NULL;
+    return {};
+
+  intrusive_list<so_list> sos;
 
   /* Build a struct so_list for each entry on the list.
      We skip the first entry, since this is the entry corresponding
      to the main executable, not a shared library.  */
-  for (ix = 1; ix < library_list->size (); ix++)
+  for (int ix = 1; ix < library_list->size (); ix++)
     {
       so_list *new_solib = new so_list;
       std::string so_name;
@@ -488,16 +487,10 @@ solib_aix_current_sos (void)
       new_solib->lm_info = gdb::make_unique<lm_info_aix> (info);
 
       /* Add it to the list.  */
-      if (!start)
-	last = start = new_solib;
-      else
-	{
-	  last->next = new_solib;
-	  last = new_solib;
-	}
+      sos.push_back (*new_solib);
     }
 
-  return start;
+  return sos;
 }
 
 /* Implement the "open_symbol_file_object" target_so_ops method.  */

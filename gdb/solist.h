@@ -36,7 +36,7 @@ struct lm_info
 
 using lm_info_up = std::unique_ptr<lm_info>;
 
-struct so_list
+struct so_list : intrusive_list_node<so_list>
 {
   /* Free symbol-file related contents of SO and reset for possible reloading
      of SO.  If we have opened a BFD for SO, close it.  If we have placed SO's
@@ -51,8 +51,6 @@ struct so_list
   /* The following fields of the structure come directly from the
      dynamic linker's tables in the inferior, and are initialized by
      current_sos.  */
-
-  struct so_list *next = nullptr;	/* next structure in linked list */
 
   /* A pointer to target specific link map information.  Often this
      will be a copy of struct link_map from the user process, but
@@ -121,7 +119,7 @@ struct target_so_ops
      inferior --- we don't examine any of the shared library files
      themselves.  The declaration of `struct so_list' says which fields
      we provide values for.  */
-  struct so_list *(*current_sos) (void);
+  intrusive_list<so_list> (*current_sos) ();
 
   /* Find, open, and read the symbols for the main executable.  If
      FROM_TTY is non-zero, allow messages to be printed.  */
@@ -170,8 +168,6 @@ struct target_so_ops
      for this target.  */
   void (*handle_event) (void);
 };
-
-using so_list_range = next_range<so_list>;
 
 /* Free the memory associated with a (so_list *).  */
 void free_so (so_list &so);
