@@ -1,3 +1,7 @@
+2023-10-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* ld.texi (Options): Fix typo metdata->metadata.
+
 2023-10-16  Nick Clifton  <nickc@redhat.com>
 
 	PR 28910

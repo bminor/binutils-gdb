@@ -3067,7 +3067,7 @@ specification.  For more information see:
 https://systemd.io/ELF_PACKAGE_METADATA/
 If the JSON argument is missing/empty then this will disable the
 creation of the metadata note, if one had been enabled by an earlier
-occurrence of the --package-metdata option.
+occurrence of the --package-metadata option.
 If the linker has been built with libjansson, then the JSON string
 will be validated.
 @end table
