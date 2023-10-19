@@ -509,7 +509,7 @@ maintenance_info_target_sections (const char *arg, int from_tty)
 		  (8 + digits), "",
 		  hex_string_custom (sec.addr, addr_size),
 		  hex_string_custom (sec.endaddr, addr_size),
-		  sec.owner);
+		  sec.owner.v ());
     }
 }
 

@@ -1195,7 +1195,7 @@ clear_solib (void)
   current_program_space->so_list.clear_and_dispose ([] (shobj *so)
     {
       notify_solib_unloaded (current_program_space, *so);
-      current_program_space->remove_target_sections (&so);
+      current_program_space->remove_target_sections (so);
       delete so;
     });
 

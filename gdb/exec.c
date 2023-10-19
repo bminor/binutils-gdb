@@ -492,8 +492,8 @@ exec_file_attach (const char *filename, int from_tty)
       /* Add the executable's sections to the current address spaces'
 	 list of sections.  This possibly pushes the exec_ops
 	 target.  */
-      current_program_space->add_target_sections (&current_program_space->ebfd,
-						  sections);
+      current_program_space->add_target_sections
+	(current_program_space->ebfd.get (), sections);
 
       /* Tell display code (if any) about the changed file name.  */
       if (deprecated_exec_file_display_hook)
@@ -599,8 +599,8 @@ build_section_table (struct bfd *some_bfd)
    current set of target sections.  */
 
 void
-program_space::add_target_sections (const void *owner,
-				    const std::vector<target_section> &sections)
+program_space::add_target_sections
+  (target_section_owner owner, const std::vector<target_section> &sections)
 {
   if (!sections.empty ())
     {
@@ -643,7 +643,7 @@ program_space::add_target_sections (struct objfile *objfile)
 	continue;
 
       m_target_sections.emplace_back (osect->addr (), osect->endaddr (),
-				      osect->the_bfd_section, (void *) objfile);
+				      osect->the_bfd_section, objfile);
     }
 }
 
@@ -651,15 +651,15 @@ program_space::add_target_sections (struct objfile *objfile)
    OWNER must be the same value passed to add_target_sections.  */
 
 void
-program_space::remove_target_sections (const void *owner)
+program_space::remove_target_sections (target_section_owner owner)
 {
-  gdb_assert (owner != NULL);
+  gdb_assert (owner.v () != nullptr);
 
   auto it = std::remove_if (m_target_sections.begin (),
 			    m_target_sections.end (),
 			    [&] (target_section &sect)
 			    {
-			      return sect.owner == owner;
+			      return sect.owner.v () == owner.v ();
 			    });
   m_target_sections.erase (it, m_target_sections.end ());
 
