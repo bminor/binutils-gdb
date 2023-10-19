@@ -1737,7 +1737,20 @@ perform_relocation (const reloc_howto_type *howto,
 {
   if (howto->pc_relative)
     value -= sec_addr (input_section) + rel->r_offset;
-  value += rel->r_addend;
+
+  switch (ELFNN_R_TYPE (rel->r_info))
+    {
+    case R_RISCV_SUB6:
+    case R_RISCV_SUB8:
+    case R_RISCV_SUB16:
+    case R_RISCV_SUB32:
+    case R_RISCV_SUB64:
+    case R_RISCV_SUB_ULEB128:
+      value -= rel->r_addend;
+      break;
+    default:
+      value += rel->r_addend;
+    }
 
   switch (ELFNN_R_TYPE (rel->r_info))
     {
@@ -1818,10 +1831,7 @@ perform_relocation (const reloc_howto_type *howto,
 	value = ENCODE_CITYPE_LUI_IMM (RISCV_CONST_HIGH_PART (value));
       break;
 
-    /* SUB_ULEB128 must be applied after SET_ULEB128, so we only write the
-       value back for SUB_ULEB128 should be enough.  */
-    case R_RISCV_SET_ULEB128:
-      break;
+    /* R_RISCV_SET_ULEB128 won't go into here.  */
     case R_RISCV_SUB_ULEB128:
       {
 	unsigned int len = 0;
@@ -2523,7 +2533,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  if (uleb128_set_rel != NULL
 	      && uleb128_set_rel->r_offset == rel->r_offset)
 	    {
-	      relocation = uleb128_set_vma - relocation;
+	      relocation = uleb128_set_vma - relocation + uleb128_set_rel->r_addend;
 	      uleb128_set_vma = 0;
 	      uleb128_set_rel = NULL;
 	    }
