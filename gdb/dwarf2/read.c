@@ -10287,7 +10287,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   /* We never call the destructor of call_site, so we must ensure it is
      trivially destructible.  */
-  gdb_static_assert(std::is_trivially_destructible<struct call_site>::value);
+  static_assert(std::is_trivially_destructible<struct call_site>::value);
 
   if (dwarf2_flag_true_p (die, DW_AT_call_tail_call, cu)
       || dwarf2_flag_true_p (die, DW_AT_GNU_tail_call, cu))

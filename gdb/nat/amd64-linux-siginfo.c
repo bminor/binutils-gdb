@@ -604,10 +604,10 @@ amd64_linux_siginfo_fixup_common (siginfo_t *ptrace, gdb_byte *inf,
 
 /* Sanity check for the siginfo structure sizes.  */
 
-gdb_static_assert (sizeof (siginfo_t) == GDB_SI_SIZE);
+static_assert (sizeof (siginfo_t) == GDB_SI_SIZE);
 #ifndef __ILP32__
-gdb_static_assert (sizeof (nat_siginfo_t) == GDB_SI_SIZE);
+static_assert (sizeof (nat_siginfo_t) == GDB_SI_SIZE);
 #endif
-gdb_static_assert (sizeof (compat_x32_siginfo_t) == GDB_SI_SIZE);
-gdb_static_assert (sizeof (compat_siginfo_t) == GDB_SI_SIZE);
-gdb_static_assert (sizeof (ptrace_siginfo_t) == GDB_SI_SIZE);
+static_assert (sizeof (compat_x32_siginfo_t) == GDB_SI_SIZE);
+static_assert (sizeof (compat_siginfo_t) == GDB_SI_SIZE);
+static_assert (sizeof (ptrace_siginfo_t) == GDB_SI_SIZE);

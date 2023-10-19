@@ -76,7 +76,7 @@ std::string
 path_join (Args... paths)
 {
   /* It doesn't make sense to join less than two paths.  */
-  gdb_static_assert (sizeof... (Args) >= 2);
+  static_assert (sizeof... (Args) >= 2);
 
   std::array<const char *, sizeof... (Args)> path_array
     { paths... };

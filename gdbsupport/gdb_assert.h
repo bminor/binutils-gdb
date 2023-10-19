@@ -21,11 +21,6 @@
 
 #include "errors.h"
 
-/* A static assertion.  This will cause a compile-time error if EXPR,
-   which must be a compile-time constant, is false.  */
-
-#define gdb_static_assert(expr) static_assert (expr, "")
-
 /* PRAGMATICS: "gdb_assert.h":gdb_assert() is a lower case (rather
    than upper case) macro since that provides the closest fit to the
    existing lower case macro <assert.h>:assert() that it is

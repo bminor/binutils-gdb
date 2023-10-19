@@ -292,8 +292,8 @@ struct setting
     /* Getters and setters are cast to and from the arbitrary `void (*) ()`
        function pointer type.  Make sure that the two types are really of the
        same size.  */
-    gdb_static_assert (sizeof (m_getter) == sizeof (getter));
-    gdb_static_assert (sizeof (m_setter) == sizeof (setter));
+    static_assert (sizeof (m_getter) == sizeof (getter));
+    static_assert (sizeof (m_setter) == sizeof (setter));
 
     m_getter = reinterpret_cast<erased_func> (getter);
     m_setter = reinterpret_cast<erased_func> (setter);

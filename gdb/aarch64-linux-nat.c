@@ -137,7 +137,7 @@ fetch_gregs_from_thread (struct regcache *regcache)
 
   /* Make sure REGS can hold all registers contents on both aarch64
      and arm.  */
-  gdb_static_assert (sizeof (regs) >= 18 * 4);
+  static_assert (sizeof (regs) >= 18 * 4);
 
   tid = regcache->ptid ().lwp ();
 
@@ -175,7 +175,7 @@ store_gregs_to_thread (const struct regcache *regcache)
 
   /* Make sure REGS can hold all registers contents on both aarch64
      and arm.  */
-  gdb_static_assert (sizeof (regs) >= 18 * 4);
+  static_assert (sizeof (regs) >= 18 * 4);
   tid = regcache->ptid ().lwp ();
 
   iovec.iov_base = &regs;
@@ -217,7 +217,7 @@ fetch_fpregs_from_thread (struct regcache *regcache)
 
   /* Make sure REGS can hold all VFP registers contents on both aarch64
      and arm.  */
-  gdb_static_assert (sizeof regs >= ARM_VFP3_REGS_SIZE);
+  static_assert (sizeof regs >= ARM_VFP3_REGS_SIZE);
 
   tid = regcache->ptid ().lwp ();
 
@@ -264,7 +264,7 @@ store_fpregs_to_thread (const struct regcache *regcache)
 
   /* Make sure REGS can hold all VFP registers contents on both aarch64
      and arm.  */
-  gdb_static_assert (sizeof regs >= ARM_VFP3_REGS_SIZE);
+  static_assert (sizeof regs >= ARM_VFP3_REGS_SIZE);
   tid = regcache->ptid ().lwp ();
 
   iovec.iov_base = &regs;

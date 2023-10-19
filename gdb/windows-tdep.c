@@ -975,7 +975,7 @@ struct pe_import_directory_entry
   uint32_t import_address_table_rva;
 };
 
-gdb_static_assert (sizeof (pe_import_directory_entry) == 20);
+static_assert (sizeof (pe_import_directory_entry) == 20);
 
 /* See windows-tdep.h.  */
 

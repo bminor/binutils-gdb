@@ -51,7 +51,7 @@ static const notif_client *const notifs[] =
   &notif_client_stop,
 };
 
-gdb_static_assert (ARRAY_SIZE (notifs) == REMOTE_NOTIF_LAST);
+static_assert (ARRAY_SIZE (notifs) == REMOTE_NOTIF_LAST);
 
 /* Parse the BUF for the expected notification NC, and send packet to
    acknowledge.  */

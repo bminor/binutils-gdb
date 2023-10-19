@@ -549,7 +549,7 @@ arc_linux_supply_gregset (const struct regset *regset,
 			  struct regcache *regcache,
 			  int regnum, const void *gregs, size_t size)
 {
-  gdb_static_assert (ARC_LAST_REGNUM
+  static_assert (ARC_LAST_REGNUM
 		     < ARRAY_SIZE (arc_linux_core_reg_offsets));
 
   const bfd_byte *buf = (const bfd_byte *) gregs;
@@ -612,7 +612,7 @@ arc_linux_collect_gregset (const struct regset *regset,
 			   const struct regcache *regcache,
 			   int regnum, void *gregs, size_t size)
 {
-  gdb_static_assert (ARC_LAST_REGNUM
+  static_assert (ARC_LAST_REGNUM
 		     < ARRAY_SIZE (arc_linux_core_reg_offsets));
 
   gdb_byte *buf = (gdb_byte *) gregs;

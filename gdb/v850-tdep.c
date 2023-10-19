@@ -312,7 +312,7 @@ v850_register_name (struct gdbarch *gdbarch, int regnum)
     "sr24", "sr25", "sr26", "sr27", "sr28", "sr29", "sr30", "sr31",
     "pc", "fp"
   };
-  gdb_static_assert (E_NUM_OF_V850_REGS == ARRAY_SIZE (v850_reg_names));
+  static_assert (E_NUM_OF_V850_REGS == ARRAY_SIZE (v850_reg_names));
   return v850_reg_names[regnum];
 }
 
@@ -331,7 +331,7 @@ v850e_register_name (struct gdbarch *gdbarch, int regnum)
     "sr24", "sr25", "sr26", "sr27", "sr28", "sr29", "sr30", "sr31",
     "pc", "fp"
   };
-  gdb_static_assert (E_NUM_OF_V850E_REGS == ARRAY_SIZE (v850e_reg_names));
+  static_assert (E_NUM_OF_V850E_REGS == ARRAY_SIZE (v850e_reg_names));
   return v850e_reg_names[regnum];
 }
 
@@ -477,7 +477,7 @@ v850e3v5_register_name (struct gdbarch *gdbarch, int regnum)
     "vr24", "vr25", "vr26", "vr27", "vr28", "vr29", "vr30", "vr31",
   };
 
-  gdb_static_assert (E_NUM_OF_V850E3V5_REGS
+  static_assert (E_NUM_OF_V850E3V5_REGS
 		     == ARRAY_SIZE (v850e3v5_reg_names));
   return v850e3v5_reg_names[regnum];
 }

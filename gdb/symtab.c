@@ -6392,7 +6392,7 @@ gdb::array_view<const struct symbol_impl> symbol_impls (symbol_impl);
 
 /* Make sure we saved enough room in struct symbol.  */
 
-gdb_static_assert (MAX_SYMBOL_IMPLS <= (1 << SYMBOL_ACLASS_BITS));
+static_assert (MAX_SYMBOL_IMPLS <= (1 << SYMBOL_ACLASS_BITS));
 
 /* Register a computed symbol type.  ACLASS must be LOC_COMPUTED.  OPS
    is the ops vector associated with this index.  This returns the new

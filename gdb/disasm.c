@@ -1149,7 +1149,7 @@ gdb_disassembler::print_insn (CORE_ADDR memaddr,
 	     To do this we perform an in-place new, but this time turn on
 	     the styling support, then we can re-disassembly the
 	     instruction, and gain any minimal styling GDB might add.  */
-	  gdb_static_assert ((std::is_same<decltype (m_buffer),
+	  static_assert ((std::is_same<decltype (m_buffer),
 			      string_file>::value));
 	  gdb_assert (!m_buffer.term_out ());
 	  m_buffer.~string_file ();

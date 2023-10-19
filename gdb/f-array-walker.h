@@ -187,7 +187,7 @@ class fortran_array_walker
   /* Ensure that Impl is derived from the required base class.  This just
      ensures that all of the required API methods are available and have a
      sensible default implementation.  */
-  gdb_static_assert ((std::is_base_of<fortran_array_walker_base_impl,Impl>::value));
+  static_assert ((std::is_base_of<fortran_array_walker_base_impl,Impl>::value));
 
 public:
   /* Create a new array walker.  TYPE is the type of the array being walked

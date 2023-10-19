@@ -92,7 +92,7 @@ static unsigned int microblaze_debug_flag = 0;
 static const char *
 microblaze_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  gdb_static_assert (ARRAY_SIZE (microblaze_register_names)
+  static_assert (ARRAY_SIZE (microblaze_register_names)
 		     == MICROBLAZE_NUM_REGS);
   return microblaze_register_names[regnum];
 }

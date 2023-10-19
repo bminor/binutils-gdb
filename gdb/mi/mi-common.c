@@ -43,7 +43,7 @@ static const char * const async_reason_string_lookup[] =
   NULL
 };
 
-gdb_static_assert (ARRAY_SIZE (async_reason_string_lookup)
+static_assert (ARRAY_SIZE (async_reason_string_lookup)
 		   == EXEC_ASYNC_LAST + 1);
 
 const char *

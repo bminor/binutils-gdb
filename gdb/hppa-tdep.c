@@ -632,7 +632,7 @@ hppa32_register_name (struct gdbarch *gdbarch, int i)
     "fr28",    "fr28R",  "fr29",   "fr29R",
     "fr30",   "fr30R",   "fr31",   "fr31R"
   };
-  gdb_static_assert (ARRAY_SIZE (names) == hppa32_num_regs);
+  static_assert (ARRAY_SIZE (names) == hppa32_num_regs);
   return names[i];
 }
 
@@ -665,7 +665,7 @@ hppa64_register_name (struct gdbarch *gdbarch, int i)
     "fr24",    "fr25",   "fr26",   "fr27",
     "fr28",  "fr29",    "fr30",   "fr31"
   };
-  gdb_static_assert (ARRAY_SIZE (names) == hppa64_num_regs);
+  static_assert (ARRAY_SIZE (names) == hppa64_num_regs);
   return names[i];
 }
 

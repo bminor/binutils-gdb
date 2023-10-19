@@ -648,7 +648,7 @@ create_cus_from_gdb_index_list (dwarf2_per_bfd *per_bfd,
 {
   for (offset_type i = 0; i < n_elements; i += 2)
     {
-      gdb_static_assert (sizeof (ULONGEST) >= 8);
+      static_assert (sizeof (ULONGEST) >= 8);
 
       sect_offset sect_off
 	= (sect_offset) extract_unsigned_integer (cu_list, 8, BFD_ENDIAN_LITTLE);
@@ -700,7 +700,7 @@ create_signatured_type_table_from_gdb_index
       void **slot;
       cu_offset type_offset_in_tu;
 
-      gdb_static_assert (sizeof (ULONGEST) >= 8);
+      static_assert (sizeof (ULONGEST) >= 8);
       sect_offset sect_off
 	= (sect_offset) extract_unsigned_integer (bytes, 8, BFD_ENDIAN_LITTLE);
       type_offset_in_tu

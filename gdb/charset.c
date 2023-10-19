@@ -939,7 +939,7 @@ default_auto_wide_charset (void)
 
 /* GDB cannot handle strings correctly if this size is different.  */
 
-gdb_static_assert (sizeof (gdb_wchar_t) == 2 || sizeof (gdb_wchar_t) == 4);
+static_assert (sizeof (gdb_wchar_t) == 2 || sizeof (gdb_wchar_t) == 4);
 
 /* intermediate_encoding returns the charset used internally by
    GDB to convert between target and host encodings. As the test above

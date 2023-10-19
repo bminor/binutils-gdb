@@ -93,7 +93,7 @@ static const char *bpf_register_names[] =
 static const char *
 bpf_register_name (struct gdbarch *gdbarch, int reg)
 {
-  gdb_static_assert (ARRAY_SIZE (bpf_register_names) == BPF_NUM_REGS);
+  static_assert (ARRAY_SIZE (bpf_register_names) == BPF_NUM_REGS);
   return bpf_register_names[reg];
 }
 

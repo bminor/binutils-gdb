@@ -3113,7 +3113,7 @@ aarch64_pseudo_read_value_1 (struct gdbarch *gdbarch,
 
   /* Enough space for a full vector register.  */
   gdb_byte reg_buf[register_size (gdbarch, AARCH64_V0_REGNUM)];
-  gdb_static_assert (AARCH64_V0_REGNUM == AARCH64_SVE_Z0_REGNUM);
+  static_assert (AARCH64_V0_REGNUM == AARCH64_SVE_Z0_REGNUM);
 
   if (regcache->raw_read (v_regnum, reg_buf) != REG_VALID)
     result_value->mark_bytes_unavailable (0,
@@ -3323,7 +3323,7 @@ aarch64_pseudo_write_1 (struct gdbarch *gdbarch, struct regcache *regcache,
 
   /* Enough space for a full vector register.  */
   gdb_byte reg_buf[register_size (gdbarch, AARCH64_V0_REGNUM)];
-  gdb_static_assert (AARCH64_V0_REGNUM == AARCH64_SVE_Z0_REGNUM);
+  static_assert (AARCH64_V0_REGNUM == AARCH64_SVE_Z0_REGNUM);
 
   /* Ensure the register buffer is zero, we want gdb writes of the
      various 'scalar' pseudo registers to behavior like architectural

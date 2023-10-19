@@ -45,7 +45,7 @@ vax_register_name (struct gdbarch *gdbarch, int regnum)
     "ps",
   };
 
-  gdb_static_assert (VAX_NUM_REGS == ARRAY_SIZE (register_names));
+  static_assert (VAX_NUM_REGS == ARRAY_SIZE (register_names));
   return register_names[regnum];
 }
 

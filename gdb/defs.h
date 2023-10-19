@@ -229,7 +229,7 @@ enum language
 /* The number of bits needed to represent all languages, with enough
    padding to allow for reasonable growth.  */
 #define LANGUAGE_BITS 5
-gdb_static_assert (nr_languages <= (1 << LANGUAGE_BITS));
+static_assert (nr_languages <= (1 << LANGUAGE_BITS));
 
 /* The number of bytes needed to represent all languages.  */
 #define LANGUAGE_BYTES ((LANGUAGE_BITS + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT)

@@ -155,7 +155,7 @@ tilegx_register_name (struct gdbarch *gdbarch, int regnum)
       "pc",   "faultnum",
     };
 
-  gdb_static_assert (TILEGX_NUM_REGS == ARRAY_SIZE (register_names));
+  static_assert (TILEGX_NUM_REGS == ARRAY_SIZE (register_names));
   return register_names[regnum];
 }
 

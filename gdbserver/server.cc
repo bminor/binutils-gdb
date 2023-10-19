@@ -55,7 +55,7 @@
 /* PBUFSIZ must also be at least as big as IPA_CMD_BUF_SIZE, because
    the client state data is passed directly to some agent
    functions.  */
-gdb_static_assert (PBUFSIZ >= IPA_CMD_BUF_SIZE);
+static_assert (PBUFSIZ >= IPA_CMD_BUF_SIZE);
 
 #define require_running_or_return(BUF)		\
   if (!target_running ())			\

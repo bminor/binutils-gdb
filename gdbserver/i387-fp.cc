@@ -83,7 +83,7 @@ struct i387_fxsave
   unsigned char xmm_space[256];
 };
 
-gdb_static_assert (sizeof(i387_fxsave) == 416);
+static_assert (sizeof(i387_fxsave) == 416);
 
 struct i387_xsave : public i387_fxsave
 {
@@ -147,7 +147,7 @@ public:
   { return xsave () + xsave_layout.pkru_offset; }
 };
 
-gdb_static_assert (sizeof(i387_xsave) == 576);
+static_assert (sizeof(i387_xsave) == 576);
 
 void
 i387_cache_to_fsave (struct regcache *regcache, void *buf)

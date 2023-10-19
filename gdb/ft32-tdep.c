@@ -96,7 +96,7 @@ static const char *const ft32_register_names[] =
 static const char *
 ft32_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
-  gdb_static_assert (ARRAY_SIZE (ft32_register_names) == FT32_NUM_REGS);
+  static_assert (ARRAY_SIZE (ft32_register_names) == FT32_NUM_REGS);
   return ft32_register_names[reg_nr];
 }
 

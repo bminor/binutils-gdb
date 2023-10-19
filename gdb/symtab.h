@@ -706,7 +706,7 @@ enum minimal_symbol_type
 /* The number of enum minimal_symbol_type values, with some padding for
    reasonable growth.  */
 #define MINSYM_TYPE_BITS 4
-gdb_static_assert (nr_minsym_types <= (1 << MINSYM_TYPE_BITS));
+static_assert (nr_minsym_types <= (1 << MINSYM_TYPE_BITS));
 
 /* Define a simple structure used to hold some very basic information about
    all defined global symbols (text, data, bss, abs, etc).  The only required
@@ -924,7 +924,7 @@ enum domain_enum
 /* The number of bits in a symbol used to represent the domain.  */
 
 #define SYMBOL_DOMAIN_BITS 3
-gdb_static_assert (NR_DOMAINS <= (1 << SYMBOL_DOMAIN_BITS));
+static_assert (NR_DOMAINS <= (1 << SYMBOL_DOMAIN_BITS));
 
 extern const char *domain_name (domain_enum);
 
@@ -1070,7 +1070,7 @@ enum address_class
    verify that we have reserved enough space for synthetic address
    classes.  */
 #define SYMBOL_ACLASS_BITS 5
-gdb_static_assert (LOC_FINAL_VALUE <= (1 << SYMBOL_ACLASS_BITS));
+static_assert (LOC_FINAL_VALUE <= (1 << SYMBOL_ACLASS_BITS));
 
 /* The methods needed to implement LOC_COMPUTED.  These methods can
    use the symbol's .aux_value for additional per-symbol information.

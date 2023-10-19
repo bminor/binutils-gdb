@@ -58,9 +58,9 @@
 /* Verify parameters of target_read_memory_bfd and target_read_memory are
    compatible.  */
 
-gdb_static_assert (sizeof (CORE_ADDR) >= sizeof (bfd_vma));
-gdb_static_assert (sizeof (gdb_byte) == sizeof (bfd_byte));
-gdb_static_assert (sizeof (ssize_t) <= sizeof (bfd_size_type));
+static_assert (sizeof (CORE_ADDR) >= sizeof (bfd_vma));
+static_assert (sizeof (gdb_byte) == sizeof (bfd_byte));
+static_assert (sizeof (ssize_t) <= sizeof (bfd_size_type));
 
 /* Provide bfd/ compatible prototype for target_read_memory.  Casting would not
    be enough as LEN width may differ.  */

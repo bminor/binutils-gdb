@@ -441,7 +441,7 @@ struct riscv_freg_feature : public riscv_register_feature
      RISCV_LAST_FP_REGNUM.  */
   const char *register_name (int regnum) const
   {
-    gdb_static_assert (RISCV_LAST_FP_REGNUM == RISCV_FIRST_FP_REGNUM + 31);
+    static_assert (RISCV_LAST_FP_REGNUM == RISCV_FIRST_FP_REGNUM + 31);
     gdb_assert (regnum >= RISCV_FIRST_FP_REGNUM
 		&& regnum <= RISCV_LAST_FP_REGNUM);
     regnum -= RISCV_FIRST_FP_REGNUM;

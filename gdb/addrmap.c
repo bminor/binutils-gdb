@@ -24,8 +24,8 @@
 
 /* Make sure splay trees can actually hold the values we want to
    store in them.  */
-gdb_static_assert (sizeof (splay_tree_key) >= sizeof (CORE_ADDR *));
-gdb_static_assert (sizeof (splay_tree_value) >= sizeof (void *));
+static_assert (sizeof (splay_tree_key) >= sizeof (CORE_ADDR *));
+static_assert (sizeof (splay_tree_value) >= sizeof (void *));
 
 
 /* Fixed address maps.  */

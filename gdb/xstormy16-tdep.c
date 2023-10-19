@@ -108,7 +108,7 @@ xstormy16_register_name (struct gdbarch *gdbarch, int regnum)
     "psw", "sp", "pc"
   };
 
-  gdb_static_assert (ARRAY_SIZE (register_names) == E_NUM_REGS);
+  static_assert (ARRAY_SIZE (register_names) == E_NUM_REGS);
   return register_names[regnum];
 }
 

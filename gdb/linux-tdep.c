@@ -1129,7 +1129,7 @@ linux_read_core_file_mappings
    read_core_file_mappings_loop_ftype  loop_cb)
 {
   /* Ensure that ULONGEST is big enough for reading 64-bit core files.  */
-  gdb_static_assert (sizeof (ULONGEST) >= 8);
+  static_assert (sizeof (ULONGEST) >= 8);
 
   /* It's not required that the NT_FILE note exists, so return silently
      if it's not found.  Beyond this point though, we'll complain

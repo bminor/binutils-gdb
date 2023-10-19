@@ -29,7 +29,7 @@
 
 #include <config.h>
 
-gdb_static_assert (sizeof (CORE_ADDR) >= sizeof (void *));
+static_assert (sizeof (CORE_ADDR) >= sizeof (void *));
 
 #include "gdbsupport/version.h"
 

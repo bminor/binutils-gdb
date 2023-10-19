@@ -32,15 +32,15 @@ enum test_enum
   TE_D = 4,
 };
 
-gdb_static_assert (sizeof (packed<test_enum, 1>) == 1);
-gdb_static_assert (sizeof (packed<test_enum, 2>) == 2);
-gdb_static_assert (sizeof (packed<test_enum, 3>) == 3);
-gdb_static_assert (sizeof (packed<test_enum, 4>) == 4);
+static_assert (sizeof (packed<test_enum, 1>) == 1);
+static_assert (sizeof (packed<test_enum, 2>) == 2);
+static_assert (sizeof (packed<test_enum, 3>) == 3);
+static_assert (sizeof (packed<test_enum, 4>) == 4);
 
-gdb_static_assert (alignof (packed<test_enum, 1>) == 1);
-gdb_static_assert (alignof (packed<test_enum, 2>) == 1);
-gdb_static_assert (alignof (packed<test_enum, 3>) == 1);
-gdb_static_assert (alignof (packed<test_enum, 4>) == 1);
+static_assert (alignof (packed<test_enum, 1>) == 1);
+static_assert (alignof (packed<test_enum, 2>) == 1);
+static_assert (alignof (packed<test_enum, 3>) == 1);
+static_assert (alignof (packed<test_enum, 4>) == 1);
 
 /* Triviality checks.  */
 #define CHECK_TRAIT(TRAIT)			\

@@ -977,7 +977,7 @@ gdb_bfd_record_inclusion (bfd *includer, bfd *includee)
 
 
 
-gdb_static_assert (ARRAY_SIZE (_bfd_std_section) == 4);
+static_assert (ARRAY_SIZE (_bfd_std_section) == 4);
 
 /* See gdb_bfd.h.  */
 

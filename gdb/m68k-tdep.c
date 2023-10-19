@@ -176,7 +176,7 @@ m68k_register_name (struct gdbarch *gdbarch, int regnum)
 {
   m68k_gdbarch_tdep *tdep = gdbarch_tdep<m68k_gdbarch_tdep> (gdbarch);
 
-  gdb_static_assert (ARRAY_SIZE (m68k_register_names) == M68K_NUM_REGS);
+  static_assert (ARRAY_SIZE (m68k_register_names) == M68K_NUM_REGS);
   if (regnum >= M68K_FP0_REGNUM && regnum <= M68K_FPI_REGNUM
       && tdep->fpregs_present == 0)
     return "";

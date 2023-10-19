@@ -1669,7 +1669,7 @@ cris_register_name (struct gdbarch *gdbarch, int regno)
   if (regno < NUM_GENREGS)
     {
       /* General register.  */
-      gdb_static_assert (ARRAY_SIZE (cris_genreg_names) == NUM_GENREGS);
+      static_assert (ARRAY_SIZE (cris_genreg_names) == NUM_GENREGS);
       return cris_genreg_names[regno];
     }
   else if (regno >= NUM_GENREGS && regno < gdbarch_num_regs (gdbarch))

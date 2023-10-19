@@ -344,7 +344,7 @@ arc_insn_get_operand_value_signed (const struct arc_instruction &insn,
       /* Convert unsigned raw value to signed one.  This assumes 2's
 	 complement arithmetic, but so is the LONG_MIN value from generic
 	 defs.h and that assumption is true for ARC.  */
-      gdb_static_assert (sizeof (insn.limm_value) == sizeof (int));
+      static_assert (sizeof (insn.limm_value) == sizeof (int));
       return (((LONGEST) insn.limm_value) ^ INT_MIN) - INT_MIN;
     case ARC_OPERAND_KIND_SHIMM:
       /* Sign conversion has been done by binutils.  */
