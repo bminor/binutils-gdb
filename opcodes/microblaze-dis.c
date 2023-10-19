@@ -35,7 +35,7 @@
 #define get_int_field_imm(instr)   ((instr & IMM_MASK) >> IMM_LOW)
 #define get_int_field_r1(instr)    ((instr & RA_MASK) >> RA_LOW)
 
-#define NUM_STRBUFS 3
+#define NUM_STRBUFS 4
 #define STRBUF_SIZE 25
 
 struct string_buf
@@ -279,7 +279,7 @@ print_insn_microblaze (bfd_vma memaddr, struct disassemble_info * info)
   prev_insn_vma = curr_insn_vma;
 
   if (op->name == NULL)
-    print_func (stream, ".short 0x%04x", (unsigned int) inst);
+    print_func (stream, ".long 0x%04x", (unsigned int) inst);
   else
     {
       print_func (stream, "%s", op->name);
