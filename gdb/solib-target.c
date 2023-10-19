@@ -54,7 +54,7 @@ using lm_info_target_up = std::unique_ptr<lm_info_target>;
 
 #if !defined(HAVE_LIBEXPAT)
 
-static lm_info_vector
+static std::vector<lm_info_target_up>
 solib_target_parse_libraries (const char *library)
 {
   static int have_warned;
@@ -66,7 +66,7 @@ solib_target_parse_libraries (const char *library)
 		 "at compile time"));
     }
 
-  return lm_info_vector ();
+  return {};
 }
 
 #else /* HAVE_LIBEXPAT */
