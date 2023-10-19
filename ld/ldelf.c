@@ -2244,6 +2244,7 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
 	   set, then it has been created by the linker, possibly as a
 	   result of a --section-start command line switch.  */
 	if (os->bfd_section != NULL
+	    && !bfd_is_abs_section (os->bfd_section)
 	    && (os->bfd_section->flags == 0
 		|| (((s->flags ^ os->bfd_section->flags)
 		     & (SEC_LOAD | SEC_ALLOC)) == 0
