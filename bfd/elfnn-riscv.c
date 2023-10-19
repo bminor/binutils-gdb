@@ -5123,7 +5123,13 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  if (h != NULL && h->type == STT_GNU_IFUNC)
 	    continue;
 
+	  /* Maybe we should check UNDEFWEAK_NO_DYNAMIC_RELOC here?  But that
+	     will break the undefweak relaxation testcases, so just make sure
+	     we won't do relaxations for linker_def symbols in short-term.  */
 	  if (h->root.type == bfd_link_hash_undefweak
+	      /* The linker_def symbol like __ehdr_start that may be undefweak
+		 for now, but will be guaranteed to be defined later.  */
+	      && !h->root.linker_def
 	      && (relax_func == _bfd_riscv_relax_lui
 		  || relax_func == _bfd_riscv_relax_pc))
 	    {
