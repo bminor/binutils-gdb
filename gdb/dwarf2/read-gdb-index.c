@@ -88,7 +88,7 @@ struct mapped_gdb_index final : public mapped_index_base
   /* A pointer to the constant pool.  */
   gdb::array_view<const gdb_byte> constant_pool;
 
-  /* The shortcut table data. */
+  /* The shortcut table data.  */
   gdb::array_view<const gdb_byte> shortcut_table;
 
   /* Return the index into the constant pool of the name of the IDXth
@@ -771,7 +771,7 @@ create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
     = new (&per_bfd->obstack) addrmap_fixed (&per_bfd->obstack, &mutable_map);
 }
 
-/* Sets the name and language of the main function from the shortcut table. */
+/* Sets the name and language of the main function from the shortcut table.  */
 
 static void
 set_main_name_from_gdb_index (dwarf2_per_objfile *per_objfile,
@@ -780,7 +780,7 @@ set_main_name_from_gdb_index (dwarf2_per_objfile *per_objfile,
   const auto expected_size = 2 * sizeof (offset_type);
   if (index->shortcut_table.size () < expected_size)
     /* The data in the section is not present, is corrupted or is in a version
-       we don't know about. Regardless, we can't make use of it. */
+       we don't know about.  Regardless, we can't make use of it.  */
     return;
 
   auto ptr = index->shortcut_table.data ();
@@ -794,7 +794,7 @@ set_main_name_from_gdb_index (dwarf2_per_objfile *per_objfile,
   if (dw_lang == 0)
     {
       /* Don't bother if the language for the main symbol was not known or if
-	 there was no main symbol at all when the index was built. */
+	 there was no main symbol at all when the index was built.  */
       return;
     }
   ptr += 4;

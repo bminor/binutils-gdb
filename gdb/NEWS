@@ -3,7 +3,7 @@
 
 *** Changes since GDB 14
 
-* GDB index now contains information about the main function. This speeds up
+* GDB index now contains information about the main function.  This speeds up
   startup when it is being used for some large binaries.
 
 * Python API

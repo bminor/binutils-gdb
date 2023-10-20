@@ -17819,7 +17819,7 @@ leb128_size (const gdb_byte *buf)
     }
 }
 
-/* Converts DWARF language names to GDB language names. */
+/* Converts DWARF language names to GDB language names.  */
 
 enum language
 dwarf_lang_to_enum_language (unsigned int lang)

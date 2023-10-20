@@ -1193,7 +1193,7 @@ write_cooked_index (cooked_index *table,
     }
 }
 
-/* Write shortcut information. */
+/* Write shortcut information.  */
 
 static void
 write_shortcuts_table (cooked_index *table, data_buf &shortcuts,

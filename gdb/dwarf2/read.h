@@ -184,7 +184,7 @@ private:
   std::atomic<packed<language, LANGUAGE_BYTES>> m_lang {language_unknown};
 
   /* The original DW_LANG_* value of the CU, as provided to us by
-     DW_AT_language. It is interesting to keep this value around in cases where
+     DW_AT_language.  It is interesting to keep this value around in cases where
      we can't use the values from the language enum, as the mapping to them is
      lossy, and, while that is usually fine, things like the index have an
      understandable bias towards not exposing internal GDB structures to the
@@ -769,7 +769,7 @@ private:
 		     std::unique_ptr<dwarf2_cu>> m_dwarf2_cus;
 };
 
-/* Converts DWARF language names to GDB language names. */
+/* Converts DWARF language names to GDB language names.  */
 
 enum language dwarf_lang_to_enum_language (unsigned int lang);
 
