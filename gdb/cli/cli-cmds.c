@@ -1644,6 +1644,10 @@ disassemble_command (const char *arg, int from_tty)
       == (DISASSEMBLY_SOURCE_DEPRECATED | DISASSEMBLY_SOURCE))
     error (_("Cannot specify both /m and /s."));
 
+  if ((flags & (DISASSEMBLY_RAW_INSN | DISASSEMBLY_RAW_BYTES))
+      == (DISASSEMBLY_RAW_INSN | DISASSEMBLY_RAW_BYTES))
+    error (_("Cannot specify both /r and /b."));
+
   if (! p || ! *p)
     {
       flags |= DISASSEMBLY_OMIT_FNAME;

@@ -9,6 +9,13 @@
 * GDB index now contains information about the main function.  This speeds up
   startup when it is being used for some large binaries.
 
+* Changed commands
+
+disassemble
+  Attempting to use both the 'r' and 'b' flags with the disassemble
+  command will now give an error.  Previously the 'b' flag would
+  always override the 'r' flag.
+
 * Python API
 
   ** New function gdb.notify_mi(NAME, DATA), that emits custom
