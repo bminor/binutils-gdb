@@ -657,6 +657,23 @@ extern const char *skip_quoted_chars (const char *, const char *,
 
 extern const char *skip_quoted (const char *);
 
+/* Called from command completion function to skip over /FMT
+   specifications, allowing the rest of the line to be completed.  Returns
+   true if the /FMT is at the end of the current line and there is nothing
+   left to complete, otherwise false is returned.
+
+   In either case *ARGS can be updated to point after any part of /FMT that
+   is present.
+
+   This function is designed so that trying to complete '/' will offer no
+   completions, the user needs to insert the format specification
+   themselves.  Trying to complete '/FMT' (where FMT is any non-empty set
+   of alpha-numeric characters) will cause readline to insert a single
+   space, setting the user up to enter the expression.  */
+
+extern bool skip_over_slash_fmt (completion_tracker &tracker,
+				 const char **args);
+
 /* Maximum number of candidates to consider before the completer
    bails by throwing MAX_COMPLETIONS_REACHED_ERROR.  Negative values
    disable limiting.  */
