@@ -37,6 +37,7 @@
 #include <sstream>
 #include <srchilite/sourcehighlight.h>
 #include <srchilite/langmap.h>
+#include <srchilite/settings.h>
 #endif
 
 /* The number of source files we'll cache.  */
@@ -205,14 +206,15 @@ try_source_highlight (std::string &contents ATTRIBUTE_UNUSED,
     return false;
 
   const char *lang_name = get_language_name (lang);
-  if (lang_name == nullptr)
-    return false;
 
   /* The global source highlight object, or null if one was
      never constructed.  This is stored here rather than in
      the class so that we don't need to include anything or do
      conditional compilation in source-cache.h.  */
   static srchilite::SourceHighlight *highlighter;
+
+  /* The global source highlight language map object.  */
+  static srchilite::LangMap *langmap;
 
   bool styled = false;
   try
@@ -221,6 +223,18 @@ try_source_highlight (std::string &contents ATTRIBUTE_UNUSED,
 	{
 	  highlighter = new srchilite::SourceHighlight ("esc.outlang");
 	  highlighter->setStyleFile ("esc.style");
+
+	  const std::string &datadir = srchilite::Settings::retrieveDataDir ();
+	  langmap = new srchilite::LangMap (datadir, "lang.map");
+	}
+
+      std::string detected_lang;
+      if (lang_name == nullptr)
+	{
+	  detected_lang = langmap->getMappedFileNameFromFileName (fullname);
+	  if (detected_lang.empty ())
+	    return false;
+	  lang_name = detected_lang.c_str ();
 	}
 
       std::istringstream input (contents);
