@@ -43,7 +43,7 @@ main:
 	rtsd	r15,8
 	nop		# Unfilled delay slot
 	cmpu	r2,r2,r4
-	BNEID	r2,reloc_none_test
+	bneid	r2,reloc_none_test
 	.end	main
 $Lfe2:
 	.size	main,$Lfe2-main
