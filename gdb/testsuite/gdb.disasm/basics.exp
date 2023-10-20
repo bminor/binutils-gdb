@@ -37,3 +37,7 @@ gdb_test "disassemble /rb main" \
     "Cannot specify both /r and /b\\."
 gdb_test "disassemble /br main" \
     "Cannot specify both /r and /b\\."
+
+# Check disassembly using 'FILE'::FUNC syntax.
+gdb_test "disassemble '$srcfile'::main" \
+    "Dump of assembler code for function main:.*End of assembler dump\\."
