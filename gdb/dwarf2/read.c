@@ -736,6 +736,18 @@ show_dwarf_max_cache_age (struct ui_file *file, int from_tty,
 		      "DWARF compilation units is %s.\n"),
 	      value);
 }
+
+/* When true, wait for DWARF reading to be complete.  */
+static bool dwarf_synchronous = false;
+
+/* "Show" callback for "maint set dwarf synchronous".  */
+static void
+show_dwarf_synchronous (struct ui_file *file, int from_tty,
+			struct cmd_list_element *c, const char *value)
+{
+  gdb_printf (file, _("Whether DWARF reading is synchronous is %s.\n"),
+	      value);
+}
 
 /* local function prototypes */
 
@@ -21935,6 +21947,21 @@ in memory longer, and more total memory will be used.  Zero disables\n\
 caching, which can slow down startup."),
 			    NULL,
 			    show_dwarf_max_cache_age,
+			    &set_dwarf_cmdlist,
+			    &show_dwarf_cmdlist);
+
+  add_setshow_boolean_cmd ("synchronous", class_obscure,
+			    &dwarf_synchronous, _("\
+Set whether DWARF is read synchronously."), _("\
+Show whether DWARF is read synchronously."), _("\
+By default, DWARF information is read in worker threads,\n\
+and gdb will not generally wait for the reading to complete\n\
+before continuing with other work, for example presenting a\n\
+prompt to the user.\n\
+Enabling this setting will cause the DWARF reader to always wait\n\
+for debug info processing to be finished before gdb can proceed."),
+			    nullptr,
+			    show_dwarf_synchronous,
 			    &set_dwarf_cmdlist,
 			    &show_dwarf_cmdlist);
 

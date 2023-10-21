@@ -41833,6 +41833,24 @@ compilation units will be stored in memory longer, and more total
 memory will be used.  Setting it to zero disables caching, which will
 slow down @value{GDBN} startup, but reduce memory consumption.
 
+@kindex maint set dwarf synchronous
+@kindex maint show dwarf synchronous
+@item maint set dwarf synchronous
+@itemx maint show dwarf synchronous
+Control whether DWARF is read asynchronously.
+
+On hosts where threading is available, the DWARF reader is mostly
+asynchronous with respect to the rest of @value{GDBN}.  That is, the
+bulk of the reading is done in the background, and @value{GDBN} will
+only pause for completion of this task when absolutely necessary.
+
+When this setting is enabled, @value{GDBN} will instead wait for DWARF
+processing to complete before continuing.
+
+On hosts without threading, or where worker threads have been disabled
+at runtime, this setting has no effect, as DWARF reading is always
+done on the main thread, and is therefore always synchronous.
+
 @kindex maint set dwarf unwinders
 @kindex maint show dwarf unwinders
 @item maint set dwarf unwinders

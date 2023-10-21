@@ -9,6 +9,10 @@
 * GDB index now contains information about the main function.  This speeds up
   startup when it is being used for some large binaries.
 
+* On hosts where threading is available, DWARF reading is now done in
+  the background, resulting in faster startup.  This can be controlled
+  using "maint set dwarf synchronous".
+
 * Changed commands
 
 disassemble
