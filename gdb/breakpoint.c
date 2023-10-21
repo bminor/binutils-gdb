@@ -3733,6 +3733,8 @@ create_std_terminate_master_breakpoint (void)
   const char *const func_name = "std::terminate()";
 
   scoped_restore_current_program_space restore_pspace;
+  scoped_restore_current_language save_language;
+  set_language (language_cplus);
 
   for (struct program_space *pspace : program_spaces)
     {
@@ -3845,7 +3847,7 @@ create_exception_master_breakpoint_hook (objfile *objfile)
     {
       struct bound_minimal_symbol debug_hook;
 
-      debug_hook = lookup_minimal_symbol (func_name, NULL, objfile);
+      debug_hook = lookup_minimal_symbol_text (func_name, objfile);
       if (debug_hook.minsym == NULL)
 	{
 	  bp_objfile_data->exception_msym.minsym = &msym_not_found;
