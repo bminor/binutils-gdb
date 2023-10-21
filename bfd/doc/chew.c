@@ -338,6 +338,23 @@ icheck_range (void)
 }
 
 static void
+drop (void)
+{
+  tos--;
+  check_range ();
+  delete_string (tos + 1);
+  pc++;
+}
+
+static void
+idrop (void)
+{
+  isp--;
+  icheck_range ();
+  pc++;
+}
+
+static void
 exec (dict_type *word)
 {
   pc = word->code;
@@ -365,9 +382,9 @@ remchar (void)
 static void
 strip_trailing_newlines (void)
 {
-  while ((isspace ((unsigned char) at (tos, tos->write_idx - 1))
-	  || at (tos, tos->write_idx - 1) == '\n')
-	 && tos->write_idx > 0)
+  while (tos->write_idx > 0
+	 && (isspace ((unsigned char) at (tos, tos->write_idx - 1))
+	     || at (tos, tos->write_idx - 1) == '\n'))
     tos->write_idx--;
   pc++;
 }
@@ -497,6 +514,33 @@ translatecomments (void)
     }
 
   overwrite_string (tos, &out);
+
+  pc++;
+}
+
+/* Wrap tos-1 as a C comment, indenting by tos.  */
+
+static void
+wrap_comment (void)
+{
+  string_type out;
+  init_string (&out);
+
+  catstr (&out, tos);
+  cattext (&out, "/* ");
+  for (unsigned int idx = 0; at (tos - 1, idx); idx++)
+    {
+      catchar (&out, at (tos - 1, idx));
+      if (at (tos - 1, idx) == '\n' && at (tos - 1, idx + 1) != '\n')
+	{
+	  catstr (&out, tos);
+	  cattext (&out, "   ");
+	}
+    }
+  cattext (&out, "  */");
+
+  overwrite_string (tos - 1, &out);
+  drop ();
 
   pc++;
 }
@@ -1035,23 +1079,6 @@ other_dup (void)
 }
 
 static void
-drop (void)
-{
-  tos--;
-  check_range ();
-  delete_string (tos + 1);
-  pc++;
-}
-
-static void
-idrop (void)
-{
-  isp--;
-  icheck_range ();
-  pc++;
-}
-
-static void
 icatstr (void)
 {
   tos--;
@@ -1543,6 +1570,7 @@ main (int ac, char *av[])
   add_intrinsic ("maybecatstr", maybecatstr);
   add_intrinsic ("catstrif", catstrif);
   add_intrinsic ("translatecomments", translatecomments);
+  add_intrinsic ("wrap_comment", wrap_comment);
   add_intrinsic ("kill_bogus_lines", kill_bogus_lines);
   add_intrinsic ("indent", indent);
   add_intrinsic ("print_stack_level", print_stack_level);
