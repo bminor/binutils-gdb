@@ -815,6 +815,28 @@ calc_hex (list_info_type *list)
 		var_rep_idx = var_rep_max;
 	    }
 	}
+      else if (frag_ptr->fr_type == rs_fill_nop && frag_ptr->fr_opcode)
+	{
+	  gas_assert (!octet_in_frag);
+
+	  /* Print as many bytes from fr_opcode as is sensible.  */
+	  while (octet_in_frag < (unsigned int) frag_ptr->fr_offset
+		 && data_buffer_size < MAX_BYTES - 3)
+	    {
+	      if (address == ~(unsigned int) 0)
+		address = frag_ptr->fr_address / OCTETS_PER_BYTE;
+
+	      sprintf (data_buffer + data_buffer_size,
+		       "%02X",
+		       frag_ptr->fr_opcode[octet_in_frag] & 0xff);
+	      data_buffer_size += 2;
+
+	      octet_in_frag++;
+	    }
+
+	  free (frag_ptr->fr_opcode);
+	  frag_ptr->fr_opcode = NULL;
+	}
 
       frag_ptr = frag_ptr->fr_next;
     }

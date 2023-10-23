@@ -1682,7 +1682,12 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 			  bfd_get_filename (stdoutput),
 			  bfd_errmsg (bfd_get_error ()));
 	      offset += count;
-	      free (buf);
+#ifndef NO_LISTING
+	      if (listing & LISTING_LISTING)
+		f->fr_opcode = buf;
+	      else
+#endif
+		free (buf);
 	    }
 	  continue;
 	}

@@ -247,7 +247,9 @@ enum _relax_state
      1 constant byte: no-op fill control byte.  */
   rs_space_nop,
 
-  /* Similar to rs_fill.  It is used to implement .nop directive .  */
+  /* Similar to rs_fill.  It is used to implement .nops directive.
+     When listings are enabled, fr_opcode gets the buffer assigned, once
+     that's available.  */
   rs_fill_nop,
 
   /* A DWARF leb128 value; only ELF uses this.  The subtype is 0 for

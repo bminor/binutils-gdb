@@ -598,6 +598,7 @@ if [gas_32_check] then {
     run_list_test "inval-pseudo" "-al"
     run_dump_test "nop-1"
     run_dump_test "nop-1-suffix"
+    run_list_test "nop-1" "-aln"
     run_dump_test "nop-2"
     run_dump_test "optimize-1"
     run_dump_test "optimize-1a"
