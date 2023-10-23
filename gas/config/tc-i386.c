@@ -1470,7 +1470,7 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	    case PROCESSOR_UNKNOWN:
 	      /* We use cpu_arch_isa_flags to check if we SHOULD
 		 optimize with nops.  */
-	      if (fragP->tc_frag_data.isa_flags.bitfield.cpunop)
+	      if (fragP->tc_frag_data.isanop)
 		patt = alt_patt;
 	      break;
 
@@ -1516,7 +1516,7 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	    default:
 	      /* We use cpu_arch_isa_flags to check if we CAN optimize
 		 with nops.  */
-	      if (fragP->tc_frag_data.isa_flags.bitfield.cpunop)
+	      if (fragP->tc_frag_data.isanop)
 		patt = alt_patt;
 	      break;
 
