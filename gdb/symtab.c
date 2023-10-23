@@ -439,7 +439,7 @@ CORE_ADDR
 minimal_symbol::value_address (objfile *objfile) const
 {
   if (this->maybe_copied (objfile))
-    return get_msymbol_address (objfile, this);
+    return this->get_maybe_copied_address (objfile);
   else
     return (CORE_ADDR (this->unrelocated_address ())
 	    + objfile->section_offsets[this->section_index ()]);
@@ -6533,18 +6533,18 @@ get_symbol_address (const struct symbol *sym)
 /* See symtab.h.  */
 
 CORE_ADDR
-get_msymbol_address (struct objfile *objf, const struct minimal_symbol *minsym)
+minimal_symbol::get_maybe_copied_address (objfile *objf) const
 {
-  gdb_assert (minsym->maybe_copied (objf));
+  gdb_assert (this->maybe_copied (objf));
   gdb_assert ((objf->flags & OBJF_MAINLINE) == 0);
 
-  const char *linkage_name = minsym->linkage_name ();
+  const char *linkage_name = this->linkage_name ();
   bound_minimal_symbol found = lookup_minimal_symbol_linkage (linkage_name,
 							      true);
   if (found.minsym != nullptr)
     return found.value_address ();
-  return (minsym->m_value.address
-	  + objf->section_offsets[minsym->section_index ()]);
+  return (this->m_value.address
+	  + objf->section_offsets[this->section_index ()]);
 }
 
 
