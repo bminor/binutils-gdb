@@ -987,8 +987,8 @@ static const arch_entry cpu_arch[] =
   ARCH (i386, I386, 386, false),
   ARCH (i486, I486, 486, false),
   ARCH (i586, PENTIUM, 586, false),
-  ARCH (i686, PENTIUMPRO, 686, false),
   ARCH (pentium, PENTIUM, 586, false),
+  ARCH (i686, I686, 686, false),
   ARCH (pentiumpro, PENTIUMPRO, PENTIUMPRO, false),
   ARCH (pentiumii, PENTIUMPRO, P2, false),
   ARCH (pentiumiii, PENTIUMPRO, P3, false),
@@ -1440,7 +1440,7 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
   /* We need to decide which NOP sequence to use for 32bit and
      64bit. When -mtune= is used:
 
-     1. For PROCESSOR_I386, PROCESSOR_I486, PROCESSOR_PENTIUM and
+     1. For PROCESSOR_I?86, PROCESSOR_PENTIUM, PROCESSOR_IAMCU, and
      PROCESSOR_GENERIC32, f32_patt will be used.
      2. For the rest, alt_patt will be used.
 
@@ -1473,6 +1473,8 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	      if (fragP->tc_frag_data.isa_flags.bitfield.cpunop)
 		patt = alt_patt;
 	      break;
+
+	    case PROCESSOR_PENTIUMPRO:
 	    case PROCESSOR_PENTIUM4:
 	    case PROCESSOR_NOCONA:
 	    case PROCESSOR_CORE:
@@ -1493,7 +1495,7 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	    case PROCESSOR_I386:
 	    case PROCESSOR_I486:
 	    case PROCESSOR_PENTIUM:
-	    case PROCESSOR_PENTIUMPRO:
+	    case PROCESSOR_I686:
 	    case PROCESSOR_IAMCU:
 	    case PROCESSOR_GENERIC32:
 	      break;
