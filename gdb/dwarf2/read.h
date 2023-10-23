@@ -524,7 +524,7 @@ public:
 
   /* The shared '.dwz' file, if one exists.  This is used when the
      original data was compressed using 'dwz -m'.  */
-  std::unique_ptr<struct dwz_file> dwz_file;
+  gdb::optional<std::unique_ptr<struct dwz_file>> dwz_file;
 
   /* Whether copy relocations are supported by this object format.  */
   bool can_copy;

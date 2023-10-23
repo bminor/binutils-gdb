@@ -29,6 +29,7 @@
 #include "gdbcore.h"
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/scoped_fd.h"
+#include "run-on-main-thread.h"
 
 const char *
 dwz_file::read_string (struct objfile *objfile, LONGEST str_offset)
@@ -196,8 +197,20 @@ dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd, bool require)
   size_t buildid_len;
   bfd_byte *buildid;
 
-  if (per_bfd->dwz_file != NULL)
-    return per_bfd->dwz_file.get ();
+  if (per_bfd->dwz_file.has_value ())
+    {
+      dwz_file *result = per_bfd->dwz_file->get ();
+      if (require && result == nullptr)
+	error (_("could not read '.gnu_debugaltlink' section"));
+      return result;
+    }
+
+  /* This may query the user via the debuginfod support, so it may
+     only be run in the main thread.  */
+  gdb_assert (is_main_thread ());
+
+  /* Set this early, so that on error it remains NULL.  */
+  per_bfd->dwz_file.emplace (nullptr);
 
   bfd_set_error (bfd_error_no_error);
   gdb::unique_xmalloc_ptr<char> data
@@ -283,5 +296,5 @@ dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd, bool require)
 
   gdb_bfd_record_inclusion (per_bfd->obfd, result->dwz_bfd.get ());
   per_bfd->dwz_file = std::move (result);
-  return per_bfd->dwz_file.get ();
+  return per_bfd->dwz_file->get ();
 }

@@ -37,8 +37,8 @@ if { [build_executable $testfile.exp $testfile [list $srcfile $asm_file]] } {
 
 clean_restart
 
-set msg "\r\ncould not find '\.gnu_debugaltlink' file for \[^\r\n\]*"
+set msg "\r\nwarning: could not find '\.gnu_debugaltlink' file for \[^\r\n\]*"
 gdb_test "file $binfile" "$msg" "file command"
 
 set question "Load new symbol table from .*\? .y or n. "
-gdb_test "file $binfile" "$msg" "file command, again" $question "y"
+gdb_test "file $binfile" "" "file command, again" $question "y"

@@ -3213,6 +3213,17 @@ dwarf2_initialize_objfile (struct objfile *objfile)
 
   dwarf_read_debug_printf ("called");
 
+  /* Try to fetch any potential dwz file early, while still on the
+     main thread.  */
+  try
+    {
+      dwarf2_get_dwz_file (per_bfd);
+    }
+  catch (const gdb_exception_error &err)
+    {
+      warning (_("%s"), err.what ());
+    }
+
   /* If we're about to read full symbols, don't bother with the
      indices.  In this case we also don't care if some other debug
      format is making psymtabs, because they are all about to be
@@ -5120,16 +5131,7 @@ create_all_units (dwarf2_per_objfile *per_objfile)
 				  &per_objfile->per_bfd->abbrev, 0,
 				  types_htab, rcuh_kind::TYPE);
 
-  dwz_file *dwz;
-  try
-    {
-      dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
-    }
-  catch (const gdb_exception_error &)
-    {
-      per_objfile->per_bfd->all_units.clear ();
-      throw;
-    }
+  dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
   if (dwz != NULL)
     {
       /* Pre-read the sections we'll need to construct an index.  */
