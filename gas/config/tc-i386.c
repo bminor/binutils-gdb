@@ -802,7 +802,7 @@ static const char *cpu_arch_name = NULL;
 static char *cpu_sub_arch_name = NULL;
 
 /* CPU feature flags.  */
-static i386_cpu_flags cpu_arch_flags = CPU_UNKNOWN_FLAGS;
+i386_cpu_flags cpu_arch_flags = CPU_UNKNOWN_FLAGS;
 
 /* If we have selected a cpu we are generating instructions for.  */
 static int cpu_arch_tune_set = 0;
@@ -1463,7 +1463,8 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
       patt = fragP->tc_frag_data.code == CODE_64BIT ? f64_patt : f32_patt;
       if (fragP->tc_frag_data.isa == PROCESSOR_UNKNOWN)
 	{
-	  /* PROCESSOR_UNKNOWN means that all ISAs may be used.  */
+	  /* PROCESSOR_UNKNOWN means that all ISAs may be used, unless
+	     explicitly disabled.  */
 	  switch (fragP->tc_frag_data.tune)
 	    {
 	    case PROCESSOR_UNKNOWN:
@@ -1485,8 +1486,10 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	    case PROCESSOR_BD:
 	    case PROCESSOR_ZNVER:
 	    case PROCESSOR_BT:
-	      patt = alt_patt;
+	      if (fragP->tc_frag_data.cpunop)
+		patt = alt_patt;
 	      break;
+
 	    case PROCESSOR_I386:
 	    case PROCESSOR_I486:
 	    case PROCESSOR_PENTIUM:
@@ -1508,35 +1511,13 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	      abort ();
 	      break;
 
-	    case PROCESSOR_I386:
-	    case PROCESSOR_I486:
-	    case PROCESSOR_PENTIUM:
-	    case PROCESSOR_IAMCU:
-	    case PROCESSOR_K6:
-	    case PROCESSOR_ATHLON:
-	    case PROCESSOR_K8:
-	    case PROCESSOR_AMDFAM10:
-	    case PROCESSOR_BD:
-	    case PROCESSOR_ZNVER:
-	    case PROCESSOR_BT:
-	    case PROCESSOR_GENERIC32:
+	    default:
 	      /* We use cpu_arch_isa_flags to check if we CAN optimize
 		 with nops.  */
 	      if (fragP->tc_frag_data.isa_flags.bitfield.cpunop)
 		patt = alt_patt;
 	      break;
-	    case PROCESSOR_PENTIUMPRO:
-	    case PROCESSOR_PENTIUM4:
-	    case PROCESSOR_NOCONA:
-	    case PROCESSOR_CORE:
-	    case PROCESSOR_CORE2:
-	    case PROCESSOR_COREI7:
-	      if (fragP->tc_frag_data.isa_flags.bitfield.cpunop)
-		patt = alt_patt;
-	      break;
-	    case PROCESSOR_GENERIC64:
-	      patt = alt_patt;
-	      break;
+
 	    case PROCESSOR_NONE:
 	      abort ();
 	    }

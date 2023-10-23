@@ -260,6 +260,7 @@ enum processor_type
   PROCESSOR_NONE
 };
 
+extern i386_cpu_flags cpu_arch_flags;
 extern enum processor_type cpu_arch_tune;
 extern enum processor_type cpu_arch_isa;
 extern i386_cpu_flags cpu_arch_isa_flags;
@@ -295,6 +296,7 @@ struct i386_tc_frag_data
   unsigned int mf_type : 3;
   unsigned int classified : 1;
   unsigned int branch_type : 3;
+  unsigned int cpunop : 1;
 };
 
 /* We need to emit the right NOP pattern in .align frags.  This is
@@ -310,6 +312,7 @@ struct i386_tc_frag_data
      (FRAGP)->tc_frag_data.isa = cpu_arch_isa;			\
      (FRAGP)->tc_frag_data.isa_flags = cpu_arch_isa_flags;	\
      (FRAGP)->tc_frag_data.tune = cpu_arch_tune;		\
+     (FRAGP)->tc_frag_data.cpunop = cpu_arch_flags.bitfield.cpunop; \
      (FRAGP)->tc_frag_data.code = i386_flag_code;		\
      (FRAGP)->tc_frag_data.max_bytes = (MAX_BYTES);		\
      (FRAGP)->tc_frag_data.length = 0;				\
