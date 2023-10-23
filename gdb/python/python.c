@@ -35,8 +35,11 @@
 #include <ctype.h>
 #include "location.h"
 #include "run-on-main-thread.h"
-#include "gdbsupport/selftest.h"
 #include "observable.h"
+
+#if GDB_SELF_TEST
+#include "gdbsupport/selftest.h"
+#endif
 
 /* Declared constants and enum for python stack printing.  */
 static const char python_excp_none[] = "none";
