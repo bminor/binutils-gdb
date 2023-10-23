@@ -6517,17 +6517,17 @@ symbol::set_symtab (struct symtab *symtab)
 /* See symtab.h.  */
 
 CORE_ADDR
-get_symbol_address (const struct symbol *sym)
+symbol::get_maybe_copied_address () const
 {
-  gdb_assert (sym->maybe_copied);
-  gdb_assert (sym->aclass () == LOC_STATIC);
+  gdb_assert (this->maybe_copied);
+  gdb_assert (this->aclass () == LOC_STATIC);
 
-  const char *linkage_name = sym->linkage_name ();
+  const char *linkage_name = this->linkage_name ();
   bound_minimal_symbol minsym = lookup_minimal_symbol_linkage (linkage_name,
 							       false);
   if (minsym.minsym != nullptr)
     return minsym.value_address ();
-  return sym->m_value.address;
+  return this->m_value.address;
 }
 
 /* See symtab.h.  */

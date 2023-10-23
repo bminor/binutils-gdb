@@ -630,14 +630,6 @@ struct general_symbol_info
 
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 
-/* Return the address of SYM.  The MAYBE_COPIED flag must be set on
-   SYM.  If SYM appears in the main program's minimal symbols, then
-   that minsym's address is returned; otherwise, SYM's address is
-   returned.  This should generally only be used via the
-   SYMBOL_VALUE_ADDRESS macro.  */
-
-extern CORE_ADDR get_symbol_address (const struct symbol *sym);
-
 /* Try to determine the demangled name for a symbol, based on the
    language of that symbol.  If the language is set to language_auto,
    it will attempt to find any demangling algorithm that works and
@@ -1359,7 +1351,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
   CORE_ADDR value_address () const
   {
     if (this->maybe_copied)
-      return get_symbol_address (this);
+      return this->get_maybe_copied_address ();
     else
       return m_value.address;
   }
@@ -1520,6 +1512,13 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
   void *aux_value = nullptr;
 
   struct symbol *hash_next = nullptr;
+
+private:
+  /* Return the address of this symbol.  The MAYBE_COPIED flag must be set.
+   If the symbol appears in the main program's minimal symbols, then
+   that minsym's address is returned; otherwise, this symbol's address is
+   returned.  */
+ CORE_ADDR get_maybe_copied_address () const;
 };
 
 /* Several lookup functions return both a symbol and the block in which the
