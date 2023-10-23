@@ -148,6 +148,7 @@ if [gas_32_check] then {
     run_dump_test "nops-7"
     run_dump_test "nops-8"
     run_dump_test "nops-9"
+    run_dump_test "nops-10"
     run_dump_test "noreg16"
     run_list_test "noreg16"
     run_dump_test "noreg16-data32"

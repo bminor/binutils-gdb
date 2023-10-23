@@ -1434,7 +1434,7 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
      When -march= or .arch is used, we can't use anything beyond
      cpu_arch_isa_flags.   */
 
-  if (flag_code == CODE_16BIT)
+  if (fragP->tc_frag_data.code == CODE_16BIT)
     {
       patt = f16_patt;
       max_single_nop_size = sizeof (f16_patt) / sizeof (f16_patt[0]);
@@ -1446,7 +1446,7 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
       if (fragP->tc_frag_data.isa == PROCESSOR_UNKNOWN)
 	{
 	  /* PROCESSOR_UNKNOWN means that all ISAs may be used.  */
-	  switch (cpu_arch_tune)
+	  switch (fragP->tc_frag_data.tune)
 	    {
 	    case PROCESSOR_UNKNOWN:
 	      /* We use cpu_arch_isa_flags to check if we SHOULD
