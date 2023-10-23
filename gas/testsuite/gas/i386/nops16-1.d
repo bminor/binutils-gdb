@@ -55,7 +55,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
-[ 	]*[a-f0-9]+:	66 90                	xchg   %eax,%eax
+[ 	]*[a-f0-9]+:	89 f6                	mov    %si,%si
 
 0+80 <nop27>:
 [ 	]*[a-f0-9]+:	90                   	nop
@@ -118,7 +118,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
-[ 	]*[a-f0-9]+:	66 90                	xchg   %eax,%eax
+[ 	]*[a-f0-9]+:	89 f6                	mov    %si,%si
 
 0+100 <nop23>:
 [ 	]*[a-f0-9]+:	90                   	nop
@@ -193,7 +193,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
-[ 	]*[a-f0-9]+:	66 90                	xchg   %eax,%eax
+[ 	]*[a-f0-9]+:	89 f6                	mov    %si,%si
 
 0+180 <nop19>:
 [ 	]*[a-f0-9]+:	90                   	nop
@@ -280,7 +280,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
-[ 	]*[a-f0-9]+:	66 90                	xchg   %eax,%eax
+[ 	]*[a-f0-9]+:	89 f6                	mov    %si,%si
 
 0+200 <nop15>:
 [ 	]*[a-f0-9]+:	90                   	nop
@@ -315,7 +315,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	eb 0a                	jmp    240 <nop11>
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
-[ 	]*[a-f0-9]+:	66 90                	xchg   %eax,%eax
+[ 	]*[a-f0-9]+:	89 f6                	mov    %si,%si
 
 0+240 <nop11>:
 [ 	]*[a-f0-9]+:	90                   	nop
@@ -336,7 +336,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	90                   	nop
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
-[ 	]*[a-f0-9]+:	66 90                	xchg   %eax,%eax
+[ 	]*[a-f0-9]+:	89 f6                	mov    %si,%si
 
 0+260 <nop9>:
 [ 	]*[a-f0-9]+:	90                   	nop
@@ -387,7 +387,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	90                   	nop
 [ 	]*[a-f0-9]+:	90                   	nop
 [ 	]*[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
-[ 	]*[a-f0-9]+:	66 90                	xchg   %eax,%eax
+[ 	]*[a-f0-9]+:	89 f6                	mov    %si,%si
 
 0+2a0 <nop5>:
 [ 	]*[a-f0-9]+:	90                   	nop
@@ -450,5 +450,5 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	90                   	nop
 [ 	]*[a-f0-9]+:	90                   	nop
 [ 	]*[a-f0-9]+:	90                   	nop
-[ 	]*[a-f0-9]+:	66 90                	xchg   %eax,%eax
+[ 	]*[a-f0-9]+:	89 f6                	mov    %si,%si
 #pass

@@ -1291,6 +1291,7 @@ static const unsigned char f64_7[] =
 #define f64_8 (f64_9 + 1)		/* lea 0L(%rsi,%riz),%rsi */
 static const unsigned char f64_9[] =
   {0x2e,0x48,0x8d,0xb4,0x26,0x00,0x00,0x00,0x00}; /* lea %cs:0L(%rsi,%riz),%rsi */
+#define f16_2 (f64_3 + 1)		/* mov %si,%si	*/
 static const unsigned char f16_3[] =
   {0x8d,0x74,0x00};			/* lea 0(%si),%si	*/
 static const unsigned char f16_4[] =
@@ -1311,7 +1312,7 @@ static const unsigned char *const f64_patt[] = {
 };
 /* 16-bit NOPs patterns.  */
 static const unsigned char *const f16_patt[] = {
-  f32_1, f32_2, f16_3, f16_4
+  f32_1, f16_2, f16_3, f16_4
 };
 /* nopl (%[re]ax) */
 static const unsigned char alt_3[] =

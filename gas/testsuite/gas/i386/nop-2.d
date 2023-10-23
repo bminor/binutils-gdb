@@ -26,7 +26,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
  +[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
  +[a-f0-9]+:	8d b4 00 00          	lea    0x0\(%si\),%si
- +[a-f0-9]+:	66 90                	xchg   %eax,%eax
+ +[a-f0-9]+:	89 f6                	mov    %si,%si
 
 0+26 <pseudo_30>:
  +[a-f0-9]+:	eb 1c                	jmp    44 <pseudo_129>
