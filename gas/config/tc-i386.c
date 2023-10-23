@@ -1279,6 +1279,18 @@ static const unsigned char f32_6[] =
   {0x8d,0xb6,0x00,0x00,0x00,0x00};	/* leal 0L(%esi),%esi	*/
 static const unsigned char f32_7[] =
   {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};	/* leal 0L(%esi,1),%esi */
+static const unsigned char f64_3[] =
+  {0x48,0x89,0xf6};			/* mov %rsi,%rsi	*/
+static const unsigned char f64_4[] =
+  {0x48,0x8d,0x76,0x00};		/* lea 0(%rsi),%rsi	*/
+#define f64_5 (f64_6 + 1)		/* lea 0(%rsi,%riz),%rsi	*/
+static const unsigned char f64_6[] =
+  {0x2e,0x48,0x8d,0x74,0x26,0x00};	/* lea %cs:0(%rsi,%riz),%rsi	*/
+static const unsigned char f64_7[] =
+  {0x48,0x8d,0xb6,0x00,0x00,0x00,0x00};	/* lea 0L(%rsi),%rsi	*/
+#define f64_8 (f64_9 + 1)		/* lea 0L(%rsi,%riz),%rsi */
+static const unsigned char f64_9[] =
+  {0x2e,0x48,0x8d,0xb4,0x26,0x00,0x00,0x00,0x00}; /* lea %cs:0L(%rsi,%riz),%rsi */
 static const unsigned char f16_3[] =
   {0x8d,0x74,0x00};			/* lea 0(%si),%si	*/
 static const unsigned char f16_4[] =
@@ -1292,6 +1304,10 @@ static const unsigned char jump16_disp32[] =
 /* 32-bit NOPs patterns.  */
 static const unsigned char *const f32_patt[] = {
   f32_1, f32_2, f32_3, f32_4, NULL, f32_6, f32_7
+};
+/* 64-bit NOPs patterns.  */
+static const unsigned char *const f64_patt[] = {
+  f32_1, f32_2, f64_3, f64_4, f64_5, f64_6, f64_7, f64_8, f64_9
 };
 /* 16-bit NOPs patterns.  */
 static const unsigned char *const f16_patt[] = {
@@ -1428,7 +1444,7 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
      2. For the rest, alt_patt will be used.
 
      When -mtune= isn't used, alt_patt will be used if
-     cpu_arch_isa_flags has CpuNop.  Otherwise, f32_patt will
+     cpu_arch_isa_flags has CpuNop.  Otherwise, f32_patt/f64_patt will
      be used.
 
      When -march= or .arch is used, we can't use anything beyond
@@ -1443,6 +1459,7 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
     }
   else
     {
+      patt = fragP->tc_frag_data.code == CODE_64BIT ? f64_patt : f32_patt;
       if (fragP->tc_frag_data.isa == PROCESSOR_UNKNOWN)
 	{
 	  /* PROCESSOR_UNKNOWN means that all ISAs may be used.  */
@@ -1453,8 +1470,6 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 		 optimize with nops.  */
 	      if (fragP->tc_frag_data.isa_flags.bitfield.cpunop)
 		patt = alt_patt;
-	      else
-		patt = f32_patt;
 	      break;
 	    case PROCESSOR_PENTIUM4:
 	    case PROCESSOR_NOCONA:
@@ -1477,7 +1492,6 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	    case PROCESSOR_PENTIUMPRO:
 	    case PROCESSOR_IAMCU:
 	    case PROCESSOR_GENERIC32:
-	      patt = f32_patt;
 	      break;
 	    case PROCESSOR_NONE:
 	      abort ();
@@ -1509,8 +1523,6 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 		 with nops.  */
 	      if (fragP->tc_frag_data.isa_flags.bitfield.cpunop)
 		patt = alt_patt;
-	      else
-		patt = f32_patt;
 	      break;
 	    case PROCESSOR_PENTIUMPRO:
 	    case PROCESSOR_PENTIUM4:
@@ -1520,8 +1532,6 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	    case PROCESSOR_COREI7:
 	      if (fragP->tc_frag_data.isa_flags.bitfield.cpunop)
 		patt = alt_patt;
-	      else
-		patt = f32_patt;
 	      break;
 	    case PROCESSOR_GENERIC64:
 	      patt = alt_patt;
@@ -1531,9 +1541,10 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	    }
 	}
 
-      if (patt == f32_patt)
+      if (patt != alt_patt)
 	{
-	  max_single_nop_size = sizeof (f32_patt) / sizeof (f32_patt[0]);
+	  max_single_nop_size = patt == f32_patt ? ARRAY_SIZE (f32_patt)
+						 : ARRAY_SIZE (f64_patt);
 	  /* Limit number of NOPs to 2 for older processors.  */
 	  max_number_of_nops = 2;
 	}
