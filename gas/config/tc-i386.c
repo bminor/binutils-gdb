@@ -165,7 +165,7 @@ static const char *parse_insn (const char *, char *, bool);
 static char *parse_operands (char *, const char *);
 static void swap_operands (void);
 static void swap_2_operands (unsigned int, unsigned int);
-static enum flag_code i386_addressing_mode (void);
+static enum i386_flag_code i386_addressing_mode (void);
 static void optimize_imm (void);
 static bool optimize_disp (const insn_template *t);
 static const insn_template *match_template (char);
@@ -579,15 +579,8 @@ static int this_operand = -1;
 /* Are we processing a .insn directive?  */
 #define dot_insn() (i.tm.mnem_off == MN__insn)
 
-/* We support four different modes.  FLAG_CODE variable is used to distinguish
-   these.  */
-
-enum flag_code {
-	CODE_32BIT,
-	CODE_16BIT,
-	CODE_64BIT };
-
-static enum flag_code flag_code;
+enum i386_flag_code i386_flag_code;
+#define flag_code i386_flag_code /* Permit to continue using original name.  */
 static unsigned int object_64bit;
 static unsigned int disallow_64bit_reloc;
 static int use_rela_relocations = 0;
@@ -9162,8 +9155,6 @@ output_branch (void)
       off = 0;
     }
 
-  frag_now->tc_frag_data.code64 = flag_code == CODE_64BIT;
-
   /* 1 possible extra opcode + 4 byte displacement go in var part.
      Pass reloc in fr_var.  */
   frag_var (rs_machine_dependent, 5, i.reloc[0], subtype, sym, off, p);
@@ -13524,7 +13515,8 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
       else if (size == 2)
 	reloc_type = BFD_RELOC_16_PCREL;
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-      else if (fragP->tc_frag_data.code64 && fragP->fr_offset == 0
+      else if (fragP->tc_frag_data.code == CODE_64BIT
+	       && fragP->fr_offset == 0
 	       && need_plt32_p (fragP->fr_symbol))
 	reloc_type = BFD_RELOC_X86_64_PLT32;
 #endif

@@ -264,6 +264,15 @@ extern enum processor_type cpu_arch_tune;
 extern enum processor_type cpu_arch_isa;
 extern i386_cpu_flags cpu_arch_isa_flags;
 
+/* We support four different modes.  I386_FLAG_CODE variable is used to
+   distinguish three of these.  */
+
+extern enum i386_flag_code {
+	CODE_32BIT,
+	CODE_16BIT,
+	CODE_64BIT
+} i386_flag_code;
+
 struct i386_tc_frag_data
 {
   union
@@ -275,6 +284,7 @@ struct i386_tc_frag_data
   enum processor_type isa;
   i386_cpu_flags isa_flags;
   enum processor_type tune;
+  enum i386_flag_code code;
   unsigned int max_bytes;
   unsigned char length;
   unsigned char last_length;
@@ -285,7 +295,6 @@ struct i386_tc_frag_data
   unsigned int mf_type : 3;
   unsigned int classified : 1;
   unsigned int branch_type : 3;
-  unsigned int code64 : 1; /* Only set by output_branch for now.  */
 };
 
 /* We need to emit the right NOP pattern in .align frags.  This is
@@ -301,6 +310,7 @@ struct i386_tc_frag_data
      (FRAGP)->tc_frag_data.isa = cpu_arch_isa;			\
      (FRAGP)->tc_frag_data.isa_flags = cpu_arch_isa_flags;	\
      (FRAGP)->tc_frag_data.tune = cpu_arch_tune;		\
+     (FRAGP)->tc_frag_data.code = i386_flag_code;		\
      (FRAGP)->tc_frag_data.max_bytes = (MAX_BYTES);		\
      (FRAGP)->tc_frag_data.length = 0;				\
      (FRAGP)->tc_frag_data.last_length = 0;			\
