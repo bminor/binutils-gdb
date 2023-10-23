@@ -9,23 +9,23 @@ Disassembly of section .text:
 
 0+ <i386>:
 [ 	]*[a-f0-9]+:	0f be f0             	movsbl %al,%esi
-[ 	]*[a-f0-9]+:	8d b4 26 00 00 00 00 	lea    0x0\(%rsi,%riz,1\),%esi
-[ 	]*[a-f0-9]+:	8d b6 00 00 00 00    	lea    0x0\(%rsi\),%esi
+[ 	]*[a-f0-9]+:	2e 8d b4 26 00 00 00 00 	cs lea (0x)?0\(%rsi,%riz,1\),%esi
+[ 	]*[a-f0-9]+:	2e 8d 74 26 00       	cs lea (0x)?0\(%rsi,%riz,1\),%esi
 
 0+10 <i486>:
 [ 	]*[a-f0-9]+:	0f be f0             	movsbl %al,%esi
-[ 	]*[a-f0-9]+:	8d b4 26 00 00 00 00 	lea    0x0\(%rsi,%riz,1\),%esi
-[ 	]*[a-f0-9]+:	8d b6 00 00 00 00    	lea    0x0\(%rsi\),%esi
+[ 	]*[a-f0-9]+:	2e 8d b4 26 00 00 00 00 	cs lea (0x)?0\(%rsi,%riz,1\),%esi
+[ 	]*[a-f0-9]+:	2e 8d 74 26 00       	cs lea (0x)?0\(%rsi,%riz,1\),%esi
 
 0+20 <i586>:
 [ 	]*[a-f0-9]+:	0f be f0             	movsbl %al,%esi
-[ 	]*[a-f0-9]+:	8d b4 26 00 00 00 00 	lea    0x0\(%rsi,%riz,1\),%esi
-[ 	]*[a-f0-9]+:	8d b6 00 00 00 00    	lea    0x0\(%rsi\),%esi
+[ 	]*[a-f0-9]+:	2e 8d b4 26 00 00 00 00 	cs lea (0x)?0\(%rsi,%riz,1\),%esi
+[ 	]*[a-f0-9]+:	2e 8d 74 26 00       	cs lea (0x)?0\(%rsi,%riz,1\),%esi
 
 0+30 <i686>:
 [ 	]*[a-f0-9]+:	0f be f0             	movsbl %al,%esi
-[ 	]*[a-f0-9]+:	8d b4 26 00 00 00 00 	lea    0x0\(%rsi,%riz,1\),%esi
-[ 	]*[a-f0-9]+:	8d b6 00 00 00 00    	lea    0x0\(%rsi\),%esi
+[ 	]*[a-f0-9]+:	2e 8d b4 26 00 00 00 00 	cs lea (0x)?0\(%rsi,%riz,1\),%esi
+[ 	]*[a-f0-9]+:	2e 8d 74 26 00       	cs lea (0x)?0\(%rsi,%riz,1\),%esi
 
 0+40 <pentium4>:
 [ 	]*[a-f0-9]+:	0f be f0             	movsbl %al,%esi
@@ -49,8 +49,8 @@ Disassembly of section .text:
 
 0+80 <k6>:
 [ 	]*[a-f0-9]+:	0f be f0             	movsbl %al,%esi
-[ 	]*[a-f0-9]+:	8d b4 26 00 00 00 00 	lea    0x0\(%rsi,%riz,1\),%esi
-[ 	]*[a-f0-9]+:	8d b6 00 00 00 00    	lea    0x0\(%rsi\),%esi
+[ 	]*[a-f0-9]+:	2e 8d b4 26 00 00 00 00 	cs lea (0x)?0\(%rsi,%riz,1\),%esi
+[ 	]*[a-f0-9]+:	2e 8d 74 26 00       	cs lea (0x)?0\(%rsi,%riz,1\),%esi
 
 0+90 <athlon>:
 [ 	]*[a-f0-9]+:	0f be f0             	movsbl %al,%esi
@@ -64,8 +64,8 @@ Disassembly of section .text:
 
 0+b0 <generic32>:
 [ 	]*[a-f0-9]+:	0f be f0             	movsbl %al,%esi
-[ 	]*[a-f0-9]+:	8d b4 26 00 00 00 00 	lea    0x0\(%rsi,%riz,1\),%esi
-[ 	]*[a-f0-9]+:	8d b6 00 00 00 00    	lea    0x0\(%rsi\),%esi
+[ 	]*[a-f0-9]+:	2e 8d b4 26 00 00 00 00 	cs lea (0x)?0\(%rsi,%riz,1\),%esi
+[ 	]*[a-f0-9]+:	2e 8d 74 26 00       	cs lea (0x)?0\(%rsi,%riz,1\),%esi
 
 0+c0 <generic64>:
 [ 	]*[a-f0-9]+:	0f be f0             	movsbl %al,%esi

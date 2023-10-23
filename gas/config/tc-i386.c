@@ -1273,12 +1273,14 @@ static const unsigned char f32_2[] =
   {0x66,0x90};				/* xchg %ax,%ax		*/
 static const unsigned char f32_3[] =
   {0x8d,0x76,0x00};			/* leal 0(%esi),%esi	*/
-static const unsigned char f32_4[] =
-  {0x8d,0x74,0x26,0x00};		/* leal 0(%esi,1),%esi	*/
+#define f32_4 (f32_5 + 1)	/* leal 0(%esi,%eiz),%esi */
+static const unsigned char f32_5[] =
+  {0x2e,0x8d,0x74,0x26,0x00};		/* leal %cs:0(%esi,%eiz),%esi	*/
 static const unsigned char f32_6[] =
   {0x8d,0xb6,0x00,0x00,0x00,0x00};	/* leal 0L(%esi),%esi	*/
-static const unsigned char f32_7[] =
-  {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};	/* leal 0L(%esi,1),%esi */
+#define f32_7 (f32_8 + 1)	/* leal 0L(%esi,%eiz),%esi */
+static const unsigned char f32_8[] =
+  {0x2e,0x8d,0xb4,0x26,0x00,0x00,0x00,0x00}; /* leal %cs:0L(%esi,%eiz),%esi */
 static const unsigned char f64_3[] =
   {0x48,0x89,0xf6};			/* mov %rsi,%rsi	*/
 static const unsigned char f64_4[] =
@@ -1294,8 +1296,9 @@ static const unsigned char f64_9[] =
 #define f16_2 (f64_3 + 1)		/* mov %si,%si	*/
 static const unsigned char f16_3[] =
   {0x8d,0x74,0x00};			/* lea 0(%si),%si	*/
-static const unsigned char f16_4[] =
-  {0x8d,0xb4,0x00,0x00};		/* lea 0W(%si),%si	*/
+#define f16_4 (f16_5 + 1)		/* lea 0W(%si),%si */
+static const unsigned char f16_5[] =
+  {0x2e,0x8d,0xb4,0x00,0x00};		/* lea %cs:0W(%si),%si	*/
 static const unsigned char jump_disp8[] =
   {0xeb};				/* jmp disp8	       */
 static const unsigned char jump32_disp32[] =
@@ -1304,7 +1307,7 @@ static const unsigned char jump16_disp32[] =
   {0x66,0xe9};				/* jmp disp32	       */
 /* 32-bit NOPs patterns.  */
 static const unsigned char *const f32_patt[] = {
-  f32_1, f32_2, f32_3, f32_4, NULL, f32_6, f32_7
+  f32_1, f32_2, f32_3, f32_4, f32_5, f32_6, f32_7, f32_8
 };
 /* 64-bit NOPs patterns.  */
 static const unsigned char *const f64_patt[] = {
@@ -1312,7 +1315,7 @@ static const unsigned char *const f64_patt[] = {
 };
 /* 16-bit NOPs patterns.  */
 static const unsigned char *const f16_patt[] = {
-  f32_1, f16_2, f16_3, f16_4
+  f32_1, f16_2, f16_3, f16_4, f16_5
 };
 /* nopl (%[re]ax) */
 static const unsigned char alt_3[] =
@@ -1368,14 +1371,6 @@ i386_output_nops (char *where, const unsigned char *const *patt,
     }
 
   nops = patt[max_single_nop_size - 1];
-
-  /* Use the smaller one if the requsted one isn't available.  */
-  if (nops == NULL)
-    {
-      max_single_nop_size--;
-      nops = patt[max_single_nop_size - 1];
-    }
-
   last = count % max_single_nop_size;
 
   count -= last;
@@ -1385,17 +1380,7 @@ i386_output_nops (char *where, const unsigned char *const *patt,
   if (last)
     {
       nops = patt[last - 1];
-      if (nops == NULL)
-	{
-	  /* Use the smaller one plus one-byte NOP if the needed one
-	     isn't available.  */
-	  last--;
-	  nops = patt[last - 1];
-	  memcpy (where + offset, nops, last);
-	  where[offset + last] = *patt[0];
-	}
-      else
-	memcpy (where + offset, nops, last);
+      memcpy (where + offset, nops, last);
     }
 }
 
