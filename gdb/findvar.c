@@ -31,7 +31,6 @@
 #include "block.h"
 #include "objfiles.h"
 #include "language.h"
-#include "dwarf2/loc.h"
 #include "gdbsupport/selftest.h"
 
 /* Basic byte-swapping routines.  All 'extract' functions return a
@@ -391,41 +390,6 @@ symbol_read_needs_frame (struct symbol *sym)
   return symbol_read_needs (sym) == SYMBOL_NEEDS_FRAME;
 }
 
-/* Given static link expression and the frame it lives in, look for the frame
-   the static links points to and return it.  Return NULL if we could not find
-   such a frame.   */
-
-static frame_info_ptr
-follow_static_link (frame_info_ptr frame,
-		    const struct dynamic_prop *static_link)
-{
-  CORE_ADDR upper_frame_base;
-
-  if (!dwarf2_evaluate_property (static_link, frame, NULL, &upper_frame_base))
-    return NULL;
-
-  /* Now climb up the stack frame until we reach the frame we are interested
-     in.  */
-  for (; frame != NULL; frame = get_prev_frame (frame))
-    {
-      struct symbol *framefunc = get_frame_function (frame);
-
-      /* Stacks can be quite deep: give the user a chance to stop this.  */
-      QUIT;
-
-      /* If we don't know how to compute FRAME's base address, don't give up:
-	 maybe the frame we are looking for is upper in the stack frame.  */
-      if (framefunc != NULL
-	  && SYMBOL_BLOCK_OPS (framefunc) != NULL
-	  && SYMBOL_BLOCK_OPS (framefunc)->get_frame_base != NULL
-	  && (SYMBOL_BLOCK_OPS (framefunc)->get_frame_base (framefunc, frame)
-	      == upper_frame_base))
-	break;
-    }
-
-  return frame;
-}
-
 /* Assuming VAR is a symbol that can be reached from FRAME thanks to lexical
    rules, look for the frame that is actually hosting VAR and return it.  If,
    for some reason, we found no such frame, return NULL.
@@ -494,25 +458,14 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
       /* Assuming we have a block for this frame: if we are at the function
 	 level, the immediate upper lexical block is in an outer function:
 	 follow the static link.  */
-      else if (frame_block->function ())
+      else if (frame_block->function () != nullptr)
 	{
-	  const struct dynamic_prop *static_link
-	    = frame_block->static_link ();
-	  int could_climb_up = 0;
-
-	  if (static_link != NULL)
+	  frame = frame_follow_static_link (frame);
+	  if (frame != nullptr)
 	    {
-	      frame = follow_static_link (frame, static_link);
-	      if (frame != NULL)
-		{
-		  frame_block = get_frame_block (frame, NULL);
-		  could_climb_up = frame_block != NULL;
-		}
-	    }
-	  if (!could_climb_up)
-	    {
-	      frame = NULL;
-	      break;
+	      frame_block = get_frame_block (frame, nullptr);
+	      if (frame_block == nullptr)
+		frame = nullptr;
 	    }
 	}
 

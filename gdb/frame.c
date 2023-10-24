@@ -43,6 +43,7 @@
 #include "hashtab.h"
 #include "valprint.h"
 #include "cli/cli-option.h"
+#include "dwarf2/loc.h"
 
 /* The sentinel frame terminates the innermost end of the frame chain.
    If unwound, it returns the information needed to construct an
@@ -3118,6 +3119,45 @@ get_frame_sp (frame_info_ptr this_frame)
   /* NOTE drow/2008-06-28: gdbarch_unwind_sp could be converted to
      operate on THIS_FRAME now.  */
   return gdbarch_unwind_sp (gdbarch, frame_info_ptr (this_frame->next));
+}
+
+/* See frame.h.  */
+
+frame_info_ptr
+frame_follow_static_link (frame_info_ptr frame)
+{
+  const block *frame_block = get_frame_block (frame, nullptr);
+  frame_block = frame_block->function_block ();
+
+  const struct dynamic_prop *static_link = frame_block->static_link ();
+  if (static_link == nullptr)
+    return {};
+
+  CORE_ADDR upper_frame_base;
+
+  if (!dwarf2_evaluate_property (static_link, frame, NULL, &upper_frame_base))
+    return {};
+
+  /* Now climb up the stack frame until we reach the frame we are interested
+     in.  */
+  for (; frame != nullptr; frame = get_prev_frame (frame))
+    {
+      struct symbol *framefunc = get_frame_function (frame);
+
+      /* Stacks can be quite deep: give the user a chance to stop this.  */
+      QUIT;
+
+      /* If we don't know how to compute FRAME's base address, don't give up:
+	 maybe the frame we are looking for is upper in the stack frame.  */
+      if (framefunc != NULL
+	  && SYMBOL_BLOCK_OPS (framefunc) != NULL
+	  && SYMBOL_BLOCK_OPS (framefunc)->get_frame_base != NULL
+	  && (SYMBOL_BLOCK_OPS (framefunc)->get_frame_base (framefunc, frame)
+	      == upper_frame_base))
+	break;
+    }
+
+  return frame;
 }
 
 /* Return the reason why we can't unwind past FRAME.  */

@@ -640,6 +640,13 @@ class address_space;
 /* Return the frame's address space.  */
 extern const address_space *get_frame_address_space (frame_info_ptr);
 
+/* A frame may have a "static link".  That is, in some languages, a
+   nested function may have access to variables from the enclosing
+   block and frame.  This function looks for a frame's static link.
+   If found, returns the corresponding frame; otherwise, returns a
+   null frame_info_ptr.  */
+extern frame_info_ptr frame_follow_static_link (frame_info_ptr frame);
+
 /* For frames where we can not unwind further, describe why.  */
 
 enum unwind_stop_reason
