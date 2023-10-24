@@ -42,7 +42,8 @@ func (const A &a)
   b.i = 10;
   b.c = 'a';
 
-  return 0; /* Break here.  */
+  val *= 1; /* Break here.  */
+  return 0;
 }
 
 int
