@@ -622,6 +622,30 @@ frapy_language (PyObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+/* The static link for this frame.  */
+
+static PyObject *
+frapy_static_link (PyObject *self, PyObject *args)
+{
+  frame_info_ptr link;
+
+  try
+    {
+      FRAPY_REQUIRE_VALID (self, link);
+
+      link = frame_follow_static_link (link);
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  if (link == nullptr)
+    Py_RETURN_NONE;
+
+  return frame_info_to_frame_object (link);
+}
+
 /* Implementation of gdb.newest_frame () -> gdb.Frame.
    Returns the newest frame object.  */
 
@@ -800,6 +824,8 @@ Return the value of the variable in this frame." },
     "The stack level of this frame." },
   { "language", frapy_language, METH_NOARGS,
     "The language of this frame." },
+  { "static_link", frapy_static_link, METH_NOARGS,
+    "The static link of this frame, or None." },
   {NULL}  /* Sentinel */
 };
 
