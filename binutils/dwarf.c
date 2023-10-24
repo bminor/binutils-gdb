@@ -10949,16 +10949,21 @@ display_gdb_index (struct dwarf_section *section,
       display_lang (lang);
       printf ("\n");
 
-      uint32_t name_offset = byte_get_little_endian (shortcut_table + 4, 4);
       printf (_("Name of main: "));
-      if (name_offset >= section->size - constant_pool_offset)
-	{
-	  printf (_("<corrupt offset: %x>\n"), name_offset);
-	  warn (_("Corrupt name offset of 0x%x found for name of main\n"),
-		name_offset);
-	}
+      if (lang == 0)
+	printf (_("<unknown>\n"));
       else
-	printf ("%s\n", constant_pool + name_offset);
+	{
+	  uint32_t name_offset = byte_get_little_endian (shortcut_table + 4, 4);
+	  if (name_offset >= section->size - constant_pool_offset)
+	    {
+	      printf (_("<corrupt offset: %x>\n"), name_offset);
+	      warn (_("Corrupt name offset of 0x%x found for name of main\n"),
+		    name_offset);
+	    }
+	  else
+	    printf ("%s\n", constant_pool + name_offset);
+	}
     }
 
   return 1;

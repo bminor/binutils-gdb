@@ -1,3 +1,7 @@
+2023-10-24  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf.c (display_gdb_index): Handle unknown name of main.
+
 2023-10-10  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf.c (display_lang): New function, factored out of ...
