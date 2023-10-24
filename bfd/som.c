@@ -5146,28 +5146,30 @@ som_set_reloc_info (unsigned char *fixup,
 		     section contents.  */
 		  rptr->addend = var ('V');
 
-		  if (rptr->addend == 0 && !section->contents)
-		    {
-		      /* Got to read the damn contents first.  We don't
-			 bother saving the contents (yet).  Add it one
-			 day if the need arises.  */
-		      bfd_byte *contents;
-		      if (!bfd_malloc_and_get_section (section->owner, section,
-						       &contents))
-			{
-			  free (contents);
-			  return (unsigned) -1;
-			}
-		      section->contents = contents;
-		      deallocate_contents = 1;
-		    }
 		  if (rptr->addend == 0
-		      && offset - var ('L') <= section->size
-		      && section->size - (offset - var ('L')) >= 4)
-		    rptr->addend = bfd_get_32 (section->owner,
-					       (section->contents
-						+ offset - var ('L')));
-
+		      && (section->flags & SEC_HAS_CONTENTS) != 0)
+		    {
+		      if (!section->contents)
+			{
+			  /* Got to read the damn contents first.  We don't
+			     bother saving the contents (yet).  Add it one
+			     day if the need arises.  */
+			  bfd_byte *contents;
+			  if (!bfd_malloc_and_get_section (section->owner,
+							   section, &contents))
+			    {
+			      free (contents);
+			      return (unsigned) -1;
+			    }
+			  section->contents = contents;
+			  deallocate_contents = 1;
+			}
+		      if (offset - var ('L') <= section->size
+			  && section->size - (offset - var ('L')) >= 4)
+			rptr->addend = bfd_get_32 (section->owner,
+						   (section->contents
+						    + offset - var ('L')));
+		    }
 		}
 	      else
 		rptr->addend = var ('V');
