@@ -53,7 +53,8 @@ typedef struct CollectorUtilFuncs
   char *(*fgets)(char *s, int n, FILE *stream);
   FILE *(*fopen)(const char *filename, const char *mode);
   pid_t (*vfork)();
-  int (*fprintf)(FILE *stream, const char *format, ...);
+  int (*fprintf)(FILE *stream, const char *format, ...)
+	__attribute__ ((format (printf, 2, 3)));
   void (*free)(void *ptr);
   int (*fstat)(int fd, struct stat *buf);
   int (*getcontext)(ucontext_t *ucp);
@@ -82,7 +83,8 @@ typedef struct CollectorUtilFuncs
   int (*setenv)(const char *name, const char *value, int overwrite);
   int (*sigfillset)(sigset_t *set);
   int (*sigprocmask)(int how, const sigset_t *set, sigset_t *oldset);
-  int (*snprintf)(char *str, size_t size, const char *format, ...);
+  int (*snprintf)(char *str, size_t size, const char *format, ...)
+	__attribute__ ((format (printf, 3, 4)));
   int (*stack_getbounds)();
   char *(*strchr)(const char *name, int c);
   int (*strcmp)(const char *s1, const char *s2);
@@ -168,12 +170,13 @@ typedef struct CollectorInterface
   CollectorModule (*registerModule)(struct ModuleInterface*);
   const char *(*getParams)();
   const char *(*getExpDir)();
-  int (*writeLog)(char *format, ...);
+  int (*writeLog)(char *format, ...) __attribute__ ((format (printf, 1, 2)));
   FrameInfo (*getFrameInfo)(CollectorModule modl, HiResTime ts, int mode, void *arg);
   FrameInfo (*getUID)(CM_Array *arg);
   FrameInfo (*getUID2)(CM_Array *arg, FrameInfo uid);
   int (*getStackTrace)(void *buf, int size, void *bptr, void *eptr, void *arg);
-  int (*writeMetaData)(CollectorModule modl, char *format, ...);
+  int (*writeMetaData)(CollectorModule modl, char *format, ...)
+	__attribute__ ((format (printf, 2, 3)));
 
   /* writeDataRecord ensures that the header is filled in, and then calls writeDataPacket */
   int (*writeDataRecord)(CollectorModule modl, struct Common_packet *pckt);

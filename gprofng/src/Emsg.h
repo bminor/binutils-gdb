@@ -105,7 +105,8 @@ public:
   Vector<Emsg*> *msgs;
   void remove_msg (Emsg *msg);
   Emsg *get_error ();
-  Emsg *append_msg (Cmsg_warn w, const char *fmt, ...);
+  Emsg *append_msg (Cmsg_warn w, const char *fmt, ...)
+	__attribute__ ((format (printf, 3, 4)));
   void append_msgs (Vector<Emsg*> *lst);
 };
 

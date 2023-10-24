@@ -640,7 +640,7 @@ remapBlock (DataHandle *hndl, unsigned iflow, unsigned ichunk)
       hrtime_t teo = __collector_gethrtime ();
       double deltato = (double) (teo - tso) / 1000000.;
       (void) CALL_UTIL (snprintf) (errmsg, sizeof (errmsg),
-	      " t=%d, %s: open-retries=%lu, %3.6f ms.; remap\n",
+	      " t=%ld, %s: open-retries=%d, %3.6f ms.; remap\n",
 	      (unsigned long) __collector_thr_self (), hndl->fname,
 	      iter, deltato);
       __collector_log_write ("<event kind=\"%s\" id=\"%d\">%s</event>\n",

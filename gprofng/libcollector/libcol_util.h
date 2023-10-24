@@ -38,7 +38,8 @@ extern  void __collector_libscf_funcs_init();
 
 /* -------  functions from libcol_util.c ----------------- */
 extern void * __collector_memcpy (void *s1, const void *s2, size_t n);
-extern int (*__collector_sscanfp)(const char *restrict s, const char *restrict fmt, ...);
+extern int (*__collector_sscanfp)(const char *restrict s, const char *restrict fmt, ...)
+	__attribute__ ((format (scanf, 2, 3)));
 extern char * __collector_strcat (char *s1, const char *s2);
 extern char * __collector_strchr (const char *s1, int chr);
 extern size_t __collector_strlcpy (char *dst, const char *src, size_t dstsize);

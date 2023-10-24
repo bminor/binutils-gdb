@@ -26,6 +26,7 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #include <semaphore.h>		/* sem_wait() */
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/param.h>
@@ -252,22 +253,28 @@ open_experiment (const char *exp)
   collector_interface->writeLog ("  <profdata fname=\"%s\"/>\n",
 				 module_interface.description);
   /* Record Sync_packet description */
-  Sync_packet *pp = NULL;
   collector_interface->writeLog ("  <profpckt kind=\"%d\" uname=\"Synchronization tracing data\">\n", SYNC_PCKT);
   collector_interface->writeLog ("    <field name=\"LWPID\" uname=\"Lightweight process id\" offset=\"%d\" type=\"%s\"/>\n",
-				 &pp->comm.lwp_id, sizeof (pp->comm.lwp_id) == 4 ? "INT32" : "INT64");
+		(int) offsetof (Sync_packet, comm.lwp_id),
+		fld_sizeof (Sync_packet, comm.lwp_id) == 4 ? "INT32" : "INT64");
   collector_interface->writeLog ("    <field name=\"THRID\" uname=\"Thread number\" offset=\"%d\" type=\"%s\"/>\n",
-				 &pp->comm.thr_id, sizeof (pp->comm.thr_id) == 4 ? "INT32" : "INT64");
+		(int) offsetof (Sync_packet, comm.thr_id),
+		fld_sizeof (Sync_packet, comm.thr_id) == 4 ? "INT32" : "INT64");
   collector_interface->writeLog ("    <field name=\"CPUID\" uname=\"CPU id\" offset=\"%d\" type=\"%s\"/>\n",
-				 &pp->comm.cpu_id, sizeof (pp->comm.cpu_id) == 4 ? "INT32" : "INT64");
+		(int) offsetof (Sync_packet, comm.cpu_id),
+		fld_sizeof (Sync_packet, comm.cpu_id) == 4 ? "INT32" : "INT64");
   collector_interface->writeLog ("    <field name=\"TSTAMP\" uname=\"High resolution timestamp\" offset=\"%d\" type=\"%s\"/>\n",
-				 &pp->comm.tstamp, sizeof (pp->comm.tstamp) == 4 ? "INT32" : "INT64");
+		(int) offsetof (Sync_packet, comm.tstamp),
+		fld_sizeof (Sync_packet, comm.tstamp) == 4 ? "INT32" : "INT64");
   collector_interface->writeLog ("    <field name=\"FRINFO\" offset=\"%d\" type=\"%s\"/>\n",
-				 &pp->comm.frinfo, sizeof (pp->comm.frinfo) == 4 ? "INT32" : "INT64");
+		(int) offsetof (Sync_packet, comm.frinfo),
+		fld_sizeof (Sync_packet, comm.frinfo) == 4 ? "INT32" : "INT64");
   collector_interface->writeLog ("    <field name=\"SRQST\" uname=\"Synchronization start time\" offset=\"%d\" type=\"%s\"/>\n",
-				 &pp->requested, sizeof (pp->requested) == 4 ? "INT32" : "INT64");
+		(int) offsetof (Sync_packet, requested),
+		fld_sizeof (Sync_packet, requested) == 4 ? "INT32" : "INT64");
   collector_interface->writeLog ("    <field name=\"SOBJ\" uname=\"Synchronization object address\" offset=\"%d\" type=\"%s\"/>\n",
-				 &pp->objp, sizeof (pp->objp) == 4 ? "INT32" : "INT64");
+		(int) offsetof (Sync_packet, objp),
+		fld_sizeof (Sync_packet, objp) == 4 ? "INT32" : "INT64");
   collector_interface->writeLog ("  </profpckt>\n");
   collector_interface->writeLog ("</profile>\n");
 

@@ -1594,7 +1594,7 @@ ClassFile::get_disasm (uint64_t inst_address, uint64_t end_address,
     {
       append_msg (CMSG_ERROR, GTXT ("Cannot disassemble class file %s (%s), implausible size = %lld"),
 		  get_name (), dbeFile->get_location (),
-		  (end_address - start_address));
+		  (long long) (end_address - start_address));
       inst_size = 0;
       return NULL;
     }

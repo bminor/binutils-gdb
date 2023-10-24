@@ -28,7 +28,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/param.h> /* MAXPATHLEN */
-
+#include <stddef.h>
 #include <jni.h>
 #include <jvmti.h>
 
@@ -628,8 +628,8 @@ jvmti_ThreadStart (jvmtiEnv *jvmti_env, JNIEnv* jni_env, jthread thread)
 				 group_name,
 				 parent_name,
 				 (unsigned long) tid,
-				 thread,
-				 jni_env
+				 (unsigned long) thread,
+				 (unsigned long) jni_env
 				 );
   TSD_Entry *tsd = collector_interface->getKey (tsd_key);
   if (tsd)
@@ -648,8 +648,8 @@ jvmti_ThreadEnd (jvmtiEnv *jvmti_env, JNIEnv* jni_env, jthread thread)
 				 SP_JCMD_JTHREND,
 				 (unsigned) (hrt / NANOSEC), (unsigned) (hrt % NANOSEC),
 				 (unsigned long) tid,
-				 thread,
-				 jni_env
+				 (unsigned long) thread,
+				 (unsigned long) jni_env
 				 );
   TSD_Entry *tsd = collector_interface->getKey (tsd_key);
   if (tsd)
