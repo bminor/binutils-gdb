@@ -120,11 +120,6 @@ reopen_exec_file (void)
       && current_program_space->ebfd_mtime
       && current_program_space->ebfd_mtime != st.st_mtime)
     exec_file_attach (filename.c_str (), 0);
-  else
-    /* If we accessed the file since last opening it, close it now;
-       this stops GDB from holding the executable open after it
-       exits.  */
-    bfd_cache_close_all ();
 }
 
 /* If we have both a core file and an exec file,

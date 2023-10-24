@@ -462,6 +462,22 @@ display_gdb_prompt (const char *new_prompt)
     }
 }
 
+/* Notify the 'before_prompt' observer, and run any additional actions
+   that must be done before we display the prompt.  */
+static void
+notify_before_prompt (const char *prompt)
+{
+  /* Give observers a chance of changing the prompt.  E.g., the python
+     `gdb.prompt_hook' is installed as an observer.  */
+  gdb::observers::before_prompt.notify (prompt);
+
+  /* As we are about to display the prompt, and so GDB might be sitting
+     idle for some time, close all the cached BFDs.  This ensures that
+     when we next start running a user command all BFDs will be reopened
+     as needed, and as a result, we will see any on-disk changes.  */
+  bfd_cache_close_all ();
+}
+
 /* Return the top level prompt, as specified by "set prompt", possibly
    overridden by the python gdb.prompt_hook hook, and then composed
    with the prompt prefix and suffix (annotations).  */
@@ -469,9 +485,7 @@ display_gdb_prompt (const char *new_prompt)
 static std::string
 top_level_prompt (void)
 {
-  /* Give observers a chance of changing the prompt.  E.g., the python
-     `gdb.prompt_hook' is installed as an observer.  */
-  gdb::observers::before_prompt.notify (get_prompt ().c_str ());
+  notify_before_prompt (get_prompt ().c_str ());
 
   const std::string &prompt = get_prompt ();
 

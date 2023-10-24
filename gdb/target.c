@@ -2737,11 +2737,6 @@ target_mourn_inferior (ptid_t ptid)
 {
   gdb_assert (ptid.pid () == inferior_ptid.pid ());
   current_inferior ()->top_target ()->mourn_inferior ();
-
-  /* We no longer need to keep handles on any of the object files.
-     Make sure to release them to avoid unnecessarily locking any
-     of them while we're not actually debugging.  */
-  bfd_cache_close_all ();
 }
 
 /* Look for a target which can describe architectural features, starting

@@ -894,6 +894,11 @@ notify_target_resumed (ptid_t ptid)
 {
   interps_notify_target_resumed (ptid);
   gdb::observers::target_resumed.notify (ptid);
+
+  /* We are about to resume the inferior.  Close all cached BFDs so that
+     when the inferior next stops, and GDB regains control, we will spot
+     any on-disk changes to the BFDs we are using.  */
+  bfd_cache_close_all ();
 }
 
 /* See gdbthread.h.  */

@@ -2499,7 +2499,6 @@ kill_command (const char *arg, int from_tty)
   int infnum = current_inferior ()->num;
 
   target_kill ();
-  bfd_cache_close_all ();
 
   update_previous_thread ();
 

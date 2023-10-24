@@ -1124,7 +1124,6 @@ symbol_file_add_with_addrs (const gdb_bfd_ref_ptr &abfd, const char *name,
 
   gdb::observers::new_objfile.notify (objfile);
 
-  bfd_cache_close_all ();
   return objfile;
 }
 

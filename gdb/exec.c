@@ -500,8 +500,6 @@ exec_file_attach (const char *filename, int from_tty)
 	(*deprecated_exec_file_display_hook) (filename);
     }
 
-  bfd_cache_close_all ();
-
   /* Are are loading the same executable?  */
   bfd *prev_bfd = exec_bfd_holder.get ();
   bfd *curr_bfd = current_program_space->exec_bfd ();
