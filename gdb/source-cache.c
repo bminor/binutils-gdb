@@ -22,7 +22,6 @@
 #include "source.h"
 #include "cli/cli-style.h"
 #include "symtab.h"
-#include "gdbsupport/selftest.h"
 #include "objfiles.h"
 #include "exec.h"
 #include "cli/cli-cmds.h"
@@ -38,6 +37,10 @@
 #include <srchilite/sourcehighlight.h>
 #include <srchilite/langmap.h>
 #include <srchilite/settings.h>
+#endif
+
+#if GDB_SELF_TEST
+#include "gdbsupport/selftest.h"
 #endif
 
 /* The number of source files we'll cache.  */
@@ -257,6 +260,43 @@ try_source_highlight (std::string &contents ATTRIBUTE_UNUSED,
   return false;
 #endif /* HAVE_SOURCE_HIGHLIGHT */
 }
+
+#ifdef HAVE_SOURCE_HIGHLIGHT
+#if GDB_SELF_TEST
+namespace selftests
+{
+static void gnu_source_highlight_test ()
+{
+  const std::string prog
+    = ("int\n"
+       "foo (void)\n"
+       "{\n"
+       "  return 0;\n"
+       "}\n");
+  const std::string fullname = "test.c";
+  std::string styled_prog;
+
+  bool res = false;
+  bool saw_exception = false;
+  styled_prog = prog;
+  try
+    {
+      res = try_source_highlight (styled_prog, language_c, fullname);
+    }
+  catch (...)
+    {
+      saw_exception = true;
+    }
+
+  SELF_CHECK (!saw_exception);
+  if (res)
+    SELF_CHECK (prog.size () < styled_prog.size ());
+  else
+    SELF_CHECK (prog == styled_prog);
+}
+}
+#endif /* GDB_SELF_TEST */
+#endif /* HAVE_SOURCE_HIGHLIGHT */
 
 /* See source-cache.h.  */
 
@@ -489,5 +529,9 @@ styling to source code lines that are shown."),
 
 #if GDB_SELF_TEST
   selftests::register_test ("source-cache", selftests::extract_lines_test);
+#ifdef HAVE_SOURCE_HIGHLIGHT
+  selftests::register_test ("gnu-source-highlight",
+			    selftests::gnu_source_highlight_test);
+#endif
 #endif
 }
