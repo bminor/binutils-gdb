@@ -9571,7 +9571,7 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bool default_imported_symver)
 	}
       elf_tdata (abfd)->cverrefs = i;
 
-      if (elf_tdata (abfd)->dt_verneed == NULL)
+      if (free_contents)
 	free (contents);
       contents = NULL;
     }
@@ -9618,6 +9618,7 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bool default_imported_symver)
 	  if (contents == NULL)
 	    goto error_return_verdef;
 
+	  free_contents = true;
 	  BFD_ASSERT (sizeof (Elf_External_Verdef)
 		      >= sizeof (Elf_External_Verdaux));
 
@@ -9767,7 +9768,7 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bool default_imported_symver)
 		     ((bfd_byte *) everdef + iverdef->vd_next));
 	}
 
-      if (elf_tdata (abfd)->dt_verdef == NULL)
+      if (free_contents)
 	free (contents);
       contents = NULL;
     }
