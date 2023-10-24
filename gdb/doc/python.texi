@@ -5671,6 +5671,16 @@ Set this frame to be the selected frame.  @xref{Stack, ,Examining the
 Stack}.
 @end defun
 
+@defun Frame.static_link ()
+In some languages (e.g., Ada, but also a GNU C extension), a nested
+function can access the variables in the outer scope.  This is done
+via a ``static link'', which is a reference from the nested frame to
+the appropriate outer frame.
+
+This method returns this frame's static link frame, if one exists.  If
+there is no static link, this method returns @code{None}.
+@end defun
+
 @defun Frame.level ()
 Return an integer, the stack frame level for this frame.  @xref{Frames, ,Stack Frames}.
 @end defun

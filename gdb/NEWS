@@ -350,6 +350,9 @@ show tui mouse-events
 
   ** gdb.LazyString now implements the __str__ method.
 
+  ** New method gdb.Frame.static_link that returns the outer frame
+     of a nested function frame.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.
