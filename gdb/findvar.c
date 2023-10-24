@@ -460,8 +460,7 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
      tests that embed global/static symbols with null location lists.
      We want to get <optimized out> instead of <frame required> when evaluating
      them so return a frame instead of raising an error.  */
-  else if (var_block == var_block->global_block ()
-	   || var_block == var_block->static_block ())
+  else if (var_block->is_global_block () || var_block->is_static_block ())
     return frame;
 
   /* We have to handle the "my_func::my_local_var" notation.  This requires us
@@ -486,7 +485,7 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
 
       /* If we failed to find the proper frame, fallback to the heuristic
 	 method below.  */
-      else if (frame_block == frame_block->global_block ())
+      else if (frame_block->is_global_block ())
 	{
 	  frame = NULL;
 	  break;
