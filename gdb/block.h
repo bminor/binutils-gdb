@@ -254,9 +254,24 @@ struct block : public allocate_on_obstack
 
   const struct block *static_block () const;
 
+  /* Return true if this block is a static block.  */
+
+  bool is_static_block () const
+  {
+    const block *sup = superblock ();
+    if (sup == nullptr)
+      return false;
+    return sup->is_global_block ();
+  }
+
   /* Return the static block associated with block.  */
 
   const struct block *global_block () const;
+
+  /* Return true if this block is a global block.  */
+
+  bool is_global_block () const
+  { return superblock () == nullptr; }
 
   /* Set the compunit of this block, which must be a global block.  */
 
