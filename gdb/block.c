@@ -378,6 +378,19 @@ block::global_block () const
 
 /* See block.h.  */
 
+const struct block *
+block::function_block () const
+{
+  const block *block = this;
+
+  while (block != nullptr && block->function () == nullptr)
+    block = block->superblock ();
+
+  return block;
+}
+
+/* See block.h.  */
+
 void
 block::set_compunit_symtab (struct compunit_symtab *cu)
 {

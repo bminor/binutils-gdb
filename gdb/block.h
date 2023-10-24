@@ -273,6 +273,12 @@ struct block : public allocate_on_obstack
   bool is_global_block () const
   { return superblock () == nullptr; }
 
+  /* Return the function block for this block.  Returns nullptr if
+     there is no enclosing function, i.e., if this block is a static
+     or global block.  */
+
+  const struct block *function_block () const;
+
   /* Set the compunit of this block, which must be a global block.  */
 
   void set_compunit_symtab (struct compunit_symtab *);
