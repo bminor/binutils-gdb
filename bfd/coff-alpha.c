@@ -815,10 +815,20 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
       arelent *rel;
       bfd_reloc_status_type r;
       char *err;
+      unsigned int r_type;
 
       rel = *relp;
-      r = bfd_reloc_ok;
-      switch (rel->howto->type)
+      if (rel->howto == NULL)
+	{
+	  r = bfd_reloc_notsupported;
+	  r_type = ALPHA_R_IGNORE;
+	}
+      else
+	{
+	  r = bfd_reloc_ok;
+	  r_type = rel->howto->type;
+	}
+      switch (r_type)
 	{
 	case ALPHA_R_IGNORE:
 	  rel->address += input_section->output_offset;
@@ -985,7 +995,10 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
 	    relocation += rel->addend;
 
 	    if (tos >= RELOC_STACKSIZE)
-	      abort ();
+	      {
+		r = bfd_reloc_notsupported;
+		break;
+	      }
 
 	    stack[tos++] = relocation;
 	  }
@@ -1004,7 +1017,10 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
 	      }
 
 	    if (tos == 0)
-	      abort ();
+	      {
+		r = bfd_reloc_notsupported;
+		break;
+	      }
 
 	    /* The offset and size for this reloc are encoded into the
 	       addend field by alpha_adjust_reloc_in.  */
@@ -1045,7 +1061,10 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
 	    relocation += rel->addend;
 
 	    if (tos == 0)
-	      abort ();
+	      {
+		r = bfd_reloc_notsupported;
+		break;
+	      }
 
 	    stack[tos - 1] -= relocation;
 	  }
@@ -1078,7 +1097,10 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
 	    relocation += rel->addend;
 
 	    if (tos == 0)
-	      abort ();
+	      {
+		r = bfd_reloc_notsupported;
+		break;
+	      }
 
 	    stack[tos - 1] >>= relocation;
 	  }
@@ -1091,7 +1113,8 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
 	  break;
 
 	default:
-	  abort ();
+	  r = bfd_reloc_notsupported;
+	  break;
 	}
 
       if (relocatable)
@@ -1123,15 +1146,30 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
 		 input_section, rel->address);
 	      break;
 	    case bfd_reloc_outofrange:
+	      (*link_info->callbacks->einfo)
+		/* xgettext:c-format */
+		(_("%X%P: %pB(%pA): relocation \"%pR\" goes out of range\n"),
+		 abfd, input_section, rel);
+	      goto error_return;
+	    case bfd_reloc_notsupported:
+	      (*link_info->callbacks->einfo)
+		/* xgettext:c-format */
+		(_("%X%P: %pB(%pA): relocation \"%pR\" is not supported\n"),
+		 abfd, input_section, rel);
+	      goto error_return;
 	    default:
-	      abort ();
+	      (*link_info->callbacks->einfo)
+		/* xgettext:c-format */
+		(_("%X%P: %pB(%pA): relocation \"%pR\""
+		   " returns an unrecognized value %x\n"),
+		 abfd, input_section, rel, r);
 	      break;
 	    }
 	}
     }
 
   if (tos != 0)
-    abort ();
+    goto error_return;
 
  successful_return:
   free (reloc_vector);
