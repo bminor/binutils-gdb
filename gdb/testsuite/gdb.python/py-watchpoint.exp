@@ -42,5 +42,20 @@ gdb_test "source $pyfile" ".*Python script imported.*" \
     "import python scripts"
 gdb_test "python print(len(gdb.breakpoints()))" "2" "check modified BP count"
 gdb_test "continue" ".*" "run until program stops"
-gdb_test "python print(bpt.n)" "5" "check watchpoint hits"
+# Clang doesn't use CFA location information for variables (despite generating
+# them), meaning when the instruction "pop rbp" happens, we get a false hit
+# on the watchpoint. for more details, see:
+# https://github.com/llvm/llvm-project/issues/64390
+gdb_test_multiple "python print(bpt.n)" "check watchpoint hits" {
+    -re -wrap "5" {
+	pass $gdb_test_name
+    }
+    -re -wrap "6" {
+	if {[test_compiler_info "clang-*"]} {
+	    xfail "$gdb_test_name (clang issue 64390)"
+	} else {
+	    fail $gdb_test_name
+	}
+    }
+}
 gdb_test "python print(len(gdb.breakpoints()))" "1" "check BP count"
