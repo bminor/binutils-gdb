@@ -3207,10 +3207,16 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	       unrelocated_addr (pc - objfile->text_section_offset ()),
 	       pc_compare));
       if (item != first)
-	prev = item - 1;		/* Found a matching item.  */
+	{
+	  prev = item - 1;		/* Found a matching item.  */
+	  /* At this point, prev is a line whose address is <= pc.  However, we
+	     don't know if ITEM is pointing to the same statement or not.  */
+	  while (item != last && prev->line == item->line && !item->is_stmt)
+	    item++;
+	}
 
       /* At this point, prev points at the line whose start addr is <= pc, and
-	 item points at the next line.  If we ran off the end of the linetable
+	 item points at the next statement.  If we ran off the end of the linetable
 	 (pc >= start of the last line), then prev == item.  If pc < start of
 	 the first line, prev will not be set.  */
 
