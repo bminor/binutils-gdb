@@ -32,7 +32,6 @@
 #include <sys/ptrace.h>
 #include <asm/ptrace.h>
 #include <stdarg.h>
-#include "aarch64-scalable-linux-ptrace.h"
 #include "aarch64-scalable-linux-sigcontext.h"
 
 /* Indicates whether a SVE ptrace header is followed by SVE registers or a
