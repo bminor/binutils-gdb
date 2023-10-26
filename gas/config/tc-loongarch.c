@@ -893,8 +893,10 @@ check_this_insn_before_appending (struct loongarch_cl_insn *ip)
       ip->reloc_num++;
     }
   else if (ip->insn->mask == 0xffff8000
-	   /* amswap.w  rd, rk, rj  */
-	   && ((ip->insn_bin & 0xfff00000) == 0x38600000
+	   /* amcas.b  rd, rk, rj  */
+	   && ((ip->insn_bin & 0xfff80000) == 0x38580000
+	       /* amswap.w  rd, rk, rj  */
+	       || (ip->insn_bin & 0xfff00000) == 0x38600000
 	       /* ammax_db.wu  rd, rk, rj  */
 	       || (ip->insn_bin & 0xffff0000) == 0x38700000
 	       /* ammin_db.wu  rd, rk, rj  */
