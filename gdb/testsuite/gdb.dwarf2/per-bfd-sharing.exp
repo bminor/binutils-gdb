@@ -48,6 +48,7 @@ with_test_prefix "populate index cache" {
 	"set index-cache directory"
     gdb_test_no_output "set index-cache enabled on"
     gdb_test "file $host_binfile" "Reading symbols from .*" "file"
+    gdb_test_no_output "maint wait-for-index-cache"
 }
 
 proc load_binary { method } {
