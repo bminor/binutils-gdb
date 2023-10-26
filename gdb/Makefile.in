@@ -1971,6 +1971,14 @@ check-parallel: force
 	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check-parallel; \
 	else true; fi
 
+check-all-boards: force
+	@if [ -f testsuite/Makefile ]; then \
+	  rootme=`pwd`; export rootme; \
+	  rootsrc=`cd $(srcdir); pwd`; export rootsrc; \
+	  cd testsuite; \
+	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check-all-boards; \
+	else true; fi
+
 # The idea is to parallelize testing of multilibs, for example:
 #   make -j3 check//sh-hms-sim/{-m1,-m2,-m3,-m3e,-m4}/{,-nofpu}
 # will run 3 concurrent sessions of check, eventually testing all 10
