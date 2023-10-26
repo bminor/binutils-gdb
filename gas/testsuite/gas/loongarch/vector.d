@@ -1459,3 +1459,11 @@ Disassembly of section .text:
 [ 	]+16a0:[ 	]+77e40420[ 	]+xvpermi.w[ 	]+\$xr0,[ 	]+\$xr1,[ 	]+0x1
 [ 	]+16a4:[ 	]+77e80420[ 	]+xvpermi.d[ 	]+\$xr0,[ 	]+\$xr1,[ 	]+0x1
 [ 	]+16a8:[ 	]+77ec0420[ 	]+xvpermi.q[ 	]+\$xr0,[ 	]+\$xr1,[ 	]+0x1
+[ 	]+16ac:[ 	]+729d1420[ 	]+vfrecipe.s[ 	]+\$vr0,[ 	]+\$vr1
+[ 	]+16b0:[ 	]+729d1820[ 	]+vfrecipe.d[ 	]+\$vr0,[ 	]+\$vr1
+[ 	]+16b4:[ 	]+729d2420[ 	]+vfrsqrte.s[ 	]+\$vr0,[ 	]+\$vr1
+[ 	]+16b8:[ 	]+729d2820[ 	]+vfrsqrte.d[ 	]+\$vr0,[ 	]+\$vr1
+[ 	]+16bc:[ 	]+769d1420[ 	]+xvfrecipe.s[ 	]+\$xr0,[ 	]+\$xr1
+[ 	]+16c0:[ 	]+769d1820[ 	]+xvfrecipe.d[ 	]+\$xr0,[ 	]+\$xr1
+[ 	]+16c4:[ 	]+769d2420[ 	]+xvfrsqrte.s[ 	]+\$xr0,[ 	]+\$xr1
+[ 	]+16c8:[ 	]+769d2820[ 	]+xvfrsqrte.d[ 	]+\$xr0,[ 	]+\$xr1

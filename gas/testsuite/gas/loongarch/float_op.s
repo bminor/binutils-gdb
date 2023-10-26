@@ -74,3 +74,7 @@ ffint.d.w  $f0,$f1
 ffint.d.l  $f0,$f1
 frint.s  $f0,$f1
 frint.d  $f0,$f1
+frecipe.s  $f0,$f1
+frecipe.d  $f0,$f1
+frsqrte.s  $f0,$f1
+frsqrte.d  $f0,$f1

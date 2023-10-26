@@ -1449,3 +1449,11 @@ xvldi	$xr0, 1
 xvpermi.w	$xr0, $xr1, 1
 xvpermi.d	$xr0, $xr1, 1
 xvpermi.q	$xr0, $xr1, 1
+vfrecipe.s	$vr0, $vr1
+vfrecipe.d	$vr0, $vr1
+vfrsqrte.s	$vr0, $vr1
+vfrsqrte.d	$vr0, $vr1
+xvfrecipe.s	$xr0, $xr1
+xvfrecipe.d	$xr0, $xr1
+xvfrsqrte.s	$xr0, $xr1
+xvfrsqrte.d	$xr0, $xr1
