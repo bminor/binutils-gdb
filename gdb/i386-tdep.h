@@ -295,7 +295,7 @@ enum i386_regnum
   I386_FS_REGNUM,		/* %fs */
   I386_GS_REGNUM,		/* %gs */
   I386_ST0_REGNUM,		/* %st(0) */
-  I386_MXCSR_REGNUM = 40,	/* %mxcsr */ 
+  I386_MXCSR_REGNUM = 40,	/* %mxcsr */
   I386_YMM0H_REGNUM,		/* %ymm0h */
   I386_YMM7H_REGNUM = I386_YMM0H_REGNUM + 7,
   I386_BND0R_REGNUM,
