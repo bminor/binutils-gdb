@@ -2372,10 +2372,10 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 	  switch (*(*pp)++)
 	    {
 	    case VISIBILITY_PRIVATE:
-	      new_sublist->fn_field.is_private = 1;
+	      new_sublist->fn_field.accessibility = accessibility::PRIVATE;
 	      break;
 	    case VISIBILITY_PROTECTED:
-	      new_sublist->fn_field.is_protected = 1;
+	      new_sublist->fn_field.accessibility = accessibility::PROTECTED;
 	      break;
 	    }
 

@@ -1611,8 +1611,8 @@ struct fn_field
 
   unsigned int is_const:1;
   unsigned int is_volatile:1;
-  unsigned int is_private:1;
-  unsigned int is_protected:1;
+  /* Accessibility of the field.  */
+  ENUM_BITFIELD (accessibility) accessibility : 2;
   unsigned int is_artificial:1;
 
   /* * A stub method only has some fields valid (but they are enough
@@ -1657,11 +1657,8 @@ struct decl_field
 
   struct type *type;
 
-  /* * True if this field was declared protected, false otherwise.  */
-  unsigned int is_protected : 1;
-
-  /* * True if this field was declared private, false otherwise.  */
-  unsigned int is_private : 1;
+  /* Accessibility of the field.  */
+  ENUM_BITFIELD (accessibility) accessibility : 2;
 };
 
 /* * C++ language-specific information for TYPE_CODE_STRUCT and
@@ -1984,8 +1981,10 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_FN_FIELD_ARGS(thisfn, n) (((thisfn)[n].type)->fields ())
 #define TYPE_FN_FIELD_CONST(thisfn, n) ((thisfn)[n].is_const)
 #define TYPE_FN_FIELD_VOLATILE(thisfn, n) ((thisfn)[n].is_volatile)
-#define TYPE_FN_FIELD_PRIVATE(thisfn, n) ((thisfn)[n].is_private)
-#define TYPE_FN_FIELD_PROTECTED(thisfn, n) ((thisfn)[n].is_protected)
+#define TYPE_FN_FIELD_PRIVATE(thisfn, n) \
+  ((thisfn)[n].accessibility == accessibility::PRIVATE)
+#define TYPE_FN_FIELD_PROTECTED(thisfn, n) \
+  ((thisfn)[n].accessibility == accessibility::PROTECTED)
 #define TYPE_FN_FIELD_ARTIFICIAL(thisfn, n) ((thisfn)[n].is_artificial)
 #define TYPE_FN_FIELD_STUB(thisfn, n) ((thisfn)[n].is_stub)
 #define TYPE_FN_FIELD_CONSTRUCTOR(thisfn, n) ((thisfn)[n].is_constructor)
@@ -2008,9 +2007,9 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_TYPEDEF_FIELD_COUNT(thistype) \
   TYPE_CPLUS_SPECIFIC (thistype)->typedef_field_count
 #define TYPE_TYPEDEF_FIELD_PROTECTED(thistype, n) \
-  TYPE_TYPEDEF_FIELD (thistype, n).is_protected
+  (TYPE_TYPEDEF_FIELD (thistype, n).accessibility == accessibility::PROTECTED)
 #define TYPE_TYPEDEF_FIELD_PRIVATE(thistype, n)        \
-  TYPE_TYPEDEF_FIELD (thistype, n).is_private
+  (TYPE_TYPEDEF_FIELD (thistype, n).accessibility == accessibility::PRIVATE)
 
 #define TYPE_NESTED_TYPES_ARRAY(thistype)	\
   TYPE_CPLUS_SPECIFIC (thistype)->nested_types
@@ -2023,9 +2022,11 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_NESTED_TYPES_COUNT(thistype) \
   TYPE_CPLUS_SPECIFIC (thistype)->nested_types_count
 #define TYPE_NESTED_TYPES_FIELD_PROTECTED(thistype, n) \
-  TYPE_NESTED_TYPES_FIELD (thistype, n).is_protected
+  (TYPE_NESTED_TYPES_FIELD (thistype, n).accessibility \
+   == accessibility::PROTECTED)
 #define TYPE_NESTED_TYPES_FIELD_PRIVATE(thistype, n)	\
-  TYPE_NESTED_TYPES_FIELD (thistype, n).is_private
+  (TYPE_NESTED_TYPES_FIELD (thistype, n).accessibility \
+   == accessibility::PRIVATE)
 
 #define TYPE_IS_OPAQUE(thistype) \
   ((((thistype)->code () == TYPE_CODE_STRUCT) \

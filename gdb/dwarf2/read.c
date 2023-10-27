@@ -11716,10 +11716,10 @@ dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
       /* The assumed value if neither private nor protected.  */
       break;
     case DW_ACCESS_private:
-      fp.is_private = 1;
+      fp.accessibility = accessibility::PRIVATE;
       break;
     case DW_ACCESS_protected:
-      fp.is_protected = 1;
+      fp.accessibility = accessibility::PROTECTED;
       break;
     }
 
@@ -12078,10 +12078,10 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   switch (accessibility)
     {
     case DW_ACCESS_private:
-      fnp->is_private = 1;
+      fnp->accessibility = accessibility::PRIVATE;
       break;
     case DW_ACCESS_protected:
-      fnp->is_protected = 1;
+      fnp->accessibility = accessibility::PROTECTED;
       break;
     }
 
