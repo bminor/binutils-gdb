@@ -33,16 +33,6 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 
-/* A list of access specifiers used for printing.  */
-
-enum access_specifier
-{
-  s_none,
-  s_public,
-  s_private,
-  s_protected
-};
-
 static void c_type_print_varspec_suffix (struct type *, struct ui_file *, int,
 					 int, int,
 					 enum language,
@@ -866,85 +856,32 @@ print_spaces_filtered_with_print_options
 /* Output an access specifier to STREAM, if needed.  LAST_ACCESS is the
    last access specifier output (typically returned by this function).  */
 
-static enum access_specifier
+static accessibility
 output_access_specifier (struct ui_file *stream,
-			 enum access_specifier last_access,
-			 int level, bool is_protected, bool is_private,
+			 accessibility last_access,
+			 int level, accessibility new_access,
 			 const struct type_print_options *flags)
 {
-  if (is_protected)
+  if (last_access == new_access)
+    return new_access;
+
+  if (new_access == accessibility::PROTECTED)
     {
-      if (last_access != s_protected)
-	{
-	  last_access = s_protected;
-	  print_spaces_filtered_with_print_options (level + 2, stream, flags);
-	  gdb_printf (stream, "protected:\n");
-	}
+      print_spaces_filtered_with_print_options (level + 2, stream, flags);
+      gdb_printf (stream, "protected:\n");
     }
-  else if (is_private)
+  else if (new_access == accessibility::PRIVATE)
     {
-      if (last_access != s_private)
-	{
-	  last_access = s_private;
-	  print_spaces_filtered_with_print_options (level + 2, stream, flags);
-	  gdb_printf (stream, "private:\n");
-	}
+      print_spaces_filtered_with_print_options (level + 2, stream, flags);
+      gdb_printf (stream, "private:\n");
     }
   else
     {
-      if (last_access != s_public)
-	{
-	  last_access = s_public;
-	  print_spaces_filtered_with_print_options (level + 2, stream, flags);
-	  gdb_printf (stream, "public:\n");
-	}
+      print_spaces_filtered_with_print_options (level + 2, stream, flags);
+      gdb_printf (stream, "public:\n");
     }
 
-  return last_access;
-}
-
-/* Return true if an access label (i.e., "public:", "private:",
-   "protected:") needs to be printed for TYPE.  */
-
-static bool
-need_access_label_p (struct type *type)
-{
-  if (type->is_declared_class ())
-    {
-      for (int i = TYPE_N_BASECLASSES (type); i < type->num_fields (); i++)
-	if (!type->field (i).is_private ())
-	  return true;
-      for (int j = 0; j < TYPE_NFN_FIELDS (type); j++)
-	for (int i = 0; i < TYPE_FN_FIELDLIST_LENGTH (type, j); i++)
-	  if (!TYPE_FN_FIELD_PRIVATE (TYPE_FN_FIELDLIST1 (type,
-							  j), i))
-	    return true;
-      for (int i = 0; i < TYPE_TYPEDEF_FIELD_COUNT (type); ++i)
-	if (!TYPE_TYPEDEF_FIELD_PRIVATE (type, i))
-	  return true;
-    }
-  else
-    {
-      for (int i = TYPE_N_BASECLASSES (type); i < type->num_fields (); i++)
-	if (!type->field (i).is_public ())
-	  return true;
-      for (int j = 0; j < TYPE_NFN_FIELDS (type); j++)
-	{
-	  for (int i = 0; i < TYPE_FN_FIELDLIST_LENGTH (type, j); i++)
-	    if (TYPE_FN_FIELD_PROTECTED (TYPE_FN_FIELDLIST1 (type,
-							     j), i)
-		|| TYPE_FN_FIELD_PRIVATE (TYPE_FN_FIELDLIST1 (type,
-							      j),
-					  i))
-	      return true;
-	}
-      for (int i = 0; i < TYPE_TYPEDEF_FIELD_COUNT (type); ++i)
-	if (TYPE_TYPEDEF_FIELD_PROTECTED (type, i)
-	    || TYPE_TYPEDEF_FIELD_PRIVATE (type, i))
-	  return true;
-    }
-
-  return false;
+  return new_access;
 }
 
 /* Helper function that temporarily disables FLAGS->PRINT_OFFSETS,
@@ -1067,17 +1004,9 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 			metadata_style.style ().ptr (), nullptr);
 	}
 
-      /* Start off with no specific section type, so we can print
-	 one for the first field we find, and use that section type
-	 thereafter until we find another type.  */
-
-      enum access_specifier section_type = s_none;
-
-      /* For a class, if all members are private, there's no need
-	 for a "private:" label; similarly, for a struct or union
-	 masquerading as a class, if all members are public, there's
-	 no need for a "public:" label.  */
-      bool need_access_label = need_access_label_p (type);
+      accessibility section_type = (type->is_declared_class ()
+				    ? accessibility::PRIVATE
+				    : accessibility::PUBLIC);
 
       /* If there is a base class for this type,
 	 do not print the field that it occupies.  */
@@ -1098,13 +1027,10 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	      || type->field (i).is_artificial ())
 	    continue;
 
-	  if (need_access_label)
-	    {
-	      section_type = output_access_specifier
-		(stream, section_type, level,
-		 type->field (i).is_protected (),
-		 type->field (i).is_private (), flags);
-	    }
+	  section_type
+	    = output_access_specifier (stream, section_type, level,
+				       type->field (i).accessibility (),
+				       flags);
 
 	  bool is_static = type->field (i).is_static ();
 
@@ -1176,7 +1102,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	    if (!TYPE_FN_FIELD_ARTIFICIAL (f, j))
 	      real_len++;
 	}
-      if (real_len > 0 && section_type != s_none)
+      if (real_len > 0)
 	gdb_printf (stream, "\n");
 
       /* C++: print out the methods.  */
@@ -1207,8 +1133,8 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	      QUIT;
 	      section_type = output_access_specifier
 		(stream, section_type, level,
-		 TYPE_FN_FIELD_PROTECTED (f, j),
-		 TYPE_FN_FIELD_PRIVATE (f, j), flags);
+		 TYPE_FN_FIELD (f, j).accessibility,
+		 flags);
 
 	      print_spaces_filtered_with_print_options (level + 4, stream,
 							flags);
@@ -1334,13 +1260,11 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	      gdb_assert (target->code () == TYPE_CODE_TYPEDEF);
 	      target = target->target_type ();
 
-	      if (need_access_label)
-		{
-		  section_type = output_access_specifier
-		    (stream, section_type, level,
-		     TYPE_TYPEDEF_FIELD_PROTECTED (type, i),
-		     TYPE_TYPEDEF_FIELD_PRIVATE (type, i), flags);
-		}
+	      section_type = (output_access_specifier
+			      (stream, section_type, level,
+			       TYPE_TYPEDEF_FIELD (type, i).accessibility,
+			       flags));
+
 	      print_spaces_filtered_with_print_options (level + 4, stream,
 							flags);
 	      gdb_printf (stream, "typedef ");
