@@ -32,7 +32,7 @@
 
 /* This disassembler supports two different syntaxes for BPF assembly.
    One is called "normal" and has the typical form for assembly
-   languages, with mnemonics and the like.  The othe is called
+   languages, with mnemonics and the like.  The other is called
    "pseudoc" and looks like C.  */
 
 enum bpf_dialect
