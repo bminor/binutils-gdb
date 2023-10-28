@@ -2391,9 +2391,7 @@ clear_dangling_display_expressions (struct objfile *objfile)
    struct symbol.  NAME is the name to print; if NULL then VAR's print
    name will be used.  STREAM is the ui_file on which to print the
    value.  INDENT specifies the number of indent levels to print
-   before printing the variable name.
-
-   This function invalidates FRAME.  */
+   before printing the variable name.  */
 
 void
 print_variable_and_value (const char *name, struct symbol *var,
@@ -2420,10 +2418,6 @@ print_variable_and_value (const char *name, struct symbol *var,
       get_user_print_options (&opts);
       opts.deref_ref = true;
       common_val_print_checked (val, stream, indent, &opts, current_language);
-
-      /* common_val_print invalidates FRAME when a pretty printer calls inferior
-	 function.  */
-      frame = NULL;
     }
   catch (const gdb_exception_error &except)
     {

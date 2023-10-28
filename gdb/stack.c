@@ -2326,9 +2326,7 @@ prepare_reg (const char *regexp, gdb::optional<compiled_regex> *reg)
    If T_REGEXP is not NULL, only print local variables whose type
    matches T_REGEXP.
    If no local variables have been printed and !QUIET, prints a message
-   explaining why no local variables could be printed.
-
-   This function will invalidate FRAME.  */
+   explaining why no local variables could be printed.  */
 
 static void
 print_frame_local_vars (frame_info_ptr frame,
@@ -2490,9 +2488,7 @@ iterate_over_block_arg_vars (const struct block *b,
    If T_REGEXP is not NULL, only print argument variables whose type
    matches T_REGEXP.
    If no argument variables have been printed and !QUIET, prints a message
-   explaining why no argument variables could be printed.
-
-   This function will invalidate FRAME.  */
+   explaining why no argument variables could be printed.  */
 
 static void
 print_frame_arg_vars (frame_info_ptr frame,
@@ -2530,9 +2526,6 @@ print_frame_arg_vars (frame_info_ptr frame,
   cb_data.values_printed = 0;
 
   iterate_over_block_arg_vars (func->value_block (), cb_data);
-
-  /* do_print_variable_and_value invalidates FRAME.  */
-  frame = NULL;
 
   if (!cb_data.values_printed && !quiet)
     {

@@ -10952,9 +10952,6 @@ until_break_command (const char *arg, int from_tty, int anywhere)
       lj_deleter.emplace (thread);
     }
 
-  /* set_momentary_breakpoint could invalidate FRAME.  */
-  frame = NULL;
-
   /* If the user told us to continue until a specified location, we
      don't specify a frame at which we need to stop.  Otherwise,
      specify the selected frame, because we want to stop only at the
