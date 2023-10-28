@@ -1647,10 +1647,11 @@ void
 md_operand (expressionS *expressionP)
 {
   /* If this hook is invoked it means GAS failed to parse a generic
-  expression.  We should inhibit the as_bad in expr.c, so we can fail
-  while parsing instruction alternatives.  To do that, we change the
-  expression to not have an O_absent.  But then we also need to set
-  exp_parse_failed to parse_expression above does the right thing.  */
+     expression.  We should inhibit the as_bad in expr.c, so we can
+     fail while parsing instruction alternatives.  To do that, we
+     change the expression to not have an O_absent.  But then we also
+     need to set exp_parse_failed to parse_expression above does the
+     right thing.  */
   ++input_line_pointer;
   expressionP->X_op = O_constant;
   expressionP->X_add_number = 0;
