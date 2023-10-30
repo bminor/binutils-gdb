@@ -69,3 +69,4 @@ Disassembly of section .text:
  1d0:	d7 10 00 00 00 00 00 10 	r1 = bswap16 r1
  1d8:	d7 20 00 00 00 00 00 20 	r2 = bswap32 r2
  1e0:	d7 30 00 00 00 00 00 40 	r3 = bswap64 r3
+ 1e8:	b7 20 00 00 00 00 02 9a 	r2=0x29a

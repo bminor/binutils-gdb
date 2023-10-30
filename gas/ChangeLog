@@ -1,3 +1,10 @@
+2023-10-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/bpf/alu-pseudoc.s: Add test to make sure C-like
+	suffix `ll' is not interpreted as lddw syntax.
+	* testsuite/gas/bpf/alu-pseudoc.d: Update expected results.
+	* testsuite/gas/bpf/alu-be-pseudoc.d: Likewise.
+
 2023-10-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 30861
