@@ -213,18 +213,36 @@ class DAPFrameDecorator(_FrameDecoratorBase):
             return sal.symtab.fullname()
         return None
 
+    def frame_locals(self):
+        """Return an iterable of local variables for this frame, if
+        any.  The iterable object contains objects conforming with the
+        Symbol/Value interface.  If there are no frame locals, or if
+        this frame is deemed to be a special case, return None."""
+
+        if hasattr(self._base, "frame_locals"):
+            return self._base.frame_locals()
+
+        frame = self.inferior_frame()
+        args = FrameVars(frame)
+        return args.fetch_frame_locals(True)
+
 
 class SymValueWrapper(object):
     """A container class conforming to the Symbol/Value interface
     which holds frame locals or frame arguments."""
 
-    def __init__(self, symbol, value):
+    # The FRAME argument is needed here because gdb.Symbol doesn't
+    # carry the block with it, and so read_var can't find symbols from
+    # outer (static link) frames.
+    def __init__(self, frame, symbol):
+        self.frame = frame
         self.sym = symbol
-        self.val = value
 
     def value(self):
         """Return the value associated with this symbol, or None"""
-        return self.val
+        if self.frame is None:
+            return None
+        return self.frame.read_var(self.sym)
 
     def symbol(self):
         """Return the symbol, or Python text, associated with this
@@ -240,32 +258,50 @@ class FrameVars(object):
     def __init__(self, frame):
         self.frame = frame
 
-    def fetch_frame_locals(self):
+    def fetch_frame_locals(self, follow_link=False):
         """Public utility method to fetch frame local variables for
         the stored frame.  Frame arguments are not fetched.  If there
         are no frame local variables, return an empty list."""
         lvars = []
 
+        frame = self.frame
         try:
-            block = self.frame.block()
+            block = frame.block()
         except RuntimeError:
             block = None
 
+        traversed_link = False
         while block is not None:
             if block.is_global or block.is_static:
                 break
             for sym in block:
+                # Exclude arguments from the innermost function, but
+                # if we found and traversed a static link, just treat
+                # all such variables as "local".
                 if sym.is_argument:
+                    if not traversed_link:
+                        continue
+                elif not sym.is_variable:
+                    # We use an 'elif' here because is_variable
+                    # returns False for arguments as well.  Anyway,
+                    # don't include non-variables here.
                     continue
-                if sym.is_variable:
-                    lvars.append(SymValueWrapper(sym, None))
+                lvars.append(SymValueWrapper(frame, sym))
 
-            # Stop when the function itself is seen, to avoid showing
-            # variables from outer functions in a nested function.
             if block.function is not None:
-                break
-
-            block = block.superblock
+                if not follow_link:
+                    break
+                # If the frame has a static link, follow it here.
+                traversed_link = True
+                frame = frame.static_link()
+                if frame is None:
+                    break
+                try:
+                    block = frame.block()
+                except RuntimeError:
+                    block = None
+            else:
+                block = block.superblock
 
         return lvars
 
@@ -287,10 +323,12 @@ class FrameVars(object):
             for sym in block:
                 if not sym.is_argument:
                     continue
-                args.append(SymValueWrapper(sym, None))
+                args.append(SymValueWrapper(None, sym))
 
             # Stop when the function itself is seen, to avoid showing
             # variables from outer functions in a nested function.
+            # Note that we don't traverse the static link for
+            # arguments, only for locals.
             if block.function is not None:
                 break
 
