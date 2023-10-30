@@ -303,6 +303,15 @@ loongarch_after_parse_args ()
   for (i = 0; i < ARRAY_SIZE (loongarch_r_normal_name); i++)
     str_hash_insert (r_htab, loongarch_r_normal_name[i], (void *) (i + 1), 0);
 
+  /* Init ilp32/lp64 registers alias.  */
+  r_abi_names = loongarch_r_alias;
+  for (i = 0; i < ARRAY_SIZE (loongarch_r_alias); i++)
+    str_hash_insert (r_htab, loongarch_r_alias[i], (void *) (i + 1),
+	0);
+  for (i = 0; i < ARRAY_SIZE (loongarch_r_alias_deprecated); i++)
+    str_hash_insert (r_deprecated_htab, loongarch_r_alias_deprecated[i],
+	(void *) (i + 1), 0);
+
   if (!cr_htab)
     cr_htab = str_htab_create (), str_hash_insert (cr_htab, "", 0, 0);
 
@@ -322,6 +331,15 @@ loongarch_after_parse_args ()
       for (i = 0; i < ARRAY_SIZE (loongarch_f_normal_name); i++)
 	str_hash_insert (f_htab, loongarch_f_normal_name[i], (void *) (i + 1),
 			 0);
+
+      /* Init float-ilp32/lp64 registers alias.  */
+      f_abi_names = loongarch_f_alias;
+      for (i = 0; i < ARRAY_SIZE (loongarch_f_alias); i++)
+	str_hash_insert (f_htab, loongarch_f_alias[i],
+	    (void *) (i + 1), 0);
+      for (i = 0; i < ARRAY_SIZE (loongarch_f_alias_deprecated); i++)
+	str_hash_insert (f_deprecated_htab, loongarch_f_alias_deprecated[i],
+	    (void *) (i + 1), 0);
 
       if (!fc_htab)
 	fc_htab = str_htab_create (), str_hash_insert (fc_htab, "", 0, 0);
@@ -366,29 +384,6 @@ loongarch_after_parse_args ()
 			 0);
     }
 
-  /* Init lp64 registers alias.  */
-  if (LARCH_opts.ase_lp64)
-    {
-      r_abi_names = loongarch_r_lp64_name;
-      for (i = 0; i < ARRAY_SIZE (loongarch_r_lp64_name); i++)
-	str_hash_insert (r_htab, loongarch_r_lp64_name[i], (void *) (i + 1),
-			 0);
-      for (i = 0; i < ARRAY_SIZE (loongarch_r_lp64_name_deprecated); i++)
-	str_hash_insert (r_deprecated_htab, loongarch_r_lp64_name_deprecated[i],
-			 (void *) (i + 1), 0);
-    }
-
-  /* Init float-lp64 registers alias */
-  if ((LARCH_opts.ase_sf || LARCH_opts.ase_df) && LARCH_opts.ase_lp64)
-    {
-      f_abi_names = loongarch_f_lp64_name;
-      for (i = 0; i < ARRAY_SIZE (loongarch_f_lp64_name); i++)
-	str_hash_insert (f_htab, loongarch_f_lp64_name[i],
-			 (void *) (i + 1), 0);
-      for (i = 0; i < ARRAY_SIZE (loongarch_f_lp64_name_deprecated); i++)
-	str_hash_insert (f_deprecated_htab, loongarch_f_lp64_name_deprecated[i],
-			 (void *) (i + 1), 0);
-    }
 }
 
 const char *

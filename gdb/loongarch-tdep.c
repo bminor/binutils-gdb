@@ -1774,15 +1774,15 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   info.target_desc = tdesc;
   info.tdesc_data = tdesc_data.get ();
 
-  for (int i = 0; i < ARRAY_SIZE (loongarch_r_lp64_name); ++i)
-    if (loongarch_r_lp64_name[i][0] != '\0')
-      user_reg_add (gdbarch, loongarch_r_lp64_name[i] + 1,
+  for (int i = 0; i < ARRAY_SIZE (loongarch_r_alias); ++i)
+    if (loongarch_r_alias[i][0] != '\0')
+      user_reg_add (gdbarch, loongarch_r_alias[i] + 1,
 	value_of_loongarch_user_reg, (void *) (size_t) i);
 
-  for (int i = 0; i < ARRAY_SIZE (loongarch_f_lp64_name); ++i)
+  for (int i = 0; i < ARRAY_SIZE (loongarch_f_alias); ++i)
     {
-      if (loongarch_f_lp64_name[i][0] != '\0')
-	user_reg_add (gdbarch, loongarch_f_lp64_name[i] + 1,
+      if (loongarch_f_alias[i][0] != '\0')
+	user_reg_add (gdbarch, loongarch_f_alias[i] + 1,
 		      value_of_loongarch_user_reg,
 		      (void *) (size_t) (LOONGARCH_FIRST_FP_REGNUM + i));
     }
