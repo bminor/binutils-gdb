@@ -167,6 +167,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SME2,
   /* Translation Hardening Extension.  */
   AARCH64_FEATURE_THE,
+  /* LSE128.  */
+  AARCH64_FEATURE_LSE128,
   AARCH64_NUM_FEATURES
 };
 
@@ -857,6 +859,7 @@ enum aarch64_insn_class
   log_imm,
   log_shift,
   lse_atomic,
+  lse128_atomic,
   movewide,
   pcreladdr,
   ic_system,

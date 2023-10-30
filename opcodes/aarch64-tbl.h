@@ -2470,6 +2470,8 @@ static const aarch64_feature_set aarch64_feature_crc =
   AARCH64_FEATURE (CRC);
 static const aarch64_feature_set aarch64_feature_lse =
   AARCH64_FEATURE (LSE);
+static const aarch64_feature_set aarch64_feature_lse128 =
+  AARCH64_FEATURES (2, LSE, LSE128);
 static const aarch64_feature_set aarch64_feature_lor =
   AARCH64_FEATURE (LOR);
 static const aarch64_feature_set aarch64_feature_rdma =
@@ -2584,6 +2586,7 @@ static const aarch64_feature_set aarch64_feature_the =
 #define SIMD		&aarch64_feature_simd
 #define CRC		&aarch64_feature_crc
 #define LSE		&aarch64_feature_lse
+#define LSE128		&aarch64_feature_lse128
 #define LOR		&aarch64_feature_lor
 #define RDMA		&aarch64_feature_rdma
 #define FP_F16		&aarch64_feature_fp_f16
@@ -2652,6 +2655,8 @@ static const aarch64_feature_set aarch64_feature_the =
   { NAME, OPCODE, MASK, CLASS, 0, CRC, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _LSE_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, LSE, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define _LSE128_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, LSE128, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _LOR_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, LOR, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define RDMA_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \

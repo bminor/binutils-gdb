@@ -265,6 +265,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Guarded Control Stack Extension.
 @item @code{the} @tab ARMv8-A/Armv9-A @tab ARMv8.9-A/Armv9.4-A or later
  @tab Enable Translation Hardening extension.
+@item @code{lse128} @tab Armv9.4-A @tab No
+ @tab Enable the 128-bit Atomic Instructions extension.  This implies @code{lse}.
 
 @end multitable
 
