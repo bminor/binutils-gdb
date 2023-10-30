@@ -107,10 +107,14 @@ def _get_scope(id):
     else:
         frame = frame_for_id(id)
         scopes = []
-        args = frame.frame_args()
+        # Make sure to handle the None case as well as the empty
+        # iterator case.
+        args = tuple(frame.frame_args() or ())
         if args:
             scopes.append(_ScopeReference("Arguments", "arguments", frame, args))
-        locs = frame.frame_locals()
+        # Make sure to handle the None case as well as the empty
+        # iterator case.
+        locs = tuple(frame.frame_locals() or ())
         if locs:
             scopes.append(_ScopeReference("Locals", "locals", frame, locs))
         scopes.append(_RegisterReference("Registers", frame))
