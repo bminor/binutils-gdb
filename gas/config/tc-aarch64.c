@@ -7863,6 +7863,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  po_char_or_fail ('!');
 	  break;
 
+	case AARCH64_OPND_LSE128_Rt:
+	case AARCH64_OPND_LSE128_Rt2:
+	  po_int_fp_reg_or_fail (REG_TYPE_R_64);
+	  break;
+
 	default:
 	  as_fatal (_("unhandled operand code %d"), operands[i]);
 	}

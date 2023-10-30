@@ -226,6 +226,8 @@ const aarch64_field fields[] =
     { 10,  8 }, /* CSSC_imm8.  */
     { 11,  1 },	/* H: in advsimd scalar x indexed element instructions.  */
     { 21,  1 },	/* L: in advsimd scalar x indexed element instructions.  */
+    {  0,  5 },	/* LSE128_Rt: Shared input+output operand register.  */
+    { 16,  5 },	/* LSE128_Rt2: Shared input+output operand register 2.  */
     { 20,  1 },	/* M: in advsimd scalar x indexed element instructions.  */
     { 22,  1 },	/* N: in logical (immediate) instructions.  */
     { 30,  1 },	/* Q: in most AdvSIMD instructions.  */
@@ -3770,6 +3772,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_Rt_SYS:
     case AARCH64_OPND_PAIRREG:
     case AARCH64_OPND_SVE_Rm:
+    case AARCH64_OPND_LSE128_Rt:
+    case AARCH64_OPND_LSE128_Rt2:
       /* The optional-ness of <Xt> in e.g. IC <ic_op>{, <Xt>} is determined by
 	 the <ic_op>, therefore we use opnd->present to override the
 	 generic optional-ness information.  */

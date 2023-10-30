@@ -36,6 +36,8 @@ enum aarch64_field_kind
   FLD_CSSC_imm8,
   FLD_H,
   FLD_L,
+  FLD_LSE128_Rt,
+  FLD_LSE128_Rt2,
   FLD_M,
   FLD_N,
   FLD_Q,
