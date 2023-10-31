@@ -40,6 +40,7 @@ dwarf2_cu::dwarf2_cu (dwarf2_per_cu_data *per_cu,
     producer_is_icc_lt_14 (false),
     producer_is_codewarrior (false),
     producer_is_clang (false),
+    producer_is_gas_lt_2_38 (false),
     producer_is_gas_2_39 (false),
     processing_has_namespace_info (false),
     load_all_dies (false)

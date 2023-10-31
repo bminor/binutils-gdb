@@ -265,6 +265,7 @@ public:
   bool producer_is_icc_lt_14 : 1;
   bool producer_is_codewarrior : 1;
   bool producer_is_clang : 1;
+  bool producer_is_gas_lt_2_38 : 1;
   bool producer_is_gas_2_39 : 1;
 
   /* When true, the file that we're processing is known to have
