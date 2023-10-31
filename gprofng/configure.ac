@@ -208,14 +208,6 @@ AM_ZLIB
 build_man=false
 build_doc=false
 if test $cross_compiling = no; then
-  AC_CHECK_PROGS([HELP2MAN], help2man, [$MISSING help2man])
-  case "x$HELP2MAN" in
-    x | */missing\ help2man* )
-      AC_MSG_WARN([gprofng: help2man is missing. Man pages will not be built.])
-      ;;
-    * ) build_man=true ;;
-    esac
-
   AC_CHECK_PROGS([MAKEINFO], makeinfo, [$MISSING makeinfo])
   case "x$MAKEINFO" in
     x | */missing\ makeinfo*)
