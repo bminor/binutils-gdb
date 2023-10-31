@@ -48,6 +48,12 @@ struct loongarch_elf_link_hash_entry
 #define GOT_TLS_GD  2
 #define GOT_TLS_IE  4
 #define GOT_TLS_LE  8
+#define GOT_TLS_GDESC 16
+
+#define GOT_TLS_GD_BOTH_P(tls_type) \
+  ((tls_type & GOT_TLS_GD) && (tls_type & GOT_TLS_GDESC))
+#define GOT_TLS_GD_ANY_P(tls_type) \
+  ((tls_type & GOT_TLS_GD) || (tls_type & GOT_TLS_GDESC))
   char tls_type;
 };
 
@@ -563,6 +569,7 @@ loongarch_elf_record_tls_and_got_reference (bfd *abfd,
     case GOT_NORMAL:
     case GOT_TLS_GD:
     case GOT_TLS_IE:
+    case GOT_TLS_GDESC:
       /* Need GOT.  */
       if (htab->elf.sgot == NULL
 	  && !loongarch_elf_create_got_section (htab->elf.dynobj, info))
@@ -747,6 +754,14 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (!loongarch_elf_record_tls_and_got_reference (abfd, info, h,
 							   r_symndx,
 							   GOT_TLS_LE))
+	    return false;
+	  break;
+
+	case R_LARCH_TLS_DESC_PC_HI20:
+	case R_LARCH_TLS_DESC_HI20:
+	  if (!loongarch_elf_record_tls_and_got_reference (abfd, info, h,
+							   r_symndx,
+							   GOT_TLS_GDESC))
 	    return false;
 	  break;
 
@@ -1130,7 +1145,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       s = htab->elf.sgot;
       h->got.offset = s->size;
-      if (tls_type & (GOT_TLS_GD | GOT_TLS_IE))
+      if (tls_type & (GOT_TLS_GD | GOT_TLS_IE | GOT_TLS_GDESC))
 	{
 	  /* TLS_GD needs two dynamic relocs and two GOT slots.  */
 	  if (tls_type & GOT_TLS_GD)
@@ -1167,7 +1182,15 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		  htab->elf.srelgot->size += sizeof (ElfNN_External_Rela);
 		}
 	    }
+
+	  /* TLS_DESC needs one dynamic reloc and two GOT slot.  */
+	  if (tls_type & GOT_TLS_GDESC)
+	    {
+	      s->size += GOT_ENTRY_SIZE * 2;
+	      htab->elf.srelgot->size += sizeof (ElfNN_External_Rela);
+	    }
 	}
+
       else
 	{
 	  s->size += GOT_ENTRY_SIZE;
@@ -1670,19 +1693,34 @@ loongarch_elf_size_dynamic_sections (bfd *output_bfd,
 	  if (0 < *local_got)
 	    {
 	      *local_got = s->size;
+	      if (*local_tls_type & (GOT_TLS_GD | GOT_TLS_IE | GOT_TLS_GDESC))
+		{
+		  /* TLS gd use two got.  */
+		  if (*local_tls_type & GOT_TLS_GD)
+		    {
+		      s->size += 2 * GOT_ENTRY_SIZE;
+		      if (!bfd_link_executable (info))
+			srel->size += sizeof (ElfNN_External_Rela);
+		    }
 
-	      /* TLS gd use two got.  */
-	      if (*local_tls_type & GOT_TLS_GD)
-		s->size += GOT_ENTRY_SIZE * 2;
-	      else
-		/* Normal got, tls ie/ld use one got.  */
-		s->size += GOT_ENTRY_SIZE;
+		  /* TLS_DESC use two got.  */
+		  if (*local_tls_type & GOT_TLS_GDESC)
+		    {
+		      s->size += 2 * GOT_ENTRY_SIZE;
+		      srel->size += sizeof (ElfNN_External_Rela);
+		    }
 
-	      if (bfd_link_executable (info)
-		  && (*local_tls_type & (GOT_TLS_GD| GOT_TLS_IE)))
-		;/* Do nothing.  */
+		  /* TLS ie and use one got.  */
+		  if (*local_tls_type & GOT_TLS_IE)
+		    {
+		      s->size += GOT_ENTRY_SIZE;
+		      if (!bfd_link_executable (info))
+			srel->size += sizeof (ElfNN_External_Rela);
+		    }
+		}
 	      else
 		{
+		  s->size += GOT_ENTRY_SIZE;
 		  srel->size += sizeof (ElfNN_External_Rela);
 		}
 	    }
@@ -2126,6 +2164,15 @@ perform_relocation (const Elf_Internal_Rela *rel, asection *input_section,
     case R_LARCH_TLS_GD_HI20:
     case R_LARCH_PCREL20_S2:
     case R_LARCH_CALL36:
+    case R_LARCH_TLS_DESC_PC_HI20:
+    case R_LARCH_TLS_DESC_PC_LO12:
+    case R_LARCH_TLS_DESC64_PC_LO20:
+    case R_LARCH_TLS_DESC64_PC_HI12:
+    case R_LARCH_TLS_DESC_HI20:
+    case R_LARCH_TLS_DESC_LO12:
+    case R_LARCH_TLS_DESC64_LO20:
+    case R_LARCH_TLS_DESC64_HI12:
+
       r = loongarch_check_offset (rel, input_section);
       if (r != bfd_reloc_ok)
 	break;
@@ -2133,6 +2180,11 @@ perform_relocation (const Elf_Internal_Rela *rel, asection *input_section,
       r = loongarch_reloc_rewrite_imm_insn (rel, input_section,
 					    howto, input_bfd,
 					    contents, value);
+      break;
+
+    case R_LARCH_TLS_DESC_LD:
+    case R_LARCH_TLS_DESC_CALL:
+      r = bfd_reloc_ok;
       break;
 
     case R_LARCH_RELAX:
@@ -2383,10 +2435,10 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       struct elf_link_hash_entry *h = NULL;
       const char *name;
       bfd_reloc_status_type r = bfd_reloc_ok;
-      bool is_ie, is_undefweak, unresolved_reloc, defined_local;
+      bool is_ie, is_desc, is_undefweak, unresolved_reloc, defined_local;
       bool resolved_local, resolved_dynly, resolved_to_const;
       char tls_type;
-      bfd_vma relocation, off, ie_off;
+      bfd_vma relocation, off, ie_off, desc_off;
       int i, j;
 
       howto = loongarch_elf_rtype_to_howto (input_bfd, r_type);
@@ -2515,6 +2567,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
       BFD_ASSERT (!resolved_local || defined_local);
 
+      is_desc = false;
       is_ie = false;
       switch (r_type)
 	{
@@ -3405,12 +3458,18 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_LARCH_TLS_LD_HI20:
 	case R_LARCH_TLS_GD_PC_HI20:
 	case R_LARCH_TLS_GD_HI20:
+	case R_LARCH_TLS_DESC_PC_HI20:
+	case R_LARCH_TLS_DESC_HI20:
 	  BFD_ASSERT (rel->r_addend == 0);
 	  unresolved_reloc = false;
 
 	  if (r_type == R_LARCH_TLS_IE_PC_HI20
 	      || r_type == R_LARCH_TLS_IE_HI20)
 	    is_ie = true;
+
+	  if (r_type == R_LARCH_TLS_DESC_PC_HI20
+	      || r_type == R_LARCH_TLS_DESC_HI20)
+	    is_desc = true;
 
 	  bfd_vma got_off = 0;
 	  if (h != NULL)
@@ -3426,9 +3485,19 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	  BFD_ASSERT (got_off != MINUS_ONE);
 
-	  ie_off = 0;
 	  tls_type = _bfd_loongarch_elf_tls_type (input_bfd, h, r_symndx);
-	  if ((tls_type & GOT_TLS_GD) && (tls_type & GOT_TLS_IE))
+
+	  /* If a tls variable is accessed in multiple ways, GD uses
+	     the first two slots of GOT, desc follows with two slots,
+	     and IE uses one slot at the end.  */
+	  desc_off = 0;
+	  if (GOT_TLS_GD_BOTH_P (tls_type))
+	    desc_off = 2 * GOT_ENTRY_SIZE;
+
+	  ie_off = 0;
+	  if (GOT_TLS_GD_BOTH_P (tls_type) && (tls_type & GOT_TLS_IE))
+	    ie_off = 4 * GOT_ENTRY_SIZE;
+	  else if (GOT_TLS_GD_ANY_P (tls_type) && (tls_type & GOT_TLS_IE))
 	    ie_off = 2 * GOT_ENTRY_SIZE;
 
 	  if ((got_off & 1) == 0)
@@ -3477,6 +3546,21 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      loongarch_elf_append_rela (output_bfd, relgot, &rela);
 		    }
 		}
+	      if (tls_type & GOT_TLS_GDESC)
+		{
+		  /* Unless it is a static link, DESC always emits a
+		     dynamic relocation.  */
+		  int indx = h && h->dynindx != -1 ? h->dynindx : 0;
+		  rela.r_offset = sec_addr (got) + got_off + desc_off;
+		  rela.r_addend = 0;
+		  if (indx == 0)
+		    rela.r_addend = relocation - elf_hash_table (info)->tls_sec->vma;
+
+		  rela.r_info = ELFNN_R_INFO (indx, R_LARCH_TLS_DESCNN);
+		  loongarch_elf_append_rela (output_bfd, relgot, &rela);
+		  bfd_put_NN (output_bfd, 0,
+			      got->contents + got_off + desc_off);
+		}
 	      if (tls_type & GOT_TLS_IE)
 		{
 		  rela.r_offset = sec_addr (got) + got_off + ie_off;
@@ -3504,14 +3588,50 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		    }
 		}
 	    }
-	  relocation = (got_off & (~(bfd_vma)1)) + sec_addr (got)
-			+ (is_ie ? ie_off : 0);
+	  relocation = (got_off & (~(bfd_vma)1)) + sec_addr (got);
+	  if (is_desc)
+	    relocation += desc_off;
+	  else if (is_ie)
+	    relocation += ie_off;
 
 	  if (r_type == R_LARCH_TLS_LD_PC_HI20
 	      || r_type == R_LARCH_TLS_GD_PC_HI20
-	      || r_type == R_LARCH_TLS_IE_PC_HI20)
+	      || r_type == R_LARCH_TLS_IE_PC_HI20
+	      || r_type == R_LARCH_TLS_DESC_PC_HI20)
 	    RELOCATE_CALC_PC32_HI20 (relocation, pc);
 
+	  break;
+
+	case R_LARCH_TLS_DESC_PC_LO12:
+	case R_LARCH_TLS_DESC64_PC_LO20:
+	case R_LARCH_TLS_DESC64_PC_HI12:
+	case R_LARCH_TLS_DESC_LO12:
+	case R_LARCH_TLS_DESC64_LO20:
+	case R_LARCH_TLS_DESC64_HI12:
+	  {
+	    unresolved_reloc = false;
+
+	    if (h)
+	      relocation = sec_addr (got) + (h->got.offset & (~(bfd_vma)1));
+	    else
+	      relocation = sec_addr (got)
+			   + (local_got_offsets[r_symndx] & (~(bfd_vma)1));
+
+	    tls_type = _bfd_loongarch_elf_tls_type (input_bfd, h, r_symndx);
+	    /* Use both TLS_GD and TLS_DESC.  */
+	    if ((tls_type & GOT_TLS_GD) && (tls_type & GOT_TLS_GDESC))
+	      relocation += 2 * GOT_ENTRY_SIZE;
+	  }
+
+	    if (r_type == R_LARCH_TLS_DESC64_PC_LO20
+		|| r_type == R_LARCH_TLS_DESC64_PC_HI12)
+	      RELOCATE_CALC_PC64_HI32 (relocation, pc);
+
+	    break;
+
+	case R_LARCH_TLS_DESC_LD:
+	case R_LARCH_TLS_DESC_CALL:
+	  unresolved_reloc = false;
 	  break;
 
 	case R_LARCH_TLS_IE_PC_LO12:
@@ -3523,14 +3643,17 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  unresolved_reloc = false;
 
 	  if (h)
-	    relocation = sec_addr (got) + (h->got.offset & (~(bfd_vma)3));
+	    relocation = sec_addr (got) + (h->got.offset & (~(bfd_vma)1));
 	  else
 	    relocation = sec_addr (got)
-	      + (local_got_offsets[r_symndx] & (~(bfd_vma)3));
+	      + (local_got_offsets[r_symndx] & (~(bfd_vma)1));
 
 	  tls_type = _bfd_loongarch_elf_tls_type (input_bfd, h, r_symndx);
-	  /* Use both TLS_GD and TLS_IE.  */
-	  if ((tls_type & GOT_TLS_GD) && (tls_type & GOT_TLS_IE))
+	  /* Use TLS_GD TLS_DESC and TLS_IE.  */
+	  if (GOT_TLS_GD_BOTH_P (tls_type) && (tls_type & GOT_TLS_IE))
+	    relocation += 4 * GOT_ENTRY_SIZE;
+	  /* Use GOT_TLS_GD_ANY_P (tls_type) and TLS_IE.  */
+	  else if (GOT_TLS_GD_ANY_P (tls_type) && (tls_type & GOT_TLS_IE))
 	    relocation += 2 * GOT_ENTRY_SIZE;
 
 	  if (r_type == R_LARCH_TLS_IE64_PC_LO20
@@ -4174,7 +4297,8 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
 
   if (h->got.offset != MINUS_ONE
       /* TLS got entry have been handled in elf_relocate_section.  */
-      && !(loongarch_elf_hash_entry (h)->tls_type & (GOT_TLS_GD | GOT_TLS_IE))
+      && !(loongarch_elf_hash_entry (h)->tls_type
+	   & (GOT_TLS_GD | GOT_TLS_IE | GOT_TLS_GDESC))
       /* Have allocated got entry but not allocated rela before.  */
       && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
     {
