@@ -412,7 +412,7 @@ do_examine (CORE_ADDR start, int bcnt)
 
   CORE_ADDR vstart = adi_align_address (vaddr);
   int cnt = adi_convert_byte_count (vaddr, bcnt, vstart);
-  gdb::def_vector<gdb_byte> buf (cnt);
+  gdb::byte_vector buf (cnt);
   int read_cnt = adi_read_versions (vstart, cnt, buf.data ());
   if (read_cnt == -1)
     error (_("No ADI information"));

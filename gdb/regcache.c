@@ -1884,7 +1884,7 @@ cooked_read_test (struct gdbarch *gdbarch)
 
   readwrite_regcache readwrite (&mockctx.mock_inferior, gdbarch);
   readwrite.set_ptid (mockctx.mock_ptid);
-  gdb::def_vector<gdb_byte> buf (register_size (gdbarch, nonzero_regnum));
+  gdb::byte_vector buf (register_size (gdbarch, nonzero_regnum));
 
   readwrite.raw_read (nonzero_regnum, buf.data ());
 
@@ -1905,7 +1905,7 @@ cooked_read_test (struct gdbarch *gdbarch)
       if (register_size (gdbarch, regnum) == 0)
 	continue;
 
-      gdb::def_vector<gdb_byte> inner_buf (register_size (gdbarch, regnum));
+      gdb::byte_vector inner_buf (register_size (gdbarch, regnum));
 
       SELF_CHECK (REG_VALID == readwrite.cooked_read (regnum,
 						      inner_buf.data ()));
@@ -1928,7 +1928,7 @@ cooked_read_test (struct gdbarch *gdbarch)
       if (register_size (gdbarch, regnum) == 0)
 	continue;
 
-      gdb::def_vector<gdb_byte> inner_buf (register_size (gdbarch, regnum));
+      gdb::byte_vector inner_buf (register_size (gdbarch, regnum));
       enum register_status status = readonly.cooked_read (regnum,
 							  inner_buf.data ());
 

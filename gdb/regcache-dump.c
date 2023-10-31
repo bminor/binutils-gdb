@@ -57,7 +57,7 @@ protected:
 	    if (size == 0)
 	      return;
 
-	    gdb::def_vector<gdb_byte> buf (size);
+	    gdb::byte_vector buf (size);
 	    auto status = m_regcache->cooked_read (regnum, buf.data ());
 
 	    if (status == REG_UNKNOWN)

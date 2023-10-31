@@ -1148,7 +1148,7 @@ linux_read_core_file_mappings
       return;
     }
 
-  gdb::def_vector<gdb_byte> contents (note_size);
+  gdb::byte_vector contents (note_size);
   if (!bfd_get_section_contents (core_bfd, section, contents.data (),
 				 0, note_size))
     {
