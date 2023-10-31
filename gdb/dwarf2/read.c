@@ -11250,8 +11250,8 @@ check_producer (struct dwarf2_cu *cu)
     cu->producer_is_codewarrior = true;
   else if (producer_is_clang (cu->producer, &major, &minor))
     cu->producer_is_clang = true;
-  else if (startswith (cu->producer, "GNU AS 2.39.0"))
-    cu->producer_is_gas_2_39 = true;
+  else if (producer_is_gas (cu->producer, &major, &minor))
+    cu->producer_is_gas_2_39 = major == 2 && minor == 39;
   else
     {
       /* For other non-GCC compilers, expect their behavior is DWARF version

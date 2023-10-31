@@ -82,6 +82,45 @@ producer_is_gcc (const char *producer, int *major, int *minor)
 /* See producer.h.  */
 
 bool
+producer_is_gas (const char *producer, int *major, int *minor)
+{
+  if (producer == nullptr)
+    {
+      /* No producer, don't know.  */
+      return false;
+    }
+
+  /* Detect prefix.  */
+  const char prefix[] = "GNU AS ";
+  if (!startswith (producer, prefix))
+    {
+      /* Producer is not gas.  */
+      return false;
+    }
+
+  /* Skip prefix.  */
+  const char *cs = &producer[strlen (prefix)];
+
+  /* Ensure that major/minor are not nullptrs.  */
+  int maj, min;
+  if (major == nullptr)
+    major = &maj;
+  if (minor == nullptr)
+    minor = &min;
+
+  int scanned = sscanf (cs, "%d.%d", major, minor);
+  if (scanned != 2)
+    {
+      /* Unable to scan major/minor version.  */
+      return false;
+    }
+
+  return true;
+}
+
+  /* See producer.h.  */
+
+bool
 producer_is_icc_ge_19 (const char *producer)
 {
   int major, minor;
@@ -251,6 +290,23 @@ Version 18.0 Beta";
     SELF_CHECK (!producer_is_gcc (flang_llvm_exp, &major, &minor));
     SELF_CHECK (producer_is_llvm (flang_llvm_exp));
   }
+
+  {
+    static const char gas_exp[] = "GNU AS 2.39.0";
+    int major = 0, minor = 0;
+    SELF_CHECK (!producer_is_gcc (gas_exp, &major, &minor));
+    SELF_CHECK (producer_is_gas (gas_exp, &major, &minor));
+    SELF_CHECK (major == 2 && minor == 39);
+
+    static const char gas_incomplete_exp[] = "GNU AS ";
+    SELF_CHECK (!producer_is_gas (gas_incomplete_exp, &major, &minor));
+    SELF_CHECK (!producer_is_gcc (gas_incomplete_exp, &major, &minor));
+
+    static const char gas_incomplete_exp_2[] = "GNU AS 2";
+    SELF_CHECK (!producer_is_gas (gas_incomplete_exp_2, &major, &minor));
+    SELF_CHECK (!producer_is_gcc (gas_incomplete_exp_2, &major, &minor));
+  }
+
 }
 }
 }
