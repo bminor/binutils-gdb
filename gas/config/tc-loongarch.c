@@ -682,7 +682,7 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 		      esc_ch1, esc_ch2, bit_field, arg);
 
 	  if (ip->reloc_info[0].type >= BFD_RELOC_LARCH_B16
-	      && ip->reloc_info[0].type < BFD_RELOC_UNUSED)
+	      && ip->reloc_info[0].type <= BFD_RELOC_LARCH_TLS_DESC_CALL)
 	    {
 	      /* As we compact stack-relocs, it is no need for pop operation.
 		 But break out until here in order to check the imm field.
@@ -1274,6 +1274,14 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_LARCH_TLS_LD_HI20:
     case BFD_RELOC_LARCH_TLS_GD_PC_HI20:
     case BFD_RELOC_LARCH_TLS_GD_HI20:
+    case BFD_RELOC_LARCH_TLS_DESC_PC_HI20:
+    case BFD_RELOC_LARCH_TLS_DESC_PC_LO12:
+    case BFD_RELOC_LARCH_TLS_DESC64_PC_LO20:
+    case BFD_RELOC_LARCH_TLS_DESC64_PC_HI12:
+    case BFD_RELOC_LARCH_TLS_DESC_HI20:
+    case BFD_RELOC_LARCH_TLS_DESC_LO12:
+    case BFD_RELOC_LARCH_TLS_DESC64_LO20:
+    case BFD_RELOC_LARCH_TLS_DESC64_HI12:
       /* Add tls lo (got_lo reloc type).  */
       if (fixP->fx_addsy == NULL)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -1292,6 +1300,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 		     - (fixP->fx_where + fixP->fx_frag->fr_address));
       else
 	stack_top = 0;
+      break;
+
+    case BFD_RELOC_LARCH_TLS_DESC_LD:
+    case BFD_RELOC_LARCH_TLS_DESC_CALL:
       break;
 
     case BFD_RELOC_LARCH_SOP_POP_32_S_10_5:

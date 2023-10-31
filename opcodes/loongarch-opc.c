@@ -303,6 +303,55 @@ const char *const loongarch_x_normal_name[32] =
   "jirl $zero,%1,0;",   \
   0, 0
 
+/* For TLS_DESC32 pcrel.  */
+#define INSN_LA_TLS_DESC32		\
+  "pcalau12i $r4,%%desc_pc_hi20(%2);"	\
+  "addi.w $r4,$r4,%%desc_pc_lo12(%2);"	\
+  "ld.w $r1,$r4,%%desc_ld(%2);"		\
+  "jirl $r1,$r1,%%desc_call(%2);",	\
+  &LARCH_opts.ase_ilp32,		\
+  &LARCH_opts.ase_lp64
+
+/* For TLS_DESC32 abs.  */
+#define INSN_LA_TLS_DESC32_ABS		\
+  "lu12i.w $r4,%%desc_hi20(%2);"	\
+  "ori $r4,$r4,%%desc_lo12(%2);"	\
+  "ld.w $r1,$r4,%%desc_ld(%2);"		\
+  "jirl $r1,$r1,%%desc_call(%2);",	\
+  &LARCH_opts.ase_gabs,			\
+  &LARCH_opts.ase_lp64
+
+/* For TLS_DESC64 pcrel.  */
+#define INSN_LA_TLS_DESC64		\
+  "pcalau12i $r4,%%desc_pc_hi20(%2);"	\
+  "addi.d $r4,$r4,%%desc_pc_lo12(%2);"	\
+  "ld.d $r1,$r4,%%desc_ld(%2);"		\
+  "jirl $r1,$r1,%%desc_call(%2);",	\
+  &LARCH_opts.ase_lp64, 0
+
+/* For TLS_DESC64 large pcrel.  */
+#define INSN_LA_TLS_DESC64_LARGE_PCREL	\
+  "pcalau12i $r4,%%desc_pc_hi20(%3);"	\
+  "addi.d %2,$r0,%%desc_pc_lo12(%3);"	\
+  "lu32i.d %2,%%desc64_pc_lo20(%3);"	\
+  "lu52i.d %2,%2,%%desc64_pc_hi12(%3);"	\
+  "add.d $r4,$r4,%2;"			\
+  "ld.d $r1,$r4,%%desc_ld(%3);"		\
+  "jirl $r1,$r1,%%desc_call(%3);",	\
+  &LARCH_opts.ase_lp64,			\
+  &LARCH_opts.ase_gabs
+
+/* For TLS_DESC64 large abs.  */
+#define INSN_LA_TLS_DESC64_LARGE_ABS	\
+  "lu12i.w $r4,%%desc_hi20(%2);"	\
+  "ori $r4,$r4,%%desc_lo12(%2);"	\
+  "lu32i.d $r4,%%desc64_lo20(%2);"	\
+  "lu52i.d $r4,$r4,%%desc64_hi12(%2);"	\
+  "ld.d $r1,$r4,%%desc_ld(%2);"		\
+  "jirl $r1,$r1,%%desc_call(%2);",	\
+  &LARCH_opts.ase_gabs,			\
+  &LARCH_opts.ase_gpcr
+
 static struct loongarch_opcode loongarch_macro_opcodes[] =
 {
   /* match,    mask,	   name, format, macro, include, exclude, pinfo.  */
@@ -352,6 +401,11 @@ static struct loongarch_opcode loongarch_macro_opcodes[] =
   { 0, 0, "call36",	"la",	  INSN_LA_CALL,			0 },
   { 0, 0, "tail36",	"r,la",	  INSN_LA_TAIL,			0 },
   { 0, 0, "pcaddi",	"r,la",	  "pcaddi %1, %%pcrel_20(%2)",	&LARCH_opts.ase_ilp32, 0, 0 },
+  { 0, 0, "la.tls.desc", "r,l",	  INSN_LA_TLS_DESC32_ABS,	0 },
+  { 0, 0, "la.tls.desc", "r,l",	  INSN_LA_TLS_DESC32,		0 },
+  { 0, 0, "la.tls.desc", "r,l",	  INSN_LA_TLS_DESC64_LARGE_ABS,	0 },
+  { 0, 0, "la.tls.desc", "r,l",	  INSN_LA_TLS_DESC64,		0 },
+  { 0, 0, "la.tls.desc", "r,r,l", INSN_LA_TLS_DESC64_LARGE_PCREL,0 },
   { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 
