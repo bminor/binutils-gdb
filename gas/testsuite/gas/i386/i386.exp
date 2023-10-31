@@ -510,6 +510,7 @@ if [gas_32_check] then {
     run_dump_test "sm4"
     run_dump_test "sm4-intel"
     run_list_test "pbndkb-inval"
+    run_list_test "user_msr-inval"
     run_list_test "sg"
     run_dump_test "clzero"
     run_dump_test "invlpgb"

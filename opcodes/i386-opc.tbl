@@ -112,6 +112,8 @@
 #define EVexMap5 OpcodeSpace=SPACE_EVEXMAP5
 #define EVexMap6 OpcodeSpace=SPACE_EVEXMAP6
 
+#define VexMap7 OpcodeSpace=SPACE_VEXMAP7
+
 #define VexW0 VexW=VEXW0
 #define VexW1 VexW=VEXW1
 #define VexWIG VexW=VEXWIG
@@ -3346,3 +3348,12 @@ erets, 0xf20f01ca, FRED|x64, NoSuf, {}
 eretu, 0xf30f01ca, FRED|x64, NoSuf, {}
 
 // FRED instructions end.
+
+// USER_MSR instructions.
+
+urdmsr, 0xf20f38f8, USER_MSR|x64, RegMem|NoSuf|NoRex64, { Reg64, Reg64 }
+urdmsr, 0xf2f8/0, USER_MSR|x64, Modrm|Vex128|VexMap7|VexW0|NoSuf, { Imm32, Reg64 }
+uwrmsr, 0xf30f38f8, USER_MSR|x64, Modrm|NoSuf|NoRex64, { Reg64, Reg64 }
+uwrmsr, 0xf3f8/0, USER_MSR|x64, Modrm|Vex128|VexMap7|VexW0|NoSuf, { Reg64, Imm32 }
+
+// USER_MSR instructions end.

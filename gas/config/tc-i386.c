@@ -1157,6 +1157,7 @@ static const arch_entry cpu_arch[] =
   VECARCH (sm4, SM4, ANY_SM4, reset),
   SUBARCH (pbndkb, PBNDKB, PBNDKB, false),
   VECARCH (avx10.1, AVX10_1, ANY_AVX512F, set),
+  SUBARCH (user_msr, USER_MSR, USER_MSR, false),
 };
 
 #undef SUBARCH
@@ -2474,7 +2475,8 @@ smallest_imm_type (offsetT num)
 	t.bitfield.imm8 = 1;
       t.bitfield.imm8s = 1;
       t.bitfield.imm16 = 1;
-      t.bitfield.imm32 = 1;
+      if (flag_code != CODE_64BIT || fits_in_unsigned_long (num))
+	t.bitfield.imm32 = 1;
       t.bitfield.imm32s = 1;
     }
   else if (fits_in_unsigned_byte (num))
@@ -2487,12 +2489,14 @@ smallest_imm_type (offsetT num)
   else if (fits_in_signed_word (num) || fits_in_unsigned_word (num))
     {
       t.bitfield.imm16 = 1;
-      t.bitfield.imm32 = 1;
+      if (flag_code != CODE_64BIT || fits_in_unsigned_long (num))
+	t.bitfield.imm32 = 1;
       t.bitfield.imm32s = 1;
     }
   else if (fits_in_signed_long (num))
     {
-      t.bitfield.imm32 = 1;
+      if (flag_code != CODE_64BIT || fits_in_unsigned_long (num))
+	t.bitfield.imm32 = 1;
       t.bitfield.imm32s = 1;
     }
   else if (fits_in_unsigned_long (num))
@@ -3833,6 +3837,7 @@ build_vex_prefix (const insn_template *t)
 	case SPACE_0F:
 	case SPACE_0F38:
 	case SPACE_0F3A:
+	case SPACE_VEXMAP7:
 	  i.vex.bytes[0] = 0xc4;
 	  break;
 	case SPACE_XOP08:
@@ -5203,7 +5208,23 @@ md_assemble (char *line)
       swap_2_operands (0, 1);
 
   if (i.imm_operands)
-    optimize_imm ();
+    {
+      /* For USER_MSR instructions, imm32 stands for the name of an model specific
+	 register (MSR). That's an unsigned quantity, whereas all other insns with
+	 32-bit immediate and 64-bit operand size use sign-extended
+	 immediates (imm32s). Therefore these insns are special-cased, bypassing
+	 the normal handling of immediates here.  */
+      if (is_cpu(current_templates->start, CpuUSER_MSR))
+	{
+	  for (j = 0; j < i.operands; j++)
+	    {
+	      if (operand_type_check(i.types[j], imm))
+		i.types[j] = smallest_imm_type (i.op[j].imms->X_add_number);
+	    }
+	}
+      else
+	optimize_imm ();
+    }
 
   if (i.disp_operands && !optimize_disp (t))
     return;
@@ -7534,6 +7555,17 @@ match_template (char mnem_suffix)
       i.tm.operand_types[j] = operand_types[j + 1];
       i.tm.operand_types[j + 1] = operand_types[j];
       break;
+    }
+
+  /* This pattern aims to put the unusually placed imm operand to a usual
+     place. The constraints are currently only adapted to uwrmsr, and may
+     need further tweaking when new similar instructions become available.  */
+  if (i.imm_operands && i.imm_operands < i.operands
+      && operand_type_check (operand_types[i.operands - 1], imm))
+    {
+      i.tm.operand_types[0] = operand_types[i.operands - 1];
+      i.tm.operand_types[i.operands - 1] = operand_types[0];
+      swap_2_operands(0, i.operands - 1);
     }
 
   return t;

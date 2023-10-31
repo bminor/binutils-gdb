@@ -223,6 +223,8 @@ enum i386_cpu
   CpuFRED,
   /* lkgs instruction required */
   CpuLKGS,
+  /* Intel USER_MSR Instruction support required.  */
+  CpuUSER_MSR,
   /* mwaitx instruction required */
   CpuMWAITX,
   /* Clzero instruction required */
@@ -471,6 +473,7 @@ typedef union i386_cpu_flags
       unsigned int cpurao_int:1;
       unsigned int cpufred:1;
       unsigned int cpulkgs:1;
+      unsigned int cpuuser_msr:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;
@@ -966,6 +969,7 @@ typedef struct insn_template
      3: 0F3A opcode prefix / space.
      5: EVEXMAP5 opcode prefix / space.
      6: EVEXMAP6 opcode prefix / space.
+     7: VEXMAP7 opcode prefix / space.
      8: XOP 08 opcode space.
      9: XOP 09 opcode space.
      A: XOP 0A opcode space.
@@ -976,6 +980,7 @@ typedef struct insn_template
 #define SPACE_0F3A	3
 #define SPACE_EVEXMAP5	5
 #define SPACE_EVEXMAP6	6
+#define SPACE_VEXMAP7	7
 #define SPACE_XOP08	8
 #define SPACE_XOP09	9
 #define SPACE_XOP0A	0xA
