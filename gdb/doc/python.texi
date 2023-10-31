@@ -5984,7 +5984,9 @@ local variables will require a frame, but other symbols will not.
 @end defvar
 
 @defvar Symbol.is_variable
-@code{True} if the symbol is a variable.
+@code{True} if the symbol is a variable, as opposed to something like
+a function or type.  Note that this also returns @code{False} for
+arguments.
 @end defvar
 
 A @code{gdb.Symbol} object has the following methods:
