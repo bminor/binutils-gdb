@@ -18037,6 +18037,7 @@ public:
     record_line (false);
     m_discriminator = 0;
     m_flags &= ~LEF_PROLOGUE_END;
+    m_flags &= ~LEF_EPILOGUE_BEGIN;
   }
 
   /* Handle DW_LNE_end_sequence.  */
@@ -18049,6 +18050,11 @@ public:
   void handle_set_prologue_end ()
   {
     m_flags |= LEF_PROLOGUE_END;
+  }
+
+  void handle_set_epilogue_begin ()
+  {
+    m_flags |= LEF_EPILOGUE_BEGIN;
   }
 
 private:
@@ -18140,6 +18146,7 @@ lnp_state_machine::handle_special_opcode (unsigned char op_code)
   record_line (false);
   m_discriminator = 0;
   m_flags &= ~LEF_PROLOGUE_END;
+  m_flags &= ~LEF_EPILOGUE_BEGIN;
 }
 
 void
@@ -18278,11 +18285,13 @@ lnp_state_machine::record_line (bool end_sequence)
     {
       gdb_printf (gdb_stdlog,
 		  "Processing actual line %u: file %u,"
-		  " address %s, is_stmt %u, prologue_end %u, discrim %u%s\n",
+		  " address %s, is_stmt %u, prologue_end %u,"
+		  " epilogue_begin %u, discrim %u%s\n",
 		  m_line, m_file,
 		  paddress (m_gdbarch, (CORE_ADDR) m_address),
 		  (m_flags & LEF_IS_STMT) != 0,
 		  (m_flags & LEF_PROLOGUE_END) != 0,
+		  (m_flags & LEF_EPILOGUE_BEGIN) != 0,
 		  m_discriminator,
 		  (end_sequence ? "\t(end sequence)" : ""));
     }
@@ -18584,6 +18593,9 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	      break;
 	    case DW_LNS_set_prologue_end:
 	      state_machine.handle_set_prologue_end ();
+	      break;
+	    case DW_LNS_set_epilogue_begin:
+	      state_machine.handle_set_epilogue_begin ();
 	      break;
 	    default:
 	      {

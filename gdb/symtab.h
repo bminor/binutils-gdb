@@ -1630,6 +1630,9 @@ struct linetable_entry
      function prologue.  */
   bool prologue_end : 1;
 
+  /* True if this location marks the start of the epilogue.  */
+  bool epilogue_begin : 1;
+
 private:
 
   /* The address for this entry.  */
@@ -2925,5 +2928,13 @@ private:
 extern void info_sources_worker (struct ui_out *uiout,
 				 bool group_by_objfile,
 				 const info_sources_filter &filter);
+
+/* This function returns the address at which the function epilogue begins,
+   according to the linetable.
+
+   Returns an empty optional if EPILOGUE_BEGIN is never set in the
+   linetable.  */
+
+std::optional<CORE_ADDR> find_epilogue_using_linetable (CORE_ADDR func_addr);
 
 #endif /* !defined(SYMTAB_H) */

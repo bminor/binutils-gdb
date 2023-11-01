@@ -4068,6 +4068,47 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 
 /* See symtab.h.  */
 
+std::optional<CORE_ADDR>
+find_epilogue_using_linetable (CORE_ADDR func_addr)
+{
+  CORE_ADDR start_pc, end_pc;
+
+  if (!find_pc_partial_function (func_addr, nullptr, &start_pc, &end_pc))
+    return {};
+
+  const struct symtab_and_line sal = find_pc_line (start_pc, 0);
+  if (sal.symtab != nullptr && sal.symtab->language () != language_asm)
+    {
+      struct objfile *objfile = sal.symtab->compunit ()->objfile ();
+      unrelocated_addr unrel_start
+	= unrelocated_addr (start_pc - objfile->text_section_offset ());
+      unrelocated_addr unrel_end
+	= unrelocated_addr (end_pc - objfile->text_section_offset ());
+
+      const linetable *linetable = sal.symtab->linetable ();
+      /* This should find the last linetable entry of the current function.
+	 It is probably where the epilogue begins, but since the DWARF 5
+	 spec doesn't guarantee it, we iterate backwards through the function
+	 until we either find it or are sure that it doesn't exist.  */
+      auto it = std::lower_bound
+	(linetable->item, linetable->item + linetable->nitems, unrel_end,
+	 [] (const linetable_entry &lte, unrelocated_addr pc)
+	 {
+	   return lte.unrelocated_pc () < pc;
+	 });
+
+      while (it->unrelocated_pc () >= unrel_start)
+      {
+	if (it->epilogue_begin)
+	  return {it->pc (objfile)};
+	it --;
+      }
+    }
+  return {};
+}
+
+/* See symtab.h.  */
+
 symbol *
 find_function_alias_target (bound_minimal_symbol msymbol)
 {

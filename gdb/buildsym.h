@@ -131,6 +131,10 @@ enum linetable_entry_flag : unsigned
   /* Indicates this PC is a good location to place a breakpoint at the first
      instruction past a function prologue.  */
   LEF_PROLOGUE_END = 1 << 2,
+
+  /* Indicated that this PC is part of the epilogue of a function, making
+     software watchpoints unreliable.  */
+  LEF_EPILOGUE_BEGIN = 1 << 3,
 };
 DEF_ENUM_FLAGS_TYPE (enum linetable_entry_flag, linetable_entry_flags);
 

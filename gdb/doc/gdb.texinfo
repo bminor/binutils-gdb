@@ -20453,25 +20453,27 @@ objfile: /home/gnu/build/a.out ((struct objfile *) 0x6120000e0d40)
 compunit_symtab: simple.cpp ((struct compunit_symtab *) 0x6210000ff450)
 symtab: /home/gnu/src/simple.cpp ((struct symtab *) 0x6210000ff4d0)
 linetable: ((struct linetable *) 0x62100012b760):
-INDEX  LINE   ADDRESS            IS-STMT PROLOGUE-END
+INDEX  LINE   ADDRESS            IS-STMT PROLOGUE-END EPILOGUE-BEGIN
 0      3      0x0000000000401110 Y
-1      4      0x0000000000401114 Y       Y
+1      4      0x0000000000401114 Y       Y            Y
 2      9      0x0000000000401120 Y
 3      10     0x0000000000401124 Y       Y
-4      10     0x0000000000401129
+4      10     0x0000000000401129 Y                    Y
 5      15     0x0000000000401130 Y
 6      16     0x0000000000401134 Y       Y
 7      16     0x0000000000401139
-8      21     0x0000000000401140 Y
+8      21     0x0000000000401140 Y                    Y
 9      22     0x000000000040114f Y       Y
-10     22     0x0000000000401154
+10     22     0x0000000000401154                      Y
 11     END    0x000000000040115a Y
 @end smallexample
 @noindent
 The @samp{IS-STMT} column indicates if the address is a recommended breakpoint
 location to represent a line or a statement.  The @samp{PROLOGUE-END} column
 indicates that a given address is an adequate place to set a breakpoint at the
-first instruction following a function prologue.
+first instruction following a function prologue.  The @samp{EPILOGUE-BEGIN}
+column indicates that a given address marks the point where a block's frame is
+destroyed, making local variables hard or impossible to find.
 
 @kindex set always-read-ctf [on|off]
 @kindex show always-read-ctf

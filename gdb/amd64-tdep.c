@@ -2840,6 +2840,14 @@ amd64_stack_frame_destroyed_p_1 (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   gdb_byte insn;
 
+  std::optional<CORE_ADDR> epilogue = find_epilogue_using_linetable (pc);
+
+  /* PC is pointing at the next instruction to be executed. If it is
+     equal to the epilogue start, it means we're right before it starts,
+     so the stack is still valid.  */
+  if (epilogue)
+    return pc > epilogue;
+
   if (target_read_memory (pc, &insn, 1))
     return 0;   /* Can't read memory at pc.  */
 

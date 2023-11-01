@@ -16,6 +16,11 @@ disassemble
   command will now give an error.  Previously the 'b' flag would
   always override the 'r' flag.
 
+maintenance info line-table
+  Add an EPILOGUE-BEGIN column to the output of the command.  It indicates
+  if the line is considered the start of the epilgoue, and thus a point at
+  which the frame can be considered destroyed.
+
 * New commands
 
 info missing-debug-handler
