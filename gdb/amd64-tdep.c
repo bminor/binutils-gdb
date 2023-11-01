@@ -2833,6 +2833,22 @@ static const struct frame_base amd64_frame_base =
   amd64_frame_base_address
 };
 
+/* Implement core of the stack_frame_destroyed_p gdbarch method.  */
+
+static int
+amd64_stack_frame_destroyed_p_1 (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_byte insn;
+
+  if (target_read_memory (pc, &insn, 1))
+    return 0;   /* Can't read memory at pc.  */
+
+  if (insn != 0xc3)     /* 'ret' instruction.  */
+    return 0;
+
+  return 1;
+}
+
 /* Normal frames, but in a function epilogue.  */
 
 /* Implement the stack_frame_destroyed_p gdbarch method.
@@ -2844,15 +2860,13 @@ static const struct frame_base amd64_frame_base =
 static int
 amd64_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  gdb_byte insn;
+  struct compunit_symtab *cust = find_pc_compunit_symtab (pc);
 
-  if (target_read_memory (pc, &insn, 1))
-    return 0;   /* Can't read memory at pc.  */
+  if (cust != nullptr && cust->producer () != nullptr
+      && producer_is_llvm (cust->producer ()))
+    return amd64_stack_frame_destroyed_p_1 (gdbarch, pc);
 
-  if (insn != 0xc3)     /* 'ret' instruction.  */
-    return 0;
-
-  return 1;
+  return 0;
 }
 
 static int
@@ -2885,7 +2899,7 @@ amd64_epilogue_frame_sniffer_1 (const struct frame_unwind *self,
     }
 
   /* Check whether we're in an epilogue.  */
-  return amd64_stack_frame_destroyed_p (gdbarch, pc);
+  return amd64_stack_frame_destroyed_p_1 (gdbarch, pc);
 }
 
 static int
@@ -3255,6 +3269,8 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
   set_gdbarch_relocate_instruction (gdbarch, amd64_relocate_instruction);
 
   set_gdbarch_gen_return_address (gdbarch, amd64_gen_return_address);
+
+  set_gdbarch_stack_frame_destroyed_p (gdbarch, amd64_stack_frame_destroyed_p);
 
   /* SystemTap variables and functions.  */
   set_gdbarch_stap_integer_prefixes (gdbarch, stap_integer_prefixes);
