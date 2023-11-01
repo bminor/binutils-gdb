@@ -96,11 +96,14 @@ extern sort_type sort_section;
 
 struct wildcard_spec
 {
-  const char *name;
-  struct name_list *exclude_name_list;
-  struct flag_info *section_flag_list;
-  size_t namelen, prefixlen, suffixlen;
-  sort_type sorted;
+  const char *        name;
+  struct name_list *  exclude_name_list;
+  struct flag_info *  section_flag_list;
+  size_t              namelen;
+  size_t              prefixlen;
+  size_t              suffixlen;
+  sort_type           sorted;
+  bool                reversed;
 };
 
 struct wildcard_list

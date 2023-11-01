@@ -12,6 +12,10 @@ Changes in 2.41:
 * The linker command line option --print-map-locals can be used to include
   local symbols in a linker map.  (ELF targets only).
 
+* A new linker script sorting directive has been added: REVERSE.  This reverses
+  the order of the sorting.  It be combined with either SORT_BY_INIT_PRIORITY
+  or SORT_BY_NAME.
+
 * For most ELF based targets, if the --enable-linker-version option is used
   then the version of the linker will be inserted as a string into the .comment
   section.

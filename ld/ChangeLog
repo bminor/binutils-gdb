@@ -1,3 +1,27 @@
+2023-11-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 27565
+	* ldlex.l: Add REVERSE.
+	* ldgram.y: Allow REVERSE to be used wherever a sorting command
+	can be used.
+	* ld.h (struct wildcard_spec): Add 'reversed' field.
+	* ldlang.h (lang_wild_statement_struct): Add 'filenames_reversed' field.
+	* ldlang.c (compare_sections): Add reversed parameter.
+	(wild_sort): Reverse the comparison if requested.
+	(print_wild_statement): Handle the reversed field.
+	* ld.texi: Document the new feature.
+	* NEWS: Mention the new feature.
+	* testsuite/ld-scripts/sort-file-reversed-1.d: New test driver.
+	* testsuite/ld-scripts/sort-file-reversed-1.t: New test source.
+	* testsuite/ld-scripts/sort-file-reversed-2.t: New test source.
+	* testsuite/ld-scripts/sort-file-reversed-2.d: New test driver.
+	* testsuite/ld-scripts/sort-sections-reversed-1.d: New test driver.
+	* testsuite/ld-scripts/sort-sections-reversed-1.t: New test source.
+	* testsuite/ld-scripts/sort-sections-reversed-2.t: New test source.
+	* testsuite/ld-scripts/sort-sections-reversed-2.d: New test driver.
+	* testsuite/ld-scripts/sort-sections-reversed-3.d: New test driver.
+	* testsuite/ld-scripts/sort-sections-reversed-3.t: New test source.
+
 2023-10-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/ka.po: New Georgian translation.

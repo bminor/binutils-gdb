@@ -102,7 +102,7 @@ static void yyerror (const char *);
 %type <flag_info> sect_flags
 %type <name> memspec_opt memspec_at_opt paren_script_name casesymlist
 %type <cname> wildcard_name
-%type <wildcard> section_name_spec filename_spec wildcard_maybe_exclude
+%type <wildcard> section_name_spec filename_spec wildcard_maybe_exclude wildcard_maybe_reverse
 %token <bigint> INT
 %token <name> NAME LNAME
 %type <integer> length
@@ -132,7 +132,7 @@ static void yyerror (const char *);
 %token SECTIONS PHDRS INSERT_K AFTER BEFORE LINKER_VERSION
 %token DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
 %token SORT_BY_NAME SORT_BY_ALIGNMENT SORT_NONE
-%token SORT_BY_INIT_PRIORITY
+%token SORT_BY_INIT_PRIORITY REVERSE
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token INHIBIT_COMMON_ALLOCATION FORCE_GROUP_ALLOCATION
@@ -440,6 +440,7 @@ wildcard_maybe_exclude:
 			  $$.sorted = none;
 			  $$.exclude_name_list = NULL;
 			  $$.section_flag_list = NULL;
+			  $$.reversed = false;
 			}
 	|	EXCLUDE_FILE '(' exclude_name_list ')' wildcard_name
 			{
@@ -447,64 +448,94 @@ wildcard_maybe_exclude:
 			  $$.sorted = none;
 			  $$.exclude_name_list = $3;
 			  $$.section_flag_list = NULL;
+			  $$.reversed = false;
+			}
+	;
+
+wildcard_maybe_reverse:
+		wildcard_maybe_exclude
+	|	REVERSE '(' wildcard_maybe_exclude ')'
+			{
+			  $$ = $3;
+			  $$.reversed = true;
+			  $$.sorted = by_name;
 			}
 	;
 
 filename_spec:
-		wildcard_maybe_exclude
-	|	SORT_BY_NAME '(' wildcard_maybe_exclude ')'
+		wildcard_maybe_reverse
+	|	SORT_BY_NAME '(' wildcard_maybe_reverse ')'
 			{
 			  $$ = $3;
 			  $$.sorted = by_name;
 			}
-	|	SORT_NONE '(' wildcard_maybe_exclude ')'
+	|	SORT_NONE '(' wildcard_maybe_reverse ')'
 			{
 			  $$ = $3;
 			  $$.sorted = by_none;
+			  $$.reversed = false;
+			}
+	|	REVERSE '(' SORT_BY_NAME '(' wildcard_maybe_exclude ')' ')'
+			{
+			  $$ = $5;
+			  $$.sorted = by_name;
+			  $$.reversed = true;
 			}
 	;
 
 section_name_spec:
-		wildcard_maybe_exclude
-	|	SORT_BY_NAME '(' wildcard_maybe_exclude ')'
+		wildcard_maybe_reverse
+	|	SORT_BY_NAME '(' wildcard_maybe_reverse ')'
 			{
 			  $$ = $3;
 			  $$.sorted = by_name;
 			}
-	|	SORT_BY_ALIGNMENT '(' wildcard_maybe_exclude ')'
+	|	SORT_BY_ALIGNMENT '(' wildcard_maybe_reverse ')'
 			{
 			  $$ = $3;
 			  $$.sorted = by_alignment;
 			}
-	|	SORT_NONE '(' wildcard_maybe_exclude ')'
+	|	SORT_NONE '(' wildcard_maybe_reverse ')'
 			{
 			  $$ = $3;
 			  $$.sorted = by_none;
 			}
-	|	SORT_BY_NAME '(' SORT_BY_ALIGNMENT '(' wildcard_maybe_exclude ')' ')'
+	|	SORT_BY_NAME '(' SORT_BY_ALIGNMENT '(' wildcard_maybe_reverse ')' ')'
 			{
 			  $$ = $5;
 			  $$.sorted = by_name_alignment;
 			}
-	|	SORT_BY_NAME '(' SORT_BY_NAME '(' wildcard_maybe_exclude ')' ')'
+	|	SORT_BY_NAME '(' SORT_BY_NAME '(' wildcard_maybe_reverse ')' ')'
 			{
 			  $$ = $5;
 			  $$.sorted = by_name;
 			}
-	|	SORT_BY_ALIGNMENT '(' SORT_BY_NAME '(' wildcard_maybe_exclude ')' ')'
+	|	SORT_BY_ALIGNMENT '(' SORT_BY_NAME '(' wildcard_maybe_reverse ')' ')'
 			{
 			  $$ = $5;
 			  $$.sorted = by_alignment_name;
 			}
-	|	SORT_BY_ALIGNMENT '(' SORT_BY_ALIGNMENT '(' wildcard_maybe_exclude ')' ')'
+	|	SORT_BY_ALIGNMENT '(' SORT_BY_ALIGNMENT '(' wildcard_maybe_reverse ')' ')'
 			{
 			  $$ = $5;
 			  $$.sorted = by_alignment;
 			}
-	|	SORT_BY_INIT_PRIORITY '(' wildcard_maybe_exclude ')'
+	|	SORT_BY_INIT_PRIORITY '(' wildcard_maybe_reverse ')'
 			{
 			  $$ = $3;
 			  $$.sorted = by_init_priority;
+			}
+	|	REVERSE '(' SORT_BY_NAME '(' wildcard_maybe_exclude ')' ')'
+			{
+			  $$ = $5;
+			  $$.sorted = by_name;
+			  $$.reversed = true;
+			}
+	|	REVERSE '(' SORT_BY_INIT_PRIORITY '(' wildcard_maybe_exclude ')' ')'
+			{
+			  $$ = $5;
+			  $$.sorted = by_init_priority;
+			  $$.reversed = true;
 			}
 	;
 

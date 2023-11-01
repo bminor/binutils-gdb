@@ -5263,6 +5263,35 @@ the init_priority.  In @code{.ctors.NNNNN} and @code{.dtors.NNNNN},
 @cindex SORT
 @code{SORT} is an alias for @code{SORT_BY_NAME}.
 
+@cindex REVERSE
+@code{REVERSE} indicates that the sorting should be reversed.  If used
+on its own then @code{REVERSE} implies @code{SORT_BY_NAME}, otherwise
+it reverses the enclosed @code{SORT..} command.  Note - reverse
+sorting of alignment is not currently supported.
+
+Note - the sorting commands only accept a single wildcard pattern.  So
+for example the following will not work:
+@smallexample
+  *(REVERSE(.text* .init*))
+@end smallexample
+To resolve this problem list the patterns individually, like this:
+@smallexample
+  *(REVERSE(.text*))
+  *(REVERSE(.init*))
+@end smallexample
+
+Note - you can put the @code{EXCLUDE_FILE} command inside a sorting
+command, but not the other way around.  So for example:
+@smallexample
+  *(SORT_BY_NAME(EXCLUDE_FILE(foo) .text*))
+@end smallexample
+will work, but:
+@smallexample
+  *(EXCLUDE_FILE(foo) SORT_BY_NAME(.text*))
+@end smallexample
+will not.
+
+
 When there are nested section sorting commands in linker script, there
 can be at most 1 level of nesting for section sorting commands.
 
@@ -5281,6 +5310,15 @@ treated the same as @code{SORT_BY_NAME} (wildcard section pattern).
 @item
 @code{SORT_BY_ALIGNMENT} (@code{SORT_BY_ALIGNMENT} (wildcard section pattern))
 is treated the same as @code{SORT_BY_ALIGNMENT} (wildcard section pattern).
+@item
+@code{SORT_BY_NAME} (@code{REVERSE} (wildcard section pattern))
+reverse sorts by name.
+@item
+@code{REVERSE} (@code{SORT_BY_NAME} (wildcard section pattern))
+reverse sorts by name.
+@item
+@code{SORT_BY_INIT_PRIORITY} (@code{REVERSE} (wildcard section pattern))
+reverse sorts by init priority.
 @item
 All other nested section sorting commands are invalid.
 @end enumerate
