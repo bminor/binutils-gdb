@@ -289,3 +289,7 @@ Disassembly of section \.text:
 [^:]*:	d5189923 	msr	pmsnevfr_el1, x3
 [^:]*:	d53c1242 	mrs	x2, hcrx_el2
 [^:]*:	d51c1243 	msr	hcrx_el2, x3
+[^:]*:	d538d0c2 	mrs	x2, rcwmask_el1
+[^:]*:	d518d0c3 	msr	rcwmask_el1, x3
+[^:]*:	d538d062 	mrs	x2, rcwsmask_el1
+[^:]*:	d518d063 	msr	rcwsmask_el1, x3

@@ -185,3 +185,8 @@
 
 	rwreg	pmsnevfr_el1
 	rwreg	hcrx_el2
+
+	.arch	armv8-a+the
+
+	rwreg	rcwmask_el1
+	rwreg	rcwsmask_el1

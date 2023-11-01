@@ -2576,6 +2576,8 @@ static const aarch64_feature_set aarch64_feature_chk =
   AARCH64_FEATURE (CHK);
 static const aarch64_feature_set aarch64_feature_gcs =
   AARCH64_FEATURE (GCS);
+static const aarch64_feature_set aarch64_feature_the =
+  AARCH64_FEATURE (THE);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2636,6 +2638,7 @@ static const aarch64_feature_set aarch64_feature_gcs =
 #define CSSC	  &aarch64_feature_cssc
 #define CHK	  &aarch64_feature_chk
 #define GCS	  &aarch64_feature_gcs
+#define THE	  &aarch64_feature_the
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }

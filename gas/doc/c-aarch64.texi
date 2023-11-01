@@ -263,6 +263,9 @@ automatically cause those extensions to be disabled.
  @tab Enable Check Feature Status Extension.
 @item @code{gcs} @tab N/A @tab No
  @tab Enable Guarded Control Stack Extension.
+@item @code{the} @tab ARMv8-A/Armv9-A @tab ARMv8.9-A/Armv9.4-A or later
+ @tab Enable Translation Hardening extension.
+
 @end multitable
 
 @node AArch64 Syntax

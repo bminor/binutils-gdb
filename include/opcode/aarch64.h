@@ -165,6 +165,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_GCS,
   /* SME2.  */
   AARCH64_FEATURE_SME2,
+  /* Translation Hardening Extension.  */
+  AARCH64_FEATURE_THE,
   AARCH64_NUM_FEATURES
 };
 
