@@ -161,9 +161,10 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_V8_9A,
   /* Check Feature Status Extension.  */
   AARCH64_FEATURE_CHK,
+  /* Guarded Control Stack.  */
+  AARCH64_FEATURE_GCS,
   /* SME2.  */
   AARCH64_FEATURE_SME2,
-  DUMMY2,
   AARCH64_NUM_FEATURES
 };
 
@@ -895,6 +896,7 @@ enum aarch64_insn_class
   dotproduct,
   bfloat16,
   cssc,
+  gcs,
 };
 
 /* Opcode enumerators.  */

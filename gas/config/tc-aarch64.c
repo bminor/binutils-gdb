@@ -10325,6 +10325,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"hbc",		AARCH64_FEATURE (HBC), AARCH64_NO_FEATURES},
   {"cssc",		AARCH64_FEATURE (CSSC), AARCH64_NO_FEATURES},
   {"chk",		AARCH64_FEATURE (CHK), AARCH64_NO_FEATURES},
+  {"gcs",		AARCH64_FEATURE (GCS), AARCH64_NO_FEATURES},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 

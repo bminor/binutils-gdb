@@ -261,6 +261,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Transactional Memory Extensions.
 @item @code{chk} @tab ARMv8-A @tab ARMv8-A
  @tab Enable Check Feature Status Extension.
+@item @code{gcs} @tab N/A @tab No
+ @tab Enable Guarded Control Stack Extension.
 @end multitable
 
 @node AArch64 Syntax

@@ -2574,6 +2574,8 @@ static const aarch64_feature_set aarch64_feature_cssc =
   AARCH64_FEATURE (CSSC);
 static const aarch64_feature_set aarch64_feature_chk =
   AARCH64_FEATURE (CHK);
+static const aarch64_feature_set aarch64_feature_gcs =
+  AARCH64_FEATURE (GCS);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2633,6 +2635,7 @@ static const aarch64_feature_set aarch64_feature_chk =
 #define HBC	  &aarch64_feature_hbc
 #define CSSC	  &aarch64_feature_cssc
 #define CHK	  &aarch64_feature_chk
+#define GCS	  &aarch64_feature_gcs
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2782,6 +2785,8 @@ static const aarch64_feature_set aarch64_feature_chk =
   { NAME, OPCODE, MASK, cssc, 0, CSSC, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define CHK_INSN(NAME, OPCODE, MASK, OPS, QUALS, FLAGS) \
   { NAME, OPCODE, MASK, ic_system, 0, CHK, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define GCS_INSN(NAME, OPCODE, MASK, OPS, QUALS, FLAGS) \
+  { NAME, OPCODE, MASK, gcs, 0, GCS, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -4141,6 +4146,16 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("dmb", 0xd50330bf, 0xfffff0ff, ic_system, 0, OP1 (BARRIER), {}, 0),
   CORE_INSN ("isb", 0xd50330df, 0xfffff0ff, ic_system, 0, OP1 (BARRIER_ISB), {}, F_OPD0_OPT | F_DEFAULT (0xF)),
   SB_INSN ("sb", 0xd50330ff, 0xffffffff, ic_system, OP0 (), {}, 0),
+  GCS_INSN ("gcspushx", 0xd508779f, 0xffffffff, OP0 (), {}, 0),
+  GCS_INSN ("gcspopx", 0xd50877df, 0xffffffff, OP0 (), {}, 0),
+  GCS_INSN ("gcspopcx", 0xd50877bf, 0xffffffff, OP0 (), {}, 0),
+  GCS_INSN ("gcsss1", 0xd50b7740, 0xffffffe0, OP1 (Rt), QL_I1X, 0),
+  GCS_INSN ("gcspushm", 0xd50b7700, 0xffffffe0, OP1 (Rt), QL_I1X, 0),
+  GCS_INSN ("gcsss2", 0xd52b7760, 0xffffffe0, OP1 (Rt), QL_I1X, 0),
+  GCS_INSN ("gcspopm", 0xd52b773f, 0xffffffff, OP0 (), {}, 0),
+  GCS_INSN ("gcspopm", 0xd52b7720, 0xffffffe0, OP1 (Rt), QL_I1X, 0),
+  GCS_INSN ("gcsstr", 0xd91f0c00, 0xfffffc00, OP2 (Rt, Rn_SP), QL_I2SAMEX, 0),
+  GCS_INSN ("gcssttr", 0xd91f1c00, 0xfffffc00, OP2 (Rt, Rn_SP), QL_I2SAMEX, 0),
   CORE_INSN ("sys", 0xd5080000, 0xfff80000, ic_system, 0, OP5 (UIMM3_OP1, CRn, CRm, UIMM3_OP2, Rt), QL_SYS, F_HAS_ALIAS | F_OPD4_OPT | F_DEFAULT (0x1F)),
   CORE_INSN ("at",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_AT, Rt), QL_SRC_X, F_ALIAS),
   CORE_INSN ("dc",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_DC, Rt), QL_SRC_X, F_ALIAS),
