@@ -157,11 +157,12 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_V8_8A,
   /* Common Short Sequence Compression instructions.  */
   AARCH64_FEATURE_CSSC,
+  /* Armv8.9-A processors.  */
+  AARCH64_FEATURE_V8_9A,
   /* SME2.  */
   AARCH64_FEATURE_SME2,
   DUMMY1,
   DUMMY2,
-  DUMMY3,
   AARCH64_NUM_FEATURES
 };
 
@@ -216,6 +217,7 @@ enum aarch64_feature_bit {
 #define AARCH64_ARCH_V8_8A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_8A)	\
 					 | AARCH64_FEATBIT (X, MOPS)	\
 					 | AARCH64_FEATBIT (X, HBC))
+#define AARCH64_ARCH_V8_9A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_9A))
 
 #define AARCH64_ARCH_V9A_FEATURES(X)	(AARCH64_FEATBIT (X, V9A)	\
 					 | AARCH64_FEATBIT (X, F16)	\
@@ -224,6 +226,7 @@ enum aarch64_feature_bit {
 #define AARCH64_ARCH_V9_1A_FEATURES(X)	AARCH64_ARCH_V8_6A_FEATURES (X)
 #define AARCH64_ARCH_V9_2A_FEATURES(X)	AARCH64_ARCH_V8_7A_FEATURES (X)
 #define AARCH64_ARCH_V9_3A_FEATURES(X)	AARCH64_ARCH_V8_8A_FEATURES (X)
+#define AARCH64_ARCH_V9_4A_FEATURES(X)	AARCH64_ARCH_V8_9A_FEATURES (X)
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8A(X)	(AARCH64_FEATBIT (X, V8) \
@@ -244,6 +247,8 @@ enum aarch64_feature_bit {
 				 | AARCH64_ARCH_V8_7A_FEATURES (X))
 #define AARCH64_ARCH_V8_8A(X)	(AARCH64_ARCH_V8_7A (X)	\
 				 | AARCH64_ARCH_V8_8A_FEATURES (X))
+#define AARCH64_ARCH_V8_9A(X)	(AARCH64_ARCH_V8_8A (X)	\
+				 | AARCH64_ARCH_V8_9A_FEATURES (X))
 #define AARCH64_ARCH_V8R(X)	((AARCH64_ARCH_V8_4A (X)	\
 				  | AARCH64_FEATBIT (X, V8R))	\
 				 & ~AARCH64_FEATBIT (X, V8A)	\
@@ -257,6 +262,8 @@ enum aarch64_feature_bit {
 				 | AARCH64_ARCH_V9_2A_FEATURES (X))
 #define AARCH64_ARCH_V9_3A(X)	(AARCH64_ARCH_V9_2A (X) \
 				 | AARCH64_ARCH_V9_3A_FEATURES (X))
+#define AARCH64_ARCH_V9_4A(X)	(AARCH64_ARCH_V9_3A (X) \
+				 | AARCH64_ARCH_V9_4A_FEATURES (X))
 
 #define AARCH64_ARCH_NONE(X)	0
 

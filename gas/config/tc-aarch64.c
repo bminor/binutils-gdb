@@ -10241,11 +10241,13 @@ static const struct aarch64_arch_option_table aarch64_archs[] = {
   {"armv8.6-a", AARCH64_ARCH_FEATURES (V8_6A)},
   {"armv8.7-a", AARCH64_ARCH_FEATURES (V8_7A)},
   {"armv8.8-a", AARCH64_ARCH_FEATURES (V8_8A)},
+  {"armv8.9-a", AARCH64_ARCH_FEATURES (V8_9A)},
   {"armv8-r",	AARCH64_ARCH_FEATURES (V8R)},
   {"armv9-a",	AARCH64_ARCH_FEATURES (V9A)},
   {"armv9.1-a",	AARCH64_ARCH_FEATURES (V9_1A)},
   {"armv9.2-a",	AARCH64_ARCH_FEATURES (V9_2A)},
   {"armv9.3-a",	AARCH64_ARCH_FEATURES (V9_3A)},
+  {"armv9.4-a",	AARCH64_ARCH_FEATURES (V9_4A)},
   {NULL, AARCH64_NO_FEATURES}
 };
 
