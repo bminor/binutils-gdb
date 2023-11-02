@@ -3,6 +3,7 @@
 	gcspopcx
 	gcspopx
 	gcspopm
+	gcsb dsync
 
 	.irp op gcspushm, gcsss1, gcsss2, gcspopm
         .irp reg1 x0, x15, x30, xzr

@@ -4156,6 +4156,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   GCS_INSN ("gcspopm", 0xd52b7720, 0xffffffe0, OP1 (Rt), QL_I1X, 0),
   GCS_INSN ("gcsstr", 0xd91f0c00, 0xfffffc00, OP2 (Rt, Rn_SP), QL_I2SAMEX, 0),
   GCS_INSN ("gcssttr", 0xd91f1c00, 0xfffffc00, OP2 (Rt, Rn_SP), QL_I2SAMEX, 0),
+  CORE_INSN ("gcsb", 0xd503227f, 0xffffffff, ic_system, 0, OP1 (BARRIER_GCSB), {}, F_ALIAS),
   CORE_INSN ("sys", 0xd5080000, 0xfff80000, ic_system, 0, OP5 (UIMM3_OP1, CRn, CRm, UIMM3_OP2, Rt), QL_SYS, F_HAS_ALIAS | F_OPD4_OPT | F_DEFAULT (0x1F)),
   CORE_INSN ("at",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_AT, Rt), QL_SRC_X, F_ALIAS),
   CORE_INSN ("dc",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_DC, Rt), QL_SRC_X, F_ALIAS),
@@ -6300,7 +6301,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a range prefetch operation specifier")				\
     Y(SYSTEM, none, "BARRIER_PSB", 0, F (),				\
       "the PSB/TSB option name CSYNC")					\
-    Y(SYSTEM, hint, "BTI", 0, F (),					\
+    Y(SYSTEM, none, "BARRIER_GCSB", 0, F (),				\
+      "the GCSB option name DSYNC")					\
+    Y(SYSTEM, hint, "BTI_TARGET", 0, F (),				\
       "BTI targets j/c/jc")						\
     Y(ADDRESS, sve_addr_ri_s4, "SVE_ADDR_RI_S4x16",			\
       4 << OPD_F_OD_LSB, F(FLD_Rn),					\

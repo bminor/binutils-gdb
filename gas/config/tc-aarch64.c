@@ -4417,12 +4417,13 @@ parse_barrier (char **str)
   return o->value;
 }
 
-/* Parse an operand for a PSB barrier.  Set *HINT_OPT to the hint-option record
-   return 0 if successful.  Otherwise return PARSE_FAIL.  */
+/* Parse an option for barrier, bti and guarded control stack data
+   synchronization instructions.  Return true on matching the target
+   options else return false.  */
 
-static int
-parse_barrier_psb (char **str,
-		   const struct aarch64_name_value_pair ** hint_opt)
+static bool
+parse_hint_opt (const char *name, char **str,
+		const struct aarch64_name_value_pair ** hint_opt)
 {
   char *p, *q;
   const struct aarch64_name_value_pair *o;
@@ -4433,64 +4434,19 @@ parse_barrier_psb (char **str,
 
   o = str_hash_find_n (aarch64_hint_opt_hsh, p, q - p);
   if (!o)
-    {
-      set_fatal_syntax_error
-	( _("unknown or missing option to PSB/TSB"));
-      return PARSE_FAIL;
-    }
+    return false;
 
-  if (o->value != 0x11)
-    {
-      /* PSB only accepts option name 'CSYNC'.  */
-      set_syntax_error
-	(_("the specified option is not accepted for PSB/TSB"));
-      return PARSE_FAIL;
-    }
+  if ((strcmp ("gcsb", name) == 0 && o->value != HINT_OPD_DSYNC)
+      || ((strcmp ("psb", name) == 0 || strcmp ("tsb", name) == 0)
+	  && o->value != HINT_OPD_CSYNC)
+      || ((strcmp ("bti", name) == 0)
+	  && (o->value != HINT_OPD_C && o->value != HINT_OPD_J
+	      && o->value != HINT_OPD_JC)))
+      return false;
 
   *str = q;
   *hint_opt = o;
-  return 0;
-}
-
-/* Parse an operand for BTI.  Set *HINT_OPT to the hint-option record
-   return 0 if successful.  Otherwise return PARSE_FAIL.  */
-
-static int
-parse_bti_operand (char **str,
-		   const struct aarch64_name_value_pair ** hint_opt)
-{
-  char *p, *q;
-  const struct aarch64_name_value_pair *o;
-
-  p = q = *str;
-  while (ISALPHA (*q))
-    q++;
-
-  o = str_hash_find_n (aarch64_hint_opt_hsh, p, q - p);
-  if (!o)
-    {
-      set_fatal_syntax_error
-	( _("unknown option to BTI"));
-      return PARSE_FAIL;
-    }
-
-  switch (o->value)
-    {
-    /* Valid BTI operands.  */
-    case HINT_OPD_C:
-    case HINT_OPD_J:
-    case HINT_OPD_JC:
-      break;
-
-    default:
-      set_syntax_error
-	(_("unknown option to BTI"));
-      return PARSE_FAIL;
-    }
-
-  *str = q;
-  *hint_opt = o;
-  return 0;
+  return true;
 }
 
 /* Parse STR for reg of REG_TYPE and following '.' and QUALIFIER.
@@ -7777,8 +7733,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_BARRIER_PSB:
-	  val = parse_barrier_psb (&str, &(info->hint_option));
-	  if (val == PARSE_FAIL)
+	  if (!parse_hint_opt (opcode->name, &str, &(info->hint_option)))
 	    goto failure;
 	  break;
 
@@ -7833,9 +7788,13 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    info->qualifier = vectype_to_qualifier (&vectype);
 	  break;
 
+	case AARCH64_OPND_BARRIER_GCSB:
+	  if (!parse_hint_opt (opcode->name, &str, &(info->hint_option)))
+	    goto failure;
+	  break;
+
 	case AARCH64_OPND_BTI_TARGET:
-	  val = parse_bti_operand (&str, &(info->hint_option));
-	  if (val == PARSE_FAIL)
+	  if (!parse_hint_opt (opcode->name, &str, &(info->hint_option)))
 	    goto failure;
 	  break;
 

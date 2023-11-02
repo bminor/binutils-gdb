@@ -12,6 +12,7 @@
 .*:	d50877bf 	gcspopcx
 .*:	d50877df 	gcspopx
 .*:	d52b773f 	gcspopm
+.*:	d503227f 	gcsb	dsync
 .*:	d50b7700 	gcspushm	x0
 .*:	d50b770f 	gcspushm	x15
 .*:	d50b771e 	gcspushm	x30

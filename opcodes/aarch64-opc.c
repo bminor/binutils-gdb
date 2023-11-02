@@ -554,6 +554,7 @@ const struct aarch64_name_value_pair aarch64_hint_options[] =
   /* BTI.  This is also the F_DEFAULT entry for AARCH64_OPND_BTI_TARGET.  */
   { " ",	HINT_ENCODE (HINT_OPD_F_NOPRINT, 0x20) },
   { "csync",	HINT_OPD_CSYNC },	/* PSB CSYNC.  */
+  { "dsync",	HINT_OPD_DSYNC },	/* GCSB DSYNC.  */
   { "c",	HINT_OPD_C },		/* BTI C.  */
   { "j",	HINT_OPD_J },		/* BTI J.  */
   { "jc",	HINT_OPD_JC },		/* BTI JC.  */
@@ -4627,6 +4628,10 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_SME_ZT0_LIST:
       snprintf (buf, size, "{%s}", style_reg (styler, "zt0"));
+      break;
+
+    case AARCH64_OPND_BARRIER_GCSB:
+      snprintf (buf, size, "%s", style_sub_mnem (styler, "dsync"));
       break;
 
     case AARCH64_OPND_BTI_TARGET:
