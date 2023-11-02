@@ -1,3 +1,10 @@
+2023-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-x86-64/property-3.r: Update regexp to allow for
+	targets which support x86-64-v3.
+	* testsuite/ld-x86-64/property-4.r: Likewise.
+	* testsuite/ld-x86-64/property-5.r: Likewise.
+
 2023-11-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 27565
