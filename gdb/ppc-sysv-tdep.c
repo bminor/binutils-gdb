@@ -1127,7 +1127,11 @@ ppc64_aggregate_candidate (struct type *type,
 
 	  if (!get_array_bounds (type, &low_bound, &high_bound))
 	    return -1;
-	  count *= high_bound - low_bound;
+
+	  LONGEST nr_array_elements = (low_bound > high_bound
+				       ? 0
+				       : (high_bound - low_bound + 1));
+	  count *= nr_array_elements;
 
 	  /* There must be no padding.  */
 	  if (count == 0)
