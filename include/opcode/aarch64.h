@@ -159,9 +159,10 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_CSSC,
   /* Armv8.9-A processors.  */
   AARCH64_FEATURE_V8_9A,
+  /* Check Feature Status Extension.  */
+  AARCH64_FEATURE_CHK,
   /* SME2.  */
   AARCH64_FEATURE_SME2,
-  DUMMY1,
   DUMMY2,
   AARCH64_NUM_FEATURES
 };
@@ -183,7 +184,8 @@ enum aarch64_feature_bit {
 #define AARCH64_ARCH_V8A_FEATURES(X)	(AARCH64_FEATBIT (X, V8A)	\
 					 | AARCH64_FEATBIT (X, FP)	\
 					 | AARCH64_FEATBIT (X, RAS)	\
-					 | AARCH64_FEATBIT (X, SIMD))
+					 | AARCH64_FEATBIT (X, SIMD)	\
+					 | AARCH64_FEATBIT (X, CHK))
 #define AARCH64_ARCH_V8_1A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_1A)	\
 					 | AARCH64_FEATBIT (X, CRC)	\
 					 | AARCH64_FEATBIT (X, LSE)	\
@@ -386,6 +388,7 @@ enum aarch64_opnd
   AARCH64_OPND_Rm,	/* Integer register as source.  */
   AARCH64_OPND_Rt,	/* Integer register used in ld/st instructions.  */
   AARCH64_OPND_Rt2,	/* Integer register used in ld/st pair instructions.  */
+  AARCH64_OPND_X16,	/* Integer register x16 in chkfeat instruction.  */
   AARCH64_OPND_Rt_LS64,	/* Integer register used in LS64 instructions.  */
   AARCH64_OPND_Rt_SP,	/* Integer Rt or SP used in STG instructions.  */
   AARCH64_OPND_Rs,	/* Integer register used in ld/st exclusive.  */

@@ -4612,6 +4612,10 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       snprintf (buf, size, "%s", style_sub_mnem (styler, "csync"));
       break;
 
+    case AARCH64_OPND_X16:
+      snprintf (buf, size, "%s", style_reg (styler, "x16"));
+      break;
+
     case AARCH64_OPND_SME_ZT0:
       snprintf (buf, size, "%s", style_reg (styler, "zt0"));
       break;

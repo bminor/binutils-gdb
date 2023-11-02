@@ -55,7 +55,7 @@ Disassembly of section \.text:
 .*:	d50324bf 	hint	#0x25
 .*:	d50324df 	(hint	#0x26|bti	jc)
 .*:	d50324ff 	hint	#0x27
-.*:	d503251f 	hint	#0x28
+.*:	d503251f 	(hint	#0x28|chkfeat	x16)
 .*:	d503253f 	hint	#0x29
 .*:	d503255f 	hint	#0x2a
 .*:	d503257f 	hint	#0x2b

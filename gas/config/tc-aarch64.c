@@ -6570,6 +6570,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Rm:
 	case AARCH64_OPND_Rt:
 	case AARCH64_OPND_Rt2:
+	case AARCH64_OPND_X16:
 	case AARCH64_OPND_Rs:
 	case AARCH64_OPND_Ra:
 	case AARCH64_OPND_Rt_LS64:
@@ -6581,17 +6582,26 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  /* In LS64 load/store instructions Rt register number must be even
 	     and <=22.  */
 	  if (operands[i] == AARCH64_OPND_Rt_LS64)
-	  {
-	    /* We've already checked if this is valid register.
-	       This will check if register number (Rt) is not undefined for LS64
-	       instructions:
-	       if Rt<4:3> == '11' || Rt<0> == '1' then UNDEFINED.  */
-	    if ((info->reg.regno & 0x18) == 0x18 || (info->reg.regno & 0x01) == 0x01)
 	    {
-	      set_syntax_error (_("invalid Rt register number in 64-byte load/store"));
-	      goto failure;
+	      /* We've already checked if this is valid register.
+		This will check if register number (Rt) is not undefined for
+		LS64 instructions:
+		if Rt<4:3> == '11' || Rt<0> == '1' then UNDEFINED.  */
+	      if ((info->reg.regno & 0x18) == 0x18
+		  || (info->reg.regno & 0x01) == 0x01)
+		{
+		  set_syntax_error
+		    (_("invalid Rt register number in 64-byte load/store"));
+		  goto failure;
+		}
 	    }
-	  }
+	  else if (operands[i] == AARCH64_OPND_X16)
+	    {
+	      if (info->reg.regno != 16)
+		{
+		  goto failure;
+		}
+	    }
 	  break;
 
 	case AARCH64_OPND_Rd_SP:
@@ -10314,6 +10324,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"mops",		AARCH64_FEATURE (MOPS), AARCH64_NO_FEATURES},
   {"hbc",		AARCH64_FEATURE (HBC), AARCH64_NO_FEATURES},
   {"cssc",		AARCH64_FEATURE (CSSC), AARCH64_NO_FEATURES},
+  {"chk",		AARCH64_FEATURE (CHK), AARCH64_NO_FEATURES},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 

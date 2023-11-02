@@ -2572,6 +2572,8 @@ static const aarch64_feature_set aarch64_feature_hbc =
   AARCH64_FEATURE (HBC);
 static const aarch64_feature_set aarch64_feature_cssc =
   AARCH64_FEATURE (CSSC);
+static const aarch64_feature_set aarch64_feature_chk =
+  AARCH64_FEATURE (CHK);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2630,6 +2632,7 @@ static const aarch64_feature_set aarch64_feature_cssc =
 #define MOPS_MEMTAG &aarch64_feature_mops_memtag
 #define HBC	  &aarch64_feature_hbc
 #define CSSC	  &aarch64_feature_cssc
+#define CHK	  &aarch64_feature_chk
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2777,6 +2780,8 @@ static const aarch64_feature_set aarch64_feature_cssc =
   { NAME, OPCODE, MASK, CLASS, 0, HBC, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define CSSC_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, cssc, 0, CSSC, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define CHK_INSN(NAME, OPCODE, MASK, OPS, QUALS, FLAGS) \
+  { NAME, OPCODE, MASK, ic_system, 0, CHK, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -4106,6 +4111,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_INSN ("smstart", 0xd503417f, 0xfffff1ff, sme_start, 0, OP1 (SME_SM_ZA), {}, F_SYS_WRITE, 0),
   SME_INSN ("smstop",  0xd503407f, 0xfffff1ff, sme_stop,  0, OP1 (SME_SM_ZA), {}, F_SYS_WRITE, 0),
   /* System.  */
+  CHK_INSN ("chkfeat", 0xd503251f, 0xffffffff, OP1 (X16), QL_I1X, 0),
   CORE_INSN ("msr", 0xd500401f, 0xfff8f01f, ic_system, 0, OP2 (PSTATEFIELD, UIMM4), {}, F_SYS_WRITE),
   CORE_INSN ("hint",0xd503201f, 0xfffff01f, ic_system, 0, OP1 (UIMM7), {}, F_HAS_ALIAS),
   CORE_INSN ("nop", 0xd503201f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
@@ -6092,6 +6098,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(INT_REG, regno, "Rm", 0, F(FLD_Rm), "an integer register")	\
     Y(INT_REG, regno, "Rt", 0, F(FLD_Rt), "an integer register")	\
     Y(INT_REG, regno, "Rt2", 0, F(FLD_Rt2), "an integer register")	\
+    Y(INT_REG, none, "X16", 0, F(), "X16")	\
     Y(INT_REG, regno, "Rt_LS64", 0, F(FLD_Rt), "an integer register")	\
     Y(INT_REG, regno, "Rt_SP", OPD_F_MAYBE_SP, F(FLD_Rt),		\
       "an integer or stack pointer register")				\

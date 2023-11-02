@@ -259,6 +259,8 @@ automatically cause those extensions to be disabled.
  @tab Enable SVE2 SM4 Extension.  This implies @code{sm4} and @code{sve2}.
 @item @code{tme} @tab ARMv8-A @tab No
  @tab Enable Transactional Memory Extensions.
+@item @code{chk} @tab ARMv8-A @tab ARMv8-A
+ @tab Enable Check Feature Status Extension.
 @end multitable
 
 @node AArch64 Syntax
