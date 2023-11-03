@@ -15,7 +15,7 @@
 
 import gdb
 
-from .events import StopKinds, exec_and_expect_stop
+from .events import exec_and_expect_stop
 from .server import capability, request
 from .startup import in_gdb_thread, send_gdb, send_gdb_with_response
 from .state import set_thread
@@ -57,7 +57,7 @@ def next(
     cmd = "next"
     if granularity == "instruction":
         cmd += "i"
-    exec_and_expect_stop(cmd, StopKinds.STEP)
+    exec_and_expect_stop(cmd)
 
 
 @capability("supportsSteppingGranularity")
@@ -70,13 +70,13 @@ def step_in(
     cmd = "step"
     if granularity == "instruction":
         cmd += "i"
-    exec_and_expect_stop(cmd, StopKinds.STEP)
+    exec_and_expect_stop(cmd)
 
 
 @request("stepOut", response=False)
 def step_out(*, threadId: int, singleThread: bool = False, **args):
     _handle_thread_step(threadId, singleThread, True)
-    exec_and_expect_stop("finish", StopKinds.STEP)
+    exec_and_expect_stop("finish")
 
 
 # This is a server-side request because it is funny: it wants to
@@ -87,5 +87,5 @@ def step_out(*, threadId: int, singleThread: bool = False, **args):
 @request("continue", on_dap_thread=True)
 def continue_request(*, threadId: int, singleThread: bool = False, **args):
     locked = send_gdb_with_response(lambda: _handle_thread_step(threadId, singleThread))
-    send_gdb(lambda: exec_and_expect_stop("continue", None))
+    send_gdb(lambda: exec_and_expect_stop("continue"))
     return {"allThreadsContinued": not locked}

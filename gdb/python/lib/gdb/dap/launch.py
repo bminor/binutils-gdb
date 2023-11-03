@@ -80,6 +80,4 @@ def config_done(**args):
     global _program
     if _program is not None:
         expect_process("process")
-        # Suppress the continue event, but don't set any particular
-        # expected stop.
-        exec_and_expect_stop("run", None)
+        exec_and_expect_stop("run")
