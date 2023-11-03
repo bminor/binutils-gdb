@@ -23,7 +23,6 @@
 #include "py-event.h"
 
 extern gdbpy_ref<> create_stop_event_object (PyTypeObject *py_type);
-extern void stop_evpy_dealloc (PyObject *self);
 
 extern int emit_stop_event (struct bpstat *bs,
 			    enum gdb_signal stop_signal);
