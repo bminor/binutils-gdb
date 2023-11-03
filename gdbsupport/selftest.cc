@@ -72,8 +72,9 @@ run_verbose ()
 void
 run_tests (gdb::array_view<const char *const> filters, bool verbose)
 {
-  int ran = 0, failed = 0;
+  int ran = 0;
   run_verbose_ = verbose;
+  std::vector<const char *> failed;
 
   for (const auto &test : all_selftests ())
     {
@@ -101,15 +102,25 @@ run_tests (gdb::array_view<const char *const> filters, bool verbose)
 	}
       catch (const gdb_exception_error &ex)
 	{
-	  ++failed;
 	  debug_printf ("Self test failed: %s\n", ex.what ());
+	  failed.push_back (test.name.c_str ());
 	}
 
       reset ();
     }
 
-  debug_printf (_("Ran %d unit tests, %d failed\n"),
-		ran, failed);
+  if (!failed.empty ())
+    {
+      debug_printf ("\nFailures:\n");
+
+      for (const char *name : failed)
+	debug_printf ("  %s\n", name);
+
+      debug_printf ("\n");
+    }
+
+  debug_printf (_("Ran %d unit tests, %zu failed\n"),
+		ran, failed.size ());
 }
 
 /* See selftest.h.  */
