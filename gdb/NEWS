@@ -75,6 +75,10 @@ show remote thread-options-packet
      sub-classed to create handlers for objfiles with missing debug
      information.
 
+  ** Stop events now have a "details" attribute that holds a
+     dictionary that carries the same information as an MI "*stopped"
+     event.
+
 * Debugger Adapter Protocol changes
 
   ** GDB now emits the "process" event.

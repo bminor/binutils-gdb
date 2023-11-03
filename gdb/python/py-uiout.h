@@ -46,14 +46,14 @@ public:
   /* Return the Python object that was created.  If a Python error
      occurred during the processing, set the Python error and return
      nullptr.  */
-  PyObject *result ()
+  gdbpy_ref<> result ()
   {
     if (m_error.has_value ())
       {
 	m_error->restore ();
 	return nullptr;
       }
-    return current ().obj.release ();
+    return std::move (current ().obj);
   }
 
 protected:

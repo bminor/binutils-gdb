@@ -173,7 +173,7 @@ gdbpy_execute_mi_command (PyObject *self, PyObject *args, PyObject *kw)
       return nullptr;
     }
 
-  return uiout.result ();
+  return uiout.result ().release ();
 }
 
 /* Convert KEY_OBJ into a string that can be used as a field name in MI

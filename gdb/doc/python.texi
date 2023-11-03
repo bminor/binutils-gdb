@@ -3750,6 +3750,17 @@ registry extend @code{gdb.StopEvent}.  As a child of
 thread when @value{GDBN} is running in non-stop mode.  Refer to
 @code{gdb.ThreadEvent} above for more details.
 
+@code{gdb.StopEvent} has the following additional attributes:
+
+@defvar StopEvent.details
+A dictionary holding any details relevant to the stop.  The exact keys
+and values depend on the type of stop, but are identical to the
+corresponding MI output (@pxref{GDB/MI Async Records}).
+
+A dictionary was used for this (rather than adding attributes directly
+to the event object) so that the MI keys could be used unchanged.
+@end defvar
+
 Emits @code{gdb.SignalEvent}, which extends @code{gdb.StopEvent}.
 
 This event indicates that the inferior or one of its threads has

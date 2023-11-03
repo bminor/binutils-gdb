@@ -21,10 +21,11 @@
 #include "py-stopevent.h"
 
 gdbpy_ref<>
-create_signal_event_object (enum gdb_signal stop_signal)
+create_signal_event_object (const gdbpy_ref<> &dict,
+			    enum gdb_signal stop_signal)
 {
   gdbpy_ref<> signal_event_obj
-    = create_stop_event_object (&signal_event_object_type);
+    = create_stop_event_object (&signal_event_object_type, dict);
 
   if (signal_event_obj == NULL)
     return NULL;

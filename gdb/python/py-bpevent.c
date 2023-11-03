@@ -24,10 +24,11 @@
    references to BREAKPOINT_LIST and FIRST_BP.  */
 
 gdbpy_ref<>
-create_breakpoint_event_object (PyObject *breakpoint_list, PyObject *first_bp)
+create_breakpoint_event_object (const gdbpy_ref<> &dict,
+				PyObject *breakpoint_list, PyObject *first_bp)
 {
   gdbpy_ref<> breakpoint_event_obj
-    = create_stop_event_object (&breakpoint_event_object_type);
+    = create_stop_event_object (&breakpoint_event_object_type, dict);
 
   if (breakpoint_event_obj == NULL)
     return NULL;
