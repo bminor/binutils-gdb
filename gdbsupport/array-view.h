@@ -185,6 +185,7 @@ public:
   /* Slice an array view.  */
 
   /* Return a new array view over SIZE elements starting at START.  */
+  [[nodiscard]]
   constexpr array_view<T> slice (size_type start, size_type size) const noexcept
   {
 #if defined(_GLIBCXX_DEBUG) && __cplusplus >= 201402L
@@ -195,6 +196,7 @@ public:
 
   /* Return a new array view over all the elements after START,
      inclusive.  */
+  [[nodiscard]]
   constexpr array_view<T> slice (size_type start) const noexcept
   {
 #if defined(_GLIBCXX_DEBUG) && __cplusplus >= 201402L
