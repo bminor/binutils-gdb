@@ -121,7 +121,11 @@ private:
   /* The program name, adjusted if needed.  */
   std::string m_path;
 } program_path;
-static std::vector<char *> program_args;
+
+/* All program arguments are merged into a single string.  */
+
+static std::string program_args;
+
 static std::string wrapper_argv;
 
 /* The PID of the originally created or attached inferior.  Used to
@@ -3458,9 +3462,8 @@ handle_v_run (char *own_buf)
   else
     program_path.set (new_program_name.get ());
 
-  /* Free the old argv and install the new one.  */
-  free_vector_argv (program_args);
-  program_args = new_argv;
+  program_args = construct_inferior_arguments (new_argv);
+  free_vector_argv (new_argv);
 
   try
     {
@@ -4346,12 +4349,11 @@ captured_main (int argc, char *argv[])
 
   if (pid == 0 && *next_arg != NULL)
     {
-      int i, n;
-
-      n = argc - (next_arg - argv);
       program_path.set (next_arg[0]);
-      for (i = 1; i < n; i++)
-	program_args.push_back (xstrdup (next_arg[i]));
+
+      int n = argc - (next_arg - argv);
+      program_args
+	= construct_inferior_arguments ({&next_arg[1], &next_arg[n]});
 
       /* Wait till we are at first instruction in program.  */
       target_create_inferior (program_path.get (), program_args);
