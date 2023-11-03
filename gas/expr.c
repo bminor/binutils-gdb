@@ -538,17 +538,26 @@ integer_constant (int radix, expressionS *expressionP)
 #ifndef tc_allow_U_suffix
 #define tc_allow_U_suffix 1
 #endif
+  bool u_seen = !tc_allow_U_suffix;
   /* PR 19910: Look for, and ignore, a U suffix to the number.  */
-  if (tc_allow_U_suffix && (c == 'U' || c == 'u'))
-    c = * input_line_pointer++;
+  if (!u_seen && (c == 'U' || c == 'u'))
+    {
+      c = *input_line_pointer++;
+      u_seen = true;
+    }
 
 #ifndef tc_allow_L_suffix
 #define tc_allow_L_suffix 1
 #endif
   /* PR 20732: Look for, and ignore, a L or LL suffix to the number.  */
-  if (tc_allow_L_suffix)
-    while (c == 'L' || c == 'l')
+  if (tc_allow_L_suffix && (c == 'L' || c == 'l'))
+    {
       c = * input_line_pointer++;
+      if (c == 'L' || c == 'l')
+	c = *input_line_pointer++;
+      if (!u_seen && (c == 'U' || c == 'u'))
+	c = *input_line_pointer++;
+    }
 
   if (small)
     {
@@ -888,6 +897,19 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	    input_line_pointer++;
 	  goto default_case;
 
+	case 'l':
+	case 'L':
+	  /* Accept an L suffix to the zero.  */
+	  if (tc_allow_L_suffix)
+	    goto numeric;
+	  goto default_case;
+
+	case 'u':
+	case 'U':
+	  /* Accept a U suffix to the zero.  */
+	  if (!tc_allow_U_suffix)
+	    goto default_case;
+	  /* Fall through.  */
 	case '0':
 	case '1':
 	case '2':
@@ -896,6 +918,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	case '5':
 	case '6':
 	case '7':
+	numeric:
 	  integer_constant ((flag_m68k_mri || NUMBERS_WITH_SUFFIX)
 			    ? 0 : 8,
 			    expressionP);

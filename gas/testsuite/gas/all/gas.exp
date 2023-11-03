@@ -469,6 +469,11 @@ run_list_test cond-2 "-al"
 setup_xfail "tic30-*-*"
 run_list_test linefile ""
 
+# Again, .byte does not emit 8 bits on either tic4x or tic54x.
+if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] } {
+    run_list_test const-1 "-alm"
+}
+
 run_list_test macro "-alm"
 
 run_list_test pr20312
