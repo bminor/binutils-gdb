@@ -1164,7 +1164,7 @@ frame_pop (frame_info_ptr this_frame)
      definition can lead to targets writing back bogus values
      (arguably a bug in the target code mind).  */
   /* Now copy those saved registers into the current regcache.  */
-  get_current_regcache ()->restore (scratch.get ());
+  get_thread_regcache (inferior_thread ())->restore (scratch.get ());
 
   /* We've made right mess of GDB's local state, just discard
      everything.  */
@@ -1445,7 +1445,7 @@ put_frame_register (frame_info_ptr frame, int regnum,
 	break;
       }
     case lval_register:
-      get_current_regcache ()->cooked_write (realnum, buf);
+      get_thread_regcache (inferior_thread ())->cooked_write (realnum, buf);
       break;
     default:
       error (_("Attempt to assign to an unmodifiable value."));
@@ -1690,7 +1690,8 @@ get_current_frame (void)
   if (sentinel_frame == NULL)
     sentinel_frame =
       create_sentinel_frame (current_program_space, current_inferior ()->aspace,
-			     get_current_regcache (), 0, 0).get ();
+			     get_thread_regcache (inferior_thread ()),
+			     0, 0).get ();
 
   /* Set the current frame before computing the frame id, to avoid
      recursion inside compute_frame_id, in case the frame's
@@ -2024,7 +2025,7 @@ create_new_frame (frame_id id)
 
   fi->next = create_sentinel_frame (current_program_space,
 				    current_inferior ()->aspace,
-				    get_current_regcache (),
+				    get_thread_regcache (inferior_thread ()),
 				    id.stack_addr, id.code_addr).get ();
 
   /* Set/update this frame's cached PC value, found in the next frame.

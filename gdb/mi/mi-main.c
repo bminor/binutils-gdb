@@ -1132,7 +1132,6 @@ void
 mi_cmd_data_write_register_values (const char *command,
 				   const char *const *argv, int argc)
 {
-  struct regcache *regcache;
   struct gdbarch *gdbarch;
   int numregs, i;
 
@@ -1143,7 +1142,7 @@ mi_cmd_data_write_register_values (const char *command,
      will change depending upon the particular processor being
      debugged.  */
 
-  regcache = get_current_regcache ();
+  regcache *regcache = get_thread_regcache (inferior_thread ());
   gdbarch = regcache->arch ();
   numregs = gdbarch_num_cooked_regs (gdbarch);
 

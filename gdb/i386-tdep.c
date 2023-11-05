@@ -8907,11 +8907,10 @@ i386_target_description (uint64_t xcr0, bool segments)
 static unsigned long
 i386_mpx_bd_base (void)
 {
-  struct regcache *rcache;
   ULONGEST ret;
   enum register_status regstatus;
 
-  rcache = get_current_regcache ();
+  regcache *rcache = get_thread_regcache (inferior_thread ());
   gdbarch *arch = rcache->arch ();
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (arch);
 

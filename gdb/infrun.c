@@ -2621,9 +2621,9 @@ do_target_resume (ptid_t resume_ptid, bool step, enum gdb_signal sig)
 static void
 resume_1 (enum gdb_signal sig)
 {
-  struct regcache *regcache = get_current_regcache ();
-  struct gdbarch *gdbarch = regcache->arch ();
   struct thread_info *tp = inferior_thread ();
+  regcache *regcache = get_thread_regcache (tp);
+  struct gdbarch *gdbarch = regcache->arch ();
   ptid_t resume_ptid;
   /* This represents the user's step vs continue request.  When
      deciding whether "set scheduler-locking step" applies, it's the
@@ -3566,7 +3566,6 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 {
   INFRUN_SCOPED_DEBUG_ENTER_EXIT;
 
-  struct regcache *regcache;
   struct gdbarch *gdbarch;
   CORE_ADDR pc;
 
@@ -3587,14 +3586,12 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   /* We'll update this if & when we switch to a new thread.  */
   update_previous_thread ();
 
-  regcache = get_current_regcache ();
-  gdbarch = regcache->arch ();
-
-  pc = regcache_read_pc_protected (regcache);
-
   thread_info *cur_thr = inferior_thread ();
-
   infrun_debug_printf ("cur_thr = %s", cur_thr->ptid.to_string ().c_str ());
+
+  regcache *regcache = get_thread_regcache (cur_thr);
+  gdbarch = regcache->arch ();
+  pc = regcache_read_pc_protected (regcache);
 
   /* Fill in with reasonable starting values.  */
   init_thread_stepping_state (cur_thr);
@@ -8894,7 +8891,7 @@ keep_going_pass_signal (struct execution_control_state *ecs)
     }
   else
     {
-      struct regcache *regcache = get_current_regcache ();
+      regcache *regcache = get_thread_regcache (ecs->event_thread);
       int remove_bp;
       int remove_wps;
       step_over_what step_what;
@@ -9112,7 +9109,7 @@ print_signal_received_reason (struct ui_out *uiout, enum gdb_signal siggnal)
       annotate_signal_string ();
       uiout->field_string ("signal-meaning", gdb_signal_to_string (siggnal));
 
-      struct regcache *regcache = get_current_regcache ();
+      regcache *regcache = get_thread_regcache (thr);
       struct gdbarch *gdbarch = regcache->arch ();
       if (gdbarch_report_signal_info_p (gdbarch))
 	gdbarch_report_signal_info (gdbarch, uiout, siggnal);
@@ -10026,7 +10023,7 @@ infcall_suspend_state_up
 save_infcall_suspend_state ()
 {
   struct thread_info *tp = inferior_thread ();
-  struct regcache *regcache = get_current_regcache ();
+  regcache *regcache = get_thread_regcache (tp);
   struct gdbarch *gdbarch = regcache->arch ();
 
   infcall_suspend_state_up inf_state
@@ -10047,7 +10044,7 @@ void
 restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 {
   struct thread_info *tp = inferior_thread ();
-  struct regcache *regcache = get_current_regcache ();
+  regcache *regcache = get_thread_regcache (inferior_thread ());
   struct gdbarch *gdbarch = regcache->arch ();
 
   inf_state->restore (gdbarch, tp, regcache);

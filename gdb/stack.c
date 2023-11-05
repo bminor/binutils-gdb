@@ -2798,13 +2798,13 @@ return_command (const char *retval_exp, int from_tty)
   if (return_value != NULL)
     {
       struct type *return_type = return_value->type ();
-      struct gdbarch *cache_arch = get_current_regcache ()->arch ();
+      regcache *regcache = get_thread_regcache (inferior_thread ());
+      struct gdbarch *cache_arch = regcache->arch ();
 
       gdb_assert (rv_conv != RETURN_VALUE_STRUCT_CONVENTION
 		  && rv_conv != RETURN_VALUE_ABI_RETURNS_ADDRESS);
       gdbarch_return_value_as_value
-	(cache_arch, function, return_type,
-	 get_current_regcache (), NULL /*read*/,
+	(cache_arch, function, return_type, regcache, NULL /*read*/,
 	 return_value->contents ().data () /*write*/);
     }
 

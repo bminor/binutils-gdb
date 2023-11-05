@@ -1441,7 +1441,7 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 	  if (step)
 	    {
 	      /* Single step by setting t bit.  */
-	      struct regcache *regcache = get_current_regcache ();
+	      regcache *regcache = get_thread_regcache (inferior_thread ());
 	      struct gdbarch *gdbarch = regcache->arch ();
 	      fetch_registers (regcache, gdbarch_ps_regnum (gdbarch));
 	      th->wow64_context.EFlags |= FLAG_TRACE_BIT;
@@ -1469,7 +1469,7 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 	  if (step)
 	    {
 	      /* Single step by setting t bit.  */
-	      struct regcache *regcache = get_current_regcache ();
+	      regcache *regcache = get_thread_regcache (inferior_thread ());
 	      struct gdbarch *gdbarch = regcache->arch ();
 	      fetch_registers (regcache, gdbarch_ps_regnum (gdbarch));
 	      th->context.EFlags |= FLAG_TRACE_BIT;

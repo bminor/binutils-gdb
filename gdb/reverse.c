@@ -113,7 +113,8 @@ save_bookmark_command (const char *args, int from_tty)
 {
   /* Get target's idea of a bookmark.  */
   gdb_byte *bookmark_id = target_get_bookmark (args, from_tty);
-  struct gdbarch *gdbarch = get_current_regcache ()->arch ();
+  regcache *regcache = get_thread_regcache (inferior_thread ());
+  gdbarch *gdbarch = regcache->arch ();
 
   /* CR should not cause another identical bookmark.  */
   dont_repeat ();
@@ -125,7 +126,7 @@ save_bookmark_command (const char *args, int from_tty)
   all_bookmarks.emplace_back ();
   bookmark &b = all_bookmarks.back ();
   b.number = ++bookmark_count;
-  b.pc = regcache_read_pc (get_current_regcache ());
+  b.pc = regcache_read_pc (regcache);
   b.sal = find_pc_line (b.pc, 0);
   b.sal.pspace = get_frame_program_space (get_current_frame ());
   b.opaque_data.reset (bookmark_id);
@@ -237,7 +238,7 @@ goto_bookmark_command (const char *args, int from_tty)
 static int
 bookmark_1 (int bnum)
 {
-  struct gdbarch *gdbarch = get_current_regcache ()->arch ();
+  gdbarch *gdbarch = get_thread_regcache (inferior_thread ())->arch ();
   int matched = 0;
 
   for (const bookmark &iter : all_bookmarks)

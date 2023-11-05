@@ -693,7 +693,7 @@ ia64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 {
   CORE_ADDR psr;
   siginfo_t siginfo;
-  struct regcache *regcache = get_current_regcache ();
+  regcache *regcache = get_thread_regcache (inferior_thread ());
 
   if (!linux_nat_get_siginfo (inferior_ptid, &siginfo))
     return false;

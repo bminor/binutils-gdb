@@ -233,7 +233,7 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
   gdbarch *gdbarch;
 
   if (target_has_registers ())
-    gdbarch = get_current_regcache ()->arch ();
+    gdbarch = get_thread_regcache (inferior_thread ())->arch ();
   else
     gdbarch = current_inferior ()->arch ();
 
@@ -254,7 +254,8 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
 	auto dump_pseudo = (what_to_dump == regcache_dump_cooked);
 
 	if (target_has_registers ())
-	  dump.reset (new register_dump_regcache (get_current_regcache (),
+	  dump.reset (new register_dump_regcache (get_thread_regcache
+						    (inferior_thread ()),
 						  dump_pseudo));
 	else
 	  {

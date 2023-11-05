@@ -2098,7 +2098,7 @@ generic_load (const char *args, int from_tty)
   uiout->text (", load size ");
   uiout->field_unsigned ("load-size", total_progress.data_count);
   uiout->text ("\n");
-  regcache_write_pc (get_current_regcache (), entry);
+  regcache_write_pc (get_thread_regcache (inferior_thread ()), entry);
 
   /* Reset breakpoints, now that we have changed the load image.  For
      instance, breakpoints may have been set (or reset, by

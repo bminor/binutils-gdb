@@ -13946,7 +13946,7 @@ insert_single_step_breakpoint (struct gdbarch *gdbarch,
 int
 insert_single_step_breakpoints (struct gdbarch *gdbarch)
 {
-  struct regcache *regcache = get_current_regcache ();
+  regcache *regcache = get_thread_regcache (inferior_thread ());
   std::vector<CORE_ADDR> next_pcs;
 
   next_pcs = gdbarch_software_single_step (gdbarch, regcache);

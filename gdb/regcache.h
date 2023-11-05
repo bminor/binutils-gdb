@@ -30,7 +30,6 @@ class thread_info;
 struct process_stratum_target;
 struct inferior;
 
-extern struct regcache *get_current_regcache (void);
 extern struct regcache *get_thread_regcache (process_stratum_target *target,
 					     ptid_t ptid);
 

@@ -114,7 +114,7 @@ frv_fdpic_loadmap_addresses (struct gdbarch *gdbarch, CORE_ADDR *interp_addr,
     return -1;
   else
     {
-      struct regcache *regcache = get_current_regcache ();
+      regcache *regcache = get_thread_regcache (inferior_thread ());
 
       if (interp_addr != NULL)
 	{

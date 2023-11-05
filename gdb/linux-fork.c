@@ -219,12 +219,13 @@ fork_load_infrun_state (struct fork_info *fp)
   linux_nat_switch_fork (fp->ptid);
 
   if (fp->savedregs)
-    get_current_regcache ()->restore (fp->savedregs);
+    get_thread_regcache (inferior_thread ())->restore (fp->savedregs);
 
   registers_changed ();
   reinit_frame_cache ();
 
-  inferior_thread ()->set_stop_pc (regcache_read_pc (get_current_regcache ()));
+  inferior_thread ()->set_stop_pc
+    (regcache_read_pc (get_thread_regcache (inferior_thread ())));
   nullify_last_target_wait_ptid ();
 
   /* Now restore the file positions of open file descriptors.  */
@@ -251,8 +252,9 @@ fork_save_infrun_state (struct fork_info *fp)
   if (fp->savedregs)
     delete fp->savedregs;
 
-  fp->savedregs = new readonly_detached_regcache (*get_current_regcache ());
-  fp->pc = regcache_read_pc (get_current_regcache ());
+  fp->savedregs = new readonly_detached_regcache
+    (*get_thread_regcache (inferior_thread ()));
+  fp->pc = regcache_read_pc (get_thread_regcache (inferior_thread ()));
 
   /* Now save the 'state' (file position) of all open file descriptors.
      Unfortunately fork does not take care of that for us...  */

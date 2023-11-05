@@ -383,7 +383,7 @@ or1k_single_step_through_delay (struct gdbarch *gdbarch,
   ULONGEST val;
   CORE_ADDR ppc;
   CORE_ADDR npc;
-  struct regcache *regcache = get_current_regcache ();
+  regcache *regcache = get_thread_regcache (inferior_thread ());
 
   /* Get the previous and current instruction addresses.  If they are not
     adjacent, we cannot be in a delay slot.  */

@@ -161,7 +161,8 @@ xtensa_read_register (int regnum)
 {
   ULONGEST value;
 
-  regcache_raw_read_unsigned (get_current_regcache (), regnum, &value);
+  regcache_raw_read_unsigned (get_thread_regcache (inferior_thread ()), regnum,
+			      &value);
   return (unsigned long) value;
 }
 
@@ -169,7 +170,8 @@ xtensa_read_register (int regnum)
 static void
 xtensa_write_register (int regnum, ULONGEST value)
 {
-  regcache_raw_write_unsigned (get_current_regcache (), regnum, value);
+  regcache_raw_write_unsigned (get_thread_regcache (inferior_thread ()), regnum,
+			       value);
 }
 
 /* Return the window size of the previous call to the function from which we

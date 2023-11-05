@@ -3605,7 +3605,7 @@ procfs_target::make_corefile_notes (bfd *obfd, int *note_size)
 
   stop_signal = find_stop_signal ();
 
-  fill_gregset (get_current_regcache (), &gregs, -1);
+  fill_gregset (get_thread_regcache (inferior_thread ()), &gregs, -1);
   note_data.reset (elfcore_write_pstatus (obfd, note_data.release (), note_size,
 					  inferior_ptid.pid (),
 					  stop_signal, &gregs));

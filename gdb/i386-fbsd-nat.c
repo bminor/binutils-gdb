@@ -233,7 +233,7 @@ i386_fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 
   if (!step)
     {
-      struct regcache *regcache = get_current_regcache ();
+      regcache *regcache = get_thread_regcache (inferior_thread ());
       ULONGEST eflags;
 
       /* Workaround for a bug in FreeBSD.  Make sure that the trace

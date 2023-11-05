@@ -1867,7 +1867,7 @@ svr4_handle_solib_event (void)
   if (info->probes_table == NULL)
     return;
 
-  pc = regcache_read_pc (get_current_regcache ());
+  pc = regcache_read_pc (get_thread_regcache (inferior_thread ()));
   pa = solib_event_probe_at (info, pc);
   if (pa == nullptr)
     {

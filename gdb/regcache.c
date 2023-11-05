@@ -415,12 +415,6 @@ get_thread_regcache (thread_info *thread)
 			      thread->ptid);
 }
 
-struct regcache *
-get_current_regcache (void)
-{
-  return get_thread_regcache (inferior_thread ());
-}
-
 /* See gdbsupport/common-regcache.h.  */
 
 struct regcache *

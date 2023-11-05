@@ -482,7 +482,7 @@ get_call_return_value (struct call_return_meta_info *ri)
   else
     {
       gdbarch_return_value_as_value (ri->gdbarch, ri->function, ri->value_type,
-				     get_current_regcache (),
+				     get_thread_regcache (inferior_thread ()),
 				     &retval, NULL);
       if (stack_temporaries && class_or_union_p (ri->value_type))
 	{
@@ -1068,7 +1068,7 @@ call_function_by_hand_dummy (struct value *function,
 
 	sp = push_dummy_code (gdbarch, sp, funaddr, args,
 			      target_values_type, &real_pc, &bp_addr,
-			      get_current_regcache ());
+			      get_thread_regcache (inferior_thread ()));
 
 	/* Write a legitimate instruction at the point where the infcall
 	   breakpoint is going to be inserted.  While this instruction
@@ -1270,7 +1270,8 @@ call_function_by_hand_dummy (struct value *function,
   /* Create the dummy stack frame.  Pass in the call dummy address as,
      presumably, the ABI code knows where, in the call dummy, the
      return address should be pointed.  */
-  sp = gdbarch_push_dummy_call (gdbarch, function, get_current_regcache (),
+  sp = gdbarch_push_dummy_call (gdbarch, function,
+				get_thread_regcache (inferior_thread ()),
 				bp_addr, args.size (), args.data (),
 				sp, return_method, struct_addr);
 

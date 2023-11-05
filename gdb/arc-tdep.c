@@ -322,7 +322,7 @@ arc_insn_get_operand_value (const struct arc_instruction &insn,
       return insn.operands[operand_num].value;
     default:
       /* Value in instruction is a register number.  */
-      struct regcache *regcache = get_current_regcache ();
+      regcache *regcache = get_thread_regcache (inferior_thread ());
       ULONGEST value;
       regcache_cooked_read_unsigned (regcache,
 				     insn.operands[operand_num].value,
@@ -351,7 +351,7 @@ arc_insn_get_operand_value_signed (const struct arc_instruction &insn,
       return insn.operands[operand_num].value;
     default:
       /* Value in instruction is a register number.  */
-      struct regcache *regcache = get_current_regcache ();
+      regcache *regcache = get_thread_regcache (inferior_thread ());
       LONGEST value;
       regcache_cooked_read_signed (regcache,
 				   insn.operands[operand_num].value,
@@ -449,7 +449,7 @@ arc_insn_get_branch_target (const struct arc_instruction &insn)
   /* LEAVE_S: PC = BLINK.  */
   else if (insn.insn_class == LEAVE)
     {
-      struct regcache *regcache = get_current_regcache ();
+      regcache *regcache = get_thread_regcache (inferior_thread ());
       ULONGEST value;
       regcache_cooked_read_unsigned (regcache, ARC_BLINK_REGNUM, &value);
       return value;

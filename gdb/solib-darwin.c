@@ -362,7 +362,7 @@ darwin_read_exec_load_addr_at_init (struct darwin_info *info)
   gdb_byte buf[8];
 
   /* Get SP.  */
-  if (regcache_cooked_read_unsigned (get_current_regcache (),
+  if (regcache_cooked_read_unsigned (get_thread_regcache (inferior_thread ()),
 				     gdbarch_sp_regnum (gdbarch),
 				     &load_ptr_addr) != REG_VALID)
     return 0;
@@ -450,7 +450,7 @@ darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
   /* We find the dynamic linker's base address by examining
      the current pc (which should point at the entry point for the
      dynamic linker) and subtracting the offset of the entry point.  */
-  load_addr = (regcache_read_pc (get_current_regcache ())
+  load_addr = (regcache_read_pc (get_thread_regcache (inferior_thread ()))
 	       - bfd_get_start_address (dyld_bfd.get ()));
 
   /* Now try to set a breakpoint in the dynamic linker.  */
@@ -574,7 +574,7 @@ darwin_solib_create_inferior_hook (int from_tty)
 		 for the dynamic linker) and subtracting the offset of
 		 the entry point.  */
 
-	      pc = regcache_read_pc (get_current_regcache ());
+	      pc = regcache_read_pc (get_thread_regcache (inferior_thread ()));
 	      dyld_relocated_base_address = pc - dyld_bfd_start_address;
 
 	      /* We get the proper notifier relocated address by

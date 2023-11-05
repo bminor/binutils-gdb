@@ -2556,7 +2556,7 @@ m32c_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
   CORE_ADDR func_addr, func_end;
   struct m32c_prologue p;
 
-  struct regcache *regcache = get_current_regcache ();
+  regcache *regcache = get_thread_regcache (inferior_thread ());
   m32c_gdbarch_tdep *tdep = gdbarch_tdep<m32c_gdbarch_tdep> (gdbarch);
   
   if (!find_pc_partial_function (pc, &name, &func_addr, &func_end))

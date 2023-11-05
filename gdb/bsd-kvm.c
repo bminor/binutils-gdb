@@ -136,7 +136,7 @@ bsd_kvm_target_open (const char *arg, int from_tty)
   thread_info *thr = add_thread_silent (&bsd_kvm_ops, bsd_kvm_ptid);
   switch_to_thread (thr);
 
-  target_fetch_registers (get_current_regcache (), -1);
+  target_fetch_registers (get_thread_regcache (thr), -1);
 
   reinit_frame_cache ();
   print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
@@ -334,7 +334,7 @@ bsd_kvm_proc_cmd (const char *arg, int fromtty)
   if (kvm_read (core_kd, addr, &bsd_kvm_paddr, sizeof bsd_kvm_paddr) == -1)
     error (("%s"), kvm_geterr (core_kd));
 
-  target_fetch_registers (get_current_regcache (), -1);
+  target_fetch_registers (get_thread_regcache (inferior_thread ()), -1);
 
   reinit_frame_cache ();
   print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
@@ -354,7 +354,7 @@ bsd_kvm_pcb_cmd (const char *arg, int fromtty)
 
   bsd_kvm_paddr = (struct pcb *)(u_long) parse_and_eval_address (arg);
 
-  target_fetch_registers (get_current_regcache (), -1);
+  target_fetch_registers (get_thread_regcache (inferior_thread ()), -1);
 
   reinit_frame_cache ();
   print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);

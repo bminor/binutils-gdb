@@ -2283,7 +2283,7 @@ tfind_pc_command (const char *args, int from_tty)
   check_trace_running (current_trace_status ());
 
   if (args == 0 || *args == 0)
-    pc = regcache_read_pc (get_current_regcache ());
+    pc = regcache_read_pc (get_thread_regcache (inferior_thread ()));
   else
     pc = parse_and_eval_address (args);
 
@@ -2731,7 +2731,7 @@ get_traceframe_location (int *stepping_frame_p)
   /* The current frame is a trap frame if the frame PC is equal to the
      tracepoint PC.  If not, then the current frame was collected
      during single-stepping.  */
-  regcache = get_current_regcache ();
+  regcache = get_thread_regcache (inferior_thread ());
 
   /* If the traceframe's address matches any of the tracepoint's
      locations, assume it is a direct hit rather than a while-stepping

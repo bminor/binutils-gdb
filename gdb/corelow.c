@@ -773,7 +773,7 @@ core_target_open (const char *arg, int from_tty)
     }
 
   /* Fetch all registers from core file.  */
-  target_fetch_registers (get_current_regcache (), -1);
+  target_fetch_registers (get_thread_regcache (inferior_thread ()), -1);
 
   /* Now, set up the frame cache, and print the top of stack.  */
   reinit_frame_cache ();

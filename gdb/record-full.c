@@ -913,7 +913,7 @@ record_full_async_inferior_event_handler (gdb_client_data data)
 static void
 record_full_core_open_1 (const char *name, int from_tty)
 {
-  struct regcache *regcache = get_current_regcache ();
+  regcache *regcache = get_thread_regcache (inferior_thread ());
   int regnum = gdbarch_num_regs (regcache->arch ());
   int i;
 
@@ -1069,7 +1069,7 @@ record_full_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
     {
       struct gdbarch *gdbarch = target_thread_architecture (ptid);
 
-      record_full_message (get_current_regcache (), signal);
+      record_full_message (get_thread_regcache (inferior_thread ()), signal);
 
       if (!step)
 	{
@@ -1216,7 +1216,7 @@ record_full_wait_1 (struct target_ops *ops,
 		  registers_changed ();
 		  switch_to_thread (current_inferior ()->process_target (),
 				    ret);
-		  regcache = get_current_regcache ();
+		  regcache = get_thread_regcache (inferior_thread ());
 		  tmp_pc = regcache_read_pc (regcache);
 		  const address_space *aspace = current_inferior ()->aspace;
 
@@ -1286,7 +1286,7 @@ record_full_wait_1 (struct target_ops *ops,
     {
       switch_to_thread (current_inferior ()->process_target (),
 			record_full_resume_ptid);
-      struct regcache *regcache = get_current_regcache ();
+      regcache *regcache = get_thread_regcache (inferior_thread ());
       struct gdbarch *gdbarch = regcache->arch ();
       const address_space *aspace = current_inferior ()->aspace;
       int continue_flag = 1;
@@ -2001,7 +2001,9 @@ record_full_goto_entry (struct record_full_entry *p)
 
   registers_changed ();
   reinit_frame_cache ();
-  inferior_thread ()->set_stop_pc (regcache_read_pc (get_current_regcache ()));
+  
+  thread_info *thr = inferior_thread ();
+  thr->set_stop_pc (regcache_read_pc (get_thread_regcache (thr)));
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
@@ -2322,7 +2324,6 @@ record_full_restore (void)
   asection *osec;
   uint32_t osec_size;
   int bfd_offset = 0;
-  struct regcache *regcache;
 
   /* We restore the execution log from the open core bfd,
      if there is one.  */
@@ -2365,7 +2366,7 @@ record_full_restore (void)
 
   try
     {
-      regcache = get_current_regcache ();
+      regcache *regcache = get_thread_regcache (inferior_thread ());
 
       while (1)
 	{
@@ -2525,7 +2526,6 @@ record_full_base_target::save_record (const char *recfilename)
 {
   struct record_full_entry *cur_record_full_list;
   uint32_t magic;
-  struct regcache *regcache;
   struct gdbarch *gdbarch;
   int save_size = 0;
   asection *osec = NULL;
@@ -2546,7 +2546,7 @@ record_full_base_target::save_record (const char *recfilename)
   cur_record_full_list = record_full_list;
 
   /* Get the values of regcache and gdbarch.  */
-  regcache = get_current_regcache ();
+  regcache *regcache = get_thread_regcache (inferior_thread ());
   gdbarch = regcache->arch ();
 
   /* Disable the GDB operation record.  */
@@ -2731,7 +2731,7 @@ record_full_goto_insn (struct record_full_entry *entry,
 {
   scoped_restore restore_operation_disable
     = record_full_gdb_operation_disable_set ();
-  struct regcache *regcache = get_current_regcache ();
+  regcache *regcache = get_thread_regcache (inferior_thread ());
   struct gdbarch *gdbarch = regcache->arch ();
 
   /* Assume everything is valid: we will hit the entry,
