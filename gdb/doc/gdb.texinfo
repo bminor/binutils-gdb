@@ -23674,11 +23674,42 @@ program.  For more information,
 @pxref{--multi Option in Types of Remote Connnections}.
 
 @cindex @option{--debug}, @code{gdbserver} option
-The @option{--debug} option tells @code{gdbserver} to display extra
-status information about the debugging process.
-@cindex @option{--remote-debug}, @code{gdbserver} option
-The @option{--remote-debug} option tells @code{gdbserver} to display
-remote protocol debug output.
+The @option{--debug[=option1,option2,@dots{}]} option tells
+@code{gdbserver} to display extra diagnostic information about the
+debugging process.  The options (@var{option1}, @var{option2}, etc)
+control for which areas of @code{gdbserver} additional information
+will be displayed, possible values are:
+
+@table @code
+@item all
+This enables all available diagnostic output.
+@item threads
+This enables diagnostic output related to threading.  Currently other
+general diagnostic output is included in this category, but this could
+change in future releases of @code{gdbserver}.
+@item event-loop
+This enables event-loop specific diagnostic output.
+@item remote
+This enables diagnostic output related to the transfer of remote
+protocol packets too and from the debugger.
+@end table
+
+@noindent
+If no options are passed to @option{--debug} then this is treated as
+equivalent to @option{--debug=threads}.  This could change in future
+releases of @code{gdbserver}.  The options passed to @option{--debug}
+are processed left to right, and individual options can be prefixed
+with the @kbd{-} (minus) character to disable diagnostic output from
+this area, so it is possible to use:
+
+@smallexample
+  target> gdbserver --debug=all,-event-loop
+@end smallexample
+
+@noindent
+In order to enable all diagnostic output except that for the
+event-loop.
+
 @cindex @option{--debug-file}, @code{gdbserver} option
 @cindex @code{gdbserver}, send all debug output to a single file
 The @option{--debug-file=@var{filename}} option tells @code{gdbserver} to
@@ -50671,16 +50702,27 @@ the program you want to debug.  The syntax is:
 target> gdbserver --multi @var{comm}
 @end smallexample
 
-@item --debug
-Instruct @code{gdbserver} to display extra status information about the debugging
-process.
-This option is intended for @code{gdbserver} development and for bug reports to
-the developers.
+@item --debug@r{[}=option1,option2,@dots{}@r{]}
+Instruct @code{gdbserver} to display extra status information about
+the debugging process.  This option is intended for @code{gdbserver}
+development and for bug reports to the developers.
 
-@item --remote-debug
-Instruct @code{gdbserver} to display remote protocol debug output.
-This option is intended for @code{gdbserver} development and for bug reports to
-the developers.
+Each @var{option} is the name of a component for which debugging
+should be enabled.  The list of possible options is @option{all},
+@option{threads}, @option{event-loop}, @option{remote}.  The special
+option @option{all} enables all components.  The option list is
+processed left to right, and an option can be prefixed with the
+@kbd{-} character to disable output for that component, so you could write:
+
+@smallexample
+target> gdbserver --debug=all,-event-loop
+@end smallexample
+
+@noindent
+to turn on debug output for all components except @option{event-loop}.
+If no options are passed to @option{--debug} then this is treated as
+equivalent to @option{--debug=threads}.  This could change in future
+releases of @code{gdbserver}.
 
 @item --debug-file=@var{filename}
 Instruct @code{gdbserver} to send any debug output to the given @var{filename}.
