@@ -30,6 +30,7 @@
 #include <algorithm>
 #include "gdbarch.h"
 #include "inferior.h"
+#include "progspace.h"
 
 static std::vector<mem_region> user_mem_region_list, target_mem_region_list;
 static std::vector<mem_region> *mem_region_list = &target_mem_region_list;
@@ -483,7 +484,7 @@ enable_mem_command (const char *args, int from_tty)
 {
   require_user_regions (from_tty);
 
-  target_dcache_invalidate ();
+  target_dcache_invalidate (current_program_space->aspace);
 
   if (args == NULL || *args == '\0')
     { /* Enable all mem regions.  */
@@ -521,7 +522,7 @@ disable_mem_command (const char *args, int from_tty)
 {
   require_user_regions (from_tty);
 
-  target_dcache_invalidate ();
+  target_dcache_invalidate (current_program_space->aspace);
 
   if (args == NULL || *args == '\0')
     {
@@ -567,7 +568,7 @@ delete_mem_command (const char *args, int from_tty)
 {
   require_user_regions (from_tty);
 
-  target_dcache_invalidate ();
+  target_dcache_invalidate (current_program_space->aspace);
 
   if (args == NULL || *args == '\0')
     {

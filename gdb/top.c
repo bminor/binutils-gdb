@@ -360,7 +360,7 @@ prepare_execute_command ()
      it.  For the duration of the command, though, use the dcache to
      help things like backtrace.  */
   if (non_stop)
-    target_dcache_invalidate ();
+    target_dcache_invalidate (current_program_space->aspace);
 
   return scoped_value_mark ();
 }

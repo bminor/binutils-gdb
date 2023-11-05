@@ -2131,7 +2131,7 @@ tfind_1 (enum trace_find_type type, int num,
   tp = get_tracepoint_by_number_on_target (target_tracept);
 
   reinit_frame_cache ();
-  target_dcache_invalidate ();
+  target_dcache_invalidate (current_program_space->aspace);
 
   set_tracepoint_num (tp ? tp->number : target_tracept);
 

@@ -20,13 +20,15 @@
 
 #include "dcache.h"
 
-extern void target_dcache_invalidate (void);
+struct address_space;
 
-extern DCACHE *target_dcache_get (void);
+extern void target_dcache_invalidate (address_space *aspace);
 
-extern DCACHE *target_dcache_get_or_init (void);
+extern DCACHE *target_dcache_get (address_space *aspace);
 
-extern int target_dcache_init_p (void);
+extern DCACHE *target_dcache_get_or_init (address_space *aspace);
+
+extern int target_dcache_init_p (address_space *aspace);
 
 extern int stack_cache_enabled_p (void);
 

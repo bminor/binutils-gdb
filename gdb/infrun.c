@@ -4356,7 +4356,7 @@ wait_for_inferior (inferior *inf)
 	 Target was running and cache could be stale.  This is just a
 	 heuristic.  Running threads may modify target memory, but we
 	 don't get any event.  */
-      target_dcache_invalidate ();
+      target_dcache_invalidate (current_program_space->aspace);
 
       ecs.ptid = do_target_wait_1 (inf, minus_one_ptid, &ecs.ws, 0);
       ecs.target = inf->process_target ();
@@ -4605,7 +4605,7 @@ fetch_inferior_event ()
        was running and cache could be stale.  This is just a heuristic.
        Running threads may modify target memory, but we don't get any
        event.  */
-    target_dcache_invalidate ();
+    target_dcache_invalidate (current_program_space->aspace);
 
     scoped_restore save_exec_dir
       = make_scoped_restore (&execution_direction,
@@ -5184,7 +5184,7 @@ poll_one_curr_target (struct target_waitstatus *ws)
      Target was running and cache could be stale.  This is just a
      heuristic.  Running threads may modify target memory, but we
      don't get any event.  */
-  target_dcache_invalidate ();
+  target_dcache_invalidate (current_program_space->aspace);
 
   event_ptid = target_wait (minus_one_ptid, ws, TARGET_WNOHANG);
 

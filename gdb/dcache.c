@@ -651,7 +651,7 @@ dcache_info_1 (DCACHE *dcache, const char *exp)
 static void
 info_dcache_command (const char *exp, int tty)
 {
-  dcache_info_1 (target_dcache_get (), exp);
+  dcache_info_1 (target_dcache_get (current_program_space->aspace), exp);
 }
 
 static void
@@ -663,7 +663,7 @@ set_dcache_size (const char *args, int from_tty,
       dcache_size = DCACHE_DEFAULT_SIZE;
       error (_("Dcache size must be greater than 0."));
     }
-  target_dcache_invalidate ();
+  target_dcache_invalidate (current_program_space->aspace);
 }
 
 static void
@@ -677,7 +677,7 @@ set_dcache_line_size (const char *args, int from_tty,
       dcache_line_size = DCACHE_DEFAULT_LINE_SIZE;
       error (_("Invalid dcache line size: %u (must be power of 2)."), d);
     }
-  target_dcache_invalidate ();
+  target_dcache_invalidate (current_program_space->aspace);
 }
 
 void _initialize_dcache ();
