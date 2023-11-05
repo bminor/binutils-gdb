@@ -1153,9 +1153,7 @@ monitor_show_help (void)
   monitor_output ("    Enable event loop debugging messages\n");
   monitor_output ("  set debug-format option1[,option2,...]\n");
   monitor_output ("    Add additional information to debugging messages\n");
-  monitor_output ("    Options: all, none");
-  monitor_output (", timestamp");
-  monitor_output ("\n");
+  monitor_output ("    Options: all, none, timestamp\n");
   monitor_output ("  exit\n");
   monitor_output ("    Quit GDBserver\n");
 }
