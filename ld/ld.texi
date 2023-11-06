@@ -920,6 +920,17 @@ Updated property 0xc0010001 (0x1) to merge foo.o (0x1) and bar.o (0x1)
 This indicates that property 0xc0010001 value is updated to 0x1 in output
 when merging properties in  @file{foo.o}, whose 0xc0010001 property value
 is 0x1, and @file{bar.o}, whose 0xc0010001 property value is 0x1.
+
+@item
+On some ELF targets, a list of fixups inserted by @option{--relax}
+
+@smallexample
+foo.o: Adjusting branch at 0x00000008 towards "far" in section .text
+@end smallexample
+
+This indicates that the branch at 0x00000008 in foo.o, targeting
+the symbol "far" in section .text, has been replaced by a trampoline.
+
 @end itemize
 
 @cindex link map discarded

@@ -6169,7 +6169,7 @@ ppc_elf_relax_section (bfd *abfd,
 	  asection *tsec;
 	  struct one_branch_fixup *f;
 	  size_t insn_offset = 0;
-	  bfd_vma max_branch_offset = 0, val;
+	  bfd_vma max_branch_offset = 0, val, reladdr;
 	  bfd_byte *hit_addr;
 	  unsigned long t0;
 	  struct elf_link_hash_entry *h;
@@ -6415,6 +6415,7 @@ ppc_elf_relax_section (bfd *abfd,
 	    continue;
 
 	  roff = irel->r_offset;
+	  reladdr = isec->output_section->vma + isec->output_offset + roff;
 
 	  /* Avoid creating a lot of unnecessary fixups when
 	     relocatable if the output section size is such that a
@@ -6433,10 +6434,9 @@ ppc_elf_relax_section (bfd *abfd,
 		     final link, so do not presume they remain in range.  */
 		  || tsec->output_section == isec->output_section))
 	    {
-	      bfd_vma symaddr, reladdr;
+	      bfd_vma symaddr;
 
 	      symaddr = tsec->output_section->vma + tsec->output_offset + toff;
-	      reladdr = isec->output_section->vma + isec->output_offset + roff;
 	      if (symaddr - reladdr + max_branch_offset
 		  < 2 * max_branch_offset)
 		continue;
@@ -6506,6 +6506,12 @@ ppc_elf_relax_section (bfd *abfd,
 	      /* Nop out the reloc, since we're finalizing things here.  */
 	      irel->r_info = ELF32_R_INFO (0, R_PPC_NONE);
 	    }
+
+	  link_info->callbacks->minfo
+	    (_("%pB: Adjusting branch at 0x%V towards \"%s\" in section %s\n"),
+	     abfd, reladdr,
+	     (h && h->root.root.string? h->root.root.string : "<unknown>"),
+	     f->tsec->name);
 
 	  /* Get the section contents.  */
 	  if (contents == NULL)
