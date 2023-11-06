@@ -20,7 +20,7 @@ from typing import Optional
 
 from .server import capability, request
 from .sources import decode_source
-from .startup import in_gdb_thread, send_gdb_with_response
+from .startup import in_gdb_thread
 
 
 @in_gdb_thread
@@ -46,4 +46,4 @@ def _find_lines(source, start_line, end_line):
 def breakpoint_locations(*, source, line: int, endLine: Optional[int] = None, **extra):
     if endLine is None:
         endLine = line
-    return send_gdb_with_response(lambda: _find_lines(source, line, endLine))
+    return _find_lines(source, line, endLine)

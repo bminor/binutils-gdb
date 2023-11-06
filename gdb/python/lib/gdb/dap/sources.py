@@ -18,7 +18,7 @@ import os
 import gdb
 
 from .server import request, capability
-from .startup import send_gdb_with_response, in_gdb_thread
+from .startup import in_gdb_thread
 
 
 # The next available source reference ID.  Must be greater than 0.
@@ -76,31 +76,14 @@ def decode_source(source):
     return _id_map[ref]["path"]
 
 
-@in_gdb_thread
-def _sources():
+@request("loadedSources")
+@capability("supportsLoadedSourcesRequest")
+def loaded_sources(**extra):
     result = []
     for elt in gdb.execute_mi("-file-list-exec-source-files")["files"]:
         result.append(make_source(elt["fullname"], elt["file"]))
     return {
         "sources": result,
-    }
-
-
-@request("loadedSources")
-@capability("supportsLoadedSourcesRequest")
-def loaded_sources(**extra):
-    return send_gdb_with_response(_sources)
-
-
-# This helper is needed because we must only access the globals here
-# from the gdb thread.
-@in_gdb_thread
-def _get_source(source):
-    filename = decode_source(source)
-    with open(filename) as f:
-        content = f.read()
-    return {
-        "content": content,
     }
 
 
@@ -111,4 +94,9 @@ def source(*, source=None, sourceReference: int, **extra):
     # 'source' is preferred.
     if source is None:
         source = {"sourceReference": sourceReference}
-    return send_gdb_with_response(lambda: _get_source(source))
+    filename = decode_source(source)
+    with open(filename) as f:
+        content = f.read()
+    return {
+        "content": content,
+    }

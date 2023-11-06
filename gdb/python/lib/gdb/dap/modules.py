@@ -16,7 +16,7 @@
 import gdb
 
 from .server import capability, request
-from .startup import in_gdb_thread, send_gdb_with_response
+from .startup import in_gdb_thread
 
 
 @in_gdb_thread
@@ -63,4 +63,4 @@ def _modules(start, count):
 @capability("supportsModulesRequest")
 @request("modules")
 def modules(*, startModule: int = 0, moduleCount: int = 0, **args):
-    return send_gdb_with_response(lambda: _modules(startModule, moduleCount))
+    return _modules(startModule, moduleCount)

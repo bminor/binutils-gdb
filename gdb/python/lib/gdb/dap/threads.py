@@ -16,7 +16,6 @@
 import gdb
 
 from .server import request
-from .startup import send_gdb_with_response, in_gdb_thread
 
 
 def _thread_name(thr):
@@ -27,9 +26,8 @@ def _thread_name(thr):
     return None
 
 
-# A helper function to construct the list of threads.
-@in_gdb_thread
-def _get_threads():
+@request("threads")
+def threads(**args):
     result = []
     for thr in gdb.selected_inferior().threads():
         one_result = {
@@ -39,12 +37,6 @@ def _get_threads():
         if name is not None:
             one_result["name"] = name
         result.append(one_result)
-    return result
-
-
-@request("threads")
-def threads(**args):
-    result = send_gdb_with_response(_get_threads)
     return {
         "threads": result,
     }

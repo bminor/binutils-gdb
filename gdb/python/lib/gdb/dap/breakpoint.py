@@ -24,7 +24,7 @@ from typing import Optional, Sequence
 
 from .server import request, capability, send_event
 from .sources import make_source
-from .startup import send_gdb_with_response, in_gdb_thread, log_stack
+from .startup import in_gdb_thread, log_stack
 from .typecheck import type_check
 
 
@@ -287,7 +287,7 @@ def set_breakpoint(*, source, breakpoints: Sequence = (), **args):
         # Be sure to include the path in the key, so that we only
         # clear out breakpoints coming from this same source.
         key = "source:" + source["path"]
-        result = send_gdb_with_response(lambda: _set_breakpoints(key, specs))
+        result = _set_breakpoints(key, specs)
     return {
         "breakpoints": result,
     }
@@ -315,9 +315,8 @@ def _rewrite_fn_breakpoint(
 @capability("supportsFunctionBreakpoints")
 def set_fn_breakpoint(*, breakpoints: Sequence, **args):
     specs = [_rewrite_fn_breakpoint(**bp) for bp in breakpoints]
-    result = send_gdb_with_response(lambda: _set_breakpoints("function", specs))
     return {
-        "breakpoints": result,
+        "breakpoints": _set_breakpoints("function", specs),
     }
 
 
@@ -351,9 +350,8 @@ def set_insn_breakpoints(
     *, breakpoints: Sequence, offset: Optional[int] = None, **args
 ):
     specs = [_rewrite_insn_breakpoint(**bp) for bp in breakpoints]
-    result = send_gdb_with_response(lambda: _set_breakpoints("instruction", specs))
     return {
-        "breakpoints": result,
+        "breakpoints": _set_breakpoints("instruction", specs),
     }
 
 
@@ -432,7 +430,6 @@ def set_exception_breakpoints(
     options = [{"filterId": filter} for filter in filters]
     options.extend(filterOptions)
     options = [_rewrite_exception_breakpoint(**bp) for bp in options]
-    result = send_gdb_with_response(lambda: _set_exception_catchpoints(options))
     return {
-        "breakpoints": result,
+        "breakpoints": _set_exception_catchpoints(options),
     }

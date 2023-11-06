@@ -15,9 +15,8 @@
 
 from .events import StopKinds, ExecutionInvoker
 from .server import request
-from .startup import send_gdb
 
 
-@request("pause")
+@request("pause", response=False)
 def pause(**args):
-    send_gdb(ExecutionInvoker("interrupt -a", StopKinds.PAUSE))
+    ExecutionInvoker("interrupt -a", StopKinds.PAUSE)()

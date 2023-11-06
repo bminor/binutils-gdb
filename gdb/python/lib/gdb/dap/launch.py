@@ -20,11 +20,11 @@ from typing import Mapping, Optional, Sequence
 
 from .events import ExecutionInvoker
 from .server import request, capability
-from .startup import send_gdb, send_gdb_with_response, in_gdb_thread, exec_and_log
+from .startup import in_gdb_thread, exec_and_log
 
 
-# The program being launched, or None.  This should only be access
-# from the DAP thread.
+# The program being launched, or None.  This should only be accessed
+# from the gdb thread.
 _program = None
 
 
@@ -49,7 +49,7 @@ def _launch_setup(program, cwd, args, env, stopAtBeginningOfMainSubprogram):
 # Any parameters here are necessarily extensions -- DAP requires this
 # from implementations.  Any additions or changes here should be
 # documented in the gdb manual.
-@request("launch")
+@request("launch", response=False)
 def launch(
     *,
     program: Optional[str] = None,
@@ -61,9 +61,7 @@ def launch(
 ):
     global _program
     _program = program
-    send_gdb(
-        lambda: _launch_setup(program, cwd, args, env, stopAtBeginningOfMainSubprogram)
-    )
+    _launch_setup(program, cwd, args, env, stopAtBeginningOfMainSubprogram)
 
 
 @request("attach")
@@ -77,17 +75,14 @@ def attach(*, pid: Optional[int] = None, target: Optional[str] = None, **args):
         cmd = "target remote " + target
     else:
         raise Exception("attach requires either 'pid' or 'target'")
-    # Use send_gdb_with_response to ensure we get an error if the
-    # attach fails.
-    send_gdb_with_response(cmd)
-    return None
+    exec_and_log(cmd)
 
 
 @capability("supportsConfigurationDoneRequest")
-@request("configurationDone")
+@request("configurationDone", response=False)
 def config_done(**args):
     global _program
     if _program is not None:
         # Suppress the continue event, but don't set any particular
         # expected stop.
-        send_gdb(ExecutionInvoker("run", None))
+        ExecutionInvoker("run", None)()

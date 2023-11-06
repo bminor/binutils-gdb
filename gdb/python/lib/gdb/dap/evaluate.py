@@ -20,7 +20,7 @@ from typing import Optional
 
 from .frames import select_frame
 from .server import capability, request, client_bool_capability
-from .startup import send_gdb_with_response, in_gdb_thread
+from .startup import in_gdb_thread
 from .varref import find_variable, VariableReference, apply_format
 
 
@@ -96,14 +96,12 @@ def eval_request(
 ):
     if context in ("watch", "variables"):
         # These seem to be expression-like.
-        return send_gdb_with_response(lambda: _evaluate(expression, frameId, format))
+        return _evaluate(expression, frameId, format)
     elif context == "hover":
-        return send_gdb_with_response(
-            lambda: _eval_for_hover(expression, frameId, format)
-        )
+        return _eval_for_hover(expression, frameId, format)
     elif context == "repl":
         # Ignore the format for repl evaluation.
-        return send_gdb_with_response(lambda: _repl(expression, frameId))
+        return _repl(expression, frameId)
     else:
         raise Exception('unknown evaluate context "' + context + '"')
 
@@ -127,10 +125,7 @@ def variables(
     if not client_bool_capability("supportsVariablePaging"):
         start = 0
         count = 0
-    result = send_gdb_with_response(
-        lambda: _variables(variablesReference, start, count, format)
-    )
-    return {"variables": result}
+    return {"variables": _variables(variablesReference, start, count, format)}
 
 
 @capability("supportsSetExpression")
@@ -138,9 +133,7 @@ def variables(
 def set_expression(
     *, expression: str, value: str, frameId: Optional[int] = None, format=None, **args
 ):
-    return send_gdb_with_response(
-        lambda: _set_expression(expression, value, frameId, format)
-    )
+    return _set_expression(expression, value, frameId, format)
 
 
 # Helper function to perform an assignment.
@@ -159,6 +152,4 @@ def _set_variable(ref, name, value, value_format):
 def set_variable(
     *, variablesReference: int, name: str, value: str, format=None, **args
 ):
-    return send_gdb_with_response(
-        lambda: _set_variable(variablesReference, name, value, format)
-    )
+    return _set_variable(variablesReference, name, value, format)

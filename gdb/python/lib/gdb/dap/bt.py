@@ -24,7 +24,7 @@ from .modules import module_id
 from .scopes import symbol_value
 from .server import request, capability
 from .sources import make_source
-from .startup import send_gdb_with_response, in_gdb_thread
+from .startup import in_gdb_thread
 from .state import set_thread
 from .typecheck import type_check
 from .varref import apply_format
@@ -147,6 +147,4 @@ def stacktrace(
     if format is None:
         format = {}
     format = check_stack_frame(**format)
-    return send_gdb_with_response(
-        lambda: _backtrace(threadId, levels, startFrame, format)
-    )
+    return _backtrace(threadId, levels, startFrame, format)
