@@ -1,4 +1,4 @@
-#as: -march=rv32iq
+#as: -march=rv32iq2p2
 #name: Q extension (32-bit)
 #objdump: -dwrMnumeric
 
