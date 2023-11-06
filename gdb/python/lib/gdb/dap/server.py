@@ -20,11 +20,14 @@ import sys
 
 from .io import start_json_writer, read_json
 from .startup import (
+    exec_and_log,
     in_dap_thread,
+    in_gdb_thread,
+    send_gdb,
+    send_gdb_with_response,
     start_thread,
     log,
     log_stack,
-    send_gdb_with_response,
 )
 from .typecheck import type_check
 
@@ -160,12 +163,27 @@ def send_event(event, body=None):
     _server.send_event(event, body)
 
 
-def request(name):
-    """A decorator that indicates that the wrapper function implements
-    the DAP request NAME."""
+def request(name: str, *, response: bool = True, on_dap_thread: bool = False):
+    """A decorator for DAP requests.
+
+    This registers the function as the implementation of the DAP
+    request NAME.  By default, the function is invoked in the gdb
+    thread, and its result is returned as the 'body' of the DAP
+    response.
+
+    Some keyword arguments are provided as well:
+
+    If RESPONSE is False, the result of the function will not be
+    waited for and no 'body' will be in the response.
+
+    If ON_DAP_THREAD is True, the function will be invoked in the DAP
+    thread.  When ON_DAP_THREAD is True, RESPONSE may not be False.
+    """
+
+    # Validate the parameters.
+    assert not on_dap_thread or response
 
     def wrap(func):
-        global _commands
         code = func.__code__
         # We don't permit requests to have positional arguments.
         try:
@@ -176,11 +194,32 @@ def request(name):
         assert code.co_argcount == 0
         # A request must have a **args parameter.
         assert code.co_flags & inspect.CO_VARKEYWORDS
-        # All requests must run in the DAP thread.
-        # Also type-check the calls.
-        func = in_dap_thread(type_check(func))
-        _commands[name] = func
-        return func
+
+        # Type-check the calls.
+        func = type_check(func)
+
+        # Verify that the function is run on the correct thread.
+        if on_dap_thread:
+            cmd = in_dap_thread(func)
+        else:
+            func = in_gdb_thread(func)
+
+            if response:
+
+                def sync_call(**args):
+                    return send_gdb_with_response(lambda: func(**args))
+
+                cmd = sync_call
+            else:
+
+                def non_sync_call(**args):
+                    return send_gdb(lambda: func(**args))
+
+                cmd = non_sync_call
+
+        global _commands
+        _commands[name] = cmd
+        return cmd
 
     return wrap
 
@@ -208,7 +247,7 @@ def client_bool_capability(name):
     return False
 
 
-@request("initialize")
+@request("initialize", on_dap_thread=True)
 def initialize(**args):
     global _server, _capabilities
     _server.config = args
@@ -219,14 +258,12 @@ def initialize(**args):
 @request("terminate")
 @capability("supportsTerminateRequest")
 def terminate(**args):
-    # We can ignore the result here, because we only really need to
-    # synchronize.
-    send_gdb_with_response("kill")
+    exec_and_log("kill")
 
 
-@request("disconnect")
+@request("disconnect", on_dap_thread=True)
 @capability("supportTerminateDebuggee")
 def disconnect(*, terminateDebuggee: bool = False, **args):
     if terminateDebuggee:
-        terminate()
+        send_gdb_with_response("kill")
     _server.shutdown()

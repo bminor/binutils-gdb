@@ -16,7 +16,7 @@
 import gdb
 
 from .frames import frame_for_id
-from .startup import send_gdb_with_response, in_gdb_thread
+from .startup import in_gdb_thread
 from .server import request
 from .varref import BaseReference
 
@@ -133,5 +133,4 @@ def _get_scope(id):
 
 @request("scopes")
 def scopes(*, frameId: int, **extra):
-    scopes = send_gdb_with_response(lambda: _get_scope(frameId))
-    return {"scopes": scopes}
+    return {"scopes": _get_scope(frameId)}

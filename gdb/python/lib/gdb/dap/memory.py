@@ -17,35 +17,22 @@ import base64
 import gdb
 
 from .server import request, capability
-from .startup import send_gdb_with_response, in_gdb_thread
-
-
-@in_gdb_thread
-def _read_memory(addr, count):
-    buf = gdb.selected_inferior().read_memory(addr, count)
-    return base64.b64encode(buf).decode("ASCII")
 
 
 @request("readMemory")
 @capability("supportsReadMemoryRequest")
 def read_memory(*, memoryReference: str, offset: int = 0, count: int, **extra):
     addr = int(memoryReference, 0) + offset
-    buf = send_gdb_with_response(lambda: _read_memory(addr, count))
+    buf = gdb.selected_inferior().read_memory(addr, count)
     return {
         "address": hex(addr),
-        "data": buf,
+        "data": base64.b64encode(buf).decode("ASCII"),
     }
-
-
-@in_gdb_thread
-def _write_memory(addr, contents):
-    buf = base64.b64decode(contents)
-    gdb.selected_inferior().write_memory(addr, buf)
 
 
 @request("writeMemory")
 @capability("supportsWriteMemoryRequest")
 def write_memory(*, memoryReference: str, offset: int = 0, data: str, **extra):
     addr = int(memoryReference, 0) + offset
-    send_gdb_with_response(lambda: _write_memory(addr, data))
-    return {}
+    buf = base64.b64decode(data)
+    gdb.selected_inferior().write_memory(addr, buf)

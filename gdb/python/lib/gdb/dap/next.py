@@ -49,37 +49,42 @@ def _handle_thread_step(thread_id, single_thread, select=False):
     return result
 
 
-@request("next")
+@request("next", response=False)
 def next(
     *, threadId: int, singleThread: bool = False, granularity: str = "statement", **args
 ):
-    send_gdb(lambda: _handle_thread_step(threadId, singleThread))
+    _handle_thread_step(threadId, singleThread)
     cmd = "next"
     if granularity == "instruction":
         cmd += "i"
-    send_gdb(ExecutionInvoker(cmd, StopKinds.STEP))
+    ExecutionInvoker(cmd, StopKinds.STEP)()
 
 
 @capability("supportsSteppingGranularity")
 @capability("supportsSingleThreadExecutionRequests")
-@request("stepIn")
+@request("stepIn", response=False)
 def step_in(
     *, threadId: int, singleThread: bool = False, granularity: str = "statement", **args
 ):
-    send_gdb(lambda: _handle_thread_step(threadId, singleThread))
+    _handle_thread_step(threadId, singleThread)
     cmd = "step"
     if granularity == "instruction":
         cmd += "i"
-    send_gdb(ExecutionInvoker(cmd, StopKinds.STEP))
+    ExecutionInvoker(cmd, StopKinds.STEP)()
 
 
-@request("stepOut")
+@request("stepOut", response=False)
 def step_out(*, threadId: int, singleThread: bool = False, **args):
-    send_gdb(lambda: _handle_thread_step(threadId, singleThread, True))
-    send_gdb(ExecutionInvoker("finish", StopKinds.STEP))
+    _handle_thread_step(threadId, singleThread, True)
+    ExecutionInvoker("finish", StopKinds.STEP)()
 
 
-@request("continue")
+# This is a server-side request because it is funny: it wants to
+# 'continue' but also return a result, which precludes using
+# response=False.  Using 'continue &' would mostly work ok, but this
+# yields races when a stop occurs before the response is sent back to
+# the client.
+@request("continue", on_dap_thread=True)
 def continue_request(*, threadId: int, singleThread: bool = False, **args):
     locked = send_gdb_with_response(lambda: _handle_thread_step(threadId, singleThread))
     send_gdb(ExecutionInvoker("continue", None))

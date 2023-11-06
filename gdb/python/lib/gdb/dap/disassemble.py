@@ -16,7 +16,7 @@
 import gdb
 
 from .server import request, capability
-from .startup import send_gdb_with_response, in_gdb_thread
+from .startup import in_gdb_thread
 
 
 @in_gdb_thread
@@ -54,6 +54,4 @@ def disassemble(
     **extra
 ):
     pc = int(memoryReference, 0) + offset
-    return send_gdb_with_response(
-        lambda: _disassemble(pc, instructionOffset, instructionCount)
-    )
+    return _disassemble(pc, instructionOffset, instructionCount)
