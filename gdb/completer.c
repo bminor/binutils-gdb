@@ -2812,7 +2812,7 @@ gdb_complete_get_screenwidth (const struct match_list_displayer *displayer)
 extern int _rl_completion_prefix_display_length;
 extern int _rl_print_completions_horizontally;
 
-EXTERN_C int _rl_qsort_string_compare (const void *, const void *);
+extern "C" int _rl_qsort_string_compare (const void *, const void *);
 typedef int QSFUNC (const void *, const void *);
 
 /* GDB version of readline/complete.c:rl_display_match_list.

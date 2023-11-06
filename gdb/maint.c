@@ -791,7 +791,7 @@ extern char etext;
 
 static int profiling_state;
 
-EXTERN_C void _mcleanup (void);
+extern "C" void _mcleanup (void);
 
 static void
 mcleanup_wrapper (void)
@@ -800,7 +800,7 @@ mcleanup_wrapper (void)
     _mcleanup ();
 }
 
-EXTERN_C void monstartup (unsigned long, unsigned long);
+extern "C" void monstartup (unsigned long, unsigned long);
 extern int main (int, char **);
 
 static void

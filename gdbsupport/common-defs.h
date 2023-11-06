@@ -214,10 +214,6 @@
 #include "common-exceptions.h"
 #include "gdbsupport/poison.h"
 
-#define EXTERN_C extern "C"
-#define EXTERN_C_PUSH extern "C" {
-#define EXTERN_C_POP }
-
 /* Pull in gdb::unique_xmalloc_ptr.  */
 #include "gdbsupport/gdb_unique_ptr.h"
 

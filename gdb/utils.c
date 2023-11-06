@@ -1112,7 +1112,7 @@ static bool filter_initialized = false;
 
 /* See readline's rlprivate.h.  */
 
-EXTERN_C int _rl_term_autowrap;
+extern "C" int _rl_term_autowrap;
 
 /* See utils.h.  */
 

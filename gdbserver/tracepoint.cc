@@ -826,7 +826,7 @@ struct wstep_state
 
 #endif
 
-EXTERN_C_PUSH
+extern "C" {
 
 /* The linked list of all tracepoints.  Marked explicitly as used as
    the in-process library doesn't use it for the fast tracepoints
@@ -848,7 +848,7 @@ IP_AGENT_EXPORT_VAR int trace_buffer_is_full;
    enum eval_result_type values.  */
 IP_AGENT_EXPORT_VAR int expr_eval_result = expr_eval_no_error;
 
-EXTERN_C_POP
+}
 
 #ifndef IN_PROCESS_AGENT
 
@@ -868,9 +868,9 @@ static const char * const eval_result_names[] =
 
 /* The tracepoint in which the error occurred.  */
 
-EXTERN_C_PUSH
+extern "C" {
 IP_AGENT_EXPORT_VAR struct tracepoint *error_tracepoint;
-EXTERN_C_POP
+}
 
 struct trace_state_variable
 {
@@ -982,7 +982,7 @@ static int circular_trace_buffer;
 
 static LONGEST trace_buffer_size;
 
-EXTERN_C_PUSH
+extern "C" {
 
 /* Pointer to the block of memory that traceframes all go into.  */
 
@@ -993,7 +993,7 @@ IP_AGENT_EXPORT_VAR unsigned char *trace_buffer_lo;
 
 IP_AGENT_EXPORT_VAR unsigned char *trace_buffer_hi;
 
-EXTERN_C_POP
+}
 
 /* Control structure holding the read/write/etc. pointers into the
    trace buffer.  We need more than one of these to implement a
@@ -4683,9 +4683,9 @@ collect_data_at_step (struct tracepoint_hit_ctx *ctx,
 #ifdef IN_PROCESS_AGENT
 /* The target description index for IPA.  Passed from gdbserver, used
    to select ipa_tdesc.  */
-EXTERN_C_PUSH
+extern "C" {
 IP_AGENT_EXPORT_VAR int ipa_tdesc_idx;
-EXTERN_C_POP
+}
 #endif
 
 static struct regcache *
@@ -5749,9 +5749,9 @@ fast_tracepoint_collecting, returning continue-until-break at %s",
    NULL if it isn't locked.  Note that this lock *must* be set while
    executing any *function other than the jump pad.  See
    fast_tracepoint_collecting.  */
-EXTERN_C_PUSH
+extern "C" {
 IP_AGENT_EXPORT_VAR collecting_t *collecting;
-EXTERN_C_POP
+}
 
 /* This is needed for -Wmissing-declarations.  */
 IP_AGENT_EXPORT_FUNC void gdb_collect (struct tracepoint *tpoint,
@@ -5840,14 +5840,14 @@ typedef ULONGEST (*get_raw_reg_ptr_type) (const unsigned char *, int);
 typedef LONGEST (*get_trace_state_variable_value_ptr_type) (int);
 typedef void (*set_trace_state_variable_value_ptr_type) (int, LONGEST);
 
-EXTERN_C_PUSH
+extern "C" {
 IP_AGENT_EXPORT_VAR gdb_collect_ptr_type gdb_collect_ptr = gdb_collect;
 IP_AGENT_EXPORT_VAR get_raw_reg_ptr_type get_raw_reg_ptr = get_raw_reg;
 IP_AGENT_EXPORT_VAR get_trace_state_variable_value_ptr_type
   get_trace_state_variable_value_ptr = get_trace_state_variable_value;
 IP_AGENT_EXPORT_VAR set_trace_state_variable_value_ptr_type
   set_trace_state_variable_value_ptr = set_trace_state_variable_value;
-EXTERN_C_POP
+}
 
 #endif
 
@@ -6834,9 +6834,9 @@ run_inferior_command (char *cmd, int len)
 
 /* Thread ID of the helper thread.  GDBserver reads this to know which
    is the help thread.  This is an LWP id on Linux.  */
-EXTERN_C_PUSH
+extern "C" {
 IP_AGENT_EXPORT_VAR int helper_thread_id;
-EXTERN_C_POP
+}
 
 static int
 init_named_socket (const char *name)
@@ -7265,9 +7265,9 @@ gdb_agent_helper_thread (void *arg)
 #include <signal.h>
 #include <pthread.h>
 
-EXTERN_C_PUSH
+extern "C" {
 IP_AGENT_EXPORT_VAR int gdb_agent_capability = AGENT_CAPA_STATIC_TRACE;
-EXTERN_C_POP
+}
 
 static void
 gdb_agent_init (void)

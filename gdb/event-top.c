@@ -138,7 +138,7 @@ static struct async_signal_handler *async_sigterm_token;
 void (*after_char_processing_hook) (void);
 
 #if RL_VERSION_MAJOR == 7
-EXTERN_C void _rl_signal_handler (int);
+extern "C" void _rl_signal_handler (int);
 #endif
 
 /* Wrapper function for calling into the readline library.  This takes

@@ -303,7 +303,7 @@ extern int annotation_level;	/* in stack.c */
    "const char *" in unistd.h, so we can't declare the argument
    as "char *".  */
 
-EXTERN_C char *re_comp (const char *);
+extern "C" char *re_comp (const char *);
 
 /* From symfile.c */
 

@@ -55,12 +55,12 @@ void initialize_tracepoint (void);
    must also be exported with C linkage.  As we can't both use extern
    "C" and initialize a variable in the same statement, variables that
    don't have a separate declaration must use
-   EXTERN_C_PUSH/EXTERN_C_POP around their definition.  */
+   extern "C" {...} around their definition.  */
 
 #ifdef IN_PROCESS_AGENT
-# define IP_AGENT_EXPORT_FUNC EXTERN_C EXPORTED_SYMBOL ATTR_NOINLINE ATTR_USED
+# define IP_AGENT_EXPORT_FUNC extern "C" EXPORTED_SYMBOL ATTR_NOINLINE ATTR_USED
 # define IP_AGENT_EXPORT_VAR EXPORTED_SYMBOL ATTR_USED
-# define IP_AGENT_EXPORT_VAR_DECL EXTERN_C EXPORTED_SYMBOL
+# define IP_AGENT_EXPORT_VAR_DECL extern "C" EXPORTED_SYMBOL
 #else
 # define IP_AGENT_EXPORT_FUNC static
 # define IP_AGENT_EXPORT_VAR
