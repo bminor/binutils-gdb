@@ -5552,6 +5552,36 @@ entire section.  If both are used, the @code{FILL} command takes
 precedence.  @xref{Output Section Fill}, for details on the fill
 expression.
 
+Note - normally the value of @code{expression} is zero extended to 4
+bytes when used to fill gaps.  Thus @samp{FILL(144)} will fill a
+region with repeats of the pattern @samp{0 0 0 144}.  The value is
+treated as a big-endian number, so for example
+@samp{FILL(22 * 256 + 23)} will fill the region with repeats of the
+pattern @samp {0 0 22 23}.  If the expression results in a value with
+more than 4 significant bytes only the least 4 bytes of the value will
+be used.
+
+The above rules do not apply when the @code{expression} is a simple
+hexadecimal number.  In this case zero extension is not performed and
+all bytes are significant.  So @samp{FILL(0x90)} will fill a region with
+repeats of @samp{0x90} with no zero bytes, and @samp{FILL(0x9192)}
+will fill the region with repeats of @samp{0x91 0x92}.  Zero bytes
+in a hexadecimal expression are significant even at the start, so
+@samp{FILL(0x0090)} will fill a region with repeats of @samp{0x00 0x90}.
+
+Hexadecimal numbers can be longer than 4 bytes, and all of the bytes
+are significant, so @samp{FILL(0x123456789a)} will fill a region with
+repeats of the 5 byte sequence @samp{0x12 0x34 0x56 0x78 0x9a}.
+Excess bytes in a hexadecimal value beyond the size of a region will 
+be silently ignored.
+
+The above only applies to hexadecimal numbers specified as
+@samp{0x[0-9][a-f][A-F]}.  Hexadecimal numbers specified with a
+@samp{$} prefix, or a @samp{h}, @samp{H}, @samp{x} or @samp{X} suffix
+will follow the normal fill value rules.  This also applies to
+expressions that involve hexadecimal numbers, and hexadecimal numbers
+that have a magnitude suffix.
+
 @kindex LINKER_VERSION
 @cindex LINKER_VERSION
 The @code{LINKER_VERSION} command inserts a string containing the
@@ -5966,7 +5996,15 @@ an arbitrarily long sequence of hex digits can be used to specify the
 fill pattern;  Leading zeros become part of the pattern too.  For all
 other cases, including extra parentheses or a unary @code{+}, the fill
 pattern is the four least significant bytes of the value of the
-expression.  In all cases, the number is big-endian.
+expression.  If the value is less than four bytes in size then it will
+be zero extended to four bytes.  In all cases, the number is big-endian.
+
+@smallexample
+Fill Value     Fill Pattern
+0x90           90 90 90 90
+0x0090         00 90 00 90
+144            00 00 00 90
+@end smallexample
 
 You can also change the fill value with a @code{FILL} command in the
 output section commands; (@pxref{Output Section Data}).

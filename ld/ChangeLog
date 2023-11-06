@@ -1,3 +1,11 @@
+2023-11-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 30865
+	* ld.texi: Update description of the FILL command.
+	* testsuite/ld-scripts/fill2.d: New test.
+	* testsuite/ld-scripts/fill2.t: New test source.
+	* testsuite/ld-scripts/data.exp: Run the new test.
+
 2023-11-02  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-x86-64/property-3.r: Update regexp to allow for

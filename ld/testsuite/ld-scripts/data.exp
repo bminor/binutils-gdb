@@ -29,6 +29,7 @@ if { [is_pecoff_format] } then {
 run_dump_test data
 run_dump_test fill
 run_dump_test fill16
+run_dump_test fill2
 run_dump_test pr27100
 
 set LDFLAGS $old_LDFLAGS
