@@ -13,10 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from .events import StopKinds, ExecutionInvoker
+from .events import StopKinds, exec_and_expect_stop
 from .server import request
 
 
 @request("pause", response=False)
 def pause(**args):
-    ExecutionInvoker("interrupt -a", StopKinds.PAUSE)()
+    exec_and_expect_stop("interrupt -a", StopKinds.PAUSE)

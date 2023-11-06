@@ -18,7 +18,7 @@ import gdb
 # These are deprecated in 3.9, but required in older versions.
 from typing import Mapping, Optional, Sequence
 
-from .events import ExecutionInvoker
+from .events import exec_and_expect_stop
 from .server import request, capability
 from .startup import in_gdb_thread, exec_and_log
 
@@ -85,4 +85,4 @@ def config_done(**args):
     if _program is not None:
         # Suppress the continue event, but don't set any particular
         # expected stop.
-        ExecutionInvoker("run", None)()
+        exec_and_expect_stop("run", None)
