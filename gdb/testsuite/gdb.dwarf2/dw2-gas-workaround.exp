@@ -83,7 +83,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
 
 gdb_test_no_output "set debug symtab-create 1"
 gdb_test_multiple "ptype bar" "" {
-    -re -wrap "$objdir.*" {
+    -re -wrap "name_for_id = $objdir/$srcfile\r\n.*" {
 	fail $gdb_test_name
     }
     -re -wrap "" {
