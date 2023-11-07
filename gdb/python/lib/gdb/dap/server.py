@@ -16,12 +16,11 @@
 import functools
 import inspect
 import json
-import queue
-import sys
 
 from .io import start_json_writer, read_json
 from .startup import (
     exec_and_log,
+    DAPQueue,
     in_dap_thread,
     in_gdb_thread,
     send_gdb,
@@ -54,10 +53,7 @@ class Server:
         # This queue accepts JSON objects that are then sent to the
         # DAP client.  Writing is done in a separate thread to avoid
         # blocking the read loop.
-        if sys.version_info[0] == 3 and sys.version_info[1] <= 6:
-            self.write_queue = queue.Queue()
-        else:
-            self.write_queue = queue.SimpleQueue()
+        self.write_queue = DAPQueue()
         self.done = False
         global _server
         _server = self

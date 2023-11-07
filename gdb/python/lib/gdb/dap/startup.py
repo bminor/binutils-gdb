@@ -23,6 +23,14 @@ import traceback
 import sys
 
 
+# Adapt to different Queue types.  This is exported for use in other
+# modules as well.
+if sys.version_info[0] == 3 and sys.version_info[1] <= 6:
+    DAPQueue = queue.Queue
+else:
+    DAPQueue = queue.SimpleQueue
+
+
 # The GDB thread, aka the main thread.
 _gdb_thread = threading.current_thread()
 
@@ -158,10 +166,7 @@ def send_gdb_with_response(fn):
     """
     if isinstance(fn, str):
         fn = Invoker(fn)
-    if sys.version_info[0] == 3 and sys.version_info[1] <= 6:
-        result_q = queue.Queue()
-    else:
-        result_q = queue.SimpleQueue()
+    result_q = DAPQueue()
 
     def message():
         try:
