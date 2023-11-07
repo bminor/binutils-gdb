@@ -361,7 +361,8 @@ ctf_create_per_cu (ctf_dict_t *fp, ctf_dict_t *input, const char *cu_name)
 
 /* Add a mapping directing that the CU named FROM should have its
    conflicting/non-duplicate types (depending on link mode) go into a dict
-   named TO.  Many FROMs can share a TO.
+   named TO.  Many FROMs can share a TO, but adding the same FROM with
+   a different TO will replace the old mapping.
 
    We forcibly add a dict named TO in every case, even though it may well
    wind up empty, because clients that use this facility usually expect to find
@@ -371,7 +372,7 @@ int
 ctf_link_add_cu_mapping (ctf_dict_t *fp, const char *from, const char *to)
 {
   int err;
-  char *f = NULL, *t = NULL;
+  char *f = NULL, *t = NULL, *existing;
   ctf_dynhash_t *one_out;
 
   /* Mappings cannot be set up if per-CU output dicts already exist.  */
@@ -392,6 +393,19 @@ ctf_link_add_cu_mapping (ctf_dict_t *fp, const char *from, const char *to)
 						      ctf_dynhash_destroy);
   if (fp->ctf_link_out_cu_mapping == NULL)
     goto oom;
+
+  /* If this FROM already exists, remove the mapping from both the FROM->TO
+     and the TO->FROM lists: the user wants to change it.  */
+
+  if ((existing = ctf_dynhash_lookup (fp->ctf_link_in_cu_mapping, from)) != NULL)
+    {
+      one_out = ctf_dynhash_lookup (fp->ctf_link_out_cu_mapping, existing);
+      if (!ctf_assert (fp, one_out))
+	return -1;				/* errno is set for us.  */
+
+      ctf_dynhash_remove (one_out, from);
+      ctf_dynhash_remove (fp->ctf_link_in_cu_mapping, from);
+    }
 
   f = strdup (from);
   t = strdup (to);
