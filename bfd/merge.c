@@ -711,6 +711,7 @@ record_section (struct sec_merge_info *sinfo,
   unsigned int align;
   bfd_size_type amt;
   bfd_byte *contents;
+  void *tmpptr;
 
   amt = sec->size;
   if (sec->flags & SEC_STRINGS)
@@ -771,6 +772,19 @@ record_section (struct sec_merge_info *sinfo,
 
   free (contents);
   contents = NULL;
+
+  /* We allocate the ofsmap arrays in blocks of 2048 elements.
+     In case we have very many small input files/sections,
+     this might waste large amounts of memory, so reallocate these
+     arrays here to their true size.  */
+  amt = secinfo->noffsetmap + 1;
+  tmpptr = bfd_realloc (secinfo->map, amt * sizeof(secinfo->map[0]));
+  if (tmpptr)
+    secinfo->map = tmpptr;
+  tmpptr = bfd_realloc (secinfo->map_ofs, amt * sizeof(secinfo->map_ofs[0]));
+  if (tmpptr)
+    secinfo->map_ofs = tmpptr;
+
   /*printf ("ZZZ %s:%s %u entries\n", sec->owner->filename, sec->name,
 	  (unsigned)secinfo->noffsetmap);*/
 
