@@ -1,3 +1,10 @@
+2023-11-06  Jan Beulich  <jbeulich@suse.com>
+
+	PR 30722
+	* testsuite/ld-x86-64/property-3.r: Revert commit bf77f42f6708.
+	* testsuite/ld-x86-64/property-4.r: Likewise.
+	* testsuite/ld-x86-64/property-5.r: Likewise.
+
 2023-11-06  Nick Clifton  <nickc@redhat.com>
 
 	PR 30865
