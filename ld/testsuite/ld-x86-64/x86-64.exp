@@ -1093,86 +1093,6 @@ if { [isnative] && [check_compiler_available] } {
 	    "property-2.so" \
 	] \
 	[list \
-	    "Build property 3" \
-	    "" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-stack.S property-x86-1.S} \
-	    {{readelf {-n} property-3.r}} \
-	    "property-3" \
-	] \
-	[list \
-	    "Build property 3 (.o)" \
-	    "-r -nostdlib" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-x86-1.S property-stack.S} \
-	    {{readelf {-n} property-3a.r}} \
-	    "property-3.o" \
-	] \
-	[list \
-	    "Build property 3 (.so)" \
-	    "-shared" \
-	    "-fPIC -Wa,-mx86-used-note=yes" \
-	    {property-x86-1.S pass.c property-stack.S} \
-	    {{readelf {-n} property-3.r}} \
-	    "property-3.so" \
-	] \
-	[list \
-	    "Build property 4" \
-	    "" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-stack.S property-x86-1.S property-x86-2.S} \
-	    {{readelf {-n} property-4.r}} \
-	    "property-4" \
-	] \
-	[list \
-	    "Build property 4 (.o)" \
-	    "-r -nostdlib" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-x86-2.S property-x86-1.S property-stack.S} \
-	    {{readelf {-n} property-4a.r}} \
-	    "property-4.o" \
-	] \
-	[list \
-	    "Build property 4 (.so)" \
-	    "-shared" \
-	    "-fPIC -Wa,-mx86-used-note=yes" \
-	    {property-x86-2.S property-x86-1.S pass.c property-stack.S} \
-	    {{readelf {-n} property-4.r}} \
-	    "property-4.so" \
-	] \
-	[list \
-	    "Build property 4 (-Wl,-z,stack-size=0)" \
-	    "-Wl,-z,stack-size=0" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-stack.S property-x86-1.S property-x86-2.S} \
-	    {{readelf {-n} property-4.r}} \
-	    "property-4" \
-	] \
-	[list \
-	    "Build property 5" \
-	    "-Wl,-z,stack-size=0x900000" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-stack.S property-x86-1.S property-x86-2.S} \
-	    {{readelf {-n} property-5.r}} \
-	    "property-5" \
-	] \
-	[list \
-	    "Build property 5 (.o)" \
-	    "-r -nostdlib -Wl,-z,stack-size=0x900000" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-x86-2.S property-x86-1.S property-stack.S} \
-	    {{readelf {-n} property-5a.r}} \
-	    "property-5.o" \
-	] \
-	[list \
-	    "Build property 5 (.so)" \
-	    "-shared -Wl,-z,stack-size=0x900000" \
-	    "-fPIC -Wa,-mx86-used-note=yes" \
-	    {property-x86-2.S property-x86-1.S pass.c property-stack.S} \
-	    {{readelf {-n} property-5.r}} \
-	    "property-5.so" \
-	] \
-	[list \
 	    "Build property-6.so" \
 	    "-shared" \
 	    "-fPIC -Wa,-mx86-used-note=yes" \
@@ -2178,6 +2098,96 @@ run_ld_link_tests [list \
 	{plt2.s} \
 	{{readelf -SW plt2.rd} {objdump -dwr plt2.dd}} \
 	"plt2" \
+    ] \
+    [list \
+	"Build property 3" \
+	"" \
+	"" \
+	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
+	{property-stk.s property-x86-1.s} \
+	{{readelf -n property-3.r}} \
+	"property-3" \
+    ] \
+    [list \
+	"Build property 3 (.o)" \
+	"-r -nostdlib" \
+	"" \
+	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
+	{property-x86-1.s property-stk.s} \
+	{{readelf -n property-3a.r}} \
+	"property-3.o" \
+    ] \
+    [list \
+	"Build property 3 (.so)" \
+	"-shared" \
+	"" \
+	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
+	{property-x86-1.s property-stk.s} \
+	{{readelf -n property-3.r}} \
+	"property-3.so" \
+    ] \
+    [list \
+	"Build property 4" \
+	"" \
+	"" \
+	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
+	{property-stk.s property-x86-1.s property-x86-2.s} \
+	{{readelf -n property-4.r}} \
+	"property-4" \
+    ] \
+    [list \
+	"Build property 4 (.o)" \
+	"-r -nostdlib" \
+	"" \
+	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
+	{property-x86-2.s property-x86-1.s property-stk.s} \
+	{{readelf {-n} property-4a.r}} \
+	"property-4.o" \
+    ] \
+    [list \
+	"Build property 4 (.so)" \
+	"-shared" \
+	"" \
+	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
+	{property-x86-2.s property-x86-1.s property-stk.s} \
+	{{readelf -n property-4.r}} \
+	"property-4.so" \
+    ] \
+    [list \
+	"Build property 4 (-z stack-size=0)" \
+	"-z stack-size=0" \
+	"" \
+	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
+	{property-stk.s property-x86-1.s property-x86-2.s} \
+	{{readelf -n property-4.r}} \
+	"property-4" \
+    ] \
+    [list \
+	"Build property 5" \
+	"-z stack-size=0x900000" \
+	"" \
+	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
+	{property-stk.s property-x86-1.s property-x86-2.s} \
+	{{readelf -n property-5.r}} \
+	"property-5" \
+    ] \
+    [list \
+	"Build property 5 (.o)" \
+	"-r -nostdlib -z stack-size=0x900000" \
+	"" \
+	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
+	{property-x86-2.s property-x86-1.s property-stk.s} \
+	{{readelf {-n} property-5a.r}} \
+	"property-5.o" \
+    ] \
+    [list \
+	"Build property 5 (.so)" \
+	"-shared -z stack-size=0x900000" \
+	"" \
+	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
+	{property-x86-2.s property-x86-1.s property-stk.s} \
+	{{readelf -n property-5.r}} \
+	"property-5.so" \
     ] \
     [list \
 	"Build pr21626.so" \
