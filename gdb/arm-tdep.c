@@ -5337,9 +5337,12 @@ arm_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
 
   bpaddr = gdbarch_addr_bits_remove (gdbarch, bpaddr);
 
-  if (find_pc_partial_function (bpaddr, NULL, &func_start, NULL)
-      && func_start > boundary)
-    boundary = func_start;
+  if (find_pc_partial_function (bpaddr, NULL, &func_start, NULL))
+    {
+      func_start = gdbarch_addr_bits_remove (gdbarch, func_start);
+      if (func_start > boundary)
+	boundary = func_start;
+    }
 
   /* Search for a candidate IT instruction.  We have to do some fancy
      footwork to distinguish a real IT instruction from the second
