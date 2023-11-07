@@ -75,4 +75,75 @@ foreach event [lindex $result 1] {
 }
 gdb_assert {$seen == "pass"} "continue event from inferior call"
 
+#
+# Test that a repl evaluation that causes a continue can be canceled.
+#
+
+set cont_id [dap_send_request evaluate \
+		 {o expression [s continue] context [s repl]}]
+dap_wait_for_event_and_check "continued" continued
+
+set cancel_id [dap_send_request cancel \
+		   [format {o requestId [i %d]} $cont_id]]
+
+# The stop event will come before any responses to the requests.
+dap_wait_for_event_and_check "stopped by cancel" stopped
+
+# Now we can wait for the 'continue' request to complete, and then the
+# 'cancel' request.
+dap_read_response evaluate $cont_id
+dap_read_response cancel $cancel_id
+
+#
+# Test that a repl evaluation of a long-running gdb command (that does
+# not continue the inferior) can be canceled.
+#
+
+proc write_file {suffix contents} {
+    global testfile
+
+    set gdbfile [standard_output_file ${testfile}.$suffix]
+    set ofd [open $gdbfile w]
+    puts $ofd $contents
+    close $ofd
+    return $gdbfile
+}
+
+set gdbfile [write_file gdb "set \$x = 0\nwhile 1\nset \$x = \$x + 1\nend"]
+set cont_id [dap_send_request evaluate \
+		 [format {o expression [s "source %s"] context [s repl]} \
+		      $gdbfile]]
+
+# Wait a little to try to ensure the command is running.
+sleep 0.2
+set cancel_id [dap_send_request cancel \
+		   [format {o requestId [i %d]} $cont_id]]
+
+set info [lindex [dap_read_response evaluate $cont_id] 0]
+gdb_assert {[dict get $info success] == "false"} "gdb command failed"
+gdb_assert {[dict get $info message] == "cancelled"} "gdb command canceled"
+
+dap_read_response cancel $cancel_id
+
+#
+# Test that a repl evaluation of a long-running Python command (that
+# does not continue the inferior) can be canceled.
+#
+
+write_file py "while True:\n  pass"
+set cont_id [dap_send_request evaluate \
+		 [format {o expression [s "source %s"] context [s repl]} \
+		      $gdbfile]]
+
+# Wait a little to try to ensure the command is running.
+sleep 0.2
+set cancel_id [dap_send_request cancel \
+		   [format {o requestId [i %d]} $cont_id]]
+
+set info [lindex [dap_read_response evaluate $cont_id] 0]
+gdb_assert {[dict get $info success] == "false"} "python command failed"
+gdb_assert {[dict get $info message] == "cancelled"} "python command canceled"
+
+dap_read_response cancel $cancel_id
+
 dap_shutdown

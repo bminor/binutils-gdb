@@ -39595,6 +39595,22 @@ to return the bytes of each instruction in an implementation-defined
 format.  @value{GDBN} implements this by sending a string with the
 bytes encoded in hex, like @code{"55a2b900"}.
 
+When the @code{repl} context is used for the @code{evaluate} request,
+@value{GDBN} evaluates the provided expression as a CLI command.
+
+Evaluation in general can cause the inferior to continue execution.
+For example, evaluating the @code{continue} command could do this, as
+could evaluating an expression that involves an inferior function
+call.
+
+@code{repl} evaluation can also cause @value{GDBN} to appear to stop
+responding to requests, for example if a CLI script does a lengthy
+computation.
+
+Evaluations like this can be interrupted using the DAP @code{cancel}
+request.  (In fact, @code{cancel} should work for any request, but it
+is unlikely to be useful for most of them.)
+
 @node JIT Interface
 @chapter JIT Compilation Interface
 @cindex just-in-time compilation

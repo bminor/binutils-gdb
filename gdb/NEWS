@@ -86,6 +86,8 @@ show remote thread-options-packet
 
   ** GDB now emits the "process" event.
 
+  ** GDB now supports the "cancel" request.
+
 * New remote packets
 
 New stop reason: clone
