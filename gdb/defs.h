@@ -299,12 +299,6 @@ extern std::string relocate_gdb_directory (const char *initial, bool relocatable
 extern int annotation_level;	/* in stack.c */
 
 
-/* From regex.c or libc.  BSD 4.4 declares this with the argument type as
-   "const char *" in unistd.h, so we can't declare the argument
-   as "char *".  */
-
-extern "C" char *re_comp (const char *);
-
 /* From symfile.c */
 
 extern void symbol_file_command (const char *, int);
