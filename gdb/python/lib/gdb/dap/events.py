@@ -21,8 +21,17 @@ from .startup import exec_and_log, in_gdb_thread, log
 from .modules import is_module, make_module
 
 
+# True when the inferior is thought to be running, False otherwise.
+# This may be accessed from any thread, which can be racy.  However,
+# this unimportant because this global is only used for the
+# 'notStopped' response, which itself is inherently racy.
+inferior_running = False
+
+
 @in_gdb_thread
 def _on_exit(event):
+    global inferior_running
+    inferior_running = False
     code = 0
     if hasattr(event, "exit_code"):
         code = event.exit_code
@@ -48,6 +57,8 @@ def thread_event(event, reason):
 
 @in_gdb_thread
 def _new_thread(event):
+    global inferior_running
+    inferior_running = True
     thread_event(event, "started")
 
 
@@ -85,6 +96,8 @@ _suppress_cont = False
 
 @in_gdb_thread
 def _cont(event):
+    global inferior_running
+    inferior_running = True
     global _suppress_cont
     if _suppress_cont:
         log("_suppress_cont case")
@@ -123,6 +136,8 @@ def exec_and_expect_stop(cmd, reason):
 
 @in_gdb_thread
 def _on_stop(event):
+    global inferior_running
+    inferior_running = False
     log("entering _on_stop: " + repr(event))
     global _expected_stop
     obj = {
