@@ -60,6 +60,9 @@ class Server:
         # DAP client.  Writing is done in a separate thread to avoid
         # blocking the read loop.
         self.write_queue = DAPQueue()
+        # Reading is also done in a separate thread, and a queue of
+        # requests is kept.
+        self.read_queue = DAPQueue()
         self.done = False
         global _server
         _server = self
@@ -111,6 +114,14 @@ class Server:
         log("WROTE: <<<" + json.dumps(obj) + ">>>")
         self.write_queue.put(obj)
 
+    # This is run in a separate thread and simply reads requests from
+    # the client and puts them into a queue.
+    def _reader_thread(self):
+        while True:
+            cmd = read_json(self.in_stream)
+            log("READ: <<<" + json.dumps(cmd) + ">>>")
+            self.read_queue.put(cmd)
+
     @in_dap_thread
     def main_loop(self):
         """The main loop of the DAP server."""
@@ -118,9 +129,9 @@ class Server:
         # client, and the thread that reads output from the inferior.
         start_thread("output reader", self._read_inferior_output)
         start_json_writer(self.out_stream, self.write_queue)
+        start_thread("JSON reader", self._reader_thread)
         while not self.done:
-            cmd = read_json(self.in_stream)
-            log("READ: <<<" + json.dumps(cmd) + ">>>")
+            cmd = self.read_queue.get()
             result = self._handle_command(cmd)
             self._send_json(result)
             events = self.delayed_events
