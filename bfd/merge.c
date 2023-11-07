@@ -94,6 +94,10 @@ struct sec_merge_hash
   struct sec_merge_hash_entry **values;
 };
 
+/* True when given NEWCOUNT and NBUCKETS indicate that the hash table needs
+   resizing.  */
+#define NEEDS_RESIZE(newcount, nbuckets) ((newcount) > (nbuckets) / 3 * 2)
+
 struct sec_merge_sec_info;
 
 /* Information per merged blob.  This is the unit of merging and is
@@ -167,7 +171,7 @@ static bool
 sec_merge_maybe_resize (struct sec_merge_hash *table, unsigned added)
 {
   struct bfd_hash_table *bfdtab = &table->table;
-  if (bfdtab->count + added > table->nbuckets * 2 / 3)
+  if (NEEDS_RESIZE (bfdtab->count + added, table->nbuckets))
     {
       unsigned i;
       unsigned long newnb = table->nbuckets * 2;
@@ -175,7 +179,7 @@ sec_merge_maybe_resize (struct sec_merge_hash *table, unsigned added)
       uint64_t *newl;
       unsigned long alloc;
 
-      while (bfdtab->count + added > newnb * 2 / 3)
+      while (NEEDS_RESIZE (bfdtab->count + added, newnb))
 	{
 	  newnb *= 2;
 	  if (!newnb)
@@ -239,8 +243,8 @@ sec_merge_hash_insert (struct sec_merge_hash *table,
   hashp->alignment = 0;
   hashp->u.suffix = NULL;
   hashp->next = NULL;
-  // We must not need resizing, otherwise _index is wrong
-  BFD_ASSERT (bfdtab->count + 1 <= table->nbuckets * 2 / 3);
+  // We must not need resizing, otherwise the estimation was wrong
+  BFD_ASSERT (!NEEDS_RESIZE (bfdtab->count + 1, table->nbuckets));
   bfdtab->count++;
   table->key_lens[_index] = (hash << 32) | (uint32_t)len;
   table->values[_index] = hashp;
