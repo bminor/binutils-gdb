@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import functools
 import inspect
 import json
 import queue
@@ -163,7 +164,28 @@ def send_event(event, body=None):
     _server.send_event(event, body)
 
 
-def request(name: str, *, response: bool = True, on_dap_thread: bool = False):
+# A helper decorator that checks whether the inferior is running.
+def _check_not_running(func):
+    @functools.wraps(func)
+    def check(*args, **kwargs):
+        # Import this as late as possible.  This is done to avoid
+        # circular imports.
+        from .events import inferior_running
+
+        if inferior_running:
+            raise Exception("notStopped")
+        return func(*args, **kwargs)
+
+    return check
+
+
+def request(
+    name: str,
+    *,
+    response: bool = True,
+    on_dap_thread: bool = False,
+    expect_stopped: bool = True
+):
     """A decorator for DAP requests.
 
     This registers the function as the implementation of the DAP
@@ -178,6 +200,11 @@ def request(name: str, *, response: bool = True, on_dap_thread: bool = False):
 
     If ON_DAP_THREAD is True, the function will be invoked in the DAP
     thread.  When ON_DAP_THREAD is True, RESPONSE may not be False.
+
+    If EXPECT_STOPPED is True (the default), then the request will
+    fail with the 'notStopped' reason if it is processed while the
+    inferior is running.  When EXPECT_STOPPED is False, the request
+    will proceed regardless of the inferior's state.
     """
 
     # Validate the parameters.
@@ -217,6 +244,12 @@ def request(name: str, *, response: bool = True, on_dap_thread: bool = False):
 
                 cmd = non_sync_call
 
+        # If needed, check that the inferior is not running.  This
+        # wrapping is done last, so the check is done first, before
+        # trying to dispatch the request to another thread.
+        if expect_stopped:
+            cmd = _check_not_running(cmd)
+
         global _commands
         _commands[name] = cmd
         return cmd
@@ -255,13 +288,13 @@ def initialize(**args):
     return _capabilities.copy()
 
 
-@request("terminate")
+@request("terminate", expect_stopped=False)
 @capability("supportsTerminateRequest")
 def terminate(**args):
     exec_and_log("kill")
 
 
-@request("disconnect", on_dap_thread=True)
+@request("disconnect", on_dap_thread=True, expect_stopped=False)
 @capability("supportTerminateDebuggee")
 def disconnect(*, terminateDebuggee: bool = False, **args):
     if terminateDebuggee:

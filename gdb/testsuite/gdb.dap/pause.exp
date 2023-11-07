@@ -32,6 +32,13 @@ if {[dap_launch $testfile] == ""} {
 dap_check_request_and_response "start inferior" configurationDone
 dap_wait_for_event_and_check "inferior started" thread "body reason" started
 
+set resp [lindex [dap_request_and_response evaluate {o expression [s 23]}] \
+	      0]
+gdb_assert {[dict get $resp success] == "false"} \
+    "evaluate failed while inferior executing"
+gdb_assert {[dict get $resp message] == "notStopped"} \
+    "evaluate issued notStopped"
+
 dap_check_request_and_response pause pause \
     {o threadId [i 1]}
 
