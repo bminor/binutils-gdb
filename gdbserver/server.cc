@@ -1143,14 +1143,15 @@ static void
 monitor_show_help (void)
 {
   monitor_output ("The following monitor commands are supported:\n");
-  monitor_output ("  set debug <0|1>\n");
+  monitor_output ("  set debug on\n");
   monitor_output ("    Enable general debugging messages\n");
+  monitor_output ("  set debug off\n");
+  monitor_output ("    Disable all debugging messages\n");
+  monitor_output ("  set debug COMPONENT <off|on>\n");
+  monitor_output ("    Enable debugging messages for COMPONENT, which is\n");
+  monitor_output ("    one of: all, threads, remote, event-loop.\n");
   monitor_output ("  set debug-hw-points <0|1>\n");
   monitor_output ("    Enable h/w breakpoint/watchpoint debugging messages\n");
-  monitor_output ("  set remote-debug <0|1>\n");
-  monitor_output ("    Enable remote protocol debugging messages\n");
-  monitor_output ("  set event-loop-debug <0|1>\n");
-  monitor_output ("    Enable event loop debugging messages\n");
   monitor_output ("  set debug-format option1[,option2,...]\n");
   monitor_output ("    Add additional information to debugging messages\n");
   monitor_output ("    Options: all, none, timestamp\n");
@@ -1575,20 +1576,150 @@ parse_debug_options (const char *options)
     }
 }
 
+/* Called from the 'monitor' command handler, to handle general 'set debug'
+   monitor commands with one of the formats:
+
+     set debug COMPONENT VALUE
+     set debug VALUE
+
+   In both of these command formats VALUE can be 'on', 'off', '1', or '0'
+   with 1/0 being equivalent to on/off respectively.
+
+   In the no-COMPONENT version of the command, if VALUE is 'on' (or '1')
+   then the component 'threads' is assumed, this is for backward
+   compatibility, but maybe in the future we might find a better "default"
+   set of debug flags to enable.
+
+   In the no-COMPONENT version of the command, if VALUE is 'off' (or '0')
+   then all debugging is turned off.
+
+   Otherwise, COMPONENT must be one of the known debug components, and that
+   component is either enabled or disabled as appropriate.
+
+   The string MON contains either 'COMPONENT VALUE' or just the 'VALUE' for
+   the second command format, the 'set debug ' has been stripped off
+   already.
+
+   Return a string containing an error message if something goes wrong,
+   this error can be returned as part of the monitor command output.  If
+   everything goes correctly then the debug global will have been updated,
+   and an empty string is returned.  */
+
+static std::string
+handle_general_monitor_debug (const char *mon)
+{
+  mon = skip_spaces (mon);
+
+  if (*mon == '\0')
+    return "No debug component name found.\n";
+
+  /* Find the first word within MON.  This is either the component name,
+     or the value if no component has been given.  */
+  const char *end = skip_to_space (mon);
+  std::string component (mon, end - mon);
+  if (component.find (',') != component.npos || component[0] == '-'
+      || component[0] == '+')
+    return "Invalid character found in debug component name.\n";
+
+  /* In ACTION_STR we create a string that will be passed to the
+     parse_debug_options string.  This will be either '+COMPONENT' or
+     '-COMPONENT' depending on whether we want to enable or disable
+     COMPONENT.  */
+  std::string action_str;
+
+  /* If parse_debug_options succeeds, then MSG will be returned to the user
+     as the output of the monitor command.  */
+  std::string msg;
+
+  /* Check for 'set debug off', this disables all debug output.  */
+  if (component == "0" || component == "off")
+    {
+      if (*skip_spaces (end) != '\0')
+	return string_printf
+	  ("Junk '%s' found at end of 'set debug %s' command.\n",
+	   skip_spaces (end), std::string (mon, end - mon).c_str ());
+
+      action_str = "-all";
+      msg = "All debug output disabled.\n";
+    }
+  /* Check for 'set debug on', this disables a general set of debug.  */
+  else if (component == "1" || component == "on")
+    {
+      if (*skip_spaces (end) != '\0')
+	return string_printf
+	  ("Junk '%s' found at end of 'set debug %s' command.\n",
+	   skip_spaces (end), std::string (mon, end - mon).c_str ());
+
+      action_str = "+threads";
+      msg = "General debug output enabled.\n";
+    }
+  /* Otherwise we should have 'set debug COMPONENT VALUE'.  Extract the two
+     parts and validate.  */
+  else
+    {
+      /* Figure out the value the user passed.  */
+      const char *value_start = skip_spaces (end);
+      if (*value_start == '\0')
+	return string_printf ("Missing value for 'set debug %s' command.\n",
+			      mon);
+
+      const char *after_value = skip_to_space (value_start);
+      if (*skip_spaces (after_value) != '\0')
+	return string_printf
+	  ("Junk '%s' found at end of 'set debug %s' command.\n",
+	   skip_spaces (after_value),
+	   std::string (mon, after_value - mon).c_str ());
+
+      std::string value (value_start, after_value - value_start);
+
+      /* Check VALUE to see if we are enabling, or disabling.  */
+      bool enable;
+      if (value == "0" || value == "off")
+	enable = false;
+      else if (value == "1" || value == "on")
+	enable = true;
+      else
+	return string_printf ("Invalid value '%s' for 'set debug %s'.\n",
+			      value.c_str (),
+			      std::string (mon, end - mon).c_str ());
+
+      action_str = std::string (enable ? "+" : "-") + component;
+      msg = string_printf ("Debug output for '%s' %s.\n", component.c_str (),
+			   enable ? "enabled" : "disabled");
+    }
+
+  gdb_assert (!msg.empty ());
+  gdb_assert (!action_str.empty ());
+
+  try
+    {
+      parse_debug_options (action_str.c_str ());
+      monitor_output (msg.c_str ());
+    }
+  catch (const gdb_exception_error &exception)
+    {
+      return string_printf ("Error: %s\n", exception.what ());
+    }
+
+  return {};
+}
+
 /* Handle monitor commands not handled by target-specific handlers.  */
 
 static void
 handle_monitor_command (char *mon, char *own_buf)
 {
-  if (strcmp (mon, "set debug 1") == 0)
+  if (startswith (mon, "set debug "))
     {
-      debug_threads = true;
-      monitor_output ("Debug output enabled.\n");
-    }
-  else if (strcmp (mon, "set debug 0") == 0)
-    {
-      debug_threads = false;
-      monitor_output ("Debug output disabled.\n");
+      std::string error_msg
+	= handle_general_monitor_debug (mon + sizeof ("set debug ") - 1);
+
+      if (!error_msg.empty ())
+	{
+	  monitor_output (error_msg.c_str ());
+	  monitor_show_help ();
+	  write_enn (own_buf);
+	}
     }
   else if (strcmp (mon, "set debug-hw-points 1") == 0)
     {
@@ -1599,26 +1730,6 @@ handle_monitor_command (char *mon, char *own_buf)
     {
       show_debug_regs = 0;
       monitor_output ("H/W point debugging output disabled.\n");
-    }
-  else if (strcmp (mon, "set remote-debug 1") == 0)
-    {
-      remote_debug = true;
-      monitor_output ("Protocol debug output enabled.\n");
-    }
-  else if (strcmp (mon, "set remote-debug 0") == 0)
-    {
-      remote_debug = false;
-      monitor_output ("Protocol debug output disabled.\n");
-    }
-  else if (strcmp (mon, "set event-loop-debug 1") == 0)
-    {
-      debug_event_loop = debug_event_loop_kind::ALL;
-      monitor_output ("Event loop debug output enabled.\n");
-    }
-  else if (strcmp (mon, "set event-loop-debug 0") == 0)
-    {
-      debug_event_loop = debug_event_loop_kind::OFF;
-      monitor_output ("Event loop debug output disabled.\n");
     }
   else if (startswith (mon, "set debug-format "))
     {

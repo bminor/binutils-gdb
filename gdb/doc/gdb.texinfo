@@ -23805,14 +23805,30 @@ Here are the available commands.
 @item monitor help
 List the available monitor commands.
 
-@item monitor set debug 0
-@itemx monitor set debug 1
-Disable or enable general debugging messages.
+@item monitor set debug off
+Disable all internal logging from gdbserver.
 
-@item monitor set remote-debug 0
-@itemx monitor set remote-debug 1
-Disable or enable specific debugging messages associated with the remote
+@item monitor set debug on
+Enable some general logging from within gdbserver.  Currently this is
+equivalent to @kbd{monitor set debug threads on}, but this might
+change in future releases of gdbserver.
+
+@item monitor set debug threads off
+@itemx monitor set debug threads on
+Disable or enable specific logging messages associated with thread
+handling in gdbserver.  Currently this category also includes
+additional output not specifically related to thread handling, this
+could change in future releases of gdbserver.
+
+@item monitor set debug remote off
+@itemx monitor set debug remote on
+Disable or enable specific logging messages associated with the remote
 protocol (@pxref{Remote Protocol}).
+
+@item monitor set debug event-loop off
+@itemx monitor set debug event-loop on
+Disable or enable specific logging messages associated with
+gdbserver's event-loop.
 
 @item monitor set debug-file filename
 @itemx monitor set debug-file

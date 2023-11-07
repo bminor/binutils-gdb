@@ -48,6 +48,14 @@ show remote thread-options-packet
      supported components are: all, threads, event-loop, and remote.
      If no components are given then threads is assumed.
 
+  ** The 'monitor set remote-debug' and 'monitor set event-loop-debug'
+     command have been removed.
+
+  ** The 'monitor set debug 0|1' command has been extended to take a
+     component name, e.g.: 'monitor set debug COMPONENT off|on'.
+     Possible component names are: all, threads, event-loop, and
+     remote.
+
 * Python API
 
   ** New function gdb.notify_mi(NAME, DATA), that emits custom
