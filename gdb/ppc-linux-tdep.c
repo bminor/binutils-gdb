@@ -83,6 +83,7 @@
 #include "features/rs6000/powerpc-isa207-vsx64l.c"
 #include "features/rs6000/powerpc-isa207-htm-vsx64l.c"
 #include "features/rs6000/powerpc-e500l.c"
+#include "dwarf2/frame.h"
 
 /* Shared library operations for PowerPC-Linux.  */
 static struct target_so_ops powerpc_so_ops;
@@ -2088,6 +2089,49 @@ ppc_linux_displaced_step_prepare  (gdbarch *arch, thread_info *thread,
   return per_inferior->disp_step_buf->prepare (thread, displaced_pc);
 }
 
+/* Convert a Dwarf 2 register number to a GDB register number for Linux.  */
+
+static int
+rs6000_linux_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int num)
+{
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep>(gdbarch);
+
+  if (0 <= num && num <= 31)
+    return tdep->ppc_gp0_regnum + num;
+  else if (32 <= num && num <= 63)
+    return tdep->ppc_fp0_regnum + (num - 32);
+  else if (77 <= num && num < 77 + 32)
+    return tdep->ppc_vr0_regnum + (num - 77);
+  else
+    switch (num)
+      {
+      case 65:
+	return tdep->ppc_lr_regnum;
+      case 66:
+	return tdep->ppc_ctr_regnum;
+      case 76:
+	return tdep->ppc_xer_regnum;
+      case 109:
+	return tdep->ppc_vrsave_regnum;
+      case 110:
+	return tdep->ppc_vrsave_regnum - 1; /* vscr */
+      }
+
+  /* Unknown DWARF register number.  */
+  return -1;
+}
+
+/* Translate a .eh_frame register to DWARF register, or adjust a
+   .debug_frame register.  */
+
+static int
+rs6000_linux_adjust_frame_regnum (struct gdbarch *gdbarch, int num,
+				  int eh_frame_p)
+{
+  /* Linux uses the same numbering for .debug_frame numbering as .eh_frame.  */
+  return num;
+}
+
 static void
 ppc_linux_init_abi (struct gdbarch_info info,
 		    struct gdbarch *gdbarch)
@@ -2135,6 +2179,15 @@ ppc_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_stap_is_single_operand (gdbarch, ppc_stap_is_single_operand);
   set_gdbarch_stap_parse_special_token (gdbarch,
 					ppc_stap_parse_special_token);
+  /* Linux DWARF register mapping is different from the other OSes.  */
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch,
+				    rs6000_linux_dwarf2_reg_to_regnum);
+  /* Note on Linux the mapping for the DWARF registers and the stab registers
+     use the same numbers.  Install rs6000_linux_dwarf2_reg_to_regnum for the
+     stab register mappings as well.  */
+  set_gdbarch_stab_reg_to_regnum (gdbarch,
+				    rs6000_linux_dwarf2_reg_to_regnum);
+  dwarf2_frame_set_adjust_regnum (gdbarch, rs6000_linux_adjust_frame_regnum);
 
   if (tdep->wordsize == 4)
     {

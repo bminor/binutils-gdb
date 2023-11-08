@@ -7336,8 +7336,21 @@ process_event_stop_test (struct execution_control_state *ecs)
      initial outermost frame, before sp was valid, would
      have code_addr == &_start.  See the comment in frame_id::operator==
      for more.  */
+
+  /* We want "nexti" to step into, not over, signal handlers invoked
+     by the kernel, therefore this subroutine check should not trigger
+     for a signal handler invocation.  On most platforms, this is already
+     not the case, as the kernel puts a signal trampoline frame onto the
+     stack to handle proper return after the handler, and therefore at this
+     point, the current frame is a grandchild of the step frame, not a
+     child.  However, on some platforms, the kernel actually uses a
+     trampoline to handle *invocation* of the handler.  In that case,
+     when executing the first instruction of the trampoline, this check
+     would erroneously detect the trampoline invocation as a subroutine
+     call.  Fix this by checking for SIGTRAMP_FRAME.  */
   if ((get_stack_frame_id (frame)
        != ecs->event_thread->control.step_stack_frame_id)
+      && get_frame_type (frame) != SIGTRAMP_FRAME
       && ((frame_unwind_caller_id (get_current_frame ())
 	   == ecs->event_thread->control.step_stack_frame_id)
 	  && ((ecs->event_thread->control.step_stack_frame_id
