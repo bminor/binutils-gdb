@@ -2484,13 +2484,13 @@ S_IS_FORWARD_REF (const symbolS *s)
 }
 
 const char *
-S_GET_NAME (symbolS *s)
+S_GET_NAME (const symbolS *s)
 {
   return s->name;
 }
 
 segT
-S_GET_SEGMENT (symbolS *s)
+S_GET_SEGMENT (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return ((struct local_symbol *) s)->section;
