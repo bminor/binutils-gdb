@@ -63,6 +63,7 @@
 #include <ctype.h>
 #include "elf-bfd.h"
 #include "producer.h"
+#include "target-float.h"
 
 #include "features/rs6000/powerpc-32l.c"
 #include "features/rs6000/powerpc-altivec32l.c"
@@ -2099,6 +2100,9 @@ rs6000_linux_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int num)
   if (0 <= num && num <= 31)
     return tdep->ppc_gp0_regnum + num;
   else if (32 <= num && num <= 63)
+    /* Map dwarf register numbers for floating point, double, IBM double and
+       IEEE 128-bit floating point to the fpr range.  Will have to fix the
+       mapping for the IEEE 128-bit register numbers later.  */
     return tdep->ppc_fp0_regnum + (num - 32);
   else if (77 <= num && num < 77 + 32)
     return tdep->ppc_vr0_regnum + (num - 77);

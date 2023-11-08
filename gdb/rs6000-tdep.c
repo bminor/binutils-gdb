@@ -2676,7 +2676,25 @@ rs6000_convert_register_p (struct gdbarch *gdbarch, int regnum,
 	  && regnum < tdep->ppc_fp0_regnum + ppc_num_fprs
 	  && type->code () == TYPE_CODE_FLT
 	  && (type->length ()
-	      != builtin_type (gdbarch)->builtin_double->length ()));
+	      == builtin_type (gdbarch)->builtin_float->length ()));
+}
+
+static int
+ieee_128_float_regnum_adjust (struct gdbarch *gdbarch, struct type *type,
+			      int regnum)
+{
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
+
+  /* If we have the an IEEE 128-bit floating point value, need to map the
+   register number to the corresponding VSR.  */
+  if (tdep->ppc_vsr0_regnum != -1
+      && regnum >= tdep->ppc_fp0_regnum
+      && regnum < (tdep->ppc_fp0_regnum + ppc_num_fprs)
+      && (gdbarch_long_double_format (gdbarch) == floatformats_ieee_quad)
+      && (type->length() == 16))
+    regnum = regnum - tdep->ppc_fp0_regnum + tdep->ppc_vsr0_regnum;
+
+  return regnum;
 }
 
 static int
@@ -2690,6 +2708,10 @@ rs6000_register_to_value (frame_info_ptr frame,
   gdb_byte from[PPC_MAX_REGISTER_SIZE];
   
   gdb_assert (type->code () == TYPE_CODE_FLT);
+
+  /* We have an IEEE 128-bit float -- need to change regnum mapping from
+     fpr to vsr.  */
+  regnum = ieee_128_float_regnum_adjust (gdbarch, type, regnum);
 
   if (!get_frame_register_bytes (frame, regnum, 0,
 				 gdb::make_array_view (from,
@@ -2715,9 +2737,49 @@ rs6000_value_to_register (frame_info_ptr frame,
 
   gdb_assert (type->code () == TYPE_CODE_FLT);
 
+  /* We have an IEEE 128-bit float -- need to change regnum mapping from
+     fpr to vsr.  */
+  regnum = ieee_128_float_regnum_adjust (gdbarch, type, regnum);
+
   target_float_convert (from, type,
 			to, builtin_type (gdbarch)->builtin_double);
   put_frame_register (frame, regnum, to);
+}
+
+static struct value *
+rs6000_value_from_register (struct gdbarch *gdbarch, struct type *type,
+			    int regnum, struct frame_id frame_id)
+{
+  int len = type->length ();
+  struct value *value = value::allocate (type);
+
+  /* We have an IEEE 128-bit float -- need to change regnum mapping from
+     fpr to vsr.  */
+  regnum = ieee_128_float_regnum_adjust (gdbarch, type, regnum);
+
+  value->set_lval (lval_register);
+  frame_info_ptr frame = frame_find_by_id (frame_id);
+
+  if (frame == NULL)
+    frame_id = null_frame_id;
+  else
+    frame_id = get_frame_id (get_next_frame_sentinel_okay (frame));
+
+  VALUE_NEXT_FRAME_ID (value) = frame_id;
+  VALUE_REGNUM (value) = regnum;
+
+  /* Any structure stored in more than one register will always be
+     an integral number of registers.  Otherwise, you need to do
+     some fiddling with the last register copied here for little
+     endian machines.  */
+  if (type_byte_order (type) == BFD_ENDIAN_BIG
+      && len < register_size (gdbarch, regnum))
+    /* Big-endian, and we want less than full size.  */
+    value->set_offset (register_size (gdbarch, regnum) - len);
+  else
+    value->set_offset (0);
+
+  return value;
 }
 
  /* The type of a function that moves the value of REG between CACHE
@@ -8337,6 +8399,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_convert_register_p (gdbarch, rs6000_convert_register_p);
   set_gdbarch_register_to_value (gdbarch, rs6000_register_to_value);
   set_gdbarch_value_to_register (gdbarch, rs6000_value_to_register);
+  set_gdbarch_value_from_register (gdbarch, rs6000_value_from_register);
 
   set_gdbarch_stab_reg_to_regnum (gdbarch, rs6000_stab_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, rs6000_dwarf2_reg_to_regnum);
