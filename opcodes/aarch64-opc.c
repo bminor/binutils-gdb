@@ -5037,7 +5037,7 @@ aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
     return true;
 
   if ((reg_value == CPENC (3,0,13,0,3)
-       || CPENC (3,0,13,0,6))
+       || reg_value == CPENC (3,0,13,0,6))
       && AARCH64_CPU_HAS_FEATURE (features, THE))
     return true;
 

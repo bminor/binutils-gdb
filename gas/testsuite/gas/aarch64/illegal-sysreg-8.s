@@ -16,6 +16,8 @@
 	.arch	armv8.2-a
 
 	roreg	ccsidr2_el1
+	rwreg	rcwmask_el1
+	rwreg	rcwsmask_el1
 
 	.arch	armv8.3-a
 

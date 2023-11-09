@@ -3,6 +3,14 @@
 .*: *Info: macro .*
 .*: Error: selected processor does not support system register name 'ccsidr2_el1'
 .*: *Info: macro .*
+.*: Error: selected processor does not support system register name 'rcwmask_el1'
+.*: *Info: macro .*
+.*: Error: selected processor does not support system register name 'rcwmask_el1'
+.*: *Info: macro .*
+.*: Error: selected processor does not support system register name 'rcwsmask_el1'
+.*: *Info: macro .*
+.*: Error: selected processor does not support system register name 'rcwsmask_el1'
+.*: *Info: macro .*
 .*: Error: selected processor does not support system register name 'trfcr_el1'
 .*: *Info: macro .*
 .*: Error: selected processor does not support system register name 'trfcr_el1'
