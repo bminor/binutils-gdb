@@ -1192,6 +1192,16 @@ process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
   fprintf (table, " SPACE_%s, %s,\n",
 	   spaces[space], extension_opcode ? extension_opcode : "None");
 
+  /* Rather than evaluating multiple conditions at runtime to determine
+     whether an EVEX encoding is being dealt with, derive that information
+     right here.  A missing EVex attribute means "dynamic".  */
+  if (!modifiers[EVex].value
+      && (modifiers[Disp8MemShift].value
+	  || modifiers[Broadcast].value
+	  || modifiers[Masking].value
+	  || modifiers[SAE].value))
+    modifiers[EVex].value = EVEXDYN;
+
   output_opcode_modifier (table, modifiers, ARRAY_SIZE (modifiers));
 }
 

@@ -3860,17 +3860,9 @@ build_vex_prefix (const insn_template *t)
 }
 
 static INLINE bool
-is_evex_encoding (const insn_template *t)
-{
-  return t->opcode_modifier.evex || t->opcode_modifier.disp8memshift
-	 || t->opcode_modifier.broadcast || t->opcode_modifier.masking
-	 || t->opcode_modifier.sae;
-}
-
-static INLINE bool
 is_any_vex_encoding (const insn_template *t)
 {
-  return t->opcode_modifier.vex || is_evex_encoding (t);
+  return t->opcode_modifier.vex || t->opcode_modifier.evex;
 }
 
 static unsigned int
@@ -3890,8 +3882,7 @@ get_broadcast_bytes (const insn_template *t, bool diag)
 
   gas_assert (op < t->operands);
 
-  if (t->opcode_modifier.evex
-      && t->opcode_modifier.evex != EVEXDYN)
+  if (t->opcode_modifier.evex != EVEXDYN)
     switch (i.broadcast.bytes)
       {
       case 1:
@@ -4039,8 +4030,7 @@ build_evex_prefix (void)
       /* Encode the vector length.  */
       unsigned int vec_length;
 
-      if (!i.tm.opcode_modifier.evex
-	  || i.tm.opcode_modifier.evex == EVEXDYN)
+      if (i.tm.opcode_modifier.evex == EVEXDYN)
 	{
 	  unsigned int op;
 
@@ -4538,7 +4528,7 @@ optimize_encoding (void)
 	   && !i.types[2].bitfield.xmmword
 	   && (i.tm.opcode_modifier.vex
 	       || ((!i.mask.reg || i.mask.zeroing)
-		   && is_evex_encoding (&i.tm)
+		   && i.tm.opcode_modifier.evex
 		   && (i.vec_encoding != vex_encoding_evex
 		       || cpu_arch_isa_flags.bitfield.cpuavx512vl
 		       || is_cpu (&i.tm, CpuAVX512VL)
@@ -4587,7 +4577,7 @@ optimize_encoding (void)
 	     VEX VOP %kM, %kM, %kN
 	       -> VEX kandnw %kM, %kM, %kN
        */
-      if (is_evex_encoding (&i.tm))
+      if (i.tm.opcode_modifier.evex)
 	{
 	  if (i.vec_encoding != vex_encoding_evex)
 	    {
@@ -4623,7 +4613,7 @@ optimize_encoding (void)
 	   && !i.mask.reg
 	   && !i.broadcast.type
 	   && !i.broadcast.bytes
-	   && is_evex_encoding (&i.tm)
+	   && i.tm.opcode_modifier.evex
 	   && ((i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0x6f
 	       || (i.tm.base_opcode & ~4) == 0xdb
 	       || (i.tm.base_opcode & ~4) == 0xeb)
@@ -4702,7 +4692,7 @@ optimize_encoding (void)
 	   && i.op[0].regs == i.op[1].regs
 	   && (!i.tm.opcode_modifier.vex
 	       || !(i.op[0].regs->reg_flags & RegRex))
-	   && !is_evex_encoding (&i.tm))
+	   && !i.tm.opcode_modifier.evex)
     {
       /* Optimize: -Os:
          pcmpeqq %xmmN, %xmmN          -> pcmpeqd %xmmN, %xmmN
@@ -4719,7 +4709,7 @@ optimize_encoding (void)
 		&& i.tm.opcode_space == SPACE_0F38))
 	   && i.operands == i.reg_operands
 	   && i.op[0].regs == i.op[1].regs
-	   && !is_evex_encoding (&i.tm))
+	   && !i.tm.opcode_modifier.evex)
     {
       /* Optimize: -O:
          pcmpgt[bwd] %mmN, %mmN             -> pxor %mmN, %mmN
@@ -6955,7 +6945,7 @@ VEX_check_encoding (const insn_template *t)
       || i.vec_encoding == vex_encoding_evex512)
     {
       /* This instruction must be encoded with EVEX prefix.  */
-      if (!is_evex_encoding (t))
+      if (!t->opcode_modifier.evex)
 	{
 	  i.error = unsupported;
 	  return 1;
@@ -7785,27 +7775,22 @@ process_suffix (void)
 		    {
 		      i.tm.operand_types[op].bitfield.ymmword = 0;
 		      if (i.tm.operand_types[op].bitfield.xmmword
-			  && (i.tm.opcode_modifier.evex == EVEXDYN
-			      || (!i.tm.opcode_modifier.evex
-				  && is_evex_encoding (&i.tm))))
+			  && i.tm.opcode_modifier.evex == EVEXDYN)
 			i.tm.opcode_modifier.evex = EVEX128;
 		    }
 		  else if (i.tm.operand_types[op].bitfield.ymmword
 			   && !i.tm.operand_types[op].bitfield.xmmword
-			   && (i.tm.opcode_modifier.evex == EVEXDYN
-			       || (!i.tm.opcode_modifier.evex
-				   && is_evex_encoding (&i.tm))))
+			   && i.tm.opcode_modifier.evex == EVEXDYN)
 		    i.tm.opcode_modifier.evex = EVEX256;
 		}
-	      else if (is_evex_encoding (&i.tm)
+	      else if (i.tm.opcode_modifier.evex
 		       && !cpu_arch_flags.bitfield.cpuavx512vl)
 		{
 		  if (i.tm.operand_types[op].bitfield.ymmword)
 		    i.tm.operand_types[op].bitfield.xmmword = 0;
 		  if (i.tm.operand_types[op].bitfield.zmmword)
 		    i.tm.operand_types[op].bitfield.ymmword = 0;
-		  if (!i.tm.opcode_modifier.evex
-		      || i.tm.opcode_modifier.evex == EVEXDYN)
+		  if (i.tm.opcode_modifier.evex == EVEXDYN)
 		    i.tm.opcode_modifier.evex = EVEX512;
 		}
 
@@ -7833,7 +7818,7 @@ process_suffix (void)
 		    suffixes |= 1 << 7;
 		  if (i.tm.operand_types[op].bitfield.zmmword)
 		    suffixes |= 1 << 8;
-		  if (is_evex_encoding (&i.tm))
+		  if (i.tm.opcode_modifier.evex)
 		    evex = EVEX512;
 		}
 	    }
@@ -8727,7 +8712,7 @@ build_modrm_byte (void)
 	  exp = i.op[0].imms;
 	}
       exp->X_add_number |= register_number (i.op[reg_slot].regs)
-			   << (3 + !(is_evex_encoding (&i.tm)
+			   << (3 + !(i.tm.opcode_modifier.evex
 				     || i.vec_encoding == vex_encoding_evex));
     }
 
