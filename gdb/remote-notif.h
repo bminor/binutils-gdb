@@ -67,7 +67,7 @@ struct notif_client
      something wrong, throw an exception.  */
   void (*ack) (remote_target *remote,
 	       const notif_client *self, const char *buf,
-	       struct notif_event *event);
+	       notif_event_up event);
 
   /* Check this notification client can get pending events in
      'remote_notif_process'.  */
@@ -111,14 +111,14 @@ struct remote_notif_state
      this notification (which is done by
      remote.c:remote_notif_pending_replies).  */
 
-  struct notif_event *pending_event[REMOTE_NOTIF_LAST] {};
+  notif_event_up pending_event[REMOTE_NOTIF_LAST];
 };
 
 void remote_notif_ack (remote_target *remote, const notif_client *nc,
 		       const char *buf);
-struct notif_event *remote_notif_parse (remote_target *remote,
-					const notif_client *nc,
-					const char *buf);
+notif_event_up remote_notif_parse (remote_target *remote,
+				   const notif_client *nc,
+				   const char *buf);
 
 void handle_notification (struct remote_notif_state *notif_state,
 			  const char *buf);

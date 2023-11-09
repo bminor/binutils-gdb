@@ -67,12 +67,12 @@ remote_notif_ack (remote_target *remote,
 		nc->ack_command);
 
   nc->parse (remote, nc, buf, event.get ());
-  nc->ack (remote, nc, buf, event.release ());
+  nc->ack (remote, nc, buf, std::move (event));
 }
 
 /* Parse the BUF for the expected notification NC.  */
 
-struct notif_event *
+notif_event_up
 remote_notif_parse (remote_target *remote,
 		    const notif_client *nc, const char *buf)
 {
@@ -83,7 +83,7 @@ remote_notif_parse (remote_target *remote,
 
   nc->parse (remote, nc, buf, event.get ());
 
-  return event.release ();
+  return event;
 }
 
 /* Process notifications in STATE's notification queue one by one.
@@ -150,12 +150,12 @@ handle_notification (struct remote_notif_state *state, const char *buf)
     }
   else
     {
-      struct notif_event *event
+      notif_event_up event
 	= remote_notif_parse (state->remote, nc, buf + strlen (nc->name) + 1);
 
       /* Be careful to only set it after parsing, since an error
 	 may be thrown then.  */
-      state->pending_event[nc->id] = event;
+      state->pending_event[nc->id] = std::move (event);
 
       /* Notify the event loop there's a stop reply to acknowledge
 	 and that there may be more events to fetch.  */
@@ -230,14 +230,9 @@ remote_notif_state_allocate (remote_target *remote)
 
 remote_notif_state::~remote_notif_state ()
 {
-  int i;
-
   /* Unregister async_event_handler for notification.  */
   if (get_pending_events_token != NULL)
     delete_async_event_handler (&get_pending_events_token);
-
-  for (i = 0; i < REMOTE_NOTIF_LAST; i++)
-    delete pending_event[i];
 }
 
 void _initialize_notif ();

@@ -1110,7 +1110,7 @@ public: /* Remote specific methods.  */
   ptid_t wait_as (ptid_t ptid, target_waitstatus *status,
 		  target_wait_flags options);
 
-  ptid_t process_stop_reply (struct stop_reply *stop_reply,
+  ptid_t process_stop_reply (stop_reply_up stop_reply,
 			     target_waitstatus *status);
 
   ptid_t select_thread_for_ambiguous_stop_reply
@@ -1137,8 +1137,8 @@ public: /* Remote specific methods.  */
     (bool *may_global_wildcard_vcont);
 
   void discard_pending_stop_replies_in_queue ();
-  struct stop_reply *remote_notif_remove_queued_reply (ptid_t ptid);
-  struct stop_reply *queued_stop_reply (ptid_t ptid);
+  stop_reply_up remote_notif_remove_queued_reply (ptid_t ptid);
+  stop_reply_up queued_stop_reply (ptid_t ptid);
   int peek_stop_reply (ptid_t ptid);
   void remote_parse_stop_reply (const char *buf, stop_reply *event);
 
@@ -1305,7 +1305,7 @@ public: /* Remote specific methods.  */
 					ULONGEST *xfered_len,
 					const unsigned int which_packet);
 
-  void push_stop_reply (struct stop_reply *new_event);
+  void push_stop_reply (stop_reply_up new_event);
 
   bool vcont_r_supported ();
 
@@ -4973,6 +4973,16 @@ private:
   scoped_restore_tmpl<bool> m_restore_starting_up;
 };
 
+/* Transfer ownership of the stop_reply owned by EVENT to a
+   stop_reply_up object.  */
+
+static stop_reply_up
+as_stop_reply_up (notif_event_up event)
+{
+  auto *stop_reply = static_cast<struct stop_reply *> (event.release ());
+  return stop_reply_up (stop_reply);
+}
+
 /* Helper for remote_target::start_remote, start the remote connection and
    sync state.  Return true if everything goes OK, otherwise, return false.
    This function exists so that the scoped_restore created within it will
@@ -5214,9 +5224,9 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
 
       /* Use the previously fetched status.  */
       gdb_assert (wait_status != NULL);
-      struct notif_event *reply
+      notif_event_up reply
 	= remote_notif_parse (this, &notif_client_stop, wait_status);
-      push_stop_reply ((struct stop_reply *) reply);
+      push_stop_reply (as_stop_reply_up (std::move (reply)));
 
       ::start_remote (from_tty); /* Initialize gdb process mechanisms.  */
     }
@@ -6551,10 +6561,9 @@ extended_remote_target::attach (const char *args, int from_tty)
       /* Use the previously fetched status.  */
       gdb_assert (wait_status != NULL);
 
-      struct notif_event *reply
-	=  remote_notif_parse (this, &notif_client_stop, wait_status);
-
-      push_stop_reply ((struct stop_reply *) reply);
+      notif_event_up reply
+	= remote_notif_parse (this, &notif_client_stop, wait_status);
+      push_stop_reply (as_stop_reply_up (std::move (reply)));
     }
   else
     {
@@ -7335,7 +7344,7 @@ remote_target::remote_stop_ns (ptid_t ptid)
 	      = remote_thr->resumed_pending_vcont_info ();
 	    gdb_assert (info.sig == GDB_SIGNAL_0);
 
-	    stop_reply *sr = new stop_reply ();
+	    stop_reply_up sr = std::make_unique<stop_reply> ();
 	    sr->ptid = tp->ptid;
 	    sr->rs = rs;
 	    sr->ws.set_stopped (GDB_SIGNAL_0);
@@ -7343,7 +7352,7 @@ remote_target::remote_stop_ns (ptid_t ptid)
 	    sr->stop_reason = TARGET_STOPPED_BY_NO_REASON;
 	    sr->watch_data_address = 0;
 	    sr->core = 0;
-	    this->push_stop_reply (sr);
+	    this->push_stop_reply (std::move (sr));
 
 	    /* Pretend that this thread was actually resumed on the
 	       remote target, then stopped.  If we leave it in the
@@ -7574,9 +7583,9 @@ remote_notif_stop_parse (remote_target *remote,
 static void
 remote_notif_stop_ack (remote_target *remote,
 		       const notif_client *self, const char *buf,
-		       struct notif_event *event)
+		       notif_event_up event)
 {
-  struct stop_reply *stop_reply = (struct stop_reply *) event;
+  stop_reply_up stop_reply = as_stop_reply_up (std::move (event));
 
   /* acknowledge */
   putpkt (remote, self->ack_command);
@@ -7585,7 +7594,7 @@ remote_notif_stop_ack (remote_target *remote,
      the notification.  It was left in the queue because we need to
      acknowledge it and pull the rest of the notifications out.  */
   if (stop_reply->ws.kind () != TARGET_WAITKIND_IGNORE)
-    remote->push_stop_reply (stop_reply);
+    remote->push_stop_reply (std::move (stop_reply));
 }
 
 static int
@@ -7696,7 +7705,6 @@ remote_target::check_pending_events_prevent_wildcard_vcont
 void
 remote_target::discard_pending_stop_replies (struct inferior *inf)
 {
-  struct stop_reply *reply;
   struct remote_state *rs = get_remote_state ();
   struct remote_notif_state *rns = rs->notif_state;
 
@@ -7705,7 +7713,8 @@ remote_target::discard_pending_stop_replies (struct inferior *inf)
   if (rs->remote_desc == NULL)
     return;
 
-  reply = (struct stop_reply *) rns->pending_event[notif_client_stop.id];
+  stop_reply_up reply
+    = as_stop_reply_up (std::move (rns->pending_event[notif_client_stop.id]));
 
   /* Discard the in-flight notification.  */
   if (reply != NULL && reply->ptid.pid () == inf->pid)
@@ -7757,7 +7766,7 @@ remote_target::discard_pending_stop_replies_in_queue ()
 /* Remove the first reply in 'stop_reply_queue' which matches
    PTID.  */
 
-struct stop_reply *
+stop_reply_up
 remote_target::remote_notif_remove_queued_reply (ptid_t ptid)
 {
   remote_state *rs = get_remote_state ();
@@ -7768,12 +7777,10 @@ remote_target::remote_notif_remove_queued_reply (ptid_t ptid)
 			    {
 			      return event->ptid.matches (ptid);
 			    });
-  struct stop_reply *result;
-  if (iter == rs->stop_reply_queue.end ())
-    result = nullptr;
-  else
+  stop_reply_up result;
+  if (iter != rs->stop_reply_queue.end ())
     {
-      result = iter->release ();
+      result = std::move (*iter);
       rs->stop_reply_queue.erase (iter);
     }
 
@@ -7790,11 +7797,11 @@ remote_target::remote_notif_remove_queued_reply (ptid_t ptid)
    found.  If there are still queued events left to process, tell the
    event loop to get back to target_wait soon.  */
 
-struct stop_reply *
+stop_reply_up
 remote_target::queued_stop_reply (ptid_t ptid)
 {
   remote_state *rs = get_remote_state ();
-  struct stop_reply *r = remote_notif_remove_queued_reply (ptid);
+  stop_reply_up r = remote_notif_remove_queued_reply (ptid);
 
   if (!rs->stop_reply_queue.empty () && target_can_async_p ())
     {
@@ -7810,10 +7817,10 @@ remote_target::queued_stop_reply (ptid_t ptid)
    core side, tell the event loop to get back to target_wait soon.  */
 
 void
-remote_target::push_stop_reply (struct stop_reply *new_event)
+remote_target::push_stop_reply (stop_reply_up new_event)
 {
   remote_state *rs = get_remote_state ();
-  rs->stop_reply_queue.push_back (stop_reply_up (new_event));
+  rs->stop_reply_queue.push_back (std::move (new_event));
 
   if (notif_debug)
     gdb_printf (gdb_stdlog,
@@ -8253,8 +8260,7 @@ remote_target::remote_notif_get_pending_events (const notif_client *nc)
 
       /* acknowledge */
       nc->ack (this, nc, rs->buf.data (),
-	       rs->notif_state->pending_event[nc->id]);
-      rs->notif_state->pending_event[nc->id] = NULL;
+	       std::move (rs->notif_state->pending_event[nc->id]));
 
       while (1)
 	{
@@ -8398,7 +8404,7 @@ remote_target::select_thread_for_ambiguous_stop_reply
    destroys STOP_REPLY.  */
 
 ptid_t
-remote_target::process_stop_reply (struct stop_reply *stop_reply,
+remote_target::process_stop_reply (stop_reply_up stop_reply,
 				   struct target_waitstatus *status)
 {
   *status = stop_reply->ws;
@@ -8452,7 +8458,6 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
 	}
     }
 
-  delete stop_reply;
   return ptid;
 }
 
@@ -8463,7 +8468,6 @@ remote_target::wait_ns (ptid_t ptid, struct target_waitstatus *status,
 			target_wait_flags options)
 {
   struct remote_state *rs = get_remote_state ();
-  struct stop_reply *stop_reply;
   int ret;
   bool is_notif = false;
 
@@ -8496,9 +8500,9 @@ remote_target::wait_ns (ptid_t ptid, struct target_waitstatus *status,
 	remote_notif_get_pending_events (&notif_client_stop);
 
       /* If indeed we noticed a stop reply, we're done.  */
-      stop_reply = queued_stop_reply (ptid);
+      stop_reply_up stop_reply = queued_stop_reply (ptid);
       if (stop_reply != NULL)
-	return process_stop_reply (stop_reply, status);
+	return process_stop_reply (std::move (stop_reply), status);
 
       /* Still no event.  If we're just polling for an event, then
 	 return to the event loop.  */
@@ -8534,7 +8538,7 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
   struct remote_state *rs = get_remote_state ();
   ptid_t event_ptid = null_ptid;
   char *buf;
-  struct stop_reply *stop_reply;
+  stop_reply_up stop_reply;
 
  again:
 
@@ -8546,7 +8550,7 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
       /* None of the paths that push a stop reply onto the queue should
 	 have set the waiting_for_stop_reply flag.  */
       gdb_assert (!rs->waiting_for_stop_reply);
-      event_ptid = process_stop_reply (stop_reply, status);
+      event_ptid = process_stop_reply (std::move (stop_reply), status);
     }
   else
     {
@@ -8609,11 +8613,11 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
 	    rs->waiting_for_stop_reply = 0;
 
 	    stop_reply
-	      = (struct stop_reply *) remote_notif_parse (this,
-							  &notif_client_stop,
-							  rs->buf.data ());
+	      = as_stop_reply_up (remote_notif_parse (this,
+						      &notif_client_stop,
+						      rs->buf.data ()));
 
-	    event_ptid = process_stop_reply (stop_reply, status);
+	    event_ptid = process_stop_reply (std::move (stop_reply), status);
 	    break;
 	  }
 	case 'O':		/* Console output.  */
