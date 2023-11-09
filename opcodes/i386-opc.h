@@ -1014,7 +1014,7 @@ typedef struct insn_template
   i386_opcode_modifier opcode_modifier;
 
   /* cpu feature attributes */
-  i386_cpu_attr cpu;
+  i386_cpu_attr cpu, cpu_any;
 
   /* operand_types[i] describes the type of operand i.  This is made
      by OR'ing together all of the possible type masks.  (e.g.

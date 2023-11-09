@@ -806,15 +806,16 @@ add_isa_dependencies (bitfield *flags, const char *f, int value,
 
 static void
 output_cpu_flags (FILE *table, bitfield *flags, unsigned int size,
-		  int macro, const char *comma, const char *indent, int lineno)
+		  int mode, const char *comma, const char *indent, int lineno)
 {
   unsigned int i = 0, j = 0;
 
-  memset (&active_cpu_flags, 0, sizeof(active_cpu_flags));
+  if (mode < 0)
+    memset (&active_cpu_flags, 0, sizeof(active_cpu_flags));
 
   fprintf (table, "%s{ { ", indent);
 
-  if (!macro)
+  if (mode <= 0)
     {
       for (j = ~0u; i < CpuAttrEnums; i++)
 	{
@@ -825,7 +826,8 @@ output_cpu_flags (FILE *table, bitfield *flags, unsigned int size,
 	    fail ("%s: %d: invalid combination of CPU identifiers\n",
 		  filename, lineno);
 	  j = i;
-	  active_cpu_flags.array[i / 32] |= 1U << (i % 32);
+	  if (mode)
+	    active_cpu_flags.array[i / 32] |= 1U << (i % 32);
 	}
 
 	/* Write 0 to indicate "no associated flag".  */
@@ -843,12 +845,12 @@ output_cpu_flags (FILE *table, bitfield *flags, unsigned int size,
       if (((j + 1) % 20) == 0)
 	{
 	  /* We need \\ for macro.  */
-	  if (macro)
+	  if (mode > 0)
 	    fprintf (table, " \\\n    %s", indent);
 	  else
 	    fprintf (table, "\n    %s", indent);
 	}
-      if (flags[i].value)
+      if (mode < 0 && flags[i].value)
 	active_cpu_flags.array[i / 32] |= 1U << (i % 32);
     }
 
@@ -865,15 +867,17 @@ process_i386_cpu_flag (FILE *table, char *flag,
   unsigned int i;
   int value = 1;
   bool is_isa = false;
-  bitfield flags [ARRAY_SIZE (cpu_flags)];
+  bitfield all [ARRAY_SIZE (cpu_flags)];
+  bitfield any [ARRAY_SIZE (cpu_flags)];
 
   /* Copy the default cpu flags.  */
-  memcpy (flags, cpu_flags, sizeof (cpu_flags));
+  memcpy (all, cpu_flags, sizeof (cpu_flags));
+  memcpy (any, cpu_flags, sizeof (cpu_flags));
 
   if (flag == NULL)
     {
       for (i = 0; i < ARRAY_SIZE (isa_reverse_deps[0]); ++i)
-	flags[i].value = isa_reverse_deps[reverse][i];
+	any[i].value = isa_reverse_deps[reverse][i];
       goto output;
     }
 
@@ -895,9 +899,9 @@ process_i386_cpu_flag (FILE *table, char *flag,
 
       /* First we turn on everything except for cpuno64 and - if
          present - the padding field.  */
-      for (i = 0; i < ARRAY_SIZE (flags); i++)
-	if (flags[i].position < CpuNo64)
-	  flags[i].value = 1;
+      for (i = 0; i < ARRAY_SIZE (any); i++)
+	if (any[i].position < CpuNo64)
+	  any[i].value = 1;
 
       /* Turn off selective bits.  */
       value = 0;
@@ -905,10 +909,10 @@ process_i386_cpu_flag (FILE *table, char *flag,
 
   if (name != NULL && value != 0)
     {
-      for (i = 0; i < ARRAY_SIZE (flags); i++)
-	if (strcasecmp (flags[i].name, name) == 0)
+      for (i = 0; i < ARRAY_SIZE (any); i++)
+	if (strcasecmp (any[i].name, name) == 0)
 	  {
-	    add_isa_dependencies (flags, name, 1, reverse);
+	    add_isa_dependencies (any, name, 1, reverse);
 	    is_isa = true;
 	    break;
 	  }
@@ -916,18 +920,40 @@ process_i386_cpu_flag (FILE *table, char *flag,
 
   if (strcmp (flag, "0"))
     {
+      bool combined = false;
+
       if (is_isa)
 	return;
 
       /* Turn on/off selective bits.  */
       last = flag + strlen (flag);
+      if (name == NULL && strchr (flag, '&'))
+	{
+	  for (; next < last && *next != '('; )
+	    {
+	      str = next_field (next, '&', &next, last);
+	      set_bitfield (str, all, value, ARRAY_SIZE (all), lineno);
+	    }
+	  if (*next == '(')
+	    {
+	      if (*--last != ')')
+		fail ("%s: %d: missing `)' in bitfield: %s\n", filename,
+		      lineno, flag);
+	      ++next;
+	      *last = '\0';
+	    }
+	  combined = true;
+	}
       for (; next && next < last; )
 	{
 	  str = next_field (next, '|', &next, last);
-	  if (name == NULL)
-	    set_bitfield (str, flags, value, ARRAY_SIZE (flags), lineno);
-	  else
-	    add_isa_dependencies (flags, str, value, reverse);
+	  if (name)
+	    add_isa_dependencies (any, str, value, reverse);
+	  else if (combined || next < last)
+	    set_bitfield (str, any, value, ARRAY_SIZE (any), lineno);
+	  else /* Singular specifiers go into "all".  */
+	    set_bitfield (str, all, value, ARRAY_SIZE (all), lineno);
+	  combined = true;
 	}
     }
 
@@ -944,7 +970,7 @@ process_i386_cpu_flag (FILE *table, char *flag,
       if (flag != NULL && reverse == Cpu64)
 	return;
       if (is_isa || flag == NULL)
-	flags[Cpu64].value = 0;
+	any[Cpu64].value = 0;
 
       for (i = 0; i < len; ++i)
 	{
@@ -963,11 +989,13 @@ process_i386_cpu_flag (FILE *table, char *flag,
       /* Synthesize "64-bit mode only" dependencies from the dependencies we
 	 have accumulated.  */
       for (i = 0; i < ARRAY_SIZE (isa_reverse_deps[0]); ++i)
-	if (flags[i].value && isa_reverse_deps[Cpu64][i])
-	  flags[Cpu64].value = 1;
+	if (all[i].value && isa_reverse_deps[Cpu64][i])
+	  all[Cpu64].value = 1;
+
+      output_cpu_flags(table, all, ARRAY_SIZE (all), -1, comma, indent, lineno);
     }
 
-  output_cpu_flags (table, flags, ARRAY_SIZE (flags), name != NULL,
+  output_cpu_flags (table, any, ARRAY_SIZE (any), name != NULL,
 		    comma, indent, lineno);
 }
 
