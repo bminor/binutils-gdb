@@ -80,6 +80,7 @@
 #include "async-event.h"
 #include "gdbsupport/selftest.h"
 #include "cli/cli-style.h"
+#include "gdbsupport/remote-args.h"
 
 /* The remote target.  */
 
@@ -10835,16 +10836,15 @@ remote_target::extended_remote_run (const std::string &args)
 
   if (!args.empty ())
     {
-      int i;
+      std::vector<std::string> split_args = gdb::remote_args::split (args);
 
-      gdb_argv argv (args.c_str ());
-      for (i = 0; argv[i] != NULL; i++)
+      for (const auto &a : split_args)
 	{
-	  if (strlen (argv[i]) * 2 + 1 + len >= get_remote_packet_size ())
+	  if (a.size () * 2 + 1 + len >= get_remote_packet_size ())
 	    error (_("Argument list too long for run packet"));
 	  rs->buf[len++] = ';';
-	  len += 2 * bin2hex ((gdb_byte *) argv[i], rs->buf.data () + len,
-			      strlen (argv[i]));
+	  len += 2 * bin2hex ((gdb_byte *) a.c_str (), rs->buf.data () + len,
+			      a.size ());
 	}
     }
 
