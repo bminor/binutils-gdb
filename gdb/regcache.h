@@ -176,7 +176,10 @@ using register_read_ftype
 struct cached_reg_t
 {
   int num;
-  gdb_byte *data;
+  gdb::unique_xmalloc_ptr<gdb_byte> data;
+
+  cached_reg_t () = default;
+  cached_reg_t (cached_reg_t &&rhs) = default;
 };
 
 /* Buffer of registers.  */

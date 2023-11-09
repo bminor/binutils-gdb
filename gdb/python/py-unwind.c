@@ -785,7 +785,7 @@ pyuw_prev_register (frame_info_ptr this_frame, void **cache_ptr,
   for (; reg_info < reg_info_end; ++reg_info)
     {
       if (regnum == reg_info->num)
-	return frame_unwind_got_bytes (this_frame, regnum, reg_info->data);
+	return frame_unwind_got_bytes (this_frame, regnum, reg_info->data.get ());
     }
 
   return frame_unwind_got_optimized (this_frame, regnum);
@@ -903,15 +903,14 @@ pyuw_sniffer (const struct frame_unwind *self, frame_info_ptr this_frame,
 	struct value *value = value_object_to_value (reg->value.get ());
 	size_t data_size = register_size (gdbarch, reg->number);
 
-	cached_frame->reg[i].num = reg->number;
-
 	/* `value' validation was done before, just assert.  */
 	gdb_assert (value != NULL);
 	gdb_assert (data_size == value->type ()->length ());
 
-	cached_frame->reg[i].data = (gdb_byte *) xmalloc (data_size);
-	memcpy (cached_frame->reg[i].data,
-		value->contents ().data (), data_size);
+	cached_reg_t *cached = new (&cached_frame->reg[i]) cached_reg_t ();
+	cached->num = reg->number;
+	cached->data.reset ((gdb_byte *) xmalloc (data_size));
+	memcpy (cached->data.get (), value->contents ().data (), data_size);
       }
   }
 
@@ -928,7 +927,7 @@ pyuw_dealloc_cache (frame_info *this_frame, void *cache)
   cached_frame_info *cached_frame = (cached_frame_info *) cache;
 
   for (int i = 0; i < cached_frame->reg_count; i++)
-    xfree (cached_frame->reg[i].data);
+    cached_frame->reg[i].~cached_reg_t ();
 
   xfree (cache);
 }

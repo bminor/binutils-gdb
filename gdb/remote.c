@@ -1353,8 +1353,6 @@ public:
 
 struct stop_reply : public notif_event
 {
-  ~stop_reply ();
-
   /* The identifier of the thread about this event  */
   ptid_t ptid;
 
@@ -7604,12 +7602,6 @@ remote_notif_stop_can_get_pending_events (remote_target *remote,
   return 0;
 }
 
-stop_reply::~stop_reply ()
-{
-  for (cached_reg_t &reg : regcache)
-    xfree (reg.data);
-}
-
 static notif_event_up
 remote_notif_stop_alloc_reply ()
 {
@@ -8094,17 +8086,18 @@ Packet: '%s'\n"),
 			   hex_string (pnum), p, buf);
 
 		  cached_reg.num = reg->regnum;
-		  cached_reg.data = (gdb_byte *)
-		    xmalloc (register_size (event->arch, reg->regnum));
+		  cached_reg.data.reset ((gdb_byte *)
+					 xmalloc (register_size (event->arch,
+								 reg->regnum)));
 
 		  p = p1 + 1;
-		  fieldsize = hex2bin (p, cached_reg.data,
+		  fieldsize = hex2bin (p, cached_reg.data.get (),
 				       register_size (event->arch, reg->regnum));
 		  p += 2 * fieldsize;
 		  if (fieldsize < register_size (event->arch, reg->regnum))
 		    warning (_("Remote reply is too short: %s"), buf);
 
-		  event->regcache.push_back (cached_reg);
+		  event->regcache.push_back (std::move (cached_reg));
 		}
 	      else
 		{
@@ -8436,12 +8429,7 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
 					stop_reply->arch);
 
 	  for (cached_reg_t &reg : stop_reply->regcache)
-	    {
-	      regcache->raw_supply (reg.num, reg.data);
-	      xfree (reg.data);
-	    }
-
-	  stop_reply->regcache.clear ();
+	    regcache->raw_supply (reg.num, reg.data.get ());
 	}
 
       remote_thread_info *remote_thr = get_remote_thread_info (this, ptid);
