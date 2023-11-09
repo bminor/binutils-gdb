@@ -5188,10 +5188,14 @@ md_assemble (char *line)
 	   && operand_type_check (i.types[1], imm)))
     swap_operands ();
 
-  /* The order of the immediates should be reversed
-     for 2 immediates extrq and insertq instructions */
-  if (i.imm_operands == 2
-      && (t->mnem_off == MN_extrq || t->mnem_off == MN_insertq))
+  /* The order of the immediates should be reversed for 2-immediates EXTRQ
+     and INSERTQ instructions.  Also UWRMSR wants its immediate to be in the
+     "canonical" place (first), despite it appearing last (in AT&T syntax, or
+     because of the swapping above) in the incoming set of operands.  */
+  if ((i.imm_operands == 2
+       && (t->mnem_off == MN_extrq || t->mnem_off == MN_insertq))
+      || (t->mnem_off == MN_uwrmsr && i.imm_operands
+	  && i.operands > i.imm_operands))
       swap_2_operands (0, 1);
 
   if (i.imm_operands)
@@ -7542,17 +7546,6 @@ match_template (char mnem_suffix)
       i.tm.operand_types[j] = operand_types[j + 1];
       i.tm.operand_types[j + 1] = operand_types[j];
       break;
-    }
-
-  /* This pattern aims to put the unusually placed imm operand to a usual
-     place. The constraints are currently only adapted to uwrmsr, and may
-     need further tweaking when new similar instructions become available.  */
-  if (i.imm_operands && i.imm_operands < i.operands
-      && operand_type_check (operand_types[i.operands - 1], imm))
-    {
-      i.tm.operand_types[0] = operand_types[i.operands - 1];
-      i.tm.operand_types[i.operands - 1] = operand_types[0];
-      swap_2_operands(0, i.operands - 1);
     }
 
   return t;
