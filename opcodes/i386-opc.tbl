@@ -158,6 +158,8 @@
 #define i287 287
 #define i387 387
 #define i687 687
+// Note: Don't add this one to any templates already specifying a 64-bit-mode-
+// only ISA extension: i386-gen takes care of adding such dependencies.
 #define x64 64
 
 ### MARKER ###
@@ -1273,7 +1275,7 @@ fisttpll, 0xdd/1, FISTTP, Modrm|NoSuf|ATTSyntax, { Unspecified|BaseIndex }
 
 // CMPXCHG16B instruction.
 
-cmpxchg16b, 0xfc7/1, CX16|x64, Modrm|NoSuf|Size64|LockPrefixOk, { Oword|Unspecified|BaseIndex }
+cmpxchg16b, 0xfc7/1, CX16, Modrm|NoSuf|Size64|LockPrefixOk, { Oword|Unspecified|BaseIndex }
 
 // MONITOR instructions.
 
@@ -3013,7 +3015,7 @@ pconfig, 0x0f01c5, PCONFIG, NoSuf, {}
 
 // PBNDKB instruction.
 
-pbndkb, 0x0f01c7, PBNDKB|x64, NoSuf, {}
+pbndkb, 0x0f01c7, PBNDKB, NoSuf, {}
 
 // PBNDKB instruction end.
 
@@ -3100,8 +3102,8 @@ rmpadjust, 0xf30f01fe, SNP|x64, AddrPrefixOpReg|NoSuf, { Acc|Dword|Qword }
 
 // RMPQUERY instruction
 
-rmpquery, 0xf30f01fd, RMPQUERY|x64, NoSuf, {}
-rmpquery, 0xf30f01fd, RMPQUERY|x64, AddrPrefixOpReg|NoSuf, { Acc|Dword|Qword, RegC|Qword, RegD|Qword }
+rmpquery, 0xf30f01fd, RMPQUERY, NoSuf, {}
+rmpquery, 0xf30f01fd, RMPQUERY, AddrPrefixOpReg|NoSuf, { Acc|Dword|Qword, RegC|Qword, RegD|Qword }
 
 // RMPQUERY instruction end
 
@@ -3126,26 +3128,26 @@ xresldtrk, 0xf20f01e9, TSXLDTRK, NoSuf, {}
 
 // AMX instructions.
 
-ldtilecfg, 0x49/0, AMX_TILE|x64, Modrm|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex }
-sttilecfg, 0x6649/0, AMX_TILE|x64, Modrm|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex }
+ldtilecfg, 0x49/0, AMX_TILE, Modrm|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex }
+sttilecfg, 0x6649/0, AMX_TILE, Modrm|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex }
 
-tcmmimfp16ps, 0x666c, AMX_COMPLEX|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
-tcmmrlfp16ps, 0x6c, AMX_COMPLEX|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
+tcmmimfp16ps, 0x666c, AMX_COMPLEX, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
+tcmmrlfp16ps, 0x6c, AMX_COMPLEX, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
 
-tdpbf16ps, 0xf35c, AMX_BF16|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
-tdpfp16ps, 0xf25c, AMX_FP16|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
-tdpbssd, 0xf25e, AMX_INT8|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
-tdpbuud, 0x5e, AMX_INT8|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
-tdpbusd, 0x665e, AMX_INT8|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
-tdpbsud, 0xf35e, AMX_INT8|x64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
+tdpbf16ps, 0xf35c, AMX_BF16, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
+tdpfp16ps, 0xf25c, AMX_FP16, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
+tdpbssd, 0xf25e, AMX_INT8, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
+tdpbuud, 0x5e, AMX_INT8, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
+tdpbusd, 0x665e, AMX_INT8, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
+tdpbsud, 0xf35e, AMX_INT8, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|NoSuf, { RegTMM, RegTMM, RegTMM }
 
-tileloadd, 0xf24b, AMX_TILE|x64, Sibmem|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex, RegTMM }
-tileloaddt1, 0x664b, AMX_TILE|x64, Sibmem|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex, RegTMM }
-tilestored, 0xf34b, AMX_TILE|x64, Sibmem|Vex128|Space0F38|VexW0|NoSuf, { RegTMM, Unspecified|BaseIndex }
+tileloadd, 0xf24b, AMX_TILE, Sibmem|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex, RegTMM }
+tileloaddt1, 0x664b, AMX_TILE, Sibmem|Vex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex, RegTMM }
+tilestored, 0xf34b, AMX_TILE, Sibmem|Vex128|Space0F38|VexW0|NoSuf, { RegTMM, Unspecified|BaseIndex }
 
-tilerelease, 0x49c0, AMX_TILE|x64, Vex128|Space0F38|VexW0|NoSuf, {}
+tilerelease, 0x49c0, AMX_TILE, Vex128|Space0F38|VexW0|NoSuf, {}
 
-tilezero, 0xf249, AMX_TILE|x64, Modrm|Vex128|Space0F38|VexW0|NoSuf, { RegTMM }
+tilezero, 0xf249, AMX_TILE, Modrm|Vex128|Space0F38|VexW0|NoSuf, { RegTMM }
 
 // AMX instructions end.
 
@@ -3176,11 +3178,11 @@ seamcall, 0x660f01cf, TDX|x64, NoSuf, {}
 
 // UINTR instructions.
 
-uiret, 0xf30f01ec, UINTR|x64, NoSuf, {}
-clui, 0xf30f01ee, UINTR|x64, NoSuf, {}
-stui, 0xf30f01ef, UINTR|x64, NoSuf, {}
-testui, 0xf30f01ed, UINTR|x64, NoSuf, {}
-senduipi, 0xf30fc7/6, UINTR|x64, Modrm|NoSuf|NoRex64, { Reg64 }
+uiret, 0xf30f01ec, UINTR, NoSuf, {}
+clui, 0xf30f01ee, UINTR, NoSuf, {}
+stui, 0xf30f01ef, UINTR, NoSuf, {}
+testui, 0xf30f01ed, UINTR, NoSuf, {}
+senduipi, 0xf30fc7/6, UINTR, Modrm|NoSuf|NoRex64, { Reg64 }
 
 // UINTR instructions end.
 
@@ -3302,14 +3304,14 @@ vrsqrtsh, 0x664f, AVX512_FP16, Modrm|EVexLIG|Masking|EVexMap6|VexVVVV|VexW0|Disp
 
 // PREFETCHI instructions.
 
-prefetchit0, 0xf18/7, PREFETCHI|x64, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
-prefetchit1, 0xf18/6, PREFETCHI|x64, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
+prefetchit0, 0xf18/7, PREFETCHI, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
+prefetchit1, 0xf18/6, PREFETCHI, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
 
 // PREFETCHI instructions end.
 
 // CMPCCXADD instructions.
 
-cmp<cc>xadd, 0x66e<cc:opc>, CMPCCXADD|x64, Modrm|Vex|Space0F38|VexVVVV|SwapSources|CheckOperandSize|NoSuf, { Reg32|Reg64, Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+cmp<cc>xadd, 0x66e<cc:opc>, CMPCCXADD, Modrm|Vex|Space0F38|VexVVVV|SwapSources|CheckOperandSize|NoSuf, { Reg32|Reg64, Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
 
 // CMPCCXADD instructions end.
 
@@ -3321,8 +3323,8 @@ wrmsrns, 0x0f01c6, WRMSRNS, NoSuf, {}
 
 // MSRLIST instructions.
 
-rdmsrlist, 0xf20f01c6, MSRLIST|x64, NoSuf, {}
-wrmsrlist, 0xf30f01c6, MSRLIST|x64, NoSuf, {}
+rdmsrlist, 0xf20f01c6, MSRLIST, NoSuf, {}
+wrmsrlist, 0xf30f01c6, MSRLIST, NoSuf, {}
 
 // MSRLIST instructions end.
 
@@ -3337,23 +3339,23 @@ axor, 0xf30f38fc, RAO_INT, Modrm|IgnoreSize|CheckOperandSize|NoSuf, { Reg32|Reg6
 
 // LKGS instruction.
 
-lkgs, 0xf20f00/6, LKGS|x64, Modrm|IgnoreSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
-lkgs, 0xf20f00/6, LKGS|x64, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
+lkgs, 0xf20f00/6, LKGS, Modrm|IgnoreSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
+lkgs, 0xf20f00/6, LKGS, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
 
 // LKGS instruction end.
 
 // FRED instructions.
 
-erets, 0xf20f01ca, FRED|x64, NoSuf, {}
-eretu, 0xf30f01ca, FRED|x64, NoSuf, {}
+erets, 0xf20f01ca, FRED, NoSuf, {}
+eretu, 0xf30f01ca, FRED, NoSuf, {}
 
 // FRED instructions end.
 
 // USER_MSR instructions.
 
-urdmsr, 0xf20f38f8, USER_MSR|x64, RegMem|NoSuf|NoRex64, { Reg64, Reg64 }
-urdmsr, 0xf2f8/0, USER_MSR|x64, Modrm|Vex128|VexMap7|VexW0|NoSuf, { Imm32, Reg64 }
-uwrmsr, 0xf30f38f8, USER_MSR|x64, Modrm|NoSuf|NoRex64, { Reg64, Reg64 }
-uwrmsr, 0xf3f8/0, USER_MSR|x64, Modrm|Vex128|VexMap7|VexW0|NoSuf, { Reg64, Imm32 }
+urdmsr, 0xf20f38f8, USER_MSR, RegMem|NoSuf|NoRex64, { Reg64, Reg64 }
+urdmsr, 0xf2f8/0, USER_MSR, Modrm|Vex128|VexMap7|VexW0|NoSuf, { Imm32, Reg64 }
+uwrmsr, 0xf30f38f8, USER_MSR, Modrm|NoSuf|NoRex64, { Reg64, Reg64 }
+uwrmsr, 0xf3f8/0, USER_MSR, Modrm|Vex128|VexMap7|VexW0|NoSuf, { Reg64, Imm32 }
 
 // USER_MSR instructions end.

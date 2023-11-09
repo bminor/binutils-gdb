@@ -804,6 +804,9 @@ static char *cpu_sub_arch_name = NULL;
 /* CPU feature flags.  */
 i386_cpu_flags cpu_arch_flags = CPU_UNKNOWN_FLAGS;
 
+/* ISA extensions available in 64-bit mode only.  */
+static const i386_cpu_flags cpu_64_flags = CPU_ANY_64_FLAGS;
+
 /* If we have selected a cpu we are generating instructions for.  */
 static int cpu_arch_tune_set = 0;
 
@@ -1874,7 +1877,12 @@ cpu_flags_match (const insn_template *t)
   else
     {
       /* This instruction is available only on some archs.  */
-      i386_cpu_flags cpu = cpu_arch_flags;
+      i386_cpu_flags active, cpu;
+
+      if (flag_code != CODE_64BIT)
+	active = cpu_flags_and_not (cpu_arch_flags, cpu_64_flags);
+      else
+	active = cpu_arch_flags;
 
       /* Dual VEX/EVEX templates may need stripping of one of the flags.  */
       if (t->opcode_modifier.vex && t->opcode_modifier.evex)
@@ -1895,14 +1903,14 @@ cpu_flags_match (const insn_template *t)
 		{
 		  x.bitfield.cpuavx512f = 0;
 		  x.bitfield.cpuavx512vl = 0;
-		  if (x.bitfield.cpufma && !cpu.bitfield.cpufma)
+		  if (x.bitfield.cpufma && !active.bitfield.cpufma)
 		    x.bitfield.cpuavx = 0;
 		}
 	    }
 	}
 
       /* AVX512VL is no standalone feature - match it and then strip it.  */
-      if (x.bitfield.cpuavx512vl && !cpu.bitfield.cpuavx512vl)
+      if (x.bitfield.cpuavx512vl && !active.bitfield.cpuavx512vl)
 	return match;
       x.bitfield.cpuavx512vl = 0;
 
@@ -1912,7 +1920,7 @@ cpu_flags_match (const insn_template *t)
       if (x.bitfield.cpuavx && x.bitfield.cpuavx2)
 	x.bitfield.cpuavx2 = 0;
 
-      cpu = cpu_flags_and (x, cpu);
+      cpu = cpu_flags_and (x, active);
       if (!cpu_flags_all_zero (&cpu))
 	{
 	  if (t->cpu.bitfield.cpuavx && t->cpu.bitfield.cpuavx512f)
@@ -1921,7 +1929,7 @@ cpu_flags_match (const insn_template *t)
 		   ? cpu.bitfield.cpuavx512f
 		   : cpu.bitfield.cpuavx)
 		  && (!x.bitfield.cpufma || cpu.bitfield.cpufma
-		      || cpu_arch_flags.bitfield.cpuavx512f)
+		      || active.bitfield.cpuavx512f)
 		  && (!x.bitfield.cpugfni || cpu.bitfield.cpugfni)
 		  && (!x.bitfield.cpuvaes || cpu.bitfield.cpuvaes)
 		  && (!x.bitfield.cpuvpclmulqdq || cpu.bitfield.cpuvpclmulqdq))

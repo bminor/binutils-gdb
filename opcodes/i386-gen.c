@@ -166,6 +166,10 @@ static const dependency isa_dependencies[] =
     "AVX2" },
   { "AVX_NE_CONVERT",
     "AVX2" },
+  { "CX16",
+    "64" },
+  { "LKGS",
+    "64" },
   { "FRED",
     "LKGS" },
   { "AVX512F",
@@ -240,13 +244,13 @@ static const dependency isa_dependencies[] =
   { "SNP",
     "SEV_ES" },
   { "RMPQUERY",
-    "SNP" },
+    "SNP|64" },
   { "TSX",
     "RTM|HLE" },
   { "TSXLDTRK",
     "RTM" },
   { "AMX_TILE",
-    "XSAVE" },
+    "XSAVE|64" },
   { "AMX_INT8",
     "AMX_TILE" },
   { "AMX_BF16",
@@ -259,6 +263,18 @@ static const dependency isa_dependencies[] =
     "SSE2" },
   { "WIDEKL",
     "KL" },
+  { "PBNDKB",
+    "64" },
+  { "UINTR",
+    "64" },
+  { "PREFETCHI",
+    "64" },
+  { "CMPCCXADD",
+    "64" },
+  { "MSRLIST",
+    "64" },
+  { "USER_MSR",
+    "64" },
 };
 
 /* This array is populated as process_i386_initializers() walks cpu_flags[].  */
@@ -772,8 +788,10 @@ add_isa_dependencies (bitfield *flags, const char *f, int value,
 	  }
 	free (deps);
 
-	/* ISA extensions with dependencies need CPU_ANY_*_FLAGS emitted.  */
-	if (reverse < ARRAY_SIZE (isa_reverse_deps[0]))
+	/* ISA extensions with dependencies need CPU_ANY_*_FLAGS emitted,
+	   unless the sole dependency is the "64-bit mode only" one.  */
+	if (reverse < ARRAY_SIZE (isa_reverse_deps[0])
+	    && strcmp (isa_dependencies[i].deps, "64"))
 	  isa_reverse_deps[reverse][reverse] = 1;
 
 	is_avx = orig_is_avx;
@@ -919,6 +937,15 @@ process_i386_cpu_flag (FILE *table, char *flag,
       size_t len = strlen (name);
       char *upper = xmalloc (len + 1);
 
+      /* Cpu64 is special: It specifies a mode dependency, not an ISA one.  Zap
+	 the flag from ISA initializer macros (and from CPU_ANY_64_FLAGS
+	 itself we only care about tracking its dependents.  Also don't emit the
+	 (otherwise all zero) CPU_64_FLAGS.  */
+      if (flag != NULL && reverse == Cpu64)
+	return;
+      if (is_isa || flag == NULL)
+	flags[Cpu64].value = 0;
+
       for (i = 0; i < len; ++i)
 	{
 	  /* Don't emit #define-s for auxiliary entries.  */
@@ -930,6 +957,14 @@ process_i386_cpu_flag (FILE *table, char *flag,
       fprintf (table, "\n#define CPU_%s%s_FLAGS \\\n",
 	       flag != NULL ? "": "ANY_", upper);
       free (upper);
+    }
+  else
+    {
+      /* Synthesize "64-bit mode only" dependencies from the dependencies we
+	 have accumulated.  */
+      for (i = 0; i < ARRAY_SIZE (isa_reverse_deps[0]); ++i)
+	if (flags[i].value && isa_reverse_deps[Cpu64][i])
+	  flags[Cpu64].value = 1;
     }
 
   output_cpu_flags (table, flags, ARRAY_SIZE (flags), name != NULL,
@@ -2142,6 +2177,8 @@ main (int argc, char **argv)
   qsort (operand_types, ARRAY_SIZE (operand_types),
 	 sizeof (operand_types [0]), compare);
 
+  process_i386_initializers ();
+
   table = fopen ("i386-tbl.h", "w");
   if (table == NULL)
     fail ("can't create i386-tbl.h, errno = %s\n",
@@ -2151,7 +2188,6 @@ main (int argc, char **argv)
 
   process_i386_opcodes (table);
   process_i386_registers (table);
-  process_i386_initializers ();
 
   fclose (table);
 
