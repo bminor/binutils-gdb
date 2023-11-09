@@ -1501,7 +1501,8 @@ int
 gdb_bfd_scan_elf_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr,
 			 CORE_ADDR *ptr_addr)
 {
-  int arch_size, step, sect_size;
+  int arch_size, step;
+  bfd_size_type sect_size;
   long current_dyntag;
   CORE_ADDR dyn_ptr, dyn_addr;
   gdb_byte *bufend, *bufstart, *buf;
@@ -1546,7 +1547,8 @@ gdb_bfd_scan_elf_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr,
   /* Read in .dynamic from the BFD.  We will get the actual value
      from memory later.  */
   sect_size = bfd_section_size (sect);
-  buf = bufstart = (gdb_byte *) alloca (sect_size);
+  gdb::byte_vector buffer (sect_size);
+  buf = bufstart = buffer.data ();
   if (!bfd_get_section_contents (abfd, sect,
 				 buf, 0, sect_size))
     return 0;
