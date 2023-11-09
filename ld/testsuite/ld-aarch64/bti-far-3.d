@@ -2,7 +2,6 @@
 #source: bti-far-3a.s
 #source: bti-far-3b.s
 #source: bti-far-3c.s
-#as: -mabi=lp64
 #ld: -shared -T bti-far-3.ld
 #objdump: -dr
 
