@@ -1,6 +1,5 @@
 #name: Check linker stubs with indirect calls handle BTI (exe).
 #source: bti-far.s
-#as: -mabi=lp64
 #ld: -T bti-far.ld
 #objdump: -dr
 

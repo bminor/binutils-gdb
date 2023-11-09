@@ -1,7 +1,6 @@
 #name: Check linker stubs with indirect calls handle BTI when target has BTI.
 #source: bti-far-opt.s
 #target: [check_shared_lib_support]
-#as: -mabi=lp64
 #ld: -shared -T bti-far.ld
 #objdump: -dr
 
