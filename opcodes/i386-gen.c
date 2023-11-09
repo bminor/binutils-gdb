@@ -63,7 +63,7 @@ static const dependency isa_dependencies[] =
   { "NOCONA",
     "GENERIC64|FISTTP|SSE3|MONITOR|CX16" },
   { "CORE",
-    "P4|FISTTP|SSE3|MONITOR|CX16" },
+    "P4|FISTTP|SSE3|MONITOR" },
   { "CORE2",
     "NOCONA|SSSE3" },
   { "COREI7",
