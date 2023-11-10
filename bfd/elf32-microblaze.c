@@ -1341,9 +1341,9 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		/* Need to generate relocs ? */
 		if ((bfd_link_pic (info) || indx != 0)
 		    && (h == NULL
-		    || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-			&& !resolved_to_zero)
-		    || h->root.type != bfd_link_hash_undefweak))
+			|| (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+			    && !resolved_to_zero)
+			|| h->root.type != bfd_link_hash_undefweak))
 		  need_relocs = true;
 
 		/* 2. Compute/Emit Static value of r-expression */
@@ -2028,8 +2028,8 @@ microblaze_elf_relax_section (bfd *abfd,
 	  irelscanend = irelocs + o->reloc_count;
 	  for (irelscan = irelocs; irelscan < irelscanend; irelscan++)
 	    {
-	      if ((ELF32_R_TYPE (irelscan->r_info) == (int) R_MICROBLAZE_32) ||
-		  (ELF32_R_TYPE (irelscan->r_info) == (int) R_MICROBLAZE_32_NONE))
+	      if ((ELF32_R_TYPE (irelscan->r_info) == (int) R_MICROBLAZE_32)
+		  || (ELF32_R_TYPE (irelscan->r_info) == (int) R_MICROBLAZE_32_NONE))
 		{
 		  isym = isymbuf + ELF32_R_SYM (irelscan->r_info);
 
@@ -2096,9 +2096,9 @@ microblaze_elf_relax_section (bfd *abfd,
 		}
 	      else if ((ELF32_R_TYPE (irelscan->r_info) == (int) R_MICROBLAZE_32_PCREL_LO)
 		       || (ELF32_R_TYPE (irelscan->r_info)
-				   == (int) R_MICROBLAZE_32_LO)
+			   == (int) R_MICROBLAZE_32_LO)
 		       || (ELF32_R_TYPE (irelscan->r_info)
-				   == (int) R_MICROBLAZE_TEXTREL_32_LO))
+			   == (int) R_MICROBLAZE_TEXTREL_32_LO))
 		{
 		  isym = isymbuf + ELF32_R_SYM (irelscan->r_info);
 
@@ -3238,9 +3238,9 @@ microblaze_elf_finish_dynamic_symbol (bfd *output_bfd,
     }
 
   /* h->got.refcount to be checked ? */
-  if (h->got.offset != (bfd_vma) -1 &&
-      ! ((h->got.offset & 1) ||
-	  IS_TLS_LD(eh->tls_mask) || IS_TLS_GD(eh->tls_mask)))
+  if ((h->got.offset != (bfd_vma) -1)
+      && ! ((h->got.offset & 1)
+	    || IS_TLS_LD(eh->tls_mask) || IS_TLS_GD(eh->tls_mask)))
     {
       asection *sgot;
       asection *srela;
