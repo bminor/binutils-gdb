@@ -1242,7 +1242,7 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "comdat-reloc"
 
-    run_dump_test "${tmips}mips${el}16-e"
+    run_dump_test "${tmips}mips${el}16-e${imips}"
     run_dump_test "${tmips}mips${el}16-f"
 
     run_dump_test "elf-consthilo"
