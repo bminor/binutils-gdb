@@ -2059,7 +2059,8 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "module-override"
     run_dump_test "module-defer-warn1"
-    run_list_test "module-defer-warn2" "-32"
+    run_dump_test "module-defer-warn2"
+    run_dump_test "module-defer-warn2-r2"
 
     foreach testopt [list -mfp32 -mfpxx -mfp64 "-mfp64-noodd" \
 			  -msingle-float -msoft-float] {
