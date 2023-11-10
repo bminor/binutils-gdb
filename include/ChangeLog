@@ -1,3 +1,9 @@
+2023-11-10  Simon Marchi  <simon.marchi@efficios.com>
+
+	* elf/amdgpu.h (EF_AMDGPU_MACH_AMDGCN_GFX1100,
+	EF_AMDGPU_MACH_AMDGCN_GFX1101,
+	EF_AMDGPU_MACH_AMDGCN_GFX1102): New.
+
 2023-11-10  Nick Clifton  <nickc@redhat.com>
 
 	* bfdlink.h (struct bfd_link_info): Update descriptions of the

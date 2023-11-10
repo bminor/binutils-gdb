@@ -1,3 +1,8 @@
+2023-11-10  Simon Marchi  <simon.marchi@efficios.com>
+
+	* readelf.c (decode_AMDGPU_machine_flags): Handle gfx1100,
+	gfx1101, gfx1102.
+
 2023-11-10  Vsevolod Alekseyev  <sevaa@sprynet.com>
 
 	PR 30880

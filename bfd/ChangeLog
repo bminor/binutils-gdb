@@ -1,3 +1,13 @@
+2023-11-10  Simon Marchi  <simon.marchi@efficios.com>
+
+	* archures.c (bfd_mach_amdgcn_gfx1100, bfd_mach_amdgcn_gfx1101,
+	bfd_mach_amdgcn_gfx1102): New.
+	* bfd-in2.h (bfd_mach_amdgcn_gfx1100, bfd_mach_amdgcn_gfx1101,
+	bfd_mach_amdgcn_gfx1102): New.
+	* cpu-amdgcn.c (arch_info_struct): Add entries for
+	bfd_mach_amdgcn_gfx1100, bfd_mach_amdgcn_gfx1101,
+	bfd_mach_amdgcn_gfx1102.
+
 2023-11-10  Nick Clifton  <nickc@redhat.com>
 
 	* elf.c (assign_file_positions_except_relocs): Turn warnings about
