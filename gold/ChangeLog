@@ -1,3 +1,8 @@
+2023-11-10  YunQiang Su  <yunqiang.su@cipunited.com>
+
+	* configure.tgt (targ_machine): Set to EM_MIPS for little endian
+	mips targets.
+
 2023-09-05  Roland McGrath  <mcgrathr@google.com>
 
 	The std::basic_string template type is only specified for
