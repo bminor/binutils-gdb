@@ -5572,8 +5572,16 @@ map_matching_symbols (struct objfile *objfile,
 		      match_data &data)
 {
   data.objfile = objfile;
-  objfile->expand_matching_symbols (lookup_name, domain, global,
-				    is_wild_match ? nullptr : compare_names);
+  if (is_wild_match || lookup_name.ada ().standard_p ())
+    objfile->expand_matching_symbols (lookup_name, domain, global,
+				      is_wild_match ? nullptr : compare_names);
+  else
+    objfile->expand_symtabs_matching (nullptr, &lookup_name,
+				      nullptr, nullptr,
+				      global
+				      ? SEARCH_GLOBAL_BLOCK
+				      : SEARCH_STATIC_BLOCK,
+				      domain, ALL_DOMAIN);
 
   const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
   for (compunit_symtab *symtab : objfile->compunits ())
