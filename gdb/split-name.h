@@ -33,8 +33,6 @@ enum class split_style
   /* Split at ".".  Used by Ada, Go, D.  This has a funny name to work
      around a bug in Bison 2.3, which is used on macOS.  */
   DOT_STYLE,
-  /* Split at "__".  Used by Ada encoded names.  */
-  UNDERSCORE,
 };
 
 /* Split NAME into components at module boundaries.  STYLE indicates
