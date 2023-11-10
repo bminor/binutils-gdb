@@ -54,6 +54,7 @@ static const char *regname (unsigned int regno, int row);
 static const char *regname_internal_by_table_only (unsigned int regno);
 
 static int have_frame_base;
+static int frame_base_level = -1; /* To support nested DW_TAG_subprogram's.  */
 static int need_base_address;
 
 static unsigned int num_debug_info_entries = 0;
@@ -2770,9 +2771,7 @@ read_and_display_attr_value (unsigned long attribute,
 
 	  if (form == DW_FORM_loclistx)
 	    {
-	      if (debug_info_p == NULL )
-		idx = (uint64_t) -1;
-	      else if (dwo)
+	      if (dwo)
 		{
 		  idx = fetch_indexed_offset (uvalue, loclists_dwo,
 					      debug_info_p->loclists_base,
@@ -2780,7 +2779,7 @@ read_and_display_attr_value (unsigned long attribute,
 		  if (idx != (uint64_t) -1)
 		    idx += (offset_size == 8) ? 20 : 12;
 		}
-	      else if (dwarf_version > 4)
+	      else if (debug_info_p == NULL || dwarf_version > 4)
 		{
 		  idx = fetch_indexed_offset (uvalue, loclists,
 					      debug_info_p->loclists_base,
@@ -2805,12 +2804,21 @@ read_and_display_attr_value (unsigned long attribute,
 	    }
 	  else if (form == DW_FORM_rnglistx)
 	    {
-	      if (debug_info_p == NULL)
-		idx = (uint64_t) -1;
+	      if (dwo)
+		{
+		  idx = fetch_indexed_offset (uvalue, rnglists,
+					      debug_info_p->rnglists_base,
+					      debug_info_p->offset_size);
+		}
 	      else
-		idx = fetch_indexed_offset (uvalue, rnglists,
-					    debug_info_p->rnglists_base,
-					    debug_info_p->offset_size);
+		{
+		  if (debug_info_p == NULL)
+		    base = 0;
+		  else
+		    base = debug_info_p->rnglists_base;
+		  idx = fetch_indexed_offset (uvalue, rnglists, base,
+					      debug_info_p->offset_size);
+		}
 	    }
 	  else
 	    {
@@ -2889,7 +2897,10 @@ read_and_display_attr_value (unsigned long attribute,
 	  break;
 
 	case DW_AT_frame_base:
+	  /* This is crude; the have_frame_base is reset on the next
+	     subprogram, not at the end of the current topmost one.  */
 	  have_frame_base = 1;
+	  frame_base_level = level;
 	  /* Fall through.  */
 	case DW_AT_location:
 	case DW_AT_GNU_locviews:
@@ -2941,8 +2952,6 @@ read_and_display_attr_value (unsigned long attribute,
 	      debug_info_p->have_frame_base [num] = have_frame_base;
 	      if (attribute != DW_AT_GNU_locviews)
 		{
-		  uvalue += debug_info_p->loclists_base;
-
 		  /* Corrupt DWARF info can produce more offsets than views.
 		     See PR 23062 for an example.  */
 		  if (debug_info_p->num_loc_offsets
@@ -3698,7 +3707,7 @@ read_bases (abbrev_entry *   entry,
 	  else
 	    warn (_("Unexpected form of DW_AT_rnglists_base in the top DIE\n"));
 	}
-      else if(attr->attribute == DW_AT_addr_base || attr->attribute == DW_AT_GNU_addr_base)
+      else if (attr->attribute == DW_AT_addr_base || attr->attribute == DW_AT_GNU_addr_base)
 	{
 	  if (attr->form == DW_FORM_sec_offset)
 	    {
@@ -3709,7 +3718,8 @@ read_bases (abbrev_entry *   entry,
 	    warn (_("Unexpected form of DW_AT_addr_base in the top DIE\n"));
 	}
       else
-	data = skip_attribute(attr->form, data, end, pointer_size, offset_size, dwarf_version);
+	data = skip_attribute (attr->form, data, end, pointer_size,
+			       offset_size, dwarf_version);
     }
 }
 
@@ -4206,10 +4216,15 @@ process_debug_info (struct dwarf_section * section,
 	      need_dwo_info = do_loc;
 	      break;
 	    case DW_TAG_entry_point:
-	    case DW_TAG_subprogram:
 	      need_base_address = 0;
 	      /* Assuming that there is no DW_AT_frame_base.  */
 	      have_frame_base = 0;
+	      break;
+	    case DW_TAG_subprogram:
+	      need_base_address = 0;
+		if (level <= frame_base_level)
+		  /* Don't reset that for nested subprogram.  */
+		  have_frame_base = 0;
 	      break;
 	    }
 
@@ -4221,11 +4236,12 @@ process_debug_info (struct dwarf_section * section,
 		  || (debug_info_p->num_loc_offsets
 		      == debug_info_p->num_loc_views));
 
-	  /* Look ahead so that the values of DW_AT_rnglists_base, DW_AT_[GNU_]addr_base
-	     are available before attributes that reference them are parsed in the same DIE.
+	  /* Look ahead so that the values of DW_AT_rnglists_base,
+	     DW_AT_[GNU_]addr_base are available before attributes that
+	     reference them are parsed in the same DIE.
 	     Only needed for the top DIE on DWARFv5+.
-	     No simiar treatment for loclists_base because there should be no loclist
-	     attributes in top DIE.  */
+	     No simiar treatment for loclists_base because there should
+	     be no loclist attributes in top DIE.  */
 	  if (compunit.cu_version >= 5 && level == 0)
 	    {
 	      int64_t stemp;
@@ -4290,7 +4306,7 @@ process_debug_info (struct dwarf_section * section,
 		break;
 
 	      case -1:
-		warn(_("DIE has locviews without loclist\n"));
+		warn (_("DIE has locviews without loclist\n"));
 		debug_info_p->num_loc_views--;
 		break;
 
@@ -6804,7 +6820,7 @@ display_loc_list (struct dwarf_section *section,
 static void
 display_loclists_list (struct dwarf_section *  section,
 		       unsigned char **        start_ptr,
-		       unsigned int            debug_info_entry,
+		       debug_info *            debug_info_p,
 		       uint64_t                offset,
 		       uint64_t                base_address,
 		       unsigned char **        vstart_ptr,
@@ -6817,6 +6833,7 @@ display_loclists_list (struct dwarf_section *  section,
   unsigned int pointer_size;
   unsigned int offset_size;
   unsigned int dwarf_version;
+  uint64_t index;
 
   /* Initialize it due to a false compiler warning.  */
   uint64_t begin = -1, vbegin = -1;
@@ -6824,23 +6841,15 @@ display_loclists_list (struct dwarf_section *  section,
   uint64_t length;
   int need_frame_base;
 
-  if (debug_info_entry >= num_debug_info_entries)
-    {
-      warn (_("No debug information available for "
-	      "loclists lists of entry: %u\n"),
-	    debug_info_entry);
-      return;
-    }
-
-  cu_offset = debug_information [debug_info_entry].cu_offset;
-  pointer_size = debug_information [debug_info_entry].pointer_size;
-  offset_size = debug_information [debug_info_entry].offset_size;
-  dwarf_version = debug_information [debug_info_entry].dwarf_version;
+  cu_offset = debug_info_p->cu_offset;
+  pointer_size = debug_info_p->pointer_size;
+  offset_size = debug_info_p->offset_size;
+  dwarf_version = debug_info_p->dwarf_version;
 
   if (pointer_size < 2 || pointer_size > 8)
     {
       warn (_("Invalid pointer size (%d) in debug info for entry %d\n"),
-	    pointer_size, debug_info_entry);
+	    pointer_size, (int)(debug_info_p - debug_information));
       return;
     }
 
@@ -6883,24 +6892,28 @@ display_loclists_list (struct dwarf_section *  section,
 	  break;
 
 	case DW_LLE_base_addressx:
-	  READ_ULEB (base_address, start, section_end);
-	  print_hex (base_address, pointer_size);
+	  READ_ULEB (index, start, section_end);
+	  print_hex (index, pointer_size);
 	  printf (_("(index into .debug_addr) "));
-	  base_address = fetch_indexed_addr (base_address, pointer_size);
+	  base_address = fetch_indexed_addr
+	    (debug_info_p->addr_base + index * pointer_size, pointer_size);
 	  print_hex (base_address, pointer_size);
 	  printf (_("(base address)\n"));
 	  break;
 
 	case DW_LLE_startx_endx:
-	  READ_ULEB (begin, start, section_end);
-	  begin = fetch_indexed_addr (begin, pointer_size);
-	  READ_ULEB (end, start, section_end);
-	  end = fetch_indexed_addr (end, pointer_size);
+	  READ_ULEB (index, start, section_end);
+	  begin = fetch_indexed_addr
+	    (debug_info_p->addr_base + index * pointer_size, pointer_size);
+	  READ_ULEB (index, start, section_end);
+	  end = fetch_indexed_addr
+	    (debug_info_p->addr_base + index * pointer_size, pointer_size);
 	  break;
 
 	case DW_LLE_startx_length:
-	  READ_ULEB (begin, start, section_end);
-	  begin = fetch_indexed_addr (begin, pointer_size);
+	  READ_ULEB (index, start, section_end);
+	  begin = fetch_indexed_addr
+	    (debug_info_p->addr_base + index * pointer_size, pointer_size);
 	  READ_ULEB (end, start, section_end);
 	  end += begin;
 	  break;
@@ -7197,202 +7210,74 @@ loc_offsets_compar (const void *ap, const void *bp)
   return ret;
 }
 
-static int
-display_offset_entry_loclists (struct dwarf_section *section)
+/* Reads and dumps the DWARFv5 loclists compiler unit header,
+   including the offset table.
+   Returns the offset of the next compile unit header.  */
+
+static uint64_t
+display_loclists_unit_header (struct dwarf_section *  section,
+			      uint64_t                header_offset,
+			      uint32_t *              offset_count,
+			      unsigned char **        loclists_start)
 {
-  unsigned char *  start = section->start;
-  unsigned char * const end = start + section->size;
+  uint64_t length;
+  unsigned char *start = section->start + header_offset;
+  unsigned char *end = section->start + section->size;
+  unsigned short version;
+  unsigned char address_size;
+  unsigned char segment_selector_size;
+  bool is_64bit;
+  uint32_t i;
 
-  introduce (section, false);
+  printf (_("Table at Offset %#" PRIx64 "\n"), header_offset);
 
-  do
+  SAFE_BYTE_GET_AND_INC (length, start, 4, end);
+  if (length == 0xffffffff)
     {
-      uint64_t length;
-      unsigned short version;
-      unsigned char address_size;
-      unsigned char segment_selector_size;
-      uint32_t offset_entry_count;
-      uint32_t i;
-      bool is_64bit;
+      is_64bit = true;
+      SAFE_BYTE_GET_AND_INC (length, start, 8, end);
+    }
+  else
+    is_64bit = false;
 
-      printf (_("Table at Offset %#tx\n"), start - section->start);
+  SAFE_BYTE_GET_AND_INC (version, start, 2, end);
+  SAFE_BYTE_GET_AND_INC (address_size, start, 1, end);
+  SAFE_BYTE_GET_AND_INC (segment_selector_size, start, 1, end);
+  SAFE_BYTE_GET_AND_INC (*offset_count, start, 4, end);
 
-      SAFE_BYTE_GET_AND_INC (length, start, 4, end);
-      if (length == 0xffffffff)
-	{
-	  is_64bit = true;
-	  SAFE_BYTE_GET_AND_INC (length, start, 8, end);
-	}
-      else
-	is_64bit = false;
+  printf (_("  Length:          %#" PRIx64 "\n"), length);
+  printf (_("  DWARF version:   %u\n"), version);
+  printf (_("  Address size:    %u\n"), address_size);
+  printf (_("  Segment size:    %u\n"), segment_selector_size);
+  printf (_("  Offset entries:  %u\n"), *offset_count);
 
-      SAFE_BYTE_GET_AND_INC (version, start, 2, end);
-      SAFE_BYTE_GET_AND_INC (address_size, start, 1, end);
-      SAFE_BYTE_GET_AND_INC (segment_selector_size, start, 1, end);
-      SAFE_BYTE_GET_AND_INC (offset_entry_count, start, 4, end);
+  if (segment_selector_size != 0)
+    {
+      warn (_("The %s section contains an "
+	      "unsupported segment selector size: %d.\n"),
+	    section->name, segment_selector_size);
+      return (uint64_t)-1;
+    }
 
-      printf (_("  Length:          %#" PRIx64 "\n"), length);
-      printf (_("  DWARF version:   %u\n"), version);
-      printf (_("  Address size:    %u\n"), address_size);
-      printf (_("  Segment size:    %u\n"), segment_selector_size);
-      printf (_("  Offset entries:  %u\n"), offset_entry_count);
-
-      if (version < 5)
-	{
-	  warn (_("The %s section contains a corrupt or "
-		  "unsupported version number: %d.\n"),
-		section->name, version);
-	  return 0;
-	}
-
-      if (segment_selector_size != 0)
-	{
-	  warn (_("The %s section contains an "
-		  "unsupported segment selector size: %d.\n"),
-		section->name, segment_selector_size);
-	  return 0;
-	}
-
-      if (offset_entry_count == 0)
-	{
-	  warn (_("The %s section contains a table without offset\n"),
-		section->name);
-	  return 0;
-	}
-
+  if ( *offset_count)
+    {
       printf (_("\n   Offset Entries starting at %#tx:\n"),
 	      start - section->start);
 
-      for (i = 0; i < offset_entry_count; i++)
+      for (i = 0; i < *offset_count; i++)
 	{
 	  uint64_t entry;
 
 	  SAFE_BYTE_GET_AND_INC (entry, start, is_64bit ? 8 : 4, end);
 	  printf (_("    [%6u] %#" PRIx64 "\n"), i, entry);
 	}
-
-      putchar ('\n');
-
-      uint32_t j;
-
-      for (j = 1, i = 0; i < offset_entry_count;)
-	{
-	  unsigned char lle;
-	  uint64_t base_address = 0;
-	  uint64_t begin;
-	  uint64_t finish;
-	  uint64_t off = start - section->start;
-
-	  if (j != i)
-	    {
-	      printf (_("   Offset Entry %u\n"), i);
-	      j = i;
-	    }
-
-	  printf ("    ");
-	  print_hex (off, 4);
-
-	  SAFE_BYTE_GET_AND_INC (lle, start, 1, end);
-
-	  switch (lle)
-	    {
-	    case DW_LLE_end_of_list:
-	      printf (_("<End of list>\n\n"));
-	      i ++;
-	      continue;
-
-	    case DW_LLE_base_addressx:
-	      READ_ULEB (base_address, start, end);
-	      print_hex (base_address, address_size);
-	      printf (_("(index into .debug_addr) "));
-	      base_address = fetch_indexed_addr (base_address, address_size);
-	      print_hex (base_address, address_size);
-	      printf (_("(base address)\n"));
-	      continue;
-
-	    case DW_LLE_startx_endx:
-	      READ_ULEB (begin, start, end);
-	      begin = fetch_indexed_addr (begin, address_size);
-	      READ_ULEB (finish, start, end);
-	      finish = fetch_indexed_addr (finish, address_size);
-	      break;
-
-	    case DW_LLE_startx_length:
-	      READ_ULEB (begin, start, end);
-	      begin = fetch_indexed_addr (begin, address_size);
-	      READ_ULEB (finish, start, end);
-	      finish += begin;
-	      break;
-
-	    case DW_LLE_offset_pair:
-	      READ_ULEB (begin, start, end);
-	      begin += base_address;
-	      READ_ULEB (finish, start, end);
-	      finish += base_address;
-	      break;
-
-	    case DW_LLE_default_location:
-	      begin = finish = 0;
-	      break;
-
-	    case DW_LLE_base_address:
-	      SAFE_BYTE_GET_AND_INC (base_address, start, address_size, end);
-	      print_hex (base_address, address_size);
-	      printf (_("(base address)\n"));
-	      continue;
-
-	    case DW_LLE_start_end:
-	      SAFE_BYTE_GET_AND_INC (begin,  start, address_size, end);
-	      SAFE_BYTE_GET_AND_INC (finish, start, address_size, end);
-	      break;
-
-	    case DW_LLE_start_length:
-	      SAFE_BYTE_GET_AND_INC (begin, start, address_size, end);
-	      READ_ULEB (finish, start, end);
-	      finish += begin;
-	      break;
-
-	    default:
-	      error (_("Invalid location list entry type %d\n"), lle);
-	      return 0;
-	    }
-
-	  if (start == end)
-	    {
-	      warn (_("Location list starting at offset %#" PRIx64
-		      " is not terminated.\n"), off);
-	      break;
-	    }
-
-	  print_hex (begin, address_size);
-	  print_hex (finish, address_size);
-
-	  if (begin == finish)
-	    fputs (_("(start == end)"), stdout);
-	  else if (begin > finish)
-	    fputs (_("(start > end)"), stdout);
-
-	  /* Read the counted location descriptions.  */
-	  READ_ULEB (length, start, end);
-
-	  if (length > (size_t) (end - start))
-	    {
-	      warn (_("Location list starting at offset %#" PRIx64
-		      " is not terminated.\n"), off);
-	      break;
-	    }
-
-	  (void) decode_location_expression (start, address_size, address_size,
-					     version, length, 0, section);
-	  start += length;
-	  putchar ('\n');
-	}
-
-      putchar ('\n');
     }
-  while (start < end);
 
-  return 1;
+  putchar ('\n');
+  *loclists_start = start;
+
+  /* The length field doesn't include the length field itself.  */
+  return header_offset + length + (is_64bit ? 12 : 4);
 }
 
 static int
@@ -7414,7 +7299,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
   const char *suffix = strrchr (section->name, '.');
   bool is_dwo = false;
   int is_loclists = strstr (section->name, "debug_loclists") != NULL;
-  uint64_t header_size = 0;
+  uint64_t next_header_offset = 0;
 
   if (suffix && strcmp (suffix, ".dwo") == 0)
     is_dwo = true;
@@ -7462,10 +7347,10 @@ display_debug_loc (struct dwarf_section *section, void *file)
 
       SAFE_BYTE_GET_AND_INC (offset_entry_count, hdrptr, 4, end);
 
-      if (offset_entry_count != 0)
-	return display_offset_entry_loclists (section);
+      /*if (offset_entry_count != 0)
+	return display_offset_entry_loclists (section);*/
 
-      header_size = hdrptr - section_begin;
+      //header_size = hdrptr - section_begin;
     }
 
   if (load_debug_info (file) == 0)
@@ -7520,14 +7405,6 @@ display_debug_loc (struct dwarf_section *section, void *file)
   if (!seen_first_offset)
     error (_("No location lists in .debug_info section!\n"));
 
-  if (debug_information [first].num_loc_offsets > 0
-      && debug_information [first].loc_offsets [0] != header_size
-      && debug_information [first].loc_views [0] != header_size)
-    warn (_("Location lists in %s section start at %#" PRIx64
-	    " rather than %#" PRIx64 "\n"),
-	  section->name, debug_information [first].loc_offsets [0],
-	  header_size);
-
   if (!locs_sorted)
     array = (unsigned int *) xcmalloc (num_loc_list, sizeof (unsigned int));
 
@@ -7536,7 +7413,8 @@ display_debug_loc (struct dwarf_section *section, void *file)
   if (reloc_at (section, 0))
     printf (_(" Warning: This section has relocations - addresses seen here may not be accurate.\n\n"));
 
-  printf (_("    Offset   Begin            End              Expression\n"));
+  if (!is_loclists)
+    printf (_("    Offset   Begin            End              Expression\n"));
 
   for (i = first; i < num_debug_info_entries; i++)
     {
@@ -7544,56 +7422,74 @@ display_debug_loc (struct dwarf_section *section, void *file)
       uint64_t base_address;
       unsigned int k;
       int has_frame_base;
+	debug_info *debug_info_p = debug_information + i;
+	uint32_t offset_count;
+	
 
       if (!locs_sorted)
 	{
-	  for (k = 0; k < debug_information [i].num_loc_offsets; k++)
+	  for (k = 0; k < debug_info_p->num_loc_offsets; k++)
 	    array[k] = k;
-	  loc_offsets = debug_information [i].loc_offsets;
-	  loc_views = debug_information [i].loc_views;
-	  qsort (array, debug_information [i].num_loc_offsets,
+	  loc_offsets = debug_info_p->loc_offsets;
+	  loc_views = debug_info_p->loc_views;
+	  qsort (array, debug_info_p->num_loc_offsets,
 		 sizeof (*array), loc_offsets_compar);
 	}
 
       /* .debug_loclists has a per-unit header.
 	 Update start if we are detecting it.  */
-      if (debug_information [i].dwarf_version == 5)
+      if (debug_info_p->dwarf_version == 5)
 	{
 	  j = locs_sorted ? 0 : array [0];
 
-	  if (debug_information [i].num_loc_offsets)
-	    offset = debug_information [i].loc_offsets [j];
+	  if (debug_info_p->num_loc_offsets)
+	    offset = debug_info_p->loc_offsets [j];
 
-	  if (debug_information [i].num_loc_views)
-	    voffset = debug_information [i].loc_views [j];
+	  if (debug_info_p->num_loc_views)
+	    voffset = debug_info_p->loc_views [j];
 
-	  /* Assume that the size of the header is constant across CUs. */
-	  if (((start - section_begin) + header_size == offset)
-	      || ((start -section_begin) + header_size == voffset))
-	    start += header_size;
+	  /* Parse and dump unit headers in loclists.
+	     This will misbehave if the order of CUs in debug_info
+	     doesn't match the one in loclists.  */
+	  if (next_header_offset < offset)
+	    {
+	      while (next_header_offset < offset)
+		{
+		  next_header_offset = display_loclists_unit_header
+		    (section, next_header_offset, &offset_count, &start);
+
+		  if (next_header_offset == (uint64_t)-1)
+		    /* Header parsing error.  */
+		    return 0;
+		}
+
+	      printf (_("\
+    Offset   Begin            End              Expression\n"));
+	    }
 	}
 
       int adjacent_view_loclists = 1;
-      for (k = 0; k < debug_information [i].num_loc_offsets; k++)
+
+      for (k = 0; k < debug_info_p->num_loc_offsets; k++)
 	{
 	  j = locs_sorted ? k : array[k];
 	  if (k
-	      && (debug_information [i].loc_offsets [locs_sorted
+	      && (debug_info_p->loc_offsets [locs_sorted
 						    ? k - 1 : array [k - 1]]
-		  == debug_information [i].loc_offsets [j])
-	      && (debug_information [i].loc_views [locs_sorted
+		  == debug_info_p->loc_offsets [j])
+	      && (debug_info_p->loc_views [locs_sorted
 						   ? k - 1 : array [k - 1]]
-		  == debug_information [i].loc_views [j]))
+		  == debug_info_p->loc_views [j]))
 	    continue;
-	  has_frame_base = debug_information [i].have_frame_base [j];
-	  offset = debug_information [i].loc_offsets [j];
+	  has_frame_base = debug_info_p->have_frame_base [j];
+	  offset = debug_info_p->loc_offsets [j];
 	  next = section_begin + offset;
-	  voffset = debug_information [i].loc_views [j];
+	  voffset = debug_info_p->loc_views [j];
 	  if (voffset != (uint64_t) -1)
 	    vnext = section_begin + voffset;
 	  else
 	    vnext = NULL;
-	  base_address = debug_information [i].base_address;
+	  base_address = debug_info_p->base_address;
 
 	  if (vnext && vnext < next)
 	    {
@@ -7649,8 +7545,8 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	      if (is_dwo)
 		warn (_("DWO is not yet supported.\n"));
 	      else
-		display_loclists_list (section, &start, i, offset, base_address,
-				       &vstart, has_frame_base);
+		display_loclists_list (section, &start, debug_info_p, offset,
+				       base_address, &vstart, has_frame_base);
 	    }
 
 	  /* FIXME: this arrangement is quite simplistic.  Nothing
@@ -10745,31 +10641,29 @@ display_gdb_index (struct dwarf_section *section,
   unsigned char *start = section->start;
   uint32_t version;
   uint32_t cu_list_offset, tu_list_offset;
-  uint32_t address_table_offset, symbol_table_offset, constant_pool_offset,
-    shortcut_table_offset;
+  uint32_t address_table_offset, symbol_table_offset, constant_pool_offset;
   unsigned int cu_list_elements, tu_list_elements;
   unsigned int address_table_elements, symbol_table_slots;
   unsigned char *cu_list, *tu_list;
-  unsigned char *address_table, *symbol_table, *shortcut_table, *constant_pool;
+  unsigned char *address_table, *symbol_table, *constant_pool;
   unsigned int i;
 
   /* The documentation for the format of this file is in gdb/dwarf2read.c.  */
 
   introduce (section, false);
 
-  version = section->size < 4 ? 0 : byte_get_little_endian (start, 4);
-  size_t header_size = (version < 9 ? 6 : 7) * sizeof (uint32_t);
-  if (section->size < header_size)
+  if (section->size < 6 * sizeof (uint32_t))
     {
       warn (_("Truncated header in the %s section.\n"), section->name);
       return 0;
     }
 
+  version = byte_get_little_endian (start, 4);
   printf (_("Version %lu\n"), (unsigned long) version);
 
   /* Prior versions are obsolete, and future versions may not be
      backwards compatible.  */
-  if (version < 3 || version > 9)
+  if (version < 3 || version > 8)
     {
       warn (_("Unsupported version %lu.\n"), (unsigned long) version);
       return 0;
@@ -10791,23 +10685,17 @@ display_gdb_index (struct dwarf_section *section,
   tu_list_offset = byte_get_little_endian (start + 8, 4);
   address_table_offset = byte_get_little_endian (start + 12, 4);
   symbol_table_offset = byte_get_little_endian (start + 16, 4);
-  shortcut_table_offset = byte_get_little_endian (start + 20, 4);
-  if (version < 9)
-    constant_pool_offset = shortcut_table_offset;
-  else
-    constant_pool_offset = byte_get_little_endian (start + 24, 4);
+  constant_pool_offset = byte_get_little_endian (start + 20, 4);
 
   if (cu_list_offset > section->size
       || tu_list_offset > section->size
       || address_table_offset > section->size
       || symbol_table_offset > section->size
-      || shortcut_table_offset > section->size
       || constant_pool_offset > section->size
       || tu_list_offset < cu_list_offset
       || address_table_offset < tu_list_offset
       || symbol_table_offset < address_table_offset
-      || shortcut_table_offset < symbol_table_offset
-      || constant_pool_offset < shortcut_table_offset)
+      || constant_pool_offset < symbol_table_offset)
     {
       warn (_("Corrupt header in the %s section.\n"), section->name);
       return 0;
@@ -10816,13 +10704,12 @@ display_gdb_index (struct dwarf_section *section,
   cu_list_elements = (tu_list_offset - cu_list_offset) / 16;
   tu_list_elements = (address_table_offset - tu_list_offset) / 24;
   address_table_elements = (symbol_table_offset - address_table_offset) / 20;
-  symbol_table_slots = (shortcut_table_offset - symbol_table_offset) / 8;
+  symbol_table_slots = (constant_pool_offset - symbol_table_offset) / 8;
 
   cu_list = start + cu_list_offset;
   tu_list = start + tu_list_offset;
   address_table = start + address_table_offset;
   symbol_table = start + symbol_table_offset;
-  shortcut_table = start + shortcut_table_offset;
   constant_pool = start + constant_pool_offset;
 
   printf (_("\nCU table:\n"));
@@ -10931,38 +10818,6 @@ display_gdb_index (struct dwarf_section *section,
 	    }
 	  if (num_cus <= 1)
 	    printf ("\n");
-	}
-    }
-
-  if (version >= 9)
-    {
-      printf (_("\nShortcut table:\n"));
-
-      if (shortcut_table_offset + 8 > constant_pool_offset)
-	{
-	  warn (_("Corrupt shortcut table in the %s section.\n"), section->name);
-	  return 0;
-	}
-
-      uint32_t lang = byte_get_little_endian (shortcut_table, 4);
-      printf (_("Language of main: "));
-      display_lang (lang);
-      printf ("\n");
-
-      printf (_("Name of main: "));
-      if (lang == 0)
-	printf (_("<unknown>\n"));
-      else
-	{
-	  uint32_t name_offset = byte_get_little_endian (shortcut_table + 4, 4);
-	  if (name_offset >= section->size - constant_pool_offset)
-	    {
-	      printf (_("<corrupt offset: %x>\n"), name_offset);
-	      warn (_("Corrupt name offset of 0x%x found for name of main\n"),
-		    name_offset);
-	    }
-	  else
-	    printf ("%s\n", constant_pool + name_offset);
 	}
     }
 
