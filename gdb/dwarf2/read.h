@@ -966,8 +966,7 @@ extern void finalize_all_units (dwarf2_per_bfd *per_bfd);
 
 /* Create a list of all compilation units in OBJFILE.  */
 
-extern void create_all_units (dwarf2_per_objfile *per_objfile,
-			      bool pre_read_p = true);
+extern void create_all_units (dwarf2_per_objfile *per_objfile);
 
 /* Create a quick_file_names hash table.  */
 

@@ -467,7 +467,7 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 	}
     }
 
-  create_all_units (per_objfile, false);
+  create_all_units (per_objfile);
   if (!check_cus_from_debug_names (per_bfd, *map, dwz_map))
     {
       per_bfd->all_units.clear ();

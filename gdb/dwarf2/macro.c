@@ -735,8 +735,6 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 		dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd,
 						     true);
 
-		dwz->macro.read (objfile);
-
 		include_section = &dwz->macro;
 		include_bfd = include_section->get_bfd_owner ();
 		include_mac_end = dwz->macro.buffer + dwz->macro.size;

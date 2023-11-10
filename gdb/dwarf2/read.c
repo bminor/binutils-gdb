@@ -3201,7 +3201,7 @@ dwarf2_initialize_objfile (struct objfile *objfile)
      main thread.  */
   try
     {
-      dwarf2_get_dwz_file (per_bfd);
+      dwarf2_read_dwz_file (per_objfile);
     }
   catch (const gdb_exception_error &err)
     {
@@ -5101,7 +5101,7 @@ finalize_all_units (dwarf2_per_bfd *per_bfd)
 /* See read.h.  */
 
 void
-create_all_units (dwarf2_per_objfile *per_objfile, bool pre_read_p)
+create_all_units (dwarf2_per_objfile *per_objfile)
 {
   htab_up types_htab;
   gdb_assert (per_objfile->per_bfd->all_units.empty ());
@@ -5117,15 +5117,6 @@ create_all_units (dwarf2_per_objfile *per_objfile, bool pre_read_p)
   dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
   if (dwz != NULL)
     {
-      if (pre_read_p)
-	{
-	  /* Pre-read the sections we'll need to construct an index.  */
-	  struct objfile *objfile = per_objfile->objfile;
-	  dwz->abbrev.read (objfile);
-	  dwz->info.read (objfile);
-	  dwz->str.read (objfile);
-	  dwz->line.read (objfile);
-	}
       read_comp_units_from_section (per_objfile, &dwz->info, &dwz->abbrev, 1,
 				    types_htab, rcuh_kind::COMPILE);
 
