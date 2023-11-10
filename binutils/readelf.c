@@ -3734,70 +3734,70 @@ decode_MIPS_machine_flags (char *out, unsigned int e_flags)
 
   switch ((e_flags & EF_MIPS_MACH))
     {
-    case E_MIPS_MACH_3900:
+    case EF_MIPS_MACH_3900:
       out = stpcpy (out, ", 3900");
       break;
-    case E_MIPS_MACH_4010:
+    case EF_MIPS_MACH_4010:
       out = stpcpy (out, ", 4010");
       break;
-    case E_MIPS_MACH_4100:
+    case EF_MIPS_MACH_4100:
       out = stpcpy (out, ", 4100");
       break;
-    case E_MIPS_MACH_4111:
+    case EF_MIPS_MACH_4111:
       out = stpcpy (out, ", 4111");
       break;
-    case E_MIPS_MACH_4120:
+    case EF_MIPS_MACH_4120:
       out = stpcpy (out, ", 4120");
       break;
-    case E_MIPS_MACH_4650:
+    case EF_MIPS_MACH_4650:
       out = stpcpy (out, ", 4650");
       break;
-    case E_MIPS_MACH_5400:
+    case EF_MIPS_MACH_5400:
       out = stpcpy (out, ", 5400");
       break;
-    case E_MIPS_MACH_5500:
+    case EF_MIPS_MACH_5500:
       out = stpcpy (out, ", 5500");
       break;
-    case E_MIPS_MACH_5900:
+    case EF_MIPS_MACH_5900:
       out = stpcpy (out, ", 5900");
       break;
-    case E_MIPS_MACH_SB1:
+    case EF_MIPS_MACH_SB1:
       out = stpcpy (out, ", sb1");
       break;
-    case E_MIPS_MACH_9000:
+    case EF_MIPS_MACH_9000:
       out = stpcpy (out, ", 9000");
       break;
-    case E_MIPS_MACH_LS2E:
+    case EF_MIPS_MACH_LS2E:
       out = stpcpy (out, ", loongson-2e");
       break;
-    case E_MIPS_MACH_LS2F:
+    case EF_MIPS_MACH_LS2F:
       out = stpcpy (out, ", loongson-2f");
       break;
-    case E_MIPS_MACH_GS464:
+    case EF_MIPS_MACH_GS464:
       out = stpcpy (out, ", gs464");
       break;
-    case E_MIPS_MACH_GS464E:
+    case EF_MIPS_MACH_GS464E:
       out = stpcpy (out, ", gs464e");
       break;
-    case E_MIPS_MACH_GS264E:
+    case EF_MIPS_MACH_GS264E:
       out = stpcpy (out, ", gs264e");
       break;
-    case E_MIPS_MACH_OCTEON:
+    case EF_MIPS_MACH_OCTEON:
       out = stpcpy (out, ", octeon");
       break;
-    case E_MIPS_MACH_OCTEON2:
+    case EF_MIPS_MACH_OCTEON2:
       out = stpcpy (out, ", octeon2");
       break;
-    case E_MIPS_MACH_OCTEON3:
+    case EF_MIPS_MACH_OCTEON3:
       out = stpcpy (out, ", octeon3");
       break;
-    case E_MIPS_MACH_XLR:
+    case EF_MIPS_MACH_XLR:
       out = stpcpy (out, ", xlr");
       break;
-    case E_MIPS_MACH_IAMR2:
+    case EF_MIPS_MACH_IAMR2:
       out = stpcpy (out, ", interaptiv-mr2");
       break;
-    case E_MIPS_MACH_ALLEGREX:
+    case EF_MIPS_MACH_ALLEGREX:
       out = stpcpy (out, ", allegrex");
       break;
     case 0:
@@ -3812,16 +3812,16 @@ decode_MIPS_machine_flags (char *out, unsigned int e_flags)
 
   switch ((e_flags & EF_MIPS_ABI))
     {
-    case E_MIPS_ABI_O32:
+    case EF_MIPS_ABI_O32:
       out = stpcpy (out, ", o32");
       break;
-    case E_MIPS_ABI_O64:
+    case EF_MIPS_ABI_O64:
       out = stpcpy (out, ", o64");
       break;
-    case E_MIPS_ABI_EABI32:
+    case EF_MIPS_ABI_EABI32:
       out = stpcpy (out, ", eabi32");
       break;
-    case E_MIPS_ABI_EABI64:
+    case EF_MIPS_ABI_EABI64:
       out = stpcpy (out, ", eabi64");
       break;
     case 0:
@@ -3846,37 +3846,37 @@ decode_MIPS_machine_flags (char *out, unsigned int e_flags)
 
   switch ((e_flags & EF_MIPS_ARCH))
     {
-    case E_MIPS_ARCH_1:
+    case EF_MIPS_ARCH_1:
       out = stpcpy (out, ", mips1");
       break;
-    case E_MIPS_ARCH_2:
+    case EF_MIPS_ARCH_2:
       out = stpcpy (out, ", mips2");
       break;
-    case E_MIPS_ARCH_3:
+    case EF_MIPS_ARCH_3:
       out = stpcpy (out, ", mips3");
       break;
-    case E_MIPS_ARCH_4:
+    case EF_MIPS_ARCH_4:
       out = stpcpy (out, ", mips4");
       break;
-    case E_MIPS_ARCH_5:
+    case EF_MIPS_ARCH_5:
       out = stpcpy (out, ", mips5");
       break;
-    case E_MIPS_ARCH_32:
+    case EF_MIPS_ARCH_32:
       out = stpcpy (out, ", mips32");
       break;
-    case E_MIPS_ARCH_32R2:
+    case EF_MIPS_ARCH_32R2:
       out = stpcpy (out, ", mips32r2");
       break;
-    case E_MIPS_ARCH_32R6:
+    case EF_MIPS_ARCH_32R6:
       out = stpcpy (out, ", mips32r6");
       break;
-    case E_MIPS_ARCH_64:
+    case EF_MIPS_ARCH_64:
       out = stpcpy (out, ", mips64");
       break;
-    case E_MIPS_ARCH_64R2:
+    case EF_MIPS_ARCH_64R2:
       out = stpcpy (out, ", mips64r2");
       break;
-    case E_MIPS_ARCH_64R6:
+    case EF_MIPS_ARCH_64R6:
       out = stpcpy (out, ", mips64r6");
       break;
     default:
@@ -7697,7 +7697,7 @@ process_section_headers (Filedata * filedata)
 	 earlier compilers provided no way of distinguishing ILP32 objects
 	 from LP64 objects, so if there's any doubt, we should assume that
 	 the official LP64 form is being used.  */
-      if ((filedata->file_header.e_flags & EF_MIPS_ABI) == E_MIPS_ABI_EABI64
+      if ((filedata->file_header.e_flags & EF_MIPS_ABI) == EF_MIPS_ABI_EABI64
 	  && find_section (filedata, ".gcc_compiled_long32") == NULL)
 	eh_addr_size = 8;
       break;

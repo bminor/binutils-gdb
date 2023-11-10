@@ -372,14 +372,14 @@ changequote([,])dnl
 	    AC_MSG_ERROR($target_cpu isn't a supported MIPS CPU name)
 	    ;;
 	esac
-	# See whether it's appropriate to set E_MIPS_ABI_O32 for o32
+	# See whether it's appropriate to set EF_MIPS_ABI_O32 for o32
 	# binaries.  It's a GNU extension that some OSes don't understand.
 	case ${target} in
 	  *-*-irix*)
-	    use_e_mips_abi_o32=0
+	    use_ef_mips_abi_o32=0
 	    ;;
 	  *)
-	    use_e_mips_abi_o32=1
+	    use_ef_mips_abi_o32=1
 	    ;;
 	esac
 	# Decide whether to generate 32-bit or 64-bit code by default.
@@ -410,8 +410,8 @@ changequote([,])dnl
 	esac
 	AC_DEFINE_UNQUOTED(MIPS_CPU_STRING_DEFAULT, "$mips_cpu",
 			   [Default CPU for MIPS targets. ])
-	AC_DEFINE_UNQUOTED(USE_E_MIPS_ABI_O32, $use_e_mips_abi_o32,
-			   [Allow use of E_MIPS_ABI_O32 on MIPS targets. ])
+	AC_DEFINE_UNQUOTED(USE_EF_MIPS_ABI_O32, $use_ef_mips_abi_o32,
+			   [Allow use of EF_MIPS_ABI_O32 on MIPS targets. ])
 	AC_DEFINE_UNQUOTED(MIPS_DEFAULT_64BIT, $mips_default_64bit,
 			   [Generate 64-bit code by default on MIPS targets. ])
 	AC_DEFINE_UNQUOTED(MIPS_DEFAULT_ABI, $mips_default_abi,

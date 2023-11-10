@@ -19534,16 +19534,16 @@ mips_elf_final_processing (void)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ARCH_ASE_MDMX;
 
   /* Set the MIPS ELF ABI flags.  */
-  if (mips_abi == O32_ABI && USE_E_MIPS_ABI_O32)
-    elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O32;
+  if (mips_abi == O32_ABI && USE_EF_MIPS_ABI_O32)
+    elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ABI_O32;
   else if (mips_abi == O64_ABI)
-    elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O64;
+    elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ABI_O64;
   else if (mips_abi == EABI_ABI)
     {
       if (file_mips_opts.gp == 64)
-	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI64;
+	elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ABI_EABI64;
       else
-	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI32;
+	elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ABI_EABI32;
     }
 
   /* Nothing to do for N32_ABI or N64_ABI.  */

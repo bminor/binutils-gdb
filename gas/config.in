@@ -264,8 +264,8 @@
 /* Use emulation support? */
 #undef USE_EMULATIONS
 
-/* Allow use of E_MIPS_ABI_O32 on MIPS targets. */
-#undef USE_E_MIPS_ABI_O32
+/* Allow use of EF_MIPS_ABI_O32 on MIPS targets. */
+#undef USE_EF_MIPS_ABI_O32
 
 /* Enable extensions on AIX 3, Interix.  */
 #ifndef _ALL_SOURCE

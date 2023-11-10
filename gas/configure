@@ -12234,14 +12234,14 @@ _ACEOF
 	    as_fn_error $? "$target_cpu isn't a supported MIPS CPU name" "$LINENO" 5
 	    ;;
 	esac
-	# See whether it's appropriate to set E_MIPS_ABI_O32 for o32
+	# See whether it's appropriate to set EF_MIPS_ABI_O32 for o32
 	# binaries.  It's a GNU extension that some OSes don't understand.
 	case ${target} in
 	  *-*-irix*)
-	    use_e_mips_abi_o32=0
+	    use_ef_mips_abi_o32=0
 	    ;;
 	  *)
-	    use_e_mips_abi_o32=1
+	    use_ef_mips_abi_o32=1
 	    ;;
 	esac
 	# Decide whether to generate 32-bit or 64-bit code by default.
@@ -12277,7 +12277,7 @@ _ACEOF
 
 
 cat >>confdefs.h <<_ACEOF
-#define USE_E_MIPS_ABI_O32 $use_e_mips_abi_o32
+#define USE_EF_MIPS_ABI_O32 $use_ef_mips_abi_o32
 _ACEOF
 
 

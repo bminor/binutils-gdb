@@ -2135,8 +2135,8 @@ bfd_elf32_bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
       /* We need to handle BFD_RELOC_CTOR specially.
 	 Select the right relocation (R_MIPS_32 or R_MIPS_64) based on the
 	 size of addresses of the ABI.  */
-      if ((elf_elfheader (abfd)->e_flags & (E_MIPS_ABI_O64
-					    | E_MIPS_ABI_EABI64)) != 0)
+      if ((elf_elfheader (abfd)->e_flags & (EF_MIPS_ABI_O64
+					    | EF_MIPS_ABI_EABI64)) != 0)
 	return &elf_mips_ctor64_howto;
       else
 	return &howto_table[(int) R_MIPS_32];
