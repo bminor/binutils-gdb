@@ -84,13 +84,6 @@ struct dwarf2_debug_names_index : public dwarf2_base_index_functions
 {
   void dump (struct objfile *objfile) override;
 
-  void expand_matching_symbols
-    (struct objfile *,
-     const lookup_name_info &lookup_name,
-     domain_enum domain,
-     int global,
-     symbol_compare_ftype *ordered_compare) override;
-
   bool expand_symtabs_matching
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
@@ -939,45 +932,6 @@ void
 dwarf2_debug_names_index::dump (struct objfile *objfile)
 {
   gdb_printf (".debug_names: exists\n");
-}
-
-void
-dwarf2_debug_names_index::expand_matching_symbols
-  (struct objfile *objfile,
-   const lookup_name_info &name, domain_enum domain,
-   int global,
-   symbol_compare_ftype *ordered_compare)
-{
-  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-
-  mapped_debug_names &map
-    = *(gdb::checked_static_cast<mapped_debug_names *>
-	(per_objfile->per_bfd->index_table.get ()));
-  const block_search_flags block_flags
-    = global ? SEARCH_GLOBAL_BLOCK : SEARCH_STATIC_BLOCK;
-
-  const char *match_name = name.ada ().lookup_name ().c_str ();
-  auto matcher = [&] (const char *symname)
-    {
-      if (ordered_compare == nullptr)
-	return true;
-      return ordered_compare (symname, match_name) == 0;
-    };
-
-  dw2_expand_symtabs_matching_symbol (map, name, matcher,
-				      [&] (offset_type namei)
-    {
-      /* The name was matched, now expand corresponding CUs that were
-	 marked.  */
-      dw2_debug_names_iterator iter (map, block_flags, domain, namei,
-				     per_objfile);
-
-      struct dwarf2_per_cu_data *per_cu;
-      while ((per_cu = iter.next ()) != NULL)
-	dw2_expand_symtabs_matching_one (per_cu, per_objfile, nullptr,
-					 nullptr);
-      return true;
-    }, per_objfile);
 }
 
 bool

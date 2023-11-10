@@ -388,24 +388,6 @@ objfile::expand_symtabs_with_fullname (const char *fullname)
 				   ALL_DOMAIN);
 }
 
-void
-objfile::expand_matching_symbols
-  (const lookup_name_info &name, domain_enum domain,
-   int global,
-   symbol_compare_ftype *ordered_compare)
-{
-  if (debug_symfile)
-    gdb_printf (gdb_stdlog,
-		"qf->expand_matching_symbols (%s, %s, %d, %s)\n",
-		objfile_debug_name (this),
-		domain_name (domain), global,
-		host_address_to_string (ordered_compare));
-
-  for (const auto &iter : qf_require_partial_symbols ())
-    iter->expand_matching_symbols (this, name, domain, global,
-				   ordered_compare);
-}
-
 bool
 objfile::expand_symtabs_matching
   (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,

@@ -1628,15 +1628,6 @@ struct readnow_functions : public dwarf2_base_index_functions
   {
   }
 
-  void expand_matching_symbols
-    (struct objfile *,
-     const lookup_name_info &lookup_name,
-     domain_enum domain,
-     int global,
-     symbol_compare_ftype *ordered_compare) override
-  {
-  }
-
   bool expand_symtabs_matching
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
@@ -16514,13 +16505,6 @@ struct cooked_index_functions : public dwarf2_base_index_functions
     index->dump (objfile->arch ());
   }
 
-  void expand_matching_symbols
-    (struct objfile *,
-     const lookup_name_info &lookup_name,
-     domain_enum domain,
-     int global,
-     symbol_compare_ftype *ordered_compare) override;
-
   bool expand_symtabs_matching
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
@@ -16615,44 +16599,6 @@ cooked_index_functions::find_compunit_symtab_by_address
     return nullptr;
 
   return dw2_instantiate_symtab (per_cu, per_objfile, false);
-}
-
-void
-cooked_index_functions::expand_matching_symbols
-     (struct objfile *objfile,
-      const lookup_name_info &lookup_name,
-      domain_enum domain,
-      int global,
-      symbol_compare_ftype *ordered_compare)
-{
-  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-  cooked_index *table
-    = (gdb::checked_static_cast<cooked_index *>
-       (per_objfile->per_bfd->index_table.get ()));
-  if (table == nullptr)
-    return;
-
-  const block_search_flags search_flags = (global
-					   ? SEARCH_GLOBAL_BLOCK
-					   : SEARCH_STATIC_BLOCK);
-  const language_defn *lang = language_def (language_ada);
-  symbol_name_matcher_ftype *name_match
-    = lang->get_symbol_name_matcher (lookup_name);
-
-  for (const cooked_index_entry *entry : table->all_entries ())
-    {
-      QUIT;
-
-      if (entry->parent_entry != nullptr)
-	continue;
-
-      if (!entry->matches (search_flags)
-	  || !entry->matches (domain))
-	continue;
-
-      if (name_match (entry->canonical, lookup_name, nullptr))
-	dw2_instantiate_symtab (entry->per_cu, per_objfile, false);
-    }
 }
 
 bool

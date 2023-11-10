@@ -585,12 +585,6 @@ public:
   void expand_symtabs_with_fullname (const char *fullname);
 
   /* See quick_symbol_functions.  */
-  void expand_matching_symbols
-    (const lookup_name_info &name, domain_enum domain,
-     int global,
-     symbol_compare_ftype *ordered_compare);
-
-  /* See quick_symbol_functions.  */
   bool expand_symtabs_matching
     (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
      const lookup_name_info *lookup_name,

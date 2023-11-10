@@ -30,11 +30,6 @@ enum block_search_flag_values
 
 DEF_ENUM_FLAGS_TYPE (enum block_search_flag_values, block_search_flags);
 
-/* Comparison function for symbol look ups.  */
-
-typedef int (symbol_compare_ftype) (const char *string1,
-				    const char *string2);
-
 /* Callback for quick_symbol_functions->map_symbol_filenames.  */
 
 typedef void (symbol_filename_ftype) (const char *filename,
@@ -124,28 +119,6 @@ struct quick_symbol_functions
 
   /* Read all symbol tables associated with OBJFILE.  */
   virtual void expand_all_symtabs (struct objfile *objfile) = 0;
-
-  /* Find global or static symbols in all tables that are in DOMAIN
-     and for which MATCH (symbol name, NAME) == 0, reading in partial
-     symbol tables as needed.  Look through global symbols if GLOBAL
-     and otherwise static symbols.
-
-     MATCH must be weaker than strcmp_iw_ordered in the sense that
-     strcmp_iw_ordered(x,y) == 0 --> MATCH(x,y) == 0.  ORDERED_COMPARE,
-     if non-null, must be an ordering relation compatible with
-     strcmp_iw_ordered in the sense that
-	    strcmp_iw_ordered(x,y) == 0 --> ORDERED_COMPARE(x,y) == 0
-     and 
-	    strcmp_iw_ordered(x,y) <= 0 --> ORDERED_COMPARE(x,y) <= 0
-     (allowing strcmp_iw_ordered(x,y) < 0 while ORDERED_COMPARE(x, y) == 0).
-  */
-
-  virtual void expand_matching_symbols
-    (struct objfile *,
-     const lookup_name_info &lookup_name,
-     domain_enum domain,
-     int global,
-     symbol_compare_ftype *ordered_compare) = 0;
 
   /* Expand all symbol tables in OBJFILE matching some criteria.
 
