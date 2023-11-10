@@ -39,7 +39,7 @@ if { [is_pecoff_format] } {
 }
 
 if ![ld_link $ld tmpdir/alignof "-T $srcdir/$subdir/alignof.t \
-	$IMAGE_BASE tmpdir/alignof.o"] {
+	$IMAGE_BASE tmpdir/alignof.o --no-error-rwx-segments"] {
     fail $testname
     return
 }

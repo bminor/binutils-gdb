@@ -19,6 +19,14 @@
 /* Define if you want compressed debug sections by default. */
 #undef DEFAULT_FLAG_COMPRESS_DEBUG
 
+/* Define to 1 if you want to turn executable stack warnings into errors by
+   default. */
+#undef DEFAULT_LD_ERROR_EXECSTACK
+
+/* Define to 1 if you want to turn executable segment warnings into errors by
+   default. */
+#undef DEFAULT_LD_ERROR_RWX_SEGMENTS
+
 /* Define to 0 if you want to disable the generation of an executable stack
    when a .note-GNU-stack section is missing. */
 #undef DEFAULT_LD_EXECSTACK

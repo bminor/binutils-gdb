@@ -34,7 +34,7 @@ if { [is_pecoff_format] } {
 }
 
 if ![ld_link $ld tmpdir/sizeof "$LDFLAGS -T $srcdir/$subdir/sizeof.t \
-	$IMAGE_BASE tmpdir/sizeof.o"] {
+	$IMAGE_BASE tmpdir/sizeof.o --no-error-rwx-segments"] {
     fail $testname
     return
 }

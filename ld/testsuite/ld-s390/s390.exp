@@ -81,7 +81,7 @@ set s390xtests {
      {{objdump -dzrj.text gotreloc_64-relro-1.dd}}
      "gotreloc_64-1"}
     {"PLT: offset test"
-     "-shared -m elf64_s390 -dT pltoffset-1.ld" ""
+     "-shared -m elf64_s390 -dT pltoffset-1.ld --no-error-rwx-segments" ""
      "-m64" {pltoffset-1.s}
      {{objdump "-dzrj.text --stop-address=16" pltoffset-1.dd}}
      "pltoffset-1"}

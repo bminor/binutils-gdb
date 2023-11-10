@@ -1,6 +1,6 @@
 #source: sort-file2.s
 #source: sort-file1.s
-#ld: -T sort-file.t
+#ld: -T sort-file.t --no-error-rwx-segments
 #nm: -n
 
 # Check that SORT_BY_NAME on filenames works

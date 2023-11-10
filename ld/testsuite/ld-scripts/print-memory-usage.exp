@@ -51,7 +51,7 @@ run_ld_link_tests {
 
     {
 	"print-memory-usage-2"
-	"-T print-memory-usage-2.t --print-memory-usage"
+	"-T print-memory-usage-2.t --print-memory-usage --no-error-rwx-segments"
 	""
 	""
 	{ "print-memory-usage-1.s" }

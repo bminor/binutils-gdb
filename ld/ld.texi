@@ -2784,28 +2784,51 @@ detect the use of global constructors.
 @cindex warnings, on executable stack
 @cindex executable stack, warnings on
 @item --warn-execstack
+@itemx --warn-execstack-objects
 @itemx --no-warn-execstack
-On ELF platforms this option controls how the linker generates warning
-messages when it creates an output file with an executable stack.  By
-default the linker will not warn if the @command{-z execstack} command
-line option has been used, but this behaviour can be overridden by the
-@option{--warn-execstack} option.
+On ELF platforms the linker may generate warning messages if it is
+asked to create an output file that contains an executable stack.
+There are three possible states:
+@enumerate
+@item
+Do not generate any warnings.
+@item
+Always generate warnings, even if the executable stack is requested
+via the @option{-z execstack} command line option.
+@item
+Only generate a warning if an object file requests an executable
+stack, but not if the @option{-z execstack} option is used.
+@end enumerate
 
-On the other hand the linker will normally warn if the stack is made
-executable because one or more of the input files need an execuable
-stack and neither of the @command{-z execstack} or @command{-z
-noexecstack} command line options have been specified.  This warning
-can be disabled via the @command{--no-warn-execstack} option.
+The default state depends upon how the linker was configured when it
+was built.  The @option{--no-warn-execstack} option always puts the
+linker into the no-warnings state.  The @option{--warn-execstack}
+option puts the linker into the warn-always state.  The
+@option{--warn-execstack-objects} option puts the linker into the
+warn-for-object-files-only state.
 
-Note: ELF format input files specify that they need an executable
+Note: ELF format input files can specify that they need an executable
 stack by having a @var{.note.GNU-stack} section with the executable
 bit set in its section flags.  They can specify that they do not need
-an executable stack by having that section, but without the executable
-flag bit set.  If an input file does not have a @var{.note.GNU-stack}
-section present then the default behaviour is target specific.  For
-some targets, then absence of such a section implies that an
-executable stack @emph{is} required.  This is often a problem for hand
-crafted assembler files.
+an executable stack by having the same section, but without the
+executable flag bit set.  If an input file does not have a
+@var{.note.GNU-stack} section then the default behaviour is target
+specific.  For some targets, then absence of such a section implies
+that an executable stack @emph{is} required.  This is often a problem
+for hand crafted assembler files.
+
+@kindex --error-execstack
+@item --error-execstack
+@itemx --no-error-execstack
+If the linker is going to generate a warning message about an
+executable stack then the @option{--error-execstack} option will
+instead change that warning into an error.  Note - this option does
+not change the linker's execstack warning generation state.  Use
+@option{--warn-execstack} or @option{--warn-execstack-objects} to set
+a specific warning state.
+
+The @option{--no-error-execstack} option will restore the default
+behaviour of generating warning messages.
 
 @kindex --warn-multiple-gp
 @item --warn-multiple-gp
@@ -2843,6 +2866,20 @@ not it has the read and/or write flags set.
 These warnings are enabled by default.  They can be disabled via the
 @option{--no-warn-rwx-segments} option and re-enabled via the
 @option{--warn-rwx-segments} option.
+
+@kindex --error-rwx-segments
+@item --error-rwx-segments
+@itemx --no-error-rwx-segments
+If the linker is going to generate a warning message about an
+executable, writeable segment, or an executable TLS segment, then the
+@option{--error-rwx-segments} option will turn this warning into an
+error instead.  The @option{--no-error-rwx-segments} option will
+restore the default behaviour of just generating a warning message.
+
+Note - the @option{--error-rwx-segments} option does not by itself
+turn on warnings about these segments.  These warnings are either
+enabled by default, if the linker was configured that way, or via the
+@option{--warn-rwx-segments} command line option.
 
 @kindex --warn-section-align
 @cindex warnings, on section alignment

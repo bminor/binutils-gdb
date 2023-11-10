@@ -7010,6 +7010,9 @@ assign_file_positions_except_relocs (bfd *abfd,
     {
       if (link_info != NULL && ! link_info->no_warn_rwx_segments)
 	{
+	  bool warned_tls = false;
+	  bool warned_rwx = false;
+
 	  /* Memory resident segments with non-zero size and RWX
 	     permissions are a security risk, so we generate a warning
 	     here if we are creating any.  */
@@ -7022,16 +7025,47 @@ assign_file_positions_except_relocs (bfd *abfd,
 	      if (phdr->p_memsz == 0)
 		continue;
 
-	      if (phdr->p_type == PT_TLS && (phdr->p_flags & PF_X))
-		_bfd_error_handler (_("warning: %pB has a TLS segment"
-				      " with execute permission"),
-				    abfd);
-	      else if (phdr->p_type == PT_LOAD
+	      if (! warned_tls
+		  && phdr->p_type == PT_TLS
+		  && (phdr->p_flags & PF_X))
+		{
+		  if (link_info->warn_is_error_for_rwx_segments)
+		    {
+		      _bfd_error_handler (_("\
+error: %pB has a TLS segment with execute permission"),
+					  abfd);
+		      return false;
+		    }
+
+		  _bfd_error_handler (_("\
+warning: %pB has a TLS segment with execute permission"),
+				      abfd);
+		  if (warned_rwx)
+		    break;
+
+		  warned_tls = true;
+		}
+	      else if (! warned_rwx
+		       && phdr->p_type == PT_LOAD
 		       && ((phdr->p_flags & (PF_R | PF_W | PF_X))
 			   == (PF_R | PF_W | PF_X)))
-		_bfd_error_handler (_("warning: %pB has a LOAD segment"
-				      " with RWX permissions"),
-				    abfd);
+		{
+		  if (link_info->warn_is_error_for_rwx_segments)
+		    {
+		      _bfd_error_handler (_("\
+error: %pB has a LOAD segment with RWX permissions"),
+					  abfd);
+		      return false;
+		    }
+
+		  _bfd_error_handler (_("\
+warning: %pB has a LOAD segment with RWX permissions"),
+				      abfd);
+		  if (warned_tls)
+		    break;
+
+		  warned_rwx = true;
+		}
 	    }
 	}
 

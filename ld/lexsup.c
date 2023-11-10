@@ -551,14 +551,27 @@ static const struct ld_option ld_options[] =
   { {"warn-constructors", no_argument, NULL, OPTION_WARN_CONSTRUCTORS},
     '\0', NULL, N_("Warn if global constructors/destructors are seen"),
     TWO_DASHES },
+
+  { {"error-execstack", no_argument, NULL, OPTION_ERROR_EXECSTACK},
+    '\0', NULL, NULL, TWO_DASHES },
+  { {"no-error-execstack", no_argument, NULL, OPTION_NO_ERROR_EXECSTACK},
+    '\0', NULL, NULL, TWO_DASHES },
+  { {"warn-execstack-objects", no_argument, NULL, OPTION_WARN_EXECSTACK_OBJECTS},
+    '\0', NULL, NULL, TWO_DASHES },
   { {"warn-execstack", no_argument, NULL, OPTION_WARN_EXECSTACK},
-    '\0', NULL, N_("Warn when creating an executable stack"), TWO_DASHES },
+    '\0', NULL, NULL, TWO_DASHES },
   { {"no-warn-execstack", no_argument, NULL, OPTION_NO_WARN_EXECSTACK},
-    '\0', NULL, N_("Do not warn when creating an executable stack"), TWO_DASHES },
+    '\0', NULL, NULL, TWO_DASHES },
+
+  { {"error-rwx-segments", no_argument, NULL, OPTION_ERROR_RWX_SEGMENTS},
+    '\0', NULL, NULL, TWO_DASHES },
+  { {"no-error-rwx-segments", no_argument, NULL, OPTION_NO_ERROR_RWX_SEGMENTS},
+    '\0', NULL, NULL, TWO_DASHES },
   { {"warn-rwx-segments", no_argument, NULL, OPTION_WARN_RWX_SEGMENTS},
-    '\0', NULL, N_("Warn when creating executable segments"), TWO_DASHES },
+    '\0', NULL, NULL, TWO_DASHES },
   { {"no-warn-rwx-segments", no_argument, NULL, OPTION_NO_WARN_RWX_SEGMENTS},
-    '\0', NULL, N_("Do not warn when creating executable segments"), TWO_DASHES },
+    '\0', NULL, NULL, TWO_DASHES },
+
   { {"warn-multiple-gp", no_argument, NULL, OPTION_WARN_MULTIPLE_GP},
     '\0', NULL, N_("Warn if the multiple GP values are used"), TWO_DASHES },
   { {"warn-once", no_argument, NULL, OPTION_WARN_ONCE},
@@ -944,11 +957,28 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_NON_CONTIGUOUS_REGIONS_WARNINGS:
 	  link_info.non_contiguous_regions_warnings = true;
 	  break;
+
+	case OPTION_ERROR_EXECSTACK:
+	  link_info.error_execstack = 1;
+	  break;
+	case OPTION_NO_ERROR_EXECSTACK:
+	  link_info.error_execstack = 0;
+	  break;
+	case OPTION_WARN_EXECSTACK_OBJECTS:
+	  link_info.warn_execstack = 2;
+	  break;
 	case OPTION_WARN_EXECSTACK:
 	  link_info.warn_execstack = 1;
 	  break;
 	case OPTION_NO_WARN_EXECSTACK:
 	  link_info.warn_execstack = 0;
+	  break;
+
+	case OPTION_ERROR_RWX_SEGMENTS:
+	  link_info.warn_is_error_for_rwx_segments = 1;
+	  break;
+	case OPTION_NO_ERROR_RWX_SEGMENTS:
+	  link_info.warn_is_error_for_rwx_segments = 0;
 	  break;
 	case OPTION_WARN_RWX_SEGMENTS:
 	  link_info.no_warn_rwx_segments = 0;
@@ -958,6 +988,7 @@ parse_args (unsigned argc, char **argv)
 	  link_info.no_warn_rwx_segments = 1;
 	  link_info.user_warn_rwx_segments = 1;
 	  break;
+
 	case 'e':
 	  lang_add_entry (optarg, true);
 	  break;
@@ -2239,24 +2270,32 @@ elf_static_list_options (FILE *file)
   -z muldefs                  Allow multiple definitions\n"));
   fprintf (file, _("\
   -z stack-size=SIZE          Set size of stack segment\n"));
+
   fprintf (file, _("\
   -z execstack                Mark executable as requiring executable stack\n"));
   fprintf (file, _("\
-  -z noexecstack              Mark executable as not requiring executable stack\n"));
-#if DEFAULT_LD_WARN_EXECSTACK == 1
+  -z noexecstack              Mark executable as not requiring executable stack\n"));  
   fprintf (file, _("\
-  --warn-execstack            Generate a warning if the stack is executable (default)\n"));
+  --warn-execstack-objects    Generate a warning if an object file requests an executable stack\n"));
+#if DEFAULT_LD_WARN_EXECSTACK == 0
+  fprintf (file, _("\
+  --warn-execstack            Generate a warning if creating an executable stack\n"));
 #else
   fprintf (file, _("\
-  --warn-execstack            Generate a warning if the stack is executable\n"));
+  --warn-execstack            Generate a warning if creating an executable stack (default)\n"));
 #endif
 #if DEFAULT_LD_WARN_EXECSTACK == 0
   fprintf (file, _("\
-  --no-warn-execstack         Do not generate a warning if the stack is executable (default)\n"));
+  --no-warn-execstack         Do not generate a warning if creating an executable stack (default)\n"));
 #else
   fprintf (file, _("\
-  --no-warn-execstack         Do not generate a warning if the stack is executable\n"));
+  --no-warn-execstack         Do not generate a warning if creating an executable stack\n"));
 #endif
+  fprintf (file, _("\
+  --error-execstack           Turn warnings about executable stacks into errors\n"));
+  fprintf (file, _("\
+  --no-error-execstack         Do not turn warnings about executable stacks into errors\n"));
+  
 #if DEFAULT_LD_WARN_RWX_SEGMENTS
   fprintf (file, _("\
   --warn-rwx-segments         Generate a warning if a LOAD segment has RWX permissions (default)\n"));
@@ -2268,6 +2307,11 @@ elf_static_list_options (FILE *file)
   fprintf (file, _("\
   --no-warn-rwx-segments      Do not generate a warning if a LOAD segments has RWX permissions (default)\n"));
 #endif
+  fprintf (file, _("\
+  --error-rwx-segments        Turn warnings about loadable RWX segments into errors\n"));
+  fprintf (file, _("\
+  --no-error-rwx-segments     Do not turn warnings about loadable RWX segments into errors\n"));
+
   fprintf (file, _("\
   -z unique-symbol            Avoid duplicated local symbol names\n"));
   fprintf (file, _("\

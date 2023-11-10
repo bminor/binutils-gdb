@@ -6,6 +6,15 @@
   the order of the sorting.  It may be combined with either SORT_BY_NAME or
   SORT_BY_INIT_PRIORITY.
 
+* Added --warn-execstack-objects to warn about executable stacks only when an
+  input object file requests one.  Also added --error-execstack and
+  --error-rxw-segments options to convert warnings about executable stacks and
+  segments into errors.
+
+  Also added --enable-error-execstack=[yes|no] and
+  --enable-error-rwx-segments=[yes|no] configure options to set the default for
+  converting warnings into errors.
+
 Changes in 2.41:
 
 * The linker now accepts a command line option of --remap-inputs

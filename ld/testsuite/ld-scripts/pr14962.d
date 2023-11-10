@@ -1,4 +1,4 @@
-#ld: -Ttext=0x1000 -Tdata=0x2000 -T pr14962.t
+#ld: -Ttext=0x1000 -Tdata=0x2000 -T pr14962.t --no-error-rwx-segments
 #source: pr14962a.s
 #source: pr14962b.s
 #nm: -n

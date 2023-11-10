@@ -1,3 +1,90 @@
+2023-11-10  Nick Clifton  <nickc@redhat.com>
+
+	* ldlex.h (enum option_values): Add OPTION_ERROR_EXECSTACK,
+	OPTION_NO_ERROR_EXECSTACK, OPTION_WARN_EXECSTACK_OBJECTS,
+	OPTION_ERROR_RWX_SEGMENTS and OPTION_NO_ERROR_RWX_SEGMENTS.
+	(struct ld_option): Add new long options.
+	(parse_args): Parse new long options.
+	(elf_static_list_options): Display the new options.
+	* ld.texi: Document the new command line options.
+	* configure.ac (error-execstack): New configuration option.
+	(error-rwx-segments): New configuration option.
+	* emultempl/elf.em (_before_parse): Initialse the new linkinfo
+	fields.
+	* NEWS: Mention the new features.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* testsuite/ld-elf/commonpage2.d: Disable errors for RWX segments
+	and/or executable stacks.
+	* testsuite/ld-elf/elf.exp: Likewise.
+	* testsuite/ld-elf/header.d: Likewise.
+	* testsuite/ld-elf/loadaddr1.d: Likewise.
+	* testsuite/ld-elf/loadaddr2.d: Likewise.
+	* testsuite/ld-elf/maxpage4.d: Likewise.
+	* testsuite/ld-elf/nobits-1.d: Likewise.
+	* testsuite/ld-elf/note-1.d: Likewise.
+	* testsuite/ld-elf/orphan-10.d: Likewise.
+	* testsuite/ld-elf/orphan-11.d: Likewise.
+	* testsuite/ld-elf/orphan-12.d: Likewise.
+	* testsuite/ld-elf/orphan-5.d: Likewise.
+	* testsuite/ld-elf/orphan-7.d: Likewise.
+	* testsuite/ld-elf/orphan-8.d: Likewise.
+	* testsuite/ld-elf/orphan-9.d: Likewise.
+	* testsuite/ld-elf/orphan-region.d: Likewise.
+	* testsuite/ld-elf/orphan.d: Likewise.
+	* testsuite/ld-elf/pr19539.d: Likewise.
+	* testsuite/ld-elf/pr26256-1a.d: Likewise.
+	* testsuite/ld-elf/pr26907.d: Likewise.
+	* testsuite/ld-elf/pr28597.d: Likewise.
+	* testsuite/ld-elf/retain2.d: Likewise.
+	* testsuite/ld-elf/shared.exp: Likewise.
+	* testsuite/ld-elf/size-1.d: Likewise.
+	* testsuite/ld-elf/textaddr7.d: Likewise.
+	* testsuite/ld-elf/warn1.d: Likewise.
+	* testsuite/ld-elf/warn2.d: Likewise.
+	* testsuite/ld-i386/discarded1.d: Likewise.
+	* testsuite/ld-i386/pr19175.d: Likewise.
+	* testsuite/ld-i386/pr19539.d: Likewise.
+	* testsuite/ld-i386/pr23189.d: Likewise.
+	* testsuite/ld-plugin/lto-3r.d: Likewise.
+	* testsuite/ld-plugin/lto-5r.d: Likewise.
+	* testsuite/ld-plugin/lto.exp: Likewise.
+	* testsuite/ld-powerpc/ppc476-shared.d: Likewise.
+	* testsuite/ld-powerpc/ppc476-shared2.d: Likewise.
+	* testsuite/ld-powerpc/pr28827-2.d: Likewise.
+	* testsuite/ld-s390/s390.exp: Likewise.
+	* testsuite/ld-scripts/align2a.d: Likewise.
+	* testsuite/ld-scripts/align2b.d: Likewise.
+	* testsuite/ld-scripts/align5.d: Likewise.
+	* testsuite/ld-scripts/alignof.exp: Likewise.
+	* testsuite/ld-scripts/crossref.exp: Likewise.
+	* testsuite/ld-scripts/defined2.d: Likewise.
+	* testsuite/ld-scripts/defined3.d: Likewise.
+	* testsuite/ld-scripts/defined5.d: Likewise.
+	* testsuite/ld-scripts/pr14962.d: Likewise.
+	* testsuite/ld-scripts/pr18963.d: Likewise.
+	* testsuite/ld-scripts/pr20302.d: Likewise.
+	* testsuite/ld-scripts/print-memory-usage.exp: Likewise.
+	* testsuite/ld-scripts/rgn-at1.d: Likewise.
+	* testsuite/ld-scripts/rgn-at10.d: Likewise.
+	* testsuite/ld-scripts/rgn-at4.d: Likewise.
+	* testsuite/ld-scripts/rgn-at6.d: Likewise.
+	* testsuite/ld-scripts/rgn-at8.d: Likewise.
+	* testsuite/ld-scripts/rgn-at9.d: Likewise.
+	* testsuite/ld-scripts/rgn-over1.d: Likewise.
+	* testsuite/ld-scripts/rgn-over2.d: Likewise.
+	* testsuite/ld-scripts/rgn-over4.d: Likewise.
+	* testsuite/ld-scripts/rgn-over5.d: Likewise.
+	* testsuite/ld-scripts/rgn-over6.d: Likewise.
+	* testsuite/ld-scripts/script.exp: Likewise.
+	* testsuite/ld-scripts/sizeof.exp: Likewise.
+	* testsuite/ld-scripts/sort-file.d: Likewise.
+	* testsuite/ld-x86-64/discarded1.d: Likewise.
+	* testsuite/ld-x86-64/pr19175.d: Likewise.
+	* testsuite/ld-x86-64/pr19539a.d: Likewise.
+	* testsuite/ld-x86-64/pr19539b.d: Likewise.
+	* testsuite/ld-x86-64/pr23189.d: Likewise.
+
 2023-11-06  Jan Beulich  <jbeulich@suse.com>
 
 	PR 30722

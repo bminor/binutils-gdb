@@ -190,7 +190,7 @@ if { [is_pecoff_format] } then {
 }
 set flags $LDFLAGS
 
-if ![ld_link $ld tmpdir/script "$flags -T $srcdir/$subdir/script.t tmpdir/script.o"] {
+if ![ld_link $ld tmpdir/script "$flags -T $srcdir/$subdir/script.t tmpdir/script.o --no-error-rwx-segments"] {
     fail $testname
 } else {
     check_script
@@ -198,7 +198,7 @@ if ![ld_link $ld tmpdir/script "$flags -T $srcdir/$subdir/script.t tmpdir/script
 
 set testname "MRI script"
 
-if ![ld_link $ld tmpdir/script "$flags -c $srcdir/$subdir/scriptm.t"] {
+if ![ld_link $ld tmpdir/script "$flags -c $srcdir/$subdir/scriptm.t --no-error-rwx-segments"] {
     fail $testname
 } else {
     check_script

@@ -847,7 +847,9 @@ enable_relro
 enable_textrel_check
 enable_separate_code
 enable_warn_execstack
+enable_error_execstack
 enable_warn_rwx_segments
+enable_error_rwx_segments
 enable_default_execstack
 enable_error_handling_script
 enable_default_hash_style
@@ -15669,12 +15671,32 @@ esac
 fi
 
 
+ac_default_ld_error_execstack=0
+# Check whether --enable-error-execstack was given.
+if test "${enable_error_execstack+set}" = set; then :
+  enableval=$enable_error_execstack; case "${enableval}" in
+  yes) ac_default_ld_error_execstack=1 ;;
+  no)  ac_default_ld_error_execstack=0 ;;
+esac
+fi
+
+
 ac_default_ld_warn_rwx_segments=unset
 # Check whether --enable-warn-rwx-segments was given.
 if test "${enable_warn_rwx_segments+set}" = set; then :
   enableval=$enable_warn_rwx_segments; case "${enableval}" in
   yes) ac_default_ld_warn_rwx_segments=1 ;;
   no)  ac_default_ld_warn_rwx_segments=0 ;;
+esac
+fi
+
+
+ac_default_ld_error_rwx_segments=0
+# Check whether --enable-error-rwx-segments was given.
+if test "${enable_error_rwx_segments+set}" = set; then :
+  enableval=$enable_error_rwx_segments; case "${enableval}" in
+  yes) ac_default_ld_error_rwx_segments=1 ;;
+  no)  ac_default_ld_error_rwx_segments=0 ;;
 esac
 fi
 
@@ -17444,12 +17466,24 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_LD_ERROR_EXECSTACK $ac_default_ld_error_execstack
+_ACEOF
+
+
 if test "${ac_default_ld_warn_rwx_segments}" = unset; then
   ac_default_ld_warn_rwx_segments=1
 fi
 
 cat >>confdefs.h <<_ACEOF
 #define DEFAULT_LD_WARN_RWX_SEGMENTS $ac_default_ld_warn_rwx_segments
+_ACEOF
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_LD_ERROR_RWX_SEGMENTS $ac_default_ld_error_rwx_segments
 _ACEOF
 
 

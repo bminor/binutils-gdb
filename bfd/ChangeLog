@@ -1,3 +1,10 @@
+2023-11-10  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (assign_file_positions_except_relocs): Turn warnings about
+	executable segments into errors if so requested.
+	* elflink.c (bfd_elf_size_dynamic_sections): Turn warnings about
+	executable stacks into errors if so requested.
+
 2023-10-30  Nick Clifton  <nickc@redhat.com>
 
 	* bpf-reloc.def (R_BPF_64_NODLD32): Add entry.

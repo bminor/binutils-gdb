@@ -127,7 +127,7 @@ set lto_link_tests [list \
    "" "-flto -O2 $lto_fat $NOSANITIZE_CFLAGS" \
    {pr12758b.c} {} "libpr12758.a"] \
   [list "PR ld/12758" \
-   "$NOPIE_LDFLAGS $NOSANITIZE_CFLAGS -O2 -Wl,-e,foo -nostdlib -flto -fuse-linker-plugin tmpdir/pr12758a.o -Wl,--start-group tmpdir/libpr12758.a -Wl,--end-group" \
+  "$NOPIE_LDFLAGS $NOSANITIZE_CFLAGS -O2 -Wl,-e,foo -nostdlib -flto -fuse-linker-plugin tmpdir/pr12758a.o -Wl,--start-group tmpdir/libpr12758.a -Wl,--end-group -Wl,--no-error-execstack" \
    "$NOSANITIZE_CFLAGS" \
    {dummy.c} {} "pr12758.exe"] \
   [list "Build libpr13183.a" \
@@ -919,7 +919,7 @@ run_cc_link_tests $lto_link_symbol_tests
 
 run_ld_link_tests [list \
   [list "PR ld/19317 (2)" \
-   "-r tmpdir/pr19317.o" "" "" \
+   "-r tmpdir/pr19317.o --no-error-execstack" "" "" \
    {dummy.s} {} "pr19317-r.o"] \
 ]
 

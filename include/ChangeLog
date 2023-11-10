@@ -1,3 +1,9 @@
+2023-11-10  Nick Clifton  <nickc@redhat.com>
+
+	* bfdlink.h (struct bfd_link_info): Update descriptions of the
+	'execstack', 'noexecstack' and 'warn_execstack'	fields.
+	Add 'error_exectack' and 'warn_is_error_for_rwx_segments' fields.
+
 2023-10-30  Nick Clifton  <nickc@redhat.com>
 
 	* elf/bpf.h (R_BPF_64_NODYLD32): Add a note that this reloc is

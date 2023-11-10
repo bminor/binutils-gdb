@@ -259,13 +259,13 @@ if { [check_gc_sections_available] } {
 	    "pr20828-v.so"] \
 	[list \
 	    "PR ld/20828 forcibly exported symbol version without section GC" \
-	    "$LFLAGS --no-dynamic-linker -e foo -E -T pr20828-v.ld" "" "" \
+	    "$LFLAGS --no-dynamic-linker -e foo -E -T pr20828-v.ld --no-error-rwx-segments" "" "" \
 	    {pr20828-v.s} \
 	    {{objdump -p pr20828-v.od}} \
 	    "pr20828-v-1"] \
 	[list \
 	    "PR ld/20828 forcibly exported symbol version with section GC" \
-	    "$LFLAGS --no-dynamic-linker -e foo --gc-sections -E -T pr20828-v.ld" "" "" \
+	    "$LFLAGS --no-dynamic-linker -e foo --gc-sections -E -T pr20828-v.ld --no-error-rwx-segments" "" "" \
 	    {pr20828-v.s} \
 	    {{objdump -p pr20828-v.od}} \
 	    "pr20828-v-2"]]
@@ -282,7 +282,7 @@ if { [check_gc_sections_available] } {
 	[list \
 	    "PR ld/21233 dynamic symbols with section GC\
 	     (auxiliary shared library)" \
-	    "$LFLAGS -shared -T pr21233.ld" "" "$AFLAGS_PIC" \
+	    "$LFLAGS -shared -T pr21233.ld --no-error-rwx-segments" "" "$AFLAGS_PIC" \
 	    {pr21233-l.s} \
 	    {{readelf --dyn-syms pr21233-l.sd}} \
 	    "libpr21233.so"]]
@@ -290,7 +290,7 @@ if { [check_gc_sections_available] } {
     run_ld_link_tests [list \
 	[list \
 	    "PR ld/21233 dynamic symbols with section GC (--undefined)" \
-	    "$LFLAGS --gc-sections -e foo --undefined=bar -T pr21233.ld" \
+	    "$LFLAGS --gc-sections -e foo --undefined=bar -T pr21233.ld --no-error-rwx-segments" \
 	    "tmpdir/libpr21233.so" "" \
 	    {pr21233.s} \
 	    {{readelf --dyn-syms pr21233.sd}} \
@@ -300,7 +300,7 @@ if { [check_gc_sections_available] } {
 	[list \
 	    "PR ld/21233 dynamic symbols with section GC (--require-defined)" \
 	    "$LFLAGS --gc-sections -e foo --require-defined=bar\
-	     -T pr21233.ld" \
+	     -T pr21233.ld --no-error-rwx-segments" \
 	    "tmpdir/libpr21233.so" "" \
 	    {pr21233.s} \
 	    {{readelf --dyn-syms pr21233.sd}} \
@@ -309,7 +309,7 @@ if { [check_gc_sections_available] } {
     run_ld_link_tests [list \
 	[list \
 	    "PR ld/21233 dynamic symbols with section GC (EXTERN)" \
-	    "$LFLAGS --gc-sections -e foo -T pr21233-e.ld" \
+	    "$LFLAGS --gc-sections -e foo -T pr21233-e.ld --no-error-rwx-segments" \
 	    "tmpdir/libpr21233.so" "" \
 	    {pr21233.s} \
 	    {{readelf --dyn-syms pr21233.sd}} \

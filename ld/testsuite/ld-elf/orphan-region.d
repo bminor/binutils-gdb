@@ -1,5 +1,5 @@
 #source: orphan-region.s
-#ld: -T orphan-region.ld -N -z stack-size=0
+#ld: -T orphan-region.ld -N -z stack-size=0 --no-warn-rwx-segments
 #readelf: -S -l --wide
 #xfail: [uses_genelf] hppa*64*-*-* spu-*-* *-*-nacl*
 # if not using elf.em, you don't get fancy orphan handling

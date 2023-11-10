@@ -225,6 +225,15 @@ AC_ARG_ENABLE(warn-execstack,
   no)  ac_default_ld_warn_execstack=0 ;;
 esac])
 
+ac_default_ld_error_execstack=0
+AC_ARG_ENABLE(error-execstack,
+	      AS_HELP_STRING([--enable-error-execstack],
+	      [turn executable stack warnings into errors]),
+[case "${enableval}" in
+  yes) ac_default_ld_error_execstack=1 ;;
+  no)  ac_default_ld_error_execstack=0 ;;
+esac])
+
 ac_default_ld_warn_rwx_segments=unset
 AC_ARG_ENABLE(warn-rwx-segments,
 	      AS_HELP_STRING([--enable-warn-rwx-segments],
@@ -232,6 +241,15 @@ AC_ARG_ENABLE(warn-rwx-segments,
 [case "${enableval}" in
   yes) ac_default_ld_warn_rwx_segments=1 ;;
   no)  ac_default_ld_warn_rwx_segments=0 ;;
+esac])
+
+ac_default_ld_error_rwx_segments=0
+AC_ARG_ENABLE(error-rwx-segments,
+	      AS_HELP_STRING([--enable-error-rwx-segments],
+	      [turn executable segment warnings into errors]),
+[case "${enableval}" in
+  yes) ac_default_ld_error_rwx_segments=1 ;;
+  no)  ac_default_ld_error_rwx_segments=0 ;;
 esac])
 
 ac_default_ld_default_execstack=unset
@@ -549,12 +567,20 @@ AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_EXECSTACK,
   $ac_default_ld_warn_execstack,
   [Define to 1 if you want to enable --warn-execstack in ELF linker by default.])
 
+AC_DEFINE_UNQUOTED(DEFAULT_LD_ERROR_EXECSTACK,
+  $ac_default_ld_error_execstack,
+  [Define to 1 if you want to turn executable stack warnings into errors by default.])
+
 if test "${ac_default_ld_warn_rwx_segments}" = unset; then
   ac_default_ld_warn_rwx_segments=1
 fi
 AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_RWX_SEGMENTS,
   $ac_default_ld_warn_rwx_segments,
   [Define to 0 if you want to disable --warn-rwx-segments in ELF linker by default.])
+
+AC_DEFINE_UNQUOTED(DEFAULT_LD_ERROR_RWX_SEGMENTS,
+  $ac_default_ld_error_rwx_segments,
+  [Define to 1 if you want to turn executable segment warnings into errors by default.])
 
 if test "${ac_default_ld_default_execstack}" = unset; then
   ac_default_ld_default_execstack=1

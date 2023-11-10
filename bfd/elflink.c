@@ -7152,9 +7152,20 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       /* If the user has explicitly requested warnings, then generate one even
 	 though the choice is the result of another command line option.  */
       if (info->warn_execstack == 1)
-	_bfd_error_handler
-	  (_("\
+	{
+	  if (info->error_execstack)
+	    {
+	      _bfd_error_handler
+		(_("\
+error: creating an executable stack because of -z execstack command line option"));
+	      return false;
+	    }
+
+	  _bfd_error_handler
+	    (_("\
 warning: enabling an executable stack because of -z execstack command line option"));
+	}
+
       elf_stack_flags (output_bfd) = PF_R | PF_W | PF_X;
     }
   else if (info->noexecstack)
@@ -7210,11 +7221,29 @@ warning: enabling an executable stack because of -z execstack command line optio
 		     being enabled despite the fact that it was not requested
 		     on the command line.  */
 		  if (noteobj)
-		    _bfd_error_handler (_("\
+		    {
+		      if (info->error_execstack)
+			{
+			  _bfd_error_handler (_("\
+error: %s: is triggering the generation of an executable stack (because it has an executable .note.GNU-stack section)"),
+					      bfd_get_filename (noteobj));
+			  return false;
+			}
+
+		      _bfd_error_handler (_("\
 warning: %s: requires executable stack (because the .note.GNU-stack section is executable)"),
 		       bfd_get_filename (noteobj));
+		    }
 		  else if (emptyobj)
 		    {
+		      if (info->error_execstack)
+			{
+			  _bfd_error_handler (_("\
+error: %s: is triggering the generation of an executable stack because it does not have a .note.GNU-stack section"),
+					      bfd_get_filename (emptyobj));
+			  return false;
+			}
+
 		      _bfd_error_handler (_("\
 warning: %s: missing .note.GNU-stack section implies executable stack"),
 					  bfd_get_filename (emptyobj));
