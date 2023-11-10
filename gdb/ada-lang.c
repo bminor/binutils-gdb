@@ -1308,7 +1308,7 @@ convert_from_hex_encoded (std::string &out, const char *str, int n)
 /* See ada-lang.h.  */
 
 std::string
-ada_decode (const char *encoded, bool wrap, bool operators)
+ada_decode (const char *encoded, bool wrap, bool operators, bool wide)
 {
   int i;
   int len0;
@@ -1502,7 +1502,7 @@ ada_decode (const char *encoded, bool wrap, bool operators)
 	    i++;
 	}
 
-      if (i < len0 + 3 && encoded[i] == 'U' && isxdigit (encoded[i + 1]))
+      if (wide && i < len0 + 3 && encoded[i] == 'U' && isxdigit (encoded[i + 1]))
 	{
 	  if (convert_from_hex_encoded (decoded, &encoded[i + 1], 2))
 	    {
@@ -1510,7 +1510,7 @@ ada_decode (const char *encoded, bool wrap, bool operators)
 	      continue;
 	    }
 	}
-      else if (i < len0 + 5 && encoded[i] == 'W' && isxdigit (encoded[i + 1]))
+      else if (wide && i < len0 + 5 && encoded[i] == 'W' && isxdigit (encoded[i + 1]))
 	{
 	  if (convert_from_hex_encoded (decoded, &encoded[i + 1], 4))
 	    {
@@ -1518,7 +1518,7 @@ ada_decode (const char *encoded, bool wrap, bool operators)
 	      continue;
 	    }
 	}
-      else if (i < len0 + 10 && encoded[i] == 'W' && encoded[i + 1] == 'W'
+      else if (wide && i < len0 + 10 && encoded[i] == 'W' && encoded[i + 1] == 'W'
 	       && isxdigit (encoded[i + 2]))
 	{
 	  if (convert_from_hex_encoded (decoded, &encoded[i + 2], 8))
@@ -5465,91 +5465,6 @@ ada_add_block_renamings (std::vector<struct block_symbol> &result,
   return result.size () != defns_mark;
 }
 
-/* Implements compare_names, but only applying the comparision using
-   the given CASING.  */
-
-static int
-compare_names_with_case (const char *string1, const char *string2,
-			 enum case_sensitivity casing)
-{
-  while (*string1 != '\0' && *string2 != '\0')
-    {
-      char c1, c2;
-
-      if (isspace (*string1) || isspace (*string2))
-	return strcmp_iw_ordered (string1, string2);
-
-      if (casing == case_sensitive_off)
-	{
-	  c1 = tolower (*string1);
-	  c2 = tolower (*string2);
-	}
-      else
-	{
-	  c1 = *string1;
-	  c2 = *string2;
-	}
-      if (c1 != c2)
-	break;
-
-      string1 += 1;
-      string2 += 1;
-    }
-
-  switch (*string1)
-    {
-    case '(':
-      return strcmp_iw_ordered (string1, string2);
-    case '_':
-      if (*string2 == '\0')
-	{
-	  if (is_name_suffix (string1))
-	    return 0;
-	  else
-	    return 1;
-	}
-      [[fallthrough]];
-    default:
-      if (*string2 == '(')
-	return strcmp_iw_ordered (string1, string2);
-      else
-	{
-	  if (casing == case_sensitive_off)
-	    return tolower (*string1) - tolower (*string2);
-	  else
-	    return *string1 - *string2;
-	}
-    }
-}
-
-/* Compare STRING1 to STRING2, with results as for strcmp.
-   Compatible with strcmp_iw_ordered in that...
-
-       strcmp_iw_ordered (STRING1, STRING2) <= 0
-
-   ... implies...
-
-       compare_names (STRING1, STRING2) <= 0
-
-   (they may differ as to what symbols compare equal).  */
-
-static int
-compare_names (const char *string1, const char *string2)
-{
-  int result;
-
-  /* Similar to what strcmp_iw_ordered does, we need to perform
-     a case-insensitive comparison first, and only resort to
-     a second, case-sensitive, comparison if the first one was
-     not sufficient to differentiate the two strings.  */
-
-  result = compare_names_with_case (string1, string2, case_sensitive_off);
-  if (result == 0)
-    result = compare_names_with_case (string1, string2, case_sensitive_on);
-
-  return result;
-}
-
 /* Convenience function to get at the Ada encoded lookup name for
    LOOKUP_NAME, as a C string.  */
 
@@ -5559,29 +5474,24 @@ ada_lookup_name (const lookup_name_info &lookup_name)
   return lookup_name.ada ().lookup_name ().c_str ();
 }
 
-/* A helper for add_nonlocal_symbols.  Call expand_matching_symbols
+/* A helper for add_nonlocal_symbols.  Expand all necessary symtabs
    for OBJFILE, then walk the objfile's symtabs and update the
    results.  */
 
 static void
 map_matching_symbols (struct objfile *objfile,
 		      const lookup_name_info &lookup_name,
-		      bool is_wild_match,
 		      domain_enum domain,
 		      int global,
 		      match_data &data)
 {
   data.objfile = objfile;
-  if (is_wild_match || lookup_name.ada ().standard_p ())
-    objfile->expand_matching_symbols (lookup_name, domain, global,
-				      is_wild_match ? nullptr : compare_names);
-  else
-    objfile->expand_symtabs_matching (nullptr, &lookup_name,
-				      nullptr, nullptr,
-				      global
-				      ? SEARCH_GLOBAL_BLOCK
-				      : SEARCH_STATIC_BLOCK,
-				      domain, ALL_DOMAIN);
+  objfile->expand_symtabs_matching (nullptr, &lookup_name,
+				    nullptr, nullptr,
+				    global
+				    ? SEARCH_GLOBAL_BLOCK
+				    : SEARCH_STATIC_BLOCK,
+				    domain, ALL_DOMAIN);
 
   const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
   for (compunit_symtab *symtab : objfile->compunits ())
@@ -5610,8 +5520,7 @@ add_nonlocal_symbols (std::vector<struct block_symbol> &result,
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      map_matching_symbols (objfile, lookup_name, is_wild_match, domain,
-			    global, data);
+      map_matching_symbols (objfile, lookup_name, domain, global, data);
 
       for (compunit_symtab *cu : objfile->compunits ())
 	{
@@ -5631,7 +5540,7 @@ add_nonlocal_symbols (std::vector<struct block_symbol> &result,
       lookup_name_info name1 (bracket_name, symbol_name_match_type::FULL);
 
       for (objfile *objfile : current_program_space->objfiles ())
-	map_matching_symbols (objfile, name1, false, domain, global, data);
+	map_matching_symbols (objfile, name1, domain, global, data);
     }
 }
 
@@ -13296,6 +13205,8 @@ ada_lookup_name_info::ada_lookup_name_info (const lookup_name_info &lookup_name)
 	}
       else
 	m_standard_p = false;
+
+      m_decoded_name = ada_decode (m_encoded_name.c_str (), true, false, false);
 
       /* If the name contains a ".", then the user is entering a fully
 	 qualified entity name, and the match must not be done in wild

@@ -263,7 +263,11 @@ gdb::unique_xmalloc_ptr<char>
 cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
 					       htab_t gnat_entries)
 {
-  std::string canonical = ada_decode (entry->name, false, false);
+  /* We decode Ada names in a particular way: operators and wide
+     characters are left as-is.  This is done to make name matching a
+     bit simpler; and for wide characters, it means the choice of Ada
+     source charset does not affect the indexer directly.  */
+  std::string canonical = ada_decode (entry->name, false, false, false);
   if (canonical.empty ())
     return {};
   std::vector<std::string_view> names = split_name (canonical.c_str (),

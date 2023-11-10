@@ -128,20 +128,25 @@ class ada_lookup_name_info final
      peculiarities.  */
   std::vector<std::string_view> split_name () const
   {
-    if (m_verbatim_p || m_standard_p)
+    if (m_verbatim_p)
       {
+	/* For verbatim matches, just return the encoded name
+	   as-is.  */
 	std::vector<std::string_view> result;
-	if (m_standard_p)
-	  result.emplace_back ("standard");
 	result.emplace_back (m_encoded_name);
 	return result;
       }
-    return ::split_name (m_encoded_name.c_str (), split_style::UNDERSCORE);
+    /* Otherwise, split the decoded name for matching.  */
+    return ::split_name (m_decoded_name.c_str (), split_style::DOT_STYLE);
   }
 
 private:
   /* The Ada-encoded lookup name.  */
   std::string m_encoded_name;
+
+  /* The decoded lookup name.  This is formed by calling ada_decode
+     with both 'operators' and 'wide' set to false.  */
+  std::string m_decoded_name;
 
   /* Whether the user-provided lookup name was Ada encoded.  If so,
      then return encoded names in the 'matches' method's 'completion

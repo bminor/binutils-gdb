@@ -216,10 +216,18 @@ extern const char *ada_decode_symbol (const struct general_symbol_info *);
    the name does not appear to be GNAT-encoded, then the result
    depends on WRAP.  If WRAP is true (the default), then the result is
    simply wrapped in <...>.  If WRAP is false, then the empty string
-   will be returned.  Also, when OPERATORS is false, operator names
-   will not be decoded.  */
+   will be returned.
+
+   When OPERATORS is false, operator names will not be decoded.  By
+   default, they are decoded, e.g., 'Oadd' will be transformed to
+   '"+"'.
+
+   When WIDE is false, wide characters will be left as-is.  By
+   default, they converted from their hex encoding to the host
+   charset.  */
 extern std::string ada_decode (const char *name, bool wrap = true,
-			       bool operators = true);
+			       bool operators = true,
+			       bool wide = true);
 
 extern std::vector<struct block_symbol> ada_lookup_symbol_list
      (const char *, const struct block *, domain_enum);
