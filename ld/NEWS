@@ -1,8 +1,12 @@
 -*- text -*-
 
-Changes in 2.41:
-
 * Add support for the KVX instruction set.
+
+* A new linker script sorting directive has been added: REVERSE.  This reverses
+  the order of the sorting.  It may be combined with either SORT_BY_NAME or
+  SORT_BY_INIT_PRIORITY.
+
+Changes in 2.41:
 
 * The linker now accepts a command line option of --remap-inputs
   <PATTERN>=<FILE> to relace any input file that matches <PATTERN> with
@@ -11,10 +15,6 @@ Changes in 2.41:
 
 * The linker command line option --print-map-locals can be used to include
   local symbols in a linker map.  (ELF targets only).
-
-* A new linker script sorting directive has been added: REVERSE.  This reverses
-  the order of the sorting.  It may be combined with either SORT_BY_NAME or
-  SORT_BY_INIT_PRIORITY.
 
 * For most ELF based targets, if the --enable-linker-version option is used
   then the version of the linker will be inserted as a string into the .comment
