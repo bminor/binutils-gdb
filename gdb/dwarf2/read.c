@@ -9173,6 +9173,8 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
 
   dwarf_read_debug_printf ("DWO file found: %s", dwo_name);
 
+  bfd_cache_close (dwo_file->dbfd.get ());
+
   return dwo_file.release ();
 }
 
@@ -9464,6 +9466,8 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
   dwarf_read_debug_printf ("    %s CUs, %s TUs",
 			   pulongest (dwp_file->cus ? dwp_file->cus->nr_units : 0),
 			   pulongest (dwp_file->tus ? dwp_file->tus->nr_units : 0));
+
+  bfd_cache_close (dwp_file->dbfd.get ());
 
   return dwp_file;
 }
