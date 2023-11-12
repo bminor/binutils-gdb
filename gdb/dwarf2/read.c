@@ -353,7 +353,7 @@ struct dwo_file
      For virtual DWO files the name is constructed from the section offsets
      of abbrev,line,loc,str_offsets so that we combine virtual DWO files
      from related CU+TUs.  */
-  const char *dwo_name = nullptr;
+  std::string dwo_name;
 
   /* The DW_AT_comp_dir attribute.  */
   const char *comp_dir = nullptr;
@@ -7717,19 +7717,30 @@ hash_dwo_file (const void *item)
   const struct dwo_file *dwo_file = (const struct dwo_file *) item;
   hashval_t hash;
 
-  hash = htab_hash_string (dwo_file->dwo_name);
+  hash = htab_hash_string (dwo_file->dwo_name.c_str ());
   if (dwo_file->comp_dir != NULL)
     hash += htab_hash_string (dwo_file->comp_dir);
   return hash;
 }
 
+/* This is used when looking up entries in the DWO hash table.  */
+
+struct dwo_file_search
+{
+  /* Name of the DWO to look for.  */
+  const char *dwo_name;
+  /* Compilation directory to look for.  */
+  const char *comp_dir;
+};
+
 static int
 eq_dwo_file (const void *item_lhs, const void *item_rhs)
 {
   const struct dwo_file *lhs = (const struct dwo_file *) item_lhs;
-  const struct dwo_file *rhs = (const struct dwo_file *) item_rhs;
+  const struct dwo_file_search *rhs
+    = (const struct dwo_file_search *) item_rhs;
 
-  if (strcmp (lhs->dwo_name, rhs->dwo_name) != 0)
+  if (lhs->dwo_name != rhs->dwo_name)
     return 0;
   if (lhs->comp_dir == NULL || rhs->comp_dir == NULL)
     return lhs->comp_dir == rhs->comp_dir;
@@ -7755,7 +7766,7 @@ lookup_dwo_file_slot (dwarf2_per_objfile *per_objfile,
 		      const char *dwo_name,
 		      const char *comp_dir)
 {
-  struct dwo_file find_entry;
+  struct dwo_file_search find_entry;
   void **slot;
 
   if (per_objfile->per_bfd->dwo_files == NULL)
@@ -7823,7 +7834,7 @@ create_dwo_cu_reader (const struct die_reader_specs *reader,
     {
       complaint (_("Dwarf Error: debug entry at offset %s is missing"
 		   " its dwo_id [in module %s]"),
-		 sect_offset_str (sect_off), dwo_file->dwo_name);
+		 sect_offset_str (sect_off), dwo_file->dwo_name.c_str ());
       return;
     }
 
@@ -8474,7 +8485,7 @@ create_dwo_unit_in_dwp_v1 (dwarf2_per_objfile *per_objfile,
 			       virtual_dwo_name.c_str ());
 
       dwo_file = new struct dwo_file;
-      dwo_file->dwo_name = per_objfile->objfile->intern (virtual_dwo_name);
+      dwo_file->dwo_name = std::move (virtual_dwo_name);
       dwo_file->comp_dir = comp_dir;
       dwo_file->sections.abbrev = sections.abbrev;
       dwo_file->sections.line = sections.line;
@@ -8659,7 +8670,7 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_objfile *per_objfile,
 			       virtual_dwo_name.c_str ());
 
       dwo_file = new struct dwo_file;
-      dwo_file->dwo_name = per_objfile->objfile->intern (virtual_dwo_name);
+      dwo_file->dwo_name = std::move (virtual_dwo_name);
       dwo_file->comp_dir = comp_dir;
       dwo_file->sections.abbrev =
 	create_dwp_v2_or_v5_section (per_objfile, &dwp_file->sections.abbrev,
@@ -8831,7 +8842,7 @@ create_dwo_unit_in_dwp_v5 (dwarf2_per_objfile *per_objfile,
 			       virtual_dwo_name.c_str ());
 
       dwo_file = new struct dwo_file;
-      dwo_file->dwo_name = per_objfile->objfile->intern (virtual_dwo_name);
+      dwo_file->dwo_name = std::move (virtual_dwo_name);
       dwo_file->comp_dir = comp_dir;
       dwo_file->sections.abbrev =
 	create_dwp_v2_or_v5_section (per_objfile,
@@ -17583,7 +17594,7 @@ read_dwo_str_index (const struct die_reader_specs *reader, ULONGEST str_index)
 	     least has a limit. */
 	  complaint (_("Section .debug_str_offsets in %s has unsupported"
 		       " version %d, use empty string."),
-		   reader->dwo_file->dwo_name, version);
+		     reader->dwo_file->dwo_name.c_str (), version);
 	  return "";
 	}
 
