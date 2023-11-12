@@ -1536,9 +1536,13 @@ Optional Features:
                           enable DT_TEXTREL check in ELF linker
   --enable-separate-code  enable -z separate-code in ELF linker by default
   --enable-warn-execstack enable warnings when creating an executable stack
+  --enable-error-execstack
+                          turn executable stack warnings into errors
   --enable-warn-rwx-segments
                           enable warnings when creating segments with RWX
                           permissions
+  --enable-error-rwx-segments
+                          turn executable segment warnings into errors
   --enable-default-execstack
                           create an executable stack if an input file is
                           missing a .note.GNU-stack section
@@ -11657,7 +11661,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11658 "configure"
+#line 11664 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11763,7 +11767,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11764 "configure"
+#line 11770 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
