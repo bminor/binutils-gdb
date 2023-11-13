@@ -108,7 +108,7 @@ static const struct ld_option ld_options[] =
     'A', N_("ARCH"), N_("Set architecture") , EXACTLY_TWO_DASHES },
   { {"format", required_argument, NULL, 'b'},
     'b', N_("TARGET"), N_("Specify target for following input files"),
-    TWO_DASHES },
+    EXACTLY_TWO_DASHES },
   { {"mri-script", required_argument, NULL, 'c'},
     'c', N_("FILE"), N_("Read MRI format linker script"), TWO_DASHES },
   { {"dc", no_argument, NULL, 'd'},
