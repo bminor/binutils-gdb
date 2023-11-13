@@ -350,7 +350,7 @@ class NoOpStructPrinter(gdb.ValuePrinter):
 
     def children(self):
         for field in self.__ty.fields():
-            if field.name is not None:
+            if hasattr(field, "bitpos") and field.name is not None:
                 yield (field.name, self.__value[field])
 
 

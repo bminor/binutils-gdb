@@ -15,9 +15,21 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+struct some_struct
+{
+  int x;
+  int y;
+
+  static int z;
+};
+
+int some_struct::z = 37;
+
 void
 func ()
 {
+  some_struct aggregate { 91, 87 };
+
   int value = 23;
 
   int *ptr = &value;
