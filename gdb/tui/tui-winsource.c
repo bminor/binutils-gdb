@@ -347,8 +347,11 @@ tui_source_window_base::refresh_window ()
   gdb_assert (pad_width > 0 || m_pad.get () == nullptr);
   gdb_assert (pad_x + view_width <= pad_width || m_pad.get () == nullptr);
 
-  prefresh (m_pad.get (), 0, pad_x, y + 1, x + left_margin,
-	    y + m_content.size (), x + left_margin + view_width - 1);
+  int sminrow = y + 1;
+  int smincol = x + left_margin;
+  int smaxrow = sminrow + m_content.size () - 1;
+  int smaxcol = smincol + view_width - 1;
+  prefresh (m_pad.get (), 0, pad_x, sminrow, smincol, smaxrow, smaxcol);
 }
 
 void
