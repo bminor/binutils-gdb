@@ -1,3 +1,7 @@
+2023-11-13  Chung-Ju Wu  <jasonwucj@gmail.com>
+
+	* ld.texi: Fix redundant space typo.
+
 2023-11-10  Nick Clifton  <nickc@redhat.com>
 
 	* ldlex.h (enum option_values): Add OPTION_ERROR_EXECSTACK,
