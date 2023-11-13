@@ -468,6 +468,11 @@ For compatibility reasons, @samp{@var{n}x} and @samp{@var{b}fx} are
 accepted as synonyms for @samp{@var{n}f1_1}.  These values are
 deprecated.
 
+In addition the special name @samp{from-abi} can be used, in which
+case the assembler will select an architecture suitable for whichever
+ABI has been selected, either via the @option{-mabi=} command line
+option or the built in default.
+
 @item -mtune=@var{cpu}
 Schedule and tune for a particular MIPS CPU.  Valid @var{cpu} values are
 identical to @samp{-march=@var{cpu}}.
