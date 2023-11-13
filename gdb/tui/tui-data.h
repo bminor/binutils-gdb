@@ -88,6 +88,18 @@ public:
     return true;
   }
 
+  /* Return the width of the box.  */
+  int box_width () const
+  {
+    return can_box () ? 1 : 0;
+  }
+
+  /* Return the size of the box.  */
+  int box_size () const
+  {
+    return 2 * box_width ();
+  }
+
   /* Resize this window.  The parameters are used to set the window's
      size and position.  */
   virtual void resize (int height, int width,

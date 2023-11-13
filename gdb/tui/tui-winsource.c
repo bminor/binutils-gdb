@@ -211,7 +211,7 @@ void
 tui_source_window_base::do_erase_source_content (const char *str)
 {
   int x_pos;
-  int half_width = (width - 2) / 2;
+  int half_width = (width - box_size ()) / 2;
 
   m_content.clear ();
   if (handle != NULL)
@@ -347,7 +347,7 @@ tui_source_window_base::refresh_window ()
   gdb_assert (pad_width > 0 || m_pad.get () == nullptr);
   gdb_assert (pad_x + view_width <= pad_width || m_pad.get () == nullptr);
 
-  int sminrow = y + 1;
+  int sminrow = y + box_width ();
   int smincol = x + left_margin;
   int smaxrow = sminrow + m_content.size () - 1;
   int smaxcol = smincol + view_width - 1;
@@ -412,11 +412,15 @@ tui_source_window_base::show_source_content ()
   for (int lineno = 0; lineno < m_content.size (); lineno++)
     show_source_line (lineno);
 
-  /* Calling check_and_display_highlight_if_needed will call refresh_window
-     (so long as the current window can be boxed), which will ensure that
-     the newly loaded window content is copied to the screen.  */
-  gdb_assert (can_box ());
-  check_and_display_highlight_if_needed ();
+  if (can_box ())
+    {
+      /* Calling check_and_display_highlight_if_needed will call refresh_window
+	 (so long as the current window can be boxed), which will ensure that
+	 the newly loaded window content is copied to the screen.  */
+      check_and_display_highlight_if_needed ();
+    }
+  else
+    refresh_window ();
 }
 
 tui_source_window_base::tui_source_window_base ()
@@ -693,7 +697,7 @@ tui_source_window_base::update_exec_info (bool refresh_p)
       if (src_element->is_exec_point)
 	element[TUI_EXEC_POS] = '>';
 
-      mvwaddstr (handle.get (), i + 1, 1, element);
+      mvwaddstr (handle.get (), i + box_width (), box_width (), element);
 
       show_line_number (i);
     }

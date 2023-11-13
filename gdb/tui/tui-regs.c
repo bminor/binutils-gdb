@@ -281,15 +281,15 @@ tui_data_window::display_registers_from (int start_element_no)
   for (i = 0; i < start_element_no; i++)
     m_regs_content[i].y = 0;
 
-  m_regs_column_count = (width - 2) / m_item_width;
+  m_regs_column_count = (width - box_size ()) / m_item_width;
   if (m_regs_column_count == 0)
     m_regs_column_count = 1;
-  m_item_width = (width - 2) / m_regs_column_count;
+  m_item_width = (width - box_size ()) / m_regs_column_count;
 
   /* Now create each data "sub" window, and write the display into
      it.  */
   int cur_y = 1;
-  while (i < m_regs_content.size () && cur_y <= height - 2)
+  while (i < m_regs_content.size () && cur_y <= height - box_size ())
     {
       for (int j = 0;
 	   j < m_regs_column_count && i < m_regs_content.size ();
@@ -325,7 +325,7 @@ tui_data_window::display_reg_element_at_line (int start_element_no,
       int last_line_no, first_line_on_last_page;
 
       last_line_no = last_regs_line_no ();
-      first_line_on_last_page = last_line_no - (height - 2);
+      first_line_on_last_page = last_line_no - (height - box_size ());
       if (first_line_on_last_page < 0)
 	first_line_on_last_page = 0;
 
@@ -400,7 +400,7 @@ tui_data_window::erase_data_content (const char *prompt)
   check_and_display_highlight_if_needed ();
   if (prompt != NULL)
     {
-      int half_width = (width - 2) / 2;
+      int half_width = (width - box_size ()) / 2;
       int x_pos;
 
       if (strlen (prompt) >= half_width)

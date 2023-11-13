@@ -106,7 +106,7 @@ box_win (struct tui_win_info *win_info,
     {
       /* Emit "+-TITLE-+" -- so 2 characters on the right and 2 on
 	 the left.  */
-      int max_len = win_info->width - 2 - 2;
+      int max_len = win_info->width - win_info->box_size () - 2;
 
       if (win_info->title ().size () <= max_len)
 	mvwaddstr (win, 0, 2, win_info->title ().c_str ());

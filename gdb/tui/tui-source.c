@@ -53,7 +53,7 @@ tui_source_window::set_contents (struct gdbarch *arch,
 
   /* Take hilite (window border) into account, when
      calculating the number of lines.  */
-  int nlines = height - 2;
+  int nlines = height - box_size ();
 
   std::string srclines;
   const std::vector<off_t> *offsets;
@@ -201,7 +201,7 @@ tui_source_window::line_is_displayed (int line) const
 void
 tui_source_window::maybe_update (frame_info_ptr fi, symtab_and_line sal)
 {
-  int start_line = (sal.line - ((height - 2) / 2)) + 1;
+  int start_line = (sal.line - ((height - box_size ()) / 2)) + 1;
   if (start_line <= 0)
     start_line = 1;
 

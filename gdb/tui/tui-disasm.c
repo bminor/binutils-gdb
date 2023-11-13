@@ -341,7 +341,7 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
   cur_pc = tui_location.addr ();
 
   /* Window size, excluding highlight box.  */
-  max_lines = height - 2;
+  max_lines = height - box_size ();
 
   /* Get temporary table that will hold all strings (addr & insn).  */
   std::vector<tui_asm_line> asm_lines;
