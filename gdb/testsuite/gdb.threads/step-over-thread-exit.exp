@@ -96,6 +96,16 @@ proc test {displaced-stepping non-stop target-non-stop schedlock cmd ns_stop_all
 	    if {${non-stop}} {
 		gdb_test -nopass "thread $thread" "Switching to thread .*" \
 		    "switch to event thread"
+
+		# Once we continue, the current thread exits, and the
+		# main thread thus unblocks from its pthread_join, and
+		# spawns a new thread.  That new thread may hit the
+		# breakpoint at my_exit_syscall very quickly.  GDB
+		# could then see/process that breakpoint event before
+		# the thread exit event for the thread we care about,
+		# which would result in a failure in the test below.
+		# Just delete the breakpoint to avoid it.
+		delete_breakpoints
 	    }
 
 	    gdb_test_multiple $cmd "command aborts when thread exits" {
