@@ -268,11 +268,8 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 	      || (last_addr == pc && asm_lines.size () < max_lines))
 	     && new_low != prev_low);
 
-      /* If we failed to disassemble the required number of lines then the
-	 following walk forward is not going to work, it assumes that
-	 ASM_LINES contains exactly MAX_LINES entries.  Instead we should
-	 consider falling back to a previous possible start address in
-	 POSSIBLE_NEW_LOW.  */
+      /* If we failed to disassemble the required number of lines, try to fall
+	 back to a previous possible start address in POSSIBLE_NEW_LOW.  */
       if (asm_lines.size () < max_lines)
 	{
 	  if (!possible_new_low.has_value ())
@@ -282,8 +279,11 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 	  new_low = *possible_new_low;
 	  next_addr = tui_disassemble (gdbarch, asm_lines, new_low, max_lines);
 	  last_addr = asm_lines.back ().addr;
-	  gdb_assert (asm_lines.size () >= max_lines);
 	}
+
+      /* The following walk forward assumes that ASM_LINES contains exactly
+	 MAX_LINES entries.  */
+      gdb_assert (asm_lines.size () == max_lines);
 
       /* Scan forward disassembling one instruction at a time until
 	 the last visible instruction of the window matches the pc.
