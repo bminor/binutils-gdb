@@ -18,4 +18,5 @@ with Callee;
 procedure Caller is
 begin
    Callee;
-end Caller;
+end Caller;    -- CALLEE_LOC, this is where the inlined callee breakpoint
+               -- is located.
