@@ -206,13 +206,13 @@ private:
   /* Return the size of the left margin space, this is the space used to
      display things like breakpoint markers.  */
   int left_margin () const
-  { return box_width () + TUI_EXECINFO_SIZE + extra_margin (); }
+  { return TUI_EXECINFO_SIZE + extra_margin (); }
 
   /* Return the width of the area that is available for window content.
      This is the window width minus the borders and the left margin, which
      is used for displaying things like breakpoint markers.  */
   int view_width () const
-  { return width - left_margin () - box_width (); }
+  { return width - left_margin () - box_size (); }
 
   void show_source_content ();
 
