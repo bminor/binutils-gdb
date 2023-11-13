@@ -1,8 +1,9 @@
 #PROG: objcopy
+#as: -march=from-abi
 #objdump: -d --prefix-addresses --show-raw-insn
 #name: MIPS16 unsupported EXTEND and undefined opcode disassembly
 
-# Verify raw hexadecimal EXTEND and inexistent opcode disassembly.
+# Verify raw hexadecimal EXTEND and unexistent opcode disassembly.
 
 .*: +file format .*mips.*
 
