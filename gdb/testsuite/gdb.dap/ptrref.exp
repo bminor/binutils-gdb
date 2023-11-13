@@ -55,7 +55,7 @@ gdb_assert {[llength $scopes] == 2} "two scopes"
 lassign $scopes scope reg_scope
 gdb_assert {[dict get $scope name] == "Locals"} "scope is locals"
 
-gdb_assert {[dict get $scope namedVariables] == 3} "three vars in scope"
+gdb_assert {[dict get $scope namedVariables] == 4} "three vars in scope"
 
 set num [dict get $scope variablesReference]
 set refs [lindex [dap_check_request_and_response "fetch variables" \
@@ -96,6 +96,13 @@ foreach var [dict get $refs body variables] {
 	    gdb_assert {[dict get $var namedVariables] == 1} \
 		"$name has exactly one child"
 	    fetch_pointer $name $var
+	}
+	"aggregate" {
+	    gdb_assert {[dict get $var variablesReference] != 0} \
+		"$name has children"
+	    # This should omit the static field.
+	    gdb_assert {[dict get $var namedVariables] == 2} \
+		"$name has exactly 2 children"
 	}
     }
 }
