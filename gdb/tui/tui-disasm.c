@@ -278,7 +278,6 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 	  /* Take the best possible match we have.  */
 	  new_low = *possible_new_low;
 	  next_addr = tui_disassemble (gdbarch, asm_lines, new_low, max_lines);
-	  last_addr = asm_lines.back ().addr;
 	}
 
       /* The following walk forward assumes that ASM_LINES contains exactly
@@ -290,6 +289,7 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 	 We keep the disassembled instructions in the 'lines' window
 	 and shift it downward (increasing its addresses).  */
       int pos = max_lines - 1;
+      last_addr = asm_lines.back ().addr;
       if (last_addr < pc)
 	do
 	  {
