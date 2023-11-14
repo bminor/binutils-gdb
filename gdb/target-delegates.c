@@ -2291,9 +2291,9 @@ dummy_target::supports_set_thread_options (gdb_thread_options arg0)
 bool
 debug_target::supports_set_thread_options (gdb_thread_options arg0)
 {
-  bool result;
   gdb_printf (gdb_stdlog, "-> %s->supports_set_thread_options (...)\n", this->beneath ()->shortname ());
-  result = this->beneath ()->supports_set_thread_options (arg0);
+  bool result
+    = this->beneath ()->supports_set_thread_options (arg0);
   gdb_printf (gdb_stdlog, "<- %s->supports_set_thread_options (", this->beneath ()->shortname ());
   target_debug_print_gdb_thread_options (arg0);
   gdb_puts (") = ", gdb_stdlog);
