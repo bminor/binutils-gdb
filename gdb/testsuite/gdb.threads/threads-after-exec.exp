@@ -32,14 +32,18 @@ proc do_test { } {
     gdb_test "continue" "Catchpoint $::decimal .*" "continue until exec"
 
     # Confirm we only have one thread in the thread list.
-    gdb_test "info threads" "\\* 1\[ \t\]+\[^\r\n\]+.*"
+    gdb_test "p \$_inferior_thread_count" " = 1"
+
+    # Get the post-exec thread number.  Due to PR gdb/31069 ("Zombie
+    # leader detection racy") this isn't always thread 1.1.
+    set cur_thr [get_integer_valueof "\$_thread" 0]
 
     if {[istarget *-*-linux*] && [gdb_is_target_native]} {
 	# Confirm there's only one LWP in the list as well, and that
-	# it is bound to thread 1.1.
+	# it is bound to the existing GDB thread.
 	set inf_pid [get_inferior_pid]
 	gdb_test_multiple "maint info linux-lwps" "" {
-	    -wrap -re "Thread ID *\r\n$inf_pid\.$inf_pid\.0\[ \t\]+1\.1 *" {
+	    -wrap -re "Thread ID *\r\n$inf_pid\.$inf_pid\.0\[ \t\]+1\.$cur_thr *" {
 		pass $gdb_test_name
 	    }
 	}
