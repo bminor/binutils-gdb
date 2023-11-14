@@ -321,7 +321,8 @@ with_test_prefix "enable 'abc-def'" {
     set re [string_to_regexp $binfile]
 
     gdb_test "enable missing-debug-handler \"$re\" abc-def" \
-	"^1 missing debug handler enabled"
+	"^1 missing debug handler enabled" \
+	"enable missing-debug-handler"
 
     gdb_test "info missing-debug-handlers" \
 	[multi_line \
