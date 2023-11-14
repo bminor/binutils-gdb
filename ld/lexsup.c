@@ -110,7 +110,7 @@ static const struct ld_option ld_options[] =
     'b', N_("TARGET"), N_("Specify target for following input files"),
     EXACTLY_TWO_DASHES },
   { {"mri-script", required_argument, NULL, 'c'},
-    'c', N_("FILE"), N_("Read MRI format linker script"), TWO_DASHES },
+    'c', N_("FILE"), N_("Read MRI format linker script"), EXACTLY_TWO_DASHES },
   { {"dc", no_argument, NULL, 'd'},
     'd', NULL, N_("Force common symbols to be defined"), ONE_DASH },
   { {"dp", no_argument, NULL, 'd'},

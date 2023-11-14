@@ -1,3 +1,9 @@
+2023-11-14  Nick Clifton  <nickc@redhat.com>
+
+	PR 28910
+	* lexsup.c (ld_options): Ensure that the --mri-script option is
+	correctly recognised.
+
 2023-11-13  Nick Clifton  <nickc@redhat.com>
 
 	PR 28910
