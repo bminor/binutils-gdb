@@ -148,7 +148,7 @@ future, if there are, a reference to the list will be included here.
 
 The current global maintainers are (in alphabetical order):
 
-Pedro Alves                     pedro@palves.net
+Pedro Alves			pedro@palves.net
 Kevin Buettner			kevinb@redhat.com
 Andrew Burgess			aburgess@redhat.com
 Simon Marchi			simon.marchi@polymtl.ca
@@ -367,7 +367,7 @@ Solaris			Rainer Orth		ro@CeBiTec.Uni-Bielefeld.DE
 
 Core: Generic components used by all of GDB
 
-linespec		Keith Seitz             keiths@redhat.com
+linespec		Keith Seitz		keiths@redhat.com
 
 language support
   D			Iain Buclaw		ibuclaw@gdcproject.org
@@ -378,7 +378,7 @@ MI interface		Vladimir Prus		vladimir@codesourcery.com
 documentation		Eli Zaretskii		eliz@gnu.org
   (including NEWS)
 testsuite
-  gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
+  gdbtk (gdb.gdbtk)	Keith Seitz		keiths@redhat.com
 
 SystemTap		Sergio Durigan Junior	sergiodj@sergiodj.net
 
@@ -393,7 +393,7 @@ record
 
 UI: External (user) interfaces.
 
-gdbtk (c & tcl)		Fernando Nasser         fnasser@redhat.com
+gdbtk (c & tcl)		Fernando Nasser		fnasser@redhat.com
 			Keith Seitz		keiths@redhat.com
 libgui (w/foundry, sn)	Keith Seitz		keiths@redhat.com
 
@@ -471,7 +471,7 @@ Per Bothner					per@bothner.com
 Don Breazeal					donb@codesourcery.com
 Joel Brobecker					brobecker@adacore.com
 Dave Brolley					brolley@redhat.com
-Samuel Bronson                                  naesten@gmail.com
+Samuel Bronson					naesten@gmail.com
 Paul Brook					paul@codesourcery.com
 Julian Brown					julian@codesourcery.com
 Iain Buclaw					ibuclaw@gdcproject.org
@@ -498,7 +498,7 @@ Dhananjay Deshpande				dhananjayd@kpitcummins.com
 Markus Deuling					deuling@de.ibm.com
 Klee Dienes					kdienes@apple.com
 Hannes Domani					ssbssa@yahoo.de
-Gabriel Dos Reis                                gdr@integrable-solutions.net
+Gabriel Dos Reis				gdr@integrable-solutions.net
 Sergio Durigan Junior				sergiodj@sergiodj.net
 Michael Eager					eager@eagercon.com
 Richard Earnshaw				rearnsha@arm.com
@@ -581,12 +581,12 @@ Yan-Ting Lin					currygt52@gmail.com
 Robert Lipe					rjl@sco.com
 Lei Liu						lei.liu2@windriver.com
 Sandra Loosemore				sandra@codesourcery.com
-Carl Love                  			cel@linux.ibm.com
+Carl Love					cel@linux.ibm.com
 H.J. Lu						hjl.tools@gmail.com
-Michal Ludvig                                   mludvig@suse.cz
+Michal Ludvig					mludvig@suse.cz
 Edjunior B. Machado				emachado@linux.vnet.ibm.com
 Luis Machado					luis.machado@arm.com
-Jose E. Marchesi                                jose.marchesi@oracle.com
+Jose E. Marchesi				jose.marchesi@oracle.com
 Glen McCready					gkm@redhat.com
 Greg McGary					greg@mcgary.org
 Roland McGrath					roland@hack.frob.com
@@ -595,7 +595,7 @@ Jason Merrill					jason@redhat.com
 Markus T. Metzger				markus.t.metzger@intel.com
 David S. Miller					davem@redhat.com
 Mark Mitchell					mark@codesourcery.com
-Marko Mlinar                                    markom@opencores.org
+Marko Mlinar					markom@opencores.org
 Alan Modra					amodra@gmail.com
 Fawzi Mohamed					fawzi.mohamed@nokia.com
 Jason Molenda					jmolenda@apple.com
@@ -603,7 +603,7 @@ Chris Moller					cmoller@redhat.com
 Patrick Monnerat				patrick@monnerat.net
 Phil Muldoon					pmuldoon@redhat.com
 Pierre Muller					muller@sourceware.org
-Gaius Mulley                                    gaius@glam.ac.uk
+Gaius Mulley					gaius@glam.ac.uk
 Masaki Muranaka					monaka@monami-software.com
 Joseph Myers					joseph@codesourcery.com
 Fernando Nasser					fnasser@redhat.com
@@ -625,7 +625,7 @@ Kevin Pouget					kevin.pouget@st.com
 Paul Pluzhnikov					ppluzhnikov@google.com
 Marek Polacek					mpolacek@redhat.com
 Siddhesh Poyarekar				siddhesh@redhat.com
-Vladimir Prus                                   vladimir@codesourcery.com
+Vladimir Prus					vladimir@codesourcery.com
 Yao Qi						qiyao@sourceware.org
 Qinwei						qinwei@sunnorth.com.cn
 Ramana Radhakrishnan				ramana.radhakrishnan@arm.com
@@ -734,7 +734,7 @@ J.T. Conklin (dcache, NetBSD, remote, global)	jtc at acorntoolworks dot com
 Frank Ch. Eigler (sim)				fche at redhat dot com
 Per Bothner (Java)				per at bothner dot com
 Anthony Green (Java)				green at redhat dot com
-Fernando Nasser (testsuite/, mi, cli, KOD)      fnasser at redhat dot com
+Fernando Nasser (testsuite/, mi, cli, KOD)	fnasser at redhat dot com
 Mark Salter (testsuite/lib+config)		msalter at redhat dot com
 Jim Kingdon (web pages)				kingdon at panix dot com
 Jim Ingham (gdbtk, libgui)			jingham at apple dot com
