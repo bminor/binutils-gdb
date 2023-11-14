@@ -4977,13 +4977,11 @@ print_bp_stop_message (bpstat *bs)
     case print_it_noop:
       /* Nothing should be printed for this bpstat entry.  */
       return PRINT_UNKNOWN;
-      break;
 
     case print_it_done:
       /* We still want to print the frame, but we already printed the
 	 relevant messages.  */
       return PRINT_SRC_AND_LOC;
-      break;
 
     case print_it_normal:
       {
@@ -4997,11 +4995,9 @@ print_bp_stop_message (bpstat *bs)
 	/* Normal case.  Call the breakpoint's print_it method.  */
 	return b->print_it (bs);
       }
-      break;
 
     default:
       internal_error (_("print_bp_stop_message: unrecognized enum value"));
-      break;
     }
 }
 
