@@ -152,6 +152,7 @@ Pedro Alves			pedro@palves.net
 John Baldwin			jhb@freebsd.org
 Kevin Buettner			kevinb@redhat.com
 Andrew Burgess			aburgess@redhat.com
+Luis Machado			luis.machado@arm.com
 Simon Marchi			simon.marchi@polymtl.ca
 Tom Tromey			tom@tromey.com
 Tom de Vries			tdevries@suse.de
@@ -585,7 +586,6 @@ Carl Love					cel@linux.ibm.com
 H.J. Lu						hjl.tools@gmail.com
 Michal Ludvig					mludvig@suse.cz
 Edjunior B. Machado				emachado@linux.vnet.ibm.com
-Luis Machado					luis.machado@arm.com
 Jose E. Marchesi				jose.marchesi@oracle.com
 Glen McCready					gkm@redhat.com
 Greg McGary					greg@mcgary.org
