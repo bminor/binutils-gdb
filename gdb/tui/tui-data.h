@@ -25,6 +25,7 @@
 #include "tui/tui.h"
 #include "gdb_curses.h"
 #include "observable.h"
+#include "gdbsupport/gdb-checked-static-cast.h"
 
 /* A deleter that calls delwin.  */
 struct curses_deleter
@@ -194,6 +195,82 @@ private:
   std::string m_title;
 };
 
+/* A TUI window that doesn't scroll.  */
+
+struct tui_noscroll_window : public virtual tui_win_info
+{
+public:
+  virtual bool can_scroll () const final override
+  {
+    return false;
+  }
+
+protected:
+  virtual void do_scroll_vertical (int num_to_scroll) final override
+  {
+  }
+
+  /* Scroll the contents horizontally.  This is only called via
+     left_scroll and right_scroll.  */
+  virtual void do_scroll_horizontal (int num_to_scroll) final override
+  {
+  }
+};
+
+/* A TUI window that cannot have focus.  */
+
+struct tui_nofocus_window : public virtual tui_win_info
+{
+public:
+  virtual bool can_focus () const final override
+  {
+    return false;
+  }
+};
+
+/* A TUI window that occupies a single line.  */
+
+struct tui_oneline_window : public virtual tui_win_info
+{
+  int max_height () const final override
+  {
+    return 1;
+  }
+
+  int min_height () const final override
+  {
+    return 1;
+  }
+};
+
+/* A TUI window that has no border.  */
+
+struct tui_nobox_window : public virtual tui_win_info
+{
+  bool can_box () const final override
+  {
+    return false;
+  }
+};
+
+/* A TUI window that is not refreshed.  */
+
+struct tui_norefresh_window : public virtual tui_win_info
+{
+  virtual void refresh_window () final override
+  {
+  }
+};
+
+/* A TUI window that is always visible.  */
+
+struct tui_always_visible_window : public virtual tui_win_info
+{
+  virtual void make_visible (bool visible) final override
+  {
+  }
+};
+
 /* Constant definitions.  */
 #define SRC_NAME                "src"
 #define CMD_NAME                "cmd"
@@ -204,11 +281,16 @@ private:
 /* Global Data.  */
 extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
-#define TUI_SRC_WIN     ((tui_source_window *) tui_win_list[SRC_WIN])
-#define TUI_DISASM_WIN	((tui_disasm_window *) tui_win_list[DISASSEM_WIN])
-#define TUI_DATA_WIN    ((tui_data_window *) tui_win_list[DATA_WIN])
-#define TUI_CMD_WIN     ((tui_cmd_window *) tui_win_list[CMD_WIN])
-#define TUI_STATUS_WIN  ((tui_locator_window *) tui_win_list[STATUS_WIN])
+#define TUI_SRC_WIN \
+  (gdb::checked_static_cast<tui_source_window *> (tui_win_list[SRC_WIN]))
+#define TUI_DISASM_WIN \
+  (gdb::checked_static_cast<tui_disasm_window *> (tui_win_list[DISASSEM_WIN]))
+#define TUI_DATA_WIN \
+  (gdb::checked_static_cast<tui_data_window *> (tui_win_list[DATA_WIN]))
+#define TUI_CMD_WIN \
+  (gdb::checked_static_cast<tui_cmd_window *> (tui_win_list[CMD_WIN]))
+#define TUI_STATUS_WIN \
+  (gdb::checked_static_cast<tui_locator_window *> (tui_win_list[STATUS_WIN]))
 
 /* All the windows that are currently instantiated, in layout
    order.  */

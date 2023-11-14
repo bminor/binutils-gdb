@@ -28,7 +28,9 @@ class frame_info_ptr;
 
 /* Locator window class.  */
 
-struct tui_locator_window : public tui_win_info
+struct tui_locator_window
+  : public tui_nofocus_window, tui_noscroll_window, tui_oneline_window,
+    tui_nobox_window
 {
   tui_locator_window () = default;
 
@@ -37,37 +39,7 @@ struct tui_locator_window : public tui_win_info
     return STATUS_NAME;
   }
 
-  int max_height () const override
-  {
-    return 1;
-  }
-
-  int min_height () const override
-  {
-    return 1;
-  }
-
-  bool can_box () const override
-  {
-    return false;
-  }
-
-  bool can_focus () const override
-  {
-    return false;
-  }
-
   void rerender () override;
-
-protected:
-
-  void do_scroll_vertical (int n) override
-  {
-  }
-
-  void do_scroll_horizontal (int n) override
-  {
-  }
 
 private:
 

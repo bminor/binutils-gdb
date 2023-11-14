@@ -25,49 +25,22 @@
 #include "tui/tui-data.h"
 
 /* The TUI command window.  */
-struct tui_cmd_window : public tui_win_info
+struct tui_cmd_window
+  : public tui_noscroll_window, tui_nobox_window, tui_norefresh_window,
+    tui_always_visible_window
 {
   tui_cmd_window () = default;
 
   DISABLE_COPY_AND_ASSIGN (tui_cmd_window);
-
-  void refresh_window () override
-  {
-  }
 
   const char *name () const override
   {
     return CMD_NAME;
   }
 
-  bool can_scroll () const override
-  {
-    return false;
-  }
-
-  bool can_box () const override
-  {
-    return false;
-  }
-
   void resize (int height, int width, int origin_x, int origin_y) override;
 
-  void make_visible (bool visible) override
-  {
-    /* The command window can't be made invisible.  */
-  }
-
   int start_line = 0;
-
-protected:
-
-  void do_scroll_vertical (int num_to_scroll) override
-  {
-  }
-
-  void do_scroll_horizontal (int num_to_scroll) override
-  {
-  }
 };
 
 /* Refresh the command window.  */
