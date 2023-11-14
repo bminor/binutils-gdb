@@ -389,6 +389,7 @@ SystemTap		Sergio Durigan Junior	sergiodj@sergiodj.net
 Reverse debugging / Record and Replay / Tracing:
 
 record
+  full			Guinevere Larsen	blarsen@redhat.com
   btrace		Markus T. Metzger	markus.t.metzger@intel.com
 
 
