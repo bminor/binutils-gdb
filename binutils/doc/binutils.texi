@@ -2269,6 +2269,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-r}|@option{--reloc}]
         [@option{-R}|@option{--dynamic-reloc}]
         [@option{-s}|@option{--full-contents}]
+        [@option{-Z}|@option{--decompress}]
         [@option{-W[lLiaprmfFsoORtUuTgAck]}|
          @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links]]
         [@option{-WK}|@option{--dwarf=follow-links}]
@@ -2800,7 +2801,10 @@ disassembly.
 @cindex object file sections
 Display the full contents of sections, often used in combination with
 @option{-j} to request specific sections.  By default all non-empty
-non-bss sections are displayed.
+non-bss sections are displayed.  By default any compressed section
+will be displayed in its compressed form.  In order to see the
+contents in a decompressed form add the @option{-Z} option to the
+command line.
 
 @item -S
 @itemx --source
@@ -3056,6 +3060,15 @@ Also do not truncate symbol names when they are displayed.
 Normally the disassembly output will skip blocks of zeroes.  This
 option directs the disassembler to disassemble those blocks, just like
 any other data.
+
+@item -Z
+@itemx --decompress
+@cindex sections, full contents
+@cindex object file sections
+@cindex compressed section contents
+The @option{-Z} option is meant to be used in conunction with the
+@option{-s} option.  It instructs @command{objdump} to decompress any
+compressed sections before displaying their contents.
 @end table
 
 @c man end

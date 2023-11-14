@@ -1,3 +1,27 @@
+2023-11-14  Nick Clifton  <nickc@redhat.com>
+
+	PR 31062
+	* objdump.c (decompressed_dumps): New local variable.
+	(usage): Mention the -z/--decompress option.
+	(long_options): Add --decompress.
+	(dump_section_header): Add "COMPRESSED" to the Flags field of any
+	compressed section.
+	(dump_section): Warn users when dumping a compressed section.
+	(display_any_bfd): Decompress the section if decompressed_dumps is
+	true.
+	(main): Handle the -z/--decompress option.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi: Document the new feature.
+	* testsuite/binutils-all/objdump.s: Update expected output.
+	* testsuite/binutils-all/objdump.exp: Add test of -Z -s.
+	* testsuite/binutils-all/objdump.Zs: New file.
+
+	* readelf.c (maybe_expand_or_relocate_section): New function.
+	Contains common code found in dump functions.  Adds a note message
+	if a compressed section is not being decompressed.
+	(dump_section_as_strings): Use new function.
+	(dump_section_as_bytes): Likewise.
+
 2023-11-10  Simon Marchi  <simon.marchi@efficios.com>
 
 	* readelf.c (decode_AMDGPU_machine_flags): Handle gfx1100,

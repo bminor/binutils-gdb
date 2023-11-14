@@ -137,6 +137,7 @@ static bool color_output = false;	/* --visualize-jumps=color.  */
 static bool extended_color_output = false; /* --visualize-jumps=extended-color.  */
 static int process_links = false;       /* --process-links.  */
 static int show_all_symbols;            /* --show-all-symbols.  */
+static bool decompressed_dumps = false; /* -Z, --decompress.  */
 
 static enum color_selection
   {
@@ -277,6 +278,8 @@ usage (FILE *stream, int status)
       --source-comment[=<txt>] Prefix lines of source code with <txt>\n"));
   fprintf (stream, _("\
   -s, --full-contents      Display the full contents of all sections requested\n"));
+  fprintf (stream, _("\
+  -Z, --decompress         Decompress section(s) before displaying their contents\n"));
   fprintf (stream, _("\
   -g, --debugging          Display debug information in object file\n"));
   fprintf (stream, _("\
@@ -500,6 +503,7 @@ static struct option long_options[]=
 #endif
   {"debugging", no_argument, NULL, 'g'},
   {"debugging-tags", no_argument, NULL, 'e'},
+  {"decompress", no_argument, NULL, 'Z'},
   {"demangle", optional_argument, NULL, 'C'},
   {"disassemble", optional_argument, NULL, 'd'},
   {"disassemble-all", no_argument, NULL, 'D'},
@@ -929,6 +933,9 @@ dump_section_header (bfd *abfd, asection *section, void *data)
 
       comma = ", ";
     }
+
+  if (bfd_is_section_compressed (abfd, section))
+    printf ("%sCOMPRESSED", comma);
 
   printf ("\n");
 #undef PF
@@ -5024,6 +5031,9 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
 	    (unsigned long) (section->filepos + start_offset));
   printf ("\n");
 
+  if (bfd_is_section_compressed (abfd, section) && ! decompressed_dumps)
+    printf (_(" NOTE: This section is compressed, but its contents have NOT been expanded for this dump.\n"));
+
   if (!bfd_get_full_section_contents (abfd, section, &data))
     {
       non_fatal (_("Reading section %s failed because: %s"),
@@ -5780,7 +5790,7 @@ static void
 display_any_bfd (bfd *file, int level)
 {
   /* Decompress sections unless dumping the section contents.  */
-  if (!dump_section_contents)
+  if (!dump_section_contents || decompressed_dumps)
     file->flags |= BFD_DECOMPRESS;
 
   /* If the file is an archive, process all of its elements.  */
@@ -5897,7 +5907,7 @@ main (int argc, char **argv)
   set_default_bfd_target ();
 
   while ((c = getopt_long (argc, argv,
-			   "CDE:FGHI:LM:P:RSTU:VW::ab:defghij:lm:prstvwxz",
+			   "CDE:FGHI:LM:P:RSTU:VW::Zab:defghij:lm:prstvwxz",
 			   long_options, (int *) 0))
 	 != EOF)
     {
@@ -5907,6 +5917,9 @@ main (int argc, char **argv)
 	  break;		/* We've been given a long option.  */
 	case 'm':
 	  machine = optarg;
+	  break;
+	case 'Z':
+	  decompressed_dumps = true;
 	  break;
 	case 'M':
 	  {

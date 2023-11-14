@@ -1,5 +1,13 @@
 -*- text -*-
 
+* The objdump program has a new command line option -Z/--decompress which
+  changes the behaviour of the -s/--full-contents option, forcing it to
+  decompress the contents of any compressed section before they are displayed.
+
+  In addition when objdump is displaying sections headers (via the -h/--headers
+  command line option) it will now display "COMPRESSED" in the Flags field of
+  any compressed section.
+
 * The readelf program has a new command line option --extra-sym-info which
   extends the information displayed by the --symbols option.  When enabled
   the display will include the name of the section referenced by a symbol's

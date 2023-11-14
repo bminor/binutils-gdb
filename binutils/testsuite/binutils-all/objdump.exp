@@ -466,6 +466,22 @@ if { ![is_elf_format] } then {
     } else {
 	pass "objdump -W"
     }
+
+    # Test objdump -Z -s on a file that contains some compressed .debug sections
+
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Z -s -j .zdebug_abbrev $compressed_testfile" "" "/dev/null" "objdump.out"]
+
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	fail "objdump -Z -s (reason: unexpected output)"
+	send_log $got
+	send_log "\n"
+    }
+
+    if { [regexp_diff objdump.out $srcdir/$subdir/objdump.Zs] } then {
+	fail "objdump -Z -s"
+    } else {
+	pass "objdump -Z -s"
+    }
 }
 
 # Test objdump -WL on a file that contains line information for multiple files and search directories.
