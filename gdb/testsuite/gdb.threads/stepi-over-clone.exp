@@ -44,8 +44,12 @@ gdb_test_multiple "catch syscall group:process" "catch process syscalls" {
     }
 }
 
+set re_loc1 "$hex in clone\[23\]? \\(\\)"
+set re_loc2 "$decimal\[ \t\]+in \[^\r\n\]+"
+set re_loc3 "clone\[23\]? \\(\\) at \[^:\]+:$decimal"
+
 gdb_test "continue" \
-    "Catchpoint $decimal \\(call to syscall clone\[23\]\\), .*"
+    "Catchpoint $decimal \\(call to syscall clone\[23\]?\\), ($re_loc1|$re_loc3).*"
 
 # Return true if INSN is a syscall instruction.
 
@@ -201,7 +205,7 @@ proc test {non_stop displaced third_thread} {
 
 		-i $::gdb_spawn_id
 
-		-re "^$hex in clone\[23\]? \\(\\)\r\n" {
+		-re "^($::re_loc1|$::re_loc2)\r\n" {
 		    verbose -log "XXX: Consume stop location line"
 		    set thread_1_stopped true
 		    if { !$seen_prompt } {
@@ -240,7 +244,7 @@ proc test {non_stop displaced third_thread} {
 		    }
 
 		}
-		-re "^Thread 2\[^\r\n\]+ hit Breakpoint $decimal, $hex in clone\[23\]? \\(\\)\r\n" {
+		-re "^Thread 2\[^\r\n\]+ hit Breakpoint $decimal, ($::re_loc1|$::re_loc3)\r\n" {
 		    verbose -log "XXX: Consume thread 2 hit breakpoint"
 		    set thread_2_stopped true
 		    if { !$seen_prompt } {
@@ -277,7 +281,7 @@ proc test {non_stop displaced third_thread} {
 	    # always still be in clone.
 	    set match_code {}
 	    lappend match_code {
-		-re "\\*?\\s+1\\s+Thread\[^\r\n\]+clone\[23\]? \\(\\)\r\n" {
+		-re "\\*?\\s+1\\s+Thread\[^\r\n\]+($::re_loc1|$::re_loc3)\r\n" {
 		    incr thread_count
 		    exp_continue
 		}
@@ -291,7 +295,7 @@ proc test {non_stop displaced third_thread} {
 		    # be stopped at the breakpoint in clone (just before the
 		    # third thread is actually created).
 		    lappend match_code {
-			-re "\\*?\\s+2\\s+Thread\[^\r\n\]+$hex in clone\[23\]? \\(\\)\r\n" {
+			-re "\\*?\\s+2\\s+Thread\[^\r\n\]+($::re_loc1|$::re_loc3)\r\n" {
 			    incr thread_count
 			    exp_continue
 			}
