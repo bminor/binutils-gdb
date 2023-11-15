@@ -2168,4 +2168,10 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "global-local-symtab-sort-n32${tmips}"
 	run_dump_test "global-local-symtab-sort-n64${tmips}"
     }
+
+    # Gas doesn't generate .pdr section for Irix objects by default.
+    # See `int mips_flag_pdr` in tc-mips.c.
+    if [istarget *-*-irix*] {
+      run_dump_test "irix-no-pdr"
+    }
 }

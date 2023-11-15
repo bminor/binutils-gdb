@@ -1,6 +1,6 @@
 #objdump: -rst --special-syms -mips16
 #name: MIPS16 reloc
-#as: -32 -mips16
+#as: -32 -mips16 -mpdr
 #source: mips16-e.s
 
 # The Irix 5 and 6 assemblers set the type of any common symbol and
@@ -21,7 +21,7 @@ SYMBOL TABLE:
 0+0000000 l    d  \.(mdebug|pdr)	0+0000000 \.mdebug|\.pdr
 0+0000000 l    d  \.gnu\.attributes	0+0000000 \.gnu\.attributes
 0+0000002 l       \.text	0+0000000 0xf0 l1
-0+0000004 l       \.text	0+0000000 0xf0 \.L11
+0+0000004 l       \.text	0+0000000 0xf0 \.L.*
 0+0000000       O \*UND\*	0+0000000 g1
 
 

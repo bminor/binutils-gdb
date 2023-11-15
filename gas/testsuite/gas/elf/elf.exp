@@ -208,6 +208,10 @@ if { [is_elf_format] } then {
 	    riscv*-*-* {
 		set as_flags "$as_flags -march-attr"
 	    }
+	    mips*-*-irix* {
+		# Irix has no pdr section by default.
+		set as_flags "$as_flags -mpdr"
+	    }
 	}
 	run_elf_list_test "section2" "$target_machine" "$as_flags" "-s" ""
     }
