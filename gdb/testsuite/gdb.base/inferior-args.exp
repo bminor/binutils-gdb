@@ -211,17 +211,84 @@ lappend test_desc_list [list "test four" \
 			    [list "$hex \"'\"" \
 				 "$hex \"\\\\\"\""]]
 
-# Run all tests in the global TEST_DESC_LIST.
+# Run all tests in the global TEST_DESC_LIST, as well as some tests of
+# inferior arguments containing newlines.
 proc run_all_tests {} {
+    set all_methods { "start" "starti" "run" "set args" }
+
     foreach desc $::test_desc_list {
 	lassign $desc name stub_suitable args re_list
 	with_test_prefix $name {
-	    foreach_with_prefix set_method { "start" "starti" "run" "set args" } {
+	    foreach_with_prefix set_method $all_methods {
 		foreach_with_prefix startup_with_shell { on off } {
 		    do_test $set_method $startup_with_shell $args $re_list \
 			$stub_suitable
 		}
 	    }
+	}
+    }
+
+    # Check the multi-line argument entry.  This isn't going to work when
+    # using the gdbstub, as the only way to set arguments in this case is
+    # via the gdbserver command line, which isn't what we're testing here.
+    if { ![use_gdb_stub] } {
+	foreach_with_prefix set_method $all_methods {
+	    clean_restart $::testfile
+
+	    # First check that we can abort entering multi-line arguments.
+	    set saw_prompt false
+	    gdb_test_multiple "$set_method \"ab" "abort argument entry" {
+		-re "^$set_method \"ab\r\n" {
+		    exp_continue
+		}
+		-re "^> $" {
+		    set saw_prompt true
+		    send_gdb "\004"
+		    exp_continue
+		}
+		-re "quit\r\n$::gdb_prompt $" {
+		    gdb_assert {$saw_prompt} \
+			$gdb_test_name
+		}
+	    }
+
+	    # Now place a breakpoint on main.
+	    if { ![gdb_breakpoint "main" message] } {
+		fail "could not set breakpoint on main"
+		continue
+	    }
+
+	    # And actually enter some multi-line arguments.
+	    set saw_prompt false
+	    gdb_test_multiple "$set_method \"xy" "complete argument entry" {
+		-re "^$set_method \"xy\r\n" {
+		    exp_continue
+		}
+		-re "^> $" {
+		    set saw_prompt true
+		    send_gdb "12\"\n"
+		    exp_continue
+		}
+
+		-re "$::gdb_prompt $" {
+		    gdb_assert { $saw_prompt } \
+			$gdb_test_name
+		}
+	    }
+
+	    # For the two methods that don't automatically run to main,
+	    # poke the inferior along to main.
+	    if { $set_method == "set args" } {
+		if { ![runto_main] } {
+		    continue
+		}
+	    } elseif { $set_method == "starti" } {
+		gdb_continue_to_breakpoint "b/p in main"
+	    }
+
+	    # And check we correctly see the argument containing a newline.
+	    gdb_test "print argc" " = 2"
+	    gdb_test "print argv\[1\]" " = $::hex \"xy\\\\n12\""
 	}
     }
 }

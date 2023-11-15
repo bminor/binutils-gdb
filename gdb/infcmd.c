@@ -116,11 +116,129 @@ show_inferior_tty_command (struct ui_file *file, int from_tty,
 		"is \"%s\".\n"), value);
 }
 
+/* Return true if the inferior argument string ARGS represents a "complete"
+   set of arguments.  Arguments are considered complete so long as they
+   don't contain unbalanced single or double quoted strings.  Unbalanced
+   means that a single or double quoted argument is started, but not
+   finished.  */
+
+static bool
+args_complete_p (const std::string &args)
+{
+  const char *input = args.c_str ();
+  bool squote = false, dquote = false;
+
+  while (*input != '\0')
+    {
+      input = skip_spaces (input);
+
+      if (squote)
+	{
+	  /* Inside a single quoted argument, look for the closing single
+	     quote.  */
+	  if (*input == '\'')
+	    squote = false;
+	}
+      else if (dquote)
+	{
+	  /* If we see either '\"' or '\\' within a double quoted argument
+	     then skip both characters (one is skipped here, and the other
+	     at the end of the loop).  We need to skip the '\"' so that we
+	     don't consider the '"' as closing the double quoted argument,
+	     and we don't skip the entire '\\' then we'll only skip the
+	     first '\', in which case we might see the second '\' as a '\"'
+	     sequence, which would be wrong.  */
+	  if (*input == '\\' && strchr ("\"\\", *(input + 1)) != nullptr)
+	    ++input;
+	  /* Otherwise, just look for the closing double quote.  */
+	  else if (*input == '"')
+	    dquote = false;
+	}
+      else
+	{
+	  /* Outside of either a single or double quoted argument, we need
+	     to check for '\"', '\'', and '\\'.  The escaped quotes we
+	     obviously need to skip so we don't think that we have started
+	     a quoted argument.  The '\\' we need to skip so we don't just
+	     skip the first '\' and then incorrectly consider the second
+	     '\' are part of a '\"' or '\'' sequence.  */
+	  if (*input == '\\' && strchr ("\"\\'", *(input + 1)) != nullptr)
+	    ++input;
+	  /* Otherwise, check for the start of a single or double quoted
+	     argument.  Single quotes have no special meaning on Windows
+	     hosts.  This is a little iffy as we are allowing the choice of
+	     host to determine what is, or isn't a special character, when
+	     really, this is a function of the target.  */
+#ifndef _WIN32
+	  else if (*input == '\'')
+	    squote = true;
+#endif
+	  else if (*input == '"')
+	    dquote = true;
+	}
+
+      ++input;
+    }
+
+  return (!dquote && !squote);
+}
+
+/* Build a complete inferior argument string (all arguments to pass to the
+   inferior) and return it.  ARGS is the initial part of the inferior
+   arguments string, which might be the complete inferior arguments, in
+   which case this function will immediately return ARGS.
+
+   If ARGS is not considered complete then a prompt is presented to the
+   user and they can continue to extend ARGS.  At the end of each line of
+   input the full value of ARGS is examined, if it is complete then the
+   full ARGS value is returned, otherwise, the user is given another prompt
+   and can continue to add to ARGS.
+
+   ARGS is considered incomplete if there are unbalanced, unquoted, double
+   or single quotes within ARGS.  */
+
+static std::string
+get_complete_args (std::string args)
+{
+  /* If the user wants an argument containing a newline then they need to
+     do so within quotes.  Use args_complete_p to check if the ARGS string
+     contains balanced double and single quotes.  If not then prompt the
+     user for additional arguments and append this to ARGS.  */
+  const char *prompt = nullptr;
+  while (!args_complete_p (args))
+    {
+      if (prompt == nullptr)
+	{
+	  prompt = getenv ("PS2");
+	  if (prompt == nullptr)
+	    prompt = "> ";
+	}
+
+      std::string buffer;
+      const char *content = command_line_input (buffer, prompt, "set_args");
+      if (content == nullptr)
+	return {};
+
+      args += "\n" + buffer;
+    }
+
+  return args;
+}
+
 /* Store the new value passed to 'set args'.  */
 
 static void
-set_args_value (const std::string &args)
+set_args_value (const std::string &args_in)
 {
+  std::string args;
+
+  if (!args_in.empty ())
+    {
+      args = get_complete_args (args_in);
+      if (args.empty ())
+	return;
+    }
+
   current_inferior ()->set_args (args);
 }
 
@@ -369,6 +487,20 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
 
   dont_repeat ();
 
+  gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (args, &async_exec);
+
+  std::string inf_args;
+  /* If there were other args, beside '&', process them.  */
+  if (stripped != nullptr)
+    {
+      /* If ARGS is only a partial argument string then this call will
+	 interactively read more arguments from the user.  If the user
+	 quits then we shouldn't start the inferior.  */
+      inf_args = get_complete_args (stripped.get ());
+      if (inf_args.empty ())
+	return;
+    }
+
   scoped_disable_commit_resumed disable_commit_resumed ("running");
 
   kill_if_already_running (from_tty);
@@ -390,9 +522,6 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
   reopen_exec_file ();
   reread_symbols (from_tty);
 
-  gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (args, &async_exec);
-  args = stripped.get ();
-
   /* Do validation and preparation before possibly changing anything
      in the inferior.  */
 
@@ -404,6 +533,9 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
     error (_("The target does not support running in non-stop mode."));
 
   /* Done.  Can now set breakpoints, change inferior args, etc.  */
+
+  if (!inf_args.empty ())
+    current_inferior ()->set_args (inf_args);
 
   /* Insert temporary breakpoint in main function if requested.  */
   if (run_how == RUN_STOP_AT_MAIN)
@@ -425,10 +557,6 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
      the symbols describe does not persist between runs.  Currently
      the user has to manually nuke all symbols between runs if they
      want them to go away (PR 2207).  This is probably reasonable.  */
-
-  /* If there were other args, beside '&', process them.  */
-  if (args != nullptr)
-    current_inferior ()->set_args (args);
 
   if (from_tty)
     {

@@ -99,6 +99,14 @@ single-inf-arg in qSupported
   reply with the single-inf-arg feature to indicate that it is able to
   accept arguments as a single string.
 
+set args
+run
+start
+starti
+  These commands now all allow for entering inferior arguments that
+  contain a newline character.  The newline must be contained within a
+  single or double quoted argument.
+
 * New remote packets
 
 qExecAndArgs
