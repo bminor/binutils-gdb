@@ -2582,6 +2582,8 @@ static const aarch64_feature_set aarch64_feature_gcs =
   AARCH64_FEATURE (GCS);
 static const aarch64_feature_set aarch64_feature_ite =
   AARCH64_FEATURE (ITE);
+static const aarch64_feature_set aarch64_feature_d128 =
+  AARCH64_FEATURE (D128);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2645,6 +2647,7 @@ static const aarch64_feature_set aarch64_feature_ite =
 #define CHK	  &aarch64_feature_chk
 #define GCS	  &aarch64_feature_gcs
 #define ITE	  &aarch64_feature_ite
+#define D128	  &aarch64_feature_d128
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2798,6 +2801,8 @@ static const aarch64_feature_set aarch64_feature_ite =
   { NAME, OPCODE, MASK, ic_system, 0, CHK, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define GCS_INSN(NAME, OPCODE, MASK, OPS, QUALS, FLAGS) \
   { NAME, OPCODE, MASK, gcs, 0, GCS, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define D128_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, ic_system, 0, D128, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \

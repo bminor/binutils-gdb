@@ -274,6 +274,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Prediction instructions.
 @item @code{ite} @tab N/A @tab no
  @tab Enable TRCIT instruction.
+@item @code{d128} @tab Armv9.4-A @tab No
+ @tab Enable the 128-bit Page Descriptor Extension.  This implies @code{lse128}.
 @end multitable
 
 @node AArch64 Syntax

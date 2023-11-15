@@ -201,6 +201,9 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_PREDRES2,
   /* Instrumentation Extension.  */
   AARCH64_FEATURE_ITE,
+  /* 128-bit page table descriptor, system registers
+     and isntructions.  */
+  AARCH64_FEATURE_D128,
   AARCH64_NUM_FEATURES
 };
 
