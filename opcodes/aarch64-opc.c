@@ -1710,7 +1710,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
       else if (type == AARCH64_OPND_PAIRREG
 	       || type == AARCH64_OPND_PAIRREG_OR_XZR)
 	{
-	  assert (idx == 1 || idx == 3);
+	  assert (idx == 1 || idx == 3 || idx == 5);
 	  if (opnds[idx - 1].reg.regno % 2 != 0)
 	    {
 	      set_syntax_error (mismatch_detail, idx - 1,
