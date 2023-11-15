@@ -163,6 +163,11 @@ proc mips_arch_create {arch gprsize extends props as_flags objdump_flags
     	    set archdata(as_flags) ""
 	    set archdata(objdump_flags) ""
 
+	    if { [string compare $arch mips32r6] == 0
+		 ||  [string compare $arch mips64r6] == 0} {
+		set archdata(as_flags) "--defsym r6="
+	    }
+
 	    set mips_arches(default) [array get archdata]
 	    break
 	}

@@ -1,3 +1,8 @@
+2023-11-15  YunQiang Su  <yunqiang.su@cipunited.com>
+
+	* testsuite/gas/mips/mips.exp (mips_arch_create): Add "--defsym
+	r6=" to as_flags for r6 targets.
+
 2023-11-15  Arsen Arsenović  <arsen@aarsen.me>
 
 	* aclocal.m4: Regenerate.
