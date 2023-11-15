@@ -307,7 +307,7 @@ gdb_test "compile code globalvar = func_nodebug (75);" \
     "call func_nodebug"
 gdb_test "p globalvar" " = -75" "expect -75"
 gdb_test \
-    "compile code int (*funcp) (int) = func_nodebug; globalvar = funcp (76);" \
+    "compile code int (*funcp) (int) = (int (*) (int)) func_nodebug; globalvar = funcp (76);" \
     "warning: function has unknown return type; assuming int" \
     "call func_nodebug indirectly"
 gdb_test "p globalvar" " = -76" "expect -76"
