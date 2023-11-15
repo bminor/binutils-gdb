@@ -1629,9 +1629,6 @@ loongarch_larch_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 	return lht->bfd_type;
     }
 
-  (*_bfd_error_handler) (_("%pB: unsupported relocation type name %s"),
-			 abfd, l_r_name);
-  bfd_set_error (bfd_error_bad_value);
   return BFD_RELOC_NONE;
 }
 

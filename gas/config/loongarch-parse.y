@@ -132,7 +132,11 @@ reloc (const char *op_c_str, const char *id_c_str, offsetT addend)
   if (0 == strcmp (op_c_str, "plt"))
     btype = BFD_RELOC_LARCH_B26;
   else
-    btype = loongarch_larch_reloc_name_lookup (NULL, op_c_str);
+    {
+      btype = loongarch_larch_reloc_name_lookup (NULL, op_c_str);
+      if (btype == BFD_RELOC_NONE)
+	as_fatal (_("unsupported modifier %s"), op_c_str);
+    }
 
   if (id_c_str)
   {
