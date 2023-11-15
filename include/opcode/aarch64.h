@@ -566,6 +566,7 @@ enum aarch64_opnd
   AARCH64_OPND_SYSREG_DC,	/* System register <dc_op> operand.  */
   AARCH64_OPND_SYSREG_IC,	/* System register <ic_op> operand.  */
   AARCH64_OPND_SYSREG_TLBI,	/* System register <tlbi_op> operand.  */
+  AARCH64_OPND_SYSREG_TLBIP,	/* System register <tlbip_op> operand.  */
   AARCH64_OPND_SYSREG_SR,	/* System register RCTX operand.  */
   AARCH64_OPND_BARRIER,		/* Barrier operand.  */
   AARCH64_OPND_BARRIER_DSB_NXS,	/* Barrier operand for DSB nXS variant.  */

@@ -4218,6 +4218,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("dc",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_DC, Rt), QL_SRC_X, F_ALIAS),
   CORE_INSN ("ic",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_IC, Rt_SYS), QL_SRC_X, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)),
   CORE_INSN ("tlbi",0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_TLBI, Rt_SYS), QL_SRC_X, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)),
+  D128_INSN ("tlbip",0xd5480000, 0xfff80000, OP3 (SYSREG_TLBIP, Rt_SYS, PAIRREG_OR_XZR), QL_SRC_X2, F_ALIAS| F_OPD1_OPT | F_OPD_PAIR_OPT | F_DEFAULT (0x1f)),
   V8_7A_INSN ("wfet", 0xd5031000, 0xffffffe0, ic_system, OP1 (Rd), QL_I1X, F_HAS_ALIAS),
   V8_7A_INSN ("wfit", 0xd5031020, 0xffffffe0, ic_system, OP1 (Rd), QL_I1X, F_HAS_ALIAS),
   PREDRES_INSN ("cfp", 0xd50b7380, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
@@ -6351,6 +6352,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "an instruction cache maintenance operation specifier")		\
     Y(SYSTEM, sysins_op, "SYSREG_TLBI", 0, F(),				\
       "a TBL invalidation operation specifier")				\
+    Y(SYSTEM, sysins_op, "SYSREG_TLBIP", 0, F(),				\
+      "a 128-bit TBL invalidation operation specifier")			\
     Y(SYSTEM, sysins_op, "SYSREG_SR", 0, F(),				\
       "a Speculation Restriction option name (RCTX)")			\
     Y(SYSTEM, barrier, "BARRIER", 0, F(),				\

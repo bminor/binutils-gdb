@@ -7666,6 +7666,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  goto sys_reg_ins;
 
 	case AARCH64_OPND_SYSREG_TLBI:
+	case AARCH64_OPND_SYSREG_TLBIP:
 	  inst.base.operands[i].sysins_op =
 	    parse_sys_ins_reg (&str, aarch64_sys_regs_tlbi_hsh);
 	sys_reg_ins:
