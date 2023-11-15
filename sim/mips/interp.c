@@ -1557,8 +1557,8 @@ store_word (SIM_DESC sd,
 }
 
 #define MIPSR6_P(abfd) \
-  ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32R6 \
-    || (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_64R6)
+  ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == EF_MIPS_ARCH_32R6 \
+    || (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == EF_MIPS_ARCH_64R6)
 
 /* Load a word from memory.  */
 
