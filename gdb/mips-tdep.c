@@ -8109,16 +8109,16 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Check ELF_FLAGS to see if it specifies the ABI being used.  */
   switch ((elf_flags & EF_MIPS_ABI))
     {
-    case E_MIPS_ABI_O32:
+    case EF_MIPS_ABI_O32:
       found_abi = MIPS_ABI_O32;
       break;
-    case E_MIPS_ABI_O64:
+    case EF_MIPS_ABI_O64:
       found_abi = MIPS_ABI_O64;
       break;
-    case E_MIPS_ABI_EABI32:
+    case EF_MIPS_ABI_EABI32:
       found_abi = MIPS_ABI_EABI32;
       break;
-    case E_MIPS_ABI_EABI64:
+    case EF_MIPS_ABI_EABI64:
       found_abi = MIPS_ABI_EABI64;
       break;
     default:
@@ -8924,16 +8924,16 @@ mips_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
       /* Determine the ISA.  */
       switch (tdep->elf_flags & EF_MIPS_ARCH)
 	{
-	case E_MIPS_ARCH_1:
+	case EF_MIPS_ARCH_1:
 	  ef_mips_arch = 1;
 	  break;
-	case E_MIPS_ARCH_2:
+	case EF_MIPS_ARCH_2:
 	  ef_mips_arch = 2;
 	  break;
-	case E_MIPS_ARCH_3:
+	case EF_MIPS_ARCH_3:
 	  ef_mips_arch = 3;
 	  break;
-	case E_MIPS_ARCH_4:
+	case EF_MIPS_ARCH_4:
 	  ef_mips_arch = 4;
 	  break;
 	default:
