@@ -34,6 +34,7 @@
 #define OP3(a,b,c) {OPND(a), OPND(b), OPND(c)}
 #define OP4(a,b,c,d) {OPND(a), OPND(b), OPND(c), OPND(d)}
 #define OP5(a,b,c,d,e) {OPND(a), OPND(b), OPND(c), OPND(d), OPND(e)}
+#define OP6(a,b,c,d,e,f) {OPND(a), OPND(b), OPND(c), OPND(d), OPND(e), OPND(f)}
 
 #define QLF(x) AARCH64_OPND_QLF_##x
 #define QLF1(a) {QLF(a)}
@@ -41,6 +42,7 @@
 #define QLF3(a,b,c) {QLF(a), QLF(b), QLF(c)}
 #define QLF4(a,b,c,d) {QLF(a), QLF(b), QLF(c), QLF(d)}
 #define QLF5(a,b,c,d,e) {QLF(a), QLF(b), QLF(c), QLF(d), QLF(e)}
+#define QLF6(a,b,c,d,e) {QLF(a), QLF(b), QLF(c), QLF(d), QLF(e), QLF(f)}
 
 /* Qualifiers list.  */
 

@@ -1075,7 +1075,7 @@ enum err_type
 };
 
 /* Maximum number of operands an instruction can have.  */
-#define AARCH64_MAX_OPND_NUM 6
+#define AARCH64_MAX_OPND_NUM 7
 /* Maximum number of qualifier sequences an instruction can have.  */
 #define AARCH64_MAX_QLF_SEQ_NUM 10
 /* Operand qualifier typedef; optimized for the size.  */
