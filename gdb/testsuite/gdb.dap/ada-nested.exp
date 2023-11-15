@@ -60,13 +60,15 @@ lassign $scopes args locals _ignore
 gdb_assert {[dict get $args name] == "Arguments"} "argument scope"
 gdb_assert {[dict get $locals name] == "Locals"} "local scope"
 
-gdb_assert {[dict get $locals namedVariables] == 3} "two locals"
+set num_vars [dict get $locals namedVariables]
+# Some versions of GNAT emit an extra 'x' in scope.
+gdb_assert {$num_vars == 3 || $num_vars == 4} "correct number of locals"
 
 set num [dict get $locals variablesReference]
 set refs [lindex [dap_check_request_and_response "fetch variables" \
 		      "variables" \
-		      [format {o variablesReference [i %d] count [i 3]} \
-			   $num]] \
+		      [format {o variablesReference [i %d] count [i %d]} \
+			   $num $num_vars]] \
 	      0]
 
 foreach var [dict get $refs body variables] {
@@ -76,8 +78,10 @@ foreach var [dict get $refs body variables] {
 	"i" {
 	    gdb_assert {[dict get $var value] == "1"} "check value of i"
 	}
-	"x" {
-	    gdb_assert {[dict get $var value] == "12"} "check value of x"
+	"x" - "x #2" {
+	    # Some versions of GNAT erroneously emit a duplicate 'x'.
+	    # Work around it here.
+	    gdb_assert {[dict get $var value] == "12"} "check value of $name"
 	}
 	"outer_arg" {
 	    gdb_assert {[dict get $var value] == "1"} "check value of outer_arg"
