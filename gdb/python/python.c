@@ -1703,7 +1703,7 @@ gdbpy_handle_missing_debuginfo (const struct extension_language_defn *extlang,
 				struct objfile *objfile)
 {
   /* Early exit if Python is not initialised.  */
-  if (!gdb_python_initialized)
+  if (!gdb_python_initialized || gdb_python_module == nullptr)
     return {};
 
   struct gdbarch *gdbarch = objfile->arch ();
