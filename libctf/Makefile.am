@@ -21,6 +21,11 @@ ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 
 AUTOMAKE_OPTIONS = dejagnu foreign info-in-builddir no-texinfo.tex
 
+# Suppress 'configure.ac: error: AM_GNU_GETTEXT used but SUBDIRS not defined'
+# from Automake, as libctf uses AM_GNU_GETTEXT (through
+# ZW_GNU_GETTEXT_SISTER_DIR) but has no po/ subdir (currently).
+SUBDIRS =
+
 # Variables that we might accumulate conditionally or in subdirs.
 info_TEXINFOS =
 DISTCLEANFILES =

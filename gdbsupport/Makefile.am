@@ -20,6 +20,11 @@
 AUTOMAKE_OPTIONS = no-dist foreign
 ACLOCAL_AMFLAGS = -I . -I ../config
 
+# Suppress 'configure.ac: error: AM_GNU_GETTEXT used but SUBDIRS not defined'
+# from Automake, as gdbsupport uses AM_GNU_GETTEXT through
+# ZW_GNU_GETTEXT_SISTER_DIR, but doesn't have any translations (currently).
+SUBDIRS =
+
 AM_CPPFLAGS = -I$(srcdir)/../include -I$(srcdir)/../gdb \
     -I../gnulib/import -I$(srcdir)/../gnulib/import \
     -I.. -I$(srcdir)/.. $(INCINTL) -I../bfd -I$(srcdir)/../bfd \

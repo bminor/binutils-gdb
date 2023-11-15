@@ -1,3 +1,10 @@
+2023-11-15  Arsen Arsenović  <arsen@aarsen.me>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* po/Make-in ($(srcdir)/$(PACKAGE).pot): Output to a .pot
+	temporary file, to suppress xgettext checking charset names.
+
 2023-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.

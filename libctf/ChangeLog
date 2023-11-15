@@ -1,3 +1,12 @@
+2023-11-15  Arsen Arsenović  <arsen@aarsen.me>
+
+	* Makefile.am (SUBDIRS): Define to empty to suppress a check in
+	Automake.
+	* Makefile.in: Regenerate.
+	* configure.ac (CTF_LIBADD): Use LTLIBINTL rather than LIBINTL.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
 2023-07-03  Nick Clifton  <nickc@redhat.com>
 
 	2.41 Branch Point.

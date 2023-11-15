@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2023-07-03 11:43+0100\n"
+"POT-Creation-Date: 2023-11-15 11:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,14 +80,14 @@ msgid ""
 "current value is 0x%lx."
 msgstr ""
 
-#: aarch64.cc:6016 arm.cc:8477 i386.cc:1772 mips.cc:12461 powerpc.cc:7845
+#: aarch64.cc:6016 arm.cc:8477 i386.cc:1772 mips.cc:12461 powerpc.cc:7848
 #: s390.cc:2185 s390.cc:2633 sparc.cc:2134 tilegx.cc:3137 tilegx.cc:3589
 #: x86_64.cc:3012 x86_64.cc:3459
 #, c-format
 msgid "%s: unsupported reloc %u against local symbol"
 msgstr ""
 
-#: aarch64.cc:6057 powerpc.cc:7950 s390.cc:2259 sparc.cc:2230
+#: aarch64.cc:6057 powerpc.cc:7953 s390.cc:2259 sparc.cc:2230
 msgid "requires unsupported dynamic reloc; recompile with -fPIC"
 msgstr ""
 
@@ -106,7 +106,7 @@ msgstr ""
 msgid "%s: unsupported TLSLE reloc %u in shared code."
 msgstr ""
 
-#: aarch64.cc:6373 arm.cc:8885 i386.cc:2127 mips.cc:12474 powerpc.cc:8785
+#: aarch64.cc:6373 arm.cc:8885 i386.cc:2127 mips.cc:12474 powerpc.cc:8788
 #: s390.cc:3064 s390.cc:3081 sparc.cc:2572 tilegx.cc:3605 tilegx.cc:4144
 #: x86_64.cc:3475 x86_64.cc:3979
 #, c-format
@@ -123,7 +123,7 @@ msgstr ""
 msgid "%s: unsupported reloc type in global scan"
 msgstr ""
 
-#: aarch64.cc:6908 powerpc.cc:9922 s390.cc:4014 sparc.cc:3164 tilegx.cc:4211
+#: aarch64.cc:6908 powerpc.cc:9925 s390.cc:4014 sparc.cc:3164 tilegx.cc:4211
 #: x86_64.cc:4044
 #, c-format
 msgid "%s: unsupported REL reloc section"
@@ -134,7 +134,7 @@ msgstr ""
 msgid "cannot relocate %s in object file"
 msgstr ""
 
-#: aarch64.cc:7344 i386.cc:2987 i386.cc:3753 mips.cc:10076 powerpc.cc:12279
+#: aarch64.cc:7344 i386.cc:2987 i386.cc:3753 mips.cc:10076 powerpc.cc:12282
 #: s390.cc:3465 sparc.cc:3695 tilegx.cc:4726 x86_64.cc:4537
 #, c-format
 msgid "unexpected reloc %u in object file"
@@ -394,7 +394,7 @@ msgstr ""
 msgid "%s: unsupported TLS reloc %u for IFUNC symbol"
 msgstr ""
 
-#: arm.cc:8643 i386.cc:1862 powerpc.cc:8254 s390.cc:2369 x86_64.cc:3216
+#: arm.cc:8643 i386.cc:1862 powerpc.cc:8257 s390.cc:2369 x86_64.cc:3216
 #, c-format
 msgid "section symbol %u has bad shndx %u"
 msgstr ""
@@ -426,7 +426,7 @@ msgid ""
 msgstr ""
 
 #: arm.cc:10247 i386.cc:3019 i386.cc:3101 i386.cc:3166 i386.cc:3202
-#: i386.cc:3274 mips.cc:12296 powerpc.cc:12393 s390.cc:3471 s390.cc:3542
+#: i386.cc:3274 mips.cc:12296 powerpc.cc:12396 s390.cc:3471 s390.cc:3542
 #: s390.cc:3579 s390.cc:3601 s390.cc:3626 sparc.cc:3701 sparc.cc:3892
 #: sparc.cc:3953 sparc.cc:4060 tilegx.cc:4732 x86_64.cc:4558 x86_64.cc:4684
 #: x86_64.cc:4756 x86_64.cc:4790
@@ -550,7 +550,7 @@ msgstr ""
 msgid "cannot open %s: %s:"
 msgstr ""
 
-#: common.cc:351 output.cc:2469 output.cc:2568
+#: common.cc:351 output.cc:2470 output.cc:2569
 #, c-format
 msgid "out of patch space in section %s; relink with --incremental-full"
 msgstr ""
@@ -1124,7 +1124,7 @@ msgstr ""
 msgid "unsupported reloc %u in object file"
 msgstr ""
 
-#: i386.cc:4036 powerpc.cc:9876 s390.cc:4886 x86_64.cc:5642
+#: i386.cc:4036 powerpc.cc:9879 s390.cc:4886 x86_64.cc:5642
 #, c-format
 msgid "failed to match split-stack sequence at section %u offset %0zx"
 msgstr ""
@@ -1182,7 +1182,7 @@ msgstr ""
 msgid "unsupported ELF machine number %d"
 msgstr ""
 
-#: incremental.cc:871 object.cc:3403
+#: incremental.cc:871 object.cc:3432
 #, c-format
 msgid "%s: incompatible target"
 msgstr ""
@@ -1335,12 +1335,12 @@ msgstr ""
 msgid "load segment overlap [0x%llx -> 0x%llx] and [0x%llx -> 0x%llx]"
 msgstr ""
 
-#: layout.cc:4311 output.cc:4549
+#: layout.cc:4311 output.cc:4550
 #, c-format
 msgid "out of patch space for section %s; relink with --incremental-full"
 msgstr ""
 
-#: layout.cc:4320 output.cc:4557
+#: layout.cc:4320 output.cc:4558
 #, c-format
 msgid "%s: section changed size; relink with --incremental-full"
 msgstr ""
@@ -1634,7 +1634,7 @@ msgstr ""
 msgid "unaligned PC-relative relocation"
 msgstr ""
 
-#: nacl.cc:43 object.cc:174 object.cc:3451 output.cc:5191
+#: nacl.cc:43 object.cc:174 object.cc:3480 output.cc:5192
 #, c-format
 msgid "%s: %s"
 msgstr ""
@@ -1742,41 +1742,41 @@ msgstr ""
 msgid "local symbol %u section index %u out of range"
 msgstr ""
 
-#: object.cc:3156 reloc.cc:833
+#: object.cc:3185 reloc.cc:833
 #, c-format
 msgid "could not decompress section %s"
 msgstr ""
 
-#: object.cc:3282
+#: object.cc:3311
 #, c-format
 msgid "%s is not supported but is required for %s in %s"
 msgstr ""
 
-#: object.cc:3359
+#: object.cc:3388
 msgid "function "
 msgstr ""
 
-#: object.cc:3393
+#: object.cc:3422
 #, c-format
 msgid "%s: unsupported ELF machine number %d"
 msgstr ""
 
-#: object.cc:3467 plugin.cc:2279
+#: object.cc:3496 plugin.cc:2279
 #, c-format
 msgid "%s: not configured to support 32-bit big-endian object"
 msgstr ""
 
-#: object.cc:3483 plugin.cc:2288
+#: object.cc:3512 plugin.cc:2288
 #, c-format
 msgid "%s: not configured to support 32-bit little-endian object"
 msgstr ""
 
-#: object.cc:3502 plugin.cc:2300
+#: object.cc:3531 plugin.cc:2300
 #, c-format
 msgid "%s: not configured to support 64-bit big-endian object"
 msgstr ""
 
-#: object.cc:3518 plugin.cc:2309
+#: object.cc:3547 plugin.cc:2309
 #, c-format
 msgid "%s: not configured to support 64-bit little-endian object"
 msgstr ""
@@ -3330,96 +3330,96 @@ msgstr ""
 msgid "Merge all .text.* prefix sections."
 msgstr ""
 
-#: output.cc:1346
+#: output.cc:1347
 msgid "section group retained but group element discarded"
 msgstr ""
 
-#: output.cc:1733 output.cc:1765
+#: output.cc:1734 output.cc:1766
 msgid "out of patch space (GOT); relink with --incremental-full"
 msgstr ""
 
-#: output.cc:2414
+#: output.cc:2415
 #, c-format
 msgid "invalid alignment %lu for section \"%s\""
 msgstr ""
 
-#: output.cc:4577
+#: output.cc:4578
 msgid ""
 "script places BSS section in the middle of a LOAD segment; space will be "
 "allocated in the file"
 msgstr ""
 
-#: output.cc:4599
+#: output.cc:4600
 #, c-format
 msgid "dot moves backward in linker script from 0x%llx to 0x%llx"
 msgstr ""
 
-#: output.cc:4602
+#: output.cc:4603
 #, c-format
 msgid "address of section '%s' moves backward from 0x%llx to 0x%llx"
 msgstr ""
 
-#: output.cc:4971
+#: output.cc:4972
 #, c-format
 msgid "%s: incremental base and output file name are the same"
 msgstr ""
 
-#: output.cc:4978
+#: output.cc:4979
 #, c-format
 msgid "%s: stat: %s"
 msgstr ""
 
-#: output.cc:4983
+#: output.cc:4984
 #, c-format
 msgid "%s: incremental base file is empty"
 msgstr ""
 
-#: output.cc:4995 output.cc:5093
+#: output.cc:4996 output.cc:5094
 #, c-format
 msgid "%s: open: %s"
 msgstr ""
 
-#: output.cc:5012
+#: output.cc:5013
 #, c-format
 msgid "%s: read failed: %s"
 msgstr ""
 
-#: output.cc:5017
+#: output.cc:5018
 #, c-format
 msgid "%s: file too short: read only %lld of %lld bytes"
 msgstr ""
 
-#: output.cc:5117
+#: output.cc:5118
 #, c-format
 msgid "%s: mremap: %s"
 msgstr ""
 
-#: output.cc:5136
+#: output.cc:5137
 #, c-format
 msgid "%s: mmap: %s"
 msgstr ""
 
-#: output.cc:5228
+#: output.cc:5229
 #, c-format
 msgid "%s: mmap: failed to allocate %lu bytes for output file: %s"
 msgstr ""
 
-#: output.cc:5246
+#: output.cc:5247
 #, c-format
 msgid "%s: munmap: %s"
 msgstr ""
 
-#: output.cc:5266
+#: output.cc:5267
 #, c-format
 msgid "%s: write: unexpected 0 return-value"
 msgstr ""
 
-#: output.cc:5268
+#: output.cc:5269
 #, c-format
 msgid "%s: write: %s"
 msgstr ""
 
-#: output.cc:5283
+#: output.cc:5284
 #, c-format
 msgid "%s: close: %s"
 msgstr ""
@@ -3563,105 +3563,110 @@ msgstr ""
 msgid "%s:%s: branch in non-executable section, no long branch stub for you"
 msgstr ""
 
-#: powerpc.cc:3795
+#: powerpc.cc:3798
 #, c-format
 msgid "%s: stub group size is too large; retrying with %#x"
 msgstr ""
 
-#: powerpc.cc:5738
+#: powerpc.cc:5741
 msgid "** glink"
 msgstr ""
 
-#: powerpc.cc:6403 powerpc.cc:7118
+#: powerpc.cc:6406 powerpc.cc:7121
 #, c-format
 msgid "linkage table error against `%s'"
 msgstr ""
 
-#: powerpc.cc:6406
+#: powerpc.cc:6409
 #, c-format
 msgid "linkage table error against `%s:[local %u]'"
 msgstr ""
 
-#: powerpc.cc:7245
+#: powerpc.cc:7248
 msgid "** save/restore"
 msgstr ""
 
-#: powerpc.cc:8043
+#: powerpc.cc:8046
 #, c-format
 msgid "%s: unsupported reloc %u for IFUNC symbol"
 msgstr ""
 
-#: powerpc.cc:8309 powerpc.cc:9096
+#: powerpc.cc:8312 powerpc.cc:9099
 #, c-format
 msgid "tocsave symbol %u has bad shndx %u"
 msgstr ""
 
-#: powerpc.cc:8600 powerpc.cc:9433
+#: powerpc.cc:8603 powerpc.cc:9436
 #, c-format
 msgid "%s: toc optimization is not supported for %#08x instruction"
 msgstr ""
 
-#: powerpc.cc:8666 powerpc.cc:9495
+#: powerpc.cc:8669 powerpc.cc:9498
 #, c-format
 msgid "%s: unsupported -mbss-plt code"
 msgstr ""
 
-#: powerpc.cc:9842
+#: powerpc.cc:9845
 #, c-format
 msgid "split-stack stack size overflow at section %u offset %0zx"
 msgstr ""
 
-#: powerpc.cc:9913
+#: powerpc.cc:9916
 msgid ""
 "--plt-localentry is especially dangerous without ld.so support to detect ABI "
 "violations"
 msgstr ""
 
-#: powerpc.cc:9942
+#: powerpc.cc:9945
 msgid "--plt-localentry is incompatible with power10 pc-relative code"
 msgstr ""
 
-#: powerpc.cc:10249 powerpc.cc:10255
+#: powerpc.cc:10252 powerpc.cc:10258
 #, c-format
 msgid "%s uses hard float, %s uses soft float"
 msgstr ""
 
-#: powerpc.cc:10261 powerpc.cc:10268
+#: powerpc.cc:10264 powerpc.cc:10271
 #, c-format
 msgid ""
 "%s uses double-precision hard float, %s uses single-precision hard float"
 msgstr ""
 
-#: powerpc.cc:10288 powerpc.cc:10294
+#: powerpc.cc:10291 powerpc.cc:10297
 #, c-format
 msgid "%s uses 64-bit long double, %s uses 128-bit long double"
 msgstr ""
 
-#: powerpc.cc:10300 powerpc.cc:10306
+#: powerpc.cc:10303 powerpc.cc:10309
 #, c-format
 msgid "%s uses IBM long double, %s uses IEEE long double"
 msgstr ""
 
-#: powerpc.cc:10360 powerpc.cc:10366
+#: powerpc.cc:10363 powerpc.cc:10369
 #, c-format
 msgid "%s uses AltiVec vector ABI, %s uses SPE vector ABI"
 msgstr ""
 
-#: powerpc.cc:10395 powerpc.cc:10402
+#: powerpc.cc:10398 powerpc.cc:10405
 #, c-format
 msgid "%s uses r3/r4 for small structure returns, %s uses memory"
 msgstr ""
 
-#: powerpc.cc:10972
+#: powerpc.cc:10975
 msgid "call lacks nop, can't restore toc; recompile with -fPIC"
 msgstr ""
 
-#: powerpc.cc:12424 s390.cc:3479
-msgid "relocation overflow"
+#: powerpc.cc:12434 powerpc.cc:12442
+#, c-format
+msgid "reloc type %u overflow against '%s'"
 msgstr ""
 
-#: powerpc.cc:12426
+#: powerpc.cc:12437
 msgid "try relinking with a smaller --stub-group-size"
+msgstr ""
+
+#: powerpc.cc:12444
+msgid "debug info may be unreliable, compile with -gdwarf64"
 msgstr ""
 
 #: readsyms.cc:285
@@ -3805,6 +3810,10 @@ msgstr ""
 
 #: s390.cc:1099 tilegx.cc:2088 x86_64.cc:1697
 msgid "out of patch space (PLT); relink with --incremental-full"
+msgstr ""
+
+#: s390.cc:3479
+msgid "relocation overflow"
 msgstr ""
 
 #: s390.cc:3677 s390.cc:3733 x86_64.cc:4878
@@ -4113,17 +4122,17 @@ msgstr ""
 msgid "%s: little endian elf flag clear on LE object"
 msgstr ""
 
-#: stringpool.cc:513
+#: stringpool.cc:514
 #, c-format
 msgid "%s: %s entries: %zu; buckets: %zu\n"
 msgstr ""
 
-#: stringpool.cc:517
+#: stringpool.cc:518
 #, c-format
 msgid "%s: %s entries: %zu\n"
 msgstr ""
 
-#: stringpool.cc:520
+#: stringpool.cc:521
 #, c-format
 msgid "%s: %s Stringdata structures: %zu\n"
 msgstr ""

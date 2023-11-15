@@ -280,7 +280,7 @@ changequote([,])dnl
   fi
 fi
 
-SHARED_LIBADD="$SHARED_LIBADD $LIBINTL"
+SHARED_LIBADD="$SHARED_LIBADD $LTLIBINTL"
 
 if test "$enable_shared" = "yes"; then
   case "${host}" in

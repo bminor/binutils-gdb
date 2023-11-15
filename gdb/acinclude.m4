@@ -235,7 +235,8 @@ AC_DEFUN([GDB_AC_CHECK_BFD], [
   # always want our bfd.
   CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
   LDFLAGS="-L../bfd -L../libiberty $LDFLAGS"
-  intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
+  # LTLIBINTL because we use libtool as CC below.
+  intl="$(echo "$LTLIBINTL" | sed 's,\$[[{(]top_builddir[)}]]/,,')"
   LIBS="-lbfd -liberty $intl $LIBS"
   CC="./libtool --quiet --mode=link $CC"
   AC_CACHE_CHECK(

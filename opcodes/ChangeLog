@@ -1,3 +1,14 @@
+2023-11-15  Arsen Arsenović  <arsen@aarsen.me>
+
+	* aclocal.m4: Regenerate.
+	* po/Make-in ($(srcdir)/$(PACKAGE).pot): Output to a .pot
+	temporary file to suppress xgettext checking charset names.
+	* configure.ac (SHARED_LIBADD): Use LTLIBINTL rather than
+	LIBINTL.
+	* configure: Regenerate.
+	* po/Make-in ($(srcdir)/$(PACKAGE).pot): Output to a .pot
+	temporary file, to suppress xgettext checking charset names.
+
 2023-10-05  Neal frager  <neal.frager@amd.com>
 
 	* microblaze-opcm.h (struct op_code_struct): Tidy and remove

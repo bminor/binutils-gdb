@@ -72,8 +72,20 @@
 /* Define to choose default GOT handling scheme */
 #undef GOT_HANDLING_DEFAULT
 
+/* Define to 1 if you have the Mac OS X function
+   CFLocaleCopyPreferredLanguages in the CoreFoundation framework. */
+#undef HAVE_CFLOCALECOPYPREFERREDLANGUAGES
+
+/* Define to 1 if you have the Mac OS X function CFPreferencesCopyAppValue in
+   the CoreFoundation framework. */
+#undef HAVE_CFPREFERENCESCOPYAPPVALUE
+
 /* Define to 1 if you have the `close' function. */
 #undef HAVE_CLOSE
+
+/* Define if the GNU dcgettext() function is already present or preinstalled.
+   */
+#undef HAVE_DCGETTEXT
 
 /* Define to 1 if you have the declaration of `asprintf', and to 0 if you
    don't. */
@@ -102,8 +114,14 @@
 /* Define to 1 if you have the `getpagesize' function. */
 #undef HAVE_GETPAGESIZE
 
+/* Define if the GNU gettext() function is already present or preinstalled. */
+#undef HAVE_GETTEXT
+
 /* Define to 1 if you have the `glob' function. */
 #undef HAVE_GLOB
+
+/* Define if you have the iconv() function and it works. */
+#undef HAVE_ICONV
 
 /* Define .init_array/.fini_array sections are available and working. */
 #undef HAVE_INITFINI_ARRAY

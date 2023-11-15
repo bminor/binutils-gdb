@@ -1,3 +1,12 @@
+2023-11-15  Arsen Arsenović  <arsen@aarsen.me>
+
+	* aclocal.m4: Regenerate.
+	* configure.ac (SHARED_LIBADD): Use LTLIBINTL rather than
+	LIBINTL.
+	* configure: Regenerate.
+	* po/Make-in ($(srcdir)/$(PACKAGE).pot): Output to a .pot
+	temporary file, to suppress xgettext checking charset names.
+
 2023-11-10  Simon Marchi  <simon.marchi@efficios.com>
 
 	* archures.c (bfd_mach_amdgcn_gfx1100, bfd_mach_amdgcn_gfx1101,

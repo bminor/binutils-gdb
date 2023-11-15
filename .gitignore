@@ -72,3 +72,4 @@ stamp-*
 /mpc*
 /gmp*
 /isl*
+/gettext*
