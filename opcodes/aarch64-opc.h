@@ -300,6 +300,7 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 #undef F_REG_128
 #define F_REG_128	(1 << 7) /* System regsister implementable as 128-bit wide.  */
 
+
 /* PSTATE field name for the MSR instruction this is encoded in "op1:op2:CRm".
    Part of CRm can be used to encode <pstatefield>. E.g. CRm[3:1] for SME.
    In order to set/get full PSTATE field name use flag F_REG_IN_CRM and below
