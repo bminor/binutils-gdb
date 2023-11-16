@@ -267,7 +267,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Translation Hardening extension.
 @item @code{lse128} @tab Armv9.4-A @tab No
  @tab Enable the 128-bit Atomic Instructions extension.  This implies @code{lse}.
-
+@item @code{rasv2} @tab N/A @tab Armv9.4-A or later
+ @tab Enable the Reliability, Availability and Serviceability extension v2.
 @end multitable
 
 @node AArch64 Syntax

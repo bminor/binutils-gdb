@@ -7,10 +7,12 @@
 Disassembly of section .text:
 
 0+ <.*>:
-   [0-9a-f]+:	d5380725 	mrs	x5, id_aa64mmfr1_el1
-   [0-9a-f]+:	d5380747 	mrs	x7, id_aa64mmfr2_el1
-   [0-9a-f]+:	d5385305 	mrs	x5, erridr_el1
-   [0-9a-f]+:	d5185327 	msr	errselr_el1, x7
+.*:	d5380725 	mrs	x5, id_aa64mmfr1_el1
+.*:	d5380747 	mrs	x7, id_aa64mmfr2_el1
+.*:	d5380769 	mrs	x9, id_aa64mmfr3_el1
+.*:	d538078b 	mrs	x11, id_aa64mmfr4_el1
+  [0-9a-f]+:	d5385305 	mrs	x5, erridr_el1
+  [0-9a-f]+:	d5185327 	msr	errselr_el1, x7
   [0-9a-f]+:	d5385327 	mrs	x7, errselr_el1
   [0-9a-f]+:	d5385405 	mrs	x5, erxfr_el1
   [0-9a-f]+:	d5185425 	msr	erxctlr_el1, x5

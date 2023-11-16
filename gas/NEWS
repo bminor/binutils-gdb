@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add support for Reliability, Availability and Serviceability extension v2
+  (RASv2) for AArch64.
+
 * Add support for 128-bit Atomic Instructions (LSE128) for AArch64.
 
 * Add support for Guarded Control Stack (GCS) for AArch64.

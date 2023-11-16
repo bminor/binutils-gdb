@@ -13,6 +13,8 @@
 
 	rw_sys_reg sys_reg=id_aa64mmfr1_el1 xreg=x5 r=1 w=0
 	rw_sys_reg sys_reg=id_aa64mmfr2_el1 xreg=x7 r=1 w=0
+	rw_sys_reg sys_reg=id_aa64mmfr3_el1 xreg=x9 r=1 w=0
+	rw_sys_reg sys_reg=id_aa64mmfr4_el1 xreg=x11 r=1 w=0
 
 	/* RAS extension.  */
 

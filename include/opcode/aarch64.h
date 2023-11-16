@@ -175,6 +175,14 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_THE,
   /* LSE128.  */
   AARCH64_FEATURE_LSE128,
+  /* ARMv8.9-A RAS Extensions.  */
+  AARCH64_FEATURE_RASv2,
+  /* System Control Register2.  */
+  AARCH64_FEATURE_SCTLR2,
+  /* Fine Grained Traps.  */
+  AARCH64_FEATURE_FGT2,
+  /* Physical Fault Address.  */
+  AARCH64_FEATURE_PFAR,
   AARCH64_NUM_FEATURES
 };
 
@@ -233,7 +241,11 @@ enum aarch64_feature_bit {
 #define AARCH64_ARCH_V8_9A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_9A)	\
 					 | AARCH64_FEATBIT (X, SPEv1p4) \
 					 | AARCH64_FEATBIT (X, SPE_CRR)	\
-					 | AARCH64_FEATBIT (X, SPE_FDS))
+					 | AARCH64_FEATBIT (X, SPE_FDS) \
+					 | AARCH64_FEATBIT (X, RASv2)	\
+					 | AARCH64_FEATBIT (X, SCTLR2)	\
+					 | AARCH64_FEATBIT (X, FGT2)	\
+					 | AARCH64_FEATBIT (X, PFAR))
 
 #define AARCH64_ARCH_V9A_FEATURES(X)	(AARCH64_FEATBIT (X, V9A)	\
 					 | AARCH64_FEATBIT (X, F16)	\
