@@ -3996,29 +3996,22 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	    loongarch_relax_align (abfd, sec, sym_sec, info, rel, symval);
 	  break;
 	case R_LARCH_DELETE:
-	  if (info->relax_pass == 1)
+	  if (1 == info->relax_pass)
 	    {
 	      loongarch_relax_delete_bytes (abfd, sec, rel->r_offset, 4, info);
 	      rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
 	    }
 	  break;
 	case R_LARCH_PCALA_HI20:
-	  if (info->relax_pass == 0)
-	    {
-	      if (i + 4 > sec->reloc_count)
-		break;
-	      loongarch_relax_pcala_addi (abfd, sec, rel, symval);
-	    }
+	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
+	    loongarch_relax_pcala_addi (abfd, sec, rel, symval);
 	  break;
 	case R_LARCH_GOT_PC_HI20:
-	  if (local_got)
+	  if (local_got && 0 == info->relax_pass
+	      && (i + 4) <= sec->reloc_count)
 	    {
-	      if (i + 4 > sec->reloc_count)
-		break;
 	      if (loongarch_relax_pcala_ld (abfd, sec, rel))
-		{
-		  loongarch_relax_pcala_addi (abfd, sec, rel, symval);
-		}
+		loongarch_relax_pcala_addi (abfd, sec, rel, symval);
 	    }
 	  break;
 	default:
