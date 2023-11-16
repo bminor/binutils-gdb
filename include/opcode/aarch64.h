@@ -185,6 +185,18 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_PFAR,
   /* Address Translate Stage 1.  */
   AARCH64_FEATURE_ATS1A,
+  /* Memory Attribute Index Enhancement.  */
+  AARCH64_FEATURE_AIE,
+  /* Stage 1 Permission Indirection Extension.  */
+  AARCH64_FEATURE_S1PIE,
+  /* Stage 2 Permission Indirection Extension.  */
+  AARCH64_FEATURE_S2PIE,
+  /* Stage 1 Permission Overlay Extension.  */
+  AARCH64_FEATURE_S1POE,
+  /* Stage 2 Permission Overlay Extension.  */
+  AARCH64_FEATURE_S2POE,
+  /* Extension to Translation Control Registers.  */
+  AARCH64_FEATURE_TCR2,
   AARCH64_NUM_FEATURES
 };
 
@@ -248,7 +260,14 @@ enum aarch64_feature_bit {
 					 | AARCH64_FEATBIT (X, SCTLR2)	\
 					 | AARCH64_FEATBIT (X, FGT2)	\
 					 | AARCH64_FEATBIT (X, PFAR)	\
-					 | AARCH64_FEATBIT (X, ATS1A))
+					 | AARCH64_FEATBIT (X, ATS1A)	\
+					 | AARCH64_FEATBIT (X, AIE)	\
+					 | AARCH64_FEATBIT (X, S1PIE)	\
+					 | AARCH64_FEATBIT (X, S2PIE)	\
+					 | AARCH64_FEATBIT (X, S1POE)	\
+					 | AARCH64_FEATBIT (X, S2POE)	\
+					 | AARCH64_FEATBIT (X, TCR2)	\
+					)
 
 #define AARCH64_ARCH_V9A_FEATURES(X)	(AARCH64_FEATBIT (X, V9A)	\
 					 | AARCH64_FEATBIT (X, F16)	\
