@@ -763,7 +763,7 @@ TARGET_LIB_PATH_libatomic = $$r/$(TARGET_SUBDIR)/libatomic/.libs:
 
 # This is the list of directories that may be needed in RPATH_ENVVAR
 # so that programs built for the host machine work.
-HOST_LIB_PATH = $(HOST_LIB_PATH_gmp)$(HOST_LIB_PATH_mpfr)$(HOST_LIB_PATH_mpc)$(HOST_LIB_PATH_isl)$(HOST_LIB_PATH_gettext)
+HOST_LIB_PATH = $(HOST_LIB_PATH_gmp)$(HOST_LIB_PATH_mpfr)$(HOST_LIB_PATH_mpc)$(HOST_LIB_PATH_isl)
 
 # Define HOST_LIB_PATH_gcc here, for the sake of TARGET_LIB_PATH, ouch
 @if gcc
@@ -790,11 +790,6 @@ HOST_LIB_PATH_mpc = \
 HOST_LIB_PATH_isl = \
   $$r/$(HOST_SUBDIR)/isl/.libs:$$r/$(HOST_SUBDIR)/prev-isl/.libs:
 @endif isl
-
-@if gettext
-HOST_LIB_PATH_gettext = \
-  $$r/$(HOST_SUBDIR)/gettext/intl/.libs:$$r/$(HOST_SUBDIR)/prev-gettext/intl/.libs:
-@endif gettext
 
 
 CXX_FOR_TARGET_FLAG_TO_PASS = \
@@ -19822,7 +19817,7 @@ configure-gettext:
 	  $$s/$$module_srcdir/configure \
 	  --srcdir=$${topdir}/$$module_srcdir \
 	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
-	  --target=${target_alias} --disable-shared --disable-java --disable-csharp --with-pic \
+	  --target=${target_alias} --disable-shared --disable-threads --disable-java --disable-csharp --with-pic --disable-libasprintf \
 	  || exit 1
 @endif gettext
 
@@ -19858,7 +19853,7 @@ configure-stage1-gettext:
 	  --target=${target_alias} \
 	   \
 	  $(STAGE1_CONFIGURE_FLAGS) \
-	  --disable-shared --disable-java --disable-csharp --with-pic
+	  --disable-shared --disable-threads --disable-java --disable-csharp --with-pic --disable-libasprintf
 @endif gettext-bootstrap
 
 .PHONY: configure-stage2-gettext maybe-configure-stage2-gettext
@@ -19892,7 +19887,7 @@ configure-stage2-gettext:
 	  --target=${target_alias} \
 	  --with-build-libsubdir=$(HOST_SUBDIR) \
 	  $(STAGE2_CONFIGURE_FLAGS) \
-	  --disable-shared --disable-java --disable-csharp --with-pic
+	  --disable-shared --disable-threads --disable-java --disable-csharp --with-pic --disable-libasprintf
 @endif gettext-bootstrap
 
 .PHONY: configure-stage3-gettext maybe-configure-stage3-gettext
@@ -19926,7 +19921,7 @@ configure-stage3-gettext:
 	  --target=${target_alias} \
 	  --with-build-libsubdir=$(HOST_SUBDIR) \
 	  $(STAGE3_CONFIGURE_FLAGS) \
-	  --disable-shared --disable-java --disable-csharp --with-pic
+	  --disable-shared --disable-threads --disable-java --disable-csharp --with-pic --disable-libasprintf
 @endif gettext-bootstrap
 
 .PHONY: configure-stage4-gettext maybe-configure-stage4-gettext
@@ -19960,7 +19955,7 @@ configure-stage4-gettext:
 	  --target=${target_alias} \
 	  --with-build-libsubdir=$(HOST_SUBDIR) \
 	  $(STAGE4_CONFIGURE_FLAGS) \
-	  --disable-shared --disable-java --disable-csharp --with-pic
+	  --disable-shared --disable-threads --disable-java --disable-csharp --with-pic --disable-libasprintf
 @endif gettext-bootstrap
 
 .PHONY: configure-stageprofile-gettext maybe-configure-stageprofile-gettext
@@ -19994,7 +19989,7 @@ configure-stageprofile-gettext:
 	  --target=${target_alias} \
 	  --with-build-libsubdir=$(HOST_SUBDIR) \
 	  $(STAGEprofile_CONFIGURE_FLAGS) \
-	  --disable-shared --disable-java --disable-csharp --with-pic
+	  --disable-shared --disable-threads --disable-java --disable-csharp --with-pic --disable-libasprintf
 @endif gettext-bootstrap
 
 .PHONY: configure-stagetrain-gettext maybe-configure-stagetrain-gettext
@@ -20028,7 +20023,7 @@ configure-stagetrain-gettext:
 	  --target=${target_alias} \
 	  --with-build-libsubdir=$(HOST_SUBDIR) \
 	  $(STAGEtrain_CONFIGURE_FLAGS) \
-	  --disable-shared --disable-java --disable-csharp --with-pic
+	  --disable-shared --disable-threads --disable-java --disable-csharp --with-pic --disable-libasprintf
 @endif gettext-bootstrap
 
 .PHONY: configure-stagefeedback-gettext maybe-configure-stagefeedback-gettext
@@ -20062,7 +20057,7 @@ configure-stagefeedback-gettext:
 	  --target=${target_alias} \
 	  --with-build-libsubdir=$(HOST_SUBDIR) \
 	  $(STAGEfeedback_CONFIGURE_FLAGS) \
-	  --disable-shared --disable-java --disable-csharp --with-pic
+	  --disable-shared --disable-threads --disable-java --disable-csharp --with-pic --disable-libasprintf
 @endif gettext-bootstrap
 
 .PHONY: configure-stageautoprofile-gettext maybe-configure-stageautoprofile-gettext
@@ -20096,7 +20091,7 @@ configure-stageautoprofile-gettext:
 	  --target=${target_alias} \
 	  --with-build-libsubdir=$(HOST_SUBDIR) \
 	  $(STAGEautoprofile_CONFIGURE_FLAGS) \
-	  --disable-shared --disable-java --disable-csharp --with-pic
+	  --disable-shared --disable-threads --disable-java --disable-csharp --with-pic --disable-libasprintf
 @endif gettext-bootstrap
 
 .PHONY: configure-stageautofeedback-gettext maybe-configure-stageautofeedback-gettext
@@ -20130,7 +20125,7 @@ configure-stageautofeedback-gettext:
 	  --target=${target_alias} \
 	  --with-build-libsubdir=$(HOST_SUBDIR) \
 	  $(STAGEautofeedback_CONFIGURE_FLAGS) \
-	  --disable-shared --disable-java --disable-csharp --with-pic
+	  --disable-shared --disable-threads --disable-java --disable-csharp --with-pic --disable-libasprintf
 @endif gettext-bootstrap
 
 
@@ -20587,23 +20582,8 @@ maybe-info-gettext:
 @if gettext
 maybe-info-gettext: info-gettext
 
-info-gettext: \
-    configure-gettext 
-	@[ -f ./gettext/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing info in gettext"; \
-	(cd $(HOST_SUBDIR)/gettext && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          info) \
-	  || exit 1
+# gettext doesn't support info.
+info-gettext:
 
 @endif gettext
 
@@ -20612,23 +20592,8 @@ maybe-dvi-gettext:
 @if gettext
 maybe-dvi-gettext: dvi-gettext
 
-dvi-gettext: \
-    configure-gettext 
-	@[ -f ./gettext/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing dvi in gettext"; \
-	(cd $(HOST_SUBDIR)/gettext && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          dvi) \
-	  || exit 1
+# gettext doesn't support dvi.
+dvi-gettext:
 
 @endif gettext
 
@@ -20637,23 +20602,8 @@ maybe-pdf-gettext:
 @if gettext
 maybe-pdf-gettext: pdf-gettext
 
-pdf-gettext: \
-    configure-gettext 
-	@[ -f ./gettext/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing pdf in gettext"; \
-	(cd $(HOST_SUBDIR)/gettext && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          pdf) \
-	  || exit 1
+# gettext doesn't support pdf.
+pdf-gettext:
 
 @endif gettext
 
@@ -20662,23 +20612,8 @@ maybe-html-gettext:
 @if gettext
 maybe-html-gettext: html-gettext
 
-html-gettext: \
-    configure-gettext 
-	@[ -f ./gettext/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing html in gettext"; \
-	(cd $(HOST_SUBDIR)/gettext && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          html) \
-	  || exit 1
+# gettext doesn't support html.
+html-gettext:
 
 @endif gettext
 
@@ -20687,23 +20622,8 @@ maybe-TAGS-gettext:
 @if gettext
 maybe-TAGS-gettext: TAGS-gettext
 
-TAGS-gettext: \
-    configure-gettext 
-	@[ -f ./gettext/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing TAGS in gettext"; \
-	(cd $(HOST_SUBDIR)/gettext && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          TAGS) \
-	  || exit 1
+# gettext doesn't support TAGS.
+TAGS-gettext:
 
 @endif gettext
 
@@ -20712,24 +20632,8 @@ maybe-install-info-gettext:
 @if gettext
 maybe-install-info-gettext: install-info-gettext
 
-install-info-gettext: \
-    configure-gettext \
-    info-gettext 
-	@[ -f ./gettext/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-info in gettext"; \
-	(cd $(HOST_SUBDIR)/gettext && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-info) \
-	  || exit 1
+# gettext doesn't support install-info.
+install-info-gettext:
 
 @endif gettext
 
@@ -20738,24 +20642,8 @@ maybe-install-dvi-gettext:
 @if gettext
 maybe-install-dvi-gettext: install-dvi-gettext
 
-install-dvi-gettext: \
-    configure-gettext \
-    dvi-gettext 
-	@[ -f ./gettext/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-dvi in gettext"; \
-	(cd $(HOST_SUBDIR)/gettext && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-dvi) \
-	  || exit 1
+# gettext doesn't support install-dvi.
+install-dvi-gettext:
 
 @endif gettext
 
@@ -20764,24 +20652,8 @@ maybe-install-pdf-gettext:
 @if gettext
 maybe-install-pdf-gettext: install-pdf-gettext
 
-install-pdf-gettext: \
-    configure-gettext \
-    pdf-gettext 
-	@[ -f ./gettext/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-pdf in gettext"; \
-	(cd $(HOST_SUBDIR)/gettext && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-pdf) \
-	  || exit 1
+# gettext doesn't support install-pdf.
+install-pdf-gettext:
 
 @endif gettext
 
@@ -20790,24 +20662,8 @@ maybe-install-html-gettext:
 @if gettext
 maybe-install-html-gettext: install-html-gettext
 
-install-html-gettext: \
-    configure-gettext \
-    html-gettext 
-	@[ -f ./gettext/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-html in gettext"; \
-	(cd $(HOST_SUBDIR)/gettext && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-html) \
-	  || exit 1
+# gettext doesn't support install-html.
+install-html-gettext:
 
 @endif gettext
 
