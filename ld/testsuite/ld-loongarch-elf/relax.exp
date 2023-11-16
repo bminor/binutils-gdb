@@ -22,7 +22,7 @@
 if [istarget loongarch64-*-*] {
 
   if [isbuild loongarch64-*-*] {
-    set testname "loongarch relax build"
+    set testname "loongarch relax .exe build"
     set pre_builds [list \
       [list \
 	"$testname" \
@@ -39,17 +39,87 @@ if [istarget loongarch64-*-*] {
     if [file exist "tmpdir/relax"] {
       set objdump_output [run_host_cmd "objdump" "-d tmpdir/relax"]
       if { [ regexp ".*pcaddi.*pcaddi.*" $objdump_output] } {
-	pass "loongarch relax"
+	pass "loongarch relax .exe"
       } {
-	fail "loongarch relax"
+	fail "loongarch relax .exe"
       }
     }
+
+    set testname "loongarch ld --no-relax build"
+    set pre_builds [list \
+      [list \
+	"$testname" \
+	"-Wl,--no-relax" \
+	"" \
+	{relax.s} \
+	{} \
+	"norelax" \
+      ] \
+    ]
+
+    run_cc_link_tests $pre_builds
+
+    if [file exist "tmpdir/norelax"] {
+      set objdump_output [run_host_cmd "objdump" "-d tmpdir/norelax"]
+      if { [ regexp ".*pcaddi.*" $objdump_output] } {
+	fail "loongarch ld --no-relax"
+      } {
+	pass "loongarch ld --no-relax"
+      }
+    }
+
+    run_ld_link_tests \
+	[list \
+	    [list \
+		"loongarch relax .so build" \
+		"-shared -e 0x0" "" \
+		"" \
+		{relax-so.s} \
+		{} \
+		"relax-so" \
+	    ] \
+	]
+
+      if [file exist "tmpdir/relax-so"] {
+	set objdump_output [run_host_cmd "objdump" "-d tmpdir/relax-so"]
+	if { [ regexp ".*pcaddi.*" $objdump_output] } {
+	  pass "loongarch relax .so"
+	} {
+	  fail "loongarch relax .so"
+	}
+      }
+
+    # If symbol in data segment, offset need to sub segment align to prevent
+    # overflow.
+    run_ld_link_tests \
+	[list \
+	    [list \
+		"loongarch relax segment alignment min" \
+		"-e0 -Ttext 0x120004000 -pie -z relro" "" \
+		"" \
+		{relax-segment-min.s} \
+		{} \
+		"relax-segment-min" \
+	    ] \
+	]
+
+    run_ld_link_tests \
+	[list \
+	    [list \
+		"loongarch relax segment alignment max" \
+		"-e0 -Ttext 0x120004000 -pie -z relro" "" \
+		"" \
+		{relax-segment-max.s} \
+		{} \
+		"relax-segment-max" \
+	    ] \
+	]
   }
 
   run_ld_link_tests \
       [list \
 	  [list \
-	      "relax-align" \
+	      "loongarch relax-align" \
 	      "-e 0x0 -z relro" "" \
 	      "" \
 	      {relax-align.s} \
@@ -64,7 +134,7 @@ if [istarget loongarch64-*-*] {
   run_ld_link_tests \
       [list \
 	  [list \
-	      "uleb128" \
+	      "loongarch uleb128" \
 	      "-e 0x0" "" \
 	      "" \
 	      {uleb128.s} \
