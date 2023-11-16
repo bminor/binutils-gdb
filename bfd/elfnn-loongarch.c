@@ -3738,7 +3738,7 @@ loongarch_relax_delete_bytes (bfd *abfd,
 
 /* Relax pcalau12i,addi.d => pcaddi.  */
 static bool
-loongarch_relax_pcala_addi (bfd *abfd, asection *sec,
+loongarch_relax_pcala_addi (bfd *abfd, asection *sec, asection *sym_sec,
 		       Elf_Internal_Rela *rel_hi, bfd_vma symval,
 		       struct bfd_link_info *info, bool *again)
 {
@@ -3747,7 +3747,24 @@ loongarch_relax_pcala_addi (bfd *abfd, asection *sec,
   uint32_t pca = bfd_get (32, abfd, contents + rel_hi->r_offset);
   uint32_t add = bfd_get (32, abfd, contents + rel_lo->r_offset);
   uint32_t rd = pca & 0x1f;
+
+  /* This section's output_offset need to subtract the bytes of instructions
+     relaxed by the previous sections, so it needs to be updated beforehand.
+     size_input_section already took care of updating it after relaxation,
+     so we additionally update once here.  */
+  sec->output_offset = sec->output_section->size;
   bfd_vma pc = sec_addr (sec) + rel_hi->r_offset;
+
+  /* If pc and symbol not in the same segment, add/sub segment alignment.
+     FIXME: if there are multiple readonly segments?  */
+  if (!(sym_sec->flags & SEC_READONLY))
+    {
+      if (symval > pc)
+	pc -= info->maxpagesize;
+      else if (symval < pc)
+	pc += info->maxpagesize;
+    }
+
   const uint32_t addi_d = 0x02c00000;
   const uint32_t pcaddi = 0x18000000;
 
@@ -3889,7 +3906,6 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
       || sec->sec_flg0
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
-      || elf_seg_map (info->output_bfd) == NULL
       || (info->disable_target_specific_optimizations
 	  && info->relax_pass == 0)
       /* The exp_seg_relro_adjust is enum phase_enum (0x4),
@@ -4009,14 +4025,15 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  break;
 	case R_LARCH_PCALA_HI20:
 	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
-	    loongarch_relax_pcala_addi (abfd, sec, rel, symval, info, again);
+	    loongarch_relax_pcala_addi (abfd, sec, sym_sec, rel, symval,
+					info, again);
 	  break;
 	case R_LARCH_GOT_PC_HI20:
 	  if (local_got && 0 == info->relax_pass
 	      && (i + 4) <= sec->reloc_count)
 	    {
 	      if (loongarch_relax_pcala_ld (abfd, sec, rel))
-		loongarch_relax_pcala_addi (abfd, sec, rel, symval,
+		loongarch_relax_pcala_addi (abfd, sec, sym_sec, rel, symval,
 					    info, again);
 	    }
 	  break;
