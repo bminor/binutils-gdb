@@ -62,6 +62,24 @@ gld${EMULATION_NAME}_after_allocation (void)
 	}
     }
 
+  /* The program header size of executable file may increase.  */
+  if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
+      && !bfd_link_relocatable (&link_info))
+    {
+      if (lang_phdr_list == NULL)
+        elf_seg_map (link_info.output_bfd) = NULL;
+      if (!_bfd_elf_map_sections_to_segments (link_info.output_bfd,
+					      &link_info,
+					      NULL))
+        einfo (_("%F%P: map sections to segments failed: %E\n"));
+    }
+
+  /* Adjust program header size and .eh_frame_hdr size before
+     lang_relax_sections. Without it, the vma of data segment may increase.  */
+  lang_do_assignments (lang_allocating_phase_enum);
+  lang_reset_memory_regions ();
+  lang_size_sections (NULL, true);
+
   enum phase_enum *phase = &(expld.dataseg.phase);
   bfd_elf${ELFSIZE}_loongarch_set_data_segment_info (&link_info, (int *) phase);
   /* gld${EMULATION_NAME}_map_segments (need_layout); */
