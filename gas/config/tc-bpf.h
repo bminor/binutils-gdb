@@ -51,6 +51,10 @@
    a jump to offset 0 means jump to the next instruction.  */
 #define md_single_noop_insn "ja 0"
 
+#define md_parse_name(name, exp, mode, c) \
+  bpf_parse_name (name, exp, mode)
+bool bpf_parse_name (const char *, struct expressionS *, enum expr_mode);
+
 #define TC_EQUAL_IN_INSN(c, s) bpf_tc_equal_in_insn ((c), (s))
 extern bool bpf_tc_equal_in_insn (int, char *);
 

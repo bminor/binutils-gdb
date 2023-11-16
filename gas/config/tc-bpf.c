@@ -1223,12 +1223,16 @@ add_relaxed_insn (struct bpf_insn *insn, expressionS *exp)
    See md_operand below to see how exp_parse_failed is used.  */
 
 static int exp_parse_failed = 0;
+static bool parsing_insn_operands = false;
 
 static char *
 parse_expression (char *s, expressionS *exp)
 {
   char *saved_input_line_pointer = input_line_pointer;
   char *saved_s = s;
+
+  /* Wake up bpf_parse_name before the call to expression ().  */
+  parsing_insn_operands = true;
 
   exp_parse_failed = 0;
   input_line_pointer = s;
@@ -1249,6 +1253,71 @@ parse_expression (char *s, expressionS *exp)
   }
 
   return s;
+}
+
+/* Symbols created by this parse, but not yet committed to the real
+   symbol table.  */
+static symbolS *deferred_sym_rootP;
+static symbolS *deferred_sym_lastP;
+
+/* Symbols discarded by a previous parse.  Symbols cannot easily be freed
+   after creation, so try to recycle.  */
+static symbolS *orphan_sym_rootP;
+static symbolS *orphan_sym_lastP;
+
+/* Implement md_parse_name hook.  Handles any symbol found in an expression.
+   This allows us to tentatively create symbols, before we know for sure
+   whether the parser is using the correct template for an instruction.
+   If we end up keeping the instruction, the deferred symbols are committed
+   to the real symbol table. This approach is modeled after the riscv port.  */
+
+bool
+bpf_parse_name (const char *name, expressionS *exp, enum expr_mode mode)
+{
+  symbolS *sym;
+
+  /* If we aren't currently parsing an instruction, don't do anything.
+     This prevents tampering with operands to directives.  */
+  if (!parsing_insn_operands)
+    return false;
+
+  gas_assert (mode == expr_normal);
+
+  if (symbol_find (name) != NULL)
+    return false;
+
+  for (sym = deferred_sym_rootP; sym; sym = symbol_next (sym))
+    if (strcmp (name, S_GET_NAME (sym)) == 0)
+      break;
+
+  /* Tentatively create a symbol.  */
+  if (!sym)
+    {
+      /* See if we can reuse a symbol discarded by a previous parse.
+	 This may be quite common, for example when trying multiple templates
+	 for an instruction with the first reference to a valid symbol.  */
+      for (sym = orphan_sym_rootP; sym; sym = symbol_next (sym))
+	if (strcmp (name, S_GET_NAME (sym)) == 0)
+	  {
+	    symbol_remove (sym, &orphan_sym_rootP, &orphan_sym_lastP);
+	    break;
+	  }
+
+      if (!sym)
+	  sym = symbol_create (name, undefined_section, &zero_address_frag, 0);
+
+      /* Add symbol to the deferred list.  If we commit to the isntruction,
+	 then the symbol will be inserted into to the real symbol table at
+	 that point (in md_assemble).  */
+      symbol_append (sym, deferred_sym_lastP, &deferred_sym_rootP,
+		     &deferred_sym_lastP);
+    }
+
+  exp->X_op = O_symbol;
+  exp->X_add_symbol = sym;
+  exp->X_add_number = 0;
+
+  return true;
 }
 
 /* Parse a BPF register name and return the corresponding register
@@ -1316,6 +1385,16 @@ parse_error (int length, const char *fmt, ...)
       errmsg = xvasprintf (fmt, args);
       va_end (args);
       partial_match_length = length;
+    }
+
+  /* Discard deferred symbols from the failed parse.  They may potentially
+     be reused in the future from the orphan list.  */
+  while (deferred_sym_rootP)
+    {
+      symbolS *sym = deferred_sym_rootP;
+      symbol_remove (sym, &deferred_sym_rootP, &deferred_sym_lastP);
+      symbol_append (sym, orphan_sym_lastP, &orphan_sym_rootP,
+		     &orphan_sym_lastP);
     }
 }
 
@@ -1606,6 +1685,10 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
         }
     }
 
+  /* Mark that we are no longer parsing an instruction, bpf_parse_name does
+     not interfere with symbols in e.g. assembler directives.  */
+  parsing_insn_operands = false;
+
   if (opcode == NULL)
     {
       as_bad (_("unrecognized instruction `%s'"), str);
@@ -1621,6 +1704,15 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
   insn.opcode = opcode->opcode;
 
 #undef PARSE_ERROR
+
+  /* Commit any symbols created while parsing the instruction.  */
+  while (deferred_sym_rootP)
+    {
+      symbolS *sym = deferred_sym_rootP;
+      symbol_remove (sym, &deferred_sym_rootP, &deferred_sym_lastP);
+      symbol_append (sym, symbol_lastP, &symbol_rootP, &symbol_lastP);
+      symbol_table_insert (sym);
+    }
 
   /* Generate the frags and fixups for the parsed instruction.  */
   if (do_relax && isa_spec >= BPF_V4 && insn.is_relaxable)
