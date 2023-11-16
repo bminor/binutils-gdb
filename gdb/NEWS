@@ -16,7 +16,7 @@ disassemble
   command will now give an error.  Previously the 'b' flag would
   always override the 'r' flag.
 
-* New Commands
+* New commands
 
 info missing-debug-handler
   List all the registered missing debug handlers.
@@ -30,6 +30,13 @@ disable missing-debug-handler LOCUS HANDLER
   'progspace' to operate on handlers within the current program space,
   or can be a regular expression which is matched against the filename
   of the primary executable in each program space.
+
+maintenance info linux-lwps
+  List all LWPs under control of the linux-nat target.
+
+set remote thread-options-packet
+show remote thread-options-packet
+  Set/show the use of the thread options packet.
 
 * Python API
 
@@ -49,15 +56,6 @@ disable missing-debug-handler LOCUS HANDLER
   ** New class gdb.missing_debug.MissingDebugInfo which can be
      sub-classed to create handlers for objfiles with missing debug
      information.
-
-* New commands
-
-maintenance info linux-lwps
-  List all LWPs under control of the linux-nat target.
-
-set remote thread-options-packet
-show remote thread-options-packet
-  Set/show the use of the thread options packet.
 
 * New remote packets
 
