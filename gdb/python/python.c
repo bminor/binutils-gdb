@@ -1118,6 +1118,23 @@ gdbpy_post_event (PyObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+/* Interrupt the current operation on the main thread.  */
+static PyObject *
+gdbpy_interrupt (PyObject *self, PyObject *args)
+{
+  {
+    /* Make sure the interrupt isn't delivered immediately somehow.
+       This probably is not truly needed, but at the same time it
+       seems more clear to be explicit about the intent.  */
+    gdbpy_allow_threads temporarily_exit_python;
+    scoped_disable_cooperative_sigint_handling no_python_sigint;
+
+    set_quit_flag ();
+  }
+
+  Py_RETURN_NONE;
+}
+
 
 
 /* This is the extension_language_ops.before_prompt "method".  */
@@ -2678,6 +2695,8 @@ Parse String as an expression, evaluate it, and return the result as a Value."
 
   { "post_event", gdbpy_post_event, METH_VARARGS,
     "Post an event into gdb's event loop." },
+  { "interrupt", gdbpy_interrupt, METH_NOARGS,
+    "Interrupt gdb's current operation." },
 
   { "target_charset", gdbpy_target_charset, METH_NOARGS,
     "target_charset () -> string.\n\

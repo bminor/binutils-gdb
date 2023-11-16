@@ -79,6 +79,9 @@ show remote thread-options-packet
      dictionary that carries the same information as an MI "*stopped"
      event.
 
+  ** New function gdb.interrupt(), that interrupts GDB as if the user
+     typed control-c.
+
 * Debugger Adapter Protocol changes
 
   ** GDB now emits the "process" event.

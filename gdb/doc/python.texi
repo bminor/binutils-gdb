@@ -664,6 +664,17 @@ this an easy-to-use drop-in replacement for creating threads that will
 work well in @value{GDBN}.
 @end deftp
 
+@defun gdb.interrupt ()
+This causes @value{GDBN} to react as if the user had typed a control-C
+character at the terminal.  That is, if the inferior is running, it is
+interrupted; if a @value{GDBN} command is executing, it is stopped;
+and if a Python command is running, @code{KeyboardInterrupt} will be
+raised.
+
+Unlike most Python APIs in @value{GDBN}, @code{interrupt} is
+thread-safe.
+@end defun
+
 @defun gdb.post_event (event)
 Put @var{event}, a callable object taking no arguments, into
 @value{GDBN}'s internal event queue.  This callable will be invoked at
