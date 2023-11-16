@@ -3740,7 +3740,7 @@ loongarch_relax_delete_bytes (bfd *abfd,
 static bool
 loongarch_relax_pcala_addi (bfd *abfd, asection *sec,
 		       Elf_Internal_Rela *rel_hi, bfd_vma symval,
-		       struct bfd_link_info *info)
+		       struct bfd_link_info *info, bool *again)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
   Elf_Internal_Rela *rel_lo = rel_hi + 2;
@@ -3765,6 +3765,9 @@ loongarch_relax_pcala_addi (bfd *abfd, asection *sec,
       || ((bfd_signed_vma)(symval - pc) < (bfd_signed_vma)(int32_t)0xffe00000)
       || ((bfd_signed_vma)(symval - pc) > (bfd_signed_vma)(int32_t)0x1ffffc))
     return false;
+
+  /* Continue next relax trip.  */
+  *again = true;
 
   pca = pcaddi | rd;
   bfd_put (32, abfd, pca, contents + rel_hi->r_offset);
@@ -4006,14 +4009,15 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  break;
 	case R_LARCH_PCALA_HI20:
 	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
-	    loongarch_relax_pcala_addi (abfd, sec, rel, symval, info);
+	    loongarch_relax_pcala_addi (abfd, sec, rel, symval, info, again);
 	  break;
 	case R_LARCH_GOT_PC_HI20:
 	  if (local_got && 0 == info->relax_pass
 	      && (i + 4) <= sec->reloc_count)
 	    {
 	      if (loongarch_relax_pcala_ld (abfd, sec, rel))
-		loongarch_relax_pcala_addi (abfd, sec, rel, symval, info);
+		loongarch_relax_pcala_addi (abfd, sec, rel, symval,
+					    info, again);
 	    }
 	  break;
 	default:
