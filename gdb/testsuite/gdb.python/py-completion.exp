@@ -46,6 +46,11 @@ if { [readline_is_used] && ![is_remote host] } {
     # Just discarding whatever we typed.
     gdb_test " " ".*" "discard #[incr discard]"
 
+    # This should offer no suggestions - the complete() methods
+    # returns something that is neither an integer, or a sequence.
+    gdb_test_no_output "complete completefilenone ${testdir_complete}" \
+	"no suggestions given"
+
     # This is the problematic one.
     send_gdb "completefilemethod ${testdir_complete}\t"
     gdb_test_multiple "" "completefilemethod completion" {

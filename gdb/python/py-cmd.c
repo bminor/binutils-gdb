@@ -290,7 +290,7 @@ cmdpy_completer (struct cmd_list_element *command,
       else if (value >= 0 && value < (long) N_COMPLETERS)
 	completers[value].completer (command, tracker, text, word);
     }
-  else
+  else if (PySequence_Check (resultobj.get ()))
     {
       gdbpy_ref<> iter (PyObject_GetIter (resultobj.get ()));
 

@@ -28,6 +28,17 @@ class CompleteFileInit(gdb.Command):
         raise gdb.GdbError("not implemented")
 
 
+class CompleteFileNone(gdb.Command):
+    def __init__(self):
+        gdb.Command.__init__(self, "completefilenone", gdb.COMMAND_USER)
+
+    def invoke(self, argument, from_tty):
+        raise gdb.GdbError("not implemented")
+
+    def complete(self, text, word):
+        return None
+
+
 class CompleteFileMethod(gdb.Command):
     def __init__(self):
         gdb.Command.__init__(self, "completefilemethod", gdb.COMMAND_USER)
@@ -203,6 +214,7 @@ class CompleteLimit7(gdb.Command):
 
 
 CompleteFileInit()
+CompleteFileNone()
 CompleteFileMethod()
 CompleteFileCommandCond()
 CompleteLimit1()
