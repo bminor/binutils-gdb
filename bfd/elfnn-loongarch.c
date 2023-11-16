@@ -4013,7 +4013,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
       switch (ELFNN_R_TYPE (rel->r_info))
 	{
 	case R_LARCH_ALIGN:
-	  if (2 == info->relax_pass)
+	  if (1 == info->relax_pass)
 	    loongarch_relax_align (abfd, sec, sym_sec, info, rel, symval);
 	  break;
 	case R_LARCH_DELETE:
