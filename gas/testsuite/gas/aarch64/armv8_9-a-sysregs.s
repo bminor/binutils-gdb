@@ -1,0 +1,2 @@
+	mrs x3, PMSDSFR_EL1
+	msr PMSDSFR_EL1, x3

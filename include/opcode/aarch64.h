@@ -163,6 +163,12 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_CHK,
   /* Guarded Control Stack.  */
   AARCH64_FEATURE_GCS,
+  /* SPE Call Return branch records.  */
+  AARCH64_FEATURE_SPE_CRR,
+  /* SPE Filter by data source.  */
+  AARCH64_FEATURE_SPE_FDS,
+  /* Additional SPE events.  */
+  AARCH64_FEATURE_SPEv1p4,
   /* SME2.  */
   AARCH64_FEATURE_SME2,
   /* Translation Hardening Extension.  */
@@ -224,7 +230,10 @@ enum aarch64_feature_bit {
 #define AARCH64_ARCH_V8_8A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_8A)	\
 					 | AARCH64_FEATBIT (X, MOPS)	\
 					 | AARCH64_FEATBIT (X, HBC))
-#define AARCH64_ARCH_V8_9A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_9A))
+#define AARCH64_ARCH_V8_9A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_9A)	\
+					 | AARCH64_FEATBIT (X, SPEv1p4) \
+					 | AARCH64_FEATBIT (X, SPE_CRR)	\
+					 | AARCH64_FEATBIT (X, SPE_FDS))
 
 #define AARCH64_ARCH_V9A_FEATURES(X)	(AARCH64_FEATBIT (X, V9A)	\
 					 | AARCH64_FEATBIT (X, F16)	\
