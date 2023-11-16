@@ -87,7 +87,7 @@
 	//
 
 	.irp op, pld, pli, pst
-	.irp l, l1, l2, l3
+	.irp l, l1, l2, l3, slc
 	.irp t, keep, strm
 	prfm	\op\l\t, [x3, #24]
 	.endr
