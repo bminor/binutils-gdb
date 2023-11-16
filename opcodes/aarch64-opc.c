@@ -4810,6 +4810,9 @@ const aarch64_sys_ins_reg aarch64_sys_regs_at[] =
     { "s1e3w",      CPENS (6, C7, C8, 1), F_HASXT },
     { "s1e1rp",     CPENS (0, C7, C9, 0), F_HASXT | F_ARCHEXT },
     { "s1e1wp",     CPENS (0, C7, C9, 1), F_HASXT | F_ARCHEXT },
+    { "s1e1a",      CPENS (0, C7, C9, 2), F_HASXT | F_ARCHEXT },
+    { "s1e2a",      CPENS (4, C7, C9, 2), F_HASXT | F_ARCHEXT },
+    { "s1e3a",      CPENS (6, C7, C9, 2), F_HASXT | F_ARCHEXT },
     { 0,       CPENS(0,0,0,0), 0 }
 };
 
@@ -5039,6 +5042,12 @@ aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
   if ((reg_value == CPENC (3,0,13,0,3)
        || reg_value == CPENC (3,0,13,0,6))
       && AARCH64_CPU_HAS_FEATURE (features, THE))
+    return true;
+
+  if ((reg_value == CPENS (0, C7, C9, 2)
+       || reg_value == CPENS (4, C7, C9, 2)
+       || reg_value == CPENS (6, C7, C9, 2))
+      && AARCH64_CPU_HAS_FEATURE (features, ATS1A))
     return true;
 
   return false;

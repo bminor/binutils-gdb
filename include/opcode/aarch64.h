@@ -183,6 +183,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_FGT2,
   /* Physical Fault Address.  */
   AARCH64_FEATURE_PFAR,
+  /* Address Translate Stage 1.  */
+  AARCH64_FEATURE_ATS1A,
   AARCH64_NUM_FEATURES
 };
 
@@ -245,7 +247,8 @@ enum aarch64_feature_bit {
 					 | AARCH64_FEATBIT (X, RASv2)	\
 					 | AARCH64_FEATBIT (X, SCTLR2)	\
 					 | AARCH64_FEATBIT (X, FGT2)	\
-					 | AARCH64_FEATBIT (X, PFAR))
+					 | AARCH64_FEATBIT (X, PFAR)	\
+					 | AARCH64_FEATBIT (X, ATS1A))
 
 #define AARCH64_ARCH_V9A_FEATURES(X)	(AARCH64_FEATBIT (X, V9A)	\
 					 | AARCH64_FEATBIT (X, F16)	\

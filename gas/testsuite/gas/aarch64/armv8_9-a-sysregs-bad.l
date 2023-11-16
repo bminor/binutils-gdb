@@ -24,3 +24,6 @@
 .*: Error: selected processor does not support system register name 'pfar_el1'
 .*: Error: selected processor does not support system register name 'pfar_el2'
 .*: Error: selected processor does not support system register name 'pfar_el12'
+.*: Error: selected processor does not support system register name 's1e1a'
+.*: Error: selected processor does not support system register name 's1e2a'
+.*: Error: selected processor does not support system register name 's1e3a'

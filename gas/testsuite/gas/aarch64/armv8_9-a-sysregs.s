@@ -27,3 +27,8 @@
 	msr PFAR_EL1, x0
 	msr PFAR_EL2, x0
 	msr PFAR_EL12, x0
+
+	/* AT.  */
+	at s1e1a, x1
+	at s1e2a, x3
+	at s1e3a, x5

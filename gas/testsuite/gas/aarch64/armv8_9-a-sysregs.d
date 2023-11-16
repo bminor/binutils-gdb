@@ -31,3 +31,6 @@ Disassembly of section \.text:
 .*:	d51860a0 	msr	pfar_el1, x0
 .*:	d51c60a0 	msr	pfar_el2, x0
 .*:	d51d60a0 	msr	pfar_el12, x0
+.*:	d5087941 	at	s1e1a, x1
+.*:	d50c7943 	at	s1e2a, x3
+.*:	d50e7945 	at	s1e3a, x5
