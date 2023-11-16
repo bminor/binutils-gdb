@@ -18,6 +18,7 @@ MissingDebugHandler base class, and register_handler function.
 """
 
 import gdb
+from curses.ascii import isascii, isalnum
 
 
 def _validate_name(name):
@@ -38,7 +39,7 @@ def _validate_name(name):
                     name.
     """
     for ch in name:
-        if not ch.isascii() or not (ch.isalnum() or ch in "_-"):
+        if not isascii(ch) or not (isalnum(ch) or ch in "_-"):
             raise ValueError("invalid character '%s' in handler name: %s" % (ch, name))
 
 
