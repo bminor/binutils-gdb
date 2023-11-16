@@ -3739,7 +3739,8 @@ loongarch_relax_delete_bytes (bfd *abfd,
 /* Relax pcalau12i,addi.d => pcaddi.  */
 static bool
 loongarch_relax_pcala_addi (bfd *abfd, asection *sec,
-		       Elf_Internal_Rela *rel_hi, bfd_vma symval)
+		       Elf_Internal_Rela *rel_hi, bfd_vma symval,
+		       struct bfd_link_info *info)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
   Elf_Internal_Rela *rel_lo = rel_hi + 2;
@@ -3771,8 +3772,9 @@ loongarch_relax_pcala_addi (bfd *abfd, asection *sec,
   /* Adjust relocations.  */
   rel_hi->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_hi->r_info),
 				 R_LARCH_PCREL20_S2);
-  rel_lo->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_hi->r_info),
-				 R_LARCH_DELETE);
+  rel_lo->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
+
+  loongarch_relax_delete_bytes (abfd, sec, rel_lo->r_offset, 4, info);
 
   return true;
 }
@@ -4004,14 +4006,14 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  break;
 	case R_LARCH_PCALA_HI20:
 	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
-	    loongarch_relax_pcala_addi (abfd, sec, rel, symval);
+	    loongarch_relax_pcala_addi (abfd, sec, rel, symval, info);
 	  break;
 	case R_LARCH_GOT_PC_HI20:
 	  if (local_got && 0 == info->relax_pass
 	      && (i + 4) <= sec->reloc_count)
 	    {
 	      if (loongarch_relax_pcala_ld (abfd, sec, rel))
-		loongarch_relax_pcala_addi (abfd, sec, rel, symval);
+		loongarch_relax_pcala_addi (abfd, sec, rel, symval, info);
 	    }
 	  break;
 	default:
