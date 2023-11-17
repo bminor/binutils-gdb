@@ -1,3 +1,3 @@
 target:
-	th.fmv.hw.x	a0, fa1
+	th.fmv.hw.x	fa1, a0
 	th.fmv.x.hw	a1, fa0

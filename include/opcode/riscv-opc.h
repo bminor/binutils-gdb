@@ -2515,10 +2515,10 @@
 #define MATCH_TH_FSURW 0x5000700b
 #define MASK_TH_FSURW 0xf800707f
 /* Vendor-specific (T-Head) XTheadFmv instructions. */
-#define MATCH_TH_FMV_HW_X 0x5000100b
-#define MASK_TH_FMV_HW_X 0xfff0707f
-#define MATCH_TH_FMV_X_HW 0x6000100b
-#define MASK_TH_FMV_X_HW 0xfff0707f
+#define MATCH_TH_FMV_X_HW 0xc000100b
+#define MASK_TH_FMV_X_HW  0xfff0707f
+#define MATCH_TH_FMV_HW_X 0xa000100b
+#define MASK_TH_FMV_HW_X  0xfff0707f
 /* Vendor-specific (T-Head) XTheadInt instructions. */
 #define MATCH_TH_IPOP 0x0050000b
 #define MASK_TH_IPOP 0xffffffff

@@ -7,5 +7,5 @@
 Disassembly of section .text:
 
 0+000 <target>:
-[ 	]+[0-9a-f]+:[ 	]+5005950b[ 	]+th.fmv.hw.x[ 	]+a0,fa1
-[ 	]+[0-9a-f]+:[ 	]+6005158b[ 	]+th.fmv.x.hw[ 	]+a1,fa0
+[ 	]+[0-9a-f]+:[ 	]+a005158b[ 	]+th.fmv.hw.x[ 	]+fa1,a0
+[ 	]+[0-9a-f]+:[ 	]+c005158b[ 	]+th.fmv.x.hw[ 	]+a1,fa0
