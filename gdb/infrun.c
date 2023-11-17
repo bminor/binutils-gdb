@@ -5885,6 +5885,13 @@ handle_thread_exited (execution_control_state *ecs)
      update the thread list and delete the event thread.  */
   bool abort_cmd = (ecs->event_thread->thread_fsm () != nullptr);
 
+  /* Mark the thread exited right now, because finish_step_over may
+     update the thread list and that may delete the thread silently
+     (depending on target), while we always want to emit the "[Thread
+     ... exited]" notification.  Don't actually delete the thread yet,
+     because we need to pass its pointer down to finish_step_over.  */
+  set_thread_exited (ecs->event_thread);
+
   /* Maybe the thread was doing a step-over, if so release
      resources and start any further pending step-overs.
 
@@ -5904,10 +5911,6 @@ handle_thread_exited (execution_control_state *ecs)
 	 event thread again, as finish_step_over may have switched
 	 threads.  */
       switch_to_thread (ecs->event_thread);
-
-      /* Emit [Thread ... exited] notification.  */
-      delete_thread (ecs->event_thread);
-
       ecs->event_thread = nullptr;
       return false;
     }
