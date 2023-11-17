@@ -134,7 +134,6 @@ struct dummy_target : public target_ops
   void dumpcore (const char *arg0) override;
   bool can_run_breakpoint_commands () override;
   struct gdbarch *thread_architecture (ptid_t arg0) override;
-  struct address_space *thread_address_space (ptid_t arg0) override;
   bool filesystem_is_local () override;
   void trace_init () override;
   void download_tracepoint (struct bp_location *arg0) override;
@@ -311,7 +310,6 @@ struct debug_target : public target_ops
   void dumpcore (const char *arg0) override;
   bool can_run_breakpoint_commands () override;
   struct gdbarch *thread_architecture (ptid_t arg0) override;
-  struct address_space *thread_address_space (ptid_t arg0) override;
   bool filesystem_is_local () override;
   void trace_init () override;
   void download_tracepoint (struct bp_location *arg0) override;
@@ -3010,32 +3008,6 @@ debug_target::thread_architecture (ptid_t arg0)
   target_debug_print_ptid_t (arg0);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_gdbarch_p (result);
-  gdb_puts ("\n", gdb_stdlog);
-  return result;
-}
-
-struct address_space *
-target_ops::thread_address_space (ptid_t arg0)
-{
-  return this->beneath ()->thread_address_space (arg0);
-}
-
-struct address_space *
-dummy_target::thread_address_space (ptid_t arg0)
-{
-  return NULL;
-}
-
-struct address_space *
-debug_target::thread_address_space (ptid_t arg0)
-{
-  gdb_printf (gdb_stdlog, "-> %s->thread_address_space (...)\n", this->beneath ()->shortname ());
-  struct address_space * result
-    = this->beneath ()->thread_address_space (arg0);
-  gdb_printf (gdb_stdlog, "<- %s->thread_address_space (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
-  gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_address_space_p (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }

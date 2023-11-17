@@ -208,11 +208,10 @@ reg_buffer::reg_buffer (gdbarch *gdbarch, bool has_pseudo)
     }
 }
 
-regcache::regcache (inferior *inf_for_target_calls, gdbarch *gdbarch,
-		    const address_space *aspace_)
+regcache::regcache (inferior *inf_for_target_calls, gdbarch *gdbarch)
 /* The register buffers.  A read/write register cache can only hold
    [0 .. gdbarch_num_regs).  */
-  : detached_regcache (gdbarch, false), m_aspace (aspace_),
+  : detached_regcache (gdbarch, false),
     m_inf_for_target_calls (inf_for_target_calls)
 {
   m_ptid = minus_one_ptid;
@@ -348,10 +347,9 @@ using target_pid_ptid_regcache_map
    target when appropriate.  */
 static target_pid_ptid_regcache_map regcaches;
 
-struct regcache *
-get_thread_arch_aspace_regcache (inferior *inf_for_target_calls,
-				 ptid_t ptid, gdbarch *arch,
-				 struct address_space *aspace)
+regcache *
+get_thread_arch_regcache (inferior *inf_for_target_calls, ptid_t ptid,
+			  gdbarch *arch)
 {
   gdb_assert (inf_for_target_calls != nullptr);
 
@@ -373,25 +371,13 @@ get_thread_arch_aspace_regcache (inferior *inf_for_target_calls,
     }
 
   /* It does not exist, create it.  */
-  regcache *new_regcache = new regcache (inf_for_target_calls, arch, aspace);
+  regcache *new_regcache = new regcache (inf_for_target_calls, arch);
   new_regcache->set_ptid (ptid);
   /* Work around a problem with g++ 4.8 (PR96537): Call the regcache_up
      constructor explicitly instead of implicitly.  */
   ptid_regc_map.insert (std::make_pair (ptid, regcache_up (new_regcache)));
 
   return new_regcache;
-}
-
-struct regcache *
-get_thread_arch_regcache (process_stratum_target *target, ptid_t ptid,
-			  struct gdbarch *gdbarch)
-{
-  scoped_restore_current_inferior restore_current_inferior;
-  inferior *inf = find_inferior_ptid (target, ptid);
-  set_current_inferior (inf);
-  address_space *aspace = target_thread_address_space (ptid);
-
-  return get_thread_arch_aspace_regcache (inf, ptid, gdbarch, aspace);
 }
 
 static process_stratum_target *current_thread_target;
@@ -401,6 +387,8 @@ static struct gdbarch *current_thread_arch;
 struct regcache *
 get_thread_regcache (process_stratum_target *target, ptid_t ptid)
 {
+  inferior *inf = find_inferior_ptid (target, ptid);
+
   if (!current_thread_arch
       || target != current_thread_target
       || current_thread_ptid != ptid)
@@ -411,11 +399,11 @@ get_thread_regcache (process_stratum_target *target, ptid_t ptid)
       current_thread_target = target;
 
       scoped_restore_current_inferior restore_current_inferior;
-      set_current_inferior (find_inferior_ptid (target, ptid));
+      set_current_inferior (inf);
       current_thread_arch = target_thread_architecture (ptid);
     }
 
-  return get_thread_arch_regcache (target, ptid, current_thread_arch);
+  return get_thread_arch_regcache (inf, ptid, current_thread_arch);
 }
 
 /* See regcache.h.  */
@@ -1618,24 +1606,22 @@ regcache_count (process_stratum_target *target, ptid_t ptid)
   return 0;
 };
 
-/* Wrapper around get_thread_arch_aspace_regcache that does some self checks.  */
+/* Wrapper around get_thread_arch_regcache that does some self checks.  */
 
 static void
-get_thread_arch_aspace_regcache_and_check (inferior *inf_for_target_calls,
-					   ptid_t ptid)
+get_thread_arch_regcache_and_check (inferior *inf_for_target_calls,
+				    ptid_t ptid)
 {
   /* We currently only test with a single gdbarch.  Any gdbarch will do, so use
      the current inferior's gdbarch.  Also use the current inferior's address
      space.  */
   gdbarch *arch = inf_for_target_calls->arch ();
-  address_space *aspace = inf_for_target_calls->aspace;
-  regcache *regcache = get_thread_arch_aspace_regcache (inf_for_target_calls,
-							ptid, arch, aspace);
+  regcache *regcache
+    = get_thread_arch_regcache (inf_for_target_calls, ptid, arch);
 
   SELF_CHECK (regcache != NULL);
   SELF_CHECK (regcache->ptid () == ptid);
   SELF_CHECK (regcache->arch () == arch);
-  SELF_CHECK (regcache->aspace () == aspace);
 }
 
 /* The data that the regcaches selftests must hold onto for the duration of the
@@ -1683,12 +1669,12 @@ populate_regcaches_for_test ()
     {
       for (long lwp : { 1, 2, 3 })
 	{
-	  get_thread_arch_aspace_regcache_and_check
+	  get_thread_arch_regcache_and_check
 	    (&data->test_ctx_1.mock_inferior, ptid_t (pid, lwp));
 	  expected_regcache_size++;
 	  SELF_CHECK (regcaches_size () == expected_regcache_size);
 
-	  get_thread_arch_aspace_regcache_and_check
+	  get_thread_arch_regcache_and_check
 	    (&data->test_ctx_2.mock_inferior, ptid_t (pid, lwp));
 	  expected_regcache_size++;
 	  SELF_CHECK (regcaches_size () == expected_regcache_size);
@@ -1699,16 +1685,16 @@ populate_regcaches_for_test ()
 }
 
 static void
-get_thread_arch_aspace_regcache_test ()
+get_thread_arch_regcache_test ()
 {
   /* populate_regcaches_for_test already tests most of the
-     get_thread_arch_aspace_regcache functionality.  */
+     get_thread_arch_regcache functionality.  */
   regcache_test_data_up data = populate_regcaches_for_test ();
   size_t regcaches_size_before = regcaches_size ();
 
   /* Test that getting an existing regcache doesn't create a new one.  */
-  get_thread_arch_aspace_regcache_and_check (&data->test_ctx_1.mock_inferior,
-					     ptid_t (2, 2));
+  get_thread_arch_regcache_and_check (&data->test_ctx_1.mock_inferior,
+				      ptid_t (2, 2));
   SELF_CHECK (regcaches_size () == regcaches_size_before);
 }
 
@@ -1835,7 +1821,7 @@ class readwrite_regcache : public regcache
 public:
   readwrite_regcache (inferior *inf_for_target_calls,
 		      struct gdbarch *gdbarch)
-    : regcache (inf_for_target_calls, gdbarch, nullptr)
+    : regcache (inf_for_target_calls, gdbarch)
   {}
 };
 
@@ -2116,10 +2102,8 @@ regcache_thread_ptid_changed ()
   gdb_assert (regcaches.empty ());
 
   /* Populate the regcaches container.  */
-  get_thread_arch_aspace_regcache (&target1.mock_inferior, old_ptid, arch,
-				   nullptr);
-  get_thread_arch_aspace_regcache (&target2.mock_inferior, old_ptid, arch,
-				   nullptr);
+  get_thread_arch_regcache (&target1.mock_inferior, old_ptid, arch);
+  get_thread_arch_regcache (&target2.mock_inferior, old_ptid, arch);
 
   gdb_assert (regcaches.size () == 2);
   gdb_assert (regcache_count (&target1.mock_target, old_ptid) == 1);
@@ -2163,8 +2147,8 @@ _initialize_regcache ()
   deprecate_cmd (c, "maintenance flush register-cache");
 
 #if GDB_SELF_TEST
-  selftests::register_test ("get_thread_arch_aspace_regcache",
-			    selftests::get_thread_arch_aspace_regcache_test);
+  selftests::register_test ("get_thread_arch_regcache",
+			    selftests::get_thread_arch_regcache_test);
   selftests::register_test ("registers_changed_ptid_all",
 			    selftests::registers_changed_ptid_all_test);
   selftests::register_test ("registers_changed_ptid_target",

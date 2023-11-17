@@ -166,10 +166,8 @@ static CORE_ADDR
 riscv_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 				     CORE_ADDR lm_addr, CORE_ADDR offset)
 {
-  struct regcache *regcache;
-
-  regcache = get_thread_arch_regcache (current_inferior ()->process_target (),
-				       ptid, gdbarch);
+  regcache *regcache
+    = get_thread_arch_regcache (current_inferior (), ptid, gdbarch);
 
   target_fetch_registers (regcache, RISCV_TP_REGNUM);
 

@@ -8421,6 +8421,8 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
       && status->kind () != TARGET_WAITKIND_SIGNALLED
       && status->kind () != TARGET_WAITKIND_NO_RESUMED)
     {
+      remote_notice_new_inferior (ptid, false);
+
       /* Expedited registers.  */
       if (!stop_reply->regcache.empty ())
 	{
@@ -8429,8 +8431,9 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
 	     already).  */
 	  gdb_assert (status->kind () != TARGET_WAITKIND_THREAD_EXITED);
 
-	  struct regcache *regcache
-	    = get_thread_arch_regcache (this, ptid, stop_reply->arch);
+	  regcache *regcache
+	    = get_thread_arch_regcache (find_inferior_ptid (this, ptid), ptid,
+					stop_reply->arch);
 
 	  for (cached_reg_t &reg : stop_reply->regcache)
 	    {
@@ -8441,7 +8444,6 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
 	  stop_reply->regcache.clear ();
 	}
 
-      remote_notice_new_inferior (ptid, false);
       remote_thread_info *remote_thr = get_remote_thread_info (this, ptid);
       remote_thr->core = stop_reply->core;
       remote_thr->stop_reason = stop_reply->stop_reason;

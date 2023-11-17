@@ -51,10 +51,6 @@ public:
   bool supports_non_stop () override { return false; }
   bool supports_disable_randomization () override { return false; }
 
-  /* This default implementation returns the inferior's address
-     space.  */
-  struct address_space *thread_address_space (ptid_t ptid) override;
-
   /* This default implementation always returns the current inferior's
      gdbarch.  */
   struct gdbarch *thread_architecture (ptid_t ptid) override;

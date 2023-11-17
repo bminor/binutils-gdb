@@ -26,7 +26,6 @@
 struct regcache;
 struct regset;
 struct gdbarch;
-struct address_space;
 class thread_info;
 struct process_stratum_target;
 struct inferior;
@@ -38,11 +37,8 @@ extern struct regcache *get_thread_regcache (process_stratum_target *target,
 /* Get the regcache of THREAD.  */
 extern struct regcache *get_thread_regcache (thread_info *thread);
 
-extern struct regcache *get_thread_arch_regcache
-  (process_stratum_target *targ, ptid_t, struct gdbarch *);
-extern struct regcache *get_thread_arch_aspace_regcache
-  (inferior *inf_for_target_calls, ptid_t,
-   struct gdbarch *, struct address_space *);
+extern regcache *get_thread_arch_regcache (inferior *inf_for_target_calls,
+					   ptid_t ptid, gdbarch *arch);
 
 extern enum register_status
   regcache_raw_read_signed (struct regcache *regcache,
@@ -339,12 +335,6 @@ class regcache : public detached_regcache
 public:
   DISABLE_COPY_AND_ASSIGN (regcache);
 
-  /* Return REGCACHE's address space.  */
-  const address_space *aspace () const
-  {
-    return m_aspace;
-  }
-
   /* Restore 'this' regcache.  The set of registers restored into
      the regcache determined by the restore_reggroup.
      Writes to regcache will go through to the target.  SRC is a
@@ -422,8 +412,7 @@ public:
   void debug_print_register (const char *func, int regno);
 
 protected:
-  regcache (inferior *inf_for_target_calls, gdbarch *gdbarch,
-	    const address_space *aspace);
+  regcache (inferior *inf_for_target_calls, gdbarch *gdbarch);
 
 private:
 
@@ -445,10 +434,6 @@ private:
   enum register_status write_part (int regnum, int offset, int len,
 				   const gdb_byte *in, bool is_raw);
 
-  /* The address space of this register cache (for registers where it
-     makes sense, like PC or SP).  */
-  const address_space * const m_aspace;
-
   /* The inferior to switch to, to make target calls.
 
      This may not be the inferior of thread M_PTID.  For instance, this
@@ -462,10 +447,8 @@ private:
      it connected to?  */
   ptid_t m_ptid;
 
-  friend struct regcache *
-  get_thread_arch_aspace_regcache (inferior *inf_for_target_calls, ptid_t ptid,
-				   struct gdbarch *gdbarch,
-				   struct address_space *aspace);
+  friend regcache *get_thread_arch_regcache (inferior *inf_for_target_calls,
+					     ptid_t ptid, gdbarch *gdbarch);
 };
 
 using regcache_up = std::unique_ptr<regcache>;

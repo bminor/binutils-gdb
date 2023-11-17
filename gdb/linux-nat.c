@@ -2472,6 +2472,17 @@ stop_wait_callback (struct lwp_info *lp)
   return 0;
 }
 
+/* Get the inferior associated to LWP.  Must be called with an LWP that has
+   an associated inferior.  Always return non-nullptr.  */
+
+static inferior *
+lwp_inferior (const lwp_info *lwp)
+{
+  inferior *inf = find_inferior_ptid (linux_target, lwp->ptid);
+  gdb_assert (inf != nullptr);
+  return inf;
+}
+
 /* Return non-zero if LP has a wait status pending.  Discard the
    pending event and resume the LWP if the event that originally
    caused the stop became uninteresting.  */
@@ -2507,7 +2518,7 @@ status_callback (struct lwp_info *lp)
 	}
 
 #if !USE_SIGTRAP_SIGINFO
-      else if (!breakpoint_inserted_here_p (regcache->aspace (), pc))
+      else if (!breakpoint_inserted_here_p (lwp_inferior (lp)->aspace, pc))
 	{
 	  linux_nat_debug_printf ("previous breakpoint of %s, at %s gone",
 				  lp->ptid.to_string ().c_str (),
@@ -2607,7 +2618,7 @@ save_stop_reason (struct lwp_info *lp)
   if (!linux_target->low_status_is_event (lp->status))
     return;
 
-  inferior *inf = find_inferior_ptid (linux_target, lp->ptid);
+  inferior *inf = lwp_inferior (lp);
   if (inf->starting_up)
     return;
 
@@ -2662,15 +2673,14 @@ save_stop_reason (struct lwp_info *lp)
     }
 #else
   if ((!lp->step || lp->stop_pc == sw_bp_pc)
-      && software_breakpoint_inserted_here_p (regcache->aspace (),
-					      sw_bp_pc))
+      && software_breakpoint_inserted_here_p (inf->aspace, sw_bp_pc))
     {
       /* The LWP was either continued, or stepped a software
 	 breakpoint instruction.  */
       lp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
     }
 
-  if (hardware_breakpoint_inserted_here_p (regcache->aspace (), pc))
+  if (hardware_breakpoint_inserted_here_p (inf->aspace, pc))
     lp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
 
   if (lp->stop_reason == TARGET_STOPPED_BY_NO_REASON)
@@ -3417,7 +3427,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 static int
 resume_stopped_resumed_lwps (struct lwp_info *lp, const ptid_t wait_ptid)
 {
-  inferior *inf = find_inferior_ptid (linux_target, lp->ptid);
+  inferior *inf = lwp_inferior (lp);
 
   if (!lp->stopped)
     {
@@ -3453,7 +3463,7 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, const ptid_t wait_ptid)
 	     immediately, and we're not waiting for this LWP.  */
 	  if (!lp->ptid.matches (wait_ptid))
 	    {
-	      if (breakpoint_inserted_here_p (regcache->aspace (), pc))
+	      if (breakpoint_inserted_here_p (inf->aspace, pc))
 		leave_stopped = 1;
 	    }
 
@@ -4381,38 +4391,6 @@ linux_nat_target::stop (ptid_t ptid)
 {
   LINUX_NAT_SCOPED_DEBUG_ENTER_EXIT;
   iterate_over_lwps (ptid, linux_nat_stop_lwp);
-}
-
-/* When requests are passed down from the linux-nat layer to the
-   single threaded inf-ptrace layer, ptids of (lwpid,0,0) form are
-   used.  The address space pointer is stored in the inferior object,
-   but the common code that is passed such ptid can't tell whether
-   lwpid is a "main" process id or not (it assumes so).  We reverse
-   look up the "main" process id from the lwp here.  */
-
-struct address_space *
-linux_nat_target::thread_address_space (ptid_t ptid)
-{
-  struct lwp_info *lwp;
-  struct inferior *inf;
-  int pid;
-
-  if (ptid.lwp () == 0)
-    {
-      /* An (lwpid,0,0) ptid.  Look up the lwp object to get at the
-	 tgid.  */
-      lwp = find_lwp_pid (ptid);
-      pid = lwp->ptid.pid ();
-    }
-  else
-    {
-      /* A (pid,lwpid,0) ptid.  */
-      pid = ptid.pid ();
-    }
-
-  inf = find_inferior_pid (this, pid);
-  gdb_assert (inf != NULL);
-  return inf->aspace;
 }
 
 /* Return the cached value of the processor core for thread PTID.  */

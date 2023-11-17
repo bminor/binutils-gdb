@@ -135,8 +135,7 @@ static struct regcache *
 get_ps_regcache (struct ps_prochandle *ph, lwpid_t lwpid)
 {
   inferior *inf = ph->thread->inf;
-  return get_thread_arch_regcache (inf->process_target (),
-				   ptid_t (inf->pid, lwpid),
+  return get_thread_arch_regcache (inf, ptid_t (inf->pid, lwpid),
 				   inf->arch ());
 }
 

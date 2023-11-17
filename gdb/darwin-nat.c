@@ -1151,7 +1151,7 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 }
 
 int
-darwin_nat_target::cancel_breakpoint (ptid_t ptid)
+darwin_nat_target::cancel_breakpoint (inferior *inf, ptid_t ptid)
 {
   /* Arrange for a breakpoint to be hit again later.  We will handle
      the current event, eventually we will resume this thread, and this
@@ -1166,7 +1166,7 @@ darwin_nat_target::cancel_breakpoint (ptid_t ptid)
   CORE_ADDR pc;
 
   pc = regcache_read_pc (regcache) - gdbarch_decr_pc_after_break (gdbarch);
-  if (breakpoint_inserted_here_p (regcache->aspace (), pc))
+  if (breakpoint_inserted_here_p (inf->aspace, pc))
     {
       inferior_debug (4, "cancel_breakpoint for thread 0x%lx\n",
 		      (unsigned long) ptid.tid ());
@@ -1286,7 +1286,8 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
 	  && thread->event.ex_type == EXC_BREAKPOINT)
 	{
 	  if (thread->single_step
-	      || cancel_breakpoint (ptid_t (inf->pid, 0, thread->gdb_port)))
+	      || cancel_breakpoint (inf,
+				    ptid_t (inf->pid, 0, thread->gdb_port)))
 	    {
 	      gdb_assert (thread->msg_state == DARWIN_MESSAGE);
 	      darwin_send_reply (inf, thread);

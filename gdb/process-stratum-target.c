@@ -26,20 +26,6 @@ process_stratum_target::~process_stratum_target ()
 {
 }
 
-struct address_space *
-process_stratum_target::thread_address_space (ptid_t ptid)
-{
-  /* Fall-back to the "main" address space of the inferior.  */
-  inferior *inf = find_inferior_ptid (this, ptid);
-
-  if (inf == NULL || inf->aspace == NULL)
-    internal_error (_("Can't determine the current "
-		      "address space of thread %s\n"),
-		    target_pid_to_str (ptid).c_str ());
-
-  return inf->aspace;
-}
-
 struct gdbarch *
 process_stratum_target::thread_architecture (ptid_t ptid)
 {

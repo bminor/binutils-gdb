@@ -2999,19 +2999,6 @@ target_get_osdata (const char *type)
   return target_read_stralloc (t, TARGET_OBJECT_OSDATA, type);
 }
 
-/* Determine the current address space of thread PTID.  */
-
-struct address_space *
-target_thread_address_space (ptid_t ptid)
-{
-  struct address_space *aspace;
-
-  aspace = current_inferior ()->top_target ()->thread_address_space (ptid);
-  gdb_assert (aspace != NULL);
-
-  return aspace;
-}
-
 /* See target.h.  */
 
 target_ops *

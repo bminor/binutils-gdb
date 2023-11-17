@@ -949,10 +949,6 @@ struct target_ops
     virtual struct gdbarch *thread_architecture (ptid_t)
       TARGET_DEFAULT_RETURN (NULL);
 
-    /* Determine current address space of thread PTID.  */
-    virtual struct address_space *thread_address_space (ptid_t)
-      TARGET_DEFAULT_RETURN (NULL);
-
     /* Target file operations.  */
 
     /* Return true if the filesystem seen by the current inferior
@@ -1543,10 +1539,6 @@ extern void target_store_registers (struct regcache *regcache, int regs);
    debugged.  */
 
 extern void target_prepare_to_store (regcache *regcache);
-
-/* Determine current address space of thread PTID.  */
-
-struct address_space *target_thread_address_space (ptid_t);
 
 /* Implement the "info proc" command.  This returns one if the request
    was handled, and zero otherwise.  It can also throw an exception if

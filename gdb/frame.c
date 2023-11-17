@@ -1620,14 +1620,15 @@ put_frame_register_bytes (frame_info_ptr frame, int regnum,
    CODE_ADDR.  */
 
 static frame_info_ptr
-create_sentinel_frame (struct program_space *pspace, struct regcache *regcache,
-		       CORE_ADDR stack_addr, CORE_ADDR code_addr)
+create_sentinel_frame (program_space *pspace, address_space *aspace,
+		       regcache *regcache, CORE_ADDR stack_addr,
+		       CORE_ADDR code_addr)
 {
   frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
 
   frame->level = -1;
   frame->pspace = pspace;
-  frame->aspace = regcache->aspace ();
+  frame->aspace = aspace;
   /* Explicitly initialize the sentinel frame's cache.  Provide it
      with the underlying regcache.  In the future additional
      information, such as the frame's thread will be added.  */
@@ -1688,8 +1689,8 @@ get_current_frame (void)
 
   if (sentinel_frame == NULL)
     sentinel_frame =
-      create_sentinel_frame (current_program_space, get_current_regcache (),
-			     0, 0).get ();
+      create_sentinel_frame (current_program_space, current_inferior ()->aspace,
+			     get_current_regcache (), 0, 0).get ();
 
   /* Set the current frame before computing the frame id, to avoid
      recursion inside compute_frame_id, in case the frame's
@@ -2022,6 +2023,7 @@ create_new_frame (frame_id id)
   frame_info *fi = FRAME_OBSTACK_ZALLOC (struct frame_info);
 
   fi->next = create_sentinel_frame (current_program_space,
+				    current_inferior ()->aspace,
 				    get_current_regcache (),
 				    id.stack_addr, id.code_addr).get ();
 

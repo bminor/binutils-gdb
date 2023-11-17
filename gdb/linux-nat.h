@@ -68,8 +68,6 @@ public:
 
   const char *thread_name (struct thread_info *) override;
 
-  struct address_space *thread_address_space (ptid_t) override;
-
   bool stopped_by_watchpoint () override;
 
   bool stopped_data_address (CORE_ADDR *) override;

@@ -128,9 +128,8 @@ gcore_elf_build_thread_register_notes
   (struct gdbarch *gdbarch, struct thread_info *info, gdb_signal stop_signal,
    bfd *obfd, gdb::unique_xmalloc_ptr<char> *note_data, int *note_size)
 {
-  struct regcache *regcache
-    = get_thread_arch_regcache (info->inf->process_target (),
-				info->ptid, gdbarch);
+  regcache *regcache
+    = get_thread_arch_regcache (info->inf, info->ptid, gdbarch);
   target_fetch_registers (regcache, -1);
   gcore_elf_collect_thread_registers (regcache, info->ptid, obfd,
 				      note_data, note_size, stop_signal);

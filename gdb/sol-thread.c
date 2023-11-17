@@ -845,9 +845,8 @@ ps_err_e
 ps_lgetregs (struct ps_prochandle *ph, lwpid_t lwpid, prgregset_t gregset)
 {
   ptid_t ptid = ptid_t (current_inferior ()->pid, lwpid, 0);
-  struct regcache *regcache
-    = get_thread_arch_regcache (current_inferior ()->process_target (),
-				ptid, current_inferior ()->arch ());
+  regcache *regcache = get_thread_arch_regcache (current_inferior (), ptid,
+						 current_inferior ()->arch ());
 
   target_fetch_registers (regcache, -1);
   fill_gregset (regcache, (gdb_gregset_t *) gregset, -1);
@@ -862,9 +861,8 @@ ps_lsetregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	     const prgregset_t gregset)
 {
   ptid_t ptid = ptid_t (current_inferior ()->pid, lwpid, 0);
-  struct regcache *regcache
-    = get_thread_arch_regcache (current_inferior ()->process_target (),
-				ptid, current_inferior ()->arch ());
+  regcache *regcache = get_thread_arch_regcache (current_inferior (), ptid,
+						 current_inferior ()->arch ());
 
   supply_gregset (regcache, (const gdb_gregset_t *) gregset);
   target_store_registers (regcache, -1);
@@ -915,9 +913,8 @@ ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	       prfpregset_t *fpregset)
 {
   ptid_t ptid = ptid_t (current_inferior ()->pid, lwpid, 0);
-  struct regcache *regcache
-    = get_thread_arch_regcache (current_inferior ()->process_target (),
-				ptid, current_inferior ()->arch ());
+  regcache *regcache = get_thread_arch_regcache (current_inferior (), ptid,
+						 current_inferior ()->arch ());
 
   target_fetch_registers (regcache, -1);
   fill_fpregset (regcache, (gdb_fpregset_t *) fpregset, -1);
@@ -932,9 +929,8 @@ ps_lsetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	       const prfpregset_t * fpregset)
 {
   ptid_t ptid = ptid_t (current_inferior ()->pid, lwpid, 0);
-  struct regcache *regcache
-    = get_thread_arch_regcache (current_inferior ()->process_target (),
-				ptid, current_inferior ()->arch ());
+  regcache *regcache = get_thread_arch_regcache (current_inferior (), ptid,
+						 current_inferior ()->arch ());
 
   supply_fpregset (regcache, (const gdb_fpregset_t *) fpregset);
   target_store_registers (regcache, -1);

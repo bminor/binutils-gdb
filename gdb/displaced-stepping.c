@@ -53,7 +53,6 @@ displaced_step_buffers::prepare (thread_info *thread, CORE_ADDR &displaced_pc)
     gdb_assert (buf.current_thread != thread);
 
   regcache *regcache = get_thread_regcache (thread);
-  const address_space *aspace = regcache->aspace ();
   gdbarch *arch = regcache->arch ();
   ULONGEST len = gdbarch_displaced_step_buffer_length (arch);
 
@@ -64,7 +63,7 @@ displaced_step_buffers::prepare (thread_info *thread, CORE_ADDR &displaced_pc)
 
   for (displaced_step_buffer &candidate : m_buffers)
     {
-      bool bp_in_range = breakpoint_in_range_p (aspace, candidate.addr, len);
+      bool bp_in_range = breakpoint_in_range_p (thread->inf->aspace, candidate.addr, len);
       bool is_free = candidate.current_thread == nullptr;
 
       if (!bp_in_range)
