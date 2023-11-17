@@ -128,8 +128,9 @@ def exec_and_expect_stop(cmd, reason):
     """Indicate that a stop is expected, then execute CMD"""
     global _expected_stop
     _expected_stop = reason
-    global _suppress_cont
-    _suppress_cont = True
+    if reason != StopKinds.PAUSE:
+        global _suppress_cont
+        _suppress_cont = True
     # FIXME if the call fails should we clear _suppress_cont?
     exec_and_log(cmd)
 
@@ -156,6 +157,26 @@ def _on_stop(event):
     send_event("stopped", obj)
 
 
+# This keeps a bit of state between the start of an inferior call and
+# the end.  If the inferior was already running when the call started
+# (as can happen if a breakpoint condition calls a function), then we
+# do not want to emit 'continued' or 'stop' events for the call.  Note
+# that, for some reason, gdb.events.cont does not fire for an infcall.
+_infcall_was_running = False
+
+
+@in_gdb_thread
+def _on_inferior_call(event):
+    global _infcall_was_running
+    if isinstance(event, gdb.InferiorCallPreEvent):
+        _infcall_was_running = inferior_running
+        if not _infcall_was_running:
+            _cont(None)
+    else:
+        if not _infcall_was_running:
+            _on_stop(None)
+
+
 gdb.events.stop.connect(_on_stop)
 gdb.events.exited.connect(_on_exit)
 gdb.events.new_thread.connect(_new_thread)
@@ -163,3 +184,4 @@ gdb.events.thread_exited.connect(_thread_exited)
 gdb.events.cont.connect(_cont)
 gdb.events.new_objfile.connect(_new_objfile)
 gdb.events.free_objfile.connect(_objfile_removed)
+gdb.events.inferior_call.connect(_on_inferior_call)
