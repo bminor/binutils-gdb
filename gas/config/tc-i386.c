@@ -3063,8 +3063,7 @@ i386_arch (void)
 {
   if (cpu_arch_isa == PROCESSOR_IAMCU)
     {
-      if (OUTPUT_FLAVOR != bfd_target_elf_flavour
-	  || flag_code == CODE_64BIT)
+      if (!IS_ELF || flag_code == CODE_64BIT)
 	as_fatal (_("Intel MCU is 32bit ELF only"));
       return bfd_arch_iamcu;
     }
@@ -3087,7 +3086,7 @@ i386_mach (void)
     {
       if (cpu_arch_isa == PROCESSOR_IAMCU)
 	{
-	  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+	  if (!IS_ELF)
 	    as_fatal (_("Intel MCU is 32bit ELF only"));
 	  return bfd_mach_i386_iamcu;
 	}
