@@ -8112,8 +8112,10 @@ check_long_reg (void)
 		i.suffix);
 	return 0;
       }
-    /* Error if the e prefix on a general reg is missing.  */
-    else if (i.types[op].bitfield.word
+    /* Error if the e prefix on a general reg is missing, or if the r
+       prefix on a general reg is present.  */
+    else if ((i.types[op].bitfield.word
+	      || i.types[op].bitfield.qword)
 	     && (i.tm.operand_types[op].bitfield.class == Reg
 		 || i.tm.operand_types[op].bitfield.instance == Accum)
 	     && i.tm.operand_types[op].bitfield.dword)
@@ -8121,16 +8123,6 @@ check_long_reg (void)
 	as_bad (_("incorrect register `%s%s' used with `%c' suffix"),
 		register_prefix, i.op[op].regs->reg_name,
 		i.suffix);
-	return 0;
-      }
-    /* Warn if the r prefix on a general reg is present.  */
-    else if (i.types[op].bitfield.qword
-	     && (i.tm.operand_types[op].bitfield.class == Reg
-		 || i.tm.operand_types[op].bitfield.instance == Accum)
-	     && i.tm.operand_types[op].bitfield.dword)
-      {
-	as_bad (_("incorrect register `%s%s' used with `%c' suffix"),
-		register_prefix, i.op[op].regs->reg_name, i.suffix);
 	return 0;
       }
   return 1;
@@ -8161,7 +8153,7 @@ check_qword_reg (void)
 		i.suffix);
 	return 0;
       }
-    /* Warn if the r prefix on a general reg is missing.  */
+    /* Error if the r prefix on a general reg is missing.  */
     else if ((i.types[op].bitfield.word
 	      || i.types[op].bitfield.dword)
 	     && (i.tm.operand_types[op].bitfield.class == Reg
