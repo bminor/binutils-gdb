@@ -587,9 +587,7 @@ static int use_rela_relocations = 0;
 /* __tls_get_addr/___tls_get_addr symbol for TLS.  */
 static const char *tls_get_addr;
 
-#if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
-     || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
-     || defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O))
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 
 /* The ELF ABI to use.  */
 enum x86_elf_abi
@@ -3527,15 +3525,15 @@ reloc (unsigned int size,
   return NO_RELOC;
 }
 
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 /* Here we decide which fixups can be adjusted to make them relative to
    the beginning of the section instead of the symbol.  Basically we need
    to make sure that the dynamic relocations are done correctly, so in
    some cases we force the original symbol to be used.  */
 
 int
-tc_i386_fix_adjustable (fixS *fixP ATTRIBUTE_UNUSED)
+tc_i386_fix_adjustable (fixS *fixP)
 {
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   if (!IS_ELF)
     return 1;
 
@@ -3586,9 +3584,9 @@ tc_i386_fix_adjustable (fixS *fixP ATTRIBUTE_UNUSED)
       || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
-#endif
   return 1;
 }
+#endif
 
 static INLINE bool
 want_disp32 (const insn_template *t)
@@ -15264,10 +15262,12 @@ i386_target_format (void)
   if (startswith (default_arch, "x86_64"))
     {
       update_code_flag (CODE_64BIT, 1);
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       if (default_arch[6] == '\0')
 	x86_elf_abi = X86_64_ABI;
       else
 	x86_elf_abi = X86_64_X32_ABI;
+#endif
     }
   else if (!strcmp (default_arch, "i386"))
     update_code_flag (CODE_32BIT, 1);
@@ -15399,12 +15399,12 @@ md_undefined_symbol (char *name)
   return 0;
 }
 
+#if defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT)
 /* Round up a section size to the appropriate boundary.  */
 
 valueT
-md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
+md_section_align (segT segment, valueT size)
 {
-#if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
   if (OUTPUT_FLAVOR == bfd_target_aout_flavour)
     {
       /* For a.out, force the section size to be aligned.  If we don't do
@@ -15417,10 +15417,10 @@ md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
       align = bfd_section_alignment (segment);
       size = ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
     }
-#endif
 
   return size;
 }
+#endif
 
 /* On the i386, PC-relative offsets are relative to the start of the
    next instruction.  That is, the address of the offset, plus its
@@ -15864,6 +15864,20 @@ x86_dwarf2_addr_size (void)
   return bfd_arch_bits_per_address (stdoutput) / 8;
 }
 
+#ifdef TE_PE
+void
+tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
+{
+  expressionS exp;
+
+  exp.X_op = O_secrel;
+  exp.X_add_symbol = symbol;
+  exp.X_add_number = 0;
+  emit_expr (&exp, size);
+}
+#endif
+
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 int
 i386_elf_section_type (const char *str, size_t len)
 {
@@ -15884,20 +15898,6 @@ i386_solaris_fix_up_eh_frame (segT sec)
 }
 #endif
 
-#ifdef TE_PE
-void
-tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
-{
-  expressionS exp;
-
-  exp.X_op = O_secrel;
-  exp.X_add_symbol = symbol;
-  exp.X_add_number = 0;
-  emit_expr (&exp, size);
-}
-#endif
-
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 /* For ELF on x86-64, add support for SHF_X86_64_LARGE.  */
 
 bfd_vma
