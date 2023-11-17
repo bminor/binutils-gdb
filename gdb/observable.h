@@ -126,6 +126,11 @@ extern observable<thread_info */* t */,
 		  std::optional<ULONGEST> /* exit_code */,
 		  bool /* silent */> thread_exit;
 
+/* The thread specified by T has been deleted, with delete_thread.
+   This is called just before the thread_info object is destroyed with
+   operator delete.  */
+extern observable<thread_info */* t */> thread_deleted;
+
 /* An explicit stop request was issued to PTID.  If PTID equals
    minus_one_ptid, the request applied to all threads.  If
    ptid_is_pid(PTID) returns true, the request applied to all

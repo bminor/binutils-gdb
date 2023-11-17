@@ -46,6 +46,7 @@ DEFINE_OBSERVABLE (all_objfiles_removed);
 DEFINE_OBSERVABLE (free_objfile);
 DEFINE_OBSERVABLE (new_thread);
 DEFINE_OBSERVABLE (thread_exit);
+DEFINE_OBSERVABLE (thread_deleted);
 DEFINE_OBSERVABLE (thread_stop_requested);
 DEFINE_OBSERVABLE (target_resumed);
 DEFINE_OBSERVABLE (about_to_proceed);

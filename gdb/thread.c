@@ -527,6 +527,8 @@ delete_thread_1 (thread_info *thr, std::optional<ULONGEST> exit_code,
   auto it = thr->inf->thread_list.iterator_to (*thr);
   thr->inf->thread_list.erase (it);
 
+  gdb::observers::thread_deleted.notify (thr);
+
   delete thr;
 }
 
