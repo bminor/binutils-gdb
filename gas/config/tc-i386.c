@@ -5887,16 +5887,32 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	 Check if we should swap operand or force 32bit displacement in
 	 encoding.  */
       if (mnem_p - 2 == dot_p && dot_p[1] == 's')
-	i.dir_encoding = dir_encoding_swap;
+	{
+	  if (i.dir_encoding == dir_encoding_default)
+	    i.dir_encoding = dir_encoding_swap;
+	  else
+	    as_warn (_("ignoring `.s' suffix due to earlier `{%s}'"),
+		     i.dir_encoding == dir_encoding_load ? "load" : "store");
+	}
       else if (mnem_p - 3 == dot_p
 	       && dot_p[1] == 'd'
 	       && dot_p[2] == '8')
-	i.disp_encoding = disp_encoding_8bit;
+	{
+	  if (i.disp_encoding == disp_encoding_default)
+	    i.disp_encoding = disp_encoding_8bit;
+	  else if (i.disp_encoding != disp_encoding_8bit)
+	    as_warn (_("ignoring `.d8' suffix due to earlier `{disp<N>}'"));
+	}
       else if (mnem_p - 4 == dot_p
 	       && dot_p[1] == 'd'
 	       && dot_p[2] == '3'
 	       && dot_p[3] == '2')
-	i.disp_encoding = disp_encoding_32bit;
+	{
+	  if (i.disp_encoding == disp_encoding_default)
+	    i.disp_encoding = disp_encoding_32bit;
+	  else if (i.disp_encoding != disp_encoding_32bit)
+	    as_warn (_("ignoring `.d32' suffix due to earlier `{disp<N>}'"));
+	}
       else
 	goto check_suffix;
       mnem_p = dot_p;
