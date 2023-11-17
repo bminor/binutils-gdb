@@ -96,7 +96,7 @@ amd_dbgapi_lib_debug_module ()
 /* Print amd-dbgapi start/end debug statements.  */
 
 #define AMD_DBGAPI_SCOPED_DEBUG_START_END(fmt, ...) \
-    scoped_debug_start_end (debug_infrun, amd_dbgapi_debug_module (), \
+    scoped_debug_start_end (debug_amd_dbgapi, amd_dbgapi_debug_module (), \
 			    fmt, ##__VA_ARGS__)
 
 /* inferior_created observer token.  */
