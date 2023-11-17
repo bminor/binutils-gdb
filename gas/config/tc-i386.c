@@ -242,6 +242,8 @@ enum i386_error
     unsupported,
     unsupported_on_arch,
     unsupported_64bit,
+    no_vex_encoding,
+    no_evex_encoding,
     invalid_sib_address,
     invalid_vsib_address,
     invalid_vector_register_set,
@@ -254,7 +256,7 @@ enum i386_error
     mask_not_on_destination,
     no_default_mask,
     unsupported_rc_sae,
-    invalid_register_operand,
+    unsupported_vector_size,
     internal_error,
   };
 
@@ -5304,6 +5306,12 @@ md_assemble (char *line)
 			pass1_mnem ? pass1_mnem : insn_name (current_templates->start));
 	    }
 	  return;
+	case no_vex_encoding:
+	  err_msg = _("no VEX/XOP encoding");
+	  break;
+	case no_evex_encoding:
+	  err_msg = _("no EVEX encoding");
+	  break;
 	case invalid_sib_address:
 	  err_msg = _("invalid SIB address");
 	  break;
@@ -5340,9 +5348,10 @@ md_assemble (char *line)
 	case unsupported_rc_sae:
 	  err_msg = _("unsupported static rounding/sae");
 	  break;
-	case invalid_register_operand:
-	  err_msg = _("invalid register operand");
-	  break;
+	case unsupported_vector_size:
+	  as_bad (_("vector size above %u required for `%s'"), 128u << vector_size,
+		  pass1_mnem ? pass1_mnem : insn_name (current_templates->start));
+	  return;
 	case internal_error:
 	  err_msg = _("internal error");
 	  break;
@@ -6567,7 +6576,7 @@ check_VecOperands (const insn_template *t)
 	      && (i.types[op].bitfield.ymmword
 		  || i.types[op].bitfield.xmmword))
 	    {
-	      i.error = unsupported;
+	      i.error = operand_size_mismatch;
 	      return 1;
 	    }
 	}
@@ -6583,7 +6592,7 @@ check_VecOperands (const insn_template *t)
 	  if (t->operand_types[op].bitfield.xmmword
 	      && i.types[op].bitfield.ymmword)
 	    {
-	      i.error = unsupported;
+	      i.error = operand_size_mismatch;
 	      return 1;
 	    }
 	}
@@ -6963,7 +6972,7 @@ VEX_check_encoding (const insn_template *t)
 	      || t->opcode_modifier.vex == VEX256
 	      || t->opcode_modifier.vsz >= VSZ256)))
     {
-      i.error = unsupported;
+      i.error = unsupported_vector_size;
       return 1;
     }
 
@@ -6973,7 +6982,7 @@ VEX_check_encoding (const insn_template *t)
       /* This instruction must be encoded with EVEX prefix.  */
       if (!t->opcode_modifier.evex)
 	{
-	  i.error = unsupported;
+	  i.error = no_evex_encoding;
 	  return 1;
 	}
       return 0;
@@ -6984,7 +6993,7 @@ VEX_check_encoding (const insn_template *t)
       /* This instruction template doesn't have VEX prefix.  */
       if (i.vec_encoding != vex_encoding_default)
 	{
-	  i.error = unsupported;
+	  i.error = no_vex_encoding;
 	  return 1;
 	}
       return 0;

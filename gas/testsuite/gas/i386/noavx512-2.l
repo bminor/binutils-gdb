@@ -5,7 +5,7 @@
 .*:17: Error: .*bad register name `%zmm.*
 .*:18: Error: .*bad register name `%zmm.*
 .*:21: Error: .*bad register name `%zmm.*
-.*:24: Error: .*unsupported instruction.*
+.*:24: Error: .*vector size.*
 .*:25: Error: .*bad register name `%zmm.*
 .*:8: Error: .*bad register name `%zmm.*
 .*:10: Error: .*bad register name `%ymm.*
@@ -23,16 +23,16 @@
 .*:27: Error: .*bad register name `%ymm.*
 .*:9: Error: .*unsupported masking.*
 .*:10: Error: .*unsupported masking.*
-.*:12: Error: .*unsupported instruction.*
-.*:13: Error: .*unsupported instruction.*
-.*:15: Error: .*unsupported instruction.*
-.*:16: Error: .*unsupported instruction.*
+.*:12: Error: .*operand size mismatch.*
+.*:13: Error: .*operand size mismatch.*
+.*:15: Error: .*operand size mismatch.*
+.*:16: Error: .*operand size mismatch.*
 .*:19: Error: .*unsupported masking.*
 .*:20: Error: .*unsupported masking.*
-.*:22: Error: .*unsupported instruction.*
-.*:23: Error: .*unsupported instruction.*
-.*:26: Error: .*unsupported instruction.*
-.*:27: Error: .*unsupported instruction.*
+.*:22: Error: .*operand size mismatch.*
+.*:23: Error: .*operand size mismatch.*
+.*:26: Error: .*operand size mismatch.*
+.*:27: Error: .*operand size mismatch.*
 #...
 [ 	]*[0-9]+[ 	]+\# Test \.arch \.noavx512vl
 [ 	]*[0-9]+[ 	]+\.text
