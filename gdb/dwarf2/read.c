@@ -19212,39 +19212,38 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      sym->set_aclass_index (LOC_TYPEDEF);
 	      sym->set_domain (STRUCT_DOMAIN);
 	    }
-	  {
-	    /* NOTE: carlton/2003-11-10: C++ class symbols shouldn't
-	       really ever be static objects: otherwise, if you try
-	       to, say, break of a class's method and you're in a file
-	       which doesn't mention that class, it won't work unless
-	       the check for all static symbols in lookup_symbol_aux
-	       saves you.  See the OtherFileClass tests in
-	       gdb.c++/namespace.exp.  */
 
-	    if (!suppress_add)
-	      {
-		buildsym_compunit *builder = cu->get_builder ();
-		list_to_add
-		  = (cu->list_in_scope == builder->get_file_symbols ()
-		     && cu->lang () == language_cplus
-		     ? builder->get_global_symbols ()
-		     : cu->list_in_scope);
+	  /* NOTE: carlton/2003-11-10: C++ class symbols shouldn't
+	     really ever be static objects: otherwise, if you try
+	     to, say, break of a class's method and you're in a file
+	     which doesn't mention that class, it won't work unless
+	     the check for all static symbols in lookup_symbol_aux
+	     saves you.  See the OtherFileClass tests in
+	     gdb.c++/namespace.exp.  */
 
-		/* The semantics of C++ state that "struct foo {
-		   ... }" also defines a typedef for "foo".  */
-		if (cu->lang () == language_cplus
-		    || cu->lang () == language_ada
-		    || cu->lang () == language_d
-		    || cu->lang () == language_rust)
-		  {
-		    /* The symbol's name is already allocated along
-		       with this objfile, so we don't need to
-		       duplicate it for the type.  */
-		    if (sym->type ()->name () == 0)
-		      sym->type ()->set_name (sym->search_name ());
-		  }
-	      }
-	  }
+	  if (!suppress_add)
+	    {
+	      buildsym_compunit *builder = cu->get_builder ();
+	      list_to_add
+		= (cu->list_in_scope == builder->get_file_symbols ()
+		   && cu->lang () == language_cplus
+		   ? builder->get_global_symbols ()
+		   : cu->list_in_scope);
+
+	      /* The semantics of C++ state that "struct foo {
+		 ... }" also defines a typedef for "foo".  */
+	      if (cu->lang () == language_cplus
+		  || cu->lang () == language_ada
+		  || cu->lang () == language_d
+		  || cu->lang () == language_rust)
+		{
+		  /* The symbol's name is already allocated along
+		     with this objfile, so we don't need to
+		     duplicate it for the type.  */
+		  if (sym->type ()->name () == 0)
+		    sym->type ()->set_name (sym->search_name ());
+		}
+	    }
 	  break;
 	case DW_TAG_unspecified_type:
 	  if (cu->lang () == language_ada)
@@ -19265,16 +19264,15 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    {
 	      dwarf2_const_value (attr, sym, cu);
 	    }
-	  {
-	    /* NOTE: carlton/2003-11-10: See comment above in the
-	       DW_TAG_class_type, etc. block.  */
 
-	    list_to_add
-	      = (cu->list_in_scope == cu->get_builder ()->get_file_symbols ()
-		 && cu->lang () == language_cplus
-		 ? cu->get_builder ()->get_global_symbols ()
-		 : cu->list_in_scope);
-	  }
+	  /* NOTE: carlton/2003-11-10: See comment above in the
+	     DW_TAG_class_type, etc. block.  */
+
+	  list_to_add
+	    = (cu->list_in_scope == cu->get_builder ()->get_file_symbols ()
+	       && cu->lang () == language_cplus
+	       ? cu->get_builder ()->get_global_symbols ()
+	       : cu->list_in_scope);
 	  break;
 	case DW_TAG_imported_declaration:
 	case DW_TAG_namespace:
