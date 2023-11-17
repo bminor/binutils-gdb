@@ -1,3 +1,7 @@
+2023-11-17  YunQiang Su  <yunqiang.su@cipunited.com>
+
+	* configure.tgt (mips targets): Set targ_extra_size=64.
+
 2023-11-15  Arsen Arsenović  <arsen@aarsen.me>
 
 	* aclocal.m4: Regenerate.
@@ -7,8 +11,8 @@
 
 2023-11-10  YunQiang Su  <yunqiang.su@cipunited.com>
 
-	* configure.tgt (targ_machine): Set to EM_MIPS for little endian
-	mips targets.
+	* configure.tgt (mips targets): Set targ_machine to EM_MIPS for
+	little endian mips targets.
 
 2023-09-05  Roland McGrath  <mcgrathr@google.com>
 
