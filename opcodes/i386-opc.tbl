@@ -892,7 +892,7 @@ rex.wrxb, 0x4f, x64, NoSuf|IsPrefix, {}
 
 // Pseudo prefixes (base_opcode == PSEUDO_PREFIX)
 
-<pseudopfx:ident:cpu, disp8:Disp8:0, disp16:Disp16:0, disp32:Disp32:0, +
+<pseudopfx:ident:cpu, disp8:Disp8:0, disp16:Disp16:No64, disp32:Disp32:i386, +
                       load:Load:0, store:Store:0, +
                       vex:VEX:0, vex2:VEX:0, vex3:VEX3:0, evex:EVEX:0, +
                       rex:REX:x64, nooptimize:NoOptimize:0>

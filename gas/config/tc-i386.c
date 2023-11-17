@@ -5769,12 +5769,21 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	  && current_templates
 	  && current_templates->start->opcode_modifier.isprefix)
 	{
-	  if (!cpu_flags_check_cpu64 (current_templates->start))
+	  supported = cpu_flags_match (current_templates->start);
+	  if (!(supported & CPU_FLAGS_64BIT_MATCH))
 	    {
 	      as_bad ((flag_code != CODE_64BIT
 		       ? _("`%s' is only supported in 64-bit mode")
 		       : _("`%s' is not supported in 64-bit mode")),
 		      insn_name (current_templates->start));
+	      return NULL;
+	    }
+	  if (supported != CPU_FLAGS_PERFECT_MATCH)
+	    {
+	      as_bad (_("`%s' is not supported on `%s%s'"),
+		      insn_name (current_templates->start),
+		      cpu_arch_name ? cpu_arch_name : default_arch,
+		      cpu_sub_arch_name ? cpu_sub_arch_name : "");
 	      return NULL;
 	    }
 	  /* If we are in 16-bit mode, do not allow addr16 or data16.
