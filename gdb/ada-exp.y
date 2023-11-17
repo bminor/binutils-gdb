@@ -1404,7 +1404,7 @@ block_lookup (const struct block *context, const char *raw_name)
     }
 
   std::vector<struct block_symbol> syms
-    = ada_lookup_symbol_list (name, context, SEARCH_VFT);
+    = ada_lookup_symbol_list (name, context, SEARCH_FUNCTION_DOMAIN);
 
   if (context == NULL
       && (syms.empty () || syms[0].symbol->aclass () != LOC_BLOCK))
@@ -1483,7 +1483,7 @@ find_primitive_type (struct parser_state *par_state, const char *name)
 	(char *) alloca (strlen (name) + sizeof ("standard__"));
       strcpy (expanded_name, "standard__");
       strcat (expanded_name, name);
-      sym = ada_lookup_symbol (expanded_name, NULL, SEARCH_VFT).symbol;
+      sym = ada_lookup_symbol (expanded_name, NULL, SEARCH_TYPE_DOMAIN).symbol;
       if (sym != NULL && sym->aclass () == LOC_TYPEDEF)
 	type = sym->type ();
     }

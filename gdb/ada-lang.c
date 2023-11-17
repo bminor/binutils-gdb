@@ -7436,14 +7436,8 @@ field_alignment (struct type *type, int f)
 static struct symbol *
 ada_find_any_type_symbol (const char *name)
 {
-  struct symbol *sym;
-
-  sym = standard_lookup (name, get_selected_block (NULL), SEARCH_VFT);
-  if (sym != NULL && sym->aclass () == LOC_TYPEDEF)
-    return sym;
-
-  sym = standard_lookup (name, NULL, SEARCH_STRUCT_DOMAIN);
-  return sym;
+  return standard_lookup (name, get_selected_block (nullptr),
+			  SEARCH_TYPE_DOMAIN);
 }
 
 /* Find a type named NAME.  Ignores ambiguity.  This routine will look
