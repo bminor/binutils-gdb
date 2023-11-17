@@ -3688,7 +3688,7 @@ read_ranges (struct comp_unit *unit, struct arange *arange,
 
       if (low_pc == 0 && high_pc == 0)
 	break;
-      if (low_pc == -1UL && high_pc != -1UL)
+      if (low_pc == (bfd_vma) -1 && high_pc != (bfd_vma) -1)
 	base_address = high_pc;
       else
 	{
