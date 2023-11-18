@@ -6214,12 +6214,29 @@ in the symbol information or in @value{GDBN}'s handling of symbols.
 
 @vindex SYMBOL_VAR_DOMAIN
 @item gdb.SYMBOL_VAR_DOMAIN
-This domain contains variables, function names, typedef names and enum
-type values.
+This domain contains variables.
+
+@vindex SYMBOL_FUNCTION_DOMAIN
+@item gdb.SYMBOL_FUNCTION_DOMAIN
+This domain contains functions.
+
+@vindex SYMBOL_TYPE_DOMAIN
+@item gdb.SYMBOL_TYPE_DOMAIN
+This domain contains types.  In a C-like language, types using a tag
+(the name appearing after a @code{struct}, @code{union}, or
+@code{enum} keyword) will not appear here; in other languages, all
+types are in this domain.
 
 @vindex SYMBOL_STRUCT_DOMAIN
 @item gdb.SYMBOL_STRUCT_DOMAIN
-This domain holds struct, union and enum type names.
+This domain holds struct, union and enum tag names.  This domain is
+only used for C-like languages.  For example, in this code:
+@smallexample
+struct type_one @{ int x; @};
+typedef struct type_one type_two;
+@end smallexample
+Here @code{type_one} will be in @code{SYMBOL_STRUCT_DOMAIN}, but
+@code{type_two} will be in @code{SYMBOL_TYPE_DOMAIN}.
 
 @vindex SYMBOL_LABEL_DOMAIN
 @item gdb.SYMBOL_LABEL_DOMAIN
@@ -6233,6 +6250,22 @@ This domain contains names of Fortran module types.
 @item gdb.SYMBOL_COMMON_BLOCK_DOMAIN
 This domain contains names of Fortran common blocks.
 @end vtable
+
+When searching for a symbol, the desired domain constant can be passed
+verbatim to the lookup function.  For example:
+@smallexample
+symbol = gdb.lookup_symbol ("name", domain=gdb.SYMBOL_VAR_DOMAIN)
+@end smallexample
+
+For more complex searches, there is a corresponding set of constants,
+each named after one of the preceding constants, but with the
+@samp{SEARCH} prefix replacing the @samp{SYMBOL} prefix; for example,
+@code{SEARCH_LABEL_DOMAIN}.  These may be or'd together to form a
+search constant, e.g.:
+@smallexample
+symbol = gdb.lookup_symbol ("name",
+                            domain=gdb.SEARCH_VAR_DOMAIN | gdb.SEARCH_TYPE_DOMAIN)
+@end smallexample
 
 The available address class categories in @code{gdb.Symbol} are represented
 as constants in the @code{gdb} module:

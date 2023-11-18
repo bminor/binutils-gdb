@@ -108,6 +108,11 @@ show remote thread-options-packet
      object, these will be stored in the object's new
      InferiorThread.__dict__ attribute.
 
+  ** New constants gdb.SYMBOL_TYPE_DOMAIN, gdb.SYMBOL_FUNCTION_DOMAIN,
+     and gdb.SEARCH_*_DOMAIN corresponding to all the existing symbol
+     domains.  Symbol lookup can now search in multiple domains at
+     once, and can also narrowly search for just a type or function.
+
 * Debugger Adapter Protocol changes
 
   ** GDB now emits the "process" event.
@@ -120,6 +125,13 @@ show remote thread-options-packet
 
   ** The "set debug dap-log-file" command is now documented.  This
      command was available in GDB 14 but not documented.
+
+* Guile API
+
+  ** New constants SYMBOL_TYPE_DOMAIN, SYMBOL_FUNCTION_DOMAIN, and
+     SEARCH_*_DOMAIN corresponding to all the existing symbol domains.
+     Symbol lookup can now search in multiple domains at once, and can
+     also narrowly search for just a type or function.
 
 * New remote packets
 
