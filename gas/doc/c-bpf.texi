@@ -113,7 +113,12 @@ Read-only frame pointer register.
 
 @noindent
 Note that in the Pseudo-C syntax register names are not preceded by
-@code{%} characters.
+@code{%} characters.  A consequence of that is that in contexts like
+instruction operands, where both register names and expressions
+involving symbols are expected, there is no way to disambiguate
+between them.  In order to keep things simple, this assembler does not
+allow to refer to symbols whose names collide with register names in
+instruction operands.
 
 @node BPF Directives
 @section BPF Directives

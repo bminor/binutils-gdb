@@ -1255,71 +1255,6 @@ parse_expression (char *s, expressionS *exp)
   return s;
 }
 
-/* Symbols created by this parse, but not yet committed to the real
-   symbol table.  */
-static symbolS *deferred_sym_rootP;
-static symbolS *deferred_sym_lastP;
-
-/* Symbols discarded by a previous parse.  Symbols cannot easily be freed
-   after creation, so try to recycle.  */
-static symbolS *orphan_sym_rootP;
-static symbolS *orphan_sym_lastP;
-
-/* Implement md_parse_name hook.  Handles any symbol found in an expression.
-   This allows us to tentatively create symbols, before we know for sure
-   whether the parser is using the correct template for an instruction.
-   If we end up keeping the instruction, the deferred symbols are committed
-   to the real symbol table. This approach is modeled after the riscv port.  */
-
-bool
-bpf_parse_name (const char *name, expressionS *exp, enum expr_mode mode)
-{
-  symbolS *sym;
-
-  /* If we aren't currently parsing an instruction, don't do anything.
-     This prevents tampering with operands to directives.  */
-  if (!parsing_insn_operands)
-    return false;
-
-  gas_assert (mode == expr_normal);
-
-  if (symbol_find (name) != NULL)
-    return false;
-
-  for (sym = deferred_sym_rootP; sym; sym = symbol_next (sym))
-    if (strcmp (name, S_GET_NAME (sym)) == 0)
-      break;
-
-  /* Tentatively create a symbol.  */
-  if (!sym)
-    {
-      /* See if we can reuse a symbol discarded by a previous parse.
-	 This may be quite common, for example when trying multiple templates
-	 for an instruction with the first reference to a valid symbol.  */
-      for (sym = orphan_sym_rootP; sym; sym = symbol_next (sym))
-	if (strcmp (name, S_GET_NAME (sym)) == 0)
-	  {
-	    symbol_remove (sym, &orphan_sym_rootP, &orphan_sym_lastP);
-	    break;
-	  }
-
-      if (!sym)
-	  sym = symbol_create (name, undefined_section, &zero_address_frag, 0);
-
-      /* Add symbol to the deferred list.  If we commit to the isntruction,
-	 then the symbol will be inserted into to the real symbol table at
-	 that point (in md_assemble).  */
-      symbol_append (sym, deferred_sym_lastP, &deferred_sym_rootP,
-		     &deferred_sym_lastP);
-    }
-
-  exp->X_op = O_symbol;
-  exp->X_add_symbol = sym;
-  exp->X_add_number = 0;
-
-  return true;
-}
-
 /* Parse a BPF register name and return the corresponding register
    number.  Return NULL in case of parse error, or a pointer to the
    first character in S that is not part of the register name.  */
@@ -1366,6 +1301,88 @@ parse_bpf_register (char *s, char rw, uint8_t *regno)
     }
 
   return s;
+}
+
+/* Symbols created by this parse, but not yet committed to the real
+   symbol table.  */
+static symbolS *deferred_sym_rootP;
+static symbolS *deferred_sym_lastP;
+
+/* Symbols discarded by a previous parse.  Symbols cannot easily be freed
+   after creation, so try to recycle.  */
+static symbolS *orphan_sym_rootP;
+static symbolS *orphan_sym_lastP;
+
+/* Implement md_parse_name hook.  Handles any symbol found in an expression.
+   This allows us to tentatively create symbols, before we know for sure
+   whether the parser is using the correct template for an instruction.
+   If we end up keeping the instruction, the deferred symbols are committed
+   to the real symbol table. This approach is modeled after the riscv port.  */
+
+bool
+bpf_parse_name (const char *name, expressionS *exp, enum expr_mode mode)
+{
+  symbolS *sym;
+
+  /* If we aren't currently parsing an instruction, don't do anything.
+     This prevents tampering with operands to directives.  */
+  if (!parsing_insn_operands)
+    return false;
+
+  gas_assert (mode == expr_normal);
+
+  /* Pseudo-C syntax uses unprefixed register names like r2 or w3.
+     Since many instructions take either a register or an
+     immediate/expression, we should not allow references to symbols
+     with these names in operands.  */
+  if (asm_dialect == DIALECT_PSEUDOC)
+    {
+      uint8_t regno;
+
+      if (parse_bpf_register ((char *) name, 'r', &regno)
+          || parse_bpf_register ((char *) name, 'w', &regno))
+        {
+          as_bad (_("unexpected register name `%s' in expression"),
+                  name);
+          return false;
+        }
+    }
+
+  if (symbol_find (name) != NULL)
+    return false;
+
+  for (sym = deferred_sym_rootP; sym; sym = symbol_next (sym))
+    if (strcmp (name, S_GET_NAME (sym)) == 0)
+      break;
+
+  /* Tentatively create a symbol.  */
+  if (!sym)
+    {
+      /* See if we can reuse a symbol discarded by a previous parse.
+	 This may be quite common, for example when trying multiple templates
+	 for an instruction with the first reference to a valid symbol.  */
+      for (sym = orphan_sym_rootP; sym; sym = symbol_next (sym))
+	if (strcmp (name, S_GET_NAME (sym)) == 0)
+	  {
+	    symbol_remove (sym, &orphan_sym_rootP, &orphan_sym_lastP);
+	    break;
+	  }
+
+      if (!sym)
+	  sym = symbol_create (name, undefined_section, &zero_address_frag, 0);
+
+      /* Add symbol to the deferred list.  If we commit to the isntruction,
+	 then the symbol will be inserted into to the real symbol table at
+	 that point (in md_assemble).  */
+      symbol_append (sym, deferred_sym_lastP, &deferred_sym_rootP,
+		     &deferred_sym_lastP);
+    }
+
+  exp->X_op = O_symbol;
+  exp->X_add_symbol = sym;
+  exp->X_add_number = 0;
+
+  return true;
 }
 
 /* Collect a parse error message.  */

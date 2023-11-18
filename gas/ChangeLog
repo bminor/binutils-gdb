@@ -1,3 +1,15 @@
+2023-11-18  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* config/tc-bpf.c (parse_bpf_register): Move before
+	bpf_parse_name.
+	(bpf_parse_name): Do not allow using symbols that are also
+	register names as operands in pseudo-c syntax.
+	* testsuite/gas/bpf/regs-for-symbols-pseudoc.d: New file.
+	* testsuite/gas/bpf/regs-for-symbols-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/regs-for-symbols-pseudoc.l: Likewise.
+	* doc/c-bpf.texi (BPF Registers): Document that it is not possible
+	to refer to register names as symbols in instruction operands.
+
 2023-11-15  YunQiang Su  <yunqiang.su@cipunited.com>
 
 	* testsuite/gas/mips/mips.exp (mips_arch_create): Add "--defsym
