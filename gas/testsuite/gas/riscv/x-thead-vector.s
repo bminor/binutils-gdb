@@ -1340,3 +1340,95 @@
 	th.vmv.v.x v8, a1
 	th.vmv.v.i v8, 15
 	th.vmv.v.i v8, -16
+
+	th.vsaddu.vv v4, v8, v12
+	th.vsaddu.vx v4, v8, a1
+	th.vsaddu.vi v4, v8, 15
+	th.vsaddu.vi v4, v8, -16
+	th.vsaddu.vv v4, v8, v12, v0.t
+	th.vsaddu.vx v4, v8, a1, v0.t
+	th.vsaddu.vi v4, v8, 15, v0.t
+	th.vsaddu.vi v4, v8, -16, v0.t
+	th.vsadd.vv v4, v8, v12
+	th.vsadd.vx v4, v8, a1
+	th.vsadd.vi v4, v8, 15
+	th.vsadd.vi v4, v8, -16
+	th.vsadd.vv v4, v8, v12, v0.t
+	th.vsadd.vx v4, v8, a1, v0.t
+	th.vsadd.vi v4, v8, 15, v0.t
+	th.vsadd.vi v4, v8, -16, v0.t
+	th.vssubu.vv v4, v8, v12
+	th.vssubu.vx v4, v8, a1
+	th.vssubu.vv v4, v8, v12, v0.t
+	th.vssubu.vx v4, v8, a1, v0.t
+	th.vssub.vv v4, v8, v12
+	th.vssub.vx v4, v8, a1
+	th.vssub.vv v4, v8, v12, v0.t
+	th.vssub.vx v4, v8, a1, v0.t
+
+	th.vaadd.vv v4, v8, v12
+	th.vaadd.vx v4, v8, a1
+	th.vaadd.vi v4, v8, 15
+	th.vaadd.vi v4, v8, -16
+	th.vaadd.vv v4, v8, v12, v0.t
+	th.vaadd.vx v4, v8, a1, v0.t
+	th.vaadd.vi v4, v8, 15, v0.t
+	th.vaadd.vi v4, v8, -16, v0.t
+	th.vasub.vv v4, v8, v12
+	th.vasub.vx v4, v8, a1
+	th.vasub.vv v4, v8, v12, v0.t
+	th.vasub.vx v4, v8, a1, v0.t
+
+	th.vsmul.vv v4, v8, v12
+	th.vsmul.vx v4, v8, a1
+	th.vsmul.vv v4, v8, v12, v0.t
+	th.vsmul.vx v4, v8, a1, v0.t
+
+	th.vwsmaccu.vv v4, v12, v8
+	th.vwsmaccu.vx v4, a1, v8
+	th.vwsmacc.vv v4, v12, v8
+	th.vwsmacc.vx v4, a1, v8
+	th.vwsmaccsu.vv v4, v12, v8
+	th.vwsmaccsu.vx v4, a1, v8
+	th.vwsmaccus.vx v4, a1, v8
+	th.vwsmaccu.vv v4, v12, v8, v0.t
+	th.vwsmaccu.vx v4, a1, v8, v0.t
+	th.vwsmacc.vv v4, v12, v8, v0.t
+	th.vwsmacc.vx v4, a1, v8, v0.t
+	th.vwsmaccsu.vv v4, v12, v8, v0.t
+	th.vwsmaccsu.vx v4, a1, v8, v0.t
+	th.vwsmaccus.vx v4, a1, v8, v0.t
+
+	th.vssrl.vv v4, v8, v12
+	th.vssrl.vx v4, v8, a1
+	th.vssrl.vi v4, v8, 1
+	th.vssrl.vi v4, v8, 31
+	th.vssrl.vv v4, v8, v12, v0.t
+	th.vssrl.vx v4, v8, a1, v0.t
+	th.vssrl.vi v4, v8, 1, v0.t
+	th.vssrl.vi v4, v8, 31, v0.t
+	th.vssra.vv v4, v8, v12
+	th.vssra.vx v4, v8, a1
+	th.vssra.vi v4, v8, 1
+	th.vssra.vi v4, v8, 31
+	th.vssra.vv v4, v8, v12, v0.t
+	th.vssra.vx v4, v8, a1, v0.t
+	th.vssra.vi v4, v8, 1, v0.t
+	th.vssra.vi v4, v8, 31, v0.t
+
+	th.vnclipu.vv v4, v8, v12
+	th.vnclipu.vx v4, v8, a1
+	th.vnclipu.vi v4, v8, 1
+	th.vnclipu.vi v4, v8, 31
+	th.vnclipu.vv v4, v8, v12, v0.t
+	th.vnclipu.vx v4, v8, a1, v0.t
+	th.vnclipu.vi v4, v8, 1, v0.t
+	th.vnclipu.vi v4, v8, 31, v0.t
+	th.vnclip.vv v4, v8, v12
+	th.vnclip.vx v4, v8, a1
+	th.vnclip.vi v4, v8, 1
+	th.vnclip.vi v4, v8, 31
+	th.vnclip.vv v4, v8, v12, v0.t
+	th.vnclip.vx v4, v8, a1, v0.t
+	th.vnclip.vi v4, v8, 1, v0.t
+	th.vnclip.vi v4, v8, 31, v0.t
