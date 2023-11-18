@@ -568,8 +568,18 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	      }
 
 	    if (riscv_csr_hash[csr] != NULL)
-	      print (info->stream, dis_style_register, "%s",
-		     riscv_csr_hash[csr]);
+	      if (riscv_subset_supports (&riscv_rps_dis, "xtheadvector")
+		  && (csr == CSR_VSTART
+		      || csr == CSR_VXSAT
+		      || csr == CSR_VXRM
+		      || csr == CSR_VL
+		      || csr == CSR_VTYPE
+		      || csr == CSR_VLENB))
+		print (info->stream, dis_style_register, "%s",
+		       concat ("th.", riscv_csr_hash[csr], NULL));
+	      else
+		print (info->stream, dis_style_register, "%s",
+		       riscv_csr_hash[csr]);
 	    else
 	      print (info->stream, dis_style_immediate, "0x%x", csr);
 	    break;
