@@ -1432,3 +1432,191 @@
 	th.vnclip.vx v4, v8, a1, v0.t
 	th.vnclip.vi v4, v8, 1, v0.t
 	th.vnclip.vi v4, v8, 31, v0.t
+
+	th.vfadd.vv v4, v8, v12
+	th.vfadd.vf v4, v8, fa2
+	th.vfadd.vv v4, v8, v12, v0.t
+	th.vfadd.vf v4, v8, fa2, v0.t
+	th.vfsub.vv v4, v8, v12
+	th.vfsub.vf v4, v8, fa2
+	th.vfsub.vv v4, v8, v12, v0.t
+	th.vfsub.vf v4, v8, fa2, v0.t
+	th.vfrsub.vf v4, v8, fa2
+	th.vfrsub.vf v4, v8, fa2, v0.t
+
+	th.vfwadd.vv v4, v8, v12
+	th.vfwadd.vf v4, v8, fa2
+	th.vfwadd.vv v4, v8, v12, v0.t
+	th.vfwadd.vf v4, v8, fa2, v0.t
+	th.vfwsub.vv v4, v8, v12
+	th.vfwsub.vf v4, v8, fa2
+	th.vfwsub.vv v4, v8, v12, v0.t
+	th.vfwsub.vf v4, v8, fa2, v0.t
+	th.vfwadd.wv v4, v8, v12
+	th.vfwadd.wf v4, v8, fa2
+	th.vfwadd.wv v4, v8, v12, v0.t
+	th.vfwadd.wf v4, v8, fa2, v0.t
+	th.vfwsub.wv v4, v8, v12
+	th.vfwsub.wf v4, v8, fa2
+	th.vfwsub.wv v4, v8, v12, v0.t
+	th.vfwsub.wf v4, v8, fa2, v0.t
+
+	th.vfmul.vv v4, v8, v12
+	th.vfmul.vf v4, v8, fa2
+	th.vfmul.vv v4, v8, v12, v0.t
+	th.vfmul.vf v4, v8, fa2, v0.t
+	th.vfdiv.vv v4, v8, v12
+	th.vfdiv.vf v4, v8, fa2
+	th.vfdiv.vv v4, v8, v12, v0.t
+	th.vfdiv.vf v4, v8, fa2, v0.t
+	th.vfrdiv.vf v4, v8, fa2
+	th.vfrdiv.vf v4, v8, fa2, v0.t
+
+	th.vfwmul.vv v4, v8, v12
+	th.vfwmul.vf v4, v8, fa2
+	th.vfwmul.vv v4, v8, v12, v0.t
+	th.vfwmul.vf v4, v8, fa2, v0.t
+
+	th.vfmadd.vv v4, v12, v8
+	th.vfmadd.vf v4, fa2, v8
+	th.vfnmadd.vv v4, v12, v8
+	th.vfnmadd.vf v4, fa2, v8
+	th.vfmsub.vv v4, v12, v8
+	th.vfmsub.vf v4, fa2, v8
+	th.vfnmsub.vv v4, v12, v8
+	th.vfnmsub.vf v4, fa2, v8
+	th.vfmadd.vv v4, v12, v8, v0.t
+	th.vfmadd.vf v4, fa2, v8, v0.t
+	th.vfnmadd.vv v4, v12, v8, v0.t
+	th.vfnmadd.vf v4, fa2, v8, v0.t
+	th.vfmsub.vv v4, v12, v8, v0.t
+	th.vfmsub.vf v4, fa2, v8, v0.t
+	th.vfnmsub.vv v4, v12, v8, v0.t
+	th.vfnmsub.vf v4, fa2, v8, v0.t
+	th.vfmacc.vv v4, v12, v8
+	th.vfmacc.vf v4, fa2, v8
+	th.vfnmacc.vv v4, v12, v8
+	th.vfnmacc.vf v4, fa2, v8
+	th.vfmsac.vv v4, v12, v8
+	th.vfmsac.vf v4, fa2, v8
+	th.vfnmsac.vv v4, v12, v8
+	th.vfnmsac.vf v4, fa2, v8
+	th.vfmacc.vv v4, v12, v8, v0.t
+	th.vfmacc.vf v4, fa2, v8, v0.t
+	th.vfnmacc.vv v4, v12, v8, v0.t
+	th.vfnmacc.vf v4, fa2, v8, v0.t
+	th.vfmsac.vv v4, v12, v8, v0.t
+	th.vfmsac.vf v4, fa2, v8, v0.t
+	th.vfnmsac.vv v4, v12, v8, v0.t
+	th.vfnmsac.vf v4, fa2, v8, v0.t
+
+	th.vfwmacc.vv v4, v12, v8
+	th.vfwmacc.vf v4, fa2, v8
+	th.vfwnmacc.vv v4, v12, v8
+	th.vfwnmacc.vf v4, fa2, v8
+	th.vfwmsac.vv v4, v12, v8
+	th.vfwmsac.vf v4, fa2, v8
+	th.vfwnmsac.vv v4, v12, v8
+	th.vfwnmsac.vf v4, fa2, v8
+	th.vfwmacc.vv v4, v12, v8, v0.t
+	th.vfwmacc.vf v4, fa2, v8, v0.t
+	th.vfwnmacc.vv v4, v12, v8, v0.t
+	th.vfwnmacc.vf v4, fa2, v8, v0.t
+	th.vfwmsac.vv v4, v12, v8, v0.t
+	th.vfwmsac.vf v4, fa2, v8, v0.t
+	th.vfwnmsac.vv v4, v12, v8, v0.t
+	th.vfwnmsac.vf v4, fa2, v8, v0.t
+
+	th.vfsqrt.v v4, v8
+	th.vfsqrt.v v4, v8, v0.t
+
+	th.vfmin.vv v4, v8, v12
+	th.vfmin.vf v4, v8, fa2
+	th.vfmax.vv v4, v8, v12
+	th.vfmax.vf v4, v8, fa2
+	th.vfmin.vv v4, v8, v12, v0.t
+	th.vfmin.vf v4, v8, fa2, v0.t
+	th.vfmax.vv v4, v8, v12, v0.t
+	th.vfmax.vf v4, v8, fa2, v0.t
+
+	th.vfsgnj.vv v4, v8, v12
+	th.vfsgnj.vf v4, v8, fa2
+	th.vfsgnjn.vv v4, v8, v12
+	th.vfsgnjn.vf v4, v8, fa2
+	th.vfsgnjx.vv v4, v8, v12
+	th.vfsgnjx.vf v4, v8, fa2
+	th.vfsgnj.vv v4, v8, v12, v0.t
+	th.vfsgnj.vf v4, v8, fa2, v0.t
+	th.vfsgnjn.vv v4, v8, v12, v0.t
+	th.vfsgnjn.vf v4, v8, fa2, v0.t
+	th.vfsgnjx.vv v4, v8, v12, v0.t
+	th.vfsgnjx.vf v4, v8, fa2, v0.t
+
+	# Aliases
+	th.vmfgt.vv v4, v8, v12
+	th.vmfge.vv v4, v8, v12
+	th.vmfgt.vv v4, v8, v12, v0.t
+	th.vmfge.vv v4, v8, v12, v0.t
+
+	th.vmfeq.vv v4, v8, v12
+	th.vmfeq.vf v4, v8, fa2
+	th.vmfne.vv v4, v8, v12
+	th.vmfne.vf v4, v8, fa2
+	th.vmflt.vv v4, v8, v12
+	th.vmflt.vf v4, v8, fa2
+	th.vmfle.vv v4, v8, v12
+	th.vmfle.vf v4, v8, fa2
+	th.vmfgt.vf v4, v8, fa2
+	th.vmfge.vf v4, v8, fa2
+	th.vmfeq.vv v4, v8, v12, v0.t
+	th.vmfeq.vf v4, v8, fa2, v0.t
+	th.vmfne.vv v4, v8, v12, v0.t
+	th.vmfne.vf v4, v8, fa2, v0.t
+	th.vmflt.vv v4, v8, v12, v0.t
+	th.vmflt.vf v4, v8, fa2, v0.t
+	th.vmfle.vv v4, v8, v12, v0.t
+	th.vmfle.vf v4, v8, fa2, v0.t
+	th.vmfgt.vf v4, v8, fa2, v0.t
+	th.vmfge.vf v4, v8, fa2, v0.t
+
+	th.vmford.vv v4, v8, v12
+	th.vmford.vf v4, v8, fa2
+	th.vmford.vv v4, v8, v12, v0.t
+	th.vmford.vf v4, v8, fa2, v0.t
+
+	th.vfclass.v v4, v8
+	th.vfclass.v v4, v8, v0.t
+
+	th.vfmerge.vfm v4, v8, fa2, v0
+	th.vfmv.v.f v4, fa1
+
+	th.vfcvt.xu.f.v v4, v8
+	th.vfcvt.x.f.v v4, v8
+	th.vfcvt.f.xu.v v4, v8
+	th.vfcvt.f.x.v v4, v8
+	th.vfcvt.xu.f.v v4, v8, v0.t
+	th.vfcvt.x.f.v v4, v8, v0.t
+	th.vfcvt.f.xu.v v4, v8, v0.t
+	th.vfcvt.f.x.v v4, v8, v0.t
+
+	th.vfwcvt.xu.f.v v4, v8
+	th.vfwcvt.x.f.v v4, v8
+	th.vfwcvt.f.xu.v v4, v8
+	th.vfwcvt.f.x.v v4, v8
+	th.vfwcvt.f.f.v v4, v8
+	th.vfwcvt.xu.f.v v4, v8, v0.t
+	th.vfwcvt.x.f.v v4, v8, v0.t
+	th.vfwcvt.f.xu.v v4, v8, v0.t
+	th.vfwcvt.f.x.v v4, v8, v0.t
+	th.vfwcvt.f.f.v v4, v8, v0.t
+
+	th.vfncvt.xu.f.v v4, v8
+	th.vfncvt.x.f.v v4, v8
+	th.vfncvt.f.xu.v v4, v8
+	th.vfncvt.f.x.v v4, v8
+	th.vfncvt.f.f.v v4, v8
+	th.vfncvt.xu.f.v v4, v8, v0.t
+	th.vfncvt.x.f.v v4, v8, v0.t
+	th.vfncvt.f.xu.v v4, v8, v0.t
+	th.vfncvt.f.x.v v4, v8, v0.t
+	th.vfncvt.f.f.v v4, v8, v0.t
