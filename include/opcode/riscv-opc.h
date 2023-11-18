@@ -2959,6 +2959,16 @@
 #define MASK_TH_VIOTAM 0xfc0ff07f
 #define MATCH_TH_VIDV 0x5808a057
 #define MASK_TH_VIDV 0xfdfff07f
+#define MATCH_TH_VMVXS 0x32002057
+#define MASK_TH_VMVXS 0xfe0ff07f
+#define MATCH_TH_VEXTXV 0x32002057
+#define MASK_TH_VEXTXV 0xfe00707f
+#define MATCH_TH_VMVSX 0x36006057
+#define MASK_TH_VMVSX 0xfff0707f
+#define MATCH_TH_VFMVFS 0x32001057
+#define MASK_TH_VFMVFS 0xfe0ff07f
+#define MATCH_TH_VFMVSF 0x36005057
+#define MASK_TH_VFMVSF 0xfff0707f
 /* Vendor-specific (Ventana Microsystems) XVentanaCondOps instructions */
 #define MATCH_VT_MASKC 0x607b
 #define MASK_VT_MASKC 0xfe00707f

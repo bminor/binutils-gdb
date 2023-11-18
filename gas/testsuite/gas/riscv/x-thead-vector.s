@@ -1686,3 +1686,41 @@
 	th.vmsof.m v4, v8, v0.t
 	th.viota.m v4, v8, v0.t
 	th.vid.v v4, v0.t
+
+	# Alias
+	th.vmv.x.s a0, v12
+
+	th.vext.x.v a0, v12, a2
+	th.vmv.s.x v4, a0
+
+	th.vfmv.f.s fa0, v8
+	th.vfmv.s.f v4, fa1
+
+	th.vslideup.vx v4, v8, a1
+	th.vslideup.vi v4, v8, 0
+	th.vslideup.vi v4, v8, 31
+	th.vslidedown.vx v4, v8, a1
+	th.vslidedown.vi v4, v8, 0
+	th.vslidedown.vi v4, v8, 31
+	th.vslideup.vx v4, v8, a1, v0.t
+	th.vslideup.vi v4, v8, 0, v0.t
+	th.vslideup.vi v4, v8, 31, v0.t
+	th.vslidedown.vx v4, v8, a1, v0.t
+	th.vslidedown.vi v4, v8, 0, v0.t
+	th.vslidedown.vi v4, v8, 31, v0.t
+
+	th.vslide1up.vx v4, v8, a1
+	th.vslide1down.vx v4, v8, a1
+	th.vslide1up.vx v4, v8, a1, v0.t
+	th.vslide1down.vx v4, v8, a1, v0.t
+
+	th.vrgather.vv v4, v8, v12
+	th.vrgather.vx v4, v8, a1
+	th.vrgather.vi v4, v8, 0
+	th.vrgather.vi v4, v8, 31
+	th.vrgather.vv v4, v8, v12, v0.t
+	th.vrgather.vx v4, v8, a1, v0.t
+	th.vrgather.vi v4, v8, 0, v0.t
+	th.vrgather.vi v4, v8, 31, v0.t
+
+	th.vcompress.vm v4, v8, v12
