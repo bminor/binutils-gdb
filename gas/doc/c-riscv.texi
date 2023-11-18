@@ -819,6 +819,12 @@ The XTheadVector extension provides instructions for thead vector.
 
 It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.3.0/xthead-2023-11-10-2.3.0.pdf}.
 
+@item XTheadZvamo
+The XTheadZvamo extension is a subextension of the XTheadVector extension,
+and it provides AMO instructions for the T-Head VECTOR vendor extension.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.3.0/xthead-2023-11-10-2.3.0.pdf}.
+
 @item XVentanaCondOps
 XVentanaCondOps extension provides instructions for branchless
 sequences that perform conditional arithmetic, conditional
