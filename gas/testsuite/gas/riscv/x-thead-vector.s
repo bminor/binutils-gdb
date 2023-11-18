@@ -1620,3 +1620,39 @@
 	th.vfncvt.f.xu.v v4, v8, v0.t
 	th.vfncvt.f.x.v v4, v8, v0.t
 	th.vfncvt.f.f.v v4, v8, v0.t
+
+	th.vredsum.vs v4, v8, v12
+	th.vredmaxu.vs v4, v8, v8
+	th.vredmax.vs v4, v8, v8
+	th.vredminu.vs v4, v8, v8
+	th.vredmin.vs v4, v8, v8
+	th.vredand.vs v4, v8, v12
+	th.vredor.vs v4, v8, v12
+	th.vredxor.vs v4, v8, v12
+	th.vredsum.vs v4, v8, v12, v0.t
+	th.vredmaxu.vs v4, v8, v8, v0.t
+	th.vredmax.vs v4, v8, v8, v0.t
+	th.vredminu.vs v4, v8, v8, v0.t
+	th.vredmin.vs v4, v8, v8, v0.t
+	th.vredand.vs v4, v8, v12, v0.t
+	th.vredor.vs v4, v8, v12, v0.t
+	th.vredxor.vs v4, v8, v12, v0.t
+
+	th.vwredsumu.vs v4, v8, v12
+	th.vwredsum.vs v4, v8, v12
+	th.vwredsumu.vs v4, v8, v12, v0.t
+	th.vwredsum.vs v4, v8, v12, v0.t
+
+	th.vfredosum.vs v4, v8, v12
+	th.vfredsum.vs v4, v8, v12
+	th.vfredmax.vs v4, v8, v12
+	th.vfredmin.vs v4, v8, v12
+	th.vfredosum.vs v4, v8, v12, v0.t
+	th.vfredsum.vs v4, v8, v12, v0.t
+	th.vfredmax.vs v4, v8, v12, v0.t
+	th.vfredmin.vs v4, v8, v12, v0.t
+
+	th.vfwredosum.vs v4, v8, v12
+	th.vfwredsum.vs v4, v8, v12
+	th.vfwredosum.vs v4, v8, v12, v0.t
+	th.vfwredsum.vs v4, v8, v12, v0.t
