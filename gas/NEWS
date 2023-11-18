@@ -31,6 +31,9 @@
 
 * Add support for Cortex-X4 for AArch64.
 
+* Add support for various T-Head extensions (XTheadVector, XTheadZvlsseg
+  and XTheadZvamo) from version 2.3.0 of the T-Head ISA manual.
+
 Changes in 2.41:
 
 * Add support for the KVX instruction set.

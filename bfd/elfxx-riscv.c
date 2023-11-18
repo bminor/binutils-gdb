@@ -1373,6 +1373,7 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xtheadmemidx",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadmempair",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadsync",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
+  {"xtheadvector",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xventanacondops",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {NULL, 0, 0, 0, 0}
 };
@@ -1984,6 +1985,13 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
 	(_("`zfinx' is conflict with the `f/d/q/zfh/zfhmin' extension"));
       no_conflict = false;
     }
+  if (riscv_lookup_subset (rps->subset_list, "xtheadvector", &subset)
+      && riscv_lookup_subset (rps->subset_list, "v", &subset))
+    {
+      rps->error_handler
+	(_("`xtheadvector' is conflict with the `v' extension"));
+      no_conflict = false;
+    }
 
   bool support_zve = false;
   bool support_zvl = false;
@@ -2580,6 +2588,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "xtheadmempair");
     case INSN_CLASS_XTHEADSYNC:
       return riscv_subset_supports (rps, "xtheadsync");
+    case INSN_CLASS_XTHEADVECTOR:
+      return riscv_subset_supports (rps, "xtheadvector");
     case INSN_CLASS_XVENTANACONDOPS:
       return riscv_subset_supports (rps, "xventanacondops");
     default:
@@ -2824,6 +2834,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "xtheadmempair";
     case INSN_CLASS_XTHEADSYNC:
       return "xtheadsync";
+    case INSN_CLASS_XTHEADVECTOR:
+      return "xtheadvector";
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));
