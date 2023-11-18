@@ -1656,3 +1656,33 @@
 	th.vfwredsum.vs v4, v8, v12
 	th.vfwredosum.vs v4, v8, v12, v0.t
 	th.vfwredsum.vs v4, v8, v12, v0.t
+
+	# Aliases
+	th.vmcpy.m v4, v8
+	th.vmclr.m v4
+	th.vmset.m v4
+	th.vmnot.m v4, v8
+
+	th.vmand.mm v4, v8, v12
+	th.vmnand.mm v4, v8, v12
+	th.vmandnot.mm v4, v8, v12
+	th.vmxor.mm v4, v8, v12
+	th.vmor.mm v4, v8, v12
+	th.vmnor.mm v4, v8, v12
+	th.vmornot.mm v4, v8, v12
+	th.vmxnor.mm v4, v8, v12
+
+	th.vmpopc.m a0, v12
+	th.vmfirst.m a0, v12
+	th.vmsbf.m v4, v8
+	th.vmsif.m v4, v8
+	th.vmsof.m v4, v8
+	th.viota.m v4, v8
+	th.vid.v v4
+	th.vmpopc.m a0, v12, v0.t
+	th.vmfirst.m a0, v12, v0.t
+	th.vmsbf.m v4, v8, v0.t
+	th.vmsif.m v4, v8, v0.t
+	th.vmsof.m v4, v8, v0.t
+	th.viota.m v4, v8, v0.t
+	th.vid.v v4, v0.t
