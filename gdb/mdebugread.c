@@ -711,7 +711,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
     case stLabel:		/* label, goes into current block.  */
       s = new_symbol (name);
-      s->set_domain (VAR_DOMAIN);	/* So that it can be used */
+      s->set_domain (LABEL_DOMAIN);	/* So that it can be used */
       s->set_aclass_index (LOC_LABEL);	/* but not misused.  */
       s->set_section_index (section_index);
       s->set_value_address (sh->value);
