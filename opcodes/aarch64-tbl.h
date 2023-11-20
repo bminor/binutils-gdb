@@ -4201,7 +4201,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   GCS_INSN ("gcssttr", 0xd91f1c00, 0xfffffc00, OP2 (Rt, Rn_SP), QL_I2SAMEX, 0),
   CORE_INSN ("gcsb", 0xd503227f, 0xffffffff, ic_system, 0, OP1 (BARRIER_GCSB), {}, F_ALIAS),
   CORE_INSN ("sys", 0xd5080000, 0xfff80000, ic_system, 0, OP5 (UIMM3_OP1, CRn, CRm, UIMM3_OP2, Rt), QL_SYS, F_HAS_ALIAS | F_OPD4_OPT | F_DEFAULT (0x1F)),
-  D128_INSN ("sysp", 0xd5480000, 0xfff80000, OP6 (UIMM3_OP1, CRn, CRm, UIMM3_OP2, Rt, PAIRREG_OR_XZR), QL_SYSP, F_HAS_ALIAS | F_OPD4_OPT | F_OPD_PAIR_OPT | F_DEFAULT (0x1f)),
+  D128_INSN ("sysp", 0xd5480000, 0xfff80000, OP6 (UIMM3_OP1, CRn, CRm, UIMM3_OP2, Rt, PAIRREG_OR_XZR), QL_SYSP, F_HAS_ALIAS | F_OPD_NARROW | F_OPD4_OPT | F_OPD_PAIR_OPT | F_DEFAULT (0x1f)),
   CORE_INSN ("at",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_AT, Rt), QL_SRC_X, F_ALIAS),
   CORE_INSN ("dc",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_DC, Rt), QL_SRC_X, F_ALIAS),
   CORE_INSN ("ic",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_IC, Rt_SYS), QL_SRC_X, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)),

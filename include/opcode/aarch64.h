@@ -1224,7 +1224,12 @@ extern const aarch64_opcode aarch64_opcode_table[];
    to be optional, then we also implicitly specify (N+1)th operand to also be
    optional.  */
 #define F_OPD_PAIR_OPT (1ULL << 32)
-/* Next bit is 33.  */
+/* This instruction does not allow the full range of values that the
+   width of fields in the assembler instruction would theoretically
+   allow.  This impacts the constraintts on assembly but yelds no
+   impact on disassembly.  */
+#define F_OPD_NARROW (1ULL << 33)
+/* Next bit is 34.  */
 
 /* Instruction constraints.  */
 /* This instruction has a predication constraint on the instruction at PC+4.  */
