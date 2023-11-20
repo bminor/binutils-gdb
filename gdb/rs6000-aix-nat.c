@@ -918,11 +918,8 @@ rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   /* stop after load" status.  */
   if (status == 0x57c)
     ourstatus->set_loaded ();
-  /* 0x7f is signal 0.  0x17f and 0x137f are status returned
-     if we follow parent, a switch is made to a child post parent
-     execution and child continues its execution [user switches
-     to child and presses continue].  */
-  else if (status == 0x7f || status == 0x17f || status == 0x137f)
+  /* 0x7f is signal 0.  */
+  else if (status == 0x7f)
     ourstatus->set_spurious ();
   /* A normal waitstatus.  Let the usual macros deal with it.  */
   else
