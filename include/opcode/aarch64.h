@@ -561,6 +561,7 @@ enum aarch64_opnd
   AARCH64_OPND_SIMD_ADDR_POST,	/* Address of ld/st multiple post-indexed.  */
 
   AARCH64_OPND_SYSREG,		/* System register operand.  */
+  AARCH64_OPND_SYSREG128,	/* 128-bit system register operand.  */
   AARCH64_OPND_PSTATEFIELD,	/* PSTATE field name operand.  */
   AARCH64_OPND_SYSREG_AT,	/* System register <at_op> operand.  */
   AARCH64_OPND_SYSREG_DC,	/* System register <dc_op> operand.  */
@@ -1328,6 +1329,7 @@ typedef struct
 extern const aarch64_sys_reg aarch64_sys_regs [];
 extern const aarch64_sys_reg aarch64_pstatefields [];
 extern bool aarch64_sys_reg_deprecated_p (const uint32_t);
+extern bool aarch64_sys_reg_128bit_p (const uint32_t);
 extern bool aarch64_sys_reg_alias_p (const uint32_t);
 extern bool aarch64_pstatefield_supported_p (const aarch64_feature_set,
 					     const aarch64_sys_reg *);

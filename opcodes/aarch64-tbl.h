@@ -4236,6 +4236,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("msr", 0xd5000000, 0xffe00000, ic_system, 0, OP2 (SYSREG, Rt), QL_SRC_X, F_SYS_WRITE),
   CORE_INSN ("sysl",0xd5280000, 0xfff80000, ic_system, 0, OP5 (Rt, UIMM3_OP1, CRn, CRm, UIMM3_OP2), QL_SYSL, 0),
   CORE_INSN ("mrs", 0xd5200000, 0xffe00000, ic_system, 0, OP2 (Rt, SYSREG), QL_DST_X, F_SYS_READ),
+  D128_INSN ("mrrs", 0xd5700000, 0xfff00000, OP3 (Rt, PAIRREG, SYSREG128),  QL_DST_X2, F_SYS_READ),
+  D128_INSN ("msrr", 0xd5500000, 0xfff00000, OP3 (SYSREG128, Rt, PAIRREG), QL_SRC_X2, F_SYS_WRITE),
   CORE_INSN ("paciaz",  0xd503231f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("paciasp", 0xd503233f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("pacibz",  0xd503235f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
@@ -6342,6 +6344,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(ADDRESS, simd_addr_post, "SIMD_ADDR_POST", 0, F(),		\
       "a post-indexed address with immediate or register increment")	\
     Y(SYSTEM, sysreg, "SYSREG", 0, F(), "a system register")		\
+    Y(SYSTEM, sysreg, "SYSREG128", 0, F(), "a 128-bit system register")	\
     Y(SYSTEM, pstatefield, "PSTATEFIELD", 0, F(),			\
       "a PSTATE field name")						\
     Y(SYSTEM, sysins_op, "SYSREG_AT", 0, F(),				\

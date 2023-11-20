@@ -1710,7 +1710,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
       else if (type == AARCH64_OPND_PAIRREG
 	       || type == AARCH64_OPND_PAIRREG_OR_XZR)
 	{
-	  assert (idx == 1 || idx == 3 || idx == 5);
+	  assert (idx == 1 || idx == 2 || idx == 3 || idx == 5);
 	  if (opnds[idx - 1].reg.regno % 2 != 0)
 	    {
 	      set_syntax_error (mismatch_detail, idx - 1,
@@ -4514,6 +4514,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_SYSREG:
+    case AARCH64_OPND_SYSREG128:
       for (i = 0; aarch64_sys_regs[i].name; ++i)
 	{
 	  const aarch64_sys_reg *sr = aarch64_sys_regs + i;
@@ -4721,6 +4722,12 @@ bool
 aarch64_sys_reg_deprecated_p (const uint32_t reg_flags)
 {
   return (reg_flags & F_DEPRECATED) != 0;
+}
+
+bool
+aarch64_sys_reg_128bit_p (const uint32_t reg_flags)
+{
+  return (reg_flags & F_REG_128) != 0;
 }
 
 bool

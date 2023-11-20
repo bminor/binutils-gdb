@@ -4788,7 +4788,7 @@ parse_sme_sm_za (char **str)
 static int
 parse_sys_reg (char **str, htab_t sys_regs,
 	       int imple_defined_p, int pstatefield_p,
-	       uint32_t* flags)
+	       uint32_t* flags, bool sysreg128_p)
 {
   char *p, *q;
   char buf[AARCH64_MAX_SYSREG_NAME_LEN];
@@ -4838,6 +4838,9 @@ parse_sys_reg (char **str, htab_t sys_regs,
 					       &o->features))
 	as_bad (_("selected processor does not support system register "
 		  "name '%s'"), buf);
+      if (sysreg128_p && !aarch64_sys_reg_128bit_p (o->flags))
+	as_bad (_("128-bit-wide accsess not allowed on selected system"
+		  " register '%s'"), buf);
       if (aarch64_sys_reg_deprecated_p (o->flags))
 	as_warn (_("system register name '%s' is deprecated and may be "
 		   "removed in a future release"), buf);
@@ -7616,12 +7619,14 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    }
 	  info->qualifier = base_qualifier;
 	  goto regoff_addr;
-
 	case AARCH64_OPND_SYSREG:
+	case AARCH64_OPND_SYSREG128:
 	  {
+	    bool sysreg128_p = operands[i] == AARCH64_OPND_SYSREG128;
 	    uint32_t sysreg_flags;
 	    if ((val = parse_sys_reg (&str, aarch64_sys_regs_hsh, 1, 0,
-				      &sysreg_flags)) == PARSE_FAIL)
+				      &sysreg_flags,
+				      sysreg128_p)) == PARSE_FAIL)
 	      {
 		set_syntax_error (_("unknown or missing system register name"));
 		goto failure;
@@ -7635,7 +7640,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  {
 	    uint32_t sysreg_flags;
 	    if ((val = parse_sys_reg (&str, aarch64_pstatefield_hsh, 0, 1,
-				      &sysreg_flags)) == PARSE_FAIL)
+				      &sysreg_flags, false)) == PARSE_FAIL)
 	      {
 	        set_syntax_error (_("unknown or missing PSTATE field name"));
 	        goto failure;

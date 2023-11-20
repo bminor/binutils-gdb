@@ -302,6 +302,7 @@ aarch64_ext_regno_pair (const aarch64_operand *self ATTRIBUTE_UNUSED, aarch64_op
 		   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   assert (info->idx == 1
+	  || info->idx == 2
 	  || info->idx == 3
 	  || info->idx == 5);
 
