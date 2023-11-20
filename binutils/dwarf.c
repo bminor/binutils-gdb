@@ -10641,29 +10641,31 @@ display_gdb_index (struct dwarf_section *section,
   unsigned char *start = section->start;
   uint32_t version;
   uint32_t cu_list_offset, tu_list_offset;
-  uint32_t address_table_offset, symbol_table_offset, constant_pool_offset;
+  uint32_t address_table_offset, symbol_table_offset, constant_pool_offset,
+    shortcut_table_offset;
   unsigned int cu_list_elements, tu_list_elements;
   unsigned int address_table_elements, symbol_table_slots;
   unsigned char *cu_list, *tu_list;
-  unsigned char *address_table, *symbol_table, *constant_pool;
+  unsigned char *address_table, *symbol_table, *shortcut_table, *constant_pool;
   unsigned int i;
 
   /* The documentation for the format of this file is in gdb/dwarf2read.c.  */
 
   introduce (section, false);
 
-  if (section->size < 6 * sizeof (uint32_t))
+  version = section->size < 4 ? 0 : byte_get_little_endian (start, 4);
+  size_t header_size = (version < 9 ? 6 : 7) * sizeof (uint32_t);
+  if (section->size < header_size)
     {
       warn (_("Truncated header in the %s section.\n"), section->name);
       return 0;
     }
 
-  version = byte_get_little_endian (start, 4);
   printf (_("Version %lu\n"), (unsigned long) version);
 
   /* Prior versions are obsolete, and future versions may not be
      backwards compatible.  */
-  if (version < 3 || version > 8)
+  if (version < 3 || version > 9)
     {
       warn (_("Unsupported version %lu.\n"), (unsigned long) version);
       return 0;
@@ -10685,17 +10687,23 @@ display_gdb_index (struct dwarf_section *section,
   tu_list_offset = byte_get_little_endian (start + 8, 4);
   address_table_offset = byte_get_little_endian (start + 12, 4);
   symbol_table_offset = byte_get_little_endian (start + 16, 4);
-  constant_pool_offset = byte_get_little_endian (start + 20, 4);
+  shortcut_table_offset = byte_get_little_endian (start + 20, 4);
+  if (version < 9)
+    constant_pool_offset = shortcut_table_offset;
+  else
+    constant_pool_offset = byte_get_little_endian (start + 24, 4);
 
   if (cu_list_offset > section->size
       || tu_list_offset > section->size
       || address_table_offset > section->size
       || symbol_table_offset > section->size
+      || shortcut_table_offset > section->size
       || constant_pool_offset > section->size
       || tu_list_offset < cu_list_offset
       || address_table_offset < tu_list_offset
       || symbol_table_offset < address_table_offset
-      || constant_pool_offset < symbol_table_offset)
+      || shortcut_table_offset < symbol_table_offset
+      || constant_pool_offset < shortcut_table_offset)
     {
       warn (_("Corrupt header in the %s section.\n"), section->name);
       return 0;
@@ -10704,12 +10712,13 @@ display_gdb_index (struct dwarf_section *section,
   cu_list_elements = (tu_list_offset - cu_list_offset) / 16;
   tu_list_elements = (address_table_offset - tu_list_offset) / 24;
   address_table_elements = (symbol_table_offset - address_table_offset) / 20;
-  symbol_table_slots = (constant_pool_offset - symbol_table_offset) / 8;
+  symbol_table_slots = (shortcut_table_offset - symbol_table_offset) / 8;
 
   cu_list = start + cu_list_offset;
   tu_list = start + tu_list_offset;
   address_table = start + address_table_offset;
   symbol_table = start + symbol_table_offset;
+  shortcut_table = start + shortcut_table_offset;
   constant_pool = start + constant_pool_offset;
 
   printf (_("\nCU table:\n"));
@@ -10818,6 +10827,38 @@ display_gdb_index (struct dwarf_section *section,
 	    }
 	  if (num_cus <= 1)
 	    printf ("\n");
+	}
+    }
+
+  if (version >= 9)
+    {
+      printf (_("\nShortcut table:\n"));
+
+      if (shortcut_table_offset + 8 > constant_pool_offset)
+	{
+	  warn (_("Corrupt shortcut table in the %s section.\n"), section->name);
+	  return 0;
+	}
+
+      uint32_t lang = byte_get_little_endian (shortcut_table, 4);
+      printf (_("Language of main: "));
+      display_lang (lang);
+      printf ("\n");
+
+      printf (_("Name of main: "));
+      if (lang == 0)
+	printf (_("<unknown>\n"));
+      else
+	{
+	  uint32_t name_offset = byte_get_little_endian (shortcut_table + 4, 4);
+	  if (name_offset >= section->size - constant_pool_offset)
+	    {
+	      printf (_("<corrupt offset: %x>\n"), name_offset);
+	      warn (_("Corrupt name offset of 0x%x found for name of main\n"),
+		    name_offset);
+	    }
+	  else
+	    printf ("%s\n", constant_pool + name_offset);
 	}
     }
 
