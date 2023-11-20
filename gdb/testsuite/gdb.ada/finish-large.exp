@@ -19,7 +19,13 @@ require allow_ada_tests
 
 standard_ada_testfile p
 
-if {[gdb_compile_ada "${srcfile}" "${binfile}" executable debug] != ""} {
+set flags {debug}
+
+if {[have_fvar_tracking]} {
+  lappend flags "additional_flags=-fvar-tracking"
+}
+
+if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != ""} {
   return -1
 }
 
