@@ -813,6 +813,32 @@ arm_linux_sigreturn_next_pc (struct regcache *regcache,
   return next_pc;
 }
 
+/* Return true if we're at execve syscall-exit-stop.  */
+
+static bool
+is_execve_syscall_exit (struct regcache *regs)
+{
+  ULONGEST reg = -1;
+
+  /* Check that lr is 0.  */
+  regcache_cooked_read_unsigned (regs, ARM_LR_REGNUM, &reg);
+  if (reg != 0)
+    return false;
+
+  /* Check that r0-r8 is 0.  */
+  for (int i = 0; i <= 8; ++i)
+    {
+      reg = -1;
+      regcache_cooked_read_unsigned (regs, ARM_A1_REGNUM + i, &reg);
+      if (reg != 0)
+	return false;
+    }
+
+  return true;
+}
+
+#define arm_sys_execve 11
+
 /* At a ptrace syscall-stop, return the syscall number.  This either
    comes from the SWI instruction (OABI) or from r7 (EABI).
 
@@ -830,6 +856,9 @@ arm_linux_get_syscall_number (struct gdbarch *gdbarch,
   int is_thumb;
   ULONGEST svc_number = -1;
 
+  if (is_execve_syscall_exit (regs))
+    return arm_sys_execve;
+
   regcache_cooked_read_unsigned (regs, ARM_PC_REGNUM, &pc);
   regcache_cooked_read_unsigned (regs, ARM_PS_REGNUM, &cpsr);
   is_thumb = (cpsr & t_bit) != 0;
@@ -845,9 +874,14 @@ arm_linux_get_syscall_number (struct gdbarch *gdbarch,
 
       /* PC gets incremented before the syscall-stop, so read the
 	 previous instruction.  */
-      unsigned long this_instr = 
-	read_memory_unsigned_integer (pc - 4, 4, byte_order_for_code);
-
+      unsigned long this_instr;
+      {
+	ULONGEST val;
+	if (!safe_read_memory_unsigned_integer (pc - 4, 4, byte_order_for_code,
+						&val))
+	  return -1;
+	this_instr = val;
+      }
       unsigned long svc_operand = (0x00ffffff & this_instr);
 
       if (svc_operand)
@@ -1265,7 +1299,7 @@ arm_canonicalize_syscall (int syscall)
     case 8: return gdb_sys_creat;
     case 9: return gdb_sys_link;
     case 10: return gdb_sys_unlink;
-    case 11: return gdb_sys_execve;
+    case arm_sys_execve: return gdb_sys_execve;
     case 12: return gdb_sys_chdir;
     case 13: return gdb_sys_time;
     case 14: return gdb_sys_mknod;
