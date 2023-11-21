@@ -7547,12 +7547,12 @@ garbage collection or orphan handling.
 The contents of any section whoes name starts with the prefix
 @samp{.gnu.warning.} and then finishes with the name of a symbol is
 treated in a similar fashion to the @samp{.gnu.warning} section, but
-only if the named symbol is defined.  So for example the contents of a
-section called @samp{.gnu.warning.foo} will be displayed as warning
-message if, and only if, the symbol @samp{foo} is defined by one or
-more of the input files.  This includes object files pulled in from
-static libraries, shared objects needed to complete the link and so
-on.
+only if the named symbol is referenced.  So for example the contents
+of a section called @samp{.gnu.warning.foo} will be displayed as
+warning message if, and only if, the symbol @samp{foo} is referenced
+by one or more of the input files.  This includes object files pulled
+in from static libraries, shared objects needed to complete the link
+and so on.
 
 Note - because these warning messages are generated before the linker
 performs garbage collection (if enabled) it is possible for a warning
