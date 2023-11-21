@@ -127,6 +127,7 @@ in the section entitled ``GNU Free Documentation License''.
 * Invocation::                  Invocation
 * Scripts::                     Linker Scripts
 * Plugins::                     Linker Plugins
+* Special Sections::            Special Sections
 @ifset GENERIC
 * Machine Dependent::           Machine Dependent Features
 @end ifset
@@ -7524,6 +7525,50 @@ the @samp{__.LIBDEP} member of @file{libssl.a} would contain
 @smallexample
 -L/usr/local/lib -lcrypto
 @end smallexample
+
+@node Special Sections
+When linking ELF format object files @command{ld} treats some sections
+in a special, non standard manner.  This part of the manual describes
+these sections.
+
+@table @gcctabopt
+@item .gnu.warning
+The contents of any section with this name are assumed to be an ascii
+format warning message.  The contents will be displayed to the user if
+the sections appears in any input file, but the section will not be
+copied into the output image.  If the @option{--fatal-warnings} option
+is enabled then the warnings - if any are encountered - will also stop
+the link from completing.
+
+Note - the @samp{.gnu.warning} section is not subject to linker
+garbage collection or orphan handling.
+
+@item .gnu.warning.@var{SYM}
+The contents of any section whoes name starts with the prefix
+@samp{.gnu.warning.} and then finishes with the name of a symbol is
+treated in a similar fashion to the @samp{.gnu.warning} section, but
+only if the named symbol is defined.  So for example the contents of a
+section called @samp{.gnu.warning.foo} will be displayed as warning
+message if, and only if, the symbol @samp{foo} is defined by one or
+more of the input files.  This includes object files pulled in from
+static libraries, shared objects needed to complete the link and so
+on.
+
+Note - because these warning messages are generated before the linker
+performs garbage collection (if enabled) it is possible for a warning
+to be displayed for a symbol that is later removed and then never
+appears in the final output.
+
+@item .note.gnu.property
+When the linker combines sections of this name it will merge them
+together according to various rules encoded into the notes
+themselves.  Therefore the contents of the output .note.gnu.property
+section may not correspond to a simple concatenation of the input
+sections.  If the @option{-Map} option has been used to request a
+linker map then details of any property merging will be included in
+the map.
+
+@end table
 
 @ifset GENERIC
 @node Machine Dependent

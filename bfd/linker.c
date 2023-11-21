@@ -1784,6 +1784,14 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	    {
 	      (*info->callbacks->warning) (info, string, h->root.string,
 					   hash_entry_bfd (h), NULL, 0);
+	      /* PR 31067: If garbage collection is enabled then the
+		 referenced symbol may actually be discarded later on.
+		 This could be very confusing to the user.  So give them
+		 a hint as to what might be happening.  */
+	      if (info->gc_sections)
+		(*info->callbacks->info)
+		  (_("%P: %pB: note: the message above does not take linker garbage collection into account\n"),
+		   hash_entry_bfd (h));
 	      break;
 	    }
 	  /* Fall through.  */

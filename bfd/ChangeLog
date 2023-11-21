@@ -1,3 +1,10 @@
+2023-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 31067
+	linker.c (_bfd_generic_link_add_one_symbol): When issuing a
+	warning message, also display a message about the warning not
+	being affected by garbage colleciton.
+
 2023-11-15  Arsen Arsenović  <arsen@aarsen.me>
 
 	* aclocal.m4: Regenerate.

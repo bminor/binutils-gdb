@@ -1,3 +1,10 @@
+2023-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 31067
+	* ld.texi (Special Sections): New entry in the linker manual.
+	Describes how the .gnu.warning and .gnu.warning.SYM sections
+	behave.
+
 2023-11-15  Arsen Arsenović  <arsen@aarsen.me>
 
 	* aclocal.m4: Regenerate.
