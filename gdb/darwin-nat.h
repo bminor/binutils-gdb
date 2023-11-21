@@ -126,7 +126,7 @@ private:
   void stop_inferior (inferior *inf);
   void init_thread_list (inferior *inf);
   void ptrace_him (int pid);
-  int cancel_breakpoint (ptid_t ptid);
+  int cancel_breakpoint (inferior *inf, ptid_t ptid);
 };
 
 /* Describe the mach exception handling state for a task.  This state is saved
