@@ -1300,6 +1300,10 @@ parse_bpf_register (char *s, char rw, uint8_t *regno)
       s += 1;
     }
 
+  /* If we are still parsing a name, it is not a register.  */
+  if (is_part_of_name (*s))
+    return NULL;
+
   return s;
 }
 
