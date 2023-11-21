@@ -18,6 +18,7 @@
 #include <pthread.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "../lib/my-syscalls.h"
 
 static void *
@@ -30,13 +31,19 @@ thread_func (void *arg)
   abort ();
 }
 
+/* Number of threads we'll create.  */
+int n_threads = 100;
+
 int
-main (void)
+main (int argc, char **argv)
 {
   int i;
 
-  /* Spawn and join a thread, 100 times.  */
-  for (i = 0; i < 100; i++)
+  if (argc > 1)
+    n_threads = atoi (argv[1]);
+
+  /* Spawn and join a thread, N_THREADS times.  */
+  for (i = 0; i < n_threads; i++)
     {
       pthread_t thread;
       int ret;
@@ -48,5 +55,8 @@ main (void)
       assert (ret == 0);
     }
 
+  /* Some time to make sure that GDB processes the thread exit event
+     before the whole-process exit.  */
+  sleep (3);
   return 0;
 }
