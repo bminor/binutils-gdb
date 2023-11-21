@@ -157,6 +157,7 @@ mips*el*-*-*|mips*le*-*-*)
  targ_obj=mips
  targ_machine=EM_MIPS
  targ_size=32
+ targ_extra_size=64
  targ_big_endian=false
  targ_extra_big_endian=true
  ;;
@@ -164,6 +165,7 @@ mips*-*-*)
  targ_obj=mips
  targ_machine=EM_MIPS
  targ_size=32
+ targ_extra_size=64
  targ_big_endian=true
  targ_extra_big_endian=false
  ;;

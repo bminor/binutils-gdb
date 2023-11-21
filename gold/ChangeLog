@@ -1,5 +1,9 @@
 2023-11-21  YunQiang Su  <yunqiang.su@cipunited.com>
 
+	* configure.tgt (mips targets): Set targ_extra_size=64.
+
+2023-11-21  YunQiang Su  <yunqiang.su@cipunited.com>
+
 	* configure.tgt (mips targets): Set targ_machine to EM_MIPS for
 	little endian mips targets.
 
