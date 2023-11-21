@@ -348,7 +348,7 @@ powerpc_init_dialect (struct disassemble_info *info)
 {
   ppc_cpu_t dialect = 0;
   ppc_cpu_t sticky = 0;
-  struct dis_private *priv = calloc (sizeof (*priv), 1);
+  struct dis_private *priv = calloc (1, sizeof (*priv));
 
   if (priv == NULL)
     return;

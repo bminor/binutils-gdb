@@ -147,7 +147,7 @@ static bool
 init_arc_disasm_info (struct disassemble_info *info)
 {
   struct arc_disassemble_info *arc_infop
-    = calloc (sizeof (*arc_infop), 1);
+    = calloc (1, sizeof (*arc_infop));
 
   if (arc_infop == NULL)
     return false;
