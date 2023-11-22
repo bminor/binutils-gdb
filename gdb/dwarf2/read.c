@@ -5647,7 +5647,7 @@ compute_delayed_physnames (struct dwarf2_cu *cu)
 
 	  while (1)
 	    {
-	      if (physname[len] == ')') /* shortcut */
+	      if (physname[len - 1] == ')') /* shortcut */
 		break;
 	      else if (check_modifier (physname, len, " const"))
 		TYPE_FN_FIELD_CONST (fn_flp->fn_fields, mi.index) = 1;
