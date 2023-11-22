@@ -534,7 +534,7 @@ union field_location
 };
 
 /* Accessibility of a member.  */
-enum class accessibility : unsigned
+enum class accessibility : unsigned char
 {
   /* It's important that this be 0 so that fields default to
      public.  */
@@ -717,8 +717,6 @@ struct field
 
   unsigned int m_artificial : 1;
 
-  /* Accessibility of the field.  */
-  ENUM_BITFIELD (accessibility) m_accessibility : 2;
   /* Whether the field is 'virtual'.  */
   bool m_virtual : 1;
   /* Whether the field is 'ignored'.  */
@@ -728,13 +726,16 @@ struct field
 
   ENUM_BITFIELD(field_loc_kind) m_loc_kind : 3;
 
+  /* Accessibility of the field.  */
+  enum accessibility m_accessibility;
+
   /* * Size of this field, in bits, or zero if not packed.
      If non-zero in an array type, indicates the element size in
      bits (used only in Ada at the moment).
      For an unpacked field, the field's type's length
      says how many bytes the field occupies.  */
 
-  unsigned int m_bitsize : 28;
+  unsigned int m_bitsize;
 
   /* * In a struct or union type, type of this field.
      - In a function or member type, type of this argument.
@@ -1611,8 +1612,6 @@ struct fn_field
 
   unsigned int is_const:1;
   unsigned int is_volatile:1;
-  /* Accessibility of the field.  */
-  ENUM_BITFIELD (accessibility) accessibility : 2;
   unsigned int is_artificial:1;
 
   /* * A stub method only has some fields valid (but they are enough
@@ -1633,9 +1632,8 @@ struct fn_field
 
   ENUM_BITFIELD (dwarf_defaulted_attribute) defaulted : 2;
 
-  /* * Unused.  */
-
-  unsigned int dummy:6;
+  /* Accessibility of the field.  */
+  enum accessibility accessibility;
 
   /* * Index into that baseclass's virtual function table, minus 2;
      else if static: VOFFSET_STATIC; else: 0.  */
@@ -1658,7 +1656,7 @@ struct decl_field
   struct type *type;
 
   /* Accessibility of the field.  */
-  ENUM_BITFIELD (accessibility) accessibility : 2;
+  enum accessibility accessibility;
 };
 
 /* * C++ language-specific information for TYPE_CODE_STRUCT and
