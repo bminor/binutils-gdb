@@ -136,6 +136,8 @@ public:
   const char *extra_thread_info (struct thread_info *) override;
 
   ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
+
+  void update_thread_list () override;
 };
 
 static aix_thread_target aix_thread_ops;
@@ -1015,7 +1017,7 @@ pd_update (pid_t pid)
    If successful and there exists and we can find an event thread, return a ptid
    for that thread.  Otherwise, return a ptid-only ptid using PID.  */
 
-static ptid_t
+static void
 pd_activate (pid_t pid)
 {
   int status;
@@ -1030,8 +1032,23 @@ pd_activate (pid_t pid)
       return ptid_t (pid);
     }
   data->pd_active = 1;
-  return pd_update (pid);
+  return;
 }
+
+/* AIX implementation of update_thread_list.  */
+
+void
+aix_thread_target::update_thread_list ()
+{
+  for (inferior *inf : all_inferiors ())
+    {
+      if (inf->pid == 0)
+	continue;
+
+      pd_update (inf->pid);
+    }
+}
+
 
 /* An object file has just been loaded.  Check whether the current
    application is pthreaded, and if so, prepare for thread debugging.  */
@@ -1076,11 +1093,6 @@ pd_enable (inferior *inf)
   /* Prepare for thread debugging.  */
   current_inferior ()->push_target (&aix_thread_ops);
   data->pd_able = 1;
-
-  /* When attaching / handling fork child, don't try activating
-     thread debugging until we know about all shared libraries.  */
-  if (inf->in_initial_library_scan)
-    return;
 
   /* If we're debugging a core file or an attached inferior, the
      pthread library may already have been initialized, so try to
@@ -1216,7 +1228,7 @@ aix_thread_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
       if (regcache_read_pc (regcache)
 	  - gdbarch_decr_pc_after_break (gdbarch) == data->pd_brk_addr)
-	return pd_activate (ptid.pid ());
+	pd_activate (ptid.pid ());
     }
 
   return pd_update (ptid.pid ());
