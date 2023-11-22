@@ -452,6 +452,13 @@ tui_layout_window::apply (int x_, int y_, int width_, int height_,
   width = width_;
   height = height_;
   gdb_assert (m_window != nullptr);
+  if (width == 0 || height == 0)
+    {
+      /* The window was dropped, so it's going to be deleted, reset the
+	 soon to be dangling pointer.  */
+      m_window = nullptr;
+      return;
+    }
   m_window->resize (height, width, x, y);
 }
 
@@ -833,6 +840,7 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_,
   int available_size = m_vertical ? height : width;
   int last_index = -1;
   int total_weight = 0;
+  int prev = -1;
   for (int i = 0; i < m_splits.size (); ++i)
     {
       bool cmd_win_already_exists = TUI_CMD_WIN != nullptr;
@@ -864,6 +872,14 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_,
 	  info[i].max_size = info[i].min_size;
 	}
 
+      if (info[i].min_size > info[i].max_size)
+	{
+	  /* There is not enough room for this window, drop it.  */
+	  info[i].min_size = 0;
+	  info[i].max_size = 0;
+	  continue;
+	}
+
       if (info[i].min_size == info[i].max_size)
 	available_size -= info[i].min_size;
       else
@@ -874,10 +890,12 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_,
 
       /* Two adjacent boxed windows will share a border, making a bit
 	 more size available.  */
-      if (i > 0
-	  && m_splits[i - 1].layout->last_edge_has_border_p ()
+      if (prev != -1
+	  && m_splits[prev].layout->last_edge_has_border_p ()
 	  && m_splits[i].layout->first_edge_has_border_p ())
 	info[i].share_box = true;
+
+      prev = i;
     }
 
   /* If last_index is set then we have a window that is not of a fixed
