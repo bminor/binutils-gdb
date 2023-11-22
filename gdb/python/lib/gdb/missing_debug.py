@@ -18,8 +18,18 @@ MissingDebugHandler base class, and register_handler function.
 """
 
 import gdb
-from curses.ascii import isascii, isalnum
-
+import sys
+if sys.version_info >= (3, 7):
+    # Functions str.isascii() and str.isalnum are available starting Python
+    # 3.7.
+    def isascii(ch):
+        return ch.isascii()
+    def isalnum(ch):
+        return ch.isalnum()
+else:
+    # Fall back to curses.ascii.isascii() and curses.ascii.isalnum() for
+    # earlier versions.
+    from curses.ascii import isascii, isalnum
 
 def _validate_name(name):
     """Validate a missing debug handler name string.
