@@ -40,6 +40,18 @@ struct tui_cmd_window
 
   void resize (int height, int width, int origin_x, int origin_y) override;
 
+  /* Compute the minimum height of this window.  */
+  virtual int min_height () const override
+  {
+    int preferred_min = tui_win_info::min_height ();
+    int max = max_height ();
+    /* If there is enough space to accommodate the preferred minimum height,
+       use it.  Otherwise, use as much as possible.  */
+    return (preferred_min <= max
+	    ? preferred_min
+	    : max);
+  }
+
   int start_line = 0;
 };
 
