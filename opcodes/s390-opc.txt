@@ -305,6 +305,7 @@ b30d debr RRE_FF "divide short bfp" g5 esa,zarch
 ed000000000d deb RXE_FRRD "divide short bfp" g5 esa,zarch
 b35b didbr RRF_FUFF "divide to integer long bfp" g5 esa,zarch
 b353 diebr RRF_FUFF "divide to integer short bfp" g5 esa,zarch
+# efpc and sfpc have only one operand; retain RR register format for compatibility
 b38c efpc RRE_RR "extract fpc" g5 esa,zarch optparm
 b342 ltxbr RRE_FEFE "load and test extended bfp" g5 esa,zarch
 b312 ltdbr RRE_FF "load and test long bfp" g5 esa,zarch
@@ -348,6 +349,7 @@ b31f msdbr RRF_F0FF "multiply and subtract long bfp" g5 esa,zarch
 ed000000001f msdb RXF_FRRDF "multiply and subtract long bfp" g5 esa,zarch
 b30f msebr RRF_F0FF "multiply and subtract short bfp" g5 esa,zarch
 ed000000000f mseb RXF_FRRDF "multiply and subtract short bfp" g5 esa,zarch
+# efpc and sfpc have only one operand; retain RR register format for compatibility
 b384 sfpc RRE_RR "set fpc" g5 esa,zarch optparm
 b299 srnm S_RD "set rounding mode" g5 esa,zarch
 b316 sqxbr RRE_FEFE "square root extended bfp" g5 esa,zarch
@@ -966,11 +968,11 @@ c201 msfi RIL_RI "multiply single immediate (32)" z10 zarch
 c200 msgfi RIL_RI "multiply single immediate (64)" z10 zarch
 e30000000036 pfd RXY_URRD "prefetch data" z10 zarch
 c602 pfdrl RIL_UP "prefetch data relative long" z10 zarch
-ec0000000054 rnsbg RIE_RRUUU "rotate then and selected bits" z10 zarch
-ec0000000057 rxsbg RIE_RRUUU "rotate then exclusive or selected bits" z10 zarch
-ec0000000056 rosbg RIE_RRUUU "rotate then or selected bits" z10 zarch
-ec0000000055 risbg RIE_RRUUU "rotate then insert selected bits" z10 zarch
-ec0000800055 risbgz RIE_RRUUU2 "rotate then insert selected bits and zero remaining bits" z10 zarch
+ec0000000054 rnsbg RIE_RRUUU "rotate then and selected bits" z10 zarch optparm
+ec0000000057 rxsbg RIE_RRUUU "rotate then exclusive or selected bits" z10 zarch optparm
+ec0000000056 rosbg RIE_RRUUU "rotate then or selected bits" z10 zarch optparm
+ec0000000055 risbg RIE_RRUUU "rotate then insert selected bits" z10 zarch optparm
+ec0000800055 risbgz RIE_RRUUU2 "rotate then insert selected bits and zero remaining bits" z10 zarch optparm
 c40f strl RIL_RP "store relative long (32)" z10 zarch
 c40b stgrl RIL_RP "store relative long (64)" z10 zarch
 c407 sthrl RIL_RP "store halfword relative long" z10 zarch
@@ -1014,8 +1016,8 @@ e300000000c4 lhh RXY_RRRD "load halfword high" z196 zarch
 e300000000ca lfh RXY_RRRD "load high" z196 zarch
 e300000000c2 llch RXY_RRRD "load logical character high" z196 zarch
 e300000000c6 llhh RXY_RRRD "load logical halfword high" z196 zarch
-ec000000005d risbhg RIE_RRUUU "rotate then insert selected bits high" z196 zarch
-ec0000000051 risblg RIE_RRUUU "rotate then insert selected bits low" z196 zarch
+ec000000005d risbhg RIE_RRUUU "rotate then insert selected bits high" z196 zarch optparm
+ec0000000051 risblg RIE_RRUUU "rotate then insert selected bits low" z196 zarch optparm
 e300000000c3 stch RXY_RRRD "store character high" z196 zarch
 e300000000c7 sthh RXY_RRRD "store halfword high" z196 zarch
 e300000000cb stfh RXY_RRRD "store high" z196 zarch
@@ -1153,8 +1155,8 @@ eb0000000023 clt RSY_RURD "compare logical and trap 32 bit reg-mem" zEC12 zarch
 eb0000000023 clt$12 RSY_R0RD "compare logical and trap 32 bit reg-mem" zEC12 zarch
 eb000000002b clgt RSY_RURD "compare logical and trap 64 bit reg-mem" zEC12 zarch
 eb000000002b clgt$12 RSY_R0RD "compare logical and trap 64 bit reg-mem" zEC12 zarch
-ec0000000059 risbgn RIE_RRUUU "rotate then insert selected bits nocc" zEC12 zarch
-ec0000800059 risbgnz RIE_RRUUU2 "rotate then insert selected bits and zero remaining bits nocc" zEC12 zarch
+ec0000000059 risbgn RIE_RRUUU "rotate then insert selected bits nocc" zEC12 zarch optparm
+ec0000800059 risbgnz RIE_RRUUU2 "rotate then insert selected bits and zero remaining bits nocc" zEC12 zarch optparm
 ed00000000aa cdzt RSL_LRDFU "convert from zoned long" zEC12 zarch
 ed00000000ab cxzt RSL_LRDFEU "convert from zoned extended" zEC12 zarch
 ed00000000a8 czdt RSL_LRDFU "convert to zoned long" zEC12 zarch

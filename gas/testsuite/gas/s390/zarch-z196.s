@@ -23,7 +23,9 @@ foo:
 	llch	%r6,-5555(%r7,%r8)
 	llhh	%r6,-5555(%r7,%r8)
 	risbhg	%r6,%r7,12,13,14
+	risbhg	%r6,%r7,12,13
 	risblg	%r6,%r7,12,13,14
+	risblg	%r6,%r7,12,13
 	stch	%r6,-5555(%r7,%r8)
 	sthh	%r6,-5555(%r7,%r8)
 	stfh	%r6,-5555(%r7,%r8)

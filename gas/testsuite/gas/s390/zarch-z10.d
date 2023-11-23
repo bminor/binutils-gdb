@@ -360,11 +360,17 @@ Disassembly of section .text:
 .*:	e3 a6 75 b3 01 36 [	 ]*pfd	10,5555\(%r6,%r7\)
  *([\da-f]+):	c6 a2 00 00 00 00 [	 ]*pfdrl	10,\1 <foo\+0x\1>
 .*:	ec 67 d2 dc e6 54 [	 ]*rnsbg	%r6,%r7,210,220,230
+.*:	ec 67 d2 dc 00 54 [	 ]*rnsbg	%r6,%r7,210,220
 .*:	ec 67 d2 dc e6 57 [	 ]*rxsbg	%r6,%r7,210,220,230
+.*:	ec 67 d2 dc 00 57 [	 ]*rxsbg	%r6,%r7,210,220
 .*:	ec 67 d2 dc e6 56 [	 ]*rosbg	%r6,%r7,210,220,230
+.*:	ec 67 d2 dc 00 56 [	 ]*rosbg	%r6,%r7,210,220
 .*:	ec 67 d2 14 e6 55 [	 ]*risbg	%r6,%r7,210,20,230
+.*:	ec 67 d2 14 00 55 [	 ]*risbg	%r6,%r7,210,20
 .*:	ec 67 d2 bc e6 55 [	 ]*risbgz	%r6,%r7,210,60,230
+.*:	ec 67 d2 bc 00 55 [	 ]*risbgz	%r6,%r7,210,60
 .*:	ec 67 d2 94 e6 55 [	 ]*risbgz	%r6,%r7,210,20,230
+.*:	ec 67 d2 94 00 55 [	 ]*risbgz	%r6,%r7,210,20
  *([\da-f]+):	c4 6f 00 00 00 00 [	 ]*strl	%r6,\1 <foo\+0x\1>
  *([\da-f]+):	c4 6b 00 00 00 00 [	 ]*stgrl	%r6,\1 <foo\+0x\1>
  *([\da-f]+):	c4 67 00 00 00 00 [	 ]*sthrl	%r6,\1 <foo\+0x\1>
