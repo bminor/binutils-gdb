@@ -57,12 +57,12 @@ Disassembly of section .text:
 .*:	b9 8f 60 59 [	 ]*crdte	%r5,%r6,%r9
 .*:	b9 8f 61 59 [	 ]*crdte	%r5,%r6,%r9,1
 .*:	c5 a0 0c 00 00 0c [	 ]*bprp	10,136 <bar>,136 <bar>
-.*:	c5 a0 00 00 00 00 [	 ]*bprp	10,124 <foo\+0x124>,124 <foo\+0x124>
+ *([\da-f]+):	c5 a0 00 00 00 00 [	 ]*bprp	10,\1 <foo\+0x\1>,\1 <foo\+0x\1>
 [	 ]*125: R_390_PLT12DBL	bar\+0x1
 [	 ]*127: R_390_PLT24DBL	bar\+0x3
-.*:	c7 a0 00 00 00 00 [	 ]*bpp	10,12a <foo\+0x12a>,0
+ *([\da-f]+):	c7 a0 00 00 00 00 [	 ]*bpp	10,\1 <foo\+0x\1>,0
 [	 ]*12e: R_390_PLT16DBL	bar\+0x4
-.*:	c7 a0 00 00 00 00 [	 ]*bpp	10,130 <foo\+0x130>,0
+ *([\da-f]+):	c7 a0 00 00 00 00 [	 ]*bpp	10,\1 <foo\+0x\1>,0
 [	 ]*134: R_390_PC16DBL	baz\+0x4
 
 
