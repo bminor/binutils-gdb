@@ -1910,7 +1910,7 @@ e30000000049 stgsc RXY_RRRD "store guarded storage controls" arch12 zarch
 
 b929 kma RRF_R0RR "cipher message with galois counter mode" arch12 zarch
 
-b93c prno RRE_RR "perform pseudorandom number operation" arch12 zarch
+b93c prno RRE_RR "perform random number operation" arch12 zarch
 b9a1 tpei RRE_RR "test pending external interruption" arch12 zarch
 b9ac irbm RRE_RR "insert reference bits multiple" arch12 zarch
 
