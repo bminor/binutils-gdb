@@ -34,76 +34,82 @@
    inserting operands into instructions and vice-versa is kept in this
    file.  */
 
+/* Build-time checks are preferrable over runtime ones.  Use this construct
+   in preference where possible.  */
+#define static_assert(e) ((void)sizeof (struct { int _:1 - 2 * !(e); }))
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+
 /* The operands table.
    The fields are bits, shift, insert, extract, flags.  */
 
 const struct s390_operand s390_operands[] =
 {
-#define UNUSED 0
+#define UNUSED      0
   { 0, 0, 0 },                    /* Indicates the end of the operand list */
 
 /* General purpose register operands.  */
 
-#define R_8         1             /* GPR starting at position 8 */
+#define R_8         (UNUSED + 1)  /* GPR starting at position 8 */
   { 4, 8, S390_OPERAND_GPR },
-#define R_12        2             /* GPR starting at position 12 */
+#define R_12        (R_8 + 1)     /* GPR starting at position 12 */
   { 4, 12, S390_OPERAND_GPR },
-#define R_16        3             /* GPR starting at position 16 */
+#define R_16        (R_12 + 1)    /* GPR starting at position 16 */
   { 4, 16, S390_OPERAND_GPR },
-#define R_20        4             /* GPR starting at position 20 */
+#define R_20        (R_16 + 1)    /* GPR starting at position 20 */
   { 4, 20, S390_OPERAND_GPR },
-#define R_24        5             /* GPR starting at position 24 */
+#define R_24        (R_20 + 1)    /* GPR starting at position 24 */
   { 4, 24, S390_OPERAND_GPR },
-#define R_28        6             /* GPR starting at position 28 */
+#define R_28        (R_24 + 1)    /* GPR starting at position 28 */
   { 4, 28, S390_OPERAND_GPR },
-#define R_32        7             /* GPR starting at position 32 */
+#define R_32        (R_28 + 1)    /* GPR starting at position 32 */
   { 4, 32, S390_OPERAND_GPR },
 
 /* General purpose register pair operands.  */
 
-#define RE_8        8             /* GPR starting at position 8 */
+#define RE_8        (R_32 + 1)    /* GPR starting at position 8 */
   { 4, 8, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
-#define RE_12       9             /* GPR starting at position 12 */
+#define RE_12       (RE_8 + 1)    /* GPR starting at position 12 */
   { 4, 12, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
-#define RE_16       10            /* GPR starting at position 16 */
+#define RE_16       (RE_12 + 1)   /* GPR starting at position 16 */
   { 4, 16, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
-#define RE_20       11            /* GPR starting at position 20 */
+#define RE_20       (RE_16 + 1)   /* GPR starting at position 20 */
   { 4, 20, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
-#define RE_24       12            /* GPR starting at position 24 */
+#define RE_24       (RE_20 + 1)   /* GPR starting at position 24 */
   { 4, 24, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
-#define RE_28       13            /* GPR starting at position 28 */
+#define RE_28       (RE_24 + 1)   /* GPR starting at position 28 */
   { 4, 28, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
-#define RE_32       14            /* GPR starting at position 32 */
+#define RE_32       (RE_28 + 1)   /* GPR starting at position 32 */
   { 4, 32, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
 
 /* Floating point register operands.  */
 
-#define F_8         15            /* FPR starting at position 8 */
+#define F_8         (RE_32 + 1)   /* FPR starting at position 8 */
   { 4, 8, S390_OPERAND_FPR },
-#define F_12        16            /* FPR starting at position 12 */
+#define F_12        (F_8 + 1)     /* FPR starting at position 12 */
   { 4, 12, S390_OPERAND_FPR },
-#define F_16        17            /* FPR starting at position 16 */
+#define F_16        (F_12 + 1)    /* FPR starting at position 16 */
   { 4, 16, S390_OPERAND_FPR },
-#define F_24        18            /* FPR starting at position 24 */
+#define F_24        (F_16 + 1)    /* FPR starting at position 24 */
   { 4, 24, S390_OPERAND_FPR },
-#define F_28        19            /* FPR starting at position 28 */
+#define F_28        (F_24 + 1)    /* FPR starting at position 28 */
   { 4, 28, S390_OPERAND_FPR },
-#define F_32        20            /* FPR starting at position 32 */
+#define F_32        (F_28 + 1)    /* FPR starting at position 32 */
   { 4, 32, S390_OPERAND_FPR },
 
 /* Floating point register pair operands.  */
 
-#define FE_8        21            /* FPR starting at position 8 */
+#define FE_8        (F_32 + 1)    /* FPR starting at position 8 */
   { 4, 8, S390_OPERAND_FPR | S390_OPERAND_REG_PAIR },
-#define FE_12       22            /* FPR starting at position 12 */
+#define FE_12       (FE_8 + 1)    /* FPR starting at position 12 */
   { 4, 12, S390_OPERAND_FPR | S390_OPERAND_REG_PAIR },
-#define FE_16       23            /* FPR starting at position 16 */
+#define FE_16       (FE_12 + 1)   /* FPR starting at position 16 */
   { 4, 16, S390_OPERAND_FPR | S390_OPERAND_REG_PAIR },
-#define FE_24       24            /* FPR starting at position 24 */
+#define FE_24       (FE_16 + 1)   /* FPR starting at position 24 */
   { 4, 24, S390_OPERAND_FPR | S390_OPERAND_REG_PAIR },
-#define FE_28       25            /* FPR starting at position 28 */
+#define FE_28       (FE_24 + 1)   /* FPR starting at position 28 */
   { 4, 28, S390_OPERAND_FPR | S390_OPERAND_REG_PAIR },
-#define FE_32       26            /* FPR starting at position 32 */
+#define FE_32       (FE_28 + 1)   /* FPR starting at position 32 */
   { 4, 32, S390_OPERAND_FPR | S390_OPERAND_REG_PAIR },
 
 /* Vector register operands.  */
@@ -111,145 +117,149 @@ const struct s390_operand s390_operands[] =
 /* For each of these operands and additional bit in the RXB operand is
    needed.  */
 
-#define V_8         27            /* Vector reg. starting at position 8 */
+#define V_8         (FE_32 + 1)   /* Vector reg. starting at position 8 */
   { 4, 8, S390_OPERAND_VR },
-#define V_12        28            /* Vector reg. starting at position 12 */
+#define V_12        (V_8 + 1)     /* Vector reg. starting at position 12 */
   { 4, 12, S390_OPERAND_VR },
-#define V_CP16_12   29            /* Vector reg. starting at position 12 */
+#define V_CP16_12   (V_12 + 1)    /* Vector reg. starting at position 12 */
   { 4, 12, S390_OPERAND_VR | S390_OPERAND_CP16 }, /* with a copy at pos 16 */
-#define V_16        30            /* Vector reg. starting at position 16 */
+#define V_16        (V_CP16_12+1) /* Vector reg. starting at position 16 */
   { 4, 16, S390_OPERAND_VR },
-#define V_32        31            /* Vector reg. starting at position 32 */
+#define V_32        (V_16 + 1)    /* Vector reg. starting at position 32 */
   { 4, 32, S390_OPERAND_VR },
 
 /* Access register operands.  */
 
-#define A_8         32            /* Access reg. starting at position 8 */
+#define A_8         (V_32 + 1)    /* Access reg. starting at position 8 */
   { 4, 8, S390_OPERAND_AR },
-#define A_12        33            /* Access reg. starting at position 12 */
+#define A_12        (A_8 + 1)     /* Access reg. starting at position 12 */
   { 4, 12, S390_OPERAND_AR },
-#define A_24        34            /* Access reg. starting at position 24 */
+#define A_24        (A_12 + 1)    /* Access reg. starting at position 24 */
   { 4, 24, S390_OPERAND_AR },
-#define A_28        35            /* Access reg. starting at position 28 */
+#define A_28        (A_24 + 1)    /* Access reg. starting at position 28 */
   { 4, 28, S390_OPERAND_AR },
 
 /* Control register operands.  */
 
-#define C_8         36            /* Control reg. starting at position 8 */
+#define C_8         (A_28 + 1)    /* Control reg. starting at position 8 */
   { 4, 8, S390_OPERAND_CR },
-#define C_12        37            /* Control reg. starting at position 12 */
+#define C_12        (C_8 + 1)     /* Control reg. starting at position 12 */
   { 4, 12, S390_OPERAND_CR },
 
 /* Base register operands.  */
 
-#define B_16        38            /* Base register starting at position 16 */
+#define B_16        (C_12 + 1)    /* Base register starting at position 16 */
   { 4, 16, S390_OPERAND_BASE | S390_OPERAND_GPR },
-#define B_32        39            /* Base register starting at position 32 */
+#define B_32        (B_16 + 1)    /* Base register starting at position 32 */
   { 4, 32, S390_OPERAND_BASE | S390_OPERAND_GPR },
 
-#define X_12        40            /* Index register starting at position 12 */
+#define X_12        (B_32 + 1)    /* Index register starting at position 12 */
   { 4, 12, S390_OPERAND_INDEX | S390_OPERAND_GPR },
 
-#define VX_12       41     /* Vector index register starting at position 12 */
+#define VX_12       (X_12+1) /* Vector index register starting at position 12 */
   { 4, 12, S390_OPERAND_INDEX | S390_OPERAND_VR },
 
 /* Address displacement operands.  */
 
-#define D_20        42            /* Displacement starting at position 20 */
+#define D_20        (VX_12 + 1)   /* Displacement starting at position 20 */
   { 12, 20, S390_OPERAND_DISP },
-#define D_36        43            /* Displacement starting at position 36 */
+#define D_36        (D_20 + 1)    /* Displacement starting at position 36 */
   { 12, 36, S390_OPERAND_DISP },
-#define D20_20      44		  /* 20 bit displacement starting at 20 */
+#define D20_20      (D_36 + 1)    /* 20 bit displacement starting at 20 */
   { 20, 20, S390_OPERAND_DISP | S390_OPERAND_SIGNED },
 
 /* Length operands.  */
 
-#define L4_8        45            /* 4 bit length starting at position 8 */
+#define L4_8        (D20_20 + 1)  /* 4 bit length starting at position 8 */
   { 4, 8, S390_OPERAND_LENGTH },
-#define L4_12       46            /* 4 bit length starting at position 12 */
+#define L4_12       (L4_8 + 1)    /* 4 bit length starting at position 12 */
   { 4, 12, S390_OPERAND_LENGTH },
-#define L8_8        47            /* 8 bit length starting at position 8 */
+#define L8_8        (L4_12 + 1)   /* 8 bit length starting at position 8 */
   { 8, 8, S390_OPERAND_LENGTH },
 
 /* Signed immediate operands.  */
 
-#define I8_8        48		  /* 8 bit signed value starting at 8 */
+#define I8_8        (L8_8 + 1)    /* 8 bit signed value starting at 8 */
   { 8, 8, S390_OPERAND_SIGNED },
-#define I8_32       49		  /* 8 bit signed value starting at 32 */
+#define I8_32       (I8_8 + 1)    /* 8 bit signed value starting at 32 */
   { 8, 32, S390_OPERAND_SIGNED },
-#define I12_12      50		  /* 12 bit signed value starting at 12 */
+#define I12_12      (I8_32 + 1)   /* 12 bit signed value starting at 12 */
   { 12, 12, S390_OPERAND_SIGNED },
-#define I16_16      51            /* 16 bit signed value starting at 16 */
+#define I16_16      (I12_12 + 1)  /* 16 bit signed value starting at 16 */
   { 16, 16, S390_OPERAND_SIGNED },
-#define I16_32      52            /* 16 bit signed value starting at 32 */
+#define I16_32      (I16_16 + 1)  /* 16 bit signed value starting at 32 */
   { 16, 32, S390_OPERAND_SIGNED },
-#define I24_24      53		  /* 24 bit signed value starting at 24 */
+#define I24_24      (I16_32 + 1)  /* 24 bit signed value starting at 24 */
   { 24, 24, S390_OPERAND_SIGNED },
-#define I32_16      54		  /* 32 bit signed value starting at 16 */
+#define I32_16      (I24_24 + 1)  /* 32 bit signed value starting at 16 */
   { 32, 16, S390_OPERAND_SIGNED },
 
 /* Unsigned immediate operands.  */
 
-#define U4_8        55            /* 4 bit unsigned value starting at 8 */
+#define U4_8        (I32_16 + 1)  /* 4 bit unsigned value starting at 8 */
   { 4, 8, 0 },
-#define U4_12       56            /* 4 bit unsigned value starting at 12 */
+#define U4_12       (U4_8 + 1)    /* 4 bit unsigned value starting at 12 */
   { 4, 12, 0 },
-#define U4_16       57            /* 4 bit unsigned value starting at 16 */
+#define U4_16       (U4_12 + 1)   /* 4 bit unsigned value starting at 16 */
   { 4, 16, 0 },
-#define U4_20       58            /* 4 bit unsigned value starting at 20 */
+#define U4_20       (U4_16 + 1)   /* 4 bit unsigned value starting at 20 */
   { 4, 20, 0 },
-#define U4_24       59            /* 4 bit unsigned value starting at 24 */
+#define U4_24       (U4_20 + 1)   /* 4 bit unsigned value starting at 24 */
   { 4, 24, 0 },
-#define U4_OR1_24   60            /* 4 bit unsigned value ORed with 1 */
+#define U4_OR1_24   (U4_24 + 1)   /* 4 bit unsigned value ORed with 1 */
   { 4, 24, S390_OPERAND_OR1 },	  /* starting at 24 */
-#define U4_OR2_24   61            /* 4 bit unsigned value ORed with 2 */
+#define U4_OR2_24   (U4_OR1_24+1) /* 4 bit unsigned value ORed with 2 */
   { 4, 24, S390_OPERAND_OR2 },    /* starting at 24 */
-#define U4_OR3_24   62            /* 4 bit unsigned value ORed with 3 */
+#define U4_OR3_24   (U4_OR2_24+1) /* 4 bit unsigned value ORed with 3 */
   { 4, 24, S390_OPERAND_OR1 | S390_OPERAND_OR2 }, /* starting at 24 */
-#define U4_28       63            /* 4 bit unsigned value starting at 28 */
+#define U4_28       (U4_OR3_24+1) /* 4 bit unsigned value starting at 28 */
   { 4, 28, 0 },
-#define U4_OR8_28   64            /* 4 bit unsigned value ORed with 8 */
+#define U4_OR8_28   (U4_28 + 1)   /* 4 bit unsigned value ORed with 8 */
   { 4, 28, S390_OPERAND_OR8 },    /* starting at 28 */
-#define U4_32       65            /* 4 bit unsigned value starting at 32 */
+#define U4_32       (U4_OR8_28+1) /* 4 bit unsigned value starting at 32 */
   { 4, 32, 0 },
-#define U4_36       66            /* 4 bit unsigned value starting at 36 */
+#define U4_36       (U4_32 + 1)   /* 4 bit unsigned value starting at 36 */
   { 4, 36, 0 },
-#define U8_8        67            /* 8 bit unsigned value starting at 8 */
+#define U8_8        (U4_36 + 1)   /* 8 bit unsigned value starting at 8 */
   { 8, 8, 0 },
-#define U8_16       68            /* 8 bit unsigned value starting at 16 */
+#define U8_16       (U8_8 + 1)    /* 8 bit unsigned value starting at 16 */
   { 8, 16, 0 },
-#define U6_26       69            /* 6 bit unsigned value starting at 26 */
+#define U6_26       (U8_16 + 1)   /* 6 bit unsigned value starting at 26 */
   { 6, 26, 0 },
-#define U8_24       70            /* 8 bit unsigned value starting at 24 */
+#define U8_24       (U6_26 + 1)   /* 8 bit unsigned value starting at 24 */
   { 8, 24, 0 },
-#define U8_28       71            /* 8 bit unsigned value starting at 28 */
+#define U8_28       (U8_24 + 1)   /* 8 bit unsigned value starting at 28 */
   { 8, 28, 0 },
-#define U8_32       72            /* 8 bit unsigned value starting at 32 */
+#define U8_32       (U8_28 + 1)   /* 8 bit unsigned value starting at 32 */
   { 8, 32, 0 },
-#define U12_16      73            /* 12 bit unsigned value starting at 16 */
+#define U12_16      (U8_32 + 1)   /* 12 bit unsigned value starting at 16 */
   { 12, 16, 0 },
-#define U16_16      74            /* 16 bit unsigned value starting at 16 */
+#define U16_16      (U12_16 + 1)  /* 16 bit unsigned value starting at 16 */
   { 16, 16, 0 },
-#define U16_32      75		  /* 16 bit unsigned value starting at 32 */
+#define U16_32      (U16_16 + 1)  /* 16 bit unsigned value starting at 32 */
   { 16, 32, 0 },
-#define U32_16      76		  /* 32 bit unsigned value starting at 16 */
+#define U32_16      (U16_32 + 1)  /* 32 bit unsigned value starting at 16 */
   { 32, 16, 0 },
 
 /* PC-relative address operands.  */
 
-#define J12_12      77            /* 12 bit PC relative offset at 12 */
+#define J12_12      (U32_16 + 1)  /* 12 bit PC relative offset at 12 */
   { 12, 12, S390_OPERAND_PCREL },
-#define J16_16      78            /* 16 bit PC relative offset at 16 */
+#define J16_16      (J12_12 + 1)  /* 16 bit PC relative offset at 16 */
   { 16, 16, S390_OPERAND_PCREL },
-#define J16_32      79            /* 16 bit PC relative offset at 32 */
+#define J16_32      (J16_16 + 1)  /* 16 bit PC relative offset at 32 */
   { 16, 32, S390_OPERAND_PCREL },
-#define J24_24      80            /* 24 bit PC relative offset at 24 */
+#define J24_24      (J16_32 + 1)  /* 24 bit PC relative offset at 24 */
   { 24, 24, S390_OPERAND_PCREL },
-#define J32_16      81            /* 32 bit PC relative offset at 16 */
+#define J32_16      (J24_24 + 1)  /* 32 bit PC relative offset at 16 */
   { 32, 16, S390_OPERAND_PCREL },
 
 };
 
+static inline void unused_s390_operands_static_asserts(void)
+{
+  static_assert(ARRAY_SIZE(s390_operands) - 1 == J32_16);
+}
 
 /* Macros used to form opcodes.  */
 
