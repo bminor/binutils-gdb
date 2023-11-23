@@ -355,10 +355,22 @@ foo:
 	pfdrl	10,.
 	rnsbg	%r6,%r7,210,220,230
 	rnsbg	%r6,%r7,210,220
+	rnsbg	%r6,%r7,146,220,230
+	rnsbg	%r6,%r7,146,220
+	rnsbgt	%r6,%r7,18,28,38
+	rnsbgt	%r6,%r7,18,28
 	rxsbg	%r6,%r7,210,220,230
 	rxsbg	%r6,%r7,210,220
+	rxsbg	%r6,%r7,146,220,230
+	rxsbg	%r6,%r7,146,220
+	rxsbgt	%r6,%r7,18,28,38
+	rxsbgt	%r6,%r7,18,28
 	rosbg	%r6,%r7,210,220,230
 	rosbg	%r6,%r7,210,220
+	rosbg	%r6,%r7,146,220,230
+	rosbg	%r6,%r7,146,220
+	rosbgt	%r6,%r7,18,28,38
+	rosbgt	%r6,%r7,18,28
 	risbg	%r6,%r7,210,20,230
 	risbg	%r6,%r7,210,20
 	risbg	%r6,%r7,210,188,230

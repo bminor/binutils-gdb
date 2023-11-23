@@ -80,6 +80,7 @@ Disassembly of section .text:
  *([\da-f]+):	a7 95 00 00 [	 ]*bras	%r9,\1 <foo\+0x\1>
  *([\da-f]+):	a7 65 00 00 [	 ]*bras	%r6,\1 <foo\+0x\1>
  *([\da-f]+):	a7 64 00 00 [	 ]*jlh	\1 <foo\+0x\1>
+ *([\da-f]+):	a7 64 00 00 [	 ]*jlh	\1 <foo\+0x\1>
  *([\da-f]+):	a7 66 00 00 [	 ]*brct	%r6,\1 <foo\+0x\1>
  *([\da-f]+):	a7 66 00 00 [	 ]*brct	%r6,\1 <foo\+0x\1>
  *([\da-f]+):	84 69 00 00 [	 ]*brxh	%r6,%r9,\1 <foo\+0x\1>

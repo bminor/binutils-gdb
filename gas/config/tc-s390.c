@@ -699,13 +699,17 @@ s390_insert_operand (unsigned char *insn,
   if (operand->flags & S390_OPERAND_OR8)
     uval |= 8;
 
-  /* Duplicate the operand at bit pos 12 to 16.  */
+  /* Duplicate the GPR/VR operand at bit pos 12 to 16.  */
   if (operand->flags & S390_OPERAND_CP16)
     {
-      /* Copy VR operand at bit pos 12 to bit pos 16.  */
+      /* Copy GPR/VR operand at bit pos 12 to bit pos 16.  */
       insn[2] |= uval << 4;
-      /* Copy the flag in the RXB field.  */
-      insn[4] |= (insn[4] & 4) >> 1;
+
+      if (operand->flags & S390_OPERAND_VR)
+        {
+          /* Copy the VR flag in the RXB field.  */
+          insn[4] |= (insn[4] & 4) >> 1;
+        }
     }
 
   /* Insert fragments of the operand byte for byte.  */

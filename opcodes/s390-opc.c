@@ -62,7 +62,9 @@ const struct s390_operand s390_operands[] =
   { 4, 24, S390_OPERAND_GPR },
 #define R_28        (R_24 + 1)    /* GPR starting at position 28 */
   { 4, 28, S390_OPERAND_GPR },
-#define R_32        (R_28 + 1)    /* GPR starting at position 32 */
+#define R_CP16_28   (R_28 + 1)    /* GPR starting at position 28 */
+  { 4, 28, S390_OPERAND_GPR | S390_OPERAND_CP16 }, /* with a copy at pos 16 */
+#define R_32        (R_CP16_28+1) /* GPR starting at position 32 */
   { 4, 32, S390_OPERAND_GPR },
 
 /* General purpose register pair operands.  */
@@ -222,9 +224,13 @@ const struct s390_operand s390_operands[] =
   { 4, 36, 0 },
 #define U8_8        (U4_36 + 1)   /* 8 bit unsigned value starting at 8 */
   { 8, 8, 0 },
-#define U8_16       (U8_8 + 1)    /* 8 bit unsigned value starting at 16 */
+#define U6_18       (U8_8 + 1)    /* 6 bit unsigned value starting at 18 */
+  { 6, 18, 0 },
+#define U8_16       (U6_18 + 1)   /* 8 bit unsigned value starting at 16 */
   { 8, 16, 0 },
-#define U6_26       (U8_16 + 1)   /* 6 bit unsigned value starting at 26 */
+#define U5_27       (U8_16 + 1)   /* 5 bit unsigned value starting at 27 */
+  { 5, 27, 0 },
+#define U6_26       (U5_27 + 1)   /* 6 bit unsigned value starting at 26 */
   { 6, 26, 0 },
 #define U8_24       (U6_26 + 1)   /* 8 bit unsigned value starting at 24 */
   { 8, 24, 0 },
@@ -289,7 +295,7 @@ static inline void unused_s390_operands_static_asserts(void)
       p - pc relative
       r - general purpose register
       re - gpr extended operand, a valid general purpose register pair
-      u - unsigned integer, 4, 8, 16 or 32 bit
+      u - unsigned integer, 4, 6, 8, 16 or 32 bit
       m - mode field, 4 bit
       0 - operand skipped.
       The order of the letters reflects the layout of the format in
@@ -325,7 +331,9 @@ static inline void unused_s390_operands_static_asserts(void)
 #define INSTR_RIE_R0U0     6, { R_8,U16_16,0,0,0,0 }             /* e.g. clfitne */
 #define INSTR_RIE_RUI0     6, { R_8,I16_16,U4_12,0,0,0 }         /* e.g. lochi */
 #define INSTR_RIE_RRUUU    6, { R_8,R_12,U8_16,U8_24,U8_32,0 }   /* e.g. rnsbg */
-#define INSTR_RIE_RRUUU2   6, { R_8,R_12,U8_16,U6_26,U8_32,0 }   /* e.g. rnsbg */
+#define INSTR_RIE_RRUUU2   6, { R_8,R_12,U8_16,U6_26,U8_32,0 }   /* e.g. risbgz */
+#define INSTR_RIE_RRUUU3   6, { R_8,R_12,U8_16,U5_27,U8_32,0 }   /* e.g. risbhg */
+#define INSTR_RIE_RRUUU4   6, { R_8,R_12,U6_18,U8_24,U8_32,0 }   /* e.g. rnsbgt */
 #define INSTR_RIL_0P       6, { J32_16,0,0,0,0 }                 /* e.g. jg    */
 #define INSTR_RIL_RP       6, { R_8,J32_16,0,0,0,0 }             /* e.g. brasl */
 #define INSTR_RIL_UP       6, { U4_8,J32_16,0,0,0,0 }            /* e.g. brcl  */
@@ -374,6 +382,7 @@ static inline void unused_s390_operands_static_asserts(void)
 #define INSTR_RRF_R0RR2    4, { R_24,R_28,R_16,0,0,0 }           /* e.g. ark   */
 #define INSTR_RRF_R0RER    4, { RE_24,R_28,R_16,0,0,0 }          /* e.g. mgrk  */
 #define INSTR_RRF_R0RR3    4, { R_24,R_28,R_16,0,0,0 }           /* e.g. selrz */
+#define INSTR_RRF_R0RR4    4, { R_24,R_CP16_28,0,0,0,0 }         /* e.g. notr  */
 #define INSTR_RRF_U0FF     4, { F_24,U4_16,F_28,0,0,0 }          /* e.g. fidbr */
 #define INSTR_RRF_U0FEFE   4, { FE_24,U4_16,FE_28,0,0,0 }        /* e.g. fixbr */
 #define INSTR_RRF_U0RF     4, { R_24,U4_16,F_28,0,0,0 }          /* e.g. cfebr */
@@ -550,6 +559,8 @@ static inline void unused_s390_operands_static_asserts(void)
 #define MASK_RIE_RUI0     { 0xff, 0x00, 0x00, 0x00, 0xff, 0xff }
 #define MASK_RIE_RRUUU    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RIE_RRUUU2   { 0xff, 0x00, 0x00, 0xc0, 0x00, 0xff }
+#define MASK_RIE_RRUUU3   { 0xff, 0x00, 0x00, 0xe0, 0x00, 0xff }
+#define MASK_RIE_RRUUU4   { 0xff, 0x00, 0xc0, 0x00, 0x00, 0xff }
 #define MASK_RIL_0P       { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RIL_RP       { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RIL_UP       { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
@@ -598,6 +609,7 @@ static inline void unused_s390_operands_static_asserts(void)
 #define MASK_RRF_R0RR2    { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RRF_R0RER    { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RRF_R0RR3    { 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00 }
+#define MASK_RRF_R0RR4    { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RRF_U0FF     { 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00 }
 #define MASK_RRF_U0FEFE   { 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00 }
 #define MASK_RRF_U0RF     { 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00 }

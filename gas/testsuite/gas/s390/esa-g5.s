@@ -74,6 +74,7 @@ foo:
 	bras	%r9,.
 	jas	%r6,.
 	brc	6,.
+	jc	6,.
 	brct	6,.
 	jct	%r6,.
 	brxh	%r6,%r9,.

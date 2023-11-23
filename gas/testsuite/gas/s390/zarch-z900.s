@@ -79,6 +79,7 @@ foo:
 	llihl	%r9,65535
 	llilh	%r9,65535
 	llill	%r9,65535
+	llghi	%r9,65535
 	lmd	%r9,%r6,4095(%r5),4095(%r10)
 	lmg	%r9,%r6,4095(%r5)
 	lmh	%r9,%r6,4095(%r5)
