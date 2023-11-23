@@ -143,3 +143,9 @@ foo:
 	tracg	%r9,%r6,4095(%r5)
 	xg	%r9,4095(%r5,%r10)
 	xgr	%r9,%r6
+	brasl	%r6,.
+	jasl	%r6,.
+	brasl	%r6,.-0x100000000
+	jasl	%r6,.-0x100000000
+	brasl	%r6,.+0xfffffffe
+	jasl	%r6,.+0xfffffffe

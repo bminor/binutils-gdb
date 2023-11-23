@@ -149,4 +149,10 @@ Disassembly of section .text:
 .*:	eb 96 5f ff 00 0f [ 	]*tracg	%r9,%r6,4095\(%r5\)
 .*:	e3 95 af ff 00 82 [ 	]*xg	%r9,4095\(%r5,%r10\)
 .*:	b9 82 00 96 [ 	]*xgr	%r9,%r6
+ *([\da-f]+):	c0 65 00 00 00 00 [ 	]*brasl	%r6,\1 <foo\+0x\1>
+ *([\da-f]+):	c0 65 00 00 00 00 [ 	]*brasl	%r6,\1 <foo\+0x\1>
+ *([\da-f]+):	c0 65 80 00 00 00 [ 	]*brasl	%r6,ffffffff0+\1 <foo\+0xffffffff0+\1>
+ *([\da-f]+):	c0 65 80 00 00 00 [ 	]*brasl	%r6,ffffffff0+\1 <foo\+0xffffffff0+\1>
+.*:	c0 65 7f ff ff ff [ 	]*brasl	%r6,1000002d0 <foo\+0x1000002d0>
+.*:	c0 65 7f ff ff ff [ 	]*brasl	%r6,1000002d6 <foo\+0x1000002d6>
 .*:	07 07 [	 ]*nopr	%r7
