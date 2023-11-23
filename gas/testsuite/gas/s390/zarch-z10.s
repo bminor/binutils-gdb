@@ -354,11 +354,17 @@ foo:
 	pfd	10,5555(%r6,%r7)
 	pfdrl	10,.
 	rnsbg	%r6,%r7,210,220,230
+	rnsbg	%r6,%r7,210,220
 	rxsbg	%r6,%r7,210,220,230
+	rxsbg	%r6,%r7,210,220
 	rosbg	%r6,%r7,210,220,230
+	rosbg	%r6,%r7,210,220
 	risbg	%r6,%r7,210,20,230
+	risbg	%r6,%r7,210,20
 	risbg	%r6,%r7,210,188,230
+	risbg	%r6,%r7,210,188
 	risbgz	%r6,%r7,210,20,230
+	risbgz	%r6,%r7,210,20
 	strl	%r6,.
 	stgrl	%r6,.
 	sthrl	%r6,.
