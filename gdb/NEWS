@@ -18,6 +18,15 @@
 
 GNU/Linux/MicroBlaze (gdbserver) microblazeel-*linux*
 
+* Changed remote packets
+
+single-inf-arg in qSupported
+  The new single-inf-arg feature within the qSupported packet allows
+  GDB to inform the stub that it would like to send the inferior
+  arguments as a single string within the vRun packet.  The stub can
+  reply with the single-inf-arg feature to indicate that it is able to
+  accept arguments as a single string.
+
 *** Changes in GDB 17
 
 * Debugging Linux programs that use x86-64 or x86-64 with 32-bit pointer

@@ -401,6 +401,10 @@ enum {
      errors, and so they should not need to check for this feature.  */
   PACKET_accept_error_message,
 
+  /* Not really a packet; this indicates support for sending the vRun
+     inferior arguments as a single string.  */
+  PACKET_vRun_single_argument,
+
   PACKET_MAX
 };
 
@@ -825,6 +829,11 @@ struct remote_features
   /* Returns true if memory tagging is supported, false otherwise.  */
   bool remote_memory_tagging_p () const
   { return packet_support (PACKET_memory_tagging_feature) == PACKET_ENABLE; }
+
+  /* Returns true if there is support for sending vRun inferior arguments
+     as a single string.  */
+  bool remote_vrun_single_arg_p () const
+  { return packet_support (PACKET_vRun_single_argument) == PACKET_ENABLE; }
 
   /* Reset all packets back to "unknown support".  Called when opening a
      new connection to a remote target.  */
@@ -5876,6 +5885,8 @@ static const struct protocol_feature remote_protocol_features[] = {
   { "error-message", PACKET_ENABLE, remote_supported_packet,
     PACKET_accept_error_message },
   { "binary-upload", PACKET_DISABLE, remote_supported_packet, PACKET_x },
+  { "single-inf-arg", PACKET_DISABLE, remote_supported_packet,
+    PACKET_vRun_single_argument },
 };
 
 static char *remote_support_xml;
@@ -5986,6 +5997,10 @@ remote_target::remote_query_supported ()
       if (m_features.packet_set_cmd_state (PACKET_memory_tagging_feature)
 	  != AUTO_BOOLEAN_FALSE)
 	remote_query_supported_append (&q, "memory-tagging+");
+
+      if (m_features.packet_set_cmd_state (PACKET_vRun_single_argument)
+	  != AUTO_BOOLEAN_FALSE)
+	remote_query_supported_append (&q, "single-inf-arg+");
 
       /* Keep this one last to work around a gdbserver <= 7.10 bug in
 	 the qSupported:xmlRegisters=i386 handling.  */
@@ -10850,7 +10865,11 @@ remote_target::extended_remote_run (const std::string &args)
 
   if (!args.empty ())
     {
-      std::vector<std::string> split_args = gdb::remote_args::split (args);
+      std::vector<std::string> split_args;
+      if (!m_features.remote_vrun_single_arg_p ())
+	split_args = gdb::remote_args::split (args);
+      else
+	split_args.push_back (args);
 
       for (const auto &a : split_args)
 	{
@@ -16552,6 +16571,10 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (PACKET_accept_error_message,
 			 "error-message", "error-message", 0);
+
+  add_packet_config_cmd (PACKET_vRun_single_argument,
+			 "single-inferior-argument-feature",
+			 "single-inferior-argument-feature", 0);
 
   /* Assert that we've registered "set remote foo-packet" commands
      for all packet configs.  */

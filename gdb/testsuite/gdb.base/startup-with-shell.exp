@@ -94,73 +94,97 @@ proc run_test_same { args re testname } {
     run_test $args $re $re $testname
 }
 
-# The regexp to match a single '\' character.
-set bs "\\\\"
+# Run the actual tests
+proc run_all_tests { { is_remote_with_split_args false } } {
+    # The regexp to match a single '\' character.
+    set bs "\\\\"
 
-# Are we using 'remote' or 'extended-remote' protocol?
-set is_remote_p [gdb_protocol_is_remote]
+    run_test "$::unique_file_dir/*.unique-extension" \
+	"\"$::unique_file\"" \
+	"\"$::unique_file_dir/\\\*\.unique-extension\"" \
+	"arg is glob" \
+	$is_remote_with_split_args
 
-## Run the actual tests
+    run_test_same "$::unique_file_dir/\\*.unique-extension" \
+	"\"$::unique_file_dir/\\\*\.unique-extension\"" \
+	"arg is escaped glob"
 
-run_test "$unique_file_dir/*.unique-extension" \
-    "\"$unique_file\"" \
-    "\"$unique_file_dir/\\\*\.unique-extension\"" \
-    "arg is glob" \
-    $is_remote_p
+    save_vars { ::env(TEST) } {
+	set ::env(TEST) "1234"
+	run_test "\$TEST" \
+	    "\"1234\"" \
+	    "\"\\\$TEST\"" \
+	    "arg is shell variable" \
+	    $is_remote_with_split_args
 
-run_test_same "$unique_file_dir/\\*.unique-extension" \
-    "\"$unique_file_dir/\\\*\.unique-extension\"" \
-    "arg is escaped glob"
+	run_test_same "\\\$TEST" \
+	    "\"\\\$TEST\"" \
+	    "arg is escaped shell variable"
+    }
 
-save_vars { env(TEST) } {
-    set env(TEST) "1234"
-    run_test "\$TEST" \
-	"\"1234\"" \
-	"\"\\\$TEST\"" \
-	"arg is shell variable" \
-	$is_remote_p
+    run_test "\$(echo foo)" \
+	"\"foo\"" \
+	"\"\\\$\\(echo\"" \
+	"arg is parameter expansion, command execution" \
+	$is_remote_with_split_args
 
-    run_test_same "\\\$TEST" \
-	"\"\\\$TEST\"" \
-	"arg is escaped shell variable"
+    run_test "\$((2 + 3))" \
+	"\"5\"" \
+	"\"\\\$\\(\\(2\"" \
+	"arg is parameter expansion, expression evaluation" \
+	$is_remote_with_split_args
+
+    run_test_same "\"\\a\"" \
+	"\"${bs}${bs}a\"" \
+	"retain backslash in double quote arg"
+
+    run_test_same "'\\a'" \
+	"\"${bs}${bs}a\"" \
+	"retain backslash in single quote arg"
+
+    run_test_same "\"\\\$\"" \
+	"\"\\\$\"" \
+	"'\$' can be escaped in double quote arg"
+
+    run_test_same "'\\\$'" \
+	"\"${bs}${bs}\\\$\"" \
+	"'\$' is not escaped in single quote arg"
+
+    run_test_same "\"\\`\"" \
+	"\"\\`\"" \
+	"'`' can be escaped in double quote arg"
+
+    run_test_same "'\\`'" \
+	"\"${bs}${bs}`\"" \
+	"'`' is not escaped in single quote arg"
+
+    run_test_same "\"\\\"\"" \
+	"\"${bs}\"\"" \
+	"'\"' can be escaped in double quote arg"
+
+    run_test_same "'\\\"'" \
+	"\"${bs}${bs}${bs}\"\"" \
+	"'\"' is not escaped in single quote arg"
+
+    run_test_same "\"\\\\\"" \
+	"\"${bs}${bs}\"" \
+	"'\\' can be escaped in double quote arg"
+
+    run_test_same "'\\\\'" \
+	"\"${bs}${bs}${bs}${bs}\"" \
+	"'\\' is not escaped in single quote arg"
 }
 
-run_test_same "\"\\a\"" \
-    "\"${bs}${bs}a\"" \
-    "retain backslash in double quote arg"
+run_all_tests
 
-run_test_same "'\\a'" \
-    "\"${bs}${bs}a\"" \
-    "retain backslash in single quote arg"
-
-run_test_same "\"\\\$\"" \
-    "\"\\\$\"" \
-    "'\$' can be escaped in double quote arg"
-
-run_test_same "'\\\$'" \
-    "\"${bs}${bs}\\\$\"" \
-    "'\$' is not escaped in single quote arg"
-
-run_test_same "\"\\`\"" \
-    "\"\\`\"" \
-    "'`' can be escaped in double quote arg"
-
-run_test_same "'\\`'" \
-    "\"${bs}${bs}`\"" \
-    "'`' is not escaped in single quote arg"
-
-run_test_same "\"\\\"\"" \
-    "\"${bs}\"\"" \
-    "'\"' can be escaped in double quote arg"
-
-run_test_same "'\\\"'" \
-    "\"${bs}${bs}${bs}\"\"" \
-    "'\"' is not escaped in single quote arg"
-
-run_test_same "\"\\\\\"" \
-    "\"${bs}${bs}\"" \
-    "'\\' can be escaped in double quote arg"
-
-run_test_same "'\\\\'" \
-    "\"${bs}${bs}${bs}${bs}\"" \
-    "'\\' is not escaped in single quote arg"
+# For extended-remote targets, disable the packet which passes
+# inferior arguments as a single string.  This changes how the vRun
+# (extended-remote only) packet works.
+if {[target_info gdb_protocol] == "extended-remote"} {
+    with_test_prefix "single-inferior-arg disabled" {
+	save_vars { GDBFLAGS } {
+	    append GDBFLAGS " -ex \"set remote single-inferior-argument-feature-packet off\""
+	    run_all_tests true
+	}
+    }
+}

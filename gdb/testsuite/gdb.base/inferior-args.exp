@@ -213,14 +213,31 @@ lappend test_desc_list [list "test four" \
 			    [list "$hex \"'\"" \
 				 "$hex \"\\\\\"\""]]
 
-foreach desc $test_desc_list {
-    lassign $desc name stub_suitable args re_list
-    with_test_prefix $name {
-	foreach_with_prefix set_method { "start" "starti" "run" "set args" } {
-	    foreach_with_prefix startup_with_shell { on off } {
-		do_test $set_method $startup_with_shell $args $re_list \
-		    $stub_suitable
+# Run all tests in the global TEST_DESC_LIST.
+proc run_all_tests {} {
+    foreach desc $::test_desc_list {
+	lassign $desc name stub_suitable args re_list
+	with_test_prefix $name {
+	    foreach_with_prefix set_method { "start" "starti" "run" "set args" } {
+		foreach_with_prefix startup_with_shell { on off } {
+		    do_test $set_method $startup_with_shell $args $re_list \
+			$stub_suitable
+		}
 	    }
 	}
+    }
+}
+
+run_all_tests
+
+# For extended-remote targets, disable the packet which passes
+# inferior arguments as a single string.  This changes how the vRun
+# (extended-remote only) packet works.
+if {[target_info gdb_protocol] == "extended-remote"} {
+    with_test_prefix "single-inferior-arg disabled" {
+	save_vars { GDBFLAGS } {
+	   append GDBFLAGS " -ex \"set remote single-inferior-argument-feature-packet off\""
+	   run_all_tests
+       }
     }
 }

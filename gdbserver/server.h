@@ -197,6 +197,11 @@ struct client_state
      are not supported with qRcmd and m packets, but are still supported
      everywhere else.  This is for backward compatibility reasons.  */
   bool error_message_supported = false;
+
+  /* If true then we've agreed that the debugger will send all inferior
+     arguments as a single string.  When false the debugger will attempt
+     to split the inferior arguments before sending them.  */
+  bool single_inferior_argument = false;
 };
 
 client_state &get_client_state ();
