@@ -2121,7 +2121,7 @@
 #define MASK_VDOTUVV  0xfc00707f
 #define MATCH_VFDOTVV  0xe4001057
 #define MASK_VFDOTVV  0xfc00707f
-/* Zvbb instructions.  */
+/* Zvbb/Zvkb instructions.  */
 #define MATCH_VANDN_VV 0x4000057
 #define MASK_VANDN_VV 0xfc00707f
 #define MATCH_VANDN_VX 0x4004057
@@ -3798,7 +3798,7 @@ DECLARE_INSN(c_ntl_all, MATCH_C_NTL_ALL, MASK_C_NTL_ALL)
 /* Zawrs instructions.  */
 DECLARE_INSN(wrs_nto, MATCH_WRS_NTO, MASK_WRS_NTO)
 DECLARE_INSN(wrs_sto, MATCH_WRS_STO, MASK_WRS_STO)
-/* Zvbb instructions.  */
+/* Zvbb/Zvkb instructions.  */
 DECLARE_INSN(vandn_vv, MATCH_VANDN_VV, MASK_VANDN_VV)
 DECLARE_INSN(vandn_vx, MATCH_VANDN_VX, MASK_VANDN_VX)
 DECLARE_INSN(vbrev8_v, MATCH_VBREV8_V, MASK_VBREV8_V)

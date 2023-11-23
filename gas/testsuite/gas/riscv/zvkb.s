@@ -1,5 +1,3 @@
-	vsm4k.vi v4, v8, 0
-	vsm3c.vi v4, v8, 0
 	vandn.vv v4, v8, v12
 	vandn.vv v4, v8, v12, v0.t
 	vandn.vx v4, v8, a1
