@@ -1,5 +1,11 @@
 2023-11-23  YunQiang Su  <yunqiang.su@cipunited.com>
 
+	* testsuite/gas/mips/elf-rel.s: Use addiu in place of addi.
+	* testsuite/gas/mips/elf-rel.d: Update expected output.
+	* testsuite/gas/mips/elfel-rel.d: Likewise.
+
+2023-11-23  YunQiang Su  <yunqiang.su@cipunited.com>
+
 	* testsuite/gas/mips/branch-section-1.d: Allow for r6 encoding of
 	JR instruction.
 	* testsuite/gas/mips/branch-weak-1.d: Likewise.
