@@ -13,7 +13,7 @@ Disassembly of section .text:
 .*:	b9 da 80 67 [	 ]*alhhlr	%r6,%r7,%r8
 .*:	cc 6a 00 00 fd e8 [	 ]*alsih	%r6,65000
 .*:	cc 6b 00 00 fd e8 [	 ]*alsihn	%r6,65000
-.*:	cc 66 00 00 00 00 [	 ]*brcth	%r6,22 <foo\+0x22>
+ *([\da-f]+):	cc 66 00 00 00 00 [	 ]*brcth	%r6,\1 <foo\+0x\1>
 .*:	b9 cd 00 67 [	 ]*chhr	%r6,%r7
 .*:	b9 dd 00 67 [	 ]*chlr	%r6,%r7
 .*:	e3 67 85 b3 01 cd [	 ]*chf	%r6,5555\(%r7,%r8\)
