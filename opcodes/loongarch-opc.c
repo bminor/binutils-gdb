@@ -293,6 +293,15 @@ const char *const loongarch_x_normal_name[32] =
   &LARCH_opts.ase_lp64,		      \
   &LARCH_opts.ase_gpcr
 
+#define INSN_LA_CALL		      \
+  "pcaddu18i $ra,%%call36(%1);"    \
+  "jirl $ra,$ra,0;",    \
+  0, 0
+
+#define INSN_LA_TAIL		      \
+  "pcaddu18i %1,%%call36(%2);"   \
+  "jirl $zero,%1,0;",   \
+  0, 0
 
 static struct loongarch_opcode loongarch_macro_opcodes[] =
 {
@@ -340,6 +349,8 @@ static struct loongarch_opcode loongarch_macro_opcodes[] =
   { 0, 0, "la.tls.gd",	"r,l",	  INSN_LA_TLS_GD64,		0 },
   { 0, 0, "la.tls.gd",	"r,l",	  INSN_LA_TLS_GD64_LARGE_ABS,	0 },
   { 0, 0, "la.tls.gd",	"r,r,l",  INSN_LA_TLS_GD64_LARGE_PCREL,	0 },
+  { 0, 0, "call36",	"la",	  INSN_LA_CALL,			0 },
+  { 0, 0, "tail36",	"r,la",	  INSN_LA_TAIL,			0 },
   { 0, 0, "pcaddi",	"r,la",	  "pcaddi %1, %%pcrel_20(%2)",	&LARCH_opts.ase_ilp32, 0, 0 },
   { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
