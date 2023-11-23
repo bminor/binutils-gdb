@@ -361,10 +361,22 @@ Disassembly of section .text:
  *([\da-f]+):	c6 a2 00 00 00 00 [	 ]*pfdrl	10,\1 <foo\+0x\1>
 .*:	ec 67 d2 dc e6 54 [	 ]*rnsbg	%r6,%r7,210,220,230
 .*:	ec 67 d2 dc 00 54 [	 ]*rnsbg	%r6,%r7,210,220
+.*:	ec 67 92 dc e6 54 [	 ]*rnsbgt	%r6,%r7,18,220,230
+.*:	ec 67 92 dc 00 54 [	 ]*rnsbgt	%r6,%r7,18,220
+.*:	ec 67 92 1c 26 54 [	 ]*rnsbgt	%r6,%r7,18,28,38
+.*:	ec 67 92 1c 00 54 [	 ]*rnsbgt	%r6,%r7,18,28
 .*:	ec 67 d2 dc e6 57 [	 ]*rxsbg	%r6,%r7,210,220,230
 .*:	ec 67 d2 dc 00 57 [	 ]*rxsbg	%r6,%r7,210,220
+.*:	ec 67 92 dc e6 57 [	 ]*rxsbgt	%r6,%r7,18,220,230
+.*:	ec 67 92 dc 00 57 [	 ]*rxsbgt	%r6,%r7,18,220
+.*:	ec 67 92 1c 26 57 [	 ]*rxsbgt	%r6,%r7,18,28,38
+.*:	ec 67 92 1c 00 57 [	 ]*rxsbgt	%r6,%r7,18,28
 .*:	ec 67 d2 dc e6 56 [	 ]*rosbg	%r6,%r7,210,220,230
 .*:	ec 67 d2 dc 00 56 [	 ]*rosbg	%r6,%r7,210,220
+.*:	ec 67 92 dc e6 56 [	 ]*rosbgt	%r6,%r7,18,220,230
+.*:	ec 67 92 dc 00 56 [	 ]*rosbgt	%r6,%r7,18,220
+.*:	ec 67 92 1c 26 56 [	 ]*rosbgt	%r6,%r7,18,28,38
+.*:	ec 67 92 1c 00 56 [	 ]*rosbgt	%r6,%r7,18,28
 .*:	ec 67 d2 14 e6 55 [	 ]*risbg	%r6,%r7,210,20,230
 .*:	ec 67 d2 14 00 55 [	 ]*risbg	%r6,%r7,210,20
 .*:	ec 67 d2 bc e6 55 [	 ]*risbgz	%r6,%r7,210,60,230

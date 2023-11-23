@@ -85,6 +85,7 @@ Disassembly of section .text:
 .*:	a5 9d ff ff [ 	]*llihl	%r9,65535
 .*:	a5 9e ff ff [ 	]*llilh	%r9,65535
 .*:	a5 9f ff ff [ 	]*llill	%r9,65535
+.*:	a5 9f ff ff [ 	]*llill	%r9,65535
 .*:	ef 96 5f ff af ff [ 	]*lmd	%r9,%r6,4095\(%r5\),4095\(%r10\)
 .*:	eb 96 5f ff 00 04 [ 	]*lmg	%r9,%r6,4095\(%r5\)
 .*:	eb 96 5f ff 00 96 [ 	]*lmh	%r9,%r6,4095\(%r5\)
@@ -153,6 +154,6 @@ Disassembly of section .text:
  *([\da-f]+):	c0 65 00 00 00 00 [ 	]*brasl	%r6,\1 <foo\+0x\1>
  *([\da-f]+):	c0 65 80 00 00 00 [ 	]*brasl	%r6,ffffffff0+\1 <foo\+0xffffffff0+\1>
  *([\da-f]+):	c0 65 80 00 00 00 [ 	]*brasl	%r6,ffffffff0+\1 <foo\+0xffffffff0+\1>
-.*:	c0 65 7f ff ff ff [ 	]*brasl	%r6,1000002d0 <foo\+0x1000002d0>
-.*:	c0 65 7f ff ff ff [ 	]*brasl	%r6,1000002d6 <foo\+0x1000002d6>
+.*:	c0 65 7f ff ff ff [ 	]*brasl	%r6,1000002d4 <foo\+0x1000002d4>
+.*:	c0 65 7f ff ff ff [ 	]*brasl	%r6,1000002da <foo\+0x1000002da>
 .*:	07 07 [	 ]*nopr	%r7
