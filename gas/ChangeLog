@@ -1,3 +1,12 @@
+2023-11-23  YunQiang Su  <yunqiang.su@cipunited.com>
+
+	* testsuite/gas/mips/branch-section-1.d: Allow for r6 encoding of
+	JR instruction.
+	* testsuite/gas/mips/branch-weak-1.d: Likewise.
+	* testsuite/gas/mips/option-pic-1.d: Likewise.
+	* testsuite/gas/mips/option-pic-relax-0.d: Likewise.
+	* testsuite/gas/mips/option-pic-relax-1.d: Likewise.
+
 2023-11-18  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* config/tc-bpf.c (parse_bpf_register): Move before
