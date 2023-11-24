@@ -1499,6 +1499,24 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		    goto unknown_validate_operand;
 		}
 	      break;
+	    case 's': /* Vendor-specific (SiFive) operands.  */
+	      switch (*++oparg)
+		{
+		  case 'd': USE_BITS (OP_MASK_RD, OP_SH_RD); break;
+		  case 't': USE_BITS (OP_MASK_RS2, OP_SH_RS2); break;
+		  case 'O':
+		    switch (*++oparg)
+		      {
+			case '2': USE_BITS (OP_MASK_XSO2, OP_SH_XSO2); break;
+			case '1': USE_BITS (OP_MASK_XSO1, OP_SH_XSO1); break;
+			default:
+			  goto unknown_validate_operand;
+		      }
+		    break;
+		  default:
+		    goto unknown_validate_operand;
+		}
+		break;
 	    default:
 	      goto unknown_validate_operand;
 	    }
@@ -3614,6 +3632,56 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      default:
 			goto unknown_riscv_ip_operand;
 		    }
+		  break;
+
+		case 's': /* Vendor-specific (SiFive) operands.  */
+#define UIMM_BITFIELD_VAL(S, E) (1 << ((E) - (S) + 1))
+#define ENCODE_UIMM_BIT_FIELD(NAME, IP, EXPR, RELOC, ASARG, \
+			      START, END) \
+  do \
+    { \
+      if (my_getOpcodeExpression (EXPR, RELOC, ASARG) \
+	  || EXPR->X_op != O_constant \
+	  || EXPR->X_add_number < 0 \
+	  || EXPR->X_add_number >= UIMM_BITFIELD_VAL (START, END)) \
+	{ \
+	  as_bad (_("bad value for <bit-%s-%s> " \
+		    "field, value must be 0...%d"), \
+		  #START, #END, UIMM_BITFIELD_VAL (START, END)); \
+	  break; \
+	} \
+      INSERT_OPERAND (NAME, *IP, EXPR->X_add_number); \
+      EXPR->X_op = O_absent; \
+      ASARG = expr_parse_end; \
+    } \
+  while (0);
+		  switch (*++oparg)
+		    {
+		    case 'd': /* Xsd */
+		      ENCODE_UIMM_BIT_FIELD
+			(RD, ip, imm_expr, imm_reloc, asarg, 7, 11);
+		      continue;
+		    case 't': /* Xst */
+		      ENCODE_UIMM_BIT_FIELD
+			(RS2, ip, imm_expr, imm_reloc, asarg, 20, 24)
+		      continue;
+		    case 'O':
+		      switch (*++oparg)
+			{
+			case '2': /* XsO2 */
+			  ENCODE_UIMM_BIT_FIELD
+			    (XSO2, ip, imm_expr, imm_reloc, asarg, 26, 27);
+			  continue;
+			case '1': /* XsO1 */
+			  ENCODE_UIMM_BIT_FIELD
+			    (XSO1, ip, imm_expr, imm_reloc, asarg, 26, 26);
+			  continue;
+			}
+		    default:
+		      goto unknown_riscv_ip_operand;
+		    }
+#undef UIMM_BITFIELD_VAL
+#undef ENCODE_UIMM_BIT_FIELD
 		  break;
 
 		default:

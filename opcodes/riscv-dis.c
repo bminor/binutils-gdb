@@ -702,6 +702,33 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		    goto undefined_modifier;
 		}
 	      break;
+	    case 's': /* Vendor-specific (SiFive) operands.  */
+	      switch (*++oparg)
+		{
+		/* SiFive vector coprocessor interface.  */
+		case 'd':
+		  print (info->stream, dis_style_register, "0x%x",
+			 (unsigned) EXTRACT_OPERAND (RD, l));
+		  break;
+		case 't':
+		  print (info->stream, dis_style_register, "0x%x",
+			 (unsigned) EXTRACT_OPERAND (RS2, l));
+		  break;
+		case 'O':
+		  switch (*++oparg)
+		    {
+		    case '2':
+		      print (info->stream, dis_style_register, "0x%x",
+			     (unsigned) EXTRACT_OPERAND (XSO2, l));
+		      break;
+		    case '1':
+		      print (info->stream, dis_style_register, "0x%x",
+			     (unsigned) EXTRACT_OPERAND (XSO1, l));
+		      break;
+		    }
+		  break;
+		}
+	      break;
 	    default:
 	      goto undefined_modifier;
 	    }

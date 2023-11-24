@@ -832,4 +832,11 @@ bitwise-logic, and conditional select operations.
 
 It is documented in @url{https://github.com/ventanamicro/ventana-custom-extensions/releases/download/v1.0.0/ventana-custom-extensions-v1.0.0.pdf}.
 
+@item XSfVcp
+The XSfVcp (VCIX) extension provides flexible instructions for extending
+vector coprocessor.  To accelerate performance, system designers may use
+VCIX as a low-latency, high-throughput interface to a coprocessor.
+
+It is documented in @url{https://sifive.cdn.prismic.io/sifive/c3829e36-8552-41f0-a841-79945784241b_vcix-spec-software.pdf}.
+
 @end table

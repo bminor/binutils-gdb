@@ -331,6 +331,12 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define NVECR 32
 #define NVECM 1
 
+/* SiFive fields.  */
+#define OP_MASK_XSO2            0x3
+#define OP_SH_XSO2              26
+#define OP_MASK_XSO1            0x1
+#define OP_SH_XSO1              26
+
 /* ABI names for selected x-registers.  */
 
 #define X_RA 1
@@ -471,6 +477,7 @@ enum riscv_insn_class
   INSN_CLASS_XTHEADVECTOR,
   INSN_CLASS_XTHEADZVAMO,
   INSN_CLASS_XVENTANACONDOPS,
+  INSN_CLASS_XSFVCP,
 };
 
 /* This structure holds information for a particular instruction.  */
