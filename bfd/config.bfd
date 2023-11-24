@@ -1550,7 +1550,7 @@ case "${targ_defvec} ${targ_selvecs}" in
 esac
 
 case "${targ}" in
-  mipsisa32r6* | mipsisa64r6*)
+  mipsisa32r6* | mipsisa64r6* | mips*-img-*)
     targ_cflags="$targ_cflags -DMIPS_DEFAULT_R6=1"
     ;;
 esac

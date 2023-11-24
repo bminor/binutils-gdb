@@ -382,6 +382,12 @@ changequote([,])dnl
 	    use_ef_mips_abi_o32=1
 	    ;;
 	esac
+	# If Vendor is IMG, then MIPSr6 is used
+	case ${target} in
+	  mips*-img-*)
+	    mips_cpu=mips32r6
+	    ;;
+	esac
 	# Decide whether to generate 32-bit or 64-bit code by default.
 	# Used to resolve -march=from-abi when an embedded ABI is selected.
 	case ${target} in

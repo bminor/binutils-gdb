@@ -473,7 +473,7 @@ mips_arch_create mips32r5 32	mips32r3 { fpisa3 fpisa4 fpisa5 ror } \
 mips_arch_create mips32r6 32	mips32r5 { fpisa3 fpisa4 fpisa5 ror } \
 			{ -march=mips32r6 -mtune=mips32r6 --defsym r6=} \
 			{ -mmips:isa32r6 } \
-			{ mipsisa32r6-*-* mipsisa32r6el-*-* }
+			{ mipsisa32r6-*-* mipsisa32r6el-*-* mips*-img-* }
 mips_arch_create mips64	64	mips5	{ mips32 } \
 			{ -march=mips64 -mtune=mips64 } { -mmips:isa64 } \
 			{ mipsisa64-*-* mipsisa64el-*-* }
