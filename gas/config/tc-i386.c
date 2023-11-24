@@ -7475,20 +7475,27 @@ match_template (char mnem_suffix)
 	}
 
       /* Check whether to use the shorter VEX encoding for certain insns where
-	 the EVEX enconding comes first in the table.  This requires the respective
-	 AVX-* feature to be explicitly enabled.  */
-      if (t == current_templates->start
+	 the EVEX encoding comes first in the table.  This requires the respective
+	 AVX-* feature to be explicitly enabled.
+
+	 Most of the respective insns have just a single EVEX and a single VEX
+	 template.  The one that's presently different is generated using the
+	 Vxy / Exy constructs: There are 3 suffix-less EVEX forms, the latter
+	 two of which may fall back to their two corresponding VEX forms.  */
+      j = t->mnem_off != MN_vcvtneps2bf16 ? 1 : 2;
+      if ((t == current_templates->start || j > 1)
 	  && t->opcode_modifier.disp8memshift
 	  && !t->opcode_modifier.vex
 	  && !need_evex_encoding ()
-	  && t + 1 < current_templates->end
-	  && t[1].opcode_modifier.vex)
+	  && t + j < current_templates->end
+	  && t[j].opcode_modifier.vex)
 	{
 	  i386_cpu_flags cpu;
 	  unsigned int memshift = i.memshift;
 
 	  i.memshift = 0;
-	  cpu = cpu_flags_and (cpu_flags_from_attr (t[1].cpu), cpu_arch_isa_flags);
+	  cpu = cpu_flags_and (cpu_flags_from_attr (t[j].cpu),
+			       cpu_arch_isa_flags);
 	  if (!cpu_flags_all_zero (&cpu)
 	      && (!i.types[0].bitfield.disp8
 		  || !operand_type_check (i.types[0], disp)
@@ -7496,6 +7503,7 @@ match_template (char mnem_suffix)
 		  || fits_in_disp8 (i.op[0].disps->X_add_number)))
 	    {
 	      specific_error = progress (internal_error);
+	      t += j - 1;
 	      continue;
 	    }
 	  i.memshift = memshift;

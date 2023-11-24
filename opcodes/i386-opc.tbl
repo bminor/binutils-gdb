@@ -1481,6 +1481,9 @@ gf2p8mulb<gfni>, 0x660f38cf, <gfni:cpu>GFNI, Modrm|<gfni:w0>|NoSuf, { RegXMM|Uns
     true_us:1f:C>
 
 // <Vxy> is used for VEX instructions with x/y suffixes.
+// NOTE: The order of the "unnamed" ($-prefixed) entries here needs to remain
+//       in sync with <Exy>, for match_template()'s EVEX-to-VEX lowering to
+//       continue to work.
 <Vxy:vex:syntax:src, +
     $i:Vex:IntelSyntax:RegXMM|RegYMM|Unspecified|BaseIndex, +
     $a:Vex:ATTSyntax:RegXMM|RegYMM, +
@@ -2097,6 +2100,9 @@ vpclmulhqhqdq, 0x6644/0x11, VPCLMULQDQ&(AVX|AVX512F), Modrm|Space0F3A|Vex|EVexDY
 // AVX512F instructions.
 
 // <Exy> is used for EVEX instructions with x/y suffixes.
+// NOTE: The order of the "unnamed" ($-prefixed) entries here needs to remain
+//       in sync with <Vxy>, for match_template()'s EVEX-to-VEX lowering to
+//       continue to work.
 <Exy:vl:attr:sr:sae:src:dst, +
     $z::EVex512|Disp8MemShift=6:StaticRounding|SAE:SAE:RegZMM|Unspecified|BaseIndex:RegYMM, +
     $i:AVX512VL:Disp8ShiftVL|IntelSyntax:::RegXMM|RegYMM|Unspecified|BaseIndex:RegXMM, +
