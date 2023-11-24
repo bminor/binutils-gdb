@@ -569,7 +569,7 @@ static char *save_stack_p;
 static i386_insn i;
 
 /* Possible templates for current insn.  */
-static const templates *current_templates;
+static templates current_templates;
 
 /* Per instruction expressionS buffers: max displacements & immediates.  */
 static expressionS disp_expressions[MAX_MEMORY_OPERANDS];
@@ -3101,6 +3101,20 @@ i386_mach (void)
 
 #include "opcodes/i386-tbl.h"
 
+static void
+op_lookup (const char *mnemonic)
+{
+   i386_op_off_t *pos = str_hash_find (op_hash, mnemonic);
+
+   if (pos != NULL)
+     {
+       current_templates.start = &i386_optab[pos[0]];
+       current_templates.end = &i386_optab[pos[1]];
+     }
+   else
+     current_templates.end = current_templates.start = NULL;
+}
+
 void
 md_begin (void)
 {
@@ -3111,16 +3125,12 @@ md_begin (void)
   op_hash = str_htab_create ();
 
   {
-    const insn_template *const *sets = i386_op_sets;
-    const insn_template *const *end = sets + ARRAY_SIZE (i386_op_sets) - 1;
+    const i386_op_off_t *cur = i386_op_sets;
+    const i386_op_off_t *end = cur + ARRAY_SIZE (i386_op_sets) - 1;
 
-    /* Type checks to compensate for the conversion through void * which
-       occurs during hash table insertion / lookup.  */
-    (void) sizeof (sets == &current_templates->start);
-    (void) sizeof (end == &current_templates->end);
-    for (; sets < end; ++sets)
-      if (str_hash_insert (op_hash, insn_name (*sets), sets, 0))
-	as_fatal (_("duplicate %s"), insn_name (*sets));
+    for (; cur < end; ++cur)
+      if (str_hash_insert (op_hash, insn_name (&i386_optab[*cur]), cur, 0))
+	as_fatal (_("duplicate %s"), insn_name (&i386_optab[*cur]));
   }
 
   /* Initialize reg_hash hash table.  */
@@ -5121,7 +5131,7 @@ md_assemble (char *line)
   const insn_template *t;
 
   /* Initialize globals.  */
-  current_templates = NULL;
+  current_templates.end = current_templates.start = NULL;
  retry:
   init_globals ();
 
@@ -5136,8 +5146,8 @@ md_assemble (char *line)
 	goto match_error;
       if (i.error != no_error)
 	{
-	  gas_assert (current_templates != NULL);
-	  if (may_need_pass2 (current_templates->start) && !i.suffix)
+	  gas_assert (current_templates.start != NULL);
+	  if (may_need_pass2 (current_templates.start) && !i.suffix)
 	    goto no_match;
 	  /* No point in trying a 2nd pass - it'll only find the same suffix
 	     again.  */
@@ -5146,7 +5156,7 @@ md_assemble (char *line)
 	}
       return;
     }
-  t = current_templates->start;
+  t = current_templates.start;
   if (may_need_pass2 (t))
     {
       /* Make a copy of the full line in case we need to retry.  */
@@ -5204,7 +5214,7 @@ md_assemble (char *line)
 	 32-bit immediate and 64-bit operand size use sign-extended
 	 immediates (imm32s). Therefore these insns are special-cased, bypassing
 	 the normal handling of immediates here.  */
-      if (is_cpu(current_templates->start, CpuUSER_MSR))
+      if (is_cpu(current_templates.start, CpuUSER_MSR))
 	{
 	  for (j = 0; j < i.operands; j++)
 	    {
@@ -5233,7 +5243,7 @@ md_assemble (char *line)
 	  copy = NULL;
   no_match:
 	  pass1_err = i.error;
-	  pass1_mnem = insn_name (current_templates->start);
+	  pass1_mnem = insn_name (current_templates.start);
 	  goto retry;
 	}
 
@@ -5276,11 +5286,11 @@ md_assemble (char *line)
 	  break;
 	case unsupported:
 	  as_bad (_("unsupported instruction `%s'"),
-		  pass1_mnem ? pass1_mnem : insn_name (current_templates->start));
+		  pass1_mnem ? pass1_mnem : insn_name (current_templates.start));
 	  return;
 	case unsupported_on_arch:
 	  as_bad (_("`%s' is not supported on `%s%s'"),
-		  pass1_mnem ? pass1_mnem : insn_name (current_templates->start),
+		  pass1_mnem ? pass1_mnem : insn_name (current_templates.start),
 		  cpu_arch_name ? cpu_arch_name : default_arch,
 		  cpu_sub_arch_name ? cpu_sub_arch_name : "");
 	  return;
@@ -5289,21 +5299,21 @@ md_assemble (char *line)
 	    {
 	      if (flag_code == CODE_64BIT)
 		as_bad (_("`%s%c' is not supported in 64-bit mode"),
-			pass1_mnem ? pass1_mnem : insn_name (current_templates->start),
+			pass1_mnem ? pass1_mnem : insn_name (current_templates.start),
 			mnem_suffix);
 	      else
 		as_bad (_("`%s%c' is only supported in 64-bit mode"),
-			pass1_mnem ? pass1_mnem : insn_name (current_templates->start),
+			pass1_mnem ? pass1_mnem : insn_name (current_templates.start),
 			mnem_suffix);
 	    }
 	  else
 	    {
 	      if (flag_code == CODE_64BIT)
 		as_bad (_("`%s' is not supported in 64-bit mode"),
-			pass1_mnem ? pass1_mnem : insn_name (current_templates->start));
+			pass1_mnem ? pass1_mnem : insn_name (current_templates.start));
 	      else
 		as_bad (_("`%s' is only supported in 64-bit mode"),
-			pass1_mnem ? pass1_mnem : insn_name (current_templates->start));
+			pass1_mnem ? pass1_mnem : insn_name (current_templates.start));
 	    }
 	  return;
 	case no_vex_encoding:
@@ -5350,14 +5360,14 @@ md_assemble (char *line)
 	  break;
 	case unsupported_vector_size:
 	  as_bad (_("vector size above %u required for `%s'"), 128u << vector_size,
-		  pass1_mnem ? pass1_mnem : insn_name (current_templates->start));
+		  pass1_mnem ? pass1_mnem : insn_name (current_templates.start));
 	  return;
 	case internal_error:
 	  err_msg = _("internal error");
 	  break;
 	}
       as_bad (_("%s for `%s'"), err_msg,
-	      pass1_mnem ? pass1_mnem : insn_name (current_templates->start));
+	      pass1_mnem ? pass1_mnem : insn_name (current_templates.start));
       return;
     }
 
@@ -5710,7 +5720,7 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 {
   const char *l = line, *token_start = l;
   char *mnem_p;
-  bool pass1 = !current_templates;
+  bool pass1 = !current_templates.start;
   int supported;
   const insn_template *t;
   char *dot_p = NULL;
@@ -5771,47 +5781,47 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	}
 
       /* Look up instruction (or prefix) via hash table.  */
-      current_templates = (const templates *) str_hash_find (op_hash, mnemonic);
+      op_lookup (mnemonic);
 
       if (*l != END_OF_INSN
 	  && (!is_space_char (*l) || l[1] != END_OF_INSN)
-	  && current_templates
-	  && current_templates->start->opcode_modifier.isprefix)
+	  && current_templates.start
+	  && current_templates.start->opcode_modifier.isprefix)
 	{
-	  supported = cpu_flags_match (current_templates->start);
+	  supported = cpu_flags_match (current_templates.start);
 	  if (!(supported & CPU_FLAGS_64BIT_MATCH))
 	    {
 	      as_bad ((flag_code != CODE_64BIT
 		       ? _("`%s' is only supported in 64-bit mode")
 		       : _("`%s' is not supported in 64-bit mode")),
-		      insn_name (current_templates->start));
+		      insn_name (current_templates.start));
 	      return NULL;
 	    }
 	  if (supported != CPU_FLAGS_PERFECT_MATCH)
 	    {
 	      as_bad (_("`%s' is not supported on `%s%s'"),
-		      insn_name (current_templates->start),
+		      insn_name (current_templates.start),
 		      cpu_arch_name ? cpu_arch_name : default_arch,
 		      cpu_sub_arch_name ? cpu_sub_arch_name : "");
 	      return NULL;
 	    }
 	  /* If we are in 16-bit mode, do not allow addr16 or data16.
 	     Similarly, in 32-bit mode, do not allow addr32 or data32.  */
-	  if ((current_templates->start->opcode_modifier.size == SIZE16
-	       || current_templates->start->opcode_modifier.size == SIZE32)
+	  if ((current_templates.start->opcode_modifier.size == SIZE16
+	       || current_templates.start->opcode_modifier.size == SIZE32)
 	      && flag_code != CODE_64BIT
-	      && ((current_templates->start->opcode_modifier.size == SIZE32)
+	      && ((current_templates.start->opcode_modifier.size == SIZE32)
 		  ^ (flag_code == CODE_16BIT)))
 	    {
 	      as_bad (_("redundant %s prefix"),
-		      insn_name (current_templates->start));
+		      insn_name (current_templates.start));
 	      return NULL;
 	    }
 
-	  if (current_templates->start->base_opcode == PSEUDO_PREFIX)
+	  if (current_templates.start->base_opcode == PSEUDO_PREFIX)
 	    {
 	      /* Handle pseudo prefixes.  */
-	      switch (current_templates->start->extension_opcode)
+	      switch (current_templates.start->extension_opcode)
 		{
 		case Prefix_Disp8:
 		  /* {disp8} */
@@ -5860,21 +5870,21 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	  else
 	    {
 	      /* Add prefix, checking for repeated prefixes.  */
-	      switch (add_prefix (current_templates->start->base_opcode))
+	      switch (add_prefix (current_templates.start->base_opcode))
 		{
 		case PREFIX_EXIST:
 		  return NULL;
 		case PREFIX_DS:
-		  if (is_cpu (current_templates->start, CpuIBT))
-		    i.notrack_prefix = insn_name (current_templates->start);
+		  if (is_cpu (current_templates.start, CpuIBT))
+		    i.notrack_prefix = insn_name (current_templates.start);
 		  break;
 		case PREFIX_REP:
-		  if (is_cpu (current_templates->start, CpuHLE))
-		    i.hle_prefix = insn_name (current_templates->start);
-		  else if (is_cpu (current_templates->start, CpuMPX))
-		    i.bnd_prefix = insn_name (current_templates->start);
+		  if (is_cpu (current_templates.start, CpuHLE))
+		    i.hle_prefix = insn_name (current_templates.start);
+		  else if (is_cpu (current_templates.start, CpuMPX))
+		    i.bnd_prefix = insn_name (current_templates.start);
 		  else
-		    i.rep_prefix = insn_name (current_templates->start);
+		    i.rep_prefix = insn_name (current_templates.start);
 		  break;
 		default:
 		  break;
@@ -5890,7 +5900,7 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
   if (prefix_only)
     return token_start;
 
-  if (!current_templates)
+  if (!current_templates.start)
     {
       /* Deprecated functionality (new code should use pseudo-prefixes instead):
 	 Check if we should swap operand or force 32bit displacement in
@@ -5926,12 +5936,12 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	goto check_suffix;
       mnem_p = dot_p;
       *dot_p = '\0';
-      current_templates = (const templates *) str_hash_find (op_hash, mnemonic);
+      op_lookup (mnemonic);
     }
 
-  if (!current_templates || !pass1)
+  if (!current_templates.start || !pass1)
     {
-      current_templates = NULL;
+      current_templates.start = NULL;
 
     check_suffix:
       if (mnem_p > mnemonic)
@@ -5948,8 +5958,7 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	      case QWORD_MNEM_SUFFIX:
 		i.suffix = mnem_p[-1];
 	      mnem_p[-1] = '\0';
-	      current_templates
-		= (const templates *) str_hash_find (op_hash, mnemonic);
+	      op_lookup (mnemonic);
 	      break;
 	    case SHORT_MNEM_SUFFIX:
 	    case LONG_MNEM_SUFFIX:
@@ -5957,8 +5966,7 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 		{
 		  i.suffix = mnem_p[-1];
 		  mnem_p[-1] = '\0';
-		  current_templates
-		    = (const templates *) str_hash_find (op_hash, mnemonic);
+		  op_lookup (mnemonic);
 		}
 	      break;
 
@@ -5971,8 +5979,7 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 		  else
 		    i.suffix = LONG_MNEM_SUFFIX;
 		  mnem_p[-1] = '\0';
-		  current_templates
-		    = (const templates *) str_hash_find (op_hash, mnemonic);
+		  op_lookup (mnemonic);
 		}
 	      /* For compatibility reasons accept MOVSD and CMPSD without
 	         operands even in AT&T mode.  */
@@ -5980,12 +5987,11 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 		       || (is_space_char (*l) && l[1] == END_OF_INSN))
 		{
 		  mnem_p[-1] = '\0';
-		  current_templates
-		    = (const templates *) str_hash_find (op_hash, mnemonic);
-		  if (current_templates != NULL
+		  op_lookup (mnemonic);
+		  if (current_templates.start != NULL
 		      /* MOVS or CMPS */
-		      && (current_templates->start->base_opcode | 2) == 0xa6
-		      && current_templates->start->opcode_space
+		      && (current_templates.start->base_opcode | 2) == 0xa6
+		      && current_templates.start->opcode_space
 			 == SPACE_BASE
 		      && mnem_p[-2] == 's')
 		    {
@@ -5995,7 +6001,7 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 		    }
 		  else
 		    {
-		      current_templates = NULL;
+		      current_templates.start = NULL;
 		      mnem_p[-1] = 'd';
 		    }
 		}
@@ -6003,7 +6009,7 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	    }
 	}
 
-      if (!current_templates)
+      if (!current_templates.start)
 	{
 	  if (pass1)
 	    as_bad (_("no such instruction: `%s'"), token_start);
@@ -6011,8 +6017,8 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	}
     }
 
-  if (current_templates->start->opcode_modifier.jump == JUMP
-      || current_templates->start->opcode_modifier.jump == JUMP_BYTE)
+  if (current_templates.start->opcode_modifier.jump == JUMP
+      || current_templates.start->opcode_modifier.jump == JUMP_BYTE)
     {
       /* Check for a branch hint.  We allow ",pt" and ",pn" for
 	 predict taken and predict not taken respectively.
@@ -6046,7 +6052,7 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 
   /* Check if instruction is supported on specified architecture.  */
   supported = 0;
-  for (t = current_templates->start; t < current_templates->end; ++t)
+  for (t = current_templates.start; t < current_templates.end; ++t)
     {
       supported |= cpu_flags_match (t);
 
@@ -6313,7 +6319,7 @@ optimize_imm (void)
 	       /* A more generic (but also more involved) way of dealing
 		  with the special case(s) would be to go look for
 		  DefaultSize attributes on any of the templates.  */
-	       && current_templates->start->mnem_off != MN_push))
+	       && current_templates.start->mnem_off != MN_push))
     guess_suffix = LONG_MNEM_SUFFIX;
 
   for (op = i.operands; --op >= 0;)
@@ -6387,7 +6393,7 @@ optimize_imm (void)
 	       than those matching the insn suffix.  */
 	    {
 	      i386_operand_type mask, allowed;
-	      const insn_template *t = current_templates->start;
+	      const insn_template *t = current_templates.start;
 
 	      operand_type_set (&mask, 0);
 	      switch (guess_suffix)
@@ -6410,7 +6416,7 @@ optimize_imm (void)
 		}
 
 	      allowed = operand_type_and (t->operand_types[op], mask);
-	      while (++t < current_templates->end)
+	      while (++t < current_templates.end)
 		{
 		  allowed = operand_type_or (allowed, t->operand_types[op]);
 		  allowed = operand_type_and (allowed, mask);
@@ -7034,7 +7040,7 @@ match_template (char mnem_suffix)
   found_reverse_match = 0;
   addr_prefix_disp = -1;
 
-  for (t = current_templates->start; t < current_templates->end; t++)
+  for (t = current_templates.start; t < current_templates.end; t++)
     {
       addr_prefix_disp = -1;
       found_reverse_match = 0;
@@ -7483,11 +7489,11 @@ match_template (char mnem_suffix)
 	 Vxy / Exy constructs: There are 3 suffix-less EVEX forms, the latter
 	 two of which may fall back to their two corresponding VEX forms.  */
       j = t->mnem_off != MN_vcvtneps2bf16 ? 1 : 2;
-      if ((t == current_templates->start || j > 1)
+      if ((t == current_templates.start || j > 1)
 	  && t->opcode_modifier.disp8memshift
 	  && !t->opcode_modifier.vex
 	  && !need_evex_encoding ()
-	  && t + j < current_templates->end
+	  && t + j < current_templates.end
 	  && t[j].opcode_modifier.vex)
 	{
 	  i386_cpu_flags cpu;
@@ -7515,7 +7521,7 @@ match_template (char mnem_suffix)
 
 #undef progress
 
-  if (t == current_templates->end)
+  if (t == current_templates.end)
     {
       /* We found no match.  */
       i.error = specific_error;
@@ -10942,7 +10948,6 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
   unsigned int j;
   valueT val;
   bool vex = false, xop = false, evex = false;
-  static const templates tt = { &i.tm, &i.tm + 1 };
 
   init_globals ();
 
@@ -10960,7 +10965,8 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
     }
   line += end - line;
 
-  current_templates = &tt;
+  current_templates.start = &i.tm;
+  current_templates.end = &i.tm + 1;
   i.tm.mnem_off = MN__insn;
   i.tm.extension_opcode = None;
 
@@ -12177,8 +12183,8 @@ i386_displacement (char *disp_start, char *disp_end)
   operand_type_set (&bigdisp, 0);
   if (i.jumpabsolute
       || i.types[this_operand].bitfield.baseindex
-      || (current_templates->start->opcode_modifier.jump != JUMP
-	  && current_templates->start->opcode_modifier.jump != JUMP_DWORD))
+      || (current_templates.start->opcode_modifier.jump != JUMP
+	  && current_templates.start->opcode_modifier.jump != JUMP_DWORD))
     {
       i386_addressing_mode ();
       override = (i.prefix[ADDR_PREFIX] != 0);
@@ -12199,24 +12205,18 @@ i386_displacement (char *disp_start, char *disp_end)
 	 dependent upon data size, but is never dependent upon address size.
 	 Also make sure to not unintentionally match against a non-PC-relative
 	 branch template.  */
-      static templates aux_templates;
-      const insn_template *t = current_templates->start;
+      const insn_template *t = current_templates.start;
       bool has_intel64 = false;
 
-      aux_templates.start = t;
-      while (++t < current_templates->end)
+      while (++t < current_templates.end)
 	{
 	  if (t->opcode_modifier.jump
-	      != current_templates->start->opcode_modifier.jump)
+	      != current_templates.start->opcode_modifier.jump)
 	    break;
 	  if ((t->opcode_modifier.isa64 >= INTEL64))
 	    has_intel64 = true;
 	}
-      if (t < current_templates->end)
-	{
-	  aux_templates.end = t;
-	  current_templates = &aux_templates;
-	}
+      current_templates.end = t;
 
       override = (i.prefix[DATA_PREFIX] != 0);
       if (flag_code == CODE_64BIT)
@@ -12389,7 +12389,7 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
     }
 #endif
 
-  else if (current_templates->start->opcode_modifier.jump == JUMP_BYTE)
+  else if (current_templates.start->opcode_modifier.jump == JUMP_BYTE)
     i.types[this_operand].bitfield.disp8 = 1;
 
   /* Check if this is a displacement only operand.  */
@@ -12413,7 +12413,7 @@ i386_addressing_mode (void)
   if (i.prefix[ADDR_PREFIX])
     addr_mode = flag_code == CODE_32BIT ? CODE_16BIT : CODE_32BIT;
   else if (flag_code == CODE_16BIT
-	   && is_cpu (current_templates->start, CpuMPX)
+	   && is_cpu (current_templates.start, CpuMPX)
 	   /* Avoid replacing the "16-bit addressing not allowed" diagnostic
 	      from md_assemble() by "is not a valid base/index expression"
 	      when there is a base and/or index.  */
@@ -12486,7 +12486,7 @@ i386_index_check (const char *operand_string)
 {
   const char *kind = "base/index";
   enum flag_code addr_mode = i386_addressing_mode ();
-  const insn_template *t = current_templates->end - 1;
+  const insn_template *t = current_templates.end - 1;
 
   if (t->opcode_modifier.isstring)
     {
@@ -12553,7 +12553,7 @@ i386_index_check (const char *operand_string)
     }
   else
     {
-      t = current_templates->start;
+      t = current_templates.start;
 
       if (addr_mode != CODE_16BIT)
 	{
@@ -12678,7 +12678,7 @@ i386_att_operand (char *operand_string)
   /* We check for an absolute prefix (differentiating,
      for example, 'jmp pc_relative_label' from 'jmp *absolute_label'.  */
   if (*op_string == ABSOLUTE_PREFIX
-      && current_templates->start->opcode_modifier.jump)
+      && current_templates.start->opcode_modifier.jump)
     {
       ++op_string;
       if (is_space_char (*op_string))
@@ -12710,7 +12710,7 @@ i386_att_operand (char *operand_string)
 
 	  /* Handle case of %es:*foo.  */
 	  if (!i.jumpabsolute && *op_string == ABSOLUTE_PREFIX
-	      && current_templates->start->opcode_modifier.jump)
+	      && current_templates.start->opcode_modifier.jump)
 	    {
 	      ++op_string;
 	      if (is_space_char (*op_string))
@@ -12767,7 +12767,7 @@ i386_att_operand (char *operand_string)
 	    if (i.rounding.type == RC_NamesTable[j].type)
 	      break;
 	  as_bad (_("`%s': misplaced `{%s}'"),
-		  insn_name (current_templates->start), RC_NamesTable[j].name);
+		  insn_name (current_templates.start), RC_NamesTable[j].name);
 	  return 0;
 	}
     }
@@ -12789,7 +12789,7 @@ i386_att_operand (char *operand_string)
       if (i.rounding.type != rc_none)
 	{
 	  as_bad (_("`%s': RC/SAE operand must follow immediate operands"),
-		  insn_name (current_templates->start));
+		  insn_name (current_templates.start));
 	  return 0;
 	}
     }
@@ -12802,7 +12802,7 @@ i386_att_operand (char *operand_string)
 	      && i.op[0].regs->reg_type.bitfield.class != Reg))
 	{
 	  as_bad (_("`%s': misplaced `%s'"),
-		  insn_name (current_templates->start), operand_string);
+		  insn_name (current_templates.start), operand_string);
 	  return 0;
 	}
     }

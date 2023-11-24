@@ -1883,23 +1883,26 @@ process_i386_opcodes (FILE *table)
 
   /* Generate opcode sets array.  */
   fprintf (table, "\n/* i386 opcode sets table.  */\n\n");
-  fprintf (table, "static const insn_template *const i386_op_sets[] =\n{\n");
-  fprintf (table, "  i386_optab,\n");
+  fprintf (table, "typedef unsigned short i386_op_off_t;\n");
+  fprintf (table, "static const i386_op_off_t i386_op_sets[] =\n{\n ");
 
   for (nr = j = 0; j < i; j++)
     {
       struct opcode_entry *next = &opcode_array[j]->entry;
 
+      if ((j + 1) % 8 != 0)
+	fprintf (table, "%5u,", nr);
+      else
+	fprintf (table, "%5u,\n ", nr);
       do
 	{
 	  ++nr;
 	  next = next->next;
 	}
       while (next);
-      fprintf (table, "  i386_optab + %u,\n", nr);
     }
 
-  fprintf (table, "};\n");
+  fprintf (table, "%5u\n};\n", nr);
 
   /* Emit mnemonics and associated #define-s.  */
   qsort (opcode_array, i, sizeof (*opcode_array), mnemonic_cmp);
