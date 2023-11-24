@@ -558,10 +558,9 @@ enum
   M_CALL,
   M_J,
   M_LI,
-  M_ZEXTH,
+  M_EXTH,
   M_ZEXTW,
   M_SEXTB,
-  M_SEXTH,
   M_VMSGE,
   M_NUM_MACROS
 };
