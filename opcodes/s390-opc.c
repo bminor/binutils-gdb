@@ -262,9 +262,10 @@ const struct s390_operand s390_operands[] =
 
 };
 
-static inline void unused_s390_operands_static_asserts(void)
+static inline void ATTRIBUTE_UNUSED
+unused_s390_operands_static_asserts (void)
 {
-  static_assert(ARRAY_SIZE(s390_operands) - 1 == J32_16);
+  static_assert (ARRAY_SIZE (s390_operands) - 1 == J32_16);
 }
 
 /* Macros used to form opcodes.  */
