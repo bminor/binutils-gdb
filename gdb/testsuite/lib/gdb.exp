@@ -10026,6 +10026,21 @@ proc is_target_non_stop { {testname ""} } {
     return $is_non_stop
 }
 
+# Return the number of worker threads that GDB is currently using.
+
+proc gdb_get_worker_threads { {testname ""} } {
+    set worker_threads "UNKNOWN"
+    gdb_test_multiple "maintenance show worker-threads" $testname {
+	-wrap -re "^The number of worker threads GDB can use is unlimited \\(currently ($::decimal)\\)\\." {
+	    set worker_threads $expect_out(1,string)
+	}
+	-wrap -re "The number of worker threads GDB can use is ($::decimal)\\." {
+	    set worker_threads $expect_out(1,string)
+	}
+    }
+    return $worker_threads
+}
+
 # Check if the compiler emits epilogue information associated
 # with the closing brace or with the last statement line.
 #

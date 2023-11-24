@@ -35,6 +35,9 @@ with_timeout_factor $timeout_factor {
     clean_restart $filename
 }
 
+# Record how many worker threads GDB is using.
+set worker_threads [gdb_get_worker_threads]
+
 # Generate an index file.
 set dir1 [standard_output_file "index_1"]
 remote_exec host "mkdir -p ${dir1}"
@@ -113,3 +116,41 @@ proc check_symbol_table_usage { filename } {
 
 set index_filename_base [file tail $filename]
 check_symbol_table_usage "$dir1/${index_filename_base}.gdb-index"
+
+# If GDB is using more than 1 worker thread then reduce the number of
+# worker threads, regenerate the index, and check that we get the same
+# index file back.  At one point the layout of the index would vary
+# based on the number of worker threads used.
+if { $worker_threads > 1 } {
+    # Start GDB, but don't load a file yet.
+    clean_restart
+
+    # Adjust the number of threads to use.
+    set reduced_threads [expr $worker_threads / 2]
+    gdb_test_no_output "maint set worker-threads $reduced_threads"
+
+    with_timeout_factor $timeout_factor {
+	# Now load the test binary.
+	gdb_file_cmd $filename
+    }
+
+    # Generate an index file.
+    set dir2 [standard_output_file "index_2"]
+    remote_exec host "mkdir -p ${dir2}"
+    with_timeout_factor $timeout_factor {
+	gdb_test_no_output "save gdb-index $dir2" \
+	    "create second gdb-index file"
+    }
+
+    # Close GDB.
+    gdb_exit
+
+    # Now check that the index files are identical.
+    foreach suffix { gdb-index  } {
+	set result \
+	    [remote_exec host \
+		 "cmp -s \"$dir1/${index_filename_base}.${suffix}\" \"$dir2/${index_filename_base}.${suffix}\""]
+	gdb_assert { [lindex $result 0] == 0 } \
+	    "$suffix files are identical"
+    }
+}

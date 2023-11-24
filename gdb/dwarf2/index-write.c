@@ -212,6 +212,13 @@ struct mapped_symtab
   void add_index_entry (const char *name, int is_static,
 			gdb_index_symbol_kind kind, offset_type cu_index);
 
+  /* When entries are originally added into the data hash the order will
+     vary based on the number of worker threads GDB is configured to use.
+     This function will rebuild the hash such that the final layout will be
+     deterministic regardless of the number of worker threads used.  */
+
+  void sort ();
+
   /* Access the obstack.  */
   struct obstack *obstack ()
   { return &m_string_obstack; }
@@ -296,6 +303,65 @@ mapped_symtab::hash_expand ()
 	auto &ref = this->find_slot (it.name);
 	ref = std::move (it);
       }
+}
+
+/* See mapped_symtab class declaration.  */
+
+void mapped_symtab::sort ()
+{
+  /* Move contents out of this->data vector.  */
+  std::vector<symtab_index_entry> original_data = std::move (m_data);
+
+  /* Restore the size of m_data, this will avoid having to expand the hash
+     table (and rehash all elements) when we reinsert after sorting.
+     However, we do reset the element count, this allows for some sanity
+     checking asserts during the reinsert phase.  */
+  gdb_assert (m_data.size () == 0);
+  m_data.resize (original_data.size ());
+  m_element_count = 0;
+
+  /* Remove empty entries from ORIGINAL_DATA, this makes sorting quicker.  */
+  auto it = std::remove_if (original_data.begin (), original_data.end (),
+			    [] (const symtab_index_entry &entry) -> bool
+			    {
+			      return entry.name == nullptr;
+			    });
+  original_data.erase (it, original_data.end ());
+
+  /* Sort the existing contents.  */
+  std::sort (original_data.begin (), original_data.end (),
+	     [] (const symtab_index_entry &a,
+		 const symtab_index_entry &b) -> bool
+	     {
+	       /* Return true if A is before B.  */
+	       gdb_assert (a.name != nullptr);
+	       gdb_assert (b.name != nullptr);
+
+	       return strcmp (a.name, b.name) < 0;
+	     });
+
+  /* Re-insert each item from the sorted list.  */
+  for (auto &entry : original_data)
+    {
+      /* We know that ORIGINAL_DATA contains no duplicates, this data was
+	 taken from a hash table that de-duplicated entries for us, so
+	 count this as a new item.
+
+	 As we retained the original size of m_data (see above) then we
+	 should never need to grow m_data_ during this re-insertion phase,
+	 assert that now.  */
+      ++m_element_count;
+      gdb_assert (!this->hash_needs_expanding ());
+
+      /* Lookup a slot.  */
+      symtab_index_entry &slot = this->find_slot (entry.name);
+
+      /* As discussed above, we should not find duplicates.  */
+      gdb_assert (slot.name == nullptr);
+
+      /* Move this item into the slot we found.  */
+      slot = std::move (entry);
+    }
 }
 
 /* See class definition.  */
@@ -1345,6 +1411,9 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
   data_buf addr_vec;
   for (auto map : table->get_addrmaps ())
     write_address_map (map, addr_vec, cu_index_htab);
+
+  /* Ensure symbol hash is built domestically.  */
+  symtab.sort ();
 
   /* Now that we've processed all symbols we can shrink their cu_indices
      lists.  */
