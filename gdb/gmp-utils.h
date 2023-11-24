@@ -251,17 +251,30 @@ struct gdb_mpz
     return result;
   }
 
+  gdb_mpz operator- () const
+  {
+    gdb_mpz result;
+    mpz_neg (result.m_val, m_val);
+    return result;
+  }
+
   gdb_mpz &operator<<= (unsigned long nbits)
   {
     mpz_mul_2exp (m_val, m_val, nbits);
     return *this;
   }
 
-  gdb_mpz operator<< (unsigned long nbits) const
+  gdb_mpz operator<< (unsigned long nbits) const &
   {
     gdb_mpz result;
     mpz_mul_2exp (result.m_val, m_val, nbits);
     return result;
+  }
+
+  gdb_mpz operator<< (unsigned long nbits) &&
+  {
+    mpz_mul_2exp (m_val, m_val, nbits);
+    return *this;
   }
 
   gdb_mpz operator>> (unsigned long nbits) const

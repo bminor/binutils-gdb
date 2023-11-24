@@ -603,15 +603,13 @@ value_cast (struct type *type, struct value *arg2)
 	 pointers and four byte addresses.  */
 
       int addr_bit = gdbarch_addr_bit (type2->arch ());
-      LONGEST longest = value_as_long (arg2);
+      gdb_mpz longest = value_as_mpz (arg2);
 
-      if (addr_bit < sizeof (LONGEST) * HOST_CHAR_BIT)
-	{
-	  if (longest >= ((LONGEST) 1 << addr_bit)
-	      || longest <= -((LONGEST) 1 << addr_bit))
-	    warning (_("value truncated"));
-	}
-      return value_from_longest (to_type, longest);
+      gdb_mpz addr_val = gdb_mpz (1) << addr_bit;
+      if (longest >= addr_val || longest <= -addr_val)
+	warning (_("value truncated"));
+
+      return value_from_mpz (to_type, longest);
     }
   else if (code1 == TYPE_CODE_METHODPTR && code2 == TYPE_CODE_INT
 	   && value_as_long (arg2) == 0)
