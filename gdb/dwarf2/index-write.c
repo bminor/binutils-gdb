@@ -256,20 +256,29 @@ add_index_entry (struct mapped_symtab *symtab, const char *name,
 		 int is_static, gdb_index_symbol_kind kind,
 		 offset_type cu_index)
 {
-  offset_type cu_index_and_attrs;
-
-  ++symtab->n_elements;
-  if (4 * symtab->n_elements / 3 >= symtab->data.size ())
-    hash_expand (symtab);
-
-  symtab_index_entry &slot = find_slot (symtab, name);
-  if (slot.name == NULL)
+  symtab_index_entry *slot = &find_slot (symtab, name);
+  if (slot->name == NULL)
     {
-      slot.name = name;
+      /* This is a new element in the hash table.  */
+      ++symtab->n_elements;
+
+      /* We might need to grow the hash table.  */
+      if (4 * symtab->n_elements / 3 >= symtab->data.size ())
+	{
+	  hash_expand (symtab);
+
+	  /* This element will have a different slot in the new table.  */
+	  slot = &find_slot (symtab, name);
+
+	  /* But it should still be a new element in the hash table.  */
+	  gdb_assert (slot->name == nullptr);
+	}
+
+      slot->name = name;
       /* index_offset is set later.  */
     }
 
-  cu_index_and_attrs = 0;
+  offset_type cu_index_and_attrs = 0;
   DW2_GDB_INDEX_CU_SET_VALUE (cu_index_and_attrs, cu_index);
   DW2_GDB_INDEX_SYMBOL_STATIC_SET_VALUE (cu_index_and_attrs, is_static);
   DW2_GDB_INDEX_SYMBOL_KIND_SET_VALUE (cu_index_and_attrs, kind);
@@ -281,7 +290,7 @@ add_index_entry (struct mapped_symtab *symtab, const char *name,
      the last entry pushed), but a symbol could have multiple kinds in one CU.
      To keep things simple we don't worry about the duplication here and
      sort and uniquify the list after we've processed all symbols.  */
-  slot.cu_indices.push_back (cu_index_and_attrs);
+  slot->cu_indices.push_back (cu_index_and_attrs);
 }
 
 /* See symtab_index_entry.  */
