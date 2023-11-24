@@ -1,5 +1,8 @@
 -*- text -*-
 
+* On RISC-V macro instructions expanding to AUIPC and a load, store, or branch
+  no longer accept x0 as an intermediate and/or destination register.
+
 * Add support for Reliability, Availability and Serviceability extension v2
   (RASv2) for AArch64.
 

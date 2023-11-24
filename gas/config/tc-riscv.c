@@ -2531,11 +2531,11 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	  switch (*oparg)
 	    {
 	    case '\0': /* End of args.  */
+	      if (insn->match_func && !insn->match_func (insn, ip->insn_opcode))
+		break;
+
 	      if (insn->pinfo != INSN_MACRO)
 		{
-		  if (!insn->match_func (insn, ip->insn_opcode))
-		    break;
-
 		  /* For .insn, insn->match and insn->mask are 0.  */
 		  if (riscv_insn_length ((insn->match == 0 && insn->mask == 0)
 					 ? ip->insn_opcode

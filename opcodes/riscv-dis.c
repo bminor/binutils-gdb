@@ -787,6 +787,9 @@ riscv_disassemble_insn (bfd_vma memaddr,
 
       for (; op->name; op++)
 	{
+	  /* Ignore macro insns.  */
+	  if (op->pinfo == INSN_MACRO)
+	    continue;
 	  /* Does the opcode match?  */
 	  if (! (op->match_func) (op, word))
 	    continue;
