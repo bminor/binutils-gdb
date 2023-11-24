@@ -218,4 +218,8 @@ func_cu1:
 	.byte		0x9c
 	.byte		0x00
 	.byte		0x92
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

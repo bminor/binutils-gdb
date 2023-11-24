@@ -375,4 +375,8 @@
 
 	.section	.debug_line
 .Ldebug_line0:
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

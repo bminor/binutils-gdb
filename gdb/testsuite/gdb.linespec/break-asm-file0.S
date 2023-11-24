@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-	.file "a/break-asm-file0.s"
+	.file "a/break-asm-file0.S"
 	.text
 .Lbegin_text1:
 	.globl _func2
@@ -34,7 +34,7 @@ _func:
 	.type func, %function
 func:
 .Lbegin_func:
-	.file 1 "a/break-asm-file0.s"
+	.file 1 "a/break-asm-file0.S"
 	nop
 .Lfunc_1:
 	nop
@@ -60,7 +60,7 @@ func:
 	.4byte	.Lline1_begin			/* DW_AT_stmt_list */
 	.4byte	.Lend_text1			/* DW_AT_high_pc */
 	.4byte	.Lbegin_text1			/* DW_AT_low_pc */
-	.ascii	"a/break-asm-file0.s\0"			/* DW_AT_name */
+	.ascii	"a/break-asm-file0.S\0"			/* DW_AT_name */
 	.ascii	"GNU C 3.3.3\0"			/* DW_AT_producer */
 	.2byte	0x8001				/* DW_AT_language (Mips Assembler) */
 
@@ -161,7 +161,7 @@ func:
 	.byte		0
 
 	/* File names */
-	.ascii		"a/break-asm-file0.s\0"
+	.ascii		"a/break-asm-file0.S\0"
 	.uleb128	0
 	.uleb128	0
 	.uleb128	0
@@ -231,4 +231,8 @@ func:
 	.byte		1
 
 .Lline1_end:
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

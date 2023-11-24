@@ -360,4 +360,8 @@ die149:	.uleb128 0x16		/* DW_TAG_variable */
 .LASF4:
 	.string	"GNU C++ 4.4.2"
 	.ident	"GCC: (GNU) 4.4.2"
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

@@ -378,4 +378,8 @@ SYMBOL(main):
 .LASF3:
 	.string	"main"
 
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

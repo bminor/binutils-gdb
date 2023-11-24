@@ -20,4 +20,8 @@ var1:	.byte	1
 
 	.section	sect2, "a"
 var2:	.byte	2
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

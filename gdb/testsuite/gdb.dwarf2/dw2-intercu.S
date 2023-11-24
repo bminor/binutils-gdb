@@ -314,4 +314,8 @@ func_cu1:
 	.byte		1
 
 .Lline1_end:
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

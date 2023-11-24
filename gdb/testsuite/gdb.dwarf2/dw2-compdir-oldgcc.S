@@ -239,4 +239,8 @@ gcc43:	.globl gcc43
 	.uleb128	1
 	.byte		1
 .Lgcc43_end:
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

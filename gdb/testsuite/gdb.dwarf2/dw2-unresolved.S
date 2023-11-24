@@ -178,4 +178,8 @@ SYMBOL(var):	.byte	2
 
 	.byte		0x0			/* Terminator */
 	.byte		0x0			/* Terminator */
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

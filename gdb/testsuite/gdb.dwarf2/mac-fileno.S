@@ -209,4 +209,8 @@ func_cu1:
 	.uleb128 0x0	/* Included from line number 0 */
 	.uleb128 0x0	/* Filename we just started (bug: number too small) */
         .byte   0x0     /* end of CU's macro information */
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

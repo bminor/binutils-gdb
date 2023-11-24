@@ -20,8 +20,8 @@ load_lib dwarf.exp
 
 standard_testfile .c
 set execfile $testfile
-set asm_file1 break-asm-file1.s
-set asm_file0 break-asm-file0.s
+set asm_file1 break-asm-file1.S
+set asm_file0 break-asm-file0.S
 
 # This test can only be run on targets which support DWARF-2 and use gas.
 require dwarf2_support

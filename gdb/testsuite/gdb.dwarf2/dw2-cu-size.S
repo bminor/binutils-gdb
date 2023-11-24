@@ -107,4 +107,8 @@
 
 	.byte		0x0			/* Terminator .debug_abbrev
 						   section.  */
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

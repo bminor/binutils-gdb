@@ -31,4 +31,8 @@ main_end:
 	.section	.debug_abbrev
 .Ldebug_abbrev0:
 	.byte	0x0
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

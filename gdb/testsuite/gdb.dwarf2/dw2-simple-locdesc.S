@@ -167,4 +167,8 @@ d:
 	.string	"sizetype"
 .LASF1:
 	.string	"char"
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

@@ -106,4 +106,8 @@ var:	.4byte	1
 
 	.byte		0x0			/* Terminator */
 	.byte		0x0			/* Terminator */
+#ifdef __arm__
+	.type   some_func, %function
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

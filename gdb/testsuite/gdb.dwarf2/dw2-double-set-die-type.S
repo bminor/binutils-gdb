@@ -617,4 +617,8 @@
 	.byte	0x0
 	.byte	0x0
 
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

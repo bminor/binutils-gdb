@@ -121,4 +121,8 @@ die221:
 	.string	"GNU Modula-2 0.78 (20100402) grafted onto GCC 4.1.2"
 .LASF2:
 	.string	""
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

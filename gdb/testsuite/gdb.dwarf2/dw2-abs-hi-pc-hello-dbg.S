@@ -149,4 +149,8 @@ LELTP:
         .uleb128 0x1
         .byte   0x1
 LELT:
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

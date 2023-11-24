@@ -20,4 +20,8 @@ _start:
 	.rept 5
 	nop
 	.endr
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

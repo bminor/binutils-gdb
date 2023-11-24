@@ -56,7 +56,7 @@ func:
 	.4byte	.Lline1_begin			/* DW_AT_stmt_list */
 	.4byte	.Lend_text1			/* DW_AT_high_pc */
 	.4byte	.Lbegin_text1			/* DW_AT_low_pc */
-	.ascii	"b/break-asm-file0.s\0"			/* DW_AT_name */
+	.ascii	"b/break-asm-file0.S\0"			/* DW_AT_name */
 	.ascii	"GNU C 3.3.3\0"			/* DW_AT_producer */
 	.2byte	0x8001				/* DW_AT_language (Mips Assembler) */
 
@@ -187,7 +187,7 @@ func:
 	.byte		0
 
 	/* File names */
-	.ascii		"b/break-asm-file0.s\0"
+	.ascii		"b/break-asm-file0.S\0"
 	.uleb128	0
 	.uleb128	0
 	.uleb128	0
@@ -257,4 +257,8 @@ func:
 	.byte		1
 
 .Lline1_end:
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

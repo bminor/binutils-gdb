@@ -33,4 +33,4 @@ main:
 	mov	r0, #0
 	bx	lr
 	.size	main, .-main
-	.section	.note.GNU-stack,"",@progbits
+	.section	.note.GNU-stack,"",%progbits

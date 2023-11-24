@@ -164,4 +164,8 @@ __start_high_pc:
 
 .global __cu_high_pc
 __cu_high_pc:
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif

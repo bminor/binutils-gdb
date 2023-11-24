@@ -176,4 +176,8 @@
 	.string		"hello world!\n"
 .Lemptyname:
 	.string		""
+#ifdef __arm__
+	.section	.note.GNU-stack,"",%progbits
+#else
 	.section	.note.GNU-stack,"",@progbits
+#endif
