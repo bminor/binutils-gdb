@@ -22,7 +22,7 @@
 # though the tui should be disabled.
 
 load_lib gdb-python.exp
-require allow_tui_tests
+require allow_tui_tests allow_python_tests
 tuiterm_env
 
 standard_testfile
@@ -49,9 +49,6 @@ proc clean_restart_and_setup { prefix } {
 
 	Term::clean_restart 24 80 $testfile
 
-	# Skip all tests if Python scripting is not enabled.
-	if { ![allow_python_tests] } { return 0 }
-
 	# Now source the python script.
 	gdb_test_no_output "source ${remote_python_file}" \
 	    "source ${testfile}.py"
@@ -64,7 +61,7 @@ proc clean_restart_and_setup { prefix } {
 
 	if {![runto_main]} {
 	    perror "test suppressed"
-	    return
+	    return 0
 	}
     }
 
