@@ -189,86 +189,135 @@ struct mapped_symtab
 {
   mapped_symtab ()
   {
-    data.resize (1024);
+    m_data.resize (1024);
   }
 
-  /* Minimize each entry in the symbol table, removing duplicates.  */
+  /* If there are no elements in the symbol table, then reduce the table
+     size to zero.  Otherwise call symtab_index_entry::minimize each entry
+     in the symbol table.  */
+
   void minimize ()
   {
-    for (symtab_index_entry &item : data)
+    if (m_element_count == 0)
+      m_data.resize (0);
+
+    for (symtab_index_entry &item : m_data)
       item.minimize ();
   }
 
-  offset_type n_elements = 0;
-  std::vector<symtab_index_entry> data;
+  /* Add an entry to SYMTAB.  NAME is the name of the symbol.  CU_INDEX is
+     the index of the CU in which the symbol appears.  IS_STATIC is one if
+     the symbol is static, otherwise zero (global).  */
+
+  void add_index_entry (const char *name, int is_static,
+			gdb_index_symbol_kind kind, offset_type cu_index);
+
+  /* Access the obstack.  */
+  struct obstack *obstack ()
+  { return &m_string_obstack; }
+
+private:
+
+  /* Find a slot in SYMTAB for the symbol NAME.  Returns a reference to
+     the slot.
+
+     Function is used only during write_hash_table so no index format
+     backward compatibility is needed.  */
+
+  symtab_index_entry &find_slot (const char *name);
+
+  /* Expand SYMTAB's hash table.  */
+
+  void hash_expand ();
+
+  /* Return true if the hash table in data needs to grow.  */
+
+  bool hash_needs_expanding () const
+  { return 4 * m_element_count / 3 >= m_data.size (); }
+
+  /* A vector that is used as a hash table.  */
+  std::vector<symtab_index_entry> m_data;
+
+  /* The number of elements stored in the m_data hash.  */
+  offset_type m_element_count = 0;
 
   /* Temporary storage for names.  */
   auto_obstack m_string_obstack;
+
+public:
+  using iterator = decltype (m_data)::iterator;
+  using const_iterator = decltype (m_data)::const_iterator;
+
+  iterator begin ()
+  { return m_data.begin (); }
+
+  iterator end ()
+  { return m_data.end (); }
+
+  const_iterator cbegin ()
+  { return m_data.cbegin (); }
+
+  const_iterator cend ()
+  { return m_data.cend (); }
 };
 
-/* Find a slot in SYMTAB for the symbol NAME.  Returns a reference to
-   the slot.
+/* See class definition.  */
 
-   Function is used only during write_hash_table so no index format backward
-   compatibility is needed.  */
-
-static symtab_index_entry &
-find_slot (struct mapped_symtab *symtab, const char *name)
+symtab_index_entry &
+mapped_symtab::find_slot (const char *name)
 {
   offset_type index, step, hash = mapped_index_string_hash (INT_MAX, name);
 
-  index = hash & (symtab->data.size () - 1);
-  step = ((hash * 17) & (symtab->data.size () - 1)) | 1;
+  index = hash & (m_data.size () - 1);
+  step = ((hash * 17) & (m_data.size () - 1)) | 1;
 
   for (;;)
     {
-      if (symtab->data[index].name == NULL
-	  || strcmp (name, symtab->data[index].name) == 0)
-	return symtab->data[index];
-      index = (index + step) & (symtab->data.size () - 1);
+      if (m_data[index].name == NULL
+	  || strcmp (name, m_data[index].name) == 0)
+	return m_data[index];
+      index = (index + step) & (m_data.size () - 1);
     }
 }
 
-/* Expand SYMTAB's hash table.  */
+/* See class definition.  */
 
-static void
-hash_expand (struct mapped_symtab *symtab)
+void
+mapped_symtab::hash_expand ()
 {
-  auto old_entries = std::move (symtab->data);
+  auto old_entries = std::move (m_data);
 
-  symtab->data.clear ();
-  symtab->data.resize (old_entries.size () * 2);
+  gdb_assert (m_data.size () == 0);
+  m_data.resize (old_entries.size () * 2);
 
   for (auto &it : old_entries)
     if (it.name != NULL)
       {
-	auto &ref = find_slot (symtab, it.name);
+	auto &ref = this->find_slot (it.name);
 	ref = std::move (it);
       }
 }
 
-/* Add an entry to SYMTAB.  NAME is the name of the symbol.
-   CU_INDEX is the index of the CU in which the symbol appears.
-   IS_STATIC is one if the symbol is static, otherwise zero (global).  */
+/* See class definition.  */
 
-static void
-add_index_entry (struct mapped_symtab *symtab, const char *name,
-		 int is_static, gdb_index_symbol_kind kind,
-		 offset_type cu_index)
+void
+mapped_symtab::add_index_entry (const char *name, int is_static,
+				gdb_index_symbol_kind kind,
+				offset_type cu_index)
 {
-  symtab_index_entry *slot = &find_slot (symtab, name);
+  symtab_index_entry *slot = &this->find_slot (name);
   if (slot->name == NULL)
     {
       /* This is a new element in the hash table.  */
-      ++symtab->n_elements;
+      ++this->m_element_count;
 
       /* We might need to grow the hash table.  */
-      if (4 * symtab->n_elements / 3 >= symtab->data.size ())
+      if (this->hash_needs_expanding ())
 	{
-	  hash_expand (symtab);
+	  this->hash_expand ();
 
 	  /* This element will have a different slot in the new table.  */
-	  slot = &find_slot (symtab, name);
+	  slot = &this->find_slot (name);
 
 	  /* But it should still be a new element in the hash table.  */
 	  gdb_assert (slot->name == nullptr);
@@ -389,7 +438,7 @@ write_hash_table (mapped_symtab *symtab, data_buf &output, data_buf &cpool)
 
     /* We add all the index vectors to the constant pool first, to
        ensure alignment is ok.  */
-    for (symtab_index_entry &entry : symtab->data)
+    for (symtab_index_entry &entry : *symtab)
       {
 	if (entry.name == NULL)
 	  continue;
@@ -418,7 +467,7 @@ write_hash_table (mapped_symtab *symtab, data_buf &output, data_buf &cpool)
 
   /* Now write out the hash table.  */
   std::unordered_map<c_str_view, offset_type, c_str_view_hasher> str_table;
-  for (const auto &entry : symtab->data)
+  for (const auto &entry : *symtab)
     {
       offset_type str_off, vec_off;
 
@@ -1159,7 +1208,7 @@ write_cooked_index (cooked_index *table,
       const auto it = cu_index_htab.find (entry->per_cu);
       gdb_assert (it != cu_index_htab.cend ());
 
-      const char *name = entry->full_name (&symtab->m_string_obstack);
+      const char *name = entry->full_name (symtab->obstack ());
 
       if (entry->per_cu->lang () == language_ada)
 	{
@@ -1167,8 +1216,7 @@ write_cooked_index (cooked_index *table,
 	     gdb, it has to use the encoded name, with any
 	     suffixes stripped.  */
 	  std::string encoded = ada_encode (name, false);
-	  name = obstack_strdup (&symtab->m_string_obstack,
-				 encoded.c_str ());
+	  name = obstack_strdup (symtab->obstack (), encoded.c_str ());
 	}
       else if (entry->per_cu->lang () == language_cplus
 	       && (entry->flags & IS_LINKAGE) != 0)
@@ -1199,8 +1247,8 @@ write_cooked_index (cooked_index *table,
       else
 	kind = GDB_INDEX_SYMBOL_KIND_TYPE;
 
-      add_index_entry (symtab, name, (entry->flags & IS_STATIC) != 0,
-		       kind, it->second);
+      symtab->add_index_entry (name, (entry->flags & IS_STATIC) != 0,
+			       kind, it->second);
     }
 }
 
@@ -1303,8 +1351,6 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
   symtab.minimize ();
 
   data_buf symtab_vec, constant_pool;
-  if (symtab.n_elements == 0)
-    symtab.data.resize (0);
 
   write_hash_table (&symtab, symtab_vec, constant_pool);
 
