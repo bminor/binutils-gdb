@@ -42,6 +42,12 @@ extern "C"
     ((value) < (-(1 << ((bits) - 1) << align)) 	\
       || (value) > ((((1 << ((bits) - 1)) - 1) << align)))
 
+  #define LARCH_LU12I_W 0x14000000
+  #define LARCH_ORI 0x03800000
+  #define LARCH_LD_D 0x28c00000
+  #define LARCH_RD_A0 0x04
+  #define LARCH_RD_RJ_A0 0x084
+
   typedef uint32_t insn_t;
 
   struct loongarch_opcode
