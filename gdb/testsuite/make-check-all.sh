@@ -66,6 +66,7 @@ host_target_boards=(
 # Boards that run everything on local target and local host.
 target_boards=(
     cc-with-gdb-index
+    cc-with-index-cache
     cc-with-debug-names
     cc-with-dwz
     cc-with-dwz-m

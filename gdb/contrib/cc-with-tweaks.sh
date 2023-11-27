@@ -43,6 +43,7 @@
 # -z compress using dwz
 # -m compress using dwz -m
 # -i make an index (.gdb_index)
+# -c make an index (currently .gdb_index) in a cache dir
 # -n make a dwarf5 index (.debug_names)
 # -p create .dwp files (Fission), you need to also use gcc option -gsplit-dwarf
 # -l creates separate debuginfo files linked to using .gnu_debuglink
@@ -85,6 +86,7 @@ output_file=a.out
 
 want_index=false
 index_options=""
+want_index_cache=false
 want_dwz=false
 want_multi=false
 want_dwp=false
@@ -97,6 +99,7 @@ while [ $# -gt 0 ]; do
 	-z) want_dwz=true ;;
 	-i) want_index=true ;;
 	-n) want_index=true; index_options=-dwarf-5;;
+	-c) want_index_cache=true ;;
 	-m) want_multi=true ;;
 	-p) want_dwp=true ;;
 	-l) want_gnu_debuglink=true ;;
@@ -206,6 +209,15 @@ if [ "$want_index" = true ]; then
     rc=${PIPESTATUS[0]}
     mv "$tmpfile" "$output_file"
     rm -f "$tmpdir"/*.dwo
+    [ $rc != 0 ] && exit $rc
+fi
+
+if [ "$want_index_cache" = true ]; then
+    $GDB -q -batch \
+	-ex "set index-cache directory $INDEX_CACHE_DIR" \
+	-ex "set index-cache enabled on" \
+	-ex "file $output_file"
+    rc=$?
     [ $rc != 0 ] && exit $rc
 fi
 
