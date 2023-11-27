@@ -454,6 +454,11 @@ public:
     return strcmp (m_cstr, other.m_cstr) == 0;
   }
 
+  bool operator< (const c_str_view &other) const
+  {
+    return strcmp (m_cstr, other.m_cstr) < 0;
+  }
+
   /* Return the underlying C string.  Note, the returned string is
      only a reference with lifetime of this object.  */
   const char *c_str () const
@@ -773,10 +778,18 @@ public:
       }
     for (size_t bucket_ix = 0; bucket_ix < bucket_hash.size (); ++bucket_ix)
       {
-	const std::forward_list<hash_it_pair> &hashitlist
-	  = bucket_hash[bucket_ix];
+	std::forward_list<hash_it_pair> &hashitlist = bucket_hash[bucket_ix];
 	if (hashitlist.empty ())
 	  continue;
+
+	/* Sort the items within each bucket.  This ensures that the
+	   generated index files will be the same no matter the order in
+	   which symbols were added into the index.  */
+	hashitlist.sort ([] (const hash_it_pair &a, const hash_it_pair &b)
+	{
+	  return a.it->first < b.it->first;
+	});
+
 	uint32_t &bucket_slot = m_bucket_table[bucket_ix];
 	/* The hashes array is indexed starting at 1.  */
 	store_unsigned_integer (reinterpret_cast<gdb_byte *> (&bucket_slot),

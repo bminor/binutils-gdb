@@ -44,6 +44,9 @@ remote_exec host "mkdir -p ${dir1}"
 with_timeout_factor $timeout_factor {
     gdb_test_no_output "save gdb-index $dir1" \
 	"create gdb-index file"
+
+    gdb_test_no_output "save gdb-index -dwarf-5 $dir1" \
+	"create dwarf-index files"
 }
 
 # Close GDB.
@@ -140,13 +143,16 @@ if { $worker_threads > 1 } {
     with_timeout_factor $timeout_factor {
 	gdb_test_no_output "save gdb-index $dir2" \
 	    "create second gdb-index file"
+
+	gdb_test_no_output "save gdb-index -dwarf-5 $dir2" \
+	    "create second dwarf-index files"
     }
 
     # Close GDB.
     gdb_exit
 
     # Now check that the index files are identical.
-    foreach suffix { gdb-index  } {
+    foreach suffix { gdb-index debug_names debug_str } {
 	set result \
 	    [remote_exec host \
 		 "cmp -s \"$dir1/${index_filename_base}.${suffix}\" \"$dir2/${index_filename_base}.${suffix}\""]
