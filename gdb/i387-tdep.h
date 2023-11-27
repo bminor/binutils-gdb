@@ -147,6 +147,11 @@ extern void i387_supply_fxsave (struct regcache *regcache, int regnum,
 extern bool i387_guess_xsave_layout (uint64_t xcr0, size_t xsave_size,
 				     x86_xsave_layout &layout);
 
+/* Compute an XSAVE layout based on the XCR0 bitmask.  This is used
+   as a fallback if a target does not provide an XSAVE layout.  */
+
+extern x86_xsave_layout i387_fallback_xsave_layout (uint64_t xcr0);
+
 /* Similar to i387_supply_fxsave, but use XSAVE extended state.  */
 
 extern void i387_supply_xsave (struct regcache *regcache, int regnum,
