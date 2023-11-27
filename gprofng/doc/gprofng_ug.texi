@@ -93,16 +93,16 @@ section entitled ``GNU Free Documentation License.''
 @c * Archive Experiment Data::         Archive an experiment.
 
 @menu
-* Introduction::                    About this manual.
-* Overview::                        A brief overview of @ProductName{}.
-* A Mini Tutorial::                 A short tutorial covering the key features.
-* The gprofng Tools::               An overview of the tools supported.
-* Performance Data Collection::     Record the performance information.
-* View the Performance Information:: Different ways to view the data.
-* Terminology::                     Concepts and terminology explained.
-* Other Document Formats::          Create this document in other formats.
-* The gprofng Man Pages::           The gprofng man pages.
-* Index::                           The index.
+* Introduction::                      About this manual.
+* Overview::                          A brief overview of @ProductName{}.
+* A Mini Tutorial::                   A short tutorial covering the key features.
+* The gprofng Tools::                 An overview of the tools supported.
+* Performance Data Collection::       Record the performance information.
+* View the Performance Information::  Different ways to view the data.
+* Terminology::                       Concepts and terminology explained.
+* Other Document Formats::            Create this document in other formats.
+* The gprofng Man Pages::             The gprofng man pages.
+* Index::                             The index.
 
 @detailmenu
 
@@ -131,6 +131,14 @@ The gprofng Tools
 * Filters::                                   Filters.
 * Supported Environment Variables::           The supported environment variables.
 
+Performance Data Collection
+
+* The @command{gprofng collect app} Tool::    Collect application performance data.
+
+View the Performance Information
+
+* The @command{gprofng display text} Tool::   View the performance data in plain text.
+
 Terminology
 
 * The Program Counter::                    What is a Program Counter?
@@ -139,17 +147,17 @@ Terminology
 * The Viewmode::                           Select the way call stacks are presented.
 * The Selection List::                     How to define a selection.
 * Load Objects and Functions::             The components in an application.
-* The Concept of a CPU in @ProductName{}:: The definition of a CPU.
+* The Concept of a CPU in gprofng::        The definition of a CPU.
 * Hardware Event Counters Explained::      What are event counters?
 * apath::                                  Our generic definition of a path.
 
 The gprofng Man Pages
 
-* gprofng collect app::                    The man page for gprofng collect app.
-* gprofng display text::                   The man page for gprofng display text.
-* gprofng display src::                    The man page for gprofng display src.
-* gprofng display html::                   The man page for gprofng display html.
-* gprofng archive::                        The man page for gprofng archive.
+* Man page for @command{gprofng collect app}::   The man page for gprofng collect app.
+* Man page for @command{gprofng display text}::  The man page for gprofng display text.
+* Man page for @command{gprofng display html}::  The man page for gprofng display html.
+* Man page for @command{gprofng display src}::   The man page for gprofng display src.
+* Man page for @command{gprofng archive}::       The man page for gprofng archive.
 
 @c -- Index
 
@@ -1899,7 +1907,7 @@ referred to as
 
 Similar to the commands for the threads, there are several commands related
 to the usage of the cores, or @emph{CPUs} as they are called in @ToolName{}
-(@xref{The Concept of a CPU in @ProductName{}}).
+(@xref{The Concept of a CPU in gprofng}).
 
 @IndexSubentry{Options,  @code{-cpu_list}}
 @IndexSubentry{Commands, @code{cpu_list}}
@@ -2615,7 +2623,8 @@ portable in case we would like to repeat this experiment on another processor.
 
 @IndexSubentry{Hardware event counters, @code{hwc} metric}
 This is where the special @code{hwc} metric comes very handy.  It
-automatically expands to the active set of events used.
+automatically expands to the active set of hardware event counters used
+in the experiment(s).
 
 With this, it is very easy to display the event counter values.  Note that
 although the regular clock based profiling was enabled, we only want to see
@@ -3205,24 +3214,46 @@ the results.
 
 @item @DisplayText{}
 @IndexSubentry{@code{gprofng}, @code{display text}}
+
 Generates performance reports in ASCII format.  Commandline
 options, and/or commands in a script file are used to control the contents
 and lay-out of the generated report(s).
 
 @item @DisplayHTML{}
 @IndexSubentry{@code{gprofng}, @code{display html}}
+
 Takes one or more experiment directories and generates a directory with
 HTML files.  Starting from the index.html file, the performance data
 may be examined in a browser.
 
 @item @DisplaySRC{}
 @IndexSubentry{@code{gprofng}, @code{display src}}
+
 Displays the source code, interleaved with the disassembled instructions.
 
 @item @Archive{}
 @IndexSubentry{@code{gprofng}, @code{archive}}
+
 Archives an experiment directory by (optionally) including source code and
 object files, as well as the shared libraries that have been used.
+
+@item @GUI{}
+@IndexSubentry{@code{gprofng}, @code{display gui}}
+
+This is an optional component that can be installed in addition to the
+command line gprofng tools listed above.  It supports the graphical
+analysis of one or more experiments that have been created using
+@CollectApp{}.
+
+The GUI part of @ProductName{} is a GNU project.  This is the link to the
+@url{https://savannah.gnu.org/projects/gprofng-gui, gprofng GUI page}.
+This page contains more information (e.g. how to clone the repo).
+There is also a 
+@url{https://ftp.gnu.org/gnu/gprofng-gui, tar file distribution directory}
+with tar files that include everything that is needed to build and install
+the GUI code.  Various versions are available here.
+Be aware that in order to build and use the gprofng GUI, Java needs to be
+installed first.  The minimum Java version required is Java 8.
 
 @end table
 
@@ -3232,13 +3263,14 @@ object files, as well as the shared libraries that have been used.
 @c ----------------------------------------------------------------------------
 The @file{gprofng.rc}
 @cindex gprofng.rc
-file is used to define default settings for the @DisplayText{} and
-@DisplaySRC{} tools, but the user can override these defaults through local
-configuration files.
+file is used to define default settings for the @DisplayText{}, @Archive{},
+and @DisplaySRC{} tools, but the user can override these defaults through
+local configuration settings when building and installing from the source
+code..
 
 There are three files that are checked when the tool starts up.  The first
 file has pre-defined settings and comes with the installation, but through
-a hidden file called @file{.gprofng.rc}, the user can (re)define the defaults:
+a hidden file called @file{.gprofng.rc}, the user can (re)define the defaults.
 
 These are the locations and files that are checked upon starting the above
 mentioned tools:
@@ -3247,7 +3279,7 @@ mentioned tools:
 
 @item
 The system-wide filename is called @file{gprofng.rc} and is located in
-the top level @file{/etc} directory.
+the @file{/etc} subdirectory in case an RPM was used for the installation..
 
 If @ProductName{} has been built from the source, this file is in
 subdirectory @file{etc} in the top level installation directory.
@@ -3256,7 +3288,7 @@ subdirectory @file{etc} in the top level installation directory.
 The user's home directory may have a hidden file called @file{.gprofng.rc}.
 
 @item
-The directory where @DisplayText{} (or @DisplaySRC{}) is invoked from may
+The directory where @DisplayText{} (or @DisplaySRC{}) is invoked from, may
 have a hidden file called @file{.gprofng.rc}.
 
 @end enumerate
@@ -3439,7 +3471,7 @@ For a list of all the predefined filters see @ref{Predefined Filters}.
 
 Various environment variables are supported.  We refer to the man page for
 gprofng(1) for an overview and description
-(@xref{Man page for gprofng}).
+(@xref{Man page for @command{gprofng}}).
 
 @c -- A new chapter -----------------------------------------------------------
 @node    Performance Data Collection
@@ -3456,8 +3488,8 @@ used to store the relevant information and forms the basis for a subsequent
 analysis with one of the viewing tools.
 
 @c -- A new section -----------------------------------------------------------
-@node    The @CollectApp{} command
-@section The @CollectApp{} command
+@node    The @command{gprofng collect app} Tool
+@section The @command{gprofng collect app} Tool
 @c ----------------------------------------------------------------------------
 
 This is the command to collect the performance information for the target
@@ -3483,8 +3515,8 @@ directories are available.  In this chapter, these will all be covered in
 detail.
 
 @c -- A new section -----------------------------------------------------------
-@node    The @code{gprofng display text} Tool
-@section The @code{gprofng display text} Tool
+@node    The @command{gprofng display text} Tool
+@section The @command{gprofng display text} Tool
 @c ----------------------------------------------------------------------------
 
 This tool displays the performance information in ASCII format.  It supports
@@ -3518,8 +3550,8 @@ or command, occurs multiple times, the rightmost setting is selected.
 @c ----------------------------------------------------------------------------
 
 The most commonly used commands are documented in the man page for this tool
-(@xref{gprofng display text}).  In this section we list and describe all other
-commands that are supported.
+(@xref{Man page for @command{gprofng display text}}).  In this section we list
+and describe all other commands that are supported.
 
 @c -- A new sub subsection ----------------------------------------------------
 @node                Commands that List Experiment Details
@@ -4124,8 +4156,8 @@ Most of the functions correspond directly to the source model of the program, bu
 there are exceptions.  This topic is however outside of the scope of this guide.
 
 @c ----------------------------------------------------------------------------
-@node    The Concept of a CPU in @ProductName{}
-@section The Concept of a CPU in @ProductName{}
+@node    The Concept of a CPU in gprofng
+@section The Concept of a CPU in gprofng
 @c ----------------------------------------------------------------------------
 
 @cindex CPU
@@ -4333,15 +4365,15 @@ in the make file in the @code{<my-build-dir/gprofng/doc} directory.
 @end itemize
 
 @c -- An appendix -------------------------------------------------------------
-@node     The @ProductName{} Man Pages
-@appendix The @ProductName{} Man Pages
+@node     The gprofng Man Pages
+@appendix The gprofng Man Pages
 @c ----------------------------------------------------------------------------
 
 In this appendix the man pages for the various @ProductName{} tools are listed.
 
 @c -- A new node --------------------------------------------------------------
 @c  @node    gprofng driver
-@node    Man page for gprofng
+@node    Man page for @command{gprofng}
 @section Man page for @command{gprofng}
 @c ----------------------------------------------------------------------------
 
@@ -4349,7 +4381,7 @@ In this appendix the man pages for the various @ProductName{} tools are listed.
 
 @c -- A new node --------------------------------------------------------------
 @page
-@node    gprofng collect app
+@node    Man page for @command{gprofng collect app}
 @section Man page for @command{gprofng collect app}
 @c ----------------------------------------------------------------------------
 
@@ -4357,7 +4389,7 @@ In this appendix the man pages for the various @ProductName{} tools are listed.
 
 @c -- A new node --------------------------------------------------------------
 @page
-@node    gprofng display text
+@node    Man page for @command{gprofng display text}
 @section Man page for @command{gprofng display text}
 @c ----------------------------------------------------------------------------
 
@@ -4365,7 +4397,7 @@ In this appendix the man pages for the various @ProductName{} tools are listed.
 
 @c -- A new node --------------------------------------------------------------
 @page
-@node    gprofng display html
+@node    Man page for @command{gprofng display html}
 @section Man page for @command{gprofng display html}
 @c ----------------------------------------------------------------------------
 
@@ -4373,7 +4405,7 @@ In this appendix the man pages for the various @ProductName{} tools are listed.
 
 @c -- A new node --------------------------------------------------------------
 @page
-@node    gprofng display src
+@node    Man page for @command{gprofng display src}
 @section Man page for @command{gprofng display src}
 @c ----------------------------------------------------------------------------
 
@@ -4381,7 +4413,7 @@ In this appendix the man pages for the various @ProductName{} tools are listed.
 
 @c -- A new node --------------------------------------------------------------
 @page
-@node    gprofng archive
+@node    Man page for @command{gprofng archive}
 @section Man page for @command{gprofng archive}
 @c ----------------------------------------------------------------------------
 

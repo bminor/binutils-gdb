@@ -1,11 +1,11 @@
 @c ----------------------------------------------------------------------------
-@c This is the Texinfo source file for the gp-collect-app man page.
+@c This is the Texinfo source file for the gp-display-text man page.
 @c
 @c Author: Ruud van der Pas
 @c ----------------------------------------------------------------------------
 @ifset man
 \input texinfo @c -*-texinfo-*-
-@setfilename gprofng display text
+@setfilename gp-display-text
 @settitle Display the performance data in plain text format
 @include gp-macros.texi
 @end ifset
@@ -54,7 +54,7 @@
 @ManPageStart{NAME}
 @c man begin NAME
 
-gprofng display text - Display the performance data in plain text format
+gp-display-text - Display the performance data in plain text format
 
 @c man end
 @ManPageEnd{}
@@ -84,8 +84,8 @@ Print a plain text version of the various displays supported by gprofng.
 The input consists of one or more experiment directories.  Through commands,
 the user controls the output.
 
-There is a rich set of commands to control the display of the data. The
-@samp{NOTES} section lists the most common ones. The gprofng user guide
+There is a rich set of commands to control the display of the data.  The
+@samp{NOTES} section lists the most common ones.  The gprofng user guide
 lists all the commands supported.
 
 Commands specified on the command line need to be prepended with the dash ('-')
@@ -107,8 +107,9 @@ Note that the commands are processed and interpreted from left to right,
 @emph{so the order matters}.
 
 If this tool is invoked without options, commands, or a script file, it
-starts in interpreter mode. The user can then issue the commands interactively.
-The session is terminated with the @command{exit} command in the interpreter.
+starts in interpreter mode.  The user can then issue the commands
+interactively.  The session is terminated with the @command{exit} command in
+the interpreter.
 
 @c man end
 @ManPageEnd{}
@@ -136,13 +137,6 @@ Print the version number and exit.
 
 Print usage information and exit.
 
-@c -- @item --verbose @{on|off@}
-@c -- @ifclear man
-@c -- @IndexSubentry{Options, @code{--verbose}}
-@c -- @end ifclear
-
-@c -- Enable (on) or disable (off) verbose mode; the default is @samp{off}.
-
 @item -script @var{script-file}
 @ifclear man
 @IndexSubentry{Options,  @code{-script}}
@@ -164,12 +158,12 @@ with commands specified at the command line.
 @ManPageStart{NOTES}
 @c man begin NOTES
 
-Many commands are supported. Below, the more common ones are listed in
+Many commands are supported.  Below, the more common ones are listed in
 mostly alphabetical order, because sometimes it is more logical to
 swap the order of two entries.
 
 @ifset man
-There are many more commands. These are documented in the user guide.
+There are many more commands.  These are documented in the user guide.
 @end ifset
 
 @table @code
@@ -198,7 +192,7 @@ metrics at each level.
 @IndexSubentry{Options,  @code{-compare}}
 @IndexSubentry{Commands, @code{compare}}
 @end ifclear
-By default, the results for multiple experiments are aggregated. This
+By default, the results for multiple experiments are aggregated.  This
 command changes this to enable the comparison of experiments for certain
 views (e.g. the function view).  The first experiment specified is defined
 to be the reference.  The following options are supported:
@@ -227,7 +221,7 @@ experiments are shown as a ratio relative to the reference (current/reference).
 @IndexSubentry{Options,  @code{-disasm}}
 @IndexSubentry{Commands, @code{disasm}}
 @end ifclear
-List the source code and instructions for the function specified. The 
+List the source code and instructions for the function specified.  The
 instructions are annotated with the metrics used.
 
 @item fsingle @var{function-name} [@samp{n}]
@@ -251,7 +245,7 @@ Write a summary panel for each function in the function list.
 @IndexSubentry{Commands, @code{functions}}
 @end ifclear
 Display a list of all functions executed.  For each function the used metrics
-(e.g. the CPU time) ar shown.
+(e.g. the CPU time) are shown.
 
 @item header
 @ifclear man
@@ -274,7 +268,7 @@ Limit the output to @var{n} lines.
 @IndexSubentry{Commands, @code{lines}}
 @end ifclear
 Write a list of source lines and their metrics, ordered by the current
-sort metric. 
+sort metric.
 
 @item metric_list
 @ifclear man
@@ -296,6 +290,20 @@ The @var{metric-spec} can either be the keyword @samp{default}
 to restore the default metrics selection, or a colon separated list
 with metrics.
 
+@ifclear man
+@IndexSubentry{Hardware event counters, @code{hwc} metric}
+@end ifclear
+A special metric is @code{hwc}.  It automatically expands to the active
+set of hardware event counters used in the experiment(s).
+
+@ifclear man
+@IndexSubentry{Hardware event counters, @code{IPC} metric}
+@IndexSubentry{Hardware event counters, @code{CPI} metric}
+@end ifclear
+If both instructions and clock cycles have been measured, the @code{CPI}
+and @code{IPC} metrics can be used to see the Clockcycles Per Instruction
+and Instructions Per Clockcyle values, respectively.
+
 The gprofng user guide has more details how to define metrics.
 
 @item name @{short | long | mangled@}[:@{soname | nosoname@}]
@@ -311,8 +319,12 @@ the output by adding the @emph{soname} keyword.  It can also be ommitted
 Whether there is an actual difference between these types of names depends
 on the language.
 
-Note that there should be no (white)space to the left and right of the 
+Note that there should be no (white)space to the left and right of the
 colon (@samp{:}).
+
+This option should not be confused with the keyword @samp{name} in a
+metric definition, which is used to specify that the names of functions
+should be shown in the function overview.
 
 @item overview
 @ifclear man
@@ -328,14 +340,14 @@ specified on the command line.
 @IndexSubentry{Commands, @code{pcs}}
 @end ifclear
 Write a list of program counters (PCs) and their metrics, ordered by
-the current sort metric. 
+the current sort metric.
 
 @item sort @var{metric-spec}
 @ifclear man
 @IndexSubentry{Options,  @code{-sort}}
 @IndexSubentry{Commands, @code{sort}}
 @end ifclear
-Sort the function list on the @var{metric-spec} given. 
+Sort the function list on the @var{metric-spec} given.
 
 @IndexSubentry{Sort, Reverse order}
 The data can be sorted in reverse order by prepending the metric definition
@@ -397,10 +409,19 @@ for C, C++, and Fortran.
 @c SEEALSO section
 @c ----------------------------------------------------------------------------
 
-@ManPageStart{SEEALSO}
+@ManPageStart{SEE ALSO}
 @c man begin SEEALSO
 
-gprofng(1), gp-archive(1), gp-collect-app(1), gp-display-html(1), gp-display-src(1)
+gprofng(1),
+gp-archive(1),
+gp-collect-app(1),
+gp-display-gui(1),
+gp-display-html(1),
+gp-display-src(1)
+
+@iftex
+@vspace{1}
+@end iftex
 
 The user guide for gprofng is maintained as a Texinfo manual.  If the
 @command{info} and @command{gprofng} programs are correctly installed, the

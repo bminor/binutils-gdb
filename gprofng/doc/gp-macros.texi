@@ -23,6 +23,10 @@
 @command{gprofng archive}
 @end macro
 
+@macro GUI{}
+@command{gprofng display gui}
+@end macro
+
 @macro Driver{}
 @command{gprofng}
 @end macro
@@ -41,7 +45,9 @@ gprofng
 @end macro
 
 @macro vspace {lines}
+@iftex
 @sp \lines\
+@end iftex
 @end macro
 
 @c -- For some reason ending this macro with @noindent does not work out well.

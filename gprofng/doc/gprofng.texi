@@ -74,7 +74,8 @@ gprofng - The driver for the gprofng application profiling tool
 @ManPageStart{SYNOPSIS}
 @c man begin SYNOPSIS
 
-@command{gprofng} [@var{option(s)}] @var{action} [@var{qualifier}] [@var{option(s)}] @var{target} [@var{options}]
+@command{gprofng} [@var{option(s)}] @var{action} [@var{qualifier}]
+[@var{option(s)}] @var{target} [@var{options}]
 
 @c man end
 @ManPageEnd{}
@@ -86,17 +87,17 @@ gprofng - The driver for the gprofng application profiling tool
 @ManPageStart{DESCRIPTION}
 @c man begin DESCRIPTION
 
-This is the driver for the gprofng tools suite to gather and analyze performance
-data.
+This is the driver for the gprofng tools suite to gather and analyze
+performance data.
 
-The driver executes the @var{action} specified. An example of an action is
-@samp{collect} to collect performance data. Depending on the action, a
+The driver executes the @var{action} specified.  An example of an action is
+@samp{collect} to collect performance data.  Depending on the action, a
 @var{qualifier} may be needed to further define the command.
 The last item is the @var{target} that the command applies to.
 
 There are three places where options are supported.  The driver supports
 options.  These can be found below.  The @var{action}, possibly in combination
-with the @var{qualifier} also supports options. A description of these can be
+with the @var{qualifier} also supports options.  A description of these can be
 found in the man page for the command.  Any options needed to execute the
 target command should follow the target name.
 
@@ -108,12 +109,12 @@ the following command may be used:
 $ gprofng collect app -o mydata.er a.out -t 2
 @end smallexample
 
-In this example, the action is @samp{collect}, the qualifier is @samp{app}, the single
-argument to the command is @code{-o mydata.er} and the target is @command{a.out}.
-The target command is invoked with the @samp{-t 2} option.
+In this example, the action is @samp{collect}, the qualifier is @samp{app},
+the single argument to the command is @code{-o mydata.er} and the target is
+@command{a.out}.  The target command is invoked with the @samp{-t 2} option.
 
-If gprofng is executed without any additional option, action, or target, a usage
-overview is printed.
+If gprofng is executed without any additional option, action, or target, a
+usage overview is printed.
 
 @c man end
 @ManPageEnd{}
@@ -144,9 +145,9 @@ Print usage information and exit.
 @c man end
 @ManPageEnd{}
 
-@c -----------------------------------------------------------------------------
+@c ----------------------------------------------------------------------------
 @c ENVIRONMENT SECTION
-@c -----------------------------------------------------------------------------
+@c ----------------------------------------------------------------------------
 
 @ManPageStart{ENVIRONMENT}
 @c man begin ENVIRONMENT
@@ -156,44 +157,93 @@ The following environment variables are supported:
 @table @samp
 
 @item @env{GPROFNG_MAX_CALL_STACK_DEPTH}
+
+@ifclear man
 @cindex Environment variables
+@end ifclear
+
 Set the depth of the call stack (default is 256).
 
 @item @env{GPROFNG_USE_JAVA_OPTIONS}
+
+@ifclear man
 @cindex Environment variables
+@end ifclear
+
 May be set when profiling a C/C++ application that uses dlopen() to execute
 Java code.
 
 @c -- deferred @item @env{GPROFNG_SSH_REMOTE_DISPLAY}
-@c -- deferred Use this variable to define the ssh command executed by the remote display tool.
+@c -- deferred Use this variable to define the ssh command executed by the
+@c -- remote display tool.
 
 @c -- deferred @item @env{GPROFNG_SKIP_VALIDATION}
-@c -- deferred Set this variable to disable checking hardware, system, and Java versions.
+@c -- deferred Set this variable to disable checking hardware, system, and
+@c -- Java versions.
 
 @item @env{GPROFNG_ALLOW_CORE_DUMP}
+
+@ifclear man
 @cindex Environment variables
+@end ifclear
+
 Set this variable to allow a core file to be generated; otherwise an error
-report is created on /tmp.
+report is created on @samp{/tmp}.
 
 @item @env{GPROFNG_ARCHIVE}
+
+@ifclear man
 @cindex Environment variables
-Use this variable to define the settings for automatic archiving upon experiment
-recording completion.
+@end ifclear
+
+Use this variable to define the settings for automatic archiving upon
+experiment recording completion.
 
 @item @env{GPROFNG_ARCHIVE_COMMON_DIR}
+
+@ifclear man
 @cindex Environment variables
+@end ifclear
+
 Set this variable to the location of the common archive.
 
 @item @env{GPROFNG_JAVA_MAX_CALL_STACK_DEPTH}
+
+@ifclear man
 @cindex Environment variables
+@end ifclear
+
 Set the depth of the Java call stack; the default is 256; set to 0 to disable
 capturing of call stacks.
 
 @item @env{GPROFNG_JAVA_NATIVE_MAX_CALL_STACK_DEPTH}
+
+@ifclear man
 @cindex Environment variables
+@end ifclear
+
 Set the depth of the Java native call stack; the default is 256; set to 0 to
 disable capturing of call stacks (JNI and assembly call stacks are not
 captured).
+
+@item @env{GPROFNG_SYSCONFDIR}
+
+@ifclear man
+@cindex Environment variables
+@end ifclear
+
+Set the path to the @file{gprofng.rc} configuration file.  By default, this
+file is placed in the @file{etc} subdirectory of the binutils installation
+directory.  In case an RPM has been used for the installation, this file is
+in directory @file{/etc}.
+
+When building and installing from the source, the user can set the path
+to this configuration file to a non-default location.  If this is the case,
+the user may set the @code{GPROFNG_SYSCONFDIR} environment variable to point
+to this location.
+
+Otherwise, the @command{gp-display-text}, @command{gp-display-src}, and
+@command{gp-archive} tools cannot find this file.
 
 @end table
 
@@ -208,10 +258,14 @@ captured).
 @c man begin NOTES
 
 The gprofng driver supports the following commands.
-@vspace{1}
 
-@c The man pages for the commands below can be viewed using the command name with "gprofng" replaced by "gp" and the spaces replaced by a dash ("-"). For example the man page
-@c        name for "gprofng collect app" is "gp-collect-app".
+@iftex
+@vspace{1}
+@end iftex
+
+@c The man pages for the commands below can be viewed using the command name
+@c with "gprofng" replaced by "gp" and the spaces replaced by a dash ("-").
+@c For example the man page name for "gprofng collect app" is "gp-collect-app".
 
 @i{Collect performance data:}
 
@@ -231,6 +285,10 @@ Display the performance data in ASCII format.
 
 @item gprofng display html
 Generate an HTML file from one or more experiments.
+
+@item gprofng display gui
+Start the GUI.  Note that this tool is not available by default and needs to
+be installed seperately.
 
 @end table
 
@@ -257,13 +315,21 @@ use the driver.
 @c SEEALSO section
 @c ----------------------------------------------------------------------------
 
-@ManPageStart{SEEALSO}
+@ManPageStart{SEE ALSO}
 @c man begin SEEALSO
 
-gp-archive(1), gp-collect-app(1), gp-display-html(1), gp-display-src(1),
+gp-archive(1),
+gp-collect-app(1),
+gp-display-gui(1),
+gp-display-html(1),
+gp-display-src(1),
 gp-display-text(1)
 
-Each gprofng command also supports the @option{--help} option. This lists the
+@iftex
+@vspace{1}
+@end iftex
+
+Each gprofng command also supports the @option{--help} option.  This lists the
 options and a short description for each option.
 
 For example this displays the options supported on the

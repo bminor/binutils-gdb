@@ -5,7 +5,7 @@
 @c ----------------------------------------------------------------------------
 @ifset man
 \input texinfo @c -*-texinfo-*-
-@setfilename gprofng collect app
+@setfilename gp-collect-app
 @settitle Collect performance data for the target application
 @include gp-macros.texi
 @end ifset
@@ -54,7 +54,7 @@
 @ManPageStart{NAME}
 @c man begin NAME
 
-gprofng collect app - Collect performance data for the target program
+gp-collect-app - Collect performance data for the target program
 
 @c man end
 @ManPageEnd{}
@@ -66,7 +66,8 @@ gprofng collect app - Collect performance data for the target program
 @ManPageStart{SYNOPSIS}
 @c man begin SYNOPSIS
 
-@command{gprofng collect app} [@var{option(s)}] @var{target} [@var{option(s)}]
+@command{gprofng collect app} [@var{option(s)}] @var{target}
+[@var{target-option(s)}]
 
 @c man end
 @ManPageEnd{}
@@ -79,7 +80,8 @@ gprofng collect app - Collect performance data for the target program
 @c man begin DESCRIPTION
 
 Collect performance data on the target program.  In addition to Program Counter
-(PC) sampling, hardware event counters and various tracing options are supported.
+(PC) sampling, hardware event counters and various tracing options are
+supported.
 
 For example, this command collects performance data for an executable called
 @samp{a.out} and stores the data collected in an experiment directory with
@@ -115,28 +117,29 @@ Print the version number and exit.
 
 Print usage information and exit.
 
-@c -- @item --verbose @{on|off@}
-@c -- @ifclear man
-@c -- @IndexSubentry{Options, @code{--verbose}}
-@c -- @end ifclear
+@item -v, --verbose
+@ifclear man
+@IndexSubentry{Options, @code{-v}}
+@IndexSubentry{Options, @code{--verbose}}
+@end ifclear
 
-@c -- Enable (on) or disable (off) verbose mode; the default is @samp{off}.
+By default, verbose mode is disabled.  This option enables it.
 
-@item -p @{off|on|lo|hi|@var{<value>}@}
+@item -p @{off | on | lo[w] | hi[gh] | @var{<value>}@}
 @ifclear man
 @IndexSubentry{Options, @code{-p}}
 @end ifclear
 
-Disable (off) or enable (on) clock-profiling using a default sampling
-granularity, or enable clock-profiling implicitly by setting the sampling
-granularity (lo, hi, or a specific value in ms). By default, clock profiling
-is enabled (@samp{-p on}).
+Disable (@samp{off}) or enable (@samp{on}) clock profiling using a default
+sampling granularity, or enable clock profiling implicitly by setting the
+sampling granularity (@samp{lo[w]}, @samp{hi[gh]}, or a specific value in
+ms).  By default, clock profiling is enabled (@samp{-p on}).
 
-@item -h @var{@{<ctr_def>...,<ctr_n_def>@}}
+@item -h @var{<ctr_def>[,<ctr_def>]}
 @ifclear man
 @IndexSubentry{Options, @code{-h}}
 @end ifclear
-Enable hardware event counter profiling and select the counter(s).
+Enable hardware event counter profiling and select one or more counter(s).
 To see the supported counters on this system, use the @samp{-h} option
 without other arguments.
 
@@ -147,6 +150,7 @@ without other arguments.
 
 Specify the name for the experiment directory.  The name has to end with
 @samp{.er} and may contain an absolute path (e.g. @file{/tmp/experiment.er}).
+An existing experiment with the same name will not be overwritten.
 
 @item -O @var{<exp_name>}
 @ifclear man
@@ -164,41 +168,46 @@ overwrites an existing experiment directory with the same name.
 Add up to 10 comment strings to the experiment.  These comments appear in the
 notes section of the header and can be retrieved with the
 @command{gprofng display text} command using the @samp{-header} option.
+@ifclear man
+@IndexSubentry{Options, @code{-header}}
+@IndexSubentry{Commands, @code{-header}}
+@end ifclear
 
-@item -j @{on|off|@var{<path>}@}
+@item -j @{on | off | @var{<path>}@}
 @ifclear man
 @IndexSubentry{Options, @code{-j}}
 @end ifclear
 
-Controls Java profiling when the target is a JVM machine. The allowed values of
-this option are: enable (on), disable (off) Java profiling when the target
-program is a JVM, or set @samp{<path>} to a non-default JVM.
-The default is @samp{-j on}
+Controls Java profiling when the target is a JVM machine.  The allowed values
+for this option are:
 
 @table @gcctabopt
 
 @item on
 Record profiling data for the JVM machine, and recognize methods compiled by
-the Java HotSpot virtual machine.  Also record Java call stacks.  The default
-is @samp{-j on}.
+the Java HotSpot virtual machine.  Also record Java call stacks.
 
 @item off
-Does not record Java profiling data.  Profiling data for native call stacks is
+Do not record Java profiling data.  Profiling data for native call stacks is
 still recorded.
 
 @item @var{<path>}
-Records profiling data for the JVM, and use the JVM as installed in @var{<path>}.
+Records profiling data for the JVM, and use the JVM as installed in
+@var{<path>}.
 
 @end table
 
-@item -J @var{<jvm-options>}
+The default is @samp{-j on}.
+
+@item -J @var{<jvm-option(s)>}
 @ifclear man
 @IndexSubentry{Options, @code{-J}}
 @end ifclear
 
-Specifies additional options to be passed to the JVM used.  The
-@var{jvm-options} list must be enclosed in quotation marks if it contains more
-than one option. The items in the list need to be separated by spaces or tab.
+Specifies one or more additional options to be passed to the JVM used.  The
+@var{jvm-option(s)} list must be enclosed in quotation marks if it contains
+more than one option.  The items in the list need to be separated by spaces
+or tabs.
 Each item is passed as a separate option to the JVM.  Note that this option
 implies @samp{-j on}.
 
@@ -211,11 +220,12 @@ Collects data for the specified duration.  The duration can be a single number,
 optionally followed by either @samp{m} to specify minutes, or @samp{s} to
 specify seconds, which is the default.
 
-The duration can also two numbers separated by minus (-) sign.  If a single
-number is given, data is collected from the start of the run until the given
-time. If two numbers are given, data is collected from the first time to the
-second.  If the second time is zero, data is collected until the end of the
-run. If two non-zero numbers are given, the first must be less than the second.
+The duration can also consists of two numbers separated by a minus (@minus{})
+sign.  If a single number is given, data is collected from the start of the run
+until the given time.
+If two numbers are given, data is collected from the first time to the second.
+In case the second time is zero, data is collected until the end of the run.
+If two non-zero numbers are given, the first must be less than the second.
 
 @item -n
 @ifclear man
@@ -243,8 +253,8 @@ enclose the @var{regex} in single quotes.  The default is @samp{-F on}.
 @end ifclear
 
 Specify archiving of binaries and other files.  In addition to disable this
-feature (off), or enable archiving off all loadobjects and sources (on),
-the  other  op tions support a more refined selection.
+feature (@samp{off}), or enable archiving off all loadobjects and sources
+(@samp{on}), the other options support a more refined selection.
 
 All of these options enable archiving, but the keyword controls what exactly
 is selected: all load objects (ldobjects), all source files (src), the
@@ -257,9 +267,9 @@ The default is @samp{-a ldobjects}.
 @IndexSubentry{Options, @code{-S}}
 @end ifclear
 
-Disable (off), or enable (on) periodic sampling of process-wide resource
-utilization. By default, sampling occurs every second. Use the @var{<seconds>}
-option to change this.  The default is @samp{-S on}.
+Disable (off), or enable (on) periodic sampling of process-wide
+resource utilization.  By default, sampling occurs every second.  Use the
+@var{<seconds>} option to change this.  The default is @samp{-S on}.
 
 @item -y @var{<signal>}[,r]
 @ifclear man
@@ -267,11 +277,11 @@ option to change this.  The default is @samp{-S on}.
 @end ifclear
 
 Controls recording of data with the signal named @var{<signal>}, referred to
-as the pause-resume signal. Whenever the given signal is delivered to the
+as the pause-resume signal.  Whenever the given signal is delivered to the
 process, switch between paused (no data is recorded) and resumed (data is
 recorded) states.
 
-By default, data collection begins in the paused state. If the optional
+By default, data collection begins in the paused state.  If the optional
 @samp{r} is given, data collection begins in the resumed state and data
 collection begins immediately.
 
@@ -283,8 +293,9 @@ not used by the target can be used.
 @IndexSubentry{Options, @code{-l}}
 @end ifclear
 
-Specify a signal that will trigger a sample of process-wide resource utilization.
-When the named @var{<signal>} is delivered to the process, a sample is recorded.
+Specify a signal that will trigger a sample of process-wide resource
+utilization.  When the named @var{<signal>} is delivered to the process,
+a sample is recorded.
 
 The signal can be specified using the full name, without the initial
 letters @code{SIG}, or the signal number.  Note that the @command{kill}
@@ -299,9 +310,10 @@ different.
 @end ifclear
 
 Enable synchronization wait tracing, where @var{<option>} is used to define the
-specifics of the tracing (on, off, @var{<threshold>}, or all).  The API is 
+specifics of the tracing (on, off, @var{<threshold>}, or all).  The API is
 selected through the setting for @var{<API>}: @samp{n} selects native/Pthreads,
-@samp{j} selects Java, and @samp{nj} selects both.  The default is @samp{-s off}.
+@samp{j} selects Java, and @samp{nj} selects both.  The default is
+@samp{-s off}.
 
 @item -H @{off|on@}
 @ifclear man
@@ -340,10 +352,19 @@ gprofng can provide more details, but this is not a requirement.
 @c SEEALSO section
 @c ----------------------------------------------------------------------------
 
-@ManPageStart{SEEALSO}
+@ManPageStart{SEE ALSO}
 @c man begin SEEALSO
 
-gprofng(1), gp-archive(1), gp-display-html(1), gp-display-src(1), gp-display-text(1)
+gprofng(1),
+gp-archive(1),
+gp-display-gui(1),
+gp-display-html(1),
+gp-display-src(1),
+gp-display-text(1)
+
+@iftex
+@vspace{1}
+@end iftex
 
 The user guide for gprofng is maintained as a Texinfo manual.  If the
 @command{info} and @command{gprofng} programs are correctly installed, the

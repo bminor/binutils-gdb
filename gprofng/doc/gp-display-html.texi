@@ -1,11 +1,11 @@
 @c ----------------------------------------------------------------------------
-@c This is the Texinfo source file for the gp-collect-app man page.
+@c This is the Texinfo source file for the gp-display-html man page.
 @c
 @c Author: Ruud van der Pas
 @c ----------------------------------------------------------------------------
 @ifset man
 \input texinfo @c -*-texinfo-*-
-@setfilename gprofng display html
+@setfilename gp-display-html
 @settitle Generate an HTML based directory structure to browse the profiles
 @include gp-macros.texi
 @end ifset
@@ -54,7 +54,8 @@
 @ManPageStart{NAME}
 @c man begin NAME
 
-gprofng display html - Generate an HTML based directory structure to browse the profiles
+gp-display-html - Generate an HTML based directory structure to browse the
+profiles
 
 @c man end
 @ManPageEnd{}
@@ -107,85 +108,87 @@ Print the version number and exit.
 
 Print usage information and exit.
 
-@item --verbose @{on|off@}
+@item --verbose
 @ifclear man
 @IndexSubentry{Options, @code{--verbose}}
 @end ifclear
 
-Enable (@samp{on}) or disable (@samp{off)} verbose mode.
-The default is @samp{off}.
+Enable verbose mode to show diagnostic messages about the processing of the
+data.  By default verbose mode is disabled.
 
-@item --debug @{on|s|m|l|xl|off@}
-@item -d      @{on|s|m|l|xl|off@}
+@item -d [@var{db-vol-size}], --debug[=@var{db-vol-size}]
 @ifclear man
 @IndexSubentry{Options, @code{-d}}
 @IndexSubentry{Options, @code{--debug}}
 @end ifclear
 
-Control the printing of run time information to assist with troubleshooting,
-or further development of this tool.  The keyword is case insensitive.
-A setting of @samp{on} gives a modest amount of information. The keywords
-@samp{s}, @samp{m}, @samp{l}, and @samp{xl} give an increasing amount of
-information, while @samp{off} disables the printing of debug information.
-This is also the default.
+Control the printing of run time debug information to assist with the
+troubleshooting, or further development of this tool.
 
-Note that currently @samp{on}, @samp{s}, @samp{m}, and @samp{l} are
-equivalent.  This is expected to change in future updates.
+The @var{db-vol-size} parameter controls the output volume and is one from
+the list @samp{s}, @samp{S}, @samp{m}, @samp{M}, @samp{l}, @samp{L}, @samp{xl},
+or @samp{XL}.  If @var{db-vol-size} is not set, a modest amount of information
+is printed.  This is equivalent to select @samp{s}, or @samp{S}.  The volume
+of data goes up as the size increases.  Note that currently @samp{l/L} is
+equivalent to @samp{xl/XL}, but this is expected to change in future updates.
+By default debug mode is disabled.
 
-@item ---highlight-percentage @var{value}
-@item -hp @var{value}
+@item --highlight-percentage=@var{value}
 @ifclear man
 @IndexSubentry{Options, @code{--highlight-percentage}}
-@IndexSubentry{Options, @code{-hp}}
 @end ifclear
 
 Set a percentage value in the interval [0,100] to select and color code source
 lines, as well as instructions, that are within this percentage of the maximum
-metric value(s).  The default is 90 (%).
+metric value(s).  The default is 90 (%).  A value of zero disables this
+feature.
 
-A value of zero @samp{(-hp 0)} disables this feature.
-
-@item --output @var{dirname}
-@item -o       @var{dirname}
+@item -o @var{dirname}, --output=@var{dirname}
 @ifclear man
-@IndexSubentry{Options, @code{--output}}
 @IndexSubentry{Options, @code{-o}}
+@IndexSubentry{Options, @code{--output}}
 @end ifclear
 
-Use @var{dirname} as the directory name to store the HTML files in.
-The default name is @samp{display.<n>.html} with @var{<n>} the first
-positive integer number not in use.  An existing directory with the
-same name is not overwritten.
+Use @var{dirname} as the directory name to store the results in.  In
+absence of this option, the default name is @samp{display.<n>.html}.
+This directory is created in the current directory.
+The number @var{<n>} is the first positive integer number not in use in
+this naming scheme.  An existing directory with the same name is not
+overwritten.
+In case the directory exists already, an error message is printed and
+the tool terminates.
 
-@item --overwrite @var{dirname}
-@item -O          @var{dirname}
+@item -O @var{dirname}, --overwrite=@var{dirname}
 @ifclear man
-@IndexSubentry{Options, @code{--overwrite}}
 @IndexSubentry{Options, @code{-O}}
+@IndexSubentry{Options, @code{--overwrite}}
 @end ifclear
 
-Use @var{dirname} as the directory name to store the HTML files in.
+Use @var{dirname} as the directory name to store the results in.  In
+absence of this option, the default name is @samp{display.<n>.html}.
+This directory is created in the current directory.
+The number @var{<n>} is the first positive integer number not in use in
+this naming scheme.  An existing directory with the same name is silently
+overwritten.
 
-@item --quiet @{on|off@}
-@item -q      @{on|off@}
+@item -q,  --quiet
 @ifclear man
-@IndexSubentry{Options, @code{--quiet}}
 @IndexSubentry{Options, @code{-q}}
+@IndexSubentry{Options, @code{--quiet}}
 @end ifclear
 
-Control the display of all warning, debug and verbose messages.
-If set to @samp{on}, the settings for verbose, warnings and debug are ignored.
-By default the quiet mode is disabled (@samp{-q off}).
+Disable the display of all warning, debug, verbose and any other messages.
+If enabled, the settings for verbose and debug are accepted, but ignored.
+With this option, there is no screen output, other than errors.  By default
+quiet mode is disabled.
 
-@item --warnings @{on|off@}
-@item -w         @{on|off@}
+@item --nowarnings
 @ifclear man
-@IndexSubentry{Options, @code{--warnings}}
-@IndexSubentry{Options, @code{-w}}
+@IndexSubentry{Options, @code{--nowarnings}}
 @end ifclear
 
-Enable (@samp{on}), or disable (@samp{off}) run time warning messages from
-the tool. By default these are enabled.
+Disable the printing of warning messages on stdout.  By default warning
+messages are printed.
 
 @end table
 
@@ -199,11 +202,51 @@ the tool. By default these are enabled.
 @ManPageStart{NOTES}
 @c man begin NOTES
 
-When setting a directory name for the HTML files to be stored in, make sure that
-umask is set to the correct access permissions.
+@itemize @minus
 
-Regardless of the setting for the warning messages, any warnings are accessible
-through the main @file{index.html} page.
+@item
+The options and values are case sensitive.
+
+@item
+In this release, the option syntax has changed to be more compliant with other
+tools and commands.
+
+The options that used to have an @samp{on} or @samp{off} value only, now act
+as a switch.  The option negates the default setting.  For example, by
+default, verbose mode is disabled.  It is enabled by using the
+@samp{--verbose} option.
+
+The long options, those starting with @code{--}, that require a value, expect
+the @code{=} sign between the option and the value.
+
+While the previous syntax and choices are accepted still, we strongly
+recommend to change the usage of the options according to the new syntax
+and values.  At some point, these legacy settings may no longer be accepted.
+
+To assist with the transition, a warning message is shown if the legacy
+syntax, or value, or both, are used.
+
+@item
+The @samp{-hp} option is still accepted, but it will be deprecated in a
+future release.  Use the @samp{--highlight-percentage} option instead.
+
+@item
+When setting a directory name for the HTML files to be stored in, make sure
+that umask is set to the correct access permissions.
+
+@item
+Regardless of the setting for the warning messages, if there are warnings, they
+are accessible through the main @file{index.html} page.
+
+@item
+The tool tries to accumulate as many warnings and errors as possible, before
+taking action.  In this way, it is easier to address multiple issues at
+once.  As a result of this approach, it may be that the messages do not show
+immediately.  In particular, warnings are shown towards the end of the
+execution, but one or more errors will terminate execution before the
+processing begins.
+
+@end itemize
 
 @c man end
 @ManPageEnd{}
@@ -212,10 +255,19 @@ through the main @file{index.html} page.
 @c SEEALSO section
 @c ----------------------------------------------------------------------------
 
-@ManPageStart{SEEALSO}
+@ManPageStart{SEE ALSO}
 @c man begin SEEALSO
 
-gprofng(1), gp-archive(1), gp-collect-app(1), gp-display-src(1), gp-display-text(1)
+gprofng(1),
+gp-archive(1),
+gp-collect-app(1),
+gp-display-gui(1),
+gp-display-src(1),
+gp-display-text(1)
+
+@iftex
+@vspace{1}
+@end iftex
 
 The user guide for gprofng is maintained as a Texinfo manual.  If the
 @command{info} and @command{gprofng} programs are correctly installed, the
