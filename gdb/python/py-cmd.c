@@ -183,7 +183,10 @@ cmdpy_completer_helper (struct cmd_list_element *command,
   gdbpy_ref<> textobj (PyUnicode_Decode (text, strlen (text), host_charset (),
 					 NULL));
   if (textobj == NULL)
-    error (_("Could not convert argument to Python string."));
+    {
+      gdbpy_print_stack ();
+      error (_("Could not convert argument to Python string."));
+    }
 
   gdbpy_ref<> wordobj;
   if (word == NULL)
@@ -196,17 +199,22 @@ cmdpy_completer_helper (struct cmd_list_element *command,
       wordobj.reset (PyUnicode_Decode (word, strlen (word), host_charset (),
 				       NULL));
       if (wordobj == NULL)
-	error (_("Could not convert argument to Python string."));
+	{
+	  gdbpy_print_stack ();
+	  error (_("Could not convert argument to Python string."));
+	}
     }
 
   gdbpy_ref<> resultobj (PyObject_CallMethodObjArgs ((PyObject *) obj,
 						     complete_cst,
 						     textobj.get (),
 						     wordobj.get (), NULL));
-  if (resultobj == NULL)
+
+  /* Check if an exception was raised by the Command.complete method.  */
+  if (resultobj == nullptr)
     {
-      /* Just swallow errors here.  */
-      PyErr_Clear ();
+      gdbpy_print_stack_or_quit ();
+      error (_("exception raised during Command.complete method"));
     }
 
   return resultobj;
@@ -240,10 +248,7 @@ cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
       long value;
 
       if (!gdb_py_int_as_long (resultobj.get (), &value))
-	{
-	  /* Ignore.  */
-	  PyErr_Clear ();
-	}
+	gdbpy_print_stack ();
       else if (value >= 0 && value < (long) N_COMPLETERS)
 	{
 	  completer_handle_brkchars_ftype *brkchars_fn;
@@ -283,10 +288,7 @@ cmdpy_completer (struct cmd_list_element *command,
       long value;
 
       if (! gdb_py_int_as_long (resultobj.get (), &value))
-	{
-	  /* Ignore.  */
-	  PyErr_Clear ();
-	}
+	gdbpy_print_stack ();
       else if (value >= 0 && value < (long) N_COMPLETERS)
 	completers[value].completer (command, tracker, text, word);
     }
@@ -295,36 +297,36 @@ cmdpy_completer (struct cmd_list_element *command,
       gdbpy_ref<> iter (PyObject_GetIter (resultobj.get ()));
 
       if (iter == NULL)
-	return;
+	{
+	  gdbpy_print_stack ();
+	  return;
+	}
 
-      bool got_matches = false;
       while (true)
 	{
 	  gdbpy_ref<> elt (PyIter_Next (iter.get ()));
 	  if (elt == NULL)
-	    break;
+	    {
+	      if (PyErr_Occurred() != nullptr)
+		gdbpy_print_stack ();
+	      break;
+	    }
 
 	  if (! gdbpy_is_string (elt.get ()))
 	    {
 	      /* Skip problem elements.  */
 	      continue;
 	    }
+
 	  gdb::unique_xmalloc_ptr<char>
 	    item (python_string_to_host_string (elt.get ()));
 	  if (item == NULL)
 	    {
-	      /* Skip problem elements.  */
-	      PyErr_Clear ();
+	      gdbpy_print_stack ();
 	      continue;
 	    }
 	  tracker.add_completion (std::move (item));
-	  got_matches = true;
 	}
-
-      /* If we got some results, ignore problems.  Otherwise, report
-	 the problem.  */
-      if (got_matches && PyErr_Occurred ())
-	PyErr_Clear ();
     }
 }
 

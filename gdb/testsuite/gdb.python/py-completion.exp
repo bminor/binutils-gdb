@@ -87,6 +87,17 @@ gdb_exit
 gdb_start
 gdb_test_no_output "source ${pyfile}" "load python file again"
 
+# Check that GDB prints exceptions raised by Command.complete calls.
+# This first command raises an exception during the brkchars phase of
+# completion.
+gdb_test "complete complete_brkchar_exception " \
+    "Python Exception <class 'gdb\\.GdbError'>: brkchars exception"
+
+# In this test the brkchars phase of completion is fine, but an
+# exception is raised during the actual completion phase.
+gdb_test "complete complete_raise_exception " \
+    "Python Exception <class 'gdb\\.GdbError'>: completion exception"
+
 gdb_test_sequence "complete completel" \
     "list all completions of 'complete completel'" {
 	"completelimit1"
