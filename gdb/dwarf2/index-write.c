@@ -39,6 +39,7 @@
 #include "objfiles.h"
 #include "ada-lang.h"
 #include "dwarf2/tag.h"
+#include "gdbsupport/gdb_tilde_expand.h"
 
 #include <algorithm>
 #include <cmath>
@@ -1548,6 +1549,8 @@ save_gdb_index_command (const char *arg, int from_tty)
   if (!*arg)
     error (_("usage: save gdb-index [-dwarf-5] DIRECTORY"));
 
+  std::string directory (gdb_tilde_expand (arg));
+
   for (objfile *objfile : current_program_space->objfiles ())
     {
       /* If the objfile does not correspond to an actual file, skip it.  */
@@ -1567,8 +1570,8 @@ save_gdb_index_command (const char *arg, int from_tty)
 	      if (dwz != NULL)
 		dwz_basename = lbasename (dwz->filename ());
 
-	      write_dwarf_index (per_objfile->per_bfd, arg, basename,
-				 dwz_basename, index_kind);
+	      write_dwarf_index (per_objfile->per_bfd, directory.c_str (),
+				 basename, dwz_basename, index_kind);
 	    }
 	  catch (const gdb_exception_error &except)
 	    {
