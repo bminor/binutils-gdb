@@ -534,8 +534,16 @@ language_defn::read_var_value (struct symbol *var,
     case LOC_CONST:
       if (is_dynamic_type (type))
 	{
-	  /* Value is a constant byte-sequence and needs no memory access.  */
-	  type = resolve_dynamic_type (type, {}, /* Unused address.  */ 0);
+	  gdb_byte bytes[sizeof (LONGEST)];
+
+	  size_t len = std::min (sizeof (LONGEST), (size_t) type->length ());
+	  store_unsigned_integer (bytes, len,
+				  type_byte_order (type),
+				  var->value_longest ());
+	  gdb::array_view<const gdb_byte> view (bytes, len);
+
+	  /* Value is a constant byte-sequence.  */
+	  type = resolve_dynamic_type (type, view, /* Unused address.  */ 0);
 	}
       /* Put the constant back in target format. */
       v = value::allocate (type);
@@ -575,8 +583,11 @@ language_defn::read_var_value (struct symbol *var,
     case LOC_CONST_BYTES:
       if (is_dynamic_type (type))
 	{
-	  /* Value is a constant byte-sequence and needs no memory access.  */
-	  type = resolve_dynamic_type (type, {}, /* Unused address.  */ 0);
+	  gdb::array_view<const gdb_byte> view (var->value_bytes (),
+						type->length ());
+
+	  /* Value is a constant byte-sequence.  */
+	  type = resolve_dynamic_type (type, view, /* Unused address.  */ 0);
 	}
       v = value::allocate (type);
       memcpy (v->contents_raw ().data (), var->value_bytes (),
