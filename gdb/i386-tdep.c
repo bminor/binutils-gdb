@@ -8295,6 +8295,72 @@ i386_floatformat_for_type (struct gdbarch *gdbarch,
   return default_floatformat_for_type (gdbarch, name, len);
 }
 
+/* Compute an XCR0 mask based on a target description.  */
+
+static uint64_t
+i386_xcr0_from_tdesc (const struct target_desc *tdesc)
+{
+  if (! tdesc_has_registers (tdesc))
+    return 0;
+
+  const struct tdesc_feature *feature_core;
+
+  const struct tdesc_feature *feature_sse, *feature_avx, *feature_mpx,
+			     *feature_avx512, *feature_pkeys;
+
+  /* Get core registers.  */
+  feature_core = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.core");
+  if (feature_core == NULL)
+    return 0;
+
+  /* Get SSE registers.  */
+  feature_sse = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.sse");
+
+  /* Try AVX registers.  */
+  feature_avx = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx");
+
+  /* Try MPX registers.  */
+  feature_mpx = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.mpx");
+
+  /* Try AVX512 registers.  */
+  feature_avx512 = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx512");
+
+  /* Try PKEYS  */
+  feature_pkeys = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.pkeys");
+
+  /* The XCR0 bits.  */
+  uint64_t xcr0 = X86_XSTATE_X87;
+
+  if (feature_sse)
+    xcr0 |= X86_XSTATE_SSE;
+
+  if (feature_avx)
+    {
+      /* AVX register description requires SSE register description.  */
+      if (!feature_sse)
+	return 0;
+
+      xcr0 |= X86_XSTATE_AVX;
+    }
+
+  if (feature_mpx)
+    xcr0 |= X86_XSTATE_MPX_MASK;
+
+  if (feature_avx512)
+    {
+      /* AVX512 register description requires AVX register description.  */
+      if (!feature_avx)
+	return 0;
+
+      xcr0 |= X86_XSTATE_AVX512;
+    }
+
+  if (feature_pkeys)
+    xcr0 |= X86_XSTATE_PKRU;
+
+  return xcr0;
+}
+
 static int
 i386_validate_tdesc_p (i386_gdbarch_tdep *tdep,
 		       struct tdesc_arch_data *tdesc_data)
@@ -8505,6 +8571,15 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int num_bnd_cooked;
 
   x86_xsave_layout xsave_layout = target_fetch_x86_xsave_layout ();
+
+  /* If the target did not provide an XSAVE layout but the target
+     description includes registers from the XSAVE extended region,
+     use a fallback XSAVE layout.  Specifically, this fallback layout
+     is used when writing out a local core dump for a remote
+     target.  */
+  if (xsave_layout.sizeof_xsave == 0)
+    xsave_layout
+      = i387_fallback_xsave_layout (i386_xcr0_from_tdesc (info.target_desc));
 
   /* If there is already a candidate, use it.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);

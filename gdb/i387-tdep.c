@@ -987,6 +987,54 @@ i387_guess_xsave_layout (uint64_t xcr0, size_t xsave_size,
   return true;
 }
 
+/* See i387-tdep.h.  */
+
+x86_xsave_layout
+i387_fallback_xsave_layout (uint64_t xcr0)
+{
+  x86_xsave_layout layout;
+
+  if (HAS_PKRU (xcr0))
+    {
+      /* Intel CPUs supporting PKRU.  */
+      layout.avx_offset = 576;
+      layout.bndregs_offset = 960;
+      layout.bndcfg_offset = 1024;
+      layout.k_offset = 1088;
+      layout.zmm_h_offset = 1152;
+      layout.zmm_offset = 1664;
+      layout.pkru_offset = 2688;
+      layout.sizeof_xsave = 2696;
+    }
+  else if (HAS_AVX512 (xcr0))
+    {
+      /* Intel CPUs supporting AVX512.  */
+      layout.avx_offset = 576;
+      layout.bndregs_offset = 960;
+      layout.bndcfg_offset = 1024;
+      layout.k_offset = 1088;
+      layout.zmm_h_offset = 1152;
+      layout.zmm_offset = 1664;
+      layout.sizeof_xsave = 2688;
+    }
+  else if (HAS_MPX (xcr0))
+    {
+      /* Intel CPUs supporting MPX.  */
+      layout.avx_offset = 576;
+      layout.bndregs_offset = 960;
+      layout.bndcfg_offset = 1024;
+      layout.sizeof_xsave = 1088;
+    }
+  else if (HAS_AVX (xcr0))
+    {
+      /* Intel and AMD CPUs supporting AVX.  */
+      layout.avx_offset = 576;
+      layout.sizeof_xsave = 832;
+    }
+
+  return layout;
+}
+
 /* Extract from XSAVE a bitset of the features that are available on the
    target, but which have not yet been enabled.  */
 
