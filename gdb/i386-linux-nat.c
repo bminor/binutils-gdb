@@ -652,7 +652,7 @@ i386_linux_nat_target::low_resume (ptid_t ptid, int step, enum gdb_signal signal
   int pid = ptid.lwp ();
   int request;
 
-  if (catch_syscall_enabled () > 0)
+  if (catch_syscall_enabled ())
    request = PTRACE_SYSCALL;
   else
     request = PTRACE_CONT;

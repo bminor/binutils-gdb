@@ -465,8 +465,10 @@ is_syscall_catchpoint_enabled (struct breakpoint *bp)
     return 0;
 }
 
-int
-catch_syscall_enabled (void)
+/* See breakpoint.h.  */
+
+bool
+catch_syscall_enabled ()
 {
   struct catch_syscall_inferior_data *inf_data
     = get_catch_syscall_inferior_data (current_inferior ());

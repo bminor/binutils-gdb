@@ -509,7 +509,7 @@ nbsd_resume(nbsd_nat_target *target, ptid_t ptid, int step,
 	  perror_with_name (("ptrace"));
     }
 
-  if (catch_syscall_enabled () > 0)
+  if (catch_syscall_enabled ())
     request = PT_SYSCALL;
   else
     request = PT_CONTINUE;

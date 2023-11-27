@@ -262,7 +262,7 @@ inf_ptrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
        single-threaded processes, so simply resume the inferior.  */
     ptid = ptid_t (inferior_ptid.pid ());
 
-  if (catch_syscall_enabled () > 0)
+  if (catch_syscall_enabled ())
     request = PT_SYSCALL;
   else
     request = PT_CONTINUE;

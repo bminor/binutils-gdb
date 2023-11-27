@@ -5080,7 +5080,7 @@ handle_syscall_event (struct execution_control_state *ecs)
   syscall_number = ecs->ws.syscall_number ();
   ecs->event_thread->set_stop_pc (regcache_read_pc (regcache));
 
-  if (catch_syscall_enabled () > 0
+  if (catch_syscall_enabled ()
       && catching_syscall_number (syscall_number))
     {
       infrun_debug_printf ("syscall number=%d", syscall_number);

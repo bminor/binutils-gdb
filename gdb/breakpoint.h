@@ -1868,9 +1868,8 @@ extern void set_breakpoint_condition (struct breakpoint *b, const char *exp,
 extern void set_breakpoint_condition (int bpnum, const char *exp,
 				      int from_tty, bool force);
 
-/* Checks if we are catching syscalls or not.
-   Returns 0 if not, greater than 0 if we are.  */
-extern int catch_syscall_enabled (void);
+/* Checks if we are catching syscalls or not.  */
+extern bool catch_syscall_enabled ();
 
 /* Checks if we are catching syscalls with the specific
    syscall_number.  Used for "filtering" the catchpoints.
