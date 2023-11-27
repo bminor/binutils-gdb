@@ -1523,6 +1523,48 @@ write_dwarf_index (dwarf2_per_bfd *per_bfd, const char *dir,
     dwz_index_wip->finalize ();
 }
 
+/* Options structure for the 'save gdb-index' command.  */
+
+struct save_gdb_index_options
+{
+  bool dwarf_5 = false;
+};
+
+/* The option_def list for the 'save gdb-index' command.  */
+
+static const gdb::option::option_def save_gdb_index_options_defs[] = {
+  gdb::option::boolean_option_def<save_gdb_index_options> {
+    "dwarf-5",
+    [] (save_gdb_index_options *opt) { return &opt->dwarf_5; },
+    nullptr, /* show_cmd_cb */
+    nullptr /* set_doc */
+  }
+};
+
+/* Create an options_def_group for the 'save gdb-index' command.  */
+
+static gdb::option::option_def_group
+make_gdb_save_index_options_def_group (save_gdb_index_options *opts)
+{
+  return {{save_gdb_index_options_defs}, opts};
+}
+
+/* Completer for the "save gdb-index" command.  */
+
+static void
+gdb_save_index_cmd_completer (struct cmd_list_element *ignore,
+			      completion_tracker &tracker,
+			      const char *text, const char *word)
+{
+  auto grp = make_gdb_save_index_options_def_group (nullptr);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp))
+    return;
+
+  word = advance_to_filename_complete_word_point (tracker, text);
+  filename_completer (ignore, tracker, text, word);
+}
+
 /* Implementation of the `save gdb-index' command.
 
    Note that the .gdb_index file format used by this command is
@@ -1530,26 +1572,19 @@ write_dwarf_index (dwarf2_per_bfd *per_bfd, const char *dir,
    there.  */
 
 static void
-save_gdb_index_command (const char *arg, int from_tty)
+save_gdb_index_command (const char *args, int from_tty)
 {
-  const char dwarf5space[] = "-dwarf-5 ";
-  dw_index_kind index_kind = dw_index_kind::GDB_INDEX;
+  save_gdb_index_options opts;
+  const auto group = make_gdb_save_index_options_def_group (&opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group);
 
-  if (!arg)
-    arg = "";
-
-  arg = skip_spaces (arg);
-  if (strncmp (arg, dwarf5space, strlen (dwarf5space)) == 0)
-    {
-      index_kind = dw_index_kind::DEBUG_NAMES;
-      arg += strlen (dwarf5space);
-      arg = skip_spaces (arg);
-    }
-
-  if (!*arg)
+  if (args == nullptr || *args == '\0')
     error (_("usage: save gdb-index [-dwarf-5] DIRECTORY"));
 
-  std::string directory (gdb_tilde_expand (arg));
+  std::string directory (gdb_tilde_expand (args));
+  dw_index_kind index_kind
+    = (opts.dwarf_5 ? dw_index_kind::DEBUG_NAMES : dw_index_kind::GDB_INDEX);
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
@@ -1675,5 +1710,5 @@ No options create one file with .gdb-index extension for pre-DWARF-5\n\
 compatible .gdb_index section.  With -dwarf-5 creates two files with\n\
 extension .debug_names and .debug_str for DWARF-5 .debug_names section."),
 	       &save_cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer_handle_brkchars (c, gdb_save_index_cmd_completer);
 }
