@@ -40,12 +40,12 @@
 
 #include "gdb_curses.h"
 
-#define PROC_PREFIX             "In: "
-#define LINE_PREFIX             "L"
-#define PC_PREFIX               "PC: "
+static const std::string PROC_PREFIX = "In: ";
+static const std::string LINE_PREFIX = "L";
+static const std::string PC_PREFIX = "PC: ";
 
 /* Strings to display in the TUI status line.  */
-#define SINGLE_KEY              "(SingleKey)"
+static const std::string SINGLE_KEY = "(SingleKey)";
 
 /* Minimum/Maximum length of some fields displayed in the TUI status
    line.  */
@@ -107,16 +107,15 @@ tui_locator_window::make_status_line () const
   int pc_width = pc_out.size ();
 
   /* First determine the amount of proc name width we have available.
-     The +1 are for a space separator between fields.
-     The -1 are to take into account the \0 counted by sizeof.  */
+     The +1 are for a space separator between fields.  */
   proc_width = (status_size
 		- (target_width + 1)
 		- (pid_width + 1)
-		- (sizeof (PROC_PREFIX) - 1 + 1)
-		- (sizeof (LINE_PREFIX) - 1 + line_width + 1)
-		- (sizeof (PC_PREFIX) - 1 + pc_width + 1)
+		- (PROC_PREFIX.size () + 1)
+		- (LINE_PREFIX.size () + line_width + 1)
+		- (PC_PREFIX.size () + pc_width + 1)
 		- (tui_current_key_mode == TUI_SINGLE_KEY_MODE
-		   ? (sizeof (SINGLE_KEY) - 1 + 1)
+		   ? (SINGLE_KEY.size () + 1)
 		   : 0));
 
   /* If there is no room to print the function name, try by removing
@@ -131,11 +130,11 @@ tui_locator_window::make_status_line () const
 	  pid_width = 0;
 	  if (proc_width <= MIN_PROC_WIDTH)
 	    {
-	      proc_width += pc_width + sizeof (PC_PREFIX) - 1 + 1;
+	      proc_width += pc_width + PC_PREFIX.size () + 1;
 	      pc_width = 0;
 	      if (proc_width < 0)
 		{
-		  proc_width += line_width + sizeof (LINE_PREFIX) - 1 + 1;
+		  proc_width += line_width + LINE_PREFIX.size () + 1;
 		  line_width = 0;
 		  if (proc_width < 0)
 		    proc_width = 0;
@@ -156,7 +155,7 @@ tui_locator_window::make_status_line () const
   /* Show whether we are in SingleKey mode.  */
   if (tui_current_key_mode == TUI_SINGLE_KEY_MODE)
     {
-      string.puts (SINGLE_KEY);
+      string.puts (SINGLE_KEY.c_str ());
       string.puts (" ");
     }
 
@@ -165,19 +164,19 @@ tui_locator_window::make_status_line () const
     {
       const std::string &proc_name = tui_location.proc_name ();
       if (proc_name.size () > proc_width)
-	string.printf ("%s%*.*s* ", PROC_PREFIX,
+	string.printf ("%s%*.*s* ", PROC_PREFIX.c_str (),
 		       1 - proc_width, proc_width - 1, proc_name.c_str ());
       else
-	string.printf ("%s%*.*s ", PROC_PREFIX,
+	string.printf ("%s%*.*s ", PROC_PREFIX.c_str (),
 		       -proc_width, proc_width, proc_name.c_str ());
     }
 
   if (line_width > 0)
-    string.printf ("%s%*.*s ", LINE_PREFIX,
+    string.printf ("%s%*.*s ", LINE_PREFIX.c_str (),
 		   -line_width, line_width, line_buf);
   if (pc_width > 0)
     {
-      string.puts (PC_PREFIX);
+      string.puts (PC_PREFIX.c_str ());
       string.puts (pc_buf);
     }
 
