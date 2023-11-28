@@ -37,6 +37,10 @@
 * Add support for various T-Head extensions (XTheadVector, XTheadZvlsseg
   and XTheadZvamo) from version 2.3.0 of the T-Head ISA manual.
 
+* The BPF assembler now uses semi-colon (;) to separate statements, and
+  therefore they cannot longer be used to begin line comments. This matches the
+  behavior of the clang/LLVM BPF assembler.
+
 Changes in 2.41:
 
 * Add support for the KVX instruction set.

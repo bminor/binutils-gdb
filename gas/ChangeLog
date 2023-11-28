@@ -1,5 +1,10 @@
 2023-11-28  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* NEWS: Add entry about change of comment syntax in the BPF
+	assembler.
+
+2023-11-28  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* config/tc-bpf.c: Semicolon does not start a comment, but
 	separates multiple commands on a single line.
 	* testsuite/gas/bpf/alu-pseudoc.s: Adapt test accordingly.
