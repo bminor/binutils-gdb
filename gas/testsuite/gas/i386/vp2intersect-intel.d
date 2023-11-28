@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw -Mintel
 #name: i386 VP2INTERSECT insns (Intel disassembly)
 #source: vp2intersect.s

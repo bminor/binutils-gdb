@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: i386 AVX512CD/VL insns
 #source: avx512cd_vl.s

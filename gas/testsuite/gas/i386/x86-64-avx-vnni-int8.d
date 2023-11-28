@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: x86_64 AVX-VNNI-INT8 insns
 #source: x86-64-avx-vnni-int8.s

@@ -1,4 +1,3 @@
-#as:
 #objdump: -dwMintel
 #name: x86-64 PREFETCHI insns (Intel disassembly)
 #source: x86-64-prefetchi.s

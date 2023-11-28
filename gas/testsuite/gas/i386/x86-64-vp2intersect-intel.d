@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw -Mintel
 #name: x86_64 VP2INTERSECT insns (Intel disassembly)
 #source: x86-64-vp2intersect.s

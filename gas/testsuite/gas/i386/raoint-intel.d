@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw -Mintel
 #name: i386 RAO_INT insns (Intel disassembly)
 #source: raoint.s

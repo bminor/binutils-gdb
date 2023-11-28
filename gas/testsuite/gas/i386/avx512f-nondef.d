@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: i386 AVX512F insns with nondefault values in ignored / reserved bits
 

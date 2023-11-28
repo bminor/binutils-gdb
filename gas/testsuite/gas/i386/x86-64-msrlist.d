@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: x86_64 MSRLIST insns
 #source: x86-64-msrlist.s

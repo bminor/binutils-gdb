@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: i386 AVX512-FP16,AVX512VL insns
 #source: avx512_fp16_vl.s

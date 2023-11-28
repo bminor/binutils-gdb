@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: i386 WRMSRNS insns
 #source: wrmsrns.s

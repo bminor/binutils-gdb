@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: i386 AVX512BITALG/VL insns
 #source: avx512bitalg_vl.s

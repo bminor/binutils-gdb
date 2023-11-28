@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw -Mintel
 #name: x86_64 AVX-NE-CONVERT insns (Intel disassembly)
 #source: x86-64-avx-ne-convert.s

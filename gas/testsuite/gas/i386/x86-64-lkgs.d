@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: x86_64 LKGS insns
 #source: x86-64-lkgs.s

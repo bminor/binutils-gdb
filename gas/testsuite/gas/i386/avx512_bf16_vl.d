@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: i386 BF16 VL insns
 #source: avx512_bf16_vl.s

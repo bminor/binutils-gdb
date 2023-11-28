@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw -Msuffix
 #name: i386 AVX512F opts insns
 

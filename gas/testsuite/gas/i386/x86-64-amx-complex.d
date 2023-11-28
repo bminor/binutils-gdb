@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: x86_64 AMX-COMPLEX insns
 #source: x86-64-amx-complex.s

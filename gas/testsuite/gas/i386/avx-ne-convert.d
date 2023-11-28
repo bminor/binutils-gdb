@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: i386 AVX-NE-CONVERT insns
 #source: avx-ne-convert.s

@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: x86_64 AMX-FP16 insns
 #source: x86-64-amx-fp16.s

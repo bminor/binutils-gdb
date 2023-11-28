@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw -Mintel
 #name: i386 AVX IFMA insns (Intel disassembly)
 #source: avx-ifma.s

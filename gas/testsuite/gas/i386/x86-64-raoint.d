@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: x86_64 RAO_INT insns
 #source: x86-64-raoint.s

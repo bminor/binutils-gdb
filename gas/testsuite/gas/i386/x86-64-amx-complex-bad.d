@@ -1,4 +1,3 @@
-#as:
 #objdump: -drw
 #name: x86_64 Illegal AMX-COMPLEX insns
 #source: x86-64-amx-complex-bad.s

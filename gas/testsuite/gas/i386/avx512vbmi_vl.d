@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: i386 AVX512VBMI/VL insns
 #source: avx512vbmi_vl.s

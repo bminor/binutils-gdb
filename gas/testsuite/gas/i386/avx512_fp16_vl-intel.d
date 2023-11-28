@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw -Mintel
 #name: i386 AVX512-FP16,AVX512VL insns (Intel disassembly)
 #source: avx512_fp16_vl.s

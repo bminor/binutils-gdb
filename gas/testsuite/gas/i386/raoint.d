@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: i386 RAO_INT insns
 #source: raoint.s

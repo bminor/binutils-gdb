@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw -Mintel
 #name: x86_64 AVX-VNNI-INT8 insns (Intel disassembly)
 #source: x86-64-avx-vnni-int8.s

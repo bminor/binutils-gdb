@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: x86-64 AVX IFMA insns
 #source: x86-64-avx-ifma.s

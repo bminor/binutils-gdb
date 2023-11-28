@@ -1,4 +1,3 @@
-#as:
 #objdump: -drw
 #name: x86_64 Illegal AMX-FP16 insns
 #source: x86-64-amx-fp16-bad.s

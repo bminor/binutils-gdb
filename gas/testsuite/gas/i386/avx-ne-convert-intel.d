@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw -Mintel
 #name: i386 AVX-NE-CONVERT insns (Intel disassembly)
 #source: avx-ne-convert.s

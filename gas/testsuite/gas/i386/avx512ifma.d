@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: i386 AVX512IFMA insns
 #source: avx512ifma.s

@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw -Mintel
 #name: i386 AVX-VNNI-INT8 insns (Intel disassembly)
 #source: avx-vnni-int8.s

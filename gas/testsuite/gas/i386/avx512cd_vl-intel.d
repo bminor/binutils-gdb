@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw -Mintel
 #name: i386 AVX512CD/VL insns (Intel disassembly)
 #source: avx512cd_vl.s

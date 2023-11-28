@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw -Mintel
 #name: x86_64 LKGS insns (Intel disassembly)
 #source: x86-64-lkgs.s

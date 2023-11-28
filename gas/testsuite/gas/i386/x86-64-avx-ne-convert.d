@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: x86_64 AVX-NE-CONVERT insns
 #source: x86-64-avx-ne-convert.s

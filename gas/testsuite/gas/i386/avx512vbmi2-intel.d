@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw -Mintel
 #name: i386 AVX512VBMI2 insns (Intel disassembly)
 #source: avx512vbmi2.s

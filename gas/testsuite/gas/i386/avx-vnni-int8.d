@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: i386 AVX-VNNI-INT8 insns
 #source: avx-vnni-int8.s

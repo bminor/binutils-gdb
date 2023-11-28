@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: i386 VP2INTERSECT insns
 #source: vp2intersect.s

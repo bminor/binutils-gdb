@@ -1,4 +1,3 @@
-#as:
 #objdump: -d -Mintel
 #name: x86_64 AMX-FP16 insns (Intel disassembly)
 #source: x86-64-amx-fp16.s

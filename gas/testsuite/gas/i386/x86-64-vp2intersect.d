@@ -1,4 +1,3 @@
-#as:
 #objdump: -dw
 #name: x86_64 VP2INTERSECT insns
 #source: x86-64-vp2intersect.s
