@@ -841,15 +841,13 @@ remove_inferior_command (const char *args, int from_tty)
 struct inferior *
 add_inferior_with_spaces (void)
 {
-  struct address_space *aspace;
   struct program_space *pspace;
   struct inferior *inf;
 
   /* If all inferiors share an address space on this system, this
      doesn't really return a new address space; otherwise, it
      really does.  */
-  aspace = maybe_new_address_space ();
-  pspace = new program_space (aspace);
+  pspace = new program_space (maybe_new_address_space ());
   inf = add_inferior (0);
   inf->pspace = pspace;
   inf->aspace = pspace->aspace;
@@ -1012,15 +1010,13 @@ clone_inferior_command (const char *args, int from_tty)
 
   for (i = 0; i < copies; ++i)
     {
-      struct address_space *aspace;
       struct program_space *pspace;
       struct inferior *inf;
 
       /* If all inferiors share an address space on this system, this
 	 doesn't really return a new address space; otherwise, it
 	 really does.  */
-      aspace = maybe_new_address_space ();
-      pspace = new program_space (aspace);
+      pspace = new program_space (maybe_new_address_space ());
       inf = add_inferior (0);
       inf->pspace = pspace;
       inf->aspace = pspace->aspace;

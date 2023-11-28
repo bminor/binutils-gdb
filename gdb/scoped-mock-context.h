@@ -38,7 +38,7 @@ struct scoped_mock_context
 
   Target mock_target;
   ptid_t mock_ptid {1, 1};
-  program_space mock_pspace {new address_space ()};
+  program_space mock_pspace {new_address_space ()};
   inferior mock_inferior {mock_ptid.pid ()};
   thread_info mock_thread {&mock_inferior, mock_ptid};
 

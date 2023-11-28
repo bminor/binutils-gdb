@@ -19,16 +19,15 @@
 #define TARGET_DCACHE_H
 
 #include "dcache.h"
+#include "progspace.h"
 
-struct address_space;
+extern void target_dcache_invalidate (address_space_ref_ptr aspace);
 
-extern void target_dcache_invalidate (address_space *aspace);
+extern DCACHE *target_dcache_get (address_space_ref_ptr aspace);
 
-extern DCACHE *target_dcache_get (address_space *aspace);
+extern DCACHE *target_dcache_get_or_init (address_space_ref_ptr aspace);
 
-extern DCACHE *target_dcache_get_or_init (address_space *aspace);
-
-extern int target_dcache_init_p (address_space *aspace);
+extern int target_dcache_init_p (address_space_ref_ptr aspace);
 
 extern int stack_cache_enabled_p (void);
 

@@ -67,4 +67,21 @@ struct refcounted_object_ref_policy
   }
 };
 
+/* A policy class to interface gdb::ref_ptr with a refcounted_object, that
+   deletes the object once the refcount reaches 0..  */
+
+template<typename T>
+struct refcounted_object_delete_ref_policy
+{
+  static void incref (T *obj)
+  { obj->incref (); }
+
+  static void decref (T *obj)
+  {
+    obj->decref ();
+    if (obj->refcount () == 0)
+      delete obj;
+  }
+};
+
 #endif /* COMMON_REFCOUNTED_OBJECT_H */

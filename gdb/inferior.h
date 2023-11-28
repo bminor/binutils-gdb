@@ -584,7 +584,7 @@ public:
   bool removable = false;
 
   /* The address space bound to this inferior.  */
-  struct address_space *aspace = NULL;
+  address_space_ref_ptr aspace;
 
   /* The program space bound to this inferior.  */
   struct program_space *pspace = NULL;

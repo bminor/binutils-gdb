@@ -3463,7 +3463,7 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, const ptid_t wait_ptid)
 	     immediately, and we're not waiting for this LWP.  */
 	  if (!lp->ptid.matches (wait_ptid))
 	    {
-	      if (breakpoint_inserted_here_p (inf->aspace, pc))
+	      if (breakpoint_inserted_here_p (inf->aspace.get (), pc))
 		leave_stopped = 1;
 	    }
 

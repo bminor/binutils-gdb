@@ -1689,7 +1689,8 @@ get_current_frame (void)
 
   if (sentinel_frame == NULL)
     sentinel_frame =
-      create_sentinel_frame (current_program_space, current_inferior ()->aspace,
+      create_sentinel_frame (current_program_space,
+			     current_inferior ()->aspace.get (),
 			     get_thread_regcache (inferior_thread ()),
 			     0, 0).get ();
 
@@ -2024,7 +2025,7 @@ create_new_frame (frame_id id)
   frame_info *fi = FRAME_OBSTACK_ZALLOC (struct frame_info);
 
   fi->next = create_sentinel_frame (current_program_space,
-				    current_inferior ()->aspace,
+				    current_inferior ()->aspace.get (),
 				    get_thread_regcache (inferior_thread ()),
 				    id.stack_addr, id.code_addr).get ();
 

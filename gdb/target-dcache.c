@@ -30,10 +30,10 @@ static const registry<address_space>::key<DCACHE, dcache_deleter>
 /* Target dcache is initialized or not.  */
 
 int
-target_dcache_init_p (address_space *aspace)
+target_dcache_init_p (address_space_ref_ptr aspace)
 {
   DCACHE *dcache
-    = target_dcache_aspace_key.get (aspace);
+    = target_dcache_aspace_key.get (aspace.get ());
 
   return (dcache != NULL);
 }
@@ -41,10 +41,10 @@ target_dcache_init_p (address_space *aspace)
 /* Invalidate the target dcache.  */
 
 void
-target_dcache_invalidate (address_space *aspace)
+target_dcache_invalidate (address_space_ref_ptr aspace)
 {
   DCACHE *dcache
-    = target_dcache_aspace_key.get (aspace);
+    = target_dcache_aspace_key.get (aspace.get ());
 
   if (dcache != NULL)
     dcache_invalidate (dcache);
@@ -54,24 +54,24 @@ target_dcache_invalidate (address_space *aspace)
    initialized yet.  */
 
 DCACHE *
-target_dcache_get (address_space *aspace)
+target_dcache_get (address_space_ref_ptr aspace)
 {
-  return target_dcache_aspace_key.get (aspace);
+  return target_dcache_aspace_key.get (aspace.get ());
 }
 
 /* Return the target dcache.  If it is not initialized yet, initialize
    it.  */
 
 DCACHE *
-target_dcache_get_or_init (address_space *aspace)
+target_dcache_get_or_init (address_space_ref_ptr aspace)
 {
   DCACHE *dcache
-    = target_dcache_aspace_key.get (aspace);
+    = target_dcache_aspace_key.get (aspace.get ());
 
   if (dcache == NULL)
     {
       dcache = dcache_init ();
-      target_dcache_aspace_key.set (aspace, dcache);
+      target_dcache_aspace_key.set (aspace.get (), dcache);
     }
 
   return dcache;

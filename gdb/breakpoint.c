@@ -1723,7 +1723,7 @@ one_breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
   int bptoffset = 0;
 
   if (!breakpoint_address_match (target_info->placed_address_space, 0,
-				 current_program_space->aspace, 0))
+				 current_program_space->aspace.get (), 0))
     {
       /* The breakpoint is inserted in a different address space.  */
       return;
@@ -2409,7 +2409,7 @@ should_be_inserted (struct bp_location *bl)
      a breakpoint.  */
   if ((bl->loc_type == bp_loc_software_breakpoint
        || bl->loc_type == bp_loc_hardware_breakpoint)
-      && stepping_past_instruction_at (bl->pspace->aspace,
+      && stepping_past_instruction_at (bl->pspace->aspace.get (),
 				       bl->address)
       /* The single-step breakpoint may be inserted at the location
 	 we're trying to step if the instruction branches to itself.
@@ -2847,7 +2847,7 @@ insert_bp_location (struct bp_location *bl,
      read the breakpoint instead of returning the data saved in
      the breakpoint location's shadow contents.  */
   bl->target_info.reqstd_address = bl->address;
-  bl->target_info.placed_address_space = bl->pspace->aspace;
+  bl->target_info.placed_address_space = bl->pspace->aspace.get ();
   bl->target_info.length = bl->length;
 
   /* When working with target-side conditions, we must pass all the conditions
@@ -4429,7 +4429,7 @@ bp_location_inserted_here_p (const struct bp_location *bl,
 			     const address_space *aspace, CORE_ADDR pc)
 {
   if (bl->inserted
-      && breakpoint_address_match (bl->pspace->aspace, bl->address,
+      && breakpoint_address_match (bl->pspace->aspace.get (), bl->address,
 				   aspace, pc))
     {
       /* An unmapped overlay can't be a match.  */
@@ -4508,7 +4508,7 @@ hardware_watchpoint_inserted_in_range (const address_space *aspace,
 	continue;
 
       for (bp_location &loc : bpt.locations ())
-	if (loc.pspace->aspace == aspace && loc.inserted)
+	if (loc.pspace->aspace.get () == aspace && loc.inserted)
 	  {
 	    CORE_ADDR l, h;
 
@@ -7327,10 +7327,10 @@ breakpoint_location_address_match (struct bp_location *bl,
 				   const address_space *aspace,
 				   CORE_ADDR addr)
 {
-  return (breakpoint_address_match (bl->pspace->aspace, bl->address,
+  return (breakpoint_address_match (bl->pspace->aspace.get (), bl->address,
 				    aspace, addr)
 	  || (bl->length
-	      && breakpoint_address_match_range (bl->pspace->aspace,
+	      && breakpoint_address_match_range (bl->pspace->aspace.get (),
 						 bl->address, bl->length,
 						 aspace, addr)));
 }
@@ -7347,7 +7347,7 @@ breakpoint_location_address_range_overlap (struct bp_location *bl,
 					   CORE_ADDR addr, int len)
 {
   if (gdbarch_has_global_breakpoints (current_inferior ()->arch ())
-      || bl->pspace->aspace == aspace)
+      || bl->pspace->aspace.get () == aspace)
     {
       int bl_len = bl->length != 0 ? bl->length : 1;
 
@@ -7404,8 +7404,10 @@ breakpoint_locations_match (const struct bp_location *loc1,
     /* We compare bp_location.length in order to cover ranged
        breakpoints.  Keep this in sync with
        bp_location_is_less_than.  */
-    return (breakpoint_address_match (loc1->pspace->aspace, loc1->address,
-				     loc2->pspace->aspace, loc2->address)
+    return (breakpoint_address_match (loc1->pspace->aspace.get (),
+				      loc1->address,
+				      loc2->pspace->aspace.get (),
+				      loc2->address)
 	    && (loc1->loc_type == loc2->loc_type || sw_hw_bps_match)
 	    && loc1->length == loc2->length);
 }
@@ -9565,8 +9567,9 @@ ranged_breakpoint::breakpoint_hit (const struct bp_location *bl,
       || ws.sig () != GDB_SIGNAL_TRAP)
     return 0;
 
-  return breakpoint_address_match_range (bl->pspace->aspace, bl->address,
-					 bl->length, aspace, bp_addr);
+  return breakpoint_address_match_range (bl->pspace->aspace.get (),
+					 bl->address, bl->length, aspace,
+					 bp_addr);
 }
 
 /* Implement the "resources_needed" method for ranged breakpoints.  */
@@ -12012,7 +12015,7 @@ code_breakpoint::breakpoint_hit (const struct bp_location *bl,
       || ws.sig () != GDB_SIGNAL_TRAP)
     return 0;
 
-  if (!breakpoint_address_match (bl->pspace->aspace, bl->address,
+  if (!breakpoint_address_match (bl->pspace->aspace.get (), bl->address,
 				 aspace, bp_addr))
     return 0;
 

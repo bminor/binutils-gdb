@@ -2321,7 +2321,7 @@ record_btrace_replay_at_breakpoint (struct thread_info *tp)
   if (insn == NULL)
     return 0;
 
-  return record_check_stopped_by_breakpoint (tp->inf->aspace, insn->pc,
+  return record_check_stopped_by_breakpoint (tp->inf->aspace.get (), insn->pc,
 					     &btinfo->stop_reason);
 }
 

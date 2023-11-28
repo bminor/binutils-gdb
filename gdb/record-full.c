@@ -884,7 +884,7 @@ record_full_exec_insn (struct regcache *regcache,
 		       not doing the change at all if the watchpoint
 		       traps.  */
 		    if (hardware_watchpoint_inserted_in_range
-			(current_inferior ()->aspace,
+			(current_inferior ()->aspace.get (),
 			 entry->u.mem.addr, entry->u.mem.len))
 		      record_full_stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
 		  }
@@ -1218,7 +1218,8 @@ record_full_wait_1 (struct target_ops *ops,
 				    ret);
 		  regcache = get_thread_regcache (inferior_thread ());
 		  tmp_pc = regcache_read_pc (regcache);
-		  const address_space *aspace = current_inferior ()->aspace;
+		  const address_space *aspace
+		    = current_inferior ()->aspace.get ();
 
 		  if (target_stopped_by_watchpoint ())
 		    {
@@ -1288,7 +1289,7 @@ record_full_wait_1 (struct target_ops *ops,
 			record_full_resume_ptid);
       regcache *regcache = get_thread_regcache (inferior_thread ());
       struct gdbarch *gdbarch = regcache->arch ();
-      const address_space *aspace = current_inferior ()->aspace;
+      const address_space *aspace = current_inferior ()->aspace.get ();
       int continue_flag = 1;
       int first_record_full_end = 1;
 

@@ -63,7 +63,8 @@ displaced_step_buffers::prepare (thread_info *thread, CORE_ADDR &displaced_pc)
 
   for (displaced_step_buffer &candidate : m_buffers)
     {
-      bool bp_in_range = breakpoint_in_range_p (thread->inf->aspace, candidate.addr, len);
+      bool bp_in_range = breakpoint_in_range_p (thread->inf->aspace.get (),
+						candidate.addr, len);
       bool is_free = candidate.current_thread == nullptr;
 
       if (!bp_in_range)

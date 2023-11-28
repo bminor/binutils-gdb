@@ -29,6 +29,8 @@
 #include "gdbsupport/next-iterator.h"
 #include "gdbsupport/safe-iterator.h"
 #include "gdbsupport/intrusive_list.h"
+#include "gdbsupport/refcounted-object.h"
+#include "gdbsupport/gdb_ref_ptr.h"
 #include <list>
 #include <vector>
 
@@ -42,6 +44,40 @@ struct program_space;
 struct shobj;
 
 typedef std::list<std::unique_ptr<objfile>> objfile_list;
+
+/* An address space.  It is used for comparing if
+   pspaces/inferior/threads see the same address space and for
+   associating caches to each address space.  */
+struct address_space : public refcounted_object
+{
+  /* Create a new address space object, and add it to the list.  */
+  address_space ();
+  DISABLE_COPY_AND_ASSIGN (address_space);
+
+  /* Returns the integer address space id of this address space.  */
+  int num () const
+  {
+    return m_num;
+  }
+
+  /* Per aspace data-pointers required by other GDB modules.  */
+  registry<address_space> registry_fields;
+
+private:
+  int m_num;
+};
+
+using address_space_ref_ptr
+  = gdb::ref_ptr<address_space,
+		 refcounted_object_delete_ref_policy<address_space>>;
+
+/* Create a new address space.  */
+
+static inline address_space_ref_ptr
+new_address_space ()
+{
+  return address_space_ref_ptr::new_reference (new address_space);
+}
 
 /* An iterator that wraps an iterator over std::unique_ptr<objfile>,
    and dereferences the returned object.  This is useful for iterating
@@ -192,7 +228,7 @@ struct program_space
 {
   /* Constructs a new empty program space, binds it to ASPACE, and
      adds it to the program space list.  */
-  explicit program_space (address_space *aspace);
+  explicit program_space (address_space_ref_ptr aspace);
 
   /* Releases a program space, and all its contents (shared libraries,
      objfiles, and any other references to the program space in other
@@ -334,7 +370,7 @@ struct program_space
      are global, then this field is ignored (we don't currently
      support inferiors sharing a program space if the target doesn't
      make breakpoints global).  */
-  struct address_space *aspace = NULL;
+  address_space_ref_ptr aspace;
 
   /* True if this program space's section offsets don't yet represent
      the final offsets of the "live" address space (that is, the
@@ -381,28 +417,6 @@ private:
   std::vector<target_section> m_target_sections;
 };
 
-/* An address space.  It is used for comparing if
-   pspaces/inferior/threads see the same address space and for
-   associating caches to each address space.  */
-struct address_space
-{
-  /* Create a new address space object, and add it to the list.  */
-  address_space ();
-  DISABLE_COPY_AND_ASSIGN (address_space);
-
-  /* Returns the integer address space id of this address space.  */
-  int num () const
-  {
-    return m_num;
-  }
-
-  /* Per aspace data-pointers required by other GDB modules.  */
-  registry<address_space> registry_fields;
-
-private:
-  int m_num;
-};
-
 /* The list of all program spaces.  There's always at least one.  */
 extern std::vector<struct program_space *>program_spaces;
 
@@ -445,7 +459,7 @@ private:
 /* Maybe create a new address space object, and add it to the list, or
    return a pointer to an existing address space, in case inferiors
    share an address space.  */
-extern struct address_space *maybe_new_address_space (void);
+extern address_space_ref_ptr maybe_new_address_space ();
 
 /* Update all program spaces matching to address spaces.  The user may
    have created several program spaces, and loaded executables into
