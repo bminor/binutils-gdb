@@ -16,31 +16,6 @@
 import gdb
 
 from .server import request, capability
-from .startup import in_gdb_thread
-
-
-@in_gdb_thread
-def _disassemble(pc, skip_insns, count):
-    inf = gdb.selected_inferior()
-    try:
-        arch = gdb.selected_frame().architecture()
-    except gdb.error:
-        # Maybe there was no frame.
-        arch = inf.architecture()
-    result = []
-    total_count = skip_insns + count
-    for elt in arch.disassemble(pc, count=total_count)[skip_insns:]:
-        mem = inf.read_memory(elt["addr"], elt["length"])
-        result.append(
-            {
-                "address": hex(elt["addr"]),
-                "instruction": elt["asm"],
-                "instructionBytes": mem.hex(),
-            }
-        )
-    return {
-        "instructions": result,
-    }
 
 
 @request("disassemble")
@@ -54,4 +29,23 @@ def disassemble(
     **extra
 ):
     pc = int(memoryReference, 0) + offset
-    return _disassemble(pc, instructionOffset, instructionCount)
+    inf = gdb.selected_inferior()
+    try:
+        arch = gdb.selected_frame().architecture()
+    except gdb.error:
+        # Maybe there was no frame.
+        arch = inf.architecture()
+    result = []
+    total_count = instructionOffset + instructionCount
+    for elt in arch.disassemble(pc, count=total_count)[instructionOffset:]:
+        mem = inf.read_memory(elt["addr"], elt["length"])
+        result.append(
+            {
+                "address": hex(elt["addr"]),
+                "instruction": elt["asm"],
+                "instructionBytes": mem.hex(),
+            }
+        )
+    return {
+        "instructions": result,
+    }

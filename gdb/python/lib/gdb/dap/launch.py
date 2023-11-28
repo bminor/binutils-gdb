@@ -20,30 +20,12 @@ from typing import Mapping, Optional, Sequence
 
 from .events import exec_and_expect_stop, expect_process
 from .server import request, capability
-from .startup import in_gdb_thread, exec_and_log
+from .startup import exec_and_log
 
 
 # The program being launched, or None.  This should only be accessed
 # from the gdb thread.
 _program = None
-
-
-@in_gdb_thread
-def _launch_setup(program, cwd, args, env, stopAtBeginningOfMainSubprogram):
-    if cwd is not None:
-        exec_and_log("cd " + cwd)
-    if program is not None:
-        exec_and_log("file " + program)
-    inf = gdb.selected_inferior()
-    if stopAtBeginningOfMainSubprogram:
-        main = inf.main_name
-        if main is not None:
-            exec_and_log("tbreak " + main)
-    inf.arguments = args
-    if env is not None:
-        inf.clear_env()
-        for name, value in env.items():
-            inf.set_env(name, value)
 
 
 # Any parameters here are necessarily extensions -- DAP requires this
@@ -61,7 +43,20 @@ def launch(
 ):
     global _program
     _program = program
-    _launch_setup(program, cwd, args, env, stopAtBeginningOfMainSubprogram)
+    if cwd is not None:
+        exec_and_log("cd " + cwd)
+    if program is not None:
+        exec_and_log("file " + program)
+    inf = gdb.selected_inferior()
+    if stopAtBeginningOfMainSubprogram:
+        main = inf.main_name
+        if main is not None:
+            exec_and_log("tbreak " + main)
+    inf.arguments = args
+    if env is not None:
+        inf.clear_env()
+        for name, value in env.items():
+            inf.set_env(name, value)
 
 
 @request("attach")

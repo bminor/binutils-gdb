@@ -45,22 +45,17 @@ def make_module(objf):
     return result
 
 
-@in_gdb_thread
-def _modules(start, count):
-    # Don't count invalid objfiles or separate debug objfiles.
-    objfiles = [x for x in gdb.objfiles() if is_module(x)]
-    if count == 0:
-        # Use all items.
-        last = len(objfiles)
-    else:
-        last = start + count
-    return {
-        "modules": [make_module(x) for x in objfiles[start:last]],
-        "totalModules": len(objfiles),
-    }
-
-
 @capability("supportsModulesRequest")
 @request("modules")
 def modules(*, startModule: int = 0, moduleCount: int = 0, **args):
-    return _modules(startModule, moduleCount)
+    # Don't count invalid objfiles or separate debug objfiles.
+    objfiles = [x for x in gdb.objfiles() if is_module(x)]
+    if moduleCount == 0:
+        # Use all items.
+        last = len(objfiles)
+    else:
+        last = startModule + moduleCount
+    return {
+        "modules": [make_module(x) for x in objfiles[startModule:last]],
+        "totalModules": len(objfiles),
+    }

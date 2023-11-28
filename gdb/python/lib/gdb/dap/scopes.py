@@ -107,14 +107,13 @@ class _RegisterReference(_ScopeReference):
         )
 
 
-# Helper function to create a DAP scopes for a given frame ID.
-@in_gdb_thread
-def _get_scope(id):
+@request("scopes")
+def scopes(*, frameId: int, **extra):
     global frame_to_scope
-    if id in frame_to_scope:
-        scopes = frame_to_scope[id]
+    if frameId in frame_to_scope:
+        scopes = frame_to_scope[frameId]
     else:
-        frame = frame_for_id(id)
+        frame = frame_for_id(frameId)
         scopes = []
         # Make sure to handle the None case as well as the empty
         # iterator case.
@@ -127,10 +126,5 @@ def _get_scope(id):
         if locs:
             scopes.append(_ScopeReference("Locals", "locals", frame, locs))
         scopes.append(_RegisterReference("Registers", frame))
-        frame_to_scope[id] = scopes
-    return [x.to_object() for x in scopes]
-
-
-@request("scopes")
-def scopes(*, frameId: int, **extra):
-    return {"scopes": _get_scope(frameId)}
+        frame_to_scope[frameId] = scopes
+    return {"scopes": [x.to_object() for x in scopes]}

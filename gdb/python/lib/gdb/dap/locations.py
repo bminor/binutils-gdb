@@ -20,18 +20,6 @@ from typing import Optional
 
 from .server import capability, request
 from .sources import decode_source
-from .startup import in_gdb_thread
-
-
-@in_gdb_thread
-def _find_lines(source, start_line, end_line):
-    filename = decode_source(source)
-    lines = set()
-    for entry in gdb.execute_mi("-symbol-list-lines", filename)["lines"]:
-        line = entry["line"]
-        if line >= start_line and line <= end_line:
-            lines.add(line)
-    return {"breakpoints": [{"line": x} for x in sorted(lines)]}
 
 
 # Note that the spec says that the arguments to this are optional.
@@ -46,4 +34,10 @@ def _find_lines(source, start_line, end_line):
 def breakpoint_locations(*, source, line: int, endLine: Optional[int] = None, **extra):
     if endLine is None:
         endLine = line
-    return _find_lines(source, line, endLine)
+    filename = decode_source(source)
+    lines = set()
+    for entry in gdb.execute_mi("-symbol-list-lines", filename)["lines"]:
+        this_line = entry["line"]
+        if this_line >= line and this_line <= endLine:
+            lines.add(this_line)
+    return {"breakpoints": [{"line": x} for x in sorted(lines)]}
