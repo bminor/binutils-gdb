@@ -68,11 +68,18 @@ the host endianness is used.
 
 @cindex line comment character, BPF
 @cindex BPF line comment character
-The presence of a @samp{;} or a @samp{#} on a line indicates the start
-of a comment that extends to the end of the current line.
+The presence of a @samp{#} on a line indicates the start of a comment
+that extends to the end of the current line.
+
+@cindex block comments, BPF
+@cindex BPF block comments
+The presence of the @samp{/*} sequence indicates the beginning of a
+block (multi-line) comment, whose contents span until the next
+@samp{*/} sequence.  It is not possible to nest block comments.
 
 @cindex statement separator, BPF
-Statements and assembly directives are separated by newlines.
+Statements and assembly directives are separated by newlines and
+@samp{;} characters.
 
 @node BPF Registers
 @section BPF Registers

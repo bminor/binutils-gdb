@@ -1,5 +1,5 @@
-        ;; This test checks that flexible spacing is supported in the
-        ;; pseudoc syntax.
+        /* This test checks that flexible spacing is supported in the
+           pseudoc syntax.  */
         r4 = 0xdeadbeefll
         r4 = 0xdeadbeef ll
         goto +1

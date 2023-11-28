@@ -61,5 +61,5 @@
         r1 = bswap16 r1
         r2 = bswap32 r2
         r3 = bswap64 r3
-        ;; The following is to be interpreted as a mov, not lddw.
+        /* The following is to be interpreted as a mov, not lddw. */
         r2 = 666ll

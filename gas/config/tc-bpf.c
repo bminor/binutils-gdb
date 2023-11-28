@@ -56,9 +56,9 @@ struct bpf_insn
   expressionS *relaxed_exp;
 };
 
-const char comment_chars[]        = ";#";
+const char comment_chars[]        = "#";
 const char line_comment_chars[]   = "#";
-const char line_separator_chars[] = "`";
+const char line_separator_chars[] = ";`";
 const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "fFdD";
 
