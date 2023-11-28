@@ -1166,7 +1166,7 @@ darwin_nat_target::cancel_breakpoint (inferior *inf, ptid_t ptid)
   CORE_ADDR pc;
 
   pc = regcache_read_pc (regcache) - gdbarch_decr_pc_after_break (gdbarch);
-  if (breakpoint_inserted_here_p (inf->aspace, pc))
+  if (breakpoint_inserted_here_p (inf->aspace.get (), pc))
     {
       inferior_debug (4, "cancel_breakpoint for thread 0x%lx\n",
 		      (unsigned long) ptid.tid ());
