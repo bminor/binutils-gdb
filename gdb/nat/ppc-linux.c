@@ -78,6 +78,8 @@ ppc64_64bit_inferior_p (long msr)
 int
 ppc_linux_target_wordsize (int tid)
 {
+  gdb_assert (tid != 0);
+
   int wordsize = 4;
 
   /* Check for 64-bit inferior process.  This is the case when the host is

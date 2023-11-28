@@ -1914,6 +1914,8 @@ ppc_linux_nat_target::auxv_parse (const gdb_byte **readptr,
 				  const gdb_byte *endptr, CORE_ADDR *typep,
 				  CORE_ADDR *valp)
 {
+  gdb_assert (inferior_ptid != null_ptid);
+
   int tid = inferior_ptid.lwp ();
   if (tid == 0)
     tid = inferior_ptid.pid ();

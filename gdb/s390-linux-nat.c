@@ -949,10 +949,12 @@ s390_target_wordsize (void)
   /* Check for 64-bit inferior process.  This is the case when the host is
      64-bit, and in addition bit 32 of the PSW mask is set.  */
 #ifdef __s390x__
+  int tid = s390_inferior_tid ();
+  gdb_assert (tid != 0);
   long pswm;
 
   errno = 0;
-  pswm = (long) ptrace (PTRACE_PEEKUSER, s390_inferior_tid (), PT_PSWMASK, 0);
+  pswm = (long) ptrace (PTRACE_PEEKUSER, tid, PT_PSWMASK, 0);
   if (errno == 0 && (pswm & 0x100000000ul) != 0)
     wordsize = 8;
 #endif
@@ -965,6 +967,7 @@ s390_linux_nat_target::auxv_parse (const gdb_byte **readptr,
 				   const gdb_byte *endptr, CORE_ADDR *typep,
 				   CORE_ADDR *valp)
 {
+  gdb_assert (inferior_ptid != null_ptid);
   int sizeof_auxv_field = s390_target_wordsize ();
   bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   const gdb_byte *ptr = *readptr;
