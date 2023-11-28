@@ -1208,7 +1208,7 @@ regcache::transfer_regset (const struct regset *regset, int regbase,
 	for (; count--; regno++, offs += slot_size)
 	  {
 	    if (offs + slot_size > size)
-	      break;
+	      return;
 
 	    transfer_regset_register (out_regcache, regno, in_buf, out_buf,
 				      slot_size, offs);
