@@ -1,3 +1,8 @@
+2023-11-28  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldbuildid.c (generate_build_id): Use sha1_choose_process_bytes ()
+	instead of &sha1_process_bytes.
+
 2023-11-28  Nick Clifton  <nickc@redhat.com>
 
 	* po/ro.po: New Romanian translation.
