@@ -1,6 +1,5 @@
 # Check 32bit AVX512{BF16,VL} instructions
 
-	.allow_index_reg
 	.text
 bf16:
 	vcvtne2ps2bf16	%ymm4, %ymm5, %ymm6	 #AVX512{BF16,VL}

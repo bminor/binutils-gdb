@@ -1,6 +1,5 @@
 # Check 32bit NOTRACK prefix
 
-	.allow_index_reg
 	.text
 _start:
 	notrack call *%eax

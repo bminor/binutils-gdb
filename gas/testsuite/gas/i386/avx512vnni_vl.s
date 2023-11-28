@@ -1,6 +1,5 @@
 # Check 32bit AVX512{VNNI,VL} instructions
 
-	.allow_index_reg
 	.text
 vnni:
 	vpdpwssd	%xmm2, %xmm4, %xmm2{%k3}	 # AVX512{VNNI,VL}

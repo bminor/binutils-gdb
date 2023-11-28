@@ -1,6 +1,5 @@
 # Check 64bit AVX-VNNI-INT8 instructions
 
-	.allow_index_reg
 	.text
 _start:
 	vpdpbssd	%ymm8, %ymm9, %ymm10	 #AVX-VNNI-INT8

@@ -1,6 +1,5 @@
 # Check 32bit AVX512{CD,VL} instructions
 
-	.allow_index_reg
 	.text
 cd:
 	vpconflictd	%xmm5, %xmm6{%k7}	 # AVX512{CD,VL}

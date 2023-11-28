@@ -1,6 +1,5 @@
 # Check 32bit AVX512CD instructions
 
-	.allow_index_reg
 	.text
 cd:
 

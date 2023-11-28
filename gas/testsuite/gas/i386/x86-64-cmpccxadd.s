@@ -1,6 +1,5 @@
 # Check 64bit CMPccXADD instructions
 
-	.allow_index_reg
 	.text
 _start:
 	cmpbexadd	%eax, %ecx, 0x10000000(%rbp, %r14, 8)	 #CMPCCXADD

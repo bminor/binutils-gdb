@@ -1,6 +1,5 @@
 # Check 32bit RAO-INT instructions
 
-	.allow_index_reg
 	.text
 _start:
         aadd    %edx, (%eax)     #RAO-INT

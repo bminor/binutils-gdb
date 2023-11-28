@@ -1,6 +1,5 @@
 # Check 64bit PREFETCHI instructions
 
-	.allow_index_reg
 	.text
 _start:
 

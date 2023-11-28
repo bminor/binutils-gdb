@@ -1,6 +1,5 @@
 # Check Illegal CMPccXADD instructions
 
-	.allow_index_reg
 	.text
 _start:
 	cmpbexadd	%eax, %eax, 0x10000000(%esp, %esi, 8)

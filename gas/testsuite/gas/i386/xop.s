@@ -1,6 +1,5 @@
 # Check XOP instructions (maxcombos=16, maxops=3, archbits=32, seed=1)
 
-	.allow_index_reg
 	.text
 _start:
 

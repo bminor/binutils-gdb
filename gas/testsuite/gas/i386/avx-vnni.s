@@ -1,5 +1,3 @@
-	.allow_index_reg
-
 .macro test_insn mnemonic
 	\mnemonic	%xmm2, %xmm4, %xmm2
 	{evex} \mnemonic %xmm2, %xmm4, %xmm2

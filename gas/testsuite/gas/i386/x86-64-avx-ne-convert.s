@@ -1,6 +1,5 @@
 # Check 64bit AVX-NE-CONVERT instructions
 
-	.allow_index_reg
 	.text
 _start:
 	vbcstnebf162ps	0x10000000(%rbp, %r14, 8), %xmm6	 #AVX-NE-CONVERT

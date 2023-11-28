@@ -1,6 +1,5 @@
 # Check EVEX instructions
 
-	.allow_index_reg
 	.text
 _start:
 	.insn EVEX.LIG.F3.0F.W1 0x2a, %eax,{rd-sae},%xmm5,%xmm6

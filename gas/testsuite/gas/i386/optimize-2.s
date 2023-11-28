@@ -1,6 +1,5 @@
 # Check instructions with optimized encoding
 
-	.allow_index_reg
 	.text
 _start:
 	testl	$0x7f, %eax

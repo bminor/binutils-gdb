@@ -1,6 +1,5 @@
 # Check 64bit RAO_INT instructions
 
-	.allow_index_reg
 	.text
 _start:
         aadd    %rdx, (%rax)     #RAO-INT

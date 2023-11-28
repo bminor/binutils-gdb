@@ -1,6 +1,5 @@
 # Check 32bit AVX-VNNI-INT8 instructions
 
-	.allow_index_reg
 	.text
 _start:
 	vpdpbssd	%ymm4, %ymm5, %ymm6	 #AVX-VNNI-INT8

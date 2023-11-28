@@ -1,6 +1,5 @@
 # Check 64bit instructions with optimized encoding
 
-	.allow_index_reg
 	.text
 _start:
 	testq	$0x7f, %rax

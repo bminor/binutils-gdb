@@ -1,6 +1,5 @@
 # Check 64bit LKGS instructions
 
-	.allow_index_reg
 	.text
 _start:
 	lkgs	%r12	 #LKGS

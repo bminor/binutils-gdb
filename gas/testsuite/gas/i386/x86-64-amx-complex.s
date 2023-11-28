@@ -1,6 +1,5 @@
 # Check 64bit AMX-COMPLEX instructions
 
-	.allow_index_reg
 	.text
 _start:
 	tcmmimfp16ps	%tmm4, %tmm5, %tmm6	 #AMX-COMPLEX

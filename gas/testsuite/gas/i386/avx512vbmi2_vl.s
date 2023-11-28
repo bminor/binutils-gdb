@@ -1,6 +1,5 @@
 # Check 32bit AVX512{VBMI2,VL} instructions
 
-	.allow_index_reg
 	.text
 vbmi2:
 	vpcompressb	%xmm6, -123456(%esp,%esi,8){%k7}	 # AVX512{VBMI2,VL}

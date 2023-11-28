@@ -1,6 +1,5 @@
 # Check 32bit AVX512{IFMA,VL} instructions
 
-	.allow_index_reg
 	.text
 ifma:
 	vpmadd52luq	%xmm4, %xmm5, %xmm6{%k7}	 # AVX512{IFMA,VL}

@@ -1,6 +1,5 @@
 # Check error for invalid {1toXX} and {2toXX} broadcasts.
 
-	.allow_index_reg
 	.text
 _start:
 	vp2intersectd 8(%rax){1to8}, %zmm2, %k3

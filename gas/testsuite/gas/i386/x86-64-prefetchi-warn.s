@@ -1,6 +1,5 @@
 # Check error for ICACHE-PREFETCH 64-bit instruction
 
-	.allow_index_reg
 	.text
 _start:
 	prefetchit0     0x12345678(%rax)
