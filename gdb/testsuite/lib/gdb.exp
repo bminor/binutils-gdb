@@ -10034,7 +10034,7 @@ proc gdb_get_worker_threads { {testname ""} } {
 	-wrap -re "^The number of worker threads GDB can use is unlimited \\(currently ($::decimal)\\)\\." {
 	    set worker_threads $expect_out(1,string)
 	}
-	-wrap -re "The number of worker threads GDB can use is ($::decimal)\\." {
+	-wrap -re "^The number of worker threads GDB can use is ($::decimal)\\." {
 	    set worker_threads $expect_out(1,string)
 	}
     }
