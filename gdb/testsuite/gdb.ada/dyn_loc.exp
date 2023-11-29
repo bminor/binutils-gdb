@@ -30,7 +30,7 @@ if {![runto "pack.adb:$bp_location"]} {
   return -1
 }
 
-set eol "\[\r\n\]+"
+set eol "\r\n"
 
 set test "info locals"
 gdb_test_multiple "$test" "$test" {

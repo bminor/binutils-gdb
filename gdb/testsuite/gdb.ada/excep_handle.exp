@@ -27,7 +27,7 @@ clean_restart ${testfile}
 
 # Some global variables used to simplify the maintenance of some of
 # the regular expressions below.
-set eol "\[\r\n\]+"
+set eol "\r\n"
 set sp "\[ \t\]*"
 
 set when "when"

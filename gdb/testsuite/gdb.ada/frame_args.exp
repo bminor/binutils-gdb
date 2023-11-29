@@ -27,7 +27,7 @@ clean_restart ${testfile}
 
 set any_nb "\[0-9\]+"
 set any_addr "0x\[0-9a-zA-Z\]+"
-set eol "\[\r\n\]+"
+set eol "\r\n"
 set sp "\[ \t\]*"
 
 if {![runto break_me]} {

@@ -20,7 +20,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
 
-set eol "\[\r\n\]+"
+set eol "\r\n"
 
 # Check the output of "info target".  Note that we are not interested
 # in this case in checking the actual info, but rather to make sure that

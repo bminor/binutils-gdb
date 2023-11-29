@@ -20,7 +20,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debu
     return -1
 }
 
-set eol "\[\r\n\]+"
+set eol "\r\n"
 set sp "\[ \t\]*"
 
 clean_restart ${binfile}

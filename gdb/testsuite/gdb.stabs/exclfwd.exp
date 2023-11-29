@@ -35,19 +35,21 @@ if {![runto_main]} {
 
 get_debug_format
 
-set eol "\[ \t\]*\[\n\r\]+"
-
-gdb_test "ptype v1" "type = struct a {$eol
-    int x;$eol
-    int y;$eol
-}"
+gdb_test "ptype v1" \
+    [multi_line \
+	 "type = struct a {" \
+	 "    int x;" \
+	 "    int y;" \
+	 "}"]
 
 if {[test_debug_format "stabs"]} {
     setup_kfail "gdb/1602" *-*-*
 }
-gdb_test "ptype v2" "type = struct a {$eol
-    const char .c;$eol
-}"
+gdb_test "ptype v2" \
+    [multi_line \
+	 "type = struct a {" \
+	 "    const char .c;" \
+	 "}"]
 
 if {[test_debug_format "stabs"]} {
     setup_kfail "gdb/1603" *-*-*

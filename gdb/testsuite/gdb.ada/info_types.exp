@@ -26,8 +26,8 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 # when the Ada language is being used.
 gdb_test "set lang ada" ""
 
-set eol "\[\r\n\]+"
+set eol "\r\n"
 
 gdb_test "info types new_integer_type" \
-         "All types matching regular expression \"new_integer_type\":${eol}File .*info_types.c:${eol}.*\tint"
+         "All types matching regular expression \"new_integer_type\":${eol}${eol}File .*info_types.c:${eol}.*\tint"
 

@@ -29,7 +29,7 @@ clean_restart ${testfile}
 # the regular expressions below.
 set any_nb "\[0-9\]+"
 set any_addr "0x\[0-9a-zA-Z\]+"
-set eol "\[\r\n\]+"
+set eol "\r\n"
 set sp "\[ \t\]*"
 
 set info_break_header "Num${sp}Type${sp}Disp${sp}Enb${sp}Address${sp}What"

@@ -157,7 +157,7 @@ gdb_test "up" ".*main.*" "up from marker2"
 # Make sure that `Local' isn't in scope here; it's local to foobar.
 # setup_kfail "gdb/825"
 
-set eol "\[\t \]*\[\r\n\]+\[\t \]*"
+set eol "\[\t \]*\r\n\[\t \]*"
 gdb_test_multiple "ptype Local" "local out of scope" {
     -re "No symbol \"Local\" in current context.*${gdb_prompt} $" {
         pass "local out of scope"
