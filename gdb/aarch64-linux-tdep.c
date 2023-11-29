@@ -1497,7 +1497,9 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
       /* Create this on the fly in order to handle the ZA register size.  */
       const struct regcache_map_entry za_regmap[] =
 	{
-	  { 1, tdep->sme_za_regnum, (int) std::pow (sve_vl_from_vq (tdep->sme_svq), 2) }
+	  { 1, tdep->sme_za_regnum,
+	    (int) std::pow (sve_vl_from_vq (tdep->sme_svq), 2) },
+	  { 0 }
 	};
 
       const struct regset aarch64_linux_za_regset =
@@ -1518,7 +1520,8 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	{
 	  const struct regcache_map_entry zt_regmap[] =
 	    {
-	      { 1, tdep->sme2_zt0_regnum, AARCH64_SME2_ZT0_SIZE }
+	      { 1, tdep->sme2_zt0_regnum, AARCH64_SME2_ZT0_SIZE },
+	      { 0 }
 	    };
 
 	  /* We set the register set size to REGSET_VARIABLE_SIZE here because
