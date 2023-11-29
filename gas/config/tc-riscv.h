@@ -80,6 +80,9 @@ extern int riscv_parse_long_option (const char *);
 extern void riscv_pre_output_hook (void);
 #define GAS_SORT_RELOCS 1
 
+#define md_end riscv_md_end
+extern void riscv_md_end (void);
+
 /* Let the linker resolve all the relocs due to relaxation.  */
 #define tc_fix_adjustable(fixp) 0
 #define md_allow_local_subtract(l,r,s) 0
