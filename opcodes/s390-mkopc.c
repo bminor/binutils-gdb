@@ -431,6 +431,18 @@ main (void)
 		       && (str[2] == 0 || str[2] == ',')) {
 	      flag_bits |= S390_INSTR_FLAG_VX;
 	      str += 2;
+	    } else if (strncmp (str, "jump", 7) == 0
+		&& (str[4] == 0 || str[4] == ',')) {
+	      flag_bits |= S390_INSTR_FLAGS_CLASS_JUMP;
+	      str += 4;
+	    } else if (strncmp (str, "condjump", 7) == 0
+		&& (str[8] == 0 || str[8] == ',')) {
+	      flag_bits |= S390_INSTR_FLAGS_CLASS_CONDJUMP;
+	      str += 8;
+	    } else if (strncmp (str, "jumpsr", 7) == 0
+		&& (str[6] == 0 || str[6] == ',')) {
+	      flag_bits |= S390_INSTR_FLAGS_CLASS_JUMPSR;
+	      str += 6;
 	    } else {
 	      fprintf (stderr, "Couldn't parse flags string %s\n",
 		       flags_string);

@@ -17,6 +17,8 @@
 * objcopy --set-section-flags now supports "large" to set SHF_X86_64_LARGE
   for ELF x86-64 objects.
 
+* objdump --visualize-jumps is now supported on s390 architecture.
+
 Changes in 2.41:
 
 * The MIPS port now supports the Sony Interactive Entertainment Allegrex

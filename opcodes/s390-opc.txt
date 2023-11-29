@@ -245,15 +245,15 @@ d7 xc SS_L0RDRD "exclusive OR" g5 esa,zarch
 17 xr RR_RR "exclusive OR" g5 esa,zarch
 f8 zap SS_LLRDRD "zero and add" g5 esa,zarch
 a70a ahi RI_RI "add halfword immediate" g5 esa,zarch
-84 brxh RSI_RRP "branch relative on index high" g5 esa,zarch
-84 jxh RSI_RRP "branch relative on index high" g5 esa,zarch
-85 brxle RSI_RRP "branch relative on index low or equal" g5 esa,zarch
-85 jxle RSI_RRP "branch relative on index low or equal" g5 esa,zarch
-a705 bras RI_RP "branch relative and save" g5 esa,zarch
-a705 jas RI_RP "branch relative and save" g5 esa,zarch
-a704 brc RI_UP "branch relative on condition" g5 esa,zarch
-a706 brct RI_RP "branch relative on count" g5 esa,zarch
-a706 jct RI_RP "branch relative on count" g5 esa,zarch
+84 brxh RSI_RRP "branch relative on index high" g5 esa,zarch condjump
+84 jxh RSI_RRP "branch relative on index high" g5 esa,zarch condjump
+85 brxle RSI_RRP "branch relative on index low or equal" g5 esa,zarch condjump
+85 jxle RSI_RRP "branch relative on index low or equal" g5 esa,zarch condjump
+a705 bras RI_RP "branch relative and save" g5 esa,zarch jumpsr
+a705 jas RI_RP "branch relative and save" g5 esa,zarch jumpsr
+a704 brc RI_UP "branch relative on condition" g5 esa,zarch condjump
+a706 brct RI_RP "branch relative on count" g5 esa,zarch condjump
+a706 jct RI_RP "branch relative on count" g5 esa,zarch condjump
 b241 cksm RRE_RR "checksum" g5 esa,zarch
 a70e chi RI_RI "compare halfword immediate" g5 esa,zarch
 a9 clcle RS_RRRD "compare logical long extended" g5 esa,zarch
@@ -272,12 +272,12 @@ a701 tml RI_RU "test under mask low" g5 esa,zarch
 4700 nop RX_0RRD "no operation" g5 esa,zarch optparm
 4700 b*8 RX_0RRD "conditional branch" g5 esa,zarch
 47f0 b RX_0RRD "unconditional branch" g5 esa,zarch
-a704 jc RI_UP "conditional jump" g5 esa,zarch
+a704 jc RI_UP "conditional jump" g5 esa,zarch condjump
 a704 jnop RI_0P "nop jump" g5 esa,zarch
-a704 j*8 RI_0P "conditional jump" g5 esa,zarch
-a704 br*8 RI_0P "conditional jump" g5 esa,zarch
-a7f4 j RI_0P "unconditional jump" g5 esa,zarch
-a7f4 bru RI_0P "unconditional jump" g5 esa,zarch
+a704 j*8 RI_0P "conditional jump" g5 esa,zarch condjump
+a704 br*8 RI_0P "conditional jump" g5 esa,zarch condjump
+a7f4 j RI_0P "unconditional jump" g5 esa,zarch jump
+a7f4 bru RI_0P "unconditional jump" g5 esa,zarch jump
 b34a axbr RRE_FEFE "add extended bfp" g5 esa,zarch
 b31a adbr RRE_FF "add long bfp" g5 esa,zarch
 ed000000001a adb RXE_FRRD "add long bfp" g5 esa,zarch
@@ -446,10 +446,10 @@ e3000000000b slg RXE_RRRD "subtract logical 64" z900 zarch
 e3000000001b slgf RXE_RRRD "subtract logical 64<32" z900 zarch
 e3000000000c msg RXE_RRRD "multiply single 64" z900 zarch
 e3000000001c msgf RXE_RRRD "multiply single 64<32" z900 zarch
-ec0000000044 brxhg RIE_RRP "branch relative on index high 64" z900 zarch
-ec0000000044 jxhg RIE_RRP "branch relative on index high 64" z900 zarch
-ec0000000045 brxlg RIE_RRP "branch relative on index low or equal 64" z900 zarch
-ec0000000045 jxleg RIE_RRP "branch relative on index low or equal 64" z900 zarch
+ec0000000044 brxhg RIE_RRP "branch relative on index high 64" z900 zarch condjump
+ec0000000044 jxhg RIE_RRP "branch relative on index high 64" z900 zarch condjump
+ec0000000045 brxlg RIE_RRP "branch relative on index low or equal 64" z900 zarch condjump
+ec0000000045 jxleg RIE_RRP "branch relative on index low or equal 64" z900 zarch condjump
 eb0000000044 bxhg RSE_RRRD "branch on index high 64" z900 zarch
 eb0000000045 bxleg RSE_RRRD "branch on index low or equal 64" z900 zarch
 eb000000000c srlg RSE_RRRD "shift right single logical 64" z900 zarch
@@ -473,18 +473,18 @@ eb000000002c stcmh RSE_RURD "store characters under mask high" z900 zarch
 eb0000000080 icmh RSE_RURD "insert characters under mask high" z900 zarch
 a702 tmhh RI_RU "test under mask high high" z900 zarch
 a703 tmhl RI_RU "test under mask high low" z900 zarch
-c004 brcl RIL_UP "branch relative on condition long" z900 esa,zarch
+c004 brcl RIL_UP "branch relative on condition long" z900 esa,zarch condjump
 # jlc omitted due to missing jl* (see jl*8) and not added as non-standard jgc
 c004 jgnop RIL_0P "nop jump long" z900 esa,zarch
-c004 jg*8 RIL_0P "conditional jump long" z900 esa,zarch
+c004 jg*8 RIL_0P "conditional jump long" z900 esa,zarch condjump
 # jl*8 omitted due to clash with non-standard j*8 flavors jle and jlh; exists as non-standard jg*8 instead
-c004 br*8l RIL_0P "conditional jump long" z900 esa,zarch
-c0f4 jg RIL_0P "unconditional jump long" z900 esa,zarch
-c0f4 brul RIL_0P "unconditional jump long" z900 esa,zarch
-c005 brasl RIL_RP "branch relative and save long" z900 esa,zarch
-c005 jasl RIL_RP "branch relative and save long" z900 esa,zarch
-a707 brctg RI_RP "branch relative on count 64" z900 zarch
-a707 jctg RI_RP "branch relative on count 64" z900 zarch
+c004 br*8l RIL_0P "conditional jump long" z900 esa,zarch condjump
+c0f4 jg RIL_0P "unconditional jump long" z900 esa,zarch jump
+c0f4 brul RIL_0P "unconditional jump long" z900 esa,zarch jump
+c005 brasl RIL_RP "branch relative and save long" z900 esa,zarch jumpsr
+c005 jasl RIL_RP "branch relative and save long" z900 esa,zarch jumpsr
+a707 brctg RI_RP "branch relative on count 64" z900 zarch condjump
+a707 jctg RI_RP "branch relative on count 64" z900 zarch condjump
 a709 lghi RI_RI "load halfword immediate 64" z900 zarch
 a70b aghi RI_RI "add halfword immediate 64" z900 zarch
 a70d mghi RI_RI "multiply halfword immediate 64" z900 zarch
@@ -896,18 +896,18 @@ ec00000000f6 crb$32 RRS_RRRD0 "compare and branch (32)" z10 zarch
 ec00000000f6 crb RRS_RRRDU "compare and branch (32)" z10 zarch
 ec00000000e4 cgrb$32 RRS_RRRD0 "compare and branch (64)" z10 zarch
 ec00000000e4 cgrb RRS_RRRDU "compare and branch (64)" z10 zarch
-ec0000000076 crj$32 RIE_RRP0 "compare and branch relative (32)" z10 zarch
-ec0000000076 crj RIE_RRPU "compare and branch relative (32)" z10 zarch
-ec0000000064 cgrj$32 RIE_RRP0 "compare and branch relative (64)" z10 zarch
-ec0000000064 cgrj RIE_RRPU "compare and branch relative (64)" z10 zarch
+ec0000000076 crj$32 RIE_RRP0 "compare and branch relative (32)" z10 zarch condjump
+ec0000000076 crj RIE_RRPU "compare and branch relative (32)" z10 zarch condjump
+ec0000000064 cgrj$32 RIE_RRP0 "compare and branch relative (64)" z10 zarch condjump
+ec0000000064 cgrj RIE_RRPU "compare and branch relative (64)" z10 zarch condjump
 ec00000000fe cib$12 RIS_R0RDI "compare immediate and branch (32<8)" z10 zarch
 ec00000000fe cib RIS_RURDI "compare immediate and branch (32<8)" z10 zarch
 ec00000000fc cgib$12 RIS_R0RDI "compare immediate and branch (64<8)" z10 zarch
 ec00000000fc cgib RIS_RURDI "compare immediate and branch (64<8)" z10 zarch
-ec000000007e cij$12 RIE_R0PI "compare immediate and branch relative (32<8)" z10 zarch
-ec000000007e cij RIE_RUPI "compare immediate and branch relative (32<8)" z10 zarch
-ec000000007c cgij$12 RIE_R0PI "compare immediate and branch relative (64<8)" z10 zarch
-ec000000007c cgij RIE_RUPI "compare immediate and branch relative (64<8)" z10 zarch
+ec000000007e cij$12 RIE_R0PI "compare immediate and branch relative (32<8)" z10 zarch condjump
+ec000000007e cij RIE_RUPI "compare immediate and branch relative (32<8)" z10 zarch condjump
+ec000000007c cgij$12 RIE_R0PI "compare immediate and branch relative (64<8)" z10 zarch condjump
+ec000000007c cgij RIE_RUPI "compare immediate and branch relative (64<8)" z10 zarch condjump
 b9720000 crt$16 RRF_00RR "compare and trap" z10 zarch
 b972 crt RRF_U0RR "compare and trap" z10 zarch
 b9600000 cgrt$16 RRF_00RR "compare and trap 64" z10 zarch
@@ -934,10 +934,10 @@ ec00000000f7 clrb$32 RRS_RRRD0 "compare logical and branch (32)" z10 zarch
 ec00000000f7 clrb RRS_RRRDU "compare logical and branch (32)" z10 zarch
 ec00000000e5 clgrb$32 RRS_RRRD0 "compare logical and branch (64)" z10 zarch
 ec00000000e5 clgrb RRS_RRRDU "compare logical and branch (64)" z10 zarch
-ec0000000077 clrj$32 RIE_RRP0 "compare logical and branch relative (32)" z10 zarch
-ec0000000077 clrj RIE_RRPU "compare logical and branch relative (32)" z10 zarch
-ec0000000065 clgrj$32 RIE_RRP0 "compare logical and branch relative (64)" z10 zarch
-ec0000000065 clgrj RIE_RRPU "compare logical and branch relative (64)" z10 zarch
+ec0000000077 clrj$32 RIE_RRP0 "compare logical and branch relative (32)" z10 zarch condjump
+ec0000000077 clrj RIE_RRPU "compare logical and branch relative (32)" z10 zarch condjump
+ec0000000065 clgrj$32 RIE_RRP0 "compare logical and branch relative (64)" z10 zarch condjump
+ec0000000065 clgrj RIE_RRPU "compare logical and branch relative (64)" z10 zarch condjump
 ec00000000ff clib$12 RIS_R0RDU "compare logical immediate and branch (32<8)" z10 zarch
 ec00000000ff clib RIS_RURDU "compare logical immediate and branch (32<8)" z10 zarch
 ec00000000fd clgib$12 RIS_R0RDU "compare logical immediate and branch (64<8)" z10 zarch
@@ -1011,8 +1011,8 @@ b9ca alhhhr RRF_R0RR2 "add logical high high" z196 zarch
 b9da alhhlr RRF_R0RR2 "add logical high low" z196 zarch
 cc0a alsih RIL_RI "add logical with signed immediate high with cc" z196 zarch
 cc0b alsihn RIL_RI "add logical with signed immediate high no cc" z196 zarch
-cc06 brcth RIL_RP "branch relative on count high" z196 zarch
-cc06 jcth RIL_RP "jump on count high" z196 zarch
+cc06 brcth RIL_RP "branch relative on count high" z196 zarch condjump
+cc06 jcth RIL_RP "jump on count high" z196 zarch condjump
 b9cd chhr RRE_RR "compare high high" z196 zarch
 b9dd chlr RRE_RR "compare high low" z196 zarch
 e300000000cd chf RXY_RRRD "compare high" z196 zarch
