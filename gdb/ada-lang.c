@@ -3934,7 +3934,7 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
 /* The term "match" here is rather loose.  The match is heuristic and
    liberal.  */
 
-static int
+static bool
 ada_type_match (struct type *ftype, struct type *atype)
 {
   ftype = ada_check_typedef (ftype);
@@ -3951,11 +3951,11 @@ ada_type_match (struct type *ftype, struct type *atype)
       return ftype->code () == atype->code ();
     case TYPE_CODE_PTR:
       if (atype->code () != TYPE_CODE_PTR)
-	return 0;
+	return false;
       atype = atype->target_type ();
       /* This can only happen if the actual argument is 'null'.  */
       if (atype->code () == TYPE_CODE_INT && atype->length () == 0)
-	return 1;
+	return true;
       return ada_type_match (ftype->target_type (), atype);
     case TYPE_CODE_INT:
     case TYPE_CODE_ENUM:
@@ -3965,9 +3965,9 @@ ada_type_match (struct type *ftype, struct type *atype)
 	case TYPE_CODE_INT:
 	case TYPE_CODE_ENUM:
 	case TYPE_CODE_RANGE:
-	  return 1;
+	  return true;
 	default:
-	  return 0;
+	  return false;
 	}
 
     case TYPE_CODE_ARRAY:
