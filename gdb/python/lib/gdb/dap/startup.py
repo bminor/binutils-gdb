@@ -172,11 +172,11 @@ def send_gdb_with_response(fn):
         try:
             val = fn()
             result_q.put(val)
-        except Exception as e:
+        except (Exception, KeyboardInterrupt) as e:
             result_q.put(e)
 
     send_gdb(message)
     val = result_q.get()
-    if isinstance(val, Exception):
+    if isinstance(val, (Exception, KeyboardInterrupt)):
         raise val
     return val
