@@ -3014,7 +3014,7 @@ procfs_target::can_use_hw_breakpoint (enum bptype type, int cnt, int othertype)
      procfs_address_to_host_pointer will reveal that an internal error
      will be generated when the host and target pointer sizes are
      different.  */
-  type *ptr_type
+  struct type *ptr_type
     = builtin_type (current_inferior ()->arch ())->builtin_data_ptr;
 
   if (sizeof (void *) != ptr_type->length ())
