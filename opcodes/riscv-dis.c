@@ -873,20 +873,20 @@ riscv_disassemble_insn (bfd_vma memaddr,
   return insnlen;
 }
 
-/* Return true if we find the suitable mapping symbol,
-   and also update the STATE.  Otherwise, return false.  */
+/* If we find the suitable mapping symbol update the STATE.
+   Otherwise, do nothing.  */
 
-static bool
-riscv_get_map_state (int n,
-		     enum riscv_seg_mstate *state,
-		     struct disassemble_info *info)
+static void
+riscv_update_map_state (int n,
+			enum riscv_seg_mstate *state,
+			struct disassemble_info *info)
 {
   const char *name;
 
   /* If the symbol is in a different section, ignore it.  */
   if (info->section != NULL
       && info->section != info->symtab[n]->section)
-    return false;
+    return;
 
   name = bfd_asymbol_name(info->symtab[n]);
   if (strcmp (name, "$x") == 0)
@@ -913,10 +913,26 @@ riscv_get_map_state (int n,
       else
 	riscv_parse_subset (&riscv_rps_dis, name + 2);
     }
-  else
+}
+
+/* Return true if we find the suitable mapping symbol.
+   Otherwise, return false.  */
+
+static bool
+riscv_is_valid_mapping_symbol (int n,
+			     struct disassemble_info *info)
+{
+  const char *name;
+
+  /* If the symbol is in a different section, ignore it.  */
+  if (info->section != NULL
+      && info->section != info->symtab[n]->section)
     return false;
 
-  return true;
+  name = bfd_asymbol_name(info->symtab[n]);
+  return (strcmp (name, "$x") == 0
+	  || strcmp (name, "$d") == 0
+	  || strncmp (name, "$xrv", 4) == 0);
 }
 
 /* Check the sorted symbol table (sorted by the symbol value), find the
@@ -975,7 +991,7 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
       /* We have searched all possible symbols in the range.  */
       if (addr > memaddr)
 	break;
-      if (riscv_get_map_state (n, &mstate, info))
+      if (riscv_is_valid_mapping_symbol (n, info))
 	{
 	  symbol = n;
 	  found = true;
@@ -1002,7 +1018,7 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
 	  if (addr < (info->section ? info->section->vma : 0))
 	    break;
 	  /* Stop searching once we find the closed mapping symbol.  */
-	  if (riscv_get_map_state (n, &mstate, info))
+	  if (riscv_is_valid_mapping_symbol (n, info))
 	    {
 	      symbol = n;
 	      found = true;
@@ -1013,6 +1029,8 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
 
   if (found)
     {
+      riscv_update_map_state (symbol, &mstate, info);
+
       /* Find the next mapping symbol to determine the boundary of this mapping
 	 symbol.  */
 
@@ -1068,11 +1086,12 @@ riscv_data_length (bfd_vma memaddr,
 	{
 	  bfd_vma addr = bfd_asymbol_value (info->symtab[n]);
 	  if (addr > memaddr
-	      && riscv_get_map_state (n, &m, info))
+	      && riscv_is_valid_mapping_symbol (n, info))
 	    {
 	      if (addr - memaddr < length)
 		length = addr - memaddr;
 	      found = true;
+	      riscv_update_map_state (n, &m, info);
 	      break;
 	    }
 	}
