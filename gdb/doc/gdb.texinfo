@@ -39487,6 +39487,10 @@ depend on the language).
 @node Debugger Adapter Protocol
 @chapter Debugger Adapter Protocol
 
+The Debugger Adapter Protocol is a generic API that is used by some
+IDEs to communicate with debuggers.  It is documented at
+@url{https://microsoft.github.io/debug-adapter-protocol/}.
+
 Generally, @value{GDBN} implements the Debugger Adapter Protocol as
 written.  However, in some cases, extensions are either needed or even
 expected.
