@@ -57,6 +57,8 @@ LT_OUTPUT
 # necessary, set CXX_DIALECT to some -std=xxx switch.
 AX_CXX_COMPILE_STDCXX(17, , mandatory)
 
+GDB_AC_COMMON
+
 # Dependency checking.
 ZW_CREATE_DEPDIR
 ZW_PROG_COMPILER_DEPENDENCIES([CC])
@@ -1353,7 +1355,6 @@ AC_CHECK_FUNCS([getuid getgid \
 		setrlimit getrlimit posix_madvise waitpid \
 		use_default_colors])
 AM_LANGINFO_CODESET
-GDB_AC_COMMON
 
 # Check the return and argument types of ptrace.
 GDB_AC_PTRACE
