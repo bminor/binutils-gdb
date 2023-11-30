@@ -42,6 +42,12 @@ _commands = {}
 _server = None
 
 
+# A subclass of Exception that is used solely for reporting that a
+# request needs the inferior to be stopped, but it is not stopped.
+class NotStoppedException(Exception):
+    pass
+
+
 class Server:
     """The DAP server class."""
 
@@ -78,6 +84,9 @@ class Server:
             if body is not None:
                 result["body"] = body
             result["success"] = True
+        except NotStoppedException:
+            result["success"] = False
+            result["message"] = "notStopped"
         except BaseException as e:
             log_stack()
             result["success"] = False
@@ -169,7 +178,7 @@ def _check_not_running(func):
         from .events import inferior_running
 
         if inferior_running:
-            raise Exception("notStopped")
+            raise NotStoppedException()
         return func(*args, **kwargs)
 
     return check
