@@ -111,7 +111,7 @@ proc _dap_send_ton {obj} {
 # omitted.  The sequence number of the request is automatically added,
 # and this is also the return value.  OBJ is assumed to already be in
 # TON form.
-proc _dap_send_request {command {obj {}}} {
+proc dap_send_request {command {obj {}}} {
     # We can construct this directly as a TON object.
     set result $::dap_seq
     incr ::dap_seq
@@ -186,7 +186,7 @@ proc _dap_read_json {} {
 # response is seen, this leaves the global "last_ton" set to the TON
 # for the response.
 
-proc _dap_read_response {cmd num} {
+proc dap_read_response {cmd num} {
     set result {}
     while 1 {
 	set d [_dap_read_json]
@@ -204,11 +204,11 @@ proc _dap_read_response {cmd num} {
     }
 }
 
-# A wrapper for _dap_send_request and _dap_read_response.  This sends a
+# A wrapper for dap_send_request and dap_read_response.  This sends a
 # request to gdb and returns the response as a dict.
 proc dap_request_and_response {command {obj {}}} {
-    set seq [_dap_send_request $command $obj]
-    return [_dap_read_response $command $seq]
+    set seq [dap_send_request $command $obj]
+    return [dap_read_response $command $seq]
 }
 
 # Like dap_request_and_response, but also checks that the response
