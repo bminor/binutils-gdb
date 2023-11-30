@@ -18,6 +18,10 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  
 
 if {[istarget bpf*-*-*]} {
+    # Misc tests.
+    run_dump_test comments
+    run_dump_test comments-pseudoc
+
     # Little-endian BPF tests
     run_dump_test call
     run_dump_test exit

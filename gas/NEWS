@@ -41,6 +41,9 @@
   therefore they cannot longer be used to begin line comments. This matches the
   behavior of the clang/LLVM BPF assembler.
 
+* The BPF assembler now allows using both hash (#) and double slash (//) to
+  begin line comments.
+
 Changes in 2.41:
 
 * Add support for the KVX instruction set.

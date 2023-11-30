@@ -68,8 +68,8 @@ the host endianness is used.
 
 @cindex line comment character, BPF
 @cindex BPF line comment character
-The presence of a @samp{#} on a line indicates the start of a comment
-that extends to the end of the current line.
+The presence of a @samp{#} or @samp{//} anywhere on a line indicates
+the start of a comment that extends to the end of the line.
 
 @cindex block comments, BPF
 @cindex BPF block comments

@@ -35,6 +35,9 @@
 #define TARGET_BYTES_BIG_ENDIAN 0
 #endif
 
+/* Permit // comments.  */
+#define DOUBLESLASH_LINE_COMMENTS 1
+
 /* .-foo gets turned into PC relative relocs.  */
 #define DIFF_EXPR_OK    1
 

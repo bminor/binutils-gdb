@@ -1,3 +1,14 @@
+2023-11-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-bpf.h (DOUBLESLASH_LINE_COMMENTS): Define.
+	* testsuite/gas/bpf/comments.s: New file.
+	* testsuite/gas/bpf/comments.d: Likewise.
+	* testsuite/gas/bpf/comments-pseudoc.d: Likewise.
+	* testsuite/gas/bpf/comments-pseudoc.s: Likewise.
+	* testsuite/gas/bpf/bpf.exp: Run comments and comments-pseudoc.
+	* doc/c-bpf.texi (BPF Special Characters): Document // comments.
+	* NEWS: Update.
+
 2023-11-28  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* NEWS: Add entry about change of comment syntax in the BPF
