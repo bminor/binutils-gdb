@@ -1641,9 +1641,9 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
 	  state->lexptr++;
 	  return '-';
 	}
-      [[fallthrough]];
 
     try_number:
+      [[fallthrough]];
     case '0':
     case '1':
     case '2':
