@@ -829,7 +829,6 @@ sync_threadlists (pid_t pid)
   pthread_t pthid;
   pthdb_tid_t tid;
   process_stratum_target *proc_target = current_inferior ()->process_target ();
-  thread_info  *tp;
   struct aix_thread_variables *data;
   data = get_thread_data_helper_for_pid (pid);
 
@@ -931,7 +930,7 @@ sync_threadlists (pid_t pid)
 
 	      if (gptid.is_pid ())
 		{
-		  tp = proc_target->find_thread (gptid);
+		  thread_info *tp = proc_target->find_thread (gptid);
 		  thread_change_ptid (proc_target, gptid, pptid);
 		  aix_thread_info *priv = new aix_thread_info;
 		  priv->pdtid = pbuf[pi].pdtid;
@@ -1027,12 +1026,8 @@ pd_activate (pid_t pid)
   status = pthdb_session_init (pid, data->arch64 ? PEM_64BIT : PEM_32BIT,
 			       PTHDB_FLAG_REGS, &pd_callbacks,
 			       &data->pd_session);
-  if (status != PTHDB_SUCCESS)
-    {
-      return ptid_t (pid);
-    }
-  data->pd_active = 1;
-  return;
+  if (status == PTHDB_SUCCESS)
+    data->pd_active = 1;
 }
 
 /* AIX implementation of update_thread_list.  */
@@ -1746,7 +1741,6 @@ store_regs_user_thread (const struct regcache *regcache, pthdb_pthread_t pdtid)
   uint64_t int64;
   struct aix_thread_variables *data;
   data = get_thread_data_helper_for_ptid (inferior_ptid);
-  int ret;
   __vmx_context_t vmx;
   __vsx_context_t  vsx;
 
