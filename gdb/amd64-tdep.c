@@ -3205,8 +3205,8 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
 
   set_gdbarch_pseudo_register_read_value (gdbarch,
 					  amd64_pseudo_register_read_value);
-  set_gdbarch_pseudo_register_write (gdbarch,
-				     amd64_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						amd64_pseudo_register_write);
   set_gdbarch_ax_pseudo_register_collect (gdbarch,
 					  amd64_ax_pseudo_register_collect);
 

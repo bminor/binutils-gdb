@@ -4481,7 +4481,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_num_pseudo_regs (gdbarch, num_pseudo_regs);
   set_gdbarch_pseudo_register_read_value (gdbarch, aarch64_pseudo_read_value);
-  set_gdbarch_pseudo_register_write (gdbarch, aarch64_pseudo_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch, aarch64_pseudo_write);
   set_tdesc_pseudo_register_name (gdbarch, aarch64_pseudo_register_name);
   set_tdesc_pseudo_register_type (gdbarch, aarch64_pseudo_register_type);
   set_tdesc_pseudo_register_reggroup_p (gdbarch,

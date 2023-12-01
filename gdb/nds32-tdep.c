@@ -2001,7 +2001,8 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else if (use_pseudo_fsrs == 1)
     {
       set_gdbarch_pseudo_register_read (gdbarch, nds32_pseudo_register_read);
-      set_gdbarch_pseudo_register_write (gdbarch, nds32_pseudo_register_write);
+      set_gdbarch_deprecated_pseudo_register_write
+	(gdbarch, nds32_pseudo_register_write);
       set_tdesc_pseudo_register_name (gdbarch, nds32_pseudo_register_name);
       set_tdesc_pseudo_register_type (gdbarch, nds32_pseudo_register_type);
       set_gdbarch_num_pseudo_regs (gdbarch, num_fsr_map[fpu_freg]);

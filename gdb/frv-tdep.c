@@ -1499,7 +1499,8 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_sim_regno (gdbarch, frv_register_sim_regno);
 
   set_gdbarch_pseudo_register_read (gdbarch, frv_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, frv_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						frv_pseudo_register_write);
 
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
   set_gdbarch_skip_main_prologue (gdbarch, frv_skip_main_prologue);

@@ -1002,9 +1002,9 @@ riscv_pseudo_register_read (struct gdbarch *gdbarch,
   return REG_UNKNOWN;
 }
 
-/* Implement gdbarch_pseudo_register_write.  Write the contents of BUF into
-   pseudo-register REGNUM in REGCACHE.  BUF is sized based on the type of
-   register REGNUM.  */
+/* Implement gdbarch_deprecated_pseudo_register_write.  Write the contents of
+   BUF into pseudo-register REGNUM in REGCACHE.  BUF is sized based on the type
+   of register REGNUM.  */
 
 static void
 riscv_pseudo_register_write (struct gdbarch *gdbarch,
@@ -4229,7 +4229,8 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_tdesc_pseudo_register_reggroup_p (gdbarch,
 					riscv_pseudo_register_reggroup_p);
   set_gdbarch_pseudo_register_read (gdbarch, riscv_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, riscv_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						riscv_pseudo_register_write);
 
   /* Finalise the target description registers.  */
   tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data),

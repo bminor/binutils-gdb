@@ -805,7 +805,8 @@ bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_num_regs (gdbarch, BFIN_NUM_REGS);
   set_gdbarch_pseudo_register_read (gdbarch, bfin_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, bfin_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						bfin_pseudo_register_write);
   set_gdbarch_num_pseudo_regs (gdbarch, BFIN_NUM_PSEUDO_REGS);
   set_gdbarch_sp_regnum (gdbarch, BFIN_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, BFIN_PC_REGNUM);

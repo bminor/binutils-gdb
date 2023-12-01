@@ -74,7 +74,7 @@ struct gdbarch
   gdbarch_virtual_frame_pointer_ftype *virtual_frame_pointer = legacy_virtual_frame_pointer;
   gdbarch_pseudo_register_read_ftype *pseudo_register_read = nullptr;
   gdbarch_pseudo_register_read_value_ftype *pseudo_register_read_value = nullptr;
-  gdbarch_pseudo_register_write_ftype *pseudo_register_write = nullptr;
+  gdbarch_deprecated_pseudo_register_write_ftype *deprecated_pseudo_register_write = nullptr;
   int num_regs = -1;
   int num_pseudo_regs = 0;
   gdbarch_ax_pseudo_register_collect_ftype *ax_pseudo_register_collect = nullptr;
@@ -330,7 +330,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
   /* Skip verify of pseudo_register_read, has predicate.  */
   /* Skip verify of pseudo_register_read_value, has predicate.  */
-  /* Skip verify of pseudo_register_write, has predicate.  */
+  /* Skip verify of deprecated_pseudo_register_write, has predicate.  */
   if (gdbarch->num_regs == -1)
     log.puts ("\n\tnum_regs");
   /* Skip verify of num_pseudo_regs, invalid_p == 0 */
@@ -650,11 +650,11 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 	      "gdbarch_dump: pseudo_register_read_value = <%s>\n",
 	      host_address_to_string (gdbarch->pseudo_register_read_value));
   gdb_printf (file,
-	      "gdbarch_dump: gdbarch_pseudo_register_write_p() = %d\n",
-	      gdbarch_pseudo_register_write_p (gdbarch));
+	      "gdbarch_dump: gdbarch_deprecated_pseudo_register_write_p() = %d\n",
+	      gdbarch_deprecated_pseudo_register_write_p (gdbarch));
   gdb_printf (file,
-	      "gdbarch_dump: pseudo_register_write = <%s>\n",
-	      host_address_to_string (gdbarch->pseudo_register_write));
+	      "gdbarch_dump: deprecated_pseudo_register_write = <%s>\n",
+	      host_address_to_string (gdbarch->deprecated_pseudo_register_write));
   gdb_printf (file,
 	      "gdbarch_dump: num_regs = %s\n",
 	      plongest (gdbarch->num_regs));
@@ -1903,27 +1903,27 @@ set_gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch,
 }
 
 bool
-gdbarch_pseudo_register_write_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_pseudo_register_write_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->pseudo_register_write != NULL;
+  return gdbarch->deprecated_pseudo_register_write != NULL;
 }
 
 void
-gdbarch_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const gdb_byte *buf)
+gdbarch_deprecated_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const gdb_byte *buf)
 {
   gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->pseudo_register_write != NULL);
+  gdb_assert (gdbarch->deprecated_pseudo_register_write != NULL);
   if (gdbarch_debug >= 2)
-    gdb_printf (gdb_stdlog, "gdbarch_pseudo_register_write called\n");
-  gdbarch->pseudo_register_write (gdbarch, regcache, cookednum, buf);
+    gdb_printf (gdb_stdlog, "gdbarch_deprecated_pseudo_register_write called\n");
+  gdbarch->deprecated_pseudo_register_write (gdbarch, regcache, cookednum, buf);
 }
 
 void
-set_gdbarch_pseudo_register_write (struct gdbarch *gdbarch,
-				   gdbarch_pseudo_register_write_ftype pseudo_register_write)
+set_gdbarch_deprecated_pseudo_register_write (struct gdbarch *gdbarch,
+					      gdbarch_deprecated_pseudo_register_write_ftype deprecated_pseudo_register_write)
 {
-  gdbarch->pseudo_register_write = pseudo_register_write;
+  gdbarch->deprecated_pseudo_register_write = deprecated_pseudo_register_write;
 }
 
 int

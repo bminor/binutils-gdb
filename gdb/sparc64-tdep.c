@@ -1825,7 +1825,8 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_tdesc_pseudo_register_name (gdbarch, sparc64_pseudo_register_name);
   set_tdesc_pseudo_register_type (gdbarch, sparc64_pseudo_register_type);
   set_gdbarch_pseudo_register_read (gdbarch, sparc64_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, sparc64_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						sparc64_pseudo_register_write);
 
   /* Register numbers of various important registers.  */
   set_gdbarch_pc_regnum (gdbarch, SPARC64_PC_REGNUM); /* %pc */

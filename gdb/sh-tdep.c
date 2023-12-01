@@ -2286,7 +2286,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_fp0_regnum (gdbarch, 25);
       set_gdbarch_num_pseudo_regs (gdbarch, 9);
       set_gdbarch_pseudo_register_read (gdbarch, sh_pseudo_register_read);
-      set_gdbarch_pseudo_register_write (gdbarch, sh_pseudo_register_write);
+      set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						    sh_pseudo_register_write);
       set_gdbarch_return_value (gdbarch, sh_return_value_fpu);
       set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
       break;
@@ -2297,7 +2298,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       set_gdbarch_num_pseudo_regs (gdbarch, 1);
       set_gdbarch_pseudo_register_read (gdbarch, sh_pseudo_register_read);
-      set_gdbarch_pseudo_register_write (gdbarch, sh_pseudo_register_write);
+      set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						    sh_pseudo_register_write);
       break;
 
     case bfd_mach_sh_dsp:
@@ -2337,7 +2339,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_fp0_regnum (gdbarch, 25);
       set_gdbarch_num_pseudo_regs (gdbarch, 13);
       set_gdbarch_pseudo_register_read (gdbarch, sh_pseudo_register_read);
-      set_gdbarch_pseudo_register_write (gdbarch, sh_pseudo_register_write);
+      set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						    sh_pseudo_register_write);
       set_gdbarch_return_value (gdbarch, sh_return_value_fpu);
       set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
       break;

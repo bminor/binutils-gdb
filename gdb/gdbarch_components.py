@@ -419,8 +419,16 @@ never be called.
 )
 
 Method(
+    comment="""
+Write bytes to a pseudo register.
+
+This is marked as deprecated because it gets passed a regcache for
+implementations to write raw registers in.  This doesn't work for unwound
+frames, where the raw registers backing the pseudo registers may have been
+saved elsewhere.
+""",
     type="void",
-    name="pseudo_register_write",
+    name="deprecated_pseudo_register_write",
     params=[
         ("struct regcache *", "regcache"),
         ("int", "cookednum"),

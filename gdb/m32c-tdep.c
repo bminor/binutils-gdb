@@ -977,7 +977,8 @@ make_regs (struct gdbarch *arch)
   set_gdbarch_register_name (arch, m32c_register_name);
   set_gdbarch_register_type (arch, m32c_register_type);
   set_gdbarch_pseudo_register_read (arch, m32c_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (arch, m32c_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (arch,
+						m32c_pseudo_register_write);
   set_gdbarch_register_sim_regno (arch, m32c_register_sim_regno);
   set_gdbarch_stab_reg_to_regnum (arch, m32c_debug_info_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (arch, m32c_debug_info_reg_to_regnum);

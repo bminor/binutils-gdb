@@ -10906,7 +10906,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       set_gdbarch_num_pseudo_regs (gdbarch, num_pseudos);
       set_gdbarch_pseudo_register_read (gdbarch, arm_pseudo_read);
-      set_gdbarch_pseudo_register_write (gdbarch, arm_pseudo_write);
+      set_gdbarch_deprecated_pseudo_register_write (gdbarch, arm_pseudo_write);
     }
 
   /* Add standard register aliases.  We add aliases even for those

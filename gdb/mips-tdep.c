@@ -8518,7 +8518,8 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_register_reggroup_p (gdbarch, mips_register_reggroup_p);
   set_gdbarch_pseudo_register_read (gdbarch, mips_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, mips_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						mips_pseudo_register_write);
 
   set_gdbarch_ax_pseudo_register_collect (gdbarch,
 					  mips_ax_pseudo_register_collect);

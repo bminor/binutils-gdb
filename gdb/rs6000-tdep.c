@@ -8353,8 +8353,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       || have_vsx || have_htm_fpu || have_htm_vsx)
     {
       set_gdbarch_pseudo_register_read (gdbarch, rs6000_pseudo_register_read);
-      set_gdbarch_pseudo_register_write (gdbarch,
-					 rs6000_pseudo_register_write);
+      set_gdbarch_deprecated_pseudo_register_write
+	(gdbarch, rs6000_pseudo_register_write);
       set_gdbarch_ax_pseudo_register_collect (gdbarch,
 	      rs6000_ax_pseudo_register_collect);
     }

@@ -3959,7 +3959,8 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_type (gdbarch, ia64_register_type);
 
   set_gdbarch_pseudo_register_read (gdbarch, ia64_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, ia64_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						ia64_pseudo_register_write);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, ia64_dwarf_reg_to_regnum);
   set_gdbarch_register_reggroup_p (gdbarch, ia64_register_reggroup_p);
   set_gdbarch_convert_register_p (gdbarch, ia64_convert_register_p);

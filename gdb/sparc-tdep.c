@@ -1844,7 +1844,8 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_tdesc_pseudo_register_name (gdbarch, sparc32_pseudo_register_name);
   set_tdesc_pseudo_register_type (gdbarch, sparc32_pseudo_register_type);
   set_gdbarch_pseudo_register_read (gdbarch, sparc32_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, sparc32_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						sparc32_pseudo_register_write);
 
   /* Register numbers of various important registers.  */
   set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM); /* %sp */

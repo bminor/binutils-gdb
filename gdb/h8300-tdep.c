@@ -1318,7 +1318,8 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   set_gdbarch_pseudo_register_read (gdbarch, h8300_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, h8300_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						h8300_pseudo_register_write);
 
   /*
    * Basic register fields and methods.

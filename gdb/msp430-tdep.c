@@ -937,7 +937,8 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, MSP430_SP_REGNUM);
   set_gdbarch_register_reggroup_p (gdbarch, msp430_register_reggroup_p);
   set_gdbarch_pseudo_register_read (gdbarch, msp430_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, msp430_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						msp430_pseudo_register_write);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, msp430_dwarf2_reg_to_regnum);
   set_gdbarch_register_sim_regno (gdbarch, msp430_register_sim_regno);
 

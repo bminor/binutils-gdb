@@ -3176,7 +3176,8 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Pseudo-Register read/write.  */
   set_gdbarch_pseudo_register_read (gdbarch, xtensa_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, xtensa_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						xtensa_pseudo_register_write);
 
   /* Set target information.  */
   set_gdbarch_num_regs (gdbarch, tdep->num_regs);

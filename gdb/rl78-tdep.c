@@ -1436,7 +1436,8 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, RL78_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, RL78_SP_REGNUM);
   set_gdbarch_pseudo_register_read (gdbarch, rl78_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, rl78_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						rl78_pseudo_register_write);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, rl78_dwarf_reg_to_regnum);
   set_gdbarch_register_reggroup_p (gdbarch, rl78_register_reggroup_p);
   set_gdbarch_register_sim_regno (gdbarch, rl78_register_sim_regno);

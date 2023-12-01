@@ -2424,7 +2424,8 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_type (gdbarch, mep_register_type);
   set_gdbarch_num_pseudo_regs (gdbarch, MEP_NUM_PSEUDO_REGS);
   set_gdbarch_pseudo_register_read (gdbarch, mep_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, mep_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						mep_pseudo_register_write);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, mep_debug_reg_to_regnum);
   set_gdbarch_stab_reg_to_regnum (gdbarch, mep_debug_reg_to_regnum);
 

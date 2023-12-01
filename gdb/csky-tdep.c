@@ -2872,8 +2872,8 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				   tdep->fv_pseudo_registers_count);
       set_gdbarch_pseudo_register_read (gdbarch,
 					csky_pseudo_register_read);
-      set_gdbarch_pseudo_register_write (gdbarch,
-					 csky_pseudo_register_write);
+      set_gdbarch_deprecated_pseudo_register_write
+	(gdbarch, csky_pseudo_register_write);
       set_tdesc_pseudo_register_name (gdbarch, csky_pseudo_register_name);
     }
 

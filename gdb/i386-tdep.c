@@ -8686,7 +8686,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Pseudo registers may be changed by amd64_init_abi.  */
   set_gdbarch_pseudo_register_read_value (gdbarch,
 					  i386_pseudo_register_read_value);
-  set_gdbarch_pseudo_register_write (gdbarch, i386_pseudo_register_write);
+  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
+						i386_pseudo_register_write);
   set_gdbarch_ax_pseudo_register_collect (gdbarch,
 					  i386_ax_pseudo_register_collect);
 
