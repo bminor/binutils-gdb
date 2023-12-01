@@ -7527,6 +7527,7 @@ the @samp{__.LIBDEP} member of @file{libssl.a} would contain
 @end smallexample
 
 @node Special Sections
+@chapter Special Sections
 When linking ELF format object files @command{ld} treats some sections
 in a special, non standard manner.  This part of the manual describes
 these sections.
