@@ -78,11 +78,41 @@ struct reg_buffer_common
      buffer.  */
   virtual register_status get_register_status (int regnum) const = 0;
 
-  /* Supply register REGNUM, whose contents are stored in BUF, to REGCACHE.  */
-  virtual void raw_supply (int regnum, const void *buf) = 0;
+  /* Supply register REGNUM, whose contents are stored in SRC, to this register
+     buffer.  */
+  virtual void raw_supply (int regnum, gdb::array_view<const gdb_byte> src)
+    = 0;
 
-  /* Collect register REGNUM from REGCACHE and store its contents in BUF.  */
-  virtual void raw_collect (int regnum, void *buf) const = 0;
+  void raw_supply (int regnum, const uint64_t *src)
+  {
+    raw_supply (regnum,
+		gdb::make_array_view ((const gdb_byte *) src, sizeof (*src)));
+  }
+
+  void raw_supply (int regnum, const gdb_byte *src)
+  {
+    raw_supply (regnum,
+		gdb::make_array_view (src,
+				      regcache_register_size (this, regnum)));
+  }
+
+  /* Collect register REGNUM from this register buffer and store its contents in
+     DST.  */
+  virtual void raw_collect (int regnum, gdb::array_view<gdb_byte> dst) const
+    = 0;
+
+  void raw_collect (int regnum, uint64_t *dst) const
+  {
+    raw_collect (regnum,
+		 gdb::make_array_view ((gdb_byte *) dst, sizeof (*dst)));
+  };
+
+  void raw_collect (int regnum, gdb_byte *dst)
+  {
+    raw_collect (regnum,
+		 gdb::make_array_view (dst,
+				       regcache_register_size (this, regnum)));
+  }
 
   /* Compare the contents of the register stored in the regcache (ignoring the
      first OFFSET bytes) to the contents of BUF (without any offset).  Returns

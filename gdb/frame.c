@@ -1108,9 +1108,9 @@ get_frame_func (frame_info_ptr this_frame)
 std::unique_ptr<readonly_detached_regcache>
 frame_save_as_regcache (frame_info_ptr this_frame)
 {
-  auto cooked_read = [this_frame] (int regnum, gdb_byte *buf)
+  auto cooked_read = [this_frame] (int regnum, gdb::array_view<gdb_byte> buf)
     {
-      if (!deprecated_frame_register_read (this_frame, regnum, buf))
+      if (!deprecated_frame_register_read (this_frame, regnum, buf.data ()))
 	return REG_UNAVAILABLE;
       else
 	return REG_VALID;

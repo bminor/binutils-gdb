@@ -54,6 +54,8 @@ extern std::string hex2str (const char *hex, int count);
 
 extern int bin2hex (const gdb_byte *bin, char *hex, int count);
 
+extern int bin2hex (gdb::array_view<gdb_byte> bin, char *hex);
+
 /* Overloaded version of bin2hex that returns a std::string.  */
 
 extern std::string bin2hex (const gdb_byte *bin, int count);

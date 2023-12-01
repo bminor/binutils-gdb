@@ -613,7 +613,7 @@ aarch64_sve_regs_copy_to_reg_buf (int tid, struct reg_buffer_common *reg_buf)
 {
   gdb::byte_vector sve_state = aarch64_fetch_sve_regset (tid);
 
-  char *base = (char *) sve_state.data ();
+  gdb_byte *base = sve_state.data ();
   struct user_sve_header *header
     = (struct user_sve_header *) sve_state.data ();
 
@@ -684,8 +684,10 @@ aarch64_sve_regs_copy_to_reg_buf (int tid, struct reg_buffer_common *reg_buf)
 	  reg_buf->raw_supply (AARCH64_SVE_Z0_REGNUM + i, reg);
 	}
 
-      reg_buf->raw_supply (AARCH64_FPSR_REGNUM, &fpsimd->fpsr);
-      reg_buf->raw_supply (AARCH64_FPCR_REGNUM, &fpsimd->fpcr);
+      reg_buf->raw_supply (AARCH64_FPSR_REGNUM,
+			   (const gdb_byte *) &fpsimd->fpsr);
+      reg_buf->raw_supply (AARCH64_FPCR_REGNUM,
+			   (const gdb_byte *) &fpsimd->fpcr);
 
       /* Clear the SVE only registers.  */
       memset (reg, 0, SVE_PT_SVE_ZREG_SIZE (vq));
@@ -720,7 +722,7 @@ aarch64_sve_regs_copy_from_reg_buf (int tid,
   gdb::byte_vector new_state (SVE_PT_SIZE (32, SVE_PT_REGS_SVE), 0);
   memcpy (new_state.data (), sve_state.data (), sve_state.size ());
   header = (struct user_sve_header *) new_state.data ();
-  char *base = (char *) new_state.data ();
+  gdb_byte *base = new_state.data ();
 
   /* Sanity check the data in the header.  */
   if (!sve_vl_valid (header->vl)
@@ -805,9 +807,11 @@ aarch64_sve_regs_copy_from_reg_buf (int tid,
 	    }
 
 	  if (REG_VALID == reg_buf->get_register_status (AARCH64_FPSR_REGNUM))
-	    reg_buf->raw_collect (AARCH64_FPSR_REGNUM, &fpsimd->fpsr);
+	    reg_buf->raw_collect (AARCH64_FPSR_REGNUM,
+				  (gdb_byte *) &fpsimd->fpsr);
 	  if (REG_VALID == reg_buf->get_register_status (AARCH64_FPCR_REGNUM))
-	    reg_buf->raw_collect (AARCH64_FPCR_REGNUM, &fpsimd->fpcr);
+	    reg_buf->raw_collect (AARCH64_FPCR_REGNUM,
+				  (gdb_byte *) &fpsimd->fpcr);
 
 	  /* At this point we have collected all the data from the register
 	     cache and we are ready to update the FPSIMD register content
@@ -894,7 +898,7 @@ aarch64_za_regs_copy_to_reg_buf (int tid, struct reg_buffer_common *reg_buf,
   /* Sanity check.  */
   gdb_assert (!za_state.empty ());
 
-  char *base = (char *) za_state.data ();
+  gdb_byte *base = za_state.data ();
   struct user_za_header *header = (struct user_za_header *) base;
 
   /* If we have ZA state, read it.  Otherwise, make the contents of ZA
@@ -1027,7 +1031,7 @@ aarch64_za_regs_copy_from_reg_buf (int tid,
       /* Fetch the current ZA state from the thread.  */
       gdb::byte_vector za_state = aarch64_fetch_za_regset (tid);
 
-      char *base = (char *) za_state.data ();
+      gdb_byte *base = za_state.data ();
       struct user_za_header *za_header = (struct user_za_header *) base;
       uint64_t svq = sve_vq_from_vl (za_header->vl);
 

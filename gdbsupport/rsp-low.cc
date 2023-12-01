@@ -143,6 +143,14 @@ bin2hex (const gdb_byte *bin, char *hex, int count)
 
 /* See rsp-low.h.  */
 
+int
+bin2hex (gdb::array_view<gdb_byte> bin, char *hex)
+{
+  return bin2hex (bin.data (), hex, bin.size ());
+}
+
+/* See rsp-low.h.  */
+
 std::string
 bin2hex (const gdb_byte *bin, int count)
 {
