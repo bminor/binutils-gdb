@@ -999,7 +999,8 @@ mips_value_to_register (frame_info_ptr frame, int regnum,
     {
       gdb_byte fill[8];
       size_t len = type->length ();
-      
+      frame_info_ptr next_frame = get_next_frame_sentinel_okay (frame);
+
       /* Sign extend values, irrespective of type, that are stored to 
 	 a 64-bit general purpose register.  (32-bit unsigned values
 	 are stored as signed quantities within a 64-bit register.
@@ -1012,8 +1013,8 @@ mips_value_to_register (frame_info_ptr frame, int regnum,
 	    store_signed_integer (fill, 8, BFD_ENDIAN_BIG, -1);
 	  else
 	    store_signed_integer (fill, 8, BFD_ENDIAN_BIG, 0);
-	  put_frame_register_bytes (frame, regnum, 0, {fill, 8 - len});
-	  put_frame_register_bytes (frame, regnum, 8 - len, {from, len});
+	  put_frame_register_bytes (next_frame, regnum, 0, {fill, 8 - len});
+	  put_frame_register_bytes (next_frame, regnum, 8 - len, {from, len});
 	}
       else
 	{
@@ -1021,8 +1022,8 @@ mips_value_to_register (frame_info_ptr frame, int regnum,
 	    store_signed_integer (fill, 8, BFD_ENDIAN_LITTLE, -1);
 	  else
 	    store_signed_integer (fill, 8, BFD_ENDIAN_LITTLE, 0);
-	  put_frame_register_bytes (frame, regnum, 0, {from, len});
-	  put_frame_register_bytes (frame, regnum, len, {fill, 8 - len});
+	  put_frame_register_bytes (next_frame, regnum, 0, {from, len});
+	  put_frame_register_bytes (next_frame, regnum, len, {fill, 8 - len});
 	}
     }
   else

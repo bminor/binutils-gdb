@@ -743,8 +743,8 @@ extern bool get_frame_register_bytes (frame_info_ptr frame, int regnum,
 				      int *optimizedp, int *unavailablep);
 
 /* Write bytes from BUFFER to one or multiple registers starting with REGNUM
-   in frame FRAME, starting at OFFSET.  */
-extern void put_frame_register_bytes (frame_info_ptr frame, int regnum,
+   in NEXT_FRAME's previous frame, starting at OFFSET.  */
+extern void put_frame_register_bytes (frame_info_ptr next_frame, int regnum,
 				      CORE_ADDR offset,
 				      gdb::array_view<const gdb_byte> buffer);
 

@@ -1193,10 +1193,6 @@ value_assign (struct value *toval, struct value *fromval)
 
     case lval_register:
       {
-	frame_info_ptr frame;
-	struct gdbarch *gdbarch;
-	int value_reg;
-
 	/* Figure out which frame this register value is in.  The value
 	   holds the frame_id for the next frame, that is the frame this
 	   register value was unwound from.
@@ -1204,15 +1200,14 @@ value_assign (struct value *toval, struct value *fromval)
 	   Below we will call put_frame_register_bytes which requires that
 	   we pass it the actual frame in which the register value is
 	   valid, i.e. not the next frame.  */
-	frame = frame_find_by_id (VALUE_NEXT_FRAME_ID (toval));
-	frame = get_prev_frame_always (frame);
+	frame_info_ptr next_frame = frame_find_by_id (VALUE_NEXT_FRAME_ID (toval));
 
-	value_reg = VALUE_REGNUM (toval);
+	int value_reg = VALUE_REGNUM (toval);
 
-	if (!frame)
+	if (next_frame == nullptr)
 	  error (_("Value being assigned to is no longer active."));
 
-	gdbarch = get_frame_arch (frame);
+	gdbarch *gdbarch = frame_unwind_arch (next_frame);
 
 	if (toval->bitsize ())
 	  {
@@ -1232,9 +1227,10 @@ value_assign (struct value *toval, struct value *fromval)
 		       "don't fit in a %d bit word."),
 		     (int) sizeof (LONGEST) * HOST_CHAR_BIT);
 
-	    if (!get_frame_register_bytes (frame, value_reg, offset,
-					   {buffer, changed_len},
-					   &optim, &unavail))
+	    if (!get_frame_register_bytes (get_prev_frame_always (next_frame),
+					   value_reg, offset,
+					   { buffer, changed_len }, &optim,
+					   &unavail))
 	      {
 		if (optim)
 		  throw_error (OPTIMIZED_OUT_ERROR,
@@ -1247,8 +1243,8 @@ value_assign (struct value *toval, struct value *fromval)
 	    modify_field (type, buffer, value_as_long (fromval),
 			  toval->bitpos (), toval->bitsize ());
 
-	    put_frame_register_bytes (frame, value_reg, offset,
-				      {buffer, changed_len});
+	    put_frame_register_bytes (next_frame, value_reg, offset,
+				      { buffer, changed_len });
 	  }
 	else
 	  {
@@ -1258,17 +1254,19 @@ value_assign (struct value *toval, struct value *fromval)
 		/* If TOVAL is a special machine register requiring
 		   conversion of program values to a special raw
 		   format.  */
-		gdbarch_value_to_register (gdbarch, frame,
+		gdbarch_value_to_register (gdbarch,
+					   get_prev_frame_always (next_frame),
 					   VALUE_REGNUM (toval), type,
 					   fromval->contents ().data ());
 	      }
 	    else
-	      put_frame_register_bytes (frame, value_reg,
+	      put_frame_register_bytes (next_frame, value_reg,
 					toval->offset (),
 					fromval->contents ());
 	  }
 
-	gdb::observers::register_changed.notify (frame, value_reg);
+	gdb::observers::register_changed.notify
+	  (get_prev_frame_always (next_frame), value_reg);
 	break;
       }
 

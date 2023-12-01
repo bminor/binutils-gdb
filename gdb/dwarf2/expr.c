@@ -272,9 +272,9 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 		copy_bitwise (buffer.data (), bits_to_skip % 8,
 			      from_contents, offset,
 			      this_size_bits, bits_big_endian);
-		put_frame_register_bytes (frame, gdb_regnum,
-					  bits_to_skip / 8,
-					  buffer);
+		put_frame_register_bytes
+		  (get_next_frame_sentinel_okay (frame), gdb_regnum,
+		   bits_to_skip / 8, buffer);
 	      }
 	  }
 	  break;
