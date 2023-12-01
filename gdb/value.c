@@ -959,6 +959,21 @@ value::allocate (struct type *type)
   return allocate (type, true);
 }
 
+/* See value.h  */
+
+struct value *
+value::allocate_register (frame_info_ptr next_frame, int regnum)
+{
+  value *result
+    = value::allocate (register_type (frame_unwind_arch (next_frame), regnum));
+
+  result->set_lval (lval_register);
+  VALUE_REGNUM (result) = regnum;
+  VALUE_NEXT_FRAME_ID (result) = get_frame_id (next_frame);
+
+  return result;
+}
+
 /* Allocate a  value  that has the correct length
    for COUNT repetitions of type TYPE.  */
 

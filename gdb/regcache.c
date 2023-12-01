@@ -775,11 +775,8 @@ readable_regcache::cooked_read_value (int regnum)
       || (m_has_pseudo && m_register_status[regnum] != REG_UNKNOWN)
       || !gdbarch_pseudo_register_read_value_p (m_descr->gdbarch))
     {
-      struct value *result;
-
-      result = value::allocate (register_type (m_descr->gdbarch, regnum));
-      result->set_lval (lval_register);
-      VALUE_REGNUM (result) = regnum;
+      value *result = value::allocate_register
+	(get_next_frame_sentinel_okay (get_current_frame ()), regnum);
 
       /* It is more efficient in general to do this delegation in this
 	 direction than in the other one, even though the value-based
