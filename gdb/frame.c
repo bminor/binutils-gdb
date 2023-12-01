@@ -1398,10 +1398,10 @@ read_frame_register_unsigned (frame_info_ptr frame, int regnum,
 }
 
 void
-put_frame_register (frame_info_ptr frame, int regnum,
-		    gdb::array_view<const gdb_byte> buf)
+put_frame_register (frame_info_ptr next_frame, int regnum,
+		     gdb::array_view<const gdb_byte> buf)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  gdbarch *gdbarch = frame_unwind_arch (next_frame);
   int realnum;
   int optim;
   int unavail;
@@ -1411,8 +1411,8 @@ put_frame_register (frame_info_ptr frame, int regnum,
 
   gdb_assert (buf.size () == size);
 
-  frame_register_unwind (get_next_frame_sentinel_okay (frame), regnum, &optim,
-			 &unavail, &lval, &addr, &realnum, nullptr);
+  frame_register_unwind (next_frame, regnum, &optim, &unavail, &lval, &addr,
+			 &realnum, nullptr);
   if (optim)
     error (_("Attempt to assign to a register that was not saved."));
   switch (lval)
@@ -1557,7 +1557,8 @@ put_frame_register_bytes (frame_info_ptr frame, int regnum,
 				    buffer.size ());
 
       if (curr_len == register_size (gdbarch, regnum))
-	put_frame_register (frame, regnum, buffer.slice (0, curr_len));
+	put_frame_register (get_next_frame_sentinel_okay (frame), regnum,
+			    buffer.slice (0, curr_len));
       else
 	{
 	  value *value
@@ -1567,7 +1568,8 @@ put_frame_register_bytes (frame_info_ptr frame, int regnum,
 
 	  copy (buffer.slice (0, curr_len),
 		value->contents_writeable ().slice (offset, curr_len));
-	  put_frame_register (frame, regnum, value->contents_raw ());
+	  put_frame_register (get_next_frame_sentinel_okay (frame), regnum,
+			      value->contents_raw ());
 	  release_value (value);
 	}
 

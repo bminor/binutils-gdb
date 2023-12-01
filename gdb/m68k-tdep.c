@@ -250,7 +250,7 @@ m68k_value_to_register (frame_info_ptr frame, int regnum,
   /* Convert from TYPE.  */
   target_float_convert (from, type, to, fpreg_type);
   auto to_view = gdb::make_array_view (to, fpreg_type->length ());
-  put_frame_register (frame, regnum, to_view);
+  put_frame_register (get_next_frame_sentinel_okay (frame), regnum, to_view);
 }
 
 

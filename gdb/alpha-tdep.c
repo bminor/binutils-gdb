@@ -269,8 +269,9 @@ alpha_value_to_register (frame_info_ptr frame, int regnum,
 
   gdb_byte out[ALPHA_REGISTER_SIZE];
   alpha_lds (get_frame_arch (frame), out, in);
+
   auto out_view = gdb::make_array_view (out, reg_size);
-  put_frame_register (frame, regnum, out_view);
+  put_frame_register (get_next_frame_sentinel_okay (frame), regnum, out_view);
 }
 
 

@@ -1248,7 +1248,7 @@ ia64_value_to_register (frame_info_ptr frame, int regnum,
   type *to_type = ia64_ext_type (gdbarch);
   target_float_convert (in, valtype, out, to_type);
   auto out_view = gdb::make_array_view (out, to_type->length ());
-  put_frame_register (frame, regnum, out_view);
+  put_frame_register (get_next_frame_sentinel_okay (frame), regnum, out_view);
 }
 
 

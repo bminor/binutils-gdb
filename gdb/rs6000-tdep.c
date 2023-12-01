@@ -2744,7 +2744,7 @@ rs6000_value_to_register (frame_info_ptr frame,
   struct type *to_type = builtin_type (gdbarch)->builtin_double;
   target_float_convert (from, type, to, to_type);
   auto to_view = gdb::make_array_view (to, to_type->length ());
-  put_frame_register (frame, regnum, to_view);
+  put_frame_register (get_next_frame_sentinel_okay (frame), regnum, to_view);
 }
 
 static struct value *

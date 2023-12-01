@@ -727,10 +727,10 @@ extern ULONGEST get_frame_register_unsigned (frame_info_ptr frame,
 extern bool read_frame_register_unsigned (frame_info_ptr frame,
 					  int regnum, ULONGEST *val);
 
-/* The reverse.  Store a register value relative to the specified
-   frame.  Note: this call makes the frame's state undefined.  The
-   register and frame caches must be flushed.  */
-extern void put_frame_register (frame_info_ptr frame, int regnum,
+/* The reverse.  Store a register value relative to NEXT_FRAME's previous frame.
+   Note: this call makes the frame's state undefined.  The register and frame
+   caches must be flushed.  */
+extern void put_frame_register (frame_info_ptr next_frame, int regnum,
 				gdb::array_view<const gdb_byte> buf);
 
 /* Read LEN bytes from one or multiple registers starting with REGNUM
