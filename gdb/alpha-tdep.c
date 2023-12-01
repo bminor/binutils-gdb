@@ -263,14 +263,14 @@ static void
 alpha_value_to_register (frame_info_ptr frame, int regnum,
 			 struct type *valtype, const gdb_byte *in)
 {
-  gdb_byte out[ALPHA_REGISTER_SIZE];
-
+  int reg_size = register_size (get_frame_arch (frame), regnum);
   gdb_assert (valtype->length () == 4);
-  gdb_assert (register_size (get_frame_arch (frame), regnum)
-	      <= ALPHA_REGISTER_SIZE);
-  alpha_lds (get_frame_arch (frame), out, in);
+  gdb_assert (reg_size <= ALPHA_REGISTER_SIZE);
 
-  put_frame_register (frame, regnum, out);
+  gdb_byte out[ALPHA_REGISTER_SIZE];
+  alpha_lds (get_frame_arch (frame), out, in);
+  auto out_view = gdb::make_array_view (out, reg_size);
+  put_frame_register (frame, regnum, out_view);
 }
 
 

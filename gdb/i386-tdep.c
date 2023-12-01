@@ -3917,7 +3917,8 @@ i386_value_to_register (frame_info_ptr frame, int regnum,
       gdb_assert (regnum != -1);
       gdb_assert (register_size (get_frame_arch (frame), regnum) == 4);
 
-      put_frame_register (frame, regnum, from);
+      auto from_view = gdb::make_array_view (from, 4);
+      put_frame_register (frame, regnum, from_view);
       regnum = i386_next_regnum (regnum);
       len -= 4;
       from += 4;

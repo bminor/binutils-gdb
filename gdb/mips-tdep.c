@@ -990,8 +990,9 @@ mips_value_to_register (frame_info_ptr frame, int regnum,
 
   if (mips_convert_register_float_case_p (gdbarch, regnum, type))
     {
-      put_frame_register (frame, regnum + 0, from + 4);
-      put_frame_register (frame, regnum + 1, from + 0);
+      auto from_view = gdb::make_array_view (from, 8);
+      put_frame_register (frame, regnum, from_view.slice (4));
+      put_frame_register (frame, regnum + 1, from_view.slice (0, 4));
     }
   else if (mips_convert_register_gpreg_case_p (gdbarch, regnum, type))
     {

@@ -397,8 +397,10 @@ i387_value_to_register (frame_info_ptr frame, int regnum,
     }
 
   /* Convert from TYPE.  */
-  target_float_convert (from, type, to, i387_ext_type (gdbarch));
-  put_frame_register (frame, regnum, to);
+  struct type *to_type = i387_ext_type (gdbarch);
+  target_float_convert (from, type, to, to_type);
+  auto to_view = gdb::make_array_view (to, to_type->length ());
+  put_frame_register (frame, regnum, to_view);
 }
 
 

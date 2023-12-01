@@ -731,7 +731,7 @@ extern bool read_frame_register_unsigned (frame_info_ptr frame,
    frame.  Note: this call makes the frame's state undefined.  The
    register and frame caches must be flushed.  */
 extern void put_frame_register (frame_info_ptr frame, int regnum,
-				const gdb_byte *buf);
+				gdb::array_view<const gdb_byte> buf);
 
 /* Read LEN bytes from one or multiple registers starting with REGNUM
    in frame FRAME, starting at OFFSET, into BUF.  If the register

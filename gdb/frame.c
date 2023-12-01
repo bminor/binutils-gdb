@@ -1424,7 +1424,7 @@ read_frame_register_unsigned (frame_info_ptr frame, int regnum,
 
 void
 put_frame_register (frame_info_ptr frame, int regnum,
-		    const gdb_byte *buf)
+		    gdb::array_view<const gdb_byte> buf)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   int realnum;
@@ -1432,6 +1432,9 @@ put_frame_register (frame_info_ptr frame, int regnum,
   int unavail;
   enum lval_type lval;
   CORE_ADDR addr;
+  int size = register_size (gdbarch, regnum);
+
+  gdb_assert (buf.size () == size);
 
   frame_register (frame, regnum, &optim, &unavail,
 		  &lval, &addr, &realnum, NULL);
@@ -1441,7 +1444,7 @@ put_frame_register (frame_info_ptr frame, int regnum,
     {
     case lval_memory:
       {
-	write_memory (addr, buf, register_size (gdbarch, regnum));
+	write_memory (addr, buf.data (), size);
 	break;
       }
     case lval_register:
@@ -1577,7 +1580,7 @@ put_frame_register_bytes (frame_info_ptr frame, int regnum,
 				    buffer.size ());
 
       if (curr_len == register_size (gdbarch, regnum))
-	put_frame_register (frame, regnum, buffer.data ());
+	put_frame_register (frame, regnum, buffer.slice (0, curr_len));
       else
 	{
 	  value *value
@@ -1587,7 +1590,7 @@ put_frame_register_bytes (frame_info_ptr frame, int regnum,
 
 	  copy (buffer.slice (0, curr_len),
 		value->contents_writeable ().slice (offset, curr_len));
-	  put_frame_register (frame, regnum, value->contents_raw ().data ());
+	  put_frame_register (frame, regnum, value->contents_raw ());
 	  release_value (value);
 	}
 

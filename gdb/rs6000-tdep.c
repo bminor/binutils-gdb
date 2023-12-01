@@ -2741,9 +2741,10 @@ rs6000_value_to_register (frame_info_ptr frame,
      fpr to vsr.  */
   regnum = ieee_128_float_regnum_adjust (gdbarch, type, regnum);
 
-  target_float_convert (from, type,
-			to, builtin_type (gdbarch)->builtin_double);
-  put_frame_register (frame, regnum, to);
+  struct type *to_type = builtin_type (gdbarch)->builtin_double;
+  target_float_convert (from, type, to, to_type);
+  auto to_view = gdb::make_array_view (to, to_type->length ());
+  put_frame_register (frame, regnum, to_view);
 }
 
 static struct value *

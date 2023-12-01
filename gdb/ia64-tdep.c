@@ -1245,8 +1245,10 @@ ia64_value_to_register (frame_info_ptr frame, int regnum,
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte out[IA64_FP_REGISTER_SIZE];
-  target_float_convert (in, valtype, out, ia64_ext_type (gdbarch));
-  put_frame_register (frame, regnum, out);
+  type *to_type = ia64_ext_type (gdbarch);
+  target_float_convert (in, valtype, out, to_type);
+  auto out_view = gdb::make_array_view (out, to_type->length ());
+  put_frame_register (frame, regnum, out_view);
 }
 
 
