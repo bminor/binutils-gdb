@@ -6833,7 +6833,7 @@ display_loclists_list (struct dwarf_section *  section,
   unsigned int pointer_size;
   unsigned int offset_size;
   unsigned int dwarf_version;
-  uint64_t index;
+  uint64_t idx;
 
   /* Initialize it due to a false compiler warning.  */
   uint64_t begin = -1, vbegin = -1;
@@ -6892,28 +6892,28 @@ display_loclists_list (struct dwarf_section *  section,
 	  break;
 
 	case DW_LLE_base_addressx:
-	  READ_ULEB (index, start, section_end);
-	  print_hex (index, pointer_size);
+	  READ_ULEB (idx, start, section_end);
+	  print_hex (idx, pointer_size);
 	  printf (_("(index into .debug_addr) "));
 	  base_address = fetch_indexed_addr
-	    (debug_info_p->addr_base + index * pointer_size, pointer_size);
+	    (debug_info_p->addr_base + idx * pointer_size, pointer_size);
 	  print_hex (base_address, pointer_size);
 	  printf (_("(base address)\n"));
 	  break;
 
 	case DW_LLE_startx_endx:
-	  READ_ULEB (index, start, section_end);
+	  READ_ULEB (idx, start, section_end);
 	  begin = fetch_indexed_addr
-	    (debug_info_p->addr_base + index * pointer_size, pointer_size);
-	  READ_ULEB (index, start, section_end);
+	    (debug_info_p->addr_base + idx * pointer_size, pointer_size);
+	  READ_ULEB (idx, start, section_end);
 	  end = fetch_indexed_addr
-	    (debug_info_p->addr_base + index * pointer_size, pointer_size);
+	    (debug_info_p->addr_base + idx * pointer_size, pointer_size);
 	  break;
 
 	case DW_LLE_startx_length:
-	  READ_ULEB (index, start, section_end);
+	  READ_ULEB (idx, start, section_end);
 	  begin = fetch_indexed_addr
-	    (debug_info_p->addr_base + index * pointer_size, pointer_size);
+	    (debug_info_p->addr_base + idx * pointer_size, pointer_size);
 	  READ_ULEB (end, start, section_end);
 	  end += begin;
 	  break;
