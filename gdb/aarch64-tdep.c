@@ -3114,12 +3114,11 @@ aarch64_pseudo_read_value_1 (frame_info_ptr next_frame,
 }
 
 /* Helper function for reading/writing ZA pseudo-registers.  Given REGNUM,
-   a ZA pseudo-register number, return, in OFFSETS, the information on positioning
-   of the bytes that must be read from/written to.  */
+   a ZA pseudo-register number, return the information on positioning of the
+   bytes that must be read from/written to.  */
 
-static void
-aarch64_za_offsets_from_regnum (struct gdbarch *gdbarch, int regnum,
-				struct za_offsets &offsets)
+static za_offsets
+aarch64_za_offsets_from_regnum (struct gdbarch *gdbarch, int regnum)
 {
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
 
@@ -3135,6 +3134,7 @@ aarch64_za_offsets_from_regnum (struct gdbarch *gdbarch, int regnum,
 
   /* Fetch the streaming vector length.  */
   size_t svl = sve_vl_from_vq (tdep->sme_svq);
+  za_offsets offsets;
 
   if (is_sme_tile_slice_pseudo_register (gdbarch, regnum))
     {
@@ -3190,6 +3190,8 @@ aarch64_za_offsets_from_regnum (struct gdbarch *gdbarch, int regnum,
       /* The chunk size is always svl bytes.  */
       offsets.chunk_size = svl;
     }
+
+  return offsets;
 }
 
 /* Given REGNUM, a SME pseudo-register number, return its value in RESULT.  */
@@ -3207,8 +3209,8 @@ aarch64_sme_pseudo_register_read (gdbarch *gdbarch, frame_info_ptr next_frame,
 
   /* Fetch the offsets that we need in order to read from the correct blocks
      of ZA.  */
-  struct za_offsets offsets;
-  aarch64_za_offsets_from_regnum (gdbarch, pseudo_reg_num, offsets);
+  za_offsets offsets
+    = aarch64_za_offsets_from_regnum (gdbarch, pseudo_reg_num);
 
   /* Fetch the contents of ZA.  */
   value *za_value = value_of_register (tdep->sme_za_regnum, next_frame);
@@ -3330,8 +3332,7 @@ aarch64_sme_pseudo_register_write (struct gdbarch *gdbarch,
 
   /* Fetch the offsets that we need in order to write to the correct blocks
      of ZA.  */
-  struct za_offsets offsets;
-  aarch64_za_offsets_from_regnum (gdbarch, regnum, offsets);
+  za_offsets offsets = aarch64_za_offsets_from_regnum (gdbarch, regnum);
 
   /* Fetch the contents of ZA.  */
   size_t svl = sve_vl_from_vq (tdep->sme_svq);
