@@ -9816,61 +9816,73 @@ arm_neon_quad_read (struct gdbarch *gdbarch, readable_regcache *regcache,
   return REG_VALID;
 }
 
-/* Read the contents of the MVE pseudo register REGNUM and store it
-   in BUF.  */
+/* Read the contents of a NEON quad register, by reading from two double
+   registers, and return it as a value.  QUAD_REG_INDEX is the index of the quad
+   register, in [0, 15].  */
 
-static enum register_status
-arm_mve_pseudo_read (struct gdbarch *gdbarch, readable_regcache *regcache,
-		     int regnum, gdb_byte *buf)
+static value *
+arm_neon_quad_read_value (gdbarch *gdbarch, frame_info_ptr next_frame,
+			  int pseudo_reg_num, int quad_reg_index)
+{
+  std::string raw_reg_name = string_printf ("d%d", quad_reg_index << 1);
+  int double_regnum
+    = user_reg_map_name_to_regnum (gdbarch, raw_reg_name.c_str (),
+				   raw_reg_name.length ());
+
+  return pseudo_from_concat_raw (next_frame, pseudo_reg_num, double_regnum,
+				 double_regnum + 1);
+}
+
+/* Read the contents of the MVE pseudo register REGNUM and return it as a
+   value.  */
+static value *
+arm_mve_pseudo_read_value (gdbarch *gdbarch, frame_info_ptr next_frame,
+			   int pseudo_reg_num)
 {
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   /* P0 is the first 16 bits of VPR.  */
-  return regcache->raw_read_part (tdep->mve_vpr_regnum, 0, 2, buf);
+  return pseudo_from_raw_part (next_frame, pseudo_reg_num,
+			       tdep->mve_vpr_regnum, 0);
 }
 
-static enum register_status
-arm_pseudo_read (struct gdbarch *gdbarch, readable_regcache *regcache,
-		 int regnum, gdb_byte *buf)
+static value *
+arm_pseudo_read_value (gdbarch *gdbarch, frame_info_ptr next_frame,
+		       const int pseudo_reg_num)
 {
-  const int num_regs = gdbarch_num_regs (gdbarch);
-  char name_buf[4];
-  gdb_byte reg_buf[8];
-  int offset, double_regnum;
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
-  gdb_assert (regnum >= num_regs);
+  gdb_assert (pseudo_reg_num >= gdbarch_num_regs (gdbarch));
 
-  if (is_q_pseudo (gdbarch, regnum))
+  if (is_q_pseudo (gdbarch, pseudo_reg_num))
     {
       /* Quad-precision register.  */
-      return arm_neon_quad_read (gdbarch, regcache,
-				 regnum - tdep->q_pseudo_base, buf);
+      return arm_neon_quad_read_value (gdbarch, next_frame, pseudo_reg_num,
+				       pseudo_reg_num - tdep->q_pseudo_base);
     }
-  else if (is_mve_pseudo (gdbarch, regnum))
-    return arm_mve_pseudo_read (gdbarch, regcache, regnum, buf);
+  else if (is_mve_pseudo (gdbarch, pseudo_reg_num))
+    return arm_mve_pseudo_read_value (gdbarch, next_frame, pseudo_reg_num);
   else
     {
-      enum register_status status;
+      int s_reg_index = pseudo_reg_num - tdep->s_pseudo_base;
 
-      regnum -= tdep->s_pseudo_base;
       /* Single-precision register.  */
-      gdb_assert (regnum < 32);
+      gdb_assert (s_reg_index < 32);
 
       /* s0 is always the least significant half of d0.  */
+      int offset;
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-	offset = (regnum & 1) ? 0 : 4;
+	offset = (s_reg_index & 1) ? 0 : 4;
       else
-	offset = (regnum & 1) ? 4 : 0;
+	offset = (s_reg_index & 1) ? 4 : 0;
 
-      xsnprintf (name_buf, sizeof (name_buf), "d%d", regnum >> 1);
-      double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
-						   strlen (name_buf));
+      std::string raw_reg_name = string_printf ("d%d", s_reg_index >> 1);
+      int double_regnum
+	= user_reg_map_name_to_regnum (gdbarch, raw_reg_name.c_str (),
+				       raw_reg_name.length ());
 
-      status = regcache->raw_read (double_regnum, reg_buf);
-      if (status == REG_VALID)
-	memcpy (buf, reg_buf + offset, 4);
-      return status;
+      return pseudo_from_raw_part (next_frame, pseudo_reg_num, double_regnum,
+				   offset);
     }
 }
 
@@ -10905,7 +10917,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (tdep->have_s_pseudos || have_mve || have_pacbti)
     {
       set_gdbarch_num_pseudo_regs (gdbarch, num_pseudos);
-      set_gdbarch_pseudo_register_read (gdbarch, arm_pseudo_read);
+      set_gdbarch_pseudo_register_read_value (gdbarch, arm_pseudo_read_value);
       set_gdbarch_deprecated_pseudo_register_write (gdbarch, arm_pseudo_write);
     }
 
