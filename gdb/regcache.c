@@ -911,6 +911,10 @@ regcache::cooked_write (int regnum, gdb::array_view<const gdb_byte> src)
 
   if (regnum < num_raw_registers ())
     raw_write (regnum, src);
+  else if (gdbarch_pseudo_register_write_p (m_descr->gdbarch))
+    gdbarch_pseudo_register_write
+      (m_descr->gdbarch, get_next_frame_sentinel_okay (get_current_frame ()),
+       regnum, src);
   else
     gdbarch_deprecated_pseudo_register_write (m_descr->gdbarch, this, regnum,
 					      src.data ());

@@ -4072,6 +4072,23 @@ pseudo_from_raw_part (frame_info_ptr next_frame, int pseudo_reg_num,
 
 /* See value.h.  */
 
+void
+pseudo_to_raw_part (frame_info_ptr next_frame,
+		    gdb::array_view<const gdb_byte> pseudo_buf,
+		    int raw_reg_num, int raw_offset)
+{
+  int raw_reg_size
+    = register_size (frame_unwind_arch (next_frame), raw_reg_num);
+
+  /* When overflowing a register, put_frame_register_bytes writes to the
+     subsequent registers.  We don't want that behavior here, so make sure
+     the write is wholly within register RAW_REG_NUM.  */
+  gdb_assert (raw_offset + pseudo_buf.size () <= raw_reg_size);
+  put_frame_register_bytes (next_frame, raw_reg_num, raw_offset, pseudo_buf);
+}
+
+/* See value.h.  */
+
 value *
 pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
 			int raw_reg_1_num, int raw_reg_2_num)
@@ -4093,6 +4110,29 @@ pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
   gdb_assert (dst_offset == pseudo_reg_val->type ()->length ());
 
   return pseudo_reg_val;
+}
+
+/* See value.h. */
+
+void
+pseudo_to_concat_raw (frame_info_ptr next_frame,
+		      gdb::array_view<const gdb_byte> pseudo_buf,
+		      int raw_reg_1_num, int raw_reg_2_num)
+{
+  int src_offset = 0;
+  gdbarch *arch = frame_unwind_arch (next_frame);
+
+  int raw_reg_1_size = register_size (arch, raw_reg_1_num);
+  put_frame_register_bytes (next_frame, raw_reg_1_num, 0,
+			    pseudo_buf.slice (src_offset, raw_reg_1_size));
+  src_offset += raw_reg_1_size;
+
+  int raw_reg_2_size = register_size (arch, raw_reg_2_num);
+  put_frame_register_bytes (next_frame, raw_reg_2_num, 0,
+			    pseudo_buf.slice (src_offset, raw_reg_2_size));
+  src_offset += raw_reg_2_size;
+
+  gdb_assert (src_offset == pseudo_buf.size ());
 }
 
 /* See value.h.  */
@@ -4124,6 +4164,34 @@ pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
   gdb_assert (dst_offset == pseudo_reg_val->type ()->length ());
 
   return pseudo_reg_val;
+}
+
+/* See value.h. */
+
+void
+pseudo_to_concat_raw (frame_info_ptr next_frame,
+		      gdb::array_view<const gdb_byte> pseudo_buf,
+		      int raw_reg_1_num, int raw_reg_2_num, int raw_reg_3_num)
+{
+  int src_offset = 0;
+  gdbarch *arch = frame_unwind_arch (next_frame);
+
+  int raw_reg_1_size = register_size (arch, raw_reg_1_num);
+  put_frame_register_bytes (next_frame, raw_reg_1_num, 0,
+			    pseudo_buf.slice (src_offset, raw_reg_1_size));
+  src_offset += raw_reg_1_size;
+
+  int raw_reg_2_size = register_size (arch, raw_reg_2_num);
+  put_frame_register_bytes (next_frame, raw_reg_2_num, 0,
+			    pseudo_buf.slice (src_offset, raw_reg_2_size));
+  src_offset += raw_reg_2_size;
+
+  int raw_reg_3_size = register_size (arch, raw_reg_3_num);
+  put_frame_register_bytes (next_frame, raw_reg_3_num, 0,
+			    pseudo_buf.slice (src_offset, raw_reg_3_size));
+  src_offset += raw_reg_3_size;
+
+  gdb_assert (src_offset == pseudo_buf.size ());
 }
 
 /* Implementation of the convenience function $_isvoid.  */

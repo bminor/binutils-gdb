@@ -420,12 +420,31 @@ never be called.
 
 Method(
     comment="""
+Write bytes in BUF to pseudo register with number PSEUDO_REG_NUM.
+
+Raw registers backing the pseudo register should be written to using
+NEXT_FRAME.
+""",
+    type="void",
+    name="pseudo_register_write",
+    params=[
+        ("frame_info_ptr", "next_frame"),
+        ("int", "pseudo_reg_num"),
+        ("gdb::array_view<const gdb_byte>", "buf"),
+    ],
+    predicate=True,
+)
+
+Method(
+    comment="""
 Write bytes to a pseudo register.
 
 This is marked as deprecated because it gets passed a regcache for
 implementations to write raw registers in.  This doesn't work for unwound
 frames, where the raw registers backing the pseudo registers may have been
 saved elsewhere.
+
+Implementations should be migrated to implement pseudo_register_write instead.
 """,
     type="void",
     name="deprecated_pseudo_register_write",

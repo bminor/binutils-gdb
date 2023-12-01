@@ -1661,6 +1661,13 @@ private:
 value *pseudo_from_raw_part (frame_info_ptr next_frame, int pseudo_reg_num,
 			     int raw_reg_num, int raw_offset);
 
+/* Write PSEUDO_BUF, the contents of a pseudo register, to part of raw register
+   RAW_REG_NUM starting at RAW_OFFSET.  */
+
+void pseudo_to_raw_part (frame_info_ptr next_frame,
+			 gdb::array_view<const gdb_byte> pseudo_buf,
+			 int raw_reg_num, int raw_offset);
+
 /* Create a value for pseudo register PSEUDO_REG_NUM by concatenating raw
    registers RAW_REG_1_NUM and RAW_REG_2_NUM.
 
@@ -1670,10 +1677,25 @@ value *pseudo_from_raw_part (frame_info_ptr next_frame, int pseudo_reg_num,
 value *pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
 			       int raw_reg_1_num, int raw_reg_2_num);
 
+/* Write PSEUDO_BUF, the contents of a pseudo register, to the two raw registers
+   RAW_REG_1_NUM and RAW_REG_2_NUM.  */
+
+void pseudo_to_concat_raw (frame_info_ptr next_frame,
+			   gdb::array_view<const gdb_byte> pseudo_buf,
+			   int raw_reg_1_num, int raw_reg_2_num);
+
 /* Same as the above, but with three raw registers.  */
 
 value *pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
 			       int raw_reg_1_num, int raw_reg_2_num,
 			       int raw_reg_3_num);
+
+/* Write PSEUDO_BUF, the contents of a pseudo register, to the three raw
+   registers RAW_REG_1_NUM, RAW_REG_2_NUM and RAW_REG_3_NUM.  */
+
+void pseudo_to_concat_raw (frame_info_ptr next_frame,
+			   gdb::array_view<const gdb_byte> pseudo_buf,
+			   int raw_reg_1_num, int raw_reg_2_num,
+			   int raw_reg_3_num);
 
 #endif /* !defined (VALUE_H) */
