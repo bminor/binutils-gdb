@@ -3466,10 +3466,6 @@ s_nop (int ignore ATTRIBUTE_UNUSED)
   md_flush_pending_output ();
 #endif
 
-#ifdef md_cons_align
-  md_cons_align (1);
-#endif
-
   SKIP_WHITESPACE ();
   expression (&exp);
   demand_empty_rest_of_line ();
@@ -3517,10 +3513,6 @@ s_nops (int ignore ATTRIBUTE_UNUSED)
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
-#endif
-
-#ifdef md_cons_align
-  md_cons_align (1);
 #endif
 
   SKIP_WHITESPACE ();
