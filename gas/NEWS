@@ -34,8 +34,10 @@
 
 * Add support for Cortex-X4 for AArch64.
 
-* Add support for various T-Head extensions (XTheadVector, XTheadZvlsseg
+* Add support for RISC-V T-Head extensions (XTheadVector, XTheadZvlsseg
   and XTheadZvamo) from version 2.3.0 of the T-Head ISA manual.
+
+* Add support for RISC-V CORE-V extensions (XCVmac, XCValu) with version 1.0.
 
 * Add support for RISC-V SiFive VCIX extension (XSfVcp) with version 1.0.
 
