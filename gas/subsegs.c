@@ -61,7 +61,6 @@ alloc_seginfo (segT seg)
 
   seginfo = obstack_alloc (&notes, sizeof (*seginfo));
   memset (seginfo, 0, sizeof (*seginfo));
-  seginfo->bfd_section = seg;
   bfd_set_section_userdata (seg, seginfo);
 }
 /*
