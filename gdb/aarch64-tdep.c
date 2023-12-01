@@ -3337,6 +3337,7 @@ aarch64_sme_pseudo_register_write (struct gdbarch *gdbarch,
   /* Fetch the contents of ZA.  */
   size_t svl = sve_vl_from_vq (tdep->sme_svq);
   gdb::byte_vector za (std::pow (svl, 2));
+  regcache->raw_read (tdep->sme_za_regnum, za);
 
   /* Copy the requested data.  */
   for (int chunks = 0; chunks < offsets.chunks; chunks++)
