@@ -873,16 +873,16 @@ readable_regcache::read_part (int regnum, int offset, int len,
   int reg_size = register_size (arch (), regnum);
 
   gdb_assert (out != NULL);
-  gdb_assert (offset >= 0 && offset <= reg_size);
+  gdb_assert (offset >= 0);
   gdb_assert (len >= 0 && offset + len <= reg_size);
 
-  if (offset == 0 && len == 0)
+  if (len == 0)
     {
       /* Nothing to do.  */
       return REG_VALID;
     }
 
-  if (offset == 0 && len == reg_size)
+  if (len == reg_size)
     {
       /* Read the full register.  */
       return (is_raw) ? raw_read (regnum, out) : cooked_read (regnum, out);
@@ -910,16 +910,16 @@ reg_buffer::raw_collect_part (int regnum, int offset, int len,
   int reg_size = register_size (arch (), regnum);
 
   gdb_assert (out != nullptr);
-  gdb_assert (offset >= 0 && offset <= reg_size);
+  gdb_assert (offset >= 0);
   gdb_assert (len >= 0 && offset + len <= reg_size);
 
-  if (offset == 0 && len == 0)
+  if (len == 0)
     {
       /* Nothing to do.  */
       return;
     }
 
-  if (offset == 0 && len == reg_size)
+  if (len == reg_size)
     {
       /* Collect the full register.  */
       return raw_collect (regnum, out);
@@ -940,16 +940,16 @@ regcache::write_part (int regnum, int offset, int len,
   int reg_size = register_size (arch (), regnum);
 
   gdb_assert (in != NULL);
-  gdb_assert (offset >= 0 && offset <= reg_size);
+  gdb_assert (offset >= 0);
   gdb_assert (len >= 0 && offset + len <= reg_size);
 
-  if (offset == 0 && len == 0)
+  if (len == 0)
     {
       /* Nothing to do.  */
       return REG_VALID;
     }
 
-  if (offset == 0 && len == reg_size)
+  if (len == reg_size)
     {
       /* Write the full register.  */
       (is_raw) ? raw_write (regnum, in) : cooked_write (regnum, in);
@@ -979,16 +979,16 @@ reg_buffer::raw_supply_part (int regnum, int offset, int len,
   int reg_size = register_size (arch (), regnum);
 
   gdb_assert (in != nullptr);
-  gdb_assert (offset >= 0 && offset <= reg_size);
+  gdb_assert (offset >= 0);
   gdb_assert (len >= 0 && offset + len <= reg_size);
 
-  if (offset == 0 && len == 0)
+  if (len == 0)
     {
       /* Nothing to do.  */
       return;
     }
 
-  if (offset == 0 && len == reg_size)
+  if (len == reg_size)
     {
       /* Supply the full register.  */
       return raw_supply (regnum, in);
