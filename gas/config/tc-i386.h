@@ -321,6 +321,7 @@ struct i386_tc_frag_data
   unsigned int branch_type : 3;
   unsigned int cpunop : 1;
   unsigned int isanop : 1;
+  unsigned int last_insn_normal : 1;
 };
 
 /* We need to emit the right NOP pattern in .align frags.  This is
@@ -347,7 +348,10 @@ struct i386_tc_frag_data
      (FRAGP)->tc_frag_data.cmp_size = 0;			\
      (FRAGP)->tc_frag_data.classified = 0;			\
      (FRAGP)->tc_frag_data.branch_type = 0;			\
-     (FRAGP)->tc_frag_data.mf_type = 0;			\
+     (FRAGP)->tc_frag_data.mf_type = 0;				\
+     (FRAGP)->tc_frag_data.last_insn_normal			\
+	= (seg_info(now_seg)->tc_segment_info_data.last_insn.kind \
+	   == last_insn_other);					\
    }								\
  while (0)
 

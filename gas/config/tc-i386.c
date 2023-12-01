@@ -1529,6 +1529,14 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
   else if (fragP->fr_type != rs_machine_dependent)
     fragP->fr_var = count;
 
+  /* Emit a plain NOP first when the last thing we saw may not have been
+     a proper instruction (e.g. a stand-alone prefix or .byte).  */
+  if (!fragP->tc_frag_data.last_insn_normal)
+    {
+      *where++ = 0x90;
+      --count;
+    }
+
   if ((count / max_single_nop_size) > max_number_of_nops)
     {
       /* Generate jump over NOPs.  */
