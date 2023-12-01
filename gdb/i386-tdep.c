@@ -3464,17 +3464,6 @@ i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
 	      memcpy (buf + size, &upper, size);
 	    }
 	}
-      else if (i386_k_regnum_p (gdbarch, regnum))
-	{
-	  regnum -= tdep->k0_regnum;
-
-	  /* Extract (always little endian).  */
-	  status = regcache->raw_read (tdep->k0_regnum + regnum, raw_buf);
-	  if (status != REG_VALID)
-	    result_value->mark_bytes_unavailable (0, 8);
-	  else
-	    memcpy (buf, raw_buf, 8);
-	}
       else if (i386_zmm_regnum_p (gdbarch, regnum))
 	{
 	  regnum -= tdep->zmm0_regnum;
@@ -3656,12 +3645,6 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
 	  regcache->raw_write (I387_BND0R_REGNUM (tdep) + regnum, raw_buf);
 	}
-      else if (i386_k_regnum_p (gdbarch, regnum))
-	{
-	  regnum -= tdep->k0_regnum;
-
-	  regcache->raw_write (tdep->k0_regnum + regnum, buf);
-	}
       else if (i386_zmm_regnum_p (gdbarch, regnum))
 	{
 	  regnum -= tdep->zmm0_regnum;
@@ -3756,12 +3739,6 @@ i386_ax_pseudo_register_collect (struct gdbarch *gdbarch,
     {
       regnum -= tdep->bnd0_regnum;
       ax_reg_mask (ax, I387_BND0R_REGNUM (tdep) + regnum);
-      return 0;
-    }
-  else if (i386_k_regnum_p (gdbarch, regnum))
-    {
-      regnum -= tdep->k0_regnum;
-      ax_reg_mask (ax, tdep->k0_regnum + regnum);
       return 0;
     }
   else if (i386_zmm_regnum_p (gdbarch, regnum))
