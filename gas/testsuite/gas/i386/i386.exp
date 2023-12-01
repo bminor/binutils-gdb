@@ -642,6 +642,17 @@ if [gas_32_check] then {
     run_dump_test "lfence-ret-c"
     run_dump_test "lfence-ret-d"
     run_dump_test "lfence-byte"
+    # This test uses the .section directive, which only ELF and COFF/PE support.
+    if {[is_elf_format]
+	|| [istarget "*-*-vxworks*"]
+	|| [istarget "*-*-coff*"]
+	|| [istarget "*-*-pe*"]
+	|| [istarget "*-*-cygwin*"]
+	|| [istarget "*-*-mingw*"]
+    } then {
+	run_dump_test "lfence-section"
+    }
+
     run_dump_test "branch"
 
     # These tests require support for 8 and 16 bit relocs,

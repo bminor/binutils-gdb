@@ -281,6 +281,23 @@ extern enum i386_flag_code {
 	CODE_64BIT
 } i386_flag_code;
 
+struct i386_segment_info {
+  /* Type of previous "instruction", e.g. .byte or stand-alone prefix.  */
+  struct last_insn {
+    const char *file;
+    const char *name;
+    unsigned int line;
+    enum last_insn_kind
+      {
+	last_insn_other = 0,
+	last_insn_directive,
+	last_insn_prefix
+      } kind;
+  } last_insn;
+};
+
+#define TC_SEGMENT_INFO_TYPE struct i386_segment_info
+
 struct i386_tc_frag_data
 {
   union
