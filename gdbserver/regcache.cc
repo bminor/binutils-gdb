@@ -21,6 +21,8 @@
 #include "gdbthread.h"
 #include "tdesc.h"
 #include "gdbsupport/rsp-low.h"
+#include "gdbsupport/gdb-checked-static-cast.h"
+
 #ifndef IN_PROCESS_AGENT
 
 struct regcache *
@@ -64,7 +66,7 @@ get_thread_regcache (struct thread_info *thread, int fetch)
 
 /* See gdbsupport/common-regcache.h.  */
 
-struct regcache *
+reg_buffer_common *
 get_thread_regcache_for_ptid (ptid_t ptid)
 {
   return get_thread_regcache (find_thread_ptid (ptid), 1);
@@ -307,9 +309,10 @@ register_size (const struct target_desc *tdesc, int n)
 /* See gdbsupport/common-regcache.h.  */
 
 int
-regcache_register_size (const struct regcache *regcache, int n)
+regcache_register_size (const reg_buffer_common *regcache, int n)
 {
-  return register_size (regcache->tdesc, n);
+  return register_size
+    (gdb::checked_static_cast<const struct regcache *> (regcache)->tdesc, n);
 }
 
 static unsigned char *
@@ -437,10 +440,11 @@ regcache::raw_collect (int n, void *buf) const
 }
 
 enum register_status
-regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
+regcache_raw_read_unsigned (reg_buffer_common *reg_buf, int regnum,
 			    ULONGEST *val)
 {
   int size;
+  regcache *regcache = gdb::checked_static_cast<struct regcache *> (reg_buf);
 
   gdb_assert (regcache != NULL);
 
@@ -486,9 +490,10 @@ collect_register_by_name (struct regcache *regcache,
 /* Special handling for register PC.  */
 
 CORE_ADDR
-regcache_read_pc (struct regcache *regcache)
+regcache_read_pc (reg_buffer_common *regcache)
 {
-  return the_target->read_pc (regcache);
+  return the_target->read_pc
+    (gdb::checked_static_cast<struct regcache *> (regcache));
 }
 
 void

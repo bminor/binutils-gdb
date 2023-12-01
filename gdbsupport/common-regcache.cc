@@ -23,7 +23,7 @@
 /* Return the register's value or throw if it's not available.  */
 
 ULONGEST
-regcache_raw_get_unsigned (struct regcache *regcache, int regnum)
+regcache_raw_get_unsigned (reg_buffer_common *regcache, int regnum)
 {
   ULONGEST value;
   enum register_status status;

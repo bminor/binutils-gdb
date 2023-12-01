@@ -284,13 +284,12 @@ perf_event_read_bts (btrace_target_info *tinfo, const uint8_t *begin,
   struct perf_event_sample sample;
   size_t read = 0;
   struct btrace_block block = { 0, 0 };
-  struct regcache *regcache;
 
   gdb_assert (begin <= start);
   gdb_assert (start <= end);
 
   /* The first block ends at the current pc.  */
-  regcache = get_thread_regcache_for_ptid (tinfo->ptid);
+  reg_buffer_common *regcache = get_thread_regcache_for_ptid (tinfo->ptid);
   block.end = regcache_read_pc (regcache);
 
   /* The buffer may contain a partial record as its last entry (i.e. when the

@@ -322,7 +322,7 @@ thumb2_instruction_changes_pc (unsigned short inst1, unsigned short inst2)
 /* See arm.h.  */
 
 unsigned long
-shifted_reg_val (struct regcache *regcache, unsigned long inst,
+shifted_reg_val (reg_buffer_common *regcache, unsigned long inst,
 		 int carry, unsigned long pc_val, unsigned long status_reg)
 {
   unsigned long res, shift;

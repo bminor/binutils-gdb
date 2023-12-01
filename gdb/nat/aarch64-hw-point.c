@@ -137,8 +137,7 @@ aarch64_point_is_aligned (ptid_t ptid, int is_watchpoint, CORE_ADDR addr,
     alignment = AARCH64_HWP_ALIGNMENT;
   else
     {
-      struct regcache *regcache
-	= get_thread_regcache_for_ptid (ptid);
+      reg_buffer_common *regcache = get_thread_regcache_for_ptid (ptid);
 
       /* Set alignment to 2 only if the current process is 32-bit,
 	 since thumb instruction can be 2-byte aligned.  Otherwise, set

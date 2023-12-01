@@ -903,8 +903,10 @@ static CORE_ADDR
 arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
 {
   CORE_ADDR next_pc = 0;
-  CORE_ADDR pc = regcache_read_pc (self->regcache);
-  int is_thumb = arm_is_thumb (self->regcache);
+  regcache *regcache
+    = gdb::checked_static_cast<struct regcache *> (self->regcache);
+  CORE_ADDR pc = regcache_read_pc (regcache);
+  int is_thumb = arm_is_thumb (regcache);
   ULONGEST svc_number = 0;
 
   if (is_thumb)
@@ -914,7 +916,7 @@ arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
     }
   else
     {
-      struct gdbarch *gdbarch = self->regcache->arch ();
+      struct gdbarch *gdbarch = regcache->arch ();
       enum bfd_endian byte_order_for_code = 
 	gdbarch_byte_order_for_code (gdbarch);
       unsigned long this_instr = 
@@ -937,8 +939,7 @@ arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
     {
       /* SIGRETURN or RT_SIGRETURN may affect the arm thumb mode, so
 	 update IS_THUMB.   */
-      next_pc = arm_linux_sigreturn_next_pc (self->regcache, svc_number,
-					     &is_thumb);
+      next_pc = arm_linux_sigreturn_next_pc (regcache, svc_number, &is_thumb);
     }
 
   /* Addresses for calling Thumb functions have the bit 0 set.  */

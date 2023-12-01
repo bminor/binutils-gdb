@@ -20,6 +20,8 @@
 #ifndef COMMON_COMMON_REGCACHE_H
 #define COMMON_COMMON_REGCACHE_H
 
+struct reg_buffer_common;
+
 /* This header is a stopgap until we have an independent regcache.  */
 
 enum register_status : signed char
@@ -44,28 +46,29 @@ enum register_status : signed char
    thread specified by PTID.  This function must be provided by
    the client.  */
 
-extern struct regcache *get_thread_regcache_for_ptid (ptid_t ptid);
+extern reg_buffer_common *get_thread_regcache_for_ptid (ptid_t ptid);
 
 /* Return the size of register numbered N in REGCACHE.  This function
    must be provided by the client.  */
 
-extern int regcache_register_size (const struct regcache *regcache, int n);
+extern int regcache_register_size (const reg_buffer_common *regcache, int n);
 
 /* Read the PC register.  This function must be provided by the
    client.  */
 
-extern CORE_ADDR regcache_read_pc (struct regcache *regcache);
+extern CORE_ADDR regcache_read_pc (reg_buffer_common *regcache);
 
 /* Read the PC register.  If PC cannot be read, return 0.
    This is a wrapper around 'regcache_read_pc'.  */
 
-extern CORE_ADDR regcache_read_pc_protected (regcache *regcache);
+extern CORE_ADDR regcache_read_pc_protected (reg_buffer_common *regcache);
 
 /* Read a raw register into a unsigned integer.  */
-extern enum register_status regcache_raw_read_unsigned
-  (struct regcache *regcache, int regnum, ULONGEST *val);
+extern enum register_status
+regcache_raw_read_unsigned (reg_buffer_common *regcache, int regnum,
+			    ULONGEST *val);
 
-ULONGEST regcache_raw_get_unsigned (struct regcache *regcache, int regnum);
+ULONGEST regcache_raw_get_unsigned (reg_buffer_common *regcache, int regnum);
 
 struct reg_buffer_common
 {

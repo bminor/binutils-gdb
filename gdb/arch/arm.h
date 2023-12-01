@@ -188,7 +188,7 @@ enum system_register_address : CORE_ADDR
   ((CORE_ADDR) (((unsigned long) (addr)) + 8 + (sbits (instr, 0, 23) << 2)))
 
 /* Forward declaration.  */
-struct regcache;
+struct reg_buffer_common;
 
 /* Return the size in bytes of the complete Thumb instruction whose
    first halfword is INST1.  */
@@ -213,7 +213,7 @@ int thumb_advance_itstate (unsigned int itstate);
 
 /* Decode shifted register value.  */
 
-unsigned long shifted_reg_val (struct regcache *regcache,
+unsigned long shifted_reg_val (reg_buffer_common *regcache,
 			       unsigned long inst,
 			       int carry,
 			       unsigned long pc_val,

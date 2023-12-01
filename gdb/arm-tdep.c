@@ -7255,7 +7255,8 @@ CORE_ADDR
 arm_get_next_pcs_addr_bits_remove (struct arm_get_next_pcs *self,
 				   CORE_ADDR val)
 {
-  return gdbarch_addr_bits_remove (self->regcache->arch (), val);
+  return gdbarch_addr_bits_remove
+    (gdb::checked_static_cast<regcache *> (self->regcache)->arch (), val);
 }
 
 /* Wrapper over syscall_next_pc for use in get_next_pcs.  */
@@ -7271,7 +7272,7 @@ arm_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
 int
 arm_get_next_pcs_is_thumb (struct arm_get_next_pcs *self)
 {
-  return arm_is_thumb (self->regcache);
+  return arm_is_thumb (gdb::checked_static_cast<regcache *> (self->regcache));
 }
 
 /* single_step() is called just before we want to resume the inferior,

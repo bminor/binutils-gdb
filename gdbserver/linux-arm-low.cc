@@ -24,6 +24,7 @@
 #include "linux-aarch32-low.h"
 #include "linux-aarch32-tdesc.h"
 #include "linux-arm-tdesc.h"
+#include "gdbsupport/gdb-checked-static-cast.h"
 
 #include <sys/uio.h>
 /* Don't include elf.h if linux/elf.h got included by gdb_proc_service.h.
@@ -913,7 +914,8 @@ get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
   CORE_ADDR pc = regcache_read_pc (self->regcache);
   int is_thumb = arm_is_thumb_mode ();
   ULONGEST svc_number = 0;
-  struct regcache *regcache = self->regcache;
+  regcache *regcache
+    = gdb::checked_static_cast<struct regcache *> (self->regcache);
 
   if (is_thumb)
     {
