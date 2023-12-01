@@ -1978,7 +1978,7 @@ main (int argc, char **argv)
     fatal (_("fatal error: libbfd ABI mismatch"));
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "aABCDef:gHhjJlnopPrSst:uU:vVvWX:",
+  while ((c = getopt_long (argc, argv, "aABCDef:gHhjJlnopPrSst:uUvVvWX:",
 			   long_options, (int *) 0)) != EOF)
     {
       switch (c)
