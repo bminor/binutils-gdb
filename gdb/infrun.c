@@ -2021,8 +2021,6 @@ displaced_step_finish (thread_info *event_thread,
 		       const target_waitstatus &event_status)
 {
   /* Check whether the parent is displaced stepping.  */
-  struct regcache *regcache = get_thread_regcache (event_thread);
-  struct gdbarch *gdbarch = regcache->arch ();
   inferior *parent_inf = event_thread->inf;
 
   /* If this was a fork/vfork/clone, this event indicates that the
@@ -2040,10 +2038,15 @@ displaced_step_finish (thread_info *event_thread,
      gdbarch_displaced_step_restore_all_in_ptid.  This is not enforced
      during gdbarch validation to support architectures which support
      displaced stepping but not forks.  */
-  if (event_status.kind () == TARGET_WAITKIND_FORKED
-      && gdbarch_supports_displaced_stepping (gdbarch))
-    gdbarch_displaced_step_restore_all_in_ptid
-      (gdbarch, parent_inf, event_status.child_ptid ());
+  if (event_status.kind () == TARGET_WAITKIND_FORKED)
+    {
+      struct regcache *parent_regcache = get_thread_regcache (event_thread);
+      struct gdbarch *gdbarch = parent_regcache->arch ();
+
+      if (gdbarch_supports_displaced_stepping (gdbarch))
+	gdbarch_displaced_step_restore_all_in_ptid
+	  (gdbarch, parent_inf, event_status.child_ptid ());
+    }
 
   displaced_step_thread_state *displaced = &event_thread->displaced_step_state;
 
@@ -2082,11 +2085,13 @@ displaced_step_finish (thread_info *event_thread,
 	 child hasn't been added to the inferior list yet at this
 	 point.  */
 
+      struct regcache *parent_regcache = get_thread_regcache (event_thread);
+      struct gdbarch *gdbarch = parent_regcache->arch ();
       struct regcache *child_regcache
 	= get_thread_arch_regcache (parent_inf, event_status.child_ptid (),
 				    gdbarch);
       /* Read PC value of parent.  */
-      CORE_ADDR parent_pc = regcache_read_pc (regcache);
+      CORE_ADDR parent_pc = regcache_read_pc (parent_regcache);
 
       displaced_debug_printf ("write child pc from %s to %s",
 			      paddress (gdbarch,
