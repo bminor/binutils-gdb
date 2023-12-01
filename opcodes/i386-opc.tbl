@@ -3359,9 +3359,9 @@ eretu, 0xf30f01ca, FRED, NoSuf, {}
 
 // USER_MSR instructions.
 
-urdmsr, 0xf20f38f8, USER_MSR, RegMem|NoSuf|NoRex64, { Reg64, Reg64 }
+urdmsr, 0xf20f38f8, USER_MSR, RegMem|NoSuf|NoRex64, { Reg32|Reg64, Reg64 }
 urdmsr, 0xf2f8/0, USER_MSR, Modrm|Vex128|VexMap7|VexW0|NoSuf, { Imm32, Reg64 }
-uwrmsr, 0xf30f38f8, USER_MSR, Modrm|NoSuf|NoRex64, { Reg64, Reg64 }
+uwrmsr, 0xf30f38f8, USER_MSR, Modrm|NoSuf|NoRex64, { Reg64, Reg32|Reg64 }
 // Immediates want to be first; md_assemble() takes care of swapping operands
 // accordingly.
 uwrmsr, 0xf3f8/0, USER_MSR, Modrm|Vex128|VexMap7|VexW0|NoSuf, { Imm32, Reg64 }
