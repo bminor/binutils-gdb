@@ -2101,7 +2101,7 @@ run_ld_link_tests [list \
     ] \
     [list \
 	"Build property 3" \
-	"" \
+	"-m elf_x86_64" \
 	"" \
 	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
 	{property-stk.s property-x86-1.s} \
@@ -2110,7 +2110,7 @@ run_ld_link_tests [list \
     ] \
     [list \
 	"Build property 3 (.o)" \
-	"-r -nostdlib" \
+	"-m elf_x86_64 -r" \
 	"" \
 	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
 	{property-x86-1.s property-stk.s} \
@@ -2119,7 +2119,7 @@ run_ld_link_tests [list \
     ] \
     [list \
 	"Build property 3 (.so)" \
-	"-shared" \
+	"-m elf_x86_64 -shared" \
 	"" \
 	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
 	{property-x86-1.s property-stk.s} \
@@ -2128,7 +2128,7 @@ run_ld_link_tests [list \
     ] \
     [list \
 	"Build property 4" \
-	"" \
+	"-m elf_x86_64" \
 	"" \
 	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
 	{property-stk.s property-x86-1.s property-x86-2.s} \
@@ -2137,7 +2137,7 @@ run_ld_link_tests [list \
     ] \
     [list \
 	"Build property 4 (.o)" \
-	"-r -nostdlib" \
+	"-m elf_x86_64 -r" \
 	"" \
 	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
 	{property-x86-2.s property-x86-1.s property-stk.s} \
@@ -2146,7 +2146,7 @@ run_ld_link_tests [list \
     ] \
     [list \
 	"Build property 4 (.so)" \
-	"-shared" \
+	"-m elf_x86_64 -shared" \
 	"" \
 	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
 	{property-x86-2.s property-x86-1.s property-stk.s} \
@@ -2155,7 +2155,7 @@ run_ld_link_tests [list \
     ] \
     [list \
 	"Build property 4 (-z stack-size=0)" \
-	"-z stack-size=0" \
+	"-m elf_x86_64 -z stack-size=0" \
 	"" \
 	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
 	{property-stk.s property-x86-1.s property-x86-2.s} \
@@ -2164,7 +2164,7 @@ run_ld_link_tests [list \
     ] \
     [list \
 	"Build property 5" \
-	"-z stack-size=0x900000" \
+	"-m elf_x86_64 -z stack-size=0x900000" \
 	"" \
 	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
 	{property-stk.s property-x86-1.s property-x86-2.s} \
@@ -2173,7 +2173,7 @@ run_ld_link_tests [list \
     ] \
     [list \
 	"Build property 5 (.o)" \
-	"-r -nostdlib -z stack-size=0x900000" \
+	"-m elf_x86_64 -r -z stack-size=0x900000" \
 	"" \
 	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
 	{property-x86-2.s property-x86-1.s property-stk.s} \
@@ -2182,7 +2182,7 @@ run_ld_link_tests [list \
     ] \
     [list \
 	"Build property 5 (.so)" \
-	"-shared -z stack-size=0x900000" \
+	"-m elf_x86_64 -shared -z stack-size=0x900000" \
 	"" \
 	"--64 -defsym __64_bit__=1 -mx86-used-note=yes" \
 	{property-x86-2.s property-x86-1.s property-stk.s} \
