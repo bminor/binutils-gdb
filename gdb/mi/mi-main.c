@@ -1101,7 +1101,8 @@ output_register (frame_info_ptr frame, int regnum, int format,
 		 int skip_unavailable)
 {
   struct ui_out *uiout = current_uiout;
-  struct value *val = value_of_register (regnum, frame);
+  value *val
+    = value_of_register (regnum, get_next_frame_sentinel_okay (frame));
   struct value_print_options opts;
 
   if (skip_unavailable && !val->entirely_available ())

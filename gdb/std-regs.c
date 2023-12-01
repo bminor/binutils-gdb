@@ -39,7 +39,7 @@ value_of_builtin_frame_fp_reg (frame_info_ptr frame, const void *baton)
        register can do so by adding "fp" to register name table (mind
        you, doing this is probably a dangerous thing).  */
     return value_of_register (gdbarch_deprecated_fp_regnum (gdbarch),
-			      frame);
+			      get_next_frame_sentinel_okay (frame));
   else
     {
       struct type *data_ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
@@ -58,7 +58,8 @@ value_of_builtin_frame_pc_reg (frame_info_ptr frame, const void *baton)
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
   if (gdbarch_pc_regnum (gdbarch) >= 0)
-    return value_of_register (gdbarch_pc_regnum (gdbarch), frame);
+    return value_of_register (gdbarch_pc_regnum (gdbarch),
+			      get_next_frame_sentinel_okay (frame));
   else
     {
       struct type *func_ptr_type = builtin_type (gdbarch)->builtin_func_ptr;
@@ -77,7 +78,8 @@ value_of_builtin_frame_sp_reg (frame_info_ptr frame, const void *baton)
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
   if (gdbarch_sp_regnum (gdbarch) >= 0)
-    return value_of_register (gdbarch_sp_regnum (gdbarch), frame);
+    return value_of_register (gdbarch_sp_regnum (gdbarch),
+			      get_next_frame_sentinel_okay (frame));
   error (_("Standard register ``$sp'' is not available for this target"));
 }
 
@@ -87,7 +89,8 @@ value_of_builtin_frame_ps_reg (frame_info_ptr frame, const void *baton)
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
   if (gdbarch_ps_regnum (gdbarch) >= 0)
-    return value_of_register (gdbarch_ps_regnum (gdbarch), frame);
+    return value_of_register (gdbarch_ps_regnum (gdbarch),
+			      get_next_frame_sentinel_okay (frame));
   error (_("Standard register ``$ps'' is not available for this target"));
 }
 

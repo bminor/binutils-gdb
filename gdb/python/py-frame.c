@@ -260,7 +260,8 @@ frapy_read_register (PyObject *self, PyObject *args, PyObject *kw)
 	return nullptr;
 
       gdb_assert (regnum >= 0);
-      struct value *val = value_of_register (regnum, frame);
+      value *val
+	= value_of_register (regnum, get_next_frame_sentinel_okay (frame));
 
       if (val == NULL)
 	PyErr_SetString (PyExc_ValueError, _("Can't read register."));

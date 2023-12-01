@@ -278,7 +278,8 @@ struct value *
 frame_unwind_got_register (frame_info_ptr frame,
 			   int regnum, int new_regnum)
 {
-  return value_of_register_lazy (frame, new_regnum);
+  return value_of_register_lazy (get_next_frame_sentinel_okay (frame),
+				 new_regnum);
 }
 
 /* Return a value which indicates that FRAME saved REGNUM in memory at

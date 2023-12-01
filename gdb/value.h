@@ -1123,9 +1123,14 @@ extern struct value *value_of_variable (struct symbol *var,
 extern struct value *address_of_variable (struct symbol *var,
 					  const struct block *b);
 
-extern struct value *value_of_register (int regnum, frame_info_ptr frame);
+/* Return a value with the contents of register REGNUM as found in the frame
+   previous to NEXT_FRAME.  */
 
-struct value *value_of_register_lazy (frame_info_ptr frame, int regnum);
+extern value *value_of_register (int regnum, frame_info_ptr next_frame);
+
+/* Same as the above, but the value is not fetched.  */
+
+extern value *value_of_register_lazy (frame_info_ptr next_frame, int regnum);
 
 /* Return the symbol's reading requirement.  */
 

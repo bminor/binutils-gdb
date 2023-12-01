@@ -168,7 +168,7 @@ static struct value *
 value_of_riscv_user_reg (frame_info_ptr frame, const void *baton)
 {
   const int *reg_p = (const int *) baton;
-  return value_of_register (*reg_p, frame);
+  return value_of_register (*reg_p, get_next_frame_sentinel_okay (frame));
 }
 
 /* Information about a register alias that needs to be set up for this
@@ -1149,7 +1149,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 
   try
     {
-      val = value_of_register (regnum, frame);
+      val = value_of_register (regnum, get_next_frame_sentinel_okay (frame));
       regtype = val->type ();
     }
   catch (const gdb_exception_error &ex)

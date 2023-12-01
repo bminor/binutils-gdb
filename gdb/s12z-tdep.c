@@ -494,7 +494,7 @@ s12z_print_ccw_info (struct gdbarch *gdbarch,
 		     frame_info_ptr frame,
 		     int reg)
 {
-  struct value *v = value_of_register (reg, frame);
+  value *v = value_of_register (reg, get_next_frame_sentinel_okay (frame));
   const char *name = gdbarch_register_name (gdbarch, reg);
   uint32_t ccw = value_as_long (v);
   gdb_puts (name, file);

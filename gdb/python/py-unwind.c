@@ -467,8 +467,8 @@ pending_framepy_read_register (PyObject *self, PyObject *args, PyObject *kw)
 	 which maps to a real register.  In the past,
 	 get_frame_register_value() was used here, which did not
 	 handle the user register case.  */
-      struct value *val = value_of_register (regnum,
-					     pending_frame->frame_info);
+      value *val = value_of_register
+        (regnum, get_next_frame_sentinel_okay (pending_frame->frame_info));
       if (val == NULL)
 	PyErr_Format (PyExc_ValueError,
 		      "Cannot read register %d from frame.",

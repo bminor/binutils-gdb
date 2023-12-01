@@ -1134,7 +1134,8 @@ eval_op_register (struct type *expect_type, struct expression *exp,
       && regno < gdbarch_num_cooked_regs (exp->gdbarch))
     val = value::zero (register_type (exp->gdbarch, regno), not_lval);
   else
-    val = value_of_register (regno, get_selected_frame (NULL));
+    val = value_of_register
+      (regno, get_next_frame_sentinel_okay (get_selected_frame ()));
   if (val == NULL)
     error (_("Value of register %s not available."), name);
   else

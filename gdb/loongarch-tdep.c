@@ -392,7 +392,8 @@ loongarch_software_single_step (struct regcache *regcache)
 static struct value *
 value_of_loongarch_user_reg (frame_info_ptr frame, const void *baton)
 {
-  return value_of_register ((long long) baton, frame);
+  return value_of_register ((long long) baton,
+			    get_next_frame_sentinel_okay (frame));
 }
 
 /* Implement the frame_align gdbarch method.  */

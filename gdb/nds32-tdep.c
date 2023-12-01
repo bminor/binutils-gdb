@@ -267,9 +267,10 @@ static const struct
 static struct value *
 value_of_nds32_reg (frame_info_ptr frame, const void *baton)
 {
-  return value_of_register ((int) (intptr_t) baton, frame);
+  return value_of_register ((int) (intptr_t) baton,
+			    get_next_frame_sentinel_okay (frame));
 }
-
+
 /* Implement the "frame_align" gdbarch method.  */
 
 static CORE_ADDR

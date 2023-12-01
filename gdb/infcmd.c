@@ -2280,9 +2280,9 @@ default_print_registers_info (struct gdbarch *gdbarch,
       if (*(gdbarch_register_name (gdbarch, i)) == '\0')
 	continue;
 
-      default_print_one_register_info (file,
-				       gdbarch_register_name (gdbarch, i),
-				       value_of_register (i, frame));
+      default_print_one_register_info
+	(file, gdbarch_register_name (gdbarch, i),
+	 value_of_register (i, get_next_frame_sentinel_okay (frame)));
     }
 }
 
