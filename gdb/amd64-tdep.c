@@ -380,9 +380,8 @@ amd64_pseudo_register_read_value (gdbarch *gdbarch, frame_info_ptr next_frame,
 }
 
 static void
-amd64_pseudo_register_write (struct gdbarch *gdbarch,
-			     struct regcache *regcache,
-			     int regnum, const gdb_byte *buf)
+amd64_pseudo_register_write (gdbarch *gdbarch, frame_info_ptr next_frame,
+			     int regnum, gdb::array_view<const gdb_byte> buf)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
@@ -393,41 +392,18 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
       if (gpnum >= AMD64_NUM_LOWER_BYTE_REGS)
 	{
 	  gpnum -= AMD64_NUM_LOWER_BYTE_REGS;
-	  gdb_byte raw_buf[register_size (gdbarch, gpnum)];
-
-	  /* Read ... AH, BH, CH, DH.  */
-	  regcache->raw_read (gpnum, raw_buf);
-	  /* ... Modify ... (always little endian).  */
-	  memcpy (raw_buf + 1, buf, 1);
-	  /* ... Write.  */
-	  regcache->raw_write (gpnum, raw_buf);
+	  pseudo_to_raw_part (next_frame, buf, gpnum, 1);
 	}
       else
-	{
-	  gdb_byte raw_buf[register_size (gdbarch, gpnum)];
-
-	  /* Read ...  */
-	  regcache->raw_read (gpnum, raw_buf);
-	  /* ... Modify ... (always little endian).  */
-	  memcpy (raw_buf, buf, 1);
-	  /* ... Write.  */
-	  regcache->raw_write (gpnum, raw_buf);
-	}
+	pseudo_to_raw_part (next_frame, buf, gpnum, 0);
     }
   else if (i386_dword_regnum_p (gdbarch, regnum))
     {
       int gpnum = regnum - tdep->eax_regnum;
-      gdb_byte raw_buf[register_size (gdbarch, gpnum)];
-
-      /* Read ...  */
-      regcache->raw_read (gpnum, raw_buf);
-      /* ... Modify ... (always little endian).  */
-      memcpy (raw_buf, buf, 4);
-      /* ... Write.  */
-      regcache->raw_write (gpnum, raw_buf);
+      pseudo_to_raw_part (next_frame, buf, gpnum, 0);
     }
   else
-    i386_pseudo_register_write (gdbarch, regcache, regnum, buf);
+    i386_pseudo_register_write (gdbarch, next_frame, regnum, buf);
 }
 
 /* Implement the 'ax_pseudo_register_collect' gdbarch method.  */
@@ -3205,8 +3181,7 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
 
   set_gdbarch_pseudo_register_read_value (gdbarch,
 					  amd64_pseudo_register_read_value);
-  set_gdbarch_deprecated_pseudo_register_write (gdbarch,
-						amd64_pseudo_register_write);
+  set_gdbarch_pseudo_register_write (gdbarch, amd64_pseudo_register_write);
   set_gdbarch_ax_pseudo_register_collect (gdbarch,
 					  amd64_ax_pseudo_register_collect);
 

@@ -380,9 +380,9 @@ extern value *i386_pseudo_register_read_value (gdbarch *gdbarch,
 					       frame_info_ptr next_frame,
 					       int regnum);
 
-extern void i386_pseudo_register_write (struct gdbarch *gdbarch,
-					struct regcache *regcache,
-					int regnum, const gdb_byte *buf);
+extern void i386_pseudo_register_write (gdbarch *gdbarch,
+					frame_info_ptr next_frame, int regnum,
+					gdb::array_view<const gdb_byte> buf);
 
 extern int i386_ax_pseudo_register_collect (struct gdbarch *gdbarch,
 					    struct agent_expr *ax,
