@@ -957,9 +957,7 @@ riscv_is_valid_mapping_symbol (int n,
     return false;
 
   name = bfd_asymbol_name(info->symtab[n]);
-  return (strcmp (name, "$x") == 0
-	  || strcmp (name, "$d") == 0
-	  || strncmp (name, "$xrv", 4) == 0);
+  return riscv_elf_is_mapping_symbols (name);
 }
 
 /* Check the sorted symbol table (sorted by the symbol value), find the

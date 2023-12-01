@@ -147,6 +147,7 @@ riscv_get_priv_spec_class_from_numbers (unsigned int major,
 bool
 riscv_elf_is_mapping_symbols (const char *name)
 {
-  return (!strncmp (name, "$d", 2)
-	  || !strncmp (name, "$x", 2));
+  return (!strcmp (name, "$d")
+	  || !strcmp (name, "$x")
+	  || !strncmp (name, "$xrv", 4));
 }
