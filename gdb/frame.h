@@ -714,7 +714,7 @@ extern LONGEST frame_unwind_register_signed (frame_info_ptr next_frame,
 					     int regnum);
 extern LONGEST get_frame_register_signed (frame_info_ptr frame,
 					  int regnum);
-extern ULONGEST frame_unwind_register_unsigned (frame_info_ptr frame,
+extern ULONGEST frame_unwind_register_unsigned (frame_info_ptr next_frame,
 						int regnum);
 extern ULONGEST get_frame_register_unsigned (frame_info_ptr frame,
 					     int regnum);
