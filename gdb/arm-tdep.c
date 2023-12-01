@@ -9908,57 +9908,67 @@ arm_neon_quad_write (struct gdbarch *gdbarch, struct regcache *regcache,
   regcache->raw_write (double_regnum + 1, buf + 8);
 }
 
+static void
+arm_neon_quad_write (gdbarch *gdbarch, frame_info_ptr next_frame,
+		     int quad_reg_index, gdb::array_view<const gdb_byte> buf)
+{
+  std::string raw_reg_name = string_printf ("d%d", quad_reg_index << 1);
+  int double_regnum
+    = user_reg_map_name_to_regnum (gdbarch, raw_reg_name.data (),
+				   raw_reg_name.length ());
+
+  pseudo_to_concat_raw (next_frame, buf, double_regnum, double_regnum + 1);
+}
+
 /* Store the contents of BUF to the MVE pseudo register REGNUM.  */
 
 static void
-arm_mve_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
-		      int regnum, const gdb_byte *buf)
+arm_mve_pseudo_write (gdbarch *gdbarch, frame_info_ptr next_frame,
+		      int pseudo_reg_num, gdb::array_view<const gdb_byte> buf)
 {
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   /* P0 is the first 16 bits of VPR.  */
-  regcache->raw_write_part (tdep->mve_vpr_regnum, 0, 2, buf);
+  pseudo_to_raw_part(next_frame, buf, tdep->mve_vpr_regnum, 0);
 }
 
 static void
-arm_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
-		  int regnum, const gdb_byte *buf)
+arm_pseudo_write (gdbarch *gdbarch, frame_info_ptr next_frame,
+		  const int pseudo_reg_num,
+		  gdb::array_view<const gdb_byte> buf)
 {
-  const int num_regs = gdbarch_num_regs (gdbarch);
-  char name_buf[4];
-  gdb_byte reg_buf[8];
-  int offset, double_regnum;
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
-  gdb_assert (regnum >= num_regs);
+  gdb_assert (pseudo_reg_num >= gdbarch_num_regs (gdbarch));
 
-  if (is_q_pseudo (gdbarch, regnum))
+  if (is_q_pseudo (gdbarch, pseudo_reg_num))
     {
       /* Quad-precision register.  */
-      arm_neon_quad_write (gdbarch, regcache,
-			   regnum - tdep->q_pseudo_base, buf);
+      arm_neon_quad_write (gdbarch, next_frame,
+			   pseudo_reg_num - tdep->q_pseudo_base, buf);
     }
-  else if (is_mve_pseudo (gdbarch, regnum))
-    arm_mve_pseudo_write (gdbarch, regcache, regnum, buf);
+  else if (is_mve_pseudo (gdbarch, pseudo_reg_num))
+    arm_mve_pseudo_write (gdbarch, next_frame, pseudo_reg_num, buf);
   else
     {
-      regnum -= tdep->s_pseudo_base;
+      int s_reg_index = pseudo_reg_num - tdep->s_pseudo_base;
+
       /* Single-precision register.  */
-      gdb_assert (regnum < 32);
+      gdb_assert (s_reg_index < 32);
 
       /* s0 is always the least significant half of d0.  */
+      int offset;
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-	offset = (regnum & 1) ? 0 : 4;
+	offset = (s_reg_index & 1) ? 0 : 4;
       else
-	offset = (regnum & 1) ? 4 : 0;
+	offset = (s_reg_index & 1) ? 4 : 0;
 
-      xsnprintf (name_buf, sizeof (name_buf), "d%d", regnum >> 1);
-      double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
-						   strlen (name_buf));
+      std::string raw_reg_name = string_printf ("d%d", s_reg_index >> 1);
+      int double_regnum
+	= user_reg_map_name_to_regnum (gdbarch, raw_reg_name.c_str (),
+				       raw_reg_name.length ());
 
-      regcache->raw_read (double_regnum, reg_buf);
-      memcpy (reg_buf + offset, buf, 4);
-      regcache->raw_write (double_regnum, reg_buf);
+      pseudo_to_raw_part (next_frame, buf, double_regnum, offset);
     }
 }
 
@@ -10918,7 +10928,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       set_gdbarch_num_pseudo_regs (gdbarch, num_pseudos);
       set_gdbarch_pseudo_register_read_value (gdbarch, arm_pseudo_read_value);
-      set_gdbarch_deprecated_pseudo_register_write (gdbarch, arm_pseudo_write);
+      set_gdbarch_pseudo_register_write (gdbarch, arm_pseudo_write);
     }
 
   /* Add standard register aliases.  We add aliases even for those
