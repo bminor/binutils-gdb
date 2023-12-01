@@ -15491,22 +15491,11 @@ i386_cons_align (int ignore ATTRIBUTE_UNUSED)
   struct last_insn *last_insn
     = &seg_info(now_seg)->tc_segment_info_data.last_insn;
 
-  if (last_insn->kind != last_insn_directive
-      && (bfd_section_flags (now_seg) & SEC_CODE))
+  if (bfd_section_flags (now_seg) & SEC_CODE)
     {
       last_insn->kind = last_insn_directive;
       last_insn->name = "constant directive";
       last_insn->file = as_where (&last_insn->line);
-      if (lfence_before_ret != lfence_before_ret_none)
-	{
-	  if (lfence_before_indirect_branch != lfence_branch_none)
-	    as_warn (_("constant directive skips -mlfence-before-ret "
-		       "and -mlfence-before-indirect-branch"));
-	  else
-	    as_warn (_("constant directive skips -mlfence-before-ret"));
-	}
-      else if (lfence_before_indirect_branch != lfence_branch_none)
-	as_warn (_("constant directive skips -mlfence-before-indirect-branch"));
     }
 }
 
