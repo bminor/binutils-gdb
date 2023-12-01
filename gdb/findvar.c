@@ -159,12 +159,12 @@ extract_typed_address (const gdb_byte *buf, struct type *type)
    target-format integer at ADDR which is LEN bytes long.  */
 template<typename T, typename>
 void
-store_integer (gdb_byte *addr, int len, enum bfd_endian byte_order,
+store_integer (gdb::array_view<gdb_byte> dst, enum bfd_endian byte_order,
 	       T val)
 {
   gdb_byte *p;
-  gdb_byte *startaddr = addr;
-  gdb_byte *endaddr = startaddr + len;
+  gdb_byte *startaddr = dst.data ();
+  gdb_byte *endaddr = startaddr + dst.size ();
 
   /* Start at the least significant end of the integer, and work towards
      the most significant.  */
@@ -187,13 +187,11 @@ store_integer (gdb_byte *addr, int len, enum bfd_endian byte_order,
 }
 
 /* Explicit instantiations.  */
-template void store_integer (gdb_byte *addr, int len,
-			     enum bfd_endian byte_order,
-			     LONGEST val);
+template void store_integer (gdb::array_view<gdb_byte> dst,
+			     bfd_endian byte_order, LONGEST val);
 
-template void store_integer (gdb_byte *addr, int len,
-			     enum bfd_endian byte_order,
-			     ULONGEST val);
+template void store_integer (gdb::array_view<gdb_byte> dst,
+			     bfd_endian byte_order, ULONGEST val);
 
 /* Store the address ADDR as a pointer of type TYPE at BUF, in target
    form.  */
