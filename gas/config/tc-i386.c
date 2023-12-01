@@ -5120,6 +5120,11 @@ md_assemble (char *line)
  retry:
   init_globals ();
 
+  /* Suppress optimization when the last thing we saw may not have been
+     a proper instruction (e.g. a stand-alone prefix or .byte).  */
+  if (last_insn->kind != last_insn_other)
+    i.no_optimize = true;
+
   /* First parse an instruction mnemonic & call i386_operand for the operands.
      We assume that the scrubber has arranged it so that line[0] is the valid
      start of a (possibly prefixed) mnemonic.  */
