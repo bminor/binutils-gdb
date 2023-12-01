@@ -1257,9 +1257,39 @@ frame_unwind_register_value (frame_info_ptr next_frame, int regnum)
     frame_unwind_find_by_frame (next_frame, &next_frame->prologue_cache);
 
   /* Ask this frame to unwind its register.  */
-  value *value = next_frame->unwind->prev_register (next_frame,
-						    &next_frame->prologue_cache,
-						    regnum);
+  value *value
+    = next_frame->unwind->prev_register (next_frame,
+					 &next_frame->prologue_cache, regnum);
+  if (value == nullptr)
+    {
+      if (gdbarch_pseudo_register_read_value_p (gdbarch))
+	{
+	  /* This is a pseudo register, we don't know how how what raw registers
+	     this pseudo register is made of.  Ask the gdbarch to read the
+	     value, it will itself ask the next frame to unwind the values of
+	     the raw registers it needs to compose the value of the pseudo
+	     register.  */
+	  value = gdbarch_pseudo_register_read_value
+	    (gdbarch, next_frame, regnum);
+	}
+      else if (gdbarch_pseudo_register_read_p (gdbarch))
+	{
+	  value = value::allocate_register (next_frame, regnum);
+
+	  /* Passing the current regcache is known to be broken, the pseudo
+	     register value will be constructed using the current raw registers,
+	     rather than reading them using NEXT_FRAME.  Architectures should be
+	     migrated to gdbarch_pseudo_register_read_value.  */
+	  register_status status = gdbarch_pseudo_register_read
+	    (gdbarch, get_thread_regcache (inferior_thread ()), regnum,
+	     value->contents_writeable ().data ());
+	  if (status == REG_UNAVAILABLE)
+	    value->mark_bytes_unavailable (0, value->type ()->length ());
+	}
+      else
+	error (_("Can't unwind value of register %d (%s)"), regnum,
+	       user_reg_map_regnum_to_name (gdbarch, regnum));
+    }
 
   if (frame_debug)
     {

@@ -4056,6 +4056,76 @@ value::fetch_lazy ()
   set_lazy (false);
 }
 
+/* See value.h.  */
+
+value *
+pseudo_from_raw_part (frame_info_ptr next_frame, int pseudo_reg_num,
+		      int raw_reg_num, int raw_offset)
+{
+  value *pseudo_reg_val
+    = value::allocate_register (next_frame, pseudo_reg_num);
+  value *raw_reg_val = value_of_register (raw_reg_num, next_frame);
+  raw_reg_val->contents_copy (pseudo_reg_val, 0, raw_offset,
+			      pseudo_reg_val->type ()->length ());
+  return pseudo_reg_val;
+}
+
+/* See value.h.  */
+
+value *
+pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
+			int raw_reg_1_num, int raw_reg_2_num)
+{
+  value *pseudo_reg_val
+    = value::allocate_register (next_frame, pseudo_reg_num);
+  int dst_offset = 0;
+
+  value *raw_reg_1_val = value_of_register (raw_reg_1_num, next_frame);
+  raw_reg_1_val->contents_copy (pseudo_reg_val, dst_offset, 0,
+				raw_reg_1_val->type ()->length ());
+  dst_offset += raw_reg_1_val->type ()->length ();
+
+  value *raw_reg_2_val = value_of_register (raw_reg_2_num, next_frame);
+  raw_reg_2_val->contents_copy (pseudo_reg_val, dst_offset, 0,
+				raw_reg_2_val->type ()->length ());
+  dst_offset += raw_reg_2_val->type ()->length ();
+
+  gdb_assert (dst_offset == pseudo_reg_val->type ()->length ());
+
+  return pseudo_reg_val;
+}
+
+/* See value.h.  */
+
+value *
+pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
+			int raw_reg_1_num, int raw_reg_2_num,
+			int raw_reg_3_num)
+{
+  value *pseudo_reg_val
+    = value::allocate_register (next_frame, pseudo_reg_num);
+  int dst_offset = 0;
+
+  value *raw_reg_1_val = value_of_register (raw_reg_1_num, next_frame);
+  raw_reg_1_val->contents_copy (pseudo_reg_val, dst_offset, 0,
+				raw_reg_1_val->type ()->length ());
+  dst_offset += raw_reg_1_val->type ()->length ();
+
+  value *raw_reg_2_val = value_of_register (raw_reg_2_num, next_frame);
+  raw_reg_2_val->contents_copy (pseudo_reg_val, dst_offset, 0,
+				raw_reg_2_val->type ()->length ());
+  dst_offset += raw_reg_2_val->type ()->length ();
+
+  value *raw_reg_3_val = value_of_register (raw_reg_3_num, next_frame);
+  raw_reg_3_val->contents_copy (pseudo_reg_val, dst_offset, 0,
+				raw_reg_3_val->type ()->length ());
+  dst_offset += raw_reg_3_val->type ()->length ();
+
+  gdb_assert (dst_offset == pseudo_reg_val->type ()->length ());
+
+  return pseudo_reg_val;
+}
+
 /* Implementation of the convenience function $_isvoid.  */
 
 static struct value *

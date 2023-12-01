@@ -1650,4 +1650,30 @@ private:
   std::optional<int> m_old_value;
 };
 
+/* Helpers for building pseudo register values from raw registers.  */
+
+/* Create a value for pseudo register PSEUDO_REG_NUM by using bytes from
+   raw register RAW_REG_NUM starting at RAW_OFFSET.
+
+   The size of the pseudo register specifies how many bytes to use.  The
+   offset plus the size must not overflow the raw register's size.  */
+
+value *pseudo_from_raw_part (frame_info_ptr next_frame, int pseudo_reg_num,
+			     int raw_reg_num, int raw_offset);
+
+/* Create a value for pseudo register PSEUDO_REG_NUM by concatenating raw
+   registers RAW_REG_1_NUM and RAW_REG_2_NUM.
+
+   The sum of the sizes of raw registers must be equal to the size of the
+   pseudo register.  */
+
+value *pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
+			       int raw_reg_1_num, int raw_reg_2_num);
+
+/* Same as the above, but with three raw registers.  */
+
+value *pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
+			       int raw_reg_1_num, int raw_reg_2_num,
+			       int raw_reg_3_num);
+
 #endif /* !defined (VALUE_H) */

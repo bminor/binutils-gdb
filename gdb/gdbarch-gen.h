@@ -196,8 +196,8 @@ extern void set_gdbarch_pseudo_register_read (struct gdbarch *gdbarch, gdbarch_p
 
 extern bool gdbarch_pseudo_register_read_value_p (struct gdbarch *gdbarch);
 
-typedef struct value * (gdbarch_pseudo_register_read_value_ftype) (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
-extern struct value * gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
+typedef struct value * (gdbarch_pseudo_register_read_value_ftype) (struct gdbarch *gdbarch, frame_info_ptr next_frame, int cookednum);
+extern struct value * gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch, frame_info_ptr next_frame, int cookednum);
 extern void set_gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch, gdbarch_pseudo_register_read_value_ftype *pseudo_register_read_value);
 
 extern bool gdbarch_pseudo_register_write_p (struct gdbarch *gdbarch);

@@ -1886,13 +1886,13 @@ gdbarch_pseudo_register_read_value_p (struct gdbarch *gdbarch)
 }
 
 struct value *
-gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum)
+gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch, frame_info_ptr next_frame, int cookednum)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->pseudo_register_read_value != NULL);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_pseudo_register_read_value called\n");
-  return gdbarch->pseudo_register_read_value (gdbarch, regcache, cookednum);
+  return gdbarch->pseudo_register_read_value (gdbarch, next_frame, cookednum);
 }
 
 void

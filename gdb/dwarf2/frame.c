@@ -1220,7 +1220,10 @@ dwarf2_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 	 "undefined").  Code above issues a complaint about this.
 	 Here just fudge the books, assume GCC, and that the value is
 	 more inner on the stack.  */
-      return frame_unwind_got_register (this_frame, regnum, regnum);
+      if (regnum < gdbarch_num_regs (gdbarch))
+	return frame_unwind_got_register (this_frame, regnum, regnum);
+      else
+	return nullptr;
 
     case DWARF2_FRAME_REG_SAME_VALUE:
       return frame_unwind_got_register (this_frame, regnum, regnum);

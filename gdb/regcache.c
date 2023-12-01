@@ -735,8 +735,9 @@ readable_regcache::cooked_read (int regnum, gdb::array_view<gdb_byte> dst)
     {
       register_status result = REG_VALID;
       scoped_value_mark mark;
-      value *computed
-	= gdbarch_pseudo_register_read_value (m_descr->gdbarch, this, regnum);
+      value *computed = gdbarch_pseudo_register_read_value
+	(m_descr->gdbarch, get_next_frame_sentinel_okay (get_current_frame ()),
+	 regnum);
 
       if (computed->entirely_available ())
 	copy (computed->contents_raw (), dst);
@@ -788,8 +789,9 @@ readable_regcache::cooked_read_value (int regnum)
       return result;
     }
   else
-    return gdbarch_pseudo_register_read_value (m_descr->gdbarch,
-					       this, regnum);
+    return gdbarch_pseudo_register_read_value
+      (m_descr->gdbarch, get_next_frame_sentinel_okay (get_current_frame ()),
+       regnum);
 }
 
 enum register_status
@@ -1952,10 +1954,18 @@ cooked_read_test (struct gdbarch *gdbarch)
 	break;
     }
 
-  readwrite_regcache readwrite (&mockctx.mock_inferior, gdbarch);
-  readwrite.set_ptid (mockctx.mock_ptid);
-  gdb::byte_vector buf (register_size (gdbarch, nonzero_regnum));
+  /* Install this regcache in the regcaches global structure, so that.  */
+  pid_ptid_regcache_map &x = regcaches[&mockctx.mock_target];
+  ptid_regcache_map &y = x[mockctx.mock_ptid.pid ()];
+  regcache &readwrite
+    = *y.emplace (std::make_pair (mockctx.mock_ptid,
+				  std::make_unique<readwrite_regcache> (
+				    &mockctx.mock_inferior, gdbarch)))
+	 ->second;
 
+  readwrite.set_ptid (mockctx.mock_ptid);
+
+  gdb::byte_vector buf (register_size (gdbarch, nonzero_regnum));
   readwrite.raw_read (nonzero_regnum, buf);
 
   /* raw_read calls target_fetch_registers.  */
@@ -2053,6 +2063,8 @@ cooked_read_test (struct gdbarch *gdbarch)
 
       mockctx.mock_target.reset ();
     }
+
+  regcaches.erase (&mockctx.mock_target);
 }
 
 /* Test regcache::cooked_write by writing some expected contents to
@@ -2067,7 +2079,17 @@ cooked_write_test (struct gdbarch *gdbarch)
 
   /* Create a mock environment.  A process_stratum target pushed.  */
   scoped_mock_context<target_ops_no_register> ctx (gdbarch);
-  readwrite_regcache readwrite (&ctx.mock_inferior, gdbarch);
+
+
+  /* Install this regcache in the regcaches global structure, so that.  */
+  pid_ptid_regcache_map &x = regcaches[&ctx.mock_target];
+  ptid_regcache_map &y = x[ctx.mock_ptid.pid ()];
+  regcache &readwrite
+    = *y.emplace (std::make_pair (ctx.mock_ptid,
+				  std::make_unique<readwrite_regcache> (
+				    &ctx.mock_inferior, gdbarch)))
+	 ->second;
+
   readwrite.set_ptid (ctx.mock_ptid);
   const int num_regs = gdbarch_num_cooked_regs (gdbarch);
 
@@ -2148,6 +2170,8 @@ cooked_write_test (struct gdbarch *gdbarch)
       SELF_CHECK (readwrite.cooked_read (regnum, buf) == REG_VALID);
       SELF_CHECK (expected == buf);
     }
+
+  regcaches.erase (&ctx.mock_target);
 }
 
 /* Verify that when two threads with the same ptid exist (from two different

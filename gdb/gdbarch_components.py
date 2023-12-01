@@ -414,7 +414,7 @@ never be called.
 """,
     type="struct value *",
     name="pseudo_register_read_value",
-    params=[("readable_regcache *", "regcache"), ("int", "cookednum")],
+    params=[("frame_info_ptr", "next_frame"), ("int", "cookednum")],
     predicate=True,
 )
 
