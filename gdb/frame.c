@@ -1214,31 +1214,6 @@ frame_register_unwind (frame_info_ptr next_frame, int regnum,
   release_value (value);
 }
 
-/* Get the value of the register that belongs to this FRAME.  This
-   function is a wrapper to the call sequence ``frame_register_unwind
-   (get_next_frame (FRAME))''.  As per frame_register_unwind(), if
-   VALUEP is NULL, the registers value is not fetched/computed.  */
-
-static void
-frame_register (frame_info_ptr frame, int regnum,
-		int *optimizedp, int *unavailablep, enum lval_type *lvalp,
-		CORE_ADDR *addrp, int *realnump, gdb_byte *bufferp)
-{
-  /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
-     that the value proper does not need to be fetched.  */
-  gdb_assert (optimizedp != NULL);
-  gdb_assert (lvalp != NULL);
-  gdb_assert (addrp != NULL);
-  gdb_assert (realnump != NULL);
-  /* gdb_assert (bufferp != NULL); */
-
-  /* Obtain the register value by unwinding the register from the next
-     (more inner frame).  */
-  gdb_assert (frame != NULL && frame->next != NULL);
-  frame_register_unwind (frame_info_ptr (frame->next), regnum, optimizedp,
-			 unavailablep, lvalp, addrp, realnump, bufferp);
-}
-
 void
 frame_unwind_register (frame_info_ptr next_frame, int regnum, gdb_byte *buf)
 {
@@ -1436,8 +1411,8 @@ put_frame_register (frame_info_ptr frame, int regnum,
 
   gdb_assert (buf.size () == size);
 
-  frame_register (frame, regnum, &optim, &unavail,
-		  &lval, &addr, &realnum, NULL);
+  frame_register_unwind (get_next_frame_sentinel_okay (frame), regnum, &optim,
+			 &unavail, &lval, &addr, &realnum, nullptr);
   if (optim)
     error (_("Attempt to assign to a register that was not saved."));
   switch (lval)
@@ -1473,8 +1448,9 @@ deprecated_frame_register_read (frame_info_ptr frame, int regnum,
   CORE_ADDR addr;
   int realnum;
 
-  frame_register (frame, regnum, &optimized, &unavailable,
-		  &lval, &addr, &realnum, myaddr);
+  frame_register_unwind (get_next_frame_sentinel_okay (frame), regnum,
+			 &optimized, &unavailable, &lval, &addr, &realnum,
+			 myaddr);
 
   return !optimized && !unavailable;
 }
@@ -1523,8 +1499,9 @@ get_frame_register_bytes (frame_info_ptr frame, int regnum,
 	  CORE_ADDR addr;
 	  int realnum;
 
-	  frame_register (frame, regnum, optimizedp, unavailablep, &lval,
-			  &addr, &realnum, buffer.data ());
+	  frame_register_unwind (get_next_frame_sentinel_okay (frame), regnum,
+				 optimizedp, unavailablep, &lval, &addr,
+				 &realnum, buffer.data ());
 	  if (*optimizedp || *unavailablep)
 	    return false;
 	}
