@@ -1456,12 +1456,11 @@ deprecated_frame_register_read (frame_info_ptr frame, int regnum,
 }
 
 bool
-get_frame_register_bytes (frame_info_ptr frame, int regnum,
-			  CORE_ADDR offset,
-			  gdb::array_view<gdb_byte> buffer,
+get_frame_register_bytes (frame_info_ptr next_frame, int regnum,
+			  CORE_ADDR offset, gdb::array_view<gdb_byte> buffer,
 			  int *optimizedp, int *unavailablep)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  gdbarch *gdbarch = frame_unwind_arch (next_frame);
 
   /* Skip registers wholly inside of OFFSET.  */
   while (offset >= register_size (gdbarch, regnum))
@@ -1499,17 +1498,14 @@ get_frame_register_bytes (frame_info_ptr frame, int regnum,
 	  CORE_ADDR addr;
 	  int realnum;
 
-	  frame_register_unwind (get_next_frame_sentinel_okay (frame), regnum,
-				 optimizedp, unavailablep, &lval, &addr,
-				 &realnum, buffer.data ());
+	  frame_register_unwind (next_frame, regnum, optimizedp, unavailablep,
+				 &lval, &addr, &realnum, buffer.data ());
 	  if (*optimizedp || *unavailablep)
 	    return false;
 	}
       else
 	{
-	  struct value *value
-	    = frame_unwind_register_value (frame_info_ptr (frame->next),
-					   regnum);
+	  value *value = frame_unwind_register_value (next_frame, regnum);
 	  gdb_assert (value != NULL);
 	  *optimizedp = value->optimized_out ();
 	  *unavailablep = !value->entirely_available ();

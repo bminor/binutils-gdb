@@ -216,11 +216,11 @@ m68k_register_to_value (frame_info_ptr frame, int regnum,
   gdb_assert (type->code () == TYPE_CODE_FLT);
 
   /* Convert to TYPE.  */
-  if (!get_frame_register_bytes (frame, regnum, 0,
-				 gdb::make_array_view (from,
-						       register_size (gdbarch,
-								      regnum)),
-				 optimizedp, unavailablep))
+  auto from_view
+    = gdb::make_array_view (from, register_size (gdbarch, regnum));
+  frame_info_ptr next_frame = get_next_frame_sentinel_okay (frame);
+  if (!get_frame_register_bytes (next_frame, regnum, 0, from_view, optimizedp,
+				 unavailablep))
     return 0;
 
   target_float_convert (from, fpreg_type, to, type);

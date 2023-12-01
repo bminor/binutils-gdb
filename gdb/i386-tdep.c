@@ -3877,10 +3877,10 @@ i386_register_to_value (frame_info_ptr frame, int regnum,
       gdb_assert (regnum != -1);
       gdb_assert (register_size (gdbarch, regnum) == 4);
 
-      if (!get_frame_register_bytes (frame, regnum, 0,
-				     gdb::make_array_view (to,
-							register_size (gdbarch,
-								       regnum)),
+      auto to_view
+	= gdb::make_array_view (to, register_size (gdbarch, regnum));
+      frame_info_ptr next_frame = get_next_frame_sentinel_okay (frame);
+      if (!get_frame_register_bytes (next_frame, regnum, 0, to_view,
 				     optimizedp, unavailablep))
 	return 0;
 

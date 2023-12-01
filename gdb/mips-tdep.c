@@ -947,17 +947,18 @@ mips_register_to_value (frame_info_ptr frame, int regnum,
 			int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  frame_info_ptr next_frame = get_next_frame_sentinel_okay (frame);
 
   if (mips_convert_register_float_case_p (gdbarch, regnum, type))
     {
       get_frame_register (frame, regnum + 0, to + 4);
       get_frame_register (frame, regnum + 1, to + 0);
 
-      if (!get_frame_register_bytes (frame, regnum + 0, 0, {to + 4, 4},
+      if (!get_frame_register_bytes (next_frame, regnum + 0, 0, { to + 4, 4 },
 				     optimizedp, unavailablep))
 	return 0;
 
-      if (!get_frame_register_bytes (frame, regnum + 1, 0, {to + 0, 4},
+      if (!get_frame_register_bytes (next_frame, regnum + 1, 0, { to + 0, 4 },
 				     optimizedp, unavailablep))
 	return 0;
       *optimizedp = *unavailablep = 0;
@@ -969,7 +970,7 @@ mips_register_to_value (frame_info_ptr frame, int regnum,
       CORE_ADDR offset;
 
       offset = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 8 - len : 0;
-      if (!get_frame_register_bytes (frame, regnum, offset, {to, len},
+      if (!get_frame_register_bytes (next_frame, regnum, offset, { to, len },
 				     optimizedp, unavailablep))
 	return 0;
 

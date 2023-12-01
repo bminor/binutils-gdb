@@ -1227,8 +1227,7 @@ value_assign (struct value *toval, struct value *fromval)
 		       "don't fit in a %d bit word."),
 		     (int) sizeof (LONGEST) * HOST_CHAR_BIT);
 
-	    if (!get_frame_register_bytes (get_prev_frame_always (next_frame),
-					   value_reg, offset,
+	    if (!get_frame_register_bytes (next_frame, value_reg, offset,
 					   { buffer, changed_len }, &optim,
 					   &unavail))
 	      {
