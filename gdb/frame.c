@@ -1483,9 +1483,6 @@ get_frame_register_bytes (frame_info_ptr frame, int regnum,
 			  int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  int i;
-  int maxsize;
-  int numregs;
 
   /* Skip registers wholly inside of OFFSET.  */
   while (offset >= register_size (gdbarch, regnum))
@@ -1496,9 +1493,9 @@ get_frame_register_bytes (frame_info_ptr frame, int regnum,
 
   /* Ensure that we will not read beyond the end of the register file.
      This can only ever happen if the debug information is bad.  */
-  maxsize = -offset;
-  numregs = gdbarch_num_cooked_regs (gdbarch);
-  for (i = regnum; i < numregs; i++)
+  int maxsize = -offset;
+  int numregs = gdbarch_num_cooked_regs (gdbarch);
+  for (int i = regnum; i < numregs; i++)
     {
       int thissize = register_size (gdbarch, i);
 
@@ -1507,20 +1504,15 @@ get_frame_register_bytes (frame_info_ptr frame, int regnum,
       maxsize += thissize;
     }
 
-  int len = buffer.size ();
-  if (len > maxsize)
+  if (buffer.size () > maxsize)
     error (_("Bad debug information detected: "
-	     "Attempt to read %d bytes from registers."), len);
+	     "Attempt to read %zu bytes from registers."), buffer.size ());
 
   /* Copy the data.  */
-  while (len > 0)
+  while (!buffer.empty ())
     {
-      int curr_len = register_size (gdbarch, regnum) - offset;
-
-      if (curr_len > len)
-	curr_len = len;
-
-      gdb_byte *myaddr = buffer.data ();
+      int curr_len = std::min<int> (register_size (gdbarch, regnum) - offset,
+				    buffer.size ());
 
       if (curr_len == register_size (gdbarch, regnum))
 	{
@@ -1528,8 +1520,8 @@ get_frame_register_bytes (frame_info_ptr frame, int regnum,
 	  CORE_ADDR addr;
 	  int realnum;
 
-	  frame_register (frame, regnum, optimizedp, unavailablep,
-			  &lval, &addr, &realnum, myaddr);
+	  frame_register (frame, regnum, optimizedp, unavailablep, &lval,
+			  &addr, &realnum, buffer.data ());
 	  if (*optimizedp || *unavailablep)
 	    return false;
 	}
@@ -1548,13 +1540,12 @@ get_frame_register_bytes (frame_info_ptr frame, int regnum,
 	      return false;
 	    }
 
-	  memcpy (myaddr, value->contents_all ().data () + offset,
-		  curr_len);
+	  copy (value->contents_all ().slice (offset, curr_len),
+		buffer.slice (0, curr_len));
 	  release_value (value);
 	}
 
-      myaddr += curr_len;
-      len -= curr_len;
+      buffer = buffer.slice (curr_len);
       offset = 0;
       regnum++;
     }
@@ -1579,36 +1570,28 @@ put_frame_register_bytes (frame_info_ptr frame, int regnum,
       regnum++;
     }
 
-  int len = buffer.size ();
   /* Copy the data.  */
-  while (len > 0)
+  while (!buffer.empty ())
     {
-      int curr_len = register_size (gdbarch, regnum) - offset;
+      int curr_len = std::min<int> (register_size (gdbarch, regnum) - offset,
+				    buffer.size ());
 
-      if (curr_len > len)
-	curr_len = len;
-
-      const gdb_byte *myaddr = buffer.data ();
       if (curr_len == register_size (gdbarch, regnum))
-	{
-	  put_frame_register (frame, regnum, myaddr);
-	}
+	put_frame_register (frame, regnum, buffer.data ());
       else
 	{
-	  struct value *value
+	  value *value
 	    = frame_unwind_register_value (frame_info_ptr (frame->next),
 					   regnum);
-	  gdb_assert (value != NULL);
+	  gdb_assert (value != nullptr);
 
-	  memcpy ((char *) value->contents_writeable ().data () + offset,
-		  myaddr, curr_len);
-	  put_frame_register (frame, regnum,
-			      value->contents_raw ().data ());
+	  copy (buffer.slice (0, curr_len),
+		value->contents_writeable ().slice (offset, curr_len));
+	  put_frame_register (frame, regnum, value->contents_raw ().data ());
 	  release_value (value);
 	}
 
-      myaddr += curr_len;
-      len -= curr_len;
+      buffer = buffer.slice (curr_len);
       offset = 0;
       regnum++;
     }
