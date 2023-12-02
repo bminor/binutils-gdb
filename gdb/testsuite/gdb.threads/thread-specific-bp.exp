@@ -87,31 +87,19 @@ proc check_thread_specific_breakpoint {non_stop} {
     } else {
 	set cmd "continue"
     }
-    set test "continue to end"
-    set thread_exited 0
-    set prompt 0
     set msg_re \
 	[join \
 	     [list \
 		  "Thread-specific breakpoint 3 deleted" \
 		  "-" \
 		  "thread 2 no longer in the thread list\\."]]
-    gdb_test_multiple "$cmd" $test -lbl {
-	-re "(^|\r\n)${msg_re}(?=\r\n)" {
-	    if { $prompt } {
-		pass $gdb_test_name
-	    } else {
-		set thread_exited 1
-		exp_continue
-	    }
+
+    gdb_test_multiple "$cmd" "continue to end" {
+	-re "$\r\n${gdb_prompt} .*${msg_re}\r\n" {
+	    pass $gdb_test_name
 	}
-	-re "\r\n$gdb_prompt " {
-	    if { $thread_exited } {
-		pass $gdb_test_name
-	    } else {
-		set prompt 1
-		exp_continue
-	    }
+	-re "\r\n${msg_re}\r\n.*$gdb_prompt " {
+	    pass $gdb_test_name
 	}
     }
 
