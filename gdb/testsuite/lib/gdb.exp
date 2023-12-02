@@ -9230,36 +9230,27 @@ proc readnow { } {
 		  || [lsearch -exact $::GDBFLAGS --readnow] != -1}]
 }
 
-# Return index name if symbols were read in using an index.
-# Otherwise, return "".
+# Return 'gdb_index' if the symbols from OBJFILE were read using a
+# .gdb_index index.  Return 'debug_names' if the symbols were read
+# using a DWARF-5 style .debug_names index.  Otherwise, return an
+# empty string.
 
 proc have_index { objfile } {
+
     # This proc is mostly used with $binfile, but that gives problems with
     # remote host, while using $testfile would work.
     # Fix this by reducing $binfile to $testfile.
     set objfile [file tail $objfile]
 
-    set res ""
-    set cmd "maint print objfiles $objfile"
-    gdb_test_multiple $cmd "" -lbl {
-	-re "\r\n.gdb_index: faked for \"readnow\"" {
-	    set res ""
-	    exp_continue
-	}
-	-re "\r\n.gdb_index:" {
-	    set res "gdb_index"
-	    exp_continue
-	}
-	-re "\r\n.debug_names:" {
-	    set res "debug_names"
-	    exp_continue
-	}
-	-re -wrap "" {
-	    # We don't care about any other input.
-	}
-    }
+    set index_type [get_index_type $objfile]
 
-    return $res
+    if { $index_type eq "gdb" } {
+	return "gdb_index"
+    } elseif { $index_type eq "dwarf5" } {
+	return "debug_names"
+    } else {
+	return ""
+    }
 }
 
 # Return 1 if partial symbols are available.  Otherwise, return 0.
@@ -9323,6 +9314,64 @@ proc add_gdb_index { program {style ""} } {
     return 1
 }
 
+# Use 'maint print objfiles OBJFILE' to determine what (if any) type
+# of index is present in OBJFILE.  Return a string indicating the
+# index type:
+#
+# 'gdb' - Contains a .gdb_index style index,
+#
+# 'dwarf5' - Contain DWARF5 style index sections,
+#
+# 'readnow' - A fake .gdb_index as a result of readnow being used,
+#
+# 'cooked' - The cooked index created when reading non-indexed debug
+#            information,
+#
+# 'none' - There's no index, and no debug information to create a
+#          cooked index from.
+#
+# If something goes wrong then this proc will emit a FAIL and return
+# an empty string.
+#
+# TESTNAME is used as part of any pass/fail emitted from this proc.
+proc get_index_type { objfile { testname "" } } {
+    if { $testname eq "" } {
+	set testname "find index type"
+    }
+
+    set index_type "unknown"
+    gdb_test_multiple "maint print objfiles ${objfile}" $testname -lbl {
+	-re "\r\n\\.gdb_index: version ${::decimal}(?=\r\n)" {
+	    set index_type "gdb"
+	    gdb_test_lines "" $gdb_test_name ".*"
+	}
+	-re "\r\n\\.debug_names: exists(?=\r\n)" {
+	    set index_type "dwarf5"
+	    gdb_test_lines "" $gdb_test_name ".*"
+	}
+	-re "\r\n(Cooked index in use:|Psymtabs)(?=\r\n)" {
+	    set index_type "cooked"
+	    gdb_test_lines "" $gdb_test_name ".*"
+	}
+	-re ".gdb_index: faked for \"readnow\"" {
+	    set index_type "readnow"
+	    gdb_test_lines "" $gdb_test_name ".*"
+	}
+	-re -wrap "" {
+	    set index_type "none"
+	}
+    }
+
+    gdb_assert { $index_type ne "unknown" } \
+	"$testname, check type is valid"
+
+    if { $index_type eq "unknown" } {
+	set index_type ""
+    }
+
+    return $index_type
+}
+
 # Add a .gdb_index section to PROGRAM, unless it alread has an index
 # (.gdb_index/.debug_names).  Gdb doesn't support building an index from a
 # program already using one.  Return 1 if a .gdb_index was added, return 0
@@ -9332,38 +9381,16 @@ proc add_gdb_index { program {style ""} } {
 # string (the default) means .gdb_index; "-dwarf-5" means .debug_names.
 
 proc ensure_gdb_index { binfile {style ""} } {
-    global decimal
-
     set testfile [file tail $binfile]
-    set test "check if index present"
-    set has_index 0
-    set has_readnow 0
-    gdb_test_multiple "mt print objfiles ${testfile}" $test -lbl {
-	-re "\r\n\\.gdb_index: version ${decimal}(?=\r\n)" {
-	    set has_index 1
-	    gdb_test_lines "" $gdb_test_name ".*"
-	}
-	-re "\r\n\\.debug_names: exists(?=\r\n)" {
-	    set has_index 1
-	    gdb_test_lines "" $gdb_test_name ".*"
-	}
-	-re "\r\n(Cooked index in use:|Psymtabs)(?=\r\n)" {
-	    gdb_test_lines "" $gdb_test_name ".*"
-	}
-	-re ".gdb_index: faked for \"readnow\"" {
-	    set has_readnow 1
-	    gdb_test_lines "" $gdb_test_name ".*"
-	}
-	-re -wrap "" {
-	    fail $gdb_test_name
-	}
-    }
 
-    if { $has_index } {
+    set test "check if index present"
+    set index_type [get_index_type $testfile $test]
+
+    if { $index_type eq "gdb" || $index_type eq "dwarf5" } {
 	return 0
     }
 
-    if { $has_readnow } {
+    if { $index_type eq "readnow" } {
 	return -1
     }
 
