@@ -3066,8 +3066,11 @@ namespace eval Dwarf {
 	_op .4byte $abbrev_table_size "Abbrev_table_size"
 
 	# Header - augmentation string.
-	_op .4byte 4 "Augmentation_string_size"
-	_op .ascii [_quote GDB] "Augmentation_string"
+	_op .4byte 8 "Augmentation_string_size"
+	_op .ascii [_quote GDB2] "Augmentation_string"
+	_op .byte 0
+	_op .byte 0
+	_op .byte 0
 
 	# List of CUs.
 	set comment "CU offset"
