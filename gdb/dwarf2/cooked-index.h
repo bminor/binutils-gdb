@@ -107,12 +107,14 @@ extern bool language_requires_canonicalization (enum language lang);
 struct cooked_index_entry : public allocate_on_obstack
 {
   cooked_index_entry (sect_offset die_offset_, enum dwarf_tag tag_,
-		      cooked_index_flag flags_, const char *name_,
+		      cooked_index_flag flags_,
+		      enum language lang_, const char *name_,
 		      cooked_index_entry_ref parent_entry_,
 		      dwarf2_per_cu_data *per_cu_)
     : name (name_),
       tag (tag_),
       flags (flags_),
+      lang (lang_),
       die_offset (die_offset_),
       per_cu (per_cu_),
       m_parent_entry (parent_entry_)
@@ -281,6 +283,8 @@ struct cooked_index_entry : public allocate_on_obstack
   enum dwarf_tag tag;
   /* Any flags attached to this entry.  */
   cooked_index_flag flags;
+  /* The language of this symbol.  */
+  ENUM_BITFIELD (language) lang : LANGUAGE_BITS;
   /* The offset of this DIE.  */
   sect_offset die_offset;
   /* The CU from which this entry originates.  */
@@ -318,7 +322,7 @@ public:
   /* Create a new cooked_index_entry and register it with this object.
      Entries are owned by this object.  The new item is returned.  */
   cooked_index_entry *add (sect_offset die_offset, enum dwarf_tag tag,
-			   cooked_index_flag flags,
+			   cooked_index_flag flags, enum language lang,
 			   const char *name,
 			   cooked_index_entry_ref parent_entry,
 			   dwarf2_per_cu_data *per_cu);
@@ -370,12 +374,13 @@ private:
   cooked_index_entry *create (sect_offset die_offset,
 			      enum dwarf_tag tag,
 			      cooked_index_flag flags,
+			      enum language lang,
 			      const char *name,
 			      cooked_index_entry_ref parent_entry,
 			      dwarf2_per_cu_data *per_cu)
   {
     return new (&m_storage) cooked_index_entry (die_offset, tag, flags,
-						name, parent_entry,
+						lang, name, parent_entry,
 						per_cu);
   }
 
@@ -439,7 +444,8 @@ public:
 			   cooked_index_entry_ref parent_entry,
 			   dwarf2_per_cu_data *per_cu)
   {
-    return m_index->add (die_offset, tag, flags, name, parent_entry, per_cu);
+    return m_index->add (die_offset, tag, flags, per_cu->lang (),
+			 name, parent_entry, per_cu);
   }
 
   /* Install the current addrmap into the shard being constructed,

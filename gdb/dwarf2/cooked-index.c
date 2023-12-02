@@ -207,7 +207,7 @@ cooked_index_entry::full_name (struct obstack *storage, bool for_main) const
     return local_name;
 
   const char *sep = nullptr;
-  switch (per_cu->lang ())
+  switch (lang)
     {
     case language_cplus:
     case language_rust:
@@ -247,11 +247,12 @@ cooked_index_entry::write_scope (struct obstack *storage,
 
 cooked_index_entry *
 cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
-			 cooked_index_flag flags, const char *name,
+			 cooked_index_flag flags, enum language lang,
+			 const char *name,
 			 cooked_index_entry_ref parent_entry,
 			 dwarf2_per_cu_data *per_cu)
 {
-  cooked_index_entry *result = create (die_offset, tag, flags, name,
+  cooked_index_entry *result = create (die_offset, tag, flags, lang, name,
 				       parent_entry, per_cu);
   m_entries.push_back (result);
 
@@ -262,7 +263,7 @@ cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
   else if ((flags & IS_PARENT_DEFERRED) == 0
 	   && parent_entry.resolved == nullptr
 	   && m_main == nullptr
-	   && language_may_use_plain_main (per_cu->lang ())
+	   && language_may_use_plain_main (lang)
 	   && strcmp (name, "main") == 0)
     m_main = result;
 
@@ -301,7 +302,7 @@ cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
 	  gdb::unique_xmalloc_ptr<char> new_name
 	    = make_unique_xstrndup (name.data (), name.length ());
 	  last = create (entry->die_offset, DW_TAG_namespace,
-			 0, new_name.get (), parent,
+			 0, language_ada, new_name.get (), parent,
 			 entry->per_cu);
 	  last->canonical = last->name;
 	  m_names.push_back (std::move (new_name));
@@ -364,7 +365,7 @@ cooked_index_shard::finalize ()
       gdb_assert (entry->canonical == nullptr);
       if ((entry->flags & IS_LINKAGE) != 0)
 	entry->canonical = entry->name;
-      else if (entry->per_cu->lang () == language_ada)
+      else if (entry->lang == language_ada)
 	{
 	  gdb::unique_xmalloc_ptr<char> canon_name
 	    = handle_gnat_encoded_entry (entry, gnat_entries.get ());
@@ -376,15 +377,14 @@ cooked_index_shard::finalize ()
 	      m_names.push_back (std::move (canon_name));
 	    }
 	}
-      else if (entry->per_cu->lang () == language_cplus
-	       || entry->per_cu->lang () == language_c)
+      else if (entry->lang == language_cplus || entry->lang == language_c)
 	{
 	  void **slot = htab_find_slot (seen_names.get (), entry,
 					INSERT);
 	  if (*slot == nullptr)
 	    {
 	      gdb::unique_xmalloc_ptr<char> canon_name
-		= (entry->per_cu->lang () == language_cplus
+		= (entry->lang == language_cplus
 		   ? cp_canonicalize_string (entry->name)
 		   : c_canonicalize_name (entry->name));
 	      if (canon_name == nullptr)
@@ -572,7 +572,7 @@ cooked_index::get_main_name (struct obstack *obstack, enum language *lang)
   if (entry == nullptr)
     return nullptr;
 
-  *lang = entry->per_cu->lang ();
+  *lang = entry->lang;
   return entry->full_name (obstack, true);
 }
 
@@ -595,7 +595,7 @@ cooked_index::get_main () const
 	{
 	  if ((entry->flags & IS_MAIN) != 0)
 	    {
-	      if (!language_requires_canonicalization (entry->per_cu->lang ()))
+	      if (!language_requires_canonicalization (entry->lang))
 		{
 		  /* There won't be one better than this.  */
 		  return entry;

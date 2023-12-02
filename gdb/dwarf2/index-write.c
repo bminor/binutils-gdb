@@ -1282,7 +1282,7 @@ write_cooked_index (cooked_index *table,
 
       const char *name = entry->full_name (symtab->obstack ());
 
-      if (entry->per_cu->lang () == language_ada)
+      if (entry->lang == language_ada)
 	{
 	  /* In order for the index to work when read back into
 	     gdb, it has to use the encoded name, with any
@@ -1290,7 +1290,7 @@ write_cooked_index (cooked_index *table,
 	  std::string encoded = ada_encode (name, false);
 	  name = obstack_strdup (symtab->obstack (), encoded.c_str ());
 	}
-      else if (entry->per_cu->lang () == language_cplus
+      else if (entry->lang == language_cplus
 	       && (entry->flags & IS_LINKAGE) != 0)
 	{
 	  /* GDB never put C++ linkage names into .gdb_index.  The
