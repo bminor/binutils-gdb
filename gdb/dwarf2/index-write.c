@@ -1629,6 +1629,8 @@ write_dwarf_index (dwarf2_per_bfd *per_bfd, const char *dir,
   if (per_bfd->index_table == nullptr)
     error (_("No debugging symbols"));
   cooked_index *table = per_bfd->index_table->index_for_writing ();
+  if (table == nullptr)
+    error (_("Cannot use an index to create the index"));
 
   if (per_bfd->types.size () > 1)
     error (_("Cannot make an index when the file has multiple .debug_types sections"));

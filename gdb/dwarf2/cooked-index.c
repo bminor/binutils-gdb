@@ -704,8 +704,11 @@ void
 cooked_index::maybe_write_index (dwarf2_per_bfd *per_bfd,
 				 const index_cache_store_context &ctx)
 {
-  /* (maybe) store an index in the cache.  */
-  global_index_cache.store (m_per_bfd, ctx);
+  if (index_for_writing () != nullptr)
+    {
+      /* (maybe) store an index in the cache.  */
+      global_index_cache.store (m_per_bfd, ctx);
+    }
   m_state->set (cooked_state::CACHE_DONE);
 }
 

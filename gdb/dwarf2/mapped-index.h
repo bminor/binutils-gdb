@@ -127,9 +127,7 @@ struct mapped_index_base : public dwarf_scanner_base
 				 dwarf2_per_objfile *per_objfile) const;
 
   cooked_index *index_for_writing () override
-  {
-    error (_("Cannot use an index to create the index"));
-  }
+  { return nullptr; }
 };
 
 #endif /* GDB_DWARF2_MAPPED_INDEX_H */
