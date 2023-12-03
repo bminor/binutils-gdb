@@ -404,8 +404,7 @@ static_assert (sizeof (old_gdb_augmentation) % 4 == 0);
 
 /* DWARF-5 augmentation string for GDB's DW_IDX_GNU_* extension.  This
    must have a size that is a multiple of 4.  */
-static const gdb_byte dwarf5_augmentation[]
-     = { 'G', 'D', 'B', '2', 0, 0, 0, 0 };
+const gdb_byte dwarf5_augmentation[8] = { 'G', 'D', 'B', '2', 0, 0, 0, 0 };
 static_assert (sizeof (dwarf5_augmentation) % 4 == 0);
 
 /* A helper function that reads the .debug_names section in SECTION

@@ -22,6 +22,8 @@
 
 struct dwarf2_per_objfile;
 
+extern const gdb_byte dwarf5_augmentation[8];
+
 /* Read .debug_names.  If everything went ok, initialize the "quick"
    elements of all the CUs and return true.  Otherwise, return false.  */
 
