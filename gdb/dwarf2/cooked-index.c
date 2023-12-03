@@ -449,26 +449,18 @@ cooked_index_worker::start ()
 {
   gdb::thread_pool::g_thread_pool->post_task ([=] ()
   {
-    this->start_reading ();
+    try
+      {
+	do_reading ();
+      }
+    catch (const gdb_exception &exc)
+      {
+	m_failed = exc;
+	set (cooked_state::CACHE_DONE);
+      }
+
+    bfd_thread_cleanup ();
   });
-}
-
-/* See cooked-index.h.  */
-
-void
-cooked_index_worker::start_reading ()
-{
-  SCOPE_EXIT { bfd_thread_cleanup (); };
-
-  try
-    {
-      do_reading ();
-    }
-  catch (const gdb_exception &exc)
-    {
-      m_failed = exc;
-      set (cooked_state::CACHE_DONE);
-    }
 }
 
 /* See cooked-index.h.  */
@@ -520,7 +512,7 @@ cooked_index_worker::wait (cooked_state desired_state, bool allow_quit)
 
   if (m_failed.has_value ())
     {
-      /* start_reading failed -- report it.  */
+      /* do_reading failed -- report it.  */
       exception_print (gdb_stderr, *m_failed);
       m_failed.reset ();
       return done;

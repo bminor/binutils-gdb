@@ -534,13 +534,8 @@ protected:
   friend class cooked_index;
   void set (cooked_state desired_state);
 
-  /* Start reading DWARF.  This can be run in a worker thread without
-     problems.  */
-  void start_reading ();
-
-  /* Helper function that does most of the work for start_reading.
-     This must be able to be run in a worker thread without
-     problems.  */
+  /* Helper function that does the work of reading.  This must be able
+     to be run in a worker thread without problems.  */
   virtual void do_reading () = 0;
 
   /* A callback that can print stats, if needed.  This is called when
@@ -579,9 +574,9 @@ protected:
      arose during scanning have been reported by 'wait'.  This may
      only be modified on the main thread.  */
   bool m_reported = false;
-  /* If set, an exception occurred during start_reading; in this case
-     the scanning is stopped and this exception will later be reported
-     by the 'wait' method.  */
+  /* If set, an exception occurred during reading; in this case the
+     scanning is stopped and this exception will later be reported by
+     the 'wait' method.  */
   std::optional<gdb_exception> m_failed;
 };
 
