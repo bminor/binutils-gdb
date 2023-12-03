@@ -32,6 +32,7 @@
 
 #include "nat/gdb_ptrace.h"
 #include "gdbsupport/gdb_wait.h"
+#include "target/waitstatus.h"
 #include <dirent.h>
 #include <ctype.h>
 
@@ -363,15 +364,24 @@ linux_fork_mourn_inferior (void)
    the first available.  */
 
 void
-linux_fork_detach (int from_tty)
+linux_fork_detach (int from_tty, lwp_info *lp)
 {
+  gdb_assert (lp != nullptr);
+  gdb_assert (lp->ptid == inferior_ptid);
+
   /* OK, inferior_ptid is the one we are detaching from.  We need to
      delete it from the fork_list, and switch to the next available
-     fork.  */
+     fork.  But before doing the detach, do make sure that the lwp
+     hasn't exited or been terminated first.  */
 
-  if (ptrace (PTRACE_DETACH, inferior_ptid.pid (), 0, 0))
-    error (_("Unable to detach %s"),
-	   target_pid_to_str (inferior_ptid).c_str ());
+  if (lp->waitstatus.kind () != TARGET_WAITKIND_EXITED
+      && lp->waitstatus.kind () != TARGET_WAITKIND_THREAD_EXITED
+      && lp->waitstatus.kind () != TARGET_WAITKIND_SIGNALLED)
+    {
+      if (ptrace (PTRACE_DETACH, inferior_ptid.pid (), 0, 0))
+	error (_("Unable to detach %s"),
+	       target_pid_to_str (inferior_ptid).c_str ());
+    }
 
   delete_fork (inferior_ptid);
 

@@ -1410,6 +1410,20 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
       lp->signalled = 0;
     }
 
+  /* If the lwp has exited or was terminated due to a signal, there's
+     nothing left to do.  */
+  if (lp->waitstatus.kind () == TARGET_WAITKIND_EXITED
+      || lp->waitstatus.kind () == TARGET_WAITKIND_THREAD_EXITED
+      || lp->waitstatus.kind () == TARGET_WAITKIND_SIGNALLED)
+    {
+      linux_nat_debug_printf
+	("Can't detach %s - it has exited or was terminated: %s.",
+	 lp->ptid.to_string ().c_str (),
+	 lp->waitstatus.to_string ().c_str ());
+      delete_lwp (lp->ptid);
+      return;
+    }
+
   if (signo_p == NULL)
     {
       /* Pass on any pending signal for this LWP.  */
@@ -1483,13 +1497,13 @@ linux_nat_target::detach (inferior *inf, int from_tty)
   gdb_assert (num_lwps (pid) == 1
 	      || (target_is_non_stop_p () && num_lwps (pid) == 0));
 
-  if (forks_exist_p ())
+  if (pid == inferior_ptid.pid () && forks_exist_p ())
     {
       /* Multi-fork case.  The current inferior_ptid is being detached
 	 from, but there are other viable forks to debug.  Detach from
 	 the current fork, and context-switch to the first
 	 available.  */
-      linux_fork_detach (from_tty);
+      linux_fork_detach (from_tty, find_lwp_pid (ptid_t (pid)));
     }
   else
     {
