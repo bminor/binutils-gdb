@@ -21479,6 +21479,7 @@ program.  To debug a core dump of a previous run, you must also tell
 * Separate Debug Files::        Debugging information in separate files
 * MiniDebugInfo::               Debugging information in a special section
 * Index Files::                 Index files speed up GDB
+* Debug Names::                 Extensions to .debug_names
 * Symbol Errors::               Errors reading symbol files
 * Data Files::                  GDB data files
 @end menu
@@ -22680,6 +22681,44 @@ to delete the content of that directory to free up disk space.
 @item show index-cache stats
 Print the number of cache hits and misses since the launch of @value{GDBN}.
 
+@end table
+
+@node Debug Names
+@section Extensions to @samp{.debug_names}
+@cindex index files
+@cindex @samp{.debug_names} section
+
+The DWARF specification documents an optional index section called
+@samp{.debug_names}.  @value{GDBN} can both read and create this
+section.  However, in order to work with @value{GDBN}, some extensions
+were necessary.
+
+@value{GDBN} uses the augmentation string @samp{GDB2}.  Earlier
+versions used the string @samp{GDB}, but these versions of the index
+are no longer supported.
+
+@value{GDBN} does not use the specified hash table.  Therefore,
+because this hash table is optional, @value{GDBN} also does not write
+it.
+
+@value{GDBN} also generates and uses some extra index attributes:
+@table @code
+@item DW_IDX_GNU_internal
+This has the value @samp{0x2000}.  It is a flag that, when set,
+indicates that the associated entry has @code{static} linkage.
+
+@item DW_IDX_GNU_main
+This has the value @samp{0x2002}.  It is a flag that, when set,
+indicates that the associated entry is the program's @code{main}.
+
+@item DW_IDX_GNU_language
+This has the value @samp{0x2003}.  It is @samp{DW_LANG_} constant,
+indicating the language of the associated entry.
+
+@item DW_IDX_GNU_linkage_name
+This has the value @samp{0x2004}.  It is a flag that, when set,
+indicates that the associated entry is a linkage name, and not a
+source name.
 @end table
 
 @node Symbol Errors
