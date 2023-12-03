@@ -4517,6 +4517,7 @@ private:
 				   sect_offset *sibling_offset,
 				   const cooked_index_entry **parent_entry,
 				   CORE_ADDR *maybe_defer,
+				   bool *is_enum_class,
 				   bool for_specification);
 
   /* Handle DW_TAG_imported_unit, by scanning the DIE to find
@@ -16162,6 +16163,7 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 				 sect_offset *sibling_offset,
 				 const cooked_index_entry **parent_entry,
 				 CORE_ADDR *maybe_defer,
+				 bool *is_enum_class,
 				 bool for_specification)
 {
   bool origin_is_dwz = false;
@@ -16245,7 +16247,7 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 
 	case DW_AT_enum_class:
 	  if (attr.as_boolean ())
-	    *flags |= IS_ENUM_CLASS;
+	    *is_enum_class = true;
 	  break;
 
 	case DW_AT_low_pc:
@@ -16355,7 +16357,8 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 	  else
 	    scan_attributes (scanning_per_cu, new_reader, new_info_ptr,
 			     new_info_ptr, new_abbrev, name, linkage_name,
-			     flags, nullptr, parent_entry, maybe_defer, true);
+			     flags, nullptr, parent_entry, maybe_defer,
+			     is_enum_class, true);
 	}
     }
 
@@ -16507,6 +16510,7 @@ cooked_indexer::index_dies (cutu_reader *reader,
       cooked_index_flag flags = IS_STATIC;
       sect_offset sibling {};
       const cooked_index_entry *this_parent_entry = parent_entry;
+      bool is_enum_class = false;
 
       /* The scope of a DW_TAG_entry_point cooked_index_entry is the one of
 	 its surrounding subroutine.  */
@@ -16515,7 +16519,7 @@ cooked_indexer::index_dies (cutu_reader *reader,
       info_ptr = scan_attributes (reader->cu->per_cu, reader, info_ptr,
 				  info_ptr, abbrev, &name, &linkage_name,
 				  &flags, &sibling, &this_parent_entry,
-				  &defer, false);
+				  &defer, &is_enum_class, false);
 
       if (abbrev->tag == DW_TAG_namespace
 	  && m_language == language_cplus
@@ -16585,9 +16589,7 @@ cooked_indexer::index_dies (cutu_reader *reader,
 		 "enum_class::enumerator"; otherwise we inject the
 		 names into our own parent scope.  */
 	      info_ptr = recurse (reader, info_ptr,
-				  ((flags & IS_ENUM_CLASS) == 0)
-				  ? parent_entry
-				  : this_entry,
+				  is_enum_class ? this_entry : parent_entry,
 				  fully);
 	      continue;
 

@@ -48,7 +48,6 @@ to_string (cooked_index_flag flags)
   static constexpr cooked_index_flag::string_mapping mapping[] = {
     MAP_ENUM_FLAG (IS_MAIN),
     MAP_ENUM_FLAG (IS_STATIC),
-    MAP_ENUM_FLAG (IS_ENUM_CLASS),
     MAP_ENUM_FLAG (IS_LINKAGE),
     MAP_ENUM_FLAG (IS_TYPE_DECLARATION),
     MAP_ENUM_FLAG (IS_PARENT_DEFERRED),

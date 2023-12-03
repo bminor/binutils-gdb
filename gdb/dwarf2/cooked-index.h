@@ -57,16 +57,14 @@ enum cooked_index_flag_enum : unsigned char
   IS_MAIN = 1,
   /* True if this entry represents a "static" object.  */
   IS_STATIC = 2,
-  /* True if this entry is an "enum class".  */
-  IS_ENUM_CLASS = 4,
   /* True if this entry uses the linkage name.  */
-  IS_LINKAGE = 8,
+  IS_LINKAGE = 4,
   /* True if this entry is just for the declaration of a type, not the
      definition.  */
-  IS_TYPE_DECLARATION = 16,
+  IS_TYPE_DECLARATION = 8,
   /* True is parent_entry.deferred has a value rather than parent_entry
      .resolved.  */
-  IS_PARENT_DEFERRED = 32,
+  IS_PARENT_DEFERRED = 16,
 };
 DEF_ENUM_FLAGS_TYPE (enum cooked_index_flag_enum, cooked_index_flag);
 
