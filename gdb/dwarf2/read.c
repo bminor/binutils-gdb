@@ -4824,32 +4824,58 @@ process_skeletonless_type_units (dwarf2_per_objfile *per_objfile,
     }
 }
 
-cooked_index_worker::cooked_index_worker (dwarf2_per_objfile *per_objfile)
-  : m_per_objfile (per_objfile)
+/* A subclass of cooked_index_worker that handles scanning
+   .debug_info.  */
+
+class cooked_index_debug_info : public cooked_index_worker
 {
-  gdb_assert (is_main_thread ());
-
-  struct objfile *objfile = per_objfile->objfile;
-  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
-
-  dwarf_read_debug_printf ("Building psymtabs of objfile %s ...",
-			   objfile_name (objfile));
-
-  per_bfd->map_info_sections (objfile);
-}
-
-void
-cooked_index_worker::start ()
-{
-  gdb::thread_pool::g_thread_pool->post_task ([=] ()
+public:
+  cooked_index_debug_info (dwarf2_per_objfile *per_objfile)
+    : cooked_index_worker (per_objfile)
   {
-    this->start_reading ();
-  });
-}
+    gdb_assert (is_main_thread ());
+
+    struct objfile *objfile = per_objfile->objfile;
+    dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
+
+    dwarf_read_debug_printf ("Building psymtabs of objfile %s ...",
+			     objfile_name (objfile));
+
+    per_bfd->map_info_sections (objfile);
+  }
+
+private:
+
+  void do_reading () override;
+
+  void print_stats () override
+  {
+    if (dwarf_read_debug > 0)
+      print_tu_stats (m_per_objfile);
+  }
+
+  /* After the last DWARF-reading task has finished, this function
+     does the remaining work to finish the scan.  */
+  void done_reading ();
+
+  /* An iterator for the comp units.  */
+  typedef std::vector<dwarf2_per_cu_data_up>::iterator unit_iterator;
+
+  /* Process a batch of CUs.  This may be called multiple times in
+     separate threads.  TASK_NUMBER indicates which task this is --
+     the result is stored in that slot of M_RESULTS.  */
+  void process_cus (size_t task_number, unit_iterator first,
+ 		    unit_iterator end);
+
+  /* A storage object for "leftovers" -- see the 'start' method, but
+     essentially things not parsed during the normal CU parsing
+     passes.  */
+  cooked_index_storage m_index_storage;
+};
 
 void
-cooked_index_worker::process_cus (size_t task_number, unit_iterator first,
-				  unit_iterator end)
+cooked_index_debug_info::process_cus (size_t task_number, unit_iterator first,
+				      unit_iterator end)
 {
   SCOPE_EXIT { bfd_thread_cleanup (); };
 
@@ -4877,7 +4903,7 @@ cooked_index_worker::process_cus (size_t task_number, unit_iterator first,
 }
 
 void
-cooked_index_worker::done_reading ()
+cooked_index_debug_info::done_reading ()
 {
   /* Only handle the scanning results here.  Complaints and exceptions
      can only be dealt with on the main thread.  */
@@ -4899,23 +4925,7 @@ cooked_index_worker::done_reading ()
 }
 
 void
-cooked_index_worker::start_reading ()
-{
-  SCOPE_EXIT { bfd_thread_cleanup (); };
-
-  try
-    {
-      do_reading ();
-    }
-  catch (const gdb_exception &exc)
-    {
-      m_failed = exc;
-      set (cooked_state::CACHE_DONE);
-    }
-}
-
-void
-cooked_index_worker::do_reading ()
+cooked_index_debug_info::do_reading ()
 {
   dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
 
@@ -4984,106 +4994,6 @@ cooked_index_worker::do_reading ()
 
   m_results.resize (task_count);
   workers.start ();
-}
-
-bool
-cooked_index_worker::wait (cooked_state desired_state, bool allow_quit)
-{
-  bool done;
-#if CXX_STD_THREAD
-  {
-    std::unique_lock<std::mutex> lock (m_mutex);
-
-    /* This may be called from a non-main thread -- this functionality
-       is needed for the index cache -- but in this case we require
-       that the desired state already have been attained.  */
-    gdb_assert (is_main_thread () || desired_state <= m_state);
-
-    while (desired_state > m_state)
-      {
-	if (allow_quit)
-	  {
-	    std::chrono::milliseconds duration { 15 };
-	    if (m_cond.wait_for (lock, duration) == std::cv_status::timeout)
-	      QUIT;
-	  }
-	else
-	  m_cond.wait (lock);
-      }
-    done = m_state == cooked_state::CACHE_DONE;
-  }
-#else
-  /* Without threads, all the work is done immediately on the main
-     thread, and there is never anything to wait for.  */
-  done = true;
-#endif /* CXX_STD_THREAD */
-
-  /* Only the main thread is allowed to report complaints and the
-     like.  */
-  if (!is_main_thread ())
-    return false;
-
-  if (m_reported)
-    return done;
-  m_reported = true;
-
-  /* Emit warnings first, maybe they were emitted before an exception
-     (if any) was thrown.  */
-  m_warnings.emit ();
-
-  if (m_failed.has_value ())
-    {
-      /* start_reading failed -- report it.  */
-      exception_print (gdb_stderr, *m_failed);
-      m_failed.reset ();
-      return done;
-    }
-
-  /* Only show a given exception a single time.  */
-  std::unordered_set<gdb_exception> seen_exceptions;
-  for (auto &one_result : m_results)
-    {
-      re_emit_complaints (std::get<1> (one_result));
-      for (auto &one_exc : std::get<2> (one_result))
-	if (seen_exceptions.insert (one_exc).second)
-	  exception_print (gdb_stderr, one_exc);
-    }
-
-  if (dwarf_read_debug > 0)
-    print_tu_stats (m_per_objfile);
-
-  struct objfile *objfile = m_per_objfile->objfile;
-  dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
-  cooked_index *table
-    = (gdb::checked_static_cast<cooked_index *>
-       (per_bfd->index_table.get ()));
-
-  auto_obstack temp_storage;
-  enum language lang = language_unknown;
-  const char *main_name = table->get_main_name (&temp_storage, &lang);
-  if (main_name != nullptr)
-    set_objfile_main_name (objfile, main_name, lang);
-
-  dwarf_read_debug_printf ("Done building psymtabs of %s",
-			   objfile_name (objfile));
-
-  return done;
-}
-
-void
-cooked_index_worker::set (cooked_state desired_state)
-{
-  gdb_assert (desired_state != cooked_state::INITIAL);
-
-#if CXX_STD_THREAD
-  std::lock_guard<std::mutex> guard (m_mutex);
-  gdb_assert (desired_state > m_state);
-  m_state = desired_state;
-  m_cond.notify_one ();
-#else
-  /* Without threads, all the work is done immediately on the main
-     thread, and there is never anything to do.  */
-#endif /* CXX_STD_THREAD */
 }
 
 static void
@@ -16818,7 +16728,9 @@ start_debug_info_reader (dwarf2_per_objfile *per_objfile)
   /* Set the index table early so that sharing works even while
      scanning; and then start the scanning.  */
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
-  cooked_index *idx = new cooked_index (per_objfile);
+  std::unique_ptr<cooked_index_worker> worker
+    (new cooked_index_debug_info (per_objfile));
+  cooked_index *idx = new cooked_index (per_objfile, std::move (worker));
   per_bfd->index_table.reset (idx);
   /* Don't start reading until after 'index_table' is set.  This
      avoids races.  */

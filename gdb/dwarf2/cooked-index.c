@@ -442,9 +442,141 @@ cooked_index_shard::find (const std::string &name, bool completing) const
   return range (lower, upper);
 }
 
+/* See cooked-index.h.  */
 
-cooked_index::cooked_index (dwarf2_per_objfile *per_objfile)
-  : m_state (std::make_unique<cooked_index_worker> (per_objfile)),
+void
+cooked_index_worker::start ()
+{
+  gdb::thread_pool::g_thread_pool->post_task ([=] ()
+  {
+    this->start_reading ();
+  });
+}
+
+/* See cooked-index.h.  */
+
+void
+cooked_index_worker::start_reading ()
+{
+  SCOPE_EXIT { bfd_thread_cleanup (); };
+
+  try
+    {
+      do_reading ();
+    }
+  catch (const gdb_exception &exc)
+    {
+      m_failed = exc;
+      set (cooked_state::CACHE_DONE);
+    }
+}
+
+/* See cooked-index.h.  */
+
+bool
+cooked_index_worker::wait (cooked_state desired_state, bool allow_quit)
+{
+  bool done;
+#if CXX_STD_THREAD
+  {
+    std::unique_lock<std::mutex> lock (m_mutex);
+
+    /* This may be called from a non-main thread -- this functionality
+       is needed for the index cache -- but in this case we require
+       that the desired state already have been attained.  */
+    gdb_assert (is_main_thread () || desired_state <= m_state);
+
+    while (desired_state > m_state)
+      {
+	if (allow_quit)
+	  {
+	    std::chrono::milliseconds duration { 15 };
+	    if (m_cond.wait_for (lock, duration) == std::cv_status::timeout)
+	      QUIT;
+	  }
+	else
+	  m_cond.wait (lock);
+      }
+    done = m_state == cooked_state::CACHE_DONE;
+  }
+#else
+  /* Without threads, all the work is done immediately on the main
+     thread, and there is never anything to wait for.  */
+  done = true;
+#endif /* CXX_STD_THREAD */
+
+  /* Only the main thread is allowed to report complaints and the
+     like.  */
+  if (!is_main_thread ())
+    return false;
+
+  if (m_reported)
+    return done;
+  m_reported = true;
+
+  /* Emit warnings first, maybe they were emitted before an exception
+     (if any) was thrown.  */
+  m_warnings.emit ();
+
+  if (m_failed.has_value ())
+    {
+      /* start_reading failed -- report it.  */
+      exception_print (gdb_stderr, *m_failed);
+      m_failed.reset ();
+      return done;
+    }
+
+  /* Only show a given exception a single time.  */
+  std::unordered_set<gdb_exception> seen_exceptions;
+  for (auto &one_result : m_results)
+    {
+      re_emit_complaints (std::get<1> (one_result));
+      for (auto &one_exc : std::get<2> (one_result))
+	if (seen_exceptions.insert (one_exc).second)
+	  exception_print (gdb_stderr, one_exc);
+    }
+
+  print_stats ();
+
+  struct objfile *objfile = m_per_objfile->objfile;
+  dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
+  cooked_index *table
+    = (gdb::checked_static_cast<cooked_index *>
+       (per_bfd->index_table.get ()));
+
+  auto_obstack temp_storage;
+  enum language lang = language_unknown;
+  const char *main_name = table->get_main_name (&temp_storage, &lang);
+  if (main_name != nullptr)
+    set_objfile_main_name (objfile, main_name, lang);
+
+  /* dwarf_read_debug_printf ("Done building psymtabs of %s", */
+  /* 			   objfile_name (objfile)); */
+
+  return done;
+}
+
+/* See cooked-index.h.  */
+
+void
+cooked_index_worker::set (cooked_state desired_state)
+{
+  gdb_assert (desired_state != cooked_state::INITIAL);
+
+#if CXX_STD_THREAD
+  std::lock_guard<std::mutex> guard (m_mutex);
+  gdb_assert (desired_state > m_state);
+  m_state = desired_state;
+  m_cond.notify_one ();
+#else
+  /* Without threads, all the work is done immediately on the main
+     thread, and there is never anything to do.  */
+#endif /* CXX_STD_THREAD */
+}
+
+cooked_index::cooked_index (dwarf2_per_objfile *per_objfile,
+			    std::unique_ptr<cooked_index_worker> &&worker)
+  : m_state (std::move (worker)),
     m_per_bfd (per_objfile->per_bfd)
 {
   /* ACTIVE_VECTORS is not locked, and this assert ensures that this

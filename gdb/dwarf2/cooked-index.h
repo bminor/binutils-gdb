@@ -500,13 +500,21 @@ enum class cooked_state
 
 /* An object of this type controls the scanning of the DWARF.  It
    schedules the worker tasks and tracks the current state.  Once
-   scanning is done, this object is discarded.  */
+   scanning is done, this object is discarded.
+   
+   This is an abstract base class that defines the basic behavior of
+   scanners.  Separate concrete implementations exist for scanning
+   .debug_names and .debug_info.  */
 
 class cooked_index_worker
 {
 public:
 
-  explicit cooked_index_worker (dwarf2_per_objfile *per_objfile);
+  explicit cooked_index_worker (dwarf2_per_objfile *per_objfile)
+    : m_per_objfile (per_objfile)
+  { }
+  virtual ~cooked_index_worker ()
+  { }
   DISABLE_COPY_AND_ASSIGN (cooked_index_worker);
 
   /* Start reading.  */
@@ -520,7 +528,7 @@ public:
      cache writer.)  */
   bool wait (cooked_state desired_state, bool allow_quit);
 
-private:
+protected:
 
   /* Let cooked_index call the 'set' method.  */
   friend class cooked_index;
@@ -530,21 +538,15 @@ private:
      problems.  */
   void start_reading ();
 
-  /* Helper function that does most of the work for start_reading.  */
-  void do_reading ();
+  /* Helper function that does most of the work for start_reading.
+     This must be able to be run in a worker thread without
+     problems.  */
+  virtual void do_reading () = 0;
 
-  /* After the last DWARF-reading task has finished, this function
-     does the remaining work to finish the scan.  */
-  void done_reading ();
-
-  /* An iterator for the comp units.  */
-  typedef std::vector<dwarf2_per_cu_data_up>::iterator unit_iterator;
-
-  /* Process a batch of CUs.  This may be called multiple times in
-     separate threads.  TASK_NUMBER indicates which task this is --
-     the result is stored in that slot of M_RESULTS.  */
-  void process_cus (size_t task_number, unit_iterator first,
- 		    unit_iterator end);
+  /* A callback that can print stats, if needed.  This is called when
+     transitioning to the 'MAIN_AVAILABLE' state.  */
+  virtual void print_stats ()
+  { }
 
   /* Each thread returns a tuple holding a cooked index, any collected
      complaints, and a vector of errors that should be printed.  The
@@ -557,10 +559,6 @@ private:
 
   /* The per-objfile object.  */
   dwarf2_per_objfile *m_per_objfile;
-  /* A storage object for "leftovers" -- see the 'start' method, but
-     essentially things not parsed during the normal CU parsing
-     passes.  */
-  cooked_index_storage m_index_storage;
   /* Result of each worker task.  */
   std::vector<result_type> m_results;
   /* Any warnings emitted.  This is not in 'result_type' because (for
@@ -648,7 +646,8 @@ public:
      object.  */
   using vec_type = std::vector<std::unique_ptr<cooked_index_shard>>;
 
-  explicit cooked_index (dwarf2_per_objfile *per_objfile);
+  cooked_index (dwarf2_per_objfile *per_objfile,
+		std::unique_ptr<cooked_index_worker> &&worker);
   ~cooked_index () override;
 
   DISABLE_COPY_AND_ASSIGN (cooked_index);
