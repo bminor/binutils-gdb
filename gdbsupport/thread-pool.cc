@@ -154,6 +154,7 @@ thread_pool::set_thread_count (size_t num_threads)
 {
 #if CXX_STD_THREAD
   std::lock_guard<std::mutex> guard (m_tasks_mutex);
+  m_sized_at_least_once = true;
 
   /* If the new size is larger, start some new threads.  */
   if (m_thread_count < num_threads)
@@ -197,6 +198,9 @@ thread_pool::set_thread_count (size_t num_threads)
 void
 thread_pool::do_post_task (std::packaged_task<void ()> &&func)
 {
+  /* This assert is here to check that no tasks are posted to the pool between
+     its initialization and sizing.  */
+  gdb_assert (m_sized_at_least_once);
   std::packaged_task<void ()> t (std::move (func));
 
   if (m_thread_count != 0)

@@ -26,6 +26,10 @@ extern void set_per_command_time (int);
 
 extern void set_per_command_space (int);
 
+/* Update the thread pool for the desired number of threads.  */
+
+extern void update_thread_pool_size ();
+
 /* Records a run time and space usage to be used as a base for
    reporting elapsed time or change in space.  */
 

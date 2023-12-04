@@ -844,15 +844,23 @@ maintenance_set_profile_cmd (const char *args, int from_tty,
 
 static int n_worker_threads = -1;
 
-/* Update the thread pool for the desired number of threads.  */
-static void
+/* See maint.h.  */
+
+void
 update_thread_pool_size ()
 {
 #if CXX_STD_THREAD
   int n_threads = n_worker_threads;
 
   if (n_threads < 0)
-    n_threads = std::thread::hardware_concurrency ();
+    {
+      const int hardware_threads = std::thread::hardware_concurrency ();
+      /* Testing in #29959 indicates that parallel efficiency drops between
+	 n_threads=5 to 8.  Therefore, clamp the default value to 8 to avoid an
+	 excessive number of threads in the pool on many-core systems.  */
+      const int throttle = 8;
+      n_threads = std::clamp (hardware_threads, hardware_threads, throttle);
+    }
 
   gdb::thread_pool::g_thread_pool->set_thread_count (n_threads);
 #endif
@@ -874,7 +882,7 @@ maintenance_show_worker_threads (struct ui_file *file, int from_tty,
   if (n_worker_threads == -1)
     {
       gdb_printf (file, _("The number of worker threads GDB "
-			  "can use is unlimited (currently %zu).\n"),
+			  "can use is the default (currently %zu).\n"),
 		  gdb::thread_pool::g_thread_pool->thread_count ());
       return;
     }
@@ -1474,6 +1482,4 @@ such as demangling symbol names."),
 					     maintenance_selftest_option_defs,
 					     &set_selftest_cmdlist,
 					     &show_selftest_cmdlist);
-
-  update_thread_pool_size ();
 }

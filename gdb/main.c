@@ -1058,6 +1058,10 @@ captured_main_1 (struct captured_main_args *context)
   execute_cmdargs (&cmdarg_vec, CMDARG_EARLYINIT_FILE,
 		   CMDARG_EARLYINIT_COMMAND, &ret);
 
+  /* Set the thread pool size here, so the size can be influenced by the
+     early initialization commands.  */
+  update_thread_pool_size ();
+
   /* Initialize the extension languages.  */
   ext_lang_initialization ();
 

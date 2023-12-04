@@ -99,6 +99,25 @@ proc check_gdb_startups_up_quietly { message } {
     }
 }
 
+# Restart GDB and check that the size of the thread pool has not been
+# adjusted to match the number of machine cores at early init time.
+proc check_gdb_maint_show { message } {
+    global gdb_prompt
+    global gdb_sanitizer_msg_re
+    gdb_exit
+    gdb_spawn
+    set setshowprefix "The number of worker threads GDB can use is"
+    set unset "$setshowprefix the default \\\(currently 0\\\)."
+    set final "$setshowprefix 1."
+    # Output when CXX_STD_THREAD is undefined.
+    set off "$setshowprefix 0."
+    gdb_test_multiple "" $message {
+	-re "^(${gdb_sanitizer_msg_re})?($unset|$off)\r\n($final|$off)\r\n$gdb_prompt $" {
+	    pass $gdb_test_name
+	}
+    }
+}
+
 with_ansi_styling_terminal {
 
     # Start GDB and confirm that the version string is styled.
@@ -163,5 +182,26 @@ with_ansi_styling_terminal {
 	set env(HOME) $empty_home_dir
 	check_gdb_startups_up_quietly \
 	    "check GDB starts quietly using XDG_CONFIG_HOME"
+    }
+
+    # Create fake home directory for the thread pool size check.
+    set dirs [setup_home_directories "maint-show" \
+		  [multi_line_input \
+		       "set startup-quietly on" \
+		       "maint show worker-threads" \
+		       "maint set worker-threads 1" \
+		       "maint show worker-threads"]]
+
+    set home_dir [lindex $dirs 0]
+
+    # Now arrange to use the fake home directory startup file.
+    save_vars { INTERNAL_GDBFLAGS env(HOME) env(XDG_CONFIG_HOME) } {
+	set INTERNAL_GDBFLAGS [string map {"-nx" "" "-q" ""} $INTERNAL_GDBFLAGS]
+
+	# Now test GDB when using the HOME directory.
+	set env(HOME) $home_dir
+	unset -nocomplain env(XDG_CONFIG_HOME)
+	check_gdb_maint_show \
+	    "check early init of thread pool size"
     }
 }

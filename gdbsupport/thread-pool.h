@@ -204,6 +204,7 @@ private:
      between the main thread and the worker threads.  */
   std::condition_variable m_tasks_cv;
   std::mutex m_tasks_mutex;
+  bool m_sized_at_least_once = false;
 #endif /* CXX_STD_THREAD */
 };
 
