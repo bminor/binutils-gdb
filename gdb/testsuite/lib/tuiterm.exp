@@ -1102,6 +1102,21 @@ namespace eval Term {
 	}
     }
 
+    # Wait until a box appears at the given coordinates.
+    proc wait_for_box {test_name x y width height} {
+	while 1 {
+	    if { [accept_gdb_output] == 0 } {
+		return 0
+	    }
+
+	    set why [_check_box $x $y $width $height]
+	    if {$why == ""} {
+		pass $test_name
+		break
+	    }
+	}
+    }
+
     # Check whether the text contents of the terminal match the
     # regular expression.  Note that text styling is not considered.
     proc check_contents {test_name regexp} {

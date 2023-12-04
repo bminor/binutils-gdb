@@ -223,10 +223,7 @@ tui_source_window_base::do_erase_source_content (const char *str)
 	x_pos = 1;
       else
 	x_pos = half_width - strlen (str);
-      mvwaddstr (handle.get (),
-		 (height / 2),
-		 x_pos,
-		 (char *) str);
+      display_string (height / 2, x_pos, str);
 
       refresh_window ();
     }
@@ -697,7 +694,7 @@ tui_source_window_base::update_exec_info (bool refresh_p)
       if (src_element->is_exec_point)
 	element[TUI_EXEC_POS] = '>';
 
-      mvwaddstr (handle.get (), i + box_width (), box_width (), element);
+      display_string (i + box_width (), box_width (), element);
 
       show_line_number (i);
     }

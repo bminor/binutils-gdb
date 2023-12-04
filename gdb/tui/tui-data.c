@@ -164,6 +164,36 @@ tui_win_info::set_title (std::string &&new_title)
     }
 }
 
+/* See tui-data.h.  */
+
+void
+tui_win_info::display_string (int y, int x, const char *str) const
+{
+  int n = width - box_width () - x;
+  if (n <= 0)
+    return;
+
+  mvwaddnstr (handle.get (), y, x, str, n);
+}
+
+/* See tui-data.h.  */
+
+void
+tui_win_info::display_string (const char *str) const
+{
+  int y, x;
+  getyx (handle.get (), y, x);
+
+  /* Avoid Wunused-but-set-variable.  */
+  (void) y;
+
+  int n = width - box_width () - x;
+  if (n <= 0)
+    return;
+
+  waddnstr (handle.get (), str, n);
+}
+
 void
 tui_win_info::rerender ()
 {

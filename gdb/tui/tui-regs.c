@@ -407,7 +407,7 @@ tui_data_window::erase_data_content (const char *prompt)
 	x_pos = 1;
       else
 	x_pos = half_width - strlen (prompt);
-      mvwaddstr (handle.get (), (height / 2), x_pos, (char *) prompt);
+      display_string (height / 2, x_pos, prompt);
     }
   tui_wrefresh (handle.get ());
 }

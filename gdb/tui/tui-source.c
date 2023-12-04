@@ -253,5 +253,5 @@ tui_source_window::show_line_number (int offset) const
 		 tui_left_margin_verbose ? "%0*d%c" : "%*d%c", m_digits - 1,
 		 lineno, space);
     }
-  waddstr (handle.get (), text);
+  display_string (text);
 }

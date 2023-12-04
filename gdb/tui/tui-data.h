@@ -167,6 +167,14 @@ public:
   const std::string &title () const
   { return m_title; }
 
+  /* Display string STR in the window at position (Y,X), abbreviated if
+     necessary.  */
+  void display_string (int y, int x, const char *str) const;
+
+  /* Display string STR in the window at the current cursor position,
+     abbreviated if necessary.  */
+  void display_string (const char *str) const;
+
   /* Window handle.  */
   std::unique_ptr<WINDOW, curses_deleter> handle;
   /* Window width.  */
