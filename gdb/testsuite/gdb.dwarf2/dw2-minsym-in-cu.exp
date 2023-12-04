@@ -29,6 +29,16 @@ if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
     return -1
 }
 
+# The "info func" code tries to expand the corresponding symtab when a
+# minsym is found; and if this works, it omits the minsym from the
+# results.  However, this test also does not include .debug_aranges,
+# so with .debug_names this ends up showing an entry -- because the
+# symtab cannot be expanded.
+set index [have_index $binfile]
+if {$index == "debug_names"} {
+    setup_kfail "symtab/31132" *-*-*
+}
+
 # Ask for address which is still located in this CU but not described by
 # any DIE.
 gdb_test "info fun func2" {All functions matching regular expression "func2":}
