@@ -56,6 +56,7 @@
 #include "gdbsupport/alt-stack.h"
 #include "observable.h"
 #include "serial.h"
+#include "cli-out.h"
 
 /* The selected interpreter.  */
 std::string interpreter_p;
@@ -688,6 +689,16 @@ captured_main_1 (struct captured_main_args *context)
   gdb_stdtargerr = gdb_stderr;
   gdb_stdtargin = gdb_stdin;
 
+  /* Put a CLI based uiout in place early.  If the early initialization
+     files trigger any I/O then it isn't hard to reach parts of GDB that
+     assume current_uiout is not nullptr.  Maybe we should just install the
+     CLI interpreter initially, then switch to the application requested
+     interpreter later?  But that would (potentially) result in an
+     interpreter being instantiated "just in case".  For now this feels
+     like the least effort way to protect GDB from crashing.  */
+  auto temp_uiout = std::make_unique<cli_ui_out> (gdb_stdout);
+  current_uiout = temp_uiout.get ();
+
   if (bfd_init () != BFD_INIT_MAGIC)
     error (_("fatal error: libbfd ABI mismatch"));
 
@@ -1141,6 +1152,10 @@ captured_main_1 (struct captured_main_args *context)
   /* Install the default UI.  All the interpreters should have had a
      look at things by now.  Initialize the default interpreter.  */
   set_top_level_interpreter (interpreter_p.c_str ());
+
+  /* The interpreter should have installed the real uiout by now.  */
+  gdb_assert (current_uiout != temp_uiout.get ());
+  temp_uiout = nullptr;
 
   if (!quiet)
     {
