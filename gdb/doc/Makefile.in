@@ -429,10 +429,12 @@ GDBvn.texi : version.subst
 	  echo "@set SYSTEM_READLINE" >> ./GDBvn.new; \
 	fi
 	if [ -n "$(SYSTEM_GDBINIT)" ]; then \
-	  echo "@set SYSTEM_GDBINIT $(SYSTEM_GDBINIT)" >> ./GDBvn.new; \
+	  escaped_system_gdbinit=`echo $(SYSTEM_GDBINIT) | sed 's/@/@@/g'`; \
+	  echo "@set SYSTEM_GDBINIT $$escaped_system_gdbinit" >> ./GDBvn.new; \
 	fi
 	if [ -n "$(SYSTEM_GDBINIT_DIR)" ]; then \
-	  echo "@set SYSTEM_GDBINIT_DIR $(SYSTEM_GDBINIT_DIR)" >> ./GDBvn.new; \
+	  escaped_system_gdbinit_dir=`echo $(SYSTEM_GDBINIT_DIR) | sed 's/@/@@/g'`; \
+	  echo "@set SYSTEM_GDBINIT_DIR $$escaped_system_gdbinit_dir" >> ./GDBvn.new; \
 	fi
 	mv GDBvn.new GDBvn.texi
 
