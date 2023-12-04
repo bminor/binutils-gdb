@@ -10353,7 +10353,8 @@ display_debug_names (struct dwarf_section *section, void *file)
       const uint32_t *const hash_table_buckets = (uint32_t *) hdrptr;
       hdrptr += bucket_count * sizeof (uint32_t);
       const uint32_t *const hash_table_hashes = (uint32_t *) hdrptr;
-      hdrptr += name_count * sizeof (uint32_t);
+      if (bucket_count != 0)
+	hdrptr += name_count * sizeof (uint32_t);
       unsigned char *const name_table_string_offsets = hdrptr;
       hdrptr += name_count * offset_size;
       unsigned char *const name_table_entry_offsets = hdrptr;
@@ -10478,8 +10479,12 @@ display_debug_names (struct dwarf_section *section, void *file)
 	  p = name_table_entry_offsets + namei * offset_size;
 	  SAFE_BYTE_GET (entry_offset, p, offset_size, unit_end);
 
-	  printf ("[%3u] #%08x %s:", namei, hash_table_hashes[namei],
-		  fetch_indirect_string (string_offset));
+	  /* The name table is indexed starting at 1 according to
+	     DWARF, so be sure to use the DWARF numbering here.  */
+	  printf ("[%3u] ", namei + 1);
+	  if (bucket_count != 0)
+	    printf ("#%08x ", hash_table_hashes[namei]);
+	  printf ("%s:", fetch_indirect_string (string_offset));
 
 	  unsigned char *entryptr = entry_pool + entry_offset;
 

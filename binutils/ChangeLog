@@ -1,3 +1,8 @@
+2023-12-04  Tom Tromey  <tom@tromey.com>
+
+	* dwarf.c (display_debug_names): Handle empty .debug_names hash
+	table.  Name entries start at 1.
+
 2023-11-15  Arsen Arsenović  <arsen@aarsen.me>
 
 	* aclocal.m4: Regenerate.
