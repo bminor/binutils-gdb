@@ -10044,7 +10044,6 @@ remote_target::putpkt_binary (const char *buf, int cnt)
 					      rs->buf.data ());
 		continue;
 	      }
-	      /* fall-through */
 	    default:
 	      remote_debug_printf_nofunc ("Junk: %c%s", ch & 0177,
 					  rs->buf.data ());
