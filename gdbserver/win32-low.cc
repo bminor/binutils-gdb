@@ -1237,7 +1237,7 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 	default:
 	  OUTMSG (("Ignoring unknown internal event, %d\n",
 		  ourstatus->kind ()));
-	  /* fall-through */
+	  [[fallthrough]];
 	case TARGET_WAITKIND_SPURIOUS:
 	  /* do nothing, just continue */
 	  child_continue (continue_status,
