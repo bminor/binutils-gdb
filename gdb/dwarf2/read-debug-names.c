@@ -294,7 +294,8 @@ read_debug_names_from_section (struct objfile *objfile,
   map.bucket_table_reordered = reinterpret_cast<const uint32_t *> (addr);
   addr += map.bucket_count * 4;
   map.hash_table_reordered = reinterpret_cast<const uint32_t *> (addr);
-  addr += map.name_count * 4;
+  if (map.bucket_count != 0)
+    addr += map.name_count * 4;
 
   /* Name Table */
   map.name_table_string_offs_reordered = addr;
