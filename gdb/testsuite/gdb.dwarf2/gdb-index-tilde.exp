@@ -82,7 +82,8 @@ if { !$can_dump_index } {
 }
 
 # Generate an index file.
-gdb_test_no_output "save gdb-index $dir"
+gdb_test_no_output "save gdb-index $dir" \
+    "save gdb-index to tilde based directory"
 gdb_exit
 
 # Confirm that the index file exists.
