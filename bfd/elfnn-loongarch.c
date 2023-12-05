@@ -3993,8 +3993,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  else
 	    continue;
 
-	  if (h && bfd_link_executable (info)
-	      && SYMBOL_REFERENCES_LOCAL (info, h))
+	  if (h && SYMBOL_REFERENCES_LOCAL (info, h))
 	    local_got = true;
 	  symtype = h->type;
 	}
