@@ -14,6 +14,9 @@ AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address
 
 AC_CONFIG_HEADERS([config.h])
 
+dnl Set the 'development' global before loading the SIM macros.
+. $srcdir/../bfd/development.sh
+
 SIM_AC_TOOLCHAIN
 SIM_AC_PLATFORM
 

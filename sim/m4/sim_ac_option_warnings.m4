@@ -25,8 +25,8 @@ AC_ARG_ENABLE(werror,
      *) AC_MSG_ERROR(bad value ${enableval} for --enable-werror) ;;
    esac])
 
-dnl Enable -Werror by default when using gcc
-if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
+dnl Enable -Werror by default when using gcc.  Turn it off for releases.
+if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" && $development; then
   ERROR_ON_WARNING=yes
 fi
 

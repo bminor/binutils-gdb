@@ -45,6 +45,8 @@ MOSTLYCLEANFILES = core
 ## make sure all objects in subdirs get cleaned up.
 MOSTLYCLEANFILES += $(SIM_ENABLED_ARCHES:%=%/*.o)
 
+CONFIG_STATUS_DEPENDENCIES = $(srcroot)/bfd/development.sh
+
 AM_CFLAGS = \
 	$(WERROR_CFLAGS) \
 	$(WARN_CFLAGS) \

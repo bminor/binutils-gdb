@@ -1798,6 +1798,7 @@ MOSTLYCLEANFILES = core $(SIM_ENABLED_ARCHES:%=%/*.o) \
 	$(am__append_57) $(am__append_61) $(am__append_75) \
 	$(am__append_80) $(am__append_88) $(am__append_103) \
 	$(am__append_107)
+CONFIG_STATUS_DEPENDENCIES = $(srcroot)/bfd/development.sh
 AM_CFLAGS = \
 	$(WERROR_CFLAGS) \
 	$(WARN_CFLAGS) \
