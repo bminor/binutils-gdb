@@ -155,7 +155,8 @@ do_syscall (SIM_DESC sd)
     {
       /* EXIT - caller can look in parm1 to work out the reason */
       sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
-		       (parm1 == 0xdead ? SIM_SIGABRT : sim_exited), parm1);
+		       parm1 == 0xdead ? sim_stopped : sim_exited,
+		       parm1 == 0xdead ? SIM_SIGABRT : parm1);
     }
   else
     {
