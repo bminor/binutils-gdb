@@ -1178,7 +1178,7 @@ inner_rsqrt(uint64_t op1,
 	uint32_t res;
 	sim_fpu_32to (&wop1, op1);
 	status |= sim_fpu_sqrt (&ans, &wop1);
-	status |= sim_fpu_round_32 (&ans, status, round);
+	status |= sim_fpu_round_32 (&ans, round, denorm);
 	wop1 = ans;
 	op_status = sim_fpu_inv (&ans, &wop1);
 	op_status |= sim_fpu_round_32 (&ans, round, denorm);
@@ -1216,7 +1216,7 @@ fp_inv_sqrt(sim_cpu *cpu,
 	    FP_formats fmt)
 {
   sim_fpu_round round = rounding_mode (GETRM());
-  sim_fpu_round denorm = denorm_mode (cpu);
+  sim_fpu_denorm denorm = denorm_mode (cpu);
   sim_fpu_status status = 0;
   uint64_t result = 0;
 
@@ -1903,8 +1903,8 @@ convert_ps (sim_cpu *cpu,
       result = (((uint64_t)res_u) << 32) | (uint64_t)res_l;
       break;
     case fmt_ps:
-      status_u |= sim_fpu_round_32 (&wop_u, 0, round);
-      status_l |= sim_fpu_round_32 (&wop_l, 0, round);
+      status_u |= sim_fpu_round_32 (&wop_u, round, denorm);
+      status_l |= sim_fpu_round_32 (&wop_l, round, denorm);
       sim_fpu_to32 (&res_u, &wop_u);
       sim_fpu_to32 (&res_l, &wop_l);
       result = FP_PS_cat(res_u, res_l);
