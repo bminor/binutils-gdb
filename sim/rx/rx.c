@@ -754,6 +754,7 @@ typedef union {
   float f;
 } FloatInt;
 
+ATTRIBUTE_UNUSED
 static inline int
 float2int (float f)
 {
