@@ -36,7 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "misc.h"
 
 #ifdef WITH_PROFILE
-static const char * id_names[] = {
+static const char * const id_names[] = {
   "RXO_unknown",
   "RXO_mov",	/* d = s (signed) */
   "RXO_movbi",	/* d = [s,s2] (signed) */
@@ -142,7 +142,7 @@ static const char * id_names[] = {
   "RXO_sccnd",	/* d = cond(s) ? 1 : 0 */
 };
 
-static const char * optype_names[] = {
+static const char * const optype_names[] = {
   " -  ",
   "#Imm",	/* #addend */
   " Rn ",	/* Rn */
@@ -332,7 +332,7 @@ div_cycles(long num, long den)
 
 #endif /* else CYCLE_ACCURATE */
 
-static int size2bytes[] = {
+static const int size2bytes[] = {
   4, 1, 1, 1, 2, 2, 2, 3, 4
 };
 
