@@ -2837,7 +2837,7 @@ gensim_caselist (op *p)
       const char *s = p->code;
 
       printf ("  /* %s %s */\n", p->name, p->code);
-      printf ("  case %d:      \n", p->index);
+      printf ("  case %d:\n", p->index);
 
       printf ("    {\n");
       while (*s)
@@ -2881,8 +2881,8 @@ gensim_caselist (op *p)
 	    case 'x':
 	      if (s[1] == 'y')	/* xy */
 		{
-		  printf ("      int n = (iword & 3) ? \n");
-		  printf ("              ((iword >> 9) & 1) + 4 : \n");
+		  printf ("      int n = (iword & 3) ?\n");
+		  printf ("              ((iword >> 9) & 1) + 4 :\n");
 		  printf ("              REG_xy ((iword >> 8) & 3);\n");
 		}
 	      else
@@ -2893,8 +2893,8 @@ gensim_caselist (op *p)
 	    case 'y':
 	      if (s[1] == 'x')	/* yx */
 		{
-		  printf ("      int n = (iword & 0xc) ? \n");
-		  printf ("              ((iword >> 8) & 1) + 6 : \n");
+		  printf ("      int n = (iword & 0xc) ?\n");
+		  printf ("              ((iword >> 8) & 1) + 6 :\n");
 		  printf ("              REG_yx ((iword >> 8) & 3);\n");
 		}
 	      else
@@ -2913,8 +2913,8 @@ gensim_caselist (op *p)
 	    case 'X':
 	      if (s[1] == 'Y')	/* XY */
 		{
-		  printf ("      int m = (iword & 3) ? \n");
-		  printf ("              ((iword >> 7) & 1) + 8 : \n");
+		  printf ("      int m = (iword & 3) ?\n");
+		  printf ("              ((iword >> 7) & 1) + 8 :\n");
 		  printf ("              DSP_xy ((iword >> 6) & 3);\n");
 		}
 	      else
@@ -2924,8 +2924,8 @@ gensim_caselist (op *p)
 	    case 'a':
 	      if (s[1] == 'x')	/* ax */
 		{
-		  printf ("      int m = (iword & 3) ? \n");
-		  printf ("              7 - ((iword >> 6) & 2) : \n");
+		  printf ("      int m = (iword & 3) ?\n");
+		  printf ("              7 - ((iword >> 6) & 2) :\n");
 		  printf ("              DSP_ax ((iword >> 6) & 3);\n");
 		}
 	      else
@@ -2935,8 +2935,8 @@ gensim_caselist (op *p)
 	    case 'Y':
 	      if (s[1] == 'X')	/* YX */
 		{
-		  printf ("      int m = (iword & 0xc) ? \n");
-		  printf ("              ((iword >> 6) & 1) + 10 : \n");
+		  printf ("      int m = (iword & 0xc) ?\n");
+		  printf ("              ((iword >> 6) & 1) + 10 :\n");
 		  printf ("              DSP_yx ((iword >> 6) & 3);\n");
 		}
 	      else
@@ -2946,8 +2946,8 @@ gensim_caselist (op *p)
 	    case 'A':
 	      if (s[1] == 'Y')	/* AY */
 		{
-		  printf ("      int m = (iword & 0xc) ? \n");
-		  printf ("              7 - ((iword >> 5) & 2) : \n");
+		  printf ("      int m = (iword & 0xc) ?\n");
+		  printf ("              7 - ((iword >> 5) & 2) :\n");
 		  printf ("              DSP_ay ((iword >> 6) & 3);\n");
 		}
 	      else
@@ -3270,7 +3270,7 @@ ppi_gensim (void)
       const char *s = p->code;
 
       printf ("  /* %s %s */\n", p->name, p->code);
-      printf ("  case %d:      \n", p->index);
+      printf ("  case %d:\n", p->index);
 
       printf ("    {\n");
       for (shift = 16; *s; )
@@ -3297,7 +3297,7 @@ ppi_gensim (void)
 	      printf ("      if ((((iword >> 8) ^ DSR) & 1) == 0)\n");
 	      printf ("\treturn;\n");
 	      printf ("    }\n");
-	      printf ("  case %d:      \n", p->index + 1);
+	      printf ("  case %d:\n", p->index + 1);
 	      printf ("    {\n");
 	      cond = 1;
 	    case '0':
