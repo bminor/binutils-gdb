@@ -10031,7 +10031,7 @@ proc is_target_non_stop { {testname ""} } {
 proc gdb_get_worker_threads { {testname ""} } {
     set worker_threads "UNKNOWN"
     gdb_test_multiple "maintenance show worker-threads" $testname {
-	-wrap -re "^The number of worker threads GDB can use is unlimited \\(currently ($::decimal)\\)\\." {
+	-wrap -re "^The number of worker threads GDB can use is the default \\(currently ($::decimal)\\)\\." {
 	    set worker_threads $expect_out(1,string)
 	}
 	-wrap -re "^The number of worker threads GDB can use is ($::decimal)\\." {
