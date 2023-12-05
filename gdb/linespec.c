@@ -4281,6 +4281,10 @@ search_minsyms_for_name (struct collect_info *info,
 	      if (&item2 == &item)
 		continue;
 
+	      /* Ignore other trampoline symbols.  */
+	      if (item2.minsym->type () == mst_solib_trampoline)
+		continue;
+
 	      /* Trampoline symbols can only jump to exported
 		 symbols.  */
 	      if (msymbol_type_is_static (item2.minsym->type ()))
