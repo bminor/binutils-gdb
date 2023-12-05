@@ -270,6 +270,16 @@ rdseed (void)
 #endif
 }
 
+/* Test rdtscp support.  */
+
+void
+rdtscp (void)
+{
+#ifdef __x86_64__
+  __asm__ volatile ("rdtscp");
+#endif
+}
+
 /* Initialize arch-specific bits.  */
 
 static void
@@ -283,5 +293,6 @@ initialize (void)
 static testcase_ftype testcases[] =
 {
   rdrand,
-  rdseed
+  rdseed,
+  rdtscp
 };

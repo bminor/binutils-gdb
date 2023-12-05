@@ -7008,6 +7008,9 @@ Do you want to stop the program?"),
       goto no_support;
       break;
 
+    case 0x0f01f9:  /* rdtscp */
+      I386_RECORD_FULL_ARCH_LIST_ADD_REG (X86_RECORD_RECX_REGNUM);
+      [[fallthrough]];
     case 0x0f31:    /* rdtsc */
       I386_RECORD_FULL_ARCH_LIST_ADD_REG (X86_RECORD_REAX_REGNUM);
       I386_RECORD_FULL_ARCH_LIST_ADD_REG (X86_RECORD_REDX_REGNUM);
@@ -7117,6 +7120,11 @@ Do you want to stop the program?"),
     case 0x0f01:
       if (i386_record_modrm (&ir))
 	return -1;
+      if (ir.modrm == 0xf9)
+	{
+	  opcode = (opcode << 8) | 0xf9;
+	  goto reswitch;
+	}
       switch (ir.reg)
 	{
 	case 0:  /* sgdt */
