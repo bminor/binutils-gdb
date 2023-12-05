@@ -7864,9 +7864,9 @@ display_debug_addr (struct dwarf_section *section,
 
 	  if (header_size != 8 && header_size != 16)
 	    {
-	      warn (_("Corrupt %s section: expecting header size of 8 or 16, but found %zd instead\n"),
+	      warn (_("Corrupt %s section: expecting header size of 8 or 16, but found %zd instead"),
 		    section->name, header_size);
-	      return 0;
+	      break;
 	    }
 
 	  SAFE_BYTE_GET_AND_INC (length, curr_header, 4, entry);
@@ -7876,8 +7876,8 @@ display_debug_addr (struct dwarf_section *section,
 	      || length < (size_t) (entry - curr_header))
 	    {
 	      warn (_("Corrupt %s section: unit_length field of %#" PRIx64
-		      " is invalid\n"), section->name, length);
-	      return 0;
+		      " is invalid"), section->name, length);
+	      break;
 	    }
 	  end = curr_header + length;
 	  SAFE_BYTE_GET_AND_INC (version, curr_header, 2, entry);
@@ -7899,7 +7899,7 @@ display_debug_addr (struct dwarf_section *section,
 	{
 	  warn (_("Corrupt %s section: address size (%x) is wrong"),
 		section->name, address_size);
-	  return 0;
+	  break;
 	}
 
       while ((size_t) (end - entry) >= address_size)
@@ -7914,8 +7914,9 @@ display_debug_addr (struct dwarf_section *section,
     }
   printf ("\n");
 
+  free (debug_addr_info[count]);
   free (debug_addr_info);
-  return 1;
+  return i == count;
 }
 
 /* Display the .debug_str_offsets and .debug_str_offsets.dwo sections.  */
