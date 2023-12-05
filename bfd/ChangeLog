@@ -1,3 +1,10 @@
+2023-12-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 31106
+	* elfcode.h (elf_write_relocs): Do not convert a relocation
+	against a zero-value absolute symbol into a relocation without a
+	symbol if the symbol is being used for a complex relocation.
+
 2023-11-21  Nick Clifton  <nickc@redhat.com>
 
 	PR 31067
