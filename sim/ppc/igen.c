@@ -233,7 +233,7 @@ gen_semantics_c(insn_table *table,
     lf_printf(file, "  option_mpc860c0 = 0;\n");
     lf_printf(file, "  if (tree_find_property(root, \"/options/mpc860c0\"))\n");
     lf_printf(file, "    option_mpc860c0 = tree_find_integer_property(root, \"/options/mpc860c0\");\n");
-    lf_printf(file, "    option_mpc860c0 *= 4;   /* convert word count to byte count */\n");
+    lf_printf(file, "  option_mpc860c0 *= 4;   /* convert word count to byte count */\n");
     lf_printf(file, "}\n");
     lf_printf(file, "\n");
     if (generate_expanded_instructions)
