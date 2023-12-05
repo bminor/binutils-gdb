@@ -221,7 +221,7 @@ mem_put_byte (int address, unsigned char value)
 	static int old_led = -1;
 	static char *led_on[] =
 	  { "\033[31m O ", "\033[32m O ", "\033[34m O " };
-	static char *led_off[] = { "\033[0m · ", "\033[0m · ", "\033[0m · " };
+	static char *led_off[] = { "\033[0m Â· ", "\033[0m Â· ", "\033[0m Â· " };
 	int i;
 	if (old_led != value)
 	  {
