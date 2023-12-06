@@ -30552,7 +30552,7 @@ or a window description.  The windows will be displayed from top to
 bottom in the order listed.
 
 The names of the windows are the same as the ones given to the
-@code{focus} command (see below); additional, the @code{status}
+@code{focus} command (see below); additionally, the @code{status}
 window can be specified.  Note that, because it is of fixed height,
 the weight assigned to the status window is of no importance.  It is
 conventional to use @samp{0} here.
