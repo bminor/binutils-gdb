@@ -5827,7 +5827,6 @@ do_vec_xtl (sim_cpu *cpu)
       else if (INSTR (20, 20))
 	{
 	  int32_t v[4];
-	  int32_t v1,v2,v3,v4;
 
 	  shift = INSTR (19, 16);
 	  bias *= 2;
