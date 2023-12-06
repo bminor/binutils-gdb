@@ -15824,7 +15824,7 @@ fi
 build_warnings="-Wall -Wpointer-arith
 -Wno-unused -Wunused-value -Wunused-function
 -Wno-switch -Wno-char-subscripts
--Wempty-body -Wunused-but-set-parameter
+-Wempty-body -Wunused-but-set-parameter -Wunused-but-set-variable
 -Wno-sign-compare -Wno-error=maybe-uninitialized
 -Wno-error=deprecated-register
 -Wmissing-declarations
