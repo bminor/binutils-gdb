@@ -71,7 +71,7 @@ if [prepare_for_testing "failed to prepare" $testfile "${asm_file} ${srcfile}" \
 set re \
     [list \
 	 "warning:" \
-	 "Section .debug_names has non-ascending CU table," \
+	 "Section .debug_names has incorrect entry in CU table," \
 	 "ignoring .debug_names."]
 set re [join $re]
 gdb_assert {[regexp $re $gdb_file_cmd_msg]} "warning"

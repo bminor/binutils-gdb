@@ -1048,8 +1048,6 @@ static void prepare_one_comp_unit (struct dwarf2_cu *cu,
 static struct type *set_die_type (struct die_info *, struct type *,
 				  struct dwarf2_cu *, bool = false);
 
-static void create_all_units (dwarf2_per_objfile *per_objfile);
-
 static void load_full_comp_unit (dwarf2_per_cu_data *per_cu,
 				 dwarf2_per_objfile *per_objfile,
 				 dwarf2_cu *existing_cu,
@@ -5109,11 +5107,10 @@ finalize_all_units (dwarf2_per_bfd *per_bfd)
   per_bfd->all_type_units = tmp.slice (nr_cus, nr_tus);
 }
 
-/* Create a list of all compilation units in OBJFILE.
-   This is only done for -readnow and building partial symtabs.  */
+/* See read.h.  */
 
-static void
-create_all_units (dwarf2_per_objfile *per_objfile)
+void
+create_all_units (dwarf2_per_objfile *per_objfile, bool pre_read_p)
 {
   htab_up types_htab;
   gdb_assert (per_objfile->per_bfd->all_units.empty ());
@@ -5129,12 +5126,15 @@ create_all_units (dwarf2_per_objfile *per_objfile)
   dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
   if (dwz != NULL)
     {
-      /* Pre-read the sections we'll need to construct an index.  */
-      struct objfile *objfile = per_objfile->objfile;
-      dwz->abbrev.read (objfile);
-      dwz->info.read (objfile);
-      dwz->str.read (objfile);
-      dwz->line.read (objfile);
+      if (pre_read_p)
+	{
+	  /* Pre-read the sections we'll need to construct an index.  */
+	  struct objfile *objfile = per_objfile->objfile;
+	  dwz->abbrev.read (objfile);
+	  dwz->info.read (objfile);
+	  dwz->str.read (objfile);
+	  dwz->line.read (objfile);
+	}
       read_comp_units_from_section (per_objfile, &dwz->info, &dwz->abbrev, 1,
 				    types_htab, rcuh_kind::COMPILE);
 

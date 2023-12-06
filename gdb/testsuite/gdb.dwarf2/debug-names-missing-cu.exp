@@ -67,7 +67,7 @@ if [prepare_for_testing "failed to prepare" $testfile "${asm_file} ${srcfile}" \
 
 # Verify that .debug_names section is not ignored.
 set index [have_index $binfile]
-gdb_assert { [string equal $index "debug_names"] } ".debug_names used"
+gdb_assert { [string equal $index ""] } ".debug_names not used"
 
 # Verify that initially no symtab is expanded.
 gdb_test_no_output "maint info symtabs"

@@ -108,52 +108,46 @@ mapped_debug_names::make_quick_functions () const
   return quick_symbol_functions_up (new dwarf2_debug_names_index);
 }
 
-/* Create the signatured type hash table from .debug_names.  */
+/* Check the signatured type hash table from .debug_names.  */
 
-static void
-create_signatured_type_table_from_debug_names
+static bool
+check_signatured_type_table_from_debug_names
   (dwarf2_per_objfile *per_objfile,
    const mapped_debug_names &map,
-   struct dwarf2_section_info *section,
-   struct dwarf2_section_info *abbrev_section)
+   struct dwarf2_section_info *section)
 {
   struct objfile *objfile = per_objfile->objfile;
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
+  int nr_cus = per_bfd->all_comp_units.size ();
+  int nr_cus_tus = per_bfd->all_units.size ();
 
   section->read (objfile);
-  abbrev_section->read (objfile);
 
-  htab_up sig_types_hash = allocate_signatured_type_table ();
-
+  uint32_t j = nr_cus;
   for (uint32_t i = 0; i < map.tu_count; ++i)
     {
-      signatured_type_up sig_type;
-      void **slot;
-
       sect_offset sect_off
 	= (sect_offset) (extract_unsigned_integer
 			 (map.tu_table_reordered + i * map.offset_size,
 			  map.offset_size,
 			  map.dwarf5_byte_order));
 
-      comp_unit_head cu_header;
-      read_and_check_comp_unit_head (per_objfile, &cu_header, section,
-				     abbrev_section,
-				     section->buffer + to_underlying (sect_off),
-				     rcuh_kind::TYPE);
-
-      sig_type = per_objfile->per_bfd->allocate_signatured_type
-	(cu_header.signature);
-      sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
-      sig_type->section = section;
-      sig_type->sect_off = sect_off;
-
-      slot = htab_find_slot (sig_types_hash.get (), sig_type.get (), INSERT);
-      *slot = sig_type.get ();
-
-      per_objfile->per_bfd->all_units.emplace_back (sig_type.release ());
+      bool found = false;
+      for (; j < nr_cus_tus; j++)
+	if (per_bfd->get_cu (j)->sect_off == sect_off)
+	  {
+	    found = true;
+	    break;
+	  }
+      if (!found)
+	{
+	  warning (_("Section .debug_names has incorrect entry in TU table,"
+		     " ignoring .debug_names."));
+	  return false;
+	}
+      per_bfd->all_comp_units_index_tus.push_back (per_bfd->get_cu (j));
     }
-
-  per_objfile->per_bfd->signatured_types = std::move (sig_types_hash);
+  return true;
 }
 
 /* Read the address map data from DWARF-5 .debug_aranges, and use it to
@@ -363,17 +357,20 @@ read_debug_names_from_section (struct objfile *objfile,
   return true;
 }
 
-/* A helper for create_cus_from_debug_names that handles the MAP's CU
+/* A helper for check_cus_from_debug_names that handles the MAP's CU
    list.  */
 
 static bool
-create_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
-				  const mapped_debug_names &map,
-				  dwarf2_section_info &section,
-				  bool is_dwz)
+check_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
+				 const mapped_debug_names &map,
+				 dwarf2_section_info &section,
+				 bool is_dwz)
 {
+  int nr_cus = per_bfd->all_comp_units.size ();
+
   if (!map.augmentation_is_gdb)
     {
+      uint32_t j = 0;
       for (uint32_t i = 0; i < map.cu_count; ++i)
 	{
 	  sect_offset sect_off
@@ -381,56 +378,44 @@ create_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 			     (map.cu_table_reordered + i * map.offset_size,
 			      map.offset_size,
 			      map.dwarf5_byte_order));
-	  /* We don't know the length of the CU, because the CU list in a
-	     .debug_names index can be incomplete, so we can't use the start
-	     of the next CU as end of this CU.  We create the CUs here with
-	     length 0, and in cutu_reader::cutu_reader we'll fill in the
-	     actual length.  */
-	  dwarf2_per_cu_data_up per_cu
-	    = create_cu_from_index_list (per_bfd, &section, is_dwz,
-					 sect_off, 0);
-	  per_bfd->all_units.push_back (std::move (per_cu));
+	  bool found = false;
+	  for (; j < nr_cus; j++)
+	    if (per_bfd->get_cu (j)->sect_off == sect_off)
+	      {
+		found = true;
+		break;
+	      }
+	  if (!found)
+	    {
+	      warning (_("Section .debug_names has incorrect entry in CU table,"
+			 " ignoring .debug_names."));
+	      return false;
+	    }
+	  per_bfd->all_comp_units_index_cus.push_back (per_bfd->get_cu (j));
 	}
       return true;
     }
 
-  sect_offset sect_off_prev;
-  for (uint32_t i = 0; i <= map.cu_count; ++i)
+  if (map.cu_count != nr_cus)
     {
-      sect_offset sect_off_next;
-      if (i < map.cu_count)
+      warning (_("Section .debug_names has incorrect number of CUs in CU table,"
+		 " ignoring .debug_names."));
+      return false;
+    }
+
+  for (uint32_t i = 0; i < map.cu_count; ++i)
+    {
+      sect_offset sect_off
+	= (sect_offset) (extract_unsigned_integer
+			 (map.cu_table_reordered + i * map.offset_size,
+			  map.offset_size,
+			  map.dwarf5_byte_order));
+      if (sect_off != per_bfd->get_cu (i)->sect_off)
 	{
-	  sect_off_next
-	    = (sect_offset) (extract_unsigned_integer
-			     (map.cu_table_reordered + i * map.offset_size,
-			      map.offset_size,
-			      map.dwarf5_byte_order));
+	  warning (_("Section .debug_names has incorrect entry in CU table,"
+		     " ignoring .debug_names."));
+	  return false;
 	}
-      else
-	sect_off_next = (sect_offset) section.size;
-      if (i >= 1)
-	{
-	  if (sect_off_next == sect_off_prev)
-	    {
-	      warning (_("Section .debug_names has duplicate entry in CU table,"
-			 " ignoring .debug_names."));
-	      return false;
-	    }
-	  if (sect_off_next < sect_off_prev)
-	    {
-	      warning (_("Section .debug_names has non-ascending CU table,"
-			 " ignoring .debug_names."));
-	      return false;
-	    }
-	  /* Note: we're not using length = sect_off_next - sect_off_prev,
-	     to gracefully handle an incomplete CU list.  */
-	  const ULONGEST length = 0;
-	  dwarf2_per_cu_data_up per_cu
-	    = create_cu_from_index_list (per_bfd, &section, is_dwz,
-					 sect_off_prev, length);
-	  per_bfd->all_units.push_back (std::move (per_cu));
-	}
-      sect_off_prev = sect_off_next;
     }
 
   return true;
@@ -440,23 +425,20 @@ create_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
    the CU objects for this dwarf2_per_objfile.  */
 
 static bool
-create_cus_from_debug_names (dwarf2_per_bfd *per_bfd,
-			     const mapped_debug_names &map,
-			     const mapped_debug_names &dwz_map)
+check_cus_from_debug_names (dwarf2_per_bfd *per_bfd,
+			    const mapped_debug_names &map,
+			    const mapped_debug_names &dwz_map)
 {
-  gdb_assert (per_bfd->all_units.empty ());
-  per_bfd->all_units.reserve (map.cu_count + dwz_map.cu_count);
-
-  if (!create_cus_from_debug_names_list (per_bfd, map, per_bfd->info,
-					 false /* is_dwz */))
+  if (!check_cus_from_debug_names_list (per_bfd, map, per_bfd->info,
+					false /* is_dwz */))
     return false;
 
   if (dwz_map.cu_count == 0)
     return true;
 
   dwz_file *dwz = dwarf2_get_dwz_file (per_bfd);
-  return create_cus_from_debug_names_list (per_bfd, dwz_map, dwz->info,
-					   true /* is_dwz */);
+  return check_cus_from_debug_names_list (per_bfd, dwz_map, dwz->info,
+					  true /* is_dwz */);
 }
 
 /* See read-debug-names.h.  */
@@ -492,7 +474,8 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 	}
     }
 
-  if (!create_cus_from_debug_names (per_bfd, *map, dwz_map))
+  create_all_units (per_objfile, false);
+  if (!check_cus_from_debug_names (per_bfd, *map, dwz_map))
     {
       per_bfd->all_units.clear ();
       return false;
@@ -513,11 +496,13 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 	   ? &per_bfd->types[0]
 	   : &per_bfd->info);
 
-      create_signatured_type_table_from_debug_names
-	(per_objfile, *map, section, &per_bfd->abbrev);
+      if (!check_signatured_type_table_from_debug_names
+	     (per_objfile, *map, section))
+	{
+	  per_bfd->all_units.clear ();
+	  return false;
+	}
     }
-
-  finalize_all_units (per_bfd);
 
   create_addrmap_from_aranges (per_objfile, &per_bfd->debug_aranges);
 
@@ -791,7 +776,7 @@ dw2_debug_names_iterator::next ()
 		continue;
 	      }
 	  }
-	  per_cu = per_bfd->get_cu (ull);
+	  per_cu = per_bfd->get_index_cu (ull);
 	  break;
 	case DW_IDX_type_unit:
 	  /* Don't crash on bad data.  */
@@ -804,15 +789,14 @@ dw2_debug_names_iterator::next ()
 	      continue;
 	    }
 	  {
-	    int nr_cus = per_bfd->all_comp_units.size ();
-	    per_cu = per_bfd->get_cu (nr_cus + ull);
+	    per_cu = per_bfd->get_index_tu (ull);
 	  }
 	  break;
 	case DW_IDX_die_offset:
 	  /* In a per-CU index (as opposed to a per-module index), index
 	     entries without CU attribute implicitly refer to the single CU.  */
 	  if (per_cu == NULL)
-	    per_cu = per_bfd->get_cu (0);
+	    per_cu = per_bfd->get_index_cu (0);
 	  break;
 	case DW_IDX_GNU_internal:
 	  if (!m_map.augmentation_is_gdb)
