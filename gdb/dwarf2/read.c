@@ -3267,6 +3267,10 @@ dwarf2_initialize_objfile (struct objfile *objfile,
       global_index_cache.miss ();
       objfile->qf.push_front (make_cooked_index_funcs (per_objfile));
     }
+
+  if (dwarf_synchronous && per_bfd->index_table != nullptr)
+    per_bfd->index_table->wait_completely ();
+
   return true;
 }
 
@@ -16919,9 +16923,6 @@ make_cooked_index_funcs (dwarf2_per_objfile *per_objfile)
   /* Don't start reading until after 'index_table' is set.  This
      avoids races.  */
   idx->start_reading ();
-
-  if (dwarf_synchronous)
-    idx->wait_completely ();
 
   return quick_symbol_functions_up (new cooked_index_functions);
 }
