@@ -2521,7 +2521,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  else
 	    {
 	      msg = ("Mismatched R_RISCV_SET_ULEB128, it must be paired with"
-		     "and applied before R_RISCV_SUB_ULEB128");
+		     " and applied before R_RISCV_SUB_ULEB128");
 	      r = bfd_reloc_dangerous;
 	    }
 	  break;
@@ -2537,7 +2537,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  else
 	    {
 	      msg = ("Mismatched R_RISCV_SUB_ULEB128, it must be paired with"
-		     "and applied after R_RISCV_SET_ULEB128");
+		     " and applied after R_RISCV_SET_ULEB128");
 	      r = bfd_reloc_dangerous;
 	    }
 	  break;
