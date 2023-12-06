@@ -45,7 +45,7 @@ Disassembly of section .text_high:
  f000014:	d503201f 	nop
 
 000000000f000018 <__foo_c64a64_veneer>:
- f000018:	90f88090 	adrp	c16, 100010000 <___veneer\+0xf100ffd8>
+ f000018:	90f88090 	adrp	c16, 10000 <foo>
  f00001c:	02000210 	add	c16, c16, #0x0
  f000020:	c2c21200 	br	c16
  f000024:	00000000 	.*
