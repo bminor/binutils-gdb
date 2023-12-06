@@ -734,9 +734,9 @@ win32_process_target::detach (process_info *process)
     return -1;
 
   DebugSetProcessKillOnExit (FALSE);
+  win32_clear_inferiors ();
   remove_process (process);
 
-  win32_clear_inferiors ();
   return 0;
 }
 
