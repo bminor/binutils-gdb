@@ -56,8 +56,7 @@ static void engine_run_n (SIM_DESC, int, int, int, int);
 static int
 cgen_get_fast_p (SIM_DESC sd)
 {
-  int i, c;
-  int run_fast_p = 1;
+  int c;
 
   for (c = 0; c < MAX_NR_PROCESSORS; ++c)
     {

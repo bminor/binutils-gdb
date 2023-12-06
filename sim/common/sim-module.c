@@ -133,8 +133,6 @@ sim_module_install_list (SIM_DESC sd, MODULE_INSTALL_FN * const *modules,
 SIM_RC
 sim_module_install (SIM_DESC sd)
 {
-  MODULE_INSTALL_FN * const *modp;
-
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   SIM_ASSERT (STATE_MODULES (sd) == NULL);
 

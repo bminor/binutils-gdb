@@ -169,8 +169,6 @@ static SIM_RC
 schedule_watchpoint (SIM_DESC sd,
 		     sim_watch_point *point)
 {
-  sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
-
   switch (point->type)
     {
     case pc_watchpoint:

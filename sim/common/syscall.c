@@ -213,9 +213,7 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
 	/* Buffer size.  */
 	int bufsize = sc->arg2;
 	int written = 0;
-	/* Q is the target address of where all the strings go.  */
-	TADDR q;
-	int i, argc, envc, len, ret;
+	int argc, envc, len, ret;
 	char **argv = cb->argv;
 	char **envp = cb->envp;
 
