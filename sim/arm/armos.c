@@ -99,7 +99,6 @@ ARMul_OSInit (ARMul_State * state)
 #ifndef NOOS
 #ifndef VALIDATE
   ARMword instr, i, j;
-  struct OSblock *OSptr = (struct OSblock *) state->OSptr;
 
   if (state->OSptr == NULL)
     {
@@ -111,7 +110,6 @@ ARMul_OSInit (ARMul_State * state)
 	}
     }
 
-  OSptr = (struct OSblock *) state->OSptr;
   state->Reg[13] = ADDRSUPERSTACK;			/* Set up a stack for the current mode...  */
   ARMul_SetReg (state, SVC32MODE,   13, ADDRSUPERSTACK);/* ...and for supervisor mode...  */
   ARMul_SetReg (state, ABORT32MODE, 13, ADDRSUPERSTACK);/* ...and for abort 32 mode...  */
