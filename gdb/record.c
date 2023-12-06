@@ -248,7 +248,6 @@ record_check_stopped_by_breakpoint (const address_space *aspace,
       return 1;
     }
 
-  *reason = TARGET_STOPPED_BY_NO_REASON;
   return 0;
 }
 
