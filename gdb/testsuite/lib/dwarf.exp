@@ -958,13 +958,22 @@ namespace eval Dwarf {
 	_handle_macro_at_range $attr_value
     }
 
+    # Return the next available abbrev number in the current CU's abbrev
+    # table.
+    proc _get_abbrev_num {} {
+	variable _abbrev_num
+	set res $_abbrev_num
+	incr _abbrev_num
+	return $res
+    }
+
     proc _handle_DW_TAG {tag_name {attrs {}} {children {}}} {
 	variable _abbrev_section
 	variable _abbrev_num
 	variable _constants
 
 	set has_children [expr {[string length $children] > 0}]
-	set my_abbrev [incr _abbrev_num]
+	set my_abbrev [_get_abbrev_num]
 
 	# We somewhat wastefully emit a new abbrev entry for each tag.
 	# There's no reason for this other than laziness.
