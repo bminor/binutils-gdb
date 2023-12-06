@@ -210,7 +210,10 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
 			      " \"%s\" in dll \"%s\", pointing to \"%s\"\n"),
 		sym_name, dll_name, forward_qualified_name.c_str ());
 
-  unrelocated_addr vma = msymbol.minsym->unrelocated_address ();
+  /* Calculate VMA as if it were relative to DLL_NAME/OBJFILE, even though
+     it actually points inside another dll (FORWARD_DLL_NAME).  */
+  unrelocated_addr vma = unrelocated_addr (msymbol.value_address ()
+					   - objfile->text_section_offset ());
   msymtype = msymbol.minsym->type ();
   section = msymbol.minsym->section_index ();
 
