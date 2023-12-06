@@ -202,16 +202,18 @@ fmtconst_str (const_forms_t cf, bs32 x, bu32 pc)
 
   if (constant_formats[cf].reloc)
     {
+#if 0
       bu32 ea = (((constant_formats[cf].pcrel ? SIGNEXTEND (x, constant_formats[cf].nbits)
 		      : x) + constant_formats[cf].offset) << constant_formats[cf].scale);
       if (constant_formats[cf].pcrel)
 	ea += pc;
-     /*if (outf->symbol_at_address_func (ea, outf) || !constant_formats[cf].exact)
+      if (outf->symbol_at_address_func (ea, outf) || !constant_formats[cf].exact)
        {
 	  outf->print_address_func (ea, outf);
 	  return "";
        }
-     else*/
+      else
+#endif
        {
 	  sprintf (buf, "%#x", x);
 	  return buf;
@@ -1592,7 +1594,8 @@ decode_macfunc (SIM_CPU *cpu, int which, int op, int h0, int h1, int src0,
 
   if (op != 3)
     {
-      bu8 sgn0 = (acc >> 31) & 1;
+      /* TODO: Figure out how the 32-bit sign is used.  */
+      ATTRIBUTE_UNUSED bu8 sgn0 = (acc >> 31) & 1;
       bu8 sgn40 = (acc >> 39) & 1;
       bu40 nosat_acc;
 

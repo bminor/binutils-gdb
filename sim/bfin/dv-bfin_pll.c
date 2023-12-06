@@ -56,7 +56,6 @@ bfin_pll_io_write_buffer (struct hw *me, const void *source,
   bu32 mmr_off;
   bu32 value;
   bu16 *value16p;
-  bu32 *value32p;
   void *valuep;
 
   /* Invalid access mode is higher priority than missing register.  */
@@ -71,7 +70,6 @@ bfin_pll_io_write_buffer (struct hw *me, const void *source,
   mmr_off = addr - pll->base;
   valuep = (void *)((uintptr_t)pll + mmr_base() + mmr_off);
   value16p = valuep;
-  value32p = valuep;
 
   HW_TRACE_WRITE ();
 

@@ -1011,7 +1011,6 @@ bfin_user_init (SIM_DESC sd, SIM_CPU *cpu, struct bfd *abfd,
   if (auxvt)
     {
 # define AT_PUSH(at, val) \
-  auxvt_size += 8; \
   sp -= 4; \
   auxvt = (val); \
   sim_write (sd, sp, &auxvt, 4); \
@@ -1020,7 +1019,6 @@ bfin_user_init (SIM_DESC sd, SIM_CPU *cpu, struct bfd *abfd,
   sim_write (sd, sp, &auxvt, 4)
       unsigned int egid = getegid (), gid = getgid ();
       unsigned int euid = geteuid (), uid = getuid ();
-      bu32 auxvt_size = 0;
       AT_PUSH (AT_NULL, 0);
       AT_PUSH (AT_SECURE, egid != gid || euid != uid);
       AT_PUSH (AT_EGID, egid);

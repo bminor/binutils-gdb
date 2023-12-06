@@ -539,10 +539,7 @@ bfin_emac_tap_init (struct hw *me)
 {
 #if WITH_TUN
   struct bfin_emac *emac = hw_data (me);
-  const hw_unit *unit;
   int flags;
-
-  unit = hw_unit_address (me);
 
   emac->tap = open ("/dev/net/tun", O_RDWR);
   if (emac->tap == -1)

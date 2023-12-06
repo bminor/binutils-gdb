@@ -451,7 +451,7 @@ _mmu_check_addr (SIM_CPU *cpu, bu32 addr, bool write, bool inst, int size)
 {
   SIM_DESC sd = CPU_STATE (cpu);
   struct bfin_mmu *mmu;
-  bu32 *fault_status, *fault_addr, *mem_control, *cplb_addr, *cplb_data;
+  bu32 *mem_control, *cplb_addr, *cplb_data;
   bu32 faults;
   bool supv, do_excp, dag1;
   int i, hits;
@@ -469,8 +469,6 @@ _mmu_check_addr (SIM_CPU *cpu, bu32 addr, bool write, bool inst, int size)
     }
 
   mmu = MMU_STATE (cpu);
-  fault_status = inst ? &mmu->icplb_fault_status : &mmu->dcplb_fault_status;
-  fault_addr = inst ? &mmu->icplb_fault_addr : &mmu->dcplb_fault_addr;
   mem_control = inst ? &mmu->imem_control : &mmu->dmem_control;
   cplb_addr = inst ? &mmu->icplb_addr[0] : &mmu->dcplb_addr[0];
   cplb_data = inst ? &mmu->icplb_data[0] : &mmu->dcplb_data[0];
