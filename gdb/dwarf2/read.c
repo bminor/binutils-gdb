@@ -3190,8 +3190,7 @@ get_gdb_index_contents_from_cache_dwz (objfile *obj, dwz_file *dwz)
   return global_index_cache.lookup_gdb_index (build_id, &dwz->index_cache_res);
 }
 
-static quick_symbol_functions_up make_cooked_index_funcs
-     (dwarf2_per_objfile *);
+static void start_debug_info_reader (dwarf2_per_objfile *);
 
 /* See dwarf2/public.h.  */
 
@@ -3236,23 +3235,13 @@ dwarf2_initialize_objfile (struct objfile *objfile,
   /* Was a GDB index already read when we processed an objfile sharing
      PER_BFD?  */
   else if (per_bfd->index_table != nullptr)
-    {
-      dwarf_read_debug_printf ("re-using symbols");
-      objfile->qf.push_front (per_bfd->index_table->make_quick_functions ());
-    }
+    dwarf_read_debug_printf ("re-using symbols");
   else if (dwarf2_read_debug_names (per_objfile))
-    {
-      dwarf_read_debug_printf ("found debug names");
-      objfile->qf.push_front
-	(per_bfd->index_table->make_quick_functions ());
-    }
+    dwarf_read_debug_printf ("found debug names");
   else if (dwarf2_read_gdb_index (per_objfile,
 				  get_gdb_index_contents_from_section<struct dwarf2_per_bfd>,
 				  get_gdb_index_contents_from_section<dwz_file>))
-    {
-      dwarf_read_debug_printf ("found gdb index from file");
-      objfile->qf.push_front (per_bfd->index_table->make_quick_functions ());
-    }
+    dwarf_read_debug_printf ("found gdb index from file");
   /* ... otherwise, try to find the index in the index cache.  */
   else if (dwarf2_read_gdb_index (per_objfile,
 			     get_gdb_index_contents_from_cache,
@@ -3260,16 +3249,19 @@ dwarf2_initialize_objfile (struct objfile *objfile,
     {
       dwarf_read_debug_printf ("found gdb index from cache");
       global_index_cache.hit ();
-      objfile->qf.push_front (per_bfd->index_table->make_quick_functions ());
     }
   else
     {
       global_index_cache.miss ();
-      objfile->qf.push_front (make_cooked_index_funcs (per_objfile));
+      start_debug_info_reader (per_objfile);
     }
 
-  if (dwarf_synchronous && per_bfd->index_table != nullptr)
-    per_bfd->index_table->wait_completely ();
+  if (per_bfd->index_table != nullptr)
+    {
+      if (dwarf_synchronous)
+	per_bfd->index_table->wait_completely ();
+      objfile->qf.push_front (per_bfd->index_table->make_quick_functions ());
+    }
 
   return true;
 }
@@ -16910,10 +16902,10 @@ cooked_index_functions::expand_symtabs_matching
   return true;
 }
 
-/* Return a new cooked_index_functions object.  */
+/* Start reading .debug_info using the indexer.  */
 
-static quick_symbol_functions_up
-make_cooked_index_funcs (dwarf2_per_objfile *per_objfile)
+static void
+start_debug_info_reader (dwarf2_per_objfile *per_objfile)
 {
   /* Set the index table early so that sharing works even while
      scanning; and then start the scanning.  */
@@ -16923,8 +16915,6 @@ make_cooked_index_funcs (dwarf2_per_objfile *per_objfile)
   /* Don't start reading until after 'index_table' is set.  This
      avoids races.  */
   idx->start_reading ();
-
-  return quick_symbol_functions_up (new cooked_index_functions);
 }
 
 quick_symbol_functions_up
