@@ -36,16 +36,34 @@ fi
 
 dnl The options we'll try to enable.
 dnl NB: Kept somewhat in sync with gdbsupport/warnings.m4.
-build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith
+build_warnings="-Wall -Wpointer-arith
 -Wno-unused -Wunused-value -Wunused-function
 -Wno-switch -Wno-char-subscripts
 -Wempty-body -Wunused-but-set-parameter
--Wno-error=maybe-uninitialized
+-Wno-sign-compare -Wno-error=maybe-uninitialized
+dnl C++ -Wno-mismatched-tags
+-Wno-error=deprecated-register
+dnl C++ -Wsuggest-override
+dnl C++ -Wdeprecated-copy
+dnl C++ -Wdeprecated-copy-dtor
+dnl C++ -Wredundant-move
 -Wmissing-declarations
+dnl C++ -Wstrict-null-sentinel
+"
+dnl Some extra warnings we use in the sim.
+build_warnings="$build_warnings
+-Wdeclaration-after-statement
+-Wdeprecated-non-prototype
+-Wimplicit-function-declaration
+-Wimplicit-int
+-Wincompatible-function-pointer-types
+-Wincompatible-pointer-types
+-Wmisleading-indentation
+-Wmissing-parameter-type
 -Wmissing-prototypes
--Wdeclaration-after-statement -Wmissing-parameter-type
+-Wold-style-declaration
+-Wold-style-definition
 -Wpointer-sign
--Wold-style-declaration -Wold-style-definition
 "
 
 case "${host}" in
