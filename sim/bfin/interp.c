@@ -103,7 +103,6 @@ void
 bfin_syscall (SIM_CPU *cpu)
 {
   SIM_DESC sd = CPU_STATE (cpu);
-  char * const *argv = (void *)STATE_PROG_ARGV (sd);
   host_callback *cb = STATE_CALLBACK (sd);
   bu32 args[6];
   CB_SYSCALL sc;
