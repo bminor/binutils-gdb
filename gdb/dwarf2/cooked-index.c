@@ -616,6 +616,12 @@ cooked_index::get_main () const
   return best_entry;
 }
 
+quick_symbol_functions_up
+cooked_index::make_quick_functions () const
+{
+  return quick_symbol_functions_up (new cooked_index_functions);
+}
+
 /* See cooked-index.h.  */
 
 void

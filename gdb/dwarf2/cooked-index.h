@@ -737,4 +737,98 @@ private:
   dwarf2_per_bfd *m_per_bfd;
 };
 
+/* An implementation of quick_symbol_functions for the cooked DWARF
+   index.  */
+
+struct cooked_index_functions : public dwarf2_base_index_functions
+{
+  cooked_index *wait (struct objfile *objfile, bool allow_quit)
+  {
+    dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+    cooked_index *table
+      = (gdb::checked_static_cast<cooked_index *>
+	 (per_objfile->per_bfd->index_table.get ()));
+    table->wait (cooked_state::MAIN_AVAILABLE, allow_quit);
+    return table;
+  }
+
+  dwarf2_per_cu_data *find_per_cu (dwarf2_per_bfd *per_bfd,
+				   unrelocated_addr adjusted_pc) override;
+
+  struct compunit_symtab *find_compunit_symtab_by_address
+    (struct objfile *objfile, CORE_ADDR address) override;
+
+  bool has_unexpanded_symtabs (struct objfile *objfile) override
+  {
+    wait (objfile, true);
+    return dwarf2_base_index_functions::has_unexpanded_symtabs (objfile);
+  }
+
+  struct symtab *find_last_source_symtab (struct objfile *objfile) override
+  {
+    wait (objfile, true);
+    return dwarf2_base_index_functions::find_last_source_symtab (objfile);
+  }
+
+  void forget_cached_source_info (struct objfile *objfile) override
+  {
+    wait (objfile, true);
+    dwarf2_base_index_functions::forget_cached_source_info (objfile);
+  }
+
+  void print_stats (struct objfile *objfile, bool print_bcache) override
+  {
+    wait (objfile, true);
+    dwarf2_base_index_functions::print_stats (objfile, print_bcache);
+  }
+
+  void dump (struct objfile *objfile) override
+  {
+    cooked_index *index = wait (objfile, true);
+    gdb_printf ("Cooked index in use:\n");
+    gdb_printf ("\n");
+    index->dump (objfile->arch ());
+  }
+
+  void expand_all_symtabs (struct objfile *objfile) override
+  {
+    wait (objfile, true);
+    dwarf2_base_index_functions::expand_all_symtabs (objfile);
+  }
+
+  bool expand_symtabs_matching
+    (struct objfile *objfile,
+     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     const lookup_name_info *lookup_name,
+     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     block_search_flags search_flags,
+     domain_enum domain,
+     enum search_domain kind) override;
+
+  struct compunit_symtab *find_pc_sect_compunit_symtab
+    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
+     CORE_ADDR pc, struct obj_section *section, int warn_if_readin) override
+  {
+    wait (objfile, true);
+    return (dwarf2_base_index_functions::find_pc_sect_compunit_symtab
+	    (objfile, msymbol, pc, section, warn_if_readin));
+  }
+
+  void map_symbol_filenames
+       (struct objfile *objfile,
+	gdb::function_view<symbol_filename_ftype> fun,
+	bool need_fullname) override
+  {
+    wait (objfile, true);
+    return (dwarf2_base_index_functions::map_symbol_filenames
+	    (objfile, fun, need_fullname));
+  }
+
+  void compute_main_name (struct objfile *objfile) override
+  {
+    wait (objfile, false);
+  }
+};
+
 #endif /* GDB_DWARF2_COOKED_INDEX_H */
