@@ -37,7 +37,7 @@ fi
 dnl The options we'll try to enable.
 dnl NB: Kept somewhat in sync with gdbsupport/warnings.m4.
 build_warnings="-Wall -Wpointer-arith
--Wno-unused -Wunused-value -Wunused-function
+-Wno-unused -Wunused-value -Wunused-variable -Wunused-function
 -Wno-switch -Wno-char-subscripts
 -Wempty-body -Wunused-but-set-parameter -Wunused-but-set-variable
 -Wno-sign-compare -Wno-error=maybe-uninitialized
