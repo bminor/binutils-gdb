@@ -56,13 +56,11 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
       if (except.reason == RETURN_QUIT)
 	return NULL;
 
-      /* The thread state is nulled during gdbpy_readline_wrapper,
-	 with the original value saved in the following undocumented
-	 variable (see Python's Parser/myreadline.c and
-	 Modules/readline.c).  */
-      PyEval_RestoreThread (_PyOS_ReadlineTState);
+
+      /* This readline callback is called without the GIL held.  */
+      gdbpy_gil gil;
+
       gdbpy_convert_exception (except);
-      PyEval_SaveThread ();
       return NULL;
     }
 
