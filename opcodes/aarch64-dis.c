@@ -676,6 +676,7 @@ aarch64_ext_imm (const aarch64_operand *self, aarch64_opnd_info *info,
 		 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   uint64_t imm;
+  unsigned width_ofs = 1;
 
   imm = extract_all_fields (self, code);
 
@@ -688,10 +689,11 @@ aarch64_ext_imm (const aarch64_operand *self, aarch64_opnd_info *info,
 	return FALSE;
 
       imm &= (1UL << 20) - 1;
+      width_ofs++;
     }
 
   if (operand_need_sign_extension (self))
-    imm = sign_extend (imm, get_operand_fields_width (self) - 1);
+    imm = sign_extend (imm, get_operand_fields_width (self) - width_ofs);
 
   if (operand_need_shift_by_two (self))
     imm <<= 2;
