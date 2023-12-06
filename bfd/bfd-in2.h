@@ -1089,6 +1089,8 @@ const char *bfd_generic_group_name (bfd *, const asection *sec);
 
 bool bfd_generic_discard_group (bfd *abfd, asection *group);
 
+bool bfd_section_size_insane (bfd *abfd, asection *sec);
+
 /* Extracted from syms.c.  */
 typedef struct bfd_symbol
 {

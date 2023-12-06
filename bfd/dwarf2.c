@@ -716,7 +716,7 @@ read_section (bfd *abfd,
 	  return false;
 	}
 
-      if (_bfd_section_size_insane (abfd, msec))
+      if (bfd_section_size_insane (abfd, msec))
 	{
 	  /* PR 26946 */
 	  _bfd_error_handler (_("DWARF error: section %s is too big"),
@@ -5520,7 +5520,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	   msec;
 	   msec = find_debug_info (debug_bfd, debug_sections, msec))
 	{
-	  if (_bfd_section_size_insane (debug_bfd, msec))
+	  if (bfd_section_size_insane (debug_bfd, msec))
 	    goto restore_vma;
 	  /* Catch PR25070 testcase overflowing size calculation here.  */
 	  if (total_size + msec->size < total_size)

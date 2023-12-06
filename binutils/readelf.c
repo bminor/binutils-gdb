@@ -15902,7 +15902,7 @@ uncompress_section_contents (bool              is_zstd,
   z_stream strm;
   int rc;
 
-  /* Similar to _bfd_section_size_insane() in the BFD library we expect an
+  /* Similar to bfd_section_size_insane() in the BFD library we expect an
      upper limit of ~10x compression.  Any compression larger than that is
      thought to be due to fuzzing of the compression header.  */
   if (uncompressed_size > file_size * 10)

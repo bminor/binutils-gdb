@@ -739,7 +739,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 
   if (p == NULL
       && compress_status != COMPRESS_SECTION_DONE
-      && _bfd_section_size_insane (abfd, sec))
+      && bfd_section_size_insane (abfd, sec))
     {
       /* PR 24708: Avoid attempts to allocate a ridiculous amount
 	 of memory.  */
@@ -1070,7 +1070,7 @@ bfd_init_section_compress_status (bfd *abfd, sec_ptr sec)
       || sec->rawsize != 0
       || sec->contents != NULL
       || sec->compress_status != COMPRESS_SECTION_NONE
-      || _bfd_section_size_insane (abfd, sec))
+      || bfd_section_size_insane (abfd, sec))
     {
       bfd_set_error (bfd_error_invalid_operation);
       return false;

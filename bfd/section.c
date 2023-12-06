@@ -1715,11 +1715,11 @@ _bfd_nowrite_set_section_contents (bfd *abfd,
 }
 
 /*
-INTERNAL_FUNCTION
-	_bfd_section_size_insane
+FUNCTION
+	bfd_section_size_insane
 
 SYNOPSIS
-	bool _bfd_section_size_insane (bfd *abfd, asection *sec);
+	bool bfd_section_size_insane (bfd *abfd, asection *sec);
 
 DESCRIPTION
 	Returns true if the given section has a size that indicates
@@ -1729,7 +1729,7 @@ DESCRIPTION
 */
 
 bool
-_bfd_section_size_insane (bfd *abfd, asection *sec)
+bfd_section_size_insane (bfd *abfd, asection *sec)
 {
   bfd_size_type size = bfd_get_section_limit_octets (abfd, sec);
   if (size == 0)
