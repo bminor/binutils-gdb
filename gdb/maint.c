@@ -855,11 +855,12 @@ update_thread_pool_size ()
   if (n_threads < 0)
     {
       const int hardware_threads = std::thread::hardware_concurrency ();
-      /* Testing in #29959 indicates that parallel efficiency drops between
-	 n_threads=5 to 8.  Therefore, clamp the default value to 8 to avoid an
-	 excessive number of threads in the pool on many-core systems.  */
-      const int throttle = 8;
-      n_threads = std::clamp (hardware_threads, hardware_threads, throttle);
+      /* Testing in PR gdb/29959 indicates that parallel efficiency drops
+	 between n_threads=5 to 8.  Therefore, use no more than 8 threads
+	 to avoid an excessive number of threads in the pool on many-core
+	 systems.  */
+      const int max_thread_count = 8;
+      n_threads = std::min (hardware_threads, max_thread_count);
     }
 
   gdb::thread_pool::g_thread_pool->set_thread_count (n_threads);
