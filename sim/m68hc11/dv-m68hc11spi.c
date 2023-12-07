@@ -157,14 +157,10 @@ m68hc11spi_port_event (struct hw *me,
                        int source_port,
                        int level)
 {
-  SIM_DESC sd;
   struct m68hc11spi *controller;
-  sim_cpu *cpu;
   uint8_t val;
   
   controller = hw_data (me);
-  sd         = hw_system (me);
-  cpu        = STATE_CPU (sd, 0);  
   switch (my_port)
     {
     case RESET_PORT:

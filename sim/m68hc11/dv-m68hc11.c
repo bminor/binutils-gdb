@@ -589,13 +589,11 @@ m68hc11_info (struct hw *me)
   uint16_t base = 0;
   sim_cpu *cpu;
   struct m68hc11_sim_cpu *m68hc11_cpu;
-  struct m68hc11sio *controller;
   uint8_t val;
   
   sd = hw_system (me);
   cpu = STATE_CPU (sd, 0);
   m68hc11_cpu = M68HC11_SIM_CPU (cpu);
-  controller = hw_data (me);
 
   base = cpu_get_io_base (cpu);
   sim_io_printf (sd, "M68HC11:\n");
