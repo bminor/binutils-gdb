@@ -2792,7 +2792,6 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	    struct stat stat_rec;	/* Stat record */
 	    int fstat_return;	/* Return value from callback to stat.  */
 	    int stat_ptr;	/* Pointer to stat record.  */
-	    char *temp_stat_ptr;	/* Temporary stat_rec pointer.  */
 
 	    fd = (h8300hmode && !h8300_normal_mode) ? GET_L_REG (0) : GET_W_REG (0);
 
@@ -2802,9 +2801,6 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	    /* Callback stat and return.  */
 	    fstat_return = sim_callback->to_fstat (sim_callback, fd,
 						   &stat_rec);
-
-	    /* Have stat_ptr point to starting of stat_rec.  */
-	    temp_stat_ptr = (char *) (&stat_rec);
 
 	    /* Setting up the stat structure returned.  */
 	    SET_MEMORY_W (stat_ptr, stat_rec.st_dev);
@@ -2843,7 +2839,6 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	    struct stat stat_rec;	/* Stat record */
 	    int stat_return;	/* Return value from callback to stat */
 	    int stat_ptr;	/* Pointer to stat record.  */
-	    char *temp_stat_ptr;	/* Temporary stat_rec pointer.  */
 	    int i = 0;		/* Loop Counter */
 
 	    /* Setting filename_ptr to first argument of open.  */
@@ -2877,9 +2872,6 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	    stat_return =
 	      sim_callback->to_stat (sim_callback, filename, &stat_rec);
 
-	    /* Have stat_ptr point to starting of stat_rec.  */
-	    temp_stat_ptr = (char *) (&stat_rec);
- 
 	    /* Freeing memory used for filename.  */
 	    free (filename);
  
