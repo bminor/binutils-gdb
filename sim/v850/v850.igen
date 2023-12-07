@@ -3537,12 +3537,11 @@ rrrrr,11111100001 + wwww,010001000100:F_I:::trncf_sl
 {
   int64_t ans;
   sim_fpu wop;
-  sim_fpu_status status;
 
   sim_fpu_32to (&wop, GR[reg2]);
   TRACE_FP_INPUT_FPU1 (&wop);
 
-  status = sim_fpu_to64i (&ans, &wop, sim_fpu_round_zero);
+  sim_fpu_to64i (&ans, &wop, sim_fpu_round_zero);
 
   GR[reg3e] = ans;
   GR[reg3e+1] = ans >> 32L;
@@ -3557,12 +3556,11 @@ rrrrr,11111110001 + wwww,010001000100:F_I:::trncf_sul
 {
   uint64_t ans;
   sim_fpu wop;
-  sim_fpu_status status;
 
   sim_fpu_32to (&wop, GR[reg2]);
   TRACE_FP_INPUT_FPU1 (&wop);
 
-  status = sim_fpu_to64u (&ans, &wop, sim_fpu_round_zero);
+  sim_fpu_to64u (&ans, &wop, sim_fpu_round_zero);
 
   GR[reg3e] = ans;
   GR[reg3e+1] = ans >> 32L;
