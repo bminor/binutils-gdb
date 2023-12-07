@@ -1042,10 +1042,6 @@ port_init(void)
 static uint32_t
 read_uart(uint32_t addr)
 {
-
-    unsigned        tmp;
-
-    tmp = 0;
     switch (addr & 0xff) {
 
     case 0xE0:			/* UART 1 */
@@ -1071,7 +1067,7 @@ read_uart(uint32_t addr)
 
 	}
 #else
-	tmp = uarta_data;
+	unsigned tmp = uarta_data;
 	uarta_data &= ~UART_DR;
 	uart_stat_reg &= ~UARTA_DR;
 	return tmp;
@@ -1103,7 +1099,7 @@ read_uart(uint32_t addr)
 
 	}
 #else
-	tmp = uartb_data;
+	unsigned tmp = uartb_data;
 	uartb_data &= ~UART_DR;
 	uart_stat_reg &= ~UARTB_DR;
 	return tmp;

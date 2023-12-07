@@ -687,11 +687,8 @@ int_handler(int32_t sig)
 void
 init_signals(void)
 {
-    typedef void    (*PFI) ();
-    static PFI      int_tab[2];
-
-    int_tab[0] = signal(SIGTERM, int_handler);
-    int_tab[1] = signal(SIGINT, int_handler);
+    signal(SIGTERM, int_handler);
+    signal(SIGINT, int_handler);
 }
 
 
@@ -706,7 +703,6 @@ disp_fpu(struct pstate *sregs)
 {
 
     int         i;
-    float	t;
 
     printf("\n fsr: %08X\n\n", sregs->fsr);
 
@@ -716,7 +712,6 @@ disp_fpu(struct pstate *sregs)
 #endif
 
     for (i = 0; i < 32; i++) {
-	t = sregs->fs[i];
 	printf(" f%02d  %08x  %14e  ", i, sregs->fsi[i], sregs->fs[i]);
 	if (!(i & 1))
 	    printf("%14e\n", sregs->fd[i >> 1]);
@@ -1006,7 +1001,6 @@ bfd_load (const char *fname)
 {
     asection       *section;
     bfd            *pbfd;
-    const bfd_arch_info_type *arch;
     int            i;
 
     pbfd = bfd_openr(fname, 0);
@@ -1020,7 +1014,6 @@ bfd_load (const char *fname)
 	return -1;
     }
 
-    arch = bfd_get_arch_info (pbfd);
     if (sis_verbose)
 	printf("loading %s:", fname);
     for (section = pbfd->sections; section; section = section->next) {
