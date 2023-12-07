@@ -332,8 +332,6 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 
   /* TODO: Unindent this block.  */
     {
-      int32_t oldpc;
-
       insts ++;
 
       if (pc & 02)
@@ -407,8 +405,6 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 
       if (tracing)
 	fprintf (stderr, "%.4x: inst = %.4x ", pc, inst);
-
-      oldpc = pc;
 
       pc += 2;
 
