@@ -362,7 +362,6 @@ read_data_from_memory (SIM_CPU *current_cpu, SI address, char *buffer,
 static void
 fill_line_from_memory (FRV_CACHE *cache, FRV_CACHE_TAG *tag, SI address)
 {
-  PCADDR pc;
   int line_alignment;
   SI read_address;
   SIM_CPU *current_cpu = cache->cpu;
@@ -382,7 +381,6 @@ fill_line_from_memory (FRV_CACHE *cache, FRV_CACHE_TAG *tag, SI address)
       tag->line = cache->data_storage + (line_index * cache->line_size);
     }
 
-  pc = CPU_PC_GET (current_cpu);
   line_alignment = cache->line_size - 1;
   read_address = address & ~line_alignment;
   read_data_from_memory (current_cpu, read_address, tag->line,

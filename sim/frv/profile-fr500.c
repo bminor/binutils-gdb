@@ -2043,7 +2043,6 @@ frvbf_model_fr500_u_media (SIM_CPU *cpu, const IDESC *idesc,
 {
   int cycles;
   FRV_PROFILE_STATE *ps;
-  const CGEN_INSN *insn;
   int is_media_s1;
   int is_media_s2;
   int busy_adjustment[] = {0, 0, 0};
@@ -2057,7 +2056,6 @@ frvbf_model_fr500_u_media (SIM_CPU *cpu, const IDESC *idesc,
   cycles = idesc->timing->units[unit_num].done;
 
   ps = CPU_PROFILE_STATE (cpu);
-  insn = idesc->idata;
 
   /* If the previous use of the registers was a media op,
      then their latency will be less than previously recorded.
