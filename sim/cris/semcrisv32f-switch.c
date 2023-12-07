@@ -265,7 +265,7 @@ This file is part of the GNU simulators.
 
 /* If hyper-fast [well not unnecessarily slow] execution is selected, turn
    off frills like tracing and profiling.  */
-/* FIXME: A better way would be to have CGEN_TRACE_RESULT check for something
+/* FIXME: A better way would be to have TRACE_RESULT check for something
    that can cause it to be optimized out.  Another way would be to emit
    special handlers into the instruction "stream".  */
 
