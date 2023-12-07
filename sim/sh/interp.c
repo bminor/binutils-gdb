@@ -1667,10 +1667,8 @@ dump_profile (void)
 {
   unsigned int minpc;
   unsigned int maxpc;
-  unsigned short *p;
   int i;
 
-  p = saved_state.asregs.profile_hist;
   minpc = 0;
   maxpc = (1 << sim_profile_size);
 
