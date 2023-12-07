@@ -16,6 +16,10 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## Some CGEN kludges are causing build-time warnings.  See cris.cpu for details.
+AM_CFLAGS_%C%_mloopv10f.o = -Wno-unused-but-set-variable
+AM_CFLAGS_%C%_mloopv32f.o = -Wno-unused-but-set-variable
+
 nodist_%C%_libsim_a_SOURCES = \
 	%D%/modules.c
 %C%_libsim_a_SOURCES = \

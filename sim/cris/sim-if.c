@@ -337,7 +337,6 @@ cris_set_section_offset_iterator (bfd *abfd, asection *s, void *vp)
 static void
 cris_offset_sections (SIM_DESC sd, int offset)
 {
-  bfd_boolean ret;
   struct bfd *abfd = STATE_PROG_BFD (sd);
   asection *text;
   struct offsetinfo oi;
@@ -350,7 +349,7 @@ cris_offset_sections (SIM_DESC sd, int offset)
   oi.offset = offset;
 
   bfd_map_over_sections (abfd, cris_set_section_offset_iterator, &oi);
-  ret = bfd_set_start_address (abfd, bfd_get_start_address (abfd) + offset);
+  bfd_set_start_address (abfd, bfd_get_start_address (abfd) + offset);
 
   STATE_START_ADDR (sd) = bfd_get_start_address (abfd);
 }
@@ -516,7 +515,7 @@ cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
   for (i = 0; i < n_hdrs; i++)
     {
       int interplen;
-      bfd_size_type interpsiz, interp_filesiz;
+      bfd_size_type interpsiz;
       struct progbounds interp_bounds;
 
       if (phdr[i].p_type != PT_INTERP)
@@ -563,7 +562,7 @@ cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
 	 perhaps should.  */
       interp_load_addr = 0x40000;
       interpsiz = interp_bounds.endmem - interp_bounds.startmem;
-      interp_filesiz = interp_bounds.end_loadmem - interp_bounds.startmem;
+      /* interp_filesiz = interp_bounds.end_loadmem - interp_bounds.startmem; */
 
       /* If we have a non-DSO or interpreter starting at the wrong
 	 address, bail.  */
