@@ -88,13 +88,13 @@ lookup_hash (SIM_DESC sd, SIM_CPU *cpu, uint32_t ins, int size)
 INLINE static void
 get_operands (struct simops *s, uint32_t ins)
 {
-  int i, shift, bits, flags;
+  int i, shift, bits;
   uint32_t mask;
   for (i=0; i < s->numops; i++)
     {
       shift = s->operands[3*i];
       bits = s->operands[3*i+1];
-      flags = s->operands[3*i+2];
+      /* flags = s->operands[3*i+2]; */
       mask = 0x7FFFFFFF >> (31 - bits);
       OP[i] = (ins >> shift) & mask;
     }
