@@ -702,11 +702,7 @@ sim_engine_run (SIM_DESC sd,
 		int nr_cpus,      /* ignore  */
 		int siggnal)      /* ignore  */
 {
-  sim_cpu *cpu;
-
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-
-  cpu = STATE_CPU (sd, 0);
 
   while (1)
     {
