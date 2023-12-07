@@ -202,11 +202,10 @@ sim_create_inferior (SIM_DESC sd,
 		     char * const *env)
 {
   unsigned char resetv[2];
-  int c;
   int new_pc;
 
   /* Set the PC to the default reset vector if available.  */
-  c = sim_core_read_buffer (sd, STATE_CPU (sd, 0), read_map, resetv, 0xfffe, 2);
+  sim_core_read_buffer (sd, STATE_CPU (sd, 0), read_map, resetv, 0xfffe, 2);
   new_pc = resetv[0] + 256 * resetv[1];
 
   /* If the reset vector isn't initialized, then use the ELF entry.  */
