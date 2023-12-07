@@ -10265,8 +10265,7 @@ bfm32 (sim_cpu *cpu, uint32_t r, uint32_t s)
   value2 |= value;
 
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
-  aarch64_set_reg_u64
-    (cpu, rd, NO_SP, (aarch64_get_reg_u32 (cpu, rd, NO_SP) & ~mask) | value);
+  aarch64_set_reg_u64 (cpu, rd, NO_SP, value2);
 }
 
 /* 64 bit bitfield move, non-affected bits left as is.
