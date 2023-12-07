@@ -88,6 +88,8 @@ show remote thread-options-packet
 
   ** GDB now supports the "cancel" request.
 
+  ** The "attach" request now supports specifying the program.
+
 * New remote packets
 
 New stop reason: clone

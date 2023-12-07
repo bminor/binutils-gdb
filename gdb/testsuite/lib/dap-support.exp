@@ -306,12 +306,17 @@ proc dap_launch {file {args {}}} {
 # Start gdb, send a DAP initialize request, and then an attach request
 # specifying PID as the inferior process ID.  Returns the empty string
 # on failure, or the response object from the attach request.
-proc dap_attach {pid} {
+proc dap_attach {pid {prog ""}} {
     if {[_dap_initialize "startup - initialize"] == ""} {
 	return ""
     }
-    return [dap_check_request_and_response "startup - attach" attach \
-		[format {o pid [i %s]} $pid]]
+
+    set args [format {o pid [i %s]} $pid]
+    if {$prog != ""} {
+	append args [format { program [s %s]} $prog]
+    }
+
+    return [dap_check_request_and_response "startup - attach" attach $args]
 }
 
 # Start gdb, send a DAP initialize request, and then an attach request

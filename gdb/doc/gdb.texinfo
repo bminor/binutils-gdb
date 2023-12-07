@@ -39603,11 +39603,20 @@ the same approach as the @code{start} command.  @xref{Starting}.
 @end table
 
 @value{GDBN} defines some parameters that can be passed to the
-@code{attach} request.  One of these must be specified.
+@code{attach} request.  Either @code{pid} or @code{target} must be
+specified, but if both are specified then @code{target} will be
+ignored.
 
 @table @code
 @item pid
 The process ID to which @value{GDBN} should attach.  @xref{Attach}.
+
+@item program
+If provided, this is a string that specifies the program to use.  This
+corresponds to the @code{file} command.  @xref{Files}.  In some cases,
+@value{GDBN} can automatically determine which program is running.
+However, for many remote targets, this is not the case, and so this
+should be supplied.
 
 @item target
 The target to which @value{GDBN} should connect.  This is a string and

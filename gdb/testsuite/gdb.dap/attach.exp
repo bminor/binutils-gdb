@@ -29,7 +29,7 @@ set test_spawn_id [spawn_wait_for_attach $binfile]
 set testpid [spawn_id_get_pid $test_spawn_id]
 
 # We just want to test that attaching works at all.
-if {[dap_attach $testpid] != ""} {
+if {[dap_attach $testpid $binfile] != ""} {
     dap_shutdown true
 }
 
