@@ -133,5 +133,9 @@ if {[prepare_for_testing "failed to prepare" ${testfile} \
 
 runto breakpoint_label
 
+# When using cc-with-debug-names, nothing will force the CU to be
+# expanded.  Do it manually.
+gdb_test_no_output "maint expand-symtabs [file tail $srcfile]"
+
 # Bad GDB was printing an additional "value = <optimized out>".
 gdb_test "info locals" "value = 42\r\nnum = 42"
