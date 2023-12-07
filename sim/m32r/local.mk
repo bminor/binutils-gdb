@@ -17,17 +17,6 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## Some modules don't build cleanly yet.
-AM_CFLAGS_%C%_cpu.o = -Wno-error
-AM_CFLAGS_%C%_cpu2.o = -Wno-error
-AM_CFLAGS_%C%_cpux.o = -Wno-error
-AM_CFLAGS_%C%_m32r.o = -Wno-error
-AM_CFLAGS_%C%_m32r2.o = -Wno-error
-AM_CFLAGS_%C%_m32rx.o = -Wno-error
-AM_CFLAGS_%C%_mloop.o = -Wno-error
-AM_CFLAGS_%C%_mloop2.o = -Wno-error
-AM_CFLAGS_%C%_mloopx.o = -Wno-error
-AM_CFLAGS_%C%_sem.o = -Wno-error
-AM_CFLAGS_%C%_sim_if.o = -Wno-error
 AM_CFLAGS_%C%_traps.o = -Wno-error
 
 nodist_%C%_libsim_a_SOURCES = \

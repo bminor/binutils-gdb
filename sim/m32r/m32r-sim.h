@@ -39,24 +39,42 @@
 
 extern int m32r_decode_gdb_ctrl_regnum (int);
 
+/* The other cpu cores reuse m32rbf funcs to avoid duplication, but they don't
+   provide externs to access, and we can't e.g. include decode.h in decodex.h
+   because of all the redefinitions of cgen macros.  */
+
+extern void m32rbf_model_insn_before (SIM_CPU *, int);
+extern void m32rbf_model_insn_after (SIM_CPU *, int, int);
+extern CPUREG_FETCH_FN m32rbf_fetch_register;
+extern CPUREG_STORE_FN m32rbf_store_register;
+extern void m32rbf_h_cr_set (SIM_CPU *, UINT, USI);
+
 /* Cover macros for hardware accesses.
    FIXME: Eventually move to cgen.  */
 #define GET_H_SM() ((CPU (h_psw) & 0x80) != 0)
 
-#ifndef GET_H_CR
 extern USI  m32rbf_h_cr_get_handler (SIM_CPU *, UINT);
 extern void m32rbf_h_cr_set_handler (SIM_CPU *, UINT, USI);
+extern USI  m32r2f_h_cr_get_handler (SIM_CPU *, UINT);
+extern void m32r2f_h_cr_set_handler (SIM_CPU *, UINT, USI);
+extern USI  m32rxf_h_cr_get_handler (SIM_CPU *, UINT);
+extern void m32rxf_h_cr_set_handler (SIM_CPU *, UINT, USI);
 
+#ifndef GET_H_CR
 #define GET_H_CR(regno) \
   XCONCAT2 (WANT_CPU,_h_cr_get_handler) (current_cpu, (regno))
 #define SET_H_CR(regno, val) \
   XCONCAT2 (WANT_CPU,_h_cr_set_handler) (current_cpu, (regno), (val))
 #endif
 
-#ifndef  GET_H_PSW
 extern UQI  m32rbf_h_psw_get_handler (SIM_CPU *);
 extern void m32rbf_h_psw_set_handler (SIM_CPU *, UQI);
+extern UQI  m32r2f_h_psw_get_handler (SIM_CPU *);
+extern void m32r2f_h_psw_set_handler (SIM_CPU *, UQI);
+extern UQI  m32rxf_h_psw_get_handler (SIM_CPU *);
+extern void m32rxf_h_psw_set_handler (SIM_CPU *, UQI);
 
+#ifndef  GET_H_PSW
 #define GET_H_PSW() \
   XCONCAT2 (WANT_CPU,_h_psw_get_handler) (current_cpu)
 #define SET_H_PSW(val) \
@@ -72,8 +90,15 @@ extern void m32rbf_h_psw_set_handler (SIM_CPU *, UQI);
    prototypes for each of the functions it generates.  */
 extern DI   m32rbf_h_accum_get_handler (SIM_CPU *);
 extern void m32rbf_h_accum_set_handler (SIM_CPU *, DI);
+extern DI   m32r2f_h_accum_get_handler (SIM_CPU *);
+extern void m32r2f_h_accum_set_handler (SIM_CPU *, DI);
+extern DI   m32rxf_h_accum_get_handler (SIM_CPU *);
+extern void m32rxf_h_accum_set_handler (SIM_CPU *, DI);
+
 extern DI   m32r2f_h_accums_get_handler (SIM_CPU *, UINT);
 extern void m32r2f_h_accums_set_handler (SIM_CPU *, UINT, DI);
+extern DI   m32rxf_h_accums_get_handler (SIM_CPU *, UINT);
+extern void m32rxf_h_accums_set_handler (SIM_CPU *, UINT, DI);
 
 #ifndef  GET_H_ACCUM
 #define GET_H_ACCUM() \
