@@ -340,6 +340,15 @@ proc test_stepping {} {
 	}
 
 	gdb_test "step" "ival2 = count.*" "step to ival2 assignment"
+
+	# Check that the watchpoint is triggered during a step.
+	gdb_test "step" \
+		 "\[Ww\]atchpoint.*: ival2.*Old value = -1.*New value = 4.*ival3 = count; ival4 = count;" \
+		 "step over ival2 assignment"
+
+	# Step again and check that correct statement is reached after
+	# hitting a watchpoint during a step.
+	gdb_test "step" "marker2 \\(\\);.*" "step to marker2"
     }
 }
 
