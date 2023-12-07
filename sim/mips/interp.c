@@ -1403,18 +1403,20 @@ sim_monitor (SIM_DESC sd,
             if (c == '%')
 	      {
 		char tmp[40];
+		/* The format logic isn't passed down.
 		enum {FMT_RJUST, FMT_LJUST, FMT_RJUST0, FMT_CENTER} fmt = FMT_RJUST;
+		*/
 		int width = 0, trunc = 0, haddot = 0, longlong = 0;
 		while (sim_read (sd, s++, &c, 1) && c != '\0')
 		  {
 		    if (strchr ("dobxXulscefg%", c))
 		      break;
 		    else if (c == '-')
-		      fmt = FMT_LJUST;
+		      /* fmt = FMT_LJUST */;
 		    else if (c == '0')
-		      fmt = FMT_RJUST0;
+		      /* fmt = FMT_RJUST0 */;
 		    else if (c == '~')
-		      fmt = FMT_CENTER;
+		      /* fmt = FMT_CENTER */;
 		    else if (c == '*')
 		      {
 			if (haddot)
