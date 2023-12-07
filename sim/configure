@@ -12915,7 +12915,7 @@ if test "$ac_res" != no; then :
 
 fi
 
-if test "${ac_cv_lib_dl_dlopen}" = "yes"; then
+if test "${ac_cv_search_dlopen}" = "none required" || test "${ac_cv_lib_dl_dlopen}" = "yes"; then
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for sdl2" >&5

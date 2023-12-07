@@ -151,7 +151,7 @@ AC_SEARCH_LIBS([fabs], [m])
 AC_SEARCH_LIBS([log2], [m])
 
 AC_SEARCH_LIBS([dlopen], [dl])
-if test "${ac_cv_lib_dl_dlopen}" = "yes"; then
+if test "${ac_cv_search_dlopen}" = "none required" || test "${ac_cv_lib_dl_dlopen}" = "yes"; then
   PKG_CHECK_MODULES(SDL, sdl2, [dnl
     SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL=2"
   ], [
