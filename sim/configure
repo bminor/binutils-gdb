@@ -15842,6 +15842,7 @@ build_warnings="$build_warnings
 -Wold-style-declaration
 -Wold-style-definition
 -Wpointer-sign
+-Wno-enum-conversion
 "
 
 case "${host}" in
