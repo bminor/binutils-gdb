@@ -183,6 +183,11 @@ public:
   virtual void display_start_addr (struct gdbarch **gdbarch_p,
 				   CORE_ADDR *addr_p) = 0;
 
+  /* Function to ensure that the source or disassembly window
+     reflects the input address.  Single window variant of
+     update_source_windows_with_addr.  */
+  void update_source_window_with_addr (struct gdbarch *, CORE_ADDR);
+
 private:
 
   /* Used for horizontal scroll.  */

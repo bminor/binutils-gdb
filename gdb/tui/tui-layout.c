@@ -45,8 +45,6 @@
 #include "gdb_curses.h"
 #include "gdbsupport/gdb-safe-ctype.h"
 
-static void extract_display_start_addr (struct gdbarch **, CORE_ADDR *);
-
 /* The layouts.  */
 static std::vector<std::unique_ptr<tui_layout_split>> layouts;
 
@@ -69,11 +67,6 @@ std::vector<tui_win_info *> tui_windows;
 void
 tui_apply_current_layout (bool preserve_cmd_win_size_p)
 {
-  struct gdbarch *gdbarch;
-  CORE_ADDR addr;
-
-  extract_display_start_addr (&gdbarch, &addr);
-
   for (tui_win_info *win_info : tui_windows)
     win_info->make_visible (false);
 
@@ -108,10 +101,6 @@ tui_apply_current_layout (bool preserve_cmd_win_size_p)
 
   /* Replace the global list of active windows.  */
   tui_windows = std::move (new_tui_windows);
-
-  if (gdbarch == nullptr && TUI_DISASM_WIN != nullptr)
-    tui_get_begin_asm_address (&gdbarch, &addr);
-  tui_update_source_windows_with_addr (gdbarch, addr);
 }
 
 /* See tui-layout.  */
@@ -282,20 +271,6 @@ tui_remove_some_windows ()
 
   applied_layout->remove_windows (focus->name ());
   tui_apply_current_layout (true);
-}
-
-static void
-extract_display_start_addr (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
-{
-  if (TUI_SRC_WIN != nullptr)
-    TUI_SRC_WIN->display_start_addr (gdbarch_p, addr_p);
-  else if (TUI_DISASM_WIN != nullptr)
-    TUI_DISASM_WIN->display_start_addr (gdbarch_p, addr_p);
-  else
-    {
-      *gdbarch_p = nullptr;
-      *addr_p = 0;
-    }
 }
 
 void

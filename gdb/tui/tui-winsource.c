@@ -178,6 +178,18 @@ tui_source_window_base::update_source_window_as_is
 }
 
 
+/* See tui-winsource.h.  */
+void
+tui_source_window_base::update_source_window_with_addr (struct gdbarch *gdbarch,
+							CORE_ADDR addr)
+{
+  struct symtab_and_line sal {};
+  if (addr != 0)
+    sal = find_pc_line (addr, 0);
+
+  update_source_window (gdbarch, sal);
+}
+
 /* Function to ensure that the source and/or disassembly windows
    reflect the input address.  */
 void
@@ -473,7 +485,15 @@ tui_source_window_base::rerender ()
       update_source_window (gdbarch, cursal);
     }
   else
-    erase_source_content ();
+    {
+      CORE_ADDR addr;
+      struct gdbarch *gdbarch;
+      tui_get_begin_asm_address (&gdbarch, &addr);
+      if (addr == 0)
+	erase_source_content ();
+      else
+	update_source_window_with_addr (gdbarch, addr);
+    }
 }
 
 /* See tui-data.h.  */

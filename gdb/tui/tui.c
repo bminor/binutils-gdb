@@ -493,11 +493,6 @@ tui_enable (void)
       tui_resize_all ();
     }
 
-  if (deprecated_safe_get_selected_frame ())
-    tui_show_frame_info (deprecated_safe_get_selected_frame ());
-  else
-    tui_display_main ();
-
   /* Install the TUI specific hooks.  This must be done after the call to
      tui_display_main so that we don't detect the symtab changed event it
      can cause.  */
