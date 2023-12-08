@@ -1054,16 +1054,6 @@ common_val_print (struct value *value, struct ui_file *stream, int recurse,
 
   QUIT;
 
-  /* Ensure that the type is complete and not just a stub.  If the type is
-     only a stub and we can't find and substitute its complete type, then
-     print appropriate string and return.  */
-
-  if (real_type->is_stub ())
-    {
-      fprintf_styled (stream, metadata_style.style (), _("<incomplete type>"));
-      return;
-    }
-
   if (!valprint_check_validity (stream, real_type, 0, value))
     return;
 
@@ -1072,6 +1062,16 @@ common_val_print (struct value *value, struct ui_file *stream, int recurse,
       if (apply_ext_lang_val_pretty_printer (value, stream, recurse, options,
 					     language))
 	return;
+    }
+
+  /* Ensure that the type is complete and not just a stub.  If the type is
+     only a stub and we can't find and substitute its complete type, then
+     print appropriate string and return.  */
+
+  if (real_type->is_stub ())
+    {
+      fprintf_styled (stream, metadata_style.style (), _("<incomplete type>"));
+      return;
     }
 
   /* Handle summary mode.  If the value is a scalar, print it;
