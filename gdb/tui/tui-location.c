@@ -17,7 +17,7 @@
 
 #include "defs.h"
 #include "tui/tui.h"
-#include "tui/tui-stack.h"
+#include "tui/tui-status.h"
 #include "tui/tui-data.h"
 #include "tui/tui-location.h"
 #include "symtab.h"

@@ -33,7 +33,7 @@
 #include "tui/tui-win.h"
 #include "tui/tui-layout.h"
 #include "tui/tui-winsource.h"
-#include "tui/tui-stack.h"
+#include "tui/tui-status.h"
 #include "tui/tui-file.h"
 #include "tui/tui-disasm.h"
 #include "tui/tui-source.h"

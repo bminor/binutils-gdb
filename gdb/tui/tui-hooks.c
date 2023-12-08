@@ -44,7 +44,7 @@
 #include "tui/tui-io.h"
 #include "tui/tui-regs.h"
 #include "tui/tui-win.h"
-#include "tui/tui-stack.h"
+#include "tui/tui-status.h"
 #include "tui/tui-winsource.h"
 
 #include "gdb_curses.h"

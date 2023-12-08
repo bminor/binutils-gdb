@@ -321,7 +321,7 @@ SUBDIR_TUI_SRCS = \
 	tui/tui-out.c \
 	tui/tui-regs.c \
 	tui/tui-source.c \
-	tui/tui-stack.c \
+	tui/tui-status.c \
 	tui/tui-win.c \
 	tui/tui-wingeneral.c \
 	tui/tui-winsource.c
@@ -1608,7 +1608,7 @@ HFILES_NO_SRCDIR = \
 	tui/tui-out.h \
 	tui/tui-regs.h \
 	tui/tui-source.h \
-	tui/tui-stack.h \
+	tui/tui-status.h \
 	tui/tui-win.h \
 	tui/tui-wingeneral.h \
 	tui/tui-winsource.h \
