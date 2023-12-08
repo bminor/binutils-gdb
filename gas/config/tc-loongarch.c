@@ -1652,13 +1652,15 @@ loongarch_make_nops (char *buf, bfd_vma bytes)
    the correct alignment now because of other linker relaxations.  */
 
 bool
-loongarch_frag_align_code (int n)
+loongarch_frag_align_code (int n, int max)
 {
-  bfd_vma bytes = (bfd_vma) 1 << n;
-  bfd_vma insn_alignment = 4;
-  bfd_vma worst_case_bytes = bytes - insn_alignment;
   char *nops;
+  symbolS *s;
   expressionS ex;
+
+  bfd_vma insn_alignment = 4;
+  bfd_vma bytes = (bfd_vma) 1 << n;
+  bfd_vma worst_case_bytes = bytes - insn_alignment;
 
   /* If we are moving to a smaller alignment than the instruction size, then no
      alignment is required.  */
@@ -1671,8 +1673,14 @@ loongarch_frag_align_code (int n)
 
   nops = frag_more (worst_case_bytes);
 
-  ex.X_op = O_constant;
-  ex.X_add_number = worst_case_bytes;
+  s = symbol_find (".Lla-relax-align");
+  if (s == NULL)
+    s = (symbolS *)local_symbol_make (".Lla-relax-align", now_seg,
+				      &zero_address_frag, 0);
+
+  ex.X_add_symbol = s;
+  ex.X_op = O_symbol;
+  ex.X_add_number = (max << 8) | n;
 
   loongarch_make_nops (nops, worst_case_bytes);
 

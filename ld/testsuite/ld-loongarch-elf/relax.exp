@@ -121,7 +121,7 @@ if [istarget loongarch64-*-*] {
 	  [list \
 	      "loongarch relax-align" \
 	      "-e 0x0 -z relro" "" \
-	      "" \
+	      "--no-warn" \
 	      {relax-align.s} \
 	      [list \
 		  [list objdump -d relax-align.dd] \

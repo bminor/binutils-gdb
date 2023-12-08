@@ -1395,9 +1395,13 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 NULL,					/* adjust_reloc_bits.  */
 	 NULL),					/* larch_reloc_type_name.  */
 
-  /* Indicates an alignment statement.  The addend field encodes how many
-     bytes of NOPs follow the statement.  The desired alignment is the
-     addend rounded up to the next power of two.  */
+  /* Indicates an alignment statement. f the symbol index is 0,
+     the addend indicates the number of bytes occupied by nop instructions
+     at the relocation offset. The alignment boundary is specified by the
+     addend rounded up to the next power of two.
+     If the symbol index is not 0, the addend indicates the first and third
+     expressions of .align. The lowest 8 bits are used to represent the first
+     expression, other bits are used to represent the third expression.  */
   LOONGARCH_HOWTO (R_LARCH_ALIGN,		/* type (102).  */
 	 0,					/* rightshift.  */
 	 0,					/* size.  */

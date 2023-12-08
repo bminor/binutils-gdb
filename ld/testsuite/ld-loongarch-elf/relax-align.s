@@ -4,6 +4,9 @@
   .text
 L1:
   la.local $a0, L1
+  .align 3
   la.local $a0, L1
-  .align 4
+  .align 3, ,4
+  la.local $a0, L1
+  .align 3, ,2
   la.local $a0, L1

@@ -49,11 +49,11 @@ extern int loongarch_relax_frag (asection *, struct frag *, long);
 #define md_undefined_symbol(name) (0)
 #define md_operand(x)
 
-extern bool loongarch_frag_align_code (int);
+extern bool loongarch_frag_align_code (int, int);
 #define md_do_align(N, FILL, LEN, MAX, LABEL)				\
   if ((N) != 0 && !(FILL) && !need_pass_2 && subseg_text_p (now_seg))	\
     {									\
-      if (loongarch_frag_align_code (N))				\
+      if (loongarch_frag_align_code (N, MAX))				\
 	goto LABEL;							\
     }
 

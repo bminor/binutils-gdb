@@ -3858,44 +3858,53 @@ loongarch_relax_align (bfd *abfd, asection *sec,
 			Elf_Internal_Rela *rel,
 			bfd_vma symval)
 {
-  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
-  bfd_vma alignment = 1, pos;
-  while (alignment <= rel->r_addend)
-    alignment *= 2;
+  bfd_vma  addend, max = 0, alignment = 1;
 
-  symval -= rel->r_addend;
+  int index = ELFNN_R_SYM (rel->r_info);
+  if (index > 0)
+    {
+      alignment = 1 << (rel->r_addend & 0xff);
+      max = rel->r_addend >> 8;
+    }
+  else
+    alignment = rel->r_addend + 4;
+
+  addend = alignment - 4; /* The bytes of NOPs added by R_LARCH_ALIGN.  */
+  symval -= addend; /* The address of first NOP added by R_LARCH_ALIGN.  */
   bfd_vma aligned_addr = ((symval - 1) & ~(alignment - 1)) + alignment;
-  bfd_vma nop_bytes = aligned_addr - symval;
-
-  /* Once we've handled an R_LARCH_ALIGN, we can't relax anything else.  */
-  sec->sec_flg0 = true;
+  bfd_vma need_nop_bytes = aligned_addr - symval; /* */
 
   /* Make sure there are enough NOPs to actually achieve the alignment.  */
-  if (rel->r_addend < nop_bytes)
+  if (addend < need_nop_bytes)
     {
       _bfd_error_handler
 	(_("%pB(%pA+%#" PRIx64 "): %" PRId64 " bytes required for alignment "
 	   "to %" PRId64 "-byte boundary, but only %" PRId64 " present"),
 	 abfd, sym_sec, (uint64_t) rel->r_offset,
-	 (int64_t) nop_bytes, (int64_t) alignment, (int64_t) rel->r_addend);
+	 (int64_t) need_nop_bytes, (int64_t) alignment, (int64_t) addend);
       bfd_set_error (bfd_error_bad_value);
       return false;
     }
 
-  /* Delete the reloc.  */
+  /* Once we've handled an R_LARCH_ALIGN in a section,
+     we can't relax anything else in this section.  */
+  sec->sec_flg0 = true;
   rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
 
+  /* If skipping more bytes than the specified maximum,
+     then the alignment is not done at all and delete all NOPs.  */
+  if (max > 0 && need_nop_bytes > max)
+    return loongarch_relax_delete_bytes (abfd, sec, rel->r_offset,
+					  addend, link_info);
+
   /* If the number of NOPs is already correct, there's nothing to do.  */
-  if (nop_bytes == rel->r_addend)
+  if (need_nop_bytes == addend)
     return true;
 
-  /* Write as many LOONGARCH NOPs as we need.  */
-  for (pos = 0; pos < (nop_bytes & -4); pos += 4)
-    bfd_putl32 (LARCH_NOP, contents + rel->r_offset + pos);
-
   /* Delete the excess NOPs.  */
-  return loongarch_relax_delete_bytes (abfd, sec, rel->r_offset + nop_bytes,
-				   rel->r_addend - nop_bytes, link_info);
+  return loongarch_relax_delete_bytes (abfd, sec,
+					rel->r_offset + need_nop_bytes,
+					addend - need_nop_bytes, link_info);
 }
 
 static bool
@@ -3904,8 +3913,8 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 			       bool *again)
 {
   struct loongarch_elf_link_hash_table *htab = loongarch_elf_hash_table (info);
-  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
   struct bfd_elf_section_data *data = elf_section_data (sec);
+  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
   Elf_Internal_Rela *relocs;
   *again = false;
 
@@ -3938,7 +3947,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 						   0, NULL, NULL, NULL)))
     return true;
 
-      data->relocs = relocs;
+  data->relocs = relocs;
 
   for (unsigned int i = 0; i < sec->reloc_count; i++)
     {
@@ -3946,6 +3955,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
       asection *sym_sec;
       bfd_vma symval;
       unsigned long r_symndx = ELFNN_R_SYM (rel->r_info);
+      unsigned long r_type = ELFNN_R_TYPE (rel->r_info);
       bool local_got = false;
       char symtype;
       struct elf_link_hash_entry *h = NULL;
@@ -3957,7 +3967,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 	    continue;
 
-	  if (sym->st_shndx == SHN_UNDEF)
+	  if (sym->st_shndx == SHN_UNDEF || R_LARCH_ALIGN == r_type)
 	    {
 	      sym_sec = sec;
 	      symval = rel->r_offset;
@@ -3983,9 +3993,9 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	    continue;
 
 	  if ((h->root.type == bfd_link_hash_defined
-		    || h->root.type == bfd_link_hash_defweak)
-		   && h->root.u.def.section != NULL
-		   && h->root.u.def.section->output_section != NULL)
+		  || h->root.type == bfd_link_hash_defweak)
+		&& h->root.u.def.section != NULL
+		&& h->root.u.def.section->output_section != NULL)
 	    {
 	      symval = h->root.u.def.value;
 	      sym_sec = h->root.u.def.section;
@@ -4011,12 +4021,21 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	   if (symtype != STT_SECTION)
 	     symval += rel->r_addend;
 	}
+      /* For R_LARCH_ALIGN, symval is sec_addr (sym_sec) + rel->r_offset
+	 + (alingmeng - 4).
+	 If r_symndx is 0, alignmeng-4 is r_addend.
+	 If r_symndx > 0, alignment-4 is 2^(r_addend & 0xff)-4.  */
+      else if (R_LARCH_ALIGN == r_type)
+	if (r_symndx > 0)
+	  symval += ((1 << (rel->r_addend & 0xff)) - 4);
+	else
+	  symval += rel->r_addend;
       else
 	symval += rel->r_addend;
 
       symval += sec_addr (sym_sec);
 
-      switch (ELFNN_R_TYPE (rel->r_info))
+      switch (r_type)
 	{
 	case R_LARCH_ALIGN:
 	  if (1 == info->relax_pass)
