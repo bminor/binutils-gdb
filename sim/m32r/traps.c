@@ -843,7 +843,8 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	    break;
 
 	  case TARGET_LINUX_SYS_syslog:
-	    result = syslog (arg1, (char *) t2h_addr (cb, &s, arg2));
+	    syslog (arg1, "%s", (char *) t2h_addr (cb, &s, arg2));
+	    result = 0;
 	    errcode = errno;
 	    break;
 
