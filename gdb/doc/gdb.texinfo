@@ -30340,6 +30340,9 @@ Indicates the current @value{GDBN} target.
 Gives the current process or thread number.
 When no process is being debugged, this field is set to @code{No process}.
 
+@item focus
+Shows the name of the TUI window that has the focus.
+
 @item function
 Gives the current function name for the selected frame.
 The name is demangled if demangling is turned on (@pxref{Print Settings}).

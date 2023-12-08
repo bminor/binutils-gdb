@@ -106,6 +106,12 @@ tui_locator_window::make_status_line () const
   const char *pc_buf = pc_out.c_str ();
   int pc_width = pc_out.size ();
 
+  /* Width of the field showing the window with current focus.  For a window
+     named "src" we show "(src)".  */
+  int focus_width = (tui_win_with_focus () != nullptr
+		     ? 1 + strlen (tui_win_with_focus ()->name ()) + 1
+		     : 0);
+
   /* First determine the amount of proc name width we have available.
      The +1 are for a space separator between fields.  */
   proc_width = (status_size
@@ -116,6 +122,9 @@ tui_locator_window::make_status_line () const
 		- (PC_PREFIX.size () + pc_width + 1)
 		- (tui_current_key_mode == TUI_SINGLE_KEY_MODE
 		   ? (SINGLE_KEY.size () + 1)
+		   : 0)
+		- (focus_width > 0
+		   ? focus_width + 1
 		   : 0));
 
   /* If there is no room to print the function name, try by removing
@@ -157,6 +166,13 @@ tui_locator_window::make_status_line () const
     {
       string.puts (SINGLE_KEY.c_str ());
       string.puts (" ");
+    }
+
+  if (tui_win_with_focus () != nullptr)
+    {
+      string.puts ("(");
+      string.puts (tui_win_with_focus ()->name ());
+      string.puts (") ");
     }
 
   /* Procedure/class name.  */
