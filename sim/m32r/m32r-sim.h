@@ -47,6 +47,18 @@ extern void m32rbf_model_insn_before (SIM_CPU *, int);
 extern void m32rbf_model_insn_after (SIM_CPU *, int, int);
 extern CPUREG_FETCH_FN m32rbf_fetch_register;
 extern CPUREG_STORE_FN m32rbf_store_register;
+extern UQI  m32rbf_h_psw_get (SIM_CPU *);
+extern void m32rbf_h_psw_set (SIM_CPU *, UQI);
+extern UQI  m32r2f_h_psw_get (SIM_CPU *);
+extern void m32r2f_h_psw_set (SIM_CPU *, UQI);
+extern UQI  m32rxf_h_psw_get (SIM_CPU *);
+extern void m32rxf_h_psw_set (SIM_CPU *, UQI);
+extern void m32rbf_h_bpsw_set (SIM_CPU *, UQI);
+extern void m32r2f_h_bpsw_set (SIM_CPU *, UQI);
+extern void m32rxf_h_bpsw_set (SIM_CPU *, UQI);
+extern SI   m32rbf_h_gr_get (SIM_CPU *, UINT);
+extern void m32rbf_h_gr_set (SIM_CPU *, UINT, SI);
+extern USI  m32rbf_h_cr_get (SIM_CPU *, UINT);
 extern void m32rbf_h_cr_set (SIM_CPU *, UINT, USI);
 
 /* Cover macros for hardware accesses.
