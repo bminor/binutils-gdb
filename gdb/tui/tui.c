@@ -291,7 +291,7 @@ tui_set_key_mode (enum tui_key_mode mode)
   tui_current_key_mode = mode;
   rl_set_keymap (mode == TUI_SINGLE_KEY_MODE
 		 ? tui_keymap : tui_readline_standard_keymap);
-  tui_show_locator_content ();
+  tui_show_status_content ();
 }
 
 /* Initialize readline and configure the keymap for the switching

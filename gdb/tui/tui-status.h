@@ -1,4 +1,4 @@
-/* TUI display locator.
+/* TUI status line.
 
    Copyright (C) 1998-2023 Free Software Foundation, Inc.
 
@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TUI_TUI_STACK_H
-#define TUI_TUI_STACK_H
+#ifndef TUI_TUI_STATUS_H
+#define TUI_TUI_STATUS_H
 
 #include "tui/tui-data.h"
 
@@ -28,11 +28,11 @@ class frame_info_ptr;
 
 /* Locator window class.  */
 
-struct tui_locator_window
+struct tui_status_window
   : public tui_nofocus_window, tui_noscroll_window, tui_oneline_window,
     tui_nobox_window
 {
-  tui_locator_window () = default;
+  tui_status_window () = default;
 
   const char *name () const override
   {
@@ -50,7 +50,7 @@ private:
   std::string make_status_line () const;
 };
 
-extern void tui_show_locator_content (void);
+extern void tui_show_status_content (void);
 extern bool tui_show_frame_info (frame_info_ptr);
 
-#endif /* TUI_TUI_STACK_H */
+#endif /* TUI_TUI_STATUS_H */

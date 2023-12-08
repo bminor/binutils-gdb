@@ -1,4 +1,4 @@
-/* TUI display locator.
+/* TUI status line.
 
    Copyright (C) 1998-2023 Free Software Foundation, Inc.
 
@@ -58,7 +58,7 @@ static const std::string SINGLE_KEY = "(SingleKey)";
 
 
 std::string
-tui_locator_window::make_status_line () const
+tui_status_window::make_status_line () const
 {
   char line_buf[50];
   int status_size;
@@ -152,7 +152,7 @@ tui_locator_window::make_status_line () const
 	}
     }
 
-  /* Now create the locator line from the string version of the
+  /* Now create the status line from the string version of the
      elements.  */
   string_file string;
 
@@ -242,7 +242,7 @@ tui_get_function_from_frame (frame_info_ptr fi)
 }
 
 void
-tui_locator_window::rerender ()
+tui_status_window::rerender ()
 {
   gdb_assert (handle != NULL);
 
@@ -271,7 +271,7 @@ tui_locator_window::rerender ()
 bool
 tui_show_frame_info (frame_info_ptr fi)
 {
-  bool locator_changed_p;
+  bool status_changed_p;
 
   if (fi != nullptr)
     {
@@ -285,13 +285,13 @@ tui_show_frame_info (frame_info_ptr fi)
       else
 	func_name = _("<unavailable>");
 
-      locator_changed_p
+      status_changed_p
 	= tui_location.set_location (get_frame_arch (fi), sal, func_name);
 
-      /* If the locator information has not changed, then frame information has
+      /* If the status information has not changed, then frame information has
 	 not changed.  If frame information has not changed, then the windows'
 	 contents will not change.  So don't bother refreshing the windows.  */
-      if (!locator_changed_p)
+      if (!status_changed_p)
 	return false;
 
       for (struct tui_source_window_base *win_info : tui_source_windows ())
@@ -304,9 +304,9 @@ tui_show_frame_info (frame_info_ptr fi)
     {
       symtab_and_line sal {};
 
-      locator_changed_p = tui_location.set_location (NULL, sal, "");
+      status_changed_p = tui_location.set_location (NULL, sal, "");
 
-      if (!locator_changed_p)
+      if (!status_changed_p)
 	return false;
 
       for (struct tui_source_window_base *win_info : tui_source_windows ())
@@ -317,7 +317,7 @@ tui_show_frame_info (frame_info_ptr fi)
 }
 
 void
-tui_show_locator_content ()
+tui_show_status_content ()
 {
   if (tui_is_window_visible (STATUS_WIN))
     TUI_STATUS_WIN->rerender ();
@@ -338,7 +338,7 @@ void
 _initialize_tui_stack ()
 {
   add_com ("update", class_tui, tui_update_command,
-	   _("Update the source window and locator to "
-	     "display the current execution point.\n\
+	   _("\
+Update the source window to display the current execution point.\n\
 Usage: update"));
 }

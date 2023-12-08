@@ -32,9 +32,9 @@
 
 struct tui_location_tracker
 {
-  /* Update the current location with the provided arguments.  Returns true
-     if any of the locator's fields were actually changed, and false
-     otherwise.  */
+  /* Update the current location with the provided arguments.  Returns
+     true if any of the status window's fields were actually changed,
+     and false otherwise.  */
   bool set_location (struct gdbarch *gdbarch,
 		     const struct symtab_and_line &sal,
 		     const char *procname);

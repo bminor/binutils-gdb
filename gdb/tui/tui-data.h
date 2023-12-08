@@ -298,7 +298,7 @@ extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 #define TUI_CMD_WIN \
   (gdb::checked_static_cast<tui_cmd_window *> (tui_win_list[CMD_WIN]))
 #define TUI_STATUS_WIN \
-  (gdb::checked_static_cast<tui_locator_window *> (tui_win_list[STATUS_WIN]))
+  (gdb::checked_static_cast<tui_status_window *> (tui_win_list[STATUS_WIN]))
 
 /* All the windows that are currently instantiated, in layout
    order.  */

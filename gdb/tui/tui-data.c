@@ -70,7 +70,7 @@ tui_set_win_focus_to (struct tui_win_info *win_info)
       tui_unhighlight_win (win_with_focus);
       win_with_focus = win_info;
       tui_highlight_win (win_info);
-      tui_show_locator_content ();
+      tui_show_status_content ();
     }
 }
 

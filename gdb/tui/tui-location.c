@@ -48,7 +48,7 @@ tui_location_tracker::set_location (struct gdbarch *gdbarch,
   m_gdbarch = gdbarch;
 
   if (location_changed_p)
-    tui_show_locator_content ();
+    tui_show_status_content ();
 
   return location_changed_p;
 }
@@ -61,7 +61,7 @@ tui_location_tracker::set_location (struct symtab *symtab)
   bool location_changed_p = set_fullname (symtab);
 
   if (location_changed_p)
-    tui_show_locator_content ();
+    tui_show_status_content ();
 
   return location_changed_p;
 }

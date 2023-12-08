@@ -306,7 +306,7 @@ tui_win_info::resize (int height_, int width_,
 
 
 
-/* Helper function to create one of the built-in (non-locator)
+/* Helper function to create one of the built-in (non-status)
    windows.  */
 
 template<enum tui_win_type V, class T>
@@ -369,7 +369,7 @@ initialize_known_windows ()
 						    tui_disasm_window>);
   known_window_types.emplace (STATUS_NAME,
 			       make_standard_window<STATUS_WIN,
-						    tui_locator_window>);
+						    tui_status_window>);
 }
 
 /* See tui-layout.h.  */
