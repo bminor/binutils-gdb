@@ -38,9 +38,14 @@
    NB: The emulation is also missing argument conversion (endian & bitsize)
    even on Linux hosts.  */
 #ifdef __linux__
+#include <syslog.h>
+#include <sys/file.h>
+#include <sys/fsuid.h>
+#include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/poll.h>
 #include <sys/resource.h>
+#include <sys/sendfile.h>
 #include <sys/sysinfo.h>
 #include <sys/stat.h>
 #include <sys/time.h>
