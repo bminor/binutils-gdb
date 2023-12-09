@@ -855,20 +855,26 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_,
 	  continue;
 	}
 
+      /* Two adjacent boxed windows will share a border.  */
+      if (prev != -1
+	  && m_splits[prev].layout->last_edge_has_border_p ()
+	  && m_splits[i].layout->first_edge_has_border_p ())
+	info[i].share_box = true;
+
       if (info[i].min_size == info[i].max_size)
-	available_size -= info[i].min_size;
+	{
+	  available_size -= info[i].min_size;
+	  if (info[i].share_box)
+	    {
+	      /* A shared border makes a bit more size available.  */
+	      ++available_size;
+	    }
+	}
       else
 	{
 	  last_index = i;
 	  total_weight += m_splits[i].weight;
 	}
-
-      /* Two adjacent boxed windows will share a border, making a bit
-	 more size available.  */
-      if (prev != -1
-	  && m_splits[prev].layout->last_edge_has_border_p ()
-	  && m_splits[i].layout->first_edge_has_border_p ())
-	info[i].share_box = true;
 
       prev = i;
     }
@@ -900,7 +906,10 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_,
 	     this function.  */
 	  used_size += info[i].size;
 	  if (info[i].share_box)
-	    --used_size;
+	    {
+	      /* A shared border makes a bit more size available.  */
+	      --used_size;
+	    }
 	}
       else
 	info[i].size = info[i].min_size;
