@@ -1010,12 +1010,12 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 		std::unique_ptr<explicit_location_spec> explicit_loc
 		  (new explicit_location_spec ());
 
-		explicit_loc->source_filename
-		  = source != nullptr ? xstrdup (source) : nullptr;
-		explicit_loc->function_name
-		  = function != nullptr ? xstrdup (function) : nullptr;
-		explicit_loc->label_name
-		  = label != nullptr ? xstrdup (label) : nullptr;
+		if (source != nullptr)
+		  explicit_loc->source_filename = make_unique_xstrdup (source);
+		if (function != nullptr)
+		  explicit_loc->function_name = make_unique_xstrdup (function);
+		if (label != nullptr)
+		  explicit_loc->label_name = make_unique_xstrdup (label);
 
 		if (line != NULL)
 		  explicit_loc->line_offset

@@ -190,9 +190,12 @@ protected:
 
 struct explicit_location_spec : public location_spec
 {
-  explicit_location_spec ();
+  explicit explicit_location_spec (const char *function_name);
 
-  ~explicit_location_spec ();
+  explicit_location_spec ()
+    : explicit_location_spec (nullptr)
+  {
+  }
 
   location_spec_up clone () const override;
 
@@ -203,18 +206,18 @@ struct explicit_location_spec : public location_spec
      canonicalized/valid.  */
   std::string to_linespec () const;
 
-  /* The source filename. Malloc'd.  */
-  char *source_filename = nullptr;
+  /* The source filename.  */
+  gdb::unique_xmalloc_ptr<char> source_filename;
 
-  /* The function name.  Malloc'd.  */
-  char *function_name = nullptr;
+  /* The function name.  */
+  gdb::unique_xmalloc_ptr<char> function_name;
 
   /* Whether the function name is fully-qualified or not.  */
   symbol_name_match_type func_name_match_type
     = symbol_name_match_type::WILD;
 
-  /* The name of a label.  Malloc'd.  */
-  char *label_name = nullptr;
+  /* The name of a label.  */
+  gdb::unique_xmalloc_ptr<char> label_name;
 
   /* A line offset relative to the start of the symbol
      identified by the above fields or the current symtab
@@ -284,10 +287,7 @@ const probe_location_spec *
 static inline location_spec_up
 new_explicit_location_spec_function (const char *function_name)
 {
-  explicit_location_spec *spec
-    = new explicit_location_spec ();
-  spec->function_name
-    = (function_name != nullptr ? xstrdup (function_name) : nullptr);
+  explicit_location_spec *spec = new explicit_location_spec (function_name);
   return location_spec_up (spec);
 }
 

@@ -12890,9 +12890,8 @@ update_static_tracepoint (tracepoint *tp, struct symtab_and_line sal)
 	  tp->first_loc ().symtab = sym != NULL ? sal2.symtab : NULL;
 
 	  std::unique_ptr<explicit_location_spec> els
-	    (new explicit_location_spec ());
-	  els->source_filename
-	    = xstrdup (symtab_to_filename_for_display (sal2.symtab));
+	    (new explicit_location_spec
+	     (symtab_to_filename_for_display (sal2.symtab)));
 	  els->line_offset.offset = tp->first_loc ().line_number;
 	  els->line_offset.sign = LINE_OFFSET_NONE;
 

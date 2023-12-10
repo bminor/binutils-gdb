@@ -267,15 +267,15 @@ mi_cmd_break_insert_1 (int dprintf, const char *command,
 	  break;
 	case EXPLICIT_SOURCE_OPT:
 	  is_explicit = 1;
-	  explicit_loc->source_filename = xstrdup (oarg);
+	  explicit_loc->source_filename = make_unique_xstrdup (oarg);
 	  break;
 	case EXPLICIT_FUNC_OPT:
 	  is_explicit = 1;
-	  explicit_loc->function_name = xstrdup (oarg);
+	  explicit_loc->function_name = make_unique_xstrdup (oarg);
 	  break;
 	case EXPLICIT_LABEL_OPT:
 	  is_explicit = 1;
-	  explicit_loc->label_name = xstrdup (oarg);
+	  explicit_loc->label_name = make_unique_xstrdup (oarg);
 	  break;
 	case EXPLICIT_LINE_OPT:
 	  is_explicit = 1;

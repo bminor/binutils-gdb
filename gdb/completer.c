@@ -725,7 +725,8 @@ collect_explicit_location_matches (completion_tracker &tracker,
     {
     case MATCH_SOURCE:
       {
-	const char *source = string_or_empty (explicit_loc->source_filename);
+	const char *source
+	  = string_or_empty (explicit_loc->source_filename.get ());
 	completion_list matches
 	  = make_source_files_completion_list (source, source);
 	tracker.add_completions (std::move (matches));
@@ -734,10 +735,11 @@ collect_explicit_location_matches (completion_tracker &tracker,
 
     case MATCH_FUNCTION:
       {
-	const char *function = string_or_empty (explicit_loc->function_name);
+	const char *function
+	  = string_or_empty (explicit_loc->function_name.get ());
 	linespec_complete_function (tracker, function,
 				    explicit_loc->func_name_match_type,
-				    explicit_loc->source_filename);
+				    explicit_loc->source_filename.get ());
       }
       break;
 
@@ -750,10 +752,10 @@ collect_explicit_location_matches (completion_tracker &tracker,
 
     case MATCH_LABEL:
       {
-	const char *label = string_or_empty (explicit_loc->label_name);
+	const char *label = string_or_empty (explicit_loc->label_name.get ());
 	linespec_complete_label (tracker, language,
-				 explicit_loc->source_filename,
-				 explicit_loc->function_name,
+				 explicit_loc->source_filename.get (),
+				 explicit_loc->function_name.get (),
 				 explicit_loc->func_name_match_type,
 				 label);
       }
