@@ -3072,7 +3072,8 @@ location_spec_to_sals (linespec_parser *parser,
       {
 	const linespec_location_spec *ls = as_linespec_location_spec (locspec);
 	PARSER_STATE (parser)->is_linespec = 1;
-	result = parse_linespec (parser, ls->spec_string, ls->match_type);
+	result = parse_linespec (parser, ls->spec_string.get (),
+				 ls->match_type);
       }
       break;
 

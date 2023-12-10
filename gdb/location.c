@@ -83,13 +83,8 @@ linespec_location_spec::linespec_location_spec
 	 breakpoint setting code, where spec_string being nullptr means
 	 to use the default breakpoint location.  */
       if ((p - orig) > 0)
-	spec_string = savestring (orig, p - orig);
+	spec_string.reset (savestring (orig, p - orig));
     }
-}
-
-linespec_location_spec::~linespec_location_spec ()
-{
-  xfree (spec_string);
 }
 
 location_spec_up
@@ -108,7 +103,7 @@ linespec_location_spec::linespec_location_spec
   (const linespec_location_spec &other)
   : location_spec (other),
     match_type (other.match_type),
-    spec_string (maybe_xstrdup (other.spec_string))
+    spec_string (maybe_xstrdup (other.spec_string.get ()))
 {
 }
 
@@ -118,9 +113,9 @@ linespec_location_spec::compute_string () const
   if (spec_string != nullptr)
     {
       if (match_type == symbol_name_match_type::FULL)
-	return std::string ("-qualified ") + spec_string;
+	return std::string ("-qualified ") + spec_string.get ();
       else
-	return spec_string;
+	return spec_string.get ();
     }
   return {};
 }

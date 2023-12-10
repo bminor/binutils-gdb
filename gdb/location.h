@@ -149,8 +149,6 @@ struct linespec_location_spec : public location_spec
   linespec_location_spec (const char **linespec,
 			  symbol_name_match_type match_type);
 
-  ~linespec_location_spec ();
-
   location_spec_up clone () const override;
 
   bool empty_p () const override;
@@ -159,7 +157,7 @@ struct linespec_location_spec : public location_spec
   symbol_name_match_type match_type;
 
   /* The linespec.  */
-  char *spec_string = nullptr;
+  gdb::unique_xmalloc_ptr<char> spec_string;
 
 protected:
   linespec_location_spec (const linespec_location_spec &other);
