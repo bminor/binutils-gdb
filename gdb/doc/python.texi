@@ -2846,7 +2846,7 @@ frame registers when @value{GDBN} core asks for them.
 
 An unwinder should do as little work as possible.  Some otherwise
 innocuous operations can cause problems (even crashes, as this code is
-not not well-hardened yet).  For example, making an inferior call from
+not well-hardened yet).  For example, making an inferior call from
 an unwinder is unadvisable, as an inferior call will reset
 @value{GDBN}'s stack unwinding process, potentially causing re-entrant
 unwinding.
