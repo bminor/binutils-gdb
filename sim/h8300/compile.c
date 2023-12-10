@@ -44,6 +44,11 @@
 
 int debug;
 
+/* Each entry in this array is an index into the main opcode
+   array for the first instruction starting with the given
+   4 bit nibble.  */
+static int nib_indices[16];
+
 static int memory_size;
 
 #define X(op, size)  (op * 4 + size)
@@ -388,14 +393,21 @@ decode (SIM_DESC sd, sim_cpu *cpu, int addr, unsigned char *data, decoded_inst *
   int reg[3]   = {0, 0, 0};
   int rdisp[3] = {0, 0, 0};
   int opnum;
+  int index;
   const struct h8_opcode *q;
 
   dst->dst.type = -1;
   dst->src.type = -1;
   dst->op3.type = -1;
 
-  /* Find the exact opcode/arg combo.  */
-  for (q = h8_opcodes; q->name; q++)
+  /* We speed up instruction decoding by caching an index into
+     the main opcode array for the first instruction with the
+     given 4 bit nibble.  */
+  index = nib_indices[(data[0] & 0xf0) >> 4];
+
+  /* Find the exact opcode/arg combo, starting with the precomputed
+     index.  Note this loop is performance sensitive.  */
+  for (q = &h8_opcodes[index]; q->name; q++)
     {
       const op_type *nib = q->data.nib;
       unsigned int len = 0;
@@ -1557,6 +1569,85 @@ store2 (SIM_DESC sd, ea_type *arg, int n)
   return store_1 (sd, arg, n, 1);
 }
 
+/* Callback for qsort.  We sort first based on availablity
+   (available instructions sort lower).  When availability state
+   is the same, then we use the first 4 bit nibble as a secondary
+   sort key.
+
+   We don't really care about 100% stability here, just that the
+   available instructions come first and all instrutions with
+   the same starting nibble are consecutive.
+
+   We could do even better by recording frequency information into the
+   main table and using that to sort within a nibble's group with the
+   highest frequency instructions appearing first.  */
+
+static int
+instruction_comparator (const void *p1_, const void *p2_)
+{
+  struct h8_opcode *p1 = (struct h8_opcode *)p1_;
+  struct h8_opcode *p2 = (struct h8_opcode *)p2_;
+
+  /* The 1st sort key is based on whether or not the
+     instruction is even available.  This reduces the
+     number of entries we have to look at in the common
+     case.  */
+  bool p1_available = !((p1->available == AV_H8SX && !h8300sxmode)
+			|| (p1->available == AV_H8S  && !h8300smode)
+			|| (p1->available == AV_H8H  && !h8300hmode));
+
+  bool p2_available = !((p2->available == AV_H8SX && !h8300sxmode)
+			|| (p2->available == AV_H8S  && !h8300smode)
+			|| (p2->available == AV_H8H  && !h8300hmode));
+
+  /* Sort so that available instructions come before unavailable
+     instructions.  */
+  if (p1_available != p2_available)
+    return p2_available - p1_available;
+
+  /* Secondarily sort based on the first opcode nibble.  */
+  return p1->data.nib[0] - p2->data.nib[0];
+}
+
+
+/* OPS is the opcode array, which is initially sorted by mnenomic.
+
+   Sort the array so that the instructions for the sub-architecture
+   are at the start and unavailable instructions are at the end.
+
+   Within the set of available instructions, further sort them based
+   on the first 4 bit nibble.
+
+   Then find the first index into OPS for each of the 16 possible
+   nibbles and record that into NIB_INDICES to speed up decoding.  */
+
+static void
+sort_opcodes_and_setup_nibble_indices (struct h8_opcode *ops)
+{
+  const struct h8_opcode *q;
+  int *indices;
+  int i;
+
+  /* First sort the OPS array.  */
+  for (i = 0, q = ops; q->name; q++, i++)
+    ;
+  qsort (ops, i, sizeof (struct h8_opcode), instruction_comparator);
+
+  /* Now walk the array caching the index of the first
+     occurrence of each 4 bit nibble.  */
+  memset (nib_indices, -1, sizeof (nib_indices));
+  for (i = 0, q = ops; q->name; q++, i++)
+    {
+      int nib = q->data.nib[0];
+
+      /* Record the location of the first entry with the right
+	 nibble count.  */
+      if (nib_indices[nib] == -1)
+	nib_indices[nib] = i;
+    }
+}
+
+
 /* Flag to be set whenever a new SIM_DESC object is created.  */
 static int init_pointers_needed = 1;
 
@@ -1638,6 +1729,9 @@ init_pointers (SIM_DESC sd)
 
 	  h8_set_reg (cpu, i, 0);
 	}
+
+      /* Sort the opcode table and create indices to speed up decode.  */
+      sort_opcodes_and_setup_nibble_indices (ops);
 
       init_pointers_needed = 0;
     }
