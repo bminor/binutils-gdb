@@ -153,12 +153,16 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   addrmap_mutable mutable_map;
+  deferred_warnings warnings;
 
   section->read (per_objfile->objfile);
-  if (read_addrmap_from_aranges (per_objfile, section, &mutable_map))
+  if (read_addrmap_from_aranges (per_objfile, section, &mutable_map,
+				 &warnings))
     per_bfd->index_addrmap
       = new (&per_bfd->obstack) addrmap_fixed (&per_bfd->obstack,
 					       &mutable_map);
+
+  warnings.emit ();
 }
 
 /* DWARF-5 debug_names reader.  */

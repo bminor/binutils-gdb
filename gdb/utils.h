@@ -395,13 +395,16 @@ assign_return_if_changed (T &lval, const T &val)
 
 struct deferred_warnings
 {
+  deferred_warnings ()
+    : m_can_style (gdb_stderr->can_emit_style_escape ())
+  {
+  }
+
   /* Add a warning to the list of deferred warnings.  */
   void warn (const char *format, ...) ATTRIBUTE_PRINTF(2,3)
   {
-    /* Generate the warning text into a string_file.  We allow the text to
-       be styled only if gdb_stderr allows styling -- warnings are sent to
-       gdb_stderr.  */
-    string_file msg (gdb_stderr->can_emit_style_escape ());
+    /* Generate the warning text into a string_file.  */
+    string_file msg (m_can_style);
 
     va_list args;
     va_start (args, format);
@@ -420,6 +423,11 @@ struct deferred_warnings
   }
 
 private:
+
+  /* True if gdb_stderr supports styling at the moment this object is
+     constructed.  This is done just once so that objects of this type
+     can be used off the main thread.  */
+  bool m_can_style;
 
   /* The list of all deferred warnings.  */
   std::vector<string_file> m_warnings;

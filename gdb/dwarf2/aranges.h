@@ -30,6 +30,7 @@ class addrmap;
 
 extern bool read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 				       dwarf2_section_info *section,
-				       addrmap *mutable_map);
+				       addrmap *mutable_map,
+				       deferred_warnings *warn);
 
 #endif /* GDB_DWARF2_ARANGES_H */

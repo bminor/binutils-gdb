@@ -4926,8 +4926,12 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
   per_bfd->quick_file_names_table
     = create_quick_file_names_table (per_bfd->all_units.size ());
   if (!per_bfd->debug_aranges.empty ())
-    read_addrmap_from_aranges (per_objfile, &per_bfd->debug_aranges,
-			       index_storage.get_addrmap ());
+    {
+      deferred_warnings warn;
+      read_addrmap_from_aranges (per_objfile, &per_bfd->debug_aranges,
+				 index_storage.get_addrmap (), &warn);
+      warn.emit ();
+    }
 
   {
     using iter_type = decltype (per_bfd->all_units.begin ());
