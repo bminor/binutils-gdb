@@ -45,6 +45,14 @@ struct registry_accessor<bfd>
 
 int is_target_filename (const char *name);
 
+/* An overload for strings.  */
+
+static inline int
+is_target_filename (const std::string &name)
+{
+  return is_target_filename (name.c_str ());
+}
+
 /* Returns nonzero if the filename associated with ABFD starts with
    TARGET_SYSROOT_PREFIX, zero otherwise.  */
 

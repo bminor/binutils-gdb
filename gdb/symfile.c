@@ -1413,8 +1413,9 @@ find_separate_debug_file (const char *dir,
      Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
      cause "/..." lookups.  */
 
-  bool target_prefix = startswith (dir, "target:");
-  const char *dir_notarget = target_prefix ? dir + strlen ("target:") : dir;
+  bool target_prefix = is_target_filename (dir);
+  const char *dir_notarget
+    = target_prefix ? dir + strlen (TARGET_SYSROOT_PREFIX) : dir;
   std::vector<gdb::unique_xmalloc_ptr<char>> debugdir_vec
     = dirnames_to_char_ptr_vec (debug_file_directory.c_str ());
   gdb::unique_xmalloc_ptr<char> canon_sysroot
@@ -1443,7 +1444,7 @@ find_separate_debug_file (const char *dir,
 
   for (const gdb::unique_xmalloc_ptr<char> &debugdir : debugdir_vec)
     {
-      debugfile = target_prefix ? "target:" : "";
+      debugfile = target_prefix ? TARGET_SYSROOT_PREFIX : "";
       debugfile += debugdir;
       debugfile += "/";
       debugfile += drive;
@@ -1465,7 +1466,7 @@ find_separate_debug_file (const char *dir,
 	{
 	  /* If the file is in the sysroot, try using its base path in
 	     the global debugfile directory.  */
-	  debugfile = target_prefix ? "target:" : "";
+	  debugfile = target_prefix ? TARGET_SYSROOT_PREFIX : "";
 	  debugfile += debugdir;
 	  debugfile += "/";
 	  debugfile += base_path;
@@ -1481,12 +1482,13 @@ find_separate_debug_file (const char *dir,
 	     prefix -- but if that would yield the empty string, we
 	     don't bother at all, because that would just give the
 	     same result as above.  */
-	  if (gdb_sysroot != "target:")
+	  if (gdb_sysroot != TARGET_SYSROOT_PREFIX)
 	    {
-	      debugfile = target_prefix ? "target:" : "";
-	      if (startswith (gdb_sysroot, "target:"))
+	      debugfile = target_prefix ? TARGET_SYSROOT_PREFIX : "";
+	      if (is_target_filename (gdb_sysroot))
 		{
-		  std::string root = gdb_sysroot.substr (strlen ("target:"));
+		  std::string root
+		    = gdb_sysroot.substr (strlen (TARGET_SYSROOT_PREFIX));
 		  gdb_assert (!root.empty ());
 		  debugfile += root;
 		}

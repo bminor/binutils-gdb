@@ -90,7 +90,7 @@ build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
   /* lrealpath() is expensive even for the usually non-existent files.  */
   gdb::unique_xmalloc_ptr<char> filename_holder;
   const char *filename = nullptr;
-  if (startswith (link, TARGET_SYSROOT_PREFIX))
+  if (is_target_filename (link))
     filename = link.c_str ();
   else if (access (link.c_str (), F_OK) == 0)
     {
