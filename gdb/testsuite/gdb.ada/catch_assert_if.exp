@@ -52,7 +52,7 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/bla.adb]
 set catchpoint_msg \
   "Catchpoint $decimal, failed assertion at $hex in bla \\\(\\\).*at .*bla.adb:$bp_location"
 gdb_test "continue" \
-         "Continuing\.$eol$catchpoint_msg$eol.*STOP" \
+	 "Continuing\.$eol$eol$catchpoint_msg$eol.*STOP" \
          "continuing to expected failed assertion"
 
 gdb_test "continue" \
