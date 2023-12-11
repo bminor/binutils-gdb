@@ -16266,15 +16266,17 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 	  const gdb_byte *new_info_ptr = (new_reader->buffer
 					  + to_underlying (origin_offset));
 
-	  if (new_reader->cu == reader->cu
-	      && new_info_ptr > watermark_ptr
-	      && *parent_entry == nullptr)
-	    *maybe_defer = form_addr (origin_offset, origin_is_dwz);
-	  else if (*parent_entry == nullptr)
+	  if (*parent_entry == nullptr)
 	    {
-	      CORE_ADDR lookup = form_addr (origin_offset, origin_is_dwz);
-	      void *obj = m_die_range_map.find (lookup);
-	      *parent_entry = static_cast <cooked_index_entry *> (obj);
+	      CORE_ADDR addr = form_addr (origin_offset, origin_is_dwz);
+	      if (new_reader->cu == reader->cu
+		  && new_info_ptr > watermark_ptr)
+		*maybe_defer = addr;
+	      else
+		{
+		  void *obj = m_die_range_map.find (addr);
+		  *parent_entry = static_cast <cooked_index_entry *> (obj);
+		}
 	    }
 
 	  unsigned int bytes_read;
