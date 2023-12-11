@@ -4283,7 +4283,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_RISCV_PCREL_HI20:
     case BFD_RELOC_RISCV_PCREL_LO12_S:
     case BFD_RELOC_RISCV_PCREL_LO12_I:
-      relaxable = riscv_opts.relax;
+      relaxable = true;
       break;
 
     case BFD_RELOC_RISCV_ALIGN:
