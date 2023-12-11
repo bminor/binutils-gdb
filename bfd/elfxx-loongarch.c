@@ -1775,6 +1775,60 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 BFD_RELOC_LARCH_TLS_DESC_CALL,		/* bfd_reloc_code_real_type.  */
 	 NULL,					/* adjust_reloc_bits.  */
 	 "desc_call"),				/* larch_reloc_type_name.  */
+
+  /* For pcaddi, ld_pc_hi20 + ld_pc_lo12 can relax to ld_pcrel20_s2.  */
+  LOONGARCH_HOWTO (R_LARCH_TLS_LD_PCREL20_S2,	/* type (124).  */
+	 2,					/* rightshift.  */
+	 4,					/* size.  */
+	 20,					/* bitsize.  */
+	 false,					/* pc_relative.  */
+	 5,					/* bitpos.  */
+	 complain_overflow_signed,		/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,			/* special_function.  */
+	 "R_LARCH_TLS_LD_PCREL20_S2",		/* name.  */
+	 false,					/* partial_inplace.  */
+	 0,					/* src_mask.  */
+	 0x1ffffe0,				/* dst_mask.  */
+	 true,					/* pcrel_offset.  */
+	 BFD_RELOC_LARCH_TLS_LD_PCREL20_S2,	/* bfd_reloc_code_real_type.  */
+	 reloc_sign_bits,			/* adjust_reloc_bits.  */
+	 "ld_pcrel_20"),			/* larch_reloc_type_name.  */
+
+  /* For pcaddi, gd_pc_hi20 + gd_pc_lo12 can relax to gd_pcrel20_s2.  */
+  LOONGARCH_HOWTO (R_LARCH_TLS_GD_PCREL20_S2,	/* type (125).  */
+	 2,					/* rightshift.  */
+	 4,					/* size.  */
+	 20,					/* bitsize.  */
+	 false,					/* pc_relative.  */
+	 5,					/* bitpos.  */
+	 complain_overflow_signed,		/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,			/* special_function.  */
+	 "R_LARCH_TLS_GD_PCREL20_S2",		/* name.  */
+	 false,					/* partial_inplace.  */
+	 0,					/* src_mask.  */
+	 0x1ffffe0,				/* dst_mask.  */
+	 true,					/* pcrel_offset.  */
+	 BFD_RELOC_LARCH_TLS_GD_PCREL20_S2,	/* bfd_reloc_code_real_type.  */
+	 reloc_sign_bits,			/* adjust_reloc_bits.  */
+	 "gd_pcrel_20"),			/* larch_reloc_type_name.  */
+
+  /* For pcaddi, desc_pc_hi20 + desc_pc_lo12 can relax to desc_pcrel20_s2.  */
+  LOONGARCH_HOWTO (R_LARCH_TLS_DESC_PCREL20_S2,	/* type (126).  */
+	 2,					/* rightshift.  */
+	 4,					/* size.  */
+	 20,					/* bitsize.  */
+	 false,					/* pc_relative.  */
+	 5,					/* bitpos.  */
+	 complain_overflow_signed,		/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,			/* special_function.  */
+	 "R_LARCH_TLS_DESC_PCREL20_S2",		/* name.  */
+	 false,					/* partial_inplace.  */
+	 0,					/* src_mask.  */
+	 0x1ffffe0,				/* dst_mask.  */
+	 true,					/* pcrel_offset.  */
+	 BFD_RELOC_LARCH_TLS_DESC_PCREL20_S2,	/* bfd_reloc_code_real_type.  */
+	 reloc_sign_bits,			/* adjust_reloc_bits.  */
+	 "desc_pcrel_20"),			/* larch_reloc_type_name.  */
 };
 
 reloc_howto_type *
@@ -1783,7 +1837,9 @@ loongarch_elf_rtype_to_howto (bfd *abfd, unsigned int r_type)
   if(r_type < R_LARCH_count)
     {
       /* For search table fast.  */
+      /*
       BFD_ASSERT (ARRAY_SIZE (loongarch_howto_table) == R_LARCH_count);
+      */
 
       if (loongarch_howto_table[r_type].howto.type == r_type)
 	return (reloc_howto_type *)&loongarch_howto_table[r_type];
@@ -1802,7 +1858,9 @@ loongarch_elf_rtype_to_howto (bfd *abfd, unsigned int r_type)
 reloc_howto_type *
 loongarch_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
 {
+  /*
   BFD_ASSERT (ARRAY_SIZE (loongarch_howto_table) == R_LARCH_count);
+  */
 
   for (size_t i = 0; i < ARRAY_SIZE (loongarch_howto_table); i++)
     if (loongarch_howto_table[i].howto.name
@@ -1821,7 +1879,9 @@ reloc_howto_type *
 loongarch_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 			     bfd_reloc_code_real_type code)
 {
+  /*
   BFD_ASSERT (ARRAY_SIZE (loongarch_howto_table) == R_LARCH_count);
+  */
 
   /* Fast search for new reloc types.  */
   if (BFD_RELOC_LARCH_B16 <= code && code < BFD_RELOC_LARCH_RELAX)

@@ -2285,7 +2285,9 @@ perform_relocation (const Elf_Internal_Rela *rel, asection *input_section,
     case R_LARCH_TLS_DESC_LO12:
     case R_LARCH_TLS_DESC64_LO20:
     case R_LARCH_TLS_DESC64_HI12:
-
+    case R_LARCH_TLS_LD_PCREL20_S2:
+    case R_LARCH_TLS_GD_PCREL20_S2:
+    case R_LARCH_TLS_DESC_PCREL20_S2:
       r = loongarch_check_offset (rel, input_section);
       if (r != bfd_reloc_ok)
 	break;
@@ -3674,6 +3676,9 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_LARCH_TLS_GD_HI20:
 	case R_LARCH_TLS_DESC_PC_HI20:
 	case R_LARCH_TLS_DESC_HI20:
+	case R_LARCH_TLS_LD_PCREL20_S2:
+	case R_LARCH_TLS_GD_PCREL20_S2:
+	case R_LARCH_TLS_DESC_PCREL20_S2:
 	  BFD_ASSERT (rel->r_addend == 0);
 	  unresolved_reloc = false;
 
@@ -3682,7 +3687,8 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    is_ie = true;
 
 	  if (r_type == R_LARCH_TLS_DESC_PC_HI20
-	      || r_type == R_LARCH_TLS_DESC_HI20)
+	      || r_type == R_LARCH_TLS_DESC_HI20
+	      || r_type == R_LARCH_TLS_DESC_PCREL20_S2)
 	    is_desc = true;
 
 	  bfd_vma got_off = 0;
@@ -3813,7 +3819,11 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      || r_type == R_LARCH_TLS_IE_PC_HI20
 	      || r_type == R_LARCH_TLS_DESC_PC_HI20)
 	    RELOCATE_CALC_PC32_HI20 (relocation, pc);
-
+	  else if (r_type == R_LARCH_TLS_LD_PCREL20_S2
+	      || r_type == R_LARCH_TLS_GD_PCREL20_S2
+	      || r_type == R_LARCH_TLS_DESC_PCREL20_S2)
+	    relocation -= pc;
+	  /* else {} ABS relocations.  */
 	  break;
 
 	case R_LARCH_TLS_DESC_PC_LO12:
@@ -4244,6 +4254,85 @@ loongarch_relax_align (bfd *abfd, asection *sec,
 					addend - need_nop_bytes, link_info);
 }
 
+/* Relax pcalau12i + addi.d of TLS LD/GD/DESC to pcaddi.  */
+static bool
+loongarch_relax_tls_ld_gd_desc (bfd *abfd, asection *sec, asection *sym_sec,
+		       Elf_Internal_Rela *rel_hi, bfd_vma symval,
+		       struct bfd_link_info *info, bool *again)
+{
+  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
+  Elf_Internal_Rela *rel_lo = rel_hi + 2;
+  uint32_t pca = bfd_get (32, abfd, contents + rel_hi->r_offset);
+  uint32_t add = bfd_get (32, abfd, contents + rel_lo->r_offset);
+  uint32_t rd = pca & 0x1f;
+
+  /* This section's output_offset need to subtract the bytes of instructions
+     relaxed by the previous sections, so it needs to be updated beforehand.
+     size_input_section already took care of updating it after relaxation,
+     so we additionally update once here.  */
+  sec->output_offset = sec->output_section->size;
+  bfd_vma pc = sec_addr (sec) + rel_hi->r_offset;
+
+  /* If pc and symbol not in the same segment, add/sub segment alignment.
+     FIXME: if there are multiple readonly segments?  */
+  if (!(sym_sec->flags & SEC_READONLY))
+    {
+      if (symval > pc)
+	pc -= info->maxpagesize;
+      else if (symval < pc)
+	pc += info->maxpagesize;
+    }
+
+  const uint32_t addi_d = 0x02c00000;
+  const uint32_t pcaddi = 0x18000000;
+
+  /* Is pcalau12i + addi.d insns?  */
+  if ((ELFNN_R_TYPE (rel_lo->r_info) != R_LARCH_GOT_PC_LO12
+	&& ELFNN_R_TYPE (rel_lo->r_info) != R_LARCH_TLS_DESC_PC_LO12)
+      || (ELFNN_R_TYPE ((rel_lo + 1)->r_info) != R_LARCH_RELAX)
+      || (ELFNN_R_TYPE ((rel_hi + 1)->r_info) != R_LARCH_RELAX)
+      || (rel_hi->r_offset + 4 != rel_lo->r_offset)
+      || ((add & addi_d) != addi_d)
+      /* Is pcalau12i $rd + addi.d $rd,$rd?  */
+      || ((add & 0x1f) != rd)
+      || (((add >> 5) & 0x1f) != rd)
+      /* Can be relaxed to pcaddi?  */
+      || (symval & 0x3) /* 4 bytes align.  */
+      || ((bfd_signed_vma)(symval - pc) < (bfd_signed_vma)(int32_t)0xffe00000)
+      || ((bfd_signed_vma)(symval - pc) > (bfd_signed_vma)(int32_t)0x1ffffc))
+    return false;
+
+  /* Continue next relax trip.  */
+  *again = true;
+
+  pca = pcaddi | rd;
+  bfd_put (32, abfd, pca, contents + rel_hi->r_offset);
+
+  /* Adjust relocations.  */
+  switch (ELFNN_R_TYPE (rel_hi->r_info))
+    {
+    case R_LARCH_TLS_LD_PC_HI20:
+      rel_hi->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_hi->r_info),
+				      R_LARCH_TLS_LD_PCREL20_S2);
+      break;
+    case R_LARCH_TLS_GD_PC_HI20:
+      rel_hi->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_hi->r_info),
+				      R_LARCH_TLS_GD_PCREL20_S2);
+      break;
+    case R_LARCH_TLS_DESC_PC_HI20:
+      rel_hi->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_hi->r_info),
+				      R_LARCH_TLS_DESC_PCREL20_S2);
+      break;
+    default:
+      break;
+    }
+  rel_lo->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
+
+  loongarch_relax_delete_bytes (abfd, sec, rel_lo->r_offset, 4, info);
+
+  return true;
+}
+
 static bool
 loongarch_elf_relax_section (bfd *abfd, asection *sec,
 			       struct bfd_link_info *info,
@@ -4288,15 +4377,23 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 
   for (unsigned int i = 0; i < sec->reloc_count; i++)
     {
-      Elf_Internal_Rela *rel = relocs + i;
-      asection *sym_sec;
-      bfd_vma symval;
-      unsigned long r_symndx = ELFNN_R_SYM (rel->r_info);
-      unsigned long r_type = ELFNN_R_TYPE (rel->r_info);
-      bool local_got = false;
       char symtype;
+      bfd_vma symval;
+      asection *sym_sec;
+      bool local_got = false;
+      Elf_Internal_Rela *rel = relocs + i;
       struct elf_link_hash_entry *h = NULL;
+      unsigned long r_type = ELFNN_R_TYPE (rel->r_info);
+      unsigned long r_symndx = ELFNN_R_SYM (rel->r_info);
 
+      /* Four kind of relocations:
+	 Normal: symval is the symbol address.
+	 R_LARCH_ALIGN: symval is the address of the last NOP instruction
+	 added by this relocation, and then adds 4 more.
+	 R_LARCH_CALL36: symval is the symbol address for local symbols,
+	 or the PLT entry address of the symbol. (Todo)
+	 R_LARCHL_TLS_LD/GD/DESC_PC_HI20: symval is the GOT entry address
+	 of the symbol.  */
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  Elf_Internal_Sym *sym = (Elf_Internal_Sym *)symtab_hdr->contents
@@ -4304,7 +4401,24 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 	    continue;
 
-	  if (sym->st_shndx == SHN_UNDEF || R_LARCH_ALIGN == r_type)
+	  if (R_LARCH_TLS_LD_PC_HI20 == r_type
+	      || R_LARCH_TLS_GD_PC_HI20 == r_type
+	      || R_LARCH_TLS_DESC_PC_HI20 == r_type)
+	    {
+	      if (loongarch_can_relax_tls (info, r_type, h, abfd, r_symndx))
+		continue;
+	      else
+		{
+		  sym_sec = htab->elf.sgot;
+		  symval = elf_local_got_offsets (abfd)[r_symndx];
+		  char tls_type = _bfd_loongarch_elf_tls_type (abfd, h,
+								r_symndx);
+		  if (R_LARCH_TLS_DESC_PC_HI20 == r_type
+			&& GOT_TLS_GD_BOTH_P (tls_type))
+		    symval += 2 * GOT_ENTRY_SIZE;
+		}
+	    }
+	  else if (sym->st_shndx == SHN_UNDEF || R_LARCH_ALIGN == r_type)
 	    {
 	      sym_sec = sec;
 	      symval = rel->r_offset;
@@ -4329,7 +4443,26 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  if (h != NULL && h->type == STT_GNU_IFUNC)
 	    continue;
 
-	  if ((h->root.type == bfd_link_hash_defined
+	  /* The GOT entry of tls symbols must in current execute file or
+	     shared object.  */
+	  if (R_LARCH_TLS_LD_PC_HI20 == r_type
+	      || R_LARCH_TLS_GD_PC_HI20 == r_type
+	      || R_LARCH_TLS_DESC_PC_HI20 == r_type)
+	    {
+	      if (loongarch_can_relax_tls (info, r_type, h, abfd, r_symndx))
+		continue;
+	      else
+		{
+		  sym_sec = htab->elf.sgot;
+		  symval = h->got.offset;
+		  char tls_type = _bfd_loongarch_elf_tls_type (abfd, h,
+								r_symndx);
+		  if (R_LARCH_TLS_DESC_PC_HI20 == r_type
+			&& GOT_TLS_GD_BOTH_P (tls_type))
+		    symval += 2 * GOT_ENTRY_SIZE;
+		}
+	    }
+	  else if ((h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak)
 		&& h->root.u.def.section != NULL
 		&& h->root.u.def.section->output_section != NULL)
@@ -4358,7 +4491,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	   if (symtype != STT_SECTION)
 	     symval += rel->r_addend;
 	}
-      /* For R_LARCH_ALIGN, symval is sec_addr (sym_sec) + rel->r_offset
+      /* For R_LARCH_ALIGN, symval is sec_addr (sec) + rel->r_offset
 	 + (alingmeng - 4).
 	 If r_symndx is 0, alignmeng-4 is r_addend.
 	 If r_symndx > 0, alignment-4 is 2^(r_addend & 0xff)-4.  */
@@ -4399,6 +4532,25 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 					    info, again);
 	    }
 	  break;
+
+	case R_LARCH_TLS_LD_PC_HI20:
+	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
+	    loongarch_relax_tls_ld_gd_desc (abfd, sec, sym_sec, rel, symval,
+					    info, again);
+	  break;
+
+	case R_LARCH_TLS_GD_PC_HI20:
+	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
+	    loongarch_relax_tls_ld_gd_desc (abfd, sec, sym_sec, rel, symval,
+					    info, again);
+	  break;
+
+	case R_LARCH_TLS_DESC_PC_HI20:
+	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
+	    loongarch_relax_tls_ld_gd_desc (abfd, sec, sym_sec, rel, symval,
+					    info, again);
+	  break;
+
 	default:
 	  break;
 	}
