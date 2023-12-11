@@ -13,6 +13,7 @@ elf64-riscv.c
 elf64-target.h
 pe-aarch64igen.c
 pe-loongarch64igen.c
+pe-riscv64igen.c
 peigen.c
 pepigen.c
 pex64igen.c

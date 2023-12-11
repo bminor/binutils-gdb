@@ -330,6 +330,7 @@ pei-i386.c
 pei-ia64.c
 pei-loongarch64.c
 pei-mcore.c
+pei-riscv64.c
 pei-sh.c
 pei-x86_64.c
 peicode.h
