@@ -27,6 +27,11 @@
 #include "host-defs.h"
 #include <new>
 
+/* These are declared in <new> starting C++14, but removing them
+   caused a build failure with clang.  See PR build/31141.  */
+extern void operator delete (void *p, std::size_t) noexcept;
+extern void operator delete[] (void *p, std::size_t) noexcept;
+
 /* Override operator new / operator new[], in order to internal_error
    on allocation failure and thus query the user for abort/core
    dump/continue, just like xmalloc does.  We don't do this from a
