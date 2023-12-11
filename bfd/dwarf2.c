@@ -6123,6 +6123,7 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
       free (file->dwarf_line_str_buffer);
       free (file->dwarf_str_buffer);
       free (file->dwarf_ranges_buffer);
+      free (file->dwarf_rnglists_buffer);
       free (file->dwarf_line_buffer);
       free (file->dwarf_abbrev_buffer);
       free (file->dwarf_info_buffer);
