@@ -4367,11 +4367,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 					 target))
 	    as_warn (_("too many pcrel_hi"));
 
-	    bfd_putl32 (bfd_getl32 (buf)
-			| ENCODE_UTYPE_IMM (RISCV_CONST_HIGH_PART (value)),
-			buf);
-	    if (!riscv_opts.relax)
-	      fixP->fx_done = 1;
+	  bfd_putl32 (bfd_getl32 (buf)
+		      | ENCODE_UTYPE_IMM (RISCV_CONST_HIGH_PART (value)),
+		      buf);
+	  if (!riscv_opts.relax)
+	    fixP->fx_done = 1;
 	}
       relaxable = true;
       break;
