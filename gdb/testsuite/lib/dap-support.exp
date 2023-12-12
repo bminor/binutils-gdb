@@ -16,6 +16,11 @@
 # The JSON parser.
 load_lib ton.tcl
 
+# The sequence number for the currently-executing instance of gdb
+# launched via dap_gdb_start.  This is used for log-file checking
+# after the run is complete.  Zero means gdb hasn't started yet.
+set dap_gdb_instance 0
+
 # The sequence number for the next DAP request.  This is used by the
 # automatic sequence-counting code below.  It is reset each time GDB
 # is restarted.
@@ -29,10 +34,13 @@ proc dap_gdb_start {} {
 
     gdb_stdin_log_init
 
+    global dap_gdb_instance
+    incr dap_gdb_instance
+
     global GDBFLAGS stty_init
     save_vars { GDBFLAGS stty_init } {
 	set stty_init "-echo raw"
-	set logfile [standard_output_file "dap.log.$gdb_instances"]
+	set logfile [standard_output_file "dap.log.$dap_gdb_instance"]
 	append GDBFLAGS " -iex \"set debug dap-log-file $logfile\" -q -i=dap"
 	set res [gdb_spawn]
 	if {$res != 0} {
@@ -330,11 +338,35 @@ proc dap_target_remote {target} {
 		[format {o target [s %s]} $target]]
 }
 
+# Read the most recent DAP log file and check it for exceptions.
+proc _dap_check_log_file {} {
+    global dap_gdb_instance
+
+    set fd [open [standard_output_file "dap.log.$dap_gdb_instance"]]
+    set contents [read $fd]
+    close $fd
+
+    set ok 1
+    foreach line [split $contents "\n"] {
+	if {[regexp "^Traceback" $line]} {
+	    set ok 0
+	    break
+	}
+    }
+
+    if {$ok} {
+	pass "exceptions in log file"
+    } else {
+	fail "exceptions in log file"
+    }
+}
+
 # Cleanly shut down gdb.  TERMINATE is passed as the terminateDebuggee
 # parameter to the request.
 proc dap_shutdown {{terminate false}} {
     dap_check_request_and_response "shutdown" disconnect \
 	[format {o terminateDebuggee [l %s]} $terminate]
+    _dap_check_log_file
 }
 
 # Search the event list EVENTS for an output event matching the regexp
