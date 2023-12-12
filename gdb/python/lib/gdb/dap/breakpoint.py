@@ -24,7 +24,7 @@ from typing import Optional, Sequence
 
 from .server import request, capability, send_event
 from .sources import make_source
-from .startup import in_gdb_thread, log_stack, parse_and_eval, DAPException
+from .startup import in_gdb_thread, log_stack, parse_and_eval, LogLevel, DAPException
 from .typecheck import type_check
 
 
@@ -176,7 +176,9 @@ def _set_breakpoints_callback(kind, specs, creator):
             result.append(_breakpoint_descriptor(bp))
         # Exceptions other than gdb.error are possible here.
         except Exception as e:
-            log_stack()
+            # Don't normally want to see this, as it interferes with
+            # the test suite.
+            log_stack(LogLevel.FULL)
             # Maybe the breakpoint was made but setting an attribute
             # failed.  We still want this to fail.
             if bp is not None:

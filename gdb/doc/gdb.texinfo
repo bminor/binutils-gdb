@@ -39644,6 +39644,24 @@ Evaluations like this can be interrupted using the DAP @code{cancel}
 request.  (In fact, @code{cancel} should work for any request, but it
 is unlikely to be useful for most of them.)
 
+@value{GDBN} provides a couple of logging settings that can be used in
+DAP mode.  These can be set on the command line using the @code{-iex}
+option (@pxref{File Options}).
+
+@table @code
+@item set debug dap-log-file @r{[}@var{filename}@r{]}
+Enable DAP logging.  Logs are written to @var{filename}.  If no
+@var{filename} is given, logging is stopped.
+
+@item set debug dap-log-level @var{level}
+Set the DAP logging level.  The default is @samp{1}, which logs the
+DAP protocol, whatever debug messages the developers thought were
+useful, and unexpected exceptions.  Level @samp{2} can be used to log
+all exceptions, including ones that are considered to be expected.
+For example, a failure to parse an expression would be considered a
+normal exception and not normally be logged.
+@end table
+
 @node JIT Interface
 @chapter JIT Compilation Interface
 @cindex just-in-time compilation

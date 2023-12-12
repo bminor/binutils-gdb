@@ -22,6 +22,7 @@ import threading
 import traceback
 import sys
 
+from enum import IntEnum, auto
 
 # Adapt to different Queue types.  This is exported for use in other
 # modules as well.
@@ -101,6 +102,28 @@ def in_dap_thread(func):
     return ensure_dap_thread
 
 
+# Logging levels.
+class LogLevel(IntEnum):
+    DEFAULT = auto()
+    FULL = auto()
+
+
+class LogLevelParam(gdb.Parameter):
+    """DAP logging level."""
+
+    set_doc = "Set the DAP logging level."
+    show_doc = "Show the DAP logging level."
+
+    def __init__(self):
+        super().__init__(
+            "debug dap-log-level", gdb.COMMAND_MAINTENANCE, gdb.PARAM_ZUINTEGER
+        )
+        self.value = LogLevel.DEFAULT
+
+
+_log_level = LogLevelParam()
+
+
 class LoggingParam(gdb.Parameter):
     """Whether DAP logging is enabled."""
 
@@ -128,16 +151,16 @@ class LoggingParam(gdb.Parameter):
 dap_log = LoggingParam()
 
 
-def log(something):
+def log(something, level=LogLevel.DEFAULT):
     """Log SOMETHING to the log file, if logging is enabled."""
-    if dap_log.log_file is not None:
+    if dap_log.log_file is not None and level <= _log_level.value:
         print(something, file=dap_log.log_file)
         dap_log.log_file.flush()
 
 
-def log_stack():
+def log_stack(level=LogLevel.DEFAULT):
     """Log a stack trace to the log file, if logging is enabled."""
-    if dap_log.log_file is not None:
+    if dap_log.log_file is not None and level <= _log_level.value:
         traceback.print_exc(file=dap_log.log_file)
 
 

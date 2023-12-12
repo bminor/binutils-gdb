@@ -23,6 +23,7 @@ import threading
 from .io import start_json_writer, read_json
 from .startup import (
     exec_and_log,
+    DAPException,
     DAPQueue,
     in_dap_thread,
     in_gdb_thread,
@@ -31,6 +32,7 @@ from .startup import (
     start_thread,
     log,
     log_stack,
+    LogLevel,
 )
 from .typecheck import type_check
 
@@ -139,12 +141,20 @@ class Server:
                 result["body"] = body
             result["success"] = True
         except NotStoppedException:
+            # This is an expected exception, and the result is clearly
+            # visible in the log, so do not log it.
             result["success"] = False
             result["message"] = "notStopped"
         except KeyboardInterrupt:
             # This can only happen when a request has been canceled.
             result["success"] = False
             result["message"] = "cancelled"
+        except DAPException as e:
+            # Don't normally want to see this, as it interferes with
+            # the test suite.
+            log_stack(LogLevel.FULL)
+            result["success"] = False
+            result["message"] = str(e)
         except BaseException as e:
             log_stack()
             result["success"] = False

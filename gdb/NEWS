@@ -90,6 +90,11 @@ show remote thread-options-packet
 
   ** The "attach" request now supports specifying the program.
 
+  ** New command "set debug dap-log-level" controls DAP logging.
+
+  ** The "set debug dap-log-file" command is now documented.  This
+     command was available in GDB 14 but not documented.
+
 * New remote packets
 
 New stop reason: clone
