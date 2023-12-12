@@ -1129,6 +1129,10 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 
 	for (thread_info *tp : all_threads ())
 	  {
+	    /* In case REQUESTED_THREADS contains $_thread.  */
+	    if (current_thread != nullptr)
+	      switch_to_thread (current_thread);
+
 	    if (!should_print_thread (requested_threads, default_inf_num,
 				      global_ids, pid, tp))
 	      continue;
@@ -1175,6 +1179,10 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	  any_thread = true;
 	  if (tp == current_thread && tp->state == THREAD_EXITED)
 	    current_exited = true;
+
+	  /* In case REQUESTED_THREADS contains $_thread.  */
+	  if (current_thread != nullptr)
+	    switch_to_thread (current_thread);
 
 	  if (!should_print_thread (requested_threads, default_inf_num,
 				    global_ids, pid, tp))

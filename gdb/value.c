@@ -2119,6 +2119,21 @@ get_internalvar_integer (struct internalvar *var, LONGEST *result)
 	}
     }
 
+  if (var->kind == INTERNALVAR_MAKE_VALUE)
+    {
+      struct gdbarch *gdbarch = get_current_arch ();
+      struct value *val
+	= (*var->u.make_value.functions->make_value) (gdbarch, var,
+						      var->u.make_value.data);
+      struct type *type = check_typedef (val->type ());
+
+      if (type->code () == TYPE_CODE_INT)
+	{
+	  *result = value_as_long (val);
+	  return 1;
+	}
+    }
+
   return 0;
 }
 
