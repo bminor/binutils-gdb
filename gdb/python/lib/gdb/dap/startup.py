@@ -39,6 +39,24 @@ _gdb_thread = threading.current_thread()
 _dap_thread = None
 
 
+# "Known" exceptions are wrapped in a DAP exception, so that, by
+# default, only rogue exceptions are logged -- this is then used by
+# the test suite.
+class DAPException(Exception):
+    pass
+
+
+# Wrapper for gdb.parse_and_eval that turns exceptions into
+# DAPException.
+def parse_and_eval(expression, global_context=False):
+    try:
+        return gdb.parse_and_eval(expression, global_context=global_context)
+    except Exception as e:
+        # Be sure to preserve the summary, as this can propagate to
+        # the client.
+        raise DAPException(str(e)) from e
+
+
 def start_thread(name, target, args=()):
     """Start a new thread, invoking TARGET with *ARGS there.
     This is a helper function that ensures that any GDB signals are

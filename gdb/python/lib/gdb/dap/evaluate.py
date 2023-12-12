@@ -20,7 +20,7 @@ from typing import Optional
 
 from .frames import select_frame
 from .server import capability, request, client_bool_capability
-from .startup import in_gdb_thread
+from .startup import in_gdb_thread, parse_and_eval, DAPException
 from .varref import find_variable, VariableReference, apply_format
 
 
@@ -37,7 +37,7 @@ def _evaluate(expr, frame_id, value_format):
         if frame_id is not None:
             select_frame(frame_id)
             global_context = False
-        val = gdb.parse_and_eval(expr, global_context=global_context)
+        val = parse_and_eval(expr, global_context=global_context)
         ref = EvaluateResult(val)
         return ref.to_object()
 
@@ -89,7 +89,7 @@ def eval_request(
         # Ignore the format for repl evaluation.
         return _repl(expression, frameId)
     else:
-        raise Exception('unknown evaluate context "' + context + '"')
+        raise DAPException('unknown evaluate context "' + context + '"')
 
 
 @request("variables")
@@ -119,8 +119,8 @@ def set_expression(
         if frameId is not None:
             select_frame(frameId)
             global_context = False
-        lhs = gdb.parse_and_eval(expression, global_context=global_context)
-        rhs = gdb.parse_and_eval(value, global_context=global_context)
+        lhs = parse_and_eval(expression, global_context=global_context)
+        rhs = parse_and_eval(value, global_context=global_context)
         lhs.assign(rhs)
         return _SetResult(lhs).to_object()
 
@@ -133,6 +133,6 @@ def set_variable(
     with apply_format(format):
         var = find_variable(variablesReference)
         lhs = var.find_child_by_name(name)
-        rhs = gdb.parse_and_eval(value)
+        rhs = parse_and_eval(value)
         lhs.assign(rhs)
         return lhs.to_object()

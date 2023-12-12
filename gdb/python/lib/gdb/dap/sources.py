@@ -18,7 +18,7 @@ import os
 import gdb
 
 from .server import request, capability
-from .startup import in_gdb_thread
+from .startup import in_gdb_thread, DAPException
 
 
 # The next available source reference ID.  Must be greater than 0.
@@ -68,11 +68,11 @@ def decode_source(source):
     if "path" in source:
         return source["path"]
     if "sourceReference" not in source:
-        raise Exception("either 'path' or 'sourceReference' must appear in Source")
+        raise DAPException("either 'path' or 'sourceReference' must appear in Source")
     ref = source["sourceReference"]
     global _id_map
     if ref not in _id_map:
-        raise Exception("no sourceReference " + str(ref))
+        raise DAPException("no sourceReference " + str(ref))
     return _id_map[ref]["path"]
 
 

@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gdb
-from .startup import in_gdb_thread
+from .startup import in_gdb_thread, DAPException
 from .server import client_bool_capability
 from abc import ABC, abstractmethod
 from collections import defaultdict
@@ -165,7 +165,7 @@ class BaseReference(ABC):
         # map here.
         if name in self.by_name:
             return self.by_name[name]
-        raise Exception("no variable named '" + name + "'")
+        raise DAPException("no variable named '" + name + "'")
 
 
 class VariableReference(BaseReference):
@@ -271,5 +271,5 @@ def find_variable(ref):
     # Variable references are offset by 1.
     ref = ref - 1
     if ref < 0 or ref > len(all_variables):
-        raise Exception("invalid variablesReference")
+        raise DAPException("invalid variablesReference")
     return all_variables[ref]

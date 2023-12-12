@@ -20,7 +20,7 @@ from typing import Mapping, Optional, Sequence
 
 from .events import exec_and_expect_stop, expect_process
 from .server import request, capability
-from .startup import exec_and_log
+from .startup import exec_and_log, DAPException
 
 
 # The program being launched, or None.  This should only be accessed
@@ -86,7 +86,7 @@ def attach(
     elif target is not None:
         cmd = "target remote " + target
     else:
-        raise Exception("attach requires either 'pid' or 'target'")
+        raise DAPException("attach requires either 'pid' or 'target'")
     expect_process("attach")
     exec_and_log(cmd)
 
