@@ -147,6 +147,16 @@ def _cont(event):
         )
 
 
+_suppress_stop = False
+
+
+@in_gdb_thread
+def suppress_stop():
+    """Indicate that the next stop should not emit an event."""
+    global _suppress_stop
+    _suppress_stop = True
+
+
 _expected_pause = False
 
 
@@ -198,6 +208,13 @@ stop_reason_map = {
 def _on_stop(event):
     global inferior_running
     inferior_running = False
+
+    global _suppress_stop
+    if _suppress_stop:
+        _suppress_stop = False
+        log("suppressing stop in _on_stop")
+        return
+
     log("entering _on_stop: " + repr(event))
     log("   details: " + repr(event.details))
     obj = {
@@ -206,17 +223,23 @@ def _on_stop(event):
     }
     if isinstance(event, gdb.BreakpointEvent):
         obj["hitBreakpointIds"] = [x.number for x in event.breakpoints]
-    global stop_reason_map
-    reason = event.details["reason"]
     global _expected_pause
-    if (
+    # Some stop events still do not emit details.  For example,
+    # 'attach' causes a reason-less stop.
+    if "reason" not in event.details:
+        # This can only really happen via a "repl" evaluation of
+        # something like "attach".  In this case just emit a generic
+        # stop.
+        obj["reason"] = "stopped"
+    elif (
         _expected_pause
-        and reason == "signal-received"
+        and event.details["reason"] == "signal-received"
         and event.details["signal-name"] in ("SIGINT", "SIGSTOP")
     ):
         obj["reason"] = "pause"
     else:
-        obj["reason"] = stop_reason_map[reason]
+        global stop_reason_map
+        obj["reason"] = stop_reason_map[event.details["reason"]]
     _expected_pause = False
     send_event("stopped", obj)
 
