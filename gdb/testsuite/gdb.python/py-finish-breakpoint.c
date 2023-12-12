@@ -34,6 +34,19 @@ void increase (int *a)
   increase_1 (a);
 }
 
+int increase_2 (int *a)
+{
+  *a += 10;
+  return -8;
+}
+
+inline void __attribute__((always_inline))
+increase_inlined (int *a)
+{
+  increase_2 (a);
+  *a += 5;
+}
+
 int
 test_1 (int i, int j)
 {
@@ -85,6 +98,7 @@ int main (int argc, char *argv[])
   increase (&i);
   increase (&i);
   increase (&i);
+  increase_inlined (&i);
 
   for (i = 0; i < 10; i++)
     {
