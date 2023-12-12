@@ -198,8 +198,10 @@ ALL_EMULATION_SOURCES = \
 	eavrtiny.c   \
 	eavrxmega1.c \
 	eavrxmega2.c \
+	eavrxmega2_flmap.c \
 	eavrxmega3.c \
 	eavrxmega4.c \
+	eavrxmega4_flmap.c \
 	eavrxmega5.c \
 	eavrxmega6.c \
 	eavrxmega7.c \

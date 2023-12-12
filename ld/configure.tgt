@@ -253,7 +253,7 @@ arm*-*-haiku*)		targ_emul=armelf_haiku
 			targ_extra_emuls=armelf
 			;;
 avr-*-*)		targ_emul=avr2
-			targ_extra_emuls="avr1 avr25 avr3 avr31 avr35 avr4 avr5 avr51 avr6 avrxmega1 avrxmega2 avrxmega3 avrxmega4 avrxmega5 avrxmega6 avrxmega7 avrtiny"
+			targ_extra_emuls="avr1 avr25 avr3 avr31 avr35 avr4 avr5 avr51 avr6 avrxmega1 avrxmega2 avrxmega2_flmap avrxmega3 avrxmega4 avrxmega4_flmap avrxmega5 avrxmega6 avrxmega7 avrtiny"
 			;;
 bfin-*-elf | bfin-*-rtems*)
 			targ_emul=elf32bfin

@@ -1,3 +1,17 @@
+2023-12-12  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR 31124
+	* Makefile.am (ALL_EMULATION_SOURCES): Add eavrxmega2_flmap.c and
+	eavrxmega4_flmap.c.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add eavrxmega2_flmap and eavrxmega4_flmap to
+	avr's targ_extra_emuls list.
+	* emulparams/avrxmega2.sh (MAYBE_FLMAP): Define.
+	* emulparams/avrxmega2_flmap.sh: New file.
+	* emulparams/avrxmega4.sh (MAYBE_FLMAP): Define.
+	* emulparams/avrxmega4_flmap.sh: New file.
+	* scripttempl/avr.sc: Add support for HAVE_FLMAP.
+
 2023-11-28  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldbuildid.c (generate_build_id): Use sha1_choose_process_bytes ()
