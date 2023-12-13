@@ -699,7 +699,7 @@ void
 ctf_arc_flush_caches (ctf_archive_t *wrapper)
 {
   free (wrapper->ctfi_symdicts);
-  free (wrapper->ctfi_symnamedicts);
+  ctf_dynhash_destroy (wrapper->ctfi_symnamedicts);
   ctf_dynhash_destroy (wrapper->ctfi_dicts);
   wrapper->ctfi_symdicts = NULL;
   wrapper->ctfi_symnamedicts = NULL;
