@@ -13016,6 +13016,8 @@ i386_att_operand (char *operand_string)
 	  && !operand_type_check (i.types[this_operand], disp))
 	{
 	  i.types[this_operand] = i.base_reg->reg_type;
+	  i.op[this_operand].regs = i.base_reg;
+	  i.base_reg = NULL;
 	  i.input_output_operand = true;
 	  return 1;
 	}
