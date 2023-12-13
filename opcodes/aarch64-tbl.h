@@ -6174,6 +6174,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "an integer or stack pointer register")				\
     X(INT_REG, 0, ext_regno_pair, "PAIRREG", 0, F(),			\
       "the second reg of a pair")					\
+    X(INT_REG, 0, ext_regno_pair, "PAIRREG_OR_XZR", 0, F(),		\
+      "the second reg of a pair")					\
     Y(MODIFIED_REG, reg_extended, "Rm_EXT", 0, F(),			\
       "an integer register with optional extension")			\
     Y(MODIFIED_REG, reg_shifted, "Rm_SFT", 0, F(),			\

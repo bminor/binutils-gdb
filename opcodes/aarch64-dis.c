@@ -302,8 +302,11 @@ aarch64_ext_regno_pair (const aarch64_operand *self ATTRIBUTE_UNUSED, aarch64_op
 		   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   assert (info->idx == 1
-	  || info->idx ==3);
-  info->reg.regno = inst->operands[info->idx - 1].reg.regno + 1;
+	  || info->idx == 3);
+
+  unsigned prev_regno = inst->operands[info->idx - 1].reg.regno;
+  info->reg.regno = (prev_regno == 0x1f) ? 0x1f
+					 : prev_regno + 1;
   return true;
 }
 

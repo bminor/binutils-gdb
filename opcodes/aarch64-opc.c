@@ -1693,8 +1693,22 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
   switch (aarch64_operands[type].op_class)
     {
     case AARCH64_OPND_CLASS_INT_REG:
-      /* Check pair reg constraints for cas* instructions.  */
-      if (type == AARCH64_OPND_PAIRREG)
+      /* Check for pair of xzr registers.  */
+      if (type == AARCH64_OPND_PAIRREG_OR_XZR
+	  && opnds[idx - 1].reg.regno == 0x1f)
+	{
+	  if (opnds[idx].reg.regno != 0x1f)
+	    {
+	      set_syntax_error (mismatch_detail, idx - 1,
+				_("second reg in pair should be xzr if first is"
+				  " xzr"));
+	      return 0;
+	    }
+	}
+      /* Check pair reg constraints for instructions taking a pair of
+	 consecutively-numbered general-purpose registers.  */
+      else if (type == AARCH64_OPND_PAIRREG
+	       || type == AARCH64_OPND_PAIRREG_OR_XZR)
 	{
 	  assert (idx == 1 || idx == 3);
 	  if (opnds[idx - 1].reg.regno % 2 != 0)
@@ -3771,6 +3785,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_Rt_LS64:
     case AARCH64_OPND_Rt_SYS:
     case AARCH64_OPND_PAIRREG:
+    case AARCH64_OPND_PAIRREG_OR_XZR:
     case AARCH64_OPND_SVE_Rm:
     case AARCH64_OPND_LSE128_Rt:
     case AARCH64_OPND_LSE128_Rt2:
