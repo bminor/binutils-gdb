@@ -69,3 +69,12 @@ if [istarget "loongarch64-*-*"] {
 	  ] \
       ]
 }
+
+if [istarget "loongarch64-*-*"] {
+    run_dump_test "desc-ie"
+    run_dump_test "desc-le"
+    run_dump_test "ie-le"
+    run_dump_test "tlsdesc-dso"
+    run_dump_test "desc-norelax"
+    run_dump_test "desc-relax"
+}
