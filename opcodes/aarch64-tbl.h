@@ -52,10 +52,22 @@
   QLF2(NIL,X),			\
 }
 
+/* e.g. MSRR <systemreg>, <Xt>, <Xt2>.  */
+#define QL_SRC_X2		\
+{				\
+  QLF3(NIL,X,X),		\
+}
+
 /* e.g. MRS <Xt>, <systemreg>.  */
 #define QL_DST_X		\
 {				\
   QLF2(X,NIL),			\
+}
+
+/* e.g. MRRS <Xt>, <Xt2>, <systemreg>.  */
+#define QL_DST_X2		\
+{				\
+  QLF3(X,X,NIL),		\
 }
 
 /* e.g. SYS #<op1>, <Cn>, <Cm>, #<op2>{, <Xt>}.  */
