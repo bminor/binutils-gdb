@@ -30481,6 +30481,10 @@ switch into this mode, where the following key bindings are used:
 @item c
 continue
 
+@kindex C @r{(SingleKey TUI key)}
+@item C
+reverse-continue
+
 @kindex d @r{(SingleKey TUI key)}
 @item d
 down
@@ -30489,13 +30493,25 @@ down
 @item f
 finish
 
+@kindex F @r{(SingleKey TUI key)}
+@item F
+reverse-finish
+
 @kindex n @r{(SingleKey TUI key)}
 @item n
 next
 
+@kindex N @r{(SingleKey TUI key)}
+@item N
+reverse-next
+
 @kindex o @r{(SingleKey TUI key)}
 @item o
 nexti.  The shortcut letter @samp{o} stands for ``step Over''.
+
+@kindex O @r{(SingleKey TUI key)}
+@item O
+reverse-nexti
 
 @kindex q @r{(SingleKey TUI key)}
 @item q
@@ -30509,9 +30525,17 @@ run
 @item s
 step
 
+@kindex S @r{(SingleKey TUI key)}
+@item S
+reverse-step
+
 @kindex i @r{(SingleKey TUI key)}
 @item i
 stepi.  The shortcut letter @samp{i} stands for ``step Into''.
+
+@kindex I @r{(SingleKey TUI key)}
+@item I
+reverse-stepi
 
 @kindex u @r{(SingleKey TUI key)}
 @item u
