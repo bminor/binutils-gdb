@@ -90,7 +90,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	0f ae e8             	lfence
  +[a-f0-9]+:	58                   	pop    %rax
  +[a-f0-9]+:	0f ae e8             	lfence
- +[a-f0-9]+:	66 d1 11             	rclw   \(%rcx\)
+ +[a-f0-9]+:	66 d1 11             	rclw   \$1,\(%rcx\)
  +[a-f0-9]+:	0f ae e8             	lfence
  +[a-f0-9]+:	f7 01 01 00 00 00    	testl  \$0x1,\(%rcx\)
  +[a-f0-9]+:	0f ae e8             	lfence

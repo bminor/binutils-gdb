@@ -208,8 +208,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	cd 90 [ 	]*int    \$0x90
 [ 	]*[a-f0-9]+:	ce [ 	]*into
 [ 	]*[a-f0-9]+:	cf [ 	]*iret
-[ 	]*[a-f0-9]+:	d0 90 90 90 90 90 [ 	]*rclb   -0x6f6f6f70\(%eax\)
-[ 	]*[a-f0-9]+:	d1 90 90 90 90 90 [ 	]*rcll   -0x6f6f6f70\(%eax\)
+[ 	]*[a-f0-9]+:	d0 90 90 90 90 90 [ 	]*rclb   \$1,-0x6f6f6f70\(%eax\)
+[ 	]*[a-f0-9]+:	d1 90 90 90 90 90 [ 	]*rcll   \$1,-0x6f6f6f70\(%eax\)
 [ 	]*[a-f0-9]+:	d2 90 90 90 90 90 [ 	]*rclb   %cl,-0x6f6f6f70\(%eax\)
 [ 	]*[a-f0-9]+:	d3 90 90 90 90 90 [ 	]*rcll   %cl,-0x6f6f6f70\(%eax\)
 [ 	]*[a-f0-9]+:	d4 90 [ 	]*aam    \$0x90
@@ -527,7 +527,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 ca 90 90 [ 	]*lretw  \$0x9090
 [ 	]*[a-f0-9]+:	66 cb [ 	]*lretw
 [ 	]*[a-f0-9]+:	66 cf [ 	]*iretw
-[ 	]*[a-f0-9]+:	66 d1 90 90 90 90 90 [ 	]*rclw   -0x6f6f6f70\(%eax\)
+[ 	]*[a-f0-9]+:	66 d1 90 90 90 90 90 [ 	]*rclw   \$1,-0x6f6f6f70\(%eax\)
 [ 	]*[a-f0-9]+:	66 d3 90 90 90 90 90 [ 	]*rclw   %cl,-0x6f6f6f70\(%eax\)
 [ 	]*[a-f0-9]+:	66 e5 90 [ 	]*in     \$0x90,%ax
 [ 	]*[a-f0-9]+:	66 e7 90 [ 	]*out    %ax,\$0x90

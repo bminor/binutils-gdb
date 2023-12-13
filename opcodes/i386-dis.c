@@ -12090,6 +12090,8 @@ OP_I (instr_info *ins, int bytemode, int sizeflag)
     case const_1_mode:
       if (ins->intel_syntax)
 	oappend (ins, "1");
+      else
+	oappend (ins, "$1");
       return true;
     default:
       oappend (ins, INTERNAL_DISASSEMBLER_ERROR);

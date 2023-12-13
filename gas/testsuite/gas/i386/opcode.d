@@ -205,8 +205,8 @@ Disassembly of section .text:
  279:	cd 90 [ 	]*int    \$0x90
  27b:	ce [ 	]*into
  27c:	cf [ 	]*iret
- 27d:	d0 90 90 90 90 90 [ 	]*rclb   -0x6f6f6f70\(%eax\)
- 283:	d1 90 90 90 90 90 [ 	]*rcll   -0x6f6f6f70\(%eax\)
+ 27d:	d0 90 90 90 90 90 [ 	]*rclb   \$1,-0x6f6f6f70\(%eax\)
+ 283:	d1 90 90 90 90 90 [ 	]*rcll   \$1,-0x6f6f6f70\(%eax\)
  289:	d2 90 90 90 90 90 [ 	]*rclb   %cl,-0x6f6f6f70\(%eax\)
  28f:	d3 90 90 90 90 90 [ 	]*rcll   %cl,-0x6f6f6f70\(%eax\)
  295:	d4 90 [ 	]*aam    \$0x90
@@ -522,7 +522,7 @@ Disassembly of section .text:
  869:	66 ca 90 90 [ 	]*lretw  \$0x9090
  86d:	66 cb [ 	]*lretw
  86f:	66 cf [ 	]*iretw
- 871:	66 d1 90 90 90 90 90 [ 	]*rclw   -0x6f6f6f70\(%eax\)
+ 871:	66 d1 90 90 90 90 90 [ 	]*rclw   \$1,-0x6f6f6f70\(%eax\)
  878:	66 d3 90 90 90 90 90 [ 	]*rclw   %cl,-0x6f6f6f70\(%eax\)
  87f:	66 e5 90 [ 	]*in     \$0x90,%ax
  882:	66 e7 90 [ 	]*out    %ax,\$0x90
@@ -610,8 +610,8 @@ Disassembly of section .text:
  +[a-f0-9]+:	f7 c9 04 00 00 00    	test   \$(0x)?0*4,%ecx
  +[a-f0-9]+:	c0 f0 02             	shl    \$0x2,%al
  +[a-f0-9]+:	c1 f0 01             	shl    \$0x1,%eax
- +[a-f0-9]+:	d0 f0                	shl    %al
- +[a-f0-9]+:	d1 f0                	shl    %eax
+ +[a-f0-9]+:	d0 f0                	shl    \$1,%al
+ +[a-f0-9]+:	d1 f0                	shl    \$1,%eax
  +[a-f0-9]+:	d2 f0                	shl    %cl,%al
  +[a-f0-9]+:	d3 f0                	shl    %cl,%eax
 #pass

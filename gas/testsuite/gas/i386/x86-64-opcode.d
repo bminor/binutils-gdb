@@ -335,9 +335,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c0 f0 02             	shl    \$0x2,%al
 [ 	]*[a-f0-9]+:	c1 f0 01             	shl    \$0x1,%eax
 [ 	]*[a-f0-9]+:	48 c1 f0 01          	shl    \$0x1,%rax
-[ 	]*[a-f0-9]+:	d0 f0                	shl    %al
-[ 	]*[a-f0-9]+:	d1 f0                	shl    %eax
-[ 	]*[a-f0-9]+:	48 d1 f0             	shl    %rax
+[ 	]*[a-f0-9]+:	d0 f0                	shl    \$1,%al
+[ 	]*[a-f0-9]+:	d1 f0                	shl    \$1,%eax
+[ 	]*[a-f0-9]+:	48 d1 f0             	shl    \$1,%rax
 [ 	]*[a-f0-9]+:	d2 f0                	shl    %cl,%al
 [ 	]*[a-f0-9]+:	d3 f0                	shl    %cl,%eax
 [ 	]*[a-f0-9]+:	48 d3 f0             	shl    %cl,%rax
