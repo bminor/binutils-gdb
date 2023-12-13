@@ -6168,6 +6168,17 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_VnD1:
       operand->reg.regno = default_value;
       break;
+    case AARCH64_OPND_PAIRREG_OR_XZR:
+      if (inst.base.operands[idx - 1].reg.regno == 0x1f)
+	{
+	  operand->reg.regno = 0x1f;
+	  break;
+	}
+      operand->reg.regno = inst.base.operands[idx - 1].reg.regno + 1;
+      break;
+    case AARCH64_OPND_PAIRREG:
+      operand->reg.regno = inst.base.operands[idx - 1].reg.regno + 1;
+      break;
 
     case AARCH64_OPND_Ed:
     case AARCH64_OPND_En:
@@ -7864,6 +7875,12 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
       /* If we get here, this operand was successfully parsed.  */
       inst.base.operands[i].present = 1;
+
+      /* As instructions can have multiple optional operands, it is imporant to
+	 reset the backtrack_pos variable once we finish processing an operand
+	 successfully.  */
+      backtrack_pos = 0;
+
       continue;
 
     failure:
@@ -7885,8 +7902,6 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	char *tmp = backtrack_pos;
 	char endchar = END_OF_INSN;
 
-	if (i != (aarch64_num_of_operands (opcode) - 1))
-	  endchar = ',';
 	skip_past_char (&tmp, ',');
 
 	if (*tmp != endchar)

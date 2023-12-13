@@ -1220,7 +1220,11 @@ extern const aarch64_opcode aarch64_opcode_table[];
 /* This instruction has an extra constraint on it that imposes a requirement on
    subsequent instructions.  */
 #define F_SCAN (1ULL << 31)
-/* Next bit is 32.  */
+/* Instruction takes a pair of optional operands.  If we specify the Nth operand
+   to be optional, then we also implicitly specify (N+1)th operand to also be
+   optional.  */
+#define F_OPD_PAIR_OPT (1ULL << 32)
+/* Next bit is 33.  */
 
 /* Instruction constraints.  */
 /* This instruction has a predication constraint on the instruction at PC+4.  */
@@ -1259,9 +1263,15 @@ pseudo_opcode_p (const aarch64_opcode *opcode)
   return (opcode->flags & F_PSEUDO) != 0lu;
 }
 
+/* Deal with two possible scenarios: If F_OP_PAIR_OPT not set, as is the case
+   by default, F_OPDn_OPT must equal IDX + 1, else F_OPDn_OPT must be in range
+   [IDX, IDX + 1].  */
 static inline bool
 optional_operand_p (const aarch64_opcode *opcode, unsigned int idx)
 {
+  if (opcode->flags & F_OPD_PAIR_OPT)
+    return (((opcode->flags >> 12) & 0x7) == idx
+	    || ((opcode->flags >> 12) & 0x7) == idx + 1);
   return ((opcode->flags >> 12) & 0x7) == idx + 1;
 }
 
