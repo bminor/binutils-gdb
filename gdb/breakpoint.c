@@ -8526,6 +8526,9 @@ bp_loc_is_permanent (struct bp_location *loc)
 static void
 update_dprintf_command_list (struct breakpoint *b)
 {
+  gdb_assert (b->type == bp_dprintf);
+  gdb_assert (b->extra_string != nullptr);
+
   const char *dprintf_args = b->extra_string.get ();
   gdb::unique_xmalloc_ptr<char> printf_line = nullptr;
 
@@ -8699,12 +8702,7 @@ code_breakpoint::code_breakpoint (struct gdbarch *gdbarch_,
       /* Dynamic printf requires and uses additional arguments on the
 	 command line, otherwise it's an error.  */
       if (type == bp_dprintf)
-	{
-	  if (extra_string != nullptr)
-	    update_dprintf_command_list (this);
-	  else
-	    error (_("Format string required"));
-	}
+	update_dprintf_command_list (this);
       else if (extra_string != nullptr)
 	error (_("Garbage '%s' at end of command"), extra_string.get ());
     }
@@ -12420,9 +12418,6 @@ dprintf_breakpoint::re_set ()
 {
   re_set_default ();
 
-  /* extra_string should never be non-NULL for dprintf.  */
-  gdb_assert (extra_string != NULL);
-
   /* 1 - connect to target 1, that can run breakpoint commands.
      2 - create a dprintf, which resolves fine.
      3 - disconnect from target 1
@@ -12433,8 +12428,7 @@ dprintf_breakpoint::re_set ()
      answers for target_can_run_breakpoint_commands().
      Given absence of finer grained resetting, we get to do
      it all the time.  */
-  if (extra_string != NULL)
-    update_dprintf_command_list (this);
+  update_dprintf_command_list (this);
 }
 
 /* Implement the "print_recreate" method for dprintf.  */
