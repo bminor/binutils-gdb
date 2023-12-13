@@ -33,7 +33,6 @@
 #include "tui/tui-win.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-file.h"
-#include "tui/tui-out.h"
 #include "ui-out.h"
 #include "cli-out.h"
 #include <fcntl.h>
@@ -917,7 +916,7 @@ tui_initialize_io (void)
   tui_stdout = new pager_file (new tui_file (stdout, true));
   tui_stderr = new tui_file (stderr, false);
   tui_stdlog = new timestamped_file (tui_stderr);
-  tui_out = new tui_ui_out (tui_stdout);
+  tui_out = new cli_ui_out (tui_stdout, 0);
 
   /* Create the default UI.  */
   tui_old_uiout = new cli_ui_out (gdb_stdout);

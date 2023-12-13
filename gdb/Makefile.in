@@ -318,7 +318,6 @@ SUBDIR_TUI_SRCS = \
 	tui/tui-io.c \
 	tui/tui-layout.c \
 	tui/tui-location.c \
-	tui/tui-out.c \
 	tui/tui-regs.c \
 	tui/tui-source.c \
 	tui/tui-status.c \
@@ -1605,7 +1604,6 @@ HFILES_NO_SRCDIR = \
 	tui/tui-io.h \
 	tui/tui-layout.h \
 	tui/tui-location.h \
-	tui/tui-out.h \
 	tui/tui-regs.h \
 	tui/tui-source.h \
 	tui/tui-status.h \
