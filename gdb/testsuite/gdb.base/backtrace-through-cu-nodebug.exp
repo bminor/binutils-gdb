@@ -1,0 +1,91 @@
+# Copyright 2010-2023 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test that GDB can generate accurate backtraces even if some of the stack
+# trace goes through a function with no debug information.
+
+standard_testfile -caller.c -main.c
+set objmainfile ${testfile}-main.o
+set objcallerfile ${testfile}-caller.o
+
+# recompile the inferior with or without CFI information, then run the
+# inferior until the point where the important test starts
+# returns TRUE on an ERROR.
+proc prepare_test {has_cfi} {
+    global srcdir subdir srcfile srcfile2 objmainfile objcallerfile binfile
+    if {$has_cfi} {
+	set extension "cfi"
+	if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" ${objcallerfile} \
+	     object [list {additional_flags=-fomit-frame-pointer \
+		 -funwind-tables -fasynchronous-unwind-tables}]] != "" } {
+	    untested "couldn't compile without cfi"
+	    return true
+      }
+    } else {
+	set extension "no-cfi"
+	if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" ${objcallerfile} \
+	     object [list {additional_flags=-fomit-frame-pointer \
+		 -fno-unwind-tables \
+		 -fno-asynchronous-unwind-tables}]] != "" } {
+	    untested "couldn't compile with cfi"
+	    return true
+      }
+    }
+    if {[gdb_compile "${objmainfile} ${objcallerfile}" \
+	    "${binfile}-${extension}" binfile {}] != ""} {
+	untested "couldn't link object files"
+	return true
+    }
+
+    clean_restart "$binfile-${extension}"
+
+    if ![runto callback] then {
+       fail "has_cfi=$has_cfi: Can't run to callback"
+       return true
+    }
+    return false
+}
+
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile2}" ${objmainfile} \
+	object {debug}] != "" } {
+    untested "couldn't compile main file"
+    return
+}
+
+if { [prepare_test false] } {
+     untested ${testfile}.exp
+} else {
+    gdb_test_multiple "bt" "verify unwinding breaks without CFI" {
+	-re -wrap " in \[?\]\[?\] .*" {
+	    # It may backtrace through some random frames even to main().
+	    pass $gdb_test_name
+	}
+	-re -wrap " in main .*" {
+	    fail $gdb_test_name
+	}
+    }
+}
+
+if { [prepare_test true] } {
+     untested ${testfile}.exp
+} else {
+
+    # #0  callback () at ...
+    # #1  0x00000000004004e9 in caller ()
+    # #2  0x00000000004004cd in main () at ...
+    gdb_test "bt" \
+	"#0 +callback \[^\r\n\]+\r\n#1 \[^\r\n\]+ in caller \[^\r\n\]+\r\n#2 \[^\r\n\]+ in main \[^\r\n\]+" \
+	"verify unwinding works for CFI without DIEs"
+}
