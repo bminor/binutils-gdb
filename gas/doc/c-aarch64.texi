@@ -91,6 +91,7 @@ on the target processor.  The following processor names are recognized:
 @code{cortex-r82},
 @code{cortex-x1},
 @code{cortex-x2},
+@code{cortex-x3},
 and
 @code{cortex-x4}.
 The special name @code{all} may be used to allow the assembler to accept

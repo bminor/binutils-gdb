@@ -32,6 +32,8 @@
 
 * Add support for Cortex-A720 for AArch64.
 
+* Add support for Cortex-X3 for AArch64.
+
 * Add support for Cortex-X4 for AArch64.
 
 * Add support for RISC-V T-Head extensions (XTheadVector, XTheadZvlsseg
