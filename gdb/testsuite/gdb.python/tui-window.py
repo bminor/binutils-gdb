@@ -32,7 +32,8 @@ class TestWindow:
         self.win.erase()
         w = self.win.width
         h = self.win.height
-        self.win.write("Test: " + str(self.count) + " " + str(w) + "x" + str(h))
+        self.win.write(string="Test: " + str(self.count) + " " + str(w) + "x" + str(h),
+                       full_window=False)
         self.count = self.count + 1
 
     # Tries to delete the title attribute.  GDB will throw an error.
