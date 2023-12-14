@@ -304,7 +304,7 @@ struct string_option_def : option_def
 		  show_cmd_cb_,
 		  set_doc_, show_doc_, help_doc_)
   {
-    var_address.enumeration = detail::get_var_address<const char *, Context>;
+    var_address.string = detail::get_var_address<std::string, Context>;
   }
 };
 
