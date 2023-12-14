@@ -2993,12 +2993,12 @@ recursively_find_pc_sect_compunit_symtab (struct compunit_symtab *cust,
 
 dwarf2_per_cu_data *
 dwarf2_base_index_functions::find_per_cu (dwarf2_per_bfd *per_bfd,
-					  CORE_ADDR adjusted_pc)
+					  unrelocated_addr adjusted_pc)
 {
   if (per_bfd->index_addrmap == nullptr)
     return nullptr;
 
-  void *obj = per_bfd->index_addrmap->find (adjusted_pc);
+  void *obj = per_bfd->index_addrmap->find ((CORE_ADDR) adjusted_pc);
   return static_cast<dwarf2_per_cu_data *> (obj);
 }
 
@@ -3015,8 +3015,8 @@ dwarf2_base_index_functions::find_pc_sect_compunit_symtab
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
   CORE_ADDR baseaddr = objfile->text_section_offset ();
-  struct dwarf2_per_cu_data *data = find_per_cu (per_objfile->per_bfd,
-						 pc - baseaddr);
+  struct dwarf2_per_cu_data *data
+    = find_per_cu (per_objfile->per_bfd, (unrelocated_addr) (pc - baseaddr));
   if (data == nullptr)
     return nullptr;
 
@@ -16659,7 +16659,7 @@ struct cooked_index_functions : public dwarf2_base_index_functions
   }
 
   dwarf2_per_cu_data *find_per_cu (dwarf2_per_bfd *per_bfd,
-				   CORE_ADDR adjusted_pc) override;
+				   unrelocated_addr adjusted_pc) override;
 
   struct compunit_symtab *find_compunit_symtab_by_address
     (struct objfile *objfile, CORE_ADDR address) override;
@@ -16739,7 +16739,7 @@ struct cooked_index_functions : public dwarf2_base_index_functions
 
 dwarf2_per_cu_data *
 cooked_index_functions::find_per_cu (dwarf2_per_bfd *per_bfd,
-				     CORE_ADDR adjusted_pc)
+				     unrelocated_addr adjusted_pc)
 {
   cooked_index *table
     = (gdb::checked_static_cast<cooked_index *>
@@ -16758,7 +16758,8 @@ cooked_index_functions::find_compunit_symtab_by_address
   cooked_index *table = wait (objfile, true);
 
   CORE_ADDR baseaddr = objfile->data_section_offset ();
-  dwarf2_per_cu_data *per_cu = table->lookup (address - baseaddr);
+  dwarf2_per_cu_data *per_cu
+    = table->lookup ((unrelocated_addr) (address - baseaddr));
   if (per_cu == nullptr)
     return nullptr;
 

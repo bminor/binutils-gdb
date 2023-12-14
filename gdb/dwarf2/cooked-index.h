@@ -309,9 +309,10 @@ private:
   /* Look up ADDR in the address map, and return either the
      corresponding CU, or nullptr if the address could not be
      found.  */
-  dwarf2_per_cu_data *lookup (CORE_ADDR addr)
+  dwarf2_per_cu_data *lookup (unrelocated_addr addr)
   {
-    return static_cast<dwarf2_per_cu_data *> (m_addrmap->find (addr));
+    return (static_cast<dwarf2_per_cu_data *>
+	    (m_addrmap->find ((CORE_ADDR) addr)));
   }
 
   /* Create a new cooked_index_entry and register it with this object.
@@ -625,7 +626,7 @@ public:
   /* Look up ADDR in the address map, and return either the
      corresponding CU, or nullptr if the address could not be
      found.  */
-  dwarf2_per_cu_data *lookup (CORE_ADDR addr);
+  dwarf2_per_cu_data *lookup (unrelocated_addr addr);
 
   /* Return a new vector of all the addrmaps used by all the indexes
      held by this object.  */

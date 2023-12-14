@@ -522,7 +522,7 @@ cooked_index::~cooked_index ()
 /* See cooked-index.h.  */
 
 dwarf2_per_cu_data *
-cooked_index::lookup (CORE_ADDR addr)
+cooked_index::lookup (unrelocated_addr addr)
 {
   /* Ensure that the address maps are ready.  */
   wait (cooked_state::MAIN_AVAILABLE, true);

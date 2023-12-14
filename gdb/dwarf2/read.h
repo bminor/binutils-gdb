@@ -893,7 +893,7 @@ struct dwarf2_base_index_functions : public quick_symbol_functions
   /* A helper function that finds the per-cu object from an "adjusted"
      PC -- a PC with the base text offset removed.  */
   virtual dwarf2_per_cu_data *find_per_cu (dwarf2_per_bfd *per_bfd,
-					   CORE_ADDR adjusted_pc);
+					   unrelocated_addr adjusted_pc);
 
   struct compunit_symtab *find_pc_sect_compunit_symtab
     (struct objfile *objfile, struct bound_minimal_symbol msymbol,
