@@ -1081,10 +1081,6 @@ Coll_Ctrl::set_synctrace (const char *string)
   if (*endchar != 0 || tval < 0)
     {
       free (val);
-      /* invalid setting */
-      /* restore the comma, if it was zeroed out */
-      if (comma_p != NULL)
-	*comma_p = ',';
       return dbe_sprintf (GTXT ("Unrecognized synchronization tracing threshold `%s'\n"), string);
     }
   free (val);
