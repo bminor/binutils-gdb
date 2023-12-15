@@ -29,15 +29,6 @@ if {[build_executable $testfile.exp $testfile $srcfile] == -1} {
     return -1
 }
 
-set startup_with_shell_modes { "on" }
-if {![gdb_protocol_is_remote]} {
-    lappend startup_with_shell_modes "off"
-} else {
-    # Some of these tests will not work when using the remote protocol
-    # due to bug PR gdb/28392.
-    unsupported "gdbserver 'startup-with-shell off' broken PR gdb/28392"
-}
-
 # NAME is the name to use for the tests and ARGLIST is the list of
 # arguments that are passed to GDB when it is started.
 #
@@ -55,7 +46,7 @@ proc args_test { name arglist {re_list {}} } {
 	set re_list $arglist
     }
 
-    foreach_with_prefix startup_with_shell $::startup_with_shell_modes {
+    foreach_with_prefix startup_with_shell { on off } {
 	save_vars { ::GDBFLAGS } {
 	    set ::GDBFLAGS "$::GDBFLAGS --args $::binfile $arglist"
 

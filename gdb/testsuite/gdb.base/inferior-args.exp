@@ -174,22 +174,48 @@ set bs "\\\\"
 lappend item [list "$hex \"$bs\"\"" "$hex \"$bs$bs$bs\"\""]
 lappend test_desc_list $item
 
-set startup_with_shell_modes { "on" }
-if {![gdb_protocol_is_remote]} {
-    lappend startup_with_shell_modes "off"
-} else {
-    # Due to PR gdb/28392 gdbserver doesn't currently support having
-    # startup-with-shell off, and then attempting to pass arguments
-    # containing whitespace.
-    unsupported "bug gdb/28392: gdbserver doesn't support this"
-}
+# test three
+# ----------
+#
+# This test focuses on sending special shell characters within a
+# double quote argument, and each special character is prefixed with a
+# backslash.
+#
+# In a POSIX shell, within a double quoted argument, only $ (dollar),
+# ` (backtick), " (double quote), \ (backslash), and newline can be
+# escaped.  All other backslash characters are literal backslashes.
+#
+# As with the previous test, the double quotes are lost when the
+# arguments are sent through gdbserver_start, as such, this test isn't
+# going to work when using the native-gdbserver board, hence we set
+# the second arguemnt to 'false'.
+lappend test_desc_list [list "test three" \
+			    false \
+			    { "\&" "\<" "\#" "\^" "\>" "\$" "\`" } \
+			    [list "$hex \"\\\\\\\\&\"" \
+				 "$hex \"\\\\\\\\<\"" \
+				 "$hex \"\\\\\\\\#\"" \
+				 "$hex \"\\\\\\\\\\^\"" \
+				 "$hex \"\\\\\\\\>\"" \
+				 "$hex \"\\\$\"" \
+				 "$hex \"`\""]]
 
+# test four
+# ---------
+#
+# This test passes two arguments, a single and double quote, each
+# escaped with a backslash.
+lappend test_desc_list [list "test four" \
+			    true \
+			    { \' \" } \
+			    [list "$hex \"'\"" \
+				 "$hex \"\\\\\"\""]]
 
 foreach desc $test_desc_list {
     lassign $desc name stub_suitable args re_list
     with_test_prefix $name {
 	foreach_with_prefix set_method { "start" "starti" "run" "set args" } {
-	    foreach_with_prefix startup_with_shell $startup_with_shell_modes {
+	    foreach_with_prefix startup_with_shell { on off } {
 		do_test $set_method $startup_with_shell $args $re_list \
 		    $stub_suitable
 	    }

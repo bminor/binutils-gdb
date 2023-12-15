@@ -59,12 +59,8 @@ proc initial_setup_simple { startup_with_shell run_args } {
 # If PROBLEMATIC_ON is true then when startup-with-shell is on we
 # expect the comparison to fail, so setup an xfail.
 #
-# If PROBLEMATIC_OFF is true then when startup-with-shell is off we
-# expect the comparison to fail, so setup an xfail.
-#
 # TESTNAME is a string used in the test names.
-proc run_test { args on_re off_re testname { problematic_on false } \
-		    { problematic_off false } } {
+proc run_test { args on_re off_re testname { problematic_on false } } {
     foreach startup_with_shell { "on" "off" } {
 	with_test_prefix "$testname, startup_with_shell: ${startup_with_shell}" {
 	    if {![initial_setup_simple $startup_with_shell $args]} {
@@ -76,7 +72,7 @@ proc run_test { args on_re off_re testname { problematic_on false } \
 		set problematic $problematic_on
 	    } else {
 		set re $off_re
-		set problematic $problematic_off
+		set problematic false
 	    }
 
 	    if { $problematic } {
@@ -91,9 +87,8 @@ proc run_test { args on_re off_re testname { problematic_on false } \
 # This is like the run_test proc except that RE is used as the
 # expected argument regexp when startup-with-shell is both on and off.
 # For the other arguments, see run_test.
-proc run_test_same { args re testname { problematic_on false } \
-			 { problematic_off false } } {
-    run_test $args $re $re $testname $problematic_on $problematic_off
+proc run_test_same { args re testname } {
+    run_test $args $re $re $testname
 }
 
 # The regexp to match a single '\' character.
@@ -129,13 +124,11 @@ save_vars { env(TEST) } {
 
 run_test_same "\"\\a\"" \
     "\"${bs}${bs}a\"" \
-    "retain backslash in double quote arg" \
-    false $is_remote_p
+    "retain backslash in double quote arg"
 
 run_test_same "'\\a'" \
     "\"${bs}${bs}a\"" \
-    "retain backslash in single quote arg" \
-    false $is_remote_p
+    "retain backslash in single quote arg"
 
 run_test_same "\"\\\$\"" \
     "\"\\\$\"" \
@@ -143,8 +136,7 @@ run_test_same "\"\\\$\"" \
 
 run_test_same "'\\\$'" \
     "\"${bs}${bs}\\\$\"" \
-    "'\$' is not escaped in single quote arg" \
-    false $is_remote_p
+    "'\$' is not escaped in single quote arg"
 
 run_test_same "\"\\`\"" \
     "\"\\`\"" \
@@ -152,25 +144,20 @@ run_test_same "\"\\`\"" \
 
 run_test_same "'\\`'" \
     "\"${bs}${bs}`\"" \
-    "'`' is not escaped in single quote arg" \
-    false $is_remote_p
+    "'`' is not escaped in single quote arg"
 
 run_test_same "\"\\\"\"" \
     "\"${bs}\"\"" \
-    "'\"' can be escaped in double quote arg" \
-    false $is_remote_p
+    "'\"' can be escaped in double quote arg"
 
 run_test_same "'\\\"'" \
     "\"${bs}${bs}${bs}\"\"" \
-    "'\"' is not escaped in single quote arg" \
-    false $is_remote_p
+    "'\"' is not escaped in single quote arg"
 
 run_test_same "\"\\\\\"" \
     "\"${bs}${bs}\"" \
-    "'\\' can be escaped in double quote arg" \
-    false $is_remote_p
+    "'\\' can be escaped in double quote arg"
 
 run_test_same "'\\\\'" \
     "\"${bs}${bs}${bs}${bs}\"" \
-    "'\\' is not escaped in single quote arg" \
-    false $is_remote_p
+    "'\\' is not escaped in single quote arg"

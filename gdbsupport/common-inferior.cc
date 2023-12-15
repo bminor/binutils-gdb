@@ -31,92 +31,66 @@ construct_inferior_arguments (gdb::array_view<char * const> argv)
 {
   std::string result;
 
-  if (startup_with_shell)
-    {
 #ifdef __MINGW32__
-      /* This holds all the characters considered special to the
-	 Windows shells.  */
-      static const char special[] = "\"!&*|[]{}<>?`~^=;, \t\n";
-      static const char quote = '"';
+  /* This holds all the characters considered special to the
+     Windows shells.  */
+  static const char special[] = "\"!&*|[]{}<>?`~^=;, \t\n";
+  static const char quote = '"';
 #else
-      /* This holds all the characters considered special to the
-	 typical Unix shells.  We include `^' because the SunOS
-	 /bin/sh treats it as a synonym for `|'.  */
-      static const char special[] = "\"!#$&*()\\|[]{}<>?'`~^; \t\n";
-      static const char quote = '\'';
+  /* This holds all the characters considered special to the
+     typical Unix shells.  We include `^' because the SunOS
+     /bin/sh treats it as a synonym for `|'.  */
+  static const char special[] = "\"!#$&*()\\|[]{}<>?'`~^; \t\n";
+  static const char quote = '\'';
 #endif
-      for (int i = 0; i < argv.size (); ++i)
-	{
-	  if (i > 0)
-	    result += ' ';
+  for (int i = 0; i < argv.size (); ++i)
+    {
+      if (i > 0)
+	result += ' ';
 
-	  /* Need to handle empty arguments specially.  */
-	  if (argv[i][0] == '\0')
+      /* Need to handle empty arguments specially.  */
+      if (argv[i][0] == '\0')
+	{
+	  result += quote;
+	  result += quote;
+	}
+      else
+	{
+#ifdef __MINGW32__
+	  bool quoted = false;
+
+	  if (strpbrk (argv[i], special))
 	    {
-	      result += quote;
+	      quoted = true;
 	      result += quote;
 	    }
-	  else
+#endif
+	  for (char *cp = argv[i]; *cp != '\0'; ++cp)
 	    {
-#ifdef __MINGW32__
-	      bool quoted = false;
-
-	      if (strpbrk (argv[i], special))
+	      if (*cp == '\n')
 		{
-		  quoted = true;
+		  /* A newline cannot be quoted with a backslash (it
+		     just disappears), only by putting it inside
+		     quotes.  */
+		  result += quote;
+		  result += '\n';
 		  result += quote;
 		}
-#endif
-	      for (char *cp = argv[i]; *cp; ++cp)
+	      else
 		{
-		  if (*cp == '\n')
-		    {
-		      /* A newline cannot be quoted with a backslash (it
-			 just disappears), only by putting it inside
-			 quotes.  */
-		      result += quote;
-		      result += '\n';
-		      result += quote;
-		    }
-		  else
-		    {
 #ifdef __MINGW32__
-		      if (*cp == quote)
+		  if (*cp == quote)
 #else
-		      if (strchr (special, *cp) != NULL)
+		    if (strchr (special, *cp) != NULL)
 #endif
-			result += '\\';
-		      result += *cp;
-		    }
+		      result += '\\';
+		  result += *cp;
 		}
-#ifdef __MINGW32__
-	      if (quoted)
-		result += quote;
-#endif
 	    }
-	}
-    }
-  else
-    {
-      /* In this case we can't handle arguments that contain spaces,
-	 tabs, or newlines -- see breakup_args().  */
-      for (char *arg : argv)
-	{
-	  char *cp = strchr (arg, ' ');
-	  if (cp == NULL)
-	    cp = strchr (arg, '\t');
-	  if (cp == NULL)
-	    cp = strchr (arg, '\n');
-	  if (cp != NULL)
-	    error (_("can't handle command-line "
-		     "argument containing whitespace"));
-	}
-
-      for (int i = 0; i < argv.size (); ++i)
-	{
-	  if (i > 0)
-	    result += " ";
-	  result += argv[i];
+#ifdef __MINGW32__
+	  if (quoted)
+	    result += quote;
+#endif
 	}
     }
 
