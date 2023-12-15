@@ -176,6 +176,8 @@ _bfd_delete_bfd (bfd *abfd)
   else
     free ((char *) bfd_get_filename (abfd));
 
+  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+    free (abfd->iostream);
   free (abfd->arelt_data);
   free (abfd);
 }
@@ -1064,7 +1066,6 @@ bfd_make_readable (bfd *abfd)
   abfd->section_count = 0;
   abfd->usrdata = NULL;
   abfd->cacheable = false;
-  abfd->flags |= BFD_IN_MEMORY;
   abfd->mtime_set = false;
 
   abfd->target_defaulted = true;

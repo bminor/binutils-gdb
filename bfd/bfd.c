@@ -160,8 +160,8 @@ CODE_FRAGMENT
 .#define BFD_TRADITIONAL_FORMAT    0x400
 .
 .  {* This flag indicates that the BFD contents are actually cached
-.     in memory.  If this is set, iostream points to a bfd_in_memory
-.     struct.  *}
+.     in memory.  If this is set, iostream points to a malloc'd
+.     bfd_in_memory struct.  *}
 .#define BFD_IN_MEMORY             0x800
 .
 .  {* This BFD has been created by the linker and doesn't correspond

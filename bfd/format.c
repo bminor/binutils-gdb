@@ -166,7 +166,14 @@ io_reinit (bfd *abfd, struct bfd_preserve *preserve)
 	 won't do anything unless abfd->iovec is the cache_iovec.  */
       bfd_cache_close (abfd);
       abfd->iovec = preserve->iovec;
-      abfd->iostream = preserve->iostream;
+
+      if (abfd->iostream != preserve->iostream)
+	{
+	  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+	    free (abfd->iostream);
+	  abfd->iostream = preserve->iostream;
+	}
+
       /* Handle in-memory to file backed transition.  */
       if ((abfd->flags & BFD_CLOSED_BY_CACHE) != 0
 	  && (abfd->flags & BFD_IN_MEMORY) != 0
