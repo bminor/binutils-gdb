@@ -1191,7 +1191,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
 		 struct vector_type_el *typeinfo, unsigned int flags)
 {
   char *str = *ccp;
-  bool isalpha = ISALPHA (*str);
+  bool is_alpha = ISALPHA (*str);
   const reg_entry *reg = parse_reg (&str);
   struct vector_type_el atype;
   struct vector_type_el parsetype;
@@ -1208,7 +1208,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
     {
       if (typeinfo)
 	*typeinfo = atype;
-      if (!isalpha && (flags & PTR_IN_REGLIST))
+      if (!is_alpha && (flags & PTR_IN_REGLIST))
 	set_fatal_syntax_error (_("syntax error in register list"));
       else if (flags & PTR_GOOD_MATCH)
 	set_fatal_syntax_error (NULL);
@@ -1237,7 +1237,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
 	  if ((reg->type == REG_TYPE_ZAT
 	       || reg->type == REG_TYPE_ZATH
 	       || reg->type == REG_TYPE_ZATV)
-	      && reg->number * 8 >= parsetype.element_size)
+	      && reg->number * 8U >= parsetype.element_size)
 	    {
 	      set_syntax_error (_("ZA tile number out of range"));
 	      return NULL;
