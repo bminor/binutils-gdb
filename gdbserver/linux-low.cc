@@ -7013,11 +7013,13 @@ current_lwp_ptid (void)
 }
 
 /* A helper function that copies NAME to DEST, replacing non-printable
-   characters with '?'.  Returns DEST as a convenience.  */
+   characters with '?'.  Returns the original DEST as a
+   convenience.  */
 
 static const char *
 replace_non_ascii (char *dest, const char *name)
 {
+  const char *result = dest;
   while (*name != '\0')
     {
       if (!ISPRINT (*name))
@@ -7026,7 +7028,8 @@ replace_non_ascii (char *dest, const char *name)
 	*dest++ = *name;
       ++name;
     }
-  return dest;
+  *dest = '\0';
+  return result;
 }
 
 const char *
@@ -7064,8 +7067,8 @@ linux_process_target::thread_name (ptid_t thread)
       else if ((errno == EILSEQ || errno == EINVAL)
 	       && outbuf < &dest[sizeof (dest) - 2])
 	*outbuf++ = '?';
-      *outbuf = '\0';
     }
+  *outbuf = '\0';
 
   iconv_close (handle);
   return *dest == '\0' ? nullptr : dest;
