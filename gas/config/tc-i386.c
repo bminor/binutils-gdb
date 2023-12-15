@@ -7052,13 +7052,14 @@ match_template (char mnem_suffix)
 
       /* Check AT&T mnemonic.   */
       specific_error = progress (unsupported_with_intel_mnemonic);
-      if (intel_mnemonic && t->opcode_modifier.attmnemonic)
+      if (!intel_syntax && intel_mnemonic && t->opcode_modifier.attmnemonic)
 	continue;
 
       /* Check AT&T/Intel syntax.  */
       specific_error = progress (unsupported_syntax);
-      if ((intel_syntax && t->opcode_modifier.attsyntax)
-	  || (!intel_syntax && t->opcode_modifier.intelsyntax))
+      if (intel_syntax
+	   ? t->opcode_modifier.attsyntax || t->opcode_modifier.attmnemonic
+	   : t->opcode_modifier.intelsyntax)
 	continue;
 
       /* Check Intel64/AMD64 ISA.   */
@@ -15223,7 +15224,7 @@ md_show_usage (FILE *stream)
   else
     fprintf (stream, _("(default: intel)\n"));
   fprintf (stream, _("\
-                          use AT&T/Intel mnemonic\n"));
+                          use AT&T/Intel mnemonic (AT&T syntax only)\n"));
   fprintf (stream, _("\
   -msyntax=[att|intel] (default: att)\n\
                           use AT&T/Intel syntax\n"));

@@ -704,14 +704,13 @@ faddp, 0xdec1, FP, NoSuf, {}
 fsub, 0xd8/4, FP, Modrm|NoSuf, { FloatReg }
 fsub, 0xd8/4, FP, D|Modrm|NoSuf, { FloatReg, FloatAcc }
 // alias for fsubp
-fsub, 0xdee1, FP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
-fsub, 0xdee9, FP, NoSuf|Ugh|ATTMnemonic, {}
+fsub, 0xdee1, FP, NoSuf|Ugh|ATTMnemonic, {}
 fsub, 0xd8/4, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
 fisub, 0xde/4, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fsubp, 0xde/4, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
-fsubp, 0xde/4, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
-fsubp, 0xdee1, FP, NoSuf|ATTMnemonic|ATTSyntax, {}
+fsubp, 0xde/4, FP, Modrm|NoSuf|ATTMnemonic, { FloatAcc, FloatReg }
+fsubp, 0xde/4, FP, Modrm|NoSuf|ATTMnemonic, { FloatReg }
+fsubp, 0xdee1, FP, NoSuf|ATTMnemonic, {}
 fsubp, 0xde/5, FP, Modrm|NoSuf, { FloatAcc, FloatReg }
 fsubp, 0xde/5, FP, Modrm|NoSuf, { FloatReg }
 fsubp, 0xdee9, FP, NoSuf, {}
@@ -720,14 +719,13 @@ fsubp, 0xdee9, FP, NoSuf, {}
 fsubr, 0xd8/5, FP, Modrm|NoSuf, { FloatReg }
 fsubr, 0xd8/5, FP, D|Modrm|NoSuf, { FloatReg, FloatAcc }
 // alias for fsubrp
-fsubr, 0xdee9, FP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
-fsubr, 0xdee1, FP, NoSuf|Ugh|ATTMnemonic, {}
+fsubr, 0xdee9, FP, NoSuf|Ugh|ATTMnemonic, {}
 fsubr, 0xd8/5, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
 fisubr, 0xde/5, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fsubrp, 0xde/5, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
-fsubrp, 0xde/5, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
-fsubrp, 0xdee9, FP, NoSuf|ATTMnemonic|ATTSyntax, {}
+fsubrp, 0xde/5, FP, Modrm|NoSuf|ATTMnemonic, { FloatAcc, FloatReg }
+fsubrp, 0xde/5, FP, Modrm|NoSuf|ATTMnemonic, { FloatReg }
+fsubrp, 0xdee9, FP, NoSuf|ATTMnemonic, {}
 fsubrp, 0xde/4, FP, Modrm|NoSuf, { FloatAcc, FloatReg }
 fsubrp, 0xde/4, FP, Modrm|NoSuf, { FloatReg }
 fsubrp, 0xdee1, FP, NoSuf, {}
@@ -749,14 +747,13 @@ fmulp, 0xdec9, FP, NoSuf, {}
 fdiv, 0xd8/6, FP, Modrm|NoSuf, { FloatReg }
 fdiv, 0xd8/6, FP, D|Modrm|NoSuf, { FloatReg, FloatAcc }
 // alias for fdivp
-fdiv, 0xdef1, FP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
-fdiv, 0xdef9, FP, NoSuf|Ugh|ATTMnemonic, {}
+fdiv, 0xdef1, FP, NoSuf|Ugh|ATTMnemonic, {}
 fdiv, 0xd8/6, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
 fidiv, 0xde/6, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fdivp, 0xde/6, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
-fdivp, 0xde/6, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
-fdivp, 0xdef1, FP, NoSuf|ATTMnemonic|ATTSyntax, {}
+fdivp, 0xde/6, FP, Modrm|NoSuf|ATTMnemonic, { FloatAcc, FloatReg }
+fdivp, 0xde/6, FP, Modrm|NoSuf|ATTMnemonic, { FloatReg }
+fdivp, 0xdef1, FP, NoSuf|ATTMnemonic, {}
 fdivp, 0xde/7, FP, Modrm|NoSuf, { FloatAcc, FloatReg }
 fdivp, 0xde/7, FP, Modrm|NoSuf, { FloatReg }
 fdivp, 0xdef9, FP, NoSuf, {}
@@ -765,14 +762,13 @@ fdivp, 0xdef9, FP, NoSuf, {}
 fdivr, 0xd8/7, FP, Modrm|NoSuf, { FloatReg }
 fdivr, 0xd8/7, FP, D|Modrm|NoSuf, { FloatReg, FloatAcc }
 // alias for fdivrp
-fdivr, 0xdef9, FP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
-fdivr, 0xdef1, FP, NoSuf|Ugh|ATTMnemonic, {}
+fdivr, 0xdef9, FP, NoSuf|Ugh|ATTMnemonic, {}
 fdivr, 0xd8/7, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Dword|Qword|Unspecified|BaseIndex }
 fidivr, 0xde/7, FP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fdivrp, 0xde/7, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
-fdivrp, 0xde/7, FP, Modrm|NoSuf|ATTMnemonic|ATTSyntax, { FloatReg }
-fdivrp, 0xdef9, FP, NoSuf|ATTMnemonic|ATTSyntax, {}
+fdivrp, 0xde/7, FP, Modrm|NoSuf|ATTMnemonic, { FloatAcc, FloatReg }
+fdivrp, 0xde/7, FP, Modrm|NoSuf|ATTMnemonic, { FloatReg }
+fdivrp, 0xdef9, FP, NoSuf|ATTMnemonic, {}
 fdivrp, 0xde/6, FP, Modrm|NoSuf, { FloatAcc, FloatReg }
 fdivrp, 0xde/6, FP, Modrm|NoSuf, { FloatReg }
 fdivrp, 0xdef1, FP, NoSuf, {}

@@ -1,5 +1,5 @@
 #as: -mmnemonic=intel
-#objdump: -d -Mintel-mnemonic
+#objdump: -d -Mintel
 #name: i386 float Intel mnemonic (2)
 #source: compat.s
 

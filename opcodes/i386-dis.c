@@ -8571,10 +8571,10 @@ with the -M switch (multiple options should be separated by commas):\n"));
   fprintf (stream, _("  i8086       Disassemble in 16bit mode\n"));
   fprintf (stream, _("  att         Display instruction in AT&T syntax\n"));
   fprintf (stream, _("  intel       Display instruction in Intel syntax\n"));
-  fprintf (stream, _("  att-mnemonic\n"
-		     "              Display instruction in AT&T mnemonic\n"));
-  fprintf (stream, _("  intel-mnemonic\n"
-		     "              Display instruction in Intel mnemonic\n"));
+  fprintf (stream, _("  att-mnemonic  (AT&T syntax only)\n"
+		     "              Display instruction with AT&T mnemonic\n"));
+  fprintf (stream, _("  intel-mnemonic  (AT&T syntax only)\n"
+		     "              Display instruction with Intel mnemonic\n"));
   fprintf (stream, _("  addr64      Assume 64bit address size\n"));
   fprintf (stream, _("  addr32      Assume 32bit address size\n"));
   fprintf (stream, _("  addr16      Assume 16bit address size\n"));
@@ -9241,9 +9241,10 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 	}
       else if (startswith (p, "intel"))
 	{
-	  ins.intel_syntax = 1;
 	  if (startswith (p + 5, "-mnemonic"))
 	    ins.intel_mnemonic = true;
+	  else
+	    ins.intel_syntax = 1;
 	}
       else if (startswith (p, "att"))
 	{

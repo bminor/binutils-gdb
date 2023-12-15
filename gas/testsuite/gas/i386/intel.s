@@ -632,7 +632,6 @@ rot5:
  shrd   eax, edx, cl
  shld   eax, edx, cl
 
-fadd
 fadd	st(3)
 fadd	st,st(3)
 fadd	st(3),st
@@ -641,7 +640,6 @@ fadd   QWORD PTR [ebx]
 faddp
 faddp	st(3)
 faddp	st(3),st
-fdiv
 fdiv   st(3)
 fdiv   st,st(3)
 fdiv   st(3),st
@@ -651,7 +649,6 @@ fdivp
 fdivp  st(3)
 fdivp  st(3),st
 fdiv  st,st(3)
-fdivr
 fdivr  st(3)
 fdivr  st,st(3)
 fdivr  st(3),st
@@ -661,7 +658,6 @@ fdivrp
 fdivrp st(3)
 fdivrp st(3),st
 fdivr st,st(3)
-fmul
 fmul	st(3)
 fmul	st,st(3)
 fmul	st(3),st
@@ -670,8 +666,6 @@ fmul   QWORD PTR [ebx]
 fmulp
 fmulp	st(3)
 fmulp	st(3),st
-fsub
-fsubr
 fsub   st(3)
 fsub   st,st(3)
 fsub   st(3),st
