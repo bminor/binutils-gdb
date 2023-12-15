@@ -181,7 +181,7 @@ static const reg_entry *build_modrm_byte (void);
 static void output_insn (const struct last_insn *);
 static void output_imm (fragS *, offsetT);
 static void output_disp (fragS *, offsetT);
-#ifndef I386COFF
+#ifdef OBJ_AOUT
 static void s_bss (int);
 #endif
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
@@ -1201,9 +1201,10 @@ const pseudo_typeS md_pseudo_table[] =
   {"align", s_align_ptwo, 0},
 #endif
   {"arch", set_cpu_arch, 0},
-#ifndef I386COFF
+#ifdef OBJ_AOUT
   {"bss", s_bss, 0},
-#else
+#endif
+#ifdef I386COFF
   {"lcomm", pe_lcomm, 1},
 #endif
   {"ffloat", float_cons, 'f'},
@@ -15477,17 +15478,13 @@ md_pcrel_from (fixS *fixP)
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
 
-#ifndef I386COFF
+#ifdef OBJ_AOUT
 
 static void
 s_bss (int ignore ATTRIBUTE_UNUSED)
 {
   int temp;
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  if (IS_ELF)
-    obj_elf_section_change_hook ();
-#endif
   temp = get_absolute_expression ();
   subseg_set (bss_section, (subsegT) temp);
   demand_empty_rest_of_line ();
