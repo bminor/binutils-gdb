@@ -198,7 +198,7 @@ extern void obj_elf_data (int);
 extern void obj_elf_text (int);
 extern void obj_elf_change_section
   (const char *, unsigned int, bfd_vma, int, struct elf_section_match *,
-   int, int);
+   bool);
 extern void obj_elf_vtable_inherit (int);
 extern void obj_elf_vtable_entry (int);
 extern struct fix * obj_elf_get_vtable_inherit (void);

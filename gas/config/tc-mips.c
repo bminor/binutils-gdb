@@ -16435,7 +16435,7 @@ s_change_section (int ignore ATTRIBUTE_UNUSED)
     section_type = SHT_PROGBITS;
 
   obj_elf_change_section (section_name, section_type, section_flag,
-			  section_entry_size, 0, 0, 0);
+			  section_entry_size, 0, false);
 }
 
 void

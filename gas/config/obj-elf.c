@@ -540,14 +540,14 @@ get_section_by_match (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
    other possibilities, but I don't know what they are.  In any case,
    BFD doesn't really let us set the section type.  */
 
-void
-obj_elf_change_section (const char *name,
-			unsigned int type,
-			bfd_vma attr,
-			int entsize,
-			struct elf_section_match *match_p,
-			int linkonce,
-			int push)
+static void
+change_section (const char *name,
+		unsigned int type,
+		bfd_vma attr,
+		int entsize,
+		struct elf_section_match *match_p,
+		bool linkonce,
+		bool push)
 {
   asection *old_sec;
   segT sec;
@@ -818,6 +818,17 @@ obj_elf_change_section (const char *name,
 #ifdef md_elf_section_change_hook
   md_elf_section_change_hook ();
 #endif
+}
+
+void
+obj_elf_change_section (const char *name,
+			unsigned int type,
+			bfd_vma attr,
+			int entsize,
+			struct elf_section_match *match_p,
+			bool linkonce)
+{
+  change_section (name, type, attr, entsize, match_p, linkonce, false);
 }
 
 static bfd_vma
@@ -1488,8 +1499,7 @@ obj_elf_section (int push)
 	}
     }
 
-  obj_elf_change_section (name, type, attr, entsize, &match, linkonce,
-			  push);
+  change_section (name, type, attr, entsize, &match, linkonce, push);
 
   if (linked_to_section_index != -1UL)
     {
