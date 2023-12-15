@@ -23,9 +23,10 @@
 #         bit-field NVMCTRL_CTRLB.FLMAP.
 #         Output section .rodata is placed in MEMORY region rodata.
 #         The LMA of the .rodata section can be set by means of:
-#         * __flmap specifies which 32k block is visible in RAM.
 #         * __RODATA_FLASH_START__ specifies the byte address of the
-#           rodata LMA and is used if __flmap is undefined.
+#           rodata LMA.
+#         * __flmap specifies which 32k block is visible in RAM provided
+#           __RODATA_FLASH_START__ is undefined
 #         * When __flmap and __RODATA_FLASH_START__ are undefined, then an
 #           emulation-specific default is used (the last 32k block).
 
@@ -36,18 +37,21 @@
 #         achieved by new emulations avrxmega2_flmap and avrxmega4_flmap that
 #         are selected by compiler option -mno-rodata-in-ram.
 #
-#         In order to facilitate initialization of NVMCTRL_CTRLB.FLMAP in
-#         the startup code irrespective of HAVE_FLMAP, the follwing symbols
-#         are defined in order to communicate with the startup code.
+#         In order to facilitate initialization of NVMCTRL_CTRLB.FLMAP and
+#         NVMCTRL_CTRLB.FLMAPLOCK in the startup code irrespective of
+#         HAVE_FLMAP, the following symbols are used / defined in order to
+#         communicate with the startup code.
 #         Notice that the hardware default for FLMAP is the last 32k block,
 #         so that explicit initialization of FLMAP is only required when the
-#         user wants to deviate from the defauls.
+#         user wants to deviate from the defaults.
 #
 #         __flmap = HAVE_FLMAP
 #                   ? given by __flmap resp. __RODATA_FLASH_START__ >> 15
 #                   : 0;
 #
-#         __flmap_lsl4 = __flmap << 4;
+#         __flmap_value = __flmap << __flmap_bpos;
+#
+#         __flmap_value_with_lock = __flmap__value | __flmap_lock_mask;
 #
 #         __flmap_init_label = HAVE_FLMAP
 #                              ? __flmap_init_start
@@ -55,7 +59,14 @@
 #             Supposed to be used as a jump target for RJMP so that the code
 #             can initialize FLMAP / skip initialization of FLMAP depending
 #             on the chosen emulation, and without the need to support two code
-#             versions of crt<mcu>.o for the two possble emulations.
+#             versions of crt<mcu>.o for the two possible emulations.
+#
+#         __flmap_lock is a bool provided by the user when FLMAP should be
+#             protected from any further changes.
+#
+#         __flmap_lock_mask is an 8-bit mask like NVMCTRL_FLMAPLOCK_bm
+#             provided by the user which is set in __flmap_value_with_lock
+#             when __flmap_lock is on.
 #
 #         __do_init_flmap = HAVE_FLMAP ? 1 : 0;
 #             Whether or not FLMAP is supposed to be initialized according
@@ -343,20 +354,11 @@ EOF
 # memory at 0x8000 (RODATA_LDS_OFFSET).  Which portion will be determined by
 # bitfield NVMCTRL_CTRLB.FLMAP.
 
-if test -n "${MAYBE_FLMAP}" && test -n "${RELOCATING}"; then
-    cat <<EOF
-
-__do_init_flmap = ${HAVE_FLMAP-0};
-
-EOF
-fi
-
 if test -z "${HAVE_FLMAP}" && test -n "${RELOCATING}"; then
     cat <<EOF
 
 PROVIDE (__flmap_init_label = DEFINED(__flmap_noinit_start) ? __flmap_noinit_start : 0) ;
 PROVIDE (__flmap = DEFINED(__flmap) ? __flmap : 0) ;
-PROVIDE (__flmap_lsl4 = __flmap << 4) ;
 
 EOF
 fi
@@ -367,15 +369,14 @@ if test -n "${HAVE_FLMAP}"; then
 ${RELOCATING+
 PROVIDE (__flmap_init_label = DEFINED(__flmap_init_start) ? __flmap_init_start : 0) ;
 /* User can specify position of .rodata in flash (LMA) by supplying
-   __RODATA_FLASH_START__ or __flmap, where __flmap takes precedence. */
-__RODATA_FLASH_START__ = DEFINED(__flmap)
-   ? __flmap * 32K
-   : DEFINED(__RODATA_FLASH_START__) ? __RODATA_FLASH_START__ : ${RODATA_FLASH_START};
+   __RODATA_FLASH_START__ or __flmap, where the former takes precedence. */
+__RODATA_FLASH_START__ = DEFINED(__RODATA_FLASH_START__)
+   ? __RODATA_FLASH_START__
+   : DEFINED(__flmap) ? __flmap * 32K : ${RODATA_FLASH_START};
 ASSERT (__RODATA_FLASH_START__ % 32K == 0, \"__RODATA_FLASH_START__ must be a multiple of 32 KiB\")
-__flmap = ${FLMAP_MASK} & (DEFINED(__flmap) ? __flmap : __RODATA_FLASH_START__ >> 15);
+__flmap = ${FLMAP_MASK} & (__RODATA_FLASH_START__ >> 15);
 __RODATA_FLASH_START__ = __flmap << 15;
 __rodata_load_start = MAX (__data_load_end, __RODATA_FLASH_START__);
-PROVIDE (__flmap_lsl4 = __flmap << 4) ;
 __rodata_start = __RODATA_ORIGIN__ + __rodata_load_start - __RODATA_FLASH_START__;}
 
   .rodata ${RELOCATING+ __rodata_start} ${RELOCATING-0} : ${RELOCATING+ AT (__rodata_load_start)}
@@ -387,6 +388,19 @@ __rodata_start = __RODATA_ORIGIN__ + __rodata_load_start - __RODATA_FLASH_START_
   } ${RELOCATING+ > rodata}
 
 ${RELOCATING+ __rodata_load_end = __rodata_load_start + __rodata_end - __rodata_start;}
+
+EOF
+fi
+
+if test -n "${MAYBE_FLMAP}" && test -n "${RELOCATING}"; then
+    cat <<EOF
+
+__do_init_flmap = ${HAVE_FLMAP-0};
+__flmap_value = __flmap << (DEFINED(__flmap_bpos) ? __flmap_bpos : 4);
+__flmap_value_with_lock =
+   __flmap_value | (DEFINED(__flmap_lock) && DEFINED(__flmap_lock_mask)
+                    ? (__flmap_lock && __do_init_flmap ? __flmap_lock_mask : 0)
+                    : 0);
 
 EOF
 fi
