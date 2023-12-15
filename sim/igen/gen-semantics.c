@@ -262,10 +262,17 @@ print_semantic_body (lf *file,
     {
       /* true code */
       lf_printf (file, "{\n");
-      lf_indent (file, +2);
+      /* NB: Do not indent the code.  If the .igen source files cause a compiler
+	 warning, the diagnostics can read the line from the original source,
+	 but use column offsets from the generated files, causing columns to be
+	 misaligned.  It makes the generated code slightly more difficult to
+	 read, but accurate compiler diagnostics relative to the original source
+	 are more important here.
+      lf_indent (file, +2); */
       lf_print__line_ref (file, instruction->code->line);
       table_print_code (file, instruction->code);
-      lf_indent (file, -2);
+      /* NB: Disabled -- see above.
+      lf_indent (file, -2); */
       lf_printf (file, "}\n");
       lf_print__internal_ref (file);
     }
