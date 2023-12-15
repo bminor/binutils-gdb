@@ -90,8 +90,7 @@ emit_full16 (SIM_CPU *current_cpu, PCADDR pc, CGEN_INSN_INT insn, SCACHE *sc,
   @cpu@_emit_before (current_cpu, sc, pc, 1);
   id = emit_16 (current_cpu, pc, insn, sc + 1, 0, 0);
   @cpu@_emit_after (current_cpu, sc + 2, pc);
-  sc[1].argbuf.trace_p = trace_p;
-  sc[1].argbuf.profile_p = profile_p;
+  @cpu@_fill_argbuf_tp (current_cpu, &sc[1].argbuf, trace_p, profile_p);
   return id;
 }
 
@@ -140,15 +139,13 @@ emit_full_parallel (SIM_CPU *current_cpu, PCADDR pc, CGEN_INSN_INT insn,
 
   /* FIXME: No need to handle this parallelly if second is nop.  */
   id = emit_16 (current_cpu, pc, insn >> 16, sc + 1, 0, 1);
-  sc[1].argbuf.trace_p = trace_p;
-  sc[1].argbuf.profile_p = profile_p;
+  @cpu@_fill_argbuf_tp (current_cpu, &sc[1].argbuf, trace_p, profile_p);
 
   @cpu@_emit_before (current_cpu, sc + 2, pc, 0);
 
   /* Note that this can never be a cti.  No cti's go in the S pipeline.  */
   id2 = emit_16 (current_cpu, pc + 2, insn & 0x7fff, sc + 3, 0, 0);
-  sc[3].argbuf.trace_p = trace_p;
-  sc[3].argbuf.profile_p = profile_p;
+  @cpu@_fill_argbuf_tp (current_cpu, &sc[3].argbuf, trace_p, profile_p);
 
   /* Set sc/snc insns notion of where to skip to.  */
   if (IDESC_SKIP_P (id))
@@ -184,8 +181,7 @@ emit_full32 (SIM_CPU *current_cpu, PCADDR pc, CGEN_INSN_INT insn, SCACHE *sc,
   @cpu@_emit_before (current_cpu, sc, pc, 1);
   id = emit_32 (current_cpu, pc, insn, sc + 1, 0);
   @cpu@_emit_after (current_cpu, sc + 2, pc);
-  sc[1].argbuf.trace_p = trace_p;
-  sc[1].argbuf.profile_p = profile_p;
+  @cpu@_fill_argbuf_tp (current_cpu, &sc[1].argbuf, trace_p, profile_p);
   return id;
 }
 
