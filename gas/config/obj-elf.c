@@ -547,7 +547,8 @@ change_section (const char *name,
 		int entsize,
 		struct elf_section_match *match_p,
 		bool linkonce,
-		bool push)
+		bool push,
+		subsegT new_subsection)
 {
   asection *old_sec;
   segT sec;
@@ -585,10 +586,10 @@ change_section (const char *name,
   if (old_sec)
     {
       sec = old_sec;
-      subseg_set (sec, 0);
+      subseg_set (sec, new_subsection);
     }
   else
-    sec = subseg_force_new (name, 0);
+    sec = subseg_force_new (name, new_subsection);
 
   bed = get_elf_backend_data (stdoutput);
   ssect = (*bed->get_sec_type_attr) (stdoutput, sec);
@@ -828,7 +829,7 @@ obj_elf_change_section (const char *name,
 			struct elf_section_match *match_p,
 			bool linkonce)
 {
-  change_section (name, type, attr, entsize, match_p, linkonce, false);
+  change_section (name, type, attr, entsize, match_p, linkonce, false, 0);
 }
 
 static bfd_vma
@@ -1114,8 +1115,8 @@ obj_elf_section (int push)
   bfd_vma attr;
   bfd_vma gnu_attr;
   int entsize;
-  int linkonce;
-  subsegT new_subsection = -1;
+  bool linkonce;
+  subsegT new_subsection = 0;
   struct elf_section_match match;
   unsigned long linked_to_section_index = -1UL;
 
@@ -1499,7 +1500,8 @@ obj_elf_section (int push)
 	}
     }
 
-  change_section (name, type, attr, entsize, &match, linkonce, push);
+  change_section (name, type, attr, entsize, &match, linkonce, push,
+		  new_subsection);
 
   if (linked_to_section_index != -1UL)
     {
@@ -1507,9 +1509,6 @@ obj_elf_section (int push)
       elf_section_data (now_seg)->this_hdr.sh_link = linked_to_section_index;
       /* FIXME: Should we perform some sanity checking on the section index ?  */
     }
-
-  if (push && new_subsection != -1)
-    subseg_set (now_seg, new_subsection);
 }
 
 /* Change to the .bss section.  */
@@ -2529,9 +2528,17 @@ obj_elf_ident (int ignore ATTRIBUTE_UNUSED)
       *p = 0;
     }
   else
-    subseg_set (comment_section, 0);
+    {
+      subseg_set (comment_section, 0);
+#ifdef md_elf_section_change_hook
+      md_elf_section_change_hook ();
+#endif
+    }
   stringer (8 + 1);
   subseg_set (old_section, old_subsection);
+#ifdef md_elf_section_change_hook
+  md_elf_section_change_hook ();
+#endif
 }
 
 #ifdef INIT_STAB_SECTION
