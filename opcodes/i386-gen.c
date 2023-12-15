@@ -482,9 +482,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Disp8MemShift),
   BITFIELD (Vsz),
   BITFIELD (Optimize),
-  BITFIELD (ATTMnemonic),
-  BITFIELD (ATTSyntax),
-  BITFIELD (IntelSyntax),
+  BITFIELD (Dialect),
   BITFIELD (ISA64),
 };
 

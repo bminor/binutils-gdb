@@ -86,6 +86,10 @@
 #define SwapSources       OperandConstraint=SWAP_SOURCES
 #define Ugh               OperandConstraint=UGH
 
+#define ATTSyntax         Dialect=ATT_SYNTAX
+#define ATTMnemonic       Dialect=ATT_MNEMONIC
+#define IntelSyntax       Dialect=INTEL_SYNTAX
+
 #define IgnoreSize	MnemonicSize=IGNORESIZE
 #define DefaultSize	MnemonicSize=DEFAULTSIZE
 

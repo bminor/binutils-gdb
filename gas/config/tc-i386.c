@@ -7052,14 +7052,15 @@ match_template (char mnem_suffix)
 
       /* Check AT&T mnemonic.   */
       specific_error = progress (unsupported_with_intel_mnemonic);
-      if (!intel_syntax && intel_mnemonic && t->opcode_modifier.attmnemonic)
+      if (!intel_syntax && intel_mnemonic
+	  && t->opcode_modifier.dialect == ATT_MNEMONIC)
 	continue;
 
       /* Check AT&T/Intel syntax.  */
       specific_error = progress (unsupported_syntax);
       if (intel_syntax
-	   ? t->opcode_modifier.attsyntax || t->opcode_modifier.attmnemonic
-	   : t->opcode_modifier.intelsyntax)
+	   ? t->opcode_modifier.dialect >= ATT_SYNTAX
+	   : t->opcode_modifier.dialect == INTEL_SYNTAX)
 	continue;
 
       /* Check Intel64/AMD64 ISA.   */

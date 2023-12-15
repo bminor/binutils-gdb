@@ -729,12 +729,12 @@ enum
   /* Support encoding optimization.  */
   Optimize,
 
-  /* AT&T mnemonic.  */
-  ATTMnemonic,
-  /* AT&T syntax.  */
-  ATTSyntax,
-  /* Intel syntax.  */
-  IntelSyntax,
+  /* Language dialect.  NOTE: Order matters!  */
+#define INTEL_SYNTAX 1
+#define ATT_SYNTAX   2
+#define ATT_MNEMONIC 3
+  Dialect,
+
   /* ISA64: Don't change the order without other code adjustments.
 	0: Common to AMD64 and Intel64.
 	1: AMD64.
@@ -788,9 +788,7 @@ typedef struct i386_opcode_modifier
   unsigned int disp8memshift:3;
   unsigned int vsz:3;
   unsigned int optimize:1;
-  unsigned int attmnemonic:1;
-  unsigned int attsyntax:1;
-  unsigned int intelsyntax:1;
+  unsigned int dialect:2;
   unsigned int isa64:2;
 } i386_opcode_modifier;
 

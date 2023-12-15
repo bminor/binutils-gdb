@@ -825,8 +825,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
 	      /* Easy checks to skip templates which won't match anyway.  */
 	      if (this_operand >= t->operands
-		  || t->opcode_modifier.attsyntax
-		  || t->opcode_modifier.attmnemonic)
+		  || t->opcode_modifier.dialect >= ATT_SYNTAX)
 		continue;
 
 	      switch (suffix)
