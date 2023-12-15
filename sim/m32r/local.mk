@@ -105,7 +105,7 @@ BUILT_SOURCES += \
 
 ## FIXME: Use of `mono' is wip.
 %D%/mloopx.c %D%/engx.h: %D%/stamp-mloop-x ; @true
-%D%/stamp-mloop-x: $(srccom)/genmloop.sh %D%/mloop.in
+%D%/stamp-mloop-x: $(srccom)/genmloop.sh %D%/mloopx.in
 	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -no-fast -pbb -parallel-write -switch semx-switch.c \
 		-cpu m32rxf \
@@ -116,7 +116,7 @@ BUILT_SOURCES += \
 
 ## FIXME: Use of `mono' is wip.
 %D%/mloop2.c %D%/eng2.h: %D%/stamp-mloop-2 ; @true
-%D%/stamp-mloop-2: $(srccom)/genmloop.sh %D%/mloop.in
+%D%/stamp-mloop-2: $(srccom)/genmloop.sh %D%/mloop2.in
 	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -no-fast -pbb -parallel-write -switch sem2-switch.c \
 		-cpu m32r2f \

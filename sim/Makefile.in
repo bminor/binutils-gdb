@@ -5218,7 +5218,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)touch $@
 
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/mloopx.c m32r/engx.h: m32r/stamp-mloop-x ; @true
-@SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop-x: $(srccom)/genmloop.sh m32r/mloop.in
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop-x: $(srccom)/genmloop.sh m32r/mloopx.in
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 @SIM_ENABLE_ARCH_m32r_TRUE@		-mono -no-fast -pbb -parallel-write -switch semx-switch.c \
 @SIM_ENABLE_ARCH_m32r_TRUE@		-cpu m32rxf \
@@ -5228,7 +5228,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)touch $@
 
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/mloop2.c m32r/eng2.h: m32r/stamp-mloop-2 ; @true
-@SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop-2: $(srccom)/genmloop.sh m32r/mloop.in
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop-2: $(srccom)/genmloop.sh m32r/mloop2.in
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 @SIM_ENABLE_ARCH_m32r_TRUE@		-mono -no-fast -pbb -parallel-write -switch sem2-switch.c \
 @SIM_ENABLE_ARCH_m32r_TRUE@		-cpu m32r2f \
