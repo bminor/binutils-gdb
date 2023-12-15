@@ -4216,7 +4216,9 @@ elf32_hppa_finish_dynamic_symbol (bfd *output_bfd,
 	     file, we just want to emit a RELATIVE reloc.  The entry
 	     in the global offset table will already have been
 	     initialized in the relocate_section function.  */
-	  if (!is_dyn)
+	  if (!is_dyn
+	      && (eh->root.type == bfd_link_hash_defined
+		  || eh->root.type == bfd_link_hash_defweak))
 	    {
 	      rela.r_info = ELF32_R_INFO (0, R_PARISC_DIR32);
 	      rela.r_addend = (eh->root.u.def.value
