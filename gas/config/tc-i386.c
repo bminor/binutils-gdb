@@ -15922,6 +15922,39 @@ i386_elf_section_type (const char *str, size_t len)
   return -1;
 }
 
+void
+i386_elf_section_change_hook (void)
+{
+  struct i386_segment_info *info = &seg_info(now_seg)->tc_segment_info_data;
+  struct i386_segment_info *curr, *prev;
+
+  if (info->subseg == now_subseg)
+    return;
+
+  /* Find the (or make a) list entry to save state into.  */
+  for (prev = info; (curr = prev->next) != NULL; prev = curr)
+    if (curr->subseg == info->subseg)
+      break;
+  if (!curr)
+    {
+      curr = XNEW (struct i386_segment_info);
+      curr->subseg = info->subseg;
+      curr->next = NULL;
+      prev->next = curr;
+    }
+  curr->last_insn = info->last_insn;
+
+  /* Find the list entry to load state from.  */
+  for (curr = info->next; curr; curr = curr->next)
+    if (curr->subseg == now_subseg)
+      break;
+  if (curr)
+    info->last_insn = curr->last_insn;
+  else
+    memset (&info->last_insn, 0, sizeof (info->last_insn));
+  info->subseg = now_subseg;
+}
+
 #ifdef TE_SOLARIS
 void
 i386_solaris_fix_up_eh_frame (segT sec)

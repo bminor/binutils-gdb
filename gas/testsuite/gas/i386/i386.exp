@@ -745,6 +745,8 @@ if [gas_32_check] then {
 	run_dump_test "nop-6"
 	run_dump_test "unique"
 
+	run_dump_test "lfence-subsect"
+
 	run_dump_test "property-1"
 
 	if {[istarget "*-*-linux*"]} then {

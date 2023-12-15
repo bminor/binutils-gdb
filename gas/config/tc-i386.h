@@ -294,6 +294,8 @@ struct i386_segment_info {
 	last_insn_prefix
       } kind;
   } last_insn;
+  subsegT subseg;
+  struct i386_segment_info *next;
 };
 
 #define TC_SEGMENT_INFO_TYPE struct i386_segment_info
@@ -394,6 +396,9 @@ extern void tc_x86_frame_initial_instructions (void);
 
 #define md_elf_section_type(str,len) i386_elf_section_type (str, len)
 extern int i386_elf_section_type (const char *, size_t);
+
+#define md_elf_section_change_hook i386_elf_section_change_hook
+extern void i386_elf_section_change_hook (void);
 
 #ifdef TE_SOLARIS
 #define md_fix_up_eh_frame(sec) i386_solaris_fix_up_eh_frame (sec)
