@@ -154,7 +154,6 @@ bpf_write_u64 (SIM_CPU *cpu, bfd_vma address, uint64_t value)
 static int
 bpf_trace_printk (SIM_CPU *cpu)
 {
-  va_list ap;
   SIM_DESC sd = CPU_STATE (cpu);
 
   bfd_vma fmt_address;
@@ -1328,7 +1327,6 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
                      char * const *argv, char * const *env)
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
-  host_callback *cb = STATE_CALLBACK (sd);
   bfd_vma addr;
 
   /* Determine the start address.
