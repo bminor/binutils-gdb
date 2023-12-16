@@ -1110,10 +1110,6 @@ static bool filter_initialized = false;
 
 
 
-/* See readline's rlprivate.h.  */
-
-extern "C" int _rl_term_autowrap;
-
 /* See utils.h.  */
 
 int readline_hidden_cols = 0;
@@ -1154,10 +1150,17 @@ init_page_info (void)
 	   (because rl_change_environment defaults to 1)
 	 - may report one less than the detected screen width in
 	   rl_get_screen_size (when _rl_term_autowrap == 0).
-	 We could set readline_hidden_cols by comparing COLUMNS to cols as
-	 returned by rl_get_screen_size, but instead simply use
-	 _rl_term_autowrap.  */
-      readline_hidden_cols = _rl_term_autowrap ? 0 : 1;
+	 We could use _rl_term_autowrap, but we want to avoid introducing
+	 another dependency on readline private variables, so set
+	 readline_hidden_cols by comparing COLUMNS to cols as returned by
+	 rl_get_screen_size.  */
+      const char *columns_env_str = getenv ("COLUMNS");
+      gdb_assert (columns_env_str != nullptr);
+      int columns_env_val = atoi (columns_env_str);
+      gdb_assert (columns_env_val != 0);
+      readline_hidden_cols = columns_env_val - cols;
+      gdb_assert (readline_hidden_cols >= 0);
+      gdb_assert (readline_hidden_cols <= 1);
 
       lines_per_page = rows;
       chars_per_line = cols + readline_hidden_cols;
