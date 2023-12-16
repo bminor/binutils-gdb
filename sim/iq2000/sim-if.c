@@ -59,7 +59,6 @@ SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 	  char * const *argv)
 {
-  char c;
   int i;
   SIM_DESC sd = sim_state_alloc (kind, callback);
 
