@@ -735,7 +735,6 @@ decode (SIM_DESC sd, sim_cpu *cpu, int addr, unsigned char *data, decoded_inst *
 		  /* Fill in the args.  */
 		  {
 		    const op_type *args = q->args.nib;
-		    int hadone = 0;
 		    int nargs;
 
 		    for (nargs = 0; 
@@ -1625,7 +1624,6 @@ static void
 sort_opcodes_and_setup_nibble_indices (struct h8_opcode *ops)
 {
   const struct h8_opcode *q;
-  int *indices;
   int i;
 
   /* First sort the OPS array.  */
@@ -1771,7 +1769,6 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
   int trace = 0;
   int intMask = 0;
   int oldmask;
-  const struct h8300_sim_state *state = H8300_SIM_STATE (sd);
   host_callback *sim_callback = STATE_CALLBACK (sd);
 
   init_pointers (sd);
@@ -2573,8 +2570,6 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	    int no_of_args = 0;	/* The no. or cmdline args.  */
 	    int current_location = 0;	/* Location of string.  */
 	    int old_sp = 0;	/* The Initial Stack Pointer.  */
-	    int no_of_slots = 0;	/* No. of slots required on the stack
-					   for storing cmdline args.  */
 	    int sp_move = 0;	/* No. of locations by which the stack needs
 				   to grow.  */
 	    int new_sp = 0;	/* The final stack pointer location passed
@@ -4578,7 +4573,6 @@ void
 sim_info (SIM_DESC sd, bool verbose)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0);
-  const struct h8300_sim_state *state = H8300_SIM_STATE (sd);
   double timetaken = (double) h8_get_ticks (cpu) / (double) now_persec ();
   double virttime = h8_get_cycles (cpu) / 10.0e6;
 
@@ -4880,7 +4874,6 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
   int i = 0;
-  int len_arg = 0;
   int no_of_args = 0;
 
   if (abfd != NULL)
