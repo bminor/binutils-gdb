@@ -67,7 +67,7 @@ struct hash_entry hash_table[MAX_HASH+1];
 INLINE static long
 hash(unsigned long long insn, int format)
 { 
-  unsigned int i = 4, tmp;
+  unsigned int i = 4;
   if (format)
     {
       while ((insn >> i) != 0) i +=4;
@@ -113,7 +113,7 @@ INLINE static void
 get_operands (operand_desc *s, uint64_t ins, int isize, int nops)
 {
   uint32_t i, opn = 0, start_bit = 0, op_type = 0; 
-  int32_t op_size = 0, mask = 0;
+  int32_t op_size = 0;
 
   if (isize == 1) /* Trunkcate the extra 16 bits of INS.  */
     ins = ins >> 16;
@@ -397,7 +397,6 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb,
   struct simops *s;
   struct hash_entry *h;
   static int init_p = 0;
-  char **p;
   int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
