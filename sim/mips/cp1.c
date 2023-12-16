@@ -630,7 +630,6 @@ fp_rint (sim_cpu *cpu,
 	 FP_formats fmt)
 {
   sim_fpu wop = {0}, wtemp = {0}, wmagic = {0}, wans = {0};
-  int64_t intermediate;
   int status = 0;
   sim_fpu_round round = rounding_mode (GETRM());
 
@@ -743,7 +742,6 @@ fp_r6_cmp (sim_cpu *cpu,
 {
   sim_fpu wop1, wop2;
   int result = 0;
-  int signalling = cond & 0x8;
 
   switch (fmt)
     {
@@ -1556,7 +1554,6 @@ fpu_inv1(sim_fpu *f, const sim_fpu *l)
     sim_fpu_class_number, 0, IMPLICIT_1, 0
   };
   int  status = 0;
-  sim_fpu t;
 
   if (sim_fpu_is_zero (l))
     {

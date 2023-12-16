@@ -400,8 +400,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	  /* If we find an entry at address 0, then we will end up
 	     allocating a new buffer in the "memory alias" command
 	     below. The region at address 0 will be deleted. */
-	  address_word size = (entry->modulo != 0
-			       ? entry->modulo : entry->nr_bytes);
 	  if (entry->addr == 0
 	      && (!match || entry->level < match->level))
 	    match = entry;
