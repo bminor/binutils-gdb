@@ -822,7 +822,7 @@ static int
 strswaplen (int str)
 {
   unsigned char *memory = saved_state.asregs.memory;
-  int start, end;
+  int end;
   int endian = endianb;
 
   if (! endian)
@@ -1499,8 +1499,6 @@ get_loop_bounds (int rs, int re, unsigned char *memory, unsigned char *mem_end,
 static void *
 mcalloc (size_t nmemb, size_t size)
 {
-  void *page;
-
   if (nmemb != 1)
     size *= nmemb;
   return mmap (0, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS,
