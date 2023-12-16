@@ -614,7 +614,9 @@ reset_stat(struct pstate *sregs)
 void
 show_stat(struct pstate *sregs)
 {
+#ifdef STAT
     uint32_t          iinst;
+#endif
     uint32_t          stime;
 
     if (sregs->tottime == 0.0)

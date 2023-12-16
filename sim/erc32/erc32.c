@@ -1632,10 +1632,7 @@ memory_read(int32_t asi, uint32_t addr, void *data, int32_t sz, int32_t *ws)
 int
 memory_write(int32_t asi, uint32_t addr, uint32_t *data, int32_t sz, int32_t *ws)
 {
-    uint32_t          byte_addr;
-    uint32_t          byte_mask;
     uint32_t          waddr;
-    uint32_t         *ram;
     int32_t           mexc;
     int             i;
     int             wphit[2];

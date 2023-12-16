@@ -332,7 +332,7 @@ sim_fetch_register(SIM_DESC sd, int regno, void *buf, int length)
 uint64_t
 sim_write (SIM_DESC sd, uint64_t mem, const void *buffer, uint64_t length)
 {
-    int i, len;
+    int i;
     const unsigned char *data = buffer;
 
     for (i = 0; i < length; i++) {
@@ -344,7 +344,7 @@ sim_write (SIM_DESC sd, uint64_t mem, const void *buffer, uint64_t length)
 uint64_t
 sim_read (SIM_DESC sd, uint64_t mem, void *buffer, uint64_t length)
 {
-    int i, len;
+    int i;
     unsigned char *data = buffer;
 
     for (i = 0; i < length; i++) {
