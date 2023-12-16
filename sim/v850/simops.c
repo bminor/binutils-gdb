@@ -2455,7 +2455,6 @@ OP_28007E0 (void)
   signed long int remainder;
   signed long int divide_by;
   signed long int divide_this;
-  int         overflow = 0;
   
   trace_input ("divh", OP_REG_REG_REG, 0);
   
