@@ -796,13 +796,12 @@ msp430_cio (SIM_DESC sd)
      perform.  */
   sim_cpu *cpu = STATE_CPU (sd, 0);
   struct msp430_cpu_state *msp430_cpu = MSP430_SIM_CPU (cpu);
-  unsigned char raw_parms[13];
   unsigned char parms[8];
   long length;
   int command;
   unsigned char buffer[512];
   long ret_buflen = 0;
-  long fd, addr, len, rv;
+  long fd, len, rv;
 
   sim_core_read_buffer (sd, cpu, 0, parms, msp430_cpu->cio_buffer, 5);
   length = CIO_I (0);
@@ -1045,7 +1044,6 @@ msp430_step_once (SIM_DESC sd)
   sim_cpu *cpu = STATE_CPU (sd, 0);
   struct msp430_cpu_state *msp430_cpu = MSP430_SIM_CPU (cpu);
   Get_Byte_Local_Data ld;
-  unsigned char buf[100];
   int i;
   int opsize;
   unsigned int opcode_pc;
@@ -1053,8 +1051,7 @@ msp430_step_once (SIM_DESC sd)
   MSP430_Opcode_Decoded *opcode = &opcode_buf;
   int s1, s2, result;
   int u1 = 0, u2, uresult;
-  int c = 0, reg;
-  int sp;
+  int c = 0;
   int carry_to_use;
   int n_repeats;
   int rept;
