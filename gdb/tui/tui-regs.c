@@ -192,7 +192,7 @@ tui_data_window::show_registers (const reggroup *group)
       m_regs_content.clear ();
     }
 
-  rerender ();
+  rerender (false);
 }
 
 
@@ -415,10 +415,18 @@ tui_data_window::erase_data_content (const char *prompt)
 /* See tui-regs.h.  */
 
 void
-tui_data_window::rerender ()
+tui_data_window::rerender (bool toplevel)
 {
   if (m_regs_content.empty ())
-    erase_data_content (_("[ Register Values Unavailable ]"));
+    {
+      if (toplevel && has_stack_frames ())
+	{
+	  frame_info_ptr fi = get_selected_frame (NULL);
+	  check_register_values (fi);
+	}
+      else
+	erase_data_content (_("[ Register Values Unavailable ]"));
+    }
   else
     {
       erase_data_content (NULL);

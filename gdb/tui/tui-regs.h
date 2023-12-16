@@ -75,7 +75,11 @@ protected:
   {
   }
 
-  void rerender () override;
+  void rerender (bool toplevel);
+  void rerender () override
+  {
+    rerender (true);
+  }
 
 private:
 

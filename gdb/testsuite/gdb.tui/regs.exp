@@ -41,10 +41,12 @@ Term::command "layout regs"
 Term::check_box "register box" 0 0 80 8
 Term::check_box "source box in regs layout" 0 7 80 8
 
-set text [Term::get_line 1]
-# Just check for any register window content at all.
-Term::check_contents "any register contents" "\\|.*\[^ \].*\\|"
-
+# The current frame is main, check that registers are available.
+set re_reg_vals_unavailable \
+    [string_to_regexp {[ Register Values Unavailable ]}]
+gdb_assert \
+    { ![Term::check_region_contents_p 0 0 80 8 $re_reg_vals_unavailable] } \
+    "Register values available"
 
 # Check that we can successfully cause the register window to appear
 # using the 'tui reg next' and 'tui reg prev' commands.
