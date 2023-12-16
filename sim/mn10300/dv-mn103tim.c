@@ -474,8 +474,6 @@ read_special_timer6_reg (struct hw *me,
 			 void *dest,
 			 unsigned  nr_bytes)
 {
-  uint32_t val;
-
   switch (nr_bytes) {
   case 1:
     {
@@ -612,7 +610,6 @@ do_counter6_event (struct hw *me,
 {
   struct mn103tim *timers = hw_data(me);
   long timer_nr = (uintptr_t) data;
-  int next_timer;
 
   /* Check if counting is still enabled. */
   if ( (timers->reg[timer_nr].mode & count_mask) != 0 )
@@ -641,7 +638,6 @@ write_base_reg (struct hw *me,
 		const void *source,
 		unsigned  nr_bytes)
 {
-  unsigned i;
   const uint8_t *buf8 = source;
   const uint16_t *buf16 = source;
 
@@ -931,8 +927,6 @@ write_special_timer6_reg (struct hw *me,
 			  const void *source,
 			  unsigned  nr_bytes)
 {
-  uint32_t val;
-
   switch (nr_bytes) {
   case 1:
     {

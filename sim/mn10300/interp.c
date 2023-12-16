@@ -35,7 +35,6 @@ mn10300_option_handler (SIM_DESC sd,
 			char *arg,
 			int is_command)
 {
-  int cpu_nr;
   switch (opt)
     {
     case OPTION_BOARD:
@@ -392,8 +391,6 @@ program_interrupt (SIM_DESC sd,
 		   sim_cia cia,
 		   SIM_SIGNAL sig)
 {
-  int status;
-  struct hw *device;
   static int in_interrupt = 0;
 
 #ifdef SIM_CPU_EXCEPTION_TRIGGER
