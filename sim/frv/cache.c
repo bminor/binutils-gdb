@@ -517,7 +517,6 @@ frv_cache_write (FRV_CACHE *cache, SI address, char *data, unsigned length)
 
   /* See if this data is already in the cache.  */
   SIM_CPU *current_cpu = cache->cpu;
-  USI hsr0 = GET_HSR0 ();
   FRV_CACHE_TAG *tag;
   int found;
 
@@ -851,7 +850,7 @@ pipeline_requeue_request (FRV_CACHE_PIPELINE *p)
 static int
 next_priority (FRV_CACHE *cache, FRV_CACHE_PIPELINE *pipeline)
 {
-  int i, j;
+  int i;
   int pipe;
   int lowest = 0;
   FRV_CACHE_REQUEST *req;
@@ -1155,7 +1154,6 @@ address_interference (FRV_CACHE *cache, SI address, FRV_CACHE_REQUEST *req,
 static void
 wait_for_WAR (FRV_CACHE* cache, int pipe, FRV_CACHE_REQUEST *req)
 {
-  FRV_CACHE_WAR war;
   FRV_CACHE_PIPELINE *pipeline = & cache->pipeline[pipe];
 
   if (! cache->BARS.valid)
@@ -1286,7 +1284,6 @@ static void
 handle_req_preload (FRV_CACHE *cache, int pipe, FRV_CACHE_REQUEST *req)
 {
   int found;
-  FRV_CACHE_WAR war;
   FRV_CACHE_TAG *tag;
   int length;
   int lock;
@@ -1462,7 +1459,6 @@ handle_req_unlock (FRV_CACHE *cache, int pipe, FRV_CACHE_REQUEST *req)
 static void
 handle_req_WAR (FRV_CACHE *cache, int pipe, FRV_CACHE_REQUEST *req)
 {
-  char *buffer;
   FRV_CACHE_TAG *tag;
   SI address = req->address;
 

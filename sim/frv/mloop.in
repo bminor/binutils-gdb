@@ -139,7 +139,6 @@ static void
 {
   int i;
 
-  FRV_VLIW *vliw = CPU_VLIW (current_cpu);
   CGEN_WRITE_QUEUE *q = CPU_WRITE_QUEUE (current_cpu);
 
   /* Loop over the queued writes, executing them. Set the pc to the address

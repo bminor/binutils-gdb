@@ -172,7 +172,7 @@ frv_itrap (SIM_CPU *current_cpu, PCADDR pc, USI base, SI offset)
 #if TRAPDUMP || (defined (TRAP_REGDUMP1)) || (defined (TRAP_REGDUMP2))
       {
 	char buf[256];
-	int i, j;
+	int i;
 
 	buf[0] = 0;
 	if (STATE_TEXT_SECTION (sd)
@@ -824,7 +824,6 @@ clear_ne_flags (
 )
 {
   SI NE_flags[2];
-  int exception;
 
   GET_NE_FLAGS (NE_flags, NE_base);
   if (target_index >= 0)
@@ -857,7 +856,6 @@ frvbf_clear_ne_flags (SIM_CPU *current_cpu, SI target_index, BI is_float)
 {
   int hi_available;
   int lo_available;
-  int exception;
   SI NE_base;
   USI necr;
   FRV_REGISTER_CONTROL *control;
@@ -897,7 +895,6 @@ frvbf_commit (SIM_CPU *current_cpu, SI target_index, BI is_float)
   SI NE_base;
   SI NE_flags[2];
   BI NE_flag;
-  int exception;
   int hi_available;
   int lo_available;
   USI necr;

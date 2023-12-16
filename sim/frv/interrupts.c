@@ -390,7 +390,6 @@ frv_detect_insn_access_interrupts (SIM_CPU *current_cpu, SCACHE *sc)
 {
 
   const CGEN_INSN *insn = sc->argbuf.idesc->idata;
-  SIM_DESC sd = CPU_STATE (current_cpu);
   FRV_VLIW *vliw = CPU_VLIW (current_cpu);
 
   /* Check for vliw constraints.  */
@@ -431,6 +430,7 @@ frv_detect_insn_access_interrupts (SIM_CPU *current_cpu, SCACHE *sc)
       /* Enter the halt state if FSR0.QNE is set and we are executing a
 	 floating point insn, a media insn or an insn which access a FR
 	 register.  */
+      SIM_DESC sd = CPU_STATE (current_cpu);
       SI fsr0 = GET_FSR (0);
       if (GET_FSR_QNE (fsr0)
 	  && (frv_is_float_insn (insn) || frv_is_media_insn (insn)
@@ -808,7 +808,6 @@ set_exception_status_registers (
 )
 {
   struct frv_interrupt *interrupt = & frv_interrupt_table[item->kind];
-  int slot = (item->vpc - previous_vliw_pc) / 4;
   int reg_index = -1;
   int set_ear = 0;
   int set_edr = 0;

@@ -2043,11 +2043,8 @@ frvbf_model_fr500_u_media (SIM_CPU *cpu, const IDESC *idesc,
 {
   int cycles;
   FRV_PROFILE_STATE *ps;
-  int is_media_s1;
-  int is_media_s2;
   int busy_adjustment[] = {0, 0, 0};
   int *fr;
-  int *acc;
 
   if (model_insn == FRV_INSN_MODEL_PASS_1)
     return 0;
