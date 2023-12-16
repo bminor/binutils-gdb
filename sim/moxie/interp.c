@@ -91,11 +91,6 @@ moxie_store_unsigned_integer (unsigned char *addr, int len, unsigned long val)
     }
 }
 
-/* moxie register names.  */
-static const char *reg_names[16] = 
-  { "$fp", "$sp", "$r0", "$r1", "$r2", "$r3", "$r4", "$r5", 
-    "$r6", "$r7", "$r8", "$r9", "$r10", "$r11", "$r12", "$r13" };
-
 /* The machine state.
 
    This state is maintained in host byte order.  The fetch/store
@@ -137,7 +132,6 @@ static void
 set_initial_gprs (void)
 {
   int i;
-  long space;
   
   /* Set up machine just out of reset.  */
   cpu.asregs.regs[PC_REGNO] = 0;
@@ -944,7 +938,6 @@ sim_engine_run (SIM_DESC sd,
 		    {
 		      char fname[1024];
 		      int mode = (int) convert_target_flags ((unsigned) cpu.asregs.regs[3]);
-		      int perm = (int) cpu.asregs.regs[4];
 		      int fd;
 		      sim_core_read_buffer (sd, scpu, read_map, fname,
 					    cpu.asregs.regs[2], 1024);
@@ -1297,7 +1290,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd,
 		     char * const *argv, char * const *env)
 {
   char * const *avp;
-  int l, argc, i, tp;
+  int argc, i, tp;
   sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */
 
   if (prog_bfd != NULL)
