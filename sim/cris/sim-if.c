@@ -338,7 +338,6 @@ static void
 cris_offset_sections (SIM_DESC sd, int offset)
 {
   struct bfd *abfd = STATE_PROG_BFD (sd);
-  asection *text;
   struct offsetinfo oi;
 
   /* Only happens for usage error.  */
@@ -499,7 +498,6 @@ static bfd_boolean
 cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
 {
   int i, n_hdrs;
-  bfd_byte buf[4];
   char *interp = NULL;
   struct bfd *ibfd;
   bfd_boolean ok = FALSE;

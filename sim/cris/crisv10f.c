@@ -58,7 +58,6 @@ MY (deliver_interrupt) (SIM_CPU *current_cpu,
 			unsigned int vec)
 {
   unsigned char entryaddr_le[4];
-  int was_user;
   SIM_DESC sd = CPU_STATE (current_cpu);
   uint32_t entryaddr;
 
