@@ -199,7 +199,6 @@ static void
 lm32timer_finish (struct hw *me)
 {
   struct lm32timer *timers;
-  int i;
 
   timers = HW_ZALLOC (me, struct lm32timer);
   set_hw_data (me, timers);

@@ -143,8 +143,6 @@ deliver_lm32cpu_interrupt (struct hw *me, void *data)
   struct lm32cpu *controller = hw_data (me);
   SIM_DESC sd = hw_system (me);
   sim_cpu *cpu = STATE_CPU (sd, 0);	/* NB: fix CPU 0.  */
-  address_word cia = CPU_PC_GET (cpu);
-  int interrupt = (uintptr_t) data;
 
 
   HW_TRACE ((me, "interrupt-check event"));
@@ -198,7 +196,6 @@ lm32cpu_port_event (struct hw *me,
   struct lm32cpu *controller = hw_data (me);
   SIM_DESC sd = hw_system (me);
   sim_cpu *cpu = STATE_CPU (sd, 0);	/* NB: fix CPU 0.  */
-  address_word cia = CPU_PC_GET (cpu);
 
 
   HW_TRACE ((me, "interrupt event on port %d, level %d", my_port, level));

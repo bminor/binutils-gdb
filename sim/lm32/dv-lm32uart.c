@@ -292,7 +292,6 @@ static void
 lm32uart_finish (struct hw *me)
 {
   struct lm32uart *uart;
-  int i;
 
   uart = HW_ZALLOC (me, struct lm32uart);
   set_hw_data (me, uart);
