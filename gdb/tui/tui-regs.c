@@ -96,7 +96,7 @@ tui_register_format (frame_info_ptr frame, int regnum)
   /* Remove the possible \n.  */
   std::string str = stream.release ();
   if (!str.empty () && str.back () == '\n')
-    str.resize (str.size () - 1);
+    str.pop_back ();
 
   return str;
 }
