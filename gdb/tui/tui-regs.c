@@ -288,7 +288,7 @@ tui_data_window::display_registers_from (int start_element_no)
 
   /* Now create each data "sub" window, and write the display into
      it.  */
-  int cur_y = 1;
+  int cur_y = box_width ();
   while (i < m_regs_content.size () && cur_y <= height - box_size ())
     {
       for (int j = 0;
@@ -296,7 +296,7 @@ tui_data_window::display_registers_from (int start_element_no)
 	   j++)
 	{
 	  /* Create the window if necessary.  */
-	  m_regs_content[i].x = (m_item_width * j) + 1;
+	  m_regs_content[i].x = box_width () + (m_item_width * j);
 	  m_regs_content[i].y = cur_y;
 	  m_regs_content[i].visible = true;
 	  m_regs_content[i].rerender (handle.get (), m_item_width);
@@ -487,6 +487,10 @@ tui_data_window::check_register_values (frame_info_ptr frame)
 void
 tui_data_item_window::rerender (WINDOW *handle, int field_width)
 {
+  /* In case the regs window is not boxed, we'll write the last char in the
+     last line here, causing a scroll, so prevent that.  */
+  scrollok (handle, FALSE);
+
   if (highlight)
     /* We ignore the return value, casting it to void in order to avoid
        a compiler warning.  The warning itself was introduced by a patch
