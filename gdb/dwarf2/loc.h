@@ -39,7 +39,8 @@ extern unsigned int entry_values_debug;
 const gdb_byte *dwarf2_find_location_expression
   (const dwarf2_loclist_baton *baton,
    size_t *locexpr_length,
-   CORE_ADDR pc);
+   CORE_ADDR pc,
+   bool at_entry = false);
 
 /* Find the frame base information for FRAMEFUNC at PC.  START is an
    out parameter which is set to point to the DWARF expression to
