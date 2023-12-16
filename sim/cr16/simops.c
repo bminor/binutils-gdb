@@ -5465,7 +5465,7 @@ OP_C_C (SIM_DESC sd, SIM_CPU *cpu)
 void
 OP_3_9 (SIM_DESC sd, SIM_CPU *cpu)
 {
-  uint16_t a = OP[0] + 1, b = OP[1], c = OP[2], i = 0;
+  uint16_t a = OP[0] + 1, b = OP[1], i = 0;
   uint32_t tmp, sp_addr = (GPR32 (15)) - (a * 2) - 4, is_regp = 0;
   trace_input ("push", OP_CONSTANT3, OP_REG, OP_REG);
 
@@ -5585,7 +5585,7 @@ OP_11E_10 (SIM_DESC sd, SIM_CPU *cpu)
 void
 OP_5_9 (SIM_DESC sd, SIM_CPU *cpu)
 {
-  uint16_t a = OP[0] + 1, b = OP[1], c = OP[2], i = 0;
+  uint16_t a = OP[0] + 1, b = OP[1], i = 0;
   uint32_t tmp, sp_addr = (GPR32 (15)), is_regp = 0;;
   trace_input ("pop", OP_CONSTANT3, OP_REG, OP_REG);
 
@@ -5707,7 +5707,6 @@ OP_21E_10 (SIM_DESC sd, SIM_CPU *cpu)
 void
 OP_7_9 (SIM_DESC sd, SIM_CPU *cpu)
 {
-  uint16_t a = OP[0], b = OP[1];
   trace_input ("popret", OP_CONSTANT3, OP_REG, OP_REG);
   OP_5_9 (sd, cpu);
   JMP(((GPR32(14)) << 1) & 0xffffff);
@@ -5719,7 +5718,6 @@ OP_7_9 (SIM_DESC sd, SIM_CPU *cpu)
 void
 OP_3_8 (SIM_DESC sd, SIM_CPU *cpu)
 {
-  uint16_t a = OP[0], b = OP[1];
   trace_input ("popret", OP_CONSTANT3, OP_REG, OP_VOID);
   OP_2_8 (sd, cpu);
   JMP(((GPR32(14)) << 1) & 0xffffff);
