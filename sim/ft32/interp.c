@@ -116,8 +116,6 @@ ft32_read_item (SIM_DESC sd, int dw, uint32_t ea)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0);
   address_word cia = CPU_PC_GET (cpu);
-  uint8_t byte[4];
-  uint32_t r;
 
   ea = ft32_align (dw, ea);
 
@@ -139,7 +137,6 @@ ft32_write_item (SIM_DESC sd, int dw, uint32_t ea, uint32_t v)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0);
   address_word cia = CPU_PC_GET (cpu);
-  uint8_t byte[4];
 
   ea = ft32_align (dw, ea);
 
@@ -166,8 +163,6 @@ static uint32_t cpu_mem_read (SIM_DESC sd, uint32_t dw, uint32_t ea)
   sim_cpu *cpu = STATE_CPU (sd, 0);
   struct ft32_cpu_state *ft32_cpu = FT32_SIM_CPU (cpu);
   uint32_t insnpc = ft32_cpu->pc;
-  uint32_t r;
-  uint8_t byte[4];
 
   ea &= 0x1ffff;
   if (ea & ~0xffff)
@@ -327,7 +322,6 @@ step_once (SIM_DESC sd)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0);
   struct ft32_cpu_state *ft32_cpu = FT32_SIM_CPU (cpu);
-  address_word cia = CPU_PC_GET (cpu);
   uint32_t inst;
   uint32_t dw;
   uint32_t cb;
