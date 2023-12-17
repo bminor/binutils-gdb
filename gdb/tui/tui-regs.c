@@ -173,7 +173,7 @@ tui_data_window::first_reg_element_no_inline (int line_no) const
 void
 tui_data_window::show_registers (const reggroup *group)
 {
-  if (group == 0)
+  if (group == nullptr)
     group = general_reggroup;
 
   if (target_has_registers () && target_has_stack () && target_has_memory ())
@@ -188,7 +188,7 @@ tui_data_window::show_registers (const reggroup *group)
     }
   else
     {
-      m_current_group = 0;
+      m_current_group = nullptr;
       m_regs_content.clear ();
     }
 
@@ -472,9 +472,7 @@ tui_data_window::check_register_values (frame_info_ptr frame)
     {
       for (auto &&data_item_win : m_regs_content)
 	{
-	  int was_hilighted;
-
-	  was_hilighted = data_item_win.highlight;
+	  bool was_hilighted = data_item_win.highlight;
 
 	  tui_get_register (frame, &data_item_win,
 			    data_item_win.regno,
