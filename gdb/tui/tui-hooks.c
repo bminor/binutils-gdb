@@ -63,9 +63,6 @@ static void
 tui_all_objfiles_removed (program_space *pspace)
 { tui_on_objfiles_changed (); }
 
-/* Prevent recursion of deprecated_register_changed_hook().  */
-static bool tui_refreshing_registers = false;
-
 /* Observer for the register_changed notification.  */
 
 static void
@@ -82,12 +79,7 @@ tui_register_changed (frame_info_ptr frame, int regno)
      up in the other.  So we always use the selected frame here, and ignore
      FRAME.  */
   fi = get_selected_frame (NULL);
-  if (!tui_refreshing_registers)
-    {
-      tui_refreshing_registers = true;
-      TUI_DATA_WIN->check_register_values (fi);
-      tui_refreshing_registers = false;
-    }
+  TUI_DATA_WIN->check_register_values (fi);
 }
 
 /* Breakpoint creation hook.
@@ -145,11 +137,7 @@ tui_refresh_frame_and_register_information ()
       /* Refresh the register window if it's visible.  */
       if (tui_is_window_visible (DATA_WIN)
 	  && (frame_info_changed_p || from_stack))
-	{
-	  tui_refreshing_registers = true;
-	  TUI_DATA_WIN->check_register_values (fi);
-	  tui_refreshing_registers = false;
-	}
+	TUI_DATA_WIN->check_register_values (fi);
     }
   else if (!from_stack)
     {
