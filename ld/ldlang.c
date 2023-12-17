@@ -9921,7 +9921,9 @@ lang_ld_feature (char *str)
 static void
 lang_print_memory_size (uint64_t sz)
 {
-  if ((sz & 0x3fffffff) == 0)
+  if (sz == 0)
+    printf (" %10" PRIu64 " B", sz);
+  else if ((sz & 0x3fffffff) == 0)
     printf ("%10" PRIu64 " GB", sz >> 30);
   else if ((sz & 0xfffff) == 0)
     printf ("%10" PRIu64 " MB", sz >> 20);
