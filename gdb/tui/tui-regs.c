@@ -170,15 +170,10 @@ tui_data_window::show_registers (const reggroup *group)
     group = general_reggroup;
 
   if (target_has_registers () && target_has_stack () && target_has_memory ())
-    {
-      update_register_data (group, get_selected_frame (nullptr));
-
-      /* Clear all notation of changed values.  */
-      for (auto &&data_item_win : m_regs_content)
-	data_item_win.highlight = false;
-    }
+    update_register_data (group, get_selected_frame (nullptr));
   else
     {
+      set_title (_("Registers"));
       m_current_group = nullptr;
       m_regs_content.clear ();
     }
@@ -194,40 +189,30 @@ void
 tui_data_window::update_register_data (const reggroup *group,
 				       frame_info_ptr frame)
 {
-  if (group != m_current_group)
+  m_current_group = group;
+
+  /* Make a new title showing which group we display.  */
+  this->set_title (string_printf ("Register group: %s", group->name ()));
+
+  /* Create the registers.  */
+  m_regs_content.clear ();
+
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  for (int regnum = 0;
+       regnum < gdbarch_num_cooked_regs (gdbarch);
+       regnum++)
     {
-      m_current_group = group;
+      /* Must be in the group.  */
+      if (!gdbarch_register_reggroup_p (gdbarch, regnum, group))
+	continue;
 
-      /* Make a new title showing which group we display.  */
-      this->set_title (string_printf ("Register group: %s", group->name ()));
+      /* If the register name is empty, it is undefined for this
+	 processor, so don't display anything.  */
+      const char *name = gdbarch_register_name (gdbarch, regnum);
+      if (*name == '\0')
+	continue;
 
-      /* Create the registers.  */
-      m_regs_content.clear ();
-
-      struct gdbarch *gdbarch = get_frame_arch (frame);
-      for (int regnum = 0;
-	   regnum < gdbarch_num_cooked_regs (gdbarch);
-	   regnum++)
-	{
-	  /* Must be in the group.  */
-	  if (!gdbarch_register_reggroup_p (gdbarch, regnum, group))
-	    continue;
-
-	  /* If the register name is empty, it is undefined for this
-	     processor, so don't display anything.  */
-	  const char *name = gdbarch_register_name (gdbarch, regnum);
-	  if (*name == '\0')
-	    continue;
-
-	  m_regs_content.emplace_back (regnum, frame);
-	}
-    }
-  else
-    {
-      /* The group did not change, so we can simply update each
-	 item. */
-      for (tui_register_info &reg : m_regs_content)
-	reg.update (frame);
+      m_regs_content.emplace_back (regnum, frame);
     }
 }
 
