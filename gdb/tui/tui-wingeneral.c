@@ -165,8 +165,6 @@ tui_win_info::make_window ()
   handle.reset (newwin (height, width, y, x));
   if (handle != NULL)
     {
-      if (suppress_output)
-	wnoutrefresh (handle.get ());
       scrollok (handle.get (), TRUE);
       if (can_box ())
 	box_win (this, false);
