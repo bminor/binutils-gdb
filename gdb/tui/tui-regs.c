@@ -105,15 +105,12 @@ tui_register_format (frame_info_ptr frame, int regnum)
    the display.  update 'content' and set 'highlight' if the contents
    changed.  */
 void
-tui_data_item_window::update (const frame_info_ptr &frame)
+tui_register_info::update (const frame_info_ptr &frame)
 {
   if (target_has_registers ())
     {
       std::string new_content = tui_register_format (frame, m_regno);
-
-      if (content != new_content)
-	highlight = true;
-
+      highlight = content != new_content;
       content = std::move (new_content);
     }
 }
@@ -229,7 +226,7 @@ tui_data_window::update_register_data (const reggroup *group,
     {
       /* The group did not change, so we can simply update each
 	 item. */
-      for (tui_data_item_window &reg : m_regs_content)
+      for (tui_register_info &reg : m_regs_content)
 	reg.update (frame);
     }
 }
@@ -443,7 +440,7 @@ tui_data_window::check_register_values (frame_info_ptr frame)
     show_registers (m_current_group);
   else
     {
-      for (tui_data_item_window &data_item_win : m_regs_content)
+      for (tui_register_info &data_item_win : m_regs_content)
 	{
 	  bool was_hilighted = data_item_win.highlight;
 
@@ -462,7 +459,7 @@ tui_data_window::check_register_values (frame_info_ptr frame)
 /* Display a register in a window.  If hilite is TRUE, then the value
    will be displayed in reverse video.  */
 void
-tui_data_item_window::rerender (WINDOW *handle, int field_width)
+tui_register_info::rerender (WINDOW *handle, int field_width)
 {
   /* In case the regs window is not boxed, we'll write the last char in the
      last line here, causing a scroll, so prevent that.  */

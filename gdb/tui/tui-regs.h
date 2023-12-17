@@ -25,20 +25,20 @@
 #include "tui/tui-data.h"
 #include "reggroups.h"
 
-/* A data item window.  */
+/* Information about the display of a single register.  */
 
-struct tui_data_item_window
+struct tui_register_info
 {
-  tui_data_item_window (int regno, const frame_info_ptr &frame)
+  tui_register_info (int regno, const frame_info_ptr &frame)
     : m_regno (regno)
   {
     update (frame);
     highlight = false;
   }
 
-  DISABLE_COPY_AND_ASSIGN (tui_data_item_window);
+  DISABLE_COPY_AND_ASSIGN (tui_register_info);
 
-  tui_data_item_window (tui_data_item_window &&) = default;
+  tui_register_info (tui_register_info &&) = default;
 
   void update (const frame_info_ptr &frame);
 
@@ -136,8 +136,8 @@ private:
 
   void erase_data_content (const char *prompt);
 
-  /* Windows that are used to display registers.  */
-  std::vector<tui_data_item_window> m_regs_content;
+  /* Information about each register in the current register group.  */
+  std::vector<tui_register_info> m_regs_content;
   int m_regs_column_count = 0;
   const reggroup *m_current_group = nullptr;
 
