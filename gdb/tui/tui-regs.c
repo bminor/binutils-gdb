@@ -236,6 +236,10 @@ tui_data_window::update_register_data (const reggroup *group,
 void
 tui_data_window::display_registers_from (int start_element_no)
 {
+  /* In case the regs window is not boxed, we'll write the last char in the
+     last line here, causing a scroll, so prevent that.  */
+  scrollok (handle.get (), FALSE);
+
   int max_len = 0;
   for (auto &&data_item_win : m_regs_content)
     {
@@ -448,10 +452,6 @@ tui_data_window::check_register_values (frame_info_ptr frame)
 void
 tui_register_info::rerender (WINDOW *handle, int field_width)
 {
-  /* In case the regs window is not boxed, we'll write the last char in the
-     last line here, causing a scroll, so prevent that.  */
-  scrollok (handle, FALSE);
-
   if (highlight)
     /* We ignore the return value, casting it to void in order to avoid
        a compiler warning.  The warning itself was introduced by a patch
