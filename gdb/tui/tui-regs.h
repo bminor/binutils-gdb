@@ -62,7 +62,10 @@ private:
 /* The TUI registers window.  */
 struct tui_data_window : public tui_win_info
 {
-  tui_data_window () = default;
+  tui_data_window ()
+  {
+    update_register_data (nullptr);
+  }
 
   DISABLE_COPY_AND_ASSIGN (tui_data_window);
 
@@ -87,11 +90,7 @@ protected:
   {
   }
 
-  void rerender (bool toplevel);
-  void rerender () override
-  {
-    rerender (true);
-  }
+  void rerender () override;
 
 private:
 
@@ -116,8 +115,7 @@ private:
      display off the end of the register display.  */
   void display_reg_element_at_line (int start_element_no, int start_line_no);
 
-  void update_register_data (const reggroup *group,
-			     frame_info_ptr frame);
+  void update_register_data (const reggroup *group);
 
   /* Answer the number of the last line in the regs display.  If there
      are no registers (-1) is returned.  */

@@ -166,29 +166,31 @@ tui_data_window::first_reg_element_no_inline (int line_no) const
 void
 tui_data_window::show_registers (const reggroup *group)
 {
-  if (group == nullptr)
-    group = general_reggroup;
-
-  if (target_has_registers () && target_has_stack () && target_has_memory ())
-    update_register_data (group, get_selected_frame (nullptr));
-  else
-    {
-      set_title (_("Registers"));
-      m_current_group = nullptr;
-      m_regs_content.clear ();
-    }
-
-  rerender (false);
+  update_register_data (group);
+  rerender ();
 }
-
 
 /* Set the data window to display the registers of the register group
    using the given frame.  */
 
 void
-tui_data_window::update_register_data (const reggroup *group,
-				       frame_info_ptr frame)
+tui_data_window::update_register_data (const reggroup *group)
 {
+  if (group == nullptr)
+    group = general_reggroup;
+
+  if (!target_has_registers ()
+      || !target_has_stack ()
+      || !target_has_memory ())
+    {
+      set_title (_("Registers"));
+      m_current_group = nullptr;
+      m_regs_content.clear ();
+      return;
+    }
+
+  frame_info_ptr frame = get_selected_frame (nullptr);
+
   m_current_group = group;
 
   /* Make a new title showing which group we display.  */
@@ -221,6 +223,9 @@ tui_data_window::update_register_data (const reggroup *group,
 void
 tui_data_window::display_registers_from (int start_element_no)
 {
+  werase (handle.get ());
+  check_and_display_highlight_if_needed ();
+
   /* In case the regs window is not boxed, we'll write the last char in the
      last line here, causing a scroll, so prevent that.  */
   scrollok (handle.get (), FALSE);
@@ -357,29 +362,18 @@ tui_data_window::erase_data_content (const char *prompt)
 	x_pos = half_width - strlen (prompt);
       display_string (height / 2, x_pos, prompt);
     }
-  tui_wrefresh (handle.get ());
 }
 
 /* See tui-regs.h.  */
 
 void
-tui_data_window::rerender (bool toplevel)
+tui_data_window::rerender ()
 {
   if (m_regs_content.empty ())
-    {
-      if (toplevel && has_stack_frames ())
-	{
-	  frame_info_ptr fi = get_selected_frame (NULL);
-	  check_register_values (fi);
-	}
-      else
-	erase_data_content (_("[ Register Values Unavailable ]"));
-    }
+    erase_data_content (_("[ Register Values Unavailable ]"));
   else
-    {
-      erase_data_content (NULL);
-      display_registers_from (0);
-    }
+    display_registers_from (0);
+  tui_wrefresh (handle.get ());
 }
 
 
@@ -401,7 +395,6 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
   if (first_line >= 0)
     {
       first_line += num_to_scroll;
-      erase_data_content (NULL);
       display_registers_from_line (first_line);
     }
 }
