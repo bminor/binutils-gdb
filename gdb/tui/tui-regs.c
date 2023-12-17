@@ -268,7 +268,6 @@ tui_data_window::display_registers_from (int start_element_no)
 	  /* Create the window if necessary.  */
 	  m_regs_content[i].x = box_width () + (m_item_width * j);
 	  m_regs_content[i].y = cur_y;
-	  m_regs_content[i].visible = true;
 	  m_regs_content[i].rerender (handle.get (), m_item_width);
 	  i++;		/* Next register.  */
 	}
@@ -346,22 +345,12 @@ tui_data_window::first_data_item_displayed ()
 {
   for (int i = 0; i < m_regs_content.size (); i++)
     {
-      if (m_regs_content[i].visible)
+      if (m_regs_content[i].visible ())
 	return i;
     }
 
   return -1;
 }
-
-/* See tui-regs.h.  */
-
-void
-tui_data_window::delete_data_content_windows ()
-{
-  for (auto &win : m_regs_content)
-    win.visible = false;
-}
-
 
 void
 tui_data_window::erase_data_content (const char *prompt)
@@ -400,7 +389,6 @@ tui_data_window::rerender (bool toplevel)
   else
     {
       erase_data_content (NULL);
-      delete_data_content_windows ();
       display_registers_from (0);
     }
 }
@@ -425,7 +413,6 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
     {
       first_line += num_to_scroll;
       erase_data_content (NULL);
-      delete_data_content_windows ();
       display_registers_from_line (first_line);
     }
 }
@@ -448,7 +435,7 @@ tui_data_window::check_register_values (frame_info_ptr frame)
 
 	  /* Register windows whose y == 0 are outside the visible area.  */
 	  if ((data_item_win.highlight || was_hilighted)
-	      && data_item_win.y > 0)
+	      && data_item_win.visible ())
 	    data_item_win.rerender (handle.get (), m_item_width);
 	}
     }

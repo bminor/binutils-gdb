@@ -44,11 +44,13 @@ struct tui_register_info
 
   void rerender (WINDOW *handle, int field_width);
 
+  bool visible () const
+  { return y > 0; }
+
   /* Location.  */
   int x = 0;
   int y = 0;
   bool highlight = false;
-  bool visible = false;
   std::string content;
 
 private:
@@ -129,10 +131,6 @@ private:
   /* Answer the index of the first element in line_no.  If line_no is
      past the register area (-1) is returned.  */
   int first_reg_element_no_inline (int line_no) const;
-
-  /* Delete all the item windows in the data window.  This is usually
-     done when the data window is scrolled.  */
-  void delete_data_content_windows ();
 
   void erase_data_content (const char *prompt);
 
