@@ -76,7 +76,7 @@ struct tui_data_window : public tui_win_info
 
   void check_register_values (frame_info_ptr frame);
 
-  void show_registers (const reggroup *group);
+  void set_register_group (const reggroup *group);
 
   const reggroup *get_current_group () const
   {

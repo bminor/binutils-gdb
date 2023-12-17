@@ -164,7 +164,7 @@ tui_data_window::first_reg_element_no_inline (int line_no) const
 /* Show the registers of the given group in the data window
    and refresh the window.  */
 void
-tui_data_window::show_registers (const reggroup *group)
+tui_data_window::set_register_group (const reggroup *group)
 {
   update_register_data (group);
   rerender ();
@@ -404,7 +404,7 @@ void
 tui_data_window::check_register_values (frame_info_ptr frame)
 {
   if (m_regs_content.empty ())
-    show_registers (m_current_group);
+    set_register_group (m_current_group);
   else
     {
       for (tui_register_info &data_item_win : m_regs_content)
@@ -542,7 +542,7 @@ tui_reg_command (const char *args, int from_tty)
       if (match == NULL)
 	error (_("unknown register group '%s'"), args);
 
-      TUI_DATA_WIN->show_registers (match);
+      TUI_DATA_WIN->set_register_group (match);
     }
   else
     {
