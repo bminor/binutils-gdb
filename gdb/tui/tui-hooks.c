@@ -132,11 +132,10 @@ tui_refresh_frame_and_register_information ()
 
       /* Display the frame position (even if there is no symbols or
 	 the PC is not known).  */
-      bool frame_info_changed_p = tui_show_frame_info (fi);
+      tui_show_frame_info (fi);
 
       /* Refresh the register window if it's visible.  */
-      if (tui_is_window_visible (DATA_WIN)
-	  && (frame_info_changed_p || from_stack))
+      if (tui_is_window_visible (DATA_WIN))
 	TUI_DATA_WIN->check_register_values (fi);
     }
   else if (!from_stack)
