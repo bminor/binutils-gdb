@@ -343,7 +343,7 @@ tui_source_window_base::refresh_window ()
   int smincol = x + box_width () + left_margin;
   int smaxrow = sminrow + m_content.size () - 1;
   int smaxcol = smincol + view_width - 1;
-  prefresh (m_pad.get (), 0, pad_x, sminrow, smincol, smaxrow, smaxcol);
+  pnoutrefresh (m_pad.get (), 0, pad_x, sminrow, smincol, smaxrow, smaxcol);
 }
 
 void

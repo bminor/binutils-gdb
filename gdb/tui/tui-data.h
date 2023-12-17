@@ -117,13 +117,6 @@ public:
     return true;
   }
 
-  /* Disable output until the next call to doupdate.  */
-  void no_refresh ()
-  {
-    if (handle != nullptr)
-      wnoutrefresh (handle.get ());
-  }
-
   /* Called after the tab width has been changed.  */
   virtual void update_tab_width ()
   {

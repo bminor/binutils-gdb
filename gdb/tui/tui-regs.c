@@ -492,10 +492,10 @@ tui_reg_command (const char *args, int from_tty)
     {
       size_t len = strlen (args);
 
+      tui_batch_rendering suppress;
+
       /* Make sure the curses mode is enabled.  */
       tui_enable ();
-
-      tui_suppress_output suppress;
 
       /* Make sure the register window is visible.  If not, select an
 	 appropriate layout.  We need to do this before trying to run the

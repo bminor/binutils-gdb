@@ -61,6 +61,8 @@ std::vector<tui_win_info *> tui_windows;
 void
 tui_apply_current_layout (bool preserve_cmd_win_size_p)
 {
+  tui_batch_rendering defer;
+
   for (tui_win_info *win_info : tui_windows)
     win_info->make_visible (false);
 
