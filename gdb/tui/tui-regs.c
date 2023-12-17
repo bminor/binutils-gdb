@@ -107,12 +107,9 @@ tui_register_format (frame_info_ptr frame, int regnum)
 void
 tui_register_info::update (const frame_info_ptr &frame)
 {
-  if (target_has_registers ())
-    {
-      std::string new_content = tui_register_format (frame, m_regno);
-      highlight = content != new_content;
-      content = std::move (new_content);
-    }
+  std::string new_content = tui_register_format (frame, m_regno);
+  highlight = content != new_content;
+  content = std::move (new_content);
 }
 
 /* See tui-regs.h.  */
@@ -185,13 +182,22 @@ tui_data_window::update_register_data (const reggroup *group)
     {
       set_title (_("Registers"));
       m_current_group = nullptr;
+      m_gdbarch = nullptr;
       m_regs_content.clear ();
       return;
     }
 
   frame_info_ptr frame = get_selected_frame (nullptr);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+
+  if (m_current_group == group && m_gdbarch == gdbarch)
+    {
+      /* Nothing to do here.  */
+      return;
+    }
 
   m_current_group = group;
+  m_gdbarch = gdbarch;
 
   /* Make a new title showing which group we display.  */
   this->set_title (string_printf ("Register group: %s", group->name ()));
@@ -199,7 +205,6 @@ tui_data_window::update_register_data (const reggroup *group)
   /* Create the registers.  */
   m_regs_content.clear ();
 
-  struct gdbarch *gdbarch = get_frame_arch (frame);
   for (int regnum = 0;
        regnum < gdbarch_num_cooked_regs (gdbarch);
        regnum++)
@@ -403,24 +408,31 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
 void
 tui_data_window::check_register_values (frame_info_ptr frame)
 {
-  if (m_regs_content.empty ())
-    set_register_group (m_current_group);
+  if (frame == nullptr)
+    set_register_group (nullptr);
   else
     {
-      for (tui_register_info &data_item_win : m_regs_content)
+      /* If the frame architecture changed, we need to reset the
+	 register group.  */
+      struct gdbarch *gdbarch = get_frame_arch (frame);
+      if (gdbarch != m_gdbarch)
+	set_register_group (nullptr);
+      else
 	{
-	  bool was_hilighted = data_item_win.highlight;
+	  for (tui_register_info &data_item_win : m_regs_content)
+	    {
+	      bool was_hilighted = data_item_win.highlight;
 
-	  data_item_win.update (frame);
+	      data_item_win.update (frame);
 
-	  /* Register windows whose y == 0 are outside the visible area.  */
-	  if ((data_item_win.highlight || was_hilighted)
-	      && data_item_win.visible ())
-	    data_item_win.rerender (handle.get (), m_item_width);
+	      /* Register windows whose y == 0 are outside the visible area.  */
+	      if ((data_item_win.highlight || was_hilighted)
+		  && data_item_win.visible ())
+		data_item_win.rerender (handle.get (), m_item_width);
+	    }
 	}
+      tui_wrefresh (handle.get ());
     }
-
-  tui_wrefresh (handle.get ());
 }
 
 /* Display a register in a window.  If hilite is TRUE, then the value

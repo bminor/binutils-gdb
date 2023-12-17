@@ -126,19 +126,23 @@ tui_refresh_frame_and_register_information ()
   target_terminal::scoped_restore_terminal_state term_state;
   target_terminal::ours_for_output ();
 
-  if (from_stack && has_stack_frames ())
+  if (from_stack)
     {
-      frame_info_ptr fi = get_selected_frame (NULL);
+      frame_info_ptr fi;
+      if (has_stack_frames ())
+	{
+	  fi = get_selected_frame (NULL);
 
-      /* Display the frame position (even if there is no symbols or
-	 the PC is not known).  */
-      tui_show_frame_info (fi);
+	  /* Display the frame position (even if there is no symbols or
+	     the PC is not known).  */
+	  tui_show_frame_info (fi);
+	}
 
       /* Refresh the register window if it's visible.  */
       if (tui_is_window_visible (DATA_WIN))
 	TUI_DATA_WIN->check_register_values (fi);
     }
-  else if (!from_stack)
+  else
     {
       /* Make sure that the source window is displayed.  */
       tui_add_win_to_layout (SRC_WIN);
@@ -169,6 +173,7 @@ tui_inferior_exit (struct inferior *inf)
   tui_set_key_mode (TUI_COMMAND_MODE);
   tui_show_frame_info (0);
   tui_display_main ();
+  from_stack = true;
 }
 
 /* Observer for the before_prompt notification.  */

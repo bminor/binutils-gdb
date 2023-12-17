@@ -30,6 +30,9 @@ if {![runto_main]} {
     return
 }
 
+# This is convenient later on.
+gdb_test_no_output "set confirm off"
+
 if {![Term::enter_tui]} {
     unsupported "TUI not supported"
     return
@@ -47,6 +50,11 @@ set re_reg_vals_unavailable \
 gdb_assert \
     { ![Term::check_region_contents_p 0 0 80 8 $re_reg_vals_unavailable] } \
     "Register values available"
+
+Term::command "kill"
+gdb_assert \
+    { [Term::check_region_contents_p 0 0 80 8 $re_reg_vals_unavailable] } \
+    "Register values no longer available"
 
 # Check that we can successfully cause the register window to appear
 # using the 'tui reg next' and 'tui reg prev' commands.

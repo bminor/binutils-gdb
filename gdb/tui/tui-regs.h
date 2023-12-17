@@ -139,6 +139,10 @@ private:
 
   /* Width of each register's display area.  */
   int m_item_width = 0;
+
+  /* Architecture of frame whose registers are being displayed, or
+     nullptr if the display is empty (i.e., there is no frame).  */
+  gdbarch *m_gdbarch = nullptr;
 };
 
 #endif /* TUI_TUI_REGS_H */
