@@ -130,7 +130,7 @@ private:
      past the register area (-1) is returned.  */
   int first_reg_element_no_inline (int line_no) const;
 
-  void erase_data_content (const char *prompt);
+  void erase_data_content ();
 
   /* Information about each register in the current register group.  */
   std::vector<tui_register_info> m_regs_content;

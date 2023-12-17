@@ -347,21 +347,19 @@ tui_data_window::first_data_item_displayed ()
 }
 
 void
-tui_data_window::erase_data_content (const char *prompt)
+tui_data_window::erase_data_content ()
 {
   werase (handle.get ());
   check_and_display_highlight_if_needed ();
-  if (prompt != NULL)
-    {
-      int half_width = (width - box_size ()) / 2;
-      int x_pos;
 
-      if (strlen (prompt) >= half_width)
-	x_pos = 1;
-      else
-	x_pos = half_width - strlen (prompt);
-      display_string (height / 2, x_pos, prompt);
-    }
+  const char *prompt = _("[ Register Values Unavailable ]");
+  int half_width = (width - box_size ()) / 2;
+  int x_pos;
+  if (strlen (prompt) >= half_width)
+    x_pos = 1;
+  else
+    x_pos = half_width - strlen (prompt);
+  display_string (height / 2, x_pos, prompt);
 }
 
 /* See tui-regs.h.  */
@@ -370,7 +368,7 @@ void
 tui_data_window::rerender ()
 {
   if (m_regs_content.empty ())
-    erase_data_content (_("[ Register Values Unavailable ]"));
+    erase_data_content ();
   else
     display_registers_from (0);
   tui_wrefresh (handle.get ());
