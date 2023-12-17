@@ -29,22 +29,32 @@
 
 struct tui_data_item_window
 {
-  tui_data_item_window () = default;
+  tui_data_item_window (int regno, const frame_info_ptr &frame)
+    : m_regno (regno)
+  {
+    update (frame);
+    highlight = false;
+  }
 
   DISABLE_COPY_AND_ASSIGN (tui_data_item_window);
 
   tui_data_item_window (tui_data_item_window &&) = default;
+
+  void update (const frame_info_ptr &frame);
 
   void rerender (WINDOW *handle, int field_width);
 
   /* Location.  */
   int x = 0;
   int y = 0;
-  /* The register number.  */
-  int regno = -1;
   bool highlight = false;
   bool visible = false;
   std::string content;
+
+private:
+
+  /* The register number.  */
+  const int m_regno;
 };
 
 /* The TUI registers window.  */
@@ -104,9 +114,8 @@ private:
      display off the end of the register display.  */
   void display_reg_element_at_line (int start_element_no, int start_line_no);
 
-  void show_register_group (const reggroup *group,
-			    frame_info_ptr frame,
-			    bool refresh_values_only);
+  void update_register_data (const reggroup *group,
+			     frame_info_ptr frame);
 
   /* Answer the number of the last line in the regs display.  If there
      are no registers (-1) is returned.  */

@@ -101,24 +101,20 @@ tui_register_format (frame_info_ptr frame, int regnum)
   return str;
 }
 
-/* Get the register value from the given frame and format it for the
-   display.  When changedp is set, check if the new register value has
-   changed with respect to the previous call.  */
-static void
-tui_get_register (frame_info_ptr frame,
-		  struct tui_data_item_window *data, 
-		  int regnum, bool *changedp)
+/* Compute the register value from the given frame and format it for
+   the display.  update 'content' and set 'highlight' if the contents
+   changed.  */
+void
+tui_data_item_window::update (const frame_info_ptr &frame)
 {
-  if (changedp)
-    *changedp = false;
   if (target_has_registers ())
     {
-      std::string new_content = tui_register_format (frame, regnum);
+      std::string new_content = tui_register_format (frame, m_regno);
 
-      if (changedp != NULL && data->content != new_content)
-	*changedp = true;
+      if (content != new_content)
+	highlight = true;
 
-      data->content = std::move (new_content);
+      content = std::move (new_content);
     }
 }
 
@@ -178,13 +174,11 @@ tui_data_window::show_registers (const reggroup *group)
 
   if (target_has_registers () && target_has_stack () && target_has_memory ())
     {
-      show_register_group (group, get_selected_frame (NULL),
-			   group == m_current_group);
+      update_register_data (group, get_selected_frame (nullptr));
 
       /* Clear all notation of changed values.  */
       for (auto &&data_item_win : m_regs_content)
 	data_item_win.highlight = false;
-      m_current_group = group;
     }
   else
     {
@@ -197,67 +191,46 @@ tui_data_window::show_registers (const reggroup *group)
 
 
 /* Set the data window to display the registers of the register group
-   using the given frame.  Values are refreshed only when
-   refresh_values_only is true.  */
+   using the given frame.  */
 
 void
-tui_data_window::show_register_group (const reggroup *group,
-				      frame_info_ptr frame, 
-				      bool refresh_values_only)
+tui_data_window::update_register_data (const reggroup *group,
+				       frame_info_ptr frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  int nr_regs;
-  int regnum, pos;
-
-  /* Make a new title showing which group we display.  */
-  this->set_title (string_printf ("Register group: %s", group->name ()));
-
-  /* See how many registers must be displayed.  */
-  nr_regs = 0;
-  for (regnum = 0; regnum < gdbarch_num_cooked_regs (gdbarch); regnum++)
+  if (group != m_current_group)
     {
-      const char *name;
+      m_current_group = group;
 
-      /* Must be in the group.  */
-      if (!gdbarch_register_reggroup_p (gdbarch, regnum, group))
-	continue;
+      /* Make a new title showing which group we display.  */
+      this->set_title (string_printf ("Register group: %s", group->name ()));
 
-      /* If the register name is empty, it is undefined for this
-	 processor, so don't display anything.  */
-      name = gdbarch_register_name (gdbarch, regnum);
-      if (*name == '\0')
-	continue;
+      /* Create the registers.  */
+      m_regs_content.clear ();
 
-      nr_regs++;
-    }
-
-  m_regs_content.resize (nr_regs);
-
-  /* Now set the register names and values.  */
-  pos = 0;
-  for (regnum = 0; regnum < gdbarch_num_cooked_regs (gdbarch); regnum++)
-    {
-      struct tui_data_item_window *data_item_win;
-      const char *name;
-
-      /* Must be in the group.  */
-      if (!gdbarch_register_reggroup_p (gdbarch, regnum, group))
-	continue;
-
-      /* If the register name is empty, it is undefined for this
-	 processor, so don't display anything.  */
-      name = gdbarch_register_name (gdbarch, regnum);
-      if (*name == '\0')
-	continue;
-
-      data_item_win = &m_regs_content[pos];
-      if (!refresh_values_only)
+      struct gdbarch *gdbarch = get_frame_arch (frame);
+      for (int regnum = 0;
+	   regnum < gdbarch_num_cooked_regs (gdbarch);
+	   regnum++)
 	{
-	  data_item_win->regno = regnum;
-	  data_item_win->highlight = false;
+	  /* Must be in the group.  */
+	  if (!gdbarch_register_reggroup_p (gdbarch, regnum, group))
+	    continue;
+
+	  /* If the register name is empty, it is undefined for this
+	     processor, so don't display anything.  */
+	  const char *name = gdbarch_register_name (gdbarch, regnum);
+	  if (*name == '\0')
+	    continue;
+
+	  m_regs_content.emplace_back (regnum, frame);
 	}
-      tui_get_register (frame, data_item_win, regnum, 0);
-      pos++;
+    }
+  else
+    {
+      /* The group did not change, so we can simply update each
+	 item. */
+      for (tui_data_item_window &reg : m_regs_content)
+	reg.update (frame);
     }
 }
 
@@ -470,13 +443,11 @@ tui_data_window::check_register_values (frame_info_ptr frame)
     show_registers (m_current_group);
   else
     {
-      for (auto &&data_item_win : m_regs_content)
+      for (tui_data_item_window &data_item_win : m_regs_content)
 	{
 	  bool was_hilighted = data_item_win.highlight;
 
-	  tui_get_register (frame, &data_item_win,
-			    data_item_win.regno,
-			    &data_item_win.highlight);
+	  data_item_win.update (frame);
 
 	  /* Register windows whose y == 0 are outside the visible area.  */
 	  if ((data_item_win.highlight || was_hilighted)
