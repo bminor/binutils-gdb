@@ -635,22 +635,8 @@ ctf_get_dict (ctf_dict_t *fp, ctf_id_t type)
 
 ctf_id_t ctf_lookup_by_rawname (ctf_dict_t *fp, int kind, const char *name)
 {
-  return ctf_lookup_by_rawhash (fp, ctf_name_table (fp, kind), name);
-}
-
-/* Look up a name in the given name table, in the appropriate hash given the
-   readability state of the dictionary.  The name is a raw, undecorated
-   identifier.  */
-
-ctf_id_t ctf_lookup_by_rawhash (ctf_dict_t *fp, ctf_names_t *np, const char *name)
-{
-  ctf_id_t id;
-
-  if (fp->ctf_flags & LCTF_RDWR)
-    id = (ctf_id_t) (uintptr_t) ctf_dynhash_lookup (np->ctn_writable, name);
-  else
-    id = ctf_hash_lookup_type (np->ctn_readonly, fp, name);
-  return id;
+  return (ctf_id_t) (uintptr_t)
+    ctf_dynhash_lookup (ctf_name_table (fp, kind), name);
 }
 
 /* Lookup the given type ID and return its name as a new dynamically-allocated

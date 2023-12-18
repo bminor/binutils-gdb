@@ -154,10 +154,10 @@ ctf_create (int *errp)
   if ((fp = ctf_bufopen_internal (&cts, NULL, NULL, NULL, 1, errp)) == NULL)
     goto err_dv;
 
-  fp->ctf_structs.ctn_writable = structs;
-  fp->ctf_unions.ctn_writable = unions;
-  fp->ctf_enums.ctn_writable = enums;
-  fp->ctf_names.ctn_writable = names;
+  fp->ctf_structs = structs;
+  fp->ctf_unions = unions;
+  fp->ctf_enums = enums;
+  fp->ctf_names = names;
   fp->ctf_objthash = objthash;
   fp->ctf_funchash = funchash;
   fp->ctf_dthash = dthash;
@@ -203,19 +203,19 @@ ctf_update (ctf_dict_t *fp)
   return 0;
 }
 
-ctf_names_t *
+ctf_dynhash_t *
 ctf_name_table (ctf_dict_t *fp, int kind)
 {
   switch (kind)
     {
     case CTF_K_STRUCT:
-      return &fp->ctf_structs;
+      return fp->ctf_structs;
     case CTF_K_UNION:
-      return &fp->ctf_unions;
+      return fp->ctf_unions;
     case CTF_K_ENUM:
-      return &fp->ctf_enums;
+      return fp->ctf_enums;
     default:
-      return &fp->ctf_names;
+      return fp->ctf_names;
     }
 }
 
@@ -230,7 +230,7 @@ ctf_dtd_insert (ctf_dict_t *fp, ctf_dtdef_t *dtd, int flag, int kind)
   if (flag == CTF_ADD_ROOT && dtd->dtd_data.ctt_name
       && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL)
     {
-      if (ctf_dynhash_insert (ctf_name_table (fp, kind)->ctn_writable,
+      if (ctf_dynhash_insert (ctf_name_table (fp, kind),
 			      (char *) name, (void *) (uintptr_t)
 			      dtd->dtd_type) < 0)
 	{
@@ -287,8 +287,7 @@ ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
       && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL
       && LCTF_INFO_ISROOT (fp, dtd->dtd_data.ctt_info))
     {
-      ctf_dynhash_remove (ctf_name_table (fp, name_kind)->ctn_writable,
-			  name);
+      ctf_dynhash_remove (ctf_name_table (fp, name_kind), name);
       ctf_str_remove_ref (fp, name, &dtd->dtd_data.ctt_name);
     }
 
@@ -410,8 +409,7 @@ ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
 	  && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL
 	  && LCTF_INFO_ISROOT (fp, dtd->dtd_data.ctt_info))
 	{
-	  ctf_dynhash_remove (ctf_name_table (fp, kind)->ctn_writable,
-			      name);
+	  ctf_dynhash_remove (ctf_name_table (fp, kind), name);
 	  ctf_str_remove_ref (fp, name, &dtd->dtd_data.ctt_name);
 	}
 

@@ -276,8 +276,9 @@ ctf_lookup_by_name_internal (ctf_dict_t *fp, ctf_dict_t *child,
 		    return ctf_set_typed_errno (fp, ENOMEM);
 		}
 
-	      if ((type = ctf_lookup_by_rawhash (fp, lp->ctl_hash,
-						 fp->ctf_tmp_typeslice)) == 0)
+	      if ((type = (ctf_id_t) (uintptr_t)
+		   ctf_dynhash_lookup (lp->ctl_hash,
+				       fp->ctf_tmp_typeslice)) == 0)
 		goto notype;
 
 	      break;

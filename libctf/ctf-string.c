@@ -73,6 +73,30 @@ ctf_strptr (ctf_dict_t *fp, uint32_t name)
   return (s != NULL ? s : "(?)");
 }
 
+/* As above, but return info on what is wrong in more detail.
+   (Used for type lookups.) */
+
+const char *
+ctf_strptr_validate (ctf_dict_t *fp, uint32_t name)
+{
+  const char *str = ctf_strraw (fp, name);
+
+  if (str == NULL)
+    {
+      if (CTF_NAME_STID (name) == CTF_STRTAB_1
+	  && fp->ctf_syn_ext_strtab == NULL
+	  && fp->ctf_str[CTF_NAME_STID (name)].cts_strs == NULL)
+	{
+	  ctf_set_errno (fp, ECTF_STRTAB);
+	  return NULL;
+	}
+
+      ctf_set_errno (fp, ECTF_BADNAME);
+      return NULL;
+    }
+  return str;
+}
+
 /* Remove all refs to a given atom.  */
 static void
 ctf_str_purge_atom_refs (ctf_str_atom_t *atom)

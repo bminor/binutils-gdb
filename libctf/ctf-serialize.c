@@ -1203,10 +1203,10 @@ ctf_serialize (ctf_dict_t *fp)
   memset (fp->ctf_lookups, 0, sizeof (fp->ctf_lookups));
   memset (&fp->ctf_in_flight_dynsyms, 0, sizeof (fp->ctf_in_flight_dynsyms));
   memset (&fp->ctf_dedup, 0, sizeof (fp->ctf_dedup));
-  fp->ctf_structs.ctn_writable = NULL;
-  fp->ctf_unions.ctn_writable = NULL;
-  fp->ctf_enums.ctn_writable = NULL;
-  fp->ctf_names.ctn_writable = NULL;
+  fp->ctf_structs = NULL;
+  fp->ctf_unions = NULL;
+  fp->ctf_enums = NULL;
+  fp->ctf_names = NULL;
 
   memcpy (&ofp, fp, sizeof (ctf_dict_t));
   memcpy (fp, nfp, sizeof (ctf_dict_t));

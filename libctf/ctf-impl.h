@@ -123,17 +123,11 @@ typedef struct ctf_dmodel
   size_t ctd_long;		/* Size of long in bytes.  */
 } ctf_dmodel_t;
 
-typedef struct ctf_names
-{
-  ctf_hash_t *ctn_readonly;	/* Hash table when readonly.  */
-  ctf_dynhash_t *ctn_writable;	/* Hash table when writable.  */
-} ctf_names_t;
-
 typedef struct ctf_lookup
 {
   const char *ctl_prefix;	/* String prefix for this lookup.  */
   size_t ctl_len;		/* Length of prefix string in bytes.  */
-  ctf_names_t *ctl_hash;	/* Pointer to hash table for lookup.  */
+  ctf_dynhash_t *ctl_hash;	/* Pointer to hash table for lookup.  */
 } ctf_lookup_t;
 
 typedef struct ctf_dictops
@@ -382,10 +376,10 @@ struct ctf_dict
   ctf_dynhash_t *ctf_syn_ext_strtab; /* Maps ext-strtab offsets to names.  */
   void *ctf_data_mmapped;	    /* CTF data we mmapped, to free later.  */
   size_t ctf_data_mmapped_len;	    /* Length of CTF data we mmapped.  */
-  ctf_names_t ctf_structs;	    /* Hash table of struct types.  */
-  ctf_names_t ctf_unions;	    /* Hash table of union types.  */
-  ctf_names_t ctf_enums;	    /* Hash table of enum types.  */
-  ctf_names_t ctf_names;	    /* Hash table of remaining type names.  */
+  ctf_dynhash_t *ctf_structs;	    /* Hash table of struct types.  */
+  ctf_dynhash_t *ctf_unions;	    /* Hash table of union types.  */
+  ctf_dynhash_t *ctf_enums;	    /* Hash table of enum types.  */
+  ctf_dynhash_t *ctf_names;	    /* Hash table of remaining type names.  */
   ctf_lookup_t ctf_lookups[5];	    /* Pointers to nametabs for name lookup.  */
   ctf_strs_t ctf_str[2];	    /* Array of string table base and bounds.  */
   ctf_dynhash_t *ctf_str_atoms;	    /* Hash table of ctf_str_atoms_t.  */
@@ -597,10 +591,9 @@ struct ctf_next
 #define LCTF_DIRTY	0x0004	/* CTF dict has been modified.  */
 #define LCTF_LINKING	0x0008  /* CTF link is underway: respect ctf_link_flags.  */
 
-extern ctf_names_t *ctf_name_table (ctf_dict_t *, int);
+extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, int);
 extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t);
 extern ctf_id_t ctf_lookup_by_rawname (ctf_dict_t *, int, const char *);
-extern ctf_id_t ctf_lookup_by_rawhash (ctf_dict_t *, ctf_names_t *, const char *);
 extern void ctf_set_ctl_hashes (ctf_dict_t *);
 
 extern int ctf_symtab_skippable (ctf_link_sym_t *sym);
@@ -629,19 +622,19 @@ typedef int (*ctf_hash_iter_find_f) (void *key, void *value, void *arg);
 typedef int (*ctf_hash_sort_f) (const ctf_next_hkv_t *, const ctf_next_hkv_t *,
 				void *arg);
 
-extern ctf_hash_t *ctf_hash_create (unsigned long, ctf_hash_fun, ctf_hash_eq_fun);
-extern int ctf_hash_insert_type (ctf_hash_t *, ctf_dict_t *, uint32_t, uint32_t);
-extern int ctf_hash_define_type (ctf_hash_t *, ctf_dict_t *, uint32_t, uint32_t);
-extern ctf_id_t ctf_hash_lookup_type (ctf_hash_t *, ctf_dict_t *, const char *);
-extern uint32_t ctf_hash_size (const ctf_hash_t *);
-extern void ctf_hash_destroy (ctf_hash_t *);
-
 extern ctf_dynhash_t *ctf_dynhash_create (ctf_hash_fun, ctf_hash_eq_fun,
 					  ctf_hash_free_fun, ctf_hash_free_fun);
+extern ctf_dynhash_t *ctf_dynhash_create_sized (unsigned long, ctf_hash_fun,
+						ctf_hash_eq_fun,
+						ctf_hash_free_fun,
+						ctf_hash_free_fun);
+
 extern int ctf_dynhash_insert (ctf_dynhash_t *, void *, void *);
 extern void ctf_dynhash_remove (ctf_dynhash_t *, const void *);
 extern size_t ctf_dynhash_elements (ctf_dynhash_t *);
 extern void ctf_dynhash_empty (ctf_dynhash_t *);
+extern int ctf_dynhash_insert_type (ctf_dict_t *, ctf_dynhash_t *, uint32_t, uint32_t);
+extern ctf_id_t ctf_dynhash_lookup_type (ctf_dynhash_t *, const char *);
 extern void *ctf_dynhash_lookup (ctf_dynhash_t *, const void *);
 extern int ctf_dynhash_lookup_kv (ctf_dynhash_t *, const void *key,
 				  const void **orig_key, void **value);
@@ -720,6 +713,7 @@ extern const char *ctf_strptr (ctf_dict_t *, uint32_t);
 extern const char *ctf_strraw (ctf_dict_t *, uint32_t);
 extern const char *ctf_strraw_explicit (ctf_dict_t *, uint32_t,
 					ctf_strs_t *);
+extern const char *ctf_strptr_validate (ctf_dict_t *, uint32_t);
 extern int ctf_str_create_atoms (ctf_dict_t *);
 extern void ctf_str_free_atoms (ctf_dict_t *);
 extern uint32_t ctf_str_add (ctf_dict_t *, const char *);

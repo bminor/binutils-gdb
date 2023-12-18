@@ -740,33 +740,33 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
   /* Now that we've counted up the number of each type, we can allocate
      the hash tables, type translation table, and pointer table.  */
 
-  if ((fp->ctf_structs.ctn_readonly
-       = ctf_hash_create (pop[CTF_K_STRUCT], ctf_hash_string,
-			  ctf_hash_eq_string)) == NULL)
+  if ((fp->ctf_structs
+       = ctf_dynhash_create_sized (pop[CTF_K_STRUCT], ctf_hash_string,
+				   ctf_hash_eq_string, NULL, NULL)) == NULL)
     return ENOMEM;
 
-  if ((fp->ctf_unions.ctn_readonly
-       = ctf_hash_create (pop[CTF_K_UNION], ctf_hash_string,
-			  ctf_hash_eq_string)) == NULL)
+  if ((fp->ctf_unions
+       = ctf_dynhash_create_sized (pop[CTF_K_UNION], ctf_hash_string,
+				   ctf_hash_eq_string, NULL, NULL)) == NULL)
     return ENOMEM;
 
-  if ((fp->ctf_enums.ctn_readonly
-       = ctf_hash_create (pop[CTF_K_ENUM], ctf_hash_string,
-			  ctf_hash_eq_string)) == NULL)
+  if ((fp->ctf_enums
+       = ctf_dynhash_create_sized (pop[CTF_K_ENUM], ctf_hash_string,
+				   ctf_hash_eq_string, NULL, NULL)) == NULL)
     return ENOMEM;
 
-  if ((fp->ctf_names.ctn_readonly
-       = ctf_hash_create (pop[CTF_K_UNKNOWN] +
-			  pop[CTF_K_INTEGER] +
-			  pop[CTF_K_FLOAT] +
-			  pop[CTF_K_FUNCTION] +
-			  pop[CTF_K_TYPEDEF] +
-			  pop[CTF_K_POINTER] +
-			  pop[CTF_K_VOLATILE] +
-			  pop[CTF_K_CONST] +
-			  pop[CTF_K_RESTRICT],
-			  ctf_hash_string,
-			  ctf_hash_eq_string)) == NULL)
+  if ((fp->ctf_names
+       = ctf_dynhash_create_sized (pop[CTF_K_UNKNOWN] +
+				   pop[CTF_K_INTEGER] +
+				   pop[CTF_K_FLOAT] +
+				   pop[CTF_K_FUNCTION] +
+				   pop[CTF_K_TYPEDEF] +
+				   pop[CTF_K_POINTER] +
+				   pop[CTF_K_VOLATILE] +
+				   pop[CTF_K_CONST] +
+				   pop[CTF_K_RESTRICT],
+				   ctf_hash_string,
+				   ctf_hash_eq_string, NULL, NULL)) == NULL)
     return ENOMEM;
 
   fp->ctf_txlate = malloc (sizeof (uint32_t) * (fp->ctf_typemax + 1));
@@ -810,11 +810,10 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
 	     root-visible version so that we can be sure to find it when
 	     checking for conflicting definitions in ctf_add_type().  */
 
-	  if (((ctf_hash_lookup_type (fp->ctf_names.ctn_readonly,
-				      fp, name)) == 0)
+	  if (((ctf_dynhash_lookup_type (fp->ctf_names, name)) == 0)
 	      || isroot)
 	    {
-	      err = ctf_hash_define_type (fp->ctf_names.ctn_readonly, fp,
+	      err = ctf_dynhash_insert_type (fp, fp->ctf_names,
 					  LCTF_INDEX_TO_TYPE (fp, id, child),
 					  tp->ctt_name);
 	      if (err != 0)
@@ -832,9 +831,9 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
 	  if (!isroot)
 	    break;
 
-	  err = ctf_hash_insert_type (fp->ctf_names.ctn_readonly, fp,
-				      LCTF_INDEX_TO_TYPE (fp, id, child),
-				      tp->ctt_name);
+	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
+					 LCTF_INDEX_TO_TYPE (fp, id, child),
+					 tp->ctt_name);
 	  if (err != 0)
 	    return err;
 	  break;
@@ -846,9 +845,9 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
 	  if (!isroot)
 	    break;
 
-	  err = ctf_hash_define_type (fp->ctf_structs.ctn_readonly, fp,
-				      LCTF_INDEX_TO_TYPE (fp, id, child),
-				      tp->ctt_name);
+	  err = ctf_dynhash_insert_type (fp, fp->ctf_structs,
+					 LCTF_INDEX_TO_TYPE (fp, id, child),
+					 tp->ctt_name);
 
 	  if (err != 0)
 	    return err;
@@ -862,9 +861,9 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
 	  if (!isroot)
 	    break;
 
-	  err = ctf_hash_define_type (fp->ctf_unions.ctn_readonly, fp,
-				      LCTF_INDEX_TO_TYPE (fp, id, child),
-				      tp->ctt_name);
+	  err = ctf_dynhash_insert_type (fp, fp->ctf_unions,
+					 LCTF_INDEX_TO_TYPE (fp, id, child),
+					 tp->ctt_name);
 
 	  if (err != 0)
 	    return err;
@@ -874,9 +873,9 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
 	  if (!isroot)
 	    break;
 
-	  err = ctf_hash_define_type (fp->ctf_enums.ctn_readonly, fp,
-				      LCTF_INDEX_TO_TYPE (fp, id, child),
-				      tp->ctt_name);
+	  err = ctf_dynhash_insert_type (fp, fp->ctf_enums,
+					 LCTF_INDEX_TO_TYPE (fp, id, child),
+					 tp->ctt_name);
 
 	  if (err != 0)
 	    return err;
@@ -886,27 +885,26 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
 	  if (!isroot)
 	    break;
 
-	  err = ctf_hash_insert_type (fp->ctf_names.ctn_readonly, fp,
-				      LCTF_INDEX_TO_TYPE (fp, id, child),
-				      tp->ctt_name);
+	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
+					 LCTF_INDEX_TO_TYPE (fp, id, child),
+					 tp->ctt_name);
 	  if (err != 0)
 	    return err;
 	  break;
 
 	case CTF_K_FORWARD:
 	  {
-	    ctf_names_t *np = ctf_name_table (fp, tp->ctt_type);
+	    ctf_dynhash_t *h = ctf_name_table (fp, tp->ctt_type);
 
 	    if (!isroot)
 	      break;
 
 	    /* Only insert forward tags into the given hash if the type or tag
 	       name is not already present.  */
-	    if (ctf_hash_lookup_type (np->ctn_readonly, fp, name) == 0)
+	    if (ctf_dynhash_lookup_type (h, name) == 0)
 	      {
-		err = ctf_hash_insert_type (np->ctn_readonly, fp,
-					    LCTF_INDEX_TO_TYPE (fp, id, child),
-					    tp->ctt_name);
+		err = ctf_dynhash_insert_type (fp, h, LCTF_INDEX_TO_TYPE (fp, id, child),
+					       tp->ctt_name);
 		if (err != 0)
 		  return err;
 	      }
@@ -929,15 +927,15 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
 	  if (!isroot)
 	    break;
 
-	  err = ctf_hash_insert_type (fp->ctf_names.ctn_readonly, fp,
-				      LCTF_INDEX_TO_TYPE (fp, id, child),
-				      tp->ctt_name);
+	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
+					 LCTF_INDEX_TO_TYPE (fp, id, child),
+					 tp->ctt_name);
 	  if (err != 0)
 	    return err;
 	  break;
 	default:
 	  ctf_err_warn (fp, 0, ECTF_CORRUPT,
-			_("init_types(): unhandled CTF kind: %x"), kind);
+			_("init_static_types(): unhandled CTF kind: %x"), kind);
 	  return ECTF_CORRUPT;
 	}
 
@@ -946,14 +944,14 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
     }
 
   ctf_dprintf ("%lu total types processed\n", fp->ctf_typemax);
-  ctf_dprintf ("%u enum names hashed\n",
-	       ctf_hash_size (fp->ctf_enums.ctn_readonly));
-  ctf_dprintf ("%u struct names hashed (%d long)\n",
-	       ctf_hash_size (fp->ctf_structs.ctn_readonly), nlstructs);
-  ctf_dprintf ("%u union names hashed (%d long)\n",
-	       ctf_hash_size (fp->ctf_unions.ctn_readonly), nlunions);
-  ctf_dprintf ("%u base type names hashed\n",
-	       ctf_hash_size (fp->ctf_names.ctn_readonly));
+  ctf_dprintf ("%zu enum names hashed\n",
+	       ctf_dynhash_elements (fp->ctf_enums));
+  ctf_dprintf ("%zu struct names hashed (%d long)\n",
+	       ctf_dynhash_elements (fp->ctf_structs), nlstructs);
+  ctf_dprintf ("%zu union names hashed (%d long)\n",
+	       ctf_dynhash_elements (fp->ctf_unions), nlunions);
+  ctf_dprintf ("%zu base type names hashed\n",
+	       ctf_dynhash_elements (fp->ctf_names));
 
   return 0;
 }
@@ -1235,16 +1233,16 @@ void ctf_set_ctl_hashes (ctf_dict_t *fp)
      array of type name prefixes and the corresponding ctf_hash to use.  */
   fp->ctf_lookups[0].ctl_prefix = "struct";
   fp->ctf_lookups[0].ctl_len = strlen (fp->ctf_lookups[0].ctl_prefix);
-  fp->ctf_lookups[0].ctl_hash = &fp->ctf_structs;
+  fp->ctf_lookups[0].ctl_hash = fp->ctf_structs;
   fp->ctf_lookups[1].ctl_prefix = "union";
   fp->ctf_lookups[1].ctl_len = strlen (fp->ctf_lookups[1].ctl_prefix);
-  fp->ctf_lookups[1].ctl_hash = &fp->ctf_unions;
+  fp->ctf_lookups[1].ctl_hash = fp->ctf_unions;
   fp->ctf_lookups[2].ctl_prefix = "enum";
   fp->ctf_lookups[2].ctl_len = strlen (fp->ctf_lookups[2].ctl_prefix);
-  fp->ctf_lookups[2].ctl_hash = &fp->ctf_enums;
+  fp->ctf_lookups[2].ctl_hash = fp->ctf_enums;
   fp->ctf_lookups[3].ctl_prefix = _CTF_NULLSTR;
   fp->ctf_lookups[3].ctl_len = strlen (fp->ctf_lookups[3].ctl_prefix);
-  fp->ctf_lookups[3].ctl_hash = &fp->ctf_names;
+  fp->ctf_lookups[3].ctl_hash = fp->ctf_names;
   fp->ctf_lookups[4].ctl_prefix = NULL;
   fp->ctf_lookups[4].ctl_len = 0;
   fp->ctf_lookups[4].ctl_hash = NULL;
@@ -1764,20 +1762,11 @@ ctf_dict_close (ctf_dict_t *fp)
       ctf_dtd_delete (fp, dtd);
     }
   ctf_dynhash_destroy (fp->ctf_dthash);
-  if (fp->ctf_flags & LCTF_RDWR)
-    {
-      ctf_dynhash_destroy (fp->ctf_structs.ctn_writable);
-      ctf_dynhash_destroy (fp->ctf_unions.ctn_writable);
-      ctf_dynhash_destroy (fp->ctf_enums.ctn_writable);
-      ctf_dynhash_destroy (fp->ctf_names.ctn_writable);
-    }
-  else
-    {
-      ctf_hash_destroy (fp->ctf_structs.ctn_readonly);
-      ctf_hash_destroy (fp->ctf_unions.ctn_readonly);
-      ctf_hash_destroy (fp->ctf_enums.ctn_readonly);
-      ctf_hash_destroy (fp->ctf_names.ctn_readonly);
-    }
+
+  ctf_dynhash_destroy (fp->ctf_structs);
+  ctf_dynhash_destroy (fp->ctf_unions);
+  ctf_dynhash_destroy (fp->ctf_enums);
+  ctf_dynhash_destroy (fp->ctf_names);
 
   for (dvd = ctf_list_next (&fp->ctf_dvdefs); dvd != NULL; dvd = nvd)
     {
