@@ -42,7 +42,12 @@ enum regset_type {
   GENERAL_REGS,
   FP_REGS,
   EXTENDED_REGS,
-  OPTIONAL_REGS, /* Do not error if the regset cannot be accessed.  */
+  OPTIONAL_REGS, /* Do not error if the regset cannot be accessed.
+		    Disable the regset instead.  */
+  OPTIONAL_RUNTIME_REGS, /* Some optional regsets can only be accessed
+			    dependent on the execution flow.  For such
+			    access errors don't show a warning and don't
+			    disable the regset.  */
 };
 
 /* The arch's regsets array initializer must be terminated with a NULL
