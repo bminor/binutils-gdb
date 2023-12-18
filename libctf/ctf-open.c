@@ -685,6 +685,7 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
   const ctf_type_t *tp;
   uint32_t id;
   uint32_t *xp;
+  unsigned long typemax = 0;
 
   /* We determine whether the dict is a child or a parent based on the value of
      cth_parname.  */
@@ -708,7 +709,7 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
   /* We make two passes through the entire type section.  In this first
      pass, we count the number of each type and the total number of types.  */
 
-  for (tp = tbuf; tp < tend; fp->ctf_typemax++)
+  for (tp = tbuf; tp < tend; typemax++)
     {
       unsigned short kind = LCTF_INFO_KIND (fp, tp->ctt_info);
       unsigned long vlen = LCTF_INFO_VLEN (fp, tp->ctt_info);
@@ -769,8 +770,8 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
 				   ctf_hash_eq_string, NULL, NULL)) == NULL)
     return ENOMEM;
 
-  fp->ctf_txlate = malloc (sizeof (uint32_t) * (fp->ctf_typemax + 1));
-  fp->ctf_ptrtab_len = fp->ctf_typemax + 1;
+  fp->ctf_txlate = malloc (sizeof (uint32_t) * (typemax + 1));
+  fp->ctf_ptrtab_len = typemax + 1;
   fp->ctf_ptrtab = malloc (sizeof (uint32_t) * fp->ctf_ptrtab_len);
 
   if (fp->ctf_txlate == NULL || fp->ctf_ptrtab == NULL)
@@ -779,13 +780,17 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
   xp = fp->ctf_txlate;
   *xp++ = 0;			/* Type id 0 is used as a sentinel value.  */
 
-  memset (fp->ctf_txlate, 0, sizeof (uint32_t) * (fp->ctf_typemax + 1));
-  memset (fp->ctf_ptrtab, 0, sizeof (uint32_t) * (fp->ctf_typemax + 1));
+  memset (fp->ctf_txlate, 0, sizeof (uint32_t) * (typemax + 1));
+  memset (fp->ctf_ptrtab, 0, sizeof (uint32_t) * (typemax + 1));
 
   /* In the second pass through the types, we fill in each entry of the
-     type and pointer tables and add names to the appropriate hashes.  */
+     type and pointer tables and add names to the appropriate hashes.
 
-  for (id = 1, tp = tbuf; tp < tend; xp++, id++)
+     Bump ctf_typemax as we go, but keep it one higher than normal, so that
+     the type being read in is considered a valid type and it is at least
+     barely possible to run simple lookups on it.  */
+
+  for (id = 1, fp->ctf_typemax = 1, tp = tbuf; tp < tend; xp++, id++, fp->ctf_typemax++)
     {
       unsigned short kind = LCTF_INFO_KIND (fp, tp->ctt_info);
       unsigned short isroot = LCTF_INFO_ISROOT (fp, tp->ctt_info);
@@ -799,27 +804,47 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
       /* Cannot fail: shielded by call in loop above.  */
       vbytes = LCTF_VBYTES (fp, kind, size, vlen);
 
+      *xp = (uint32_t) ((uintptr_t) tp - (uintptr_t) fp->ctf_buf);
+
       switch (kind)
 	{
 	case CTF_K_UNKNOWN:
 	case CTF_K_INTEGER:
 	case CTF_K_FLOAT:
-	  /* Names are reused by bit-fields, which are differentiated by their
-	     encodings, and so typically we'd record only the first instance of
-	     a given intrinsic.  However, we replace an existing type with a
-	     root-visible version so that we can be sure to find it when
-	     checking for conflicting definitions in ctf_add_type().  */
+	  {
+	    ctf_id_t existing;
+	    ctf_encoding_t existing_en;
+	    ctf_encoding_t this_en;
 
-	  if (((ctf_dynhash_lookup_type (fp->ctf_names, name)) == 0)
-	      || isroot)
-	    {
-	      err = ctf_dynhash_insert_type (fp, fp->ctf_names,
-					  LCTF_INDEX_TO_TYPE (fp, id, child),
-					  tp->ctt_name);
-	      if (err != 0)
-		return err;
-	    }
-	  break;
+	    if (!isroot)
+	      break;
+
+	    /* Names are reused by bitfields, which are differentiated by
+	       their encodings.  So check for the type already existing, and
+	       iff the new type is a root-visible non-bitfield, replace the
+	       old one.  It's a little hard to figure out whether a type is
+	       a non-bitfield without already knowing that type's native
+	       width, but we can converge on it by replacing an existing
+	       type as long as the new type is zero-offset and has a
+	       bit-width wider than the existing one, since the native type
+	       must necessarily have a bit-width at least as wide as any
+	       bitfield based on it. */
+
+	    if (((existing = ctf_dynhash_lookup_type (fp->ctf_names, name)) == 0)
+		|| ctf_type_encoding (fp, existing, &existing_en) != 0
+		|| (ctf_type_encoding (fp, LCTF_INDEX_TO_TYPE (fp, id, child), &this_en) == 0
+		    && this_en.cte_offset == 0
+		    && (existing_en.cte_offset != 0
+			|| existing_en.cte_bits < this_en.cte_bits)))
+	      {
+		err = ctf_dynhash_insert_type (fp, fp->ctf_names,
+					       LCTF_INDEX_TO_TYPE (fp, id, child),
+					       tp->ctt_name);
+		if (err != 0)
+		  return err;
+	      }
+	    break;
+	  }
 
 	  /* These kinds have no name, so do not need interning into any
 	     hashtables.  */
@@ -938,10 +963,10 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
 			_("init_static_types(): unhandled CTF kind: %x"), kind);
 	  return ECTF_CORRUPT;
 	}
-
-      *xp = (uint32_t) ((uintptr_t) tp - (uintptr_t) fp->ctf_buf);
       tp = (ctf_type_t *) ((uintptr_t) tp + increment + vbytes);
     }
+  fp->ctf_typemax--;
+  assert (fp->ctf_typemax == typemax);
 
   ctf_dprintf ("%lu total types processed\n", fp->ctf_typemax);
   ctf_dprintf ("%zu enum names hashed\n",
