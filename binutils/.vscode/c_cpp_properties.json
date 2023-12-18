@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/trdthg/plct/riscv-gnu-toolchain/build-binutils-newlib/bfd"
+            ],
+            "defines": [],
+            "compilerPath": "/etc/profiles/per-user/trdthg/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}

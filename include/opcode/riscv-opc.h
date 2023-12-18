@@ -2320,6 +2320,13 @@
 #define MASK_WRS_NTO 0xffffffff
 #define MATCH_WRS_STO 0x01d00073
 #define MASK_WRS_STO 0xffffffff
+/* Zacas intructions */
+#define MATCH_CAS_W 0x2800202F
+#define MASK_CAS_W 0xFE00707F
+#define MATCH_CAS_D 0x2800302F
+#define MASK_CAS_D 0xFE00707F
+#define MATCH_CAS_Q 0x2800602F
+#define MASK_CAS_Q 0xFE00707F
 /* Vendor-specific (CORE-V) Xcvmac instructions.  */
 #define MATCH_CV_MAC       0x9000302b
 #define MASK_CV_MAC        0xfe00707f
