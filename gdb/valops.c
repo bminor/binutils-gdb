@@ -1193,13 +1193,6 @@ value_assign (struct value *toval, struct value *fromval)
 
     case lval_register:
       {
-	/* Figure out which frame this register value is in.  The value
-	   holds the frame_id for the next frame, that is the frame this
-	   register value was unwound from.
-
-	   Below we will call put_frame_register_bytes which requires that
-	   we pass it the actual frame in which the register value is
-	   valid, i.e. not the next frame.  */
 	frame_info_ptr next_frame = frame_find_by_id (VALUE_NEXT_FRAME_ID (toval));
 
 	int value_reg = VALUE_REGNUM (toval);
