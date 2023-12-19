@@ -163,16 +163,15 @@ io_reinit (bfd *abfd, struct bfd_preserve *preserve)
   if (abfd->iovec != preserve->iovec)
     {
       /* Handle file backed to in-memory transition.  bfd_cache_close
-	 won't do anything unless abfd->iovec is the cache_iovec.  */
+	 won't do anything unless abfd->iovec is the cache_iovec.
+	 Don't be tempted to call iovec->bclose here.  We don't want
+	 to call memory_bclose, which would free the bim.  The bim
+	 must be kept if bfd_check_format_matches is going to decide
+	 later that the PE format needing it is in fact the correct
+	 target match.  */
       bfd_cache_close (abfd);
       abfd->iovec = preserve->iovec;
-
-      if (abfd->iostream != preserve->iostream)
-	{
-	  if ((abfd->flags & BFD_IN_MEMORY) != 0)
-	    free (abfd->iostream);
-	  abfd->iostream = preserve->iostream;
-	}
+      abfd->iostream = preserve->iostream;
 
       /* Handle in-memory to file backed transition.  */
       if ((abfd->flags & BFD_CLOSED_BY_CACHE) != 0

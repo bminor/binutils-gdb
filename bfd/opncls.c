@@ -176,8 +176,6 @@ _bfd_delete_bfd (bfd *abfd)
   else
     free ((char *) bfd_get_filename (abfd));
 
-  if ((abfd->flags & BFD_IN_MEMORY) != 0)
-    free (abfd->iostream);
   free (abfd->arelt_data);
   free (abfd);
 }
