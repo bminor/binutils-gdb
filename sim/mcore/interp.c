@@ -1015,7 +1015,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	case 0x38: case 0x39:				/* xsr, rotli */
 	  {
 	    unsigned imm = IMM5;
-	    unsigned long tmp = gr[RD];
+	    uint32_t tmp = gr[RD];
 	    if (imm == 0)
 	      {
 		int32_t cbit;
