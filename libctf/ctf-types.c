@@ -492,6 +492,7 @@ ctf_id_t
 ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
 {
   ctf_next_t *i = *it;
+  ctf_id_t id;
 
   if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parent == NULL))
     return (ctf_set_typed_errno (fp, ECTF_NOPARENT));
@@ -503,8 +504,7 @@ ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
 
       i->cu.ctn_fp = fp;
       i->ctn_iter_fun = (void (*) (void)) ctf_variable_next;
-      if (fp->ctf_flags & LCTF_RDWR)
-	i->u.ctn_dvd = ctf_list_next (&fp->ctf_dvdefs);
+      i->u.ctn_dvd = ctf_list_next (&fp->ctf_dvdefs);
       *it = i;
     }
 
@@ -514,26 +514,20 @@ ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
   if (fp != i->cu.ctn_fp)
     return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
 
-  if (!(fp->ctf_flags & LCTF_RDWR))
+  if (i->ctn_n < fp->ctf_nvars)
     {
-      if (i->ctn_n >= fp->ctf_nvars)
-	goto end_iter;
-
       *name = ctf_strptr (fp, fp->ctf_vars[i->ctn_n].ctv_name);
       return fp->ctf_vars[i->ctn_n++].ctv_type;
-    }
-  else
-    {
-      ctf_id_t id;
 
-      if (i->u.ctn_dvd == NULL)
-	goto end_iter;
-
-      *name = i->u.ctn_dvd->dvd_name;
-      id = i->u.ctn_dvd->dvd_type;
-      i->u.ctn_dvd = ctf_list_next (i->u.ctn_dvd);
-      return id;
     }
+
+  if (i->u.ctn_dvd == NULL)
+    goto end_iter;
+
+  *name = i->u.ctn_dvd->dvd_name;
+  id = i->u.ctn_dvd->dvd_type;
+  i->u.ctn_dvd = ctf_list_next (i->u.ctn_dvd);
+  return id;
 
  end_iter:
   ctf_next_destroy (i);

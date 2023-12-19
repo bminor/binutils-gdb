@@ -670,13 +670,15 @@ upgrade_types (ctf_dict_t *fp, ctf_header_t *cth)
   return 0;
 }
 
-/* Initialize the type ID translation table with the byte offset of each type,
+/* Populate statically-defined types (those loaded from a saved buffer).
+
+   Initialize the type ID translation table with the byte offset of each type,
    and initialize the hash tables of each named type.  Upgrade the type table to
    the latest supported representation in the process, if needed, and if this
    recension of libctf supports upgrading.  */
 
 static int
-init_types (ctf_dict_t *fp, ctf_header_t *cth)
+init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 {
   const ctf_type_t *tbuf;
   const ctf_type_t *tend;
@@ -693,8 +695,6 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
   int child = cth->cth_parname != 0;
   int nlstructs = 0, nlunions = 0;
   int err;
-
-  assert (!(fp->ctf_flags & LCTF_RDWR));
 
   if (_libctf_unlikely_ (fp->ctf_version == CTF_VERSION_1))
     {
@@ -770,9 +770,16 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
 				   ctf_hash_eq_string, NULL, NULL)) == NULL)
     return ENOMEM;
 
+  /* The ptrtab and txlate can be appropriately sized for precisely this set
+     of types: the txlate because it is only used to look up static types,
+     so dynamic types added later will never go through it, and the ptrtab
+     because later-added types will call grow_ptrtab() automatically, as
+     needed.  */
+
   fp->ctf_txlate = malloc (sizeof (uint32_t) * (typemax + 1));
   fp->ctf_ptrtab_len = typemax + 1;
   fp->ctf_ptrtab = malloc (sizeof (uint32_t) * fp->ctf_ptrtab_len);
+  fp->ctf_stypes = typemax;
 
   if (fp->ctf_txlate == NULL || fp->ctf_ptrtab == NULL)
     return ENOMEM;		/* Memory allocation failed.  */
@@ -1283,7 +1290,7 @@ ctf_dict_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
 {
   return ctf_simple_open_internal (ctfsect, ctfsect_size, symsect, symsect_size,
 				   symsect_entsize, strsect, strsect_size, NULL,
-				   0, errp);
+				   errp);
 }
 
 /* Open a CTF file, mocking up a suitable ctf_sect and overriding the external
@@ -1293,8 +1300,7 @@ ctf_dict_t *ctf_simple_open_internal (const char *ctfsect, size_t ctfsect_size,
 				      const char *symsect, size_t symsect_size,
 				      size_t symsect_entsize,
 				      const char *strsect, size_t strsect_size,
-				      ctf_dynhash_t *syn_strtab, int writable,
-				      int *errp)
+				      ctf_dynhash_t *syn_strtab, int *errp)
 {
   ctf_sect_t skeleton;
 
@@ -1332,7 +1338,7 @@ ctf_dict_t *ctf_simple_open_internal (const char *ctfsect, size_t ctfsect_size,
     }
 
   return ctf_bufopen_internal (ctfsectp, symsectp, strsectp, syn_strtab,
-			       writable, errp);
+			       errp);
 }
 
 /* Decode the specified CTF buffer and optional symbol table, and create a new
@@ -1344,7 +1350,7 @@ ctf_dict_t *
 ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	     const ctf_sect_t *strsect, int *errp)
 {
-  return ctf_bufopen_internal (ctfsect, symsect, strsect, NULL, 0, errp);
+  return ctf_bufopen_internal (ctfsect, symsect, strsect, NULL, errp);
 }
 
 /* Like ctf_bufopen, but overriding the external strtab with a synthetic one.  */
@@ -1352,7 +1358,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 ctf_dict_t *
 ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 		      const ctf_sect_t *strsect, ctf_dynhash_t *syn_strtab,
-		      int writable, int *errp)
+		      int *errp)
 {
   const ctf_preamble_t *pp;
   size_t hdrsz = sizeof (ctf_header_t);
@@ -1441,9 +1447,6 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   memset (fp, 0, sizeof (ctf_dict_t));
 
-  if (writable)
-    fp->ctf_flags |= LCTF_RDWR;
-
   if ((fp->ctf_header = malloc (sizeof (struct ctf_header))) == NULL)
     {
       free (fp);
@@ -1526,7 +1529,7 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
      section's buffer pointer into ctf_buf, below.  */
 
   /* Note: if this is a v1 buffer, it will be reallocated and expanded by
-     init_types().  */
+     init_static_types().  */
 
   if (hp->cth_flags & CTF_F_COMPRESS)
     {
@@ -1607,7 +1610,7 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
      proceed with initializing the ctf_dict_t we allocated above.
 
      Nothing that depends on buf or base should be set directly in this function
-     before the init_types() call, because it may be reallocated during
+     before the init_static_types() call, because it may be reallocated during
      transparent upgrade if this recension of libctf is so configured: see
      ctf_set_base().  */
 
@@ -1660,6 +1663,26 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     }
   fp->ctf_syn_ext_strtab = syn_strtab;
 
+  /* Dynamic state, for dynamic addition to this dict after loading.  */
+
+  fp->ctf_dthash = ctf_dynhash_create (ctf_hash_integer, ctf_hash_eq_integer,
+				       NULL, NULL);
+  fp->ctf_dvhash = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
+				       NULL, NULL);
+  fp->ctf_snapshots = 1;
+
+  fp->ctf_objthash = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
+					   free, NULL);
+  fp->ctf_funchash = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
+					 free, NULL);
+
+  if (!fp->ctf_dthash || !fp->ctf_dvhash || !fp->ctf_snapshots ||
+      !fp->ctf_objthash || !fp->ctf_funchash)
+    {
+      err = ENOMEM;
+      goto bad;
+    }
+
   if (foreign_endian &&
       (err = ctf_flip (fp, hp, fp->ctf_buf, 0)) != 0)
     {
@@ -1673,15 +1696,7 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   ctf_set_base (fp, hp, fp->ctf_base);
 
-  /* No need to do anything else for dynamic dicts: they do not support symbol
-     lookups, and the type table is maintained in the dthashes.  */
-  if (fp->ctf_flags & LCTF_RDWR)
-    {
-      fp->ctf_refcnt = 1;
-      return fp;
-    }
-
-  if ((err = init_types (fp, hp)) != 0)
+  if ((err = init_static_types (fp, hp)) != 0)
     goto bad;
 
   /* Allocate and initialize the symtab translation table, pointed to by
@@ -1800,7 +1815,8 @@ ctf_dict_close (ctf_dict_t *fp)
     }
   ctf_dynhash_destroy (fp->ctf_dvhash);
 
-  ctf_dynhash_destroy (fp->ctf_symhash);
+  ctf_dynhash_destroy (fp->ctf_symhash_func);
+  ctf_dynhash_destroy (fp->ctf_symhash_objt);
   free (fp->ctf_funcidx_sxlate);
   free (fp->ctf_objtidx_sxlate);
   ctf_dynhash_destroy (fp->ctf_objthash);

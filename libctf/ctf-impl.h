@@ -369,7 +369,8 @@ struct ctf_dict
   ctf_sect_t ctf_symtab;	    /* Symbol table from object file.  */
   ctf_sect_t ctf_strtab;	    /* String table from object file.  */
   int ctf_symsect_little_endian;    /* Endianness of the ctf_symtab.  */
-  ctf_dynhash_t *ctf_symhash;       /* (partial) hash, symsect name -> idx. */
+  ctf_dynhash_t *ctf_symhash_func;  /* (partial) hash, symsect name -> idx. */
+  ctf_dynhash_t *ctf_symhash_objt;  /* ditto, for object symbols.  */
   size_t ctf_symhash_latest;	    /* Amount of symsect scanned so far.  */
   ctf_dynhash_t *ctf_prov_strtab;   /* Maps provisional-strtab offsets
 				       to names.  */
@@ -406,8 +407,8 @@ struct ctf_dict
   uint32_t *ctf_funcidx_sxlate;	  /* Offsets into funcinfo for a given funcidx.  */
   uint32_t *ctf_objtidx_sxlate;	  /* Likewise, for ctf_objtidx.  */
   size_t ctf_nobjtidx;		  /* Number of objtidx entries.  */
-  ctf_dynhash_t *ctf_objthash;	  /* name -> type ID.  */
-  ctf_dynhash_t *ctf_funchash;	  /* name -> CTF_K_FUNCTION type ID.  */
+  ctf_dynhash_t *ctf_objthash;	  /* Dynamic: name -> type ID.  */
+  ctf_dynhash_t *ctf_funchash;	  /* Dynamic: name -> CTF_K_FUNCTION type ID.  */
 
   /* The next three are linker-derived state found in ctf_link targets only.  */
 
@@ -418,6 +419,7 @@ struct ctf_dict
   struct ctf_varent *ctf_vars;	  /* Sorted variable->type mapping.  */
   unsigned long ctf_nvars;	  /* Number of variables in ctf_vars.  */
   unsigned long ctf_typemax;	  /* Maximum valid type ID number.  */
+  unsigned long ctf_stypes;	  /* Number of static (non-dynamic) types.  */
   const ctf_dmodel_t *ctf_dmodel; /* Data model pointer (see above).  */
   const char *ctf_cuname;	  /* Compilation unit name (if any).  */
   char *ctf_dyncuname;		  /* Dynamically allocated name of CU.  */
@@ -575,7 +577,7 @@ struct ctf_next
 					   (id))
 
 #define LCTF_INDEX_TO_TYPEPTR(fp, i) \
-    ((fp->ctf_flags & LCTF_RDWR) ?					\
+  ((i > fp->ctf_stypes) ?							\
      &(ctf_dtd_lookup (fp, LCTF_INDEX_TO_TYPE				\
 		       (fp, i, fp->ctf_flags & LCTF_CHILD))->dtd_data) : \
      (ctf_type_t *)((uintptr_t)(fp)->ctf_buf + (fp)->ctf_txlate[(i)]))
@@ -587,14 +589,19 @@ struct ctf_next
   ((fp)->ctf_dictops->ctfo_get_vbytes(fp, kind, size, vlen))
 
 #define LCTF_CHILD	0x0001	/* CTF dict is a child.  */
-#define LCTF_RDWR	0x0002	/* CTF dict is writable.  */
-#define LCTF_DIRTY	0x0004	/* CTF dict has been modified.  */
-#define LCTF_LINKING	0x0008  /* CTF link is underway: respect ctf_link_flags.  */
+#define LCTF_DIRTY	0x0002	/* CTF dict has been modified.  */
+#define LCTF_LINKING	0x0004  /* CTF link is underway: respect ctf_link_flags.  */
 
 extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, int);
 extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t);
+extern ctf_id_t ctf_lookup_variable_here (ctf_dict_t *fp, const char *name);
+extern ctf_id_t ctf_lookup_by_sym_or_name (ctf_dict_t *, unsigned long symidx,
+					   const char *symname, int try_parent,
+					   int is_function);
 extern ctf_id_t ctf_lookup_by_rawname (ctf_dict_t *, int, const char *);
 extern void ctf_set_ctl_hashes (ctf_dict_t *);
+extern ctf_id_t ctf_symbol_next_static (ctf_dict_t *, ctf_next_t **,
+					const char **, int);
 
 extern int ctf_symtab_skippable (ctf_link_sym_t *sym);
 extern int ctf_add_funcobjt_sym (ctf_dict_t *, int is_function,
@@ -690,6 +697,9 @@ extern ctf_id_t ctf_add_encoded (ctf_dict_t *, uint32_t, const char *,
 				 const ctf_encoding_t *, uint32_t kind);
 extern ctf_id_t ctf_add_reftype (ctf_dict_t *, uint32_t, ctf_id_t,
 				 uint32_t kind);
+extern int ctf_add_variable_forced (ctf_dict_t *, const char *, ctf_id_t);
+extern int ctf_add_funcobjt_sym_forced (ctf_dict_t *, int is_function,
+					const char *, ctf_id_t);
 
 extern int ctf_dedup_atoms_init (ctf_dict_t *);
 extern int ctf_dedup (ctf_dict_t *, ctf_dict_t **, uint32_t ninputs,
@@ -741,10 +751,10 @@ extern int ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *, int);
 extern ctf_dict_t *ctf_simple_open_internal (const char *, size_t, const char *,
 					     size_t, size_t,
 					     const char *, size_t,
-					     ctf_dynhash_t *, int, int *);
+					     ctf_dynhash_t *, int *);
 extern ctf_dict_t *ctf_bufopen_internal (const ctf_sect_t *, const ctf_sect_t *,
 					 const ctf_sect_t *, ctf_dynhash_t *,
-					 int, int *);
+					 int *);
 extern int ctf_import_unref (ctf_dict_t *fp, ctf_dict_t *pfp);
 extern int ctf_serialize (ctf_dict_t *);
 

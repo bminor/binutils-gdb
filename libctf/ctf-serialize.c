@@ -945,7 +945,12 @@ ctf_sort_var (const void *one_, const void *two_, void *arg_)
    code simple: ctf_simple_open_internal() will return a new ctf_dict_t, but we
    want to keep the fp constant for the caller, so after
    ctf_simple_open_internal() returns, we use memcpy to swap the interior of the
-   old and new ctf_dict_t's, and then free the old.  */
+   old and new ctf_dict_t's, and then free the old.
+
+   We do not currently support serializing a dict that has already been
+   serialized in the past: but all the tables support it except for the types
+   table.  */
+
 int
 ctf_serialize (ctf_dict_t *fp)
 {
@@ -956,6 +961,7 @@ ctf_serialize (ctf_dict_t *fp)
   ctf_strs_writable_t strtab;
   int err;
   int num_missed_str_refs;
+  int sym_functions = 0;
 
   unsigned char *t;
   unsigned long i;
@@ -967,7 +973,11 @@ ctf_serialize (ctf_dict_t *fp)
   emit_symtypetab_state_t symstate;
   memset (&symstate, 0, sizeof (emit_symtypetab_state_t));
 
-  if (!(fp->ctf_flags & LCTF_RDWR))
+  /* This isn't a very nice error code, but it's close enough: it's what you
+     get if you try to modify a type loaded out of a serialized dict, so
+     it makes at least a little sense that it's what you get if you try to
+     reserialize the dict again.  */
+  if (fp->ctf_stypes > 0)
     return (ctf_set_errno (fp, ECTF_RDONLY));
 
   /* Update required?  */
@@ -999,9 +1009,43 @@ ctf_serialize (ctf_dict_t *fp)
      of the dynsym and dynstr these days.  */
   hdr.cth_flags = (CTF_F_NEWFUNCINFO | CTF_F_DYNSTR);
 
+  /* Propagate all symbols in the symtypetabs into the dynamic state, so that
+     we can put them back in the right order.  Symbols already in the dynamic
+     state are left as they are.  */
+  do
+    {
+      ctf_next_t *it = NULL;
+      const char *sym_name;
+      ctf_id_t sym;
+
+      while ((sym = ctf_symbol_next_static (fp, &it, &sym_name,
+					    sym_functions)) != CTF_ERR)
+	if ((ctf_add_funcobjt_sym_forced (fp, sym_functions, sym_name, sym)) < 0)
+	  if (ctf_errno (fp) != ECTF_DUPLICATE)
+	    return -1;				/* errno is set for us.  */
+
+      if (ctf_errno (fp) != ECTF_NEXT_END)
+	return -1;				/* errno is set for us.  */
+    } while (sym_functions++ < 1);
+
+  /* Figure out how big the symtypetabs are now.  */
+
   if (ctf_symtypetab_sect_sizes (fp, &symstate, &hdr, &objt_size, &func_size,
 				 &objtidx_size, &funcidx_size) < 0)
     return -1;					/* errno is set for us.  */
+
+  /* Propagate all vars into the dynamic state, so we can put them back later.
+     Variables already in the dynamic state, likely due to repeated
+     serialization, are left unchanged.  */
+
+  for (i = 0; i < fp->ctf_nvars; i++)
+    {
+      const char *name = ctf_strptr (fp, fp->ctf_vars[i].ctv_name);
+
+      if (name != NULL && !ctf_dvd_lookup (fp, name))
+	if (ctf_add_variable_forced (fp, name, fp->ctf_vars[i].ctv_type) < 0)
+	  return -1;				/* errno is set for us.  */
+    }
 
   for (nvars = 0, dvd = ctf_list_next (&fp->ctf_dvdefs);
        dvd != NULL; dvd = ctf_list_next (dvd), nvars++);
@@ -1101,7 +1145,7 @@ ctf_serialize (ctf_dict_t *fp)
 
   if ((nfp = ctf_simple_open_internal ((char *) buf, buf_size, NULL, 0,
 				       0, NULL, 0, fp->ctf_syn_ext_strtab,
-				       1, &err)) == NULL)
+				       &err)) == NULL)
     {
       free (buf);
       return (ctf_set_errno (fp, err));
@@ -1131,6 +1175,7 @@ ctf_serialize (ctf_dict_t *fp)
   nfp->ctf_ptrtab = fp->ctf_ptrtab;
   nfp->ctf_pptrtab = fp->ctf_pptrtab;
   nfp->ctf_typemax = fp->ctf_typemax;
+  nfp->ctf_stypes = fp->ctf_stypes;
   nfp->ctf_dynsymidx = fp->ctf_dynsymidx;
   nfp->ctf_dynsymmax = fp->ctf_dynsymmax;
   nfp->ctf_ptrtab_len = fp->ctf_ptrtab_len;

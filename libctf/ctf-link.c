@@ -1576,6 +1576,8 @@ ctf_link_intern_extern_string (void *key _libctf_unused_, void *value,
 /* Repeatedly call ADD_STRING to acquire strings from the external string table,
    adding them to the atoms table for this CU and all subsidiary CUs.
 
+   Must be called on a dict that has not yet been serialized.
+
    If ctf_link is also called, it must be called first if you want the new CTF
    files ctf_link can create to get their strings dedupped against the ELF
    strtab properly.  */
@@ -1586,6 +1588,9 @@ ctf_link_add_strtab (ctf_dict_t *fp, ctf_link_strtab_string_f *add_string,
   const char *str;
   uint32_t offset;
   int err = 0;
+
+  if (fp->ctf_stypes > 0)
+    return ctf_set_errno (fp, ECTF_RDONLY);
 
   while ((str = add_string (&offset, arg)) != NULL)
     {
@@ -1610,7 +1615,8 @@ ctf_link_add_strtab (ctf_dict_t *fp, ctf_link_strtab_string_f *add_string,
 /* Inform the ctf-link machinery of a new symbol in the target symbol table
    (which must be some symtab that is not usually stripped, and which
    is in agreement with ctf_bfdopen_ctfsect).  May be called either before or
-   after ctf_link_add_strtab.  */
+   after ctf_link_add_strtab.  As with that function, must be called on a dict which
+   has not yet been serialized.  */
 int
 ctf_link_add_linker_symbol (ctf_dict_t *fp, ctf_link_sym_t *sym)
 {
@@ -1624,6 +1630,9 @@ ctf_link_add_linker_symbol (ctf_dict_t *fp, ctf_link_sym_t *sym)
 
   if (ctf_errno (fp) == ENOMEM)
     return -ENOMEM;				/* errno is set for us.  */
+
+  if (fp->ctf_stypes > 0)
+    return ctf_set_errno (fp, ECTF_RDONLY);
 
   if (ctf_symtab_skippable (sym))
     return 0;
@@ -1659,6 +1668,9 @@ ctf_link_shuffle_syms (ctf_dict_t *fp)
   ctf_next_t *i = NULL;
   int err = ENOMEM;
   void *name_, *sym_;
+
+  if (fp->ctf_stypes > 0)
+    return ctf_set_errno (fp, ECTF_RDONLY);
 
   if (!fp->ctf_dynsyms)
     {
