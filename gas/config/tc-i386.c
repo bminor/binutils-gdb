@@ -823,6 +823,9 @@ static unsigned int sse2avx;
 static unsigned int use_unaligned_vector_move;
 
 /* Maximum permitted vector size. */
+#define VSZ128 0
+#define VSZ256 1
+#define VSZ512 2
 #define VSZ_DEFAULT VSZ512
 static unsigned int vector_size = VSZ_DEFAULT;
 
@@ -6968,12 +6971,10 @@ VEX_check_encoding (const insn_template *t)
 
   /* Vector size restrictions.  */
   if ((vector_size < VSZ512
-       && (t->opcode_modifier.evex == EVEX512
-	   || t->opcode_modifier.vsz >= VSZ512))
+       && t->opcode_modifier.evex == EVEX512)
       || (vector_size < VSZ256
 	  && (t->opcode_modifier.evex == EVEX256
-	      || t->opcode_modifier.vex == VEX256
-	      || t->opcode_modifier.vsz >= VSZ256)))
+	      || t->opcode_modifier.vex == VEX256)))
     {
       i.error = unsupported_vector_size;
       return 1;

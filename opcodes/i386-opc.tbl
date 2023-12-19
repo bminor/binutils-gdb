@@ -139,9 +139,6 @@
 
 #define Disp8ShiftVL Disp8MemShift=DISP8_SHIFT_VL
 
-#define Vsz256 Vsz=VSZ256
-#define Vsz512 Vsz=VSZ512
-
 // The EVEX purpose of StaticRounding appears only together with SAE. Re-use
 // the bit to mark commutative VEX encodings where swapping the source
 // operands may allow to switch from 3-byte to 2-byte VEX encoding.
@@ -996,9 +993,9 @@ pause, 0xf390, i186, NoSuf, {}
     b:0:VexW0:Byte:AVX512DQ:66:AVX512VBMI, +
     w:1:VexW1:Word:AVX512F::AVX512BW>
 
-<dq:opc:vexw:vexw64:elem:cpu64:gpr:kpfx:kvsz, +
-    d:0:VexW0::Dword::Reg32:66:Vsz256, +
-    q:1:VexW1:VexW1:Qword:x64:Reg64::Vsz512>
+<dq:opc:vexw:vexw64:elem:cpu64:gpr:kpfx, +
+    d:0:VexW0::Dword::Reg32:66, +
+    q:1:VexW1:VexW1:Qword:x64:Reg64:>
 
 emms, 0xf77, MMX, NoSuf, {}
 // These really shouldn't allow for Reg64 (movq is the right mnemonic for
@@ -2590,22 +2587,22 @@ vpmovzxdq, 0x6635, AVX512VL, Modrm|EVex=3|Masking|Space0F38|VexW=1|Disp8MemShift
 
 // AVX512BW instructions.
 
-kadd<dq>, 0x<dq:kpfx>4a, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|<dq:kvsz>|NoSuf, { RegMask, RegMask, RegMask }
-kand<dq>, 0x<dq:kpfx>41, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|<dq:kvsz>|NoSuf, { RegMask, RegMask, RegMask }
-kandn<dq>, 0x<dq:kpfx>42, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|<dq:kvsz>|NoSuf|Optimize, { RegMask, RegMask, RegMask }
-kmov<dq>, 0x<dq:kpfx>90, AVX512BW, Modrm|Vex128|Space0F|VexW1|<dq:kvsz>|NoSuf, { RegMask|<dq:elem>|Unspecified|BaseIndex, RegMask }
-kmov<dq>, 0x<dq:kpfx>91, AVX512BW, Modrm|Vex128|Space0F|VexW1|<dq:kvsz>|NoSuf, { RegMask, <dq:elem>|Unspecified|BaseIndex }
-kmov<dq>, 0xf292, AVX512BW, D|Modrm|Vex128|Space0F|<dq:vexw64>|<dq:kvsz>|NoSuf, { <dq:gpr>, RegMask }
-knot<dq>, 0x<dq:kpfx>44, AVX512BW, Modrm|Vex128|Space0F|VexW1|<dq:kvsz>|NoSuf, { RegMask, RegMask }
-kor<dq>, 0x<dq:kpfx>45, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|<dq:kvsz>|NoSuf, { RegMask, RegMask, RegMask }
-kortest<dq>, 0x<dq:kpfx>98, AVX512BW, Modrm|Vex128|Space0F|VexW1|<dq:kvsz>|NoSuf, { RegMask, RegMask }
-ktest<dq>, 0x<dq:kpfx>99, AVX512BW, Modrm|Vex128|Space0F|VexW1|<dq:kvsz>|NoSuf, { RegMask, RegMask }
-kxnor<dq>, 0x<dq:kpfx>46, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|<dq:kvsz>|NoSuf, { RegMask, RegMask, RegMask }
-kxor<dq>, 0x<dq:kpfx>47, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|<dq:kvsz>|NoSuf|Optimize, { RegMask, RegMask, RegMask }
-kunpckdq, 0x4B, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|Vsz512|NoSuf, { RegMask, RegMask, RegMask }
-kunpckwd, 0x4B, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW0|Vsz256|NoSuf, { RegMask, RegMask, RegMask }
-kshiftl<dq>, 0x6633, AVX512BW, Modrm|Vex128|Space0F3A|<dq:vexw>|<dq:kvsz>|NoSuf, { Imm8, RegMask, RegMask }
-kshiftr<dq>, 0x6631, AVX512BW, Modrm|Vex128|Space0F3A|<dq:vexw>|<dq:kvsz>|NoSuf, { Imm8, RegMask, RegMask }
+kadd<dq>, 0x<dq:kpfx>4a, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|NoSuf, { RegMask, RegMask, RegMask }
+kand<dq>, 0x<dq:kpfx>41, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|NoSuf, { RegMask, RegMask, RegMask }
+kandn<dq>, 0x<dq:kpfx>42, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|NoSuf|Optimize, { RegMask, RegMask, RegMask }
+kmov<dq>, 0x<dq:kpfx>90, AVX512BW, Modrm|Vex128|Space0F|VexW1|NoSuf, { RegMask|<dq:elem>|Unspecified|BaseIndex, RegMask }
+kmov<dq>, 0x<dq:kpfx>91, AVX512BW, Modrm|Vex128|Space0F|VexW1|NoSuf, { RegMask, <dq:elem>|Unspecified|BaseIndex }
+kmov<dq>, 0xf292, AVX512BW, D|Modrm|Vex128|Space0F|<dq:vexw64>|NoSuf, { <dq:gpr>, RegMask }
+knot<dq>, 0x<dq:kpfx>44, AVX512BW, Modrm|Vex128|Space0F|VexW1|NoSuf, { RegMask, RegMask }
+kor<dq>, 0x<dq:kpfx>45, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|NoSuf, { RegMask, RegMask, RegMask }
+kortest<dq>, 0x<dq:kpfx>98, AVX512BW, Modrm|Vex128|Space0F|VexW1|NoSuf, { RegMask, RegMask }
+ktest<dq>, 0x<dq:kpfx>99, AVX512BW, Modrm|Vex128|Space0F|VexW1|NoSuf, { RegMask, RegMask }
+kxnor<dq>, 0x<dq:kpfx>46, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|NoSuf, { RegMask, RegMask, RegMask }
+kxor<dq>, 0x<dq:kpfx>47, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|NoSuf|Optimize, { RegMask, RegMask, RegMask }
+kunpckdq, 0x4B, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW1|NoSuf, { RegMask, RegMask, RegMask }
+kunpckwd, 0x4B, AVX512BW, Modrm|Vex256|Space0F|VexVVVV|VexW0|NoSuf, { RegMask, RegMask, RegMask }
+kshiftl<dq>, 0x6633, AVX512BW, Modrm|Vex128|Space0F3A|<dq:vexw>|NoSuf, { Imm8, RegMask, RegMask }
+kshiftr<dq>, 0x6631, AVX512BW, Modrm|Vex128|Space0F3A|<dq:vexw>|NoSuf, { Imm8, RegMask, RegMask }
 
 vdbpsadbw, 0x6642, AVX512BW, Modrm|Masking|Space0F3A|VexVVVV|VexW0|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8|Imm8S, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 

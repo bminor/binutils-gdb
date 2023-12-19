@@ -716,16 +716,6 @@ enum
 #define DISP8_SHIFT_VL 7
   Disp8MemShift,
 
-  /* insn has vector size restrictions, requiring a minimum of:
-	0: 128 bits.
-	1: 256 bits.
-	2: 512 bits.
-   */
-#define VSZ128                 0 /* Not to be used in templates.  */
-#define VSZ256                 1
-#define VSZ512                 2
-  Vsz,
-
   /* Support encoding optimization.  */
   Optimize,
 
@@ -786,7 +776,6 @@ typedef struct i386_opcode_modifier
   unsigned int staticrounding:1;
   unsigned int sae:1;
   unsigned int disp8memshift:3;
-  unsigned int vsz:3;
   unsigned int optimize:1;
   unsigned int dialect:2;
   unsigned int isa64:2;
