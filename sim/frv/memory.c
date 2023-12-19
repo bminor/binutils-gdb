@@ -670,7 +670,7 @@ frvbf_read_imem_USI (SIM_CPU *current_cpu, PCADDR vpc)
   if (GET_HSR0_ICE (hsr0))
     {
       FRV_CACHE *cache;
-      USI value;
+      SI value;
 
       /* We don't want this to show up in the cache statistics.  That read
 	 is done in frvbf_simulate_insn_prefetch.  So read the cache or memory
