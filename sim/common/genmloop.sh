@@ -1138,8 +1138,6 @@ void
 void
 @prefix@_pbb_after (SIM_CPU *current_cpu, SCACHE *sc)
 {
-  SEM_ARG sem_arg = sc;
-  const ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   const SEM_ARG prev_sem_arg = sc - 1;
   const ARGBUF *prev_abuf = SEM_ARGBUF (prev_sem_arg);
 
