@@ -3181,7 +3181,6 @@ cgen_rtx_error (current_cpu, "move-r-spr: trying to set a read-only special regi
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 {
-  SI tmp_grno;
   SI tmp_prno;
   SI tmp_newval;
   tmp_prno = FLD (f_operand2);
@@ -11778,7 +11777,8 @@ SET_H_VBIT_MOVE (0);
 {
   SI tmp_tmpd;
   SI tmp_cnt;
-  tmp_tmpd = SLLSI (GET_H_GR (FLD (f_operand2)), SUBSI (31, ANDSI (GET_H_GR (FLD (f_operand1)), 31)));
+  tmp_cnt = SUBSI (31, ANDSI (GET_H_GR (FLD (f_operand1)), 31));
+  tmp_tmpd = SLLSI (GET_H_GR (FLD (f_operand2)), tmp_cnt);
 {
   {
     BI opval = LTSI (tmp_tmpd, 0);
