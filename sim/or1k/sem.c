@@ -933,7 +933,6 @@ SEM_FN_NAME (or1k32bf,l_swa) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   SI tmp_addr;
-  BI tmp_flag;
   tmp_addr = or1k32bf_make_load_store_addr (current_cpu, GET_H_GPR (FLD (f_r2)), EXTSISI (FLD (f_simm16_split)), 4);
   {
     USI opval = ANDBI (CPU (h_atomic_reserve), EQSI (tmp_addr, CPU (h_atomic_address)));
