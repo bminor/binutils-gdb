@@ -1159,8 +1159,6 @@ void
 void
 @prefix@_engine_run_full (SIM_CPU *current_cpu)
 {
-  SIM_DESC current_state = CPU_STATE (current_cpu);
-  SCACHE *scache = CPU_SCACHE_CACHE (current_cpu);
   /* virtual program counter */
   SEM_PC vpc;
 #if WITH_SEM_SWITCH_FULL
@@ -1251,8 +1249,6 @@ if [ x$fast = xyes ] ; then
 void
 @prefix@_engine_run_fast (SIM_CPU *current_cpu)
 {
-  SIM_DESC current_state = CPU_STATE (current_cpu);
-  SCACHE *scache = CPU_SCACHE_CACHE (current_cpu);
   /* virtual program counter */
   SEM_PC vpc;
 #if WITH_SEM_SWITCH_FAST
