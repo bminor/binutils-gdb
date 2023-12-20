@@ -173,6 +173,8 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "attr-phdr"
     run_dump_test "relax-max-align-gp"
     run_dump_test "uleb128"
+    run_dump_test "pr31179"
+    run_dump_test "pr31179-r"
     run_ld_link_tests [list \
 	[list "Weak reference 32" "-T weakref.ld -m[riscv_choose_ilp32_emul]" "" \
 	    "-march=rv32i -mabi=ilp32" {weakref32.s} \

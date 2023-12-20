@@ -1735,19 +1735,9 @@ perform_relocation (const reloc_howto_type *howto,
   if (howto->pc_relative)
     value -= sec_addr (input_section) + rel->r_offset;
 
-  switch (ELFNN_R_TYPE (rel->r_info))
-    {
-    case R_RISCV_SUB6:
-    case R_RISCV_SUB8:
-    case R_RISCV_SUB16:
-    case R_RISCV_SUB32:
-    case R_RISCV_SUB64:
-    case R_RISCV_SUB_ULEB128:
-      value -= rel->r_addend;
-      break;
-    default:
-      value += rel->r_addend;
-    }
+  /* PR31179, ignore the non-zero addend of R_RISCV_SUB_ULEB128.  */
+  if (ELFNN_R_TYPE (rel->r_info) != R_RISCV_SUB_ULEB128)
+    value += rel->r_addend;
 
   switch (ELFNN_R_TYPE (rel->r_info))
     {
@@ -2530,9 +2520,35 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  if (uleb128_set_rel != NULL
 	      && uleb128_set_rel->r_offset == rel->r_offset)
 	    {
-	      relocation = uleb128_set_vma - relocation + uleb128_set_rel->r_addend;
+	      relocation = uleb128_set_vma - relocation
+			   + uleb128_set_rel->r_addend;
 	      uleb128_set_vma = 0;
 	      uleb128_set_rel = NULL;
+
+	      /* PR31179, the addend of SUB_ULEB128 should be zero if using
+		 .uleb128, but we make it non-zero by accident in assembler,
+		 so just ignore it in perform_relocation, and make assembler
+		 continue doing the right thing.  Don't reset the addend of
+		 SUB_ULEB128 to zero here since it will break the --emit-reloc,
+		 even though the non-zero addend is unexpected.
+
+		 We encourage people to rebuild their stuff to get the
+		 non-zero addend of SUB_ULEB128, but that might need some
+		 times, so report warnings to inform people need to rebuild
+		 if --check-uleb128 is enabled.  However, since the failed
+		 .reloc cases for ADD/SET/SUB/ULEB128 are rarely to use, it
+		 may acceptable that stop supproting them until people rebuld
+		 their stuff, maybe half-year or one year later.  I believe
+		 this might be the least harmful option that we should go.
+
+		 Or maybe we should teach people that don't write the
+		 .reloc R_RISCV_SUB* with non-zero constant, and report
+		 warnings/errors in assembler.  */
+	      if (htab->params->check_uleb128
+		  && rel->r_addend != 0)
+		_bfd_error_handler (_("%pB: warning: R_RISCV_SUB_ULEB128 with"
+				      " non-zero addend, please rebuild by"
+				      " binutils 2.42 or up"), input_bfd);
 	    }
 	  else
 	    {

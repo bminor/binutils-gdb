@@ -1,5 +1,10 @@
 -*- text -*-
 
+* On RISC-V, add ld target option --[no-]check-uleb128.  Should rebuild the
+  objects by binutils 2.42 and up if enabling the option and get warnings,
+  since the non-zero addend of SUB_ULEB128 shouldn't be generated from .uleb128
+  directives.
+
 * Add support for the KVX instruction set.
 
 * A new linker script sorting directive has been added: REVERSE.  This reverses
