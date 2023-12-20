@@ -25,6 +25,19 @@
 #include <string.h>
 #include "opcode/s390.h"
 
+#define STRINGIFY(x) _STRINGIFY(x)
+#define _STRINGIFY(x) #x
+
+/* Length of strings without terminating '\0' character.  */
+#define MAX_OPCODE_LEN 15
+#define MAX_MNEMONIC_LEN 15
+#define MAX_FORMAT_LEN 15
+#define MAX_DESCRIPTION_LEN 79
+
+#define MAX_CPU_LEN 15
+#define MAX_MODES_LEN 15
+#define MAX_FLAGS_LEN 79
+
 /* Return code.  */
 int return_code = EXIT_SUCCESS;
 
@@ -44,9 +57,9 @@ print_error (const char *fmt, ...)
 
 struct op_struct
   {
-    char  opcode[16];
-    char  mnemonic[16];
-    char  format[16];
+    char  opcode[MAX_OPCODE_LEN + 1];
+    char  mnemonic[MAX_MNEMONIC_LEN + 1];
+    char  format[MAX_FORMAT_LEN + 1];
     int   mode_bits;
     int   min_cpu;
     int   flags;
@@ -108,9 +121,12 @@ insertOpcode (char *opcode, char *mnemonic, char *format,
       break;
   for (k = no_ops; k > ix; k--)
     op_array[k] = op_array[k-1];
-  strcpy(op_array[ix].opcode, opcode);
-  strcpy(op_array[ix].mnemonic, mnemonic);
-  strcpy(op_array[ix].format, format);
+  strncpy (op_array[ix].opcode, opcode, MAX_OPCODE_LEN);
+  op_array[ix].opcode[MAX_OPCODE_LEN] = '\0';
+  strncpy (op_array[ix].mnemonic, mnemonic, MAX_MNEMONIC_LEN);
+  op_array[ix].mnemonic[MAX_MNEMONIC_LEN] = '\0';
+  strncpy (op_array[ix].format, format, MAX_FORMAT_LEN);
+  op_array[ix].format[MAX_FORMAT_LEN] = '\0';
   op_array[ix].sort_value = sort_value;
   op_array[ix].no_nibbles = no_nibbles;
   op_array[ix].min_cpu = min_cpu;
@@ -180,9 +196,9 @@ insertExpandedMnemonic (char *opcode, char *mnemonic, char *format,
 			int min_cpu, int mode_bits, int flags)
 {
   char *tag;
-  char prefix[15];
-  char suffix[15];
-  char number[15];
+  char prefix[MAX_MNEMONIC_LEN + 1];
+  char suffix[MAX_MNEMONIC_LEN + 1];
+  char number[MAX_MNEMONIC_LEN + 1];
   int mask_start, i = 0, tag_found = 0, reading_number = 0;
   int number_p = 0, suffix_p = 0, prefix_p = 0;
   const struct s390_cond_ext_format *ext_table;
@@ -263,12 +279,17 @@ insertExpandedMnemonic (char *opcode, char *mnemonic, char *format,
 
   for (i = 0; i < ext_table_length; i++)
     {
-      char new_mnemonic[15];
+      char new_mnemonic[MAX_MNEMONIC_LEN + 1];
 
-      strcpy (new_mnemonic, prefix);
       opcode[mask_start] = ext_table[i].nibble;
-      strcat (new_mnemonic, ext_table[i].extension);
-      strcat (new_mnemonic, suffix);
+
+      if (snprintf (new_mnemonic, sizeof (new_mnemonic), "%s%s%s", prefix,
+		    ext_table[i].extension, suffix) >= sizeof (new_mnemonic))
+	{
+	  print_error ("Mnemonic: \"%s\": Concatenated mnemonic exceeds max. length\n", mnemonic);
+	  return;
+	}
+
       insertOpcode (opcode, new_mnemonic, format, min_cpu, mode_bits, flags);
     }
   return;
@@ -338,13 +359,13 @@ main (void)
       make an entry into the opcode table.  */
   while (fgets (currentLine, sizeof (currentLine), stdin) != NULL)
     {
-      char  opcode[16];
-      char  mnemonic[16];
-      char  format[16];
-      char  description[80];
-      char  cpu_string[16];
-      char  modes_string[16];
-      char  flags_string[80];
+      char  opcode[MAX_OPCODE_LEN + 1];
+      char  mnemonic[MAX_MNEMONIC_LEN + 1];
+      char  format[MAX_FORMAT_LEN + 1];
+      char  description[MAX_DESCRIPTION_LEN + 1];
+      char  cpu_string[MAX_CPU_LEN + 1];
+      char  modes_string[MAX_MODES_LEN + 1];
+      char  flags_string[MAX_FLAGS_LEN + 1];
       int   min_cpu;
       int   mode_bits;
       int   flag_bits;
@@ -353,11 +374,17 @@ main (void)
 
       if (currentLine[0] == '#' || currentLine[0] == '\n')
 	continue;
-      memset (opcode, 0, 8);
-      num_matched =
-	sscanf (currentLine, "%15s %15s %15s \"%79[^\"]\" %15s %15s %79[^\n]",
-		opcode, mnemonic, format, description,
-		cpu_string, modes_string, flags_string);
+      memset (opcode, '\0', sizeof(opcode));
+      num_matched = sscanf (currentLine,
+			    "%" STRINGIFY (MAX_OPCODE_LEN) "s "
+			    "%" STRINGIFY (MAX_MNEMONIC_LEN) "s "
+			    "%" STRINGIFY (MAX_FORMAT_LEN) "s "
+			    "\"%" STRINGIFY (MAX_DESCRIPTION_LEN) "[^\"]\" "
+			    "%" STRINGIFY (MAX_CPU_LEN) "s "
+			    "%" STRINGIFY (MAX_MODES_LEN) "s "
+			    "%" STRINGIFY (MAX_FLAGS_LEN) "[^\n]",
+			    opcode, mnemonic, format, description,
+			    cpu_string, modes_string, flags_string);
       if (num_matched != 6 && num_matched != 7)
 	{
 	  print_error ("Couldn't scan line %s\n", currentLine);
