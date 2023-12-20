@@ -8,3 +8,5 @@ foo:
 	risbhgz	%r6,%r7,12,13,14
 	cxfbra %f5,3,%r9,7
 	risbgnz	%r6,%r7,12,20,14
+	lochhino	%r6,-32765
+	cgijnl	%r6,-42,.

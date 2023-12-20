@@ -32,7 +32,7 @@
 #define MAX_OPCODE_LEN 15
 #define MAX_MNEMONIC_LEN 15
 #define MAX_FORMAT_LEN 15
-#define MAX_DESCRIPTION_LEN 79
+#define MAX_DESCRIPTION_LEN 127
 
 #define MAX_CPU_LEN 15
 #define MAX_MODES_LEN 15
@@ -142,50 +142,52 @@ struct s390_cond_ext_format
 {
   char nibble;
   char extension[4];
+  char *description_suffix;
+
 };
 
 /* The mnemonic extensions for conditional jumps used to replace
    the '*' tag.  */
 #define NUM_COND_EXTENSIONS 20
 const struct s390_cond_ext_format s390_cond_extensions[NUM_COND_EXTENSIONS] =
-{ { '1', "o" },    /* jump on overflow / if ones */
-  { '2', "h" },    /* jump on A high */
-  { '2', "p" },    /* jump on plus */
-  { '3', "nle" },  /* jump on not low or equal */
-  { '4', "l" },    /* jump on A low */
-  { '4', "m" },    /* jump on minus / if mixed */
-  { '5', "nhe" },  /* jump on not high or equal */
-  { '6', "lh" },   /* jump on low or high */
-  { '7', "ne" },   /* jump on A not equal B */
-  { '7', "nz" },   /* jump on not zero / if not zeros */
-  { '8', "e" },    /* jump on A equal B */
-  { '8', "z" },    /* jump on zero / if zeros */
-  { '9', "nlh" },  /* jump on not low or high */
-  { 'a', "he" },   /* jump on high or equal */
-  { 'b', "nl" },   /* jump on A not low */
-  { 'b', "nm" },   /* jump on not minus / if not mixed */
-  { 'c', "le" },   /* jump on low or equal */
-  { 'd', "nh" },   /* jump on A not high */
-  { 'd', "np" },   /* jump on not plus */
-  { 'e', "no" },   /* jump on not overflow / if not ones */
+{ { '1', "o", "on overflow / if ones"},		/* jump on overflow / if ones */
+  { '2', "h", "on A high"},			/* jump on A high */
+  { '2', "p", "on plus" },			/* jump on plus */
+  { '3', "nle", "on not low or equal" },	/* jump on not low or equal */
+  { '4', "l", "on A low" },			/* jump on A low */
+  { '4', "m", "on minus / if mixed" },		/* jump on minus / if mixed */
+  { '5', "nhe", "on not high or equal" },	/* jump on not high or equal */
+  { '6', "lh", "on low or high" },		/* jump on low or high */
+  { '7', "ne", "on A not equal B" },		/* jump on A not equal B */
+  { '7', "nz", "on not zero / if not zeros" },	/* jump on not zero / if not zeros */
+  { '8', "e", "on A equal B" },			/* jump on A equal B */
+  { '8', "z", "on zero / if zeros" },		/* jump on zero / if zeros */
+  { '9', "nlh", "on not low or high " },	/* jump on not low or high */
+  { 'a', "he", "on high or equal" },		/* jump on high or equal */
+  { 'b', "nl", "on A not low" },		/* jump on A not low */
+  { 'b', "nm", "on not minus / if not mixed" },	/* jump on not minus / if not mixed */
+  { 'c', "le", "on low or equal" },		/* jump on low or equal */
+  { 'd', "nh", "on A not high" },		/* jump on A not high */
+  { 'd', "np", "on not plus" },			/* jump on not plus */
+  { 'e', "no", "on not overflow / if not ones" },/* jump on not overflow / if not ones */
 };
 
 /* The mnemonic extensions for conditional branches used to replace
    the '$' tag.  */
 #define NUM_CRB_EXTENSIONS 12
 const struct s390_cond_ext_format s390_crb_extensions[NUM_CRB_EXTENSIONS] =
-{ { '2', "h" },    /* jump on A high */
-  { '2', "nle" },  /* jump on not low or equal */
-  { '4', "l" },    /* jump on A low */
-  { '4', "nhe" },  /* jump on not high or equal */
-  { '6', "ne" },   /* jump on A not equal B */
-  { '6', "lh" },   /* jump on low or high */
-  { '8', "e" },    /* jump on A equal B */
-  { '8', "nlh" },  /* jump on not low or high */
-  { 'a', "nl" },   /* jump on A not low */
-  { 'a', "he" },   /* jump on high or equal */
-  { 'c', "nh" },   /* jump on A not high */
-  { 'c', "le" },   /* jump on low or equal */
+{ { '2', "h", "on A high" },			/* jump on A high */
+  { '2', "nle", "on not low or equal" },	/* jump on not low or equal */
+  { '4', "l", "on A low" },			/* jump on A low */
+  { '4', "nhe", "on not high or equal" },	/* jump on not high or equal */
+  { '6', "ne", "on A not equal B" },		/* jump on A not equal B */
+  { '6', "lh", "on low or high" },		/* jump on low or high */
+  { '8', "e", "on A equal B" },			/* jump on A equal B */
+  { '8', "nlh", "on not low or high" },		/* jump on not low or high */
+  { 'a', "nl", "on A not low" },		/* jump on A not low */
+  { 'a', "he", "on high or equal" },		/* jump on high or equal */
+  { 'c', "nh", "on A not high" },		/* jump on A not high */
+  { 'c', "le", "on low or equal" },		/* jump on low or equal */
 };
 
 /* As with insertOpcode instructions are added to the sorted opcode
@@ -283,6 +285,7 @@ insertExpandedMnemonic (char *opcode, char *mnemonic, char *format,
   for (i = 0; i < ext_table_length; i++)
     {
       char new_mnemonic[MAX_MNEMONIC_LEN + 1];
+      char new_description[MAX_DESCRIPTION_LEN + 1];
 
       opcode[mask_start] = ext_table[i].nibble;
 
@@ -293,7 +296,14 @@ insertExpandedMnemonic (char *opcode, char *mnemonic, char *format,
 	  return;
 	}
 
-      insertOpcode (opcode, new_mnemonic, format, min_cpu, mode_bits, flags, description);
+      if (snprintf (new_description, sizeof (new_description), "%s %s", description,
+		    ext_table[i].description_suffix) >= sizeof (new_description))
+	{
+	  print_error ("Mnemonic \"%s\": Concatenated description exceeds max. length\n", mnemonic);
+	  return;
+	}
+
+      insertOpcode (opcode, new_mnemonic, format, min_cpu, mode_bits, flags, new_description);
     }
   return;
 

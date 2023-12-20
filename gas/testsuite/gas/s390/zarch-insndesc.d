@@ -14,4 +14,6 @@ Disassembly of section .text:
 .*:	ec 67 0c 8d 0e 5d [	 ]*risbhgz	%r6,%r7,12,13,14	# rotate then insert selected bits high and zero remaining bits
 .*:	b3 96 37 59 [	 ]*cxfbra	%f5,3,%r9,7	# convert from 32 bit fixed to extended bfp with rounding mode
 .*:	ec 67 0c 94 0e 59 [	 ]*risbgnz	%r6,%r7,12,20,14	# rotate then insert selected bits and zero remaining bits nocc
+.*:	ec 6e 80 03 00 4e [	 ]*lochhino	%r6,-32765	# load halfword high immediate on condition on not overflow / if not ones
+ *([\da-f]+):	ec 6a 00 00 d6 7c [	 ]*cgijnl	%r6,-42,\1 <foo\+0x\1>	# compare immediate and branch relative \(64<8\) on A not low
 .*:	07 07 [	 ]*nopr	%r7	# no operation
