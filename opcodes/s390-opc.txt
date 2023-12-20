@@ -2034,31 +2034,41 @@ e60000000052 vcvbg VRR_RV0UU "vector convert to binary 64 bit" arch13 zarch optp
 b93a kdsa RRE_RR "compute digital signature authentication" arch13 zarch
 
 
-# arch14 instructions
+# arch14 (z16) instructions
 
-e60000000074 vschp VRR_VVV0U0U " " arch14 zarch
-e60000002074 vschsp VRR_VVV0U0 " " arch14 zarch
-e60000003074 vschdp VRR_VVV0U0 " " arch14 zarch
-e60000004074 vschxp VRR_VVV0U0 " " arch14 zarch
-e6000000007c vscshp VRR_VVV " " arch14 zarch
-e6000000007d vcsph VRR_VVV0U0 " " arch14 zarch
-e60000000051 vclzdp VRR_VV0U2 " " arch14 zarch
-e60000000070 vpkzr VRI_VVV0UU2 " " arch14 zarch
-e60000000072 vsrpr VRI_VVV0UU2 " " arch14 zarch
-e60000000054 vupkzh VRR_VV0U2 " " arch14 zarch
-e6000000005c vupkzl VRR_VV0U2 " " arch14 zarch
+# Vector-Packed-Decimal-Enhancement Facility 2
 
-b93b nnpa RRE_00 " " arch14 zarch
-e60000000056 vclfnh VRR_VV0UU2 " " arch14 zarch
-e6000000005e vclfnl VRR_VV0UU2 " " arch14 zarch
-e60000000075 vcrnf VRR_VVV0UU " " arch14 zarch
-e6000000005d vcfn VRR_VV0UU2 " " arch14 zarch
-e60000000055 vcnf VRR_VV0UU2 " " arch14 zarch
+e60000000074 vschp VRR_VVV0U0U "decimal scale and convert to hfp" arch14 zarch
+e60000002074 vschsp VRR_VVV0U0 "decimal scale and convert to short hfp" arch14 zarch
+e60000003074 vschdp VRR_VVV0U0 "decimal scale and convert to long hfp" arch14 zarch
+e60000004074 vschxp VRR_VVV0U0 "decimal scale and convert to extended hfp" arch14 zarch
+e6000000007c vscshp VRR_VVV "decimal scale and convert and split to hfp" arch14 zarch
+e6000000007d vcsph VRR_VVV0U0 "vector convert hfp to scaled decimal" arch14 zarch
+e60000000051 vclzdp VRR_VV0U2 "vector count leading zero digits" arch14 zarch
+e60000000070 vpkzr VRI_VVV0UU2 "vector pack zoned register" arch14 zarch
+e60000000072 vsrpr VRI_VVV0UU2 "vector shift and round decimal register" arch14 zarch
+e60000000054 vupkzh VRR_VV0U2 "vector unpack zoned high" arch14 zarch
+e6000000005c vupkzl VRR_VV0U2 "vector unpack zoned low" arch14 zarch
 
-b98B rdp RRF_RURR2 " " arch14 zarch optparm
+# Neural-Network-Processing-Assist Facility
 
-eb0000000071 lpswey SIY_RD " " arch14 zarch
-b200 lbear S_RD " " arch14 zarch
-b201 stbear S_RD " " arch14 zarch
+b93b nnpa RRE_00 "neural network processing assist" arch14 zarch
+e60000000056 vclfnh VRR_VV0UU2 "vector fp convert and lengthen from nnp high" arch14 zarch
+e6000000005e vclfnl VRR_VV0UU2 "vector fp convert and lengthen from nnp low" arch14 zarch
+e60000000075 vcrnf VRR_VVV0UU "vector fp convert and round to nnp" arch14 zarch
+e6000000005d vcfn VRR_VV0UU2 "vector fp convert from nnp" arch14 zarch
+e60000000055 vcnf VRR_VV0UU2 "vector fp convert to nnp" arch14 zarch
 
-b28f qpaci S_RD " " arch14 zarch
+# Reset-DAT-Protection Facility
+
+b98B rdp RRF_RURR2 "reset dat protection" arch14 zarch optparm
+
+# BEAR-Enhancement Facility
+
+eb0000000071 lpswey SIY_RD "load PSW extended" arch14 zarch
+b200 lbear S_RD "load bear" arch14 zarch
+b201 stbear S_RD "store bear" arch14 zarch
+
+# Processor-Activity-Instrumentation Facility
+
+b28f qpaci S_RD "query processor activity counter information" arch14 zarch
