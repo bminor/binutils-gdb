@@ -232,12 +232,6 @@ struct gdbarch_list
 
 struct gdbarch_info
 {
-  gdbarch_info ()
-    /* Ensure the union is zero-initialized.  Relies on the fact that there's
-       no member larger than TDESC_DATA.  */
-    : tdesc_data ()
-  {}
-
   const struct bfd_arch_info *bfd_arch_info = nullptr;
 
   enum bfd_endian byte_order = BFD_ENDIAN_UNKNOWN;
@@ -247,7 +241,7 @@ struct gdbarch_info
   bfd *abfd = nullptr;
 
   /* Architecture-specific target description data.  */
-  struct tdesc_arch_data *tdesc_data;
+  struct tdesc_arch_data *tdesc_data = nullptr;
 
   enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
