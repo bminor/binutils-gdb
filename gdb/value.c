@@ -972,7 +972,7 @@ value::allocate_register_lazy (frame_info_ptr next_frame, int regnum,
 
   result->set_lval (lval_register);
   VALUE_REGNUM (result) = regnum;
-  VALUE_NEXT_FRAME_ID (result) = get_frame_id (next_frame);
+  result->m_location.reg.next_frame_id = get_frame_id (next_frame);
 
   return result;
 }
@@ -1419,13 +1419,6 @@ value::set_address (CORE_ADDR addr)
 {
   gdb_assert (m_lval == lval_memory);
   m_location.address = addr;
-}
-
-struct frame_id *
-value::deprecated_next_frame_id_hack ()
-{
-  gdb_assert (m_lval == lval_register);
-  return &m_location.reg.next_frame_id;
 }
 
 int *
@@ -3928,7 +3921,7 @@ value::fetch_lazy_memory ()
 void
 value::fetch_lazy_register ()
 {
-  frame_info_ptr next_frame;
+ 
   int regnum;
   struct type *type = check_typedef (this->type ());
   struct value *new_val = this;
@@ -3941,12 +3934,11 @@ value::fetch_lazy_register ()
 
   while (new_val->lval () == lval_register && new_val->lazy ())
     {
-      struct frame_id next_frame_id = VALUE_NEXT_FRAME_ID (new_val);
-
-      next_frame = frame_find_by_id (next_frame_id);
-      regnum = VALUE_REGNUM (new_val);
-
+      frame_id next_frame_id = new_val->next_frame_id ();
+      frame_info_ptr next_frame = frame_find_by_id (next_frame_id);
       gdb_assert (next_frame != NULL);
+
+      regnum = VALUE_REGNUM (new_val);
 
       /* Convertible register routines are used for multi-register
 	 values and for interpretation in different types
@@ -3956,12 +3948,6 @@ value::fetch_lazy_register ()
       gdb_assert (!gdbarch_convert_register_p (get_frame_arch (next_frame),
 					       regnum, type));
 
-      /* FRAME was obtained, above, via VALUE_NEXT_FRAME_ID.
-	 Since a "->next" operation was performed when setting
-	 this field, we do not need to perform a "next" operation
-	 again when unwinding the register.  That's why
-	 frame_unwind_register_value() is called here instead of
-	 get_frame_register_value().  */
       new_val = frame_unwind_register_value (next_frame, regnum);
 
       /* If we get another lazy lval_register value, it means the
@@ -3976,7 +3962,7 @@ value::fetch_lazy_register ()
 	 in this situation.  */
       if (new_val->lval () == lval_register
 	  && new_val->lazy ()
-	  && VALUE_NEXT_FRAME_ID (new_val) == next_frame_id)
+	  && new_val->next_frame_id () == next_frame_id)
 	internal_error (_("infinite loop while fetching a register"));
     }
 
@@ -3994,12 +3980,10 @@ value::fetch_lazy_register ()
 
   if (frame_debug)
     {
-      struct gdbarch *gdbarch;
-      frame_info_ptr frame;
-      frame = frame_find_by_id (VALUE_NEXT_FRAME_ID (this));
+      frame_info_ptr frame = frame_find_by_id (this->next_frame_id ());
       frame = get_prev_frame_always (frame);
       regnum = VALUE_REGNUM (this);
-      gdbarch = get_frame_arch (frame);
+      gdbarch *gdbarch = get_frame_arch (frame);
 
       string_file debug_file;
       gdb_printf (&debug_file,

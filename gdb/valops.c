@@ -1193,7 +1193,7 @@ value_assign (struct value *toval, struct value *fromval)
 
     case lval_register:
       {
-	frame_info_ptr next_frame = frame_find_by_id (VALUE_NEXT_FRAME_ID (toval));
+	frame_info_ptr next_frame = frame_find_by_id (toval->next_frame_id ());
 
 	int value_reg = VALUE_REGNUM (toval);
 
@@ -1410,11 +1410,10 @@ address_of_variable (struct symbol *var, const struct block *b)
     {
     case lval_register:
       {
-	frame_info_ptr frame;
 	const char *regname;
 
-	frame = frame_find_by_id (VALUE_NEXT_FRAME_ID (val));
-	gdb_assert (frame);
+	frame_info_ptr frame = frame_find_by_id (val->next_frame_id ());
+	gdb_assert (frame != nullptr);
 
 	regname = gdbarch_register_name (get_frame_arch (frame),
 					 VALUE_REGNUM (val));

@@ -373,7 +373,15 @@ public:
   struct internalvar **deprecated_internalvar_hack ()
   { return &m_location.internalvar; }
 
-  struct frame_id *deprecated_next_frame_id_hack ();
+  /* Return this value's next frame id.
+
+     The value must be of lval == lval_register.  */
+  frame_id next_frame_id ()
+  {
+    gdb_assert (m_lval == lval_register);
+
+    return m_location.reg.next_frame_id;
+  }
 
   int *deprecated_regnum_hack ();
 
@@ -963,12 +971,6 @@ extern void error_value_optimized_out (void);
 
 /* Pointer to internal variable.  */
 #define VALUE_INTERNALVAR(val) (*((val)->deprecated_internalvar_hack ()))
-
-/* Frame ID of "next" frame to which a register value is relative.  A
-   register value is indicated by VALUE_LVAL being set to lval_register.
-   So, if the register value is found relative to frame F, then the
-   frame id of F->next will be stored in VALUE_NEXT_FRAME_ID.  */
-#define VALUE_NEXT_FRAME_ID(val) (*((val)->deprecated_next_frame_id_hack ()))
 
 /* Register number if the value is from a register.  */
 #define VALUE_REGNUM(val) (*((val)->deprecated_regnum_hack ()))

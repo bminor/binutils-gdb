@@ -779,7 +779,7 @@ read_frame_register_value (value *value)
 {
   gdb_assert (value->lval () == lval_register);
 
-  frame_info_ptr next_frame = frame_find_by_id (VALUE_NEXT_FRAME_ID (value));
+  frame_info_ptr next_frame = frame_find_by_id (value->next_frame_id ());
   gdb_assert (next_frame != nullptr);
 
   gdbarch *gdbarch = frame_unwind_arch (next_frame);
