@@ -142,6 +142,7 @@ infile=""
 prefix="unknown"
 outprefix=""
 outsuffix=""
+lineno=""
 
 while test $# -gt 0
 do
@@ -166,6 +167,8 @@ do
 	-cpu) shift ; cpu=$1 ;;
 	-infile) shift ; infile=$1 ;;
 	-shell) shift ; SHELL=$1 ;;
+	-awk) shift ; AWK=$1 ; export AWK ;;
+	-lineno) shift ; lineno=$1 ;;
 	*) echo "unknown option: $1" >&2 ; exit 1 ;;
 	esac
 	shift
@@ -198,6 +201,16 @@ CPU=`echo ${cpu} | tr "${lowercase}" "${uppercase}"`
 PREFIX=`echo ${prefix} | tr "${lowercase}" "${uppercase}"`
 
 ##########################################################################
+
+load_infile_section() {
+  if [ -n "${lineno}" ]; then
+    ${SHELL} ${lineno} \
+      "${infile}" "${outprefix}mloop${outsuffix}.tmp" \
+      "$@"
+  else
+    ${SHELL} ${infile} "$@"
+  fi
+}
 
 rm -f ${outprefix}eng${outsuffix}.hin
 exec 1>${outprefix}eng${outsuffix}.hin
@@ -380,7 +393,7 @@ ATTRIBUTE_UNUSED static INLINE void
 
 EOF
 
-${SHELL} $infile support
+load_infile_section support
 
 ##########################################################################
 
@@ -425,7 +438,7 @@ esac
 
 # Any initialization code before looping starts.
 # Note that this code may declare some locals.
-${SHELL} $infile init
+load_infile_section init
 
 if [ x$parallel = xread ] ; then
   cat << EOF
@@ -466,7 +479,7 @@ cat << EOF
 /* begin full-exec-simple */
 EOF
 
-${SHELL} $infile full-exec-simple
+load_infile_section full-exec-simple
 
 cat << EOF
 /* end full-exec-simple */
@@ -527,7 +540,7 @@ static INLINE SCACHE *
 /* begin extract-scache */
 EOF
 
-${SHELL} $infile extract-scache
+load_infile_section extract-scache
 
 cat << EOF
 /* end extract-scache */
@@ -557,7 +570,7 @@ EOF
 
 # Any initialization code before looping starts.
 # Note that this code may declare some locals.
-${SHELL} $infile init
+load_infile_section init
 
 cat << EOF
 
@@ -580,7 +593,7 @@ cat << EOF
 /* begin full-exec-scache */
 EOF
 
-${SHELL} $infile full-exec-scache
+load_infile_section full-exec-scache
 
 cat << EOF
 /* end full-exec-scache */
@@ -618,7 +631,7 @@ EOF
 
 # Any initialization code before looping starts.
 # Note that this code may declare some locals.
-${SHELL} $infile init
+load_infile_section init
 
 cat << EOF
 
@@ -647,7 +660,7 @@ cat << EOF
 /* begin fast-exec-scache */
 EOF
 
-${SHELL} $infile fast-exec-scache
+load_infile_section fast-exec-scache
 
 cat << EOF
 /* end fast-exec-scache */
@@ -695,7 +708,7 @@ static INLINE SCACHE *
 /* begin extract-scache */
 EOF
 
-${SHELL} $infile extract-scache
+load_infile_section extract-scache
 
 cat << EOF
 /* end extract-scache */
@@ -726,7 +739,7 @@ EOF
 
 # Any initialization code before looping starts.
 # Note that this code may declare some locals.
-${SHELL} $infile init
+load_infile_section init
 
 if [ x$parallel = xread ] ; then
 cat << EOF
@@ -762,7 +775,7 @@ cat << EOF
 /* begin full-exec-scache */
 EOF
 
-${SHELL} $infile full-exec-scache
+load_infile_section full-exec-scache
 
 cat << EOF
 /* end full-exec-scache */
@@ -798,7 +811,7 @@ EOF
 
 # Any initialization code before looping starts.
 # Note that this code may declare some locals.
-${SHELL} $infile init
+load_infile_section init
 
 if [ x$parallel = xread ] ; then
 cat << EOF
@@ -841,7 +854,7 @@ cat << EOF
 /* begin fast-exec-scache */
 EOF
 
-${SHELL} $infile fast-exec-scache
+load_infile_section fast-exec-scache
 
 cat << EOF
 /* end fast-exec-scache */
@@ -948,7 +961,7 @@ INLINE SEM_PC
 /* begin extract-pbb */
 EOF
 
-${SHELL} $infile extract-pbb
+load_infile_section extract-pbb
 
 cat << EOF
 /* end extract-pbb */
@@ -1181,7 +1194,7 @@ esac
 
 # Any initialization code before looping starts.
 # Note that this code may declare some locals.
-${SHELL} $infile init
+load_infile_section init
 
 cat << EOF
 
@@ -1224,7 +1237,7 @@ cat << EOF
 /* begin full-exec-pbb */
 EOF
 
-${SHELL} $infile full-exec-pbb
+load_infile_section full-exec-pbb
 
 cat << EOF
 /* end full-exec-pbb */
@@ -1271,7 +1284,7 @@ esac
 
 # Any initialization code before looping starts.
 # Note that this code may declare some locals.
-${SHELL} $infile init
+load_infile_section init
 
 cat << EOF
 
@@ -1314,7 +1327,7 @@ cat << EOF
 /* begin fast-exec-pbb */
 EOF
 
-${SHELL} $infile fast-exec-pbb
+load_infile_section fast-exec-pbb
 
 cat << EOF
 /* end fast-exec-pbb */

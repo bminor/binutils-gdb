@@ -234,6 +234,8 @@ CGEN_GEN_CPU_DESC = \
 		$(CGEN_ARCHFILE) ignored $$opcfile
 
 CGEN_GEN_MLOOP = \
-	$(SHELL) $(srccom)/genmloop.sh \
-		-shell $(SHELL) \
+	$(SHELL) $(srccom)/lineno.sh \
+		$(srccom)/genmloop.sh \
+		$@.lineno.sh \
+		-shell $(SHELL) -awk $(AWK) -lineno $(srccom)/lineno.sh \
 		-infile $< -outfile-prefix $(@D)/
