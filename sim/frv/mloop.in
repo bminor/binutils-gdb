@@ -39,6 +39,7 @@ case "x$1" in
 xsupport)
 
 cat <<EOF
+#line $LINENO "$0"
 
 static INLINE const IDESC *
 extract (SIM_CPU *current_cpu, PCADDR pc, CGEN_INSN_INT insn, ARGBUF *abuf,
@@ -411,6 +412,7 @@ EOF
 xinit)
 
 cat <<EOF
+#line $LINENO "$0"
 /*xxxinit*/
   /* If the timer is enabled, then we will enable model profiling during
      execution.  This is because the timer needs accurate cycles counts to
@@ -428,6 +430,7 @@ xextract-simple | xextract-scache)
 # SET_LAST_INSN_P(last_p) called to indicate whether insn is last one
 
 cat <<EOF
+#line $LINENO "$0"
 {
   CGEN_INSN_INT insn = frvbf_read_imem_USI (current_cpu, vpc);
   extract (current_cpu, vpc, insn, SEM_ARGBUF (sc), FAST_P);
@@ -449,6 +452,7 @@ xfull-exec-* | xfast-exec-*)
 # scache lookup.
 
 cat <<EOF
+#line $LINENO "$0"
 {
   FRV_VLIW *vliw;
   int first_insn_p = 1;
