@@ -144,14 +144,14 @@ d3 mvz SS_L0RDRD "move zones" g5 esa,zarch
 67 mxd RX_FERRD "multiply (long to ext.)" g5 esa,zarch
 27 mxdr RR_FEF "multiply (long to ext.)" g5 esa,zarch
 26 mxr RR_FEFE "multiply (ext.)" g5 esa,zarch
-54 n RX_RRRD "AND" g5 esa,zarch
-d4 nc SS_L0RDRD "AND" g5 esa,zarch
-94 ni SI_URD "AND" g5 esa,zarch
-14 nr RR_RR "AND" g5 esa,zarch
-56 o RX_RRRD "OR" g5 esa,zarch
-d6 oc SS_L0RDRD "OR" g5 esa,zarch
-96 oi SI_URD "OR" g5 esa,zarch
-16 or RR_RR "OR" g5 esa,zarch
+54 n RX_RRRD "and" g5 esa,zarch
+d4 nc SS_L0RDRD "and" g5 esa,zarch
+94 ni SI_URD "and" g5 esa,zarch
+14 nr RR_RR "and" g5 esa,zarch
+56 o RX_RRRD "or" g5 esa,zarch
+d6 oc SS_L0RDRD "or" g5 esa,zarch
+96 oi SI_URD "or" g5 esa,zarch
+16 or RR_RR "or" g5 esa,zarch
 f2 pack SS_LLRDRD "pack" g5 esa,zarch
 b248 palb RRE_00 "purge ALB" g5 esa,zarch
 b218 pc S_RD "program call" g5 esa,zarch
@@ -215,8 +215,8 @@ b6 stctl RS_CCRD "store control" g5 esa,zarch
 40 sth RX_RRRD "store halfword" g5 esa,zarch
 b202 stidp S_RD "store CPU id" g5 esa,zarch
 90 stm RS_RRRD "store multiple" g5 esa,zarch
-ac stnsm SI_URD "store then AND system mask" g5 esa,zarch
-ad stosm SI_URD "store then OR system mask" g5 esa,zarch
+ac stnsm SI_URD "store then and system mask" g5 esa,zarch
+ad stosm SI_URD "store then or system mask" g5 esa,zarch
 b209 stpt S_RD "store CPU timer" g5 esa,zarch
 b211 stpx S_RD "store prefix" g5 esa,zarch
 b234 stsch S_RD "store subchannel" g5 esa,zarch
@@ -239,10 +239,10 @@ dd trt SS_L0RDRD "translate and test" g5 esa,zarch
 b235 tsch S_RD "test subchannel" g5 esa,zarch
 f3 unpk SS_LLRDRD "unpack" g5 esa,zarch
 0102 upt E "update tree" g5 esa,zarch
-57 x RX_RRRD "exclusive OR" g5 esa,zarch
-d7 xc SS_L0RDRD "exclusive OR" g5 esa,zarch
-97 xi SI_URD "exclusive OR" g5 esa,zarch
-17 xr RR_RR "exclusive OR" g5 esa,zarch
+57 x RX_RRRD "exclusive or" g5 esa,zarch
+d7 xc SS_L0RDRD "exclusive or" g5 esa,zarch
+97 xi SI_URD "exclusive or" g5 esa,zarch
+17 xr RR_RR "exclusive or" g5 esa,zarch
 f8 zap SS_LLRDRD "zero and add" g5 esa,zarch
 a70a ahi RI_RI "add halfword immediate" g5 esa,zarch
 84 brxh RSI_RRP "branch relative on index high" g5 esa,zarch condjump
@@ -821,8 +821,8 @@ b370 lpdfr RRE_FF "load positive no cc" z9-ec zarch
 b371 lndfr RRE_FF "load negative no cc" z9-ec zarch
 b372 cpsdr RRF_F0FF2 "copy sign" z9-ec zarch
 b373 lcdfr RRE_FF "load complement no cc" z9-ec zarch
-b3c1 ldgr RRE_FR "load fpr from gr" z9-ec zarch
-b3cd lgdr RRE_RF "load gr from fpr" z9-ec zarch
+b3c1 ldgr RRE_FR "load FPR from GR" z9-ec zarch
+b3cd lgdr RRE_RF "load GR from FPR" z9-ec zarch
 b3d2 adtr RRR_F0FF "add long dfp" z9-ec zarch
 b3da axtr RRR_FE0FEFE "add extended dfp" z9-ec zarch
 b3e4 cdtr RRE_FF "compare long dfp" z9-ec zarch
@@ -1203,11 +1203,11 @@ e70000000040 vleib VRI_V0IU "vector load byte element immediate" z13 zarch vx
 e70000000041 vleih VRI_V0IU "vector load halfword element immediate" z13 zarch vx
 e70000000043 vleif VRI_V0IU "vector load word element immediate" z13 zarch vx
 e70000000042 vleig VRI_V0IU "vector load double word element immediate" z13 zarch vx
-e70000000021 vlgv VRS_RVRDU "vector load gr from vr element" z13 zarch vx
-e70000000021 vlgvb VRS_RVRD "vector load gr from vr byte element" z13 zarch vx
-e70000001021 vlgvh VRS_RVRD "vector load gr from vr halfword element" z13 zarch vx
-e70000002021 vlgvf VRS_RVRD "vector load gr from vr word element" z13 zarch vx
-e70000003021 vlgvg VRS_RVRD "vector load gr from vr double word element" z13 zarch vx
+e70000000021 vlgv VRS_RVRDU "vector load GR from VR element" z13 zarch vx
+e70000000021 vlgvb VRS_RVRD "vector load GR from VR byte element" z13 zarch vx
+e70000001021 vlgvh VRS_RVRD "vector load GR from VR halfword element" z13 zarch vx
+e70000002021 vlgvf VRS_RVRD "vector load GR from VR word element" z13 zarch vx
+e70000003021 vlgvg VRS_RVRD "vector load GR from VR double word element" z13 zarch vx
 e70000000004 vllez VRX_VRRDU "vector load logical element and zero" z13 zarch vx
 e70000000004 vllezb VRX_VRRD "vector load logical byte element and zero" z13 zarch vx
 e70000001004 vllezh VRX_VRRD "vector load logical halfword element and zero" z13 zarch vx
