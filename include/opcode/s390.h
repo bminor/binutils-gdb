@@ -81,7 +81,7 @@ enum s390_opcode_cpu_val
 
 struct s390_opcode
   {
-    /* The opcode name.  */
+    /* The opcode name (mnemonic).  */
     const char * name;
 
     /* The opcode itself.  Those bits which will be filled in with
@@ -110,6 +110,9 @@ struct s390_opcode
 
     /* Instruction specific flags.  */
     unsigned int flags;
+
+    /* Instruction description.  */
+    const char * description;
   };
 
 /* The table itself is sorted by major opcode number, and is otherwise

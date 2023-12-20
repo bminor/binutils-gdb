@@ -19,6 +19,11 @@
 
 * objdump --visualize-jumps is now supported on s390 architecture.
 
+* The s390 disassembly now optionally includes the instruction description as
+  comment with the s390-specific disassembler option "insndesc":
+  - For objdump it can be enabled with "objdump -M insndesc ...".
+  - In gdb it can be enabled with "set disassembler-options insndesc".
+
 Changes in 2.41:
 
 * The MIPS port now supports the Sony Interactive Entertainment Allegrex

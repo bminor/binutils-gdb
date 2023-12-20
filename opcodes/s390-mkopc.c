@@ -63,6 +63,7 @@ struct op_struct
     int   mode_bits;
     int   min_cpu;
     int   flags;
+    char  description[MAX_DESCRIPTION_LEN + 1];
 
     unsigned long long sort_value;
     int   no_nibbles;
@@ -84,7 +85,7 @@ createTable (void)
 
 static void
 insertOpcode (char *opcode, char *mnemonic, char *format,
-	      int min_cpu, int mode_bits, int flags)
+	      int min_cpu, int mode_bits, int flags, char* description)
 {
   char *str;
   unsigned long long sort_value;
@@ -132,6 +133,8 @@ insertOpcode (char *opcode, char *mnemonic, char *format,
   op_array[ix].min_cpu = min_cpu;
   op_array[ix].mode_bits = mode_bits;
   op_array[ix].flags = flags;
+  strncpy (op_array[ix].description, description, MAX_DESCRIPTION_LEN);
+  op_array[ix].description[MAX_DESCRIPTION_LEN] = '\0';
   no_ops++;
 }
 
@@ -193,7 +196,7 @@ const struct s390_cond_ext_format s390_crb_extensions[NUM_CRB_EXTENSIONS] =
 
 static void
 insertExpandedMnemonic (char *opcode, char *mnemonic, char *format,
-			int min_cpu, int mode_bits, int flags)
+			int min_cpu, int mode_bits, int flags, char *description)
 {
   char *tag;
   char prefix[MAX_MNEMONIC_LEN + 1];
@@ -206,7 +209,7 @@ insertExpandedMnemonic (char *opcode, char *mnemonic, char *format,
 
   if (!(tag = strpbrk (mnemonic, "*$")))
     {
-      insertOpcode (opcode, mnemonic, format, min_cpu, mode_bits, flags);
+      insertOpcode (opcode, mnemonic, format, min_cpu, mode_bits, flags, description);
       return;
     }
 
@@ -290,7 +293,7 @@ insertExpandedMnemonic (char *opcode, char *mnemonic, char *format,
 	  return;
 	}
 
-      insertOpcode (opcode, new_mnemonic, format, min_cpu, mode_bits, flags);
+      insertOpcode (opcode, new_mnemonic, format, min_cpu, mode_bits, flags, description);
     }
   return;
 
@@ -311,7 +314,8 @@ static const char file_header[] =
   "   instruction which matches.\n"
   "   MODE_BITS - zarch or esa\n"
   "   MIN_CPU - number of the min cpu level required\n"
-  "   FLAGS - instruction flags.  */\n\n"
+  "   FLAGS - instruction flags.\n"
+  "   DESCRIPTION - description of the instruction.  */\n\n"
   "const struct s390_opcode s390_opcodes[] =\n  {\n";
 
 /* `dumpTable': write opcode table.  */
@@ -337,7 +341,8 @@ dumpTable (void)
 	      op_array[ix].format, op_array[ix].format);
       printf ("%i, ", op_array[ix].mode_bits);
       printf ("%i, ", op_array[ix].min_cpu);
-      printf ("%i}", op_array[ix].flags);
+      printf ("%i, ", op_array[ix].flags);
+      printf ("\"%s\" }", op_array[ix].description);
       if (ix < no_ops-1)
 	printf (",\n");
       else
@@ -497,7 +502,7 @@ main (void)
 	      str++;
 	  } while (*str != 0);
 	}
-      insertExpandedMnemonic (opcode, mnemonic, format, min_cpu, mode_bits, flag_bits);
+      insertExpandedMnemonic (opcode, mnemonic, format, min_cpu, mode_bits, flag_bits, description);
 
  continue_loop:
       ;

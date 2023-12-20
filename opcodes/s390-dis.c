@@ -31,6 +31,7 @@
 static int opc_index[256];
 static int current_arch_mask = 0;
 static int option_use_insn_len_bits_p = 0;
+static int option_print_insn_desc = 0;
 
 typedef struct
 {
@@ -43,7 +44,8 @@ static const s390_options_t options[] =
   { "esa" ,       N_("Disassemble in ESA architecture mode") },
   { "zarch",      N_("Disassemble in z/Architecture mode") },
   { "insnlength", N_("Print unknown instructions according to "
-		     "length from first two bits") }
+		     "length from first two bits") },
+  { "insndesc",   N_("Print instruction description as comment") },
 };
 
 /* Set up index table for first opcode byte.  */
@@ -63,6 +65,7 @@ disassemble_init_s390 (struct disassemble_info *info)
 
   current_arch_mask = 1 << S390_OPCODE_ZARCH;
   option_use_insn_len_bits_p = 0;
+  option_print_insn_desc = 0;
 
   for (p = info->disassembler_options; p != NULL; )
     {
@@ -72,6 +75,8 @@ disassemble_init_s390 (struct disassemble_info *info)
 	current_arch_mask = 1 << S390_OPCODE_ZARCH;
       else if (startswith (p, "insnlength"))
 	option_use_insn_len_bits_p = 1;
+      else if (startswith (p, "insndesc"))
+	option_print_insn_desc = 1;
       else
 	/* xgettext:c-format */
 	opcodes_error_handler (_("unknown S/390 disassembler option: %s"), p);
@@ -311,6 +316,12 @@ s390_print_insn_with_opcode (bfd_vma memaddr,
       else
 	separator = ',';
     }
+
+  /* Optional: instruction name.  */
+  if (option_print_insn_desc && opcode->description
+      && opcode->description[0] != '\0')
+    info->fprintf_styled_func (info->stream, dis_style_comment_start, "\t# %s",
+			       opcode->description);
 }
 
 /* Check whether opcode A's mask is more specific than that of B.  */
