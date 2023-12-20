@@ -5024,6 +5024,64 @@ gdb_caching_proc allow_aarch64_mops_tests {} {
     return $allow_mops_tests
 }
 
+# Run a test on the target to see if it supports Aarch64 GCS extensions.
+# Return 0 if so, 1 if it does not.  Note this causes a restart of GDB.
+
+gdb_caching_proc allow_aarch64_gcs_tests {} {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "allow_aarch64_gcs_tests"
+
+    if { ![is_aarch64_target]} {
+	return 0
+    }
+
+    # Compile a program that tests the GCS feature.
+    set src {
+	#include <stdbool.h>
+	#include <sys/auxv.h>
+
+	/* Feature check for Guarded Control Stack.  */
+	#ifndef HWCAP_GCS
+	#define HWCAP_GCS (1UL << 32)
+	#endif
+
+	int main (void) {
+	    bool gcs_supported = getauxval (AT_HWCAP) & HWCAP_GCS;
+
+	    /* Return success if GCS is supported.  */
+	    return !gcs_supported;
+	}
+    }
+
+    if {![gdb_simple_compile $me $src executable]} {
+	return 0
+    }
+
+    # Compilation succeeded so now run it via gdb.
+    clean_restart $obj
+    gdb_run_cmd
+    gdb_expect {
+	-re ".*$inferior_exited_re with code 01.*${gdb_prompt} $" {
+	    verbose -log "\n$me gcs support not detected"
+	    set allow_gcs_tests 0
+	}
+	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+	    verbose -log "\n$me: gcs support detected"
+	    set allow_gcs_tests 1
+	}
+	default {
+	  warning "\n$me: default case taken"
+	    set allow_gcs_tests 0
+	}
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $allow_gcs_tests" 2
+    return $allow_gcs_tests
+}
+
 # A helper that compiles a test case to see if __int128 is supported.
 proc gdb_int128_helper {lang} {
     return [gdb_can_simple_compile "i128-for-$lang" {
