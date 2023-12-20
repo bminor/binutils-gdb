@@ -7713,8 +7713,9 @@ remote_target::discard_pending_stop_replies (struct inferior *inf)
   if (rs->remote_desc == NULL)
     return;
 
-  stop_reply_up reply
-    = as_stop_reply_up (std::move (rns->pending_event[notif_client_stop.id]));
+  struct notif_event *notif_event
+    = rns->pending_event[notif_client_stop.id].get ();
+  auto *reply = static_cast<stop_reply *> (notif_event);
 
   /* Discard the in-flight notification.  */
   if (reply != NULL && reply->ptid.pid () == inf->pid)
