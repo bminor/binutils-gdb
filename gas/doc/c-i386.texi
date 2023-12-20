@@ -125,6 +125,7 @@ processor names are recognized:
 @code{znver2},
 @code{znver3},
 @code{znver4},
+@code{znver5},
 @code{btver1},
 @code{btver2},
 @code{generic32} and
@@ -1632,7 +1633,8 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{k6} @tab @samp{k6_2} @tab @samp{athlon} @tab @samp{k8}
 @item @samp{amdfam10} @tab @samp{bdver1} @tab @samp{bdver2} @tab @samp{bdver3}
 @item @samp{bdver4} @tab @samp{znver1} @tab @samp{znver2} @tab @samp{znver3}
-@item @samp{znver4} @tab @samp{btver1} @tab @samp{btver2} @tab @samp{generic32}
+@item @samp{znver4} @tab @samp{znver5} @tab @samp{btver1} @tab @samp{btver2}
+@item @samp{generic32}
 @item @samp{generic64} @tab @samp{.cmov} @tab @samp{.fxsr} @tab @samp{.mmx}
 @item @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3} @tab @samp{.sse4a}
 @item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}

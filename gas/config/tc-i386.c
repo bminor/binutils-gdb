@@ -1018,6 +1018,7 @@ static const arch_entry cpu_arch[] =
   ARCH (znver2, ZNVER, ZNVER2, false),
   ARCH (znver3, ZNVER, ZNVER3, false),
   ARCH (znver4, ZNVER, ZNVER4, false),
+  ARCH (znver5, ZNVER, ZNVER5, false),
   ARCH (btver1, BT, BTVER1, false),
   ARCH (btver2, BT, BTVER2, false),
 
