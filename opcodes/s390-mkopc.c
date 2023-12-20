@@ -21,8 +21,26 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include "opcode/s390.h"
+
+/* Return code.  */
+int return_code = EXIT_SUCCESS;
+
+/* Helper to print an error message and set the return code.  */
+static void __attribute__ ((format (printf, 1, 2)))
+print_error (const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start(ap, fmt);
+  fprintf(stderr, "Error: ");
+  vfprintf(stderr, fmt, ap);
+  va_end(ap);
+
+  return_code = EXIT_FAILURE;
+}
 
 struct op_struct
   {
@@ -223,8 +241,7 @@ insertExpandedMnemonic (char *opcode, char *mnemonic, char *format,
 
   if (mask_start & 3)
     {
-      fprintf (stderr, "Conditional mask not at nibble boundary in: %s\n",
-	       mnemonic);
+      print_error ("Mnemonic \"%s\": Conditional mask not at nibble boundary\n", mnemonic);
       return;
     }
 
@@ -257,7 +274,7 @@ insertExpandedMnemonic (char *opcode, char *mnemonic, char *format,
   return;
 
  malformed_mnemonic:
-  fprintf (stderr, "Malformed mnemonic: %s\n", mnemonic);
+  print_error ("Malformed mnemonic: %s\n", mnemonic);
 }
 
 static const char file_header[] =
@@ -343,8 +360,8 @@ main (void)
 		cpu_string, modes_string, flags_string);
       if (num_matched != 6 && num_matched != 7)
 	{
-	  fprintf (stderr, "Couldn't scan line %s\n", currentLine);
-	  exit (1);
+	  print_error ("Couldn't scan line %s\n", currentLine);
+	  exit (EXIT_FAILURE);
 	}
 
       if (strcmp (cpu_string, "g5") == 0
@@ -385,8 +402,9 @@ main (void)
 	       || strcmp (cpu_string, "arch14") == 0)
 	min_cpu = S390_OPCODE_ARCH14;
       else {
-	fprintf (stderr, "Couldn't parse cpu string %s\n", cpu_string);
-	exit (1);
+	print_error ("Mnemonic \"%s\": Couldn't parse CPU string: %s\n",
+		     mnemonic, cpu_string);
+	goto continue_loop;
       }
 
       str = modes_string;
@@ -401,9 +419,9 @@ main (void)
 	  mode_bits |= 1 << S390_OPCODE_ZARCH;
 	  str += 5;
 	} else {
-	  fprintf (stderr, "Couldn't parse modes string %s\n",
-		   modes_string);
-	  exit (1);
+	  print_error ("Mnemonic \"%s\": Couldn't parse modes string: %s\n",
+		       mnemonic, modes_string);
+	  goto continue_loop;
 	}
 	if (*str == ',')
 	  str++;
@@ -444,17 +462,20 @@ main (void)
 	      flag_bits |= S390_INSTR_FLAGS_CLASS_JUMPSR;
 	      str += 6;
 	    } else {
-	      fprintf (stderr, "Couldn't parse flags string %s\n",
-		       flags_string);
-	      exit (1);
+	      print_error ("Mnemonic \"%s\": Couldn't parse flags string: %s\n",
+			   mnemonic, flags_string);
+	      goto continue_loop;
 	    }
 	    if (*str == ',')
 	      str++;
 	  } while (*str != 0);
 	}
       insertExpandedMnemonic (opcode, mnemonic, format, min_cpu, mode_bits, flag_bits);
+
+ continue_loop:
+      ;
     }
 
   dumpTable ();
-  return 0;
+  return return_code;
 }
