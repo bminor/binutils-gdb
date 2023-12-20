@@ -94,33 +94,30 @@ BUILT_SOURCES += \
 
 ## FIXME: Use of `mono' is wip.
 %D%/mloop.c %D%/eng.h: %D%/stamp-mloop ; @true
-%D%/stamp-mloop: $(srccom)/genmloop.sh %D%/mloop.in
-	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+%D%/stamp-mloop: %D%/mloop.in $(srccom)/genmloop.sh
+	$(AM_V_GEN)$(CGEN_GEN_MLOOP) \
 		-mono -fast -pbb -switch sem-switch.c \
-		-cpu m32rbf \
-		-infile $(srcdir)/%D%/mloop.in -outfile-prefix %D%/
+		-cpu m32rbf
 	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change %D%/eng.hin %D%/eng.h
 	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change %D%/mloop.cin %D%/mloop.c
 	$(AM_V_at)touch $@
 
 ## FIXME: Use of `mono' is wip.
 %D%/mloopx.c %D%/engx.h: %D%/stamp-mloop-x ; @true
-%D%/stamp-mloop-x: $(srccom)/genmloop.sh %D%/mloopx.in
-	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+%D%/stamp-mloop-x: %D%/mloopx.in $(srccom)/genmloop.sh
+	$(AM_V_GEN)$(CGEN_GEN_MLOOP) \
 		-mono -no-fast -pbb -parallel-write -switch semx-switch.c \
-		-cpu m32rxf \
-		-infile $(srcdir)/%D%/mloopx.in -outfile-prefix %D%/ -outfile-suffix x
+		-cpu m32rxf -outfile-suffix x
 	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change %D%/engx.hin %D%/engx.h
 	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change %D%/mloopx.cin %D%/mloopx.c
 	$(AM_V_at)touch $@
 
 ## FIXME: Use of `mono' is wip.
 %D%/mloop2.c %D%/eng2.h: %D%/stamp-mloop-2 ; @true
-%D%/stamp-mloop-2: $(srccom)/genmloop.sh %D%/mloop2.in
-	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+%D%/stamp-mloop-2: %D%/mloop2.in $(srccom)/genmloop.sh
+	$(AM_V_GEN)$(CGEN_GEN_MLOOP) \
 		-mono -no-fast -pbb -parallel-write -switch sem2-switch.c \
-		-cpu m32r2f \
-		-infile $(srcdir)/%D%/mloop2.in -outfile-prefix %D%/ -outfile-suffix 2
+		-cpu m32r2f -outfile-suffix 2
 	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change %D%/eng2.hin %D%/eng2.h
 	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change %D%/mloop2.cin %D%/mloop2.c
 	$(AM_V_at)touch $@

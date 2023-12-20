@@ -232,3 +232,8 @@ CGEN_GEN_CPU_DESC = \
 		$(CGEN) $(cgendir) "$(CGENFLAGS)" \
 		$(@D) "$$FLAGS" $$cpu "$$isa" $$mach "$$SUFFIX" \
 		$(CGEN_ARCHFILE) ignored $$opcfile
+
+CGEN_GEN_MLOOP = \
+	$(SHELL) $(srccom)/genmloop.sh \
+		-shell $(SHELL) \
+		-infile $< -outfile-prefix $(@D)/

@@ -1925,6 +1925,11 @@ CGEN_GEN_CPU_DESC = \
 		$(@D) "$$FLAGS" $$cpu "$$isa" $$mach "$$SUFFIX" \
 		$(CGEN_ARCHFILE) ignored $$opcfile
 
+CGEN_GEN_MLOOP = \
+	$(SHELL) $(srccom)/genmloop.sh \
+		-shell $(SHELL) \
+		-infile $< -outfile-prefix $(@D)/
+
 
 # igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
 # leak detection while running it.
@@ -4998,21 +5003,19 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_cris_TRUE@cris/modules.c: | $(cris_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_cris_TRUE@cris/mloopv10f.c cris/engv10.h: cris/stamp-mloop-v10f ; @true
-@SIM_ENABLE_ARCH_cris_TRUE@cris/stamp-mloop-v10f: $(srccom)/genmloop.sh cris/mloop.in
-@SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+@SIM_ENABLE_ARCH_cris_TRUE@cris/stamp-mloop-v10f: cris/mloop.in $(srccom)/genmloop.sh
+@SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)$(CGEN_GEN_MLOOP) \
 @SIM_ENABLE_ARCH_cris_TRUE@		-mono -no-fast -pbb -switch semcrisv10f-switch.c \
-@SIM_ENABLE_ARCH_cris_TRUE@		-cpu crisv10f \
-@SIM_ENABLE_ARCH_cris_TRUE@		-infile $(srcdir)/cris/mloop.in -outfile-prefix cris/ -outfile-suffix -v10f
+@SIM_ENABLE_ARCH_cris_TRUE@		-cpu crisv10f -outfile-suffix -v10f
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change cris/eng-v10f.hin cris/engv10.h
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change cris/mloop-v10f.cin cris/mloopv10f.c
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)touch $@
 
 @SIM_ENABLE_ARCH_cris_TRUE@cris/mloopv32f.c cris/engv32.h: cris/stamp-mloop-v32f ; @true
-@SIM_ENABLE_ARCH_cris_TRUE@cris/stamp-mloop-v32f: $(srccom)/genmloop.sh cris/mloop.in
-@SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+@SIM_ENABLE_ARCH_cris_TRUE@cris/stamp-mloop-v32f: cris/mloop.in $(srccom)/genmloop.sh
+@SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)$(CGEN_GEN_MLOOP) \
 @SIM_ENABLE_ARCH_cris_TRUE@		-mono -no-fast -pbb -switch semcrisv32f-switch.c \
-@SIM_ENABLE_ARCH_cris_TRUE@		-cpu crisv32f \
-@SIM_ENABLE_ARCH_cris_TRUE@		-infile $(srcdir)/cris/mloop.in -outfile-prefix cris/ -outfile-suffix -v32f
+@SIM_ENABLE_ARCH_cris_TRUE@		-cpu crisv32f -outfile-suffix -v32f
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change cris/eng-v32f.hin cris/engv32.h
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change cris/mloop-v32f.cin cris/mloopv32f.c
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)touch $@
@@ -5087,11 +5090,10 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_frv_TRUE@frv/modules.c: | $(frv_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_frv_TRUE@frv/mloop.c frv/eng.h: frv/stamp-mloop ; @true
-@SIM_ENABLE_ARCH_frv_TRUE@frv/stamp-mloop: $(srccom)/genmloop.sh frv/mloop.in
-@SIM_ENABLE_ARCH_frv_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+@SIM_ENABLE_ARCH_frv_TRUE@frv/stamp-mloop: frv/mloop.in $(srccom)/genmloop.sh
+@SIM_ENABLE_ARCH_frv_TRUE@	$(AM_V_GEN)$(CGEN_GEN_MLOOP) \
 @SIM_ENABLE_ARCH_frv_TRUE@		-mono -scache -parallel-generic-write -parallel-only \
-@SIM_ENABLE_ARCH_frv_TRUE@		-cpu frvbf \
-@SIM_ENABLE_ARCH_frv_TRUE@		-infile $(srcdir)/frv/mloop.in -outfile-prefix frv/
+@SIM_ENABLE_ARCH_frv_TRUE@		-cpu frvbf
 @SIM_ENABLE_ARCH_frv_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change frv/eng.hin frv/eng.h
 @SIM_ENABLE_ARCH_frv_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change frv/mloop.cin frv/mloop.c
 @SIM_ENABLE_ARCH_frv_TRUE@	$(AM_V_at)touch $@
@@ -5127,11 +5129,10 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/modules.c: | $(iq2000_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/mloop.c iq2000/eng.h: iq2000/stamp-mloop ; @true
-@SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/stamp-mloop: $(srccom)/genmloop.sh iq2000/mloop.in
-@SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+@SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/stamp-mloop: iq2000/mloop.in $(srccom)/genmloop.sh
+@SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_GEN)$(CGEN_GEN_MLOOP) \
 @SIM_ENABLE_ARCH_iq2000_TRUE@		-mono -fast -pbb -switch sem-switch.c \
-@SIM_ENABLE_ARCH_iq2000_TRUE@		-cpu iq2000bf \
-@SIM_ENABLE_ARCH_iq2000_TRUE@		-infile $(srcdir)/iq2000/mloop.in -outfile-prefix iq2000/
+@SIM_ENABLE_ARCH_iq2000_TRUE@		-cpu iq2000bf
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change iq2000/eng.hin iq2000/eng.h
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change iq2000/mloop.cin iq2000/mloop.c
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_at)touch $@
@@ -5155,11 +5156,10 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/modules.c: | $(lm32_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/mloop.c lm32/eng.h: lm32/stamp-mloop ; @true
-@SIM_ENABLE_ARCH_lm32_TRUE@lm32/stamp-mloop: $(srccom)/genmloop.sh lm32/mloop.in
-@SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+@SIM_ENABLE_ARCH_lm32_TRUE@lm32/stamp-mloop: lm32/mloop.in $(srccom)/genmloop.sh
+@SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_GEN)$(CGEN_GEN_MLOOP) \
 @SIM_ENABLE_ARCH_lm32_TRUE@		-mono -fast -pbb -switch sem-switch.c \
-@SIM_ENABLE_ARCH_lm32_TRUE@		-cpu lm32bf \
-@SIM_ENABLE_ARCH_lm32_TRUE@		-infile $(srcdir)/lm32/mloop.in -outfile-prefix lm32/
+@SIM_ENABLE_ARCH_lm32_TRUE@		-cpu lm32bf
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change lm32/eng.hin lm32/eng.h
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change lm32/mloop.cin lm32/mloop.c
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_at)touch $@
@@ -5207,31 +5207,28 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/modules.c: | $(m32r_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/mloop.c m32r/eng.h: m32r/stamp-mloop ; @true
-@SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop: $(srccom)/genmloop.sh m32r/mloop.in
-@SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop: m32r/mloop.in $(srccom)/genmloop.sh
+@SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)$(CGEN_GEN_MLOOP) \
 @SIM_ENABLE_ARCH_m32r_TRUE@		-mono -fast -pbb -switch sem-switch.c \
-@SIM_ENABLE_ARCH_m32r_TRUE@		-cpu m32rbf \
-@SIM_ENABLE_ARCH_m32r_TRUE@		-infile $(srcdir)/m32r/mloop.in -outfile-prefix m32r/
+@SIM_ENABLE_ARCH_m32r_TRUE@		-cpu m32rbf
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change m32r/eng.hin m32r/eng.h
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change m32r/mloop.cin m32r/mloop.c
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)touch $@
 
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/mloopx.c m32r/engx.h: m32r/stamp-mloop-x ; @true
-@SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop-x: $(srccom)/genmloop.sh m32r/mloopx.in
-@SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop-x: m32r/mloopx.in $(srccom)/genmloop.sh
+@SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)$(CGEN_GEN_MLOOP) \
 @SIM_ENABLE_ARCH_m32r_TRUE@		-mono -no-fast -pbb -parallel-write -switch semx-switch.c \
-@SIM_ENABLE_ARCH_m32r_TRUE@		-cpu m32rxf \
-@SIM_ENABLE_ARCH_m32r_TRUE@		-infile $(srcdir)/m32r/mloopx.in -outfile-prefix m32r/ -outfile-suffix x
+@SIM_ENABLE_ARCH_m32r_TRUE@		-cpu m32rxf -outfile-suffix x
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change m32r/engx.hin m32r/engx.h
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change m32r/mloopx.cin m32r/mloopx.c
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)touch $@
 
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/mloop2.c m32r/eng2.h: m32r/stamp-mloop-2 ; @true
-@SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop-2: $(srccom)/genmloop.sh m32r/mloop2.in
-@SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop-2: m32r/mloop2.in $(srccom)/genmloop.sh
+@SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)$(CGEN_GEN_MLOOP) \
 @SIM_ENABLE_ARCH_m32r_TRUE@		-mono -no-fast -pbb -parallel-write -switch sem2-switch.c \
-@SIM_ENABLE_ARCH_m32r_TRUE@		-cpu m32r2f \
-@SIM_ENABLE_ARCH_m32r_TRUE@		-infile $(srcdir)/m32r/mloop2.in -outfile-prefix m32r/ -outfile-suffix 2
+@SIM_ENABLE_ARCH_m32r_TRUE@		-cpu m32r2f -outfile-suffix 2
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change m32r/eng2.hin m32r/eng2.h
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change m32r/mloop2.cin m32r/mloop2.c
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)touch $@
@@ -5563,11 +5560,10 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/modules.c: | $(or1k_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/mloop.c or1k/eng.h: or1k/stamp-mloop ; @true
-@SIM_ENABLE_ARCH_or1k_TRUE@or1k/stamp-mloop: $(srccom)/genmloop.sh or1k/mloop.in
-@SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+@SIM_ENABLE_ARCH_or1k_TRUE@or1k/stamp-mloop: or1k/mloop.in $(srccom)/genmloop.sh
+@SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_GEN)$(CGEN_GEN_MLOOP) \
 @SIM_ENABLE_ARCH_or1k_TRUE@		-mono -fast -pbb -switch sem-switch.c \
-@SIM_ENABLE_ARCH_or1k_TRUE@		-cpu or1k32bf \
-@SIM_ENABLE_ARCH_or1k_TRUE@		-infile $(srcdir)/or1k/mloop.in -outfile-prefix or1k/
+@SIM_ENABLE_ARCH_or1k_TRUE@		-cpu or1k32bf
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change or1k/eng.hin or1k/eng.h
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change or1k/mloop.cin or1k/mloop.c
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_at)touch $@
