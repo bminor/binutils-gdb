@@ -1548,8 +1548,11 @@ opc2c$(EXEEXT_FOR_BUILD): opc2c.o $(BUILD_LIBS_DEPS)
 opc2c.o: opc2c.c $(INCDIR)/libiberty.h
 	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $(srcdir)/opc2c.c
 
-s390-mkopc$(EXEEXT_FOR_BUILD): s390-mkopc.c
-	$(AM_V_CCLD)$(COMPILE_FOR_BUILD) -o s390-mkopc $(srcdir)/s390-mkopc.c
+s390-mkopc$(EXEEXT_FOR_BUILD): s390-mkopc.o
+	$(AM_V_CCLD)$(LINK_FOR_BUILD) s390-mkopc.o
+
+s390-mkopc.o: s390-mkopc.c $(INCDIR)/opcode/s390.h
+	$(COMPILE_FOR_BUILD) -c $(srcdir)/s390-mkopc.c
 
 s390-opc.tab: s390-mkopc$(EXEEXT_FOR_BUILD) s390-opc.txt
 	$(AM_V_GEN)./s390-mkopc$(EXEEXT_FOR_BUILD) < $(srcdir)/s390-opc.txt > s390-opc.tab
