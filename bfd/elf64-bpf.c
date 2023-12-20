@@ -276,6 +276,7 @@ bpf_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
           }
 	case R_BPF_64_ABS64:
 	case R_BPF_64_ABS32:
+	case R_BPF_64_NODYLD32:
 	  {
 	    addend = bfd_get (howto->bitsize, input_bfd, where);
 	    relocation += addend;
