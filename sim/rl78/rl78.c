@@ -499,6 +499,7 @@ decode_opcode (void)
 	CLOCKS (3); /* note: adds two clocks, total 5 clocks */
       else
 	CLOCKS (2); /* note: adds one clock, total 4 clocks */
+      ATTRIBUTE_FALLTHROUGH;
     case RLO_branch:
       tprintf ("BRANCH: ");
       v = GPC ();
