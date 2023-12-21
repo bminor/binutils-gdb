@@ -829,7 +829,7 @@ hw_find_string_array_property (struct hw *me,
       if (node->sizeof_array == 0
 	  || ((char*)node->array)[node->sizeof_array - 1] != '\0')
 	hw_abort (me, "property \"%s\" invalid for string array", property);
-      /* FALL THROUGH */
+      ATTRIBUTE_FALLTHROUGH;
     case string_array_property:
       ASSERT (node->sizeof_array > 0);
       ASSERT (((char*)node->array)[node->sizeof_array - 1] == '\0');

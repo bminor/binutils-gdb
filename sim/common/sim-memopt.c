@@ -300,10 +300,10 @@ parse_size (char *chp,
       break;
     case 'g': case 'G': /* Gigabyte suffix.  */
       *nr_bytes <<= 10;
-      /* Fall through.  */
+      ATTRIBUTE_FALLTHROUGH;
     case 'm': case 'M': /* Megabyte suffix.  */
       *nr_bytes <<= 10;
-      /* Fall through.  */
+      ATTRIBUTE_FALLTHROUGH;
     case 'k': case 'K': /* Kilobyte suffix.  */
       *nr_bytes <<= 10;
       /* Check for a modulo specifier after the suffix.  */
