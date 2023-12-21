@@ -88,7 +88,7 @@ extern void sim_engine_restart
 (SIM_DESC sd,
  sim_cpu *last_cpu, /* NULL -> in event-mgr */
  sim_cpu *next_cpu, /* NULL -> succ (last_cpu) or event-mgr */
- sim_cia cia);
+ sim_cia cia) ATTRIBUTE_NORETURN;
 
 /* Restart hook - allow target specific operation when restarting a
    simulator */
