@@ -523,6 +523,7 @@ m68hc11sio_io_read_buffer (struct hw *me,
     case M6811_SCSR:
       controller->rx_clear_scsr = m68hc11_cpu->ios[M6811_SCSR]
         & (M6811_RDRF | M6811_IDLE | M6811_OR | M6811_NF | M6811_FE);
+      ATTRIBUTE_FALLTHROUGH;
       
     case M6811_BAUD:
     case M6811_SCCR1:

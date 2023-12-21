@@ -405,6 +405,7 @@ m68hc11spi_io_read_buffer (struct hw *me,
     case M6811_SPSR:
       controller->rx_clear_scsr = m68hc11_cpu->ios[M6811_SCSR]
         & (M6811_SPIF | M6811_WCOL | M6811_MODF);
+      ATTRIBUTE_FALLTHROUGH;
       
     case M6811_SPCR:
       val = m68hc11_cpu->ios[base];
