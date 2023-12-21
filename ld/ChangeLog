@@ -1,3 +1,8 @@
+2023-12-21  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* emulparams/elf_i386.sh (LIBPATH_SUFFIX, LIBPATH_SUFFIX_SKIP)
+	[x86_64*-freebsd*]: Set for i386 emulation.
+
 2023-12-12  Georg-Johann Lay  <avr@gjlay.de>
 
 	PR 31124
