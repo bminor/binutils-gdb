@@ -867,40 +867,10 @@ value_from_register (struct type *type, int regnum, frame_info_ptr frame)
 CORE_ADDR
 address_from_register (int regnum, frame_info_ptr frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct type *type = builtin_type (gdbarch)->builtin_data_ptr;
-  CORE_ADDR result;
-  int regnum_max_excl = gdbarch_num_cooked_regs (gdbarch);
+  type *type = builtin_type (get_frame_arch (frame))->builtin_data_ptr;
+  value_ref_ptr v = release_value (value_from_register (type, regnum, frame));
 
-  if (regnum < 0 || regnum >= regnum_max_excl)
-    error (_("Invalid register #%d, expecting 0 <= # < %d"), regnum,
-	   regnum_max_excl);
-
-  /* Some targets require a special conversion routine even for plain
-     pointer types.  Avoid constructing a value object in those cases.  */
-  if (gdbarch_convert_register_p (gdbarch, regnum, type))
-    {
-      gdb_byte *buf = (gdb_byte *) alloca (type->length ());
-      int optim, unavail, ok;
-
-      ok = gdbarch_register_to_value (gdbarch, frame, regnum, type,
-				      buf, &optim, &unavail);
-      if (!ok)
-	{
-	  /* This function is used while computing a location expression.
-	     Complain about the value being optimized out, rather than
-	     letting value_as_address complain about some random register
-	     the expression depends on not being saved.  */
-	  error_value_optimized_out ();
-	}
-
-      return unpack_long (type, buf);
-    }
-
-  value *value = gdbarch_value_from_register (gdbarch, type, regnum, frame);
-  read_frame_register_value (value);
-
-  if (value->optimized_out ())
+  if (v->optimized_out ())
     {
       /* This function is used while computing a location expression.
 	 Complain about the value being optimized out, rather than
@@ -909,10 +879,7 @@ address_from_register (int regnum, frame_info_ptr frame)
       error_value_optimized_out ();
     }
 
-  result = value_as_address (value);
-  release_value (value);
-
-  return result;
+  return value_as_address (v.get ());
 }
 
 #if GDB_SELF_TEST
