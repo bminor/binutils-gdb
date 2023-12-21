@@ -126,6 +126,7 @@ store_csr (SIM_CPU *cpu, const char *name, int csr, unsigned_word *reg,
     case CSR_INSTRETH:
     case CSR_TIMEH:
       RISCV_ASSERT_RV32 (cpu, "CSR: %s", name);
+      ATTRIBUTE_FALLTHROUGH;
 
     /* All the rest are immutable.  */
     default:
