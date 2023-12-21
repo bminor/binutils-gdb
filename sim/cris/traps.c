@@ -1527,7 +1527,7 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		  retval = TARGET_O_WRONLY;
 		  break;
 		}
-	      /* FALLTHROUGH */
+	      ATTRIBUTE_FALLTHROUGH;
 	    default:
 	      /* Nothing else is implemented.  */
 	      retval

@@ -67,6 +67,10 @@ MY (f_break_handler) (SIM_CPU *cpu, USI breaknum, USI pc)
       cris_break_13_handler (cpu, /* TARGET_SYS_exit */ 1, 0,
 			     0, 0, 0, 0, 0, pc);
 
+      /* This shouldn't be reached, but we can't mark break 13 as noreturn
+	 since there are some calls which should return.  */
+      ATTRIBUTE_FALLTHROUGH;
+
     default:
       abort ();
     }
