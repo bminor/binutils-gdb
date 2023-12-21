@@ -324,6 +324,7 @@ mem_put_byte (unsigned int address, unsigned char value)
 	  halt_pipeline_stats ();
 	else
 	  reset_pipeline_stats ();
+	break;
       }
 #endif
 
