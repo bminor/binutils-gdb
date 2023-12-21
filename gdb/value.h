@@ -1119,9 +1119,6 @@ extern value *default_value_from_register (gdbarch *gdbarch, type *type,
 					   int regnum,
 					   const frame_info_ptr &this_frame);
 
-extern void read_frame_register_value (struct value *value,
-				       frame_info_ptr frame);
-
 extern struct value *value_from_register (struct type *type, int regnum,
 					  frame_info_ptr frame);
 

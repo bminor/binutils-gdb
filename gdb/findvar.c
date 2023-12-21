@@ -767,23 +767,26 @@ default_value_from_register (gdbarch *gdbarch, type *type, int regnum,
 }
 
 /* VALUE must be an lval_register value.  If regnum is the value's
-   associated register number, and len the length of the values type,
-   read one or more registers in FRAME, starting with register REGNUM,
+   associated register number, and len the length of the value's type,
+   read one or more registers in VALUE's frame, starting with register REGNUM,
    until we've read LEN bytes.
 
    If any of the registers we try to read are optimized out, then mark the
    complete resulting value as optimized out.  */
 
-void
-read_frame_register_value (struct value *value, frame_info_ptr frame)
+static void
+read_frame_register_value (value *value)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  gdb_assert (value->lval () == lval_register);
+
+  frame_info_ptr next_frame = frame_find_by_id (VALUE_NEXT_FRAME_ID (value));
+  gdb_assert (next_frame != nullptr);
+
+  gdbarch *gdbarch = frame_unwind_arch (next_frame);
   LONGEST offset = 0;
   LONGEST reg_offset = value->offset ();
   int regnum = VALUE_REGNUM (value);
   int len = type_length_units (check_typedef (value->type ()));
-
-  gdb_assert (value->lval () == lval_register);
 
   /* Skip registers wholly inside of REG_OFFSET.  */
   while (reg_offset >= register_size (gdbarch, regnum))
@@ -795,7 +798,7 @@ read_frame_register_value (struct value *value, frame_info_ptr frame)
   /* Copy the data.  */
   while (len > 0)
     {
-      struct value *regval = get_frame_register_value (frame, regnum);
+      struct value *regval = frame_unwind_register_value (next_frame, regnum);
       int reg_len = type_length_units (regval->type ()) - reg_offset;
 
       /* If the register length is larger than the number of bytes
@@ -852,7 +855,7 @@ value_from_register (struct type *type, int regnum, frame_info_ptr frame)
       v = gdbarch_value_from_register (gdbarch, type, regnum, frame);
 
       /* Get the data.  */
-      read_frame_register_value (v, frame);
+      read_frame_register_value (v);
     }
 
   return v;
@@ -895,7 +898,7 @@ address_from_register (int regnum, frame_info_ptr frame)
     }
 
   value *value = gdbarch_value_from_register (gdbarch, type, regnum, frame);
-  read_frame_register_value (value, frame);
+  read_frame_register_value (value);
 
   if (value->optimized_out ())
     {
