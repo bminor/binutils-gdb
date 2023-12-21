@@ -341,7 +341,7 @@ typedef struct {
 } RX_Data;
 
 #define rx_abort() _rx_abort(__FILE__, __LINE__)
-static void
+static void ATTRIBUTE_NORETURN
 _rx_abort (const char *file, int line)
 {
   if (strrchr (file, '/'))
