@@ -15827,6 +15827,7 @@ build_warnings="-Wall -Wpointer-arith
 -Wempty-body -Wunused-but-set-parameter -Wunused-but-set-variable
 -Wno-sign-compare -Wno-error=maybe-uninitialized
 -Wno-error=deprecated-register
+-Wduplicated-cond
 -Wmissing-declarations
 "
 build_warnings="$build_warnings
