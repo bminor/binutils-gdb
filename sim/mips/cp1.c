@@ -262,6 +262,7 @@ store_fpr (sim_cpu *cpu,
 	{
 	case fmt_uninterpreted_32:
 	  fmt = fmt_uninterpreted;
+	  ATTRIBUTE_FALLTHROUGH;
 	case fmt_single:
 	case fmt_word:
 	  if (STATE_VERBOSE_P (SD))
@@ -274,6 +275,7 @@ store_fpr (sim_cpu *cpu,
 
 	case fmt_uninterpreted_64:
 	  fmt = fmt_uninterpreted;
+	  ATTRIBUTE_FALLTHROUGH;
 	case fmt_uninterpreted:
 	case fmt_double:
 	case fmt_long:
@@ -294,6 +296,7 @@ store_fpr (sim_cpu *cpu,
 	{
 	case fmt_uninterpreted_32:
 	  fmt = fmt_uninterpreted;
+	  ATTRIBUTE_FALLTHROUGH;
 	case fmt_single:
 	case fmt_word:
 	  FGR[fpr] = (value & 0xFFFFFFFF);
@@ -302,6 +305,7 @@ store_fpr (sim_cpu *cpu,
 
 	case fmt_uninterpreted_64:
 	  fmt = fmt_uninterpreted;
+	  ATTRIBUTE_FALLTHROUGH;
 	case fmt_uninterpreted:
 	case fmt_double:
 	case fmt_long:

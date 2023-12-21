@@ -1247,7 +1247,7 @@ sim_monitor (SIM_DESC sd,
 	if (A0 == 0)	/* waitflag == NOWAIT */
 	  V0 = (unsigned_word)-1;
       }
-     /* Drop through to case 11 */
+     ATTRIBUTE_FALLTHROUGH;
 
     case 11: /* char inbyte(void) */
       {
@@ -1904,6 +1904,7 @@ signal_exception (SIM_DESC sd,
 	 }
        /* else fall through to normal exception processing */
        sim_io_eprintf(sd,"ReservedInstruction at PC = 0x%s\n", pr_addr (cia));
+       ATTRIBUTE_FALLTHROUGH;
      }
 
     default:
@@ -2329,6 +2330,7 @@ decode_coproc (SIM_DESC sd,
 				  "Warning: PC 0x%lx:interp.c decode_coproc DEADC0DE\n",
 				  (unsigned long)cia);
 		GPR[rt] = 0xDEADC0DE; /* CPR[0,rd] */
+		ATTRIBUTE_FALLTHROUGH;
 		/* CPR[0,rd] = GPR[rt]; */
 	      default:
 		if (op == cp0_mfc0 || op == cp0_dmfc0)
