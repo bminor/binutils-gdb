@@ -40,7 +40,7 @@ typedef void (SIM_CORE_SIGNAL_FN)
      (SIM_DESC sd, sim_cpu *cpu, sim_cia cia, unsigned map, int nr_bytes,
       address_word addr, transfer_type transfer, sim_core_signals sig);
 
-extern SIM_CORE_SIGNAL_FN sim_core_signal;
+extern SIM_CORE_SIGNAL_FN sim_core_signal ATTRIBUTE_NORETURN;
 
 
 /* basic types */

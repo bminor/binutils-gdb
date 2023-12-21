@@ -48,6 +48,6 @@ mn10300_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), 
 #include "mn10300-sim.h"
 #endif
 
-extern SIM_CORE_SIGNAL_FN mn10300_core_signal;
+extern SIM_CORE_SIGNAL_FN mn10300_core_signal ATTRIBUTE_NORETURN;
 
 #endif

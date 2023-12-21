@@ -2498,7 +2498,8 @@ mips_core_signal (SIM_DESC sd,
 		      (unsigned long) addr, (unsigned long) ip);
       COP0_BADVADDR = addr;
       SignalExceptionDataReference();
-      break;
+      /* Shouldn't actually be reached.  */
+      abort ();
 
     case sim_core_unaligned_signal:
       sim_io_eprintf (sd, "mips-core: %d byte %s to unaligned address 0x%lx at 0x%lx\n",
@@ -2509,7 +2510,8 @@ mips_core_signal (SIM_DESC sd,
 	SignalExceptionAddressLoad();
       else
 	SignalExceptionAddressStore();
-      break;
+      /* Shouldn't actually be reached.  */
+      abort ();
 
     default:
       sim_engine_abort (sd, cpu, cia,

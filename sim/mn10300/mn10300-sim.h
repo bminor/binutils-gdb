@@ -196,7 +196,8 @@ INLINE_SIM_MAIN (void) genericOr (uint32_t source, uint32_t destReg);
 INLINE_SIM_MAIN (void) genericXor (uint32_t source, uint32_t destReg);
 INLINE_SIM_MAIN (void) genericBtst (uint32_t leftOpnd, uint32_t rightOpnd);
 INLINE_SIM_MAIN (void) do_syscall (SIM_DESC sd);
-void program_interrupt (SIM_DESC sd, sim_cpu *cpu, sim_cia cia, SIM_SIGNAL sig);
+void program_interrupt (SIM_DESC sd, sim_cpu *cpu, sim_cia cia, SIM_SIGNAL sig)
+  ATTRIBUTE_NORETURN;
 
 void mn10300_cpu_exception_trigger(SIM_DESC sd, sim_cpu* cpu, address_word pc);
 void mn10300_cpu_exception_suspend(SIM_DESC sd, sim_cpu* cpu, int exception);

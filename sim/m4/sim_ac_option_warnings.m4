@@ -45,6 +45,7 @@ dnl C++ -Wno-mismatched-tags
 -Wno-error=deprecated-register
 dnl C++ -Wsuggest-override
 -Wduplicated-cond
+dnl -Wshadow=local
 dnl C++ -Wdeprecated-copy
 dnl C++ -Wdeprecated-copy-dtor
 dnl C++ -Wredundant-move
