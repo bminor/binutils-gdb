@@ -697,11 +697,13 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	    case AngelSWI_Reason_Remove:
 	      SWIremove (state,
 			 ARMul_ReadWord (state, addr));
+	      break;
 
 	    case AngelSWI_Reason_Rename:
 	      SWIrename (state,
 			 ARMul_ReadWord (state, addr),
 			 ARMul_ReadWord (state, addr + 4));
+	      break;
 	    }
 	}
       else
