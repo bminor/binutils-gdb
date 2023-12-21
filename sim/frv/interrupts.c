@@ -835,7 +835,7 @@ set_exception_status_registers (
 	{
 	case FRV_DIVISION_EXCEPTION:
 	  set_isr_exception_fields (current_cpu, item);
-	  /* fall thru to set reg_index.  */
+	  ATTRIBUTE_FALLTHROUGH;  /* To set reg_index.  */
 	case FRV_COMMIT_EXCEPTION:
 	  /* For fr550, always use ESR0.  */
 	  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
@@ -855,7 +855,7 @@ set_exception_status_registers (
 	  break;
 	case FRV_DATA_ACCESS_EXCEPTION:
 	  set_daec = 1;
-	  /* fall through */
+	  ATTRIBUTE_FALLTHROUGH;
 	case FRV_DATA_ACCESS_MMU_MISS:
 	case FRV_MEM_ADDRESS_NOT_ALIGNED:
 	  /* Get the appropriate ESR, EPCR, EAR and EDR.

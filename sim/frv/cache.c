@@ -136,7 +136,7 @@ frv_cache_reconfigure (SIM_CPU *current_cpu, FRV_CACHE *cache)
 	      break;
 	    }
 	}
-      /* fall through */
+      ATTRIBUTE_FALLTHROUGH;
     default:
       /* Set the cache to its original settings.  */
       cache->sets = cache->configured_sets;
