@@ -504,6 +504,16 @@ get_store_name (SIM_CPU *cpu, bu32 *p)
     return greg_names[4 * 8 + 2];
   else if (p == &AWREG (1))
     return greg_names[4 * 8 + 3];
+  else if (p == &ASTATREG (ac0))
+    return "ASTAT[ac0]";
+  else if (p == &ASTATREG (ac0_copy))
+    return "ASTAT[ac0_copy]";
+  else if (p == &ASTATREG (ac1))
+    return "ASTAT[ac1]";
+  else if (p == &ASTATREG (an))
+    return "ASTAT[an]";
+  else if (p == &ASTATREG (aq))
+    return "ASTAT[aq]";
   else if (p == &ASTATREG (av0))
     return "ASTAT[av0]";
   else if (p == &ASTATREG (av0s))
@@ -512,22 +522,14 @@ get_store_name (SIM_CPU *cpu, bu32 *p)
     return "ASTAT[av1]";
   else if (p == &ASTATREG (av1s))
     return "ASTAT[av1s]";
+  else if (p == &ASTATREG (az))
+    return "ASTAT[az]";
   else if (p == &ASTATREG (v))
     return "ASTAT[v]";
-  else if (p == &ASTATREG (vs))
-    return "ASTAT[vs]";
   else if (p == &ASTATREG (v_copy))
     return "ASTAT[v_copy]";
-  else if (p == &ASTATREG (az))
-    return "ASTAT[az]";
-  else if (p == &ASTATREG (an))
-    return "ASTAT[an]";
-  else if (p == &ASTATREG (az))
-    return "ASTAT[az]";
-  else if (p == &ASTATREG (ac0))
-    return "ASTAT[ac0]";
-  else if (p == &ASTATREG (ac0_copy))
-    return "ASTAT[ac0_copy]";
+  else if (p == &ASTATREG (vs))
+    return "ASTAT[vs]";
   else
     {
       /* Worry about this when we start to STORE() it.  */
