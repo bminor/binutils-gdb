@@ -44,6 +44,7 @@ build_warnings="-Wall -Wpointer-arith
 dnl C++ -Wno-mismatched-tags
 -Wno-error=deprecated-register
 dnl C++ -Wsuggest-override
+-Wimplicit-fallthrough=5
 -Wduplicated-cond
 dnl -Wshadow=local
 dnl C++ -Wdeprecated-copy
