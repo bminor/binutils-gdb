@@ -288,6 +288,7 @@ get_operands (operand_desc *s, uint64_t ins, int isize, int nops)
             OP[i] = (ins) & 0x3FFF;
             OP[++i] = (ins >> 14) & 0x1;     /* get 1 bit for index-reg.  */
             OP[++i] = (ins >> 16) & 0xF;     /* get 4 bit for reg.  */
+            break;
           case rindex7_abs20:
           case rindex8_abs20:
             OP[i] = (ins) & 0xFFFFF;
