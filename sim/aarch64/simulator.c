@@ -129,11 +129,11 @@ expand_logical_immediate (uint32_t S, uint32_t R, uint32_t N)
   /* Replicate the value according to SIMD size.  */
   switch (simd_size)
     {
-    case  2: imm = (imm <<  2) | imm;
-    case  4: imm = (imm <<  4) | imm;
-    case  8: imm = (imm <<  8) | imm;
-    case 16: imm = (imm << 16) | imm;
-    case 32: imm = (imm << 32) | imm;
+    case  2: imm = (imm <<  2) | imm; ATTRIBUTE_FALLTHROUGH;
+    case  4: imm = (imm <<  4) | imm; ATTRIBUTE_FALLTHROUGH;
+    case  8: imm = (imm <<  8) | imm; ATTRIBUTE_FALLTHROUGH;
+    case 16: imm = (imm << 16) | imm; ATTRIBUTE_FALLTHROUGH;
+    case 32: imm = (imm << 32) | imm; ATTRIBUTE_FALLTHROUGH;
     case 64: break;
     default: return 0;
     }
@@ -2040,12 +2040,12 @@ extreg32 (sim_cpu *cpu, unsigned int lo, Extension extension)
     {
     case UXTB: return aarch64_get_reg_u8  (cpu, lo, NO_SP);
     case UXTH: return aarch64_get_reg_u16 (cpu, lo, NO_SP);
-    case UXTW: /* Fall through.  */
+    case UXTW: ATTRIBUTE_FALLTHROUGH;
     case UXTX: return aarch64_get_reg_u32 (cpu, lo, NO_SP);
     case SXTB: return aarch64_get_reg_s8  (cpu, lo, NO_SP);
     case SXTH: return aarch64_get_reg_s16 (cpu, lo, NO_SP);
-    case SXTW: /* Fall through.  */
-    case SXTX: /* Fall through.  */
+    case SXTW: ATTRIBUTE_FALLTHROUGH;
+    case SXTX: ATTRIBUTE_FALLTHROUGH;
     default:   return aarch64_get_reg_s32 (cpu, lo, NO_SP);
   }
 }
@@ -3346,7 +3346,7 @@ do_vec_MOV_immediate (sim_cpu *cpu)
 
     case 0xa: /* 16-bit, shift by 8.  */
       val <<= 8;
-      /* Fall through.  */
+      ATTRIBUTE_FALLTHROUGH;
     case 0x8: /* 16-bit, no shift.  */
       for (i = 0; i < (full ? 8 : 4); i++)
 	aarch64_set_vec_u16 (cpu, vd, i, val);
@@ -3355,7 +3355,7 @@ do_vec_MOV_immediate (sim_cpu *cpu)
     case 0xd: /* 32-bit, mask shift by 16.  */
       val <<= 8;
       val |= 0xFF;
-      /* Fall through.  */
+      ATTRIBUTE_FALLTHROUGH;
     case 0xc: /* 32-bit, mask shift by 8. */
       val <<= 8;
       val |= 0xFF;
@@ -3416,6 +3416,7 @@ do_vec_MVNI (sim_cpu *cpu)
 
     case 0xa: /* 16-bit, 8 bit shift. */
       val <<= 8;
+      ATTRIBUTE_FALLTHROUGH;
     case 0x8: /* 16-bit, no shift. */
       val = ~ val;
       for (i = 0; i < (full ? 8 : 4); i++)
@@ -3425,6 +3426,7 @@ do_vec_MVNI (sim_cpu *cpu)
     case 0xd: /* 32-bit, mask shift by 16.  */
       val <<= 8;
       val |= 0xFF;
+      ATTRIBUTE_FALLTHROUGH;
     case 0xc: /* 32-bit, mask shift by 8. */
       val <<= 8;
       val |= 0xFF;
@@ -4691,6 +4693,8 @@ do_vec_SCVTF (sim_cpu *cpu)
 				 aarch64_get_vec_##SOURCE##64 (cpu, vm, i) \
 				 ? -1ULL : 0);				\
 	  return;							\
+	default:							\
+	  HALT_UNALLOC;							\
 	}								\
     }									\
   while (0)
@@ -4726,6 +4730,8 @@ do_vec_SCVTF (sim_cpu *cpu)
 				 aarch64_get_vec_##SOURCE##64 (cpu, vn, i) \
 				 CMP 0 ? -1ULL : 0);			\
 	  return;							\
+	default:							\
+	  HALT_UNALLOC;							\
 	}								\
     }									\
   while (0)
@@ -5316,6 +5322,7 @@ do_vec_sub_long (sim_cpu *cpu)
     {
     case 2: /* SSUBL2.  */
       bias = 2;
+      ATTRIBUTE_FALLTHROUGH;
     case 0: /* SSUBL.  */
       switch (size)
 	{
@@ -5349,6 +5356,7 @@ do_vec_sub_long (sim_cpu *cpu)
 
     case 3: /* USUBL2.  */
       bias = 2;
+      ATTRIBUTE_FALLTHROUGH;
     case 1: /* USUBL.  */
       switch (size)
 	{
@@ -5811,6 +5819,7 @@ do_vec_xtl (sim_cpu *cpu)
     {
     case 2: /* SXTL2, SSHLL2.  */
       bias = 2;
+      ATTRIBUTE_FALLTHROUGH;
     case 0: /* SXTL, SSHLL.  */
       if (INSTR (21, 21))
 	{
@@ -5851,6 +5860,7 @@ do_vec_xtl (sim_cpu *cpu)
 
     case 3: /* UXTL2, USHLL2.  */
       bias = 2;
+      ATTRIBUTE_FALLTHROUGH;
     case 1: /* UXTL, USHLL.  */
       if (INSTR (21, 21))
 	{
@@ -8568,6 +8578,7 @@ dexSimpleFPIntegerConvert (sim_cpu *cpu)
 	case 1: scvtd32 (cpu); return;
 	case 2: scvtf (cpu); return;
 	case 3: scvtd (cpu); return;
+	default: HALT_UNALLOC;
 	}
 
     case 6:			/* FMOV GR, Vec.  */
@@ -8593,6 +8604,7 @@ dexSimpleFPIntegerConvert (sim_cpu *cpu)
 	case 1: fcvtszd32 (cpu); return;
 	case 2: fcvtszs (cpu); return;
 	case 3: fcvtszd (cpu); return;
+	default: HALT_UNALLOC;
 	}
 
     case 25: do_fcvtzu (cpu); return;
@@ -9186,7 +9198,7 @@ do_scalar_FCM (sim_cpu *cpu)
 	case 3: /* 011 */
 	  val1 = fabs (val1);
 	  val2 = fabs (val2);
-	  /* Fall through. */
+	  ATTRIBUTE_FALLTHROUGH;
 	case 2: /* 010 */
 	  result = val1 >= val2;
 	  break;
@@ -9194,7 +9206,7 @@ do_scalar_FCM (sim_cpu *cpu)
 	case 7: /* 111 */
 	  val1 = fabs (val1);
 	  val2 = fabs (val2);
-	  /* Fall through. */
+	  ATTRIBUTE_FALLTHROUGH;
 	case 6: /* 110 */
 	  result = val1 > val2;
 	  break;
@@ -9219,7 +9231,7 @@ do_scalar_FCM (sim_cpu *cpu)
     case 3: /* 011 */
       val1 = fabsf (val1);
       val2 = fabsf (val2);
-      /* Fall through. */
+      ATTRIBUTE_FALLTHROUGH;
     case 2: /* 010 */
       result = val1 >= val2;
       break;
@@ -9227,7 +9239,7 @@ do_scalar_FCM (sim_cpu *cpu)
     case 7: /* 111 */
       val1 = fabsf (val1);
       val2 = fabsf (val2);
-      /* Fall through. */
+      ATTRIBUTE_FALLTHROUGH;
     case 6: /* 110 */
       result = val1 > val2;
       break;
