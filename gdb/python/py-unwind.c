@@ -123,7 +123,15 @@ struct cached_frame_info
   /* Length of the `reg' array below.  */
   int reg_count;
 
-  cached_reg_t reg[];
+  /* Flexible array member.  Note: use a zero-sized array rather than
+     an actual C99-style flexible array member (unsized array),
+     because the latter would cause an error with Clang:
+
+       error: flexible array member 'reg' of type 'cached_reg_t[]' with non-trivial destruction
+
+     Note we manually call the destructor of each array element in
+     pyuw_dealloc_cache.  */
+  cached_reg_t reg[0];
 };
 
 extern PyTypeObject pending_frame_object_type
