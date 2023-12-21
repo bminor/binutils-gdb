@@ -652,6 +652,7 @@ hw_phb_unit_decode(device *me,
 	     && val != 0x10 && val != 0x18 && val != 0x20)
       device_error(me, "Register number (0x%lx) invalid in 64bit PCI address %s",
 		   val, unit);
+    break;
   case ss_config_code:
     device_error(me, "internal error");
   }
