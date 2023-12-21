@@ -23,6 +23,9 @@
 /* Include gnulib's various configure tests.  */
 #include "gnulib/config.h"
 
+/* This comes from gnulib.  Export it until ansidecl.h handles it.  */
+#define ATTRIBUTE_FALLTHROUGH _GL_ATTRIBUTE_FALLTHROUGH
+
 /* Reset macros that our config.h will provide.  */
 #undef PACKAGE
 #undef PACKAGE_BUGREPORT
