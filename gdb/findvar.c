@@ -755,13 +755,11 @@ default_value_from_register (gdbarch *gdbarch, type *type, int regnum,
   struct value *value = value::allocate (type);
   value->set_lval (lval_register);
 
-  frame_id next_frame_id;
-  if (this_frame == nullptr)
-    next_frame_id = null_frame_id;
-  else
-    next_frame_id = get_frame_id (get_next_frame_sentinel_okay (this_frame));
+  frame_info_ptr next_frame = get_next_frame_sentinel_okay (this_frame);
+  while (get_frame_type (next_frame) == INLINE_FRAME)
+    next_frame = get_next_frame_sentinel_okay (next_frame);
 
-  VALUE_NEXT_FRAME_ID (value) = next_frame_id;
+  VALUE_NEXT_FRAME_ID (value) = get_frame_id (next_frame);
   VALUE_REGNUM (value) = regnum;
 
   /* Any structure stored in more than one register will always be
@@ -887,13 +885,6 @@ address_from_register (int regnum, frame_info_ptr frame)
     error (_("Invalid register #%d, expecting 0 <= # < %d"), regnum,
 	   regnum_max_excl);
 
-  /* This routine may be called during early unwinding, at a time
-     where the ID of FRAME is not yet known.  Calling value_from_register
-     would therefore abort in get_frame_id.  However, since we only need
-     a temporary value that is never used as lvalue, we actually do not
-     really need to set its VALUE_NEXT_FRAME_ID.  Therefore, we re-implement
-     the core of value_from_register, but use the null_frame_id.  */
-
   /* Some targets require a special conversion routine even for plain
      pointer types.  Avoid constructing a value object in those cases.  */
   if (gdbarch_convert_register_p (gdbarch, regnum, type))
@@ -915,7 +906,7 @@ address_from_register (int regnum, frame_info_ptr frame)
       return unpack_long (type, buf);
     }
 
-  value *value = gdbarch_value_from_register (gdbarch, type, regnum, nullptr);
+  value *value = gdbarch_value_from_register (gdbarch, type, regnum, frame);
   read_frame_register_value (value, frame);
 
   if (value->optimized_out ())

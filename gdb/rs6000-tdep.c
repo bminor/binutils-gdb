@@ -2760,13 +2760,11 @@ rs6000_value_from_register (gdbarch *gdbarch, type *type, int regnum,
 
   value->set_lval (lval_register);
 
-  frame_id next_frame_id;
-  if (this_frame == nullptr)
-    next_frame_id = null_frame_id;
-  else
-    next_frame_id = get_frame_id (get_next_frame_sentinel_okay (this_frame));
+  frame_info_ptr next_frame = get_next_frame_sentinel_okay (this_frame);
+  while (get_frame_type (next_frame) == INLINE_FRAME)
+    next_frame = get_next_frame_sentinel_okay (next_frame);
 
-  VALUE_NEXT_FRAME_ID (value) = next_frame_id;
+  VALUE_NEXT_FRAME_ID (value) = get_frame_id (next_frame);
   VALUE_REGNUM (value) = regnum;
 
   /* Any structure stored in more than one register will always be
