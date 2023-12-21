@@ -158,6 +158,7 @@ bfin_uart_io_read_buffer (struct hw *me, void *dest,
     case mmr_offset(lsr):
       uart->lsr &= ~(DR | THRE | TEMT);
       uart->lsr |= bfin_uart_get_status (me);
+      ATTRIBUTE_FALLTHROUGH;
     case mmr_offset(thr):
     case mmr_offset(msr):
     case mmr_offset(dll):

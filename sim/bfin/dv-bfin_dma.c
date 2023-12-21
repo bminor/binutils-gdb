@@ -173,6 +173,7 @@ bfin_dma_process_desc (struct hw *me, struct bfin_dma *dma)
 	  dma->ndph = _flows[1];
 	  --ndsize;
 	  ++flows;
+	  ATTRIBUTE_FALLTHROUGH;
 	case DMAFLOW_SMALL:
 	  dma->ndpl = _flows[0];
 	  --ndsize;
