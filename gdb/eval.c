@@ -2828,7 +2828,7 @@ var_value_operation::evaluate_for_sizeof (struct expression *exp,
 	  if (type_not_allocated (type) || type_not_associated (type))
 	    return value::zero (size_type, not_lval);
 	  else if (is_dynamic_type (type->index_type ())
-		   && type->bounds ()->high.kind () == PROP_UNDEFINED)
+		   && !type->bounds ()->high.is_available ())
 	    return value::allocate_optimized_out (size_type);
 	}
     }

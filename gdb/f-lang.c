@@ -1372,7 +1372,7 @@ fortran_undetermined::value_subarray (value *array,
 	     have a known upper bound, so don't error check in that
 	     situation.  */
 	  if (index < lb
-	      || (dim_type->index_type ()->bounds ()->high.kind () != PROP_UNDEFINED
+	      || (dim_type->index_type ()->bounds ()->high.is_available ()
 		  && index > ub)
 	      || (array->lval () != lval_memory
 		  && dim_type->index_type ()->bounds ()->high.kind () == PROP_UNDEFINED))

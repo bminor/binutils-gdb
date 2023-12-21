@@ -192,7 +192,7 @@ c_number_of_children (const struct varobj *var)
     {
     case TYPE_CODE_ARRAY:
       if (type->length () > 0 && target->length () > 0
-	  && (type->bounds ()->high.kind () != PROP_UNDEFINED))
+	  && type->bounds ()->high.is_available ())
 	children = type->length () / target->length ();
       else
 	/* If we don't know how many elements there are, don't display

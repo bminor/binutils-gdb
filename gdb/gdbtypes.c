@@ -2179,21 +2179,35 @@ resolve_dynamic_range (struct type *dyn_range_type,
   gdb_assert (rank >= 0);
 
   const struct dynamic_prop *prop = &dyn_range_type->bounds ()->low;
-  if (resolve_p && dwarf2_evaluate_property (prop, frame, addr_stack, &value,
-					     { (CORE_ADDR) rank }))
-    low_bound.set_const_val (value);
+  if (resolve_p)
+    {
+      if (dwarf2_evaluate_property (prop, frame, addr_stack, &value,
+				    { (CORE_ADDR) rank }))
+	low_bound.set_const_val (value);
+      else if (prop->kind () == PROP_UNDEFINED)
+	low_bound.set_undefined ();
+      else
+	low_bound.set_optimized_out ();
+    }
   else
     low_bound.set_undefined ();
 
   prop = &dyn_range_type->bounds ()->high;
-  if (resolve_p && dwarf2_evaluate_property (prop, frame, addr_stack, &value,
-					     { (CORE_ADDR) rank }))
+  if (resolve_p)
     {
-      high_bound.set_const_val (value);
+      if (dwarf2_evaluate_property (prop, frame, addr_stack, &value,
+				    { (CORE_ADDR) rank }))
+	{
+	  high_bound.set_const_val (value);
 
-      if (dyn_range_type->bounds ()->flag_upper_bound_is_count)
-	high_bound.set_const_val
-	  (low_bound.const_val () + high_bound.const_val () - 1);
+	  if (dyn_range_type->bounds ()->flag_upper_bound_is_count)
+	    high_bound.set_const_val
+	      (low_bound.const_val () + high_bound.const_val () - 1);
+	}
+      else if (prop->kind () == PROP_UNDEFINED)
+	high_bound.set_undefined ();
+      else
+	high_bound.set_optimized_out ();
     }
   else
     high_bound.set_undefined ();

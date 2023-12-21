@@ -679,7 +679,7 @@ ada_discrete_type_high_bound (struct type *type)
 	  return high.const_val ();
 	else
 	  {
-	    gdb_assert (high.kind () == PROP_UNDEFINED);
+	    gdb_assert (!high.is_available ());
 
 	    /* This happens when trying to evaluate a type's dynamic bound
 	       without a live target.  There is nothing relevant for us to
@@ -714,7 +714,7 @@ ada_discrete_type_low_bound (struct type *type)
 	  return low.const_val ();
 	else
 	  {
-	    gdb_assert (low.kind () == PROP_UNDEFINED);
+	    gdb_assert (!low.is_available ());
 
 	    /* This happens when trying to evaluate a type's dynamic bound
 	       without a live target.  There is nothing relevant for us to

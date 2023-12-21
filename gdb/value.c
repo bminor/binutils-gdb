@@ -3603,9 +3603,16 @@ value_from_contents_and_address (struct type *type,
   struct type *resolved_type = resolve_dynamic_type (type, view, address,
 						     &frame);
   struct type *resolved_type_no_typedef = check_typedef (resolved_type);
-  struct value *v;
 
-  if (valaddr == NULL)
+  struct value *v;
+  if (resolved_type_no_typedef->code () == TYPE_CODE_ARRAY
+      && resolved_type_no_typedef->bound_optimized_out ())
+    {
+      /* Resolution found that the bounds are optimized out.  In this
+	 case, mark the array itself as optimized-out.  */
+      v = value::allocate_optimized_out (resolved_type);
+    }
+  else if (valaddr == nullptr)
     v = value::allocate_lazy (resolved_type);
   else
     v = value_from_contents (resolved_type, valaddr);
