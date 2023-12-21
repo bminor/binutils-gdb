@@ -77,6 +77,9 @@ do_syscall (SIM_CPU *current_cpu, PCADDR pc)
 	  /* Fail.  */
 	  puts ("fail");
 	  exit (1);
+	default:
+	  puts ("unknown exit");
+	  exit (2);
 	}
 
     case TARGET_NEWLIB_SYS_write:
