@@ -578,7 +578,7 @@ psim_restart(psim *system,
 }
 
 
-static void
+static ATTRIBUTE_NORETURN void
 cntrl_c_simulation(void *data)
 {
   psim *system = data;
