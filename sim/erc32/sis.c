@@ -281,6 +281,7 @@ main(int argc, char **argv)
 	    break;
 	case CTRL_C:
 	    printf("\b\bInterrupt!\n");
+	    ATTRIBUTE_FALLTHROUGH;
 	case TIME_OUT:
 	    printf(" Stopped at time %" PRIu64 " (%.3f ms)\n", ebase.simtime,
 	      ((double) ebase.simtime / (double) sregs.freq) / 1000.0);

@@ -1220,6 +1220,7 @@ dispatch_instruction(struct pstate *sregs)
 	switch (op3) {
 	case LDDA:
 	    if (!chk_asi(sregs, &asi, op3)) break;
+	    ATTRIBUTE_FALLTHROUGH;
 	case LDD:
 	    if (address & 0x7) {
 		sregs->trap = TRAP_UNALI;
@@ -1250,6 +1251,7 @@ dispatch_instruction(struct pstate *sregs)
 
 	case LDA:
 	    if (!chk_asi(sregs, &asi, op3)) break;
+	    ATTRIBUTE_FALLTHROUGH;
 	case LD:
 	    if (address & 0x3) {
 		sregs->trap = TRAP_UNALI;
@@ -1265,6 +1267,7 @@ dispatch_instruction(struct pstate *sregs)
 	    break;
 	case LDSTUBA:
 	    if (!chk_asi(sregs, &asi, op3)) break;
+	    ATTRIBUTE_FALLTHROUGH;
 	case LDSTUB:
 	    mexc = memory_read(asi, address, &data, 0, &ws);
 	    sregs->hold += ws;
@@ -1288,6 +1291,7 @@ dispatch_instruction(struct pstate *sregs)
 	case LDSBA:
 	case LDUBA:
 	    if (!chk_asi(sregs, &asi, op3)) break;
+	    ATTRIBUTE_FALLTHROUGH;
 	case LDSB:
 	case LDUB:
 	    mexc = memory_read(asi, address, &data, 0, &ws);
@@ -1305,6 +1309,7 @@ dispatch_instruction(struct pstate *sregs)
 	case LDSHA:
 	case LDUHA:
 	    if (!chk_asi(sregs, &asi, op3)) break;
+	    ATTRIBUTE_FALLTHROUGH;
 	case LDSH:
 	case LDUH:
 	    if (address & 0x1) {
@@ -1426,6 +1431,7 @@ dispatch_instruction(struct pstate *sregs)
 
 	case STA:
 	    if (!chk_asi(sregs, &asi, op3)) break;
+	    ATTRIBUTE_FALLTHROUGH;
 	case ST:
 	    if (address & 0x3) {
 		sregs->trap = TRAP_UNALI;
@@ -1439,6 +1445,7 @@ dispatch_instruction(struct pstate *sregs)
 	    break;
 	case STBA:
 	    if (!chk_asi(sregs, &asi, op3)) break;
+	    ATTRIBUTE_FALLTHROUGH;
 	case STB:
 	    mexc = memory_write(asi, address, rdd, 0, &ws);
 	    sregs->hold += ws;
@@ -1448,6 +1455,7 @@ dispatch_instruction(struct pstate *sregs)
 	    break;
 	case STDA:
 	    if (!chk_asi(sregs, &asi, op3)) break;
+	    ATTRIBUTE_FALLTHROUGH;
 	case STD:
 	    if (address & 0x7) {
 		sregs->trap = TRAP_UNALI;
@@ -1505,6 +1513,7 @@ dispatch_instruction(struct pstate *sregs)
 	    break;
 	case STHA:
 	    if (!chk_asi(sregs, &asi, op3)) break;
+	    ATTRIBUTE_FALLTHROUGH;
 	case STH:
 	    if (address & 0x1) {
 		sregs->trap = TRAP_UNALI;
@@ -1561,6 +1570,7 @@ dispatch_instruction(struct pstate *sregs)
 	    break;
 	case SWAPA:
 	    if (!chk_asi(sregs, &asi, op3)) break;
+	    ATTRIBUTE_FALLTHROUGH;
 	case SWAP:
 	    if (address & 0x3) {
 		sregs->trap = TRAP_UNALI;

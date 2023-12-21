@@ -799,6 +799,7 @@ mec_write(uint32_t addr, uint32_t data)
     case MEC_UARTA:
     case MEC_UARTB:
         if (data & 0xFFFFFF00) mecparerror();
+        ATTRIBUTE_FALLTHROUGH;
     case MEC_UART_CTRL:
         if (data & 0xFF00FF00) mecparerror();
 	write_uart(addr, data);
