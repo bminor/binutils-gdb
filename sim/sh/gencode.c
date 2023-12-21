@@ -3296,6 +3296,7 @@ ppi_gensim (void)
 	    case 'c':
 	      printf ("      if ((((iword >> 8) ^ DSR) & 1) == 0)\n");
 	      printf ("\treturn;\n");
+	      printf ("      ATTRIBUTE_FALLTHROUGH;\n");
 	      printf ("    }\n");
 	      printf ("  case %d:\n", p->index + 1);
 	      printf ("    {\n");
