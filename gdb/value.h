@@ -1110,10 +1110,9 @@ extern struct value *value_from_contents_and_address
       frame_info_ptr frame = nullptr);
 extern struct value *value_from_contents (struct type *, const gdb_byte *);
 
-extern struct value *default_value_from_register (struct gdbarch *gdbarch,
-						  struct type *type,
-						  int regnum,
-						  struct frame_id frame_id);
+extern value *default_value_from_register (gdbarch *gdbarch, type *type,
+					   int regnum,
+					   const frame_info_ptr &this_frame);
 
 extern void read_frame_register_value (struct value *value,
 				       frame_info_ptr frame);

@@ -2747,9 +2747,9 @@ rs6000_value_to_register (frame_info_ptr frame,
   put_frame_register (get_next_frame_sentinel_okay (frame), regnum, to_view);
 }
 
-static struct value *
-rs6000_value_from_register (struct gdbarch *gdbarch, struct type *type,
-			    int regnum, struct frame_id frame_id)
+static value *
+rs6000_value_from_register (gdbarch *gdbarch, type *type, int regnum,
+			    const frame_info_ptr &this_frame)
 {
   int len = type->length ();
   struct value *value = value::allocate (type);
@@ -2759,14 +2759,14 @@ rs6000_value_from_register (struct gdbarch *gdbarch, struct type *type,
   regnum = ieee_128_float_regnum_adjust (gdbarch, type, regnum);
 
   value->set_lval (lval_register);
-  frame_info_ptr frame = frame_find_by_id (frame_id);
 
-  if (frame == NULL)
-    frame_id = null_frame_id;
+  frame_id next_frame_id;
+  if (this_frame == nullptr)
+    next_frame_id = null_frame_id;
   else
-    frame_id = get_frame_id (get_next_frame_sentinel_okay (frame));
+    next_frame_id = get_frame_id (get_next_frame_sentinel_okay (this_frame));
 
-  VALUE_NEXT_FRAME_ID (value) = frame_id;
+  VALUE_NEXT_FRAME_ID (value) = next_frame_id;
   VALUE_REGNUM (value) = regnum;
 
   /* Any structure stored in more than one register will always be

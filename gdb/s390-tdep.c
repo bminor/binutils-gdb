@@ -1236,13 +1236,13 @@ regnum_is_vxr_full (s390_gdbarch_tdep *tdep, int regnum)
    registers, even though we are otherwise a big-endian platform.  The
    same applies to a 'float' value within a vector.  */
 
-static struct value *
-s390_value_from_register (struct gdbarch *gdbarch, struct type *type,
-			  int regnum, struct frame_id frame_id)
+static value *
+s390_value_from_register (gdbarch *gdbarch, type *type, int regnum,
+			  const frame_info_ptr &this_frame)
 {
   s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
-  struct value *value = default_value_from_register (gdbarch, type,
-						     regnum, frame_id);
+  value *value
+    = default_value_from_register (gdbarch, type, regnum, this_frame);
   check_typedef (type);
 
   if ((regnum >= S390_F0_REGNUM && regnum <= S390_F15_REGNUM

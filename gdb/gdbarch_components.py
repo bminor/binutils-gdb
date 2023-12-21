@@ -814,7 +814,7 @@ Function(
 Method(
     comment="""
 Construct a value representing the contents of register REGNUM in
-frame FRAME_ID, interpreted as type TYPE.  The routine needs to
+frame THIS_FRAME, interpreted as type TYPE.  The routine needs to
 allocate and return a struct value with all value attributes
 (but not the value contents) filled in.
 """,
@@ -823,7 +823,7 @@ allocate and return a struct value with all value attributes
     params=[
         ("struct type *", "type"),
         ("int", "regnum"),
-        ("struct frame_id", "frame_id"),
+        ("const frame_info_ptr &", "this_frame"),
     ],
     predefault="default_value_from_register",
     invalid=False,

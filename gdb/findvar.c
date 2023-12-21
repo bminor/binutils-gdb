@@ -747,23 +747,21 @@ read_var_value (struct symbol *var, const struct block *var_block,
 
 /* Install default attributes for register values.  */
 
-struct value *
-default_value_from_register (struct gdbarch *gdbarch, struct type *type,
-			     int regnum, struct frame_id frame_id)
+value *
+default_value_from_register (gdbarch *gdbarch, type *type, int regnum,
+			     const frame_info_ptr &this_frame)
 {
   int len = type->length ();
   struct value *value = value::allocate (type);
-  frame_info_ptr frame;
-
   value->set_lval (lval_register);
-  frame = frame_find_by_id (frame_id);
 
-  if (frame == NULL)
-    frame_id = null_frame_id;
+  frame_id next_frame_id;
+  if (this_frame == nullptr)
+    next_frame_id = null_frame_id;
   else
-    frame_id = get_frame_id (get_next_frame_sentinel_okay (frame));
+    next_frame_id = get_frame_id (get_next_frame_sentinel_okay (this_frame));
 
-  VALUE_NEXT_FRAME_ID (value) = frame_id;
+  VALUE_NEXT_FRAME_ID (value) = next_frame_id;
   VALUE_REGNUM (value) = regnum;
 
   /* Any structure stored in more than one register will always be
@@ -865,8 +863,7 @@ value_from_register (struct type *type, int regnum, frame_info_ptr frame)
   else
     {
       /* Construct the value.  */
-      v = gdbarch_value_from_register (gdbarch, type,
-				       regnum, get_frame_id (frame));
+      v = gdbarch_value_from_register (gdbarch, type, regnum, frame);
 
       /* Get the data.  */
       read_frame_register_value (v, frame);
@@ -883,7 +880,6 @@ address_from_register (int regnum, frame_info_ptr frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct type *type = builtin_type (gdbarch)->builtin_data_ptr;
-  struct value *value;
   CORE_ADDR result;
   int regnum_max_excl = gdbarch_num_cooked_regs (gdbarch);
 
@@ -919,7 +915,7 @@ address_from_register (int regnum, frame_info_ptr frame)
       return unpack_long (type, buf);
     }
 
-  value = gdbarch_value_from_register (gdbarch, type, regnum, null_frame_id);
+  value *value = gdbarch_value_from_register (gdbarch, type, regnum, nullptr);
   read_frame_register_value (value, frame);
 
   if (value->optimized_out ())
