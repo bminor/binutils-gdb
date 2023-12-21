@@ -896,7 +896,7 @@ step_once (SIM_CPU *cpu)
 
       case OP_reti:
 	sram[SREG] |= SREG_I;
-	/* Fall through */
+	ATTRIBUTE_FALLTHROUGH;
       case OP_ret:
 	{
 	  const struct avr_sim_state *state = AVR_SIM_STATE (CPU_STATE (cpu));
