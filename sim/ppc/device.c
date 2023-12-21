@@ -1453,7 +1453,7 @@ device_find_string_array_property(device *me,
     if (node->sizeof_array == 0
 	|| ((char*)node->array)[node->sizeof_array - 1] != '\0')
       device_error(me, "property %s invalid for string array", property);
-    /* FALL THROUGH */
+    ATTRIBUTE_FALLTHROUGH;
   case string_array_property:
     ASSERT(node->sizeof_array > 0);
     ASSERT(((char*)node->array)[node->sizeof_array - 1] == '\0');
