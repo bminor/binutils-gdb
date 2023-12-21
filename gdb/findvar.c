@@ -270,17 +270,6 @@ value_of_register_lazy (frame_info_ptr next_frame, int regnum)
   gdb_assert (regnum < gdbarch_num_cooked_regs (gdbarch));
   gdb_assert (next_frame != nullptr);
 
-  /* In some cases NEXT_FRAME may not have a valid frame-id yet.  This can
-     happen if we end up trying to unwind a register as part of the frame
-     sniffer.  The only time that we get here without a valid frame-id is
-     if NEXT_FRAME is an inline frame.  If this is the case then we can
-     avoid getting into trouble here by skipping past the inline frames.  */
-  while (get_frame_type (next_frame) == INLINE_FRAME)
-    next_frame = get_next_frame_sentinel_okay (next_frame);
-
-  /* We should have a valid next frame.  */
-  gdb_assert (frame_id_p (get_frame_id (next_frame)));
-
   return value::allocate_register_lazy (next_frame, regnum);
 }
 
@@ -746,11 +735,9 @@ value *
 default_value_from_register (gdbarch *gdbarch, type *type, int regnum,
 			     const frame_info_ptr &this_frame)
 {
-  frame_info_ptr next_frame = get_next_frame_sentinel_okay (this_frame);
-  while (get_frame_type (next_frame) == INLINE_FRAME)
-    next_frame = get_next_frame_sentinel_okay (next_frame);
-
-  value *value = value::allocate_register (next_frame, regnum, type);
+  value *value
+    = value::allocate_register (get_next_frame_sentinel_okay (this_frame),
+				regnum, type);
 
   /* Any structure stored in more than one register will always be
      an integral number of registers.  Otherwise, you need to do

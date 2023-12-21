@@ -972,7 +972,19 @@ value::allocate_register_lazy (frame_info_ptr next_frame, int regnum,
 
   result->set_lval (lval_register);
   result->m_location.reg.regnum = regnum;
+
+  /* If this register value is created during unwind (while computing a frame
+     id), and NEXT_FRAME is a frame inlined in the frame being unwound, then
+     NEXT_FRAME will not have a valid frame id yet.  Find the next non-inline
+     frame (possibly the sentinel frame).  This is where registers are unwound
+     from anyway.  */
+  while (get_frame_type (next_frame) == INLINE_FRAME)
+    next_frame = get_next_frame_sentinel_okay (next_frame);
+
   result->m_location.reg.next_frame_id = get_frame_id (next_frame);
+
+  /* We should have a next frame with a valid id.  */
+  gdb_assert (frame_id_p (result->m_location.reg.next_frame_id));
 
   return result;
 }

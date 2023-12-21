@@ -2755,12 +2755,9 @@ rs6000_value_from_register (gdbarch *gdbarch, type *type, int regnum,
      fpr to vsr.  */
   regnum = ieee_128_float_regnum_adjust (gdbarch, type, regnum);
 
-  frame_info_ptr next_frame = get_next_frame_sentinel_okay (this_frame);
-  while (get_frame_type (next_frame) == INLINE_FRAME)
-    next_frame = get_next_frame_sentinel_okay (next_frame);
-
   value *value
-    = value::allocate_register (next_frame, regnum, type);
+    = value::allocate_register (get_next_frame_sentinel_okay (this_frame),
+				regnum, type);
 
   /* Any structure stored in more than one register will always be
      an integral number of registers.  Otherwise, you need to do

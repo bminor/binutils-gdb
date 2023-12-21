@@ -691,10 +691,10 @@ private:
     {
       /* Register number.  */
       int regnum;
-      /* Frame ID of "next" frame to which a register value is relative.
-	 If the register value is found relative to frame F, then the
-	 frame id of F->next will be stored in next_frame_id.  */
-      struct frame_id next_frame_id;
+
+      /* Frame ID of the next physical (non-inline) frame to which a register
+	 value is relative.  */
+      frame_id next_frame_id;
     } reg;
 
     /* Pointer to internal variable.  */
