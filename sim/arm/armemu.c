@@ -4388,7 +4388,7 @@ check_PMUintr:
 		    ARMul_UndefInstr (state, instr);
 		  break;
 		}
-	      /* Drop through.  */
+	      ATTRIBUTE_FALLTHROUGH;
 
 	    case 0xc0:		/* Store , No WriteBack , Post Dec.  */
 	      ARMul_STC (state, instr, LHS);
@@ -4435,7 +4435,7 @@ check_PMUintr:
 		    ARMul_UndefInstr (state, instr);
 		  break;
 		}
-	      /* Drop through.  */
+	      ATTRIBUTE_FALLTHROUGH;
 
 	    case 0xc1:		/* Load , No WriteBack , Post Dec.  */
 	      ARMul_LDC (state, instr, LHS);
@@ -4622,7 +4622,7 @@ check_PMUintr:
 		  default:
 		    break;
 		  }
-	      /* Drop through.  */
+	      ATTRIBUTE_FALLTHROUGH;
 
 	    case 0xe0:
 	    case 0xe4:

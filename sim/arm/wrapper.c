@@ -251,7 +251,7 @@ sim_create_inferior (SIM_DESC sd ATTRIBUTE_UNUSED,
 	(sim_callback,
 	 "Unknown machine type '%d'; please update sim_create_inferior.\n",
 	 mach);
-      /* fall through */
+      ATTRIBUTE_FALLTHROUGH;
 
     case 0:
       /* We wouldn't set the machine type with earlier toolchains, so we
@@ -310,7 +310,7 @@ sim_create_inferior (SIM_DESC sd ATTRIBUTE_UNUSED,
 	  ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_XScale_Prop);
 	  break;
 	}
-      /* Otherwise drop through.  */
+      ATTRIBUTE_FALLTHROUGH;
 
     case bfd_mach_arm_5T:
       ARMul_SelectProcessor (state, ARM_v5_Prop);

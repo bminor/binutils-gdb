@@ -308,7 +308,7 @@ handle_T2_insn (ARMul_State * state,
 	  * pvalid = t_branch;
 	  break;
 	}
-      /* Fall through.  */
+      ATTRIBUTE_FALLTHROUGH;
     case 0x42:
     case 0x43:
     case 0x47:
@@ -2261,7 +2261,7 @@ ARMul_ThumbDecode (ARMul_State * state,
 		    | ((tinstr & 0x0078) >> 3);	/* Rd */
 		  break;
 		}
-	      /* Drop through.  */
+	      ATTRIBUTE_FALLTHROUGH;
 	    default:
 	    case 0x0:		/* UNDEFINED */
 	    case 0x4:		/* UNDEFINED */
@@ -2415,7 +2415,7 @@ ARMul_ThumbDecode (ARMul_State * state,
 		* ainstr = 0xE1200070 | ((tinstr & 0xf0) << 4) | (tinstr & 0xf);
 	      break;
 	    }
-	  /* Drop through.  */
+	  ATTRIBUTE_FALLTHROUGH;
 	default:
 	  /* Everything else is an undefined instruction.  */
 	  handle_v6_thumb_insn (state, tinstr, next_instr, pc, ainstr, & valid);
@@ -2601,6 +2601,7 @@ ARMul_ThumbDecode (ARMul_State * state,
 	}
       /* else we fall through to process the second half of the BL */
       pc += 2;			/* point the pc at the 2nd half */
+      ATTRIBUTE_FALLTHROUGH;
     case 31:			/* BL instruction 2 */
       if (state->is_v6)
 	{

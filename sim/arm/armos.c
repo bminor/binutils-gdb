@@ -832,6 +832,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	    }
 	  break;
 	}
+      ATTRIBUTE_FALLTHROUGH;
 
     default:
       unhandled = TRUE;
