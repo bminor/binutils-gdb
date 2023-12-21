@@ -86,7 +86,7 @@ enum timer_register_types {
   TM6MDB,
   TM6CA,
   TM6CB,
-  LAST_TIMER_REG = TM6BC,
+  LAST_TIMER_REG = TM6CB,
 };
 
 
