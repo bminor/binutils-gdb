@@ -159,12 +159,17 @@ public:
   /* Allocate a value and its contents for type TYPE.  */
   static struct value *allocate (struct type *type);
 
-  /* Allocate a non-lazy value representing register RENUM in the frame previous
-     to NEXT_FRAME.  The type of the value is found using `register_type`.
+  /* Allocate a lazy value representing register REGNUM in the frame previous
+     to NEXT_FRAME.  If TYPE is non-nullptr, use it as the value type.
+     Otherwise, use `register_type` to obtain the type.  */
+  static struct value *allocate_register_lazy (frame_info_ptr next_frame,
+					  int regnum, type *type = nullptr);
 
+  /* Same as `allocate_register_lazy`, but make the value non-lazy.
+  
      The caller is responsible for filling the value's contents.  */
   static struct value *allocate_register (frame_info_ptr next_frame,
-					  int regnum);
+					  int regnum, type *type = nullptr);
 
   /* Create a computed lvalue, with type TYPE, function pointers
      FUNCS, and closure CLOSURE.  */

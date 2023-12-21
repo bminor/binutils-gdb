@@ -2751,30 +2751,25 @@ static value *
 rs6000_value_from_register (gdbarch *gdbarch, type *type, int regnum,
 			    const frame_info_ptr &this_frame)
 {
-  int len = type->length ();
-  struct value *value = value::allocate (type);
-
   /* We have an IEEE 128-bit float -- need to change regnum mapping from
      fpr to vsr.  */
   regnum = ieee_128_float_regnum_adjust (gdbarch, type, regnum);
-
-  value->set_lval (lval_register);
 
   frame_info_ptr next_frame = get_next_frame_sentinel_okay (this_frame);
   while (get_frame_type (next_frame) == INLINE_FRAME)
     next_frame = get_next_frame_sentinel_okay (next_frame);
 
-  VALUE_NEXT_FRAME_ID (value) = get_frame_id (next_frame);
-  VALUE_REGNUM (value) = regnum;
+  value *value
+    = value::allocate_register (next_frame, regnum, type);
 
   /* Any structure stored in more than one register will always be
      an integral number of registers.  Otherwise, you need to do
      some fiddling with the last register copied here for little
      endian machines.  */
   if (type_byte_order (type) == BFD_ENDIAN_BIG
-      && len < register_size (gdbarch, regnum))
+      && type->length () < register_size (gdbarch, regnum))
     /* Big-endian, and we want less than full size.  */
-    value->set_offset (register_size (gdbarch, regnum) - len);
+    value->set_offset (register_size (gdbarch, regnum) - type->length ());
   else
     value->set_offset (0);
 

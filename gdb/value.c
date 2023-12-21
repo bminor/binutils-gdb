@@ -961,16 +961,30 @@ value::allocate (struct type *type)
 
 /* See value.h  */
 
-struct value *
-value::allocate_register (frame_info_ptr next_frame, int regnum)
+value *
+value::allocate_register_lazy (frame_info_ptr next_frame, int regnum,
+			       struct type *type)
 {
-  value *result
-    = value::allocate (register_type (frame_unwind_arch (next_frame), regnum));
+  if (type == nullptr)
+    type = register_type (frame_unwind_arch (next_frame), regnum);
+
+  value *result = value::allocate_lazy (type);
 
   result->set_lval (lval_register);
   VALUE_REGNUM (result) = regnum;
   VALUE_NEXT_FRAME_ID (result) = get_frame_id (next_frame);
 
+  return result;
+}
+
+/* See value.h  */
+
+value *
+value::allocate_register (frame_info_ptr next_frame, int regnum,
+			  struct type *type)
+{
+  value *result = value::allocate_register_lazy (next_frame, regnum, type);
+  result->set_lazy (false);
   return result;
 }
 

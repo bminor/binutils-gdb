@@ -281,12 +281,7 @@ value_of_register_lazy (frame_info_ptr next_frame, int regnum)
   /* We should have a valid next frame.  */
   gdb_assert (frame_id_p (get_frame_id (next_frame)));
 
-  value *reg_val = value::allocate_lazy (register_type (gdbarch, regnum));
-  reg_val->set_lval (lval_register);
-  VALUE_REGNUM (reg_val) = regnum;
-  VALUE_NEXT_FRAME_ID (reg_val) = get_frame_id (next_frame);
-
-  return reg_val;
+  return value::allocate_register_lazy (next_frame, regnum);
 }
 
 /* Given a pointer of type TYPE in target form in BUF, return the
@@ -751,25 +746,20 @@ value *
 default_value_from_register (gdbarch *gdbarch, type *type, int regnum,
 			     const frame_info_ptr &this_frame)
 {
-  int len = type->length ();
-  struct value *value = value::allocate (type);
-  value->set_lval (lval_register);
-
   frame_info_ptr next_frame = get_next_frame_sentinel_okay (this_frame);
   while (get_frame_type (next_frame) == INLINE_FRAME)
     next_frame = get_next_frame_sentinel_okay (next_frame);
 
-  VALUE_NEXT_FRAME_ID (value) = get_frame_id (next_frame);
-  VALUE_REGNUM (value) = regnum;
+  value *value = value::allocate_register (next_frame, regnum, type);
 
   /* Any structure stored in more than one register will always be
      an integral number of registers.  Otherwise, you need to do
      some fiddling with the last register copied here for little
      endian machines.  */
   if (type_byte_order (type) == BFD_ENDIAN_BIG
-      && len < register_size (gdbarch, regnum))
+      && type->length () < register_size (gdbarch, regnum))
     /* Big-endian, and we want less than full size.  */
-    value->set_offset (register_size (gdbarch, regnum) - len);
+    value->set_offset (register_size (gdbarch, regnum) - type->length ());
   else
     value->set_offset (0);
 
@@ -842,10 +832,8 @@ value_from_register (struct type *type, int regnum, frame_info_ptr frame)
 	 the corresponding [integer] type (see Alpha).  The assumption
 	 is that gdbarch_register_to_value populates the entire value
 	 including the location.  */
-      v = value::allocate (type);
-      v->set_lval (lval_register);
-      VALUE_NEXT_FRAME_ID (v) = get_frame_id (get_next_frame_sentinel_okay (frame));
-      VALUE_REGNUM (v) = regnum;
+      v = value::allocate_register (get_next_frame_sentinel_okay (frame),
+				    regnum, type);
       ok = gdbarch_register_to_value (gdbarch, frame, regnum, type1,
 				      v->contents_raw ().data (), &optim,
 				      &unavail);
