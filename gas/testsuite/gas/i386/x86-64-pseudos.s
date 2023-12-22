@@ -438,3 +438,5 @@ _start:
 	mov al, BYTE PTR [r13]
 	{disp8} mov al, BYTE PTR [r13d]
 	{disp32} mov al, BYTE PTR [r13d]
+
+	.insn {rex} 0x8a, al, cl

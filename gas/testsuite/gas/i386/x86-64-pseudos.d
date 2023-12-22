@@ -470,4 +470,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	41 8a 45 00          	mov    0x0\(%r13\),%al
  +[a-f0-9]+:	67 41 8a 45 00       	mov    0x0\(%r13d\),%al
  +[a-f0-9]+:	67 41 8a 85 00 00 00 00 	mov    0x0\(%r13d\),%al
+ +[a-f0-9]+:	40 8a c1             	rex mov %cl,%al
 #pass

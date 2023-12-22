@@ -596,6 +596,7 @@ if { ![istarget "*-*-aix*"]
      && ![istarget "*-*-solaris*"]
      && ![istarget "*-*-sysv*"] } then {
     run_dump_test "rex"
+    run_list_test "rex-bad"
 }
 
 # ELF specific tests

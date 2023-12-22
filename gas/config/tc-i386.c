@@ -4126,6 +4126,74 @@ build_evex_prefix (void)
     i.vex.bytes[3] |= i.mask.reg->reg_num;
 }
 
+static void establish_rex (void)
+{
+  /* Note that legacy encodings have at most 2 non-immediate operands.  */
+  unsigned int first = i.imm_operands;
+  unsigned int last = i.operands > first ? i.operands - first - 1 : first;
+
+  /* Respect a user-specified REX prefix.  */
+  i.rex |= i.prefix[REX_PREFIX] & REX_OPCODE;
+
+  /* For 8 bit registers we need an empty rex prefix.  Also if the
+     instruction already has a prefix, we need to convert old
+     registers to new ones.  */
+
+  if ((i.types[first].bitfield.class == Reg && i.types[first].bitfield.byte
+       && ((i.op[first].regs->reg_flags & RegRex64) != 0 || i.rex != 0))
+      || (i.types[last].bitfield.class == Reg && i.types[last].bitfield.byte
+	  && ((i.op[last].regs->reg_flags & RegRex64) != 0 || i.rex != 0)))
+    {
+      unsigned int x;
+
+      i.rex |= REX_OPCODE;
+      for (x = first; x <= last; x++)
+	{
+	  /* Look for 8 bit operand that uses old registers.  */
+	  if (i.types[x].bitfield.class == Reg && i.types[x].bitfield.byte
+	      && (i.op[x].regs->reg_flags & RegRex64) == 0)
+	    {
+	      gas_assert (!(i.op[x].regs->reg_flags & RegRex));
+	      /* In case it is "hi" register, give up.  */
+	      if (i.op[x].regs->reg_num > 3)
+		as_bad (_("can't encode register '%s%s' in an "
+			  "instruction requiring REX prefix"),
+			register_prefix, i.op[x].regs->reg_name);
+
+	      /* Otherwise it is equivalent to the extended register.
+		 Since the encoding doesn't change this is merely
+		 cosmetic cleanup for debug output.  */
+	      i.op[x].regs += 8;
+	    }
+	}
+    }
+
+  if (i.rex == 0 && i.rex_encoding)
+    {
+      /* Check if we can add a REX_OPCODE byte.  Look for 8 bit operand
+	 that uses legacy register.  If it is "hi" register, don't add
+	 the REX_OPCODE byte.  */
+      unsigned int x;
+
+      for (x = first; x <= last; x++)
+	if (i.types[x].bitfield.class == Reg
+	    && i.types[x].bitfield.byte
+	    && (i.op[x].regs->reg_flags & RegRex64) == 0
+	    && i.op[x].regs->reg_num > 3)
+	  {
+	    gas_assert (!(i.op[x].regs->reg_flags & RegRex));
+	    i.rex_encoding = false;
+	    break;
+	  }
+
+      if (i.rex_encoding)
+	i.rex = REX_OPCODE;
+    }
+
+  if (i.rex != 0)
+    add_prefix (REX_OPCODE | i.rex);
+}
+
 static void
 process_immext (void)
 {
@@ -5623,66 +5691,7 @@ md_assemble (char *line)
       i.op[0].disps->X_op = O_symbol;
     }
 
-  /* For 8 bit registers we need an empty rex prefix.  Also if the
-     instruction already has a prefix, we need to convert old
-     registers to new ones.  */
-
-  if ((i.types[0].bitfield.class == Reg && i.types[0].bitfield.byte
-       && (i.op[0].regs->reg_flags & RegRex64) != 0)
-      || (i.types[1].bitfield.class == Reg && i.types[1].bitfield.byte
-	  && (i.op[1].regs->reg_flags & RegRex64) != 0)
-      || (((i.types[0].bitfield.class == Reg && i.types[0].bitfield.byte)
-	   || (i.types[1].bitfield.class == Reg && i.types[1].bitfield.byte))
-	  && i.rex != 0))
-    {
-      int x;
-
-      i.rex |= REX_OPCODE;
-      for (x = 0; x < 2; x++)
-	{
-	  /* Look for 8 bit operand that uses old registers.  */
-	  if (i.types[x].bitfield.class == Reg && i.types[x].bitfield.byte
-	      && (i.op[x].regs->reg_flags & RegRex64) == 0)
-	    {
-	      gas_assert (!(i.op[x].regs->reg_flags & RegRex));
-	      /* In case it is "hi" register, give up.  */
-	      if (i.op[x].regs->reg_num > 3)
-		as_bad (_("can't encode register '%s%s' in an "
-			  "instruction requiring REX prefix."),
-			register_prefix, i.op[x].regs->reg_name);
-
-	      /* Otherwise it is equivalent to the extended register.
-		 Since the encoding doesn't change this is merely
-		 cosmetic cleanup for debug output.  */
-
-	      i.op[x].regs = i.op[x].regs + 8;
-	    }
-	}
-    }
-
-  if (i.rex == 0 && i.rex_encoding)
-    {
-      /* Check if we can add a REX_OPCODE byte.  Look for 8 bit operand
-	 that uses legacy register.  If it is "hi" register, don't add
-	 the REX_OPCODE byte.  */
-      int x;
-      for (x = 0; x < 2; x++)
-	if (i.types[x].bitfield.class == Reg
-	    && i.types[x].bitfield.byte
-	    && (i.op[x].regs->reg_flags & RegRex64) == 0
-	    && i.op[x].regs->reg_num > 3)
-	  {
-	    gas_assert (!(i.op[x].regs->reg_flags & RegRex));
-	    i.rex_encoding = false;
-	    break;
-	  }
-
-      if (i.rex_encoding)
-	i.rex = REX_OPCODE;
-    }
-
-  if (i.rex != 0)
-    add_prefix (REX_OPCODE | i.rex);
+  establish_rex ();
 
   insert_lfence_before (last_insn);
 
@@ -11698,8 +11707,8 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
       build_evex_prefix ();
       i.rex &= REX_OPCODE;
     }
-  else if (i.rex != 0)
-    add_prefix (REX_OPCODE | i.rex);
+  else
+    establish_rex ();
 
   last_insn = &seg_info(now_seg)->tc_segment_info_data.last_insn;
   output_insn (last_insn);
