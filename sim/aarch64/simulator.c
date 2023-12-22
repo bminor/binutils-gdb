@@ -7942,44 +7942,44 @@ do_FRINT (sim_cpu *cpu)
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
-      double val = aarch64_get_FP_double (cpu, rs);
+      double dval = aarch64_get_FP_double (cpu, rs);
 
       switch (rmode)
 	{
 	case 0: /* mode N: nearest or even.  */
 	  {
-	    double rval = round (val);
+	    double rval = round (dval);
 
-	    if (val - rval == 0.5)
+	    if (dval - rval == 0.5)
 	      {
 		if (((rval / 2.0) * 2.0) != rval)
 		  rval += 1.0;
 	      }
 
-	    aarch64_set_FP_double (cpu, rd, round (val));
+	    aarch64_set_FP_double (cpu, rd, round (dval));
 	    return;
 	  }
 
 	case 1: /* mode P: towards +inf.  */
-	  if (val < 0.0)
-	    aarch64_set_FP_double (cpu, rd, trunc (val));
+	  if (dval < 0.0)
+	    aarch64_set_FP_double (cpu, rd, trunc (dval));
 	  else
-	    aarch64_set_FP_double (cpu, rd, round (val));
+	    aarch64_set_FP_double (cpu, rd, round (dval));
 	  return;
 
 	case 2: /* mode M: towards -inf.  */
-	  if (val < 0.0)
-	    aarch64_set_FP_double (cpu, rd, round (val));
+	  if (dval < 0.0)
+	    aarch64_set_FP_double (cpu, rd, round (dval));
 	  else
-	    aarch64_set_FP_double (cpu, rd, trunc (val));
+	    aarch64_set_FP_double (cpu, rd, trunc (dval));
 	  return;
 
 	case 3: /* mode Z: towards 0.  */
-	  aarch64_set_FP_double (cpu, rd, trunc (val));
+	  aarch64_set_FP_double (cpu, rd, trunc (dval));
 	  return;
 
 	case 4: /* mode A: away from 0.  */
-	  aarch64_set_FP_double (cpu, rd, round (val));
+	  aarch64_set_FP_double (cpu, rd, round (dval));
 	  return;
 
 	case 6: /* mode X: use FPCR with exactness check.  */
@@ -9186,29 +9186,29 @@ do_scalar_FCM (sim_cpu *cpu)
   TRACE_DECODE (cpu, "emulated at line %d", __LINE__);
   if (INSTR (22, 22))
     {
-      double val1 = aarch64_get_FP_double (cpu, rn);
-      double val2 = aarch64_get_FP_double (cpu, rm);
+      double dval1 = aarch64_get_FP_double (cpu, rn);
+      double dval2 = aarch64_get_FP_double (cpu, rm);
 
       switch (EUac)
 	{
 	case 0: /* 000 */
-	  result = val1 == val2;
+	  result = dval1 == dval2;
 	  break;
 
 	case 3: /* 011 */
-	  val1 = fabs (val1);
-	  val2 = fabs (val2);
+	  dval1 = fabs (dval1);
+	  dval2 = fabs (dval2);
 	  ATTRIBUTE_FALLTHROUGH;
 	case 2: /* 010 */
-	  result = val1 >= val2;
+	  result = dval1 >= dval2;
 	  break;
 
 	case 7: /* 111 */
-	  val1 = fabs (val1);
-	  val2 = fabs (val2);
+	  dval1 = fabs (dval1);
+	  dval2 = fabs (dval2);
 	  ATTRIBUTE_FALLTHROUGH;
 	case 6: /* 110 */
-	  result = val1 > val2;
+	  result = dval1 > dval2;
 	  break;
 
 	default:
