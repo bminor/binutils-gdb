@@ -586,7 +586,6 @@ static PyObject *
 infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
   inferior_object *inf = (inferior_object *) self;
-  struct gdb_exception except;
   Py_ssize_t buf_len;
   const gdb_byte *buffer;
   CORE_ADDR addr, length;
@@ -625,10 +624,8 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
     }
   catch (gdb_exception &ex)
     {
-      except = std::move (ex);
+      GDB_PY_HANDLE_EXCEPTION (ex);
     }
-
-  GDB_PY_HANDLE_EXCEPTION (except);
 
   Py_RETURN_NONE;
 }
@@ -645,7 +642,6 @@ static PyObject *
 infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
   inferior_object *inf = (inferior_object *) self;
-  struct gdb_exception except;
   CORE_ADDR start_addr, length;
   static const char *keywords[] = { "address", "length", "pattern", NULL };
   PyObject *start_addr_obj, *length_obj;
@@ -702,10 +698,8 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
     }
   catch (gdb_exception &ex)
     {
-      except = std::move (ex);
+      GDB_PY_HANDLE_EXCEPTION (ex);
     }
-
-  GDB_PY_HANDLE_EXCEPTION (except);
 
   if (found)
     return gdb_py_object_from_ulongest (found_addr).release ();

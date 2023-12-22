@@ -847,26 +847,20 @@ private:
   PyGILState_STATE m_state;
 };
 
-/* Use this after a TRY_EXCEPT to throw the appropriate Python
-   exception.  */
+/* Use this in a 'catch' block to convert the exception to a Python
+   exception and return nullptr.  */
 #define GDB_PY_HANDLE_EXCEPTION(Exception)	\
   do {						\
-    if (Exception.reason < 0)			\
-      {						\
-	gdbpy_convert_exception (Exception);	\
-	return NULL;				\
-      }						\
+    gdbpy_convert_exception (Exception);	\
+    return nullptr;				\
   } while (0)
 
-/* Use this after a TRY_EXCEPT to throw the appropriate Python
-   exception.  This macro is for use inside setter functions.  */
+/* Use this in a 'catch' block to convert the exception to a Python
+   exception and return -1.  */
 #define GDB_PY_SET_HANDLE_EXCEPTION(Exception)				\
     do {								\
-      if (Exception.reason < 0)						\
-	{								\
-	  gdbpy_convert_exception (Exception);				\
-	  return -1;							\
-	}								\
+      gdbpy_convert_exception (Exception);				\
+      return -1;							\
     } while (0)
 
 int gdbpy_print_python_errors_p (void);

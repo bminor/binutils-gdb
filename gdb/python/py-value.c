@@ -1046,7 +1046,6 @@ get_field_type (PyObject *field)
 static PyObject *
 valpy_getitem (PyObject *self, PyObject *key)
 {
-  struct gdb_exception except;
   value_object *self_value = (value_object *) self;
   gdb::unique_xmalloc_ptr<char> field;
   struct type *base_class_type = NULL, *field_type = NULL;
@@ -1178,10 +1177,8 @@ valpy_getitem (PyObject *self, PyObject *key)
     }
   catch (gdb_exception &ex)
     {
-      except = std::move (ex);
+      GDB_PY_HANDLE_EXCEPTION (ex);
     }
-
-  GDB_PY_HANDLE_EXCEPTION (except);
 
   return result;
 }
@@ -1678,7 +1675,6 @@ valpy_absolute (PyObject *self)
 static int
 valpy_nonzero (PyObject *self)
 {
-  struct gdb_exception except;
   value_object *self_value = (value_object *) self;
   struct type *type;
   int nonzero = 0; /* Appease GCC warning.  */
@@ -1698,13 +1694,11 @@ valpy_nonzero (PyObject *self)
     }
   catch (gdb_exception &ex)
     {
-      except = std::move (ex);
+      /* This is not documented in the Python documentation, but if
+	 this function fails, return -1 as slot_nb_nonzero does (the
+	 default Python nonzero function).  */
+      GDB_PY_SET_HANDLE_EXCEPTION (ex);
     }
-
-  /* This is not documented in the Python documentation, but if this
-     function fails, return -1 as slot_nb_nonzero does (the default
-     Python nonzero function).  */
-  GDB_PY_SET_HANDLE_EXCEPTION (except);
 
   return nonzero;
 }

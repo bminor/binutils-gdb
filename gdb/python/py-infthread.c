@@ -214,7 +214,6 @@ thpy_get_ptid_string (PyObject *self, void *closure)
   catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
-      return nullptr;
     }
 }
 
