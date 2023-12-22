@@ -413,9 +413,9 @@ unpack_fpu (sim_fpu *dst, uint64_t packed, int is_double)
       }
     else
       {
-	uint32_t val = pack_fpu (dst, 0);
+	uint32_t fval = pack_fpu (dst, 0);
 	uint32_t org = packed;
-	ASSERT (val == org);
+	ASSERT (fval == org);
       }
   }
 }

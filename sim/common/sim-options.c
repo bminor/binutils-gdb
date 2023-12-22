@@ -496,7 +496,7 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 
     case OPTION_ENV_UNSET:
       {
-	int i, varlen;
+	int varlen;
 	char **envp;
 
 	if (STATE_PROG_ENVP (sd) == NULL)
