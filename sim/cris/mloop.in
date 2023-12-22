@@ -234,7 +234,6 @@ cat <<EOF
 	     for invalid programs.  */
 	  if (insn != 0 && CGEN_ATTR_VALUE (NULL, idesc->attrs, CGEN_INSN_DELAY_SLOT))
 	    {
-	      UHI insn;
 	      trace_p = PC_IN_TRACE_RANGE_P (current_cpu, pc);
 	      profile_p = PC_IN_PROFILE_RANGE_P (current_cpu, pc);
 	      befaft_p = profile_p || trace_p;

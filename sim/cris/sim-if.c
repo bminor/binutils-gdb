@@ -761,7 +761,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
       int len = strlen (name) + 1;
       USI epp, epp0;
       USI stacklen;
-      int i;
       char **prog_argv = STATE_PROG_ARGV (sd);
       int my_argc = 0;
       USI csp;
