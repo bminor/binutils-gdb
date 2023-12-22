@@ -782,7 +782,6 @@ m68hc11_option_handler (SIM_DESC sd, sim_cpu *cpu,
           osc = &controller->oscillators[i];
           if (osc->event)
             {
-              double f;
               int cur_value;
               int next_value;
               char freq[32];
@@ -927,7 +926,7 @@ m68hc11cpu_set_port (struct hw *me, sim_cpu *cpu,
       /* Scan IC3, IC2 and IC1.  Bit number is 3 - i.  */
       for (i = 0; i < 3; i++)
         {
-          uint8_t mask = (1 << i);
+          mask = (1 << i);
           
           if (delta & mask)
             {

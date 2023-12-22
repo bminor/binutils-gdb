@@ -227,7 +227,7 @@ m68hc11sio_port_event (struct hw *me,
            simulate some initial setup by the internal rom.  */
         if (((m68hc11_cpu->ios[M6811_HPRIO]) & (M6811_SMOD | M6811_MDA)) == M6811_SMOD)
           {
-            unsigned char val = 0x33;
+            val = 0x33;
             
             m68hc11sio_io_write_buffer (me, &val, io_map,
                                         (unsigned_word) M6811_BAUD, 1);

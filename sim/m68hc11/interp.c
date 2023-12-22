@@ -478,7 +478,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
   /* CPU specific initialization.  */
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     {
-      SIM_CPU *cpu = STATE_CPU (sd, i);
+      cpu = STATE_CPU (sd, i);
 
       CPU_REG_FETCH (cpu) = m68hc11_reg_fetch;
       CPU_REG_STORE (cpu) = m68hc11_reg_store;
