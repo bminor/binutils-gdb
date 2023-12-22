@@ -707,7 +707,7 @@ dispatch_instruction(struct pstate *sregs)
 	    case DIVScc:
 		{
 		  int sign;
-		  uint32_t result, remainder;
+		  uint32_t uresult, remainder;
 		  int c0, y31;
 
 		  if (!sparclite) {
@@ -723,7 +723,7 @@ dispatch_instruction(struct pstate *sregs)
 		     Otherwise, calculate remainder + divisor.  */
 		  if (sign == 0)
 		    operand2 = ~operand2 + 1;
-		  result = remainder + operand2;
+		  uresult = remainder + operand2;
 
 		  /* The SPARClite User's Manual is not clear on how
 		     the "carry out" of the above ALU operation is to
@@ -733,24 +733,23 @@ dispatch_instruction(struct pstate *sregs)
 		     even in cases where the divisor is subtracted
 		     from the remainder.  FIXME: get the true story
 		     from Fujitsu. */
-		  c0 = result < (uint32_t) remainder
-		       || result < (uint32_t) operand2;
+		  c0 = uresult < remainder || uresult < (uint32_t) operand2;
 
-		  if (result & 0x80000000)
+		  if (uresult & 0x80000000)
 		    sregs->psr |= PSR_N;
 		  else
 		    sregs->psr &= ~PSR_N;
 
 		  y31 = (sregs->y & 0x80000000) == 0x80000000;
 
-		  if (result == 0 && sign == y31)
+		  if (uresult == 0 && sign == y31)
 		    sregs->psr |= PSR_Z;
 		  else
 		    sregs->psr &= ~PSR_Z;
 
 		  sign = (sign && !y31) || (!c0 && (sign || !y31));
 
-		  if (sign ^ (result >> 31))
+		  if (sign ^ (uresult >> 31))
 		    sregs->psr |= PSR_V;
 		  else
 		    sregs->psr &= ~PSR_V;
@@ -760,7 +759,7 @@ dispatch_instruction(struct pstate *sregs)
 		  else
 		    sregs->psr &= ~PSR_C;
 
-		  sregs->y = result;
+		  sregs->y = uresult;
 
 		  if (rd != 0)
 		    *rdd = (rs1 << 1) | !sign;
@@ -773,21 +772,21 @@ dispatch_instruction(struct pstate *sregs)
 		break;
 	    case SMULCC:
 		{
-		  uint32_t result;
+		  uint32_t uresult;
 
-		  mul64 (rs1, operand2, &sregs->y, &result, 1);
+		  mul64 (rs1, operand2, &sregs->y, &uresult, 1);
 
-		  if (result & 0x80000000)
+		  if (uresult & 0x80000000)
 		    sregs->psr |= PSR_N;
 		  else
 		    sregs->psr &= ~PSR_N;
 
-		  if (result == 0)
+		  if (uresult == 0)
 		    sregs->psr |= PSR_Z;
 		  else
 		    sregs->psr &= ~PSR_Z;
 
-		  *rdd = result;
+		  *rdd = uresult;
 		}
 		break;
 	    case UMUL:
@@ -797,21 +796,21 @@ dispatch_instruction(struct pstate *sregs)
 		break;
 	    case UMULCC:
 		{
-		  uint32_t result;
+		  uint32_t uresult;
 
-		  mul64 (rs1, operand2, &sregs->y, &result, 0);
+		  mul64 (rs1, operand2, &sregs->y, &uresult, 0);
 
-		  if (result & 0x80000000)
+		  if (uresult & 0x80000000)
 		    sregs->psr |= PSR_N;
 		  else
 		    sregs->psr &= ~PSR_N;
 
-		  if (result == 0)
+		  if (uresult == 0)
 		    sregs->psr |= PSR_Z;
 		  else
 		    sregs->psr &= ~PSR_Z;
 
-		  *rdd = result;
+		  *rdd = uresult;
 		}
 		break;
 	    case SDIV:
@@ -831,7 +830,7 @@ dispatch_instruction(struct pstate *sregs)
 		break;
 	    case SDIVCC:
 		{
-		  uint32_t result;
+		  uint32_t uresult;
 
 		  if (sparclite) {
 		     sregs->trap = TRAP_UNIMP;
@@ -843,14 +842,14 @@ dispatch_instruction(struct pstate *sregs)
 		    break;
 		  }
 
-		  div64 (sregs->y, rs1, operand2, &result, 1);
+		  div64 (sregs->y, rs1, operand2, &uresult, 1);
 
-		  if (result & 0x80000000)
+		  if (uresult & 0x80000000)
 		    sregs->psr |= PSR_N;
 		  else
 		    sregs->psr &= ~PSR_N;
 
-		  if (result == 0)
+		  if (uresult == 0)
 		    sregs->psr |= PSR_Z;
 		  else
 		    sregs->psr &= ~PSR_Z;
@@ -858,7 +857,7 @@ dispatch_instruction(struct pstate *sregs)
 		  /* FIXME: should set overflow flag correctly.  */
 		  sregs->psr &= ~(PSR_C | PSR_V);
 
-		  *rdd = result;
+		  *rdd = uresult;
 		}
 		break;
 	    case UDIV:
@@ -878,7 +877,7 @@ dispatch_instruction(struct pstate *sregs)
 		break;
 	    case UDIVCC:
 		{
-		  uint32_t result;
+		  uint32_t uresult;
 
 		  if (sparclite) {
 		     sregs->trap = TRAP_UNIMP;
@@ -890,14 +889,14 @@ dispatch_instruction(struct pstate *sregs)
 		    break;
 		  }
 
-		  div64 (sregs->y, rs1, operand2, &result, 0);
+		  div64 (sregs->y, rs1, operand2, &uresult, 0);
 
-		  if (result & 0x80000000)
+		  if (uresult & 0x80000000)
 		    sregs->psr |= PSR_N;
 		  else
 		    sregs->psr &= ~PSR_N;
 
-		  if (result == 0)
+		  if (uresult == 0)
 		    sregs->psr |= PSR_Z;
 		  else
 		    sregs->psr &= ~PSR_Z;
@@ -905,7 +904,7 @@ dispatch_instruction(struct pstate *sregs)
 		  /* FIXME: should set overflow flag correctly.  */
 		  sregs->psr &= ~(PSR_C | PSR_V);
 
-		  *rdd = result;
+		  *rdd = uresult;
 		}
 		break;
 	    case IXNOR:
@@ -1168,7 +1167,7 @@ dispatch_instruction(struct pstate *sregs)
 
 	    case SCAN:
 		{
-		  uint32_t result, mask;
+		  uint32_t uresult, mask;
 		  int i;
 
 		  if (!sparclite) {
@@ -1176,12 +1175,12 @@ dispatch_instruction(struct pstate *sregs)
                      break;
 		  }
 		  mask = (operand2 & 0x80000000) | (operand2 >> 1);
-		  result = rs1 ^ mask;
+		  uresult = rs1 ^ mask;
 
 		  for (i = 0; i < 32; i++) {
-		    if (result & 0x80000000)
+		    if (uresult & 0x80000000)
 		      break;
-		    result <<= 1;
+		    uresult <<= 1;
 		  }
 
 		  *rdd = i == 32 ? 63 : i;
