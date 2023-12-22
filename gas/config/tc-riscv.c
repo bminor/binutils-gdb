@@ -4586,15 +4586,6 @@ s_dtprel (int bytes)
   demand_empty_rest_of_line ();
 }
 
-/* Handle the .bss pseudo-op.  */
-
-static void
-s_bss (int ignore ATTRIBUTE_UNUSED)
-{
-  subseg_set (bss_section, 0);
-  demand_empty_rest_of_line ();
-}
-
 static void
 riscv_make_nops (char *buf, bfd_vma bytes)
 {
@@ -5325,7 +5316,6 @@ static const pseudo_typeS riscv_pseudo_table[] =
   {"dword", cons, 8},
   {"dtprelword", s_dtprel, 4},
   {"dtpreldword", s_dtprel, 8},
-  {"bss", s_bss, 0},
   {"uleb128", s_riscv_leb128, 0},
   {"sleb128", s_riscv_leb128, 1},
   {"insn", s_riscv_insn, 0},

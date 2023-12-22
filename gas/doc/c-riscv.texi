@@ -138,10 +138,6 @@ Emits a DTP-relative word (or double-word) at the current position.  This is
 meant to be used by the compiler in shared libraries for DWARF debug info for
 thread local variables.
 
-@cindex BSS directive
-@item .bss
-Sets the current section to the BSS section.
-
 @cindex LEB128 directives
 @item .uleb128 @var{value}
 @itemx .sleb128 @var{value}
