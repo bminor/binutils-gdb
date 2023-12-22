@@ -125,14 +125,14 @@ do { \
 #define DITRACE(OBJECT, ARGS) \
 do { \
   if (WITH_TRACE) { \
-    device *me = device_instance_device(instance); \
-    int trace_device = device_trace(me); \
+    device *_me = device_instance_device(instance); \
+    int trace_device = device_trace(_me); \
     if (ppc_trace[trace_devices] \
 	|| ppc_trace[trace_##OBJECT##_device] \
 	|| trace_device) { \
       sim_io_printf_filtered("%s:%d:%s:%s%s ", \
 			     filter_filename(__FILE__), __LINE__, #OBJECT, \
-			     trace_device ? device_path(me) : "",	\
+			     trace_device ? device_path(_me) : "",	\
 			     trace_device ? ":" : "");			\
       sim_io_printf_filtered ARGS; \
     } \
