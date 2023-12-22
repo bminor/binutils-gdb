@@ -1738,7 +1738,7 @@ init_pointers (SIM_DESC sd)
 #define OBITOP(name, f, s, op) 			\
 case O (name, SB):				\
 {						\
-  int m, tmp;					\
+  int m;					\
 	 					\
   if (f)					\
     if (fetch (sd, &code->dst, &ea))		\
@@ -4770,7 +4770,7 @@ sim_open (SIM_OPEN_KIND kind,
   /* CPU specific initialization.  */
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     {
-      SIM_CPU *cpu = STATE_CPU (sd, i);
+      cpu = STATE_CPU (sd, i);
 
       CPU_REG_FETCH (cpu) = h8300_reg_fetch;
       CPU_REG_STORE (cpu) = h8300_reg_store;
