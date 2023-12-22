@@ -184,7 +184,7 @@ mips_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt, char *arg,
 	 etc.). */
       for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++)
 	{
-	  sim_cpu *cpu = STATE_CPU (sd, cpu_nr);
+	  cpu = STATE_CPU (sd, cpu_nr);
 	  if (arg == NULL)
 	    STATE |= simTRACE;
 	  else if (strcmp (arg, "yes") == 0)
@@ -448,8 +448,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   else if (board != NULL
 	   && (strcmp(board, BOARD_BSP) == 0))
     {
-      int i;
-
       STATE_ENVIRONMENT (sd) = OPERATING_ENVIRONMENT;
 
       /* ROM: 0x9FC0_0000 - 0x9FFF_FFFF and 0xBFC0_0000 - 0xBFFF_FFFF */
@@ -481,7 +479,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	       strcmp(board, BOARD_JMR3904_DEBUG) == 0))
     {
       /* match VIRTUAL memory layout of JMR-TX3904 board */
-      int i;
 
       /* --- disable monitor unless forced on by user --- */
 
@@ -805,7 +802,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   /* CPU specific initialization.  */
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     {
-      SIM_CPU *cpu = STATE_CPU (sd, i);
+      cpu = STATE_CPU (sd, i);
 
       CPU_REG_FETCH (cpu) = mips_reg_fetch;
       CPU_REG_STORE (cpu) = mips_reg_store;
