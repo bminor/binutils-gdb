@@ -605,10 +605,8 @@ static void
 proc_error (procinfo *pi, const char *func, int line)
 {
   int saved_errno = errno;
-  error ("procfs: %s line %d, %ps: %s",
-	 func, line, styled_string (file_name_style.style (),
-				    pi->pathname),
-	 safe_strerror (saved_errno));
+  error ("procfs: %s line %d, %s: %s",
+	 func, line, pi->pathname, safe_strerror (saved_errno));
 }
 
 /* Updates the status struct in the procinfo.  There is a 'valid'
