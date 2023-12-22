@@ -275,3 +275,11 @@ gdb_test "print null_t_struct && null_t_struct->v_int_member == 0" \
 # Regression test for unusual function-call parse that caused a crash.
 gdb_test "print v_short++(97)" \
     "cast the call to its declared return type"
+
+# Test for a syntax error at the end of an expression.
+gdb_test "print v_short + " \
+    "A syntax error in expression, near the end of `v_short \\+'\\."
+
+# Test for a syntax error in the middle of an expression.
+gdb_test "print v_short =}{= 3" \
+    "A syntax error in expression, near `\\}\\{= 3'\\."

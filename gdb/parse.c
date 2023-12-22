@@ -252,7 +252,11 @@ parser_state::parse_error (const char *msg)
   if (this->prev_lexptr)
     this->lexptr = this->prev_lexptr;
 
-  error (_("A %s in expression, near `%s'."), msg, this->lexptr);
+  if (*this->lexptr == '\0')
+    error (_("A %s in expression, near the end of `%s'."),
+	   msg, this->start_of_input);
+  else
+    error (_("A %s in expression, near `%s'."), msg, this->lexptr);
 }
 
 
