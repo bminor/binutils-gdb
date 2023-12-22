@@ -229,8 +229,8 @@ m32rbf_decode (SIM_CPU *current_cpu, IADDR pc,
     CGEN_INSN_WORD insn = base_insn;
 
     {
-      unsigned int val = (((insn >> 8) & (15 << 4)) | ((insn >> 4) & (15 << 0)));
-      switch (val)
+      unsigned int val0 = (((insn >> 8) & (15 << 4)) | ((insn >> 4) & (15 << 0)));
+      switch (val0)
       {
       case 0 : itype = M32RBF_INSN_SUBV; goto extract_sfmt_addv;
       case 1 : itype = M32RBF_INSN_SUBX; goto extract_sfmt_addx;
@@ -258,8 +258,8 @@ m32rbf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 26 : itype = M32RBF_INSN_MVTC; goto extract_sfmt_mvtc;
       case 28 :
         {
-          unsigned int val = (((insn >> 8) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 8) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xfff0) == 0x1ec0)
@@ -325,8 +325,8 @@ m32rbf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 85 : itype = M32RBF_INSN_SLLI; goto extract_sfmt_slli;
       case 87 :
         {
-          unsigned int val = (((insn >> 0) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xf0ff) == 0x5070)
@@ -349,8 +349,8 @@ m32rbf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 95 :
         {
-          unsigned int val = (((insn >> 0) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (3 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xf0ff) == 0x50f0)
@@ -385,8 +385,8 @@ m32rbf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 111 : itype = M32RBF_INSN_LDI8; goto extract_sfmt_ldi8;
       case 112 :
         {
-          unsigned int val = (((insn >> 8) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 8) & (15 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffff) == 0x7000)
@@ -417,8 +417,8 @@ m32rbf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 126 : /* fall through */
       case 127 :
         {
-          unsigned int val = (((insn >> 8) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 8) & (15 << 0)));
+          switch (val1)
           {
           case 1 : itype = M32RBF_INSN_SETPSW; goto extract_sfmt_setpsw;
           case 2 : itype = M32RBF_INSN_CLRPSW; goto extract_sfmt_clrpsw;
@@ -544,8 +544,8 @@ m32rbf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 254 : /* fall through */
       case 255 :
         {
-          unsigned int val = (((insn >> 8) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 8) & (3 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xff000000) == 0xfc000000)

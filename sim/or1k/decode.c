@@ -266,8 +266,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
     CGEN_INSN_WORD insn = base_insn;
 
     {
-      unsigned int val = (((insn >> 21) & (63 << 5)) | ((insn >> 0) & (31 << 0)));
-      switch (val)
+      unsigned int val0 = (((insn >> 21) & (63 << 5)) | ((insn >> 0) & (31 << 0)));
+      switch (val0)
       {
       case 0 : /* fall through */
       case 1 : /* fall through */
@@ -466,8 +466,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 192 :
         {
-          unsigned int val = (((insn >> 16) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 16) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xfc1f0000) == 0x18000000)
@@ -516,8 +516,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 256 :
         {
-          unsigned int val = (((insn >> 23) & (7 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 23) & (7 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffff0000) == 0x20000000)
@@ -574,8 +574,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 286 : /* fall through */
       case 287 :
         {
-          unsigned int val = (((insn >> 24) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 24) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffff0000) == 0x20000000)
@@ -1132,8 +1132,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1502 : /* fall through */
       case 1503 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xfc00ffc0) == 0xb8000000)
@@ -1187,8 +1187,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1534 : /* fall through */
       case 1535 :
         {
-          unsigned int val = (((insn >> 21) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 21) & (15 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe00000) == 0xbc000000)
@@ -1283,8 +1283,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 1600 :
         {
-          unsigned int val = (((insn >> 5) & (7 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 5) & (7 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xfc0007ff) == 0xc8000000)
@@ -1327,8 +1327,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 1608 :
         {
-          unsigned int val = (((insn >> 5) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 5) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe007ff) == 0xc8000008)
@@ -1343,8 +1343,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1609 :
         {
-          unsigned int val = (((insn >> 5) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 5) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe007ff) == 0xc8000009)
@@ -1359,8 +1359,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1610 :
         {
-          unsigned int val = (((insn >> 5) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 5) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe007ff) == 0xc800000a)
@@ -1375,8 +1375,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1611 :
         {
-          unsigned int val = (((insn >> 5) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 5) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe007ff) == 0xc800000b)
@@ -1391,8 +1391,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1612 :
         {
-          unsigned int val = (((insn >> 5) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 5) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe007ff) == 0xc800000c)
@@ -1407,8 +1407,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1613 :
         {
-          unsigned int val = (((insn >> 5) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 5) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe007ff) == 0xc800000d)
@@ -1427,8 +1427,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 1616 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xfc0000ff) == 0xc8000010)
@@ -1471,8 +1471,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 1624 :
         {
-          unsigned int val = (((insn >> 5) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 5) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe004ff) == 0xc8000018)
@@ -1487,8 +1487,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1625 :
         {
-          unsigned int val = (((insn >> 5) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 5) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe004ff) == 0xc8000019)
@@ -1503,8 +1503,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1626 :
         {
-          unsigned int val = (((insn >> 5) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 5) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe004ff) == 0xc800001a)
@@ -1519,8 +1519,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1627 :
         {
-          unsigned int val = (((insn >> 5) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 5) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe004ff) == 0xc800001b)
@@ -1535,8 +1535,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1628 :
         {
-          unsigned int val = (((insn >> 5) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 5) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe004ff) == 0xc800001c)
@@ -1551,8 +1551,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1629 :
         {
-          unsigned int val = (((insn >> 5) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 5) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe004ff) == 0xc800001d)
@@ -1731,8 +1731,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 1800 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xfc0007ff) == 0xe0000008)
@@ -1767,8 +1767,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 1804 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xfc00ffff) == 0xe000000c)
@@ -1791,8 +1791,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1805 :
         {
-          unsigned int val = (((insn >> 7) & (3 << 1)) | ((insn >> 6) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 7) & (3 << 1)) | ((insn >> 6) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xfc00ffff) == 0xe000000d)
@@ -1815,8 +1815,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 1807 :
         {
-          unsigned int val = (((insn >> 8) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 8) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xfc0007ff) == 0xe000000f)
@@ -1831,8 +1831,8 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1824 :
         {
-          unsigned int val = (((insn >> 21) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 21) & (15 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe007ff) == 0xe4000000)

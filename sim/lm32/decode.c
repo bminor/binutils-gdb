@@ -187,8 +187,8 @@ lm32bf_decode (SIM_CPU *current_cpu, IADDR pc,
     CGEN_INSN_WORD insn = base_insn;
 
     {
-      unsigned int val = (((insn >> 26) & (63 << 0)));
-      switch (val)
+      unsigned int val0 = (((insn >> 26) & (63 << 0)));
+      switch (val0)
       {
       case 0 : itype = LM32BF_INSN_SRUI; goto extract_sfmt_addi;
       case 1 : itype = LM32BF_INSN_NORI; goto extract_sfmt_andi;
@@ -260,8 +260,8 @@ lm32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = LM32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 43 :
         {
-          unsigned int val = (((insn >> 1) & (1 << 1)) | ((insn >> 0) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 1) & (1 << 1)) | ((insn >> 0) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffffffff) == 0xac000002)

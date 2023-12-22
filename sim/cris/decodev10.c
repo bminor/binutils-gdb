@@ -328,8 +328,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
     CGEN_INSN_WORD insn = base_insn;
 
     {
-      unsigned int val = (((insn >> 4) & (255 << 0)));
-      switch (val)
+      unsigned int val0 = (((insn >> 4) & (255 << 0)));
+      switch (val0)
       {
       case 0 : /* fall through */
       case 1 : /* fall through */
@@ -348,8 +348,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
       case 14 : /* fall through */
       case 15 :
         {
-          unsigned int val = (((insn >> 12) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 12) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -387,8 +387,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
       case 30 : /* fall through */
       case 31 :
         {
-          unsigned int val = (((insn >> 12) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 12) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -459,8 +459,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
       case 79 : itype = CRISV10F_INSN_BTST; goto extract_sfmt_btst;
       case 80 :
         {
-          unsigned int val = (((insn >> 8) & (7 << 4)) | ((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 8) & (7 << 4)) | ((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -591,8 +591,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
           case 127 : itype = CRISV10F_INSN_ADDI_B_R; goto extract_sfmt_addi_b_r;
           case 15 :
             {
-              unsigned int val = (((insn >> 15) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 15) & (1 << 0)));
+              switch (val2)
               {
               case 0 : itype = CRISV10F_INSN_NOP; goto extract_sfmt_nop;
               case 1 : itype = CRISV10F_INSN_ADDI_B_R; goto extract_sfmt_addi_b_r;
@@ -607,8 +607,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
       case 83 : itype = CRISV10F_INSN_SCC; goto extract_sfmt_scc;
       case 84 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -631,8 +631,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 85 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -655,8 +655,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 86 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -693,8 +693,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
       case 101 : itype = CRISV10F_INSN_MOVE_W_R; goto extract_sfmt_move_b_r;
       case 102 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -717,8 +717,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 103 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -768,8 +768,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
       case 130 : itype = CRISV10F_INSN_ADDS_M_B_M; goto extract_sfmt_adds_m_b_m;
       case 131 :
         {
-          unsigned int val = (((insn >> 8) & (7 << 4)) | ((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 8) & (7 << 4)) | ((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -900,8 +900,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
           case 126 : itype = CRISV10F_INSN_ADDS_M_W_M; goto extract_sfmt_adds_m_w_m;
           case 127 :
             {
-              unsigned int val = (((insn >> 15) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 15) & (1 << 0)));
+              switch (val2)
               {
               case 0 : itype = CRISV10F_INSN_ADDS_M_W_M; goto extract_sfmt_adds_m_w_m;
               case 1 : itype = CRISV10F_INSN_ADDSPCPC; goto extract_sfmt_addspcpc;
@@ -928,8 +928,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
       case 146 : itype = CRISV10F_INSN_MULU_D; goto extract_sfmt_muls_b;
       case 147 :
         {
-          unsigned int val = (((insn >> 12) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 12) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1005,8 +1005,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
       case 187 : /* fall through */
       case 251 :
         {
-          unsigned int val = (((insn >> 12) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 12) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1037,8 +1037,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
       case 255 : itype = CRISV10F_INSN_MOVEM_R_M; goto extract_sfmt_movem_r_m;
       case 192 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1061,8 +1061,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 193 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1085,8 +1085,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 194 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1109,8 +1109,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 195 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1133,8 +1133,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 196 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1157,8 +1157,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 197 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1181,8 +1181,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 198 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1205,8 +1205,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 199 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1229,8 +1229,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 200 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1253,8 +1253,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 201 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1277,8 +1277,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 202 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1301,8 +1301,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 203 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1325,8 +1325,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 204 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1349,8 +1349,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 205 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1373,8 +1373,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 206 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1397,8 +1397,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 207 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1424,8 +1424,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
       case 210 : itype = CRISV10F_INSN_MULS_D; goto extract_sfmt_muls_b;
       case 211 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1448,8 +1448,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 212 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1472,8 +1472,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 213 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1496,8 +1496,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 214 :
         {
-          unsigned int val = (((insn >> 12) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 12) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1515,8 +1515,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
           case 13 : /* fall through */
           case 14 :
             {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 0) & (15 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -1539,8 +1539,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 15 :
             {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 0) & (15 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -1566,8 +1566,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 215 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1596,8 +1596,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 220 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1620,8 +1620,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 221 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1644,8 +1644,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 222 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1668,8 +1668,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 223 :
         {
-          unsigned int val = (((insn >> 12) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 12) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1698,8 +1698,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 224 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1722,8 +1722,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 225 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1746,8 +1746,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 226 :
         {
-          unsigned int val = (((insn >> 12) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 12) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -1765,8 +1765,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
           case 13 : /* fall through */
           case 14 :
             {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 0) & (15 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -1789,8 +1789,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 15 :
             {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 0) & (15 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -1816,8 +1816,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 227 :
         {
-          unsigned int val = (((insn >> 11) & (15 << 1)) | ((insn >> 0) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 11) & (15 << 1)) | ((insn >> 0) & (1 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 2 : /* fall through */
@@ -1842,8 +1842,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
           case 30 : itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10;
           case 1 :
             {
-              unsigned int val = (((insn >> 1) & (7 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 1) & (7 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -1858,8 +1858,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 11 :
             {
-              unsigned int val = (((insn >> 1) & (7 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 1) & (7 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -1874,8 +1874,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 15 :
             {
-              unsigned int val = (((insn >> 1) & (7 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 1) & (7 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -1890,8 +1890,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 16 :
             {
-              unsigned int val = (((insn >> 1) & (7 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 1) & (7 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -1906,8 +1906,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 19 :
             {
-              unsigned int val = (((insn >> 1) & (7 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 1) & (7 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -1922,8 +1922,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 21 :
             {
-              unsigned int val = (((insn >> 1) & (7 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 1) & (7 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -1938,8 +1938,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 23 :
             {
-              unsigned int val = (((insn >> 1) & (7 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 1) & (7 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -1954,8 +1954,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 25 :
             {
-              unsigned int val = (((insn >> 1) & (7 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 1) & (7 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -1970,8 +1970,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 27 :
             {
-              unsigned int val = (((insn >> 1) & (7 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 1) & (7 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -1986,8 +1986,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 29 :
             {
-              unsigned int val = (((insn >> 1) & (7 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 1) & (7 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -2002,8 +2002,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 31 :
             {
-              unsigned int val = (((insn >> 1) & (7 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 1) & (7 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 1 : /* fall through */
@@ -2021,8 +2021,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 228 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2045,8 +2045,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 229 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2069,8 +2069,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 230 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2093,8 +2093,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 232 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2117,8 +2117,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 233 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2141,8 +2141,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 234 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2165,8 +2165,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 236 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2189,8 +2189,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 237 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2213,8 +2213,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 238 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2237,8 +2237,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 240 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2261,8 +2261,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 241 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2285,8 +2285,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 242 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2309,8 +2309,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 244 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2333,8 +2333,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 245 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */
@@ -2357,8 +2357,8 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 246 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 1 : /* fall through */

@@ -868,13 +868,13 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     CGEN_INSN_WORD insn = base_insn;
 
     {
-      unsigned int val = (((insn >> 18) & (127 << 0)));
-      switch (val)
+      unsigned int val0 = (((insn >> 18) & (127 << 0)));
+      switch (val0)
       {
       case 0 :
         {
-          unsigned int val = (((insn >> 6) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (15 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x1fc0fc0) == 0x0)
@@ -921,8 +921,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1 :
         {
-          unsigned int val = (((insn >> 6) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (15 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x1fc0fc0) == 0x40000)
@@ -971,8 +971,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 2 :
         {
-          unsigned int val = (((insn >> 6) & (63 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (63 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_LDSB; goto extract_sfmt_ldsb;
           case 1 : itype = FRVBF_INSN_LDUB; goto extract_sfmt_ldsb;
@@ -1033,8 +1033,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 3 :
         {
-          unsigned int val = (((insn >> 6) & (63 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (63 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_STB; goto extract_sfmt_stb;
           case 1 : itype = FRVBF_INSN_STH; goto extract_sfmt_stb;
@@ -1164,8 +1164,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 4 :
         {
-          unsigned int val = (((insn >> 25) & (15 << 2)) | ((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 25) & (15 << 2)) | ((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x7fffffff) == 0x100000)
@@ -1312,8 +1312,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 6 :
         {
-          unsigned int val = (((insn >> 27) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 27) & (15 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x7ffcffff) == 0x180000)
@@ -1342,8 +1342,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 7 :
         {
-          unsigned int val = (((insn >> 27) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 27) & (15 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x7ffcffff) == 0x1c0000)
@@ -1372,8 +1372,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 8 :
         {
-          unsigned int val = (((insn >> 27) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 27) & (15 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x79ffffff) == 0x200000)
@@ -1444,8 +1444,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 9 :
         {
-          unsigned int val = (((insn >> 27) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 27) & (15 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x79fffffc) == 0x240000)
@@ -1516,8 +1516,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 10 :
         {
-          unsigned int val = (((insn >> 6) & (31 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (31 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x1ffffff) == 0x280000)
@@ -1600,8 +1600,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 12 :
         {
-          unsigned int val = (((insn >> 25) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 25) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x7ffc0fc0) == 0x300000)
@@ -1616,8 +1616,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 13 :
         {
-          unsigned int val = (((insn >> 25) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 25) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x7ffc0000) == 0x340000)
@@ -1632,8 +1632,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 14 :
         {
-          unsigned int val = (((insn >> 25) & (15 << 2)) | ((insn >> 14) & (1 << 1)) | ((insn >> 13) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 25) & (15 << 2)) | ((insn >> 14) & (1 << 1)) | ((insn >> 13) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x7ffcffff) == 0x384000)
@@ -1641,8 +1641,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 1 :
             {
-              unsigned int val = (((insn >> 14) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 14) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x7ffcefff) == 0x382000)
@@ -1921,8 +1921,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 27 : itype = FRVBF_INSN_UMULICC; goto extract_sfmt_smulicc;
       case 28 :
         {
-          unsigned int val = (((insn >> 27) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 27) & (15 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x7fffffff) == 0x700000)
@@ -1951,8 +1951,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 29 :
         {
-          unsigned int val = (((insn >> 27) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 27) & (15 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x7fffffff) == 0x740000)
@@ -2031,8 +2031,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 69 : itype = FRVBF_INSN_NLDDI; goto extract_sfmt_nlddi;
       case 70 :
         {
-          unsigned int val = (((insn >> 6) & (7 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (7 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x1fc0fc0) == 0x1180000)
@@ -2084,8 +2084,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 87 : itype = FRVBF_INSN_STQFI; goto extract_sfmt_ldqfi;
       case 88 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CADD; goto extract_sfmt_cadd;
           case 1 : itype = FRVBF_INSN_CSUB; goto extract_sfmt_cadd;
@@ -2096,8 +2096,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 89 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CADDCC; goto extract_sfmt_caddcc;
           case 1 : itype = FRVBF_INSN_CSUBCC; goto extract_sfmt_caddcc;
@@ -2108,8 +2108,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 90 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CAND; goto extract_sfmt_cadd;
           case 1 : itype = FRVBF_INSN_COR; goto extract_sfmt_cadd;
@@ -2123,8 +2123,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 91 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CANDCC; goto extract_sfmt_caddcc;
           case 1 : itype = FRVBF_INSN_CORCC; goto extract_sfmt_caddcc;
@@ -2134,8 +2134,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 92 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CSLL; goto extract_sfmt_cadd;
           case 1 : itype = FRVBF_INSN_CSRL; goto extract_sfmt_cadd;
@@ -2145,8 +2145,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 93 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CSLLCC; goto extract_sfmt_caddcc;
           case 1 : itype = FRVBF_INSN_CSRLCC; goto extract_sfmt_caddcc;
@@ -2156,8 +2156,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 94 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CLDSB; goto extract_sfmt_cldsb;
           case 1 : itype = FRVBF_INSN_CLDUB; goto extract_sfmt_cldsb;
@@ -2168,8 +2168,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 95 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CLD; goto extract_sfmt_cldsb;
           case 1 : itype = FRVBF_INSN_CLDD; goto extract_sfmt_cldd;
@@ -2179,8 +2179,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 96 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CLDBF; goto extract_sfmt_cldbf;
           case 1 : itype = FRVBF_INSN_CLDHF; goto extract_sfmt_cldbf;
@@ -2191,8 +2191,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 97 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CLDSBU; goto extract_sfmt_cldsbu;
           case 1 : itype = FRVBF_INSN_CLDUBU; goto extract_sfmt_cldsbu;
@@ -2203,8 +2203,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 98 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CLDU; goto extract_sfmt_cldsbu;
           case 1 : itype = FRVBF_INSN_CLDDU; goto extract_sfmt_clddu;
@@ -2214,8 +2214,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 99 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CLDBFU; goto extract_sfmt_cldbfu;
           case 1 : itype = FRVBF_INSN_CLDHFU; goto extract_sfmt_cldbfu;
@@ -2226,8 +2226,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 100 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CSTB; goto extract_sfmt_cstb;
           case 1 : itype = FRVBF_INSN_CSTH; goto extract_sfmt_cstb;
@@ -2238,8 +2238,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 101 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CSTQ; goto extract_sfmt_cldq;
           case 2 : itype = FRVBF_INSN_CSWAP; goto extract_sfmt_cswap;
@@ -2249,8 +2249,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 102 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CSTBF; goto extract_sfmt_cstbf;
           case 1 : itype = FRVBF_INSN_CSTHF; goto extract_sfmt_cstbf;
@@ -2261,8 +2261,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 103 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CSTBU; goto extract_sfmt_cstbu;
           case 1 : itype = FRVBF_INSN_CSTHU; goto extract_sfmt_cstbu;
@@ -2273,8 +2273,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 104 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CSTBFU; goto extract_sfmt_cstbfu;
           case 1 : itype = FRVBF_INSN_CSTHFU; goto extract_sfmt_cstbfu;
@@ -2285,8 +2285,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 105 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x1fff0c0) == 0x1a40000)
@@ -2309,13 +2309,13 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 106 :
         {
-          unsigned int val = (((insn >> 26) & (15 << 1)) | ((insn >> 6) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 26) & (15 << 1)) | ((insn >> 6) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             {
-              unsigned int val = (((insn >> 24) & (1 << 1)) | ((insn >> 7) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 24) & (1 << 1)) | ((insn >> 7) & (1 << 0)));
+              switch (val2)
               {
               case 0 : /* fall through */
               case 2 :
@@ -2462,8 +2462,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 107 :
         {
-          unsigned int val = (((insn >> 6) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x1fff0c0) == 0x1ac0000)
@@ -2478,8 +2478,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 108 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x1fff0c0) == 0x1b00000)
@@ -2498,8 +2498,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 109 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CFADDS; goto extract_sfmt_cfadds;
           case 1 : itype = FRVBF_INSN_CFSUBS; goto extract_sfmt_cfadds;
@@ -2512,8 +2512,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 110 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CFMULS; goto extract_sfmt_cfadds;
           case 1 : itype = FRVBF_INSN_CFDIVS; goto extract_sfmt_cfadds;
@@ -2526,8 +2526,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 111 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CFMADDS; goto extract_sfmt_cfmadds;
           case 1 : itype = FRVBF_INSN_CFMSUBS; goto extract_sfmt_cfmadds;
@@ -2538,8 +2538,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 112 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CMAND; goto extract_sfmt_cmand;
           case 1 : itype = FRVBF_INSN_CMOR; goto extract_sfmt_cmand;
@@ -2553,8 +2553,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 113 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CMADDHSS; goto extract_sfmt_cmaddhss;
           case 1 : itype = FRVBF_INSN_CMADDHUS; goto extract_sfmt_cmaddhss;
@@ -2565,8 +2565,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 114 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CMMULHS; goto extract_sfmt_cmmulhs;
           case 1 : itype = FRVBF_INSN_CMMULHU; goto extract_sfmt_cmmulhs;
@@ -2577,8 +2577,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 115 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CMQADDHSS; goto extract_sfmt_cmqaddhss;
           case 1 : itype = FRVBF_INSN_CMQADDHUS; goto extract_sfmt_cmqaddhss;
@@ -2589,8 +2589,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 116 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CMQMULHS; goto extract_sfmt_cmqmulhs;
           case 1 : itype = FRVBF_INSN_CMQMULHU; goto extract_sfmt_cmqmulhs;
@@ -2601,8 +2601,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 117 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_CMCPXRS; goto extract_sfmt_cmcpxrs;
           case 1 : itype = FRVBF_INSN_CMCPXRU; goto extract_sfmt_cmcpxrs;
@@ -2613,8 +2613,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 118 :
         {
-          unsigned int val = (((insn >> 6) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (1 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x1fc00c0) == 0x1d80080)
@@ -2629,8 +2629,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 119 :
         {
-          unsigned int val = (((insn >> 6) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (3 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x1fff0c0) == 0x1dc0000)
@@ -2649,8 +2649,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 120 :
         {
-          unsigned int val = (((insn >> 6) & (63 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (63 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_MQXMACHS; goto extract_sfmt_mqmachs;
           case 1 : itype = FRVBF_INSN_MQXMACXHS; goto extract_sfmt_mqmachs;
@@ -2712,13 +2712,13 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 121 :
         {
-          unsigned int val = (((insn >> 7) & (1 << 3)) | ((insn >> 6) & (7 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 7) & (1 << 3)) | ((insn >> 6) & (7 << 0)));
+          switch (val1)
           {
           case 0 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x1ffffc0) == 0x1e40000)
@@ -2735,8 +2735,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 1 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x1ffffc0) == 0x1e40040)
@@ -2753,8 +2753,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 2 :
             {
-              unsigned int val = (((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x1ffffc0) == 0x1e40080)
@@ -2769,8 +2769,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 3 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x1ffffc0) == 0x1e400c0)
@@ -2783,8 +2783,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 4 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x1ffffc0) == 0x1e40100)
@@ -2797,8 +2797,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 5 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x1ffffc0) == 0x1e40140)
@@ -2817,8 +2817,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 6 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 : itype = FRVBF_INSN_FADDS; goto extract_sfmt_fadds;
               case 1 : itype = FRVBF_INSN_FMAS; goto extract_sfmt_fmas;
@@ -2829,8 +2829,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 7 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 : itype = FRVBF_INSN_FSUBS; goto extract_sfmt_fadds;
               case 1 : itype = FRVBF_INSN_FMSS; goto extract_sfmt_fmas;
@@ -2841,8 +2841,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 8 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x1ffffc0) == 0x1e40400)
@@ -2859,8 +2859,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 9 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x1ffffc0) == 0x1e40440)
@@ -2877,8 +2877,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 10 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x1ffffc0) == 0x1e40480)
@@ -2897,8 +2897,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 11 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x1ffffc0) == 0x1e404c0)
@@ -2911,8 +2911,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 12 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x1ffffc0) == 0x1e40500)
@@ -2925,8 +2925,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 13 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x1ffffc0) == 0x1e40540)
@@ -2943,8 +2943,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 14 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 : itype = FRVBF_INSN_FDADDS; goto extract_sfmt_fmas;
               case 1 : itype = FRVBF_INSN_FDSADS; goto extract_sfmt_fmas;
@@ -2955,8 +2955,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 15 :
             {
-              unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
+              switch (val2)
               {
               case 0 : itype = FRVBF_INSN_FDSUBS; goto extract_sfmt_fmas;
               case 1 : itype = FRVBF_INSN_FDMULCS; goto extract_sfmt_fmas;
@@ -2970,8 +2970,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 122 :
         {
-          unsigned int val = (((insn >> 6) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (15 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0x1ffffc0) == 0x1e80000)
@@ -3038,8 +3038,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 123 :
         {
-          unsigned int val = (((insn >> 6) & (63 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 6) & (63 << 0)));
+          switch (val1)
           {
           case 0 : itype = FRVBF_INSN_MAND; goto extract_sfmt_mand;
           case 1 : itype = FRVBF_INSN_MOR; goto extract_sfmt_mand;
@@ -3126,8 +3126,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 59 :
             {
-              unsigned int val = (((insn >> 17) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 17) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0x1ffffff) == 0x1ec0ec0)
@@ -3135,8 +3135,8 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               case 1 :
                 {
-                  unsigned int val = (((insn >> 25) & (63 << 0)));
-                  switch (val)
+                  unsigned int val3 = (((insn >> 25) & (63 << 0)));
+                  switch (val3)
                   {
                   case 0 : /* fall through */
                   case 1 : /* fall through */

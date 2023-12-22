@@ -269,13 +269,13 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
     CGEN_INSN_WORD insn = base_insn;
 
     {
-      unsigned int val = (((insn >> 26) & (63 << 0)));
-      switch (val)
+      unsigned int val0 = (((insn >> 26) & (63 << 0)));
+      switch (val0)
       {
       case 0 :
         {
-          unsigned int val = (((insn >> 1) & (1 << 4)) | ((insn >> 0) & (15 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 1) & (1 << 4)) | ((insn >> 0) & (15 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe0003f) == 0x0)
@@ -386,8 +386,8 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 1 :
         {
-          unsigned int val = (((insn >> 17) & (1 << 3)) | ((insn >> 16) & (7 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 17) & (1 << 3)) | ((insn >> 16) & (7 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xfc1f0000) == 0x4000000)
@@ -459,8 +459,8 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 16 :
         {
-          unsigned int val = (((insn >> 19) & (15 << 3)) | ((insn >> 15) & (3 << 1)) | ((insn >> 4) & (1 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 19) & (15 << 3)) | ((insn >> 15) & (3 << 1)) | ((insn >> 4) & (1 << 0)));
+          switch (val1)
           {
           case 0 : /* fall through */
           case 2 : /* fall through */
@@ -519,8 +519,8 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 17 :
         {
-          unsigned int val = (((insn >> 22) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 22) & (3 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe007ff) == 0x44000000)
@@ -543,13 +543,13 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 18 :
         {
-          unsigned int val = (((insn >> 16) & (3 << 5)) | ((insn >> 0) & (31 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 16) & (3 << 5)) | ((insn >> 0) & (31 << 0)));
+          switch (val1)
           {
           case 0 :
             {
-              unsigned int val = (((insn >> 23) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 23) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0xffe007ff) == 0x48000000)
@@ -636,8 +636,8 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 64 :
             {
-              unsigned int val = (((insn >> 23) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 23) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0xffe007ff) == 0x48400000)
@@ -655,8 +655,8 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 19 :
         {
-          unsigned int val = (((insn >> 19) & (31 << 2)) | ((insn >> 0) & (3 << 0)));
-          switch (val)
+          unsigned int val1 = (((insn >> 19) & (31 << 2)) | ((insn >> 0) & (3 << 0)));
+          switch (val1)
           {
           case 0 :
             if ((entire_insn & 0xffe007ff) == 0x4c000000)
@@ -664,8 +664,8 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 4 :
             {
-              unsigned int val = (((insn >> 2) & (3 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 2) & (3 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0xffe007ff) == 0x4c200000)
@@ -684,8 +684,8 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 5 :
             {
-              unsigned int val = (((insn >> 3) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 3) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0xffe007ff) == 0x4c200001)
@@ -700,8 +700,8 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 6 :
             {
-              unsigned int val = (((insn >> 2) & (3 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 2) & (3 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0xffe007ff) == 0x4c200002)
@@ -720,8 +720,8 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 7 :
             {
-              unsigned int val = (((insn >> 2) & (1 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 2) & (1 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0xffe007ff) == 0x4c200003)
@@ -751,8 +751,8 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
           case 34 : /* fall through */
           case 35 :
             {
-              unsigned int val = (((insn >> 16) & (3 << 0)));
-              switch (val)
+              unsigned int val2 = (((insn >> 16) & (3 << 0)));
+              switch (val2)
               {
               case 0 :
                 if ((entire_insn & 0xffff0000) == 0x4d000000)
