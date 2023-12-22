@@ -282,7 +282,7 @@ dump_lines (opcode * op, int level, Indirect * ind)
 		varnames[i], (i < vn - 1) ? "," : "\\n", varnames[i]);
       printf ("%*s    }\n", level, "");
     }
-  printf ("#line %d \"%s\"\n", op->lineno + 1, orig_filename);
+  printf ("#line %d \"%s\"\n", op->lineno, orig_filename);
   for (i = 0; i < op->nlines; i++)
     printf ("%*s%s", level, "", op->lines[i]);
   if (op->comment)
