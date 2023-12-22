@@ -11485,6 +11485,16 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 
       for (j = i.imm_operands; j < i.operands; ++j)
 	{
+	  /* Look for 8-bit operands that use old registers.  */
+	  if (i.vec_encoding != vex_encoding_default
+	      && flag_code == CODE_64BIT
+	      && i.types[j].bitfield.class == Reg
+	      && i.types[j].bitfield.byte
+	      && !(i.op[j].regs->reg_flags & RegRex64)
+	      && i.op[j].regs->reg_num > 3)
+	    as_bad (_("can't encode register '%s%s' with VEX/XOP/EVEX"),
+		    register_prefix, i.op[j].regs->reg_name);
+
 	  i.types[j].bitfield.instance = InstanceNone;
 
 	  if (operand_type_check (i.types[j], disp))
