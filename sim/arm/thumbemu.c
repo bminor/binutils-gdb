@@ -2135,7 +2135,7 @@ ARMul_ThumbDecode (ARMul_State * state,
 	    ARMword opcode;
 	    enum { t_norm, t_shift, t_neg, t_mul } otype;
 	  };
-	  struct insn_format subset[16] =
+	  static const struct insn_format subset[16] =
 	  {
 	    { 0xE0100000, t_norm},			/* ANDS Rd,Rd,Rs     */
 	    { 0xE0300000, t_norm},			/* EORS Rd,Rd,Rs     */
@@ -2158,7 +2158,7 @@ ARMul_ThumbDecode (ARMul_State * state,
 
 	  if (in_IT_block ())
 	    {
-	      struct insn_format it_subset[16] =
+	      static const struct insn_format it_subset[16] =
 		{
 		  { 0xE0000000, t_norm},	/* AND  Rd,Rd,Rs     */
 		  { 0xE0200000, t_norm},	/* EOR  Rd,Rd,Rs     */
