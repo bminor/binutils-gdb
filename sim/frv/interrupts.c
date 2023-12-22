@@ -887,7 +887,6 @@ set_exception_status_registers (
 	  break;
 	default:
 	  {
-	    SIM_DESC sd = CPU_STATE (current_cpu);
 	    IADDR pc = CPU_PC_GET (current_cpu);
 	    sim_engine_abort (sd, current_cpu, pc,
 			      "invalid non-strict program interrupt kind: %d\n",
