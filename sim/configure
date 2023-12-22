@@ -16156,6 +16156,7 @@ build_warnings="-Wall -Wpointer-arith
 -Wno-error=deprecated-register
 -Wimplicit-fallthrough=5
 -Wduplicated-cond
+-Wshadow=local
 -Wmissing-declarations
 "
 build_warnings="$build_warnings

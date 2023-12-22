@@ -46,7 +46,7 @@ dnl C++ -Wno-mismatched-tags
 dnl C++ -Wsuggest-override
 -Wimplicit-fallthrough=5
 -Wduplicated-cond
-dnl -Wshadow=local
+-Wshadow=local
 dnl C++ -Wdeprecated-copy
 dnl C++ -Wdeprecated-copy-dtor
 dnl C++ -Wredundant-move
