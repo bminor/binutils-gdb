@@ -1046,8 +1046,8 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	    if (regs[5] < countargv (prog_argv))
 	      {
 		/* Include the termination byte.  */
-		int i = strlen (prog_argv[regs[5]]) + 1;
-		regs[0] = sim_write (0, regs[6], prog_argv[regs[5]], i);
+		int len = strlen (prog_argv[regs[5]]) + 1;
+		regs[0] = sim_write (0, regs[6], prog_argv[regs[5]], len);
 	      }
 	    else
 	      regs[0] = -1;
