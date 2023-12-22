@@ -439,15 +439,22 @@ main(int argc,
               {
               case '=':
 	        icache_size = atoi (argp + strlen ("gen-icache") + 1);
-	        code |= generate_with_icache;
+		if (enable_p)
+		  code |= generate_with_icache;
+		else
+		  code &= ~generate_with_icache;
                 break;
               case '\0':
-	        code |= generate_with_icache;
+		if (enable_p)
+		  code |= generate_with_icache;
+		else
+		  code &= ~generate_with_icache;
                 break;
               default:
 		error ("Expecting -Ggen-icache or -Ggen-icache=<N>\n");
               }
           }
+	  break;
 	}
     case 'I':
       {
