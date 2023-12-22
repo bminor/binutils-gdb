@@ -191,7 +191,7 @@ cat <<EOF
 
           if (CGEN_ATTR_VALUE (NULL, idesc->attrs, CGEN_INSN_DELAY_SLOT))
 	    {
-              USI insn = GETIMEMUSI (current_cpu, CPU2INSN(pc));
+              insn = GETIMEMUSI (current_cpu, CPU2INSN(pc));
 	      idesc = extract (current_cpu, pc, insn, &sc->argbuf, FAST_P);
 
               if (likely_cti && IDESC_CTI_P (idesc))
