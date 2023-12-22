@@ -69,6 +69,7 @@ build_warnings="$build_warnings
 -Wold-style-definition
 -Wpointer-sign
 -Wreturn-mismatch
+-Wreturn-type
 -Wstrict-prototypes
 dnl The cgen virtual insn logic involves enum conversions.
 dnl Disable until we can figure out how to make this work.

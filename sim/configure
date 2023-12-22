@@ -15846,6 +15846,7 @@ build_warnings="$build_warnings
 -Wold-style-definition
 -Wpointer-sign
 -Wreturn-mismatch
+-Wreturn-type
 -Wstrict-prototypes
 -Wno-enum-conversion
 "
