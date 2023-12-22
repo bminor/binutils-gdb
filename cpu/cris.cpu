@@ -3668,10 +3668,10 @@
   "Perform word-wise swap within each dword"
   (sequence
     SI
-    ((SI tmpb))
-    (set tmpb x)
-    (or (and (sll tmpb 16) #xffff0000)
-	(and (srl tmpb 16) #xffff)))
+    ((SI tmpw))
+    (set tmpw x)
+    (or (and (sll tmpw 16) #xffff0000)
+	(and (srl tmpw 16) #xffff)))
 )
 
 (define-pmacro (swap-_ x)
