@@ -6199,7 +6199,7 @@ pa_callinfo (int unused ATTRIBUTE_UNUSED)
    label when finished.  */
 
 static void
-pa_text (int unused ATTRIBUTE_UNUSED)
+pa_text (int arg)
 {
 #ifdef OBJ_SOM
   current_space = is_defined_space ("$TEXT$");
@@ -6207,21 +6207,32 @@ pa_text (int unused ATTRIBUTE_UNUSED)
     = pa_subsegment_to_subspace (current_space->sd_seg, 0);
 #endif
 
-  s_text (0);
+#ifdef OBJ_ELF
+  obj_elf_text (arg);
+#else
+  s_text (arg);
+#endif
+
   pa_undefine_label ();
 }
 
 /* Switch to the data space.  As usual delete our label.  */
 
 static void
-pa_data (int unused ATTRIBUTE_UNUSED)
+pa_data (int arg)
 {
 #ifdef OBJ_SOM
   current_space = is_defined_space ("$PRIVATE$");
   current_subspace
     = pa_subsegment_to_subspace (current_space->sd_seg, 0);
 #endif
-  s_data (0);
+
+#ifdef OBJ_ELF
+  obj_elf_data (arg);
+#else
+  s_data (arg);
+#endif
+
   pa_undefine_label ();
 }
 
