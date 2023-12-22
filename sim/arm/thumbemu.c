@@ -2131,14 +2131,11 @@ ARMul_ThumbDecode (ARMul_State * state,
       if ((tinstr & (1 << 10)) == 0)
 	{
 	  /* Format 4 */
-	  struct
-	  {
+	  struct insn_format {
 	    ARMword opcode;
-	    enum
-	    { t_norm, t_shift, t_neg, t_mul }
-	    otype;
-	  }
-	  subset[16] =
+	    enum { t_norm, t_shift, t_neg, t_mul } otype;
+	  };
+	  struct insn_format subset[16] =
 	  {
 	    { 0xE0100000, t_norm},			/* ANDS Rd,Rd,Rs     */
 	    { 0xE0300000, t_norm},			/* EORS Rd,Rd,Rs     */
@@ -2161,14 +2158,7 @@ ARMul_ThumbDecode (ARMul_State * state,
 
 	  if (in_IT_block ())
 	    {
-	      struct
-	      {
-		ARMword opcode;
-		enum
-		  { t_norm, t_shift, t_neg, t_mul }
-		  otype;
-	      }
-	      subset[16] =
+	      struct insn_format it_subset[16] =
 		{
 		  { 0xE0000000, t_norm},	/* AND  Rd,Rd,Rs     */
 		  { 0xE0200000, t_norm},	/* EOR  Rd,Rd,Rs     */
@@ -2187,7 +2177,7 @@ ARMul_ThumbDecode (ARMul_State * state,
 		  { 0xE1C00000, t_norm},	/* BIC  Rd,Rd,Rs     */
 		  { 0xE1E00000, t_norm}		/* MVN  Rd,Rs        */
 		};
-	      *ainstr = subset[(tinstr & 0x03C0) >> 6].opcode;	/* base */
+	      *ainstr = it_subset[(tinstr & 0x03C0) >> 6].opcode;	/* base */
 	    }
 
 	  switch (subset[(tinstr & 0x03C0) >> 6].otype)
