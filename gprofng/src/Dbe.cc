@@ -271,7 +271,7 @@ dbeGetFileAttributes (const char *filename, const char *format)
       if (!strcmp (format, NTXT ("/bin/ls -dl ")))
 	{
 	  // A kind of "/bin/ls -dl " simulation
-	  struct stat64 sbuf;
+	  dbe_stat_t sbuf;
 	  sbuf.st_mode = 0;
 	  dbe_stat (filename, &sbuf);
 	  if (S_IREAD & sbuf.st_mode)

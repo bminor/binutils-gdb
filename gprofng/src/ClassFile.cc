@@ -1006,7 +1006,7 @@ ClassFile::openFile (const char *fname)
       append_msg (CMSG_ERROR, GTXT ("Cannot open file %s"), fname);
       return;
     }
-  struct stat64 stat_buf;
+  dbe_stat_t stat_buf;
   if ((fstat64 (fd, &stat_buf) == -1) || (stat_buf.st_size == 0))
     {
       close (fd);

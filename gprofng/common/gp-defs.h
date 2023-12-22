@@ -63,4 +63,10 @@
 # endif
 #endif
 
+#if defined(__MUSL_LIBC)
+#define ino64_t ino_t
+#define off64_t off_t
+#define fpos64_t fpos_t
+#endif
+
 #endif

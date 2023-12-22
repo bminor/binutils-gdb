@@ -136,7 +136,13 @@ timestruc2hr (timestruc_t *s)
   return (hrtime_t) s->tv_sec * NANOSEC + (hrtime_t) s->tv_nsec;
 }
 
-struct stat64;
+#if defined(__MUSL_LIBC)
+typedef struct stat dbe_stat_t;
+#define fstat64 fstat
+#define open64 open
+#else
+typedef struct stat64 dbe_stat_t;
+#endif
 
 #if defined(__cplusplus)
 extern "C"
@@ -162,8 +168,8 @@ extern "C"
   char *get_relative_link (const char *path_to, const char *path_from);
   char *get_prog_name (int basename);
   char *dbe_strndup (const char *str, size_t len);
-  int dbe_stat (const char *path, struct stat64 *sbuf);
-  int dbe_stat_file (const char *path, struct stat64 *sbuf);
+  int dbe_stat (const char *path, dbe_stat_t *sbuf);
+  int dbe_stat_file (const char *path, dbe_stat_t *sbuf);
   char *dbe_read_dir (const char *path, const char *format);
   char *dbe_get_processes (const char *format);
   char *dbe_create_directories (const char *pathname);

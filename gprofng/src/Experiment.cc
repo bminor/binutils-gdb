@@ -1631,7 +1631,7 @@ Experiment::open (char *path)
     return status;
 
   // Get creation time for experiment
-  struct stat64 st;
+  dbe_stat_t st;
   if (dbe_stat (path, &st) == 0)
     mtime = st.st_mtime;
 
@@ -5594,7 +5594,7 @@ Experiment::find_expdir (char *path)
 {
   // This function checks that the experiment directory
   // is of the proper form, and accessible
-  struct stat64 sbuf;
+  dbe_stat_t sbuf;
 
   // Save the name
   expt_name = dbe_strdup (path);
@@ -5703,7 +5703,7 @@ Experiment::get_descendants_names ()
       if (entry->d_name[0] == '_' || strncmp (entry->d_name, "M_r", 3) == 0)
 	{
 	  char *dpath = dbe_sprintf (NTXT ("%s/%s"), dir_name, entry->d_name);
-	  struct stat64 sbuf;
+	  dbe_stat_t sbuf;
 	  if (dbe_stat (dpath, &sbuf) == 0 && S_ISDIR (sbuf.st_mode))
 	    exp_names->append (dpath);
 	  else
@@ -5727,7 +5727,7 @@ Experiment::create_dir (char *dname)
     {
       return true;
     }
-  struct stat64 sbuf;
+  dbe_stat_t sbuf;
   if (dbe_stat (dname, &sbuf) != 0 || S_ISDIR (sbuf.st_mode) == 0)
     {
       char *buf = dbe_sprintf (GTXT ("Unable to create directory `%s'\n"),
@@ -6515,7 +6515,7 @@ Experiment::copy_file_to_archive (const char *name, const char *aname, int hide_
     }
   close (fd_w);
 
-  struct stat64 s_buf;
+  dbe_stat_t s_buf;
   if (fstat64 (fd_r, &s_buf) == 0)
     {
       struct utimbuf u_buf;
@@ -6703,7 +6703,7 @@ Experiment::copy_file_to_common_archive (const char *name, const char *aname,
 	  return 1;
 	}
       // Set read-only permissions
-      struct stat64 statbuf;
+      dbe_stat_t statbuf;
       if (0 == dbe_stat_file (name, &statbuf))
 	{
 	  mode_t mask = S_IRUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;

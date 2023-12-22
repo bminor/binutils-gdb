@@ -223,7 +223,7 @@ collect::Exec_status
 collect::check_executable (char *target_name)
 {
   char target_path[MAXPATHLEN];
-  struct stat64 statbuf;
+  dbe_stat_t statbuf;
   if (target_name == NULL) // not set, but assume caller knows what it's doing
     return EXEC_OK;
   if (getenv ("GPROFNG_SKIP_VALIDATION")) // don't check target

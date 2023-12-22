@@ -1169,7 +1169,7 @@ DbeSession::open_experiment (Experiment *exp, char *path)
       t_exp_list[j] = NULL;
 
       char *lineage_name = exp_names->fetch (j);
-      struct stat64 sbuf;
+      dbe_stat_t sbuf;
       char *dpath = dbe_sprintf (NTXT ("%s/%s"), path, lineage_name);
 
       // look for experiments with no profile collected
