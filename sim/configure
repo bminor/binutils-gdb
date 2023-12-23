@@ -657,6 +657,8 @@ SIM_MIPS_FPU_BITSIZE
 SIM_MIPS_BITSIZE
 SIM_MIPS_SUBTARGET
 SIM_FRV_TRAPDUMP_FLAGS
+SIM_CFLAG_WNO_UNUSED_BUT_SET_VARIABLE
+SIM_CFLAG_WNO_SHADOW_LOCAL
 IGEN_FLAGS_SMP
 SIM_INLINE
 SIM_HW_SOCKSER
@@ -12290,7 +12292,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12293 "configure"
+#line 12295 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12396,7 +12398,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12399 "configure"
+#line 12401 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15906,28 +15908,23 @@ $as_echo_n "checking compiler warning flags... " >&6; }
     # Separate out the -Werror flag as some files just cannot be
     # compiled with it enabled.
     for w in ${build_warnings}; do
-	# GCC does not complain about -Wno-unknown-warning.  Invert
-	# and test -Wunknown-warning instead.
-	case $w in
-	-Wno-*)
-		wtest=`echo $w | sed 's/-Wno-/-W/g'` ;;
-        -Wformat-nonliteral)
-		# gcc requires -Wformat before -Wformat-nonliteral
-		# will work, so stick them together.
-		w="-Wformat $w"
-		wtest="$w"
-		;;
-	*)
-		wtest=$w ;;
-	esac
-
 	case $w in
 	-Werr*) WERROR_CFLAGS=-Werror ;;
-	*)
-	    # Check whether GCC accepts it.
-	    saved_CFLAGS="$CFLAGS"
-	    CFLAGS="$CFLAGS -Werror $wtest"
-	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	*)       w="$w"
+  case $w in
+  -Wno-*)
+    wtest=`echo $w | sed 's/-Wno-/-W/g'` ;;
+  -Wformat-nonliteral)
+            w="-Wformat $w"
+    wtest="$w"
+    ;;
+  *)
+    wtest=$w ;;
+  esac
+
+    saved_CFLAGS="$CFLAGS"
+  CFLAGS="$CFLAGS -Werror $wtest"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 int
@@ -15942,11 +15939,95 @@ if ac_fn_c_try_compile "$LINENO"; then :
   WARN_CFLAGS="${WARN_CFLAGS} $w"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-	    CFLAGS="$saved_CFLAGS"
+  CFLAGS="$saved_CFLAGS"
+ ;;
 	esac
     done
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
 $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
+
+          { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether -Wno-shadow=local is supported" >&5
+$as_echo_n "checking whether -Wno-shadow=local is supported... " >&6; }
+        w="-Wno-shadow=local"
+  case $w in
+  -Wno-*)
+    wtest=`echo $w | sed 's/-Wno-/-W/g'` ;;
+  -Wformat-nonliteral)
+            w="-Wformat $w"
+    wtest="$w"
+    ;;
+  *)
+    wtest=$w ;;
+  esac
+
+    saved_CFLAGS="$CFLAGS"
+  CFLAGS="$CFLAGS -Werror $wtest"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+        SIM_CFLAG_WNO_SHADOW_LOCAL=-Wno-shadow=local
+
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CFLAGS="$saved_CFLAGS"
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether -Wno-unused-but-set-variable is supported" >&5
+$as_echo_n "checking whether -Wno-unused-but-set-variable is supported... " >&6; }
+        w="-Wno-unused-but-set-variable"
+  case $w in
+  -Wno-*)
+    wtest=`echo $w | sed 's/-Wno-/-W/g'` ;;
+  -Wformat-nonliteral)
+            w="-Wformat $w"
+    wtest="$w"
+    ;;
+  *)
+    wtest=$w ;;
+  esac
+
+    saved_CFLAGS="$CFLAGS"
+  CFLAGS="$CFLAGS -Werror $wtest"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+        SIM_CFLAG_WNO_UNUSED_BUT_SET_VARIABLE=-Wno-unused-but-set-variable
+
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CFLAGS="$saved_CFLAGS"
+
 fi
 
 

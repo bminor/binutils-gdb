@@ -128,33 +128,57 @@ then
     # Separate out the -Werror flag as some files just cannot be
     # compiled with it enabled.
     for w in ${build_warnings}; do
-	# GCC does not complain about -Wno-unknown-warning.  Invert
-	# and test -Wunknown-warning instead.
-	case $w in
-	-Wno-*)
-		wtest=`echo $w | sed 's/-Wno-/-W/g'` ;;
-        -Wformat-nonliteral)
-		# gcc requires -Wformat before -Wformat-nonliteral
-		# will work, so stick them together.
-		w="-Wformat $w"
-		wtest="$w"
-		;;
-	*)
-		wtest=$w ;;
-	esac
-
 	case $w in
 	-Werr*) WERROR_CFLAGS=-Werror ;;
-	*)
-	    # Check whether GCC accepts it.
-	    saved_CFLAGS="$CFLAGS"
-	    CFLAGS="$CFLAGS -Werror $wtest"
-	    AC_TRY_COMPILE([],[],WARN_CFLAGS="${WARN_CFLAGS} $w",)
-	    CFLAGS="$saved_CFLAGS"
+	*) _SIM_TEST_WARNING_FLAG($w, [WARN_CFLAGS="${WARN_CFLAGS} $w"]) ;;
 	esac
     done
     AC_MSG_RESULT(${WARN_CFLAGS} ${WERROR_CFLAGS})
+
+    dnl Test individual flags to export to dedicated variables.
+    m4_map([_SIM_EXPORT_WARNING_FLAG], m4_split(m4_normalize([
+	-Wno-shadow=local
+	-Wno-unused-but-set-variable
+    ])))dnl
 fi
+])
+dnl Test a warning flag $1 and execute $2 if it passes, else $3.
+AC_DEFUN([_SIM_TEST_WARNING_FLAG], [dnl
+  dnl GCC does not complain about -Wno-unknown-warning.  Invert
+  dnl and test -Wunknown-warning instead.
+  w="$1"
+  case $w in
+  -Wno-*)
+    wtest=`echo $w | sed 's/-Wno-/-W/g'` ;;
+  -Wformat-nonliteral)
+    dnl gcc requires -Wformat before -Wformat-nonliteral
+    dnl will work, so stick them together.
+    w="-Wformat $w"
+    wtest="$w"
+    ;;
+  *)
+    wtest=$w ;;
+  esac
+
+  dnl Check whether GCC accepts it.
+  saved_CFLAGS="$CFLAGS"
+  CFLAGS="$CFLAGS -Werror $wtest"
+  AC_TRY_COMPILE([],[],$2,$3)
+  CFLAGS="$saved_CFLAGS"
+])
+dnl Export variable $1 to $2 for use in makefiles.
+AC_DEFUN([_SIM_EXPORT_WARNING], [dnl
+  AS_VAR_SET($1, $2)
+  AC_SUBST($1)
+])
+dnl Test if $1 is a known warning flag, and export a variable for makefiles.
+dnl If $1=-Wfoo, then SIM_CFLAG_WFOO will be set to -Wfoo if it's supported.
+AC_DEFUN([_SIM_EXPORT_WARNING_FLAG], [dnl
+  AC_MSG_CHECKING([whether $1 is supported])
+  _SIM_TEST_WARNING_FLAG($1, [dnl
+    _SIM_EXPORT_WARNING([SIM_CFLAG]m4_toupper(m4_translit($1, [-= ], [__])), $1)
+    AC_MSG_RESULT(yes)
+  ], [AC_MSG_RESULT(no)])
 ])
 AC_SUBST(WARN_CFLAGS)
 AC_SUBST(WERROR_CFLAGS)

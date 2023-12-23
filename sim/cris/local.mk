@@ -17,10 +17,10 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## Some CGEN kludges are causing build-time warnings.  See cris.cpu for details.
-AM_CFLAGS_%C%_mloopv10f.o = -Wno-unused-but-set-variable
-AM_CFLAGS_%C%_mloopv32f.o = -Wno-unused-but-set-variable
+AM_CFLAGS_%C%_mloopv10f.o = $(SIM_CFLAG_WNO_UNUSED_BUT_SET_VARIABLE)
+AM_CFLAGS_%C%_mloopv32f.o = $(SIM_CFLAG_WNO_UNUSED_BUT_SET_VARIABLE)
 ## Some CGEN assignments use variable names that are nested & repeated.
-AM_CFLAGS_%C%_mloopv10f.o += -Wno-shadow=local
+AM_CFLAGS_%C%_mloopv10f.o += $(SIM_CFLAG_WNO_SHADOW_LOCAL)
 
 nodist_%C%_libsim_a_SOURCES = \
 	%D%/modules.c
