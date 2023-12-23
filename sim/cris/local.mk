@@ -19,6 +19,8 @@
 ## Some CGEN kludges are causing build-time warnings.  See cris.cpu for details.
 AM_CFLAGS_%C%_mloopv10f.o = -Wno-unused-but-set-variable
 AM_CFLAGS_%C%_mloopv32f.o = -Wno-unused-but-set-variable
+## Some CGEN assignments use variable names that are nested & repeated.
+AM_CFLAGS_%C%_mloopv10f.o += -Wno-shadow=local
 
 nodist_%C%_libsim_a_SOURCES = \
 	%D%/modules.c
