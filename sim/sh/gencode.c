@@ -2439,7 +2439,7 @@ static op ppi_tab[] =
     "if (0xa05f >> z & 1)",
     "  RAISE_EXCEPTION (SIGILL);",
     "else",
-    "  MACL = DSP_R (z) = res;",
+    "  MACL = DSP_R (z);",
     "return;",
   },
   /* sh4a */
