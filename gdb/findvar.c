@@ -785,7 +785,7 @@ read_frame_register_value (value *value)
   gdbarch *gdbarch = frame_unwind_arch (next_frame);
   LONGEST offset = 0;
   LONGEST reg_offset = value->offset ();
-  int regnum = VALUE_REGNUM (value);
+  int regnum = value->regnum ();
   int len = type_length_units (check_typedef (value->type ()));
 
   /* Skip registers wholly inside of REG_OFFSET.  */

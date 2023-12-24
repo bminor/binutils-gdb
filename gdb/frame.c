@@ -1196,7 +1196,7 @@ frame_register_unwind (frame_info_ptr next_frame, int regnum,
   *lvalp = value->lval ();
   *addrp = value->address ();
   if (*lvalp == lval_register)
-    *realnump = VALUE_REGNUM (value);
+    *realnump = value->regnum ();
   else
     *realnump = -1;
 
@@ -1304,8 +1304,7 @@ frame_unwind_register_value (frame_info_ptr next_frame, int regnum)
       else
 	{
 	  if (value->lval () == lval_register)
-	    gdb_printf (&debug_file, " register=%d",
-			VALUE_REGNUM (value));
+	    gdb_printf (&debug_file, " register=%d", value->regnum ());
 	  else if (value->lval () == lval_memory)
 	    gdb_printf (&debug_file, " address=%s",
 			paddress (gdbarch,
@@ -1417,7 +1416,7 @@ read_frame_register_unsigned (frame_info_ptr frame, int regnum,
     {
       struct gdbarch *gdbarch = get_frame_arch (frame);
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-      int size = register_size (gdbarch, VALUE_REGNUM (regval));
+      int size = register_size (gdbarch, regval->regnum ());
 
       *val = extract_unsigned_integer (regval->contents ().data (), size,
 				       byte_order);

@@ -383,7 +383,16 @@ public:
     return m_location.reg.next_frame_id;
   }
 
-  int *deprecated_regnum_hack ();
+  /* Return this value's register number.
+
+     The value must be of lval == lval_register.  */
+  int regnum ()
+  {
+    gdb_assert (m_lval == lval_register);
+
+    return m_location.reg.regnum;
+  }
+
 
   /* contents() and contents_raw() both return the address of the gdb
      buffer used to hold a copy of the contents of the lval.
@@ -971,9 +980,6 @@ extern void error_value_optimized_out (void);
 
 /* Pointer to internal variable.  */
 #define VALUE_INTERNALVAR(val) (*((val)->deprecated_internalvar_hack ()))
-
-/* Register number if the value is from a register.  */
-#define VALUE_REGNUM(val) (*((val)->deprecated_regnum_hack ()))
 
 /* Return value after lval_funcs->coerce_ref (after check_typedef).  Return
    NULL if lval_funcs->coerce_ref is not applicable for whatever reason.  */

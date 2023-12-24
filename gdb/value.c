@@ -971,7 +971,7 @@ value::allocate_register_lazy (frame_info_ptr next_frame, int regnum,
   value *result = value::allocate_lazy (type);
 
   result->set_lval (lval_register);
-  VALUE_REGNUM (result) = regnum;
+  result->m_location.reg.regnum = regnum;
   result->m_location.reg.next_frame_id = get_frame_id (next_frame);
 
   return result;
@@ -1421,14 +1421,6 @@ value::set_address (CORE_ADDR addr)
   m_location.address = addr;
 }
 
-int *
-value::deprecated_regnum_hack ()
-{
-  gdb_assert (m_lval == lval_register);
-  return &m_location.reg.regnum;
-}
-
-
 /* Return a mark in the value chain.  All values allocated after the
    mark is obtained (except for those released) are subject to being freed
    if a subsequent value_free_to_mark is passed the mark.  */
@@ -3921,8 +3913,6 @@ value::fetch_lazy_memory ()
 void
 value::fetch_lazy_register ()
 {
- 
-  int regnum;
   struct type *type = check_typedef (this->type ());
   struct value *new_val = this;
 
@@ -3938,7 +3928,7 @@ value::fetch_lazy_register ()
       frame_info_ptr next_frame = frame_find_by_id (next_frame_id);
       gdb_assert (next_frame != NULL);
 
-      regnum = VALUE_REGNUM (new_val);
+      int regnum = new_val->regnum ();
 
       /* Convertible register routines are used for multi-register
 	 values and for interpretation in different types
@@ -3982,7 +3972,7 @@ value::fetch_lazy_register ()
     {
       frame_info_ptr frame = frame_find_by_id (this->next_frame_id ());
       frame = get_prev_frame_always (frame);
-      regnum = VALUE_REGNUM (this);
+      int regnum = this->regnum ();
       gdbarch *gdbarch = get_frame_arch (frame);
 
       string_file debug_file;
@@ -4003,8 +3993,7 @@ value::fetch_lazy_register ()
 	  gdb::array_view<const gdb_byte> buf = new_val->contents ();
 
 	  if (new_val->lval () == lval_register)
-	    gdb_printf (&debug_file, " register=%d",
-			VALUE_REGNUM (new_val));
+	    gdb_printf (&debug_file, " register=%d", new_val->regnum ());
 	  else if (new_val->lval () == lval_memory)
 	    gdb_printf (&debug_file, " address=%s",
 			paddress (gdbarch,
