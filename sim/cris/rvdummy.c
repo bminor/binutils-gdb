@@ -478,7 +478,6 @@ main (int argc, char *argv[])
 {
   int optc;
   int fd;
-  FILE *f;
   int i;
 
   progname = argv[0];
