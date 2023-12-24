@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996-2024 Free Software Foundation, Inc.
+Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -351,8 +351,8 @@ USI frvbf_h_accg_get (SIM_CPU *, UINT);
 void frvbf_h_accg_set (SIM_CPU *, UINT, USI);
 DI frvbf_h_acc40S_get (SIM_CPU *, UINT);
 void frvbf_h_acc40S_set (SIM_CPU *, UINT, DI);
-UDI frvbf_h_acc40U_get (SIM_CPU *, UINT);
-void frvbf_h_acc40U_set (SIM_CPU *, UINT, UDI);
+DI frvbf_h_acc40U_get (SIM_CPU *, UINT);
+void frvbf_h_acc40U_set (SIM_CPU *, UINT, DI);
 DI frvbf_h_iacc0_get (SIM_CPU *, UINT);
 void frvbf_h_iacc0_set (SIM_CPU *, UINT, DI);
 UQI frvbf_h_iccr_get (SIM_CPU *, UINT);
@@ -1330,13 +1330,13 @@ union sem_fields {
     unsigned char in_CCi;
     unsigned char in_FRinti;
     unsigned char in_FRintj;
-    unsigned char in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1;
+    unsigned char in_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_1;
     unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRinti_0;
     unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintj_0;
     unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRinti_0;
     unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintj_0;
     unsigned char out_ACC40Uk;
-    unsigned char out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1;
+    unsigned char out_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_1;
   } sfmt_cmmachu;
   struct { /*  */
     UINT f_ACC40Sk;
@@ -1490,9 +1490,9 @@ union sem_fields {
     unsigned char in_CCi;
     unsigned char in_FRintieven;
     unsigned char in_FRintjeven;
-    unsigned char in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1;
-    unsigned char in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_2;
-    unsigned char in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_3;
+    unsigned char in_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_1;
+    unsigned char in_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_2;
+    unsigned char in_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_3;
     unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_0;
     unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_1;
     unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintjeven_0;
@@ -1502,9 +1502,9 @@ union sem_fields {
     unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_0;
     unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_1;
     unsigned char out_ACC40Uk;
-    unsigned char out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1;
-    unsigned char out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_2;
-    unsigned char out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_3;
+    unsigned char out_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_1;
+    unsigned char out_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_2;
+    unsigned char out_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_3;
   } sfmt_cmqmachu;
   struct { /*  */
     UINT f_ACC40Sk;

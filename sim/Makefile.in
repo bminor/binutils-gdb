@@ -2373,7 +2373,6 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_examples_TRUE@	$(SIM_COMMON_LIBS)
 
 @SIM_ENABLE_ARCH_frv_TRUE@AM_CPPFLAGS_frv = $(SIM_FRV_TRAPDUMP_FLAGS)
-@SIM_ENABLE_ARCH_frv_TRUE@AM_CFLAGS_frv_sem.o = -Wno-error
 @SIM_ENABLE_ARCH_frv_TRUE@nodist_frv_libsim_a_SOURCES = \
 @SIM_ENABLE_ARCH_frv_TRUE@	frv/modules.c
 

@@ -18,9 +18,6 @@
 
 AM_CPPFLAGS_%C% = $(SIM_FRV_TRAPDUMP_FLAGS)
 
-## Some modules don't build cleanly yet.
-AM_CFLAGS_%C%_sem.o = -Wno-error
-
 nodist_%C%_libsim_a_SOURCES = \
 	%D%/modules.c
 %C%_libsim_a_SOURCES = \

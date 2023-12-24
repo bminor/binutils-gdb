@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996-2024 Free Software Foundation, Inc.
+Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -11216,13 +11216,13 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_ACC40Uk) = f_ACC40Uk;
       FLD (in_FRinti) = f_FRi;
       FLD (in_FRintj) = f_FRj;
-      FLD (in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
+      FLD (in_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
       FLD (in_h_fr_hi_UHI_add__INT_index_of__INT_FRinti_0) = ((FLD (f_FRi)) + (0));
       FLD (in_h_fr_hi_UHI_add__INT_index_of__INT_FRintj_0) = ((FLD (f_FRj)) + (0));
       FLD (in_h_fr_lo_UHI_add__INT_index_of__INT_FRinti_0) = ((FLD (f_FRi)) + (0));
       FLD (in_h_fr_lo_UHI_add__INT_index_of__INT_FRintj_0) = ((FLD (f_FRj)) + (0));
       FLD (out_ACC40Uk) = f_ACC40Uk;
-      FLD (out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
+      FLD (out_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
     }
 #endif
 #undef FLD
@@ -11308,13 +11308,13 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_CCi) = f_CCi;
       FLD (in_FRinti) = f_FRi;
       FLD (in_FRintj) = f_FRj;
-      FLD (in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
+      FLD (in_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
       FLD (in_h_fr_hi_UHI_add__INT_index_of__INT_FRinti_0) = ((FLD (f_FRi)) + (0));
       FLD (in_h_fr_hi_UHI_add__INT_index_of__INT_FRintj_0) = ((FLD (f_FRj)) + (0));
       FLD (in_h_fr_lo_UHI_add__INT_index_of__INT_FRinti_0) = ((FLD (f_FRi)) + (0));
       FLD (in_h_fr_lo_UHI_add__INT_index_of__INT_FRintj_0) = ((FLD (f_FRj)) + (0));
       FLD (out_ACC40Uk) = f_ACC40Uk;
-      FLD (out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
+      FLD (out_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
     }
 #endif
 #undef FLD
@@ -11394,9 +11394,9 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_ACC40Uk) = f_ACC40Uk;
       FLD (in_FRintieven) = f_FRi;
       FLD (in_FRintjeven) = f_FRj;
-      FLD (in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
-      FLD (in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_2) = ((FLD (f_ACC40Uk)) + (2));
-      FLD (in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_3) = ((FLD (f_ACC40Uk)) + (3));
+      FLD (in_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
+      FLD (in_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_2) = ((FLD (f_ACC40Uk)) + (2));
+      FLD (in_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_3) = ((FLD (f_ACC40Uk)) + (3));
       FLD (in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_0) = ((FLD (f_FRi)) + (0));
       FLD (in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_1) = ((FLD (f_FRi)) + (1));
       FLD (in_h_fr_hi_UHI_add__INT_index_of__INT_FRintjeven_0) = ((FLD (f_FRj)) + (0));
@@ -11406,9 +11406,9 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_0) = ((FLD (f_FRj)) + (0));
       FLD (in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_1) = ((FLD (f_FRj)) + (1));
       FLD (out_ACC40Uk) = f_ACC40Uk;
-      FLD (out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
-      FLD (out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_2) = ((FLD (f_ACC40Uk)) + (2));
-      FLD (out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_3) = ((FLD (f_ACC40Uk)) + (3));
+      FLD (out_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
+      FLD (out_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_2) = ((FLD (f_ACC40Uk)) + (2));
+      FLD (out_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_3) = ((FLD (f_ACC40Uk)) + (3));
     }
 #endif
 #undef FLD
@@ -11502,9 +11502,9 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_CCi) = f_CCi;
       FLD (in_FRintieven) = f_FRi;
       FLD (in_FRintjeven) = f_FRj;
-      FLD (in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
-      FLD (in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_2) = ((FLD (f_ACC40Uk)) + (2));
-      FLD (in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_3) = ((FLD (f_ACC40Uk)) + (3));
+      FLD (in_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
+      FLD (in_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_2) = ((FLD (f_ACC40Uk)) + (2));
+      FLD (in_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_3) = ((FLD (f_ACC40Uk)) + (3));
       FLD (in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_0) = ((FLD (f_FRi)) + (0));
       FLD (in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_1) = ((FLD (f_FRi)) + (1));
       FLD (in_h_fr_hi_UHI_add__INT_index_of__INT_FRintjeven_0) = ((FLD (f_FRj)) + (0));
@@ -11514,9 +11514,9 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_0) = ((FLD (f_FRj)) + (0));
       FLD (in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_1) = ((FLD (f_FRj)) + (1));
       FLD (out_ACC40Uk) = f_ACC40Uk;
-      FLD (out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
-      FLD (out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_2) = ((FLD (f_ACC40Uk)) + (2));
-      FLD (out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_3) = ((FLD (f_ACC40Uk)) + (3));
+      FLD (out_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_1) = ((FLD (f_ACC40Uk)) + (1));
+      FLD (out_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_2) = ((FLD (f_ACC40Uk)) + (2));
+      FLD (out_h_acc40U_DI_add__INT_index_of__INT_ACC40Uk_3) = ((FLD (f_ACC40Uk)) + (3));
     }
 #endif
 #undef FLD

@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996-2024 Free Software Foundation, Inc.
+Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -24375,7 +24375,7 @@ frvbf_media_overflow (current_cpu, 8);
 if (GTDI (tmp_tmp, MAKEDI (255, 0xffffffff))) {
 {
   {
-    UDI opval = MAKEDI (255, 0xffffffff);
+    DI opval = MAKEDI (255, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 12);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -24386,7 +24386,7 @@ frvbf_media_overflow (current_cpu, 4);
 if (LTDI (tmp_tmp, MAKEDI (0, 0))) {
 {
   {
-    UDI opval = MAKEDI (0, 0);
+    DI opval = MAKEDI (0, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 12);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -24395,7 +24395,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 } else {
   {
-    UDI opval = tmp_tmp;
+    DI opval = tmp_tmp;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 12);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -24581,7 +24581,7 @@ frvbf_media_overflow (current_cpu, 8);
 if (GTDI (tmp_tmp, MAKEDI (255, 0xffffffff))) {
 {
   {
-    UDI opval = MAKEDI (255, 0xffffffff);
+    DI opval = MAKEDI (255, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 12);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -24592,7 +24592,7 @@ frvbf_media_overflow (current_cpu, 4);
 if (LTDI (tmp_tmp, MAKEDI (0, 0))) {
 {
   {
-    UDI opval = MAKEDI (0, 0);
+    DI opval = MAKEDI (0, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 12);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -24601,7 +24601,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 } else {
   {
-    UDI opval = tmp_tmp;
+    DI opval = tmp_tmp;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 12);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -24790,7 +24790,7 @@ frvbf_media_overflow (current_cpu, 8);
 if (GTDI (tmp_tmp, MAKEDI (255, 0xffffffff))) {
 {
   {
-    UDI opval = MAKEDI (255, 0xffffffff);
+    DI opval = MAKEDI (255, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 14);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -24801,7 +24801,7 @@ frvbf_media_overflow (current_cpu, 4);
 if (LTDI (tmp_tmp, MAKEDI (0, 0))) {
 {
   {
-    UDI opval = MAKEDI (0, 0);
+    DI opval = MAKEDI (0, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 14);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -24810,7 +24810,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 } else {
   {
-    UDI opval = tmp_tmp;
+    DI opval = tmp_tmp;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 14);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25078,7 +25078,7 @@ frvbf_media_overflow (current_cpu, 8);
 if (GTDI (tmp_tmp, MAKEDI (255, 0xffffffff))) {
 {
   {
-    UDI opval = MAKEDI (255, 0xffffffff);
+    DI opval = MAKEDI (255, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 18);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25089,7 +25089,7 @@ frvbf_media_overflow (current_cpu, 4);
 if (LTDI (tmp_tmp, MAKEDI (0, 0))) {
 {
   {
-    UDI opval = MAKEDI (0, 0);
+    DI opval = MAKEDI (0, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 18);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25098,7 +25098,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 } else {
   {
-    UDI opval = tmp_tmp;
+    DI opval = tmp_tmp;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 18);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25118,7 +25118,7 @@ frvbf_media_overflow (current_cpu, 4);
 if (GTDI (tmp_tmp, MAKEDI (255, 0xffffffff))) {
 {
   {
-    UDI opval = MAKEDI (255, 0xffffffff);
+    DI opval = MAKEDI (255, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 2), opval);
     written |= (1 << 19);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25129,7 +25129,7 @@ frvbf_media_overflow (current_cpu, 2);
 if (LTDI (tmp_tmp, MAKEDI (0, 0))) {
 {
   {
-    UDI opval = MAKEDI (0, 0);
+    DI opval = MAKEDI (0, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 2), opval);
     written |= (1 << 19);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25138,7 +25138,7 @@ frvbf_media_overflow (current_cpu, 2);
 }
 } else {
   {
-    UDI opval = tmp_tmp;
+    DI opval = tmp_tmp;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 2), opval);
     written |= (1 << 19);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25152,7 +25152,7 @@ frvbf_media_overflow (current_cpu, 2);
 if (GTDI (tmp_tmp, MAKEDI (255, 0xffffffff))) {
 {
   {
-    UDI opval = MAKEDI (255, 0xffffffff);
+    DI opval = MAKEDI (255, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 3), opval);
     written |= (1 << 20);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25163,7 +25163,7 @@ frvbf_media_overflow (current_cpu, 1);
 if (LTDI (tmp_tmp, MAKEDI (0, 0))) {
 {
   {
-    UDI opval = MAKEDI (0, 0);
+    DI opval = MAKEDI (0, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 3), opval);
     written |= (1 << 20);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25172,7 +25172,7 @@ frvbf_media_overflow (current_cpu, 1);
 }
 } else {
   {
-    UDI opval = tmp_tmp;
+    DI opval = tmp_tmp;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 3), opval);
     written |= (1 << 20);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25443,7 +25443,7 @@ frvbf_media_overflow (current_cpu, 8);
 if (GTDI (tmp_tmp, MAKEDI (255, 0xffffffff))) {
 {
   {
-    UDI opval = MAKEDI (255, 0xffffffff);
+    DI opval = MAKEDI (255, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 20);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25454,7 +25454,7 @@ frvbf_media_overflow (current_cpu, 4);
 if (LTDI (tmp_tmp, MAKEDI (0, 0))) {
 {
   {
-    UDI opval = MAKEDI (0, 0);
+    DI opval = MAKEDI (0, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 20);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25463,7 +25463,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 } else {
   {
-    UDI opval = tmp_tmp;
+    DI opval = tmp_tmp;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 1), opval);
     written |= (1 << 20);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25483,7 +25483,7 @@ frvbf_media_overflow (current_cpu, 4);
 if (GTDI (tmp_tmp, MAKEDI (255, 0xffffffff))) {
 {
   {
-    UDI opval = MAKEDI (255, 0xffffffff);
+    DI opval = MAKEDI (255, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 2), opval);
     written |= (1 << 21);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25494,7 +25494,7 @@ frvbf_media_overflow (current_cpu, 2);
 if (LTDI (tmp_tmp, MAKEDI (0, 0))) {
 {
   {
-    UDI opval = MAKEDI (0, 0);
+    DI opval = MAKEDI (0, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 2), opval);
     written |= (1 << 21);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25503,7 +25503,7 @@ frvbf_media_overflow (current_cpu, 2);
 }
 } else {
   {
-    UDI opval = tmp_tmp;
+    DI opval = tmp_tmp;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 2), opval);
     written |= (1 << 21);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25517,7 +25517,7 @@ frvbf_media_overflow (current_cpu, 2);
 if (GTDI (tmp_tmp, MAKEDI (255, 0xffffffff))) {
 {
   {
-    UDI opval = MAKEDI (255, 0xffffffff);
+    DI opval = MAKEDI (255, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 3), opval);
     written |= (1 << 22);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25528,7 +25528,7 @@ frvbf_media_overflow (current_cpu, 1);
 if (LTDI (tmp_tmp, MAKEDI (0, 0))) {
 {
   {
-    UDI opval = MAKEDI (0, 0);
+    DI opval = MAKEDI (0, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 3), opval);
     written |= (1 << 22);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
@@ -25537,7 +25537,7 @@ frvbf_media_overflow (current_cpu, 1);
 }
 } else {
   {
-    UDI opval = tmp_tmp;
+    DI opval = tmp_tmp;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40U_set, ADDSI (FLD (f_ACC40Uk), 3), opval);
     written |= (1 << 22);
     CGEN_TRACE_RESULT (current_cpu, abuf, "acc40U", 'D', opval);
