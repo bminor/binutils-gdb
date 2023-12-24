@@ -3055,6 +3055,7 @@ SEM_FN_NAME (frvbf,cmpb) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   QI tmp_cc;
+  tmp_cc = 0;
 if (EQBI (EQSI (ANDSI (GET_H_GR (FLD (f_GRi)), 0xff000000), ANDSI (GET_H_GR (FLD (f_GRj)), 0xff000000)), 0)) {
   tmp_cc = ANDQI (tmp_cc, 7);
 } else {
