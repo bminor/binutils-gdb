@@ -272,607 +272,607 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
       unsigned int val0 = (((insn >> 26) & (63 << 0)));
       switch (val0)
       {
-      case 0 :
+      case 0:
         {
           unsigned int val1 = (((insn >> 1) & (1 << 4)) | ((insn >> 0) & (15 << 0)));
           switch (val1)
           {
-          case 0 :
+          case 0:
             if ((entire_insn & 0xffe0003f) == 0x0)
               { itype = IQ2000BF_INSN_SLL; goto extract_sfmt_sll; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
+          case 1:
             if ((entire_insn & 0xfc00003f) == 0x1)
               { itype = IQ2000BF_INSN_SLMV; goto extract_sfmt_slmv; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 2 :
+          case 2:
             if ((entire_insn & 0xffe0003f) == 0x2)
               { itype = IQ2000BF_INSN_SRL; goto extract_sfmt_sll; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 3 :
+          case 3:
             if ((entire_insn & 0xffe0003f) == 0x3)
               { itype = IQ2000BF_INSN_SRA; goto extract_sfmt_sll; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 4 :
+          case 4:
             if ((entire_insn & 0xfc0007ff) == 0x4)
               { itype = IQ2000BF_INSN_SLLV; goto extract_sfmt_add; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 5 :
+          case 5:
             if ((entire_insn & 0xfc00003f) == 0x5)
               { itype = IQ2000BF_INSN_SRMV; goto extract_sfmt_slmv; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 6 :
+          case 6:
             if ((entire_insn & 0xfc0007ff) == 0x6)
               { itype = IQ2000BF_INSN_SRLV; goto extract_sfmt_add; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 7 :
+          case 7:
             if ((entire_insn & 0xfc0007ff) == 0x7)
               { itype = IQ2000BF_INSN_SRAV; goto extract_sfmt_add; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 8 :
+          case 8:
             if ((entire_insn & 0xfc1fffff) == 0x8)
               { itype = IQ2000BF_INSN_JR; goto extract_sfmt_jr; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 9 :
+          case 9:
             if ((entire_insn & 0xfc1f07ff) == 0x9)
               { itype = IQ2000BF_INSN_JALR; goto extract_sfmt_jalr; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 10 :
+          case 10:
             if ((entire_insn & 0xfc1fffff) == 0xa)
               { itype = IQ2000BF_INSN_JCR; goto extract_sfmt_bctxt; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 12 :
+          case 12:
             if ((entire_insn & 0xfc00003f) == 0xc)
               { itype = IQ2000BF_INSN_SYSCALL; goto extract_sfmt_break; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 13 :
+          case 13:
             if ((entire_insn & 0xffffffff) == 0xd)
               { itype = IQ2000BF_INSN_BREAK; goto extract_sfmt_break; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 14 :
+          case 14:
             if ((entire_insn & 0xfc00003f) == 0xe)
               { itype = IQ2000BF_INSN_SLEEP; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 16 :
+          case 16:
             if ((entire_insn & 0xfc0007ff) == 0x20)
               { itype = IQ2000BF_INSN_ADD; goto extract_sfmt_add; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 17 :
+          case 17:
             if ((entire_insn & 0xfc0007ff) == 0x21)
               { itype = IQ2000BF_INSN_ADDU; goto extract_sfmt_add; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 18 :
+          case 18:
             if ((entire_insn & 0xfc0007ff) == 0x22)
               { itype = IQ2000BF_INSN_SUB; goto extract_sfmt_add; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 19 :
+          case 19:
             if ((entire_insn & 0xfc0007ff) == 0x23)
               { itype = IQ2000BF_INSN_SUBU; goto extract_sfmt_add; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 20 :
+          case 20:
             if ((entire_insn & 0xfc0007ff) == 0x24)
               { itype = IQ2000BF_INSN_AND; goto extract_sfmt_add; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 21 :
+          case 21:
             if ((entire_insn & 0xfc0007ff) == 0x25)
               { itype = IQ2000BF_INSN_OR; goto extract_sfmt_add; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 22 :
+          case 22:
             if ((entire_insn & 0xfc0007ff) == 0x26)
               { itype = IQ2000BF_INSN_XOR; goto extract_sfmt_add; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 23 :
+          case 23:
             if ((entire_insn & 0xfc0007ff) == 0x27)
               { itype = IQ2000BF_INSN_NOR; goto extract_sfmt_add; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 25 :
+          case 25:
             if ((entire_insn & 0xfc0007ff) == 0x29)
               { itype = IQ2000BF_INSN_ADO16; goto extract_sfmt_add; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 26 :
+          case 26:
             if ((entire_insn & 0xfc0007ff) == 0x2a)
               { itype = IQ2000BF_INSN_SLT; goto extract_sfmt_slt; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 27 :
+          case 27:
             if ((entire_insn & 0xfc0007ff) == 0x2b)
               { itype = IQ2000BF_INSN_SLTU; goto extract_sfmt_slt; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 29 :
+          case 29:
             if ((entire_insn & 0xfc00043f) == 0x2d)
               { itype = IQ2000BF_INSN_MRGB; goto extract_sfmt_mrgb; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+          default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 1 :
+      case 1:
         {
           unsigned int val1 = (((insn >> 17) & (1 << 3)) | ((insn >> 16) & (7 << 0)));
           switch (val1)
           {
-          case 0 :
+          case 0:
             if ((entire_insn & 0xfc1f0000) == 0x4000000)
               { itype = IQ2000BF_INSN_BLTZ; goto extract_sfmt_bgez; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
+          case 1:
             if ((entire_insn & 0xfc1f0000) == 0x4010000)
               { itype = IQ2000BF_INSN_BGEZ; goto extract_sfmt_bgez; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 2 :
+          case 2:
             if ((entire_insn & 0xfc1f0000) == 0x4020000)
               { itype = IQ2000BF_INSN_BLTZL; goto extract_sfmt_bgez; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 3 :
+          case 3:
             if ((entire_insn & 0xfc1f0000) == 0x4030000)
               { itype = IQ2000BF_INSN_BGEZL; goto extract_sfmt_bgez; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 6 :
+          case 6:
             if ((entire_insn & 0xfc1f0000) == 0x4060000)
               { itype = IQ2000BF_INSN_BCTXT; goto extract_sfmt_bctxt; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 8 :
+          case 8:
             if ((entire_insn & 0xfc1f0000) == 0x4100000)
               { itype = IQ2000BF_INSN_BLTZAL; goto extract_sfmt_bgezal; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 9 :
+          case 9:
             if ((entire_insn & 0xfc1f0000) == 0x4110000)
               { itype = IQ2000BF_INSN_BGEZAL; goto extract_sfmt_bgezal; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 10 :
+          case 10:
             if ((entire_insn & 0xfc1f0000) == 0x4120000)
               { itype = IQ2000BF_INSN_BLTZALL; goto extract_sfmt_bgezal; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 11 :
+          case 11:
             if ((entire_insn & 0xfc1f0000) == 0x4130000)
               { itype = IQ2000BF_INSN_BGEZALL; goto extract_sfmt_bgezal; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+          default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 2 :
+      case 2:
         if ((entire_insn & 0xffff0000) == 0x8000000)
           { itype = IQ2000BF_INSN_J; goto extract_sfmt_j; }
         itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 3 :
+      case 3:
         if ((entire_insn & 0xffff0000) == 0xc000000)
           { itype = IQ2000BF_INSN_JAL; goto extract_sfmt_jal; }
         itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 4 : itype = IQ2000BF_INSN_BEQ; goto extract_sfmt_bbv;
-      case 5 : itype = IQ2000BF_INSN_BNE; goto extract_sfmt_bbv;
-      case 6 :
+      case 4: itype = IQ2000BF_INSN_BEQ; goto extract_sfmt_bbv;
+      case 5: itype = IQ2000BF_INSN_BNE; goto extract_sfmt_bbv;
+      case 6:
         if ((entire_insn & 0xfc1f0000) == 0x18000000)
           { itype = IQ2000BF_INSN_BLEZ; goto extract_sfmt_bgez; }
         itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 7 :
+      case 7:
         if ((entire_insn & 0xfc1f0000) == 0x1c000000)
           { itype = IQ2000BF_INSN_BGTZ; goto extract_sfmt_bgez; }
         itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 8 : itype = IQ2000BF_INSN_ADDI; goto extract_sfmt_addi;
-      case 9 : itype = IQ2000BF_INSN_ADDIU; goto extract_sfmt_addi;
-      case 10 : itype = IQ2000BF_INSN_SLTI; goto extract_sfmt_slti;
-      case 11 : itype = IQ2000BF_INSN_SLTIU; goto extract_sfmt_slti;
-      case 12 : itype = IQ2000BF_INSN_ANDI; goto extract_sfmt_addi;
-      case 13 : itype = IQ2000BF_INSN_ORI; goto extract_sfmt_addi;
-      case 14 : itype = IQ2000BF_INSN_XORI; goto extract_sfmt_addi;
-      case 15 :
+      case 8: itype = IQ2000BF_INSN_ADDI; goto extract_sfmt_addi;
+      case 9: itype = IQ2000BF_INSN_ADDIU; goto extract_sfmt_addi;
+      case 10: itype = IQ2000BF_INSN_SLTI; goto extract_sfmt_slti;
+      case 11: itype = IQ2000BF_INSN_SLTIU; goto extract_sfmt_slti;
+      case 12: itype = IQ2000BF_INSN_ANDI; goto extract_sfmt_addi;
+      case 13: itype = IQ2000BF_INSN_ORI; goto extract_sfmt_addi;
+      case 14: itype = IQ2000BF_INSN_XORI; goto extract_sfmt_addi;
+      case 15:
         if ((entire_insn & 0xffe00000) == 0x3c000000)
           { itype = IQ2000BF_INSN_LUI; goto extract_sfmt_lui; }
         itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 16 :
+      case 16:
         {
           unsigned int val1 = (((insn >> 19) & (15 << 3)) | ((insn >> 15) & (3 << 1)) | ((insn >> 4) & (1 << 0)));
           switch (val1)
           {
-          case 0 : /* fall through */
-          case 2 : /* fall through */
-          case 4 : /* fall through */
-          case 6 :
+          case 0:
+          case 2:
+          case 4:
+          case 6:
             if ((entire_insn & 0xffe007ff) == 0x40000000)
               { itype = IQ2000BF_INSN_MFC0; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 8 : /* fall through */
-          case 10 : /* fall through */
-          case 12 : /* fall through */
-          case 14 :
+          case 8:
+          case 10:
+          case 12:
+          case 14:
             if ((entire_insn & 0xffe007ff) == 0x40400000)
               { itype = IQ2000BF_INSN_CFC0; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 16 : /* fall through */
-          case 18 : /* fall through */
-          case 20 : /* fall through */
-          case 22 :
+          case 16:
+          case 18:
+          case 20:
+          case 22:
             if ((entire_insn & 0xffe007ff) == 0x40800000)
               { itype = IQ2000BF_INSN_MTC0; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 24 : /* fall through */
-          case 26 : /* fall through */
-          case 28 : /* fall through */
-          case 30 :
+          case 24:
+          case 26:
+          case 28:
+          case 30:
             if ((entire_insn & 0xffe007ff) == 0x40c00000)
               { itype = IQ2000BF_INSN_CTC0; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 32 : /* fall through */
-          case 33 :
+          case 32:
+          case 33:
             if ((entire_insn & 0xffff0000) == 0x41000000)
               { itype = IQ2000BF_INSN_BC0F; goto extract_sfmt_bctxt; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 34 : /* fall through */
-          case 35 :
+          case 34:
+          case 35:
             if ((entire_insn & 0xffff0000) == 0x41010000)
               { itype = IQ2000BF_INSN_BC0T; goto extract_sfmt_bctxt; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 36 : /* fall through */
-          case 37 :
+          case 36:
+          case 37:
             if ((entire_insn & 0xffff0000) == 0x41020000)
               { itype = IQ2000BF_INSN_BC0FL; goto extract_sfmt_bctxt; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 38 : /* fall through */
-          case 39 :
+          case 38:
+          case 39:
             if ((entire_insn & 0xffff0000) == 0x41030000)
               { itype = IQ2000BF_INSN_BC0TL; goto extract_sfmt_bctxt; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 65 :
+          case 65:
             if ((entire_insn & 0xffffffff) == 0x42000010)
               { itype = IQ2000BF_INSN_RFE; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+          default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 17 :
+      case 17:
         {
           unsigned int val1 = (((insn >> 22) & (3 << 0)));
           switch (val1)
           {
-          case 0 :
+          case 0:
             if ((entire_insn & 0xffe007ff) == 0x44000000)
               { itype = IQ2000BF_INSN_MFC1; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
+          case 1:
             if ((entire_insn & 0xffe007ff) == 0x44400000)
               { itype = IQ2000BF_INSN_CFC1; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 2 :
+          case 2:
             if ((entire_insn & 0xffe007ff) == 0x44800000)
               { itype = IQ2000BF_INSN_MTC1; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 3 :
+          case 3:
             if ((entire_insn & 0xffe007ff) == 0x44c00000)
               { itype = IQ2000BF_INSN_CTC1; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+          default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 18 :
+      case 18:
         {
           unsigned int val1 = (((insn >> 16) & (3 << 5)) | ((insn >> 0) & (31 << 0)));
           switch (val1)
           {
-          case 0 :
+          case 0:
             {
               unsigned int val2 = (((insn >> 23) & (1 << 0)));
               switch (val2)
               {
-              case 0 :
+              case 0:
                 if ((entire_insn & 0xffe007ff) == 0x48000000)
                   { itype = IQ2000BF_INSN_MFC2; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 1 :
+              case 1:
                 if ((entire_insn & 0xffe007ff) == 0x48800000)
                   { itype = IQ2000BF_INSN_MTC2; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+              default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
-          case 32 :
+          case 32:
             if ((entire_insn & 0xffe0ffff) == 0x48200000)
               { itype = IQ2000BF_INSN_LUULCK; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 33 :
+          case 33:
             if ((entire_insn & 0xffe007ff) == 0x48200001)
               { itype = IQ2000BF_INSN_LUR; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 34 :
+          case 34:
             if ((entire_insn & 0xffe007ff) == 0x48200002)
               { itype = IQ2000BF_INSN_LUM32; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 35 :
+          case 35:
             if ((entire_insn & 0xffe007ff) == 0x48200003)
               { itype = IQ2000BF_INSN_LUC32; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 36 :
+          case 36:
             if ((entire_insn & 0xffe0ffff) == 0x48200004)
               { itype = IQ2000BF_INSN_LULCK; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 37 :
+          case 37:
             if ((entire_insn & 0xffe007ff) == 0x48200005)
               { itype = IQ2000BF_INSN_LURL; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 38 :
+          case 38:
             if ((entire_insn & 0xffe007ff) == 0x48200006)
               { itype = IQ2000BF_INSN_LUM32L; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 39 :
+          case 39:
             if ((entire_insn & 0xffe007ff) == 0x48200007)
               { itype = IQ2000BF_INSN_LUC32L; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 40 :
+          case 40:
             if ((entire_insn & 0xffe007ff) == 0x48200008)
               { itype = IQ2000BF_INSN_LUK; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 42 :
+          case 42:
             if ((entire_insn & 0xffe007ff) == 0x4820000a)
               { itype = IQ2000BF_INSN_LUM64; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 43 :
+          case 43:
             if ((entire_insn & 0xffe007ff) == 0x4820000b)
               { itype = IQ2000BF_INSN_LUC64; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 46 :
+          case 46:
             if ((entire_insn & 0xffe007ff) == 0x4820000e)
               { itype = IQ2000BF_INSN_LUM64L; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 47 :
+          case 47:
             if ((entire_insn & 0xffe007ff) == 0x4820000f)
               { itype = IQ2000BF_INSN_LUC64L; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 48 :
+          case 48:
             if ((entire_insn & 0xffe0ffff) == 0x48200010)
               { itype = IQ2000BF_INSN_SRRD; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 49 :
+          case 49:
             if ((entire_insn & 0xffe007ff) == 0x48200011)
               { itype = IQ2000BF_INSN_SRWR; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 52 :
+          case 52:
             if ((entire_insn & 0xffe0ffff) == 0x48200014)
               { itype = IQ2000BF_INSN_SRRDL; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 53 :
+          case 53:
             if ((entire_insn & 0xffe007ff) == 0x48200015)
               { itype = IQ2000BF_INSN_SRWRU; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 54 :
+          case 54:
             if ((entire_insn & 0xffe0ffff) == 0x48200016)
               { itype = IQ2000BF_INSN_SRULCK; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 64 :
+          case 64:
             {
               unsigned int val2 = (((insn >> 23) & (1 << 0)));
               switch (val2)
               {
-              case 0 :
+              case 0:
                 if ((entire_insn & 0xffe007ff) == 0x48400000)
                   { itype = IQ2000BF_INSN_CFC2; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 1 :
+              case 1:
                 if ((entire_insn & 0xffe007ff) == 0x48c00000)
                   { itype = IQ2000BF_INSN_CTC2; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+              default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
-          default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+          default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 19 :
+      case 19:
         {
           unsigned int val1 = (((insn >> 19) & (31 << 2)) | ((insn >> 0) & (3 << 0)));
           switch (val1)
           {
-          case 0 :
+          case 0:
             if ((entire_insn & 0xffe007ff) == 0x4c000000)
               { itype = IQ2000BF_INSN_MFC3; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 4 :
+          case 4:
             {
               unsigned int val2 = (((insn >> 2) & (3 << 0)));
               switch (val2)
               {
-              case 0 :
+              case 0:
                 if ((entire_insn & 0xffe007ff) == 0x4c200000)
                   { itype = IQ2000BF_INSN_WB; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 1 :
+              case 1:
                 if ((entire_insn & 0xffe007ff) == 0x4c200004)
                   { itype = IQ2000BF_INSN_RB; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 2 :
+              case 2:
                 if ((entire_insn & 0xffffffff) == 0x4c200008)
                   { itype = IQ2000BF_INSN_TRAPQFL; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+              default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
-          case 5 :
+          case 5:
             {
               unsigned int val2 = (((insn >> 3) & (1 << 0)));
               switch (val2)
               {
-              case 0 :
+              case 0:
                 if ((entire_insn & 0xffe007ff) == 0x4c200001)
                   { itype = IQ2000BF_INSN_WBU; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 1 :
+              case 1:
                 if ((entire_insn & 0xffffffff) == 0x4c200009)
                   { itype = IQ2000BF_INSN_TRAPQNE; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+              default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
-          case 6 :
+          case 6:
             {
               unsigned int val2 = (((insn >> 2) & (3 << 0)));
               switch (val2)
               {
-              case 0 :
+              case 0:
                 if ((entire_insn & 0xffe007ff) == 0x4c200002)
                   { itype = IQ2000BF_INSN_WX; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 1 :
+              case 1:
                 if ((entire_insn & 0xffe007ff) == 0x4c200006)
                   { itype = IQ2000BF_INSN_RX; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 2 :
+              case 2:
                 if ((entire_insn & 0xffe0ffff) == 0x4c20000a)
                   { itype = IQ2000BF_INSN_TRAPREL; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+              default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
-          case 7 :
+          case 7:
             {
               unsigned int val2 = (((insn >> 2) & (1 << 0)));
               switch (val2)
               {
-              case 0 :
+              case 0:
                 if ((entire_insn & 0xffe007ff) == 0x4c200003)
                   { itype = IQ2000BF_INSN_WXU; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 1 :
+              case 1:
                 if ((entire_insn & 0xffe007ff) == 0x4c200007)
                   { itype = IQ2000BF_INSN_PKRL; goto extract_sfmt_cfc0; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+              default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
-          case 8 :
+          case 8:
             if ((entire_insn & 0xffe007ff) == 0x4c400000)
               { itype = IQ2000BF_INSN_CFC3; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 16 :
+          case 16:
             if ((entire_insn & 0xffe007ff) == 0x4c800000)
               { itype = IQ2000BF_INSN_MTC3; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 24 :
+          case 24:
             if ((entire_insn & 0xffe007ff) == 0x4cc00000)
               { itype = IQ2000BF_INSN_CTC3; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 32 : /* fall through */
-          case 33 : /* fall through */
-          case 34 : /* fall through */
-          case 35 :
+          case 32:
+          case 33:
+          case 34:
+          case 35:
             {
               unsigned int val2 = (((insn >> 16) & (3 << 0)));
               switch (val2)
               {
-              case 0 :
+              case 0:
                 if ((entire_insn & 0xffff0000) == 0x4d000000)
                   { itype = IQ2000BF_INSN_BC3F; goto extract_sfmt_bctxt; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 1 :
+              case 1:
                 if ((entire_insn & 0xffff0000) == 0x4d010000)
                   { itype = IQ2000BF_INSN_BC3T; goto extract_sfmt_bctxt; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 2 :
+              case 2:
                 if ((entire_insn & 0xffff0000) == 0x4d020000)
                   { itype = IQ2000BF_INSN_BC3FL; goto extract_sfmt_bctxt; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 3 :
+              case 3:
                 if ((entire_insn & 0xffff0000) == 0x4d030000)
                   { itype = IQ2000BF_INSN_BC3TL; goto extract_sfmt_bctxt; }
                 itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+              default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
-          case 36 :
+          case 36:
             if ((entire_insn & 0xffe007ff) == 0x4d200000)
               { itype = IQ2000BF_INSN_CHKHDR; goto extract_sfmt_cfc0; }
             itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 64 : /* fall through */
-          case 65 : /* fall through */
-          case 66 : /* fall through */
-          case 67 : itype = IQ2000BF_INSN_WBR1; goto extract_sfmt_cfc0;
-          case 68 : /* fall through */
-          case 69 : /* fall through */
-          case 70 : /* fall through */
-          case 71 : itype = IQ2000BF_INSN_WBR1U; goto extract_sfmt_cfc0;
-          case 72 : /* fall through */
-          case 73 : /* fall through */
-          case 74 : /* fall through */
-          case 75 : itype = IQ2000BF_INSN_WBR30; goto extract_sfmt_cfc0;
-          case 76 : /* fall through */
-          case 77 : /* fall through */
-          case 78 : /* fall through */
-          case 79 : itype = IQ2000BF_INSN_WBR30U; goto extract_sfmt_cfc0;
-          case 80 : /* fall through */
-          case 81 : /* fall through */
-          case 82 : /* fall through */
-          case 83 : itype = IQ2000BF_INSN_WXR1; goto extract_sfmt_cfc0;
-          case 84 : /* fall through */
-          case 85 : /* fall through */
-          case 86 : /* fall through */
-          case 87 : itype = IQ2000BF_INSN_WXR1U; goto extract_sfmt_cfc0;
-          case 88 : /* fall through */
-          case 89 : /* fall through */
-          case 90 : /* fall through */
-          case 91 : itype = IQ2000BF_INSN_WXR30; goto extract_sfmt_cfc0;
-          case 92 : /* fall through */
-          case 93 : /* fall through */
-          case 94 : /* fall through */
-          case 95 : itype = IQ2000BF_INSN_WXR30U; goto extract_sfmt_cfc0;
-          case 96 : /* fall through */
-          case 97 : /* fall through */
-          case 98 : /* fall through */
-          case 99 : itype = IQ2000BF_INSN_RBR1; goto extract_sfmt_cfc0;
-          case 104 : /* fall through */
-          case 105 : /* fall through */
-          case 106 : /* fall through */
-          case 107 : itype = IQ2000BF_INSN_RBR30; goto extract_sfmt_cfc0;
-          case 112 : /* fall through */
-          case 113 : /* fall through */
-          case 114 : /* fall through */
-          case 115 : itype = IQ2000BF_INSN_RXR1; goto extract_sfmt_cfc0;
-          case 116 : /* fall through */
-          case 117 : /* fall through */
-          case 118 : /* fall through */
-          case 119 : itype = IQ2000BF_INSN_PKRLR1; goto extract_sfmt_cfc0;
-          case 120 : /* fall through */
-          case 121 : /* fall through */
-          case 122 : /* fall through */
-          case 123 : itype = IQ2000BF_INSN_RXR30; goto extract_sfmt_cfc0;
-          case 124 : /* fall through */
-          case 125 : /* fall through */
-          case 126 : /* fall through */
-          case 127 : itype = IQ2000BF_INSN_PKRLR30; goto extract_sfmt_cfc0;
-          default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 64:
+          case 65:
+          case 66:
+          case 67: itype = IQ2000BF_INSN_WBR1; goto extract_sfmt_cfc0;
+          case 68:
+          case 69:
+          case 70:
+          case 71: itype = IQ2000BF_INSN_WBR1U; goto extract_sfmt_cfc0;
+          case 72:
+          case 73:
+          case 74:
+          case 75: itype = IQ2000BF_INSN_WBR30; goto extract_sfmt_cfc0;
+          case 76:
+          case 77:
+          case 78:
+          case 79: itype = IQ2000BF_INSN_WBR30U; goto extract_sfmt_cfc0;
+          case 80:
+          case 81:
+          case 82:
+          case 83: itype = IQ2000BF_INSN_WXR1; goto extract_sfmt_cfc0;
+          case 84:
+          case 85:
+          case 86:
+          case 87: itype = IQ2000BF_INSN_WXR1U; goto extract_sfmt_cfc0;
+          case 88:
+          case 89:
+          case 90:
+          case 91: itype = IQ2000BF_INSN_WXR30; goto extract_sfmt_cfc0;
+          case 92:
+          case 93:
+          case 94:
+          case 95: itype = IQ2000BF_INSN_WXR30U; goto extract_sfmt_cfc0;
+          case 96:
+          case 97:
+          case 98:
+          case 99: itype = IQ2000BF_INSN_RBR1; goto extract_sfmt_cfc0;
+          case 104:
+          case 105:
+          case 106:
+          case 107: itype = IQ2000BF_INSN_RBR30; goto extract_sfmt_cfc0;
+          case 112:
+          case 113:
+          case 114:
+          case 115: itype = IQ2000BF_INSN_RXR1; goto extract_sfmt_cfc0;
+          case 116:
+          case 117:
+          case 118:
+          case 119: itype = IQ2000BF_INSN_PKRLR1; goto extract_sfmt_cfc0;
+          case 120:
+          case 121:
+          case 122:
+          case 123: itype = IQ2000BF_INSN_RXR30; goto extract_sfmt_cfc0;
+          case 124:
+          case 125:
+          case 126:
+          case 127: itype = IQ2000BF_INSN_PKRLR30; goto extract_sfmt_cfc0;
+          default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 20 : itype = IQ2000BF_INSN_BEQL; goto extract_sfmt_bbv;
-      case 21 : itype = IQ2000BF_INSN_BNEL; goto extract_sfmt_bbv;
-      case 22 :
+      case 20: itype = IQ2000BF_INSN_BEQL; goto extract_sfmt_bbv;
+      case 21: itype = IQ2000BF_INSN_BNEL; goto extract_sfmt_bbv;
+      case 22:
         if ((entire_insn & 0xfc1f0000) == 0x58000000)
           { itype = IQ2000BF_INSN_BLEZL; goto extract_sfmt_bgez; }
         itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 23 :
+      case 23:
         if ((entire_insn & 0xfc1f0000) == 0x5c000000)
           { itype = IQ2000BF_INSN_BGTZL; goto extract_sfmt_bgez; }
         itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 24 : itype = IQ2000BF_INSN_BMB0; goto extract_sfmt_bbv;
-      case 25 : itype = IQ2000BF_INSN_BMB1; goto extract_sfmt_bbv;
-      case 26 : itype = IQ2000BF_INSN_BMB2; goto extract_sfmt_bbv;
-      case 27 : itype = IQ2000BF_INSN_BMB3; goto extract_sfmt_bbv;
-      case 28 : itype = IQ2000BF_INSN_BBI; goto extract_sfmt_bbi;
-      case 29 : itype = IQ2000BF_INSN_BBV; goto extract_sfmt_bbv;
-      case 30 : itype = IQ2000BF_INSN_BBIN; goto extract_sfmt_bbi;
-      case 31 : itype = IQ2000BF_INSN_BBVN; goto extract_sfmt_bbv;
-      case 32 : itype = IQ2000BF_INSN_LB; goto extract_sfmt_lb;
-      case 33 : itype = IQ2000BF_INSN_LH; goto extract_sfmt_lh;
-      case 35 : itype = IQ2000BF_INSN_LW; goto extract_sfmt_lw;
-      case 36 : itype = IQ2000BF_INSN_LBU; goto extract_sfmt_lb;
-      case 37 : itype = IQ2000BF_INSN_LHU; goto extract_sfmt_lh;
-      case 39 :
+      case 24: itype = IQ2000BF_INSN_BMB0; goto extract_sfmt_bbv;
+      case 25: itype = IQ2000BF_INSN_BMB1; goto extract_sfmt_bbv;
+      case 26: itype = IQ2000BF_INSN_BMB2; goto extract_sfmt_bbv;
+      case 27: itype = IQ2000BF_INSN_BMB3; goto extract_sfmt_bbv;
+      case 28: itype = IQ2000BF_INSN_BBI; goto extract_sfmt_bbi;
+      case 29: itype = IQ2000BF_INSN_BBV; goto extract_sfmt_bbv;
+      case 30: itype = IQ2000BF_INSN_BBIN; goto extract_sfmt_bbi;
+      case 31: itype = IQ2000BF_INSN_BBVN; goto extract_sfmt_bbv;
+      case 32: itype = IQ2000BF_INSN_LB; goto extract_sfmt_lb;
+      case 33: itype = IQ2000BF_INSN_LH; goto extract_sfmt_lh;
+      case 35: itype = IQ2000BF_INSN_LW; goto extract_sfmt_lw;
+      case 36: itype = IQ2000BF_INSN_LBU; goto extract_sfmt_lb;
+      case 37: itype = IQ2000BF_INSN_LHU; goto extract_sfmt_lh;
+      case 39:
         if ((entire_insn & 0xfc000020) == 0x9c000000)
           { itype = IQ2000BF_INSN_RAM; goto extract_sfmt_ram; }
         itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 40 : itype = IQ2000BF_INSN_SB; goto extract_sfmt_sb;
-      case 41 : itype = IQ2000BF_INSN_SH; goto extract_sfmt_sh;
-      case 43 : itype = IQ2000BF_INSN_SW; goto extract_sfmt_sw;
-      case 44 : itype = IQ2000BF_INSN_ANDOI; goto extract_sfmt_addi;
-      case 45 : itype = IQ2000BF_INSN_BMB; goto extract_sfmt_bbv;
-      case 47 : itype = IQ2000BF_INSN_ORUI; goto extract_sfmt_andoui;
-      case 48 : itype = IQ2000BF_INSN_LDW; goto extract_sfmt_ldw;
-      case 56 : itype = IQ2000BF_INSN_SDW; goto extract_sfmt_sdw;
-      case 63 : itype = IQ2000BF_INSN_ANDOUI; goto extract_sfmt_andoui;
-      default : itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 40: itype = IQ2000BF_INSN_SB; goto extract_sfmt_sb;
+      case 41: itype = IQ2000BF_INSN_SH; goto extract_sfmt_sh;
+      case 43: itype = IQ2000BF_INSN_SW; goto extract_sfmt_sw;
+      case 44: itype = IQ2000BF_INSN_ANDOI; goto extract_sfmt_addi;
+      case 45: itype = IQ2000BF_INSN_BMB; goto extract_sfmt_bbv;
+      case 47: itype = IQ2000BF_INSN_ORUI; goto extract_sfmt_andoui;
+      case 48: itype = IQ2000BF_INSN_LDW; goto extract_sfmt_ldw;
+      case 56: itype = IQ2000BF_INSN_SDW; goto extract_sfmt_sdw;
+      case 63: itype = IQ2000BF_INSN_ANDOUI; goto extract_sfmt_andoui;
+      default: itype = IQ2000BF_INSN_X_INVALID; goto extract_sfmt_empty;
       }
     }
   }

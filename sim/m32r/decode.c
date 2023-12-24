@@ -232,341 +232,341 @@ m32rbf_decode (SIM_CPU *current_cpu, IADDR pc,
       unsigned int val0 = (((insn >> 8) & (15 << 4)) | ((insn >> 4) & (15 << 0)));
       switch (val0)
       {
-      case 0 : itype = M32RBF_INSN_SUBV; goto extract_sfmt_addv;
-      case 1 : itype = M32RBF_INSN_SUBX; goto extract_sfmt_addx;
-      case 2 : itype = M32RBF_INSN_SUB; goto extract_sfmt_add;
-      case 3 : itype = M32RBF_INSN_NEG; goto extract_sfmt_mv;
-      case 4 : itype = M32RBF_INSN_CMP; goto extract_sfmt_cmp;
-      case 5 : itype = M32RBF_INSN_CMPU; goto extract_sfmt_cmp;
-      case 8 : itype = M32RBF_INSN_ADDV; goto extract_sfmt_addv;
-      case 9 : itype = M32RBF_INSN_ADDX; goto extract_sfmt_addx;
-      case 10 : itype = M32RBF_INSN_ADD; goto extract_sfmt_add;
-      case 11 : itype = M32RBF_INSN_NOT; goto extract_sfmt_mv;
-      case 12 : itype = M32RBF_INSN_AND; goto extract_sfmt_add;
-      case 13 : itype = M32RBF_INSN_XOR; goto extract_sfmt_add;
-      case 14 : itype = M32RBF_INSN_OR; goto extract_sfmt_add;
-      case 15 :
+      case 0: itype = M32RBF_INSN_SUBV; goto extract_sfmt_addv;
+      case 1: itype = M32RBF_INSN_SUBX; goto extract_sfmt_addx;
+      case 2: itype = M32RBF_INSN_SUB; goto extract_sfmt_add;
+      case 3: itype = M32RBF_INSN_NEG; goto extract_sfmt_mv;
+      case 4: itype = M32RBF_INSN_CMP; goto extract_sfmt_cmp;
+      case 5: itype = M32RBF_INSN_CMPU; goto extract_sfmt_cmp;
+      case 8: itype = M32RBF_INSN_ADDV; goto extract_sfmt_addv;
+      case 9: itype = M32RBF_INSN_ADDX; goto extract_sfmt_addx;
+      case 10: itype = M32RBF_INSN_ADD; goto extract_sfmt_add;
+      case 11: itype = M32RBF_INSN_NOT; goto extract_sfmt_mv;
+      case 12: itype = M32RBF_INSN_AND; goto extract_sfmt_add;
+      case 13: itype = M32RBF_INSN_XOR; goto extract_sfmt_add;
+      case 14: itype = M32RBF_INSN_OR; goto extract_sfmt_add;
+      case 15:
         if ((entire_insn & 0xf8f0) == 0xf0)
           { itype = M32RBF_INSN_BTST; goto extract_sfmt_btst; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 16 : itype = M32RBF_INSN_SRL; goto extract_sfmt_add;
-      case 18 : itype = M32RBF_INSN_SRA; goto extract_sfmt_add;
-      case 20 : itype = M32RBF_INSN_SLL; goto extract_sfmt_add;
-      case 22 : itype = M32RBF_INSN_MUL; goto extract_sfmt_add;
-      case 24 : itype = M32RBF_INSN_MV; goto extract_sfmt_mv;
-      case 25 : itype = M32RBF_INSN_MVFC; goto extract_sfmt_mvfc;
-      case 26 : itype = M32RBF_INSN_MVTC; goto extract_sfmt_mvtc;
-      case 28 :
+      case 16: itype = M32RBF_INSN_SRL; goto extract_sfmt_add;
+      case 18: itype = M32RBF_INSN_SRA; goto extract_sfmt_add;
+      case 20: itype = M32RBF_INSN_SLL; goto extract_sfmt_add;
+      case 22: itype = M32RBF_INSN_MUL; goto extract_sfmt_add;
+      case 24: itype = M32RBF_INSN_MV; goto extract_sfmt_mv;
+      case 25: itype = M32RBF_INSN_MVFC; goto extract_sfmt_mvfc;
+      case 26: itype = M32RBF_INSN_MVTC; goto extract_sfmt_mvtc;
+      case 28:
         {
           unsigned int val1 = (((insn >> 8) & (1 << 0)));
           switch (val1)
           {
-          case 0 :
+          case 0:
             if ((entire_insn & 0xfff0) == 0x1ec0)
               { itype = M32RBF_INSN_JL; goto extract_sfmt_jl; }
             itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
+          case 1:
             if ((entire_insn & 0xfff0) == 0x1fc0)
               { itype = M32RBF_INSN_JMP; goto extract_sfmt_jmp; }
             itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-          default : itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          default: itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 29 :
+      case 29:
         if ((entire_insn & 0xffff) == 0x10d6)
           { itype = M32RBF_INSN_RTE; goto extract_sfmt_rte; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 31 :
+      case 31:
         if ((entire_insn & 0xfff0) == 0x10f0)
           { itype = M32RBF_INSN_TRAP; goto extract_sfmt_trap; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 32 : itype = M32RBF_INSN_STB; goto extract_sfmt_stb;
-      case 34 : itype = M32RBF_INSN_STH; goto extract_sfmt_sth;
-      case 36 : itype = M32RBF_INSN_ST; goto extract_sfmt_st;
-      case 37 : itype = M32RBF_INSN_UNLOCK; goto extract_sfmt_unlock;
-      case 38 : itype = M32RBF_INSN_ST_PLUS; goto extract_sfmt_st_plus;
-      case 39 : itype = M32RBF_INSN_ST_MINUS; goto extract_sfmt_st_plus;
-      case 40 : itype = M32RBF_INSN_LDB; goto extract_sfmt_ldb;
-      case 41 : itype = M32RBF_INSN_LDUB; goto extract_sfmt_ldb;
-      case 42 : itype = M32RBF_INSN_LDH; goto extract_sfmt_ldh;
-      case 43 : itype = M32RBF_INSN_LDUH; goto extract_sfmt_ldh;
-      case 44 : itype = M32RBF_INSN_LD; goto extract_sfmt_ld;
-      case 45 : itype = M32RBF_INSN_LOCK; goto extract_sfmt_lock;
-      case 46 : itype = M32RBF_INSN_LD_PLUS; goto extract_sfmt_ld_plus;
-      case 48 : itype = M32RBF_INSN_MULHI; goto extract_sfmt_mulhi;
-      case 49 : itype = M32RBF_INSN_MULLO; goto extract_sfmt_mulhi;
-      case 50 : itype = M32RBF_INSN_MULWHI; goto extract_sfmt_mulhi;
-      case 51 : itype = M32RBF_INSN_MULWLO; goto extract_sfmt_mulhi;
-      case 52 : itype = M32RBF_INSN_MACHI; goto extract_sfmt_machi;
-      case 53 : itype = M32RBF_INSN_MACLO; goto extract_sfmt_machi;
-      case 54 : itype = M32RBF_INSN_MACWHI; goto extract_sfmt_machi;
-      case 55 : itype = M32RBF_INSN_MACWLO; goto extract_sfmt_machi;
-      case 64 : /* fall through */
-      case 65 : /* fall through */
-      case 66 : /* fall through */
-      case 67 : /* fall through */
-      case 68 : /* fall through */
-      case 69 : /* fall through */
-      case 70 : /* fall through */
-      case 71 : /* fall through */
-      case 72 : /* fall through */
-      case 73 : /* fall through */
-      case 74 : /* fall through */
-      case 75 : /* fall through */
-      case 76 : /* fall through */
-      case 77 : /* fall through */
-      case 78 : /* fall through */
-      case 79 : itype = M32RBF_INSN_ADDI; goto extract_sfmt_addi;
-      case 80 : /* fall through */
-      case 81 : itype = M32RBF_INSN_SRLI; goto extract_sfmt_slli;
-      case 82 : /* fall through */
-      case 83 : itype = M32RBF_INSN_SRAI; goto extract_sfmt_slli;
-      case 84 : /* fall through */
-      case 85 : itype = M32RBF_INSN_SLLI; goto extract_sfmt_slli;
-      case 87 :
+      case 32: itype = M32RBF_INSN_STB; goto extract_sfmt_stb;
+      case 34: itype = M32RBF_INSN_STH; goto extract_sfmt_sth;
+      case 36: itype = M32RBF_INSN_ST; goto extract_sfmt_st;
+      case 37: itype = M32RBF_INSN_UNLOCK; goto extract_sfmt_unlock;
+      case 38: itype = M32RBF_INSN_ST_PLUS; goto extract_sfmt_st_plus;
+      case 39: itype = M32RBF_INSN_ST_MINUS; goto extract_sfmt_st_plus;
+      case 40: itype = M32RBF_INSN_LDB; goto extract_sfmt_ldb;
+      case 41: itype = M32RBF_INSN_LDUB; goto extract_sfmt_ldb;
+      case 42: itype = M32RBF_INSN_LDH; goto extract_sfmt_ldh;
+      case 43: itype = M32RBF_INSN_LDUH; goto extract_sfmt_ldh;
+      case 44: itype = M32RBF_INSN_LD; goto extract_sfmt_ld;
+      case 45: itype = M32RBF_INSN_LOCK; goto extract_sfmt_lock;
+      case 46: itype = M32RBF_INSN_LD_PLUS; goto extract_sfmt_ld_plus;
+      case 48: itype = M32RBF_INSN_MULHI; goto extract_sfmt_mulhi;
+      case 49: itype = M32RBF_INSN_MULLO; goto extract_sfmt_mulhi;
+      case 50: itype = M32RBF_INSN_MULWHI; goto extract_sfmt_mulhi;
+      case 51: itype = M32RBF_INSN_MULWLO; goto extract_sfmt_mulhi;
+      case 52: itype = M32RBF_INSN_MACHI; goto extract_sfmt_machi;
+      case 53: itype = M32RBF_INSN_MACLO; goto extract_sfmt_machi;
+      case 54: itype = M32RBF_INSN_MACWHI; goto extract_sfmt_machi;
+      case 55: itype = M32RBF_INSN_MACWLO; goto extract_sfmt_machi;
+      case 64:
+      case 65:
+      case 66:
+      case 67:
+      case 68:
+      case 69:
+      case 70:
+      case 71:
+      case 72:
+      case 73:
+      case 74:
+      case 75:
+      case 76:
+      case 77:
+      case 78:
+      case 79: itype = M32RBF_INSN_ADDI; goto extract_sfmt_addi;
+      case 80:
+      case 81: itype = M32RBF_INSN_SRLI; goto extract_sfmt_slli;
+      case 82:
+      case 83: itype = M32RBF_INSN_SRAI; goto extract_sfmt_slli;
+      case 84:
+      case 85: itype = M32RBF_INSN_SLLI; goto extract_sfmt_slli;
+      case 87:
         {
           unsigned int val1 = (((insn >> 0) & (1 << 0)));
           switch (val1)
           {
-          case 0 :
+          case 0:
             if ((entire_insn & 0xf0ff) == 0x5070)
               { itype = M32RBF_INSN_MVTACHI; goto extract_sfmt_mvtachi; }
             itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
+          case 1:
             if ((entire_insn & 0xf0ff) == 0x5071)
               { itype = M32RBF_INSN_MVTACLO; goto extract_sfmt_mvtachi; }
             itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-          default : itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          default: itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 88 :
+      case 88:
         if ((entire_insn & 0xffff) == 0x5080)
           { itype = M32RBF_INSN_RACH; goto extract_sfmt_rac; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 89 :
+      case 89:
         if ((entire_insn & 0xffff) == 0x5090)
           { itype = M32RBF_INSN_RAC; goto extract_sfmt_rac; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 95 :
+      case 95:
         {
           unsigned int val1 = (((insn >> 0) & (3 << 0)));
           switch (val1)
           {
-          case 0 :
+          case 0:
             if ((entire_insn & 0xf0ff) == 0x50f0)
               { itype = M32RBF_INSN_MVFACHI; goto extract_sfmt_mvfachi; }
             itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
+          case 1:
             if ((entire_insn & 0xf0ff) == 0x50f1)
               { itype = M32RBF_INSN_MVFACLO; goto extract_sfmt_mvfachi; }
             itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 2 :
+          case 2:
             if ((entire_insn & 0xf0ff) == 0x50f2)
               { itype = M32RBF_INSN_MVFACMI; goto extract_sfmt_mvfachi; }
             itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-          default : itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          default: itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 96 : /* fall through */
-      case 97 : /* fall through */
-      case 98 : /* fall through */
-      case 99 : /* fall through */
-      case 100 : /* fall through */
-      case 101 : /* fall through */
-      case 102 : /* fall through */
-      case 103 : /* fall through */
-      case 104 : /* fall through */
-      case 105 : /* fall through */
-      case 106 : /* fall through */
-      case 107 : /* fall through */
-      case 108 : /* fall through */
-      case 109 : /* fall through */
-      case 110 : /* fall through */
-      case 111 : itype = M32RBF_INSN_LDI8; goto extract_sfmt_ldi8;
-      case 112 :
+      case 96:
+      case 97:
+      case 98:
+      case 99:
+      case 100:
+      case 101:
+      case 102:
+      case 103:
+      case 104:
+      case 105:
+      case 106:
+      case 107:
+      case 108:
+      case 109:
+      case 110:
+      case 111: itype = M32RBF_INSN_LDI8; goto extract_sfmt_ldi8;
+      case 112:
         {
           unsigned int val1 = (((insn >> 8) & (15 << 0)));
           switch (val1)
           {
-          case 0 :
+          case 0:
             if ((entire_insn & 0xffff) == 0x7000)
               { itype = M32RBF_INSN_NOP; goto extract_sfmt_nop; }
             itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 : itype = M32RBF_INSN_SETPSW; goto extract_sfmt_setpsw;
-          case 2 : itype = M32RBF_INSN_CLRPSW; goto extract_sfmt_clrpsw;
-          case 12 : itype = M32RBF_INSN_BC8; goto extract_sfmt_bc8;
-          case 13 : itype = M32RBF_INSN_BNC8; goto extract_sfmt_bc8;
-          case 14 : itype = M32RBF_INSN_BL8; goto extract_sfmt_bl8;
-          case 15 : itype = M32RBF_INSN_BRA8; goto extract_sfmt_bra8;
-          default : itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1: itype = M32RBF_INSN_SETPSW; goto extract_sfmt_setpsw;
+          case 2: itype = M32RBF_INSN_CLRPSW; goto extract_sfmt_clrpsw;
+          case 12: itype = M32RBF_INSN_BC8; goto extract_sfmt_bc8;
+          case 13: itype = M32RBF_INSN_BNC8; goto extract_sfmt_bc8;
+          case 14: itype = M32RBF_INSN_BL8; goto extract_sfmt_bl8;
+          case 15: itype = M32RBF_INSN_BRA8; goto extract_sfmt_bra8;
+          default: itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 113 : /* fall through */
-      case 114 : /* fall through */
-      case 115 : /* fall through */
-      case 116 : /* fall through */
-      case 117 : /* fall through */
-      case 118 : /* fall through */
-      case 119 : /* fall through */
-      case 120 : /* fall through */
-      case 121 : /* fall through */
-      case 122 : /* fall through */
-      case 123 : /* fall through */
-      case 124 : /* fall through */
-      case 125 : /* fall through */
-      case 126 : /* fall through */
-      case 127 :
+      case 113:
+      case 114:
+      case 115:
+      case 116:
+      case 117:
+      case 118:
+      case 119:
+      case 120:
+      case 121:
+      case 122:
+      case 123:
+      case 124:
+      case 125:
+      case 126:
+      case 127:
         {
           unsigned int val1 = (((insn >> 8) & (15 << 0)));
           switch (val1)
           {
-          case 1 : itype = M32RBF_INSN_SETPSW; goto extract_sfmt_setpsw;
-          case 2 : itype = M32RBF_INSN_CLRPSW; goto extract_sfmt_clrpsw;
-          case 12 : itype = M32RBF_INSN_BC8; goto extract_sfmt_bc8;
-          case 13 : itype = M32RBF_INSN_BNC8; goto extract_sfmt_bc8;
-          case 14 : itype = M32RBF_INSN_BL8; goto extract_sfmt_bl8;
-          case 15 : itype = M32RBF_INSN_BRA8; goto extract_sfmt_bra8;
-          default : itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1: itype = M32RBF_INSN_SETPSW; goto extract_sfmt_setpsw;
+          case 2: itype = M32RBF_INSN_CLRPSW; goto extract_sfmt_clrpsw;
+          case 12: itype = M32RBF_INSN_BC8; goto extract_sfmt_bc8;
+          case 13: itype = M32RBF_INSN_BNC8; goto extract_sfmt_bc8;
+          case 14: itype = M32RBF_INSN_BL8; goto extract_sfmt_bl8;
+          case 15: itype = M32RBF_INSN_BRA8; goto extract_sfmt_bra8;
+          default: itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 132 :
+      case 132:
         if ((entire_insn & 0xfff00000) == 0x80400000)
           { itype = M32RBF_INSN_CMPI; goto extract_sfmt_cmpi; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 133 :
+      case 133:
         if ((entire_insn & 0xfff00000) == 0x80500000)
           { itype = M32RBF_INSN_CMPUI; goto extract_sfmt_cmpi; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 136 : itype = M32RBF_INSN_ADDV3; goto extract_sfmt_addv3;
-      case 138 : itype = M32RBF_INSN_ADD3; goto extract_sfmt_add3;
-      case 140 : itype = M32RBF_INSN_AND3; goto extract_sfmt_and3;
-      case 141 : itype = M32RBF_INSN_XOR3; goto extract_sfmt_and3;
-      case 142 : itype = M32RBF_INSN_OR3; goto extract_sfmt_or3;
-      case 144 :
+      case 136: itype = M32RBF_INSN_ADDV3; goto extract_sfmt_addv3;
+      case 138: itype = M32RBF_INSN_ADD3; goto extract_sfmt_add3;
+      case 140: itype = M32RBF_INSN_AND3; goto extract_sfmt_and3;
+      case 141: itype = M32RBF_INSN_XOR3; goto extract_sfmt_and3;
+      case 142: itype = M32RBF_INSN_OR3; goto extract_sfmt_or3;
+      case 144:
         if ((entire_insn & 0xf0f0ffff) == 0x90000000)
           { itype = M32RBF_INSN_DIV; goto extract_sfmt_div; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 145 :
+      case 145:
         if ((entire_insn & 0xf0f0ffff) == 0x90100000)
           { itype = M32RBF_INSN_DIVU; goto extract_sfmt_div; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 146 :
+      case 146:
         if ((entire_insn & 0xf0f0ffff) == 0x90200000)
           { itype = M32RBF_INSN_REM; goto extract_sfmt_div; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 147 :
+      case 147:
         if ((entire_insn & 0xf0f0ffff) == 0x90300000)
           { itype = M32RBF_INSN_REMU; goto extract_sfmt_div; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 152 : itype = M32RBF_INSN_SRL3; goto extract_sfmt_sll3;
-      case 154 : itype = M32RBF_INSN_SRA3; goto extract_sfmt_sll3;
-      case 156 : itype = M32RBF_INSN_SLL3; goto extract_sfmt_sll3;
-      case 159 :
+      case 152: itype = M32RBF_INSN_SRL3; goto extract_sfmt_sll3;
+      case 154: itype = M32RBF_INSN_SRA3; goto extract_sfmt_sll3;
+      case 156: itype = M32RBF_INSN_SLL3; goto extract_sfmt_sll3;
+      case 159:
         if ((entire_insn & 0xf0ff0000) == 0x90f00000)
           { itype = M32RBF_INSN_LDI16; goto extract_sfmt_ldi16; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 160 : itype = M32RBF_INSN_STB_D; goto extract_sfmt_stb_d;
-      case 162 : itype = M32RBF_INSN_STH_D; goto extract_sfmt_sth_d;
-      case 164 : itype = M32RBF_INSN_ST_D; goto extract_sfmt_st_d;
-      case 166 :
+      case 160: itype = M32RBF_INSN_STB_D; goto extract_sfmt_stb_d;
+      case 162: itype = M32RBF_INSN_STH_D; goto extract_sfmt_sth_d;
+      case 164: itype = M32RBF_INSN_ST_D; goto extract_sfmt_st_d;
+      case 166:
         if ((entire_insn & 0xf8f00000) == 0xa0600000)
           { itype = M32RBF_INSN_BSET; goto extract_sfmt_bset; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 167 :
+      case 167:
         if ((entire_insn & 0xf8f00000) == 0xa0700000)
           { itype = M32RBF_INSN_BCLR; goto extract_sfmt_bset; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 168 : itype = M32RBF_INSN_LDB_D; goto extract_sfmt_ldb_d;
-      case 169 : itype = M32RBF_INSN_LDUB_D; goto extract_sfmt_ldb_d;
-      case 170 : itype = M32RBF_INSN_LDH_D; goto extract_sfmt_ldh_d;
-      case 171 : itype = M32RBF_INSN_LDUH_D; goto extract_sfmt_ldh_d;
-      case 172 : itype = M32RBF_INSN_LD_D; goto extract_sfmt_ld_d;
-      case 176 : itype = M32RBF_INSN_BEQ; goto extract_sfmt_beq;
-      case 177 : itype = M32RBF_INSN_BNE; goto extract_sfmt_beq;
-      case 184 :
+      case 168: itype = M32RBF_INSN_LDB_D; goto extract_sfmt_ldb_d;
+      case 169: itype = M32RBF_INSN_LDUB_D; goto extract_sfmt_ldb_d;
+      case 170: itype = M32RBF_INSN_LDH_D; goto extract_sfmt_ldh_d;
+      case 171: itype = M32RBF_INSN_LDUH_D; goto extract_sfmt_ldh_d;
+      case 172: itype = M32RBF_INSN_LD_D; goto extract_sfmt_ld_d;
+      case 176: itype = M32RBF_INSN_BEQ; goto extract_sfmt_beq;
+      case 177: itype = M32RBF_INSN_BNE; goto extract_sfmt_beq;
+      case 184:
         if ((entire_insn & 0xfff00000) == 0xb0800000)
           { itype = M32RBF_INSN_BEQZ; goto extract_sfmt_beqz; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 185 :
+      case 185:
         if ((entire_insn & 0xfff00000) == 0xb0900000)
           { itype = M32RBF_INSN_BNEZ; goto extract_sfmt_beqz; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 186 :
+      case 186:
         if ((entire_insn & 0xfff00000) == 0xb0a00000)
           { itype = M32RBF_INSN_BLTZ; goto extract_sfmt_beqz; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 187 :
+      case 187:
         if ((entire_insn & 0xfff00000) == 0xb0b00000)
           { itype = M32RBF_INSN_BGEZ; goto extract_sfmt_beqz; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 188 :
+      case 188:
         if ((entire_insn & 0xfff00000) == 0xb0c00000)
           { itype = M32RBF_INSN_BLEZ; goto extract_sfmt_beqz; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 189 :
+      case 189:
         if ((entire_insn & 0xfff00000) == 0xb0d00000)
           { itype = M32RBF_INSN_BGTZ; goto extract_sfmt_beqz; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 220 :
+      case 220:
         if ((entire_insn & 0xf0ff0000) == 0xd0c00000)
           { itype = M32RBF_INSN_SETH; goto extract_sfmt_seth; }
         itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-      case 224 : /* fall through */
-      case 225 : /* fall through */
-      case 226 : /* fall through */
-      case 227 : /* fall through */
-      case 228 : /* fall through */
-      case 229 : /* fall through */
-      case 230 : /* fall through */
-      case 231 : /* fall through */
-      case 232 : /* fall through */
-      case 233 : /* fall through */
-      case 234 : /* fall through */
-      case 235 : /* fall through */
-      case 236 : /* fall through */
-      case 237 : /* fall through */
-      case 238 : /* fall through */
-      case 239 : itype = M32RBF_INSN_LD24; goto extract_sfmt_ld24;
-      case 240 : /* fall through */
-      case 241 : /* fall through */
-      case 242 : /* fall through */
-      case 243 : /* fall through */
-      case 244 : /* fall through */
-      case 245 : /* fall through */
-      case 246 : /* fall through */
-      case 247 : /* fall through */
-      case 248 : /* fall through */
-      case 249 : /* fall through */
-      case 250 : /* fall through */
-      case 251 : /* fall through */
-      case 252 : /* fall through */
-      case 253 : /* fall through */
-      case 254 : /* fall through */
-      case 255 :
+      case 224:
+      case 225:
+      case 226:
+      case 227:
+      case 228:
+      case 229:
+      case 230:
+      case 231:
+      case 232:
+      case 233:
+      case 234:
+      case 235:
+      case 236:
+      case 237:
+      case 238:
+      case 239: itype = M32RBF_INSN_LD24; goto extract_sfmt_ld24;
+      case 240:
+      case 241:
+      case 242:
+      case 243:
+      case 244:
+      case 245:
+      case 246:
+      case 247:
+      case 248:
+      case 249:
+      case 250:
+      case 251:
+      case 252:
+      case 253:
+      case 254:
+      case 255:
         {
           unsigned int val1 = (((insn >> 8) & (3 << 0)));
           switch (val1)
           {
-          case 0 :
+          case 0:
             if ((entire_insn & 0xff000000) == 0xfc000000)
               { itype = M32RBF_INSN_BC24; goto extract_sfmt_bc24; }
             itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
+          case 1:
             if ((entire_insn & 0xff000000) == 0xfd000000)
               { itype = M32RBF_INSN_BNC24; goto extract_sfmt_bc24; }
             itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 2 :
+          case 2:
             if ((entire_insn & 0xff000000) == 0xfe000000)
               { itype = M32RBF_INSN_BL24; goto extract_sfmt_bl24; }
             itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 3 :
+          case 3:
             if ((entire_insn & 0xff000000) == 0xff000000)
               { itype = M32RBF_INSN_BRA24; goto extract_sfmt_bra24; }
             itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
-          default : itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          default: itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      default : itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      default: itype = M32RBF_INSN_X_INVALID; goto extract_sfmt_empty;
       }
     }
   }
