@@ -11361,6 +11361,9 @@ SET_H_VBIT_MOVE (0);
 ; ORSI (ANDSI (SLLSI (tmp_tmpb, 8), 0xff00ff00), ANDSI (SRLSI (tmp_tmpb, 8), 16711935)); });
 ; ORSI (SLLSI (ANDSI (tmp_tmpr, 16843009), 7), ORSI (SLLSI (ANDSI (tmp_tmpr, 33686018), 5), ORSI (SLLSI (ANDSI (tmp_tmpr, 67372036), 3), ORSI (SLLSI (ANDSI (tmp_tmpr, 134744072), 1), ORSI (SRLSI (ANDSI (tmp_tmpr, 269488144), 1), ORSI (SRLSI (ANDSI (tmp_tmpr, 538976288), 3), ORSI (SRLSI (ANDSI (tmp_tmpr, 1077952576), 5), SRLSI (ANDSI (tmp_tmpr, 0x80808080), 7)))))))); });
 }
+ else {
+cgen_rtx_error (current_cpu, "Unknown swapcode");
+}
 ; tmp_tmpres; });
   {
     SI opval = tmp_tmpd;
@@ -12510,6 +12513,9 @@ crisv32f_rfg_handler (current_cpu, pc);
  else if (EQSI (tmp_tmpcond, 15)) {
   tmp_condres = CPU (h_pbit);
 }
+ else {
+cgen_rtx_error (current_cpu, "Unknown condition code");
+}
 ; tmp_condres; });
 crisv32f_branch_taken (current_cpu, pc, FLD (i_o_pcrel), tmp_truthval);
 {
@@ -12641,6 +12647,9 @@ if (tmp_truthval) {
 }
  else if (EQSI (tmp_tmpcond, 15)) {
   tmp_condres = CPU (h_pbit);
+}
+ else {
+cgen_rtx_error (current_cpu, "Unknown condition code");
 }
 ; tmp_condres; });
 crisv32f_branch_taken (current_cpu, pc, FLD (i_o_word_pcrel), tmp_truthval);
@@ -13429,6 +13438,9 @@ SET_H_VBIT_MOVE (0);
 }
  else if (EQSI (tmp_tmpcond, 15)) {
   tmp_condres = CPU (h_pbit);
+}
+ else {
+cgen_rtx_error (current_cpu, "Unknown condition code");
 }
 ; tmp_condres; });
   {

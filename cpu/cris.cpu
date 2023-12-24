@@ -550,7 +550,8 @@
 	 (condn condc)
 	 ((eq tmpcond condn) (set condres (.sym condc -condition))))
 	(.iota 16)
-	cris-condition-codes)))
+	cris-condition-codes))
+      (else (error "Unknown condition code")))
      condres)
 )
 
@@ -3710,7 +3711,8 @@
 	((eq tmpcode x-swapcode)
 	 (set tmpres ((.sym swap- x-swap) tmpval))))
        (.iota 16)
-       (.splice _ (.unsplice cris-swap-codes)))))
+       (.splice _ (.unsplice cris-swap-codes))))
+     (else (error "Unknown swapcode")))
     tmpres)
 )
 
