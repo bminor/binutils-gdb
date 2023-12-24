@@ -705,6 +705,6 @@ SUBOFDI (DI a, DI b, BI c)
 
 #endif
 
-extern void cgen_rtx_error (SIM_CPU *, const char *);
+extern void cgen_rtx_error (SIM_CPU *, const char *) ATTRIBUTE_NORETURN;
 
 #endif /* CGEN_SEM_OPS_H */
