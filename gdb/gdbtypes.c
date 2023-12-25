@@ -4207,6 +4207,19 @@ types_equal (struct type *a, struct type *b)
       return true;
     }
 
+  /* Two array types are the same if they have the same element types
+     and array bounds.  */
+  if (a->code () == TYPE_CODE_ARRAY)
+    {
+      if (!types_equal (a->target_type (), b->target_type ()))
+	return false;
+
+      if (*a->bounds () != *b->bounds ())
+	return false;
+
+      return true;
+    }
+
   return false;
 }
 
