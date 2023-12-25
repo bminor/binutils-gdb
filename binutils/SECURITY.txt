@@ -10,7 +10,7 @@ What is a binutils security bug?
     bugs might occur.  In the first, the programs themselves might be
     tricked into a direct compromise of security.  In the second, the
     tools might introduce a vulnerability in the generated output that
-    was not already present in the files used as input. 
+    was not already present in the files used as input.
 
     Other than that, all other bugs will be treated as non-security
     issues.  This does not mean that they will be ignored, just that
@@ -52,7 +52,7 @@ Reporting private security bugs
    with other teams as necessary.
 
    The team contacted will take care of details such as vulnerability
-   rating and CVE assignment (http://cve.mitre.org/about/).  It is likely
+   rating and CVE assignment (https://cve.mitre.org/about/).  It is likely
    that the team will ask to file a public bug because the issue is
    sufficiently minor and does not warrant an embargo.  An embargo is not
    a requirement for being credited with the discovery of a security
