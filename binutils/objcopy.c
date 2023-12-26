@@ -3610,9 +3610,9 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
   struct name_list
     {
       struct name_list *next;
-      const char *name;
+      char *name;
       bfd *obfd;
-    } *list, *l;
+    } *list;
   bfd **ptr = &obfd->archive_head;
   bfd *this_element;
   char *dir = NULL;
@@ -3671,7 +3671,6 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       bfd *output_element;
       struct stat buf;
       int stat_status = 0;
-      bool del = true;
       bool ok_object;
 
       /* PR binutils/17533: Do not allow directory traversal
@@ -3704,7 +3703,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	      goto cleanup_and_exit;
 	    }
 
-	  l = (struct name_list *) xmalloc (sizeof (struct name_list));
+	  struct name_list *l = xmalloc (sizeof (*l));
 	  l->name = tmpdir;
 	  l->next = list;
 	  l->obfd = NULL;
@@ -3723,7 +3722,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 		       bfd_get_filename (this_element));
 	}
 
-      l = (struct name_list *) xmalloc (sizeof (struct name_list));
+      struct name_list *l = xmalloc (sizeof (*l));
       l->name = output_name;
       l->next = list;
       l->obfd = NULL;
@@ -3751,32 +3750,31 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 
       if (ok_object)
 	{
-	  del = !copy_object (this_element, output_element, input_arch);
+	  status = !copy_object (this_element, output_element, input_arch);
 
-	  if (del && bfd_get_arch (this_element) == bfd_arch_unknown)
+	  if (status && bfd_get_arch (this_element) == bfd_arch_unknown)
 	    /* Try again as an unknown object file.  */
 	    ok_object = false;
 	}
 
       if (!ok_object)
-	del = !copy_unknown_object (this_element, output_element);
+	status = !copy_unknown_object (this_element, output_element);
 
-      if (!(ok_object && !del && !status
+      if (!(ok_object && !status
 	    ? bfd_close : bfd_close_all_done) (output_element))
 	{
 	  bfd_nonfatal_message (output_name, NULL, NULL, NULL);
-	  /* Error in new object file. Don't change archive.  */
-	  status = 1;
-	}
-
-      if (del)
-	{
-	  unlink (output_name);
+	  /* Error in new object file.  Don't change archive.  */
 	  status = 1;
 	}
 
       if (status)
-	bfd_close (this_element);
+	{
+	  unlink (output_name);
+	  free (output_name);
+	  list->name = NULL;
+	  bfd_close (this_element);
+	}
       else
 	{
 	  if (preserve_dates && stat_status == 0)
@@ -3785,7 +3783,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	  /* Open the newly created output file and attach to our list.  */
 	  output_element = bfd_openr (output_name, output_target);
 
-	  l->obfd = output_element;
+	  list->obfd = output_element;
 
 	  *ptr = output_element;
 	  ptr = &output_element->archive_next;
@@ -3817,17 +3815,20 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
   free (filename);
 
   /* Delete all the files that we opened.  */
-  struct name_list *next;
+  struct name_list *l, *next;
   for (l = list; l != NULL; l = next)
     {
-      if (l->obfd == NULL)
-	rmdir (l->name);
-      else
+      if (l->name != NULL)
 	{
-	  bfd_close (l->obfd);
-	  unlink (l->name);
+	  if (l->obfd == NULL)
+	    rmdir (l->name);
+	  else
+	    {
+	      bfd_close (l->obfd);
+	      unlink (l->name);
+	    }
+	  free (l->name);
 	}
-      free ((char *) l->name);
       next = l->next;
       free (l);
     }
