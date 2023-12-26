@@ -1776,6 +1776,10 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 NULL,					/* adjust_reloc_bits.  */
 	 "desc_call"),				/* larch_reloc_type_name.  */
 
+  LOONGARCH_EMPTY_HOWTO (121),
+  LOONGARCH_EMPTY_HOWTO (122),
+  LOONGARCH_EMPTY_HOWTO (123),
+
   /* For pcaddi, ld_pc_hi20 + ld_pc_lo12 can relax to ld_pcrel20_s2.  */
   LOONGARCH_HOWTO (R_LARCH_TLS_LD_PCREL20_S2,	/* type (124).  */
 	 2,					/* rightshift.  */
@@ -1834,19 +1838,11 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 reloc_howto_type *
 loongarch_elf_rtype_to_howto (bfd *abfd, unsigned int r_type)
 {
-  if(r_type < R_LARCH_count)
+  if (r_type < R_LARCH_count)
     {
-      /* For search table fast.  */
-      /*
       BFD_ASSERT (ARRAY_SIZE (loongarch_howto_table) == R_LARCH_count);
-      */
-
-      if (loongarch_howto_table[r_type].howto.type == r_type)
-	return (reloc_howto_type *)&loongarch_howto_table[r_type];
-
-      for (size_t i = 0; i < ARRAY_SIZE (loongarch_howto_table); i++)
-	if (loongarch_howto_table[i].howto.type == r_type)
-	  return (reloc_howto_type *)&loongarch_howto_table[i];
+      BFD_ASSERT (loongarch_howto_table[r_type].howto.type == r_type);
+      return &loongarch_howto_table[r_type].howto;
     }
 
   (*_bfd_error_handler) (_("%pB: unsupported relocation type %#x"),
@@ -1858,19 +1854,14 @@ loongarch_elf_rtype_to_howto (bfd *abfd, unsigned int r_type)
 reloc_howto_type *
 loongarch_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
 {
-  /*
-  BFD_ASSERT (ARRAY_SIZE (loongarch_howto_table) == R_LARCH_count);
-  */
-
   for (size_t i = 0; i < ARRAY_SIZE (loongarch_howto_table); i++)
     if (loongarch_howto_table[i].howto.name
 	&& strcasecmp (loongarch_howto_table[i].howto.name, r_name) == 0)
-      return (reloc_howto_type *)&loongarch_howto_table[i];
+      return &loongarch_howto_table[i].howto;
 
   (*_bfd_error_handler) (_("%pB: unsupported relocation type %s"),
 			 abfd, r_name);
   bfd_set_error (bfd_error_bad_value);
-
   return NULL;
 }
 
@@ -1888,20 +1879,19 @@ loongarch_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     {
       BFD_ASSERT (BFD_RELOC_LARCH_RELAX - BFD_RELOC_LARCH_B16
 		  == R_LARCH_RELAX - R_LARCH_B16);
-      loongarch_reloc_howto_type *ht = NULL;
+      loongarch_reloc_howto_type *ht;
       ht = &loongarch_howto_table[code - BFD_RELOC_LARCH_B16 + R_LARCH_B16];
       BFD_ASSERT (ht->bfd_type == code);
-      return (reloc_howto_type *)ht;
+      return &ht->howto;
     }
 
   for (size_t i = 0; i < ARRAY_SIZE (loongarch_howto_table); i++)
     if (loongarch_howto_table[i].bfd_type == code)
-      return (reloc_howto_type *)&loongarch_howto_table[i];
+      return &loongarch_howto_table[i].howto;
 
   (*_bfd_error_handler) (_("%pB: unsupported bfd relocation type %#x"),
 			 abfd, code);
   bfd_set_error (bfd_error_bad_value);
-
   return NULL;
 }
 
