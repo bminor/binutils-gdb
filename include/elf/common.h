@@ -645,6 +645,9 @@
 					/*   note name must be "LINUX".  */
 #define NT_X86_CET	0x203		/* x86 CET state.  */
 					/*   note name must be "LINUX".  */
+#define NT_X86_SHSTK	0x204		/* x86 SHSTK state.  */
+					/* This replaces NT_X86_CET (0x203).  */
+					/*   note name must be "LINUX".  */
 #define NT_S390_HIGH_GPRS 0x300		/* S/390 upper halves of GPRs  */
 					/*   note name must be "LINUX".  */
 #define NT_S390_TIMER	0x301		/* S390 timer */

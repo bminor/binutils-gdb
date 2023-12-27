@@ -20079,6 +20079,8 @@ get_note_type (Filedata * filedata, unsigned e_type)
 	return _("NT_X86_XSTATE (x86 XSAVE extended state)");
       case NT_X86_CET:
 	return _("NT_X86_CET (x86 CET state)");
+      case NT_X86_SHSTK:
+	return _("NT_X86_SHSTK (x86 SHSTK state)");
       case NT_S390_HIGH_GPRS:
 	return _("NT_S390_HIGH_GPRS (s390 upper register halves)");
       case NT_S390_TIMER:
