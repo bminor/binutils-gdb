@@ -150,17 +150,19 @@ if [istarget loongarch64-*-*] {
       }
     }
 
-    run_ld_link_tests \
-	[list \
-	    [list \
-		"loongarch relax .so build" \
-		"-shared -e 0x0" "" \
-		"" \
-		{relax-so.s} \
-		{} \
-		"relax-so" \
-	    ] \
-	]
+    if [check_shared_lib_support] {
+      run_ld_link_tests \
+	  [list \
+	      [list \
+		  "loongarch relax .so build" \
+		  "-shared -e 0x0" "" \
+		  "" \
+		  {relax-so.s} \
+		  {} \
+		  "relax-so" \
+	      ] \
+	  ]
+    }
 
       if [file exist "tmpdir/relax-so"] {
 	set objdump_output [run_host_cmd "objdump" "-d tmpdir/relax-so"]
@@ -173,29 +175,31 @@ if [istarget loongarch64-*-*] {
 
     # If symbol in data segment, offset need to sub segment align to prevent
     # overflow.
-    run_ld_link_tests \
-	[list \
-	    [list \
-		"loongarch relax segment alignment min" \
-		"-e0 -Ttext 0x120004000 -pie -z relro" "" \
-		"" \
-		{relax-segment-min.s} \
-		{} \
-		"relax-segment-min" \
-	    ] \
-	]
+    if [check_pie_support] {
+      run_ld_link_tests \
+	  [list \
+	      [list \
+		  "loongarch relax segment alignment min" \
+		  "-e0 -Ttext 0x120004000 -pie -z relro" "" \
+		  "" \
+		  {relax-segment-min.s} \
+		  {} \
+		  "relax-segment-min" \
+	      ] \
+	  ]
 
-    run_ld_link_tests \
-	[list \
-	    [list \
-		"loongarch relax segment alignment max" \
-		"-e0 -Ttext 0x120004000 -pie -z relro" "" \
-		"" \
-		{relax-segment-max.s} \
-		{} \
-		"relax-segment-max" \
-	    ] \
-	]
+      run_ld_link_tests \
+	  [list \
+	      [list \
+		  "loongarch relax segment alignment max" \
+		  "-e0 -Ttext 0x120004000 -pie -z relro" "" \
+		  "" \
+		  {relax-segment-max.s} \
+		  {} \
+		  "relax-segment-max" \
+	      ] \
+	  ]
+    }
 
     if [file exist "tmpdir/relax-tls-le"] {
       set objdump_output1 [run_host_cmd "objdump" "-d tmpdir/relax-tls-le"]
@@ -265,19 +269,22 @@ if [istarget loongarch64-*-*] {
     }
 
   }
-  run_ld_link_tests \
-      [list \
-	  [list \
-	      "loongarch relax-align" \
-	      "-e 0x0 -z relro" "" \
-	      "--no-warn" \
-	      {relax-align.s} \
-	      [list \
-		  [list objdump -d relax-align.dd] \
-	      ] \
-	      "relax-align" \
-	  ] \
-      ]
+
+  if [check_shared_lib_support] {
+    run_ld_link_tests \
+	[list \
+	    [list \
+		"loongarch relax-align" \
+		"-e 0x0 -z relro" "" \
+		"--no-warn" \
+		{relax-align.s} \
+		[list \
+		    [list objdump -d relax-align.dd] \
+		] \
+		"relax-align" \
+	    ] \
+	]
+  }
 
   set objdump_flags "-s -j .data"
   run_ld_link_tests \

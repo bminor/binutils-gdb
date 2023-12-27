@@ -1,6 +1,7 @@
 #as:
 #ld: -shared -z combreloc
 #objdump: -R
+#skip: loongarch*-elf
 
 .*: +file format .*
 

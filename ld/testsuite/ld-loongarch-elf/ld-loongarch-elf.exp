@@ -43,19 +43,21 @@ if [istarget "loongarch32-*-*"] {
 }
 
 if [istarget "loongarch64-*-*"] {
-  run_ld_link_tests \
-      [list \
-	  [list \
-	      "64_pcrel" \
-	      "-e 0x0 -z relro" "" \
-	      "" \
-	      {64_pcrel.s} \
-	      [list \
-		  [list objdump -D 64_pcrel.d] \
-	      ] \
-	      "64_pcrel" \
-	  ] \
-      ]
+  if [check_shared_lib_support] {
+    run_ld_link_tests \
+	[list \
+	    [list \
+		"64_pcrel" \
+		"-e 0x0 -z relro" "" \
+		"" \
+		{64_pcrel.s} \
+		[list \
+		    [list objdump -D 64_pcrel.d] \
+		] \
+		"64_pcrel" \
+	    ] \
+	]
+  }
 
   run_ld_link_tests \
       [list \
@@ -71,10 +73,12 @@ if [istarget "loongarch64-*-*"] {
 }
 
 if [istarget "loongarch64-*-*"] {
+  if [check_shared_lib_support] {
     run_dump_test "desc-ie"
     run_dump_test "desc-le"
     run_dump_test "ie-le"
     run_dump_test "tlsdesc-dso"
     run_dump_test "desc-norelax"
     run_dump_test "desc-relax"
+  }
 }
