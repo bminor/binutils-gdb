@@ -1,9 +1,8 @@
-#as:
+#as: -mla-global-with-pcrel
 #objdump: -dr
 #skip: loongarch32-*-*
 
 .*:     file format .*
-
 
 Disassembly of section .text:
 
@@ -20,16 +19,16 @@ Disassembly of section .text:
 			c: R_LARCH_PCALA64_HI12	.L1
   10:	00109484 	add.d       	\$a0, \$a0, \$a1
   14:	1a000004 	pcalau12i   	\$a0, 0
-			14: R_LARCH_GOT_PC_HI20	.L1
+			14: R_LARCH_PCALA_HI20	.L1
 			14: R_LARCH_RELAX	\*ABS\*
   18:	02c00005 	li.d        	\$a1, 0
-			18: R_LARCH_GOT_PC_LO12	.L1
+			18: R_LARCH_PCALA_LO12	.L1
 			18: R_LARCH_RELAX	\*ABS\*
   1c:	16000005 	lu32i.d     	\$a1, 0
-			1c: R_LARCH_GOT64_PC_LO20	.L1
+			1c: R_LARCH_PCALA64_LO20	.L1
   20:	030000a5 	lu52i.d     	\$a1, \$a1, 0
-			20: R_LARCH_GOT64_PC_HI12	.L1
-  24:	380c1484 	ldx.d       	\$a0, \$a0, \$a1
+			20: R_LARCH_PCALA64_HI12	.L1
+  24:	00109484 	add.d       	\$a0, \$a0, \$a1
   28:	1a000004 	pcalau12i   	\$a0, 0
 			28: R_LARCH_PCALA_HI20	.L1
 			28: R_LARCH_RELAX	\*ABS\*
