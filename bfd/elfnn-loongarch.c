@@ -4195,8 +4195,9 @@ loongarch_relax_tls_le (bfd *abfd, asection *sec,
 /* Relax pcalau12i,addi.d => pcaddi.  */
 static bool
 loongarch_relax_pcala_addi (bfd *abfd, asection *sec, asection *sym_sec,
-		       Elf_Internal_Rela *rel_hi, bfd_vma symval,
-		       struct bfd_link_info *info, bool *again)
+			    Elf_Internal_Rela *rel_hi, bfd_vma symval,
+			    struct bfd_link_info *info, bool *again,
+			    bfd_vma max_alignment)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
   Elf_Internal_Rela *rel_lo = rel_hi + 2;
@@ -4212,14 +4213,22 @@ loongarch_relax_pcala_addi (bfd *abfd, asection *sec, asection *sym_sec,
   bfd_vma pc = sec_addr (sec) + rel_hi->r_offset;
 
   /* If pc and symbol not in the same segment, add/sub segment alignment.
-     FIXME: if there are multiple readonly segments?  */
+     FIXME: if there are multiple readonly segments? How to determine if
+     two sections are in the same segment.  */
   if (!(sym_sec->flags & SEC_READONLY))
     {
+      max_alignment = info->maxpagesize > max_alignment ? info->maxpagesize
+							  : max_alignment;
       if (symval > pc)
-	pc -= info->maxpagesize;
+	pc -= max_alignment;
       else if (symval < pc)
-	pc += info->maxpagesize;
+	pc += max_alignment;
     }
+  else
+    if (symval > pc)
+      pc -= max_alignment;
+    else if (symval < pc)
+      pc += max_alignment;
 
   const uint32_t addi_d = 0x02c00000;
   const uint32_t pcaddi = 0x18000000;
@@ -4359,8 +4368,9 @@ loongarch_relax_align (bfd *abfd, asection *sec,
 /* Relax pcalau12i + addi.d of TLS LD/GD/DESC to pcaddi.  */
 static bool
 loongarch_relax_tls_ld_gd_desc (bfd *abfd, asection *sec, asection *sym_sec,
-		       Elf_Internal_Rela *rel_hi, bfd_vma symval,
-		       struct bfd_link_info *info, bool *again)
+				Elf_Internal_Rela *rel_hi, bfd_vma symval,
+				struct bfd_link_info *info, bool *again,
+				bfd_vma max_alignment)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
   Elf_Internal_Rela *rel_lo = rel_hi + 2;
@@ -4379,11 +4389,18 @@ loongarch_relax_tls_ld_gd_desc (bfd *abfd, asection *sec, asection *sym_sec,
      FIXME: if there are multiple readonly segments?  */
   if (!(sym_sec->flags & SEC_READONLY))
     {
+      max_alignment = info->maxpagesize > max_alignment ? info->maxpagesize
+							  : max_alignment;
       if (symval > pc)
-	pc -= info->maxpagesize;
+	pc -= max_alignment;
       else if (symval < pc)
-	pc += info->maxpagesize;
+	pc += max_alignment;
     }
+  else
+    if (symval > pc)
+      pc -= max_alignment;
+    else if (symval < pc)
+      pc += max_alignment;
 
   const uint32_t addi_d = 0x02c00000;
   const uint32_t pcaddi = 0x18000000;
@@ -4435,6 +4452,21 @@ loongarch_relax_tls_ld_gd_desc (bfd *abfd, asection *sec, asection *sym_sec,
   return true;
 }
 
+/* Traverse all output sections and return the max alignment.  */
+
+static bfd_vma
+loongarch_get_max_alignment (asection *sec)
+{
+  asection *o;
+  unsigned int max_alignment_power = 0;
+
+  for (o = sec->output_section->owner->sections; o != NULL; o = o->next)
+      if (o->alignment_power > max_alignment_power)
+	max_alignment_power = o->alignment_power;
+
+  return (bfd_vma) 1 << max_alignment_power;
+}
+
 static bool
 loongarch_elf_relax_section (bfd *abfd, asection *sec,
 			       struct bfd_link_info *info,
@@ -4445,6 +4477,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
   Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
   Elf_Internal_Rela *relocs;
   *again = false;
+  bfd_vma max_alignment = 0;
 
   if (bfd_link_relocatable (info)
       || sec->sec_flg0
@@ -4476,6 +4509,15 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
     return true;
 
   data->relocs = relocs;
+
+  /* Estimate the maximum alignment for all output sections once time
+     should be enough.  */
+  max_alignment = htab->max_alignment;
+  if (max_alignment == (bfd_vma) -1)
+    {
+      max_alignment = loongarch_get_max_alignment (sec);
+      htab->max_alignment = max_alignment;
+    }
 
   for (unsigned int i = 0; i < sec->reloc_count; i++)
     {
@@ -4613,6 +4655,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  if (1 == info->relax_pass)
 	    loongarch_relax_align (abfd, sec, sym_sec, info, rel, symval);
 	  break;
+
 	case R_LARCH_DELETE:
 	  if (1 == info->relax_pass)
 	    {
@@ -4620,6 +4663,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	      rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
 	    }
 	  break;
+
 	case R_LARCH_TLS_LE_HI20_R:
 	case R_LARCH_TLS_LE_LO12_R:
 	case R_LARCH_TLS_LE_ADD_R:
@@ -4630,34 +4674,25 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	case R_LARCH_PCALA_HI20:
 	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
 	    loongarch_relax_pcala_addi (abfd, sec, sym_sec, rel, symval,
-					info, again);
+					info, again, max_alignment);
 	  break;
+
 	case R_LARCH_GOT_PC_HI20:
 	  if (local_got && 0 == info->relax_pass
 	      && (i + 4) <= sec->reloc_count)
 	    {
 	      if (loongarch_relax_pcala_ld (abfd, sec, rel))
 		loongarch_relax_pcala_addi (abfd, sec, sym_sec, rel, symval,
-					    info, again);
+					    info, again, max_alignment);
 	    }
 	  break;
 
 	case R_LARCH_TLS_LD_PC_HI20:
-	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
-	    loongarch_relax_tls_ld_gd_desc (abfd, sec, sym_sec, rel, symval,
-					    info, again);
-	  break;
-
 	case R_LARCH_TLS_GD_PC_HI20:
-	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
-	    loongarch_relax_tls_ld_gd_desc (abfd, sec, sym_sec, rel, symval,
-					    info, again);
-	  break;
-
 	case R_LARCH_TLS_DESC_PC_HI20:
 	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
 	    loongarch_relax_tls_ld_gd_desc (abfd, sec, sym_sec, rel, symval,
-					    info, again);
+					    info, again, max_alignment);
 	  break;
 
 	default:

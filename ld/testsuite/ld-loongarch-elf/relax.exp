@@ -82,14 +82,14 @@ if [istarget loongarch64-*-*] {
 	  ]
     }
 
-      if [file exist "tmpdir/relax-so"] {
-	set objdump_output [run_host_cmd "objdump" "-d tmpdir/relax-so"]
-	if { [ regexp ".*pcaddi.*" $objdump_output] } {
-	  pass "loongarch relax .so"
-	} {
-	  fail "loongarch relax .so"
-	}
+    if [file exist "tmpdir/relax-so"] {
+      set objdump_output [run_host_cmd "objdump" "-d tmpdir/relax-so"]
+      if { [ regexp ".*pcaddi.*" $objdump_output] } {
+	pass "loongarch relax .so"
+      } {
+	fail "loongarch relax .so"
       }
+    }
 
     run_ld_link_tests \
 	[list \
@@ -268,6 +268,17 @@ if [istarget loongarch64-*-*] {
 	  ]
     }
 
+    run_ld_link_tests \
+	[list \
+	    [list \
+		"loongarch relax section align overflow" \
+		"-e0 -Ttext 0x120000000" "" \
+		"" \
+		{relax-section-align-overflow.s} \
+		{} \
+		"relax-section-align-overflow" \
+	    ] \
+	]
   }
 
   if [check_shared_lib_support] {
