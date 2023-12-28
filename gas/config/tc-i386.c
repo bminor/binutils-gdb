@@ -239,6 +239,7 @@ enum i386_error
     bad_imm4,
     unsupported_with_intel_mnemonic,
     unsupported_syntax,
+    unsupported_EGPR_for_addressing,
     unsupported,
     unsupported_on_arch,
     unsupported_64bit,
@@ -249,6 +250,7 @@ enum i386_error
     invalid_vector_register_set,
     invalid_tmm_register_set,
     invalid_dest_and_src_register_set,
+    invalid_pseudo_prefix,
     unsupported_vector_index_register,
     unsupported_broadcast,
     broadcast_needed,
@@ -356,6 +358,7 @@ struct _i386_insn
     modrm_byte rm;
     rex_byte rex;
     rex_byte vrex;
+    rex_byte rex2;
     sib_byte sib;
     vex_prefix vex;
 
@@ -428,6 +431,9 @@ struct _i386_insn
 
     /* Prefer the REX byte in encoding.  */
     bool rex_encoding;
+
+    /* Prefer the REX2 prefix in encoding.  */
+    bool rex2_encoding;
 
     /* Disable instruction size optimization.  */
     bool no_optimize;
@@ -1149,6 +1155,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (pbndkb, PBNDKB, PBNDKB, false),
   VECARCH (avx10.1, AVX10_1, ANY_AVX512F, set),
   SUBARCH (user_msr, USER_MSR, USER_MSR, false),
+  SUBARCH (apx_f, APX_F, APX_F, false),
 };
 
 #undef SUBARCH
@@ -1664,6 +1671,7 @@ _is_cpu (const i386_cpu_attr *a, enum i386_cpu cpu)
     case CpuHLE:      return a->bitfield.cpuhle;
     case CpuAVX512F:  return a->bitfield.cpuavx512f;
     case CpuAVX512VL: return a->bitfield.cpuavx512vl;
+    case CpuAPX_F:    return a->bitfield.cpuapx_f;
     case Cpu64:       return a->bitfield.cpu64;
     case CpuNo64:     return a->bitfield.cpuno64;
     default:
@@ -2335,7 +2343,7 @@ register_number (const reg_entry *r)
   if (r->reg_flags & RegRex)
     nr += 8;
 
-  if (r->reg_flags & RegVRex)
+  if (r->reg_flags & (RegVRex | RegRex2))
     nr += 16;
 
   return nr;
@@ -3871,6 +3879,12 @@ is_any_vex_encoding (const insn_template *t)
   return t->opcode_modifier.vex || t->opcode_modifier.evex;
 }
 
+static INLINE bool
+is_apx_rex2_encoding (void)
+{
+  return i.rex2 || i.rex2_encoding;
+}
+
 static unsigned int
 get_broadcast_bytes (const insn_template *t, bool diag)
 {
@@ -4126,6 +4140,22 @@ build_evex_prefix (void)
     i.vex.bytes[3] |= i.mask.reg->reg_num;
 }
 
+/* Build (2 bytes) rex2 prefix.
+   | D5h |
+   | m | R4 X4 B4 | W R X B |
+
+   Rex2 reuses i.vex as they both encode i.tm.opcode_space in their prefixes.
+ */
+static void
+build_rex2_prefix (void)
+{
+  i.vex.length = 2;
+  i.vex.bytes[0] = 0xd5;
+  /* For the W R X B bits, the variables of rex prefix will be reused.  */
+  i.vex.bytes[1] = ((i.tm.opcode_space << 7)
+		    | (i.rex2 << 4) | i.rex);
+}
+
 static void establish_rex (void)
 {
   /* Note that legacy encodings have at most 2 non-immediate operands.  */
@@ -4140,13 +4170,16 @@ static void establish_rex (void)
      registers to new ones.  */
 
   if ((i.types[first].bitfield.class == Reg && i.types[first].bitfield.byte
-       && ((i.op[first].regs->reg_flags & RegRex64) != 0 || i.rex != 0))
+       && ((i.op[first].regs->reg_flags & RegRex64) != 0 || i.rex != 0
+	   || i.rex2 != 0))
       || (i.types[last].bitfield.class == Reg && i.types[last].bitfield.byte
-	  && ((i.op[last].regs->reg_flags & RegRex64) != 0 || i.rex != 0)))
+	  && ((i.op[last].regs->reg_flags & RegRex64) != 0 || i.rex != 0
+	      || i.rex2 != 0)))
     {
       unsigned int x;
 
-      i.rex |= REX_OPCODE;
+      if (!is_apx_rex2_encoding () && !is_any_vex_encoding(&i.tm))
+	i.rex |= REX_OPCODE;
       for (x = first; x <= last; x++)
 	{
 	  /* Look for 8 bit operand that uses old registers.  */
@@ -4157,7 +4190,7 @@ static void establish_rex (void)
 	      /* In case it is "hi" register, give up.  */
 	      if (i.op[x].regs->reg_num > 3)
 		as_bad (_("can't encode register '%s%s' in an "
-			  "instruction requiring REX prefix"),
+			  "instruction requiring REX/REX2 prefix"),
 			register_prefix, i.op[x].regs->reg_name);
 
 	      /* Otherwise it is equivalent to the extended register.
@@ -4168,11 +4201,11 @@ static void establish_rex (void)
 	}
     }
 
-  if (i.rex == 0 && i.rex_encoding)
+   if (i.rex == 0 && i.rex2 == 0 && (i.rex_encoding || i.rex2_encoding))
     {
       /* Check if we can add a REX_OPCODE byte.  Look for 8 bit operand
 	 that uses legacy register.  If it is "hi" register, don't add
-	 the REX_OPCODE byte.  */
+	 rex and rex2 prefix.  */
       unsigned int x;
 
       for (x = first; x <= last; x++)
@@ -4183,6 +4216,7 @@ static void establish_rex (void)
 	  {
 	    gas_assert (!(i.op[x].regs->reg_flags & RegRex));
 	    i.rex_encoding = false;
+	    i.rex2_encoding = false;
 	    break;
 	  }
 
@@ -4190,8 +4224,14 @@ static void establish_rex (void)
 	i.rex = REX_OPCODE;
     }
 
-  if (i.rex != 0)
-    add_prefix (REX_OPCODE | i.rex);
+   if (is_apx_rex2_encoding ())
+     {
+       build_rex2_prefix ();
+       /* The individual REX.RXBW bits got consumed.  */
+       i.rex &= REX_OPCODE;
+     }
+   else if (i.rex != 0)
+     add_prefix (REX_OPCODE | i.rex);
 }
 
 static void
@@ -4457,14 +4497,22 @@ optimize_encoding (void)
 	  i.types[1].bitfield.byte = 1;
 	  /* Ignore the suffix.  */
 	  i.suffix = 0;
-	  /* Convert to byte registers.  */
+	  /* Convert to byte registers. 8-bit registers are special,
+	     RegRex64 and non-RegRex64 each have 8 registers.  */
 	  if (i.types[1].bitfield.word)
-	    j = 16;
-	  else if (i.types[1].bitfield.dword)
+	    /* 32 (or 40) 8-bit registers.  */
 	    j = 32;
+	  else if (i.types[1].bitfield.dword)
+	    /* 32 (or 40) 8-bit registers + 32 16-bit registers.  */
+	    j = 64;
 	  else
-	    j = 48;
-	  if (!(i.op[1].regs->reg_flags & RegRex) && base_regnum < 4)
+	    /* 32 (or 40) 8-bit registers + 32 16-bit registers
+	       + 32 32-bit registers.  */
+	    j = 96;
+
+	  /* In 64-bit mode, the following byte registers cannot be accessed
+	     if using the Rex and Rex2 prefix: AH, BH, CH, DH */
+	  if (!(i.op[1].regs->reg_flags & (RegRex | RegRex2)) && base_regnum < 4)
 	    j += 8;
 	  i.op[1].regs -= j;
 	}
@@ -5354,6 +5402,9 @@ md_assemble (char *line)
 	case unsupported_syntax:
 	  err_msg = _("unsupported syntax");
 	  break;
+	case unsupported_EGPR_for_addressing:
+	  err_msg = _("extended GPR cannot be used as base/index");
+	  break;
 	case unsupported:
 	  as_bad (_("unsupported instruction `%s'"),
 		  pass1_mnem ? pass1_mnem : insn_name (current_templates.start));
@@ -5406,6 +5457,9 @@ md_assemble (char *line)
 	  break;
 	case invalid_dest_and_src_register_set:
 	  err_msg = _("destination and source registers must be distinct");
+	  break;
+	case invalid_pseudo_prefix:
+	  err_msg = _("rex2 pseudo prefix cannot be used");
 	  break;
 	case unsupported_vector_index_register:
 	  err_msg = _("unsupported vector index register");
@@ -5662,6 +5716,13 @@ md_assemble (char *line)
 	  return;
 	}
 
+      /* Check for explicit REX2 prefix.  */
+      if (i.rex2_encoding)
+	{
+	  as_bad (_("{rex2} prefix invalid with `%s'"), insn_name (&i.tm));
+	  return;
+	}
+
       if (i.tm.opcode_modifier.vex)
 	build_vex_prefix (t);
       else
@@ -5867,6 +5928,10 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 		case Prefix_REX:
 		  /* {rex} */
 		  i.rex_encoding = true;
+		  break;
+		case Prefix_REX2:
+		  /* {rex2} */
+		  i.rex2_encoding = true;
 		  break;
 		case Prefix_NoOptimize:
 		  /* {nooptimize} */
@@ -7015,6 +7080,43 @@ VEX_check_encoding (const insn_template *t)
   return 0;
 }
 
+/* Check if Egprs operands are valid for the instruction.  */
+
+static bool
+check_EgprOperands (const insn_template *t)
+{
+  if (!t->opcode_modifier.noegpr)
+    return 0;
+
+  for (unsigned int op = 0; op < i.operands; op++)
+    {
+      if (i.types[op].bitfield.class != Reg)
+	continue;
+
+      if (i.op[op].regs->reg_flags & RegRex2)
+	{
+	  i.error = register_type_mismatch;
+	  return 1;
+	}
+    }
+
+  if ((i.index_reg && (i.index_reg->reg_flags & RegRex2))
+      || (i.base_reg && (i.base_reg->reg_flags & RegRex2)))
+    {
+      i.error = unsupported_EGPR_for_addressing;
+      return 1;
+    }
+
+  /* Check if pseudo prefix {rex2} is valid.  */
+  if (i.rex2_encoding)
+    {
+      i.error = invalid_pseudo_prefix;
+      return 1;
+    }
+
+  return 0;
+}
+
 /* Helper function for the progress() macro in match_template().  */
 static INLINE enum i386_error progress (enum i386_error new,
 					enum i386_error last,
@@ -7156,6 +7258,13 @@ match_template (char mnem_suffix)
 	  if (VEX_check_encoding (t))
 	    {
 	      specific_error = progress (i.error);
+	      continue;
+	    }
+
+	  /* Check if pseudo prefix {rex2} is valid.  */
+	  if (t->opcode_modifier.noegpr && i.rex2_encoding)
+	    {
+	      specific_error = progress (invalid_pseudo_prefix);
 	      continue;
 	    }
 
@@ -7477,6 +7586,13 @@ match_template (char mnem_suffix)
 
       /* Check if VEX/EVEX encoding requirements can be satisfied.  */
       if (VEX_check_encoding (t))
+	{
+	  specific_error = progress (i.error);
+	  continue;
+	}
+
+      /* Check if EGPR operands(r16-r31) are valid.  */
+      if (check_EgprOperands (t))
 	{
 	  specific_error = progress (i.error);
 	  continue;
@@ -8387,6 +8503,18 @@ static INLINE void set_rex_vrex (const reg_entry *r, unsigned int rex_bit,
 
   if (r->reg_flags & RegVRex)
     i.vrex |= rex_bit;
+
+  if (r->reg_flags & RegRex2)
+    i.rex2 |= rex_bit;
+}
+
+static INLINE void
+set_rex_rex2 (const reg_entry *r, unsigned int rex_bit)
+{
+  if ((r->reg_flags & RegRex) != 0)
+    i.rex |= rex_bit;
+  if ((r->reg_flags & RegRex2) != 0)
+    i.rex2 |= rex_bit;
 }
 
 static int
@@ -8870,8 +8998,7 @@ build_modrm_byte (void)
 		  i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
 		  i.types[op] = operand_type_and_not (i.types[op], anydisp);
 		  i.types[op].bitfield.disp32 = 1;
-		  if ((i.index_reg->reg_flags & RegRex) != 0)
-		    i.rex |= REX_X;
+		  set_rex_rex2 (i.index_reg, REX_X);
 		}
 	    }
 	  /* RIP addressing for 64bit mode.  */
@@ -8942,8 +9069,7 @@ build_modrm_byte (void)
 
 	      if (!i.tm.opcode_modifier.sib)
 		i.rm.regmem = i.base_reg->reg_num;
-	      if ((i.base_reg->reg_flags & RegRex) != 0)
-		i.rex |= REX_B;
+	      set_rex_rex2 (i.base_reg, REX_B);
 	      i.sib.base = i.base_reg->reg_num;
 	      /* x86-64 ignores REX prefix bit here to avoid decoder
 		 complications.  */
@@ -8981,8 +9107,7 @@ build_modrm_byte (void)
 		  else
 		    i.sib.index = i.index_reg->reg_num;
 		  i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
-		  if ((i.index_reg->reg_flags & RegRex) != 0)
-		    i.rex |= REX_X;
+		  set_rex_rex2 (i.index_reg, REX_X);
 		}
 
 	      if (i.disp_operands
@@ -10126,6 +10251,12 @@ output_insn (const struct last_insn *last_insn)
 	  for (j = ARRAY_SIZE (i.prefix), q = i.prefix; j > 0; j--, q++)
 	    if (*q)
 	      frag_opcode_byte (*q);
+
+	  if (is_apx_rex2_encoding ())
+	    {
+	      frag_opcode_byte (i.vex.bytes[0]);
+	      frag_opcode_byte (i.vex.bytes[1]);
+	    }
 	}
       else
 	{
@@ -14162,6 +14293,13 @@ static bool check_register (const reg_entry *r)
 	i.vec_encoding = vex_encoding_evex;
       else if (i.vec_encoding != vex_encoding_evex)
 	i.vec_encoding = vex_encoding_error;
+    }
+
+  if (r->reg_flags & RegRex2)
+    {
+      if (!cpu_arch_flags.bitfield.cpuapx_f
+	  || flag_code != CODE_64BIT)
+	return false;
     }
 
   if (((r->reg_flags & (RegRex64 | RegRex)) || r->reg_type.bitfield.qword)

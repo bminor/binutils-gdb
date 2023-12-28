@@ -217,6 +217,7 @@ accept various extension mnemonics.  For example,
 @code{avx10.1/256},
 @code{avx10.1/128},
 @code{user_msr},
+@code{apx_f},
 @code{amx_int8},
 @code{amx_bf16},
 @code{amx_fp16},
@@ -984,6 +985,10 @@ instructions (x86-64 only).  Note that this differs from the @samp{rex}
 prefix which generates REX prefix unconditionally.
 
 @item
+@samp{@{rex2@}} -- prefer REX2 prefix for integer and legacy vector
+instructions (APX_F only).
+
+@item
 @samp{@{nooptimize@}} -- disable instruction size optimization.
 @end itemize
 
@@ -1663,7 +1668,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
 @item @samp{.padlock} @tab @samp{.clzero} @tab @samp{.mwaitx} @tab @samp{.rdpru}
 @item @samp{.mcommit} @tab @samp{.sev_es} @tab @samp{.snp} @tab @samp{.invlpgb}
-@item @samp{.tlbsync}
+@item @samp{.tlbsync} @tab @samp{.apx_f}
 @end multitable
 
 Apart from the warning, there are only two other effects on

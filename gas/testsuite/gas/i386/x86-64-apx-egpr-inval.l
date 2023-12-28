@@ -1,0 +1,15 @@
+.*: Assembler messages:
+.*:4: Error: bad register name `%r17d'
+.*:7: Error: extended GPR cannot be used as base/index for `xsave'
+.*:8: Error: extended GPR cannot be used as base/index for `xsave64'
+.*:9: Error: extended GPR cannot be used as base/index for `xrstor'
+.*:10: Error: extended GPR cannot be used as base/index for `xrstor64'
+.*:11: Error: extended GPR cannot be used as base/index for `xsaves'
+.*:12: Error: extended GPR cannot be used as base/index for `xsaves64'
+.*:13: Error: extended GPR cannot be used as base/index for `xrstors'
+.*:14: Error: extended GPR cannot be used as base/index for `xrstors64'
+.*:15: Error: extended GPR cannot be used as base/index for `xsaveopt'
+.*:16: Error: extended GPR cannot be used as base/index for `xsaveopt64'
+.*:17: Error: extended GPR cannot be used as base/index for `xsavec'
+.*:18: Error: extended GPR cannot be used as base/index for `xsavec64'
+#pass

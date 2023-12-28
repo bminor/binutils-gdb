@@ -360,6 +360,18 @@ _start:
 	{rex} movaps (%r8),%xmm2
 	{rex} phaddw (%rcx),%mm0
 	{rex} phaddw (%r8),%mm0
+	{rex2} mov %al,%ah
+	{rex2} shl %cl, %eax
+	{rex2} cmp %cl, %dl
+	{rex2} mov $1, %bl
+	{rex2} movl %eax,%ebx
+	{rex2} movl %eax,%r14d
+	{rex2} movl %eax,(%r8)
+	{rex2} movaps %xmm7,%xmm2
+	{rex2} movaps %xmm7,%xmm12
+	{rex2} movaps (%rcx),%xmm2
+	{rex2} movaps (%r8),%xmm2
+	{rex2} pmullw %mm0,%mm6
 
 	movb (%rbp),%al
 	{disp8} movb (%rbp),%al
@@ -422,6 +434,15 @@ _start:
 	{rex} movaps xmm2,XMMWORD PTR [r8]
 	{rex} phaddw mm0,QWORD PTR [rcx]
 	{rex} phaddw mm0,QWORD PTR [r8]
+	{rex2} mov ah,al
+	{rex2} mov ebx,eax
+	{rex2} mov r14d,eax
+	{rex2} mov DWORD PTR [r8],eax
+	{rex2} movaps xmm2,xmm7
+	{rex2} movaps xmm12,xmm7
+	{rex2} movaps xmm2,XMMWORD PTR [rcx]
+	{rex2} movaps xmm2,XMMWORD PTR [r8]
+	{rex2} pmullw mm6,mm0
 
 	mov al, BYTE PTR [rbp]
 	{disp8} mov al, BYTE PTR [rbp]

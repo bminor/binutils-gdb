@@ -144,6 +144,12 @@ struct instr_info
   /* Bits of REX we've already used.  */
   uint8_t rex_used;
 
+  /* Record W R4 X4 B4 bits for rex2.  */
+  unsigned char rex2;
+  /* Bits of rex2 we've already used.  */
+  unsigned char rex2_used;
+  unsigned char rex2_payload;
+
   bool need_modrm;
   unsigned char need_vex;
   bool has_sib;
@@ -169,6 +175,7 @@ struct instr_info
   signed char last_data_prefix;
   signed char last_addr_prefix;
   signed char last_rex_prefix;
+  signed char last_rex2_prefix;
   signed char last_seg_prefix;
   signed char fwait_prefix;
   /* The active segment register prefix.  */
@@ -265,8 +272,13 @@ struct dis_private {
   {							\
     if (value)						\
       {							\
-	if ((ins->rex & value))				\
+	if (ins->rex & value)				\
 	  ins->rex_used |= (value) | REX_OPCODE;	\
+	if (ins->rex2 & value)				\
+	  {						\
+	    ins->rex2_used |= (value);			\
+	    ins->rex_used |= REX_OPCODE;		\
+	  }						\
       }							\
     else						\
       ins->rex_used |= REX_OPCODE;			\
@@ -275,6 +287,7 @@ struct dis_private {
 
 #define EVEX_b_used 1
 #define EVEX_len_used 2
+
 
 /* Flags stored in PREFIXES.  */
 #define PREFIX_REPZ 1
@@ -289,6 +302,7 @@ struct dis_private {
 #define PREFIX_DATA 0x200
 #define PREFIX_ADDR 0x400
 #define PREFIX_FWAIT 0x800
+#define PREFIX_REX2 0x1000
 
 /* Make sure that bytes from INFO->PRIVATE_DATA->BUFFER (inclusive)
    to ADDR (exclusive) are valid.  Returns true for success, false
@@ -370,6 +384,7 @@ fetch_error (const instr_info *ins)
 #define PREFIX_IGNORED_DATA	(PREFIX_DATA << PREFIX_IGNORED_SHIFT)
 #define PREFIX_IGNORED_ADDR	(PREFIX_ADDR << PREFIX_IGNORED_SHIFT)
 #define PREFIX_IGNORED_LOCK	(PREFIX_LOCK << PREFIX_IGNORED_SHIFT)
+#define PREFIX_REX2_ILLEGAL	(PREFIX_REX2 << PREFIX_IGNORED_SHIFT)
 
 /* Opcode prefixes.  */
 #define PREFIX_OPCODE		(PREFIX_REPZ \
@@ -1888,23 +1903,23 @@ static const struct dis386 dis386[] = {
   { "outs{b|}",		{ indirDXr, Xb }, 0 },
   { X86_64_TABLE (X86_64_6F) },
   /* 70 */
-  { "joH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jnoH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jbH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jaeH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jeH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jneH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jbeH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jaH",		{ Jb, BND, cond_jump_flag }, 0 },
+  { "joH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jnoH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jbH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jaeH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jeH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jneH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jbeH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jaH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
   /* 78 */
-  { "jsH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jnsH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jpH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jnpH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jlH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jgeH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jleH",		{ Jb, BND, cond_jump_flag }, 0 },
-  { "jgH",		{ Jb, BND, cond_jump_flag }, 0 },
+  { "jsH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jnsH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jpH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jnpH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jlH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jgeH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jleH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jgH",		{ Jb, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
   /* 80 */
   { REG_TABLE (REG_80) },
   { REG_TABLE (REG_81) },
@@ -1942,23 +1957,23 @@ static const struct dis386 dis386[] = {
   { "sahf",		{ XX }, 0 },
   { "lahf",		{ XX }, 0 },
   /* a0 */
-  { "mov%LB",		{ AL, Ob }, 0 },
-  { "mov%LS",		{ eAX, Ov }, 0 },
-  { "mov%LB",		{ Ob, AL }, 0 },
-  { "mov%LS",		{ Ov, eAX }, 0 },
-  { "movs{b|}",		{ Ybr, Xb }, 0 },
-  { "movs{R|}",		{ Yvr, Xv }, 0 },
-  { "cmps{b|}",		{ Xb, Yb }, 0 },
-  { "cmps{R|}",		{ Xv, Yv }, 0 },
+  { "mov%LB",		{ AL, Ob }, PREFIX_REX2_ILLEGAL },
+  { "mov%LS",		{ eAX, Ov }, PREFIX_REX2_ILLEGAL },
+  { "mov%LB",		{ Ob, AL }, PREFIX_REX2_ILLEGAL },
+  { "mov%LS",		{ Ov, eAX }, PREFIX_REX2_ILLEGAL },
+  { "movs{b|}",		{ Ybr, Xb }, PREFIX_REX2_ILLEGAL },
+  { "movs{R|}",		{ Yvr, Xv }, PREFIX_REX2_ILLEGAL },
+  { "cmps{b|}",		{ Xb, Yb }, PREFIX_REX2_ILLEGAL },
+  { "cmps{R|}",		{ Xv, Yv }, PREFIX_REX2_ILLEGAL },
   /* a8 */
-  { "testB",		{ AL, Ib }, 0 },
-  { "testS",		{ eAX, Iv }, 0 },
-  { "stosB",		{ Ybr, AL }, 0 },
-  { "stosS",		{ Yvr, eAX }, 0 },
-  { "lodsB",		{ ALr, Xb }, 0 },
-  { "lodsS",		{ eAXr, Xv }, 0 },
-  { "scasB",		{ AL, Yb }, 0 },
-  { "scasS",		{ eAX, Yv }, 0 },
+  { "testB",		{ AL, Ib }, PREFIX_REX2_ILLEGAL },
+  { "testS",		{ eAX, Iv }, PREFIX_REX2_ILLEGAL },
+  { "stosB",		{ Ybr, AL }, PREFIX_REX2_ILLEGAL },
+  { "stosS",		{ Yvr, eAX }, PREFIX_REX2_ILLEGAL },
+  { "lodsB",		{ ALr, Xb }, PREFIX_REX2_ILLEGAL },
+  { "lodsS",		{ eAXr, Xv }, PREFIX_REX2_ILLEGAL },
+  { "scasB",		{ AL, Yb }, PREFIX_REX2_ILLEGAL },
+  { "scasS",		{ eAX, Yv }, PREFIX_REX2_ILLEGAL },
   /* b0 */
   { "movB",		{ RMAL, Ib }, 0 },
   { "movB",		{ RMCL, Ib }, 0 },
@@ -2014,23 +2029,23 @@ static const struct dis386 dis386[] = {
   { FLOAT },
   { FLOAT },
   /* e0 */
-  { "loopneFH",		{ Jb, XX, loop_jcxz_flag }, 0 },
-  { "loopeFH",		{ Jb, XX, loop_jcxz_flag }, 0 },
-  { "loopFH",		{ Jb, XX, loop_jcxz_flag }, 0 },
-  { "jEcxzH",		{ Jb, XX, loop_jcxz_flag }, 0 },
-  { "inB",		{ AL, Ib }, 0 },
-  { "inG",		{ zAX, Ib }, 0 },
-  { "outB",		{ Ib, AL }, 0 },
-  { "outG",		{ Ib, zAX }, 0 },
+  { "loopneFH",		{ Jb, XX, loop_jcxz_flag }, PREFIX_REX2_ILLEGAL },
+  { "loopeFH",		{ Jb, XX, loop_jcxz_flag }, PREFIX_REX2_ILLEGAL },
+  { "loopFH",		{ Jb, XX, loop_jcxz_flag }, PREFIX_REX2_ILLEGAL },
+  { "jEcxzH",		{ Jb, XX, loop_jcxz_flag }, PREFIX_REX2_ILLEGAL },
+  { "inB",		{ AL, Ib }, PREFIX_REX2_ILLEGAL },
+  { "inG",		{ zAX, Ib }, PREFIX_REX2_ILLEGAL },
+  { "outB",		{ Ib, AL }, PREFIX_REX2_ILLEGAL },
+  { "outG",		{ Ib, zAX }, PREFIX_REX2_ILLEGAL },
   /* e8 */
   { X86_64_TABLE (X86_64_E8) },
   { X86_64_TABLE (X86_64_E9) },
   { X86_64_TABLE (X86_64_EA) },
-  { "jmp",		{ Jb, BND }, 0 },
-  { "inB",		{ AL, indirDX }, 0 },
-  { "inG",		{ zAX, indirDX }, 0 },
-  { "outB",		{ indirDX, AL }, 0 },
-  { "outG",		{ indirDX, zAX }, 0 },
+  { "jmp",		{ Jb, BND }, PREFIX_REX2_ILLEGAL },
+  { "inB",		{ AL, indirDX }, PREFIX_REX2_ILLEGAL },
+  { "inG",		{ zAX, indirDX }, PREFIX_REX2_ILLEGAL },
+  { "outB",		{ indirDX, AL }, PREFIX_REX2_ILLEGAL },
+  { "outG",		{ indirDX, zAX }, PREFIX_REX2_ILLEGAL },
   /* f0 */
   { Bad_Opcode },	/* lock prefix */
   { "int1",		{ XX }, 0 },
@@ -2107,12 +2122,12 @@ static const struct dis386 dis386_twobyte[] = {
   { PREFIX_TABLE (PREFIX_0F2E) },
   { PREFIX_TABLE (PREFIX_0F2F) },
   /* 30 */
-  { "wrmsr",		{ XX }, 0 },
-  { "rdtsc",		{ XX }, 0 },
-  { "rdmsr",		{ XX }, 0 },
-  { "rdpmc",		{ XX }, 0 },
-  { "sysenter",		{ SEP }, 0 },
-  { "sysexit%LQ",	{ SEP }, 0 },
+  { "wrmsr",		{ XX }, PREFIX_REX2_ILLEGAL },
+  { "rdtsc",		{ XX }, PREFIX_REX2_ILLEGAL },
+  { "rdmsr",		{ XX }, PREFIX_REX2_ILLEGAL },
+  { "rdpmc",		{ XX }, PREFIX_REX2_ILLEGAL },
+  { "sysenter",		{ SEP }, PREFIX_REX2_ILLEGAL },
+  { "sysexit%LQ",	{ SEP }, PREFIX_REX2_ILLEGAL },
   { Bad_Opcode },
   { "getsec",		{ XX }, 0 },
   /* 38 */
@@ -2197,23 +2212,23 @@ static const struct dis386 dis386_twobyte[] = {
   { PREFIX_TABLE (PREFIX_0F7E) },
   { PREFIX_TABLE (PREFIX_0F7F) },
   /* 80 */
-  { "joH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jnoH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jbH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jaeH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jeH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jneH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jbeH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jaH",		{ Jv, BND, cond_jump_flag }, 0 },
+  { "joH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jnoH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jbH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jaeH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jeH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jneH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jbeH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jaH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
   /* 88 */
-  { "jsH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jnsH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jpH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jnpH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jlH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jgeH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jleH",		{ Jv, BND, cond_jump_flag }, 0 },
-  { "jgH",		{ Jv, BND, cond_jump_flag }, 0 },
+  { "jsH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jnsH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jpH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jnpH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jlH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jgeH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jleH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
+  { "jgH",		{ Jv, BND, cond_jump_flag }, PREFIX_REX2_ILLEGAL },
   /* 90 */
   { "seto",		{ Eb }, 0 },
   { "setno",		{ Eb }, 0 },
@@ -2406,22 +2421,30 @@ static const char intel_index16[][6] = {
 
 static const char att_names64[][8] = {
   "%rax", "%rcx", "%rdx", "%rbx", "%rsp", "%rbp", "%rsi", "%rdi",
-  "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15"
+  "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15",
+  "%r16", "%r17", "%r18", "%r19", "%r20", "%r21", "%r22", "%r23",
+  "%r24", "%r25", "%r26", "%r27", "%r28", "%r29", "%r30", "%r31",
 };
 static const char att_names32[][8] = {
   "%eax", "%ecx", "%edx", "%ebx", "%esp", "%ebp", "%esi", "%edi",
-  "%r8d", "%r9d", "%r10d", "%r11d", "%r12d", "%r13d", "%r14d", "%r15d"
+  "%r8d", "%r9d", "%r10d", "%r11d", "%r12d", "%r13d", "%r14d", "%r15d",
+  "%r16d", "%r17d", "%r18d", "%r19d", "%r20d", "%r21d", "%r22d", "%r23d",
+  "%r24d", "%r25d", "%r26d", "%r27d", "%r28d", "%r29d", "%r30d", "%r31d",
 };
 static const char att_names16[][8] = {
   "%ax", "%cx", "%dx", "%bx", "%sp", "%bp", "%si", "%di",
-  "%r8w", "%r9w", "%r10w", "%r11w", "%r12w", "%r13w", "%r14w", "%r15w"
+  "%r8w", "%r9w", "%r10w", "%r11w", "%r12w", "%r13w", "%r14w", "%r15w",
+  "%r16w", "%r17w", "%r18w", "%r19w", "%r20w", "%r21w", "%r22w", "%r23w",
+  "%r24w", "%r25w", "%r26w", "%r27w", "%r28w", "%r29w", "%r30w", "%r31w",
 };
 static const char att_names8[][8] = {
   "%al", "%cl", "%dl", "%bl", "%ah", "%ch", "%dh", "%bh",
 };
 static const char att_names8rex[][8] = {
   "%al", "%cl", "%dl", "%bl", "%spl", "%bpl", "%sil", "%dil",
-  "%r8b", "%r9b", "%r10b", "%r11b", "%r12b", "%r13b", "%r14b", "%r15b"
+  "%r8b", "%r9b", "%r10b", "%r11b", "%r12b", "%r13b", "%r14b", "%r15b",
+  "%r16b", "%r17b", "%r18b", "%r19b", "%r20b", "%r21b", "%r22b", "%r23b",
+  "%r24b", "%r25b", "%r26b", "%r27b", "%r28b", "%r29b", "%r30b", "%r31b",
 };
 static const char att_names_seg[][4] = {
   "%es", "%cs", "%ss", "%ds", "%fs", "%gs", "%?", "%?",
@@ -2810,9 +2833,9 @@ static const struct dis386 reg_table[][8] = {
     { Bad_Opcode },
     { "cmpxchg8b", { { CMPXCHG8B_Fixup, q_mode } }, 0 },
     { Bad_Opcode },
-    { "xrstors", { FXSAVE }, 0 },
-    { "xsavec", { FXSAVE }, 0 },
-    { "xsaves", { FXSAVE }, 0 },
+    { "xrstors", { FXSAVE }, PREFIX_REX2_ILLEGAL },
+    { "xsavec", { FXSAVE }, PREFIX_REX2_ILLEGAL },
+    { "xsaves", { FXSAVE }, PREFIX_REX2_ILLEGAL },
     { MOD_TABLE (MOD_0FC7_REG_6) },
     { MOD_TABLE (MOD_0FC7_REG_7) },
   },
@@ -3384,7 +3407,7 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_0FAE_REG_4_MOD_0 */
   {
-    { "xsave",	{ FXSAVE }, 0 },
+    { "xsave",	{ FXSAVE }, PREFIX_REX2_ILLEGAL },
     { "ptwrite{%LQ|}", { Edq }, 0 },
   },
 
@@ -3402,7 +3425,7 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_0FAE_REG_6_MOD_0 */
   {
-    { "xsaveopt",	{ FXSAVE }, PREFIX_OPCODE },
+    { "xsaveopt",	{ FXSAVE }, PREFIX_OPCODE | PREFIX_REX2_ILLEGAL },
     { "clrssbsy",	{ Mq }, PREFIX_OPCODE },
     { "clwb",	{ Mb }, PREFIX_OPCODE },
   },
@@ -4197,13 +4220,13 @@ static const struct dis386 x86_64_table[][2] = {
   /* X86_64_E8 */
   {
     { "callP",		{ Jv, BND }, 0 },
-    { "call@",		{ Jv, BND }, 0 }
+    { "call@",		{ Jv, BND }, PREFIX_REX2_ILLEGAL }
   },
 
   /* X86_64_E9 */
   {
     { "jmpP",		{ Jv, BND }, 0 },
-    { "jmp@",		{ Jv, BND }, 0 }
+    { "jmp@",		{ Jv, BND }, PREFIX_REX2_ILLEGAL }
   },
 
   /* X86_64_EA */
@@ -8184,7 +8207,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0FAE_REG_5 */
-    { "xrstor",		{ FXSAVE }, PREFIX_OPCODE },
+    { "xrstor",		{ FXSAVE }, PREFIX_OPCODE | PREFIX_REX2_ILLEGAL },
     { PREFIX_TABLE (PREFIX_0FAE_REG_5_MOD_3) },
   },
   {
@@ -8387,6 +8410,24 @@ ckprefix (instr_info *ins)
 	    return ckp_okay;
 	  ins->last_rex_prefix = i;
 	  break;
+	/* REX2 must be the last prefix. */
+	case REX2_OPCODE:
+	  if (ins->address_mode == mode_64bit)
+	    {
+	      if (ins->last_rex_prefix >= 0)
+		return ckp_bogus;
+
+	      ins->codep++;
+	      if (!fetch_code (ins->info, ins->codep + 1))
+		return ckp_fetch_error;
+	      ins->rex2_payload = *ins->codep;
+	      ins->rex2 = ins->rex2_payload >> 4;
+	      ins->rex = (ins->rex2_payload & 0xf) | REX_OPCODE;
+	      ins->codep++;
+	      ins->last_rex2_prefix = i;
+	      ins->all_prefixes[i] = REX2_OPCODE;
+	    }
+	  return ckp_okay;
 	case 0xf3:
 	  ins->prefixes |= PREFIX_REPZ;
 	  ins->last_repz_prefix = i;
@@ -8554,6 +8595,8 @@ prefix_name (enum address_mode mode, uint8_t pref, int sizeflag)
       return "bnd";
     case NOTRACK_PREFIX:
       return "notrack";
+    case REX2_OPCODE:
+      return "rex2";
     default:
       return NULL;
     }
@@ -9202,6 +9245,7 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
     .last_data_prefix = -1,
     .last_addr_prefix = -1,
     .last_rex_prefix = -1,
+    .last_rex2_prefix = -1,
     .last_seg_prefix = -1,
     .fwait_prefix = -1,
   };
@@ -9367,13 +9411,18 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
       goto out;
     }
 
-  if (*ins.codep == 0x0f)
+  /* REX2.M in rex2 prefix represents map0 or map1.  */
+  if (ins.last_rex2_prefix < 0 ? *ins.codep == 0x0f : (ins.rex2 & REX2_M))
     {
       unsigned char threebyte;
 
-      ins.codep++;
-      if (!fetch_code (info, ins.codep + 1))
-	goto fetch_error_out;
+      if (!ins.rex2)
+	{
+	  ins.codep++;
+	  if (!fetch_code (info, ins.codep + 1))
+	    goto fetch_error_out;
+	}
+
       threebyte = *ins.codep;
       dp = &dis386_twobyte[threebyte];
       ins.need_modrm = twobyte_has_modrm[threebyte];
@@ -9529,7 +9578,15 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
       goto out;
     }
 
-  switch (dp->prefix_requirement)
+  if ((dp->prefix_requirement & PREFIX_REX2_ILLEGAL)
+      && ins.last_rex2_prefix >= 0)
+    {
+      i386_dis_printf (info, dis_style_text, "(bad)");
+      ret = ins.end_codep - priv.the_buffer;
+      goto out;
+    }
+
+  switch (dp->prefix_requirement & ~PREFIX_REX2_ILLEGAL)
     {
     case PREFIX_DATA:
       /* If only the data prefix is marked as mandatory, its absence renders
@@ -9588,6 +9645,13 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
       && !ins.need_vex && ins.last_rex_prefix >= 0)
     ins.all_prefixes[ins.last_rex_prefix] = 0;
 
+  /* Check if the REX2 prefix is used.  */
+  if (ins.last_rex2_prefix >= 0
+      && ((ins.rex2 & 0x7) ^ (ins.rex2_used & 0x7)) == 0
+      && (ins.rex ^ ins.rex_used) == 0
+      && (ins.rex2 & 0x7))
+    ins.all_prefixes[ins.last_rex2_prefix] = 0;
+
   /* Check if the SEG prefix is used.  */
   if ((ins.prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS | PREFIX_ES
 		       | PREFIX_FS | PREFIX_GS)) != 0
@@ -9616,7 +9680,11 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 	if (name == NULL)
 	  abort ();
 	prefix_length += strlen (name) + 1;
-	i386_dis_printf (info, dis_style_mnemonic, "%s ", name);
+	if (ins.all_prefixes[i] == REX2_OPCODE)
+	  i386_dis_printf (info, dis_style_mnemonic, "{%s 0x%x} ", name,
+			   (unsigned int) ins.rex2_payload);
+	else
+	  i386_dis_printf (info, dis_style_mnemonic, "%s ", name);
       }
 
   /* Check maximum code length.  */
@@ -11163,6 +11231,8 @@ print_register (instr_info *ins, unsigned int reg, unsigned int rexmask,
   USED_REX (rexmask);
   if (ins->rex & rexmask)
     reg += 8;
+  if (ins->rex2 & rexmask)
+    reg += 16;
 
   switch (bytemode)
     {
@@ -11170,7 +11240,7 @@ print_register (instr_info *ins, unsigned int reg, unsigned int rexmask,
     case b_swap_mode:
       if (reg & 4)
 	USED_REX (0);
-      if (ins->rex)
+      if (ins->rex || ins->rex2)
 	names = att_names8rex;
       else
 	names = att_names8;
@@ -11386,6 +11456,8 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
   int riprel = 0;
   int shift;
 
+  add += (ins->rex2 & REX_B) ? 16 : 0;
+
   if (ins->vex.evex)
     {
 
@@ -11559,6 +11631,9 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 		}
 	      break;
 	    default:
+	      if (ins->rex2 & REX_X)
+		vindex += 16;
+
 	      if (vindex != 4)
 		indexes = ins->address_mode == mode_64bit && !addr32flag
 			  ? att_names64 : att_names32;
@@ -11946,7 +12021,7 @@ static bool
 OP_REG (instr_info *ins, int code, int sizeflag)
 {
   const char *s;
-  int add;
+  int add = 0;
 
   switch (code)
     {
@@ -11959,8 +12034,8 @@ OP_REG (instr_info *ins, int code, int sizeflag)
   USED_REX (REX_B);
   if (ins->rex & REX_B)
     add = 8;
-  else
-    add = 0;
+  if (ins->rex2 & REX_B)
+    add += 16;
 
   switch (code)
     {
@@ -12674,6 +12749,8 @@ OP_EX (instr_info *ins, int bytemode, int sizeflag)
   USED_REX (REX_B);
   if (ins->rex & REX_B)
     reg += 8;
+  if (ins->rex2 & REX_B)
+    reg += 16;
   if (ins->vex.evex)
     {
       USED_REX (REX_X);

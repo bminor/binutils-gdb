@@ -319,6 +319,8 @@ enum i386_cpu
   CpuAVX512F,
   /* Intel AVX-512 VL Instructions support required.  */
   CpuAVX512VL,
+  /* Intel APX_F Instructions support required.  */
+  CpuAPX_F,
   /* Not supported in the 64bit mode  */
   CpuNo64,
 
@@ -354,6 +356,7 @@ enum i386_cpu
 		   cpuhle:1, \
 		   cpuavx512f:1, \
 		   cpuavx512vl:1, \
+		   cpuapx_f:1, \
       /* NOTE: This field needs to remain last. */ \
 		   cpuno64:1
 
@@ -735,6 +738,11 @@ enum
 #define INTEL64		2
 #define INTEL64ONLY	3
   ISA64,
+
+  /* egprs (r16-r31) on instruction illegal. We also use it to judge
+     whether the instruction supports pseudo-prefix {rex2}.  */
+  NoEgpr,
+
   /* The last bitfield in i386_opcode_modifier.  */
   Opcode_Modifier_Num
 };
@@ -779,6 +787,7 @@ typedef struct i386_opcode_modifier
   unsigned int optimize:1;
   unsigned int dialect:2;
   unsigned int isa64:2;
+  unsigned int noegpr:1;
 } i386_opcode_modifier;
 
 /* Operand classes.  */
@@ -993,7 +1002,8 @@ typedef struct insn_template
 #define Prefix_VEX3		6	/* {vex3} */
 #define Prefix_EVEX		7	/* {evex} */
 #define Prefix_REX		8	/* {rex} */
-#define Prefix_NoOptimize	9	/* {nooptimize} */
+#define Prefix_REX2		9	/* {rex2} */
+#define Prefix_NoOptimize	10	/* {nooptimize} */
 
   /* the bits in opcode_modifier are used to generate the final opcode from
      the base_opcode.  These bits also are used to detect alternate forms of
@@ -1020,6 +1030,7 @@ typedef struct
 #define RegRex	    0x1  /* Extended register.  */
 #define RegRex64    0x2  /* Extended 8 bit register.  */
 #define RegVRex	    0x4  /* Extended vector register.  */
+#define RegRex2	    0x8  /* Extended GPRs R16–R31 register.  */
   unsigned char reg_num;
 #define RegIP	((unsigned char ) ~0)
 /* EIZ and RIZ are fake index registers.  */

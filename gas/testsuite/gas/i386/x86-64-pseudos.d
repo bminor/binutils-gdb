@@ -404,6 +404,18 @@ Disassembly of section .text:
  +[a-f0-9]+:	41 0f 28 10          	movaps \(%r8\),%xmm2
  +[a-f0-9]+:	40 0f 38 01 01       	rex phaddw \(%rcx\),%mm0
  +[a-f0-9]+:	41 0f 38 01 00       	phaddw \(%r8\),%mm0
+ +[a-f0-9]+:	88 c4                	mov    %al,%ah
+ +[a-f0-9]+:	d5 00 d3 e0          	{rex2 0x0} shl %cl,%eax
+ +[a-f0-9]+:	d5 00 38 ca          	{rex2 0x0} cmp %cl,%dl
+ +[a-f0-9]+:	d5 00 b3 01          	{rex2 0x0} mov \$(0x)?1,%bl
+ +[a-f0-9]+:	d5 00 89 c3          	{rex2 0x0} mov %eax,%ebx
+ +[a-f0-9]+:	d5 01 89 c6          	{rex2 0x1} mov %eax,%r14d
+ +[a-f0-9]+:	d5 01 89 00          	{rex2 0x1} mov %eax,\(%r8\)
+ +[a-f0-9]+:	d5 80 28 d7          	{rex2 0x80} movaps %xmm7,%xmm2
+ +[a-f0-9]+:	d5 84 28 e7          	{rex2 0x84} movaps %xmm7,%xmm12
+ +[a-f0-9]+:	d5 80 28 11          	{rex2 0x80} movaps \(%rcx\),%xmm2
+ +[a-f0-9]+:	d5 81 28 10          	{rex2 0x81} movaps \(%r8\),%xmm2
+ +[a-f0-9]+:	d5 80 d5 f0          	{rex2 0x80} pmullw %mm0,%mm6
  +[a-f0-9]+:	8a 45 00             	mov    0x0\(%rbp\),%al
  +[a-f0-9]+:	8a 45 00             	mov    0x0\(%rbp\),%al
  +[a-f0-9]+:	8a 85 00 00 00 00    	mov    0x0\(%rbp\),%al
@@ -458,6 +470,15 @@ Disassembly of section .text:
  +[a-f0-9]+:	41 0f 28 10          	movaps \(%r8\),%xmm2
  +[a-f0-9]+:	40 0f 38 01 01       	rex phaddw \(%rcx\),%mm0
  +[a-f0-9]+:	41 0f 38 01 00       	phaddw \(%r8\),%mm0
+ +[a-f0-9]+:	88 c4                	mov    %al,%ah
+ +[a-f0-9]+:	d5 00 89 c3          	{rex2 0x0} mov %eax,%ebx
+ +[a-f0-9]+:	d5 01 89 c6          	{rex2 0x1} mov %eax,%r14d
+ +[a-f0-9]+:	d5 01 89 00          	{rex2 0x1} mov %eax,\(%r8\)
+ +[a-f0-9]+:	d5 80 28 d7          	{rex2 0x80} movaps %xmm7,%xmm2
+ +[a-f0-9]+:	d5 84 28 e7          	{rex2 0x84} movaps %xmm7,%xmm12
+ +[a-f0-9]+:	d5 80 28 11          	{rex2 0x80} movaps \(%rcx\),%xmm2
+ +[a-f0-9]+:	d5 81 28 10          	{rex2 0x81} movaps \(%r8\),%xmm2
+ +[a-f0-9]+:	d5 80 d5 f0          	{rex2 0x80} pmullw %mm0,%mm6
  +[a-f0-9]+:	8a 45 00             	mov    0x0\(%rbp\),%al
  +[a-f0-9]+:	8a 45 00             	mov    0x0\(%rbp\),%al
  +[a-f0-9]+:	8a 85 00 00 00 00    	mov    0x0\(%rbp\),%al

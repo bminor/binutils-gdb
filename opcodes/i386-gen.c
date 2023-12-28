@@ -275,6 +275,8 @@ static const dependency isa_dependencies[] =
     "64" },
   { "USER_MSR",
     "64" },
+  { "APX_F",
+    "XSAVE|64" },
 };
 
 /* This array is populated as process_i386_initializers() walks cpu_flags[].  */
@@ -397,6 +399,7 @@ static bitfield cpu_flags[] =
   BITFIELD (FRED),
   BITFIELD (LKGS),
   BITFIELD (USER_MSR),
+  BITFIELD (APX_F),
   BITFIELD (MWAITX),
   BITFIELD (CLZERO),
   BITFIELD (OSPKE),
@@ -483,6 +486,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Optimize),
   BITFIELD (Dialect),
   BITFIELD (ISA64),
+  BITFIELD (NoEgpr),
 };
 
 #define CLASS(n) #n, n
@@ -1069,10 +1073,44 @@ get_element_size (char **opnd, int lineno)
   return elem_size;
 }
 
+static bool
+rex2_disallowed (const unsigned long long opcode, unsigned int length,
+		 unsigned int space, const char *cpu_flags)
+{
+  /* Some opcodes encode a ModR/M-like byte directly in the opcode.  */
+  unsigned int base_opcode = opcode >> (8 * length - 8);
+
+  /* All opcodes listed map0 0x4*, 0x7*, 0xa*, 0xe* and map1 0x3*, 0x8*
+     are reserved under REX2 and triggers #UD when prefixed with REX2 */
+  if (space == 0)
+    switch (base_opcode >> 4)
+      {
+      case 0x4:
+      case 0x7:
+      case 0xA:
+      case 0xE:
+	return true;
+      default:
+	return false;
+    }
+
+  if (space == SPACE_0F)
+    switch (base_opcode >> 4)
+      {
+      case 0x3:
+      case 0x8:
+	return true;
+      default:
+	return false;
+      }
+
+  return false;
+}
+
 static void
 process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
 			      unsigned int prefix, const char *extension_opcode,
-			      char **opnd, int lineno)
+			      char **opnd, int lineno, bool rex2_disallowed)
 {
   char *str, *next, *last;
   bitfield modifiers [ARRAY_SIZE (opcode_modifiers)];
@@ -1198,6 +1236,12 @@ process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
 	  || modifiers[Masking].value
 	  || modifiers[SAE].value))
     modifiers[EVex].value = EVEXDYN;
+
+  /* Vex, legacy map2 and map3 and rex2_disallowed do not support EGPR.
+     For templates supporting both Vex and EVex allowing EGPR.  */
+  if ((modifiers[Vex].value || space > SPACE_0F || rex2_disallowed)
+      && !modifiers[EVex].value)
+    modifiers[NoEgpr].value = 1;
 
   output_opcode_modifier (table, modifiers, ARRAY_SIZE (modifiers));
 }
@@ -1423,7 +1467,9 @@ output_i386_opcode (FILE *table, const char *name, char *str,
   free (ident);
 
   process_i386_opcode_modifier (table, opcode_modifier, space, prefix,
-				extension_opcode, operand_types, lineno);
+				extension_opcode, operand_types, lineno,
+				rex2_disallowed (opcode, length, space,
+						 cpu_flags));
 
   process_i386_cpu_flag (table, cpu_flags, NULL, ",", "    ", lineno, CpuMax);
 

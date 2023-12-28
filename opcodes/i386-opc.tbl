@@ -892,7 +892,7 @@ rex.wrxb, 0x4f, x64, NoSuf|IsPrefix, {}
 <pseudopfx:ident:cpu, disp8:Disp8:0, disp16:Disp16:No64, disp32:Disp32:i386, +
                       load:Load:0, store:Store:0, +
                       vex:VEX:0, vex2:VEX:0, vex3:VEX3:0, evex:EVEX:0, +
-                      rex:REX:x64, nooptimize:NoOptimize:0>
+                      rex:REX:x64, rex2:REX2:APX_F, nooptimize:NoOptimize:0>
 
 {<pseudopfx>}, PSEUDO_PREFIX/Prefix_<pseudopfx:ident>, <pseudopfx:cpu>, NoSuf|IsPrefix, {}
 
@@ -1425,16 +1425,17 @@ crc32, 0xf20f38f0, SSE4_2&x64, W|Modrm|No_wSuf|No_lSuf|No_sSuf, { Reg8|Reg64|Uns
 
 // xsave/xrstor New Instructions.
 
-xsave, 0xfae/4, Xsave, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Unspecified|BaseIndex }
-xsave64, 0xfae/4, Xsave&x64, Modrm|NoSuf|Size64, { Unspecified|BaseIndex }
-xrstor, 0xfae/5, Xsave, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Unspecified|BaseIndex }
-xrstor64, 0xfae/5, Xsave&x64, Modrm|NoSuf|Size64, { Unspecified|BaseIndex }
+xsave, 0xfae/4, Xsave, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoEgpr, { Unspecified|BaseIndex }
+xsave64, 0xfae/4, Xsave&x64, Modrm|NoSuf|Size64|NoEgpr, { Unspecified|BaseIndex }
+xrstor, 0xfae/5, Xsave, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoEgpr, { Unspecified|BaseIndex }
+xrstor64, 0xfae/5, Xsave&x64, Modrm|NoSuf|Size64|NoEgpr, { Unspecified|BaseIndex }
 xgetbv, 0xf01d0, Xsave, NoSuf, {}
 xsetbv, 0xf01d1, Xsave, NoSuf, {}
 
 // xsaveopt
-xsaveopt, 0xfae/6, Xsaveopt, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Unspecified|BaseIndex }
-xsaveopt64, 0xfae/6, Xsaveopt&x64, Modrm|NoSuf|Size64, { Unspecified|BaseIndex }
+
+xsaveopt, 0xfae/6, Xsaveopt, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoEgpr, { Unspecified|BaseIndex }
+xsaveopt64, 0xfae/6, Xsaveopt&x64, Modrm|NoSuf|Size64|NoEgpr, { Unspecified|BaseIndex }
 
 // AES instructions.
 
@@ -2477,17 +2478,17 @@ clflushopt, 0x660fae/7, ClflushOpt, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex 
 
 // XSAVES/XRSTORS instructions.
 
-xrstors, 0xfc7/3, XSAVES, Modrm|NoSuf, { Unspecified|BaseIndex }
-xrstors64, 0xfc7/3, XSAVES&x64, Modrm|NoSuf|Size64, { Unspecified|BaseIndex }
-xsaves, 0xfc7/5, XSAVES, Modrm|NoSuf, { Unspecified|BaseIndex }
-xsaves64, 0xfc7/5, XSAVES&x64, Modrm|NoSuf|Size64, { Unspecified|BaseIndex }
+xrstors, 0xfc7/3, XSAVES, Modrm|NoSuf|NoEgpr, { Unspecified|BaseIndex }
+xrstors64, 0xfc7/3, XSAVES&x64, Modrm|NoSuf|Size64|NoEgpr, { Unspecified|BaseIndex }
+xsaves, 0xfc7/5, XSAVES, Modrm|NoSuf|NoEgpr, { Unspecified|BaseIndex }
+xsaves64, 0xfc7/5, XSAVES&x64, Modrm|NoSuf|Size64|NoEgpr, { Unspecified|BaseIndex }
 
 // XSAVES instructions end.
 
 // XSAVEC instructions.
 
-xsavec, 0xfc7/4, XSAVEC, Modrm|NoSuf, { Unspecified|BaseIndex }
-xsavec64, 0xfc7/4, XSAVEC&x64, Modrm|NoSuf|Size64, { Unspecified|BaseIndex }
+xsavec, 0xfc7/4, XSAVEC, Modrm|NoSuf|NoEgpr, { Unspecified|BaseIndex }
+xsavec64, 0xfc7/4, XSAVEC&x64, Modrm|NoSuf|Size64|NoEgpr, { Unspecified|BaseIndex }
 
 // XSAVEC instructions end.
 
