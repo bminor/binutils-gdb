@@ -18,6 +18,7 @@
    along with this program; see the file COPYING3.  If not,
    see <http://www.gnu.org/licenses/>.  */
 #include "sysdep.h"
+#include <stdbool.h>
 #include "opcode/loongarch.h"
 
 int
@@ -256,9 +257,12 @@ loongarch_split_args_by_comma (char *args, const char *arg_strs[])
 
   if (*args)
     {
+      bool inquote = false;
       arg_strs[num++] = args;
       for (; *args; args++)
-	if (*args == ',')
+	if (*args == '"')
+	  inquote = !inquote;
+	else if (*args == ',' && !inquote)
 	  {
 	    if (MAX_ARG_NUM_PLUS_2 - 1 == num)
 	      goto out;
