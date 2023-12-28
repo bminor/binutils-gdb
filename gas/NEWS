@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Initial support for Intel APX: 32 GPRs, NDD, PUSH2/POP2 and PUSHP/POPP.
+
 * On RISC-V macro instructions expanding to AUIPC and a load, store, or branch
   no longer accept x0 as an intermediate and/or destination register.
 
