@@ -636,6 +636,30 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 	  break;
 	}
       break;
+    /* This is used for TLS, where the fourth operand is %le_add_r,
+       to get a relocation applied to an add instruction, for relaxation to use.
+       Two conditions, ip->match_now and reloc_num, are used to check tls insn
+       to prevent cases like add.d $a0,$a0,$a0,8.  */
+    case 't':
+      ip->match_now = loongarch_parse_expr (arg, ip->reloc_info + ip->reloc_num,
+				reloc_num_we_have, &reloc_num, &imm) == 0;
+
+      if (!ip->match_now)
+	break;
+
+      bfd_reloc_code_real_type tls_reloc_type = BFD_RELOC_LARCH_TLS_LE_ADD_R;
+
+      if (reloc_num
+	  && (ip->reloc_info[ip->reloc_num].type == tls_reloc_type))
+	{
+	  ip->reloc_num += reloc_num;
+	  ip->reloc_info[ip->reloc_num].type = BFD_RELOC_LARCH_RELAX;
+	  ip->reloc_info[ip->reloc_num].value = const_0;
+	  ip->reloc_num++;
+	}
+      else
+	ip->match_now = 0;
+      break;
     case 's':
     case 'u':
       ip->match_now =
@@ -690,6 +714,14 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 	      ip->reloc_num += reloc_num;
 	      reloc_type = ip->reloc_info[0].type;
 
+	      if (LARCH_opts.relax
+		    && (BFD_RELOC_LARCH_TLS_LE_HI20_R == reloc_type
+			|| BFD_RELOC_LARCH_TLS_LE_LO12_R == reloc_type))
+		{
+		  ip->reloc_info[ip->reloc_num].type = BFD_RELOC_LARCH_RELAX;
+		  ip->reloc_info[ip->reloc_num].value = const_0;
+		  ip->reloc_num++;
+		}
 	      if (LARCH_opts.relax && ip->macro_id
 		    && (BFD_RELOC_LARCH_PCALA_HI20 == reloc_type
 			|| BFD_RELOC_LARCH_PCALA_LO12 == reloc_type
