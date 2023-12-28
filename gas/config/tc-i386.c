@@ -435,6 +435,9 @@ struct _i386_insn
     /* Prefer the REX2 prefix in encoding.  */
     bool rex2_encoding;
 
+    /* Need to use an Egpr capable encoding (REX2 or EVEX).  */
+    bool has_egpr;
+
     /* Disable instruction size optimization.  */
     bool no_optimize;
 
@@ -1862,10 +1865,11 @@ cpu_flags_and_not (i386_cpu_flags x, i386_cpu_flags y)
 
 static const i386_cpu_flags avx512 = CPU_ANY_AVX512F_FLAGS;
 
-static INLINE bool need_evex_encoding (void)
+static INLINE bool need_evex_encoding (const insn_template *t)
 {
   return i.vec_encoding == vex_encoding_evex
 	|| i.vec_encoding == vex_encoding_evex512
+	|| (t->opcode_modifier.vex && i.has_egpr)
 	|| i.mask.reg;
 }
 
@@ -1905,13 +1909,13 @@ cpu_flags_match (const insn_template *t)
       if ((any.bitfield.cpuavx || any.bitfield.cpuavx2 || any.bitfield.cpufma)
 	  && (any.bitfield.cpuavx512f || any.bitfield.cpuavx512vl))
 	{
-	  if (need_evex_encoding ())
+	  if (need_evex_encoding (t))
 	    {
 	      any.bitfield.cpuavx = 0;
 	      any.bitfield.cpuavx2 = 0;
 	      any.bitfield.cpufma = 0;
 	    }
-	  /* need_evex_encoding() isn't reliable before operands were
+	  /* need_evex_encoding(t) isn't reliable before operands were
 	     parsed.  */
 	  else if (i.operands)
 	    {
@@ -3676,12 +3680,12 @@ install_template (const insn_template *t)
 
   /* Dual VEX/EVEX templates need stripping one of the possible variants.  */
   if (t->opcode_modifier.vex && t->opcode_modifier.evex)
-  {
+    {
       if ((maybe_cpu (t, CpuAVX) || maybe_cpu (t, CpuAVX2)
 	   || maybe_cpu (t, CpuFMA))
 	  && (maybe_cpu (t, CpuAVX512F) || maybe_cpu (t, CpuAVX512VL)))
 	{
-	  if (need_evex_encoding ())
+	  if (need_evex_encoding (t))
 	    {
 	      i.tm.opcode_modifier.vex = 0;
 	      i.tm.cpu.bitfield.cpuavx512f = i.tm.cpu_any.bitfield.cpuavx512f;
@@ -3698,7 +3702,19 @@ install_template (const insn_template *t)
 		gas_assert (i.tm.cpu.bitfield.isa == i.tm.cpu_any.bitfield.isa);
 	    }
 	}
-  }
+
+      if ((maybe_cpu (t, CpuCMPCCXADD) || maybe_cpu (t, CpuAMX_TILE)
+	   || maybe_cpu (t, CpuAVX512F) || maybe_cpu (t, CpuAVX512DQ)
+	   || maybe_cpu (t, CpuAVX512BW) || maybe_cpu (t, CpuBMI)
+	   || maybe_cpu (t, CpuBMI2))
+	  && maybe_cpu (t, CpuAPX_F))
+	{
+	  if (need_evex_encoding (t))
+	    i.tm.opcode_modifier.vex = 0;
+	  else
+	    i.tm.opcode_modifier.evex = 0;
+	}
+    }
 
   /* Note that for pseudo prefixes this produces a length of 1. But for them
      the length isn't interesting at all.  */
@@ -3877,6 +3893,15 @@ static INLINE bool
 is_any_vex_encoding (const insn_template *t)
 {
   return t->opcode_modifier.vex || t->opcode_modifier.evex;
+}
+
+/* We can use this function only when the current encoding is evex.  */
+static INLINE bool
+is_apx_evex_encoding (void)
+{
+  return i.rex2 || i.tm.opcode_space == SPACE_EVEXMAP4
+    || (i.vex.register_specifier
+	&& (i.vex.register_specifier->reg_flags & RegRex2));
 }
 
 static INLINE bool
@@ -4154,6 +4179,27 @@ build_rex2_prefix (void)
   /* For the W R X B bits, the variables of rex prefix will be reused.  */
   i.vex.bytes[1] = ((i.tm.opcode_space << 7)
 		    | (i.rex2 << 4) | i.rex);
+}
+
+/* Build the EVEX prefix (4-byte) for evex insn
+   | 62h |
+   | `R`X`B`R' | B'mmm |
+   | W | v`v`v`v | `x' | pp |
+   | z| L'L | b | `v | aaa |
+*/
+static void
+build_apx_evex_prefix (void)
+{
+  build_evex_prefix ();
+  if (i.rex2 & REX_R)
+    i.vex.bytes[1] &= ~0x10;
+  if (i.rex2 & REX_B)
+    i.vex.bytes[1] |= 0x08;
+  if (i.rex2 & REX_X)
+    i.vex.bytes[2] &= ~0x04;
+  if (i.vex.register_specifier
+      && i.vex.register_specifier->reg_flags & RegRex2)
+    i.vex.bytes[3] &= ~0x08;
 }
 
 static void establish_rex (void)
@@ -5723,13 +5769,18 @@ md_assemble (char *line)
 	  return;
 	}
 
-      if (i.tm.opcode_modifier.vex)
+      if (is_apx_evex_encoding ())
+	build_apx_evex_prefix ();
+      else if (i.tm.opcode_modifier.vex)
 	build_vex_prefix (t);
       else
 	build_evex_prefix ();
 
       /* The individual REX.RXBW bits got consumed.  */
       i.rex &= REX_OPCODE;
+
+      /* The rex2 bits got consumed.  */
+      i.rex2 = 0;
     }
 
   /* Handle conversion of 'int $3' --> special int3 insn.  */
@@ -6648,7 +6699,7 @@ check_VecOperands (const insn_template *t)
   if (!cpu_flags_all_zero (&cpu)
       && !is_cpu (t, CpuAVX512VL)
       && !cpu_arch_flags.bitfield.cpuavx512vl
-      && (!t->opcode_modifier.vex || need_evex_encoding ()))
+      && (!t->opcode_modifier.vex || need_evex_encoding (t)))
     {
       for (op = 0; op < t->operands; ++op)
 	{
@@ -6960,7 +7011,7 @@ check_VecOperands (const insn_template *t)
   /* Check vector Disp8 operand.  */
   if (t->opcode_modifier.disp8memshift
       && (!t->opcode_modifier.vex
-          || need_evex_encoding ())
+	  || need_evex_encoding (t))
       && i.disp_encoding <= disp_encoding_8bit)
     {
       if (i.broadcast.type || i.broadcast.bytes)
@@ -7617,7 +7668,7 @@ match_template (char mnem_suffix)
       if ((t == current_templates.start || j > 1)
 	  && t->opcode_modifier.disp8memshift
 	  && !t->opcode_modifier.vex
-	  && !need_evex_encoding ()
+	  && !need_evex_encoding (t)
 	  && t + j < current_templates.end
 	  && t[j].opcode_modifier.vex)
 	{
@@ -8084,7 +8135,8 @@ process_suffix (void)
       if (i.suffix != QWORD_MNEM_SUFFIX
 	  && i.tm.opcode_modifier.mnemonicsize != IGNORESIZE
 	  && !i.tm.opcode_modifier.floatmf
-	  && !is_any_vex_encoding (&i.tm)
+	  && (!is_any_vex_encoding (&i.tm)
+	      || i.tm.opcode_space == SPACE_EVEXMAP4)
 	  && ((i.suffix == LONG_MNEM_SUFFIX) == (flag_code == CODE_16BIT)
 	      || (flag_code == CODE_64BIT
 		  && i.tm.opcode_modifier.jump == JUMP_BYTE)))
@@ -8094,7 +8146,14 @@ process_suffix (void)
 	  if (i.tm.opcode_modifier.jump == JUMP_BYTE) /* jcxz, loop */
 	    prefix = ADDR_PREFIX_OPCODE;
 
-	  if (!add_prefix (prefix))
+	  /* The DATA PREFIX of EVEX promoted from legacy APX instructions
+	     needs to be adjusted.  */
+	  if (i.tm.opcode_space == SPACE_EVEXMAP4)
+	    {
+	      gas_assert (!i.tm.opcode_modifier.opcodeprefix);
+	      i.tm.opcode_modifier.opcodeprefix = PREFIX_0X66;
+	    }
+	  else if (!add_prefix (prefix))
 	    return 0;
 	}
 
@@ -14300,6 +14359,8 @@ static bool check_register (const reg_entry *r)
       if (!cpu_arch_flags.bitfield.cpuapx_f
 	  || flag_code != CODE_64BIT)
 	return false;
+
+      i.has_egpr = true;
     }
 
   if (((r->reg_flags & (RegRex64 | RegRex)) || r->reg_type.bitfield.qword)

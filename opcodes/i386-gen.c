@@ -487,6 +487,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Dialect),
   BITFIELD (ISA64),
   BITFIELD (NoEgpr),
+  BITFIELD (NF),
 };
 
 #define CLASS(n) #n, n
@@ -1120,6 +1121,7 @@ process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
     SPACE(0F),
     SPACE(0F38),
     SPACE(0F3A),
+    SPACE(EVEXMAP4),
     SPACE(EVEXMAP5),
     SPACE(EVEXMAP6),
     SPACE(VEXMAP7),

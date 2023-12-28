@@ -132,6 +132,13 @@ enum x86_64_isa
   intel64
 };
 
+enum evex_type
+{
+  evex_default = 0,
+  evex_from_legacy,
+  evex_from_vex,
+};
+
 struct instr_info
 {
   enum address_mode address_mode;
@@ -212,13 +219,14 @@ struct instr_info
     int ll;
     bool w;
     bool evex;
-    bool r;
     bool v;
     bool zeroing;
     bool b;
     bool no_broadcast;
   }
   vex;
+
+  enum evex_type evex_type;
 
   /* Remember if the current op is a jump instruction.  */
   bool op_is_jump;
@@ -303,6 +311,8 @@ struct dis_private {
 #define PREFIX_ADDR 0x400
 #define PREFIX_FWAIT 0x800
 #define PREFIX_REX2 0x1000
+#define PREFIX_NP_OR_DATA 0x2000
+#define NO_PREFIX   0x4000
 
 /* Make sure that bytes from INFO->PRIVATE_DATA->BUFFER (inclusive)
    to ADDR (exclusive) are valid.  Returns true for success, false
@@ -800,6 +810,7 @@ enum
   USE_RM_TABLE,
   USE_PREFIX_TABLE,
   USE_X86_64_TABLE,
+  USE_X86_64_EVEX_FROM_VEX_TABLE,
   USE_3BYTE_TABLE,
   USE_XOP_8F_TABLE,
   USE_VEX_C4_TABLE,
@@ -818,6 +829,8 @@ enum
 #define RM_TABLE(I)		DIS386 (USE_RM_TABLE, (I))
 #define PREFIX_TABLE(I)		DIS386 (USE_PREFIX_TABLE, (I))
 #define X86_64_TABLE(I)		DIS386 (USE_X86_64_TABLE, (I))
+#define X86_64_EVEX_FROM_VEX_TABLE(I) \
+  DIS386 (USE_X86_64_EVEX_FROM_VEX_TABLE, (I))
 #define THREE_BYTE_TABLE(I)	DIS386 (USE_3BYTE_TABLE, (I))
 #define XOP_8F_TABLE()		DIS386 (USE_XOP_8F_TABLE, 0)
 #define VEX_C4_TABLE()		DIS386 (USE_VEX_C4_TABLE, 0)
@@ -866,7 +879,7 @@ enum
   REG_VEX_0F73,
   REG_VEX_0FAE,
   REG_VEX_0F3849_X86_64_L_0_W_0_M_1_P_0,
-  REG_VEX_0F38F3_L_0,
+  REG_VEX_0F38F3_L_0_P_0,
   REG_VEX_MAP7_F8_L_0_W_0,
 
   REG_XOP_09_01_L_0,
@@ -878,7 +891,7 @@ enum
   REG_EVEX_0F72,
   REG_EVEX_0F73,
   REG_EVEX_0F38C6_L_2,
-  REG_EVEX_0F38C7_L_2
+  REG_EVEX_0F38C7_L_2,
 };
 
 enum
@@ -1094,6 +1107,8 @@ enum
   PREFIX_VEX_0F38CC,
   PREFIX_VEX_0F38CD,
   PREFIX_VEX_0F38DA_W_0,
+  PREFIX_VEX_0F38F2_L_0,
+  PREFIX_VEX_0F38F3_L_0,
   PREFIX_VEX_0F38F5_L_0,
   PREFIX_VEX_0F38F6_L_0,
   PREFIX_VEX_0F38F7_L_0,
@@ -1155,6 +1170,18 @@ enum
   PREFIX_EVEX_0F3A66,
   PREFIX_EVEX_0F3A67,
   PREFIX_EVEX_0F3AC2,
+
+  PREFIX_EVEX_MAP4_D8,
+  PREFIX_EVEX_MAP4_DA,
+  PREFIX_EVEX_MAP4_DB,
+  PREFIX_EVEX_MAP4_DC,
+  PREFIX_EVEX_MAP4_DD,
+  PREFIX_EVEX_MAP4_DE,
+  PREFIX_EVEX_MAP4_DF,
+  PREFIX_EVEX_MAP4_F0,
+  PREFIX_EVEX_MAP4_F1,
+  PREFIX_EVEX_MAP4_F2,
+  PREFIX_EVEX_MAP4_F8,
 
   PREFIX_EVEX_MAP5_10,
   PREFIX_EVEX_MAP5_11,
@@ -1267,7 +1294,19 @@ enum
   X86_64_VEX_0F38ED,
   X86_64_VEX_0F38EE,
   X86_64_VEX_0F38EF,
+
   X86_64_VEX_MAP7_F8_L_0_W_0_R_0,
+
+  X86_64_EVEX_0F90,
+  X86_64_EVEX_0F91,
+  X86_64_EVEX_0F92,
+  X86_64_EVEX_0F93,
+  X86_64_EVEX_0F38F2,
+  X86_64_EVEX_0F38F3,
+  X86_64_EVEX_0F38F5,
+  X86_64_EVEX_0F38F6,
+  X86_64_EVEX_0F38F7,
+  X86_64_EVEX_0F3AF0,
 };
 
 enum
@@ -2882,12 +2921,12 @@ static const struct dis386 reg_table[][8] = {
   {
     { RM_TABLE (RM_VEX_0F3849_X86_64_L_0_W_0_M_1_P_0_R_0) },
   },
-  /* REG_VEX_0F38F3_L_0 */
+  /* REG_VEX_0F38F3_L_0_P_0 */
   {
     { Bad_Opcode },
-    { "blsrS",		{ VexGdq, Edq }, PREFIX_OPCODE },
-    { "blsmskS",	{ VexGdq, Edq }, PREFIX_OPCODE },
-    { "blsiS",		{ VexGdq, Edq }, PREFIX_OPCODE },
+    { "blsrS",		{ VexGdq, Edq }, 0 },
+    { "blsmskS",	{ VexGdq, Edq }, 0 },
+    { "blsiS",		{ VexGdq, Edq }, 0 },
   },
   /* REG_VEX_MAP7_F8_L_0_W_0 */
   {
@@ -4035,6 +4074,16 @@ static const struct dis386 prefix_table[][4] = {
     { "vsm4rnds4", { XM, Vex, EXx }, 0 },
   },
 
+  /* PREFIX_VEX_0F38F2_L_0 */
+  {
+    { "andnS",          { Gdq, VexGdq, Edq }, 0 },
+  },
+
+  /* PREFIX_VEX_0F38F3_L_0 */
+  {
+    { REG_TABLE (REG_VEX_0F38F3_L_0_P_0) },
+  },
+
   /* PREFIX_VEX_0F38F5_L_0 */
   {
     { "bzhiS",		{ Gdq, Edq, VexGdq }, 0 },
@@ -4527,6 +4576,7 @@ static const struct dis386 x86_64_table[][2] = {
     { PREFIX_TABLE (PREFIX_VEX_MAP7_F8_L_0_W_0_R_0_X86_64) },
   },
 
+#include "i386-dis-evex-x86-64.h"
 };
 
 static const struct dis386 three_byte_table[][256] = {
@@ -7113,12 +7163,12 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F38F2 */
   {
-    { "andnS",		{ Gdq, VexGdq, Edq }, PREFIX_OPCODE },
+    { PREFIX_TABLE (PREFIX_VEX_0F38F2_L_0) },
   },
 
   /* VEX_LEN_0F38F3 */
   {
-    { REG_TABLE(REG_VEX_0F38F3_L_0) },
+    { PREFIX_TABLE (PREFIX_VEX_0F38F3_L_0) },
   },
 
   /* VEX_LEN_0F38F5 */
@@ -8732,6 +8782,17 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       dp = &prefix_table[dp->op[1].bytemode][vindex];
       break;
 
+    case USE_X86_64_EVEX_FROM_VEX_TABLE:
+      ins->evex_type = evex_from_vex;
+      /* EVEX from VEX instrucions require that EVEX.z, EVEX.L’L, EVEX.b and
+	 the lower 2 bits of EVEX.aaa must be 0.  */
+      if ((ins->vex.mask_register_specifier & 0x3) != 0
+	  || ins->vex.ll != 0
+	  || ins->vex.zeroing != 0
+	  || ins->vex.b)
+	return &bad_opcode;
+
+      /* Fall through.  */
     case USE_X86_64_TABLE:
       vindex = ins->address_mode == mode_64bit ? 1 : 0;
       dp = &x86_64_table[dp->op[1].bytemode][vindex];
@@ -8977,9 +9038,13 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       if (!fetch_code (ins->info, ins->codep + 4))
 	return &err_opcode;
       /* The first byte after 0x62.  */
+      if (*ins->codep & 0x8)
+	ins->rex2 |= REX_B;
+      if (!(*ins->codep & 0x10))
+	ins->rex2 |= REX_R;
+
       ins->rex = ~(*ins->codep >> 5) & 0x7;
-      ins->vex.r = *ins->codep & 0x10;
-      switch ((*ins->codep & 0xf))
+      switch (*ins->codep & 0x7)
 	{
 	default:
 	  return &bad_opcode;
@@ -8991,6 +9056,12 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	  break;
 	case 0x3:
 	  vex_table_index = EVEX_0F3A;
+	  break;
+	case 0x4:
+	  vex_table_index = EVEX_MAP4;
+	  ins->evex_type = evex_from_legacy;
+	  if (ins->address_mode != mode_64bit)
+	    return &bad_opcode;
 	  break;
 	case 0x5:
 	  vex_table_index = EVEX_MAP5;
@@ -9008,9 +9079,8 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 
       ins->vex.register_specifier = (~(*ins->codep >> 3)) & 0xf;
 
-      /* The U bit.  */
       if (!(*ins->codep & 0x4))
-	return &bad_opcode;
+	ins->rex2 |= REX_X;
 
       switch ((*ins->codep & 0x3))
 	{
@@ -9040,12 +9110,26 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 
       if (ins->address_mode != mode_64bit)
 	{
+	  /* Report bad for !evex_default and when two fixed values of evex
+	     change..  */
+	  if (ins->evex_type != evex_default
+	      || (ins->rex2 & (REX_B | REX_X)))
+	    return &bad_opcode;
 	  /* In 16/32-bit mode silently ignore following bits.  */
 	  ins->rex &= ~REX_B;
-	  ins->vex.r = true;
+	  ins->rex2 &= ~REX_R;
 	}
 
       ins->need_vex = 4;
+
+      /* EVEX from legacy instructions require that EVEX.z, EVEX.L’L and the
+	 lower 2 bits of EVEX.aaa must be 0.  */
+      if (ins->evex_type == evex_from_legacy
+	  && ((ins->vex.mask_register_specifier & 0x3) != 0
+	      || ins->vex.ll != 0
+	      || ins->vex.zeroing != 0))
+	return &bad_opcode;
+
       ins->codep++;
       vindex = *ins->codep++;
       dp = &evex_table[vex_table_index][vindex];
@@ -9460,6 +9544,13 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
       dp = get_valid_dis386 (dp, &ins);
       if (dp == &err_opcode)
 	goto fetch_error_out;
+
+      /* For APX instructions promoted from legacy maps 0/1, embedded prefix
+	 is interpreted as the operand size override.  */
+      if (ins.evex_type == evex_from_legacy
+	  && ins.vex.prefix == DATA_PREFIX_OPCODE)
+	sizeflag ^= DFLAG;
+
       if (dp != NULL && putop (&ins, dp->name, sizeflag) == 0)
 	{
 	  if (!get_sib (&ins, sizeflag))
@@ -9638,6 +9729,25 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 	ins.all_prefixes[ins.last_repz_prefix] = 0xf3;
       if (ins.last_repnz_prefix >= 0)
 	ins.all_prefixes[ins.last_repnz_prefix] = 0xf2;
+      break;
+
+    case PREFIX_NP_OR_DATA:
+      if (ins.vex.prefix == REPE_PREFIX_OPCODE
+	  || ins.vex.prefix == REPNE_PREFIX_OPCODE)
+	{
+	  i386_dis_printf (info, dis_style_text, "(bad)");
+	  ret = ins.end_codep - priv.the_buffer;
+	  goto out;
+	}
+      break;
+
+    case NO_PREFIX:
+      if (ins.vex.prefix)
+	{
+	  i386_dis_printf (info, dis_style_text, "(bad)");
+	  ret = ins.end_codep - priv.the_buffer;
+	  goto out;
+	}
       break;
     }
 
@@ -10348,7 +10458,7 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 		{
 		case 'X':
 		  if (!ins->vex.evex || ins->vex.b || ins->vex.ll >= 2
-		      || !ins->vex.r
+		      || (ins->rex2 & 7)
 		      || (ins->modrm.mod == 3 && (ins->rex & REX_X))
 		      || !ins->vex.v || ins->vex.mask_register_specifier)
 		    break;
@@ -11459,7 +11569,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 
   add += (ins->rex2 & REX_B) ? 16 : 0;
 
-  if (ins->vex.evex)
+  if (ins->vex.evex && ins->evex_type == evex_default)
     {
 
       /* Zeroing-masking is invalid for memory destinations. Set the flag
@@ -11603,6 +11713,13 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 		abort ();
 	      if (ins->vex.evex)
 		{
+		  /* S/G EVEX insns require EVEX.X4 not to be set.  */
+		  if (ins->rex2 & REX_X)
+		    {
+		      oappend (ins, "(bad)");
+		      return true;
+		    }
+
 		  if (!ins->vex.v)
 		    vindex += 16;
 		  check_gather = ins->obufp == ins->op_out[1];
@@ -11805,7 +11922,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 
 	      if (ins->rex & REX_R)
 	        modrm_reg += 8;
-	      if (!ins->vex.r)
+	      if (ins->rex2 & REX_R)
 	        modrm_reg += 16;
 	      if (vindex == modrm_reg)
 		oappend (ins, "/(bad)");
@@ -12011,10 +12128,7 @@ OP_indirE (instr_info *ins, int bytemode, int sizeflag)
 static bool
 OP_G (instr_info *ins, int bytemode, int sizeflag)
 {
-  if (ins->vex.evex && !ins->vex.r && ins->address_mode == mode_64bit)
-    oappend (ins, "(bad)");
-  else
-    print_register (ins, ins->modrm.reg, REX_R, bytemode, sizeflag);
+  print_register (ins, ins->modrm.reg, REX_R, bytemode, sizeflag);
   return true;
 }
 
@@ -12645,7 +12759,7 @@ OP_XMM (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     reg += 8;
   if (ins->vex.evex)
     {
-      if (!ins->vex.r)
+      if (ins->rex2 & REX_R)
 	reg += 16;
     }
 
@@ -13652,7 +13766,7 @@ DistinctDest_Fixup (instr_info *ins, int bytemode, int sizeflag)
   /* Calc destination register number.  */
   if (ins->rex & REX_R)
     modrm_reg += 8;
-  if (!ins->vex.r)
+  if (ins->rex2 & REX_R)
     modrm_reg += 16;
 
   /* Calc src1 register number.  */

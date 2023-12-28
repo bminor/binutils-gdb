@@ -743,6 +743,9 @@ enum
      whether the instruction supports pseudo-prefix {rex2}.  */
   NoEgpr,
 
+  /* No CSPAZO flags update indication.  */
+  NF,
+
   /* The last bitfield in i386_opcode_modifier.  */
   Opcode_Modifier_Num
 };
@@ -788,6 +791,7 @@ typedef struct i386_opcode_modifier
   unsigned int dialect:2;
   unsigned int isa64:2;
   unsigned int noegpr:1;
+  unsigned int nf:1;
 } i386_opcode_modifier;
 
 /* Operand classes.  */
@@ -963,6 +967,7 @@ typedef struct insn_template
      1: 0F opcode prefix / space.
      2: 0F38 opcode prefix / space.
      3: 0F3A opcode prefix / space.
+     4: EVEXMAP4 opcode prefix / space.
      5: EVEXMAP5 opcode prefix / space.
      6: EVEXMAP6 opcode prefix / space.
      7: VEXMAP7 opcode prefix / space.
@@ -974,6 +979,7 @@ typedef struct insn_template
 #define SPACE_0F	1
 #define SPACE_0F38	2
 #define SPACE_0F3A	3
+#define SPACE_EVEXMAP4	4
 #define SPACE_EVEXMAP5	5
 #define SPACE_EVEXMAP6	6
 #define SPACE_VEXMAP7	7

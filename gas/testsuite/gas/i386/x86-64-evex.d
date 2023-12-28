@@ -17,6 +17,6 @@ Disassembly of section .text:
  +[a-f0-9]+:	62 f1 d6 38 7b f0    	vcvtusi2ss %rax,\{rd-sae\},%xmm5,%xmm6
  +[a-f0-9]+:	62 f1 57 38 7b f0    	vcvtusi2sd %eax,\{rd-bad\},%xmm5,%xmm6
  +[a-f0-9]+:	62 f1 d7 38 7b f0    	vcvtusi2sd %rax,\{rd-sae\},%xmm5,%xmm6
- +[a-f0-9]+:	62 e1 7e 08 2d c0    	vcvtss2si %xmm0,\(bad\)
+ +[a-f0-9]+:	62 e1 7e 08 2d c0    	vcvtss2si %xmm0,%r16d
  +[a-f0-9]+:	62 e1 7c 08 c2 c0 00 	vcmpeqps %xmm0,%xmm0,\(bad\)
 #pass
