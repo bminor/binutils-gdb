@@ -574,13 +574,8 @@ show_always_inserted_mode (struct ui_file *file, int from_tty,
 	      value);
 }
 
-/* True if breakpoint debug output is enabled.  */
-static bool debug_breakpoint = false;
-
-/* Print a "breakpoint" debug statement.  */
-#define breakpoint_debug_printf(fmt, ...) \
-  debug_prefixed_printf_cond (debug_breakpoint, "breakpoint", fmt, \
-			      ##__VA_ARGS__)
+/* See breakpoint.h.  */
+bool debug_breakpoint = false;
 
 /* "show debug breakpoint" implementation.  */
 static void

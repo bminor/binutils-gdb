@@ -46,6 +46,14 @@ struct linespec_result;
 struct linespec_sals;
 struct inferior;
 
+/* True if breakpoint debug output is enabled.  */
+extern bool debug_breakpoint;
+
+/* Print a "breakpoint" debug statement.  */
+#define breakpoint_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (debug_breakpoint, "breakpoint", fmt, \
+			      ##__VA_ARGS__)
+
 /* Enum for exception-handling support in 'catch throw', 'catch rethrow',
    'catch catch' and the MI equivalent.  */
 
