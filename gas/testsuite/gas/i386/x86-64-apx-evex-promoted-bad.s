@@ -37,3 +37,6 @@ _start:
 
 	#EVEX from VEX bzhi %rax,(%rax,%rbx),%rcx EVEX.P[20](EVEX.b) == 0b1
 	.insn EVEX.L0.NP.0f38.W1 0xf5, %rax, (%rax,%rbx){1to8}, %rcx
+
+	#{evex} inc %rax %rbx EVEX.vvvv != 1111 && EVEX.ND = 0.
+	.insn EVEX.L0.NP.M4.W1 0xff/0, (%rax,%rcx), %rbx

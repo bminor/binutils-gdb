@@ -2240,8 +2240,10 @@ operand_size_match (const insn_template *t)
       unsigned int given = i.operands - j - 1;
 
       /* For FMA4 and XOP insns VEX.W controls just the first two
-	 register operands.  */
-      if (is_cpu (t, CpuFMA4) || is_cpu (t, CpuXOP))
+	 register operands. And APX_F insns just swap the two source operands,
+	 with the 3rd one being the destination.  */
+      if (is_cpu (t, CpuFMA4) || is_cpu (t, CpuXOP)
+	  || is_cpu (t, CpuAPX_F))
 	given = j < 2 ? 1 - j : j;
 
       if (t->operand_types[j].bitfield.class == Reg
@@ -4200,6 +4202,11 @@ build_apx_evex_prefix (void)
   if (i.vex.register_specifier
       && i.vex.register_specifier->reg_flags & RegRex2)
     i.vex.bytes[3] &= ~0x08;
+
+  /* Encode the NDD bit of the instruction promoted from the legacy
+     space.  */
+  if (i.vex.register_specifier && i.tm.opcode_space == SPACE_EVEXMAP4)
+    i.vex.bytes[3] |= 0x10;
 }
 
 static void establish_rex (void)
@@ -7473,18 +7480,22 @@ match_template (char mnem_suffix)
 	     - the store form is requested, and the template is a load form,
 	     - the non-default (swapped) form is requested.  */
 	  overlap1 = operand_type_and (operand_types[0], operand_types[1]);
+
+	  j = i.operands - 1 - (t->opcode_space == SPACE_EVEXMAP4
+				&& t->opcode_modifier.vexvvvv);
+
 	  if (t->opcode_modifier.d && i.reg_operands == i.operands
 	      && !operand_type_all_zero (&overlap1))
 	    switch (i.dir_encoding)
 	      {
 	      case dir_encoding_load:
-		if (operand_type_check (operand_types[i.operands - 1], anymem)
+		if (operand_type_check (operand_types[j], anymem)
 		    || t->opcode_modifier.regmem)
 		  goto check_reverse;
 		break;
 
 	      case dir_encoding_store:
-		if (!operand_type_check (operand_types[i.operands - 1], anymem)
+		if (!operand_type_check (operand_types[j], anymem)
 		    && !t->opcode_modifier.regmem)
 		  goto check_reverse;
 		break;
@@ -7495,6 +7506,7 @@ match_template (char mnem_suffix)
 	      case dir_encoding_default:
 		break;
 	      }
+
 	  /* If we want store form, we skip the current load.  */
 	  if ((i.dir_encoding == dir_encoding_store
 	       || i.dir_encoding == dir_encoding_swap)
@@ -7524,11 +7536,13 @@ match_template (char mnem_suffix)
 		continue;
 	      /* Try reversing direction of operands.  */
 	      j = is_cpu (t, CpuFMA4)
-		  || is_cpu (t, CpuXOP) ? 1 : i.operands - 1;
+		  || is_cpu (t, CpuXOP)
+		  || is_cpu (t, CpuAPX_F) ? 1 : i.operands - 1;
 	      overlap0 = operand_type_and (i.types[0], operand_types[j]);
 	      overlap1 = operand_type_and (i.types[j], operand_types[0]);
 	      overlap2 = operand_type_and (i.types[1], operand_types[1]);
-	      gas_assert (t->operands != 3 || !check_register);
+	      gas_assert (t->operands != 3 || !check_register
+			  || is_cpu (t, CpuAPX_F));
 	      if (!operand_type_match (overlap0, i.types[0])
 		  || !operand_type_match (overlap1, i.types[j])
 		  || (t->operands == 3
@@ -7561,6 +7575,11 @@ match_template (char mnem_suffix)
 	      else if (is_cpu (t, CpuFMA4) || is_cpu (t, CpuXOP))
 		{
 		  found_reverse_match = Opcode_VexW;
+		  goto check_operands_345;
+		}
+	      else if (is_cpu (t, CpuAPX_F) && i.operands == 3)
+		{
+		  found_reverse_match = Opcode_D;
 		  goto check_operands_345;
 		}
 	      else if (t->opcode_space != SPACE_BASE
@@ -7744,6 +7763,9 @@ match_template (char mnem_suffix)
 
       i.tm.base_opcode ^= found_reverse_match;
 
+      if (i.tm.opcode_space == SPACE_EVEXMAP4)
+	goto swap_first_2;
+
       /* Certain SIMD insns have their load forms specified in the opcode
 	 table, and hence we need to _set_ RegMem instead of clearing it.
 	 We need to avoid setting the bit though on insns like KMOVW.  */
@@ -7763,6 +7785,7 @@ match_template (char mnem_suffix)
 	 flipping VEX.W.  */
       i.tm.opcode_modifier.vexw ^= VEXW0 ^ VEXW1;
 
+    swap_first_2:
       j = i.tm.operand_types[0].bitfield.imm8;
       i.tm.operand_types[j] = operand_types[j + 1];
       i.tm.operand_types[j + 1] = operand_types[j];
@@ -8584,12 +8607,9 @@ process_operands (void)
      unnecessary segment overrides.  */
   const reg_entry *default_seg = NULL;
 
-  /* We only need to check those implicit registers for instructions
-     with 3 operands or less.  */
-  if (i.operands <= 3)
-    for (unsigned int j = 0; j < i.operands; j++)
-      if (i.types[j].bitfield.instance != InstanceNone)
-	i.reg_operands--;
+  for (unsigned int j = 0; j < i.operands; j++)
+    if (i.types[j].bitfield.instance != InstanceNone)
+      i.reg_operands--;
 
   if (i.tm.opcode_modifier.sse2avx)
     {
@@ -8943,11 +8963,19 @@ build_modrm_byte (void)
 				     || i.vec_encoding == vex_encoding_evex));
     }
 
-  for (v = source + 1; v < dest; ++v)
-    if (v != reg_slot)
-      break;
-  if (v >= dest)
-    v = ~0;
+  if (i.tm.opcode_modifier.vexvvvv == VexVVVV_DST)
+    {
+      v = dest;
+      dest-- ;
+    }
+  else
+    {
+      for (v = source + 1; v < dest; ++v)
+	if (v != reg_slot)
+	  break;
+      if (v >= dest)
+	v = ~0;
+    }
   if (i.tm.extension_opcode != None)
     {
       if (dest != source)

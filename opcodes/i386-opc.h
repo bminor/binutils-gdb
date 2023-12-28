@@ -638,8 +638,10 @@ enum
   Vex,
   /* How to encode VEX.vvvv:
      0: VEX.vvvv must be 1111b.
-     1: VEX.vvvv encodes one of the register operands.
+     1: VEX.vvvv encodes one of the src register operands.
+     2: VEX.vvvv encodes the dest register operand.
    */
+#define VexVVVV_DST   2
   VexVVVV,
   /* How the VEX.W bit is used:
      0: Set by the REX.W bit.
@@ -776,7 +778,7 @@ typedef struct i386_opcode_modifier
   unsigned int immext:1;
   unsigned int norex64:1;
   unsigned int vex:2;
-  unsigned int vexvvvv:1;
+  unsigned int vexvvvv:2;
   unsigned int vexw:2;
   unsigned int opcodeprefix:2;
   unsigned int sib:3;

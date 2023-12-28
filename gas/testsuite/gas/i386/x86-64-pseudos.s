@@ -134,6 +134,49 @@ _start:
 	{load} xor (%rdi), %eax
 	{store} xor %eax, (%rdi)
 	{store} xor (%rdi), %eax
+	{load}  add    %r31,(%r8),%r16
+	{load}	add    (%r8),%r31,%r16
+	{store} add    %r31,(%r8),%r16
+	{store}	add    (%r8),%r31,%r16
+	{load} 	sub    %r15d,(%r8),%r18d
+	{load}	sub    (%r8),%r15d,%r18d
+	{store} sub    %r15d,(%r8),%r18d
+	{store} sub    (%r8),%r15d,%r18d
+	{load} 	sbb    %r15d,(%r8),%r18d
+	{load}	sbb    (%r8),%r15d,%r18d
+	{store} sbb    %r15d,(%r8),%r18d
+	{store} sbb    (%r8),%r15d,%r18d
+	{load} 	and    %r15d,(%r8),%r18d
+	{load}	and    (%r8),%r15d,%r18d
+	{store} and    %r15d,(%r8),%r18d
+	{store} and    (%r8),%r15d,%r18d
+	{load} 	or     %r15d,(%r8),%r18d
+	{load}	or     (%r8),%r15d,%r18d
+	{store} or     %r15d,(%r8),%r18d
+	{store} or     (%r8),%r15d,%r18d
+	{load} 	xor    %r15d,(%r8),%r18d
+	{load}	xor    (%r8),%r15d,%r18d
+	{store} xor    %r15d,(%r8),%r18d
+	{store} xor    (%r8),%r15d,%r18d
+	{load} 	adc    %r15d,(%r8),%r18d
+	{load}	adc    (%r8),%r15d,%r18d
+	{store} adc    %r15d,(%r8),%r18d
+	{store} adc    (%r8),%r15d,%r18d
+
+	{store} add    %r31,%r8,%r16
+	{load}  add    %r31,%r8,%r16
+	{store} sub    %r15b,%r17b,%r18b
+	{load}	sub    %r15b,%r17b,%r18b
+	{store}	sbb    %r15b,%r17b,%r18b
+	{load}	sbb    %r15b,%r17b,%r18b
+	{store}	and    %r15b,%r17b,%r18b
+	{load}	and    %r15b,%r17b,%r18b
+	{store}	or     %r15b,%r17b,%r18b
+	{load}	or     %r15b,%r17b,%r18b
+	{store}	xor    %r15b,%r17b,%r18b
+	{load}	xor    %r15b,%r17b,%r18b
+	{store}	adc    %r15b,%r17b,%r18b
+	{load}	adc    %r15b,%r17b,%r18b
 
 	.irp m, mov, adc, add, and, cmp, or, sbb, sub, test, xor
 	\m	$0x12, %al
