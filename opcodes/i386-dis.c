@@ -1296,6 +1296,7 @@ enum
   EVEX_0F = 0,
   EVEX_0F38,
   EVEX_0F3A,
+  EVEX_MAP4,
   EVEX_MAP5,
   EVEX_MAP6,
 };
