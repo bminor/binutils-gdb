@@ -106,6 +106,7 @@ static bool MOVSXD_Fixup (instr_info *, int, int);
 static bool DistinctDest_Fixup (instr_info *, int, int);
 static bool PREFETCHI_Fixup (instr_info *, int, int);
 static bool PUSH2_POP2_Fixup (instr_info *, int, int);
+static bool JMPABS_Fixup (instr_info *, int, int);
 
 static void ATTRIBUTE_PRINTF_3 i386_dis_printf (const disassemble_info *,
 						enum disassembler_style,
@@ -2018,7 +2019,7 @@ static const struct dis386 dis386[] = {
   { "lahf",		{ XX }, 0 },
   /* a0 */
   { "mov%LB",		{ AL, Ob }, PREFIX_REX2_ILLEGAL },
-  { "mov%LS",		{ eAX, Ov }, PREFIX_REX2_ILLEGAL },
+  { "mov%LS",		{ { JMPABS_Fixup, eAX_reg }, { JMPABS_Fixup, v_mode } }, PREFIX_REX2_ILLEGAL },
   { "mov%LB",		{ Ob, AL }, PREFIX_REX2_ILLEGAL },
   { "mov%LS",		{ Ov, eAX }, PREFIX_REX2_ILLEGAL },
   { "movs{b|}",		{ Ybr, Xb }, PREFIX_REX2_ILLEGAL },
@@ -9699,7 +9700,7 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
     }
 
   if ((dp->prefix_requirement & PREFIX_REX2_ILLEGAL)
-      && ins.last_rex2_prefix >= 0)
+      && ins.last_rex2_prefix >= 0 && (ins.rex2 & REX2_SPECIAL) == 0)
     {
       i386_dis_printf (info, dis_style_text, "(bad)");
       ret = ins.end_codep - priv.the_buffer;
@@ -13941,4 +13942,36 @@ PUSH2_POP2_Fixup (instr_info *ins, int bytemode, int sizeflag)
     }
 
   return OP_VEX (ins, bytemode, sizeflag);
+}
+
+static bool
+JMPABS_Fixup (instr_info *ins, int bytemode, int sizeflag)
+{
+  if (ins->last_rex2_prefix >= 0)
+    {
+      uint64_t op;
+
+      if ((ins->prefixes & (PREFIX_OPCODE | PREFIX_ADDR | PREFIX_LOCK)) != 0x0
+	  || (ins->rex & REX_W) != 0x0)
+	{
+	  oappend (ins, "(bad)");
+	  return true;
+	}
+
+      if (bytemode == eAX_reg)
+	return true;
+
+      if (!get64 (ins, &op))
+	return false;
+
+      ins->mnemonicendp = stpcpy (ins->obuf, "jmpabs");
+      ins->rex2 |= REX2_SPECIAL;
+      oappend_immediate (ins, op);
+
+      return true;
+    }
+
+  if (bytemode == eAX_reg)
+    return OP_IMREG (ins, bytemode, sizeflag);
+  return OP_OFF64 (ins, bytemode, sizeflag);
 }
