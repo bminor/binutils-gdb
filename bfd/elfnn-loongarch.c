@@ -858,6 +858,7 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_LARCH_TLS_LE_HI20:
+	case R_LARCH_TLS_LE_HI20_R:
 	case R_LARCH_SOP_PUSH_TLS_TPREL:
 	  if (!bfd_link_executable (info))
 	    return false;
@@ -2261,6 +2262,8 @@ perform_relocation (const Elf_Internal_Rela *rel, asection *input_section,
     case R_LARCH_GOT64_HI12:
     case R_LARCH_TLS_LE_HI20:
     case R_LARCH_TLS_LE_LO12:
+    case R_LARCH_TLS_LE_HI20_R:
+    case R_LARCH_TLS_LE_LO12_R:
     case R_LARCH_TLS_LE64_LO20:
     case R_LARCH_TLS_LE64_HI12:
     case R_LARCH_TLS_IE_PC_HI20:
@@ -2303,6 +2306,7 @@ perform_relocation (const Elf_Internal_Rela *rel, asection *input_section,
       break;
 
     case R_LARCH_RELAX:
+    case R_LARCH_TLS_LE_ADD_R:
       break;
 
     default:
@@ -2481,6 +2485,16 @@ loongarch_reloc_is_fatal (struct bfd_link_info *info,
 		  - (pc & ~(bfd_vma)0xfff);		\
     if (__lo > 0x7ff)					\
 	relocation += 0x1000;				\
+  })
+
+/* Handle problems caused by symbol extensions in TLS LE, The processing
+   is similar to the macro RELOCATE_CALC_PC32_HI20 method.  */
+#define RELOCATE_TLS_TP32_HI20(relocation)		\
+  ({							\
+    bfd_vma __lo = (relocation) & ((bfd_vma)0xfff);	\
+    if (__lo > 0x7ff)					\
+	relocation += 0x800;				\
+    relocation = relocation & ~(bfd_vma)0xfff;		\
   })
 
 /* For example: pc is 0x11000010000100, symbol is 0x1812348ffff812
@@ -3481,6 +3495,13 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	  break;
 
+	case R_LARCH_TLS_LE_HI20_R:
+	  relocation -= elf_hash_table (info)->tls_sec->vma;
+
+	  RELOCATE_TLS_TP32_HI20 (relocation);
+
+	  break;
+
 	case R_LARCH_PCALA_LO12:
 	  /* Not support if sym_addr in 2k page edge.
 	     pcalau12i pc_hi20 (sym_addr)
@@ -3651,6 +3672,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	case R_LARCH_TLS_LE_HI20:
 	case R_LARCH_TLS_LE_LO12:
+	case R_LARCH_TLS_LE_LO12_R:
 	case R_LARCH_TLS_LE64_LO20:
 	case R_LARCH_TLS_LE64_HI12:
 	  BFD_ASSERT (resolved_local && elf_hash_table (info)->tls_sec);
@@ -4089,6 +4111,82 @@ loongarch_relax_delete_bytes (bfd *abfd,
 
   return true;
 }
+/*  Relax tls le, mainly relax the process of getting TLS le symbolic addresses.
+  there are three situations in which an assembly instruction sequence needs to
+  be relaxed:
+  symbol address = tp + offset (symbol),offset (symbol) = le_hi20_r + le_lo12_r
+
+  Case 1:
+  in this case, the rd register in the st.{w/d} instruction does not store the
+  full tls symbolic address, but tp + le_hi20_r, which is a part of the tls
+  symbolic address, and then obtains the rd + le_lo12_r address through the
+  st.w instruction feature.
+  this is the full tls symbolic address (tp + le_hi20_r + le_lo12_r).
+
+  before relax:				after relax:
+
+  lu12i.w   $rd,%le_hi20_r (sym)	==> (instruction deleted)
+  add.{w/d} $rd,$rd,$tp,%le_add_r (sym) ==> (instruction deleted)
+  st.{w/d}  $rs,$rd,%le_lo12_r (sym)    ==> st.{w/d}   $rs,$tp,%le_lo12_r (sym)
+
+  Case 2:
+  in this case, ld.{w/d} is similar to st.{w/d} in case1.
+
+  before relax:				after relax:
+
+  lu12i.w   $rd,%le_hi20_r (sym)	==> (instruction deleted)
+  add.{w/d} $rd,$rd,$tp,%le_add_r (sym) ==> (instruction deleted)
+  ld.{w/d}  $rs,$rd,%le_lo12_r (sym)    ==> ld.{w/d}   $rs,$tp,%le_lo12_r (sym)
+
+  Case 3:
+  in this case,the rs register in addi.{w/d} stores the full address of the tls
+  symbol (tp + le_hi20_r + le_lo12_r).
+
+  before relax:				after relax:
+
+  lu12i.w    $rd,%le_hi20_r (sym)	 ==> (instruction deleted)
+  add.{w/d}  $rd,$rd,$tp,%le_add_r (sym) ==> (instruction deleted)
+  addi.{w/d} $rs,$rd,%le_lo12_r (sym)    ==> addi.{w/d} $rs,$tp,%le_lo12_r (sym)
+*/
+static bool
+loongarch_relax_tls_le (bfd *abfd, asection *sec,
+			Elf_Internal_Rela *rel,
+			struct bfd_link_info *link_info,
+			bfd_vma symval)
+{
+  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
+  uint32_t insn = bfd_get (32, abfd, contents + rel->r_offset);
+  static uint32_t insn_rj,insn_rd;
+  symval = symval - elf_hash_table (link_info)->tls_sec->vma;
+  /* Whether the symbol offset is in the interval (offset < 0x800).  */
+  if (ELFNN_R_TYPE ((rel + 1)->r_info == R_LARCH_RELAX) && (symval < 0x800))
+    {
+      switch (ELFNN_R_TYPE (rel->r_info))
+	{
+	case R_LARCH_TLS_LE_HI20_R:
+	case R_LARCH_TLS_LE_ADD_R:
+	  /* delete insn.  */
+	  rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
+	  loongarch_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info);
+	  break;
+	case R_LARCH_TLS_LE_LO12_R:
+	  /* Change rj to $tp.  */
+	  insn_rj = 0x2 << 5;
+	  /* Get rd register.  */
+	  insn_rd = insn & 0x1f;
+	  /* Write symbol offset.  */
+	  symval <<= 10;
+	  /* Writes the modified instruction.  */
+	  insn = insn & 0xffc00000;
+	  insn = insn | symval | insn_rj | insn_rd;
+	  bfd_put (32, abfd, insn, contents + rel->r_offset);
+	  break;
+	default:
+	  break;
+	}
+    }
+  return true;
+}
 
 /* Relax pcalau12i,addi.d => pcaddi.  */
 static bool
@@ -4518,6 +4616,13 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	      rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
 	    }
 	  break;
+	case R_LARCH_TLS_LE_HI20_R:
+	case R_LARCH_TLS_LE_LO12_R:
+	case R_LARCH_TLS_LE_ADD_R:
+	  if (0 == info->relax_pass && (i + 2) <= sec->reloc_count)
+	    loongarch_relax_tls_le (abfd, sec, rel, info, symval);
+	  break;
+
 	case R_LARCH_PCALA_HI20:
 	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
 	    loongarch_relax_pcala_addi (abfd, sec, sym_sec, rel, symval,

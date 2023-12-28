@@ -1776,9 +1776,56 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 NULL,					/* adjust_reloc_bits.  */
 	 "desc_call"),				/* larch_reloc_type_name.  */
 
-  LOONGARCH_EMPTY_HOWTO (121),
-  LOONGARCH_EMPTY_HOWTO (122),
-  LOONGARCH_EMPTY_HOWTO (123),
+  LOONGARCH_HOWTO (R_LARCH_TLS_LE_HI20_R,	/* type (121).  */
+	 12,					/* rightshift.  */
+	 4,					/* size.  */
+	 20,					/* bitsize.  */
+	 false,					/* pc_relative.  */
+	 5,					/* bitpos.  */
+	 complain_overflow_signed,		/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,			/* special_function.  */
+	 "R_LARCH_TLS_LE_HI20_R",		/* name.  */
+	 false,					/* partial_inplace.  */
+	 0,					/* src_mask.  */
+	 0x1ffffe0,				/* dst_mask.  */
+	 false,					/* pcrel_offset.  */
+	 BFD_RELOC_LARCH_TLS_LE_HI20_R,		/* bfd_reloc_code_real_type.  */
+	 reloc_bits,				/* adjust_reloc_bits.  */
+	 "le_hi20_r"),				/* larch_reloc_type_name.  */
+
+  LOONGARCH_HOWTO (R_LARCH_TLS_LE_ADD_R,	/* type (122).  */
+	 0,					/* rightshift.  */
+	 0,					/* size.  */
+	 0,					/* bitsize.  */
+	 false,					/* pc_relative.  */
+	 0,					/* bitpos.  */
+	 complain_overflow_dont,		/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,			/* special_function.  */
+	 "R_LARCH_TLS_LE_ADD_R",		/* name.  */
+	 false,					/* partial_inplace.  */
+	 0,					/* src_mask.  */
+	 0,					/* dst_mask.  */
+	 false,					/* pcrel_offset.  */
+	 BFD_RELOC_LARCH_TLS_LE_ADD_R,		/* bfd_reloc_code_real_type.  */
+	 NULL,					/* adjust_reloc_bits.  */
+	 "le_add_r"),				/* larch_reloc_type_name.  */
+
+  LOONGARCH_HOWTO (R_LARCH_TLS_LE_LO12_R,	/* type (123).  */
+	 0,					/* rightshift.  */
+	 4,					/* size.  */
+	 12,					/* bitsize.  */
+	 false,					/* pc_relative.  */
+	 10,					/* bitpos.  */
+	 complain_overflow_signed,		/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,			/* special_function.  */
+	 "R_LARCH_TLS_LE_LO12_R",		/* name.  */
+	 false,					/* partial_inplace.  */
+	 0,					/* src_mask.  */
+	 0x3ffc00,				/* dst_mask.  */
+	 false,					/* pcrel_offset.  */
+	 BFD_RELOC_LARCH_TLS_LE_LO12_R,		/* bfd_reloc_code_real_type.  */
+	 reloc_bits,				/* adjust_reloc_bits.  */
+	 "le_lo12_r"),				/* larch_reloc_type_name.  */
 
   /* For pcaddi, ld_pc_hi20 + ld_pc_lo12 can relax to ld_pcrel20_s2.  */
   LOONGARCH_HOWTO (R_LARCH_TLS_LD_PCREL20_S2,	/* type (124).  */
@@ -1870,9 +1917,7 @@ reloc_howto_type *
 loongarch_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 			     bfd_reloc_code_real_type code)
 {
-  /*
   BFD_ASSERT (ARRAY_SIZE (loongarch_howto_table) == R_LARCH_count);
-  */
 
   /* Fast search for new reloc types.  */
   if (BFD_RELOC_LARCH_B16 <= code && code < BFD_RELOC_LARCH_RELAX)
