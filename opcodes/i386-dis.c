@@ -105,6 +105,7 @@ static bool FXSAVE_Fixup (instr_info *, int, int);
 static bool MOVSXD_Fixup (instr_info *, int, int);
 static bool DistinctDest_Fixup (instr_info *, int, int);
 static bool PREFETCHI_Fixup (instr_info *, int, int);
+static bool PUSH2_POP2_Fixup (instr_info *, int, int);
 
 static void ATTRIBUTE_PRINTF_3 i386_dis_printf (const disassemble_info *,
 						enum disassembler_style,
@@ -900,6 +901,7 @@ enum
   REG_EVEX_MAP4_80,
   REG_EVEX_MAP4_81,
   REG_EVEX_MAP4_83,
+  REG_EVEX_MAP4_8F,
   REG_EVEX_MAP4_F6,
   REG_EVEX_MAP4_F7,
   REG_EVEX_MAP4_FE,
@@ -1738,6 +1740,9 @@ enum
   EVEX_W_0F3A43_L_n,
   EVEX_W_0F3A70,
   EVEX_W_0F3A72,
+
+  EVEX_W_MAP4_8F_R_0,
+  EVEX_W_MAP4_FF_R_6,
 
   EVEX_W_MAP5_5B_P_0,
   EVEX_W_MAP5_7A_P_3,
@@ -13510,6 +13515,9 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	case b_mode:
 	  names = att_names8rex;
 	  break;
+	case q_mode:
+	  names = att_names64;
+	  break;
 	case mask_bd_mode:
 	case mask_mode:
 	  if (reg > 0x7)
@@ -13893,4 +13901,27 @@ PREFETCHI_Fixup (instr_info *ins, int bytemode, int sizeflag)
     }
 
   return OP_M (ins, bytemode, sizeflag);
+}
+
+static bool
+PUSH2_POP2_Fixup (instr_info *ins, int bytemode, int sizeflag)
+{
+  if (ins->modrm.mod != 3)
+    return true;
+
+  unsigned int vvvv_reg = ins->vex.register_specifier
+    | (!ins->vex.v << 4);
+  unsigned int rm_reg = ins->modrm.rm + (ins->rex & REX_B ? 8 : 0)
+    + (ins->rex2 & REX_B ? 16 : 0);
+
+  /* Push2/Pop2 cannot use RSP and Pop2 cannot pop two same registers.  */
+  if (!ins->vex.nd || vvvv_reg == 0x4 || rm_reg == 0x4
+      || (!ins->modrm.reg
+	  && vvvv_reg == rm_reg))
+    {
+      oappend (ins, "(bad)");
+      return true;
+    }
+
+  return OP_VEX (ins, bytemode, sizeflag);
 }

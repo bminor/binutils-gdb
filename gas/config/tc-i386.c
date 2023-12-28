@@ -250,6 +250,7 @@ enum i386_error
     invalid_vector_register_set,
     invalid_tmm_register_set,
     invalid_dest_and_src_register_set,
+    invalid_dest_register_set,
     invalid_pseudo_prefix,
     unsupported_vector_index_register,
     unsupported_broadcast,
@@ -259,6 +260,7 @@ enum i386_error
     no_default_mask,
     unsupported_rc_sae,
     unsupported_vector_size,
+    unsupported_rsp_register,
     internal_error,
   };
 
@@ -5511,6 +5513,9 @@ md_assemble (char *line)
 	case invalid_dest_and_src_register_set:
 	  err_msg = _("destination and source registers must be distinct");
 	  break;
+	case invalid_dest_register_set:
+	  err_msg = _("two dest registers must be distinct");
+	  break;
 	case invalid_pseudo_prefix:
 	  err_msg = _("rex2 pseudo prefix cannot be used");
 	  break;
@@ -5539,6 +5544,9 @@ md_assemble (char *line)
 	  as_bad (_("vector size above %u required for `%s'"), 128u << vector_size,
 		  pass1_mnem ? pass1_mnem : insn_name (current_templates.start));
 	  return;
+	case unsupported_rsp_register:
+	  err_msg = _("'rsp' register cannot be used");
+	  break;
 	case internal_error:
 	  err_msg = _("internal error");
 	  break;
@@ -7175,6 +7183,35 @@ check_EgprOperands (const insn_template *t)
   return 0;
 }
 
+/* Check if APX operands are valid for the instruction.  */
+static bool
+check_APX_operands (const insn_template *t)
+{
+  /* Push2* and Pop2* cannot use RSP and Pop2* cannot pop two same registers.
+   */
+  switch (t->mnem_off)
+    {
+    case MN_pop2:
+    case MN_pop2p:
+      if (register_number (i.op[0].regs) == register_number (i.op[1].regs))
+	{
+	  i.error = invalid_dest_register_set;
+	  return 1;
+	}
+    /* fall through */
+    case MN_push2:
+    case MN_push2p:
+      if (register_number (i.op[0].regs) == 4
+	  || register_number (i.op[1].regs) == 4)
+	{
+	  i.error = unsupported_rsp_register;
+	  return 1;
+	}
+      break;
+    }
+  return 0;
+}
+
 /* Helper function for the progress() macro in match_template().  */
 static INLINE enum i386_error progress (enum i386_error new,
 					enum i386_error last,
@@ -7670,6 +7707,13 @@ match_template (char mnem_suffix)
 
       /* Check if vector operands are valid.  */
       if (check_VecOperands (t))
+	{
+	  specific_error = progress (i.error);
+	  continue;
+	}
+
+      /* Check if APX operands are valid.  */
+      if (check_APX_operands (t))
 	{
 	  specific_error = progress (i.error);
 	  continue;

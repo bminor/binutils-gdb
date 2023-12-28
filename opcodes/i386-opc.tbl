@@ -3480,3 +3480,12 @@ uwrmsr, 0xf30f38f8, USER_MSR, Modrm|NoSuf|NoRex64, { Reg64, Reg64 }
 uwrmsr, 0xf3f8/0, USER_MSR, Modrm|Vex128|VexMap7|VexW0|NoSuf, { Imm32, Reg64 }
 
 // USER_MSR instructions end.
+
+// APX Push2/Pop2 instructions.
+
+push2, 0xff/6, APX_F, Modrm|VexW0|EVex128|EVexMap4|VexVVVV|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Reg64, Reg64 }
+push2p, 0xff/6, APX_F, Modrm|VexW1|EVex128|EVexMap4|VexVVVV|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Reg64, Reg64 }
+pop2, 0x8f/0, APX_F, Modrm|VexW0|EVex128|EVexMap4|VexVVVV|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Reg64, Reg64 }
+pop2p, 0x8f/0, APX_F, Modrm|VexW1|EVex128|EVexMap4|VexVVVV|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Reg64, Reg64 }
+
+// APX Push2/Pop2 instructions end.

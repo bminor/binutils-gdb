@@ -442,6 +442,16 @@
     { Bad_Opcode },
     { "vpshrdw",   { XM, Vex, EXx, Ib }, 0 },
   },
+  /* EVEX_W_MAP4_8F_R_0 */
+  {
+    { "pop2", { { PUSH2_POP2_Fixup, q_mode}, Eq }, NO_PREFIX },
+    { "pop2p", { { PUSH2_POP2_Fixup, q_mode}, Eq }, NO_PREFIX },
+  },
+  /* EVEX_W_MAP4_FF_R_6 */
+  {
+    { "push2", { { PUSH2_POP2_Fixup, q_mode}, Eq }, 0 },
+    { "push2p", { { PUSH2_POP2_Fixup, q_mode}, Eq }, 0 },
+  },
   /* EVEX_W_MAP5_5B_P_0 */
   {
     { "vcvtdq2ph%XY",	{ XMxmmq, EXx, EXxEVexR }, 0 },

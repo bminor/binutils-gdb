@@ -40,3 +40,10 @@ _start:
 
 	#{evex} inc %rax %rbx EVEX.vvvv != 1111 && EVEX.ND = 0.
 	.insn EVEX.L0.NP.M4.W1 0xff/0, (%rax,%rcx), %rbx
+	# pop2 %rax, %r8 set EVEX.ND=0.
+	.insn EVEX.L0.M4.W0 0x8f/0,  %rax, %r8
+	.byte 0xff, 0xff, 0xff
+	# pop2 %rax, %r8 set EVEX.vvvv = 1111.
+	.insn EVEX.L0.M4.W0 0x8f,  %rax, {rn-sae},%r8
+	# pop2 %r8, %r8.
+	.insn EVEX.L0.M4.W0 0x8f/0,  %r8,{rn-sae}, %r8

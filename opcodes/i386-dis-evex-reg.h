@@ -79,6 +79,10 @@
     { "subQ",	{ VexGv, Ev, sIb }, PREFIX_NP_OR_DATA },
     { "xorQ",	{ VexGv, Ev, sIb }, PREFIX_NP_OR_DATA },
   },
+  /* REG_EVEX_MAP4_8F */
+  {
+    { VEX_W_TABLE (EVEX_W_MAP4_8F_R_0) },
+  },
   /* REG_EVEX_MAP4_F6 */
   {
     { Bad_Opcode },
@@ -102,4 +106,9 @@
   {
     { "incQ",	{ VexGv, Ev }, PREFIX_NP_OR_DATA },
     { "decQ",	{ VexGv, Ev }, PREFIX_NP_OR_DATA },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { VEX_W_TABLE (EVEX_W_MAP4_FF_R_6) },
   },

@@ -1035,7 +1035,7 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { REG_TABLE (REG_EVEX_MAP4_8F) },
     /* 90 */
     { Bad_Opcode },
     { Bad_Opcode },
