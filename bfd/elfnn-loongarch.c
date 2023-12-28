@@ -863,8 +863,6 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (!bfd_link_executable (info))
 	    return false;
 
-	  info->flags |= DF_STATIC_TLS;
-
 	  if (!loongarch_elf_record_tls_and_got_reference (abfd, info, h,
 							   r_symndx,
 							   GOT_TLS_LE))
