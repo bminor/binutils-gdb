@@ -3911,7 +3911,8 @@ is_apx_evex_encoding (void)
 static INLINE bool
 is_apx_rex2_encoding (void)
 {
-  return i.rex2 || i.rex2_encoding;
+  return i.rex2 || i.rex2_encoding
+	|| i.tm.opcode_modifier.operandconstraint == REX2_REQUIRED;
 }
 
 static unsigned int

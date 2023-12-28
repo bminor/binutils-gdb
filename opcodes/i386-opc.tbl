@@ -85,6 +85,7 @@
 #define RegKludge         OperandConstraint=REG_KLUDGE
 #define SwapSources       OperandConstraint=SWAP_SOURCES
 #define Ugh               OperandConstraint=UGH
+#define Rex2              OperandConstraint=REX2_REQUIRED
 
 #define ATTSyntax         Dialect=ATT_SYNTAX
 #define ATTMnemonic       Dialect=ATT_MNEMONIC
@@ -229,6 +230,7 @@ push, 0x68, i186&No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm16|Imm32 }
 push, 0x6, No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, { SReg }
 // In 64bit mode, the operand size is implicitly 64bit.
 push, 0x50, x64, No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64 }
+pushp, 0x50, APX_F, No_bSuf|No_wSuf|No_lSuf|No_sSuf|Rex2, { Reg64 }
 push, 0xff/6, x64, Modrm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64|Unspecified|BaseIndex }
 push, 0x6a, x64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Imm8S }
 push, 0x68, x64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Imm16|Imm32S }
@@ -242,6 +244,7 @@ pop, 0x8f/0, No64, Modrm|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32|Unsp
 pop, 0x7, No64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, { SReg }
 // In 64bit mode, the operand size is implicitly 64bit.
 pop, 0x58, x64, No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64 }
+popp, 0x58, APX_F, No_bSuf|No_wSuf|No_lSuf|No_sSuf|Rex2, { Reg64 }
 pop, 0x8f/0, x64, Modrm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64|Unspecified|BaseIndex }
 pop, 0xfa1, x64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { SReg }
 

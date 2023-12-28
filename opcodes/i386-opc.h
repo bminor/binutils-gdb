@@ -579,6 +579,8 @@ enum
   /* Instrucion requires that destination must be distinct from source
      registers.  */
 #define DISTINCT_DEST 9
+  /* Instrucion requires REX2 prefix.  */
+#define REX2_REQUIRED 10
   OperandConstraint,
   /* instruction ignores operand size prefix and in Intel mode ignores
      mnemonic size suffix check.  */

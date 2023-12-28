@@ -301,6 +301,9 @@ struct dis_private {
 #define EVEX_len_used 2
 
 
+/* {rex2} is not printed when the REX2_SPECIAL is set.  */
+#define REX2_SPECIAL 16
+
 /* Flags stored in PREFIXES.  */
 #define PREFIX_REPZ 1
 #define PREFIX_REPNZ 2
@@ -1924,23 +1927,23 @@ static const struct dis386 dis386[] = {
   { "dec{S|}",		{ RMeSI }, 0 },
   { "dec{S|}",		{ RMeDI }, 0 },
   /* 50 */
-  { "push{!P|}",		{ RMrAX }, 0 },
-  { "push{!P|}",		{ RMrCX }, 0 },
-  { "push{!P|}",		{ RMrDX }, 0 },
-  { "push{!P|}",		{ RMrBX }, 0 },
-  { "push{!P|}",		{ RMrSP }, 0 },
-  { "push{!P|}",		{ RMrBP }, 0 },
-  { "push{!P|}",		{ RMrSI }, 0 },
-  { "push{!P|}",		{ RMrDI }, 0 },
+  { "push!P",		{ RMrAX }, 0 },
+  { "push!P",		{ RMrCX }, 0 },
+  { "push!P",		{ RMrDX }, 0 },
+  { "push!P",		{ RMrBX }, 0 },
+  { "push!P",		{ RMrSP }, 0 },
+  { "push!P",		{ RMrBP }, 0 },
+  { "push!P",		{ RMrSI }, 0 },
+  { "push!P",		{ RMrDI }, 0 },
   /* 58 */
-  { "pop{!P|}",		{ RMrAX }, 0 },
-  { "pop{!P|}",		{ RMrCX }, 0 },
-  { "pop{!P|}",		{ RMrDX }, 0 },
-  { "pop{!P|}",		{ RMrBX }, 0 },
-  { "pop{!P|}",		{ RMrSP }, 0 },
-  { "pop{!P|}",		{ RMrBP }, 0 },
-  { "pop{!P|}",		{ RMrSI }, 0 },
-  { "pop{!P|}",		{ RMrDI }, 0 },
+  { "pop!P",		{ RMrAX }, 0 },
+  { "pop!P",		{ RMrCX }, 0 },
+  { "pop!P",		{ RMrDX }, 0 },
+  { "pop!P",		{ RMrBX }, 0 },
+  { "pop!P",		{ RMrSP }, 0 },
+  { "pop!P",		{ RMrBP }, 0 },
+  { "pop!P",		{ RMrSI }, 0 },
+  { "pop!P",		{ RMrDI }, 0 },
   /* 60 */
   { X86_64_TABLE (X86_64_60) },
   { X86_64_TABLE (X86_64_61) },
@@ -9783,9 +9786,10 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 
   /* Check if the REX2 prefix is used.  */
   if (ins.last_rex2_prefix >= 0
-      && ((ins.rex2 & 0x7) ^ (ins.rex2_used & 0x7)) == 0
-      && (ins.rex ^ ins.rex_used) == 0
-      && (ins.rex2 & 0x7))
+      && ((ins.rex2 & REX2_SPECIAL)
+	  || (((ins.rex2 & 7) ^ (ins.rex2_used & 7)) == 0
+	      && (ins.rex ^ ins.rex_used) == 0
+	      && (ins.rex2 & 7))))
     ins.all_prefixes[ins.last_rex2_prefix] = 0;
 
   /* Check if the SEG prefix is used.  */
@@ -10632,6 +10636,19 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 	case 'P':
 	  if (l == 0)
 	    {
+	      if (!cond && ins->last_rex2_prefix >= 0 && (ins->rex & REX_W))
+		{
+		  /* For pushp and popp, p is printed and do not print {rex2}
+		     for them.  */
+		  *ins->obufp++ = 'p';
+		  ins->rex2 |= REX2_SPECIAL;
+		  break;
+		}
+
+	      /* For "!P" print nothing else in Intel syntax.  */
+	      if (!cond && ins->intel_syntax)
+		break;
+
 	      if ((ins->modrm.mod == 3 || !cond)
 		  && !(sizeflag & SUFFIX_ALWAYS))
 		break;
