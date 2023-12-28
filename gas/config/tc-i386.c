@@ -7213,6 +7213,56 @@ check_APX_operands (const insn_template *t)
   return 0;
 }
 
+/* Check if the instruction use the REX registers or REX prefix.  */
+static bool
+check_Rex_required (void)
+{
+  for (unsigned int op = 0; op < i.operands; op++)
+    {
+      if (i.types[op].bitfield.class != Reg)
+	continue;
+
+      if (i.op[op].regs->reg_flags & (RegRex | RegRex64))
+	return true;
+    }
+
+  if ((i.index_reg && (i.index_reg->reg_flags & (RegRex | RegRex64)))
+      || (i.base_reg && (i.base_reg->reg_flags & (RegRex | RegRex64))))
+    return true;
+
+  /* Check pseudo prefix {rex} are valid.  */
+  return i.rex_encoding;
+}
+
+/* Optimize APX NDD insns to legacy insns.  */
+static unsigned int
+can_convert_NDD_to_legacy (const insn_template *t)
+{
+  unsigned int match_dest_op = ~0;
+
+  if (!i.tm.opcode_modifier.nf
+      && i.reg_operands >= 2)
+    {
+      unsigned int dest = i.operands - 1;
+      unsigned int src1 = i.operands - 2;
+      unsigned int src2 = (i.operands > 3) ? i.operands - 3 : 0;
+
+      if (i.types[src1].bitfield.class == Reg
+	  && i.op[src1].regs == i.op[dest].regs)
+	match_dest_op = src1;
+      /* If the first operand is the same as the third operand,
+	 these instructions need to support the ability to commutative
+	 the first two operands and still not change the semantics in order
+	 to be optimized.  */
+      else if (optimize > 1
+	       && t->opcode_modifier.commutative
+	       && i.types[src2].bitfield.class == Reg
+	       && i.op[src2].regs == i.op[dest].regs)
+	match_dest_op = src2;
+    }
+  return match_dest_op;
+}
+
 /* Helper function for the progress() macro in match_template().  */
 static INLINE enum i386_error progress (enum i386_error new,
 					enum i386_error last,
@@ -7753,6 +7803,60 @@ match_template (char mnem_suffix)
 	      continue;
 	    }
 	  i.memshift = memshift;
+	}
+
+      /* If we can optimize a NDD insn to legacy insn, like
+	 add %r16, %r8, %r8 -> add %r16, %r8,
+	 add  %r8, %r16, %r8 -> add %r16, %r8, then rematch template.
+	 Note that the semantics have not been changed.  */
+      if (optimize
+	  && !i.no_optimize
+	  && i.vec_encoding != vex_encoding_evex
+	  && t + 1 < current_templates.end
+	  && !t[1].opcode_modifier.evex
+	  && t[1].opcode_space <= SPACE_0F38
+	  && t->opcode_modifier.vexvvvv == VexVVVV_DST
+	  && (i.types[i.operands - 1].bitfield.dword
+	      || i.types[i.operands - 1].bitfield.qword))
+	{
+	  unsigned int match_dest_op = can_convert_NDD_to_legacy (t);
+
+	  if (match_dest_op != (unsigned int) ~0)
+	    {
+	      size_match = true;
+	      /* We ensure that the next template has the same input
+		 operands as the original matching template by the first
+		 opernd (ATT). To avoid someone support new NDD insns and
+		 put it in the wrong position.  */
+	      overlap0 = operand_type_and (i.types[0],
+					   t[1].operand_types[0]);
+	      if (t->opcode_modifier.d)
+		overlap1 = operand_type_and (i.types[0],
+					     t[1].operand_types[1]);
+	      if (!operand_type_match (overlap0, i.types[0])
+		  && (!t->opcode_modifier.d
+		      || !operand_type_match (overlap1, i.types[0])))
+		size_match = false;
+
+	      if (size_match
+		  && (t[1].opcode_space <= SPACE_0F
+		      /* Some non-legacy-map0/1 insns can be shorter when
+			 legacy-encoded and when no REX prefix is required.  */
+		      || (!check_EgprOperands (t + 1)
+			  && !check_Rex_required ()
+			  && !i.op[i.operands - 1].regs->reg_type.bitfield.qword)))
+		{
+		  if (i.operands > 2 && match_dest_op == i.operands - 3)
+		    swap_2_operands (match_dest_op, i.operands - 2);
+
+		  --i.operands;
+		  --i.reg_operands;
+
+		  specific_error = progress (internal_error);
+		  continue;
+		}
+
+	    }
 	}
 
       /* We've found a match; break out of loop.  */
