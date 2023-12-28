@@ -7318,6 +7318,37 @@ update_line_range_start (CORE_ADDR pc, struct execution_control_state *ecs)
   return start_line_pc;
 }
 
+namespace {
+
+/* Helper class for process_event_stop_test implementing lazy evaluation.  */
+template<typename T>
+class lazy_loader
+{
+  using fetcher_t = std::function<T ()>;
+
+public:
+  explicit lazy_loader (fetcher_t &&f) : m_loader (std::move (f))
+  { }
+
+  T &operator* ()
+  {
+    if (!m_value.has_value ())
+      m_value.emplace (m_loader ());
+    return m_value.value ();
+  }
+
+  T *operator-> ()
+  {
+    return &**this;
+  }
+
+private:
+  std::optional<T> m_value;
+  fetcher_t m_loader;
+};
+
+}
+
 /* Come here when we've got some debug event / signal we can explain
    (IOW, not a random signal), and test whether it should cause a
    stop, or whether we should resume the inferior (transparently).
@@ -7358,7 +7389,8 @@ process_event_stop_test (struct execution_control_state *ecs)
   /* Shorthand to make if statements smaller.  */
   struct frame_id original_frame_id
     = ecs->event_thread->control.step_frame_id;
-  struct frame_id curr_frame_id = get_frame_id (get_current_frame ());
+  lazy_loader<frame_id> curr_frame_id
+    ([] () { return get_frame_id (get_current_frame ()); });
 
   switch (what.main_action)
     {
@@ -7446,7 +7478,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 
 	if (init_frame)
 	  {
-	    if (curr_frame_id == ecs->event_thread->initiating_frame)
+	    if (*curr_frame_id == ecs->event_thread->initiating_frame)
 	      {
 		/* Case 2.  Fall through.  */
 	      }
@@ -7619,7 +7651,7 @@ process_event_stop_test (struct execution_control_state *ecs)
   if (pc_in_thread_step_range (ecs->event_thread->stop_pc (),
 			       ecs->event_thread)
       && (execution_direction != EXEC_REVERSE
-	  || curr_frame_id == original_frame_id))
+	  || *curr_frame_id == original_frame_id))
     {
       infrun_debug_printf
 	("stepping inside range [%s-%s]",
@@ -8062,7 +8094,7 @@ process_event_stop_test (struct execution_control_state *ecs)
      frame machinery detected some skipped call sites, we have entered
      a new inline function.  */
 
-  if ((curr_frame_id == original_frame_id)
+  if ((*curr_frame_id == original_frame_id)
       && inline_skipped_frames (ecs->event_thread))
     {
       infrun_debug_printf ("stepped into inlined function");
@@ -8110,7 +8142,7 @@ process_event_stop_test (struct execution_control_state *ecs)
      through a more inlined call beyond its call site.  */
 
   if (get_frame_type (get_current_frame ()) == INLINE_FRAME
-      && (curr_frame_id != original_frame_id)
+      && (*curr_frame_id != original_frame_id)
       && stepped_in_from (get_current_frame (), original_frame_id))
     {
       infrun_debug_printf ("stepping through inlined function");
@@ -8164,7 +8196,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  end_stepping_range (ecs);
 	  return;
 	}
-      else if (curr_frame_id == original_frame_id)
+      else if (*curr_frame_id == original_frame_id)
 	{
 	  /* We are not at the start of a statement, and we have not changed
 	     frame.
@@ -8190,9 +8222,9 @@ process_event_stop_test (struct execution_control_state *ecs)
 	}
     }
   else if (execution_direction == EXEC_REVERSE
-	  && curr_frame_id != original_frame_id
-	  && original_frame_id.code_addr_p && curr_frame_id.code_addr_p
-	  && original_frame_id.code_addr == curr_frame_id.code_addr)
+	  && *curr_frame_id != original_frame_id
+	  && original_frame_id.code_addr_p && curr_frame_id->code_addr_p
+	  && original_frame_id.code_addr == curr_frame_id->code_addr)
     {
       /* If we enter here, we're leaving a recursive function call.  In this
 	 situation, we shouldn't refresh the step information, because if we
