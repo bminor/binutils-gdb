@@ -36,6 +36,14 @@ struct thread_info;
    thrown.  */
 struct thread_info *parse_thread_id (const char *tidstr, const char **end);
 
+/* Return true if TIDSTR is pointing to a string that looks like a
+   thread-id.  This doesn't mean that TIDSTR identifies a valid thread, but
+   the string does at least look like a valid thread-id.  If END is not
+   NULL, parse_thread_id stores the address of the first character after
+   the thread-id into *END.  */
+
+bool is_thread_id (const char *tidstr, const char **end);
+
 /* Parse a thread ID or a thread range list.
 
    A range will be of the form
