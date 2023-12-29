@@ -35,73 +35,6 @@
 #include "gdbarch.h"
 #include "interps.h"
 
-/* You can have any number of hooks for `exec_file_command' command to
-   call.  If there's only one hook, it is set in exec_file_display
-   hook.  If there are two or more hooks, they are set in
-   exec_file_extra_hooks[], and deprecated_exec_file_display_hook is
-   set to a function that calls all of them.  This extra complexity is
-   needed to preserve compatibility with old code that assumed that
-   only one hook could be set, and which called
-   deprecated_exec_file_display_hook directly.  */
-
-typedef void (*hook_type) (const char *);
-
-hook_type deprecated_exec_file_display_hook;	/* The original hook.  */
-static hook_type *exec_file_extra_hooks;	/* Array of additional
-						   hooks.  */
-static int exec_file_hook_count = 0;		/* Size of array.  */
-
-
-
-/* If there are two or more functions that wish to hook into
-   exec_file_command, this function will call all of the hook
-   functions.  */
-
-static void
-call_extra_exec_file_hooks (const char *filename)
-{
-  int i;
-
-  for (i = 0; i < exec_file_hook_count; i++)
-    (*exec_file_extra_hooks[i]) (filename);
-}
-
-/* Call this to specify the hook for exec_file_command to call back.
-   This is called from the x-window display code.  */
-
-void
-specify_exec_file_hook (void (*hook) (const char *))
-{
-  hook_type *new_array;
-
-  if (deprecated_exec_file_display_hook != NULL)
-    {
-      /* There's already a hook installed.  Arrange to have both it
-	 and the subsequent hooks called.  */
-      if (exec_file_hook_count == 0)
-	{
-	  /* If this is the first extra hook, initialize the hook
-	     array.  */
-	  exec_file_extra_hooks = XNEW (hook_type);
-	  exec_file_extra_hooks[0] = deprecated_exec_file_display_hook;
-	  deprecated_exec_file_display_hook = call_extra_exec_file_hooks;
-	  exec_file_hook_count = 1;
-	}
-
-      /* Grow the hook array by one and add the new hook to the end.
-	 Yes, it's inefficient to grow it by one each time but since
-	 this is hardly ever called it's not a big deal.  */
-      exec_file_hook_count++;
-      new_array = (hook_type *)
-	xrealloc (exec_file_extra_hooks,
-		  exec_file_hook_count * sizeof (hook_type));
-      exec_file_extra_hooks = new_array;
-      exec_file_extra_hooks[exec_file_hook_count - 1] = hook;
-    }
-  else
-    deprecated_exec_file_display_hook = hook;
-}
-
 void
 reopen_exec_file (void)
 {

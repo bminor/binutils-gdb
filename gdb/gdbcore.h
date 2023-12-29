@@ -114,16 +114,11 @@ extern void write_memory_signed_integer (CORE_ADDR addr, int len,
 					 enum bfd_endian byte_order,
 					 LONGEST value);
 
-/* Hook for `exec_file_command' command to call.  */
-
-extern void (*deprecated_exec_file_display_hook) (const char *filename);
 
 /* Hook for "file_command", which is more useful than above
    (because it is invoked AFTER symbols are read, not before).  */
 
 extern void (*deprecated_file_changed_hook) (const char *filename);
-
-extern void specify_exec_file_hook (void (*hook) (const char *filename));
 
 /* Binary File Diddler for the core file.  */
 

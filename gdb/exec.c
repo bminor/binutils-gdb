@@ -494,10 +494,6 @@ exec_file_attach (const char *filename, int from_tty)
 	 target.  */
       current_program_space->add_target_sections
 	(current_program_space->ebfd.get (), sections);
-
-      /* Tell display code (if any) about the changed file name.  */
-      if (deprecated_exec_file_display_hook)
-	(*deprecated_exec_file_display_hook) (filename);
     }
 
   /* Are are loading the same executable?  */
