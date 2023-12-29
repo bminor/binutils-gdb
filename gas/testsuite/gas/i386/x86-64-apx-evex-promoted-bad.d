@@ -39,3 +39,4 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:[ 	]+62 74 7c 18 8f c0[ 	]+pop2   %rax,\(bad\)
 [ 	]*[a-f0-9]+:[ 	]+62 d4 3c 18 8f[ 	]+\(bad\)
 [ 	]*[a-f0-9]+:[ 	]+c0[ 	]+.*
+#pass

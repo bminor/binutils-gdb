@@ -12,3 +12,4 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*d5 19 57[ 	]+pushp  %r31
 \s*[a-f0-9]+:\s*d5 08 58[ 	]+popp   %rax
 \s*[a-f0-9]+:\s*d5 19 5f[ 	]+popp   %r31
+#pass

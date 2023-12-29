@@ -158,3 +158,4 @@ Disassembly of section .text:
 \s*[a-f0-9]+:\s*62 c4 3c 18 32 04 07 	xor    \(%r15,%rax,1\),%r16b,%r8b
 \s*[a-f0-9]+:\s*62 c4 3d 18 33 04 07 	xor    \(%r15,%rax,1\),%r16w,%r8w
 \s*[a-f0-9]+:\s*62 fc 5c 10 83 34 83 11 	xorl   \$0x11,\(%r19,%rax,4\),%r20d
+#pass
