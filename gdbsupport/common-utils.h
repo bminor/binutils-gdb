@@ -100,6 +100,16 @@ startswith (std::string_view string, std::string_view pattern)
 	  && strncmp (string.data (), pattern.data (), pattern.length ()) == 0);
 }
 
+/* Version of startswith that takes a string_view for only one of its
+   arguments.  Return true if STR starts with PREFIX, otherwise return
+   false.  */
+
+static inline bool
+startswith (const char *str, const std::string_view &prefix)
+{
+  return strncmp (str, prefix.data (), prefix.length ()) == 0;
+}
+
 /* Return true if the strings are equal.  */
 
 static inline bool
