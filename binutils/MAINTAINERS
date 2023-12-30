@@ -140,7 +140,7 @@ responsibility among the other maintainers.
   SPARC		   Jose E. Marchesi <jose.marchesi@oracle.com>
   SPU		   Alan Modra <amodra@gmail.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
-  TIC6X            Joseph Myers <joseph@codesourcery.com>
+  TIC6X            Joseph Myers <jsm@polyomino.org.uk>
   TILE-Gx          Walter Lee <walt@tilera.com>
   TILEPro          Walter Lee <walt@tilera.com>
   VAX		   Matt Thomas <matt@netbsd.org>
