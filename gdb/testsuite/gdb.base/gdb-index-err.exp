@@ -62,9 +62,15 @@ remote_exec host "chmod u-w,g-w ${non_writable_dir}"
 
 # Try to write the index into a non-writable directory.
 foreach_with_prefix flag { "" "-dwarf-5" } {
+    set test "try to write index to a non-writable directory"
+    if { [root_user] } {
+	unsupported $test
+	continue
+    }
+
     gdb_test "save gdb-index ${flag} ${non_writable_dir}" \
 	"Error while writing index for `[string_to_regexp $binfile]': couldn't open `[string_to_regexp $non_writable_dir]/${gdb_test_file_name}.*': Permission denied\\." \
-	"try to write index to a non-writable directory"
+	$test
 }
 
 # Create copies of the executable, we will add an index section to
