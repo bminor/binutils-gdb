@@ -7484,7 +7484,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_LARCH_TLS_DESC_PCREL20_S2,
   BFD_RELOC_UNUSED
 };
-
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 
 reloc_howto_type *bfd_reloc_type_lookup
