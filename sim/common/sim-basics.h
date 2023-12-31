@@ -86,7 +86,7 @@ enum {
 /* disposition of an object when things are reset */
 
 typedef enum {
-  permenant_object,
+  permanent_object,
   temporary_object,
 } object_disposition;
 

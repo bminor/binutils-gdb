@@ -849,7 +849,7 @@ hw_tree_vparse (struct hw *current,
 			    my_port,
 			    dest,
 			    dest_port,
-			    permenant_object);
+			    permanent_object);
 	    break;
 	  }
 	default:

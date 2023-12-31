@@ -670,7 +670,7 @@ sim_core_set_xor (SIM_DESC sd,
   else {
     if (is_xor)
       sim_engine_abort (sd, NULL, NULL_CIA,
-			"Attempted to enable xor-endian mode when permenantly disabled.");
+			"Attempted to enable xor-endian mode when permanently disabled.");
   }
 }
 #endif
