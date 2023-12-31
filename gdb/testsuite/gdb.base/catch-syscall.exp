@@ -752,7 +752,7 @@ proc setup_all_syscalls {} {
 		pass $gdb_test_name
 		set ok 1
 	    }
-	    -re -wrap "Catchpoint $decimal \\(call to syscall (pipe2|$SYS_pipe)\\).*" {
+	    -re -wrap "Catchpoint $decimal \\(call to syscall (pipe2|$SYS_pipe2)\\).*" {
 		lappend all_syscalls pipe2
 		pass $gdb_test_name
 		set ok 1
