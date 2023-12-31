@@ -133,7 +133,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 				comment (); }
 
 <MRI,EXPRESSION>"$"([0-9A-Fa-f])+ {
-				yylval.integer = bfd_scan_vma (yytext + 1, 0, 16);
+				yylval.integer = strtoull (yytext + 1, 0, 16);
 				yylval.bigint.str = NULL;
 				return INT;
 			}
@@ -158,8 +158,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 				    default:
 				     ibase = 10;
 				   }
-				   yylval.integer = bfd_scan_vma (yytext, 0,
-								  ibase);
+				   yylval.integer = strtoull (yytext, 0, ibase);
 				   yylval.bigint.str = NULL;
 				   return INT;
 				 }
@@ -172,7 +171,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 				      ++s;
 				      ibase = 16;
 				    }
-				  yylval.integer = bfd_scan_vma (s, 0, ibase);
+				  yylval.integer = strtoull (s, 0, ibase);
 				  yylval.bigint.str = NULL;
 				  if (yytext[yyleng - 1] == 'M'
 				      || yytext[yyleng - 1] == 'm')
