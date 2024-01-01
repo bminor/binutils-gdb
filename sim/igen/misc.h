@@ -56,12 +56,12 @@ extern error_func warning;
 extern error_func notify;
 
 
-#define ERROR(EXPRESSION) \
+#define ERROR(EXPRESSION, args...) \
 do { \
   line_ref line; \
   line.file_name = filter_filename (__FILE__); \
   line.line_nr = __LINE__; \
-  error (&line, EXPRESSION "\n"); \
+  error (&line, EXPRESSION "\n", ## args); \
 } while (0)
 
 #define ASSERT(EXPRESSION) \
