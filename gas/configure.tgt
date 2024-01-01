@@ -134,6 +134,7 @@ case ${generic_target} in
     case ${cpu}-${os} in
       aarch64*-linux-gnu_ilp32)		arch=aarch64:32 ;;
     esac ;;
+  aarch64*-*-gnu*)			fmt=elf em=gnu ;;
   aarch64*-*-netbsd*)			fmt=elf em=nbsd;;
   aarch64*-*-nto*)			fmt=elf;;
   aarch64*-*-openbsd*)			fmt=elf;;

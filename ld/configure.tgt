@@ -116,6 +116,11 @@ aarch64-*-linux*)	targ_emul=aarch64linux
 			targ_extra_libpath="aarch64linuxb aarch64linux32 aarch64linux32b armelfb_linux_eabi armelf_linux_eabi"
 			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb $targ_extra_libpath"
 			;;
+# This has to come after aarch64-*-linux* for aarch64-*-linux-gnu to hit the Linux branch.
+aarch64-*-gnu*)
+			targ_emul=aarch64gnu
+			targ_extra_emuls="aarch64elf aarch64elfb armelf armelfb"
+			;;
 aarch64-*-haiku*)	targ_emul=aarch64haiku
 			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb armelf_haiku $targ_extra_libpath"
 			;;
