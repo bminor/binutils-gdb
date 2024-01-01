@@ -50,7 +50,7 @@ EXTRA_LIBRARIES += %D%/libigen.a
 %C%_igen_LDADD = %D%/libigen.a
 
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
-igen/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA_igen_libigen_a_DEPENDENCIES) igen/$(am__dirstamp)
+%D%/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA_igen_libigen_a_DEPENDENCIES) %D%/$(am__dirstamp)
 	$(AM_V_at)-rm -f $@
 	$(AM_V_AR)$(AR_FOR_BUILD) $(ARFLAGS) $@ $(igen_libigen_a_OBJECTS) $(igen_libigen_a_LIBADD)
 	$(AM_V_at)$(RANLIB_FOR_BUILD) $@
@@ -93,4 +93,4 @@ igen/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA
 	%D%/ld-insn \
 	%D%/table
 EXTRA_PROGRAMS += $(%C%_IGEN_TOOLS)
-MOSTLYCLEANFILES += $(%C%_IGEN_TOOLS)
+MOSTLYCLEANFILES += $(%C%_IGEN_TOOLS) %D%/libigen.a

@@ -1794,12 +1794,12 @@ MOSTLYCLEANFILES = core $(SIM_ENABLED_ARCHES:%=%/*.o) \
 	$(SIM_ENABLED_ARCHES:%=%/stamp-hw) \
 	$(SIM_ENABLED_ARCHES:%=%/modules.c) \
 	$(SIM_ENABLED_ARCHES:%=%/stamp-modules) $(igen_IGEN_TOOLS) \
-	site-sim-config.exp testrun.log testrun.sum $(am__append_17) \
-	$(am__append_22) $(am__append_27) $(am__append_37) \
-	$(am__append_45) $(am__append_49) $(am__append_53) \
-	$(am__append_57) $(am__append_61) $(am__append_75) \
-	$(am__append_80) $(am__append_88) $(am__append_103) \
-	$(am__append_107)
+	igen/libigen.a site-sim-config.exp testrun.log testrun.sum \
+	$(am__append_17) $(am__append_22) $(am__append_27) \
+	$(am__append_37) $(am__append_45) $(am__append_49) \
+	$(am__append_53) $(am__append_57) $(am__append_61) \
+	$(am__append_75) $(am__append_80) $(am__append_88) \
+	$(am__append_103) $(am__append_107)
 CONFIG_STATUS_DEPENDENCIES = $(srcroot)/bfd/development.sh
 AM_CFLAGS = \
 	$(WERROR_CFLAGS) \
