@@ -409,8 +409,7 @@ BUILT_SRC_WO_CONFIG = \
 	model.h model.c \
 	support.h support.c \
 	pk.h \
-	hw.h hw.c \
-	filter_host.c
+	hw.h hw.c
 
 BUILT_SRC = \
 	$(BUILT_SRC_WO_CONFIG) \

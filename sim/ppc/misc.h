@@ -26,7 +26,7 @@
 #include <stdlib.h>
 
 #include "ansidecl.h"
-#include "filter_filename.h"
+#include "filter_host.h"
 
 extern void error (const char *msg, ...)
   ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);

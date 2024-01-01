@@ -48,7 +48,6 @@ EXTRA_LIBRARIES += %D%/libigen.a
 	%D%/table.c \
 	%D%/lf.c \
 	%D%/misc.c \
-	%D%/filter_host.c \
 	%D%/ld-decode.c \
 	%D%/ld-cache.c \
 	%D%/filter.c \
@@ -59,6 +58,7 @@ EXTRA_LIBRARIES += %D%/libigen.a
 	%D%/gen-semantics.c \
 	%D%/gen-idecode.c \
 	%D%/gen-support.c
+%C%_libigen_a_LIBADD = igen/filter_host.o
 
 %C%_igen_SOURCES = %D%/igen.c
 %C%_igen_LDADD = %D%/libigen.a
@@ -78,7 +78,7 @@ SIM_ALL_RECURSIVE_DEPS += $(PPC_IGEN)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(%C%_igen_OBJECTS) $(%C%_igen_LDADD)
 
 $(%C%_libigen_a_OBJECTS) $(%C%_igen_OBJECTS): %D%/%.o: %D%/%.c
-	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $< -o $@
+	$(AM_V_CC)$(COMPILE_FOR_BUILD) -I$(srcdir)/igen -I$(srcdir)/%D% -c $< -o $@
 
 ## Build some of the files in standalone mode for developers of igen itself.
 %D%/%-main.o: %D%/%.c
