@@ -215,8 +215,8 @@ name2i (const char *names, const name_map * map)
   while (*name != '\0')
     {
       /* find our name */
-      char *end = strchr (name, ',');
-      char *next;
+      const char *end = strchr (name, ',');
+      const char *next;
       unsigned len;
       if (end == NULL)
 	{
