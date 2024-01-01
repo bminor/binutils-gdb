@@ -28,8 +28,11 @@
 #include "ansidecl.h"
 #include "filter_host.h"
 
-extern void error (const char *msg, ...)
-  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
+extern void error (const void *line, const char *msg, ...)
+  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
+
+#define ERROR(EXPRESSION, args...) \
+  error (NULL, EXPRESSION, ## args)
 
 #define ASSERT(EXPRESSION) \
 do { \

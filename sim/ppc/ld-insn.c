@@ -110,7 +110,7 @@ parse_insn_format(table_entry *entry,
 
     /* sanity check */
     if (!isdigit(*chp)) {
-      error("%s:%d: missing position field at `%s'\n",
+      ERROR("%s:%d: missing position field at `%s'\n",
 	    entry->file_name, entry->line_nr, chp);
     }
 
@@ -122,7 +122,7 @@ parse_insn_format(table_entry *entry,
     if (*chp == '.' && strlen_pos > 0)
       chp++;
     else {
-      error("%s:%d: missing field value at %s\n",
+      ERROR("%s:%d: missing field value at %s\n",
 	    entry->file_name, entry->line_nr, chp);
       break;
     }
@@ -137,7 +137,7 @@ parse_insn_format(table_entry *entry,
     if (*chp == ',')
       chp++;
     else if (*chp != '\0' || strlen_val == 0) {
-      error("%s:%d: missing field terminator at %s\n",
+      ERROR("%s:%d: missing field terminator at %s\n",
 	    entry->file_name, entry->line_nr, chp);
       break;
     }
@@ -216,7 +216,7 @@ parse_include_entry (table *file,
 {
   /* parse the include file_entry */
   if (file_entry->nr_fields < 4)
-    error ("Incorrect nr fields for include record\n");
+    ERROR ("Incorrect nr fields for include record\n");
   /* process it */
   if (!is_filtered_out(file_entry->fields[include_flags], filters))
     {
@@ -326,7 +326,7 @@ insn_table_insert_insn(insn_table *table,
     }
 
     if (!model_ptr)
-      error("%s:%d: machine model `%s' was not known about\n",
+      ERROR("%s:%d: machine model `%s' was not known about\n",
 	    file_entry->file_name, file_entry->line_nr, name);
   }
 
@@ -663,7 +663,7 @@ insn_table_find_opcode_field(insn *insns,
     curr_opcode->boolean_constant = rule->special_constant;
     break;
   default:
-    error("Something is going wrong\n");
+    ERROR("Something is going wrong\n");
   }
 
   return curr_opcode;
@@ -979,7 +979,7 @@ main(int argc, char **argv)
   cache_table *cache_rules = NULL;
 
   if (argc != 5)
-    error("Usage: insn <filter> <hi-bit-nr> <decode-table> <insn-table>\n");
+    ERROR("Usage: insn <filter> <hi-bit-nr> <decode-table> <insn-table>\n");
 
   filters = new_filter(argv[1], filters);
   hi_bit_nr = a2i(argv[2]);

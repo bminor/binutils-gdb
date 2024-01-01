@@ -274,7 +274,7 @@ lf_print__c_code(lf *file,
       chp++;
     }
     if (in_bit_field)
-      error("bit field paren miss match some where\n");
+      ERROR("bit field paren miss match some where\n");
     if (*chp == '\n') {
       nr += lf_putchr(file, '\n');
       chp++;

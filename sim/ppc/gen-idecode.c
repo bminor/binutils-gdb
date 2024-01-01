@@ -1543,6 +1543,6 @@ gen_idecode_c(lf *file,
 
   }
   else {
-    error("Something is wrong!\n");
+    ERROR("Something is wrong!\n");
   }
 }

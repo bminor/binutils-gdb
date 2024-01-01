@@ -28,7 +28,7 @@
 #include <string.h>
 
 void
-error (const char *msg, ...)
+error (const void *line, const char *msg, ...)
 {
   va_list ap;
   va_start(ap, msg);
@@ -42,7 +42,7 @@ zalloc(long size)
 {
   void *memory = malloc(size);
   if (memory == NULL)
-    error("zalloc failed\n");
+    ERROR("zalloc failed\n");
   memset(memory, 0, size);
   return memory;
 }
@@ -186,7 +186,7 @@ name2i(const char *names,
   if (curr->i >= 0)
     return curr->i;
   else
-    error("%s contains no valid names\n", names);
+    ERROR("%s contains no valid names\n", names);
   return 0;
 }
 
@@ -199,6 +199,6 @@ i2name(const int i,
       return map->name;
     map++;
   }
-  error("map lookup failed for %d\n", i);
+  ERROR("map lookup failed for %d\n", i);
   return NULL;
 }

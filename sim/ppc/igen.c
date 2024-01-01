@@ -450,7 +450,7 @@ main(int argc,
 		  code &= ~generate_with_icache;
                 break;
               default:
-		error ("Expecting -Ggen-icache or -Ggen-icache=<N>\n");
+		ERROR ("Expecting -Ggen-icache or -Ggen-icache=<N>\n");
               }
           }
 	  break;
@@ -568,7 +568,7 @@ main(int argc,
       real_file_name = NULL;
       break;
     default:
-      error("unknown option\n");
+      ERROR("unknown option\n");
     }
   }
   return 0;

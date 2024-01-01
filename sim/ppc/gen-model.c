@@ -52,7 +52,7 @@ model_c_or_h_function(insn_table *entry,
 {
   if (function->fields[function_type] == NULL
       || function->fields[function_type][0] == '\0') {
-    error("Model function type not specified for %s", function->fields[function_name]);
+    ERROR("Model function type not specified for %s", function->fields[function_name]);
   }
   lf_printf(file, "\n");
   lf_print_function_type(file, function->fields[function_type], prefix, " ");
@@ -203,7 +203,7 @@ model_c_function(insn_table *table,
 {
   if (function->fields[function_type] == NULL
       || function->fields[function_type][0] == '\0') {
-    error("Model function return type not specified for %s", function->fields[function_name]);
+    ERROR("Model function return type not specified for %s", function->fields[function_name]);
   }
   else {
     lf_printf(file, "\n");

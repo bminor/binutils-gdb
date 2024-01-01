@@ -98,7 +98,7 @@ table_push (table *root,
       /* free (dup_name); */
       if (include->next == NULL)
 	{
-	  error ("Problem opening file `%s'\n", file_name);
+	  ERROR ("Problem opening file `%s'\n", file_name);
 	  perror (file_name);
 	  exit (1);
 	}

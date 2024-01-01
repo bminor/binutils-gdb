@@ -115,7 +115,7 @@ main(int argc, char **argv)
 {
   cache_table *rules;
   if (argc != 3)
-    error("Usage: cache <cache-file> <hi-bit-nr>\n");
+    ERROR("Usage: cache <cache-file> <hi-bit-nr>\n");
   rules = load_cache_table(argv[1], a2i(argv[2]));
   dump_cache_rules(rules, 0);
   return 0;
