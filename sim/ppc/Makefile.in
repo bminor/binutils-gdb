@@ -64,7 +64,6 @@ INLINE_CFLAGS = $(SIM_INLINE)
 SMP_CFLAGS = @sim_smp@
 XOR_ENDIAN_CFLAGS = @sim_xor_endian@
 BITSIZE_CFLAGS = @sim_bitsize@
-HOSTBITSIZE_CFLAGS = @sim_hostbitsize@
 TIMEBASE_CFLAGS = @sim_timebase@
 FLOAT_CFLAGS = @sim_float@
 MONITOR_CFLAGS = @sim_monitor@
@@ -75,7 +74,6 @@ CONFIG_CFLAGS = \
   $(SMP_CFLAGS) \
   $(XOR_ENDIAN_CFLAGS) \
   $(BITSIZE_CFLAGS) \
-  $(HOSTBITSIZE_CFLAGS) \
   $(TIMEBASE_CFLAGS) \
   $(FLOAT_CFLAGS) \
   $(MONITOR_CFLAGS) \

@@ -628,7 +628,6 @@ sim_model
 sim_monitor
 sim_float
 sim_timebase
-sim_hostbitsize
 sim_bitsize
 sim_igen_smp
 sim_smp
@@ -4179,7 +4178,6 @@ else
   cd ..
   rm -rf $tempdir
 fi
-
 
 
 
