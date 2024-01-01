@@ -966,7 +966,7 @@ dump_insn_table(insn_table *table,
   }
 }
 
-int insn_bit_size = max_insn_bit_size;
+int insn_bit_size = ppc_max_insn_bit_size;
 int hi_bit_nr;
 int generate_expanded_instructions;
 

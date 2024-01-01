@@ -40,7 +40,7 @@
 #include "gen-support.h"
 
 int hi_bit_nr;
-int insn_bit_size = max_insn_bit_size;
+int insn_bit_size = ppc_max_insn_bit_size;
 
 igen_code code = generate_calls;
 
@@ -472,7 +472,7 @@ main(int argc,
       break;
     case 'B':
       insn_bit_size = a2i(optarg);
-      ASSERT(insn_bit_size > 0 && insn_bit_size <= max_insn_bit_size
+      ASSERT(insn_bit_size > 0 && insn_bit_size <= ppc_max_insn_bit_size
 	     && (hi_bit_nr == insn_bit_size-1 || hi_bit_nr == 0));
       break;
     case 'H':
