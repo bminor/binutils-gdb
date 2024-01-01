@@ -198,8 +198,7 @@ CPU_H = \
 	cpu.c
 
 DEBUG_H = \
-	debug.h \
-	$(FILTER_FILENAME_H)
+	debug.h
 
 DEVICE_H = \
 	device.h
@@ -239,9 +238,6 @@ EMUL_UNIX_H = \
 
 EVENTS_H = \
 	events.h
-
-FILTER_FILENAME_H = \
-	filter_filename.h
 
 FILTER_H = \
 	filter.h
@@ -304,8 +300,7 @@ LF_H = \
 
 MISC_H = \
 	misc.h \
-	$(CONFIG_H) \
-	$(FILTER_FILENAME_H)
+	$(CONFIG_H)
 
 MON_H = \
 	mon.h \
@@ -466,7 +461,6 @@ COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/%)
 #       first
 LIB_OBJ = \
 	debug.o \
-	filter_filename.o \
 	bits.o \
 	sim-endian.o \
 	os_emul.o \
@@ -519,7 +513,6 @@ psim.o: psim.c $(CPU_H) $(IDECODE_H) $(OPTIONS_H) $(TREE_H) $(BFD_H)
 bits.o: bits.c $(BASICS_H)
 
 debug.o: debug.c $(CONFIG_H) $(BASICS_H)
-filter_filename.o: filter_filename.c $(CONFIG_H) $(FILTER_FILENAME_H)
 
 sim-endian.o: sim-endian.c $(CONFIG_H) $(BASICS_H) $(SIM_ENDIAN_N_H)
 
