@@ -613,20 +613,14 @@ tmp-igen: igen $(srcdir)/powerpc.igen $(srcdir)/altivec.igen $(srcdir)/e500.igen
 		-n support.c   -f  support.c
 	$(SILENCE) touch $@
 
-# NOTE: Some versions of make don't handle files created as side-effects
-# uncomment the below if that is the case.
-
 $(TARGETLIB): tmp-igen
 itable.h itable.c icache.h icache.c idecode.h idecode.c semantics.h semantics.c model.h model.c support.h support.c: tmp-igen
 
 igen: igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o
 	$(ECHO_CCLD) $(LINK_FOR_BUILD) igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o
 
-filter_host.c: filter_filename.c
-	$(ECHO_GEN) cat $(srcdir)/filter_filename.c > filter_host.c
-
 filter_host.o: filter_host.c $(CONFIG_H) $(FILTER_FILENAME_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c filter_host.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/filter_host.c
 
 table.o: table.c $(CONFIG_H) $(MISC_H) $(LF_H) $(TABLE_H)
 	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/table.c
