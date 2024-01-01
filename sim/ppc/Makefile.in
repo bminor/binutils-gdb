@@ -88,7 +88,6 @@ BUILD_CFLAGS	= $(CFLAGS_FOR_BUILD) $(INCLUDES) $(WARN_CFLAGS)
 
 LIBS = $(COMMON_LIBS) @LIBS@ $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
 
-COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
 
 IGEN_OPCODE_RULES = @sim_opcode@
@@ -616,63 +615,6 @@ tmp-igen: igen $(srcdir)/powerpc.igen $(srcdir)/altivec.igen $(srcdir)/e500.igen
 $(TARGETLIB): tmp-igen
 itable.h itable.c icache.h icache.c idecode.h idecode.c semantics.h semantics.c model.h model.c support.h support.c: tmp-igen
 
-igen: igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o
-	$(ECHO_CCLD) $(LINK_FOR_BUILD) igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o
-
-filter_host.o: filter_host.c $(CONFIG_H) $(FILTER_FILENAME_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/filter_host.c
-
-table.o: table.c $(CONFIG_H) $(MISC_H) $(LF_H) $(TABLE_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/table.c
-
-lf.o: lf.c $(CONFIG_H) $(MISC_H) $(LF_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/lf.c
-
-filter.o: filter.c $(CONFIG_H) $(MISC_H) $(FILTER_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/filter.c
-tmp-filter: filter.c $(MISC_H) misc.o
-	$(ECHO_CCLD) $(LINK_FOR_BUILD) -DMAIN $(srcdir)/filter.c misc.o
-
-ld-decode.o: ld-decode.c $(MISC_H) $(LF_H) $(TABLE_H) $(LD_DECODE_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/ld-decode.c
-tmp-ld-decode: ld-decode.c misc.o lf.o table.o filter_host.o 
-	$(ECHO_CCLD) $(LINK_FOR_BUILD) -DMAIN $(srcdir)/ld-decode.c misc.o lf.o table.o filter_host.o
-
-ld-cache.o: ld-cache.c $(MISC_H) $(LF_H) $(TABLE_H) $(LD_CACHE_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/ld-cache.c
-tmp-ld-cache: ld-cache.c misc.o lf.o table.o filter_host.o 
-	$(ECHO_CCLD) $(LINK_FOR_BUILD) -DMAIN $(srcdir)/ld-cache.c misc.o lf.o table.o filter_host.o
-
-ld-insn.o: ld-insn.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECODE_H) $(LD_CACHE_H) $(LD_INSN_H) $(IGEN_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/ld-insn.c
-tmp-ld-insn: ld-insn.c ld-cache.o misc.o lf.o table.o ld-decode.o filter_host.o filter.o
-	$(ECHO_CCLD) $(LINK_FOR_BUILD) -DMAIN $(srcdir)/ld-insn.c ld-cache.o misc.o lf.o table.o ld-decode.o filter_host.o filter.o
-
-gen-model.o: gen-model.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_CACHE_H) $(LD_DECODE_H) $(LD_INSN_H) $(GEN_MODEL_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-model.c
-
-gen-itable.o: gen-itable.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_CACHE_H) $(LD_DECODE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_ITABLE_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-itable.c
-
-gen-icache.o: gen-icache.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECODE_H) $(LD_CACHE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_SEMANTICS_H) $(GEN_IDECODE_H) $(GEN_ICACHE_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-icache.c
-
-gen-semantics.o: gen-semantics.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECODE_H) $(LD_CACHE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_SEMANTICS_H) $(GEN_ICACHE_H) $(GEN_IDECODE_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-semantics.c
-
-gen-idecode.o: gen-idecode.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECODE_H) $(LD_CACHE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_IDECODE_H) $(GEN_ICACHE_H) $(GEN_SEMANTICS_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-idecode.c
-
-gen-support.o: gen-support.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECODE_H) $(LD_CACHE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_SEMANTICS_H) $(GEN_SUPPORT_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-support.c
-
-igen.o: igen.c $(MISC_H) $(LF_H) $(TABLE_H) $(CONFIG_H) $(FILTER_H) $(LD_CACHE_H) $(LD_DECODE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_MODEL_H) $(GEN_ICACHE_H) $(GEN_ITABLE_H) $(GEN_IDECODE_H) $(GEN_SEMANTICS_H) $(GEN_SUPPORT_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/igen.c
-
-misc.o: misc.c $(CONFIG_H) $(MISC_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/misc.c
-
-
 
 # real hardware
 hw.c hw.h: tmp-hw; @true
@@ -762,7 +704,7 @@ TAGS: $(BUILT_SRC)
 	etags $(srcdir)/*.h $(srcdir)/*.c $(BUILT_SRC)
 
 clean mostlyclean:
-	rm -f tmp-* *.[oasi] core igen $(BUILT_SRC_WO_CONFIG)
+	rm -f tmp-* *.[oasi] core $(BUILT_SRC_WO_CONFIG)
 
 distclean realclean: clean
 	rm -f TAGS Makefile config.cache config.status config.h defines.h stamp-h config.log
