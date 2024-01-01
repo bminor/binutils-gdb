@@ -27,6 +27,7 @@
 #include "misc.h"
 #include "lf.h"
 #include "table.h"
+#include "dumpf.h"
 
 #include <unistd.h>
 #include <stdlib.h>

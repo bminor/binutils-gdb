@@ -806,10 +806,10 @@ or1k_libsim_a_OBJECTS = $(am_or1k_libsim_a_OBJECTS) \
 	$(nodist_or1k_libsim_a_OBJECTS)
 ppc_libigen_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_libigen_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_ppc_TRUE@	igen/filter_host.o
+@SIM_ENABLE_ARCH_ppc_TRUE@	igen/filter_host.o igen/misc.o
 @SIM_ENABLE_ARCH_ppc_TRUE@am_ppc_libigen_a_OBJECTS =  \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/table.$(OBJEXT) ppc/lf.$(OBJEXT) \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/misc.$(OBJEXT) \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/dumpf.$(OBJEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-decode.$(OBJEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-cache.$(OBJEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/filter.$(OBJEXT) \
@@ -2908,7 +2908,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_libigen_a_SOURCES = \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/table.c \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/lf.c \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/misc.c \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/dumpf.c \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-decode.c \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-cache.c \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/filter.c \
@@ -2920,7 +2920,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/gen-idecode.c \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/gen-support.c
 
-@SIM_ENABLE_ARCH_ppc_TRUE@ppc_libigen_a_LIBADD = igen/filter_host.o
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc_libigen_a_LIBADD = \
+@SIM_ENABLE_ARCH_ppc_TRUE@	igen/filter_host.o \
+@SIM_ENABLE_ARCH_ppc_TRUE@	igen/misc.o
+
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_igen_SOURCES = ppc/igen.c
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_igen_LDADD = ppc/libigen.a
 @SIM_ENABLE_ARCH_ppc_TRUE@PPC_IGEN = ppc/igen$(EXEEXT)
@@ -3627,7 +3630,7 @@ ppc/$(DEPDIR)/$(am__dirstamp):
 	@: > ppc/$(DEPDIR)/$(am__dirstamp)
 ppc/table.$(OBJEXT): ppc/$(am__dirstamp) ppc/$(DEPDIR)/$(am__dirstamp)
 ppc/lf.$(OBJEXT): ppc/$(am__dirstamp) ppc/$(DEPDIR)/$(am__dirstamp)
-ppc/misc.$(OBJEXT): ppc/$(am__dirstamp) ppc/$(DEPDIR)/$(am__dirstamp)
+ppc/dumpf.$(OBJEXT): ppc/$(am__dirstamp) ppc/$(DEPDIR)/$(am__dirstamp)
 ppc/ld-decode.$(OBJEXT): ppc/$(am__dirstamp) \
 	ppc/$(DEPDIR)/$(am__dirstamp)
 ppc/ld-cache.$(OBJEXT): ppc/$(am__dirstamp) \
@@ -4085,6 +4088,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@moxie/$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@msp430/$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@or1k/$(DEPDIR)/modules.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/dumpf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/filter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/gen-icache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/gen-idecode.Po@am__quote@
@@ -4097,7 +4101,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/ld-decode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/ld-insn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/lf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@pru/$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@riscv/$(DEPDIR)/modules.Po@am__quote@

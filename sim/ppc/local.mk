@@ -47,7 +47,7 @@ EXTRA_LIBRARIES += %D%/libigen.a
 %C%_libigen_a_SOURCES = \
 	%D%/table.c \
 	%D%/lf.c \
-	%D%/misc.c \
+	%D%/dumpf.c \
 	%D%/ld-decode.c \
 	%D%/ld-cache.c \
 	%D%/filter.c \
@@ -58,7 +58,9 @@ EXTRA_LIBRARIES += %D%/libigen.a
 	%D%/gen-semantics.c \
 	%D%/gen-idecode.c \
 	%D%/gen-support.c
-%C%_libigen_a_LIBADD = igen/filter_host.o
+%C%_libigen_a_LIBADD = \
+	igen/filter_host.o \
+	igen/misc.o
 
 %C%_igen_SOURCES = %D%/igen.c
 %C%_igen_LDADD = %D%/libigen.a

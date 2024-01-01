@@ -25,6 +25,7 @@
 #include "ld-decode.h"
 #include "ld-cache.h"
 #include "ld-insn.h"
+#include "dumpf.h"
 
 #include "igen.h"
 

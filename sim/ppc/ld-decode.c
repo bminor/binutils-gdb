@@ -23,6 +23,7 @@
 #include "lf.h"
 #include "table.h"
 #include "ld-decode.h"
+#include "dumpf.h"
 
 
 enum {

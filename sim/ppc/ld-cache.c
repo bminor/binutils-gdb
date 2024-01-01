@@ -22,6 +22,7 @@
 #include "lf.h"
 #include "table.h"
 #include "ld-cache.h"
+#include "dumpf.h"
 
 
 enum {
