@@ -4147,38 +4147,6 @@ _ACEOF
 fi
 
 
-# Since we run commands on the build system, we have to create a
-# separate config header for the build system if build != host.
-if test x$host = x$build; then
-  ac_config_commands="$ac_config_commands build-config.h"
-
-else
-  tempdir=build.$$
-  rm -rf $tempdir
-  mkdir $tempdir
-  cd $tempdir
-  case ${srcdir} in
-  /* | A-Za-z:\\/* ) realsrcdir=${srcdir};;
-  *) realsrcdir=../${srcdir};;
-  esac
-  saved_CFLAGS="${CFLAGS}"
-  # Put a plausible default for CC_FOR_BUILD in Makefile.
-  if test "x$cross_compiling" = "xno"; then
-    CC_FOR_BUILD='$(CC)'
-  else
-    CC_FOR_BUILD=gcc
-  fi
-  CC="${CC_FOR_BUILD}" CFLAGS="${CFLAGS_FOR_BUILD-${CFLAGS}}" \
-  LDFLAGS="${LDFLAGS_FOR_BUILD}" \
-  ${realsrcdir}/configure \
-    --enable-languages=${enable_languages-all} \
-    --target=$target_alias --host=$build_alias --build=$build_alias
-  CFLAGS="${saved_CFLAGS}"
-  mv config.h ../build-config.h
-  cd ..
-  rm -rf $tempdir
-fi
-
 
 
 
@@ -4900,7 +4868,6 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.in" ;;
-    "build-config.h") CONFIG_COMMANDS="$CONFIG_COMMANDS build-config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
 
@@ -5458,7 +5425,6 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
 
 
   case $ac_file$ac_mode in
-    "build-config.h":C) cp config.h build-config.h ;;
     "default":C) case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac ;;
 
   esac

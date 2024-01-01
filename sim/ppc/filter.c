@@ -20,8 +20,6 @@
 
 #include <stdio.h>
 
-#include "build-config.h"
-
 #include <string.h>
 
 #include "misc.h"

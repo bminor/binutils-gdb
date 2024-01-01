@@ -24,7 +24,6 @@
 #include <fcntl.h>
 #include <ctype.h>
 
-#include "build-config.h"
 #include "misc.h"
 #include "lf.h"
 #include "table.h"

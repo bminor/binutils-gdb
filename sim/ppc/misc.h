@@ -20,8 +20,6 @@
 
 /* Frustrating header junk */
 
-#include "build-config.h"
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
