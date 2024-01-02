@@ -262,6 +262,11 @@ struct parser_state : public expr_builder
     push (expr::make_operation<T> (std::move (lhs), std::move (rhs)));
   }
 
+  /* Function called from the various parsers' yyerror functions to throw
+     an error.  The error will include a message identifying the location
+     of the error within the current expression.  */
+  void parse_error (const char *msg);
+
   /* If this is nonzero, this block is used as the lexical context for
      symbol names.  */
 

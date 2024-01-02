@@ -244,6 +244,17 @@ parser_state::push_dollar (struct stoken str)
     (create_internalvar (copy.c_str () + 1));
 }
 
+/* See parser-defs.h.  */
+
+void
+parser_state::parse_error (const char *msg)
+{
+  if (this->prev_lexptr)
+    this->lexptr = this->prev_lexptr;
+
+  error (_("A %s in expression, near `%s'."), msg, this->lexptr);
+}
+
 
 
 const char *

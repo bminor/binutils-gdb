@@ -1212,7 +1212,7 @@ ada_parse (struct parser_state *par_state)
 static void
 yyerror (const char *msg)
 {
-  error (_("Error in expression, near `%s'."), pstate->lexptr);
+  pstate->parse_error (msg);
 }
 
 /* Emit expression to access an instance of SYM, in block BLOCK (if
