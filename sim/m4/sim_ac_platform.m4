@@ -133,6 +133,61 @@ AC_CHECK_TYPES(socklen_t, [], [],
 #include <sys/socket.h>
 ])
 
+dnl Some System V related checks.
+AC_CACHE_CHECK([if union semun defined],
+  [sim_cv_has_union_semun],
+  [AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>], [
+  union semun arg;
+], [sim_cv_has_union_semun="yes"], [sim_cv_has_union_semun="no"])])
+AS_IF([test x"$sim_cv_has_union_semun" = x"yes"], [dnl
+  AC_DEFINE(HAVE_UNION_SEMUN, 1,
+	    [Define if union semun is defined in <sys/sem.h>])
+])
+
+AC_CACHE_CHECK([whether System V semaphores are supported],
+  [sim_cv_sysv_sem],
+  [AC_TRY_COMPILE([
+  #include <sys/types.h>
+  #include <sys/ipc.h>
+  #include <sys/sem.h>
+#ifndef HAVE_UNION_SEMUN
+  union semun {
+    int val;
+    struct semid_ds *buf;
+    ushort *array;
+  };
+#endif], [
+  union semun arg;
+  int id = semget(IPC_PRIVATE, 1, IPC_CREAT|0400);
+  if (id == -1)
+    return 1;
+  arg.val = 0; /* avoid implicit type cast to union */
+  if (semctl(id, 0, IPC_RMID, arg) == -1)
+    return 1;
+], [sim_cv_sysv_sem="yes"], [sim_cv_sysv_sem="no"])])
+AS_IF([test x"$sim_cv_sysv_sem" = x"yes"], [dnl
+  AC_DEFINE(HAVE_SYSV_SEM, 1, [Define if System V semaphores are supported])
+])
+
+AC_CACHE_CHECK([whether System V shared memory is supported],
+  [sim_cv_sysv_shm],
+  [AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>], [
+  int id = shmget(IPC_PRIVATE, 1, IPC_CREAT|0400);
+  if (id == -1)
+    return 1;
+  if (shmctl(id, IPC_RMID, 0) == -1)
+    return 1;
+], [sim_cv_sysv_shm="yes"], [sim_cv_sysv_shm="no"])])
+AS_IF([test x"$sim_cv_sysv_shm" = x"yes"], [dnl
+  AC_DEFINE(HAVE_SYSV_SHM, 1, [Define if System V shared memory is supported])
+])
+
 dnl Types used by common code
 AC_TYPE_GETGROUPS
 AC_TYPE_MODE_T

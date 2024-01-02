@@ -24,20 +24,11 @@
 /* Define if struct statfs is defined in <sys/mount.h> */
 #undef HAVE_STRUCT_STATFS
 
-/* Define if System V semaphores are supported */
-#undef HAVE_SYSV_SEM
-
-/* Define if System V shared memory is supported */
-#undef HAVE_SYSV_SHM
-
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
-
-/* Define if union semun is defined in <sys/sem.h> */
-#undef HAVE_UNION_SEMUN
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H

@@ -273,6 +273,12 @@
 /* Define to 1 if you have the `symlink' function. */
 #undef HAVE_SYMLINK
 
+/* Define if System V semaphores are supported */
+#undef HAVE_SYSV_SEM
+
+/* Define if System V shared memory is supported */
+#undef HAVE_SYSV_SHM
+
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
 #undef HAVE_SYS_DIR_H
@@ -360,6 +366,9 @@
 
 /* Define to 1 if you have the `umask' function. */
 #undef HAVE_UMASK
+
+/* Define if union semun is defined in <sys/sem.h> */
+#undef HAVE_UNION_SEMUN
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
