@@ -992,9 +992,15 @@ const struct riscv_opcode riscv_opcodes[] =
 {"amocas.w",       0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_W, MASK_CAS_W, match_opcode, 0 },
 {"amocas.d",       0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_D, MASK_CAS_D, match_opcode, 0 },
 {"amocas.q",      64, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_Q, MASK_CAS_Q, match_opcode, 0 },
-// {"amocas.w.aqrl",  0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_W|MASK_AQRL, MASK_CAS_W|MASK_AQRL, match_opcode, 0 },
-// {"amocas.d.aqrl",  0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_D|MASK_AQRL, MASK_CAS_D|MASK_AQRL, match_opcode, 0 },
-// {"amocas.q.aqrl", 64, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_Q|MASK_AQRL, MASK_CAS_Q|MASK_AQRL, match_opcode, 0 },
+{"amocas.w.aq",    0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_W|MASK_AQ, MASK_CAS_W|MASK_AQ, match_opcode, 0 },
+{"amocas.d.aq",    0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_D|MASK_AQ, MASK_CAS_D|MASK_AQ, match_opcode, 0 },
+{"amocas.q.aq",   64, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_Q|MASK_AQ, MASK_CAS_Q|MASK_AQ, match_opcode, 0 },
+{"amocas.w.rl",    0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_W|MASK_RL, MASK_CAS_W|MASK_RL, match_opcode, 0 },
+{"amocas.d.rl",    0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_D|MASK_RL, MASK_CAS_D|MASK_RL, match_opcode, 0 },
+{"amocas.q.rl",   64, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_Q|MASK_RL, MASK_CAS_Q|MASK_RL, match_opcode, 0 },
+{"amocas.w.aqrl",  0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_W|MASK_AQRL, MASK_CAS_W|MASK_AQRL, match_opcode, 0 },
+{"amocas.d.aqrl",  0, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_D|MASK_AQRL, MASK_CAS_D|MASK_AQRL, match_opcode, 0 },
+{"amocas.q.aqrl", 64, INSN_CLASS_ZACAS, "d,t,0(s)", MATCH_CAS_Q|MASK_AQRL, MASK_CAS_Q|MASK_AQRL, match_opcode, 0 },
 
 /* Zfa instructions.  */
 {"fli.s",       0, INSN_CLASS_ZFA,         "D,Wfv", MATCH_FLI_S, MASK_FLI_S, match_opcode, 0 },

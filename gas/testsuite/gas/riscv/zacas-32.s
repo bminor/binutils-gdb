@@ -1,2 +1,17 @@
 target:
-	amocas.w        a0,a1,a2
+	amocas.w      a0,a1,0(a2)
+	amocas.w      a0,a1,(a2)
+	amocas.w.aq   a0,a1,0(a2)
+	amocas.w.aq   a0,a1,(a2)
+	amocas.w.rl   a0,a1,0(a2)
+	amocas.w.rl   a0,a1,(a2)
+	amocas.w.aqrl a0,a1,0(a2)
+	amocas.w.aqrl a0,a1,(a2)
+	amocas.d      a0,a1,0(a2)
+	amocas.d      a0,a1,(a2)
+	amocas.d.aq   a0,a1,0(a2)
+	amocas.d.aq   a0,a1,(a2)
+	amocas.d.rl   a0,a1,0(a2)
+	amocas.d.rl   a0,a1,(a2)
+	amocas.d.aqrl a0,a1,0(a2)
+	amocas.d.aqrl a0,a1,(a2)
