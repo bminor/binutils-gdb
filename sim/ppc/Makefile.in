@@ -362,8 +362,7 @@ INLINE = \
 	inline.c
 
 BUILT_SRC_WO_CONFIG = \
-	pk.h \
-	hw.h hw.c
+	pk.h
 
 BUILT_SRC = \
 	$(BUILT_SRC_WO_CONFIG)
@@ -456,7 +455,7 @@ PACKAGE_SRC = pk_disklabel.c
 PACKAGE_OBJ = $(PACKAGE_SRC:.c=.o)
 
 
-$(TARGETLIB): tmp-hw defines.h $(LIB_OBJ) $(GDB_OBJ)
+$(TARGETLIB): defines.h $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_AR) $(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_RANLIB) $(RANLIB) $(TARGETLIB)
 
@@ -528,38 +527,6 @@ sim-fpu.o: $(srcdir)/../common/sim-fpu.c
 # Rebuild options whenever something changes so the date/time is up to date.
 options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) ../config.status Makefile
 	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_ppc_opcode@"' '-DIGEN_FLAGS="$(ppc_IGEN_FLAGS)"' $(srcdir)/options.c
-
-# real hardware
-hw.c hw.h: tmp-hw; @true
-tmp-hw: Makefile $(HW_SRC) $(srcroot)/move-if-change
-	$(ECHO_GEN)# The first for loop is to remove duplicates.
-	$(SILENCE) f=""; \
-	for i in $(HW_SRC) ; do \
-	  case " $$f " in \
-	    *" $$i "*) ;; \
-	    *) f="$$f $$i" ;; \
-	  esac ; \
-	done ; \
-	for hw in $$f ; do echo $$hw ; done \
-	| sed -e 's/^.*\(hw_.*\)\.c/\1/' \
-		-e 's/^/extern const device_descriptor /' \
-		-e 's/$$/_device_descriptor\[\];/' \
-		> tmp-hw.h
-	$(SILENCE) f=""; \
-	for i in $(HW_SRC) ; do \
-	  case " $$f " in \
-	    *" $$i "*) ;; \
-	    *) f="$$f $$i" ;; \
-	  esac ; \
-	done ; \
-	for hw in $$f ; do echo $$hw ; done \
-	| sed -e 's/^.*\(hw_.*\)\.c/\1/' \
-		-e 's/^/    /' \
-		-e 's/$$/_device_descriptor,/' \
-		> tmp-hw.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-hw.h hw.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-hw.c hw.c
-	$(SILENCE) touch $@
 
 hw_cpu.o: hw_cpu.c $(DEVICE_TABLE_H) $(HW_CPU_H) $(INTERRUPTS_H) $(CPU_H)
 hw_com.o: hw_com.c $(DEVICE_TABLE_H)

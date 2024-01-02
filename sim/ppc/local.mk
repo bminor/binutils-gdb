@@ -177,5 +177,48 @@ MOSTLYCLEANFILES += $(%C%_IGEN_TOOLS) %D%/libigen.a
 
 IGEN_OPCODE_RULES = @sim_ppc_opcode@
 
+## Real hardware.
+## NB: The first for loop is to remove duplicates.
+%C%_HW_SRC = $(sim_ppc_hw_src:%=%D%/%)
+%D%/hw.c %D%/hw.h: %D%/stamp-hw ; @true
+%D%/stamp-hw: Makefile $(%C%_HW_SRC) $(srcroot)/move-if-change
+	$(AM_V_GEN)\
+	f=""; \
+	for i in $(%C%_HW_SRC) ; do \
+	  case " $$f " in \
+	    *" $$i "*) ;; \
+	    *) f="$$f $$i" ;; \
+	  esac ; \
+	done ; \
+	for hw in $$f ; do echo $$hw ; done \
+	| sed -e 's/^.*\(hw_.*\)\.c/\1/' \
+		-e 's/^/extern const device_descriptor /' \
+		-e 's/$$/_device_descriptor\[\];/' \
+		> %D%/hw.hin; \
+	f=""; \
+	for i in $(%C%_HW_SRC) ; do \
+	  case " $$f " in \
+	    *" $$i "*) ;; \
+	    *) f="$$f $$i" ;; \
+	  esac ; \
+	done ; \
+	for hw in $$f ; do echo $$hw ; done \
+	| sed -e 's/^.*\(hw_.*\)\.c/\1/' \
+		-e 's/^/    /' \
+		-e 's/$$/_device_descriptor,/' \
+		> %D%/hw.cin
+	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change %D%/hw.hin %D%/hw.h
+	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change %D%/hw.cin %D%/hw.c
+	$(AM_V_at)touch $@
+
+BUILT_SOURCES += \
+	%D%/hw.h
+%C%_BUILD_OUTPUTS += \
+	%D%/hw.c \
+	%D%/hw.h \
+	%D%/stamp-hw
+SIM_ALL_RECURSIVE_DEPS += %D%/stamp-hw
+%D%/hw.c %D%/hw.h: %D%/stamp-igen
+
 %C%docdir = $(docdir)/%C%
 %C%doc_DATA = %D%/BUGS %D%/INSTALL %D%/README %D%/RUN

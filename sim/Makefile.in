@@ -280,21 +280,17 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_87 = or1k/eng.h
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_88 = $(or1k_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_89 = common/libcommon.a \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/defines.h ppc/stamp-igen
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/defines.h ppc/stamp-igen \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-hw
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_90 = ppc/run
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_91 = ppc/defines.h \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-defines \
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(ppc_BUILD_OUTPUTS) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(ppc_IGEN_TOOLS) ppc/libigen.a
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_92 = ppc/libigen.a
-@SIM_ENABLE_ARCH_ppc_TRUE@am__append_93 = \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/icache.h \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/idecode.h \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/semantics.h \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/model.h \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/support.h \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/itable.h
-
+@SIM_ENABLE_ARCH_ppc_TRUE@am__append_93 = ppc/icache.h ppc/idecode.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/semantics.h ppc/model.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/support.h ppc/itable.h ppc/hw.h
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_94 = $(ppc_IGEN_TOOLS)
 @SIM_ENABLE_ARCH_pru_TRUE@am__append_95 = pru/libsim.a
 @SIM_ENABLE_ARCH_pru_TRUE@am__append_96 = pru/run
@@ -2988,10 +2984,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/itable.h \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/itable.c
 
-@SIM_ENABLE_ARCH_ppc_TRUE@ppc_BUILD_OUTPUTS = \
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc_BUILD_OUTPUTS =  \
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(ppc_BUILT_SRC_FROM_IGEN) \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-igen
-
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-igen ppc/hw.c ppc/hw.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-hw
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_IGEN_OPCODE_RULES = ppc/@sim_ppc_opcode@
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_filter_SOURCES = 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_filter_LDADD = ppc/filter-main.o ppc/libigen.a
@@ -3009,6 +3005,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-insn
 
 @SIM_ENABLE_ARCH_ppc_TRUE@IGEN_OPCODE_RULES = @sim_ppc_opcode@
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc_HW_SRC = $(sim_ppc_hw_src:%=ppc/%)
 @SIM_ENABLE_ARCH_ppc_TRUE@ppcdocdir = $(docdir)/ppc
 @SIM_ENABLE_ARCH_ppc_TRUE@ppcdoc_DATA = ppc/BUGS ppc/INSTALL ppc/README ppc/RUN
 @SIM_ENABLE_ARCH_pru_TRUE@nodist_pru_libsim_a_SOURCES = \
@@ -5857,6 +5854,37 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/%-main.o: ppc/%.c
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_CC)$(COMPILE_FOR_BUILD) -DMAIN -c $< -o $@
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc/hw.c ppc/hw.h: ppc/stamp-hw ; @true
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc/stamp-hw: Makefile $(ppc_HW_SRC) $(srcroot)/move-if-change
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_GEN)\
+@SIM_ENABLE_ARCH_ppc_TRUE@	f=""; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	for i in $(ppc_HW_SRC) ; do \
+@SIM_ENABLE_ARCH_ppc_TRUE@	  case " $$f " in \
+@SIM_ENABLE_ARCH_ppc_TRUE@	    *" $$i "*) ;; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	    *) f="$$f $$i" ;; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	  esac ; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	done ; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	for hw in $$f ; do echo $$hw ; done \
+@SIM_ENABLE_ARCH_ppc_TRUE@	| sed -e 's/^.*\(hw_.*\)\.c/\1/' \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-e 's/^/extern const device_descriptor /' \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-e 's/$$/_device_descriptor\[\];/' \
+@SIM_ENABLE_ARCH_ppc_TRUE@		> ppc/hw.hin; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	f=""; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	for i in $(ppc_HW_SRC) ; do \
+@SIM_ENABLE_ARCH_ppc_TRUE@	  case " $$f " in \
+@SIM_ENABLE_ARCH_ppc_TRUE@	    *" $$i "*) ;; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	    *) f="$$f $$i" ;; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	  esac ; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	done ; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	for hw in $$f ; do echo $$hw ; done \
+@SIM_ENABLE_ARCH_ppc_TRUE@	| sed -e 's/^.*\(hw_.*\)\.c/\1/' \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-e 's/^/    /' \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-e 's/$$/_device_descriptor,/' \
+@SIM_ENABLE_ARCH_ppc_TRUE@		> ppc/hw.cin
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change ppc/hw.hin ppc/hw.h
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change ppc/hw.cin ppc/hw.c
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)touch $@
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc/hw.c ppc/hw.h: ppc/stamp-igen
 @SIM_ENABLE_ARCH_pru_TRUE@$(pru_libsim_a_OBJECTS) $(pru_libsim_a_LIBADD): pru/hw-config.h
 
 @SIM_ENABLE_ARCH_pru_TRUE@pru/modules.o: pru/modules.c
