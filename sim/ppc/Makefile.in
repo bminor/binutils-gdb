@@ -61,14 +61,14 @@ BISON = bison
 MAKEINFO = makeinfo
 
 INLINE_CFLAGS = $(SIM_INLINE)
-SMP_CFLAGS = @sim_smp@
-XOR_ENDIAN_CFLAGS = @sim_xor_endian@
-BITSIZE_CFLAGS = @sim_bitsize@
-TIMEBASE_CFLAGS = @sim_timebase@
-FLOAT_CFLAGS = @sim_float@
-MONITOR_CFLAGS = @sim_monitor@
-MODEL_CFLAGS = @sim_model@ @sim_default_model@ @sim_model_issue@
-SWITCH_CFLAGS = @sim_switch@
+SMP_CFLAGS = @sim_ppc_smp@
+XOR_ENDIAN_CFLAGS = @sim_ppc_xor_endian@
+BITSIZE_CFLAGS = @sim_ppc_bitsize@
+TIMEBASE_CFLAGS = @sim_ppc_timebase@
+FLOAT_CFLAGS = @sim_ppc_float@
+MONITOR_CFLAGS = @sim_ppc_monitor@
+MODEL_CFLAGS = @sim_ppc_model@ @sim_ppc_default_model@ @sim_ppc_model_issue@
+SWITCH_CFLAGS = @sim_ppc_switch@
 CONFIG_CFLAGS = \
   -DHAVE_CONFIG_H \
   $(SMP_CFLAGS) \
@@ -86,14 +86,14 @@ NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(INCLUDES) $(SIM_FP
 
 LIBS = $(COMMON_LIBS) @LIBS@ $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
 
-IGEN_OPCODE_RULES = @sim_opcode@
-IGEN_DECODE_MECHANISM = @sim_decode_mechanism@
-IGEN_DUPLICATE = @sim_dup@
-IGEN_JUMP = @sim_jump@
-IGEN_FILTER = @sim_filter@
-IGEN_ICACHE = @sim_icache@
-IGEN_SMP = @sim_igen_smp@
-IGEN_LINE_NR = @sim_line_nr@
+IGEN_OPCODE_RULES = @sim_ppc_opcode@
+IGEN_DECODE_MECHANISM = @sim_ppc_decode_mechanism@
+IGEN_DUPLICATE = @sim_ppc_dup@
+IGEN_JUMP = @sim_ppc_jump@
+IGEN_FILTER = @sim_ppc_filter@
+IGEN_ICACHE = @sim_ppc_icache@
+IGEN_SMP = @sim_ppc_igen_smp@
+IGEN_LINE_NR = @sim_ppc_line_nr@
 
 IGEN_FLAGS = \
 	$(IGEN_DECODE_MECHANISM) \
@@ -482,8 +482,8 @@ LIB_OBJ = \
 
 GDB_OBJ = gdb-sim.o sim_calls.o
 
-HW_SRC = @sim_hw_src@
-HW_OBJ = @sim_hw_obj@
+HW_SRC = @sim_ppc_hw_src@
+HW_OBJ = @sim_ppc_hw_obj@
 
 PACKAGE_SRC = pk_disklabel.c
 PACKAGE_OBJ = $(PACKAGE_SRC:.c=.o)
@@ -560,7 +560,7 @@ sim-fpu.o: $(srcdir)/../common/sim-fpu.c
 
 # Rebuild options whenever something changes so the date/time is up to date.
 options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) config.status Makefile
-	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' $(srcdir)/options.c
+	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_ppc_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' $(srcdir)/options.c
 
 #
 # Rules to create the built c source code files
