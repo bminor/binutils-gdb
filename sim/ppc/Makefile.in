@@ -70,6 +70,7 @@ MONITOR_CFLAGS = @sim_monitor@
 MODEL_CFLAGS = @sim_model@ @sim_default_model@ @sim_model_issue@
 SWITCH_CFLAGS = @sim_switch@
 CONFIG_CFLAGS = \
+  -DHAVE_CONFIG_H \
   $(SMP_CFLAGS) \
   $(XOR_ENDIAN_CFLAGS) \
   $(BITSIZE_CFLAGS) \
@@ -141,9 +142,6 @@ COMMON_SIM_INLINE_H = $(srcroot)/sim/common/sim-inline.h
 COMMON_SIM_SIGNAL_H = $(srcroot)/sim/common/sim-signal.h
 
 # Headers in sim/ppc.
-ACCONFIG_H = \
-	acconfig.h
-
 ALTIVEC_EXPRESSION_H = \
 	altivec_expression.h
 
@@ -152,7 +150,6 @@ ALTIVEC_REGISTERS_H = \
 
 BASICS_H = \
 	basics.h \
-	$(CONFIG_H) \
 	$(INLINE_H) \
 	$(SIM_CALLBACKS_H) \
 	$(DEBUG_H) \
@@ -293,8 +290,7 @@ LF_H = \
 	lf.h
 
 MISC_H = \
-	misc.h \
-	$(CONFIG_H)
+	misc.h
 
 MON_H = \
 	mon.h \
@@ -353,9 +349,6 @@ WORDS_H = \
 
 
 # Generated headers.
-CONFIG_H = \
-        config.h
-
 DEFINES_H = \
         defines.h
 
@@ -406,8 +399,7 @@ BUILT_SRC_WO_CONFIG = \
 	hw.h hw.c
 
 BUILT_SRC = \
-	$(BUILT_SRC_WO_CONFIG) \
-	config.h
+	$(BUILT_SRC_WO_CONFIG)
 
 LIB_INLINE_SRC = \
 	psim.c \
@@ -505,9 +497,9 @@ psim.o: psim.c $(CPU_H) $(IDECODE_H) $(OPTIONS_H) $(TREE_H) $(BFD_H)
 
 bits.o: bits.c $(BASICS_H)
 
-debug.o: debug.c $(CONFIG_H) $(BASICS_H)
+debug.o: debug.c $(BASICS_H)
 
-sim-endian.o: sim-endian.c $(CONFIG_H) $(BASICS_H) $(SIM_ENDIAN_N_H)
+sim-endian.o: sim-endian.c $(BASICS_H) $(SIM_ENDIAN_N_H)
 
 os_emul.o: os_emul.c $(CPU_H) $(IDECODE_H) $(OS_EMUL_H) $(EMUL_GENERIC_H) $(EMUL_NETBSD_H) $(EMUL_UNIX_H) $(EMUL_CHIRP_H) $(EMUL_BUGAPI_H)
 emul_generic.o: emul_generic.c $(EMUL_GENERIC_H)
@@ -563,7 +555,7 @@ itable.o: itable.c $(ITABLE_H)
 
 mon.o: mon.c $(BASICS_H) $(CPU_H) $(MON_H)
 
-sim-fpu.o: $(srcdir)/../common/sim-fpu.c $(CONFIG_H)
+sim-fpu.o: $(srcdir)/../common/sim-fpu.c
 	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/sim-fpu.c 
 
 # Rebuild options whenever something changes so the date/time is up to date.
@@ -571,8 +563,8 @@ options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H)
 	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' $(srcdir)/options.c
 
 defines.h: tmp-defines; @true
-tmp-defines: config.h Makefile
-	$(ECHO_GEN) sed -n -e '/^#define HAVE_/s/ 1$$/",/' -e '/^#define HAVE_/s//"HAVE_/p' < config.h > tmp-defines.h
+tmp-defines: Makefile
+	$(ECHO_GEN) sed -n -e '/^#define HAVE_/s/ 1$$/",/' -e '/^#define HAVE_/s//"HAVE_/p' < ../config.h > tmp-defines.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-defines.h defines.h
 	$(SILENCE) touch $@
 
@@ -693,17 +685,13 @@ clean mostlyclean:
 	rm -f tmp-* *.[oasi] core $(BUILT_SRC_WO_CONFIG)
 
 distclean realclean: clean
-	rm -f TAGS Makefile config.cache config.status config.h defines.h stamp-h config.log
+	rm -f TAGS Makefile config.cache config.status defines.h stamp-h config.log
 
 maintainer-clean: distclean
 	rm -f *~ *.log core *.core
 
 Makefile: Makefile.in config.status
 	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
-
-config.h: stamp-h ; @true
-stamp-h: config.in config.status
-	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
 
 config.status: configure
 	$(SHELL) ./config.status --recheck

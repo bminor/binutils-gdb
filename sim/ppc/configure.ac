@@ -285,9 +285,6 @@ if test x"$silent" != x"yes" && test x"$sim_xor_endian" != x""; then
 fi],[sim_xor_endian=""])dnl
 
 
-AC_CONFIG_HEADER(config.h:config.in)
-
-
 AC_SUBST(sim_line_nr)
 AC_SUBST(sim_opcode)
 AC_SUBST(sim_switch)
@@ -309,5 +306,4 @@ AC_SUBST(sim_model)
 AC_SUBST(sim_default_model)
 AC_SUBST(sim_model_issue)
 
-AC_OUTPUT(Makefile,
-[case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])
+AC_OUTPUT(Makefile)
