@@ -3170,10 +3170,14 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_has_union_semun" >&5
 $as_echo "$ac_cv_has_union_semun" >&6; }
+if test x"$ac_cv_has_union_semun" = x"yes"; then :
+
+$as_echo "#define HAVE_UNION_SEMUN 1" >>confdefs.h
 
 
-if test "$ac_cv_has_union_semun" = "yes"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether System V semaphores are supported" >&5
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether System V semaphores are supported" >&5
 $as_echo_n "checking whether System V semaphores are supported... " >&6; }
 if ${ac_cv_sysv_sem+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -3188,53 +3192,13 @@ else
   #include <sys/types.h>
   #include <sys/ipc.h>
   #include <sys/sem.h>
-  int main () {
-    union semun arg ;
-
-    int id=semget(IPC_PRIVATE,1,IPC_CREAT|0400);
-    if (id == -1)
-      exit(1);
-    arg.val = 0; /* avoid implicit type cast to union */
-    if (semctl(id, 0, IPC_RMID, arg) == -1)
-      exit(1);
-    exit(0);
-  }
-
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  ac_cv_sysv_sem="yes"
-else
-  ac_cv_sysv_sem="no"
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sysv_sem" >&5
-$as_echo "$ac_cv_sysv_sem" >&6; }
-else  # semun is not defined
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether System V semaphores are supported" >&5
-$as_echo_n "checking whether System V semaphores are supported... " >&6; }
-if ${ac_cv_sysv_sem+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-  if test "$cross_compiling" = yes; then :
-  :
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-  #include <sys/types.h>
-  #include <sys/ipc.h>
-  #include <sys/sem.h>
+#ifndef HAVE_UNION_SEMUN
   union semun {
     int val;
     struct semid_ds *buf;
     ushort *array;
   };
+#endif
   int main () {
     union semun arg ;
 
@@ -3261,7 +3225,6 @@ fi
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sysv_sem" >&5
 $as_echo "$ac_cv_sysv_sem" >&6; }
-fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether System V shared memory is supported" >&5
 $as_echo_n "checking whether System V shared memory is supported... " >&6; }
@@ -3307,13 +3270,6 @@ if test x"$ac_cv_sysv_shm" = x"yes" -a x"$ac_cv_sysv_sem" = x"yes" ; then
 else
   sim_sysv_ipc_hw="";
 fi
-
-if test x"$ac_cv_has_union_semun" = x"yes" -a x"$ac_cv_sysv_sem" = x"yes" ; then
-
-$as_echo "#define HAVE_UNION_SEMUN 1" >>confdefs.h
-
-fi
-
 
 # Check whether --enable-sim-hardware was given.
 if test "${enable_sim_hardware+set}" = set; then :
