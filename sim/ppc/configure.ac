@@ -97,16 +97,14 @@ esac
 ])dnl
 
 AC_CACHE_CHECK([if union semun defined],
-  ac_cv_HAS_UNION_SEMUN,
+  [ac_cv_has_union_semun],
   [AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>],
 [union semun arg ;],
 [ac_cv_has_union_semun="yes"],
-[ac_cv_has_union_semun="no"])
-AC_MSG_RESULT($ac_cv_has_union_semun)
-])
+[ac_cv_has_union_semun="no"])])
 
 
 if test "$ac_cv_has_union_semun" = "yes"; then
