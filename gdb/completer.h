@@ -328,7 +328,7 @@ public:
 class completion_tracker
 {
 public:
-  completion_tracker ();
+  explicit completion_tracker (bool from_readline);
   ~completion_tracker ();
 
   DISABLE_COPY_AND_ASSIGN (completion_tracker);
@@ -423,6 +423,11 @@ public:
   completion_result build_completion_result (const char *text,
 					     int start, int end);
 
+  /* Tells if the completion task is triggered by readline.  See
+     m_from_readline.  */
+  bool from_readline () const
+  { return m_from_readline; }
+
 private:
 
   /* The type that we place into the m_entries_hash hash table.  */
@@ -512,6 +517,11 @@ private:
      track the maximum possible size of the lowest common denominator,
      which we know as each completion is added.  */
   size_t m_lowest_common_denominator_max_length = 0;
+
+  /* Indicates that the completions are to be displayed by readline
+     interactively. The 'complete' command is a way to generate completions
+     not to be displayed by readline.  */
+  bool m_from_readline;
 };
 
 /* Return a string to hand off to readline as a completion match

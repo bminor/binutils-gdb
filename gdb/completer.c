@@ -31,6 +31,7 @@
 #include <algorithm>
 #include "linespec.h"
 #include "cli/cli-decode.h"
+#include "gdbsupport/gdb_tilde_expand.h"
 
 /* FIXME: This is needed because of lookup_cmd_1 ().  We should be
    calling a hook instead so we eliminate the CLI dependency.  */
@@ -224,6 +225,20 @@ filename_completer (struct cmd_list_element *ignore,
       const char *p = p_rl.get ();
       if (p[strlen (p) - 1] == '~')
 	continue;
+
+      /* Readline appends a trailing '/' if the completion is a
+	 directory.  If this completion request originated from outside
+	 readline (e.g. GDB's 'complete' command), then we append the
+	 trailing '/' ourselves now.  */
+      if (!tracker.from_readline ())
+	{
+	  std::string expanded = gdb_tilde_expand (p_rl.get ());
+	  struct stat finfo;
+	  const bool isdir = (stat (expanded.c_str (), &finfo) == 0
+			      && S_ISDIR (finfo.st_mode));
+	  if (isdir)
+	    p_rl.reset (concat (p_rl.get (), "/", nullptr));
+	}
 
       tracker.add_completion
 	(make_completion_match_str (std::move (p_rl), text, word));
@@ -1474,7 +1489,8 @@ int max_completions = 200;
 
 /* See completer.h.  */
 
-completion_tracker::completion_tracker ()
+completion_tracker::completion_tracker (bool from_readline)
+  : m_from_readline (from_readline)
 {
   discard_completions ();
 }
@@ -1671,8 +1687,8 @@ make_completion_match_str (gdb::unique_xmalloc_ptr<char> &&match_name,
 completion_result
 complete (const char *line, char const **word, int *quote_char)
 {
-  completion_tracker tracker_handle_brkchars;
-  completion_tracker tracker_handle_completions;
+  completion_tracker tracker_handle_brkchars (false);
+  completion_tracker tracker_handle_completions (false);
   completion_tracker *tracker;
 
   /* The WORD should be set to the end of word to complete.  We initialize
@@ -1902,7 +1918,7 @@ gdb_completion_word_break_characters_throw ()
   /* New completion starting.  Get rid of the previous tracker and
      start afresh.  */
   delete current_completion.tracker;
-  current_completion.tracker = new completion_tracker ();
+  current_completion.tracker = new completion_tracker (true);
 
   completion_tracker &tracker = *current_completion.tracker;
 
@@ -2308,7 +2324,7 @@ gdb_rl_attempted_completion_function_throw (const char *text, int start, int end
   if (end == 0 || !current_completion.tracker->use_custom_word_point ())
     {
       delete current_completion.tracker;
-      current_completion.tracker = new completion_tracker ();
+      current_completion.tracker = new completion_tracker (true);
 
       complete_line (*current_completion.tracker, text,
 		     rl_line_buffer, rl_point);

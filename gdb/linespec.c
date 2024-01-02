@@ -1784,7 +1784,7 @@ linespec_parse_basic (linespec_parser *parser)
       if (!parser->completion_quote_char
 	  && strcmp (PARSER_STREAM (parser), ":") == 0)
 	{
-	  completion_tracker tmp_tracker;
+	  completion_tracker tmp_tracker (false);
 	  const char *source_filename
 	    = PARSER_EXPLICIT (parser)->source_filename.get ();
 	  symbol_name_match_type match_type
