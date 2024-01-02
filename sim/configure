@@ -8635,6 +8635,53 @@ _ACEOF
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct statfs" >&5
+$as_echo_n "checking for struct statfs... " >&6; }
+if ${sim_cv_struct_statfs+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_MOUNT_H
+#include <sys/mount.h>
+#endif
+#ifdef HAVE_SYS_VFS_H
+#include <sys/vfs.h>
+#endif
+#ifdef HAVE_SYS_STATFS_H
+#include <sys/statfs.h>
+#endif
+int
+main ()
+{
+
+  struct statfs s;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  sim_cv_struct_statfs="yes"
+else
+  sim_cv_struct_statfs="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_cv_struct_statfs" >&5
+$as_echo "$sim_cv_struct_statfs" >&6; }
+if test x"sim_cv_struct_statfs" = x"yes"; then :
+
+$as_echo "#define HAVE_STRUCT_STATFS 1" >>confdefs.h
+
+
+fi
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if union semun defined" >&5
 $as_echo_n "checking if union semun defined... " >&6; }
 if ${sim_cv_has_union_semun+:} false; then :
@@ -12430,7 +12477,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12433 "configure"
+#line 12480 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12536,7 +12583,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12539 "configure"
+#line 12586 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

@@ -134,6 +134,30 @@ AC_CHECK_TYPES(socklen_t, [], [],
 ])
 AC_CHECK_TYPES([long long])
 
+dnl Check for struct statfs.
+AC_CACHE_CHECK([for struct statfs],
+  [sim_cv_struct_statfs],
+  [AC_TRY_COMPILE([
+#include <sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_MOUNT_H
+#include <sys/mount.h>
+#endif
+#ifdef HAVE_SYS_VFS_H
+#include <sys/vfs.h>
+#endif
+#ifdef HAVE_SYS_STATFS_H
+#include <sys/statfs.h>
+#endif], [
+  struct statfs s;
+], [sim_cv_struct_statfs="yes"], [sim_cv_struct_statfs="no"])])
+AS_IF([test x"sim_cv_struct_statfs" = x"yes"], [dnl
+  AC_DEFINE(HAVE_STRUCT_STATFS, 1,
+	    [Define if struct statfs is defined in <sys/mount.h>])
+])
+
 dnl Some System V related checks.
 AC_CACHE_CHECK([if union semun defined],
   [sim_cv_has_union_semun],

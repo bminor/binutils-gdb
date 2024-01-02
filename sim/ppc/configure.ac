@@ -358,30 +358,6 @@ else
   ac_cv_termio_cline=no
 fi
 
-dnl Check for struct statfs
-AC_MSG_CHECKING(for struct statfs)
-AC_CACHE_VAL(ac_cv_struct_statfs,
-[AC_TRY_COMPILE([#include <sys/types.h>
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifdef HAVE_SYS_MOUNT_H
-#include <sys/mount.h>
-#endif
-#ifdef HAVE_SYS_VFS_H
-#include <sys/vfs.h>
-#endif
-#ifdef HAVE_SYS_STATFS_H
-#include <sys/statfs.h>
-#endif],
-[static struct statfs s;],
-ac_cv_struct_statfs=yes, ac_cv_struct_statfs=no)])
-AC_MSG_RESULT($ac_cv_struct_statfs)
-if test $ac_cv_struct_statfs = yes; then
-  AC_DEFINE(HAVE_STRUCT_STATFS, 1,
-	    [Define if struct statfs is defined in <sys/mount.h>])
-fi
-
 AC_SUBST(sim_line_nr)
 AC_SUBST(sim_opcode)
 AC_SUBST(sim_switch)

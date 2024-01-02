@@ -1,8 +1,5 @@
 /* config.in.  Generated from configure.ac by autoheader.  */
 
-/* Define if struct statfs is defined in <sys/mount.h> */
-#undef HAVE_STRUCT_STATFS
-
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 
