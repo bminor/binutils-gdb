@@ -382,8 +382,6 @@ if test $ac_cv_struct_statfs = yes; then
 	    [Define if struct statfs is defined in <sys/mount.h>])
 fi
 
-AC_CHECK_TYPES(long long)
-
 AC_SUBST(sim_line_nr)
 AC_SUBST(sim_opcode)
 AC_SUBST(sim_switch)

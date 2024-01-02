@@ -8624,6 +8624,16 @@ _ACEOF
 
 fi
 
+ac_fn_c_check_type "$LINENO" "long long" "ac_cv_type_long_long" "$ac_includes_default"
+if test "x$ac_cv_type_long_long" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_LONG_LONG 1
+_ACEOF
+
+
+fi
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if union semun defined" >&5
 $as_echo_n "checking if union semun defined... " >&6; }
@@ -12420,7 +12430,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12423 "configure"
+#line 12433 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12526,7 +12536,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12529 "configure"
+#line 12539 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

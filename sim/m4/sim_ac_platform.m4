@@ -132,6 +132,7 @@ AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>
 #include <sys/socket.h>
 ])
+AC_CHECK_TYPES([long long])
 
 dnl Some System V related checks.
 AC_CACHE_CHECK([if union semun defined],
