@@ -73,6 +73,7 @@
 #include <string_view>
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/common-utils.h"
+#include <optional>
 
 /* Forward declarations for local functions.  */
 
@@ -3315,6 +3316,55 @@ find_pc_line (CORE_ADDR pc, int notcurrent)
   sal.pc = overlay_unmapped_address (sal.pc, section);
   sal.end = overlay_unmapped_address (sal.end, section);
   return sal;
+}
+
+/* Compare two symtab_and_line entries.  Return true if both have
+   the same line number and the same symtab pointer.  That means we
+   are dealing with two entries from the same line and from the same
+   source file.
+
+   Return false otherwise.  */
+
+static bool
+sal_line_symtab_matches_p (const symtab_and_line &sal1,
+			   const symtab_and_line &sal2)
+{
+  return sal1.line == sal2.line && sal1.symtab == sal2.symtab;
+}
+
+/* See symtah.h.  */
+
+std::optional<CORE_ADDR>
+find_line_range_start (CORE_ADDR pc)
+{
+  struct symtab_and_line current_sal = find_pc_line (pc, 0);
+
+  if (current_sal.line == 0)
+    return {};
+
+  struct symtab_and_line prev_sal = find_pc_line (current_sal.pc - 1, 0);
+
+  /* If the previous entry is for a different line, that means we are already
+     at the entry with the start PC for this line.  */
+  if (!sal_line_symtab_matches_p (prev_sal, current_sal))
+    return current_sal.pc;
+
+  /* Otherwise, keep looking for entries for the same line but with
+     smaller PC's.  */
+  bool done = false;
+  CORE_ADDR prev_pc;
+  while (!done)
+    {
+      prev_pc = prev_sal.pc;
+
+      prev_sal = find_pc_line (prev_pc - 1, 0);
+
+      /* Did we notice a line change?  If so, we are done searching.  */
+      if (!sal_line_symtab_matches_p (prev_sal, current_sal))
+	done = true;
+    }
+
+  return prev_pc;
 }
 
 /* See symtab.h.  */

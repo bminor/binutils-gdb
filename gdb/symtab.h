@@ -38,6 +38,7 @@
 #include "gdb-demangle.h"
 #include "split-name.h"
 #include "frame.h"
+#include <optional>
 
 /* Opaque declarations.  */
 struct ui_file;
@@ -2366,6 +2367,22 @@ extern struct symtab_and_line find_pc_line (CORE_ADDR, int);
 
 extern struct symtab_and_line find_pc_sect_line (CORE_ADDR,
 						 struct obj_section *, int);
+
+/* Given PC, and assuming it is part of a range of addresses that is part of
+   a line, go back through the linetable and find the starting PC of that
+   line.
+
+   For example, suppose we have 3 PC ranges for line X:
+
+   Line X - [0x0 - 0x8]
+   Line X - [0x8 - 0x10]
+   Line X - [0x10 - 0x18]
+
+   If we call the function with PC == 0x14, we want to return 0x0, as that is
+   the starting PC of line X, and the ranges are contiguous.
+*/
+
+extern std::optional<CORE_ADDR> find_line_range_start (CORE_ADDR pc);
 
 /* Wrapper around find_pc_line to just return the symtab.  */
 
