@@ -353,8 +353,20 @@
 /* Define to 1 if you have the `tcsetpgrp' function. */
 #undef HAVE_TCSETPGRP
 
+/* Define if struct termios has c_line. */
+#undef HAVE_TERMIOS_CLINE
+
 /* Define to 1 if you have the <termios.h> header file. */
 #undef HAVE_TERMIOS_H
+
+/* Define if struct termios exists. */
+#undef HAVE_TERMIOS_STRUCTURE
+
+/* Define if struct termio has c_line. */
+#undef HAVE_TERMIO_CLINE
+
+/* Define if struct termio exists. */
+#undef HAVE_TERMIO_STRUCTURE
 
 /* Define to 1 if you have the `time' function. */
 #undef HAVE_TIME

@@ -8810,6 +8810,140 @@ $as_echo "#define HAVE_SYSV_SHM 1" >>confdefs.h
 
 fi
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct termios" >&5
+$as_echo_n "checking for struct termios... " >&6; }
+if ${sim_cv_termios_struct+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <sys/types.h>
+#include <sys/termios.h>
+int
+main ()
+{
+
+  static struct termios x;
+  x.c_iflag = 0;
+  x.c_oflag = 0;
+  x.c_cflag = 0;
+  x.c_lflag = 0;
+  x.c_cc[NCCS] = 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  sim_cv_termios_struct="yes"
+else
+  sim_cv_termios_struct="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_cv_termios_struct" >&5
+$as_echo "$sim_cv_termios_struct" >&6; }
+if test $sim_cv_termios_struct = yes; then
+
+$as_echo "#define HAVE_TERMIOS_STRUCTURE 1" >>confdefs.h
+
+fi
+
+if test "$sim_cv_termios_struct" = "yes"; then
+  if ${sim_cv_termios_cline+:} false; then :
+  $as_echo_n "(cached) " >&6
+fi
+
+  ac_fn_c_check_member "$LINENO" "struct termios" "c_line" "ac_cv_member_struct_termios_c_line" "
+#include <sys/types.h>
+#include <sys/termios.h>
+
+"
+if test "x$ac_cv_member_struct_termios_c_line" = xyes; then :
+  sim_cv_termios_cline="yes"
+else
+  sim_cv_termios_cline="no"
+fi
+
+  if test $sim_cv_termios_cline = yes; then
+
+$as_echo "#define HAVE_TERMIOS_CLINE 1" >>confdefs.h
+
+  fi
+else
+  sim_cv_termios_cline=no
+fi
+
+if test "$sim_cv_termios_struct" != "yes"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct termio" >&5
+$as_echo_n "checking for struct termio... " >&6; }
+if ${sim_cv_termio_struct+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <sys/types.h>
+#include <sys/termio.h>
+int
+main ()
+{
+
+  static struct termio x;
+  x.c_iflag = 0;
+  x.c_oflag = 0;
+  x.c_cflag = 0;
+  x.c_lflag = 0;
+  x.c_cc[NCC] = 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  sim_cv_termio_struct="yes"
+else
+  sim_cv_termio_struct="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_cv_termio_struct" >&5
+$as_echo "$sim_cv_termio_struct" >&6; }
+  if test $sim_cv_termio_struct = yes; then
+
+$as_echo "#define HAVE_TERMIO_STRUCTURE 1" >>confdefs.h
+
+  fi
+else
+  sim_cv_termio_struct=no
+fi
+
+if test "$sim_cv_termio_struct" = "yes"; then
+  if ${sim_cv_termio_cline+:} false; then :
+  $as_echo_n "(cached) " >&6
+fi
+
+  ac_fn_c_check_member "$LINENO" "struct termio" "c_line" "ac_cv_member_struct_termio_c_line" "
+#include <sys/types.h>
+#include <sys/termio.h>
+
+"
+if test "x$ac_cv_member_struct_termio_c_line" = xyes; then :
+  sim_cv_termio_cline="yes"
+else
+  sim_cv_termio_cline="no"
+fi
+
+  if test $sim_cv_termio_cline = yes; then
+
+$as_echo "#define HAVE_TERMIO_CLINE 1" >>confdefs.h
+
+  fi
+else
+  sim_cv_termio_cline=no
+fi
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking type of array argument to getgroups" >&5
 $as_echo_n "checking type of array argument to getgroups... " >&6; }
 if ${ac_cv_type_getgroups+:} false; then :
@@ -12477,7 +12611,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12480 "configure"
+#line 12614 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12583,7 +12717,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12586 "configure"
+#line 12720 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
