@@ -1274,24 +1274,39 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-sim-bitsize=n		Specify target bitsize (32 or 64).
-  --enable-sim-decode-mechanism=which		Specify the instruction decode mechanism.
-  --enable-sim-default-model=which	Specify default PowerPC to model.
-  --enable-sim-duplicate		Expand (duplicate) semantic functions.
-  --enable-sim-filter=rule		Specify filter rules.
-  --enable-sim-float			Specify whether the target has hard, soft, altivec or e500 floating point.
-  --enable-sim-hardware=list		Specify the hardware to be included in the build.
-  --enable-sim-icache=size		Specify instruction-decode cache size and type.
-  --enable-sim-jump		Jump between semantic code (instead of call/return).
-  --enable-sim-line-nr=opts		Generate extra CPP code that references source rather than generated code
-  --enable-sim-model=which		Specify PowerPC to model.
-  --enable-sim-model-issue		Specify whether to simulate model specific actions
-  --enable-sim-monitor=mon		Specify whether to enable monitoring events.
-  --enable-sim-opcode=which		Override default opcode lookup.
-  --enable-sim-smp=n			Specify number of processors to configure for.
-  --enable-sim-switch			Use a switch instead of a table for instruction call.
-  --enable-sim-timebase			Specify whether the PPC timebase is supported.
-  --enable-sim-xor-endian=n		Specify number bytes involved in PowerPC XOR bi-endian mode (default 8).
+  --enable-sim-bitsize=n  Specify target bitsize (32 or 64).
+  --enable-sim-decode-mechanism=which
+                          Specify the instruction decode mechanism.
+  --enable-sim-default-model=which
+                          Specify default PowerPC to model.
+  --enable-sim-duplicate  Expand (duplicate) semantic functions.
+  --enable-sim-filter=rule
+                          Specify filter rules.
+  --enable-sim-float      Specify whether the target has hard, soft, altivec
+                          or e500 floating point.
+  --enable-sim-hardware=list
+                          Specify the hardware to be included in the build.
+  --enable-sim-icache=size
+                          Specify instruction-decode cache size and type.
+  --enable-sim-jump       Jump between semantic code (instead of call/return).
+  --enable-sim-line-nr=opts
+                          Generate extra CPP code that references source
+                          rather than generated code
+  --enable-sim-model=which
+                          Specify PowerPC to model.
+  --enable-sim-model-issue
+                          Specify whether to simulate model specific actions
+  --enable-sim-monitor=mon
+                          Specify whether to enable monitoring events.
+  --enable-sim-opcode=which
+                          Override default opcode lookup.
+  --enable-sim-smp=n      Specify number of processors to configure for.
+  --enable-sim-switch     Use a switch instead of a table for instruction
+                          call.
+  --enable-sim-timebase   Specify whether the PPC timebase is supported.
+  --enable-sim-xor-endian=n
+                          Specify number bytes involved in PowerPC XOR
+                          bi-endian mode (default 8).
 
 Report bugs to the package provider.
 _ACEOF

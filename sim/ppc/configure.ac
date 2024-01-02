@@ -4,7 +4,7 @@ AC_CONFIG_MACRO_DIRS([../.. ../../config])
 
 
 AC_ARG_ENABLE(sim-bitsize,
-[  --enable-sim-bitsize=n		Specify target bitsize (32 or 64).],
+[AS_HELP_STRING([--enable-sim-bitsize=n], [Specify target bitsize (32 or 64).])],
 [case "${enableval}" in
   32|64) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=$enableval";;
   *)	 AC_MSG_ERROR("--enable-sim-bitsize was given $enableval.  Expected 32 or 64"); sim_bitsize="";;
@@ -15,7 +15,7 @@ fi],[sim_bitsize=""])dnl
 
 
 AC_ARG_ENABLE(sim-decode-mechanism,
-[  --enable-sim-decode-mechanism=which		Specify the instruction decode mechanism.],
+[AS_HELP_STRING([--enable-sim-decode-mechanism=which], [Specify the instruction decode mechanism.])],
 [case "${enableval}" in
   yes|no)	AC_MSG_ERROR("No value supplied for --enable-sim-decode-mechanism=file");;
   array|switch|padded-switch|goto-switch)	sim_decode_mechanism="-T ${enableval}";;
@@ -31,7 +31,7 @@ fi])dnl
 
 
 AC_ARG_ENABLE(sim-default-model,
-[  --enable-sim-default-model=which	Specify default PowerPC to model.],
+[AS_HELP_STRING([--enable-sim-default-model=which], [Specify default PowerPC to model.])],
 [case "${enableval}" in
   yes|no)	AC_MSG_ERROR("No value supplied for --enable-sim-default-model=model");;
   *)		sim_default_model="-DWITH_DEFAULT_MODEL=${enableval}";;
@@ -42,7 +42,7 @@ fi],[sim_default_model=""])dnl
 
 
 AC_ARG_ENABLE(sim-duplicate,
-[  --enable-sim-duplicate		Expand (duplicate) semantic functions.],
+[AS_HELP_STRING([--enable-sim-duplicate], [Expand (duplicate) semantic functions.])],
 [case "${enableval}" in
   yes)	sim_dup="-E";;
   no)	sim_dup="";;
@@ -57,7 +57,7 @@ fi])dnl
 
 
 AC_ARG_ENABLE(sim-filter,
-[  --enable-sim-filter=rule		Specify filter rules.],
+[AS_HELP_STRING([--enable-sim-filter=rule], [Specify filter rules.])],
 [case "${enableval}" in
   yes)	AC_MSG_ERROR("--enable-sim-filter must be specified with a rule to filter or no"); sim_filter="";;
   no)	sim_filter="";;
@@ -72,7 +72,7 @@ fi])dnl
 
 
 AC_ARG_ENABLE(sim-float,
-[  --enable-sim-float			Specify whether the target has hard, soft, altivec or e500 floating point.],
+[AS_HELP_STRING([--enable-sim-float], [Specify whether the target has hard, soft, altivec or e500 floating point.])],
 [case "${enableval}" in
   yes | hard)	sim_float="-DWITH_FLOATING_POINT=HARD_FLOATING_POINT";;
   no | soft)	sim_float="-DWITH_FLOATING_POINT=SOFT_FLOATING_POINT";;
@@ -92,7 +92,7 @@ esac
 
 
 AC_ARG_ENABLE(sim-hardware,
-[  --enable-sim-hardware=list		Specify the hardware to be included in the build.],
+[AS_HELP_STRING([--enable-sim-hardware=list], [Specify the hardware to be included in the build.])],
 [hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide,sem,shm"
 case "${enableval}" in
   yes)	;;
@@ -114,7 +114,7 @@ fi])dnl
 
 
 AC_ARG_ENABLE(sim-icache,
-[  --enable-sim-icache=size		Specify instruction-decode cache size and type.],
+[AS_HELP_STRING([--enable-sim-icache=size], [Specify instruction-decode cache size and type.])],
 [icache="-R"
  case "${enableval}" in
   yes)		icache="1024"; sim_icache="-I $icache";;
@@ -141,7 +141,7 @@ fi])dnl
 
 
 AC_ARG_ENABLE(sim-jump,
-[  --enable-sim-jump		Jump between semantic code (instead of call/return).],
+[AS_HELP_STRING([--enable-sim-jump], [Jump between semantic code (instead of call/return).])],
 [case "${enableval}" in
   yes)	sim_jump="-J";;
   no)	sim_jump="";;
@@ -156,7 +156,7 @@ fi])dnl
 
 
 AC_ARG_ENABLE(sim-line-nr,
-[  --enable-sim-line-nr=opts		Generate extra CPP code that references source rather than generated code],
+[AS_HELP_STRING([--enable-sim-line-nr=opts], [Generate extra CPP code that references source rather than generated code])],
 [case "${enableval}" in
   yes)	sim_line_nr="";;
   no)	sim_line_nr="-L";;
@@ -168,7 +168,7 @@ fi],[sim_line_nr=""])dnl
 
 
 AC_ARG_ENABLE(sim-model,
-[  --enable-sim-model=which		Specify PowerPC to model.],
+[AS_HELP_STRING([--enable-sim-model=which], [Specify PowerPC to model.])],
 [case "${enableval}" in
   yes|no)	AC_MSG_ERROR("No value supplied for --enable-sim-model=model");;
   *)		sim_model="-DWITH_MODEL=${enableval}";;
@@ -179,7 +179,7 @@ fi],[sim_model=""])dnl
 
 
 AC_ARG_ENABLE(sim-model-issue,
-[  --enable-sim-model-issue		Specify whether to simulate model specific actions],
+[AS_HELP_STRING([--enable-sim-model-issue], [Specify whether to simulate model specific actions])],
 [case "${enableval}" in
   yes)	sim_model_issue="-DWITH_MODEL_ISSUE=MODEL_ISSUE_PROCESS";;
   no)	sim_model_issue="-DWITH_MODEL_ISSUE=MODEL_ISSUE_IGNORE";;
@@ -191,7 +191,7 @@ fi],[sim_model_issue=""])dnl
 
 
 AC_ARG_ENABLE(sim-monitor,
-[  --enable-sim-monitor=mon		Specify whether to enable monitoring events.],
+[AS_HELP_STRING([--enable-sim-monitor=mon], [Specify whether to enable monitoring events.])],
 [case "${enableval}" in
   yes)		sim_monitor="-DWITH_MON='MONITOR_INSTRUCTION_ISSUE | MONITOR_LOAD_STORE_UNIT'";;
   no)		sim_monitor="-DWITH_MON=0";;
@@ -205,7 +205,7 @@ fi],[sim_monitor=""])dnl
 
 
 AC_ARG_ENABLE(sim-opcode,
-[  --enable-sim-opcode=which		Override default opcode lookup.],
+[AS_HELP_STRING([--enable-sim-opcode=which], [Override default opcode lookup.])],
 [case "${enableval}" in
   yes|no)	AC_MSG_ERROR("No value supplied for --enable-sim-opcode=file");;
   *)		if test -f "${srcdir}/${enableval}"; then
@@ -226,7 +226,7 @@ fi])dnl
 
 
 AC_ARG_ENABLE(sim-smp,
-[  --enable-sim-smp=n			Specify number of processors to configure for.],
+[AS_HELP_STRING([--enable-sim-smp=n], [Specify number of processors to configure for.])],
 [case "${enableval}" in
   yes)	sim_smp="-DWITH_SMP=5" ; sim_igen_smp="-N 5";;
   no)	sim_smp="-DWITH_SMP=0" ; sim_igen_smp="-N 0";;
@@ -241,7 +241,7 @@ fi])dnl
 
 
 AC_ARG_ENABLE(sim-switch,
-[  --enable-sim-switch			Use a switch instead of a table for instruction call.],
+[AS_HELP_STRING([--enable-sim-switch], [Use a switch instead of a table for instruction call.])],
 [case "${enableval}" in
   yes)	sim_switch="-DWITH_SPREG_SWITCH_TABLE";;
   no)	sim_switch="";;
@@ -256,7 +256,7 @@ fi])dnl
 
 
 AC_ARG_ENABLE(sim-timebase,
-[  --enable-sim-timebase			Specify whether the PPC timebase is supported.],
+[AS_HELP_STRING([--enable-sim-timebase], [Specify whether the PPC timebase is supported.])],
 [case "${enableval}" in
   yes)	sim_timebase="-DWITH_TIME_BASE=1";;
   no)	sim_timebase="-DWITH_TIME_BASE=0";;
@@ -268,7 +268,7 @@ fi],[sim_timebase=""])dnl
 
 
 AC_ARG_ENABLE(sim-xor-endian,
-[  --enable-sim-xor-endian=n		Specify number bytes involved in PowerPC XOR bi-endian mode (default 8).],
+[AS_HELP_STRING([--enable-sim-xor-endian=n], [Specify number bytes involved in PowerPC XOR bi-endian mode (default 8).])],
 [case "${enableval}" in
   yes)	sim_xor_endian="-DWITH_XOR_ENDIAN=8";;
   no)	sim_xor_endian="-DWITH_XOR_ENDIAN=0";;
