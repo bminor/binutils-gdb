@@ -86,9 +86,6 @@ m4_define([SIM_TARGET], [dnl
   AM_CONDITIONAL([SIM_ENABLE_ARCH_$2], [${sim_enable_arch_$2}])
 ])
 
-subdirs=""
-AC_SUBST(subdirs)
-
 dnl WHEN ADDING ENTRIES TO THIS MATRIX:
 dnl Make sure that the left side always has two dashes.  Otherwise you can get
 dnl spurious matches.  Even for unambiguous cases, do this as a convention, else
