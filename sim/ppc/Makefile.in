@@ -100,7 +100,7 @@ BFD_LIB		= ../../bfd/libbfd.la
 
 TARGETLIB	= libsim.a
 
-all:	main.o $(TARGETLIB) $(GDB_OBJ)
+all:	$(TARGETLIB) $(GDB_OBJ)
 
 .c.o:
 	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) $<
@@ -388,11 +388,6 @@ LIB_SRC = \
 	$(HW_SRC) \
 	$(LIB_INLINE_SRC)
 
-MAIN_SRC = \
-	main.c \
-	gdb-sim.c \
-	sim_calls.c
-
 COMMON_OBJS_NAMES = \
 	callback.o \
 	target-newlib-errno.o \
@@ -494,8 +489,6 @@ sim_calls.o: sim_calls.c $(PSIM_H) $(OPTIONS_H) $(DEFS_H) $(BFD_H) $(GDB_CALLBAC
 gdb-sim.o: gdb-sim.c $(PSIM_H)  $(OPTIONS_H) $(REGISTERS_H) $(GDB_REMOTE_SIM_H) $(GDB_SIM_PPC_H) $(SIM_CALLBACK_H)
 
 spreg.o: spreg.c $(BASICS_H) $(SPREG_H)
-
-main.o: main.c $(PSIM_H) $(OPTIONS_H) $(DEVICE_H) $(EVENTS_H) $(BFD_H) $(GDB_CALLBACK_H) $(GDB_REMOTE_SIM_H)
 
 device.o: device.c $(DEVICE_TABLE_H) $(CAP_H) $(EVENTS_H) $(PSIM_H)
 

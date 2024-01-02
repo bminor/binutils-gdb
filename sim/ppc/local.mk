@@ -15,9 +15,20 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-%C%_run_SOURCES =
+AM_CPPFLAGS_%C% = \
+	-DHAVE_COMMON_FPU \
+	$(sim_ppc_smp) \
+	$(sim_ppc_xor_endian) \
+	$(sim_ppc_bitsize) \
+	$(sim_ppc_timebase) \
+	$(sim_ppc_float) \
+	$(sim_ppc_monitor) \
+	$(sim_ppc_model) $(sim_ppc_default_model) $(sim_ppc_model_issue) \
+	$(sim_ppc_switch)
+
+%C%_run_SOURCES = \
+	%D%/main.c
 %C%_run_LDADD = \
-	%D%/main.o \
 	%D%/libsim.a \
 	$(SIM_COMMON_LIBS)
 
@@ -26,10 +37,6 @@
 SIM_ALL_RECURSIVE_DEPS += common/libcommon.a
 %D%/libsim.a: common/libcommon.a
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
-## Helper targets for running make from the top-level due to run's sis.o.
-%D%/main.o: %D%/%.o: %D%/%.c | %D%/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
-	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 noinst_PROGRAMS += %D%/run
 
