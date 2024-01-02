@@ -24,6 +24,12 @@
 /* Define if struct statfs is defined in <sys/mount.h> */
 #undef HAVE_STRUCT_STATFS
 
+/* Define if System V semaphores are supported */
+#undef HAVE_SYSV_SEM
+
+/* Define if System V shared memory is supported */
+#undef HAVE_SYSV_SHM
+
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
 

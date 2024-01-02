@@ -84,6 +84,8 @@
 
    */
 
+#ifdef HAVE_SYSV_SEM
+
 typedef struct _hw_sem_device {
   unsigned_word physical_address;
   key_t key;
@@ -277,5 +279,13 @@ const device_descriptor hw_sem_device_descriptor[] = {
   { "sem", hw_sem_create, &hw_sem_callbacks },
   { NULL },
 };
+
+#else
+
+const device_descriptor hw_sem_device_descriptor[] = {
+  { NULL },
+};
+
+#endif /* HAVE_SYSV_SEM */
 
 #endif /* _HW_SEM_C_ */

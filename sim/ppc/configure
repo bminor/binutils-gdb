@@ -3220,6 +3220,12 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sysv_sem" >&5
 $as_echo "$ac_cv_sysv_sem" >&6; }
+if test x"$ac_cv_sysv_sem" = x"yes"; then :
+
+$as_echo "#define HAVE_SYSV_SEM 1" >>confdefs.h
+
+
+fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether System V shared memory is supported" >&5
 $as_echo_n "checking whether System V shared memory is supported... " >&6; }
@@ -3255,16 +3261,16 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sysv_shm" >&5
 $as_echo "$ac_cv_sysv_shm" >&6; }
+if test x"$ac_cv_sysv_shm" = x"yes"; then :
 
-if test x"$ac_cv_sysv_shm" = x"yes" -a x"$ac_cv_sysv_sem" = x"yes" ; then
-  sim_sysv_ipc_hw=",sem,shm";
-else
-  sim_sysv_ipc_hw="";
+$as_echo "#define HAVE_SYSV_SHM 1" >>confdefs.h
+
+
 fi
 
 # Check whether --enable-sim-hardware was given.
 if test "${enable_sim_hardware+set}" = set; then :
-  enableval=$enable_sim_hardware; hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide${sim_sysv_ipc_hw}"
+  enableval=$enable_sim_hardware; hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide,sem,shm"
 case "${enableval}" in
   yes)	;;
   no)	as_fn_error $? "\"List of hardware must be specified for --enable-sim-hardware\"" "$LINENO" 5; hardware="";;
@@ -3278,7 +3284,7 @@ if test x"$silent" != x"yes" && test x"$hardware" != x""; then
   echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
 fi
 else
-  hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide${sim_sysv_ipc_hw}"
+  hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide,sem,shm"
 sim_hw_src=`echo $hardware | sed -e 's/,/.c hw_/g' -e 's/^/hw_/' -e s'/$/.c/'`
 sim_hw_obj=`echo $sim_hw_src | sed -e 's/\.c/.o/g'`
 if test x"$silent" != x"yes"; then
