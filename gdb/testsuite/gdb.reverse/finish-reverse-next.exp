@@ -76,14 +76,10 @@ gdb_continue_to_breakpoint \
 repeat_cmd_until "stepi" "CALL VIA LEP" "{" "stepi into function1 call" "100"
 
 # The reverse-finish command should stop on the function call instruction
-# which is the last instruction in the source code line.  A reverse-next
-# instruction should then stop at the first instruction in the same source
-# code line.  Another revers-next instruction stops at the previous source
-# code line.
+# which is the last instruction in the source code line.  Another reverse-next
+# instruction stops at the previous source code line.
 gdb_test "reverse-finish" ".*function1 \\(a, b\\);   // CALL VIA LEP.*" \
     "reverse-finish function1 LEP call from LEP "
-gdb_test "reverse-next" ".*function1 \\(a, b\\);   // CALL VIA LEP" \
-    "reverse next 1 LEP entry point function call from LEP"
 gdb_test "reverse-next" ".*b = 5;.*" "reverse next 2, at b = 5, call from LEP"
 
 
@@ -109,14 +105,10 @@ gdb_continue_to_breakpoint \
 gdb_test "step" ".*int ret = 0;.*" "step test 1"
 
 # The reverse-finish command should stop on the function call instruction
-# which is the last instruction in the source code line.  A reverse-next
-# instruction should then stop at the first instruction in the same source
-# code line.  Another revers-next instruction stops at the previous source
-# code line.
+# which is the last instruction in the source code line.  Another reverse-next
+# instruction stops at the previous source code line.
 gdb_test "reverse-finish" ".*function1 \\(a, b\\);   // CALL VIA LEP.*" \
     "reverse-finish function1 LEP call from function body"
-gdb_test "reverse-next" ".*function1 \\(a, b\\);   // CALL VIA LEP.*" \
-    "reverse next 1 LEP from function body"
 gdb_test "reverse-next" ".*b = 5;.*" \
     "reverse next 2 at b = 5, from function body"
 
@@ -144,14 +136,10 @@ gdb_continue_to_breakpoint \
 repeat_cmd_until "stepi" "CALL VIA GEP" "{" "stepi into funp call"
 
 # The reverse-finish command should stop on the function call instruction
-# which is the last instruction in the source code line.  A reverse-next
-# instruction should then stop at the first instruction in the same source
-# code line.  Another revers-next instruction stops at the previous source
-# code line.
+# which is the last instruction in the source code line.  Another reverse-next
+# instruction stops at the previous source code line.
 gdb_test "reverse-finish" ".*funp \\(a, b\\);.*" \
     "function1 GEP call call from GEP"
-gdb_test "reverse-next" ".*funp \\(a, b\\);.*" \
-    "reverse next 1 GEP entry point function call from GEP"
 gdb_test "reverse-next" ".*b = 50;.*" "reverse next 2 at b = 50, call from GEP"
 
 gdb_test "reverse-continue" ".*" "setup for test 4"
@@ -180,14 +168,10 @@ repeat_cmd_until "stepi" "CALL VIA GEP" "{" "stepi into funp call again"
 gdb_test "stepi" "{" "stepi to between GEP and LEP"
 
 # The reverse-finish command should stop on the function call instruction
-# which is the last instruction in the source code line.  A reverse-next
-# instruction should then stop at the first instruction in the same source
-# code line.  Another revers-next instruction stops at the previous source
-# code line.
+# which is the last instruction in the source code line.  Another reverse-next
+# instruction stops at the previous source code line.
 gdb_test "reverse-finish" ".*funp \\(a, b\\);.*" \
     "function1 GEP call call from GEP again"
-gdb_test "reverse-next" ".*funp \\(a, b\\);.*" \
-    "reverse next 1 GEP entry point function call from GEP again"
 gdb_test "reverse-next" ".*b = 50;.*" \
     "reverse next 2 at b = 50, call from GEP again"
 
@@ -212,13 +196,9 @@ gdb_continue_to_breakpoint \
 gdb_test "step" ".*int ret = 0;.*" "step test 2"
 
 # The reverse-finish command should stop on the function call instruction
-# which is the last instruction in the source code line.  A reverse-next
-# instruction should then stop at the first instruction in the same source
-# code line.  Another revers-next instruction stops at the previous source
-# code line.
+# which is the last instruction in the source code line.  Another reverse-next
+# instruction stops at the previous source code line.
 gdb_test "reverse-finish" ".*funp \\(a, b\\);.*" \
     "reverse-finish function1 GEP call, from function body  "
-gdb_test "reverse-next" ".*funp \\(a, b\\);.*" \
-    "reverse next 1 GEP call from function body"
 gdb_test "reverse-next" ".*b = 50;.*" \
     "reverse next 2 at b = 50 from function body"

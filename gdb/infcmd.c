@@ -976,6 +976,19 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 				 &tp->control.step_range_start,
 				 &tp->control.step_range_end);
 
+	  if (execution_direction == EXEC_REVERSE)
+	    {
+	      symtab_and_line sal = find_pc_line (pc, 0);
+	      symtab_and_line sal_start
+		= find_pc_line (tp->control.step_range_start, 0);
+
+	      if (sal.line == sal_start.line)
+		/* Executing in reverse, the step_range_start address is in
+		   the same line.  We want to stop in the previous line so
+		   move step_range_start before the current line.  */
+		tp->control.step_range_start--;
+	    }
+
 	  /* There's a problem in gcc (PR gcc/98780) that causes missing line
 	     table entries, which results in a too large stepping range.
 	     Use inlined_subroutine info to make the range more narrow.  */
