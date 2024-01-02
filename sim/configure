@@ -634,12 +634,31 @@ ac_includes_default="\
 
 ac_header_list=
 ac_func_list=
-enable_option_checking=no
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 SIM_RX_CYCLE_ACCURATE_FLAGS
 SIM_RISCV_BITSIZE
+sim_ppc_model_issue
+sim_ppc_default_model
+sim_ppc_model
+sim_ppc_monitor
+sim_ppc_float
+sim_ppc_timebase
+sim_ppc_bitsize
+sim_ppc_igen_smp
+sim_ppc_smp
+sim_ppc_xor_endian
+sim_ppc_hw_obj
+sim_ppc_hw_src
+sim_ppc_icache
+sim_ppc_filter
+sim_ppc_jump
+sim_ppc_decode_mechanism
+sim_ppc_dup
+sim_ppc_switch
+sim_ppc_opcode
+sim_ppc_line_nr
 SIM_MIPS_GEN_MODE_MULTI_FALSE
 SIM_MIPS_GEN_MODE_MULTI_TRUE
 SIM_MIPS_GEN_MODE_M16_FALSE
@@ -715,7 +734,6 @@ SIM_ENABLE_ARCH_ppc_TRUE
 CC_FOR_TARGET_PPC
 LD_FOR_TARGET_PPC
 AS_FOR_TARGET_PPC
-subdirs
 SIM_ENABLE_ARCH_or1k_FALSE
 SIM_ENABLE_ARCH_or1k_TRUE
 CC_FOR_TARGET_OR1K
@@ -834,6 +852,7 @@ AS_FOR_TARGET_AARCH64
 LD_FOR_TARGET
 AS_FOR_TARGET
 CC_FOR_TARGET
+subdirs
 SIM_ENABLED_ARCHES
 SIM_PRIMARY_TARGET
 AM_BACKSLASH
@@ -1010,6 +1029,24 @@ enable_werror
 enable_build_warnings
 enable_sim_build_warnings
 enable_sim_frv_trapdump
+enable_sim_ppc_bitsize
+enable_sim_ppc_decode_mechanism
+enable_sim_ppc_default_model
+enable_sim_ppc_duplicate
+enable_sim_ppc_filter
+enable_sim_ppc_float
+enable_sim_ppc_hardware
+enable_sim_ppc_icache
+enable_sim_ppc_jump
+enable_sim_ppc_line_nr
+enable_sim_ppc_model
+enable_sim_ppc_model_issue
+enable_sim_ppc_monitor
+enable_sim_ppc_opcode
+enable_sim_ppc_smp
+enable_sim_ppc_switch
+enable_sim_ppc_timebase
+enable_sim_ppc_xor_endian
 enable_sim_rx_cycle_accurate
 '
       ac_precious_vars='build_alias
@@ -1122,7 +1159,7 @@ CC_FOR_TARGET_V850
 AS_FOR_TARGET_EXAMPLE_SYNACOR
 LD_FOR_TARGET_EXAMPLE_SYNACOR
 CC_FOR_TARGET_EXAMPLE_SYNACOR'
-ac_subdirs_all='ppc'
+
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -1792,6 +1829,42 @@ Optional Features:
                           gcc is used
   --enable-sim-frv-trapdump
                           Make unknown traps dump the registers
+  --enable-sim-ppc-bitsize=n
+                          Specify target bitsize (32 or 64).
+  --enable-sim-ppc-decode-mechanism=which
+                          Specify the instruction decode mechanism.
+  --enable-sim-ppc-default-model=which
+                          Specify default PowerPC to model.
+  --enable-sim-ppc-duplicate
+                          Expand (duplicate) semantic functions.
+  --enable-sim-ppc-filter=rule
+                          Specify filter rules.
+  --enable-sim-ppc-float  Specify whether the target has hard, soft, altivec
+                          or e500 floating point.
+  --enable-sim-ppc-hardware=list
+                          Specify the hardware to be included in the build.
+  --enable-sim-ppc-icache=size
+                          Specify instruction-decode cache size and type.
+  --enable-sim-ppc-jump   Jump between semantic code (instead of call/return).
+  --enable-sim-ppc-line-nr=opts
+                          Generate extra CPP code that references source
+                          rather than generated code
+  --enable-sim-ppc-model=which
+                          Specify PowerPC to model.
+  --enable-sim-ppc-model-issue
+                          Specify whether to simulate model specific actions
+  --enable-sim-ppc-monitor=mon
+                          Specify whether to enable monitoring events.
+  --enable-sim-ppc-opcode=which
+                          Override default opcode lookup.
+  --enable-sim-ppc-smp=n  Specify number of processors to configure for.
+  --enable-sim-ppc-switch Use a switch instead of a table for instruction
+                          call.
+  --enable-sim-ppc-timebase
+                          Specify whether the PPC timebase is supported.
+  --enable-sim-ppc-xor-endian=n
+                          Specify number bytes involved in PowerPC XOR
+                          bi-endian mode (default 8).
   --disable-sim-rx-cycle-accurate
                           Disable cycle accurate simulation (faster runtime)
 
@@ -12611,7 +12684,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12614 "configure"
+#line 12687 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12717,7 +12790,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12720 "configure"
+#line 12793 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14435,6 +14508,9 @@ ENABLE_SIM=no
 
 
 
+subdirs=""
+
+
 if test "${enable_sim}" != no; then
   for targ in `echo $target $enable_targets | sed 's/,/ /g'`
   do
@@ -15424,10 +15500,9 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " ppc"
+      ac_config_files="$ac_config_files ppc/Makefile"
 
-
-subdirs="$subdirs ppc"
-
+    subdirs="$subdirs ppc"
 
   ac_config_files="$ac_config_files ppc/.gdbinit:common/gdbinit.in"
 
@@ -16694,6 +16769,340 @@ else
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc bitsize settings" >&5
+$as_echo_n "checking for sim ppc bitsize settings... " >&6; }
+# Check whether --enable-sim-ppc-bitsize was given.
+if test "${enable_sim_ppc_bitsize+set}" = set; then :
+  enableval=$enable_sim_ppc_bitsize; case "${enableval}" in
+  32|64) sim_ppc_bitsize="-DWITH_TARGET_WORD_BITSIZE=$enableval";;
+  *)	 as_fn_error $? "\"--enable-sim-ppc-bitsize was given $enableval.  Expected 32 or 64\"" "$LINENO" 5;;
+esac
+else
+  sim_ppc_bitsize=""
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_bitsize" >&5
+$as_echo "$sim_ppc_bitsize" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc decode mechanism" >&5
+$as_echo_n "checking for sim ppc decode mechanism... " >&6; }
+# Check whether --enable-sim-ppc-decode-mechanism was given.
+if test "${enable_sim_ppc_decode_mechanism+set}" = set; then :
+  enableval=$enable_sim_ppc_decode_mechanism; case "${enableval}" in
+  yes|no)	as_fn_error $? "\"No value supplied for --enable-sim-ppc-decode-mechanism=file\"" "$LINENO" 5;;
+  array|switch|padded-switch|goto-switch)	sim_ppc_decode_mechanism="-T ${enableval}";;
+  *)		as_fn_error $? "\"File $enableval is not an opcode rules file\"" "$LINENO" 5;;
+esac
+else
+  sim_ppc_decode_mechanism=""
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_decode_mechanism" >&5
+$as_echo "$sim_ppc_decode_mechanism" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc default model" >&5
+$as_echo_n "checking for sim ppc default model... " >&6; }
+# Check whether --enable-sim-ppc-default-model was given.
+if test "${enable_sim_ppc_default_model+set}" = set; then :
+  enableval=$enable_sim_ppc_default_model; case "${enableval}" in
+  yes|no)	as_fn_error $? "\"No value supplied for --enable-sim-ppc-default-model=model\"" "$LINENO" 5;;
+  *)		sim_ppc_default_model="-DWITH_DEFAULT_MODEL=${enableval}";;
+esac
+else
+  sim_ppc_default_model=""
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_default_model" >&5
+$as_echo "$sim_ppc_default_model" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc duplicate settings" >&5
+$as_echo_n "checking for sim ppc duplicate settings... " >&6; }
+# Check whether --enable-sim-ppc-duplicate was given.
+if test "${enable_sim_ppc_duplicate+set}" = set; then :
+  enableval=$enable_sim_ppc_duplicate; case "${enableval}" in
+  yes)	sim_ppc_dup="-E";;
+  no)	sim_ppc_dup="";;
+  *)	as_fn_error $? "\"--enable-sim-ppc-duplicate does not take a value\"" "$LINENO" 5;;
+esac
+else
+  sim_ppc_dup="-E"
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_dup" >&5
+$as_echo "$sim_ppc_dup" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc filter rules" >&5
+$as_echo_n "checking for sim ppc filter rules... " >&6; }
+# Check whether --enable-sim-ppc-filter was given.
+if test "${enable_sim_ppc_filter+set}" = set; then :
+  enableval=$enable_sim_ppc_filter; case "${enableval}" in
+  yes)	as_fn_error $? "\"--enable-sim-ppc-filter must be specified with a rule to filter or no\"" "$LINENO" 5;;
+  no)	sim_ppc_filter="";;
+  *)	sim_ppc_filter="-F $enableval";;
+esac
+else
+  sim_ppc_filter="-F 32,f,o"
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_filter" >&5
+$as_echo "$sim_ppc_filter" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc float settings" >&5
+$as_echo_n "checking for sim ppc float settings... " >&6; }
+# Check whether --enable-sim-ppc-float was given.
+if test "${enable_sim_ppc_float+set}" = set; then :
+  enableval=$enable_sim_ppc_float; case "${enableval}" in
+  yes | hard)	sim_ppc_float="-DWITH_FLOATING_POINT=HARD_FLOATING_POINT";;
+  no | soft)	sim_ppc_float="-DWITH_FLOATING_POINT=SOFT_FLOATING_POINT";;
+  altivec)      sim_ppc_float="-DWITH_ALTIVEC" ; sim_ppc_filter="${sim_ppc_filter},av" ;;
+  *spe*|*simd*) sim_ppc_float="-DWITH_E500" ; sim_ppc_filter="${sim_ppc_filter},e500" ;;
+  *)		as_fn_error $? "\"Unknown value $enableval passed to --enable-sim-ppc-float\"" "$LINENO" 5;;
+esac
+else
+  case "${target}" in
+  *altivec*) sim_ppc_float="-DWITH_ALTIVEC" ; sim_ppc_filter="${sim_ppc_filter},av" ;;
+  *spe*|*simd*)	sim_ppc_float="-DWITH_E500" ; sim_ppc_filter="${sim_ppc_filter},e500" ;;
+  *) sim_ppc_float=""
+esac
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_float" >&5
+$as_echo "$sim_ppc_float" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc hardware settings" >&5
+$as_echo_n "checking for sim ppc hardware settings... " >&6; }
+hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide,sem,shm"
+# Check whether --enable-sim-ppc-hardware was given.
+if test "${enable_sim_ppc_hardware+set}" = set; then :
+  enableval=$enable_sim_ppc_hardware; case "${enableval}" in
+  yes)	;;
+  no)	as_fn_error $? "\"List of hardware must be specified for --enable-sim-ppc-hardware\"" "$LINENO" 5;;
+  ,*)   hardware="${hardware}${enableval}";;
+  *,)   hardware="${enableval}${hardware}";;
+  *)	hardware="${enableval}"'';;
+esac
+fi
+
+sim_ppc_hw_src=`echo $hardware | sed -e 's/,/.c hw_/g' -e 's/^/hw_/' -e s'/$/.c/'`
+sim_ppc_hw_obj=`echo $sim_ppc_hw_src | sed -e 's/\.c/.o/g'`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $hardware" >&5
+$as_echo "$hardware" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc icache settings" >&5
+$as_echo_n "checking for sim ppc icache settings... " >&6; }
+# Check whether --enable-sim-ppc-icache was given.
+if test "${enable_sim_ppc_icache+set}" = set; then :
+  enableval=$enable_sim_ppc_icache; icache="-R"
+ case "${enableval}" in
+  yes)		icache="1024"; sim_ppc_icache="-I $icache";;
+  no)		sim_ppc_icache="-R";;
+  *) icache=1024
+     sim_ppc_icache="-"
+     for x in `echo "${enableval}" | sed -e "s/,/ /g"`; do
+       case "$x" in
+         define)	sim_ppc_icache="${sim_ppc_icache}R";;
+         semantic)	sim_ppc_icache="${sim_ppc_icache}C";;
+	 insn)		sim_ppc_icache="${sim_ppc_icache}S";;
+	 0*|1*|2*|3*|4*|5*|6*|7*|8*|9*)	icache=$x;;
+         *)		as_fn_error $? "\"Unknown value $x for --enable-sim-ppc-icache\"" "$LINENO" 5;;
+       esac
+     done
+     sim_ppc_icache="${sim_ppc_icache}I $icache";;
+esac
+else
+  sim_ppc_icache="-CSRI 1024"
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_icache" >&5
+$as_echo "$sim_ppc_icache" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc jump settings" >&5
+$as_echo_n "checking for sim ppc jump settings... " >&6; }
+# Check whether --enable-sim-ppc-jump was given.
+if test "${enable_sim_ppc_jump+set}" = set; then :
+  enableval=$enable_sim_ppc_jump; case "${enableval}" in
+  yes)	sim_ppc_jump="-J";;
+  no)	sim_ppc_jump="";;
+  *)	as_fn_error $? "\"--enable-sim-ppc-jump does not take a value\"" "$LINENO" 5;;
+esac
+else
+  sim_ppc_jump=""
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_jump" >&5
+$as_echo "$sim_ppc_jump" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc source debug line numbers" >&5
+$as_echo_n "checking for sim ppc source debug line numbers... " >&6; }
+# Check whether --enable-sim-ppc-line-nr was given.
+if test "${enable_sim_ppc_line_nr+set}" = set; then :
+  enableval=$enable_sim_ppc_line_nr; case "${enableval}" in
+  yes)	sim_ppc_line_nr="";;
+  no)	sim_ppc_line_nr="-L";;
+  *)	as_fn_error $? "\"--enable-sim-ppc-line-nr does not take a value\"" "$LINENO" 5;;
+esac
+else
+  sim_ppc_line_nr=""
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_line_nr" >&5
+$as_echo "$sim_ppc_line_nr" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc model" >&5
+$as_echo_n "checking for sim ppc model... " >&6; }
+# Check whether --enable-sim-ppc-model was given.
+if test "${enable_sim_ppc_model+set}" = set; then :
+  enableval=$enable_sim_ppc_model; case "${enableval}" in
+  yes|no)	as_fn_error $? "\"No value supplied for --enable-sim-ppc-model=model\"" "$LINENO" 5;;
+  *)		sim_ppc_model="-DWITH_MODEL=${enableval}";;
+esac
+else
+  sim_ppc_model=""
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_model" >&5
+$as_echo "$sim_ppc_model" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc model issue" >&5
+$as_echo_n "checking for sim ppc model issue... " >&6; }
+# Check whether --enable-sim-ppc-model-issue was given.
+if test "${enable_sim_ppc_model_issue+set}" = set; then :
+  enableval=$enable_sim_ppc_model_issue; case "${enableval}" in
+  yes)	sim_ppc_model_issue="-DWITH_MODEL_ISSUE=MODEL_ISSUE_PROCESS";;
+  no)	sim_ppc_model_issue="-DWITH_MODEL_ISSUE=MODEL_ISSUE_IGNORE";;
+  *)	as_fn_error $? "\"--enable-sim-ppc-model-issue does not take a value\"" "$LINENO" 5;;
+esac
+else
+  sim_ppc_model_issue=""
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_model_issue" >&5
+$as_echo "$sim_ppc_model_issue" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc event monitoring" >&5
+$as_echo_n "checking for sim ppc event monitoring... " >&6; }
+# Check whether --enable-sim-ppc-monitor was given.
+if test "${enable_sim_ppc_monitor+set}" = set; then :
+  enableval=$enable_sim_ppc_monitor; case "${enableval}" in
+  yes)		sim_ppc_monitor="-DWITH_MON='MONITOR_INSTRUCTION_ISSUE | MONITOR_LOAD_STORE_UNIT'";;
+  no)		sim_ppc_monitor="-DWITH_MON=0";;
+  instruction)	sim_ppc_monitor="-DWITH_MON=MONITOR_INSTRUCTION_ISSUE";;
+  memory)	sim_ppc_monitor="-DWITH_MON=MONITOR_LOAD_STORE_UNIT";;
+  *)		as_fn_error $? "\"Unknown value $enableval passed to --enable-sim-ppc-mon\"" "$LINENO" 5;;
+esac
+else
+  sim_ppc_monitor=""
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_monitor" >&5
+$as_echo "$sim_ppc_monitor" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc opcode lookup settings" >&5
+$as_echo_n "checking for sim ppc opcode lookup settings... " >&6; }
+# Check whether --enable-sim-ppc-opcode was given.
+if test "${enable_sim_ppc_opcode+set}" = set; then :
+  enableval=$enable_sim_ppc_opcode; case "${enableval}" in
+  yes|no)	as_fn_error $? "\"No value supplied for --enable-sim-ppc-opcode=file\"" "$LINENO" 5;;
+  *)		if test -f "${srcdir}/${enableval}"; then
+		  sim_ppc_opcode="${enableval}"
+		elif test -f "${srcdir}/dc-${enableval}"; then
+		  sim_ppc_opcode="dc-${enableval}"
+		else
+		  as_fn_error $? "\"File $enableval is not an opcode rules file\"" "$LINENO" 5
+		fi;;
+esac
+else
+  sim_ppc_opcode="dc-complex"
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_opcode" >&5
+$as_echo "$sim_ppc_opcode" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc smp settings" >&5
+$as_echo_n "checking for sim ppc smp settings... " >&6; }
+# Check whether --enable-sim-ppc-smp was given.
+if test "${enable_sim_ppc_smp+set}" = set; then :
+  enableval=$enable_sim_ppc_smp; case "${enableval}" in
+  yes)	sim_ppc_smp="-DWITH_SMP=5" ; sim_ppc_igen_smp="-N 5";;
+  no)	sim_ppc_smp="-DWITH_SMP=0" ; sim_ppc_igen_smp="-N 0";;
+  *)	sim_ppc_smp="-DWITH_SMP=$enableval" ; sim_ppc_igen_smp="-N $enableval";;
+esac
+else
+  sim_ppc_smp="-DWITH_SMP=5" ; sim_ppc_igen_smp="-N 5"
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_smp" >&5
+$as_echo "$sim_ppc_smp" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc switch table settings" >&5
+$as_echo_n "checking for sim ppc switch table settings... " >&6; }
+# Check whether --enable-sim-ppc-switch was given.
+if test "${enable_sim_ppc_switch+set}" = set; then :
+  enableval=$enable_sim_ppc_switch; case "${enableval}" in
+  yes)	sim_ppc_switch="-DWITH_SPREG_SWITCH_TABLE";;
+  no)	sim_ppc_switch="";;
+  *)	as_fn_error $? "\"--enable-sim-ppc-switch does not take a value\"" "$LINENO" 5;;
+esac
+else
+  sim_ppc_switch=""
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_switch" >&5
+$as_echo "$sim_ppc_switch" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc timebase" >&5
+$as_echo_n "checking for sim ppc timebase... " >&6; }
+# Check whether --enable-sim-ppc-timebase was given.
+if test "${enable_sim_ppc_timebase+set}" = set; then :
+  enableval=$enable_sim_ppc_timebase; case "${enableval}" in
+  yes)	sim_ppc_timebase="-DWITH_TIME_BASE=1";;
+  no)	sim_ppc_timebase="-DWITH_TIME_BASE=0";;
+  *)	as_fn_error $? "\"--enable-sim-ppc-timebase does not take a value\"" "$LINENO" 5;;
+esac
+else
+  sim_ppc_timebase=""
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_timebase" >&5
+$as_echo "$sim_ppc_timebase" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim ppc xor endian settings" >&5
+$as_echo_n "checking for sim ppc xor endian settings... " >&6; }
+# Check whether --enable-sim-ppc-xor-endian was given.
+if test "${enable_sim_ppc_xor_endian+set}" = set; then :
+  enableval=$enable_sim_ppc_xor_endian; case "${enableval}" in
+  yes)	sim_ppc_xor_endian="-DWITH_XOR_ENDIAN=8";;
+  no)	sim_ppc_xor_endian="-DWITH_XOR_ENDIAN=0";;
+  *)	sim_ppc_xor_endian="-DWITH_XOR_ENDIAN=$enableval";;
+esac
+else
+  sim_ppc_xor_endian=""
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_ppc_xor_endian" >&5
+$as_echo "$sim_ppc_xor_endian" >&6; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking riscv bitsize" >&5
 $as_echo_n "checking riscv bitsize... " >&6; }
 SIM_RISCV_BITSIZE=64
@@ -17895,6 +18304,7 @@ do
     "moxie/.gdbinit") CONFIG_FILES="$CONFIG_FILES moxie/.gdbinit:common/gdbinit.in" ;;
     "msp430/.gdbinit") CONFIG_FILES="$CONFIG_FILES msp430/.gdbinit:common/gdbinit.in" ;;
     "or1k/.gdbinit") CONFIG_FILES="$CONFIG_FILES or1k/.gdbinit:common/gdbinit.in" ;;
+    "ppc/Makefile") CONFIG_FILES="$CONFIG_FILES ppc/Makefile" ;;
     "ppc/.gdbinit") CONFIG_FILES="$CONFIG_FILES ppc/.gdbinit:common/gdbinit.in" ;;
     "pru/.gdbinit") CONFIG_FILES="$CONFIG_FILES pru/.gdbinit:common/gdbinit.in" ;;
     "riscv/.gdbinit") CONFIG_FILES="$CONFIG_FILES riscv/.gdbinit:common/gdbinit.in" ;;
@@ -19266,151 +19676,6 @@ if test "$no_create" != yes; then
   # Use ||, not &&, to avoid exiting from the if with $? = 1, which
   # would make configure fail if this is the last instruction.
   $ac_cs_success || as_fn_exit 1
-fi
-
-#
-# CONFIG_SUBDIRS section.
-#
-if test "$no_recursion" != yes; then
-
-  # Remove --cache-file, --srcdir, and --disable-option-checking arguments
-  # so they do not pile up.
-  ac_sub_configure_args=
-  ac_prev=
-  eval "set x $ac_configure_args"
-  shift
-  for ac_arg
-  do
-    if test -n "$ac_prev"; then
-      ac_prev=
-      continue
-    fi
-    case $ac_arg in
-    -cache-file | --cache-file | --cache-fil | --cache-fi \
-    | --cache-f | --cache- | --cache | --cach | --cac | --ca | --c)
-      ac_prev=cache_file ;;
-    -cache-file=* | --cache-file=* | --cache-fil=* | --cache-fi=* \
-    | --cache-f=* | --cache-=* | --cache=* | --cach=* | --cac=* | --ca=* \
-    | --c=*)
-      ;;
-    --config-cache | -C)
-      ;;
-    -srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
-      ac_prev=srcdir ;;
-    -srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
-      ;;
-    -prefix | --prefix | --prefi | --pref | --pre | --pr | --p)
-      ac_prev=prefix ;;
-    -prefix=* | --prefix=* | --prefi=* | --pref=* | --pre=* | --pr=* | --p=*)
-      ;;
-    --disable-option-checking)
-      ;;
-    *)
-      case $ac_arg in
-      *\'*) ac_arg=`$as_echo "$ac_arg" | sed "s/'/'\\\\\\\\''/g"` ;;
-      esac
-      as_fn_append ac_sub_configure_args " '$ac_arg'" ;;
-    esac
-  done
-
-  # Always prepend --prefix to ensure using the same prefix
-  # in subdir configurations.
-  ac_arg="--prefix=$prefix"
-  case $ac_arg in
-  *\'*) ac_arg=`$as_echo "$ac_arg" | sed "s/'/'\\\\\\\\''/g"` ;;
-  esac
-  ac_sub_configure_args="'$ac_arg' $ac_sub_configure_args"
-
-  # Pass --silent
-  if test "$silent" = yes; then
-    ac_sub_configure_args="--silent $ac_sub_configure_args"
-  fi
-
-  # Always prepend --disable-option-checking to silence warnings, since
-  # different subdirs can have different --enable and --with options.
-  ac_sub_configure_args="--disable-option-checking $ac_sub_configure_args"
-
-  ac_popdir=`pwd`
-  for ac_dir in : $subdirs; do test "x$ac_dir" = x: && continue
-
-    # Do not complain, so a configure script can configure whichever
-    # parts of a large source tree are present.
-    test -d "$srcdir/$ac_dir" || continue
-
-    ac_msg="=== configuring in $ac_dir (`pwd`/$ac_dir)"
-    $as_echo "$as_me:${as_lineno-$LINENO}: $ac_msg" >&5
-    $as_echo "$ac_msg" >&6
-    as_dir="$ac_dir"; as_fn_mkdir_p
-    ac_builddir=.
-
-case "$ac_dir" in
-.) ac_dir_suffix= ac_top_builddir_sub=. ac_top_build_prefix= ;;
-*)
-  ac_dir_suffix=/`$as_echo "$ac_dir" | sed 's|^\.[\\/]||'`
-  # A ".." for each directory in $ac_dir_suffix.
-  ac_top_builddir_sub=`$as_echo "$ac_dir_suffix" | sed 's|/[^\\/]*|/..|g;s|/||'`
-  case $ac_top_builddir_sub in
-  "") ac_top_builddir_sub=. ac_top_build_prefix= ;;
-  *)  ac_top_build_prefix=$ac_top_builddir_sub/ ;;
-  esac ;;
-esac
-ac_abs_top_builddir=$ac_pwd
-ac_abs_builddir=$ac_pwd$ac_dir_suffix
-# for backward compatibility:
-ac_top_builddir=$ac_top_build_prefix
-
-case $srcdir in
-  .)  # We are building in place.
-    ac_srcdir=.
-    ac_top_srcdir=$ac_top_builddir_sub
-    ac_abs_top_srcdir=$ac_pwd ;;
-  [\\/]* | ?:[\\/]* )  # Absolute name.
-    ac_srcdir=$srcdir$ac_dir_suffix;
-    ac_top_srcdir=$srcdir
-    ac_abs_top_srcdir=$srcdir ;;
-  *) # Relative name.
-    ac_srcdir=$ac_top_build_prefix$srcdir$ac_dir_suffix
-    ac_top_srcdir=$ac_top_build_prefix$srcdir
-    ac_abs_top_srcdir=$ac_pwd/$srcdir ;;
-esac
-ac_abs_srcdir=$ac_abs_top_srcdir$ac_dir_suffix
-
-
-    cd "$ac_dir"
-
-    # Check for guested configure; otherwise get Cygnus style configure.
-    if test -f "$ac_srcdir/configure.gnu"; then
-      ac_sub_configure=$ac_srcdir/configure.gnu
-    elif test -f "$ac_srcdir/configure"; then
-      ac_sub_configure=$ac_srcdir/configure
-    elif test -f "$ac_srcdir/configure.in"; then
-      # This should be Cygnus configure.
-      ac_sub_configure=$ac_aux_dir/configure
-    else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no configuration information is in $ac_dir" >&5
-$as_echo "$as_me: WARNING: no configuration information is in $ac_dir" >&2;}
-      ac_sub_configure=
-    fi
-
-    # The recursion is here.
-    if test -n "$ac_sub_configure"; then
-      # Make the cache file name correct relative to the subdirectory.
-      case $cache_file in
-      [\\/]* | ?:[\\/]* ) ac_sub_cache_file=$cache_file ;;
-      *) # Relative name.
-	ac_sub_cache_file=$ac_top_build_prefix$cache_file ;;
-      esac
-
-      { $as_echo "$as_me:${as_lineno-$LINENO}: running $SHELL $ac_sub_configure $ac_sub_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_srcdir" >&5
-$as_echo "$as_me: running $SHELL $ac_sub_configure $ac_sub_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_srcdir" >&6;}
-      # The eval makes quoting arguments work.
-      eval "\$SHELL \"\$ac_sub_configure\" $ac_sub_configure_args \
-	   --cache-file=\"\$ac_sub_cache_file\" --srcdir=\"\$ac_srcdir\"" ||
-	as_fn_error $? "$ac_sub_configure failed for $ac_dir" "$LINENO" 5
-    fi
-
-    cd "$ac_popdir"
-  done
 fi
 if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5

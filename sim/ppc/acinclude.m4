@@ -1,7 +1,3 @@
-dnl Process this file with autoconf to produce a configure script.
-AC_INIT(Makefile.in)
-AC_CONFIG_MACRO_DIRS([../.. ../../config])
-
 AC_MSG_CHECKING([for sim ppc bitsize settings])
 AC_ARG_ENABLE(sim-ppc-bitsize,
 [AS_HELP_STRING([--enable-sim-ppc-bitsize=n], [Specify target bitsize (32 or 64).])],
@@ -230,5 +226,3 @@ AC_SUBST(sim_ppc_monitor)
 AC_SUBST(sim_ppc_model)
 AC_SUBST(sim_ppc_default_model)
 AC_SUBST(sim_ppc_model_issue)
-
-AC_OUTPUT(Makefile)

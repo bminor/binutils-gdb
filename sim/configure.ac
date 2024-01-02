@@ -63,7 +63,8 @@ m4_define([SIM_BUILD_TARGET], [dnl
   ENABLE_SIM=yes
   AS_VAR_APPEND([SIM_ENABLED_ARCHES], [" $1"])
   m4_if($2, [true], [dnl
-    AC_CONFIG_SUBDIRS($1)
+    AC_CONFIG_FILES($1/Makefile)
+    subdirs="$subdirs $1"
   ])
   AC_CONFIG_FILES($1/.gdbinit:common/gdbinit.in)
 ])
@@ -85,6 +86,9 @@ m4_define([SIM_TARGET], [dnl
   SIM_AC_TOOLCHAIN_FOR_TARGET($2)
   AM_CONDITIONAL([SIM_ENABLE_ARCH_$2], [${sim_enable_arch_$2}])
 ])
+
+subdirs=""
+AC_SUBST(subdirs)
 
 dnl WHEN ADDING ENTRIES TO THIS MATRIX:
 dnl Make sure that the left side always has two dashes.  Otherwise you can get
@@ -158,6 +162,7 @@ SIM_AC_OPTION_WARNINGS
 dnl Some arches have unique configure flags.
 m4_include([frv/acinclude.m4])
 m4_include([mips/acinclude.m4])
+m4_include([ppc/acinclude.m4])
 m4_include([riscv/acinclude.m4])
 m4_include([rx/acinclude.m4])
 

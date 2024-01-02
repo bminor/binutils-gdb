@@ -559,7 +559,7 @@ sim-fpu.o: $(srcdir)/../common/sim-fpu.c
 	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/sim-fpu.c 
 
 # Rebuild options whenever something changes so the date/time is up to date.
-options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) config.status Makefile
+options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) ../config.status Makefile
 	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_ppc_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' $(srcdir)/options.c
 
 #
@@ -679,16 +679,16 @@ clean mostlyclean:
 	rm -f tmp-* *.[oasi] core $(BUILT_SRC_WO_CONFIG)
 
 distclean realclean: clean
-	rm -f TAGS Makefile config.cache config.status stamp-h config.log
+	rm -f TAGS Makefile
 
 maintainer-clean: distclean
 	rm -f *~ *.log core *.core
 
-Makefile: Makefile.in config.status
-	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
+Makefile: Makefile.in ../config.status
+	cd .. && $(SHELL) ./config.status ppc/Makefile
 
-config.status: configure
-	$(SHELL) ./config.status --recheck
+../config.status: ../configure
+	cd .. && $(SHELL) ./config.status --recheck
 
 check:
 

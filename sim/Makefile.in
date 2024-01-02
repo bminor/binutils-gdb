@@ -342,6 +342,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/m4/sim_ac_platform.m4 \
 	$(top_srcdir)/m4/sim_ac_toolchain.m4 \
 	$(top_srcdir)/frv/acinclude.m4 $(top_srcdir)/mips/acinclude.m4 \
+	$(top_srcdir)/ppc/acinclude.m4 \
 	$(top_srcdir)/riscv/acinclude.m4 $(top_srcdir)/rx/acinclude.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -358,9 +359,10 @@ CONFIG_CLEAN_FILES = aarch64/.gdbinit arm/.gdbinit avr/.gdbinit \
 	iq2000/.gdbinit lm32/.gdbinit m32c/.gdbinit m32r/.gdbinit \
 	m68hc11/.gdbinit mcore/.gdbinit microblaze/.gdbinit \
 	mips/.gdbinit mn10300/.gdbinit moxie/.gdbinit msp430/.gdbinit \
-	or1k/.gdbinit ppc/.gdbinit pru/.gdbinit riscv/.gdbinit \
-	rl78/.gdbinit rx/.gdbinit sh/.gdbinit erc32/.gdbinit \
-	v850/.gdbinit example-synacor/.gdbinit arch-subdir.mk .gdbinit
+	or1k/.gdbinit ppc/Makefile ppc/.gdbinit pru/.gdbinit \
+	riscv/.gdbinit rl78/.gdbinit rx/.gdbinit sh/.gdbinit \
+	erc32/.gdbinit v850/.gdbinit example-synacor/.gdbinit \
+	arch-subdir.mk .gdbinit
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
@@ -1801,6 +1803,26 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
+sim_ppc_bitsize = @sim_ppc_bitsize@
+sim_ppc_decode_mechanism = @sim_ppc_decode_mechanism@
+sim_ppc_default_model = @sim_ppc_default_model@
+sim_ppc_dup = @sim_ppc_dup@
+sim_ppc_filter = @sim_ppc_filter@
+sim_ppc_float = @sim_ppc_float@
+sim_ppc_hw_obj = @sim_ppc_hw_obj@
+sim_ppc_hw_src = @sim_ppc_hw_src@
+sim_ppc_icache = @sim_ppc_icache@
+sim_ppc_igen_smp = @sim_ppc_igen_smp@
+sim_ppc_jump = @sim_ppc_jump@
+sim_ppc_line_nr = @sim_ppc_line_nr@
+sim_ppc_model = @sim_ppc_model@
+sim_ppc_model_issue = @sim_ppc_model_issue@
+sim_ppc_monitor = @sim_ppc_monitor@
+sim_ppc_opcode = @sim_ppc_opcode@
+sim_ppc_smp = @sim_ppc_smp@
+sim_ppc_switch = @sim_ppc_switch@
+sim_ppc_timebase = @sim_ppc_timebase@
+sim_ppc_xor_endian = @sim_ppc_xor_endian@
 srcdir = @srcdir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
@@ -3205,6 +3227,8 @@ moxie/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 msp430/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 or1k/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+ppc/Makefile: $(top_builddir)/config.status $(top_srcdir)/ppc/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 ppc/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
