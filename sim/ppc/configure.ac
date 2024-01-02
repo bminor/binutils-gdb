@@ -306,19 +306,19 @@ if test $ac_cv_termios_struct = yes; then
 fi
 
 if test "$ac_cv_termios_struct" = "yes"; then
-  AC_MSG_CHECKING(for c_line field in struct termios)
-  AC_CACHE_VAL(ac_cv_termios_cline,
-  [AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/termios.h>],
-[static struct termios x; x.c_line = 0;],
-  ac_cv_termios_cline=yes, ac_cv_termios_cline=no)])
-
-  AC_MSG_RESULT($ac_cv_termios_cline)
-  if test $ac_cv_termios_cline = yes; then
+  AC_CACHE_VAL([sim_cv_termios_cline])
+  AC_CHECK_MEMBER(
+    [struct termios.c_line],
+    [sim_cv_termios_cline="yes"],
+    [sim_cv_termios_cline="no"], [
+#include <sys/types.h>
+#include <sys/termios.h>
+])
+  if test $sim_cv_termios_cline = yes; then
     AC_DEFINE([HAVE_TERMIOS_CLINE], 1, [Define if struct termios has c_line.])
   fi
 else
-  ac_cv_termios_cline=no
+  sim_cv_termios_cline=no
 fi
 
 if test "$ac_cv_termios_struct" != "yes"; then
@@ -342,19 +342,19 @@ else
 fi
 
 if test "$ac_cv_termio_struct" = "yes"; then
-  AC_MSG_CHECKING(for c_line field in struct termio)
-  AC_CACHE_VAL(ac_cv_termio_cline,
-  [AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/termio.h>],
-[static struct termio x; x.c_line = 0;],
-  ac_cv_termio_cline=yes, ac_cv_termio_cline=no)])
-
-  AC_MSG_RESULT($ac_cv_termio_cline)
-  if test $ac_cv_termio_cline = yes; then
+  AC_CACHE_VAL([sim_cv_termio_cline])
+  AC_CHECK_MEMBER(
+    [struct termio.c_line],
+    [sim_cv_termio_cline="yes"],
+    [sim_cv_termio_cline="no"], [
+#include <sys/types.h>
+#include <sys/termio.h>
+])
+  if test $sim_cv_termio_cline = yes; then
     AC_DEFINE([HAVE_TERMIO_CLINE], 1, [Define if struct termio has c_line.])
   fi
 else
-  ac_cv_termio_cline=no
+  sim_cv_termio_cline=no
 fi
 
 AC_SUBST(sim_line_nr)
