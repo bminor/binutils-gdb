@@ -281,14 +281,15 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_88 = $(or1k_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_89 = ppc/libsim.a
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_90 = ppc/run
-@SIM_ENABLE_ARCH_ppc_TRUE@am__append_91 = ppc/defines.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@am__append_91 = ppc/defines.h ppc/icache.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/idecode.h ppc/semantics.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/model.h ppc/support.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/itable.h ppc/hw.h
+@SIM_ENABLE_ARCH_ppc_TRUE@am__append_92 = ppc/defines.h \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-defines \
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(ppc_BUILD_OUTPUTS) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(ppc_IGEN_TOOLS) ppc/libigen.a
-@SIM_ENABLE_ARCH_ppc_TRUE@am__append_92 = ppc/libigen.a
-@SIM_ENABLE_ARCH_ppc_TRUE@am__append_93 = ppc/icache.h ppc/idecode.h \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/semantics.h ppc/model.h \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/support.h ppc/itable.h ppc/hw.h
+@SIM_ENABLE_ARCH_ppc_TRUE@am__append_93 = ppc/libigen.a
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_94 = $(ppc_IGEN_TOOLS)
 @SIM_ENABLE_ARCH_pru_TRUE@am__append_95 = pru/libsim.a
 @SIM_ENABLE_ARCH_pru_TRUE@am__append_96 = pru/run
@@ -362,10 +363,9 @@ CONFIG_CLEAN_FILES = aarch64/.gdbinit arm/.gdbinit avr/.gdbinit \
 	iq2000/.gdbinit lm32/.gdbinit m32c/.gdbinit m32r/.gdbinit \
 	m68hc11/.gdbinit mcore/.gdbinit microblaze/.gdbinit \
 	mips/.gdbinit mn10300/.gdbinit moxie/.gdbinit msp430/.gdbinit \
-	or1k/.gdbinit ppc/Makefile ppc/.gdbinit pru/.gdbinit \
-	riscv/.gdbinit rl78/.gdbinit rx/.gdbinit sh/.gdbinit \
-	erc32/.gdbinit v850/.gdbinit example-synacor/.gdbinit \
-	arch-subdir.mk .gdbinit
+	or1k/.gdbinit ppc/.gdbinit pru/.gdbinit riscv/.gdbinit \
+	rl78/.gdbinit rx/.gdbinit sh/.gdbinit erc32/.gdbinit \
+	v850/.gdbinit example-synacor/.gdbinit arch-subdir.mk .gdbinit
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
@@ -1849,7 +1849,7 @@ GNULIB_PARENT_DIR = ..
 srccom = $(srcdir)/common
 srcroot = $(srcdir)/..
 pkginclude_HEADERS = $(am__append_1)
-EXTRA_LIBRARIES = igen/libigen.a $(am__append_92)
+EXTRA_LIBRARIES = igen/libigen.a $(am__append_93)
 noinst_LIBRARIES = common/libcommon.a $(am__append_3) $(am__append_5) \
 	$(am__append_7) $(am__append_9) $(am__append_11) \
 	$(am__append_13) $(am__append_18) $(am__append_23) \
@@ -1864,7 +1864,7 @@ noinst_LIBRARIES = common/libcommon.a $(am__append_3) $(am__append_5) \
 BUILT_SOURCES = $(am__append_15) $(am__append_21) $(am__append_25) \
 	$(am__append_36) $(am__append_44) $(am__append_48) \
 	$(am__append_56) $(am__append_71) $(am__append_79) \
-	$(am__append_87) $(am__append_93) $(am__append_105) \
+	$(am__append_87) $(am__append_91) $(am__append_105) \
 	$(am__append_110)
 CLEANFILES = common/version.c common/version.c-stamp \
 	testsuite/common/bits-gen testsuite/common/bits32m0.c \
@@ -1881,7 +1881,7 @@ MOSTLYCLEANFILES = core $(SIM_ENABLED_ARCHES:%=%/*.o) \
 	$(am__append_37) $(am__append_45) $(am__append_49) \
 	$(am__append_53) $(am__append_57) $(am__append_61) \
 	$(am__append_75) $(am__append_80) $(am__append_88) \
-	$(am__append_91) $(am__append_107) $(am__append_111)
+	$(am__append_92) $(am__append_107) $(am__append_111)
 CONFIG_STATUS_DEPENDENCIES = $(srcroot)/bfd/development.sh
 AM_CFLAGS = \
 	$(WERROR_CFLAGS) \
@@ -2942,6 +2942,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(sim_ppc_model) $(sim_ppc_default_model) $(sim_ppc_model_issue) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(sim_ppc_switch)
 
+@SIM_ENABLE_ARCH_ppc_TRUE@AM_CPPFLAGS_ppc_options.o = '-DOPCODE_RULES="$(IGEN_OPCODE_RULES)"' '-DIGEN_FLAGS="$(ppc_IGEN_FLAGS)"'
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_libsim_a_SOURCES = \
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(common_libcommon_a_SOURCES)
 
@@ -3321,8 +3322,6 @@ moxie/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 msp430/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 or1k/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-ppc/Makefile: $(top_builddir)/config.status $(top_srcdir)/ppc/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 ppc/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
@@ -5819,9 +5818,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_ppc_TRUE@-@am__include@ ppc/$(DEPDIR)/*.Po
-
-@SIM_ENABLE_ARCH_ppc_TRUE@ppc/%.o: ppc/%.c | common/libcommon.a ppc/defines.h ppc/stamp-igen ppc/hw.c ppc/hw.h
-@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/defines.h: ppc/stamp-defines ; @true
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/stamp-defines: config.h Makefile

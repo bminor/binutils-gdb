@@ -25,6 +25,7 @@ AM_CPPFLAGS_%C% = \
 	$(sim_ppc_monitor) \
 	$(sim_ppc_model) $(sim_ppc_default_model) $(sim_ppc_model_issue) \
 	$(sim_ppc_switch)
+AM_CPPFLAGS_%C%_options.o = '-DOPCODE_RULES="$(IGEN_OPCODE_RULES)"' '-DIGEN_FLAGS="$(ppc_IGEN_FLAGS)"'
 
 %C%_libsim_a_SOURCES = \
 	$(common_libcommon_a_SOURCES)
@@ -79,11 +80,6 @@ noinst_LIBRARIES += %D%/libsim.a
 	%D%/libsim.a \
 	$(SIM_COMMON_LIBS)
 
-## This makes sure common parts are available before building the arch-subdirs
-## which will refer to these.
-%D%/%.o: %D%/%.c | common/libcommon.a %D%/defines.h %D%/stamp-igen %D%/hw.c %D%/hw.h
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 noinst_PROGRAMS += %D%/run
 
 %D%/defines.h: %D%/stamp-defines ; @true
@@ -92,6 +88,7 @@ noinst_PROGRAMS += %D%/run
 	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change %D%/defines.hin %D%/defines.h
 	$(AM_V_at)touch $@
 
+BUILT_SOURCES += %D%/defines.h
 MOSTLYCLEANFILES += %D%/defines.h %D%/stamp-defines
 
 %D%/spreg.c: @MAINT@ %D%/ppc-spr-table %D%/spreg-gen.py %D%/$(am__dirstamp)

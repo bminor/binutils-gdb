@@ -15496,8 +15496,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " ppc"
-      ac_config_files="$ac_config_files ppc/Makefile"
-
 
   ac_config_files="$ac_config_files ppc/.gdbinit:common/gdbinit.in"
 
@@ -18299,7 +18297,6 @@ do
     "moxie/.gdbinit") CONFIG_FILES="$CONFIG_FILES moxie/.gdbinit:common/gdbinit.in" ;;
     "msp430/.gdbinit") CONFIG_FILES="$CONFIG_FILES msp430/.gdbinit:common/gdbinit.in" ;;
     "or1k/.gdbinit") CONFIG_FILES="$CONFIG_FILES or1k/.gdbinit:common/gdbinit.in" ;;
-    "ppc/Makefile") CONFIG_FILES="$CONFIG_FILES ppc/Makefile" ;;
     "ppc/.gdbinit") CONFIG_FILES="$CONFIG_FILES ppc/.gdbinit:common/gdbinit.in" ;;
     "pru/.gdbinit") CONFIG_FILES="$CONFIG_FILES pru/.gdbinit:common/gdbinit.in" ;;
     "riscv/.gdbinit") CONFIG_FILES="$CONFIG_FILES riscv/.gdbinit:common/gdbinit.in" ;;

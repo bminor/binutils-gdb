@@ -119,7 +119,7 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([moxie-*-*], [moxie])
     SIM_TARGET([msp430*-*-*], [msp430])
     SIM_TARGET([or1k*-*-*], [or1k])
-    SIM_TARGET([powerpc*-*-*], [ppc], [true])
+    SIM_TARGET([powerpc*-*-*], [ppc])
     SIM_TARGET([pru*-*-*], [pru])
     SIM_TARGET([riscv*-*-*], [riscv])
     SIM_TARGET([rl78-*-*], [rl78])
