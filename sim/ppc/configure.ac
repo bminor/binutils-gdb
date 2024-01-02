@@ -105,10 +105,12 @@ AC_CACHE_CHECK([if union semun defined],
 [union semun arg ;],
 [ac_cv_has_union_semun="yes"],
 [ac_cv_has_union_semun="no"])])
+AS_IF([test x"$ac_cv_has_union_semun" = x"yes"], [dnl
+  AC_DEFINE(HAVE_UNION_SEMUN, 1,
+	    [Define if union semun is defined in <sys/sem.h>])
+])
 
-
-if test "$ac_cv_has_union_semun" = "yes"; then
-  AC_CACHE_CHECK(whether System V semaphores are supported,
+AC_CACHE_CHECK([whether System V semaphores are supported],
   ac_cv_sysv_sem,
   [
   AC_TRY_RUN(
@@ -116,34 +118,13 @@ if test "$ac_cv_has_union_semun" = "yes"; then
   #include <sys/types.h>
   #include <sys/ipc.h>
   #include <sys/sem.h>
-  int main () {
-    union semun arg ;
-
-    int id=semget(IPC_PRIVATE,1,IPC_CREAT|0400);
-    if (id == -1)
-      exit(1);
-    arg.val = 0; /* avoid implicit type cast to union */
-    if (semctl(id, 0, IPC_RMID, arg) == -1)
-      exit(1);
-    exit(0);
-  }
-  ],
-  ac_cv_sysv_sem="yes", ac_cv_sysv_sem="no", :)
-  ])
-else  # semun is not defined
-  AC_CACHE_CHECK(whether System V semaphores are supported,
-  ac_cv_sysv_sem,
-  [
-  AC_TRY_RUN(
-  [
-  #include <sys/types.h>
-  #include <sys/ipc.h>
-  #include <sys/sem.h>
+#ifndef HAVE_UNION_SEMUN
   union semun {
     int val;
     struct semid_ds *buf;
     ushort *array;
   };
+#endif
   int main () {
     union semun arg ;
 
@@ -157,8 +138,7 @@ else  # semun is not defined
   }
   ],
   ac_cv_sysv_sem="yes", ac_cv_sysv_sem="no", :)
-  ])
-fi
+])
 
 AC_CACHE_CHECK(whether System V shared memory is supported,
 ac_cv_sysv_shm,
@@ -184,12 +164,6 @@ if test x"$ac_cv_sysv_shm" = x"yes" -a x"$ac_cv_sysv_sem" = x"yes" ; then
 else
   sim_sysv_ipc_hw="";
 fi
-
-if test x"$ac_cv_has_union_semun" = x"yes" -a x"$ac_cv_sysv_sem" = x"yes" ; then
-  AC_DEFINE(HAVE_UNION_SEMUN, 1,
-	    [Define if union semun is defined in <sys/sem.h>])
-fi
-
 
 AC_ARG_ENABLE(sim-hardware,
 [  --enable-sim-hardware=list		Specify the hardware to be included in the build.],
