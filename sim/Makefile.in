@@ -280,11 +280,13 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_87 = or1k/eng.h
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_88 = $(or1k_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_89 = common/libcommon.a \
-@SIM_ENABLE_ARCH_ppc_TRUE@	$(PPC_IGEN)
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/defines.h $(PPC_IGEN)
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_90 = ppc/run
-@SIM_ENABLE_ARCH_ppc_TRUE@am__append_91 = ppc/libigen.a
-@SIM_ENABLE_ARCH_ppc_TRUE@am__append_92 = $(ppc_IGEN_TOOLS)
-@SIM_ENABLE_ARCH_ppc_TRUE@am__append_93 = $(ppc_IGEN_TOOLS) ppc/libigen.a
+@SIM_ENABLE_ARCH_ppc_TRUE@am__append_91 = ppc/defines.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-defines $(ppc_IGEN_TOOLS) \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/libigen.a
+@SIM_ENABLE_ARCH_ppc_TRUE@am__append_92 = ppc/libigen.a
+@SIM_ENABLE_ARCH_ppc_TRUE@am__append_93 = $(ppc_IGEN_TOOLS)
 @SIM_ENABLE_ARCH_pru_TRUE@am__append_94 = pru/libsim.a
 @SIM_ENABLE_ARCH_pru_TRUE@am__append_95 = pru/run
 @SIM_ENABLE_ARCH_riscv_TRUE@am__append_96 = riscv/libsim.a
@@ -1817,7 +1819,7 @@ srccom = $(srcdir)/common
 srcroot = $(srcdir)/..
 SUBDIRS = @subdirs@
 pkginclude_HEADERS = $(am__append_1)
-EXTRA_LIBRARIES = igen/libigen.a $(am__append_91)
+EXTRA_LIBRARIES = igen/libigen.a $(am__append_92)
 noinst_LIBRARIES = common/libcommon.a $(am__append_3) $(am__append_5) \
 	$(am__append_7) $(am__append_9) $(am__append_11) \
 	$(am__append_13) $(am__append_18) $(am__append_23) \
@@ -1848,7 +1850,7 @@ MOSTLYCLEANFILES = core $(SIM_ENABLED_ARCHES:%=%/*.o) \
 	$(am__append_37) $(am__append_45) $(am__append_49) \
 	$(am__append_53) $(am__append_57) $(am__append_61) \
 	$(am__append_75) $(am__append_80) $(am__append_88) \
-	$(am__append_93) $(am__append_106) $(am__append_110)
+	$(am__append_91) $(am__append_106) $(am__append_110)
 CONFIG_STATUS_DEPENDENCIES = $(srcroot)/bfd/development.sh
 AM_CFLAGS = \
 	$(WERROR_CFLAGS) \
@@ -5741,6 +5743,11 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/main.o: ppc/%.o: ppc/%.c | ppc/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc/defines.h: ppc/stamp-defines ; @true
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc/stamp-defines: config.h Makefile
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_GEN)sed -n -e '/^#define HAVE_/s/ 1$$/",/' -e '/^#define HAVE_/s//"HAVE_/p' < config.h > ppc/defines.hin
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change ppc/defines.hin ppc/defines.h
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)touch $@
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/spreg.c: @MAINT@ ppc/ppc-spr-table ppc/spreg-gen.py ppc/$(am__dirstamp)
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_GEN)$(srcdir)/ppc/spreg-gen.py --source $@.tmp

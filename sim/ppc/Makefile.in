@@ -489,7 +489,7 @@ PACKAGE_SRC = pk_disklabel.c
 PACKAGE_OBJ = $(PACKAGE_SRC:.c=.o)
 
 
-$(TARGETLIB): tmp-igen tmp-hw tmp-defines $(LIB_OBJ) $(GDB_OBJ)
+$(TARGETLIB): tmp-igen tmp-hw defines.h $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_AR) $(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_RANLIB) $(RANLIB) $(TARGETLIB)
 
@@ -561,12 +561,6 @@ sim-fpu.o: $(srcdir)/../common/sim-fpu.c
 # Rebuild options whenever something changes so the date/time is up to date.
 options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) config.status Makefile
 	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' $(srcdir)/options.c
-
-defines.h: tmp-defines; @true
-tmp-defines: Makefile
-	$(ECHO_GEN) sed -n -e '/^#define HAVE_/s/ 1$$/",/' -e '/^#define HAVE_/s//"HAVE_/p' < ../config.h > tmp-defines.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-defines.h defines.h
-	$(SILENCE) touch $@
 
 #
 # Rules to create the built c source code files
@@ -685,7 +679,7 @@ clean mostlyclean:
 	rm -f tmp-* *.[oasi] core $(BUILT_SRC_WO_CONFIG)
 
 distclean realclean: clean
-	rm -f TAGS Makefile config.cache config.status defines.h stamp-h config.log
+	rm -f TAGS Makefile config.cache config.status stamp-h config.log
 
 maintainer-clean: distclean
 	rm -f *~ *.log core *.core

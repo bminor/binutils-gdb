@@ -33,6 +33,15 @@ SIM_ALL_RECURSIVE_DEPS += common/libcommon.a
 
 noinst_PROGRAMS += %D%/run
 
+SIM_ALL_RECURSIVE_DEPS += %D%/defines.h
+%D%/defines.h: %D%/stamp-defines ; @true
+%D%/stamp-defines: config.h Makefile
+	$(AM_V_GEN)sed -n -e '/^#define HAVE_/s/ 1$$/",/' -e '/^#define HAVE_/s//"HAVE_/p' < config.h > %D%/defines.hin
+	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change %D%/defines.hin %D%/defines.h
+	$(AM_V_at)touch $@
+
+MOSTLYCLEANFILES += %D%/defines.h %D%/stamp-defines
+
 %D%/spreg.c: @MAINT@ %D%/ppc-spr-table %D%/spreg-gen.py %D%/$(am__dirstamp)
 	$(AM_V_GEN)$(srcdir)/%D%/spreg-gen.py --source $@.tmp
 	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $(srcdir)/%D%/spreg.c
