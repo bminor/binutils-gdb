@@ -131,6 +131,9 @@ AC_CACHE_CHECK([whether System V semaphores are supported],
   if (semctl(id, 0, IPC_RMID, arg) == -1)
     return 1;
 ], [ac_cv_sysv_sem="yes"], [ac_cv_sysv_sem="no"])])
+AS_IF([test x"$ac_cv_sysv_sem" = x"yes"], [dnl
+  AC_DEFINE(HAVE_SYSV_SEM, 1, [Define if System V semaphores are supported])
+])
 
 AC_CACHE_CHECK(whether System V shared memory is supported,
 ac_cv_sysv_shm,
@@ -144,16 +147,13 @@ ac_cv_sysv_shm,
   if (shmctl(id, IPC_RMID, 0) == -1)
     return 1;
 ], [ac_cv_sysv_shm="yes"], [ac_cv_sysv_shm="no"])])
-
-if test x"$ac_cv_sysv_shm" = x"yes" -a x"$ac_cv_sysv_sem" = x"yes" ; then
-  sim_sysv_ipc_hw=",sem,shm";
-else
-  sim_sysv_ipc_hw="";
-fi
+AS_IF([test x"$ac_cv_sysv_shm" = x"yes"], [dnl
+  AC_DEFINE(HAVE_SYSV_SHM, 1, [Define if System V shared memory is supported])
+])
 
 AC_ARG_ENABLE(sim-hardware,
 [  --enable-sim-hardware=list		Specify the hardware to be included in the build.],
-[hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide${sim_sysv_ipc_hw}"
+[hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide,sem,shm"
 case "${enableval}" in
   yes)	;;
   no)	AC_MSG_ERROR("List of hardware must be specified for --enable-sim-hardware"); hardware="";;
@@ -165,7 +165,7 @@ sim_hw_src=`echo $hardware | sed -e 's/,/.c hw_/g' -e 's/^/hw_/' -e s'/$/.c/'`
 sim_hw_obj=`echo $sim_hw_src | sed -e 's/\.c/.o/g'`
 if test x"$silent" != x"yes" && test x"$hardware" != x""; then
   echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
-fi],[hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide${sim_sysv_ipc_hw}"
+fi],[hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide,sem,shm"
 sim_hw_src=`echo $hardware | sed -e 's/,/.c hw_/g' -e 's/^/hw_/' -e s'/$/.c/'`
 sim_hw_obj=`echo $sim_hw_src | sed -e 's/\.c/.o/g'`
 if test x"$silent" != x"yes"; then
