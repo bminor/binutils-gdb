@@ -111,10 +111,8 @@ AS_IF([test x"$ac_cv_has_union_semun" = x"yes"], [dnl
 ])
 
 AC_CACHE_CHECK([whether System V semaphores are supported],
-  ac_cv_sysv_sem,
-  [
-  AC_TRY_RUN(
-  [
+  [ac_cv_sysv_sem],
+  [AC_TRY_COMPILE([
   #include <sys/types.h>
   #include <sys/ipc.h>
   #include <sys/sem.h>
@@ -124,40 +122,28 @@ AC_CACHE_CHECK([whether System V semaphores are supported],
     struct semid_ds *buf;
     ushort *array;
   };
-#endif
-  int main () {
-    union semun arg ;
-
-    int id=semget(IPC_PRIVATE,1,IPC_CREAT|0400);
-    if (id == -1)
-      exit(1);
-    arg.val = 0; /* avoid implicit type cast to union */
-    if (semctl(id, 0, IPC_RMID, arg) == -1)
-      exit(1);
-    exit(0);
-  }
-  ],
-  ac_cv_sysv_sem="yes", ac_cv_sysv_sem="no", :)
-])
+#endif], [
+  union semun arg;
+  int id = semget(IPC_PRIVATE, 1, IPC_CREAT|0400);
+  if (id == -1)
+    return 1;
+  arg.val = 0; /* avoid implicit type cast to union */
+  if (semctl(id, 0, IPC_RMID, arg) == -1)
+    return 1;
+], [ac_cv_sysv_sem="yes"], [ac_cv_sysv_sem="no"])])
 
 AC_CACHE_CHECK(whether System V shared memory is supported,
 ac_cv_sysv_shm,
-[
-AC_TRY_RUN([
+[AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/ipc.h>
-#include <sys/shm.h>
-int main () {
-  int id=shmget(IPC_PRIVATE,1,IPC_CREAT|0400);
+#include <sys/shm.h>], [
+  int id = shmget(IPC_PRIVATE, 1, IPC_CREAT|0400);
   if (id == -1)
-    exit(1);
+    return 1;
   if (shmctl(id, IPC_RMID, 0) == -1)
-    exit(1);
-  exit(0);
-}
-],
-ac_cv_sysv_shm="yes", ac_cv_sysv_shm="no", :)
-])
+    return 1;
+], [ac_cv_sysv_shm="yes"], [ac_cv_sysv_shm="no"])])
 
 if test x"$ac_cv_sysv_shm" = x"yes" -a x"$ac_cv_sysv_sem" = x"yes" ; then
   sim_sysv_ipc_hw=",sem,shm";
