@@ -365,7 +365,7 @@ CONFIG_CLEAN_FILES = aarch64/.gdbinit arm/.gdbinit avr/.gdbinit \
 	mips/.gdbinit mn10300/.gdbinit moxie/.gdbinit msp430/.gdbinit \
 	or1k/.gdbinit ppc/.gdbinit pru/.gdbinit riscv/.gdbinit \
 	rl78/.gdbinit rx/.gdbinit sh/.gdbinit erc32/.gdbinit \
-	v850/.gdbinit example-synacor/.gdbinit arch-subdir.mk .gdbinit
+	v850/.gdbinit example-synacor/.gdbinit .gdbinit
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
@@ -3340,8 +3340,6 @@ erc32/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 v850/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 example-synacor/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-arch-subdir.mk: $(top_builddir)/config.status $(srcdir)/arch-subdir.mk.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 .gdbinit: $(top_builddir)/config.status $(srcdir)/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@

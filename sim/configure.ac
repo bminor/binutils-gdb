@@ -58,19 +58,14 @@ AC_SUBST(SIM_ENABLED_ARCHES)
 ENABLE_SIM=no
 dnl Build a particular arch subdir.
 dnl arg[1] is the arch subdir name.
-dnl arg[2] is whether the arch has a dedicated configure script.
 m4_define([SIM_BUILD_TARGET], [dnl
   ENABLE_SIM=yes
   AS_VAR_APPEND([SIM_ENABLED_ARCHES], [" $1"])
-  m4_if($2, [true], [dnl
-    AC_CONFIG_FILES($1/Makefile)
-  ])
   AC_CONFIG_FILES($1/.gdbinit:common/gdbinit.in)
 ])
 dnl Enable a particular arch subdir.
 dnl arg[1] is the matching target triple.
 dnl arg[2] is the arch subdir name.
-dnl arg[3] is whether the arch has a dedicated configure script.
 m4_define([SIM_TARGET], [dnl
   sim_enable_arch_$2=false
   case "${targ}" in
@@ -78,7 +73,7 @@ m4_define([SIM_TARGET], [dnl
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=$2
       fi
-      SIM_BUILD_TARGET($2, $3)
+      SIM_BUILD_TARGET($2)
       sim_enable_arch_$2=true
       ;;
   esac
@@ -162,5 +157,5 @@ m4_include([ppc/acinclude.m4])
 m4_include([riscv/acinclude.m4])
 m4_include([rx/acinclude.m4])
 
-AC_CONFIG_FILES([arch-subdir.mk Makefile .gdbinit:gdbinit.in])
+AC_CONFIG_FILES([Makefile .gdbinit:gdbinit.in])
 AC_OUTPUT

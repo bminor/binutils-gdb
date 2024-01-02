@@ -14518,7 +14518,6 @@ if test "${enable_sim}" != no; then
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " aarch64"
-
   ac_config_files="$ac_config_files aarch64/.gdbinit:common/gdbinit.in"
 
 
@@ -14682,7 +14681,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " arm"
-
   ac_config_files="$ac_config_files arm/.gdbinit:common/gdbinit.in"
 
 
@@ -14719,7 +14717,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " avr"
-
   ac_config_files="$ac_config_files avr/.gdbinit:common/gdbinit.in"
 
 
@@ -14756,7 +14753,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " bfin"
-
   ac_config_files="$ac_config_files bfin/.gdbinit:common/gdbinit.in"
 
 
@@ -14793,7 +14789,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " bpf"
-
   ac_config_files="$ac_config_files bpf/.gdbinit:common/gdbinit.in"
 
 
@@ -14830,7 +14825,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " cr16"
-
   ac_config_files="$ac_config_files cr16/.gdbinit:common/gdbinit.in"
 
 
@@ -14867,7 +14861,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " cris"
-
   ac_config_files="$ac_config_files cris/.gdbinit:common/gdbinit.in"
 
 
@@ -14904,7 +14897,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " d10v"
-
   ac_config_files="$ac_config_files d10v/.gdbinit:common/gdbinit.in"
 
 
@@ -14941,7 +14933,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " frv"
-
   ac_config_files="$ac_config_files frv/.gdbinit:common/gdbinit.in"
 
 
@@ -14978,7 +14969,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " ft32"
-
   ac_config_files="$ac_config_files ft32/.gdbinit:common/gdbinit.in"
 
 
@@ -15015,7 +15005,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " h8300"
-
   ac_config_files="$ac_config_files h8300/.gdbinit:common/gdbinit.in"
 
 
@@ -15052,7 +15041,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " iq2000"
-
   ac_config_files="$ac_config_files iq2000/.gdbinit:common/gdbinit.in"
 
 
@@ -15089,7 +15077,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " lm32"
-
   ac_config_files="$ac_config_files lm32/.gdbinit:common/gdbinit.in"
 
 
@@ -15126,7 +15113,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " m32c"
-
   ac_config_files="$ac_config_files m32c/.gdbinit:common/gdbinit.in"
 
 
@@ -15163,7 +15149,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " m32r"
-
   ac_config_files="$ac_config_files m32r/.gdbinit:common/gdbinit.in"
 
 
@@ -15200,7 +15185,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " m68hc11"
-
   ac_config_files="$ac_config_files m68hc11/.gdbinit:common/gdbinit.in"
 
 
@@ -15237,7 +15221,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " mcore"
-
   ac_config_files="$ac_config_files mcore/.gdbinit:common/gdbinit.in"
 
 
@@ -15274,7 +15257,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " microblaze"
-
   ac_config_files="$ac_config_files microblaze/.gdbinit:common/gdbinit.in"
 
 
@@ -15311,7 +15293,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " mips"
-
   ac_config_files="$ac_config_files mips/.gdbinit:common/gdbinit.in"
 
 
@@ -15348,7 +15329,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " mn10300"
-
   ac_config_files="$ac_config_files mn10300/.gdbinit:common/gdbinit.in"
 
 
@@ -15385,7 +15365,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " moxie"
-
   ac_config_files="$ac_config_files moxie/.gdbinit:common/gdbinit.in"
 
 
@@ -15422,7 +15401,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " msp430"
-
   ac_config_files="$ac_config_files msp430/.gdbinit:common/gdbinit.in"
 
 
@@ -15459,7 +15437,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " or1k"
-
   ac_config_files="$ac_config_files or1k/.gdbinit:common/gdbinit.in"
 
 
@@ -15496,7 +15473,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " ppc"
-
   ac_config_files="$ac_config_files ppc/.gdbinit:common/gdbinit.in"
 
 
@@ -15533,7 +15509,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " pru"
-
   ac_config_files="$ac_config_files pru/.gdbinit:common/gdbinit.in"
 
 
@@ -15570,7 +15545,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " riscv"
-
   ac_config_files="$ac_config_files riscv/.gdbinit:common/gdbinit.in"
 
 
@@ -15607,7 +15581,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " rl78"
-
   ac_config_files="$ac_config_files rl78/.gdbinit:common/gdbinit.in"
 
 
@@ -15644,7 +15617,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " rx"
-
   ac_config_files="$ac_config_files rx/.gdbinit:common/gdbinit.in"
 
 
@@ -15681,7 +15653,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " sh"
-
   ac_config_files="$ac_config_files sh/.gdbinit:common/gdbinit.in"
 
 
@@ -15718,7 +15689,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " erc32"
-
   ac_config_files="$ac_config_files erc32/.gdbinit:common/gdbinit.in"
 
 
@@ -15755,7 +15725,6 @@ fi
       fi
         ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " v850"
-
   ac_config_files="$ac_config_files v850/.gdbinit:common/gdbinit.in"
 
 
@@ -15799,7 +15768,6 @@ as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_EXAMPLE_SYNACOR LD_FOR_TARGET_EX
 
       ENABLE_SIM=yes
   as_fn_append SIM_ENABLED_ARCHES " example-synacor"
-
   ac_config_files="$ac_config_files example-synacor/.gdbinit:common/gdbinit.in"
 
 
@@ -17130,7 +17098,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files arch-subdir.mk Makefile .gdbinit:gdbinit.in"
+ac_config_files="$ac_config_files Makefile .gdbinit:gdbinit.in"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -18306,7 +18274,6 @@ do
     "erc32/.gdbinit") CONFIG_FILES="$CONFIG_FILES erc32/.gdbinit:common/gdbinit.in" ;;
     "v850/.gdbinit") CONFIG_FILES="$CONFIG_FILES v850/.gdbinit:common/gdbinit.in" ;;
     "example-synacor/.gdbinit") CONFIG_FILES="$CONFIG_FILES example-synacor/.gdbinit:common/gdbinit.in" ;;
-    "arch-subdir.mk") CONFIG_FILES="$CONFIG_FILES arch-subdir.mk" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     ".gdbinit") CONFIG_FILES="$CONFIG_FILES .gdbinit:gdbinit.in" ;;
 
