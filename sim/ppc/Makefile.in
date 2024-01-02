@@ -86,29 +86,6 @@ NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(INCLUDES) $(SIM_FP
 
 LIBS = $(COMMON_LIBS) @LIBS@ $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
 
-IGEN_OPCODE_RULES = @sim_ppc_opcode@
-IGEN_DECODE_MECHANISM = @sim_ppc_decode_mechanism@
-IGEN_DUPLICATE = @sim_ppc_dup@
-IGEN_JUMP = @sim_ppc_jump@
-IGEN_FILTER = @sim_ppc_filter@
-IGEN_ICACHE = @sim_ppc_icache@
-IGEN_SMP = @sim_ppc_igen_smp@
-IGEN_LINE_NR = @sim_ppc_line_nr@
-
-IGEN_FLAGS = \
-	$(IGEN_DECODE_MECHANISM) \
-	$(IGEN_DUPLICATE) \
-	$(IGEN_JUMP) \
-	$(IGEN_FILTER) \
-	$(IGEN_ICACHE) \
-	$(IGEN_SMP) \
-	$(IGEN_LINE_NR)
-
-# igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
-# leak detection while running it.
-
-IGEN = ASAN_OPTIONS=detect_leaks=0 ./igen
-
 .NOEXPORT:
 MAKEOVERRIDES=
 
@@ -268,9 +245,6 @@ IDECODE_EXPRESSION_H = \
 IDECODE_FIELDS_H = \
 	idecode_fields.h
 
-IGEN_H = \
-	igen.h
-
 INLINE_H = \
 	inline.h
 
@@ -388,13 +362,6 @@ INLINE = \
 	inline.c
 
 BUILT_SRC_WO_CONFIG = \
-	icache.h icache.c \
-	support.h support.c \
-	idecode.h idecode.c \
-	semantics.h semantics.c \
-	itable.h itable.c \
-	model.h model.c \
-	support.h support.c \
 	pk.h \
 	hw.h hw.c
 
@@ -489,7 +456,7 @@ PACKAGE_SRC = pk_disklabel.c
 PACKAGE_OBJ = $(PACKAGE_SRC:.c=.o)
 
 
-$(TARGETLIB): tmp-igen tmp-hw defines.h $(LIB_OBJ) $(GDB_OBJ)
+$(TARGETLIB): tmp-hw defines.h $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_AR) $(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_RANLIB) $(RANLIB) $(TARGETLIB)
 
@@ -560,33 +527,7 @@ sim-fpu.o: $(srcdir)/../common/sim-fpu.c
 
 # Rebuild options whenever something changes so the date/time is up to date.
 options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) ../config.status Makefile
-	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_ppc_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' $(srcdir)/options.c
-
-#
-# Rules to create the built c source code files
-#
-
-tmp-igen: igen $(srcdir)/powerpc.igen $(srcdir)/altivec.igen $(srcdir)/e500.igen $(IGEN_OPCODE_RULES) $(srcroot)/move-if-change
-	$(ECHO_GEN) $(IGEN) $(IGEN_FLAGS) \
-		-o $(srcdir)/$(IGEN_OPCODE_RULES) \
-		-I $(srcdir) -i $(srcdir)/powerpc.igen \
-		-n icache.h    -hc icache.h \
-		-n icache.c    -c  icache.c \
-		-n semantics.h -hs semantics.h \
-		-n semantics.c -s  semantics.c \
-		-n idecode.h   -hd idecode.h \
-		-n idecode.c   -d  idecode.c \
-		-n itable.h    -ht itable.h \
-		-n itable.c    -t  itable.c \
-		-n model.h     -hm model.h \
-		-n model.c     -m  model.c \
-		-n support.h   -hf support.h \
-		-n support.c   -f  support.c
-	$(SILENCE) touch $@
-
-$(TARGETLIB): tmp-igen
-itable.h itable.c icache.h icache.c idecode.h idecode.c semantics.h semantics.c model.h model.c support.h support.c: tmp-igen
-
+	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_ppc_opcode@"' '-DIGEN_FLAGS="$(ppc_IGEN_FLAGS)"' $(srcdir)/options.c
 
 # real hardware
 hw.c hw.h: tmp-hw; @true

@@ -280,32 +280,41 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_87 = or1k/eng.h
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_88 = $(or1k_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_89 = common/libcommon.a \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/defines.h $(PPC_IGEN)
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/defines.h ppc/stamp-igen
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_90 = ppc/run
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_91 = ppc/defines.h \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-defines $(ppc_IGEN_TOOLS) \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/libigen.a
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-defines \
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(ppc_BUILD_OUTPUTS) \
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(ppc_IGEN_TOOLS) ppc/libigen.a
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_92 = ppc/libigen.a
-@SIM_ENABLE_ARCH_ppc_TRUE@am__append_93 = $(ppc_IGEN_TOOLS)
-@SIM_ENABLE_ARCH_pru_TRUE@am__append_94 = pru/libsim.a
-@SIM_ENABLE_ARCH_pru_TRUE@am__append_95 = pru/run
-@SIM_ENABLE_ARCH_riscv_TRUE@am__append_96 = riscv/libsim.a
-@SIM_ENABLE_ARCH_riscv_TRUE@am__append_97 = riscv/run
-@SIM_ENABLE_ARCH_rl78_TRUE@am__append_98 = rl78/libsim.a
-@SIM_ENABLE_ARCH_rl78_TRUE@am__append_99 = rl78/run
-@SIM_ENABLE_ARCH_rx_TRUE@am__append_100 = rx/libsim.a
-@SIM_ENABLE_ARCH_rx_TRUE@am__append_101 = rx/run
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_102 = sh/libsim.a
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_103 = sh/run
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_104 = \
+@SIM_ENABLE_ARCH_ppc_TRUE@am__append_93 = \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/icache.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/idecode.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/semantics.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/model.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/support.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/itable.h
+
+@SIM_ENABLE_ARCH_ppc_TRUE@am__append_94 = $(ppc_IGEN_TOOLS)
+@SIM_ENABLE_ARCH_pru_TRUE@am__append_95 = pru/libsim.a
+@SIM_ENABLE_ARCH_pru_TRUE@am__append_96 = pru/run
+@SIM_ENABLE_ARCH_riscv_TRUE@am__append_97 = riscv/libsim.a
+@SIM_ENABLE_ARCH_riscv_TRUE@am__append_98 = riscv/run
+@SIM_ENABLE_ARCH_rl78_TRUE@am__append_99 = rl78/libsim.a
+@SIM_ENABLE_ARCH_rl78_TRUE@am__append_100 = rl78/run
+@SIM_ENABLE_ARCH_rx_TRUE@am__append_101 = rx/libsim.a
+@SIM_ENABLE_ARCH_rx_TRUE@am__append_102 = rx/run
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_103 = sh/libsim.a
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_104 = sh/run
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_105 = \
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/code.c \
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/ppi.c
 
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_105 = sh/gencode
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_106 = $(sh_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_107 = v850/libsim.a
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_108 = v850/run
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_109 = \
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_106 = sh/gencode
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_107 = $(sh_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_108 = v850/libsim.a
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_109 = v850/run
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_110 = \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/icache.h \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/idecode.h \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/semantics.h \
@@ -314,7 +323,7 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/itable.h \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/engine.h
 
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_110 = $(v850_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_111 = $(v850_BUILD_OUTPUTS)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
@@ -1850,13 +1859,14 @@ noinst_LIBRARIES = common/libcommon.a $(am__append_3) $(am__append_5) \
 	$(am__append_46) $(am__append_50) $(am__append_54) \
 	$(am__append_58) $(am__append_62) $(am__append_64) \
 	$(am__append_69) $(am__append_77) $(am__append_81) \
-	$(am__append_83) $(am__append_85) $(am__append_94) \
-	$(am__append_96) $(am__append_98) $(am__append_100) \
-	$(am__append_102) $(am__append_107)
+	$(am__append_83) $(am__append_85) $(am__append_95) \
+	$(am__append_97) $(am__append_99) $(am__append_101) \
+	$(am__append_103) $(am__append_108)
 BUILT_SOURCES = $(am__append_15) $(am__append_21) $(am__append_25) \
 	$(am__append_36) $(am__append_44) $(am__append_48) \
 	$(am__append_56) $(am__append_71) $(am__append_79) \
-	$(am__append_87) $(am__append_104) $(am__append_109)
+	$(am__append_87) $(am__append_93) $(am__append_105) \
+	$(am__append_110)
 CLEANFILES = common/version.c common/version.c-stamp \
 	testsuite/common/bits-gen testsuite/common/bits32m0.c \
 	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
@@ -1872,7 +1882,7 @@ MOSTLYCLEANFILES = core $(SIM_ENABLED_ARCHES:%=%/*.o) \
 	$(am__append_37) $(am__append_45) $(am__append_49) \
 	$(am__append_53) $(am__append_57) $(am__append_61) \
 	$(am__append_75) $(am__append_80) $(am__append_88) \
-	$(am__append_91) $(am__append_106) $(am__append_110)
+	$(am__append_91) $(am__append_107) $(am__append_111)
 CONFIG_STATUS_DEPENDENCIES = $(srcroot)/bfd/development.sh
 AM_CFLAGS = \
 	$(WERROR_CFLAGS) \
@@ -2950,7 +2960,39 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_igen_SOURCES = ppc/igen.c
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_igen_LDADD = ppc/libigen.a
+
+# igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
+# leak detection while running it.
 @SIM_ENABLE_ARCH_ppc_TRUE@PPC_IGEN = ppc/igen$(EXEEXT)
+@SIM_ENABLE_ARCH_ppc_TRUE@PPC_IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(PPC_IGEN) $(ppc_IGEN_FLAGS)
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc_IGEN_FLAGS = \
+@SIM_ENABLE_ARCH_ppc_TRUE@	@sim_ppc_decode_mechanism@ \
+@SIM_ENABLE_ARCH_ppc_TRUE@	@sim_ppc_dup@ \
+@SIM_ENABLE_ARCH_ppc_TRUE@	@sim_ppc_jump@ \
+@SIM_ENABLE_ARCH_ppc_TRUE@	@sim_ppc_filter@ \
+@SIM_ENABLE_ARCH_ppc_TRUE@	@sim_ppc_icache@ \
+@SIM_ENABLE_ARCH_ppc_TRUE@	@sim_ppc_igen_smp@ \
+@SIM_ENABLE_ARCH_ppc_TRUE@	@sim_ppc_line_nr@
+
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc_BUILT_SRC_FROM_IGEN = \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/icache.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/icache.c \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/idecode.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/idecode.c \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/semantics.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/semantics.c \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/model.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/model.c \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/support.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/support.c \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/itable.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/itable.c
+
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc_BUILD_OUTPUTS = \
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(ppc_BUILT_SRC_FROM_IGEN) \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-igen
+
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc_IGEN_OPCODE_RULES = ppc/@sim_ppc_opcode@
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_filter_SOURCES = 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_filter_LDADD = ppc/filter-main.o ppc/libigen.a
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_ld_cache_SOURCES = 
@@ -2966,6 +3008,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-decode \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-insn
 
+@SIM_ENABLE_ARCH_ppc_TRUE@IGEN_OPCODE_RULES = @sim_ppc_opcode@
 @SIM_ENABLE_ARCH_ppc_TRUE@ppcdocdir = $(docdir)/ppc
 @SIM_ENABLE_ARCH_ppc_TRUE@ppcdoc_DATA = ppc/BUGS ppc/INSTALL ppc/README ppc/RUN
 @SIM_ENABLE_ARCH_pru_TRUE@nodist_pru_libsim_a_SOURCES = \
@@ -5782,6 +5825,24 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_GEN)$(srcdir)/ppc/spreg-gen.py --header $@.tmp
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $(srcdir)/ppc/spreg.h
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)touch $(srcdir)/ppc/spreg.h
+@SIM_ENABLE_ARCH_ppc_TRUE@$(ppc_BUILT_SRC_FROM_IGEN): ppc/stamp-igen
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc/stamp-igen: ppc/powerpc.igen ppc/altivec.igen ppc/e500.igen $(ppc_IGEN_OPCODE_RULES) $(PPC_IGEN)
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_GEN)$(PPC_IGEN_RUN) \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-o $(srcdir)/$(ppc_IGEN_OPCODE_RULES) \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-I $(srcdir)/ppc -i $(srcdir)/ppc/powerpc.igen \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-n icache.h    -hc ppc/icache.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-n icache.c    -c  ppc/icache.c \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-n semantics.h -hs ppc/semantics.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-n semantics.c -s  ppc/semantics.c \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-n idecode.h   -hd ppc/idecode.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-n idecode.c   -d  ppc/idecode.c \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-n itable.h    -ht ppc/itable.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-n itable.c    -t  ppc/itable.c \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-n model.h     -hm ppc/model.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-n model.c     -m  ppc/model.c \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-n support.h   -hf ppc/support.h \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-n support.c   -f  ppc/support.c
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)touch $@
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/libigen.a: $(ppc_libigen_a_OBJECTS) $(ppc_libigen_a_DEPENDENCIES) $(EXTRA_ppc_libigen_a_DEPENDENCIES) ppc/$(am__dirstamp)
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)-rm -f $@

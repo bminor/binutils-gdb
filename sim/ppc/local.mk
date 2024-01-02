@@ -74,9 +74,68 @@ EXTRA_LIBRARIES += %D%/libigen.a
 %C%_igen_SOURCES = %D%/igen.c
 %C%_igen_LDADD = %D%/libigen.a
 
+# igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
+# leak detection while running it.
 PPC_IGEN = %D%/igen$(EXEEXT)
+PPC_IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(PPC_IGEN) $(%C%_IGEN_FLAGS)
 
-SIM_ALL_RECURSIVE_DEPS += $(PPC_IGEN)
+%C%_IGEN_FLAGS = \
+	@sim_ppc_decode_mechanism@ \
+	@sim_ppc_dup@ \
+	@sim_ppc_jump@ \
+	@sim_ppc_filter@ \
+	@sim_ppc_icache@ \
+	@sim_ppc_igen_smp@ \
+	@sim_ppc_line_nr@
+
+## List all generated headers to help Automake dependency tracking.
+BUILT_SOURCES += \
+	%D%/icache.h \
+	%D%/idecode.h \
+	%D%/semantics.h \
+	%D%/model.h \
+	%D%/support.h \
+	%D%/itable.h
+%C%_BUILT_SRC_FROM_IGEN = \
+	%D%/icache.h \
+	%D%/icache.c \
+	%D%/idecode.h \
+	%D%/idecode.c \
+	%D%/semantics.h \
+	%D%/semantics.c \
+	%D%/model.h \
+	%D%/model.c \
+	%D%/support.h \
+	%D%/support.c \
+	%D%/itable.h \
+	%D%/itable.c
+%C%_BUILD_OUTPUTS = \
+	$(%C%_BUILT_SRC_FROM_IGEN) \
+	%D%/stamp-igen
+
+SIM_ALL_RECURSIVE_DEPS += %D%/stamp-igen
+$(%C%_BUILT_SRC_FROM_IGEN): %D%/stamp-igen
+
+%C%_IGEN_OPCODE_RULES = %D%/@sim_ppc_opcode@
+%D%/stamp-igen: %D%/powerpc.igen %D%/altivec.igen %D%/e500.igen $(%C%_IGEN_OPCODE_RULES) $(PPC_IGEN)
+	$(AM_V_GEN)$(PPC_IGEN_RUN) \
+		-o $(srcdir)/$(%C%_IGEN_OPCODE_RULES) \
+		-I $(srcdir)/%D% -i $(srcdir)/%D%/powerpc.igen \
+		-n icache.h    -hc %D%/icache.h \
+		-n icache.c    -c  %D%/icache.c \
+		-n semantics.h -hs %D%/semantics.h \
+		-n semantics.c -s  %D%/semantics.c \
+		-n idecode.h   -hd %D%/idecode.h \
+		-n idecode.c   -d  %D%/idecode.c \
+		-n itable.h    -ht %D%/itable.h \
+		-n itable.c    -t  %D%/itable.c \
+		-n model.h     -hm %D%/model.h \
+		-n model.c     -m  %D%/model.c \
+		-n support.h   -hf %D%/support.h \
+		-n support.c   -f  %D%/support.c
+	$(AM_V_at)touch $@
+
+MOSTLYCLEANFILES += $(%C%_BUILD_OUTPUTS)
 
 ## These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 %D%/libigen.a: $(%C%_libigen_a_OBJECTS) $(%C%_libigen_a_DEPENDENCIES) $(EXTRA_%C%_libigen_a_DEPENDENCIES) %D%/$(am__dirstamp)
@@ -115,6 +174,8 @@ $(%C%_libigen_a_OBJECTS) $(%C%_igen_OBJECTS): %D%/%.o: %D%/%.c
 	%D%/ld-insn
 EXTRA_PROGRAMS += $(%C%_IGEN_TOOLS)
 MOSTLYCLEANFILES += $(%C%_IGEN_TOOLS) %D%/libigen.a
+
+IGEN_OPCODE_RULES = @sim_ppc_opcode@
 
 %C%docdir = $(docdir)/%C%
 %C%doc_DATA = %D%/BUGS %D%/INSTALL %D%/README %D%/RUN
