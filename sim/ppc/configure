@@ -584,7 +584,6 @@ PACKAGE_URL=
 ac_unique_file="Makefile.in"
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
-sim_termio
 sim_model_issue
 sim_default_model
 sim_model
@@ -3164,7 +3163,6 @@ ac_config_headers="$ac_config_headers config.h:config.in"
 
 
 
-sim_termio=""
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct termios" >&5
 $as_echo_n "checking for struct termios... " >&6; }
 
@@ -3199,7 +3197,9 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_termios_struct" >&5
 $as_echo "$ac_cv_termios_struct" >&6; }
 if test $ac_cv_termios_struct = yes; then
-  sim_termio="$sim_termio -DHAVE_TERMIOS_STRUCTURE"
+
+$as_echo "#define HAVE_TERMIOS_STRUCTURE 1" >>confdefs.h
+
 fi
 
 if test "$ac_cv_termios_struct" = "yes"; then
@@ -3232,7 +3232,9 @@ fi
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_termios_cline" >&5
 $as_echo "$ac_cv_termios_cline" >&6; }
   if test $ac_cv_termios_cline = yes; then
-    sim_termio="$sim_termio -DHAVE_TERMIOS_CLINE"
+
+$as_echo "#define HAVE_TERMIOS_CLINE 1" >>confdefs.h
+
   fi
 else
   ac_cv_termios_cline=no
@@ -3272,7 +3274,9 @@ fi
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_termio_struct" >&5
 $as_echo "$ac_cv_termio_struct" >&6; }
   if test $ac_cv_termio_struct = yes; then
-    sim_termio="$sim_termio -DHAVE_TERMIO_STRUCTURE"
+
+$as_echo "#define HAVE_TERMIO_STRUCTURE 1" >>confdefs.h
+
   fi
 else
   ac_cv_termio_struct=no
@@ -3308,12 +3312,13 @@ fi
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_termio_cline" >&5
 $as_echo "$ac_cv_termio_cline" >&6; }
   if test $ac_cv_termio_cline = yes; then
-    sim_termio="$sim_termio -DHAVE_TERMIO_CLINE"
+
+$as_echo "#define HAVE_TERMIO_CLINE 1" >>confdefs.h
+
   fi
 else
   ac_cv_termio_cline=no
 fi
-
 
 
 

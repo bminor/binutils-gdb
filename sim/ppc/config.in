@@ -1,5 +1,17 @@
 /* config.in.  Generated from configure.ac by autoheader.  */
 
+/* Define if struct termios has c_line. */
+#undef HAVE_TERMIOS_CLINE
+
+/* Define if struct termios exists. */
+#undef HAVE_TERMIOS_STRUCTURE
+
+/* Define if struct termio has c_line. */
+#undef HAVE_TERMIO_CLINE
+
+/* Define if struct termio exists. */
+#undef HAVE_TERMIO_STRUCTURE
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 

@@ -68,7 +68,6 @@ TIMEBASE_CFLAGS = @sim_timebase@
 FLOAT_CFLAGS = @sim_float@
 MONITOR_CFLAGS = @sim_monitor@
 MODEL_CFLAGS = @sim_model@ @sim_default_model@ @sim_model_issue@
-TERMIO_CFLAGS = @sim_termio@
 SWITCH_CFLAGS = @sim_switch@
 CONFIG_CFLAGS = \
   $(SMP_CFLAGS) \
@@ -78,7 +77,6 @@ CONFIG_CFLAGS = \
   $(FLOAT_CFLAGS) \
   $(MONITOR_CFLAGS) \
   $(MODEL_CFLAGS) \
-  $(TERMIO_CFLAGS) \
   $(SWITCH_CFLAGS)
 SIM_FPU_CFLAGS = -DHAVE_COMMON_FPU -I../common -I${srcdir}/../common
 

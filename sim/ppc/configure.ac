@@ -289,7 +289,6 @@ AC_CONFIG_HEADER(config.h:config.in)
 
 
 dnl Figure out what type of termio/termios support there is
-sim_termio=""
 AC_MSG_CHECKING(for struct termios)
 AC_CACHE_VAL(ac_cv_termios_struct,
 [AC_TRY_COMPILE([#include <sys/types.h>
@@ -303,7 +302,7 @@ AC_CACHE_VAL(ac_cv_termios_struct,
 ac_cv_termios_struct=yes, ac_cv_termios_struct=no)])
 AC_MSG_RESULT($ac_cv_termios_struct)
 if test $ac_cv_termios_struct = yes; then
-  sim_termio="$sim_termio -DHAVE_TERMIOS_STRUCTURE"
+  AC_DEFINE([HAVE_TERMIOS_STRUCTURE], 1, [Define if struct termios exists.])
 fi
 
 if test "$ac_cv_termios_struct" = "yes"; then
@@ -316,7 +315,7 @@ if test "$ac_cv_termios_struct" = "yes"; then
 
   AC_MSG_RESULT($ac_cv_termios_cline)
   if test $ac_cv_termios_cline = yes; then
-    sim_termio="$sim_termio -DHAVE_TERMIOS_CLINE"
+    AC_DEFINE([HAVE_TERMIOS_CLINE], 1, [Define if struct termios has c_line.])
   fi
 else
   ac_cv_termios_cline=no
@@ -336,7 +335,7 @@ if test "$ac_cv_termios_struct" != "yes"; then
 ac_cv_termio_struct=yes, ac_cv_termio_struct=no)])
   AC_MSG_RESULT($ac_cv_termio_struct)
   if test $ac_cv_termio_struct = yes; then
-    sim_termio="$sim_termio -DHAVE_TERMIO_STRUCTURE"
+    AC_DEFINE([HAVE_TERMIO_STRUCTURE], 1, [Define if struct termio exists.])
   fi
 else
   ac_cv_termio_struct=no
@@ -352,7 +351,7 @@ if test "$ac_cv_termio_struct" = "yes"; then
 
   AC_MSG_RESULT($ac_cv_termio_cline)
   if test $ac_cv_termio_cline = yes; then
-    sim_termio="$sim_termio -DHAVE_TERMIO_CLINE"
+    AC_DEFINE([HAVE_TERMIO_CLINE], 1, [Define if struct termio has c_line.])
   fi
 else
   ac_cv_termio_cline=no
@@ -378,7 +377,6 @@ AC_SUBST(sim_monitor)
 AC_SUBST(sim_model)
 AC_SUBST(sim_default_model)
 AC_SUBST(sim_model_issue)
-AC_SUBST(sim_termio)
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])
