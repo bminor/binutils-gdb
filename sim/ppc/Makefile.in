@@ -361,12 +361,6 @@ INLINE = \
 	inline.h \
 	inline.c
 
-BUILT_SRC_WO_CONFIG = \
-	pk.h
-
-BUILT_SRC = \
-	$(BUILT_SRC_WO_CONFIG)
-
 LIB_INLINE_SRC = \
 	psim.c \
 	bits.c \
@@ -483,7 +477,7 @@ interrupts.o: interrupts.c $(CPU_H) $(IDECODE_H) $(OS_EMUL_H)
 
 # Given that inlines are turned on now, rebuild idecode whenever
 # anything changes.
-idecode.o: idecode.c $(CPU_H) $(IDECODE_H) $(SEMANTICS_H) $(LIB_INLINE_SRC) $(BUILT_SRC)
+idecode.o: idecode.c $(CPU_H) $(IDECODE_H) $(SEMANTICS_H) $(LIB_INLINE_SRC)
 
 # double.o: double.c dp-bit.c
 
@@ -525,7 +519,7 @@ sim-fpu.o: $(srcdir)/../common/sim-fpu.c
 	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/sim-fpu.c 
 
 # Rebuild options whenever something changes so the date/time is up to date.
-options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) ../config.status Makefile
+options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) ../config.status Makefile
 	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_ppc_opcode@"' '-DIGEN_FLAGS="$(ppc_IGEN_FLAGS)"' $(srcdir)/options.c
 
 hw_cpu.o: hw_cpu.c $(DEVICE_TABLE_H) $(HW_CPU_H) $(INTERRUPTS_H) $(CPU_H)
@@ -552,27 +546,6 @@ hw_vm.o: hw_vm.c $(DEVICE_TABLE_H) $(CPU_H)
 
 
 
-# real packages
-$(srcdir)/pk.h: $(MAINT) tmp-pk
-	@true
-tmp-pk: $(srcdir)/Makefile.in $(PACKAGE_SRC) $(srcroot)/move-if-change
-	$(ECHO_GEN)# The first for loop is to remove duplicates.
-	$(SILENCE) echo "/* Generated file by Makefile.in; do not edit.  */" > tmp-pk.h; \
-	f=""; \
-	for i in $(PACKAGE_SRC) ; do \
-	  case " $$f " in \
-	    *" $$i "*) ;; \
-	    *) f="$$f $$i" ;; \
-	  esac ; \
-	done ; \
-	for pk in $$f ; do echo $$pk ; done \
-	| sed -e 's/^.*pk_\(.*\)\.c/\1/' \
-		-e 's/^/extern package_create_instance_callback pk_/' \
-		-e 's/$$/_create_instance;/' \
-		>> tmp-pk.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-pk.h $(srcdir)/pk.h
-	$(SILENCE) touch $@
-
 pk_disklabel.o: pk_disklabel.c $(DEVICE_TABLE_H) $(PK_H)
 # ignore this line, it stops make from getting confused
 
@@ -580,11 +553,11 @@ pk_disklabel.o: pk_disklabel.c $(DEVICE_TABLE_H) $(PK_H)
 
 tags etags: TAGS
 
-TAGS: $(BUILT_SRC)
-	etags $(srcdir)/*.h $(srcdir)/*.c $(BUILT_SRC)
+TAGS:
+	etags $(srcdir)/*.h $(srcdir)/*.c
 
 clean mostlyclean:
-	rm -f tmp-* *.[oasi] core $(BUILT_SRC_WO_CONFIG)
+	rm -f tmp-* *.[oasi] core
 
 distclean realclean: clean
 	rm -f TAGS Makefile

@@ -281,7 +281,7 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_88 = $(or1k_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_89 = common/libcommon.a \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/defines.h ppc/stamp-igen \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-hw
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-hw ppc/stamp-pk
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_90 = ppc/run
 @SIM_ENABLE_ARCH_ppc_TRUE@am__append_91 = ppc/defines.h \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-defines \
@@ -2987,7 +2987,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_BUILD_OUTPUTS =  \
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(ppc_BUILT_SRC_FROM_IGEN) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-igen ppc/hw.c ppc/hw.h \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-hw
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-hw ppc/stamp-pk
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_IGEN_OPCODE_RULES = ppc/@sim_ppc_opcode@
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_filter_SOURCES = 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_filter_LDADD = ppc/filter-main.o ppc/libigen.a
@@ -3006,6 +3006,7 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_ppc_TRUE@IGEN_OPCODE_RULES = @sim_ppc_opcode@
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_HW_SRC = $(sim_ppc_hw_src:%=ppc/%)
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc_PACKAGE_SRC = ppc/pk_disklabel.c
 @SIM_ENABLE_ARCH_ppc_TRUE@ppcdocdir = $(docdir)/ppc
 @SIM_ENABLE_ARCH_ppc_TRUE@ppcdoc_DATA = ppc/BUGS ppc/INSTALL ppc/README ppc/RUN
 @SIM_ENABLE_ARCH_pru_TRUE@nodist_pru_libsim_a_SOURCES = \
@@ -5885,6 +5886,23 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change ppc/hw.cin ppc/hw.c
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)touch $@
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/hw.c ppc/hw.h: ppc/stamp-igen
+@SIM_ENABLE_ARCH_ppc_TRUE@$(srcdir)/ppc/pk.h: @MAINT@ ppc/stamp-pk ; @true
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc/stamp-pk: $(srcdir)/ppc/Makefile.in $(ppc_PACKAGE_SRC) $(srcroot)/move-if-change
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_GEN)echo "/* Generated file by local.mk; do not edit.  */" > ppc/pk.hin; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	f=""; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	for i in $(ppc_PACKAGE_SRC) ; do \
+@SIM_ENABLE_ARCH_ppc_TRUE@	  case " $$f " in \
+@SIM_ENABLE_ARCH_ppc_TRUE@	    *" $$i "*) ;; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	    *) f="$$f $$i" ;; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	  esac ; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	done ; \
+@SIM_ENABLE_ARCH_ppc_TRUE@	for pk in $$f ; do echo $$pk ; done \
+@SIM_ENABLE_ARCH_ppc_TRUE@	| sed -e 's/^.*pk_\(.*\)\.c/\1/' \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-e 's/^/extern package_create_instance_callback pk_/' \
+@SIM_ENABLE_ARCH_ppc_TRUE@		-e 's/$$/_create_instance;/' \
+@SIM_ENABLE_ARCH_ppc_TRUE@		>> ppc/pk.hin
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change ppc/pk.hin $(srcdir)/ppc/pk.h
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)touch $@
 @SIM_ENABLE_ARCH_pru_TRUE@$(pru_libsim_a_OBJECTS) $(pru_libsim_a_LIBADD): pru/hw-config.h
 
 @SIM_ENABLE_ARCH_pru_TRUE@pru/modules.o: pru/modules.c

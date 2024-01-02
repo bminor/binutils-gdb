@@ -220,5 +220,29 @@ BUILT_SOURCES += \
 SIM_ALL_RECURSIVE_DEPS += %D%/stamp-hw
 %D%/hw.c %D%/hw.h: %D%/stamp-igen
 
+## Real packages
+## NB: The first for loop is to remove duplicates.
+%C%_PACKAGE_SRC = %D%/pk_disklabel.c
+$(srcdir)/%D%/pk.h: @MAINT@ %D%/stamp-pk ; @true
+%D%/stamp-pk: $(srcdir)/%D%/Makefile.in $(%C%_PACKAGE_SRC) $(srcroot)/move-if-change
+	$(AM_V_GEN)echo "/* Generated file by local.mk; do not edit.  */" > %D%/pk.hin; \
+	f=""; \
+	for i in $(%C%_PACKAGE_SRC) ; do \
+	  case " $$f " in \
+	    *" $$i "*) ;; \
+	    *) f="$$f $$i" ;; \
+	  esac ; \
+	done ; \
+	for pk in $$f ; do echo $$pk ; done \
+	| sed -e 's/^.*pk_\(.*\)\.c/\1/' \
+		-e 's/^/extern package_create_instance_callback pk_/' \
+		-e 's/$$/_create_instance;/' \
+		>> %D%/pk.hin
+	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change %D%/pk.hin $(srcdir)/%D%/pk.h
+	$(AM_V_at)touch $@
+
+%C%_BUILD_OUTPUTS += %D%/stamp-pk
+SIM_ALL_RECURSIVE_DEPS += %D%/stamp-pk
+
 %C%docdir = $(docdir)/%C%
 %C%doc_DATA = %D%/BUGS %D%/INSTALL %D%/README %D%/RUN
