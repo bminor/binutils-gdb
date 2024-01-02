@@ -289,23 +289,23 @@ AC_CONFIG_HEADER(config.h:config.in)
 
 
 dnl Figure out what type of termio/termios support there is
-AC_MSG_CHECKING(for struct termios)
-AC_CACHE_VAL(ac_cv_termios_struct,
-[AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/termios.h>],
-[static struct termios x;
- x.c_iflag = 0;
- x.c_oflag = 0;
- x.c_cflag = 0;
- x.c_lflag = 0;
- x.c_cc[NCCS] = 0;],
-ac_cv_termios_struct=yes, ac_cv_termios_struct=no)])
-AC_MSG_RESULT($ac_cv_termios_struct)
-if test $ac_cv_termios_struct = yes; then
+AC_CACHE_CHECK([for struct termios],
+  [sim_cv_termios_struct],
+  [AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/termios.h>], [
+  static struct termios x;
+  x.c_iflag = 0;
+  x.c_oflag = 0;
+  x.c_cflag = 0;
+  x.c_lflag = 0;
+  x.c_cc[NCCS] = 0;
+], [sim_cv_termios_struct="yes"], [sim_cv_termios_struct="no"])])
+if test $sim_cv_termios_struct = yes; then
   AC_DEFINE([HAVE_TERMIOS_STRUCTURE], 1, [Define if struct termios exists.])
 fi
 
-if test "$ac_cv_termios_struct" = "yes"; then
+if test "$sim_cv_termios_struct" = "yes"; then
   AC_CACHE_VAL([sim_cv_termios_cline])
   AC_CHECK_MEMBER(
     [struct termios.c_line],
@@ -321,27 +321,27 @@ else
   sim_cv_termios_cline=no
 fi
 
-if test "$ac_cv_termios_struct" != "yes"; then
-  AC_MSG_CHECKING(for struct termio)
-  AC_CACHE_VAL(ac_cv_termio_struct,
-  [AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/termio.h>],
-[static struct termio x;
- x.c_iflag = 0;
- x.c_oflag = 0;
- x.c_cflag = 0;
- x.c_lflag = 0;
- x.c_cc[NCC] = 0;],
-ac_cv_termio_struct=yes, ac_cv_termio_struct=no)])
-  AC_MSG_RESULT($ac_cv_termio_struct)
-  if test $ac_cv_termio_struct = yes; then
+if test "$sim_cv_termios_struct" != "yes"; then
+  AC_CACHE_CHECK([for struct termio],
+    [sim_cv_termio_struct],
+    [AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/termio.h>], [
+  static struct termio x;
+  x.c_iflag = 0;
+  x.c_oflag = 0;
+  x.c_cflag = 0;
+  x.c_lflag = 0;
+  x.c_cc[NCC] = 0;
+], [sim_cv_termio_struct="yes"], [sim_cv_termio_struct="no"])])
+  if test $sim_cv_termio_struct = yes; then
     AC_DEFINE([HAVE_TERMIO_STRUCTURE], 1, [Define if struct termio exists.])
   fi
 else
-  ac_cv_termio_struct=no
+  sim_cv_termio_struct=no
 fi
 
-if test "$ac_cv_termio_struct" = "yes"; then
+if test "$sim_cv_termio_struct" = "yes"; then
   AC_CACHE_VAL([sim_cv_termio_cline])
   AC_CHECK_MEMBER(
     [struct termio.c_line],
