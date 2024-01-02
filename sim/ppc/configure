@@ -3144,7 +3144,7 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if union semun defined" >&5
 $as_echo_n "checking if union semun defined... " >&6; }
-if ${ac_cv_HAS_UNION_SEMUN+:} false; then :
+if ${ac_cv_has_union_semun+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -3167,12 +3167,9 @@ else
   ac_cv_has_union_semun="no"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_has_union_semun" >&5
 $as_echo "$ac_cv_has_union_semun" >&6; }
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_HAS_UNION_SEMUN" >&5
-$as_echo "$ac_cv_HAS_UNION_SEMUN" >&6; }
 
 
 if test "$ac_cv_has_union_semun" = "yes"; then
