@@ -15502,7 +15502,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " ppc"
       ac_config_files="$ac_config_files ppc/Makefile"
 
-    subdirs="$subdirs ppc"
 
   ac_config_files="$ac_config_files ppc/.gdbinit:common/gdbinit.in"
 

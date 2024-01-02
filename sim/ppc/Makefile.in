@@ -97,10 +97,7 @@ INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) -I../..
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
 BFD_LIB		= ../../bfd/libbfd.la
 
-
-TARGETLIB	= libsim.a
-
-all:	$(TARGETLIB) $(GDB_OBJ)
+all:
 
 .c.o:
 	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) $<
@@ -443,10 +440,6 @@ HW_OBJ = @sim_ppc_hw_obj@
 PACKAGE_SRC = pk_disklabel.c
 PACKAGE_OBJ = $(PACKAGE_SRC:.c=.o)
 
-
-$(TARGETLIB): defines.h $(LIB_OBJ) $(GDB_OBJ)
-	$(ECHO_AR) $(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
-	$(ECHO_RANLIB) $(RANLIB) $(TARGETLIB)
 
 psim.o: psim.c $(CPU_H) $(IDECODE_H) $(OPTIONS_H) $(TREE_H) $(BFD_H)
 

@@ -64,7 +64,6 @@ m4_define([SIM_BUILD_TARGET], [dnl
   AS_VAR_APPEND([SIM_ENABLED_ARCHES], [" $1"])
   m4_if($2, [true], [dnl
     AC_CONFIG_FILES($1/Makefile)
-    subdirs="$subdirs $1"
   ])
   AC_CONFIG_FILES($1/.gdbinit:common/gdbinit.in)
 ])

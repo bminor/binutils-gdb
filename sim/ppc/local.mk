@@ -26,6 +26,53 @@ AM_CPPFLAGS_%C% = \
 	$(sim_ppc_model) $(sim_ppc_default_model) $(sim_ppc_model_issue) \
 	$(sim_ppc_switch)
 
+%C%_libsim_a_SOURCES = \
+	$(common_libcommon_a_SOURCES)
+%C%_libsim_a_LIBADD = \
+	%D%/debug.o \
+	%D%/bits.o \
+	%D%/sim-endian.o \
+	%D%/os_emul.o \
+	%D%/emul_generic.o \
+	%D%/emul_bugapi.o \
+	%D%/emul_chirp.o \
+	%D%/emul_netbsd.o \
+	%D%/emul_unix.o \
+	%D%/registers.o \
+	%D%/vm.o \
+	%D%/corefile.o \
+	%D%/model.o \
+	%D%/spreg.o \
+	%D%/cpu.o \
+	%D%/interrupts.o \
+	%D%/events.o \
+	%D%/cap.o \
+	%D%/device.o \
+	%D%/tree.o \
+	%D%/device_table.o \
+	%D%/itable.o \
+	%D%/mon.o \
+	%D%/icache.o \
+	%D%/semantics.o \
+	%D%/idecode.o \
+	%D%/support.o \
+	%D%/sim-fpu.o \
+	%D%/psim.o \
+	%D%/pk_disklabel.o \
+	$(patsubst %,%D%/%,$(sim_ppc_hw_obj)) \
+	%D%/options.o \
+	%D%/gdb-sim.o \
+	%D%/sim_calls.o
+
+noinst_LIBRARIES += %D%/libsim.a
+
+## common/sim-endian.c is matched before ppc/sim-endian.c due to the pattern
+## rule below.  Force the ppc version until we can unify the two properly.
+%D%/sim-endian.o: $(srcdir)/%D%/sim-endian.c ; $(SIM_COMPILE)
+
+%D%/%.o: common/%.c ; $(SIM_COMPILE)
+-@am__include@ %D%/$(DEPDIR)/*.Po
+
 %C%_run_SOURCES = \
 	%D%/main.c
 %C%_run_LDADD = \
@@ -34,13 +81,11 @@ AM_CPPFLAGS_%C% = \
 
 ## This makes sure common parts are available before building the arch-subdirs
 ## which will refer to these.
-SIM_ALL_RECURSIVE_DEPS += common/libcommon.a
-%D%/libsim.a: common/libcommon.a
+%D%/%.o: %D%/%.c | common/libcommon.a %D%/defines.h %D%/stamp-igen %D%/hw.c %D%/hw.h
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 noinst_PROGRAMS += %D%/run
 
-SIM_ALL_RECURSIVE_DEPS += %D%/defines.h
 %D%/defines.h: %D%/stamp-defines ; @true
 %D%/stamp-defines: config.h Makefile
 	$(AM_V_GEN)sed -n -e '/^#define HAVE_/s/ 1$$/",/' -e '/^#define HAVE_/s//"HAVE_/p' < config.h > %D%/defines.hin
@@ -120,7 +165,6 @@ BUILT_SOURCES += \
 	$(%C%_BUILT_SRC_FROM_IGEN) \
 	%D%/stamp-igen
 
-SIM_ALL_RECURSIVE_DEPS += %D%/stamp-igen
 $(%C%_BUILT_SRC_FROM_IGEN): %D%/stamp-igen
 
 %C%_IGEN_OPCODE_RULES = %D%/@sim_ppc_opcode@
@@ -224,7 +268,6 @@ BUILT_SOURCES += \
 	%D%/hw.c \
 	%D%/hw.h \
 	%D%/stamp-hw
-SIM_ALL_RECURSIVE_DEPS += %D%/stamp-hw
 %D%/hw.c %D%/hw.h: %D%/stamp-igen
 
 ## Real packages
@@ -249,7 +292,6 @@ $(srcdir)/%D%/pk.h: @MAINT@ %D%/stamp-pk ; @true
 	$(AM_V_at)touch $@
 
 %C%_BUILD_OUTPUTS += %D%/stamp-pk
-SIM_ALL_RECURSIVE_DEPS += %D%/stamp-pk
 
 %C%docdir = $(docdir)/%C%
 %C%doc_DATA = %D%/BUGS %D%/INSTALL %D%/README %D%/RUN
