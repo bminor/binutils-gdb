@@ -5150,6 +5150,8 @@ proc quote_for_host { args } {
 #     debug information
 #   - text_segment=addr: Tell the linker to place the text segment at ADDR.
 #   - build-id: Ensure the final binary includes a build-id.
+#   - column-info/no-column-info: Enable/Disable generation of column table
+#     information.
 #
 # And here are some of the not too obscure options understood by DejaGnu that
 # influence the compilation:
@@ -5359,6 +5361,38 @@ proc gdb_compile {source dest type options} {
             } else {
                 error "Don't know how to handle text_segment option."
             }
+	} elseif { $opt == "column-info" } {
+	    # If GCC or clang does not support column-info, compilation
+	    # will fail and the usupported column-info option will be
+	    # reported as such.
+	    if {[test_compiler_info {gcc-*}]} {
+		lappend new_options "additional_flags=-gcolumn-info"
+
+	    } elseif {[test_compiler_info {clang-*}]} {
+		lappend new_options "additional_flags=-gcolumn-info"
+
+	    } else {
+		error "Option gcolumn-info not supported by compiler."
+	    }
+
+	} elseif { $opt == "no-column-info" } {
+	    if {[test_compiler_info {gcc-*}]} {
+		if {[test_compiler_info {gcc-[1-6]-*}]} {
+		    # In this case, don't add the compile line option and
+		    # the result will be the same as using no-column-info
+		    # on a version that supports the option.
+		    warning "gdb_compile option no-column-info not supported, ignoring."
+		} else {
+		    lappend new_options "additional_flags=-gno-column-info"
+		}
+
+	    } elseif {[test_compiler_info {clang-*}]} {
+		lappend new_options "additional_flags=-gno-column-info"
+
+	    } else {
+		error "Option gno-column-info not supported by compiler."
+	    }
+
         } else {
             lappend new_options $opt
         }
