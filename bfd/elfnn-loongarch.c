@@ -4309,8 +4309,8 @@ loongarch_relax_align (bfd *abfd, asection *sec,
 {
   bfd_vma  addend, max = 0, alignment = 1;
 
-  int index = ELFNN_R_SYM (rel->r_info);
-  if (index > 0)
+  int sym_index = ELFNN_R_SYM (rel->r_info);
+  if (sym_index > 0)
     {
       alignment = 1 << (rel->r_addend & 0xff);
       max = rel->r_addend >> 8;
