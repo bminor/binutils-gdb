@@ -91,37 +91,39 @@ dnl in sync with that file.
 if test "${enable_sim}" != no; then
   for targ in `echo $target $enable_targets | sed 's/,/ /g'`
   do
-    SIM_TARGET([aarch64*-*-*], [aarch64])
-    SIM_TARGET([arm*-*-*], [arm])
-    SIM_TARGET([avr*-*-*], [avr])
-    SIM_TARGET([bfin-*-*], [bfin])
-    SIM_TARGET([bpf-*-*], [bpf])
-    SIM_TARGET([cr16*-*-*], [cr16])
-    SIM_TARGET([cris-*-* | crisv32-*-*], [cris])
-    SIM_TARGET([d10v-*-*], [d10v])
-    SIM_TARGET([frv-*-*], [frv])
-    SIM_TARGET([ft32-*-*], [ft32])
-    SIM_TARGET([h8300*-*-*], [h8300])
-    SIM_TARGET([iq2000-*-*], [iq2000])
-    SIM_TARGET([lm32-*-*], [lm32])
-    SIM_TARGET([m32c-*-*], [m32c])
-    SIM_TARGET([m32r-*-*], [m32r])
-    SIM_TARGET([m68hc11-*-*|m6811-*-*], [m68hc11])
-    SIM_TARGET([mcore-*-*], [mcore])
-    SIM_TARGET([microblaze*-*-*], [microblaze])
-    SIM_TARGET([mips*-*-*], [mips])
-    SIM_TARGET([mn10300*-*-*], [mn10300])
-    SIM_TARGET([moxie-*-*], [moxie])
-    SIM_TARGET([msp430*-*-*], [msp430])
-    SIM_TARGET([or1k*-*-*], [or1k])
-    SIM_TARGET([powerpc*-*-*], [ppc])
-    SIM_TARGET([pru*-*-*], [pru])
-    SIM_TARGET([riscv*-*-*], [riscv])
-    SIM_TARGET([rl78-*-*], [rl78])
-    SIM_TARGET([rx-*-*], [rx])
-    SIM_TARGET([sh*-*-*], [sh])
-    SIM_TARGET([sparc-*-*], [erc32])
-    SIM_TARGET([v850*-*-*], [v850])
+    m4_map([SIM_TARGET], [
+      [[aarch64*-*-*], [aarch64]],
+      [[arm*-*-*], [arm]],
+      [[avr*-*-*], [avr]],
+      [[bfin-*-*], [bfin]],
+      [[bpf-*-*], [bpf]],
+      [[cr16*-*-*], [cr16]],
+      [[cris-*-* | crisv32-*-*], [cris]],
+      [[d10v-*-*], [d10v]],
+      [[frv-*-*], [frv]],
+      [[ft32-*-*], [ft32]],
+      [[h8300*-*-*], [h8300]],
+      [[iq2000-*-*], [iq2000]],
+      [[lm32-*-*], [lm32]],
+      [[m32c-*-*], [m32c]],
+      [[m32r-*-*], [m32r]],
+      [[m68hc11-*-*|m6811-*-*], [m68hc11]],
+      [[mcore-*-*], [mcore]],
+      [[microblaze*-*-*], [microblaze]],
+      [[mips*-*-*], [mips]],
+      [[mn10300*-*-*], [mn10300]],
+      [[moxie-*-*], [moxie]],
+      [[msp430*-*-*], [msp430]],
+      [[or1k*-*-*], [or1k]],
+      [[powerpc*-*-*], [ppc]],
+      [[pru*-*-*], [pru]],
+      [[riscv*-*-*], [riscv]],
+      [[rl78-*-*], [rl78]],
+      [[rx-*-*], [rx]],
+      [[sh*-*-*], [sh]],
+      [[sparc-*-*], [erc32]],
+      [[v850*-*-*], [v850]],
+    ])
   done
 
   if test "x${enable_example_sims}" = xyes; then

@@ -14672,8 +14672,7 @@ else
   SIM_ENABLE_ARCH_aarch64_FALSE=
 fi
 
-
-      sim_enable_arch_arm=false
+  sim_enable_arch_arm=false
   case "${targ}" in
     all|arm*-*-*)
       if test "${targ}" = "${target}"; then
@@ -14708,8 +14707,7 @@ else
   SIM_ENABLE_ARCH_arm_FALSE=
 fi
 
-
-      sim_enable_arch_avr=false
+  sim_enable_arch_avr=false
   case "${targ}" in
     all|avr*-*-*)
       if test "${targ}" = "${target}"; then
@@ -14744,8 +14742,7 @@ else
   SIM_ENABLE_ARCH_avr_FALSE=
 fi
 
-
-      sim_enable_arch_bfin=false
+  sim_enable_arch_bfin=false
   case "${targ}" in
     all|bfin-*-*)
       if test "${targ}" = "${target}"; then
@@ -14780,8 +14777,7 @@ else
   SIM_ENABLE_ARCH_bfin_FALSE=
 fi
 
-
-      sim_enable_arch_bpf=false
+  sim_enable_arch_bpf=false
   case "${targ}" in
     all|bpf-*-*)
       if test "${targ}" = "${target}"; then
@@ -14816,8 +14812,7 @@ else
   SIM_ENABLE_ARCH_bpf_FALSE=
 fi
 
-
-      sim_enable_arch_cr16=false
+  sim_enable_arch_cr16=false
   case "${targ}" in
     all|cr16*-*-*)
       if test "${targ}" = "${target}"; then
@@ -14852,8 +14847,7 @@ else
   SIM_ENABLE_ARCH_cr16_FALSE=
 fi
 
-
-      sim_enable_arch_cris=false
+  sim_enable_arch_cris=false
   case "${targ}" in
     all|cris-*-* | crisv32-*-*)
       if test "${targ}" = "${target}"; then
@@ -14888,8 +14882,7 @@ else
   SIM_ENABLE_ARCH_cris_FALSE=
 fi
 
-
-      sim_enable_arch_d10v=false
+  sim_enable_arch_d10v=false
   case "${targ}" in
     all|d10v-*-*)
       if test "${targ}" = "${target}"; then
@@ -14924,8 +14917,7 @@ else
   SIM_ENABLE_ARCH_d10v_FALSE=
 fi
 
-
-      sim_enable_arch_frv=false
+  sim_enable_arch_frv=false
   case "${targ}" in
     all|frv-*-*)
       if test "${targ}" = "${target}"; then
@@ -14960,8 +14952,7 @@ else
   SIM_ENABLE_ARCH_frv_FALSE=
 fi
 
-
-      sim_enable_arch_ft32=false
+  sim_enable_arch_ft32=false
   case "${targ}" in
     all|ft32-*-*)
       if test "${targ}" = "${target}"; then
@@ -14996,8 +14987,7 @@ else
   SIM_ENABLE_ARCH_ft32_FALSE=
 fi
 
-
-      sim_enable_arch_h8300=false
+  sim_enable_arch_h8300=false
   case "${targ}" in
     all|h8300*-*-*)
       if test "${targ}" = "${target}"; then
@@ -15032,8 +15022,7 @@ else
   SIM_ENABLE_ARCH_h8300_FALSE=
 fi
 
-
-      sim_enable_arch_iq2000=false
+  sim_enable_arch_iq2000=false
   case "${targ}" in
     all|iq2000-*-*)
       if test "${targ}" = "${target}"; then
@@ -15068,8 +15057,7 @@ else
   SIM_ENABLE_ARCH_iq2000_FALSE=
 fi
 
-
-      sim_enable_arch_lm32=false
+  sim_enable_arch_lm32=false
   case "${targ}" in
     all|lm32-*-*)
       if test "${targ}" = "${target}"; then
@@ -15104,8 +15092,7 @@ else
   SIM_ENABLE_ARCH_lm32_FALSE=
 fi
 
-
-      sim_enable_arch_m32c=false
+  sim_enable_arch_m32c=false
   case "${targ}" in
     all|m32c-*-*)
       if test "${targ}" = "${target}"; then
@@ -15140,8 +15127,7 @@ else
   SIM_ENABLE_ARCH_m32c_FALSE=
 fi
 
-
-      sim_enable_arch_m32r=false
+  sim_enable_arch_m32r=false
   case "${targ}" in
     all|m32r-*-*)
       if test "${targ}" = "${target}"; then
@@ -15176,8 +15162,7 @@ else
   SIM_ENABLE_ARCH_m32r_FALSE=
 fi
 
-
-      sim_enable_arch_m68hc11=false
+  sim_enable_arch_m68hc11=false
   case "${targ}" in
     all|m68hc11-*-*|m6811-*-*)
       if test "${targ}" = "${target}"; then
@@ -15212,8 +15197,7 @@ else
   SIM_ENABLE_ARCH_m68hc11_FALSE=
 fi
 
-
-      sim_enable_arch_mcore=false
+  sim_enable_arch_mcore=false
   case "${targ}" in
     all|mcore-*-*)
       if test "${targ}" = "${target}"; then
@@ -15248,8 +15232,7 @@ else
   SIM_ENABLE_ARCH_mcore_FALSE=
 fi
 
-
-      sim_enable_arch_microblaze=false
+  sim_enable_arch_microblaze=false
   case "${targ}" in
     all|microblaze*-*-*)
       if test "${targ}" = "${target}"; then
@@ -15284,8 +15267,7 @@ else
   SIM_ENABLE_ARCH_microblaze_FALSE=
 fi
 
-
-      sim_enable_arch_mips=false
+  sim_enable_arch_mips=false
   case "${targ}" in
     all|mips*-*-*)
       if test "${targ}" = "${target}"; then
@@ -15320,8 +15302,7 @@ else
   SIM_ENABLE_ARCH_mips_FALSE=
 fi
 
-
-      sim_enable_arch_mn10300=false
+  sim_enable_arch_mn10300=false
   case "${targ}" in
     all|mn10300*-*-*)
       if test "${targ}" = "${target}"; then
@@ -15356,8 +15337,7 @@ else
   SIM_ENABLE_ARCH_mn10300_FALSE=
 fi
 
-
-      sim_enable_arch_moxie=false
+  sim_enable_arch_moxie=false
   case "${targ}" in
     all|moxie-*-*)
       if test "${targ}" = "${target}"; then
@@ -15392,8 +15372,7 @@ else
   SIM_ENABLE_ARCH_moxie_FALSE=
 fi
 
-
-      sim_enable_arch_msp430=false
+  sim_enable_arch_msp430=false
   case "${targ}" in
     all|msp430*-*-*)
       if test "${targ}" = "${target}"; then
@@ -15428,8 +15407,7 @@ else
   SIM_ENABLE_ARCH_msp430_FALSE=
 fi
 
-
-      sim_enable_arch_or1k=false
+  sim_enable_arch_or1k=false
   case "${targ}" in
     all|or1k*-*-*)
       if test "${targ}" = "${target}"; then
@@ -15464,8 +15442,7 @@ else
   SIM_ENABLE_ARCH_or1k_FALSE=
 fi
 
-
-      sim_enable_arch_ppc=false
+  sim_enable_arch_ppc=false
   case "${targ}" in
     all|powerpc*-*-*)
       if test "${targ}" = "${target}"; then
@@ -15500,8 +15477,7 @@ else
   SIM_ENABLE_ARCH_ppc_FALSE=
 fi
 
-
-      sim_enable_arch_pru=false
+  sim_enable_arch_pru=false
   case "${targ}" in
     all|pru*-*-*)
       if test "${targ}" = "${target}"; then
@@ -15536,8 +15512,7 @@ else
   SIM_ENABLE_ARCH_pru_FALSE=
 fi
 
-
-      sim_enable_arch_riscv=false
+  sim_enable_arch_riscv=false
   case "${targ}" in
     all|riscv*-*-*)
       if test "${targ}" = "${target}"; then
@@ -15572,8 +15547,7 @@ else
   SIM_ENABLE_ARCH_riscv_FALSE=
 fi
 
-
-      sim_enable_arch_rl78=false
+  sim_enable_arch_rl78=false
   case "${targ}" in
     all|rl78-*-*)
       if test "${targ}" = "${target}"; then
@@ -15608,8 +15582,7 @@ else
   SIM_ENABLE_ARCH_rl78_FALSE=
 fi
 
-
-      sim_enable_arch_rx=false
+  sim_enable_arch_rx=false
   case "${targ}" in
     all|rx-*-*)
       if test "${targ}" = "${target}"; then
@@ -15644,8 +15617,7 @@ else
   SIM_ENABLE_ARCH_rx_FALSE=
 fi
 
-
-      sim_enable_arch_sh=false
+  sim_enable_arch_sh=false
   case "${targ}" in
     all|sh*-*-*)
       if test "${targ}" = "${target}"; then
@@ -15680,8 +15652,7 @@ else
   SIM_ENABLE_ARCH_sh_FALSE=
 fi
 
-
-      sim_enable_arch_erc32=false
+  sim_enable_arch_erc32=false
   case "${targ}" in
     all|sparc-*-*)
       if test "${targ}" = "${target}"; then
@@ -15716,8 +15687,7 @@ else
   SIM_ENABLE_ARCH_erc32_FALSE=
 fi
 
-
-      sim_enable_arch_v850=false
+  sim_enable_arch_v850=false
   case "${targ}" in
     all|v850*-*-*)
       if test "${targ}" = "${target}"; then
