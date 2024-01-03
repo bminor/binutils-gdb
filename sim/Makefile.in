@@ -813,9 +813,11 @@ or1k_libsim_a_OBJECTS = $(am_or1k_libsim_a_OBJECTS) \
 	$(nodist_or1k_libsim_a_OBJECTS)
 ppc_libigen_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_libigen_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_ppc_TRUE@	igen/filter_host.o igen/misc.o
+@SIM_ENABLE_ARCH_ppc_TRUE@	igen/filter_host.o igen/lf.o \
+@SIM_ENABLE_ARCH_ppc_TRUE@	igen/misc.o
 @SIM_ENABLE_ARCH_ppc_TRUE@am_ppc_libigen_a_OBJECTS =  \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/table.$(OBJEXT) ppc/lf.$(OBJEXT) \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/table.$(OBJEXT) \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/lf-ppc.$(OBJEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/dumpf.$(OBJEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-decode.$(OBJEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-cache.$(OBJEXT) \
@@ -2991,7 +2993,7 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_libigen_a_SOURCES = \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/table.c \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/lf.c \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/lf-ppc.c \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/dumpf.c \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-decode.c \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-cache.c \
@@ -3006,6 +3008,7 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_libigen_a_LIBADD = \
 @SIM_ENABLE_ARCH_ppc_TRUE@	igen/filter_host.o \
+@SIM_ENABLE_ARCH_ppc_TRUE@	igen/lf.o \
 @SIM_ENABLE_ARCH_ppc_TRUE@	igen/misc.o
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_igen_SOURCES = ppc/igen.c
@@ -3746,7 +3749,8 @@ ppc/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) ppc/$(DEPDIR)
 	@: > ppc/$(DEPDIR)/$(am__dirstamp)
 ppc/table.$(OBJEXT): ppc/$(am__dirstamp) ppc/$(DEPDIR)/$(am__dirstamp)
-ppc/lf.$(OBJEXT): ppc/$(am__dirstamp) ppc/$(DEPDIR)/$(am__dirstamp)
+ppc/lf-ppc.$(OBJEXT): ppc/$(am__dirstamp) \
+	ppc/$(DEPDIR)/$(am__dirstamp)
 ppc/dumpf.$(OBJEXT): ppc/$(am__dirstamp) ppc/$(DEPDIR)/$(am__dirstamp)
 ppc/ld-decode.$(OBJEXT): ppc/$(am__dirstamp) \
 	ppc/$(DEPDIR)/$(am__dirstamp)
@@ -4223,7 +4227,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/ld-cache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/ld-decode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/ld-insn.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/lf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/lf-ppc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@pru/$(DEPDIR)/modules.Po@am__quote@

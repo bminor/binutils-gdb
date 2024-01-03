@@ -19,6 +19,7 @@
 
 #include "misc.h"
 #include "lf.h"
+#include "lf-ppc.h"
 #include "table.h"
 
 #include "filter.h"
@@ -1217,7 +1218,7 @@ print_jump_internal_function(insn_table *table,
     lf_indent(file, +2);
     lf_printf(file, "const unsigned_word cia = nia;\n");
     lf_print__c_code(file, function->annex);
-    lf_print__internal_reference(file);
+    lf_print__internal_ref(file);
     lf_printf(file, "error(\"Internal function must longjump\\n\");\n");
     lf_indent(file, -2);
     lf_printf(file, "}\n");
@@ -1447,7 +1448,7 @@ print_idecode_run_function_header(lf *file,
 {
   int indent;
   lf_printf(file, "\n");
-  lf_print_function_type(file, "void", "PSIM_INLINE_IDECODE", (is_definition ? " " : "\n"));
+  lf_print__function_type(file, "void", "PSIM_INLINE_IDECODE", (is_definition ? " " : "\n"));
   indent = lf_putstr(file, (can_stop ? "idecode_run_until_stop" : "idecode_run"));
   if (is_definition)
     lf_putstr(file, "\n");

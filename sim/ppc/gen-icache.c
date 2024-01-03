@@ -21,6 +21,7 @@
 
 #include "misc.h"
 #include "lf.h"
+#include "lf-ppc.h"
 #include "table.h"
 
 #include "filter.h"
@@ -44,7 +45,7 @@ print_icache_function_header(lf *file,
 			     int is_function_definition)
 {
   lf_printf(file, "\n");
-  lf_print_function_type(file, ICACHE_FUNCTION_TYPE, "EXTERN_ICACHE", " ");
+  lf_print__function_type(file, ICACHE_FUNCTION_TYPE, "EXTERN_ICACHE", " ");
   print_function_name(file,
 		      basename,
 		      expanded_bits,
@@ -111,7 +112,7 @@ print_icache_extraction(lf *file,
   }
   else {
     if (file_name != NULL)
-      lf_print__external_reference(file, line_nr, file_name);
+      lf_print__external_ref(file, line_nr, file_name);
     lf_printf(file, "%s const %s ATTRIBUTE_UNUSED = ",
 	      entry_type == NULL ? "unsigned" : entry_type,
 	      entry_name);
@@ -344,7 +345,7 @@ print_icache_body(lf *file,
     }
   }
 
-  lf_print__internal_reference(file);
+  lf_print__internal_ref(file);
 
   if ((code & generate_with_insn_in_icache)) {
     lf_printf(file, "\n");
@@ -499,7 +500,7 @@ print_icache_function(lf *file,
 
   /* generate code to enter decoded instruction into the icache */
   lf_printf(file, "\n");
-  lf_print_function_type(file, ICACHE_FUNCTION_TYPE, "EXTERN_ICACHE", "\n");
+  lf_print__function_type(file, ICACHE_FUNCTION_TYPE, "EXTERN_ICACHE", "\n");
   indent = print_function_name(file,
 			       instruction->file_entry->fields[insn_name],
 			       expanded_bits,
@@ -623,7 +624,7 @@ print_icache_internal_function_declaration(insn_table *table,
   ASSERT((code & generate_with_icache) != 0);
   if (it_is("internal", function->fields[insn_flags])) {
     lf_printf(file, "\n");
-    lf_print_function_type(file, ICACHE_FUNCTION_TYPE, "PSIM_INLINE_ICACHE",
+    lf_print__function_type(file, ICACHE_FUNCTION_TYPE, "PSIM_INLINE_ICACHE",
 			   "\n");
     print_function_name(file,
 			function->fields[insn_name],
@@ -643,7 +644,7 @@ print_icache_internal_function_definition(insn_table *table,
   ASSERT((code & generate_with_icache) != 0);
   if (it_is("internal", function->fields[insn_flags])) {
     lf_printf(file, "\n");
-    lf_print_function_type(file, ICACHE_FUNCTION_TYPE, "PSIM_INLINE_ICACHE",
+    lf_print__function_type(file, ICACHE_FUNCTION_TYPE, "PSIM_INLINE_ICACHE",
 			   "\n");
     print_function_name(file,
 			function->fields[insn_name],
@@ -668,7 +669,7 @@ print_icache_internal_function_definition(insn_table *table,
       lf_printf(file, ";\n");
     }
     
-    lf_print__internal_reference(file);
+    lf_print__internal_ref(file);
     lf_indent(file, -2);
     lf_printf(file, "}\n");
   }

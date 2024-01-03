@@ -158,12 +158,12 @@ print_itrace(lf *file,
 	     table_entry *file_entry,
 	     int idecode)
 {
-  lf_print__external_reference(file, file_entry->line_nr, file_entry->file_name);
+  lf_print__external_ref(file, file_entry->line_nr, file_entry->file_name);
   lf_printf(file, "ITRACE(trace_%s, (\"%s %s\\n\"));\n",
 	    (idecode ? "idecode" : "semantics"),
 	    (idecode ? "idecode" : "semantics"),
 	    file_entry->fields[insn_name]);
-  lf_print__internal_reference(file);
+  lf_print__internal_ref(file);
 }
 
 
@@ -201,7 +201,7 @@ gen_semantics_h(insn_table *table,
     
   }
   else {
-    lf_print__this_file_is_empty(file);
+    lf_print__this_file_is_empty(file, "generating jumps");
   }
 }
 
@@ -250,7 +250,7 @@ gen_semantics_c(insn_table *table,
     
   }
   else {
-    lf_print__this_file_is_empty(file);
+    lf_print__this_file_is_empty(file, "generating jump engine");
   }
 }
 
@@ -287,7 +287,7 @@ gen_icache_h(insn_table *table,
     
   }
   else {
-    lf_print__this_file_is_empty(file);
+    lf_print__this_file_is_empty(file, "generating jump engine");
   }
 }
 
@@ -331,7 +331,7 @@ gen_icache_c(insn_table *table,
     
   }
   else {
-    lf_print__this_file_is_empty(file);
+    lf_print__this_file_is_empty(file, "generating jump engine");
   }
 }
 

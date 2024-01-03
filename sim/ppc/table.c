@@ -341,7 +341,7 @@ extern void
 table_entry_print_cpp_line_nr(lf *file,
 			      table_entry *entry)
 {
-  lf_print__external_reference(file, entry->line_nr, entry->file_name);
+  lf_print__external_ref(file, entry->line_nr, entry->file_name);
 }
 
 

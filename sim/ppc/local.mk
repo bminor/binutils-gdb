@@ -100,7 +100,7 @@ MOSTLYCLEANFILES += %D%/defines.h %D%/stamp-defines
 EXTRA_LIBRARIES += %D%/libigen.a
 %C%_libigen_a_SOURCES = \
 	%D%/table.c \
-	%D%/lf.c \
+	%D%/lf-ppc.c \
 	%D%/dumpf.c \
 	%D%/ld-decode.c \
 	%D%/ld-cache.c \
@@ -114,6 +114,7 @@ EXTRA_LIBRARIES += %D%/libigen.a
 	%D%/gen-support.c
 %C%_libigen_a_LIBADD = \
 	igen/filter_host.o \
+	igen/lf.o \
 	igen/misc.o
 
 %C%_igen_SOURCES = %D%/igen.c
