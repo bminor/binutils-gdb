@@ -19,7 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
+#ifndef IGEN_MISC_H
+#define IGEN_MISC_H
 
 /* Frustrating header junk */
 
@@ -102,3 +103,5 @@ name_map;
 extern int name2i (const char *name, const name_map * map);
 
 extern const char *i2name (const int i, const name_map * map);
+
+#endif /* IGEN_MISC_H */

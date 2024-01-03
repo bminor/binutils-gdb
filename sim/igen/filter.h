@@ -19,6 +19,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef IGEN_FILTER_H
+#define IGEN_FILTER_H
+
+#include "lf.h"
 
 /* NB, an empty filter is NULL */
 typedef struct _filter filter;
@@ -68,3 +72,5 @@ const char *filter_next (const filter *set, const char *member);
 
 extern void dump_filter
   (lf *file, const char *prefix, const filter *filt, const char *suffix);
+
+#endif /* IGEN_FILTER_H */

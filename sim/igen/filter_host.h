@@ -19,9 +19,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef _FILTER_HOST_H
-#define _FILTER_HOST_H
+#ifndef IGEN_FILTER_HOST_H
+#define IGEN_FILTER_HOST_H
 
 /* Remove directory part from filename */
 extern const char *filter_filename (const char *filename);
-#endif
+
+#endif /* IGEN_FILTER_HOST_H */

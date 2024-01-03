@@ -19,10 +19,13 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
+#ifndef IGEN_GEN_ITABLE_H
+#define IGEN_GEN_ITABLE_H
 
 /* Output a table of all the instructions */
 
 extern void gen_itable_h (lf *file, const insn_table *table);
 
 extern void gen_itable_c (lf *file, const insn_table *table);
+
+#endif /* IGEN_GEN_ITABLE_H */

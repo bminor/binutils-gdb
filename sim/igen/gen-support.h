@@ -19,7 +19,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef IGEN_GEN_SUPPORT_H
+#define IGEN_GEN_SUPPORT_H
 
 extern void gen_support_h (lf *file, const insn_table *table);
 
 extern void gen_support_c (lf *file, const insn_table *table);
+
+#endif /* IGEN_GEN_SUPPORT_H */

@@ -19,8 +19,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
+#ifndef IGEN_GEN_MODEL_H
+#define IGEN_GEN_MODEL_H
 
 extern void gen_model_h (lf *file, const insn_table *isa);
 
 extern void gen_model_c (lf *file, const insn_table *isa);
+
+#endif /* IGEN_GEN_MODEL_H */
