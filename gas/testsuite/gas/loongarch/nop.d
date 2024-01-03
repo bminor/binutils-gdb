@@ -7,4 +7,4 @@
 Disassembly of section .text:
 
 0+000 <target>:
-[ 	]+0:[ 	]+03400000[ 	]+nop[ 	]+
+[ 	]+0:[ 	]+03400000[ 	]+nop

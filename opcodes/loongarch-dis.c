@@ -267,7 +267,12 @@ disassemble_one (insn_t insn, struct disassemble_info *info)
     }
 
   info->insn_type = dis_nonbranch;
-  info->fprintf_styled_func (info->stream, dis_style_mnemonic, "%-12s", opc->name);
+  if (opc->format == NULL || opc->format[0] == '\0')
+    info->fprintf_styled_func (info->stream, dis_style_mnemonic,
+				"%s", opc->name);
+  else
+    info->fprintf_styled_func (info->stream, dis_style_mnemonic,
+				"%-12s", opc->name);
 
   {
     char *fake_args = xmalloc (strlen (opc->format) + 1);
