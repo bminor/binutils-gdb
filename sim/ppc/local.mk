@@ -67,10 +67,6 @@ AM_CPPFLAGS_%C%_options.o = '-DOPCODE_RULES="$(IGEN_OPCODE_RULES)"' '-DIGEN_FLAG
 
 noinst_LIBRARIES += %D%/libsim.a
 
-## common/sim-endian.c is matched before ppc/sim-endian.c due to the pattern
-## rule below.  Force the ppc version until we can unify the two properly.
-%D%/sim-endian.o: $(srcdir)/%D%/sim-endian.c ; $(SIM_COMPILE)
-
 %D%/%.o: common/%.c ; $(SIM_COMPILE)
 -@am__include@ %D%/$(DEPDIR)/*.Po
 

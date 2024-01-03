@@ -5812,8 +5812,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_GEN)cpu=or1k32bf mach=or32,or32nd FLAGS="with-scache" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
 @SIM_ENABLE_ARCH_or1k_TRUE@$(srcdir)/or1k/cpu.h $(srcdir)/or1k/cpu.c $(srcdir)/or1k/model.c $(srcdir)/or1k/sem.c $(srcdir)/or1k/sem-switch.c $(srcdir)/or1k/decode.c $(srcdir)/or1k/decode.h: @CGEN_MAINT@ or1k/cgen-cpu-decode
 
-@SIM_ENABLE_ARCH_ppc_TRUE@ppc/sim-endian.o: $(srcdir)/ppc/sim-endian.c ; $(SIM_COMPILE)
-
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/%.o: common/%.c ; $(SIM_COMPILE)
 @SIM_ENABLE_ARCH_ppc_TRUE@-@am__include@ ppc/$(DEPDIR)/*.Po
 
