@@ -104,7 +104,7 @@ EXTRA_LIBRARIES += %D%/libigen.a
 	%D%/dumpf.c \
 	%D%/ld-decode.c \
 	%D%/ld-cache.c \
-	%D%/filter.c \
+	%D%/filter-ppc.c \
 	%D%/ld-insn.c \
 	%D%/gen-model.c \
 	%D%/gen-itable.c \
@@ -113,6 +113,7 @@ EXTRA_LIBRARIES += %D%/libigen.a
 	%D%/gen-idecode.c \
 	%D%/gen-support.c
 %C%_libigen_a_LIBADD = \
+	igen/filter.o \
 	igen/filter_host.o \
 	igen/lf.o \
 	igen/misc.o
@@ -199,9 +200,6 @@ $(%C%_libigen_a_OBJECTS) $(%C%_igen_OBJECTS): %D%/%.o: %D%/%.c
 %D%/%-main.o: %D%/%.c
 	$(AM_V_CC)$(COMPILE_FOR_BUILD) -DMAIN -c $< -o $@
 
-%C%_filter_SOURCES =
-%C%_filter_LDADD = %D%/filter-main.o %D%/libigen.a
-
 %C%_ld_cache_SOURCES =
 %C%_ld_cache_LDADD = %D%/ld-cache-main.o %D%/libigen.a
 
@@ -213,7 +211,6 @@ $(%C%_libigen_a_OBJECTS) $(%C%_igen_OBJECTS): %D%/%.o: %D%/%.c
 
 %C%_IGEN_TOOLS = \
 	$(PPC_IGEN) \
-	%D%/filter \
 	%D%/ld-cache \
 	%D%/ld-decode \
 	%D%/ld-insn

@@ -11,32 +11,31 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License
     along with this program; if not, see <http://www.gnu.org/licenses/>.
- 
+
     */
 
+#include <string.h>
 
-typedef struct _filter filter;
+#include "filter-ppc.h"
 
-
-/* append the filter onto the end of the list */
-
-extern filter *new_filter
-(const char *filt,
- filter *filters);
-
-
-/* returns true if the flags are non empty and some are missing from the filter list */
-
-extern int is_filtered_out
-(const char *flags,
- filter *filters);
-
-/* true if the flag is in the list */
-
-extern int it_is
-(const char *flag,
- const char *flags);
-
+int
+it_is(const char *flag,
+      const char *flags)
+{
+  int flag_len = strlen(flag);
+  while (*flags != '\0') {
+    if (!strncmp(flags, flag, flag_len)
+	&& (flags[flag_len] == ',' || flags[flag_len] == '\0'))
+      return 1;
+    while (*flags != ',') {
+      if (*flags == '\0')
+	return 0;
+      flags++;
+    }
+    flags++;
+  }
+  return 0;
+}

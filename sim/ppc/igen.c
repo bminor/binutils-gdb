@@ -480,7 +480,7 @@ main(int argc,
       ASSERT(hi_bit_nr == insn_bit_size-1 || hi_bit_nr == 0);
       break;
     case 'F':
-      filters = new_filter(optarg, filters);
+      filter_parse(&filters, optarg);
       break;
     case 'J':
       code &= ~generate_calls;

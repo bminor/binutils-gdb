@@ -22,6 +22,7 @@
 #include "lf.h"
 #include "table.h"
 #include "filter.h"
+#include "filter-ppc.h"
 #include "ld-decode.h"
 #include "ld-cache.h"
 #include "ld-insn.h"
@@ -219,7 +220,7 @@ parse_include_entry (table *file,
   if (file_entry->nr_fields < 4)
     ERROR ("Incorrect nr fields for include record\n");
   /* process it */
-  if (!is_filtered_out(file_entry->fields[include_flags], filters))
+  if (!is_filtered_out(filters, file_entry->fields[include_flags]))
     {
       table_push (file, includes,
                 file_entry->fields[include_path],
@@ -365,7 +366,7 @@ load_insn_table(const char *file_name,
     }
     else if ((it_is("function", file_entry->fields[insn_form])
 	      || it_is("internal", file_entry->fields[insn_form]))
-	     && !is_filtered_out(file_entry->fields[insn_flags], filters)) {
+	     && !is_filtered_out(filters, file_entry->fields[insn_flags])) {
       /* Ok, this is evil.  Need to convert a new style function into
          an old style function.  Construct an old style table and then
          copy it back.  */
@@ -409,13 +410,13 @@ load_insn_table(const char *file_name,
       model_table_insert_specific(table, file_entry, &model_data, &last_model_data);
     }
     else if (it_is("include", file_entry->fields[insn_form])
-             && !is_filtered_out(file_entry->fields[insn_flags], filters)) {
+             && !is_filtered_out(filters, file_entry->fields[insn_flags])) {
       parse_include_entry (file, file_entry, filters, includes);
     }
     else if ((it_is("cache", file_entry->fields[insn_form])
 	      || it_is("compute", file_entry->fields[insn_form])
 	      || it_is("scratch", file_entry->fields[insn_form]))
-	     && !is_filtered_out(file_entry->fields[insn_flags], filters)) {
+	     && !is_filtered_out(filters, file_entry->fields[insn_flags])) {
       append_cache_rule (cache_rules,
 			 file_entry->fields[insn_form], /* type */
 			 file_entry->fields[cache_name],
@@ -427,7 +428,7 @@ load_insn_table(const char *file_name,
     else {
       insn_fields *fields;
       /* skip instructions that aren't relevant to the mode */
-      if (is_filtered_out(file_entry->fields[insn_flags], filters)) {
+      if (is_filtered_out(filters, file_entry->fields[insn_flags])) {
 	fprintf(stderr, "Dropping %s - %s\n",
 		file_entry->fields[insn_name],
 		file_entry->fields[insn_flags]);
@@ -982,7 +983,7 @@ main(int argc, char **argv)
   if (argc != 5)
     ERROR("Usage: insn <filter> <hi-bit-nr> <decode-table> <insn-table>\n");
 
-  filters = new_filter(argv[1], filters);
+  filter_parse(&filters, argv[1]);
   hi_bit_nr = a2i(argv[2]);
   ASSERT(hi_bit_nr < insn_bit_size);
   decode_rules = load_decode_table(argv[3], hi_bit_nr);

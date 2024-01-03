@@ -23,6 +23,7 @@
 #include "table.h"
 
 #include "filter.h"
+#include "filter-ppc.h"
 
 #include "ld-decode.h"
 #include "ld-cache.h"

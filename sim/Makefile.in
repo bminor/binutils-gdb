@@ -812,7 +812,7 @@ or1k_libsim_a_AR = $(AR) $(ARFLAGS)
 or1k_libsim_a_OBJECTS = $(am_or1k_libsim_a_OBJECTS) \
 	$(nodist_or1k_libsim_a_OBJECTS)
 ppc_libigen_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_ppc_TRUE@ppc_libigen_a_DEPENDENCIES =  \
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc_libigen_a_DEPENDENCIES = igen/filter.o \
 @SIM_ENABLE_ARCH_ppc_TRUE@	igen/filter_host.o igen/lf.o \
 @SIM_ENABLE_ARCH_ppc_TRUE@	igen/misc.o
 @SIM_ENABLE_ARCH_ppc_TRUE@am_ppc_libigen_a_OBJECTS =  \
@@ -821,7 +821,7 @@ ppc_libigen_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/dumpf.$(OBJEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-decode.$(OBJEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-cache.$(OBJEXT) \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/filter.$(OBJEXT) \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/filter-ppc.$(OBJEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-insn.$(OBJEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/gen-model.$(OBJEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/gen-itable.$(OBJEXT) \
@@ -933,7 +933,6 @@ am__EXEEXT_1 = $(IGEN) igen/filter$(EXEEXT) igen/gen$(EXEEXT) \
 @SIM_ENABLE_ARCH_m32c_TRUE@am__EXEEXT_4 = m32c/opc2c$(EXEEXT)
 @SIM_ENABLE_ARCH_m68hc11_TRUE@am__EXEEXT_5 = m68hc11/gencode$(EXEEXT)
 @SIM_ENABLE_ARCH_ppc_TRUE@am__EXEEXT_6 = $(PPC_IGEN) \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/filter$(EXEEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-cache$(EXEEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-decode$(EXEEXT) \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-insn$(EXEEXT)
@@ -1148,10 +1147,6 @@ am_or1k_run_OBJECTS =
 or1k_run_OBJECTS = $(am_or1k_run_OBJECTS)
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k_run_DEPENDENCIES = or1k/nrun.o \
 @SIM_ENABLE_ARCH_or1k_TRUE@	or1k/libsim.a $(am__DEPENDENCIES_4)
-am_ppc_filter_OBJECTS =
-ppc_filter_OBJECTS = $(am_ppc_filter_OBJECTS)
-@SIM_ENABLE_ARCH_ppc_TRUE@ppc_filter_DEPENDENCIES = ppc/filter-main.o \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/libigen.a
 @SIM_ENABLE_ARCH_ppc_TRUE@am_ppc_igen_OBJECTS = ppc/igen.$(OBJEXT)
 ppc_igen_OBJECTS = $(am_ppc_igen_OBJECTS)
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_igen_DEPENDENCIES = ppc/libigen.a
@@ -1311,8 +1306,7 @@ SOURCES = $(aarch64_libsim_a_SOURCES) \
 	$(m68hc11_run_SOURCES) $(mcore_run_SOURCES) \
 	$(microblaze_run_SOURCES) $(mips_run_SOURCES) \
 	$(mn10300_run_SOURCES) $(moxie_run_SOURCES) \
-	$(msp430_run_SOURCES) $(or1k_run_SOURCES) \
-	$(ppc_filter_SOURCES) $(ppc_igen_SOURCES) \
+	$(msp430_run_SOURCES) $(or1k_run_SOURCES) $(ppc_igen_SOURCES) \
 	$(ppc_ld_cache_SOURCES) $(ppc_ld_decode_SOURCES) \
 	$(ppc_ld_insn_SOURCES) $(ppc_run_SOURCES) $(pru_run_SOURCES) \
 	$(riscv_run_SOURCES) $(rl78_run_SOURCES) $(rx_run_SOURCES) \
@@ -2997,7 +2991,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/dumpf.c \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-decode.c \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-cache.c \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/filter.c \
+@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/filter-ppc.c \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-insn.c \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/gen-model.c \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/gen-itable.c \
@@ -3007,6 +3001,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/gen-support.c
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_libigen_a_LIBADD = \
+@SIM_ENABLE_ARCH_ppc_TRUE@	igen/filter.o \
 @SIM_ENABLE_ARCH_ppc_TRUE@	igen/filter_host.o \
 @SIM_ENABLE_ARCH_ppc_TRUE@	igen/lf.o \
 @SIM_ENABLE_ARCH_ppc_TRUE@	igen/misc.o
@@ -3046,8 +3041,6 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-igen ppc/hw.c ppc/hw.h \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/stamp-hw ppc/stamp-pk
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_IGEN_OPCODE_RULES = ppc/@sim_ppc_opcode@
-@SIM_ENABLE_ARCH_ppc_TRUE@ppc_filter_SOURCES = 
-@SIM_ENABLE_ARCH_ppc_TRUE@ppc_filter_LDADD = ppc/filter-main.o ppc/libigen.a
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_ld_cache_SOURCES = 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_ld_cache_LDADD = ppc/ld-cache-main.o ppc/libigen.a
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_ld_decode_SOURCES = 
@@ -3056,7 +3049,6 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_ld_insn_LDADD = ppc/ld-insn-main.o ppc/libigen.a
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc_IGEN_TOOLS = \
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(PPC_IGEN) \
-@SIM_ENABLE_ARCH_ppc_TRUE@	ppc/filter \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-cache \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-decode \
 @SIM_ENABLE_ARCH_ppc_TRUE@	ppc/ld-insn
@@ -3756,7 +3748,7 @@ ppc/ld-decode.$(OBJEXT): ppc/$(am__dirstamp) \
 	ppc/$(DEPDIR)/$(am__dirstamp)
 ppc/ld-cache.$(OBJEXT): ppc/$(am__dirstamp) \
 	ppc/$(DEPDIR)/$(am__dirstamp)
-ppc/filter.$(OBJEXT): ppc/$(am__dirstamp) \
+ppc/filter-ppc.$(OBJEXT): ppc/$(am__dirstamp) \
 	ppc/$(DEPDIR)/$(am__dirstamp)
 ppc/ld-insn.$(OBJEXT): ppc/$(am__dirstamp) \
 	ppc/$(DEPDIR)/$(am__dirstamp)
@@ -4038,10 +4030,6 @@ msp430/run$(EXEEXT): $(msp430_run_OBJECTS) $(msp430_run_DEPENDENCIES) $(EXTRA_ms
 or1k/run$(EXEEXT): $(or1k_run_OBJECTS) $(or1k_run_DEPENDENCIES) $(EXTRA_or1k_run_DEPENDENCIES) or1k/$(am__dirstamp)
 	@rm -f or1k/run$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(or1k_run_OBJECTS) $(or1k_run_LDADD) $(LIBS)
-
-ppc/filter$(EXEEXT): $(ppc_filter_OBJECTS) $(ppc_filter_DEPENDENCIES) $(EXTRA_ppc_filter_DEPENDENCIES) ppc/$(am__dirstamp)
-	@rm -f ppc/filter$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(ppc_filter_OBJECTS) $(ppc_filter_LDADD) $(LIBS)
 ppc/igen.$(OBJEXT): ppc/$(am__dirstamp) ppc/$(DEPDIR)/$(am__dirstamp)
 
 @SIM_ENABLE_ARCH_ppc_FALSE@ppc/igen$(EXEEXT): $(ppc_igen_OBJECTS) $(ppc_igen_DEPENDENCIES) $(EXTRA_ppc_igen_DEPENDENCIES) ppc/$(am__dirstamp)
@@ -4216,7 +4204,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@msp430/$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@or1k/$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/dumpf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/filter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/filter-ppc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/gen-icache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/gen-idecode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ppc/$(DEPDIR)/gen-itable.Po@am__quote@
