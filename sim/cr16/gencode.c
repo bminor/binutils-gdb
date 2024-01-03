@@ -49,9 +49,6 @@ write_header (void)
 {
   int i = 0; 
 
-  /* Start searching from end of instruction table.  */
-  const inst *instruction = &cr16_instruction[NUMOPCODES - 1];
-
   /* Loop over instruction table until a full match is found.  */
   for ( ; i < NUMOPCODES; i++)
     printf("void OP_%lX_%X (SIM_DESC, SIM_CPU *);\t\t/* %s */\n",
@@ -66,7 +63,7 @@ write_header (void)
 static void
 write_template (void)
 {
-  int i = 0,j, k, flags;
+  int i = 0, j, k;
 
   printf ("#include \"defs.h\"\n");
   printf ("#include \"sim-main.h\"\n");
@@ -114,9 +111,10 @@ write_template (void)
 
 
 long Opcodes[512];
-static int curop=0;
 
 #if 0
+static int curop=0;
+
 static void
 check_opcodes( long op)
 {
