@@ -84,6 +84,23 @@ frapy_str (PyObject *self)
   return PyUnicode_FromString (fid.to_string ().c_str ());
 }
 
+/* Implement repr() for gdb.Frame.  */
+
+static PyObject *
+frapy_repr (PyObject *self)
+{
+  frame_object *frame_obj = (frame_object *) self;
+  frame_info_ptr f_info = frame_find_by_id (frame_obj->frame_id);
+  if (f_info == nullptr)
+    return gdb_py_invalid_object_repr (self);
+
+  const frame_id &fid = frame_obj->frame_id;
+  return PyUnicode_FromFormat ("<%s level=%d frame-id=%s>",
+			       Py_TYPE (self)->tp_name,
+			       frame_relative_level (f_info),
+			       fid.to_string ().c_str ());
+}
+
 /* Implementation of gdb.Frame.is_valid (self) -> Boolean.
    Returns True if the frame corresponding to the frame_id of this
    object still exists in the inferior.  */
@@ -840,7 +857,7 @@ PyTypeObject frame_object_type = {
   0,				  /* tp_getattr */
   0,				  /* tp_setattr */
   0,				  /* tp_compare */
-  0,				  /* tp_repr */
+  frapy_repr,			  /* tp_repr */
   0,				  /* tp_as_number */
   0,				  /* tp_as_sequence */
   0,				  /* tp_as_mapping */

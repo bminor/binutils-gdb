@@ -36,6 +36,10 @@ gdb_breakpoint [gdb_get_line_number "Block break here."]
 gdb_continue_to_breakpoint "Block break here."
 gdb_py_test_silent_cmd "python bf1 = gdb.selected_frame ()" "get frame" 0
 
+# Test Frame.__repr__() method for a valid Frame object.
+gdb_test "python print (repr(bf1))" "<gdb\\.Frame level=0 frame-id=\\{\[^\r\n\]+\\}>" \
+    "test __repr__ for gdb.Frame on a valid frame"
+
 # Test Frame.architecture() method.
 gdb_py_test_silent_cmd "python show_arch_str = gdb.execute(\"show architecture\", to_string=True)" "show arch" 0
 gdb_test "python print (bf1.architecture().name() in show_arch_str)" "True" "test Frame.architecture()"
@@ -99,6 +103,10 @@ gdb_continue_to_breakpoint "breakpoint at f2"
 gdb_py_test_silent_cmd "python bframe = gdb.selected_frame()" \
     "get bottommost frame" 0
 gdb_test "up" ".*" ""
+
+# Test Frame.__repr__() method for an invalid Frame object.
+gdb_test "python print (repr(bf1))" "<gdb\\.Frame \\(invalid\\)>" \
+    "test __repr__ for gdb.Frame on an invalid frame"
 
 gdb_py_test_silent_cmd "python f1 = gdb.selected_frame ()" "get second frame" 0
 gdb_py_test_silent_cmd "python f0 = f1.newer ()" "get first frame" 0
