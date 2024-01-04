@@ -49,7 +49,7 @@ of a comment that extends to the end of that line.
 @cindex OpenRISC registers
 @cindex register names, OpenRISC
 
-The OpenRISC register file contains 32 general pupose registers.
+The OpenRISC register file contains 32 general purpose registers.
 
 @itemize @bullet
 @item

@@ -1,5 +1,5 @@
 @c Copyright (C) 2016-2024 Free Software Foundation, Inc.
-@c This is part of the GAS anual.
+@c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo
 @c man end
 
@@ -457,7 +457,7 @@ only accept s0-s1, a0-a5, fs0-fs1 and fa0-fa5.
 @item uimm5 @tab Unsigned 5-bit immediate for operand x.
 @item uimm6 @tab Unsigned 6-bit immediate for operand x.
 @item uimm8 @tab Unsigned 8-bit immediate for operand x.
-@item symbol @tab Symbol or lable reference for operand x.
+@item symbol @tab Symbol or label reference for operand x.
 @end multitable
 @end display
 

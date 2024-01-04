@@ -345,7 +345,7 @@ The V9 address space identifier register is referred to as @samp{%asi}.
 The V9 restorable windows register is referred to as @samp{%canrestore}.
 
 @item
-The V9 savable windows register is referred to as @samp{%cansave}.
+The V9 saveable windows register is referred to as @samp{%cansave}.
 
 @item
 The V9 clean windows register is referred to as @samp{%cleanwin}.

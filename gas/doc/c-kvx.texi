@@ -98,8 +98,8 @@ Print succinct diagnostics on one line.
 @table @code
 
 @cindex @code{.align} directive, KVX
-@item .align ALIGNEMENT
-Pad with NOPs until the next boundary with the required ALIGNEMENT.
+@item .align ALIGNMENT
+Pad with NOPs until the next boundary with the required ALIGNMENT.
 
 @cindex @code{.dword} directive, KVX
 @item .dword
@@ -131,7 +131,7 @@ This directive is only supported when producing ELF files.
 
 @cindex @code{.loc} directive, KVX
 @item .loc FILENO LINENO
-This directive is only supported when producting ELF files.
+This directive is only supported when producing ELF files.
 @pxref{Line,,@code{.line}} for details.
 
 @cindex @code{.proc} directive, KVX

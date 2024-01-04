@@ -1729,7 +1729,7 @@ syntax.
 
 @item @samp{lfs}, @samp{lgs}, and @samp{lss} similarly allow for 16-
 and 32-bit operand size (32- and 48-bit memory operand) in both ISAs,
-while Intel64 additionally supports 64-bit operand sise (80-bit memory
+while Intel64 additionally supports 64-bit operand size (80-bit memory
 operands).
 
 @end itemize

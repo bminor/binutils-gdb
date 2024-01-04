@@ -154,7 +154,7 @@ Extracts most significant word from 32-bit expression 'exp'.
 Extracts 3rd word from 64-bit expression 'exp'.
 
 @item 	hhi(exp)
-Extracts 4rd word from 64-bit expression 'exp'.
+Extracts 4th word from 64-bit expression 'exp'.
 
 @end table
 

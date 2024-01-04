@@ -838,7 +838,7 @@ suffix.
 
 @item --gdwarf-cie-version=@var{version}
 Control which version of DWARF Common Information Entries (CIEs) are produced.
-When this flag is not specificed the default is version 1, though some targets
+When this flag is not specified the default is version 1, though some targets
 can modify this default.  Other possible values for @var{version} are 3 or 4.
 
 @ifset ELF
@@ -5518,7 +5518,7 @@ With this version a separate directory name is allowed, although if this is
 used then @var{filename} should not contain any directory component, except
 for @var{fileno} equal to 0: in this case, @var{dirname} is expected to be
 the current directory and @var{filename} the currently processed file, and
-the latter need not be located in the former. In addtion an MD5 hash value
+the latter need not be located in the former. In addition an MD5 hash value
 of the contents of @var{filename} can be provided. This will be stored in
 the the file table as well, and can be used by tools reading the debug
 information to verify that the contents of the source file match the
@@ -6920,7 +6920,7 @@ must be present along with an additional field like this:
 
 The @var{SymbolName} field specifies the symbol name which the section
 references.  Alternatively a numeric @var{SectionIndex} can be provided.  This
-is not generally a good idea as section indicies are rarely known at assembly
+is not generally a good idea as section indices are rarely known at assembly
 time, but the facility is provided for testing purposes.  An index of zero is
 allowed.  It indicates that the linked-to section has already been discarded.
 
