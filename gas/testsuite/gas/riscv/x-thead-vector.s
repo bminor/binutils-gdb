@@ -1,6 +1,7 @@
 	th.vsetvl a0, a1, a2
 	th.vsetvli a0, a1, 0
 	th.vsetvli a0, a1, 0x7ff
+	th.vsetvli a0, a1, e16,m2,d4
 
 	th.vlb.v v4, (a0)
 	th.vlb.v v4, 0(a0)

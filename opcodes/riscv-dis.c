@@ -653,6 +653,28 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		bool sign;
 		switch (*++oparg)
 		  {
+		  case 'V':
+		   ++oparg;
+		   if (*oparg != 'c')
+		      goto undefined_modifier;
+
+		    int imm = (*oparg == 'b') ? EXTRACT_RVV_VB_IMM (l)
+					      : EXTRACT_RVV_VC_IMM (l);
+		    unsigned int imm_vediv = EXTRACT_OPERAND (XTHEADVEDIV, imm);
+		    unsigned int imm_vlmul = EXTRACT_OPERAND (XTHEADVLMUL, imm);
+		    unsigned int imm_vsew = EXTRACT_OPERAND (XTHEADVSEW, imm);
+		    unsigned int imm_vtype_res
+		      = EXTRACT_OPERAND (XTHEADVTYPE_RES, imm);
+		    if (imm_vsew < ARRAY_SIZE (riscv_vsew)
+			&& imm_vlmul < ARRAY_SIZE (riscv_th_vlen)
+			&& imm_vediv < ARRAY_SIZE (riscv_th_vediv)
+			&& ! imm_vtype_res)
+		      print (info->stream, dis_style_text, "%s,%s,%s",
+			     riscv_vsew[imm_vsew], riscv_th_vlen[imm_vlmul],
+			     riscv_th_vediv[imm_vediv]);
+		    else
+		      print (info->stream, dis_style_immediate, "%d", imm);
+		    break;
 		  case 'l': /* Integer immediate, literal.  */
 		    oparg++;
 		    while (*oparg && *oparg != ',')

@@ -8,8 +8,9 @@ Disassembly of section .text:
 
 0+000 <.text>:
 [ 	]+[0-9a-f]+:[ 	]+80c5f557[ 	]+th.vsetvl[ 	]+a0,a1,a2
-[ 	]+[0-9a-f]+:[ 	]+0005f557[ 	]+th.vsetvli[ 	]+a0,a1,e8,m1,tu,mu
+[ 	]+[0-9a-f]+:[ 	]+0005f557[ 	]+th.vsetvli[ 	]+a0,a1,e8,m1,d1
 [ 	]+[0-9a-f]+:[ 	]+7ff5f557[ 	]+th.vsetvli[ 	]+a0,a1,2047
+[ 	]+[0-9a-f]+:[ 	]+0455f557[ 	]+th.vsetvli[ 	]+a0,a1,e16,m2,d4
 [ 	]+[0-9a-f]+:[ 	]+12050207[ 	]+th.vlb.v[ 	]+v4,\(a0\)
 [ 	]+[0-9a-f]+:[ 	]+12050207[ 	]+th.vlb.v[ 	]+v4,\(a0\)
 [ 	]+[0-9a-f]+:[ 	]+10050207[ 	]+th.vlb.v[ 	]+v4,\(a0\),v0.t

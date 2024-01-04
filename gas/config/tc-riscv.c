@@ -1467,6 +1467,15 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		size_t s;
 		switch (*++oparg)
 		  {
+		  case 'V':
+		    switch (*++oparg)
+		      {
+		      case 'c': /* Vtypei for th.vsetvli.  */
+			used_bits |= ENCODE_RVV_VC_IMM (-1U); break;
+		      default:
+			goto unknown_validate_operand;
+		      }
+		      break;
 		  case 'l': /* Integer immediate, literal.  */
 		    oparg += strcspn(oparg, ",") - 1;
 		    break;
@@ -2414,6 +2423,59 @@ my_getVsetvliExpression (expressionS *ep, char *str)
 			 | (vsew_value << OP_SH_VSEW)
 			 | (vta_value << OP_SH_VTA)
 			 | (vma_value << OP_SH_VMA);
+      expr_parse_end = str;
+    }
+  else
+    {
+      my_getExpression (ep, str);
+      str = expr_parse_end;
+    }
+}
+
+/* Parse string STR as a th.vsetvli operand.  Store the expression in *EP.
+   On exit, EXPR_PARSE_END points to the first character after the
+   expression.  */
+
+static void
+my_getThVsetvliExpression (expressionS *ep, char *str)
+{
+  unsigned int vsew_value = 0, vlen_value = 0, vediv_value = 0;
+  bfd_boolean vsew_found = FALSE, vlen_found = FALSE, vediv_found = FALSE;
+
+  if (arg_lookup (&str, riscv_vsew, ARRAY_SIZE (riscv_vsew),
+		  &vsew_value))
+    {
+      if (*str == ',')
+	++str;
+      if (vsew_found)
+	as_bad (_("multiple vsew constants"));
+      vsew_found = TRUE;
+    }
+
+  if (arg_lookup (&str, riscv_th_vlen, ARRAY_SIZE (riscv_th_vlen),
+		  &vlen_value))
+    {
+      if (*str == ',')
+	++str;
+      if (vlen_found)
+	as_bad (_("multiple vlen constants"));
+      vlen_found = TRUE;
+    }
+  if (arg_lookup (&str, riscv_th_vediv, ARRAY_SIZE (riscv_th_vediv),
+		  &vediv_value))
+    {
+      if (*str == ',')
+	++str;
+      if (vediv_found)
+	as_bad (_("multiple vediv constants"));
+      vediv_found = TRUE;
+    }
+
+  if (vlen_found || vediv_found || vsew_found)
+    {
+      ep->X_op = O_constant;
+      ep->X_add_number
+	= (vediv_value << 5) | (vsew_value << 2) | (vlen_value);
       expr_parse_end = str;
     }
   else
@@ -3624,6 +3686,23 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    bool sign;
 		    switch (*++oparg)
 		      {
+		      case 'V':
+			/* Vtypei for th.vsetvli.  */
+			++oparg;
+			if (*oparg != 'c')
+			  goto unknown_riscv_ip_operand;
+
+			my_getThVsetvliExpression (imm_expr, asarg);
+			check_absolute_expr (ip, imm_expr, FALSE);
+			if (!VALID_RVV_VC_IMM (imm_expr->X_add_number))
+			  as_bad (_("bad value for th.vsetvli immediate field, "
+				  "value must be 0..2047"));
+			ip->insn_opcode
+			  |= ENCODE_RVV_VC_IMM (imm_expr->X_add_number);
+			imm_expr->X_op = O_absent;
+			asarg = expr_parse_end;
+			continue;
+
 		      case 'l': /* Integer immediate, literal.  */
 			n = strcspn (++oparg, ",");
 			if (strncmp (oparg, asarg, n))

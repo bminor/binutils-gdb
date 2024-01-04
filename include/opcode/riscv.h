@@ -328,6 +328,15 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define OP_MASK_VWD		0x1
 #define OP_SH_VWD		26
 
+#define OP_MASK_XTHEADVLMUL	0x3
+#define OP_SH_XTHEADVLMUL	0
+#define OP_MASK_XTHEADVSEW	0x7
+#define OP_SH_XTHEADVSEW	2
+#define OP_MASK_XTHEADVEDIV	0x3
+#define OP_SH_XTHEADVEDIV	5
+#define OP_MASK_XTHEADVTYPE_RES	0xf
+#define OP_SH_XTHEADVTYPE_RES	7
+
 #define NVECR 32
 #define NVECM 1
 
@@ -595,6 +604,8 @@ extern const char * const riscv_vsew[8];
 extern const char * const riscv_vlmul[8];
 extern const char * const riscv_vta[2];
 extern const char * const riscv_vma[2];
+extern const char * const riscv_th_vlen[4];
+extern const char * const riscv_th_vediv[4];
 extern const char * const riscv_fli_symval[32];
 extern const float riscv_fli_numval[32];
 

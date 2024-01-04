@@ -110,6 +110,18 @@ const char * const riscv_vma[2] =
   "mu", "ma"
 };
 
+/* XTheadVector, List of vsetvli vlmul constants.  */
+const char * const riscv_th_vlen[4] =
+{
+    "m1", "m2", "m4", "m8"
+};
+
+/* XTheadVector, List of vsetvli vediv constants.  */
+const char * const riscv_th_vediv[4] =
+{
+    "d1", "d2", "d4", "d8"
+};
+
 /* The FLI.[HSDQ] symbolic constants (NULL for numeric constant).  */
 const char * const riscv_fli_symval[32] =
 {
@@ -2236,7 +2248,7 @@ const struct riscv_opcode riscv_opcodes[] =
 
 /* Vendor-specific (T-Head) XTheadVector instructions.  */
 {"th.vsetvl",     0, INSN_CLASS_XTHEADVECTOR,  "d,s,t", MATCH_VSETVL, MASK_VSETVL, match_opcode, 0},
-{"th.vsetvli",    0, INSN_CLASS_XTHEADVECTOR,  "d,s,Vc", MATCH_VSETVLI, MASK_VSETVLI, match_opcode, 0},
+{"th.vsetvli",    0, INSN_CLASS_XTHEADVECTOR,  "d,s,XtVc", MATCH_VSETVLI, MASK_VSETVLI, match_opcode, 0},
 {"th.vlb.v",      0, INSN_CLASS_XTHEADVECTOR,  "Vd,0(s)Vm", MATCH_TH_VLBV, MASK_TH_VLBV, match_opcode, INSN_DREF },
 {"th.vlh.v",      0, INSN_CLASS_XTHEADVECTOR,  "Vd,0(s)Vm", MATCH_TH_VLHV, MASK_TH_VLHV, match_opcode, INSN_DREF },
 {"th.vlw.v",      0, INSN_CLASS_XTHEADVECTOR,  "Vd,0(s)Vm", MATCH_TH_VLWV, MASK_TH_VLWV, match_opcode, INSN_DREF },
