@@ -337,6 +337,23 @@ thpy_thread_handle (PyObject *self, PyObject *args)
   return object;
 }
 
+/* Implement repr() for gdb.InferiorThread.  */
+
+static PyObject *
+thpy_repr (PyObject *self)
+{
+  thread_object *thread_obj = (thread_object *) self;
+
+  if (thread_obj->thread == nullptr)
+    return gdb_py_invalid_object_repr (self);
+
+  thread_info *thr = thread_obj->thread;
+  return PyUnicode_FromFormat ("<%s id=%s target-id=\"%s\">",
+			       Py_TYPE (self)->tp_name,
+			       print_full_thread_id (thr),
+			       target_pid_to_str (thr->ptid).c_str ());
+}
+
 /* Return a reference to a new Python object representing a ptid_t.
    The object is a tuple containing (pid, lwp, tid). */
 PyObject *
@@ -456,7 +473,7 @@ PyTypeObject thread_object_type =
   0,				  /*tp_getattr*/
   0,				  /*tp_setattr*/
   0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
+  thpy_repr,			  /*tp_repr*/
   0,				  /*tp_as_number*/
   0,				  /*tp_as_sequence*/
   0,				  /*tp_as_mapping*/

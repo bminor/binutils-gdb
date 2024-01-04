@@ -78,7 +78,9 @@ gdb_test "python print ('result = %s' % (i0.connection_num == i0.connection.num)
     "Inferior.connection_num equals Inferior.connection.num"
 gdb_test "python print ('result = %s' % i0.pid)" " = \[0-9\]+" "test Inferior.pid"
 gdb_test "python print ('result = %s' % i0.was_attached)" " = False" "test Inferior.was_attached"
-gdb_test "python print (i0.threads ())" "\\(<gdb.InferiorThread object at 0x\[\[:xdigit:\]\]+>,\\)" "test Inferior.threads"
+gdb_test "python print (i0.threads ())" \
+    "\\(<gdb.InferiorThread id=${decimal}\\.${decimal} target-id=\"\[^\r\n\]*\">,\\)" \
+    "test Inferior.threads"
 
 gdb_test "python print (i0.progspace)" "<gdb.Progspace object at $hex>"
 gdb_test "python print (i0.progspace == gdb.progspaces()\[0\])" "True"
@@ -89,10 +91,22 @@ gdb_breakpoint check_threads
 gdb_continue_to_breakpoint "cont to check_threads" ".*pthread_barrier_wait.*"
 gdb_test "python print (len (i0.threads ()))" "\r\n9" "test Inferior.threads 2"
 
+# Grab the last thread from the list.  This thread object will become
+# invalid when the corresponding thread exits.
+gdb_test_no_output "python last_thread = i0.threads()\[-1\]"
+gdb_test "python print(last_thread)" \
+    "<gdb.InferiorThread id=${decimal}\\.${decimal} target-id=\"\[^\r\n\]*\">" \
+    "test repr of a valid thread"
+
 # Proceed to the next test.
 
 gdb_breakpoint [gdb_get_line_number "Break here."]
 gdb_continue_to_breakpoint "cont to Break here." ".*Break here\..*"
+
+# Check the repr() for an invalid gdb.InferiorThread object.
+gdb_test "python print(last_thread)" \
+    "<gdb.InferiorThread \\(invalid\\)>" \
+    "test repr of an invalid thread"
 
 # Test memory read and write operations.
 
