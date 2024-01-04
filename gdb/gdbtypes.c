@@ -2327,10 +2327,42 @@ resolve_dynamic_array_or_string_1 (struct type *type,
 						    frame, rank - 1,
 						    resolve_p);
     }
+  else if (ary_dim != nullptr && ary_dim->code () == TYPE_CODE_STRING)
+    {
+      /* The following special case for TYPE_CODE_STRING should not be
+	 needed, ideally we would defer resolving the dynamic type of the
+	 array elements until needed later, and indeed, the resolved type
+	 of each array element might be different, so attempting to resolve
+	 the type here makes no sense.
+
+	 However, in Fortran, for arrays of strings, each element must be
+	 the same type, as such, the DWARF for the string length relies on
+	 the object address of the array itself.
+
+	 The problem here is that, when we create values from the dynamic
+	 array type, we resolve the data location, and use that as the
+	 value address, this completely discards the original value
+	 address, and it is this original value address that is the
+	 descriptor for the dynamic array, the very address that the DWARF
+	 needs us to push in order to resolve the dynamic string length.
+
+	 What this means then, is that, given the current state of GDB, if
+	 we don't resolve the string length now, then we will have lost
+	 access to the address of the dynamic object descriptor, and so we
+	 will not be able to resolve the dynamic string later.
+
+	 For now then, we handle special case TYPE_CODE_STRING on behalf of
+	 Fortran, and hope that this doesn't cause problems for anyone
+	 else.  */
+      elt_type = resolve_dynamic_type_internal (type->target_type (),
+						addr_stack, frame, 0);
+    }
   else
     elt_type = type->target_type ();
 
   prop = type->dyn_prop (DYN_PROP_BYTE_STRIDE);
+  if (prop != nullptr && type->code () == TYPE_CODE_STRING)
+    prop = nullptr;
   if (prop != NULL && resolve_p)
     {
       if (dwarf2_evaluate_property (prop, frame, addr_stack, &value))
@@ -2351,8 +2383,11 @@ resolve_dynamic_array_or_string_1 (struct type *type,
     bit_stride = type->field (0).bitsize ();
 
   type_allocator alloc (type, type_allocator::SMASH);
-  return create_array_type_with_stride (alloc, elt_type, range_type, NULL,
-					bit_stride);
+  if (type->code () == TYPE_CODE_STRING)
+    return create_string_type (alloc, elt_type, range_type);
+  else
+    return create_array_type_with_stride (alloc, elt_type, range_type, NULL,
+					  bit_stride);
 }
 
 /* Resolve an array or string type with dynamic properties, return a new
