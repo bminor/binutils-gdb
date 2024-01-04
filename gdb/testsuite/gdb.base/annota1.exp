@@ -284,9 +284,52 @@ gdb_test_multiple "continue" "continue to printf" {
 # annotate-frame-address
 # annotate-frame-address-end
 #
-set pat_begin "\r\n\032\032post-prompt\r\n\r\n\032\032frame-begin 0 $hex\r\n.0  \r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*\032\032frame-function-name\r\n.*printf(@.*)?\r\n\032\032frame-args\r\n \\(.*frame-end\r\n\r\n\032\032frame-begin 1 $hex\r\n.1  \r\n\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n"
+set pat_begin \
+    [list \
+	 "\r\n\032\032post-prompt\r\n" \
+	 "\r\n\032\032frame-begin 0 $hex\r\n" \
+	 ".0  \r\n" \
+	 "(" \
+	 "\032\032frame-address\r\n" \
+	 "${hex}( \\\[PAC\\\])?" \
+	 "\r\n\032\032frame-address-end\r\n" \
+	 " in \r\n" \
+	 ")*" \
+	 "\032\032frame-function-name\r\n" \
+	 ".*printf(@.*)?" \
+	 "\r\n\032\032frame-args\r\n" \
+	 " \\(.*frame-end\r\n" \
+	 "\r\n\032\032frame-begin 1 $hex\r\n" \
+	 ".1  " \
+	 "\r\n\032\032frame-address\r\n" \
+	 "${hex}( \\\[PAC\\\])?" \
+	 "\r\n\032\032frame-address-end\r\n" \
+	 " in " \
+	 "\r\n\032\032frame-function-name\r\n" \
+	 "main" \
+	 "\r\n\032\032frame-args\r\n" \
+	 " \\(\\)" \
+	 "\r\n\032\032frame-source-begin\r\n" \
+	 " at " \
+	 "\r\n\032\032frame-source-file\r\n"]
 
-set pat_end "\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n.*\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032frame-end\r\n(\r\n\032\032frame-begin .*\r\n\r\n\032\032frame-end\r\n)*$gdb_prompt$"
+set pat_begin [join $pat_begin ""]
+
+set pat_end \
+    [list \
+	 "\r\n\032\032frame-source-file-end\r\n" \
+	 ":" \
+	 "\r\n\032\032frame-source-line\r\n" \
+	 ".*" \
+	 "\r\n\032\032frame-source-end\r\n\r\n" \
+	 "\r\n\032\032frame-end\r\n" \
+	 "(" \
+	 "\r\n\032\032frame-begin .*\r\n" \
+	 "\r\n\032\032frame-end\r\n" \
+	 ")*" \
+	 "$gdb_prompt$"]
+
+set pat_end [join $pat_end ""]
 
 gdb_test_multiple "backtrace" "backtrace from shlibrary" {
     -re "$pat_begin$escapedsrcfile$pat_end" {

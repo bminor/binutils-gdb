@@ -111,7 +111,7 @@ gdb_test "continue"  \
 
 set name "backtrace after first throw"
 gdb_test_multiple "backtrace" $name {
-    -re ".*#\[0-9\]+.*\[\[:<:\]\]__cxa_throw\[\[:>:\]\].*#\[0-9\]+${ws}$hex in foo \\(i=20\\) at .*${srcfile}:\[0-9\]+\r\n#\[0-9\]+${ws}$hex in main \\(.*\\) at .*${srcfile}:\[0-9\]+\r\n$gdb_prompt $" {
+    -re ".*#\[0-9\]+.*\[\[:<:\]\]__cxa_throw\[\[:>:\]\].*#\[0-9\]+${ws}$hex (\\\[PAC\\\] )?in foo \\(i=20\\) at .*${srcfile}:\[0-9\]+\r\n#\[0-9\]+${ws}$hex in main \\(.*\\) at .*${srcfile}:\[0-9\]+\r\n$gdb_prompt $" {
 	# Either __cxxabiv1::__cxa_throw or __cxa_throw can be printed
 	# depending on debug info presence.
 	pass $name
@@ -129,7 +129,7 @@ gdb_test "continue" \
 
 set name "backtrace after first catch"
 gdb_test_multiple "backtrace" $name {
-    -re ".*#\[0-9\]+.*\[\[:<:\]\]__cxa_begin_catch\[\[:>:\]\].*#\[0-9\]+${ws}$hex in main \\(.*\\) at .*$srcfile:\[0-9\]+\r\n$gdb_prompt $" {
+    -re ".*#\[0-9\]+.*\[\[:<:\]\]__cxa_begin_catch\[\[:>:\]\].*#\[0-9\]+${ws}$hex (\\\[PAC\\\] )?in main \\(.*\\) at .*$srcfile:\[0-9\]+\r\n$gdb_prompt $" {
 	pass $name
     }
 }
@@ -148,7 +148,7 @@ gdb_test "continue" \
 
 set name "backtrace after second throw"
 gdb_test_multiple "backtrace" $name {
-    -re ".*#\[0-9\]+.*\[\[:<:\]\]__cxa_throw\[\[:>:\]\].*#\[0-9\]+${ws}$hex in foo \\(i=20\\) at .*${srcfile}:\[0-9\]+\r\n#\[0-9\]+${ws}$hex in main \\(.*\\) at .*${srcfile}:\[0-9\]+\r\n$gdb_prompt $" {
+    -re ".*#\[0-9\]+.*\[\[:<:\]\]__cxa_throw\[\[:>:\]\].*#\[0-9\]+${ws}$hex (\\\[PAC\\\] )?in foo \\(i=20\\) at .*${srcfile}:\[0-9\]+\r\n#\[0-9\]+${ws}$hex in main \\(.*\\) at .*${srcfile}:\[0-9\]+\r\n$gdb_prompt $" {
 	pass $name
     }
 }
@@ -164,7 +164,7 @@ gdb_test "continue" \
 
 set name "backtrace after second catch"
 gdb_test_multiple "backtrace" $name {
-    -re ".*#\[0-9\]+.*\[\[:<:\]\]__cxa_begin_catch\[\[:>:\]\].*#\[0-9\]+${ws}$hex in main \\(.*\\) at .*$srcfile:\[0-9\]+\r\n$gdb_prompt $" {
+    -re ".*#\[0-9\]+.*\[\[:<:\]\]__cxa_begin_catch\[\[:>:\]\].*#\[0-9\]+${ws}$hex (\\\[PAC\\\] )?in main \\(.*\\) at .*$srcfile:\[0-9\]+\r\n$gdb_prompt $" {
 	pass $name
     }
 }

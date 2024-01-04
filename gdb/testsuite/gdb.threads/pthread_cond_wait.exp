@@ -51,7 +51,7 @@ global decimal
 #
 # This is a "backtrace break" ("btb"):
 #
-set btb "\[^\r\n\]+\[\r\n\]+\#${decimal}\[ \t\]+${hex} in "
+set btb "\[^\r\n\]+\[\r\n\]+\#${decimal}\[ \t\]+${hex} (\\\[PAC\\\] )?in "
 
 # One of the threads is blocked on a call to pthread_cond_wait, and
 # we want to verify that we are able to get a sensible backtrace for

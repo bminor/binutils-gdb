@@ -42,4 +42,4 @@ gdb_test "continue" "Catchpoint $::decimal \\(exception thrown\\).*"
 
 # Without the corresponding fix, GDB would hit an internal error before
 # printing the frame for main.
-gdb_test "backtrace" " $::hex in func \\(t=t@entry=@$::hex: 1234\\).* $::hex in main .*"
+gdb_test "backtrace" " $::hex (\\\[PAC\\\] )?in func \\(t=t@entry=@$::hex: 1234\\).* $::hex in main .*"
