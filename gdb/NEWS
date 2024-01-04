@@ -100,6 +100,10 @@ show remote thread-options-packet
      objects can still be obtained through calling other API
      functions, for example 'gdb.current_progspace()'.
 
+  ** User defined attributes can be added to a gdb.Inferior object,
+     these will be stored in the object's new Inferior.__dict__
+     attribute.
+
 * Debugger Adapter Protocol changes
 
   ** GDB now emits the "process" event.

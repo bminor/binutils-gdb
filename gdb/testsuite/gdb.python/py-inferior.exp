@@ -85,6 +85,15 @@ gdb_test "python print (i0.threads ())" \
 gdb_test "python print (i0.progspace)" "<gdb.Progspace object at $hex>"
 gdb_test "python print (i0.progspace == gdb.progspaces()\[0\])" "True"
 
+# Add a user defined attribute to the inferior, and check the
+# attribute can be read back.
+gdb_test_no_output "python i0._user_attr = 123" \
+    "add a user defined attribute to the inferior object"
+gdb_test "python print(i0._user_attr)" \
+    "123" "read back user defined attribute from i0"
+gdb_test "python print(gdb.inferiors()\[0\]._user_attr)" \
+    "123" "read back user defined attribute from gdb.inferiors"
+
 # Test the number of inferior threads.
 
 gdb_breakpoint check_threads
@@ -126,6 +135,16 @@ gdb_test "print str" " = \"hallo, testsuite\"" \
 # Add a new inferior here, so we can test that operations work on the
 # correct inferior.
 set num [add_inferior]
+
+# Confirm the new inferior doesn't have the user defined attribute,
+# but that the first inferior does still have the attribute.
+gdb_test "python print(gdb.inferiors()\[1\]._user_attr)" \
+    [multi_line \
+	 "AttributeError: 'gdb\\.Inferior' object has no attribute '_user_attr'" \
+	 "Error while executing Python code\\."] \
+    "check new inferior doesn't have user defined attribute"
+gdb_test "python print(gdb.inferiors()\[0\]._user_attr)" \
+    "123" "read back user defined attribute again"
 
 # Test memory search.
 

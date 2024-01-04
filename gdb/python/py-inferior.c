@@ -46,6 +46,10 @@ struct inferior_object
   /* thread_object instances under this inferior.  This owns a
      reference to each object it contains.  */
   thread_map_t *threads;
+
+  /* Dictionary holding user-added attributes.
+     This is the __dict__ attribute of the object.  */
+  PyObject *dict;
 };
 
 extern PyTypeObject inferior_object_type
@@ -241,6 +245,9 @@ inferior_to_inferior_object (struct inferior *inferior)
 
       inf_obj->inferior = inferior;
       inf_obj->threads = new thread_map_t ();
+      inf_obj->dict = PyDict_New ();
+      if (inf_obj->dict == nullptr)
+	return nullptr;
 
       /* PyObject_New initializes the new object with a refcount of 1.  This
 	 counts for the reference we are keeping in the inferior data.  */
@@ -981,6 +988,8 @@ infpy_dealloc (PyObject *obj)
      function is called.  */
   gdb_assert (inf_obj->inferior == nullptr);
 
+  Py_XDECREF (inf_obj->dict);
+
   Py_TYPE (obj)->tp_free (obj);
 }
 
@@ -1038,6 +1047,8 @@ GDBPY_INITIALIZE_FILE (gdbpy_initialize_inferior);
 
 static gdb_PyGetSetDef inferior_object_getset[] =
 {
+  { "__dict__", gdb_py_generic_dict, nullptr,
+    "The __dict__ for this inferior.", &inferior_object_type },
   { "arguments", infpy_get_args, infpy_set_args,
     "Arguments to this program.", nullptr },
   { "num", infpy_get_num, NULL, "ID of inferior, as assigned by GDB.", NULL },
@@ -1135,7 +1146,7 @@ PyTypeObject inferior_object_type =
   0,				  /* tp_dict */
   0,				  /* tp_descr_get */
   0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
+  offsetof (inferior_object, dict), /* tp_dictoffset */
   0,				  /* tp_init */
   0				  /* tp_alloc */
 };
