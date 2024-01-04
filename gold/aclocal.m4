@@ -1196,6 +1196,7 @@ AC_SUBST([am__tar])
 AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
 
+m4_include([../config/ax_cxx_compile_stdcxx.m4])
 m4_include([../config/ax_pthread.m4])
 m4_include([../config/depstand.m4])
 m4_include([../config/gettext-sister.m4])

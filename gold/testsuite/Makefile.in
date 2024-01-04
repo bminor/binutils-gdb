@@ -1138,7 +1138,9 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_X86_64_TRUE@	retain_2.out
 subdir = testsuite
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/../config/ax_pthread.m4 \
+am__aclocal_m4_deps =  \
+	$(top_srcdir)/../config/ax_cxx_compile_stdcxx.m4 \
+	$(top_srcdir)/../config/ax_pthread.m4 \
 	$(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/gettext.m4 \
@@ -2647,6 +2649,7 @@ GMSGFMT = @GMSGFMT@
 GOLD_LDADD = @GOLD_LDADD@
 GOLD_LDFLAGS = @GOLD_LDFLAGS@
 GREP = @GREP@
+HAVE_CXX11 = @HAVE_CXX11@
 INCINTL = @INCINTL@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@

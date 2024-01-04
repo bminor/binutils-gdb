@@ -681,6 +681,10 @@ if test "$gold_cv_unordered_map_rehash" = "yes"; then
 	    [Define if ::std::tr1::unordered_map::rehash is usable])
 fi
 
+# Since 5e9091dab8858b25210a91d22fbbbfdee9c969ad gold now requires C++11
+# So we need to check for it.
+AX_CXX_COMPILE_STDCXX([11], [], [mandatory])
+
 # Use of tr1/unordered_map with off_t as a key is not supported on GCC
 # 4.1.xx when compiling in 32-bit mode with a 64-bit off_t type.
 AC_CACHE_CHECK([whether std::tr1::hash<off_t> is defined],
