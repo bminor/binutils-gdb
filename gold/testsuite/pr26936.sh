@@ -3,7 +3,7 @@
 # pr26936.sh -- Tests for relocations in debug sections against linkonce
 # and comdat sections.
 
-# Copyright (C) 2020-2023 Free Software Foundation, Inc.
+# Copyright (C) 2020-2024 Free Software Foundation, Inc.
 
 # This file is part of gold.
 

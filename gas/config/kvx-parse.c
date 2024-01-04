@@ -1,6 +1,6 @@
 /* kvx-parse.c -- Recursive decent parser driver for the KVX ISA
 
-   Copyright (C) 2009-2023 Free Software Foundation, Inc.
+   Copyright (C) 2009-2024 Free Software Foundation, Inc.
    Contributed by Kalray SA.
 
    This file is part of GAS.

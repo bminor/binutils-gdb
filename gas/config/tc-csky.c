@@ -1,5 +1,5 @@
 /* tc-csky.c -- Assembler for C-SKY
-   Copyright (C) 1989-2023 Free Software Foundation, Inc.
+   Copyright (C) 1989-2024 Free Software Foundation, Inc.
    Created by Lifang Xia (lifang_xia@c-sky.com)
    Contributed by C-SKY Microsystems and Mentor Graphics.
 

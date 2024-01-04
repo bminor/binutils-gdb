@@ -1,7 +1,7 @@
 /* plugin_new_section_layout.c -- Simple plugin to reorder function sections in
    plugin-generated objects
 
-   Copyright (C) 2017-2023 Free Software Foundation, Inc.
+   Copyright (C) 2017-2024 Free Software Foundation, Inc.
    Written by Stephen Crane <sjc@immunant.com>.
 
    This file is part of gold.

@@ -8,10 +8,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2023-11-15 11:13+0000\n"
+"POT-Creation-Date: 2024-01-04 22:43+1030\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -85,7 +86,7 @@ msgstr ""
 
 #: aarch64-dis.c:4184 arc-dis.c:1607 arc-dis.c:1630 arc-dis.c:1633
 #: kvx-dis.c:1586 loongarch-dis.c:332 mips-dis.c:2903 mips-dis.c:2915
-#: mips-dis.c:2918 nfp-dis.c:2995 riscv-dis.c:1410 riscv-dis.c:1413
+#: mips-dis.c:2918 nfp-dis.c:2995 riscv-dis.c:1467 riscv-dis.c:1470
 #, c-format
 msgid "\n"
 msgstr ""
@@ -326,63 +327,63 @@ msgstr ""
 msgid "writing to a read-only register"
 msgstr ""
 
-#: aarch64-opc.c:5140
+#: aarch64-opc.c:5149
 msgid "the three register operands must be distinct from one another"
 msgstr ""
 
-#: aarch64-opc.c:5251
+#: aarch64-opc.c:5260
 msgid "destination register differs from preceding instruction"
 msgstr ""
 
-#: aarch64-opc.c:5254
+#: aarch64-opc.c:5263
 msgid "source register differs from preceding instruction"
 msgstr ""
 
-#: aarch64-opc.c:5257
+#: aarch64-opc.c:5266
 msgid "size register differs from preceding instruction"
 msgstr ""
 
-#: aarch64-opc.c:5305
+#: aarch64-opc.c:5314
 msgid "instruction opens new dependency sequence without ending previous one"
 msgstr ""
 
-#: aarch64-opc.c:5334
+#: aarch64-opc.c:5343
 msgid "previous `movprfx' sequence not closed"
 msgstr ""
 
-#: aarch64-opc.c:5353
+#: aarch64-opc.c:5362
 msgid "SVE instruction expected after `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:5366
+#: aarch64-opc.c:5375
 msgid "SVE `movprfx' compatible instruction expected"
 msgstr ""
 
-#: aarch64-opc.c:5454
+#: aarch64-opc.c:5463
 msgid "predicated instruction expected after `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:5466
+#: aarch64-opc.c:5475
 msgid "merging predicate expected due to preceding `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:5478
+#: aarch64-opc.c:5487
 msgid "predicate register differs from that in preceding `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:5497
+#: aarch64-opc.c:5506
 msgid "output register of preceding `movprfx' not used in current instruction"
 msgstr ""
 
-#: aarch64-opc.c:5510
+#: aarch64-opc.c:5519
 msgid "output register of preceding `movprfx' expected as output"
 msgstr ""
 
-#: aarch64-opc.c:5522
+#: aarch64-opc.c:5531
 msgid "output register of preceding `movprfx' used as input"
 msgstr ""
 
-#: aarch64-opc.c:5538
+#: aarch64-opc.c:5547
 msgid "register size not compatible with previous `movprfx'"
 msgstr ""
 
@@ -465,7 +466,7 @@ msgid ""
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: arc-dis.c:1616 mips-dis.c:2910 riscv-dis.c:1405
+#: arc-dis.c:1616 mips-dis.c:2910 riscv-dis.c:1462
 #, c-format
 msgid ""
 "\n"
@@ -871,12 +872,11 @@ msgstr ""
 #: ip2k-asm.c:792 ip2k-asm.c:899 iq2000-asm.c:647 iq2000-asm.c:651
 #: iq2000-asm.c:740 iq2000-asm.c:847 lm32-asm.c:537 lm32-asm.c:541
 #: lm32-asm.c:630 lm32-asm.c:737 m32c-asm.c:1772 m32c-asm.c:1776
-#: m32c-asm.c:1865 m32c-asm.c:1972 m32r-asm.c:516 m32r-asm.c:520
-#: m32r-asm.c:609 m32r-asm.c:716 mep-asm.c:1473 mep-asm.c:1477 mep-asm.c:1566
-#: mep-asm.c:1673 mt-asm.c:783 mt-asm.c:787 mt-asm.c:876 mt-asm.c:983
-#: or1k-asm.c:763 or1k-asm.c:767 or1k-asm.c:856 or1k-asm.c:963
-#: xstormy16-asm.c:464 xstormy16-asm.c:468 xstormy16-asm.c:557
-#: xstormy16-asm.c:664
+#: m32c-asm.c:1865 m32c-asm.c:1972 m32r-asm.c:516 m32r-asm.c:520 m32r-asm.c:609
+#: m32r-asm.c:716 mep-asm.c:1473 mep-asm.c:1477 mep-asm.c:1566 mep-asm.c:1673
+#: mt-asm.c:783 mt-asm.c:787 mt-asm.c:876 mt-asm.c:983 or1k-asm.c:763
+#: or1k-asm.c:767 or1k-asm.c:856 or1k-asm.c:963 xstormy16-asm.c:464
+#: xstormy16-asm.c:468 xstormy16-asm.c:557 xstormy16-asm.c:664
 msgid "unrecognized instruction"
 msgstr ""
 
@@ -945,8 +945,8 @@ msgid "*unknown*"
 msgstr ""
 
 #: epiphany-dis.c:279 fr30-dis.c:300 frv-dis.c:397 ip2k-dis.c:289
-#: iq2000-dis.c:190 lm32-dis.c:148 m32c-dis.c:892 m32r-dis.c:280
-#: mep-dis.c:1202 mt-dis.c:288 or1k-dis.c:175 xstormy16-dis.c:169
+#: iq2000-dis.c:190 lm32-dis.c:148 m32c-dis.c:892 m32r-dis.c:280 mep-dis.c:1202
+#: mt-dis.c:288 or1k-dis.c:175 xstormy16-dis.c:169
 #, c-format
 msgid "internal error: unrecognized field %d while printing insn"
 msgstr ""
@@ -1098,11 +1098,11 @@ msgstr ""
 msgid "Don't understand 0x%x \n"
 msgstr ""
 
-#: i386-dis.c:8337
+#: i386-dis.c:8432
 msgid "<internal disassembler error>"
 msgstr ""
 
-#: i386-dis.c:8565
+#: i386-dis.c:8680
 #, c-format
 msgid ""
 "\n"
@@ -1111,86 +1111,86 @@ msgid ""
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: i386-dis.c:8569
+#: i386-dis.c:8684
 #, c-format
 msgid "  x86-64      Disassemble in 64bit mode\n"
 msgstr ""
 
-#: i386-dis.c:8570
+#: i386-dis.c:8685
 #, c-format
 msgid "  i386        Disassemble in 32bit mode\n"
 msgstr ""
 
-#: i386-dis.c:8571
+#: i386-dis.c:8686
 #, c-format
 msgid "  i8086       Disassemble in 16bit mode\n"
 msgstr ""
 
-#: i386-dis.c:8572
+#: i386-dis.c:8687
 #, c-format
 msgid "  att         Display instruction in AT&T syntax\n"
 msgstr ""
 
-#: i386-dis.c:8573
+#: i386-dis.c:8688
 #, c-format
 msgid "  intel       Display instruction in Intel syntax\n"
 msgstr ""
 
-#: i386-dis.c:8574
+#: i386-dis.c:8689
 #, c-format
 msgid ""
-"  att-mnemonic\n"
-"              Display instruction in AT&T mnemonic\n"
+"  att-mnemonic  (AT&T syntax only)\n"
+"              Display instruction with AT&T mnemonic\n"
 msgstr ""
 
-#: i386-dis.c:8576
+#: i386-dis.c:8691
 #, c-format
 msgid ""
-"  intel-mnemonic\n"
-"              Display instruction in Intel mnemonic\n"
+"  intel-mnemonic  (AT&T syntax only)\n"
+"              Display instruction with Intel mnemonic\n"
 msgstr ""
 
-#: i386-dis.c:8578
+#: i386-dis.c:8693
 #, c-format
 msgid "  addr64      Assume 64bit address size\n"
 msgstr ""
 
-#: i386-dis.c:8579
+#: i386-dis.c:8694
 #, c-format
 msgid "  addr32      Assume 32bit address size\n"
 msgstr ""
 
-#: i386-dis.c:8580
+#: i386-dis.c:8695
 #, c-format
 msgid "  addr16      Assume 16bit address size\n"
 msgstr ""
 
-#: i386-dis.c:8581
+#: i386-dis.c:8696
 #, c-format
 msgid "  data32      Assume 32bit data size\n"
 msgstr ""
 
-#: i386-dis.c:8582
+#: i386-dis.c:8697
 #, c-format
 msgid "  data16      Assume 16bit data size\n"
 msgstr ""
 
-#: i386-dis.c:8583
+#: i386-dis.c:8698
 #, c-format
 msgid "  suffix      Always display instruction suffix in AT&T syntax\n"
 msgstr ""
 
-#: i386-dis.c:8584
+#: i386-dis.c:8699
 #, c-format
 msgid "  amd64       Display instruction in AMD64 ISA\n"
 msgstr ""
 
-#: i386-dis.c:8585
+#: i386-dis.c:8700
 #, c-format
 msgid "  intel64     Display instruction in Intel64 ISA\n"
 msgstr ""
 
-#: i386-dis.c:9288
+#: i386-dis.c:9447
 msgid "64-bit address is disabled"
 msgstr ""
 
@@ -2018,24 +2018,24 @@ msgid ""
 "mis-matched privilege spec set by %s=%s, the elf privilege attribute is %s"
 msgstr ""
 
-#: riscv-dis.c:704
+#: riscv-dis.c:741
 #, c-format
 msgid "# internal error, undefined modifier (%c)"
 msgstr ""
 
-#: riscv-dis.c:1286
+#: riscv-dis.c:1343
 msgid "Print numeric register names, rather than ABI names."
 msgstr ""
 
-#: riscv-dis.c:1289
+#: riscv-dis.c:1346
 msgid "Disassemble only into canonical instructions."
 msgstr ""
 
-#: riscv-dis.c:1292
+#: riscv-dis.c:1349
 msgid "Print the CSR according to the chosen privilege spec."
 msgstr ""
 
-#: riscv-dis.c:1368
+#: riscv-dis.c:1425
 #, c-format
 msgid ""
 "\n"
@@ -2075,24 +2075,28 @@ msgstr ""
 msgid ".<bad>"
 msgstr ""
 
-#: s390-dis.c:42
+#: s390-dis.c:44
 msgid "Disassemble in ESA architecture mode"
 msgstr ""
 
-#: s390-dis.c:43
+#: s390-dis.c:45
 msgid "Disassemble in z/Architecture mode"
 msgstr ""
 
-#: s390-dis.c:44
+#: s390-dis.c:46
 msgid "Print unknown instructions according to length from first two bits"
 msgstr ""
 
-#: s390-dis.c:76
+#: s390-dis.c:48
+msgid "Print instruction description as comment"
+msgstr ""
+
+#: s390-dis.c:82
 #, c-format
 msgid "unknown S/390 disassembler option: %s"
 msgstr ""
 
-#: s390-dis.c:471
+#: s390-dis.c:516
 #, c-format
 msgid ""
 "\n"

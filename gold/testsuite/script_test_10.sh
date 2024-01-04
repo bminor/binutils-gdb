@@ -2,7 +2,7 @@
 
 # script_test_10.sh -- test for the section order.
 
-# Copyright (C) 2010-2023 Free Software Foundation, Inc.
+# Copyright (C) 2010-2024 Free Software Foundation, Inc.
 # Written by Viktor Kutuzov <vkutuzov@accesssoftek.com>.
 
 # This file is part of gold.

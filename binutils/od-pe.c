@@ -1,5 +1,5 @@
 /* od-pe.c -- dump information about a PE object file.
-   Copyright (C) 2011-2023 Free Software Foundation, Inc.
+   Copyright (C) 2011-2024 Free Software Foundation, Inc.
    Written by Tristan Gingold, Adacore and Nick Clifton, Red Hat.
 
    This file is part of GNU Binutils.

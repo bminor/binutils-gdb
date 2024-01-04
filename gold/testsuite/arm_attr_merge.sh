@@ -2,7 +2,7 @@
 
 # arm_attr_merge.sh -- test ARM attributes merging.
 
-# Copyright (C) 2010-2023 Free Software Foundation, Inc.
+# Copyright (C) 2010-2024 Free Software Foundation, Inc.
 # Written by Doug Kwan <dougkwan@google.com>
 
 # This file is part of gold.

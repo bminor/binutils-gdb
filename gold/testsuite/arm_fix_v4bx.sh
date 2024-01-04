@@ -2,7 +2,7 @@
 
 # arm_v4bx.sh -- a test case for --fix-v4bx and --fix-v4bx-interworking.
 
-# Copyright (C) 2010-2023 Free Software Foundation, Inc.
+# Copyright (C) 2010-2024 Free Software Foundation, Inc.
 # Written by Doug Kwan <dougkwan@google.com>.
 
 # This file is part of gold.

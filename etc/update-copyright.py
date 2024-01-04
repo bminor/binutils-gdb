@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (C) 2013-2023 Free Software Foundation, Inc.
+# Copyright (C) 2013-2024 Free Software Foundation, Inc.
 #
 # This script is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -596,6 +596,8 @@ class BinutilsCopyright (Copyright):
         self.add_external_author ('Third Eye Software, Inc.')
         self.add_external_author ('Ulrich Drepper')
         self.add_external_author ('Synopsys Inc.')
+        self.add_external_author ('Alan Woodland')
+        self.add_external_author ('Diego Elio Petteno')
 
 class BinutilsCmdLine (CmdLine):
     def __init__ (self):
@@ -634,6 +636,7 @@ class BinutilsCmdLine (CmdLine):
             'gas',
             'gold',
             'gprof',
+            'gprofng',
             'include',
             'ld',
             'libctf',

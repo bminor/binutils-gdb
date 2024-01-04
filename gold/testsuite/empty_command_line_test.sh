@@ -2,7 +2,7 @@
 
 # empty_command_line_test.sh -- test various command lines with no inputs
 
-# Copyright (C) 2017-2023 Free Software Foundation, Inc.
+# Copyright (C) 2017-2024 Free Software Foundation, Inc.
 # Written by Benjamin Peterson <bp@benjamin.pe>
 
 # This file is part of gold.

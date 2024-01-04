@@ -2,7 +2,7 @@
 
 # x86_64_ie_to_le.sh -- a test for IE -> LE conversion.
 
-# Copyright (C) 2023 Free Software Foundation, Inc.
+# Copyright (C) 2023-2024 Free Software Foundation, Inc.
 
 # This file is part of gold.
 

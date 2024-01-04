@@ -1,5 +1,5 @@
 /* riscv-opc.h.  RISC-V instruction opcode and CSR macros.
-   Copyright (C) 2011-2023 Free Software Foundation, Inc.
+   Copyright (C) 2011-2024 Free Software Foundation, Inc.
    Contributed by Andrew Waterman
 
    This file is part of GDB, GAS, and the GNU binutils.

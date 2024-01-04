@@ -1,5 +1,5 @@
 /* Multiple object format emulation.
-   Copyright (C) 1995-2023 Free Software Foundation, Inc.
+   Copyright (C) 1995-2024 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
