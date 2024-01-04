@@ -537,7 +537,7 @@ objfpy_repr (PyObject *self_)
   objfile *obj = self->objfile;
 
   if (obj == nullptr)
-    return PyUnicode_FromString ("<gdb.Objfile (invalid)>");
+    return gdb_py_invalid_object_repr (self_);
 
   return PyUnicode_FromFormat ("<gdb.Objfile filename=%s>",
 			       objfile_name (obj));

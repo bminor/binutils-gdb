@@ -897,6 +897,15 @@ int gdb_pymodule_addobject (PyObject *module, const char *name,
 			    PyObject *object)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
+
+/* Return a Python string (str) object that represents SELF.  SELF can be
+   any object type, but should be in an "invalid" state.  What "invalid"
+   means is up to the caller.  The returned string will take the form
+   "<TYPENAME (invalid)>", without the quotes, and with TYPENAME replaced
+   with the type of SELF.  */
+
+PyObject *gdb_py_invalid_object_repr (PyObject *self);
+
 struct varobj_iter;
 struct varobj;
 std::unique_ptr<varobj_iter> py_varobj_get_iterator

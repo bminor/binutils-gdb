@@ -425,7 +425,7 @@ pending_framepy_repr (PyObject *self)
   frame_info_ptr frame = pending_frame->frame_info;
 
   if (frame == nullptr)
-    return PyUnicode_FromFormat ("<%s (invalid)>", Py_TYPE (self)->tp_name);
+    return gdb_py_invalid_object_repr (self);
 
   const char *sp_str = nullptr;
   const char *pc_str = nullptr;

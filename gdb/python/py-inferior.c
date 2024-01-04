@@ -800,7 +800,7 @@ infpy_repr (PyObject *obj)
   inferior *inf = self->inferior;
 
   if (inf == nullptr)
-    return PyUnicode_FromString ("<gdb.Inferior (invalid)>");
+    return gdb_py_invalid_object_repr (obj);
 
   return PyUnicode_FromFormat ("<gdb.Inferior num=%d, pid=%d>",
 			       inf->num, inf->pid);

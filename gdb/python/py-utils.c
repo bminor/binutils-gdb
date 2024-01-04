@@ -597,3 +597,11 @@ gdbpy_fix_doc_string_indentation (gdb::unique_xmalloc_ptr<char> doc)
 
   return doc;
 }
+
+/* See python-internal.h.  */
+
+PyObject *
+gdb_py_invalid_object_repr (PyObject *self)
+{
+  return PyUnicode_FromFormat ("<%s (invalid)>", Py_TYPE (self)->tp_name);
+}

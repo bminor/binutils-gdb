@@ -425,7 +425,7 @@ blpy_repr (PyObject *self)
 {
   const auto block = block_object_to_block (self);
   if (block == nullptr)
-    return PyUnicode_FromFormat ("<%s (invalid)>", Py_TYPE (self)->tp_name);
+    return gdb_py_invalid_object_repr (self);
 
   const auto name = block->function () ?
     block->function ()->print_name () : "<anonymous>";

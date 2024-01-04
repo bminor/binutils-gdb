@@ -385,7 +385,7 @@ sympy_repr (PyObject *self)
 {
   const auto symbol = symbol_object_to_symbol (self);
   if (symbol == nullptr)
-    return PyUnicode_FromFormat ("<%s (invalid)>", Py_TYPE (self)->tp_name);
+    return gdb_py_invalid_object_repr (self);
 
   return PyUnicode_FromFormat ("<%s print_name=%s>", Py_TYPE (self)->tp_name,
 			       symbol->print_name ());

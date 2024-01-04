@@ -1750,8 +1750,8 @@ bplocpy_repr (PyObject *py_self)
 {
   const auto self = (gdbpy_breakpoint_location_object *) py_self;
   if (self->owner == nullptr || self->owner->bp == nullptr
-    || self->owner->bp != self->bp_loc->owner)
-    return PyUnicode_FromFormat ("<%s (invalid)>", Py_TYPE (self)->tp_name);
+      || self->owner->bp != self->bp_loc->owner)
+    return gdb_py_invalid_object_repr (py_self);
 
   const auto enabled = self->bp_loc->enabled ? "enabled" : "disabled";
 
