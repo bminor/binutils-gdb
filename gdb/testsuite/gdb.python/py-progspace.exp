@@ -53,6 +53,12 @@ gdb_py_test_silent_cmd "python progspace.random_attribute = 42" \
 gdb_test "python print (progspace.random_attribute)" "42" \
     "Verify set of random attribute in progspace"
 
+# Check that we can't create new (invalid) gdb.Progspace objects.
+gdb_test "python gdb.Progspace()" \
+    [multi_line "TypeError: cannot create 'gdb.Progspace' instances" \
+	 "Error while executing Python code\\."] \
+    "check for error when calling gdb.Progspace() directly"
+
 if {![runto_main]} {
     return
 }

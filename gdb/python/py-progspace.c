@@ -210,20 +210,6 @@ pspy_initialize (pspace_object *self)
   return 1;
 }
 
-static PyObject *
-pspy_new (PyTypeObject *type, PyObject *args, PyObject *keywords)
-{
-  gdbpy_ref<pspace_object> self ((pspace_object *) type->tp_alloc (type, 0));
-
-  if (self != NULL)
-    {
-      if (!pspy_initialize (self.get ()))
-	return NULL;
-    }
-
-  return (PyObject *) self.release ();
-}
-
 PyObject *
 pspy_get_printers (PyObject *o, void *ignore)
 {
@@ -859,5 +845,5 @@ PyTypeObject pspace_object_type =
   offsetof (pspace_object, dict), /* tp_dictoffset */
   0,				  /* tp_init */
   0,				  /* tp_alloc */
-  pspy_new,			  /* tp_new */
+  0,				  /* tp_new */
 };

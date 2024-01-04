@@ -95,6 +95,11 @@ show remote thread-options-packet
      attribute contains the string that appears in the 'Target Id'
      column of the 'info threads' command output.
 
+  ** It is no longer possible to create new gdb.Progspace object using
+     'gdb.Progspace()', this will result in a TypeError.  Progspace
+     objects can still be obtained through calling other API
+     functions, for example 'gdb.current_progspace()'.
+
 * Debugger Adapter Protocol changes
 
   ** GDB now emits the "process" event.
