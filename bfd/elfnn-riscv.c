@@ -5452,7 +5452,8 @@ riscv_maybe_function_sym (const asymbol *sym,
 			  bfd_vma *code_off)
 {
   if (sym->flags & BSF_LOCAL
-      && riscv_elf_is_mapping_symbols (sym->name))
+      && (riscv_elf_is_mapping_symbols (sym->name)
+	  || _bfd_elf_is_local_label_name (sec->owner, sym->name)))
     return 0;
 
   return _bfd_elf_maybe_function_sym (sym, sec, code_off);
