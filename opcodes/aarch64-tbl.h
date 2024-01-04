@@ -4216,6 +4216,11 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _LSE128_INSN ("swppa", 0x19a08000, 0xffe0fc00, lse128_atomic, OP3 (LSE128_Rt, LSE128_Rt2, ADDR_SIMPLE), QL_X2NIL, 0),
   _LSE128_INSN ("swppal", 0x19e08000, 0xffe0fc00, lse128_atomic, OP3 (LSE128_Rt, LSE128_Rt2, ADDR_SIMPLE), QL_X2NIL, 0),
   _LSE128_INSN ("swppl", 0x19608000, 0xffe0fc00, lse128_atomic, OP3 (LSE128_Rt, LSE128_Rt2, ADDR_SIMPLE), QL_X2NIL, 0),
+  /* RCPC3 extension.  */
+  RCPC3_INSN ("ldiapp", 0x19400800, 0x3fe0ec00, rcpc3, OP3 (Rt, Rs, RCPC3_ADDR_OPT_POSTIND), QL_R2NIL, F_RCPC3_SIZE),
+  RCPC3_INSN ("stilp",  0x19000800, 0x3fe0ec00, rcpc3, OP3 (Rt, Rs, RCPC3_ADDR_OPT_PREIND_WB), QL_R2NIL, F_RCPC3_SIZE),
+  RCPC3_INSN ("ldapr", 0x19c00800, 0x3ffffc00, rcpc3, OP2 (Rt, RCPC3_ADDR_POSTIND), QL_R1NIL, F_RCPC3_SIZE),
+  RCPC3_INSN ("stlr", 0x19800800, 0x3ffffc00, rcpc3, OP2 (Rt, RCPC3_ADDR_PREIND_WB), QL_R1NIL, F_RCPC3_SIZE),
   /* Move wide (immediate).  */
   CORE_INSN ("movn", 0x12800000, 0x7f800000, movewide, OP_MOVN, OP2 (Rd, HALF), QL_DST_R, F_SF | F_HAS_ALIAS),
   CORE_INSN ("mov",  0x12800000, 0x7f800000, movewide, OP_MOV_IMM_WIDEN, OP2 (Rd, IMM_MOV), QL_DST_R, F_SF | F_ALIAS | F_CONV),

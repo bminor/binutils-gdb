@@ -1013,6 +1013,7 @@ enum aarch64_insn_class
   the,
   sve2_urqvs,
   sve_index1,
+  rcpc3
 };
 
 /* Opcode enumerators.  */

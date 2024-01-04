@@ -22,7 +22,7 @@
 [^:]+:23:  Info: macro .*
 [^:]+:6: Error: the optional immediate offset can only be 0 at operand 2 -- `ldapr w1,\[x7,#8\]'
 [^:]+:23:  Info: macro .*
-[^:]+:7: Error: invalid addressing mode at operand 2 -- `ldapr w1,\[x7,#8\]!'
+[^:]+:7: Error: unexpected address writeback at operand 2 -- `ldapr w1,\[x7,#8\]!'
 [^:]+:23:  Info: macro .*
-[^:]+:8: Error: invalid addressing mode at operand 2 -- `ldapr w1,\[x7\],#8'
+[^:]+:8: Error: invalid increment amount at operand 2 -- `ldapr w1,\[x7\],#8'
 [^:]+:23:  Info: macro .*
