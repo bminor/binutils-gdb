@@ -2647,6 +2647,9 @@ static const aarch64_feature_set aarch64_feature_sme2p1 =
   AARCH64_FEATURE (SME2p1);
 static const aarch64_feature_set aarch64_feature_sve2p1 =
   AARCH64_FEATURE (SVE2p1);
+static const aarch64_feature_set aarch64_feature_rcpc3 =
+  AARCH64_FEATURE (RCPC3);
+
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2712,6 +2715,7 @@ static const aarch64_feature_set aarch64_feature_sve2p1 =
 #define B16B16  &aarch64_feature_b16b16
 #define SME2p1  &aarch64_feature_sme2p1
 #define SVE2p1  &aarch64_feature_sve2p1
+#define RCPC3	  &aarch64_feature_rcpc3
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }

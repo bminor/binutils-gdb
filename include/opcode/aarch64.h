@@ -226,6 +226,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SME2p1,
   /* SVE2.1 instructions.  */
   AARCH64_FEATURE_SVE2p1,
+  /* RCPC3 instructions.  */
+  AARCH64_FEATURE_RCPC3,
   AARCH64_NUM_FEATURES
 };
 
