@@ -194,6 +194,10 @@ if { [is_elf_format] } then {
 	}
     }
     run_dump_test "pseudo"
+    run_dump_test "text-prev" $dump_opts
+    run_dump_test "text-subsect" $dump_opts
+    run_dump_test "data-prev" $dump_opts
+    run_dump_test "data-subsect" $dump_opts
     run_dump_test "section0"
     run_dump_test "section1"
     # The h8300 port issues a warning message for
