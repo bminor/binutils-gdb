@@ -2055,7 +2055,7 @@ static void
 s_d30v_text (int i)
 
 {
-  s_text (i);
+  obj_elf_text (i);
   d30v_last_label = NULL;
   d30v_current_align = 0;
   d30v_current_align_seg = now_seg;
@@ -2067,7 +2067,7 @@ s_d30v_text (int i)
 static void
 s_d30v_data (int i)
 {
-  s_data (i);
+  obj_elf_data (i);
   d30v_last_label = NULL;
   d30v_current_align = 0;
   d30v_current_align_seg = now_seg;
