@@ -368,7 +368,7 @@ s_pru_align (int ignore ATTRIBUTE_UNUSED)
 static void
 s_pru_text (int i)
 {
-  s_text (i);
+  obj_elf_text (i);
   pru_last_label = NULL;
   pru_current_align = 0;
   pru_current_align_seg = now_seg;
@@ -379,7 +379,7 @@ s_pru_text (int i)
 static void
 s_pru_data (int i)
 {
-  s_data (i);
+  obj_elf_data (i);
   pru_last_label = NULL;
   pru_current_align = 0;
   pru_current_align_seg = now_seg;
