@@ -56,3 +56,20 @@ EOF
 
 LDEMUL_BEFORE_PARSE=elf_x86_before_parse
 fi
+
+case x${OUTPUT_FORMAT}${CALL_NOP_BYTE} in
+  x*x86-64*0x67)
+fragment <<EOF
+
+static void
+elf_x86_64_before_parse (void)
+{
+  params.mark_plt = DEFAULT_LD_Z_MARK_PLT;
+
+  elf_x86_before_parse ();
+}
+EOF
+
+    LDEMUL_BEFORE_PARSE=elf_x86_64_before_parse
+    ;;
+esac

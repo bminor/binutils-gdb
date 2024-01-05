@@ -1,5 +1,10 @@
 PARSE_AND_LIST_OPTIONS_X86_64_PLT='
-  fprintf (file, _("\
+  if (DEFAULT_LD_Z_MARK_PLT != 0)
+    fprintf (file, _("\
+  -z mark-plt                 Mark PLT with dynamic tags (default)\n\
+  -z nomark-plt               Do not mark PLT with dynamic tags\n"));
+  else
+    fprintf (file, _("\
   -z mark-plt                 Mark PLT with dynamic tags\n\
   -z nomark-plt               Do not mark PLT with dynamic tags (default)\n"));
 '

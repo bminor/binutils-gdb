@@ -213,6 +213,16 @@ AC_ARG_ENABLE(separate-code,
   no) ac_default_ld_z_separate_code=0 ;;
 esac])
 
+# Decide if -z mark-plt should be enabled in ELF x86-64 linker by default.
+ac_default_ld_z_mark_plt=unset
+AC_ARG_ENABLE(mark-plt,
+	      AS_HELP_STRING([--enable-mark-plt],
+	      [enable -z mark-plt in ELF x86-64 linker by default]),
+[case "${enableval}" in
+  yes) ac_default_ld_z_mark_plt=1 ;;
+  no) ac_default_ld_z_mark_plt=0 ;;
+esac])
+
 
 # By default warn when an executable stack is created due to object files
 # requesting such, not when the user specifies -z execstack.
@@ -561,6 +571,13 @@ fi
 AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_SEPARATE_CODE,
   $ac_default_ld_z_separate_code,
   [Define to 1 if you want to enable -z separate-code in ELF linker by default.])
+
+if test "${ac_default_ld_z_mark_plt}" = unset; then
+  ac_default_ld_z_mark_plt=0
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_MARK_PLT,
+  $ac_default_ld_z_mark_plt,
+  [Define to 1 if you want to enable -z mark-plt in ELF x86-64 linker by default.])
 
 
 AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_EXECSTACK,

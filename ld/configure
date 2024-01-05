@@ -852,6 +852,7 @@ enable_new_dtags
 enable_relro
 enable_textrel_check
 enable_separate_code
+enable_mark_plt
 enable_warn_execstack
 enable_error_execstack
 enable_warn_rwx_segments
@@ -1546,6 +1547,7 @@ Optional Features:
   --enable-textrel-check=[yes|no|warning|error]
                           enable DT_TEXTREL check in ELF linker
   --enable-separate-code  enable -z separate-code in ELF linker by default
+  --enable-mark-plt       enable -z mark-plt in ELF x86-64 linker by default
   --enable-warn-execstack enable warnings when creating an executable stack
   --enable-error-execstack
                           turn executable stack warnings into errors
@@ -11681,7 +11683,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11684 "configure"
+#line 11686 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11787,7 +11789,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11790 "configure"
+#line 11792 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15682,6 +15684,17 @@ esac
 fi
 
 
+# Decide if -z mark-plt should be enabled in ELF x86-64 linker by default.
+ac_default_ld_z_mark_plt=unset
+# Check whether --enable-mark-plt was given.
+if test "${enable_mark_plt+set}" = set; then :
+  enableval=$enable_mark_plt; case "${enableval}" in
+  yes) ac_default_ld_z_mark_plt=1 ;;
+  no) ac_default_ld_z_mark_plt=0 ;;
+esac
+fi
+
+
 
 # By default warn when an executable stack is created due to object files
 # requesting such, not when the user specifies -z execstack.
@@ -19362,6 +19375,15 @@ fi
 
 cat >>confdefs.h <<_ACEOF
 #define DEFAULT_LD_Z_SEPARATE_CODE $ac_default_ld_z_separate_code
+_ACEOF
+
+
+if test "${ac_default_ld_z_mark_plt}" = unset; then
+  ac_default_ld_z_mark_plt=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_LD_Z_MARK_PLT $ac_default_ld_z_mark_plt
 _ACEOF
 
 

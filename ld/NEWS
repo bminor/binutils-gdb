@@ -1,5 +1,10 @@
 -*- text -*-
 
+* Add -z mark-plt/-z nomark-plt options to x86-64 ELF linker to mark PLT
+  entries with DT_X86_64_PLT, DT_X86_64_PLTSZ and DT_X86_64_PLTENT dynamic
+  tags.  Also added --enable-mark-plt configure option to mark PLT entries
+  by default.
+
 * Support Intel APX relocations.
 
 * On RISC-V, add ld target option --[no-]check-uleb128.  Should rebuild the

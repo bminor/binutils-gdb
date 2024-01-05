@@ -45,6 +45,10 @@
    default. */
 #undef DEFAULT_LD_WARN_RWX_SEGMENTS
 
+/* Define to 1 if you want to enable -z mark-plt in ELF x86-64 linker by
+   default. */
+#undef DEFAULT_LD_Z_MARK_PLT
+
 /* Define to 1 if you want to enable -z relro in ELF linker by default. */
 #undef DEFAULT_LD_Z_RELRO
 
