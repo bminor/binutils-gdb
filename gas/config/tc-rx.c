@@ -222,16 +222,6 @@ md_show_usage (FILE * stream)
 }
 
 static void
-s_bss (int ignore ATTRIBUTE_UNUSED)
-{
-  int temp;
-
-  temp = get_absolute_expression ();
-  subseg_set (bss_section, (subsegT) temp);
-  demand_empty_rest_of_line ();
-}
-
-static void
 rx_float_cons (int ignore ATTRIBUTE_UNUSED)
 {
   if (elf_flags & E_FLAG_RX_64BIT_DOUBLES)
@@ -650,7 +640,6 @@ const pseudo_typeS md_pseudo_table[] =
 
   /* Our "standard" pseudos. */
   { "double",   rx_float_cons,  0 },
-  { "bss",	s_bss, 		0 },
   { "3byte",	cons,		3 },
   { "int",	cons,		4 },
   { "word",	cons,		4 },
