@@ -1568,7 +1568,6 @@ ctf_link_intern_extern_string (void *key _libctf_unused_, void *value,
   ctf_dict_t *fp = (ctf_dict_t *) value;
   ctf_link_out_string_cb_arg_t *arg = (ctf_link_out_string_cb_arg_t *) arg_;
 
-  fp->ctf_flags |= LCTF_DIRTY;
   if (!ctf_str_add_external (fp, arg->str, arg->offset))
     arg->err = ENOMEM;
 }
@@ -1596,7 +1595,6 @@ ctf_link_add_strtab (ctf_dict_t *fp, ctf_link_strtab_string_f *add_string,
     {
       ctf_link_out_string_cb_arg_t iter_arg = { str, offset, 0 };
 
-      fp->ctf_flags |= LCTF_DIRTY;
       if (!ctf_str_add_external (fp, str, offset))
 	err = ENOMEM;
 

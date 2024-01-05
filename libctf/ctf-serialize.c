@@ -980,10 +980,6 @@ ctf_serialize (ctf_dict_t *fp)
   if (fp->ctf_stypes > 0)
     return (ctf_set_errno (fp, ECTF_RDONLY));
 
-  /* Update required?  */
-  if (!(fp->ctf_flags & LCTF_DIRTY))
-    return 0;
-
   /* The strtab refs table must be empty at this stage.  Any refs already added
      will be corrupted by any modifications, including reserialization, after
      strtab finalization is complete.  Only this function, and functions it
@@ -1156,7 +1152,6 @@ ctf_serialize (ctf_dict_t *fp)
   nfp->ctf_parent = fp->ctf_parent;
   nfp->ctf_parent_unreffed = fp->ctf_parent_unreffed;
   nfp->ctf_refcnt = fp->ctf_refcnt;
-  nfp->ctf_flags |= fp->ctf_flags & ~LCTF_DIRTY;
   if (nfp->ctf_dynbase == NULL)
     nfp->ctf_dynbase = buf;		/* Make sure buf is freed on close.  */
   nfp->ctf_dthash = fp->ctf_dthash;

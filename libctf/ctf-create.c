@@ -148,7 +148,6 @@ ctf_create (int *errp)
   fp->ctf_names = names;
   fp->ctf_dtoldid = 0;
   fp->ctf_snapshot_lu = 0;
-  fp->ctf_flags |= LCTF_DIRTY;
 
   /* Make sure the ptrtab starts out at a reasonable size.  */
 
@@ -347,10 +346,6 @@ ctf_discard (ctf_dict_t *fp)
     { fp->ctf_dtoldid,
       fp->ctf_snapshot_lu + 1 };
 
-  /* Update required?  */
-  if (!(fp->ctf_flags & LCTF_DIRTY))
-    return 0;
-
   return (ctf_rollback (fp, last_update));
 }
 
@@ -415,9 +410,6 @@ ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
   fp->ctf_typemax = id.dtd_id;
   fp->ctf_snapshots = id.snapshot_id;
 
-  if (fp->ctf_snapshots == fp->ctf_snapshot_lu)
-    fp->ctf_flags &= ~LCTF_DIRTY;
-
   return 0;
 }
 
@@ -481,8 +473,6 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
 
   if (ctf_dtd_insert (fp, dtd, flag, kind) < 0)
     goto err;					/* errno is set for us.  */
-
-  fp->ctf_flags |= LCTF_DIRTY;
 
   *rp = dtd;
   return type;
@@ -729,7 +719,6 @@ ctf_set_array (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
     return (ctf_set_errno (ofp, ECTF_BADID));
 
   vlen = (ctf_array_t *) dtd->dtd_vlen;
-  fp->ctf_flags |= LCTF_DIRTY;
   vlen->cta_contents = (uint32_t) arp->ctr_contents;
   vlen->cta_index = (uint32_t) arp->ctr_index;
   vlen->cta_nelems = arp->ctr_nelems;
@@ -1113,8 +1102,6 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, root, vlen + 1);
 
-  fp->ctf_flags |= LCTF_DIRTY;
-
   return 0;
 }
 
@@ -1296,7 +1283,6 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   dtd->dtd_data.ctt_lsizelo = CTF_SIZE_TO_LSIZE_LO (ssize);
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, root, vlen + 1);
 
-  fp->ctf_flags |= LCTF_DIRTY;
   return 0;
 }
 
@@ -1365,7 +1351,6 @@ ctf_add_variable_forced (ctf_dict_t *fp, const char *name, ctf_id_t ref)
       return -1;			/* errno is set for us.  */
     }
 
-  fp->ctf_flags |= LCTF_DIRTY;
   return 0;
 }
 
