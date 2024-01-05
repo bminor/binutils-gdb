@@ -1866,17 +1866,7 @@ mapping_state_2 (enum mstate state, int max_chars)
 #define mapping_state_2(x, y)	/* nothing */
 #endif
 
-/* Directives: sectioning and alignment.  */
-
-static void
-s_bss (int ignore ATTRIBUTE_UNUSED)
-{
-  /* We don't support putting frags in the BSS segment, we fake it by
-     marking in_bss, then looking at s_skip for clues.  */
-  subseg_set (bss_section, 0);
-  demand_empty_rest_of_line ();
-  mapping_state (MAP_DATA);
-}
+/* Directives: alignment.  */
 
 static void
 s_even (int ignore ATTRIBUTE_UNUSED)
@@ -2396,7 +2386,6 @@ const pseudo_typeS md_pseudo_table[] = {
   /* Never called because '.req' does not start a line.  */
   {"req", s_req, 0},
   {"unreq", s_unreq, 0},
-  {"bss", s_bss, 0},
   {"even", s_even, 0},
   {"ltorg", s_ltorg, 0},
   {"pool", s_ltorg, 0},

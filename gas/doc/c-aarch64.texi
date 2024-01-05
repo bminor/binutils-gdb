@@ -394,11 +394,6 @@ extensions by the @option{-mcpu} command-line option.
 incrementally to the architecture being compiled for.
 
 @c BBBBBBBBBBBBBBBBBBBBBBBBBB
-
-@cindex @code{.bss} directive, AArch64
-@item .bss
-This directive switches to the @code{.bss} section.
-
 @c CCCCCCCCCCCCCCCCCCCCCCCCCC
 
 @cindex @code{.cpu} directive, AArch64
