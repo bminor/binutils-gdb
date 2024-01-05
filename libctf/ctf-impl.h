@@ -199,13 +199,13 @@ typedef struct ctf_err_warning
 } ctf_err_warning_t;
 
 /* Atoms associate strings with a list of the CTF items that reference that
-   string, so that ctf_update() can instantiate all the strings using the
+   string, so that ctf_serialize() can instantiate all the strings using the
    ctf_str_atoms and then reassociate them with the real string later.
 
    Strings can be interned into ctf_str_atom without having refs associated
    with them, for values that are returned to callers, etc.  Items are only
-   removed from this table on ctf_close(), but on every ctf_update(), all the
-   csa_refs in all entries are purged.  */
+   removed from this table on ctf_close(), but on every ctf_serialize(), all
+   the csa_refs in all entries are purged.  */
 
 typedef struct ctf_str_atom
 {
