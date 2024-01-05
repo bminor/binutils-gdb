@@ -356,6 +356,10 @@ struct thread_object
 
   /* The Inferior object to which this thread belongs.  */
   PyObject *inf_obj;
+
+  /* Dictionary holding user-added attributes.  This is the __dict__
+     attribute of the object.  */
+  PyObject *dict;
 };
 
 struct inferior_object;

@@ -51,6 +51,9 @@ create_thread_object (struct thread_info *tp)
 
   thread_obj->thread = tp;
   thread_obj->inf_obj = (PyObject *) inf_obj.release ();
+  thread_obj->dict = PyDict_New ();
+  if (thread_obj->dict == nullptr)
+    return nullptr;
 
   return thread_obj;
 }
@@ -58,7 +61,13 @@ create_thread_object (struct thread_info *tp)
 static void
 thpy_dealloc (PyObject *self)
 {
-  Py_DECREF (((thread_object *) self)->inf_obj);
+  thread_object *thr_obj = (thread_object *) self;
+
+  gdb_assert (thr_obj->inf_obj != nullptr);
+
+  Py_DECREF (thr_obj->inf_obj);
+  Py_XDECREF (thr_obj->dict);
+
   Py_TYPE (self)->tp_free (self);
 }
 
@@ -418,6 +427,8 @@ GDBPY_INITIALIZE_FILE (gdbpy_initialize_thread);
 
 static gdb_PyGetSetDef thread_object_getset[] =
 {
+  { "__dict__", gdb_py_generic_dict, nullptr,
+    "The __dict__ for this thread.", &thread_object_type },
   { "name", thpy_get_name, thpy_set_name,
     "The name of the thread, as set by the user or the OS.", NULL },
   { "details", thpy_get_details, NULL,
@@ -498,7 +509,7 @@ PyTypeObject thread_object_type =
   0,				  /* tp_dict */
   0,				  /* tp_descr_get */
   0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
+  offsetof (thread_object, dict), /* tp_dictoffset */
   0,				  /* tp_init */
   0				  /* tp_alloc */
 };

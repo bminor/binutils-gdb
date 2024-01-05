@@ -107,6 +107,19 @@ gdb_test "python print(last_thread)" \
     "<gdb.InferiorThread id=${decimal}\\.${decimal} target-id=\"\[^\r\n\]*\">" \
     "test repr of a valid thread"
 
+# Add a user defined attribute to this thread, check the attribute can
+# be read back, and check the attribute is not present on other
+# threads.
+gdb_test_no_output "python last_thread._user_attribute = 123" \
+    "add user defined attribute to InferiorThread object"
+gdb_test "python print(last_thread._user_attribute)" "123" \
+    "read back user defined attribute"
+gdb_test "python print(i0.threads ()\[0\]._user_attribute)" \
+    [multi_line \
+	 "AttributeError: 'gdb\\.InferiorThread' object has no attribute '_user_attribute'" \
+	 "Error while executing Python code\\."] \
+    "attempt to read non-existent user defined attribute"
+
 # Proceed to the next test.
 
 gdb_breakpoint [gdb_get_line_number "Break here."]
@@ -116,6 +129,10 @@ gdb_continue_to_breakpoint "cont to Break here." ".*Break here\..*"
 gdb_test "python print(last_thread)" \
     "<gdb.InferiorThread \\(invalid\\)>" \
     "test repr of an invalid thread"
+
+# Check the user defined attribute is still present on the invalid thread object.
+gdb_test "python print(last_thread._user_attribute)" "123" \
+    "check user defined attribute on an invalid InferiorThread object"
 
 # Test memory read and write operations.
 

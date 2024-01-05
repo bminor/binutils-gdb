@@ -4184,6 +4184,41 @@ the Python @code{bytes} representation of the handle and @var{type} is
 a @code{gdb.Type} for the handle type.
 @end defun
 
+One may add arbitrary attributes to @code{gdb.InferiorThread} objects
+in the usual Python way.  This is useful if, for example, one needs to
+do some extra record keeping associated with the thread.
+
+In this contrived example we record the time when a thread last
+stopped:
+
+@smallexample
+@group
+(@value{GDBP}) python
+import datetime
+
+def thread_stopped(event):
+    if event.inferior_thread is not None:
+        thread = event.inferior_thread
+    else:
+        thread = gdb.selected_thread()
+    thread._last_stop_time = datetime.datetime.today()
+
+gdb.events.stop.connect(thread_stopped)
+@end group
+@group
+(@value{GDBP}) file /tmp/hello
+Reading symbols from /tmp/hello...
+(@value{GDBP}) start
+Temporary breakpoint 1 at 0x401198: file /tmp/hello.c, line 18.
+Starting program: /tmp/hello
+
+Temporary breakpoint 1, main () at /tmp/hello.c:18
+18	  printf ("Hello World\n");
+(@value{GDBP}) python print(gdb.selected_thread()._last_stop_time)
+2024-01-04 14:48:41.347036
+@end group
+@end smallexample
+
 @node Recordings In Python
 @subsubsection Recordings In Python
 @cindex recordings in python

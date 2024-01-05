@@ -104,6 +104,10 @@ show remote thread-options-packet
      these will be stored in the object's new Inferior.__dict__
      attribute.
 
+  ** User defined attributes can be added to a gdb.InferiorThread
+     object, these will be stored in the object's new
+     InferiorThread.__dict__ attribute.
+
 * Debugger Adapter Protocol changes
 
   ** GDB now emits the "process" event.
