@@ -799,6 +799,11 @@ enum aarch64_opnd
   AARCH64_OPND_SME_Zt2,		/* Qobule SVE vector register list.  */
   AARCH64_OPND_SME_Zt3,		/* Trible SVE vector register list.  */
   AARCH64_OPND_SME_Zt4,		/* Quad SVE vector register list.  */
+  AARCH64_OPND_RCPC3_ADDR_OPT_POSTIND,   /* [<Xn|SP>]{, #<imm>}.  */
+  AARCH64_OPND_RCPC3_ADDR_OPT_PREIND_WB, /* [<Xn|SP>] or [<Xn|SP>, #<imm>]!.  */
+  AARCH64_OPND_RCPC3_ADDR_POSTIND,	 /* [<Xn|SP>], #<imm>.  */
+  AARCH64_OPND_RCPC3_ADDR_PREIND_WB, 	 /* [<Xn|SP>, #<imm>]!.  */
+  AARCH64_OPND_RCPC3_ADDR_OFFSET
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an

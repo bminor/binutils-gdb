@@ -7025,4 +7025,18 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a list of 3 SVE vector registers")				\
     X(SVE_REGLIST, ins_sve_reglist, ext_sve_reglist_zt, "SME_Zt4",	\
       4 << OPD_F_OD_LSB, F(FLD_SVE_Zt),					\
-      "a list of 4 SVE vector registers")
+      "a list of 4 SVE vector registers")				\
+    X(ADDRESS, ins_rcpc3_addr_opt_offset, ext_rcpc3_addr_opt_offset,		\
+      "RCPC3_ADDR_OPT_POSTIND", 0, F(FLD_opc2),				\
+      "an address with post-incrementing by ammount of loaded bytes") \
+    X(ADDRESS, ins_rcpc3_addr_opt_offset, ext_rcpc3_addr_opt_offset,	\
+      "RCPC3_ADDR_OPT_PREIND_WB", 0, F(FLD_opc2),			\
+      "an address with pre-incrementing with write-back by ammount of stored bytes") \
+    X(ADDRESS, ins_rcpc3_addr_opt_offset, ext_rcpc3_addr_opt_offset,	\
+      "RCPC3_ADDR_POSTIND", 0, F(),					\
+      "an address with post-incrementing by ammount of loaded bytes") \
+    X(ADDRESS, ins_rcpc3_addr_opt_offset, ext_rcpc3_addr_opt_offset,	\
+      "RCPC3_ADDR_PREIND_WB", 0, F(),					\
+      "an address with pre-incrementing with write-back by ammount of stored bytes") \
+    Y(ADDRESS, rcpc3_addr_offset, "RCPC3_ADDR_OFFSET", 0, F(FLD_Rn,FLD_imm9), \
+      "an address with an optional 8-bit signed immediate offset")
