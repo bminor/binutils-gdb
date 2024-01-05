@@ -5367,21 +5367,6 @@ s7_build_reg_hsh (struct s7_reg_map *map)
 
 
 
-/* If we change section we must dump the literal pool first.  */
-static void
-s7_s_score_bss (int ignore ATTRIBUTE_UNUSED)
-{
-  subseg_set (bss_section, (subsegT) get_absolute_expression ());
-  demand_empty_rest_of_line ();
-}
-
-static void
-s7_s_score_text (int ignore)
-{
-  obj_elf_text (ignore);
-  record_alignment (now_seg, 2);
-}
-
 static void
 s7_s_section (int ignore)
 {

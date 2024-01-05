@@ -24,8 +24,6 @@
 
 #include "tc-score7.c"
 
-static void s3_s_score_bss (int ignore ATTRIBUTE_UNUSED);
-static void s3_s_score_text (int ignore);
 static void s3_score_s_section (int ignore);
 static void s3_s_change_sec (int sec);
 static void s3_s_score_mask (int reg_type ATTRIBUTE_UNUSED);
@@ -39,7 +37,6 @@ static void s3_s_score_gpword (int ignore ATTRIBUTE_UNUSED);
 static void s3_s_score_cpadd (int ignore ATTRIBUTE_UNUSED);
 static void s3_s_score_lcomm (int bytes_p);
 
-static void s_score_bss (int ignore ATTRIBUTE_UNUSED);
 static void s_score_text (int ignore);
 static void s_section (int ignore);
 static void s_change_sec (int sec);
@@ -196,7 +193,6 @@ symbolS *GOT_symbol;
 
 const pseudo_typeS md_pseudo_table[] =
 {
-  {"bss", s_score_bss, 0},
   {"text", s_score_text, 0},
   {"word", cons, 4},
   {"long", cons, 4},
@@ -5532,22 +5528,6 @@ s3_do_dsp3 (char *str)
     s3_inst.relax_inst = 0x8000;
 }
 
-
-/* If we change section we must dump the literal pool first.  */
-static void
-s3_s_score_bss (int ignore ATTRIBUTE_UNUSED)
-{
-  subseg_set (bss_section, (subsegT) get_absolute_expression ());
-  demand_empty_rest_of_line ();
-}
-
-static void
-s3_s_score_text (int ignore)
-{
-  obj_elf_text (ignore);
-  record_alignment (now_seg, 2);
-}
-
 static void
 s3_score_s_section (int ignore)
 {
@@ -6324,21 +6304,10 @@ s3_build_dependency_insn_hsh (void)
 }
 
 static void
-s_score_bss (int ignore ATTRIBUTE_UNUSED)
-{
-  if (score3)
-    return s3_s_score_bss (ignore);
-  else
-    return s7_s_score_bss (ignore);
-}
-
-static void
 s_score_text (int ignore)
 {
-  if (score3)
-    return s3_s_score_text (ignore);
-  else
-    return s7_s_score_text (ignore);
+  obj_elf_text (ignore);
+  record_alignment (now_seg, 2);
 }
 
 static void
