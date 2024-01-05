@@ -135,27 +135,6 @@ microblaze_generate_symbol (char *sym)
 
 /* Handle the section changing pseudo-ops. */
 
-static void
-microblaze_s_text (int ignore ATTRIBUTE_UNUSED)
-{
-#ifdef OBJ_ELF
-  obj_elf_text (ignore);
-#else
-  s_text (ignore);
-#endif
-}
-
-static void
-microblaze_s_data (int ignore ATTRIBUTE_UNUSED)
-{
-#ifdef OBJ_ELF
-  obj_elf_change_section (".data", SHT_PROGBITS, SHF_ALLOC+SHF_WRITE,
-			  0, 0, false);
-#else
-  s_data (ignore);
-#endif
-}
-
 /* Things in the .sdata segment are always considered to be in the small data section.  */
 
 static void
@@ -298,20 +277,13 @@ microblaze_s_rdata (int localvar)
 }
 
 static void
-microblaze_s_bss (int localvar)
+microblaze_s_sbss (int ignore ATTRIBUTE_UNUSED)
 {
 #ifdef OBJ_ELF
-  if (localvar == 0) /* bss.  */
-    obj_elf_change_section (".bss", SHT_NOBITS, SHF_ALLOC+SHF_WRITE,
-			    0, 0, false);
-  else if (localvar == 1)
-    {
-      /* sbss.  */
-      obj_elf_change_section (".sbss", SHT_NOBITS, SHF_ALLOC+SHF_WRITE,
-			      0, 0, false);
-      if (sbss_segment == 0)
-	sbss_segment = subseg_new (".sbss", 0);
-    }
+  obj_elf_change_section (".sbss", SHT_NOBITS, SHF_ALLOC+SHF_WRITE,
+			  0, 0, false);
+  if (sbss_segment == 0)
+    sbss_segment = subseg_new (".sbss", 0);
 #else
   s_data (ignore);
 #endif
@@ -385,7 +357,6 @@ microblaze_s_weakext (int ignore ATTRIBUTE_UNUSED)
 const pseudo_typeS md_pseudo_table[] =
 {
   {"lcomm", microblaze_s_lcomm, 1},
-  {"data", microblaze_s_data, 0},
   {"data8", cons, 1},      /* Same as byte.  */
   {"data16", cons, 2},     /* Same as hword.  */
   {"data32", cons, 4},     /* Same as word.  */
@@ -396,9 +367,10 @@ const pseudo_typeS md_pseudo_table[] =
   {"rodata", microblaze_s_rdata, 0},
   {"sdata2", microblaze_s_rdata, 1},
   {"sdata", microblaze_s_sdata, 0},
-  {"bss", microblaze_s_bss, 0},
-  {"sbss", microblaze_s_bss, 1},
-  {"text", microblaze_s_text, 0},
+#ifndef OBJ_ELF
+  {"bss", s_data, 0},
+#endif
+  {"sbss", microblaze_s_sbss, 0},
   {"word", cons, 4},
   {"frame", s_ignore, 0},
   {"mask", s_ignore, 0}, /* Emitted by gcc.  */
