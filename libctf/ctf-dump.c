@@ -441,7 +441,7 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
   if ((functions && fp->ctf_funcidx_names)
       || (!functions && fp->ctf_objtidx_names))
     str = str_append (str, _("Section is indexed.\n"));
-  else if (fp->ctf_symtab.cts_data == NULL)
+  else if (fp->ctf_ext_symtab.cts_data == NULL)
     str = str_append (str, _("No symbol table.\n"));
 
   while ((id = ctf_symbol_next (fp, &i, &name, functions)) != CTF_ERR)

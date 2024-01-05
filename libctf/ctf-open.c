@@ -1626,8 +1626,8 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   if (symsect != NULL)
     {
-      memcpy (&fp->ctf_symtab, symsect, sizeof (ctf_sect_t));
-      memcpy (&fp->ctf_strtab, strsect, sizeof (ctf_sect_t));
+      memcpy (&fp->ctf_ext_symtab, symsect, sizeof (ctf_sect_t));
+      memcpy (&fp->ctf_ext_strtab, strsect, sizeof (ctf_sect_t));
     }
 
   if (fp->ctf_data.cts_name != NULL)
@@ -1636,14 +1636,14 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	err = ENOMEM;
 	goto bad;
       }
-  if (fp->ctf_symtab.cts_name != NULL)
-    if ((fp->ctf_symtab.cts_name = strdup (fp->ctf_symtab.cts_name)) == NULL)
+  if (fp->ctf_ext_symtab.cts_name != NULL)
+    if ((fp->ctf_ext_symtab.cts_name = strdup (fp->ctf_ext_symtab.cts_name)) == NULL)
       {
 	err = ENOMEM;
 	goto bad;
       }
-  if (fp->ctf_strtab.cts_name != NULL)
-    if ((fp->ctf_strtab.cts_name = strdup (fp->ctf_strtab.cts_name)) == NULL)
+  if (fp->ctf_ext_strtab.cts_name != NULL)
+    if ((fp->ctf_ext_strtab.cts_name = strdup (fp->ctf_ext_strtab.cts_name)) == NULL)
       {
 	err = ENOMEM;
 	goto bad;
@@ -1651,10 +1651,10 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   if (fp->ctf_data.cts_name == NULL)
     fp->ctf_data.cts_name = _CTF_NULLSTR;
-  if (fp->ctf_symtab.cts_name == NULL)
-    fp->ctf_symtab.cts_name = _CTF_NULLSTR;
-  if (fp->ctf_strtab.cts_name == NULL)
-    fp->ctf_strtab.cts_name = _CTF_NULLSTR;
+  if (fp->ctf_ext_symtab.cts_name == NULL)
+    fp->ctf_ext_symtab.cts_name = _CTF_NULLSTR;
+  if (fp->ctf_ext_strtab.cts_name == NULL)
+    fp->ctf_ext_strtab.cts_name = _CTF_NULLSTR;
 
   if (strsect != NULL)
     {
@@ -1836,11 +1836,11 @@ ctf_dict_close (ctf_dict_t *fp)
   if (fp->ctf_data.cts_name != _CTF_NULLSTR)
     free ((char *) fp->ctf_data.cts_name);
 
-  if (fp->ctf_symtab.cts_name != _CTF_NULLSTR)
-    free ((char *) fp->ctf_symtab.cts_name);
+  if (fp->ctf_ext_symtab.cts_name != _CTF_NULLSTR)
+    free ((char *) fp->ctf_ext_symtab.cts_name);
 
-  if (fp->ctf_strtab.cts_name != _CTF_NULLSTR)
-    free ((char *) fp->ctf_strtab.cts_name);
+  if (fp->ctf_ext_strtab.cts_name != _CTF_NULLSTR)
+    free ((char *) fp->ctf_ext_strtab.cts_name);
   else if (fp->ctf_data_mmapped)
     ctf_munmap (fp->ctf_data_mmapped, fp->ctf_data_mmapped_len);
 
@@ -1909,13 +1909,13 @@ ctf_getdatasect (const ctf_dict_t *fp)
 ctf_sect_t
 ctf_getsymsect (const ctf_dict_t *fp)
 {
-  return fp->ctf_symtab;
+  return fp->ctf_ext_symtab;
 }
 
 ctf_sect_t
 ctf_getstrsect (const ctf_dict_t *fp)
 {
-  return fp->ctf_strtab;
+  return fp->ctf_ext_strtab;
 }
 
 /* Set the endianness of the symbol table attached to FP.  */
@@ -1930,8 +1930,8 @@ ctf_symsect_endianness (ctf_dict_t *fp, int little_endian)
      our idea of the endianness has changed.  */
 
   if (old_endianness != fp->ctf_symsect_little_endian
-      && fp->ctf_sxlate != NULL && fp->ctf_symtab.cts_data != NULL)
-    assert (init_symtab (fp, fp->ctf_header, &fp->ctf_symtab) == 0);
+      && fp->ctf_sxlate != NULL && fp->ctf_ext_symtab.cts_data != NULL)
+    assert (init_symtab (fp, fp->ctf_header, &fp->ctf_ext_symtab) == 0);
 }
 
 /* Return the CTF handle for the parent CTF dict, if one exists.  Otherwise

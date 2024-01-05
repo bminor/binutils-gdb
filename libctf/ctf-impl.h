@@ -366,9 +366,9 @@ struct ctf_dict
   struct ctf_header *ctf_header;    /* The header from this CTF dict.  */
   unsigned char ctf_openflags;	    /* Flags the dict had when opened.  */
   ctf_sect_t ctf_data;		    /* CTF data from object file.  */
-  ctf_sect_t ctf_symtab;	    /* Symbol table from object file.  */
-  ctf_sect_t ctf_strtab;	    /* String table from object file.  */
-  int ctf_symsect_little_endian;    /* Endianness of the ctf_symtab.  */
+  ctf_sect_t ctf_ext_symtab;	    /* Symbol table from object file.  */
+  ctf_sect_t ctf_ext_strtab;	    /* String table from object file.  */
+  int ctf_symsect_little_endian;    /* Endianness of the ctf_ext_symtab.  */
   ctf_dynhash_t *ctf_symhash_func;  /* (partial) hash, symsect name -> idx. */
   ctf_dynhash_t *ctf_symhash_objt;  /* ditto, for object symbols.  */
   size_t ctf_symhash_latest;	    /* Amount of symsect scanned so far.  */

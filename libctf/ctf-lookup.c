@@ -469,7 +469,7 @@ ctf_symidx_sort (ctf_dict_t *fp, uint32_t *idx, size_t *nidx,
 static const char *
 ctf_lookup_symbol_name (ctf_dict_t *fp, unsigned long symidx)
 {
-  const ctf_sect_t *sp = &fp->ctf_symtab;
+  const ctf_sect_t *sp = &fp->ctf_ext_symtab;
   ctf_link_sym_t sym;
   int err;
 
@@ -540,7 +540,7 @@ static unsigned long
 ctf_lookup_symbol_idx (ctf_dict_t *fp, const char *symname, int try_parent,
 		       int is_function)
 {
-  const ctf_sect_t *sp = &fp->ctf_symtab;
+  const ctf_sect_t *sp = &fp->ctf_ext_symtab;
   ctf_link_sym_t sym;
   void *known_idx;
   int err;
@@ -973,7 +973,7 @@ ctf_lookup_by_sym_or_name (ctf_dict_t *fp, unsigned long symidx,
 			   const char *symname, int try_parent,
 			   int is_function)
 {
-  const ctf_sect_t *sp = &fp->ctf_symtab;
+  const ctf_sect_t *sp = &fp->ctf_ext_symtab;
   ctf_id_t type = 0;
   int err = 0;
 
