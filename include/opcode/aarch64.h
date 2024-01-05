@@ -1282,7 +1282,9 @@ extern const aarch64_opcode aarch64_opcode_table[];
 #define F_OPD_NARROW (1ULL << 33)
 /* For the instruction with size[22:23] field.  */
 #define F_OPD_SIZE (1ULL << 34)
-/* Next bit is 35.  */
+/* RCPC3 instruction has the field of 'size'.  */
+#define F_RCPC3_SIZE (1ULL << 35)
+/* Next bit is 36.  */
 
 /* Instruction constraints.  */
 /* This instruction has a predication constraint on the instruction at PC+4.  */
@@ -1350,7 +1352,7 @@ opcode_has_special_coder (const aarch64_opcode *opcode)
 {
   return (opcode->flags & (F_SF | F_LSE_SZ | F_SIZEQ | F_FPTYPE | F_SSIZE | F_T
 	  | F_GPRSIZE_IN_Q | F_LDS_SIZE | F_MISC | F_N | F_COND
-	  | F_OPD_SIZE)) != 0;
+	  | F_OPD_SIZE | F_RCPC3_SIZE)) != 0;
 }
 
 struct aarch64_name_value_pair

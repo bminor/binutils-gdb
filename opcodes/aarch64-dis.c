@@ -1032,6 +1032,70 @@ aarch64_ext_addr_simple (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return true;
 }
 
+/* Decode the address operand for rcpc3 instructions with optional load/store
+   datasize offset, e.g. STILPP <Xs>, <Xt>, [<Xn|SP>{,#-16}]! and
+   LIDAP <Xs>, <Xt>, [<Xn|SP>]{,#-16}.  */
+bool
+aarch64_ext_rcpc3_addr_opt_offset (const aarch64_operand *self ATTRIBUTE_UNUSED,
+				   aarch64_opnd_info *info,
+				   aarch64_insn code,
+				   const aarch64_inst *inst ATTRIBUTE_UNUSED,
+				   aarch64_operand_error *err ATTRIBUTE_UNUSED)
+{
+  info->addr.base_regno = extract_field (FLD_Rn, code, 0);
+  if (!extract_field (FLD_opc2, code, 0))
+    {
+      info->addr.writeback = 1;
+
+      enum aarch64_opnd type;
+      for (int i = 0; i < AARCH64_MAX_OPND_NUM; i++)
+	{
+	  aarch64_opnd_info opnd = info[i];
+	  type = opnd.type;
+	  if (aarch64_operands[type].op_class == AARCH64_OPND_CLASS_ADDRESS)
+	    break;
+	}
+
+      assert (aarch64_operands[type].op_class == AARCH64_OPND_CLASS_ADDRESS);
+      int offset = calc_ldst_datasize (inst->operands);
+
+      switch (type)
+	{
+	case AARCH64_OPND_RCPC3_ADDR_OPT_PREIND_WB:
+	case AARCH64_OPND_RCPC3_ADDR_PREIND_WB:
+	  info->addr.offset.imm = -offset;
+	  info->addr.preind = 1;
+	  break;
+	case AARCH64_OPND_RCPC3_ADDR_OPT_POSTIND:
+	case AARCH64_OPND_RCPC3_ADDR_POSTIND:
+	  info->addr.offset.imm = offset;
+	  info->addr.postind = 1;
+	  break;
+	default:
+	  return false;
+	}
+    }
+  return true;
+}
+
+bool
+aarch64_ext_rcpc3_addr_offset (const aarch64_operand *self ATTRIBUTE_UNUSED,
+			       aarch64_opnd_info *info,
+			       aarch64_insn code,
+			       const aarch64_inst *inst ATTRIBUTE_UNUSED,
+			       aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  info->qualifier = get_expected_qualifier (inst, info->idx);
+
+  /* Rn */
+  info->addr.base_regno = extract_field (self->fields[0], code, 0);
+
+  /* simm9 */
+  aarch64_insn imm = extract_fields (code, 0, 1, self->fields[1]);
+  info->addr.offset.imm = sign_extend (imm, 8);
+  return true;
+}
+
 /* Decode the address operand for e.g.
      stlur <Xt>, [<Xn|SP>{, <amount>}].  */
 bool
@@ -2579,6 +2643,26 @@ do_special_decoding (aarch64_inst *inst)
       value = extract_field (FLD_lse_sz, inst->value, 0);
       inst->operands[idx].qualifier = get_greg_qualifier_from_value (value);
     }
+  /* rcpc3 'size' field.  */
+  if (inst->opcode->flags & F_RCPC3_SIZE)
+    {
+      value = extract_field (FLD_rcpc3_size, inst->value, 0);
+      for (int i = 0;
+	   aarch64_operands[inst->operands[i].type].op_class != AARCH64_OPND_CLASS_ADDRESS;
+	   i++)
+	{
+	  if (aarch64_operands[inst->operands[i].type].op_class
+	      == AARCH64_OPND_CLASS_INT_REG)
+	    inst->operands[i].qualifier = get_greg_qualifier_from_value (value & 1);
+	  else if (aarch64_operands[inst->operands[i].type].op_class
+	      == AARCH64_OPND_CLASS_FP_REG)
+	    {
+	      value += (extract_field (FLD_opc1, inst->value, 0) << 2);
+	      inst->operands[i].qualifier = get_sreg_qualifier_from_value (value);
+	    }
+	}
+    }
+
   /* size:Q fields.  */
   if (inst->opcode->flags & F_SIZEQ)
     return decode_sizeq (inst);

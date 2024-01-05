@@ -216,7 +216,9 @@ enum aarch64_field_kind
   FLD_ol,
   FLD_ZAn_2,
   FLD_ZAn_3,
-  FLD_ZAn
+  FLD_ZAn,
+  FLD_opc2,
+  FLD_rcpc3_size,
 };
 
 /* Field description.  */

@@ -702,6 +702,24 @@ aarch64_ins_addr_offset (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return true;
 }
 
+/* Encode the address operand for e.g.
+     stlur <Xt>, [<Xn|SP>{, <amount>}].  */
+bool
+aarch64_ins_rcpc3_addr_offset (const aarch64_operand *self ATTRIBUTE_UNUSED,
+			       const aarch64_opnd_info *info, aarch64_insn *code,
+			       const aarch64_inst *inst ATTRIBUTE_UNUSED,
+			       aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  /* Rn */
+  insert_field (self->fields[0], code, info->addr.base_regno, 0);
+
+  /* simm9 */
+  int imm = info->addr.offset.imm;
+  insert_field (self->fields[1], code, imm, 0);
+
+  return true;
+}
+
 /* Encode the address operand for e.g. LDRSW <Xt>, [<Xn|SP>, #<simm>]!.  */
 bool
 aarch64_ins_addr_simm (const aarch64_operand *self,
@@ -732,6 +750,28 @@ aarch64_ins_addr_simm (const aarch64_operand *self,
       if (info->addr.preind)
 	insert_field (self->fields[1], code, 1, 0);
     }
+
+  return true;
+}
+
+/* Encode the address operand, potentially offset by the load/store ammount,
+   e.g. LDIAPP <Xt>, <Xt2> [<Xn|SP>, #<simm>]
+   and  STILP  <Xt>, <Xt2> [<Xn|SP>], #<simm>.*/
+bool
+aarch64_ins_rcpc3_addr_opt_offset (const aarch64_operand *self ATTRIBUTE_UNUSED,
+				   const aarch64_opnd_info *info,
+				   aarch64_insn *code,
+				   const aarch64_inst *inst ATTRIBUTE_UNUSED,
+				   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int imm;
+
+  /* Rn */
+  insert_field (FLD_Rn, code, info->addr.base_regno, 0);
+  /* simm */
+  imm = info->addr.offset.imm;
+  if (!imm)
+    insert_field (FLD_opc2, code, 1, 0);
 
   return true;
 }
@@ -1943,6 +1983,22 @@ do_special_encoding (struct aarch64_inst *inst)
 	? 1 : 0;
       insert_field (FLD_lse_sz, &inst->value, value, 0);
     }
+  if (inst->opcode->flags & F_RCPC3_SIZE)
+    {
+      switch (inst->operands[0].qualifier)
+	{
+	case AARCH64_OPND_QLF_W: value = 2; break;
+	case AARCH64_OPND_QLF_X: value = 3; break;
+	case AARCH64_OPND_QLF_S_B: value = 0; break;
+	case AARCH64_OPND_QLF_S_H: value = 1; break;
+	case AARCH64_OPND_QLF_S_S: value = 2; break;
+	case AARCH64_OPND_QLF_S_D: value = 3; break;
+	case AARCH64_OPND_QLF_S_Q: value = 0; break;
+	default: return;
+	}
+      insert_field (FLD_rcpc3_size, &inst->value, value, 0);
+    }
+
   if (inst->opcode->flags & F_SIZEQ)
     encode_sizeq (inst);
   if (inst->opcode->flags & F_FPTYPE)

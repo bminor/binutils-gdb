@@ -410,6 +410,8 @@ const aarch64_field fields[] =
     {  6,  2 }, /* ZAn_2: name of the 2bit encoded ZA tile.  */
     {  5,  3 }, /* ZAn_3: name of the 3bit encoded ZA tile.  */
     {  6,  1 }, /* ZAn: name of the bit encoded ZA tile.  */
+    { 12,  4 },	/* opc2: in rcpc3 ld/st inst deciding the pre/post-index.  */
+    { 30,  2 },	/* rcpc3_size: in rcpc3 ld/st, field controls Rt/Rt2 width.  */
 };
 
 enum aarch64_operand_class
