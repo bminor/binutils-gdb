@@ -856,7 +856,16 @@ output_cpu_flags (FILE *table, bitfield *flags, unsigned int size,
 	active_cpu_flags.array[i / 32] |= 1U << (i % 32);
     }
 
-  fprintf (table, "%d } }%s\n", flags[i].value, comma);
+#if defined(CpuAttrUnused) != defined(CpuUnused)
+  if (mode <= 0)
+# ifdef CpuUnused
+    fprintf (table, " } }%s\n", comma);
+# else
+    fprintf (table, "%d, 0 } }%s\n", flags[i].value, comma);
+# endif
+  else
+#endif
+    fprintf (table, "%d } }%s\n", flags[i].value, comma);
 }
 
 static void
