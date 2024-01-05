@@ -88,7 +88,6 @@ int s390_cie_data_alignment;
 /* Define the prototypes for the pseudo-ops */
 static void s390_byte (int);
 static void s390_elf_cons (int);
-static void s390_bss (int);
 static void s390_insn (int);
 static void s390_literals (int);
 static void s390_machine (int);
@@ -98,7 +97,6 @@ const pseudo_typeS md_pseudo_table[] =
 {
   { "align",        s_align_bytes,      0 },
   /* Pseudo-ops which must be defined.  */
-  { "bss",          s390_bss,           0 },
   { "insn",         s390_insn,          0 },
   /* Pseudo-ops which must be overridden.  */
   { "byte",	    s390_byte,	        0 },
@@ -1733,16 +1731,6 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
   abort ();
 }
 #endif
-
-void
-s390_bss (int ignore ATTRIBUTE_UNUSED)
-{
-  /* We don't support putting frags in the BSS segment, we fake it
-     by marking in_bss, then looking at s_skip for clues.  */
-
-  subseg_set (bss_section, 0);
-  demand_empty_rest_of_line ();
-}
 
 /* Pseudo-op handling.  */
 
