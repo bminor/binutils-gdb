@@ -892,11 +892,6 @@ incrementally to the architecture being compiled for.
 This performs the same action as @var{.code 32}.
 
 @c BBBBBBBBBBBBBBBBBBBBBBBBBB
-
-@cindex @code{.bss} directive, ARM
-@item .bss
-This directive switches to the @code{.bss} section.
-
 @c CCCCCCCCCCCCCCCCCCCCCCCCCC
 
 @cindex @code{.cantunwind} directive, ARM

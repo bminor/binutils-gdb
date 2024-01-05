@@ -3347,20 +3347,7 @@ s_syntax (int unused ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
-/* Directives: sectioning and alignment.  */
-
-static void
-s_bss (int ignore ATTRIBUTE_UNUSED)
-{
-  /* We don't support putting frags in the BSS segment, we fake it by
-     marking in_bss, then looking at s_skip for clues.	*/
-  subseg_set (bss_section, 0);
-  demand_empty_rest_of_line ();
-
-#ifdef md_elf_section_change_hook
-  md_elf_section_change_hook ();
-#endif
-}
+/* Directives: alignment.  */
 
 static void
 s_even (int ignore ATTRIBUTE_UNUSED)
@@ -5187,7 +5174,6 @@ const pseudo_typeS md_pseudo_table[] =
   { "dn",	   s_dn,          0 },
   { "qn",          s_qn,          0 },
   { "unreq",	   s_unreq,	  0 },
-  { "bss",	   s_bss,	  0 },
   { "align",	   s_align_ptwo,  2 },
   { "arm",	   s_arm,	  0 },
   { "thumb",	   s_thumb,	  0 },
