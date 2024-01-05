@@ -198,8 +198,6 @@ struct v850_seg_entry v850_seg_table[] =
   { NULL, ".call_table_text",
     SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY | SEC_CODE
     | SEC_HAS_CONTENTS},
-  { NULL, ".bss",
-    SEC_ALLOC }
 };
 
 #define SDATA_SECTION		0
@@ -215,7 +213,6 @@ struct v850_seg_entry v850_seg_table[] =
 #define ZCOMMON_SECTION		10
 #define CALL_TABLE_DATA_SECTION	11
 #define CALL_TABLE_TEXT_SECTION	12
-#define BSS_SECTION		13
 
 static void
 do_v850_seg (int i, subsegT sub)
@@ -578,7 +575,6 @@ const pseudo_typeS md_pseudo_table[] =
   { "zbss",		v850_seg,		ZBSS_SECTION		},
   { "rosdata",		v850_seg,		ROSDATA_SECTION 	},
   { "rozdata",		v850_seg,		ROZDATA_SECTION 	},
-  { "bss",		v850_seg,		BSS_SECTION		},
   { "offset",		v850_offset,		0			},
   { "word",		cons,			4			},
   { "zcomm",		v850_comm,		ZCOMMON_SECTION 	},
@@ -1969,7 +1965,6 @@ md_begin (void)
       op++;
     }
 
-  v850_seg_table[BSS_SECTION].s = bss_section;
   bfd_set_arch_mach (stdoutput, v850_target_arch, machine);
   bfd_set_private_flags (stdoutput, v850_e_flags);
 }
