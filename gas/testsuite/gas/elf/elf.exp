@@ -336,6 +336,13 @@ if { [is_elf_format] } then {
 
     run_dump_test "pr25917"
     run_dump_test "bss"
+    # Some targets treat .bss similar to .lcomm.
+    if { ![istarget "csky-*-*"]
+	 && ![istarget "mcore-*-*"]
+	 && ![istarget "spu-*-*"] } then {
+	run_dump_test "bss-prev" $dump_opts
+	run_dump_test "bss-subsect" $dump_opts
+    }
     run_dump_test "bad-bss"
     run_dump_test "bad-section-flag"
     run_dump_test "bad-size"
