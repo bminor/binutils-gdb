@@ -407,7 +407,7 @@ sframe_get_fre_offset_size (struct sframe_row_entry *sframe_fre)
 
 #if SFRAME_FRE_TYPE_SELECTION_OPT
 
-/* Create a composite exression CEXP (for SFrame FRE start address) such that:
+/* Create a composite expression CEXP (for SFrame FRE start address) such that:
 
       exp = <val> OP_absent <width>, where,
 
@@ -449,7 +449,7 @@ create_fre_start_addr_exp (expressionS *cexp, symbolS *fre_pc_begin,
   cexp->X_add_number = 0;
 }
 
-/* Create a composite exression CEXP (for SFrame FDE function info) such that:
+/* Create a composite expression CEXP (for SFrame FDE function info) such that:
 
       exp = <rest_of_func_info> OP_modulus <width>, where,
 
@@ -458,7 +458,7 @@ create_fre_start_addr_exp (expressionS *cexp, symbolS *fre_pc_begin,
     used to stash away the func_info.  The upper 4-bits of the func_info are copied
     back to the resulting byte by the fragment fixup logic.
     - <width> stores the expression when evaluated gives the size of the
-    funtion in number of bytes.
+    function in number of bytes.
 
    The use of OP_modulus as the X_op_symbol helps identify this expression
    later when fragments are fixed up.  */
@@ -631,7 +631,7 @@ output_sframe_internal (void)
 
   addr_size = SFRAME_RELOC_SIZE;
 
-  /* The function desciptor entries as dumped by the assembler are not
+  /* The function descriptor entries as dumped by the assembler are not
      sorted on PCs.  */
   unsigned char sframe_flags = 0;
   sframe_flags |= !SFRAME_F_FDE_SORTED;
@@ -673,10 +673,10 @@ output_sframe_internal (void)
 #endif
   out_one (fixed_ra_offset);
 
-  /* None of the AMD64, or AARCH64 ABIs need the auxilliary header.
+  /* None of the AMD64, or AARCH64 ABIs need the auxiliary header.
      When the need does arise to use this field, the appropriate backend
      must provide this information.  */
-  out_one (0); /* Auxilliary SFrame header length.  */
+  out_one (0); /* Auxiliary SFrame header length.  */
 
   out_four (num_fdes); /* Number of FDEs.  */
   out_four (num_fres); /* Number of FREs.  */
@@ -1085,7 +1085,7 @@ sframe_xlate_do_val_offset (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
 {
   /* Previous value of register is CFA + offset.  However, if the specified
      register is not interesting (FP or RA reg), the current DW_CFA_val_offset
-     instruction can be safely skipped without sacrificing the asynchonicity of
+     instruction can be safely skipped without sacrificing the asynchronicity of
      stack trace information.  */
   if (cfi_insn->u.r == SFRAME_CFA_FP_REG)
     return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
