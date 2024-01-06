@@ -1,6 +1,6 @@
 #source: dt-relr-1.s
 #as: --64
-#ld: -shared -melf_x86_64 $DT_RELR_LDFLAGS -z nocombreloc
+#ld: -shared -melf_x86_64 $DT_RELR_LDFLAGS -z nocombreloc -z nomark-plt
 #readelf: -r -s --wide
 #target: x86_64-*-linux*
 
