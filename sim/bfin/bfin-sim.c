@@ -786,7 +786,7 @@ lshift (SIM_CPU *cpu, bu64 val, int cnt, int size, bool saturate, bool overflow)
      However, it's a little more complex than looking at sign bits, we need
      to see if we are shifting the sign information away...  */
   if (((val << cnt) >> size) == 0
-      || (((val << cnt) >> size) == ~(~0 << cnt)
+      || (((val << cnt) >> size) == ~((bu32)~0 << cnt)
 	  && ((new_val >> (size - 1)) & 0x1)))
     v_i = 0;
   else
@@ -5880,7 +5880,7 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	      bu16 inshift = in << shift;
 
 	      if (((inshift & ~0xFFFF)
-		   && ((inshift & ~0xFFFF) >> 16) != ~(~0 << shift))
+		   && ((inshift & ~0xFFFF) >> 16) != ~((bu32)~0 << shift))
 		  || (inshift & 0x8000) != (in & 0x8000))
 		{
 		  if (in & 0x8000)
