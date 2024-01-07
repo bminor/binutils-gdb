@@ -90,6 +90,15 @@ public:
     m_args.push_back (value);
   }
 
+  /* Like calling emplace_back on the underlying vector.  This class takes
+     ownership of the value added to the vector, and will release the value
+     by calling xfree() on it when this object is destroyed.  */
+  template<typename... Args>
+  reference emplace_back (Args &&...args)
+  {
+    return m_args.emplace_back (std::forward<Args> (args)...);
+  }
+
   /* Non constant iterator to start of m_args.  */
   iterator begin ()
   {
@@ -132,6 +141,12 @@ public:
   bool empty () const
   {
     return m_args.empty ();
+  }
+
+  /* Clear the argument vector.  */
+  void clear ()
+  {
+    free_vector_argv (m_args);
   }
 };
 } /* namespac gdb */

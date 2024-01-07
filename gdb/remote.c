@@ -81,6 +81,7 @@
 #include "gdbsupport/selftest.h"
 #include "cli/cli-style.h"
 #include "gdbsupport/remote-args.h"
+#include "gdbsupport/gdb_argv_vec.h"
 
 /* The remote target.  */
 
@@ -12278,6 +12279,51 @@ cli_packet_command (const char *args, int from_tty)
   send_remote_packet (view, &cb);
 }
 
+/* Implement 'maint test-remote-args' command.
+
+   Treat ARGS as an argument string.  Split the remote arguments using
+   gdb::remote_args::split, and then join using gdb::remote_args::join.
+   The split and joined arguments are printed out.  Additionally, the
+   joined arguments are split and joined a second time, and compared to the
+   result of the first join, this provides some basic validation that GDB
+   sess the joined arguments as equivalent to the original argument
+   string.  */
+
+static void
+test_remote_args_command (const char *args, int from_tty)
+{
+  std::vector<std::string> split_args = gdb::remote_args::split (args);
+
+  gdb_printf ("Input (%s)\n", args);
+  for (const std::string &a : split_args)
+    gdb_printf ("  (%s)\n", a.c_str ());
+
+  gdb::argv_vec tmp_split_args;
+  for (const std::string &a : split_args)
+    tmp_split_args.emplace_back (xstrdup (a.c_str ()));
+
+  std::string joined_args = gdb::remote_args::join (tmp_split_args.get ());
+
+  gdb_printf ("Output (%s)\n", joined_args.c_str ());
+
+  std::vector<std::string> resplit = gdb::remote_args::split (joined_args);
+
+  tmp_split_args.clear ();
+  for (const std::string &a : resplit)
+    tmp_split_args.emplace_back (xstrdup (a.c_str ()));
+
+  std::string rejoined = gdb::remote_args::join (tmp_split_args.get ());
+
+  if (joined_args != rejoined || split_args != resplit)
+    {
+      gdb_printf ("FAILURE ON REJOINING\n");
+      gdb_printf ("Resplit args:\n");
+      for (const auto & a : resplit)
+	gdb_printf ("  (%s)\n", a.c_str ());
+      gdb_printf ("Rejoined (%s)\n", rejoined.c_str ());
+    }
+}
+
 #if 0
 /* --------- UNIT_TEST for THREAD oriented PACKETS ------------------- */
 
@@ -16725,6 +16771,20 @@ from the target."),
 
   /* Eventually initialize fileio.  See fileio.c */
   initialize_remote_fileio (&remote_set_cmdlist, &remote_show_cmdlist);
+
+  add_cmd ("test-remote-args", class_maintenance,
+	   test_remote_args_command, _("\
+Test remote argument splitting and joining.\n	\
+  maintenance test-remote-args ARGS\n\
+For remote targets that don't support passing inferior arguments as a\n\
+single string, GDB needs to split the inferior arguments before passing\n\
+them, and gdbserver needs to join the arguments it receives.\n\
+This command splits ARGS just as GDB would before passing them to a\n\
+remote target, and prints the result.  This command then joins the\n\
+arguments just as gdbserver would, and prints the results.\n\
+This command is useful in diagnosing problems when passing arguments\n\
+between GDB and a remote target."),
+	   &maintenancelist);
 
 #if GDB_SELF_TEST
   selftests::register_test ("remote_memory_tagging",

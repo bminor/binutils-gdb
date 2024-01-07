@@ -42842,6 +42842,26 @@ These are representative commands for each @var{kind} of setting type
 @value{GDBN} supports.  They are used by the testsuite for exercising
 the settings infrastructure.
 
+@kindex maint test-remote-args
+@item maint test-remote-args @var{args}
+For targets that don't support passing inferior arguments as a single
+string (@pxref{single-inf-arg}), @value{GDBN} will attempt to split
+the inferior arguments before passing them to the remote target, and
+the remote target might choose to join the inferior arguments upon
+receipt.  Historically gdbserver did join inferior arguments, but now
+it will request inferior arguments be passed as a single string if
+@value{GDBN} supports this feature.
+
+This maintenance command splits @var{args} as @value{GDBN} would
+normally split such an argument string before passing the arguments to
+a remote target, the split arguments are then printed.
+
+The split arguments are then joined together as gdbserver would join
+them, and the result is printed.
+
+This command is intended to help diagnose issues passing inferior
+arguments to remote targets.
+
 @kindex maint set backtrace-on-fatal-signal
 @kindex maint show backtrace-on-fatal-signal
 @item maint set backtrace-on-fatal-signal [on|off]

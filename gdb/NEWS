@@ -18,6 +18,12 @@
 
 GNU/Linux/MicroBlaze (gdbserver) microblazeel-*linux*
 
+* New commands
+
+maintenance test-remote-args ARGS
+  Test splitting and joining of inferior arguments ARGS as they would
+  be split and joined when being passed to a remote target.
+
 * Changed remote packets
 
 single-inf-arg in qSupported

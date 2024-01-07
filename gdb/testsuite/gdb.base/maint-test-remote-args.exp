@@ -1,0 +1,40 @@
+# Copyright 2024-2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test the 'maint test-remote-args' command.
+#
+# We do minimal testing in here.  If you are thinking of adding a new
+# test here then you are most likely adding the test in the wrong
+# place.  Remote argument testing is checked in the following test
+# scripts: gdb.base/args.exp, gdb.base/inferior-args.exp,
+# gdb.base/startup-with-shell.exp, and gdb.python/py-inferior.exp.
+# The test gdb.gdb/unittest.exp also runs 'maint selftest
+# remote-args', which are the remote argument self tests.
+#
+# If you have a new test for an argument that was being passed
+# incorrectly, then add the test to one of those scripts.
+#
+# This file is ONLY for validating that the 'maint test-remote-args'
+# command itself is working.
+
+gdb_start
+
+gdb_test "maint test-remote-args a b c" \
+    [multi_line \
+	 "Input \\(a b c\\)" \
+	 "  \\(a\\)" \
+	 "  \\(b\\)" \
+	 "  \\(c\\)" \
+	 "Output \\(a b c\\)"]
