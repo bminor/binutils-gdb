@@ -1778,7 +1778,7 @@ struct dis386 {
    'I' unused.
    'J' unused.
    'K' => print 'd' or 'q' if rex prefix is present.
-   'L' unused.
+   'L' => print 'l' or 'q' if suffix_always is true
    'M' => print 'r' if intel_mnemonic is false.
    'N' => print 'n' if instruction has no wait "prefix"
    'O' => print 'd' or 'o' (or 'q' in Intel mode)
@@ -3654,8 +3654,8 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0F38F6 */
   {
     { "wrssK",	{ M, Gdq }, 0 },
-    { "adoxS",	{ VexGdq, Gdq, Edq}, 0 },
-    { "adcxS",	{ VexGdq, Gdq, Edq}, 0 },
+    { "adoxL",	{ VexGdq, Gdq, Edq }, 0 },
+    { "adcxL",	{ VexGdq, Gdq, Edq }, 0 },
     { Bad_Opcode },
   },
 
@@ -10602,7 +10602,16 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 	    *ins->obufp++ = 'd';
 	  break;
 	case 'L':
-	  abort ();
+	  if (ins->intel_syntax)
+	    break;
+	  if (sizeflag & SUFFIX_ALWAYS)
+	    {
+	      if (ins->rex & REX_W)
+		*ins->obufp++ = 'q';
+	      else
+		*ins->obufp++ = 'l';
+	    }
+	  break;
 	case 'M':
 	  if (ins->intel_mnemonic != cond)
 	    *ins->obufp++ = 'r';
