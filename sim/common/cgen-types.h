@@ -72,9 +72,9 @@ typedef int64_t DI;
 typedef uint64_t UDI;
 #define GETLODI(di) ((SI) (di))
 #define GETHIDI(di) ((SI) ((UDI) (di) >> 32))
-#define SETLODI(di, val) ((di) = (((di) & 0xffffffff00000000LL) | (val)))
-#define SETHIDI(di, val) ((di) = (((di) & 0xffffffffLL) | (((DI) (val)) << 32)))
-#define MAKEDI(hi, lo) ((((DI) (SI) (hi)) << 32) | ((UDI) (USI) (lo)))
+#define SETLODI(di, val) ((di) = (((di) & 0xffffffff00000000LL) | (USI) (val)))
+#define SETHIDI(di, val) ((di) = (((di) & 0xffffffffLL) | (((UDI) (val)) << 32)))
+#define MAKEDI(hi, lo) ((DI) (((UDI) (hi) << 32) | (UDI) (USI) (lo)))
 
 /* These are used to record extracted raw data from an instruction, among other
    things.  It must be a host data type, and not a target one.  */
