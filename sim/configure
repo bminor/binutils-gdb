@@ -16175,6 +16175,7 @@ build_warnings="$build_warnings
 -Wpointer-sign
 -Wreturn-mismatch
 -Wreturn-type
+-Wshift-negative-value
 -Wstrict-prototypes
 -Wno-enum-conversion
 "

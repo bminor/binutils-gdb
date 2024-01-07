@@ -70,6 +70,7 @@ build_warnings="$build_warnings
 -Wpointer-sign
 -Wreturn-mismatch
 -Wreturn-type
+-Wshift-negative-value
 -Wstrict-prototypes
 dnl The cgen virtual insn logic involves enum conversions.
 dnl Disable until we can figure out how to make this work.
