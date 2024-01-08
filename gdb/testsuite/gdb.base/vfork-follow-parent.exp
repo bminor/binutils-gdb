@@ -92,7 +92,7 @@ proc do_test { exec_file resolution_method target_non_stop non_stop } {
 	gdb_test "set schedule-multiple on"
 	gdb_test "continue" "$::inferior_exited_re normally.*" \
 	    "continue to end of inferior 2"
-	gdb_test "inferior 1" ".*Switching to inferior 1.*"
+	gdb_test -no-prompt-anchor "inferior 1" ".*Switching to inferior 1.*"
 	gdb_test "print unblock_parent = 1" " = 1"
     } else {
 	error "invalid resolution method: $resolution_method"
