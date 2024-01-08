@@ -9338,7 +9338,7 @@ proc remove_core {pid {test ""}} {
     }
 }
 
-proc core_find {binfile {deletefiles {}} {arg ""}} {
+proc core_find {binfile {deletefiles {}} {arg ""} {output_file "/dev/null"}} {
     global objdir subdir
 
     set destcore "$binfile.core"
@@ -9360,7 +9360,7 @@ proc core_find {binfile {deletefiles {}} {arg ""}} {
     set found 0
     set coredir [standard_output_file coredir.[getpid]]
     file mkdir $coredir
-    catch "system \"(cd ${coredir}; ulimit -c unlimited; ${binfile} ${arg}; true) >/dev/null 2>&1\""
+    catch "system \"(cd ${coredir}; ulimit -c unlimited; ${binfile} ${arg}; true) >${output_file} 2>&1\""
     #      remote_exec host "${binfile}"
     foreach i "${coredir}/core ${coredir}/core.coremaker.c ${binfile}.core" {
 	if [remote_file build exists $i] {
