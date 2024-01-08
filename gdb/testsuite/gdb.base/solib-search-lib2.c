@@ -39,6 +39,9 @@ lib2_func2 (void)
 void
 lib2_spacer (void)
 {
+  int i;
+  for (i = 0; i < 10; ++i)
+    ;
 }
 
 #endif
