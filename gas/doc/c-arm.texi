@@ -268,10 +268,12 @@ names are recognized:
 @code{armv8.6-a},
 @code{armv8.7-a},
 @code{armv8.8-a},
+@code{armv8.9-a},
 @code{armv9-a},
 @code{armv9.1-a},
 @code{armv9.2-a},
 @code{armv9.3-a},
+@code{armv9.4-a},
 @code{iwmmxt},
 @code{iwmmxt2}
 and

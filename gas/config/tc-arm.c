@@ -32022,6 +32022,7 @@ static const struct arm_ext_table armv86a_ext_table[] =
 
 #define armv87a_ext_table armv86a_ext_table
 #define armv88a_ext_table armv87a_ext_table
+#define armv89a_ext_table armv88a_ext_table
 
 static const struct arm_ext_table armv9a_ext_table[] =
 {
@@ -32041,6 +32042,7 @@ static const struct arm_ext_table armv9a_ext_table[] =
 #define armv91a_ext_table armv86a_ext_table
 #define armv92a_ext_table armv91a_ext_table
 #define armv93a_ext_table armv92a_ext_table
+#define armv94a_ext_table armv93a_ext_table
 
 #define CDE_EXTENSIONS \
   ARM_ADD ("cdecp0", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE0)), \
@@ -32166,10 +32168,12 @@ static const struct arm_arch_option_table arm_archs[] =
   ARM_ARCH_OPT2 ("armv8.6-a",	  ARM_ARCH_V8_6A,	FPU_ARCH_VFP, armv86a),
   ARM_ARCH_OPT2 ("armv8.7-a",	  ARM_ARCH_V8_7A,	FPU_ARCH_VFP, armv87a),
   ARM_ARCH_OPT2 ("armv8.8-a",	  ARM_ARCH_V8_8A,	FPU_ARCH_VFP, armv88a),
+  ARM_ARCH_OPT2 ("armv8.9-a",	  ARM_ARCH_V8_9A,	FPU_ARCH_VFP, armv89a),
   ARM_ARCH_OPT2 ("armv9-a",	  ARM_ARCH_V9A,		FPU_ARCH_VFP, armv9a),
   ARM_ARCH_OPT2 ("armv9.1-a",	  ARM_ARCH_V9_1A,	FPU_ARCH_VFP, armv91a),
   ARM_ARCH_OPT2 ("armv9.2-a",	  ARM_ARCH_V9_2A,	FPU_ARCH_VFP, armv92a),
   ARM_ARCH_OPT2 ("armv9.3-a",	  ARM_ARCH_V9_2A,	FPU_ARCH_VFP, armv93a),
+  ARM_ARCH_OPT2 ("armv9.4-a",	  ARM_ARCH_V9_4A,	FPU_ARCH_VFP, armv94a),
   ARM_ARCH_OPT ("xscale",	  ARM_ARCH_XSCALE,	FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt",	  ARM_ARCH_IWMMXT,	FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt2",	  ARM_ARCH_IWMMXT2,	FPU_ARCH_VFP),
@@ -32955,10 +32959,12 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_6A},
     {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_7A},
     {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_8A},
+    {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_9A},
     {TAG_CPU_ARCH_V9,	    ARM_ARCH_V9A},
     {TAG_CPU_ARCH_V9,	    ARM_ARCH_V9_1A},
     {TAG_CPU_ARCH_V9,	    ARM_ARCH_V9_2A},
     {TAG_CPU_ARCH_V9,	    ARM_ARCH_V9_3A},
+    {TAG_CPU_ARCH_V9,	    ARM_ARCH_V9_4A},
     {-1,		    ARM_ARCH_NONE}
 };
 
