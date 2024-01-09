@@ -1939,6 +1939,30 @@ cpu_flags_match (const insn_template *t)
 	      any.bitfield.cpuavx512vl = 0;
 	    }
 	}
+
+      /* Dual non-APX/APX templates need massaging from what APX_F() in the
+         opcode table has produced.  While the direct transformation of the
+         incoming cpuid&(cpuid|APX_F) would be to cpuid&(cpuid) / cpuid&(APX_F)
+         respectively, it's cheaper to move to just cpuid / cpuid&APX_F
+         instead.  */
+      if (any.bitfield.cpuapx_f
+	  && (any.bitfield.cpubmi || any.bitfield.cpubmi2
+	      || any.bitfield.cpuavx512f || any.bitfield.cpuavx512bw
+	      || any.bitfield.cpuavx512dq || any.bitfield.cpuamx_tile
+	      || any.bitfield.cpucmpccxadd))
+	{
+	  /* These checks (verifying that APX_F() was properly used in the
+	     opcode table entry) make sure there's no need for an "else" to
+	     the "if()" below.  */
+	  gas_assert (!cpu_flags_all_zero (&all));
+	  cpu = cpu_flags_and (all, any);
+	  gas_assert (cpu_flags_equal (&cpu, &all));
+
+	  if (need_evex_encoding (t))
+	    all = any;
+
+	  memset (&any, 0, sizeof (any));
+	}
     }
 
   if (flag_code != CODE_64BIT)

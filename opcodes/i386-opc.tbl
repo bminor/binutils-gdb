@@ -143,7 +143,13 @@
 
 #define DstVVVV VexVVVV=VexVVVV_DST
 
-// The template supports VEX format for cpuid and EVEX format for cpuid & apx_f.
+// The template supports VEX format for cpuid and EVEX format for cpuid & APX_F.
+// While therefore we really mean cpuid|(cpuid&APX_F) here, this can't be
+// expressed in the generated templates.  It's equivalent to just cpuid|APX_F
+// anyway, but that is not what we want (as APX_F alone isn't a sufficient
+// prereq for such insns). Instead the assembler will massage the CPU specifier
+// to the equivalent of either cpuid&(cpuid) or cpuid&(APX_F) (or something
+// substantially similar), depending on what encoding was requested.
 #define APX_F(cpuid) cpuid&(cpuid|APX_F)
 
 // The EVEX purpose of StaticRounding appears only together with SAE. Re-use

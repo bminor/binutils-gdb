@@ -13,6 +13,13 @@
 .*:25: Error: `andn' is not supported on `x86_64.nobmi'
 .*:28: Error: `bzhi' is not supported on `x86_64.nobmi2'
 .*:29: Error: `bzhi' is not supported on `x86_64.nobmi2'
+.*:33: Error: .*`andn'.*
+.*:34: Error: .*`bzhi'.*
+.*:35: Error: .*`kmovw'.*
+.*:36: Error: .*`kmovq'.*
+.*:37: Error: .*`kmovb'.*
+.*:38: Error: .*`ldtilecfg'.*
+.*:39: Error: .*`cmpexadd'.*
 GAS LISTING .*
 #...
 [ 	]*1[ 	]+\# Check illegal 64bit APX EVEX promoted instructions
