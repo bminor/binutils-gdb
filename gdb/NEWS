@@ -91,6 +91,10 @@ show remote thread-options-packet
   ** New function gdb.interrupt(), that interrupts GDB as if the user
      typed control-c.
 
+  ** New gdb.InferiorThread.ptid_string attribute.  This read-only
+     attribute contains the string that appears in the 'Target Id'
+     column of the 'info threads' command output.
+
 * Debugger Adapter Protocol changes
 
   ** GDB now emits the "process" event.

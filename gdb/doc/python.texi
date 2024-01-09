@@ -4084,6 +4084,13 @@ Either the LWPID or TID may be 0, which indicates that the operating system
 does not  use that identifier.
 @end defvar
 
+@defvar InferiorThread.ptid_string
+This read-only attribute contains a string representing
+@code{InferiorThread.ptid}.  This is the string that @value{GDBN} uses
+in the @samp{Target Id} column in the @kbd{info threads} output
+(@pxref{info_threads,,@samp{info threads}}).
+@end defvar
+
 @defvar InferiorThread.inferior
 The inferior this thread belongs to.  This attribute is represented as
 a @code{gdb.Inferior} object.  This attribute is not writable.
