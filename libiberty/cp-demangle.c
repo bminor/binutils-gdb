@@ -993,6 +993,7 @@ d_make_comp (struct d_info *di, enum demangle_component_type type,
     case DEMANGLE_COMPONENT_VECTOR_TYPE:
     case DEMANGLE_COMPONENT_CLONE:
     case DEMANGLE_COMPONENT_MODULE_ENTITY:
+    case DEMANGLE_COMPONENT_CONSTRAINTS:
       if (left == NULL || right == NULL)
 	return NULL;
       break;
@@ -1036,6 +1037,7 @@ d_make_comp (struct d_info *di, enum demangle_component_type type,
     case DEMANGLE_COMPONENT_TEMPLATE_NON_TYPE_PARM:
     case DEMANGLE_COMPONENT_TEMPLATE_TEMPLATE_PARM:
     case DEMANGLE_COMPONENT_TEMPLATE_PACK_PARM:
+    case DEMANGLE_COMPONENT_FRIEND:
       if (left == NULL)
 	return NULL;
       break;
@@ -1344,6 +1346,22 @@ is_ctor_dtor_or_conversion (struct demangle_component *dc)
     }
 }
 
+/* [ Q <constraint-expression> ] */
+
+static struct demangle_component *
+d_maybe_constraints (struct d_info *di, struct demangle_component *dc)
+{
+  if (d_peek_char (di) == 'Q')
+    {
+      d_advance (di, 1);
+      struct demangle_component *expr = d_expression (di);
+      if (expr == NULL)
+	return NULL;
+      dc = d_make_comp (di, DEMANGLE_COMPONENT_CONSTRAINTS, dc, expr);
+    }
+  return dc;
+}
+
 /* <encoding> ::= <(function) name> <bare-function-type>
               ::= <(data) name>
               ::= <special-name>
@@ -1397,21 +1415,21 @@ d_encoding (struct d_info *di, int top_level)
 	      struct demangle_component *ftype;
 
 	      ftype = d_bare_function_type (di, has_return_type (dc));
-	      if (ftype)
-		{
-		  /* If this is a non-top-level local-name, clear the
-		     return type, so it doesn't confuse the user by
-		     being confused with the return type of whaever
-		     this is nested within.  */
-		  if (!top_level && dc->type == DEMANGLE_COMPONENT_LOCAL_NAME
-		      && ftype->type == DEMANGLE_COMPONENT_FUNCTION_TYPE)
-		    d_left (ftype) = NULL;
+	      if (!ftype)
+		return NULL;
 
-		  dc = d_make_comp (di, DEMANGLE_COMPONENT_TYPED_NAME,
-				    dc, ftype);
-		}
-	      else
-		dc = NULL;
+	      /* If this is a non-top-level local-name, clear the
+		 return type, so it doesn't confuse the user by
+		 being confused with the return type of whaever
+		 this is nested within.  */
+	      if (!top_level && dc->type == DEMANGLE_COMPONENT_LOCAL_NAME
+		  && ftype->type == DEMANGLE_COMPONENT_FUNCTION_TYPE)
+		d_left (ftype) = NULL;
+
+	      ftype = d_maybe_constraints (di, ftype);
+
+	      dc = d_make_comp (di, DEMANGLE_COMPONENT_TYPED_NAME,
+				dc, ftype);
 	    }
 	}
     }
@@ -1681,6 +1699,7 @@ d_maybe_module_name (struct d_info *di, struct demangle_component **name)
 /* <unqualified-name> ::= [<module-name>] <operator-name> [<abi-tags>]
                       ::= [<module-name>] <ctor-dtor-name> [<abi-tags>]
                       ::= [<module-name>] <source-name> [<abi-tags>]
+		      ::= [<module-name>] F <source-name> [<abi-tags>]
 		      ::= [<module-name>] <local-source-name>  [<abi-tags>]
                       ::= [<module-name>] DC <source-name>+ E [<abi-tags>]
     <local-source-name>	::= L <source-name> <discriminator> [<abi-tags>]
@@ -1692,11 +1711,18 @@ d_unqualified_name (struct d_info *di, struct demangle_component *scope,
 {
   struct demangle_component *ret;
   char peek;
+  int member_like_friend = 0;
 
   if (!d_maybe_module_name (di, &module))
     return NULL;
 
   peek = d_peek_char (di);
+  if (peek == 'F')
+    {
+      member_like_friend = 1;
+      d_advance (di, 1);
+      peek = d_peek_char (di);
+    }
   if (IS_DIGIT (peek))
     ret = d_source_name (di);
   else if (IS_LOWER (peek))
@@ -1773,6 +1799,8 @@ d_unqualified_name (struct d_info *di, struct demangle_component *scope,
     ret = d_make_comp (di, DEMANGLE_COMPONENT_MODULE_ENTITY, ret, module);
   if (d_peek_char (di) == 'B')
     ret = d_abi_tags (di, ret);
+  if (member_like_friend)
+    ret = d_make_comp (di, DEMANGLE_COMPONENT_FRIEND, ret, NULL);
   if (scope)
     ret = d_make_comp (di, DEMANGLE_COMPONENT_QUAL_NAME, scope, ret);
 
@@ -3012,7 +3040,7 @@ d_parmlist (struct d_info *di)
       struct demangle_component *type;
 
       char peek = d_peek_char (di);
-      if (peek == '\0' || peek == 'E' || peek == '.')
+      if (peek == '\0' || peek == 'E' || peek == '.' || peek == 'Q')
 	break;
       if ((peek == 'R' || peek == 'O')
 	  && d_peek_next_char (di) == 'E')
@@ -3248,7 +3276,7 @@ d_template_args (struct d_info *di)
   return d_template_args_1 (di);
 }
 
-/* <template-arg>* E  */
+/* <template-arg>* [Q <constraint-expression>] E  */
 
 static struct demangle_component *
 d_template_args_1 (struct d_info *di)
@@ -3284,12 +3312,16 @@ d_template_args_1 (struct d_info *di)
 	return NULL;
       pal = &d_right (*pal);
 
-      if (d_peek_char (di) == 'E')
-	{
-	  d_advance (di, 1);
-	  break;
-	}
+      char peek = d_peek_char (di);
+      if (peek == 'E' || peek == 'Q')
+	break;
     }
+
+  al = d_maybe_constraints (di, al);
+
+  if (d_peek_char (di) != 'E')
+    return NULL;
+  d_advance (di, 1);
 
   di->last_name = hold_last_name;
 
@@ -4431,6 +4463,7 @@ d_count_templates_scopes (struct d_print_info *dpi,
     case DEMANGLE_COMPONENT_PACK_EXPANSION:
     case DEMANGLE_COMPONENT_TAGGED_NAME:
     case DEMANGLE_COMPONENT_CLONE:
+    case DEMANGLE_COMPONENT_CONSTRAINTS:
     recurse_left_right:
       /* PR 89394 - Check for too much recursion.  */
       if (dpi->recursion > DEMANGLE_RECURSION_LIMIT)
@@ -4459,6 +4492,7 @@ d_count_templates_scopes (struct d_print_info *dpi,
     case DEMANGLE_COMPONENT_GLOBAL_CONSTRUCTORS:
     case DEMANGLE_COMPONENT_GLOBAL_DESTRUCTORS:
     case DEMANGLE_COMPONENT_MODULE_ENTITY:
+    case DEMANGLE_COMPONENT_FRIEND:
       d_count_templates_scopes (dpi, d_left (dc));
       break;
 
@@ -5189,6 +5223,22 @@ d_print_comp_inner (struct d_print_info *dpi, int options,
 	    dpt.next = dpi->templates;
 	    dpi->templates = &dpt;
 	    dpt.template_decl = typed_name;
+
+	    /* Constraints are mangled as part of the template argument list,
+	       so they wrap the _TEMPLATE_ARGLIST.  But
+	       d_lookup_template_argument expects the RHS of _TEMPLATE to be
+	       the _ARGLIST, and constraints need to refer to these args.  So
+	       move the _CONSTRAINTS out of the _TEMPLATE and onto the type.
+	       This will result in them being printed after the () like a
+	       trailing requires-clause, but that seems like our best option
+	       given that we aren't printing a template-head.  */
+	    struct demangle_component *tnr = d_right (typed_name);
+	    if (tnr->type == DEMANGLE_COMPONENT_CONSTRAINTS)
+	      {
+		d_right (typed_name) = d_left (tnr);
+		d_left (tnr) = d_right (dc);
+		d_right (dc) = tnr;
+	      }
 	  }
 
 	d_print_comp (dpi, options, d_right (dc));
@@ -6197,6 +6247,11 @@ d_print_comp_inner (struct d_print_info *dpi, int options,
       d_append_char (dpi, ']');
       return;
 
+    case DEMANGLE_COMPONENT_FRIEND:
+      d_print_comp (dpi, options, d_left (dc));
+      d_append_string (dpi, "[friend]");
+      return;
+
     case DEMANGLE_COMPONENT_TEMPLATE_HEAD:
       {
 	d_append_char (dpi, '<');
@@ -6229,6 +6284,12 @@ d_print_comp_inner (struct d_print_info *dpi, int options,
     case DEMANGLE_COMPONENT_TEMPLATE_PACK_PARM:
       d_print_comp (dpi, options, d_left (dc));
       d_append_string (dpi, "...");
+      return;
+
+    case DEMANGLE_COMPONENT_CONSTRAINTS:
+      d_print_comp (dpi, options, d_left (dc));
+      d_append_string (dpi, " requires ");
+      d_print_comp (dpi, options, d_right (dc));
       return;
 
     default:
