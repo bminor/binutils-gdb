@@ -1858,6 +1858,9 @@ aarch64_sve_dupm_mov_immediate_p (uint64_t, int);
 extern bool
 aarch64_cpu_supports_inst_p (aarch64_feature_set, aarch64_inst *);
 
+extern int
+calc_ldst_datasize (const aarch64_opnd_info *opnds);
+
 #ifdef DEBUG_AARCH64
 extern int debug_dump;
 

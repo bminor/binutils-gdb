@@ -1668,6 +1668,28 @@ check_za_access (const aarch64_opnd_info *opnd,
   return true;
 }
 
+/* Given a load/store operation, calculate the size of transferred data via a
+   cumulative sum of qualifier sizes preceding the address operand in the
+   OPNDS operand list argument.  */
+int
+calc_ldst_datasize (const aarch64_opnd_info *opnds)
+{
+  unsigned num_bytes = 0; /* total number of bytes transferred.  */
+  enum aarch64_operand_class opnd_class;
+  enum aarch64_opnd type;
+
+  for (int i = 0; i < AARCH64_MAX_OPND_NUM; i++)
+    {
+      type = opnds[i].type;
+      opnd_class = aarch64_operands[type].op_class;
+      if (opnd_class == AARCH64_OPND_CLASS_ADDRESS)
+	break;
+      num_bytes += aarch64_get_qualifier_esize (opnds[i].qualifier);
+    }
+  return num_bytes;
+}
+
+
 /* General constraint checking based on operand code.
 
    Return 1 if OPNDS[IDX] meets the general constraint of operand code TYPE
