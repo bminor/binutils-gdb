@@ -16661,8 +16661,7 @@ fi
 __EOF__
 
 else
-      SIM_MIPS_MULTI_SRC=mips/doesnt-exist.c
-  SIM_MIPS_IGEN_ITABLE_FLAGS='$(SIM_MIPS_SINGLE_FLAGS)'
+    SIM_MIPS_IGEN_ITABLE_FLAGS='$(SIM_MIPS_SINGLE_FLAGS)'
   if test "x$SIM_MIPS_GEN" = x"M16"; then :
   as_fn_append SIM_MIPS_IGEN_ITABLE_FLAGS ' $(SIM_MIPS_M16_FLAGS)'
 fi
