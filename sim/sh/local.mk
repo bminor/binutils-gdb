@@ -51,6 +51,8 @@ BUILT_SOURCES += \
 	%D%/ppi.c
 %C%_BUILD_OUTPUTS = \
 	%D%/gencode$(EXEEXT) \
+	%D%/code.c \
+	%D%/ppi.c \
 	%D%/table.c
 
 ## Generating modules.c requires all sources to scan.

@@ -74,4 +74,5 @@ BUILT_SOURCES += %D%/simops.h
 	$(AM_V_GEN)$< >$@
 
 EXTRA_PROGRAMS += %D%/gencode
+CLEANFILES += %D%/simops.h
 MOSTLYCLEANFILES += $(%C%_BUILD_OUTPUTS)

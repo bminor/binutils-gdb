@@ -80,6 +80,7 @@ BUILT_SOURCES += %D%/eng.h
 	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change %D%/mloop.cin %D%/mloop.c
 	$(AM_V_at)touch $@
 
+CLEANFILES += %D%/eng.h
 MOSTLYCLEANFILES += $(%C%_BUILD_OUTPUTS)
 
 ## Target that triggers all cgen targets that works when --disable-cgen-maint.
