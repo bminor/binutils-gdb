@@ -136,10 +136,11 @@ valid_varybits (int bits, opcode * op, int byte)
 	  int found = 0;
 	  int i;
 	  int ob;
+	  Vary *v;
 
 	  if (byte != op->vary[vn].byte)
 	    continue;
-	  Vary *v = vary[op->vary[vn].varyno];
+	  v = vary[op->vary[vn].varyno];
 	  ob = (bits >> op->vary[vn].shift) & v->mask;
 	  lprintf (sim_log, "varybits: vary %s ob %x\n", v->name, ob);
 
@@ -163,10 +164,10 @@ prmb (int mask, int bits)
   static char buf[8][30];
   static int bn = 0;
   char *bp;
+  int i;
 
   bn = (bn + 1) % 8;
   bp = buf[bn];
-  int i;
   for (i = 0; i < 8; i++)
     {
       int bit = 0x80 >> i;
