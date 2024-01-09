@@ -223,4 +223,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	c5 .*	vpxor  %xmm0,%xmm0,%xmm12
  +[a-f0-9]+:	c5 .*	vpxor  %xmm2,%xmm2,%xmm8
  +[a-f0-9]+:	c5 .*	vpxor  %ymm0,%ymm0,%ymm1
+ +[a-f0-9]+:	c4 .*	vfnmadd231sd %xmm9,%xmm2,%xmm0
 #pass

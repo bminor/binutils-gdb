@@ -222,6 +222,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	66 .*	pxor   %xmm12,%xmm12
  +[a-f0-9]+:	c5 .*	vpxor  %xmm2,%xmm2,%xmm8
  +[a-f0-9]+:	c5 .*	vpxor  %ymm0,%ymm0,%ymm1
+ +[a-f0-9]+:	c4 .*	vfnmadd231sd %xmm9,%xmm2,%xmm0
  +[a-f0-9]+:	62 f1 f5 08 55 e9    	\{evex\} vandnpd %xmm1,%xmm1,%xmm5
  +[a-f0-9]+:	62 f1 f5 08 55 e9    	\{evex\} vandnpd %xmm1,%xmm1,%xmm5
  +[a-f0-9]+:	62 f1 7d 28 6f d1    	vmovdqa32 %ymm1,%ymm2

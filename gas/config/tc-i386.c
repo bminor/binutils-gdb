@@ -3801,6 +3801,8 @@ build_vex_prefix (const insn_template *t)
       && i.reg_operands == i.operands - i.imm_operands
       && i.tm.opcode_modifier.vex
       && i.tm.opcode_modifier.commutative
+      /* .commutative aliases .staticrounding; disambiguate.  */
+      && !i.tm.opcode_modifier.sae
       && (i.tm.opcode_modifier.sse2avx
 	  || (optimize > 1 && !i.no_optimize))
       && i.rex == REX_B

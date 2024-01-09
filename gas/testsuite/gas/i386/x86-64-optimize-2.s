@@ -248,3 +248,6 @@ _start:
 	pcmpgtq		%xmm12, %xmm12
 	vpcmpgtq	%xmm2, %xmm2, %xmm8
 	vpcmpgtq	%ymm12, %ymm12, %ymm1
+
+	# PR gas/31178
+	vfnmadd231sd	%xmm9, %xmm2, %xmm0
