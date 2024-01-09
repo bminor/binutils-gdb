@@ -1189,6 +1189,12 @@
   QLF5(X, X, X, X, NIL),	\
 }
 
+/* e.g. RCWCASP <Xt1>, <Xt1+1>, <Xt2>, <Xt2+1>, [<Xn|SP>{,#0}].  */
+#define QL_X4NIL		\
+{				\
+  QLF5(X, X, X, X, NIL),	\
+}
+
 /* e.g. STXP <Ws>, <Xt1>, <Xt2>, [<Xn|SP>{,#0}].  */
 #define QL_R3_LDST_EXC		\
 {				\
@@ -2604,6 +2610,10 @@ static const aarch64_feature_set aarch64_feature_ite =
   AARCH64_FEATURE (ITE);
 static const aarch64_feature_set aarch64_feature_d128 =
   AARCH64_FEATURE (D128);
+static const aarch64_feature_set aarch64_feature_the =
+  AARCH64_FEATURE (THE);
+static const aarch64_feature_set aarch64_feature_d128_the =
+  AARCH64_FEATURES (2, D128, THE);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2668,6 +2678,8 @@ static const aarch64_feature_set aarch64_feature_d128 =
 #define GCS	  &aarch64_feature_gcs
 #define ITE	  &aarch64_feature_ite
 #define D128	  &aarch64_feature_d128
+#define THE	  &aarch64_feature_the
+#define D128_THE  &aarch64_feature_d128_the
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2823,6 +2835,10 @@ static const aarch64_feature_set aarch64_feature_d128 =
   { NAME, OPCODE, MASK, gcs, 0, GCS, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define D128_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, ic_system, 0, D128, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define THE_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, the, 0, THE, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define D128_THE_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, the, 0, D128_THE, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -6153,6 +6169,108 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("clrbhb", 0xd50322df, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
 
   ITE_INSN ("trcit", 0xd50b72e0, 0xffffffe0, ic_system, OP1 (Rt), QL_I1X, F_ALIAS),
+
+/* Read check write compare and swap doubleword in memory instructions.  */
+  THE_INSN("rcwcas", 0x19200800, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwcasa", 0x19a00800, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwcasal", 0x19e00800, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwcasl", 0x19600800, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+
+/* Read check write compare and swap quadword in memory instructions.  */
+  D128_THE_INSN("rcwcasp", 0x19200c00, 0xffe0fc00, OP5 (Rs, PAIRREG, Rt, PAIRREG, ADDR_SIMPLE), QL_X4NIL, 0),
+  D128_THE_INSN("rcwcaspa", 0x19a00c00, 0xffe0fc00, OP5 (Rs, PAIRREG, Rt, PAIRREG, ADDR_SIMPLE), QL_X4NIL, 0),
+  D128_THE_INSN("rcwcaspal", 0x19e00c00, 0xffe0fc00, OP5 (Rs, PAIRREG, Rt, PAIRREG, ADDR_SIMPLE), QL_X4NIL, 0),
+  D128_THE_INSN("rcwcaspl", 0x19600c00, 0xffe0fc00, OP5 (Rs, PAIRREG, Rt, PAIRREG, ADDR_SIMPLE), QL_X4NIL, 0),
+
+/* Read check write software compare and swap doubleword in memory
+   instructions.  */
+  THE_INSN("rcwscas", 0x59200800, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwscasa", 0x59a00800, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwscasal", 0x59e00800, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwscasl", 0x59600800, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+
+/* Read check write software compare and swap quadword in memory
+   instructions.  */
+  D128_THE_INSN("rcwscasp", 0x59200c00, 0xffe0fc00, OP5 (Rs, PAIRREG, Rt, PAIRREG, ADDR_SIMPLE), QL_X4NIL, 0),
+  D128_THE_INSN("rcwscaspa", 0x59a00c00, 0xffe0fc00, OP5 (Rs, PAIRREG, Rt, PAIRREG, ADDR_SIMPLE), QL_X4NIL, 0),
+  D128_THE_INSN("rcwscaspal", 0x59e00c00, 0xffe0fc00, OP5 (Rs, PAIRREG, Rt, PAIRREG, ADDR_SIMPLE), QL_X4NIL, 0),
+  D128_THE_INSN("rcwscaspl", 0x59600c00, 0xffe0fc00, OP5 (Rs, PAIRREG, Rt, PAIRREG, ADDR_SIMPLE), QL_X4NIL, 0),
+
+/* Read check write atomic bit clear on doubleword in memory instructions.  */
+  THE_INSN("rcwclr", 0x38209000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwclra", 0x38a09000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwclral", 0x38e09000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwclrl", 0x38609000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+
+/* Read check write atomic bit clear on quadword in memory instructions.  */
+  D128_THE_INSN("rcwclrp", 0x19209000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwclrpa", 0x19a09000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwclrpal", 0x19e09000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwclrpl", 0x19609000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+
+/* Read check write software atomic bit clear on doubleword in memory
+   instructions.  */
+  THE_INSN("rcwsclr", 0x78209000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwsclra", 0x78a09000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwsclral", 0x78e09000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwsclrl", 0x78609000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+
+/* Read check write software atomic bit clear on quadword in memory
+   instructions.  */
+  D128_THE_INSN("rcwsclrp", 0x59209000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwsclrpa", 0x59a09000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwsclrpal", 0x59e09000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwsclrpl", 0x59609000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+
+/* Read check write atomic bit set on doubleword in memory instructions.  */
+  THE_INSN("rcwset", 0x3820b000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwseta", 0x38a0b000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwsetal", 0x38e0b000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwsetl", 0x3860b000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+
+/* Read check write atomic bit set on quadword in memory instructions.  */
+  D128_THE_INSN("rcwsetp", 0x1920b000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwsetpa", 0x19a0b000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwsetpal", 0x19e0b000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwsetpl", 0x1960b000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+
+/* Read check write software atomic bit set on doubleword in memory
+   instructions.  */
+  THE_INSN("rcwsset", 0x7820b000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwsseta", 0x78a0b000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwssetal", 0x78e0b000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwssetl", 0x7860b000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+
+/* Read check write software atomic bit set on quadword in memory
+   instructions.  */
+  D128_THE_INSN("rcwssetp", 0x5920b000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwssetpa", 0x59a0b000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwssetpal", 0x59e0b000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwssetpl", 0x5960b000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+
+/* Read check write swap doubleword in memory instructions.  */
+  THE_INSN("rcwswp", 0x3820a000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwswpa", 0x38a0a000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwswpal", 0x38e0a000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwswpl", 0x3860a000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+
+/* Read check write swap quadword in memory instructions.  */
+  D128_THE_INSN("rcwswpp", 0x1920a000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwswppa", 0x19a0a000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwswppal", 0x19e0a000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwswppl", 0x1960a000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+
+/* Read check write software swap doubleword in memory instructions.  */
+  THE_INSN("rcwsswp", 0x7820a000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwsswpa", 0x78a0a000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwsswpal", 0x78e0a000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+  THE_INSN("rcwsswpl", 0x7860a000, 0xffe0fc00, OP3 (Rs, Rt, ADDR_SIMPLE), QL_X2NIL, 0),
+
+/* Read check write software swap quadword in memory instructions.  */
+  D128_THE_INSN("rcwsswpp", 0x5920a000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwsswppa", 0x59a0a000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwsswppal", 0x59e0a000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
+  D128_THE_INSN("rcwsswppl", 0x5960a000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
 
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };

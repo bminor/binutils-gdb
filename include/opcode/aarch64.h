@@ -959,6 +959,7 @@ enum aarch64_insn_class
   bfloat16,
   cssc,
   gcs,
+  the,
 };
 
 /* Opcode enumerators.  */
