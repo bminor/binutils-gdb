@@ -7783,16 +7783,24 @@ read_type_unit_scope (struct die_info *die, struct dwarf2_cu *cu)
    and DWP files (a file with the DWOs packaged up into one file), we treat
    DWP files as having a collection of virtual DWO files.  */
 
+/* A helper function to hash two file names.  This is a separate
+   function because the hash table uses a search with a different
+   type.  The second file may be NULL.  */
+
+static hashval_t
+hash_two_files (const char *one, const char *two)
+{
+  hashval_t hash = htab_hash_string (one);
+  if (two != nullptr)
+    hash += htab_hash_string (two);
+  return hash;
+}
+
 static hashval_t
 hash_dwo_file (const void *item)
 {
   const struct dwo_file *dwo_file = (const struct dwo_file *) item;
-  hashval_t hash;
-
-  hash = htab_hash_string (dwo_file->dwo_name.c_str ());
-  if (dwo_file->comp_dir != NULL)
-    hash += htab_hash_string (dwo_file->comp_dir);
-  return hash;
+  return hash_two_files (dwo_file->dwo_name.c_str (), dwo_file->comp_dir);
 }
 
 /* This is used when looking up entries in the DWO hash table.  */
@@ -7803,6 +7811,12 @@ struct dwo_file_search
   const char *dwo_name;
   /* Compilation directory to look for.  */
   const char *comp_dir;
+
+  /* Return a hash value compatible with the table.  */
+  hashval_t hash () const
+  {
+    return hash_two_files (dwo_name, comp_dir);
+  }
 };
 
 static int
@@ -7846,8 +7860,9 @@ lookup_dwo_file_slot (dwarf2_per_objfile *per_objfile,
 
   find_entry.dwo_name = dwo_name;
   find_entry.comp_dir = comp_dir;
-  slot = htab_find_slot (per_objfile->per_bfd->dwo_files.get (), &find_entry,
-			 INSERT);
+  slot = htab_find_slot_with_hash (per_objfile->per_bfd->dwo_files.get (),
+				   &find_entry, find_entry.hash (),
+				   INSERT);
 
   return slot;
 }
