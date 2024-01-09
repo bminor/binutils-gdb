@@ -1144,6 +1144,7 @@ static int current_insn_size = 0;
 
 /* Fatal error message and exit.  This method is called when an inconsistency
    is detected in the generation table.	 */
+ATTRIBUTE_PRINTF_2
 static void
 fatal_error (const struct m6811_opcode_def *opcode, const char *msg, ...)
 {
@@ -1166,6 +1167,7 @@ fatal_error (const struct m6811_opcode_def *opcode, const char *msg, ...)
 
 
 /* Format and pretty print for the code generation.  (printf like format).  */
+ATTRIBUTE_PRINTF_3
 static void
 print (FILE *fp, int col, const char *msg, ...)
 {
