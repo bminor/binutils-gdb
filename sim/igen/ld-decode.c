@@ -61,12 +61,14 @@ static const name_map decode_combine_map[] = {
   {NULL, 0},
 };
 
+#if 0
 static const name_map decode_search_map[] = {
   {"constants", decode_find_constants},
   {"mixed", decode_find_mixed},
   {"strings", decode_find_strings},
   {NULL, decode_find_mixed},
 };
+#endif
 
 
 static void
