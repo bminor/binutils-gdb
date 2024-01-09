@@ -2114,6 +2114,19 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      return 0;
 	    }
 	  break;
+	case rcpc3:
+	  if (opnd->addr.writeback)
+	    if ((type == AARCH64_OPND_RCPC3_ADDR_PREIND_WB
+		 && !opnd->addr.preind)
+		|| (type == AARCH64_OPND_RCPC3_ADDR_POSTIND
+		    && !opnd->addr.postind))
+	      {
+		set_syntax_error (mismatch_detail, idx,
+				  _("unexpected address writeback"));
+		return 0;
+	      }
+
+	  break;
 	default:
 	  assert (opnd->addr.writeback == 0);
 	  break;
@@ -2492,6 +2505,33 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SVE_ADDR_ZZ_UXTW:
 	  modifiers = 1 << AARCH64_MOD_UXTW;
 	  goto sve_zz_operand;
+
+	case AARCH64_OPND_RCPC3_ADDR_OPT_PREIND_WB:
+	case AARCH64_OPND_RCPC3_ADDR_OPT_POSTIND:
+	case AARCH64_OPND_RCPC3_ADDR_PREIND_WB:
+	case AARCH64_OPND_RCPC3_ADDR_POSTIND:
+	  {
+	    int num_bytes = calc_ldst_datasize (opnds);
+	    int abs_offset = (type == AARCH64_OPND_RCPC3_ADDR_OPT_PREIND_WB
+			      || type == AARCH64_OPND_RCPC3_ADDR_PREIND_WB)
+	      ? opnd->addr.offset.imm * -1
+	      : opnd->addr.offset.imm;
+	    if ((int) num_bytes != abs_offset
+		&& opnd->addr.offset.imm != 0)
+	      {
+		set_other_error (mismatch_detail, idx,
+				 _("invalid increment amount"));
+		return 0;
+	      }
+	  }
+	  break;
+
+	case AARCH64_OPND_RCPC3_ADDR_OFFSET:
+	  if (!value_in_range_p (opnd->addr.offset.imm, -256, 255))
+	    {
+	      set_imm_out_of_range_error (mismatch_detail, idx, -256, 255);
+	      return 0;
+	    }
 
 	default:
 	  break;
