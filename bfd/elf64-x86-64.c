@@ -2040,6 +2040,10 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
       r_symndx = htab->r_sym (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
 
+      /* Don't check R_X86_64_NONE.  */
+      if (r_type == R_X86_64_NONE)
+	continue;
+
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  /* xgettext:c-format */

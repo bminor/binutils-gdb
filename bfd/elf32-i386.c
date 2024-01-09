@@ -1525,6 +1525,10 @@ elf_i386_scan_relocs (bfd *abfd,
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
 
+      /* Don't check R_386_NONE.  */
+      if (r_type == R_386_NONE)
+	continue;
+
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
 	  /* xgettext:c-format */
