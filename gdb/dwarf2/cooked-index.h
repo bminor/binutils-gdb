@@ -517,18 +517,18 @@ private:
 #if CXX_STD_THREAD
   /* Current state of this object.  */
   cooked_state m_state = cooked_state::INITIAL;
+  /* Mutex and condition variable used to synchronize.  */
+  std::mutex m_mutex;
+  std::condition_variable m_cond;
+#endif /* CXX_STD_THREAD */
   /* This flag indicates whether any complaints or exceptions that
      arose during scanning have been reported by 'wait'.  This may
      only be modified on the main thread.  */
   bool m_reported = false;
-  /* Mutex and condition variable used to synchronize.  */
-  std::mutex m_mutex;
-  std::condition_variable m_cond;
   /* If set, an exception occurred during start_reading; in this case
      the scanning is stopped and this exception will later be reported
      by the 'wait' method.  */
   std::optional<gdb_exception> m_failed;
-#endif /* CXX_STD_THREAD */
 };
 
 /* The main index of DIEs.
