@@ -13071,6 +13071,44 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
+/* Read DW_AT_endianity from DIE and compute the byte order that
+   should be used.  The CU's arch is used as the default.  The result
+   is true if the returned arch differs from the default, and false if
+   they are the same.  If provided, the out parameter BYTE_ORDER is
+   also set.  */
+
+static bool
+die_byte_order (die_info *die, dwarf2_cu *cu, enum bfd_endian *byte_order)
+{
+  gdbarch *arch = cu->per_objfile->objfile->arch ();
+  enum bfd_endian arch_order = gdbarch_byte_order (arch);
+  enum bfd_endian new_order = arch_order;
+
+  attribute *attr = dwarf2_attr (die, DW_AT_endianity, cu);
+  if (attr != nullptr && attr->form_is_constant ())
+    {
+      int endianity = attr->constant_value (0);
+
+      switch (endianity)
+	{
+	case DW_END_big:
+	  new_order = BFD_ENDIAN_BIG;
+	  break;
+	case DW_END_little:
+	  new_order = BFD_ENDIAN_LITTLE;
+	  break;
+	default:
+	  complaint (_("DW_AT_endianity has unrecognized value %d"), endianity);
+	  break;
+	}
+    }
+
+  if (byte_order != nullptr)
+    *byte_order = new_order;
+
+  return new_order != arch_order;
+}
+
 /* Assuming DIE is an enumeration type, and TYPE is its associated
    type, update TYPE using some information only available in DIE's
    children.  In particular, the fields are computed.  */
@@ -13217,6 +13255,8 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   type->set_is_declared_class (dwarf2_flag_true_p (die, DW_AT_enum_class, cu));
+
+  type->set_endianity_is_not_default (die_byte_order (die, cu, nullptr));
 
   set_die_type (die, type, cu);
 
@@ -15121,7 +15161,6 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
   int encoding = 0, bits = 0;
   const char *name;
-  gdbarch *arch;
 
   attr = dwarf2_attr (die, DW_AT_encoding, cu);
   if (attr != nullptr && attr->form_is_constant ())
@@ -15133,27 +15172,8 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   if (!name)
     complaint (_("DW_AT_name missing from DW_TAG_base_type"));
 
-  arch = objfile->arch ();
-  enum bfd_endian byte_order = gdbarch_byte_order (arch);
-
-  attr = dwarf2_attr (die, DW_AT_endianity, cu);
-  if (attr != nullptr && attr->form_is_constant ())
-    {
-      int endianity = attr->constant_value (0);
-
-      switch (endianity)
-	{
-	case DW_END_big:
-	  byte_order = BFD_ENDIAN_BIG;
-	  break;
-	case DW_END_little:
-	  byte_order = BFD_ENDIAN_LITTLE;
-	  break;
-	default:
-	  complaint (_("DW_AT_endianity has unrecognized value %d"), endianity);
-	  break;
-	}
-    }
+  enum bfd_endian byte_order;
+  bool not_default = die_byte_order (die, cu, &byte_order);
 
   if ((encoding == DW_ATE_signed_fixed || encoding == DW_ATE_unsigned_fixed)
       && cu->lang () == language_ada
@@ -15291,7 +15311,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 
   maybe_set_alignment (cu, die, type);
 
-  type->set_endianity_is_not_default (gdbarch_byte_order (arch) != byte_order);
+  type->set_endianity_is_not_default (not_default);
 
   if (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_INT)
     {
