@@ -675,26 +675,21 @@ dump_perf_event_attr (struct perf_event_attr *at)
 }
 
 static void
-init_perf_event (struct perf_event_attr *hw, uint64_t event, uint64_t period)
+init_perf_event (struct perf_event_attr *hw, uint64_t event, uint64_t period,
+		 Hwcentry *hwce)
 {
   memset (hw, 0, sizeof (struct perf_event_attr));
-  hw->size = sizeof (struct perf_event_attr); // fwd/bwd compat
-
-#if defined(__i386__) || defined(__x86_64)
-  //note: Nehalem/Westmere OFFCORE_RESPONSE in upper 32 bits
-  hw->config = event;
-  hw->type = PERF_TYPE_RAW;     // hw/sw/trace/raw...
-#elif defined(__aarch64__)
-  hw->type = (event >> 24) & 7;
-  hw->config = event & 0xff;
-#elif defined(sparc)
-  //SPARC needs to be shifted up 16 bits
-  hw->config = (event & 0xFFFF) << 16;  // uint64_t event
-  uint64_t regs = (event >> 20) & 0xf;  // see sparc_pcbe.c
-  hw->config |= regs << 4;  // for M8, supported PICs need to be placed at bits [7:4]
-  hw->type = PERF_TYPE_RAW; // hw/sw/trace/raw...
-#endif
-
+  hw->size = sizeof (struct perf_event_attr);
+  if (hwce && hwce->use_perf_event_type)
+    {
+      hw->config = hwce->config;
+      hw->type = hwce->type;
+    }
+  else
+    { // backward compatibility. The old interface had no 'hwce' argument.
+      hw->config = event;
+      hw->type = PERF_TYPE_RAW; // hw/sw/trace/raw...
+    }
   hw->sample_period = period;
   hw->sample_type = PERF_SAMPLE_IP |
 	  // PERF_SAMPLE_TID		|
@@ -858,7 +853,7 @@ hdrv_pcl_internal_open ()
   perf_event_def_t tmp_event_def;
   memset (&tmp_event_def, 0, sizeof (tmp_event_def));
   struct perf_event_attr *pe_attr = &tmp_event_def.hw;
-  init_perf_event (pe_attr, 0, 0);
+  init_perf_event (pe_attr, 0, 0, NULL);
   pe_attr->type = PERF_TYPE_HARDWARE; // specify abstracted HW event
   pe_attr->config = PERF_COUNT_HW_INSTRUCTIONS; // specify abstracted insts
   int hwc_fd = perf_event_open (pe_attr,
@@ -1283,7 +1278,7 @@ hwcdrv_create_counters (unsigned hwcdef_cnt, Hwcentry *hwcdef)
       glb_event_def->min_time = hwcdef[idx].min_time;
       glb_event_def->name = strdup (hwcdef[idx].name); // memory leak??? very minor
       init_perf_event (&glb_event_def->hw, glb_event_def->eventsel,
-		       glb_event_def->counter_preload);
+		       glb_event_def->counter_preload, hwcdef + idx);
       TprintfT (DBG_LT1, "hwcdrv: create_counters: pic=%u name='%s' interval=%lld"
 		"(min_time=%lld): reg_num=0x%x eventsel=0x%llx ireset=%lld usr=%lld sys=%lld\n",
 		idx, hwcdef[idx].int_name, (long long) glb_event_def->counter_preload,
