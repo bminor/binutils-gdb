@@ -204,6 +204,16 @@ enum aarch64_feature_bit {
   /* 128-bit page table descriptor, system registers
      and isntructions.  */
   AARCH64_FEATURE_D128,
+  /* Armv8.9-A/Armv9.4-A architecture Debug extension.  */
+  AARCH64_FEATURE_DEBUGv8p9,
+  /* Performance Monitors Extension.  */
+  AARCH64_FEATURE_PMUv3p9,
+  /* Performance Monitors Snapshots Extension.  */
+  AARCH64_FEATURE_PMUv3_SS,
+  /* Performance Monitors Instruction Counter Extension.  */
+  AARCH64_FEATURE_PMUv3_ICNTR,
+  /* Performance Monitors Synchronous-Exception-Based Event Extension.  */
+  AARCH64_FEATURE_SEBEP,
   AARCH64_NUM_FEATURES
 };
 
@@ -274,6 +284,11 @@ enum aarch64_feature_bit {
 					 | AARCH64_FEATBIT (X, S1POE)	\
 					 | AARCH64_FEATBIT (X, S2POE)	\
 					 | AARCH64_FEATBIT (X, TCR2)	\
+					 | AARCH64_FEATBIT (X, DEBUGv8p9) \
+					 | AARCH64_FEATBIT (X, PMUv3p9)	\
+					 | AARCH64_FEATBIT (X, PMUv3_SS) \
+					 | AARCH64_FEATBIT (X, PMUv3_ICNTR) \
+					 | AARCH64_FEATBIT (X, SEBEP) \
 					)
 
 #define AARCH64_ARCH_V9A_FEATURES(X)	(AARCH64_FEATBIT (X, V9A)	\
