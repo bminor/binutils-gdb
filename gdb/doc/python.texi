@@ -3671,6 +3671,13 @@ One may add arbitrary attributes to @code{gdb.Inferior} objects in the
 usual Python way.  This is useful if, for example, one needs to do
 some extra record keeping associated with the inferior.
 
+@anchor{choosing attribute names}
+When selecting a name for a new attribute, avoid starting the new
+attribute name with a lower case letter; future attributes added by
+@value{GDBN} will start with a lower case letter.  Additionally, avoid
+starting attribute names with two underscore characters, as these
+could clash with Python builtin attribute names.
+
 In this contrived example we record the time when an inferior last
 stopped:
 
@@ -4187,6 +4194,9 @@ a @code{gdb.Type} for the handle type.
 One may add arbitrary attributes to @code{gdb.InferiorThread} objects
 in the usual Python way.  This is useful if, for example, one needs to
 do some extra record keeping associated with the thread.
+
+@xref{choosing attribute names}, for guidance on selecting a suitable
+name for new attributes.
 
 In this contrived example we record the time when a thread last
 stopped:
@@ -5403,6 +5413,9 @@ in the usual Python way.
 This is useful if, for example, one needs to do some extra record keeping
 associated with the program space.
 
+@xref{choosing attribute names}, for guidance on selecting a suitable
+name for new attributes.
+
 In this contrived example, we want to perform some processing when
 an objfile with a certain symbol is loaded, but we only want to do
 this once because it is expensive.  To achieve this we record the results
@@ -5562,6 +5575,9 @@ One may add arbitrary attributes to @code{gdb.Objfile} objects
 in the usual Python way.
 This is useful if, for example, one needs to do some extra record keeping
 associated with the objfile.
+
+@xref{choosing attribute names}, for guidance on selecting a suitable
+name for new attributes.
 
 In this contrived example we record the time when @value{GDBN}
 loaded the objfile.
