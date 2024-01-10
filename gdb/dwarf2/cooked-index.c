@@ -51,6 +51,7 @@ to_string (cooked_index_flag flags)
     MAP_ENUM_FLAG (IS_ENUM_CLASS),
     MAP_ENUM_FLAG (IS_LINKAGE),
     MAP_ENUM_FLAG (IS_TYPE_DECLARATION),
+    MAP_ENUM_FLAG (IS_PARENT_DEFERRED),
   };
 
   return flags.to_string (mapping);
@@ -248,7 +249,7 @@ cooked_index_entry::write_scope (struct obstack *storage,
 cooked_index_entry *
 cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
 			 cooked_index_flag flags, const char *name,
-			 const cooked_index_entry *parent_entry,
+			 cooked_index_entry_ref parent_entry,
 			 dwarf2_per_cu_data *per_cu)
 {
   cooked_index_entry *result = create (die_offset, tag, flags, name,
@@ -259,7 +260,8 @@ cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
      implicit "main" discovery.  */
   if ((flags & IS_MAIN) != 0)
     m_main = result;
-  else if (parent_entry == nullptr
+  else if ((flags & IS_PARENT_DEFERRED) == 0
+	   && parent_entry.resolved == nullptr
 	   && m_main == nullptr
 	   && language_may_use_plain_main (per_cu->lang ())
 	   && strcmp (name, "main") == 0)
@@ -638,7 +640,10 @@ cooked_index::dump (gdbarch *arch)
       gdb_printf ("    flags:      %s\n", to_string (entry->flags).c_str ());
       gdb_printf ("    DIE offset: %s\n", sect_offset_str (entry->die_offset));
 
-      if (entry->get_parent () != nullptr)
+      if ((entry->flags & IS_PARENT_DEFERRED) != 0)
+	gdb_printf ("    parent:     deferred (%" PRIx64 ")\n",
+		    entry->get_deferred_parent ());
+      else if (entry->get_parent () != nullptr)
 	gdb_printf ("    parent:     ((cooked_index_entry *) %p) [%s]\n",
 		    entry->get_parent (), entry->get_parent ()->name);
       else

@@ -4552,16 +4552,6 @@ private:
      understand this.  */
   addrmap_mutable m_die_range_map;
 
-  /* A single deferred entry.  */
-  struct deferred_entry
-  {
-    sect_offset die_offset;
-    const char *name;
-    CORE_ADDR spec_offset;
-    dwarf_tag tag;
-    cooked_index_flag flags;
-  };
-
   /* The generated DWARF can sometimes have the declaration for a
      method in a class (or perhaps namespace) scope, with the
      definition appearing outside this scope... just one of the many
@@ -4569,7 +4559,7 @@ private:
      defer certain entries until the end of scanning, at which point
      we'll know the containing context of all the DIEs that we might
      have scanned.  This vector stores these deferred entries.  */
-  std::vector<deferred_entry> m_deferred_entries;
+  std::vector<cooked_index_entry *> m_deferred_entries;
 };
 
 /* Subroutine of dwarf2_build_psymtabs_hard to simplify it.
@@ -16540,17 +16530,21 @@ cooked_indexer::index_dies (cutu_reader *reader,
 	  name = nullptr;
 	}
 
-      const cooked_index_entry *this_entry = nullptr;
+      cooked_index_entry *this_entry = nullptr;
       if (name != nullptr)
 	{
 	  if (defer != 0)
-	    m_deferred_entries.push_back ({
-		this_die, name, defer, abbrev->tag, flags
-	      });
+	    {
+	      this_entry
+		= m_index_storage->add (this_die, abbrev->tag,
+					flags | IS_PARENT_DEFERRED, name,
+					defer, m_per_cu);
+	      m_deferred_entries.push_back (this_entry);
+	    }
 	  else
-	    this_entry = m_index_storage->add (this_die, abbrev->tag, flags,
-					       name, this_parent_entry,
-					       m_per_cu);
+	    this_entry
+	      = m_index_storage->add (this_die, abbrev->tag, flags, name,
+				      this_parent_entry, m_per_cu);
 	}
 
       if (linkage_name != nullptr)
@@ -16651,10 +16645,9 @@ cooked_indexer::make_index (cutu_reader *reader)
 
   for (const auto &entry : m_deferred_entries)
     {
-      void *obj = m_die_range_map.find (entry.spec_offset);
+      void *obj = m_die_range_map.find (entry->get_deferred_parent ());
       cooked_index_entry *parent = static_cast<cooked_index_entry *> (obj);
-      m_index_storage->add (entry.die_offset, entry.tag, entry.flags,
-			    entry.name, parent, m_per_cu);
+      entry->resolve_parent (parent);
     }
 }
 
