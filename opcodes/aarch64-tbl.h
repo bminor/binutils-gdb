@@ -4221,6 +4221,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   RCPC3_INSN ("stilp",  0x19000800, 0x3fe0ec00, rcpc3, OP3 (Rt, Rs, RCPC3_ADDR_OPT_PREIND_WB), QL_R2NIL, F_RCPC3_SIZE),
   RCPC3_INSN ("ldapr", 0x19c00800, 0x3ffffc00, rcpc3, OP2 (Rt, RCPC3_ADDR_POSTIND), QL_R1NIL, F_RCPC3_SIZE),
   RCPC3_INSN ("stlr", 0x19800800, 0x3ffffc00, rcpc3, OP2 (Rt, RCPC3_ADDR_PREIND_WB), QL_R1NIL, F_RCPC3_SIZE),
+  RCPC3_INSN ("stl1", 0x0d018400, 0xbffffc00, rcpc3, OP2 (LEt, SIMD_ADDR_SIMPLE), QL_SIMD_IMM_D, F_OD(1)),
+  RCPC3_INSN ("ldap1", 0x0d418400, 0xbffffc00, rcpc3, OP2 (LEt, SIMD_ADDR_SIMPLE), QL_SIMD_IMM_D, F_OD(1)),
+  RCPC3_INSN ("ldapur", 0x1d400800, 0x3f600C00, rcpc3, OP2 (Ft, RCPC3_ADDR_OFFSET), QL_LDST_FP, F_RCPC3_SIZE),
+  RCPC3_INSN ("stlur", 0x1d000800, 0x3f600C00, rcpc3, OP2 (Ft, RCPC3_ADDR_OFFSET), QL_LDST_FP, F_RCPC3_SIZE),
   /* Move wide (immediate).  */
   CORE_INSN ("movn", 0x12800000, 0x7f800000, movewide, OP_MOVN, OP2 (Rd, HALF), QL_DST_R, F_SF | F_HAS_ALIAS),
   CORE_INSN ("mov",  0x12800000, 0x7f800000, movewide, OP_MOV_IMM_WIDEN, OP2 (Rd, IMM_MOV), QL_DST_R, F_SF | F_ALIAS | F_CONV),
