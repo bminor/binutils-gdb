@@ -104,6 +104,9 @@ public:
 
   const struct target_desc *read_description ()  override;
 
+  int insert_fork_catchpoint (int) override;
+  int remove_fork_catchpoint (int) override;
+
 protected:
 
   void post_startup_inferior (ptid_t ptid) override;
@@ -475,6 +478,19 @@ rs6000_nat_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
     else
       rs6000_ptrace32 (PT_DETACH, child_ptid.pid (), 0, 0, 0);
   }
+}
+
+/* Functions for catchpoint in AIX.  */
+int
+rs6000_nat_target::insert_fork_catchpoint (int pid)
+{
+  return 0;
+}
+
+int
+rs6000_nat_target::remove_fork_catchpoint (int pid)
+{
+  return 0;
 }
 
 /* Fetch register REGNO from the inferior.  */
