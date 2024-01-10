@@ -29342,9 +29342,7 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_STRVERSCMP $ac_have_decl
 _ACEOF
 
-
-  # Check for presence and size of long long.
-  ac_fn_c_check_type "$LINENO" "long long" "ac_cv_type_long_long" "$ac_includes_default"
+    ac_fn_c_check_type "$LINENO" "long long" "ac_cv_type_long_long" "$ac_includes_default"
 if test "x$ac_cv_type_long_long" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF

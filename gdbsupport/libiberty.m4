@@ -16,13 +16,12 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program; see the file COPYING3.  If not see
 dnl <http://www.gnu.org/licenses/>.
 dnl
-
+dnl
 dnl Checks for declarations ansidecl.h and libiberty.h themselves
 dnl check with HAVE_DECL_XXX, etc.
-
 AC_DEFUN([libiberty_INIT],
-[
-  # Check for presence and size of long long.
+[dnl
+  dnl Check for presence and size of long long.
   AC_CHECK_TYPES([long long], [AC_CHECK_SIZEOF(long long)])
 
   AC_CHECK_DECLS([basename(char *)])
