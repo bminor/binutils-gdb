@@ -5423,13 +5423,16 @@ with the program space because we can't predict when the desired objfile
 will be loaded.
 
 @smallexample
-(gdb) python
+(@value{GDBP}) python
+@group
 def clear_objfiles_handler(event):
     event.progspace.expensive_computation = None
 def expensive(symbol):
     """A mock routine to perform an "expensive" computation on symbol."""
     print ("Computing the answer to the ultimate question ...")
     return 42
+@end group
+@group
 def new_objfile_handler(event):
     objfile = event.new_objfile
     progspace = objfile.progspace
@@ -5444,15 +5447,18 @@ def new_objfile_handler(event):
 gdb.events.clear_objfiles.connect(clear_objfiles_handler)
 gdb.events.new_objfile.connect(new_objfile_handler)
 end
-(gdb) file /tmp/hello
+@end group
+@group
+(@value{GDBP}) file /tmp/hello
 Reading symbols from /tmp/hello...
 Computing the answer to the ultimate question ...
-(gdb) python print gdb.current_progspace().expensive_computation
+(@value{GDBP}) python print(gdb.current_progspace().expensive_computation)
 42
-(gdb) run
+(@value{GDBP}) run
 Starting program: /tmp/hello
 Hello.
 [Inferior 1 (process 4242) exited normally]
+@end group
 @end smallexample
 
 @node Objfiles In Python
@@ -5583,17 +5589,21 @@ In this contrived example we record the time when @value{GDBN}
 loaded the objfile.
 
 @smallexample
-(gdb) python
+@group
+(@value{GDBP}) python
 import datetime
 def new_objfile_handler(event):
     # Set the time_loaded attribute of the new objfile.
     event.new_objfile.time_loaded = datetime.datetime.today()
 gdb.events.new_objfile.connect(new_objfile_handler)
 end
-(gdb) file ./hello
+@end group
+@group
+(@value{GDBP}) file ./hello
 Reading symbols from ./hello...
-(gdb) python print gdb.objfiles()[0].time_loaded
+(@value{GDBP}) python print(gdb.objfiles()[0].time_loaded)
 2014-10-09 11:41:36.770345
+@end group
 @end smallexample
 
 A @code{gdb.Objfile} object has the following methods:
