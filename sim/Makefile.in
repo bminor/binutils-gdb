@@ -353,6 +353,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/m4/sim_ac_option_warnings.m4 \
 	$(top_srcdir)/m4/sim_ac_platform.m4 \
 	$(top_srcdir)/m4/sim_ac_toolchain.m4 \
+	$(top_srcdir)/../gdbsupport/libiberty.m4 \
 	$(top_srcdir)/frv/acinclude.m4 $(top_srcdir)/mips/acinclude.m4 \
 	$(top_srcdir)/ppc/acinclude.m4 \
 	$(top_srcdir)/riscv/acinclude.m4 $(top_srcdir)/rx/acinclude.m4 \

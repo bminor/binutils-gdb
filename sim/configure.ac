@@ -20,6 +20,9 @@ dnl Set the 'development' global before loading the SIM macros.
 SIM_AC_TOOLCHAIN
 SIM_AC_PLATFORM
 
+m4_include([../gdbsupport/libiberty.m4])
+libiberty_INIT
+
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE
 AM_SILENT_RULES([yes])

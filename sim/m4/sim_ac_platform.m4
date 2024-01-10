@@ -132,7 +132,6 @@ AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>
 #include <sys/socket.h>
 ])
-AC_CHECK_TYPES([long long])
 
 dnl Check for struct statfs.
 AC_CACHE_CHECK([for struct statfs],
