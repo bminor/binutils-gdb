@@ -25,7 +25,8 @@ AC_DEFUN([libiberty_INIT],
   # Check for presence and size of long long.
   AC_CHECK_TYPES([long long], [AC_CHECK_SIZEOF(long long)])
 
-  AC_CHECK_DECLS([basename(char *), ffs, asprintf, vasprintf, snprintf, vsnprintf])
-  AC_CHECK_DECLS([strtol, strtoul, strtoll, strtoull])
-  AC_CHECK_DECLS([strverscmp])
+  AC_CHECK_DECLS([basename(char *)])
+  AC_CHECK_DECLS_ONCE([ffs, asprintf, vasprintf, snprintf, vsnprintf])
+  AC_CHECK_DECLS_ONCE([strtol, strtoul, strtoll, strtoull])
+  AC_CHECK_DECLS_ONCE([strverscmp])
 ])
