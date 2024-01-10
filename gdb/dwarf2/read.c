@@ -16523,7 +16523,7 @@ cooked_indexer::index_dies (cutu_reader *reader,
       /* The scope of a DW_TAG_entry_point cooked_index_entry is the one of
 	 its surrounding subroutine.  */
       if (abbrev->tag == DW_TAG_entry_point)
-	this_parent_entry = parent_entry->parent_entry;
+	this_parent_entry = parent_entry->get_parent ();
       info_ptr = scan_attributes (reader->cu->per_cu, reader, info_ptr,
 				  info_ptr, abbrev, &name, &linkage_name,
 				  &flags, &sibling, &this_parent_entry,
@@ -16862,7 +16862,7 @@ cooked_index_functions::expand_symtabs_matching
 	     matches.  */
 	  bool found = true;
 
-	  const cooked_index_entry *parent = entry->parent_entry;
+	  const cooked_index_entry *parent = entry->get_parent ();
 	  for (int i = name_vec.size () - 1; i > 0; --i)
 	    {
 	      /* If we ran out of entries, or if this segment doesn't
@@ -16875,7 +16875,7 @@ cooked_index_functions::expand_symtabs_matching
 		  break;
 		}
 
-	      parent = parent->parent_entry;
+	      parent = parent->get_parent ();
 	    }
 
 	  if (!found)

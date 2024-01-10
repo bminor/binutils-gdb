@@ -94,8 +94,8 @@ struct cooked_index_entry : public allocate_on_obstack
       tag (tag_),
       flags (flags_),
       die_offset (die_offset_),
-      parent_entry (parent_entry_),
-      per_cu (per_cu_)
+      per_cu (per_cu_),
+      m_parent_entry (parent_entry_)
   {
   }
 
@@ -220,6 +220,18 @@ struct cooked_index_entry : public allocate_on_obstack
     return compare (canonical, other.canonical, SORT) < 0;
   }
 
+  /* Set parent entry to PARENT.  */
+  void set_parent (const cooked_index_entry *parent)
+  {
+    m_parent_entry = parent;
+  }
+
+  /* Return parent entry.  */
+  const cooked_index_entry *get_parent () const
+  {
+    return m_parent_entry;
+  }
+
   /* The name as it appears in DWARF.  This always points into one of
      the mapped DWARF sections.  Note that this may be the name or the
      linkage name -- two entries are created for DIEs which have both
@@ -234,10 +246,6 @@ struct cooked_index_entry : public allocate_on_obstack
   cooked_index_flag flags;
   /* The offset of this DIE.  */
   sect_offset die_offset;
-  /* The parent entry.  This is NULL for top-level entries.
-     Otherwise, it points to the parent entry, such as a namespace or
-     class.  */
-  const cooked_index_entry *parent_entry;
   /* The CU from which this entry originates.  */
   dwarf2_per_cu_data *per_cu;
 
@@ -248,6 +256,11 @@ private:
      a parent, its write_scope method is called first.  */
   void write_scope (struct obstack *storage, const char *sep,
 		    bool for_name) const;
+
+  /* The parent entry.  This is NULL for top-level entries.
+     Otherwise, it points to the parent entry, such as a namespace or
+     class.  */
+  const cooked_index_entry *m_parent_entry;
 };
 
 class cooked_index;

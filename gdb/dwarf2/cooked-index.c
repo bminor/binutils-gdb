@@ -203,7 +203,7 @@ cooked_index_entry::full_name (struct obstack *storage, bool for_main) const
 {
   const char *local_name = for_main ? name : canonical;
 
-  if ((flags & IS_LINKAGE) != 0 || parent_entry == nullptr)
+  if ((flags & IS_LINKAGE) != 0 || get_parent () == nullptr)
     return local_name;
 
   const char *sep = nullptr;
@@ -224,7 +224,7 @@ cooked_index_entry::full_name (struct obstack *storage, bool for_main) const
       return local_name;
     }
 
-  parent_entry->write_scope (storage, sep, for_main);
+  get_parent ()->write_scope (storage, sep, for_main);
   obstack_grow0 (storage, local_name, strlen (local_name));
   return (const char *) obstack_finish (storage);
 }
@@ -236,8 +236,8 @@ cooked_index_entry::write_scope (struct obstack *storage,
 				 const char *sep,
 				 bool for_main) const
 {
-  if (parent_entry != nullptr)
-    parent_entry->write_scope (storage, sep, for_main);
+  if (get_parent () != nullptr)
+    get_parent ()->write_scope (storage, sep, for_main);
   const char *local_name = for_main ? name : canonical;
   obstack_grow (storage, local_name, strlen (local_name));
   obstack_grow (storage, sep, strlen (sep));
@@ -310,7 +310,7 @@ cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
       parent = last;
     }
 
-  entry->parent_entry = parent;
+  entry->set_parent (parent);
   return make_unique_xstrndup (tail.data (), tail.length ());
 }
 
@@ -638,9 +638,9 @@ cooked_index::dump (gdbarch *arch)
       gdb_printf ("    flags:      %s\n", to_string (entry->flags).c_str ());
       gdb_printf ("    DIE offset: %s\n", sect_offset_str (entry->die_offset));
 
-      if (entry->parent_entry != nullptr)
+      if (entry->get_parent () != nullptr)
 	gdb_printf ("    parent:     ((cooked_index_entry *) %p) [%s]\n",
-		    entry->parent_entry, entry->parent_entry->name);
+		    entry->get_parent (), entry->get_parent ()->name);
       else
 	gdb_printf ("    parent:     ((cooked_index_entry *) 0)\n");
 
