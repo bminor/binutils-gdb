@@ -267,13 +267,93 @@ gdb_test "info bogus-gdb-command" "Undefined info command: \"bogus-gdb-command\"
 #test info breakpoints
 gdb_test "info breakpoints" "No breakpoints or watchpoints."
 #test info copying
-# FIXME -- doesn't work worth a shit
-#send_gdb "info copying"
-#	-re "GNU GENERAL PUBLIC LICENSE.*#of preserving the free status of all derivatives of our free software and.*#of promoting the sharing and reuse of software generally."# 
-gdb_test "info copying"
-#	}
-#
-#
+# The license text is very big, so it may overwhelm Expect's output buffer
+# and cause the test to fail occasionally.  To avoid this problem, verify
+# the command's output in small chunks.
+set saw_header 0
+set saw_terms 0
+set saw_section5 0
+set saw_section7 0
+set saw_section10 0
+set saw_section14 0
+set saw_last_para 0
+# These excerpts were chosen for no particular reason, except that they
+# occur at the beginning, middle and end of the license text.
+set re_header [multi_line \
+		   "\\s+GNU GENERAL PUBLIC LICENSE" \
+		   "\\s+Version 3, 29 June 2007" \
+		   "" \
+		   " Copyright \\(C\\) 2007 Free Software Foundation, Inc. <http://fsf.org/>" \
+		   " Everyone is permitted to copy and distribute verbatim copies" \
+		   " of this license document, but changing it is not allowed." \
+		   "" \
+		   "\\s+Preamble" \
+		   "" \
+		   "  The GNU General Public License is a free, copyleft license for" \
+		   "software and other kinds of works.\r\n"]
+set re_terms [multi_line \
+		  "\\s+TERMS AND CONDITIONS" \
+		  "" \
+		  "  0. Definitions." \
+		  "" \
+		  "  \"This License\" refers to version 3 of the GNU General Public License.\r\n"]
+set re_section5 [multi_line \
+		     "  5. Conveying Modified Source Versions." \
+		     "" \
+		     "  You may convey a work based on the Program, or the modifications to\r\n"]
+set re_section7 [multi_line \
+		     "  7. Additional Terms." \
+		     "" \
+		     "  \"Additional permissions\" are terms that supplement the terms of this\r\n"]
+set re_section10 [multi_line \
+		      "  10. Automatic Licensing of Downstream Recipients." \
+		      "" \
+		      "  Each time you convey a covered work, the recipient automatically\r\n"]
+set re_section14 [multi_line \
+		      "  14. Revised Versions of this License." \
+		      "" \
+		      "  The Free Software Foundation may publish revised and/or new versions of\r\n"]
+set re_last_para [multi_line \
+		      "  Later license versions may give you additional or different" \
+		      "permissions.  However, no additional obligations are imposed on any" \
+		      "author or copyright holder as a result of your choosing to follow a" \
+		      "later version.\r\n"]
+set test "info copying"
+gdb_test_multiple $test $test {
+    -re $re_header {
+	set saw_header 1
+	exp_continue
+    }
+    -re $re_terms {
+	set saw_terms 1
+	exp_continue
+    }
+    -re $re_section5 {
+	set saw_section5 1
+	exp_continue
+    }
+    -re $re_section7 {
+	set saw_section7 1
+	exp_continue
+    }
+    -re $re_section10 {
+	set saw_section10 1
+	exp_continue
+    }
+    -re $re_section14 {
+	set saw_section14 1
+	exp_continue
+    }
+    -re $re_last_para {
+	set saw_last_para 1
+	exp_continue
+    }
+    -re "$gdb_prompt \$" {
+	gdb_assert { $saw_header && $saw_terms && $saw_section5 \
+			 && $saw_section7 && $saw_section10 \
+			 && $saw_section14 && $saw_last_para } $test
+    }
+}
 #test info display
 gdb_test "info display" "There are no auto-display expressions now."
 #test info frame "f" abbreviation
