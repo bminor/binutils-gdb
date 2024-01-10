@@ -187,6 +187,8 @@ class Server:
     def _reader_thread(self):
         while True:
             cmd = read_json(self.in_stream)
+            if cmd is None:
+                break
             log("READ: <<<" + json.dumps(cmd) + ">>>")
             # Be extra paranoid about the form here.  If anything is
             # missing, it will be put in the queue and then an error
@@ -201,6 +203,8 @@ class Server:
             ):
                 self.canceller.cancel(cmd["arguments"]["requestId"])
             self.read_queue.put(cmd)
+        # When we hit EOF, signal it with None.
+        self.read_queue.put(None)
 
     @in_dap_thread
     def main_loop(self):
@@ -212,6 +216,9 @@ class Server:
         start_thread("JSON reader", self._reader_thread)
         while not self.done:
             cmd = self.read_queue.get()
+            # A None value here means the reader hit EOF.
+            if cmd is None:
+                break
             result = self._handle_command(cmd)
             self._send_json(result)
             events = self.delayed_events

@@ -339,7 +339,7 @@ proc dap_target_remote {target} {
 }
 
 # Read the most recent DAP log file and check it for exceptions.
-proc _dap_check_log_file {} {
+proc dap_check_log_file {} {
     global dap_gdb_instance
 
     set fd [open [standard_output_file "dap.log.$dap_gdb_instance"]]
@@ -366,7 +366,7 @@ proc _dap_check_log_file {} {
 proc dap_shutdown {{terminate false}} {
     dap_check_request_and_response "shutdown" disconnect \
 	[format {o terminateDebuggee [l %s]} $terminate]
-    _dap_check_log_file
+    dap_check_log_file
 }
 
 # Search the event list EVENTS for an output event matching the regexp
