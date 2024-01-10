@@ -245,7 +245,7 @@ cooked_index_entry::write_scope (struct obstack *storage,
 
 /* See cooked-index.h.  */
 
-const cooked_index_entry *
+cooked_index_entry *
 cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
 			 cooked_index_flag flags, const char *name,
 			 const cooked_index_entry *parent_entry,
