@@ -336,3 +336,17 @@ verbose "Timeout now $timeout sec."
 #
 # Finished: cleanup
 #
+
+#
+# Now let's try to delete checkpoint 0.
+#
+
+with_test_prefix "delete checkpoint 0" {
+    clean_restart $binfile
+    runto_main
+
+    gdb_test "checkpoint" "checkpoint 1: fork returned pid $decimal\\."
+    gdb_test "restart 1" "Switching to .*"
+    gdb_test "delete checkpoint 0" "Killed process $decimal"
+    gdb_test "info checkpoints" [string_to_regexp "No checkpoints."]
+}

@@ -537,6 +537,17 @@ Please switch to another checkpoint before deleting the current one"));
 
   delete_fork (ptid);
 
+  if (pptid == null_ptid)
+    {
+      int status;
+      /* Wait to collect the inferior's exit status.  Do not check whether
+	 this succeeds though, since we may be dealing with a process that we
+	 attached to.  Such a process will only report its exit status to its
+	 original parent.  */
+      waitpid (ptid.pid (), &status, 0);
+      return;
+    }
+
   /* If fi->parent_ptid is not a part of lwp but it's a part of checkpoint
      list, waitpid the ptid.
      If fi->parent_ptid is a part of lwp and it is stopped, waitpid the
