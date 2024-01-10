@@ -18809,7 +18809,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	sym->set_linkage_name (physname);
       else
 	{
-	  sym->set_demangled_name (physname, &objfile->objfile_obstack);
+	  if (physname == linkagename)
+	    sym->set_demangled_name (name, &objfile->objfile_obstack);
+	  else
+	    sym->set_demangled_name (physname, &objfile->objfile_obstack);
+
 	  sym->set_linkage_name (linkagename);
 	}
 
