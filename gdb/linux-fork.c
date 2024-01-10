@@ -583,7 +583,7 @@ info_checkpoints_command (const char *arg, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   int requested = -1;
-  const fork_info *printed = NULL;
+  bool printed = false;
 
   if (arg && *arg)
     requested = (int) parse_and_eval_long (arg);
@@ -592,8 +592,8 @@ info_checkpoints_command (const char *arg, int from_tty)
     {
       if (requested > 0 && fi.num != requested)
 	continue;
+      printed = true;
 
-      printed = &fi;
       if (fi.ptid == inferior_ptid)
 	gdb_printf ("* ");
       else
@@ -623,7 +623,8 @@ info_checkpoints_command (const char *arg, int from_tty)
 
       gdb_putc ('\n');
     }
-  if (printed == NULL)
+
+  if (!printed)
     {
       if (requested > 0)
 	gdb_printf (_("No checkpoint number %d.\n"), requested);
