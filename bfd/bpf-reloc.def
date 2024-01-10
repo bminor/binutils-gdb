@@ -38,7 +38,7 @@
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_64_ABS32",	/* name */
-	 false,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 true)			/* pcrel_offset */
@@ -53,7 +53,7 @@
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_64_ABS64",	/* name */
-	 false,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0,			/* src_mask */
 	 MINUS_ONE,		/* dst_mask */
 	 true)			/* pcrel_offset */
@@ -103,7 +103,7 @@
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_64_NODYLD32",	/* name */
-	 false,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 true)			/* pcrel_offset */

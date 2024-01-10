@@ -83,4 +83,7 @@ if {[istarget bpf*-*-*]} {
 
     # Test that parser does not create undefined symbols
     run_dump_test asm-extra-sym-1
+
+    # Test relocation installation
+    run_dump_test elf-relo-1
 }
