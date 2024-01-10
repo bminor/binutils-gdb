@@ -594,16 +594,27 @@ info_checkpoints_command (const char *arg, int from_tty)
 	continue;
       printed = true;
 
-      if (fi.ptid == inferior_ptid)
+      bool is_current = fi.ptid == inferior_ptid;
+      if (is_current)
 	gdb_printf ("* ");
       else
 	gdb_printf ("  ");
 
-      ULONGEST pc = fi.pc;
       gdb_printf ("%d %s", fi.num, target_pid_to_str (fi.ptid).c_str ());
       if (fi.num == 0)
 	gdb_printf (_(" (main process)"));
+
+      if (is_current && inferior_thread ()->state == THREAD_RUNNING)
+	{
+	  gdb_printf (_(" <running>\n"));
+	  continue;
+	}
+
       gdb_printf (_(" at "));
+      ULONGEST pc
+	= (is_current
+	   ? regcache_read_pc (get_thread_regcache (inferior_thread ()))
+	   : fi.pc);
       gdb_puts (paddress (gdbarch, pc));
 
       symtab_and_line sal = find_pc_line (pc, 0);

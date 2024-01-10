@@ -84,9 +84,11 @@ gdb_test "checkpoint" "" "checkpoint nine"
 gdb_test "continue 10" "breakpoint 1.*" "break1 ten"
 gdb_test "checkpoint" "" "checkpoint ten"
 
-gdb_test "info checkpoints" \
-    " 1 .* 2 .* 3 .* 4 .* 5 .* 6 .* 7 .* 8 .* 9 .* 10 .*" \
-    "info checkpoints one"
+set info_checkpoints_re ""
+for { set i 0 } { $i <= 10 } { incr i } {
+    append info_checkpoints_re " $i .* file .*"
+}
+gdb_test "info checkpoints" $info_checkpoints_re "info checkpoints one"
 
 delete_breakpoints
 gdb_breakpoint $break2_loc
