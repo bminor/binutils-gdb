@@ -18,7 +18,7 @@ import gdb
 # These are deprecated in 3.9, but required in older versions.
 from typing import Mapping, Optional, Sequence
 
-from .events import exec_and_expect_stop, expect_process, suppress_stop
+from .events import exec_and_expect_stop, expect_process, expect_stop
 from .server import request, capability
 from .startup import exec_and_log, DAPException
 
@@ -88,7 +88,7 @@ def attach(
     else:
         raise DAPException("attach requires either 'pid' or 'target'")
     expect_process("attach")
-    suppress_stop()
+    expect_stop("attach")
     exec_and_log(cmd)
 
 

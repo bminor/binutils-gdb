@@ -147,14 +147,14 @@ def _cont(event):
         )
 
 
-_suppress_stop = False
+_expected_stop_reason = None
 
 
 @in_gdb_thread
-def suppress_stop():
-    """Indicate that the next stop should not emit an event."""
-    global _suppress_stop
-    _suppress_stop = True
+def expect_stop(reason: str):
+    """Indicate that the next stop should be for REASON."""
+    global _expected_stop_reason
+    _expected_stop_reason = reason
 
 
 _expected_pause = False
@@ -209,24 +209,22 @@ def _on_stop(event):
     global inferior_running
     inferior_running = False
 
-    global _suppress_stop
-    if _suppress_stop:
-        _suppress_stop = False
-        log("suppressing stop in _on_stop")
-        return
-
     log("entering _on_stop: " + repr(event))
-    log("   details: " + repr(event.details))
+    if hasattr(event, "details"):
+        log("   details: " + repr(event.details))
     obj = {
         "threadId": gdb.selected_thread().global_num,
         "allThreadsStopped": True,
     }
     if isinstance(event, gdb.BreakpointEvent):
         obj["hitBreakpointIds"] = [x.number for x in event.breakpoints]
+
     global _expected_pause
-    # Some stop events still do not emit details.  For example,
-    # 'attach' causes a reason-less stop.
-    if "reason" not in event.details:
+    global _expected_stop_reason
+    if _expected_stop_reason is not None:
+        obj["reason"] = _expected_stop_reason
+        _expected_stop_reason = None
+    elif "reason" not in event.details:
         # This can only really happen via a "repl" evaluation of
         # something like "attach".  In this case just emit a generic
         # stop.

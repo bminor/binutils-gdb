@@ -28,9 +28,19 @@ if {[build_executable ${testfile}.exp $testfile] == -1} {
 set test_spawn_id [spawn_wait_for_attach $binfile]
 set testpid [spawn_id_get_pid $test_spawn_id]
 
-# We just want to test that attaching works at all.
-if {[dap_attach $testpid $binfile] != ""} {
-    dap_shutdown true
+# Test that attaching works at all.
+set result [dap_attach $testpid $binfile]
+
+set found 0
+foreach ev [lindex $result 1] {
+    if {[dict get $ev type] == "event"
+	&& [dict get $ev event] == "stopped"
+	&& [dict get $ev body reason] == "attach"} {
+	set found 1
+    }
 }
+gdb_assert {$found} "saw stopped event for attach"
+
+dap_shutdown true
 
 kill_wait_spawned_process $test_spawn_id
