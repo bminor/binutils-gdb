@@ -796,6 +796,7 @@ psim_read_register(psim *system,
     unsigned_2 unsigned_2;
     unsigned_4 unsigned_4;
     unsigned_8 unsigned_8;
+    unsigned_16 unsigned_16;
     creg creg;
     fpreg fpreg;
     fpscreg fpscreg;
@@ -922,21 +923,12 @@ psim_read_register(psim *system,
     case 8:
       *(unsigned_8*)buf = H2T_8(cooked_buf.unsigned_8);
       break;
-#ifdef WITH_ALTIVEC
     case 16:
-      if (HOST_BYTE_ORDER != CURRENT_TARGET_BYTE_ORDER)
-        {
-	  union { vreg v; unsigned_8 d[2]; } h, t;
-          memcpy(&h.v/*dest*/, cooked_buf.bytes/*src*/, description.size);
-	  { _SWAP_8(t.d[0] =, h.d[1]); }
-	  { _SWAP_8(t.d[1] =, h.d[0]); }
-          memcpy(buf/*dest*/, &t/*src*/, description.size);
-          break;
-        }
-      else
-        memcpy(buf/*dest*/, cooked_buf.bytes/*src*/, description.size);
+      {
+	unsigned_16 v = H2T_16(cooked_buf.unsigned_16);
+	memcpy(buf/*dest*/, &v, description.size);
+      }
       break;
-#endif
     }
   }
   else {
@@ -965,6 +957,7 @@ psim_write_register(psim *system,
     unsigned_2 unsigned_2;
     unsigned_4 unsigned_4;
     unsigned_8 unsigned_8;
+    unsigned_16 unsigned_16;
     creg creg;
     fpreg fpreg;
     fpscreg fpscreg;
@@ -1014,20 +1007,9 @@ psim_write_register(psim *system,
     case 8:
       cooked_buf.unsigned_8 = T2H_8(*(unsigned_8*)buf);
       break;
-#ifdef WITH_ALTIVEC
     case 16:
-      if (HOST_BYTE_ORDER != CURRENT_TARGET_BYTE_ORDER)
-        {
-	  union { vreg v; unsigned_8 d[2]; } h, t;
-          memcpy(&t.v/*dest*/, buf/*src*/, description.size);
-	  { _SWAP_8(h.d[0] =, t.d[1]); }
-	  { _SWAP_8(h.d[1] =, t.d[0]); }
-          memcpy(cooked_buf.bytes/*dest*/, &h/*src*/, description.size);
-          break;
-        }
-      else
-        memcpy(cooked_buf.bytes/*dest*/, buf/*src*/, description.size);
-#endif
+      cooked_buf.unsigned_16 = T2H_16(*(unsigned_16*)buf);
+      break;
     }
   }
   else {
