@@ -386,17 +386,20 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	  case TARGET_LINUX_SYS_ftime:
 	    {
 	      struct timeb t;
+	      struct timespec ts;
 
-	      result = ftime (&t);
+	      result = clock_gettime (CLOCK_REALTIME, &ts);
 	      errcode = errno;
 
 	      if (result != 0)
 		break;
 
-	      t.time = H2T_4 (t.time);
-	      t.millitm = H2T_2 (t.millitm);
-	      t.timezone = H2T_2 (t.timezone);
-	      t.dstflag = H2T_2 (t.dstflag);
+	      t.time = H2T_4 (ts.tv_sec);
+	      t.millitm = H2T_2 (ts.tv_nsec / 1000000);
+	      /* POSIX.1-2001 says the contents of the timezone and dstflag
+		 members of tp after a call to ftime() are unspecified.  */
+	      t.timezone = H2T_2 (0);
+	      t.dstflag = H2T_2 (0);
 	      if ((s.write_mem) (cb, &s, arg1, (char *) &t, sizeof(t))
 		  != sizeof(t))
 		{
