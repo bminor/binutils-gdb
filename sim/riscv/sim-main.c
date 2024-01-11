@@ -1040,7 +1040,7 @@ void step_once (SIM_CPU *cpu)
   for (; op->name; op++)
     {
       /* Does the opcode match?  */
-      if (! op->match_func (op, iw))
+      if (! op->match_func || ! op->match_func (op, iw))
 	continue;
       /* Is this a pseudo-instruction and may we print it as such?  */
       if (op->pinfo & INSN_ALIAS)
