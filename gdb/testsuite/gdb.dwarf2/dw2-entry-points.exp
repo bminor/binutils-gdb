@@ -180,8 +180,8 @@ if ![runto_main] {
 }
 
 # Try whether we can set and hit breakpoints at the entry_points.
-gdb_breakpoint "foo"
-gdb_breakpoint "foobar"
+gdb_breakpoint "*foo"
+gdb_breakpoint "*foobar"
 
 # Now hit the entry_point break point and check their call-stack.
 gdb_continue_to_breakpoint "foo"
@@ -204,7 +204,7 @@ if ![runto_main] {
     return -1
 }
 
-gdb_breakpoint "fooso"
+gdb_breakpoint "*fooso"
 gdb_continue_to_breakpoint "foo_so"
 
 gdb_test "bt" [multi_line \
