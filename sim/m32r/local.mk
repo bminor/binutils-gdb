@@ -16,9 +16,6 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-## Some modules don't build cleanly yet.
-AM_CFLAGS_%C%_traps.o = -Wno-error
-
 nodist_%C%_libsim_a_SOURCES = \
 	%D%/modules.c
 %C%_libsim_a_SOURCES = \

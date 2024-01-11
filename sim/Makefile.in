@@ -2573,7 +2573,6 @@ testsuite_common_CPPFLAGS = \
 # opc2c leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
 # leak detection while running it.
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c_OPC2C_RUN = ASAN_OPTIONS=detect_leaks=0 m32c/opc2c$(EXEEXT)
-@SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_traps.o = -Wno-error
 @SIM_ENABLE_ARCH_m32r_TRUE@nodist_m32r_libsim_a_SOURCES = \
 @SIM_ENABLE_ARCH_m32r_TRUE@	m32r/modules.c
 
