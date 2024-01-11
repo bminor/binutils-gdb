@@ -436,7 +436,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	    break;
 
 	  case TARGET_LINUX_SYS_brk:
-	    result = brk ((void *) arg1);
+	    result = brk ((void *) (uintptr_t) arg1);
 	    errcode = errno;
 	    //result = arg1;
 	    break;
@@ -582,51 +582,51 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	    {
 	      int n;
 	      fd_set readfds;
-	      fd_set *treadfdsp;
+	      unsigned int treadfdsp;
 	      fd_set *hreadfdsp;
 	      fd_set writefds;
-	      fd_set *twritefdsp;
+	      unsigned int twritefdsp;
 	      fd_set *hwritefdsp;
 	      fd_set exceptfds;
-	      fd_set *texceptfdsp;
+	      unsigned int texceptfdsp;
 	      fd_set *hexceptfdsp;
-	      struct timeval *ttimeoutp;
+	      unsigned int ttimeoutp;
 	      struct timeval timeout;
 
 	      n = arg1;
 
-	      treadfdsp = (fd_set *) arg2;
-	      if (treadfdsp != NULL)
+	      treadfdsp = arg2;
+	      if (treadfdsp !=0)
 		{
-		  readfds = *((fd_set *) t2h_addr (cb, &s, (unsigned int) treadfdsp));
+		  readfds = *((fd_set *) t2h_addr (cb, &s, treadfdsp));
 		  translate_endian_t2h (&readfds, sizeof(readfds));
 		  hreadfdsp = &readfds;
 		}
 	      else
 		hreadfdsp = NULL;
 
-	      twritefdsp  = (fd_set *) arg3;
-	      if (twritefdsp != NULL)
+	      twritefdsp = arg3;
+	      if (twritefdsp != 0)
 		{
-		  writefds = *((fd_set *) t2h_addr (cb, &s, (unsigned int) twritefdsp));
+		  writefds = *((fd_set *) t2h_addr (cb, &s, twritefdsp));
 		  translate_endian_t2h (&writefds, sizeof(writefds));
 		  hwritefdsp = &writefds;
 		}
 	      else
 		hwritefdsp = NULL;
 
-	      texceptfdsp = (fd_set *) arg4;
-	      if (texceptfdsp != NULL)
+	      texceptfdsp = arg4;
+	      if (texceptfdsp != 0)
 		{
-		  exceptfds = *((fd_set *) t2h_addr (cb, &s, (unsigned int) texceptfdsp));
+		  exceptfds = *((fd_set *) t2h_addr (cb, &s, texceptfdsp));
 		  translate_endian_t2h (&exceptfds, sizeof(exceptfds));
 		  hexceptfdsp = &exceptfds;
 		}
 	      else
 		hexceptfdsp = NULL;
 
-	      ttimeoutp = (struct timeval *) arg5;
-	      timeout = *((struct timeval *) t2h_addr (cb, &s, (unsigned int) ttimeoutp));
+	      ttimeoutp = arg5;
+	      timeout = *((struct timeval *) t2h_addr (cb, &s, ttimeoutp));
 	      translate_endian_t2h (&timeout, sizeof(timeout));
 
 	      result = select (n, hreadfdsp, hwritefdsp, hexceptfdsp, &timeout);
@@ -635,10 +635,10 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	      if (result != 0)
 		break;
 
-	      if (treadfdsp != NULL)
+	      if (treadfdsp != 0)
 		{
 		  translate_endian_h2t (&readfds, sizeof(readfds));
-		  if ((s.write_mem) (cb, &s, (unsigned long) treadfdsp,
+		  if ((s.write_mem) (cb, &s, treadfdsp,
 		       (char *) &readfds, sizeof(readfds)) != sizeof(readfds))
 		    {
 		      result = -1;
@@ -646,10 +646,10 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 		    }
 		}
 
-	      if (twritefdsp != NULL)
+	      if (twritefdsp != 0)
 		{
 		  translate_endian_h2t (&writefds, sizeof(writefds));
-		  if ((s.write_mem) (cb, &s, (unsigned long) twritefdsp,
+		  if ((s.write_mem) (cb, &s, twritefdsp,
 		       (char *) &writefds, sizeof(writefds)) != sizeof(writefds))
 		    {
 		      result = -1;
@@ -657,10 +657,10 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 		    }
 		}
 
-	      if (texceptfdsp != NULL)
+	      if (texceptfdsp != 0)
 		{
 		  translate_endian_h2t (&exceptfds, sizeof(exceptfds));
-		  if ((s.write_mem) (cb, &s, (unsigned long) texceptfdsp,
+		  if ((s.write_mem) (cb, &s, texceptfdsp,
 		       (char *) &exceptfds, sizeof(exceptfds)) != sizeof(exceptfds))
 		    {
 		      result = -1;
@@ -669,7 +669,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 		}
 
 	      translate_endian_h2t (&timeout, sizeof(timeout));
-	      if ((s.write_mem) (cb, &s, (unsigned long) ttimeoutp,
+	      if ((s.write_mem) (cb, &s, ttimeoutp,
 		   (char *) &timeout, sizeof(timeout)) != sizeof(timeout))
 		{
 		  result = -1;
@@ -692,8 +692,13 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	    break;
 
 	  case TARGET_LINUX_SYS_readdir:
+#if SIZEOF_VOID_P == 4
 	    result = (int) readdir ((DIR *) t2h_addr (cb, &s, arg1));
 	    errcode = errno;
+#else
+	    result = 0;
+	    errcode = ENOSYS;
+#endif
 	    break;
 
 #if 0
@@ -714,6 +719,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 #endif
 	  case TARGET_LINUX_SYS_mmap2:
 	    {
+#if SIZEOF_VOID_P == 4  /* Code assumes m32r pointer size matches host.  */
 	      void *addr;
 	      size_t len;
 	      int prot, flags, fildes;
@@ -736,11 +742,16 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 				     0, access_read_write_exec, 0,
 				     result, len, 0, NULL, NULL);
 		}
+#else
+	      result = 0;
+	      errcode = ENOSYS;
+#endif
 	    }
 	    break;
 
 	  case TARGET_LINUX_SYS_mmap:
 	    {
+#if SIZEOF_VOID_P == 4  /* Code assumes m32r pointer size matches host.  */
 	      void *addr;
 	      size_t len;
 	      int prot, flags, fildes;
@@ -773,11 +784,15 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 				     0, access_read_write_exec, 0,
 				     result, len, 0, NULL, NULL);
 		}
+#else
+	      result = 0;
+	      errcode = ENOSYS;
+#endif
 	    }
 	    break;
 
 	  case TARGET_LINUX_SYS_munmap:
-	    result = munmap ((void *)arg1, arg2);
+	    result = munmap ((void *) (uintptr_t) arg1, arg2);
 	    errcode = errno;
 	    if (result != -1)
 	      sim_core_detach (sd, NULL, 0, arg2, result);
@@ -1078,7 +1093,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	    break;
 
 	  case TARGET_LINUX_SYS_mprotect:
-	    result = mprotect ((void *) arg1, arg2, arg3);
+	    result = mprotect ((void *) (uintptr_t) arg1, arg2, arg3);
 	    errcode = errno;
 	    break;
 
@@ -1149,7 +1164,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	    break;
 
 	  case TARGET_LINUX_SYS_msync:
-	    result = msync ((void *) arg1, arg2, arg3);
+	    result = msync ((void *) (uintptr_t) arg1, arg2, arg3);
 	    errcode = errno;
 	    break;
 
@@ -1216,8 +1231,13 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	    break;
 
 	  case TARGET_LINUX_SYS_mremap: /* FIXME */
+#if SIZEOF_VOID_P == 4  /* Code assumes m32r pointer size matches host.  */
 	    result = (int) mremap ((void *) t2h_addr (cb, &s, arg1), arg2, arg3, arg4);
 	    errcode = errno;
+#else
+	    result = -1;
+	    errcode = ENOSYS;
+#endif
 	    break;
 
 	  case TARGET_LINUX_SYS_getresuid32:
@@ -1285,8 +1305,13 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	    break;
 
 	  case TARGET_LINUX_SYS_getcwd:
-	    result = (int) getcwd ((char *) t2h_addr (cb, &s, arg1), arg2);
-	    errcode = errno;
+	    {
+	      void *ret;
+
+	      ret = getcwd ((char *) t2h_addr (cb, &s, arg1), arg2);
+	      result = ret == NULL ? 0 : arg1;
+	      errcode = errno;
+	    }
 	    break;
 
 	  case TARGET_LINUX_SYS_sendfile:

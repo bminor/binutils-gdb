@@ -133,6 +133,8 @@ AC_CHECK_TYPES(socklen_t, [], [],
 #include <sys/socket.h>
 ])
 
+AC_CHECK_SIZEOF([void *])
+
 dnl Check for struct statfs.
 AC_CACHE_CHECK([for struct statfs],
   [sim_cv_struct_statfs],
