@@ -407,6 +407,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 		  errcode = EINVAL;
 		}
 	    }
+	    break;
 
 	  case TARGET_LINUX_SYS_sync:
 	    sync ();
