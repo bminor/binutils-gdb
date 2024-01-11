@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#   Copyright (C) 2021-2024 Free Software Foundation, Inc.
+#   Copyright (C) 2021-2023 Free Software Foundation, Inc.
 #   Contributed by Oracle.
 #
 #   This file is part of GNU Binutils.
@@ -65,6 +65,11 @@ my $TRUE    = 1;
 my $FALSE   = 0;
 
 #------------------------------------------------------------------------------
+# The total number of functions to be processed.
+#------------------------------------------------------------------------------
+my $g_total_function_count = 0;
+
+#------------------------------------------------------------------------------
 # Used to ensure correct alignment of columns.
 #------------------------------------------------------------------------------
 my $g_max_length_first_metric;
@@ -75,7 +80,7 @@ my $g_max_length_first_metric;
 my $g_path_to_tools;
 
 #------------------------------------------------------------------------------
-# Code debugging flag
+# Code debugging flag.
 #------------------------------------------------------------------------------
 my $g_test_code = $FALSE;
 
@@ -100,6 +105,7 @@ my $g_addressing_mode = "64 bit";
   my $g_less_than_regex      = '<';
   my $g_html_less_than_regex = '&lt;';
   my $g_endbr_inst_regex     = 'endbr[32|64]';
+  my $g_rm_surrounding_spaces_regex = '^\s+|\s+$';
 
 #------------------------------------------------------------------------------
 # For consistency, use a global variable.
@@ -1114,6 +1120,9 @@ sub main
   %addressobjtextm            = %{ $addressobjtextm_ref };
   %LINUX_vDSO                 = %{ $LINUX_vDSO_ref };
   %function_view_structure    = %{ $function_view_structure_ref };
+
+  $msg = "found " . $g_total_function_count . " functions to process";
+  gp_message ("verbose", $subr_name, $msg);
 
   for my $keys (0 .. $#function_info)
     {
@@ -4001,7 +4010,7 @@ sub extract_info_from_map_xml
   my $result_VA;
   my $va_executable_in_hex;
 
-  $msg = "- unable to open file $input_map_xml_file for reading:";
+  $msg = " - unable to open file $input_map_xml_file for reading:";
   open (MAP_XML, "<", $input_map_xml_file)
     or die ($subr_name . $msg . " " . $!);
 
@@ -4924,8 +4933,9 @@ sub function_info
     {
       $line = $_;
       chomp ($line);
+      $line =~ s/ --  no functions found//;
 
-#      gp_message ("debug", $subr_name, "FUNC_FILE: input line = $line");
+      gp_message ("debug", $subr_name, "FUNC_FILE: input line = $line");
 
       $line_n++;
       if ($line =~ /$line_regex/) # field 2|3 needs to be \S in case of -ve sign
@@ -5164,7 +5174,8 @@ sub function_info
               $segment = $1;
               $offset = $2;
               $address_decimal = bigint::hex ($offset); # decimal
-              $full_address_field = '@'.$segment.":".$offset; # e.g. @2:0x0003f280
+##              $full_address_field = '@'.$segment.":".$offset; # e.g. @2:0x0003f280
+              $full_address_field = $segment.":".$offset; # e.g. @2:0x0003f280
               $order[$index_val]{"addressobj"} = $address_decimal;
               $order[$index_val]{"addressobjtext"} = $full_address_field;
             }
@@ -5260,6 +5271,7 @@ sub generate_caller_callee
   my $input_string            = ${ $input_string_ref };
 
   my @caller_callee_data = ();
+  my $caller_callee_data_ref;
   my $outfile;
   my $input_line;
 
@@ -5278,6 +5290,9 @@ sub generate_caller_callee
   my $elements_in_name;
   my $full_hex_address;
   my $hex_address;
+  my $msg;
+
+  my $remainder2;
 
   my $file_title;
   my $page_title;
@@ -5325,7 +5340,9 @@ sub generate_caller_callee
     or die ("unable to open $outfile for writing - '$!'");
   gp_message ("debug", $subr_name, "opened file $outfile for writing");
 
-  gp_message ("debug", $subr_name, "building caller-callee file $outfile");
+  $msg = "building caller-callee file " . $outfile;
+  gp_message ("debug", $subr_name, $msg);
+  gp_message ("verbose", $subr_name, $msg);
 
 #------------------------------------------------------------------------------
 # Generate some of the structures used in the HTML output.
@@ -5337,12 +5354,19 @@ sub generate_caller_callee
   $page_title    = "Caller Callee View";
   $size_text     = "h2";
   $position_text = "center";
-  $html_title_header = ${ generate_a_header (\$page_title, \$size_text, \$position_text) };
+  $html_title_header = ${ generate_a_header (\$page_title,
+					     \$size_text,
+					     \$position_text) };
 
 #------------------------------------------------------------------------------
-# Read all of the file into array with the name caller_callee_data.
+# Read all of the file into an array with the name caller_callee_data.
 #------------------------------------------------------------------------------
   chomp (@caller_callee_data = <CALLER_CALLEE_IN>);
+
+#------------------------------------------------------------------------------
+# Remove a legacy redundant string, if any.
+#------------------------------------------------------------------------------
+  @caller_callee_data = @{ remove_redundant_string (\@caller_callee_data)};
 
 #------------------------------------------------------------------------------
 # Typical structure of the input file:
@@ -5405,73 +5429,75 @@ sub generate_caller_callee
 # Since this data is all in memory and relatively small, the performance should
 # not suffer much, but it does improve the readability of the code.
 #------------------------------------------------------------------------------
-  gp_message ("debug", $subr_name, "determine the maximum length of the first field");
-
   $g_max_length_first_metric = 0;
+
   my @hex_addresses = ();
+  my @metrics_array = ();
+  my @length_first_metric = ();
   my @special_marker = ();
   my @the_function_name = ();
   my @the_metrics = ();
-  my @length_first_metric = ();
+
+  my $find_hex_address_regex = '\s*(\d+:0x[a-fA-F0-9]+)\s+(.*)';
+  my $find_metric_values_regex  = '\)\s+\[.*\]\s+(\d+';
+     $find_metric_values_regex .= '[\.\d\ ]*)|\)\s+(\d+[\.\d\ ]*)';
+  my $find_marker_regex = '(^\*).*';
+
+  my @html_block_prologue;
+  my @html_code_function_block;
+  my $marker;
+  my $list_with_metrics;
+  my $reduced_line;
+
+  $msg  = "loop over the caller-callee data - number of lines = ";
+  $msg .= ($#caller_callee_data + 1);
+  gp_message ("debugXL", $subr_name, $msg);
 
   for (my $line = 0; $line <= $#caller_callee_data; $line++)
     {
-      my $input_line = $caller_callee_data[$line];
+      $input_line = $caller_callee_data[$line];
+      $reduced_line = $input_line;
 
-      if ($input_line =~ /$line_of_interest_regex/)
+      $msg = "line = " . $line . " input_line = " . $input_line;
+      gp_message ("debugXL", $subr_name, $msg);
+
+      if ($input_line =~ /$find_hex_address_regex/)
+#------------------------------------------------------------------------------
+# This is an input line of interest.
+#------------------------------------------------------------------------------
         {
-          if (defined ($1) and defined ($2) and defined ($3))
-#------------------------------------------------------------------------------
-# This is a line of interest, since it has the address, the function name and
-# the values for the metrics.  Examples of valid lines are:
-#
-#  2:0x00005028  *xfree_large                             0.              0
-# 12:0x0004c2b0   munmap                                  0.143     6402086
-#  7:0x0001b2df   <static>@0x1b2df (<libgomp.so.1.0.0>)   0.              0
-#
-# The function name marked with a * is the current target.
-#------------------------------------------------------------------------------
-            {
-              my $full_hex_address = $1;
-              my $marker           = $2;
-              my $remaining_line   = $3;
+          my ($hex_address_ref, $marker_ref, $reduced_line_ref, 
+              $list_with_metrics_ref) =
+                                       split_function_data_line (\$input_line);
 
-              if ($full_hex_address =~ /$get_hex_address_regex/)
-                {
-                  $hex_address = "0x" . $2;
-                  push (@hex_addresses, $hex_address);
-                  gp_message ("debugXL", $subr_name, "pushed $hex_address");
-                }
-              else
-                {
-                  my $msg = "full_hex_address = $full_hex_address has an unknown format";
-                  gp_message ("assertion", $subr_name, $msg);
-                }
-              if ($marker eq "*")
-                {
-                  push (@special_marker, "*");
-                }
-              else
-                {
-                  push (@special_marker, "X");
-                }
+          $hex_address       = ${ $hex_address_ref };
+          $marker            = ${ $marker_ref };
+          $reduced_line      = ${ $reduced_line_ref };
+          $list_with_metrics = ${ $list_with_metrics_ref };
+
+          $msg = "RESULT full_hex_address = " . $hex_address;
+          $msg .= " -- metric values = " . $list_with_metrics;
+          $msg .= " -- marker = " . $marker;
+          $msg .= " -- function name = " . $reduced_line;
+          gp_message ("debugXL", $subr_name, $msg);
+ 
+#------------------------------------------------------------------------------
+# Store the address and marker.
+#------------------------------------------------------------------------------
+          push (@the_function_name, $reduced_line);
+          push (@hex_addresses, $hex_address);
+          if ($marker eq "*")
+            {
+              push (@special_marker, "*");
             }
           else
             {
-              my $msg = "input_line = $input_line has an unknown format";
-              gp_message ("assertion", $subr_name, $msg);
+              push (@special_marker, "X");
             }
-
-          my @fields_in_line = split (" ", $input_line);
-
 #------------------------------------------------------------------------------
-# We stripped the address and marker (if any), off, so this string starts with
-# the function name.
+# Processing of the metrics.
 #------------------------------------------------------------------------------
-              my $remainder              = $3;
-              my $number_of_fields       = scalar (@fields_in_line);
-              my $words_in_function_name = $number_of_fields - $number_of_metrics - 1;
-              my @remainder_array        = split (" ", $remainder);
+          @metrics_array = split (" ", $list_with_metrics);
 
 #------------------------------------------------------------------------------
 # If the first metric is 0. (or 0, depending on the locale), the calculation
@@ -5481,62 +5507,38 @@ sub generate_caller_callee
 # first metric (ZZZ) and then compute the length.  This makes things clearer.
 # I hope ;-)
 #------------------------------------------------------------------------------
-              my $first_metric = $remainder_array[$words_in_function_name];
-              if ($first_metric =~ /^0$decimal_separator$/)
-                {
-                  gp_message ("debugXL", $subr_name, "fixed up $first_metric");
-                  $first_metric = "0.ZZZ";
-                }
-              push (@length_first_metric, length ($first_metric));
-
-              my $txt = "words in function name = $words_in_function_name ";
-              $txt   .= "first_metric = $first_metric length = ";
-              $txt   .= length ($first_metric);
-              gp_message ("debugXL", $subr_name, $txt);
-
-#------------------------------------------------------------------------------
-# Generate the regex for the metrics.
-#
-# TBD: This should be an attribute of the function and be done once only.
-#------------------------------------------------------------------------------
-              my $m_regex = '(\S+';
-              for my $f (2 .. $words_in_function_name)
-                 {
-                   $m_regex .= '\s+\S+';
-                 }
-#------------------------------------------------------------------------------
-# This last part captures all the metric values.
-#------------------------------------------------------------------------------
-              $m_regex .= $get_metric_field_regex;
-              gp_message ("debugXL", $subr_name, "m_regex = $m_regex");
-              gp_message ("debugXL", $subr_name, "remainder = $remainder");
-
-              if ($remainder =~ /$m_regex/)
-                {
-                  my $func_name   = $1;
-                  my $its_metrics = $2;
-                  my $msg = "found the info - func_name = " . $func_name .
-                            " its metrics = " . $its_metrics;
-                  gp_message ("debugXL", $subr_name, $msg);
-
-                  push (@the_function_name, $func_name);
-                  push (@the_metrics, $its_metrics);
-                }
-              else
-                {
-                  my $msg = "remainder string $remainder has an unrecognized format";
-                  gp_message ("assertion", $subr_name, $msg);
-                }
-
-              $g_max_length_first_metric = max ($g_max_length_first_metric, length ($first_metric));
-
-              my $msg = "first_metric = $first_metric " .
-                        "g_max_length_first_metric = $g_max_length_first_metric";
+          my $first_metric = $metrics_array[0];
+          $msg = "first metric found = " . $first_metric;
+          gp_message ("debugXL", $subr_name, $msg);
+          if ($first_metric =~ /^0$decimal_separator$/)
+            {
+              $first_metric = "0.ZZZ";
+              $msg = "fixed up $first_metric";
               gp_message ("debugXL", $subr_name, $msg);
+            }
+              $g_max_length_first_metric = max ($g_max_length_first_metric, 
+						length ($first_metric));
+
+              $msg = "first_metric = $first_metric " .
+                     "g_max_length_first_metric = $g_max_length_first_metric";
+              gp_message ("debugXL", $subr_name, $msg);
+              push (@length_first_metric, length ($first_metric));
+              push (@the_metrics, $list_with_metrics);
         }
     }
-  gp_message ("debugXL", $subr_name, "final: g_max_length_first_metric = $g_max_length_first_metric");
-  gp_message ("debugXL", $subr_name, "#hex_addresses = $#hex_addresses");
+
+  $msg = "the following function names have been found";
+  gp_message ("debugM", $subr_name, $msg);
+  for my $i (0 .. $#the_function_name)
+    {
+      $msg = "the_function_name{" . $i . "] = " . $the_function_name[$i];
+      gp_message ("debugM", $subr_name, $msg);
+    }
+
+  $msg = "final: g_max_length_first_metric = " . $g_max_length_first_metric;
+  gp_message ("debugM", $subr_name, $msg);
+  $msg = "\$#hex_addresses = " . $#hex_addresses;
+  gp_message ("debugM", $subr_name, $msg);
 
 #------------------------------------------------------------------------------
 # Main loop over the input data.
@@ -5545,16 +5547,19 @@ sub generate_caller_callee
   my $index_end   = -1;  # 0
   for (my $line = 0; $line <= $#caller_callee_data; $line++)
     {
-      my $input_line = $caller_callee_data[$line];
+      $input_line = $caller_callee_data[$line];
 
       if ($input_line =~ /$header_name_regex/)
         {
           $scan_header = $TRUE;
-          gp_message ("debugXL", $subr_name, "line = $line encountered start of the header scan_header = $scan_header first = $first");
+          $msg  = "line = " . $line . " encountered start of the header";
+          $msg .= " scan_header = " . $scan_header . " first = " . $first;
+          gp_message ("debugXL", $subr_name, $msg);
         }
-      elsif (($input_line =~ /$sorted_by_regex/) or ($input_line =~ /$current_regex/))
+      elsif (($input_line =~ /$sorted_by_regex/) or
+             ($input_line =~ /$current_regex/))
         {
-          my $msg =  "line = " . $line . " captured top level header: " .
+          $msg =  "line = " . $line . " captured top level header: " .
                      "input_line = " . $input_line;
           gp_message ("debugXL", $subr_name, $msg);
 
@@ -5567,10 +5572,15 @@ sub generate_caller_callee
           $scan_caller_callee_data = $TRUE;
           $data_function_block    .= $separator . $input_line;
 
-          my $msg = "line = $line updated index_end   = $index_end";
+          $msg = "line = $line updated index_end   = $index_end";
+          gp_message ("debugXL", $subr_name, $msg);
+          $msg = "line = $line input_line          = " . $input_line;
+          gp_message ("debugXL", $subr_name, $msg);
+          $msg = "line = $line data_function_block = " . $data_function_block;
           gp_message ("debugXL", $subr_name, $msg);
         }
-      elsif (($input_line =~ /$empty_line_regex/) and ($scan_caller_callee_data))
+      elsif (($input_line =~ /$empty_line_regex/) and
+             ($scan_caller_callee_data))
         {
 #------------------------------------------------------------------------------
 # An empty line is interpreted as the end of the current block and we process
@@ -5579,33 +5589,44 @@ sub generate_caller_callee
           $first = $FALSE;
           $scan_caller_callee_data = $FALSE;
 
-          gp_message ("debugXL", $subr_name, "new block");
-          gp_message ("debugXL", $subr_name, "line = $line index_start = $index_start");
-          gp_message ("debugXL", $subr_name, "line = $line index_end   = $index_end");
-          gp_message ("debugXL", $subr_name, "line = $line data_function_block = $data_function_block");
+          $msg = "new block";
+          gp_message ("debugXL", $subr_name, $msg);
+          $msg = "line = " . $line . " index_start = " . $index_start;
+          gp_message ("debugXL", $subr_name, $msg);
+          $msg = "line = " . $line . " index_end   = " . $index_end;
+          gp_message ("debugXL", $subr_name, $msg);
+
+          $msg  = "line = " . $line . " data_function_block = ";
+          $msg .= $data_function_block;
+          gp_message ("debugXL", $subr_name, $msg);
 
           push (@function_blocks, $data_function_block);
-          my ($html_block_prologue_ref, $html_code_function_block_ref) =
-                                                generate_html_function_blocks (
-                                                  \$index_start,
-                                                  \$index_end,
-                                                  \@hex_addresses,
-                                                  \@the_metrics,
-                                                  \@length_first_metric,
-                                                  \@special_marker,
-                                                  \@the_function_name,
-                                                  \$separator,
-                                                  $number_of_metrics_ref,
-                                                  \$data_function_block,
-                                                  $function_info_ref,
-                                                  $function_view_structure_ref);
 
-          my @html_block_prologue = @{ $html_block_prologue_ref };
-          my @html_code_function_block = @{ $html_code_function_block_ref };
+##          $msg  = "    generating the html blocks (";
+##          $msg .= $index_start . " - " . $index_end .")";
+##          gp_message ("verbose", $subr_name, $msg);
+
+          my ($html_block_prologue_ref, $html_code_function_block_ref) =
+					generate_html_function_blocks (
+						\$index_start,
+						\$index_end,
+						\@hex_addresses,
+						\@the_metrics,
+						\@length_first_metric,
+						\@special_marker,
+						\@the_function_name,
+						\$separator,
+						$number_of_metrics_ref,
+						\$data_function_block,
+						$function_info_ref,
+						$function_view_structure_ref);
+
+          @html_block_prologue      = @{ $html_block_prologue_ref };
+          @html_code_function_block = @{ $html_code_function_block_ref };
 
           for my $lines (0 .. $#html_code_function_block)
             {
-              my $msg = "final html_code_function_block[" . $lines . "] = " .
+              $msg = "final html_code_function_block[" . $lines . "] = " .
                         $html_code_function_block[$lines];
               gp_message ("debugXL", $subr_name, $msg);
             }
@@ -5618,8 +5639,10 @@ sub generate_caller_callee
 
           $index_start = $index_end + 1;
           $index_end   = $index_start - 1;
-          gp_message ("debugXL", $subr_name, "line = $line reset index_start = $index_start");
-          gp_message ("debugXL", $subr_name, "line = $line reset index_end   = $index_end");
+          $msg = "line = " . $line . " reset index_start = " . $index_start;
+          gp_message ("debugXL", $subr_name, $msg);
+          $msg = "line = " . $line . " reset index_end   = " . $index_end;
+          gp_message ("debugXL", $subr_name, $msg);
         }
 
 #------------------------------------------------------------------------------
@@ -5679,18 +5702,26 @@ sub generate_caller_callee
 #------------------------------------------------------------------------------
 # Parse and process the individual function blocks.
 #------------------------------------------------------------------------------
+  $msg  = "Parse and process function blocks - total blocks = ";
+  $msg .= $#function_blocks + 1;
+  gp_message ("verbose", $subr_name, $msg);
+
   for my $i (0 .. $#function_blocks)
     {
-      my $msg = "function_blocks[" . $i . "] = ". $function_blocks[$i];
+      $msg = "process function block " . $i;
+      gp_message ("debugXL", $subr_name, $msg);
+
+      $msg = "function_blocks[" . $i . "] = ". $function_blocks[$i];
       gp_message ("debugXL", $subr_name, $msg);
 #------------------------------------------------------------------------------
-# This split produces an empty first field.  This is why skip this.
+# This split produces an empty first field.  This is why we skip this in the
+# loop below.
 #------------------------------------------------------------------------------
       my @entries = split ($separator, $function_blocks[$i]);
 
 #------------------------------------------------------------------------------
-# An example of @entries:
-# <empty>
+# An example of the content of array @entries:
+# <empty line>
 # 6:0x0003ad20   drand48           0.100     0.084        768240570          0
 # 6:0x0003af50  *erand48_r         0.080     0.084        768240570          0
 # 6:0x0003b160   __drand48_iterate 0.020     0.                   0          0
@@ -5699,67 +5730,54 @@ sub generate_caller_callee
         {
           my $input_line = $entries[$k];
 
-          my $msg = "input_line = entries[" . $k . "] = ". $entries[$k];
+          $msg = "input_line = entries[" . $k . "] = ". $entries[$k];
           gp_message ("debugXL", $subr_name, $msg);
 
-          @fields = split (" ", $input_line);
+          my ($hex_address_ref, $marker_ref, $reduced_line_ref,
+              $list_with_metrics_ref) =
+                                       split_function_data_line (\$input_line);
 
-          $no_of_fields = $#fields + 1;
-          $elements_in_name = $no_of_fields - $number_of_metrics - 1;
+          $full_hex_address       = ${ $hex_address_ref };
+          $marker_target_function = ${ $marker_ref };
+          $routine                = ${ $reduced_line_ref };
+          $all_metrics            = ${ $list_with_metrics_ref };
 
-#------------------------------------------------------------------------------
-# TBD: Too restrictive.
-# CHECK CODE IN GENERATE_CALLER_CALLEE
-#------------------------------------------------------------------------------
-          if ($elements_in_name == 1)
+          $msg = "RESULT full_hex_address = " . $full_hex_address;
+          $msg .= " -- metric values = " . $all_metrics;
+          $msg .= " -- marker = " . $marker_target_function;
+          $msg .= " -- function name = " . $routine;
+          gp_message ("debugXL", $subr_name, $msg);
+
+          $metrics_length = length ($all_metrics);
+          $max_metrics_length = max ($max_metrics_length, $metrics_length);
+
+          if ($full_hex_address =~ /(\d+):0x(\S+)/)
             {
-              $name_regex = '\s*(\d+:0x[a-fA-F0-9]+)\s+([\s\*])(\S+)\s+(.*)';
+              $hex_address = "0x" . $2;
             }
-          elsif ($elements_in_name == 2)
-            {
-              $name_regex = '\s*(\d+:0x[a-fA-F0-9]+)\s+([\s\*])((\S+)\s+(\S+))\s+(.*)';
-            }
-          else
-#------------------------------------------------------------------------------
-# TBD: Handle this better in case a function entry has more than 2 words.
-#------------------------------------------------------------------------------
-            {
-              my $msg = "$elements_in_name elements in name exceeds limit";
-              gp_message ("assertion", $subr_name, $msg);
-            }
+          push (@marker, $marker_target_function);
 
-          if ($input_line =~ /$name_regex/)
-            {
-              $full_hex_address = $1;
-              $marker_target_function = $2;
-              $routine = $3;
-              if ($elements_in_name == 1)
-                {
-                  $all_metrics = $4;
-                }
-              elsif ($elements_in_name == 2)
-                {
-                  $all_metrics = $6;
-                }
+          push (@address_field, $hex_address);
+          push (@address_field, $full_hex_address);
+          $msg  = "pushed " . $full_hex_address;
+          $msg .= " to array address_field";
+          gp_message ("debugXL", $subr_name, $msg);
 
-              $metrics_length = length ($all_metrics);
-              $max_metrics_length = max ($max_metrics_length, $metrics_length);
+          $modified_line = $all_metrics . " " . $routine;
+          gp_message ("debugXL", $subr_name, "xxxxxxx = $modified_line");
 
-              if ($full_hex_address =~ /(\d+):0x(\S+)/)
-                {
-                  $hex_address = "0x" . $2;
-                }
-              push (@marker, $marker_target_function);
-              push (@address_field, $hex_address);
-              $modified_line = $all_metrics . " " . $routine;
-              push (@metric_values, $all_metrics);
-              gp_message ("debugXL", $subr_name, "xxxxxxx = $modified_line");
-              push (@function_names, $routine);
-            }
+          push (@metric_values, $all_metrics);
+          $msg = "pushed " . $all_metrics . " to array metric_values";
+          gp_message ("debugXL", $subr_name, $msg);
+
+          push (@function_names, $routine);
+          $msg = "pushed " . $routine . " to array function_names";
+          gp_message ("debugXL", $subr_name, $msg);
         }
 
       $total_header_lines = $#header_lines + 1;
-      gp_message ("debugXL", $subr_name, "total_header_lines = $total_header_lines");
+      $msg = "total_header_lines = " . $total_header_lines;
+      gp_message ("debugXL", $subr_name, $msg);
 
       gp_message ("debugXL", $subr_name, "Final output");
       for my $i (keys @header_lines)
@@ -5768,57 +5786,79 @@ sub generate_caller_callee
         }
       for my $i (0 .. $#function_names)
         {
-          my $msg = $metric_values[$i] . " " . $marker[$i] .
-                    $function_names[$i] . "(" . $address_field[$i] . ")";
+          $msg  = $metric_values[$i] . " " . $marker[$i]; 
+          $msg .= $function_names[$i] . " (" . $address_field[$i] . ")";
           gp_message ("debugXL", $subr_name, $msg);
         }
 #------------------------------------------------------------------------------
 # Check if this function has multiple occurrences.
 # TBD: Replace by the function call for this.
 #------------------------------------------------------------------------------
-      gp_message ("debugXL", $subr_name, "check for multiple occurrences");
+      $msg  = "check for multiple occurrences - function_names = ";
+      $msg .= ($#function_names + 1);
+      gp_message ("debugXL", $subr_name, $msg);
+
       for my $i (0 .. $#function_names)
         {
           my $current_address = $address_field[$i];
           my $found_a_match;
           my $ref_index;
           my $alt_name;
+          my $addr_offset;
+ 
           $routine = $function_names[$i];
           $alt_name = $routine;
           gp_message ("debugXL", $subr_name, "checking for routine = $routine");
           if (exists ($g_multi_count_function{$routine}))
             {
-
 #------------------------------------------------------------------------------
-# TBD: Scan all of the function_info list. Or beter: add index to g_multi_count_function!!
+# TBD: Scan all of the function_info list. Or beter: add index to
+# g_multi_count_function.
 #------------------------------------------------------------------------------
 
               $found_a_match = $FALSE;
-              gp_message ("debugXL", $subr_name, "$routine: occurrences = $g_function_occurrences{$routine}");
+
+              $msg  = $routine . ": occurrences = ";
+              $msg .= $g_function_occurrences{$routine};
+              gp_message ("debugXL", $subr_name, $msg);
+
               for my $ref (keys @{ $g_map_function_to_index{$routine} })
                 {
                   $ref_index = $g_map_function_to_index{$routine}[$ref];
 
-                  gp_message ("debugXL", $subr_name, "$routine: retrieving duplicate entry at ref_index = $ref_index");
-                  gp_message ("debugXL", $subr_name, "$routine: function_info[$ref_index]{'alt_name'} = $function_info[$ref_index]{'alt_name'}");
+                  $msg  = $routine . ": retrieving duplicate entry at ";
+                  $msg .= "ref_index = " . $ref_index;
+                  gp_message ("debugXL", $subr_name, $msg);
+                  $msg  = $routine . ": function_info[" . $ref_index;
+                  $msg .= "]{alt_name} = ";
+                  $msg .= $function_info[$ref_index]{'alt_name'};
+                  gp_message ("debugXL", $subr_name, $msg);
 
-                  my $addr_offset = $function_info[$ref_index]{"addressobjtext"};
-                  gp_message ("debugXL", $subr_name, "$routine: addr_offset = $addr_offset");
+                  $addr_offset = $function_info[$ref_index]{"addressobjtext"};
+                  $msg = $routine . ": addr_offset = " . $addr_offset;
+                  gp_message ("debugXL", $subr_name, $msg);
 
                   $addr_offset =~ s/$get_addr_offset_regex//;
-                  gp_message ("debugXL", $subr_name, "$routine: addr_offset = $addr_offset");
+                  $msg = $routine . ": addr_offset = " . $addr_offset;
+                  gp_message ("debugXL", $subr_name, $msg);
+
                   if ($addr_offset eq $current_address)
                     {
                       $found_a_match = $TRUE;
                       last;
                     }
                 }
-              gp_message ("debugXL", $subr_name, "$function_info[$ref_index]{'alt_name'} is the actual function for i = $i $found_a_match");
+              $msg  = $function_info[$ref_index]{'alt_name'};
+              $msg .= " is the actual function for i = " . $i . " ";
+              $msg .= $found_a_match;
+              gp_message ("debugXL", $subr_name, $msg);
+
               $alt_name = $function_info[$ref_index]{'alt_name'};
             }
           gp_message ("debugXL", $subr_name, "alt_name = $alt_name");
         }
-      gp_message ("debugXL", $subr_name, "completed check for multiple occurrences");
+      $msg = "completed the check for multiple occurrences";
+      gp_message ("debugXL", $subr_name, $msg);
 
 #------------------------------------------------------------------------------
 # Figure out the column width.  Since the columns in the header may include
@@ -5834,8 +5874,23 @@ sub generate_caller_callee
 # $i = 3 35 42
       for my $i (keys @word_index_values)
         {
-          gp_message ("debugXL", $subr_name, "i = $i $word_index_values[$i][0] $word_index_values[$i][1]");
+          $msg  = "i = " . $i . " " . $word_index_values[$i][0] . " ";
+          $msg .= $word_index_values[$i][1];
+          gp_message ("debugXL", $subr_name, $msg);
         }
+
+#------------------------------------------------------------------------------
+# Empty the buffers before processing the next block with data.
+#------------------------------------------------------------------------------
+      @function_names = ();
+      @metric_values = ();
+      @address_field = ();
+      @marker = ();
+ 
+      $msg  = "erased contents of arrays function_names, metric_values, ";
+      $msg .= "address_field, and marker";
+      gp_message ("debugXL", $subr_name, $msg);
+
     }
 
   push (@html_metric_sort_header, "<i>");
@@ -5869,6 +5924,9 @@ sub generate_caller_callee
   print CALLER_CALLEE_OUT $html_end;
 
   close (CALLER_CALLEE_OUT);
+
+  $msg = "the caller-callee information has been generated";
+  gp_message ("verbose", $subr_name, $msg);
 
   return (0);
 
@@ -6845,6 +6903,7 @@ sub generate_function_level_info
   my $gp_display_text_cmd;
   my $gp_functions_cmd;
   my $ignore_value;
+  my $msg;
   my $script_pc_metrics;
 
   my $outputdir      = append_forward_slash ($input_string);
@@ -6903,6 +6962,7 @@ sub generate_function_level_info
 
 #------------------------------------------------------------------------------
 # Empty header.
+# TBD: Is still needed? Also, add the header command.
 #------------------------------------------------------------------------------
   print SCRIPT_PC "# outfile $outputdir"."header\n";
   print SCRIPT_PC "outfile $outputdir"."header\n";
@@ -7081,6 +7141,12 @@ sub generate_function_level_info
   for (my $line = 0; $line <= $#input_data; $line++)
     {
       my $input_line = $input_data[$line];
+
+      $input_line =~ s/ --  no functions found//;
+      $input_data[$line] =~ s/ --  no functions found//;
+
+      $msg = "line = " . $line . " input_line = " . $input_line;
+      gp_message ("debugXL", $subr_name, $msg);
 
 #      if ($input_line =~ /^<Total>\s+.*/)
       if ($input_line =~ /\s*(\d+:0x[a-fA-F0-9]+)\s+(\S+)\s+(.*)/)
@@ -8147,22 +8213,25 @@ sub get_function_info
   my $line;
   my $routine_flag;
   my $value;
-  my $whatever;
+  my $field;
   my $df_flag;
   my $address_decimal;
   my $routine;
 
   my $num_source_files           = 0;
-  my $number_of_functions        = 0;
   my $number_of_unique_functions = 0;
   my $number_of_non_unique_functions = 0;
 
+  my $function_info_regex   = '\s*(\S+[a-zA-Z\s]*):(.*)';
+  my $get_hex_address_regex = '(\d+):(0x\S+)';
 #------------------------------------------------------------------------------
 # Open the file generated using the -fsummary option.
 #------------------------------------------------------------------------------
+  $msg = " - unable to open file $FSUMMARY_FILE for reading:";
   open (FSUMMARY_FILE, "<", $FSUMMARY_FILE)
-    or die ("$subr_name - unable to open $FSUMMARY_FILE for reading: '$!'");
-  gp_message ("debug", $subr_name, "opened file $FSUMMARY_FILE for reading");
+    or die ($subr_name . $msg . " " . $!);
+  $msg = "opened file $FSUMMARY_FILE for reading";
+  gp_message ("debug", $subr_name, $msg);
 
 #------------------------------------------------------------------------------
 # This is the typical structure of the fsummary output:
@@ -8218,7 +8287,19 @@ sub get_function_info
     {
       $line = $_;
       chomp ($line);
-      gp_message ("debugXL", $subr_name, "line = $line");
+
+#------------------------------------------------------------------------------
+# Legacy issue to deal with. Up until somewhere between binutils 2.40 and 2.41,
+# gprofng display text might print the " --  no functions found" comment.
+# No, the two spaces after -- are not my typo ;-)
+#
+# Since then, this comment is no longer printed, but the safe approach is to
+# remove any occurrence upfront.
+#------------------------------------------------------------------------------
+      $line =~ s/ --  no functions found//;
+
+      $msg = "line = " . $line;
+      gp_message ("debugXL", $subr_name, $msg);
 
       if ($line =~ /^\s*$/)
 #------------------------------------------------------------------------------
@@ -8256,6 +8337,8 @@ sub get_function_info
 # may show up in a function list.
 #
 # Here we determine the number of fields and store it.
+#
+# REVISIT This may not be needed anymore
 #------------------------------------------------------------------------------
           my @fields_in_name = split (" ", $routine);
           $function_info[$i]{"fields in routine name"} = scalar (@fields_in_name);
@@ -8327,59 +8410,152 @@ sub get_function_info
         }
 
 #------------------------------------------------------------------------------
-# Expected format of an input line:
-#   Exclusive Total CPU Time:  4.003 ( 34.7%)
-# or:
-#   Source File: <absolute_path>/name_of_source_file
+# Example format of an input block, where $line is one of the following:
+#         Exclusive Total CPU Time: 0.001 (  0.0%)
+#         Inclusive Total CPU Time: 0.001 (  0.0%)
+#                             Size:    92
+#                       PC Address: 5:0x00125de0
+#                      Source File: (unknown)
+#                      Object File: (unknown)
+#                      Load Object: /usr/lib64/libc-2.28.so
+#                     Mangled Name:
+#                          Aliases: __brk
 #------------------------------------------------------------------------------
       $line =~ s/^\s+//;
+      if ($line =~ /$function_info_regex/)
+        {
+          if (defined ($1) and defined($2))
+            {
+              $field = $1;
+              $value = $2;
+              $value =~ s/$g_rm_surrounding_spaces_regex//g;
 
-      my @input_fields   = split (":", $line);
-      my $no_of_elements = scalar (@input_fields);
+              $msg = "initial - field = " . $field . " value = " . $value;
+              gp_message ("debugM", $subr_name, $msg);
+            }
+          else
+            {
+              $msg = "the input line pattern was not recognized";
+              gp_message ("warning", $subr_name, $msg);
+              gp_message ("debug", $subr_name, $msg);
+              $msg = "execution continues, but there may be a problem later";
+              gp_message ("warning", $subr_name, $msg);
+              gp_message ("debug", $subr_name, $msg);
 
-      gp_message ("debugXL", $subr_name, "#input_fields = $#input_fields");
-      gp_message ("debugXL", $subr_name, "no_of_elements = $no_of_elements");
-      gp_message ("debugXL", $subr_name, "input_fields[0] = $input_fields[0]");
+              $field = "not recognized";
+              $value = "not recognized";
+            }
+#------------------------------------------------------------------------------
+# The field has no value.
+#------------------------------------------------------------------------------
+          if (length ($value) eq 0)
+##          if ($value =~ /^\s+$/)
+##              if (length ($2) gt 0)
+##              if ($2 == " ")
+            {
+              if ($field eq "Mangled Name")
+                {
+                  $value = $routine; 
 
-      if ($no_of_elements == 1)
-        {
-          $whatever = $input_fields[0];
-          $value    = "";
-        }
-      elsif ($no_of_elements == 2)
-        {
-#------------------------------------------------------------------------------
-# Note that value may consist of multiple fields (e.g. 1.651 ( 95.4%)).
-#------------------------------------------------------------------------------
-          $whatever = $input_fields[0];
-          $value    = $input_fields[1];
-        }
-      elsif ($no_of_elements == 3)
-        {
-#------------------------------------------------------------------------------
-# Assumption: must be an address field.  Restore the second colon.
-#------------------------------------------------------------------------------
-          $whatever = $input_fields[0];
-          $value    = $input_fields[1] . ":" . $input_fields[2];
-        }
-      else
-        {
-          $msg = "unexpected: number of fields = " . $no_of_elements;
-          gp_message ("assertion", $subr_name, $msg);
-        }
+                  $msg =  "no mangled name found - use the routine name ";
+                  $msg .= $routine . " as the mangled name";
+                  gp_message ("debugM", $subr_name, $msg);
+                }
+              else
+                {
+                  $value = "no_value_given";
+
+                  $msg  =  "no value was found for this field - set to ";
+                  $msg .=  $value;
+                  gp_message ("debugM", $subr_name, $msg);
+                }
+            }
 #------------------------------------------------------------------------------
 # Remove any leading whitespace characters.
 #------------------------------------------------------------------------------
-      $value =~ s/$white_space_regex//;
+          $value =~ s/$white_space_regex//;
+#------------------------------------------------------------------------------
+# These are the final values that will be used.
+#------------------------------------------------------------------------------
+          $msg = "final - field = " . $field . " value = " . $value;
+          gp_message ("debugM", $subr_name, $msg);
 
-      gp_message ("debugXL", $subr_name, "whatever = $whatever value = $value");
+          $function_info[$i]{$field} = $value;
+        }
+##      $value =~ s/$white_space_regex//;
 
-      $function_info[$i]{$whatever} = $value;
+## \s*(\S+[a-zA-Z\s]*):\ *(.*)
+
+###      my @input_fields   = split (":", $line);
+###      my $no_of_elements = scalar (@input_fields);
+
+###      gp_message ("debugXL", $subr_name, "#input_fields   = $#input_fields");
+###      gp_message ("debugXL", $subr_name, "no_of_elements  = $no_of_elements");
+###      gp_message ("debugXL", $subr_name, "input_fields[0] = $input_fields[0]");
+
+###      if ($no_of_elements == 1)
+#------------------------------------------------------------------------------
+# No value
+#------------------------------------------------------------------------------
+###         {
+###           $whatever = $input_fields[0];
+###           $value    = "";
+###         }
+###       elsif ($no_of_elements == 2)
+###         {
+### #------------------------------------------------------------------------------
+### # Note that $value may consist of multiple fields (e.g. 1.651 ( 95.4%)).
+### #------------------------------------------------------------------------------
+###           $whatever = $input_fields[0];
+###           $value    = $input_fields[1];
+###         }
+###       elsif ($no_of_elements == 3)
+###         {
+###           $whatever = $input_fields[0];
+### 	  if ($whatever eq "PC Address")
+### #------------------------------------------------------------------------------
+### # Must be an address field.  Restore the second colon.
+### #------------------------------------------------------------------------------
+### 	    {
+###               $value = $input_fields[1] . ":" . $input_fields[2];
+### 	    }
+### 	  elsif ($whatever eq "Mangled Name")
+### #------------------------------------------------------------------------------
+### # The mangled name includes a colon (:).  Just copy the entire string.
+### #------------------------------------------------------------------------------
+### 	    {
+###               $value = $input_fields[2];
+### 	    }
+###         }
+###       else
+###         {
+### 	  if ($whatever eq "Aliases")
+### #------------------------------------------------------------------------------
+### # The mangled name includes a colon (:).  Just copy the entire string.
+### #------------------------------------------------------------------------------
+### 	    {
+###               $value = $input_fields[2];
+### 	    }
+### 	  else
+### 	    {
+###               $msg = "input line = " . $line;
+###               gp_message ("debug", $subr_name, $msg);
+###               for my $i (keys @input_fields)
+###                 {
+###                   $msg = "input_fields[$i] = " . $input_fields[$i];
+###                   gp_message ("debug", $subr_name, $msg);
+###                 }
+###               $msg = "unexpected input: number of fields = " . $no_of_elements;
+###               gp_message ("debug", $subr_name, $msg);
+### ##              gp_message ("assertion", $subr_name, $msg);
+### 	    }
+###        }
+##      $function_info[$i]{$field} = $value;
 
 #------------------------------------------------------------------------------
 # TBD: Seems to be not used anymore and can most likely be removed. Check this.
 #------------------------------------------------------------------------------
-      if ($whatever =~ /Source File/)
+      if ($field =~ /Source File/)
         {
           if (!exists ($source_files{$value}))
             {
@@ -8388,7 +8564,7 @@ sub get_function_info
             }
         }
 
-      if ($whatever =~ /PC Address/)
+      if ($field =~ /PC Address/)
         {
           my $segment;
           my $offset;
@@ -8411,7 +8587,7 @@ sub get_function_info
 # Construct the address field.  Note that we use the hex address here.
 # For example @2:0x0003f280
 #------------------------------------------------------------------------------
-              $full_address_field = '@'.$segment.":0x".$offset;
+              $full_address_field = $segment.":0x".$offset;
 
               $function_info[$i]{"addressobj"}     = $address_decimal;
               $function_info[$i]{"addressobjtext"} = $full_address_field;
@@ -8432,7 +8608,7 @@ sub get_function_info
               gp_message ("debugXL", $subr_name, $msg);
             }
 
-          $number_of_functions++;
+          $g_total_function_count++;
         }
     }
   close (FSUMMARY_FILE);
@@ -8494,7 +8670,7 @@ sub get_function_info
 # The address field has the following format: @<n>:<address_offset>
 # We only care about the address offset.
 #------------------------------------------------------------------------------
-          if ($address_field =~ /(^@\d*:*)(.+)/)
+          if ($address_field =~ /$get_hex_address_regex/)
             {
               $address_offset = $2;
             }
@@ -8719,20 +8895,23 @@ sub get_function_info
     }
 
 #------------------------------------------------------------------------------
-# TBD: Include in experiment data. Include names with multiple occurrences.
+# TBD: Include this info on the page with experiment data.  Include names
+# with multiple occurrences.
 #------------------------------------------------------------------------------
-  $msg = "Number of source files                                        : " .
+  $msg = "Number of source files                            : " .
          $num_source_files;
   gp_message ("debug", $subr_name, $msg);
-  $msg = "Total number of functions: $number_of_functions";
+  $msg = "Total number of functions                         : " .
+         $g_total_function_count;
   gp_message ("debug", $subr_name, $msg);
-  $msg = "Number of functions functions with a unique name              : " .
+  $msg = "Number of functions with a unique name            : " .
          $number_of_unique_functions;
   gp_message ("debug", $subr_name, $msg);
-  $msg = "Number of functions functions with more than one occurrence   : " .
+  $msg = "Number of functions with more than one occurrence : " .
          $number_of_non_unique_functions;
   gp_message ("debug", $subr_name, $msg);
-  my $multi_occurrences = $number_of_functions - $number_of_unique_functions;
+  my $multi_occurrences = $g_total_function_count -
+                          $number_of_unique_functions;
   $msg = "Total number of multiple occurences of the same function name : " .
          $multi_occurrences;
   gp_message ("debug", $subr_name, $msg);
@@ -9027,17 +9206,20 @@ sub get_index_function_info
   my $hex_address = ${ $hex_address_ref };
   my @function_info = @{ $function_info_ref };
 
+  my $alt_name = $routine;
+  my $current_address = $hex_address;
+  my $found_a_match;
+  my $index_into_function_info;
+  my $msg;
+  my $target_tag;
+
 #------------------------------------------------------------------------------
 # Check if this function has multiple occurrences.
 #------------------------------------------------------------------------------
-  gp_message ("debug", $subr_name, "check for multiple occurrences");
-
-  my $current_address = $hex_address;
-  my $alt_name = $routine;
-
-  my $found_a_match;
-  my $index_into_function_info;
-  my $target_tag;
+  $msg = "check for multiple occurrences";
+  gp_message ("debugM", $subr_name, $msg);
+  $msg = "target routine name = " . $routine;
+  gp_message ("debugM", $subr_name, $msg);
 
   if (not exists ($g_multi_count_function{$routine}))
     {
@@ -9045,6 +9227,11 @@ sub get_index_function_info
 # There is only a single occurrence and it is straightforward to get the tag.
 #--------------------------------------------------------------------------
 ##          push (@final_function_names, $routine);
+## KANWEG      for my $key (sort keys %g_map_function_to_index)
+## KANWEG        {
+## KANWEG          $msg = "g_map_function_to_index{". $key . "} = " . $g_map_function_to_index{$key};
+## KANWEG          gp_message ("debugXL", $subr_name, $msg);
+## KANWEG        }
       if (exists ($g_map_function_to_index{$routine}))
         {
           $index_into_function_info = $g_map_function_to_index{$routine}[0];
@@ -11218,8 +11405,6 @@ sub preprocess_function_files
 
 # TBD  $outputdir .= "/";
 
-  gp_message ("debug", $subr_name, "enter subroutine");
-
   my %metric_description = %{ $metric_description_ref };
 
   for my $m (keys %metric_description)
@@ -11876,7 +12061,7 @@ sub print_user_settings
 sub print_version_info
 {
   print "$version_info\n";
-  print "Copyright (C) 2024 Free Software Foundation, Inc.\n";
+  print "Copyright (C) 2023 Free Software Foundation, Inc.\n";
   print "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.\n";
   print "This is free software: you are free to change and redistribute it.\n";
   print "There is NO WARRANTY, to the extent permitted by law.\n";
@@ -12260,8 +12445,9 @@ sub process_function_files
 #
 # TBD: Remove the part regarding clones. Legacy.
 #------------------------------------------------------------------------------
-  my $replace_quote_regex = '"/\"';
   my $find_clone_regex    = '^(.*)(\s+--\s+cloned\s+version\s+\[)([^]]+)(\])';
+  my $remove_number_regex = '^\d+:';
+  my $replace_quote_regex = '"/\"';
 
   my %addressobj_index = ();
   my %function_address_info = ();
@@ -12480,6 +12666,11 @@ sub process_function_files
       $function_info[$routine_index]{"srcline"} = "";
       $address_field = $function_info[$routine_index]{"addressobjtext"};
 
+#------------------------------------------------------------------------------
+# Strip the internal number from the address field.
+#------------------------------------------------------------------------------
+      $address_field =~ s/$remove_number_regex//;
+
 ##      $disfile = "file\.$routine_index\.dis";
       $disfile = "file." . $routine_index . "." . $g_html_base_file_name{"disassembly"};
       $srcfile = "";
@@ -12497,13 +12688,19 @@ sub process_function_files
       $tmp = $routine;
       $tmp =~ s/$replace_quote_regex//g;
       print SCRIPT "# disasm \"$tmp\" $address_field\n";
-      print SCRIPT "disasm \"$tmp\" $address_field\n";
+#------------------------------------------------------------------------------
+## TBD: adding the address is not supported.  Need to find a way to figure
+## out the ID of the function.
+##      print SCRIPT "disasm \"$tmp\" $address_field\n";
+##      print SCRIPT "source \"$tmp\" $address_field\n";
+#------------------------------------------------------------------------------
+      print SCRIPT "disasm \"$tmp\"\n";
       if ($srcfile=~/file/)
         {
           print SCRIPT "# outfile $outputdir"."$srcfile\n";
           print SCRIPT "outfile $outputdir"."$srcfile\n";
           print SCRIPT "# source \"$tmp\" $address_field\n";
-          print SCRIPT "source \"$tmp\" $address_field\n";
+          print SCRIPT "source \"$tmp\"\n";
         }
 
       if ($routine =~ /$find_clone_regex/)
@@ -12645,10 +12842,12 @@ sub process_function_overview
   my $hex_address;
   my $html_line;
   my $input_line;
+  my $marker;
   my $name_regex;
   my $no_of_fields;
   my $metrics_length;
   my $missing_digits;
+  my $msg;
   my $remaining_part_header;
   my $routine;
   my $routine_length;
@@ -12679,6 +12878,9 @@ sub process_function_overview
   my $zero_dot_at_end_regex = '[\w0-9' . $decimal_separator . ']*(0' . $decimal_separator . '$)';
   my $backward_slash_regex  = '\/';
 
+  $msg = "enter subroutine " . $subr_name;
+  gp_message ("debug", $subr_name, $msg);
+
 #------------------------------------------------------------------------------
   if (is_file_empty ($overview_file))
     {
@@ -12707,6 +12909,11 @@ sub process_function_overview
   gp_message ("debug", $subr_name, "read all of file $overview_file into memory");
 
 #------------------------------------------------------------------------------
+# Remove a legacy redundant string, if any.
+#------------------------------------------------------------------------------
+  @function_data = @{ remove_redundant_string (\@function_data)};
+
+#------------------------------------------------------------------------------
 # Parse the function view info and store the data.
 #------------------------------------------------------------------------------
   my $max_header_length  = 0;
@@ -12722,6 +12929,8 @@ sub process_function_overview
   for (my $line = 0; $line <= $#function_data; $line++)
     {
       $input_line = $function_data[$line];
+##      $input_line =~ s/ --  no functions found//;
+
       gp_message ("debugXL", $subr_name, "input_line = $input_line");
 
 #------------------------------------------------------------------------------
@@ -12747,7 +12956,7 @@ sub process_function_overview
           if (defined ($4))
             {
               $remaining_part_header = $4;
-              my $msg =  "remaining_part_header = $remaining_part_header";
+              $msg =  "remaining_part_header = $remaining_part_header";
               gp_message ("debugXL", $subr_name, $msg);
 
 #------------------------------------------------------------------------------
@@ -12794,44 +13003,32 @@ sub process_function_overview
 #------------------------------------------------------------------------------
       if ($scan_function_data and (not ($input_line =~ /$empty_line_regex/)))
         {
+          $msg = "detected a line with function data";
+          gp_message ("debugXL", $subr_name, $msg);
+
+          my ($hex_address_ref, $marker_ref, $reduced_line_ref, 
+              $list_with_metrics_ref) =
+                                       split_function_data_line (\$input_line);
+
+          $full_hex_address  = ${ $hex_address_ref };
+          $marker            = ${ $marker_ref };
+          $routine           = ${ $reduced_line_ref };
+          $all_metrics       = ${ $list_with_metrics_ref };
+
+          $msg = "RESULT full_hex_address = " . $full_hex_address;
+          $msg .= " -- metric values = " . $all_metrics;
+          $msg .= " -- marker = " . $marker;
+          $msg .= " -- function name = " . $routine;
+          gp_message ("debugXL", $subr_name, $msg);
+
           @fields = split (" ", $input_line);
 
           $no_of_fields = $#fields + 1;
           $elements_in_name = $no_of_fields - $number_of_metrics - 1;
 
-          gp_message ("debugXL", $subr_name, "no_of_fields = $no_of_fields elements_in_name = $elements_in_name");
- 
-#------------------------------------------------------------------------------
-# TBD: Handle this better in case a function entry has more than 2 words.
-# Build the regex dynamically and use eval to capture the correct group.
-# CHECK CODE IN GENERATE_CALLER_CALLEE
-#------------------------------------------------------------------------------
-          if ($elements_in_name == 1)
-            {
-              $name_regex = '\s*(\d+:0x[a-fA-F0-9]+)\s+(\S+)\s+(.*)';
-            }
-          elsif ($elements_in_name == 2)
-            {
-              $name_regex = '\s*(\d+:0x[a-fA-F0-9]+)\s+((\S+)\s+(\S+))\s+(.*)';
-            }
-          else
-            {
-              gp_message ("error", $subr_name, "assertion error: $elements_in_name elements in name exceeds limit");
-            }
-
-          if ($input_line =~ /$name_regex/)
-            {
-              $full_hex_address   = $1;
-              $routine            = $2;
-
-              if ($elements_in_name == 1)
-                {
-                  $all_metrics = $3;
-                }
-              elsif ($elements_in_name == 2)
-                {
-                  $all_metrics = $5;
-                }
+          $msg  = "no_of_fields = " . $no_of_fields;
+          $msg .= " elements_in_name = " . $elements_in_name;
+          gp_message ("debugXL", $subr_name, $msg);
 
 #------------------------------------------------------------------------------
 # In case the last metric is 0. only, we append 3 extra characters that
@@ -12861,12 +13058,24 @@ sub process_function_overview
               $max_metrics_length = max ($max_metrics_length, $metrics_length);
               gp_message ("debugXL", $subr_name, "$routine all_metrics = $all_metrics metrics_length = $metrics_length");
 
+              $msg = "verify full_hex_address = " . $full_hex_address;
+              gp_message ("debugXL", $subr_name, $msg);
+
               if ($full_hex_address =~ /$get_hex_address_regex/)
                 {
                   $hex_address = "0x" . $2;
                 }
+              else
+                {
+                  $msg = "full_hex_address = $full_hex_address has the wrong format";
+                  gp_message ("assertion", $subr_name, $msg);
+                }
 
-              push (@address_field, $hex_address);
+              push (@address_field, $full_hex_address);
+
+              $msg = "pushed full_hex_address = " . $full_hex_address; 
+              gp_message ("debugXL", $subr_name, $msg);
+
               push (@metric_values, $all_metrics);
 
 #------------------------------------------------------------------------------
@@ -12876,7 +13085,6 @@ sub process_function_overview
 # The reason to decouple this is to avoid the code gets too complex here.
 #------------------------------------------------------------------------------
               push (@function_names, $routine);
-            }
         }
     } #-- End of loop over the input lines
 
@@ -12902,6 +13110,11 @@ sub process_function_overview
 # has the final name, the html function block, etc.
 #------------------------------------------------------------------------------
 
+  for my $i (keys @address_field)
+    {
+      $msg = "address_field[" . $i ."] = " . $address_field[$i];
+      gp_message ("debugM", $subr_name, $msg);
+    }
 #------------------------------------------------------------------------------
 ## TBD: Use get_index_function_info??!!
 #------------------------------------------------------------------------------
@@ -12914,9 +13127,14 @@ sub process_function_overview
       my $routine = $function_names[$i];
       my $current_address = $address_field[$i];
 
-      my $found_a_match = $FALSE;
       my $final_function_name;
+      my $found_a_match = $FALSE;
+      my $msg;
       my $ref_index;
+
+      $msg  = "on entry - routine = " . $routine; 
+      $msg .= " current_address = " . $current_address;
+      gp_message ("debugM", $subr_name, $msg);
 
 #------------------------------------------------------------------------------
 # Check if there are duplicate entries for this function.  If there are, use
@@ -12925,7 +13143,12 @@ sub process_function_overview
       gp_message ("debugXL", $subr_name, "$routine: first check for multiple occurrences");
       if (exists ($g_multi_count_function{$routine}))
         {
-          gp_message ("debugXL", $subr_name, "$routine: occurrences = $g_function_occurrences{$routine}");
+          $msg = "$g_multi_count_function{$routine} exists";
+          gp_message ("debugXL", $subr_name, $msg);
+          $msg  = "g_function_occurrences{$routine} = ";
+          $msg .= $g_function_occurrences{$routine};
+          gp_message ("debugXL", $subr_name, $msg);
+
           for my $ref (keys @{ $g_map_function_to_index{$routine} })
             {
               my $ref_index = $g_map_function_to_index{$routine}[$ref];
@@ -12972,7 +13195,7 @@ sub process_function_overview
 # This should not happen. All we can do is print an error message and stop.
 #------------------------------------------------------------------------------
         {
-          my $msg = "cannot find the index for $routine: found_a_match = ";
+          $msg  = "cannot find the index for $routine: found_a_match = ";
           $msg .= ($found_a_match == $TRUE) ? "TRUE" : "FALSE";
           gp_message ("assertion", $subr_name, $msg);
         }
@@ -13071,7 +13294,7 @@ sub process_function_overview
       }
     else
       {
-        my $msg = "keyword $target_keyword not found in $remaining_part_header";
+        $msg = "keyword $target_keyword not found in $remaining_part_header";
         gp_message ("assertion", $subr_name, $msg);
       }
 
@@ -13199,7 +13422,7 @@ sub process_function_overview
 
   for my $i (0 .. $#function_view_array)
     {
-      my $msg = "function_view_array[$i] = $function_view_array[$i]";
+      $msg = "function_view_array[$i] = $function_view_array[$i]";
       gp_message ("debugXL", $subr_name, $msg);
     }
 #------------------------------------------------------------------------------
@@ -13208,6 +13431,9 @@ sub process_function_overview
   $function_view_structure{"header"}         = [@header_lines];
   $function_view_structure{"metrics part"}   = [@metrics_part];
   $function_view_structure{"function table"} = [@function_view_array];
+
+  $msg = "leave subroutine " . $subr_name;
+  gp_message ("debug", $subr_name, $msg);
 
   return (\%function_view_structure);
 
@@ -13320,6 +13546,7 @@ sub process_metrics_data
   my $metric_text;
   my $metricdata;
   my $metric_line;
+  my $msg;
 
   my $summary_metrics;
   my $detail_metrics;
@@ -13328,16 +13555,18 @@ sub process_metrics_data
 
   if ($g_user_settings{"default_metrics"}{"current_value"} eq "off")
     {
-      gp_message ("debug", $subr_name, "g_user_settings{default_metrics}{current_value} = " . $g_user_settings{"default_metrics"}{"current_value"});
+      $msg  = "g_user_settings{default_metrics}{current_value} = ";
+      $msg .= $g_user_settings{"default_metrics"}{"current_value"};
+      gp_message ("debug", $subr_name, $msg);
   # get metrics
 
-      $summary_metrics='';
-      $detail_metrics='';
-      $detail_metrics_system='';
-      $call_metrics = '';
-      $user_metrics=0;
-      $system_metrics=0;
-      $wall_metrics=0;
+      $summary_metrics       = '';
+      $detail_metrics        = '';
+      $detail_metrics_system = '';
+      $call_metrics          = '';
+      $user_metrics          = 0;
+      $system_metrics        = 0;
+      $wall_metrics          = 0;
 
       my ($last_metric,$metric,$value,$i,$r);
 
@@ -13439,7 +13668,7 @@ sub process_metrics_data
                       if ($value>0) # Not interested in metrics contributing zero
                         {
                           $metric_value{$metric} = $value;
-                          my $msg = "metrictotals odd line rescued '$metric'=$value";
+                          $msg = "metrictotals odd line rescued '$metric'=$value";
                           gp_message ("debug", $subr_name, $msg);
                         }
                     }
@@ -14521,11 +14750,12 @@ sub process_source
   if (not $found_target)
     {
       my $msg;
-      gp_message ("debug", $subr_name, "target function $routine not found");
 
-      $msg = "function $routine not found in $base - " .
+      $msg = "target function $routine not found in $base - " .
              "links to source code involving this function will not work";
+      gp_message ("debug", $subr_name, $msg);
       gp_message ("warning", $subr_name, $msg);
+      $g_total_warning_count++;
 
       return ($found_target);
     }
@@ -15108,6 +15338,39 @@ sub process_user_options
 } #-- End of subroutine process_user_options
 
 #------------------------------------------------------------------------------
+# This function addresses a legacy issue.
+#
+# In binutils 2.40, the "gprofng display text" tool may add a string in the
+# function overviews.  This did not add any value and was disruptive to the
+# output.  It has been removed in 2.41, but in order to support the older
+# versions of gprofng, the string is removed before the data is processed.
+#
+# Note: the double space in "--  no" is not a typo in this code!
+#------------------------------------------------------------------------------
+sub remove_redundant_string
+{
+  my $subr_name = get_my_name ();
+
+  my ($target_array_ref) = @_;
+
+  my @target_array = @{ $target_array_ref };
+
+  my $msg;
+  my $redundant_string = " --  no functions found";
+
+  for (my $line = 0; $line <= $#target_array; $line++)
+    {
+      $target_array[$line] =~ s/$redundant_string//;
+    }
+
+  $msg = "removed any occurrence of " . $redundant_string;
+  gp_message ("debugM", $subr_name, $msg);
+
+  return (\@target_array);
+
+} #-- End of subroutine remove_redundant_string
+
+#------------------------------------------------------------------------------
 # This is a hopefully temporary routine to disable/ignore selected user
 # settings.  As the functionality expands, this list will get shorter.
 #------------------------------------------------------------------------------
@@ -15392,7 +15655,8 @@ sub set_default_metrics
 # Decode the metric part of the input line. If a valid line, return the
 # metric components. Otherwise return "skipped" in the metric_spec field.
 #------------------------------------------------------------------------------
-      my ($metric_spec, $metric_flavor, $metric_visibility, $metric_name, $metric_description) = extract_metric_specifics ($metric_line);
+      my ($metric_spec, $metric_flavor, $metric_visibility, $metric_name,
+                $metric_description) = extract_metric_specifics ($metric_line);
 
       gp_message ("debug", $subr_name, "metric_spec   = $metric_spec");
       gp_message ("debug", $subr_name, "metric_flavor = $metric_flavor");
@@ -15830,6 +16094,182 @@ sub set_up_output_directory
   return ($outputdir);
 
 } #-- End of subroutine set_up_output_directory
+
+#------------------------------------------------------------------------------
+# Split a line with function data into 3 components.
+#------------------------------------------------------------------------------
+sub split_function_data_line
+{
+  my $subr_name = get_my_name ();
+
+  my ($input_line_ref) = @_;
+
+  my $input_line = ${ $input_line_ref };
+
+  my $decimal_separator = $g_locale_settings{"decimal_separator"};
+  my $full_hex_address;
+  my $function_name;
+  my $hex_address;
+  my $length_metric_list;
+  my $length_remainder;
+  my $length_target_string;
+  my $list_with_metrics;
+  my $marker;
+  my $msg;
+  my $reduced_line;
+  my $remainder;
+ 
+  my @hex_addresses = ();
+  my @special_marker = ();
+  my @the_function_name = ();
+
+  my $find_hex_address_regex = '\s*(\d+:0x[a-fA-F0-9]+)\s+(.*)';
+  my $find_marker_regex = '(^\*).*';
+  my $find_metrics_1_regex  = '\)*\ +([0-9,' . $decimal_separator;
+     $find_metrics_1_regex .= '\ ]*$)';
+  my $find_metrics_2_regex  = '\)*\ +\[.+\]\s+([0-9,' . $decimal_separator;
+     $find_metrics_2_regex  = '\ ]*$)';
+  my $get_hex_address_regex = '(\d+):0x(\S+)';
+
+  $reduced_line = $input_line;
+
+  if ($input_line =~ /$find_hex_address_regex/)
+    {
+      if (defined ($1) )
+        {
+          $full_hex_address = $1;
+          $reduced_line =~ s/$full_hex_address//;
+
+          $msg = "full_hex_address = " . $full_hex_address;
+          gp_message ("debugXL", $subr_name, $msg);
+          $msg = "reduced_line = " . $reduced_line;
+          gp_message ("debugXL", $subr_name, $msg);
+        }
+      if (defined ($2) )
+        {
+          $remainder = $2;
+          $msg = "remainder = " . $remainder;
+          gp_message ("debugXL", $subr_name, $msg);
+
+          if (($remainder =~ /$find_metrics_1_regex/) or
+              ($remainder =~ /$find_metrics_2_regex/))
+            {
+              if (defined ($1))
+                {
+                  $list_with_metrics = $1;
+                  $msg = "before list_with_metrics = " . $list_with_metrics;
+                  gp_message ("debugXL", $subr_name, $msg);
+
+                  $list_with_metrics =~ s/$g_rm_surrounding_spaces_regex//g;
+                  $msg = "after list_with_metrics = " . $list_with_metrics;
+                  gp_message ("debugXL", $subr_name, $msg);
+
+#------------------------------------------------------------------------------
+# Remove the function name from the string.
+#------------------------------------------------------------------------------
+                  $length_remainder   = length ($remainder);
+                  $length_metric_list = length ($list_with_metrics);
+
+                  $msg = "length remainder = " . $length_remainder;
+                  gp_message ("debugXL", $subr_name, $msg);
+
+                  $msg = "length list_with_metrics = " . $length_metric_list;
+                  gp_message ("debugXL", $subr_name, $msg);
+
+                  $length_target_string = $length_remainder -
+                                          $length_metric_list - 1;
+                  $function_name = substr ($remainder, 0,
+                                           $length_target_string, '');
+
+                  $msg = "new function_name  = " . $function_name;
+                  gp_message ("debugXL", $subr_name, $msg);
+
+                  $reduced_line = $function_name;
+                  $reduced_line =~ s/$g_rm_surrounding_spaces_regex//g;
+
+                  $msg = "reduced_line = " . $reduced_line;
+                  gp_message ("debugXL", $subr_name, $msg);
+
+#------------------------------------------------------------------------------
+# In some lines, the function name has a "*" prepended.  Isolate this marker
+# and later on remove it from the function name.
+# TBD: Can probably be done more efficiently.
+#------------------------------------------------------------------------------
+                  if ($reduced_line =~ /$find_marker_regex/)
+                    {
+                      if (defined ($1))
+                        {
+                          $marker = $1;
+                          $msg = "found the marker = " . $marker;
+                          gp_message ("debugXL", $subr_name, $msg);
+                        }
+                      else
+                        {
+                          $msg  = "first character in " . $reduced_line ;
+                          $msg .= " is not expected";
+                          gp_message ("assertion", $subr_name, $msg);
+                        }
+                    }
+                  else
+                    {
+                          $marker = "X";
+                    }
+                }
+              else
+                {
+                  $msg  = "failure to find metric values following the ";
+                  $msg .= "function name";
+                  gp_message ("assertion", $subr_name, $msg);
+                }
+            }
+          else
+            {
+              $msg = "cannot find metric values in remainder";
+              gp_message ("debugXL", $subr_name, $msg);
+              gp_message ("assertion", $subr_name, $msg);
+            }
+        }
+#------------------------------------------------------------------------------
+# We now have the 3 main objects from the input line.  Next, they are processed
+# and stored.
+#------------------------------------------------------------------------------
+      if ($full_hex_address =~ /$get_hex_address_regex/)
+        {
+          if (defined ($1) and defined ($2))
+            {
+              $hex_address = "0x" . $2;
+              push (@hex_addresses, $full_hex_address);
+
+              $msg = "pushed full_hex_address = " . $full_hex_address;
+              gp_message ("debugXL", $subr_name, $msg);
+            }
+        }
+      else
+        {
+          $msg = "full_hex_address = $full_hex_address has an unknown format";
+          gp_message ("assertion", $subr_name, $msg);
+        }
+      if ($marker eq "*")
+        {
+          push (@special_marker, "*");
+        }
+      else
+        {
+          push (@special_marker, "X");
+        }
+
+      $reduced_line =~ s/^\*//;
+
+      $msg = "RESULT full_hex_address = " . $full_hex_address;
+      $msg .= " -- metric values = " . $list_with_metrics;
+      $msg .= " -- marker = " . $marker;
+      $msg .= " -- function name = " . $reduced_line;
+      gp_message ("debugXL", $subr_name, $msg);
+    }
+
+  return (\$full_hex_address, \$marker, \$reduced_line, \$list_with_metrics);
+
+} #-- End of subroutine split_function_data_line
 
 #------------------------------------------------------------------------------
 # Routine to generate webfriendly names
