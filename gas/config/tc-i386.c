@@ -5387,9 +5387,8 @@ x86_scfi_callee_saved_p (unsigned int dw2reg_num)
   return false;
 }
 
-/* Check whether an instruction prefix which affects operation size
-   accompanies.  For insns in the legacy space, setting REX.W takes precedence
-   over the operand-size prefix (66H) when both are used.
+/* Check whether the instruction affecting stack implicitly has a 16-bit
+   operation size.
 
    The current users of this API are in the handlers for PUSH, POP or other
    instructions which affect the stack pointer implicitly:  the operation size
@@ -5397,9 +5396,20 @@ x86_scfi_callee_saved_p (unsigned int dw2reg_num)
    incremented / decremented (2, 4 or 8).  */
 
 static bool
-ginsn_opsize_prefix_p (void)
+ginsn_implicitstackop_opsize16_p (void)
 {
-  return (!(i.prefix[REX_PREFIX] & REX_W) && i.prefix[DATA_PREFIX]);
+  bool opsize_prefix_p = false;
+
+  if (i.tm.opcode_modifier.operandconstraint != IMPLICIT_STACK_OP)
+    return opsize_prefix_p;
+
+  /* For insns in the legacy space, setting REX.W takes precedence
+     over the operand-size prefix (66H) when both are used.  */
+  opsize_prefix_p |= !(i.prefix[REX_PREFIX] & REX_W) && i.prefix[DATA_PREFIX];
+  opsize_prefix_p |= (i.tm.opcode_space == SPACE_EVEXMAP4
+		      && i.tm.opcode_modifier.opcodeprefix == PREFIX_0X66);
+
+  return opsize_prefix_p;
 }
 
 /* Get the DWARF register number for the given register entry.
@@ -5883,7 +5893,7 @@ x86_ginsn_enter (const symbolS *insn_end_sym)
     }
 
   /* Check if this is a 16-bit op.  */
-  if (ginsn_opsize_prefix_p ())
+  if (ginsn_implicitstackop_opsize16_p ())
     stack_opnd_size = 2;
 
   /* If the nesting level is 0, the processor pushes the frame pointer from
@@ -5920,7 +5930,7 @@ x86_ginsn_leave (const symbolS *insn_end_sym)
   int stack_opnd_size = 8;
 
   /* Check if this is a 16-bit op.  */
-  if (ginsn_opsize_prefix_p ())
+  if (ginsn_implicitstackop_opsize16_p ())
     stack_opnd_size = 2;
 
   /* The 'leave' instruction copies the contents of the RBP register
@@ -6097,16 +6107,6 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
 
   opcode = i.tm.base_opcode;
 
-  /* Until it is clear how to handle APX NDD and other new opcodes, disallow
-     them from SCFI.  */
-  if (is_apx_rex2_encoding ()
-      || (i.tm.opcode_modifier.evex && is_apx_evex_encoding ()))
-    {
-      as_bad (_("SCFI: unsupported APX op %#x may cause incorrect CFI"),
-	      opcode);
-      return ginsn;
-    }
-
   switch (opcode)
     {
 
@@ -6136,7 +6136,7 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
 	break;
       dw2_regnum = ginsn_dw2_regnum (i.op[0].regs);
       /* Check if operation size is 16-bit.  */
-      if (ginsn_opsize_prefix_p ())
+      if (ginsn_implicitstackop_opsize16_p ())
 	stack_opnd_size = 2;
       ginsn = ginsn_new_sub (insn_end_sym, false,
 			     GINSN_SRC_REG, REG_SP, 0,
@@ -6157,7 +6157,7 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
 	break;
       dw2_regnum = ginsn_dw2_regnum (i.op[0].regs);
       /* Check if operation size is 16-bit.  */
-      if (ginsn_opsize_prefix_p ())
+      if (ginsn_implicitstackop_opsize16_p ())
 	stack_opnd_size = 2;
       ginsn = ginsn_new_load (insn_end_sym, false,
 			      GINSN_SRC_INDIRECT, REG_SP, 0,
@@ -6177,7 +6177,7 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
       /* push reg.  */
       dw2_regnum = ginsn_dw2_regnum (i.op[0].regs);
       /* Check if operation size is 16-bit.  */
-      if (ginsn_opsize_prefix_p ())
+      if (ginsn_implicitstackop_opsize16_p ())
 	stack_opnd_size = 2;
       ginsn = ginsn_new_sub (insn_end_sym, false,
 			     GINSN_SRC_REG, REG_SP, 0,
@@ -6201,7 +6201,7 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
 			      GINSN_DST_REG, dw2_regnum);
       ginsn_set_where (ginsn);
       /* Check if operation size is 16-bit.  */
-      if (ginsn_opsize_prefix_p ())
+      if (ginsn_implicitstackop_opsize16_p ())
 	stack_opnd_size = 2;
       ginsn_next = ginsn_new_add (insn_end_sym, false,
 				  GINSN_SRC_REG, REG_SP, 0,
@@ -6216,7 +6216,7 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
       if (i.tm.opcode_space != SPACE_BASE)
 	break;
       /* Check if operation size is 16-bit.  */
-      if (ginsn_opsize_prefix_p ())
+      if (ginsn_implicitstackop_opsize16_p ())
 	stack_opnd_size = 2;
       /* Skip getting the value of imm from machine instruction
 	 because this is not important for SCFI.  */
@@ -6285,7 +6285,7 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
 			      GINSN_DST_INDIRECT, dw2_regnum);
       ginsn_set_where (ginsn);
       /* Check if operation size is 16-bit.  */
-      if (ginsn_opsize_prefix_p ())
+      if (ginsn_implicitstackop_opsize16_p ())
 	stack_opnd_size = 2;
       ginsn_next = ginsn_new_add (insn_end_sym, false,
 				  GINSN_SRC_REG, REG_SP, 0,
@@ -6300,7 +6300,7 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
 	break;
       /* pushf / pushfq.  */
       /* Check if operation size is 16-bit.  */
-      if (ginsn_opsize_prefix_p ())
+      if (ginsn_implicitstackop_opsize16_p ())
 	stack_opnd_size = 2;
       ginsn = ginsn_new_sub (insn_end_sym, false,
 			     GINSN_SRC_REG, REG_SP, 0,
@@ -6323,7 +6323,7 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
 	break;
       /* popf / popfq.  */
       /* Check if operation size is 16-bit.  */
-      if (ginsn_opsize_prefix_p ())
+      if (ginsn_implicitstackop_opsize16_p ())
 	stack_opnd_size = 2;
       /* FIXME - hardcode the actual DWARF reg number value.  As for SCFI
 	 correctness, although this behaves simply a placeholder value; its
@@ -6348,7 +6348,7 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
       if (i.tm.extension_opcode == 6)
 	{
 	  /* Check if operation size is 16-bit.  */
-	  if (ginsn_opsize_prefix_p ())
+	  if (ginsn_implicitstackop_opsize16_p ())
 	    stack_opnd_size = 2;
 	  ginsn = ginsn_new_sub (insn_end_sym, false,
 				 GINSN_SRC_REG, REG_SP, 0,
