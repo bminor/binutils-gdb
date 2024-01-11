@@ -141,7 +141,6 @@ static void *
 t2h_addr (host_callback *cb, struct cb_syscall *sc,
 	  unsigned long taddr)
 {
-  void *addr;
   SIM_DESC sd = (SIM_DESC) sc->p1;
   SIM_CPU *cpu = (SIM_CPU *) sc->p2;
 
@@ -220,7 +219,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
       {
 	CB_SYSCALL s;
 	unsigned int func, arg1, arg2, arg3, arg4, arg5, arg6, arg7;
-	int result, result2, errcode;
+	int result, errcode;
 
 	if (STATE_ENVIRONMENT (sd) != USER_ENVIRONMENT)
 	  goto case_default;
@@ -250,7 +249,6 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	s.write_mem = sim_syscall_write_mem;
 
 	result = 0;
-	result2 = 0;
 	errcode = 0;
 
 	switch (func)
