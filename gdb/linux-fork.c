@@ -227,6 +227,8 @@ fork_load_infrun_state (struct fork_info *fp)
 
   inferior_thread ()->set_stop_pc
     (regcache_read_pc (get_thread_regcache (inferior_thread ())));
+  inferior_thread ()->set_executing (false);
+  inferior_thread ()->set_resumed (false);
   nullify_last_target_wait_ptid ();
 
   /* Now restore the file positions of open file descriptors.  */

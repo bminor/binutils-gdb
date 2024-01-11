@@ -39,9 +39,15 @@ if { [istarget "*-*-linux*"] && [target_info gdb_protocol] == ""} {
     set has_checkpoint false
 }
 
-if {[build_executable "failed to prepare" $testfile $srcfile] == -1} {
+set flags {}
+lappend flags debug
+lappend flags additional_flags=-DBINFILE=$binfile
+
+if {[build_executable "failed to prepare" $testfile $srcfile $flags] == -1} {
     return -1
 }
+
+set checkpoint_line [gdb_get_line_number "Checkpoint here"]
 
 # Start an inferior, which blocks in a spin loop.  Setup a Python
 # function that performs an action based on EXIT_P that will cause the
@@ -78,6 +84,14 @@ proc run_test { exit_p checkpoint_p } {
     }
 
     if { $checkpoint_p } {
+	# Active checkpoint-specific code in $srcfile.
+	gdb_test_no_output "set var with_checkpoint=1"
+
+	# Run to line where we want to set the checkpoint.
+	gdb_breakpoint "$::srcfile:$::checkpoint_line"
+	gdb_continue_to_breakpoint "checkpoint line"
+
+	# Set the checkpoint.
 	gdb_test "checkpoint" \
 	    "checkpoint 1: fork returned pid $::decimal\\."
     }
