@@ -2502,18 +2502,12 @@ static const aarch64_feature_set aarch64_feature_lor =
   AARCH64_FEATURE (LOR);
 static const aarch64_feature_set aarch64_feature_rdma =
   AARCH64_FEATURE (RDMA);
-static const aarch64_feature_set aarch64_feature_v8_2a =
-  AARCH64_FEATURE (V8_2A);
 static const aarch64_feature_set aarch64_feature_fp_f16 =
   AARCH64_FEATURES (2, F16, FP);
 static const aarch64_feature_set aarch64_feature_simd_f16 =
   AARCH64_FEATURES (2, F16, SIMD);
 static const aarch64_feature_set aarch64_feature_sve =
   AARCH64_FEATURE (SVE);
-static const aarch64_feature_set aarch64_feature_v8_3a =
-  AARCH64_FEATURE (V8_3A);
-static const aarch64_feature_set aarch64_feature_fp_v8_3a =
-  AARCH64_FEATURES (2, V8_3A, FP);
 static const aarch64_feature_set aarch64_feature_pac =
   AARCH64_FEATURE (PAC);
 static const aarch64_feature_set aarch64_feature_compnum =
@@ -2530,16 +2524,12 @@ static const aarch64_feature_set aarch64_feature_sha2 =
   AARCH64_FEATURES (2, V8, SHA2);
 static const aarch64_feature_set aarch64_feature_aes =
   AARCH64_FEATURES (2, V8, AES);
-static const aarch64_feature_set aarch64_feature_v8_4a =
-  AARCH64_FEATURE (V8_4A);
 static const aarch64_feature_set aarch64_feature_sm4 =
   AARCH64_FEATURES (3, SM4, SIMD, FP);
 static const aarch64_feature_set aarch64_feature_sha3 =
   AARCH64_FEATURES (4, SHA2, SHA3, SIMD, FP);
 static const aarch64_feature_set aarch64_feature_fp_16_v8_2a =
   AARCH64_FEATURES (3, F16_FML, F16, FP);
-static const aarch64_feature_set aarch64_feature_v8_5a =
-  AARCH64_FEATURE (V8_5A);
 static const aarch64_feature_set aarch64_feature_flagmanip =
   AARCH64_FEATURE (FLAGMANIP);
 static const aarch64_feature_set aarch64_feature_frintts =
@@ -2580,10 +2570,6 @@ static const aarch64_feature_set aarch64_feature_sme2_i16i64 =
   AARCH64_FEATURES (2, SME2, SME_I16I64);
 static const aarch64_feature_set aarch64_feature_sme2_f64f64 =
   AARCH64_FEATURES (2, SME2, SME_F64F64);
-static const aarch64_feature_set aarch64_feature_v8_6a =
-  AARCH64_FEATURE (V8_6A);
-static const aarch64_feature_set aarch64_feature_v8_7a =
-  AARCH64_FEATURE (V8_7A);
 static const aarch64_feature_set aarch64_feature_i8mm =
   AARCH64_FEATURE (I8MM);
 static const aarch64_feature_set aarch64_feature_i8mm_sve =
@@ -2633,10 +2619,7 @@ static const aarch64_feature_set aarch64_feature_d128_the =
 #define RDMA		&aarch64_feature_rdma
 #define FP_F16		&aarch64_feature_fp_f16
 #define SIMD_F16	&aarch64_feature_simd_f16
-#define ARMV8_2A	&aarch64_feature_v8_2a
 #define SVE		&aarch64_feature_sve
-#define ARMV8_3A	&aarch64_feature_v8_3a
-#define FP_V8_3A	&aarch64_feature_fp_v8_3a
 #define PAC		&aarch64_feature_pac
 #define COMPNUM		&aarch64_feature_compnum
 #define JSCVT		&aarch64_feature_jscvt
@@ -2644,12 +2627,10 @@ static const aarch64_feature_set aarch64_feature_d128_the =
 #define RCPC2		&aarch64_feature_rcpc2
 #define SHA2		&aarch64_feature_sha2
 #define AES		&aarch64_feature_aes
-#define ARMV8_4A	&aarch64_feature_v8_4a
 #define SHA3		&aarch64_feature_sha3
 #define SM4		&aarch64_feature_sm4
 #define FP_F16_V8_2A	&aarch64_feature_fp_16_v8_2a
 #define DOTPROD		&aarch64_feature_dotprod
-#define ARMV8_5A	&aarch64_feature_v8_5a
 #define FLAGMANIP	&aarch64_feature_flagmanip
 #define FRINTTS		&aarch64_feature_frintts
 #define SB		&aarch64_feature_sb
@@ -2668,8 +2649,6 @@ static const aarch64_feature_set aarch64_feature_d128_the =
 #define SME2		&aarch64_feature_sme2
 #define SME2_I16I64	&aarch64_feature_sme2_i16i64
 #define SME2_F64F64	&aarch64_feature_sme2_f64f64
-#define ARMV8_6A		&aarch64_feature_v8_6a
-#define ARMV8_6A_SVE		&aarch64_feature_v8_6a
 #define BFLOAT16_SVE	&aarch64_feature_bfloat16_sve
 #define BFLOAT16	&aarch64_feature_bfloat16
 #define I8MM_SVE      &aarch64_feature_i8mm_sve
@@ -2677,7 +2656,6 @@ static const aarch64_feature_set aarch64_feature_d128_the =
 #define F64MM_SVE     &aarch64_feature_f64mm_sve
 #define I8MM      &aarch64_feature_i8mm
 #define ARMV8R	  &aarch64_feature_v8r
-#define ARMV8_7A  &aarch64_feature_v8_7a
 #define LS64	  &aarch64_feature_ls64
 #define FLAGM	  &aarch64_feature_flagm
 #define XS	  &aarch64_feature_xs
@@ -2715,16 +2693,12 @@ static const aarch64_feature_set aarch64_feature_d128_the =
   { NAME, OPCODE, MASK, CLASS, 0, FP_F16, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define SF16_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS)		\
   { NAME, OPCODE, MASK, CLASS, 0, SIMD_F16, OPS, QUALS, FLAGS, 0, 0, NULL }
-#define V8_2A_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, OP, ARMV8_2A, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _SVE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE, OPS, QUALS, \
     FLAGS | F_STRICT, 0, TIED, NULL }
 #define _SVE_INSNC(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,CONSTRAINTS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE, OPS, QUALS, \
     FLAGS | F_STRICT, CONSTRAINTS, TIED, NULL }
-#define V8_3A_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, 0, ARMV8_3A, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define PAC_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, PAC, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define CNUM_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
@@ -2739,8 +2713,6 @@ static const aarch64_feature_set aarch64_feature_d128_the =
   { NAME, OPCODE, MASK, CLASS, 0, SHA2, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define AES_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, AES, OPS, QUALS, FLAGS, 0, 0, NULL }
-#define V8_4A_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, 0, ARMV8_4A, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define SHA3_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, SHA3, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define SM4_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
@@ -2749,8 +2721,6 @@ static const aarch64_feature_set aarch64_feature_d128_the =
   { NAME, OPCODE, MASK, CLASS, 0, FP_F16_V8_2A, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define DOT_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, DOTPROD, OPS, QUALS, FLAGS, 0, 0, NULL }
-#define V8_5A_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, 0, ARMV8_5A, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define FLAGMANIP_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, FLAGMANIP, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define FRINTTS_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
@@ -2808,8 +2778,6 @@ static const aarch64_feature_set aarch64_feature_d128_the =
 #define SVE2BITPERM_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE2_BITPERM, OPS, QUALS, \
     FLAGS | F_STRICT, 0, TIED, NULL }
-#define V8_6A_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, 0, ARMV8_6A, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define BFLOAT16_SVE_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, BFLOAT16_SVE, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define BFLOAT16_SVE_INSNC(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS, CONSTRAINTS, TIED) \
@@ -2829,8 +2797,6 @@ static const aarch64_feature_set aarch64_feature_d128_the =
   { NAME, OPCODE, MASK, CLASS, 0, F32MM_SVE, OPS, QUALS, FLAGS, CONSTRAINTS, TIED, NULL }
 #define V8R_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, ARMV8R, OPS, QUALS, FLAGS, 0, 0, NULL }
-#define V8_7A_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
-  { NAME, OPCODE, MASK, CLASS, 0, ARMV8_7A, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define XS_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, XS, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define WFXT_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
