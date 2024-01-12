@@ -1,6 +1,6 @@
 /* Call site information.
 
-   Copyright (C) 2011-2023 Free Software Foundation, Inc.
+   Copyright (C) 2011-2024 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 

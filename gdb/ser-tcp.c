@@ -1,6 +1,6 @@
 /* Serial interface for raw TCP connections on Un*x like systems.
 
-   Copyright (C) 1992-2023 Free Software Foundation, Inc.
+   Copyright (C) 1992-2024 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

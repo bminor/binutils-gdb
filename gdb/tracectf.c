@@ -1,6 +1,6 @@
 /* CTF format support.
 
-   Copyright (C) 2012-2023 Free Software Foundation, Inc.
+   Copyright (C) 2012-2024 Free Software Foundation, Inc.
    Contributed by Hui Zhu <hui_zhu@mentor.com>
    Contributed by Yao Qi <yao@codesourcery.com>
 

@@ -1,5 +1,5 @@
 /* Native debugging support for Intel x86 running DJGPP.
-   Copyright (C) 1997-2023 Free Software Foundation, Inc.
+   Copyright (C) 1997-2024 Free Software Foundation, Inc.
    Written by Robert Hoehne.
 
    This file is part of GDB.

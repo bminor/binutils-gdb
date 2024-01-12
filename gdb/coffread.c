@@ -1,5 +1,5 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
-   Copyright (C) 1987-2023 Free Software Foundation, Inc.
+   Copyright (C) 1987-2024 Free Software Foundation, Inc.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
 
    This file is part of GDB.

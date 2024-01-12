@@ -1,6 +1,6 @@
 /* Basic C++ demangling support for GDB.
 
-   Copyright (C) 1991-2023 Free Software Foundation, Inc.
+   Copyright (C) 1991-2024 Free Software Foundation, Inc.
 
    Written by Fred Fish at Cygnus Support.
 

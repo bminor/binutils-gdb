@@ -1,7 +1,7 @@
 /* Target-dependent code for the Texas Instruments MSP430 for GDB, the
    GNU debugger.
 
-   Copyright (C) 2012-2023 Free Software Foundation, Inc.
+   Copyright (C) 2012-2024 Free Software Foundation, Inc.
 
    Contributed by Red Hat, Inc.
 

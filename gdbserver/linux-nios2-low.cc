@@ -1,6 +1,6 @@
 /* GNU/Linux/Nios II specific low level interface, for the remote server for
    GDB.
-   Copyright (C) 2008-2023 Free Software Foundation, Inc.
+   Copyright (C) 2008-2024 Free Software Foundation, Inc.
 
    Contributed by Mentor Graphics, Inc.
 

@@ -1,6 +1,6 @@
 /* Select target systems and architectures at runtime for GDB.
 
-   Copyright (C) 1990-2023 Free Software Foundation, Inc.
+   Copyright (C) 1990-2024 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 

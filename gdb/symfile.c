@@ -1,6 +1,6 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
 
-   Copyright (C) 1990-2023 Free Software Foundation, Inc.
+   Copyright (C) 1990-2024 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 

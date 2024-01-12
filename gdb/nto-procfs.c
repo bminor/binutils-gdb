@@ -1,7 +1,7 @@
 /* Machine independent support for QNX Neutrino /proc (process file system)
    for GDB.  Written by Colin Burgess at QNX Software Systems Limited.
 
-   Copyright (C) 2003-2023 Free Software Foundation, Inc.
+   Copyright (C) 2003-2024 Free Software Foundation, Inc.
 
    Contributed by QNX Software Systems Ltd.
 

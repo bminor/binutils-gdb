@@ -1,6 +1,6 @@
 /* Thumb-2 IT blocks test program.
 
-   Copyright 2010-2023 Free Software Foundation, Inc.
+   Copyright 2010-2024 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

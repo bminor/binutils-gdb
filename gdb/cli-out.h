@@ -1,5 +1,5 @@
 /* Output generating routines for GDB CLI.
-   Copyright (C) 1999-2023 Free Software Foundation, Inc.
+   Copyright (C) 1999-2024 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
    This file is part of GDB.

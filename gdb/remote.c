@@ -1,6 +1,6 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
 
-   Copyright (C) 1988-2023 Free Software Foundation, Inc.
+   Copyright (C) 1988-2024 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

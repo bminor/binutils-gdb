@@ -1,6 +1,6 @@
 /* Target-machine dependent code for Renesas H8/300, for GDB.
 
-   Copyright (C) 1988-2023 Free Software Foundation, Inc.
+   Copyright (C) 1988-2024 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

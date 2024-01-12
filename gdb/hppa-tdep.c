@@ -1,6 +1,6 @@
 /* Target-dependent code for the HP PA-RISC architecture.
 
-   Copyright (C) 1986-2023 Free Software Foundation, Inc.
+   Copyright (C) 1986-2024 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).

@@ -1,6 +1,6 @@
 /* Target-dependent code for Atmel AVR, for GDB.
 
-   Copyright (C) 1996-2023 Free Software Foundation, Inc.
+   Copyright (C) 1996-2024 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

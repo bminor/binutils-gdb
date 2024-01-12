@@ -1,6 +1,6 @@
 /* Generate a core file for the inferior process.
 
-   Copyright (C) 2001-2023 Free Software Foundation, Inc.
+   Copyright (C) 2001-2024 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,5 +1,5 @@
 /* GDB routines for manipulating the minimal symbol tables.
-   Copyright (C) 1992-2023 Free Software Foundation, Inc.
+   Copyright (C) 1992-2024 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.

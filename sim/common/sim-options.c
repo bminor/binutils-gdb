@@ -1,5 +1,5 @@
 /* Simulator option handling.
-   Copyright (C) 1996-2023 Free Software Foundation, Inc.
+   Copyright (C) 1996-2024 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -983,7 +983,7 @@ sim_print_version (SIM_DESC sd, int is_command)
 {
   sim_io_printf (sd, "GNU simulator %s%s\n", PKGVERSION, version);
 
-  sim_io_printf (sd, "Copyright (C) 2023 Free Software Foundation, Inc.\n");
+  sim_io_printf (sd, "Copyright (C) 2024 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on

@@ -1,6 +1,6 @@
 /* Core dump and executable file functions above target vector, for GDB.
 
-   Copyright (C) 1986-2023 Free Software Foundation, Inc.
+   Copyright (C) 1986-2024 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

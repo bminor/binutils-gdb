@@ -1,6 +1,6 @@
 /* RAII type to create a temporary mock context.
 
-   Copyright (C) 2020-2023 Free Software Foundation, Inc.
+   Copyright (C) 2020-2024 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
