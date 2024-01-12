@@ -4300,7 +4300,7 @@ static void establish_rex (void)
 	}
     }
 
-   if (i.rex == 0 && i.rex2 == 0 && (i.rex_encoding || i.rex2_encoding))
+  if (i.rex == 0 && i.rex2 == 0 && (i.rex_encoding || i.rex2_encoding))
     {
       /* Check if we can add a REX_OPCODE byte.  Look for 8 bit operand
 	 that uses legacy register.  If it is "hi" register, don't add
@@ -4323,14 +4323,14 @@ static void establish_rex (void)
 	i.rex = REX_OPCODE;
     }
 
-   if (is_apx_rex2_encoding ())
-     {
-       build_rex2_prefix ();
-       /* The individual REX.RXBW bits got consumed.  */
-       i.rex &= REX_OPCODE;
-     }
-   else if (i.rex != 0)
-     add_prefix (REX_OPCODE | i.rex);
+  if (is_apx_rex2_encoding ())
+    {
+      build_rex2_prefix ();
+      /* The individual REX.RXBW bits got consumed.  */
+      i.rex &= REX_OPCODE;
+    }
+  else if (i.rex != 0)
+    add_prefix (REX_OPCODE | i.rex);
 }
 
 static void
@@ -7197,7 +7197,7 @@ static bool
 check_EgprOperands (const insn_template *t)
 {
   if (!t->opcode_modifier.noegpr)
-    return 0;
+    return false;
 
   for (unsigned int op = 0; op < i.operands; op++)
     {
@@ -7207,7 +7207,7 @@ check_EgprOperands (const insn_template *t)
       if (i.op[op].regs->reg_flags & RegRex2)
 	{
 	  i.error = register_type_mismatch;
-	  return 1;
+	  return true;
 	}
     }
 
@@ -7215,17 +7215,17 @@ check_EgprOperands (const insn_template *t)
       || (i.base_reg && (i.base_reg->reg_flags & RegRex2)))
     {
       i.error = unsupported_EGPR_for_addressing;
-      return 1;
+      return true;
     }
 
   /* Check if pseudo prefix {rex2} is valid.  */
   if (i.rex2_encoding)
     {
       i.error = invalid_pseudo_prefix;
-      return 1;
+      return true;
     }
 
-  return 0;
+  return false;
 }
 
 /* Check if APX operands are valid for the instruction.  */
