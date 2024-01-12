@@ -19,9 +19,7 @@
 
 # This test uses a hard-coded x86-64 DWARF register number, so restrict it to
 # x86-64.
-if { ![is_x86_64_m64_target] } {
-    unsupported "unsupported architecture"
-}
+require is_x86_64_m64_target
 
 load_lib dwarf.exp
 
