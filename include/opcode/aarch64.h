@@ -97,6 +97,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SVE,
   /* RCPC instructions.  */
   AARCH64_FEATURE_RCPC,
+  /* RCPC2 instructions.  */
+  AARCH64_FEATURE_RCPC2,
   /* Complex # instructions.  */
   AARCH64_FEATURE_COMPNUM,
   /* JavaScript conversion instructions.  */
@@ -251,6 +253,7 @@ enum aarch64_feature_bit {
 					 | AARCH64_FEATBIT (X, COMPNUM) \
 					 | AARCH64_FEATBIT (X, JSCVT))
 #define AARCH64_ARCH_V8_4A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_4A)	\
+					 | AARCH64_FEATBIT (X, RCPC2)	\
 					 | AARCH64_FEATBIT (X, DOTPROD)	\
 					 | AARCH64_FEATBIT (X, FLAGM)	\
 					 | AARCH64_FEATBIT (X, F16_FML))

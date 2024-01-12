@@ -2522,6 +2522,8 @@ static const aarch64_feature_set aarch64_feature_jscvt =
   AARCH64_FEATURE (JSCVT);
 static const aarch64_feature_set aarch64_feature_rcpc =
   AARCH64_FEATURE (RCPC);
+static const aarch64_feature_set aarch64_feature_rcpc2 =
+  AARCH64_FEATURE (RCPC2);
 static const aarch64_feature_set aarch64_feature_dotprod =
   AARCH64_FEATURE (DOTPROD);
 static const aarch64_feature_set aarch64_feature_sha2 =
@@ -2635,6 +2637,7 @@ static const aarch64_feature_set aarch64_feature_d128_the =
 #define COMPNUM		&aarch64_feature_compnum
 #define JSCVT		&aarch64_feature_jscvt
 #define RCPC		&aarch64_feature_rcpc
+#define RCPC2		&aarch64_feature_rcpc2
 #define SHA2		&aarch64_feature_sha2
 #define AES		&aarch64_feature_aes
 #define ARMV8_4A	&aarch64_feature_v8_4a
@@ -2724,6 +2727,8 @@ static const aarch64_feature_set aarch64_feature_d128_the =
   { NAME, OPCODE, MASK, CLASS, 0, JSCVT, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define RCPC_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, RCPC, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define RCPC2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, RCPC2, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define SHA2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, SHA2, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define AES_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
@@ -6040,19 +6045,19 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   FLAGM_INSN ("setf8",  0x3a00080d, 0xfffffc1f, ic_system, OP1 (Rn), QL_SETF, 0),
   FLAGM_INSN ("setf16", 0x3a00480d, 0xfffffc1f, ic_system, OP1 (Rn), QL_SETF, 0),
   /* Memory access instructions ARMv8.4-a.  */
-  V8_4A_INSN ("stlurb" ,  0x19000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
-  V8_4A_INSN ("ldapurb",  0x19400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
-  V8_4A_INSN ("ldapursb", 0x19c00000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
-  V8_4A_INSN ("ldapursb", 0x19800000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
-  V8_4A_INSN ("stlurh",   0x59000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
-  V8_4A_INSN ("ldapurh",  0x59400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
-  V8_4A_INSN ("ldapursh", 0x59c00000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
-  V8_4A_INSN ("ldapursh", 0x59800000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
-  V8_4A_INSN ("stlur",    0x99000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
-  V8_4A_INSN ("ldapur",   0x99400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
-  V8_4A_INSN ("ldapursw", 0x99800000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
-  V8_4A_INSN ("stlur",    0xd9000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
-  V8_4A_INSN ("ldapur",   0xd9400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
+  RCPC2_INSN ("stlurb" ,  0x19000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  RCPC2_INSN ("ldapurb",  0x19400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  RCPC2_INSN ("ldapursb", 0x19c00000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  RCPC2_INSN ("ldapursb", 0x19800000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
+  RCPC2_INSN ("stlurh",   0x59000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  RCPC2_INSN ("ldapurh",  0x59400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  RCPC2_INSN ("ldapursh", 0x59c00000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  RCPC2_INSN ("ldapursh", 0x59800000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
+  RCPC2_INSN ("stlur",    0x99000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  RCPC2_INSN ("ldapur",   0x99400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
+  RCPC2_INSN ("ldapursw", 0x99800000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
+  RCPC2_INSN ("stlur",    0xd9000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
+  RCPC2_INSN ("ldapur",   0xd9400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
 
   /* Matrix Multiply instructions.  */
   INT8MATMUL_SVE_INSNC ("smmla",  0x45009800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SBB, 0, C_SCAN_MOVPRFX, 0),

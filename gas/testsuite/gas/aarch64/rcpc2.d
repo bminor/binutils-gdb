@@ -1,4 +1,4 @@
-#as: -march=armv8.4-a
+#as: -march=armv8-a+rcpc2
 #objdump: -dr
 
 .*:     file format .*
@@ -6,122 +6,6 @@
 Disassembly of section \.text:
 
 0+ <.*>:
-[^:]+:\s+ba000443 	rmif	x2, #0, #3
-[^:]+:\s+ba00044b 	rmif	x2, #0, #11
-[^:]+:\s+ba00044f 	rmif	x2, #0, #15
-[^:]+:\s+ba040443 	rmif	x2, #8, #3
-[^:]+:\s+ba04044b 	rmif	x2, #8, #11
-[^:]+:\s+ba04044f 	rmif	x2, #8, #15
-[^:]+:\s+ba060443 	rmif	x2, #12, #3
-[^:]+:\s+ba06044b 	rmif	x2, #12, #11
-[^:]+:\s+ba06044f 	rmif	x2, #12, #15
-[^:]+:\s+ba0005e3 	rmif	x15, #0, #3
-[^:]+:\s+ba0005eb 	rmif	x15, #0, #11
-[^:]+:\s+ba0005ef 	rmif	x15, #0, #15
-[^:]+:\s+ba0405e3 	rmif	x15, #8, #3
-[^:]+:\s+ba0405eb 	rmif	x15, #8, #11
-[^:]+:\s+ba0405ef 	rmif	x15, #8, #15
-[^:]+:\s+ba0605e3 	rmif	x15, #12, #3
-[^:]+:\s+ba0605eb 	rmif	x15, #12, #11
-[^:]+:\s+ba0605ef 	rmif	x15, #12, #15
-[^:]+:\s+ba0007c3 	rmif	x30, #0, #3
-[^:]+:\s+ba0007cb 	rmif	x30, #0, #11
-[^:]+:\s+ba0007cf 	rmif	x30, #0, #15
-[^:]+:\s+ba0407c3 	rmif	x30, #8, #3
-[^:]+:\s+ba0407cb 	rmif	x30, #8, #11
-[^:]+:\s+ba0407cf 	rmif	x30, #8, #15
-[^:]+:\s+ba0607c3 	rmif	x30, #12, #3
-[^:]+:\s+ba0607cb 	rmif	x30, #12, #11
-[^:]+:\s+ba0607cf 	rmif	x30, #12, #15
-[^:]+:\s+ba000443 	rmif	x2, #0, #3
-[^:]+:\s+ba00044b 	rmif	x2, #0, #11
-[^:]+:\s+ba00044f 	rmif	x2, #0, #15
-[^:]+:\s+ba040443 	rmif	x2, #8, #3
-[^:]+:\s+ba04044b 	rmif	x2, #8, #11
-[^:]+:\s+ba04044f 	rmif	x2, #8, #15
-[^:]+:\s+ba060443 	rmif	x2, #12, #3
-[^:]+:\s+ba06044b 	rmif	x2, #12, #11
-[^:]+:\s+ba06044f 	rmif	x2, #12, #15
-[^:]+:\s+ba0005e3 	rmif	x15, #0, #3
-[^:]+:\s+ba0005eb 	rmif	x15, #0, #11
-[^:]+:\s+ba0005ef 	rmif	x15, #0, #15
-[^:]+:\s+ba0405e3 	rmif	x15, #8, #3
-[^:]+:\s+ba0405eb 	rmif	x15, #8, #11
-[^:]+:\s+ba0405ef 	rmif	x15, #8, #15
-[^:]+:\s+ba0605e3 	rmif	x15, #12, #3
-[^:]+:\s+ba0605eb 	rmif	x15, #12, #11
-[^:]+:\s+ba0605ef 	rmif	x15, #12, #15
-[^:]+:\s+ba0007c3 	rmif	x30, #0, #3
-[^:]+:\s+ba0007cb 	rmif	x30, #0, #11
-[^:]+:\s+ba0007cf 	rmif	x30, #0, #15
-[^:]+:\s+ba0407c3 	rmif	x30, #8, #3
-[^:]+:\s+ba0407cb 	rmif	x30, #8, #11
-[^:]+:\s+ba0407cf 	rmif	x30, #8, #15
-[^:]+:\s+ba0607c3 	rmif	x30, #12, #3
-[^:]+:\s+ba0607cb 	rmif	x30, #12, #11
-[^:]+:\s+ba0607cf 	rmif	x30, #12, #15
-[^:]+:\s+ba000443 	rmif	x2, #0, #3
-[^:]+:\s+ba00044b 	rmif	x2, #0, #11
-[^:]+:\s+ba00044f 	rmif	x2, #0, #15
-[^:]+:\s+ba040443 	rmif	x2, #8, #3
-[^:]+:\s+ba04044b 	rmif	x2, #8, #11
-[^:]+:\s+ba04044f 	rmif	x2, #8, #15
-[^:]+:\s+ba060443 	rmif	x2, #12, #3
-[^:]+:\s+ba06044b 	rmif	x2, #12, #11
-[^:]+:\s+ba06044f 	rmif	x2, #12, #15
-[^:]+:\s+ba0005e3 	rmif	x15, #0, #3
-[^:]+:\s+ba0005eb 	rmif	x15, #0, #11
-[^:]+:\s+ba0005ef 	rmif	x15, #0, #15
-[^:]+:\s+ba0405e3 	rmif	x15, #8, #3
-[^:]+:\s+ba0405eb 	rmif	x15, #8, #11
-[^:]+:\s+ba0405ef 	rmif	x15, #8, #15
-[^:]+:\s+ba0605e3 	rmif	x15, #12, #3
-[^:]+:\s+ba0605eb 	rmif	x15, #12, #11
-[^:]+:\s+ba0605ef 	rmif	x15, #12, #15
-[^:]+:\s+ba0007c3 	rmif	x30, #0, #3
-[^:]+:\s+ba0007cb 	rmif	x30, #0, #11
-[^:]+:\s+ba0007cf 	rmif	x30, #0, #15
-[^:]+:\s+ba0407c3 	rmif	x30, #8, #3
-[^:]+:\s+ba0407cb 	rmif	x30, #8, #11
-[^:]+:\s+ba0407cf 	rmif	x30, #8, #15
-[^:]+:\s+ba0607c3 	rmif	x30, #12, #3
-[^:]+:\s+ba0607cb 	rmif	x30, #12, #11
-[^:]+:\s+ba0607cf 	rmif	x30, #12, #15
-[^:]+:\s+ba000443 	rmif	x2, #0, #3
-[^:]+:\s+ba00044b 	rmif	x2, #0, #11
-[^:]+:\s+ba00044f 	rmif	x2, #0, #15
-[^:]+:\s+ba040443 	rmif	x2, #8, #3
-[^:]+:\s+ba04044b 	rmif	x2, #8, #11
-[^:]+:\s+ba04044f 	rmif	x2, #8, #15
-[^:]+:\s+ba060443 	rmif	x2, #12, #3
-[^:]+:\s+ba06044b 	rmif	x2, #12, #11
-[^:]+:\s+ba06044f 	rmif	x2, #12, #15
-[^:]+:\s+ba0005e3 	rmif	x15, #0, #3
-[^:]+:\s+ba0005eb 	rmif	x15, #0, #11
-[^:]+:\s+ba0005ef 	rmif	x15, #0, #15
-[^:]+:\s+ba0405e3 	rmif	x15, #8, #3
-[^:]+:\s+ba0405eb 	rmif	x15, #8, #11
-[^:]+:\s+ba0405ef 	rmif	x15, #8, #15
-[^:]+:\s+ba0605e3 	rmif	x15, #12, #3
-[^:]+:\s+ba0605eb 	rmif	x15, #12, #11
-[^:]+:\s+ba0605ef 	rmif	x15, #12, #15
-[^:]+:\s+ba0007c3 	rmif	x30, #0, #3
-[^:]+:\s+ba0007cb 	rmif	x30, #0, #11
-[^:]+:\s+ba0007cf 	rmif	x30, #0, #15
-[^:]+:\s+ba0407c3 	rmif	x30, #8, #3
-[^:]+:\s+ba0407cb 	rmif	x30, #8, #11
-[^:]+:\s+ba0407cf 	rmif	x30, #8, #15
-[^:]+:\s+ba0607c3 	rmif	x30, #12, #3
-[^:]+:\s+ba0607cb 	rmif	x30, #12, #11
-[^:]+:\s+ba0607cf 	rmif	x30, #12, #15
-[^:]+:\s+3a00080d 	setf8	w0
-[^:]+:\s+3a0008ed 	setf8	w7
-[^:]+:\s+3a000a0d 	setf8	w16
-[^:]+:\s+3a000bcd 	setf8	w30
-[^:]+:\s+3a00480d 	setf16	w0
-[^:]+:\s+3a0048ed 	setf16	w7
-[^:]+:\s+3a004a0d 	setf16	w16
-[^:]+:\s+3a004bcd 	setf16	w30
 [^:]+:\s+19000060 	stlurb	w0, \[x3\]
 [^:]+:\s+19000160 	stlurb	w0, \[x11\]
 [^:]+:\s+190001e0 	stlurb	w0, \[x15\]
@@ -2202,4 +2086,3 @@ Disassembly of section \.text:
 [^:]+:\s+998033fe 	ldapursw	x30, \[sp, #3\]
 [^:]+:\s+998523fe 	ldapursw	x30, \[sp, #82\]
 [^:]+:\s+9980d3fe 	ldapursw	x30, \[sp, #13\]
-[^:]+:\s+d500401f 	cfinv
