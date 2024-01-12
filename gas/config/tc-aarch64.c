@@ -10274,6 +10274,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"lor",		AARCH64_FEATURE (LOR), AARCH64_NO_FEATURES},
   {"ras",		AARCH64_FEATURE (RAS), AARCH64_NO_FEATURES},
   {"rdma",		AARCH64_FEATURE (RDMA), AARCH64_FEATURE (SIMD)},
+  {"rdm",		AARCH64_FEATURE (RDMA), AARCH64_FEATURE (SIMD)},
   {"fp16",		AARCH64_FEATURE (F16), AARCH64_FEATURE (FP)},
   {"fp16fml",		AARCH64_FEATURE (F16_FML), AARCH64_FEATURE (F16)},
   {"profile",		AARCH64_FEATURE (PROFILE), AARCH64_NO_FEATURES},
@@ -10438,7 +10439,8 @@ aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
       gas_assert (adding_value != -1);
 
       for (opt = aarch64_features; opt->name != NULL; opt++)
-	if (strncmp (opt->name, str, optlen) == 0)
+	if (optlen == (int) strlen(opt->name)
+	    && strncmp (opt->name, str, optlen) == 0)
 	  {
 	    aarch64_feature_set set;
 
