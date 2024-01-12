@@ -10284,6 +10284,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 			AARCH64_FEATURES (2, F16, SIMD)},
   {"compnum",		AARCH64_FEATURE (COMPNUM),
 			AARCH64_FEATURES (2, F16, SIMD)},
+  {"jscvt",		AARCH64_FEATURE (JSCVT), AARCH64_FEATURE (FP)},
   {"rcpc",		AARCH64_FEATURE (RCPC), AARCH64_NO_FEATURES},
   {"dotprod",		AARCH64_FEATURE (DOTPROD), AARCH64_FEATURE (SIMD)},
   {"sha2",		AARCH64_FEATURE (SHA2), AARCH64_FEATURE (FP)},

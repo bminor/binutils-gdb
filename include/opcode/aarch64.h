@@ -99,6 +99,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_RCPC,
   /* Complex # instructions.  */
   AARCH64_FEATURE_COMPNUM,
+  /* JavaScript conversion instructions.  */
+  AARCH64_FEATURE_JSCVT,
   /* Dot Product instructions.  */
   AARCH64_FEATURE_DOTPROD,
   /* SM3 & SM4 instructions.  */
@@ -246,7 +248,8 @@ enum aarch64_feature_bit {
 #define AARCH64_ARCH_V8_3A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_3A)	\
 					 | AARCH64_FEATBIT (X, PAC)	\
 					 | AARCH64_FEATBIT (X, RCPC)	\
-					 | AARCH64_FEATBIT (X, COMPNUM))
+					 | AARCH64_FEATBIT (X, COMPNUM) \
+					 | AARCH64_FEATBIT (X, JSCVT))
 #define AARCH64_ARCH_V8_4A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_4A)	\
 					 | AARCH64_FEATBIT (X, DOTPROD)	\
 					 | AARCH64_FEATBIT (X, FLAGM)	\

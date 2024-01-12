@@ -2518,6 +2518,8 @@ static const aarch64_feature_set aarch64_feature_pac =
   AARCH64_FEATURE (PAC);
 static const aarch64_feature_set aarch64_feature_compnum =
   AARCH64_FEATURE (COMPNUM);
+static const aarch64_feature_set aarch64_feature_jscvt =
+  AARCH64_FEATURE (JSCVT);
 static const aarch64_feature_set aarch64_feature_rcpc =
   AARCH64_FEATURE (RCPC);
 static const aarch64_feature_set aarch64_feature_dotprod =
@@ -2631,6 +2633,7 @@ static const aarch64_feature_set aarch64_feature_d128_the =
 #define FP_V8_3A	&aarch64_feature_fp_v8_3a
 #define PAC		&aarch64_feature_pac
 #define COMPNUM		&aarch64_feature_compnum
+#define JSCVT		&aarch64_feature_jscvt
 #define RCPC		&aarch64_feature_rcpc
 #define SHA2		&aarch64_feature_sha2
 #define AES		&aarch64_feature_aes
@@ -2717,6 +2720,8 @@ static const aarch64_feature_set aarch64_feature_d128_the =
   { NAME, OPCODE, MASK, CLASS, 0, PAC, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define CNUM_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, COMPNUM, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define JSCVT_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, JSCVT, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define RCPC_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, RCPC, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define SHA2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
@@ -3741,7 +3746,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   FF16_INSN ("fcvtzu",0x1ef90000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
   __FP_INSN ("fmov",  0x9eae0000, 0xfffffc00, float2int, 0, OP2 (Rd, VnD1), QL_XVD1, 0),
   __FP_INSN ("fmov",  0x9eaf0000, 0xfffffc00, float2int, 0, OP2 (VdD1, Rn), QL_VD1X, 0),
-  {"fjcvtzs", 0x1e7e0000, 0xfffffc00, float2int, 0, FP_V8_3A, OP2 (Rd, Fn), QL_FP2INT_W_D, 0, 0, 0, NULL },
+  JSCVT_INSN ("fjcvtzs", 0x1e7e0000, 0xfffffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_W_D, 0),
   /* Floating-point conditional compare.  */
   __FP_INSN ("fccmp", 0x1e200400, 0xff200c10, floatccmp, 0, OP4 (Fn, Fm, NZCV, COND), QL_FCCMP, F_FPTYPE),
   FF16_INSN ("fccmp", 0x1ee00400, 0xff200c10, floatccmp, OP4 (Fn, Fm, NZCV, COND), QL_FCCMP_H, F_FPTYPE),
