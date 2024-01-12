@@ -1,4 +1,5 @@
 #as: --gsframe
+#warning: skipping SFrame FDE due to DWARF CFI op 0xe
 #objdump: --sframe=.sframe
 #name: SFrame supports only FP/SP based CFA
 #...

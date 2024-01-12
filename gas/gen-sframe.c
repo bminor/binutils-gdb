@@ -1247,24 +1247,32 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
     case DW_CFA_GNU_window_save:
       err = sframe_xlate_do_gnu_window_save (xlate_ctx, cfi_insn);
       break;
+    /* Other CFI opcodes are not processed at this time.
+       These do not impact the coverage of the basic stack tracing
+       information as conveyed in the SFrame format.
+	- DW_CFA_register,
+	- etc.  */
+    case DW_CFA_register:
+      if (cfi_insn->u.rr.reg1 == SFRAME_CFA_SP_REG
+#ifdef SFRAME_FRE_RA_TRACKING
+	  || cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG
+#endif
+	  || cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
+	err = SFRAME_XLATE_ERR_NOTREPRESENTED;
+      break;
     case DW_CFA_undefined:
     case DW_CFA_same_value:
       break;
     default:
-      {
-	/* Other CFI opcodes are not processed at this time.
-	   These do not impact the coverage of the basic stack tracing
-	   information as conveyed in the SFrame format.
-	    - DW_CFA_register,
-	    - ...
-
-	   Following skipped operations do, however, impact the asynchronicity:
-	     - CFI_escape  */
-
-	err = SFRAME_XLATE_ERR_NOTREPRESENTED;
-	// printf (_("SFrame Unsupported or unknown Dwarf CFI number: %#x\n"), op);
-      }
+      /* Following skipped operations do, however, impact the asynchronicity:
+	  - CFI_escape.  */
+      err = SFRAME_XLATE_ERR_NOTREPRESENTED;
     }
+
+  /* An error here will cause no SFrame FDE later.  Warn the user because this
+     will affect the overall coverage and hence, asynchronicity.  */
+  if (err)
+    as_warn (_("skipping SFrame FDE due to DWARF CFI op %#x"), op);
 
   return err;
 }
