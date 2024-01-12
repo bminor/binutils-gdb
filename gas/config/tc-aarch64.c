@@ -10279,6 +10279,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"profile",		AARCH64_FEATURE (PROFILE), AARCH64_NO_FEATURES},
   {"sve",		AARCH64_FEATURE (SVE), AARCH64_FEATURE (COMPNUM)},
   {"tme",		AARCH64_FEATURE (TME), AARCH64_NO_FEATURES},
+  {"fcma",		AARCH64_FEATURE (COMPNUM),
+			AARCH64_FEATURES (2, F16, SIMD)},
   {"compnum",		AARCH64_FEATURE (COMPNUM),
 			AARCH64_FEATURES (2, F16, SIMD)},
   {"rcpc",		AARCH64_FEATURE (RCPC), AARCH64_NO_FEATURES},
