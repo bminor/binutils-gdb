@@ -35,6 +35,7 @@
 #include "dwarf2/read.h"
 #include "dwarf2/tag.h"
 #include "dwarf2/abbrev-cache.h"
+#include "dwarf2/parent-map.h"
 #include "gdbsupport/range-chain.h"
 #include "gdbsupport/task-group.h"
 #include "complaints.h"
@@ -72,7 +73,7 @@ DEF_ENUM_FLAGS_TYPE (enum cooked_index_flag_enum, cooked_index_flag);
 
 union cooked_index_entry_ref
 {
-  cooked_index_entry_ref (CORE_ADDR deferred_)
+  cooked_index_entry_ref (parent_map::addr_type deferred_)
   {
     deferred = deferred_;
   }
@@ -83,7 +84,7 @@ union cooked_index_entry_ref
   }
 
   const cooked_index_entry *resolved;
-  CORE_ADDR deferred;
+  parent_map::addr_type deferred;
 };
 
 /* Return a string representation of FLAGS.  */
@@ -221,7 +222,7 @@ struct cooked_index_entry : public allocate_on_obstack<cooked_index_entry>
   }
 
   /* Return deferred parent entry.  */
-  CORE_ADDR get_deferred_parent () const
+  parent_map::addr_type get_deferred_parent () const
   {
     gdb_assert ((flags & IS_PARENT_DEFERRED) != 0);
     return m_parent_entry.deferred;
