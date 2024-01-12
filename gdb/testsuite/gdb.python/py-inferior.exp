@@ -94,27 +94,33 @@ gdb_test "python print(i0._user_attr)" \
 gdb_test "python print(gdb.inferiors()\[0\]._user_attr)" \
     "123" "read back user defined attribute from gdb.inferiors"
 
+# Record the main thread, and check its __repr__ while we're at it.
+gdb_test_no_output "python main_thread = gdb.inferiors()\[0\].threads()\[0\]"
+gdb_test "python print(main_thread)" \
+    "<gdb.InferiorThread id=${decimal}\\.${decimal} target-id=\"\[^\r\n\]*\">" \
+
 # Test the number of inferior threads.
 
 gdb_breakpoint check_threads
 gdb_continue_to_breakpoint "cont to check_threads" ".*pthread_barrier_wait.*"
 gdb_test "python print (len (i0.threads ()))" "\r\n9" "test Inferior.threads 2"
 
-# Grab the last thread from the list.  This thread object will become
-# invalid when the corresponding thread exits.
-gdb_test_no_output "python last_thread = i0.threads()\[-1\]"
-gdb_test "python print(last_thread)" \
+# Grab a worker thread from the thread list.  A worker thread is the
+# first thread that is not the main thread.  The worker thread object
+# will become invalid when the corresponding thread exits.
+gdb_test_no_output "python worker_thread = next(filter(lambda thr : thr != main_thread, i0.threads()))"
+gdb_test "python print(worker_thread)" \
     "<gdb.InferiorThread id=${decimal}\\.${decimal} target-id=\"\[^\r\n\]*\">" \
     "test repr of a valid thread"
 
-# Add a user defined attribute to this thread, check the attribute can
-# be read back, and check the attribute is not present on other
-# threads.
-gdb_test_no_output "python last_thread._user_attribute = 123" \
+# Add a user defined attribute to the worker thread, check the
+# attribute can be read back, and check the attribute is not present
+# on the main thread.
+gdb_test_no_output "python worker_thread._user_attribute = 123" \
     "add user defined attribute to InferiorThread object"
-gdb_test "python print(last_thread._user_attribute)" "123" \
+gdb_test "python print(worker_thread._user_attribute)" "123" \
     "read back user defined attribute"
-gdb_test "python print(i0.threads ()\[0\]._user_attribute)" \
+gdb_test "python print(main_thread._user_attribute)" \
     [multi_line \
 	 "AttributeError: 'gdb\\.InferiorThread' object has no attribute '_user_attribute'" \
 	 "Error while executing Python code\\."] \
@@ -126,12 +132,11 @@ gdb_breakpoint [gdb_get_line_number "Break here."]
 gdb_continue_to_breakpoint "cont to Break here." ".*Break here\..*"
 
 # Check the repr() for an invalid gdb.InferiorThread object.
-gdb_test "python print(last_thread)" \
-    "<gdb.InferiorThread \\(invalid\\)>" \
+gdb_test "python print(worker_thread)" "<gdb.InferiorThread \\(invalid\\)>" \
     "test repr of an invalid thread"
 
 # Check the user defined attribute is still present on the invalid thread object.
-gdb_test "python print(last_thread._user_attribute)" "123" \
+gdb_test "python print(worker_thread._user_attribute)" "123" \
     "check user defined attribute on an invalid InferiorThread object"
 
 # Test memory read and write operations.
