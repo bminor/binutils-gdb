@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <string.h>
 #include <unistd.h>
 
-void
+static void
 gen_struct (void)
 {
   printf ("\n");
@@ -44,7 +44,7 @@ gen_struct (void)
 }
 
 
-void
+static void
 gen_bit (int bitsize,
 	 int msb,
 	 const char *macro,
@@ -79,7 +79,7 @@ gen_bit (int bitsize,
 }
 
 
-void
+static void
 gen_enum (const char *macro,
 	  int nr_bits)
 {
@@ -96,7 +96,7 @@ gen_enum (const char *macro,
 }
 
 
-void
+static void
 gen_mask (int bitsize,
 	  const char *msb,
 	  const char *macro,
@@ -160,7 +160,7 @@ gen_mask (int bitsize,
 }
 
 
-void
+static void
 usage (int reason)
 {
   fprintf (stderr, "Usage:\n");
