@@ -32,6 +32,10 @@
 #include "i18n.h"
 #include "debug.h"
 
+#ifndef O_LARGEFILE
+#define O_LARGEFILE 0
+#endif
+
 #define SWAP_ENDIAN(x)  swapByteOrder((void *) (&(x)), sizeof(x))
 #define AppendString(len, arr, ...) len += snprintf(arr + len, sizeof(arr) - len, __VA_ARGS__)
 #define ARR_SIZE(x)     (sizeof (x) / sizeof (*(x)))
