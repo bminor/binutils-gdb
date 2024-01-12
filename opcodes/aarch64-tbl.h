@@ -2598,6 +2598,8 @@ static const aarch64_feature_set aarch64_feature_ls64 =
   AARCH64_FEATURE (LS64);
 static const aarch64_feature_set aarch64_feature_flagm =
   AARCH64_FEATURE (FLAGM);
+static const aarch64_feature_set aarch64_feature_xs =
+  AARCH64_FEATURE (XS);
 static const aarch64_feature_set aarch64_feature_wfxt =
   AARCH64_FEATURE (WFXT);
 static const aarch64_feature_set aarch64_feature_mops =
@@ -2678,6 +2680,7 @@ static const aarch64_feature_set aarch64_feature_d128_the =
 #define ARMV8_7A  &aarch64_feature_v8_7a
 #define LS64	  &aarch64_feature_ls64
 #define FLAGM	  &aarch64_feature_flagm
+#define XS	  &aarch64_feature_xs
 #define WFXT	  &aarch64_feature_wfxt
 #define MOPS	  &aarch64_feature_mops
 #define MOPS_MEMTAG &aarch64_feature_mops_memtag
@@ -2828,6 +2831,8 @@ static const aarch64_feature_set aarch64_feature_d128_the =
   { NAME, OPCODE, MASK, CLASS, 0, ARMV8R, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define V8_7A_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, ARMV8_7A, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define XS_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, XS, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define WFXT_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, WFXT, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _LS64_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
@@ -4225,7 +4230,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("clearbhb", 0xd50322df, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("clrex", 0xd503305f, 0xfffff0ff, ic_system, 0, OP1 (UIMM4), {}, F_OPD0_OPT | F_DEFAULT (0xF)),
   CORE_INSN ("dsb", 0xd503309f, 0xfffff0ff, ic_system, 0, OP1 (BARRIER), {}, F_HAS_ALIAS),
-  V8_7A_INSN ("dsb", 0xd503323f, 0xfffff3ff, ic_system, OP1 (BARRIER_DSB_NXS), {}, F_HAS_ALIAS),
+  XS_INSN ("dsb", 0xd503323f, 0xfffff3ff, ic_system, OP1 (BARRIER_DSB_NXS), {}, F_HAS_ALIAS),
   V8R_INSN ("dfb", 0xd5033c9f, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
   CORE_INSN ("ssbb", 0xd503309f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("pssbb", 0xd503349f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),

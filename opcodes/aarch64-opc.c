@@ -5171,7 +5171,7 @@ aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
        || reg_value == CPENS (6, C9, C6, 5)
        || reg_value == CPENS (6, C9, C7, 1)
        || reg_value == CPENS (6, C9, C7, 5))
-      && AARCH64_CPU_HAS_FEATURE (features, D128))
+      && AARCH64_CPU_HAS_FEATURE (features, XS))
     return true;
 
   /* AT S1E1RP, AT S1E1WP.  Values are from aarch64_sys_regs_at.  */
