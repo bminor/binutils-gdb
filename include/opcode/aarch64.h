@@ -141,6 +141,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_MEMTAG,
   /* Transactional Memory Extension.  */
   AARCH64_FEATURE_TME,
+  /* WFx instructions with timeout.  */
+  AARCH64_FEATURE_WFXT,
   /* Standardization of memory operations.  */
   AARCH64_FEATURE_MOPS,
   /* Hinted conditional branches.  */
@@ -271,6 +273,7 @@ enum aarch64_feature_bit {
 					 | AARCH64_FEATBIT (X, BFLOAT16) \
 					 | AARCH64_FEATBIT (X, I8MM))
 #define AARCH64_ARCH_V8_7A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_7A)	\
+					 | AARCH64_FEATBIT (X, WFXT)    \
 					 | AARCH64_FEATBIT (X, LS64))
 #define AARCH64_ARCH_V8_8A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_8A)	\
 					 | AARCH64_FEATBIT (X, MOPS)	\
