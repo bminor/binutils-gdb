@@ -220,7 +220,8 @@ static void print_frame_local_vars (frame_info_ptr frame,
 				    const char *regexp, const char *t_regexp,
 				    int num_tabs, struct ui_file *stream);
 
-static void print_frame (const frame_print_options &opts,
+static void print_frame (struct ui_out *uiout,
+			 const frame_print_options &opts,
 			 frame_info_ptr frame, int print_level,
 			 enum print_what print_what,  int print_args,
 			 struct symtab_and_line sal);
@@ -1020,16 +1021,15 @@ get_user_print_what_frame_info (std::optional<enum print_what> *what)
    Used in "where" output, and to emit breakpoint or step
    messages.  */
 
-void
-print_frame_info (const frame_print_options &fp_opts,
-		  frame_info_ptr frame, int print_level,
-		  enum print_what print_what, int print_args,
-		  int set_current_sal)
+static void
+do_print_frame_info (struct ui_out *uiout, const frame_print_options &fp_opts,
+		     frame_info_ptr frame, int print_level,
+		     enum print_what print_what, int print_args,
+		     int set_current_sal)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   int source_print;
   int location_print;
-  struct ui_out *uiout = current_uiout;
 
   if (!current_uiout->is_mi_like_p ()
       && fp_opts.print_frame_info != print_frame_info_auto)
@@ -1105,7 +1105,8 @@ print_frame_info (const frame_print_options &fp_opts,
 		    || print_what == LOC_AND_ADDRESS
 		    || print_what == SHORT_LOCATION);
   if (location_print || !sal.symtab)
-    print_frame (fp_opts, frame, print_level, print_what, print_args, sal);
+    print_frame (uiout, fp_opts, frame, print_level,
+		 print_what, print_args, sal);
 
   source_print = (print_what == SRC_LINE || print_what == SRC_AND_LOC);
 
@@ -1183,6 +1184,20 @@ print_frame_info (const frame_print_options &fp_opts,
   annotate_frame_end ();
 
   gdb_flush (gdb_stdout);
+}
+
+/* Redirect output to a temporary buffer for the duration
+   of do_print_frame_info.  */
+
+void
+print_frame_info (const frame_print_options &fp_opts,
+		  frame_info_ptr frame, int print_level,
+		  enum print_what print_what, int print_args,
+		  int set_current_sal)
+{
+  do_with_buffered_output (do_print_frame_info, current_uiout,
+			   fp_opts, frame, print_level, print_what,
+			   print_args, set_current_sal);
 }
 
 /* See stack.h.  */
@@ -1309,13 +1324,13 @@ find_frame_funname (frame_info_ptr frame, enum language *funlang,
 }
 
 static void
-print_frame (const frame_print_options &fp_opts,
+print_frame (struct ui_out *uiout,
+	     const frame_print_options &fp_opts,
 	     frame_info_ptr frame, int print_level,
 	     enum print_what print_what, int print_args,
 	     struct symtab_and_line sal)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct ui_out *uiout = current_uiout;
   enum language funlang = language_unknown;
   struct value_print_options opts;
   struct symbol *func;

@@ -35,6 +35,9 @@ public:
 
   bool can_emit_style_escape () const override;
 
+  ui_file *current_stream () const override
+  { return m_streams.back (); }
+
 protected:
 
   virtual void do_table_begin (int nbrofcols, int nr_rows,

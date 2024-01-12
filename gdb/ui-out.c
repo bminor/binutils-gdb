@@ -871,3 +871,144 @@ ui_out::ui_out (ui_out_flags flags)
 ui_out::~ui_out ()
 {
 }
+
+/* See ui-out.h.  */
+
+void
+buffer_group::output_unit::flush () const
+{
+  if (!m_msg.empty ())
+    m_stream->puts (m_msg.c_str ());
+
+  if (m_wrap_hint >= 0)
+    m_stream->wrap_here (m_wrap_hint);
+
+  if (m_flush)
+    m_stream->flush ();
+}
+
+/* See ui-out.h.  */
+
+void
+buffer_group::write (const char *buf, long length_buf, ui_file *stream)
+{
+  /* Record each line separately.  */
+  for (size_t prev = 0, cur = 0; cur < length_buf; ++cur)
+    if (buf[cur] == '\n' || cur == length_buf - 1)
+      {
+	std::string msg (buf + prev, cur - prev + 1);
+
+	if (m_buffered_output.size () > 0
+	    && m_buffered_output.back ().m_wrap_hint == -1
+	    && m_buffered_output.back ().m_stream == stream
+	    && m_buffered_output.back ().m_msg.size () > 0
+	    && m_buffered_output.back ().m_msg.back () != '\n')
+	  m_buffered_output.back ().m_msg.append (msg);
+	else
+	  {
+	    m_buffered_output.emplace_back (msg);
+	    m_buffered_output.back ().m_stream = stream;
+	  }
+	prev = cur + 1;
+      }
+}
+
+/* See ui-out.h.  */
+
+void
+buffer_group::wrap_here (int indent, ui_file *stream)
+{
+  m_buffered_output.emplace_back ("", indent);
+  m_buffered_output.back ().m_stream = stream;
+}
+
+/* See ui-out.h.  */
+
+void
+buffer_group::flush_here (ui_file *stream)
+{
+  m_buffered_output.emplace_back ("", -1, true);
+  m_buffered_output.back ().m_stream = stream;
+}
+
+/* See ui-out.h.  */
+
+ui_file *
+get_unbuffered (ui_file *stream)
+{
+  buffering_file *buf = dynamic_cast<buffering_file *> (stream);
+
+  if (buf == nullptr)
+    return stream;
+
+  return get_unbuffered (buf->stream ());
+}
+
+buffered_streams::buffered_streams (buffer_group *group, ui_out *uiout)
+  : m_buffered_stdout (group, gdb_stdout),
+    m_buffered_stderr (group, gdb_stderr),
+    m_buffered_stdlog (group, gdb_stdlog),
+    m_buffered_stdtarg (group, gdb_stdtarg),
+    m_buffered_stdtargerr (group, gdb_stdtargerr),
+    m_uiout (uiout)
+{
+  gdb_stdout = &m_buffered_stdout;
+  gdb_stderr = &m_buffered_stderr;
+  gdb_stdlog = &m_buffered_stdlog;
+  gdb_stdtarg = &m_buffered_stdtarg;
+  gdb_stdtargerr = &m_buffered_stdtargerr;
+
+  ui_file *stream = current_uiout->current_stream ();
+  if (stream != nullptr)
+    {
+      m_buffered_current_uiout.emplace (group, stream);
+      current_uiout->redirect (&(*m_buffered_current_uiout));
+    }
+
+  stream = m_uiout->current_stream ();
+  if (stream != nullptr && current_uiout != m_uiout)
+    {
+      m_buffered_uiout.emplace (group, stream);
+      m_uiout->redirect (&(*m_buffered_uiout));
+    }
+
+  m_buffers_in_place = true;
+}
+
+/* See ui-out.h.  */
+
+void
+buffered_streams::remove_buffers ()
+{
+  if (!m_buffers_in_place)
+    return;
+
+  m_buffers_in_place = false;
+
+  gdb_stdout = m_buffered_stdout.stream ();
+  gdb_stderr = m_buffered_stderr.stream ();
+  gdb_stdlog = m_buffered_stdlog.stream ();
+  gdb_stdtarg = m_buffered_stdtarg.stream ();
+  gdb_stdtargerr = m_buffered_stdtargerr.stream ();
+
+  if (m_buffered_current_uiout.has_value ())
+    current_uiout->redirect (nullptr);
+
+  if (m_buffered_uiout.has_value ())
+    m_uiout->redirect (nullptr);
+}
+
+buffer_group::buffer_group (ui_out *uiout)
+  : m_buffered_streams (new buffered_streams (this, uiout))
+{ /* Nothing.  */ }
+
+/* See ui-out.h.  */
+
+void
+buffer_group::flush () const
+{
+  m_buffered_streams->remove_buffers ();
+
+  for (const output_unit &ou : m_buffered_output)
+    ou.flush ();
+}

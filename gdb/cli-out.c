@@ -299,7 +299,7 @@ cli_ui_out::do_progress_notify (const std::string &msg,
 				double howmuch, double total)
 {
   int chars_per_line = get_chars_per_line ();
-  struct ui_file *stream = m_streams.back ();
+  struct ui_file *stream = get_unbuffered (m_streams.back ());
   cli_progress_info &info (m_progress_info.back ());
 
   if (chars_per_line > MAX_CHARS_PER_LINE)
@@ -384,7 +384,7 @@ cli_ui_out::do_progress_notify (const std::string &msg,
 void
 cli_ui_out::clear_progress_notify ()
 {
-  struct ui_file *stream = m_streams.back ();
+  struct ui_file *stream = get_unbuffered (m_streams.back ());
   int chars_per_line = get_chars_per_line ();
 
   scoped_restore save_pagination
@@ -413,10 +413,12 @@ void
 cli_ui_out::do_progress_end ()
 {
   struct ui_file *stream = m_streams.back ();
-  m_progress_info.pop_back ();
+  cli_progress_info &info (m_progress_info.back ());
 
-  if (stream->isatty ())
+  if (stream->isatty () && info.state != progress_update::START)
     clear_progress_notify ();
+
+  m_progress_info.pop_back ();
 }
 
 /* local functions */

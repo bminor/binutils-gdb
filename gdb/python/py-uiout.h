@@ -56,6 +56,9 @@ public:
     return std::move (current ().obj);
   }
 
+  ui_file *current_stream () const override
+  { return nullptr; }
+
 protected:
 
   void do_progress_end () override { }

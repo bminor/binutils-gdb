@@ -1089,6 +1089,107 @@ thread_target_id_str (thread_info *tp)
     return target_id;
 }
 
+/* Print thread TP.  GLOBAL_IDS indicates whether REQUESTED_THREADS
+   is a list of global or per-inferior thread ids.  */
+
+static void
+do_print_thread (ui_out *uiout, const char *requested_threads,
+		 int global_ids, int pid, int show_global_ids,
+		 int default_inf_num, thread_info *tp,
+		 thread_info *current_thread)
+{
+  int core;
+
+  /* In case REQUESTED_THREADS contains $_thread.  */
+  if (current_thread != nullptr)
+    switch_to_thread (current_thread);
+
+  if (!should_print_thread (requested_threads, default_inf_num,
+			    global_ids, pid, tp))
+    return;
+
+  ui_out_emit_tuple tuple_emitter (uiout, NULL);
+
+  if (!uiout->is_mi_like_p ())
+    {
+      if (tp == current_thread)
+	uiout->field_string ("current", "*");
+      else
+	uiout->field_skip ("current");
+
+      uiout->field_string ("id-in-tg", print_thread_id (tp));
+    }
+
+  if (show_global_ids || uiout->is_mi_like_p ())
+    uiout->field_signed ("id", tp->global_num);
+
+  /* Switch to the thread (and inferior / target).  */
+  switch_to_thread (tp);
+
+  /* For the CLI, we stuff everything into the target-id field.
+     This is a gross hack to make the output come out looking
+     correct.  The underlying problem here is that ui-out has no
+     way to specify that a field's space allocation should be
+     shared by several fields.  For MI, we do the right thing
+     instead.  */
+
+  if (uiout->is_mi_like_p ())
+    {
+      uiout->field_string ("target-id", target_pid_to_str (tp->ptid));
+
+      const char *extra_info = target_extra_thread_info (tp);
+      if (extra_info != nullptr)
+	uiout->field_string ("details", extra_info);
+
+      const char *name = thread_name (tp);
+      if (name != NULL)
+	uiout->field_string ("name", name);
+    }
+  else
+    {
+      uiout->field_string ("target-id", thread_target_id_str (tp));
+    }
+
+  if (tp->state == THREAD_RUNNING)
+    uiout->text ("(running)\n");
+  else
+    {
+      /* The switch above put us at the top of the stack (leaf
+	 frame).  */
+      print_stack_frame (get_selected_frame (NULL),
+			 /* For MI output, print frame level.  */
+			 uiout->is_mi_like_p (),
+			 LOCATION, 0);
+    }
+
+  if (uiout->is_mi_like_p ())
+    {
+      const char *state = "stopped";
+
+      if (tp->state == THREAD_RUNNING)
+	state = "running";
+      uiout->field_string ("state", state);
+    }
+
+  core = target_core_of_thread (tp->ptid);
+  if (uiout->is_mi_like_p () && core != -1)
+    uiout->field_signed ("core", core);
+}
+
+/* Redirect output to a temporary buffer for the duration
+   of do_print_thread.  */
+
+static void
+print_thread (ui_out *uiout, const char *requested_threads,
+	      int global_ids, int pid, int show_global_ids,
+	      int default_inf_num, thread_info *tp, thread_info *current_thread)
+
+{
+  do_with_buffered_output (do_print_thread, uiout, requested_threads,
+			   global_ids, pid, show_global_ids,
+			   default_inf_num, tp, current_thread);
+}
+
 /* Like print_thread_info, but in addition, GLOBAL_IDS indicates
    whether REQUESTED_THREADS is a list of global or per-inferior
    thread ids.  */
@@ -1176,86 +1277,13 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
     for (inferior *inf : all_inferiors ())
       for (thread_info *tp : inf->threads ())
 	{
-	  int core;
-
 	  any_thread = true;
+
 	  if (tp == current_thread && tp->state == THREAD_EXITED)
 	    current_exited = true;
 
-	  /* In case REQUESTED_THREADS contains $_thread.  */
-	  if (current_thread != nullptr)
-	    switch_to_thread (current_thread);
-
-	  if (!should_print_thread (requested_threads, default_inf_num,
-				    global_ids, pid, tp))
-	    continue;
-
-	  ui_out_emit_tuple tuple_emitter (uiout, NULL);
-
-	  if (!uiout->is_mi_like_p ())
-	    {
-	      if (tp == current_thread)
-		uiout->field_string ("current", "*");
-	      else
-		uiout->field_skip ("current");
-
-	      uiout->field_string ("id-in-tg", print_thread_id (tp));
-	    }
-
-	  if (show_global_ids || uiout->is_mi_like_p ())
-	    uiout->field_signed ("id", tp->global_num);
-
-	  /* Switch to the thread (and inferior / target).  */
-	  switch_to_thread (tp);
-
-	  /* For the CLI, we stuff everything into the target-id field.
-	     This is a gross hack to make the output come out looking
-	     correct.  The underlying problem here is that ui-out has no
-	     way to specify that a field's space allocation should be
-	     shared by several fields.  For MI, we do the right thing
-	     instead.  */
-
-	  if (uiout->is_mi_like_p ())
-	    {
-	      uiout->field_string ("target-id", target_pid_to_str (tp->ptid));
-
-	      const char *extra_info = target_extra_thread_info (tp);
-	      if (extra_info != nullptr)
-		uiout->field_string ("details", extra_info);
-
-	      const char *name = thread_name (tp);
-	      if (name != NULL)
-		uiout->field_string ("name", name);
-	    }
-	  else
-	    {
-	      uiout->field_string ("target-id", thread_target_id_str (tp));
-	    }
-
-	  if (tp->state == THREAD_RUNNING)
-	    uiout->text ("(running)\n");
-	  else
-	    {
-	      /* The switch above put us at the top of the stack (leaf
-		 frame).  */
-	      print_stack_frame (get_selected_frame (NULL),
-				 /* For MI output, print frame level.  */
-				 uiout->is_mi_like_p (),
-				 LOCATION, 0);
-	    }
-
-	  if (uiout->is_mi_like_p ())
-	    {
-	      const char *state = "stopped";
-
-	      if (tp->state == THREAD_RUNNING)
-		state = "running";
-	      uiout->field_string ("state", state);
-	    }
-
-	  core = target_core_of_thread (tp->ptid);
-	  if (uiout->is_mi_like_p () && core != -1)
-	    uiout->field_signed ("core", core);
+	  print_thread (uiout, requested_threads, global_ids, pid,
+			show_global_ids, default_inf_num, tp, current_thread);
 	}
 
     /* This end scope restores the current thread and the frame

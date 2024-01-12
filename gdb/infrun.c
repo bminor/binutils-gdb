@@ -9277,10 +9277,10 @@ print_stop_location (const target_waitstatus &ws)
     print_stack_frame (get_selected_frame (nullptr), 0, source_flag, 1);
 }
 
-/* See infrun.h.  */
+/* See `print_stop_event` in infrun.h.  */
 
-void
-print_stop_event (struct ui_out *uiout, bool displays)
+static void
+do_print_stop_event (struct ui_out *uiout, bool displays)
 {
   struct target_waitstatus last;
   struct thread_info *tp;
@@ -9307,6 +9307,16 @@ print_stop_event (struct ui_out *uiout, bool displays)
       if (rv != nullptr)
 	print_return_value (uiout, rv);
     }
+}
+
+/* See infrun.h.  This function itself sets up buffered output for the
+   duration of do_print_stop_event, which performs the actual event
+   printing.  */
+
+void
+print_stop_event (struct ui_out *uiout, bool displays)
+{
+  do_with_buffered_output (do_print_stop_event, uiout, displays);
 }
 
 /* See infrun.h.  */
