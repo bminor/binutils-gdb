@@ -1,4 +1,5 @@
 #as: -march=armv8.5-a
+#as: -march=armv8-a+frintts
 # objdump: -d
 
 .*: .*
@@ -7,8 +8,6 @@
 Disassembly of section \.text:
 
 0+0 <func>:
-.*:	d500403f 	xaflag
-.*:	d500405f 	axflag
 .*:	1e284041 	frint32z	s1, s2
 .*:	1e684062 	frint32z	d2, d3
 .*:	1e28c041 	frint32x	s1, s2

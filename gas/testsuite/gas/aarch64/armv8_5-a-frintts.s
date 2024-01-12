@@ -13,7 +13,5 @@
 	.endr
 	.endm
 func:
-	xaflag
-	axflag
 	expand frint,0
 	expand frint,1
