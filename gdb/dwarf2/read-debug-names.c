@@ -345,13 +345,16 @@ cooked_index_debug_names::do_reading ()
     = create_quick_file_names_table (per_bfd->all_units.size ());
   m_results.emplace_back (nullptr,
 			  complaint_handler.release (),
-			  std::move (exceptions));
+			  std::move (exceptions),
+			  parent_map ());
   std::vector<std::unique_ptr<cooked_index_shard>> indexes;
   indexes.push_back (std::move (m_map.shard));
   cooked_index *table
     = (gdb::checked_static_cast<cooked_index *>
        (per_bfd->index_table.get ()));
-  table->set_contents (std::move (indexes), &m_warnings);
+  /* Note that this code never uses IS_PARENT_DEFERRED, so it is safe
+     to pass nullptr here.  */
+  table->set_contents (std::move (indexes), &m_warnings, nullptr);
 
   bfd_thread_cleanup ();
 }

@@ -330,7 +330,7 @@ cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
 /* See cooked-index.h.  */
 
 void
-cooked_index_shard::finalize ()
+cooked_index_shard::finalize (const parent_map_map *parent_maps)
 {
   auto hash_name_ptr = [] (const void *p)
     {
@@ -371,6 +371,13 @@ cooked_index_shard::finalize ()
 
   for (cooked_index_entry *entry : m_entries)
     {
+      if ((entry->flags & IS_PARENT_DEFERRED) != 0)
+	{
+	  const cooked_index_entry *new_parent
+	    = parent_maps->find (entry->get_deferred_parent ());
+	  entry->resolve_parent (new_parent);
+	}
+
       /* Note that this code must be kept in sync with
 	 language_requires_canonicalization.  */
       gdb_assert (entry->canonical == nullptr);
@@ -630,7 +637,8 @@ cooked_index::wait (cooked_state desired_state, bool allow_quit)
 }
 
 void
-cooked_index::set_contents (vec_type &&vec, deferred_warnings *warn)
+cooked_index::set_contents (vec_type &&vec, deferred_warnings *warn,
+			    const parent_map_map *parent_maps)
 {
   gdb_assert (m_vector.empty ());
   m_vector = std::move (vec);
@@ -652,7 +660,7 @@ cooked_index::set_contents (vec_type &&vec, deferred_warnings *warn)
   for (auto &idx : m_vector)
     {
       auto this_index = idx.get ();
-      finalizers.add_task ([=] () { this_index->finalize (); });
+      finalizers.add_task ([=] () { this_index->finalize (parent_maps); });
     }
 
   finalizers.start ();

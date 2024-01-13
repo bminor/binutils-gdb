@@ -4463,7 +4463,8 @@ public:
 		  enum language language)
     : m_index_storage (storage),
       m_per_cu (per_cu),
-      m_language (language)
+      m_language (language),
+      m_die_range_map (storage->get_parent_map ())
   {
   }
 
@@ -4539,18 +4540,8 @@ private:
   /* The language that we're assuming when reading.  */
   enum language m_language;
 
-  /* Map from DIE ranges to newly-created entries.  See
-     m_deferred_entries to understand this.  */
-  parent_map m_die_range_map;
-
-  /* The generated DWARF can sometimes have the declaration for a
-     method in a class (or perhaps namespace) scope, with the
-     definition appearing outside this scope... just one of the many
-     bad things about DWARF.  In order to handle this situation, we
-     defer certain entries until the end of scanning, at which point
-     we'll know the containing context of all the DIEs that we might
-     have scanned.  This vector stores these deferred entries.  */
-  std::vector<cooked_index_entry *> m_deferred_entries;
+  /* Map from DIE ranges to newly-created entries.  */
+  parent_map *m_die_range_map;
 };
 
 /* Subroutine of dwarf2_build_psymtabs_hard to simplify it.
@@ -4893,7 +4884,8 @@ cooked_index_debug_info::process_cus (size_t task_number, unit_iterator first,
 
   m_results[task_number] = result_type (thread_storage.release (),
 					complaint_handler.release (),
-					std::move (errors));
+					std::move (errors),
+					std::move (thread_storage.release_parent_map ()));
 }
 
 void
@@ -4903,7 +4895,10 @@ cooked_index_debug_info::done_reading ()
      can only be dealt with on the main thread.  */
   std::vector<std::unique_ptr<cooked_index_shard>> indexes;
   for (auto &one_result : m_results)
-    indexes.push_back (std::move (std::get<0> (one_result)));
+    {
+      indexes.push_back (std::move (std::get<0> (one_result)));
+      m_all_parents_map.add_map (std::get<3> (one_result));
+    }
 
   /* This has to wait until we read the CUs, we need the list of DWOs.  */
   process_skeletonless_type_units (m_per_objfile, &m_index_storage);
@@ -4911,11 +4906,14 @@ cooked_index_debug_info::done_reading ()
   indexes.push_back (m_index_storage.release ());
   indexes.shrink_to_fit ();
 
+  m_all_parents_map.add_map (m_index_storage.release_parent_map ());
+
   dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
   cooked_index *table
     = (gdb::checked_static_cast<cooked_index *>
        (per_bfd->index_table.get ()));
-  table->set_contents (std::move (indexes), &m_warnings);
+  table->set_contents (std::move (indexes), &m_warnings,
+		       &m_all_parents_map);
 }
 
 void
@@ -16258,13 +16256,17 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 
 	  if (*parent_entry == nullptr)
 	    {
+	      /* We only perform immediate lookups of parents for DIEs
+		 from earlier in this CU.  This avoids any problem
+		 with a NULL result when when we see a reference to a
+		 DIE in another CU that we may or may not have
+		 imported locally.  */
 	      parent_map::addr_type addr
 		= parent_map::form_addr (origin_offset, origin_is_dwz);
-	      if (new_reader->cu == reader->cu
-		  && new_info_ptr > watermark_ptr)
+	      if (new_reader->cu != reader->cu || new_info_ptr > watermark_ptr)
 		*maybe_defer = addr;
 	      else
-		*parent_entry = m_die_range_map.find (addr);
+		*parent_entry = m_die_range_map->find (addr);
 	    }
 
 	  unsigned int bytes_read;
@@ -16395,7 +16397,7 @@ cooked_indexer::recurse (cutu_reader *reader,
       parent_map::addr_type end
 	= parent_map::form_addr (sect_offset (info_ptr - 1 - reader->buffer),
 				 reader->cu->per_cu->is_dwz);
-      m_die_range_map.add_entry (start, end, parent_entry);
+      m_die_range_map->add_entry (start, end, parent_entry);
     }
 
   return info_ptr;
@@ -16480,13 +16482,10 @@ cooked_indexer::index_dies (cutu_reader *reader,
       if (name != nullptr)
 	{
 	  if (defer != 0)
-	    {
-	      this_entry
-		= m_index_storage->add (this_die, abbrev->tag,
-					flags | IS_PARENT_DEFERRED, name,
-					defer, m_per_cu);
-	      m_deferred_entries.push_back (this_entry);
-	    }
+	    this_entry
+	      = m_index_storage->add (this_die, abbrev->tag,
+				      flags | IS_PARENT_DEFERRED, name,
+				      defer, m_per_cu);
 	  else
 	    this_entry
 	      = m_index_storage->add (this_die, abbrev->tag, flags, name,
@@ -16578,13 +16577,6 @@ cooked_indexer::make_index (cutu_reader *reader)
   if (!reader->comp_unit_die->has_children)
     return;
   index_dies (reader, reader->info_ptr, nullptr, false);
-
-  for (const auto &entry : m_deferred_entries)
-    {
-      const cooked_index_entry *parent
-	= m_die_range_map.find (entry->get_deferred_parent ());
-      entry->resolve_parent (parent);
-    }
 }
 
 dwarf2_per_cu_data *
