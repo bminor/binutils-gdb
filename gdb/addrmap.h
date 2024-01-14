@@ -46,46 +46,6 @@ struct addrmap
 {
   virtual ~addrmap () = default;
 
-  /* In the mutable address map MAP, associate the addresses from START
-     to END_INCLUSIVE that are currently associated with NULL with OBJ
-     instead.  Addresses mapped to an object other than NULL are left
-     unchanged.
-
-     As the name suggests, END_INCLUSIVE is also mapped to OBJ.  This
-     convention is unusual, but it allows callers to accurately specify
-     ranges that abut the top of the address space, and ranges that
-     cover the entire address space.
-
-     This operation seems a bit complicated for a primitive: if it's
-     needed, why not just have a simpler primitive operation that sets a
-     range to a value, wiping out whatever was there before, and then
-     let the caller construct more complicated operations from that,
-     along with some others for traversal?
-
-     It turns out this is the mutation operation we want to use all the
-     time, at least for now.  Our immediate use for address maps is to
-     represent lexical blocks whose address ranges are not contiguous.
-     We walk the tree of lexical blocks present in the debug info, and
-     only create 'struct block' objects after we've traversed all a
-     block's children.  If a lexical block declares no local variables
-     (and isn't the lexical block for a function's body), we omit it
-     from GDB's data structures entirely.
-
-     However, this means that we don't decide to create a block (and
-     thus record it in the address map) until after we've traversed its
-     children.  If we do decide to create the block, we do so at a time
-     when all its children have already been recorded in the map.  So
-     this operation --- change only those addresses left unset --- is
-     actually the operation we want to use every time.
-
-     It seems simpler to let the code which operates on the
-     representation directly deal with the hair of implementing these
-     semantics than to provide an interface which allows it to be
-     implemented efficiently, but doesn't reveal too much of the
-     representation.  */
-  virtual void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
-			  void *obj) = 0;
-
   /* Return the object associated with ADDR in MAP.  */
   const void *find (CORE_ADDR addr) const
   { return this->do_find (addr); }
@@ -127,8 +87,6 @@ public:
   addrmap_fixed (struct obstack *obstack, addrmap_mutable *mut);
   DISABLE_COPY_AND_ASSIGN (addrmap_fixed);
 
-  void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
-		  void *obj) override;
   void relocate (CORE_ADDR offset) override;
 
 private:
@@ -165,8 +123,45 @@ public:
   ~addrmap_mutable ();
   DISABLE_COPY_AND_ASSIGN (addrmap_mutable);
 
+  /* In the mutable address map MAP, associate the addresses from START
+     to END_INCLUSIVE that are currently associated with NULL with OBJ
+     instead.  Addresses mapped to an object other than NULL are left
+     unchanged.
+
+     As the name suggests, END_INCLUSIVE is also mapped to OBJ.  This
+     convention is unusual, but it allows callers to accurately specify
+     ranges that abut the top of the address space, and ranges that
+     cover the entire address space.
+
+     This operation seems a bit complicated for a primitive: if it's
+     needed, why not just have a simpler primitive operation that sets a
+     range to a value, wiping out whatever was there before, and then
+     let the caller construct more complicated operations from that,
+     along with some others for traversal?
+
+     It turns out this is the mutation operation we want to use all the
+     time, at least for now.  Our immediate use for address maps is to
+     represent lexical blocks whose address ranges are not contiguous.
+     We walk the tree of lexical blocks present in the debug info, and
+     only create 'struct block' objects after we've traversed all a
+     block's children.  If a lexical block declares no local variables
+     (and isn't the lexical block for a function's body), we omit it
+     from GDB's data structures entirely.
+
+     However, this means that we don't decide to create a block (and
+     thus record it in the address map) until after we've traversed its
+     children.  If we do decide to create the block, we do so at a time
+     when all its children have already been recorded in the map.  So
+     this operation --- change only those addresses left unset --- is
+     actually the operation we want to use every time.
+
+     It seems simpler to let the code which operates on the
+     representation directly deal with the hair of implementing these
+     semantics than to provide an interface which allows it to be
+     implemented efficiently, but doesn't reveal too much of the
+     representation.  */
   void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
-		  void *obj) override;
+		  void *obj);
   void relocate (CORE_ADDR offset) override;
 
 private:

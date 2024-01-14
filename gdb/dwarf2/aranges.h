@@ -22,7 +22,7 @@
 
 class dwarf2_per_objfile;
 class dwarf2_section_info;
-class addrmap;
+class addrmap_mutable;
 
 /* Read the address map data from DWARF-5 .debug_aranges, and use it
    to populate given addrmap.  Returns true on success, false on
@@ -30,7 +30,7 @@ class addrmap;
 
 extern bool read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 				       dwarf2_section_info *section,
-				       addrmap *mutable_map,
+				       addrmap_mutable *mutable_map,
 				       deferred_warnings *warn);
 
 #endif /* GDB_DWARF2_ARANGES_H */

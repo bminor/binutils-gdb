@@ -30,15 +30,6 @@ static_assert (sizeof (splay_tree_value) >= sizeof (void *));
 
 /* Fixed address maps.  */
 
-void
-addrmap_fixed::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
-			  void *obj)
-{
-  internal_error ("addrmap_fixed_set_empty: "
-		  "fixed addrmaps can't be changed\n");
-}
-
-
 void *
 addrmap_fixed::do_find (CORE_ADDR addr) const
 {
