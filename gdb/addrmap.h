@@ -85,8 +85,13 @@ struct addrmap_fixed final : public addrmap,
 {
 public:
 
-  addrmap_fixed (struct obstack *obstack, addrmap_mutable *mut);
+  addrmap_fixed (struct obstack *obstack, const addrmap_mutable *mut);
   DISABLE_COPY_AND_ASSIGN (addrmap_fixed);
+
+  /* It's fine to use the default move operators, because this addrmap
+     does not own the storage for the elements.  */
+  addrmap_fixed (addrmap_fixed &&other) = default;
+  addrmap_fixed &operator= (addrmap_fixed &&) = default;
 
   void relocate (CORE_ADDR offset) override;
 
@@ -123,6 +128,18 @@ public:
   addrmap_mutable ();
   ~addrmap_mutable ();
   DISABLE_COPY_AND_ASSIGN (addrmap_mutable);
+
+  addrmap_mutable (addrmap_mutable &&other)
+    : tree (other.tree)
+  {
+    other.tree = nullptr;
+  }
+
+  addrmap_mutable &operator= (addrmap_mutable &&other)
+  {
+    std::swap (tree, other.tree);
+    return *this;
+  }
 
   /* In the mutable address map MAP, associate the addresses from START
      to END_INCLUSIVE that are currently associated with NULL with OBJ

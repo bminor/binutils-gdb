@@ -250,12 +250,13 @@ addrmap_mutable::do_find (CORE_ADDR addr) const
 }
 
 
-addrmap_fixed::addrmap_fixed (struct obstack *obstack, addrmap_mutable *mut)
+addrmap_fixed::addrmap_fixed (struct obstack *obstack,
+			      const addrmap_mutable *mut)
 {
   size_t transition_count = 0;
 
   /* Count the number of transitions in the tree.  */
-  mut->foreach ([&] (CORE_ADDR start, void *obj)
+  mut->foreach ([&] (CORE_ADDR start, const void *obj)
     {
       ++transition_count;
       return 0;
@@ -273,10 +274,10 @@ addrmap_fixed::addrmap_fixed (struct obstack *obstack, addrmap_mutable *mut)
 
   /* Copy all entries from the splay tree to the array, in order 
      of increasing address.  */
-  mut->foreach ([&] (CORE_ADDR start, void *obj)
+  mut->foreach ([&] (CORE_ADDR start, const void *obj)
     {
       transitions[num_transitions].addr = start;
-      transitions[num_transitions].value = obj;
+      transitions[num_transitions].value = const_cast<void *> (obj);
       ++num_transitions;
       return 0;
     });
@@ -344,7 +345,8 @@ addrmap_mutable::addrmap_mutable ()
 
 addrmap_mutable::~addrmap_mutable ()
 {
-  splay_tree_delete (tree);
+  if (tree != nullptr)
+    splay_tree_delete (tree);
 }
 
 
