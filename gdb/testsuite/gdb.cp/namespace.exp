@@ -251,8 +251,9 @@ gdb_test "print AAA::ALPHA" "\\$\[0-9\].* = AAA::ALPHA"
 gdb_test "whatis ::C::CClass::NestedClass" "type = C::CClass::NestedClass"
 gdb_test "whatis ::C::CClass::NestedClass *" "type = C::CClass::NestedClass \\*"
 
+set yn_re [string_to_regexp {(y or [n])}]
 # Break on functions with a malformed name.
 gdb_test "break DNE>::DNE" "" "br malformed \'>\'" \
-    "Make breakpoint pending on future shared library load?.*" "y"
+    "Make breakpoint pending on future shared library load\\? $yn_re " "Y"
 gdb_test "break DNE)::DNE" "" "br malformed \')\'" \
-    "Make breakpoint pending on future shared library load?.*" "y"
+    "Make breakpoint pending on future shared library load\\? $yn_re " "Y"
