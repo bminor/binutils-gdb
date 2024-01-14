@@ -2946,13 +2946,18 @@ proc foreach_mi_ui_mode { var_name body } {
 # Check if GDB has information about the stderr symbol.
 proc mi_gdb_is_stderr_available {} {
     set has_stderr_symbol false
-    gdb_test_multiple "-data-evaluate-expression stderr" "stderr symbol check" {
-	-re "\\^error,msg=\"'stderr' has unknown type; cast it to its declared type\"\r\n$::mi_gdb_prompt$" {
+
+    set cmd "-data-evaluate-expression stderr"
+    set test "stderr symbol check"
+    set msg_re {"'stderr' has unknown type; cast it to its declared type"}
+    gdb_test_multiple $cmd $test -prompt "$::mi_gdb_prompt$" {
+	-re -wrap "\\^error,msg=$msg_re" {
 	    # Default value of false is fine.
 	}
-	-re "$::mi_gdb_prompt$" {
+	-re -wrap "" {
 	    set has_stderr_symbol true
 	}
     }
+
     return $has_stderr_symbol
 }
