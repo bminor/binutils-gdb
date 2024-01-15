@@ -226,7 +226,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @c to be limited to one line for the header.
 @smallexample
 @c man begin SYNOPSIS
-@value{AS} [@b{-a}[@b{cdghlns}][=@var{file}]]
+@value{AS} [@b{-a}[@b{cdghilns}][=@var{file}]]
  [@b{--alternate}]
  [@b{--compress-debug-sections}] [@b{--nocompress-debug-sections}]
  [@b{-D}]
@@ -673,7 +673,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @table @gcctabopt
 @include at-file.texi
 
-@item -a[cdghlmns]
+@item -a[cdghilmns]
 Turn on listings, in any of a variety of ways:
 
 @table @gcctabopt
@@ -691,6 +691,9 @@ include high-level source
 
 @item -al
 include assembly
+
+@item -ali
+include assembly with ginsn
 
 @item -am
 include macro expansions
@@ -2418,7 +2421,7 @@ assembler.)
 @c man end
 
 @menu
-* a::             -a[cdghlns] enable listings
+* a::             -a[cdghilns] enable listings
 * alternate::     --alternate enable alternate macro syntax
 * D::             -D for compatibility and debugging
 * f::             -f to work faster
@@ -2445,7 +2448,7 @@ assembler.)
 @end menu
 
 @node a
-@section Enable Listings: @option{-a[cdghlns]}
+@section Enable Listings: @option{-a[cdghilns]}
 
 @kindex -a
 @kindex -ac
@@ -2453,6 +2456,7 @@ assembler.)
 @kindex -ag
 @kindex -ah
 @kindex -al
+@kindex -ali
 @kindex -an
 @kindex -as
 @cindex listings, enabling
@@ -2462,7 +2466,9 @@ These options enable listing output from the assembler.  By itself,
 @samp{-a} requests high-level, assembly, and symbols listing.
 You can use other letters to select specific options for the list:
 @samp{-ah} requests a high-level language listing,
-@samp{-al} requests an output-program assembly listing, and
+@samp{-al} requests an output-program assembly listing,
+@samp{-ali} requests an output-program assembly listing along with the
+associated ginsn, and
 @samp{-as} requests a symbol table listing.
 High-level listings require that a compiler debugging option like
 @samp{-g} be used, and that assembly listings (@samp{-al}) be requested
