@@ -90,3 +90,18 @@ fminqv v2.4s, p2, z4.s
 fminqv v4.2d, p3, z2.d
 fminqv v8.2d, p4, z1.d
 fminqv v16.4s, p7, z0.s
+ld1q Z0.Q, p4/Z, [Z16.D, x0]
+ld2q {Z0.Q, Z1.Q}, p4/Z, [x0,  #-4, MUL VL]
+ld3q {Z0.Q, Z1.Q, Z2.Q}, p4/Z, [x0,  #-4, MUL VL]
+ld4q {Z0.Q, Z1.Q, Z2.Q, Z3.Q}, p4/Z, [x0,  #-4, MUL VL]
+ld2q {Z0.Q, Z1.Q}, p4/Z, [x0, x2, lsl  #4]
+ld3q {Z0.Q, Z1.Q, Z2.Q}, p4/Z, [x0, x4, lsl  #4]
+ld4q {Z0.Q, Z1.Q, Z2.Q, Z3.Q}, p4/Z, [x0, x6, lsl  #4]
+
+st1q Z0.Q, p4, [Z16.D, x0]
+st2q {Z0.Q, Z1.Q}, p4, [x0,  #-4, MUL VL]
+st3q {Z0.Q, Z1.Q, Z2.Q}, p4, [x0,  #-4, MUL VL]
+st4q {Z0.Q, Z1.Q, Z2.Q, Z3.Q}, p4, [x0,  #-4, MUL VL]
+st2q {Z0.Q, Z1.Q}, p4, [x0, x2, lsl  #4]
+st3q {Z0.Q, Z1.Q, Z2.Q}, p4, [x0, x4, lsl  #4]
+st4q {Z0.Q, Z1.Q, Z2.Q, Z3.Q}, p4, [x0, x6, lsl  #4]

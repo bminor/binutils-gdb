@@ -797,6 +797,9 @@ enum aarch64_opnd
   AARCH64_OPND_MOPS_WB_Rn,	/* Rn!, in bits [5, 9].  */
   AARCH64_OPND_CSSC_SIMM8,	/* CSSC signed 8-bit immediate.  */
   AARCH64_OPND_CSSC_UIMM8,	/* CSSC unsigned 8-bit immediate.  */
+  AARCH64_OPND_SME_Zt2,		/* Qobule SVE vector register list.  */
+  AARCH64_OPND_SME_Zt3,		/* Trible SVE vector register list.  */
+  AARCH64_OPND_SME_Zt4,		/* Quad SVE vector register list.  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
