@@ -56,8 +56,8 @@ Approx time to complete from here: 2 hours ...
 
   4. Create the release branch using:
 
-	git branch binutils-2_42-branch
-        git push origin binutils-2_42-branch
+	git branch binutils-2_43-branch
+        git push origin binutils-2_43-branch
 
      If you get a message like:
      
@@ -67,7 +67,7 @@ Approx time to complete from here: 2 hours ...
 
   5. Make sure that the branch is there.  IE check out the branch sources:
   
-        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_42-branch 2.42
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_43-branch 2.43
 
      If you get a message about being in a "detached head" state, something
      has gone wrong...
@@ -89,8 +89,8 @@ Approx time to complete from here: 2 hours ...
      ask Joel Brobecker <brobecker AT adacore DOT com>.
 
   7. Rename the current HEAD version entry in Bugzilla, and create a
-     new one.  E.g. rename "2.42 (HEAD)" to 2.42, and create
-     "2.43 (HEAD)":
+     new one.  E.g. rename "2.43 (HEAD)" to 2.43, and create
+     "2.44 (HEAD)":
      
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
@@ -98,18 +98,18 @@ Approx time to complete from here: 2 hours ...
      of the next release and the BRANCH to indicate that it is almost
      ready for the release.
 
-     So if the release is going to be 2.42 then the version number on
-     the BRANCH should be set to 2.41.90 - ie almost, but not quite 2.42,
-     and the version number on the MAINLINE should be set to 2.42.50 -
-     ie half way to 2.43 release.
+     So if the release is going to be 2.43 then the version number on
+     the BRANCH should be set to 2.42.90 - ie almost, but not quite 2.43,
+     and the version number on the MAINLINE should be set to 2.43.50 -
+     ie half way to 2.44 release.
 
      So the BRANCH bfd/version.m4 has:
      
-       m4_define([BFD_VERSION], [2.41.90])
+       m4_define([BFD_VERSION], [2.42.90])
        
      and the MAINLINE has:
 
-       m4_define([BFD_VERSION], [2.42.50])
+       m4_define([BFD_VERSION], [2.43.50])
 
      Regenerate various files on both branch and HEAD by configuring
      with "--enable-maintainer-mode --enable-gold --enable-shared" and then building
@@ -141,21 +141,21 @@ Approx time to complete from here: 2 hours ...
           xz -9 binutils-<release>.tar
 
           eg:
-	    touch -d 2024-01-01 binutils-2.41.90/gas/doc/.dirstamp
-	    tar rvf binutils-2.41.90.tar binutils-2.41.90/gas/doc/.dirstamp
-            rm binutils-2.41.90.tar.xz
-            xz -9 binutils-2.41.90.tar
+	    touch -d 2024-08-01 binutils-2.42.90/gas/doc/.dirstamp
+	    tar rvf binutils-2.41.90.tar binutils-2.42.90/gas/doc/.dirstamp
+            rm binutils-2.42.90.tar.xz
+            xz -9 binutils-2.42.90.tar
 	    
 	 ...END OF FIXME   
 
      c. Build a test target using this tarball.
 
-           cp binutils-2.41.90.tar.xz /dev/shm
+           cp binutils-2.42.90.tar.xz /dev/shm
 	   pushd /dev/shm
-	   tar xvf binutils-2.41.90.tar.xz
+	   tar xvf binutils-2.42.90.tar.xz
 	   mkdir build
 	   cd build
-	   ../binutils-2.41.90/configure --quiet --enable-gold
+	   ../binutils-2.42.90/configure --quiet --enable-gold
 	   make
 	   popd
 
@@ -163,9 +163,11 @@ Approx time to complete from here: 2 hours ...
 
      d. Upload the pre-release snapshot to the sourceware FTP site:
 
-          scp binutils-2.40.90.tar.xz sourceware.org:/var/ftp/pub/binutils/snapshots
-          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.40.90.tar.xz
+          scp binutils-2.42.90.tar.xz sourceware.org:/var/ftp/pub/binutils/snapshots
+          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.42.90.tar.xz
 
+        Paranoia: Compare the checksum with the local version.
+	
      e. Clean up the source directory again.
 
          git clean -fdx
@@ -177,11 +179,11 @@ Approx time to complete from here: 2 hours ...
 ------------------------------------------------------------------------
 Dear Translation Project
 
-  The 2.42 release branch has been created for the GNU Binutils project.
+  The 2.43 release branch has been created for the GNU Binutils project.
 
   A snapshot of the branch sources can be found here:
 
-    https://sourceware.org/pub/binutils/snapshots/binutils-2.41.90.tar.xz
+    https://sourceware.org/pub/binutils/snapshots/binutils-2.42.90.tar.xz
 
   We hope to make the official release of the sources on the <DATE>
   although that could change if there are important bugs that need to
