@@ -210,7 +210,7 @@ filename_completer (struct cmd_list_element *ignore,
   while (1)
     {
       gdb::unique_xmalloc_ptr<char> p_rl
-	(rl_filename_completion_function (text, subsequent_name));
+	(rl_filename_completion_function (word, subsequent_name));
       if (p_rl == NULL)
 	break;
       /* We need to set subsequent_name to a non-zero value before the
@@ -239,7 +239,7 @@ filename_completer (struct cmd_list_element *ignore,
 	}
 
       tracker.add_completion
-	(make_completion_match_str (std::move (p_rl), text, word));
+	(make_completion_match_str (std::move (p_rl), word, word));
     }
 }
 
@@ -1193,23 +1193,6 @@ complete_line_internal_normal_command (completion_tracker &tracker,
 				       complete_line_internal_reason reason,
 				       struct cmd_list_element *c)
 {
-  const char *p = cmd_args;
-
-  if (c->completer == filename_completer)
-    {
-      /* Many commands which want to complete on file names accept
-	 several file names, as in "run foo bar >>baz".  So we don't
-	 want to complete the entire text after the command, just the
-	 last word.  To this end, we need to find the beginning of the
-	 file name by starting at `word' and going backwards.  */
-      for (p = word;
-	   p > command
-	     && strchr (gdb_completer_file_name_break_characters,
-			p[-1]) == NULL;
-	   p--)
-	;
-    }
-
   if (reason == handle_brkchars)
     {
       completer_handle_brkchars_ftype *brkchars_fn;
@@ -1223,11 +1206,11 @@ complete_line_internal_normal_command (completion_tracker &tracker,
 	       (c->completer));
 	}
 
-      brkchars_fn (c, tracker, p, word);
+      brkchars_fn (c, tracker, cmd_args, word);
     }
 
   if (reason != handle_brkchars && c->completer != NULL)
-    (*c->completer) (c, tracker, p, word);
+    (*c->completer) (c, tracker, cmd_args, word);
 }
 
 /* Internal function used to handle completions.
