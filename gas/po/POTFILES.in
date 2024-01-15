@@ -239,6 +239,8 @@ frags.c
 frags.h
 gen-sframe.c
 gen-sframe.h
+ginsn.c
+ginsn.h
 hash.c
 hash.h
 input-file.c
@@ -261,6 +263,10 @@ read.h
 remap.c
 sb.c
 sb.h
+scfi.c
+scfi.h
+scfidw2gen.c
+scfidw2gen.h
 sframe-opt.c
 stabs.c
 subsegs.c

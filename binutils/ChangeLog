@@ -1,5 +1,10 @@
 2024-01-15  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/binutils.pot: Regernate.
+
+2024-01-15  Nick Clifton  <nickc@redhat.com>
+
 	* 2.42 branch point.
 
 2023-12-04  Tom Tromey  <tom@tromey.com>

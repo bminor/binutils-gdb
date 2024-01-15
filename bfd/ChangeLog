@@ -1,5 +1,11 @@
 2024-01-15  Nick Clifton  <nickc@redhat.com>
 
+	* version.m4: Change to 2.42.50.
+	* configure: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+2024-01-15  Nick Clifton  <nickc@redhat.com>
+
 	* 2.42 branch point.
 
 2023-12-05  Nick Clifton  <nickc@redhat.com>

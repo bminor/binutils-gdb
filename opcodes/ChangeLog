@@ -1,5 +1,10 @@
 2024-01-15  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
+2024-01-15  Nick Clifton  <nickc@redhat.com>
+
 	* 2.42 branch point.
 
 2023-11-15  Arsen Arsenović  <arsen@aarsen.me>
