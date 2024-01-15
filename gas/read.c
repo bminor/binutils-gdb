@@ -38,6 +38,7 @@
 #include "obstack.h"
 #include "ecoff.h"
 #include "dw2gencfi.h"
+#include "scfidw2gen.h"
 #include "codeview.h"
 #include "wchar.h"
 #include "filenames.h"
@@ -587,6 +588,10 @@ pop_insert (const pseudo_typeS *table)
 #define cfi_pop_insert()	pop_insert(cfi_pseudo_table)
 #endif
 
+#ifndef scfi_pop_insert
+#define scfi_pop_insert()	pop_insert(scfi_pseudo_table)
+#endif
+
 static void
 pobegin (void)
 {
@@ -607,8 +612,18 @@ pobegin (void)
   pop_insert (potable);
 
   /* Now CFI ones.  */
-  pop_table_name = "cfi";
-  cfi_pop_insert ();
+#if defined (TARGET_USE_SCFI) && defined (TARGET_USE_GINSN)
+  if (flag_synth_cfi)
+    {
+      pop_table_name = "scfi";
+      scfi_pop_insert ();
+    }
+  else
+#endif
+    {
+      pop_table_name = "cfi";
+      cfi_pop_insert ();
+    }
 }
 
 static void

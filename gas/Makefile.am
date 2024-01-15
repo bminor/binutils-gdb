@@ -93,6 +93,7 @@ GAS_CFILES = \
 	read.c \
 	remap.c \
 	sb.c \
+	scfidw2gen.c \
 	sframe-opt.c \
 	stabs.c \
 	subsegs.c \
@@ -128,6 +129,7 @@ HFILES = \
 	output-file.h \
 	read.h \
 	sb.h \
+	scfidw2gen.h \
 	subsegs.h \
 	symbols.h \
 	tc.h \
