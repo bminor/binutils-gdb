@@ -181,13 +181,6 @@ static const char gdb_completer_file_name_break_characters[] =
    sequences as strings.  */
 static const char gdb_completer_quote_characters[] = "'";
 
-/* Accessor for some completer data that may interest other files.  */
-
-const char *
-get_gdb_completer_quote_characters (void)
-{
-  return gdb_completer_quote_characters;
-}
 
 /* This can be used for functions which don't want to complete on
    symbols but don't want to complete on anything else either.  */
@@ -1268,6 +1261,9 @@ complete_line_internal_1 (completion_tracker &tracker,
      commands.  */
   set_rl_completer_word_break_characters
     (current_language->word_break_characters ());
+
+  /* Likewise for the quote characters.  */
+  rl_completer_quote_characters = gdb_completer_quote_characters;
 
   /* Decide whether to complete on a list of gdb commands or on
      symbols.  */

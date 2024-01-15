@@ -37,6 +37,9 @@ proc setup_directory_tree {} {
     remote_exec host "mkdir -p ${root}/cc1"
     remote_exec host "touch ${root}/cc2"
 
+    remote_exec host "touch \"${root}/aaa/aa bb\""
+    remote_exec host "touch \"${root}/aaa/aa cc\""
+
     return $root
 }
 
@@ -45,26 +48,49 @@ proc setup_directory_tree {} {
 # sub-directory of the user's home directory ROOT might have been
 # modified to replace the $HOME prefix with a single "~" character.
 proc run_tests { root } {
-    test_gdb_complete_none "file ${root}/xx" \
-	"expand a non-existent filename"
 
-    test_gdb_complete_unique "file ${root}/a" \
-	"file ${root}/aaa/" "" false \
-	"expand a unique filename"
+    # Completing 'thread apply all ...' commands uses a custom word
+    # point.  At one point we had a bug where doing this would break
+    # completion of quoted filenames that contained white space.
+    test_gdb_complete_unique "thread apply all hel" \
+	"thread apply all help" " " false \
+	"complete a 'thread apply all' command"
 
-    test_gdb_complete_multiple "file ${root}/" \
-	"b" "b" {
-	    "bb1/"
-	    "bb2/"
-	} "" "" false \
-	"expand multiple directory names"
+    foreach_with_prefix qc [list "" "'"] {
+	test_gdb_complete_none "file ${qc}${root}/xx" \
+	    "expand a non-existent filename"
 
-    test_gdb_complete_multiple "file ${root}/" \
-	"c" "c" {
-	    "cc1/"
-	    "cc2"
-	} "" "" false \
-	"expand mixed directory and file names"
+	test_gdb_complete_unique "file ${qc}${root}/a" \
+	    "file ${qc}${root}/aaa/" "" false \
+	    "expand a unique filename"
+
+	test_gdb_complete_multiple "file ${qc}${root}/" \
+	    "b" "b" {
+		"bb1/"
+		"bb2/"
+	    } "" "${qc}" false \
+	    "expand multiple directory names"
+
+	test_gdb_complete_multiple "file ${qc}${root}/" \
+	    "c" "c" {
+		"cc1/"
+		"cc2"
+	    } "" "${qc}" false \
+	    "expand mixed directory and file names"
+
+	# GDB does not currently escape word break characters
+	# (e.g. white space) correctly in unquoted filenames.
+	if { $qc ne "" } {
+	    set sp " "
+
+	    test_gdb_complete_multiple "file ${qc}${root}/aaa/" \
+		"a" "a${sp}" {
+		    "aa bb"
+		    "aa cc"
+		} "" "${qc}" false \
+		"expand filenames containing spaces"
+	}
+    }
 }
 
 gdb_start

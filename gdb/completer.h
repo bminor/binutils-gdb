@@ -619,8 +619,6 @@ extern void reggroup_completer (struct cmd_list_element *,
 				completion_tracker &tracker,
 				const char *, const char *);
 
-extern const char *get_gdb_completer_quote_characters (void);
-
 extern char *gdb_completion_word_break_characters (void);
 
 /* Set the word break characters array to BREAK_CHARS.  This function
