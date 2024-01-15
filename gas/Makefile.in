@@ -173,12 +173,13 @@ am__objects_1 = app.$(OBJEXT) as.$(OBJEXT) atof-generic.$(OBJEXT) \
 	ecoff.$(OBJEXT) ehopt.$(OBJEXT) expr.$(OBJEXT) \
 	flonum-copy.$(OBJEXT) flonum-konst.$(OBJEXT) \
 	flonum-mult.$(OBJEXT) frags.$(OBJEXT) gen-sframe.$(OBJEXT) \
-	hash.$(OBJEXT) input-file.$(OBJEXT) input-scrub.$(OBJEXT) \
-	listing.$(OBJEXT) literal.$(OBJEXT) macro.$(OBJEXT) \
-	messages.$(OBJEXT) output-file.$(OBJEXT) read.$(OBJEXT) \
-	remap.$(OBJEXT) sb.$(OBJEXT) scfidw2gen.$(OBJEXT) \
-	sframe-opt.$(OBJEXT) stabs.$(OBJEXT) subsegs.$(OBJEXT) \
-	symbols.$(OBJEXT) write.$(OBJEXT)
+	ginsn.$(OBJEXT) hash.$(OBJEXT) input-file.$(OBJEXT) \
+	input-scrub.$(OBJEXT) listing.$(OBJEXT) literal.$(OBJEXT) \
+	macro.$(OBJEXT) messages.$(OBJEXT) output-file.$(OBJEXT) \
+	read.$(OBJEXT) remap.$(OBJEXT) sb.$(OBJEXT) \
+	scfidw2gen.$(OBJEXT) scfi.$(OBJEXT) sframe-opt.$(OBJEXT) \
+	stabs.$(OBJEXT) subsegs.$(OBJEXT) symbols.$(OBJEXT) \
+	write.$(OBJEXT)
 am_as_new_OBJECTS = $(am__objects_1)
 am__dirstamp = $(am__leading_dot)dirstamp
 as_new_OBJECTS = $(am_as_new_OBJECTS)
@@ -581,6 +582,7 @@ GAS_CFILES = \
 	flonum-mult.c \
 	frags.c \
 	gen-sframe.c \
+	ginsn.c \
 	hash.c \
 	input-file.c \
 	input-scrub.c \
@@ -593,6 +595,7 @@ GAS_CFILES = \
 	remap.c \
 	sb.c \
 	scfidw2gen.c \
+	scfi.c \
 	sframe-opt.c \
 	stabs.c \
 	subsegs.c \
@@ -617,6 +620,7 @@ HFILES = \
 	flonum.h \
 	frags.h \
 	gen-sframe.h \
+	ginsn.h \
 	hash.h \
 	input-file.h \
 	itbl-lex.h \
@@ -628,6 +632,7 @@ HFILES = \
 	read.h \
 	sb.h \
 	scfidw2gen.h \
+	scfi.h \
 	subsegs.h \
 	symbols.h \
 	tc.h \
@@ -1336,6 +1341,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flonum-mult.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frags.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen-sframe.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ginsn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input-file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input-scrub.Po@am__quote@
@@ -1350,6 +1356,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/read.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/remap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scfi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scfidw2gen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sframe-opt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stabs.Po@am__quote@

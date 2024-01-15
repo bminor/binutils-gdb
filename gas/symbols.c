@@ -25,6 +25,7 @@
 #include "obstack.h"		/* For "symbols.h" */
 #include "subsegs.h"
 #include "write.h"
+#include "scfi.h"
 
 #include <limits.h>
 #ifndef CHAR_BIT
@@ -709,6 +710,8 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 #ifdef obj_frob_label
   obj_frob_label (symbolP);
 #endif
+  if (flag_synth_cfi)
+    ginsn_frob_label (symbolP);
 
   return symbolP;
 }

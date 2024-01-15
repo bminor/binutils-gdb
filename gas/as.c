@@ -45,6 +45,7 @@
 #include "codeview.h"
 #include "bfdver.h"
 #include "write.h"
+#include "ginsn.h"
 
 #ifdef HAVE_ITBL_CPU
 #include "itbl-ops.h"
@@ -245,6 +246,7 @@ Options:\n\
                       	  d      omit debugging directives\n\
                       	  g      include general info\n\
                       	  h      include high-level source\n\
+                      	  i      include ginsn and synthesized CFI info\n\
                       	  l      include assembly\n\
                       	  m      include macro expansions\n\
                       	  n      omit forms processing\n\
@@ -1087,6 +1089,9 @@ This program has absolutely no warranty.\n"));
 		      break;
 		    case 'h':
 		      listing |= LISTING_HLL;
+		      break;
+		    case 'i':
+		      listing |= LISTING_GINSN_SCFI;
 		      break;
 		    case 'l':
 		      listing |= LISTING_LISTING;

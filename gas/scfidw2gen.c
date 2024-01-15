@@ -19,6 +19,8 @@
    02110-1301, USA.  */
 
 #include "as.h"
+#include "ginsn.h"
+#include "scfi.h"
 #include "dw2gencfi.h"
 #include "subsegs.h"
 #include "scfidw2gen.h"
@@ -43,15 +45,33 @@ dot_scfi_ignore (int ignored ATTRIBUTE_UNUSED)
 static void
 scfi_process_cfi_label (void)
 {
-  /* To be implemented. */
-  return;
+  char *name;
+  ginsnS *ginsn;
+
+  name = read_symbol_name ();
+  if (name == NULL)
+    return;
+
+  /* Add a new ginsn.  */
+  ginsn = ginsn_new_phantom (symbol_temp_new_now ());
+  frch_ginsn_data_append (ginsn);
+
+  scfi_op_add_cfi_label (ginsn, name);
+  /* TODO.  */
+  // free (name);
+
+  demand_empty_rest_of_line ();
 }
 
 static void
 scfi_process_cfi_signal_frame (void)
 {
-  /* To be implemented.  */
-  return;
+  ginsnS *ginsn;
+
+  ginsn = ginsn_new_phantom (symbol_temp_new_now ());
+  frch_ginsn_data_append (ginsn);
+
+  scfi_op_add_signal_frame (ginsn);
 }
 
 static void
