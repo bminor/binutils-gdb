@@ -1389,12 +1389,16 @@ typedef struct
   const char *name;
   uint32_t value;
   uint32_t flags ;
+
+  /* A set of features, all of which are required for this system instruction to be
+     available.  */
+  aarch64_feature_set features;
 } aarch64_sys_ins_reg;
 
 extern bool aarch64_sys_ins_reg_has_xt (const aarch64_sys_ins_reg *);
 extern bool
 aarch64_sys_ins_reg_supported_p (const aarch64_feature_set,
-				 const char *reg_name, aarch64_insn,
+				 const char *reg_name,
 				 uint32_t, const aarch64_feature_set *);
 
 extern const aarch64_sys_ins_reg aarch64_sys_regs_ic [];

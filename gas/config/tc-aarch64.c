@@ -4836,8 +4836,7 @@ parse_sys_reg (char **str, htab_t sys_regs,
 		  "name '%s'"), buf);
       if (!pstatefield_p
 	  && !aarch64_sys_ins_reg_supported_p (cpu_variant, o->name,
-					       o->value, o->flags,
-					       &o->features))
+					       o->flags, &o->features))
 	as_bad (_("selected processor does not support system register "
 		  "name '%s'"), buf);
       if (sysreg128_p && !aarch64_sys_reg_128bit_p (o->flags))
@@ -4882,7 +4881,7 @@ parse_sys_ins_reg (char **str, htab_t sys_ins_regs)
     return NULL;
 
   if (!aarch64_sys_ins_reg_supported_p (cpu_variant,
-					o->name, o->value, o->flags, 0))
+					o->name, o->flags, &o->features))
     as_bad (_("selected processor does not support system register "
 	      "name '%s'"), buf);
   if (aarch64_sys_reg_deprecated_p (o->flags))
