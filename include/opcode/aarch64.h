@@ -129,8 +129,6 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_CVADP,
   /* Random Number instructions.  */
   AARCH64_FEATURE_RNG,
-  /* BTI instructions.  */
-  AARCH64_FEATURE_BTI,
   /* SCXTNUM_ELx.  */
   AARCH64_FEATURE_SCXTNUM,
   /* ID_PFR2 instructions.  */
@@ -273,7 +271,6 @@ enum aarch64_feature_bit {
 					 | AARCH64_FEATBIT (X, SB)	\
 					 | AARCH64_FEATBIT (X, PREDRES)	\
 					 | AARCH64_FEATBIT (X, CVADP)	\
-					 | AARCH64_FEATBIT (X, BTI)	\
 					 | AARCH64_FEATBIT (X, SCXTNUM)	\
 					 | AARCH64_FEATBIT (X, ID_PFR2)	\
 					 | AARCH64_FEATBIT (X, SSBS))
