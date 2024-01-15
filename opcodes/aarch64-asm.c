@@ -1999,7 +1999,7 @@ do_special_encoding (struct aarch64_inst *inst)
 
   if ((inst->opcode->flags & F_OPD_SIZE) && inst->opcode->iclass == sve2_urqvs)
     {
-      enum aarch64_opnd_qualifier qualifier[1];
+      enum aarch64_opnd_qualifier qualifier[2];
       aarch64_insn value1 = 0;
       idx = 0;
       qualifier[0] = inst->operands[idx].qualifier;
