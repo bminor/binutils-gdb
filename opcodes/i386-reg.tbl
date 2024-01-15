@@ -18,6 +18,9 @@
 // Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
 // 02110-1301, USA.
 
+// The code in gas backend for SCFI relies on the relative ordering
+// of 8 bit / 16 bit / 32 bit / 64 bit regs
+
 // 8 bit regs
 al, Class=Reg|Instance=Accum|Byte, 0, 0, Dw2Inval, Dw2Inval
 cl, Class=Reg|Instance=RegC|Byte, 0, 1, Dw2Inval, Dw2Inval
