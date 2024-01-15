@@ -7,11 +7,6 @@
 	tlbip	vale3nxs, x2
 	tlbip	vale3nxs, x2, x3
 
-
-	/* Conversely, those without the flag do not allow us to specify registers,
-	so the only accepted alternative is the complete omission of optional ops.  */
-	tlbip	paall
-
 	/* No such checking is carried out when the same instruction is issued
 	directly via the sysp implementation defined maintenance instruction,
 	such that both GRPs are optional.  */
