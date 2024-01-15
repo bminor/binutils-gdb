@@ -321,6 +321,11 @@ Options:\n\
                           generate GNU Build notes if none are present in the input\n"));
   fprintf (stream, _("\
   --gsframe               generate SFrame stack trace information\n"));
+# if defined (TARGET_USE_SCFI) && defined (TARGET_USE_GINSN)
+  fprintf (stream, _("\
+  --scfi=experimental     Synthesize DWARF CFI for hand-written asm\n\
+                          (experimental support)\n"));
+# endif
 #endif /* OBJ_ELF */
 
   fprintf (stream, _("\
@@ -511,7 +516,8 @@ parse_args (int * pargc, char *** pargv)
       OPTION_NOCOMPRESS_DEBUG,
       OPTION_NO_PAD_SECTIONS,
       OPTION_MULTIBYTE_HANDLING,  /* = STD_BASE + 40 */
-      OPTION_SFRAME
+      OPTION_SFRAME,
+      OPTION_SCFI
     /* When you add options here, check that they do
        not collide with OPTION_MD_BASE.  See as.h.  */
     };
@@ -543,7 +549,10 @@ parse_args (int * pargc, char *** pargv)
     ,{"sectname-subst", no_argument, NULL, OPTION_SECTNAME_SUBST}
     ,{"generate-missing-build-notes", required_argument, NULL, OPTION_ELF_BUILD_NOTES}
     ,{"gsframe", no_argument, NULL, OPTION_SFRAME}
-#endif
+# if defined (TARGET_USE_SCFI) && defined (TARGET_USE_GINSN)
+    ,{"scfi", required_argument, NULL, OPTION_SCFI}
+# endif
+#endif /* OBJ_ELF || OBJ_MAYBE_ELF.  */
     ,{"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
     ,{"gdwarf-2", no_argument, NULL, OPTION_GDWARF_2}
     ,{"gdwarf-3", no_argument, NULL, OPTION_GDWARF_3}
@@ -981,6 +990,16 @@ This program has absolutely no warranty.\n"));
 	  flag_noexecstack = 1;
 	  flag_execstack = 0;
 	  break;
+
+# if defined (TARGET_USE_SCFI) && defined (TARGET_USE_GINSN)
+	case OPTION_SCFI:
+	  if (optarg && strcasecmp (optarg, "experimental") == 0)
+	    flag_synth_cfi = SYNTH_CFI_EXPERIMENTAL;
+	  else
+	    as_fatal (_("Invalid --scfi= option: `%s'; suggested option: experimental"),
+		      optarg);
+	  break;
+# endif
 
 	case OPTION_SIZE_CHECK:
 	  if (strcasecmp (optarg, "error") == 0)

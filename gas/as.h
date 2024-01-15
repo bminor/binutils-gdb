@@ -324,6 +324,14 @@ COMMON int flag_fatal_warnings; /* --fatal-warnings */
    are detected.  */
 COMMON unsigned char flag_always_generate_output; /* -Z */
 
+enum synth_cfi_type
+{
+  SYNTH_CFI_NONE = 0,
+  SYNTH_CFI_EXPERIMENTAL,
+};
+
+COMMON enum synth_cfi_type flag_synth_cfi;
+
 /* This is true if the assembler should output time and space usage.  */
 COMMON unsigned char flag_print_statistics;
 

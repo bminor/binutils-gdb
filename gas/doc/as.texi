@@ -255,6 +255,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--multibyte-handling=[allow|warn|warn-sym-only]}]
  [@b{--no-pad-sections}]
  [@b{-o} @var{objfile}] [@b{-R}]
+ [@b{--scfi=experimental}]
  [@b{--sectname-subst}]
  [@b{--size-check=[error|warning]}]
  [@b{--statistics}]
@@ -932,6 +933,20 @@ Ignored.  Supported for compatibility with tools that apss the same option to
 both the assembler and the linker.
 
 @ifset ELF
+@item --scfi=experimental
+This option controls whether the assembler should synthesize CFI for
+hand-written input.  If the input already contains some synthesizable CFI
+directives, the assembler ignores them and emits a warning.  Note that
+@code{--scfi=experimental} is not intended to be used for compiler-generated
+code, including inline assembly.  This experimental support is work in
+progress.  Only System V AMD64 ABI is supported.
+
+Each input function in assembly must begin with the @code{.type} directive, and
+should ideally be closed off using a @code{.size} directive.  When using SCFI,
+each @code{.type} directive prompts GAS to start a new FDE (a.k.a., Function
+Descriptor Entry).  This implies that with each @code{.type} directive, a
+previous block of instructions, if any, is finalised as a distinct FDE.
+
 @item --sectname-subst
 Honor substitution sequences in section names.
 @ifclear man
