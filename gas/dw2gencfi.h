@@ -27,6 +27,8 @@
 struct symbol;
 struct fde_entry;
 
+extern int all_cfi_sections;
+
 extern const pseudo_typeS cfi_pseudo_table[];
 
 #ifndef tc_cfi_frame_initial_instructions
