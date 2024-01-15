@@ -1,6 +1,6 @@
 2024-01-15  Nick Clifton  <nickc@redhat.com>
 
-	* version.m4: Change to 2.42.50.
+	* version.m4: Change to 2.41.90.
 	* configure: Regenerate.
 	* po/bfd.pot: Regenerate.
 
