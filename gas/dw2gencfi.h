@@ -41,6 +41,10 @@ extern const pseudo_typeS cfi_pseudo_table[];
 # define tc_cfi_endproc(fde) ((void) (fde))
 #endif
 
+/* Parse CFI assembler directive .cfi_sections.  This is an external function
+   because SCFI functionality also uses the same implementation.  */
+extern void dot_cfi_sections (int);
+
 /* cfi_finish() is called at the end of file. It will complain if
    the last CFI wasn't properly closed by .cfi_endproc.  */
 extern void cfi_finish (void);
