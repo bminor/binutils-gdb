@@ -1794,6 +1794,18 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    return 0;
 	  break;
 
+	case AARCH64_OPND_SVE_Zm_imm4:
+	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31, 0, 15))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SVE_Zn_5_INDEX:
+	  size = aarch64_get_qualifier_esize (opnd->qualifier);
+	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31,
+			      0, 16 / size - 1))
+	    return 0;
+	  break;
+
 	case AARCH64_OPND_SME_PNn3_INDEX1:
 	case AARCH64_OPND_SME_PNn3_INDEX2:
 	  size = get_operand_field_width (get_operand_from_code (type), 1);
@@ -4074,6 +4086,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_Zm_INDEX3_1:
     case AARCH64_OPND_SME_Zm_INDEX3_2:
     case AARCH64_OPND_SME_Zm_INDEX3_10:
+    case AARCH64_OPND_SVE_Zn_5_INDEX:
     case AARCH64_OPND_SME_Zm_INDEX4_1:
     case AARCH64_OPND_SME_Zm_INDEX4_10:
     case AARCH64_OPND_SME_Zn_INDEX1_16:
@@ -4082,6 +4095,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_Zn_INDEX3_14:
     case AARCH64_OPND_SME_Zn_INDEX3_15:
     case AARCH64_OPND_SME_Zn_INDEX4_14:
+    case AARCH64_OPND_SVE_Zm_imm4:
       snprintf (buf, size, "%s[%s]",
 		(opnd->qualifier == AARCH64_OPND_QLF_NIL
 		 ? style_reg (styler, "z%d", opnd->reglane.regno)

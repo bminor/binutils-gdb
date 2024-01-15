@@ -1220,6 +1220,21 @@ aarch64_ins_sve_index (const aarch64_operand *self,
   return true;
 }
 
+/* Encode Zn.<T>[<imm>], where <imm> is an immediate with range of 0 to one less
+   than the number of elements in 128 bit, which can encode il:tsz.  */
+bool
+aarch64_ins_sve_index_imm (const aarch64_operand *self,
+			   const aarch64_opnd_info *info, aarch64_insn *code,
+			   const aarch64_inst *inst ATTRIBUTE_UNUSED,
+			   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  insert_field (self->fields[0], code, info->reglane.regno, 0);
+  unsigned int esize = aarch64_get_qualifier_esize (info->qualifier);
+  insert_fields (code, (info->reglane.index * 2 + 1) * esize, 0,
+		 2, self->fields[1],self->fields[2]);
+  return true;
+}
+
 /* Encode a logical/bitmask immediate for the MOV alias of SVE DUPM.  */
 bool
 aarch64_ins_sve_limm_mov (const aarch64_operand *self,
@@ -2079,6 +2094,7 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
 
     case sme_shift:
     case sve_index:
+    case sve_index1:
     case sve_shift_pred:
     case sve_shift_unpred:
     case sve_shift_tsz_hsd:

@@ -44,3 +44,23 @@
 .*:	04cf2c44 	uminqv	v4.2d, p3, z2.d
 .*:	04cf3028 	uminqv	v8.2d, p4, z1.d
 .*:	048f3c10 	uminqv	v16.4s, p7, z0.s
+.*:	0530268a 	dupq	z10.b, z20.b\[0\]
+.*:	053f268a 	dupq	z10.b, z20.b\[15\]
+.*:	0521268a 	dupq	z10.h, z20.h\[0\]
+.*:	052f268a 	dupq	z10.h, z20.h\[7\]
+.*:	0522268a 	dupq	z10.s, z20.s\[0\]
+.*:	052e268a 	dupq	z10.s, z20.s\[3\]
+.*:	0524268a 	dupq	z10.d, z20.d\[0\]
+.*:	052c268a 	dupq	z10.d, z20.d\[1\]
+.*:	041d2200 	eorqv	v0.16b, p0, z16.b
+.*:	045d2501 	eorqv	v1.8h, p1, z8.h
+.*:	049d2882 	eorqv	v2.4s, p2, z4.s
+.*:	04dd2c44 	eorqv	v4.2d, p3, z2.d
+.*:	04dd3028 	eorqv	v8.2d, p4, z1.d
+.*:	049d3c10 	eorqv	v16.4s, p7, z0.s
+.*:	056a27c0 	extq	z0.b, z0.b, z10.b\[15\]
+.*:	056f25c1 	extq	z1.b, z1.b, z15.b\[7\]
+.*:	056524c2 	extq	z2.b, z2.b, z5.b\[3\]
+.*:	056c2444 	extq	z4.b, z4.b, z12.b\[1\]
+.*:	05672508 	extq	z8.b, z8.b, z7.b\[4\]
+.*:	05612610 	extq	z16.b, z16.b, z1.b\[8\]

@@ -2097,6 +2097,26 @@ aarch64_ext_sve_index (const aarch64_operand *self,
   return true;
 }
 
+/* Decode Zn.<T>[<imm>], where <imm> is an immediate with range of 0 to one less
+   than the number of elements in 128 bit, which can encode il:tsz.  */
+bool
+aarch64_ext_sve_index_imm (const aarch64_operand *self,
+			   aarch64_opnd_info *info, aarch64_insn code,
+			   const aarch64_inst *inst ATTRIBUTE_UNUSED,
+			   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int val;
+
+  info->reglane.regno = extract_field (self->fields[0], code, 0);
+  val = extract_fields (code, 0, 2, self->fields[2], self->fields[1]);
+  if ((val & 15) == 0)
+    return 0;
+  while ((val & 1) == 0)
+    val /= 2;
+  info->reglane.index = val / 2;
+  return true;
+}
+
 /* Decode a logical immediate for the MOV alias of SVE DUPM.  */
 bool
 aarch64_ext_sve_limm_mov (const aarch64_operand *self,
@@ -3223,6 +3243,17 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
     case sve_index:
       i = extract_fields (inst->value, 0, 2, FLD_SVE_tszh, FLD_imm5);
       if ((i & 31) == 0)
+	return false;
+      while ((i & 1) == 0)
+	{
+	  i >>= 1;
+	  variant += 1;
+	}
+      break;
+
+    case sve_index1:
+      i = extract_fields (inst->value, 0, 2, FLD_SVE_tsz, FLD_SVE_i2h);
+      if ((i & 15) == 0)
 	return false;
       while ((i & 1) == 0)
 	{
