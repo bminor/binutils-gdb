@@ -10335,6 +10335,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"ite",		AARCH64_FEATURE (ITE), AARCH64_NO_FEATURES},
   {"d128",		AARCH64_FEATURE (D128),
 			AARCH64_FEATURE (LSE128)},
+  {"b16b16",		AARCH64_FEATURE (B16B16), AARCH64_FEATURE (SVE2)},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 

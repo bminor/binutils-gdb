@@ -222,6 +222,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_PMUv3_ICNTR,
   /* Performance Monitors Synchronous-Exception-Based Event Extension.  */
   AARCH64_FEATURE_SEBEP,
+  /* SVE2.1 and SME2.1 non-widening BFloat16 instructions.  */
+  AARCH64_FEATURE_B16B16,
   AARCH64_NUM_FEATURES
 };
 
