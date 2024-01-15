@@ -19,7 +19,7 @@ if { ![is_elf_format] } then {
 }
 
 # common tests
-if  { ([istarget "x86_64-*-*"]) } then {
+if  { ([istarget "x86_64-*-*"] && ![istarget "x86_64-*-linux*-gnux32"]) } then {
 
     global ASFLAGS
     set old_ASFLAGS "$ASFLAGS"
