@@ -226,6 +226,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_B16B16,
   /* SME2.1 instructions.  */
   AARCH64_FEATURE_SME2p1,
+  /* SVE2.1 instructions.  */
+  AARCH64_FEATURE_SVE2p1,
   AARCH64_NUM_FEATURES
 };
 
@@ -1000,6 +1002,7 @@ enum aarch64_insn_class
   cssc,
   gcs,
   the,
+  sve2_urqvs
 };
 
 /* Opcode enumerators.  */
@@ -1272,7 +1275,9 @@ extern const aarch64_opcode aarch64_opcode_table[];
    allow.  This impacts the constraintts on assembly but yelds no
    impact on disassembly.  */
 #define F_OPD_NARROW (1ULL << 33)
-/* Next bit is 34.  */
+/* For the instruction with size[22:23] field.  */
+#define F_OPD_SIZE (1ULL << 34)
+/* Next bit is 35.  */
 
 /* Instruction constraints.  */
 /* This instruction has a predication constraint on the instruction at PC+4.  */
@@ -1339,7 +1344,8 @@ static inline bool
 opcode_has_special_coder (const aarch64_opcode *opcode)
 {
   return (opcode->flags & (F_SF | F_LSE_SZ | F_SIZEQ | F_FPTYPE | F_SSIZE | F_T
-	  | F_GPRSIZE_IN_Q | F_LDS_SIZE | F_MISC | F_N | F_COND)) != 0;
+	  | F_GPRSIZE_IN_Q | F_LDS_SIZE | F_MISC | F_N | F_COND
+	  | F_OPD_SIZE)) != 0;
 }
 
 struct aarch64_name_value_pair

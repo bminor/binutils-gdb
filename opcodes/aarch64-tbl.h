@@ -1487,6 +1487,10 @@
    - P: the operand has a /[ZM] suffix and the choice of suffix is not
      the same for all variants.
 
+   - v: the operand has a V_[16B|8H|4S|2D] qualifier and the choice of
+     qualifier suffix is not the same for all variants.  This is used for
+     the same kinds of operands as [BHSD] above.
+
    The _<sizes>, if present, give the subset of [BHSD] that are accepted
    by the V entries in <operands>.  */
 #define OP_SVE_B                                        \
@@ -1910,6 +1914,13 @@
   QLF3(S_H,S_B,NIL),                                    \
   QLF3(S_S,S_H,NIL),                                    \
   QLF3(S_D,S_S,NIL),                                    \
+}
+#define OP_SVE_vUS_BHSD_BHSD				\
+{							\
+  QLF3(V_16B,NIL,S_B),					\
+  QLF3(V_8H,NIL,S_H),					\
+  QLF3(V_4S,NIL,S_S),					\
+  QLF3(V_2D,NIL,S_D),					\
 }
 #define OP_SVE_VMV_SD                                   \
 {                                                       \
@@ -2620,6 +2631,8 @@ static const aarch64_feature_set aarch64_feature_b16b16 =
   AARCH64_FEATURE (B16B16);
 static const aarch64_feature_set aarch64_feature_sme2p1 =
   AARCH64_FEATURE (SME2p1);
+static const aarch64_feature_set aarch64_feature_sve2p1 =
+  AARCH64_FEATURE (SVE2p1);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2684,6 +2697,7 @@ static const aarch64_feature_set aarch64_feature_sme2p1 =
 #define D128_THE  &aarch64_feature_d128_the
 #define B16B16  &aarch64_feature_b16b16
 #define SME2p1  &aarch64_feature_sme2p1
+#define SVE2p1  &aarch64_feature_sve2p1
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2761,6 +2775,12 @@ static const aarch64_feature_set aarch64_feature_sme2p1 =
     FLAGS | F_STRICT, 0, TIED, NULL }
 #define B16B16_INSNC(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,CONSTRAINTS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, B16B16, OPS, QUALS, \
+    FLAGS | F_STRICT, CONSTRAINTS, TIED, NULL }
+#define SVE2p1_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SVE2p1, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
+#define SVE2p1_INSNC(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,CONSTRAINTS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SVE2p1, OPS, QUALS, \
     FLAGS | F_STRICT, CONSTRAINTS, TIED, NULL }
 #define SVE2AES_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE2_AES, OPS, QUALS, \
@@ -6309,6 +6329,15 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2p1_INSN ("movaz", 0xc0460200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrsh_1), OP_SVE_HH, 0, 0),
   SME2p1_INSN ("movaz", 0xc0860200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrss_1), OP_SVE_SS, 0, 0),
   SME2p1_INSN ("movaz", 0xc0c60200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrsd_1), OP_SVE_DD, 0, 0),
+
+/* SVE2p1 Instructions.  */
+  SVE2p1_INSNC("addqv",0x04052000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
+  SVE2p1_INSNC("andqv",0x041e2000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
+  SVE2p1_INSNC("smaxqv",0x040c2000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
+  SVE2p1_INSNC("sminqv",0x040e2000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
+  SVE2p1_INSNC("umaxqv",0x040d2000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
+  SVE2p1_INSNC("uminqv",0x040f2000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
+
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };
 

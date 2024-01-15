@@ -3,6 +3,9 @@
   hand-written asm using the new command line option --scfi=experimental on
   x86-64.  Only System V AMD64 ABI is supported.
 
+* Add support for the Arm Scalable Vector Extension version 2.1 (SVE2.1)
+  instructions.
+
 * Add support for the AArch64 Scalable Matrix Extension version 2.1 (SME2.1)
   instructions.
 

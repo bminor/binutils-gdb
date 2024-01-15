@@ -278,6 +278,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the 128-bit Page Descriptor Extension.  This implies @code{lse128}.
 @item @code{sme2p1} @tab N/A @tab No
  @tab Enable the SME2.1 Extension.
+@item @code{sve2p1} @tab N/A @tab No
+ @tab Enable the SVE2.1 Extension.
 @end multitable
 
 @node AArch64 Syntax

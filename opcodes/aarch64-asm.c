@@ -1981,6 +1981,20 @@ do_special_encoding (struct aarch64_inst *inst)
       gen_sub_field (FLD_imm5, 0, num + 1, &field);
       insert_field_2 (&field, &inst->value, 1 << num, inst->opcode->mask);
     }
+
+  if ((inst->opcode->flags & F_OPD_SIZE) && inst->opcode->iclass == sve2_urqvs)
+    {
+      enum aarch64_opnd_qualifier qualifier[1];
+      aarch64_insn value1 = 0;
+      idx = 0;
+      qualifier[0] = inst->operands[idx].qualifier;
+      qualifier[1] = inst->operands[idx+2].qualifier;
+      value = aarch64_get_qualifier_standard_value (qualifier[0]);
+      value1 = aarch64_get_qualifier_standard_value (qualifier[1]);
+      assert ((value >> 1) == value1);
+      insert_field (FLD_size, &inst->value, value1, inst->opcode->mask);
+    }
+
   if (inst->opcode->flags & F_GPRSIZE_IN_Q)
     {
       /* Use Rt to encode in the case of e.g.

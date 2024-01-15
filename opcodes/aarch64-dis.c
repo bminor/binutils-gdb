@@ -2609,6 +2609,16 @@ do_special_decoding (aarch64_inst *inst)
 	get_vreg_qualifier_from_value ((num << 1) | Q);
     }
 
+  if ((inst->opcode->flags & F_OPD_SIZE) && inst->opcode->iclass == sve2_urqvs)
+    {
+      unsigned size;
+      size = (unsigned) extract_field (FLD_size, inst->value,
+				       inst->opcode->mask);
+      inst->operands[0].qualifier
+	= get_vreg_qualifier_from_value (1 + (size << 1));
+      inst->operands[2].qualifier = get_sreg_qualifier_from_value (size);
+    }
+
   if (inst->opcode->flags & F_GPRSIZE_IN_Q)
     {
       /* Use Rt to encode in the case of e.g.
