@@ -10398,6 +10398,10 @@ struct aarch64_option_cpu_value_table
   const aarch64_feature_set require; /* Feature dependencies.  */
 };
 
+/* There are currently many feature bits with no corresponding flag for features implied by FEAT_D128.  We should combine or remove most of these in the future, but for now just make +d128 enable these dependencies as well.  */
+#define D128_FEATURE_DEPS AARCH64_FEATURES (8, LSE128, SCTLR2, FGT2, ATS1A, \
+					    AIE, S1PIE, S2PIE, TCR2)
+
 static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"crc",		AARCH64_FEATURE (CRC), AARCH64_NO_FEATURES},
   {"crypto",		AARCH64_FEATURES (2, AES, SHA2),
@@ -10469,8 +10473,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"the",		AARCH64_FEATURE (THE), AARCH64_NO_FEATURES},
   {"rasv2",		AARCH64_FEATURE (RASv2), AARCH64_FEATURE (RAS)},
   {"ite",		AARCH64_FEATURE (ITE), AARCH64_NO_FEATURES},
-  {"d128",		AARCH64_FEATURE (D128),
-			AARCH64_FEATURE (LSE128)},
+  {"d128",		AARCH64_FEATURE (D128), D128_FEATURE_DEPS},
   {"b16b16",		AARCH64_FEATURE (B16B16), AARCH64_FEATURE (SVE2)},
   {"sme2p1",		AARCH64_FEATURE (SME2p1), AARCH64_FEATURE (SME2)},
   {"sve2p1",		AARCH64_FEATURE (SVE2p1), AARCH64_FEATURE (SVE2)},
