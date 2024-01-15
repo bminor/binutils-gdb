@@ -1316,7 +1316,7 @@ dot_cfi_startproc (int ignored ATTRIBUTE_UNUSED)
   if (!simple)
     tc_cfi_frame_initial_instructions ();
 
-  if ((cfi_sections & CFI_EMIT_target) != 0)
+  if ((all_cfi_sections & CFI_EMIT_target) != 0)
     tc_cfi_startproc ();
 }
 
@@ -1336,7 +1336,7 @@ dot_cfi_endproc (int ignored ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
 
-  if ((cfi_sections & CFI_EMIT_target) != 0)
+  if ((all_cfi_sections & CFI_EMIT_target) != 0)
     tc_cfi_endproc (last_fde);
 }
 
@@ -1417,8 +1417,8 @@ dot_cfi_fde_data (int ignored ATTRIBUTE_UNUSED)
 
   last_fde = frchain_now->frch_cfi_data->cur_fde_data;
 
-  if ((cfi_sections & CFI_EMIT_target) != 0
-      || (cfi_sections & CFI_EMIT_eh_frame_compact) != 0)
+  if ((all_cfi_sections & CFI_EMIT_target) != 0
+      || (all_cfi_sections & CFI_EMIT_eh_frame_compact) != 0)
     {
       struct cfi_escape_data *head, **tail, *e;
       int num_ops = 0;
