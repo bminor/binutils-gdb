@@ -1922,6 +1922,12 @@
   QLF3(V_4S,NIL,S_S),					\
   QLF3(V_2D,NIL,S_D),					\
 }
+#define OP_SVE_vUS_HSD_HSD				\
+{							\
+  QLF3(V_8H,NIL,S_H),					\
+  QLF3(V_4S,NIL,S_S),					\
+  QLF3(V_2D,NIL,S_D),					\
+}
 #define OP_SVE_VMV_SD                                   \
 {                                                       \
   QLF3(S_S,P_M,S_S),                                    \
@@ -6338,6 +6344,12 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SVE2p1_INSNC("umaxqv",0x040d2000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
   SVE2p1_INSNC("uminqv",0x040f2000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
   SVE2p1_INSNC("eorqv",0x041d2000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
+
+  SVE2p1_INSNC("faddqv",0x6410a000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_HSD_HSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
+  SVE2p1_INSNC("fmaxnmqv",0x6414a000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_HSD_HSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
+  SVE2p1_INSNC("fmaxqv",0x6416a000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_HSD_HSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
+  SVE2p1_INSNC("fminnmqv",0x6415a000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_HSD_HSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
+  SVE2p1_INSNC("fminqv",0x6417a000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_HSD_HSD, F_OPD_SIZE, C_SCAN_MOVPRFX, 0),
 
   SVE2p1_INSN("dupq",0x05202400, 0xffe0fc00, sve_index1, 0, OP2 (SVE_Zd, SVE_Zn_5_INDEX), OP_SVE_VV_BHSD, 0, 0),
   SVE2p1_INSN("extq",0x05602400, 0xfff0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zd, SVE_Zm_imm4), OP_SVE_BBB, 0, 0),

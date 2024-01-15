@@ -61,3 +61,32 @@ extq z2.b, z2.b, z5.b[3]
 extq z4.b, z4.b, z12.b[1]
 extq z8.b, z8.b, z7.b[4]
 extq z16.b, z16.b, z1.b[8]
+faddqv v1.8h, p1, z8.h
+faddqv v2.4s, p2, z4.s
+faddqv v4.2d, p3, z2.d
+faddqv v8.2d, p4, z1.d
+faddqv v16.4s, p7, z0.s
+
+fmaxnmqv v1.8h, p1, z8.h
+fmaxnmqv v2.4s, p2, z4.s
+fmaxnmqv v4.2d, p3, z2.d
+fmaxnmqv v8.2d, p4, z1.d
+fmaxnmqv v16.4s, p7, z0.s
+
+fmaxqv v1.8h, p1, z8.h
+fmaxqv v2.4s, p2, z4.s
+fmaxqv v4.2d, p3, z2.d
+fmaxqv v8.2d, p4, z1.d
+fmaxqv v16.4s, p7, z0.s
+
+fminnmqv v1.8h, p1, z8.h
+fminnmqv v2.4s, p2, z4.s
+fminnmqv v4.2d, p3, z2.d
+fminnmqv v8.2d, p4, z1.d
+fminnmqv v16.4s, p7, z0.s
+
+fminqv v1.8h, p1, z8.h
+fminqv v2.4s, p2, z4.s
+fminqv v4.2d, p3, z2.d
+fminqv v8.2d, p4, z1.d
+fminqv v16.4s, p7, z0.s
