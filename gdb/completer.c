@@ -2371,61 +2371,6 @@ gdb_rl_attempted_completion_function (const char *text, int start, int end)
   return NULL;
 }
 
-/* Skip over the possibly quoted word STR (as defined by the quote
-   characters QUOTECHARS and the word break characters BREAKCHARS).
-   Returns pointer to the location after the "word".  If either
-   QUOTECHARS or BREAKCHARS is NULL, use the same values used by the
-   completer.  */
-
-const char *
-skip_quoted_chars (const char *str, const char *quotechars,
-		   const char *breakchars)
-{
-  char quote_char = '\0';
-  const char *scan;
-
-  if (quotechars == NULL)
-    quotechars = gdb_completer_quote_characters;
-
-  if (breakchars == NULL)
-    breakchars = current_language->word_break_characters ();
-
-  for (scan = str; *scan != '\0'; scan++)
-    {
-      if (quote_char != '\0')
-	{
-	  /* Ignore everything until the matching close quote char.  */
-	  if (*scan == quote_char)
-	    {
-	      /* Found matching close quote.  */
-	      scan++;
-	      break;
-	    }
-	}
-      else if (strchr (quotechars, *scan))
-	{
-	  /* Found start of a quoted string.  */
-	  quote_char = *scan;
-	}
-      else if (strchr (breakchars, *scan))
-	{
-	  break;
-	}
-    }
-
-  return (scan);
-}
-
-/* Skip over the possibly quoted word STR (as defined by the quote
-   characters and word break characters used by the completer).
-   Returns pointer to the location after the "word".  */
-
-const char *
-skip_quoted (const char *str)
-{
-  return skip_quoted_chars (str, NULL, NULL);
-}
-
 /* Return a message indicating that the maximum number of completions
    has been reached and that there may be more.  */
 

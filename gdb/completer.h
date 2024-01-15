@@ -662,11 +662,6 @@ extern void complete_expression (completion_tracker &tracker,
 extern void complete_nested_command_line (completion_tracker &tracker,
 					  const char *text);
 
-extern const char *skip_quoted_chars (const char *, const char *,
-				      const char *);
-
-extern const char *skip_quoted (const char *);
-
 /* Called from command completion function to skip over /FMT
    specifications, allowing the rest of the line to be completed.  Returns
    true if the /FMT is at the end of the current line and there is nothing

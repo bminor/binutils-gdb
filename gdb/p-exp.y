@@ -76,6 +76,8 @@ static void yyerror (const char *);
 
 static char *uptok (const char *, int);
 
+static const char *pascal_skip_string (const char *str);
+
 using namespace expr;
 %}
 
@@ -1042,6 +1044,28 @@ uptok (const char *tokstart, int namelen)
   return uptokstart;
 }
 
+/* Skip over a Pascal string.  STR must point to the opening single quote
+   character.  This function returns a pointer to the character after the
+   closing single quote character.
+
+   This function does not support embedded, escaped single quotes, which
+   is done by placing two consecutive single quotes into a string.
+   Support for this would be easy to add, but this function is only used
+   from the Python expression parser, and if we did skip over escaped
+   quotes then the rest of the expression parser wouldn't handle them
+   correctly.  */
+static const char *
+pascal_skip_string (const char *str)
+{
+  gdb_assert (*str == '\'');
+
+  do
+    ++str;
+  while (*str != '\0' && *str != '\'');
+
+  return str;
+}
+
 /* Read one token, getting characters through lexptr.  */
 
 static int
@@ -1120,7 +1144,7 @@ yylex (void)
       c = *pstate->lexptr++;
       if (c != '\'')
 	{
-	  namelen = skip_quoted (tokstart) - tokstart;
+	  namelen = pascal_skip_string (tokstart) - tokstart;
 	  if (namelen > 2)
 	    {
 	      pstate->lexptr = tokstart + namelen;
