@@ -365,7 +365,7 @@ usage (FILE *stream, int status)
   fprintf (stream, _("\
   -W, --no-weak          Ignore weak symbols\n"));
   fprintf (stream, _("\
-      --with-symbol-versions  Display version strings after symbol names\n"));
+      --without-symbol-versions  Do not display version strings after symbol names\n"));
   fprintf (stream, _("\
   -X 32_64               (ignored)\n"));
   fprintf (stream, _("\
