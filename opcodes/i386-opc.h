@@ -579,6 +579,8 @@ enum
   /* Instrucion requires that destination must be distinct from source
      registers.  */
 #define DISTINCT_DEST 9
+  /* Instruction updates stack pointer implicitly.  */
+#define IMPLICIT_STACK_OP 10
   OperandConstraint,
   /* instruction ignores operand size prefix and in Intel mode ignores
      mnemonic size suffix check.  */
