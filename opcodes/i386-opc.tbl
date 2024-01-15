@@ -85,7 +85,6 @@
 #define RegKludge         OperandConstraint=REG_KLUDGE
 #define SwapSources       OperandConstraint=SWAP_SOURCES
 #define Ugh               OperandConstraint=UGH
-#define Rex2              OperandConstraint=REX2_REQUIRED
 
 #define ATTSyntax         Dialect=ATT_SYNTAX
 #define ATTMnemonic       Dialect=ATT_MNEMONIC

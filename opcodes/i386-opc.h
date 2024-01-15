@@ -579,8 +579,6 @@ enum
   /* Instrucion requires that destination must be distinct from source
      registers.  */
 #define DISTINCT_DEST 9
-  /* Instrucion requires REX2 prefix.  */
-#define REX2_REQUIRED 10
   OperandConstraint,
   /* instruction ignores operand size prefix and in Intel mode ignores
      mnemonic size suffix check.  */
@@ -750,6 +748,9 @@ enum
   /* No CSPAZO flags update indication.  */
   NF,
 
+  /* Instrucion requires REX2 prefix.  */
+  Rex2,
+
   /* The last bitfield in i386_opcode_modifier.  */
   Opcode_Modifier_Num
 };
@@ -796,6 +797,7 @@ typedef struct i386_opcode_modifier
   unsigned int isa64:2;
   unsigned int noegpr:1;
   unsigned int nf:1;
+  unsigned int rex2:1;
 } i386_opcode_modifier;
 
 /* Operand classes.  */
