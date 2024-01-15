@@ -224,6 +224,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SEBEP,
   /* SVE2.1 and SME2.1 non-widening BFloat16 instructions.  */
   AARCH64_FEATURE_B16B16,
+  /* SME2.1 instructions.  */
+  AARCH64_FEATURE_SME2p1,
   AARCH64_NUM_FEATURES
 };
 
@@ -705,6 +707,14 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_Vd,		/* Scalar SIMD&FP register in Vd.  */
   AARCH64_OPND_SVE_Vm,		/* Scalar SIMD&FP register in Vm.  */
   AARCH64_OPND_SVE_Vn,		/* Scalar SIMD&FP register in Vn.  */
+  AARCH64_OPND_SME_ZA_array_vrsb_1, /* Tile to vector, two registers (B).  */
+  AARCH64_OPND_SME_ZA_array_vrsh_1, /* Tile to vector, two registers (H).  */
+  AARCH64_OPND_SME_ZA_array_vrss_1, /* Tile to vector, two registers (S).  */
+  AARCH64_OPND_SME_ZA_array_vrsd_1, /* Tile to vector, two registers (D).  */
+  AARCH64_OPND_SME_ZA_array_vrsb_2, /* Tile to vector, four registers (B).  */
+  AARCH64_OPND_SME_ZA_array_vrsh_2, /* Tile to vector, four registers (H).  */
+  AARCH64_OPND_SME_ZA_array_vrss_2, /* Tile to vector, four registers (S). */
+  AARCH64_OPND_SME_ZA_array_vrsd_2, /* Tile to vector, four registers (D).  */
   AARCH64_OPND_SVE_Za_5,	/* SVE vector register in Za, bits [9,5].  */
   AARCH64_OPND_SVE_Za_16,	/* SVE vector register in Za, bits [20,16].  */
   AARCH64_OPND_SVE_Zd,		/* SVE vector register in Zd.  */
@@ -962,6 +972,7 @@ enum aarch64_insn_class
   sme_start,
   sme_stop,
   sme2_mov,
+  sme2_movaz,
   sve_cpy,
   sve_index,
   sve_limm,

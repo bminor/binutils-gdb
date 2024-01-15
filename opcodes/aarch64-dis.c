@@ -1929,6 +1929,84 @@ aarch64_ext_sme_za_array (const aarch64_operand *self,
   return true;
 }
 
+/* Decode two ZA tile slice (V, Rv, off3| ZAn ,off2 | ZAn, ol| ZAn) feilds.  */
+bool
+aarch64_ext_sme_za_vrs1 (const aarch64_operand *self,
+			  aarch64_opnd_info *info, aarch64_insn code,
+			  const aarch64_inst *inst,
+			  aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int v = extract_field (self->fields[0], code, 0);
+  int regno = 12 + extract_field (self->fields[1], code, 0);
+  int imm, za_reg, num_offset = 2;
+
+  switch (info->qualifier)
+    {
+    case AARCH64_OPND_QLF_S_B:
+      imm = extract_field (self->fields[2], code, 0);
+      info->indexed_za.index.imm = imm * num_offset;
+      break;
+    case AARCH64_OPND_QLF_S_H:
+    case AARCH64_OPND_QLF_S_S:
+      za_reg = extract_field (self->fields[2], code, 0);
+      imm = extract_field (self->fields[3], code, 0);
+      info->indexed_za.index.imm = imm * num_offset;
+      info->indexed_za.regno = za_reg;
+      break;
+    case AARCH64_OPND_QLF_S_D:
+      za_reg = extract_field (self->fields[2], code, 0);
+      info->indexed_za.regno = za_reg;
+      break;
+    default:
+      return false;
+    }
+
+  info->indexed_za.index.regno = regno;
+  info->indexed_za.index.countm1 = num_offset - 1;
+  info->indexed_za.v = v;
+  info->indexed_za.group_size = get_opcode_dependent_value (inst->opcode);
+  return true;
+}
+
+/* Decode four ZA tile slice (V, Rv, off3| ZAn ,off2 | ZAn, ol| ZAn) feilds.  */
+bool
+aarch64_ext_sme_za_vrs2 (const aarch64_operand *self,
+			  aarch64_opnd_info *info, aarch64_insn code,
+			  const aarch64_inst *inst,
+			  aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int v = extract_field (self->fields[0], code, 0);
+  int regno = 12 + extract_field (self->fields[1], code, 0);
+  int imm, za_reg, num_offset =4;
+
+  switch (info->qualifier)
+    {
+    case AARCH64_OPND_QLF_S_B:
+      imm = extract_field (self->fields[2], code, 0);
+      info->indexed_za.index.imm = imm * num_offset;
+      break;
+    case AARCH64_OPND_QLF_S_H:
+      za_reg = extract_field (self->fields[2], code, 0);
+      imm = extract_field (self->fields[3], code, 0);
+      info->indexed_za.index.imm = imm * num_offset;
+      info->indexed_za.regno = za_reg;
+      break;
+    case AARCH64_OPND_QLF_S_S:
+    case AARCH64_OPND_QLF_S_D:
+      za_reg = extract_field (self->fields[2], code, 0);
+      info->indexed_za.regno = za_reg;
+      break;
+    default:
+      return false;
+    }
+
+  info->indexed_za.index.regno = regno;
+  info->indexed_za.index.countm1 = num_offset - 1;
+  info->indexed_za.v = v;
+  info->indexed_za.group_size = get_opcode_dependent_value (inst->opcode);
+  return true;
+}
+
 bool
 aarch64_ext_sme_addr_ri_u4xvl (const aarch64_operand *self,
                                aarch64_opnd_info *info, aarch64_insn code,
@@ -3160,6 +3238,7 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
       variant = 3;
       break;
 
+    case sme2_movaz:
     case sme_misc:
     case sve_misc:
       /* These instructions have only a single variant.  */

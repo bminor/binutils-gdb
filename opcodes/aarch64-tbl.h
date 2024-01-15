@@ -1497,6 +1497,10 @@
 {                                                       \
   QLF2(S_B,S_B),                                        \
 }
+#define OP_SVE_HH					\
+{							\
+  QLF2(S_H,S_H),					\
+}
 #define OP_SVE_BBU                                      \
 {                                                       \
   QLF3(S_B,S_B,NIL),                                \
@@ -2614,6 +2618,8 @@ static const aarch64_feature_set aarch64_feature_d128_the =
   AARCH64_FEATURES (2, D128, THE);
 static const aarch64_feature_set aarch64_feature_b16b16 =
   AARCH64_FEATURE (B16B16);
+static const aarch64_feature_set aarch64_feature_sme2p1 =
+  AARCH64_FEATURE (SME2p1);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2677,6 +2683,7 @@ static const aarch64_feature_set aarch64_feature_b16b16 =
 #define THE	  &aarch64_feature_the
 #define D128_THE  &aarch64_feature_d128_the
 #define B16B16  &aarch64_feature_b16b16
+#define SME2p1  &aarch64_feature_sme2p1
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2742,6 +2749,9 @@ static const aarch64_feature_set aarch64_feature_b16b16 =
   { NAME, OPCODE, MASK, CLASS, OP, TME, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define SVE2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE2, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
+#define SME2p1_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SME2p1, OPS, QUALS, \
     FLAGS | F_STRICT, 0, TIED, NULL }
 #define SVE2_INSNC(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,CONSTRAINTS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE2, OPS, QUALS, \
@@ -6289,6 +6299,16 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   B16B16_INSN("bfmls", 0x64200c00, 0xffa0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_11_INDEX), OP_SVE_VVV_H, 0, 0),
   B16B16_INSN("bfmul", 0x64202800, 0xffa0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_11_INDEX), OP_SVE_VVV_H, 0, 0),
 
+/* SME2.1 movaz instructions.  */
+  SME2p1_INSN ("movaz", 0xc0060600, 0xffff1f83, sme2_movaz, 0, OP2 (SME_Zdnx4, SME_ZA_array_vrsb_2), OP_SVE_BB, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0460600, 0xffff1f83, sme2_movaz, 0, OP2 (SME_Zdnx4, SME_ZA_array_vrsh_2), OP_SVE_HH, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0860600, 0xffff1f83, sme2_movaz, 0, OP2 (SME_Zdnx4, SME_ZA_array_vrss_2), OP_SVE_SS, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0c60600, 0xffff1f03, sme2_movaz, 0, OP2 (SME_Zdnx4, SME_ZA_array_vrsd_2), OP_SVE_DD, 0, 0),
+
+  SME2p1_INSN ("movaz", 0xc0060200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrsb_1), OP_SVE_BB, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0460200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrsh_1), OP_SVE_HH, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0860200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrss_1), OP_SVE_SS, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0c60200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrsd_1), OP_SVE_DD, 0, 0),
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };
 
@@ -6726,6 +6746,22 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(SIMD_REG, regno, "SVE_Vd", 0, F(FLD_SVE_Vd), "a SIMD register")	\
     Y(SIMD_REG, regno, "SVE_Vm", 0, F(FLD_SVE_Vm), "a SIMD register")	\
     Y(SIMD_REG, regno, "SVE_Vn", 0, F(FLD_SVE_Vn), "a SIMD register")	\
+    Y(ZA_ACCESS, sme_za_vrs1, "SME_ZA_array_vrsb_1", 0,			\
+      F(FLD_SME_V,FLD_SME_Rv,FLD_off3), "ZA0 tile")			\
+    Y(ZA_ACCESS, sme_za_vrs1, "SME_ZA_array_vrsh_1", 0,			\
+      F(FLD_SME_V,FLD_SME_Rv,FLD_ZAn_1,FLD_off2), "1 bit ZA tile")	\
+    Y(ZA_ACCESS, sme_za_vrs1, "SME_ZA_array_vrss_1", 0,			\
+      F(FLD_SME_V,FLD_SME_Rv,FLD_ZAn_2,FLD_ol), "2 ZA tile")		\
+    Y(ZA_ACCESS, sme_za_vrs1, "SME_ZA_array_vrsd_1", 0,			\
+      F(FLD_SME_V,FLD_SME_Rv,FLD_ZAn_3), "3 ZA tile")			\
+    Y(ZA_ACCESS, sme_za_vrs2, "SME_ZA_array_vrsb_2", 0,			\
+      F(FLD_SME_V,FLD_SME_Rv,FLD_off2), "ZA0 tile")			\
+    Y(ZA_ACCESS, sme_za_vrs2, "SME_ZA_array_vrsh_2", 0,			\
+      F(FLD_SME_V,FLD_SME_Rv,FLD_ZAn,FLD_ol), "1 bit ZA tile")		\
+    Y(ZA_ACCESS, sme_za_vrs2, "SME_ZA_array_vrss_2", 0,			\
+      F(FLD_SME_V,FLD_SME_Rv,FLD_off2), "2 bit ZA tile")		\
+    Y(ZA_ACCESS, sme_za_vrs2, "SME_ZA_array_vrsd_2", 0,			\
+      F(FLD_SME_V,FLD_SME_Rv,FLD_ZAn_3), "3 bit ZA tile")		\
     Y(SVE_REG, regno, "SVE_Za_5", 0, F(FLD_SVE_Za_5),			\
       "an SVE vector register")						\
     Y(SVE_REG, regno, "SVE_Za_16", 0, F(FLD_SVE_Za_16),			\

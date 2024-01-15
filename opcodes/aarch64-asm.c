@@ -1375,6 +1375,76 @@ aarch64_ins_sve_float_zero_one (const aarch64_operand *self,
   return true;
 }
 
+bool
+aarch64_ins_sme_za_vrs1 (const aarch64_operand *self,
+			     const aarch64_opnd_info *info,
+			     aarch64_insn *code,
+			     const aarch64_inst *inst ATTRIBUTE_UNUSED,
+			     aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int za_reg = info->indexed_za.regno;
+  int regno = info->indexed_za.index.regno & 3;
+  int imm = info->indexed_za.index.imm;
+  int v =  info->indexed_za.v;
+  int countm1 = info->indexed_za.index.countm1;
+
+  insert_field (self->fields[0], code, v, 0);
+  insert_field (self->fields[1], code, regno, 0);
+  switch (info->qualifier)
+    {
+    case AARCH64_OPND_QLF_S_B:
+      insert_field (self->fields[2], code, imm / (countm1 + 1), 0);
+      break;
+    case AARCH64_OPND_QLF_S_H:
+    case AARCH64_OPND_QLF_S_S:
+      insert_field (self->fields[2], code, za_reg, 0);
+      insert_field (self->fields[3], code, imm / (countm1 + 1), 0);
+      break;
+    case AARCH64_OPND_QLF_S_D:
+      insert_field (self->fields[2], code, za_reg, 0);
+      break;
+    default:
+      return false;
+    }
+
+  return true;
+}
+
+bool
+aarch64_ins_sme_za_vrs2 (const aarch64_operand *self,
+			     const aarch64_opnd_info *info,
+			     aarch64_insn *code,
+			     const aarch64_inst *inst ATTRIBUTE_UNUSED,
+			     aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int za_reg = info->indexed_za.regno;
+  int regno = info->indexed_za.index.regno & 3;
+  int imm = info->indexed_za.index.imm;
+  int v =  info->indexed_za.v;
+  int countm1 = info->indexed_za.index.countm1;
+
+  insert_field (self->fields[0], code, v, 0);
+  insert_field (self->fields[1], code, regno, 0);
+  switch (info->qualifier)
+    {
+    case AARCH64_OPND_QLF_S_B:
+      insert_field (self->fields[2], code, imm / (countm1 + 1), 0);
+      break;
+    case AARCH64_OPND_QLF_S_H:
+      insert_field (self->fields[2], code, za_reg, 0);
+      insert_field (self->fields[3], code, imm / (countm1 + 1), 0);
+      break;
+    case AARCH64_OPND_QLF_S_S:
+    case AARCH64_OPND_QLF_S_D:
+      insert_field (self->fields[2], code, za_reg, 0);
+      break;
+    default:
+      return false;
+    }
+
+  return true;
+}
+
 /* Encode in SME instruction such as MOVA ZA tile vector register number,
    vector indicator, vector selector and immediate.  */
 bool
@@ -2011,6 +2081,7 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
       break;
 
     case sme_misc:
+    case sme2_movaz:
     case sve_misc:
       /* These instructions have only a single variant.  */
       break;

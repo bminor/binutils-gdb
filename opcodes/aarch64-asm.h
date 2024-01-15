@@ -100,6 +100,8 @@ AARCH64_DECL_OPD_INSERTER (ins_sve_strided_reglist);
 AARCH64_DECL_OPD_INSERTER (ins_sve_scale);
 AARCH64_DECL_OPD_INSERTER (ins_sve_shlimm);
 AARCH64_DECL_OPD_INSERTER (ins_sve_shrimm);
+AARCH64_DECL_OPD_INSERTER (ins_sme_za_vrs1);
+AARCH64_DECL_OPD_INSERTER (ins_sme_za_vrs2);
 AARCH64_DECL_OPD_INSERTER (ins_sme_za_hv_tiles);
 AARCH64_DECL_OPD_INSERTER (ins_sme_za_hv_tiles_range);
 AARCH64_DECL_OPD_INSERTER (ins_sme_za_list);

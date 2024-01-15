@@ -4492,6 +4492,7 @@ parse_sme_immediate (char **str, int64_t *imm)
 
    [<Wv>, <imm>]
    [<Wv>, #<imm>]
+   [<Ws>, <offsf>:<offsl>]
 
    Return true on success, populating OPND with the parsed index.  */
 
@@ -4592,6 +4593,7 @@ parse_sme_za_index (char **str, struct aarch64_indexed_za *opnd)
    <Pm>.<T>[<Wv>< #<imm>]
    ZA[<Wv>, #<imm>]
    <ZAn><HV>.<T>[<Wv>, #<imm>]
+   <ZAn><HV>.<T>[<Ws>, <offsf>:<offsl>]
 
    FLAGS is as for parse_typed_reg.  */
 
@@ -7865,6 +7867,21 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->qualifier = qualifier;
 	  break;
 
+	case AARCH64_OPND_SME_ZA_array_vrsb_1:
+	case AARCH64_OPND_SME_ZA_array_vrsh_1:
+	case AARCH64_OPND_SME_ZA_array_vrss_1:
+	case AARCH64_OPND_SME_ZA_array_vrsd_1:
+	case AARCH64_OPND_SME_ZA_array_vrsb_2:
+	case AARCH64_OPND_SME_ZA_array_vrsh_2:
+	case AARCH64_OPND_SME_ZA_array_vrss_2:
+	case AARCH64_OPND_SME_ZA_array_vrsd_2:
+	  if (!parse_dual_indexed_reg (&str, REG_TYPE_ZATHV,
+				       &info->indexed_za, &qualifier, 0))
+	    goto failure;
+	  info->qualifier = qualifier;
+	  break;
+
+
 	case AARCH64_OPND_SME_VLxN_10:
 	case AARCH64_OPND_SME_VLxN_13:
 	  po_strict_enum_or_fail (aarch64_sme_vlxn_array);
@@ -10336,6 +10353,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"d128",		AARCH64_FEATURE (D128),
 			AARCH64_FEATURE (LSE128)},
   {"b16b16",		AARCH64_FEATURE (B16B16), AARCH64_FEATURE (SVE2)},
+  {"sme2p1",		AARCH64_FEATURE (SME2p1), AARCH64_FEATURE (SME2)},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 

@@ -400,6 +400,16 @@ const aarch64_field fields[] =
     { 22,  1 }, /* sz: 1-bit element size select.  */
     { 22,  2 },	/* type: floating point type field in fp data inst.  */
     { 10,  2 },	/* vldst_size: size field in the AdvSIMD load/store inst.  */
+    {  5,  3 }, /* off3: immediate offset used to calculate slice number in a
+		   ZA tile.  */
+    {  5,  2 }, /* off2: immediate offset used to calculate slice number in
+		   a ZA tile.  */
+    {  7,  1 }, /* ZAn_1: name of the 1bit encoded ZA tile.  */
+    {  5,  1 }, /* ol: immediate offset used to calculate slice number in a ZA
+		   tile.  */
+    {  6,  2 }, /* ZAn_2: name of the 2bit encoded ZA tile.  */
+    {  5,  3 }, /* ZAn_3: name of the 3bit encoded ZA tile.  */
+    {  6,  1 }, /* ZAn: name of the bit encoded ZA tile.  */
 };
 
 enum aarch64_operand_class
@@ -1934,6 +1944,49 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 
 	case AARCH64_OPND_SME_ZA_array_off3x2:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 7, 2,
+				get_opcode_dependent_value (opcode)))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SME_ZA_array_vrsb_1:
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 7, 2,
+				get_opcode_dependent_value (opcode)))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SME_ZA_array_vrsh_1:
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 3, 2,
+				get_opcode_dependent_value (opcode)))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SME_ZA_array_vrss_1:
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 1, 2,
+				get_opcode_dependent_value (opcode)))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SME_ZA_array_vrsd_1:
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 0, 2,
+				get_opcode_dependent_value (opcode)))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SME_ZA_array_vrsb_2:
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 3, 4,
+				get_opcode_dependent_value (opcode)))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SME_ZA_array_vrsh_2:
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 1, 4,
+				get_opcode_dependent_value (opcode)))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SME_ZA_array_vrss_2:
+	case AARCH64_OPND_SME_ZA_array_vrsd_2:
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 0, 4,
 				get_opcode_dependent_value (opcode)))
 	    return 0;
 	  break;
@@ -4101,6 +4154,30 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		? style_sub_mnem (styler, "vgx2")
 		: opnd->indexed_za.group_size == 4
 		? style_sub_mnem (styler, "vgx4") : "");
+      break;
+
+    case AARCH64_OPND_SME_ZA_array_vrsb_1:
+    case AARCH64_OPND_SME_ZA_array_vrsh_1:
+    case AARCH64_OPND_SME_ZA_array_vrss_1:
+    case AARCH64_OPND_SME_ZA_array_vrsd_1:
+    case AARCH64_OPND_SME_ZA_array_vrsb_2:
+    case AARCH64_OPND_SME_ZA_array_vrsh_2:
+    case AARCH64_OPND_SME_ZA_array_vrss_2:
+    case AARCH64_OPND_SME_ZA_array_vrsd_2:
+      snprintf (buf, size, "%s [%s, %s%s%s]",
+		style_reg (styler, "za%d%c%s%s",
+			   opnd->indexed_za.regno,
+			   opnd->indexed_za.v ? 'v': 'h',
+			   opnd->qualifier == AARCH64_OPND_QLF_NIL ? "" : ".",
+			   (opnd->qualifier == AARCH64_OPND_QLF_NIL
+			    ? ""
+			    : aarch64_get_qualifier_name (opnd->qualifier))),
+		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
+		style_imm (styler, "%" PRIi64, opnd->indexed_za.index.imm),
+		opnd->indexed_za.index.countm1 ? ":" : "",
+		opnd->indexed_za.index.countm1  ? style_imm (styler, "%d",
+		opnd->indexed_za.index.imm
+		+ opnd->indexed_za.index.countm1):"");
       break;
 
     case AARCH64_OPND_SME_SM_ZA:

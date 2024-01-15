@@ -210,6 +210,13 @@ enum aarch64_field_kind
   FLD_sz,
   FLD_type,
   FLD_vldst_size,
+  FLD_off3,
+  FLD_off2,
+  FLD_ZAn_1,
+  FLD_ol,
+  FLD_ZAn_2,
+  FLD_ZAn_3,
+  FLD_ZAn
 };
 
 /* Field description.  */
