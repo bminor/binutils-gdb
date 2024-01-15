@@ -481,6 +481,13 @@ cfi_end_fde (symbolS *label)
   frchain_now->frch_cfi_data = NULL;
 }
 
+/* Set the last FDE  .*/
+void
+cfi_set_last_fde (struct fde_entry *fde)
+{
+  last_fde = fde;
+}
+
 /* Set the return column for the current FDE.  */
 
 void
@@ -1330,7 +1337,7 @@ dot_cfi_endproc (int ignored ATTRIBUTE_UNUSED)
       return;
     }
 
-  last_fde = frchain_now->frch_cfi_data->cur_fde_data;
+  cfi_set_last_fde (frchain_now->frch_cfi_data->cur_fde_data);
 
   cfi_end_fde (symbol_temp_new_now ());
 
@@ -1415,7 +1422,7 @@ dot_cfi_fde_data (int ignored ATTRIBUTE_UNUSED)
       return;
     }
 
-  last_fde = frchain_now->frch_cfi_data->cur_fde_data;
+  cfi_set_last_fde (frchain_now->frch_cfi_data->cur_fde_data);
 
   if ((all_cfi_sections & CFI_EMIT_target) != 0
       || (all_cfi_sections & CFI_EMIT_eh_frame_compact) != 0)
@@ -1568,7 +1575,7 @@ dot_cfi_inline_lsda (int ignored ATTRIBUTE_UNUSED)
   if (last_fde->eh_header_type == EH_COMPACT_HAS_LSDA)
     output_compact_unwind_data (last_fde, align);
 
-  last_fde = NULL;
+  cfi_set_last_fde (NULL);
 
   return;
 }

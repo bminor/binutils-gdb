@@ -25,6 +25,7 @@
 #include "dwarf2.h"
 
 struct symbol;
+struct fde_entry;
 
 extern const pseudo_typeS cfi_pseudo_table[];
 
@@ -35,6 +36,7 @@ extern void cfi_finish (void);
 /* Entry points for backends to add unwind information.  */
 extern void cfi_new_fde (struct symbol *);
 extern void cfi_end_fde (struct symbol *);
+extern void cfi_set_last_fde (struct fde_entry *fde);
 extern void cfi_set_return_column (unsigned);
 extern void cfi_set_sections (void);
 extern void cfi_add_advance_loc (struct symbol *);
