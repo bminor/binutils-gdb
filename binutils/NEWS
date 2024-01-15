@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.42:
+
 * The objdump program has a new command line option -Z/--decompress which
   changes the behaviour of the -s/--full-contents option, forcing it to
   decompress the contents of any compressed section before they are displayed.

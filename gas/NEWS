@@ -1,4 +1,7 @@
 -*- text -*-
+
+Changes in 2.42:
+
 * Experimental support in GAS to synthesize CFI for ABI-conformant,
   hand-written asm using the new command line option --scfi=experimental on
   x86-64.  Only System V AMD64 ABI is supported.

@@ -38,7 +38,7 @@ How to perform a release.
 How to create the release branch.
 -------------------------------------------------
 
-Approx time to complete from here: 2 hours ....
+Approx time to complete from here: 2 hours ...
 
   2.5 If you have not built from the sources recently then now is the
       time to check that they still work...
@@ -47,7 +47,7 @@ Approx time to complete from here: 2 hours ....
      the NEWS files in gas, ld, and binutils.  No need to update NEWS
      in the gold directory - it has its own release numbering.
 
-     Likewise for the ChangeLog files in: bfd, binutils, config, cpu,
+     Likewise for the ChangeLog files in: bfd, binutils, cpu,
      elfcpp, gas, gold, gprof, include, ld, libctf, opcodes and toplevel.
 
      Add a note of the name of the new branch to binutils/BRANCHES.
