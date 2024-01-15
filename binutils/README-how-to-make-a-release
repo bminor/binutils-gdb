@@ -67,7 +67,7 @@ Approx time to complete from here: 2 hours ....
 
   5. Make sure that the branch is there.  IE check out the branch sources:
   
-        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_41-branch 2.41
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_42-branch 2.42
 
      If you get a message about being in a "detached head" state, something
      has gone wrong...
@@ -98,10 +98,10 @@ Approx time to complete from here: 2 hours ....
      of the next release and the BRANCH to indicate that it is almost
      ready for the release.
 
-     So if the release is going to be 2.41 then the version number on
-     the BRANCH should be set to 2.40.90 - ie almost, but not quite 2.41,
-     and the version number on the MAINLINE should be set to 2.41.50 -
-     ie half way to 2.42 release.
+     So if the release is going to be 2.42 then the version number on
+     the BRANCH should be set to 2.41.90 - ie almost, but not quite 2.42,
+     and the version number on the MAINLINE should be set to 2.42.50 -
+     ie half way to 2.43 release.
 
      So the BRANCH bfd/version.m4 has:
      
