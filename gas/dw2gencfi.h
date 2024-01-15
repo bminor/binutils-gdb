@@ -29,6 +29,18 @@ struct fde_entry;
 
 extern const pseudo_typeS cfi_pseudo_table[];
 
+#ifndef tc_cfi_frame_initial_instructions
+#define tc_cfi_frame_initial_instructions() ((void)0)
+#endif
+
+#ifndef tc_cfi_startproc
+# define tc_cfi_startproc() ((void)0)
+#endif
+
+#ifndef tc_cfi_endproc
+# define tc_cfi_endproc(fde) ((void) (fde))
+#endif
+
 /* cfi_finish() is called at the end of file. It will complain if
    the last CFI wasn't properly closed by .cfi_endproc.  */
 extern void cfi_finish (void);

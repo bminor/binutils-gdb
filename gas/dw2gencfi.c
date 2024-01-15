@@ -64,18 +64,6 @@
 #define EH_FRAME_ALIGNMENT (bfd_get_arch_size (stdoutput) == 64 ? 3 : 2)
 #endif
 
-#ifndef tc_cfi_frame_initial_instructions
-#define tc_cfi_frame_initial_instructions() ((void)0)
-#endif
-
-#ifndef tc_cfi_startproc
-# define tc_cfi_startproc() ((void)0)
-#endif
-
-#ifndef tc_cfi_endproc
-# define tc_cfi_endproc(fde) ((void) (fde))
-#endif
-
 #define EH_FRAME_LINKONCE (SUPPORT_FRAME_LINKONCE || compact_eh \
 			   || TARGET_MULTIPLE_EH_FRAME_SECTIONS)
 
