@@ -4749,6 +4749,24 @@ is_8byte_reloc (enum elf_ppc64_reloc_type r_type)
 	  || r_type == R_PPC64_PLTCALL);
 }
 
+/* The RELR encoding doesn't allow odd addresses, so RELR_ALIGN must
+   be at least 1.  R_PPC64_RELATIVE relocs require alignment of 2**3.
+   We use 3 here to avoid complexity in relocate_section, where for a
+   value of 1 we'd need to test for not just an output RELATIVE reloc
+   near the call to maybe_relr but also UADDR64 and some conditions on
+   the symbol.  See PR30824.  */
+#define RELR_ALIGN 3
+
+static bool
+maybe_relr (enum elf_ppc64_reloc_type r_type,
+	    const Elf_Internal_Rela *rel,
+	    const asection *sec)
+{
+  return ((r_type == R_PPC64_ADDR64 || r_type == R_PPC64_TOC)
+	  && (rel->r_offset & ((1 << RELR_ALIGN) - 1)) == 0
+	  && sec->alignment_power >= RELR_ALIGN);
+}
+
 /* Like bfd_reloc_offset_in_range but without a howto.  Return true
    iff a field of SIZE bytes at OFFSET is within SEC limits.  */
 
@@ -5401,9 +5419,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  p->count += 1;
 		  if (!must_be_dyn_reloc (info, r_type))
 		    p->pc_count += 1;
-		  if ((r_type == R_PPC64_ADDR64 || r_type == R_PPC64_TOC)
-		      && rel->r_offset % 2 == 0
-		      && sec->alignment_power != 0)
+		  if (maybe_relr (r_type, rel, sec))
 		    p->rel_count += 1;
 		}
 	      else
@@ -5438,9 +5454,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		      p->ifunc = is_ifunc;
 		    }
 		  p->count += 1;
-		  if ((r_type == R_PPC64_ADDR64 || r_type == R_PPC64_TOC)
-		      && rel->r_offset % 2 == 0
-		      && sec->alignment_power != 0)
+		  if (maybe_relr (r_type, rel, sec))
 		    p->rel_count += 1;
 		}
 	    }
@@ -7291,9 +7305,7 @@ dec_dynrel_count (const Elf_Internal_Rela *rel,
 	    {
 	      if (!must_be_dyn_reloc (info, r_type))
 		p->pc_count -= 1;
-	      if ((r_type == R_PPC64_ADDR64 || r_type == R_PPC64_TOC)
-		  && rel->r_offset % 2 == 0
-		  && sec->alignment_power != 0)
+	      if (maybe_relr (r_type, rel, sec))
 		p->rel_count -= 1;
 	      p->count -= 1;
 	      if (p->count == 0)
@@ -7326,9 +7338,7 @@ dec_dynrel_count (const Elf_Internal_Rela *rel,
 	{
 	  if (p->sec == sec && p->ifunc == is_ifunc)
 	    {
-	      if ((r_type == R_PPC64_ADDR64 || r_type == R_PPC64_TOC)
-		  && rel->r_offset % 2 == 0
-		  && sec->alignment_power != 0)
+	      if (maybe_relr (r_type, rel, sec))
 		p->rel_count -= 1;
 	      p->count -= 1;
 	      if (p->count == 0)
@@ -13884,6 +13894,9 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		  switch (r_type)
 		    {
 		    default:
+		      if (info->enable_dt_relr
+			  && maybe_relr (r_type, irela, section))
+			break;
 		      continue;
 
 		    case R_PPC64_REL24:
@@ -13893,14 +13906,6 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		    case R_PPC64_REL14_BRTAKEN:
 		    case R_PPC64_REL14_BRNTAKEN:
 		      if ((section->flags & SEC_CODE) != 0)
-			break;
-		      continue;
-
-		    case R_PPC64_ADDR64:
-		    case R_PPC64_TOC:
-		      if (info->enable_dt_relr
-			  && irela->r_offset % 2 == 0
-			  && section->alignment_power != 0)
 			break;
 		      continue;
 		    }
@@ -15285,7 +15290,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
       while (i < htab->relr_count)
 	{
 	  bfd_vma base = relr_addr[i];
-	  BFD_ASSERT (base % 2 == 0);
+	  BFD_ASSERT ((base & ((1 << RELR_ALIGN) - 1)) == 0);
 	  bfd_put_64 (htab->elf.dynobj, base, loc);
 	  loc += 8;
 	  i++;
@@ -17517,9 +17522,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	      if (!(info->enable_dt_relr
 		    && ELF64_R_TYPE (outrel.r_info) == R_PPC64_RELATIVE
-		    && rel->r_offset % 2 == 0
-		    && input_section->alignment_power != 0
-		    && ELF64_R_TYPE (orig_rel.r_info) != R_PPC64_UADDR64))
+		    && maybe_relr (ELF64_R_TYPE (orig_rel.r_info),
+				   rel, input_section)))
 		{
 		  sreloc = elf_section_data (input_section)->sreloc;
 		  if (h != NULL
