@@ -176,10 +176,15 @@ static const char gdb_completer_file_name_break_characters[] =
   " \t\n*|\"';:?><";
 #endif
 
-/* Characters that can be used to quote completion strings.  Note that
-   we can't include '"' because the gdb C parser treats such quoted
+/* Characters that can be used to quote expressions.  Note that we can't
+   include '"' (double quote) because the gdb C parser treats such quoted
    sequences as strings.  */
-static const char gdb_completer_quote_characters[] = "'";
+static const char gdb_completer_expression_quote_characters[] = "'";
+
+/* Characters that can be used to quote file names.  We do allow '"'
+   (double quotes) in this set as file names are not passed through the C
+   expression parser.  */
+static const char gdb_completer_file_name_quote_characters[] = "'\"";
 
 
 /* This can be used for functions which don't want to complete on
@@ -199,9 +204,9 @@ filename_completer (struct cmd_list_element *ignore,
 		    completion_tracker &tracker,
 		    const char *text, const char *word)
 {
-  int subsequent_name;
+  rl_completer_quote_characters = gdb_completer_file_name_quote_characters;
 
-  subsequent_name = 0;
+  int subsequent_name = 0;
   while (1)
     {
       gdb::unique_xmalloc_ptr<char> p_rl
@@ -256,6 +261,8 @@ filename_completer_handle_brkchars (struct cmd_list_element *ignore,
 {
   set_rl_completer_word_break_characters
     (gdb_completer_file_name_break_characters);
+
+  rl_completer_quote_characters = gdb_completer_file_name_quote_characters;
 }
 
 /* Find the bounds of the current word for completion purposes, and
@@ -401,12 +408,13 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
 static const char *
 advance_to_completion_word (completion_tracker &tracker,
 			    const char *word_break_characters,
+			    const char *quote_characters,
 			    const char *text)
 {
   gdb_rl_completion_word_info info;
 
   info.word_break_characters = word_break_characters;
-  info.quote_characters = gdb_completer_quote_characters;
+  info.quote_characters = quote_characters;
   info.basic_quote_characters = rl_basic_quote_characters;
 
   int delimiter;
@@ -431,7 +439,8 @@ advance_to_expression_complete_word_point (completion_tracker &tracker,
 					   const char *text)
 {
   const char *brk_chars = current_language->word_break_characters ();
-  return advance_to_completion_word (tracker, brk_chars, text);
+  const char *quote_chars = gdb_completer_expression_quote_characters;
+  return advance_to_completion_word (tracker, brk_chars, quote_chars, text);
 }
 
 /* See completer.h.  */
@@ -441,7 +450,8 @@ advance_to_filename_complete_word_point (completion_tracker &tracker,
 					 const char *text)
 {
   const char *brk_chars = gdb_completer_file_name_break_characters;
-  return advance_to_completion_word (tracker, brk_chars, text);
+  const char *quote_chars = gdb_completer_file_name_quote_characters;
+  return advance_to_completion_word (tracker, brk_chars, quote_chars, text);
 }
 
 /* See completer.h.  */
@@ -1262,8 +1272,10 @@ complete_line_internal_1 (completion_tracker &tracker,
   set_rl_completer_word_break_characters
     (current_language->word_break_characters ());
 
-  /* Likewise for the quote characters.  */
-  rl_completer_quote_characters = gdb_completer_quote_characters;
+  /* Likewise for the quote characters.  If we later find out that we are
+     completing file names then we can switch to the file name quote
+     character set (i.e., both single- and double-quotes).  */
+  rl_completer_quote_characters = gdb_completer_expression_quote_characters;
 
   /* Decide whether to complete on a list of gdb commands or on
      symbols.  */
@@ -1988,7 +2000,7 @@ completion_find_completion_word (completion_tracker &tracker, const char *text,
   gdb_rl_completion_word_info info;
 
   info.word_break_characters = rl_completer_word_break_characters;
-  info.quote_characters = gdb_completer_quote_characters;
+  info.quote_characters = rl_completer_quote_characters;
   info.basic_quote_characters = rl_basic_quote_characters;
 
   return gdb_rl_find_completion_word (&info, quote_char, NULL, text);

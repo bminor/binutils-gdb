@@ -56,7 +56,7 @@ proc run_tests { root } {
 	"thread apply all help" " " false \
 	"complete a 'thread apply all' command"
 
-    foreach_with_prefix qc [list "" "'"] {
+    foreach_with_prefix qc [list "" "'" "\""] {
 	test_gdb_complete_none "file ${qc}${root}/xx" \
 	    "expand a non-existent filename"
 
