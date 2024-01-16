@@ -2529,7 +2529,7 @@ loongarch_reloc_is_fatal (struct bfd_link_info *info,
   ({							\
     bfd_vma __lo = (relocation & (bfd_vma)0xfff);	\
     relocation = (relocation & ~(bfd_vma)0xfff)		\
-		  - (pc & ~(bfd_vma)0xfff);		\
+		  - ((pc) & ~(bfd_vma)0xfff);		\
     if (__lo > 0x7ff)					\
 	relocation += (0x1000 - 0x100000000);		\
     if (relocation & 0x80000000)			\
@@ -3534,14 +3534,16 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    }
 	  break;
 
-	case R_LARCH_PCALA64_LO20:
 	case R_LARCH_PCALA64_HI12:
+	  pc -= 4;
+	  /* Fall through.  */
+	case R_LARCH_PCALA64_LO20:
 	  if (h && h->plt.offset != MINUS_ONE)
 	    relocation = sec_addr (plt) + h->plt.offset;
 	  else
 	    relocation += rel->r_addend;
 
-	  RELOCATE_CALC_PC64_HI32 (relocation, pc);
+	  RELOCATE_CALC_PC64_HI32 (relocation, pc - 8);
 
 	  break;
 
@@ -3668,9 +3670,10 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      relocation = got_off + sec_addr (got);
 	    }
 
-	  if (r_type == R_LARCH_GOT64_PC_HI12
-	      || r_type == R_LARCH_GOT64_PC_LO20)
-	    RELOCATE_CALC_PC64_HI32 (relocation, pc);
+	  if (r_type == R_LARCH_GOT64_PC_HI12)
+	    RELOCATE_CALC_PC64_HI32 (relocation, pc - 12);
+	  else if (r_type == R_LARCH_GOT64_PC_LO20)
+	    RELOCATE_CALC_PC64_HI32 (relocation, pc - 8);
 
 	  break;
 
@@ -3871,13 +3874,14 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    /* Use both TLS_GD and TLS_DESC.  */
 	    if ((tls_type & GOT_TLS_GD) && (tls_type & GOT_TLS_GDESC))
 	      relocation += 2 * GOT_ENTRY_SIZE;
-	  }
 
-	    if (r_type == R_LARCH_TLS_DESC64_PC_LO20
-		|| r_type == R_LARCH_TLS_DESC64_PC_HI12)
-	      RELOCATE_CALC_PC64_HI32 (relocation, pc);
+	    if (r_type == R_LARCH_TLS_DESC64_PC_LO20)
+	      RELOCATE_CALC_PC64_HI32 (relocation, pc - 8);
+	    else if (r_type == R_LARCH_TLS_DESC64_PC_HI12)
+	      RELOCATE_CALC_PC64_HI32 (relocation, pc - 12);
 
 	    break;
+	  }
 
 	case R_LARCH_TLS_DESC_LD:
 	case R_LARCH_TLS_DESC_CALL:
@@ -3906,9 +3910,10 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else if (GOT_TLS_GD_ANY_P (tls_type) && (tls_type & GOT_TLS_IE))
 	    relocation += 2 * GOT_ENTRY_SIZE;
 
-	  if (r_type == R_LARCH_TLS_IE64_PC_LO20
-	      || r_type == R_LARCH_TLS_IE64_PC_HI12)
-	    RELOCATE_CALC_PC64_HI32 (relocation, pc);
+	  if (r_type == R_LARCH_TLS_IE64_PC_LO20)
+	    RELOCATE_CALC_PC64_HI32 (relocation, pc - 8);
+	  else if (r_type == R_LARCH_TLS_IE64_PC_HI12)
+	    RELOCATE_CALC_PC64_HI32 (relocation, pc - 12);
 
 	  break;
 
