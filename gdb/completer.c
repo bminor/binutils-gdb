@@ -241,14 +241,6 @@ filename_completer (struct cmd_list_element *ignore,
       tracker.add_completion
 	(make_completion_match_str (std::move (p_rl), text, word));
     }
-#if 0
-  /* There is no way to do this just long enough to affect quote
-     inserting without also affecting the next completion.  This
-     should be fixed in readline.  FIXME.  */
-  /* Ensure that readline does the right thing
-     with respect to inserting quotes.  */
-  rl_completer_word_break_characters = "";
-#endif
 }
 
 /* The corresponding completer_handle_brkchars
