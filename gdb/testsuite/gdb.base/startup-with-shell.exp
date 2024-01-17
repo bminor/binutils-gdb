@@ -59,6 +59,7 @@ proc initial_setup_simple { startup_with_shell run_args } {
 
 with_test_prefix "startup_with_shell = on; run_args = *.unique-extension" {
     initial_setup_simple "on" "$unique_file_dir/*.unique-extension"
+    gdb_test_no_output "set print characters unlimited"
     gdb_test "print argv\[1\]" "\\\$$decimal = $hex \"$unique_file\"" \
 	"first argument expanded"
 }
