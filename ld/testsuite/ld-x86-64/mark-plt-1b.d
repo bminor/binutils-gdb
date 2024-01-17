@@ -1,6 +1,6 @@
 #source: mark-plt-1.s
 #as: --64
-#ld: -melf_x86_64 -shared -z mark-plt
+#ld: -melf_x86_64 -shared -z mark-plt --hash-style=both
 #objdump: -dw
 
 #...
