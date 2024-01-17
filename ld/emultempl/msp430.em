@@ -39,6 +39,7 @@ fragment <<EOF
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldfile.h"
+#include "ldlex.h"
 #include "ldemul.h"
 #include "libiberty.h"
 #include <ldgram.h>
@@ -442,10 +443,6 @@ msp430_elf_after_open (void)
   for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)
     bfd_map_over_sections (abfd, add_region_prefix, NULL);
 }
-
-#define OPTION_CODE_REGION		321
-#define OPTION_DATA_REGION		(OPTION_CODE_REGION + 1)
-#define OPTION_DISABLE_TRANS		(OPTION_CODE_REGION + 2)
 
 static void
 gld${EMULATION_NAME}_add_options

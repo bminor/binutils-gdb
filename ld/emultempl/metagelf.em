@@ -282,10 +282,6 @@ EOF
 # Define some shell vars to insert bits of code into the standard elf
 # parse_args and list_options functions.
 #
-PARSE_AND_LIST_PROLOGUE='
-#define OPTION_STUBGROUP_SIZE		301
-'
-
 PARSE_AND_LIST_LONGOPTS='
   { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
 '

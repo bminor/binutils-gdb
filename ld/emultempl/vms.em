@@ -24,6 +24,7 @@
 fragment <<EOF
 #include "libiberty.h"
 #include "getopt.h"
+#include "ldlex.h"
 
 static void
 gld${EMULATION_NAME}_before_parse (void)
@@ -125,7 +126,6 @@ vms_place_orphan (asection *s,
 }
 
 /* VMS specific options.  */
-#define OPTION_IDENTIFICATION		(300  + 1)
 
 static void
 gld${EMULATION_NAME}_add_options

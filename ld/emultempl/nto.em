@@ -190,14 +190,6 @@ EOF
 # parse_args and list_options functions.
 #
 
-PARSE_AND_LIST_PROLOGUE=${PARSE_AND_LIST_PROLOGUE}'
-enum nto_options
-{
-  OPTION_STACK = 500,
-  OPTION_LAZY_STACK,
-};
-'
-
 PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "stack", required_argument, NULL, OPTION_STACK },
   { "lazy-stack", no_argument, NULL, OPTION_LAZY_STACK },

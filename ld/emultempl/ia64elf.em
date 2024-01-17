@@ -43,10 +43,6 @@ ia64elf_after_parse (void)
 
 EOF
 
-PARSE_AND_LIST_PROLOGUE='
-#define OPTION_ITANIUM			300
-'
-
 PARSE_AND_LIST_LONGOPTS='
     { "itanium", no_argument, NULL, OPTION_ITANIUM},
 '

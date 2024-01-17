@@ -200,10 +200,6 @@ EOF
 # Define some shell vars to insert bits of code into the standard elf
 # parse_args and list_options functions.
 #
-PARSE_AND_LIST_PROLOGUE='
-#define OPTION_GOT	301
-'
-
 PARSE_AND_LIST_LONGOPTS='
   { "got", required_argument, NULL, OPTION_GOT},
 '

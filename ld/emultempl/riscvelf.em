@@ -31,16 +31,6 @@ EOF
 
 # Define some shell vars to insert bits of code into the standard elf
 # parse_args and list_options functions.  */
-PARSE_AND_LIST_PROLOGUE=${PARSE_AND_LIST_PROLOGUE}'
-enum risccv_opt
-{
-  OPTION_RELAX_GP = 321,
-  OPTION_NO_RELAX_GP,
-  OPTION_CHECK_ULEB128,
-  OPTION_NO_CHECK_ULEB128,
-};
-'
-
 PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
     { "relax-gp", no_argument, NULL, OPTION_RELAX_GP },
     { "no-relax-gp", no_argument, NULL, OPTION_NO_RELAX_GP },

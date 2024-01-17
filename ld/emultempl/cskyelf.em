@@ -288,12 +288,6 @@ EOF
 
 # This code gets inserted into the generic elf32.sc linker script
 # and allows us to define our own command line switches.
-PARSE_AND_LIST_PROLOGUE='
-#define OPTION_BRANCH_STUB		301
-#define OPTION_NO_BRANCH_STUB		302
-#define OPTION_STUBGROUP_SIZE		303
-'
-
 PARSE_AND_LIST_LONGOPTS='
   {"branch-stub",	no_argument,       NULL, OPTION_BRANCH_STUB},
   {"no-branch-stub",	no_argument,       NULL, OPTION_NO_BRANCH_STUB},

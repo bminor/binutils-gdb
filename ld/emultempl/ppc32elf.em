@@ -264,26 +264,6 @@ fi
 # Define some shell vars to insert bits of code into the standard elf
 # parse_args and list_options functions.
 #
-PARSE_AND_LIST_PROLOGUE=${PARSE_AND_LIST_PROLOGUE}'
-enum ppc32_opt
-{
-  OPTION_NO_TLS_OPT = 321,
-  OPTION_NO_TLS_GET_ADDR_OPT,
-  OPTION_NEW_PLT,
-  OPTION_OLD_PLT,
-  OPTION_PLT_ALIGN,
-  OPTION_NO_PLT_ALIGN,
-  OPTION_NO_INLINE_OPT,
-  OPTION_OLD_GOT,
-  OPTION_STUBSYMS,
-  OPTION_NO_STUBSYMS,
-  OPTION_PPC476_WORKAROUND,
-  OPTION_NO_PPC476_WORKAROUND,
-  OPTION_NO_PICFIXUP,
-  OPTION_VLE_RELOC_FIXUP
-};
-'
-
 PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "emit-stub-syms", no_argument, NULL, OPTION_STUBSYMS },
   { "no-emit-stub-syms", no_argument, NULL, OPTION_NO_STUBSYMS },

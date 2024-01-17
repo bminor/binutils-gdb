@@ -48,6 +48,7 @@ fragment <<EOF
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldfile.h"
+#include "ldlex.h"
 #include "ldemul.h"
 #include "ldctor.h"
 #include <ldgram.h>
@@ -170,35 +171,6 @@ gld${EMULATION_NAME}_before_parse (void)
 }
 
 /* Handle AIX specific options.  */
-
-enum
-  {
-    OPTION_IGNORE = 300,
-    OPTION_AUTOIMP,
-    OPTION_ERNOTOK,
-    OPTION_EROK,
-    OPTION_EXPALL,
-    OPTION_EXPFULL,
-    OPTION_EXPORT,
-    OPTION_IMPORT,
-    OPTION_INITFINI,
-    OPTION_LOADMAP,
-    OPTION_MAXDATA,
-    OPTION_MAXSTACK,
-    OPTION_MODTYPE,
-    OPTION_NOAUTOIMP,
-    OPTION_NOEXPALL,
-    OPTION_NOEXPFULL,
-    OPTION_NOSTRCMPCT,
-    OPTION_PD,
-    OPTION_PT,
-    OPTION_STRCMPCT,
-    OPTION_UNIX,
-    OPTION_32,
-    OPTION_64,
-    OPTION_LIBPATH,
-    OPTION_NOLIBPATH,
-  };
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -1299,7 +1271,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bool import)
 {
   struct obstack *o;
   FILE *f;
-  int lineno;
+  int linenumber;
   int c;
   bool keep;
   const char *imppath;
@@ -1323,7 +1295,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bool import)
   impfile = NULL;
   impmember = NULL;
 
-  lineno = 0;
+  linenumber = 0;
 
   /* Default to 32 and 64 bit mode
      symbols at top of /lib/syscalls.exp do not have a mode modifier and they
@@ -1347,7 +1319,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bool import)
 	}
 
       obstack_1grow (o, '\0');
-      ++lineno;
+      ++linenumber;
 
       s = (char *) obstack_base (o);
       while (ISSPACE (*s))
@@ -1377,7 +1349,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bool import)
 	  else if (*s == '(')
 	    einfo (_("%F%P:%s:%d: #! ([member]) is not supported "
 		     "in import files\n"),
-		   filename, lineno);
+		   filename, linenumber);
 	  else
 	    {
 	      char cs;
@@ -1403,7 +1375,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bool import)
 		  impmember = "";
 		  if (cs != '\0')
 		    einfo (_("%P:%s:%d: warning: syntax error in import file\n"),
-			   filename, lineno);
+			   filename, linenumber);
 		}
 	      else
 		{
@@ -1415,7 +1387,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bool import)
 		    *s = '\0';
 		  else
 		    einfo (_("%P:%s:%d: warning: syntax error in import file\n"),
-			   filename, lineno);
+			   filename, linenumber);
 		}
 	    }
 
@@ -1451,7 +1423,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bool import)
 		  if (*se != '\0')
 		    einfo (_("%P:%s%d: warning: syntax error in "
 			     "import/export file\n"),
-			   filename, lineno);
+			   filename, linenumber);
 		}
 
 	      if (s != se)
@@ -1469,7 +1441,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bool import)
 			{
 			  einfo (_("%P:%s:%d: warning: syntax error in "
 				   "import/export file\n"),
-				 filename, lineno);
+				 filename, linenumber);
 
 			}
 		    }
@@ -1503,7 +1475,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bool import)
 						address, imppath, impfile,
 						impmember, syscall_flag))
 		    einfo (_("%X%P:%s:%d: failed to import symbol %s: %E\n"),
-			   filename, lineno, symname);
+			   filename, linenumber, symname);
 		}
 	    }
 	}
@@ -1513,7 +1485,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bool import)
   if (obstack_object_size (o) > 0)
     {
       einfo (_("%P:%s:%d: warning: ignoring unterminated last line\n"),
-	     filename, lineno);
+	     filename, linenumber);
       obstack_free (o, obstack_base (o));
     }
 

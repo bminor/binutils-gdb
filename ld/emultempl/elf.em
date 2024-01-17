@@ -45,6 +45,7 @@ fragment <<EOF
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldfile.h"
+#include "ldlex.h"
 #include "ldemul.h"
 #include <ldgram.h>
 #include "elf-bfd.h"
@@ -556,28 +557,7 @@ EOF
 fi
 fi
 
-if test -n "$PARSE_AND_LIST_PROLOGUE" ; then
 fragment <<EOF
- $PARSE_AND_LIST_PROLOGUE
-EOF
-fi
-
-fragment <<EOF
-
-enum elf_options
-{
-  OPTION_DISABLE_NEW_DTAGS = 400,
-  OPTION_ENABLE_NEW_DTAGS,
-  OPTION_GROUP,
-  OPTION_EH_FRAME_HDR,
-  OPTION_NO_EH_FRAME_HDR,
-  OPTION_EXCLUDE_LIBS,
-  OPTION_HASH_STYLE,
-  OPTION_BUILD_ID,
-  OPTION_PACKAGE_METADATA,
-  OPTION_AUDIT,
-  OPTION_COMPRESS_DEBUG
-};
 
 static void
 gld${EMULATION_NAME}_add_options

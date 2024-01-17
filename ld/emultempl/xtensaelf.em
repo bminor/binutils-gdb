@@ -39,6 +39,9 @@ static void xtensa_colocate_output_literals (lang_statement_union_type *);
 static void xtensa_strip_inconsistent_linkonce_sections
   (lang_statement_list_type *);
 
+extern int elf32xtensa_size_opt;
+extern int elf32xtensa_no_literal_movement;
+extern int elf32xtensa_abi;
 
 /* This number is irrelevant until we turn on use_literal_pages */
 static bfd_vma xtensa_page_power = 12; /* 4K pages.  */
@@ -1922,17 +1925,6 @@ EOF
 # Define some shell vars to insert bits of code into the standard ELF
 # parse_args and list_options functions.
 #
-PARSE_AND_LIST_PROLOGUE='
-#define OPTION_OPT_SIZEOPT              (300)
-#define OPTION_LITERAL_MOVEMENT		(OPTION_OPT_SIZEOPT + 1)
-#define OPTION_NO_LITERAL_MOVEMENT	(OPTION_LITERAL_MOVEMENT + 1)
-#define OPTION_ABI_WINDOWED		(OPTION_NO_LITERAL_MOVEMENT + 1)
-#define OPTION_ABI_CALL0		(OPTION_ABI_WINDOWED + 1)
-extern int elf32xtensa_size_opt;
-extern int elf32xtensa_no_literal_movement;
-extern int elf32xtensa_abi;
-'
-
 PARSE_AND_LIST_LONGOPTS='
   { "size-opt", no_argument, NULL, OPTION_OPT_SIZEOPT},
   { "literal-movement", no_argument, NULL, OPTION_LITERAL_MOVEMENT},

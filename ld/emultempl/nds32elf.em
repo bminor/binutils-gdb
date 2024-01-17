@@ -132,18 +132,6 @@ EOF
 # Define some shell vars to insert bits of code into the standard elf
 # parse_args and list_options functions.
 #
-PARSE_AND_LIST_PROLOGUE='
-#define OPTION_BASELINE			301
-#define OPTION_ELIM_GC_RELOCS		(OPTION_BASELINE + 1)
-#define OPTION_FP_AS_GP			(OPTION_BASELINE + 2)
-#define OPTION_NO_FP_AS_GP		(OPTION_BASELINE + 3)
-#define OPTION_REDUCE_FP_UPDATE		(OPTION_BASELINE + 4)
-#define OPTION_NO_REDUCE_FP_UPDATE	(OPTION_BASELINE + 5)
-#define OPTION_EXPORT_SYMBOLS		(OPTION_BASELINE + 6)
-#define OPTION_HYPER_RELAX		(OPTION_BASELINE + 7)
-#define OPTION_TLSDESC_TRAMPOLINE	(OPTION_BASELINE + 8)
-#define OPTION_NO_TLSDESC_TRAMPOLINE	(OPTION_BASELINE + 9)
-'
 PARSE_AND_LIST_LONGOPTS='
   { "mfp-as-gp", no_argument, NULL, OPTION_FP_AS_GP},
   { "mno-fp-as-gp", no_argument, NULL, OPTION_NO_FP_AS_GP},

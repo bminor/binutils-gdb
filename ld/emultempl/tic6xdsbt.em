@@ -165,12 +165,6 @@ EOF
 
 # This code gets inserted into the generic elf32.sc linker script
 # and allows us to define our own command line switches.
-PARSE_AND_LIST_PROLOGUE='
-#define OPTION_DSBT_INDEX		300
-#define OPTION_DSBT_SIZE		301
-#define OPTION_NO_MERGE_EXIDX_ENTRIES   302
-'
-
 PARSE_AND_LIST_LONGOPTS='
   {"dsbt-index", required_argument, NULL, OPTION_DSBT_INDEX},
   {"dsbt-size", required_argument, NULL, OPTION_DSBT_SIZE},

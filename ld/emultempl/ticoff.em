@@ -40,12 +40,12 @@ fragment <<EOF
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldfile.h"
+#include "ldlex.h"
 #include "ldemul.h"
 
 static int coff_version;
 
 /* TI COFF extra command line options */
-#define OPTION_COFF_FORMAT		(300 + 1)
 
 static void
 gld${EMULATION_NAME}_add_options

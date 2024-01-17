@@ -232,18 +232,6 @@ EOF
 # Define some shell vars to insert bits of code into the standard elf
 # parse_args and list_options functions.
 #
-PARSE_AND_LIST_PROLOGUE='
-enum
-  {
-    OPTION_INSN32 = 301,
-    OPTION_NO_INSN32,
-    OPTION_IGNORE_BRANCH_ISA,
-    OPTION_NO_IGNORE_BRANCH_ISA,
-    OPTION_COMPACT_BRANCHES,
-    OPTION_NO_COMPACT_BRANCHES
-  };
-'
-
 PARSE_AND_LIST_LONGOPTS='
   { "insn32", no_argument, NULL, OPTION_INSN32 },
   { "no-insn32", no_argument, NULL, OPTION_NO_INSN32 },

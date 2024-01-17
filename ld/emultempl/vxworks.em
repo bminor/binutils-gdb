@@ -55,12 +55,6 @@ vxworks_after_open (void)
 
 EOF
 
-PARSE_AND_LIST_PROLOGUE=$PARSE_AND_LIST_PROLOGUE'
-enum {
-  OPTION_FORCE_DYNAMIC = 501
-};
-'
-
 PARSE_AND_LIST_LONGOPTS=$PARSE_AND_LIST_LONGOPTS'
   {"force-dynamic", no_argument, NULL, OPTION_FORCE_DYNAMIC},
 '

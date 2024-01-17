@@ -322,11 +322,6 @@ EOF
 # Define some shell vars to insert bits of code into the standard elf
 # parse_args and list_options functions.
 #
-PARSE_AND_LIST_PROLOGUE='
-#define OPTION_NO_TRAMPOLINE		300
-#define OPTION_BANK_WINDOW		301
-'
-
 # The options are repeated below so that no abbreviations are allowed.
 # Otherwise -s matches stub-group-size
 PARSE_AND_LIST_LONGOPTS='
