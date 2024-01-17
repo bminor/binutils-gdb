@@ -207,7 +207,10 @@ if ![runto_main] {
 gdb_breakpoint "*fooso"
 gdb_continue_to_breakpoint "foo_so"
 
+# Note that because DW_TAG_entry_point is entered as a LOC_BLOCK
+# symbol, exactly which symbol is shown in the stack trace depends on
+# which symbol gdb happens to find first in the lookup.
 gdb_test "bt" [multi_line \
-		    "#0.*${hex} in foo \\(J=1, K=0\\).*" \
+		    "#0.*${hex} in (foo|fooso) \\(J=1, K=0\\).*" \
 		    "#1.*${hex} in prog \\(\\).*" \
 ] "bt fooso"
