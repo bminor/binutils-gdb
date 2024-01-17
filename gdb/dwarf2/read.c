@@ -5193,6 +5193,8 @@ create_all_units (dwarf2_per_objfile *per_objfile)
 
       if (!dwz->types.empty ())
 	{
+	  per_objfile->per_bfd->all_units.clear ();
+
 	  /* See enhancement PR symtab/30838.  */
 	  error (_("Dwarf Error: .debug_types section not supported in dwz file"));
 	}
