@@ -1954,12 +1954,12 @@ dwarf2_get_symbol_read_needs (gdb::array_view<const gdb_byte> expr,
 	case DW_OP_lt:
 	case DW_OP_gt:
 	case DW_OP_ne:
-	case DW_OP_GNU_push_tls_address:
 	case DW_OP_nop:
 	case DW_OP_GNU_uninit:
 	case DW_OP_push_object_address:
 	  break;
 
+	case DW_OP_GNU_push_tls_address:
 	case DW_OP_form_tls_address:
 	  if (symbol_needs <= SYMBOL_NEEDS_REGISTERS)
 	    symbol_needs = SYMBOL_NEEDS_REGISTERS;
