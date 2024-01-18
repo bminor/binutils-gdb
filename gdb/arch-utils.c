@@ -1218,6 +1218,14 @@ obstack *gdbarch_obstack (gdbarch *arch)
 
 /* See gdbarch.h.  */
 
+std::vector<const frame_unwind*>&
+gdbarch_get_unwinder_list (struct gdbarch *arch)
+{
+  return arch->unwinders;
+}
+
+/* See gdbarch.h.  */
+
 char *
 gdbarch_obstack_strdup (struct gdbarch *arch, const char *string)
 {

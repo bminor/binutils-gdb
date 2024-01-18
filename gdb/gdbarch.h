@@ -30,6 +30,7 @@
 #include "displaced-stepping.h"
 #include "gdbsupport/gdb-checked-static-cast.h"
 #include "registry.h"
+#include "frame-unwind.h"
 
 struct floatformat;
 struct ui_file;
@@ -309,6 +310,10 @@ extern obstack *gdbarch_obstack (gdbarch *arch);
 #define GDBARCH_OBSTACK_CALLOC(GDBARCH, NR, TYPE)   obstack_calloc<TYPE> (gdbarch_obstack ((GDBARCH)), (NR))
 
 #define GDBARCH_OBSTACK_ZALLOC(GDBARCH, TYPE)   obstack_zalloc<TYPE> (gdbarch_obstack ((GDBARCH)))
+
+/* Return the vector of unwinders stored in a gdbarch object.  */
+
+std::vector<const frame_unwind*>& gdbarch_get_unwinder_list (struct gdbarch *arch);
 
 /* Duplicate STRING, returning an equivalent string that's allocated on the
    obstack associated with GDBARCH.  The string is freed when the corresponding

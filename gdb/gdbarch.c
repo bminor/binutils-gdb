@@ -27,6 +27,7 @@
 
 /* Maintain the struct gdbarch object.  */
 
+#include <vector>
 struct gdbarch
 {
   /* Has this architecture been fully initialized?  */
@@ -36,6 +37,8 @@ struct gdbarch
   auto_obstack obstack;
   /* Registry.  */
   registry<gdbarch> registry_fields;
+  /* list of frame unwinders.  */
+  std::vector<const frame_unwind *> unwinders;
 
   /* basic architectural information.  */
   const struct bfd_arch_info * bfd_arch_info;

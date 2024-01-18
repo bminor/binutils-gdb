@@ -125,6 +125,7 @@ with open("gdbarch.c", "w") as f:
     print(file=f)
     print("/* Maintain the struct gdbarch object.  */", file=f)
     print(file=f)
+    print("#include <vector>",file=f)
     #
     # The struct definition body.
     #
@@ -137,6 +138,8 @@ with open("gdbarch.c", "w") as f:
     print("  auto_obstack obstack;", file=f)
     print("  /* Registry.  */", file=f)
     print("  registry<gdbarch> registry_fields;", file=f)
+    print("  /* list of frame unwinders.  */", file=f)
+    print("  std::vector<const frame_unwind *> unwinders;", file=f)
     print(file=f)
     print("  /* basic architectural information.  */", file=f)
     for c in filter(info, components):
