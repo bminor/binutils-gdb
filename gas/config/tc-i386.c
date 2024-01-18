@@ -5552,7 +5552,7 @@ x86_ginsn_addsub_mem_reg (const symbolS *insn_end_sym)
     }
   else if (i.mem_operands)
     {
-      mem_reg = (i.base_reg) ? i.base_reg : i.index_reg;
+      mem_reg = i.base_reg ? i.base_reg : i.index_reg;
       src1_dw2_regnum = ginsn_dw2_regnum (mem_reg);
       if (i.disp_operands == 1)
 	gdisp = i.op[0].disps->X_add_number;
@@ -5681,7 +5681,7 @@ x86_ginsn_move (const symbolS *insn_end_sym)
       /* mov  disp(%reg), %reg.  */
       if (i.mem_operands)
 	{
-	  src = (i.base_reg) ? i.base_reg : i.index_reg;
+	  src = i.base_reg ? i.base_reg : i.index_reg;
 	  if (i.disp_operands == 1)
 	    src_disp = i.op[0].disps->X_add_number;
 	  src_type = GINSN_SRC_INDIRECT;
@@ -5697,7 +5697,7 @@ x86_ginsn_move (const symbolS *insn_end_sym)
       src = i.op[0].regs;
       if (i.mem_operands)
 	{
-	  dst = (i.base_reg) ? i.base_reg : i.index_reg;
+	  dst = i.base_reg ? i.base_reg : i.index_reg;
 	  if (i.disp_operands == 1)
 	    dst_disp = i.op[1].disps->X_add_number;
 	  dst_type = GINSN_DST_INDIRECT;
@@ -6232,7 +6232,7 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
       gas_assert (!ginsn_link_next (ginsn, ginsn_next));
       break;
 
-    /* PS: Opcodes 0x80 ... 0x8f with opcode_space SPACE_0F are present
+    /* PS: JCC Opcodes 0x80 ... 0x8f (opcode_space SPACE_0F) are present
        only after relaxation.  They do not need to be handled for ginsn
        creation.  */
     case 0x70 ... 0x7f:
@@ -6271,7 +6271,7 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
       /* pop to reg/mem.  */
       if (i.mem_operands)
 	{
-	  mem_reg = (i.base_reg) ? i.base_reg : i.index_reg;
+	  mem_reg = i.base_reg ? i.base_reg : i.index_reg;
 	  /* Use dummy register if no base or index.  Unlike other opcodes,
 	     ginsns must be generated as this affect stack pointer.  */
 	  dw2_regnum = (mem_reg
@@ -6357,7 +6357,7 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
 	  ginsn_set_where (ginsn);
 	  if (i.mem_operands)
 	    {
-	      mem_reg = (i.base_reg) ? i.base_reg : i.index_reg;
+	      mem_reg = i.base_reg ? i.base_reg : i.index_reg;
 	      /* Use dummy register if no base or index.  Unlike other opcodes,
 		 ginsns must be generated as this affect stack pointer.  */
 	      dw2_regnum = (mem_reg
