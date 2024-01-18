@@ -42,6 +42,7 @@ typedef struct
 static const s390_options_t options[] =
 {
   { "esa" ,       N_("Disassemble in ESA architecture mode") },
+  /* TRANSLATORS: Please do not translate 'z/Architecture' as this is a technical name.  */
   { "zarch",      N_("Disassemble in z/Architecture mode") },
   { "insnlength", N_("Print unknown instructions according to "
 		     "length from first two bits") },
