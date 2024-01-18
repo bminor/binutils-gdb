@@ -662,23 +662,19 @@ windows_fetch_one_register (struct regcache *regcache,
   gdb_assert (gdbarch_pc_regnum (gdbarch) >= 0);
   gdb_assert (!gdbarch_write_pc_p (gdbarch));
 
-  if (r == I387_FISEG_REGNUM (tdep))
+  /* GDB treats some registers as 32-bit, where they are in fact only
+     16 bits long.  These cases must be handled specially to avoid
+     reading extraneous bits from the context.  */
+  if (r == I387_FISEG_REGNUM (tdep) || windows_process.segment_register_p (r))
     {
-      long l = *((long *) context_offset) & 0xffff;
-      regcache->raw_supply (r, (char *) &l);
+      gdb_byte bytes[4] = {};
+      memcpy (bytes, context_offset, 2);
+      regcache->raw_supply (r, bytes);
     }
   else if (r == I387_FOP_REGNUM (tdep))
     {
       long l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
-      regcache->raw_supply (r, (char *) &l);
-    }
-  else if (windows_process.segment_register_p (r))
-    {
-      /* GDB treats segment registers as 32bit registers, but they are
-	 in fact only 16 bits long.  Make sure we do not read extra
-	 bits from our source buffer.  */
-      long l = *((long *) context_offset) & 0xffff;
-      regcache->raw_supply (r, (char *) &l);
+      regcache->raw_supply (r, &l);
     }
   else
     {
@@ -799,7 +795,29 @@ windows_store_one_register (const struct regcache *regcache,
     context_ptr = (char *) &th->wow64_context;
 #endif
 
-  regcache->raw_collect (r, context_ptr + windows_process.mappings[r]);
+  struct gdbarch *gdbarch = regcache->arch ();
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
+
+  /* GDB treats some registers as 32-bit, where they are in fact only
+     16 bits long.  These cases must be handled specially to avoid
+     overwriting other registers in the context.  */
+  if (r == I387_FISEG_REGNUM (tdep) || windows_process.segment_register_p (r))
+    {
+      gdb_byte bytes[4];
+      regcache->raw_collect (r, bytes);
+      memcpy (context_ptr + windows_process.mappings[r], bytes, 2);
+    }
+  else if (r == I387_FOP_REGNUM (tdep))
+    {
+      gdb_byte bytes[4];
+      regcache->raw_collect (r, bytes);
+      /* The value of FOP occupies the top two bytes in the context,
+	 so write the two low-order bytes from the cache into the
+	 appropriate spot.  */
+      memcpy (context_ptr + windows_process.mappings[r] + 2, bytes, 2);
+    }
+  else
+    regcache->raw_collect (r, context_ptr + windows_process.mappings[r]);
 }
 
 /* Store a new register value into the context of the thread tied to
