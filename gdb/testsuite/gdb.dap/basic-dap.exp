@@ -25,7 +25,7 @@ if {[build_executable ${testfile}.exp $testfile] == -1} {
     return
 }
 
-if {[dap_launch $testfile] == ""} {
+if {[dap_initialize] == ""} {
     return
 }
 
@@ -72,21 +72,6 @@ if {$ok} {
     fail "check lack of new breakpoint event"
 }
 
-# Check that there are breakpoint locations on each line between FIRST
-# and BREAK.
-set first_line [gdb_get_line_number "FIRST"]
-set last_line [expr {$line - 1}]
-set obj [dap_check_request_and_response "breakpoint locations" \
-	     breakpointLocations \
-	     [format {o source [o path [%s]] line [i %d] endLine [i %d]} \
-		  [list s $srcfile] $first_line $last_line]]
-# We know gdb returns the lines in sorted order.
-foreach entry [dict get [lindex $obj 0] body breakpoints] {
-    gdb_assert {[dict get $entry line] == $first_line} \
-	"line $first_line in result"
-    incr first_line
-}
-
 # Note that in this request, we add a 'source' field to the
 # SourceBreakpoint object.  This isn't in the spec but it once caused
 # an incorrect exception in the Python code.  See PR dap/30820.
@@ -99,23 +84,15 @@ set obj [dap_check_request_and_response "reset breakpoint by line number" \
 set new_line_bpno [dap_get_breakpoint_number $obj]
 gdb_assert {$new_line_bpno == $line_bpno} "re-setting kept same breakpoint number"
 
-# This uses "&address_breakpoint_here" as the address -- this is a
-# hack because we know how this is implemented under the hood.
-set obj [dap_check_request_and_response "set breakpoint by address" \
-	     setInstructionBreakpoints \
-	     {o breakpoints [a [o instructionReference [s &address_breakpoint_here]]]}]
-set insn_bpno [dap_get_breakpoint_number $obj]
+dap_check_request_and_response "configurationDone" configurationDone
 
-set response [lindex $obj 0]
-set bplist [dict get $response body breakpoints]
-set insn_pc [dict get [lindex $bplist 0] instructionReference]
-
-dap_check_request_and_response "start inferior" configurationDone
+if {[dap_launch $testfile] == ""} {
+    return
+}
 dap_wait_for_event_and_check "inferior started" thread "body reason" started
 
 # While waiting for the stopped event, we might receive breakpoint changed
-# events indicating some breakpoint addresses were relocated.  Update INSN_PC
-# if necessary.
+# events indicating some breakpoint addresses were relocated.
 lassign [dap_wait_for_event_and_check "stopped at function breakpoint" stopped \
 	    "body reason" breakpoint \
 	    "body hitBreakpointIds" $fn_bpno] unused objs
@@ -136,12 +113,32 @@ foreach obj $objs {
 
     set breakpoint [dict get $body "breakpoint"]
     set breakpoint_id [dict get $breakpoint "id"]
+}
 
-    if { $breakpoint_id != $insn_bpno } {
-	continue
-    }
+# This uses "&address_breakpoint_here" as the address -- this is a
+# hack because we know how this is implemented under the hood.
+set obj [dap_check_request_and_response "set breakpoint by address" \
+	     setInstructionBreakpoints \
+	     {o breakpoints [a [o instructionReference [s &address_breakpoint_here]]]}]
+set insn_bpno [dap_get_breakpoint_number $obj]
 
-    set insn_pc [dict get $breakpoint "instructionReference"]
+set response [lindex $obj 0]
+set bplist [dict get $response body breakpoints]
+set insn_pc [dict get [lindex $bplist 0] instructionReference]
+
+# Check that there are breakpoint locations on each line between FIRST
+# and BREAK.
+set first_line [gdb_get_line_number "FIRST"]
+set last_line [expr {$line - 1}]
+set obj [dap_check_request_and_response "breakpoint locations" \
+	     breakpointLocations \
+	     [format {o source [o path [%s]] line [i %d] endLine [i %d]} \
+		  [list s $srcfile] $first_line $last_line]]
+# We know gdb returns the lines in sorted order.
+foreach entry [dict get [lindex $obj 0] body breakpoints] {
+    gdb_assert {[dict get $entry line] == $first_line} \
+	"line $first_line in result"
+    incr first_line
 }
 
 set obj [dap_check_request_and_response "evaluate global in function" \

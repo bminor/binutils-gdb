@@ -25,6 +25,10 @@ if {[build_executable ${testfile}.exp $testfile] == -1} {
     return
 }
 
+if {[dap_initialize] == ""} {
+    return
+}
+
 if {[dap_launch $testfile stop_at_main 1] == ""} {
     return
 }

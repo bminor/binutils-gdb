@@ -25,7 +25,7 @@ if {[build_executable ${testfile}.exp $testfile $srcfile] == -1} {
     return
 }
 
-if {[dap_launch $testfile] == ""} {
+if {[dap_initialize] == ""} {
     return
 }
 
@@ -41,7 +41,11 @@ dap_check_request_and_response "set conditional breakpoint" \
 				     condition [s "return_false()"]]]} \
 	 [list s $srcfile] $line]
 
-dap_check_request_and_response "start inferior" configurationDone
+dap_check_request_and_response "configurationDone" configurationDone
+
+if {[dap_launch $testfile] == ""} {
+    return
+}
 dap_wait_for_event_and_check "process event generated" process \
     "body startMethod" process
 dap_wait_for_event_and_check "inferior started" thread "body reason" started

@@ -25,6 +25,12 @@ if {[build_executable ${testfile}.exp $testfile $srcfile] == -1} {
     return
 }
 
+if {[dap_initialize] == ""} {
+    return
+}
+
+dap_check_request_and_response "configurationDone" configurationDone
+
 # Starting the inferior will fail if the change of cwd does not work.
 set the_dir [file dirname $testfile]
 set the_file [file tail $testfile]
@@ -32,7 +38,6 @@ if {[dap_launch $the_file cwd $the_dir stop_at_main 1] == ""} {
     return
 }
 
-dap_check_request_and_response "start inferior" configurationDone
 # We didn't explicitly set a breakpoint, so if we hit one, it worked.
 dap_wait_for_event_and_check "stopped at function breakpoint" stopped \
     "body reason" breakpoint

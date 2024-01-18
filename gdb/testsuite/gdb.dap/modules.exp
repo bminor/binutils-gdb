@@ -38,7 +38,7 @@ if {[build_executable ${testfile}.exp $testfile $srcfile \
     return
 }
 
-if {[dap_launch $testfile] == ""} {
+if {[dap_initialize] == ""} {
     return
 }
 
@@ -47,8 +47,11 @@ set obj [dap_check_request_and_response "set breakpoint on stop function" \
 	     {o breakpoints [a [o name [s stop]]]}]
 set fn_bpno [dap_get_breakpoint_number $obj]
 
-dap_check_request_and_response "start inferior" configurationDone
+dap_check_request_and_response "configurationDone" configurationDone
 
+if {[dap_launch $testfile] == ""} {
+    return
+}
 dap_wait_for_event_and_check "stopped at function breakpoint" stopped \
     "body reason" breakpoint \
     "body hitBreakpointIds" $fn_bpno

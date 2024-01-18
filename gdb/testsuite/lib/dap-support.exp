@@ -235,10 +235,9 @@ proc dap_check_request_and_response {name command {obj {}}} {
 
 # Start gdb, send a DAP initialization request and return the
 # response.  This approach lets the caller check the feature list, if
-# desired.  Callers not caring about this should probably use
-# dap_launch.  Returns the empty string on failure.  NAME is used as
-# the test name.
-proc dap_initialize {name} {
+# desired.  Returns the empty string on failure.  NAME is used as the
+# test name.
+proc dap_initialize {{name "initialize"}} {
     if {[dap_gdb_start]} {
 	return ""
     }
@@ -249,11 +248,12 @@ proc dap_initialize {name} {
 		     supportsMemoryReferences [l true]}]
 }
 
-# Start gdb, send a DAP initialize request, and then a launch request
-# specifying FILE as the program to use for the inferior.  Returns the
-# empty string on failure, or the response object from the launch
-# request.  If specified, ARGS is a dictionary of key-value pairs,
-# each passed to the launch request.  Valid keys are:
+# Send a launch request specifying FILE as the program to use for the
+# inferior.  Returns the empty string on failure, or the response
+# object from the launch request.  If specified, ARGS is a dictionary
+# of key-value pairs, each passed to the launch request.  Valid keys
+# are:
+#
 # * arguments - value is a list of strings passed as command-line
 #   arguments to the inferior
 # * env - value is a list of pairs of the form {VAR VALUE} that is
@@ -266,9 +266,6 @@ proc dap_initialize {name} {
 # After this proc is called, gdb will be ready to accept breakpoint
 # requests.
 proc dap_launch {file {args {}}} {
-    if {[dap_initialize "startup - initialize"] == ""} {
-	return ""
-    }
     set params "o program"
     append params " [format {[%s]} [list s [standard_output_file $file]]]"
 

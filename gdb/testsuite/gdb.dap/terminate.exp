@@ -27,11 +27,15 @@ if {[build_executable ${testfile}.exp $testfile $srcfile] == -1} {
     return
 }
 
-if {[dap_launch $testfile] == ""} {
+if {[dap_initialize] == ""} {
     return
 }
 
 dap_check_request_and_response "start inferior" configurationDone
+
+if {[dap_launch $testfile] == ""} {
+    return
+}
 dap_wait_for_event_and_check "inferior started" thread "body reason" started
 
 dap_wait_for_event_and_check "terminated event" terminated

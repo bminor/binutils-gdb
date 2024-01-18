@@ -29,7 +29,7 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable debug] != ""} {
   return -1
 }
 
-if {[dap_launch $testfile] == ""} {
+if {[dap_initialize] == ""} {
     return
 }
 
@@ -42,7 +42,11 @@ set obj [dap_check_request_and_response "set breakpoint by line number" \
 		  [list s cstuff.c] $line]]
 set line_bpno [dap_get_breakpoint_number $obj]
 
-dap_check_request_and_response "start inferior" configurationDone
+dap_check_request_and_response "configurationDone" configurationDone
+
+if {[dap_launch $testfile] == ""} {
+    return
+}
 dap_wait_for_event_and_check "inferior started" thread "body reason" started
 
 dap_wait_for_event_and_check "stopped at line breakpoint" stopped \

@@ -23,16 +23,6 @@ from .server import request, capability
 from .startup import exec_and_log, DAPException
 
 
-# The program being launched, or None.  This should only be accessed
-# from the gdb thread.
-_program = None
-
-
-# True if the program was attached, False otherwise.  This should only
-# be accessed from the gdb thread.
-_attach = False
-
-
 # Any parameters here are necessarily extensions -- DAP requires this
 # from implementations.  Any additions or changes here should be
 # documented in the gdb manual.
@@ -46,10 +36,6 @@ def launch(
     stopAtBeginningOfMainSubprogram: bool = False,
     **extra,
 ):
-    global _program
-    _program = program
-    global _attach
-    _attach = False
     if cwd is not None:
         exec_and_log("cd " + cwd)
     if program is not None:
@@ -64,6 +50,8 @@ def launch(
         inf.clear_env()
         for name, value in env.items():
             inf.set_env(name, value)
+    expect_process("process")
+    exec_and_expect_stop("run")
 
 
 @request("attach")
@@ -74,11 +62,6 @@ def attach(
     target: Optional[str] = None,
     **args,
 ):
-    # Ensure configurationDone does not try to run.
-    global _attach
-    _attach = True
-    global _program
-    _program = program
     if program is not None:
         exec_and_log("file " + program)
     if pid is not None:
@@ -93,9 +76,7 @@ def attach(
 
 
 @capability("supportsConfigurationDoneRequest")
-@request("configurationDone", response=False)
+@request("configurationDone")
 def config_done(**args):
-    global _attach
-    if not _attach:
-        expect_process("process")
-        exec_and_expect_stop("run")
+    # Nothing to do.
+    return None

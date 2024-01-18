@@ -28,17 +28,6 @@ from .startup import in_gdb_thread, log_stack, parse_and_eval, LogLevel, DAPExce
 from .typecheck import type_check
 
 
-@in_gdb_thread
-def _bp_modified(event):
-    send_event(
-        "breakpoint",
-        {
-            "reason": "changed",
-            "breakpoint": _breakpoint_descriptor(event),
-        },
-    )
-
-
 # True when suppressing new breakpoint events.
 _suppress_bp = False
 
@@ -56,6 +45,19 @@ def suppress_new_breakpoint_event():
 
 
 @in_gdb_thread
+def _bp_modified(event):
+    global _suppress_bp
+    if not _suppress_bp:
+        send_event(
+            "breakpoint",
+            {
+                "reason": "changed",
+                "breakpoint": _breakpoint_descriptor(event),
+            },
+        )
+
+
+@in_gdb_thread
 def _bp_created(event):
     global _suppress_bp
     if not _suppress_bp:
@@ -70,13 +72,15 @@ def _bp_created(event):
 
 @in_gdb_thread
 def _bp_deleted(event):
-    send_event(
-        "breakpoint",
-        {
-            "reason": "removed",
-            "breakpoint": _breakpoint_descriptor(event),
-        },
-    )
+    global _suppress_bp
+    if not _suppress_bp:
+        send_event(
+            "breakpoint",
+            {
+                "reason": "removed",
+                "breakpoint": _breakpoint_descriptor(event),
+            },
+        )
 
 
 gdb.events.breakpoint_created.connect(_bp_created)
@@ -97,11 +101,10 @@ def _breakpoint_descriptor(bp):
     "Return the Breakpoint object descriptor given a gdb Breakpoint."
     result = {
         "id": bp.number,
-        # We always use True here, because this field just indicates
-        # that breakpoint creation was successful -- and if we have a
-        # breakpoint, the creation succeeded.
-        "verified": True,
+        "verified": not bp.pending,
     }
+    if bp.pending:
+        result["reason"] = "pending"
     if bp.locations:
         # Just choose the first location, because DAP doesn't allow
         # multiple locations.  See
@@ -146,51 +149,54 @@ def _set_breakpoints_callback(kind, specs, creator):
         saved_map = {}
     breakpoint_map[kind] = {}
     result = []
-    for spec in specs:
-        # It makes sense to reuse a breakpoint even if the condition
-        # or ignore count differs, so remove these entries from the
-        # spec first.
-        (condition, hit_condition) = _remove_entries(spec, "condition", "hitCondition")
-        keyspec = frozenset(spec.items())
+    with suppress_new_breakpoint_event():
+        for spec in specs:
+            # It makes sense to reuse a breakpoint even if the condition
+            # or ignore count differs, so remove these entries from the
+            # spec first.
+            (condition, hit_condition) = _remove_entries(
+                spec, "condition", "hitCondition"
+            )
+            keyspec = frozenset(spec.items())
 
-        # Create or reuse a breakpoint.  If asked, set the condition
-        # or the ignore count.  Catch errors coming from gdb and
-        # report these as an "unverified" breakpoint.
-        bp = None
-        try:
-            if keyspec in saved_map:
-                bp = saved_map.pop(keyspec)
-            else:
-                with suppress_new_breakpoint_event():
+            # Create or reuse a breakpoint.  If asked, set the condition
+            # or the ignore count.  Catch errors coming from gdb and
+            # report these as an "unverified" breakpoint.
+            bp = None
+            try:
+                if keyspec in saved_map:
+                    bp = saved_map.pop(keyspec)
+                else:
                     bp = creator(**spec)
 
-            bp.condition = condition
-            if hit_condition is None:
-                bp.ignore_count = 0
-            else:
-                bp.ignore_count = int(
-                    parse_and_eval(hit_condition, global_context=True)
-                )
+                bp.condition = condition
+                if hit_condition is None:
+                    bp.ignore_count = 0
+                else:
+                    bp.ignore_count = int(
+                        parse_and_eval(hit_condition, global_context=True)
+                    )
 
-            # Reaching this spot means success.
-            breakpoint_map[kind][keyspec] = bp
-            result.append(_breakpoint_descriptor(bp))
-        # Exceptions other than gdb.error are possible here.
-        except Exception as e:
-            # Don't normally want to see this, as it interferes with
-            # the test suite.
-            log_stack(LogLevel.FULL)
-            # Maybe the breakpoint was made but setting an attribute
-            # failed.  We still want this to fail.
-            if bp is not None:
-                bp.delete()
-            # Breakpoint creation failed.
-            result.append(
-                {
-                    "verified": False,
-                    "message": str(e),
-                }
-            )
+                # Reaching this spot means success.
+                breakpoint_map[kind][keyspec] = bp
+                result.append(_breakpoint_descriptor(bp))
+            # Exceptions other than gdb.error are possible here.
+            except Exception as e:
+                # Don't normally want to see this, as it interferes with
+                # the test suite.
+                log_stack(LogLevel.FULL)
+                # Maybe the breakpoint was made but setting an attribute
+                # failed.  We still want this to fail.
+                if bp is not None:
+                    bp.delete()
+                # Breakpoint creation failed.
+                result.append(
+                    {
+                        "verified": False,
+                        "reason": "failed",
+                        "message": str(e),
+                    }
+                )
 
     # Delete any breakpoints that were not reused.
     for entry in saved_map.values():

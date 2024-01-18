@@ -25,7 +25,7 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable \
     return -1
 }
 
-if {[dap_launch $binfile] == ""} {
+if {[dap_initialize] == ""} {
     return
 }
 
@@ -61,8 +61,11 @@ foreach spec $bps {
     incr i
 }
 
-dap_check_request_and_response "start inferior" configurationDone
+dap_check_request_and_response "configurationDone" configurationDone
 
+if {[dap_launch $binfile] == ""} {
+    return
+}
 dap_wait_for_event_and_check "stopped at first raise" stopped \
     "body reason" breakpoint \
     "body hitBreakpointIds" 2

@@ -25,11 +25,15 @@ if {[build_executable ${testfile}.exp $testfile $srcfile] == -1} {
     return
 }
 
-if {[dap_launch $testfile stop_at_main 1] == ""} {
+if {[dap_initialize] == ""} {
     return
 }
 
 dap_check_request_and_response "start inferior" configurationDone
+
+if {[dap_launch $testfile stop_at_main 1] == ""} {
+    return
+}
 # We didn't explicitly set a breakpoint, so if we hit one, it worked.
 dap_wait_for_event_and_check "stopped at function breakpoint" stopped \
     "body reason" breakpoint
