@@ -16448,6 +16448,13 @@ cooked_indexer::index_dies (cutu_reader *reader,
 				  info_ptr, abbrev, &name, &linkage_name,
 				  &flags, &sibling, &this_parent_entry,
 				  &defer, &is_enum_class, false);
+      /* A DW_TAG_entry_point inherits its static/extern property from
+	 the enclosing subroutine.  */
+      if (abbrev->tag == DW_TAG_entry_point)
+	{
+	  flags &= ~IS_STATIC;
+	  flags |= parent_entry->flags & IS_STATIC;
+	}
 
       if (abbrev->tag == DW_TAG_namespace
 	  && m_language == language_cplus
