@@ -1,22 +1,23 @@
-# translation of gold to Romanian
+# Translation of gold to Romanian
 # Mesajele în limba română pentru pachetul gold.
-# Copyright © 2022 Free Software Foundation, Inc.
+# Copyright © 2022, 2023, 2024 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
 #
-# Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>, 2022 - 2023.
+# Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>, 2022 - 2024.
 #
 # Cronologia traducerii fișierului „gold”:
-# Traducerea inițială, făcută de R-GC, pentru versiunea gold 2.38.90.
+# Traducerea inițială, făcută de R-GC, pentru versiunea gold 2.38.90, dec-2022.
 # Actualizare a traducerii pentru versiunea 2.39.90, făcută de R-GC, ian-2023.
 # Actualizare a traducerii pentru versiunea 2.40.90, făcută de R-GC, iul-2023.
+# Actualizare a traducerii pentru versiunea 2.41.90, făcută de R-GC, ian-2024.
 # Actualizare a traducerii pentru versiunea Y, făcută de X, Z(luna-anul).
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gold 2.40.90\n"
+"Project-Id-Version: gold 2.41.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2023-07-03 11:34+0100\n"
-"PO-Revision-Date: 2023-07-03 21:17+0200\n"
+"POT-Creation-Date: 2024-01-15 14:59+0000\n"
+"PO-Revision-Date: 2024-01-16 18:10+0100\n"
 "Last-Translator: Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>\n"
 "Language-Team: Romanian <translation-team-ro@lists.sourceforge.net>\n"
 "Language: ro\n"
@@ -49,12 +50,12 @@ msgstr "realocare dinamică "
 msgid "Invalid/unrecognized reloc reloc %d."
 msgstr "Realocare nevalidă/nerecunoscută reloc() %d."
 
-#: aarch64.cc:511 arm.cc:7391 mips.cc:6685
+#: aarch64.cc:511 arm.cc:7391 mips.cc:6723
 #, c-format
 msgid "undefined or discarded local symbol %u from  object %s in GOT"
 msgstr "simbol local nedefinit sau eliminat %u din obiectul %s din GOT"
 
-#: aarch64.cc:532 arm.cc:7413 mips.cc:6704
+#: aarch64.cc:532 arm.cc:7413 mips.cc:6742
 #, c-format
 msgid "undefined or discarded symbol %s in GOT"
 msgstr "simbolul %s nedefinit sau eliminat în GOT"
@@ -69,112 +70,112 @@ msgstr "index de nume de tabel de simboluri nevalid: %u"
 msgid "symbol table name section has wrong type: %u"
 msgstr "secțiunea de nume a tabelului de simboluri are tip greșit: %u"
 
-#: aarch64.cc:3832 arm.cc:10905 mips.cc:9608 powerpc.cc:2935 target.cc:94
+#: aarch64.cc:3833 arm.cc:10905 mips.cc:9646 powerpc.cc:2935 target.cc:94
 #, c-format
 msgid "%s: unsupported ELF file type %d"
 msgstr "%s: tip de fișier ELF neacceptat %d"
 
-#: aarch64.cc:4014 arm.cc:12181
+#: aarch64.cc:4015 arm.cc:12181
 #, c-format
 msgid "cannot handle branch to local %u in a merged section %s"
 msgstr "nu se poate gestiona ramificarea către locația %u într-o secțiune îmbinată %s"
 
-#: aarch64.cc:4379 arm.cc:7593 i386.cc:193 s390.cc:216 sparc.cc:1366
+#: aarch64.cc:4380 arm.cc:7593 i386.cc:193 s390.cc:216 sparc.cc:1366
 #: tilegx.cc:182 x86_64.cc:314
 msgid "** PLT"
 msgstr "** PLT"
 
-#: aarch64.cc:5554
+#: aarch64.cc:5555
 #, c-format
 msgid "Stub is too far away, try a smaller value for '--stub-group-size'. The current value is 0x%lx."
 msgstr "Ciotul(stub) este prea departe, încercați o valoare mai mică pentru „--stub-group-size”. Valoarea curentă este 0x%lx."
 
-#: aarch64.cc:6016 arm.cc:8477 i386.cc:1772 mips.cc:12461 powerpc.cc:7845
+#: aarch64.cc:6017 arm.cc:8477 i386.cc:1772 mips.cc:12507 powerpc.cc:7848
 #: s390.cc:2185 s390.cc:2633 sparc.cc:2134 tilegx.cc:3137 tilegx.cc:3589
-#: x86_64.cc:3012 x86_64.cc:3459
+#: x86_64.cc:3027 x86_64.cc:3497
 #, c-format
 msgid "%s: unsupported reloc %u against local symbol"
 msgstr "%s: realocare neacceptată a lui %u în raport cu simbolul local"
 
-#: aarch64.cc:6057 powerpc.cc:7950 s390.cc:2259 sparc.cc:2230
+#: aarch64.cc:6058 powerpc.cc:7953 s390.cc:2259 sparc.cc:2230
 msgid "requires unsupported dynamic reloc; recompile with -fPIC"
 msgstr "necesită realocare dinamică neacceptată; recompilați cu „-fPIC”"
 
-#: aarch64.cc:6079
+#: aarch64.cc:6080
 #, c-format
 msgid "%s: unsupported TLS reloc %s for IFUNC symbol"
 msgstr "%s: realocare TLS neacceptată %s pentru simbolul IFUNC"
 
-#: aarch64.cc:6123 aarch64.cc:6187 aarch64.cc:6497
+#: aarch64.cc:6124 aarch64.cc:6188 aarch64.cc:6498
 #, c-format
 msgid "%s: unsupported reloc %u in pos independent link."
 msgstr "%s: realocare neacceptată %u în legătura independentă de poziție."
 
-#: aarch64.cc:6288
+#: aarch64.cc:6289
 #, c-format
 msgid "%s: unsupported TLSLE reloc %u in shared code."
 msgstr "%s: realocare TLSLE neacceptată %u în cod partajat."
 
-#: aarch64.cc:6373 arm.cc:8885 i386.cc:2127 mips.cc:12474 powerpc.cc:8785
+#: aarch64.cc:6374 arm.cc:8885 i386.cc:2127 mips.cc:12520 powerpc.cc:8788
 #: s390.cc:3064 s390.cc:3081 sparc.cc:2572 tilegx.cc:3605 tilegx.cc:4144
-#: x86_64.cc:3475 x86_64.cc:3979
+#: x86_64.cc:3513 x86_64.cc:4038
 #, c-format
 msgid "%s: unsupported reloc %u against global symbol %s"
 msgstr "%s: realocare neacceptată %u în raport cu simbolul global %s"
 
-#: aarch64.cc:6723
+#: aarch64.cc:6724
 #, c-format
 msgid "%s: unsupported TLSLE reloc type %u in shared objects."
 msgstr "%s: tip de realocare TLSLE neacceptată %u în obiectele partajate."
 
-#: aarch64.cc:6768
+#: aarch64.cc:6769
 #, c-format
 msgid "%s: unsupported reloc type in global scan"
 msgstr "%s: tip de realocare neacceptată în scanarea globală"
 
-#: aarch64.cc:6908 powerpc.cc:9922 s390.cc:4014 sparc.cc:3164 tilegx.cc:4211
-#: x86_64.cc:4044
+#: aarch64.cc:6909 powerpc.cc:9925 s390.cc:4014 sparc.cc:3164 tilegx.cc:4211
+#: x86_64.cc:4103
 #, c-format
 msgid "%s: unsupported REL reloc section"
 msgstr "%s: secțiune de realocare REL neacceptată"
 
-#: aarch64.cc:7071 arm.cc:9615
+#: aarch64.cc:7072 arm.cc:9615
 #, c-format
 msgid "cannot relocate %s in object file"
 msgstr "nu se poate realoca %s în fișierul obiect"
 
-#: aarch64.cc:7344 i386.cc:2987 i386.cc:3753 mips.cc:10076 powerpc.cc:12279
-#: s390.cc:3465 sparc.cc:3695 tilegx.cc:4726 x86_64.cc:4537
+#: aarch64.cc:7345 i386.cc:2987 i386.cc:3753 mips.cc:10114 powerpc.cc:12282
+#: s390.cc:3465 sparc.cc:3695 tilegx.cc:4726 x86_64.cc:4597
 #, c-format
 msgid "unexpected reloc %u in object file"
 msgstr "realocare neașteptată %u în fișierul obiect"
 
-#: aarch64.cc:7350
+#: aarch64.cc:7351
 #, c-format
 msgid "unsupported reloc %s"
 msgstr "realocare neacceptată %s"
 
-#: aarch64.cc:7362 arm.cc:10095 arm.cc:10713
+#: aarch64.cc:7363 arm.cc:10095 arm.cc:10713
 #, c-format
 msgid "relocation overflow in %s"
 msgstr "depășire de realocări în %s"
 
-#: aarch64.cc:7370 arm.cc:10103 arm.cc:10718
+#: aarch64.cc:7371 arm.cc:10103 arm.cc:10718
 #, c-format
 msgid "unexpected opcode while processing relocation %s"
 msgstr "cod operațional neașteptat în timpul procesării realocării %s"
 
-#: aarch64.cc:7466
+#: aarch64.cc:7467
 #, c-format
 msgid "unsupported gd_to_ie relaxation on %u"
 msgstr "relaxare gd_to_ie neacceptată pe %u"
 
-#: aarch64.cc:7638
+#: aarch64.cc:7639
 #, c-format
 msgid "%s: unsupported reloc %u in non-static TLSLE mode."
 msgstr "%s: realocare %u neacceptată în modul TLSLE nestatic."
 
-#: aarch64.cc:7723
+#: aarch64.cc:7724
 #, c-format
 msgid "%s: unsupported TLS reloc %u."
 msgstr "%s: realocare TLS neacceptată %u."
@@ -187,32 +188,32 @@ msgstr "%s: realocare TLS neacceptată %u."
 #. However the gd_to_le relaxation decision has been made early
 #. in the scan stage, where we did not allocate a GOT entry for
 #. this symbol. Therefore we have to exit and report an error now.
-#: aarch64.cc:7780 aarch64.cc:7880
+#: aarch64.cc:7781 aarch64.cc:7881
 #, c-format
 msgid "unexpected reloc insn sequence while relaxing tls gd to le for reloc %u."
 msgstr "secvență neașteptată de realocare insn în timp ce se relaxează tls gd_to_le pentru realocare %u."
 
-#: aarch64.cc:7955
+#: aarch64.cc:7956
 #, c-format
 msgid "TLS variable referred by reloc %u is too far from TP."
 msgstr "Variabila TLS referită de realocarea %u este prea departe de TP."
 
-#: aarch64.cc:8025
+#: aarch64.cc:8026
 #, c-format
 msgid "TLS variable referred by reloc %u is too far from TP. We Can't do gd_to_le relaxation.\n"
 msgstr "Variabila TLS referită de realocarea %u este prea departe de TP. Nu se poate face relaxarea gd_to_le.\n"
 
-#: aarch64.cc:8049
+#: aarch64.cc:8050
 #, c-format
 msgid "unsupported tlsdesc gd_to_le optimization on reloc %u"
 msgstr "optimizare tlsdesc gd_to_le neacceptată la realocarea %u"
 
-#: aarch64.cc:8121
+#: aarch64.cc:8122
 #, c-format
 msgid "Don't support tlsdesc gd_to_ie optimization on reloc %u"
 msgstr "Nu se acceptă optimizarea tlsdesc gd_to_ie la realocarea %u"
 
-#: aarch64.cc:8456
+#: aarch64.cc:8478
 #, c-format
 msgid "Erratum 835769 found and fixed at \"%s\", section %d, offset 0x%08x."
 msgstr "Eroare 835769 găsită și remediată la „%s”, secțiunea %d, poziția 0x%08x."
@@ -393,27 +394,27 @@ msgid "requires unsupported dynamic reloc %s; recompile with -fPIC"
 msgstr "necesită realocarea dinamică neacceptată %s; recompilați cu -fPIC"
 
 #: arm.cc:8547 i386.cc:1786 s390.cc:2276 sparc.cc:2247 tilegx.cc:3223
-#: x86_64.cc:3118
+#: x86_64.cc:3133
 #, c-format
 msgid "%s: unsupported TLS reloc %u for IFUNC symbol"
 msgstr "%s: realocare TLS neacceptată %u pentru simbolul IFUNC"
 
-#: arm.cc:8643 i386.cc:1862 powerpc.cc:8254 s390.cc:2369 x86_64.cc:3216
+#: arm.cc:8643 i386.cc:1862 powerpc.cc:8257 s390.cc:2369 x86_64.cc:3233
 #, c-format
 msgid "section symbol %u has bad shndx %u"
 msgstr "simbolul secțiunii %u are shndx incorect %u"
 
 #. These are relocations which should only be seen by the
 #. dynamic linker, and should never be seen here.
-#: arm.cc:8752 arm.cc:9233 i386.cc:1950 i386.cc:2436 mips.cc:11258
-#: s390.cc:2468 s390.cc:2902 sparc.cc:2553 sparc.cc:3033 tilegx.cc:3584
-#: tilegx.cc:4139 x86_64.cc:3331 x86_64.cc:3852
+#: arm.cc:8752 arm.cc:9233 i386.cc:1950 i386.cc:2436 mips.cc:11296 s390.cc:2468
+#: s390.cc:2902 sparc.cc:2553 sparc.cc:3033 tilegx.cc:3584 tilegx.cc:4139
+#: x86_64.cc:3358 x86_64.cc:3898
 #, c-format
 msgid "%s: unexpected reloc %u in object file"
 msgstr "%s: realocare neașteptată %u în fișierul obiect"
 
-#: arm.cc:8784 i386.cc:1984 mips.cc:10707 s390.cc:2512 sparc.cc:2452
-#: tilegx.cc:3488 x86_64.cc:3363
+#: arm.cc:8784 i386.cc:1984 mips.cc:10745 s390.cc:2512 sparc.cc:2452
+#: tilegx.cc:3488 x86_64.cc:3399
 #, c-format
 msgid "local symbol %u has bad shndx %u"
 msgstr "simbolul local %u are shndx incorect %u"
@@ -428,10 +429,10 @@ msgid "unable to provide V4BX reloc interworking fix up; the target profile does
 msgstr "imposibil de furnizat remedierea interfuncționării realocării V4BX; profilul țintă nu acceptă instrucțiunile BX"
 
 #: arm.cc:10247 i386.cc:3019 i386.cc:3101 i386.cc:3166 i386.cc:3202
-#: i386.cc:3274 mips.cc:12296 powerpc.cc:12393 s390.cc:3471 s390.cc:3542
+#: i386.cc:3274 mips.cc:12342 powerpc.cc:12396 s390.cc:3471 s390.cc:3542
 #: s390.cc:3579 s390.cc:3601 s390.cc:3626 sparc.cc:3701 sparc.cc:3892
-#: sparc.cc:3953 sparc.cc:4060 tilegx.cc:4732 x86_64.cc:4558 x86_64.cc:4684
-#: x86_64.cc:4756 x86_64.cc:4790
+#: sparc.cc:3953 sparc.cc:4060 tilegx.cc:4732 x86_64.cc:4620 x86_64.cc:4748
+#: x86_64.cc:4823 x86_64.cc:4857
 #, c-format
 msgid "unsupported reloc %u"
 msgstr "realocare neacceptată %u"
@@ -553,7 +554,7 @@ msgstr "nu se poate deschide %s: %s:"
 # a mesajului original, pentru ca mesajul, în
 # totalitatea sa, să aibă un înțeles coerent
 # pentru utilizator ;)
-#: common.cc:351 output.cc:2469 output.cc:2568
+#: common.cc:351 output.cc:2470 output.cc:2569
 #, c-format
 msgid "out of patch space in section %s; relink with --incremental-full"
 msgstr "nu mai există spațiu de corecție în secțiunea „%s”; reeditați legăturile cu opțiunea „--incremental-full”"
@@ -1074,7 +1075,7 @@ msgstr "nu se poate amesteca stiva-divizată(split-stack) „%s” și stiva-ned
 
 #. FIXME: This needs to specify the location somehow.
 #: i386.cc:639 i386.cc:2800 sparc.cc:324 sparc.cc:3296 x86_64.cc:962
-#: x86_64.cc:4238
+#: x86_64.cc:4297
 msgid "missing expected TLS relocation"
 msgstr "lipsește realocarea TLS așteptată"
 
@@ -1107,12 +1108,12 @@ msgstr "realocare neașteptată %u față de simbolul local fără registru de b
 msgid "both SUN and GNU model TLS relocations"
 msgstr "atât realocări TLS model SUN cât și model GNU"
 
-#: i386.cc:3767 mips.cc:10080
+#: i386.cc:3767 mips.cc:10118
 #, c-format
 msgid "unsupported reloc %u in object file"
 msgstr "neacceptată realocare %u în fișierul obiect"
 
-#: i386.cc:4036 powerpc.cc:9876 s390.cc:4886 x86_64.cc:5642
+#: i386.cc:4036 powerpc.cc:9879 s390.cc:4886 x86_64.cc:5743
 #, c-format
 msgid "failed to match split-stack sequence at section %u offset %0zx"
 msgstr "nu s-a putut potrivi secvența de stivă-divizată la secțiunea %u poziția %0zx"
@@ -1168,7 +1169,7 @@ msgstr "%s: fișierul script a fost modificat"
 msgid "unsupported ELF machine number %d"
 msgstr "numărul de mașină ELF %d nu este acceptat"
 
-#: incremental.cc:871 object.cc:3403
+#: incremental.cc:871 object.cc:3432
 #, c-format
 msgid "%s: incompatible target"
 msgstr "%s: țintă incompatibilă"
@@ -1316,12 +1317,12 @@ msgstr "eroare: „--package-metadata=%s” nu conține JSON valid: %s\n"
 msgid "load segment overlap [0x%llx -> 0x%llx] and [0x%llx -> 0x%llx]"
 msgstr "suprapunerea segmentului de încărcare [0x%llx -> 0x%llx] și [0x%llx -> 0x%llx]"
 
-#: layout.cc:4311 output.cc:4549
+#: layout.cc:4311 output.cc:4550
 #, c-format
 msgid "out of patch space for section %s; relink with --incremental-full"
 msgstr "epuizat spațiul de corecție pentru secțiunea %s; reeditați legăturile cu „--incremental-full”"
 
-#: layout.cc:4320 output.cc:4557
+#: layout.cc:4320 output.cc:4558
 #, c-format
 msgid "%s: section changed size; relink with --incremental-full"
 msgstr "%s: dimensiunea secțiunii s-a schimbat; reeditați legăturile cu „--incremental-full”"
@@ -1458,165 +1459,165 @@ msgstr ".reginfo"
 msgid ".MIPS.abiflags"
 msgstr ".MIPS.abiflags"
 
-#: mips.cc:4632
+#: mips.cc:4634
 msgid "JALX to a non-word-aligned address"
 msgstr "JALX la o adresă nealiniată la cuvinte"
 
-#: mips.cc:4686
+#: mips.cc:4688
 msgid "Unsupported jump between ISA modes; consider recompiling with interlinking enabled."
 msgstr "Salt neacceptat între modurile ISA; luați în considerare recompilarea cu inter-editarea de legături activată."
 
-#: mips.cc:5486
-msgid "small-data section exceeds 64KB; lower small-data size limit (see option -G)"
-msgstr "secțiunea de date de mici dimensiuni depășește 64KB; limita inferioară a dimensiunii datelor de mici dimensiuni (consultați opțiunea „-G”)"
+#: mips.cc:5481 mips.cc:5524
+msgid "small-data section too large; lower small-data size limit (see option -G)"
+msgstr "secțiunea de date de mici dimensiuni este prea mare; reduceți limita dimensiunii datelor de mici dimensiuni (consultați opțiunea „-G”)"
 
-#: mips.cc:6907
+#: mips.cc:6945
 #, c-format
 msgid "%s: .MIPS.abiflags section has unsupported version %u"
 msgstr "%s: secțiunea .MIPS.abiflags are versiunea neacceptată %u"
 
-#: mips.cc:6970
+#: mips.cc:7008
 #, c-format
 msgid "%s: Warning: bad `%s' option size %u smaller than its header"
 msgstr "%s: Avertisment: opțiunea „%s” are dimensiunea incorectă %u, mai mică decât antetul său"
 
-#: mips.cc:7050
+#: mips.cc:7088
 #, c-format
 msgid "no relocation found in mips16 stub section '%s'"
 msgstr "nu s-a găsit nicio realocare în secțiunea ciotului mips16 „%s”"
 
-#: mips.cc:7552 mips.cc:7715
+#: mips.cc:7590 mips.cc:7753
 #, c-format
 msgid ".got.plt offset of %ld from .plt beyond the range of ADDIUPC"
 msgstr "poziția .got.plt a %ld din .plt dincolo de intervalul ADDIUPC"
 
-#: mips.cc:8263
+#: mips.cc:8301
 #, c-format
 msgid "Warning: bad `%s' option size %u smaller than its header in output section"
 msgstr "Avertisment: opțiunea „%s” are dimensiunea incorectă %u, mai mică decât antetul din secțiunea de ieșire"
 
-#: mips.cc:9103
+#: mips.cc:9141
 #, c-format
 msgid "%s: Unknown architecture %s"
 msgstr "%s: Arhitectură necunoscută %s"
 
-#: mips.cc:9204
+#: mips.cc:9242
 #, c-format
 msgid "%s: Inconsistent ISA between e_flags and .MIPS.abiflags"
 msgstr "%s: ISA inconsecvent între e_flags și .MIPS.abiflags"
 
-#: mips.cc:9208
+#: mips.cc:9246
 #, c-format
 msgid "%s: Inconsistent FP ABI between .gnu.attributes and .MIPS.abiflags"
 msgstr "%s: ABI FP inconsecvent între .gnu.attributes și .MIPS.abiflags"
 
-#: mips.cc:9211
+#: mips.cc:9249
 #, c-format
 msgid "%s: Inconsistent ASEs between e_flags and .MIPS.abiflags"
 msgstr "%s: ASE-uri inconsecvente între e_flags și .MIPS.abiflags"
 
-#: mips.cc:9217
+#: mips.cc:9255
 #, c-format
 msgid "%s: Inconsistent ISA extensions between e_flags and .MIPS.abiflags"
 msgstr "%s: Extensii ISA inconsecvente între e_flags și .MIPS.abiflags"
 
-#: mips.cc:9220
+#: mips.cc:9258
 #, c-format
 msgid "%s: Unexpected flag in the flags2 field of .MIPS.abiflags (0x%x)"
 msgstr "%s: Fanion neașteptat în câmpul flags2 al .MIPS.abiflags (0x%x)"
 
-#: mips.cc:9242
+#: mips.cc:9280
 msgid "-mips32r2 -mfp64 (12 callee-saved)"
 msgstr "-mips32r2 -mfp64 (12 apelanți economisiți)"
 
-#: mips.cc:9283
+#: mips.cc:9321
 #, c-format
 msgid "%s: FP ABI %s is incompatible with %s"
 msgstr "%s: ABI FP %s este incompatibil cu %s"
 
-#: mips.cc:9418
+#: mips.cc:9456
 #, c-format
 msgid "%s: linking abicalls files with non-abicalls files"
 msgstr "%s: se vinculează fișiere abicals cu fișiere non-abicals"
 
-#: mips.cc:9431
+#: mips.cc:9469
 #, c-format
 msgid "%s: linking 32-bit code with 64-bit code"
 msgstr "%s: se vinculează cod pe 32 de biți cu un cod pe 64 de biți"
 
 #. The ISAs aren't compatible.
-#: mips.cc:9457 mips.cc:9509 mips.cc:9523
+#: mips.cc:9495 mips.cc:9547 mips.cc:9561
 #, c-format
 msgid "%s: linking %s module with previous %s modules"
 msgstr "%s: se vinculează modulul %s cu modulele %s anterioare"
 
-#: mips.cc:9473
+#: mips.cc:9511
 #, c-format
 msgid "%s: ABI mismatch: linking %s module with previous %s modules"
 msgstr "%s: nepotrivire ABI: se vinculează modulul %s cu modulele %s anterioare"
 
-#: mips.cc:9495
+#: mips.cc:9533
 #, c-format
 msgid "%s: ASE mismatch: linking %s module with previous %s modules"
 msgstr "%s: nepotrivire ASE: se vinculează modulul %s cu modulele %s anterioare"
 
-#: mips.cc:9536
+#: mips.cc:9574
 #, c-format
 msgid "%s: uses different e_flags (0x%x) fields than previous modules (0x%x)"
 msgstr "%s: utilizează câmpuri e_flags (0x%x) diferite față de modulele anterioare (0x%x)"
 
-#: mips.cc:9944
+#: mips.cc:9982
 #, c-format
 msgid "Unknown dynamic tag 0x%x"
 msgstr "Etichetă dinamică necunoscută 0x%x"
 
-#: mips.cc:10385 mips.cc:12322
+#: mips.cc:10423 mips.cc:12368
 #, c-format
 msgid "relocation overflow: %u against local symbol %u in %s"
 msgstr "depășire de realocare: %u față de simbolul local %u în %s"
 
-#: mips.cc:10391 mips.cc:12338
+#: mips.cc:10429 mips.cc:12384
 msgid "unexpected opcode while processing relocation"
 msgstr "cod operațional neașteptat în timpul procesării realocării"
 
-#: mips.cc:10539
+#: mips.cc:10577
 #, c-format
 msgid "CALL16 reloc at 0x%lx not against global symbol "
 msgstr "realocarea CALL16 la 0x%lx nu contra simbolului global "
 
-#: mips.cc:10791 mips.cc:11296
+#: mips.cc:10829 mips.cc:11334
 #, c-format
 msgid "%s: relocation %u against `%s' can not be used when making a shared object; recompile with -fPIC"
 msgstr "%s: realocarea %u contra „%s” nu poate fi utilizată când se creează un obiect partajat; recompilați cu „-fPIC”"
 
-#: mips.cc:11107
+#: mips.cc:11145
 #, c-format
 msgid "non-dynamic relocations refer to dynamic symbol %s"
 msgstr "realocările nedinamice se referă la simbolul dinamic %s"
 
-#: mips.cc:11584
+#: mips.cc:11622
 msgid "relocations against _gp_disp are permitted only with R_MIPS_HI16 and R_MIPS_LO16 relocations."
 msgstr "realocările contra _gp_disp sunt permise numai cu realocări R_MIPS_HI16 și R_MIPS_LO16."
 
-#: mips.cc:11719
+#: mips.cc:11757
 msgid "MIPS16 and microMIPS functions cannot call each other"
 msgstr "funcțiile MIPS16 și microMIPS nu se pot apela reciproc"
 
-#: mips.cc:12327
+#: mips.cc:12373
 #, c-format
 msgid "relocation overflow: %u against '%s' defined in %s"
 msgstr "depășire de realocare: %u față de „%s” definit în %s"
 
-#: mips.cc:12333
+#: mips.cc:12379
 #, c-format
 msgid "relocation overflow: %u against '%s'"
 msgstr "depășire de realocare: %u față de „%s”"
 
-#: mips.cc:12342
+#: mips.cc:12388
 msgid "unaligned PC-relative relocation"
 msgstr "realocarea relativă la PC nu este aliniată"
 
-#: nacl.cc:43 object.cc:174 object.cc:3451 output.cc:5191
+#: nacl.cc:43 object.cc:174 object.cc:3480 output.cc:5192
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -1724,41 +1725,41 @@ msgstr "indice de secțiune necunoscut %u pentru simbolul local %u"
 msgid "local symbol %u section index %u out of range"
 msgstr "simbol local %u index de secțiune %u în afara intervalului"
 
-#: object.cc:3156 reloc.cc:833
+#: object.cc:3185 reloc.cc:833
 #, c-format
 msgid "could not decompress section %s"
 msgstr "nu s-a putut decomprima secțiunea %s"
 
-#: object.cc:3282
+#: object.cc:3311
 #, c-format
 msgid "%s is not supported but is required for %s in %s"
 msgstr "%s nu este acceptat, dar este necesar pentru %s în %s"
 
-#: object.cc:3359
+#: object.cc:3388
 msgid "function "
 msgstr "funcție "
 
-#: object.cc:3393
+#: object.cc:3422
 #, c-format
 msgid "%s: unsupported ELF machine number %d"
 msgstr "%s: numărul de mașină ELF neacceptat %d"
 
-#: object.cc:3467 plugin.cc:2279
+#: object.cc:3496 plugin.cc:2279
 #, c-format
 msgid "%s: not configured to support 32-bit big-endian object"
 msgstr "%s: nu este configurat să accepte obiect big-endian pe 32 de biți"
 
-#: object.cc:3483 plugin.cc:2288
+#: object.cc:3512 plugin.cc:2288
 #, c-format
 msgid "%s: not configured to support 32-bit little-endian object"
 msgstr "%s: nu este configurat să accepte obiect little-endian pe 32 de biți"
 
-#: object.cc:3502 plugin.cc:2300
+#: object.cc:3531 plugin.cc:2300
 #, c-format
 msgid "%s: not configured to support 64-bit big-endian object"
 msgstr "%s: nu este configurat să accepte obiect big-endian pe 64 de biți"
 
-#: object.cc:3518 plugin.cc:2309
+#: object.cc:3547 plugin.cc:2309
 #, c-format
 msgid "%s: not configured to support 64-bit little-endian object"
 msgstr "%s: nu este configurat să accepte obiect little-endian pe 64 de biți"
@@ -3295,94 +3296,94 @@ msgstr "Păstrează .text.hot, .text.startup, .text.exit și .text.unlikely ca s
 msgid "Merge all .text.* prefix sections."
 msgstr "Fuzionează toate secțiunile cu prefixul .text.*."
 
-#: output.cc:1346
+#: output.cc:1347
 msgid "section group retained but group element discarded"
 msgstr "grupul de secțiuni reținut, dar elementul de grup a fost eliminat"
 
-#: output.cc:1733 output.cc:1765
+#: output.cc:1734 output.cc:1766
 msgid "out of patch space (GOT); relink with --incremental-full"
 msgstr "în afara spațiului de corecție (GOT); reeditați legăturile cu „--incremental-full”"
 
-#: output.cc:2414
+#: output.cc:2415
 #, c-format
 msgid "invalid alignment %lu for section \"%s\""
 msgstr "aliniere nevalidă %lu pentru secțiunea „%s”"
 
-#: output.cc:4577
+#: output.cc:4578
 msgid "script places BSS section in the middle of a LOAD segment; space will be allocated in the file"
 msgstr "scriptul plasează secțiunea BSS în mijlocul unui segment LOAD; spațiu va fi alocat în fișier"
 
-#: output.cc:4599
+#: output.cc:4600
 #, c-format
 msgid "dot moves backward in linker script from 0x%llx to 0x%llx"
 msgstr "punctul se deplasează înapoi în scriptul editorului de legături de la 0x%llx la 0x%llx"
 
-#: output.cc:4602
+#: output.cc:4603
 #, c-format
 msgid "address of section '%s' moves backward from 0x%llx to 0x%llx"
 msgstr "adresa secțiunii „%s” se deplasează înapoi de la 0x%llx la 0x%llx"
 
-#: output.cc:4971
+#: output.cc:4972
 #, c-format
 msgid "%s: incremental base and output file name are the same"
 msgstr "%s: baza incrementală și numele fișierului de ieșire sunt aceleași"
 
-#: output.cc:4978
+#: output.cc:4979
 #, c-format
 msgid "%s: stat: %s"
 msgstr "%s: statistică: %s"
 
-#: output.cc:4983
+#: output.cc:4984
 #, c-format
 msgid "%s: incremental base file is empty"
 msgstr "%s: fișierul de bază incremental este gol"
 
-#: output.cc:4995 output.cc:5093
+#: output.cc:4996 output.cc:5094
 #, c-format
 msgid "%s: open: %s"
 msgstr "%s: open(): %s"
 
-#: output.cc:5012
+#: output.cc:5013
 #, c-format
 msgid "%s: read failed: %s"
 msgstr "%s: read() a eșuat: %s"
 
-#: output.cc:5017
+#: output.cc:5018
 #, c-format
 msgid "%s: file too short: read only %lld of %lld bytes"
 msgstr "%s: fișier prea scurt: se citește doar %lld din %lld octeți"
 
-#: output.cc:5117
+#: output.cc:5118
 #, c-format
 msgid "%s: mremap: %s"
 msgstr "%s: mremap(): %s"
 
-#: output.cc:5136
+#: output.cc:5137
 #, c-format
 msgid "%s: mmap: %s"
 msgstr "%s: mmap(): %s"
 
-#: output.cc:5228
+#: output.cc:5229
 #, c-format
 msgid "%s: mmap: failed to allocate %lu bytes for output file: %s"
 msgstr "%s: mmap(): nu a reușit alocarea de %lu octeți pentru fișierul de ieșire: %s"
 
-#: output.cc:5246
+#: output.cc:5247
 #, c-format
 msgid "%s: munmap: %s"
 msgstr "%s: munmap(): %s"
 
-#: output.cc:5266
+#: output.cc:5267
 #, c-format
 msgid "%s: write: unexpected 0 return-value"
 msgstr "%s: write(): valoare de returnare 0, neașteptată"
 
-#: output.cc:5268
+#: output.cc:5269
 #, c-format
 msgid "%s: write: %s"
 msgstr "%s: write(): %s"
 
-#: output.cc:5283
+#: output.cc:5284
 #, c-format
 msgid "%s: close: %s"
 msgstr "%s: close(): %s"
@@ -3526,103 +3527,108 @@ msgstr "%s:%s depășește dimensiunea grupului"
 msgid "%s:%s: branch in non-executable section, no long branch stub for you"
 msgstr "%s:%s: ramură în secțiunea neexecutabilă, nu există un ciot(stub) de ramură lung pentru dumneavoastră"
 
-#: powerpc.cc:3795
+#: powerpc.cc:3798
 #, c-format
 msgid "%s: stub group size is too large; retrying with %#x"
 msgstr "%s: dimensiunea grupului ciot(stub) este prea mare; reîncercând cu %#x"
 
-#: powerpc.cc:5738
+#: powerpc.cc:5741
 msgid "** glink"
 msgstr "** glink"
 
-#: powerpc.cc:6403 powerpc.cc:7118
+#: powerpc.cc:6406 powerpc.cc:7121
 #, c-format
 msgid "linkage table error against `%s'"
 msgstr "eroare în tabelul de vinculare față de „%s”"
 
-#: powerpc.cc:6406
+#: powerpc.cc:6409
 #, c-format
 msgid "linkage table error against `%s:[local %u]'"
 msgstr "eroare în tabelul de vinculare față de „%s”:[local %u]'"
 
-#: powerpc.cc:7245
+#: powerpc.cc:7248
 msgid "** save/restore"
 msgstr "** salvează/restaurează"
 
-#: powerpc.cc:8043
+#: powerpc.cc:8046
 #, c-format
 msgid "%s: unsupported reloc %u for IFUNC symbol"
 msgstr "%s: realocare neacceptată %u pentru simbolul IFUNC"
 
-#: powerpc.cc:8309 powerpc.cc:9096
+#: powerpc.cc:8312 powerpc.cc:9099
 #, c-format
 msgid "tocsave symbol %u has bad shndx %u"
 msgstr "simbolul tocsave %u are shndx %u greșit"
 
-#: powerpc.cc:8600 powerpc.cc:9433
+#: powerpc.cc:8603 powerpc.cc:9436
 #, c-format
 msgid "%s: toc optimization is not supported for %#08x instruction"
 msgstr "%s: optimizarea toc nu este acceptată pentru instrucțiunea %#08x"
 
-#: powerpc.cc:8666 powerpc.cc:9495
+#: powerpc.cc:8669 powerpc.cc:9498
 #, c-format
 msgid "%s: unsupported -mbss-plt code"
 msgstr "%s: cod „-mbss-plt” neacceptat"
 
-#: powerpc.cc:9842
+#: powerpc.cc:9845
 #, c-format
 msgid "split-stack stack size overflow at section %u offset %0zx"
 msgstr "depășirea dimensiunii stivei de stivă-divizată la secțiunea %u poziția %0zx"
 
-#: powerpc.cc:9913
+#: powerpc.cc:9916
 msgid "--plt-localentry is especially dangerous without ld.so support to detect ABI violations"
 msgstr "„--plt-localentry” este deosebit de periculoasă fără suport ld.so pentru a detecta încălcările ABI"
 
-#: powerpc.cc:9942
+#: powerpc.cc:9945
 msgid "--plt-localentry is incompatible with power10 pc-relative code"
 msgstr "„--plt-localentry” este incompatibilă cu codul pc-relativ power10"
 
-#: powerpc.cc:10249 powerpc.cc:10255
+#: powerpc.cc:10252 powerpc.cc:10258
 #, c-format
 msgid "%s uses hard float, %s uses soft float"
 msgstr "%s folosește suport hardware pentru numere reale, %s folosește suport software pentru numere reale"
 
-#: powerpc.cc:10261 powerpc.cc:10268
+#: powerpc.cc:10264 powerpc.cc:10271
 #, c-format
 msgid "%s uses double-precision hard float, %s uses single-precision hard float"
 msgstr "%s folosește suport hardware pentru numere reale cu precizie dublă, %s folosește suport hardware pentru numere reale cu precizie simplă"
 
-#: powerpc.cc:10288 powerpc.cc:10294
+#: powerpc.cc:10291 powerpc.cc:10297
 #, c-format
 msgid "%s uses 64-bit long double, %s uses 128-bit long double"
 msgstr "%s folosește valori întregi lungi cu precizie dublă pe 64 de biți, %s folosește valori întregi lungi cu precizie dublă pe 128 de biți"
 
-#: powerpc.cc:10300 powerpc.cc:10306
+#: powerpc.cc:10303 powerpc.cc:10309
 #, c-format
 msgid "%s uses IBM long double, %s uses IEEE long double"
 msgstr "%s folosește numere întregi lungi de dublă precizie IBM, %s folosește numere întregi lungi de dublă precizie IEEE"
 
-#: powerpc.cc:10360 powerpc.cc:10366
+#: powerpc.cc:10363 powerpc.cc:10369
 #, c-format
 msgid "%s uses AltiVec vector ABI, %s uses SPE vector ABI"
 msgstr "%s folosește vectorul AltiVec ABI, %s folosește vectorul SPE ABI"
 
-#: powerpc.cc:10395 powerpc.cc:10402
+#: powerpc.cc:10398 powerpc.cc:10405
 #, c-format
 msgid "%s uses r3/r4 for small structure returns, %s uses memory"
 msgstr "%s folosește r3/r4 pentru returnări de structuri mici, %s folosește memoria"
 
-#: powerpc.cc:10972
+#: powerpc.cc:10975
 msgid "call lacks nop, can't restore toc; recompile with -fPIC"
 msgstr "apel în care nop lipsește, nu se poate restabili toc; recompilați cu „-fPIC”"
 
-#: powerpc.cc:12424 s390.cc:3479
-msgid "relocation overflow"
-msgstr "debordare de realocare"
+#: powerpc.cc:12434 powerpc.cc:12442
+#, c-format
+msgid "reloc type %u overflow against '%s'"
+msgstr "depășire a tipului de realocare %u față de „%s”"
 
-#: powerpc.cc:12426
+#: powerpc.cc:12437
 msgid "try relinking with a smaller --stub-group-size"
-msgstr "încercați să reeditați legăturile cu o „--stub-group-size” mai mică"
+msgstr "încercați să reeditați legăturile cu o valoare a opțiunii „--stub-group-size” mai mică"
+
+#: powerpc.cc:12444
+msgid "debug info may be unreliable, compile with -gdwarf64"
+msgstr "informațiile de depanare pot fi nesigure, compilați cu „-gdwarf64”"
 
 #: readsyms.cc:285
 #, c-format
@@ -3759,11 +3765,15 @@ msgstr "editor de legături definit"
 msgid "R_390_PC32DBL target misaligned at %llx"
 msgstr "ținta R_390_PC32DBL aliniată greșit la %llx"
 
-#: s390.cc:1099 tilegx.cc:2088 x86_64.cc:1697
+#: s390.cc:1099 tilegx.cc:2088 x86_64.cc:1699
 msgid "out of patch space (PLT); relink with --incremental-full"
 msgstr "în afara spațiului de corecție (PLT); reeditați legăturile cu „--incremental-full”"
 
-#: s390.cc:3677 s390.cc:3733 x86_64.cc:4878
+#: s390.cc:3479
+msgid "relocation overflow"
+msgstr "debordare de realocare"
+
+#: s390.cc:3677 s390.cc:3733 x86_64.cc:4946
 #, c-format
 msgid "unsupported reloc type %u"
 msgstr "tip de realocare neacceptat %u"
@@ -3955,7 +3965,7 @@ msgstr "„%s” apare atât ca simbol global, cât și ca simbol local pentru v
 #: script.cc:2279
 #, c-format
 msgid "wildcard match appears in both version '%s' and '%s' in script"
-msgstr "potrivirea metacaracterului apare atât în versiunea „%s” cât și în „%s” în script"
+msgstr "potrivirea metacaracterului apare atât în versiunea „%s” cât și în versiunea „%s” în script"
 
 #: script.cc:2284
 #, c-format
@@ -4056,17 +4066,17 @@ msgstr "%s: atribut elf little endian activat pe obiectul BE"
 msgid "%s: little endian elf flag clear on LE object"
 msgstr "%s: atribut elf little endian dezactivat pe obiectul LE"
 
-#: stringpool.cc:513
+#: stringpool.cc:514
 #, c-format
 msgid "%s: %s entries: %zu; buckets: %zu\n"
 msgstr "%s: %s intrări: %zu; blocuri(buckets): %zu\n"
 
-#: stringpool.cc:517
+#: stringpool.cc:518
 #, c-format
 msgid "%s: %s entries: %zu\n"
 msgstr "%s: %s intrări: %zu\n"
 
-#: stringpool.cc:520
+#: stringpool.cc:521
 #, c-format
 msgid "%s: %s Stringdata structures: %zu\n"
 msgstr "%s: %s Structuri șiruri de date: %zu\n"
@@ -4205,7 +4215,7 @@ msgstr "realocarea are poziția greșită %zu"
 msgid "linker does not include stack split support required by %s"
 msgstr "editorul de legături nu include suportul pentru împărțirea stivei cerut de %s"
 
-#: tilegx.cc:2738 x86_64.cc:2714
+#: tilegx.cc:2738 x86_64.cc:2716
 msgid "TLS_DESC not yet supported for incremental linking"
 msgstr "TLS_DESC nu este încă acceptată pentru editarea de legături incrementală"
 
@@ -4213,7 +4223,7 @@ msgstr "TLS_DESC nu este încă acceptată pentru editarea de legături incremen
 msgid "TLS_DESC not yet supported for TILEGX"
 msgstr "TLS_DESC nu este încă acceptat pentru TILEGX"
 
-#: tilegx.cc:3202 x86_64.cc:3096
+#: tilegx.cc:3202 x86_64.cc:3111
 #, c-format
 msgid "requires unsupported dynamic reloc %u; recompile with -fPIC"
 msgstr "necesită realocarea dinamică neacceptată %u; recompilați cu „-fPIC”"
@@ -4224,13 +4234,13 @@ msgstr "Realocare TLS în afara intervalului"
 
 #: tls.h:73
 msgid "TLS relocation against invalid instruction"
-msgstr "realocare TLS față de instrucțiunile nevalide"
+msgstr "realocare TLS față de o instrucțiune nevalidă"
 
 #. This output is intended to follow the GNU standards.
 #: version.cc:65
 #, c-format
-msgid "Copyright (C) 2023 Free Software Foundation, Inc.\n"
-msgstr "Drepturi de autor © 2023 Free Software Foundation, Inc.\n"
+msgid "Copyright (C) 2024 Free Software Foundation, Inc.\n"
+msgstr "Drepturi de autor © 2024 Free Software Foundation, Inc.\n"
 
 #: version.cc:66
 #, c-format
@@ -4249,46 +4259,46 @@ msgstr ""
 msgid "%s failed: %s"
 msgstr "%s a eșuat: %s"
 
-#: x86_64.cc:1500
+#: x86_64.cc:1502
 #, c-format
 msgid "%s: corrupt .note.gnu.property section (pr_datasz for property %d is not 4)"
 msgstr "%s: secțiunea .note.gnu.property este coruptă (pr_datasz pentru proprietatea %d nu este 4)"
 
-#: x86_64.cc:1508
+#: x86_64.cc:1510
 #, c-format
 msgid "%s: unknown program property type 0x%x in .note.gnu.property section"
 msgstr "%s: tip de proprietate de program necunoscut 0x%x în secțiunea .note.gnu.property"
 
-#: x86_64.cc:1930
+#: x86_64.cc:1932
 #, c-format
 msgid "PC-relative offset overflow in PLT entry %d"
 msgstr "depășire de poziție relativă la PC în intrarea PLT %d"
 
-#: x86_64.cc:2140
+#: x86_64.cc:2142
 #, c-format
 msgid "PC-relative offset overflow in APLT entry %d"
 msgstr "depășire de poziție relativă la PC în intrarea APLT %d"
 
-#: x86_64.cc:3064
+#: x86_64.cc:3079
 msgid "requires dynamic R_X86_64_32 reloc which may overflow at runtime; recompile with -fPIC"
 msgstr "necesită realocarea R_X86_64_32 dinamică, care se poate deborda în timpul rulării; recompilați cu „-fPIC”"
 
-#: x86_64.cc:3081
+#: x86_64.cc:3096
 #, c-format
 msgid "requires dynamic %s reloc against '%s' which may overflow at runtime; recompile with -fPIC"
 msgstr "necesită realocarea %s dinamică față de „%s”, care se poate deborda în timpul rulării; recompilați cu „-fPIC”"
 
-#: x86_64.cc:4569
+#: x86_64.cc:4631
 #, c-format
 msgid "relocation overflow: reference to local symbol %u in %s"
 msgstr "depășire de realocare: referință la simbolul local %u în %s"
 
-#: x86_64.cc:4576
+#: x86_64.cc:4638
 #, c-format
 msgid "relocation overflow: reference to '%s' defined in %s"
 msgstr "depășire de realocare: referință la „%s” definită în %s"
 
-#: x86_64.cc:4584
+#: x86_64.cc:4646
 #, c-format
 msgid "relocation overflow: reference to '%s'"
 msgstr "depășire de realocare: referință la „%s”"

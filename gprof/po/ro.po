@@ -1,10 +1,10 @@
 # Mesajele în limba română pentru gprof.
-# Copyright © 2003, 2022, 2023 Free Software Foundation, Inc.
+# Copyright © 2003, 2022, 2023, 2024 Free Software Foundation, Inc.
 # Acest fișier este distribuit sub aceeași licență ca pachetul gprof
 # This file is distributed under the same license as the binutils package.
 #
 # Eugen Hoanca <eugenh@urban-grafx.ro>, 2003.
-# Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>, 2022 - 2023.
+# Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>, 2022 - 2024.
 #
 # Cronologia traducerii fișierului „gprof”:
 # Traducerea inițială, făcută d EH, pentru versiunea gprof 2.14rel030712.
@@ -15,16 +15,17 @@
 # NU și a mesajelor traduse (acestea au rămas neschimbate).
 # Eliminare a mesajelor ce-au dispărut în ultima versiune.
 # Actualizări realizate de Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>, 15.01.2022.
-# Actualizare a traducerii pentru versiunea 2.36.90, făcută de R-GC, 2022.
-# Actualizare a traducerii pentru versiunea 2.39.90, făcută de R-GC, 2023.
-# Actualizare a traducerii pentru versiunea Y, făcută de X, Z(anul).
+# Actualizare a traducerii pentru versiunea 2.36.90, făcută de R-GC, feb-2022.
+# Actualizare a traducerii pentru versiunea 2.39.90, făcută de R-GC, ian-2023.
+# Actualizare a traducerii pentru versiunea 2.41.90, făcută de R-GC, ian-2024.
+# Actualizare a traducerii pentru versiunea Y, făcută de X, Z(luna-anul).
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gprof 2.39.90\n"
+"Project-Id-Version: gprof 2.41.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-12-31 12:22+0000\n"
-"PO-Revision-Date: 2023-01-02 00:06+0100\n"
+"POT-Creation-Date: 2024-01-15 14:58+0000\n"
+"PO-Revision-Date: 2024-01-16 13:29+0100\n"
 "Last-Translator: Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>\n"
 "Language-Team: Romanian <translation-team-ro@lists.sourceforge.net>\n"
 "Language: ro\n"
@@ -37,19 +38,19 @@ msgstr ""
 
 #: alpha.c:102 mips.c:54
 msgid "<indirect child>"
-msgstr "<copil indirect>"
+msgstr "<proces-copil indirect>"
 
 #: alpha.c:107 mips.c:59
 #, c-format
 msgid "[find_call] %s: 0x%lx to 0x%lx\n"
 msgstr "[find_call] %s: 0x%lx spre 0x%lx\n"
 
-#: alpha.c:129
+#: alpha.c:131
 #, c-format
 msgid "[find_call] 0x%lx: jsr%s <indirect_child>\n"
-msgstr "[find_call] 0x%lx: jsr%s <copil indirect>\n"
+msgstr "[find_call] 0x%lx: jsr%s <proces-copil indirect>\n"
 
-#: alpha.c:139
+#: alpha.c:141
 #, c-format
 msgid "[find_call] 0x%lx: bsr"
 msgstr "[find_call] 0x%lx: bsr"
@@ -62,7 +63,7 @@ msgstr "%s: %s: sfârșit neașteptat al fișierului\n"
 #: basic_blocks.c:196
 #, c-format
 msgid "%s: warning: ignoring basic-block exec counts (use -l or --line)\n"
-msgstr "%s: avertisment: se ignoră numărul de execuții ale blocului de bază (utilizați -l sau --line)\n"
+msgstr "%s: avertisment: se ignoră numărul de execuții ale blocului de bază (utilizați „-l” sau „--line”)\n"
 
 #. FIXME: This only works if bfd_vma is unsigned long.
 #: basic_blocks.c:289 basic_blocks.c:299
@@ -74,7 +75,7 @@ msgstr "%s:%d: (%s:0x%lx) %lu execuții\n"
 msgid "<unknown>"
 msgstr "<necunoscut>"
 
-#: basic_blocks.c:543
+#: basic_blocks.c:539
 #, c-format
 msgid ""
 "\n"
@@ -91,7 +92,7 @@ msgstr ""
 "     Linie      Repetări\n"
 "\n"
 
-#: basic_blocks.c:567
+#: basic_blocks.c:563
 #, c-format
 msgid ""
 "\n"
@@ -102,17 +103,17 @@ msgstr ""
 "Cuprins al Execuției:\n"
 "\n"
 
-#: basic_blocks.c:568
+#: basic_blocks.c:564
 #, c-format
 msgid "%9ld   Executable lines in this file\n"
 msgstr "%9ld   Linii executabile în acest fișier\n"
 
-#: basic_blocks.c:570
+#: basic_blocks.c:566
 #, c-format
 msgid "%9ld   Lines executed\n"
 msgstr "%9ld   Linii executate\n"
 
-#: basic_blocks.c:571
+#: basic_blocks.c:567
 #, c-format
 msgid "%9.2f   Percent of the file executed\n"
 msgstr "%9.2f   Procent de fișier executat\n"
@@ -125,7 +126,7 @@ msgstr "%9.2f   Procent de fișier executat\n"
 # probabil, traducerea cu adevărat corectă:
 # „Numărul total de linii executate”
 # Idei ?
-#: basic_blocks.c:575
+#: basic_blocks.c:571
 #, c-format
 msgid ""
 "\n"
@@ -134,7 +135,7 @@ msgstr ""
 "\n"
 "%9lu   Numărul total de execuții de linie\n"
 
-#: basic_blocks.c:577
+#: basic_blocks.c:573
 #, c-format
 msgid "%9.2f   Average executions per line\n"
 msgstr "%9.2f   Media aritmetică de execuții pe linie\n"
@@ -169,7 +170,7 @@ msgid ""
 "granularity: each sample hit covers %ld byte(s)"
 msgstr ""
 "\n"
-"granularitate: fiecare exemplu de potrivire(hit) acoperă %ld octet(ți)"
+"nivel de detaliere: fiecărui eșantion îi corespunde %ld octet(ți)"
 
 #: cg_print.c:83
 #, c-format
@@ -290,12 +291,12 @@ msgstr "%s: a rămas fără spațiu pentru %lu octeți de spațiu de text\n"
 #: corefile.c:292
 #, c-format
 msgid "%s: can't do -c\n"
-msgstr "%s: nu se poate face -c\n"
+msgstr "%s: nu se poate utiliza opțiunea „-c”\n"
 
 #: corefile.c:331
 #, c-format
 msgid "%s: -c not supported on architecture %s\n"
-msgstr "%s: -c nu este suportat pe arhitectura %s\n"
+msgstr "%s: opțiunea „-c” nu este acceptată pe arhitectura %s\n"
 
 #: corefile.c:533 corefile.c:640
 #, c-format
@@ -330,7 +331,7 @@ msgstr "%s: fișierul „%s” are un cookie magic eronat\n"
 #: gmon_io.c:319
 #, c-format
 msgid "%s: file `%s' has unsupported version %d\n"
-msgstr "%s: fișierul „%s” are versiunea nesuportată %d\n"
+msgstr "%s: fișierul „%s” are versiunea neacceptată %d\n"
 
 #: gmon_io.c:349
 #, c-format
@@ -355,12 +356,12 @@ msgstr "%s: fișierul „%s” nu pare să fie în formatul gmon.out\n"
 #: gmon_io.c:510
 #, c-format
 msgid "%s: unexpected EOF after reading %d/%d bins\n"
-msgstr "%s: EOF neașteptat după citirea a %d/%d (de) bin-uri\n"
+msgstr "%s: sfârșit de fișier neașteptat după citirea a %d/%d (de) bin-uri\n"
 
 #: gmon_io.c:542
 #, c-format
 msgid "time is in ticks, not seconds\n"
-msgstr "timpul este în bătăi(ticks), nu în secunde\n"
+msgstr "timpul este în bătăi(tic-tacuri), nu în secunde\n"
 
 # R-GC, scrie:
 # * Idei, pentru o traducere mai bună?
@@ -433,7 +434,7 @@ msgstr ""
 "\t[--static-call-graph] [--sum] [--table-length=lung] [--traditional]\n"
 "\t[--version] [--width=n] [--ignore-non-functions]\n"
 "\t[--demangle[=STIL]] [--no-demangle] [--external-symbol-table=nume] [@FIȘIER]\n"
-"\t[image-file] [profile-file...]\n"
+"\t[fișier-imagine] [fișier-profil...]\n"
 
 #: gprof.c:178
 #, c-format
@@ -443,7 +444,7 @@ msgstr "Raportați erorile la %s\n"
 #: gprof.c:252
 #, c-format
 msgid "%s: debugging not supported; -d ignored\n"
-msgstr "%s: depanare nesuportată; -d ignorat\n"
+msgstr "%s: depanarea nu este admisă; opțiunea „-d” este ignorată\n"
 
 #: gprof.c:338
 #, c-format
@@ -459,12 +460,12 @@ msgstr "GNU gprof %s\n"
 #: gprof.c:427
 #, c-format
 msgid "Based on BSD gprof, copyright 1983 Regents of the University of California.\n"
-msgstr "Bazat pe BSD gprof, copyright 1983 Regents of the University of California.\n"
+msgstr "Bazat pe BSD gprof, drepturi de autor din 1983 pentru Regents of the University of California.\n"
 
 #: gprof.c:428
 #, c-format
 msgid "This program is free software.  This program has absolutely no warranty.\n"
-msgstr "Acest program este software liber.  Acest program nu are absolut nici o garanție.\n"
+msgstr "Acest program este software liber. Acest program nu are absolut nici o garanție.\n"
 
 #: gprof.c:469
 #, c-format
@@ -474,7 +475,7 @@ msgstr "%s: stil necunoscut de descifrare(demangling) „%s”\n"
 #: gprof.c:492
 #, c-format
 msgid "%s: Only one of --function-ordering and --file-ordering may be specified.\n"
-msgstr "%s: Doar una dintre opțiunile --function-ordering sau --file-ordering poate să fie specificată.\n"
+msgstr "%s: Doar una dintre opțiunile „--function-ordering” sau „--file-ordering” poate să fie specificată.\n"
 
 #: gprof.c:544
 #, c-format
@@ -526,7 +527,7 @@ msgstr "%s: înregistrări de histogramă care se suprapun\n"
 #: hist.c:229
 #, c-format
 msgid "%s: %s: unexpected EOF after reading %u of %u samples\n"
-msgstr "%s: %s: EOF neașteptat după citirea a %u din %u exemple\n"
+msgstr "%s: %s: sfârșit de fișier neașteptat după citirea a %u din %u eșantioane\n"
 
 #: hist.c:466
 #, c-format
@@ -549,7 +550,7 @@ msgid ""
 "Each sample counts as %g %s.\n"
 msgstr ""
 "\n"
-"Fiecare exemplu contează drept %g %s.\n"
+"Fiecare eșantion contează drept %g %s.\n"
 
 #: hist.c:485
 #, c-format
@@ -584,7 +585,11 @@ msgstr "apeluri"
 # după referința pe care o are(hist.c), deduc
 # că este vorba de un profil de histogramă...
 # * Idei, despre ce este vorba exact, și o
-# propunere de traducere?
+# propunere de traducere? (v. 2.36.90)
+# ======
+# în versiunea 2.41.90, am schimbat
+# traducerea mesajului din „profil clar:”,
+# în „profil plan:”.
 #: hist.c:584
 #, c-format
 msgid ""
@@ -596,24 +601,24 @@ msgstr ""
 "\n"
 "\n"
 "\n"
-"profil clar:\n"
+"profil plan:\n"
 
 #: hist.c:590
 #, c-format
 msgid "Flat profile:\n"
-msgstr "Profil clar:\n"
+msgstr "Profil plan:\n"
 
 #: hist.c:711
 #, c-format
 msgid "%s: found a symbol that covers several histogram records"
 msgstr "%s: s-a găsit un simbol care acoperă mai multe înregistrări de histogramă"
 
-#: mips.c:71
+#: mips.c:73
 #, c-format
 msgid "[find_call] 0x%lx: jal"
 msgstr "[find_call] 0x%lx: jal"
 
-#: mips.c:99
+#: mips.c:101
 #, c-format
 msgid "[find_call] 0x%lx: jalr\n"
 msgstr "[find_call] 0x%lx: jalr\n"
