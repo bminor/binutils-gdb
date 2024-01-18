@@ -36,3 +36,4 @@ proc dump_info {cmd {what ""}} {
 dump_info "cat /proc/cpuinfo" "Cpuinfo"
 dump_info "uname -a"
 dump_info "lsb_release -a"
+dump_info "ldd --version"
