@@ -1,5 +1,5 @@
 #as:
-#ld: -z norelro -shared
+#ld: -z norelro -shared --hash-style=both
 #objdump: -dr
 #skip: loongarch32-*-*
 
