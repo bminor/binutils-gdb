@@ -9160,6 +9160,265 @@ display_augmentation_data (const unsigned char * data, uint64_t len)
   display_data (i, data, len);
 }
 
+static const char *
+decode_eh_encoding (unsigned int value)
+{
+  if (value == DW_EH_PE_omit)
+    return "omit";
+
+  char * format;
+  switch (value & 0x0f)
+    {
+    case DW_EH_PE_uleb128: format = "uleb128"; break;
+    case DW_EH_PE_udata2:  format = "udata2"; break;
+    case DW_EH_PE_udata4:  format = "udata4"; break;
+    case DW_EH_PE_udata8:  format = "udata8"; break;
+    case DW_EH_PE_sleb128: format = "sleb128"; break;
+    case DW_EH_PE_sdata2:  format = "sdata2"; break;
+    case DW_EH_PE_sdata4:  format = "sdata4"; break;
+    case DW_EH_PE_sdata8:  format = "sdata8"; break;
+
+    default: format = "<unknown format>"; break; /* FIXME: Generate a warning ?  */
+    }
+
+  char * application;
+  switch (value & 0xf0)
+    {
+    case DW_EH_PE_absptr:   application = "absolute"; break;
+    case DW_EH_PE_pcrel:    application = "pcrel"; break;
+    case DW_EH_PE_textrel:  application = "textrel"; break; /* FIXME: Is this allowed ?  */
+    case DW_EH_PE_datarel:  application = "datarel"; break;
+    case DW_EH_PE_funcrel:  application = "funcrel"; break; /* FIXME: Is this allowed ?  */
+    case DW_EH_PE_aligned:  application = "aligned"; break; /* FIXME: Is this allowed ?  */
+    case DW_EH_PE_indirect: application = "indirect"; break; /* FIXME: Is this allowed ?  */
+
+    default: application = "<unknown application method>"; break;  /* FIXME: Generate a warning ?  */
+    }
+
+  static char buffer[128];
+  sprintf (buffer, "%s, %s", format, application);
+  return buffer;
+}
+
+/* Reads a value stored at START encoded according to ENCODING.
+   Does not read from, or past, END.
+   Upon success, returns the read value and sets * RETURN_LEN to
+   the number of bytes read.
+   Upon failure returns zero and sets * RETURN_LEN to 0.
+   
+   Note: does not perform any application transformations to the value.  */
+
+static uint64_t
+get_encoded_eh_value (unsigned int     encoding,
+		      unsigned char *  start,
+		      unsigned char *  end,
+		      unsigned int *   return_len)
+{
+  uint64_t val;
+  unsigned int len;
+  int status;
+  unsigned char * old_start;
+
+  switch (encoding & 0x0f)
+    {
+    case DW_EH_PE_uleb128:
+      val = read_leb128 (start, end, false, & len, & status);
+      if (status != 0)
+	len = 0;
+      break;
+
+    case DW_EH_PE_sleb128:
+      val = read_leb128 (start, end, true, & len, & status);
+      if (status != 0)
+	len = 0;
+      break;
+
+    case DW_EH_PE_udata2:
+      old_start = start;
+      SAFE_BYTE_GET_AND_INC (val, start, 2, end);
+      len = (start == old_start) ? 0 : 2;
+      break;
+
+    case DW_EH_PE_udata4:
+      old_start = start;
+      SAFE_BYTE_GET_AND_INC (val, start, 4, end);
+      len = (start == old_start) ? 0 : 4;
+      break;
+
+    case DW_EH_PE_udata8:
+      old_start = start;
+      SAFE_BYTE_GET_AND_INC (val, start, 8, end);
+      len = (start == old_start) ? 0 : 8;
+      break;
+
+    case DW_EH_PE_sdata2:
+      old_start = start;
+      SAFE_SIGNED_BYTE_GET_AND_INC (val, start, 2, end);
+      len = (start == old_start) ? 0 : 2;
+      break;
+
+    case DW_EH_PE_sdata4:
+      old_start = start;
+      SAFE_SIGNED_BYTE_GET_AND_INC (val, start, 4, end);
+      len = (start == old_start) ? 0 : 4;
+      break;
+
+    case DW_EH_PE_sdata8:
+      old_start = start;
+      SAFE_SIGNED_BYTE_GET_AND_INC (val, start, 8, end);
+      len = (start == old_start) ? 0 : 8;
+      break;
+
+    default:
+      goto fail;
+    }
+
+  * return_len = len;
+  return val;
+
+ fail:
+  * return_len = 0;
+  return 0;
+    
+}
+
+static uint64_t
+encoded_eh_offset (unsigned int            encoding,
+		   struct dwarf_section *  section,
+		   uint64_t                section_offset,
+		   uint64_t                value)
+{
+  switch (encoding & 0xf0)
+    {
+    default:
+      /* This should not happen.  FIXME: warn ?  */
+    case DW_EH_PE_absptr:
+      return value;
+
+    case DW_EH_PE_pcrel:
+      return value + (uint64_t)(section->address + section_offset);
+
+    case DW_EH_PE_datarel:
+      return value + (uint64_t)section->address;
+    }
+}
+
+static int
+display_eh_frame_hdr (struct dwarf_section *section,
+		      void *file ATTRIBUTE_UNUSED)
+{
+  unsigned char *start = section->start;
+  unsigned char *end = start + section->size;
+
+  introduce (section, false);
+
+  if (section->size < 6)
+    {
+      warn (_(".eh_frame_hdr section is too small\n"));
+      return 0;
+    }
+
+  unsigned int version = start[0];
+  if (version != 1)
+    {
+      warn (_("Unsupported .eh_frame_hdr version %u\n"), version);
+      return 0;
+    }
+
+  printf (_("  Version:                 %u\n"), version);
+
+  unsigned int ptr_enc = start[1];
+  /* Strictly speaking this is the encoding format of the eh_frame_ptr field below.  */
+  printf (_("  Pointer Encoding Format: %#x (%s)\n"), ptr_enc, decode_eh_encoding (ptr_enc));
+
+  unsigned int count_enc = start[2];
+  printf (_("  Count Encoding Format:   %#x (%s)\n"), count_enc, decode_eh_encoding (count_enc));
+
+  unsigned int table_enc = start[3];
+  printf (_("  Table Encoding Format:   %#x (%s)\n"), table_enc, decode_eh_encoding (table_enc));
+
+  start += 4;
+
+  unsigned int len;
+
+  uint64_t eh_frame_ptr = get_encoded_eh_value (ptr_enc, start, end, & len);
+  if (len == 0)
+    {
+      warn (_("unable to read eh_frame_ptr field in .eh_frame_hdr section\n"));
+      return 0;
+    }
+  printf (_("  Start of frame section:  %#" PRIx64), eh_frame_ptr);
+
+  uint64_t offset_eh_frame_ptr = encoded_eh_offset (ptr_enc, section, 4, eh_frame_ptr);
+  if (offset_eh_frame_ptr != eh_frame_ptr)
+    printf (_(" (offset: %#" PRIx64 ")"), offset_eh_frame_ptr);
+  
+  printf ("\n");
+  start += len;
+
+  if (count_enc == DW_EH_PE_omit)
+    {
+      warn (_("It is suspicious to have a .eh_frame_hdr section with an empty search table\n"));
+      return 0;
+    }
+
+  if (count_enc & 0xf0)
+    {
+      warn (_("The count field format should be absolute, not relative to an address\n"));
+      return 0;
+    }
+  
+  uint64_t fde_count = get_encoded_eh_value (count_enc, start, end, & len);
+  if (len == 0)
+    {
+      warn (_("unable to read fde_count field in .eh_frame_hdr section\n"));
+      return 0;
+    }
+  printf (_("  Entries in search table: %#" PRIx64), fde_count);
+  printf ("\n");
+  start += len;
+
+  if (fde_count != 0 && table_enc == DW_EH_PE_omit)
+    {
+      warn (_("It is suspicious to have a .eh_frame_hdr section an empty table but a non empty count field\n"));
+      return 0;
+    }
+
+  uint64_t i;
+  /* Read and display the search table.  */
+  for (i = 0; i < fde_count; i++)
+    {
+      uint64_t location, address;
+      unsigned char * row_start = start;
+
+      location = get_encoded_eh_value (table_enc, start, end, & len);
+      if (len == 0)
+	{
+	  warn (_("Failed to read location field for entry %#" PRIx64 " in the .eh_frame_hdr's search table\n"), i);
+	  return 0;
+	}
+      start += len;
+
+      address = get_encoded_eh_value (table_enc, start, end, & len);
+      if (len == 0)
+	{
+	  warn (_("Failed to read address field for entry %#" PRIx64 " in the .eh_frame_hdr's search table\n"), i);
+	  return 0;
+	}
+      start += len;
+
+      /* This format is intended to be compatible with the output of eu-readelf's -e option.  */
+      printf ("  %#" PRIx64 " (offset: %#" PRIx64 ") -> %#" PRIx64 " fde=[ %5" PRIx64 "]\n",
+	      location,
+	      encoded_eh_offset (table_enc, section, row_start - section->start, location),
+	      address,
+	      encoded_eh_offset (table_enc, section, row_start - section->start, address) - offset_eh_frame_ptr);
+    }
+
+  printf ("\n");
+  return 1;
+}
+
 static int
 display_debug_frames (struct dwarf_section *section,
 		      void *file ATTRIBUTE_UNUSED)
@@ -12472,6 +12731,7 @@ struct dwarf_section_display debug_displays[] =
   { { ".debug_pubnames",    ".zdebug_pubnames",	     ".dwpbnms", NO_ABBREVS },	    display_debug_pubnames, &do_debug_pubnames, false },
   { { ".debug_gnu_pubnames", ".zdebug_gnu_pubnames", "",	 NO_ABBREVS },	    display_debug_gnu_pubnames, &do_debug_pubnames, false },
   { { ".eh_frame",	    "",			     "",	 NO_ABBREVS },	    display_debug_frames,   &do_debug_frames,	true },
+  { { ".eh_frame_hdr",	    "",			     "",	 NO_ABBREVS },	    display_eh_frame_hdr,   &do_debug_frames,	true },
   { { ".debug_macinfo",	    ".zdebug_macinfo",	     "",	 NO_ABBREVS },	    display_debug_macinfo,  &do_debug_macinfo,	false },
   { { ".debug_macro",	    ".zdebug_macro",	     ".dwmac",	 NO_ABBREVS },	    display_debug_macro,    &do_debug_macinfo,	true },
   { { ".debug_str",	    ".zdebug_str",	     ".dwstr",	 NO_ABBREVS },	    display_debug_str,	    &do_debug_str,	false },

@@ -83,6 +83,7 @@ enum dwarf_section_display_enum
   pubnames,
   gnu_pubnames,
   eh_frame,
+  eh_frame_hdr,
   macinfo,
   macro,
   str,

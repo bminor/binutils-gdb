@@ -7888,6 +7888,8 @@ process_section_headers (Filedata * filedata)
 	request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
       else if (do_debug_frames && streq (name, ".eh_frame"))
 	request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
+      else if (do_debug_frames && streq (name, ".eh_frame_hdr"))
+	request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
       else if (do_gdb_index && (streq (name, ".gdb_index")
 				|| streq (name, ".debug_names")))
 	request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);

@@ -1,5 +1,9 @@
 -*- text -*-
 
+* When objdump or readelf are used to display the contents of a .eh_frame
+  section they will now also display the contents of the .eh_frame_hdr section,
+  if present.
+
 Changes in 2.42:
 
 * The objdump program has a new command line option -Z/--decompress which
