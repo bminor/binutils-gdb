@@ -2,33 +2,52 @@
 
 Changes in 2.42:
 
+* Add support for the AArch64 Scalable Vector Extension version 2.1 (SVE2.1).
+
+* Add support for the AArch64 Scalable Matrix Extension version 2.1 (SME2.1).
+
+* Add support for the AArch64 BFloat16 to BFloat16 arithmetic for SVE2 and SME2
+  (B16B16).
+
+* Add support for the AArch64 Reliability, Availability and Serviceability
+  extension v2 (RASv2).
+
+* Add support for the AArch64 128-bit Atomic Instructions (LSE128).
+
+* Add support for the AArch64 Guarded Control Stack (GCS).
+
+* Add support for the AArch64 Check Feature Status Extension (CHK).
+
+* Add support for the AArch64 Enhanced Speculation Restriction Instructions
+  (SPECRES2).
+
+* Add support for the AArch64 Load-Acquire RCpc instructions version 3 (LRCPC3).
+
+* Add support for the AArch64 Translation Hardening Extension (THE).
+
+* Add support for the AArch64 Instruction Trace Extension (ITE).
+
+* Add support for the AArch64 Translation Hardening Extension (THE).
+
+* Add support for the AArch64 128-bit page table descriptors (D128).
+
+* Add support for the AArch64 XS memory attribute (XS).
+
+* Add support for '+fcma', '+jscvt', '+frintts', '+flagm2', '+rcpc2' and
+  '+wfxt' flags to enable existing AArch64 instructions.
+
+* Add support for 'armv8.9-a' and 'armv9.4-a' for -march in AArch64 GAS.
+
+* Add support for 'armv8.9-a' and 'armv9.4-a' for -march in Arm GAS.
+
+* Add support for Cortex-A520, Cortex-A720, Cortex-X3 and Cortex-X4 for
+  AArch64.
+
 * Experimental support in GAS to synthesize CFI for ABI-conformant,
   hand-written asm using the new command line option --scfi=experimental on
   x86-64.  Only System V AMD64 ABI is supported.
 
-* Add support for the Arm Scalable Vector Extension version 2.1 (SVE2.1)
-  instructions.
-
-* Add support for the AArch64 Scalable Matrix Extension version 2.1 (SME2.1)
-  instructions.
-
-* Add support for 'armv8.9-a' and 'armv9.4-a' for -march in Arm GAS.
-
 * Initial support for Intel APX: 32 GPRs, NDD, PUSH2/POP2 and PUSHP/POPP.
-
-* On RISC-V macro instructions expanding to AUIPC and a load, store, or branch
-  no longer accept x0 as an intermediate and/or destination register.
-
-* Add support for Reliability, Availability and Serviceability extension v2
-  (RASv2) for AArch64.
-
-* Add support for 128-bit Atomic Instructions (LSE128) for AArch64.
-
-* Add support for Guarded Control Stack (GCS) for AArch64.
-
-* Add support for AArch64 Check Feature Status Extension (CHK).
-
-* Add support for 'armv8.9-a' and 'armv9.4-a' for -march in AArch64 GAS.
 
 * Add support for Intel USER_MSR instructions.
 
@@ -44,13 +63,8 @@ Changes in 2.42:
 
 * Add support for Intel AVX-VNNI-INT16 instructions.
 
-* Add support for Cortex-A520 for AArch64.
-
-* Add support for Cortex-A720 for AArch64.
-
-* Add support for Cortex-X3 for AArch64.
-
-* Add support for Cortex-X4 for AArch64.
+* On RISC-V macro instructions expanding to AUIPC and a load, store, or branch
+  no longer accept x0 as an intermediate and/or destination register.
 
 * Add support for RISC-V T-Head extensions (XTheadVector, XTheadZvlsseg
   and XTheadZvamo) from version 2.3.0 of the T-Head ISA manual.
