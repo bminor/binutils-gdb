@@ -8156,7 +8156,8 @@ check_VecOperands (const insn_template *t)
     }
 
   /* Check the special Imm4 cases; must be the first operand.  */
-  if (is_cpu (t, CpuXOP) && t->operands == 5)
+  if ((is_cpu (t, CpuXOP) && t->operands == 5)
+      || (is_cpu (t, CpuAPX_F) && t->opcode_space == SPACE_0F3A))
     {
       if (i.op[0].imms->X_op != O_constant
 	  || !fits_in_imm4 (i.op[0].imms->X_add_number))
@@ -8166,7 +8167,8 @@ check_VecOperands (const insn_template *t)
 	}
 
       /* Turn off Imm<N> so that update_imm won't complain.  */
-      operand_type_set (&i.types[0], 0);
+      if (t->operands == 5)
+	operand_type_set (&i.types[0], 0);
     }
 
   /* Check vector Disp8 operand.  */
