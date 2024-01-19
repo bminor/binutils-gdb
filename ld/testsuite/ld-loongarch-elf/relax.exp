@@ -104,7 +104,7 @@ if [istarget loongarch64-*-*] {
 	]
 
       if [file exist "tmpdir/relax-tls-le"] {
-	set objdump_output1 [run_host_cmd "objdump" "-d tmpdir/relax-tls-le"]
+	set objdump_output1 [run_host_cmd "objdump" "-d tmpdir/relax-tls-le -M no-aliases"]
 	if { [ regexp ".addi.*st.*" $objdump_output1] } {
 	  pass "loongarch relax success"
 	} {
@@ -125,7 +125,7 @@ if [istarget loongarch64-*-*] {
 	]
 
       if [file exist "tmpdir/no-relax-tls-le"] {
-	set objdump_output2 [run_host_cmd "objdump" "-d tmpdir/no-relax-tls-le"]
+	set objdump_output2 [run_host_cmd "objdump" "-d tmpdir/no-relax-tls-le -M no-aliases"]
 	if { [ regexp ".*lu12i.*add.*addi.*st.*" $objdump_output2] } {
 	  pass "loongarch no-relax success"
 	} {
@@ -146,7 +146,7 @@ if [istarget loongarch64-*-*] {
 	]
 
       if [file exist "tmpdir/old-tls-le"] {
-	set objdump_output3 [run_host_cmd "objdump" "-d tmpdir/old-tls-le"]
+	set objdump_output3 [run_host_cmd "objdump" "-d tmpdir/old-tls-le -M no-aliases"]
 	if { [ regexp ".*lu12i.*ori.*add.*addi.*stptr.*" $objdump_output3] } {
 	  pass "loongarch old tls le success"
 	} {
@@ -167,7 +167,7 @@ if [istarget loongarch64-*-*] {
 	]
 
       if [file exist "tmpdir/realx-compatible"] {
-	set objdump_output4 [run_host_cmd "objdump" "-d tmpdir/realx-compatible"]
+	set objdump_output4 [run_host_cmd "objdump" "-d tmpdir/realx-compatible -M no-aliases"]
 	if { [ regexp ".addi.*st.*" $objdump_output4] && \
 	     [ regexp ".*lu12i.*ori.*add.*addi.*stptr.*" $objdump_output4] } {
 	  pass "loongarch tls le relax compatible check success"
@@ -188,7 +188,7 @@ if [istarget loongarch64-*-*] {
 	    ] \
 	]
       if [file exist "tmpdir/no-realx-compatible"] {
-	set objdump_output4 [run_host_cmd "objdump" "-d tmpdir/no-realx-compatible"]
+	set objdump_output4 [run_host_cmd "objdump" "-d tmpdir/no-realx-compatible -M no-aliases"]
 	if { [ regexp ".*lu12i.*add.*addi.*st.*" $objdump_output4] && \
 	     [ regexp ".*lu12i.*ori.*add.*addi.*stptr.*" $objdump_output4] } {
 	  pass "loongarch tls le no-relax compatible check success"
@@ -210,7 +210,7 @@ if [istarget loongarch64-*-*] {
 	]
 
       if [file exist "tmpdir/relax-bound-check-tls-le"] {
-	set objdump_output5 [run_host_cmd "objdump" "-d tmpdir/relax-bound-check-tls-le"]
+	set objdump_output5 [run_host_cmd "objdump" "-d tmpdir/relax-bound-check-tls-le -M no-aliases"]
 	if { [ regexp ".*lu12i.*add.*addi.*st.*" $objdump_output5] && \
 	     [ regexp ".addi.*st.*" $objdump_output5] } {
 	  pass "loongarch no-relax success"
@@ -232,7 +232,7 @@ if [istarget loongarch64-*-*] {
 	]
 
       if [file exist "tmpdir/no-relax-bound-check-tls-le"] {
-	set objdump_output5 [run_host_cmd "objdump" "-d tmpdir/no-relax-bound-check-tls-le"]
+	set objdump_output5 [run_host_cmd "objdump" "-d tmpdir/no-relax-bound-check-tls-le -M no-aliases"]
 	if { [ regexp ".*addi.*st.*" $objdump_output5] } {
 	  pass "loongarch no-relax success"
 	} {
