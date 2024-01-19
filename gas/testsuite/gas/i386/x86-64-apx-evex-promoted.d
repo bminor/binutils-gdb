@@ -320,3 +320,4 @@ Disassembly of section \.text:
 [	 ]*[a-f0-9]+:[	 ]*62 4c fc 08 66 bc 87 23 01 00 00[	 ]+wrssq[	 ]+%r31,0x123\(%r31,%rax,4\)
 [	 ]*[a-f0-9]+:[	 ]*62 4c 7d 08 65 8c 87 23 01 00 00[	 ]+wrussd[	 ]+%r25d,0x123\(%r31,%rax,4\)
 [	 ]*[a-f0-9]+:[	 ]*62 4c fd 08 65 bc 87 23 01 00 00[	 ]+wrussq[	 ]+%r31,0x123\(%r31,%rax,4\)
+#pass
