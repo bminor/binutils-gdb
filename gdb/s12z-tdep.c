@@ -445,6 +445,7 @@ s12z_frame_prev_register (frame_info_ptr this_frame,
 static const struct frame_unwind s12z_frame_unwind = {
   "s12z prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   s12z_frame_this_id,
   s12z_frame_prev_register,

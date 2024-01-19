@@ -165,6 +165,7 @@ static const struct frame_unwind mips_sde_frame_unwind =
 {
   "mips sde sigtramp",
   SIGTRAMP_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   mips_sde_frame_this_id,
   mips_sde_frame_prev_register,

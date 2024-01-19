@@ -1108,6 +1108,7 @@ static const struct frame_unwind jit_frame_unwind =
 {
   "jit",
   NORMAL_FRAME,
+  FRAME_UNWIND_EXTENSION,
   default_frame_unwind_stop_reason,
   jit_frame_this_id,
   jit_frame_prev_register,

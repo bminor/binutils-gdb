@@ -68,6 +68,28 @@ get_frame_unwind_table (struct gdbarch *gdbarch)
   return table;
 }
 
+static const char *
+frame_unwinder_class_str (frame_unwind_class uclass)
+{
+  switch (uclass)
+    {
+      case FRAME_UNWIND_GDB:
+	return "FRAME_UNWIND_GDB";
+
+      case FRAME_UNWIND_EXTENSION:
+	return "FRAME_UNWIND_EXTENSION";
+
+      case FRAME_UNWIND_DEBUGINFO:
+	return "FRAME_UNWIND_DEBUGINFOD";
+
+      case FRAME_UNWIND_ARCH:
+	return "FRAME_UNWIND_ARCH";
+
+      default:
+	return "<unknown class>";
+    };
+}
+
 void
 frame_unwind_prepend_unwinder (struct gdbarch *gdbarch,
 				const struct frame_unwind *unwinder)
@@ -324,19 +346,22 @@ maintenance_info_frame_unwinders (const char *args, int from_tty)
   std::vector<const frame_unwind*> table = get_frame_unwind_table (gdbarch);
 
   ui_out *uiout = current_uiout;
-  ui_out_emit_table table_emitter (uiout, 2, -1, "FrameUnwinders");
+  ui_out_emit_table table_emitter (uiout, 3, -1, "FrameUnwinders");
   uiout->table_header (27, ui_left, "name", "Name");
   uiout->table_header (25, ui_left, "type", "Type");
+  uiout->table_header (25, ui_left, "class", "Class");
   uiout->table_body ();
 
   for (const struct frame_unwind* unwinder: table)
     {
       const char *name = unwinder->name;
       const char *type = frame_type_str (unwinder->type);
+      const char *uclass = frame_unwinder_class_str (unwinder->unwinder_class);
 
       ui_out_emit_list tuple_emitter (uiout, nullptr);
       uiout->field_string ("name", name);
       uiout->field_string ("type", type);
+      uiout->field_string ("class", uclass);
       uiout->text ("\n");
     }
 }

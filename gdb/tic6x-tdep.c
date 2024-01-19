@@ -456,6 +456,7 @@ static const struct frame_unwind tic6x_frame_unwind =
 {
   "tic6x prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   tic6x_frame_this_id,
   tic6x_frame_prev_register,

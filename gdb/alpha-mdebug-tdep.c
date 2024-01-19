@@ -335,6 +335,7 @@ static const struct frame_unwind alpha_mdebug_frame_unwind =
 {
   "alpha mdebug",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   alpha_mdebug_frame_this_id,
   alpha_mdebug_frame_prev_register,

@@ -3905,6 +3905,7 @@ static const struct frame_unwind riscv_frame_unwind =
 {
   /*.name          =*/ "riscv prologue",
   /*.type          =*/ NORMAL_FRAME,
+  /*.unwinder_class=*/FRAME_UNWIND_ARCH,
   /*.stop_reason   =*/ default_frame_unwind_stop_reason,
   /*.this_id       =*/ riscv_frame_this_id,
   /*.prev_register =*/ riscv_frame_prev_register,

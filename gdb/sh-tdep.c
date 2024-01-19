@@ -1932,6 +1932,7 @@ sh_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 static const struct frame_unwind sh_frame_unwind = {
   "sh prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   sh_frame_this_id,
   sh_frame_prev_register,
@@ -1999,6 +2000,7 @@ static const struct frame_unwind sh_stub_unwind =
 {
   "sh stub",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   sh_stub_this_id,
   sh_frame_prev_register,

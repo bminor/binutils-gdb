@@ -234,6 +234,7 @@ ppcobsd_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 static const struct frame_unwind ppcobsd_sigtramp_frame_unwind = {
   "ppc openbsd sigtramp",
   SIGTRAMP_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   ppcobsd_sigtramp_frame_this_id,
   ppcobsd_sigtramp_frame_prev_register,

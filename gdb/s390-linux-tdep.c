@@ -545,6 +545,7 @@ s390_sigtramp_frame_sniffer (const struct frame_unwind *self,
 static const struct frame_unwind s390_sigtramp_frame_unwind = {
   "s390 linux sigtramp",
   SIGTRAMP_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   s390_sigtramp_frame_this_id,
   s390_sigtramp_frame_prev_register,

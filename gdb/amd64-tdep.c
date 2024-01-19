@@ -2662,6 +2662,7 @@ static const struct frame_unwind amd64_frame_unwind =
 {
   "amd64 prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   amd64_frame_unwind_stop_reason,
   amd64_frame_this_id,
   amd64_frame_prev_register,
@@ -2808,6 +2809,7 @@ static const struct frame_unwind amd64_sigtramp_frame_unwind =
 {
   "amd64 sigtramp",
   SIGTRAMP_FRAME,
+  FRAME_UNWIND_ARCH,
   amd64_sigtramp_frame_unwind_stop_reason,
   amd64_sigtramp_frame_this_id,
   amd64_sigtramp_frame_prev_register,
@@ -3000,6 +3002,7 @@ static const struct frame_unwind amd64_epilogue_override_frame_unwind =
 {
   "amd64 epilogue override",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   amd64_epilogue_frame_unwind_stop_reason,
   amd64_epilogue_frame_this_id,
   amd64_frame_prev_register,
@@ -3011,6 +3014,7 @@ static const struct frame_unwind amd64_epilogue_frame_unwind =
 {
   "amd64 epilogue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   amd64_epilogue_frame_unwind_stop_reason,
   amd64_epilogue_frame_this_id,
   amd64_frame_prev_register,

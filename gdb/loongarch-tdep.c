@@ -453,6 +453,7 @@ loongarch_frame_prev_register (frame_info_ptr this_frame,
 static const struct frame_unwind loongarch_frame_unwind = {
   "loongarch prologue",
   /*.type	   =*/NORMAL_FRAME,
+  /*.unwinder_class=*/FRAME_UNWIND_ARCH,
   /*.stop_reason   =*/default_frame_unwind_stop_reason,
   /*.this_id	   =*/loongarch_frame_this_id,
   /*.prev_register =*/loongarch_frame_prev_register,

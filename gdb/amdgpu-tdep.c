@@ -895,6 +895,7 @@ amdgpu_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 static const frame_unwind amdgpu_frame_unwind = {
   "amdgpu",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   amdgpu_frame_this_id,
   amdgpu_frame_prev_register,

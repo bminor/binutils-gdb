@@ -473,6 +473,7 @@ const struct frame_unwind dwarf2_tailcall_frame_unwind =
 {
   "dwarf2 tailcall",
   TAILCALL_FRAME,
+  FRAME_UNWIND_DEBUGINFO,
   default_frame_unwind_stop_reason,
   tailcall_frame_this_id,
   tailcall_frame_prev_register,

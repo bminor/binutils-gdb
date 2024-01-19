@@ -1158,6 +1158,7 @@ avr_frame_prev_register (frame_info_ptr this_frame,
 static const struct frame_unwind avr_frame_unwind = {
   "avr prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   avr_frame_this_id,
   avr_frame_prev_register,
