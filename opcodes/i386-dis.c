@@ -1769,7 +1769,7 @@ struct dis386 {
 };
 
 /* Upper case letters in the instruction names here are macros.
-   'A' => print 'b' if no register operands or suffix_always is true
+   'A' => print 'b' if no (suitable) register operand or suffix_always is true
    'B' => print 'b' if suffix_always is true
    'C' => print 's' or 'l' ('w' or 'd' in Intel mode) depending on operand
 	  size prefix
@@ -1788,8 +1788,8 @@ struct dis386 {
    'O' => print 'd' or 'o' (or 'q' in Intel mode)
    'P' => behave as 'T' except with register operand outside of suffix_always
 	  mode
-   'Q' => print 'w', 'l' or 'q' for memory operand or suffix_always
-	  is true
+   'Q' => print 'w', 'l' or 'q' if no (suitable) register operand or
+	  suffix_always is true
    'R' => print 'w', 'l' or 'q' ('d' for 'l' and 'e' in Intel mode)
    'S' => print 'w', 'l' or 'q' if suffix_always is true
    'T' => print 'w', 'l'/'d', or 'q' if instruction has an operand size
@@ -10416,7 +10416,7 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 	case 'A':
 	  if (ins->intel_syntax)
 	    break;
-	  if ((ins->need_modrm && ins->modrm.mod != 3)
+	  if ((ins->need_modrm && ins->modrm.mod != 3 && !ins->vex.nd)
 	      || (sizeflag & SUFFIX_ALWAYS))
 	    *ins->obufp++ = 'b';
 	  break;
@@ -10715,7 +10715,7 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 	      if (ins->intel_syntax && !alt)
 		break;
 	      USED_REX (REX_W);
-	      if ((ins->need_modrm && ins->modrm.mod != 3)
+	      if ((ins->need_modrm && ins->modrm.mod != 3 && !ins->vex.nd)
 		  || (sizeflag & SUFFIX_ALWAYS))
 		{
 		  if (ins->rex & REX_W)
