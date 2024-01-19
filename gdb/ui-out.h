@@ -543,7 +543,7 @@ do_with_buffered_output (F func, ui_out *uiout, Arg... args)
     {
       func (uiout, std::forward<Arg> (args)...);
     }
-  catch (const gdb_exception &ex)
+  catch (gdb_exception &ex)
     {
       /* Ideally flush would be called in the destructor of buffer_group,
 	 however flushing might cause an exception to be thrown.  Catch it
@@ -556,7 +556,7 @@ do_with_buffered_output (F func, ui_out *uiout, Arg... args)
 	{
 	}
 
-      throw (std::move (ex));
+      throw_exception (std::move (ex));
     }
 
   /* Try was successful.  Let any further exceptions propagate.  */
