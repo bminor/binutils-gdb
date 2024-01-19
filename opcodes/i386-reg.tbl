@@ -353,10 +353,10 @@ tmm5, Class=RegSIMD|Tmmword, 0, 5, Dw2Inval, Dw2Inval
 tmm6, Class=RegSIMD|Tmmword, 0, 6, Dw2Inval, Dw2Inval
 tmm7, Class=RegSIMD|Tmmword, 0, 7, Dw2Inval, Dw2Inval
 // Bound registers for MPX
-bnd0, Class=RegBND, 0, 0, Dw2Inval, Dw2Inval
-bnd1, Class=RegBND, 0, 1, Dw2Inval, Dw2Inval
-bnd2, Class=RegBND, 0, 2, Dw2Inval, Dw2Inval
-bnd3, Class=RegBND, 0, 3, Dw2Inval, Dw2Inval
+bnd0, Class=RegBND, 0, 0, Dw2Inval, 126
+bnd1, Class=RegBND, 0, 1, Dw2Inval, 127
+bnd2, Class=RegBND, 0, 2, Dw2Inval, 128
+bnd3, Class=RegBND, 0, 3, Dw2Inval, 129
 // No Class=Reg will make these registers rejected for all purposes except
 // for addressing.  This saves creating one extra type for RIP/EIP.
 rip, Qword, RegRex64, RegIP, Dw2Inval, 16
