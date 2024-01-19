@@ -4,22 +4,28 @@
 _start:
 	urdmsr	%r14, %r12
 	urdmsr	%r14, %rax
+	urdmsr	%r24, %rax
 	urdmsr	%rdx, %r12
+	urdmsr	%rdx, %r22
 	urdmsr	%rdx, %rax
 	urdmsr	$51515151, %r12
 	urdmsr	$51515151, %rax
 	urdmsr	$0x7f, %r12
 	urdmsr	$0x7fff, %r12
 	urdmsr	$0x80000000, %r12
+	urdmsr	$0x80000000, %r22
 	uwrmsr	%r12, %r14
 	uwrmsr	%rax, %r14
+	uwrmsr	%rax, %r24
 	uwrmsr	%r12, %rdx
+	uwrmsr	%r22, %rdx
 	uwrmsr	%rax, %rdx
 	uwrmsr	%r12, $51515151
 	uwrmsr	%rax, $51515151
 	uwrmsr	%r12, $0x7f
 	uwrmsr	%r12, $0x7fff
 	uwrmsr	%r12, $0x80000000
+	uwrmsr	%r22, $0x80000000
 
 	.intel_syntax noprefix
 	urdmsr	r12, r14

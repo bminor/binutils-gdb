@@ -392,9 +392,9 @@
   /* PREFIX_EVEX_MAP4_F8 */
   {
     { Bad_Opcode },
-    { "enqcmds", { Gva, M },  0 },
+    { MOD_TABLE (MOD_EVEX_MAP4_F8_P_1) },
     { "movdir64b", { Gva, M }, 0 },
-    { "enqcmd", { Gva, M }, 0 },
+    { MOD_TABLE (MOD_EVEX_MAP4_F8_P_3) },
   },
   /* PREFIX_EVEX_MAP5_10 */
   {

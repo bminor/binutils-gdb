@@ -950,6 +950,9 @@ enum
   MOD_0F38F8,
 
   MOD_VEX_0F3849_X86_64_L_0_W_0,
+
+  MOD_EVEX_MAP4_F8_P_1,
+  MOD_EVEX_MAP4_F8_P_3,
 };
 
 enum
@@ -1356,6 +1359,7 @@ enum
   EVEX_MAP4,
   EVEX_MAP5,
   EVEX_MAP6,
+  EVEX_MAP7,
 };
 
 enum
@@ -9090,6 +9094,9 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	case 0x6:
 	  vex_table_index = EVEX_MAP6;
 	  break;
+	case 0x7:
+	  vex_table_index = EVEX_MAP7;
+	  break;
 	}
 
       /* The second byte after 0x62.  */
@@ -9159,7 +9166,12 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 
       ins->codep++;
       vindex = *ins->codep++;
-      dp = &evex_table[vex_table_index][vindex];
+      if (vex_table_index != EVEX_MAP7)
+	dp = &evex_table[vex_table_index][vindex];
+      else if (vindex == 0xf8)
+	dp = &map7_f8_opcode;
+      else
+	dp = &bad_opcode;
       ins->end_codep = ins->codep;
       if (!fetch_modrm (ins))
 	return &err_opcode;
