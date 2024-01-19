@@ -6047,11 +6047,11 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   DOT_INSN ("sdot", 0xe009400,  0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
   DOT_INSN ("udot", 0x2f00e000, 0xbf00f400, dotproduct, OP3 (Vd, Vn, Em), QL_V2DOT, F_SIZEQ),
   DOT_INSN ("sdot", 0xf00e000,  0xbf00f400, dotproduct, OP3 (Vd, Vn, Em), QL_V2DOT, F_SIZEQ),
-/* Crypto SHA2 (optional in ARMv8.2-a).  */
-  SHA2_INSN ("sha512h",   0xce608000, 0xffe0fc00, cryptosha2, OP3 (Fd, Fn, Vm), QL_SHA512UPT, 0),
-  SHA2_INSN ("sha512h2",  0xce608400, 0xffe0fc00, cryptosha2, OP3 (Fd, Fn, Vm), QL_SHA512UPT, 0),
-  SHA2_INSN ("sha512su0", 0xcec08000, 0xfffffc00, cryptosha2, OP2 (Vd, Vn), QL_V2SAME2D, 0),
-  SHA2_INSN ("sha512su1", 0xce608800, 0xffe0fc00, cryptosha2, OP3 (Vd, Vn, Vm), QL_V3SAME2D, 0),
+/* Crypto SHA512 (optional in ARMv8.2-a).  */
+  SHA3_INSN ("sha512h",   0xce608000, 0xffe0fc00, cryptosha2, OP3 (Fd, Fn, Vm), QL_SHA512UPT, 0),
+  SHA3_INSN ("sha512h2",  0xce608400, 0xffe0fc00, cryptosha2, OP3 (Fd, Fn, Vm), QL_SHA512UPT, 0),
+  SHA3_INSN ("sha512su0", 0xcec08000, 0xfffffc00, cryptosha2, OP2 (Vd, Vn), QL_V2SAME2D, 0),
+  SHA3_INSN ("sha512su1", 0xce608800, 0xffe0fc00, cryptosha2, OP3 (Vd, Vn, Vm), QL_V3SAME2D, 0),
   /* Crypto SHA3 (optional in ARMv8.2-a).  */
   SHA3_INSN ("eor3",      0xce000000, 0xffe08000, cryptosha3, OP4 (Vd, Vn, Vm, Va), QL_V4SAME16B, 0),
   SHA3_INSN ("rax1",      0xce608c00, 0xffe0fc00, cryptosha3, OP3 (Vd, Vn, Vm), QL_V3SAME2D, 0),
