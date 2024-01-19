@@ -623,29 +623,12 @@ language_defn::read_var_value (struct symbol *var,
       {
 	int regno = SYMBOL_REGISTER_OPS (var)
 		      ->register_number (var, get_frame_arch (frame));
-	struct value *regval;
 
 	if (var->aclass () == LOC_REGPARM_ADDR)
-	  {
-	    regval = value_from_register (lookup_pointer_type (type),
-					  regno,
-					  frame);
-
-	    if (regval == NULL)
-	      error (_("Value of register variable not available for `%s'."),
-		     var->print_name ());
-
-	    addr = value_as_address (regval);
-	  }
+	  addr = value_as_address
+	   (value_from_register (lookup_pointer_type (type), regno, frame));
 	else
-	  {
-	    regval = value_from_register (type, regno, frame);
-
-	    if (regval == NULL)
-	      error (_("Value of register variable not available for `%s'."),
-		     var->print_name ());
-	    return regval;
-	  }
+	  return value_from_register (type, regno, frame);
       }
       break;
 
