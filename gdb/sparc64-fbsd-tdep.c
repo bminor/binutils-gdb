@@ -201,6 +201,7 @@ static const struct frame_unwind sparc64fbsd_sigtramp_frame_unwind =
 {
   "sparc64 freebsd sigtramp",
   SIGTRAMP_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   sparc64fbsd_sigtramp_frame_this_id,
   sparc64fbsd_sigtramp_frame_prev_register,

@@ -634,6 +634,7 @@ rx_exception_sniffer (const struct frame_unwind *self,
 static const struct frame_unwind rx_frame_unwind = {
   "rx prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   rx_frame_this_id,
   rx_frame_prev_register,
@@ -648,6 +649,7 @@ static const struct frame_unwind rx_exception_unwind = {
   "rx exception",
   /* SIGTRAMP_FRAME could be used here, but backtraces are less informative.  */
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   rx_frame_this_id,
   rx_frame_prev_register,

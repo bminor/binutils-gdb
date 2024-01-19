@@ -588,6 +588,7 @@ moxie_frame_prev_register (frame_info_ptr this_frame,
 static const struct frame_unwind moxie_frame_unwind = {
   "moxie prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   moxie_frame_this_id,
   moxie_frame_prev_register,

@@ -1981,6 +1981,7 @@ static const struct frame_unwind nios2_frame_unwind =
 {
   "nios2 prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   nios2_frame_this_id,
   nios2_frame_prev_register,
@@ -2082,6 +2083,7 @@ static const struct frame_unwind nios2_stub_frame_unwind =
 {
   "nios2 stub",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   nios2_stub_frame_this_id,
   nios2_stub_frame_prev_register,

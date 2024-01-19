@@ -83,6 +83,7 @@ const struct frame_unwind sentinel_frame_unwind =
 {
   "sentinel",
   SENTINEL_FRAME,
+  FRAME_UNWIND_GDB,
   default_frame_unwind_stop_reason,
   sentinel_frame_this_id,
   sentinel_frame_prev_register,

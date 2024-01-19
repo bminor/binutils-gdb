@@ -1958,6 +1958,7 @@ m32c_prev_register (frame_info_ptr this_frame,
 static const struct frame_unwind m32c_unwind = {
   "m32c prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   m32c_this_id,
   m32c_prev_register,

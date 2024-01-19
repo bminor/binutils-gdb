@@ -1208,6 +1208,7 @@ static frame_unwind aarch64_prologue_unwind =
 {
   "aarch64 prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   aarch64_prologue_frame_unwind_stop_reason,
   aarch64_prologue_this_id,
   aarch64_prologue_prev_register,
@@ -1303,6 +1304,7 @@ static frame_unwind aarch64_stub_unwind =
 {
   "aarch64 stub",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   aarch64_stub_frame_unwind_stop_reason,
   aarch64_stub_this_id,
   aarch64_prologue_prev_register,

@@ -903,6 +903,7 @@ tilegx_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 static const struct frame_unwind tilegx_frame_unwind = {
   "tilegx prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   tilegx_frame_this_id,
   tilegx_frame_prev_register,

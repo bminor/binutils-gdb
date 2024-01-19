@@ -450,6 +450,7 @@ lm32_frame_prev_register (frame_info_ptr this_frame,
 static const struct frame_unwind lm32_frame_unwind = {
   "lm32 prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   lm32_frame_this_id,
   lm32_frame_prev_register,

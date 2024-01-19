@@ -1185,6 +1185,7 @@ static const struct frame_unwind amd64_windows_frame_unwind =
 {
   "amd64 windows",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   &amd64_windows_frame_this_id,
   &amd64_windows_frame_prev_register,

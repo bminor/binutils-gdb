@@ -3842,6 +3842,7 @@ static const struct frame_unwind rs6000_frame_unwind =
 {
   "rs6000 prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   rs6000_frame_this_id,
   rs6000_frame_prev_register,
@@ -3983,6 +3984,7 @@ static const struct frame_unwind rs6000_epilogue_frame_unwind =
 {
   "rs6000 epilogue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   rs6000_epilogue_frame_this_id, rs6000_epilogue_frame_prev_register,
   NULL,

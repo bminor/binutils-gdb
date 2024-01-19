@@ -227,6 +227,7 @@ static const struct frame_unwind sparc64nbsd_sigcontext_frame_unwind =
 {
   "sparc64 netbsd sigcontext",
   SIGTRAMP_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   sparc64nbsd_sigcontext_frame_this_id,
   sparc64nbsd_sigcontext_frame_prev_register,

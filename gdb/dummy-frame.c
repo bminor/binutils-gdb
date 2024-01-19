@@ -380,6 +380,7 @@ const struct frame_unwind dummy_frame_unwind =
 {
   "dummy",
   DUMMY_FRAME,
+  FRAME_UNWIND_GDB,
   default_frame_unwind_stop_reason,
   dummy_frame_this_id,
   dummy_frame_prev_register,

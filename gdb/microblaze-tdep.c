@@ -482,6 +482,7 @@ static const struct frame_unwind microblaze_frame_unwind =
 {
   "microblaze prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   microblaze_frame_this_id,
   microblaze_frame_prev_register,

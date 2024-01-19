@@ -965,6 +965,7 @@ pyuw_on_new_gdbarch (gdbarch *newarch)
 
       unwinder->name = "python";
       unwinder->type = NORMAL_FRAME;
+      unwinder->unwinder_class = FRAME_UNWIND_EXTENSION;
       unwinder->stop_reason = default_frame_unwind_stop_reason;
       unwinder->this_id = pyuw_this_id;
       unwinder->prev_register = pyuw_prev_register;

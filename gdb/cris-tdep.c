@@ -439,6 +439,7 @@ static const struct frame_unwind cris_sigtramp_frame_unwind =
 {
   "cris sigtramp",
   SIGTRAMP_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   cris_sigtramp_frame_this_id,
   cris_sigtramp_frame_prev_register,
@@ -904,6 +905,7 @@ static const struct frame_unwind cris_frame_unwind =
 {
   "cris prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   cris_frame_this_id,
   cris_frame_prev_register,

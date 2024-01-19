@@ -2933,6 +2933,7 @@ static const struct frame_unwind mips_insn16_frame_unwind =
 {
   "mips insn16 prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   mips_insn16_frame_this_id,
   mips_insn16_frame_prev_register,
@@ -3369,6 +3370,7 @@ static const struct frame_unwind mips_micro_frame_unwind =
 {
   "mips micro prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   mips_micro_frame_this_id,
   mips_micro_frame_prev_register,
@@ -3748,6 +3750,7 @@ static const struct frame_unwind mips_insn32_frame_unwind =
 {
   "mips insn32 prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   mips_insn32_frame_this_id,
   mips_insn32_frame_prev_register,
@@ -3865,6 +3868,7 @@ static const struct frame_unwind mips_stub_frame_unwind =
 {
   "mips stub",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   mips_stub_frame_this_id,
   mips_stub_frame_prev_register,

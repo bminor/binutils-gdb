@@ -156,12 +156,23 @@ typedef void (frame_dealloc_cache_ftype) (frame_info *self,
 typedef struct gdbarch *(frame_prev_arch_ftype) (frame_info_ptr this_frame,
 						 void **this_prologue_cache);
 
+enum frame_unwind_class {
+  FRAME_UNWIND_GDB,
+  FRAME_UNWIND_EXTENSION,
+  FRAME_UNWIND_DEBUGINFO,
+  FRAME_UNWIND_ARCH,
+};
+
 struct frame_unwind
 {
   const char *name;
   /* The frame's type.  Should this instead be a collection of
      predicates that test the frame for various attributes?  */
   enum frame_type type;
+  /* What kind of unwinder is this.  It generally follows from where
+     the unwinder was added or where it looks for information to do the
+     unwinding.  */
+  enum frame_unwind_class unwinder_class;
   /* Should an attribute indicating the frame's address-in-block go
      here?  */
   frame_unwind_stop_reason_ftype *stop_reason;

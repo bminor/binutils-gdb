@@ -2200,6 +2200,7 @@ static const struct frame_unwind i386_frame_unwind =
 {
   "i386 prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   i386_frame_unwind_stop_reason,
   i386_frame_this_id,
   i386_frame_prev_register,
@@ -2355,6 +2356,7 @@ static const struct frame_unwind i386_epilogue_override_frame_unwind =
 {
   "i386 epilogue override",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   i386_epilogue_frame_unwind_stop_reason,
   i386_epilogue_frame_this_id,
   i386_epilogue_frame_prev_register,
@@ -2366,6 +2368,7 @@ static const struct frame_unwind i386_epilogue_frame_unwind =
 {
   "i386 epilogue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   i386_epilogue_frame_unwind_stop_reason,
   i386_epilogue_frame_this_id,
   i386_epilogue_frame_prev_register,
@@ -2448,6 +2451,7 @@ static const struct frame_unwind i386_stack_tramp_frame_unwind =
 {
   "i386 stack tramp",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   i386_epilogue_frame_unwind_stop_reason,
   i386_epilogue_frame_this_id,
   i386_epilogue_frame_prev_register,
@@ -2597,6 +2601,7 @@ static const struct frame_unwind i386_sigtramp_frame_unwind =
 {
   "i386 sigtramp",
   SIGTRAMP_FRAME,
+  FRAME_UNWIND_ARCH,
   i386_sigtramp_frame_unwind_stop_reason,
   i386_sigtramp_frame_this_id,
   i386_sigtramp_frame_prev_register,

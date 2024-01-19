@@ -1130,6 +1130,7 @@ mn10300_frame_prev_register (frame_info_ptr this_frame,
 static const struct frame_unwind mn10300_frame_unwind = {
   "mn10300 prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   mn10300_frame_this_id, 
   mn10300_frame_prev_register,
