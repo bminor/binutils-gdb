@@ -1070,13 +1070,14 @@ eval_op_var_entry_value (struct type *expect_type, struct expression *exp,
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return value::zero (sym->type (), not_lval);
 
-  if (SYMBOL_COMPUTED_OPS (sym) == NULL
-      || SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry == NULL)
+  const symbol_computed_ops *computed_ops = sym->computed_ops ();
+  if (computed_ops == nullptr
+      || computed_ops->read_variable_at_entry == nullptr)
     error (_("Symbol \"%s\" does not have any specific entry value"),
 	   sym->print_name ());
 
   frame_info_ptr frame = get_selected_frame (NULL);
-  return SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry (sym, frame);
+  return computed_ops->read_variable_at_entry (sym, frame);
 }
 
 /* Helper function that implements the body of OP_VAR_MSYM_VALUE.  */

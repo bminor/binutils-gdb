@@ -18685,7 +18685,7 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
 
   dwarf2_symbol_mark_computed (attr, sym, cu, 0);
 
-  if (SYMBOL_COMPUTED_OPS (sym)->location_has_loclist)
+  if (sym->computed_ops ()->location_has_loclist)
     cu->has_loclist = true;
 }
 

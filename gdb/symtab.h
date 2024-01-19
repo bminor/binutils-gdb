@@ -1267,6 +1267,21 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     return symbol_impls[this->m_aclass_index];
   }
 
+  const symbol_block_ops *block_ops () const
+  {
+    return this->impl ().ops_block;
+  }
+
+  const symbol_computed_ops *computed_ops () const
+  {
+    return this->impl ().ops_computed;
+  }
+
+  const symbol_register_ops *register_ops () const
+  {
+    return this->impl ().ops_register;
+  }
+
   address_class aclass () const
   {
     return this->impl ().aclass;
@@ -1543,17 +1558,15 @@ struct block_symbol
 /* Note: There is no accessor macro for symbol.owner because it is
    "private".  */
 
-#define SYMBOL_COMPUTED_OPS(symbol)	((symbol)->impl ().ops_computed)
-#define SYMBOL_BLOCK_OPS(symbol)	((symbol)->impl ().ops_block)
-#define SYMBOL_REGISTER_OPS(symbol)	((symbol)->impl ().ops_register)
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value
 
 inline const block *
 symbol::value_block () const
 {
-  if (SYMBOL_BLOCK_OPS (this) != nullptr
-      && SYMBOL_BLOCK_OPS (this)->get_block_value != nullptr)
-    return SYMBOL_BLOCK_OPS (this)->get_block_value (this);
+  if (const symbol_block_ops *block_ops = this->block_ops ();
+      block_ops != nullptr && block_ops->get_block_value != nullptr)
+    return block_ops->get_block_value (this);
+
   return m_value.block;
 }
 

@@ -521,11 +521,9 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
   value->type = check_typedef (var->type ());
   value->optimized_out = 0;
 
-  if (SYMBOL_COMPUTED_OPS (var) != NULL)
-    {
-      SYMBOL_COMPUTED_OPS (var)->tracepoint_var_ref (var, ax, value);
-      return;
-    }
+  if (const symbol_computed_ops *computed_ops = var->computed_ops ();
+      computed_ops != nullptr)
+    return computed_ops->tracepoint_var_ref (var, ax, value);
 
   /* I'm imitating the code in read_var_value.  */
   switch (var->aclass ())
@@ -587,8 +585,7 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
 	 this as an lvalue or rvalue, the caller will generate the
 	 right code.  */
       value->kind = axs_lvalue_register;
-      value->u.reg
-	= SYMBOL_REGISTER_OPS (var)->register_number (var, ax->gdbarch);
+      value->u.reg = var->register_ops ()->register_number (var, ax->gdbarch);
       break;
 
       /* A lot like LOC_REF_ARG, but the pointer lives directly in a
@@ -596,8 +593,7 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
 	 because it's just like any other case where the thing
 	 has a real address.  */
     case LOC_REGPARM_ADDR:
-      ax_reg (ax,
-	      SYMBOL_REGISTER_OPS (var)->register_number (var, ax->gdbarch));
+      ax_reg (ax, var->register_ops ()->register_number (var, ax->gdbarch));
       value->kind = axs_lvalue_memory;
       break;
 

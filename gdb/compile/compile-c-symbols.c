@@ -563,7 +563,8 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 	  stream->write (local_file.c_str (), local_file.size ());
 	}
 
-      if (SYMBOL_COMPUTED_OPS (sym) != NULL)
+      if (const symbol_computed_ops *computed_ops = sym->computed_ops ();
+	  computed_ops != nullptr)
 	{
 	  gdb::unique_xmalloc_ptr<char> generated_name
 	    = c_symbol_substitution_name (sym);
@@ -571,11 +572,9 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 	     occurs in the middle.  */
 	  string_file local_file;
 
-	  SYMBOL_COMPUTED_OPS (sym)->generate_c_location (sym, &local_file,
-							  gdbarch,
-							  registers_used,
-							  pc,
-							  generated_name.get ());
+	  computed_ops->generate_c_location (sym, &local_file, gdbarch,
+					     registers_used, pc,
+					     generated_name.get ());
 	  stream->write (local_file.c_str (), local_file.size ());
 	}
       else

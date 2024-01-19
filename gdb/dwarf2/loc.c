@@ -515,14 +515,15 @@ locexpr_get_frame_base (struct symbol *framefunc, frame_info_ptr frame)
   /* If this method is called, then FRAMEFUNC is supposed to be a DWARF block.
      Thus, it's supposed to provide the find_frame_base_location method as
      well.  */
-  gdb_assert (SYMBOL_BLOCK_OPS (framefunc)->find_frame_base_location != NULL);
+  gdb_assert (framefunc->block_ops ()->find_frame_base_location != nullptr);
 
   gdbarch = get_frame_arch (frame);
   type = builtin_type (gdbarch)->builtin_data_ptr;
   dlbaton = (struct dwarf2_locexpr_baton *) SYMBOL_LOCATION_BATON (framefunc);
 
-  SYMBOL_BLOCK_OPS (framefunc)->find_frame_base_location
-    (framefunc, get_frame_pc (frame), &start, &length);
+  framefunc->block_ops ()->find_frame_base_location (framefunc,
+						     get_frame_pc (frame),
+						     &start, &length);
   result = dwarf2_evaluate_loc_desc (type, frame, start, length,
 				     dlbaton->per_cu, dlbaton->per_objfile);
 
@@ -572,14 +573,15 @@ loclist_get_frame_base (struct symbol *framefunc, frame_info_ptr frame)
   /* If this method is called, then FRAMEFUNC is supposed to be a DWARF block.
      Thus, it's supposed to provide the find_frame_base_location method as
      well.  */
-  gdb_assert (SYMBOL_BLOCK_OPS (framefunc)->find_frame_base_location != NULL);
+  gdb_assert (framefunc->block_ops ()->find_frame_base_location != nullptr);
 
   gdbarch = get_frame_arch (frame);
   type = builtin_type (gdbarch)->builtin_data_ptr;
   dlbaton = (struct dwarf2_loclist_baton *) SYMBOL_LOCATION_BATON (framefunc);
 
-  SYMBOL_BLOCK_OPS (framefunc)->find_frame_base_location
-    (framefunc, get_frame_pc (frame), &start, &length);
+  framefunc->block_ops ()->find_frame_base_location (framefunc,
+						     get_frame_pc (frame),
+						     &start, &length);
   result = dwarf2_evaluate_loc_desc (type, frame, start, length,
 				     dlbaton->per_cu, dlbaton->per_objfile);
 
@@ -606,12 +608,9 @@ void
 func_get_frame_base_dwarf_block (struct symbol *framefunc, CORE_ADDR pc,
 				 const gdb_byte **start, size_t *length)
 {
-  if (SYMBOL_BLOCK_OPS (framefunc) != NULL)
-    {
-      const struct symbol_block_ops *ops_block = SYMBOL_BLOCK_OPS (framefunc);
-
-      ops_block->find_frame_base_location (framefunc, pc, start, length);
-    }
+  if (const symbol_block_ops *block_ops = framefunc->block_ops ();
+      block_ops != nullptr)
+    block_ops->find_frame_base_location (framefunc, pc, start, length);
   else
     *length = 0;
 

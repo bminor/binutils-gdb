@@ -3146,12 +3146,15 @@ frame_follow_static_link (frame_info_ptr frame)
 
       /* If we don't know how to compute FRAME's base address, don't give up:
 	 maybe the frame we are looking for is upper in the stack frame.  */
-      if (framefunc != NULL
-	  && SYMBOL_BLOCK_OPS (framefunc) != NULL
-	  && SYMBOL_BLOCK_OPS (framefunc)->get_frame_base != NULL
-	  && (SYMBOL_BLOCK_OPS (framefunc)->get_frame_base (framefunc, frame)
-	      == upper_frame_base))
-	break;
+      if (framefunc != nullptr)
+	{
+	  if (const symbol_block_ops *block_ops = framefunc->block_ops ();
+	      (block_ops != nullptr
+	       && block_ops->get_frame_base != nullptr
+	       && (block_ops->get_frame_base (framefunc, frame)
+		   == upper_frame_base)))
+	    break;
+	}
     }
 
   return frame;

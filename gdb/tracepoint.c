@@ -943,7 +943,7 @@ collection_list::collect_symbol (struct symbol *sym,
 	add_memrange (gdbarch, memrange_absolute, offset, len, scope);
       break;
     case LOC_REGISTER:
-      reg = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
+      reg = sym->register_ops ()->register_number (sym, gdbarch);
       if (info_verbose)
 	gdb_printf ("LOC_REG[parm] %s: ", sym->print_name ());
       add_local_register (gdbarch, reg, scope);
@@ -2502,10 +2502,10 @@ info_scope_command (const char *args_in, int from_tty)
 
 	  gdb_printf ("Symbol %s is ", symname);
 
-	  if (SYMBOL_COMPUTED_OPS (sym) != NULL)
-	    SYMBOL_COMPUTED_OPS (sym)->describe_location (sym,
-							  block->entry_pc (),
-							  gdb_stdout);
+	  if (const symbol_computed_ops *computed_ops = sym->computed_ops ();
+	      computed_ops != nullptr)
+	    computed_ops->describe_location (sym, block->entry_pc (),
+					     gdb_stdout);
 	  else
 	    {
 	      switch (sym->aclass ())
@@ -2539,8 +2539,7 @@ info_scope_command (const char *args_in, int from_tty)
 		     We assume the objfile architecture will contain all the
 		     standard registers that occur in debug info in that
 		     objfile.  */
-		  regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym,
-								      gdbarch);
+		  regno = sym->register_ops ()->register_number (sym, gdbarch);
 
 		  if (sym->is_argument ())
 		    gdb_printf ("an argument in register $%s",
@@ -2563,8 +2562,7 @@ info_scope_command (const char *args_in, int from_tty)
 		  break;
 		case LOC_REGPARM_ADDR:
 		  /* Note comment at LOC_REGISTER.  */
-		  regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym,
-								      gdbarch);
+		  regno = sym->register_ops ()->register_number (sym, gdbarch);
 		  gdb_printf ("the address of an argument, in register $%s",
 			      gdbarch_register_name (gdbarch, regno));
 		  break;

@@ -547,18 +547,16 @@ read_frame_arg (const frame_print_options &fp_opts,
 	}
     }
 
-  if (SYMBOL_COMPUTED_OPS (sym) != NULL
-      && SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry != NULL
-      && fp_opts.print_entry_values != print_entry_values_no
-      && (fp_opts.print_entry_values != print_entry_values_if_needed
-	  || !val || val->optimized_out ()))
+  if (const symbol_computed_ops *computed_ops = sym->computed_ops ();
+      (computed_ops != nullptr
+       && computed_ops->read_variable_at_entry != nullptr
+       && fp_opts.print_entry_values != print_entry_values_no
+       && (fp_opts.print_entry_values != print_entry_values_if_needed || !val
+	   || val->optimized_out ())))
     {
       try
 	{
-	  const struct symbol_computed_ops *ops;
-
-	  ops = SYMBOL_COMPUTED_OPS (sym);
-	  entryval = ops->read_variable_at_entry (sym, frame);
+	  entryval = computed_ops->read_variable_at_entry (sym, frame);
 	}
       catch (const gdb_exception_error &except)
 	{

@@ -1643,10 +1643,10 @@ info_address_command (const char *exp, int from_tty)
     section = NULL;
   gdbarch = sym->arch ();
 
-  if (SYMBOL_COMPUTED_OPS (sym) != NULL)
+  if (const symbol_computed_ops *computed_ops = sym->computed_ops ();
+      computed_ops != nullptr)
     {
-      SYMBOL_COMPUTED_OPS (sym)->describe_location (sym, context_pc,
-						    gdb_stdout);
+      computed_ops->describe_location (sym, context_pc, gdb_stdout);
       gdb_printf (".\n");
       return;
     }
@@ -1684,7 +1684,7 @@ info_address_command (const char *exp, int from_tty)
 	 architecture at this point.  We assume the objfile architecture
 	 will contain all the standard registers that occur in debug info
 	 in that objfile.  */
-      regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
+      regno = sym->register_ops ()->register_number (sym, gdbarch);
 
       if (sym->is_argument ())
 	gdb_printf (_("an argument in register %s"),
@@ -1712,7 +1712,7 @@ info_address_command (const char *exp, int from_tty)
 
     case LOC_REGPARM_ADDR:
       /* Note comment at LOC_REGISTER.  */
-      regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
+      regno = sym->register_ops ()->register_number (sym, gdbarch);
       gdb_printf (_("address of an argument in register %s"),
 		  gdbarch_register_name (gdbarch, regno));
       break;
