@@ -74,7 +74,7 @@ proc test {} {
 		    # Seen when "set debug libthread_db" is on.
 		    exp_continue
 		}
-		-re "warning: Cannot attach to lwp $decimal: Operation not permitted" {
+		-re "Cannot attach to lwp $decimal: Operation not permitted" {
 		    # On Linux, PTRACE_ATTACH sometimes fails with
 		    # EPERM, even though /proc/PID/status indicates
 		    # the thread is running.
@@ -94,6 +94,10 @@ proc test {} {
 		-re "Attaching to program.*process $testpid.*$gdb_prompt $" {
 		    pass $test
 		}
+	    }
+
+	    if { $eperm } {
+		continue
 	    }
 
 	    # Sleep a bit and try updating the thread list.  We should
