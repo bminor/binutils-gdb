@@ -152,6 +152,10 @@ _start:
 	tileloadd	0x123(%r31,%rax,4),%tmm6
 	tileloaddt1	0x123(%r31,%rax,4),%tmm6
 	tilestored	%tmm6,0x123(%r31,%rax,4)
+	vroundpd $1,(%r24),%xmm6
+	vroundps $2,(%r24),%xmm6
+	vroundsd $3,(%r24),%xmm6,%xmm3
+	vroundss $4,(%r24),%xmm6,%xmm3
 	wrssd	%r25d,0x123(%r31,%rax,4)
 	wrssq	%r31,0x123(%r31,%rax,4)
 	wrussd	%r25d,0x123(%r31,%rax,4)

@@ -195,10 +195,10 @@
 	vrcpps (%r27),%xmm6
 	vrcpps (%r27),%ymm6
 	vrcpss (%r27),%xmm6,%xmm6
-	vroundpd $1,(%r24),%xmm6
-	vroundps $2,(%r24),%xmm6
-	vroundsd $3,(%r24),%xmm6,%xmm3
-	vroundss $4,(%r24),%xmm6,%xmm3
+	vroundpd $0x11,(%r24),%xmm6
+	vroundps $0x22,(%r24),%xmm6
+	vroundsd $0x33,(%r24),%xmm6,%xmm3
+	vroundss $0x44,(%r24),%xmm6,%xmm3
 	vrsqrtps (%r27),%xmm6
 	vrsqrtps (%r27),%ymm6
 	vrsqrtss (%r27),%xmm6,%xmm6
