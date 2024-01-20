@@ -19,6 +19,7 @@
 # MA 02110-1301, USA.
 #
 
+
 # The "make check" target in the Makefile passes in
 # "CC=$(CC_FOR_TARGET)".  But, if the user invokes runtest directly,
 # these flags may not be set.
@@ -36,18 +37,32 @@ remote_exec host "sh -c \"rm -rf tmpdir; mkdir -p tmpdir\""
 if { "$CHECK_TARGET" == "check-install" } {
     set ::env(GPROFNG) "$PREFIX/bin/gprofng"
 } else {
-    # Make a temporary install dir to run gprofng from, and point at it
-    remote_exec host "sh -c \"$MAKE -C .. install-gprofng MAKEFLAGS=program_transform_name= DESTDIR=$BUILDDIR/tmpdir/root\""
-    set ::env(GPROFNG) [exec find $BUILDDIR/tmpdir -type f -name gprofng -perm -u+x | head -1]
+    set ld_library_path "${BUILDDIR}/src/.libs:${BUILDDIR}/libcollector/.libs"
+    set orig_ld_library_path ""
+    catch { set orig_ld_library_path $::env(LD_LIBRARY_PATH) }
+    if [file exists "${BUILDDIR}/../bfd/.libs/libbfd.a"] {
+        append ld_library_path ":${BUILDDIR}/../bfd/.libs"
+    }
+    if [file exists "${BUILDDIR}/../opcodes/.libs/libopcodes.a"] {
+        append ld_library_path ":${BUILDDIR}/../opcodes/.libs"
+    }
+    if [file exists "${BUILDDIR}/../libsframe/.libs/libsframe.a"] {
+        append ld_library_path ":${BUILDDIR}/../libsframe/.libs"
+    }
+    if [file exists "${BUILDDIR}/../libiberty/libiberty.a"] {
+        append ld_library_path ":${BUILDDIR}/../libiberty"
+    }
 
-    set x [exec find $BUILDDIR/tmpdir -type d -name gprofng | head -1]
-    set ::env(LD_LIBRARY_PATH) "$x:$x/.."
-
-    set x [exec find $BUILDDIR/tmpdir -type f -name gprofng.rc | head -1]
-    set ::env(GPROFNG_SYSCONFDIR) [exec dirname $x]
-
-    puts "### LD_LIBRARY_PATH: $env(LD_LIBRARY_PATH)"
-    puts "### GPROFNG_SYSCONFDIR: $env(GPROFNG_SYSCONFDIR)"
+    set f [open "gprofng_wraper" w+]
+    puts $f "#!/usr/bin/bash"
+    puts $f "LD_LIBRARY_PATH=$ld_library_path:$orig_ld_library_path"
+    puts $f "GPROFNG_SYSCONFDIR=$env(srcroot)/src"
+    puts $f "GPROFNG_PRELOAD_LIBDIRS=$BUILDDIR/libcollector/.libs"
+    puts $f "export LD_LIBRARY_PATH GPROFNG_SYSCONFDIR GPROFNG_PRELOAD_LIBDIRS"
+    puts $f "${BUILDDIR}/src/gprofng \"\$@\""
+    close $f
+    file attributes gprofng_wraper -permissions +rx
+    set ::env(GPROFNG) "$BUILDDIR/gprofng_wraper"
 }
 puts "### GPROFNG: $env(GPROFNG)"
 
