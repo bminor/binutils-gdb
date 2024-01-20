@@ -176,7 +176,7 @@ tui_win_info::make_window ()
 }
 
 /* We can't really make windows visible, or invisible.  So we have to
-   delete the entire window when making it visible, and create it
+   delete the entire window when making it invisible, and create it
    again when making it visible.  */
 void
 tui_win_info::make_visible (bool visible)
