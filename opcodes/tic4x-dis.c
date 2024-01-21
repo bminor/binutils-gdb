@@ -707,9 +707,9 @@ tic4x_disassemble (unsigned long pc,
 
   if (optab == NULL)
     {
-      optab = xcalloc (sizeof (tic4x_inst_t *), (1 << TIC4X_HASH_SIZE));
+      optab = xcalloc ((1 << TIC4X_HASH_SIZE), sizeof (tic4x_inst_t *));
 
-      optab_special = xcalloc (sizeof (tic4x_inst_t *), TIC4X_SPESOP_SIZE);
+      optab_special = xcalloc (TIC4X_SPESOP_SIZE, sizeof (tic4x_inst_t *));
 
       /* Install opcodes in reverse order so that preferred
 	 forms overwrite synonyms.  */
