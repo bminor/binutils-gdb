@@ -135,9 +135,9 @@ enum {
  * LT      Less Than                 Z and N flags are 0
  * GE      Greater Than or Equal To  Z or N flag is 1.  */
 
-static int cond_stat(int cc)
+static int cond_stat(int cond)
 {
-  switch (cc) 
+  switch (cond) 
     {
       case 0: return  PSR_Z; break;
       case 1: return !PSR_Z; break;
@@ -983,9 +983,9 @@ OP_14A_14 (SIM_DESC sd, SIM_CPU *cpu)
 void
 OP_1_4 (SIM_DESC sd, SIM_CPU *cpu)
 {
-  uint32_t tmp = 0, cc = cond_stat (OP[0]);
+  uint32_t tmp = 0, cond = cond_stat (OP[0]);
   trace_input ("b", OP_CONSTANT4, OP_DISPE9, OP_VOID);
-  if  (cc)
+  if  (cond)
     {
       if (sign_flag)
 	tmp =  (PC - (OP[1]));
@@ -1010,9 +1010,9 @@ OP_1_4 (SIM_DESC sd, SIM_CPU *cpu)
 void
 OP_18_8 (SIM_DESC sd, SIM_CPU *cpu)
 {
-  uint32_t tmp = 0, cc = cond_stat (OP[0]);
+  uint32_t tmp = 0, cond = cond_stat (OP[0]);
   trace_input ("b", OP_CONSTANT4, OP_DISP17, OP_VOID);
-  if (cc)
+  if (cond)
     {
       if (sign_flag)
 	tmp =  (PC - OP[1]);
@@ -1037,9 +1037,9 @@ OP_18_8 (SIM_DESC sd, SIM_CPU *cpu)
 void
 OP_10_10 (SIM_DESC sd, SIM_CPU *cpu)
 {
-  uint32_t tmp = 0, cc = cond_stat (OP[0]);
+  uint32_t tmp = 0, cond = cond_stat (OP[0]);
   trace_input ("b", OP_CONSTANT4, OP_DISP25, OP_VOID);
-  if (cc)
+  if (cond)
     {
       if (sign_flag)
 	tmp =  (PC - (OP[1]));
