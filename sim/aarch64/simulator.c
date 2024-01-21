@@ -85,7 +85,7 @@
   while (0)
 
 static uint64_t
-expand_logical_immediate (uint32_t S, uint32_t R, uint32_t N)
+expand_logical_immediate (uint32_t s, uint32_t r, uint32_t n)
 {
   uint64_t mask;
   uint64_t imm;
@@ -93,38 +93,38 @@ expand_logical_immediate (uint32_t S, uint32_t R, uint32_t N)
 
   /* The immediate value is S+1 bits to 1, left rotated by SIMDsize - R
      (in other words, right rotated by R), then replicated. */
-  if (N != 0)
+  if (n != 0)
     {
       simd_size = 64;
       mask = 0xffffffffffffffffull;
     }
   else
     {
-      switch (S)
+      switch (s)
 	{
 	case 0x00 ... 0x1f: /* 0xxxxx */ simd_size = 32;           break;
-	case 0x20 ... 0x2f: /* 10xxxx */ simd_size = 16; S &= 0xf; break;
-	case 0x30 ... 0x37: /* 110xxx */ simd_size =  8; S &= 0x7; break;
-	case 0x38 ... 0x3b: /* 1110xx */ simd_size =  4; S &= 0x3; break;
-	case 0x3c ... 0x3d: /* 11110x */ simd_size =  2; S &= 0x1; break;
+	case 0x20 ... 0x2f: /* 10xxxx */ simd_size = 16; s &= 0xf; break;
+	case 0x30 ... 0x37: /* 110xxx */ simd_size =  8; s &= 0x7; break;
+	case 0x38 ... 0x3b: /* 1110xx */ simd_size =  4; s &= 0x3; break;
+	case 0x3c ... 0x3d: /* 11110x */ simd_size =  2; s &= 0x1; break;
 	default: return 0;
 	}
       mask = (1ull << simd_size) - 1;
       /* Top bits are IGNORED.  */
-      R &= simd_size - 1;
+      r &= simd_size - 1;
     }
 
   /* NOTE: if S = simd_size - 1 we get 0xf..f which is rejected.  */
-  if (S == simd_size - 1)
+  if (s == simd_size - 1)
     return 0;
 
   /* S+1 consecutive bits to 1.  */
   /* NOTE: S can't be 63 due to detection above.  */
-  imm = (1ull << (S + 1)) - 1;
+  imm = (1ull << (s + 1)) - 1;
 
   /* Rotate to the left by simd_size - R.  */
-  if (R != 0)
-    imm = ((imm << (simd_size - R)) & mask) | (imm >> R);
+  if (r != 0)
+    imm = ((imm << (simd_size - r)) & mask) | (imm >> r);
 
   /* Replicate the value according to SIMD size.  */
   switch (simd_size)
@@ -153,11 +153,11 @@ aarch64_init_LIT_table (void)
 
   for (index = 0; index < LI_TABLE_SIZE; index++)
     {
-      uint32_t N    = uimm (index, 12, 12);
+      uint32_t n    = uimm (index, 12, 12);
       uint32_t immr = uimm (index, 11, 6);
       uint32_t imms = uimm (index, 5, 0);
 
-      LITable [index] = expand_logical_immediate (imms, immr, N);
+      LITable [index] = expand_logical_immediate (imms, immr, n);
     }
 }
 
@@ -9925,14 +9925,14 @@ dexLogicalImmediate (sim_cpu *cpu)
 
   /* 32 bit operations must have N = 0 or else we have an UNALLOC.  */
   uint32_t size = INSTR (31, 31);
-  uint32_t N = INSTR (22, 22);
+  uint32_t n = INSTR (22, 22);
   /* uint32_t immr = INSTR (21, 16);.  */
   /* uint32_t imms = INSTR (15, 10);.  */
   uint32_t index = INSTR (22, 10);
   uint64_t bimm64 = LITable [index];
   uint32_t dispatch = INSTR (30, 29);
 
-  if (~size & N)
+  if (~size & n)
     HALT_UNALLOC;
 
   if (!bimm64)
@@ -10338,12 +10338,12 @@ dexBitfieldImmediate (sim_cpu *cpu)
   uint32_t dispatch;
   uint32_t imms;
   uint32_t size = INSTR (31, 31);
-  uint32_t N = INSTR (22, 22);
+  uint32_t n = INSTR (22, 22);
   /* 32 bit operations must have immr[5] = 0 and imms[5] = 0.  */
   /* or else we have an UNALLOC.  */
   uint32_t immr = INSTR (21, 16);
 
-  if (~size & N)
+  if (~size & n)
     HALT_UNALLOC;
 
   if (!size && uimm (immr, 5, 5))
@@ -10429,12 +10429,12 @@ dexExtractImmediate (sim_cpu *cpu)
   /* 64 bit operations must have N = 1 or else we have an UNALLOC.  */
   uint32_t dispatch;
   uint32_t size = INSTR (31, 31);
-  uint32_t N = INSTR (22, 22);
+  uint32_t n = INSTR (22, 22);
   /* 32 bit operations must have imms[5] = 0
      or else we have an UNALLOC.  */
   uint32_t imms = INSTR (15, 10);
 
-  if (size ^ N)
+  if (size ^ n)
     HALT_UNALLOC;
 
   if (!size && uimm (imms, 5, 5))
@@ -10509,11 +10509,11 @@ dexLoadUnscaledImmediate (sim_cpu *cpu)
      instr[20,12] = simm9
      instr[9,5] = rn may be SP.  */
   /* unsigned rt = INSTR (4, 0);  */
-  uint32_t V = INSTR (26, 26);
+  uint32_t v = INSTR (26, 26);
   uint32_t dispatch = ((INSTR (31, 30) << 2) | INSTR (23, 22));
   int32_t imm = simm32 (aarch64_get_instr (cpu), 20, 12);
 
-  if (!V)
+  if (!v)
     {
       /* GReg operations.  */
       switch (dispatch)
@@ -10879,12 +10879,12 @@ dexLoadImmediatePrePost (sim_cpu *cpu)
      instr[9,5]   = Rn may be SP.
      instr[4,0]   = Rt */
 
-  uint32_t  V        = INSTR (26, 26);
+  uint32_t  v        = INSTR (26, 26);
   uint32_t  dispatch = ((INSTR (31, 30) << 2) | INSTR (23, 22));
   int32_t   imm      = simm32 (aarch64_get_instr (cpu), 20, 12);
   WriteBack wb       = INSTR (11, 11);
 
-  if (!V)
+  if (!v)
     {
       /* GReg operations.  */
       switch (dispatch)
@@ -10956,7 +10956,7 @@ dexLoadRegisterOffset (sim_cpu *cpu)
      instr[9,5]   = rn
      instr[4,0]   = rt.  */
 
-  uint32_t  V = INSTR (26, 26);
+  uint32_t  v = INSTR (26, 26);
   uint32_t  dispatch = ((INSTR (31, 30) << 2) | INSTR (23, 22));
   Scaling   scale = INSTR (12, 12);
   Extension extensionType = INSTR (15, 13);
@@ -10968,7 +10968,7 @@ dexLoadRegisterOffset (sim_cpu *cpu)
   if (extensionType == UXTX || extensionType == SXTX)
     extensionType = NoExtension;
 
-  if (!V)
+  if (!v)
     {
       /* GReg operations.  */
       switch (dispatch)
@@ -11034,11 +11034,11 @@ dexLoadUnsignedImmediate (sim_cpu *cpu)
      instr[9,5]   = rn may be SP.
      instr[4,0]   = rt.  */
 
-  uint32_t V = INSTR (26,26);
+  uint32_t v = INSTR (26,26);
   uint32_t dispatch = ((INSTR (31, 30) << 2) | INSTR (23, 22));
   uint32_t imm = INSTR (21, 10);
 
-  if (!V)
+  if (!v)
     {
       /* GReg operations.  */
       switch (dispatch)
@@ -11526,13 +11526,13 @@ vec_reg (unsigned v, unsigned o)
 
 /* Load multiple N-element structures to M consecutive registers.  */
 static void
-vec_load (sim_cpu *cpu, uint64_t address, unsigned N, unsigned M)
+vec_load (sim_cpu *cpu, uint64_t address, unsigned n, unsigned m)
 {
   int      all  = INSTR (30, 30);
   unsigned size = INSTR (11, 10);
   unsigned vd   = INSTR (4, 0);
-  unsigned rpt = (N == M) ? 1 : M;
-  unsigned selem = N;
+  unsigned rpt = (n == m) ? 1 : m;
+  unsigned selem = n;
   unsigned i, j, k;
 
   switch (size)
@@ -11634,13 +11634,13 @@ LD1_4 (sim_cpu *cpu, uint64_t address)
 
 /* Store multiple N-element structures from M consecutive registers.  */
 static void
-vec_store (sim_cpu *cpu, uint64_t address, unsigned N, unsigned M)
+vec_store (sim_cpu *cpu, uint64_t address, unsigned n, unsigned m)
 {
   int      all  = INSTR (30, 30);
   unsigned size = INSTR (11, 10);
   unsigned vd   = INSTR (4, 0);
-  unsigned rpt = (N == M) ? 1 : M;
-  unsigned selem = N;
+  unsigned rpt = (n == m) ? 1 : m;
+  unsigned selem = n;
   unsigned i, j, k;
 
   switch (size)
