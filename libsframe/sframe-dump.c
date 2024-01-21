@@ -67,7 +67,7 @@ dump_sframe_header (sframe_decoder_ctx *sfd_ctx)
 
   /* Prepare SFrame section flags string.  */
   flags = header->sfh_preamble.sfp_flags;
-  flags_str = (char*) calloc (sizeof (char), SFRAME_HEADER_FLAGS_STR_MAX_LEN);
+  flags_str = (char*) calloc (SFRAME_HEADER_FLAGS_STR_MAX_LEN, sizeof (char));
   if (flags)
     {
       if (flags & SFRAME_F_FDE_SORTED)
