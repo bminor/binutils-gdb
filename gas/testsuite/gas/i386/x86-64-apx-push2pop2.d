@@ -40,3 +40,4 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*62 d4 f4 10 8f c0\s+pop2p\s+%r8,%r17
 \s*[a-f0-9]+:\s*62 dc b4 18 8f c7\s+pop2p\s+%r31,%r9
 \s*[a-f0-9]+:\s*62 dc 84 10 8f c0\s+pop2p\s+%r24,%r31
+#pass
