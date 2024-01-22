@@ -1291,6 +1291,8 @@ list_command (const char *arg, int from_tty)
 	      set_default_source_symtab_and_line ();
 	      cursal = get_current_source_symtab_and_line ();
 	    }
+	  if (cursal.symtab == nullptr)
+	    error (_("No debug information available to print source lines."));
 	  list_around_line (arg, cursal);
 	  /* Set the repeat args so just pressing "enter" after using "list ."
 	     will print the following lines instead of the same lines again. */
