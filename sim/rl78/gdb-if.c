@@ -205,32 +205,32 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 /* Read memory.  */
 
 uint64_t
-sim_read (SIM_DESC sd, uint64_t mem, void *buf, uint64_t length)
+sim_read (SIM_DESC sd, uint64_t addr, void *buf, uint64_t length)
 {
   check_desc (sd);
 
-  if (mem >= MEM_SIZE)
+  if (addr >= MEM_SIZE)
     return 0;
-  else if (mem + length > MEM_SIZE)
-    length = MEM_SIZE - mem;
+  else if (addr + length > MEM_SIZE)
+    length = MEM_SIZE - addr;
 
-  mem_get_blk (mem, buf, length);
+  mem_get_blk (addr, buf, length);
   return length;
 }
 
 /* Write memory.  */
 
 uint64_t
-sim_write (SIM_DESC sd, uint64_t mem, const void *buf, uint64_t length)
+sim_write (SIM_DESC sd, uint64_t addr, const void *buf, uint64_t length)
 {
   check_desc (sd);
 
-  if (mem >= MEM_SIZE)
+  if (addr >= MEM_SIZE)
     return 0;
-  else if (mem + length > MEM_SIZE)
-    length = MEM_SIZE - mem;
+  else if (addr + length > MEM_SIZE)
+    length = MEM_SIZE - addr;
 
-  mem_put_blk (mem, buf, length);
+  mem_put_blk (addr, buf, length);
   return length;
 }
 
