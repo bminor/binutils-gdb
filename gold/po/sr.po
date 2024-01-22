@@ -1,14 +1,14 @@
 # Serbian translation of gold.
 # Copyright © 2020 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2020-2023.
+# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2020-2024.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gold-2.40.90\n"
+"Project-Id-Version: gold-2.41.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2023-07-03 11:34+0100\n"
-"PO-Revision-Date: 2023-07-21 07:40+0200\n"
+"POT-Creation-Date: 2024-01-15 14:59+0000\n"
+"PO-Revision-Date: 2024-01-21 08:31+0100\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <(nothing)>\n"
 "Language: sr\n"
@@ -17,7 +17,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
-"X-Generator: Gtranslator 41.0\n"
 
 #: aarch64-reloc-property.cc:173 arm-reloc-property.cc:303
 #, c-format
@@ -41,12 +40,12 @@ msgstr "динамички премештај "
 msgid "Invalid/unrecognized reloc reloc %d."
 msgstr "Неисправан/непознат премештај премештаја %d."
 
-#: aarch64.cc:511 arm.cc:7391 mips.cc:6685
+#: aarch64.cc:511 arm.cc:7391 mips.cc:6723
 #, c-format
 msgid "undefined or discarded local symbol %u from  object %s in GOT"
 msgstr "недефинисан или одбачен локални симбол „%u“ из објекта „%s“ у „GOT“"
 
-#: aarch64.cc:532 arm.cc:7413 mips.cc:6704
+#: aarch64.cc:532 arm.cc:7413 mips.cc:6742
 #, c-format
 msgid "undefined or discarded symbol %s in GOT"
 msgstr "недефинисан или одбачен симбол „%s“ у „GOT“"
@@ -61,112 +60,112 @@ msgstr "неисправан индекс назива табеле симбол
 msgid "symbol table name section has wrong type: %u"
 msgstr "одељак назива табеле симбола има погрешну врсту: %u"
 
-#: aarch64.cc:3832 arm.cc:10905 mips.cc:9608 powerpc.cc:2935 target.cc:94
+#: aarch64.cc:3833 arm.cc:10905 mips.cc:9646 powerpc.cc:2935 target.cc:94
 #, c-format
 msgid "%s: unsupported ELF file type %d"
 msgstr "%s: неподржана „ELF“ врста датотеке %d"
 
-#: aarch64.cc:4014 arm.cc:12181
+#: aarch64.cc:4015 arm.cc:12181
 #, c-format
 msgid "cannot handle branch to local %u in a merged section %s"
 msgstr "не могу да рукујем грану на месно „%u“ у спојеном о%s“"
 
-#: aarch64.cc:4379 arm.cc:7593 i386.cc:193 s390.cc:216 sparc.cc:1366
+#: aarch64.cc:4380 arm.cc:7593 i386.cc:193 s390.cc:216 sparc.cc:1366
 #: tilegx.cc:182 x86_64.cc:314
 msgid "** PLT"
 msgstr "** „PLT“"
 
-#: aarch64.cc:5554
+#: aarch64.cc:5555
 #, c-format
 msgid "Stub is too far away, try a smaller value for '--stub-group-size'. The current value is 0x%lx."
 msgstr "Окрајак је предалеко, пробајте мању вредност за „--stub-group-size“. Тренутна вредност је 0×%lx."
 
-#: aarch64.cc:6016 arm.cc:8477 i386.cc:1772 mips.cc:12461 powerpc.cc:7845
+#: aarch64.cc:6017 arm.cc:8477 i386.cc:1772 mips.cc:12507 powerpc.cc:7848
 #: s390.cc:2185 s390.cc:2633 sparc.cc:2134 tilegx.cc:3137 tilegx.cc:3589
-#: x86_64.cc:3012 x86_64.cc:3459
+#: x86_64.cc:3027 x86_64.cc:3497
 #, c-format
 msgid "%s: unsupported reloc %u against local symbol"
 msgstr "%s: неподржан премештај „%u“ наспрам локалног симбола"
 
-#: aarch64.cc:6057 powerpc.cc:7950 s390.cc:2259 sparc.cc:2230
+#: aarch64.cc:6058 powerpc.cc:7953 s390.cc:2259 sparc.cc:2230
 msgid "requires unsupported dynamic reloc; recompile with -fPIC"
 msgstr "захтева неподржани динамички премештај; поново преведите са „-fPIC“"
 
-#: aarch64.cc:6079
+#: aarch64.cc:6080
 #, c-format
 msgid "%s: unsupported TLS reloc %s for IFUNC symbol"
 msgstr "%s: неподржан „TLS“ премештај „%s“ за „IFUNC“ симбол"
 
-#: aarch64.cc:6123 aarch64.cc:6187 aarch64.cc:6497
+#: aarch64.cc:6124 aarch64.cc:6188 aarch64.cc:6498
 #, c-format
 msgid "%s: unsupported reloc %u in pos independent link."
 msgstr "%s: неподржан премештај „%u“ у пост независној вези."
 
-#: aarch64.cc:6288
+#: aarch64.cc:6289
 #, c-format
 msgid "%s: unsupported TLSLE reloc %u in shared code."
 msgstr "%s: неподржан „TLSLE“ премештај „%u“ у дељеном коду."
 
-#: aarch64.cc:6373 arm.cc:8885 i386.cc:2127 mips.cc:12474 powerpc.cc:8785
+#: aarch64.cc:6374 arm.cc:8885 i386.cc:2127 mips.cc:12520 powerpc.cc:8788
 #: s390.cc:3064 s390.cc:3081 sparc.cc:2572 tilegx.cc:3605 tilegx.cc:4144
-#: x86_64.cc:3475 x86_64.cc:3979
+#: x86_64.cc:3513 x86_64.cc:4038
 #, c-format
 msgid "%s: unsupported reloc %u against global symbol %s"
 msgstr "%s: неподржан премештај „%u“ наспрам општег симбола „%s“"
 
-#: aarch64.cc:6723
+#: aarch64.cc:6724
 #, c-format
 msgid "%s: unsupported TLSLE reloc type %u in shared objects."
 msgstr "%s: неподржана „TLSLE“ врста премештаја „%u“ у дељеним објектима."
 
-#: aarch64.cc:6768
+#: aarch64.cc:6769
 #, c-format
 msgid "%s: unsupported reloc type in global scan"
 msgstr "%s: неподржана врста премештаја у општем скенирању"
 
-#: aarch64.cc:6908 powerpc.cc:9922 s390.cc:4014 sparc.cc:3164 tilegx.cc:4211
-#: x86_64.cc:4044
+#: aarch64.cc:6909 powerpc.cc:9925 s390.cc:4014 sparc.cc:3164 tilegx.cc:4211
+#: x86_64.cc:4103
 #, c-format
 msgid "%s: unsupported REL reloc section"
 msgstr "%s: неподжан „REL“ одељак премештаја"
 
-#: aarch64.cc:7071 arm.cc:9615
+#: aarch64.cc:7072 arm.cc:9615
 #, c-format
 msgid "cannot relocate %s in object file"
 msgstr "не могу да преместим „%s“ у објектној датотеци"
 
-#: aarch64.cc:7344 i386.cc:2987 i386.cc:3753 mips.cc:10076 powerpc.cc:12279
-#: s390.cc:3465 sparc.cc:3695 tilegx.cc:4726 x86_64.cc:4537
+#: aarch64.cc:7345 i386.cc:2987 i386.cc:3753 mips.cc:10114 powerpc.cc:12282
+#: s390.cc:3465 sparc.cc:3695 tilegx.cc:4726 x86_64.cc:4597
 #, c-format
 msgid "unexpected reloc %u in object file"
 msgstr "неочекиван премештај „%u“ у објектној датотеци"
 
-#: aarch64.cc:7350
+#: aarch64.cc:7351
 #, c-format
 msgid "unsupported reloc %s"
 msgstr "неподржан премештај „%s“"
 
-#: aarch64.cc:7362 arm.cc:10095 arm.cc:10713
+#: aarch64.cc:7363 arm.cc:10095 arm.cc:10713
 #, c-format
 msgid "relocation overflow in %s"
 msgstr "прекорачење премештаја у „%s“"
 
-#: aarch64.cc:7370 arm.cc:10103 arm.cc:10718
+#: aarch64.cc:7371 arm.cc:10103 arm.cc:10718
 #, c-format
 msgid "unexpected opcode while processing relocation %s"
 msgstr "неочекивани опкод приликом обраде премештаја „%s“"
 
-#: aarch64.cc:7466
+#: aarch64.cc:7467
 #, c-format
 msgid "unsupported gd_to_ie relaxation on %u"
 msgstr "неочекивано „gd_to_ie“ опуштање на „%u“"
 
-#: aarch64.cc:7638
+#: aarch64.cc:7639
 #, c-format
 msgid "%s: unsupported reloc %u in non-static TLSLE mode."
 msgstr "%s: неподржан премештај „%u“ у не-статичком „TLSLE“ режиму."
 
-#: aarch64.cc:7723
+#: aarch64.cc:7724
 #, c-format
 msgid "%s: unsupported TLS reloc %u."
 msgstr "%s: неподржан „TLS“ премештај „%u“."
@@ -179,32 +178,32 @@ msgstr "%s: неподржан „TLS“ премештај „%u“."
 #. However the gd_to_le relaxation decision has been made early
 #. in the scan stage, where we did not allocate a GOT entry for
 #. this symbol. Therefore we have to exit and report an error now.
-#: aarch64.cc:7780 aarch64.cc:7880
+#: aarch64.cc:7781 aarch64.cc:7881
 #, c-format
 msgid "unexpected reloc insn sequence while relaxing tls gd to le for reloc %u."
 msgstr "неочекивани улазни знак премештаја приликом опуштања „tls gd to le“ за премештај „%u“."
 
-#: aarch64.cc:7955
+#: aarch64.cc:7956
 #, c-format
 msgid "TLS variable referred by reloc %u is too far from TP."
 msgstr "„TLS“ променљива на коју је упутио премештај „%u“ је предалеко од „TP“."
 
-#: aarch64.cc:8025
+#: aarch64.cc:8026
 #, c-format
 msgid "TLS variable referred by reloc %u is too far from TP. We Can't do gd_to_le relaxation.\n"
 msgstr "„TLS“ променљива на коју је упутио премештај „%u“ је предалеко од „TP“. Не можемо да одрадимо „gd_to_le“ опуштање.\n"
 
-#: aarch64.cc:8049
+#: aarch64.cc:8050
 #, c-format
 msgid "unsupported tlsdesc gd_to_le optimization on reloc %u"
 msgstr "неподржана „tlsdesc gd_to_le“ оптимизација на премештају „%u“"
 
-#: aarch64.cc:8121
+#: aarch64.cc:8122
 #, c-format
 msgid "Don't support tlsdesc gd_to_ie optimization on reloc %u"
 msgstr "Не подржавам „tlsdesc gd_to_le“ оптимизација на премештају „%u“"
 
-#: aarch64.cc:8456
+#: aarch64.cc:8478
 #, c-format
 msgid "Erratum 835769 found and fixed at \"%s\", section %d, offset 0x%08x."
 msgstr "Нађох грешку 835769 и поправих је на „%s“, одељак %d, померај 0x%08x."
@@ -385,27 +384,27 @@ msgid "requires unsupported dynamic reloc %s; recompile with -fPIC"
 msgstr "захтева неподржан динамички премештај „%s“; поново преведите са „-fPIC“"
 
 #: arm.cc:8547 i386.cc:1786 s390.cc:2276 sparc.cc:2247 tilegx.cc:3223
-#: x86_64.cc:3118
+#: x86_64.cc:3133
 #, c-format
 msgid "%s: unsupported TLS reloc %u for IFUNC symbol"
 msgstr "%s: неподржан „TLS“ премештај „%u“ за „IFUNC“ симбол"
 
-#: arm.cc:8643 i386.cc:1862 powerpc.cc:8254 s390.cc:2369 x86_64.cc:3216
+#: arm.cc:8643 i386.cc:1862 powerpc.cc:8257 s390.cc:2369 x86_64.cc:3233
 #, c-format
 msgid "section symbol %u has bad shndx %u"
 msgstr "симбол одељка „%u“ има лош „shndx %u“"
 
 #. These are relocations which should only be seen by the
 #. dynamic linker, and should never be seen here.
-#: arm.cc:8752 arm.cc:9233 i386.cc:1950 i386.cc:2436 mips.cc:11258
-#: s390.cc:2468 s390.cc:2902 sparc.cc:2553 sparc.cc:3033 tilegx.cc:3584
-#: tilegx.cc:4139 x86_64.cc:3331 x86_64.cc:3852
+#: arm.cc:8752 arm.cc:9233 i386.cc:1950 i386.cc:2436 mips.cc:11296 s390.cc:2468
+#: s390.cc:2902 sparc.cc:2553 sparc.cc:3033 tilegx.cc:3584 tilegx.cc:4139
+#: x86_64.cc:3358 x86_64.cc:3898
 #, c-format
 msgid "%s: unexpected reloc %u in object file"
 msgstr "%s: неочекивани премештај „%u“ у објектној датотеци"
 
-#: arm.cc:8784 i386.cc:1984 mips.cc:10707 s390.cc:2512 sparc.cc:2452
-#: tilegx.cc:3488 x86_64.cc:3363
+#: arm.cc:8784 i386.cc:1984 mips.cc:10745 s390.cc:2512 sparc.cc:2452
+#: tilegx.cc:3488 x86_64.cc:3399
 #, c-format
 msgid "local symbol %u has bad shndx %u"
 msgstr "локални симбол „%u“ има лош „shndx %u“"
@@ -420,10 +419,10 @@ msgid "unable to provide V4BX reloc interworking fix up; the target profile does
 msgstr "не могу да обезбедим међурадну поправку „V4BX“ премештаја; циљни профил не подржава „BX“ инструкцију"
 
 #: arm.cc:10247 i386.cc:3019 i386.cc:3101 i386.cc:3166 i386.cc:3202
-#: i386.cc:3274 mips.cc:12296 powerpc.cc:12393 s390.cc:3471 s390.cc:3542
+#: i386.cc:3274 mips.cc:12342 powerpc.cc:12396 s390.cc:3471 s390.cc:3542
 #: s390.cc:3579 s390.cc:3601 s390.cc:3626 sparc.cc:3701 sparc.cc:3892
-#: sparc.cc:3953 sparc.cc:4060 tilegx.cc:4732 x86_64.cc:4558 x86_64.cc:4684
-#: x86_64.cc:4756 x86_64.cc:4790
+#: sparc.cc:3953 sparc.cc:4060 tilegx.cc:4732 x86_64.cc:4620 x86_64.cc:4748
+#: x86_64.cc:4823 x86_64.cc:4857
 #, c-format
 msgid "unsupported reloc %u"
 msgstr "неподржан премештај „%u“"
@@ -540,7 +539,7 @@ msgstr "** особине"
 msgid "cannot open %s: %s:"
 msgstr "не могу да отворим: %s: %s:"
 
-#: common.cc:351 output.cc:2469 output.cc:2568
+#: common.cc:351 output.cc:2470 output.cc:2569
 #, c-format
 msgid "out of patch space in section %s; relink with --incremental-full"
 msgstr "нема више закрпног простора у одељаку „%s“; превежите са „--incremental-full“"
@@ -1061,7 +1060,7 @@ msgstr "не могу да помешам „split-stack“ „%s“ и „non-s
 
 #. FIXME: This needs to specify the location somehow.
 #: i386.cc:639 i386.cc:2800 sparc.cc:324 sparc.cc:3296 x86_64.cc:962
-#: x86_64.cc:4238
+#: x86_64.cc:4297
 msgid "missing expected TLS relocation"
 msgstr "недостаје очекиван „TLS“ премештај"
 
@@ -1094,12 +1093,12 @@ msgstr "неочекиван премештај „%u“ наспрам лока
 msgid "both SUN and GNU model TLS relocations"
 msgstr "„TLS“ премештаји и SUN и GNU модела"
 
-#: i386.cc:3767 mips.cc:10080
+#: i386.cc:3767 mips.cc:10118
 #, c-format
 msgid "unsupported reloc %u in object file"
 msgstr "неподржан премештај „%u“ у објектној датотеци"
 
-#: i386.cc:4036 powerpc.cc:9876 s390.cc:4886 x86_64.cc:5642
+#: i386.cc:4036 powerpc.cc:9879 s390.cc:4886 x86_64.cc:5743
 #, c-format
 msgid "failed to match split-stack sequence at section %u offset %0zx"
 msgstr "нисам успе да упоредим „split-stack“ низ на одељку „%u“ померај %0zx"
@@ -1155,7 +1154,7 @@ msgstr "%s: датотека скрипте је измењена"
 msgid "unsupported ELF machine number %d"
 msgstr "неподржан број „ELF“ машине %d"
 
-#: incremental.cc:871 object.cc:3403
+#: incremental.cc:871 object.cc:3432
 #, c-format
 msgid "%s: incompatible target"
 msgstr "%s: несагласан циљ"
@@ -1303,12 +1302,12 @@ msgstr "грешка: „--package-metadata=%s“ не садржи исправ
 msgid "load segment overlap [0x%llx -> 0x%llx] and [0x%llx -> 0x%llx]"
 msgstr "преклапање учитавања подеока [0×%llx –> 0×%llx] и [0×%llx –> 0×%llx]"
 
-#: layout.cc:4311 output.cc:4549
+#: layout.cc:4311 output.cc:4550
 #, c-format
 msgid "out of patch space for section %s; relink with --incremental-full"
 msgstr "нема више закрпног простора за одељак „%s“; превежите са „--incremental-full“"
 
-#: layout.cc:4320 output.cc:4557
+#: layout.cc:4320 output.cc:4558
 #, c-format
 msgid "%s: section changed size; relink with --incremental-full"
 msgstr "%s: одељак је изменио величину; превежите са „--incremental-full“"
@@ -1445,165 +1444,165 @@ msgstr ".reginfo"
 msgid ".MIPS.abiflags"
 msgstr ".MIPS.abiflags"
 
-#: mips.cc:4632
+#: mips.cc:4634
 msgid "JALX to a non-word-aligned address"
 msgstr "„JALX“ на не-речју-поравнатој адреси"
 
-#: mips.cc:4686
+#: mips.cc:4688
 msgid "Unsupported jump between ISA modes; consider recompiling with interlinking enabled."
 msgstr "Неподржан скок између „ISA“ режима; размотрите поновно превођење са укљученим међуповезивањем."
 
-#: mips.cc:5486
-msgid "small-data section exceeds 64KB; lower small-data size limit (see option -G)"
-msgstr "одељак малих података превазилази 64KB; доња граница величине малих података (видите опцију „-G“)"
+#: mips.cc:5481 mips.cc:5524
+msgid "small-data section too large; lower small-data size limit (see option -G)"
+msgstr "одељак малих података је превелик; смањите ограничење величине малих података (видите опцију „-G“)"
 
-#: mips.cc:6907
+#: mips.cc:6945
 #, c-format
 msgid "%s: .MIPS.abiflags section has unsupported version %u"
 msgstr "%s: „.MIPS.abiflags“ одељак има неподржано издање %u"
 
-#: mips.cc:6970
+#: mips.cc:7008
 #, c-format
 msgid "%s: Warning: bad `%s' option size %u smaller than its header"
 msgstr "%s: Упозорење: лоша „%s“ величина опције %u је мања од заглавља"
 
-#: mips.cc:7050
+#: mips.cc:7088
 #, c-format
 msgid "no relocation found in mips16 stub section '%s'"
 msgstr "нисам нашао премештај у „mips16“ одељку окрајка „%s“"
 
-#: mips.cc:7552 mips.cc:7715
+#: mips.cc:7590 mips.cc:7753
 #, c-format
 msgid ".got.plt offset of %ld from .plt beyond the range of ADDIUPC"
 msgstr "„.got.plt“ померај од %ld из „.plt“ је ван опсега „ADDIUPC“-а"
 
-#: mips.cc:8263
+#: mips.cc:8301
 #, c-format
 msgid "Warning: bad `%s' option size %u smaller than its header in output section"
 msgstr "Упозорење: лоша „%s“ величина опције %u је мања од заглавља у излазном одељку"
 
-#: mips.cc:9103
+#: mips.cc:9141
 #, c-format
 msgid "%s: Unknown architecture %s"
 msgstr "%s: Непозната архитектура „%s“"
 
-#: mips.cc:9204
+#: mips.cc:9242
 #, c-format
 msgid "%s: Inconsistent ISA between e_flags and .MIPS.abiflags"
 msgstr "%s: Недоследно „ISA“ између „e_flags“ и „.MIPS.abiflags“"
 
-#: mips.cc:9208
+#: mips.cc:9246
 #, c-format
 msgid "%s: Inconsistent FP ABI between .gnu.attributes and .MIPS.abiflags"
 msgstr "%s: Недоследно „FP ABI“ између „.gnu.attributes“ и „.MIPS.abiflags“"
 
-#: mips.cc:9211
+#: mips.cc:9249
 #, c-format
 msgid "%s: Inconsistent ASEs between e_flags and .MIPS.abiflags"
 msgstr "%s: Недоследно „ASEs“ између „e_flags“ и „.MIPS.abiflags“"
 
-#: mips.cc:9217
+#: mips.cc:9255
 #, c-format
 msgid "%s: Inconsistent ISA extensions between e_flags and .MIPS.abiflags"
 msgstr "%s: Недоследна „ISA“ проширења између „e_flags“ и „.MIPS.abiflags“"
 
-#: mips.cc:9220
+#: mips.cc:9258
 #, c-format
 msgid "%s: Unexpected flag in the flags2 field of .MIPS.abiflags (0x%x)"
 msgstr "%s: Неочекивана заставица у „flags2“ пољу „.MIPS.abiflags“-а (0×%x)"
 
-#: mips.cc:9242
+#: mips.cc:9280
 msgid "-mips32r2 -mfp64 (12 callee-saved)"
 msgstr "-mips32r2 -mfp64 (12 позиваоца-сачувано)"
 
-#: mips.cc:9283
+#: mips.cc:9321
 #, c-format
 msgid "%s: FP ABI %s is incompatible with %s"
 msgstr "%s: „FP ABI %s“ није сагласно са „%s“"
 
-#: mips.cc:9418
+#: mips.cc:9456
 #, c-format
 msgid "%s: linking abicalls files with non-abicalls files"
 msgstr "%s: повезујем датотеке абипозива са датотекама не-абипозива"
 
-#: mips.cc:9431
+#: mips.cc:9469
 #, c-format
 msgid "%s: linking 32-bit code with 64-bit code"
 msgstr "%s: повезујем 32-битни код са 64-битним кодом"
 
 #. The ISAs aren't compatible.
-#: mips.cc:9457 mips.cc:9509 mips.cc:9523
+#: mips.cc:9495 mips.cc:9547 mips.cc:9561
 #, c-format
 msgid "%s: linking %s module with previous %s modules"
 msgstr "%s: повезујем „%s“ модул са претходним „%s“ модулима"
 
-#: mips.cc:9473
+#: mips.cc:9511
 #, c-format
 msgid "%s: ABI mismatch: linking %s module with previous %s modules"
 msgstr "%s: „ABI“ не одговара: повезујем „%s“ модул са претходним „%s“ модулима"
 
-#: mips.cc:9495
+#: mips.cc:9533
 #, c-format
 msgid "%s: ASE mismatch: linking %s module with previous %s modules"
 msgstr "%s: „ASE“ не одговара: повезујем „%s“ модул са претходним „%s“ модулима"
 
-#: mips.cc:9536
+#: mips.cc:9574
 #, c-format
 msgid "%s: uses different e_flags (0x%x) fields than previous modules (0x%x)"
 msgstr "%s: користи другачија поља „e_flags“ (0×%x) него претходни модули (0×%x)"
 
-#: mips.cc:9944
+#: mips.cc:9982
 #, c-format
 msgid "Unknown dynamic tag 0x%x"
 msgstr "Непозната динамичка ознака „0×%x“"
 
-#: mips.cc:10385 mips.cc:12322
+#: mips.cc:10423 mips.cc:12368
 #, c-format
 msgid "relocation overflow: %u against local symbol %u in %s"
 msgstr "прекорачење премештаја: %u наспрам локалног симбола %u у „%s“"
 
-#: mips.cc:10391 mips.cc:12338
+#: mips.cc:10429 mips.cc:12384
 msgid "unexpected opcode while processing relocation"
 msgstr "неочекивани опкод приликом обраде премештаја"
 
-#: mips.cc:10539
+#: mips.cc:10577
 #, c-format
 msgid "CALL16 reloc at 0x%lx not against global symbol "
 msgstr "„CALL16“ премештај на 0×%lx није наспрам општег симбола "
 
-#: mips.cc:10791 mips.cc:11296
+#: mips.cc:10829 mips.cc:11334
 #, c-format
 msgid "%s: relocation %u against `%s' can not be used when making a shared object; recompile with -fPIC"
 msgstr "%s: премештај „%u“ наспрам „%s“ се не може користити приликом стварања дељеног објекта; поново преведите са „-fPIC“"
 
-#: mips.cc:11107
+#: mips.cc:11145
 #, c-format
 msgid "non-dynamic relocations refer to dynamic symbol %s"
 msgstr "не-динамички премештаји упућују на динамички симбол „%s“"
 
-#: mips.cc:11584
+#: mips.cc:11622
 msgid "relocations against _gp_disp are permitted only with R_MIPS_HI16 and R_MIPS_LO16 relocations."
 msgstr "премештаји наспрам „_gp_disp“ су допуштени само са „R_MIPS_HI16“ и „R_MIPS_LO16“ премештајима."
 
-#: mips.cc:11719
+#: mips.cc:11757
 msgid "MIPS16 and microMIPS functions cannot call each other"
 msgstr "Функције „MIPS16“ и „microMIPS“ не могу да позивају једна другу"
 
-#: mips.cc:12327
+#: mips.cc:12373
 #, c-format
 msgid "relocation overflow: %u against '%s' defined in %s"
 msgstr "прекорачење премештаја: %u наспрам „%s“ дефинисаног у „%s“"
 
-#: mips.cc:12333
+#: mips.cc:12379
 #, c-format
 msgid "relocation overflow: %u against '%s'"
 msgstr "прекорачење премештаја: %u наспрам „%s“"
 
-#: mips.cc:12342
+#: mips.cc:12388
 msgid "unaligned PC-relative relocation"
 msgstr "непоравнат премештај који се односи на „PC“"
 
-#: nacl.cc:43 object.cc:174 object.cc:3451 output.cc:5191
+#: nacl.cc:43 object.cc:174 object.cc:3480 output.cc:5192
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -1711,41 +1710,41 @@ msgstr "непознат индекс одељка %u за локални сим
 msgid "local symbol %u section index %u out of range"
 msgstr "локалног симбола %u индекс одељка %u је ван опсега"
 
-#: object.cc:3156 reloc.cc:833
+#: object.cc:3185 reloc.cc:833
 #, c-format
 msgid "could not decompress section %s"
 msgstr "не могу да распакујем одељак „%s“"
 
-#: object.cc:3282
+#: object.cc:3311
 #, c-format
 msgid "%s is not supported but is required for %s in %s"
 msgstr "„%sд није подржано али је потребно за „%s“ у „%s“"
 
-#: object.cc:3359
+#: object.cc:3388
 msgid "function "
 msgstr "функција "
 
-#: object.cc:3393
+#: object.cc:3422
 #, c-format
 msgid "%s: unsupported ELF machine number %d"
 msgstr "%s: неподржан број „ELF“ машине %d"
 
-#: object.cc:3467 plugin.cc:2279
+#: object.cc:3496 plugin.cc:2279
 #, c-format
 msgid "%s: not configured to support 32-bit big-endian object"
 msgstr "%s: није подешено да подржи 32-битне објекте велике крајњости"
 
-#: object.cc:3483 plugin.cc:2288
+#: object.cc:3512 plugin.cc:2288
 #, c-format
 msgid "%s: not configured to support 32-bit little-endian object"
 msgstr "%s: није подешено да подржи 32-битне објекте мале крајњости"
 
-#: object.cc:3502 plugin.cc:2300
+#: object.cc:3531 plugin.cc:2300
 #, c-format
 msgid "%s: not configured to support 64-bit big-endian object"
 msgstr "%s: није подешено да подржи 64-битне објекте велике крајњости"
 
-#: object.cc:3518 plugin.cc:2309
+#: object.cc:3547 plugin.cc:2309
 #, c-format
 msgid "%s: not configured to support 64-bit little-endian object"
 msgstr "%s: није подешено да подржи 64-битне објекте мале крајњости"
@@ -3282,94 +3281,94 @@ msgstr "Задржава „.text.hot“, „.text.startup“, „.text.exit“ 
 msgid "Merge all .text.* prefix sections."
 msgstr "Стапа све „all .text.*“ одељке префикса."
 
-#: output.cc:1346
+#: output.cc:1347
 msgid "section group retained but group element discarded"
 msgstr "група одељка је задржана али је елемент групе одбачен"
 
-#: output.cc:1733 output.cc:1765
+#: output.cc:1734 output.cc:1766
 msgid "out of patch space (GOT); relink with --incremental-full"
 msgstr "нема више закрпног простора (GOT); превежите са „--incremental-full“"
 
-#: output.cc:2414
+#: output.cc:2415
 #, c-format
 msgid "invalid alignment %lu for section \"%s\""
 msgstr "неисправно поравнање %lu за одељак „%s“"
 
-#: output.cc:4577
+#: output.cc:4578
 msgid "script places BSS section in the middle of a LOAD segment; space will be allocated in the file"
 msgstr "скриптна места „BSS“ одељка по средини „LOAD“ подеока; простор ће бити додељен у датотеци"
 
-#: output.cc:4599
+#: output.cc:4600
 #, c-format
 msgid "dot moves backward in linker script from 0x%llx to 0x%llx"
 msgstr "тачка се премешта уназад у скрипти повезивача са 0×%llx на 0×%llx"
 
-#: output.cc:4602
+#: output.cc:4603
 #, c-format
 msgid "address of section '%s' moves backward from 0x%llx to 0x%llx"
 msgstr "адреса одељка „%s“ се помера уназад из 0×%llx у 0×%llx"
 
-#: output.cc:4971
+#: output.cc:4972
 #, c-format
 msgid "%s: incremental base and output file name are the same"
 msgstr "%s: повећавајућа основа и излазна датотека су исте"
 
-#: output.cc:4978
+#: output.cc:4979
 #, c-format
 msgid "%s: stat: %s"
 msgstr "%s: добављање података: %s"
 
-#: output.cc:4983
+#: output.cc:4984
 #, c-format
 msgid "%s: incremental base file is empty"
 msgstr "%s: датотека повећавајуће основе је празна"
 
-#: output.cc:4995 output.cc:5093
+#: output.cc:4996 output.cc:5094
 #, c-format
 msgid "%s: open: %s"
 msgstr "%s: отварам: %s"
 
-#: output.cc:5012
+#: output.cc:5013
 #, c-format
 msgid "%s: read failed: %s"
 msgstr "%s: „read“ није успело: %s"
 
-#: output.cc:5017
+#: output.cc:5018
 #, c-format
 msgid "%s: file too short: read only %lld of %lld bytes"
 msgstr "%s: датотека је прекратка: читам само %lld од %lld бајта"
 
-#: output.cc:5117
+#: output.cc:5118
 #, c-format
 msgid "%s: mremap: %s"
 msgstr "%s: mremap: %s"
 
-#: output.cc:5136
+#: output.cc:5137
 #, c-format
 msgid "%s: mmap: %s"
 msgstr "%s: mmap: %s"
 
-#: output.cc:5228
+#: output.cc:5229
 #, c-format
 msgid "%s: mmap: failed to allocate %lu bytes for output file: %s"
 msgstr "%s: mmap: нисам успео да доделим %lu бајта за излазну датотеку: %s"
 
-#: output.cc:5246
+#: output.cc:5247
 #, c-format
 msgid "%s: munmap: %s"
 msgstr "%s: munmap: %s"
 
-#: output.cc:5266
+#: output.cc:5267
 #, c-format
 msgid "%s: write: unexpected 0 return-value"
 msgstr "%s: write: неочекивана повратна вредност 0"
 
-#: output.cc:5268
+#: output.cc:5269
 #, c-format
 msgid "%s: write: %s"
 msgstr "%s: write: %s"
 
-#: output.cc:5283
+#: output.cc:5284
 #, c-format
 msgid "%s: close: %s"
 msgstr "%s: close: %s"
@@ -3513,103 +3512,108 @@ msgstr "„%s:%s“ превазилази величину групе"
 msgid "%s:%s: branch in non-executable section, no long branch stub for you"
 msgstr "%s:%s: грана у неизвршивом одељку, нема окрајка дуге гране за вас"
 
-#: powerpc.cc:3795
+#: powerpc.cc:3798
 #, c-format
 msgid "%s: stub group size is too large; retrying with %#x"
 msgstr "%s: величина групе окрајка је превелика; поново покушавам са „%#x“"
 
-#: powerpc.cc:5738
+#: powerpc.cc:5741
 msgid "** glink"
 msgstr "** g_веза"
 
-#: powerpc.cc:6403 powerpc.cc:7118
+#: powerpc.cc:6406 powerpc.cc:7121
 #, c-format
 msgid "linkage table error against `%s'"
 msgstr "грешка табеле повезивања наспрам „%s“"
 
-#: powerpc.cc:6406
+#: powerpc.cc:6409
 #, c-format
 msgid "linkage table error against `%s:[local %u]'"
 msgstr "грешка табеле повезивања наспрам „%s:[local %u]“"
 
-#: powerpc.cc:7245
+#: powerpc.cc:7248
 msgid "** save/restore"
 msgstr "** сачуај/поврати"
 
-#: powerpc.cc:8043
+#: powerpc.cc:8046
 #, c-format
 msgid "%s: unsupported reloc %u for IFUNC symbol"
 msgstr "%s: неподржан премештај „%u“ за „IFUNC“ симбол"
 
-#: powerpc.cc:8309 powerpc.cc:9096
+#: powerpc.cc:8312 powerpc.cc:9099
 #, c-format
 msgid "tocsave symbol %u has bad shndx %u"
 msgstr "симбол чувања табеле садржаја %u има лош „shndx %u“"
 
-#: powerpc.cc:8600 powerpc.cc:9433
+#: powerpc.cc:8603 powerpc.cc:9436
 #, c-format
 msgid "%s: toc optimization is not supported for %#08x instruction"
 msgstr "%s: оптимизација табеле садржаја није подржана за инструкцију „%#08x“"
 
-#: powerpc.cc:8666 powerpc.cc:9495
+#: powerpc.cc:8669 powerpc.cc:9498
 #, c-format
 msgid "%s: unsupported -mbss-plt code"
 msgstr "%s: неподржан „-mbss-plt“ код"
 
-#: powerpc.cc:9842
+#: powerpc.cc:9845
 #, c-format
 msgid "split-stack stack size overflow at section %u offset %0zx"
 msgstr "величина спремника „split-stack“ прекорачује на одељку %u померај %0zx"
 
-#: powerpc.cc:9913
+#: powerpc.cc:9916
 msgid "--plt-localentry is especially dangerous without ld.so support to detect ABI violations"
 msgstr "„--plt-localentry“ је нарочито опасно без „ld.so“ подршке за откривање „ABI“ преступа"
 
-#: powerpc.cc:9942
+#: powerpc.cc:9945
 msgid "--plt-localentry is incompatible with power10 pc-relative code"
 msgstr "„--plt-localentry“ је несагласно са „power10“ рачунарско-односним кодом"
 
-#: powerpc.cc:10249 powerpc.cc:10255
+#: powerpc.cc:10252 powerpc.cc:10258
 #, c-format
 msgid "%s uses hard float, %s uses soft float"
 msgstr "„%s“ користи хардверски покретни зарез, „%s“ користи софтверски покретни зарез"
 
-#: powerpc.cc:10261 powerpc.cc:10268
+#: powerpc.cc:10264 powerpc.cc:10271
 #, c-format
 msgid "%s uses double-precision hard float, %s uses single-precision hard float"
 msgstr "„%s“ користи хардверски покретни зарез двоструке тачности, „%s“ користи хардверски покретни зарез једне тачности"
 
-#: powerpc.cc:10288 powerpc.cc:10294
+#: powerpc.cc:10291 powerpc.cc:10297
 #, c-format
 msgid "%s uses 64-bit long double, %s uses 128-bit long double"
 msgstr "„%s“ користи 64-битни дуги дубл, „%s“ користи 128-битни дуги дубл"
 
-#: powerpc.cc:10300 powerpc.cc:10306
+#: powerpc.cc:10303 powerpc.cc:10309
 #, c-format
 msgid "%s uses IBM long double, %s uses IEEE long double"
 msgstr "„%s“ користи „IBM“ дуги дубл, „%s“ користи „IEEE“ дуги дубл"
 
-#: powerpc.cc:10360 powerpc.cc:10366
+#: powerpc.cc:10363 powerpc.cc:10369
 #, c-format
 msgid "%s uses AltiVec vector ABI, %s uses SPE vector ABI"
 msgstr "„%s“ користи „AltiVec“ вектор „ABI“, „%s“ користи „SPE“ вектор „ABI“"
 
-#: powerpc.cc:10395 powerpc.cc:10402
+#: powerpc.cc:10398 powerpc.cc:10405
 #, c-format
 msgid "%s uses r3/r4 for small structure returns, %s uses memory"
 msgstr "„%s“ користи „r3/r4“ за мале резултате структуре, „%s“ користи меморију"
 
-#: powerpc.cc:10972
+#: powerpc.cc:10975
 msgid "call lacks nop, can't restore toc; recompile with -fPIC"
 msgstr "позиву недостаје „nop“, не могу да вратим табелу садржаја; поново преведите са „-fPIC“"
 
-#: powerpc.cc:12424 s390.cc:3479
-msgid "relocation overflow"
-msgstr "прекорачење премештаја"
+#: powerpc.cc:12434 powerpc.cc:12442
+#, c-format
+msgid "reloc type %u overflow against '%s'"
+msgstr "врста премештаја „%u“ премашује за „%s“"
 
-#: powerpc.cc:12426
+#: powerpc.cc:12437
 msgid "try relinking with a smaller --stub-group-size"
 msgstr "покушајте поново да повежете са мањом „--stub-group-size“"
+
+#: powerpc.cc:12444
+msgid "debug info may be unreliable, compile with -gdwarf64"
+msgstr "подаци о прочишћавању могу бити непоуздани, преведите са „-gdwarf64“"
 
 #: readsyms.cc:285
 #, c-format
@@ -3746,11 +3750,15 @@ msgstr "повезивач је дефинисан"
 msgid "R_390_PC32DBL target misaligned at %llx"
 msgstr "„R_390_PC32DBL“ циљ је лоше поравнат на „%llx“"
 
-#: s390.cc:1099 tilegx.cc:2088 x86_64.cc:1697
+#: s390.cc:1099 tilegx.cc:2088 x86_64.cc:1699
 msgid "out of patch space (PLT); relink with --incremental-full"
 msgstr "нема више простора закрпе (PLT); поново повежите са „--incremental-full“"
 
-#: s390.cc:3677 s390.cc:3733 x86_64.cc:4878
+#: s390.cc:3479
+msgid "relocation overflow"
+msgstr "прекорачење премештаја"
+
+#: s390.cc:3677 s390.cc:3733 x86_64.cc:4946
 #, c-format
 msgid "unsupported reloc type %u"
 msgstr "неподржана врста премештаја %u"
@@ -4043,17 +4051,17 @@ msgstr "%s: „elf“ заставица мале крајњости је пос
 msgid "%s: little endian elf flag clear on LE object"
 msgstr "%s: „elf“ заставица мале крајњости је очишћена на „LE“ објекту"
 
-#: stringpool.cc:513
+#: stringpool.cc:514
 #, c-format
 msgid "%s: %s entries: %zu; buckets: %zu\n"
 msgstr "%s: „%s“ уноси: %zu; ведра: %zu\n"
 
-#: stringpool.cc:517
+#: stringpool.cc:518
 #, c-format
 msgid "%s: %s entries: %zu\n"
 msgstr "%s: „%s“ уноси: %zu\n"
 
-#: stringpool.cc:520
+#: stringpool.cc:521
 #, c-format
 msgid "%s: %s Stringdata structures: %zu\n"
 msgstr "%s: „%s“ структуре података ниске: %zu\n"
@@ -4192,7 +4200,7 @@ msgstr "премештај има лош померај %zu"
 msgid "linker does not include stack split support required by %s"
 msgstr "повезивач не укључује подршку поделе спремника коју тражи „%s“"
 
-#: tilegx.cc:2738 x86_64.cc:2714
+#: tilegx.cc:2738 x86_64.cc:2716
 msgid "TLS_DESC not yet supported for incremental linking"
 msgstr "„TLS_DESC“ није још подржано за повећавајуће повезивање"
 
@@ -4200,7 +4208,7 @@ msgstr "„TLS_DESC“ није још подржано за повећавај�
 msgid "TLS_DESC not yet supported for TILEGX"
 msgstr "„TLS_DESC“ није још подржано за „TILEGX“"
 
-#: tilegx.cc:3202 x86_64.cc:3096
+#: tilegx.cc:3202 x86_64.cc:3111
 #, c-format
 msgid "requires unsupported dynamic reloc %u; recompile with -fPIC"
 msgstr "захтева неподржан динамички премештај „%u“; поново преведите са „-fPIC“"
@@ -4216,8 +4224,8 @@ msgstr "„TLS“ премештај наспрам неисправног уп�
 #. This output is intended to follow the GNU standards.
 #: version.cc:65
 #, c-format
-msgid "Copyright (C) 2023 Free Software Foundation, Inc.\n"
-msgstr "Ауторска права © 2023. Фондација слободног софтвера, Доо.\n"
+msgid "Copyright (C) 2024 Free Software Foundation, Inc.\n"
+msgstr "Ауторска права © 2024. Фондација слободног софтвера, Инк.\n"
 
 #: version.cc:66
 #, c-format
@@ -4235,46 +4243,46 @@ msgstr ""
 msgid "%s failed: %s"
 msgstr "„%s“ није успело: %s"
 
-#: x86_64.cc:1500
+#: x86_64.cc:1502
 #, c-format
 msgid "%s: corrupt .note.gnu.property section (pr_datasz for property %d is not 4)"
 msgstr "%s: оштећен „.note.gnu.property“ одељак („pr_datasz“ за својство %d није 4)"
 
-#: x86_64.cc:1508
+#: x86_64.cc:1510
 #, c-format
 msgid "%s: unknown program property type 0x%x in .note.gnu.property section"
 msgstr "%s: непозната врста својства програма „0×%x“ у „.note.gnu.property“ одељку"
 
-#: x86_64.cc:1930
+#: x86_64.cc:1932
 #, c-format
 msgid "PC-relative offset overflow in PLT entry %d"
 msgstr "Прекорачење „PC“-односног помераја у „PLT“ уносу %d"
 
-#: x86_64.cc:2140
+#: x86_64.cc:2142
 #, c-format
 msgid "PC-relative offset overflow in APLT entry %d"
 msgstr "Прекорачење „PC“-односног помераја у „APLT“ уносу %d"
 
-#: x86_64.cc:3064
+#: x86_64.cc:3079
 msgid "requires dynamic R_X86_64_32 reloc which may overflow at runtime; recompile with -fPIC"
 msgstr "захтева динамички „R_X86_64_32“ премештај који може да прекорачи у време извршавања; поново преведите са „-fPIC“"
 
-#: x86_64.cc:3081
+#: x86_64.cc:3096
 #, c-format
 msgid "requires dynamic %s reloc against '%s' which may overflow at runtime; recompile with -fPIC"
 msgstr "захтева динамички „%s“ премештај наспрам „%s“ који може да прекорачи у време извршавања; поново преведите са „-fPIC“"
 
-#: x86_64.cc:4569
+#: x86_64.cc:4631
 #, c-format
 msgid "relocation overflow: reference to local symbol %u in %s"
 msgstr "прекорачење премештаја: упућује на локални симбол %u у „%s“"
 
-#: x86_64.cc:4576
+#: x86_64.cc:4638
 #, c-format
 msgid "relocation overflow: reference to '%s' defined in %s"
 msgstr "прекорачење премештаја: упућује на „%s“ дефинисано у „%s“"
 
-#: x86_64.cc:4584
+#: x86_64.cc:4646
 #, c-format
 msgid "relocation overflow: reference to '%s'"
 msgstr "прекорачење премештаја: упућује на „%s“"
