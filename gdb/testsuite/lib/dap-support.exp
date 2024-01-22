@@ -238,7 +238,7 @@ proc dap_check_request_and_response {name command {obj {}}} {
 # desired.  Callers not caring about this should probably use
 # dap_launch.  Returns the empty string on failure.  NAME is used as
 # the test name.
-proc _dap_initialize {name} {
+proc dap_initialize {name} {
     if {[dap_gdb_start]} {
 	return ""
     }
@@ -266,7 +266,7 @@ proc _dap_initialize {name} {
 # After this proc is called, gdb will be ready to accept breakpoint
 # requests.
 proc dap_launch {file {args {}}} {
-    if {[_dap_initialize "startup - initialize"] == ""} {
+    if {[dap_initialize "startup - initialize"] == ""} {
 	return ""
     }
     set params "o program"
@@ -315,7 +315,7 @@ proc dap_launch {file {args {}}} {
 # specifying PID as the inferior process ID.  Returns the empty string
 # on failure, or the response object from the attach request.
 proc dap_attach {pid {prog ""}} {
-    if {[_dap_initialize "startup - initialize"] == ""} {
+    if {[dap_initialize "startup - initialize"] == ""} {
 	return ""
     }
 
@@ -331,7 +331,7 @@ proc dap_attach {pid {prog ""}} {
 # specifying TARGET as the remote target.  Returns the empty string on
 # failure, or the response object from the attach request.
 proc dap_target_remote {target} {
-    if {[_dap_initialize "startup - initialize"] == ""} {
+    if {[dap_initialize "startup - initialize"] == ""} {
 	return ""
     }
     return [dap_check_request_and_response "startup - target" attach \
