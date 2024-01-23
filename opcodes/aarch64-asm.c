@@ -1325,7 +1325,7 @@ aarch64_ins_sve_strided_reglist (const aarch64_operand *self,
 				   ATTRIBUTE_UNUSED)
 {
   unsigned int num_regs = get_operand_specific_data (self);
-  unsigned int mask = 16 | (16 / num_regs - 1);
+  unsigned int mask ATTRIBUTE_UNUSED = 16 | (16 / num_regs - 1);
   unsigned int val = info->reglist.first_regno;
   assert ((val & mask) == val);
   insert_field (self->fields[0], code, val >> 4, 0);

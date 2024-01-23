@@ -3335,12 +3335,11 @@ aarch64_match_operands_constraint (aarch64_inst *inst,
 	       invalid tying and invalid qualifiers, the error about
 	       qualifiers would suggest several alternative instructions
 	       that also have invalid tying.  */
-	    enum aarch64_operand_class op_class1
+	    enum aarch64_operand_class op_class
 	       = aarch64_get_operand_class (inst->operands[0].type);
-	    enum aarch64_operand_class op_class2
-	       = aarch64_get_operand_class (inst->operands[i].type);
-	    assert (op_class1 == op_class2);
-	    if (op_class1 == AARCH64_OPND_CLASS_SVE_REGLIST
+	    assert (aarch64_get_operand_class (inst->operands[i].type)
+		    == op_class);
+	    if (op_class == AARCH64_OPND_CLASS_SVE_REGLIST
 		? ((inst->operands[0].reglist.first_regno
 		    != inst->operands[i].reglist.first_regno)
 		   || (inst->operands[0].reglist.num_regs

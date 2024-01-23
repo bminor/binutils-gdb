@@ -3686,8 +3686,9 @@ get_style_text (enum disassembler_style style)
 
       for (i = 0; i <= 0xf; ++i)
 	{
-	  int res = snprintf (&formats[i][0], sizeof (formats[i]), "%c%x%c",
-			      STYLE_MARKER_CHAR, i, STYLE_MARKER_CHAR);
+	  int res ATTRIBUTE_UNUSED
+	    = snprintf (&formats[i][0], sizeof (formats[i]), "%c%x%c",
+			STYLE_MARKER_CHAR, i, STYLE_MARKER_CHAR);
 	  assert (res == 3);
 	}
 
