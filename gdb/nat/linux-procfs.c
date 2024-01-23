@@ -352,6 +352,11 @@ linux_proc_pid_to_exec_file (int pid)
   else
     buf[len] = '\0';
 
+  /* Use /proc/PID/exe if the actual file can't be read, but /proc/PID/exe
+     can be.  */
+  if (access (buf, R_OK) != 0 && access (name, R_OK) == 0)
+    strcpy (buf, name);
+
   return buf;
 }
 

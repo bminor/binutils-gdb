@@ -89,6 +89,18 @@ proc connect_no_symbol_file { sysroot action } {
 	}
     }
     gdb_assert $ok "connection to GDBserver succeeded"
+
+    # GDB will register /proc/PID/exe as the executable for some of
+    # these tests.  Once the test has finished the inferior will still
+    # have /proc/PID/exe registered as its executable even though that
+    # file no longer exists (most likely).  GDB will then complain
+    # about the inferior's executable having disappeared.  Silence
+    # these warnings by removing any registered file from the
+    # executable.
+    gdb_test "with confirm off -- file" \
+	[multi_line \
+	     "No executable file now\\." \
+	     "No symbol file now\\."]
 }
 
 # Make sure we have the original symbol file in a safe place to copy from.
