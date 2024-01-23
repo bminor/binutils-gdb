@@ -3252,7 +3252,7 @@ arm_epilogue_frame_this_id (frame_info_ptr this_frame,
 
   arm_gdbarch_tdep *tdep
     = gdbarch_tdep<arm_gdbarch_tdep> (get_frame_arch (this_frame));
-  *this_id = frame_id_build (arm_cache_get_prev_sp_value (cache, tdep), pc);
+  *this_id = frame_id_build (arm_cache_get_prev_sp_value (cache, tdep), func);
 }
 
 /* Implementation of function hook 'prev_register' in
