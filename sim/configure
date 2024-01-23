@@ -16561,7 +16561,6 @@ build_warnings="$build_warnings
 -Wno-enum-conversion
 "
 build_build_warnings="
--Wno-missing-braces
 -Wno-stringop-truncation
 -Wno-implicit-fallthrough
 -Wno-shadow=local

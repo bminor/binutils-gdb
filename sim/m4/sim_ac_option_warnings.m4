@@ -77,8 +77,6 @@ dnl Disable until we can figure out how to make this work.
 -Wno-enum-conversion
 "
 build_build_warnings="
-dnl TODO Fix the sh/gencode.c which triggers a ton of these warnings.
--Wno-missing-braces
 dnl TODO Figure out the igen code that triggers warnings w/FORTIFY_SOURCE.
 -Wno-stringop-truncation
 dnl Fixing this requires ATTRIBUTE_FALLTHROUGH support at build time, but we
