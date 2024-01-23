@@ -3858,6 +3858,8 @@ rs6000_epilogue_frame_cache (frame_info_ptr this_frame, void **this_cache)
   struct rs6000_frame_cache *cache;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
+  struct rs6000_framedata fdata;
+  int wordsize = tdep->wordsize;
 
   if (*this_cache)
     return (struct rs6000_frame_cache *) *this_cache;
@@ -3868,17 +3870,56 @@ rs6000_epilogue_frame_cache (frame_info_ptr this_frame, void **this_cache)
 
   try
     {
-      /* At this point the stack looks as if we just entered the
-	 function, and the return address is stored in LR.  */
-      CORE_ADDR sp, lr;
+      /* At this point the stack looks as if we just entered the function.
+	 The SP (r1) has been restored but the LR and r31 may not have been
+	 restored yet.  Need to update the register unrolling information in
+	 the cache for the LR and the saved gprs.  */
+      CORE_ADDR sp;
+      CORE_ADDR func = 0, pc = 0;
 
-      sp = get_frame_register_unsigned (this_frame, gdbarch_sp_regnum (gdbarch));
-      lr = get_frame_register_unsigned (this_frame, tdep->ppc_lr_regnum);
+      func = get_frame_func (this_frame);
+      cache->pc = func;
+      pc = get_frame_pc (this_frame);
+      skip_prologue (gdbarch, func, pc, &fdata);
+
+      /* SP is in r1 and it has been restored.  Get the current value.  */
+      sp = get_frame_register_unsigned (this_frame,
+					gdbarch_sp_regnum (gdbarch));
 
       cache->base = sp;
       cache->initial_sp = sp;
 
-      cache->saved_regs[gdbarch_pc_regnum (gdbarch)].set_value (lr);
+      /* Store the unwinding rules for the gpr registers that have not been
+	 restored yet, specifically r31.
+
+	 if != -1, fdata.saved_gpr is the smallest number of saved_gpr.
+	 All gpr's from saved_gpr to gpr31 are saved (except during the
+	 prologue).  */
+
+      if (fdata.saved_gpr >= 0)
+	{
+	  int i;
+	  CORE_ADDR gpr_addr = cache->base + fdata.gpr_offset;
+
+	  for(i = fdata.saved_gpr; i < ppc_num_gprs; i++)
+	    {
+	      if (fdata.gpr_mask & (1U << i))
+		cache->saved_regs[tdep->ppc_gp0_regnum + i].set_addr (gpr_addr);
+	      gpr_addr += wordsize;
+	    }
+	}
+
+      /* Store the lr unwinding rules.  */
+      if (fdata.lr_offset != 0)
+	cache->saved_regs[tdep->ppc_lr_regnum].set_addr (cache->base
+							 + fdata.lr_offset);
+
+      else if (fdata.lr_register != -1)
+	cache->saved_regs[tdep->ppc_lr_regnum].set_realreg (fdata.lr_register);
+
+      /* The PC is found in the link register.  */
+      cache->saved_regs[gdbarch_pc_regnum (gdbarch)]
+	= cache->saved_regs[tdep->ppc_lr_regnum];
     }
   catch (const gdb_exception_error &ex)
     {
