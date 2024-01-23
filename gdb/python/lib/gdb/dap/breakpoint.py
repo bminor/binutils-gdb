@@ -47,11 +47,12 @@ _suppress_bp = False
 def suppress_new_breakpoint_event():
     """Return a new context manager that suppresses new breakpoint events."""
     global _suppress_bp
+    saved = _suppress_bp
     _suppress_bp = True
     try:
         yield None
     finally:
-        _suppress_bp = False
+        _suppress_bp = saved
 
 
 @in_gdb_thread
