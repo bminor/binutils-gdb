@@ -29,6 +29,17 @@ Changes in 2.42:
   --enable-error-rwx-segments=[yes|no] configure options to set the default for
   converting warnings into errors.
 
+* On LoongArch, various linker relaxation bugs are fixed; the most notable
+  of which is BZ 30944 (incorrect .balign semantics).
+
+* On LoongArch, the LoongArch ABI v2.30 (LoongArch ELF psABI v20231219) is
+  now implemented. This includes new relocation types, and changed
+  semantics for PC-relative relocations handling the higher half of 64-bit
+  offsets.
+
+* On LoongArch, link-time TLS optimization and TLS relaxation are now
+  supported.
+
 Changes in 2.41:
 
 * The linker now accepts a command line option of --remap-inputs

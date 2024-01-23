@@ -66,6 +66,33 @@ Changes in 2.42:
 * The BPF assembler now allows using both hash (#) and double slash (//) to
   begin line comments.
 
+* Add support for LoongArch v1.10 new instructions: estimated reciprocal
+  instructions, sub-word atomic instructions, atomic CAS instructions,
+  16-byte store-conditional instruction, load-linked instructions with
+  acquire semantics, and store-conditional instructions with release
+  semantics.
+
+* The %call36 relocation operator, along with the pseudo-instructions
+  call36 and tail36, are now usable with the LoongArch "medium" code
+  model, allowing text sections up to 128 GiB.
+
+* TLS descriptors (TLSDESC) are now supported on LoongArch. This includes
+  the following new relocation operators: %desc_pc_hi20, %desc_pc_lo12,
+  %desc_ld, and %desc_call, and the la.tls.desc pseudo-instruction.
+
+* TLS LE relaxation is now supported on LoongArch. New relocation
+  operators %le_hi20_r, %le_lo12r, and %le_add_r are now available.
+
+* Add support for LoongArch branch relaxation: a conditional branch with
+  destination out of its immediate operand range, but still within
+  a "b"'s range, is now assembled as an inverted branch and a "b". This
+  works around the unreliable branch offset estimation of the compiler
+  when .align directive is encoded into a long NOP sequence with an
+  R_LARCH_RELAX by the assembler.
+
+* Symbol or label names in LoongArch assembly can now be spelled with
+  double-quotes.
+
 Changes in 2.41:
 
 * Add support for the KVX instruction set.
