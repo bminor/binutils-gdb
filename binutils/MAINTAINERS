@@ -99,6 +99,7 @@ responsibility among the other maintainers.
   ix86 COFF	   DJ Delorie <dj@redhat.com>
   ix86 PE/COFF	   Dave Korn <dave.korn.cygwin@gmail.com>
   ix86 INTEL MODE  Jan Beulich <jbeulich@suse.com>
+  KVX		   Paul Iannetta <piannetta@kalrayinc.com>
   libsframe	   Indu Bhagat <indu.bhagat@oracle.com>
   LM32             Jon Beniston <jon@beniston.com>
   LoongArch	   Chenghua Xu <xuchenghua@loongson.cn>
