@@ -479,6 +479,8 @@ main (int argc, char **argv)
 
   ldemul_after_parse ();
 
+  output_unknown_cmdline_warnings ();
+
   if (config.map_filename)
     {
       if (strcmp (config.map_filename, "-") == 0)

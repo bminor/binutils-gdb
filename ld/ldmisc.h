@@ -27,6 +27,8 @@ extern void minfo (const char *, ...);
 extern void info_msg (const char *, ...);
 extern void lfinfo (FILE *, const char *, ...);
 extern void info_assert (const char *, unsigned int);
+extern void queue_unknown_cmdline_warning (const char *, ...);
+extern void output_unknown_cmdline_warnings (void);
 
 #define ASSERT(x) \
 do { if (!(x)) info_assert(__FILE__,__LINE__); } while (0)

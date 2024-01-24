@@ -74,7 +74,7 @@ ldelf_after_parse (void)
       && link_info.nointerp)
     {
       if (link_info.dynamic_undefined_weak > 0)
-	einfo (_("%P: warning: -z dynamic-undefined-weak ignored\n"));
+	queue_unknown_cmdline_warning ("-z dynamic-undefined-weak");
       link_info.dynamic_undefined_weak = 0;
     }
 

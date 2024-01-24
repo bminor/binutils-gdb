@@ -620,6 +620,81 @@ einfo (const char *fmt, ...)
   fflush (stderr);
 }
 
+/* The buffer size for each command-line option warning.  */
+#define CMDLINE_WARNING_SIZE	256
+
+/* A linked list of command-line option warnings.  */
+
+struct cmdline_warning_list
+{
+  struct cmdline_warning_list *next;
+  char *warning;
+};
+
+/* The head of the linked list of command-line option warnings.  */
+static struct cmdline_warning_list *cmdline_warning_head = NULL;
+
+/* The tail of the linked list of command-line option warnings.  */
+static struct cmdline_warning_list **cmdline_warning_tail
+  = &cmdline_warning_head;
+
+/* Queue an unknown command-line option warning.  */
+
+void
+queue_unknown_cmdline_warning (const char *fmt, ...)
+{
+  va_list arg;
+  struct cmdline_warning_list *warning_ptr
+    = xmalloc (sizeof (*warning_ptr));
+  warning_ptr->warning = xmalloc (CMDLINE_WARNING_SIZE);
+  warning_ptr->next = NULL;
+  int written;
+
+  va_start (arg, fmt);
+  written = vsnprintf (warning_ptr->warning, CMDLINE_WARNING_SIZE, fmt,
+		       arg);
+  if (written < 0 || written >= CMDLINE_WARNING_SIZE)
+    {
+      /* If vsnprintf fails or truncates, output the warning directly.  */
+      fflush (stdout);
+      va_start (arg, fmt);
+      vfinfo (stderr, fmt, arg, true);
+      fflush (stderr);
+    }
+  else
+    {
+      *cmdline_warning_tail = warning_ptr;
+      cmdline_warning_tail = &warning_ptr->next;
+    }
+  va_end (arg);
+}
+
+/* Output queued unknown command-line option warnings.  */
+
+void
+output_unknown_cmdline_warnings (void)
+{
+  struct cmdline_warning_list *list = cmdline_warning_head;
+  struct cmdline_warning_list *next;
+  if (list == NULL)
+    return;
+
+  fflush (stdout);
+
+  for (; list != NULL; list = next)
+    {
+      next = list->next;
+      if (config.fatal_warnings)
+	einfo (_("%P: error: unsupported option: %s\n"), list->warning);
+      else
+	einfo (_("%P: warning: %s ignored\n"), list->warning);
+      free (list->warning);
+      free (list);
+    }
+
+  fflush (stderr);
+}
+
 void
 info_assert (const char *file, unsigned int line)
 {

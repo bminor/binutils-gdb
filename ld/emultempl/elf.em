@@ -873,7 +873,7 @@ fi
 
 fragment <<EOF
       else
-	einfo (_("%P: warning: -z %s ignored\n"), optarg);
+	queue_unknown_cmdline_warning ("-z %s", optarg);
       break;
 EOF
 
