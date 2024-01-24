@@ -716,7 +716,11 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 
 	      if (LARCH_opts.relax
 		    && (BFD_RELOC_LARCH_TLS_LE_HI20_R == reloc_type
-			|| BFD_RELOC_LARCH_TLS_LE_LO12_R == reloc_type))
+			|| BFD_RELOC_LARCH_TLS_LE_LO12_R == reloc_type
+			|| BFD_RELOC_LARCH_TLS_LE_HI20 == reloc_type
+			|| BFD_RELOC_LARCH_TLS_LE_LO12 == reloc_type
+			|| BFD_RELOC_LARCH_TLS_LE64_LO20 == reloc_type
+			|| BFD_RELOC_LARCH_TLS_LE64_HI12 == reloc_type))
 		{
 		  ip->reloc_info[ip->reloc_num].type = BFD_RELOC_LARCH_RELAX;
 		  ip->reloc_info[ip->reloc_num].value = const_0;
@@ -724,8 +728,12 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 		}
 
 	      /* Only one register macros (used in normal code model)
-		 emit R_LARCH_RELAX.  */
+		 emit R_LARCH_RELAX.
+		 LARCH_opts.ase_labs and LARCH_opts.ase_gabs are used
+		 to generate the code model of absolute addresses, and
+		 we do not relax this code model.  */
 	      if (LARCH_opts.relax && (ip->expand_from_macro & 1)
+		    && !(LARCH_opts.ase_labs | LARCH_opts.ase_gabs)
 		    && (BFD_RELOC_LARCH_PCALA_HI20 == reloc_type
 			|| BFD_RELOC_LARCH_PCALA_LO12 == reloc_type
 			|| BFD_RELOC_LARCH_GOT_PC_HI20 == reloc_type
@@ -733,7 +741,11 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 			|| BFD_RELOC_LARCH_TLS_LD_PC_HI20 == reloc_type
 			|| BFD_RELOC_LARCH_TLS_GD_PC_HI20 == reloc_type
 			|| BFD_RELOC_LARCH_TLS_DESC_PC_HI20 == reloc_type
-			|| BFD_RELOC_LARCH_TLS_DESC_PC_LO12 == reloc_type))
+			|| BFD_RELOC_LARCH_TLS_DESC_PC_LO12 == reloc_type
+			|| BFD_RELOC_LARCH_TLS_DESC_LD == reloc_type
+			|| BFD_RELOC_LARCH_TLS_DESC_CALL == reloc_type
+			|| BFD_RELOC_LARCH_TLS_IE_PC_HI20 == reloc_type
+			|| BFD_RELOC_LARCH_TLS_IE_PC_LO12 == reloc_type))
 		{
 		  ip->reloc_info[ip->reloc_num].type = BFD_RELOC_LARCH_RELAX;
 		  ip->reloc_info[ip->reloc_num].value = const_0;
@@ -1080,7 +1092,11 @@ append_fixp_and_insn (struct loongarch_cl_insn *ip)
      if (symbol_get_frag (to) == symbol_get_frag (from)))
 
      For macro instructions, only the first instruction expanded from macro
-     need to start a new frag.  */
+     need to start a new frag.
+     Since the relocations of the normal code model and the extreme code model
+     of the old LE instruction sequence are the same, it is impossible to
+     distinguish which code model it is based on relocation alone, so the
+     extreme code model has to be relaxed.  */
   if (LARCH_opts.relax
       && (BFD_RELOC_LARCH_PCALA_HI20 == reloc_info[0].type
 	  || BFD_RELOC_LARCH_GOT_PC_HI20 == reloc_info[0].type
@@ -1088,7 +1104,12 @@ append_fixp_and_insn (struct loongarch_cl_insn *ip)
 	  || BFD_RELOC_LARCH_TLS_LE_ADD_R == reloc_info[0].type
 	  || BFD_RELOC_LARCH_TLS_LD_PC_HI20 == reloc_info[0].type
 	  || BFD_RELOC_LARCH_TLS_GD_PC_HI20 == reloc_info[0].type
-	  || BFD_RELOC_LARCH_TLS_DESC_PC_HI20 == reloc_info[0].type))
+	  || BFD_RELOC_LARCH_TLS_DESC_PC_HI20 == reloc_info[0].type
+	  || BFD_RELOC_LARCH_TLS_IE_PC_HI20 == reloc_info[0].type
+	  || BFD_RELOC_LARCH_TLS_LE_HI20 == reloc_info[0].type
+	  || BFD_RELOC_LARCH_TLS_LE_LO12 == reloc_info[0].type
+	  || BFD_RELOC_LARCH_TLS_LE64_LO20 == reloc_info[0].type
+	  || BFD_RELOC_LARCH_TLS_LE64_HI12 == reloc_info[0].type))
     {
       frag_wane (frag_now);
       frag_new (0);

@@ -145,15 +145,19 @@ struct loongarch_elf_link_hash_table
 #define elf_backend_rela_normal 1
 #define elf_backend_default_execstack 0
 
-#define IS_LOONGARCH_TLS_DESC_RELOC(R_TYPE)    \
-  ((R_TYPE) == R_LARCH_TLS_DESC_PC_HI20	\
-   || (R_TYPE) == R_LARCH_TLS_DESC_PC_LO12  \
-   || (R_TYPE) == R_LARCH_TLS_DESC_LD \
-   || (R_TYPE) == R_LARCH_TLS_DESC_CALL)
-
-#define IS_LOONGARCH_TLS_IE_RELOC(R_TYPE) \
-  ((R_TYPE) == R_LARCH_TLS_IE_PC_HI20 \
+#define IS_LOONGARCH_TLS_TRANS_RELOC(R_TYPE)  \
+  ((R_TYPE) == R_LARCH_TLS_DESC_PC_HI20	      \
+   || (R_TYPE) == R_LARCH_TLS_DESC_PC_LO12    \
+   || (R_TYPE) == R_LARCH_TLS_DESC_LD	      \
+   || (R_TYPE) == R_LARCH_TLS_DESC_CALL	      \
+   || (R_TYPE) == R_LARCH_TLS_IE_PC_HI20      \
    || (R_TYPE) == R_LARCH_TLS_IE_PC_LO12)
+
+#define IS_OUTDATED_TLS_LE_RELOC(R_TYPE)  \
+  ((R_TYPE) == R_LARCH_TLS_LE_HI20	  \
+   || (R_TYPE) == R_LARCH_TLS_LE_LO12	  \
+   || (R_TYPE) == R_LARCH_TLS_LE64_LO20	  \
+   || (R_TYPE) == R_LARCH_TLS_LE64_HI12)
 
 /* Generate a PLT header.  */
 
@@ -642,15 +646,18 @@ loongarch_reloc_got_type (unsigned int r_type)
 
 /* Return true if tls type transition can be performed.  */
 static bool
-loongarch_can_relax_tls (struct bfd_link_info *info, unsigned int r_type,
-			 struct elf_link_hash_entry *h, bfd *input_bfd,
-			 unsigned long r_symndx)
+loongarch_can_trans_tls (bfd *input_bfd,
+			 struct bfd_link_info *info,
+			 struct elf_link_hash_entry *h,
+			 unsigned int r_symndx,
+			 unsigned int r_type)
 {
   char symbol_tls_type;
   unsigned int reloc_got_type;
 
-  if (! (IS_LOONGARCH_TLS_DESC_RELOC (r_type)
-	 || IS_LOONGARCH_TLS_IE_RELOC (r_type)))
+  /* Only TLS DESC/IE in normal code mode will perform type
+     transition.  */
+  if (! IS_LOONGARCH_TLS_TRANS_RELOC (r_type))
     return false;
 
   symbol_tls_type = _bfd_loongarch_elf_tls_type (input_bfd, h, r_symndx);
@@ -707,11 +714,13 @@ loongarch_tls_transition_without_check (struct bfd_link_info *info,
 }
 
 static unsigned int
-loongarch_tls_transition (struct bfd_link_info *info, unsigned int r_type,
-			  struct elf_link_hash_entry *h, bfd *input_bfd,
-			  unsigned long r_symndx)
+loongarch_tls_transition (bfd *input_bfd,
+			  struct bfd_link_info *info,
+			  struct elf_link_hash_entry *h,
+			  unsigned int r_symndx,
+			  unsigned int r_type)
 {
-  if (! loongarch_can_relax_tls (info, r_type, h, input_bfd,r_symndx))
+  if (! loongarch_can_trans_tls (input_bfd, info, h, r_symndx, r_type))
     return r_type;
 
   return loongarch_tls_transition_without_check (info, r_type, h);
@@ -818,7 +827,11 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       int need_dynreloc = 0;
       int only_need_pcrel = 0;
 
-      r_type = loongarch_tls_transition (info, r_type, h, abfd, r_symndx);
+      /* Type transitions are only possible with relocations accompanied
+	 by R_LARCH_RELAX.  */
+      if (rel + 1 != relocs + sec->reloc_count
+	  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX)
+	r_type = loongarch_tls_transition (abfd, info, h, r_symndx, r_type);
       switch (r_type)
 	{
 	case R_LARCH_GOT_PC_HI20:
@@ -2536,95 +2549,6 @@ loongarch_reloc_is_fatal (struct bfd_link_info *info,
       relocation += 0x100000000;			\
   })
 
-/* Transition instruction sequence to relax instruction sequence.  */
-static bool
-loongarch_tls_relax (bfd *abfd, asection *sec, Elf_Internal_Rela *rel,
-		    int r_type, struct elf_link_hash_entry *h,
-		    struct bfd_link_info *info)
-{
-  bool local_exec = bfd_link_executable (info)
-		    && SYMBOL_REFERENCES_LOCAL (info, h);
-  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
-  unsigned long insn;
-
-  switch (r_type)
-    {
-      case R_LARCH_TLS_DESC_PC_HI20:
-	if (local_exec)
-	    /* DESC -> LE relaxation:
-	       pcalalau12i $a0,%desc_pc_hi20(var) =>
-	       lu12i.w $a0,%le_hi20(var)
-	    */
-	    bfd_put (32, abfd, LARCH_LU12I_W | LARCH_RD_A0,
-		     contents + rel->r_offset);
-
-	/* DESC -> IE relaxation:
-	   pcalalau12i $a0,%desc_pc_hi20(var) =>
-	   pcalalau12i $a0,%ie_pc_hi20(var)
-	*/
-	return true;
-
-      case R_LARCH_TLS_DESC_PC_LO12:
-	if (local_exec)
-	  {
-	    /* DESC -> LE relaxation:
-	       addi.d $a0,$a0,%desc_pc_lo12(var) =>
-	       ori  $a0,$a0,le_lo12(var)
-	    */
-	    insn = LARCH_ORI | LARCH_RD_RJ_A0;
-	    bfd_put (32, abfd, LARCH_ORI | LARCH_RD_RJ_A0,
-		     contents + rel->r_offset);
-	  }
-	else
-	  {
-	    /* DESC -> IE relaxation:
-	       addi.d $a0,$a0,%desc_pc_lo12(var) =>
-	       ld.d $a0,$a0,%%ie_pc_lo12
-	    */
-	    bfd_put (32, abfd, LARCH_LD_D | LARCH_RD_RJ_A0,
-		     contents + rel->r_offset);
-	  }
-	return true;
-
-      case R_LARCH_TLS_DESC_LD:
-      case R_LARCH_TLS_DESC_CALL:
-	/* DESC -> LE/IE relaxation:
-	   ld.d $ra,$a0,%desc_ld(var) => NOP
-	   jirl $ra,$ra,%desc_call(var) => NOP
-	*/
-	bfd_put (32, abfd, LARCH_NOP, contents + rel->r_offset);
-	return true;
-
-      case R_LARCH_TLS_IE_PC_HI20:
-	if (local_exec)
-	  {
-	    /* IE -> LE relaxation:
-	       pcalalau12i $rd,%ie_pc_hi20(var) =>
-	       lu12i.w $rd,%le_hi20(var)
-	    */
-	    insn = bfd_getl32 (contents + rel->r_offset);
-	    bfd_put (32, abfd, LARCH_LU12I_W | (insn & 0x1f),
-		     contents + rel->r_offset);
-	  }
-	return true;
-
-      case R_LARCH_TLS_IE_PC_LO12:
-	if (local_exec)
-	  {
-	    /* IE -> LE relaxation:
-	       ld.d $rd,$rj,%%ie_pc_lo12 =>
-	       ori  $rd,$rj,le_lo12(var)
-	    */
-	    insn = bfd_getl32 (contents + rel->r_offset);
-	    bfd_put (32, abfd, LARCH_ORI | (insn & 0x3ff),
-		     contents + rel->r_offset);
-	  }
-	return true;
-    }
-
-  return false;
-}
-
 
 static int
 loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
@@ -2659,7 +2583,6 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       const char *name;
       bfd_reloc_status_type r = bfd_reloc_ok;
       bool is_ie, is_desc, is_undefweak, unresolved_reloc, defined_local;
-      unsigned int relaxed_r_type;
       bool resolved_local, resolved_dynly, resolved_to_const;
       char tls_type;
       bfd_vma relocation, off, ie_off, desc_off;
@@ -2790,16 +2713,6 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       /* BFD_ASSERT (!resolved_dynly || (h && h->dynindx != -1));.  */
 
       BFD_ASSERT (!resolved_local || defined_local);
-
-      relaxed_r_type = loongarch_tls_transition (info, r_type, h, input_bfd, r_symndx);
-      if (relaxed_r_type != r_type)
-      {
-	howto = loongarch_elf_rtype_to_howto (input_bfd, relaxed_r_type);
-	BFD_ASSERT (howto != NULL);
-
-	if (loongarch_tls_relax (input_bfd, input_section, rel, r_type, h, info))
-	  r_type = relaxed_r_type;
-      }
 
       is_desc = false;
       is_ie = false;
@@ -4112,6 +4025,116 @@ loongarch_relax_delete_bytes (bfd *abfd,
 
   return true;
 }
+
+/* Start perform TLS type transition.
+   Currently there are three cases of relocation handled here:
+   DESC -> IE, DEC -> LE and IE -> LE.  */
+static bool
+loongarch_tls_perform_trans (bfd *abfd, asection *sec,
+			   Elf_Internal_Rela *rel,
+			   struct elf_link_hash_entry *h,
+			   struct bfd_link_info *info)
+{
+  unsigned long insn;
+  bool local_exec = bfd_link_executable (info)
+		      && SYMBOL_REFERENCES_LOCAL (info, h);
+  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
+  unsigned long r_type = ELFNN_R_TYPE (rel->r_info);
+  unsigned long r_symndx = ELFNN_R_SYM (rel->r_info);
+
+  switch (r_type)
+    {
+      case R_LARCH_TLS_DESC_PC_HI20:
+	if (local_exec)
+	  {
+	    /* DESC -> LE relaxation:
+	       pcalalau12i $a0,%desc_pc_hi20(var) =>
+	       lu12i.w $a0,%le_hi20(var)
+	    */
+	    bfd_put (32, abfd, LARCH_LU12I_W | LARCH_RD_A0,
+		contents + rel->r_offset);
+	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_LE_HI20);
+	  }
+	else
+	  {
+	    /* DESC -> IE relaxation:
+	       pcalalau12i $a0,%desc_pc_hi20(var) =>
+	       pcalalau12i $a0,%ie_pc_hi20(var)
+	    */
+	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_IE_PC_HI20);
+	  }
+	return true;
+
+      case R_LARCH_TLS_DESC_PC_LO12:
+	if (local_exec)
+	  {
+	    /* DESC -> LE relaxation:
+	       addi.d $a0,$a0,%desc_pc_lo12(var) =>
+	       ori  $a0,$a0,le_lo12(var)
+	    */
+	    insn = LARCH_ORI | LARCH_RD_RJ_A0;
+	    bfd_put (32, abfd, LARCH_ORI | LARCH_RD_RJ_A0,
+		contents + rel->r_offset);
+	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_LE_LO12);
+	  }
+	else
+	  {
+	    /* DESC -> IE relaxation:
+	       addi.d $a0,$a0,%desc_pc_lo12(var) =>
+	       ld.d $a0,$a0,%ie_pc_lo12(var)
+	    */
+	    bfd_put (32, abfd, LARCH_LD_D | LARCH_RD_RJ_A0,
+		contents + rel->r_offset);
+	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_IE_PC_LO12);
+	  }
+	return true;
+
+      case R_LARCH_TLS_DESC_LD:
+      case R_LARCH_TLS_DESC_CALL:
+	/* DESC -> LE/IE relaxation:
+	   ld.d $ra,$a0,%desc_ld(var) => NOP
+	   jirl $ra,$ra,%desc_call(var) => NOP
+	*/
+	rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
+	bfd_put (32, abfd, LARCH_NOP, contents + rel->r_offset);
+	/* link with -relax option will delete NOP.  */
+	if (!info->disable_target_specific_optimizations)
+	  loongarch_relax_delete_bytes (abfd, sec, rel->r_offset, 4, info);
+	return true;
+
+      case R_LARCH_TLS_IE_PC_HI20:
+	if (local_exec)
+	  {
+	    /* IE -> LE relaxation:
+	       pcalalau12i $rd,%ie_pc_hi20(var) =>
+	       lu12i.w $rd,%le_hi20(var)
+	    */
+	    insn = bfd_getl32 (contents + rel->r_offset);
+	    bfd_put (32, abfd, LARCH_LU12I_W | (insn & 0x1f),
+		contents + rel->r_offset);
+	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_LE_HI20);
+	  }
+	return true;
+
+      case R_LARCH_TLS_IE_PC_LO12:
+	if (local_exec)
+	  {
+	    /* IE -> LE relaxation:
+	       ld.d $rd,$rj,%%ie_pc_lo12(var) =>
+	       ori  $rd,$rj,le_lo12(var)
+	    */
+	    insn = bfd_getl32 (contents + rel->r_offset);
+	    bfd_put (32, abfd, LARCH_ORI | (insn & 0x3ff),
+		contents + rel->r_offset);
+	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_LE_LO12);
+	  }
+	return true;
+    }
+
+  return false;
+}
+
+
 /*  Relax tls le, mainly relax the process of getting TLS le symbolic addresses.
   there are three situations in which an assembly instruction sequence needs to
   be relaxed:
@@ -4148,6 +4171,21 @@ loongarch_relax_delete_bytes (bfd *abfd,
   lu12i.w    $rd,%le_hi20_r (sym)	 ==> (instruction deleted)
   add.{w/d}  $rd,$rd,$tp,%le_add_r (sym) ==> (instruction deleted)
   addi.{w/d} $rs,$rd,%le_lo12_r (sym)    ==> addi.{w/d} $rs,$tp,%le_lo12_r (sym)
+
+
+  For relocation of all old LE instruction sequences, whether it is
+  a normal code model or an extreme code model, relaxation will be
+  performed when the relaxation conditions are met.
+
+  nomal code model:
+  lu12i.w   $rd,%le_hi20(sym)	    => (deleted)
+  ori	    $rd,$rd,le_lo12(sym)    => ori  $rd,$zero,le_lo12(sym)
+
+  extreme code model:
+  lu12i.w   $rd,%le_hi20(sym)	    => (deleted)
+  ori	    $rd,$rd,%le_lo12(sym)   => ori  $rd,$zero,le_lo12(sym)
+  lu32i.d   $rd,%le64_lo20(sym)	    => (deleted)
+  lu52i.d   $rd,$rd,%le64_hi12(sym) => (deleted)
 */
 static bool
 loongarch_relax_tls_le (bfd *abfd, asection *sec,
@@ -4159,31 +4197,56 @@ loongarch_relax_tls_le (bfd *abfd, asection *sec,
   uint32_t insn = bfd_get (32, abfd, contents + rel->r_offset);
   static uint32_t insn_rj,insn_rd;
   symval = symval - elf_hash_table (link_info)->tls_sec->vma;
-  /* Whether the symbol offset is in the interval (offset < 0x800).  */
-  if (ELFNN_R_TYPE ((rel + 1)->r_info) == R_LARCH_RELAX && (symval < 0x800))
+  /* The old LE instruction sequence can be relaxed when the symbol offset
+     is smaller than the 12-bit range.  */
+  if (ELFNN_R_TYPE ((rel + 1)->r_info) == R_LARCH_RELAX && (symval <= 0xfff))
     {
       switch (ELFNN_R_TYPE (rel->r_info))
 	{
-	case R_LARCH_TLS_LE_HI20_R:
-	case R_LARCH_TLS_LE_ADD_R:
-	  /* delete insn.  */
-	  rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
-	  loongarch_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info);
-	  break;
-	case R_LARCH_TLS_LE_LO12_R:
-	  /* Change rj to $tp.  */
-	  insn_rj = 0x2 << 5;
-	  /* Get rd register.  */
-	  insn_rd = insn & 0x1f;
-	  /* Write symbol offset.  */
-	  symval <<= 10;
-	  /* Writes the modified instruction.  */
-	  insn = insn & 0xffc00000;
-	  insn = insn | symval | insn_rj | insn_rd;
-	  bfd_put (32, abfd, insn, contents + rel->r_offset);
-	  break;
-	default:
-	  break;
+	  /*if offset < 0x800, then perform the new le instruction
+	    sequence relax.  */
+	  case R_LARCH_TLS_LE_HI20_R:
+	  case R_LARCH_TLS_LE_ADD_R:
+	    /* delete insn.  */
+	    if (symval < 0x800)
+	      {
+		rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
+		loongarch_relax_delete_bytes (abfd, sec, rel->r_offset,
+		    4, link_info);
+	      }
+	    break;
+
+	  case R_LARCH_TLS_LE_LO12_R:
+	    if (symval < 0x800)
+	      {
+		/* Change rj to $tp.  */
+		insn_rj = 0x2 << 5;
+		/* Get rd register.  */
+		insn_rd = insn & 0x1f;
+		/* Write symbol offset.  */
+		symval <<= 10;
+		/* Writes the modified instruction.  */
+		insn = insn & 0xffc00000;
+		insn = insn | symval | insn_rj | insn_rd;
+		bfd_put (32, abfd, insn, contents + rel->r_offset);
+	      }
+	    break;
+
+	  case R_LARCH_TLS_LE_HI20:
+	  case R_LARCH_TLS_LE64_LO20:
+	  case R_LARCH_TLS_LE64_HI12:
+	    rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
+	    loongarch_relax_delete_bytes (abfd, sec, rel->r_offset,
+					  4, link_info);
+	    break;
+
+	  case R_LARCH_TLS_LE_LO12:
+	    bfd_put (32, abfd, LARCH_ORI | (insn & 0x1f),
+		    contents + rel->r_offset);
+	    break;
+
+	  default:
+	    break;
 	}
     }
   return true;
@@ -4534,7 +4597,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	 R_LARCH_CALL36: symval is the symbol address for local symbols,
 	 or the PLT entry address of the symbol. (Todo)
 	 R_LARCHL_TLS_LD/GD/DESC_PC_HI20: symval is the GOT entry address
-	 of the symbol.  */
+	 of the symbol if transition is not possible.  */
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  Elf_Internal_Sym *sym = (Elf_Internal_Sym *)symtab_hdr->contents
@@ -4542,22 +4605,24 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 	    continue;
 
+	  /* Only TLS instruction sequences that are accompanied by
+	     R_LARCH_RELAX and cannot perform type transition can be
+	     relaxed.  */
 	  if (R_LARCH_TLS_LD_PC_HI20 == r_type
 	      || R_LARCH_TLS_GD_PC_HI20 == r_type
-	      || R_LARCH_TLS_DESC_PC_HI20 == r_type)
+	      || (R_LARCH_TLS_DESC_PC_HI20 == r_type
+		  && (i + 1 != sec->reloc_count)
+		  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX
+		  && ! loongarch_can_trans_tls (abfd, info, h,
+						  r_symndx, r_type)))
 	    {
-	      if (loongarch_can_relax_tls (info, r_type, h, abfd, r_symndx))
-		continue;
-	      else
-		{
-		  sym_sec = htab->elf.sgot;
-		  symval = elf_local_got_offsets (abfd)[r_symndx];
-		  char tls_type = _bfd_loongarch_elf_tls_type (abfd, h,
-								r_symndx);
-		  if (R_LARCH_TLS_DESC_PC_HI20 == r_type
-			&& GOT_TLS_GD_BOTH_P (tls_type))
-		    symval += 2 * GOT_ENTRY_SIZE;
-		}
+	      sym_sec = htab->elf.sgot;
+	      symval = elf_local_got_offsets (abfd)[r_symndx];
+	      char tls_type = _bfd_loongarch_elf_tls_type (abfd, h,
+							    r_symndx);
+	      if (R_LARCH_TLS_DESC_PC_HI20 == r_type
+		    && GOT_TLS_GD_BOTH_P (tls_type))
+		symval += 2 * GOT_ENTRY_SIZE;
 	    }
 	  else if (sym->st_shndx == SHN_UNDEF || R_LARCH_ALIGN == r_type)
 	    {
@@ -4588,20 +4653,19 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	     shared object.  */
 	  if (R_LARCH_TLS_LD_PC_HI20 == r_type
 	      || R_LARCH_TLS_GD_PC_HI20 == r_type
-	      || R_LARCH_TLS_DESC_PC_HI20 == r_type)
+	      || (R_LARCH_TLS_DESC_PC_HI20 == r_type
+		  && (i + 1 != sec->reloc_count)
+		  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX
+		  && !loongarch_can_trans_tls (abfd, info, h,
+						r_symndx, r_type)))
 	    {
-	      if (loongarch_can_relax_tls (info, r_type, h, abfd, r_symndx))
-		continue;
-	      else
-		{
-		  sym_sec = htab->elf.sgot;
-		  symval = h->got.offset;
-		  char tls_type = _bfd_loongarch_elf_tls_type (abfd, h,
-								r_symndx);
-		  if (R_LARCH_TLS_DESC_PC_HI20 == r_type
-			&& GOT_TLS_GD_BOTH_P (tls_type))
-		    symval += 2 * GOT_ENTRY_SIZE;
-		}
+	      sym_sec = htab->elf.sgot;
+	      symval = h->got.offset;
+	      char tls_type = _bfd_loongarch_elf_tls_type (abfd, h,
+							    r_symndx);
+	      if (R_LARCH_TLS_DESC_PC_HI20 == r_type
+		    && GOT_TLS_GD_BOTH_P (tls_type))
+		symval += 2 * GOT_ENTRY_SIZE;
 	    }
 	  else if ((h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak)
@@ -4646,6 +4710,24 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 
       symval += sec_addr (sym_sec);
 
+      /* If the conditions for tls type transition are met, type
+	 transition is performed instead of relax.
+	 During the transition from DESC->IE/LE, there are 2 situations
+	 depending on the different configurations of the relax/norelax
+	 option.
+	 If the -relax option is used, the extra nops will be removed,
+	 and this transition is performed in pass 0.
+	 If the --no-relax option is used, nop will be retained, and
+	 this transition is performed in pass 1.  */
+      if (IS_LOONGARCH_TLS_TRANS_RELOC (r_type)
+	  && (i + 1 != sec->reloc_count)
+	  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX
+	  && loongarch_can_trans_tls (abfd, info, h, r_symndx, r_type))
+	{
+	  loongarch_tls_perform_trans (abfd, sec, rel, h, info);
+	  r_type = ELFNN_R_TYPE (rel->r_info);
+	}
+
       switch (r_type)
 	{
 	case R_LARCH_ALIGN:
@@ -4664,6 +4746,10 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	case R_LARCH_TLS_LE_HI20_R:
 	case R_LARCH_TLS_LE_LO12_R:
 	case R_LARCH_TLS_LE_ADD_R:
+	case R_LARCH_TLS_LE_HI20:
+	case R_LARCH_TLS_LE_LO12:
+	case R_LARCH_TLS_LE64_LO20:
+	case R_LARCH_TLS_LE64_HI12:
 	  if (0 == info->relax_pass && (i + 2) <= sec->reloc_count)
 	    loongarch_relax_tls_le (abfd, sec, rel, info, symval);
 	  break;
