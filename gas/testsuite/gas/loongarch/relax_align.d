@@ -7,7 +7,7 @@
 
 Disassembly of section .text:
 
-[ 	]*0000000000000000 <.Lla-relax-align>:
+[ 	]*0000000000000000 <.text>:
 [ 	]+0:[ 	]+4c000020[ 	]+ret
 [ 	]+4:[ 	]+03400000[ 	]+nop
 [ 	]+4: R_LARCH_ALIGN[ 	]+\*ABS\*\+0xc
@@ -20,12 +20,12 @@ Disassembly of section .text:
 [ 	]+1c:[ 	]+03400000[ 	]+nop
 [ 	]+20:[ 	]+4c000020[ 	]+ret
 [ 	]+24:[ 	]+03400000[ 	]+nop
-[ 	]+24: R_LARCH_ALIGN[ 	]+.Lla-relax-align\+0x104
+[ 	]+24: R_LARCH_ALIGN[ 	]+.text\+0x104
 [ 	]+28:[ 	]+03400000[ 	]+nop
 [ 	]+2c:[ 	]+03400000[ 	]+nop
 [ 	]+30:[ 	]+4c000020[ 	]+ret
 [ 	]+34:[ 	]+03400000[ 	]+nop
-[ 	]+34: R_LARCH_ALIGN[ 	]+.Lla-relax-align\+0xb04
+[ 	]+34: R_LARCH_ALIGN[ 	]+.text\+0xb04
 [ 	]+38:[ 	]+03400000[ 	]+nop
 [ 	]+3c:[ 	]+03400000[ 	]+nop
 [ 	]+40:[ 	]+4c000020[ 	]+ret

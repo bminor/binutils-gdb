@@ -295,6 +295,18 @@ if [istarget loongarch64-*-*] {
 		"relax-align" \
 	    ] \
 	]
+
+    run_ld_link_tests \
+      [list \
+	[list \
+	  "loongarch relax align discard" \
+	  "-e 0x0 -T relax-align-discard.lds -r" "" \
+	  "" \
+	  {relax-align-discard.s} \
+	  {} \
+	  "relax-align-discard" \
+	] \
+      ]
   }
 
   set objdump_flags "-s -j .data"
