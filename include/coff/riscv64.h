@@ -60,5 +60,7 @@ struct external_reloc
 
 #define RELOC struct external_reloc
 #define RELSZ 14
+#define SWAP_IN_RELOC_OFFSET	H_GET_32
+#define SWAP_OUT_RELOC_OFFSET	H_PUT_32
 
 #endif /* COFF_RISCV64_H */
