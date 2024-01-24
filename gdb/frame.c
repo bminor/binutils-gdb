@@ -2423,6 +2423,38 @@ get_prev_frame_always_1 (const frame_info_ptr &this_frame)
 	}
     }
 
+  /* Ensure we can unwind the program counter of THIS_FRAME.  */
+  try
+    {
+      /* Calling frame_unwind_pc for the sentinel frame relies on the
+	 current_frame being set, which at this point it might not be if we
+	 are in the process of setting the current_frame after a stop (see
+	 get_current_frame).
+
+	 The point of this check is to ensure that the unwinder for
+	 THIS_FRAME can actually unwind the $pc, which we assume the
+	 sentinel frame unwinder can always do (it's just a read from the
+	 machine state), so we only call frame_unwind_pc for frames other
+	 than the sentinel (level -1) frame.
+
+	 Additionally, we don't actually care about the value of the
+	 unwound $pc, just that the call completed successfully.  */
+      if (this_frame->level >= 0)
+	frame_unwind_pc (this_frame);
+    }
+  catch (const gdb_exception_error &ex)
+    {
+      if (ex.error == NOT_AVAILABLE_ERROR || ex.error == OPTIMIZED_OUT_ERROR)
+	{
+	  frame_debug_printf ("  -> nullptr // no saved PC");
+	  this_frame->stop_reason = UNWIND_NO_SAVED_PC;
+	  this_frame->prev = nullptr;
+	  return nullptr;
+	}
+
+      throw;
+    }
+
   return get_prev_frame_maybe_check_cycle (this_frame);
 }
 
