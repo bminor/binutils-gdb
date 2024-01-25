@@ -2,5 +2,5 @@
 #source: start.s
 #ld: --fatal-warnings -z bad-option1 -z bad-option2
 #error: unsupported option: -z bad-option1
-#xfail: [is_generic]
-# generic linker targets don't support -z options.
+#xfail: ![is_standard_elf]
+# These targets don't support -z options.
