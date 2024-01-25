@@ -1007,9 +1007,9 @@ arm_target::low_arch_setup ()
 
   /* Check if PTRACE_GETREGSET works.  */
   if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iov) == 0)
-    have_ptrace_getregset = 1;
+    have_ptrace_getregset = TRIBOOL_TRUE;
   else
-    have_ptrace_getregset = 0;
+    have_ptrace_getregset = TRIBOOL_FALSE;
 }
 
 bool
@@ -1122,7 +1122,7 @@ arm_target::get_regs_info ()
 {
   const struct target_desc *tdesc = current_process ()->tdesc;
 
-  if (have_ptrace_getregset == 1
+  if (have_ptrace_getregset == TRIBOOL_TRUE
       && (is_aarch32_linux_description (tdesc)
 	  || arm_linux_get_tdesc_fp_type (tdesc) == ARM_FP_TYPE_VFPV3))
     return &regs_info_aarch32;

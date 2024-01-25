@@ -135,7 +135,7 @@ typedef struct
 #endif
 
 /* Does the current host support PTRACE_GETREGSET?  */
-int have_ptrace_getregset = -1;
+enum tribool have_ptrace_getregset = TRIBOOL_UNKNOWN;
 
 /* Return TRUE if THREAD is the leader thread of the process.  */
 
