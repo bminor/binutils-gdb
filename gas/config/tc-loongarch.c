@@ -316,8 +316,11 @@ loongarch_after_parse_args ()
   /* Init ilp32/lp64 registers alias.  */
   r_abi_names = loongarch_r_alias;
   for (i = 0; i < ARRAY_SIZE (loongarch_r_alias); i++)
-    str_hash_insert (r_htab, loongarch_r_alias[i], (void *) (i + 1),
-	0);
+    str_hash_insert (r_htab, loongarch_r_alias[i], (void *) (i + 1), 0);
+
+  for (i = 0; i < ARRAY_SIZE (loongarch_r_alias_1); i++)
+    str_hash_insert (r_htab, loongarch_r_alias_1[i], (void *) (i + 1), 0);
+
   for (i = 0; i < ARRAY_SIZE (loongarch_r_alias_deprecated); i++)
     str_hash_insert (r_deprecated_htab, loongarch_r_alias_deprecated[i],
 	(void *) (i + 1), 0);
