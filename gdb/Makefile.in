@@ -1585,6 +1585,7 @@ HFILES_NO_SRCDIR = \
 	nat/x86-gcc-cpuid.h \
 	nat/x86-linux.h \
 	nat/x86-linux-dregs.h \
+	nat/x86-linux-tdesc.h \
 	python/py-event.h \
 	python/py-events.h \
 	python/py-stopevent.h \

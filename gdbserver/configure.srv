@@ -109,6 +109,7 @@ case "${gdbserver_host}" in
 			srv_tgtobj="${srv_tgtobj} nat/linux-btrace.o"
 			srv_tgtobj="${srv_tgtobj} nat/x86-linux.o"
 			srv_tgtobj="${srv_tgtobj} nat/x86-linux-dregs.o"
+			srv_tgtobj="${srv_tgtobj} nat/x86-linux-tdesc.o"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
@@ -371,6 +372,7 @@ case "${gdbserver_host}" in
 			srv_tgtobj="${srv_tgtobj} nat/linux-btrace.o"
 			srv_tgtobj="${srv_tgtobj} nat/x86-linux.o"
 			srv_tgtobj="${srv_tgtobj} nat/x86-linux-dregs.o"
+			srv_tgtobj="${srv_tgtobj} nat/x86-linux-tdesc.o"
 			srv_tgtobj="${srv_tgtobj} nat/amd64-linux-siginfo.o"
 			srv_linux_usrregs=yes # This is for i386 progs.
 			srv_linux_regsets=yes

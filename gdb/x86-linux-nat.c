@@ -42,6 +42,7 @@
 #include "nat/x86-linux.h"
 #include "nat/x86-linux-dregs.h"
 #include "nat/linux-ptrace.h"
+#include "nat/x86-linux-tdesc.h"
 
 /* linux_nat_target::low_new_fork implementation.  */
 
@@ -96,90 +97,26 @@ x86_linux_nat_target::post_startup_inferior (ptid_t ptid)
 const struct target_desc *
 x86_linux_nat_target::read_description ()
 {
-  int tid;
-  int is_64bit = 0;
-#ifdef __x86_64__
-  int is_x32;
-#endif
-  static uint64_t xcr0;
-  uint64_t xcr0_features_bits;
+  static uint64_t xcr0_storage;
 
   if (inferior_ptid == null_ptid)
     return this->beneath ()->read_description ();
 
-  tid = inferior_ptid.pid ();
+  int tid = inferior_ptid.pid ();
 
-#ifdef __x86_64__
+  const char *error_msg
+    = _("Can't debug 64-bit process with 32-bit GDB");
 
-  x86_linux_arch_size arch_size = x86_linux_ptrace_get_arch_size (tid);
-  is_64bit = arch_size.is_64bit ();
-  is_x32 = arch_size.is_x32 ();
+  /* Callback that is triggered the first time x86_linux_tdesc_for_tid
+     reads the xcr0 register.  Setup other bits of state */
+  auto cb = [&] (uint64_t xcr0)
+  {
+    this->m_xsave_layout
+      = x86_fetch_xsave_layout (xcr0, x86_xsave_length ());
+  };
 
-#elif HAVE_PTRACE_GETFPXREGS
-  if (have_ptrace_getfpxregs == -1)
-    {
-      elf_fpxregset_t fpxregs;
-
-      if (ptrace (PTRACE_GETFPXREGS, tid, 0, (int) &fpxregs) < 0)
-	{
-	  have_ptrace_getfpxregs = 0;
-	  have_ptrace_getregset = TRIBOOL_FALSE;
-	  return i386_linux_read_description (X86_XSTATE_X87_MASK);
-	}
-    }
-#endif
-
-  if (have_ptrace_getregset == TRIBOOL_UNKNOWN)
-    {
-      uint64_t xstateregs[(X86_XSTATE_SSE_SIZE / sizeof (uint64_t))];
-      struct iovec iov;
-
-      iov.iov_base = xstateregs;
-      iov.iov_len = sizeof (xstateregs);
-
-      /* Check if PTRACE_GETREGSET works.  */
-      if (ptrace (PTRACE_GETREGSET, tid,
-		  (unsigned int) NT_X86_XSTATE, &iov) < 0)
-	have_ptrace_getregset = TRIBOOL_FALSE;
-      else
-	{
-	  have_ptrace_getregset = TRIBOOL_TRUE;
-
-	  /* Get XCR0 from XSAVE extended state.  */
-	  xcr0 = xstateregs[(I386_LINUX_XSAVE_XCR0_OFFSET
-			     / sizeof (uint64_t))];
-
-	  m_xsave_layout = x86_fetch_xsave_layout (xcr0, x86_xsave_length ());
-	}
-    }
-
-  /* Check the native XCR0 only if PTRACE_GETREGSET is available.  If
-     PTRACE_GETREGSET is not available then set xcr0_features_bits to
-     zero so that the "no-features" descriptions are returned by the
-     switches below.  */
-  if (have_ptrace_getregset == TRIBOOL_TRUE)
-    xcr0_features_bits = xcr0 & X86_XSTATE_ALL_MASK;
-  else
-    xcr0_features_bits = 0;
-
-  if (is_64bit)
-    {
-#ifdef __x86_64__
-      return amd64_linux_read_description (xcr0_features_bits, is_x32);
-#endif
-    }
-  else
-    {
-      const struct target_desc * tdesc
-	= i386_linux_read_description (xcr0_features_bits);
-
-      if (tdesc == NULL)
-	tdesc = i386_linux_read_description (X86_XSTATE_SSE_MASK);
-
-      return tdesc;
-    }
-
-  gdb_assert_not_reached ("failed to return tdesc");
+  return x86_linux_tdesc_for_tid (tid, &have_ptrace_getregset, cb,
+				  error_msg, &xcr0_storage);
 }
 
 
