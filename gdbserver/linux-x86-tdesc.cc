@@ -23,8 +23,10 @@
 #include "gdbsupport/x86-xstate.h"
 #ifdef __x86_64__
 #include "arch/amd64.h"
+#include "arch/amd64-linux-tdesc.h"
 #endif
 #include "x86-tdesc.h"
+#include "arch/i386-linux-tdesc.h"
 
 /* Return the right x86_linux_tdesc index for a given XCR0.  Return
    X86_TDESC_LAST if can't find a match.  */

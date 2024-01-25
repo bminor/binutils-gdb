@@ -55,9 +55,6 @@ extern void i386_linux_report_signal_info (struct gdbarch *gdbarch,
 					   struct ui_out *uiout,
 					   enum gdb_signal siggnal);
 
-/* Return the target description according to XCR0.  */
-extern const struct target_desc *i386_linux_read_description (uint64_t xcr0);
-
 extern int i386_linux_gregset_reg_offset[];
 
 /* Return x86 siginfo type.  */

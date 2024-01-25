@@ -1550,8 +1550,10 @@ HFILES_NO_SRCDIR = \
 	arch/aarch64-insn.h \
 	arch/aarch64-mte-linux.h \
 	arch/aarch64-scalable-linux.h \
+	arch/amd64-linux-tdesc.h \
 	arch/arc.h \
 	arch/arm.h \
+	arch/i386-linux-tdesc.h \
 	arch/i386.h \
 	arch/loongarch.h \
 	arch/ppc-linux-common.h \
@@ -1608,6 +1610,7 @@ HFILES_NO_SRCDIR = \
 	nat/x86-gcc-cpuid.h \
 	nat/x86-linux.h \
 	nat/x86-linux-dregs.h \
+	nat/x86-linux-tdesc.h \
 	python/py-event.h \
 	python/py-events.h \
 	python/py-stopevent.h \

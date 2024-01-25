@@ -22,6 +22,7 @@
 #include "tracepoint.h"
 #include "linux-x86-tdesc.h"
 #include "gdbsupport/x86-xstate.h"
+#include "arch/i386-linux-tdesc.h"
 
 /* GDB register numbers.  */
 

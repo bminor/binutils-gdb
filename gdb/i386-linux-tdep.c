@@ -40,6 +40,7 @@
 
 #include "i387-tdep.h"
 #include "gdbsupport/x86-xstate.h"
+#include "arch/i386-linux-tdesc.h"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_I386 "syscalls/i386-linux.xml"

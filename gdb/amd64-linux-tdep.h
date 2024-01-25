@@ -31,12 +31,6 @@
 /* Total number of registers for GNU/Linux.  */
 #define AMD64_LINUX_NUM_REGS (AMD64_LINUX_ORIG_RAX_REGNUM + 1)
 
-/* Return the right amd64-linux target descriptions according to
-   XCR0_FEATURES_BIT and IS_X32.  */
-
-const target_desc *amd64_linux_read_description (uint64_t xcr0_features_bit,
-						 bool is_x32);
-
 /* Enum that defines the syscall identifiers for amd64 linux.
    Used for process record/replay, these will be translated into
    a gdb-canonical set of syscall ids in linux-record.c.  */
