@@ -471,6 +471,7 @@ main (int argc, char **argv)
     {
       if (version_printed || command_line.print_output_format)
 	xexit (0);
+      output_unknown_cmdline_warnings ();
       einfo (_("%F%P: no input files\n"));
     }
 
