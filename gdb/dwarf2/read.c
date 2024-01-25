@@ -1366,6 +1366,7 @@ dwarf2_has_info (struct objfile *objfile,
   if (per_objfile == NULL)
     {
       dwarf2_per_bfd *per_bfd;
+      bool just_created = false;
 
       /* We can share a "dwarf2_per_bfd" with other objfiles if the
 	 BFD doesn't require relocations.
@@ -1385,6 +1386,7 @@ dwarf2_has_info (struct objfile *objfile,
 	      per_bfd = new dwarf2_per_bfd (objfile->obfd.get (), names,
 					    can_copy);
 	      dwarf2_per_bfd_bfd_data_key.set (objfile->obfd.get (), per_bfd);
+	      just_created = true;
 	    }
 	}
       else
@@ -1392,9 +1394,25 @@ dwarf2_has_info (struct objfile *objfile,
 	  /* No sharing possible, create one specifically for this objfile.  */
 	  per_bfd = new dwarf2_per_bfd (objfile->obfd.get (), names, can_copy);
 	  dwarf2_per_bfd_objfile_data_key.set (objfile, per_bfd);
+	  just_created = true;
 	}
 
       per_objfile = dwarf2_objfile_data_key.emplace (objfile, objfile, per_bfd);
+
+      if (just_created)
+	{
+	  /* Try to fetch any potential dwz file early, while still on
+	     the main thread.  Also, be sure to do it just once per
+	     BFD, to avoid races.  */
+	  try
+	    {
+	      dwarf2_read_dwz_file (per_objfile);
+	    }
+	  catch (const gdb_exception_error &err)
+	    {
+	      warning (_("%s"), err.what ());
+	    }
+	}
     }
 
   return (!per_objfile->per_bfd->info.is_virtual
@@ -3201,17 +3219,6 @@ dwarf2_initialize_objfile (struct objfile *objfile,
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   dwarf_read_debug_printf ("called");
-
-  /* Try to fetch any potential dwz file early, while still on the
-     main thread.  */
-  try
-    {
-      dwarf2_read_dwz_file (per_objfile);
-    }
-  catch (const gdb_exception_error &err)
-    {
-      warning (_("%s"), err.what ());
-    }
 
   /* If we're about to read full symbols, don't bother with the
      indices.  In this case we also don't care if some other debug

@@ -188,6 +188,8 @@ dwarf2_read_dwz_file (dwarf2_per_objfile *per_objfile)
      only be run in the main thread.  */
   gdb_assert (is_main_thread ());
 
+  /* This should only be called once.  */
+  gdb_assert (!per_bfd->dwz_file.has_value ());
   /* Set this early, so that on error it remains NULL.  */
   per_bfd->dwz_file.emplace (nullptr);
 
@@ -281,14 +283,9 @@ dwarf2_read_dwz_file (dwarf2_per_objfile *per_objfile)
 struct dwz_file *
 dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd, bool require)
 {
-  gdb_assert (!require || per_bfd->dwz_file.has_value ());
-
-  dwz_file *result = nullptr;
-  if (per_bfd->dwz_file.has_value ())
-    {
-      result = per_bfd->dwz_file->get ();
-      if (require && result == nullptr)
-	error (_("could not read '.gnu_debugaltlink' section"));
-    }
+  gdb_assert (per_bfd->dwz_file.has_value ());
+  dwz_file *result = per_bfd->dwz_file->get ();
+  if (require && result == nullptr)
+    error (_("could not read '.gnu_debugaltlink' section"));
   return result;
 }
