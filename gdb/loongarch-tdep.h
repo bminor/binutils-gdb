@@ -32,6 +32,7 @@ extern const struct regset loongarch_gregset;
 extern const struct regset loongarch_fpregset;
 extern const struct regset loongarch_lsxregset;
 extern const struct regset loongarch_lasxregset;
+extern const struct regset loongarch_lbtregset;
 
 /* Target-dependent structure in gdbarch.  */
 struct loongarch_gdbarch_tdep : gdbarch_tdep_base

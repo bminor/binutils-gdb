@@ -265,6 +265,70 @@ store_lasxregs_to_thread (struct regcache *regcache, int regnum, pid_t tid)
 }
 
 
+/* Fill GDB's register array with the lbt register values
+   from the current thread.  */
+
+static void
+fetch_lbt_from_thread (struct regcache *regcache, int regnum, pid_t tid)
+{
+  gdb_byte regset[LOONGARCH_LBT_REGS_SIZE];
+
+  if (regnum == -1
+      || (regnum >= LOONGARCH_FIRST_SCR_REGNUM
+	  && regnum <= LOONGARCH_FTOP_REGNUM))
+    {
+      struct iovec iov;
+
+      iov.iov_base = regset;
+      iov.iov_len = LOONGARCH_LBT_REGS_SIZE;
+
+      if (ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LBT, (long) &iov) < 0)
+	{
+	  /* If kernel dose not support lbt, just return. */
+	  if (errno == EINVAL)
+	    return;
+	  perror_with_name (_("Couldn't get NT_LARCH_LBT registers"));
+	}
+      else
+	loongarch_lbtregset.supply_regset (nullptr, regcache, -1,
+					   regset, LOONGARCH_LBT_REGS_SIZE);
+    }
+}
+
+/* Store to the current thread the valid lbt register values
+   in the GDB's register array.  */
+
+static void
+store_lbt_to_thread (struct regcache *regcache, int regnum, pid_t tid)
+{
+  gdb_byte regset[LOONGARCH_LBT_REGS_SIZE];
+
+  if (regnum == -1
+      || (regnum >= LOONGARCH_FIRST_SCR_REGNUM
+	  && regnum <= LOONGARCH_FTOP_REGNUM))
+    {
+      struct iovec iov;
+
+      iov.iov_base = regset;
+      iov.iov_len = LOONGARCH_LBT_REGS_SIZE;
+
+      if (ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LBT, (long) &iov) < 0)
+	{
+	  /* If kernel dose not support lbt, just return. */
+	  if (errno == EINVAL)
+	    return;
+	  perror_with_name (_("Couldn't get NT_LARCH_LBT registers"));
+	}
+      else
+	{
+	  loongarch_lbtregset.collect_regset (nullptr, regcache, regnum,
+					    regset, LOONGARCH_LBT_REGS_SIZE);
+	  if (ptrace (PTRACE_SETREGSET, tid, NT_LARCH_LBT, (long) &iov) < 0)
+	    perror_with_name (_("Couldn't set NT_LARCH_LBT registers"));
+	}
+    }
+}
+
 /* Implement the "fetch_registers" target_ops method.  */
 
 void
@@ -277,6 +341,7 @@ loongarch_linux_nat_target::fetch_registers (struct regcache *regcache,
   fetch_fpregs_from_thread(regcache, regnum, tid);
   fetch_lsxregs_from_thread(regcache, regnum, tid);
   fetch_lasxregs_from_thread(regcache, regnum, tid);
+  fetch_lbt_from_thread (regcache, regnum, tid);
 }
 
 /* Implement the "store_registers" target_ops method.  */
@@ -291,6 +356,7 @@ loongarch_linux_nat_target::store_registers (struct regcache *regcache,
   store_fpregs_to_thread(regcache, regnum, tid);
   store_lsxregs_to_thread(regcache, regnum, tid);
   store_lasxregs_to_thread(regcache, regnum, tid);
+  store_lbt_to_thread (regcache, regnum, tid);
 }
 
 /* Return the address in the core dump or inferior of register REGNO.  */

@@ -239,6 +239,7 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	loongarch/fpu.xml \
 	loongarch/lsx.xml \
 	loongarch/lasx.xml \
+	loongarch/lbt.xml \
 	riscv/rv32e-xregs.xml \
 	riscv/32bit-cpu.xml \
 	riscv/32bit-fpu.xml \

@@ -1743,6 +1743,24 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (!valid_p)
     return nullptr;
 
+  const struct tdesc_feature *feature_lbt
+    = tdesc_find_feature (tdesc, "org.gnu.gdb.loongarch.lbt");
+  if (feature_lbt == nullptr)
+    return nullptr;
+
+  /* Validate the description provides the lbt registers and
+     allocate their numbers.  */
+  regnum = LOONGARCH_FIRST_SCR_REGNUM;
+  for (int i = 0; i < LOONGARCH_LINUX_NUM_SCR; i++)
+    valid_p &= tdesc_numbered_register (feature_lbt, tdesc_data.get (), regnum++,
+					loongarch_cr_normal_name[i] + 1);
+  valid_p &= tdesc_numbered_register (feature_lbt, tdesc_data.get (), regnum++,
+				      "eflags");
+  valid_p &= tdesc_numbered_register (feature_lbt, tdesc_data.get (), regnum++,
+				      "ftop");
+  if (!valid_p)
+    return nullptr;
+
   /* LoongArch code is always little-endian.  */
   info.byte_order_for_code = BFD_ENDIAN_LITTLE;
 
