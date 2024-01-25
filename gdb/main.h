@@ -44,12 +44,6 @@ extern std::string interpreter_p;
    return value is in malloc'ed storage.  */
 extern char *windows_get_absolute_argv0 (const char *argv0);
 
-/* Return read only pointer to the name of gdb as it was invoked.  This
-   might have been expanded to an absolute path if required by the
-   platform.  Could return NULL if called before gdb has had a chance to
-   parse the argv array.  */
-extern const char *get_gdb_program_name (void);
-
 extern void set_gdb_data_directory (const char *new_data_dir);
 
 #endif
