@@ -9236,37 +9236,37 @@ get_encoded_eh_value (unsigned int     encoding,
     case DW_EH_PE_udata2:
       old_start = start;
       SAFE_BYTE_GET_AND_INC (val, start, 2, end);
-      len = (start == old_start) ? 0 : 2;
+      len = start - old_start == 2 ? 2 : 0;
       break;
 
     case DW_EH_PE_udata4:
       old_start = start;
       SAFE_BYTE_GET_AND_INC (val, start, 4, end);
-      len = (start == old_start) ? 0 : 4;
+      len = start - old_start == 4 ? 4 : 0;
       break;
 
     case DW_EH_PE_udata8:
       old_start = start;
       SAFE_BYTE_GET_AND_INC (val, start, 8, end);
-      len = (start == old_start) ? 0 : 8;
+      len = start - old_start == 8 ? 8 : 0;
       break;
 
     case DW_EH_PE_sdata2:
       old_start = start;
       SAFE_SIGNED_BYTE_GET_AND_INC (val, start, 2, end);
-      len = (start == old_start) ? 0 : 2;
+      len = start - old_start == 2 ? 2 : 0;
       break;
 
     case DW_EH_PE_sdata4:
       old_start = start;
       SAFE_SIGNED_BYTE_GET_AND_INC (val, start, 4, end);
-      len = (start == old_start) ? 0 : 4;
+      len = start - old_start == 4 ? 4 : 0;
       break;
 
     case DW_EH_PE_sdata8:
       old_start = start;
       SAFE_SIGNED_BYTE_GET_AND_INC (val, start, 8, end);
-      len = (start == old_start) ? 0 : 8;
+      len = start - old_start == 8 ? 8 : 0;
       break;
 
     default:
