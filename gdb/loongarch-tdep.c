@@ -1650,6 +1650,14 @@ loongarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   if (group == float_reggroup)
     return 0;
 
+  if (LOONGARCH_FIRST_LSX_REGNUM <= regnum
+     && regnum < LOONGARCH_FIRST_LASX_REGNUM + LOONGARCH_LINUX_NUM_LASXREGSET)
+    return group == vector_reggroup;
+
+  /* Only $vrx / $xrx in vector_reggroup */
+  if (group == vector_reggroup)
+    return 0;
+
   int ret = tdesc_register_in_reggroup_p (gdbarch, regnum, group);
   if (ret != -1)
     return ret;
@@ -1704,6 +1712,34 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++,
 					loongarch_c_normal_name[i] + 1);
   valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++, "fcsr");
+  if (!valid_p)
+    return nullptr;
+
+  const struct tdesc_feature *feature_lsx
+    = tdesc_find_feature (tdesc, "org.gnu.gdb.loongarch.lsx");
+  if (feature_lsx == nullptr)
+    return nullptr;
+
+  /* Validate the description provides the lsx registers and
+     allocate their numbers.  */
+  regnum = LOONGARCH_FIRST_LSX_REGNUM;
+  for (int i = 0; i < LOONGARCH_LINUX_NUM_LSXREGSET; i++)
+    valid_p &= tdesc_numbered_register (feature_lsx, tdesc_data.get (), regnum++,
+					loongarch_v_normal_name[i] + 1);
+  if (!valid_p)
+    return nullptr;
+
+  const struct tdesc_feature *feature_lasx
+    = tdesc_find_feature (tdesc, "org.gnu.gdb.loongarch.lasx");
+  if (feature_lasx == nullptr)
+    return nullptr;
+
+  /* Validate the description provides the lasx registers and
+     allocate their numbers.  */
+  regnum = LOONGARCH_FIRST_LASX_REGNUM;
+  for (int i = 0; i < LOONGARCH_LINUX_NUM_LASXREGSET; i++)
+    valid_p &= tdesc_numbered_register (feature_lasx, tdesc_data.get (), regnum++,
+					loongarch_x_normal_name[i] + 1);
   if (!valid_p)
     return nullptr;
 

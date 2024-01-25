@@ -146,6 +146,125 @@ store_fpregs_to_thread (struct regcache *regcache, int regnum, pid_t tid)
     }
 }
 
+/* Fill GDB's register array with the Loongson SIMD Extension
+   register values from the current thread.  */
+
+static void
+fetch_lsxregs_from_thread (struct regcache *regcache, int regnum, pid_t tid)
+{
+  elf_lsxregset_t regset;
+
+  if ((regnum == -1)
+      || (regnum >= LOONGARCH_FIRST_LSX_REGNUM && regnum < LOONGARCH_FIRST_LASX_REGNUM))
+    {
+      struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
+
+      if (ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LSX, (long) &iovec) < 0)
+	{
+	  /* If kernel dose not support lsx, just return. */
+	  if (errno == EINVAL)
+	    return;
+
+	  perror_with_name (_("Couldn't get NT_LARCH_LSX registers"));
+	}
+      else
+	loongarch_lsxregset.supply_regset (nullptr, regcache, -1,
+					   &regset, sizeof (regset));
+    }
+}
+
+/* Store to the current thread the valid Loongson SIMD Extension
+   register values in the GDB's register array.  */
+
+static void
+store_lsxregs_to_thread (struct regcache *regcache, int regnum, pid_t tid)
+{
+  elf_lsxregset_t regset;
+
+  if ((regnum == -1)
+      || (regnum >= LOONGARCH_FIRST_LSX_REGNUM && regnum < LOONGARCH_FIRST_LASX_REGNUM))
+    {
+      struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
+
+      if (ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LSX, (long) &iovec) < 0)
+	{
+	  /* If kernel dose not support lsx, just return. */
+	  if (errno == EINVAL)
+	    return;
+
+	  perror_with_name (_("Couldn't get NT_LARCH_LSX registers"));
+	}
+      else
+	{
+	  loongarch_lsxregset.collect_regset (nullptr, regcache, regnum,
+					     &regset, sizeof (regset));
+	  if (ptrace (PTRACE_SETREGSET, tid, NT_LARCH_LSX, (long) &iovec) < 0)
+	    perror_with_name (_("Couldn't set NT_LARCH_LSX registers"));
+	}
+    }
+}
+
+/* Fill GDB's register array with the Loongson Advanced SIMD Extension
+   register values from the current thread.  */
+
+static void
+fetch_lasxregs_from_thread (struct regcache *regcache, int regnum, pid_t tid)
+{
+  elf_lasxregset_t regset;
+
+  if ((regnum == -1)
+      || (regnum >= LOONGARCH_FIRST_LASX_REGNUM
+	  && regnum < LOONGARCH_FIRST_LASX_REGNUM + LOONGARCH_LINUX_NUM_LASXREGSET))
+    {
+      struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
+
+      if (ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LASX, (long) &iovec) < 0)
+	{
+	  /* If kernel dose not support lasx, just return. */
+	  if (errno == EINVAL)
+	    return;
+
+	  perror_with_name (_("Couldn't get NT_LARCH_LSX registers"));
+	}
+      else
+	loongarch_lasxregset.supply_regset (nullptr, regcache, -1,
+					    &regset, sizeof (regset));
+    }
+}
+
+/* Store to the current thread the valid Loongson Advanced SIMD Extension
+   register values in the GDB's register array.  */
+
+static void
+store_lasxregs_to_thread (struct regcache *regcache, int regnum, pid_t tid)
+{
+  elf_lasxregset_t regset;
+
+  if ((regnum == -1)
+      || (regnum >= LOONGARCH_FIRST_LASX_REGNUM
+	  && regnum < LOONGARCH_FIRST_LASX_REGNUM + LOONGARCH_LINUX_NUM_LASXREGSET))
+    {
+      struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
+
+      if (ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LASX, (long) &iovec) < 0)
+	{
+	  /* If kernel dose not support lasx, just return. */
+	  if (errno == EINVAL)
+	    return;
+
+	  perror_with_name (_("Couldn't get NT_LARCH_LSX registers"));
+	}
+      else
+	{
+	  loongarch_lasxregset.collect_regset (nullptr, regcache, regnum,
+					      &regset, sizeof (regset));
+	  if (ptrace (PTRACE_SETREGSET, tid, NT_LARCH_LASX, (long) &iovec) < 0)
+	    perror_with_name (_("Couldn't set NT_LARCH_LASX registers"));
+	}
+    }
+}
+
+
 /* Implement the "fetch_registers" target_ops method.  */
 
 void
@@ -156,6 +275,8 @@ loongarch_linux_nat_target::fetch_registers (struct regcache *regcache,
 
   fetch_gregs_from_thread(regcache, regnum, tid);
   fetch_fpregs_from_thread(regcache, regnum, tid);
+  fetch_lsxregs_from_thread(regcache, regnum, tid);
+  fetch_lasxregs_from_thread(regcache, regnum, tid);
 }
 
 /* Implement the "store_registers" target_ops method.  */
@@ -168,6 +289,8 @@ loongarch_linux_nat_target::store_registers (struct regcache *regcache,
 
   store_gregs_to_thread (regcache, regnum, tid);
   store_fpregs_to_thread(regcache, regnum, tid);
+  store_lsxregs_to_thread(regcache, regnum, tid);
+  store_lasxregs_to_thread(regcache, regnum, tid);
 }
 
 /* Return the address in the core dump or inferior of register REGNO.  */
