@@ -244,10 +244,11 @@ using private_thread_info_up = std::unique_ptr<private_thread_info>;
    strong reference, and is thus not accounted for in the thread's
    refcount.
 
-   The intrusive_list_node base links threads in a per-inferior list.  */
+   The intrusive_list_node base links threads in a per-inferior list.
+   We place it first in the inherit order to work around PR gcc/113599.  */
 
-class thread_info : public refcounted_object,
-		    public intrusive_list_node<thread_info>
+class thread_info : public intrusive_list_node<thread_info>,
+		    public refcounted_object
 {
 public:
   explicit thread_info (inferior *inf, ptid_t ptid);
