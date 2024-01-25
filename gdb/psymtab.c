@@ -1505,8 +1505,9 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		      && psym->ginfo.value_address () == 0)
 		    continue;
 
-		  sym = block_lookup_symbol (b, psym->ginfo.search_name (),
-					     symbol_name_match_type::SEARCH_NAME,
+		  lookup_name_info lookup_name
+		    (psym->ginfo.search_name (), symbol_name_match_type::SEARCH_NAME);
+		  sym = block_lookup_symbol (b, lookup_name,
 					     to_search_flags (psym->domain));
 		  if (!sym)
 		    {
@@ -1520,8 +1521,9 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	      b = bv->global_block ();
 	      for (partial_symbol *psym : ps->global_psymbols)
 		{
-		  sym = block_lookup_symbol (b, psym->ginfo.search_name (),
-					     symbol_name_match_type::SEARCH_NAME,
+		  lookup_name_info lookup_name
+		    (psym->ginfo.search_name (), symbol_name_match_type::SEARCH_NAME);
+		  sym = block_lookup_symbol (b, lookup_name,
 					     to_search_flags (psym->domain));
 		  if (!sym)
 		    {

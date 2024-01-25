@@ -421,6 +421,10 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 
   lookup_name_info func_matcher (GCC_FE_WRAPPER_FUNCTION,
 				 symbol_name_match_type::SEARCH_NAME);
+  lookup_name_info i_val_matcher (COMPILE_I_EXPR_VAL,
+				  symbol_name_match_type::SEARCH_NAME);
+  lookup_name_info i_ptr_matcher (COMPILE_I_EXPR_PTR_TYPE,
+				  symbol_name_match_type::SEARCH_NAME);
 
   bv = func_sym->symtab ()->compunit ()->blockvector ();
   nblocks = bv->num_blocks ();
@@ -434,10 +438,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
       block = bv->block (block_loop);
       if (block->function () != NULL)
 	continue;
-      gdb_val_sym = block_lookup_symbol (block,
-					 COMPILE_I_EXPR_VAL,
-					 symbol_name_match_type::SEARCH_NAME,
-					 SEARCH_VFT);
+      gdb_val_sym = block_lookup_symbol (block, i_val_matcher, SEARCH_VFT);
       if (gdb_val_sym == NULL)
 	continue;
 
@@ -461,9 +462,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   gdb_type = gdb_val_sym->type ();
   gdb_type = check_typedef (gdb_type);
 
-  gdb_ptr_type_sym = block_lookup_symbol (block, COMPILE_I_EXPR_PTR_TYPE,
-					  symbol_name_match_type::SEARCH_NAME,
-					  SEARCH_VFT);
+  gdb_ptr_type_sym = block_lookup_symbol (block, i_ptr_matcher, SEARCH_VFT);
   if (gdb_ptr_type_sym == NULL)
     error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
   gdb_ptr_type = gdb_ptr_type_sym->type ();

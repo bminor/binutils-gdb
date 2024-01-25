@@ -565,8 +565,7 @@ extern struct symbol *better_symbol (struct symbol *a, struct symbol *b,
 /* Search BLOCK for symbol NAME in DOMAIN.  */
 
 extern struct symbol *block_lookup_symbol (const struct block *block,
-					   const char *name,
-					   symbol_name_match_type match_type,
+					   const lookup_name_info &name,
 					   const domain_search_flags domain);
 
 /* Search BLOCK for symbol NAME in DOMAIN but only in primary symbol table of

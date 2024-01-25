@@ -561,7 +561,8 @@ public:
      defined, or NULL if no such symbol table exists.  If OBJFILE
      contains !TYPE_OPAQUE symbol prefer its compunit.  If it contains
      only TYPE_OPAQUE symbol(s), return at least that compunit.  */
-  struct compunit_symtab *lookup_symbol (block_enum kind, const char *name,
+  struct compunit_symtab *lookup_symbol (block_enum kind,
+					 const lookup_name_info &name,
 					 domain_search_flags domain);
 
   /* See quick_symbol_functions.  */

@@ -240,7 +240,7 @@ objfile::map_symtabs_matching_filename
 }
 
 struct compunit_symtab *
-objfile::lookup_symbol (block_enum kind, const char *name,
+objfile::lookup_symbol (block_enum kind, const lookup_name_info &name,
 			domain_search_flags domain)
 {
   struct compunit_symtab *retval = nullptr;
@@ -248,10 +248,8 @@ objfile::lookup_symbol (block_enum kind, const char *name,
   if (debug_symfile)
     gdb_printf (gdb_stdlog,
 		"qf->lookup_symbol (%s, %d, \"%s\", %s)\n",
-		objfile_debug_name (this), kind, name,
+		objfile_debug_name (this), kind, name.c_str (),
 		domain_name (domain).c_str ());
-
-  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
   auto search_one_symtab = [&] (compunit_symtab *stab)
   {
@@ -259,7 +257,7 @@ objfile::lookup_symbol (block_enum kind, const char *name,
     const struct blockvector *bv = stab->blockvector ();
     const struct block *block = bv->block (kind);
 
-    sym = block_find_symbol (block, lookup_name, domain, &with_opaque);
+    sym = block_find_symbol (block, name, domain, &with_opaque);
 
     /* Some caution must be observed with overloaded functions
        and methods, since the index will not contain any overload
@@ -282,7 +280,7 @@ objfile::lookup_symbol (block_enum kind, const char *name,
     {
       if (!iter->expand_symtabs_matching (this,
 					  nullptr,
-					  &lookup_name,
+					  &name,
 					  nullptr,
 					  search_one_symtab,
 					  kind == GLOBAL_BLOCK
