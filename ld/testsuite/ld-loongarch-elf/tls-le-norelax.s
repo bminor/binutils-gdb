@@ -15,4 +15,8 @@ _start:
 	ori	$r5,$r4,%le_lo12(a + 0x8)
 	lu12i.w $r4,%le_hi20_r(a + 0x8)
 	addi.d	$r5,$r4,%le_lo12_r(a + 0x8)
+	lu12i.w $r4,%le_hi20(a + 0x8)
+	ori	$r4,$r4,%le_lo12(a + 0x8)
+	lu32i.d	$r4,%le64_lo20(a + 0x8)
+	lu52i.d	$r4,$r4,%le64_hi12(a + 0x8)
 	jr $ra

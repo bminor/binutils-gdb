@@ -30,4 +30,12 @@ pcalau12i $t0, %le_hi20_r(a)
 add.d $t0, $tp, $t0, %le_add_r(a)
 .cfi_restore 22
 
+.cfi_def_cfa 22, 0
+la.tls.ie $t0, a
+.cfi_restore 22
+
+.cfi_def_cfa 22, 0
+la.tls.le $t0, a
+.cfi_restore 22
+
 .cfi_endproc

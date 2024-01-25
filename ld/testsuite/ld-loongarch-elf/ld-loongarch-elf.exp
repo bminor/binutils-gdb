@@ -34,7 +34,6 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "local-ifunc-reloc"
     run_dump_test "anno-sym"
     run_dump_test "pcala64"
-    run_dump_test "tls-le"
     run_dump_test "overflow_s_10_5"
     run_dump_test "overflow_s_10_12"
     run_dump_test "overflow_s_10_16"
@@ -51,6 +50,8 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "underflow_s_0_5_10_16_s2"
     run_dump_test "underflow_s_0_10_10_16_s2"
     run_dump_test "underflow_s_5_20"
+    run_dump_test "tls-le-norelax"
+    run_dump_test "tls-le-relax"
 }
 
 if [istarget "loongarch32-*-*"] {
@@ -127,8 +128,6 @@ if [istarget "loongarch64-*-*"] {
 if [istarget "loongarch64-*-*"] {
   if [check_shared_lib_support] {
     run_dump_test "desc-ie"
-    run_dump_test "desc-le"
-    run_dump_test "ie-le"
     run_dump_test "tlsdesc-dso"
     run_dump_test "desc-norelax"
     run_dump_test "desc-relax"
@@ -147,5 +146,11 @@ if [istarget "loongarch64-*-*"] {
   run_dump_test "underflow_b26"
   run_dump_test "underflow_pcrel20"
   run_dump_test "pie_discard"
+  run_dump_test "desc-le-norelax"
+  run_dump_test "desc-le-relax"
+  run_dump_test "ie-le-norelax"
+  run_dump_test "ie-le-relax"
+  run_dump_test "tlsdesc_abs"
+  run_dump_test "tlsdesc_extreme"
 }
 
