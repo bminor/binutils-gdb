@@ -898,7 +898,7 @@ x86_linux_read_description (void)
       if (ptrace (PTRACE_GETFPXREGS, tid, 0, (long) &fpxregs) < 0)
 	{
 	  have_ptrace_getfpxregs = 0;
-	  have_ptrace_getregset = 0;
+	  have_ptrace_getregset = TRIBOOL_FALSE;
 	  return i386_linux_read_description (X86_XSTATE_X87);
 	}
       else
@@ -917,7 +917,7 @@ x86_linux_read_description (void)
 	return tdesc_i386_linux_no_xml.get ();
     }
 
-  if (have_ptrace_getregset == -1)
+  if (have_ptrace_getregset == TRIBOOL_UNKNOWN)
     {
       uint64_t xstateregs[(X86_XSTATE_SSE_SIZE / sizeof (uint64_t))];
       struct iovec iov;
@@ -928,10 +928,10 @@ x86_linux_read_description (void)
       /* Check if PTRACE_GETREGSET works.  */
       if (ptrace (PTRACE_GETREGSET, tid,
 		  (unsigned int) NT_X86_XSTATE, (long) &iov) < 0)
-	have_ptrace_getregset = 0;
+	have_ptrace_getregset = TRIBOOL_FALSE;
       else
 	{
-	  have_ptrace_getregset = 1;
+	  have_ptrace_getregset = TRIBOOL_TRUE;
 
 	  /* Get XCR0 from XSAVE extended state.  */
 	  xcr0 = xstateregs[(I386_LINUX_XSAVE_XCR0_OFFSET
@@ -954,7 +954,7 @@ x86_linux_read_description (void)
     }
 
   /* Check the native XCR0 only if PTRACE_GETREGSET is available.  */
-  xcr0_features = (have_ptrace_getregset
+  xcr0_features = (have_ptrace_getregset == TRIBOOL_TRUE
 		   && (xcr0 & X86_XSTATE_ALL_MASK));
 
   if (xcr0_features)
