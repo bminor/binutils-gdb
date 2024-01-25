@@ -38,9 +38,15 @@ main (void)
       exit (1);
     case 0:
       errno = 0;
+      #if defined(_AIX) && defined (__64BIT__)
+      ptrace64 (PTRACE_ATTACH, getppid (), NULL, 0, NULL);
+      #elif defined(_AIX) && !defined (__64BIT__)
+      ptrace (PTRACE_ATTACH, getppid (), NULL, 0, NULL);
+      #else
       /* The 4th argument to ptrace () is 0 on purpose, as it is compatible
 	 between kernels that accept void* (like Linux) and int (NetBSD).  */
       ptrace (PTRACE_ATTACH, getppid (), NULL, 0);
+      #endif
       if (errno != 0)
 	perror ("PTRACE_ATTACH");
       break;
