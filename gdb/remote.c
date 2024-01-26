@@ -158,20 +158,27 @@ enum packet_status
 /* Keeps packet's return value. If packet's return value is PACKET_ERROR,
    err_msg contains an error message string from E.string or the number
    stored as a string from E.num.  */
-struct packet_result
+class packet_result
 {
-  packet_result (enum packet_status status, std::string err_msg)
-    : m_status (status), m_err_msg (std::move (err_msg))
-  {
-    gdb_assert (status == PACKET_ERROR);
-  }
+private:
+  /* Private ctors for internal use.  Clients should use the public
+     factory static methods instead.  */
 
+  /* Construct a PACKET_ERROR packet_result.  */
+  packet_result (const char *err_msg, bool textual_err_msg)
+    : m_status (PACKET_ERROR),
+      m_err_msg (err_msg),
+      m_textual_err_msg (textual_err_msg)
+  {}
+
+  /* Construct an PACKET_OK/PACKET_UNKNOWN packet_result.  */
   explicit packet_result (enum packet_status status)
     : m_status (status)
   {
     gdb_assert (status != PACKET_ERROR);
   }
 
+public:
   enum packet_status status () const
   {
     return this->m_status;
@@ -183,9 +190,39 @@ struct packet_result
     return this->m_err_msg.c_str ();
   }
 
+  bool textual_err_msg () const
+  {
+    gdb_assert (this->m_status == PACKET_ERROR);
+    return this->m_textual_err_msg;
+  }
+
+  static packet_result make_numeric_error (const char *err_msg)
+  {
+    return packet_result (err_msg, false);
+  }
+
+  static packet_result make_textual_error (const char *err_msg)
+  {
+    return packet_result (err_msg, true);
+  }
+
+  static packet_result make_ok ()
+  {
+    return packet_result (PACKET_OK);
+  }
+
+  static packet_result make_unknown ()
+  {
+    return packet_result (PACKET_UNKNOWN);
+  }
+
 private:
   enum packet_status m_status;
   std::string m_err_msg;
+
+  /* True if we have a textual error message, from an "E.MESSAGE"
+     response.  */
+  bool m_textual_err_msg;
 };
 
 /* Enumeration of packets for a remote target.  */
@@ -2473,7 +2510,7 @@ packet_check_result (const char *buf, bool accept_msg)
 	  && isxdigit (buf[1]) && isxdigit (buf[2])
 	  && buf[3] == '\0')
 	/* "Enn"  - definitely an error.  */
-	return { PACKET_ERROR, buf + 1 };
+	return packet_result::make_numeric_error (buf + 1);
 
       /* Not every request accepts an error in a E.msg form.
 	 Some packets accepts only Enn, in this case E. is not
@@ -2485,19 +2522,19 @@ packet_check_result (const char *buf, bool accept_msg)
 	  if (buf[0] == 'E' && buf[1] == '.')
 	    {
 	      if (buf[2] != '\0')
-		return { PACKET_ERROR, buf + 2 };
+		return packet_result::make_textual_error (buf + 2);
 	      else
-		return { PACKET_ERROR, "no error provided" };
+		return packet_result::make_textual_error ("no error provided");
 	    }
 	}
 
       /* The packet may or may not be OK.  Just assume it is.  */
-      return packet_result (PACKET_OK);
+      return packet_result::make_ok ();
     }
   else
   {
     /* The stub does not support the packet.  */
-    return packet_result (PACKET_UNKNOWN);
+    return packet_result::make_unknown ();
   }
 }
 
@@ -10704,7 +10741,8 @@ remote_target::extended_remote_run (const std::string &args)
   putpkt (rs->buf);
   getpkt (&rs->buf);
 
-  switch ((m_features.packet_ok (rs->buf, PACKET_vRun)).status ())
+  packet_result result = m_features.packet_ok (rs->buf, PACKET_vRun);
+  switch (result.status ())
     {
     case PACKET_OK:
       /* We have a wait response.  All is well.  */
@@ -10712,6 +10750,11 @@ remote_target::extended_remote_run (const std::string &args)
     case PACKET_UNKNOWN:
       return -1;
     case PACKET_ERROR:
+      /* If we have a textual error message, print just that.  This
+	 makes remote debugging output the same as native output, when
+	 possible.  */
+      if (result.textual_err_msg ())
+	error (("%s"), result.err_msg ());
       if (remote_exec_file[0] == '\0')
 	error (_("Running the default executable on the remote target failed; "
 		 "try \"set remote exec-file\"?"));
