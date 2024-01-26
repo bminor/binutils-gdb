@@ -66,6 +66,7 @@ if [gas_32_check] then {
     run_dump_test "intel16"
     run_list_test "intelbad" ""
     run_dump_test "intelok"
+    run_dump_test "intelok2"
     run_dump_test "prefix"
     run_list_test "prefix32" "-al"
     run_dump_test "insn-32"

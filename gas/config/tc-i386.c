@@ -2708,6 +2708,16 @@ set_16bit_gcc_code_flag (int new_code_flag)
 }
 
 static void
+_set_intel_syntax (int syntax_flag)
+{
+  intel_syntax = syntax_flag;
+
+  expr_set_rank (O_full_ptr, syntax_flag ? 10 : 0);
+
+  register_prefix = allow_naked_reg ? "" : "%";
+}
+
+static void
 set_intel_syntax (int syntax_flag)
 {
   /* Find out if register prefixing is specified.  */
@@ -2729,17 +2739,13 @@ set_intel_syntax (int syntax_flag)
     }
   demand_empty_rest_of_line ();
 
-  intel_syntax = syntax_flag;
-
   if (ask_naked_reg == 0)
-    allow_naked_reg = (intel_syntax
+    allow_naked_reg = (syntax_flag
 		       && (bfd_get_symbol_leading_char (stdoutput) != '\0'));
   else
     allow_naked_reg = (ask_naked_reg < 0);
 
-  expr_set_rank (O_full_ptr, syntax_flag ? 10 : 0);
-
-  register_prefix = allow_naked_reg ? "" : "%";
+  _set_intel_syntax (syntax_flag);
 }
 
 static void
@@ -16307,9 +16313,9 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_MSYNTAX:
       if (strcasecmp (arg, "att") == 0)
-	intel_syntax = 0;
+	_set_intel_syntax (0);
       else if (strcasecmp (arg, "intel") == 0)
-	intel_syntax = 1;
+	_set_intel_syntax (1);
       else
 	as_fatal (_("invalid -msyntax= option: `%s'"), arg);
       break;
@@ -16320,6 +16326,7 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_MNAKED_REG:
       allow_naked_reg = 1;
+      register_prefix = "";
       break;
 
     case OPTION_MSSE2AVX:
