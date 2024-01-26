@@ -275,8 +275,8 @@ proc is_generic { } {
     return 0
 }
 
-# Return true if target uses the standard ELF emulation.
-proc is_standard_elf { } {
+# Return true if target uses elf.em.
+proc uses_elf_em { } {
     if { ![is_elf_format] || [is_generic] } {
 	return 0
     }
