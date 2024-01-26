@@ -28,6 +28,7 @@ if  { ([istarget "x86_64-*-*"] && ![istarget "x86_64-*-linux*-gnux32"]) } then {
     run_list_test "ginsn-add-1" "--scfi=experimental -ali"
     run_list_test "ginsn-pop-1" "--scfi=experimental -ali"
     run_list_test "ginsn-push-1" "--scfi=experimental -ali"
+    run_list_test "ginsn-cofi-1" "--scfi=experimental -ali -W"
 
     run_dump_test "scfi-cfi-label-1"
     run_list_test "scfi-cfi-label-1" "--scfi=experimental --warn"
@@ -67,8 +68,6 @@ if  { ([istarget "x86_64-*-*"] && ![istarget "x86_64-*-linux*-gnux32"]) } then {
     run_dump_test "scfi-pushsection-2"
     run_list_test "scfi-pushsection-2" "--scfi=experimental --warn"
 
-    run_dump_test "scfi-cofi-1"
-    run_list_test "scfi-cofi-1" "--scfi=experimental --warn"
     run_dump_test "scfi-sub-1"
     run_list_test "scfi-sub-1" "--scfi=experimental --warn"
     run_dump_test "scfi-sub-2"
