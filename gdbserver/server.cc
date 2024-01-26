@@ -3427,7 +3427,15 @@ handle_v_run (char *own_buf)
   free_vector_argv (program_args);
   program_args = new_argv;
 
-  target_create_inferior (program_path.get (), program_args);
+  try
+    {
+      target_create_inferior (program_path.get (), program_args);
+    }
+  catch (const gdb_exception_error &exception)
+    {
+      sprintf (own_buf, "E.%s", exception.what ());
+      return;
+    }
 
   if (cs.last_status.kind () == TARGET_WAITKIND_STOPPED)
     {
