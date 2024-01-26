@@ -3672,21 +3672,25 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       struct stat buf;
       int stat_status = 0;
       bool ok_object;
+      const char *element_name;
 
+      element_name = bfd_get_filename (this_element);
       /* PR binutils/17533: Do not allow directory traversal
 	 outside of the current directory tree by archive members.  */
-      if (! is_valid_archive_path (bfd_get_filename (this_element)))
+      if (! is_valid_archive_path (element_name))
 	{
-	  non_fatal (_("illegal pathname found in archive member: %s"),
-		     bfd_get_filename (this_element));
-	  bfd_close (this_element);
-	  status = 1;
-	  goto cleanup_and_exit;
+	  non_fatal (_("warning: illegal pathname found in archive member: %s"),
+		     element_name);
+	  /* PR binutils/31250: But there tools which create archives
+	     containing absolute paths, so instead of failing here, try to
+	     create a suitable alternative pathname.  */
+	  element_name = lbasename (element_name);
+	  non_fatal (_("warning: using the basename of the member instead: %s"),
+		     element_name);
 	}
 
       /* Create an output file for this member.  */
-      output_name = concat (dir, "/",
-			    bfd_get_filename (this_element), (char *) 0);
+      output_name = concat (dir, "/", element_name, (char *) 0);
 
       /* If the file already exists, make another temp dir.  */
       if (stat (output_name, &buf) >= 0)
@@ -3708,8 +3712,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	  l->next = list;
 	  l->obfd = NULL;
 	  list = l;
-	  output_name = concat (tmpdir, "/",
-				bfd_get_filename (this_element), (char *) 0);
+	  output_name = concat (tmpdir, "/", element_name, (char *) 0);
 	}
 
       if (preserve_dates)
@@ -3718,8 +3721,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	  stat_status = bfd_stat_arch_elt (this_element, &buf);
 
 	  if (stat_status != 0)
-	    non_fatal (_("internal stat error on %s"),
-		       bfd_get_filename (this_element));
+	    non_fatal (_("internal stat error on %s"), element_name);
 	}
 
       struct name_list *l = xmalloc (sizeof (*l));
