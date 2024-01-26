@@ -4165,7 +4165,7 @@ loongarch_relax_tls_le (bfd *abfd, asection *sec,
   static uint32_t insn_rj,insn_rd;
   symval = symval - elf_hash_table (link_info)->tls_sec->vma;
   /* Whether the symbol offset is in the interval (offset < 0x800).  */
-  if (ELFNN_R_TYPE ((rel + 1)->r_info == R_LARCH_RELAX) && (symval < 0x800))
+  if (ELFNN_R_TYPE ((rel + 1)->r_info) == R_LARCH_RELAX && (symval < 0x800))
     {
       switch (ELFNN_R_TYPE (rel->r_info))
 	{
