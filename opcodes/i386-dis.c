@@ -821,6 +821,8 @@ enum
   USE_PREFIX_TABLE,
   USE_X86_64_TABLE,
   USE_X86_64_EVEX_FROM_VEX_TABLE,
+  USE_X86_64_EVEX_PFX_TABLE,
+  USE_X86_64_EVEX_W_TABLE,
   USE_3BYTE_TABLE,
   USE_XOP_8F_TABLE,
   USE_VEX_C4_TABLE,
@@ -841,6 +843,8 @@ enum
 #define X86_64_TABLE(I)		DIS386 (USE_X86_64_TABLE, (I))
 #define X86_64_EVEX_FROM_VEX_TABLE(I) \
   DIS386 (USE_X86_64_EVEX_FROM_VEX_TABLE, (I))
+#define X86_64_EVEX_PFX_TABLE(I) DIS386 (USE_X86_64_EVEX_PFX_TABLE, (I))
+#define X86_64_EVEX_W_TABLE(I) DIS386 (USE_X86_64_EVEX_W_TABLE, (I))
 #define THREE_BYTE_TABLE(I)	DIS386 (USE_3BYTE_TABLE, (I))
 #define XOP_8F_TABLE()		DIS386 (USE_XOP_8F_TABLE, 0)
 #define VEX_C4_TABLE()		DIS386 (USE_VEX_C4_TABLE, 0)
@@ -1317,17 +1321,6 @@ enum
   X86_64_VEX_0F38EF,
 
   X86_64_VEX_MAP7_F8_L_0_W_0_R_0,
-
-  X86_64_EVEX_0F90,
-  X86_64_EVEX_0F91,
-  X86_64_EVEX_0F92,
-  X86_64_EVEX_0F93,
-  X86_64_EVEX_0F38F2,
-  X86_64_EVEX_0F38F3,
-  X86_64_EVEX_0F38F5,
-  X86_64_EVEX_0F38F6,
-  X86_64_EVEX_0F38F7,
-  X86_64_EVEX_0F3AF0,
 };
 
 enum
@@ -4600,8 +4593,6 @@ static const struct dis386 x86_64_table[][2] = {
     { Bad_Opcode },
     { PREFIX_TABLE (PREFIX_VEX_MAP7_F8_L_0_W_0_R_0_X86_64) },
   },
-
-#include "i386-dis-evex-x86-64.h"
 };
 
 static const struct dis386 three_byte_table[][256] = {
@@ -8738,6 +8729,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       break;
 
     case USE_PREFIX_TABLE:
+    use_prefix_table:
       if (ins->need_vex)
 	{
 	  /* The prefix in VEX is implicit.  */
@@ -8808,14 +8800,22 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       break;
 
     case USE_X86_64_EVEX_FROM_VEX_TABLE:
+    case USE_X86_64_EVEX_PFX_TABLE:
+    case USE_X86_64_EVEX_W_TABLE:
       ins->evex_type = evex_from_vex;
-      /* EVEX from VEX instrucions require that EVEX.z, EVEX.L’L, EVEX.b and
-	 the lower 2 bits of EVEX.aaa must be 0.  */
-      if ((ins->vex.mask_register_specifier & 0x3) != 0
+      /* EVEX from VEX instructions are 64-bit only and require that EVEX.z,
+	 EVEX.L'L, EVEX.b, and the lower 2 bits of EVEX.aaa must be 0.  */
+      if (ins->address_mode != mode_64bit
+	  || (ins->vex.mask_register_specifier & 0x3) != 0
 	  || ins->vex.ll != 0
 	  || ins->vex.zeroing != 0
 	  || ins->vex.b)
 	return &bad_opcode;
+
+      if (dp->op[0].bytemode == USE_X86_64_EVEX_PFX_TABLE)
+	goto use_prefix_table;
+      if (dp->op[0].bytemode == USE_X86_64_EVEX_W_TABLE)
+	goto use_vex_w_table;
 
       /* Fall through.  */
     case USE_X86_64_TABLE:
@@ -9050,6 +9050,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       break;
 
     case USE_VEX_W_TABLE:
+    use_vex_w_table:
       if (!ins->need_vex)
 	abort ();
 
