@@ -89,11 +89,6 @@ private:
   /* The issued complaints.  */
   complaint_collection m_complaints;
 
-  typedef void (*saved_warning_hook_ftype) (const char *, va_list);
-
-  /* The saved value of deprecated_warning_hook.  */
-  scoped_restore_tmpl<saved_warning_hook_ftype> m_saved_warning_hook;
-
   /* The saved value of g_complaint_interceptor.  */
   scoped_restore_tmpl<complaint_interceptor *> m_saved_complaint_interceptor;
 
@@ -104,6 +99,9 @@ private:
 
   /* This object.  Used by the static callback function.  */
   static thread_local complaint_interceptor *g_complaint_interceptor;
+
+  /* Object to initialise the warning hook.  */
+  scoped_restore_warning_hook m_saved_warning_hook;
 };
 
 /* Re-emit complaints that were collected by complaint_interceptor.

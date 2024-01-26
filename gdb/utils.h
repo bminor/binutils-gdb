@@ -373,6 +373,23 @@ assign_return_if_changed (T &lval, const T &val)
   return true;
 }
 
+/* A function that can be used to intercept warnings.  */
+typedef void (*warning_hook_handler) (const char *, va_list);
+
+/* Set the thread-local warning hook, and restore the old value when
+   finished.  */
+class scoped_restore_warning_hook
+{
+public:
+  explicit scoped_restore_warning_hook (warning_hook_handler new_handler);
+
+private:
+  scoped_restore_tmpl<warning_hook_handler> m_save;
+};
+
+/* Return the current warning handler.  */
+extern warning_hook_handler get_warning_hook_handler ();
+
 /* In some cases GDB needs to try several different solutions to a problem,
    if any of the solutions work then as far as the user is concerned the
    problem is solved, and GDB should continue without warnings.  However,

@@ -57,8 +57,9 @@ complaint_internal (const char *fmt, ...)
 
   va_start (args, fmt);
 
-  if (deprecated_warning_hook)
-    (*deprecated_warning_hook) (fmt, args);
+  warning_hook_handler handler = get_warning_hook_handler ();
+  if (handler != nullptr)
+    handler (fmt, args);
   else
     {
       gdb_puts (_("During symbol reading: "), gdb_stderr);
@@ -84,15 +85,15 @@ thread_local complaint_interceptor *complaint_interceptor::g_complaint_intercept
 /* See complaints.h.  */
 
 complaint_interceptor::complaint_interceptor ()
-  : m_saved_warning_hook (&deprecated_warning_hook, issue_complaint),
-    m_saved_complaint_interceptor (&g_complaint_interceptor, this)
+  : m_saved_complaint_interceptor (&g_complaint_interceptor, this),
+    m_saved_warning_hook (issue_complaint)
 {
 }
 
 /* A helper that wraps a warning hook.  */
 
 static void
-wrap_warning_hook (void (*hook) (const char *, va_list), ...)
+wrap_warning_hook (warning_hook_handler hook, ...)
 {
   va_list args;
   va_start (args, hook);
@@ -109,8 +110,9 @@ re_emit_complaints (const complaint_collection &complaints)
 
   for (const std::string &str : complaints)
     {
-      if (deprecated_warning_hook)
-	wrap_warning_hook (deprecated_warning_hook, str.c_str ());
+      warning_hook_handler handler = get_warning_hook_handler ();
+      if (handler != nullptr)
+	wrap_warning_hook (handler, str.c_str ());
       else
 	gdb_printf (gdb_stderr, _("During symbol reading: %s\n"),
 		    str.c_str ());

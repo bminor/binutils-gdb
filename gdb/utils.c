@@ -128,7 +128,26 @@ show_pagination_enabled (struct ui_file *file, int from_tty,
 }
 
 
+/* Warning hook pointer.  This has to be 'static' to avoid link
+   problems with thread-locals on AIX.  */
 
+static thread_local void (*warning_hook) (const char *, va_list);
+
+/* See utils.h.  */
+
+warning_hook_handler
+get_warning_hook_handler ()
+{
+  return warning_hook;
+}
+
+/* See utils.h.  */
+
+scoped_restore_warning_hook::scoped_restore_warning_hook
+     (warning_hook_handler new_handler)
+       : m_save (make_scoped_restore (&warning_hook, new_handler))
+{
+}
 
 /* Print a warning message.  The first argument STRING is the warning
    message, used as an fprintf format string, the second is the
@@ -139,8 +158,8 @@ show_pagination_enabled (struct ui_file *file, int from_tty,
 void
 vwarning (const char *string, va_list args)
 {
-  if (deprecated_warning_hook)
-    (*deprecated_warning_hook) (string, args);
+  if (warning_hook != nullptr)
+    warning_hook (string, args);
   else
     {
       std::optional<target_terminal::scoped_restore_terminal_state> term_state;
