@@ -823,6 +823,7 @@ enum
   USE_X86_64_EVEX_FROM_VEX_TABLE,
   USE_X86_64_EVEX_PFX_TABLE,
   USE_X86_64_EVEX_W_TABLE,
+  USE_X86_64_EVEX_MEM_W_TABLE,
   USE_3BYTE_TABLE,
   USE_XOP_8F_TABLE,
   USE_VEX_C4_TABLE,
@@ -845,6 +846,7 @@ enum
   DIS386 (USE_X86_64_EVEX_FROM_VEX_TABLE, (I))
 #define X86_64_EVEX_PFX_TABLE(I) DIS386 (USE_X86_64_EVEX_PFX_TABLE, (I))
 #define X86_64_EVEX_W_TABLE(I) DIS386 (USE_X86_64_EVEX_W_TABLE, (I))
+#define X86_64_EVEX_MEM_W_TABLE(I) DIS386 (USE_X86_64_EVEX_MEM_W_TABLE, (I))
 #define THREE_BYTE_TABLE(I)	DIS386 (USE_3BYTE_TABLE, (I))
 #define XOP_8F_TABLE()		DIS386 (USE_XOP_8F_TABLE, 0)
 #define VEX_C4_TABLE()		DIS386 (USE_VEX_C4_TABLE, 0)
@@ -8802,6 +8804,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
     case USE_X86_64_EVEX_FROM_VEX_TABLE:
     case USE_X86_64_EVEX_PFX_TABLE:
     case USE_X86_64_EVEX_W_TABLE:
+    case USE_X86_64_EVEX_MEM_W_TABLE:
       ins->evex_type = evex_from_vex;
       /* EVEX from VEX instructions are 64-bit only and require that EVEX.z,
 	 EVEX.L'L, EVEX.b, and the lower 2 bits of EVEX.aaa must be 0.  */
@@ -8816,6 +8819,12 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	goto use_prefix_table;
       if (dp->op[0].bytemode == USE_X86_64_EVEX_W_TABLE)
 	goto use_vex_w_table;
+      if (dp->op[0].bytemode == USE_X86_64_EVEX_MEM_W_TABLE)
+	{
+	  if (ins->modrm.mod == 3)
+	    return &bad_opcode;
+	  goto use_vex_w_table;
+	}
 
       /* Fall through.  */
     case USE_X86_64_TABLE:
