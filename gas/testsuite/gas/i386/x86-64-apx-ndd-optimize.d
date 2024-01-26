@@ -118,6 +118,9 @@ Disassembly of section .text:
 \s*[a-f0-9]+:\s*67 0f 4d 90 90 90 90 90 	cmovge -0x6f6f6f70\(%eax\),%edx
 \s*[a-f0-9]+:\s*67 0f 4e 90 90 90 90 90 	cmovle -0x6f6f6f70\(%eax\),%edx
 \s*[a-f0-9]+:\s*67 0f 4f 90 90 90 90 90 	cmovg  -0x6f6f6f70\(%eax\),%edx
+\s*[a-f0-9]+:\s*62 f4 7d 08 60 c0    	movbe  %ax,%ax
+\s*[a-f0-9]+:\s*49 0f c8             	bswap  %r8
+\s*[a-f0-9]+:\s*d5 98 c8             	bswap  %r16
 \s*[a-f0-9]+:\s*66 0f 38 f6 c3       	adcx   %ebx,%eax
 \s*[a-f0-9]+:\s*66 0f 38 f6 c3       	adcx   %ebx,%eax
 \s*[a-f0-9]+:\s*62 f4 fd 18 66 c3    	adcx   %rbx,%rax,%rax

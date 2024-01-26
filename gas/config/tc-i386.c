@@ -8959,10 +8959,11 @@ match_template (char mnem_suffix)
       if (optimize
 	  && !i.no_optimize
 	  && i.vec_encoding != vex_encoding_evex
-	  && t + 1 < current_templates.end
-	  && !t[1].opcode_modifier.evex
-	  && t[1].opcode_space <= SPACE_0F38
-	  && t->opcode_modifier.vexvvvv == VexVVVV_DST
+	  && ((t + 1 < current_templates.end
+	       && !t[1].opcode_modifier.evex
+	       && t[1].opcode_space <= SPACE_0F38
+	       && t->opcode_modifier.vexvvvv == VexVVVV_DST)
+	      || t->mnem_off == MN_movbe)
 	  && (i.types[i.operands - 1].bitfield.dword
 	      || i.types[i.operands - 1].bitfield.qword))
 	{
@@ -8998,6 +8999,12 @@ match_template (char mnem_suffix)
 
 		  --i.operands;
 		  --i.reg_operands;
+
+		  if (t->mnem_off == MN_movbe)
+		    {
+		      gas_assert (t[1].mnem_off == MN_bswap);
+		      ++current_templates.end;
+		    }
 
 		  specific_error = progress (internal_error);
 		  continue;

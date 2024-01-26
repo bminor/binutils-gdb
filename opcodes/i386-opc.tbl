@@ -210,6 +210,9 @@ mov, 0xf24, i386&No64, D|RegMem|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Te
 // Move after swapping the bytes
 movbe, 0x0f38f0, Movbe, D|Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 movbe, 0x60, Movbe&APX_F, D|Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+// This needs to live here for easy EVEX -> REX2 conversion, which wants to
+// restart with the next sequential template.
+bswap, 0xfc8, i486, No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64 }
 
 // Move with sign extend.
 movsb, 0xfbe, i386, Modrm|No_bSuf|No_sSuf, { Reg8|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
@@ -980,9 +983,8 @@ rex.wrxb, 0x4f, x64, NoSuf|IsPrefix, {}
 
 {<pseudopfx>}, PSEUDO_PREFIX/Prefix_<pseudopfx:ident>, <pseudopfx:cpu>, NoSuf|IsPrefix, {}
 
-// 486 extensions.
+// 486 extensions (BSWAP moved elsewhere).
 
-bswap, 0xfc8, i486, No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64 }
 xadd, 0xfc0, i486, W|CheckOperandSize|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 cmpxchg, 0xfb0, i486, W|CheckOperandSize|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 invd, 0xf08, i486, NoSuf, {}

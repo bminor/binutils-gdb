@@ -111,6 +111,9 @@ cmovl  0x90909090(%eax),%edx,%edx
 cmovge 0x90909090(%eax),%edx,%edx
 cmovle 0x90909090(%eax),%edx,%edx
 cmovg  0x90909090(%eax),%edx,%edx
+movbe  %ax,%ax
+movbe  %r8,%r8
+movbe  %r16,%r16
 adcx   %ebx,%eax,%eax
 adcx   %eax,%ebx,%eax
 adcx   %rbx,%rax,%rax
