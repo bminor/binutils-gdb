@@ -3496,14 +3496,12 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    relocation += rel->r_addend;
 
 	  RELOCATE_CALC_PC32_HI20 (relocation, pc);
-
 	  break;
 
 	case R_LARCH_TLS_LE_HI20_R:
+	  relocation += rel->r_addend;
 	  relocation -= elf_hash_table (info)->tls_sec->vma;
-
 	  RELOCATE_TLS_TP32_HI20 (relocation);
-
 	  break;
 
 	case R_LARCH_PCALA_LO12:
@@ -3684,6 +3682,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_LARCH_TLS_LE64_HI12:
 	  BFD_ASSERT (resolved_local && elf_hash_table (info)->tls_sec);
 
+	  relocation += rel->r_addend;
 	  relocation -= elf_hash_table (info)->tls_sec->vma;
 	  break;
 

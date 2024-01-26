@@ -196,6 +196,7 @@ dec2 : [1-9][0-9]?
 
   extern const char *const loongarch_r_normal_name[32];
   extern const char *const loongarch_r_alias[32];
+  extern const char *const loongarch_r_alias_1[32];
   extern const char *const loongarch_r_alias_deprecated[32];
   extern const char *const loongarch_f_normal_name[32];
   extern const char *const loongarch_f_alias[32];

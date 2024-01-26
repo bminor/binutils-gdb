@@ -49,6 +49,15 @@ const char *const loongarch_r_alias[32] =
   "$s1",   "$s2", "$s3", "$s4", "$s5", "$s6", "$s7", "$s8",
 };
 
+/* Add support for $s9.  */
+const char *const loongarch_r_alias_1[32] =
+{
+  "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "$s9", "",
+  "", "", "", "", "", "", "", "",
+};
+
 const char *const loongarch_r_alias_deprecated[32] =
 {
   "", "", "", "", "$v0", "$v1", "", "", "", "", "", "", "", "", "", "",

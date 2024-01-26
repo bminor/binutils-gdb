@@ -34,6 +34,7 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "local-ifunc-reloc"
     run_dump_test "anno-sym"
     run_dump_test "pcala64"
+    run_dump_test "tls-le"
 }
 
 if [istarget "loongarch32-*-*"] {

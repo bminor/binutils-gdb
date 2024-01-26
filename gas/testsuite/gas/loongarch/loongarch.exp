@@ -31,4 +31,5 @@ if [istarget loongarch*-*-*] {
     }
 
   run_list_test "align"
+  run_list_test "reg-s9"
 }
