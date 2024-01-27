@@ -91,18 +91,6 @@ x86_linux_nat_target::post_startup_inferior (ptid_t ptid)
   linux_nat_target::post_startup_inferior (ptid);
 }
 
-#ifdef __x86_64__
-/* Value of CS segment register:
-     64bit process: 0x33
-     32bit process: 0x23  */
-#define AMD64_LINUX_USER64_CS 0x33
-
-/* Value of DS segment register:
-     LP64 process: 0x0
-     X32 process: 0x2b  */
-#define AMD64_LINUX_X32_DS 0x2b
-#endif
-
 /* Get Linux/x86 target description from running target.  */
 
 const struct target_desc *
@@ -122,31 +110,11 @@ x86_linux_nat_target::read_description ()
   tid = inferior_ptid.pid ();
 
 #ifdef __x86_64__
-  {
-    unsigned long cs;
-    unsigned long ds;
 
-    /* Get CS register.  */
-    errno = 0;
-    cs = ptrace (PTRACE_PEEKUSER, tid,
-		 offsetof (struct user_regs_struct, cs), 0);
-    if (errno != 0)
-      perror_with_name (_("Couldn't get CS register"));
+  x86_linux_arch_size arch_size = x86_linux_ptrace_get_arch_size (tid);
+  is_64bit = arch_size.is_64bit ();
+  is_x32 = arch_size.is_x32 ();
 
-    is_64bit = cs == AMD64_LINUX_USER64_CS;
-
-    /* Get DS register.  */
-    errno = 0;
-    ds = ptrace (PTRACE_PEEKUSER, tid,
-		 offsetof (struct user_regs_struct, ds), 0);
-    if (errno != 0)
-      perror_with_name (_("Couldn't get DS register"));
-
-    is_x32 = ds == AMD64_LINUX_X32_DS;
-
-    if (sizeof (void *) == 4 && is_64bit && !is_x32)
-      error (_("Can't debug 64-bit process with 32-bit GDB"));
-  }
 #elif HAVE_PTRACE_GETFPXREGS
   if (have_ptrace_getfpxregs == -1)
     {
