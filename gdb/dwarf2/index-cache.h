@@ -40,9 +40,10 @@ struct index_cache_resource
 
 struct index_cache_store_context
 {
-  friend class index_cache;
-
   index_cache_store_context (const index_cache &ic, dwarf2_per_bfd *per_bfd);
+
+  /* Store the index in the cache.  */
+  void store () const;
 
 private:
   /* Captured value of enabled ().  */
@@ -81,9 +82,6 @@ public:
 
   /* Disable the cache.  */
   void disable ();
-
-  /* Store an index for the specified object file in the cache.  */
-  void store (const index_cache_store_context &);
 
   /* Look for an index file matching BUILD_ID.  If found, return the contents
      as an array_view and store the underlying resources (allocated memory,
