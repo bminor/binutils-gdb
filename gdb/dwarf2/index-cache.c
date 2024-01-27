@@ -90,7 +90,8 @@ index_cache::disable ()
 
 index_cache_store_context::index_cache_store_context (const index_cache &ic,
 						      dwarf2_per_bfd *per_bfd)
-  :  m_enabled (ic.enabled ())
+  :  m_enabled (ic.enabled ()),
+     m_dir (ic.m_dir)
 {
   if (!m_enabled)
     return;
@@ -124,7 +125,7 @@ index_cache_store_context::index_cache_store_context (const index_cache &ic,
       m_dwz_build_id_str = build_id_to_string (dwz_build_id);
     }
 
-  if (ic.m_dir.empty ())
+  if (m_dir.empty ())
     {
       warning (_("The index cache directory name is empty, skipping store."));
       m_enabled = false;
@@ -134,7 +135,7 @@ index_cache_store_context::index_cache_store_context (const index_cache &ic,
   try
     {
       /* Try to create the containing directory.  */
-      if (!mkdir_recursive (ic.m_dir.c_str ()))
+      if (!mkdir_recursive (m_dir.c_str ()))
 	{
 	  warning (_("index cache: could not make cache directory: %s"),
 		   safe_strerror (errno));
@@ -170,7 +171,7 @@ index_cache::store (dwarf2_per_bfd *per_bfd,
 
       /* Write the index itself to the directory, using the build id as the
 	 filename.  */
-      write_dwarf_index (per_bfd, m_dir.c_str (),
+      write_dwarf_index (per_bfd, ctx.m_dir.c_str (),
 			 ctx.m_build_id_str.c_str (), dwz_build_id_ptr,
 			 dw_index_kind::GDB_INDEX);
     }

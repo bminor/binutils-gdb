@@ -48,6 +48,9 @@ private:
   /* Captured value of enabled ().  */
   bool m_enabled;
 
+  /* Captured value of index cache directory.  */
+  std::string m_dir;
+
   /* Captured value of build id.  */
   std::string m_build_id_str;
 
