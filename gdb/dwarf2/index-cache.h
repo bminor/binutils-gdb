@@ -49,10 +49,10 @@ private:
   bool m_enabled;
 
   /* Captured value of build id.  */
-  std::string build_id_str;
+  std::string m_build_id_str;
 
   /* Captured value of dwz build id.  */
-  std::optional<std::string> dwz_build_id_str;
+  std::optional<std::string> m_dwz_build_id_str;
 };
 
 /* Class to manage the access to the DWARF index cache.  */

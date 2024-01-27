@@ -104,7 +104,7 @@ index_cache_store_context::index_cache_store_context (const index_cache &ic,
       m_enabled = false;
       return;
     }
-  build_id_str = build_id_to_string (build_id);
+  m_build_id_str = build_id_to_string (build_id);
 
   /* Get build id of dwz file, if present.  */
   const dwz_file *dwz = dwarf2_get_dwz_file (per_bfd);
@@ -121,7 +121,7 @@ index_cache_store_context::index_cache_store_context (const index_cache &ic,
 	  return;
 	}
 
-      dwz_build_id_str = build_id_to_string (dwz_build_id);
+      m_dwz_build_id_str = build_id_to_string (dwz_build_id);
     }
 
   if (ic.m_dir.empty ())
@@ -159,8 +159,8 @@ index_cache::store (dwarf2_per_bfd *per_bfd,
   if (!ctx.m_enabled)
     return;
 
-  const char *dwz_build_id_ptr = (ctx.dwz_build_id_str.has_value ()
-				  ? ctx.dwz_build_id_str->c_str ()
+  const char *dwz_build_id_ptr = (ctx.m_dwz_build_id_str.has_value ()
+				  ? ctx.m_dwz_build_id_str->c_str ()
 				  : nullptr);
 
   try
@@ -171,7 +171,7 @@ index_cache::store (dwarf2_per_bfd *per_bfd,
       /* Write the index itself to the directory, using the build id as the
 	 filename.  */
       write_dwarf_index (per_bfd, m_dir.c_str (),
-			 ctx.build_id_str.c_str (), dwz_build_id_ptr,
+			 ctx.m_build_id_str.c_str (), dwz_build_id_ptr,
 			 dw_index_kind::GDB_INDEX);
     }
   catch (const gdb_exception_error &except)
