@@ -51,6 +51,9 @@ private:
   /* Captured value of index cache directory.  */
   std::string m_dir;
 
+  /* The per-bfd object that we're caching.  */
+  dwarf2_per_bfd *m_per_bfd;
+
   /* Captured value of build id.  */
   std::string m_build_id_str;
 
@@ -80,8 +83,7 @@ public:
   void disable ();
 
   /* Store an index for the specified object file in the cache.  */
-  void store (dwarf2_per_bfd *per_bfd,
-	      const index_cache_store_context &);
+  void store (const index_cache_store_context &);
 
   /* Look for an index file matching BUILD_ID.  If found, return the contents
      as an array_view and store the underlying resources (allocated memory,

@@ -631,7 +631,7 @@ cooked_index::set_contents (vec_type &&vec)
   gdb::task_group finalizers ([this, ctx = std::move (ctx)] ()
   {
     m_state->set (cooked_state::FINALIZED);
-    maybe_write_index (m_per_bfd, ctx);
+    maybe_write_index (ctx);
   });
 
   for (auto &idx : m_vector)
@@ -837,13 +837,12 @@ cooked_index::dump (gdbarch *arch)
 }
 
 void
-cooked_index::maybe_write_index (dwarf2_per_bfd *per_bfd,
-				 const index_cache_store_context &ctx)
+cooked_index::maybe_write_index (const index_cache_store_context &ctx)
 {
   if (index_for_writing () != nullptr)
     {
       /* (maybe) store an index in the cache.  */
-      global_index_cache.store (m_per_bfd, ctx);
+      global_index_cache.store (ctx);
     }
   m_state->set (cooked_state::CACHE_DONE);
 }

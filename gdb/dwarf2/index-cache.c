@@ -91,7 +91,8 @@ index_cache::disable ()
 index_cache_store_context::index_cache_store_context (const index_cache &ic,
 						      dwarf2_per_bfd *per_bfd)
   :  m_enabled (ic.enabled ()),
-     m_dir (ic.m_dir)
+     m_dir (ic.m_dir),
+     m_per_bfd (per_bfd)
 {
   if (!m_enabled)
     return;
@@ -154,8 +155,7 @@ index_cache_store_context::index_cache_store_context (const index_cache &ic,
 /* See dwarf-index-cache.h.  */
 
 void
-index_cache::store (dwarf2_per_bfd *per_bfd,
-		    const index_cache_store_context &ctx)
+index_cache::store (const index_cache_store_context &ctx)
 {
   if (!ctx.m_enabled)
     return;
@@ -167,18 +167,18 @@ index_cache::store (dwarf2_per_bfd *per_bfd,
   try
     {
       index_cache_debug ("writing index cache for objfile %s",
-			 bfd_get_filename (per_bfd->obfd));
+			 bfd_get_filename (ctx.m_per_bfd->obfd));
 
       /* Write the index itself to the directory, using the build id as the
 	 filename.  */
-      write_dwarf_index (per_bfd, ctx.m_dir.c_str (),
+      write_dwarf_index (ctx.m_per_bfd, ctx.m_dir.c_str (),
 			 ctx.m_build_id_str.c_str (), dwz_build_id_ptr,
 			 dw_index_kind::GDB_INDEX);
     }
   catch (const gdb_exception_error &except)
     {
       index_cache_debug ("couldn't store index cache for objfile %s: %s",
-			 bfd_get_filename (per_bfd->obfd), except.what ());
+			 bfd_get_filename (ctx.m_per_bfd->obfd), except.what ());
     }
 }
 

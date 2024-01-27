@@ -672,8 +672,7 @@ public:
 private:
 
   /* Maybe write the index to the index cache.  */
-  void maybe_write_index (dwarf2_per_bfd *per_bfd,
-			  const index_cache_store_context &);
+  void maybe_write_index (const index_cache_store_context &);
 
   /* The vector of cooked_index objects.  This is stored because the
      entries are stored on the obstacks in those objects.  */
