@@ -869,6 +869,22 @@ x86_linux_read_description (void)
 #endif
     }
 
+  /* If we are not allowed to send an XML target description then we need
+     to use the hard-wired target descriptions.  This corresponds to GDB's
+     default machine for x86.
+
+     This check needs to occur before any returns statements that might
+     generate some alternative target descriptions.  */
+  if (!use_xml)
+    {
+#ifdef __x86_64__
+      if (machine == EM_X86_64)
+	return tdesc_amd64_linux_no_xml.get ();
+      else
+#endif
+	return tdesc_i386_linux_no_xml.get ();
+    }
+
 #if !defined __x86_64__ && defined HAVE_PTRACE_GETFPXREGS
   if (machine == EM_386 && have_ptrace_getfpxregs == -1)
     {
@@ -884,17 +900,6 @@ x86_linux_read_description (void)
 	have_ptrace_getfpxregs = 1;
     }
 #endif
-
-  if (!use_xml)
-    {
-      /* Don't use XML.  */
-#ifdef __x86_64__
-      if (machine == EM_X86_64)
-	return tdesc_amd64_linux_no_xml.get ();
-      else
-#endif
-	return tdesc_i386_linux_no_xml.get ();
-    }
 
   if (have_ptrace_getregset == TRIBOOL_UNKNOWN)
     {
