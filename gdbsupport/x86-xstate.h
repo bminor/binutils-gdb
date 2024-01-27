@@ -120,4 +120,24 @@ constexpr bool operator!= (const x86_xsave_layout &lhs,
 
 #define I387_MXCSR_INIT_VAL 0x1f80
 
+/* Format of XSAVE extended state is:
+	struct
+	{
+	  fxsave_bytes[0..463]
+	  sw_usable_bytes[464..511]
+	  xstate_hdr_bytes[512..575]
+	  extended state regions (AVX, MPX, AVX512, PKRU, etc.)
+	};
+
+  Same memory layout will be used for the coredump NT_X86_XSTATE
+  representing the XSAVE extended state registers.
+
+  The first 8 bytes of the sw_usable_bytes[464..467] is the OS enabled
+  extended state mask, which is the same as the extended control register
+  0 (the XFEATURE_ENABLED_MASK register), XCR0.  We can use this mask
+  together with the mask saved in the xstate_hdr_bytes to determine what
+  states the processor/OS supports and what state, used or initialized,
+  the process/thread is in.  */
+#define I386_LINUX_XSAVE_XCR0_OFFSET 464
+
 #endif /* COMMON_X86_XSTATE_H */
