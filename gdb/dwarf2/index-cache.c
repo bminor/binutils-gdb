@@ -33,6 +33,7 @@
 #include "gdbsupport/selftest.h"
 #include <string>
 #include <stdlib.h>
+#include "run-on-main-thread.h"
 
 /* When set to true, show debug messages about the index cache.  */
 static bool debug_index_cache = false;
@@ -94,6 +95,9 @@ index_cache_store_context::index_cache_store_context (const index_cache &ic,
      m_dir (ic.m_dir),
      m_per_bfd (per_bfd)
 {
+  /* Capturing globals may only be done on the main thread.  */
+  gdb_assert (is_main_thread ());
+
   if (!m_enabled)
     return;
 

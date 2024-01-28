@@ -578,6 +578,15 @@ cooked_index_worker::set (cooked_state desired_state)
 #endif /* CXX_STD_THREAD */
 }
 
+/* See cooked-index.h.  */
+
+void
+cooked_index_worker::write_to_cache (const cooked_index *idx) const
+{
+  if (idx != nullptr)
+    m_cache_store.store ();
+}
+
 cooked_index::cooked_index (dwarf2_per_objfile *per_objfile,
 			    std::unique_ptr<cooked_index_worker> &&worker)
   : m_state (std::move (worker)),
@@ -621,17 +630,16 @@ cooked_index::set_contents (vec_type &&vec)
 
   m_state->set (cooked_state::MAIN_AVAILABLE);
 
-  index_cache_store_context ctx (global_index_cache, m_per_bfd);
-
   /* This is run after finalization is done -- but not before.  If
      this task were submitted earlier, it would have to wait for
      finalization.  However, that would take a slot in the global
      thread pool, and if enough such tasks were submitted at once, it
      would cause a livelock.  */
-  gdb::task_group finalizers ([this, ctx = std::move (ctx)] ()
+  gdb::task_group finalizers ([this] ()
   {
     m_state->set (cooked_state::FINALIZED);
-    maybe_write_index (ctx);
+    m_state->write_to_cache (index_for_writing ());
+    m_state->set (cooked_state::CACHE_DONE);
   });
 
   for (auto &idx : m_vector)
@@ -834,17 +842,6 @@ cooked_index::dump (gdbarch *arch)
 
       gdb_printf ("\n");
     }
-}
-
-void
-cooked_index::maybe_write_index (const index_cache_store_context &ctx)
-{
-  if (index_for_writing () != nullptr)
-    {
-      /* (maybe) store an index in the cache.  */
-      ctx.store ();
-    }
-  m_state->set (cooked_state::CACHE_DONE);
 }
 
 /* Wait for all the index cache entries to be written before gdb

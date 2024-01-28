@@ -467,7 +467,8 @@ class cooked_index_worker
 public:
 
   explicit cooked_index_worker (dwarf2_per_objfile *per_objfile)
-    : m_per_objfile (per_objfile)
+    : m_per_objfile (per_objfile),
+      m_cache_store (global_index_cache, per_objfile->per_bfd)
   { }
   virtual ~cooked_index_worker ()
   { }
@@ -486,9 +487,14 @@ public:
 
 protected:
 
-  /* Let cooked_index call the 'set' method.  */
+  /* Let cooked_index call the 'set' and 'write_to_cache' methods.  */
   friend class cooked_index;
+
+  /* Set the current state.  */
   void set (cooked_state desired_state);
+
+  /* Write to the index cache.  */
+  void write_to_cache (const cooked_index *idx) const;
 
   /* Helper function that does the work of reading.  This must be able
      to be run in a worker thread without problems.  */
@@ -534,6 +540,8 @@ protected:
      scanning is stopped and this exception will later be reported by
      the 'wait' method.  */
   std::optional<gdb_exception> m_failed;
+  /* An object used to write to the index cache.  */
+  index_cache_store_context m_cache_store;
 };
 
 /* The main index of DIEs.
@@ -670,9 +678,6 @@ public:
   { wait (cooked_state::CACHE_DONE); }
 
 private:
-
-  /* Maybe write the index to the index cache.  */
-  void maybe_write_index (const index_cache_store_context &);
 
   /* The vector of cooked_index objects.  This is stored because the
      entries are stored on the obstacks in those objects.  */
