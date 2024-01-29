@@ -541,8 +541,6 @@ wrap_comment (void)
 
   overwrite_string (tos - 1, &out);
   drop ();
-
-  pc++;
 }
 
 /* Mod tos so that only lines with leading dots remain */
