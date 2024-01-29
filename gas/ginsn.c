@@ -1161,8 +1161,8 @@ ginsn_data_end (const symbolS *label)
   /* Build the cfg of ginsn(s) of the function.  */
   if (!frchain_now->frch_ginsn_data->gcfg_apt_p)
     {
-      as_warn (_("Untraceable control flow for func '%s'; Skipping SCFI"),
-	       S_GET_NAME (func));
+      as_bad (_("untraceable control flow for func '%s'"),
+	      S_GET_NAME (func));
       goto end;
     }
 
