@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Controls whether to enable development-mode features by default.
-development=false
+development=true
 
 # Indicate whether this is a release branch.
 experimental=false

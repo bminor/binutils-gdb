@@ -340,7 +340,7 @@ How to create the release.
         make install-gas install-gold install-ld install-binutils install-gprofng
 
         # Needed for step 29...
-	make html pdf html-libctf pdf-libctf html-libsframe pdf-libsframe
+	make html pdf html-libctf pdf-libctf html-libsframe pdf-libsframe#
 
         popd
 
@@ -349,7 +349,7 @@ How to create the release.
 	enter a tag message such as: "Official GNU Binutils 2.4x release"
 
 	    git tag -a <TAG>         -u <Your Key>
-	    git tag -a binutils-2_42 -u DD9E3C4F      <=== Be careful to get the tag right
+	    git tag -a binutils-2_42 -u DD9E3C4F -m "Official GNU Binutils 2.4x release"       <=== Be careful to get the tag right
 
         NB/ If you do sign the binaries make sure to use a key
 	that has been published with the FSF.
