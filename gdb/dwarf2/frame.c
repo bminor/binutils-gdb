@@ -1423,7 +1423,7 @@ dwarf2_frame_cfa (frame_info_ptr this_frame)
 		 _("cfa not available for record btrace target"));
 
   while (get_frame_type (this_frame) == INLINE_FRAME)
-    this_frame = get_prev_frame (this_frame);
+    this_frame = get_prev_frame_always (this_frame);
   if (get_frame_unwind_stop_reason (this_frame) == UNWIND_UNAVAILABLE)
     throw_error (NOT_AVAILABLE_ERROR,
 		_("can't compute CFA for this frame: "

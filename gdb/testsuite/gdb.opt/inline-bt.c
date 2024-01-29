@@ -28,15 +28,15 @@ volatile int result;
 
 void bar(void);
 
-inline ATTR int func1(void)
+inline ATTR int func1(int s)
 {
   bar ();
-  return x * y;
+  return x * y + s;
 }
 
 inline ATTR int func2(void)
 {
-  return x * func1 ();
+  return x * func1 (1);
 }
 
 int main (void)
@@ -47,7 +47,7 @@ int main (void)
   y = 8;
   bar ();
 
-  val = func1 ();
+  val = func1 (2);
   result = val;
 
   val = func2 ();

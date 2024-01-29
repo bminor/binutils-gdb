@@ -1155,7 +1155,7 @@ dwarf_expr_reg_to_entry_parameter (frame_info_ptr frame,
 
   while (get_frame_type (frame) == INLINE_FRAME)
     {
-      frame = get_prev_frame (frame);
+      frame = get_prev_frame_always (frame);
       gdb_assert (frame != NULL);
     }
 
