@@ -57,8 +57,10 @@ Disassembly of section .text:
 			4c: R_LARCH_TLS_LE_LO12	TLS1
   50:	1a000004 	pcalau12i   	\$a0, 0
 			50: R_LARCH_TLS_IE_PC_HI20	TLS1
+			50: R_LARCH_RELAX	\*ABS\*
   54:	28c00084 	ld.d        	\$a0, \$a0, 0
 			54: R_LARCH_TLS_IE_PC_LO12	TLS1
+			54: R_LARCH_RELAX	\*ABS\*
   58:	1a000004 	pcalau12i   	\$a0, 0
 			58: R_LARCH_TLS_LD_PC_HI20	TLS1
 			58: R_LARCH_RELAX	\*ABS\*

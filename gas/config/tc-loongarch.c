@@ -724,8 +724,12 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 		}
 
 	      /* Only one register macros (used in normal code model)
-		 emit R_LARCH_RELAX.  */
+		 emit R_LARCH_RELAX.
+		 LARCH_opts.ase_labs and LARCH_opts.ase_gabs are used
+		 to generate the code model of absolute addresses, and
+		 we do not relax this code model.  */
 	      if (LARCH_opts.relax && (ip->expand_from_macro & 1)
+		    && ! (LARCH_opts.ase_labs | LARCH_opts.ase_gabs)
 		    && (BFD_RELOC_LARCH_PCALA_HI20 == reloc_type
 			|| BFD_RELOC_LARCH_PCALA_LO12 == reloc_type
 			|| BFD_RELOC_LARCH_GOT_PC_HI20 == reloc_type
@@ -733,7 +737,11 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 			|| BFD_RELOC_LARCH_TLS_LD_PC_HI20 == reloc_type
 			|| BFD_RELOC_LARCH_TLS_GD_PC_HI20 == reloc_type
 			|| BFD_RELOC_LARCH_TLS_DESC_PC_HI20 == reloc_type
-			|| BFD_RELOC_LARCH_TLS_DESC_PC_LO12 == reloc_type))
+			|| BFD_RELOC_LARCH_TLS_DESC_PC_LO12 == reloc_type
+			|| BFD_RELOC_LARCH_TLS_DESC_LD == reloc_type
+			|| BFD_RELOC_LARCH_TLS_DESC_CALL == reloc_type
+			|| BFD_RELOC_LARCH_TLS_IE_PC_HI20 == reloc_type
+			|| BFD_RELOC_LARCH_TLS_IE_PC_LO12 == reloc_type))
 		{
 		  ip->reloc_info[ip->reloc_num].type = BFD_RELOC_LARCH_RELAX;
 		  ip->reloc_info[ip->reloc_num].value = const_0;
@@ -1088,7 +1096,12 @@ append_fixp_and_insn (struct loongarch_cl_insn *ip)
 	  || BFD_RELOC_LARCH_TLS_LE_ADD_R == reloc_info[0].type
 	  || BFD_RELOC_LARCH_TLS_LD_PC_HI20 == reloc_info[0].type
 	  || BFD_RELOC_LARCH_TLS_GD_PC_HI20 == reloc_info[0].type
-	  || BFD_RELOC_LARCH_TLS_DESC_PC_HI20 == reloc_info[0].type))
+	  || BFD_RELOC_LARCH_TLS_DESC_PC_HI20 == reloc_info[0].type
+	  || BFD_RELOC_LARCH_TLS_DESC_PC_LO12 == reloc_info[0].type
+	  || BFD_RELOC_LARCH_TLS_DESC_LD == reloc_info[0].type
+	  || BFD_RELOC_LARCH_TLS_DESC_CALL == reloc_info[0].type
+	  || BFD_RELOC_LARCH_TLS_IE_PC_HI20 == reloc_info[0].type
+	  || BFD_RELOC_LARCH_TLS_IE_PC_LO12 == reloc_info[0].type))
     {
       frag_wane (frag_now);
       frag_new (0);

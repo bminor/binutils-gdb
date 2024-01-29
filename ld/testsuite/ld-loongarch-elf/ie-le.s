@@ -6,6 +6,7 @@ var:
 	.global	fn1
 	.type	gn1,@function
 fn1:
-	# expect IE to relax LE.
-	pcalau12i       $a0,%ie_pc_hi20(var)
-	ld.d    	$a0,$a0,%ie_pc_lo12(var)
+	# expect IE to relax LE in nomal cmodel.
+	la.tls.ie	$a0,var
+	# extreme cmodel do not do transition.
+	la.tls.ie	$a0,$a1,var

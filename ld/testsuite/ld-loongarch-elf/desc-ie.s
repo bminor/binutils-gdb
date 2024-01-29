@@ -9,10 +9,9 @@ fn1:
 
 	# Use DESC and IE to access the same symbol,
 	# DESC will relax to IE.
-	pcalau12i       $a0,%desc_pc_hi20(var)
-	addi.d  $a0,$a0,%desc_pc_lo12(var)
-	ld.d    $ra,$a0,%desc_ld(var)
-	jirl    $ra,$ra,%desc_call(var)
+	la.tls.desc $a0,var
+	la.tls.ie   $a0,var
 
-	pcalau12i       $a0,%ie_pc_hi20(var)
-	ld.d		$ra,$a0,%ie_pc_lo12(var)
+	# extreme cmodel do not do transition.
+	la.tls.desc $a0,$a1,var
+	la.tls.ie   $a0,$a1,var

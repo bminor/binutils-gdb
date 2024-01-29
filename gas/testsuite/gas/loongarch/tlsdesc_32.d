@@ -23,5 +23,7 @@ Disassembly of section .text:
 			14: R_LARCH_RELAX	\*ABS\*
   18:	28800081 	ld.w        	\$ra, \$a0, 0
 			18: R_LARCH_TLS_DESC_LD	var
+			18: R_LARCH_RELAX	\*ABS\*
   1c:	4c000021 	jirl        	\$ra, \$ra, 0
 			1c: R_LARCH_TLS_DESC_CALL	var
+			1c: R_LARCH_RELAX	\*ABS\*

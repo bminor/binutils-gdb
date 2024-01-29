@@ -145,14 +145,12 @@ struct loongarch_elf_link_hash_table
 #define elf_backend_rela_normal 1
 #define elf_backend_default_execstack 0
 
-#define IS_LOONGARCH_TLS_DESC_RELOC(R_TYPE)    \
-  ((R_TYPE) == R_LARCH_TLS_DESC_PC_HI20	\
-   || (R_TYPE) == R_LARCH_TLS_DESC_PC_LO12  \
-   || (R_TYPE) == R_LARCH_TLS_DESC_LD \
-   || (R_TYPE) == R_LARCH_TLS_DESC_CALL)
-
-#define IS_LOONGARCH_TLS_IE_RELOC(R_TYPE) \
-  ((R_TYPE) == R_LARCH_TLS_IE_PC_HI20 \
+#define IS_LOONGARCH_TLS_TRANS_RELOC(R_TYPE)  \
+  ((R_TYPE) == R_LARCH_TLS_DESC_PC_HI20	      \
+   || (R_TYPE) == R_LARCH_TLS_DESC_PC_LO12    \
+   || (R_TYPE) == R_LARCH_TLS_DESC_LD	      \
+   || (R_TYPE) == R_LARCH_TLS_DESC_CALL	      \
+   || (R_TYPE) == R_LARCH_TLS_IE_PC_HI20      \
    || (R_TYPE) == R_LARCH_TLS_IE_PC_LO12)
 
 /* Generate a PLT header.  */
@@ -642,15 +640,20 @@ loongarch_reloc_got_type (unsigned int r_type)
 
 /* Return true if tls type transition can be performed.  */
 static bool
-loongarch_can_relax_tls (struct bfd_link_info *info, unsigned int r_type,
-			 struct elf_link_hash_entry *h, bfd *input_bfd,
-			 unsigned long r_symndx)
+loongarch_can_trans_tls (bfd *input_bfd,
+			  struct bfd_link_info *info,
+			  struct elf_link_hash_entry *h,
+			  const Elf_Internal_Rela *rel,
+			  unsigned int r_type)
 {
   char symbol_tls_type;
   unsigned int reloc_got_type;
+  unsigned int r_symndx = ELFNN_R_SYM (rel->r_info);
 
-  if (! (IS_LOONGARCH_TLS_DESC_RELOC (r_type)
-	 || IS_LOONGARCH_TLS_IE_RELOC (r_type)))
+  /* Only TLS DESC/IE in normal code mode will perform type
+     transition.  */
+  if (! (IS_LOONGARCH_TLS_TRANS_RELOC (r_type)
+	  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX))
     return false;
 
   symbol_tls_type = _bfd_loongarch_elf_tls_type (input_bfd, h, r_symndx);
@@ -707,11 +710,13 @@ loongarch_tls_transition_without_check (struct bfd_link_info *info,
 }
 
 static unsigned int
-loongarch_tls_transition (struct bfd_link_info *info, unsigned int r_type,
-			  struct elf_link_hash_entry *h, bfd *input_bfd,
-			  unsigned long r_symndx)
+loongarch_tls_transition (bfd *input_bfd,
+			  struct bfd_link_info *info,
+			  struct elf_link_hash_entry *h,
+			  const Elf_Internal_Rela *rel,
+			  unsigned int r_type)
 {
-  if (! loongarch_can_relax_tls (info, r_type, h, input_bfd,r_symndx))
+  if (! loongarch_can_trans_tls (input_bfd, info, h, rel, r_type))
     return r_type;
 
   return loongarch_tls_transition_without_check (info, r_type, h);
@@ -818,7 +823,10 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       int need_dynreloc = 0;
       int only_need_pcrel = 0;
 
-      r_type = loongarch_tls_transition (info, r_type, h, abfd, r_symndx);
+      /* Type transitions are only possible with relocations accompanied
+	 by R_LARCH_RELAX.  */
+      if (rel + 1 != relocs + sec->reloc_count)
+	r_type = loongarch_tls_transition (abfd, info, h, rel, r_type);
       switch (r_type)
 	{
 	case R_LARCH_GOT_PC_HI20:
@@ -2538,7 +2546,7 @@ loongarch_reloc_is_fatal (struct bfd_link_info *info,
 
 /* Transition instruction sequence to relax instruction sequence.  */
 static bool
-loongarch_tls_relax (bfd *abfd, asection *sec, Elf_Internal_Rela *rel,
+loongarch_tls_perform_trans (bfd *abfd, asection *sec, Elf_Internal_Rela *rel,
 		    int r_type, struct elf_link_hash_entry *h,
 		    struct bfd_link_info *info)
 {
@@ -2659,7 +2667,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       const char *name;
       bfd_reloc_status_type r = bfd_reloc_ok;
       bool is_ie, is_desc, is_undefweak, unresolved_reloc, defined_local;
-      unsigned int relaxed_r_type;
+      unsigned int trans_r_type = r_type;
       bool resolved_local, resolved_dynly, resolved_to_const;
       char tls_type;
       bfd_vma relocation, off, ie_off, desc_off;
@@ -2791,14 +2799,17 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
       BFD_ASSERT (!resolved_local || defined_local);
 
-      relaxed_r_type = loongarch_tls_transition (info, r_type, h, input_bfd, r_symndx);
-      if (relaxed_r_type != r_type)
+      if (rel + 1 != relend)
+	trans_r_type = loongarch_tls_transition (input_bfd, info, h,
+						rel, r_type);
+      if (trans_r_type != r_type)
       {
-	howto = loongarch_elf_rtype_to_howto (input_bfd, relaxed_r_type);
+	howto = loongarch_elf_rtype_to_howto (input_bfd, trans_r_type);
 	BFD_ASSERT (howto != NULL);
 
-	if (loongarch_tls_relax (input_bfd, input_section, rel, r_type, h, info))
-	  r_type = relaxed_r_type;
+	if (loongarch_tls_perform_trans (input_bfd, input_section,
+					rel, r_type, h, info))
+	  r_type = trans_r_type;
       }
 
       is_desc = false;
@@ -4553,7 +4564,8 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	      || R_LARCH_TLS_GD_PC_HI20 == r_type
 	      || R_LARCH_TLS_DESC_PC_HI20 == r_type)
 	    {
-	      if (loongarch_can_relax_tls (info, r_type, h, abfd, r_symndx))
+	      if (i + 1 != sec->reloc_count
+		  && loongarch_can_trans_tls (abfd, info, h, rel, r_type))
 		continue;
 	      else
 		{
@@ -4597,7 +4609,8 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	      || R_LARCH_TLS_GD_PC_HI20 == r_type
 	      || R_LARCH_TLS_DESC_PC_HI20 == r_type)
 	    {
-	      if (loongarch_can_relax_tls (info, r_type, h, abfd, r_symndx))
+	      if (i + 1 != sec->reloc_count
+		  && loongarch_can_trans_tls (abfd, info, h, rel, r_type))
 		continue;
 	      else
 		{

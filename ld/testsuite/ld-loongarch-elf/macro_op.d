@@ -144,8 +144,10 @@ Disassembly of section .text:
 [ 	]+f8: R_LARCH_TLS_LE_LO12[ 	]+TLS1
 [ 	]+fc:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0, 0
 [ 	]+fc: R_LARCH_TLS_IE_PC_HI20[ 	]+TLS1
+[ 	]+fc: R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+100:[ 	]+28c00084[ 	]+ld.d[ 	]+\$a0, \$a0, 0
 [ 	]+100: R_LARCH_TLS_IE_PC_LO12[ 	]+TLS1
+[ 	]+100: R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+104:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0, 0
 [ 	]+104: R_LARCH_TLS_IE_PC_HI20[ 	]+TLS1
 [ 	]+108:[ 	]+02c00005[ 	]+li.d[ 	]+\$a1, 0
