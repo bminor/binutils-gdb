@@ -48,7 +48,6 @@ targ_underscore=no
 
 # Catch obsolete configurations.
 case $targ in
- *-*-beos* | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -79,6 +78,7 @@ case $targ in
     # Not obsolete
     ;;
  *-adobe-* | \
+ *-*-beos* | \
  *-go32-rtems* | \
  *-sony-* | \
  *-tandem-* | \
