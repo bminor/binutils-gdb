@@ -52,14 +52,6 @@ main:
     ldabsb      0x10
     fail_ne32   %r0, 0x5a
 
-    /* Repeat for a double-word (8-byte)
-       (note: fail_ne macro uses r0, so copy to another r1 to compare)  */
-    lddw        %r2, 0x1234deadbeef5678
-    stxdw       [%r6+0x1018], %r2
-    ldabsdw     0x18
-    mov         %r1, %r0
-    fail_ne     %r1, 0x1234deadbeef5678
-
     /* Now, we do the same for the indirect loads  */
     mov         %r7, 0x100
     stw         [%r6+0x1100], 0x0eedbeef
@@ -76,12 +68,5 @@ main:
     stb         [%r6+0x1108], 0x5f
     ldindb      %r7, 0x8
     fail_ne32   %r0, 0x5f
-
-    /* double-word  */
-    lddw        %r2, 0xcafe12345678d00d
-    stxdw       [%r6+0x1110], %r2
-    ldinddw     %r7, 0x10
-    mov         %r1, %r0
-    fail_ne     %r1, 0xcafe12345678d00d
 
     pass

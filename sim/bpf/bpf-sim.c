@@ -943,13 +943,6 @@ execute (SIM_CPU *cpu, struct bpf_insn *insn)
                                        bpf_read_u64 (cpu, bpf_regs[BPF_R6] + skb_data_offset)
                                        + bpf_regs[insn->src] + insn->imm32);
       break;
-    case BPF_INSN_LDINDDW:
-      BPF_TRACE ("BPF_INSN_LDINDDW\n");
-      bpf_regs[BPF_R0] = bpf_read_u64 (cpu,
-                                       bpf_read_u64 (cpu, bpf_regs[BPF_R6] + skb_data_offset)
-                                       + bpf_regs[insn->src] + insn->imm32);
-      break;
-      /* Absolute load instructions.  */
     case BPF_INSN_LDABSB:
       BPF_TRACE ("BPF_INSN_LDABSB\n");
       bpf_regs[BPF_R0] = bpf_read_u8 (cpu,
@@ -965,12 +958,6 @@ execute (SIM_CPU *cpu, struct bpf_insn *insn)
     case BPF_INSN_LDABSW:
       BPF_TRACE ("BPF_INSN_LDABSW\n");
       bpf_regs[BPF_R0] = bpf_read_u32 (cpu,
-                                       bpf_read_u64 (cpu, bpf_regs[BPF_R6] + skb_data_offset)
-                                       + insn->imm32);
-      break;
-    case BPF_INSN_LDABSDW:
-      BPF_TRACE ("BPF_INSN_LDABSDW\n");
-      bpf_regs[BPF_R0] = bpf_read_u64 (cpu,
                                        bpf_read_u64 (cpu, bpf_regs[BPF_R6] + skb_data_offset)
                                        + insn->imm32);
       break;
