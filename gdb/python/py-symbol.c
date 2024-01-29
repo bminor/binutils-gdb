@@ -600,7 +600,7 @@ gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
       lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
       expand_symtabs_matching (NULL, lookup_name, NULL, NULL,
 			       SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
-			       SEARCH_ALL);
+			       SEARCH_ALL_DOMAINS);
 
       for (objfile *objfile : current_program_space->objfiles ())
 	{

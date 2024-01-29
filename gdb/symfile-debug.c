@@ -222,7 +222,7 @@ objfile::map_symtabs_matching_filename
 					  on_expansion,
 					  (SEARCH_GLOBAL_BLOCK
 					   | SEARCH_STATIC_BLOCK),
-					  SEARCH_ALL))
+					  SEARCH_ALL_DOMAINS))
 	{
 	  retval = false;
 	  break;
@@ -378,7 +378,7 @@ objfile::expand_symtabs_with_fullname (const char *fullname)
 				   nullptr,
 				   (SEARCH_GLOBAL_BLOCK
 				    | SEARCH_STATIC_BLOCK),
-				   SEARCH_ALL);
+				   SEARCH_ALL_DOMAINS);
 }
 
 bool

@@ -13533,7 +13533,7 @@ public:
 			     NULL,
 			     NULL,
 			     SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
-			     SEARCH_ALL);
+			     SEARCH_ALL_DOMAINS);
 
     /* At this point scan through the misc symbol vectors and add each
        symbol you find to the list.  Eventually we want to ignore

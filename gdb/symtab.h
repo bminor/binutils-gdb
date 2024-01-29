@@ -917,7 +917,7 @@ enum domain_search_flag
 DEF_ENUM_FLAGS_TYPE (enum domain_search_flag, domain_search_flags);
 
 /* A convenience constant to search for any symbol.  */
-constexpr domain_search_flags SEARCH_ALL
+constexpr domain_search_flags SEARCH_ALL_DOMAINS
     = ((domain_search_flags) 0
 #define SYM_DOMAIN(X) | SEARCH_ ## X ## _DOMAIN
 #include "sym-domains.def"
@@ -958,7 +958,7 @@ search_flags_matches (domain_search_flags flags, domain_enum domain)
 
 /* The flag bit.  */
 constexpr int SCRIPTING_SEARCH_FLAG = 0x8000;
-static_assert (SCRIPTING_SEARCH_FLAG > SEARCH_ALL);
+static_assert (SCRIPTING_SEARCH_FLAG > SEARCH_ALL_DOMAINS);
 
 /* Convert a domain constant to a "scripting domain".  */
 static constexpr inline int

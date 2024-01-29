@@ -368,7 +368,7 @@ gcc_cplus_convert_symbol (void *datum,
 
       symbol_searcher searcher;
       searcher.find_all_symbols (identifier, current_language,
-				 SEARCH_ALL, nullptr, nullptr);
+				 SEARCH_ALL_DOMAINS, nullptr, nullptr);
 
       /* Convert any found symbols.  */
       for (const auto &it : searcher.matching_symbols ())
