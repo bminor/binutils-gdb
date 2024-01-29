@@ -251,7 +251,7 @@ How to create the release.
 
   21. a. Update the release number in bfd/version.m4 on the release
          branch to a whole new minor version number, without a point
-         value.  Eg "2.41.90" becomes "2.42".  NB/ Not: "2.42.00"
+         value.  Eg "2.42.90" becomes "2.43".  NB/ Not: "2.43.00"
 
       b. Change bfd/development.sh to set all values to "false".
 
@@ -279,10 +279,10 @@ How to create the release.
 	 need to agree to have it there.
 	
       e. Add ChangeLog entries for all of the updates and add a
-         "this-is-the-2.42-release" comment and commit.
+         "this-is-the-2.43-release" comment and commit.
 
 	   git add .
-           git commit
+           git commit -m "this-is-the-2.43-release"
 	   git push
 	   
   22. Check that your file creation mask will create the
@@ -351,14 +351,17 @@ How to create the release.
 	enter a tag message such as: "Official GNU Binutils 2.4x release"
 
 	    git tag -a <TAG>         -u <Your Key>
-	    git tag -a binutils-2_42 -u DD9E3C4F      <=== Be careful to get the tag right
+	  eg:
+	    git tag -a binutils-2_43 -u DD9E3C4F      <=== Be careful to get the tag right
+	  or:
+	    git tag -a binutils-2_43 -u DD9E3C4F -m "Official GNU Binutils 2.43 release"
 
         NB/ If you do sign the binaries make sure to use a key
 	that has been published with the FSF.
 
         Then push the release:
 	
-	    git push origin binutils-2_42
+	    git push origin binutils-2_43
 
         If you get an error message along the lines of:
 	  "Invalid revision range ..."
@@ -366,7 +369,7 @@ How to create the release.
 
   27.  Upload the tarballs to ftp.gnu.org.
 
-          gnupload --to ftp.gnu.org:binutils binutils-2.42.tar.*
+          gnupload --to ftp.gnu.org:binutils binutils-2.43.tar.*
 
         Be prepared to provide the password for the key, if you
 	signed the binaries.
@@ -422,7 +425,7 @@ How to create the release.
 
          cd as
 	 lcd <build-dir>/gas/doc/as
-	 put *                {be patient - this takes a long time...}
+	 put *                <=== Be patient - this takes a long time...
 	 lcd ..
 	 cd ..
 	 put as.html
