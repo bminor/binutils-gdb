@@ -451,10 +451,6 @@ tree for more information.
 Absolute loads:
 
 @table @code
-@item ldabsdw imm32
-@itemx r0 = *(u64 *) skb[imm32]
-Absolute 64-bit load.
-
 @item ldabsw imm32
 @itemx r0 = *(u32 *) skb[imm32]
 Absolute 32-bit load.
@@ -471,10 +467,6 @@ Absolute 8-bit load.
 Indirect loads:
 
 @table @code
-@item ldinddw rs, imm32
-@itemx r0 = *(u64 *) skb[rs + imm32]
-Indirect 64-bit load.
-
 @item ldindw rs, imm32
 @itemx r0 = *(u32 *) skb[rs + imm32]
 Indirect 32-bit load.

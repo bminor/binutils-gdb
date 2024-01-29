@@ -198,8 +198,6 @@ const struct bpf_opcode bpf_opcodes[] =
    BPF_V1, BPF_CODE, BPF_CLASS_LD|BPF_SIZE_H|BPF_MODE_IND},
   {BPF_INSN_LDINDW, "ldindw%W%sr , %i32", "r0 = * ( u32 * ) skb [ %sr %I32 ]",
    BPF_V1, BPF_CODE, BPF_CLASS_LD|BPF_SIZE_W|BPF_MODE_IND},
-  {BPF_INSN_LDINDDW, "ldinddw%W%sr , %i32", "r0 = * ( u64 * ) skb [ %sr %I32 ]",
-   BPF_V1, BPF_CODE, BPF_CLASS_LD|BPF_SIZE_DW|BPF_MODE_IND},
 
   /* Absolute load instructions, designed to be used in socket filters.  */
   {BPF_INSN_LDABSB, "ldabsb%W%i32", "r0 = * ( u8 * ) skb [ %i32 ]",
@@ -208,8 +206,6 @@ const struct bpf_opcode bpf_opcodes[] =
    BPF_V1, BPF_CODE, BPF_CLASS_LD|BPF_SIZE_H|BPF_MODE_ABS},
   {BPF_INSN_LDABSW, "ldabsw%W%i32", "r0 = * ( u32 * ) skb [ %i32 ]",
    BPF_V1, BPF_CODE, BPF_CLASS_LD|BPF_SIZE_W|BPF_MODE_ABS},
-  {BPF_INSN_LDABSDW, "ldabsdw%W%i32", "r0 = * ( u64 * ) skb [ %i32 ]",
-   BPF_V1, BPF_CODE, BPF_CLASS_LD|BPF_SIZE_DW|BPF_MODE_ABS},
 
   /* Generic load instructions (to register.)  */
   {BPF_INSN_LDXB, "ldxb%W%dr , [ %sr %o16 ]", "%dr = * ( u8 * ) ( %sr %o16 )",

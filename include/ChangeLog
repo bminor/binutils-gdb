@@ -1,3 +1,8 @@
+2024-01-29  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* opcode/bpf.h (enum bpf_insn_id): Remove BPF_INSN_LDINDDW and
+	BPF_INSN_LDABSDW instructions.
+
 2024-01-15  Nick Clifton  <nickc@redhat.com>
 
 	* 2.42 branch point.

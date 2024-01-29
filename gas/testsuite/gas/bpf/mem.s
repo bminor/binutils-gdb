@@ -5,11 +5,9 @@
  	ldabsw 0xbeef
 	ldabsh 0xbeef
  	ldabsb 0xbeef
- 	ldabsdw 0xbeef
 	ldindw %r3, 0xbeef
  	ldindh %r5, 0xbeef
  	ldindb %r7, 0xbeef
- 	ldinddw %r9, 0xbeef
  	ldxw %r2, [%r1+0x7eef]
  	ldxh %r2, [%r1+0x7eef]
  	ldxb %r2, [%r1+0x7eef]
