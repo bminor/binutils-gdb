@@ -697,11 +697,11 @@ static const scheme_integer_constant symbol_integer_constants[] =
   X (LOC_REGPARM_ADDR),
 #undef X
 
-#define DOMAIN(X) \
+#define SYM_DOMAIN(X) \
   { "SYMBOL_" #X "_DOMAIN", to_scripting_domain (X ## _DOMAIN) },	\
   { "SEARCH_" #X "_DOMAIN", to_scripting_domain (SEARCH_ ## X ## _DOMAIN) },
 #include "sym-domains.def"
-#undef DOMAIN
+#undef SYM_DOMAIN
 
   /* Historical.  */
   { "SYMBOL_VARIABLES_DOMAIN", to_scripting_domain (SEARCH_VAR_DOMAIN) },

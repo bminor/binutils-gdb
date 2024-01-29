@@ -21,38 +21,38 @@
    none of the following apply.  This usually indicates an error either
    in the symbol information or in gdb's handling of symbols.  */
 
-DOMAIN (UNDEF)
+SYM_DOMAIN (UNDEF)
 
 /* VAR_DOMAIN is the usual domain.  In C, this contains variables,
    function names, typedef names and enum type values.  */
 
-DOMAIN (VAR)
+SYM_DOMAIN (VAR)
 
 /* STRUCT_DOMAIN is used in C to hold struct, union and enum type names.
    Thus, if `struct foo' is used in a C program, it produces a symbol named
    `foo' in the STRUCT_DOMAIN.  */
 
-DOMAIN (STRUCT)
+SYM_DOMAIN (STRUCT)
 
 /* MODULE_DOMAIN is used in Fortran to hold module type names.  */
 
-DOMAIN (MODULE)
+SYM_DOMAIN (MODULE)
 
 /* LABEL_DOMAIN may be used for names of labels (for gotos).  */
 
-DOMAIN (LABEL)
+SYM_DOMAIN (LABEL)
 
 /* Fortran common blocks.  Their naming must be separate from VAR_DOMAIN.
    They also always use LOC_COMMON_BLOCK.  */
-DOMAIN (COMMON_BLOCK)
+SYM_DOMAIN (COMMON_BLOCK)
 
 /* TYPE_DOMAIN is for types and typedefs.  Note that tags are not
    found here, see STRUCT_DOMAIN above.  If a language does not have a
    tag namespace, then all types (including structures, etc) are
    here.  */
 
-DOMAIN (TYPE)
+SYM_DOMAIN (TYPE)
 
 /* FUNCTION_DOMAIN is for functions and methods.  */
 
-DOMAIN (FUNCTION)
+SYM_DOMAIN (FUNCTION)

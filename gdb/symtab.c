@@ -306,10 +306,10 @@ domain_name (domain_enum e)
 {
   switch (e)
     {
-#define DOMAIN(X)				\
+#define SYM_DOMAIN(X)				\
       case X ## _DOMAIN: return #X "_DOMAIN";
 #include "sym-domains.def"
-#undef DOMAIN
+#undef SYM_DOMAIN
     default: gdb_assert_not_reached ("bad domain_enum");
     }
 }
@@ -320,10 +320,10 @@ std::string
 domain_name (domain_search_flags flags)
 {
   static constexpr domain_search_flags::string_mapping mapping[] = {
-#define DOMAIN(X) \
+#define SYM_DOMAIN(X) \
     MAP_ENUM_FLAG (SEARCH_ ## X ## _DOMAIN),
 #include "sym-domains.def"
-#undef DOMAIN
+#undef SYM_DOMAIN
   };
 
   return flags.to_string (mapping);
@@ -340,10 +340,10 @@ from_scripting_domain (int val)
 	 convert it to a search constant.  */
       switch (val)
 	{
-#define DOMAIN(X)					\
+#define SYM_DOMAIN(X)					\
 	  case X ## _DOMAIN: break;
 #include "sym-domains.def"
-#undef DOMAIN
+#undef SYM_DOMAIN
 	default:
 	  error (_("unrecognized domain constant"));
 	}
@@ -361,10 +361,10 @@ from_scripting_domain (int val)
 	 this.  */
       val &= ~SCRIPTING_SEARCH_FLAG;
       int check = val;
-#define DOMAIN(X)				\
+#define SYM_DOMAIN(X)				\
       check &= ~ (int) SEARCH_ ## X ## _DOMAIN;
 #include "sym-domains.def"
-#undef DOMAIN
+#undef SYM_DOMAIN
       if (check != 0)
 	error (_("unrecognized domain constant"));
       return (domain_search_flag) val;

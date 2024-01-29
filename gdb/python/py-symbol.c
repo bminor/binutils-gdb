@@ -677,14 +677,14 @@ gdbpy_initialize_symbols (void)
 				  LOC_REGPARM_ADDR) < 0)
     return -1;
 
-#define DOMAIN(X)							\
+#define SYM_DOMAIN(X)							\
   if (PyModule_AddIntConstant (gdb_module, "SYMBOL_" #X "_DOMAIN",	\
 			       to_scripting_domain (X ## _DOMAIN)) < 0	\
       || PyModule_AddIntConstant (gdb_module, "SEARCH_" #X "_DOMAIN",	\
 				  to_scripting_domain (SEARCH_ ## X ## _DOMAIN)) < 0) \
     return -1;
 #include "sym-domains.def"
-#undef DOMAIN
+#undef SYM_DOMAIN
 
   return gdb_pymodule_addobject (gdb_module, "Symbol",
 				 (PyObject *) &symbol_object_type);

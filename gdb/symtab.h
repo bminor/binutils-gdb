@@ -894,9 +894,9 @@ private:
 
 enum domain_enum
 {
-#define DOMAIN(X) X ## _DOMAIN,
+#define SYM_DOMAIN(X) X ## _DOMAIN,
 #include "sym-domains.def"
-#undef DOMAIN
+#undef SYM_DOMAIN
 };
 
 /* The number of bits in a symbol used to represent the domain.  */
@@ -909,19 +909,19 @@ extern const char *domain_name (domain_enum);
    let the search match multiple kinds of symbol.  */
 enum domain_search_flag
 {
-#define DOMAIN(X) \
+#define SYM_DOMAIN(X) \
   SEARCH_ ## X ## _DOMAIN = (1 << X ## _DOMAIN),
 #include "sym-domains.def"
-#undef DOMAIN
+#undef SYM_DOMAIN
 };
 DEF_ENUM_FLAGS_TYPE (enum domain_search_flag, domain_search_flags);
 
 /* A convenience constant to search for any symbol.  */
 constexpr domain_search_flags SEARCH_ALL
     = ((domain_search_flags) 0
-#define DOMAIN(X) | SEARCH_ ## X ## _DOMAIN
+#define SYM_DOMAIN(X) | SEARCH_ ## X ## _DOMAIN
 #include "sym-domains.def"
-#undef DOMAIN
+#undef SYM_DOMAIN
        );
 
 /* A convenience define for "C-like" name lookups, matching variables,
