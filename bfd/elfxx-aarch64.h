@@ -46,6 +46,27 @@ typedef enum
   BTI_WARN	= 1,  /* BTI is enabled with -z force-bti.  */
 } aarch64_enable_bti_type;
 
+/* To indicate whether GNU_PROPERTY_AARCH64_FEATURE_1_GCS bit is
+   enabled/disabled on the output when -z experimental-gcs linker
+   command line option is passed.  */
+typedef enum
+{
+  GCS_NEVER	= 0,  /* gcs is disabled on output.  */
+  GCS_IMPLICIT  = 1,  /* gcs is deduced from input object.  */
+  GCS_ALWAYS	= 2,  /* gsc is enabled on output.  */
+} aarch64_gcs_type;
+
+/* To indicate whether to generate linker warning/errors for
+   -z experimental-gcs-report when -z experimental-gcs=always is passed.  */
+typedef enum
+{
+  GCS_NONE	= 0,  /* Does not emit any warning/error messages.  */
+  GCS_WARN	= 1,  /* Emit warning when the input objects are missing gcs
+			 markings and output have gcs marking.  */
+  GCS_ERROR	= 2,  /* Emit error when the input objects are missing gcs
+			 markings and output have gcs marking.  */
+} aarch64_gcs_report;
+
 /* A structure to encompass all information coming from BTI or PAC
    related command line options.  This involves the "PLT_TYPE" to determine
    which version of PLTs to pick and "BTI_TYPE" to determine if
@@ -54,7 +75,9 @@ typedef struct
 {
   aarch64_plt_type plt_type;
   aarch64_enable_bti_type bti_type;
-} aarch64_bti_pac_info;
+  aarch64_gcs_type gcs_type;
+  aarch64_gcs_report gcs_report;
+} aarch64_gnu_prop_info;
 
 /* An enum to define what kind of erratum fixes we should apply.  This gives the
    user a bit more control over the sequences we generate.  */
@@ -67,11 +90,11 @@ typedef enum
 
 extern void bfd_elf64_aarch64_set_options
   (bfd *, struct bfd_link_info *, int, int, int, int, erratum_84319_opts, int,
-   aarch64_bti_pac_info);
+   aarch64_gnu_prop_info);
 
 extern void bfd_elf32_aarch64_set_options
   (bfd *, struct bfd_link_info *, int, int, int, int, erratum_84319_opts, int,
-   aarch64_bti_pac_info);
+   aarch64_gnu_prop_info);
 
 /* AArch64 stub generation support for ELF64.  Called from the linker.  */
 extern int elf64_aarch64_setup_section_lists
@@ -135,8 +158,9 @@ _bfd_aarch64_elf_write_core_note (bfd *, char *, int *, int, ...);
 #define elf_backend_write_core_note	_bfd_aarch64_elf_write_core_note
 
 extern bfd *
-_bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *,
-					    uint32_t *);
+_bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *, uint32_t *,
+					    aarch64_gcs_report,
+					    aarch64_gcs_type);
 
 extern enum elf_property_kind
 _bfd_aarch64_elf_parse_gnu_properties (bfd *, unsigned int,
@@ -146,6 +170,8 @@ extern bool
 _bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *, bfd *,
 				       elf_property *, elf_property *,
 				       uint32_t);
+extern void
+_bfd_aarch64_elf_check_gcs_report (aarch64_gcs_report, bfd *);
 
 extern void
 _bfd_aarch64_elf_link_fixup_gnu_properties (struct bfd_link_info *,

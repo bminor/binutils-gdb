@@ -2546,6 +2546,12 @@ struct elf_aarch64_obj_tdata
      GNU_PROPERTY_AARCH64_FEATURE_1_BTI.  */
   int no_bti_warn;
 
+  /* Mark ouput with GCS based on -z experimental-gcs.  */
+  aarch64_gcs_type gcs_type;
+  /* Report linker warning/error for -z experimental-gcs-report based on
+     -z experimental-gcs.  */
+  aarch64_gcs_report gcs_report;
+
   /* PLT type based on security.  */
   aarch64_plt_type plt_type;
 };
@@ -5011,7 +5017,7 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
 			       int fix_erratum_835769,
 			       erratum_84319_opts fix_erratum_843419,
 			       int no_apply_dynamic_relocs,
-			       aarch64_bti_pac_info bp_info)
+			       aarch64_gnu_prop_info bp_info)
 {
   struct elf_aarch64_link_hash_table *globals;
 
@@ -5039,6 +5045,24 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
     default:
       break;
     }
+
+  switch (bp_info.gcs_type)
+    {
+    case GCS_ALWAYS:
+      elf_aarch64_tdata (output_bfd)->gnu_and_prop
+	|= GNU_PROPERTY_AARCH64_FEATURE_1_GCS;
+      break;
+    case GCS_NEVER:
+      elf_aarch64_tdata (output_bfd)->gnu_and_prop
+	&= ~GNU_PROPERTY_AARCH64_FEATURE_1_GCS;
+      break;
+
+    default:
+      break;
+    }
+
+  elf_aarch64_tdata (output_bfd)->gcs_type = bp_info.gcs_type;
+  elf_aarch64_tdata (output_bfd)->gcs_report = bp_info.gcs_report;
   elf_aarch64_tdata (output_bfd)->plt_type = bp_info.plt_type;
   setup_plt_values (link_info, bp_info.plt_type);
 }
@@ -10196,7 +10220,12 @@ static bfd *
 elfNN_aarch64_link_setup_gnu_properties (struct bfd_link_info *info)
 {
   uint32_t prop = elf_aarch64_tdata (info->output_bfd)->gnu_and_prop;
-  bfd *pbfd = _bfd_aarch64_elf_link_setup_gnu_properties (info, &prop);
+  aarch64_gcs_report gcs_report
+    = elf_aarch64_tdata (info->output_bfd)->gcs_report;
+  aarch64_gcs_report gcs_type
+    = elf_aarch64_tdata (info->output_bfd)->gcs_type;
+  bfd *pbfd = _bfd_aarch64_elf_link_setup_gnu_properties (info, &prop,
+							  gcs_report, gcs_type);
   elf_aarch64_tdata (info->output_bfd)->gnu_and_prop = prop;
   elf_aarch64_tdata (info->output_bfd)->plt_type
     |= (prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI) ? PLT_BTI : 0;
@@ -10215,30 +10244,54 @@ elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
 {
   uint32_t prop
     = elf_aarch64_tdata (info->output_bfd)->gnu_and_prop;
+  aarch64_gcs_report gcs_report
+    = elf_aarch64_tdata (info->output_bfd)->gcs_report;
+  aarch64_gcs_type gcs_type
+    = elf_aarch64_tdata (info->output_bfd)->gcs_type;
 
-  /* If output has been marked with BTI using command line argument, give out
-     warning if necessary.  */
   /* Properties are merged per type, hence only check for warnings when merging
      GNU_PROPERTY_AARCH64_FEATURE_1_AND.  */
-  if (((aprop && aprop->pr_type == GNU_PROPERTY_AARCH64_FEATURE_1_AND)
+  if ((aprop && aprop->pr_type == GNU_PROPERTY_AARCH64_FEATURE_1_AND)
 	|| (bprop && bprop->pr_type == GNU_PROPERTY_AARCH64_FEATURE_1_AND))
-      && (prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI)
-      && (!elf_aarch64_tdata (info->output_bfd)->no_bti_warn))
     {
-      if ((aprop && !(aprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
-	   || !aprop)
+      /* If output has been marked with BTI using command line argument, give
+	 out warning if necessary.  */
+      if ((prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI)
+	  && (!elf_aarch64_tdata (info->output_bfd)->no_bti_warn))
 	{
-	  _bfd_error_handler (_("%pB: warning: BTI turned on by -z force-bti when "
-				"all inputs do not have BTI in NOTE section."),
-			      abfd);
+	  if ((aprop && !(aprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
+	      || !aprop)
+	    {
+	      _bfd_error_handler (_("%pB: warning: BTI turned on by -z "
+				  "force-bti when all inputs do not have BTI "
+				  "in NOTE section."), abfd);
+	    }
+	  if ((bprop && !(bprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
+	      || !bprop)
+	    {
+	      _bfd_error_handler (_("%pB: warning: BTI turned on by -z "
+				  "force-bti when all inputs do not have BTI "
+				  "in NOTE section."), bbfd);
+	    }
 	}
-      if ((bprop && !(bprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
-	   || !bprop)
+
+      /* If output has been marked with GCS using -z experimental-gcs and input
+	 is missing GCS marking throw warning/error on
+	 -z experimental-gcs-report=warning/error.  */
+      if ((prop & GNU_PROPERTY_AARCH64_FEATURE_1_GCS) && gcs_report != GCS_NONE)
 	{
-	  _bfd_error_handler (_("%pB: warning: BTI turned on by -z force-bti when "
-				"all inputs do not have BTI in NOTE section."),
-			      bbfd);
+	  if ((aprop && !(aprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_GCS))
+	      || !aprop)
+	    _bfd_aarch64_elf_check_gcs_report (gcs_report, abfd);
+	  if ((bprop && !(bprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_GCS))
+	      || !bprop)
+	    _bfd_aarch64_elf_check_gcs_report (gcs_report, bbfd);
 	}
+
+      if (gcs_type == GCS_NEVER && aprop != NULL)
+	aprop->u.number &= ~GNU_PROPERTY_AARCH64_FEATURE_1_GCS;
+      if (gcs_type == GCS_NEVER && bprop != NULL)
+	bprop->u.number &= ~GNU_PROPERTY_AARCH64_FEATURE_1_GCS;
     }
 
   return  _bfd_aarch64_elf_merge_gnu_properties (info, abfd, aprop,

@@ -702,7 +702,9 @@ _bfd_aarch64_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_ty
    GPROP accordingly.  */
 bfd *
 _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
-					    uint32_t *gprop)
+					    uint32_t *gprop,
+					    aarch64_gcs_report gcs_report,
+					    aarch64_gcs_type gcs_type)
 {
   asection *sec;
   bfd *pbfd;
@@ -738,6 +740,11 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
 	    _bfd_error_handler (_("%pB: warning: BTI turned on by -z force-bti "
 				  "when all inputs do not have BTI in NOTE "
 				  "section."), ebfd);
+
+      if ((gnu_prop & GNU_PROPERTY_AARCH64_FEATURE_1_GCS)
+	  && !(prop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_GCS))
+	_bfd_aarch64_elf_check_gcs_report (gcs_report, ebfd);
+
       prop->u.number |= gnu_prop;
       prop->pr_kind = property_number;
 
@@ -765,6 +772,14 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
 	  elf_section_type (sec) = SHT_NOTE;
 	}
     }
+  else if (ebfd != NULL && gcs_type == GCS_NEVER)
+    {
+      prop = _bfd_elf_get_property (ebfd, GNU_PROPERTY_AARCH64_FEATURE_1_AND,
+				    4);
+      prop->u.number &= ~GNU_PROPERTY_AARCH64_FEATURE_1_GCS;
+      if (prop->u.number == 0)
+	prop->pr_kind = property_remove;
+    }
 
   pbfd = _bfd_elf_link_setup_gnu_properties (info);
 
@@ -785,7 +800,8 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
 	    {
 	      gnu_prop = (p->property.u.number
 			  & (GNU_PROPERTY_AARCH64_FEATURE_1_PAC
-			      | GNU_PROPERTY_AARCH64_FEATURE_1_BTI));
+			      | GNU_PROPERTY_AARCH64_FEATURE_1_BTI
+			      | GNU_PROPERTY_AARCH64_FEATURE_1_GCS));
 	      break;
 	    }
 	  else if (GNU_PROPERTY_AARCH64_FEATURE_1_AND < p->property.pr_type)
@@ -920,5 +936,22 @@ _bfd_aarch64_elf_link_fixup_gnu_properties
 	  /* The property list is sorted in order of type.  */
 	  break;
 	}
+    }
+}
+
+/* Check AArch64 GCS report.  */
+void
+_bfd_aarch64_elf_check_gcs_report (aarch64_gcs_report gcs_report, bfd *ebfd)
+{
+  if (gcs_report == GCS_WARN)
+    _bfd_error_handler (_("%pB: warning: GCS turned on by -z experimental-gcs "
+			"on the output when all inputs do not have GCS in NOTE "
+			"section."), ebfd);
+  else if (gcs_report == GCS_ERROR)
+    {
+      _bfd_error_handler (_("%pB: error: GCS turned on by -z experimental-gcs "
+			  "on the output when all inputs do not have GCS in "
+			  "NOTE section."), ebfd);
+      _exit (EXIT_FAILURE);
     }
 }

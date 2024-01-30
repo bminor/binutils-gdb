@@ -36,6 +36,12 @@ static erratum_84319_opts fix_erratum_843419 = ERRAT_NONE;
 static int no_apply_dynamic_relocs = 0;
 static aarch64_plt_type plt_type = PLT_NORMAL;
 static aarch64_enable_bti_type bti_type = BTI_NONE;
+static aarch64_gcs_type gcs_type = GCS_IMPLICIT;
+static aarch64_gcs_report gcs_report = GCS_NONE;
+static const char * egr = "experimental-gcs-report";
+static const char * eg = "experimental-gcs";
+#define EGR_LEN strlen (egr)
+#define EG_LEN strlen (eg)
 
 static void
 gld${EMULATION_NAME}_before_parse (void)
@@ -321,9 +327,11 @@ aarch64_elf_create_output_section_statements (void)
       return;
     }
 
-  aarch64_bti_pac_info bp_info;
+  aarch64_gnu_prop_info bp_info;
   bp_info.plt_type = plt_type;
   bp_info.bti_type = bti_type;
+  bp_info.gcs_type = gcs_type;
+  bp_info.gcs_report = gcs_report;
 
   bfd_elf${ELFSIZE}_aarch64_set_options (link_info.output_bfd, &link_info,
 				 no_enum_size_warning,
@@ -398,6 +406,19 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --no-apply-dynamic-relocs    Do not apply link-time values for dynamic relocations\n"));
   fprintf (file, _("  -z force-bti                  Turn on Branch Target Identification mechanism and generate PLTs with BTI. Generate warnings for missing BTI on inputs\n"));
   fprintf (file, _("  -z pac-plt                    Protect PLTs with Pointer Authentication.\n"));
+  fprintf (file, _("\
+  -z experimental-gcs[=always|never|implicit]		Turn on Guarded Control Stack(gcs) mechanism on the output.\n\
+							implicit(default): deduce gcs from input objects.\n\
+							always: always marks the output with gcs.\n\
+							never: never marks the output with gcs.\n"));
+  fprintf (file, _("\
+  -z experimental-gcs-report[=none|warning|error]	Emit warning/error on mismatch of gcs marking between input objects and ouput.\n\
+							none (default): Does not emit any warning/error messages.\n\
+							warning: Emit warning when the input objects are missing gcs markings\n\
+								 and output have gcs marking.\n\
+							error: Emit error when the input objects are missing gcs markings\n\
+							       and output have gcs marking.\n"));
+
 '
 
 PARSE_AND_LIST_ARGS_CASE_Z_AARCH64='
@@ -408,6 +429,28 @@ PARSE_AND_LIST_ARGS_CASE_Z_AARCH64='
 	}
       else if (strcmp (optarg, "pac-plt") == 0)
 	plt_type |= PLT_PAC;
+     else if (strncmp (optarg, egr, EGR_LEN) == 0)
+	{
+	  if (strlen (optarg) == EGR_LEN || strcmp (optarg + EGR_LEN, "=none") == 0)
+	    gcs_report = GCS_NONE;
+	  else if (strcmp (optarg + EGR_LEN, "=warning") == 0)
+	    gcs_report = GCS_WARN;
+	  else if (strcmp (optarg + EGR_LEN, "=error") == 0)
+	    gcs_report = GCS_ERROR;
+	  else
+	    einfo (_("%P: error: unrecognized: `%s'\''\n"), optarg);
+	}
+     else if (strncmp (optarg, eg, EG_LEN) == 0)
+	{
+	  if (strlen (optarg) == EG_LEN || strcmp (optarg + EG_LEN, "=always") == 0)
+	    gcs_type = GCS_ALWAYS;
+	  else if (strcmp (optarg + EG_LEN, "=never") == 0)
+	    gcs_type = GCS_NEVER;
+	  else if (strcmp (optarg + EG_LEN, "=implicit") == 0)
+	    gcs_type = GCS_IMPLICIT;
+	  else
+	    einfo (_("%P: error: unrecognized: `%s'\''\n"), optarg);
+	}
 '
 PARSE_AND_LIST_ARGS_CASE_Z="$PARSE_AND_LIST_ARGS_CASE_Z $PARSE_AND_LIST_ARGS_CASE_Z_AARCH64"
 

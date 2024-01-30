@@ -20638,6 +20638,10 @@ decode_aarch64_feature_1_and (unsigned int bitmask)
 	  printf ("PAC");
 	  break;
 
+	case GNU_PROPERTY_AARCH64_FEATURE_1_GCS:
+	  printf ("GCS");
+	  break;
+
 	default:
 	  printf (_("<unknown: %x>"), bit);
 	  break;
