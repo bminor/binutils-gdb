@@ -153,9 +153,9 @@ rust_tuple_struct_type_p (struct type *type)
   return type->num_fields () > 0 && rust_underscore_fields (type);
 }
 
-/* See rust-lang.h.  */
+/* Return true if TYPE is "slice-like"; false otherwise.  */
 
-bool
+static bool
 rust_slice_type_p (const struct type *type)
 {
   if (type->code () == TYPE_CODE_STRUCT
@@ -269,6 +269,125 @@ rust_get_trait_object_pointer (struct value *value)
   return value_cast (pointer_type, value_field (value, 1 - vtable_field));
 }
 
+/* Find and possibly rewrite the unsized part of a slice-like type.
+
+   This function has two modes.  If the out parameters are both NULL,
+   it will return true if an unsized member of IN_TYPE is found.
+
+   If the out parameters are both non-NULL, it will do the same, but
+   will also rewrite the unsized member's type to be an array of the
+   appropriate type.  BOUND is the upper bound of the new array.
+
+   See convert_slice to understand the different kinds of unsized type
+   and how they are represented.
+*/
+static bool
+rewrite_slice_type (struct type *in_type, struct type **new_type,
+		    LONGEST bound, ULONGEST *additional_length)
+{
+  if (in_type->code () != TYPE_CODE_STRUCT)
+    return false;
+
+  unsigned nfields = in_type->num_fields ();
+  if (nfields == 0)
+    return false;
+
+  struct type *rewritten;
+  const field &field = in_type->field (nfields - 1);
+  struct type *field_type = field.type ();
+  if (field.loc_kind () == FIELD_LOC_KIND_BITPOS
+      && field.loc_bitpos () == 8 * in_type->length ())
+    {
+      if (additional_length == nullptr)
+	return true;
+      rewritten = lookup_array_range_type (field_type, 0, bound);
+      *additional_length = rewritten->length ();
+    }
+  else
+    {
+    if (!rewrite_slice_type (field_type, &rewritten, bound,
+			     additional_length))
+	return false;
+      if (additional_length == nullptr)
+	return true;
+    }
+
+  struct type *result = copy_type (in_type);
+  result->copy_fields (in_type);
+  result->field (nfields - 1).set_type (rewritten);
+  result->set_length (result->length () + *additional_length);
+
+  *new_type = result;
+  return true;
+}
+
+/* Convert a Rust slice to its "true" representation.
+
+   The Rust compiler emits slices as "fat" pointers like:
+
+   struct { payload *data_ptr; usize length }
+
+   Any sort of unsized type is emitted this way.
+
+   If 'payload' is a struct type, then it must be searched to see if
+   the trailing field is unsized.  This has to be done recursively (as
+   in, if the final field in the struct type itself has struct type,
+   then that type must be searched).  In this scenario, the unsized
+   field can be recognized because it does not contribute to the
+   type's size.
+
+   If 'payload' does not have a trailing unsized type, or if it is not
+   of struct type, then this slice is "array-like".  In this case
+   rewriting will return an array.
+*/
+static struct value *
+convert_slice (struct value *val)
+{
+  struct type *type = check_typedef (val->type ());
+  /* This must have been checked by the caller.  */
+  gdb_assert (rust_slice_type_p (type));
+
+  struct value *len = value_struct_elt (&val, {}, "length", nullptr,
+					"slice");
+  LONGEST llen = value_as_long (len);
+
+  struct value *ptr = value_struct_elt (&val, {}, "data_ptr", nullptr,
+					"slice");
+  struct type *original_type = ptr->type ()->target_type ();
+  ULONGEST new_length_storage = 0;
+  struct type *new_type = nullptr;
+  if (!rewrite_slice_type (original_type, &new_type, llen - 1,
+			   &new_length_storage))
+    new_type = lookup_array_range_type (original_type, 0, llen - 1);
+
+  struct value *result = value::allocate_lazy (new_type);
+  result->set_lval (lval_memory);
+  result->set_address (value_as_address (ptr));
+  result->fetch_lazy ();
+
+  return result;
+}
+
+/* If TYPE is an array-like slice, return the element type; otherwise
+   return NULL.  */
+static struct type *
+rust_array_like_element_type (struct type *type)
+{
+  /* Caller must check this.  */
+  gdb_assert (rust_slice_type_p (type));
+  for (int i = 0; i < type->num_fields (); ++i)
+    {
+      if (strcmp (type->field (i).name (), "data_ptr") == 0)
+	{
+	  struct type *base_type = type->field (i).type ()->target_type ();
+	  if (rewrite_slice_type (base_type, nullptr, 0, nullptr))
+	    return nullptr;
+	  return base_type;
+	}
+    }
+  return nullptr;
+}
+
 
 
 /* See language.h.  */
@@ -324,57 +443,40 @@ static const struct generic_val_print_decorations rust_decorations =
 struct value *
 rust_slice_to_array (struct value *val)
 {
-  struct type *type = check_typedef (val->type ());
-  /* This must have been checked by the caller.  */
-  gdb_assert (rust_slice_type_p (type));
-
-  struct value *base = value_struct_elt (&val, {}, "data_ptr", NULL,
-					 "slice");
-  struct value *len = value_struct_elt (&val, {}, "length", NULL, "slice");
-  LONGEST llen = value_as_long (len);
-
-  struct type *elt_type = base->type ()->target_type ();
-  struct type *array_type = lookup_array_range_type (elt_type, 0,
-						     llen - 1);
-  struct value *array = value::allocate_lazy (array_type);
-  array->set_lval (lval_memory);
-  array->set_address (value_as_address (base));
-
-  return array;
+  val = convert_slice (val);
+  if (val->type ()->code () != TYPE_CODE_ARRAY)
+    return nullptr;
+  return val;
 }
 
 /* Helper function to print a slice.  */
 
-static void
-rust_val_print_slice (struct value *val, struct ui_file *stream, int recurse,
-		      const struct value_print_options *options)
+void
+rust_language::val_print_slice
+     (struct value *val, struct ui_file *stream, int recurse,
+      const struct value_print_options *options) const
 {
-  struct value *base = value_struct_elt (&val, {}, "data_ptr", NULL,
-					 "slice");
-  struct value *len = value_struct_elt (&val, {}, "length", NULL, "slice");
+  struct type *orig_type = check_typedef (val->type ());
 
+  val = convert_slice (val);
   struct type *type = check_typedef (val->type ());
-  if (strcmp (type->name (), "&str") == 0)
-    val_print_string (base->type ()->target_type (), "UTF-8",
-		      value_as_address (base), value_as_long (len), stream,
-		      options);
-  else
+
+  /* &str is handled here; but for all other slice types it is fine to
+     simply print the contents.  */
+  if (orig_type->name () != nullptr
+      && strcmp (orig_type->name (), "&str") == 0)
     {
-      LONGEST llen = value_as_long (len);
-
-      type_print (val->type (), "", stream, -1);
-      gdb_printf (stream, " ");
-
-      if (llen == 0)
-	gdb_printf (stream, "[]");
-      else
+      LONGEST low_bound, high_bound;
+      if (get_array_bounds (type, &low_bound, &high_bound))
 	{
-	  struct value *array = rust_slice_to_array (val);
-	  array->fetch_lazy ();
-	  generic_value_print (array, stream, recurse, options,
-			       &rust_decorations);
+	  val_print_string (type->target_type (), "UTF-8",
+			    val->address (), high_bound - low_bound + 1,
+			    stream, options);
+	  return;
 	}
     }
+
+  value_print_inner (val, stream, recurse, options);
 }
 
 /* See rust-lang.h.  */
@@ -390,7 +492,7 @@ rust_language::val_print_struct
 
   if (rust_slice_type_p (type))
     {
-      rust_val_print_slice (val, stream, recurse, options);
+      val_print_slice (val, stream, recurse, options);
       return;
     }
 
@@ -1180,6 +1282,7 @@ rust_subscript (struct type *expect_type, struct expression *exp,
     low = value_as_long (rhs);
 
   struct type *type = check_typedef (lhs->type ());
+  struct type *orig_type = type;
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
       struct type *base_type = nullptr;
@@ -1187,16 +1290,9 @@ rust_subscript (struct type *expect_type, struct expression *exp,
 	base_type = type->target_type ();
       else if (rust_slice_type_p (type))
 	{
-	  for (int i = 0; i < type->num_fields (); ++i)
-	    {
-	      if (strcmp (type->field (i).name (), "data_ptr") == 0)
-		{
-		  base_type = type->field (i).type ()->target_type ();
-		  break;
-		}
-	    }
+	  base_type = rust_array_like_element_type (type);
 	  if (base_type == nullptr)
-	    error (_("Could not find 'data_ptr' in slice type"));
+	    error (_("Cannot subscript non-array-like slice"));
 	}
       else if (type->code () == TYPE_CODE_PTR)
 	base_type = type->target_type ();
@@ -1227,6 +1323,12 @@ rust_subscript (struct type *expect_type, struct expression *exp,
       LONGEST low_bound;
       struct value *base;
 
+      if (rust_slice_type_p (type))
+	{
+	  lhs = convert_slice (lhs);
+	  type = check_typedef (lhs->type ());
+	}
+
       if (type->code () == TYPE_CODE_ARRAY)
 	{
 	  base = lhs;
@@ -1235,15 +1337,6 @@ rust_subscript (struct type *expect_type, struct expression *exp,
 	  if (low_bound != 0)
 	    error (_("Found array with non-zero lower bound"));
 	  ++high_bound;
-	}
-      else if (rust_slice_type_p (type))
-	{
-	  struct value *len;
-
-	  base = value_struct_elt (&lhs, {}, "data_ptr", NULL, "slice");
-	  len = value_struct_elt (&lhs, {}, "length", NULL, "slice");
-	  low_bound = 0;
-	  high_bound = value_as_long (len);
 	}
       else if (type->code () == TYPE_CODE_PTR)
 	{
@@ -1284,9 +1377,11 @@ rust_subscript (struct type *expect_type, struct expression *exp,
 	  usize = language_lookup_primitive_type (exp->language_defn,
 						  exp->gdbarch,
 						  "usize");
-	  const char *new_name = ((type != nullptr
-				   && rust_slice_type_p (type))
-				  ? type->name () : "&[*gdb*]");
+	  /* Preserve the name for slice-of-slice; this lets
+	     string-printing work a bit more nicely.  */
+	  const char *new_name = ((orig_type != nullptr
+				   && rust_slice_type_p (orig_type))
+				  ? orig_type->name () : "&[*gdb*]");
 
 	  slice = rust_slice_type (new_name, result->type (), usize);
 
@@ -1477,7 +1572,11 @@ rust_structop::evaluate (struct type *expect_type,
 	}
     }
   else
-    result = value_struct_elt (&lhs, {}, field_name, NULL, "structure");
+    {
+      if (rust_slice_type_p (type))
+	lhs = convert_slice (lhs);
+      result = value_struct_elt (&lhs, {}, field_name, NULL, "structure");
+    }
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     result = value::zero (result->type (), result->lval ());
   return result;
@@ -1673,6 +1772,16 @@ rust_language::emitchar (int ch, struct type *chtype,
     gdb_printf (stream, "\\x%02x", ch);
   else
     gdb_printf (stream, "\\u{%06x}", ch);
+}
+
+/* See language.h.  */
+
+bool
+rust_language::is_array_like (struct type *type) const
+{
+  if (!rust_slice_type_p (type))
+    return false;
+  return rust_array_like_element_type (type) != nullptr;
 }
 
 /* See language.h.  */
