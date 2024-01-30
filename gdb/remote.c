@@ -2450,11 +2450,15 @@ add_packet_config_cmd (const unsigned int which_packet, const char *name,
     }
 }
 
-/* Check GDBserver's reply packet.  Return packet_result
-   structure which contains the packet_status enum
-   and an error message for the PACKET_ERROR case.  */
+/* Check GDBserver's reply packet.  Return packet_result structure
+   which contains the packet_status enum and an error message for the
+   PACKET_ERROR case.
+
+   An error packet can always take the form Exx (where xx is a hex
+   code).  When ACCEPT_MSG is true error messages can also take the
+   form E.msg (where msg is any arbitrary string).  */
 static packet_result
-packet_check_result (const char *buf)
+packet_check_result (const char *buf, bool accept_msg)
 {
   if (buf[0] != '\0')
     {
@@ -2466,14 +2470,20 @@ packet_check_result (const char *buf)
 	/* "Enn"  - definitely an error.  */
 	return { PACKET_ERROR, buf + 1 };
 
-      /* Always treat "E." as an error.  This will be used for
-	 more verbose error messages, such as E.memtypes.  */
-      if (buf[0] == 'E' && buf[1] == '.')
+      /* Not every request accepts an error in a E.msg form.
+	 Some packets accepts only Enn, in this case E. is not
+	 defined and E. is treated as PACKET_OK.  */
+      if (accept_msg)
 	{
-	  if (buf[2] != '\0')
-	    return { PACKET_ERROR, buf + 2 };
-	  else
-	    return { PACKET_ERROR, "no error provided" };
+	  /* Always treat "E." as an error.  This will be used for
+	     more verbose error messages, such as E.memtypes.  */
+	  if (buf[0] == 'E' && buf[1] == '.')
+	    {
+	      if (buf[2] != '\0')
+		return { PACKET_ERROR, buf + 2 };
+	      else
+		return { PACKET_ERROR, "no error provided" };
+	    }
 	}
 
       /* The packet may or may not be OK.  Just assume it is.  */
@@ -2487,9 +2497,9 @@ packet_check_result (const char *buf)
 }
 
 static packet_result
-packet_check_result (const gdb::char_vector &buf)
+packet_check_result (const gdb::char_vector &buf, bool accept_msg)
 {
-  return packet_check_result (buf.data ());
+  return packet_check_result (buf.data (), accept_msg);
 }
 
 packet_status
@@ -2502,7 +2512,7 @@ remote_features::packet_ok (const char *buf, const int which_packet)
       && config->support == PACKET_DISABLE)
     internal_error (_("packet_ok: attempt to use a disabled packet"));
 
-  packet_result result = packet_check_result (buf);
+  packet_result result = packet_check_result (buf, true);
   switch (result.status ())
     {
     case PACKET_OK:
@@ -8830,7 +8840,7 @@ remote_target::send_g_packet ()
   xsnprintf (rs->buf.data (), get_remote_packet_size (), "g");
   putpkt (rs->buf);
   getpkt (&rs->buf);
-  packet_result result = packet_check_result (rs->buf);
+  packet_result result = packet_check_result (rs->buf, true);
   if (result.status () == PACKET_ERROR)
     error (_("Could not read registers; remote failure reply '%s'"),
 	   result.err_msg ());
@@ -9139,7 +9149,7 @@ remote_target::store_registers_using_G (const struct regcache *regcache)
   bin2hex (regs, p, rsa->sizeof_g_packet);
   putpkt (rs->buf);
   getpkt (&rs->buf);
-  packet_result pkt_status = packet_check_result (rs->buf);
+  packet_result pkt_status = packet_check_result (rs->buf, true);
   if (pkt_status.status () == PACKET_ERROR)
     error (_("Could not write registers; remote failure reply '%s'"),
 	   pkt_status.err_msg ());
@@ -9591,9 +9601,8 @@ remote_target::remote_read_bytes_1 (CORE_ADDR memaddr, gdb_byte *myaddr,
   *p = '\0';
   putpkt (rs->buf);
   getpkt (&rs->buf);
-  if (rs->buf[0] == 'E'
-      && isxdigit (rs->buf[1]) && isxdigit (rs->buf[2])
-      && rs->buf[3] == '\0')
+  packet_result result = packet_check_result (rs->buf, false);
+  if (result.status () == PACKET_ERROR)
     return TARGET_XFER_E_IO;
   /* Reply describes memory byte by byte, each byte encoded as two hex
      characters.  */
@@ -9747,7 +9756,7 @@ remote_target::remote_send_printf (const char *format, ...)
   rs->buf[0] = '\0';
   getpkt (&rs->buf);
 
-  return packet_check_result (rs->buf).status ();
+  return packet_check_result (rs->buf, true).status ();
 }
 
 /* Flash writing can take quite some time.  We'll set
@@ -11930,20 +11939,19 @@ remote_target::rcmd (const char *command, struct ui_file *outbuf)
 	  continue;
 	}
       buf = rs->buf.data ();
-      if (buf[0] == '\0')
-	error (_("Target does not support this command."));
       if (buf[0] == 'O' && buf[1] != 'K')
 	{
 	  remote_console_output (buf + 1); /* 'O' message from stub.  */
 	  continue;
 	}
+      packet_result result = packet_check_result (buf, false);
       if (strcmp (buf, "OK") == 0)
 	break;
-      if (strlen (buf) == 3 && buf[0] == 'E'
-	  && isxdigit (buf[1]) && isxdigit (buf[2]))
-	{
-	  error (_("Protocol error with Rcmd"));
-	}
+      else if (result.status () == PACKET_UNKNOWN)
+	error (_("Target does not support this command."));
+      else
+	error (_("Protocol error with Rcmd: %s."), result.err_msg ());
+
       for (p = buf; p[0] != '\0' && p[1] != '\0'; p += 2)
 	{
 	  char c = (fromhex (p[0]) << 4) + fromhex (p[1]);
@@ -15570,7 +15578,7 @@ remote_target::store_memtags (CORE_ADDR address, size_t len,
   getpkt (&rs->buf);
 
   /* Verify if the request was successful.  */
-  return packet_check_result (rs->buf).status () == PACKET_OK;
+  return packet_check_result (rs->buf, true).status () == PACKET_OK;
 }
 
 /* Return true if remote target T is non-stop.  */
@@ -15671,26 +15679,29 @@ static void
 test_packet_check_result ()
 {
   std::string buf = "E.msg";
-  packet_result result = packet_check_result (buf.data ());
+  packet_result result = packet_check_result (buf.data (), true);
 
   SELF_CHECK (result.status () == PACKET_ERROR);
   SELF_CHECK (strcmp(result.err_msg (), "msg") == 0);
 
-  result = packet_check_result ("E01");
+  result = packet_check_result ("E01", true);
   SELF_CHECK (result.status () == PACKET_ERROR);
   SELF_CHECK (strcmp(result.err_msg (), "01") == 0);
 
-  SELF_CHECK (packet_check_result ("E1").status () == PACKET_OK);
+  SELF_CHECK (packet_check_result ("E1", true).status () == PACKET_OK);
 
-  SELF_CHECK (packet_check_result ("E000").status () == PACKET_OK);
+  SELF_CHECK (packet_check_result ("E000", true).status () == PACKET_OK);
 
-  result = packet_check_result ("E.");
+  result = packet_check_result ("E.", true);
   SELF_CHECK (result.status () == PACKET_ERROR);
   SELF_CHECK (strcmp(result.err_msg (), "no error provided") == 0);
 
-  SELF_CHECK (packet_check_result ("some response").status () == PACKET_OK);
+  SELF_CHECK (packet_check_result ("some response", true).status () == PACKET_OK);
 
-  SELF_CHECK (packet_check_result ("").status () == PACKET_UNKNOWN);
+  SELF_CHECK (packet_check_result ("", true).status () == PACKET_UNKNOWN);
+
+  result = packet_check_result ("E.msg", false);
+  SELF_CHECK (result.status () == PACKET_OK);
 }
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
