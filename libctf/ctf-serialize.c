@@ -822,10 +822,7 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
       copied = (ctf_stype_t *) t;  /* name is at the start: constant offset.  */
       if (copied->ctt_name
 	  && (name = ctf_strraw (fp, copied->ctt_name)) != NULL)
-	{
-	  ctf_str_add_ref (fp, name, &copied->ctt_name);
-	  ctf_str_add_ref (fp, name, &dtd->dtd_data.ctt_name);
-	}
+        ctf_str_add_ref (fp, name, &copied->ctt_name);
       copied->ctt_size = type_ctt_size;
       t += len;
 
@@ -960,7 +957,6 @@ ctf_serialize (ctf_dict_t *fp)
   ctf_varent_t *dvarents;
   ctf_strs_writable_t strtab;
   int err;
-  int num_missed_str_refs;
   int sym_functions = 0;
 
   unsigned char *t;
@@ -979,16 +975,6 @@ ctf_serialize (ctf_dict_t *fp)
      reserialize the dict again.  */
   if (fp->ctf_stypes > 0)
     return (ctf_set_errno (fp, ECTF_RDONLY));
-
-  /* The strtab refs table must be empty at this stage.  Any refs already added
-     will be corrupted by any modifications, including reserialization, after
-     strtab finalization is complete.  Only this function, and functions it
-     calls, may add refs, and all memory locations (including in the dtds)
-     containing strtab offsets must be traversed as part of serialization, and
-     refs added.  */
-
-  if (!ctf_assert (fp, fp->ctf_str_num_refs == 0))
-    return -1;					/* errno is set for us.  */
 
   /* Fill in an initial CTF header.  We will leave the label, object,
      and function sections empty and only output a header, type section,
@@ -1103,12 +1089,6 @@ ctf_serialize (ctf_dict_t *fp)
 
   assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_stroff);
 
-  /* Every string added outside serialization by ctf_str_add_pending should
-     now have been added by ctf_add_ref.  */
-  num_missed_str_refs = ctf_dynset_elements (fp->ctf_str_pending_ref);
-  if (!ctf_assert (fp, num_missed_str_refs == 0))
-    goto err;					/* errno is set for us.  */
-
   /* Construct the final string table and fill out all the string refs with the
      final offsets.  Then purge the refs list, because we're about to move this
      strtab onto the end of the buf, invalidating all the offsets.  */
@@ -1211,10 +1191,8 @@ ctf_serialize (ctf_dict_t *fp)
   ctf_str_free_atoms (nfp);
   nfp->ctf_str_atoms = fp->ctf_str_atoms;
   nfp->ctf_prov_strtab = fp->ctf_prov_strtab;
-  nfp->ctf_str_pending_ref = fp->ctf_str_pending_ref;
   fp->ctf_str_atoms = NULL;
   fp->ctf_prov_strtab = NULL;
-  fp->ctf_str_pending_ref = NULL;
   memset (&fp->ctf_dtdefs, 0, sizeof (ctf_list_t));
   memset (&fp->ctf_errs_warnings, 0, sizeof (ctf_list_t));
   fp->ctf_add_processing = NULL;

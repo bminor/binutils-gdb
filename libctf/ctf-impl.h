@@ -383,8 +383,7 @@ struct ctf_dict
   ctf_dynhash_t *ctf_names;	    /* Hash table of remaining type names.  */
   ctf_lookup_t ctf_lookups[5];	    /* Pointers to nametabs for name lookup.  */
   ctf_strs_t ctf_str[2];	    /* Array of string table base and bounds.  */
-  ctf_dynhash_t *ctf_str_atoms;	    /* Hash table of ctf_str_atoms_t.  */
-  ctf_dynset_t *ctf_str_pending_ref; /* Locations awaiting ref addition.  */
+  ctf_dynhash_t *ctf_str_atoms;	  /* Hash table of ctf_str_atoms_t.  */
   uint64_t ctf_str_num_refs;	  /* Number of refs to cts_str_atoms.  */
   uint32_t ctf_str_prov_offset;	  /* Latest provisional offset assigned so far.  */
   unsigned char *ctf_base;	  /* CTF file pointer.  */
@@ -664,7 +663,6 @@ extern int ctf_dynset_insert (ctf_dynset_t *, void *);
 extern void ctf_dynset_remove (ctf_dynset_t *, const void *);
 extern void ctf_dynset_destroy (ctf_dynset_t *);
 extern void *ctf_dynset_lookup (ctf_dynset_t *, const void *);
-extern size_t ctf_dynset_elements (ctf_dynset_t *);
 extern int ctf_dynset_exists (ctf_dynset_t *, const void *key,
 			      const void **orig_key);
 extern int ctf_dynset_next (ctf_dynset_t *, ctf_next_t **, void **key);
@@ -727,8 +725,6 @@ extern int ctf_str_create_atoms (ctf_dict_t *);
 extern void ctf_str_free_atoms (ctf_dict_t *);
 extern uint32_t ctf_str_add (ctf_dict_t *, const char *);
 extern uint32_t ctf_str_add_ref (ctf_dict_t *, const char *, uint32_t *ref);
-extern uint32_t ctf_str_add_pending (ctf_dict_t *, const char *, uint32_t *);
-extern int ctf_str_move_pending (ctf_dict_t *, uint32_t *, ptrdiff_t);
 extern int ctf_str_add_external (ctf_dict_t *, const char *, uint32_t offset);
 extern void ctf_str_remove_ref (ctf_dict_t *, const char *, uint32_t *ref);
 extern void ctf_str_rollback (ctf_dict_t *, ctf_snapshot_id_t);
