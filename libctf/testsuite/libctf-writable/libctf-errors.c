@@ -12,7 +12,7 @@ main (int argc, char *argv[])
   ctf_dict_t *fp;
   ctf_next_t *i = NULL;
   size_t boom = 0;
-  ctf_id_t itype, stype;
+  ctf_id_t itype = 0, stype = 0;
   ctf_encoding_t encoding = {0};
   ctf_membinfo_t mi;
   ssize_t ret;
