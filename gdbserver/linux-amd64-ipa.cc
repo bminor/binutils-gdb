@@ -20,9 +20,9 @@
 
 #include <sys/mman.h>
 #include "tracepoint.h"
-#include "linux-x86-tdesc.h"
 #include "gdbsupport/x86-xstate.h"
 #include "arch/amd64-linux-tdesc.h"
+#include "arch/x86-linux-tdesc-features.h"
 
 /* fast tracepoints collect registers.  */
 

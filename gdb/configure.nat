@@ -257,7 +257,8 @@ case ${gdb_host} in
 		nat/x86-xstate.o \
 		i386-linux-nat.o x86-linux-nat.o nat/linux-btrace.o \
 		nat/x86-linux.o nat/x86-linux-dregs.o nat/i386-linux.o \
-		nat/x86-linux-tdesc.o"
+		nat/x86-linux-tdesc.o arch/i386-linux-tdesc.o \
+		arch/x86-linux-tdesc-features.o"
 		;;
 	    ia64)
 		# Host: Intel IA-64 running GNU/Linux
@@ -324,7 +325,8 @@ case ${gdb_host} in
 		nat/x86-xstate.o amd64-nat.o amd64-linux-nat.o x86-linux-nat.o \
 		nat/linux-btrace.o \
 		nat/x86-linux.o nat/x86-linux-dregs.o nat/x86-linux-tdesc.o \
-		nat/amd64-linux-siginfo.o"
+		nat/amd64-linux-siginfo.o arch/x86-linux-tdesc-features.o \
+		arch/i386-linux-tdesc.o arch/amd64-linux-tdesc.o"
 		;;
 	    sparc)
 		# Host: GNU/Linux UltraSPARC
