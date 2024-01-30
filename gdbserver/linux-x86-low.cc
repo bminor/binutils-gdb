@@ -47,7 +47,6 @@
 #include "nat/linux-nat.h"
 #include "nat/x86-linux.h"
 #include "nat/x86-linux-dregs.h"
-#include "linux-x86-tdesc.h"
 #include "nat/x86-linux-tdesc.h"
 
 #ifdef __x86_64__

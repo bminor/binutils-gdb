@@ -24,6 +24,8 @@
 
 struct target_desc;
 
+#ifndef IN_PROCESS_AGENT
+
 /* Return the target description for Linux thread TID.
 
    When *HAVE_PTRACE_GETREGSET is TRIBOOL_UNKNOWN then the current value of
@@ -57,19 +59,57 @@ x86_linux_tdesc_for_tid (int tid, enum tribool *have_ptrace_getregset,
 			 gdb::function_view<void (uint64_t)> xcr0_init_cb,
 			 const char *error_msg, uint64_t *xcr0_storage);
 
+#endif /* !IN_PROCESS_AGENT */
+
 #ifdef __x86_64__
 
-/* Return the right amd64-linux target descriptions according to
-   XCR0_FEATURES_BIT and IS_X32.  This is implemented separately in both
-   GDB and gdbserver.  */
+/* Return the AMD64 target descriptions corresponding to XCR0 and IS_X32.  */
 
-extern const target_desc *amd64_linux_read_description
-	(uint64_t xcr0_features_bit, bool is_x32);
+extern const target_desc *amd64_linux_read_description (uint64_t xcr0,
+							bool is_x32);
 
-#endif
+#endif /* __x86_64__ */
 
-/* Return the target description according to XCR0.  This is implemented
-   separately in both GDB and gdbserver.  */
+/* Return the i386 target description corresponding to XCR0.  */
+
 extern const struct target_desc *i386_linux_read_description (uint64_t xcr0);
+
+/* This function is called from amd64_linux_read_description and
+   i386_linux_read_description after a new target description has been
+   created, TDESC is the new target description, IS_64BIT will be true
+   when called from amd64_linux_read_description, otherwise IS_64BIT will
+   be false.  If the *_linux_read_description functions found a cached
+   target description then this function will not be called.
+
+   Both GDB and gdbserver have their own implementations of this
+   function.  */
+
+extern void x86_linux_post_init_tdesc (target_desc *tdesc, bool is_64bit);
+
+/* Convert an xcr0 value into an integer.  The integer will be passed to
+   the in-process-agent where it will then be passed to
+   x86_linux_tdesc_idx_to_xcr0 to get back the xcr0 value.  */
+
+extern int x86_linux_xcr0_to_tdesc_idx (uint64_t xcr0);
+
+
+#ifdef IN_PROCESS_AGENT
+
+/* Convert an index number (as returned from x86_linux_xcr0_to_tdesc_idx)
+   into an xcr0 value which can then be used to create a target
+   description.  */
+
+extern uint64_t x86_linux_tdesc_idx_to_xcr0 (int idx);
+
+/* Within the in-process-agent we need to pre-initialise all of the target
+   descriptions, to do this we need to know how many target descriptions
+   there are for each different target type.  These functions return the
+   target description count for the relevant target.  */
+
+extern int x86_linux_amd64_ipa_tdesc_count ();
+extern int x86_linux_x32_ipa_tdesc_count ();
+extern int x86_linux_i386_ipa_tdesc_count ();
+
+#endif /* IN_PROCESS_AGENT */
 
 #endif /* NAT_X86_LINUX_TDESC_H */
