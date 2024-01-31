@@ -534,6 +534,31 @@ loongarch_linux_syscall_next_pc (frame_info_ptr frame)
   return pc + 4;
 }
 
+/* Implement the "get_syscall_number" gdbarch method.  */
+
+static LONGEST
+loongarch_linux_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
+{
+  struct regcache *regcache = get_thread_regcache (thread);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int regsize = register_size (gdbarch, LOONGARCH_A7_REGNUM);
+  /* The content of a register.  */
+  gdb_byte buf[8];
+  /* The result.  */
+  LONGEST ret;
+
+  gdb_assert (regsize <= sizeof (buf));
+
+  /* Getting the system call number from the register.
+     When dealing with the LoongArch architecture, this information
+     is stored at the a7 register.  */
+  regcache->cooked_read (LOONGARCH_A7_REGNUM, buf);
+
+  ret = extract_signed_integer (buf, regsize, byte_order);
+
+  return ret;
+}
+
 /* Initialize LoongArch Linux ABI info.  */
 
 static void
@@ -564,6 +589,9 @@ loongarch_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_iterate_over_regset_sections (gdbarch, loongarch_iterate_over_regset_sections);
 
   tdep->syscall_next_pc = loongarch_linux_syscall_next_pc;
+
+  /* Get the syscall number from the arch's register.  */
+  set_gdbarch_get_syscall_number (gdbarch, loongarch_linux_get_syscall_number);
 }
 
 /* Initialize LoongArch Linux target support.  */
