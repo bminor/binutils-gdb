@@ -2892,14 +2892,17 @@ x86_target::get_ipa_tdesc_idx ()
   struct regcache *regcache = get_thread_regcache (current_thread, 0);
   const struct target_desc *tdesc = regcache->tdesc;
 
+  if (!use_xml)
+    {
+      if (tdesc == tdesc_i386_linux_no_xml.get ()
 #ifdef __x86_64__
-  return amd64_get_ipa_tdesc_idx (tdesc);
-#endif
+	  || tdesc == tdesc_amd64_linux_no_xml.get ()
+#endif /* __x86_64__ */
+	  )
+	return x86_linux_xcr0_to_tdesc_idx (X86_XSTATE_SSE_MASK);
+    }
 
-  if (tdesc == tdesc_i386_linux_no_xml.get ())
-    return X86_TDESC_SSE;
-
-  return i386_get_ipa_tdesc_idx (tdesc);
+  return x86_linux_xcr0_to_tdesc_idx (xcr0_storage);
 }
 
 /* The linux target ops object.  */
