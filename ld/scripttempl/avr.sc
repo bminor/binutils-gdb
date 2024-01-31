@@ -358,8 +358,8 @@ EOF
 if test -z "${HAVE_FLMAP}" && test -n "${RELOCATING}"; then
     cat <<EOF
 
-PROVIDE (__flmap_init_label = DEFINED(__flmap_noinit_start) ? __flmap_noinit_start : 0) ;
-PROVIDE (__flmap = DEFINED(__flmap) ? __flmap : 0) ;
+__flmap_init_label = DEFINED(__flmap_noinit_start) ? __flmap_noinit_start : 0 ;
+__flmap = DEFINED(__flmap) ? __flmap : 0 ;
 
 EOF
 fi
@@ -368,7 +368,7 @@ if test -n "${HAVE_FLMAP}"; then
     cat <<EOF
 
 ${RELOCATING+
-PROVIDE (__flmap_init_label = DEFINED(__flmap_init_start) ? __flmap_init_start : 0) ;
+__flmap_init_label = DEFINED(__flmap_init_start) ? __flmap_init_start : 0 ;
 /* User can specify position of .rodata in flash (LMA) by supplying
    __RODATA_FLASH_START__ or __flmap, where the former takes precedence. */
 __RODATA_FLASH_START__ = DEFINED(__RODATA_FLASH_START__)
