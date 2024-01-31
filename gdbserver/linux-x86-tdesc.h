@@ -21,29 +21,29 @@
 #ifndef GDBSERVER_LINUX_X86_TDESC_H
 #define GDBSERVER_LINUX_X86_TDESC_H
 
-/* Note: since IPA obviously knows what ABI it's running on (i386 vs x86_64
-   vs x32), it's sufficient to pass only the register set here.  This,
-   together with the ABI known at IPA compile time, maps to a tdesc.  */
+/* Convert an xcr0 value into an integer.  The integer will be passed to
+   the in-process-agent where it will then be passed to
+   x86_linux_tdesc_idx_to_xcr0 to get back the xcr0 value.  */
 
-enum x86_linux_tdesc {
-  X86_TDESC_MMX = 0,
-  X86_TDESC_SSE = 1,
-  X86_TDESC_AVX = 2,
-  X86_TDESC_MPX = 3,
-  X86_TDESC_AVX_MPX = 4,
-  X86_TDESC_AVX_AVX512 = 5,
-  X86_TDESC_AVX_MPX_AVX512_PKU = 6,
-  X86_TDESC_LAST = 7,
-};
+extern int x86_linux_xcr0_to_tdesc_idx (uint64_t xcr0);
 
-#if defined __i386__ || !defined IN_PROCESS_AGENT
-int i386_get_ipa_tdesc_idx (const struct target_desc *tdesc);
-#endif
+#ifdef IN_PROCESS_AGENT
 
-#if defined __x86_64__ && !defined IN_PROCESS_AGENT
-int amd64_get_ipa_tdesc_idx (const struct target_desc *tdesc);
-#endif
+/* Convert an index number (as returned from x86_linux_xcr0_to_tdesc_idx)
+   into an xcr0 value which can then be used to create a target
+   description.  */
 
-const struct target_desc *i386_get_ipa_tdesc (int idx);
+extern uint64_t x86_linux_tdesc_idx_to_xcr0 (int idx);
+
+/* Within the in-process-agent we need to pre-initialise all of the target
+   descriptions, to do this we need to know how many target descriptions
+   there are for each different target type.  These functions return the
+   target description count for the relevant target.  */
+
+extern int x86_linux_amd64_tdesc_count ();
+extern int x86_linux_x32_tdesc_count ();
+extern int x86_linux_i386_tdesc_count ();
+
+#endif /* IN_PROCESS_AGENT */
 
 #endif /* GDBSERVER_LINUX_X86_TDESC_H */

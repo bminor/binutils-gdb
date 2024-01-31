@@ -2877,14 +2877,28 @@ x86_target::get_ipa_tdesc_idx ()
   struct regcache *regcache = get_thread_regcache (current_thread, 0);
   const struct target_desc *tdesc = regcache->tdesc;
 
+  if (!use_xml)
+    {
+      /* If USE_XML is false then we should be using one of these target
+	 descriptions, see x86_linux_read_description for where we choose
+	 one of these.  Both of these descriptions are created from this
+	 fixed xcr0 value X86_XSTATE_SSE_MASK.  */
+      gdb_assert (tdesc == tdesc_i386_linux_no_xml.get ()
 #ifdef __x86_64__
-  return amd64_get_ipa_tdesc_idx (tdesc);
-#endif
+		  || tdesc == tdesc_amd64_linux_no_xml.get ()
+#endif /* __x86_64__ */
+		  );
+      return x86_linux_xcr0_to_tdesc_idx (X86_XSTATE_SSE_MASK);
+    }
 
-  if (tdesc == tdesc_i386_linux_no_xml.get ())
-    return X86_TDESC_SSE;
+  /* The xcr0 value and xsave layout value are cached when the target
+     description is read.  Grab their cache location, and use the cached
+     value to calculate a tdesc index.  */
+  std::pair<uint64_t *, x86_xsave_layout *> storage
+    = i387_get_xsave_storage ();
+  uint64_t xcr0 = *storage.first;
 
-  return i386_get_ipa_tdesc_idx (tdesc);
+  return x86_linux_xcr0_to_tdesc_idx (xcr0);
 }
 
 /* The linux target ops object.  */
