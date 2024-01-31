@@ -779,6 +779,7 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 {
   segment_info_type *seginfo = seg_info (sec);
   fixS *fixp;
+  valueT val;
 
   if (seginfo == NULL)
     return;
@@ -890,10 +891,20 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 	if ((symsec->flags & SEC_THREAD_LOCAL) != 0)
 	  continue;
 
+	val = S_GET_VALUE (sym);
+
+#if defined(TC_AARCH64) && defined(OBJ_COFF)
+	/* coff aarch64 relocation offsets need to be limited to 21bits.
+	   This is because addend may need to be stored in an ADRP instruction.
+	   In this case the addend cannot be stored down shifted otherwise rounding errors occur. */
+	if ((val + 0x100000) > 0x1fffff)
+	  continue;
+#endif
+
 	/* We refetch the segment when calling section_symbol, rather
 	   than using symsec, because S_GET_VALUE may wind up changing
 	   the section when it calls resolve_symbol_value.  */
-	fixp->fx_offset += S_GET_VALUE (sym);
+	fixp->fx_offset += val;
 	fixp->fx_addsy = section_symbol (S_GET_SEGMENT (sym));
 #ifdef DEBUG5
 	fprintf (stderr, "\nadjusted fixup:\n");

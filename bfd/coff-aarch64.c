@@ -352,6 +352,7 @@ coff_aarch64_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED, bfd_reloc_code_real
     return &arm64_reloc_howto_branch26;
   case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
   case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
+  case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
     return &arm64_reloc_howto_page21;
   case BFD_RELOC_AARCH64_TSTBR14:
     return &arm64_reloc_howto_branch14;
@@ -364,6 +365,7 @@ coff_aarch64_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED, bfd_reloc_code_real
   case BFD_RELOC_AARCH64_LDST32_LO12:
   case BFD_RELOC_AARCH64_LDST64_LO12:
   case BFD_RELOC_AARCH64_LDST128_LO12:
+  case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
     return &arm64_reloc_howto_pgoff12l;
   case BFD_RELOC_AARCH64_BRANCH19:
     return &arm64_reloc_howto_branch19;
@@ -756,6 +758,35 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 	    opcode |= (val & 0x1ffffc) << 3;
 
 	    bfd_putl32 (opcode, contents + rel->r_vaddr);
+	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
+
+	    break;
+	  }
+
+	case IMAGE_REL_ARM64_REL32:
+	  {
+	    uint64_t cur_vma;
+	    int64_t addend, val;
+
+	    addend = bfd_getl32 (contents + rel->r_vaddr);
+
+	    if (addend & 0x80000000)
+	      addend |= 0xffffffff00000000;
+
+	    dest_vma += addend;
+	    cur_vma = input_section->output_section->vma
+		      + input_section->output_offset
+		      + rel->r_vaddr;
+
+	    val = dest_vma - cur_vma;
+
+	    if (val > 0xffffffff || val < -0x100000000)
+	      (*info->callbacks->reloc_overflow)
+		(info, h ? &h->root : NULL, syms[symndx]._n._n_name,
+		"IMAGE_REL_ARM64_REL32", addend, input_bfd,
+		input_section, rel->r_vaddr - input_section->vma);
+
+	    bfd_putl32 (val, contents + rel->r_vaddr);
 	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
 
 	    break;
