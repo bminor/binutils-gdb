@@ -2307,9 +2307,6 @@ print_variable_and_value_data::operator() (const char *print_name,
 
   print_variable_and_value (print_name, sym, frame, stream, num_tabs);
 
-  /* print_variable_and_value invalidates FRAME.  */
-  frame = NULL;
-
   values_printed = 1;
 }
 

@@ -1300,9 +1300,6 @@ call_function_by_hand_dummy (struct value *function,
       = set_momentary_breakpoint (gdbarch, sal,
 				  dummy_id, bp_call_dummy).release ();
 
-    /* set_momentary_breakpoint invalidates FRAME.  */
-    frame = NULL;
-
     bpt->disposition = disp_del;
     gdb_assert (bpt->related_breakpoint == bpt);
 

@@ -1757,9 +1757,6 @@ finish_forward (struct finish_command_fsm *sm, frame_info_ptr frame)
 					     get_stack_frame_id (frame),
 					     bp_finish);
 
-  /* set_momentary_breakpoint invalidates FRAME.  */
-  frame = nullptr;
-
   set_longjmp_breakpoint (tp, frame_id);
 
   /* We want to print return value, please...  */

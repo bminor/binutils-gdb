@@ -989,8 +989,6 @@ elf_gnu_ifunc_resolver_stop (code_breakpoint *b)
 				    prev_frame_id,
 				    bp_gnu_ifunc_resolver_return).release ();
 
-      /* set_momentary_breakpoint invalidates PREV_FRAME.  */
-      prev_frame = NULL;
 
       /* Add new b_return to the ring list b->related_breakpoint.  */
       gdb_assert (b_return->related_breakpoint == b_return);

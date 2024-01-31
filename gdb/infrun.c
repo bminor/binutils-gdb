@@ -8848,9 +8848,6 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 					       handler,
 					       bp_exception_resume).release ();
 
-	  /* set_momentary_breakpoint_at_pc invalidates FRAME.  */
-	  frame = nullptr;
-
 	  tp->control.exception_resume_breakpoint = bp;
 	}
     }
