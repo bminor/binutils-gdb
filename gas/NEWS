@@ -2,6 +2,8 @@
 
 Changes in 2.42:
 
+* Added support for AMD znver5 processor (available from GNU Binutils 2.42 release).
+
 * Add support for the AArch64 Scalable Vector Extension version 2.1 (SVE2.1).
 
 * Add support for the AArch64 Scalable Matrix Extension version 2.1 (SME2.1).
