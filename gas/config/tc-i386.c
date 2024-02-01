@@ -11759,8 +11759,8 @@ output_insn (const struct last_insn *last_insn)
 	{
 	  j = encoding_length (insn_start_frag, insn_start_off, frag_more (0));
 	  if (j > 15)
-	    as_warn (_("instruction length of %u bytes exceeds the limit of 15"),
-		     j);
+	    as_bad (_("instruction length of %u bytes exceeds the limit of 15"),
+		    j);
 	  else if (fragP)
 	    {
 	      /* NB: Don't add prefix with GOTPC relocation since
