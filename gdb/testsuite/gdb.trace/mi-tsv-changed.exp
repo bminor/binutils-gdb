@@ -83,7 +83,7 @@ proc test_create_delete_modify_tsv { } {
 
 	mi_gdb_test "tvariable \$tvar3 = 3" \
 	    ".*=tsv-created,name=\"tvar3\",initial=\"3\".*\\^done" \
-	    "tvariable \$tvar3 modified"
+	    "tvariable \$tvar3 modified to 3"
 	mi_gdb_test "-break-insert -a gdb_c_test" \
 	    {.*\^done,bkpt=.*} \
 	    "insert tracepoint on gdb_c_test"
@@ -122,7 +122,7 @@ proc test_create_delete_modify_tsv { } {
 	mi_gdb_test "-trace-list-variables" ".*" "list trace variables"
 	mi_gdb_test "tvariable \$tvar3 = 2" \
 	    ".*=tsv-modified,name=\"tvar3\",initial=\"2\",current=\"6\".*\\^done" \
-	    "tvariable \$tvar3 modified"
+	    "tvariable \$tvar3 modified to 2"
 
     }
 }
