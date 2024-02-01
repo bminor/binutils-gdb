@@ -1,5 +1,5 @@
 # Basic jalr tests.
-# mach: riscv
+# mach: riscv32 riscv64
 
 .include "testutils.inc"
 

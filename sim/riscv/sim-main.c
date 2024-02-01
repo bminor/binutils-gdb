@@ -974,6 +974,321 @@ execute_a (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 }
 
 static sim_cia
+execute_c (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
+{
+  SIM_DESC sd = CPU_STATE (cpu);
+  struct riscv_sim_cpu *riscv_cpu = RISCV_SIM_CPU (cpu);
+  int rd = (iw >> OP_SH_RD) & OP_MASK_RD;
+  int rs1_c = ((iw >> OP_SH_CRS1S) & OP_MASK_CRS1S) + 8;
+  int rs2 = (iw >> OP_SH_CRS2) & OP_MASK_CRS2;
+  int rs2_c = ((iw >> OP_SH_CRS2S) & OP_MASK_CRS2S) + 8;
+  const char *rd_name = riscv_gpr_names_abi[rd];
+  const char *rs1_c_name = riscv_gpr_names_abi[rs1_c];
+  const char *rs2_name = riscv_gpr_names_abi[rs2];
+  const char *rs2_c_name = riscv_gpr_names_abi[rs2_c];
+  signed_word imm;
+  unsigned_word tmp;
+  sim_cia pc = riscv_cpu->pc + 2;
+
+  switch (op->match)
+    {
+    case MATCH_C_JR | MATCH_C_MV:
+      switch (op->mask)
+	{
+	case MASK_C_MV:
+	  TRACE_INSN (cpu, "c.mv %s, %s; // %s = %s",
+		      rd_name, rs2_name, rd_name, rs2_name);
+	  store_rd (cpu, rd, riscv_cpu->regs[rs2]);
+	  break;
+	case MASK_C_JR:
+	  TRACE_INSN (cpu, "c.jr %s;",
+		      rd_name);
+	  pc = riscv_cpu->regs[rd];
+	  TRACE_BRANCH (cpu, "to %#" PRIxTW, pc);
+	  break;
+	}
+      break;
+    case MATCH_C_J:
+      imm = EXTRACT_CJTYPE_IMM (iw);
+      TRACE_INSN (cpu, "c.j %" PRIxTW,
+		  imm);
+      pc = riscv_cpu->pc + imm;
+      TRACE_BRANCH (cpu, "to %#" PRIxTW, pc);
+      break;
+    case MATCH_C_JAL | MATCH_C_ADDIW:
+      /* JAL and ADDIW have the same mask but are only available on RV64 or
+	 RV32 respectively.  */
+      if (RISCV_XLEN (cpu) == 64)
+	{
+	  imm = EXTRACT_CJTYPE_IMM (iw);
+	  TRACE_INSN (cpu, "c.jal %" PRIxTW,
+		      imm);
+	  store_rd (cpu, SIM_RISCV_RA_REGNUM, riscv_cpu->pc + 2);
+	  pc = riscv_cpu->pc + imm;
+	  TRACE_BRANCH (cpu, "to %#" PRIxTW, pc);
+	}
+      else if (RISCV_XLEN (cpu) == 32)
+	{
+	  imm = EXTRACT_CITYPE_IMM (iw);
+	  TRACE_INSN (cpu, "c.addiw %s, %s, %#" PRIxTW ";  // %s += %#" PRIxTW,
+		      rd_name, rd_name, imm, rd_name, imm);
+	  store_rd (cpu, rd, EXTEND32 (riscv_cpu->regs[rd] + imm));
+	}
+      else
+	{
+	  TRACE_INSN (cpu, "UNHANDLED INSN: %s", op->name);
+	  sim_engine_halt (sd, cpu, NULL, riscv_cpu->pc, sim_signalled,
+			   SIM_SIGILL);
+	}
+      break;
+    case MATCH_C_JALR | MATCH_C_ADD | MATCH_C_EBREAK:
+      switch (op->mask)
+	{
+	case MASK_C_ADD:
+	  TRACE_INSN (cpu, "c.add %s, %s; // %s += %s",
+		      rd_name, rs2_name, rd_name, rs2_name);
+	  store_rd (cpu, rd, riscv_cpu->regs[rd] + riscv_cpu->regs[rs2]);
+	  break;
+	case MASK_C_JALR:
+	  TRACE_INSN (cpu, "c.jalr %s, %s;",
+		      riscv_gpr_names_abi[SIM_RISCV_RA_REGNUM], rd_name);
+	  store_rd (cpu, SIM_RISCV_RA_REGNUM, riscv_cpu->pc + 2);
+	  pc = riscv_cpu->regs[rd];
+	  TRACE_BRANCH (cpu, "to %#" PRIxTW, pc);
+	  break;
+	case MASK_C_EBREAK:
+	  TRACE_INSN (cpu, "ebreak");
+	  sim_engine_halt (sd, cpu, NULL, riscv_cpu->pc, sim_stopped,
+			   SIM_SIGTRAP);
+	}
+      break;
+    case MATCH_C_BEQZ:
+      imm = EXTRACT_CBTYPE_IMM (iw);
+      TRACE_INSN (cpu, "c.beqz %s, %#" PRIxTW ";  "
+		       "// if (%s == 0) goto %#" PRIxTW,
+		  rs1_c_name, imm, rs1_c_name, riscv_cpu->pc + imm);
+      if (riscv_cpu->regs[rs1_c] == riscv_cpu->regs[0])
+	{
+	  pc = riscv_cpu->pc + imm;
+	  TRACE_BRANCH (cpu, "to %#" PRIxTW, pc);
+	}
+      break;
+    case MATCH_C_BNEZ:
+      imm = EXTRACT_CBTYPE_IMM (iw);
+      TRACE_INSN (cpu, "c.bnez %s, %#" PRIxTW ";  "
+		       "// if (%s != 0) goto %#" PRIxTW,
+		  rs1_c_name, imm, rs1_c_name, riscv_cpu->pc + imm);
+      if (riscv_cpu->regs[rs1_c] != riscv_cpu->regs[0])
+	{
+	  pc = riscv_cpu->pc + imm;
+	  TRACE_BRANCH (cpu, "to %#" PRIxTW, pc);
+	}
+      break;
+    case MATCH_C_LWSP:
+      imm = EXTRACT_CITYPE_LWSP_IMM (iw);
+      TRACE_INSN (cpu, "c.lwsp %s, %" PRIiTW "(sp);",
+		  rd_name, imm);
+      store_rd (cpu, rd, EXTEND32 (
+		sim_core_read_unaligned_4 (cpu, riscv_cpu->pc, read_map,
+					   riscv_cpu->regs[SIM_RISCV_SP_REGNUM]
+					   + imm)));
+      break;
+    case MATCH_C_LW:
+      imm = EXTRACT_CLTYPE_LW_IMM (iw);
+      TRACE_INSN (cpu, "c.lw %s, %" PRIiTW "(%s);",
+		  rs2_c_name, imm, rs1_c_name);
+      store_rd (cpu, rs2_c, EXTEND32 (
+	    sim_core_read_unaligned_4 (cpu, riscv_cpu->pc, read_map,
+				       riscv_cpu->regs[rs1_c] + imm)));
+      break;
+    case MATCH_C_SWSP:
+      imm = EXTRACT_CSSTYPE_SWSP_IMM (iw);
+      TRACE_INSN (cpu, "c.swsp %s, %" PRIiTW "(sp);",
+		  rs2_name, imm);
+      sim_core_write_unaligned_4 (cpu, riscv_cpu->pc, write_map,
+				  riscv_cpu->regs[SIM_RISCV_SP_REGNUM] + imm,
+				  riscv_cpu->regs[rs2]);
+      break;
+    case MATCH_C_SW:
+      imm = EXTRACT_CLTYPE_LW_IMM (iw);
+      TRACE_INSN (cpu, "c.sw %s, %" PRIiTW "(%s);",
+		  rs2_c_name, imm, rs1_c_name);
+      sim_core_write_unaligned_4 (cpu, riscv_cpu->pc, write_map,
+				  riscv_cpu->regs[rs1_c] + (imm),
+				  riscv_cpu->regs[rs2_c]);
+      break;
+    case MATCH_C_ADDI:
+      imm = EXTRACT_CITYPE_IMM (iw);
+      TRACE_INSN (cpu, "c.addi %s, %s, %#" PRIxTW ";  // %s += %#" PRIxTW,
+		  rd_name, rd_name, imm, rd_name, imm);
+      store_rd (cpu, rd, riscv_cpu->regs[rd] + imm);
+      break;
+    case MATCH_C_LUI:
+      imm = EXTRACT_CITYPE_LUI_IMM (iw);
+      TRACE_INSN (cpu, "c.lui %s, %#" PRIxTW ";",
+		  rd_name, imm);
+      store_rd (cpu, rd, imm);
+      break;
+    case MATCH_C_LI:
+      imm = EXTRACT_CITYPE_IMM (iw);
+      TRACE_INSN (cpu, "c.li %s, %#" PRIxTW ";  // %s = %#" PRIxTW,
+		  rd_name, imm, rd_name, imm);
+      store_rd (cpu, rd, imm);
+      break;
+    case MATCH_C_ADDI4SPN:
+      imm = EXTRACT_CIWTYPE_ADDI4SPN_IMM (iw);
+      TRACE_INSN (cpu, "c.addi4spn %s, %" PRIiTW "; // %s = sp + %" PRIiTW,
+		  rs2_c_name, imm, rs2_c_name, imm);
+      store_rd (cpu, rs2_c, riscv_cpu->regs[SIM_RISCV_SP_REGNUM] + (imm));
+      break;
+    case MATCH_C_ADDI16SP:
+      imm = EXTRACT_CITYPE_ADDI16SP_IMM (iw);
+      TRACE_INSN (cpu, "c.addi16sp %s, %" PRIiTW "; // %s = sp + %" PRIiTW,
+		  rd_name, imm, rd_name, imm);
+      store_rd (cpu, rd, riscv_cpu->regs[SIM_RISCV_SP_REGNUM] + imm);
+      break;
+    case MATCH_C_SUB:
+      TRACE_INSN (cpu, "c.sub %s, %s;  // %s = %s - %s",
+		  rs1_c_name, rs2_c_name, rs1_c_name, rs1_c_name, rs2_c_name);
+      store_rd (cpu, rs1_c, riscv_cpu->regs[rs1_c] - riscv_cpu->regs[rs2_c]);
+      break;
+    case MATCH_C_AND:
+      TRACE_INSN (cpu, "c.and %s, %s;  // %s = %s & %s",
+		  rs1_c_name, rs2_c_name, rs1_c_name, rs1_c_name, rs2_c_name);
+      store_rd (cpu, rs1_c, riscv_cpu->regs[rs1_c] & riscv_cpu->regs[rs2_c]);
+      break;
+    case MATCH_C_OR:
+      TRACE_INSN (cpu, "c.or %s, %s;  // %s = %s | %s",
+		  rs1_c_name, rs2_c_name, rs1_c_name, rs1_c_name, rs2_c_name);
+      store_rd (cpu, rs1_c, riscv_cpu->regs[rs1_c] | riscv_cpu->regs[rs2_c]);
+      break;
+    case MATCH_C_XOR:
+      TRACE_INSN (cpu, "c.xor %s, %s;  // %s = %s ^ %s",
+		  rs1_c_name, rs2_c_name, rs1_c_name, rs1_c_name, rs2_c_name);
+      store_rd (cpu, rs1_c, riscv_cpu->regs[rs1_c] ^ riscv_cpu->regs[rs2_c]);
+      break;
+    case MATCH_C_SLLI | MATCH_C_SLLI64:
+      if (op->mask == MASK_C_SLLI64)
+	{
+	  /* Reserved for custom use.  */
+	  TRACE_INSN (cpu, "UNHANDLED INSN: %s", op->name);
+	  sim_engine_halt (sd, cpu, NULL, riscv_cpu->pc, sim_signalled,
+			   SIM_SIGILL);
+	  break;
+	}
+      imm = EXTRACT_CITYPE_IMM (iw);
+      TRACE_INSN (cpu, "c.slli %s, %" PRIiTW ";  // %s = %s << %#" PRIxTW,
+		  rd_name, imm, rd_name, rd_name, imm);
+      store_rd (cpu, rd, riscv_cpu->regs[rd] << imm);
+      break;
+    case MATCH_C_SRLI | MATCH_C_SRLI64:
+      if (op->mask == MASK_C_SRLI64)
+	{
+	  /* Reserved for custom use.  */
+	  TRACE_INSN (cpu, "UNHANDLED INSN: %s", op->name);
+	  sim_engine_halt (sd, cpu, NULL, riscv_cpu->pc, sim_signalled,
+			   SIM_SIGILL);
+	  break;
+	}
+      imm = EXTRACT_CITYPE_IMM (iw);
+      TRACE_INSN (cpu, "c.srli %s, %" PRIiTW ";  // %s = %s >> %#" PRIxTW,
+		  rs1_c_name, imm, rs1_c_name, rs1_c_name, imm);
+      if (RISCV_XLEN (cpu) == 32)
+	store_rd (cpu, rs1_c,
+		  EXTEND32 ((uint32_t) riscv_cpu->regs[rs1_c] >> imm));
+      else
+	store_rd (cpu, rs1_c, riscv_cpu->regs[rs1_c] >> imm);
+      break;
+    case MATCH_C_SRAI | MATCH_C_SRAI64:
+      if (op->mask == MASK_C_SRAI64)
+	{
+	  /* Reserved for custom use.  */
+	  TRACE_INSN (cpu, "UNHANDLED INSN: %s", op->name);
+	  sim_engine_halt (sd, cpu, NULL, riscv_cpu->pc, sim_signalled,
+			   SIM_SIGILL);
+	  break;
+	}
+      imm = EXTRACT_CITYPE_IMM (iw);
+      TRACE_INSN (cpu, "c.srai %s, %" PRIiTW ";  // %s = %s >> %#" PRIxTW,
+		  rs1_c_name, imm, rs1_c_name, rs1_c_name, imm);
+      if (RISCV_XLEN (cpu) == 32)
+	{
+	  if (imm > 0x1f)
+	    sim_engine_halt (sd, cpu, NULL, riscv_cpu->pc, sim_signalled,
+			     SIM_SIGILL);
+	  tmp = ashiftrt (riscv_cpu->regs[rs1_c], imm);
+	}
+      else
+	tmp = ashiftrt64 (riscv_cpu->regs[rs1_c], imm);
+      store_rd (cpu, rd, tmp);
+      break;
+    case MATCH_C_ANDI:
+      imm = EXTRACT_CITYPE_IMM (iw);
+      TRACE_INSN (cpu, "c.andi %s, %" PRIiTW ";  // %s = %s & %#" PRIxTW,
+		  rs1_c_name, imm, rs1_c_name, rs1_c_name, imm);
+      store_rd (cpu, rs1_c, riscv_cpu->regs[rs1_c] & imm);
+      break;
+    case MATCH_C_ADDW:
+      TRACE_INSN (cpu, "c.addw %s, %s;  // %s = %s + %s",
+		  rs1_c_name, rs2_c_name, rs1_c_name, rs1_c_name, rs2_c_name);
+      RISCV_ASSERT_RV64 (cpu, "insn: %s", op->name);
+      store_rd (cpu, rs1_c,
+		EXTEND32 (riscv_cpu->regs[rs1_c] + riscv_cpu->regs[rs2_c]));
+      break;
+    case MATCH_C_SUBW:
+      TRACE_INSN (cpu, "c.subw %s, %s;  // %s = %s - %s",
+		  rs1_c_name, rs2_c_name, rs1_c_name, rs1_c_name, rs2_c_name);
+      RISCV_ASSERT_RV64 (cpu, "insn: %s", op->name);
+      store_rd (cpu, rs1_c,
+		EXTEND32 (riscv_cpu->regs[rs1_c] - riscv_cpu->regs[rs2_c]));
+      break;
+    case MATCH_C_LDSP:
+      imm = EXTRACT_CITYPE_LDSP_IMM (iw);
+      TRACE_INSN (cpu, "c.ldsp %s, %" PRIiTW "(sp);",
+		  rd_name, imm);
+      RISCV_ASSERT_RV64 (cpu, "insn: %s", op->name);
+      store_rd (cpu, rd,
+	  sim_core_read_unaligned_8 (cpu, riscv_cpu->pc, read_map,
+				     riscv_cpu->regs[SIM_RISCV_SP_REGNUM]
+				     + imm));
+      break;
+    case MATCH_C_LD:
+      imm = EXTRACT_CLTYPE_LD_IMM (iw);
+      TRACE_INSN (cpu, "c.ld %s, %" PRIiTW "(%s);",
+		  rs1_c_name, imm, rs2_c_name);
+      RISCV_ASSERT_RV64 (cpu, "insn: %s", op->name);
+      store_rd (cpu, rs2_c,
+	  sim_core_read_unaligned_8 (cpu, riscv_cpu->pc, read_map,
+				     riscv_cpu->regs[rs1_c] + imm));
+      break;
+    case MATCH_C_SDSP:
+      imm = EXTRACT_CSSTYPE_SDSP_IMM (iw);
+      TRACE_INSN (cpu, "c.sdsp %s, %" PRIiTW "(sp);",
+		  rs2_name, imm);
+      RISCV_ASSERT_RV64 (cpu, "insn: %s", op->name);
+      sim_core_write_unaligned_8 (cpu, riscv_cpu->pc, write_map,
+				  riscv_cpu->regs[SIM_RISCV_SP_REGNUM] + imm,
+				  riscv_cpu->regs[rs2]);
+      break;
+    case MATCH_C_SD:
+      imm = EXTRACT_CLTYPE_LD_IMM (iw);
+      TRACE_INSN (cpu, "c.sd %s, %" PRIiTW "(%s);",
+		  rs2_c_name, imm, rs1_c_name);
+      RISCV_ASSERT_RV64 (cpu, "insn: %s", op->name);
+      sim_core_write_unaligned_8 (cpu, riscv_cpu->pc, write_map,
+				  riscv_cpu->regs[rs1_c] + imm,
+				  riscv_cpu->regs[rs2_c]);
+      break;
+    default:
+      TRACE_INSN (cpu, "UNHANDLED INSN: %s", op->name);
+      sim_engine_halt (sd, cpu, NULL, riscv_cpu->pc, sim_signalled,
+		       SIM_SIGILL);
+  }
+
+  return pc;
+}
+
+static sim_cia
 execute_one (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 {
   struct riscv_sim_cpu *riscv_cpu = RISCV_SIM_CPU (cpu);
@@ -988,6 +1303,16 @@ execute_one (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
     {
     case INSN_CLASS_A:
       return execute_a (cpu, iw, op);
+    case INSN_CLASS_C:
+      /* Check whether model with C extension is selected.  */
+      if (riscv_cpu->csr.misa & 4)
+	return execute_c (cpu, iw, op);
+      else
+	{
+	  TRACE_INSN (cpu, "UNHANDLED EXTENSION: %d", op->insn_class);
+	  sim_engine_halt (sd, cpu, NULL, riscv_cpu->pc, sim_signalled,
+			   SIM_SIGILL);
+	}
     case INSN_CLASS_I:
       return execute_i (cpu, iw, op);
     case INSN_CLASS_M:
@@ -1018,17 +1343,17 @@ void step_once (SIM_CPU *cpu)
 
   iw = sim_core_read_aligned_2 (cpu, pc, exec_map, pc);
 
-  /* Reject non-32-bit opcodes first.  */
   len = riscv_insn_length (iw);
-  if (len != 4)
+  if (len != 4 && len != 2)
     {
       sim_io_printf (sd, "sim: bad insn len %#x @ %#" PRIxTA ": %#" PRIxTW "\n",
 		     len, pc, iw);
       sim_engine_halt (sd, cpu, NULL, pc, sim_signalled, SIM_SIGILL);
     }
 
-  iw |= ((unsigned_word) sim_core_read_aligned_2 (
-    cpu, pc, exec_map, pc + 2) << 16);
+  if (len == 4)
+    iw |= ((unsigned_word) sim_core_read_aligned_2
+	   (cpu, pc, exec_map, pc + 2) << 16);
 
   TRACE_CORE (cpu, "0x%08" PRIxTW, iw);
 
