@@ -2920,9 +2920,9 @@ type::remove_dyn_prop (dynamic_prop_node_kind kind)
       if (curr_node->prop_kind == kind)
 	{
 	  /* Update the linked list but don't free anything.
-	     The property was allocated on objstack and it is not known
+	     The property was allocated on obstack and it is not known
 	     if we are on top of it.  Nevertheless, everything is released
-	     when the complete objstack is freed.  */
+	     when the complete obstack is freed.  */
 	  if (NULL == prev_node)
 	    this->main_type->dyn_prop_list = curr_node->next;
 	  else

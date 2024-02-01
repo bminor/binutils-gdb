@@ -6892,7 +6892,7 @@ dwarf2_full_name (const char *name, struct die_info *die, struct dwarf2_cu *cu)
 
 /* Construct a physname for the given DIE in CU.  NAME may either be
    from a previous call to dwarf2_name or NULL.  The result will be
-   allocated on the objfile_objstack or NULL if the DIE does not have a
+   allocated on the objfile_obstack or NULL if the DIE does not have a
    name.
 
    The output string will be canonicalized (if C++).  */
