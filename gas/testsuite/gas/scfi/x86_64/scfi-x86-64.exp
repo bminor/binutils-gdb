@@ -26,6 +26,7 @@ if  { ([istarget "x86_64-*-*"] && ![istarget "x86_64-*-linux*-gnux32"]) } then {
 
     run_list_test "ginsn-dw2-regnum-1" "--scfi=experimental -ali"
     run_list_test "ginsn-add-1" "--scfi=experimental -ali"
+    run_list_test "ginsn-lea-1" "--scfi=experimental -ali"
     run_list_test "ginsn-pop-1" "--scfi=experimental -ali"
     run_list_test "ginsn-push-1" "--scfi=experimental -ali"
     run_list_test "ginsn-cofi-1" "--scfi=experimental -ali -W"
