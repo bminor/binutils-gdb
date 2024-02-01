@@ -41,14 +41,6 @@
 #include "ABS.h"
 #include "tsd.h"
 
-/* TprintfT(<level>,...) definitions.  Adjust per module as needed */
-#define DBG_LT0 0 // for high-level configuration, unexpected errors/warnings
-#define DBG_LT1 1 // for configuration details, warnings
-#define DBG_LT2 2
-#define DBG_LT3 3
-#define DBG_LT4 4
-#define DBG_LT5 5
-
 #define  SD_OFF 0       /* before start or after close she shut down process */
 #define  SD_PENDING 1   /* before running real_detach_experiment() */
 #define  SD_COMPLETE 2  /* after running real_detach_experiment() */

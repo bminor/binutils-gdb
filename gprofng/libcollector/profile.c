@@ -41,12 +41,6 @@
 #include "hwprofile.h"
 #include "tsd.h"
 
-/* TprintfT(<level>,...) definitions.  Adjust per module as needed */
-#define DBG_LT0 0 // for high-level configuration, unexpected errors/warnings
-#define DBG_LT1 1 // for configuration details, warnings
-#define DBG_LT2 2
-#define DBG_LT3 3
-
 static int init_interface (CollectorInterface*);
 static int open_experiment (const char *);
 static int start_data_collection (void);
@@ -268,7 +262,7 @@ __collector_ext_profile_handler (siginfo_t *info, ucontext_t *context)
       return;
     }
   PUSH_REENTRANCE (guard);
-  TprintfT (DBG_LT3, "__collector_ext_profile_handler\n");
+  TprintfT (0, "__collector_ext_profile_handler\n");
   ucontext_t uctxmem;
   if (context == NULL)
     {

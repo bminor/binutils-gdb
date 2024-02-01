@@ -30,8 +30,6 @@
 
 #include "Emsgnum.h" /* for COL_ERROR_*, etc. symbols */
 
-#define SP_REMOTE_PROTOCOL_VERSION "12.4.1"
-
 #define SP_GROUP_HEADER         "#analyzer experiment group"
 
 /* Experiment name macro definitions */

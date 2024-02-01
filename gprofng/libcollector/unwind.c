@@ -60,12 +60,6 @@ struct frame
 };
 #endif
 
-/* Set the debug trace level */
-#define DBG_LT0 0
-#define DBG_LT1	1
-#define DBG_LT2	2
-#define DBG_LT3	3
-
 int (*__collector_VM_ReadByteInstruction)(unsigned char *) = NULL;
 #define VM_NO_ACCESS        (-1)
 #define VM_NOT_VM_MEMORY    (-2)
