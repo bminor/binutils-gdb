@@ -2633,7 +2633,7 @@ extern struct type *resolve_dynamic_type
    See the caveat in 'resolve_dynamic_type' to understand a scenario
    where an apparently-resolved type may still be considered
    "dynamic".  */
-extern int is_dynamic_type (struct type *type);
+extern bool is_dynamic_type (struct type *type);
 
 extern struct type *check_typedef (struct type *);
 
