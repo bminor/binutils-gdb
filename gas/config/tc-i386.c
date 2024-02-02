@@ -9464,13 +9464,31 @@ process_suffix (void)
 	  else
 	    i.tm.base_opcode |= 1;
 	}
+
+      /* Set mode64 for an operand.  */
+      if (i.suffix == QWORD_MNEM_SUFFIX)
+	{
+	  if (flag_code == CODE_64BIT
+	      && !i.tm.opcode_modifier.norex64
+	      && !i.tm.opcode_modifier.vexw
+	      /* Special case for xchg %rax,%rax.  It is NOP and doesn't
+		 need rex64. */
+	      && ! (i.operands == 2
+		    && i.tm.base_opcode == 0x90
+		    && i.tm.opcode_space == SPACE_BASE
+		    && i.types[0].bitfield.instance == Accum
+		    && i.types[1].bitfield.instance == Accum))
+	    i.rex |= REX_W;
+
+	  break;
+	}
+
     /* fall through */
     case SHORT_MNEM_SUFFIX:
       /* Now select between word & dword operations via the operand
 	 size prefix, except for instructions that will ignore this
 	 prefix anyway.  */
-      if (i.suffix != QWORD_MNEM_SUFFIX
-	  && i.tm.opcode_modifier.mnemonicsize != IGNORESIZE
+      if (i.tm.opcode_modifier.mnemonicsize != IGNORESIZE
 	  && !i.tm.opcode_modifier.floatmf
 	  && (!is_any_vex_encoding (&i.tm)
 	      || i.tm.opcode_space == SPACE_EVEXMAP4)
@@ -9493,21 +9511,6 @@ process_suffix (void)
 	  else if (!add_prefix (prefix))
 	    return 0;
 	}
-
-      /* Set mode64 for an operand.  */
-      if (i.suffix == QWORD_MNEM_SUFFIX
-	  && flag_code == CODE_64BIT
-	  && !i.tm.opcode_modifier.norex64
-	  && !i.tm.opcode_modifier.vexw
-	  /* Special case for xchg %rax,%rax.  It is NOP and doesn't
-	     need rex64. */
-	  && ! (i.operands == 2
-		&& i.tm.base_opcode == 0x90
-		&& i.tm.opcode_space == SPACE_BASE
-		&& i.types[0].bitfield.instance == Accum
-		&& i.types[0].bitfield.qword
-		&& i.types[1].bitfield.instance == Accum))
-	i.rex |= REX_W;
 
       break;
 
