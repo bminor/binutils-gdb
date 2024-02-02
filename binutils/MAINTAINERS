@@ -120,7 +120,7 @@ responsibility among the other maintainers.
   NDS32		   Kuan-Lin Chen <kuanlinchentw@gmail.com>
   NDS32		   Wei-Cheng Wang <cole945@gmail.com>
   NetBSD support   Matt Thomas <matt@netbsd.org>
-  Nios II	   Sandra Loosemore <sandra@codesourcery.com>
+  Nios II	   Sandra Loosemore <sloosemore@baylibre.com>
   Nios II	   Andrew Jenner <andrew@codesourcery.com>
   OR1K		   Christian Svensson <blue@cmd.nu>
   OR1K		   Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>
