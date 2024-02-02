@@ -158,6 +158,23 @@ load_lib gdb-utils.exp
 load_lib memory.exp
 load_lib check-test-names.exp
 
+# The path to the GCORE script to test.
+global GCORE
+if {![info exists GCORE]} {
+    set GCORE [findfile $base_dir/../../gdb/gcore]
+}
+verbose "using GCORE = $GCORE" 2
+
+# Return 0 if the gcore scipt is missing.
+proc has_gcore_script {} {
+    global GCORE
+    if {$GCORE == ""} {
+	return 0
+    } else {
+	return 1
+    }
+}
+
 # The path to the GDB binary to test.
 global GDB
 
