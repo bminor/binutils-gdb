@@ -1340,6 +1340,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_LARCH_TLS_DESC_LO12:
     case BFD_RELOC_LARCH_TLS_DESC64_LO20:
     case BFD_RELOC_LARCH_TLS_DESC64_HI12:
+    case BFD_RELOC_LARCH_TLS_LE_ADD_R:
+    case BFD_RELOC_LARCH_TLS_LE_HI20_R:
+    case BFD_RELOC_LARCH_TLS_LE_LO12_R:
       /* Add tls lo (got_lo reloc type).  */
       if (fixP->fx_addsy == NULL)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
