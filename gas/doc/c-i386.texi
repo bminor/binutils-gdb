@@ -763,6 +763,10 @@ be suffixed by @code{@{:d@var{n}@}} to specify the size (in bytes).
 This can be combined with an embedded broadcast specifier:
 @samp{8(%eax)@{1to8:d8@}}.
 
+@cindex @code{noopt} directive
+@item .noopt
+Disable instruction size optimization.
+
 @c FIXME: Document other x86 specific directives ?  Eg: .code16gcc,
 
 @end table

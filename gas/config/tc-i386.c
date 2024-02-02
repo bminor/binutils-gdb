@@ -140,6 +140,7 @@ arch_entry;
 
 static void update_code_flag (int, int);
 static void s_insn (int);
+static void s_noopt (int);
 static void set_code_flag (int);
 static void set_16bit_gcc_code_flag (int);
 static void set_intel_syntax (int);
@@ -1232,7 +1233,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"value", cons, 2},
   {"slong", signed_cons, 4},
   {"insn", s_insn, 0},
-  {"noopt", s_ignore, 0},
+  {"noopt", s_noopt, 0},
   {"optim", s_ignore, 0},
   {"code16gcc", set_16bit_gcc_code_flag, CODE_16BIT},
   {"code16", set_code_flag, CODE_16BIT},
@@ -4997,6 +4998,18 @@ optimize_encoding (void)
 
       swap_2_operands (1, 2);
     }
+}
+
+static void
+s_noopt (int dummy ATTRIBUTE_UNUSED)
+{
+  if (!is_it_end_of_statement ())
+    as_warn (_("`.noopt' arguments ignored"));
+
+  optimize = 0;
+  optimize_for_space = 0;
+
+  ignore_rest_of_line ();
 }
 
 /* Return non-zero for load instruction.  */

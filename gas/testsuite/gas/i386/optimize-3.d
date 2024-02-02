@@ -1,4 +1,4 @@
-#as: -Os
+#as: -Os --defsym USE_PREFIX=1
 #objdump: -drw
 #name: optimized encoding 3 with -Os
 
