@@ -136,12 +136,8 @@ public:
      distinguish these in buildsym.c.  */
   struct pending **list_in_scope = nullptr;
 
-  /* Hash table holding all the loaded partial DIEs
-     with partial_die->offset.SECT_OFF as hash.  */
-  htab_t partial_dies = nullptr;
-
-  /* Storage for things with the same lifetime as this read-in compilation
-     unit, including partial DIEs.  */
+  /* Storage for things with the same lifetime as this read-in
+     compilation unit. */
   auto_obstack comp_unit_obstack;
 
   /* Backlink to our per_cu entry.  */
@@ -273,12 +269,6 @@ public:
      this information, but later versions do.  */
 
   bool processing_has_namespace_info : 1;
-
-  /* This flag will be set when reading partial DIEs if we need to load
-     absolutely all DIEs for this compilation unit, instead of just the ones
-     we think are interesting.  It gets set if we look for a DIE in the
-     hash table and don't find it.  */
-  bool load_all_dies : 1;
 
   /* Get the buildsym_compunit for this CU.  */
   buildsym_compunit *get_builder ();

@@ -25,8 +25,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* FIXME: Various die-reading functions need to be more careful with
-   reading off the end of the section.
-   E.g., load_partial_dies, read_partial_die.  */
+   reading off the end of the section.  */
 
 #include "defs.h"
 #include "dwarf2/read.h"
@@ -21475,7 +21474,7 @@ dwarf2_find_containing_comp_unit (sect_offset sect_off,
   if (this_cu->is_dwz != offset_in_dwz || this_cu->sect_off > sect_off)
     {
       if (low == 0 || this_cu->is_dwz != offset_in_dwz)
-	error (_("Dwarf Error: could not find partial DIE containing "
+	error (_("Dwarf Error: could not find CU containing "
 	       "offset %s [in module %s]"),
 	       sect_offset_str (sect_off),
 	       bfd_get_filename (per_bfd->obfd));
