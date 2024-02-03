@@ -2920,6 +2920,11 @@ Target_x86_64<size>::optimize_tls_reloc(bool is_final, int r_type,
       // Another Local-Dynamic reloc.
       return tls::TLSOPT_TO_LE;
 
+    case elfcpp::R_X86_64_CODE_6_GOTTPOFF:
+      if (r_offset <= 6 || *(reloc_view - 6) != 0x62)
+	return tls::TLSOPT_NONE;
+      goto handle_gottpoff;
+
     case elfcpp::R_X86_64_CODE_4_GOTTPOFF:
       if (r_offset <= 4 || *(reloc_view - 4) != 0xd5)
 	return tls::TLSOPT_NONE;
@@ -2929,6 +2934,7 @@ Target_x86_64<size>::optimize_tls_reloc(bool is_final, int r_type,
       // from the GOT.  If we know that we are linking against the
       // local symbol, we can switch to Local-Exec, which links the
       // thread offset into the instruction.
+handle_gottpoff:
       if (is_final)
 	return tls::TLSOPT_TO_LE;
       return tls::TLSOPT_NONE;
@@ -2997,6 +3003,7 @@ Target_x86_64<size>::Scan::get_reference_flags(unsigned int r_type)
     case elfcpp::R_X86_64_DTPOFF64:
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
     case elfcpp::R_X86_64_CODE_4_GOTTPOFF:
+    case elfcpp::R_X86_64_CODE_6_GOTTPOFF:
     case elfcpp::R_X86_64_TPOFF32:          // Local-exec
       return Symbol::TLS_REF;
 
@@ -3362,6 +3369,7 @@ need_got:
       // These are initial tls relocs, which are expected when linking
     case elfcpp::R_X86_64_CODE_4_GOTPC32_TLSDESC:
     case elfcpp::R_X86_64_CODE_4_GOTTPOFF:
+    case elfcpp::R_X86_64_CODE_6_GOTTPOFF:
       {
 	section_size_type stype;
 	reloc_view = object->section_contents(data_shndx, &stype, true);
@@ -3464,6 +3472,7 @@ need_got:
 
 	  case elfcpp::R_X86_64_GOTTPOFF:    // Initial-exec
 	  case elfcpp::R_X86_64_CODE_4_GOTTPOFF:
+	  case elfcpp::R_X86_64_CODE_6_GOTTPOFF:
 	    layout->set_has_static_tls();
 	    if (optimized_type == tls::TLSOPT_NONE)
 	      {
@@ -3902,6 +3911,7 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
       // These are initial tls relocs, which are expected for global()
     case elfcpp::R_X86_64_CODE_4_GOTPC32_TLSDESC:
     case elfcpp::R_X86_64_CODE_4_GOTTPOFF:
+    case elfcpp::R_X86_64_CODE_6_GOTTPOFF:
       {
 	section_size_type stype;
 	reloc_view = object->section_contents(data_shndx, &stype, true);
@@ -3920,7 +3930,8 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
 	// when building an executable.
 	const bool is_final = (gsym->final_value_is_known() ||
 			       ((r_type == elfcpp::R_X86_64_GOTTPOFF ||
-				 r_type == elfcpp::R_X86_64_CODE_4_GOTTPOFF) &&
+				 r_type == elfcpp::R_X86_64_CODE_4_GOTTPOFF||
+				 r_type == elfcpp::R_X86_64_CODE_6_GOTTPOFF) &&
 			        gsym->is_undefined() &&
 				parameters->options().output_is_executable()));
 	size_t r_offset = reloc.get_r_offset();
@@ -4006,6 +4017,7 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
 
 	  case elfcpp::R_X86_64_GOTTPOFF:    // Initial-exec
 	  case elfcpp::R_X86_64_CODE_4_GOTTPOFF:
+	  case elfcpp::R_X86_64_CODE_6_GOTTPOFF:
 	    layout->set_has_static_tls();
 	    if (optimized_type == tls::TLSOPT_NONE)
 	      {
@@ -4608,6 +4620,7 @@ Target_x86_64<size>::Relocate::relocate(
     case elfcpp::R_X86_64_DTPOFF64:
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
     case elfcpp::R_X86_64_CODE_4_GOTTPOFF:
+    case elfcpp::R_X86_64_CODE_6_GOTTPOFF:
     case elfcpp::R_X86_64_TPOFF32:          // Local-exec
       this->relocate_tls(relinfo, target, relnum, rela, r_type, gsym, psymval,
 			 view, address, view_size);
@@ -4894,6 +4907,7 @@ Target_x86_64<size>::Relocate::relocate_tls(
 
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
     case elfcpp::R_X86_64_CODE_4_GOTTPOFF:
+    case elfcpp::R_X86_64_CODE_6_GOTTPOFF:
       if (gsym != NULL
 	  && gsym->is_undefined()
 	  && parameters->options().output_is_executable())
@@ -5308,11 +5322,19 @@ Target_x86_64<size>::Relocate::tls_ie_to_le(
 
   // movq foo@gottpoff(%rip),%reg  ==>  movq $YY,%reg
   // addq foo@gottpoff(%rip),%reg  ==>  addq $YY,%reg
+  // addq %reg1,foo@gottpoff(%rip),%reg2  ==>  addq $YY,%reg1,%reg2
+  // addq foo@gottpoff(%rip),%reg1,%reg2  ==>  addq $YY,%reg1,%reg2
 
-  tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -3);
+  int off1;
+  if (r_type == elfcpp::R_X86_64_CODE_6_GOTTPOFF)
+    off1 = -5;
+  else
+    off1 = -3;
+
+  tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, off1);
   tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 4);
 
-  unsigned char op1 = view[-3];
+  unsigned char op1 = view[off1];
   unsigned char op2 = view[-2];
   unsigned char op3 = view[-1];
   unsigned char reg = op3 >> 3;
@@ -5350,7 +5372,7 @@ Target_x86_64<size>::Relocate::tls_ie_to_le(
 	  view[-1] = 0x80 | reg | (reg << 3);
 	}
     }
-  else
+  else if (r_type == elfcpp::R_X86_64_CODE_4_GOTTPOFF)
     {
       if (op2 == 0x8b)
 	op2 = 0xc7;
@@ -5360,6 +5382,23 @@ Target_x86_64<size>::Relocate::tls_ie_to_le(
       unsigned char rex2_mask = 4 | 4 << 4;
       view[-3] = (view[-3] & ~rex2_mask) | ((view[-3] & rex2_mask) >> 2);
       view[-2] = op2;
+      view[-1] = 0xc0 | reg;
+    }
+  else
+    {
+      unsigned char updated_op1 = op1;
+
+      // Set the R bits since they is inverted.
+      updated_op1 |= 1 << 7 | 1 << 4;
+
+      // Update the B bits from the R bits.
+      if ((op1 & (1 << 7)) == 0)
+	updated_op1 &= ~(1 << 5);
+      if ((op1 & (1 << 4)) == 0)
+	updated_op1 |= 1 << 3;
+
+      view[-5] = updated_op1;
+      view[-2] = 0x81;
       view[-1] = 0xc0 | reg;
     }
 

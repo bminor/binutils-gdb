@@ -129,15 +129,23 @@ fn2:
 
 	/* IE against global var  */
 	addq	sG2@gottpoff(%rip), %r16
+	addq	%rax, sG2@gottpoff(%rip), %r16
+	addq	sG2@gottpoff(%rip), %rax, %r16
 
 	/* IE -> LE against global var defined in exec */
 	addq	sg1@gottpoff(%rip), %r17
+	addq	%r8, sg1@gottpoff(%rip), %r17
+	addq	sg1@gottpoff(%rip), %r8, %r17
 
 	/* IE -> LE against local var */
 	addq	sl1@gottpoff(%rip), %r18
+	addq	%r8, sl1@gottpoff(%rip), %rax
+	addq	sl1@gottpoff(%rip), %r8, %rax
 
 	/* IE -> LE against hidden var */
 	addq	sh1@gottpoff(%rip), %r19
+	addq	%r19, sh1@gottpoff(%rip), %r8
+	addq	sh1@gottpoff(%rip), %r19, %r8
 
 	/* Direct access through %fs  */
 

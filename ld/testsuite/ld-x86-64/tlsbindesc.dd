@@ -169,18 +169,42 @@ Disassembly of section .text:
  +[0-9a-f]+:	d5 48 03 05 ([0-9a-f]{2} ){3}[ 	]+add    0x[0-9a-f]+\(%rip\),%r16 +# [0-9a-f]+ <sG2>
 #				-> R_X86_64_TPOFF64	sG2
  +[0-9a-f]+:	00 *
+ +[0-9a-f]+:	62 f4 fc 10 01 ([0-9a-f]{2} ){2}[ 	]+add    %rax,0x[0-9a-f]+\(%rip\),%r16 +# [0-9a-f]+ <sG2>
+#				-> R_X86_64_TPOFF64	sG2
+ +[0-9a-f]+:	([0-9a-f]{2} ){3} *
+ +[0-9a-f]+:	62 f4 fc 10 03 ([0-9a-f]{2} ){2}[ 	]+add    0x[0-9a-f]+\(%rip\),%rax,%r16 +# [0-9a-f]+ <sG2>
+#				-> R_X86_64_TPOFF64	sG2
+ +[0-9a-f]+:	([0-9a-f]{2} ){3} *
 #  IE -> LE against global var defined in exec
  +[0-9a-f]+:	d5 18 81 c1 60 ff ff[ 	]+add    \$0xf+60,%r17
 #							sg1
  +[0-9a-f]+:	ff *
+ +[0-9a-f]+:	62 d4 f4 10 81 ([0-9a-f]{2} ){2}[ 	]+add    \$0x[0-9a-f]+,%r8,%r17
+#							sg1
+ +[0-9a-f]+:	ff ff ff *
+ +[0-9a-f]+:	62 d4 f4 10 81 ([0-9a-f]{2} ){2}[ 	]+add    \$0x[0-9a-f]+,%r8,%r17
+#							sg1
+ +[0-9a-f]+:	ff ff ff *
 #  IE -> LE against local var
  +[0-9a-f]+:	d5 18 81 c2 80 ff ff[ 	]+add    \$0xf+80,%r18
 #							sl1
  +[0-9a-f]+:	ff *
+ +[0-9a-f]+:	62 d4 fc 18 81 ([0-9a-f]{2} ){2}[ 	]+add    \$0x[0-9a-f]+,%r8,%rax
+#							sl1
+ +[0-9a-f]+:	ff ff ff *
+ +[0-9a-f]+:	62 d4 fc 18 81 ([0-9a-f]{2} ){2}[ 	]+add    \$0x[0-9a-f]+,%r8,%rax
+#							sl1
+ +[0-9a-f]+:	ff ff ff *
 #  IE -> LE against hidden var
  +[0-9a-f]+:	d5 18 81 c3 a0 ff ff[ 	]+add    \$0xf+a0,%r19
 #							sh1
  +[0-9a-f]+:	ff *
+ +[0-9a-f]+:	62 fc bc 18 81 ([0-9a-f]{2} ){2}[ 	]+add    \$0x[0-9a-f]+,%r19,%r8
+#							sh1
+ +[0-9a-f]+:	ff ff ff *
+ +[0-9a-f]+:	62 fc bc 18 81 ([0-9a-f]{2} ){2}[ 	]+add    \$0x[0-9a-f]+,%r19,%r8
+#							sh1
+ +[0-9a-f]+:	ff ff ff *
 #  Direct access through %fs
 #  IE against global var
  +[0-9a-f]+:	d5 48 8b 25 ([0-9a-f]{2} ){3}[ 	]+mov    0x[0-9a-f]+\(%rip\),%r20 +# [0-9a-f]+ <sG5>

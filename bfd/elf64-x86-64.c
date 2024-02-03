@@ -179,12 +179,30 @@ static reloc_howto_type x86_64_elf_howto_table[] =
   HOWTO(R_X86_64_CODE_4_GOTPC32_TLSDESC, 0, 4, 32, true, 0,
 	complain_overflow_bitfield, bfd_elf_generic_reloc,
 	"R_X86_64_CODE_4_GOTPC32_TLSDESC", false, 0, 0xffffffff, true),
+  HOWTO(R_X86_64_CODE_5_GOTPCRELX, 0, 4, 32, true, 0,
+	complain_overflow_signed, bfd_elf_generic_reloc,
+	"R_X86_64_CODE_5_GOTPCRELX", false, 0, 0xffffffff, true),
+  HOWTO(R_X86_64_CODE_5_GOTTPOFF, 0, 4, 32, true, 0,
+	complain_overflow_signed, bfd_elf_generic_reloc,
+	"R_X86_64_CODE_5_GOTTPOFF", false, 0, 0xffffffff, true),
+  HOWTO(R_X86_64_CODE_5_GOTPC32_TLSDESC, 0, 4, 32, true, 0,
+	complain_overflow_bitfield, bfd_elf_generic_reloc,
+	"R_X86_64_CODE_5_GOTPC32_TLSDESC", false, 0, 0xffffffff, true),
+  HOWTO(R_X86_64_CODE_6_GOTPCRELX, 0, 4, 32, true, 0,
+	complain_overflow_signed, bfd_elf_generic_reloc,
+	"R_X86_64_CODE_6_GOTPCRELX", false, 0, 0xffffffff, true),
+  HOWTO(R_X86_64_CODE_6_GOTTPOFF, 0, 4, 32, true, 0,
+	complain_overflow_signed, bfd_elf_generic_reloc,
+	"R_X86_64_CODE_6_GOTTPOFF", false, 0, 0xffffffff, true),
+  HOWTO(R_X86_64_CODE_6_GOTPC32_TLSDESC, 0, 4, 32, true, 0,
+	complain_overflow_bitfield, bfd_elf_generic_reloc,
+	"R_X86_64_CODE_6_GOTPC32_TLSDESC", false, 0, 0xffffffff, true),
 
   /* We have a gap in the reloc numbers here.
      R_X86_64_standard counts the number up to this point, and
      R_X86_64_vt_offset is the value to subtract from a reloc type of
      R_X86_64_GNU_VT* to form an index into this table.  */
-#define R_X86_64_standard (R_X86_64_CODE_4_GOTPC32_TLSDESC + 1)
+#define R_X86_64_standard (R_X86_64_CODE_6_GOTPC32_TLSDESC + 1)
 #define R_X86_64_vt_offset (R_X86_64_GNU_VTINHERIT - R_X86_64_standard)
 
 /* GNU extension to record C++ vtable hierarchy.  */
@@ -256,6 +274,12 @@ static const struct elf_reloc_map x86_64_reloc_map[] =
   { BFD_RELOC_X86_64_CODE_4_GOTPCRELX, R_X86_64_CODE_4_GOTPCRELX, },
   { BFD_RELOC_X86_64_CODE_4_GOTTPOFF, R_X86_64_CODE_4_GOTTPOFF, },
   { BFD_RELOC_X86_64_CODE_4_GOTPC32_TLSDESC, R_X86_64_CODE_4_GOTPC32_TLSDESC, },
+  { BFD_RELOC_X86_64_CODE_5_GOTPCRELX, R_X86_64_CODE_5_GOTPCRELX, },
+  { BFD_RELOC_X86_64_CODE_5_GOTTPOFF, R_X86_64_CODE_5_GOTTPOFF, },
+  { BFD_RELOC_X86_64_CODE_5_GOTPC32_TLSDESC, R_X86_64_CODE_5_GOTPC32_TLSDESC, },
+  { BFD_RELOC_X86_64_CODE_6_GOTPCRELX, R_X86_64_CODE_6_GOTPCRELX, },
+  { BFD_RELOC_X86_64_CODE_6_GOTTPOFF, R_X86_64_CODE_6_GOTTPOFF, },
+  { BFD_RELOC_X86_64_CODE_6_GOTPC32_TLSDESC, R_X86_64_CODE_6_GOTPC32_TLSDESC, },
   { BFD_RELOC_VTABLE_INHERIT,	R_X86_64_GNU_VTINHERIT, },
   { BFD_RELOC_VTABLE_ENTRY,	R_X86_64_GNU_VTENTRY, },
 };
@@ -1283,6 +1307,23 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 
       goto check_gottpoff;
 
+    case R_X86_64_CODE_6_GOTTPOFF:
+      /* Check transition from IE access model:
+		add %reg1, foo@gottpoff(%rip), %reg2
+		where reg1/reg2 are one of r16 to r31.  */
+
+      if (offset < 6
+	  || (offset + 4) > sec->size
+	  || contents[offset - 6] != 0x62)
+	return false;
+
+      val = bfd_get_8 (abfd, contents + offset - 2);
+      if (val != 0x01 && val != 0x03)
+	return false;
+
+      val = bfd_get_8 (abfd, contents + offset - 1);
+      return (val & 0xc7) == 5;
+
     case R_X86_64_GOTTPOFF:
       /* Check transition from IE access model:
 		mov foo@gottpoff(%rip), %reg
@@ -1417,6 +1458,7 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
     case R_X86_64_TLSDESC_CALL:
     case R_X86_64_GOTTPOFF:
     case R_X86_64_CODE_4_GOTTPOFF:
+    case R_X86_64_CODE_6_GOTTPOFF:
       if (bfd_link_executable (info))
 	{
 	  if (h == NULL)
@@ -1464,6 +1506,8 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
   /* Return TRUE if there is no transition.  */
   if (from_type == to_type
       || (from_type == R_X86_64_CODE_4_GOTTPOFF
+	  && to_type == R_X86_64_GOTTPOFF)
+      || (from_type == R_X86_64_CODE_6_GOTTPOFF
 	  && to_type == R_X86_64_GOTTPOFF))
     return true;
 
@@ -2177,6 +2221,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_X86_64_GOTTPOFF:
 	case R_X86_64_CODE_4_GOTTPOFF:
+	case R_X86_64_CODE_6_GOTTPOFF:
 	  if (!bfd_link_executable (info))
 	    info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
@@ -2214,6 +2259,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 		break;
 	      case R_X86_64_GOTTPOFF:
 	      case R_X86_64_CODE_4_GOTTPOFF:
+	      case R_X86_64_CODE_6_GOTTPOFF:
 		tls_type = GOT_TLS_IE;
 		break;
 	      case R_X86_64_GOTPC32_TLSDESC:
@@ -2500,6 +2546,26 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	      /* Count size relocation as PC-relative relocation.  */
 	      if (X86_PCREL_TYPE_P (true, r_type) || size_reloc)
 		p->pc_count += 1;
+	    }
+	  break;
+
+	case R_X86_64_CODE_5_GOTPCRELX:
+	case R_X86_64_CODE_5_GOTTPOFF:
+	case R_X86_64_CODE_5_GOTPC32_TLSDESC:
+	case R_X86_64_CODE_6_GOTPCRELX:
+	case R_X86_64_CODE_6_GOTPC32_TLSDESC:
+	    {
+	      /* These relocations are added only for completeness and
+		 aren't be used.  */
+	      if (h)
+		name = h->root.root.string;
+	      else
+		name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
+					 NULL);
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%pB: unsupported relocation %s against symbol `%s'"),
+		 abfd, x86_64_elf_howto_table[r_type].name, name);
 	    }
 	  break;
 
@@ -3570,6 +3636,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	case R_X86_64_TLSDESC_CALL:
 	case R_X86_64_GOTTPOFF:
 	case R_X86_64_CODE_4_GOTTPOFF:
+	case R_X86_64_CODE_6_GOTTPOFF:
 	  tls_type = GOT_UNKNOWN;
 	  if (h == NULL && local_got_offsets)
 	    tls_type = elf_x86_local_got_tls_type (input_bfd) [r_symndx];
@@ -3912,6 +3979,50 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 			      | (rex2 & rex2_mask) >> 2),
 			     contents + roff - 3);
 		  bfd_put_8 (output_bfd, type,
+			     contents + roff - 2);
+		  bfd_put_8 (output_bfd, 0xc0 | reg,
+			     contents + roff - 1);
+		  bfd_put_32 (output_bfd,
+			      elf_x86_64_tpoff (info, relocation),
+			      contents + roff);
+		  continue;
+		}
+	      else if (r_type == R_X86_64_CODE_6_GOTTPOFF)
+		{
+		  /* IE->LE transition:
+		     Originally it is
+		     add %reg1, foo@gottpoff(%rip), %reg2
+		     or
+		     add foo@gottpoff(%rip), %reg1, %reg2
+		     We change it into:
+		     add $foo@tpoff, %reg1, %reg2
+		   */
+		  unsigned int reg, byte1;
+		  unsigned int updated_byte1;
+
+		  if (roff < 6)
+		    goto corrupt_input;
+
+		  /* Move the R bits to the B bits in EVEX payload
+		     byte 1.  */
+		  byte1 = bfd_get_8 (input_bfd, contents + roff - 5);
+		  updated_byte1 = byte1;
+
+		  /* Set the R bits since they is inverted.  */
+		  updated_byte1 |= 1 << 7 | 1 << 4;
+
+		  /* Update the B bits from the R bits.  */
+		  if ((byte1 & (1 << 7)) == 0)
+		    updated_byte1 &= ~(1 << 5);
+		  if ((byte1 & (1 << 4)) == 0)
+		    updated_byte1 |= 1 << 3;
+
+		  reg = bfd_get_8 (input_bfd, contents + roff - 1);
+		  reg >>= 3;
+
+		  bfd_put_8 (output_bfd, updated_byte1,
+			     contents + roff - 5);
+		  bfd_put_8 (output_bfd, 0x81,
 			     contents + roff - 2);
 		  bfd_put_8 (output_bfd, 0xc0 | reg,
 			     contents + roff - 1);

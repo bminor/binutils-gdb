@@ -3641,6 +3641,7 @@ tc_i386_fix_adjustable (fixS *fixP)
       || fixP->fx_r_type == BFD_RELOC_X86_64_DTPOFF64
       || fixP->fx_r_type == BFD_RELOC_X86_64_GOTTPOFF
       || fixP->fx_r_type == BFD_RELOC_X86_64_CODE_4_GOTTPOFF
+      || fixP->fx_r_type == BFD_RELOC_X86_64_CODE_6_GOTTPOFF
       || fixP->fx_r_type == BFD_RELOC_X86_64_TPOFF32
       || fixP->fx_r_type == BFD_RELOC_X86_64_TPOFF64
       || fixP->fx_r_type == BFD_RELOC_X86_64_GOTOFF64
@@ -6761,10 +6762,19 @@ md_assemble (char *line)
       for (j = i.imm_operands; j < i.operands; ++j)
 	switch (i.reloc[j])
 	  {
+	  case BFD_RELOC_X86_64_GOTTPOFF:
+	    if (i.tm.mnem_off == MN_add
+		&& i.tm.opcode_space == SPACE_EVEXMAP4
+		&& i.mem_operands == 1
+		&& i.base_reg
+		&& i.base_reg->reg_num == RegIP
+		&& i.tm.operand_types[0].bitfield.class == Reg
+		&& i.tm.operand_types[2].bitfield.class == Reg)
+	      /* Allow APX: add %reg1, foo@gottpoff(%rip), %reg2.  */
+	      break;
+	    /* Fall through.  */
 	  case BFD_RELOC_386_TLS_GOTIE:
 	  case BFD_RELOC_386_TLS_LE_32:
-	  case BFD_RELOC_X86_64_GOTTPOFF:
-	  case BFD_RELOC_X86_64_CODE_4_GOTTPOFF:
 	  case BFD_RELOC_X86_64_TLSLD:
 	    as_bad (_("TLS relocation cannot be used with `%s'"), insn_name (&i.tm));
 	    return;
@@ -11990,6 +12000,7 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 		    case BFD_RELOC_X86_64_TLSLD:
 		    case BFD_RELOC_X86_64_GOTTPOFF:
 		    case BFD_RELOC_X86_64_CODE_4_GOTTPOFF:
+		    case BFD_RELOC_X86_64_CODE_6_GOTTPOFF:
 		    case BFD_RELOC_X86_64_GOTPC32_TLSDESC:
 		    case BFD_RELOC_X86_64_CODE_4_GOTPC32_TLSDESC:
 		    case BFD_RELOC_X86_64_TLSDESC_CALL:
@@ -12006,9 +12017,30 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 		  && !i.prefix[ADDR_PREFIX])
 		fixP->fx_signed = 1;
 
-	      /* Set fx_tcbit3 for REX2 prefix.  */
-	      if (is_apx_rex2_encoding ())
-		fixP->fx_tcbit3 = 1;
+	      if (reloc_type == BFD_RELOC_X86_64_GOTTPOFF
+		  && i.tm.opcode_space == SPACE_EVEXMAP4)
+		{
+		  /* Only "add %reg1, foo@gottpoff(%rip), %reg2" is
+		     allowed in md_assemble.  Set fx_tcbit2 for EVEX
+		     prefix.  */
+		  fixP->fx_tcbit2 = 1;
+		  continue;
+		}
+
+	      if (i.base_reg && i.base_reg->reg_num == RegIP)
+		{
+		  if (reloc_type == BFD_RELOC_X86_64_GOTPC32_TLSDESC)
+		    {
+		      /* Set fx_tcbit for REX2 prefix.  */
+		      if (is_apx_rex2_encoding ())
+			fixP->fx_tcbit = 1;
+		      continue;
+		    }
+		}
+	      /* In 64-bit, i386_validate_fix updates only (%rip)
+		 relocations.  */
+	      else if (object_64bit)
+		continue;
 
 	      /* Check for "call/jmp *mem", "mov mem, %reg",
 		 "test %reg, mem" and "binop mem, %reg" where binop
@@ -12033,10 +12065,22 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 		{
 		  if (object_64bit)
 		    {
-		      fixP->fx_tcbit = i.rex != 0;
-		      if (i.base_reg
-			  && (i.base_reg->reg_num == RegIP))
-		      fixP->fx_tcbit2 = 1;
+		      if (reloc_type == BFD_RELOC_X86_64_GOTTPOFF)
+			{
+			  /* Set fx_tcbit for REX2 prefix.  */
+			  if (is_apx_rex2_encoding ())
+			    fixP->fx_tcbit = 1;
+			}
+		      else
+			{
+			  /* Set fx_tcbit3 for REX2 prefix.  */
+			  if (is_apx_rex2_encoding ())
+			    fixP->fx_tcbit3 = 1;
+			  else if (i.rex)
+			    fixP->fx_tcbit2 = 1;
+			  else
+			    fixP->fx_tcbit = 1;
+			}
 		    }
 		  else
 		    fixP->fx_tcbit2 = 1;
@@ -15513,6 +15557,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       case BFD_RELOC_X86_64_TLSLD:
       case BFD_RELOC_X86_64_GOTTPOFF:
       case BFD_RELOC_X86_64_CODE_4_GOTTPOFF:
+      case BFD_RELOC_X86_64_CODE_6_GOTTPOFF:
       case BFD_RELOC_X86_64_GOTPC32_TLSDESC:
       case BFD_RELOC_X86_64_CODE_4_GOTPC32_TLSDESC:
 	value = 0; /* Fully resolved at runtime.  No addend.  */
@@ -17093,13 +17138,27 @@ i386_validate_fix (fixS *fixp)
 	   && (!S_IS_DEFINED (fixp->fx_addsy)
 	       || S_IS_EXTERNAL (fixp->fx_addsy));
 
-  if (fixp->fx_tcbit3)
+  /* BFD_RELOC_X86_64_GOTTPOFF:
+      1. fx_tcbit -> BFD_RELOC_X86_64_CODE_4_GOTTPOFF
+      2. fx_tcbit2 -> BFD_RELOC_X86_64_CODE_6_GOTTPOFF
+    BFD_RELOC_X86_64_GOTPC32_TLSDESC:
+      1. fx_tcbit -> BFD_RELOC_X86_64_CODE_4_GOTPC32_TLSDESC
+    BFD_RELOC_32_PCREL:
+      1. fx_tcbit -> BFD_RELOC_X86_64_GOTPCRELX
+      2. fx_tcbit2 -> BFD_RELOC_X86_64_REX_GOTPCRELX
+      3. fx_tcbit3 -> BFD_RELOC_X86_64_CODE_4_GOTPCRELX
+      4. else -> BFD_RELOC_X86_64_GOTPCREL
+   */
+  if (fixp->fx_r_type == BFD_RELOC_X86_64_GOTTPOFF)
     {
-      if (fixp->fx_r_type == BFD_RELOC_X86_64_GOTTPOFF)
+      if (fixp->fx_tcbit)
 	fixp->fx_r_type = BFD_RELOC_X86_64_CODE_4_GOTTPOFF;
-      else if (fixp->fx_r_type == BFD_RELOC_X86_64_GOTPC32_TLSDESC)
-	fixp->fx_r_type = BFD_RELOC_X86_64_CODE_4_GOTPC32_TLSDESC;
+      else if (fixp->fx_tcbit2)
+	fixp->fx_r_type = BFD_RELOC_X86_64_CODE_6_GOTTPOFF;
     }
+  else if (fixp->fx_r_type == BFD_RELOC_X86_64_GOTPC32_TLSDESC
+	   && fixp->fx_tcbit)
+    fixp->fx_r_type = BFD_RELOC_X86_64_CODE_4_GOTPC32_TLSDESC;
 #endif
 
   if (fixp->fx_subsy)
@@ -17111,15 +17170,12 @@ i386_validate_fix (fixS *fixp)
 	      if (!object_64bit)
 		abort ();
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-	      if (fixp->fx_tcbit2)
-		{
-		  if (fixp->fx_tcbit3)
-		    fixp->fx_r_type = BFD_RELOC_X86_64_CODE_4_GOTPCRELX;
-		  else
-		    fixp->fx_r_type = (fixp->fx_tcbit
-				       ? BFD_RELOC_X86_64_REX_GOTPCRELX
-				       : BFD_RELOC_X86_64_GOTPCRELX);
-		}
+	      if (fixp->fx_tcbit)
+		fixp->fx_r_type = BFD_RELOC_X86_64_GOTPCRELX;
+	      else if (fixp->fx_tcbit2)
+		fixp->fx_r_type = BFD_RELOC_X86_64_REX_GOTPCRELX;
+	      else if (fixp->fx_tcbit3)
+		fixp->fx_r_type = BFD_RELOC_X86_64_CODE_4_GOTPCRELX;
 	      else
 #endif
 		fixp->fx_r_type = BFD_RELOC_X86_64_GOTPCREL;
@@ -17245,6 +17301,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     case BFD_RELOC_X86_64_DTPOFF64:
     case BFD_RELOC_X86_64_GOTTPOFF:
     case BFD_RELOC_X86_64_CODE_4_GOTTPOFF:
+    case BFD_RELOC_X86_64_CODE_6_GOTTPOFF:
     case BFD_RELOC_X86_64_TPOFF32:
     case BFD_RELOC_X86_64_TPOFF64:
     case BFD_RELOC_X86_64_GOTOFF64:
@@ -17389,6 +17446,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	  case BFD_RELOC_X86_64_TLSLD:
 	  case BFD_RELOC_X86_64_GOTTPOFF:
 	  case BFD_RELOC_X86_64_CODE_4_GOTTPOFF:
+	  case BFD_RELOC_X86_64_CODE_6_GOTTPOFF:
 	  case BFD_RELOC_X86_64_GOTPC32_TLSDESC:
 	  case BFD_RELOC_X86_64_CODE_4_GOTPC32_TLSDESC:
 	  case BFD_RELOC_X86_64_TLSDESC_CALL:
