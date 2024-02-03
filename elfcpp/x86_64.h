@@ -110,6 +110,30 @@ enum
 					// descriptor in GOT if the
 					// instruction starts at 4 bytes
 					// before the relocation offset.
+  R_X86_64_CODE_5_GOTPCRELX = 46, // 32 bit signed PC relative offset to
+				  // GOT if the instruction starts at 5
+				  // bytes before the relocation offset,
+				  // relaxable.
+  R_X86_64_CODE_5_GOTTPOFF = 47,  // 32 bit signed PC relative offset to
+				  // GOT entry for IE symbol if the
+				  // instruction starts at 5 bytes before
+				  // the relocation offset.
+  R_X86_64_CODE_5_GOTPC32_TLSDESC = 48, // 32-bit PC relative to TLS
+					// descriptor in GOT if the
+					// instruction starts at 5 bytes
+					// before the relocation offset.
+  R_X86_64_CODE_6_GOTPCRELX = 49, // 32 bit signed PC relative offset to
+				  // GOT if the instruction starts at 6
+				  // bytes before the relocation offset,
+				  // relaxable.
+  R_X86_64_CODE_6_GOTTPOFF = 50,  // 32 bit signed PC relative offset to
+				  // GOT entry for IE symbol if the
+				  // instruction starts at 6 bytes before
+				  // the relocation offset.
+  R_X86_64_CODE_6_GOTPC32_TLSDESC = 51, // 32-bit PC relative to TLS
+					// descriptor in GOT if the
+					// instruction starts at 6 bytes
+					// before the relocation offset.
   // GNU vtable garbage collection extensions.
   R_X86_64_GNU_VTINHERIT = 250,
   R_X86_64_GNU_VTENTRY = 251
