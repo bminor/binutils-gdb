@@ -255,8 +255,8 @@ ftrace_new_function (struct btrace_thread_info *btinfo,
       insn_offset = prev->insn_offset + ftrace_call_num_insn (prev);
     }
 
-  btinfo->functions.emplace_back (mfun, fun, number, insn_offset, level);
-  return &btinfo->functions.back ();
+  return &btinfo->functions.emplace_back (mfun, fun, number, insn_offset,
+					  level);
 }
 
 /* Update the UP field of a function segment.  */

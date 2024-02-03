@@ -4027,8 +4027,7 @@ start_thread (struct gdb_xml_parser *parser,
   char *id = (char *) xml_find_attribute (attributes, "id")->value.get ();
   ptid_t ptid = read_ptid (id, NULL);
 
-  data->items.emplace_back (ptid);
-  thread_item &item = data->items.back ();
+  thread_item &item = data->items.emplace_back (ptid);
 
   attr = xml_find_attribute (attributes, "core");
   if (attr != NULL)

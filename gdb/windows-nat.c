@@ -887,8 +887,7 @@ windows_make_so (const char *name, LPVOID load_addr)
 	}
     }
 #endif
-  windows_process.solibs.emplace_back ();
-  windows_solib *so = &windows_process.solibs.back ();
+  windows_solib *so = &windows_process.solibs.emplace_back ();
   so->load_addr = load_addr;
   so->original_name = name;
 #ifndef __CYGWIN__

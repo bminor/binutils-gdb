@@ -661,8 +661,7 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
 	return;
     }
 
-  subfile->line_vector_entries.emplace_back ();
-  linetable_entry &e = subfile->line_vector_entries.back ();
+  linetable_entry &e = subfile->line_vector_entries.emplace_back ();
   e.line = line;
   e.is_stmt = (flags & LEF_IS_STMT) != 0;
   e.set_unrelocated_pc (pc);
@@ -1134,8 +1133,7 @@ buildsym_compunit::augment_type_symtab ()
 struct context_stack *
 buildsym_compunit::push_context (int desc, CORE_ADDR valu)
 {
-  m_context_stack.emplace_back ();
-  struct context_stack *newobj = &m_context_stack.back ();
+  struct context_stack *newobj = &m_context_stack.emplace_back ();
 
   newobj->depth = desc;
   newobj->locals = m_local_symbols;

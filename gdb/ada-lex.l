@@ -462,8 +462,8 @@ processInt (struct parser_state *par_state, const char *base0,
       return FLOAT;
     }
 
-  int_storage.emplace_back (new gdb_mpz (std::move (result)));
-  const gdb_mpz *value = int_storage.back ().get ();
+  const gdb_mpz *value
+    = int_storage.emplace_back (new gdb_mpz (std::move (result))).get ();
 
   int int_bits = gdbarch_int_bit (par_state->gdbarch ());
   int long_bits = gdbarch_long_bit (par_state->gdbarch ());

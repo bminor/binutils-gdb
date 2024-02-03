@@ -123,8 +123,7 @@ save_bookmark_command (const char *args, int from_tty)
     error (_("target_get_bookmark failed."));
 
   /* Set up a bookmark struct.  */
-  all_bookmarks.emplace_back ();
-  bookmark &b = all_bookmarks.back ();
+  bookmark &b = all_bookmarks.emplace_back ();
   b.number = ++bookmark_count;
   b.pc = regcache_read_pc (regcache);
   b.sal = find_pc_line (b.pc, 0);

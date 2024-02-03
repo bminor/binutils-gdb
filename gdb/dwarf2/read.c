@@ -11552,15 +11552,9 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
   const char *fieldname = "";
 
   if (die->tag == DW_TAG_inheritance)
-    {
-      fip->baseclasses.emplace_back ();
-      new_field = &fip->baseclasses.back ();
-    }
+    new_field = &fip->baseclasses.emplace_back ();
   else
-    {
-      fip->fields.emplace_back ();
-      new_field = &fip->fields.back ();
-    }
+    new_field = &fip->fields.emplace_back ();
 
   new_field->offset = die->sect_off;
 
@@ -12071,16 +12065,14 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   /* Create a new fnfieldlist if necessary.  */
   if (flp == nullptr)
     {
-      fip->fnfieldlists.emplace_back ();
-      flp = &fip->fnfieldlists.back ();
+      flp = &fip->fnfieldlists.emplace_back ();
       flp->name = fieldname;
       i = fip->fnfieldlists.size () - 1;
     }
 
   /* Create a new member function field and add it to the vector of
      fnfieldlists.  */
-  flp->fnfields.emplace_back ();
-  fnp = &flp->fnfields.back ();
+  fnp = &flp->fnfields.emplace_back ();
 
   /* Delay processing of the physname until later.  */
   if (cu->lang () == language_cplus)
@@ -12681,10 +12673,7 @@ handle_variant_part (struct die_info *die, struct type *type,
 {
   variant_part_builder *new_part;
   if (fi->current_variant_part == nullptr)
-    {
-      fi->variant_parts.emplace_back ();
-      new_part = &fi->variant_parts.back ();
-    }
+    new_part = &fi->variant_parts.emplace_back ();
   else if (!fi->current_variant_part->processing_variant)
     {
       complaint (_("nested DW_TAG_variant_part seen "
@@ -12696,8 +12685,7 @@ handle_variant_part (struct die_info *die, struct type *type,
   else
     {
       variant_field &current = fi->current_variant_part->variants.back ();
-      current.variant_parts.emplace_back ();
-      new_part = &current.variant_parts.back ();
+      new_part = &current.variant_parts.emplace_back ();
     }
 
   /* When we recurse, we want callees to add to this new variant
@@ -12761,8 +12749,7 @@ handle_variant (struct die_info *die, struct type *type,
     = make_scoped_restore (&fi->current_variant_part->processing_variant,
 			   true);
 
-  fi->current_variant_part->variants.emplace_back ();
-  variant_field &variant = fi->current_variant_part->variants.back ();
+  variant_field &variant = fi->current_variant_part->variants.emplace_back ();
   variant.first_field = fi->fields.size ();
 
   /* In a variant we want to get the discriminant and also add a
@@ -13157,8 +13144,7 @@ update_enumeration_type_from_children (struct die_info *die,
 	    flag_enum = 0;
 	}
 
-      fields.emplace_back ();
-      struct field &field = fields.back ();
+      struct field &field = fields.emplace_back ();
       field.set_name (dwarf2_physname (name, child_die, cu));
       field.set_loc_enumval (value);
     }

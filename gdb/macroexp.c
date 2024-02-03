@@ -789,12 +789,10 @@ gather_arguments (const char *name, shared_macro_buffer *src, int nargs,
 
   for (;;)
     {
-      shared_macro_buffer *arg;
       int depth;
 
       /* Initialize the next argument.  */
-      args.emplace_back ();
-      arg = &args.back ();
+      shared_macro_buffer *arg = &args.emplace_back ();
       set_token (arg, src->text, src->text);
 
       /* Gather the argument's tokens.  */
@@ -819,8 +817,7 @@ gather_arguments (const char *name, shared_macro_buffer *src, int nargs,
 		     missing.  Add an empty argument in this case.  */
 		  if (nargs != -1 && args.size () == nargs - 1)
 		    {
-		      args.emplace_back ();
-		      arg = &args.back ();
+		      arg = &args.emplace_back ();
 		      set_token (arg, src->text, src->text);
 		    }
 

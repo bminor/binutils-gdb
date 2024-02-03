@@ -1200,8 +1200,7 @@ dwarf_expr_context::stack_empty_p () const
 void
 dwarf_expr_context::add_piece (ULONGEST size, ULONGEST offset)
 {
-  this->m_pieces.emplace_back ();
-  dwarf_expr_piece &p = this->m_pieces.back ();
+  dwarf_expr_piece &p = this->m_pieces.emplace_back ();
 
   p.location = this->m_location;
   p.size = size;

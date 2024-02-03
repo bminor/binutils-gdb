@@ -428,8 +428,7 @@ arrange_linetable (std::vector<linetable_entry> &old_linetable)
       if (old_linetable[ii].line == 0)
 	{
 	  /* Function entry found.  */
-	  fentries.emplace_back ();
-	  linetable_entry &e = fentries.back ();
+	  linetable_entry &e = fentries.emplace_back ();
 	  e.line = ii;
 	  e.is_stmt = true;
 	  e.set_unrelocated_pc (old_linetable[ii].unrelocated_pc ());
