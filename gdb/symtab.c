@@ -4889,8 +4889,8 @@ global_symbol_searcher::add_matching_symbols
 	      if (!sym->matches (kind))
 		continue;
 
-	      if (preg.has_value () && !preg->exec (sym->natural_name (), 0,
-						    nullptr, 0) == 0)
+	      if (preg.has_value () && preg->exec (sym->natural_name (), 0,
+						   nullptr, 0) != 0)
 		continue;
 
 	      if (((sym->domain () == VAR_DOMAIN
