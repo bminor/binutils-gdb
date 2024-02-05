@@ -1,4 +1,4 @@
-#as: --no-warn
+#as:
 #objdump: -dr
 #skip: loongarch32-*-*
 
@@ -8,29 +8,39 @@
 Disassembly of section .text:
 
 [ 	]*0000000000000000 <.Lla-relax-align>:
-[ 	]+0:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0, 0
-[ 	]+0: R_LARCH_PCALA_HI20[ 	]+L1
-[ 	]+0: R_LARCH_RELAX[ 	]+\*ABS\*
-[ 	]+4:[ 	]+02c00084[ 	]+addi.d[ 	]+\$a0, \$a0, 0
-[ 	]+4: R_LARCH_PCALA_LO12[ 	]+L1
-[ 	]+4: R_LARCH_RELAX[ 	]+\*ABS\*
-[ 	]+8:[ 	]+03400000[ 	]+nop.*
-[ 	]+8: R_LARCH_ALIGN[ 	]+.Lla-relax-align\+0x4
-[ 	]+c:[ 	]+03400000[ 	]+nop.*
-[ 	]+10:[ 	]+03400000[ 	]+nop.*
-[ 	]+14:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0, 0
-[ 	]+14: R_LARCH_PCALA_HI20[ 	]+L1
-[ 	]+14: R_LARCH_RELAX[ 	]+\*ABS\*
-[ 	]+18:[ 	]+02c00084[ 	]+addi.d[ 	]+\$a0, \$a0, 0
-[ 	]+18: R_LARCH_PCALA_LO12[ 	]+L1
-[ 	]+18: R_LARCH_RELAX[ 	]+\*ABS\*
-[ 	]+1c:[ 	]+03400000[ 	]+nop.*
-[ 	]+1c: R_LARCH_ALIGN[ 	]+.Lla-relax-align\+0x404
-[ 	]+20:[ 	]+03400000[ 	]+nop.*
-[ 	]+24:[ 	]+03400000[ 	]+nop.*
-[ 	]+28:[ 	]+1a000004[ 	]+pcalau12i[ 	]+\$a0, 0
-[ 	]+28: R_LARCH_PCALA_HI20[ 	]+L1
-[ 	]+28: R_LARCH_RELAX[ 	]+\*ABS\*
-[ 	]+2c:[ 	]+02c00084[ 	]+addi.d[ 	]+\$a0, \$a0, 0
-[ 	]+2c: R_LARCH_PCALA_LO12[ 	]+L1
-[ 	]+2c: R_LARCH_RELAX[ 	]+\*ABS\*
+[ 	]+0:[ 	]+4c000020[ 	]+ret
+[ 	]+4:[ 	]+03400000[ 	]+nop
+[ 	]+4: R_LARCH_ALIGN[ 	]+\*ABS\*\+0xc
+[ 	]+8:[ 	]+03400000[ 	]+nop
+[ 	]+c:[ 	]+03400000[ 	]+nop
+[ 	]+10:[ 	]+4c000020[ 	]+ret
+[ 	]+14:[ 	]+03400000[ 	]+nop
+[ 	]+14: R_LARCH_ALIGN[ 	]+\*ABS\*\+0xc
+[ 	]+18:[ 	]+03400000[ 	]+nop
+[ 	]+1c:[ 	]+03400000[ 	]+nop
+[ 	]+20:[ 	]+4c000020[ 	]+ret
+[ 	]+24:[ 	]+03400000[ 	]+nop
+[ 	]+24: R_LARCH_ALIGN[ 	]+.Lla-relax-align\+0x104
+[ 	]+28:[ 	]+03400000[ 	]+nop
+[ 	]+2c:[ 	]+03400000[ 	]+nop
+[ 	]+30:[ 	]+4c000020[ 	]+ret
+[ 	]+34:[ 	]+03400000[ 	]+nop
+[ 	]+34: R_LARCH_ALIGN[ 	]+.Lla-relax-align\+0xb04
+[ 	]+38:[ 	]+03400000[ 	]+nop
+[ 	]+3c:[ 	]+03400000[ 	]+nop
+[ 	]+40:[ 	]+4c000020[ 	]+ret
+[ 	]+44:[ 	]+03400000[ 	]+nop
+[ 	]+44: R_LARCH_ALIGN[ 	]+\*ABS\*\+0xc
+[ 	]+48:[ 	]+03400000[ 	]+nop
+[ 	]+4c:[ 	]+03400000[ 	]+nop
+[ 	]+50:[ 	]+4c000020[ 	]+ret
+[ 	]+54:[ 	]+03400000[ 	]+nop
+[ 	]+54: R_LARCH_ALIGN[ 	]+\*ABS\*\+0xc
+[ 	]+58:[ 	]+03400000[ 	]+nop
+[ 	]+5c:[ 	]+03400000[ 	]+nop
+[ 	]+60:[ 	]+4c000020[ 	]+ret
+[ 	]+64:[ 	]+03400000[ 	]+nop
+[ 	]+64: R_LARCH_ALIGN[ 	]+\*ABS\*\+0xc
+[ 	]+68:[ 	]+03400000[ 	]+nop
+[ 	]+6c:[ 	]+03400000[ 	]+nop
+[ 	]+70:[ 	]+4c000020[ 	]+ret

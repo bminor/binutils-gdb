@@ -1746,14 +1746,25 @@ loongarch_frag_align_code (int n, int max)
 
   nops = frag_more (worst_case_bytes);
 
-  s = symbol_find (".Lla-relax-align");
-  if (s == NULL)
-    s = (symbolS *)local_symbol_make (".Lla-relax-align", now_seg,
-				      &zero_address_frag, 0);
-
-  ex.X_add_symbol = s;
-  ex.X_op = O_symbol;
-  ex.X_add_number = (max << 8) | n;
+  /* If max <= 0, ignore max.
+     If max >= worst_case_bytes, max has no effect.
+     Similar to gas/write.c relax_segment function rs_align_code case:
+     if (fragP->fr_subtype != 0 && offset > fragP->fr_subtype).  */
+  if (max > 0 && (bfd_vma) max < worst_case_bytes)
+    {
+      s = symbol_find (".Lla-relax-align");
+      if (s == NULL)
+	s = (symbolS *)local_symbol_make (".Lla-relax-align", now_seg,
+					  &zero_address_frag, 0);
+      ex.X_add_symbol = s;
+      ex.X_op = O_symbol;
+      ex.X_add_number = (max << 8) | n;
+    }
+  else
+    {
+      ex.X_op = O_constant;
+      ex.X_add_number = worst_case_bytes;
+    }
 
   loongarch_make_nops (nops, worst_case_bytes);
 
