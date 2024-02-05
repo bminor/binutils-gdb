@@ -172,7 +172,7 @@ get_solib_info (inferior *inf)
 /* Relocate section addresses.  */
 
 static void
-rocm_solib_relocate_section_addresses (shobj &so,
+rocm_solib_relocate_section_addresses (solib &so,
 				       struct target_section *sec)
 {
   if (!is_amdgpu_arch (gdbarch_from_bfd (so.abfd.get ())))
@@ -204,14 +204,14 @@ rocm_solib_handle_event ()
 
 /* Create so_list objects from rocm_so objects in SOS.  */
 
-static intrusive_list<shobj>
+static intrusive_list<solib>
 so_list_from_rocm_sos (const std::vector<rocm_so> &sos)
 {
-  intrusive_list<shobj> dst;
+  intrusive_list<solib> dst;
 
   for (const rocm_so &so : sos)
     {
-      struct shobj *newobj = new struct shobj;
+      solib *newobj = new solib;
       newobj->lm_info = std::make_unique<lm_info_svr4> (*so.lm_info);
 
       newobj->so_name = so.name;
@@ -223,14 +223,14 @@ so_list_from_rocm_sos (const std::vector<rocm_so> &sos)
   return dst;
 }
 
-/* Build a list of `struct shobj' objects describing the shared
+/* Build a list of `struct solib' objects describing the shared
    objects currently loaded in the inferior.  */
 
-static intrusive_list<shobj>
+static intrusive_list<solib>
 rocm_solib_current_sos ()
 {
   /* First, retrieve the host-side shared library list.  */
-  intrusive_list<shobj> sos = svr4_so_ops.current_sos ();
+  intrusive_list<solib> sos = svr4_so_ops.current_sos ();
 
   /* Then, the device-side shared library list.  */
   std::vector<rocm_so> &dev_sos = get_solib_info (current_inferior ())->solib_list;
@@ -238,7 +238,7 @@ rocm_solib_current_sos ()
   if (dev_sos.empty ())
     return sos;
 
-  intrusive_list<shobj> dev_so_list = so_list_from_rocm_sos (dev_sos);
+  intrusive_list<solib> dev_so_list = so_list_from_rocm_sos (dev_sos);
 
   if (sos.empty ())
     return dev_so_list;

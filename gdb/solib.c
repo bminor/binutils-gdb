@@ -539,7 +539,7 @@ get_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd, const char *soname)
    expansion stuff?).  */
 
 static int
-solib_map_sections (shobj &so)
+solib_map_sections (solib &so)
 {
   const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
@@ -626,7 +626,7 @@ solib_map_sections (shobj &so)
 /* See solist.h.  */
 
 void
-shobj::clear ()
+solib::clear ()
 {
   const target_so_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
@@ -654,7 +654,7 @@ lm_info::~lm_info () = default;
    be chatty about it.  Return true if any symbols were actually loaded.  */
 
 bool
-solib_read_symbols (shobj &so, symfile_add_flags flags)
+solib_read_symbols (solib &so, symfile_add_flags flags)
 {
   if (so.symbols_loaded)
     {
@@ -715,9 +715,9 @@ solib_read_symbols (shobj &so, symfile_add_flags flags)
    in the list of shared libraries.  Return false otherwise.  */
 
 static bool
-solib_used (const shobj &known)
+solib_used (const solib &known)
 {
-  for (const shobj &pivot : current_program_space->solibs ())
+  for (const solib &pivot : current_program_space->solibs ())
     if (&pivot != &known && pivot.objfile == known.objfile)
       return true;
   return false;
@@ -726,7 +726,7 @@ solib_used (const shobj &known)
 /* Notify interpreters and observers that solib SO has been loaded.  */
 
 static void
-notify_solib_loaded (shobj &so)
+notify_solib_loaded (solib &so)
 {
   interps_notify_solib_loaded (so);
   gdb::observers::solib_loaded.notify (so);
@@ -735,7 +735,7 @@ notify_solib_loaded (shobj &so)
 /* Notify interpreters and observers that solib SO has been unloaded.  */
 
 static void
-notify_solib_unloaded (program_space *pspace, const shobj &so)
+notify_solib_unloaded (program_space *pspace, const solib &so)
 {
   interps_notify_solib_unloaded (so);
   gdb::observers::solib_unloaded.notify (pspace, so);
@@ -797,12 +797,12 @@ update_solib_list (int from_tty)
      the time we're done walking GDB's list, the inferior's list
      contains only the new shared objects, which we then add.  */
 
-  intrusive_list<shobj> inferior = ops->current_sos ();
-  intrusive_list<shobj>::iterator gdb_iter
+  intrusive_list<solib> inferior = ops->current_sos ();
+  intrusive_list<solib>::iterator gdb_iter
     = current_program_space->so_list.begin ();
   while (gdb_iter != current_program_space->so_list.end ())
     {
-      intrusive_list<shobj>::iterator inferior_iter = inferior.begin ();
+      intrusive_list<solib>::iterator inferior_iter = inferior.begin ();
 
       /* Check to see whether the shared object *gdb also appears in
 	 the inferior's current list.  */
@@ -840,7 +840,7 @@ update_solib_list (int from_tty)
 
 	  current_program_space->deleted_solibs.push_back (gdb_iter->so_name);
 
-	  intrusive_list<shobj>::iterator gdb_iter_next
+	  intrusive_list<solib>::iterator gdb_iter_next
 	    = current_program_space->so_list.erase (gdb_iter);
 
 	  /* Unless the user loaded it explicitly, free SO's objfile.  */
@@ -867,13 +867,13 @@ update_solib_list (int from_tty)
       const char *not_found_filename = NULL;
 
       /* Fill in the rest of each of the `so' nodes.  */
-      for (shobj &new_so : inferior)
+      for (solib &new_so : inferior)
 	{
 	  current_program_space->added_solibs.push_back (&new_so);
 
 	  try
 	    {
-	      /* Fill in the rest of the `struct shobj' node.  */
+	      /* Fill in the rest of the `struct solib' node.  */
 	      if (!solib_map_sections (new_so))
 		{
 		  not_found++;
@@ -939,7 +939,7 @@ libpthread_name_p (const char *name)
 /* Return non-zero if SO is the libpthread shared library.  */
 
 static bool
-libpthread_solib_p (const shobj &so)
+libpthread_solib_p (const solib &so)
 {
   return libpthread_name_p (so.so_name.c_str ());
 }
@@ -990,7 +990,7 @@ solib_add (const char *pattern, int from_tty, int readsyms)
     if (from_tty)
 	add_flags |= SYMFILE_VERBOSE;
 
-    for (shobj &gdb : current_program_space->solibs ())
+    for (solib &gdb : current_program_space->solibs ())
       if (! pattern || re_exec (gdb.so_name.c_str ()))
 	{
 	  /* Normally, we would read the symbols from that library
@@ -1064,7 +1064,7 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
      so we need to make two passes over the libs.  */
 
   nr_libs = 0;
-  for (const shobj &so : current_program_space->solibs ())
+  for (const solib &so : current_program_space->solibs ())
     {
       if (!so.so_name.empty ())
 	{
@@ -1085,7 +1085,7 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
 
     uiout->table_body ();
 
-    for (const shobj &so : current_program_space->solibs ())
+    for (const solib &so : current_program_space->solibs ())
       {
 	if (so.so_name.empty ())
 	  continue;
@@ -1140,7 +1140,7 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
 /* See solib.h.  */
 
 bool
-solib_contains_address_p (const shobj &solib, CORE_ADDR address)
+solib_contains_address_p (const solib &solib, CORE_ADDR address)
 {
   for (const target_section &p : solib.sections)
     if (p.addr <= address && address < p.endaddr)
@@ -1163,7 +1163,7 @@ solib_contains_address_p (const shobj &solib, CORE_ADDR address)
 const char *
 solib_name_from_address (struct program_space *pspace, CORE_ADDR address)
 {
-  for (const shobj &so : pspace->so_list)
+  for (const solib &so : pspace->so_list)
     if (solib_contains_address_p (so, address))
       return so.so_name.c_str ();
 
@@ -1192,7 +1192,7 @@ clear_solib (void)
 
   disable_breakpoints_in_shlibs ();
 
-  current_program_space->so_list.clear_and_dispose ([] (shobj *so)
+  current_program_space->so_list.clear_and_dispose ([] (solib *so)
     {
       notify_solib_unloaded (current_program_space, *so);
       current_program_space->remove_target_sections (so);
@@ -1293,7 +1293,7 @@ reload_shared_libraries_1 (int from_tty)
   if (print_symbol_loading_p (from_tty, 0, 0))
     gdb_printf (_("Loading symbols for shared libraries.\n"));
 
-  for (shobj &so : current_program_space->solibs ())
+  for (solib &so : current_program_space->solibs ())
     {
       const char *found_pathname = NULL;
       bool was_loaded = so.symbols_loaded != 0;
@@ -1702,7 +1702,7 @@ remove_user_added_objfile (struct objfile *objfile)
 {
   if (objfile != 0 && objfile->flags & OBJF_USERLOADED)
     {
-      for (shobj &so : objfile->pspace->solibs ())
+      for (solib &so : objfile->pspace->solibs ())
 	if (so.objfile == objfile)
 	  so.objfile = nullptr;
     }

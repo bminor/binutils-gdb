@@ -24,7 +24,7 @@
 #include "target/waitstatus.h"
 
 struct bpstat;
-struct shobj;
+struct solib;
 struct objfile;
 struct thread_info;
 struct inferior;
@@ -99,12 +99,12 @@ extern observable<inferior */* parent_inf */, inferior */* child_inf */,
 /* The shared library specified by SOLIB has been loaded.  Note that
    when gdb calls this observer, the library's symbols probably
    haven't been loaded yet.  */
-extern observable<shobj &/* solib */> solib_loaded;
+extern observable<solib &/* solib */> solib_loaded;
 
 /* The shared library SOLIB has been unloaded from program space PSPACE.
    Note  when gdb calls this observer, the library's symbols have not
    been unloaded yet, and thus are still available.  */
-extern observable<program_space *, const shobj &/* solib */> solib_unloaded;
+extern observable<program_space *, const solib &/* solib */> solib_unloaded;
 
 /* The symbol file specified by OBJFILE has been loaded.  */
 extern observable<struct objfile */* objfile */> new_objfile;

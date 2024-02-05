@@ -71,7 +71,7 @@ struct hppa_unwind_info
 struct hppa_objfile_private
   {
     struct hppa_unwind_info *unwind_info = nullptr;	/* a pointer */
-    shobj *so_info = nullptr;			/* a pointer  */
+    solib *so_info = nullptr;			/* a pointer  */
     CORE_ADDR dp = 0;
 
     int dummy_call_sequence_reg = 0;

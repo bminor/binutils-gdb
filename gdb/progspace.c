@@ -130,7 +130,7 @@ void
 program_space::free_all_objfiles ()
 {
   /* Any objfile reference would become stale.  */
-  for (const shobj &so : current_program_space->solibs ())
+  for (const solib &so : current_program_space->solibs ())
     gdb_assert (so.objfile == NULL);
 
   while (!objfiles_list.empty ())

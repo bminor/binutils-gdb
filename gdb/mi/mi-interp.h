@@ -60,8 +60,8 @@ public:
   void on_record_changed (inferior *inf, int started, const char *method,
 			  const char *format) override;
   void on_target_resumed (ptid_t ptid) override;
-  void on_solib_loaded (const shobj &so) override;
-  void on_solib_unloaded (const shobj &so) override;
+  void on_solib_loaded (const solib &so) override;
+  void on_solib_unloaded (const solib &so) override;
   void on_about_to_proceed () override;
   void on_traceframe_changed (int tfnum, int tpnum) override;
   void on_tsv_created (const trace_state_variable *tsv) override;
@@ -108,7 +108,7 @@ public:
 
 /* Output the shared object attributes to UIOUT.  */
 
-void mi_output_solib_attribs (ui_out *uiout, const shobj &solib);
+void mi_output_solib_attribs (ui_out *uiout, const solib &solib);
 
 /* Returns the INTERP's data cast as mi_interp if INTERP is an MI, and
    returns NULL otherwise.  */

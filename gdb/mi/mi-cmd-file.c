@@ -163,7 +163,7 @@ mi_cmd_file_list_shared_libraries (const char *command,
   /* Print the table header.  */
   ui_out_emit_list list_emitter (uiout, "shared-libraries");
 
-  for (const shobj &so : current_program_space->solibs ())
+  for (const solib &so : current_program_space->solibs ())
     {
       if (so.so_name.empty ())
 	continue;

@@ -36,7 +36,7 @@ struct lm_info
 
 using lm_info_up = std::unique_ptr<lm_info>;
 
-struct shobj : intrusive_list_node<shobj>
+struct solib : intrusive_list_node<solib>
 {
   /* Free symbol-file related contents of SO and reset for possible reloading
      of SO.  If we have opened a BFD for SO, close it.  If we have placed SO's
@@ -97,12 +97,12 @@ struct target_so_ops
 {
   /* Adjust the section binding addresses by the base address at
      which the object was actually mapped.  */
-  void (*relocate_section_addresses) (shobj &so, target_section *);
+  void (*relocate_section_addresses) (solib &so, target_section *);
 
   /* Reset private data structures associated with SO.
      This is called when SO is about to be reloaded.
      It is also called when SO is about to be freed.  */
-  void (*clear_so) (const shobj &so);
+  void (*clear_so) (const solib &so);
 
   /* Free private data structures associated to PSPACE.  This method
      should not free resources associated to individual so_list entries,
@@ -117,9 +117,9 @@ struct target_so_ops
 
      Note that we only gather information directly available from the
      inferior --- we don't examine any of the shared library files
-     themselves.  The declaration of `struct shobj' says which fields
+     themselves.  The declaration of `struct solib' says which fields
      we provide values for.  */
-  intrusive_list<shobj> (*current_sos) ();
+  intrusive_list<solib> (*current_sos) ();
 
   /* Find, open, and read the symbols for the main executable.  If
      FROM_TTY is non-zero, allow messages to be printed.  */
@@ -145,7 +145,7 @@ struct target_so_ops
      if they represent the same library.
      Falls back to using strcmp on so_original_name field when set
      to NULL.  */
-  int (*same) (const shobj &gdb, const shobj &inferior);
+  int (*same) (const solib &gdb, const solib &inferior);
 
   /* Return whether a region of memory must be kept in a core file
      for shared libraries loaded before "gcore" is used to be
@@ -170,7 +170,7 @@ struct target_so_ops
 };
 
 /* A unique pointer to a so_list.  */
-using shobj_up = std::unique_ptr<shobj>;
+using solib_up = std::unique_ptr<solib>;
 
 /* Find main executable binary file.  */
 extern gdb::unique_xmalloc_ptr<char> exec_file_find (const char *in_pathname,

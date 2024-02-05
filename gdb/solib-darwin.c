@@ -212,7 +212,7 @@ open_symbol_file_object (int from_tty)
 
 /* Build a list of currently loaded shared objects.  See solib-svr4.c.  */
 
-static intrusive_list<shobj>
+static intrusive_list<solib>
 darwin_current_sos ()
 {
   type *ptr_type
@@ -230,7 +230,7 @@ darwin_current_sos ()
 
   image_info_size = ptr_len * 3;
 
-  intrusive_list<shobj> sos;
+  intrusive_list<solib> sos;
 
   /* Read infos for each solib.
      The first entry was rumored to be the executable itself, but this is not
@@ -271,8 +271,8 @@ darwin_current_sos ()
       if (file_path == nullptr)
 	break;
 
-      /* Create and fill the new struct shobj element.  */
-      shobj *newobj = new shobj;
+      /* Create and fill the new struct solib element.  */
+      solib *newobj = new solib;
 
       auto li = std::make_unique<lm_info_darwin> ();
 
@@ -605,7 +605,7 @@ darwin_clear_solib (program_space *pspace)
    Relocate these VMAs according to solib info.  */
 
 static void
-darwin_relocate_section_addresses (shobj &so, target_section *sec)
+darwin_relocate_section_addresses (solib &so, target_section *sec)
 {
   auto *li = gdb::checked_static_cast<lm_info_darwin *> (so.lm_info.get ());
 

@@ -41,7 +41,7 @@ struct inferior;
 struct exec;
 struct address_space;
 struct program_space;
-struct shobj;
+struct solib;
 
 typedef std::list<std::unique_ptr<objfile>> objfile_list;
 
@@ -291,7 +291,7 @@ struct program_space
   struct objfile *objfile_for_address (CORE_ADDR address);
 
   /* Return the list of  all the solibs in this program space.  */
-  intrusive_list<shobj> &solibs ()
+  intrusive_list<solib> &solibs ()
   { return so_list; }
 
   /* Close and clear exec_bfd.  If we end up with no target sections
@@ -395,14 +395,14 @@ struct program_space
 
   /* List of shared objects mapped into this space.  Managed by
      solib.c.  */
-  intrusive_list<shobj> so_list;
+  intrusive_list<solib> so_list;
 
   /* Number of calls to solib_add.  */
   unsigned int solib_add_generation = 0;
 
   /* When an solib is added, it is also added to this vector.  This
      is so we can properly report solib changes to the user.  */
-  std::vector<shobj *> added_solibs;
+  std::vector<solib *> added_solibs;
 
   /* When an solib is removed, its name is added to this vector.
      This is so we can properly report solib changes to the user.  */

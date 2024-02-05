@@ -22,7 +22,7 @@
 
 struct bfd;
 struct objfile;
-struct shobj;
+struct solib;
 
 /* A union representing the possible owner types of a target_section.  */
 
@@ -31,7 +31,7 @@ union target_section_owner
   target_section_owner () : m_v (nullptr) {}
   target_section_owner (const bfd *bfd) : bfd (bfd) {}
   target_section_owner (const objfile *objfile) : objfile (objfile) {}
-  target_section_owner (const shobj *shobj) : shobj (shobj) {}
+  target_section_owner (const solib *solib) : solib (solib) {}
 
   /* Use this to access the type-erased version of the owner, for
      comparisons, printing, etc.  We don't access the M_V member
@@ -46,7 +46,7 @@ union target_section_owner
 
   const struct bfd *bfd;
   const struct objfile *objfile;
-  const struct shobj *shobj;
+  const struct solib *solib;
 
 private:
   const void *m_v;
@@ -79,7 +79,7 @@ struct target_section
 
      It is set by add_target_sections and used by remove_target_sections.
      For example, for executables it is a pointer to exec_bfd and
-     for shlibs it is the shobj pointer.  */
+     for shlibs it is the solib pointer.  */
   target_section_owner owner;
 };
 

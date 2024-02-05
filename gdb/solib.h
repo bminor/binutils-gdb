@@ -21,7 +21,7 @@
 #define SOLIB_H
 
 /* Forward decl's for prototypes */
-struct shobj;
+struct solib;
 struct target_ops;
 struct target_so_ops;
 struct program_space;
@@ -50,7 +50,7 @@ extern void clear_solib (void);
 /* Called to add symbols from a shared library to gdb's symbol table.  */
 
 extern void solib_add (const char *, int, int);
-extern bool solib_read_symbols (shobj &, symfile_add_flags);
+extern bool solib_read_symbols (solib &, symfile_add_flags);
 
 /* Function to be called when the inferior starts up, to discover the
    names of shared libraries that are dynamically linked, the base
@@ -65,7 +65,7 @@ extern const char *solib_name_from_address (struct program_space *, CORE_ADDR);
 
 /* Return true if ADDR lies within SOLIB.  */
 
-extern bool solib_contains_address_p (const shobj &, CORE_ADDR);
+extern bool solib_contains_address_p (const solib &, CORE_ADDR);
 
 /* Return whether the data starting at VADDR, size SIZE, must be kept
    in a core file for shared libraries loaded before "gcore" is used

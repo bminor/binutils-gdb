@@ -227,10 +227,10 @@ solib_target_parse_libraries (const char *library)
 }
 #endif
 
-static intrusive_list<shobj>
+static intrusive_list<solib>
 solib_target_current_sos (void)
 {
-  intrusive_list<shobj> sos;
+  intrusive_list<solib> sos;
 
   /* Fetch the list of shared libraries.  */
   std::optional<gdb::char_vector> library_document
@@ -243,10 +243,10 @@ solib_target_current_sos (void)
   std::vector<lm_info_target_up> library_list
     = solib_target_parse_libraries (library_document->data ());
 
-  /* Build a struct shobj for each entry on the list.  */
+  /* Build a struct solib for each entry on the list.  */
   for (lm_info_target_up &info : library_list)
     {
-      shobj *new_solib = new shobj;
+      solib *new_solib = new solib;
 
       /* We don't need a copy of the name in INFO anymore.  */
       new_solib->so_name = std::move (info->name);
@@ -267,7 +267,7 @@ solib_target_solib_create_inferior_hook (int from_tty)
 }
 
 static void
-solib_target_relocate_section_addresses (shobj &so, target_section *sec)
+solib_target_relocate_section_addresses (solib &so, target_section *sec)
 {
   CORE_ADDR offset;
   auto *li = gdb::checked_static_cast<lm_info_target *> (so.lm_info.get ());

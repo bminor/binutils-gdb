@@ -166,7 +166,7 @@ void nto_init_solib_absolute_prefix (void);
 char **nto_parse_redirection (char *start_argv[], const char **in,
 			      const char **out, const char **err);
 
-void nto_relocate_section_addresses (shobj &, target_section *);
+void nto_relocate_section_addresses (solib &, target_section *);
 
 int nto_map_arch_to_cputype (const char *);
 
