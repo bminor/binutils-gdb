@@ -675,7 +675,8 @@ bool
 i386_linux_core_read_x86_xsave_layout (struct gdbarch *gdbarch,
 				       x86_xsave_layout &layout)
 {
-  return i386_linux_core_read_xsave_info (core_bfd, layout) != 0;
+  return i386_linux_core_read_xsave_info (current_program_space->core_bfd (),
+					  layout) != 0;
 }
 
 /* See i386-linux-tdep.h.  */

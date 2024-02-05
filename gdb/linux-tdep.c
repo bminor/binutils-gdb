@@ -1149,8 +1149,8 @@ linux_read_core_file_mappings
     }
 
   gdb::byte_vector contents (note_size);
-  if (!bfd_get_section_contents (core_bfd, section, contents.data (),
-				 0, note_size))
+  if (!bfd_get_section_contents (current_program_space->core_bfd (), section,
+				 contents.data (), 0, note_size))
     {
       warning (_("could not get core note contents"));
       return;
@@ -1165,10 +1165,13 @@ linux_read_core_file_mappings
       return;
     }
 
-  ULONGEST count = bfd_get (addr_size_bits, core_bfd, descdata);
+  ULONGEST count = bfd_get (addr_size_bits, current_program_space->core_bfd (),
+			    descdata);
   descdata += addr_size;
 
-  ULONGEST page_size = bfd_get (addr_size_bits, core_bfd, descdata);
+  ULONGEST page_size = bfd_get (addr_size_bits,
+				current_program_space->core_bfd (),
+				descdata);
   descdata += addr_size;
 
   if (note_size < 2 * addr_size + count * 3 * addr_size)
@@ -1215,12 +1218,12 @@ linux_read_core_file_mappings
 
   for (int i = 0; i < count; i++)
     {
-      ULONGEST start = bfd_get (addr_size_bits, core_bfd, descdata);
+      ULONGEST start = bfd_get (addr_size_bits, current_program_space->core_bfd (), descdata);
       descdata += addr_size;
-      ULONGEST end = bfd_get (addr_size_bits, core_bfd, descdata);
+      ULONGEST end = bfd_get (addr_size_bits, current_program_space->core_bfd (), descdata);
       descdata += addr_size;
       ULONGEST file_ofs
-	= bfd_get (addr_size_bits, core_bfd, descdata) * page_size;
+	= bfd_get (addr_size_bits, current_program_space->core_bfd (), descdata) * page_size;
       descdata += addr_size;
       char * filename = filenames;
       filenames += strlen ((char *) filenames) + 1;
@@ -1239,7 +1242,7 @@ linux_read_core_file_mappings
 static void
 linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
 {
-  linux_read_core_file_mappings (gdbarch, core_bfd,
+  linux_read_core_file_mappings (gdbarch, current_program_space->core_bfd (),
     [=] (ULONGEST count)
       {
 	gdb_printf (_("Mapped address spaces:\n\n"));
@@ -1289,9 +1292,9 @@ linux_core_info_proc (struct gdbarch *gdbarch, const char *args,
 
   if (exe_f)
     {
-      const char *exe;
+      const char *exe
+	= bfd_core_file_failing_command (current_program_space->core_bfd ());
 
-      exe = bfd_core_file_failing_command (core_bfd);
       if (exe != NULL)
 	gdb_printf ("exe = '%s'\n", exe);
       else
@@ -1315,11 +1318,14 @@ linux_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf,
 			 ULONGEST offset, ULONGEST len)
 {
   thread_section_name section_name (".note.linuxcore.siginfo", inferior_ptid);
-  asection *section = bfd_get_section_by_name (core_bfd, section_name.c_str ());
+  asection *section
+    = bfd_get_section_by_name (current_program_space->core_bfd (),
+			       section_name.c_str ());
   if (section == NULL)
     return -1;
 
-  if (!bfd_get_section_contents (core_bfd, section, readbuf, offset, len))
+  if (!bfd_get_section_contents (current_program_space->core_bfd (), section,
+				 readbuf, offset, len))
     return -1;
 
   return len;
@@ -1522,11 +1528,12 @@ linux_process_address_in_memtag_page (CORE_ADDR address)
 static bool
 linux_core_file_address_in_memtag_page (CORE_ADDR address)
 {
-  if (core_bfd == nullptr)
+  if (current_program_space->core_bfd () == nullptr)
     return false;
 
   memtag_section_info info;
-  return get_next_core_memtag_section (core_bfd, nullptr, address, info);
+  return get_next_core_memtag_section (current_program_space->core_bfd (),
+				       nullptr, address, info);
 }
 
 /* See linux-tdep.h.  */
@@ -2413,13 +2420,15 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
       long phdrs_size;
       int num_phdrs, i;
 
-      phdrs_size = bfd_get_elf_phdr_upper_bound (core_bfd);
+      phdrs_size
+	= bfd_get_elf_phdr_upper_bound (current_program_space->core_bfd ());
       if (phdrs_size == -1)
 	return 0;
 
       gdb::unique_xmalloc_ptr<Elf_Internal_Phdr>
 	phdrs ((Elf_Internal_Phdr *) xmalloc (phdrs_size));
-      num_phdrs = bfd_get_elf_phdrs (core_bfd, phdrs.get ());
+      num_phdrs = bfd_get_elf_phdrs (current_program_space->core_bfd (),
+				     phdrs.get ());
       if (num_phdrs == -1)
 	return 0;
 

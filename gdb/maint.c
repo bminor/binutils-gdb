@@ -459,8 +459,9 @@ maintenance_info_sections (const char *arg, int from_tty)
 				  ofile, arg);
     }
 
-  if (core_bfd)
-    maint_print_all_sections (_("Core file: "), core_bfd, nullptr, arg);
+  if (current_program_space->core_bfd () != nullptr)
+    maint_print_all_sections (_("Core file: "),
+			      current_program_space->core_bfd (), nullptr, arg);
 }
 
 /* Implement the "maintenance info target-sections" command.  */

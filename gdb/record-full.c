@@ -924,7 +924,8 @@ record_full_core_open_1 (const char *name, int from_tty)
   for (i = 0; i < regnum; i ++)
     record_full_core_regbuf->raw_supply (i, *regcache);
 
-  record_full_core_sections = build_section_table (core_bfd);
+  record_full_core_sections
+    = build_section_table (current_program_space->core_bfd ());
 
   current_inferior ()->push_target (&record_full_core_ops);
   record_full_restore ();
@@ -970,7 +971,7 @@ record_full_open (const char *name, int from_tty)
   record_full_list = &record_full_first;
   record_full_list->next = NULL;
 
-  if (core_bfd)
+  if (current_program_space->core_bfd ())
     record_full_core_open_1 (name, from_tty);
   else
     record_full_open_1 (name, from_tty);
@@ -2328,7 +2329,7 @@ record_full_restore (void)
 
   /* We restore the execution log from the open core bfd,
      if there is one.  */
-  if (core_bfd == NULL)
+  if (current_program_space->core_bfd () == nullptr)
     return;
 
   /* "record_full_restore" can only be called when record list is empty.  */
@@ -2338,7 +2339,7 @@ record_full_restore (void)
     gdb_printf (gdb_stdlog, "Restoring recording from core file.\n");
 
   /* Now need to find our special note section.  */
-  osec = bfd_get_section_by_name (core_bfd, "null0");
+  osec = bfd_get_section_by_name (current_program_space->core_bfd (), "null0");
   if (record_debug)
     gdb_printf (gdb_stdlog, "Find precord section %s.\n",
 		osec ? "succeeded" : "failed");
@@ -2349,10 +2350,11 @@ record_full_restore (void)
     gdb_printf (gdb_stdlog, "%s", bfd_section_name (osec));
 
   /* Check the magic code.  */
-  bfdcore_read (core_bfd, osec, &magic, sizeof (magic), &bfd_offset);
+  bfdcore_read (current_program_space->core_bfd (), osec, &magic,
+		sizeof (magic), &bfd_offset);
   if (magic != RECORD_FULL_FILE_MAGIC)
     error (_("Version mis-match or file format error in core file %s."),
-	   bfd_get_filename (core_bfd));
+	   bfd_get_filename (current_program_space->core_bfd ()));
   if (record_debug)
     gdb_printf (gdb_stdlog,
 		"  Reading 4-byte magic cookie "
@@ -2378,21 +2380,23 @@ record_full_restore (void)
 	  /* We are finished when offset reaches osec_size.  */
 	  if (bfd_offset >= osec_size)
 	    break;
-	  bfdcore_read (core_bfd, osec, &rectype, sizeof (rectype), &bfd_offset);
+	  bfdcore_read (current_program_space->core_bfd (), osec, &rectype,
+			sizeof (rectype), &bfd_offset);
 
 	  switch (rectype)
 	    {
 	    case record_full_reg: /* reg */
 	      /* Get register number to regnum.  */
-	      bfdcore_read (core_bfd, osec, &regnum,
+	      bfdcore_read (current_program_space->core_bfd (), osec, &regnum,
 			    sizeof (regnum), &bfd_offset);
 	      regnum = netorder32 (regnum);
 
 	      rec = record_full_reg_alloc (regcache, regnum);
 
 	      /* Get val.  */
-	      bfdcore_read (core_bfd, osec, record_full_get_loc (rec),
-			    rec->u.reg.len, &bfd_offset);
+	      bfdcore_read (current_program_space->core_bfd (), osec,
+			    record_full_get_loc (rec), rec->u.reg.len,
+			    &bfd_offset);
 
 	      if (record_debug)
 		gdb_printf (gdb_stdlog,
@@ -2405,20 +2409,21 @@ record_full_restore (void)
 
 	    case record_full_mem: /* mem */
 	      /* Get len.  */
-	      bfdcore_read (core_bfd, osec, &len,
+	      bfdcore_read (current_program_space->core_bfd (), osec, &len,
 			    sizeof (len), &bfd_offset);
 	      len = netorder32 (len);
 
 	      /* Get addr.  */
-	      bfdcore_read (core_bfd, osec, &addr,
+	      bfdcore_read (current_program_space->core_bfd (), osec, &addr,
 			    sizeof (addr), &bfd_offset);
 	      addr = netorder64 (addr);
 
 	      rec = record_full_mem_alloc (addr, len);
 
 	      /* Get val.  */
-	      bfdcore_read (core_bfd, osec, record_full_get_loc (rec),
-			    rec->u.mem.len, &bfd_offset);
+	      bfdcore_read (current_program_space->core_bfd (), osec,
+			    record_full_get_loc (rec), rec->u.mem.len,
+			    &bfd_offset);
 
 	      if (record_debug)
 		gdb_printf (gdb_stdlog,
@@ -2436,13 +2441,13 @@ record_full_restore (void)
 	      record_full_insn_num ++;
 
 	      /* Get signal value.  */
-	      bfdcore_read (core_bfd, osec, &signal,
+	      bfdcore_read (current_program_space->core_bfd (), osec, &signal,
 			    sizeof (signal), &bfd_offset);
 	      signal = netorder32 (signal);
 	      rec->u.end.sigval = (enum gdb_signal) signal;
 
 	      /* Get insn count.  */
-	      bfdcore_read (core_bfd, osec, &count,
+	      bfdcore_read (current_program_space->core_bfd (), osec, &count,
 			    sizeof (count), &bfd_offset);
 	      count = netorder32 (count);
 	      rec->u.end.insn_num = count;
@@ -2459,7 +2464,7 @@ record_full_restore (void)
 
 	    default:
 	      error (_("Bad entry type in core file %s."),
-		     bfd_get_filename (core_bfd));
+		     bfd_get_filename (current_program_space->core_bfd ()));
 	      break;
 	    }
 
@@ -2489,7 +2494,7 @@ record_full_restore (void)
 
   /* Succeeded.  */
   gdb_printf (_("Restored records from core file %s.\n"),
-	      bfd_get_filename (core_bfd));
+	      bfd_get_filename (current_program_space->core_bfd ()));
 
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }

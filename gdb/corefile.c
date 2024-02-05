@@ -64,13 +64,13 @@ reopen_exec_file (void)
 void
 validate_files (void)
 {
-  if (current_program_space->exec_bfd () && core_bfd)
+  if (current_program_space->exec_bfd () && current_program_space->core_bfd ())
     {
-      if (!core_file_matches_executable_p (core_bfd,
+      if (!core_file_matches_executable_p (current_program_space->core_bfd (),
 					   current_program_space->exec_bfd ()))
 	warning (_("core file may not match specified executable file."));
       else if (bfd_get_mtime (current_program_space->exec_bfd ())
-	       > bfd_get_mtime (core_bfd))
+	       > bfd_get_mtime (current_program_space->core_bfd ()))
 	warning (_("exec file is newer than core file."));
     }
 }

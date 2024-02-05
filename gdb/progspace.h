@@ -300,15 +300,16 @@ struct program_space
 
   /* Return the exec BFD for this program space.  */
   bfd *exec_bfd () const
-  {
-    return ebfd.get ();
-  }
+  { return ebfd.get (); }
 
   /* Set the exec BFD for this program space to ABFD.  */
   void set_exec_bfd (gdb_bfd_ref_ptr &&abfd)
   {
     ebfd = std::move (abfd);
   }
+
+  bfd *core_bfd () const
+  { return cbfd.get ();  }
 
   /* Reset saved solib data at the start of an solib event.  This lets
      us properly collect the data when calling solib_add, so it can then

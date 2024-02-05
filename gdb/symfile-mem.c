@@ -166,9 +166,9 @@ add_vsyscall_page (inferior *inf)
     {
       struct bfd *bfd;
 
-      if (core_bfd != NULL)
-	bfd = core_bfd;
-      else if (current_program_space->exec_bfd () != NULL)
+      if (current_program_space->core_bfd () != nullptr)
+	bfd = current_program_space->core_bfd ();
+      else if (current_program_space->exec_bfd () != nullptr)
 	bfd = current_program_space->exec_bfd ();
       else
        /* FIXME: cagney/2004-05-06: Should not require an existing

@@ -120,10 +120,6 @@ extern void write_memory_signed_integer (CORE_ADDR addr, int len,
 
 extern void (*deprecated_file_changed_hook) (const char *filename);
 
-/* Binary File Diddler for the core file.  */
-
-#define core_bfd (current_program_space->cbfd.get ())
-
 /* Whether to open exec and core files read-only or read-write.  */
 
 extern bool write_files;

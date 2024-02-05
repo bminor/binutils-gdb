@@ -1336,7 +1336,8 @@ rs6000_aix_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch,
   struct bfd_section *ldinfo_sec;
   int ldinfo_size;
 
-  ldinfo_sec = bfd_get_section_by_name (core_bfd, ".ldinfo");
+  ldinfo_sec = bfd_get_section_by_name (current_program_space->core_bfd (),
+					".ldinfo");
   if (ldinfo_sec == NULL)
     error (_("cannot find .ldinfo section from core file: %s"),
 	   bfd_errmsg (bfd_get_error ()));
@@ -1344,8 +1345,9 @@ rs6000_aix_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch,
 
   gdb::byte_vector ldinfo_buf (ldinfo_size);
 
-  if (! bfd_get_section_contents (core_bfd, ldinfo_sec,
-				  ldinfo_buf.data (), 0, ldinfo_size))
+  if (! bfd_get_section_contents (current_program_space->core_bfd (),
+				  ldinfo_sec, ldinfo_buf.data (), 0,
+				  ldinfo_size))
     error (_("unable to read .ldinfo section from core file: %s"),
 	  bfd_errmsg (bfd_get_error ()));
 

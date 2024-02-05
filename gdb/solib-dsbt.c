@@ -532,7 +532,8 @@ dsbt_current_sos (void)
      dsbt_current_sos, and also precedes the call to
      solib_create_inferior_hook.   (See post_create_inferior in
      infcmd.c.)  */
-  if (info->main_executable_lm_info == 0 && core_bfd != NULL)
+  if (info->main_executable_lm_info == 0
+      && current_program_space->core_bfd () != nullptr)
     dsbt_relocate_main_executable ();
 
   /* Locate the address of the first link map struct.  */

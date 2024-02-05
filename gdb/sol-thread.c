@@ -606,7 +606,7 @@ check_for_thread_db (void)
   ptid_t ptid;
 
   /* Don't attempt to use thread_db for remote targets.  */
-  if (!(target_can_run () || core_bfd))
+  if (!(target_can_run () || current_program_space->core_bfd () != nullptr))
     return;
 
   /* Do nothing if we couldn't load libthread_db.so.1.  */

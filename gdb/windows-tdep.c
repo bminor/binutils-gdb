@@ -1154,7 +1154,7 @@ windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
 				    ULONGEST offset, ULONGEST len)
 {
   cpms_data data { gdbarch, "<library-list>\n", 0 };
-  bfd_map_over_sections (core_bfd,
+  bfd_map_over_sections (current_program_space->core_bfd (),
 			 core_process_module_section,
 			 &data);
   data.xml += "</library-list>\n";

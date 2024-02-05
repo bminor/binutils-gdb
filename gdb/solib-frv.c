@@ -325,7 +325,8 @@ frv_current_sos ()
      frv_current_sos, and also precedes the call to
      solib_create_inferior_hook().   (See post_create_inferior() in
      infcmd.c.)  */
-  if (main_executable_lm_info == 0 && core_bfd != NULL)
+  if (main_executable_lm_info == 0
+      && current_program_space->core_bfd () != nullptr)
     frv_relocate_main_executable ();
 
   /* Fetch the GOT corresponding to the main executable.  */

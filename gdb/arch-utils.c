@@ -590,7 +590,7 @@ gdbarch_update_p (struct gdbarch_info info)
   if (info.abfd == NULL)
     info.abfd = current_program_space->exec_bfd ();
   if (info.abfd == NULL)
-    info.abfd = core_bfd;
+    info.abfd = current_program_space->core_bfd ();
 
   /* Check for the current target description.  */
   if (info.target_desc == NULL)
