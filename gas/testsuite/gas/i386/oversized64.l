@@ -4,6 +4,7 @@
 .*:7: Error: instruction length.*
 .*:9: Error: instruction length.*
 .*:10: Error: instruction length.*
+.*:13: Warning: instruction length.*
 GAS LISTING .*
 
 
@@ -37,4 +38,11 @@ GAS LISTING .*
 [ 	]*10[ 	]+48812CC5[ 	]*
 [ 	]*10[ 	]+00000000[ 	]*
 [ 	]*10[ 	]+44332211[ 	]*
+[ 	]*11[ 	]+
+[ 	]*12[ 	]+\.att_syntax prefix
+[ 	]*13[ 	]+\?\?\?\? 6762F1FC[ 	]+.insn EVEX.L0.0f 12/0, \$0x11223344,\(,%eax,8\),%rax
+\*\*\*\*  Warning: instruction length of 16 bytes exceeds the limit of 15
+[ 	]*13[ 	]+080C04C5[ 	]*
+[ 	]*13[ 	]+00000000[ 	]*
+[ 	]*13[ 	]+44332211[ 	]*
 #pass
