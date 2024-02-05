@@ -58,6 +58,7 @@ struct thread_info;
 struct ui_out;
 struct inferior;
 struct x86_xsave_layout;
+struct solib_ops;
 
 #include "regcache.h"
 

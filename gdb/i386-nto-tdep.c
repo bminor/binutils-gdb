@@ -316,7 +316,7 @@ static void
 i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
-  static struct target_so_ops nto_svr4_so_ops;
+  static solib_ops nto_svr4_so_ops;
 
   /* Deal with our strange signals.  */
   nto_initialize_signals ();

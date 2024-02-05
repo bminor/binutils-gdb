@@ -20,8 +20,8 @@
 #ifndef SOLIB_DSBT_H
 #define SOLIB_DSBT_H
 
-struct target_so_ops;
+struct solib_ops;
 
-extern const struct target_so_ops dsbt_so_ops;
+extern const solib_ops dsbt_so_ops;
 
 #endif /* solib-dsbt.h */

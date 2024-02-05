@@ -902,7 +902,7 @@ show_dsbt_debug (struct ui_file *file, int from_tty,
   gdb_printf (file, _("solib-dsbt debugging is %s.\n"), value);
 }
 
-const struct target_so_ops dsbt_so_ops =
+const solib_ops dsbt_so_ops =
 {
   dsbt_relocate_section_addresses,
   nullptr,

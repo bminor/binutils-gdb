@@ -23,9 +23,9 @@
 #include "solist.h"
 
 struct objfile;
-struct target_so_ops;
+struct solib_ops;
 
-extern const struct target_so_ops svr4_so_ops;
+extern const solib_ops svr4_so_ops;
 
 /* Link map info to include in an allocated so_list entry.  */
 

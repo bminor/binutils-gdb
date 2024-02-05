@@ -20,8 +20,8 @@
 #ifndef SOLIB_DARWIN_H
 #define SOLIB_DARWIN_H
 
-struct target_so_ops;
+struct solib_ops;
 
-extern const struct target_so_ops darwin_so_ops;
+extern const solib_ops darwin_so_ops;
 
 #endif /* solib-darwin.h */

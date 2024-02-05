@@ -977,7 +977,7 @@ svr4_free_objfile_observer (struct objfile *objfile)
   probes_table_remove_objfile_probes (objfile);
 }
 
-/* Implement target_so_ops.clear_so.  */
+/* Implement solib_ops.clear_so.  */
 
 static void
 svr4_clear_so (const solib &so)
@@ -1386,7 +1386,7 @@ svr4_collect_probes_sos (svr4_info *info)
   return res;
 }
 
-/* Implement the main part of the "current_sos" target_so_ops
+/* Implement the main part of the "current_sos" solib_ops
    method.  */
 
 static intrusive_list<solib>
@@ -1414,7 +1414,7 @@ svr4_current_sos_1 (svr4_info *info)
   return sos;
 }
 
-/* Implement the "current_sos" target_so_ops method.  */
+/* Implement the "current_sos" solib_ops method.  */
 
 static intrusive_list<solib>
 svr4_current_sos ()
@@ -3353,7 +3353,7 @@ svr4_iterate_over_objfiles_in_search_order
     }
 }
 
-const struct target_so_ops svr4_so_ops =
+const struct solib_ops svr4_so_ops =
 {
   svr4_relocate_section_addresses,
   svr4_clear_so,

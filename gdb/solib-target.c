@@ -403,7 +403,7 @@ solib_target_in_dynsym_resolve_code (CORE_ADDR pc)
   return in_plt_section (pc);
 }
 
-const struct target_so_ops solib_target_so_ops =
+const solib_ops solib_target_so_ops =
 {
   solib_target_relocate_section_addresses,
   nullptr,

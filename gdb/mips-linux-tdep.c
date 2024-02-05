@@ -46,7 +46,7 @@
 #include "features/mips64-linux.c"
 #include "features/mips64-dsp-linux.c"
 
-static struct target_so_ops mips_svr4_so_ops;
+static solib_ops mips_svr4_so_ops;
 
 /* This enum represents the signals' numbers on the MIPS
    architecture.  It just contains the signal definitions which are

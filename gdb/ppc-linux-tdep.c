@@ -87,7 +87,7 @@
 #include "dwarf2/frame.h"
 
 /* Shared library operations for PowerPC-Linux.  */
-static struct target_so_ops powerpc_so_ops;
+static solib_ops powerpc_so_ops;
 
 /* The syscall's XML filename for PPC and PPC64.  */
 #define XML_SYSCALL_FILENAME_PPC "syscalls/ppc-linux.xml"

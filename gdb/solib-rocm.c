@@ -154,7 +154,7 @@ struct solib_info
 /* Per-inferior data key.  */
 static const registry<inferior>::key<solib_info> rocm_solib_data;
 
-static target_so_ops rocm_solib_ops;
+static solib_ops rocm_solib_ops;
 
 /* Fetch the solib_info data for INF.  */
 

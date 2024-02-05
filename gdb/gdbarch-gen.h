@@ -785,8 +785,8 @@ extern void set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, gdbarch_s
 
 /* Vtable of solib operations functions. */
 
-extern const struct target_so_ops * gdbarch_so_ops (struct gdbarch *gdbarch);
-extern void set_gdbarch_so_ops (struct gdbarch *gdbarch, const struct target_so_ops * so_ops);
+extern const solib_ops * gdbarch_so_ops (struct gdbarch *gdbarch);
+extern void set_gdbarch_so_ops (struct gdbarch *gdbarch, const solib_ops * so_ops);
 
 /* If in_solib_dynsym_resolve_code() returns true, and SKIP_SOLIB_RESOLVER
    evaluates non-zero, this is the address where the debugger will place

@@ -655,7 +655,7 @@ darwin_bfd_open (const char *pathname)
   return res;
 }
 
-const struct target_so_ops darwin_so_ops =
+const solib_ops darwin_so_ops =
 {
   darwin_relocate_section_addresses,
   nullptr,

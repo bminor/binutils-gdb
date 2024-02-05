@@ -1383,7 +1383,7 @@ Function(
 
 Value(
     comment="Vtable of solib operations functions.",
-    type="const struct target_so_ops *",
+    type="const solib_ops *",
     name="so_ops",
     predefault="&solib_target_so_ops",
     printer="host_address_to_string (gdbarch->so_ops)",

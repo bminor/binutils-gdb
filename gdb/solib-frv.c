@@ -237,7 +237,7 @@ static void frv_relocate_main_executable (void);
 static CORE_ADDR main_got (void);
 static int enable_break2 (void);
 
-/* Implement the "open_symbol_file_object" target_so_ops method.  */
+/* Implement the "open_symbol_file_object" solib_ops method.  */
 
 static int
 open_symbol_file_object (int from_tty)
@@ -304,7 +304,7 @@ lm_base (void)
 }
 
 
-/* Implement the "current_sos" target_so_ops method.  */
+/* Implement the "current_sos" solib_ops method.  */
 
 static intrusive_list<solib>
 frv_current_sos ()
@@ -1073,7 +1073,7 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
   return 0;
 }
 
-const struct target_so_ops frv_so_ops =
+const solib_ops frv_so_ops =
 {
   frv_relocate_section_addresses,
   nullptr,

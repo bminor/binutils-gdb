@@ -154,7 +154,7 @@ struct gdbarch
   gdbarch_single_step_through_delay_ftype *single_step_through_delay = nullptr;
   gdbarch_print_insn_ftype *print_insn = default_print_insn;
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code = generic_skip_trampoline_code;
-  const struct target_so_ops * so_ops = &solib_target_so_ops;
+  const solib_ops * so_ops = &solib_target_so_ops;
   gdbarch_skip_solib_resolver_ftype *skip_solib_resolver = generic_skip_solib_resolver;
   gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline = generic_in_solib_return_trampoline;
   gdbarch_in_indirect_branch_thunk_ftype *in_indirect_branch_thunk = default_in_indirect_branch_thunk;
@@ -3398,7 +3398,7 @@ set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch,
   gdbarch->skip_trampoline_code = skip_trampoline_code;
 }
 
-const struct target_so_ops *
+const solib_ops *
 gdbarch_so_ops (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -3410,7 +3410,7 @@ gdbarch_so_ops (struct gdbarch *gdbarch)
 
 void
 set_gdbarch_so_ops (struct gdbarch *gdbarch,
-		    const struct target_so_ops * so_ops)
+		    const solib_ops * so_ops)
 {
   gdbarch->so_ops = so_ops;
 }

@@ -93,7 +93,7 @@ struct solib : intrusive_list_node<solib>
   CORE_ADDR addr_low = 0, addr_high = 0;
 };
 
-struct target_so_ops
+struct solib_ops
 {
   /* Adjust the section binding addresses by the base address at
      which the object was actually mapped.  */

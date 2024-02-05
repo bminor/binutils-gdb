@@ -862,7 +862,7 @@ windows_get_siginfo_type (struct gdbarch *gdbarch)
   return siginfo_type;
 }
 
-/* Implement the "solib_create_inferior_hook" target_so_ops method.  */
+/* Implement the "solib_create_inferior_hook" solib_ops method.  */
 
 static void
 windows_solib_create_inferior_hook (int from_tty)
@@ -910,7 +910,7 @@ windows_solib_create_inferior_hook (int from_tty)
     }
 }
 
-static struct target_so_ops windows_so_ops;
+static solib_ops windows_so_ops;
 
 /* Common parts for gdbarch initialization for the Windows and Cygwin OS
    ABIs.  */

@@ -23,7 +23,7 @@
 /* Forward decl's for prototypes */
 struct solib;
 struct target_ops;
-struct target_so_ops;
+struct solib_ops;
 struct program_space;
 
 #include "gdb_bfd.h"

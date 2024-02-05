@@ -308,7 +308,7 @@ solib_aix_bss_data_overlap (bfd *abfd)
   return 0;
 }
 
-/* Implement the "relocate_section_addresses" target_so_ops method.  */
+/* Implement the "relocate_section_addresses" solib_ops method.  */
 
 static void
 solib_aix_relocate_section_addresses (solib &so, target_section *sec)
@@ -412,7 +412,7 @@ solib_aix_get_section_offsets (struct objfile *objfile,
   return offsets;
 }
 
-/* Implement the "solib_create_inferior_hook" target_so_ops method.  */
+/* Implement the "solib_create_inferior_hook" solib_ops method.  */
 
 static void
 solib_aix_solib_create_inferior_hook (int from_tty)
@@ -443,7 +443,7 @@ solib_aix_solib_create_inferior_hook (int from_tty)
     }
 }
 
-/* Implement the "current_sos" target_so_ops method.  */
+/* Implement the "current_sos" solib_ops method.  */
 
 static intrusive_list<solib>
 solib_aix_current_sos ()
@@ -493,7 +493,7 @@ solib_aix_current_sos ()
   return sos;
 }
 
-/* Implement the "open_symbol_file_object" target_so_ops method.  */
+/* Implement the "open_symbol_file_object" solib_ops method.  */
 
 static int
 solib_aix_open_symbol_file_object (int from_tty)
@@ -501,7 +501,7 @@ solib_aix_open_symbol_file_object (int from_tty)
   return 0;
 }
 
-/* Implement the "in_dynsym_resolve_code" target_so_ops method.  */
+/* Implement the "in_dynsym_resolve_code" solib_ops method.  */
 
 static int
 solib_aix_in_dynsym_resolve_code (CORE_ADDR pc)
@@ -509,7 +509,7 @@ solib_aix_in_dynsym_resolve_code (CORE_ADDR pc)
   return 0;
 }
 
-/* Implement the "bfd_open" target_so_ops method.  */
+/* Implement the "bfd_open" solib_ops method.  */
 
 static gdb_bfd_ref_ptr
 solib_aix_bfd_open (const char *pathname)
@@ -679,8 +679,8 @@ solib_aix_normal_stop_observer (struct bpstat *unused_1, int unused_2)
   data->library_list.reset ();
 }
 
-/* The target_so_ops for AIX targets.  */
-const struct target_so_ops solib_aix_so_ops =
+/* The solib_ops for AIX targets.  */
+const solib_ops solib_aix_so_ops =
 {
   solib_aix_relocate_section_addresses,
   nullptr,
