@@ -7,6 +7,7 @@ All available -march extensions for RISC-V:
 	d                                       2.2, 2.0
 	q                                       2.2, 2.0
 	c                                       2.0
+	b                                       1.0
 	v                                       1.0
 	h                                       1.0
 	zicbom                                  1.0
@@ -20,7 +21,9 @@ All available -march extensions for RISC-V:
 	zihintpause                             2.0
 	zihpm                                   2.0
 	zmmul                                   1.0
+	zaamo                                   1.0
 	zabha                                   1.0
+	zalrsc                                  1.0
 	zawrs                                   1.0
 	zfa                                     1.0
 	zfh                                     1.0

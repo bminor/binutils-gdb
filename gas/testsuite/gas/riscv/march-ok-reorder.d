@@ -4,4 +4,4 @@
 
 Attribute Section: riscv
 File Attributes
-  Tag_RISCV_arch: "rv32i2p0_m1p0_a2p1_f2p2_d2p2_c2p0_zicsr2p0_zifencei2p0_zmmul1p0_zba1p0_xbar2p0_xfoo2p0"
+  Tag_RISCV_arch: "rv32i2p0_m1p0_a2p1_f2p2_d2p2_c2p0_zicsr2p0_zifencei2p0_zmmul1p0_zaamo1p0_zalrsc1p0_zba1p0_xbar2p0_xfoo2p0"
