@@ -2701,7 +2701,7 @@ arm_exidx_new_objfile (struct objfile *objfile)
       if (n_bytes || n_words)
 	{
 	  gdb_byte *p = entry
-	    = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack,
+	    = (gdb_byte *) obstack_alloc (&objfile->per_bfd->storage_obstack,
 					  n_bytes + n_words * 4 + 1);
 
 	  while (n_bytes--)
