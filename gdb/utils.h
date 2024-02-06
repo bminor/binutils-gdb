@@ -383,8 +383,15 @@ class scoped_restore_warning_hook
 public:
   explicit scoped_restore_warning_hook (warning_hook_handler new_handler);
 
+  ~scoped_restore_warning_hook ();
+
 private:
-  scoped_restore_tmpl<warning_hook_handler> m_save;
+  scoped_restore_warning_hook (const scoped_restore_warning_hook &other)
+    = delete;
+  scoped_restore_warning_hook &operator= (const scoped_restore_warning_hook &)
+    = delete;
+
+  warning_hook_handler m_save;
 };
 
 /* Return the current warning handler.  */

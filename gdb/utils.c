@@ -145,8 +145,14 @@ get_warning_hook_handler ()
 
 scoped_restore_warning_hook::scoped_restore_warning_hook
      (warning_hook_handler new_handler)
-       : m_save (make_scoped_restore (&warning_hook, new_handler))
+       : m_save (warning_hook)
 {
+  warning_hook = new_handler;
+}
+
+scoped_restore_warning_hook::~scoped_restore_warning_hook ()
+{
+  warning_hook = m_save;
 }
 
 /* Print a warning message.  The first argument STRING is the warning
