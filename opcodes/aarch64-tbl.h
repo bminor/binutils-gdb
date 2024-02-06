@@ -2368,6 +2368,34 @@
   QLF3(X,X,NIL),                                        \
 }
 
+#define QL_V3_BSS_LOWER    \
+{			   \
+  QLF3(V_8B, V_4S, V_4S),  \
+}
+
+#define QL_V3_BSS_FULL	   \
+{			   \
+  QLF3(V_16B, V_4S, V_4S), \
+}
+
+#define QL_V3_BHH	   \
+{			   \
+  QLF3(V_8B, V_4H, V_4H),  \
+  QLF3(V_16B, V_8H, V_8H), \
+}
+
+/* e.g. BF1CVTL <Vd>.8H, <Vn>.8B.  */
+#define QL_V2FP8B8H	   \
+{			   \
+  QLF2(V_8H, V_8B),	   \
+}
+
+/* e.g. BF1CVTL2 <Vd>.8H, <Vn>.16B.  */
+#define QL_V28H16B	   \
+{			   \
+  QLF2(V_8H, V_16B),	   \
+}
+
 /* e.g. UDOT <Vd>.2S, <Vn>.8B, <Vm>.8B.  */
 #define QL_V3DOT	   \
 {			   \
@@ -6459,6 +6487,19 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SVE2p1_INSNC("st2q",0xe4600000, 0xffe0e000, sve_misc, 0, OP3 (SME_Zt2, SVE_Pg3, SVE_ADDR_RR_LSL4), OP_SVE_QUU, 0, C_SCAN_MOVPRFX, 0),
   SVE2p1_INSNC("st3q",0xe4a00000, 0xffe0e000, sve_misc, 0, OP3 (SME_Zt3, SVE_Pg3, SVE_ADDR_RR_LSL4), OP_SVE_QUU, 0, C_SCAN_MOVPRFX, 0),
   SVE2p1_INSNC("st4q",0xe4e00000, 0xffe0e000, sve_misc, 0, OP3 (SME_Zt4, SVE_Pg3, SVE_ADDR_RR_LSL4), OP_SVE_QUU, 0, C_SCAN_MOVPRFX, 0),
+  FP8_INSN("bf1cvtl", 0x2ea17800, 0xfffffc00, asimdmisc, OP2 (Vd, Vn), QL_V2FP8B8H, 0),
+  FP8_INSN("bf1cvtl2", 0x6ea17800, 0xfffffc00, asimdmisc, OP2 (Vd, Vn), QL_V28H16B, 0),
+  FP8_INSN("bf2cvtl", 0x2ee17800, 0xfffffc00, asimdmisc, OP2 (Vd, Vn), QL_V2FP8B8H, 0),
+  FP8_INSN("bf2cvtl2", 0x6ee17800, 0xfffffc00, asimdmisc, OP2 (Vd, Vn), QL_V28H16B, 0),
+  FP8_INSN("f1cvtl", 0x2e217800, 0xfffffc00, asimdmisc, OP2 (Vd, Vn), QL_V2FP8B8H, 0),
+  FP8_INSN("f1cvtl2", 0x6e217800, 0xfffffc00, asimdmisc, OP2 (Vd, Vn), QL_V28H16B, 0),
+  FP8_INSN("f2cvtl", 0x2e617800, 0xfffffc00, asimdmisc, OP2 (Vd, Vn), QL_V2FP8B8H, 0),
+  FP8_INSN("f2cvtl2", 0x6e617800, 0xfffffc00, asimdmisc, OP2 (Vd, Vn), QL_V28H16B, 0),
+  FP8_INSN("fcvtn",  0xe00f400, 0xffe0fc00, asimdmisc, OP3 (Vd, Vn, Vm), QL_V3_BSS_LOWER, 0),
+  FP8_INSN("fcvtn2", 0x4e00f400, 0xffe0fc00, asimdmisc, OP3 (Vd, Vn, Vm), QL_V3_BSS_FULL, 0),
+  FP8_INSN("fcvtn", 0xe40f400,  0xbfe0fc00, asimdmisc, OP3 (Vd, Vn, Vm), QL_V3_BHH, F_SIZEQ),
+  FP8_INSN("fscale", 0x2ec03c00, 0xbfe0fc00, asimdmisc, OP3 (Vd, Vn, Vm), QL_VSHIFT_H, F_SIZEQ),
+  FP8_INSN("fscale", 0x2ea0fc00, 0xbfa0fc00, asimdmisc, OP3 (Vd, Vn, Vm), QL_V3SAMESD, F_SIZEQ),
 
 /* Checked Pointer Arithmetic Instructions.  */
   CPA_INSN ("addpt",  0x9a002000, 0xffe0e000, aarch64_misc, OP3 (Rd_SP, Rn_SP, Rm_LSL), QL_I3SAMEX),
