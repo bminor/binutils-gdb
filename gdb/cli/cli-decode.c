@@ -2549,7 +2549,8 @@ deprecated_cmd_warning (const char *text, struct cmd_list_element *list)
    If TEXT is a subcommand (i.e. one that is preceded by a prefix
    command) set *PREFIX_CMD.
 
-   Set *CMD to point to the command TEXT indicates.
+   Set *CMD to point to the command TEXT indicates, or to
+   CMD_LIST_AMBIGUOUS if there are multiple possible matches.
 
    If any of *ALIAS, *PREFIX_CMD, or *CMD cannot be determined or do not
    exist, they are NULL when we return.
@@ -2589,7 +2590,12 @@ lookup_cmd_composition_1 (const char *text,
       *cmd = find_cmd (command.c_str (), len, cur_list, 1, &nfound);
 
       /* We only handle the case where a single command was found.  */
-      if (*cmd == CMD_LIST_AMBIGUOUS || *cmd == nullptr)
+      if (nfound > 1)
+	{
+	  *cmd = CMD_LIST_AMBIGUOUS;
+	  return 0;
+	}
+      else if (*cmd == nullptr)
 	return 0;
       else
 	{
@@ -2623,7 +2629,8 @@ lookup_cmd_composition_1 (const char *text,
    If TEXT is a subcommand (i.e. one that is preceded by a prefix
    command) set *PREFIX_CMD.
 
-   Set *CMD to point to the command TEXT indicates.
+   Set *CMD to point to the command TEXT indicates, or to
+   CMD_LIST_AMBIGUOUS if there are multiple possible matches.
 
    If any of *ALIAS, *PREFIX_CMD, or *CMD cannot be determined or do not
    exist, they are NULL when we return.

@@ -588,6 +588,37 @@ proc_with_prefix test_language {} {
     gdb_test_no_output "set lang auto"
 }
 
+proc_with_prefix test_ambiguous_parameter {} {
+    gdb_test_multiline "create parameter" \
+	"python" "" \
+	"class TestAmbiguousParam (gdb.Parameter):" "" \
+	"   def __init__ (self, name, value):" "" \
+	"      super (TestAmbiguousParam, self).__init__ (name, gdb.COMMAND_DATA, gdb.PARAM_INTEGER)" "" \
+	"      self.value = value" "" \
+	"end"
+
+    # Create parameters.
+    gdb_test "python TestAmbiguousParam('test-ambiguous-value-1', 1)" ""
+    gdb_test "python TestAmbiguousParam('test-ambiguous-value-2-extra', 2)" ""
+    gdb_test "python TestAmbiguousParam('test-ambiguous', 3)" ""
+
+    # Test unambiguous matches.
+    gdb_test "python print(gdb.parameter('test-ambiguous-value-1'))" "1"
+    gdb_test "python print(gdb.parameter('test-ambiguous-value-2-extra'))" "2"
+    gdb_test "python print(gdb.parameter('test-ambiguous-value-2'))" "2"
+    gdb_test "python print(gdb.parameter('test-ambiguous'))" "3"
+
+    # Test ambiguous names.
+    gdb_test "python print(gdb.parameter('test-ambiguou'))" \
+	"Parameter .* is ambiguous.*Error while executing Python code."
+    gdb_test "python print(gdb.parameter('test-ambiguous-'))" \
+	"Parameter .* is ambiguous.*Error while executing Python code."
+    gdb_test "python print(gdb.parameter('test-ambiguous-v'))" \
+	"Parameter .* is ambiguous.*Error while executing Python code."
+    gdb_test "python print(gdb.parameter('test-ambiguous-value-1a'))" \
+	"Could not find parameter.*Error while executing Python code."
+}
+
 test_directories
 test_data_directory
 test_boolean_parameter
@@ -600,5 +631,6 @@ test_gdb_parameter
 test_integer_parameter
 test_throwing_parameter
 test_language
+test_ambiguous_parameter
 
 rename py_param_test_maybe_no_output ""

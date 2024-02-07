@@ -559,7 +559,10 @@ gdbpy_parameter (PyObject *self, PyObject *args)
       GDB_PY_HANDLE_EXCEPTION (ex);
     }
 
-  if (!found)
+  if (cmd == CMD_LIST_AMBIGUOUS)
+    return PyErr_Format (PyExc_RuntimeError,
+			 _("Parameter `%s' is ambiguous."), arg);
+  else if (!found)
     return PyErr_Format (PyExc_RuntimeError,
 			 _("Could not find parameter `%s'."), arg);
 

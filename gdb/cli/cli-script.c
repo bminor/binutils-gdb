@@ -1521,6 +1521,8 @@ do_document_command (const char *comname, int from_tty,
   lookup_cmd_composition (comfull, &alias, &prefix_cmd, &c);
   if (c == nullptr)
     error (_("Undefined command: \"%s\"."), comfull);
+  else if (c == CMD_LIST_AMBIGUOUS)
+    error (_("Ambiguous command: \"%s\"."), comfull);
 
   if (c->theclass != class_user
       && (alias == nullptr || alias->theclass != class_alias))
