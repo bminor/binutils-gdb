@@ -103,6 +103,10 @@ enum frame_filter_flag
 
     /* Set this flag if elided frames should not be printed.  */
     PRINT_HIDE = 1 << 5,
+
+    /* Set this flag if pretty printers for frame arguments should not
+       be invoked.  */
+    PRINT_RAW_FRAME_ARGUMENTS = 1 << 6,
   };
 
 DEF_ENUM_FLAGS_TYPE (enum frame_filter_flag, frame_filter_flags);

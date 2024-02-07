@@ -76,3 +76,17 @@ pretty_printers_dict = {}
 
 register_pretty_printers()
 gdb.pretty_printers.append(lookup_function)
+
+
+class BasicFrameFilter(object):
+    def __init__(self):
+        self.name = "BasicFrameFilter"
+        self.priority = 100
+        self.enabled = True
+        gdb.frame_filters[self.name] = self
+
+    def filter(self, frame_iter):
+        return frame_iter
+
+
+BasicFrameFilter()

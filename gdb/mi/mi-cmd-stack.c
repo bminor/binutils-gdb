@@ -372,6 +372,8 @@ mi_cmd_stack_list_args (const char *command, const char *const *argv, int argc)
   if (! raw_arg && frame_filters)
     {
       frame_filter_flags flags = PRINT_LEVEL | PRINT_ARGS;
+      if (user_frame_print_options.print_raw_frame_arguments)
+	flags |= PRINT_RAW_FRAME_ARGUMENTS;
       int py_frame_low = frame_low;
 
       /* We cannot pass -1 to frame_low, as that would signify a
@@ -466,6 +468,8 @@ mi_cmd_stack_list_variables (const char *command, const char *const *argv,
    if (! raw_arg && frame_filters)
      {
        frame_filter_flags flags = PRINT_LEVEL | PRINT_ARGS | PRINT_LOCALS;
+       if (user_frame_print_options.print_raw_frame_arguments)
+	 flags |= PRINT_RAW_FRAME_ARGUMENTS;
 
        result = mi_apply_ext_lang_frame_filter (frame, flags,
 						print_value,
@@ -491,7 +495,8 @@ mi_cmd_stack_list_variables (const char *command, const char *const *argv,
 
 static void
 list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
-		   enum print_values values, int skip_unavailable)
+		   enum print_values values, int skip_unavailable,
+		   const frame_print_options &fp_opts)
 {
   struct ui_out *uiout = current_uiout;
 
@@ -548,6 +553,8 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 
 	      get_no_prettyformat_print_options (&opts);
 	      opts.deref_ref = true;
+	      if (arg->sym->is_argument ())
+		opts.raw = fp_opts.print_raw_frame_arguments;
 	      common_val_print (arg->val, &stb, 0, &opts,
 				language_def (arg->sym->language ()));
 	    }
@@ -664,9 +671,11 @@ list_args_or_locals (const frame_print_options &fp_opts,
 		}
 
 	      if (arg.entry_kind != print_entry_values_only)
-		list_arg_or_local (&arg, what, values, skip_unavailable);
+		list_arg_or_local (&arg, what, values, skip_unavailable,
+				   fp_opts);
 	      if (entryarg.entry_kind != print_entry_values_no)
-		list_arg_or_local (&entryarg, what, values, skip_unavailable);
+		list_arg_or_local (&entryarg, what, values, skip_unavailable,
+				   fp_opts);
 	    }
 	}
 

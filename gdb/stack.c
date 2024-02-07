@@ -2016,6 +2016,8 @@ backtrace_command_1 (const frame_print_options &fp_opts,
     flags |= PRINT_LOCALS;
   if (bt_opts.hide)
     flags |= PRINT_HIDE;
+  if (fp_opts.print_raw_frame_arguments)
+    flags |= PRINT_RAW_FRAME_ARGUMENTS;
 
   if (!bt_opts.no_filters)
     {
