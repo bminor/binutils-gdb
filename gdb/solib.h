@@ -42,10 +42,10 @@ extern bool debug_solib;
 #define SOLIB_SCOPED_DEBUG_START_END(fmt, ...) \
   scoped_debug_start_end (debug_solib, "solib", fmt, ##__VA_ARGS__)
 
-/* Called when we free all symtabs, to free the shared library information
-   as well.  */
+/* Called when we free all symtabs of PSPACE, to free the shared library
+   information as well.  */
 
-extern void clear_solib (void);
+extern void clear_solib (program_space *pspace);
 
 /* Called to add symbols from a shared library to gdb's symbol table.  */
 

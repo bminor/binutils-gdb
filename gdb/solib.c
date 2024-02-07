@@ -1180,23 +1180,23 @@ solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
     return false;
 }
 
-/* Called by free_all_symtabs */
+/* See solib.h.  */
 
 void
-clear_solib (void)
+clear_solib (program_space *pspace)
 {
   const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
-  disable_breakpoints_in_shlibs (current_program_space);
+  disable_breakpoints_in_shlibs (pspace);
 
-  current_program_space->so_list.clear_and_dispose ([] (solib *so) {
-    notify_solib_unloaded (current_program_space, *so);
-    current_program_space->remove_target_sections (so);
+  pspace->so_list.clear_and_dispose ([pspace] (solib *so) {
+    notify_solib_unloaded (pspace, *so);
+    pspace->remove_target_sections (so);
     delete so;
   });
 
   if (ops->clear_solib != nullptr)
-    ops->clear_solib (current_program_space);
+    ops->clear_solib (pspace);
 }
 
 /* Shared library startup support.  When GDB starts up the inferior,
@@ -1244,7 +1244,7 @@ no_shared_libraries (const char *ignored, int from_tty)
      access to their associated objfiles.  Therefore, we can not purge the
      solibs' objfiles before clear_solib has been called.  */
 
-  clear_solib ();
+  clear_solib (current_program_space);
   objfile_purge_solibs ();
 }
 

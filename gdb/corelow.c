@@ -335,7 +335,7 @@ core_target::clear_core ()
 
       /* Clear out solib state while the bfd is still open.  See
 	 comments in clear_solib in solib.c.  */
-      clear_solib ();
+      clear_solib (current_program_space);
 
       current_program_space->cbfd.reset (nullptr);
     }
