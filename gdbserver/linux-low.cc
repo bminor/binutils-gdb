@@ -555,6 +555,16 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 			   ? ptid_t (new_pid, new_pid)
 			   : ptid_t (ptid_of (event_thr).pid (), new_pid));
 
+      process_info *child_proc = nullptr;
+
+      if (event != PTRACE_EVENT_CLONE)
+	{
+	  /* Add the new process to the tables before we add the LWP.
+	     We need to do this even if the new process will be
+	     detached.  See breakpoint cloning code further below.  */
+	  child_proc = add_linux_process (new_pid, 0);
+	}
+
       lwp_info *child_lwp = add_lwp (child_ptid);
       gdb_assert (child_lwp != NULL);
       child_lwp->stopped = 1;
@@ -588,12 +598,11 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 
       if (event != PTRACE_EVENT_CLONE)
 	{
-	  /* Add the new process to the tables and clone the breakpoint
-	     lists of the parent.  We need to do this even if the new process
-	     will be detached, since we will need the process object and the
-	     breakpoints to remove any breakpoints from memory when we
-	     detach, and the client side will access registers.  */
-	  process_info *child_proc = add_linux_process (new_pid, 0);
+	  /* Clone the breakpoint lists of the parent.  We need to do
+	     this even if the new process will be detached, since we
+	     will need the process object and the breakpoints to
+	     remove any breakpoints from memory when we detach, and
+	     the client side will access registers.  */
 	  gdb_assert (child_proc != NULL);
 
 	  process_info *parent_proc = get_thread_process (event_thr);
