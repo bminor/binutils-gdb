@@ -1695,7 +1695,7 @@ gdb_bfd_lookup_symbol (bfd *abfd,
 static void
 remove_user_added_objfile (struct objfile *objfile)
 {
-  if (objfile != 0 && objfile->flags & OBJF_USERLOADED)
+  if (objfile->flags & OBJF_USERLOADED)
     {
       for (solib &so : objfile->pspace->solibs ())
 	if (so.objfile == objfile)
