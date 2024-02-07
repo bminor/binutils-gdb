@@ -355,6 +355,7 @@ def request(
             cmd = _check_not_running(cmd)
 
         global _commands
+        assert name not in _commands
         _commands[name] = cmd
         return cmd
 
@@ -367,6 +368,7 @@ def capability(name, value=True):
 
     def wrap(func):
         global _capabilities
+        assert name not in _capabilities
         _capabilities[name] = value
         return func
 
