@@ -12529,22 +12529,24 @@ _bfd_mips_final_write_processing (bfd *abfd)
 	case SHT_MIPS_GPTAB:
 	  BFD_ASSERT ((*hdrpp)->bfd_section != NULL);
 	  name = bfd_section_name ((*hdrpp)->bfd_section);
-	  BFD_ASSERT (name != NULL
-		      && startswith (name, ".gptab."));
-	  sec = bfd_get_section_by_name (abfd, name + sizeof ".gptab" - 1);
-	  BFD_ASSERT (sec != NULL);
-	  (*hdrpp)->sh_info = elf_section_data (sec)->this_idx;
+	  if (startswith (name, ".gptab."))
+	    {
+	      sec = bfd_get_section_by_name (abfd, name + sizeof ".gptab" - 1);
+	      if (sec != NULL)
+		(*hdrpp)->sh_info = elf_section_data (sec)->this_idx;
+	    }
 	  break;
 
 	case SHT_MIPS_CONTENT:
 	  BFD_ASSERT ((*hdrpp)->bfd_section != NULL);
 	  name = bfd_section_name ((*hdrpp)->bfd_section);
-	  BFD_ASSERT (name != NULL
-		      && startswith (name, ".MIPS.content"));
-	  sec = bfd_get_section_by_name (abfd,
-					 name + sizeof ".MIPS.content" - 1);
-	  BFD_ASSERT (sec != NULL);
-	  (*hdrpp)->sh_link = elf_section_data (sec)->this_idx;
+	  if (startswith (name, ".MIPS.content"))
+	    {
+	      sec = bfd_get_section_by_name (abfd,
+					     name + sizeof ".MIPS.content" - 1);
+	      if (sec != NULL)
+		(*hdrpp)->sh_link = elf_section_data (sec)->this_idx;
+	    }
 	  break;
 
 	case SHT_MIPS_SYMBOL_LIB:
@@ -12559,19 +12561,16 @@ _bfd_mips_final_write_processing (bfd *abfd)
 	case SHT_MIPS_EVENTS:
 	  BFD_ASSERT ((*hdrpp)->bfd_section != NULL);
 	  name = bfd_section_name ((*hdrpp)->bfd_section);
-	  BFD_ASSERT (name != NULL);
 	  if (startswith (name, ".MIPS.events"))
 	    sec = bfd_get_section_by_name (abfd,
 					   name + sizeof ".MIPS.events" - 1);
+	  else if (startswith (name, ".MIPS.post_rel"))
+	    sec = bfd_get_section_by_name (abfd,
+					   name + sizeof ".MIPS.post_rel" - 1);
 	  else
-	    {
-	      BFD_ASSERT (startswith (name, ".MIPS.post_rel"));
-	      sec = bfd_get_section_by_name (abfd,
-					     (name
-					      + sizeof ".MIPS.post_rel" - 1));
-	    }
-	  BFD_ASSERT (sec != NULL);
-	  (*hdrpp)->sh_link = elf_section_data (sec)->this_idx;
+	    sec = NULL;
+	  if (sec != NULL)
+	    (*hdrpp)->sh_link = elf_section_data (sec)->this_idx;
 	  break;
 
 	case SHT_MIPS_XHASH:
