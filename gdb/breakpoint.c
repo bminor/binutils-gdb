@@ -7972,11 +7972,10 @@ create_and_insert_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR add
   return b;
 }
 
-/* Disable any breakpoints that are on code in shared libraries.  Only
-   apply to enabled breakpoints, disabled ones can just stay disabled.  */
+/* See breakpoint.h.  */
 
 void
-disable_breakpoints_in_shlibs (void)
+disable_breakpoints_in_shlibs (program_space *pspace)
 {
   for (bp_location *loc : all_bp_locations ())
     {
@@ -7992,7 +7991,7 @@ disable_breakpoints_in_shlibs (void)
 	   || (b->type == bp_jit_event)
 	   || (b->type == bp_hardware_breakpoint)
 	   || (is_tracepoint (b)))
-	  && loc->pspace == current_program_space
+	  && loc->pspace == pspace
 	  && !loc->shlib_disabled
 	  && solib_name_from_address (loc->pspace, loc->address)
 	  )

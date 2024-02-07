@@ -1187,7 +1187,7 @@ clear_solib (void)
 {
   const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
-  disable_breakpoints_in_shlibs ();
+  disable_breakpoints_in_shlibs (current_program_space);
 
   current_program_space->so_list.clear_and_dispose ([] (solib *so) {
     notify_solib_unloaded (current_program_space, *so);
