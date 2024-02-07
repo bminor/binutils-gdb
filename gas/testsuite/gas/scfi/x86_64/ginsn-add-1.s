@@ -5,6 +5,7 @@
 	.type foo, @function
 foo:
 	push %rsp
+	add %eax, %ebp
 	movq %rsp, %rbp
 
 	addq %rax, symbol
@@ -15,6 +16,7 @@ foo:
 
 	addq %rax, %rbx
 	add %eax, %ebx
+	add $8, %esp
 
 	adc $8, %rsp
 

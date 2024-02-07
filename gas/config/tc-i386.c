@@ -5467,6 +5467,9 @@ x86_ginsn_addsub_reg_mem (const symbolS *insn_end_sym)
   if (i.mem_operands)
     return ginsn;
 
+  /* Skip detection of 8/16/32-bit op size; 'add/sub reg, reg/mem' ops always
+     make the dest reg untraceable for SCFI.  */
+
   /* op reg, reg/mem.  */
   src1_dw2_regnum = ginsn_dw2_regnum (i.op[0].regs);
   /* Of interest only when second opnd is not memory.  */
@@ -5504,6 +5507,9 @@ x86_ginsn_addsub_mem_reg (const symbolS *insn_end_sym)
   /* op symbol, %reg.  */
   if (i.mem_operands && !i.base_reg && !i.index_reg)
     return ginsn;
+
+  /* Skip detection of 8/16/32-bit op size; 'add/sub reg/mem, reg' ops always
+     make the dest reg untraceable for SCFI.  */
 
   /* op reg/mem, %reg.  */
   dw2_regnum = ginsn_dw2_regnum (i.op[1].regs);
@@ -5585,6 +5591,11 @@ x86_ginsn_alu_imm (const symbolS *insn_end_sym)
   if (i.mem_operands == 1)
     return ginsn;
 
+  /* 8/16/32-bit op size makes the destination reg untraceable for SCFI.
+     Deal with this via the x86_ginsn_unhandled () code path.  */
+  if (i.suffix != QWORD_MNEM_SUFFIX)
+    return ginsn;
+
   gas_assert (i.imm_operands == 1);
   src_imm = i.op[0].imms->X_add_number;
   /* The second operand may be a register or indirect access.  For SCFI, only
@@ -5629,6 +5640,12 @@ x86_ginsn_move (const symbolS *insn_end_sym)
   /* mov %reg, symbol or mov symbol, %reg.
      Not of interest for SCFI.  Also, TBD_GINSN_GEN_NOT_SCFI.  */
   if (i.mem_operands == 1 && !i.base_reg && !i.index_reg)
+    return ginsn;
+
+  /* 8/16/32-bit op size makes the destination reg untraceable for SCFI.
+     Handle mov reg, reg only.  mov to or from a memory operand will make
+     dest reg, when present, untraceable, irrespective of the op size.  */
+  if (i.reg_operands == 2 && i.suffix != QWORD_MNEM_SUFFIX)
     return ginsn;
 
   gas_assert (i.tm.opcode_space == SPACE_BASE);
@@ -6027,6 +6044,12 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
 
   switch (opcode)
     {
+
+    /* Add opcodes 0x0/0x2 and sub opcodes 0x28/0x2a (with opcode_space
+       SPACE_BASE) are 8-bit ops.  While they are relevant for SCFI
+       correctness,  skip handling them here and use the x86_ginsn_unhandled
+       code path to generate GINSN_TYPE_OTHER when necessary.  */
+
     case 0x1:  /* add reg, reg/mem.  */
     case 0x29: /* sub reg, reg/mem.  */
       if (i.tm.opcode_space != SPACE_BASE)
