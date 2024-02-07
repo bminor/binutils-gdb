@@ -4226,33 +4226,21 @@ mark_breakpoints_out (program_space *pspace)
       bl->inserted = 0;
 }
 
-/* Clear the "inserted" flag in all breakpoints and delete any
-   breakpoints which should go away between runs of the program.
-
-   Plus other such housekeeping that has to be done for breakpoints
-   between runs.
-
-   Note: this function gets called at the end of a run (by
-   generic_mourn_inferior) and when a run begins (by
-   init_wait_for_inferior).  */
-
-
+/* See breakpoint.h.  */
 
 void
-breakpoint_init_inferior (enum inf_context context)
+breakpoint_init_inferior (inferior *inf, inf_context context)
 {
-  struct program_space *pspace = current_program_space;
-
   /* If breakpoint locations are shared across processes, then there's
      nothing to do.  */
-  if (gdbarch_has_global_breakpoints (current_inferior ()->arch ()))
+  if (gdbarch_has_global_breakpoints (inf->arch ()))
     return;
 
-  mark_breakpoints_out (pspace);
+  mark_breakpoints_out (inf->pspace);
 
   for (breakpoint &b : all_breakpoints_safe ())
     {
-      if (b.has_locations () && b.first_loc ().pspace != pspace)
+      if (b.has_locations () && b.first_loc ().pspace != inf->pspace)
 	continue;
 
       switch (b.type)

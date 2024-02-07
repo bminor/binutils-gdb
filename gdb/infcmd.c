@@ -2824,14 +2824,14 @@ detach_command (const char *args, int from_tty)
   /* Hold a strong reference to the target while (maybe)
      detaching the parent.  Otherwise detaching could close the
      target.  */
-  auto target_ref
-    = target_ops_ref::new_reference (current_inferior ()->process_target ());
+  inferior *inf = current_inferior ();
+  auto target_ref = target_ops_ref::new_reference (inf->process_target ());
 
   /* Save this before detaching, since detaching may unpush the
      process_stratum target.  */
   bool was_non_stop_p = target_is_non_stop_p ();
 
-  target_detach (current_inferior (), from_tty);
+  target_detach (inf, from_tty);
 
   update_previous_thread ();
 
@@ -2840,11 +2840,11 @@ detach_command (const char *args, int from_tty)
      this within target_detach because that is also used when
      following child forks, and in that case we will want to transfer
      breakpoints to the child, not delete them.  */
-  breakpoint_init_inferior (inf_exited);
+  breakpoint_init_inferior (inf, inf_exited);
 
   /* If the solist is global across inferiors, don't clear it when we
      detach from a single inferior.  */
-  if (!gdbarch_has_global_solist (current_inferior ()->arch ()))
+  if (!gdbarch_has_global_solist (inf->arch ()))
     no_shared_libraries (nullptr, from_tty);
 
   if (deprecated_detach_hook)

@@ -3636,7 +3636,7 @@ generic_mourn_inferior (void)
   /* Note this wipes step-resume breakpoints, so needs to be done
      after exit_inferior, which ends up referencing the step-resume
      breakpoints through clear_thread_inferior_resources.  */
-  breakpoint_init_inferior (inf_exited);
+  breakpoint_init_inferior (inf, inf_exited);
 
   registers_changed ();
 

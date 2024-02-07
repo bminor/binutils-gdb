@@ -1297,7 +1297,7 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
   /* We've followed the inferior through an exec.  Therefore, the
      inferior has essentially been killed & reborn.  */
 
-  breakpoint_init_inferior (inf_execd);
+  breakpoint_init_inferior (current_inferior (), inf_execd);
 
   gdb::unique_xmalloc_ptr<char> exec_file_host
     = exec_file_find (exec_file_target, nullptr);
@@ -3819,7 +3819,7 @@ init_wait_for_inferior (void)
 {
   /* These are meaningless until the first time through wait_for_inferior.  */
 
-  breakpoint_init_inferior (inf_starting);
+  breakpoint_init_inferior (current_inferior (), inf_starting);
 
   clear_proceed_status (0);
 

@@ -1515,7 +1515,17 @@ extern struct breakpoint *clone_momentary_breakpoint (struct breakpoint *bpkt);
 
 extern void set_ignore_count (int, int, int);
 
-extern void breakpoint_init_inferior (enum inf_context);
+/* Clear the "inserted" flag in all breakpoint locations of INF's program space
+   and delete any breakpoints which should go away between runs of the program.
+
+   Plus other such housekeeping that has to be done for breakpoints
+   between runs.
+
+   Note: this function gets called at the end of a run (by
+   generic_mourn_inferior) and when a run begins (by
+   init_wait_for_inferior).  */
+
+extern void breakpoint_init_inferior (inferior *inf, inf_context context);
 
 extern void breakpoint_auto_delete (bpstat *);
 
