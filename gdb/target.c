@@ -3628,7 +3628,7 @@ generic_mourn_inferior (void)
   /* Mark breakpoints uninserted in case something tries to delete a
      breakpoint while we delete the inferior's threads (which would
      fail, since the inferior is long gone).  */
-  mark_breakpoints_out ();
+  mark_breakpoints_out (inf->pspace);
 
   if (inf->pid != 0)
     exit_inferior (inf);

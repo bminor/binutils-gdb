@@ -1247,7 +1247,7 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
      value that was overwritten with a TRAP instruction).  Since
      we now have a new a.out, those shadow contents aren't valid.  */
 
-  mark_breakpoints_out ();
+  mark_breakpoints_out (current_program_space);
 
   /* The target reports the exec event to the main thread, even if
      some other thread does the exec, and even if the main thread was

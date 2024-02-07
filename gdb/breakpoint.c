@@ -4216,13 +4216,13 @@ remove_breakpoint (struct bp_location *bl)
   return remove_breakpoint_1 (bl, REMOVE_BREAKPOINT);
 }
 
-/* Clear the "inserted" flag in all breakpoints.  */
+/* See breakpoint.h.  */
 
 void
-mark_breakpoints_out (void)
+mark_breakpoints_out (program_space *pspace)
 {
   for (bp_location *bl : all_bp_locations ())
-    if (bl->pspace == current_program_space)
+    if (bl->pspace == pspace)
       bl->inserted = 0;
 }
 
@@ -4248,7 +4248,7 @@ breakpoint_init_inferior (enum inf_context context)
   if (gdbarch_has_global_breakpoints (current_inferior ()->arch ()))
     return;
 
-  mark_breakpoints_out ();
+  mark_breakpoints_out (pspace);
 
   for (breakpoint &b : all_breakpoints_safe ())
     {
