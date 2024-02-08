@@ -8,6 +8,7 @@ Contents of the SFrame section .sframe:
 
     Version: SFRAME_VERSION_2
     Flags: NONE
+    CFA fixed RA offset: \-8
     Num FDEs: 1
     Num FREs: 4
 
