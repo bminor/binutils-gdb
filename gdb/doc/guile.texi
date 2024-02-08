@@ -1478,7 +1478,7 @@ pretty-printer.  Guile scalars (integers, floats, and booleans) and
 strings are convertible to @code{<gdb:value>}; other types are not.
 
 Finally, if this method returns @code{#f} then no further operations
-are peformed in this method and nothing is printed.
+are performed in this method and nothing is printed.
 
 If the result is not one of these types, an exception is raised.
 
@@ -3907,7 +3907,7 @@ or @code{#f} in which case @var{printer} is added to the global list of
 printers.
 @end deffn
 
-@deffn {Scheme Procecure} append-pretty-printer! object printer
+@deffn {Scheme Procedure} append-pretty-printer! object printer
 Add @var{printer} to the end of the list of pretty-printers for
 @var{object}.  The @var{object} must either be a @code{<gdb:objfile>} object,
 or @code{#f} in which case @var{printer} is added to the global list of

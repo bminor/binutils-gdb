@@ -1852,7 +1852,7 @@ pretty-printer.  Python scalars (integers, floats, and booleans) and
 strings are convertible to @code{gdb.Value}; other types are not.
 
 Finally, if this method returns @code{None} then no further operations
-are peformed in this method and nothing is printed.
+are performed in this method and nothing is printed.
 
 If the result is not one of these types, an exception is raised.
 @end defun
@@ -2836,7 +2836,7 @@ unwinder has three methods.  The first one checks if it can handle
 given frame (``sniff'' it).  For the frames it can sniff an unwinder
 provides two additional methods: it can return frame's ID, and it can
 fetch registers from the previous frame.  A running @value{GDBN}
-mantains a list of the unwinders and calls each unwinder's sniffer in
+maintains a list of the unwinders and calls each unwinder's sniffer in
 turn until it finds the one that recognizes the current frame.  There
 is an API to register an unwinder.
 
