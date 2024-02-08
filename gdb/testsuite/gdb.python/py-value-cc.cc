@@ -37,7 +37,32 @@ union U {
 class B : public A {
  public:
   char a;
+
+  static int static_func ();
+  int arg0_func ();
+  int arg1_func (int arg1);
+  int arg2_func (int arg1, int arg2);
 };
+
+int B::static_func ()
+{
+  return 1111;
+}
+
+int B::arg0_func ()
+{
+  return A::a + a;
+}
+
+int B::arg1_func (int arg1)
+{
+  return a * arg1;
+}
+
+int B::arg2_func (int arg1, int arg2)
+{
+  return a * arg1 + arg2;
+}
 
 struct X
 {

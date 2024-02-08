@@ -99,3 +99,15 @@ gdb_test "python print(uu\[uu_fields\[1\]\]\['a'\])" "1000" "uu.a via field"
 # Test overloaded operators.
 gdb_test_no_output "python a = gdb.parse_and_eval('a')" "init a"
 gdb_test "python print(a + 5)" "10" "a + 5"
+
+# Test inferior function calls of methods.
+gdb_test "py print(b_obj\['static_func'\]())" "1111"
+gdb_test "py print(b_obj\['arg0_func'\]())" ".*Too few arguments in function call.*"
+gdb_test "py print(b_obj\['arg0_func'\](b_obj))" "198"
+gdb_test "py print(b_obj\['arg1_func'\]())" ".*Too few arguments in function call.*"
+gdb_test "py print(b_obj\['arg1_func'\](b_obj))" ".*Too few arguments in function call.*"
+gdb_test "py print(b_obj\['arg1_func'\](b_obj, 3))" "294"
+gdb_test "py print(b_obj\['arg2_func'\]())" ".*Too few arguments in function call.*"
+gdb_test "py print(b_obj\['arg2_func'\](b_obj))" ".*Too few arguments in function call.*"
+gdb_test "py print(b_obj\['arg2_func'\](b_obj, 4))" ".*Too few arguments in function call.*"
+gdb_test "py print(b_obj\['arg2_func'\](b_obj, 5, 6))" "496"

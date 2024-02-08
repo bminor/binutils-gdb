@@ -1214,10 +1214,11 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  if (ftype->code () != TYPE_CODE_FUNC)
+  if (ftype->code () != TYPE_CODE_FUNC && ftype->code () != TYPE_CODE_METHOD)
     {
       PyErr_SetString (PyExc_RuntimeError,
-		       _("Value is not callable (not TYPE_CODE_FUNC)."));
+		       _("Value is not callable (not TYPE_CODE_FUNC"
+			 " or TYPE_CODE_METHOD)."));
       return NULL;
     }
 
