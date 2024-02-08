@@ -5789,7 +5789,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd,
       elf_seg_map (abfd) = mfirst;
     }
 
-  if (!elf_modify_segment_map (abfd, info, no_user_phdrs))
+  if (!elf_modify_segment_map (abfd, info, no_user_phdrs || info == NULL))
     return false;
 
   for (count = 0, m = elf_seg_map (abfd); m != NULL; m = m->next)
