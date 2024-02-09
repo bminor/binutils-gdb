@@ -52,6 +52,7 @@ typedef enum
   BRANCH,
   BRCC,
   CONTROL,
+  DBNZ,
   DIVREM,
   DMA,
   DPI,

@@ -1,3 +1,7 @@
+2024-02-14  Yuriy Kolerov  <ykolerov@synopsys.com>
+
+	* config/tc-arc.c (is_br_jmp_insn_p): Add check against "DBNZ".
+
 2024-01-29  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* doc/c-bpf.texi (BPF Instructions): There is no indirect 64-bit

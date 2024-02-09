@@ -109,6 +109,7 @@ enum arc_rlx_types
 				  || (op)->insn_class == BBIT0		\
 				  || (op)->insn_class == BBIT1		\
 				  || (op)->insn_class == BI		\
+				  || (op)->insn_class == DBNZ		\
 				  || (op)->insn_class == EI		\
 				  || (op)->insn_class == ENTER		\
 				  || (op)->insn_class == JLI		\
