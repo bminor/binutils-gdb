@@ -5396,10 +5396,8 @@ ginsn_opsize_prefix_p (void)
 static unsigned int
 ginsn_dw2_regnum (const reg_entry *ireg)
 {
-  /* PS: Note the data type here as int32_t, because of Dw2Inval (-1).  */
-  int32_t dwarf_reg = Dw2Inval;
   const reg_entry *temp = ireg;
-  unsigned int idx = 0;
+  unsigned int dwarf_reg = Dw2Inval, idx = 0;
 
   /* ginsn creation is available for AMD64 abi only ATM.  Other flag_code
      are not expected.  */
@@ -5442,9 +5440,9 @@ ginsn_dw2_regnum (const reg_entry *ireg)
 
   /* Sanity check - failure may indicate state corruption, bad ginsn or
      perhaps the i386-reg table and the current function got out of sync.  */
-  gas_assert (dwarf_reg >= 0);
+  gas_assert (dwarf_reg < Dw2Inval);
 
-  return (unsigned int) dwarf_reg;
+  return dwarf_reg;
 }
 
 static ginsnS *
@@ -17546,14 +17544,14 @@ tc_x86_parse_to_dw2regnum (expressionS *exp)
 
   if (exp->X_op == O_register && exp->X_add_number >= 0)
     {
+      exp->X_op = O_illegal;
       if ((addressT) exp->X_add_number < i386_regtab_size)
 	{
-	  exp->X_op = O_constant;
 	  exp->X_add_number = i386_regtab[exp->X_add_number]
 			      .dw2_regnum[flag_code >> 1];
+	  if (exp->X_add_number != Dw2Inval)
+	    exp->X_op = O_constant;
 	}
-      else
-	exp->X_op = O_illegal;
     }
 }
 
