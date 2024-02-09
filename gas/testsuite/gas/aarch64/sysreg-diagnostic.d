@@ -13,3 +13,4 @@ Disassembly of section \.text:
 .*:	d5330503 	mrs	x3, dbgdtrrx_el0
 .*:	d5180003 	msr	midr_el1, x3  // note: writing to a read-only register
 .*:	d5180640 	msr	id_aa64isar2_el1, x0  // note: writing to a read-only register
+.*:	d5180660 	msr	id_aa64isar3_el1, x0  // note: writing to a read-only register
