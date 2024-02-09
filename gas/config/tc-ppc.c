@@ -1392,6 +1392,8 @@ PowerPC options:\n"));
   fprintf (stream, _("\
 -mpower10, -mpwr10      generate code for Power10 architecture\n"));
   fprintf (stream, _("\
+-mpower11, -mpwr11      generate code for Power11 architecture\n"));
+  fprintf (stream, _("\
 -mlibresoc              generate code for Libre-SOC architecture\n"));
   fprintf (stream, _("\
 -mfuture                generate code for 'future' architecture\n"));

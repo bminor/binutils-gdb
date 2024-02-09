@@ -156,6 +156,9 @@ Generate code for Power9 architecture.
 @item -mpower10, -mpwr10
 Generate code for Power10 architecture.
 
+@item -mpower11, -mpwr11
+Generate code for Power11 architecture.
+
 @item -mfuture
 Generate code for 'future' architecture.
 
