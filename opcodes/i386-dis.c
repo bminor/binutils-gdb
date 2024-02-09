@@ -8833,6 +8833,8 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       break;
 
     case USE_3BYTE_TABLE:
+      if (ins->last_rex2_prefix >= 0)
+	return &err_opcode;
       if (!fetch_code (ins->info, ins->codep + 2))
 	return &err_opcode;
       vindex = *ins->codep++;
@@ -9550,8 +9552,6 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
   /* REX2.M in rex2 prefix represents map0 or map1.  */
   if (ins.last_rex2_prefix < 0 ? *ins.codep == 0x0f : (ins.rex2 & REX2_M))
     {
-      unsigned char threebyte;
-
       if (!ins.rex2)
 	{
 	  ins.codep++;
@@ -9559,17 +9559,15 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 	    goto fetch_error_out;
 	}
 
-      threebyte = *ins.codep;
-      dp = &dis386_twobyte[threebyte];
-      ins.need_modrm = twobyte_has_modrm[threebyte];
-      ins.codep++;
+      dp = &dis386_twobyte[*ins.codep];
+      ins.need_modrm = twobyte_has_modrm[*ins.codep];
     }
   else
     {
       dp = &dis386[*ins.codep];
       ins.need_modrm = onebyte_has_modrm[*ins.codep];
-      ins.codep++;
     }
+  ins.codep++;
 
   /* Save sizeflag for printing the extra ins.prefixes later before updating
      it for mnemonic and operand processing.  The prefix names depend
