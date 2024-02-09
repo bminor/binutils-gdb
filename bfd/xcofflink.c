@@ -5482,7 +5482,13 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 		   && isym.n_sclass != C_DECL
 		   && isym.n_scnum > 0)
 	    {
-	      isym.n_scnum = (*csectpp)->output_section->target_index;
+	      if (*sym_hash != NULL
+		  && ((*sym_hash)->root.type == bfd_link_hash_defined
+		      || (*sym_hash)->root.type == bfd_link_hash_defweak)
+		  && (*sym_hash)->root.u.def.section == bfd_abs_section_ptr)
+		isym.n_scnum = N_ABS;
+	      else
+		isym.n_scnum = (*csectpp)->output_section->target_index;
 	      isym.n_value += ((*csectpp)->output_section->vma
 			       + (*csectpp)->output_offset
 			       - (*csectpp)->vma);
