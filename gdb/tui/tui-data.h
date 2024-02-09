@@ -167,9 +167,9 @@ public:
   const std::string &title () const
   { return m_title; }
 
-  /* Display string STR in the window at position (Y,X), abbreviated if
-     necessary.  */
-  void display_string (int y, int x, const char *str) const;
+  /* Clear the window, maybe draw the boarder, and then display string
+     STR centered in the window, abbreviated if necessary.  */
+  void center_string (const char *str);
 
   /* Display string STR in the window at the current cursor position,
      abbreviated if necessary.  */

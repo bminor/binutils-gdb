@@ -222,23 +222,9 @@ tui_update_source_windows_with_line (struct symtab_and_line sal)
 void
 tui_source_window_base::do_erase_source_content (const char *str)
 {
-  int x_pos;
-  int half_width = (width - box_size ()) / 2;
-
   m_content.clear ();
-  if (handle != NULL)
-    {
-      werase (handle.get ());
-      check_and_display_highlight_if_needed ();
-
-      if (strlen (str) >= half_width)
-	x_pos = 1;
-      else
-	x_pos = half_width - strlen (str);
-      display_string (height / 2, x_pos, str);
-
-      refresh_window ();
-    }
+  if (handle != nullptr)
+    center_string (str);
 }
 
 /* See tui-winsource.h.  */
@@ -714,7 +700,7 @@ tui_source_window_base::update_exec_info (bool refresh_p)
       if (src_element->is_exec_point)
 	element[TUI_EXEC_POS] = '>';
 
-      display_string (i + box_width (), box_width (), element);
+      mvwaddstr (handle.get (), i + box_width (), box_width (), element);
 
       show_line_number (i);
     }

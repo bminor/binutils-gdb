@@ -46,7 +46,10 @@ Term::check_box "source box in regs layout" 0 7 80 8
 
 # The current frame is main, check that registers are available.
 set re_reg_vals_unavailable \
-    [string_to_regexp {[ Register Values Unavailable ]}]
+    [string_to_regexp \
+	 [string cat \
+	      [string repeat " " 23] \
+	      {[ Register Values Unavailable ]}]]
 gdb_assert \
     { ![Term::check_region_contents_p 0 0 80 8 $re_reg_vals_unavailable] } \
     "Register values available"
