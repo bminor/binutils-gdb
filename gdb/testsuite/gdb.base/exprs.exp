@@ -259,6 +259,7 @@ gdb_test {print *v_int_array_init@2} { = \{10, 20\}}
 gdb_test {print v_int_array_init[0]@1} { = \{10\}}
 gdb_test {print v_int_array_init[0]@2} { = \{10, 20\}}
 gdb_test {print v_int_array_init[1]@1} { = \{20\}}
+gdb_test {print ((int &) v_int_array_init[0])@2} { = \{10, 20\}}
 
 # gdb's {} extension
 gdb_test_no_output "set variable v_short_array\[0\] = 42"

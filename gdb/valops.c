@@ -1349,6 +1349,8 @@ value_repeat (struct value *arg1, int count)
 {
   struct value *val;
 
+  arg1 = coerce_ref (arg1);
+
   if (arg1->lval () != lval_memory)
     error (_("Only values in memory can be extended with '@'."));
   if (count < 1)
