@@ -1792,8 +1792,8 @@ vroundp<sd>, 0x6608 | <sd:opc>, AVX, Modrm|Vex|Space0F3A|VexWIG|CheckOperandSize
 vrounds<sd>, 0x660a | <sd:opc>, AVX, Modrm|VexLIG|Space0F3A|VexVVVV|VexWIG|NoSuf, { Imm8, <sd:elem>|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
 // These are really clones of VRNDSCALE{P,S}{S,D}, with broadcast, masking, SAE,
 // 512-bit operand size, and register sources dropped.
-vroundp<sd>, 0x6608 | <sd:opc>, APX_F, Modrm|Space0F3A|<sd:vexw>|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, Xmmword|Ymmword|Unspecified|BaseIndex, RegXMM|RegYMM }
-vrounds<sd>, 0x660a | <sd:opc>, APX_F, Modrm|EVexLIG|Space0F3A|VexVVVV|<sd:vexw>|Disp8MemShift|NoSuf, { Imm8, <sd:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
+vroundp<sd>, 0x6608 | <sd:opc>, APX_F&AVX512VL, Modrm|Space0F3A|<sd:vexw>|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, Xmmword|Ymmword|Unspecified|BaseIndex, RegXMM|RegYMM }
+vrounds<sd>, 0x660a | <sd:opc>, APX_F&AVX512F, Modrm|EVexLIG|Space0F3A|VexVVVV|<sd:vexw>|Disp8MemShift|NoSuf, { Imm8, <sd:elem>|Unspecified|BaseIndex, RegXMM, RegXMM }
 vrsqrtps, 0x52, AVX, Modrm|Vex|Space0F|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM }
 vrsqrtss, 0xf352, AVX, Modrm|Vex=3|Space0F|VexVVVV|VexWIG|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
 vshufp<sd>, 0x<sd:ppfx>c6, AVX, Modrm|Vex|Space0F|VexVVVV|VexWIG|CheckOperandSize|NoSuf, { Imm8|Imm8S, Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
