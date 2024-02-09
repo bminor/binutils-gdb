@@ -152,6 +152,12 @@ _start:
 	tileloadd	0x123(%r31,%rax,4),%tmm6
 	tileloaddt1	0x123(%r31,%rax,4),%tmm6
 	tilestored	%tmm6,0x123(%r31,%rax,4)
+	vbroadcastf128	(%r16),%ymm3
+	vbroadcasti128	(%r16),%ymm3
+	vextractf128	$1,%ymm3,(%r16)
+	vextracti128	$1,%ymm3,(%r16)
+	vinsertf128	$1,(%r16),%ymm3,%ymm8
+	vinserti128	$1,(%r16),%ymm3,%ymm8
 	vroundpd $1,(%r24),%xmm6
 	vroundps $2,(%r24),%xmm6
 	vroundsd $3,(%r24),%xmm6,%xmm3
