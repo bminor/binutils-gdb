@@ -14,6 +14,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
+proc gas_32_check { } {
+    global NM
+    global NMFLAGS
+
+    set status [gas_host_run "$NM $NMFLAGS --help" ""]
+    return [regexp "targets:.*i386" [lindex $status 1]];
+}
+
+proc gas_x32_check { } {
+    global NM
+    global NMFLAGS
+
+    set status [gas_host_run "$NM $NMFLAGS --help" ""]
+    return [regexp "targets:.*elf32-x86-64" [lindex $status 1]];
+}
+
 if { ![is_elf_format] } then {
     return
 }
@@ -40,8 +56,12 @@ if  { ([istarget "x86_64-*-*"] && ![istarget "x86_64-*-linux*-gnux32"]) } then {
     run_list_test "scfi-fp-diag-2" "--scfi=experimental"
     run_list_test "scfi-diag-2" "--scfi=experimental"
 
-    run_list_test "scfi-unsupported-1" "--32 --scfi=experimental"
-    run_list_test "scfi-unsupported-1" "--x32 --scfi=experimental"
+    if { [gas_32_check] } then {
+	run_list_test "scfi-unsupported-1" "--32 --scfi=experimental"
+    }
+    if { [gas_x32_check] } then {
+	run_list_test "scfi-unsupported-1" "--x32 --scfi=experimental"
+    }
     run_list_test "scfi-unsupported-insn-1" "--scfi=experimental"
     run_list_test "scfi-unsupported-2" "--scfi=experimental"
     run_list_test "scfi-unsupported-3" "--scfi=experimental"
