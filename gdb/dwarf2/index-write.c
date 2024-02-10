@@ -761,7 +761,7 @@ public:
 		   : DW_IDX_type_unit);
 		m_abbrev_table.append_unsigned_leb128 (DW_FORM_udata);
 		m_abbrev_table.append_unsigned_leb128 (DW_IDX_die_offset);
-		m_abbrev_table.append_unsigned_leb128 (DW_FORM_udata);
+		m_abbrev_table.append_unsigned_leb128 (DW_FORM_ref_addr);
 		m_abbrev_table.append_unsigned_leb128 (DW_IDX_GNU_language);
 		m_abbrev_table.append_unsigned_leb128 (DW_FORM_udata);
 		if ((entry->flags & IS_STATIC) != 0)
@@ -796,7 +796,10 @@ public:
 	    gdb_assert (it != m_cu_index_htab.cend ());
 	    m_entry_pool.append_unsigned_leb128 (it->second);
 
-	    m_entry_pool.append_unsigned_leb128 (to_underlying (entry->die_offset));
+	    m_entry_pool.append_uint (dwarf5_offset_size (),
+				      m_dwarf5_byte_order,
+				      to_underlying (entry->die_offset));
+
 	    m_entry_pool.append_unsigned_leb128 (entry->per_cu->dw_lang ());
 
 	    if (parent != nullptr)

@@ -155,6 +155,10 @@ mapped_debug_names_reader::scan_one_entry (const char *name,
 	  ull = read_unsigned_leb128 (abfd, entry, &bytes_read);
 	  entry += bytes_read;
 	  break;
+	case DW_FORM_ref_addr:
+	  ull = read_offset (abfd, entry, offset_size);
+	  entry += offset_size;
+	  break;
 	case DW_FORM_ref4:
 	  ull = read_4_bytes (abfd, entry);
 	  entry += 4;
