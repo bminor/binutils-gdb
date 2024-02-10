@@ -2434,10 +2434,10 @@ message == an error message without a stack will be printed."),
 
   add_setshow_boolean_cmd ("ignore-environment", no_class,
 			   &python_ignore_environment, _("\
-Set whether the Python interpreter should ignore environment variables."), _(" \
-Show whether the Python interpreter showlist ignore environment variables."), _(" \
-When enabled GDB's Python interpreter will ignore any Python related\n	\
-flags in the environment.  This is equivalent to passing `-E' to a\n	\
+Set whether the Python interpreter should ignore environment variables."), _("\
+Show whether the Python interpreter showlist ignore environment variables."), _("\
+When enabled GDB's Python interpreter will ignore any Python related\n\
+flags in the environment.  This is equivalent to passing `-E' to a\n\
 python executable."),
 			   set_python_ignore_environment,
 			   show_python_ignore_environment,
