@@ -716,7 +716,7 @@ frob_address (struct objfile *objfile, CORE_ADDR pc,
 {
   for (obj_section *iter : objfile->sections ())
     {
-      if (pc >= iter->addr () && pc < iter->endaddr ())
+      if (iter->contains (pc))
 	{
 	  *unrel_addr = unrelocated_addr (pc - iter->offset ());
 	  return 1;

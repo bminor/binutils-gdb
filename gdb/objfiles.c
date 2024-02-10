@@ -1213,7 +1213,7 @@ is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile)
       if (section_is_overlay (osect) && !section_is_mapped (osect))
 	continue;
 
-      if (osect->addr () <= addr && addr < osect->endaddr ())
+      if (osect->contains (addr))
 	return true;
     }
   return false;

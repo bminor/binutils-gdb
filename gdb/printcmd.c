@@ -1499,7 +1499,7 @@ info_symbol_command (const char *arg, int from_tty)
 
 	sect_addr = overlay_mapped_address (addr, osect);
 
-	if (osect->addr () <= sect_addr && sect_addr < osect->endaddr ()
+	if (osect->contains (sect_addr)
 	    && (msymbol
 		= lookup_minimal_symbol_by_pc_section (sect_addr,
 						       osect).minsym))

@@ -394,6 +394,12 @@ struct obj_section
     return this->addr () + bfd_section_size (this->the_bfd_section);
   }
 
+  /* True if ADDR is in this obj_section, false otherwise.  */
+  bool contains (CORE_ADDR addr) const
+  {
+    return addr >= this->addr () && addr < endaddr ();
+  }
+
   /* BFD section pointer */
   struct bfd_section *the_bfd_section;
 

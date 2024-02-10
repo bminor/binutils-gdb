@@ -3085,8 +3085,7 @@ pc_in_mapped_range (CORE_ADDR pc, struct obj_section *section)
 {
   if (section_is_overlay (section))
     {
-      if (section->addr () <= pc
-	  && pc < section->endaddr ())
+      if (section->contains (pc))
 	return true;
     }
 
