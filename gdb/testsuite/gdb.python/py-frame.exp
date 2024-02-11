@@ -187,3 +187,17 @@ gdb_test "python print(gdb.selected_frame().language())" "c" \
 gdb_test "python print(gdb.selected_frame().read_register(list()))" \
     ".*Invalid type for register.*" \
     "test Frame.read_register with list"
+
+# Compile again without debug info.
+gdb_exit
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {}] } {
+    return -1
+}
+
+if {![runto_main]} {
+    return 0
+}
+
+# Test if Frame.static_link works for a frame without debug info.
+gdb_test "python print(gdb.selected_frame().static_link())" "None" \
+    "test Frame.static_link for a frame without debug info"

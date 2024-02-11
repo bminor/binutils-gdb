@@ -3121,6 +3121,9 @@ frame_info_ptr
 frame_follow_static_link (frame_info_ptr frame)
 {
   const block *frame_block = get_frame_block (frame, nullptr);
+  if (frame_block == nullptr)
+    return {};
+
   frame_block = frame_block->function_block ();
 
   const struct dynamic_prop *static_link = frame_block->static_link ();
