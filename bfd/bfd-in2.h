@@ -2557,6 +2557,10 @@ void bfd_perror (const char *message);
 
 typedef void (*bfd_error_handler_type) (const char *, va_list);
 
+typedef int (*bfd_print_callback) (void *, const char *, ...);
+void bfd_print_error (bfd_print_callback print_func,
+    void *stream, const char *fmt, va_list ap);
+
 void _bfd_error_handler (const char *fmt, ...) ATTRIBUTE_PRINTF_1;
 
 bfd_error_handler_type bfd_set_error_handler (bfd_error_handler_type);

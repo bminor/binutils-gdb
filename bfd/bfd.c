@@ -1000,10 +1000,13 @@ union _bfd_doprnt_args
       result = print (stream, specifier, value);		\
     } while (0)
 
-typedef int (*print_func) (void *, const char *, ...);
+/*
+CODE_FRAGMENT
+.typedef int (*bfd_print_callback) (void *, const char *, ...);
+*/
 
 static int
-_bfd_doprnt (print_func print, void *stream, const char *format,
+_bfd_doprnt (bfd_print_callback print, void *stream, const char *format,
 	     union _bfd_doprnt_args *args)
 {
   const char *ptr = format;
@@ -1446,21 +1449,44 @@ _bfd_doprnt_scan (const char *format, va_list ap, union _bfd_doprnt_args *args)
   return arg_count;
 }
 
+/*
+FUNCTION
+	bfd_print_error
+
+SYNOPSIS
+	void bfd_print_error (bfd_print_callback print_func,
+	  void *stream, const char *fmt, va_list ap);
+
+DESCRIPTION
+
+	This formats FMT and AP according to BFD "printf" rules,
+	sending the output to STREAM by repeated calls to PRINT_FUNC.
+	PRINT_FUNC is a printf-like function; it does not need to
+	implement the BFD printf format extensions.  This can be used
+	in a callback that is set via bfd_set_error_handler to turn
+	the error into ordinary output.
+*/
+
+void
+bfd_print_error (bfd_print_callback print_func, void *stream,
+		 const char *fmt, va_list ap)
+{
+  union _bfd_doprnt_args args[MAX_ARGS];
+
+  print_func (stream, "%s: ", _bfd_get_error_program_name ());
+  _bfd_doprnt_scan (fmt, ap, args);
+  _bfd_doprnt (print_func, stream, fmt, args);
+}
+
 /* The standard error handler that prints to stderr.  */
 
 static void
 error_handler_fprintf (const char *fmt, va_list ap)
 {
-  union _bfd_doprnt_args args[MAX_ARGS];
-
-  _bfd_doprnt_scan (fmt, ap, args);
-
   /* PR 4992: Don't interrupt output being sent to stdout.  */
   fflush (stdout);
 
-  fprintf (stderr, "%s: ", _bfd_get_error_program_name ());
-
-  _bfd_doprnt ((print_func) fprintf, stderr, fmt, args);
+  bfd_print_error ((bfd_print_callback) fprintf, stderr, fmt, ap);
 
   /* On AIX, putc is implemented as a macro that triggers a -Wunused-value
      warning, so use the fputc function to avoid it.  */
@@ -1512,15 +1538,13 @@ static bfd *error_handler_bfd;
 static void
 error_handler_sprintf (const char *fmt, va_list ap)
 {
-  union _bfd_doprnt_args args[MAX_ARGS];
   char error_buf[1024];
   struct buf_stream error_stream;
 
-  _bfd_doprnt_scan (fmt, ap, args);
-
   error_stream.ptr = error_buf;
   error_stream.left = sizeof (error_buf);
-  _bfd_doprnt (err_sprintf, &error_stream, fmt, args);
+
+  bfd_print_error (err_sprintf, &error_stream, fmt, ap);
 
   size_t len = error_stream.ptr - error_buf;
   struct per_xvec_message **warn
