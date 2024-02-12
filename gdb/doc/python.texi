@@ -3813,6 +3813,12 @@ corresponding MI output (@pxref{GDB/MI Async Records}).
 
 A dictionary was used for this (rather than adding attributes directly
 to the event object) so that the MI keys could be used unchanged.
+
+When a @code{StopEvent} results from a @code{finish} command, it will
+also hold the return value from the function, if that is available.
+This will be an entry named @samp{return-value} in the @code{details}
+dictionary.  The value of this entry will be a @code{gdb.Value}
+object.
 @end defvar
 
 Emits @code{gdb.SignalEvent}, which extends @code{gdb.StopEvent}.

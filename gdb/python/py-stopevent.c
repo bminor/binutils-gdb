@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "py-stopevent.h"
 #include "py-uiout.h"
+#include "thread-fsm.h"
 
 gdbpy_ref<>
 create_stop_event_object (PyTypeObject *py_type, const gdbpy_ref<> &dict)
@@ -45,6 +46,7 @@ static gdbpy_ref<>
 py_print_bpstat (bpstat *bs, enum gdb_signal stop_signal)
 {
   py_ui_out uiout;
+  struct value *return_value = nullptr;
 
   try
     {
@@ -55,6 +57,10 @@ py_print_bpstat (bpstat *bs, enum gdb_signal stop_signal)
 	{
 	  async_reply_reason reason = tp->thread_fsm ()->async_reply_reason ();
 	  uiout.field_string ("reason", async_reason_lookup (reason));
+
+	  return_value_info *rvinfo = tp->thread_fsm ()->return_value ();
+	  if (rvinfo != nullptr && rvinfo->value != nullptr)
+	    return_value = rvinfo->value;
 	}
 
       if (stop_signal != GDB_SIGNAL_0 && stop_signal != GDB_SIGNAL_TRAP)
@@ -73,7 +79,22 @@ py_print_bpstat (bpstat *bs, enum gdb_signal stop_signal)
       return nullptr;
     }
 
-  return uiout.result ();
+  gdbpy_ref<> dict = uiout.result ();
+  if (dict == nullptr)
+    return nullptr;
+
+  /* This has to be done separately to avoid error issues, and because
+     there's no API to add generic Python objects to a py_ui_out.  */
+  if (return_value != nullptr)
+    {
+      gdbpy_ref<> val (value_to_value_object (return_value));
+      if (val == nullptr)
+	return nullptr;
+      if (PyDict_SetItemString (dict.get (), "finish-value", val.get ()) < 0)
+	return nullptr;
+    }
+
+  return dict;
 }
 
 /* Callback observers when a stop event occurs.  This function will create a

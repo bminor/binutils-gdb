@@ -1484,23 +1484,6 @@ get_return_value (struct symbol *func_symbol, struct value *function)
   return value;
 }
 
-/* The captured function return value/type and its position in the
-   value history.  */
-
-struct return_value_info
-{
-  /* The captured return value.  May be NULL if we weren't able to
-     retrieve it.  See get_return_value.  */
-  struct value *value;
-
-  /* The return type.  In some cases, we'll not be able extract the
-     return value, but we always know the type.  */
-  struct type *type;
-
-  /* If we captured a value, this is the value history index.  */
-  int value_history_index;
-};
-
 /* Helper for print_return_value.  */
 
 static void
