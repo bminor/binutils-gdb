@@ -78,9 +78,9 @@ def start_thread(name, target, args=()):
             # Log when a thread terminates.
             log(thread_name + ": terminating")
 
-    result = gdb.Thread(name=name, target=thread_wrapper, args=args,
-                        daemon=True)
+    result = gdb.Thread(name=name, target=thread_wrapper, args=args, daemon=True)
     result.start()
+
 
 def start_dap(target):
     """Start the DAP thread and invoke TARGET there."""
