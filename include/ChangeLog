@@ -1,3 +1,7 @@
+2024-02-12  Frederic Cambus  <fred@statdns.com>
+
+	* elf/common.h (PT_OPENBSD_SYSCALLS): Define.
+
 2024-01-29  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* opcode/bpf.h (enum bpf_insn_id): Remove BPF_INSN_LDINDDW and
