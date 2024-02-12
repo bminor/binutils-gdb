@@ -988,7 +988,11 @@ sframe_xlate_do_def_cfa (struct sframe_xlate_ctx *xlate_ctx,
 			       get_dw_fde_start_addrS (xlate_ctx->dw_fde));
   }
   /* Define the current CFA rule to use the provided register and
-     offset.  */
+     offset.  However, if the register is not FP/SP, skip creating
+     SFrame stack trace info for the function.  */
+  if (cfi_insn->u.r != SFRAME_CFA_SP_REG
+      && cfi_insn->u.r != SFRAME_CFA_FP_REG)
+    return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
   sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.ri.reg);
   sframe_fre_set_cfa_offset (cur_fre, cfi_insn->u.ri.offset);
   cur_fre->merge_candidate = false;
@@ -1006,9 +1010,14 @@ sframe_xlate_do_def_cfa_register (struct sframe_xlate_ctx *xlate_ctx,
   struct sframe_row_entry *last_fre = xlate_ctx->last_fre;
   /* Get the scratchpad FRE.  This FRE will eventually get linked in.  */
   struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
+
   gas_assert (cur_fre);
   /* Define the current CFA rule to use the provided register (but to
-     keep the old offset).  */
+     keep the old offset).  However, if the register is not FP/SP,
+     skip creating SFrame stack trace info for the function.  */
+  if (cfi_insn->u.r != SFRAME_CFA_SP_REG
+      && cfi_insn->u.r != SFRAME_CFA_FP_REG)
+    return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
   sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.ri.reg);
   sframe_fre_set_cfa_offset (cur_fre, last_fre->cfa_offset);
   cur_fre->merge_candidate = false;
