@@ -1199,6 +1199,46 @@ sframe_xlate_do_gnu_window_save (struct sframe_xlate_ctx *xlate_ctx,
   return SFRAME_XLATE_OK;
 }
 
+/* Returns the DWARF call frame instruction name or fake CFI name for the
+   specified CFI opcode, or NULL if the value is not recognized.  */
+
+static const char *
+sframe_get_cfi_name (int cfi_opc)
+{
+  const char *cfi_name;
+
+  switch (cfi_opc)
+    {
+      /* Fake CFI type; outside the byte range of any real CFI insn.  */
+      /* See gas/dw2gencfi.h.  */
+      case CFI_adjust_cfa_offset:
+	cfi_name = "CFI_adjust_cfa_offset";
+	break;
+      case CFI_return_column:
+	cfi_name = "CFI_return_column";
+	break;
+      case CFI_rel_offset:
+	cfi_name = "CFI_rel_offset";
+	break;
+      case CFI_escape:
+	cfi_name = "CFI_escape";
+	break;
+      case CFI_signal_frame:
+	cfi_name = "CFI_signal_frame";
+	break;
+      case CFI_val_encoded_addr:
+	cfi_name = "CFI_val_encoded_addr";
+	break;
+      case CFI_label:
+	cfi_name = "CFI_label";
+	break;
+      default:
+	cfi_name = get_DW_CFA_name (cfi_opc);
+    }
+
+  return cfi_name;
+}
+
 /* Process CFI_INSN and update the translation context with the FRE
    information.
 
@@ -1274,7 +1314,14 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
   /* An error here will cause no SFrame FDE later.  Warn the user because this
      will affect the overall coverage and hence, asynchronicity.  */
   if (err)
-    as_warn (_("skipping SFrame FDE due to DWARF CFI op %#x"), op);
+    {
+      const char *cfi_name = sframe_get_cfi_name (op);
+
+      if (!cfi_name)
+	cfi_name = _("(unknown)");
+      as_warn (_("skipping SFrame FDE due to DWARF CFI op %s (%#x)"),
+	       cfi_name, op);
+    }
 
   return err;
 }
