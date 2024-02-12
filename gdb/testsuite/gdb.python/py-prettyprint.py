@@ -386,18 +386,18 @@ def register_pretty_printers():
     pretty_printers_dict[re.compile("^container$")] = ContainerPrinter
     pretty_printers_dict[re.compile("^justchildren$")] = NoStringContainerPrinter
 
-    pretty_printers_dict[
-        re.compile("^struct to_string_returns_value_inner$")
-    ] = ToStringReturnsValueInner
-    pretty_printers_dict[
-        re.compile("^to_string_returns_value_inner$")
-    ] = ToStringReturnsValueInner
-    pretty_printers_dict[
-        re.compile("^struct to_string_returns_value_wrapper$")
-    ] = ToStringReturnsValueWrapper
-    pretty_printers_dict[
-        re.compile("^to_string_returns_value_wrapper$")
-    ] = ToStringReturnsValueWrapper
+    pretty_printers_dict[re.compile("^struct to_string_returns_value_inner$")] = (
+        ToStringReturnsValueInner
+    )
+    pretty_printers_dict[re.compile("^to_string_returns_value_inner$")] = (
+        ToStringReturnsValueInner
+    )
+    pretty_printers_dict[re.compile("^struct to_string_returns_value_wrapper$")] = (
+        ToStringReturnsValueWrapper
+    )
+    pretty_printers_dict[re.compile("^to_string_returns_value_wrapper$")] = (
+        ToStringReturnsValueWrapper
+    )
 
     pretty_printers_dict[re.compile("^struct ns$")] = pp_ns
     pretty_printers_dict[re.compile("^ns$")] = pp_ns

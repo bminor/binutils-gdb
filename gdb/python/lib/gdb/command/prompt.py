@@ -21,7 +21,6 @@ import gdb.prompt
 
 
 class _ExtendedPrompt(gdb.Parameter):
-
     """Set the extended prompt.
 
     Usage: set extended-prompt VALUE

@@ -251,7 +251,6 @@ class SymValueWrapper(object):
 
 
 class FrameVars(object):
-
     """Utility class to fetch and store frame local variables, or
     frame arguments."""
 
