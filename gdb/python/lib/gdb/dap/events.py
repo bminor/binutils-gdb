@@ -15,6 +15,7 @@
 
 import gdb
 
+from .scopes import set_finish_value
 from .server import send_event
 from .startup import exec_and_log, in_gdb_thread, log
 from .modules import is_module, make_module
@@ -218,6 +219,8 @@ def _on_stop(event):
     }
     if isinstance(event, gdb.BreakpointEvent):
         obj["hitBreakpointIds"] = [x.number for x in event.breakpoints]
+    if hasattr(event, "details") and "finish-value" in event.details:
+        set_finish_value(event.details["finish-value"])
 
     global _expected_pause
     global _expected_stop_reason

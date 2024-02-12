@@ -25,15 +25,30 @@ from .varref import BaseReference
 frame_to_scope = {}
 
 
+# If the most recent stop was due to a 'finish', and the return value
+# could be computed, then this holds that value.  Otherwise it holds
+# None.
+_last_return_value = None
+
+
 # When the inferior is re-started, we erase all scope references.  See
 # the section "Lifetime of Objects References" in the spec.
 @in_gdb_thread
 def clear_scopes(event):
     global frame_to_scope
     frame_to_scope = {}
+    global _last_return_value
+    _last_return_value = None
 
 
 gdb.events.cont.connect(clear_scopes)
+
+
+@in_gdb_thread
+def set_finish_value(val):
+    """Set the current 'finish' value on a stop."""
+    global _last_return_value
+    _last_return_value = val
 
 
 # A helper function to compute the value of a symbol.  SYM is either a
@@ -76,7 +91,7 @@ class _ScopeReference(BaseReference):
         result["presentationHint"] = self.hint
         # How would we know?
         result["expensive"] = False
-        result["namedVariables"] = len(self.var_list)
+        result["namedVariables"] = self.child_count()
         if self.line is not None:
             result["line"] = self.line
             # FIXME construct a Source object
@@ -91,6 +106,22 @@ class _ScopeReference(BaseReference):
     @in_gdb_thread
     def fetch_one_child(self, idx):
         return symbol_value(self.var_list[idx], self.frame)
+
+
+# A _ScopeReference that prepends the most recent return value.  Note
+# that this object is only created if such a value actually exists.
+class _FinishScopeReference(_ScopeReference):
+    def __init__(self, *args):
+        super().__init__(*args)
+
+    def child_count(self):
+        return super().child_count() + 1
+
+    def fetch_one_child(self, idx):
+        if idx == 0:
+            global _last_return_value
+            return ("(return)", _last_return_value)
+        return super().fetch_one_child(idx - 1)
 
 
 class _RegisterReference(_ScopeReference):
@@ -109,6 +140,7 @@ class _RegisterReference(_ScopeReference):
 
 @request("scopes")
 def scopes(*, frameId: int, **extra):
+    global _last_return_value
     global frame_to_scope
     if frameId in frame_to_scope:
         scopes = frame_to_scope[frameId]
@@ -120,10 +152,13 @@ def scopes(*, frameId: int, **extra):
         args = tuple(frame.frame_args() or ())
         if args:
             scopes.append(_ScopeReference("Arguments", "arguments", frame, args))
+        has_return_value = frameId == 0 and _last_return_value is not None
         # Make sure to handle the None case as well as the empty
         # iterator case.
         locs = tuple(frame.frame_locals() or ())
-        if locs:
+        if has_return_value:
+            scopes.append(_FinishScopeReference("Locals", "locals", frame, locs))
+        elif locs:
             scopes.append(_ScopeReference("Locals", "locals", frame, locs))
         scopes.append(_RegisterReference("Registers", frame))
         frame_to_scope[frameId] = scopes
