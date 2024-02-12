@@ -62,9 +62,25 @@ def start_thread(name, target, args=()):
     """Start a new thread, invoking TARGET with *ARGS there.
     This is a helper function that ensures that any GDB signals are
     correctly blocked."""
-    result = gdb.Thread(name=name, target=target, args=args, daemon=True)
-    result.start()
 
+    def thread_wrapper(*args):
+        thread_name = threading.current_thread().name
+        # Catch any exception, and log it.  If we let it escape here, it'll be
+        # printed in gdb_stderr, which is not safe to access from anywhere but
+        # gdb's main thread.
+        try:
+            target(*args)
+        except Exception as err:
+            err_string = "%s, %s" % (err, type(err))
+            log(thread_name + ": caught exception: " + err_string)
+            log_stack()
+        finally:
+            # Log when a thread terminates.
+            log(thread_name + ": terminating")
+
+    result = gdb.Thread(name=name, target=thread_wrapper, args=args,
+                        daemon=True)
+    result.start()
 
 def start_dap(target):
     """Start the DAP thread and invoke TARGET there."""
