@@ -1027,7 +1027,7 @@ _bfd_doprnt (print_func print, void *stream, const char *format,
 	}
       else if (ptr[1] == '%')
 	{
-	  fputc ('%', stream);
+	  print (stream, "%%");
 	  result = 1;
 	  ptr += 2;
 	}
