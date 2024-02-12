@@ -1223,39 +1223,39 @@ Disassembly of section .text:
 
      e94:	e3 57 8d fd ff ff ff 00                         	lnandw \$r35 = \$r35, 536870911 \(0x1fffffff\);;
 
-     e9c:	24 49 91 7f                                     	lnord \$r36 = \$r36, \$r36;;
+     e9c:	24 49 91 7f                                     	lniord \$r36 = \$r36, \$r36;;
 
-     ea0:	e5 47 95 ff ff ff ff 00                         	lnord \$r37 = \$r37, 536870911 \(0x1fffffff\);;
+     ea0:	e5 47 95 ff ff ff ff 00                         	lniord \$r37 = \$r37, 536870911 \(0x1fffffff\);;
 
-     ea8:	a6 79 95 7f                                     	lnorhq \$r37 = \$r38, \$r38;;
+     ea8:	a6 79 95 7f                                     	lniorhq \$r37 = \$r38, \$r38;;
 
-     eac:	e7 7f 99 ff ff ff ff 00                         	lnorhq \$r38 = \$r39, 536870911 \(0x1fffffff\).@;;
+     eac:	e7 7f 99 ff ff ff ff 00                         	lniorhq \$r38 = \$r39, 536870911 \(0x1fffffff\).@;;
 
-     eb4:	27 6a 9d 7f                                     	lnorwp \$r39 = \$r39, \$r40;;
+     eb4:	27 6a 9d 7f                                     	lniorwp \$r39 = \$r39, \$r40;;
 
-     eb8:	e8 67 a1 ff ff ff ff 00                         	lnorwp \$r40 = \$r40, 536870911 \(0x1fffffff\);;
+     eb8:	e8 67 a1 ff ff ff ff 00                         	lniorwp \$r40 = \$r40, 536870911 \(0x1fffffff\);;
 
-     ec0:	69 5a a5 7f                                     	lnorw \$r41 = \$r41, \$r41;;
+     ec0:	69 5a a5 7f                                     	lniorw \$r41 = \$r41, \$r41;;
 
-     ec4:	ea 57 a9 ff ff ff ff 00                         	lnorw \$r42 = \$r42, 536870911 \(0x1fffffff\);;
+     ec4:	ea 57 a9 ff ff ff ff 00                         	lniorw \$r42 = \$r42, 536870911 \(0x1fffffff\);;
 
      ecc:	2a 00 78 0f                                     	loopdo \$r42, ffff8ecc <main\+0xffff8ecc>;;
 
-     ed0:	eb 4a ad 7e                                     	lord \$r43 = \$r43, \$r43;;
+     ed0:	eb 4a ad 7e                                     	liord \$r43 = \$r43, \$r43;;
 
-     ed4:	ec 4f b1 fe ff ff ff 00                         	lord \$r44 = \$r44, 536870911 \(0x1fffffff\).@;;
+     ed4:	ec 4f b1 fe ff ff ff 00                         	liord \$r44 = \$r44, 536870911 \(0x1fffffff\).@;;
 
-     edc:	6d 7b b1 7e                                     	lorhq \$r44 = \$r45, \$r45;;
+     edc:	6d 7b b1 7e                                     	liorhq \$r44 = \$r45, \$r45;;
 
-     ee0:	ee 77 b5 fe ff ff ff 00                         	lorhq \$r45 = \$r46, 536870911 \(0x1fffffff\);;
+     ee0:	ee 77 b5 fe ff ff ff 00                         	liorhq \$r45 = \$r46, 536870911 \(0x1fffffff\);;
 
-     ee8:	ee 6b b9 7e                                     	lorwp \$r46 = \$r46, \$r47;;
+     ee8:	ee 6b b9 7e                                     	liorwp \$r46 = \$r46, \$r47;;
 
-     eec:	ef 6f bd fe ff ff ff 00                         	lorwp \$r47 = \$r47, 536870911 \(0x1fffffff\).@;;
+     eec:	ef 6f bd fe ff ff ff 00                         	liorwp \$r47 = \$r47, 536870911 \(0x1fffffff\).@;;
 
-     ef4:	30 5c c1 7e                                     	lorw \$r48 = \$r48, \$r48;;
+     ef4:	30 5c c1 7e                                     	liorw \$r48 = \$r48, \$r48;;
 
-     ef8:	f1 57 c5 fe ff ff ff 00                         	lorw \$r49 = \$r49, 536870911 \(0x1fffffff\);;
+     ef8:	f1 57 c5 fe ff ff ff 00                         	liorw \$r49 = \$r49, 536870911 \(0x1fffffff\);;
 
      f00:	72 fc 66 3f                                     	lo.us.xs \$r24r25r26r27 = \$r49\[\$r50\];;
 
@@ -1693,73 +1693,73 @@ Disassembly of section .text:
 
     1434:	00 f0 03 7f                                     	nop;;
 
-    1438:	c3 ff 08 eb ff ff ff 87 ff ff ff 00             	nord \$r2 = \$r3, 2305843009213693951 \(0x1fffffffffffffff\);;
+    1438:	c3 ff 08 eb ff ff ff 87 ff ff ff 00             	niord \$r2 = \$r3, 2305843009213693951 \(0x1fffffffffffffff\);;
 
-    1444:	03 01 0d 7b                                     	nord \$r3 = \$r3, \$r4;;
+    1444:	03 01 0d 7b                                     	niord \$r3 = \$r3, \$r4;;
 
-    1448:	04 f0 10 6b                                     	nord \$r4 = \$r4, -64 \(0xffffffc0\);;
+    1448:	04 f0 10 6b                                     	niord \$r4 = \$r4, -64 \(0xffffffc0\);;
 
-    144c:	05 00 14 eb 00 00 80 07                         	nord \$r5 = \$r5, -8589934592 \(0xfffffffe00000000\);;
+    144c:	05 00 14 eb 00 00 80 07                         	niord \$r5 = \$r5, -8589934592 \(0xfffffffe00000000\);;
 
-    1454:	c6 0f 15 fb ff ff ff 00                         	nord \$r5 = \$r6, 536870911 \(0x1fffffff\).@;;
+    1454:	c6 0f 15 fb ff ff ff 00                         	niord \$r5 = \$r6, 536870911 \(0x1fffffff\).@;;
 
-    145c:	c6 11 19 7b                                     	norw \$r6 = \$r6, \$r7;;
+    145c:	c6 11 19 7b                                     	niorw \$r6 = \$r6, \$r7;;
 
-    1460:	07 f0 1c 7b                                     	norw \$r7 = \$r7, -64 \(0xffffffc0\);;
+    1460:	07 f0 1c 7b                                     	niorw \$r7 = \$r7, -64 \(0xffffffc0\);;
 
-    1464:	08 00 20 fb 00 00 80 07                         	norw \$r8 = \$r8, -8589934592 \(0xfffffffe00000000\);;
+    1464:	08 00 20 fb 00 00 80 07                         	niorw \$r8 = \$r8, -8589934592 \(0xfffffffe00000000\);;
 
     146c:	c9 ff 20 6c                                     	notd \$r8 = \$r9;;
 
     1470:	c9 ff 24 7c                                     	notw \$r9 = \$r9;;
 
-    1474:	ca ff 28 ed ff ff ff 87 ff ff ff 00             	nxord \$r10 = \$r10, 2305843009213693951 \(0x1fffffffffffffff\);;
+    1474:	ca ff 28 ed ff ff ff 87 ff ff ff 00             	neord \$r10 = \$r10, 2305843009213693951 \(0x1fffffffffffffff\);;
 
-    1480:	cb 02 29 7d                                     	nxord \$r10 = \$r11, \$r11;;
+    1480:	cb 02 29 7d                                     	neord \$r10 = \$r11, \$r11;;
 
-    1484:	0c f0 2c 6d                                     	nxord \$r11 = \$r12, -64 \(0xffffffc0\);;
+    1484:	0c f0 2c 6d                                     	neord \$r11 = \$r12, -64 \(0xffffffc0\);;
 
-    1488:	0d 00 30 ed 00 00 80 07                         	nxord \$r12 = \$r13, -8589934592 \(0xfffffffe00000000\);;
+    1488:	0d 00 30 ed 00 00 80 07                         	neord \$r12 = \$r13, -8589934592 \(0xfffffffe00000000\);;
 
-    1490:	ce ff 34 ed ff ff 07 00                         	nxord \$r13 = \$r14, 536870911 \(0x1fffffff\);;
+    1490:	ce ff 34 ed ff ff 07 00                         	neord \$r13 = \$r14, 536870911 \(0x1fffffff\);;
 
-    1498:	cf 13 39 7d                                     	nxorw \$r14 = \$r15, \$r15;;
+    1498:	cf 13 39 7d                                     	neorw \$r14 = \$r15, \$r15;;
 
-    149c:	10 f0 40 7d                                     	nxorw \$r16 = \$r16, -64 \(0xffffffc0\);;
+    149c:	10 f0 40 7d                                     	neorw \$r16 = \$r16, -64 \(0xffffffc0\);;
 
-    14a0:	11 00 40 fd 00 00 80 07                         	nxorw \$r16 = \$r17, -8589934592 \(0xfffffffe00000000\);;
+    14a0:	11 00 40 fd 00 00 80 07                         	neorw \$r16 = \$r17, -8589934592 \(0xfffffffe00000000\);;
 
-    14a8:	d1 ff 44 ea ff ff ff 87 ff ff ff 00             	ord \$r17 = \$r17, 2305843009213693951 \(0x1fffffffffffffff\);;
+    14a8:	d1 ff 44 ea ff ff ff 87 ff ff ff 00             	iord \$r17 = \$r17, 2305843009213693951 \(0x1fffffffffffffff\);;
 
-    14b4:	92 04 49 7a                                     	ord \$r18 = \$r18, \$r18;;
+    14b4:	92 04 49 7a                                     	iord \$r18 = \$r18, \$r18;;
 
-    14b8:	13 f0 4c 6a                                     	ord \$r19 = \$r19, -64 \(0xffffffc0\);;
+    14b8:	13 f0 4c 6a                                     	iord \$r19 = \$r19, -64 \(0xffffffc0\);;
 
-    14bc:	14 00 4c ea 00 00 80 07                         	ord \$r19 = \$r20, -8589934592 \(0xfffffffe00000000\);;
+    14bc:	14 00 4c ea 00 00 80 07                         	iord \$r19 = \$r20, -8589934592 \(0xfffffffe00000000\);;
 
-    14c4:	d4 0f 51 fa ff ff ff 00                         	ord \$r20 = \$r20, 536870911 \(0x1fffffff\).@;;
+    14c4:	d4 0f 51 fa ff ff ff 00                         	iord \$r20 = \$r20, 536870911 \(0x1fffffff\).@;;
 
-    14cc:	d5 ff 54 ef ff ff ff 87 ff ff ff 00             	ornd \$r21 = \$r21, 2305843009213693951 \(0x1fffffffffffffff\);;
+    14cc:	d5 ff 54 ef ff ff ff 87 ff ff ff 00             	iornd \$r21 = \$r21, 2305843009213693951 \(0x1fffffffffffffff\);;
 
-    14d8:	96 05 55 7f                                     	ornd \$r21 = \$r22, \$r22;;
+    14d8:	96 05 55 7f                                     	iornd \$r21 = \$r22, \$r22;;
 
-    14dc:	17 f0 58 6f                                     	ornd \$r22 = \$r23, -64 \(0xffffffc0\);;
+    14dc:	17 f0 58 6f                                     	iornd \$r22 = \$r23, -64 \(0xffffffc0\);;
 
-    14e0:	17 00 5c ef 00 00 80 07                         	ornd \$r23 = \$r23, -8589934592 \(0xfffffffe00000000\);;
+    14e0:	17 00 5c ef 00 00 80 07                         	iornd \$r23 = \$r23, -8589934592 \(0xfffffffe00000000\);;
 
-    14e8:	d8 ff 60 ef ff ff 07 00                         	ornd \$r24 = \$r24, 536870911 \(0x1fffffff\);;
+    14e8:	d8 ff 60 ef ff ff 07 00                         	iornd \$r24 = \$r24, 536870911 \(0x1fffffff\);;
 
-    14f0:	59 16 61 7f                                     	ornw \$r24 = \$r25, \$r25;;
+    14f0:	59 16 61 7f                                     	iornw \$r24 = \$r25, \$r25;;
 
-    14f4:	1a f0 64 7f                                     	ornw \$r25 = \$r26, -64 \(0xffffffc0\);;
+    14f4:	1a f0 64 7f                                     	iornw \$r25 = \$r26, -64 \(0xffffffc0\);;
 
-    14f8:	1a 00 68 ff 00 00 80 07                         	ornw \$r26 = \$r26, -8589934592 \(0xfffffffe00000000\);;
+    14f8:	1a 00 68 ff 00 00 80 07                         	iornw \$r26 = \$r26, -8589934592 \(0xfffffffe00000000\);;
 
-    1500:	db 16 6d 7a                                     	orw \$r27 = \$r27, \$r27;;
+    1500:	db 16 6d 7a                                     	iorw \$r27 = \$r27, \$r27;;
 
-    1504:	1c f0 70 7a                                     	orw \$r28 = \$r28, -64 \(0xffffffc0\);;
+    1504:	1c f0 70 7a                                     	iorw \$r28 = \$r28, -64 \(0xffffffc0\);;
 
-    1508:	1d 00 70 fa 00 00 80 07                         	orw \$r28 = \$r29, -8589934592 \(0xfffffffe00000000\);;
+    1508:	1d 00 70 fa 00 00 80 07                         	iorw \$r28 = \$r29, -8589934592 \(0xfffffffe00000000\);;
 
     1510:	c0 ff 74 f0 ff ff ff 87 ff ff ff 00             	pcrel \$r29 = 2305843009213693951 \(0x1fffffffffffffff\);;
 
@@ -2259,21 +2259,21 @@ Disassembly of section .text:
 
     1a88:	00 80 5d 04                                     	xmt44d \$a20a21a22a23 = \$a24a25a26a27;;
 
-    1a8c:	cb ff 28 ec ff ff ff 87 ff ff ff 00             	xord \$r10 = \$r11, 2305843009213693951 \(0x1fffffffffffffff\);;
+    1a8c:	cb ff 28 ec ff ff ff 87 ff ff ff 00             	eord \$r10 = \$r11, 2305843009213693951 \(0x1fffffffffffffff\);;
 
-    1a98:	0b 03 2d 7c                                     	xord \$r11 = \$r11, \$r12;;
+    1a98:	0b 03 2d 7c                                     	eord \$r11 = \$r11, \$r12;;
 
-    1a9c:	0d f0 30 6c                                     	xord \$r12 = \$r13, -64 \(0xffffffc0\);;
+    1a9c:	0d f0 30 6c                                     	eord \$r12 = \$r13, -64 \(0xffffffc0\);;
 
-    1aa0:	0e 00 34 ec 00 00 80 07                         	xord \$r13 = \$r14, -8589934592 \(0xfffffffe00000000\);;
+    1aa0:	0e 00 34 ec 00 00 80 07                         	eord \$r13 = \$r14, -8589934592 \(0xfffffffe00000000\);;
 
-    1aa8:	cf ff 38 ec ff ff 07 00                         	xord \$r14 = \$r15, 536870911 \(0x1fffffff\);;
+    1aa8:	cf ff 38 ec ff ff 07 00                         	eord \$r14 = \$r15, 536870911 \(0x1fffffff\);;
 
-    1ab0:	10 14 3d 7c                                     	xorw \$r15 = \$r16, \$r16;;
+    1ab0:	10 14 3d 7c                                     	eorw \$r15 = \$r16, \$r16;;
 
-    1ab4:	11 f0 40 7c                                     	xorw \$r16 = \$r17, -64 \(0xffffffc0\);;
+    1ab4:	11 f0 40 7c                                     	eorw \$r16 = \$r17, -64 \(0xffffffc0\);;
 
-    1ab8:	11 00 44 fc 00 00 80 07                         	xorw \$r17 = \$r17, -8589934592 \(0xfffffffe00000000\);;
+    1ab8:	11 00 44 fc 00 00 80 07                         	eorw \$r17 = \$r17, -8589934592 \(0xfffffffe00000000\);;
 
     1ac0:	92 f4 4b 29                                     	xso.xs \$r18\[\$r18\] = \$a18;;
 
