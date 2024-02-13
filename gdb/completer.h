@@ -556,17 +556,6 @@ extern void complete_line (completion_tracker &tracker,
 extern completion_result
   complete (const char *line, char const **word, int *quote_char);
 
-/* Find the bounds of the word in TEXT for completion purposes, and
-   return a pointer to the end of the word.  Calls the completion
-   machinery for a handle_brkchars phase (using TRACKER) to figure out
-   the right work break characters for the command in TEXT.
-   QUOTE_CHAR, if non-null, is set to the opening quote character if
-   we found an unclosed quoted substring, '\0' otherwise.  */
-extern const char *completion_find_completion_word (completion_tracker &tracker,
-						    const char *text,
-						    int *quote_char);
-
-
 /* Assuming TEXT is an expression in the current language, find the
    completion word point for TEXT, emulating the algorithm readline
    uses to find the word point, using the current language's word

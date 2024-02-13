@@ -46,6 +46,11 @@
 
 #include "completer.h"
 
+/* Forward declarations.  */
+static const char *completion_find_completion_word (completion_tracker &tracker,
+						    const char *text,
+						    int *quote_char);
+
 /* See completer.h.  */
 
 class completion_tracker::completion_hash_entry
@@ -1955,9 +1960,14 @@ gdb_completion_word_break_characters ()
   return NULL;
 }
 
-/* See completer.h.  */
+/* Find the bounds of the word in TEXT for completion purposes, and return
+   a pointer to the end of the word.  Calls the completion machinery for a
+   handle_brkchars phase (using TRACKER) to figure out the right work break
+   characters for the command in TEXT.  QUOTE_CHAR, if non-null, is set to
+   the opening quote character if we found an unclosed quoted substring,
+   '\0' otherwise.  */
 
-const char *
+static const char *
 completion_find_completion_word (completion_tracker &tracker, const char *text,
 				 int *quote_char)
 {
