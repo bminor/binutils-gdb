@@ -14184,6 +14184,14 @@ thumb2_record_ld_word (arm_insn_decode_record *thumb2_insn_r)
   record_buf[1] = ARM_PS_REGNUM;
   thumb2_insn_r->reg_rec_count = 2;
 
+  if ((thumb2_insn_r->arm_insn & 0xfff00900) == 0xf8500900)
+    {
+      /* Detected LDR(immediate), T4, with write-back bit set.  Record Rn
+	 update.  */
+      record_buf[2] = bits (thumb2_insn_r->arm_insn, 16, 19);
+      thumb2_insn_r->reg_rec_count++;
+    }
+
   REG_ALLOC (thumb2_insn_r->arm_regs, thumb2_insn_r->reg_rec_count,
 	    record_buf);
   return ARM_RECORD_SUCCESS;
