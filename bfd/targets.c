@@ -1454,9 +1454,6 @@ const bfd_target *const *const bfd_associated_vector = _bfd_associated_vector;
    number of entries that the array could possibly need.  */
 const size_t _bfd_target_vector_entries = ARRAY_SIZE (_bfd_target_vector);
 
-/* A place to stash a warning from _bfd_check_format.  */
-static struct per_xvec_message *per_xvec_warn[ARRAY_SIZE (_bfd_target_vector)
-					      + 1];
 
 /* This array maps configuration triplets onto BFD vectors.  */
 
@@ -1475,61 +1472,6 @@ static const struct targmatch bfd_target_match[] = {
 #include "targmatch.h"
   { NULL, NULL }
 };
-
-/*
-INTERNAL
-.{* Cached _bfd_check_format messages are put in this.  *}
-.struct per_xvec_message
-.{
-.  struct per_xvec_message *next;
-.  char message[];
-.};
-.
-INTERNAL_FUNCTION
-	_bfd_per_xvec_warn
-
-SYNOPSIS
-	struct per_xvec_message **_bfd_per_xvec_warn (const bfd_target *, size_t);
-
-DESCRIPTION
-	Return a location for the given target xvec to use for
-	warnings specific to that target.  If TARG is NULL, returns
-	the array of per_xvec_message pointers, otherwise if ALLOC is
-	zero, returns a pointer to a pointer to the list of messages
-	for TARG, otherwise (both TARG and ALLOC non-zero), allocates
-	a new 	per_xvec_message with space for a string of ALLOC
-	bytes and returns a pointer to a pointer to it.  May return a
-	pointer to a NULL pointer on allocation failure.
-*/
-
-struct per_xvec_message **
-_bfd_per_xvec_warn (const bfd_target *targ, size_t alloc)
-{
-  size_t idx;
-
-  if (!targ)
-    return per_xvec_warn;
-  for (idx = 0; idx < ARRAY_SIZE (_bfd_target_vector); idx++)
-    if (_bfd_target_vector[idx] == targ)
-      break;
-  struct per_xvec_message **m = per_xvec_warn + idx;
-  if (!alloc)
-    return m;
-  int count = 0;
-  while (*m)
-    {
-      m = &(*m)->next;
-      count++;
-    }
-  /* Anti-fuzzer measure.  Don't cache more than 5 messages.  */
-  if (count < 5)
-    {
-      *m = bfd_malloc (sizeof (**m) + alloc);
-      if (*m != NULL)
-	(*m)->next = NULL;
-    }
-  return m;
-}
 
 /* Find a target vector, given a name or configuration triplet.  */
 

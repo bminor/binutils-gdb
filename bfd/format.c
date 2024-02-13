@@ -272,10 +272,34 @@ clear_warnmsg (struct per_xvec_message **list)
   *list = NULL;
 }
 
+/* Free all the storage in LIST.  Note that the first element of LIST
+   is special and is assumed to be stack-allocated.  TARG is used for
+   re-issuing warning messages.  If TARG is PER_XVEC_NO_TARGET, then
+   it acts like a sort of wildcard -- messages are only reissued if
+   they are all associated with a single BFD target, regardless of
+   which one it is.  If TARG is anything else, then only messages
+   associated with TARG are emitted.  */
+
 static void
-null_error_handler (const char *fmt ATTRIBUTE_UNUSED,
-		    va_list ap ATTRIBUTE_UNUSED)
+print_and_clear_messages (struct per_xvec_messages *list,
+			  const bfd_target *targ)
 {
+  struct per_xvec_messages *iter = list;
+
+  if (targ == PER_XVEC_NO_TARGET && list->next == NULL)
+    print_warnmsg (&list->messages);
+
+  while (iter != NULL)
+    {
+      struct per_xvec_messages *next = iter->next;
+
+      if (iter->targ == targ)
+	print_warnmsg (&iter->messages);
+      clear_warnmsg (&iter->messages);
+      if (iter != list)
+	free (iter);
+      iter = next;
+    }
 }
 
 /* This a copy of lto_section defined in GCC (lto-streamer.h).  */
@@ -357,8 +381,8 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   unsigned int initial_section_id = _bfd_section_id;
   struct bfd_preserve preserve, preserve_match;
   bfd_cleanup cleanup = NULL;
-  bfd_error_handler_type orig_error_handler;
-  static int in_check_format;
+  struct per_xvec_messages messages = { abfd, PER_XVEC_NO_TARGET, NULL, NULL };
+  struct per_xvec_messages *orig_messages;
 
   if (matching != NULL)
     *matching = NULL;
@@ -392,11 +416,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 
   /* Don't report errors on recursive calls checking the first element
      of an archive.  */
-  if (in_check_format)
-    orig_error_handler = bfd_set_error_handler (null_error_handler);
-  else
-    orig_error_handler = _bfd_set_error_handler_caching (abfd);
-  ++in_check_format;
+  orig_messages = _bfd_set_error_handler_caching (&messages);
 
   preserve_match.marker = NULL;
   if (!bfd_preserve_save (abfd, &preserve, NULL))
@@ -638,15 +658,9 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (preserve_match.marker != NULL)
 	bfd_preserve_finish (abfd, &preserve_match);
       bfd_preserve_finish (abfd, &preserve);
-      bfd_set_error_handler (orig_error_handler);
+      _bfd_restore_error_handler_caching (orig_messages);
 
-      struct per_xvec_message **list = _bfd_per_xvec_warn (abfd->xvec, 0);
-      if (*list)
-	print_warnmsg (list);
-      list = _bfd_per_xvec_warn (NULL, 0);
-      for (size_t i = 0; i < _bfd_target_vector_entries + 1; i++)
-	clear_warnmsg (list++);
-      --in_check_format;
+      print_and_clear_messages (&messages, abfd->xvec);
 
       bfd_set_lto_type (abfd);
 
@@ -692,27 +706,8 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   if (preserve_match.marker != NULL)
     bfd_preserve_finish (abfd, &preserve_match);
   bfd_preserve_restore (abfd, &preserve);
-  bfd_set_error_handler (orig_error_handler);
-  struct per_xvec_message **list = _bfd_per_xvec_warn (NULL, 0);
-  struct per_xvec_message **one = NULL;
-  for (size_t i = 0; i < _bfd_target_vector_entries + 1; i++)
-    {
-      if (list[i])
-	{
-	  if (!one)
-	    one = list + i;
-	  else
-	    {
-	      one = NULL;
-	      break;
-	    }
-	}
-    }
-  if (one)
-    print_warnmsg (one);
-  for (size_t i = 0; i < _bfd_target_vector_entries + 1; i++)
-    clear_warnmsg (list++);
-  --in_check_format;
+  _bfd_restore_error_handler_caching (orig_messages);
+  print_and_clear_messages (&messages, PER_XVEC_NO_TARGET);
   return false;
 }
 

@@ -1565,10 +1565,91 @@ err_sprintf (void *stream, const char *fmt, ...)
   return total;
 }
 
-/* Communicate the bfd processed by bfd_check_format_matches to the
-   error handling function error_handler_sprintf.  */
+/*
+INTERNAL
+.{* Cached _bfd_check_format messages are put in this.  *}
+.struct per_xvec_message
+.{
+.  struct per_xvec_message *next;
+.  char message[];
+.};
+.
+.{* A list of per_xvec_message objects.  The targ field indicates
+.   which xvec this list holds; PER_XVEC_NO_TARGET is only set for the
+.   root of the list and indicates that the entry isn't yet used.  The
+.   abfd field is only needed in the root entry of the list.  *}
+.struct per_xvec_messages
+.{
+.  bfd *abfd;
+.  const bfd_target *targ;
+.  struct per_xvec_message *messages;
+.  struct per_xvec_messages *next;
+.};
+.
+.#define PER_XVEC_NO_TARGET ((const bfd_target *) -1)
+*/
 
-static bfd *error_handler_bfd;
+/* Helper function to find or allocate the correct per-xvec object
+   when emitting a message.  */
+
+static struct per_xvec_message *
+_bfd_per_xvec_warn (struct per_xvec_messages *messages, size_t alloc)
+{
+  const bfd_target *targ = messages->abfd->xvec;
+
+  struct per_xvec_messages *prev = NULL;
+  struct per_xvec_messages *iter = messages;
+
+  if (iter->targ == PER_XVEC_NO_TARGET)
+    iter->targ = targ;
+  else
+    for (; iter != NULL; iter = iter->next)
+      {
+	if (iter->targ == targ)
+	  break;
+	prev = iter;
+      }
+
+  if (iter == NULL)
+    {
+      iter = bfd_malloc (sizeof (*iter));
+      if (iter == NULL)
+	return NULL;
+      iter->abfd = messages->abfd;
+      iter->targ = targ;
+      iter->messages = NULL;
+      iter->next = NULL;
+      prev->next = iter;
+    }
+
+  struct per_xvec_message **m = &iter->messages;
+  int count = 0;
+  while (*m)
+    {
+      m = &(*m)->next;
+      count++;
+    }
+  /* Anti-fuzzer measure.  Don't cache more than 5 messages.  */
+  if (count < 5)
+    {
+      *m = bfd_malloc (sizeof (**m) + alloc);
+      if (*m != NULL)
+	(*m)->next = NULL;
+    }
+  return *m;
+}
+
+/* Communicate the error-message container processed by
+   bfd_check_format_matches to the error handling function
+   error_handler_sprintf.  When non-NULL, _bfd_error_handler will call
+   error_handler_sprintf; when NULL, _bfd_error_internal will be used
+   instead.  */
+
+static TLS struct per_xvec_messages *error_handler_messages;
+
+/* A special value for error_handler_messages that indicates that the
+   error should simply be ignored.  */
+#define IGNORE_ERROR_MESSAGES ((struct per_xvec_messages *) -1)
 
 /* An error handler that prints to a string, then dups that string to
    a per-xvec cache.  */
@@ -1585,12 +1666,12 @@ error_handler_sprintf (const char *fmt, va_list ap)
   _bfd_print (err_sprintf, &error_stream, fmt, ap);
 
   size_t len = error_stream.ptr - error_buf;
-  struct per_xvec_message **warn
-    = _bfd_per_xvec_warn (error_handler_bfd->xvec, len + 1);
-  if (*warn)
+  struct per_xvec_message *warn
+    = _bfd_per_xvec_warn (error_handler_messages, len + 1);
+  if (warn)
     {
-      memcpy ((*warn)->message, error_buf, len);
-      (*warn)->message[len] = 0;
+      memcpy (warn->message, error_buf, len);
+      warn->message[len] = 0;
     }
 }
 
@@ -1628,7 +1709,14 @@ _bfd_error_handler (const char *fmt, ...)
   va_list ap;
 
   va_start (ap, fmt);
-  _bfd_error_internal (fmt, ap);
+  if (error_handler_messages == IGNORE_ERROR_MESSAGES)
+    {
+      /* Nothing.  */
+    }
+  else if (error_handler_messages != NULL)
+    error_handler_sprintf (fmt, ap);
+  else
+    _bfd_error_internal (fmt, ap);
   va_end (ap);
 }
 
@@ -1659,18 +1747,42 @@ INTERNAL_FUNCTION
 	_bfd_set_error_handler_caching
 
 SYNOPSIS
-	bfd_error_handler_type _bfd_set_error_handler_caching (bfd *);
+	struct per_xvec_messages *_bfd_set_error_handler_caching (struct per_xvec_messages *);
 
 DESCRIPTION
 	Set the BFD error handler function to one that stores messages
-	to the per_xvec_warn array.  Returns the previous function.
+	to the per_xvec_messages object.  Returns the previous object
+	to which messages are stored.  Note that two sequential calls
+	to this with a non-NULL argument will cause output to be
+	dropped, rather than gathered.
 */
 
-bfd_error_handler_type
-_bfd_set_error_handler_caching (bfd *abfd)
+struct per_xvec_messages *
+_bfd_set_error_handler_caching (struct per_xvec_messages *messages)
 {
-  error_handler_bfd = abfd;
-  return bfd_set_error_handler (error_handler_sprintf);
+  struct per_xvec_messages *old = error_handler_messages;
+  if (old == NULL)
+    error_handler_messages = messages;
+  else
+    error_handler_messages = IGNORE_ERROR_MESSAGES;
+  return old;
+}
+
+/*
+INTERNAL_FUNCTION
+	_bfd_restore_error_handler_caching
+
+SYNOPSIS
+	void _bfd_restore_error_handler_caching (struct per_xvec_messages *);
+
+DESCRIPTION
+	Reset the BFD error handler object to an earlier value.
+*/
+
+void
+_bfd_restore_error_handler_caching (struct per_xvec_messages *old)
+{
+  error_handler_messages = old;
 }
 
 /*
