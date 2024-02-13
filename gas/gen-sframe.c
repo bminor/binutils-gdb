@@ -1345,9 +1345,12 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
 
   xlate_ctx->dw_fde = dw_fde;
 
-  /* If the return column is not RIP, SFrame format cannot represent it.  */
+  /* SFrame format cannot represent a non-default DWARF return column reg.  */
   if (xlate_ctx->dw_fde->return_column != DWARF2_DEFAULT_RETURN_COLUMN)
-    return SFRAME_XLATE_ERR_NOTREPRESENTED;
+    {
+      as_warn (_("skipping SFrame FDE due to non-default DWARF return column"));
+      return SFRAME_XLATE_ERR_NOTREPRESENTED;
+    }
 
   /* Iterate over the CFIs and create SFrame FREs.  */
   for (cfi_insn = dw_fde->data; cfi_insn; cfi_insn = cfi_insn->next)
@@ -1357,7 +1360,8 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
       if (err != SFRAME_XLATE_OK)
 	{
 	  /* Skip generating SFrame stack trace info for the function if any
-	     offending CFI is encountered by sframe_do_cfi_insn ().  */
+	     offending CFI is encountered by sframe_do_cfi_insn ().  Warning
+	     message already printed by sframe_do_cfi_insn ().  */
 	  return err; /* Return the error code.  */
 	}
     }
