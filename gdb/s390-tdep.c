@@ -5534,6 +5534,14 @@ ex:
 	case 0xe635: /* VLRL - vector load rightmost with immed. length */
 	case 0xe637: /* VLRLR - vector load rightmost with length */
 	case 0xe649: /* VLIP - vector load immediate decimal */
+	case 0xe656: /* VCLFNH - vector fp convert and lengthen from NNP high */
+	case 0xe65e: /* VCLFNL - vector fp convert and lengthen from NNP low */
+	case 0xe655: /* VCNF - vector fp convert to NNP */
+	case 0xe65d: /* VCFN - vector fp convert from NNP */
+	case 0xe674: /* VSCHP - decimal scale and convert to HFP */
+	case 0xe675: /* VCRNF - vector fp convert and round to NNP */
+	case 0xe67c: /* VSCSHP - decimal scale and convert and split to HFP */
+	case 0xe67d: /* VCSPH - vector convert HFP to scaled decimal */
 	case 0xe700: /* VLEB - vector load element */
 	case 0xe701: /* VLEH - vector load element */
 	case 0xe702: /* VLEG - vector load element */
@@ -5791,11 +5799,16 @@ ex:
 
 	/* 0xe747-0xe749 undefined */
 
+	case 0xe651: /* VCLZDP - vector count leading zero digits */
+	case 0xe654: /* VUPKZH - vector unpack zoned high */
 	case 0xe658: /* VCVD - vector convert to decimal 32 bit */
 	case 0xe659: /* VSRP - vector shift and round decimal */
 	case 0xe65a: /* VCVDG - vector convert to decimal 64 bit*/
 	case 0xe65b: /* VPSOP - vector perform sign operation decimal */
+	case 0xe65c: /* VUPKZL - vector unpack zoned low */
+	case 0xe670: /* VPKZR - vector pack zoned register */
 	case 0xe671: /* VAP - vector add decimal */
+	case 0xe672: /* VSRPR - vector shift and round decimal register */
 	case 0xe673: /* VSP - vector subtract decimal */
 	case 0xe678: /* VMP - vector multiply decimal */
 	case 0xe679: /* VMSP - vector multiply decimal */
