@@ -2809,10 +2809,15 @@ resolve_dynamic_type_internal (struct type *type,
 	      pinfo.addr = read_memory_typed_address (addr_stack->addr, type);
 	    pinfo.next = addr_stack;
 
-	    resolved_type = copy_type (type);
-	    resolved_type->set_target_type
-	      (resolve_dynamic_type_internal (type->target_type (),
-					      &pinfo, frame, top_level));
+	    /* Special case a NULL pointer here -- we don't want to
+	       dereference it.  */
+	    if (pinfo.addr != 0)
+	      {
+		resolved_type = copy_type (type);
+		resolved_type->set_target_type
+		  (resolve_dynamic_type_internal (type->target_type (),
+						  &pinfo, frame, true));
+	      }
 	    break;
 	  }
 

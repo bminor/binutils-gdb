@@ -26,10 +26,10 @@ if ![runto_main] {
 gdb_breakpoint [gdb_get_line_number "Before pointer assignment"]
 gdb_continue_to_breakpoint "Before pointer assignment"
 
-gdb_test "ptype ptr" "= int \\(\\*\\)\\\[3\\\]" \
+gdb_test "ptype ptr" "= int \\(\\*\\)\\\[variable length\\\]" \
     "ptype ptr, before pointer assignment"
 
-gdb_test "print ptr" "= \\(int \\(\\*\\)\\\[3\\\]\\) 0x0" \
+gdb_test "print ptr" "= \\(int \\(\\*\\)\\\[variable length\\\]\\) 0x0" \
     "print ptr, before pointer assignment"
 
 gdb_test "print *ptr" "Cannot access memory at address 0x0" \
