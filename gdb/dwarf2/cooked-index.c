@@ -581,10 +581,18 @@ cooked_index_worker::set (cooked_state desired_state)
 /* See cooked-index.h.  */
 
 void
-cooked_index_worker::write_to_cache (const cooked_index *idx) const
+cooked_index_worker::write_to_cache (const cooked_index *idx,
+				     deferred_warnings *warn) const
 {
   if (idx != nullptr)
-    m_cache_store.store ();
+    {
+      /* Writing to the index cache may cause a warning to be emitted.
+	 See PR symtab/30837.  This arranges to capture all such
+	 warnings.  This is safe because we know the deferred_warnings
+	 object isn't in use by any other thread at this point.  */
+      scoped_restore_warning_hook defer (*warn);
+      m_cache_store.store ();
+    }
 }
 
 cooked_index::cooked_index (dwarf2_per_objfile *per_objfile,
@@ -623,7 +631,7 @@ cooked_index::wait (cooked_state desired_state, bool allow_quit)
 }
 
 void
-cooked_index::set_contents (vec_type &&vec)
+cooked_index::set_contents (vec_type &&vec, deferred_warnings *warn)
 {
   gdb_assert (m_vector.empty ());
   m_vector = std::move (vec);
@@ -635,10 +643,10 @@ cooked_index::set_contents (vec_type &&vec)
      finalization.  However, that would take a slot in the global
      thread pool, and if enough such tasks were submitted at once, it
      would cause a livelock.  */
-  gdb::task_group finalizers ([this] ()
+  gdb::task_group finalizers ([=] ()
   {
     m_state->set (cooked_state::FINALIZED);
-    m_state->write_to_cache (index_for_writing ());
+    m_state->write_to_cache (index_for_writing (), warn);
     m_state->set (cooked_state::CACHE_DONE);
   });
 

@@ -4924,7 +4924,7 @@ cooked_index_debug_info::done_reading ()
   cooked_index *table
     = (gdb::checked_static_cast<cooked_index *>
        (per_bfd->index_table.get ()));
-  table->set_contents (std::move (indexes));
+  table->set_contents (std::move (indexes), &m_warnings);
 }
 
 void
