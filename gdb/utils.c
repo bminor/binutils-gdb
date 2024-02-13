@@ -131,7 +131,7 @@ show_pagination_enabled (struct ui_file *file, int from_tty,
 /* Warning hook pointer.  This has to be 'static' to avoid link
    problems with thread-locals on AIX.  */
 
-static thread_local void (*warning_hook) (const char *, va_list);
+static thread_local warning_hook_handler warning_hook;
 
 /* See utils.h.  */
 
