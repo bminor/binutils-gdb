@@ -1234,37 +1234,39 @@ list_command (const char *arg, int from_tty)
   /* Pull in the current default source line if necessary.  */
   if (arg == NULL || ((arg[0] == '+' || arg[0] == '-' || arg[0] == '.') && arg[1] == '\0'))
     {
-      set_default_source_symtab_and_line ();
-      symtab_and_line cursal = get_current_source_symtab_and_line ();
-
       /* If this is the first "list" since we've set the current
 	 source line, center the listing around that line.  */
       if (get_first_line_listed () == 0 && (arg == nullptr || arg[0] != '.'))
 	{
-	  list_around_line (arg, cursal);
+	  set_default_source_symtab_and_line ();
+	  list_around_line (arg, get_current_source_symtab_and_line ());
 	}
 
       /* "l" and "l +" lists the next few lines, unless we're listing past
 	 the end of the file.  */
       else if (arg == nullptr || arg[0] == '+')
 	{
+	  set_default_source_symtab_and_line ();
+	  const symtab_and_line cursal = get_current_source_symtab_and_line ();
 	  if (last_symtab_line (cursal.symtab) >= cursal.line)
 	    print_source_lines (cursal.symtab,
 				source_lines_range (cursal.line), 0);
 	  else
-	    {
-	      error (_("End of the file was already reached, use \"list .\" to"
-		       " list the current location again"));
-	    }
+	    error (_("End of the file was already reached, use \"list .\" to"
+		     " list the current location again"));
 	}
 
       /* "l -" lists previous ten lines, the ones before the ten just
 	 listed.  */
       else if (arg[0] == '-')
 	{
+	  set_default_source_symtab_and_line ();
+	  const symtab_and_line cursal = get_current_source_symtab_and_line ();
+
 	  if (get_first_line_listed () == 1)
 	    error (_("Already at the start of %s."),
 		   symtab_to_filename_for_display (cursal.symtab));
+
 	  source_lines_range range (get_first_line_listed (),
 				    source_lines_range::BACKWARD);
 	  print_source_lines (cursal.symtab, range, 0);
@@ -1273,6 +1275,7 @@ list_command (const char *arg, int from_tty)
       /* "list ." lists the default location again.  */
       else if (arg[0] == '.')
 	{
+	  symtab_and_line cursal;
 	  if (target_has_stack ())
 	    {
 	      /* Find the current line by getting the PC of the currently
@@ -1280,18 +1283,34 @@ list_command (const char *arg, int from_tty)
 	      frame_info_ptr frame = get_selected_frame (nullptr);
 	      CORE_ADDR curr_pc = get_frame_pc (frame);
 	      cursal = find_pc_line (curr_pc, 0);
+
+	      if (cursal.symtab == nullptr)
+		error
+		  (_("Insufficient debug info for showing source lines at "
+		     "current PC (%s)."), paddress (get_frame_arch (frame),
+						    curr_pc));
 	    }
 	  else
 	    {
 	      /* The inferior is not running, so reset the current source
 		 location to the default (usually the main function).  */
 	      clear_current_source_symtab_and_line ();
-	      set_default_source_symtab_and_line ();
+	      try
+		{
+		  set_default_source_symtab_and_line ();
+		}
+	      catch (const gdb_exception &e)
+		{
+		  error (_("Insufficient debug info for showing source "
+			   "lines at default location"));
+		}
 	      cursal = get_current_source_symtab_and_line ();
+
+	      gdb_assert (cursal.symtab != nullptr);
 	    }
-	  if (cursal.symtab == nullptr)
-	    error (_("No debug information available to print source lines."));
+
 	  list_around_line (arg, cursal);
+
 	  /* Set the repeat args so just pressing "enter" after using "list ."
 	     will print the following lines instead of the same lines again. */
 	  if (from_tty)

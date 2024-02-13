@@ -40,6 +40,12 @@ target record-full
   This command now gives an error if any unexpected arguments are
   found after the command.
 
+list .
+  When using the command "list ." in a location that has no debug information
+  or no file loaded, GDB now says that there is no debug information to print
+  lines.  This makes it more obvious that there is no information, as opposed
+  to implying there is no inferior loaded.
+
 * New commands
 
 info missing-debug-handler

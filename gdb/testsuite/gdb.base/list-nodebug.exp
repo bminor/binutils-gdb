@@ -33,8 +33,8 @@ if {![runto_main]} {
 
 # Check that GDB doesn't crash when we use list . on an inferior with
 # no debug information
-gdb_test "list ." "No debug.*" "first 'list .'"
+gdb_test "list ." "Insufficient debug.*" "first 'list .'"
 # This should be called twice because the first list invocation since
 # printing a frame may take a different codepath, which wouldn't
 # trigger the crash.
-gdb_test "list ." "No debug.*" "second 'list .'"
+gdb_test "list ." "Insufficient debug.*" "second 'list .'"
