@@ -46,6 +46,9 @@ if {$path == ""} {
 } else {
     pass "sources.c in loadedSources"
 
+    dap_wait_for_event_and_check "stopped at function breakpoint" stopped \
+	"body reason" breakpoint
+
     set obj [dap_check_request_and_response "get source" source \
 		 [format {o source [o path [s %s]] \
 			    sourceReference [i 0]} $path]]
