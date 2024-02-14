@@ -235,7 +235,28 @@ static int amd64_dwarf_regmap[] =
   /* Floating Point Control Registers.  */
   AMD64_MXCSR_REGNUM,
   AMD64_FCTRL_REGNUM,
-  AMD64_FSTAT_REGNUM
+  AMD64_FSTAT_REGNUM,
+
+  /* XMM16-XMM31.  */
+  AMD64_XMM16_REGNUM + 0, AMD64_XMM16_REGNUM + 1,
+  AMD64_XMM16_REGNUM + 2, AMD64_XMM16_REGNUM + 3,
+  AMD64_XMM16_REGNUM + 4, AMD64_XMM16_REGNUM + 5,
+  AMD64_XMM16_REGNUM + 6, AMD64_XMM16_REGNUM + 7,
+  AMD64_XMM16_REGNUM + 8, AMD64_XMM16_REGNUM + 9,
+  AMD64_XMM16_REGNUM + 10, AMD64_XMM16_REGNUM + 11,
+  AMD64_XMM16_REGNUM + 12, AMD64_XMM16_REGNUM + 13,
+  AMD64_XMM16_REGNUM + 14, AMD64_XMM16_REGNUM + 15,
+
+  /* Reserved.  */
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+
+  /* Mask Registers.  */
+  AMD64_K0_REGNUM + 0, AMD64_K0_REGNUM + 1,
+  AMD64_K0_REGNUM + 2, AMD64_K0_REGNUM + 3,
+  AMD64_K0_REGNUM + 4, AMD64_K0_REGNUM + 5,
+  AMD64_K0_REGNUM + 6, AMD64_K0_REGNUM + 7
 };
 
 static const int amd64_dwarf_regmap_len =
