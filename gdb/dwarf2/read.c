@@ -5955,7 +5955,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       /* We need a way to find the correct discriminant given a
 	 variant name.  For convenience we build a map here.  */
       struct type *enum_type = disr_field->type ();
-      std::unordered_map<std::string, ULONGEST> discriminant_map;
+      std::unordered_map<std::string_view, ULONGEST> discriminant_map;
       for (int i = 0; i < enum_type->num_fields (); ++i)
 	{
 	  if (enum_type->field (i).loc_kind () == FIELD_LOC_KIND_ENUMVAL)
