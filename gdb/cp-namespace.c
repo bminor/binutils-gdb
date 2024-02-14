@@ -1024,10 +1024,10 @@ cp_lookup_nested_symbol (struct type *parent_type,
    released version of GCC with such information.)  */
 
 struct type *
-cp_lookup_transparent_type (const char *name)
+cp_lookup_transparent_type (const char *name, domain_search_flags flags)
 {
   /* First, try the honest way of looking up the definition.  */
-  struct type *t = basic_lookup_transparent_type (name);
+  struct type *t = basic_lookup_transparent_type (name, flags);
   const char *scope;
 
   if (t != NULL)

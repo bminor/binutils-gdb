@@ -935,9 +935,11 @@ public:
   }
 
   /* See language.h.  */
-  struct type *lookup_transparent_type (const char *name) const override
+  struct type *lookup_transparent_type (const char *name,
+					domain_search_flags flags)
+    const override
   {
-    return cp_lookup_transparent_type (name);
+    return cp_lookup_transparent_type (name, flags);
   }
 
   /* See language.h.  */

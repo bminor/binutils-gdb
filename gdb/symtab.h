@@ -2307,9 +2307,11 @@ extern void reread_symbols (int from_tty);
    The type returned must not be opaque -- i.e., must have at least one field
    defined.  */
 
-extern struct type *lookup_transparent_type (const char *);
+extern struct type *lookup_transparent_type
+    (const char *name, domain_search_flags flags = SEARCH_STRUCT_DOMAIN);
 
-extern struct type *basic_lookup_transparent_type (const char *);
+extern struct type *basic_lookup_transparent_type
+     (const char *name, domain_search_flags flags = SEARCH_STRUCT_DOMAIN);
 
 /* Macro for name of symbol to indicate a file compiled with gcc.  */
 #ifndef GCC_COMPILED_FLAG_SYMBOL

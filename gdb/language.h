@@ -349,9 +349,10 @@ struct language_defn
 
   /* Find the definition of the type with the given name.  */
 
-  virtual struct type *lookup_transparent_type (const char *name) const
+  virtual struct type *lookup_transparent_type (const char *name,
+						domain_search_flags flags) const
   {
-    return basic_lookup_transparent_type (name);
+    return basic_lookup_transparent_type (name, flags);
   }
 
   /* Find all symbols in the current program space matching NAME in
