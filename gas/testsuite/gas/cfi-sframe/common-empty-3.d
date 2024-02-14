@@ -1,5 +1,5 @@
 #as: --gsframe
-#warning: skipping SFrame FDE due to non-default DWARF return column
+#warning: skipping SFrame FDE due to non-default return-address register 0
 #objdump: --sframe=.sframe
 #name: SFrame supports only default return column
 #...
