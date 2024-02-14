@@ -1898,8 +1898,6 @@ elf64_hppa_finish_dynamic_symbol (bfd *output_bfd,
   struct elf64_hppa_link_hash_table *hppa_info;
 
   hppa_info = hppa_link_hash_table (info);
-  if (hppa_info == NULL)
-    return false;
 
   stub = hppa_info->stub_sec;
   splt = hppa_info->root.splt;

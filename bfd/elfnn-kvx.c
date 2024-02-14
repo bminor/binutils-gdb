@@ -4479,8 +4479,7 @@ elfNN_kvx_finish_dynamic_symbol (bfd *output_bfd,
 
       if (bfd_link_pic (info) && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
-	  if (!h->def_regular)
-	    return false;
+	  BFD_ASSERT (h->def_regular);
 
 	  /* in case of PLT related GOT entry, it is not clear who is
 	     supposed to set the LSB of GOT entry...

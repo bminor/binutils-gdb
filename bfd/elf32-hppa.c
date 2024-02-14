@@ -4139,8 +4139,6 @@ elf32_hppa_finish_dynamic_symbol (bfd *output_bfd,
   bfd_byte *loc;
 
   htab = hppa_link_hash_table (info);
-  if (htab == NULL)
-    return false;
 
   if (eh->plt.offset != (bfd_vma) -1)
     {

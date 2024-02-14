@@ -3168,8 +3168,6 @@ microblaze_elf_finish_dynamic_symbol (bfd *output_bfd,
   struct elf32_mb_link_hash_entry *eh = elf32_mb_hash_entry(h);
 
   htab = elf32_mb_hash_table (info);
-  if (htab == NULL)
-    return false;
 
   if (h->plt.offset != (bfd_vma) -1)
     {

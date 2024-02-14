@@ -6842,6 +6842,7 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
 	indx = 0;
       else if (sec == NULL || sec->owner == NULL)
 	{
+	  BFD_ASSERT (0);
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	}
@@ -11186,7 +11187,13 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 	 sign extension at runtime in the stub, resulting in a negative
 	 index value.  */
       if (h->dynindx & ~0x7fffffff)
-	return false;
+	{
+	  _bfd_error_handler
+	    (_("%pB: cannot handle more than %d dynamic symbols"),
+	     output_bfd, 0x7fffffff);
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
 
       /* Fill the stub.  */
       if (micromips_p)

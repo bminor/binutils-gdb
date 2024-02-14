@@ -2082,8 +2082,6 @@ elf_cris_finish_dynamic_symbol (bfd *output_bfd,
   const bfd_byte *plt_pic_entry = elf_cris_pic_plt_entry;
 
   htab = elf_cris_hash_table (info);
-  if (htab == NULL)
-    return false;
 
   /* Adjust the various PLT entry offsets.  */
   if (bfd_get_mach (output_bfd) == bfd_mach_cris_v32)

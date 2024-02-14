@@ -4581,8 +4581,6 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
   bool local_undefweak;
 
   htab = elf_x86_hash_table (info, X86_64_ELF_DATA);
-  if (htab == NULL)
-    return false;
 
   /* Use the second PLT section only if there is .plt section.  */
   use_plt_second = htab->elf.splt != NULL && htab->plt_second != NULL;
@@ -4923,8 +4921,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       else if (bfd_link_pic (info)
 	       && SYMBOL_REFERENCES_LOCAL_P (info, h))
 	{
-	  if (!SYMBOL_DEFINED_NON_SHARED_P (h))
-	    return false;
+	  BFD_ASSERT (SYMBOL_DEFINED_NON_SHARED_P (h));
 	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  if (info->enable_dt_relr)
 	    generate_dynamic_reloc = false;

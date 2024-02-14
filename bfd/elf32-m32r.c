@@ -2877,8 +2877,6 @@ m32r_elf_finish_dynamic_symbol (bfd *output_bfd,
 #endif
 
   htab = m32r_elf_hash_table (info);
-  if (htab == NULL)
-    return false;
 
   if (h->plt.offset != (bfd_vma) -1)
     {

@@ -3225,8 +3225,6 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
   struct elf_s390_link_hash_entry *eh = (struct elf_s390_link_hash_entry*)h;
 
   htab = elf_s390_hash_table (info);
-  if (htab == NULL)
-    return false;
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -3373,8 +3371,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 	     RELATIVE reloc.  The entry in the global offset table
 	     will already have been initialized in the
 	     relocate_section function.  */
-	  if (!(h->def_regular || ELF_COMMON_DEF_P (h)))
-	    return false;
+	  BFD_ASSERT (h->def_regular || ELF_COMMON_DEF_P (h));
 	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  rela.r_info = ELF64_R_INFO (0, R_390_RELATIVE);
 	  rela.r_addend = (h->root.u.def.value

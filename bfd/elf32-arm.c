@@ -17199,8 +17199,6 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd,
   struct elf32_arm_link_hash_entry *eh;
 
   htab = elf32_arm_hash_table (info);
-  if (htab == NULL)
-    return false;
 
   eh = (struct elf32_arm_link_hash_entry *) h;
 

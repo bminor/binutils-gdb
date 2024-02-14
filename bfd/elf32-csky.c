@@ -2105,8 +2105,6 @@ csky_elf_finish_dynamic_symbol (bfd *output_bfd,
   struct csky_elf_link_hash_table *htab;
 
   htab = csky_elf_hash_table (info);
-  if (htab == NULL)
-    return false;
 
   /* Sanity check to make sure no unexpected symbol reaches here.
      This matches the test in csky_elf_relocate_section handling

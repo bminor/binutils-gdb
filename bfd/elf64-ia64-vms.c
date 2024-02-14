@@ -4003,8 +4003,6 @@ elf64_ia64_finish_dynamic_symbol (bfd *output_bfd,
   struct elf64_ia64_dyn_sym_info *dyn_i;
 
   ia64_info = elf64_ia64_hash_table (info);
-  if (ia64_info == NULL)
-    return false;
 
   dyn_i = get_dyn_sym_info (ia64_info, h, NULL, NULL, false);
 

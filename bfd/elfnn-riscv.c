@@ -3136,7 +3136,7 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
 	  || plt == NULL
 	  || gotplt == NULL
 	  || relplt == NULL)
-	return false;
+	abort ();
 
       /* Calculate the address of the PLT header.  */
       header_address = sec_addr (plt);

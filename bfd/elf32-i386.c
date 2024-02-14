@@ -3581,8 +3581,6 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
   bool use_plt_second;
 
   htab = elf_x86_hash_table (info, I386_ELF_DATA);
-  if (htab == NULL)
-    return false;
 
   plt_entry_size = htab->plt.plt_entry_size;
 
