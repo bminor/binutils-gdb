@@ -466,6 +466,16 @@ arc_insn_get_branch_target (const struct arc_instruction &insn)
 	 instruction, hence last two bits should be truncated.  */
       return pcrel_addr + align_down (insn.address, 4);
     }
+  /* DBNZ is the only branch instruction that keeps a branch address in
+     the second operand. It must be intercepted and treated differently. */
+  else if (insn.insn_class == DBNZ)
+    {
+      CORE_ADDR pcrel_addr = arc_insn_get_operand_value_signed (insn, 1);
+
+      /* Offset is relative to the 4-byte aligned address of the current
+	 instruction, hence last two bits should be truncated. */
+      return pcrel_addr + align_down (insn.address, 4);
+    }
   /* B, Bcc, BL, BLcc, LP, LPcc: PC = currentPC + operand.  */
   else if (insn.insn_class == BRANCH || insn.insn_class == LOOP)
     {
