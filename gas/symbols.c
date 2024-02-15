@@ -2302,7 +2302,7 @@ copy_symbol_attributes (symbolS *dest, symbolS *src)
 }
 
 int
-S_IS_FUNCTION (symbolS *s)
+S_IS_FUNCTION (const symbolS *s)
 {
   flagword flags;
 
@@ -2315,7 +2315,7 @@ S_IS_FUNCTION (symbolS *s)
 }
 
 int
-S_IS_EXTERNAL (symbolS *s)
+S_IS_EXTERNAL (const symbolS *s)
 {
   flagword flags;
 
@@ -2332,7 +2332,7 @@ S_IS_EXTERNAL (symbolS *s)
 }
 
 int
-S_IS_WEAK (symbolS *s)
+S_IS_WEAK (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 0;
@@ -2346,7 +2346,7 @@ S_IS_WEAK (symbolS *s)
 }
 
 int
-S_IS_WEAKREFR (symbolS *s)
+S_IS_WEAKREFR (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 0;
@@ -2354,7 +2354,7 @@ S_IS_WEAKREFR (symbolS *s)
 }
 
 int
-S_IS_WEAKREFD (symbolS *s)
+S_IS_WEAKREFD (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 0;
@@ -2362,7 +2362,7 @@ S_IS_WEAKREFD (symbolS *s)
 }
 
 int
-S_IS_COMMON (symbolS *s)
+S_IS_COMMON (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 0;
@@ -2370,7 +2370,7 @@ S_IS_COMMON (symbolS *s)
 }
 
 int
-S_IS_DEFINED (symbolS *s)
+S_IS_DEFINED (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return ((struct local_symbol *) s)->section != undefined_section;
@@ -2386,7 +2386,7 @@ S_IS_DEFINED (symbolS *s)
    symbols or eliminated from expressions, because they may be
    overridden by the linker.  */
 int
-S_FORCE_RELOC (symbolS *s, int strict)
+S_FORCE_RELOC (const symbolS *s, int strict)
 {
   segT sec;
   if (s->flags.local_symbol)
@@ -2405,7 +2405,7 @@ S_FORCE_RELOC (symbolS *s, int strict)
 }
 
 int
-S_IS_DEBUG (symbolS *s)
+S_IS_DEBUG (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 0;
@@ -2415,7 +2415,7 @@ S_IS_DEBUG (symbolS *s)
 }
 
 int
-S_IS_LOCAL (symbolS *s)
+S_IS_LOCAL (const symbolS *s)
 {
   flagword flags;
   const char *name;
@@ -2455,7 +2455,7 @@ S_IS_LOCAL (symbolS *s)
 }
 
 int
-S_IS_STABD (symbolS *s)
+S_IS_STABD (const symbolS *s)
 {
   return S_GET_NAME (s) == 0;
 }
@@ -2703,7 +2703,7 @@ S_SET_FORWARD_REF (symbolS *s)
 /* Return the previous symbol in a chain.  */
 
 symbolS *
-symbol_previous (symbolS *s)
+symbol_previous (const symbolS *s)
 {
   if (s->flags.local_symbol)
     abort ();
@@ -2713,7 +2713,7 @@ symbol_previous (symbolS *s)
 /* Return the next symbol in a chain.  */
 
 symbolS *
-symbol_next (symbolS *s)
+symbol_next (const symbolS *s)
 {
   if (s->flags.local_symbol)
     abort ();
@@ -2744,7 +2744,7 @@ symbol_set_value_expression (symbolS *s, const expressionS *exp)
 /* Return whether 2 symbols are the same.  */
 
 int
-symbol_same_p (symbolS *s1, symbolS *s2)
+symbol_same_p (const symbolS *s1, const symbolS *s2)
 {
   return s1 == s2;
 }
@@ -2752,7 +2752,7 @@ symbol_same_p (symbolS *s1, symbolS *s2)
 /* Return a pointer to the X_add_number component of a symbol.  */
 
 offsetT *
-symbol_X_add_number (symbolS *s)
+symbol_X_add_number (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return (offsetT *) &((struct local_symbol *) s)->value;
@@ -2787,7 +2787,7 @@ symbol_set_frag (symbolS *s, fragS *f)
 /* Return the frag of a symbol.  */
 
 fragS *
-symbol_get_frag (symbolS *s)
+symbol_get_frag (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return ((struct local_symbol *) s)->frag;
@@ -2819,7 +2819,7 @@ symbol_clear_used (symbolS *s)
 /* Return whether a symbol has been used.  */
 
 int
-symbol_used_p (symbolS *s)
+symbol_used_p (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 1;
@@ -2849,7 +2849,7 @@ symbol_clear_used_in_reloc (symbolS *s)
 /* Return whether a symbol has been used in a reloc.  */
 
 int
-symbol_used_in_reloc_p (symbolS *s)
+symbol_used_in_reloc_p (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 0;
@@ -2879,7 +2879,7 @@ symbol_clear_mri_common (symbolS *s)
 /* Return whether a symbol is an MRI common symbol.  */
 
 int
-symbol_mri_common_p (symbolS *s)
+symbol_mri_common_p (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 0;
@@ -2909,7 +2909,7 @@ symbol_clear_written (symbolS *s)
 /* Return whether a symbol has been written.  */
 
 int
-symbol_written_p (symbolS *s)
+symbol_written_p (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 0;
@@ -2929,7 +2929,7 @@ symbol_mark_removed (symbolS *s)
 /* Return whether a symbol has been marked to be removed.  */
 
 int
-symbol_removed_p (symbolS *s)
+symbol_removed_p (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 0;
@@ -2947,7 +2947,7 @@ symbol_mark_resolved (symbolS *s)
 /* Return whether a symbol has been resolved.  */
 
 int
-symbol_resolved_p (symbolS *s)
+symbol_resolved_p (const symbolS *s)
 {
   return s->flags.resolved;
 }
@@ -2969,7 +2969,7 @@ symbol_clear_resolving (symbolS *s)
 /* Return whether a symbol is being resolved.  */
 
 int
-symbol_resolving_p (symbolS *s)
+symbol_resolving_p (const symbolS *s)
 {
   return s->flags.resolving;
 }
@@ -2977,7 +2977,7 @@ symbol_resolving_p (symbolS *s)
 /* Return whether a symbol is a section symbol.  */
 
 int
-symbol_section_p (symbolS *s)
+symbol_section_p (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 0;
@@ -2987,7 +2987,7 @@ symbol_section_p (symbolS *s)
 /* Return whether a symbol is equated to another symbol.  */
 
 int
-symbol_equated_p (symbolS *s)
+symbol_equated_p (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 0;
@@ -2998,7 +2998,7 @@ symbol_equated_p (symbolS *s)
    treated specially when writing out relocs.  */
 
 int
-symbol_equated_reloc_p (symbolS *s)
+symbol_equated_reloc_p (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 0;
@@ -3017,7 +3017,7 @@ symbol_equated_reloc_p (symbolS *s)
 /* Return whether a symbol has a constant value.  */
 
 int
-symbol_constant_p (symbolS *s)
+symbol_constant_p (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 1;
@@ -3028,7 +3028,7 @@ symbol_constant_p (symbolS *s)
    symbol list.  */
 
 int
-symbol_shadow_p (symbolS *s)
+symbol_shadow_p (const symbolS *s)
 {
   if (s->flags.local_symbol)
     return 0;
