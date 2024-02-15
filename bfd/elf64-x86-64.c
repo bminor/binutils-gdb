@@ -4921,7 +4921,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       else if (bfd_link_pic (info)
 	       && SYMBOL_REFERENCES_LOCAL_P (info, h))
 	{
-	  BFD_ASSERT (SYMBOL_DEFINED_NON_SHARED_P (h));
+	  if (!SYMBOL_DEFINED_NON_SHARED_P (h))
+	    return false;
 	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  if (info->enable_dt_relr)
 	    generate_dynamic_reloc = false;

@@ -9739,7 +9739,8 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	}
       else if (bfd_link_pic (info) && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
-	  BFD_ASSERT (h->def_regular || ELF_COMMON_DEF_P (h));
+	  if (!(h->def_regular || ELF_COMMON_DEF_P (h)))
+	    return false;
 	  BFD_ASSERT ((h->got.offset & 1) != 0);
 	  rela.r_info = ELFNN_R_INFO (0, AARCH64_R (RELATIVE));
 	  rela.r_addend = (h->root.u.def.value

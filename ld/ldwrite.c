@@ -549,13 +549,9 @@ ldwrite (void)
     split_sections (link_info.output_bfd, &link_info);
   if (!bfd_final_link (link_info.output_bfd, &link_info))
     {
-      /* If there was an error recorded, print it out.  Otherwise assume
-	 an appropriate error message like unknown symbol was printed
-	 out.  */
-
       if (bfd_get_error () != bfd_error_no_error)
 	einfo (_("%F%P: final link failed: %E\n"));
       else
-	xexit (1);
+	einfo (_("%F%P: final link failed\n"));
     }
 }
