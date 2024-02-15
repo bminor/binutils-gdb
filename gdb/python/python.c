@@ -1601,7 +1601,7 @@ gdbpy_print_stack (void)
 	      /* An error occurred computing the string representation of the
 		 error message.  */
 	      gdb_printf (gdb_stderr,
-			  _("Error occurred computing Python error" \
+			  _("Error occurred computing Python error "
 			    "message.\n"));
 	      PyErr_Clear ();
 	    }
