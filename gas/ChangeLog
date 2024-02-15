@@ -1,3 +1,9 @@
+2024-02-15 Will Hawkins  <hawkinsw@obs.cr>
+
+	* testsuite/gas/bpf/indcall-1-pseudoc.d: Do not select xbpf cpu
+	version.
+	* testsuite/gas/bpf/indcall-1.d: Likewise.
+
 2024-02-14  Yuriy Kolerov  <ykolerov@synopsys.com>
 
 	* config/tc-arc.c (is_br_jmp_insn_p): Add check against "DBNZ".

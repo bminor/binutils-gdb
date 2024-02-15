@@ -273,7 +273,7 @@ const struct bpf_opcode bpf_opcodes[] =
   {BPF_INSN_JNER, "jne%W%dr , %sr , %d16", "if%w%dr != %sr%wgoto%w%d16",
    BPF_V1, BPF_CODE, BPF_CLASS_JMP|BPF_CODE_JNE|BPF_SRC_X},
   {BPF_INSN_CALLR, "call%W%dr", "callx%w%dr",
-   BPF_XBPF, BPF_CODE, BPF_CLASS_JMP|BPF_CODE_CALL|BPF_SRC_X},
+   BPF_V1, BPF_CODE, BPF_CLASS_JMP|BPF_CODE_CALL|BPF_SRC_X},
   {BPF_INSN_CALL, "call%W%d32", "call%w%d32",
    BPF_V1, BPF_CODE, BPF_CLASS_JMP|BPF_CODE_CALL|BPF_SRC_K},
   {BPF_INSN_EXIT, "exit", "exit",

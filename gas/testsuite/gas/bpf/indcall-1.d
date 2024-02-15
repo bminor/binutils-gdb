@@ -1,5 +1,5 @@
-#as: -EL -misa-spec=xbpf
-#objdump: -dr -M xbpf,dec
+#as: -EL
+#objdump: -dr -M dec
 #source: indcall-1.s
 #name: BPF indirect call 1, normal syntax
 

@@ -1,3 +1,7 @@
+2024-02-15 Will Hawkins  <hawkinsw@obs.cr>
+
+	* bpf-opc.c: Move callx into the v1 BPF CPU variant.
+
 2024-02-14  Yuriy Kolerov  <ykolerov@synopsys.com>
 
 	* arc-tbl.h (dbnz): Use "DBNZ" class.

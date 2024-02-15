@@ -1,5 +1,5 @@
-#as: -EL -mdialect=pseudoc -misa-spec=xbpf
-#objdump: -M xbpf,pseudoc,dec -dr
+#as: -EL -mdialect=pseudoc
+#objdump: -M pseudoc,dec -dr
 #source: indcall-1-pseudoc.s
 #name: BPF indirect call 1, pseudoc syntax
 
