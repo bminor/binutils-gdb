@@ -133,4 +133,8 @@ extern bool mkdir_recursive (const char *dir);
 
 extern std::optional<std::string> read_text_file_to_string (const char *path);
 
+/* Read the remaining content from FILE into an std::string.  */
+
+extern std::string read_remainder_of_file (FILE *file);
+
 #endif /* COMMON_FILESTUFF_H */

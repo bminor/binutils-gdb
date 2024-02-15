@@ -504,13 +504,9 @@ mkdir_recursive (const char *dir)
 
 /* See gdbsupport/filestuff.h.  */
 
-std::optional<std::string>
-read_text_file_to_string (const char *path)
+std::string
+read_remainder_of_file (FILE *file)
 {
-  gdb_file_up file = gdb_fopen_cloexec (path, "r");
-  if (file == nullptr)
-    return {};
-
   std::string res;
   for (;;)
     {
@@ -520,7 +516,7 @@ read_text_file_to_string (const char *path)
       /* Resize to accommodate CHUNK_SIZE bytes.  */
       res.resize (start_size + chunk_size);
 
-      int n = fread (&res[start_size], 1, chunk_size, file.get ());
+      int n = fread (&res[start_size], 1, chunk_size, file);
       if (n == chunk_size)
 	continue;
 
@@ -528,7 +524,7 @@ read_text_file_to_string (const char *path)
 
       /* Less than CHUNK means EOF or error.  If it's an error, return
 	 no value.  */
-      if (ferror (file.get ()))
+      if (ferror (file))
 	return {};
 
       /* Resize the string according to the data we read.  */
@@ -537,4 +533,16 @@ read_text_file_to_string (const char *path)
     }
 
   return res;
+}
+
+/* See gdbsupport/filestuff.h.  */
+
+std::optional<std::string>
+read_text_file_to_string (const char *path)
+{
+  gdb_file_up file = gdb_fopen_cloexec (path, "r");
+  if (file == nullptr)
+    return {};
+
+  return read_remainder_of_file (file.get ());
 }
