@@ -122,8 +122,8 @@ gdb_test "python print(worker_thread._user_attribute)" "123" \
     "read back user defined attribute"
 gdb_test "python print(main_thread._user_attribute)" \
     [multi_line \
-	 "AttributeError: 'gdb\\.InferiorThread' object has no attribute '_user_attribute'" \
-	 "Error while executing Python code\\."] \
+	 "AttributeError.*: 'gdb\\.InferiorThread' object has no attribute '_user_attribute'" \
+	 "Error occurred in Python.*"] \
     "attempt to read non-existent user defined attribute"
 
 # Proceed to the next test.
@@ -162,8 +162,8 @@ set num [add_inferior]
 # but that the first inferior does still have the attribute.
 gdb_test "python print(gdb.inferiors()\[1\]._user_attr)" \
     [multi_line \
-	 "AttributeError: 'gdb\\.Inferior' object has no attribute '_user_attr'" \
-	 "Error while executing Python code\\."] \
+	 "AttributeError.*: 'gdb\\.Inferior' object has no attribute '_user_attr'" \
+	 "Error occurred in Python.*"] \
     "check new inferior doesn't have user defined attribute"
 gdb_test "python print(gdb.inferiors()\[0\]._user_attr)" \
     "123" "read back user defined attribute again"
@@ -366,21 +366,21 @@ with_test_prefix "is_valid" {
     # Test that other properties and methods handle the removed inferior
     # correctly.
     gdb_test "python print (inf_list\[1\].num)" \
-	"RuntimeError: Inferior no longer exists.*"
+	"RuntimeError.*: Inferior no longer exists.*"
     gdb_test "python print (inf_list\[1\].connection_num)" \
-	"RuntimeError: Inferior no longer exists.*"
+	"RuntimeError.*: Inferior no longer exists.*"
     gdb_test "python print (inf_list\[1\].connection)" \
-	"RuntimeError: Inferior no longer exists.*"
+	"RuntimeError.*: Inferior no longer exists.*"
     gdb_test "python print (inf_list\[1\].pid)" \
-	"RuntimeError: Inferior no longer exists.*"
+	"RuntimeError.*: Inferior no longer exists.*"
     gdb_test "python print (inf_list\[1\].was_attached)" \
-	"RuntimeError: Inferior no longer exists.*"
+	"RuntimeError.*: Inferior no longer exists.*"
     gdb_test "python print (inf_list\[1\].progspace)" \
-	"RuntimeError: Inferior no longer exists.*"
+	"RuntimeError.*: Inferior no longer exists.*"
     gdb_test "python print (inf_list\[1\].threads ())" \
-	"RuntimeError: Inferior no longer exists.*"
+	"RuntimeError.*: Inferior no longer exists.*"
     gdb_test "python print (inf_list\[1\].thread_from_thread_handle (1))" \
-	"RuntimeError: Inferior no longer exists.*"
+	"RuntimeError.*: Inferior no longer exists.*"
 }
 
 # Test gdb.selected_inferior()

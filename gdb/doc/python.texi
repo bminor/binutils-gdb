@@ -721,9 +721,9 @@ When executing the @code{python} command, Python exceptions
 uncaught within the Python code are translated to calls to
 @value{GDBN} error-reporting mechanism.  If the command that called
 @code{python} does not handle the error, @value{GDBN} will
-terminate it and print an error message containing the Python
-exception name, the associated value, and the Python call stack
-backtrace at the point where the exception was raised.  Example:
+terminate it and print an error message.  Exactly what will be printed
+depends on @code{set python print-stack} (@pxref{Python Commands}).
+Example:
 
 @smallexample
 (@value{GDBP}) python print foo

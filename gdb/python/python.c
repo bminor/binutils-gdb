@@ -284,12 +284,14 @@ gdbpy_check_quit_flag (const struct extension_language_defn *extlang)
   return PyOS_InterruptOccurred ();
 }
 
-/* Evaluate a Python command like PyRun_SimpleString, but uses
-   Py_single_input which prints the result of expressions, and does
-   not automatically print the stack on errors.  */
+/* Evaluate a Python command like PyRun_SimpleString, but takes a
+   Python start symbol, and does not automatically print the stack on
+   errors.  FILENAME is used to set the file name in error
+   messages.  */
 
 static int
-eval_python_command (const char *command)
+eval_python_command (const char *command, int start_symbol,
+		     const char *filename = "<string>")
 {
   PyObject *m, *d;
 
@@ -300,8 +302,15 @@ eval_python_command (const char *command)
   d = PyModule_GetDict (m);
   if (d == NULL)
     return -1;
-  gdbpy_ref<> v (PyRun_StringFlags (command, Py_single_input, d, d, NULL));
-  if (v == NULL)
+
+  /* Use this API because it is in Python 3.2.  */
+  gdbpy_ref<> code (Py_CompileStringExFlags (command, filename, start_symbol,
+					     nullptr, -1));
+  if (code == nullptr)
+    return -1;
+
+  gdbpy_ref<> result (PyEval_EvalCode (code.get (), d, d));
+  if (result == nullptr)
     return -1;
 
   return 0;
@@ -324,7 +333,8 @@ python_interactive_command (const char *arg, int from_tty)
   if (arg && *arg)
     {
       std::string script = std::string (arg) + "\n";
-      err = eval_python_command (script.c_str ());
+      /* Py_single_input causes the result to be displayed.  */
+      err = eval_python_command (script.c_str (), Py_single_input);
     }
   else
     {
@@ -333,14 +343,12 @@ python_interactive_command (const char *arg, int from_tty)
     }
 
   if (err)
-    {
-      gdbpy_print_stack ();
-      error (_("Error while executing Python code."));
-    }
+    gdbpy_handle_exception ();
 }
 
-/* A wrapper around PyRun_SimpleFile.  FILE is the Python script to run
-   named FILENAME.
+/* Like PyRun_SimpleFile, but if there is an exception, it is not
+   automatically displayed.  FILE is the Python script to run named
+   FILENAME.
 
    On Windows hosts few users would build Python themselves (this is no
    trivial task on this platform), and thus use binaries built by
@@ -349,39 +357,13 @@ python_interactive_command (const char *arg, int from_tty)
    library.  Python, being built with VC, would use one version of the
    msvcr DLL (Eg. msvcr100.dll), while MinGW uses msvcrt.dll.
    A FILE * from one runtime does not necessarily operate correctly in
-   the other runtime.
+   the other runtime.  */
 
-   To work around this potential issue, we run code in Python to load
-   the script.  */
-
-static void
+static int
 python_run_simple_file (FILE *file, const char *filename)
 {
-#ifndef _WIN32
-
-  PyRun_SimpleFile (file, filename);
-
-#else /* _WIN32 */
-
-  /* Because we have a string for a filename, and are using Python to
-     open the file, we need to expand any tilde in the path first.  */
-  gdb::unique_xmalloc_ptr<char> full_path (tilde_expand (filename));
-
-  if (gdb_python_module == nullptr
-      || ! PyObject_HasAttrString (gdb_python_module, "_execute_file"))
-    error (_("Installation error: gdb._execute_file function is missing"));
-
-  gdbpy_ref<> return_value
-    (PyObject_CallMethod (gdb_python_module, "_execute_file", "s",
-			  full_path.get ()));
-  if (return_value == nullptr)
-    {
-      /* Use PyErr_PrintEx instead of gdbpy_print_stack to better match the
-	 behavior of the non-Windows codepath.  */
-      PyErr_PrintEx(0);
-    }
-
-#endif /* _WIN32 */
+  std::string contents = read_remainder_of_file (file);
+  return eval_python_command (contents.c_str (), Py_file_input, filename);
 }
 
 /* Given a command_line, return a command string suitable for passing
@@ -408,17 +390,15 @@ static void
 gdbpy_eval_from_control_command (const struct extension_language_defn *extlang,
 				 struct command_line *cmd)
 {
-  int ret;
-
   if (cmd->body_list_1 != nullptr)
     error (_("Invalid \"python\" block structure."));
 
   gdbpy_enter enter_py;
 
   std::string script = compute_python_string (cmd->body_list_0.get ());
-  ret = PyRun_SimpleString (script.c_str ());
-  if (ret)
-    error (_("Error while executing Python code."));
+  int ret = eval_python_command (script.c_str (), Py_file_input);
+  if (ret != 0)
+    gdbpy_handle_exception ();
 }
 
 /* Implementation of the gdb "python" command.  */
@@ -433,8 +413,9 @@ python_command (const char *arg, int from_tty)
   arg = skip_spaces (arg);
   if (arg && *arg)
     {
-      if (PyRun_SimpleString (arg))
-	error (_("Error while executing Python code."));
+      int ret = eval_python_command (arg, Py_file_input);
+      if (ret != 0)
+	gdbpy_handle_exception ();
     }
   else
     {
@@ -1050,7 +1031,9 @@ gdbpy_source_script (const struct extension_language_defn *extlang,
 		     FILE *file, const char *filename)
 {
   gdbpy_enter enter_py;
-  python_run_simple_file (file, filename);
+  int result = python_run_simple_file (file, filename);
+  if (result != 0)
+    gdbpy_handle_exception ();
 }
 
 
@@ -1682,7 +1665,9 @@ gdbpy_source_objfile_script (const struct extension_language_defn *extlang,
   scoped_restore restire_current_objfile
     = make_scoped_restore (&gdbpy_current_objfile, objfile);
 
-  python_run_simple_file (file, filename);
+  int result = python_run_simple_file (file, filename);
+  if (result != 0)
+    gdbpy_print_stack ();
 }
 
 /* Set the current objfile to OBJFILE and then execute SCRIPT
@@ -1703,7 +1688,9 @@ gdbpy_execute_objfile_script (const struct extension_language_defn *extlang,
   scoped_restore restire_current_objfile
     = make_scoped_restore (&gdbpy_current_objfile, objfile);
 
-  PyRun_SimpleString (script);
+  int ret = eval_python_command (script, Py_file_input);
+  if (ret != 0)
+    gdbpy_print_stack ();
 }
 
 /* Return the current Objfile, or None if there isn't one.  */
@@ -2361,21 +2348,15 @@ test_python ()
       {
 	CMD (output);
       }
-    catch (const gdb_exception &e)
+    catch (const gdb_exception_quit &e)
       {
 	saw_exception = true;
-	SELF_CHECK (e.reason == RETURN_ERROR);
-	SELF_CHECK (e.error == GENERIC_ERROR);
-	SELF_CHECK (*e.message == "Error while executing Python code.");
+	SELF_CHECK (e.reason == RETURN_QUIT);
+	SELF_CHECK (e.error == GDB_NO_ERROR);
+	SELF_CHECK (*e.message == "Quit");
       }
     SELF_CHECK (saw_exception);
-    std::string ref_output_0 ("Traceback (most recent call last):\n"
-			      "  File \"<string>\", line 0, in <module>\n"
-			      "KeyboardInterrupt\n");
-    std::string ref_output_1 ("Traceback (most recent call last):\n"
-			      "  File \"<string>\", line 1, in <module>\n"
-			      "KeyboardInterrupt\n");
-    SELF_CHECK (output == ref_output_0 || output == ref_output_1);
+    SELF_CHECK (output.empty ());
   }
 
 #undef CMD

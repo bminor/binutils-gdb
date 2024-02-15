@@ -190,7 +190,7 @@ proc_with_prefix test_bkpt_deletion { } {
     gdb_py_test_silent_cmd  "python dp1.delete()" \
 	"Delete Breakpoint" 0
     gdb_test "python print (dp1.number)" \
-	"RuntimeError: Breakpoint 2 is invalid.*" \
+	"RuntimeError.*: Breakpoint 2 is invalid.*" \
 	"Check breakpoint invalidated"
     gdb_py_test_silent_cmd "python del_list = gdb.breakpoints()" \
 	"Get Breakpoint List" 0
@@ -275,7 +275,7 @@ proc_with_prefix test_bkpt_thread_and_inferior { } {
 	gdb_test "python print(bp.thread)" "1"
 	gdb_test "python print(bp.inferior)" "None"
 	gdb_test "python bp.inferior = 1" \
-	    "RuntimeError: Cannot have both 'thread' and 'inferior' conditions on a breakpoint.*"
+	    "RuntimeError.*: Cannot have both 'thread' and 'inferior' conditions on a breakpoint.*"
 	gdb_test_no_output "python bp.thread = None"
 	gdb_test_no_output "python bp.inferior = 1" \
 	    "set the inferior now the thread has been cleared"
@@ -289,7 +289,7 @@ proc_with_prefix test_bkpt_thread_and_inferior { } {
 	gdb_test "python print(bp.thread)" "None"
 	gdb_test "python print(bp.inferior)" "1"
 	gdb_test "python bp.thread = 1" \
-	    "RuntimeError: Cannot have both 'thread' and 'inferior' conditions on a breakpoint.*"
+	    "RuntimeError.*: Cannot have both 'thread' and 'inferior' conditions on a breakpoint.*"
 	gdb_test_no_output "python bp.inferior = None"
 	gdb_test_no_output "python bp.thread = 1" \
 	    "set the thread now the inferior has been cleared"
@@ -522,7 +522,7 @@ proc_with_prefix test_bkpt_eval_funcs { } {
 	"end" ""
 
     gdb_test "python eval_bp2.stop = stop_func"  \
-	"RuntimeError: Only one stop condition allowed.  There is currently a GDB.*" \
+	"RuntimeError.*: Only one stop condition allowed.  There is currently a GDB.*" \
 	"assign stop function to a breakpoint that has a condition"
 
     delete_breakpoints
@@ -589,7 +589,7 @@ proc_with_prefix test_bkpt_temporary { } {
 	".*$srcfile:$ibp_location.*"
     gdb_test "python print (ibp.count)" "1" \
 	"Check temporary stop callback executed before deletion."
-    gdb_test "python print (ibp.temporary)" "RuntimeError: Breakpoint 2 is invalid.*" \
+    gdb_test "python print (ibp.temporary)" "RuntimeError.*: Breakpoint 2 is invalid.*" \
 	"Check temporary breakpoint is deleted after being hit"
     gdb_test "info breakpoints" "No breakpoints, watchpoints, tracepoints, or catchpoints.*" \
 	"Check info breakpoints shows temporary breakpoint is deleted"
@@ -707,7 +707,7 @@ proc_with_prefix test_bkpt_explicit_loc {} {
 
     delete_breakpoints
     gdb_test "python bp1 = gdb.Breakpoint (line=bp1)" \
-	"RuntimeError: Line keyword should be an integer or a string.*" \
+	"RuntimeError.*: Line keyword should be an integer or a string.*" \
 	"set explicit breakpoint by invalid line type"
 
     delete_breakpoints
@@ -736,7 +736,7 @@ proc_with_prefix test_bkpt_explicit_loc {} {
 
     delete_breakpoints
     gdb_test "python bp1 = gdb.Breakpoint (source=\"$srcfile\")" \
-	"RuntimeError: Specifying a source must also include a line, label or function.*" \
+	"RuntimeError.*: Specifying a source must also include a line, label or function.*" \
 	"set invalid explicit breakpoint by source only"
 
     gdb_test "python bp1 = gdb.Breakpoint (source=\"foo.c\", line=\"5\")" \
@@ -859,8 +859,8 @@ proc_with_prefix test_catchpoints {} {
     # the python api.
     gdb_test "python gdb.Breakpoint (\"syscall\", type=gdb.BP_CATCHPOINT)" \
 	[multi_line \
-	     "gdb.error: BP_CATCHPOINT not supported" \
-	     "Error while executing Python code\\."] \
+	     "gdb.error.*: BP_CATCHPOINT not supported" \
+	     "Error occurred in Python:.*"] \
 	"create a catchpoint via the api"
 
     # Setup a catchpoint.

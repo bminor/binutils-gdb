@@ -50,7 +50,7 @@ proc test_template_arg {exefile type} {
     gdb_test "python print (foo.type.template_argument(0))" $t $type
 
     gdb_test "python print(foo.type.template_argument(-1))" \
-	"Template argument number must be non-negative\r\nError while executing Python code." \
+	"Template argument number must be non-negative\r\nError occurred in Python.*" \
 	"negative template argument number in template test of $type"
 }
 

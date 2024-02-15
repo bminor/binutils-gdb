@@ -98,15 +98,15 @@ if {[allow_python_tests]} {
     gdb_test "python print(bp.thread)" "None"
     gdb_test "python bp.thread = 1" \
 	[multi_line \
-	     "RuntimeError: Cannot set both task and thread attributes\\." \
-	     "Error while executing Python code\\."] \
+	     "RuntimeError.*: Cannot set both task and thread attributes\\." \
+	     "Error occurred in Python.*"] \
 	"try setting the thread, but expect an error"
     gdb_test_no_output "python bp.task = None"
     gdb_test_no_output "python bp.thread = 1"
     gdb_test "python bp.task = 3" \
 	[multi_line \
-	     "RuntimeError: Cannot set both task and thread attributes\\." \
-	     "Error while executing Python code\\."] \
+	     "RuntimeError.*: Cannot set both task and thread attributes\\." \
+	     "Error occurred in Python.*"] \
 	"try setting the task, but expect an error"
 
     # Reset the breakpoint to the state required for the rest of this

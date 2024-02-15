@@ -342,7 +342,7 @@ proc_with_prefix test_gdb_parameter { } {
     } {
 	clean_restart
 
-	set param_range_error ".*gdb.error: integer -1 out of range.*"
+	set param_range_error ".*gdb.error.*: integer -1 out of range.*"
 	switch -- $param {
 	    "listsize" {
 		set param_get_zero None
@@ -438,8 +438,8 @@ proc_with_prefix test_integer_parameter { } {
 	    "test_param_$kind = TestNodocParam ('test-$kind')" "" \
 	    "end"
 
-	set param_range_error "RuntimeError: Range exceeded.*"
-	set param_integer_error "RuntimeError: The value must be integer.*"
+	set param_range_error "RuntimeError.*: Range exceeded.*"
+	set param_integer_error "RuntimeError.*: The value must be integer.*"
 	switch -- $kind {
 	    PARAM_UINTEGER {
 		set param_get_zero None
@@ -610,13 +610,13 @@ proc_with_prefix test_ambiguous_parameter {} {
 
     # Test ambiguous names.
     gdb_test "python print(gdb.parameter('test-ambiguou'))" \
-	"Parameter .* is ambiguous.*Error while executing Python code."
+	"Parameter .* is ambiguous.*Error occurred in Python.*"
     gdb_test "python print(gdb.parameter('test-ambiguous-'))" \
-	"Parameter .* is ambiguous.*Error while executing Python code."
+	"Parameter .* is ambiguous.*Error occurred in Python.*"
     gdb_test "python print(gdb.parameter('test-ambiguous-v'))" \
-	"Parameter .* is ambiguous.*Error while executing Python code."
+	"Parameter .* is ambiguous.*Error occurred in Python.*"
     gdb_test "python print(gdb.parameter('test-ambiguous-value-1a'))" \
-	"Could not find parameter.*Error while executing Python code."
+	"Could not find parameter.*Error occurred in Python.*"
 }
 
 test_directories

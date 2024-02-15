@@ -107,7 +107,7 @@ set warning_msg \
 
 gdb_test "step" \
     [multi_line \
-	 "^FreeProgspaceEvent: <gdb.Progspace object at $hex>(?:\r\n$warning_msg)*" \
+	 "^FreeProgspaceEvent.*: <gdb.Progspace object at $hex>(?:\r\n$warning_msg)*" \
 	 "do_parent_stuff \\(\\) at \[^\r\n\]+" \
 	 "$decimal\\s+\[^\r\n\]+"]
 

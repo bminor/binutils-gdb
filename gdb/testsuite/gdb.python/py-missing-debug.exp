@@ -201,8 +201,8 @@ proc check_bad_name {name} {
     set name_re [string_to_regexp $name]
     set re \
 	[multi_line \
-	     "ValueError: invalid character '.' in handler name: $name_re" \
-	     "Error while executing Python code\\."]
+	     "ValueError.*: invalid character '.' in handler name: $name_re" \
+	     "Error occurred in Python.*"]
 
     gdb_test "python register(\"$name\")" $re \
 	"check that '$name' is not accepted"
@@ -442,13 +442,13 @@ with_test_prefix "check handler replacement" {
     # the same name.
     gdb_test "python gdb.missing_debug.register_handler(pspace, log_handler(\"Foo\"))" \
 	[multi_line \
-	     "RuntimeError: Handler Foo already exists\\." \
-	     "Error while executing Python code\\."]
+	     "RuntimeError.*: Handler Foo already exists\\." \
+	     "Error occurred in Python.*"]
 
     gdb_test "python gdb.missing_debug.register_handler(handler=log_handler(\"Foo\"), locus=pspace)" \
 	[multi_line \
-	     "RuntimeError: Handler Foo already exists\\." \
-	     "Error while executing Python code\\."]
+	     "RuntimeError.*: Handler Foo already exists\\." \
+	     "Error occurred in Python.*"]
 
     # And now try again, but this time with 'replace=True', we
     # shouldn't get an error in this case.
@@ -464,8 +464,8 @@ with_test_prefix "check handler replacement" {
 
     gdb_test "python gdb.missing_debug.register_handler(pspace, log_handler(\"Foo\"))" \
 	[multi_line \
-	     "RuntimeError: Handler Foo already exists\\." \
-	     "Error while executing Python code\\."] \
+	     "RuntimeError.*: Handler Foo already exists\\." \
+	     "Error occurred in Python.*"] \
 	"still get an error when handler is disabled"
 
     gdb_test_no_output \

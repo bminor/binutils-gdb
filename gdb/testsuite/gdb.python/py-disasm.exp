@@ -164,16 +164,16 @@ foreach plan $test_plans {
 with_test_prefix "DisassemblerResult errors" {
     gdb_test "python gdb.disassembler.DisassemblerResult(0, 'abc')" \
 	[multi_line \
-	     "ValueError: Length must be greater than 0." \
-	     "Error while executing Python code."]
+	     "ValueError.*: Length must be greater than 0." \
+	     "Error occurred in Python.*"]
     gdb_test "python gdb.disassembler.DisassemblerResult(-1, 'abc')" \
 	[multi_line \
-	     "ValueError: Length must be greater than 0." \
-	     "Error while executing Python code."]
+	     "ValueError.*: Length must be greater than 0." \
+	     "Error occurred in Python.*"]
     gdb_test "python gdb.disassembler.DisassemblerResult(1, '')" \
 	[multi_line \
-	     "ValueError: String must not be empty." \
-	     "Error while executing Python code."]
+	     "ValueError.*: String must not be empty.*" \
+	     "Error occurred in Python.*"]
 }
 
 # Check that the architecture specific disassemblers can override the
@@ -255,8 +255,8 @@ with_test_prefix "Bad DisassembleInfo creation" {
     gdb_test "python print(my_info.is_valid())" "True"
     gdb_test "python gdb.disassembler.builtin_disassemble(my_info)" \
 	[multi_line \
-	     "RuntimeError: DisassembleInfo is no longer valid\\." \
-	     "Error while executing Python code\\."]
+	     "RuntimeError.*: DisassembleInfo is no longer valid\\." \
+	     "Error occurred in Python.*"]
 }
 
 # Some of the disassembler related types should not be sub-typed,
@@ -274,8 +274,8 @@ with_test_prefix "check inheritance" {
 	    "     pass" "" \
 	    "end" \
 	    [multi_line \
-		 "TypeError: type '${type_ptn}' is not an acceptable base type" \
-		 "Error while executing Python code\\."]
+		 "TypeError.*: type '${type_ptn}' is not an acceptable base type" \
+		 "Error occurred in Python.*"]
     }
 }
 
@@ -283,15 +283,15 @@ with_test_prefix "check inheritance" {
 # Test some error conditions when creating a DisassemblerResult object.
 gdb_test "python result = gdb.disassembler.DisassemblerResult()" \
     [multi_line \
-	 "TypeError: [missing_arg_pattern length 1]" \
-	 "Error while executing Python code\\."] \
+	 "TypeError.*: [missing_arg_pattern length 1]" \
+	 "Error occurred in Python.*"] \
     "try to create a DisassemblerResult without a length argument"
 
 foreach len {0 -1} {
     gdb_test "python result = gdb.disassembler.DisassemblerResult($len)" \
 	[multi_line \
-	     "ValueError: Length must be greater than 0\\." \
-	     "Error while executing Python code\\."] \
+	     "ValueError.*: Length must be greater than 0\\." \
+	     "Error occurred in Python.*"] \
 	"try to create a DisassemblerResult with length $len"
 }
 
@@ -300,7 +300,7 @@ foreach len {0 -1} {
 foreach type {DisassemblerTextPart DisassemblerAddressPart} {
     gdb_test "python result = gdb.disassembler.${type}()" \
 	[multi_line \
-	     "RuntimeError: Cannot create instances of DisassemblerPart\\." \
-	     "Error while executing Python code\\."] \
+	     "RuntimeError.*: Cannot create instances of DisassemblerPart\\." \
+	     "Error occurred in Python.*"] \
 	 "try to create an instance of ${type}"
 }

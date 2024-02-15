@@ -91,7 +91,7 @@ foreach size {0 1 2 3 4 8 16} {
 }
 
 gdb_test "python arch.integer_type(95)" \
-    ".*ValueError: no integer type of that size is available.*" \
+    ".*ValueError.* no integer type of that size is available.*" \
     "call integer_type with invalid size"
 
 # Test for gdb.architecture_names().  First we're going to grab the

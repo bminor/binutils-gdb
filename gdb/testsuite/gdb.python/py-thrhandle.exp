@@ -90,7 +90,7 @@ gdb_test "python print(gdb.selected_inferior().thread_from_handle(gdb.parse_and_
 # We should see an exception when passing an object of the wrong type.
 
 gdb_test "python print(gdb.selected_inferior().thread_from_handle(gdb.lookup_symbol('main')))" \
-         ".*TypeError: Argument 'handle' must be a thread handle object.*" \
+         ".*TypeError.*: Argument 'handle' must be a thread handle object.*" \
 	 "TypeError when passing a symbol object to thread_from_handle"
 
 # We should see an exception when passing too large of an object.

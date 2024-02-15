@@ -65,10 +65,10 @@ gdb_test "python print(conn.is_valid())" "False" "is_valid returns False"
 # Now check that accessing properties of the invalid connection cases
 # an error.
 gdb_test "python print(conn.num)" \
-    "RuntimeError: Connection no longer exists\\.\r\n.*"
+    "RuntimeError.*: Connection no longer exists\\.\r\n.*"
 gdb_test "python print(conn.type)" \
-    "RuntimeError: Connection no longer exists\\.\r\n.*"
+    "RuntimeError.*: Connection no longer exists\\.\r\n.*"
 gdb_test "python print(conn.description)" \
-    "RuntimeError: Connection no longer exists\\.\r\n.*"
+    "RuntimeError.*: Connection no longer exists\\.\r\n.*"
 gdb_test "python print(conn.details)" \
-    "RuntimeError: Connection no longer exists\\.\r\n.*"
+    "RuntimeError.*: Connection no longer exists\\.\r\n.*"

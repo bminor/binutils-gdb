@@ -82,7 +82,7 @@ with_test_prefix "normal conditions" {
 
     gdb_test "finish" "main.*" "return to main()"
     gdb_test "python MyFinishBreakpoint (None, gdb.selected_frame ())" \
-	"ValueError: \"FinishBreakpoint\" not meaningful in the outermost frame..*" \
+	"ValueError.*: \"FinishBreakpoint\" not meaningful in the outermost frame..*" \
 	"check FinishBP not allowed in main"
 }
 

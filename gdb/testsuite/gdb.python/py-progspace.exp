@@ -55,8 +55,8 @@ gdb_test "python print (progspace.random_attribute)" "42" \
 
 # Check that we can't create new (invalid) gdb.Progspace objects.
 gdb_test "python gdb.Progspace()" \
-    [multi_line "TypeError: cannot create 'gdb.Progspace' instances" \
-	 "Error while executing Python code\\."] \
+    [multi_line "TypeError.*: cannot create 'gdb.Progspace' instances" \
+	 "Error occurred in Python.*"] \
     "check for error when calling gdb.Progspace() directly"
 
 if {![runto_main]} {
@@ -111,7 +111,7 @@ gdb_py_test_silent_cmd "python progspace2 = gdb.current_progspace()" \
 gdb_test "inferior 1" "Switching to inferior 1.*"
 gdb_test_no_output "remove-inferiors 2"
 gdb_test "python print (progspace2.objfiles ())" \
-    "RuntimeError: Program space no longer exists.*"
+    "RuntimeError.*: Program space no longer exists.*"
 
 gdb_test "python print (progspace2.symbol_file)" \
-    "RuntimeError: Program space no longer exists.*"
+    "RuntimeError.*: Program space no longer exists.*"

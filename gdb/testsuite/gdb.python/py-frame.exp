@@ -77,25 +77,25 @@ gdb_test "python print (bf1.read_var(\"i\", sb).type)" "int" "test int i"
 # Test what happens when we provide a block of the wrong type.
 gdb_test "python print (bf1.read_var(\"i\", \"some_block\"))" \
     [multi_line \
-	 "TypeError: argument 2 must be gdb\\.Block, not str" \
-	 "Error while executing Python code\\."] \
+	 "TypeError.*: argument 2 must be gdb\\.Block, not str" \
+	 "Error occurred in Python.*"] \
     "check invalid block type error"
 gdb_test "python print (bf1.read_var(block = \"some_block\", variable = \"i\"))" \
     [multi_line \
-	 "TypeError: argument 2 must be gdb\\.Block, not str" \
-	 "Error while executing Python code\\."] \
+	 "TypeError.*: argument 2 must be gdb\\.Block, not str" \
+	 "Error occurred in Python.*"] \
     "check invalid block type error when named args are used"
 
 # Test what happens when we provide a variable of the wrong type.
 gdb_test "python print (bf1.read_var(None))" \
     [multi_line \
-	 "TypeError: argument 1 must be gdb\\.Symbol or str, not NoneType" \
-	 "Error while executing Python code\\."] \
+	 "TypeError.*: argument 1 must be gdb\\.Symbol or str, not NoneType" \
+	 "Error occurred in Python.*"] \
     "check read_var error when variable is None"
 gdb_test "python print (bf1.read_var(sb))" \
     [multi_line \
-	 "TypeError: argument 1 must be gdb\\.Symbol or str, not gdb\\.Block" \
-	 "Error while executing Python code\\."] \
+	 "TypeError.*: argument 1 must be gdb\\.Symbol or str, not gdb\\.Block" \
+	 "Error occurred in Python.*"] \
     "check read_var error when variable is a gdb.Block"
 
 gdb_breakpoint "f2"
@@ -141,7 +141,7 @@ gdb_test "python print ('result = %s' % f0.pc ())" " = \[0-9\]+" "test Frame.pc"
 gdb_test "python print ('result = %s' % (f0.older () == f1))" " = True" "test Frame.older"
 gdb_test "python print ('result = %s' % (f1.newer () == f0))" " = True" "test Frame.newer"
 gdb_test "python print ('result = %s' % f0.read_var ('variable_which_surely_doesnt_exist'))" \
-  "ValueError: Variable 'variable_which_surely_doesnt_exist' not found.*Error while executing Python code." \
+  "ValueError.*: Variable 'variable_which_surely_doesnt_exist' not found.*Error occurred in Python.*" \
   "test Frame.read_var - error"
 gdb_test "python print ('result = %s' % f0.read_var ('a'))" " = 1" "test Frame.read_var - success"
 

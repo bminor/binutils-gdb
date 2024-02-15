@@ -102,7 +102,7 @@ with_test_prefix "replace" {
     gdb_test_no_output "py gdb.printing.register_pretty_printer(gdb, lookup_function_lookup_test)"
     gdb_test_no_output "py gdb.printing.register_pretty_printer(progspace, my_pretty_printer1)"
     gdb_test "py gdb.printing.register_pretty_printer(progspace, my_pretty_printer2, replace=False)" \
-	"RuntimeError: pretty-printer already registered: pp-test\r\nError while executing Python code."
+	"RuntimeError.*: pretty-printer already registered: pp-test\r\nError occurred in Python.*"
 
     with_test_prefix "test printers 1" {
 	test_printers "s1"

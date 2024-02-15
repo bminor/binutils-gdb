@@ -30,7 +30,7 @@ if {![runto_main]} {
     return 0
 }
 
-set python_error_text "Error while executing Python code\\."
+set python_error_text "Error occurred in Python.*"
 
 gdb_py_test_silent_cmd "python sym = gdb.lookup_symbol(\"some_var\")" \
     "Find a symbol in objfile" 1

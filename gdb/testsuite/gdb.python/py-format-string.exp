@@ -1102,22 +1102,22 @@ proc_with_prefix test_invalid_args {} {
   check_format_string \
     "a_point_t" \
     "12" \
-    "TypeError: format_string\\(\\) takes 0 positional arguments but 1 were given.*"
+    "TypeError.*: format_string\\(\\) takes 0 positional arguments but 1 were given.*"
 
   check_format_string \
     "a_point_t" \
     "invalid=True" \
-    "TypeError: 'invalid' is an invalid keyword argument for this function.*"
+    "TypeError.*: 'invalid' is an invalid keyword argument for this function.*"
 
   check_format_string \
     "a_point_t" \
     "raw='hello'" \
-    "TypeError: argument 1 must be bool, not str.*"
+    "TypeError.*: argument 1 must be bool, not str.*"
 
   check_format_string \
     "a_point_t" \
     "format='xd'" \
-    "ValueError: a single character is required.*"
+    "ValueError.*: a single character is required.*"
 }
 
 # Check the styling argument to format_string.  This function needs to

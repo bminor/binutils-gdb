@@ -50,7 +50,7 @@ Term::check_contents "Window display" "Test: 0"
 
 Term::command "python delete_window_title ()"
 Term::check_contents "error message after trying to delete title" \
-    "TypeError: Cannot delete \"title\" attribute\\."
+    "TypeError.*: Cannot delete \"title\" attribute\\."
 Term::check_contents "title is unchanged" \
     "This Is The Title"
 

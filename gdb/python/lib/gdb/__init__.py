@@ -127,33 +127,6 @@ def _execute_unwinders(pending_frame):
     return None
 
 
-def _execute_file(filepath):
-    """This function is used to replace Python 2's PyRun_SimpleFile.
-
-    Loads and executes the given file.
-
-    We could use the runpy module, but its documentation says:
-    "Furthermore, any functions and classes defined by the executed code are
-    not guaranteed to work correctly after a runpy function has returned."
-    """
-    globals = sys.modules["__main__"].__dict__
-    set_file = False
-    # Set file (if not set) so that the imported file can use it (e.g. to
-    # access file-relative paths). This matches what PyRun_SimpleFile does.
-    if not hasattr(globals, "__file__"):
-        globals["__file__"] = filepath
-        set_file = True
-    try:
-        with open(filepath, "rb") as file:
-            # We pass globals also as locals to match what Python does
-            # in PyRun_SimpleFile.
-            compiled = compile(file.read(), filepath, "exec")
-            exec(compiled, globals, globals)
-    finally:
-        if set_file:
-            del globals["__file__"]
-
-
 # Convenience variable to GDB's python directory
 PYTHONDIR = os.path.dirname(os.path.dirname(__file__))
 

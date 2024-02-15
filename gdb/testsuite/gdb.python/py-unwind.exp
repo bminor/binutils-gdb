@@ -97,8 +97,8 @@ check_for_fixed_backtrace "check backtrace after flush"
 # output to be sure.
 gdb_test "python global_test_unwinder.enabled = \"off\"" \
     [multi_line \
-	 "TypeError: incorrect type for enabled attribute: <class 'str'>" \
-	 "Error while executing Python code\\."]
+	 "TypeError.*: incorrect type for enabled attribute: <class 'str'>" \
+	 "Error occurred in Python.*"]
 check_info_unwinder "info unwinder after failed disable" on
 
 # While we're doing silly stuff, lets try to change the name of this
@@ -109,8 +109,8 @@ set pattern_1 "can't set attribute(?: 'name')?"
 set pattern_2 "property 'name' of 'TestUnwinder' object has no setter"
 gdb_test "python global_test_unwinder.name = \"foo\"" \
     [multi_line \
-	 "AttributeError: (?:${pattern_1}|${pattern_2})" \
-	 "Error while executing Python code\\."]
+	 "AttributeError.*: (?:${pattern_1}|${pattern_2})" \
+	 "Error occurred in Python.*"]
 check_info_unwinder "info unwinder after failed name change" on
 
 # Now actually disable the unwinder by manually adjusting the
@@ -149,8 +149,8 @@ gdb_test "python print(read_register_error)" "Bad register" \
 # Try to create an unwinder object with a non-string name.
 gdb_test "python obj = simple_unwinder(True)" \
     [multi_line \
-	 "TypeError: incorrect type for name: <class 'bool'>" \
-	 "Error while executing Python code\\."]
+	 "TypeError.*: incorrect type for name: <class 'bool'>" \
+	 "Error occurred in Python.*"]
 
 # Now register the simple_unwinder with a valid name, and use the
 # unwinder to capture a PendingFrame object.
@@ -195,8 +195,8 @@ foreach cmd {"pf.read_register(\"pc\")" \
 		 "pf.function()" } {
     gdb_test "python $cmd" \
 	[multi_line \
-	     "ValueError: gdb\\.PendingFrame is invalid\\." \
-	     "Error while executing Python code\\."]
+	     "ValueError.*: gdb\\.PendingFrame is invalid\\." \
+	     "Error occurred in Python.*"]
 }
 
 # Turn on the useful unwinder so we have the full backtrace again, and
@@ -265,11 +265,11 @@ gdb_test_multiline "Sub-class gdb.UnwindInfo " \
     "    pass" "" \
     "end" \
     [multi_line \
-	 "TypeError: type 'gdb\\.UnwindInfo' is not an acceptable base type" \
-	 "Error while executing Python code\\."]
+	 "TypeError.*: type 'gdb\\.UnwindInfo' is not an acceptable base type" \
+	 "Error occurred in Python.*"]
 
 # Check we can't directly instantiate a gdb.UnwindInfo.
 gdb_test "python uw = gdb.UnwindInfo()" \
     [multi_line \
-     "TypeError: cannot create 'gdb\\.UnwindInfo' instances" \
-     "Error while executing Python code\\."]
+     "TypeError.*: cannot create 'gdb\\.UnwindInfo' instances" \
+     "Error occurred in Python.*"]
