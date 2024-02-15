@@ -506,7 +506,9 @@ add_symbols (void *handle, int nsyms, const struct ld_plugin_symbol *syms)
   int n;
 
   ASSERT (called_plugin);
-  symptrs = xmalloc (nsyms * sizeof *symptrs);
+  symptrs = bfd_alloc (abfd, nsyms * sizeof *symptrs);
+  if (symptrs == NULL)
+    return LDPS_ERR;
   for (n = 0; n < nsyms; n++)
     {
       enum ld_plugin_status rv;
@@ -514,6 +516,8 @@ add_symbols (void *handle, int nsyms, const struct ld_plugin_symbol *syms)
 
       bfdsym = bfd_make_empty_symbol (abfd);
       symptrs[n] = bfdsym;
+      if (bfdsym == NULL)
+	return LDPS_ERR;
       rv = asymbol_from_plugin_symbol (abfd, bfdsym, syms + n);
       if (rv != LDPS_OK)
 	return rv;
