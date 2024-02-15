@@ -16798,7 +16798,7 @@ md_show_usage (FILE *stream)
   -muse-unaligned-vector-move\n\
                           encode aligned vector move as unaligned vector move\n"));
   fprintf (stream, _("\
-  -msse-check=[none|error|warning] (default: warning)\n\
+  -msse-check=[none|error|warning] (default: none)\n\
                           check SSE instructions\n"));
   fprintf (stream, _("\
   -moperand-check=[none|error|warning] (default: warning)\n\
