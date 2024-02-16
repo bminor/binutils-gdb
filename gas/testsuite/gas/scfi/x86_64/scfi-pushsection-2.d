@@ -1,7 +1,7 @@
 #as: --scfi=experimental -W
 #as:
 #objdump: -Wf
-#name: Synthesize CFI for demarcated code blocks 2
+#name: Synthesize CFI with pushsection 2
 #...
 Contents of the .eh_frame section:
 

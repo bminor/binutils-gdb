@@ -1,7 +1,7 @@
 #as: --scfi=experimental -W
 #as:
 #objdump: -Wf
-#name: Synthesize CFI for indirect mem op to stack 3
+#name: Synthesize CFI for indirect mem op to stack 4
 #...
 Contents of the .eh_frame section:
 
