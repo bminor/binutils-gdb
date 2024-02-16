@@ -134,7 +134,7 @@ dap_read_response cancel $cancel_id
 # does not continue the inferior) can be canceled.
 #
 
-write_file py "while True:\n  pass"
+set gdbfile [write_file py "while True:\n  pass"]
 set cont_id [dap_send_request evaluate \
 		 [format {o expression [s "source %s"] context [s repl]} \
 		      $gdbfile]]
