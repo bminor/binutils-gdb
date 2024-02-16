@@ -11,7 +11,6 @@ it also contains an upload script used to install tarballs on the GNU
 FTP server.
 
 Make sure that you have upload authority on sourceware and fencepost.
-Beware - this is an involved process and can take weeks to complete.
 See the maintain.texi file for details on how to obtain these
 permissions.
 
@@ -396,102 +395,79 @@ How to create the release.
 
   29. Update web pages.  For sourceware.org:
 
-      Create a new documentation folder on the sourceware.org web
-      pages as /sourceware/www/sourceware/htdocs/binutils/docs-2.4x.
+      Clone the documentation (if you have not already done so):
+      
+        git clone ssh://sourceware.org/git/binutils-htdocs
+      
+      Create a new docs sub-directory and move into it:
 
-       sftp sourceware.org
-         cd /sourceware/www/sourceware/htdocs/binutils
-	 mkdir docs-2.4x
-	 cd docs-2.4x
-	 mkdir as
-	 mkdir bfd
-	 mkdir binutils
-	 mkdir gprof      [NB/ gprofng is not needed]
-	 mkdir ld
-	 cd ../docs-2.4(x-1)
-	 get index.html
+        cd binutils-htdocs
+	mkdir docs-2.43
+        cd docs-2.43
+	
+      Copy the index.html from the previous release
 
-      Update the (local copy of the) index.html file to point to the
-      new documentation and mention the new version and then upload it.
+        cp ../docs/index.html .
 
-	 cd ../docs-2.4x
-	 put index.html
+      Update the index.html file to reference this new release and to
+      point back to the current (now old) release.
 
-      Make the html documentation locally with the "make html" command.
-      (This should have been done by step 25 above).
-      Then upload and rename the directories as needed.
-      (Sftp does not support recursive uploads however, so the directories
-      have to be made and populated by hand).
+      If necessary make the html documentation locally with the "make
+      html" command.  (This should have been done by step 25 above).
 
-         cd as
-	 lcd <build-dir>/gas/doc/as
-	 put *                <=== Be patient - this takes a long time...
-	 lcd ..
-	 cd ..
-	 put as.html
-	 put as.pdf
+      Copy in the documentation files:
+      
+	 cp -r <build-dir>/gas/doc/as    .
+	 cp <build-dir>/gas/doc/as.html  .
+	 cp <build-dir>/gas/doc/as.pdf   .
 	 
-	 cd bfd
-	 lcd ../../bfd/doc/bfd
-	 put *
-	 cd ..
-	 lcd ..
-	 put bfd.html
-	 put bfd.pdf
-	 
-	 cd binutils
-	 lcd ../../binutils/binutils_html      <=== NB/ Path not like others
-	 put *
-	 cd ..
-	 lcd ../doc                       <=== Also not like the others
-	 put binutils.html
-	 put binutils.pdf
-	 
-	 cd gprof
-	 lcd ../../gprof/doc/gprof
-	 put *
-	 cd ..
-	 lcd ../..                        <==== Different again
-	 put gprof.html
-	 put gprof.pdf
-	 
-	 cd ld
-	 lcd ../ld/doc/ld
-	 put *
-	 cd ..
-	 lcd ../..
-	 put ld.html
-	 put ld.pdf
-	 
-	 lcd ../gprofng/doc
-	 put gprofng.html
-	 put gprofng.pdf
-	 
-	 lcd ../../libctf/doc
-	 put ctf-spec.html
-	 put ctf-spec.pdf
+	 cp -r <build-dir>/bfd/doc/bfd   .
+	 cp <build-dir>/bfd/doc/bfd.html .
+	 cp <build-dir>/bfd/doc/bfd.pdf  .
 
-	 lcd ../../libsframe/doc
-	 put sframe-spec.html
-	 put sframe-spec.pdf
-	 
-      Edit the top level binutils index.html file to change the links
-      to point to the new documentation.
+	 cp -r <build-dir>/binutils/binutils_html  binutils    [NB/ Path not like others]
+	 cp <build-dir>/binutils/doc/binutils.html .
+	 cp <build-dir>/binutils/doc/binutils.pdf  .
 
-         cd ../..
-	 get index.html
-	 [edit]
-	 [check that it works]
-	 put index.html
-         rm docs
-	 ln -s docs-2.4x docs
-	 quit
+	 cp -r <build-dir>/gprof/doc/gprof     .
+	 cp <build-dir>/gprof/doc/gprof.html   .
+	 cp <build-dir>/gprof/doc/gprof.pdf    .
+	 
+	 cp -r <build-dir>/ld/doc/ld     .
+	 cp <build-dir>/ld/doc/ld.html   .
+	 cp <build-dir>/ld/doc/ld.pdf    .
+
+	    [NB/ The gprofng documentation does not have a node-per-page selection]
+	 cp <build-dir>/gprofng/doc/gprof.html   .
+	 cp <build-dir>/gprofng/doc/gprof.pdf    .
+	 
+	 cp <build-dir>/libctf/doc/ctf-spec.html   .
+	 cp <build-dir>/libctf/doc/ctf-spec.pdf    .
+
+	 cp <build-dir>/libsframe/doc/sframe-spec.html   .
+	 cp <build-dir>/libsframe/doc/sframe-spec.pdf    .
+
+      Update the symbolic link.
+
+         cd ..     [Should now be in be in binutils-htdocs/ ]
+	 rm docs
+	 ln -s docs-2.43 docs
+	 
+      Edit index.html file to change the links to point to the new
+      release, mention any new features, update dates and so on.
 
       Check that the new web page is correct:
-      
-          https://sourceware.org/binutils/
-	  
-      For the www.gnu.org site you have to email webmasters@gnu.org
+
+         file:///<path-to-binutils-htdocs>/index.html
+
+      Add the new directories and files, commit and push the changes:
+
+        git add .
+        git commit -m"Update documenation for the 2.4x release"
+	git push
+
+
+  29.1 For the www.gnu.org site you have to email webmasters@gnu.org
       and ask them to copy the change(s):
 ---------------------------------------
 Hi FSF Webmasters,
@@ -657,9 +633,11 @@ looks like this:
 
   7. Update web pages.  For sourceware.org:
 
-      * Log on to sourceware.org
-      * Go to /sourceware/www/sourceware/htdocs/binutils
-      * Edit index.html and update the latest release number (if this is a latest release)
+      * Clone the binutils documentation: git clone ssh://sourceware.org/git/binutils-htdocs
+      * Edit index.html and update the latest release number (if this
+        is a latest release).
+      * Add new documentation (if necessary).
+      * Commit and push the changes.
 
       For the www.gnu.org site you have to email webmasters@gnu.org
       and ask them to make the change(s).
