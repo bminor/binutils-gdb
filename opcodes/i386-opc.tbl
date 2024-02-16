@@ -1096,8 +1096,8 @@ movd, 0x660f6e, SSE2&x64, D|Modrm|NoSuf|Size64, { Reg64|BaseIndex, RegXMM }
 // The MMX templates have to remain after at least the SSE2AVX ones.
 movd, 0xf6e, MMX, D|Modrm|IgnoreSize|NoSuf, { Reg32|Unspecified|BaseIndex, RegMMX }
 movd, 0xf6e, MMX&x64, D|Modrm|NoSuf|Size64, { Reg64|BaseIndex, RegMMX }
-movq, 0xf37e, AVX, Load|Modrm|Vex=1|Space0F|VexWIG|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-movq, 0x66d6, AVX, Modrm|Vex=1|Space0F|VexWIG|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex|RegXMM }
+movq, 0xf37e, AVX, Load|Modrm|Vex128|Space0F|VexW0|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+movq, 0x66d6, AVX, Modrm|Vex128|Space0F|VexW0|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex|RegXMM }
 movq, 0x666e, AVX&x64, D|Modrm|Vex=1|Space0F|VexW1|NoSuf|Size64|SSE2AVX, { Reg64|Unspecified|BaseIndex, RegXMM }
 movq, 0xf30f7e, SSE2, Load|Modrm|NoSuf, { Unspecified|Qword|BaseIndex|RegXMM, RegXMM }
 movq, 0x660fd6, SSE2, Modrm|NoSuf, { RegXMM, Unspecified|Qword|BaseIndex|RegXMM }
@@ -1446,8 +1446,8 @@ blendvp<sd>, 0x664a | <sd:opc>, AVX, Modrm|Vex128|Space0F3A|VexVVVV|VexW0|NoSuf|
 blendvp<sd>, 0x660f3814 | <sd:opc>, SSE4_1, Modrm|NoSuf, { Acc|Xmmword, RegXMM|Unspecified|BaseIndex, RegXMM }
 blendvp<sd>, 0x660f3814 | <sd:opc>, SSE4_1, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 dpp<sd><sse41>, 0x660f3a40 | <sd:opc>, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
-extractps, 0x6617, AVX, Modrm|Vex|Space0F3A|VexWIG|NoSuf|SSE2AVX, { Imm8, RegXMM, Reg32|Unspecified|BaseIndex }
-extractps, 0x6617, AVX&x64, RegMem|Vex|Space0F3A|VexWIG|NoSuf|SSE2AVX, { Imm8, RegXMM, Reg64 }
+extractps, 0x6617, AVX, Modrm|Vex128|Space0F3A|VexW0|NoSuf|SSE2AVX, { Imm8, RegXMM, Reg32|Unspecified|BaseIndex }
+extractps, 0x6617, AVX&x64, RegMem|Vex128|Space0F3A|VexW1|NoSuf|SSE2AVX, { Imm8, RegXMM, Reg64 }
 extractps, 0x660f3a17, SSE4_1, Modrm|IgnoreSize|NoSuf, { Imm8, RegXMM, Reg32|Unspecified|BaseIndex }
 extractps, 0x660f3a17, SSE4_1&x64, RegMem|NoSuf|NoRex64, { Imm8, RegXMM, Reg64 }
 insertps<sse41>, 0x660f3a21, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8, Dword|Unspecified|BaseIndex|RegXMM, RegXMM }

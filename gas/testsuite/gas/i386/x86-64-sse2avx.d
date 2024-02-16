@@ -655,7 +655,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 50 cc          	vmovmskpd %xmm4,%ecx
 [ 	]*[a-f0-9]+:	c5 f8 50 cc          	vmovmskps %xmm4,%ecx
 [ 	]*[a-f0-9]+:	c5 f9 d7 cc          	vpmovmskb %xmm4,%ecx
-[ 	]*[a-f0-9]+:	c4 e3 79 17 e1 64    	vextractps \$0x64,%xmm4,%ecx
+[ 	]*[a-f0-9]+:	c4 e3 f9 17 e1 64    	vextractps \$0x64,%xmm4,%ecx
 [ 	]*[a-f0-9]+:	c4 e3 79 17 21 64    	vextractps \$0x64,%xmm4,\(%rcx\)
 [ 	]*[a-f0-9]+:	c4 e3 79 16 e1 64    	vpextrd \$0x64,%xmm4,%ecx
 [ 	]*[a-f0-9]+:	c4 e3 79 16 21 64    	vpextrd \$0x64,%xmm4,\(%rcx\)
@@ -1291,7 +1291,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 50 cc          	vmovmskpd %xmm4,%ecx
 [ 	]*[a-f0-9]+:	c5 f8 50 cc          	vmovmskps %xmm4,%ecx
 [ 	]*[a-f0-9]+:	c5 f9 d7 cc          	vpmovmskb %xmm4,%ecx
-[ 	]*[a-f0-9]+:	c4 e3 79 17 e1 64    	vextractps \$0x64,%xmm4,%ecx
+[ 	]*[a-f0-9]+:	c4 e3 f9 17 e1 64    	vextractps \$0x64,%xmm4,%ecx
 [ 	]*[a-f0-9]+:	c4 e3 79 17 21 64    	vextractps \$0x64,%xmm4,\(%rcx\)
 [ 	]*[a-f0-9]+:	c4 e3 79 16 e1 64    	vpextrd \$0x64,%xmm4,%ecx
 [ 	]*[a-f0-9]+:	c4 e3 79 16 21 64    	vpextrd \$0x64,%xmm4,\(%rcx\)
