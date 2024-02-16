@@ -2129,12 +2129,12 @@ xcryptofb, 0xf30fa7e8, PadLock, NoSuf|RepPrefixOk, {}
 xstore, 0xfa7c0, PadLock, NoSuf|RepPrefixOk, {}
 
 // Multy-precision Add Carry, rdseed instructions.
-adcx, 0x6666, ADX&APX_F, C|Modrm|CheckOperandSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|DstVVVV|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64, Reg32|Reg64 }
+adcx, 0x6666, ADX&APX_F, C|Modrm|CheckOperandSize|No_bSuf|No_wSuf|No_sSuf|DstVVVV|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64, Reg32|Reg64 }
 adcx, 0x660f38f6, ADX, Modrm|CheckOperandSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
-adcx, 0x6666, ADX&APX_F, Modrm|CheckOperandSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
-adox, 0xf366, ADX&APX_F, C|Modrm|CheckOperandSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|DstVVVV|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64, Reg32|Reg64 }
+adcx, 0x6666, ADX&APX_F, Modrm|CheckOperandSize|No_bSuf|No_wSuf|No_sSuf|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
+adox, 0xf366, ADX&APX_F, C|Modrm|CheckOperandSize|No_bSuf|No_wSuf|No_sSuf|DstVVVV|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64, Reg32|Reg64 }
 adox, 0xf30f38f6, ADX, Modrm|CheckOperandSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
-adox, 0xf366, ADX&APX_F, Modrm|CheckOperandSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
+adox, 0xf366, ADX&APX_F, Modrm|CheckOperandSize|No_bSuf|No_wSuf|No_sSuf|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
 rdseed, 0xfc7/7, RdSeed, Modrm|NoSuf, { Reg16|Reg32|Reg64 }
 
 // SMAP instructions.
@@ -3112,11 +3112,11 @@ rdsspq, 0xf30f1e/1, SHSTK&x64, Modrm|NoSuf, { Reg64 }
 saveprevssp, 0xf30f01ea, SHSTK, NoSuf, {}
 rstorssp, 0xf30f01/5, SHSTK, Modrm|NoSuf, { Qword|Unspecified|BaseIndex }
 wrssd, 0x0f38f6, SHSTK, Modrm|IgnoreSize|NoSuf, { Reg32, Dword|Unspecified|BaseIndex }
-wrssd, 0x66, SHSTK&APX_F, Modrm|IgnoreSize|NoSuf|EVexMap4, { Reg32, Dword|Unspecified|BaseIndex }
+wrssd, 0x66, SHSTK&APX_F, Modrm|NoSuf|EVexMap4, { Reg32, Dword|Unspecified|BaseIndex }
 wrssq, 0x0f38f6, SHSTK&x64, Modrm|NoSuf|Size64, { Reg64, Qword|Unspecified|BaseIndex }
 wrssq, 0x66, SHSTK&APX_F, Modrm|NoSuf|Size64|EVexMap4, { Reg64, Qword|Unspecified|BaseIndex }
 wrussd, 0x660f38f5, SHSTK, Modrm|IgnoreSize|NoSuf, { Reg32, Dword|Unspecified|BaseIndex }
-wrussd, 0x6665, SHSTK&APX_F, Modrm|IgnoreSize|NoSuf|EVexMap4, { Reg32, Dword|Unspecified|BaseIndex }
+wrussd, 0x6665, SHSTK&APX_F, Modrm|NoSuf|EVexMap4, { Reg32, Dword|Unspecified|BaseIndex }
 wrussq, 0x660f38f5, SHSTK&x64, Modrm|NoSuf, { Reg64, Qword|Unspecified|BaseIndex }
 wrussq, 0x6665, SHSTK&APX_F, Modrm|NoSuf|EVexMap4, { Reg64, Qword|Unspecified|BaseIndex }
 setssbsy, 0xf30f01e8, SHSTK, NoSuf, {}
@@ -3166,7 +3166,7 @@ cldemote, 0x0f1c/0, CLDEMOTE, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
 // MOVDIR[I,64B] instructions.
 
 movdiri, 0xf38f9, MOVDIRI, Modrm|CheckOperandSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-movdiri, 0xf9, MOVDIRI&APX_F, Modrm|CheckOperandSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+movdiri, 0xf9, MOVDIRI&APX_F, Modrm|CheckOperandSize|No_bSuf|No_wSuf|No_sSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
 movdir64b, 0x660f38f8, MOVDIR64B, Modrm|AddrPrefixOpReg|NoSuf, { Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 movdir64b, 0x66f8, MOVDIR64B&APX_F, Modrm|AddrPrefixOpReg|NoSuf|EVexMap4, { Unspecified|BaseIndex, Reg32|Reg64 }
 
@@ -3473,13 +3473,13 @@ wrmsrlist, 0xf30f01c6, MSRLIST, NoSuf, {}
 // RAO-INT instructions.
 
 aadd, 0xf38fc, RAO_INT, Modrm|IgnoreSize|CheckOperandSize|NoSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-aadd, 0xfc, RAO_INT&APX_F, Modrm|IgnoreSize|CheckOperandSize|NoSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+aadd, 0xfc, RAO_INT&APX_F, Modrm|CheckOperandSize|NoSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
 aand, 0x660f38fc, RAO_INT, Modrm|IgnoreSize|CheckOperandSize|NoSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-aand, 0x66fc, RAO_INT&APX_F, Modrm|IgnoreSize|CheckOperandSize|NoSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+aand, 0x66fc, RAO_INT&APX_F, Modrm|CheckOperandSize|NoSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
 aor, 0xf20f38fc, RAO_INT, Modrm|IgnoreSize|CheckOperandSize|NoSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-aor, 0xf2fc, RAO_INT&APX_F, Modrm|IgnoreSize|CheckOperandSize|NoSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+aor, 0xf2fc, RAO_INT&APX_F, Modrm|CheckOperandSize|NoSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
 axor, 0xf30f38fc, RAO_INT, Modrm|IgnoreSize|CheckOperandSize|NoSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-axor, 0xf3fc, RAO_INT&APX_F, Modrm|IgnoreSize|CheckOperandSize|NoSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+axor, 0xf3fc, RAO_INT&APX_F, Modrm|CheckOperandSize|NoSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
 
 // RAO-INT instructions end.
 
