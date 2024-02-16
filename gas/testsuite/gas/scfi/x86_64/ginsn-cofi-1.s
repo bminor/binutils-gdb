@@ -11,8 +11,12 @@ foo:
 	loop    foo
 	notrack jmp     *%rax
 	call    *%r8
+	call    *cost_arr(,%rax,8)
+	call    *symbol+1
 	jecxz   .L179
 	jmp     *48(%rdi)
+	jmp     *cost_arr(,%rax,8)
+	jmp     *symbol+1
 	jo      .L179
 .L179:
 	ret

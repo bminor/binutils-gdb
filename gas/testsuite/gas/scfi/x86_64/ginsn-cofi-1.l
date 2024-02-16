@@ -1,7 +1,6 @@
 .*: Assembler messages:
-.*:20: Error: untraceable control flow for func 'foo'
+.*:24: Error: untraceable control flow for func 'foo'
 GAS LISTING .*
-
 
    1              	# Testcase with a variety of "change of flow instructions"
    2              	#
@@ -22,17 +21,29 @@ GAS LISTING .*
   12              	ginsn: JMP %r0, 
   13 \?\?\?\? 41FFD0   		call    \*%r8
   13              	ginsn: CALL
-  14 \?\?\?\? 67E305   		jecxz   .L179
-  14              	ginsn: JCC 
-  15 \?\?\?\? FF6730   		jmp     \*48\(%rdi\)
-  15              	ginsn: JMP %r5, 
-  16 \?\?\?\? 7000     		jo      .L179
+  14 \?\?\?\? FF14C500 		call    \*cost_arr\(,%rax,8\)
+  14      000000
+  14              	ginsn: CALL
+  15 \?\?\?\? FF142500 		call    \*symbol\+1
+  15      000000
+  15              	ginsn: CALL
+  16 \?\?\?\? 67E313   		jecxz   .L179
   16              	ginsn: JCC 
-  17              	.L179:
-  17              	ginsn: SYM .L179
-  18 \?\?\?\? C3       		ret
-  18              	ginsn: RET
-  19              	.LFE0:
-  19              	ginsn: SYM .LFE0
-  20              		.size   foo, .-foo
-  20              	ginsn: SYM FUNC_END
+  17 \?\?\?\? FF6730   		jmp     \*48\(%rdi\)
+  17              	ginsn: JMP %r5, 
+  18 \?\?\?\? FF24C500 		jmp     \*cost_arr\(,%rax,8\)
+  18      000000
+  18              	ginsn: JMP %r0, 
+  19 \?\?\?\? FF242500 		jmp     \*symbol\+1
+  19      000000
+  19              	ginsn: JMP %r4, 
+  20 \?\?\?\? 7000     		jo      .L179
+  20              	ginsn: JCC 
+  21              	.L179:
+  21              	ginsn: SYM .L179
+  22 \?\?\?\? C3       		ret
+  22              	ginsn: RET
+  23              	.LFE0:
+  23              	ginsn: SYM .LFE0
+  24              		.size   foo, .-foo
+  24              	ginsn: SYM FUNC_END

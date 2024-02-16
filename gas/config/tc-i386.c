@@ -5816,6 +5816,54 @@ x86_ginsn_jump (const symbolS *insn_end_sym, bool cond_p)
 }
 
 static ginsnS *
+x86_ginsn_indirect_jump_call (const symbolS *insn_end_sym)
+{
+  ginsnS *ginsn = NULL;
+  const reg_entry *mem_reg;
+  unsigned int dw2_regnum;
+
+  ginsnS * (*ginsn_func) (const symbolS *sym, bool real_p,
+			  enum ginsn_src_type src_type, unsigned int src_reg,
+			  const symbolS *src_ginsn_sym);
+
+  if (i.tm.extension_opcode == 4)
+    /* 0xFF /4 (jmp r/m).  */
+    ginsn_func = ginsn_new_jump;
+  else if (i.tm.extension_opcode == 2)
+    /* 0xFF /2 (call).  */
+    ginsn_func = ginsn_new_call;
+  else
+    /* Other cases are not expected.  Caller must screen.  */
+    return ginsn;
+
+  if (i.reg_operands)
+    {
+      dw2_regnum = ginsn_dw2_regnum (i.op[0].regs);
+      ginsn = ginsn_func (insn_end_sym, true,
+			  GINSN_SRC_REG, dw2_regnum, NULL);
+      ginsn_set_where (ginsn);
+    }
+  else if (i.mem_operands)
+    {
+      mem_reg = i.base_reg ? i.base_reg : i.index_reg;
+      /* Use dummy register if no base or index.  Unlike other opcodes,
+	 where we simply return NULL, we must try to generate a ginsn here.
+	 Otherwise, the user gets the impression of missing functionality:
+	   - a call insn is an IMPLICIT_STACK_OP.
+	   - jmp insns are necessary for accurate control flow.  */
+      dw2_regnum = (mem_reg
+		    ? ginsn_dw2_regnum (mem_reg)
+		    : GINSN_DW2_REGNUM_RSI_DUMMY);
+      /* jmp/call *sym(,%rN,imm)  or  jmp/call *sym(%rN).  */
+      ginsn = ginsn_func (insn_end_sym, true,
+			  GINSN_SRC_REG, dw2_regnum, NULL);
+      ginsn_set_where (ginsn);
+    }
+
+  return ginsn;
+}
+
+static ginsnS *
 x86_ginsn_enter (const symbolS *insn_end_sym)
 {
   ginsnS *ginsn = NULL;
@@ -6324,50 +6372,9 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
 	  ginsn_set_where (ginsn_next);
 	  gas_assert (!ginsn_link_next (ginsn, ginsn_next));
 	}
-      else if (i.tm.extension_opcode == 4)
-	{
-	  /* jmp r/m.  E.g., notrack jmp *%rax.  */
-	  if (i.reg_operands)
-	    {
-	      dw2_regnum = ginsn_dw2_regnum (i.op[0].regs);
-	      ginsn = ginsn_new_jump (insn_end_sym, true,
-				      GINSN_SRC_REG, dw2_regnum, NULL);
-	      ginsn_set_where (ginsn);
-	    }
-	  else if (i.mem_operands && i.index_reg)
-	    {
-	      /* jmp    *0x0(,%rax,8).  */
-	      dw2_regnum = ginsn_dw2_regnum (i.index_reg);
-	      ginsn = ginsn_new_jump (insn_end_sym, true,
-				      GINSN_SRC_REG, dw2_regnum, NULL);
-	      ginsn_set_where (ginsn);
-	    }
-	  else if (i.mem_operands && i.base_reg)
-	    {
-	      dw2_regnum = ginsn_dw2_regnum (i.base_reg);
-	      ginsn = ginsn_new_jump (insn_end_sym, true,
-				      GINSN_SRC_REG, dw2_regnum, NULL);
-	      ginsn_set_where (ginsn);
-	    }
-	}
-      else if (i.tm.extension_opcode == 2)
-	{
-	  /* 0xFF /2 (call).  */
-	  if (i.reg_operands)
-	    {
-	      dw2_regnum = ginsn_dw2_regnum (i.op[0].regs);
-	      ginsn = ginsn_new_call (insn_end_sym, true,
-				      GINSN_SRC_REG, dw2_regnum, NULL);
-	      ginsn_set_where (ginsn);
-	    }
-	  else if (i.mem_operands && i.base_reg)
-	    {
-	      dw2_regnum = ginsn_dw2_regnum (i.base_reg);
-	      ginsn = ginsn_new_call (insn_end_sym, true,
-				      GINSN_SRC_REG, dw2_regnum, NULL);
-	      ginsn_set_where (ginsn);
-	    }
-	}
+      else if (i.tm.extension_opcode == 4 || i.tm.extension_opcode == 2)
+	ginsn = x86_ginsn_indirect_jump_call (insn_end_sym);
+
       break;
 
     case 0xc2: /* ret imm16.  */
