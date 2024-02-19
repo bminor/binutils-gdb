@@ -1,3 +1,9 @@
+2024-02-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-bpf.c (md_assemble): Fix to take into account that
+	parse_expression can return NULL.
+	(PARSE_ERROR): Avoid passing invalid length to parse_error.
+
 2024-02-15 Will Hawkins  <hawkinsw@obs.cr>
 
 	* testsuite/gas/bpf/indcall-1-pseudoc.d: Do not select xbpf cpu

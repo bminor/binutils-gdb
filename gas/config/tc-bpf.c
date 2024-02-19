@@ -935,7 +935,7 @@ encode_insn (struct bpf_insn *insn, char *bytes,
       if (immediate_overflow (imm, 32))
         as_bad (_("immediate out of range, shall fit in 32 bits"));
       else
-        encode_int32 (insn->imm32.X_add_number, bytes + 4);        
+        encode_int32 (insn->imm32.X_add_number, bytes + 4);
     }
 
   if (insn->has_disp32 && insn->disp32.X_op == O_constant)
@@ -1454,7 +1454,7 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
   partial_match_length = 0;
   errmsg = NULL;
 
-#define PARSE_ERROR(...) parse_error (s - str, __VA_ARGS__)
+#define PARSE_ERROR(...) parse_error (s > str ? s - str : 0, __VA_ARGS__)
 
   while ((opcode = bpf_get_opcode (idx++)) != NULL)
     {
@@ -1590,6 +1590,8 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
               else if (strncmp (p, "%i32", 4) == 0
                        || strncmp (p, "%I32", 4) == 0)
                 {
+                  char *exp = NULL;
+
                   if (p[1] == 'I')
                     {
                       while (*s == ' ' || *s == '\t')
@@ -1601,17 +1603,20 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
                         }
                     }
 
-                  s = parse_expression (s, &insn.imm32);
-                  if (s == NULL)
+                  exp = parse_expression (s, &insn.imm32);
+                  if (exp == NULL)
                     {
                       PARSE_ERROR ("expected signed 32-bit immediate");
                       break;
                     }
+                  s = exp;
                   insn.has_imm32 = 1;
                   p += 4;
                 }
               else if (strncmp (p, "%o16", 4) == 0)
                 {
+                  char *exp = NULL;
+
                   while (*s == ' ' || *s == '\t')
                     s += 1;
                   if (*s != '+' && *s != '-')
@@ -1620,46 +1625,53 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
                       break;
                     }
 
-                  s = parse_expression (s, &insn.offset16);
-                  if (s == NULL)
+                  exp = parse_expression (s, &insn.offset16);
+                  if (exp == NULL)
                     {
                       PARSE_ERROR ("expected signed 16-bit offset");
                       break;
                     }
+                  s = exp;
                   insn.has_offset16 = 1;
                   p += 4;
                 }
               else if (strncmp (p, "%d16", 4) == 0)
                 {
-                  s = parse_expression (s, &insn.disp16);
-                  if (s == NULL)
+                  char *exp = parse_expression (s, &insn.disp16);
+
+                  if (exp == NULL)
                     {
                       PARSE_ERROR ("expected signed 16-bit displacement");
                       break;
                     }
+                  s = exp;
                   insn.has_disp16 = 1;
                   insn.is_relaxable = (insn.disp16.X_op != O_constant);
                   p += 4;
                 }
               else if (strncmp (p, "%d32", 4) == 0)
                 {
-                  s = parse_expression (s, &insn.disp32);
-                  if (s == NULL)
+                  char *exp = parse_expression (s, &insn.disp32);
+
+                  if (exp == NULL)
                     {
                       PARSE_ERROR ("expected signed 32-bit displacement");
                       break;
                     }
+                  s = exp;
                   insn.has_disp32 = 1;
                   p += 4;
                 }
               else if (strncmp (p, "%i64", 4) == 0)
                 {
-                  s = parse_expression (s, &insn.imm64);
-                  if (s == NULL)
+                  char *exp = parse_expression (s, &insn.imm64);
+
+                  if (exp == NULL)
                     {
                       PARSE_ERROR ("expected signed 64-bit immediate");
                       break;
                     }
+                  s = exp;
                   insn.has_imm64 = 1;
                   insn.size = 16;
                   p += 4;
@@ -1717,6 +1729,7 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
         {
           as_bad ("%s", errmsg);
           free (errmsg);
+          errmsg = NULL;
         }
 
       return;
