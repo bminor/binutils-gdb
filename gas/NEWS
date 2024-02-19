@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for 'armv9.5-a' for -march in Arm GAS.
+
 Changes in 2.42:
 
 * Add support for AMD znver5 processor.

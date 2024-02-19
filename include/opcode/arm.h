@@ -401,6 +401,7 @@
 #define ARM_ARCH_V9_2A   ARM_ARCH_V9_1A
 #define ARM_ARCH_V9_3A   ARM_ARCH_V9_2A
 #define ARM_ARCH_V9_4A   ARM_ARCH_V9_3A
+#define ARM_ARCH_V9_5A   ARM_ARCH_V9_4A
 
 /* Some useful combinations:  */
 #define ARM_ARCH_NONE	ARM_FEATURE_ALL (0, 0, 0, 0)
