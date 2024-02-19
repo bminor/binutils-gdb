@@ -16,7 +16,7 @@
 from time import asctime, gmtime
 
 import gdb  # silence pyflakes
-
+import gdb.printing
 
 class TimePrinter:
     def __init__(self, val):
