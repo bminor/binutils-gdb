@@ -135,6 +135,11 @@ struct ui
   /* See enum prompt_state's description.  */
   enum prompt_state prompt_state = PROMPT_NEEDED;
 
+  /* Whether the prompt should be kept blocked.  This is useful to not
+     unblock the prompt too early in the context of nested command
+     execution.  */
+  bool keep_prompt_blocked = false;
+
   /* The fields below that start with "m_" are "private".  They're
      meant to be accessed through wrapper macros that make them look
      like globals.  */

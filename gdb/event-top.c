@@ -522,7 +522,8 @@ async_enable_stdin (void)
 {
   struct ui *ui = current_ui;
 
-  if (ui->prompt_state == PROMPT_BLOCKED)
+  if (ui->prompt_state == PROMPT_BLOCKED
+      && !ui->keep_prompt_blocked)
     {
       target_terminal::ours ();
       ui->register_file_handler ();

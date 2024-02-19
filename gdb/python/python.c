@@ -641,6 +641,35 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 
   scoped_restore preventer = prevent_dont_repeat ();
 
+  /* If the executed command raises an exception, we may have to
+     enable stdin and recover the GDB prompt.
+
+     Stdin should not be re-enabled if it is already blocked because,
+     for example, we are running a command in the context of a
+     synchronous execution command ("run", "continue", etc.).  Like
+     this:
+
+     User runs "continue"
+     --> command blocks the prompt
+     --> Python API is invoked, e.g.  via events
+     --> gdb.execute(C) invoked inside Python
+     --> command C raises an exception
+
+     In this case case, GDB would go back to the top "continue" command
+     and move on with its normal course of execution.  That is, it
+     would enable stdin in the way it normally does.
+
+     Similarly, if the command we are about to execute enables the
+     stdin while we are still in the context of a synchronous
+     execution command, we would be displaying the prompt too early,
+     before the surrounding command completes.
+
+     For these reasons, we keep the prompt blocked, if it already is.  */
+  bool prompt_was_blocked = (current_ui->prompt_state == PROMPT_BLOCKED);
+  scoped_restore save_prompt_state
+    = make_scoped_restore (&current_ui->keep_prompt_blocked,
+			   prompt_was_blocked);
+
   try
     {
       gdbpy_allow_threads allow_threads;
