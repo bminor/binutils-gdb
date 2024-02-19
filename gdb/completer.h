@@ -569,9 +569,6 @@ const char *advance_to_expression_complete_word_point
 extern const char *advance_to_filename_complete_word_point
   (completion_tracker &tracker, const char *text);
 
-extern char **gdb_rl_attempted_completion_function (const char *text,
-						    int start, int end);
-
 extern void noop_completer (struct cmd_list_element *,
 			    completion_tracker &tracker,
 			    const char *, const char *);
@@ -607,14 +604,6 @@ extern void reg_or_group_completer (struct cmd_list_element *,
 extern void reggroup_completer (struct cmd_list_element *,
 				completion_tracker &tracker,
 				const char *, const char *);
-
-extern char *gdb_completion_word_break_characters (void);
-
-/* Set the word break characters array to BREAK_CHARS.  This function
-   is useful as const-correct alternative to direct assignment to
-   rl_completer_word_break_characters, which is "char *",
-   not "const char *".  */
-extern void set_rl_completer_word_break_characters (const char *break_chars);
 
 /* Get the matching completer_handle_brkchars_ftype function for FN.
    FN is one of the core completer functions above (filename,

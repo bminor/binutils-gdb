@@ -51,6 +51,8 @@ static const char *completion_find_completion_word (completion_tracker &tracker,
 						    const char *text,
 						    int *quote_char);
 
+static void set_rl_completer_word_break_characters (const char *break_chars);
+
 /* See completer.h.  */
 
 class completion_tracker::completion_hash_entry
@@ -1113,9 +1115,12 @@ expression_completer (struct cmd_list_element *ignore,
   complete_expression (tracker, text, word);
 }
 
-/* See definition in completer.h.  */
+/* Set the word break characters array to BREAK_CHARS.  This function is
+   useful as const-correct alternative to direct assignment to
+   rl_completer_word_break_characters, which is "char *", not "const
+   char *".  */
 
-void
+static void
 set_rl_completer_word_break_characters (const char *break_chars)
 {
   rl_completer_word_break_characters = (char *) break_chars;
@@ -1940,8 +1945,12 @@ gdb_completion_word_break_characters_throw ()
   return (char *) rl_completer_word_break_characters;
 }
 
-char *
-gdb_completion_word_break_characters ()
+/* Get the list of chars that are considered as word breaks for the current
+   command.  This function does not throw any exceptions and is called from
+   readline.  See gdb_completion_word_break_characters_throw for details.  */
+
+static char *
+gdb_completion_word_break_characters () noexcept
 {
   /* New completion starting.  */
   current_completion.aborted = false;
@@ -2336,7 +2345,7 @@ gdb_rl_attempted_completion_function_throw (const char *text, int start, int end
    hook.  Wrapper around gdb_rl_attempted_completion_function_throw
    that catches C++ exceptions, which can't cross readline.  */
 
-char **
+static char **
 gdb_rl_attempted_completion_function (const char *text, int start, int end)
 {
   /* Restore globals that might have been tweaked in
@@ -3004,6 +3013,11 @@ void _initialize_completer ();
 void
 _initialize_completer ()
 {
+  /* Setup some readline completion globals.  */
+  rl_completion_word_break_hook = gdb_completion_word_break_characters;
+  rl_attempted_completion_function = gdb_rl_attempted_completion_function;
+  set_rl_completer_word_break_characters (default_word_break_characters ());
+
   add_setshow_zuinteger_unlimited_cmd ("max-completions", no_class,
 				       &max_completions, _("\
 Set maximum number of completion candidates."), _("\
