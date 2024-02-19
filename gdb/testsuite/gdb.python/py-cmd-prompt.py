@@ -15,6 +15,7 @@
 
 import gdb
 
+
 class MyListener:
     def __init__(self):
         gdb.events.new_objfile.connect(self.handle_new_objfile_event)
@@ -25,12 +26,13 @@ class MyListener:
         if self.processed_objfile:
             return
 
-        print('loading ' + event.new_objfile.filename)
+        print("loading " + event.new_objfile.filename)
         self.processed_objfile = True
 
-        gdb.execute('add-inferior -no-connection')
-        gdb.execute('inferior 2')
-        gdb.execute('target remote ' + self.port)
-        gdb.execute('inferior 1')
+        gdb.execute("add-inferior -no-connection")
+        gdb.execute("inferior 2")
+        gdb.execute("target remote " + self.port)
+        gdb.execute("inferior 1")
+
 
 the_listener = MyListener()

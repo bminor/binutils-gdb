@@ -15,6 +15,7 @@
 
 import gdb
 
+
 class MyListener:
     def __init__(self):
         gdb.events.new_objfile.connect(self.handle_new_objfile_event)
@@ -24,10 +25,11 @@ class MyListener:
         if self.processed_objfile:
             return
 
-        print('loading ' + event.new_objfile.filename)
+        print("loading " + event.new_objfile.filename)
         self.processed_objfile = True
 
         # There is no variable 'a'.  The command raises an exception.
-        gdb.execute('print a')
+        gdb.execute("print a")
+
 
 the_listener = MyListener()
