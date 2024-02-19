@@ -40555,9 +40555,9 @@ Other packages will be used only if they are found.
 
 @heading Tools/Packages Necessary for Building @value{GDBN}
 @table @asis
-@item C@t{++}11 compiler
-@value{GDBN} is written in C@t{++}11.  It should be buildable with any
-recent C@t{++}11 compiler, e.g.@: GCC.
+@item C@t{++}17 compiler
+@value{GDBN} is written in C@t{++}17.  It should be buildable with any
+recent C@t{++}17 compiler, e.g.@: GCC.
 
 @item GNU make
 @value{GDBN}'s build system relies on features only found in the GNU
