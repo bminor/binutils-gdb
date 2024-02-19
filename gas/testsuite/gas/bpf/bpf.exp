@@ -77,6 +77,9 @@ if {[istarget bpf*-*-*]} {
     run_dump_test disp32-overflow
     run_dump_test imm32-overflow
 
+    # Bad operand (regression)
+    run_dump_test indcall-badoperand
+
     # In Pseudo-C it is not possible to refer to symbols
     # as operands that have the same name than registers.
     run_dump_test regs-for-symbols-pseudoc

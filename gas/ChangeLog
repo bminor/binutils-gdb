@@ -1,3 +1,12 @@
+2024-02-19 Will Hawkins  <hawkinsw@obs.cr>
+
+	* config/tc-bpf.c (parse_expression): Change switch to if so that
+	error condition is handled.
+	* testsuite/gas/bpf/indcall-badoperand.d: New test.
+	* testsuite/gas/bpf/indcall-badoperand.l: Likewise.
+	* testsuite/gas/bpf/indcall-badoperand.s: Likewise.
+	* testsuite/gas/bpf/bpf.exp: Invoke new test.
+
 2024-02-19  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config/tc-bpf.c (md_assemble): Fix to take into account that

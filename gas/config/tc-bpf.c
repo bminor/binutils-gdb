@@ -1240,7 +1240,7 @@ parse_expression (char *s, expressionS *exp)
   s = input_line_pointer;
   input_line_pointer = saved_input_line_pointer;
 
-  switch (exp->X_op == O_absent || exp_parse_failed)
+  if (exp->X_op == O_absent || exp_parse_failed)
     return NULL;
 
   /* The expression parser may consume trailing whitespaces.  We have
