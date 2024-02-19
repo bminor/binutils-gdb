@@ -254,7 +254,7 @@ static const unsigned char sigtramp_retcode_mipseb[RETCODE_SIZE] =
 					 NBSD_MIPS_JB_ELEMENT_SIZE (gdbarch))
 
 static int
-mipsnbsd_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
+mipsnbsd_get_longjmp_target (const frame_info_ptr &frame, CORE_ADDR *pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

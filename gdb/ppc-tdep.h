@@ -177,7 +177,7 @@ extern void ppc_collect_vsxregset (const struct regset *regset,
 
 /* Implementation of the gdbarch get_return_buf_addr hook.  */
 
-extern CORE_ADDR ppc_sysv_get_return_buf_addr (type*, frame_info_ptr);
+extern CORE_ADDR ppc_sysv_get_return_buf_addr (type*, const frame_info_ptr &);
 
 /* Private data that this module attaches to struct gdbarch.  */
 
@@ -424,7 +424,7 @@ struct ppc_insn_pattern
   int optional;                 /* If non-zero, this insn may be absent.  */
 };
 
-extern int ppc_insns_match_pattern (frame_info_ptr frame, CORE_ADDR pc,
+extern int ppc_insns_match_pattern (const frame_info_ptr &frame, CORE_ADDR pc,
 				    const struct ppc_insn_pattern *pattern,
 				    unsigned int *insns);
 extern CORE_ADDR ppc_insn_d_field (unsigned int insn);

@@ -52,7 +52,7 @@
 /* Signal trampoline support.  */
 
 static void sparc64_linux_sigframe_init (const struct tramp_frame *self,
-					 frame_info_ptr this_frame,
+					 const frame_info_ptr &this_frame,
 					 struct trad_frame_cache *this_cache,
 					 CORE_ADDR func);
 
@@ -73,7 +73,7 @@ static const struct tramp_frame sparc64_linux_rt_sigframe =
 
 static void
 sparc64_linux_sigframe_init (const struct tramp_frame *self,
-			     frame_info_ptr this_frame,
+			     const frame_info_ptr &this_frame,
 			     struct trad_frame_cache *this_cache,
 			     CORE_ADDR func)
 {
@@ -176,7 +176,7 @@ sparc64_linux_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout,
    address.  */
 
 static CORE_ADDR
-sparc64_linux_step_trap (frame_info_ptr frame, unsigned long insn)
+sparc64_linux_step_trap (const frame_info_ptr &frame, unsigned long insn)
 {
   /* __NR_rt_sigreturn is 101  */
   if ((insn == 0x91d0206d)
@@ -306,7 +306,7 @@ sparc64_linux_get_syscall_number (struct gdbarch *gdbarch,
 /* Implement the "get_longjmp_target" gdbarch method.  */
 
 static int
-sparc64_linux_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
+sparc64_linux_get_longjmp_target (const frame_info_ptr &frame, CORE_ADDR *pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   CORE_ADDR jb_addr;

@@ -962,11 +962,11 @@ value::allocate (struct type *type)
 /* See value.h  */
 
 value *
-value::allocate_register_lazy (frame_info_ptr next_frame, int regnum,
-			       struct type *type)
+value::allocate_register_lazy (const frame_info_ptr &initial_next_frame,
+			       int regnum, struct type *type)
 {
   if (type == nullptr)
-    type = register_type (frame_unwind_arch (next_frame), regnum);
+    type = register_type (frame_unwind_arch (initial_next_frame), regnum);
 
   value *result = value::allocate_lazy (type);
 
@@ -978,6 +978,7 @@ value::allocate_register_lazy (frame_info_ptr next_frame, int regnum,
      NEXT_FRAME will not have a valid frame id yet.  Find the next non-inline
      frame (possibly the sentinel frame).  This is where registers are unwound
      from anyway.  */
+  frame_info_ptr next_frame = initial_next_frame;
   while (get_frame_type (next_frame) == INLINE_FRAME)
     next_frame = get_next_frame_sentinel_okay (next_frame);
 
@@ -992,7 +993,7 @@ value::allocate_register_lazy (frame_info_ptr next_frame, int regnum,
 /* See value.h  */
 
 value *
-value::allocate_register (frame_info_ptr next_frame, int regnum,
+value::allocate_register (const frame_info_ptr &next_frame, int regnum,
 			  struct type *type)
 {
   value *result = value::allocate_register_lazy (next_frame, regnum, type);
@@ -3598,7 +3599,7 @@ struct value *
 value_from_contents_and_address (struct type *type,
 				 const gdb_byte *valaddr,
 				 CORE_ADDR address,
-				 frame_info_ptr frame)
+				 const frame_info_ptr &frame)
 {
   gdb::array_view<const gdb_byte> view;
   if (valaddr != nullptr)
@@ -4070,7 +4071,7 @@ value::fetch_lazy ()
 /* See value.h.  */
 
 value *
-pseudo_from_raw_part (frame_info_ptr next_frame, int pseudo_reg_num,
+pseudo_from_raw_part (const frame_info_ptr &next_frame, int pseudo_reg_num,
 		      int raw_reg_num, int raw_offset)
 {
   value *pseudo_reg_val
@@ -4084,7 +4085,7 @@ pseudo_from_raw_part (frame_info_ptr next_frame, int pseudo_reg_num,
 /* See value.h.  */
 
 void
-pseudo_to_raw_part (frame_info_ptr next_frame,
+pseudo_to_raw_part (const frame_info_ptr &next_frame,
 		    gdb::array_view<const gdb_byte> pseudo_buf,
 		    int raw_reg_num, int raw_offset)
 {
@@ -4101,7 +4102,7 @@ pseudo_to_raw_part (frame_info_ptr next_frame,
 /* See value.h.  */
 
 value *
-pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
+pseudo_from_concat_raw (const frame_info_ptr &next_frame, int pseudo_reg_num,
 			int raw_reg_1_num, int raw_reg_2_num)
 {
   value *pseudo_reg_val
@@ -4126,7 +4127,7 @@ pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
 /* See value.h. */
 
 void
-pseudo_to_concat_raw (frame_info_ptr next_frame,
+pseudo_to_concat_raw (const frame_info_ptr &next_frame,
 		      gdb::array_view<const gdb_byte> pseudo_buf,
 		      int raw_reg_1_num, int raw_reg_2_num)
 {
@@ -4149,7 +4150,7 @@ pseudo_to_concat_raw (frame_info_ptr next_frame,
 /* See value.h.  */
 
 value *
-pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
+pseudo_from_concat_raw (const frame_info_ptr &next_frame, int pseudo_reg_num,
 			int raw_reg_1_num, int raw_reg_2_num,
 			int raw_reg_3_num)
 {
@@ -4180,7 +4181,7 @@ pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
 /* See value.h. */
 
 void
-pseudo_to_concat_raw (frame_info_ptr next_frame,
+pseudo_to_concat_raw (const frame_info_ptr &next_frame,
 		      gdb::array_view<const gdb_byte> pseudo_buf,
 		      int raw_reg_1_num, int raw_reg_2_num, int raw_reg_3_num)
 {

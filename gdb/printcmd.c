@@ -2330,7 +2330,7 @@ clear_dangling_display_expressions (struct objfile *objfile)
 
 void
 print_variable_and_value (const char *name, struct symbol *var,
-			  frame_info_ptr frame,
+			  const frame_info_ptr &frame,
 			  struct ui_file *stream, int indent)
 {
 

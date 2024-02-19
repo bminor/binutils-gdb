@@ -235,7 +235,7 @@ alphanbsd_pc_in_sigtramp (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-alphanbsd_sigcontext_addr (frame_info_ptr frame)
+alphanbsd_sigcontext_addr (const frame_info_ptr &frame)
 {
   /* FIXME: This is not correct for all versions of NetBSD/alpha.
      We will probably need to disassemble the trampoline to figure

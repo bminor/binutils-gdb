@@ -1042,7 +1042,7 @@ mn10300_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    use the current frame PC as the limit, then
    invoke mn10300_analyze_prologue and return its result.  */
 static struct mn10300_prologue *
-mn10300_analyze_frame_prologue (frame_info_ptr this_frame,
+mn10300_analyze_frame_prologue (const frame_info_ptr &this_frame,
 			   void **this_prologue_cache)
 {
   if (!*this_prologue_cache)
@@ -1071,7 +1071,7 @@ mn10300_analyze_frame_prologue (frame_info_ptr this_frame,
 /* Given the next frame and a prologue cache, return this frame's
    base.  */
 static CORE_ADDR
-mn10300_frame_base (frame_info_ptr this_frame, void **this_prologue_cache)
+mn10300_frame_base (const frame_info_ptr &this_frame, void **this_prologue_cache)
 {
   struct mn10300_prologue *p
     = mn10300_analyze_frame_prologue (this_frame, this_prologue_cache);
@@ -1095,7 +1095,7 @@ mn10300_frame_base (frame_info_ptr this_frame, void **this_prologue_cache)
 }
 
 static void
-mn10300_frame_this_id (frame_info_ptr this_frame,
+mn10300_frame_this_id (const frame_info_ptr &this_frame,
 		       void **this_prologue_cache,
 		       struct frame_id *this_id)
 {
@@ -1106,7 +1106,7 @@ mn10300_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
-mn10300_frame_prev_register (frame_info_ptr this_frame,
+mn10300_frame_prev_register (const frame_info_ptr &this_frame,
 			     void **this_prologue_cache, int regnum)
 {
   struct mn10300_prologue *p

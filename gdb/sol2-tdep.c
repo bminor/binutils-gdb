@@ -52,7 +52,7 @@ sol2_pc_in_sigtramp (CORE_ADDR pc, const char *name)
 /* Return whether THIS_FRAME corresponds to a Solaris sigtramp routine.  */
 
 int
-sol2_sigtramp_p (frame_info_ptr this_frame)
+sol2_sigtramp_p (const frame_info_ptr &this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   const char *name;

@@ -1649,7 +1649,7 @@ bfcache_eq (const void *arg1, const void *arg2)
 /* Create a new btrace frame cache.  */
 
 static struct btrace_frame_cache *
-bfcache_new (frame_info_ptr frame)
+bfcache_new (const frame_info_ptr &frame)
 {
   struct btrace_frame_cache *cache;
   void **slot;
@@ -1667,7 +1667,7 @@ bfcache_new (frame_info_ptr frame)
 /* Extract the branch trace function from a branch trace frame.  */
 
 static const struct btrace_function *
-btrace_get_frame_function (frame_info_ptr frame)
+btrace_get_frame_function (const frame_info_ptr &frame)
 {
   const struct btrace_frame_cache *cache;
   struct btrace_frame_cache pattern;
@@ -1686,7 +1686,7 @@ btrace_get_frame_function (frame_info_ptr frame)
 /* Implement stop_reason method for record_btrace_frame_unwind.  */
 
 static enum unwind_stop_reason
-record_btrace_frame_unwind_stop_reason (frame_info_ptr this_frame,
+record_btrace_frame_unwind_stop_reason (const frame_info_ptr &this_frame,
 					void **this_cache)
 {
   const struct btrace_frame_cache *cache;
@@ -1705,7 +1705,7 @@ record_btrace_frame_unwind_stop_reason (frame_info_ptr this_frame,
 /* Implement this_id method for record_btrace_frame_unwind.  */
 
 static void
-record_btrace_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+record_btrace_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
 			     struct frame_id *this_id)
 {
   const struct btrace_frame_cache *cache;
@@ -1735,7 +1735,7 @@ record_btrace_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 /* Implement prev_register method for record_btrace_frame_unwind.  */
 
 static struct value *
-record_btrace_frame_prev_register (frame_info_ptr this_frame,
+record_btrace_frame_prev_register (const frame_info_ptr &this_frame,
 				   void **this_cache,
 				   int regnum)
 {
@@ -1781,7 +1781,7 @@ record_btrace_frame_prev_register (frame_info_ptr this_frame,
 
 static int
 record_btrace_frame_sniffer (const struct frame_unwind *self,
-			     frame_info_ptr this_frame,
+			     const frame_info_ptr &this_frame,
 			     void **this_cache)
 {
   const struct btrace_function *bfun;
@@ -1836,7 +1836,7 @@ record_btrace_frame_sniffer (const struct frame_unwind *self,
 
 static int
 record_btrace_tailcall_frame_sniffer (const struct frame_unwind *self,
-				      frame_info_ptr this_frame,
+				      const frame_info_ptr &this_frame,
 				      void **this_cache)
 {
   const struct btrace_function *bfun, *callee;

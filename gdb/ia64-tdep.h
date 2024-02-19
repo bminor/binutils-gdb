@@ -240,7 +240,7 @@ struct ia64_gdbarch_tdep : gdbarch_tdep_base
 
      Normally, the size of the register frame is always obtained by
      extracting the lowest 7 bits ("cfm & 0x7f").  */
-  int (*size_of_register_frame) (frame_info_ptr this_frame, ULONGEST cfm)
+  int (*size_of_register_frame) (const frame_info_ptr &this_frame, ULONGEST cfm)
     = nullptr;
 
   /* Determine the function address FADDR belongs to a shared library.

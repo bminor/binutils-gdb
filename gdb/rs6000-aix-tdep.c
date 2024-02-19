@@ -240,7 +240,7 @@ static const struct regset rs6000_aix_vsxregset = {
 };
 
 static struct trad_frame_cache *
-aix_sighandle_frame_cache (frame_info_ptr this_frame,
+aix_sighandle_frame_cache (const frame_info_ptr &this_frame,
 			   void **this_cache)
 {
   LONGEST backchain;
@@ -296,7 +296,7 @@ aix_sighandle_frame_cache (frame_info_ptr this_frame,
 }
 
 static void
-aix_sighandle_frame_this_id (frame_info_ptr this_frame,
+aix_sighandle_frame_this_id (const frame_info_ptr &this_frame,
 			     void **this_prologue_cache,
 			     struct frame_id *this_id)
 {
@@ -306,7 +306,7 @@ aix_sighandle_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
-aix_sighandle_frame_prev_register (frame_info_ptr this_frame,
+aix_sighandle_frame_prev_register (const frame_info_ptr &this_frame,
 				   void **this_prologue_cache, int regnum)
 {
   struct trad_frame_cache *this_trad_cache
@@ -316,7 +316,7 @@ aix_sighandle_frame_prev_register (frame_info_ptr this_frame,
 
 static int
 aix_sighandle_frame_sniffer (const struct frame_unwind *self,
-			     frame_info_ptr this_frame,
+			     const frame_info_ptr &this_frame,
 			     void **this_prologue_cache)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);

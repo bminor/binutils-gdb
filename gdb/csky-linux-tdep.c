@@ -310,7 +310,7 @@ csky_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
 static void
 csky_linux_rt_sigreturn_init (const struct tramp_frame *self,
-			      frame_info_ptr this_frame,
+			      const frame_info_ptr &this_frame,
 			      struct trad_frame_cache *this_cache,
 			      CORE_ADDR func)
 {
@@ -355,7 +355,7 @@ csky_linux_rt_sigreturn_tramp_frame = {
 
 static void
 csky_linux_rt_sigreturn_init_pt_regs (const struct tramp_frame *self,
-				      frame_info_ptr this_frame,
+				      const frame_info_ptr &this_frame,
 				      struct trad_frame_cache *this_cache,
 				      CORE_ADDR func)
 {

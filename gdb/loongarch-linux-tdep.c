@@ -446,7 +446,7 @@ const struct regset loongarch_lbtregset =
 
 static void
 loongarch_linux_rt_sigframe_init (const struct tramp_frame *self,
-				  frame_info_ptr this_frame,
+				  const frame_info_ptr &this_frame,
 				  struct trad_frame_cache *this_cache,
 				  CORE_ADDR func)
 {
@@ -521,7 +521,7 @@ loongarch_iterate_over_regset_sections (struct gdbarch *gdbarch,
    instruction to be executed.  */
 
 static CORE_ADDR
-loongarch_linux_syscall_next_pc (frame_info_ptr frame)
+loongarch_linux_syscall_next_pc (const frame_info_ptr &frame)
 {
   const CORE_ADDR pc = get_frame_pc (frame);
   ULONGEST a7 = get_frame_register_unsigned (frame, LOONGARCH_A7_REGNUM);

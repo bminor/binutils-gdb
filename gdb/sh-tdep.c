@@ -1755,7 +1755,7 @@ sh_sh2a_register_sim_regno (struct gdbarch *gdbarch, int nr)
 static void
 sh_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			  struct dwarf2_frame_state_reg *reg,
-			  frame_info_ptr this_frame)
+			  const frame_info_ptr &this_frame)
 {
   /* Mark the PC as the destination for the return address.  */
   if (regnum == gdbarch_pc_regnum (gdbarch))
@@ -1825,7 +1825,7 @@ sh_alloc_frame_cache (void)
 }
 
 static struct sh_frame_cache *
-sh_frame_cache (frame_info_ptr this_frame, void **this_cache)
+sh_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct sh_frame_cache *cache;
@@ -1892,7 +1892,7 @@ sh_frame_cache (frame_info_ptr this_frame, void **this_cache)
 }
 
 static struct value *
-sh_frame_prev_register (frame_info_ptr this_frame,
+sh_frame_prev_register (const frame_info_ptr &this_frame,
 			void **this_cache, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -1917,7 +1917,7 @@ sh_frame_prev_register (frame_info_ptr this_frame,
 }
 
 static void
-sh_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+sh_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
 		  struct frame_id *this_id)
 {
   struct sh_frame_cache *cache = sh_frame_cache (this_frame, this_cache);
@@ -1940,7 +1940,7 @@ static const struct frame_unwind sh_frame_unwind = {
 };
 
 static CORE_ADDR
-sh_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+sh_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct sh_frame_cache *cache = sh_frame_cache (this_frame, this_cache);
 
@@ -1955,7 +1955,7 @@ static const struct frame_base sh_frame_base = {
 };
 
 static struct sh_frame_cache *
-sh_make_stub_cache (frame_info_ptr this_frame)
+sh_make_stub_cache (const frame_info_ptr &this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct sh_frame_cache *cache;
@@ -1969,7 +1969,7 @@ sh_make_stub_cache (frame_info_ptr this_frame)
 }
 
 static void
-sh_stub_this_id (frame_info_ptr this_frame, void **this_cache,
+sh_stub_this_id (const frame_info_ptr &this_frame, void **this_cache,
 		 struct frame_id *this_id)
 {
   struct sh_frame_cache *cache;
@@ -1983,7 +1983,7 @@ sh_stub_this_id (frame_info_ptr this_frame, void **this_cache,
 
 static int
 sh_stub_unwind_sniffer (const struct frame_unwind *self,
-			frame_info_ptr this_frame,
+			const frame_info_ptr &this_frame,
 			void **this_prologue_cache)
 {
   CORE_ADDR addr_in_block;

@@ -976,7 +976,7 @@ value_one (struct type *type)
    e.g. in case the type is a variable length array.  */
 
 static struct value *
-get_value_at (struct type *type, CORE_ADDR addr, frame_info_ptr frame,
+get_value_at (struct type *type, CORE_ADDR addr, const frame_info_ptr &frame,
 	      int lazy)
 {
   struct value *val;
@@ -1029,7 +1029,7 @@ value_at_non_lval (struct type *type, CORE_ADDR addr)
    e.g. in case the type is a variable length array.  */
 
 struct value *
-value_at_lazy (struct type *type, CORE_ADDR addr, frame_info_ptr frame)
+value_at_lazy (struct type *type, CORE_ADDR addr, const frame_info_ptr &frame)
 {
   return get_value_at (type, addr, frame, 1);
 }

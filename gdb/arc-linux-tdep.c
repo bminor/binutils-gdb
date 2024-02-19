@@ -159,7 +159,7 @@ static const int arc_linux_core_reg_offsets[] = {
    Returns TRUE if this is a sigtramp frame.  */
 
 static bool
-arc_linux_is_sigtramp (frame_info_ptr this_frame)
+arc_linux_is_sigtramp (const frame_info_ptr &this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR pc = get_frame_pc (this_frame);
@@ -257,7 +257,7 @@ arc_linux_is_sigtramp (frame_info_ptr this_frame)
    etc) in GDB hardcode values.  */
 
 static CORE_ADDR
-arc_linux_sigcontext_addr (frame_info_ptr this_frame)
+arc_linux_sigcontext_addr (const frame_info_ptr &this_frame)
 {
   const int ucontext_offset = 0x80;
   const int sigcontext_offset = 0x14;

@@ -50,7 +50,7 @@ static int i386_sol2_gregset_reg_offset[] =
    `mcontext_t' that contains the saved set of machine registers.  */
 
 static CORE_ADDR
-i386_sol2_mcontext_addr (frame_info_ptr this_frame)
+i386_sol2_mcontext_addr (const frame_info_ptr &this_frame)
 {
   CORE_ADDR sp, ucontext_addr;
 

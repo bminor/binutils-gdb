@@ -81,7 +81,7 @@ struct alpha_gdbarch_tdep : gdbarch_tdep_base
 
   /* Translate a signal handler stack base address into the address of
      the sigcontext structure for that signal handler.  */
-  CORE_ADDR (*sigcontext_addr) (frame_info_ptr) = nullptr;
+  CORE_ADDR (*sigcontext_addr) (const frame_info_ptr &) = nullptr;
 
   /* Does the PC fall in a signal trampoline.  */
   /* NOTE: cagney/2004-04-30: Do not copy/clone this code.  Instead

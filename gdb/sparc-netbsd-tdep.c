@@ -95,7 +95,7 @@ sparc32nbsd_pc_in_sigtramp (CORE_ADDR pc, const char *name)
 }
 
 trad_frame_saved_reg *
-sparc32nbsd_sigcontext_saved_regs (frame_info_ptr this_frame)
+sparc32nbsd_sigcontext_saved_regs (const frame_info_ptr &this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   trad_frame_saved_reg *saved_regs;
@@ -180,7 +180,7 @@ sparc32nbsd_sigcontext_saved_regs (frame_info_ptr this_frame)
 }
 
 static struct sparc_frame_cache *
-sparc32nbsd_sigcontext_frame_cache (frame_info_ptr this_frame,
+sparc32nbsd_sigcontext_frame_cache (const frame_info_ptr &this_frame,
 				    void **this_cache)
 {
   struct sparc_frame_cache *cache;
@@ -211,7 +211,7 @@ sparc32nbsd_sigcontext_frame_cache (frame_info_ptr this_frame,
 }
 
 static void
-sparc32nbsd_sigcontext_frame_this_id (frame_info_ptr this_frame,
+sparc32nbsd_sigcontext_frame_this_id (const frame_info_ptr &this_frame,
 				      void **this_cache,
 				      struct frame_id *this_id)
 {
@@ -222,7 +222,7 @@ sparc32nbsd_sigcontext_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
-sparc32nbsd_sigcontext_frame_prev_register (frame_info_ptr this_frame,
+sparc32nbsd_sigcontext_frame_prev_register (const frame_info_ptr &this_frame,
 					    void **this_cache, int regnum)
 {
   struct sparc_frame_cache *cache =
@@ -233,7 +233,7 @@ sparc32nbsd_sigcontext_frame_prev_register (frame_info_ptr this_frame,
 
 static int
 sparc32nbsd_sigcontext_frame_sniffer (const struct frame_unwind *self,
-				      frame_info_ptr this_frame,
+				      const frame_info_ptr &this_frame,
 				      void **this_cache)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
@@ -264,7 +264,7 @@ static const struct frame_unwind sparc32nbsd_sigcontext_frame_unwind =
    address.  */
 
 CORE_ADDR
-sparcnbsd_step_trap (frame_info_ptr frame, unsigned long insn)
+sparcnbsd_step_trap (const frame_info_ptr &frame, unsigned long insn)
 {
   if ((X_I (insn) == 0 && X_RS1 (insn) == 0 && X_RS2 (insn) == 0)
       || (X_I (insn) == 1 && X_RS1 (insn) == 0 && (insn & 0x7f) == 0))

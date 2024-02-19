@@ -213,7 +213,7 @@ tui_status_window::make_status_line () const
    name is demangled if demangling is turned on.  Returns a pointer to
    a static area holding the result.  */
 static char*
-tui_get_function_from_frame (frame_info_ptr fi)
+tui_get_function_from_frame (const frame_info_ptr &fi)
 {
   static char name[256];
   string_file stream;
@@ -267,7 +267,7 @@ tui_status_window::rerender ()
    refresh.  */
 
 void
-tui_show_frame_info (frame_info_ptr fi)
+tui_show_frame_info (const frame_info_ptr &fi)
 {
   bool status_changed_p;
 

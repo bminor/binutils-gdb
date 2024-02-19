@@ -34,7 +34,7 @@
 
 static void
 tilegx_linux_sigframe_init (const struct tramp_frame *self,
-			    frame_info_ptr this_frame,
+			    const frame_info_ptr &this_frame,
 			    struct trad_frame_cache *this_cache,
 			    CORE_ADDR func)
 {

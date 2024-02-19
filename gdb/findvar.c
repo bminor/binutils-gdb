@@ -246,7 +246,7 @@ copy_integer_to_size (gdb_byte *dest, int dest_size, const gdb_byte *source,
 /* See value.h.  */
 
 value *
-value_of_register (int regnum, frame_info_ptr next_frame)
+value_of_register (int regnum, const frame_info_ptr &next_frame)
 {
   gdbarch *gdbarch = frame_unwind_arch (next_frame);
 
@@ -263,7 +263,7 @@ value_of_register (int regnum, frame_info_ptr next_frame)
 /* See value.h.  */
 
 value *
-value_of_register_lazy (frame_info_ptr next_frame, int regnum)
+value_of_register_lazy (const frame_info_ptr &next_frame, int regnum)
 {
   gdbarch *gdbarch = frame_unwind_arch (next_frame);
 
@@ -377,7 +377,7 @@ symbol_read_needs_frame (struct symbol *sym)
 
 static frame_info_ptr
 get_hosting_frame (struct symbol *var, const struct block *var_block,
-		   frame_info_ptr frame)
+		   const frame_info_ptr &initial_frame)
 {
   const struct block *frame_block = NULL;
 
@@ -389,7 +389,7 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
      synthetic symbols.  Without block information, we must assume they are
      local to FRAME. In this case, there is nothing to do.  */
   else if (var_block == NULL)
-    return frame;
+    return initial_frame;
 
   /* We currently assume that all symbols with a location list need a frame.
      This is true in practice because selecting the location description
@@ -398,15 +398,16 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
      We want to get <optimized out> instead of <frame required> when evaluating
      them so return a frame instead of raising an error.  */
   else if (var_block->is_global_block () || var_block->is_static_block ())
-    return frame;
+    return initial_frame;
 
   /* We have to handle the "my_func::my_local_var" notation.  This requires us
      to look for upper frames when we find no block for the current frame: here
      and below, handle when frame_block == NULL.  */
-  if (frame != NULL)
-    frame_block = get_frame_block (frame, NULL);
+  if (initial_frame != nullptr)
+    frame_block = get_frame_block (initial_frame, NULL);
 
   /* Climb up the call stack until reaching the frame we are looking for.  */
+  frame_info_ptr frame = initial_frame;
   while (frame != NULL && frame_block != var_block)
     {
       /* Stacks can be quite deep: give the user a chance to stop this.  */
@@ -476,12 +477,13 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
 struct value *
 language_defn::read_var_value (struct symbol *var,
 			       const struct block *var_block,
-			       frame_info_ptr frame) const
+			       const frame_info_ptr &frame_param) const
 {
   struct value *v;
   struct type *type = var->type ();
   CORE_ADDR addr;
   enum symbol_needs_kind sym_need;
+  frame_info_ptr frame = frame_param;
 
   /* Call check_typedef on our type to make sure that, if TYPE is
      a TYPE_CODE_TYPEDEF, its length is set to the length of the target type
@@ -704,7 +706,7 @@ language_defn::read_var_value (struct symbol *var,
 
 struct value *
 read_var_value (struct symbol *var, const struct block *var_block,
-		frame_info_ptr frame)
+		const frame_info_ptr &frame)
 {
   const struct language_defn *lang = language_def (var->language ());
 
@@ -789,7 +791,7 @@ read_frame_register_value (value *value)
 /* Return a value of type TYPE, stored in register REGNUM, in frame FRAME.  */
 
 struct value *
-value_from_register (struct type *type, int regnum, frame_info_ptr frame)
+value_from_register (struct type *type, int regnum, const frame_info_ptr &frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct type *type1 = check_typedef (type);
@@ -836,7 +838,7 @@ value_from_register (struct type *type, int regnum, frame_info_ptr frame)
    Will abort if register value is not available.  */
 
 CORE_ADDR
-address_from_register (int regnum, frame_info_ptr frame)
+address_from_register (int regnum, const frame_info_ptr &frame)
 {
   type *type = builtin_type (get_frame_arch (frame))->builtin_data_ptr;
   value_ref_ptr v = release_value (value_from_register (type, regnum, frame));

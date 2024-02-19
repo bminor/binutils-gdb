@@ -381,8 +381,8 @@ aarch64_linux_restore_vregs (struct gdbarch *gdbarch,
    SIGNAL_FRAME.  */
 
 static void
-aarch64_linux_read_signal_frame_info (frame_info_ptr this_frame,
-				  struct aarch64_linux_sigframe &signal_frame)
+aarch64_linux_read_signal_frame_info (const frame_info_ptr &this_frame,
+				      aarch64_linux_sigframe &signal_frame)
 {
   signal_frame.sp = get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
   signal_frame.sigcontext_address
@@ -570,7 +570,7 @@ aarch64_linux_read_signal_frame_info (frame_info_ptr this_frame,
 
 static void
 aarch64_linux_sigframe_init (const struct tramp_frame *self,
-			     frame_info_ptr this_frame,
+			     const frame_info_ptr &this_frame,
 			     struct trad_frame_cache *this_cache,
 			     CORE_ADDR func)
 {
@@ -704,7 +704,7 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 /* Implements the "prev_arch" method of struct tramp_frame.  */
 
 static struct gdbarch *
-aarch64_linux_sigframe_prev_arch (frame_info_ptr this_frame,
+aarch64_linux_sigframe_prev_arch (const frame_info_ptr &this_frame,
 				  void **frame_cache)
 {
   struct trad_frame_cache *cache

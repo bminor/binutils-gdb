@@ -215,14 +215,14 @@ static const gdb::option::option_def backtrace_command_option_defs[] = {
 
 /* Prototypes for local functions.  */
 
-static void print_frame_local_vars (frame_info_ptr frame,
+static void print_frame_local_vars (const frame_info_ptr &frame,
 				    bool quiet,
 				    const char *regexp, const char *t_regexp,
 				    int num_tabs, struct ui_file *stream);
 
 static void print_frame (struct ui_out *uiout,
 			 const frame_print_options &opts,
-			 frame_info_ptr frame, int print_level,
+			 const frame_info_ptr &frame, int print_level,
 			 enum print_what print_what,  int print_args,
 			 struct symtab_and_line sal);
 
@@ -315,7 +315,7 @@ static last_displayed_symtab_info_type last_displayed_symtab_info;
 /* See stack.h.  */
 
 bool
-frame_show_address (frame_info_ptr frame,
+frame_show_address (const frame_info_ptr &frame,
 		    struct symtab_and_line sal)
 {
   /* If there is a line number, but no PC, then there is no location
@@ -338,7 +338,7 @@ frame_show_address (frame_info_ptr frame,
 /* See frame.h.  */
 
 void
-print_stack_frame_to_uiout (struct ui_out *uiout, frame_info_ptr frame,
+print_stack_frame_to_uiout (struct ui_out *uiout, const frame_info_ptr &frame,
 			    int print_level, enum print_what print_what,
 			    int set_current_sal)
 {
@@ -354,7 +354,7 @@ print_stack_frame_to_uiout (struct ui_out *uiout, frame_info_ptr frame,
    source line, the actual PC is printed at the beginning.  */
 
 void
-print_stack_frame (frame_info_ptr frame, int print_level,
+print_stack_frame (const frame_info_ptr &frame, int print_level,
 		   enum print_what print_what,
 		   int set_current_sal)
 {
@@ -382,7 +382,7 @@ print_stack_frame (frame_info_ptr frame, int print_level,
    argument (not just the first nameless argument).  */
 
 static void
-print_frame_nameless_args (frame_info_ptr frame, long start, int num,
+print_frame_nameless_args (const frame_info_ptr &frame, long start, int num,
 			   int first, struct ui_file *stream)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -504,7 +504,7 @@ print_frame_arg (const frame_print_options &fp_opts,
    exception.  */
 
 void
-read_frame_local (struct symbol *sym, frame_info_ptr frame,
+read_frame_local (struct symbol *sym, const frame_info_ptr &frame,
 		  struct frame_arg *argp)
 {
   argp->sym = sym;
@@ -526,7 +526,7 @@ read_frame_local (struct symbol *sym, frame_info_ptr frame,
 
 void
 read_frame_arg (const frame_print_options &fp_opts,
-		symbol *sym, frame_info_ptr frame,
+		symbol *sym, const frame_info_ptr &frame,
 		struct frame_arg *argp, struct frame_arg *entryargp)
 {
   struct value *val = NULL, *entryval = NULL;
@@ -721,7 +721,7 @@ read_frame_arg (const frame_print_options &fp_opts,
 
 static void
 print_frame_args (const frame_print_options &fp_opts,
-		  struct symbol *func, frame_info_ptr frame,
+		  struct symbol *func, const frame_info_ptr &frame,
 		  int num, struct ui_file *stream)
 {
   struct ui_out *uiout = current_uiout;
@@ -920,7 +920,7 @@ print_frame_args (const frame_print_options &fp_opts,
    line is in the center of the next 'list'.  */
 
 void
-set_current_sal_from_frame (frame_info_ptr frame)
+set_current_sal_from_frame (const frame_info_ptr &frame)
 {
   symtab_and_line sal = find_frame_sal (frame);
   if (sal.symtab != NULL)
@@ -986,7 +986,7 @@ print_frame_info_to_print_what (const char *print_frame_info)
 /* Print the PC from FRAME, plus any flags, to UIOUT.  */
 
 static void
-print_pc (struct ui_out *uiout, struct gdbarch *gdbarch, frame_info_ptr frame,
+print_pc (struct ui_out *uiout, struct gdbarch *gdbarch, const frame_info_ptr &frame,
 	  CORE_ADDR pc)
 {
   uiout->field_core_addr ("addr", gdbarch, pc);
@@ -1021,7 +1021,7 @@ get_user_print_what_frame_info (std::optional<enum print_what> *what)
 
 static void
 do_print_frame_info (struct ui_out *uiout, const frame_print_options &fp_opts,
-		     frame_info_ptr frame, int print_level,
+		     const frame_info_ptr &frame, int print_level,
 		     enum print_what print_what, int print_args,
 		     int set_current_sal)
 {
@@ -1189,7 +1189,7 @@ do_print_frame_info (struct ui_out *uiout, const frame_print_options &fp_opts,
 
 void
 print_frame_info (const frame_print_options &fp_opts,
-		  frame_info_ptr frame, int print_level,
+		  const frame_info_ptr &frame, int print_level,
 		  enum print_what print_what, int print_args,
 		  int set_current_sal)
 {
@@ -1269,7 +1269,7 @@ get_last_displayed_sal ()
    corresponding to FRAME.  */
 
 gdb::unique_xmalloc_ptr<char>
-find_frame_funname (frame_info_ptr frame, enum language *funlang,
+find_frame_funname (const frame_info_ptr &frame, enum language *funlang,
 		    struct symbol **funcp)
 {
   struct symbol *func;
@@ -1324,7 +1324,7 @@ find_frame_funname (frame_info_ptr frame, enum language *funlang,
 static void
 print_frame (struct ui_out *uiout,
 	     const frame_print_options &fp_opts,
-	     frame_info_ptr frame, int print_level,
+	     const frame_info_ptr &frame, int print_level,
 	     enum print_what print_what, int print_args,
 	     struct symtab_and_line sal)
 {
@@ -1478,7 +1478,7 @@ frame_selection_by_function_completer (struct cmd_list_element *ignore,
    level 1') then SELECTED_FRAME_P will be false.  */
 
 static void
-info_frame_command_core (frame_info_ptr fi, bool selected_frame_p)
+info_frame_command_core (const frame_info_ptr &fi, bool selected_frame_p)
 {
   struct symbol *func;
   struct symtab *s;
@@ -1836,7 +1836,7 @@ trailing_outermost_frame (int count)
    SELECT_FRAME.  */
 
 static void
-select_frame_command_core (frame_info_ptr fi, bool ignored)
+select_frame_command_core (const frame_info_ptr &fi, bool ignored)
 {
   frame_info_ptr prev_frame = get_selected_frame ();
   select_frame (fi);
@@ -1849,7 +1849,7 @@ select_frame_command_core (frame_info_ptr fi, bool ignored)
    reprint the current frame summary).   */
 
 static void
-frame_command_core (frame_info_ptr fi, bool ignored)
+frame_command_core (const frame_info_ptr &fi, bool ignored)
 {
   frame_info_ptr prev_frame = get_selected_frame ();
   select_frame (fi);
@@ -1873,7 +1873,7 @@ frame_command_core (frame_info_ptr fi, bool ignored)
    'frame' will all cause SELECTED_FRAME_P to be true.  In all other cases
    SELECTED_FRAME_P is false.  */
 
-template <void (*FPTR) (frame_info_ptr fi, bool selected_frame_p)>
+template <void (*FPTR) (const frame_info_ptr &fi, bool selected_frame_p)>
 class frame_command_helper
 {
 public:
@@ -2338,7 +2338,7 @@ prepare_reg (const char *regexp, std::optional<compiled_regex> *reg)
    explaining why no local variables could be printed.  */
 
 static void
-print_frame_local_vars (frame_info_ptr frame,
+print_frame_local_vars (const frame_info_ptr &frame,
 			bool quiet,
 			const char *regexp, const char *t_regexp,
 			int num_tabs, struct ui_file *stream)
@@ -2500,7 +2500,7 @@ iterate_over_block_arg_vars (const struct block *b,
    explaining why no argument variables could be printed.  */
 
 static void
-print_frame_arg_vars (frame_info_ptr frame,
+print_frame_arg_vars (const frame_info_ptr &frame,
 		      bool quiet,
 		      const char *regexp, const char *t_regexp,
 		      struct ui_file *stream)

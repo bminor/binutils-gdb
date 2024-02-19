@@ -86,7 +86,7 @@ riscv_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 /* Signal trampoline support.  */
 
 static void riscv_linux_sigframe_init (const struct tramp_frame *self,
-				       frame_info_ptr this_frame,
+				       const frame_info_ptr &this_frame,
 				       struct trad_frame_cache *this_cache,
 				       CORE_ADDR func);
 
@@ -125,7 +125,7 @@ static const struct tramp_frame riscv_linux_sigframe = {
 
 static void
 riscv_linux_sigframe_init (const struct tramp_frame *self,
-			   frame_info_ptr this_frame,
+			   const frame_info_ptr &this_frame,
 			   struct trad_frame_cache *this_cache,
 			   CORE_ADDR func)
 {
@@ -163,7 +163,7 @@ riscv_linux_sigframe_init (const struct tramp_frame *self,
    instruction to be executed.  */
 
 static CORE_ADDR
-riscv_linux_syscall_next_pc (frame_info_ptr frame)
+riscv_linux_syscall_next_pc (const frame_info_ptr &frame)
 {
   const CORE_ADDR pc = get_frame_pc (frame);
   const ULONGEST a7 = get_frame_register_unsigned (frame, RISCV_A7_REGNUM);

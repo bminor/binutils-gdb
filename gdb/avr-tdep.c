@@ -979,7 +979,7 @@ avr_return_value (struct gdbarch *gdbarch, struct value *function,
    for it IS the sp for the next frame.  */
 
 static struct avr_unwind_cache *
-avr_frame_unwind_cache (frame_info_ptr this_frame,
+avr_frame_unwind_cache (const frame_info_ptr &this_frame,
 			void **this_prologue_cache)
 {
   CORE_ADDR start_pc, current_pc;
@@ -1059,7 +1059,7 @@ avr_frame_unwind_cache (frame_info_ptr this_frame,
 }
 
 static CORE_ADDR
-avr_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
+avr_unwind_pc (struct gdbarch *gdbarch, const frame_info_ptr &next_frame)
 {
   ULONGEST pc;
 
@@ -1069,7 +1069,7 @@ avr_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
 }
 
 static CORE_ADDR
-avr_unwind_sp (struct gdbarch *gdbarch, frame_info_ptr next_frame)
+avr_unwind_sp (struct gdbarch *gdbarch, const frame_info_ptr &next_frame)
 {
   ULONGEST sp;
 
@@ -1082,7 +1082,7 @@ avr_unwind_sp (struct gdbarch *gdbarch, frame_info_ptr next_frame)
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-avr_frame_this_id (frame_info_ptr this_frame,
+avr_frame_this_id (const frame_info_ptr &this_frame,
 		   void **this_prologue_cache,
 		   struct frame_id *this_id)
 {
@@ -1107,7 +1107,7 @@ avr_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
-avr_frame_prev_register (frame_info_ptr this_frame,
+avr_frame_prev_register (const frame_info_ptr &this_frame,
 			 void **this_prologue_cache, int regnum)
 {
   struct avr_unwind_cache *info
@@ -1166,7 +1166,7 @@ static const struct frame_unwind avr_frame_unwind = {
 };
 
 static CORE_ADDR
-avr_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+avr_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct avr_unwind_cache *info
     = avr_frame_unwind_cache (this_frame, this_cache);
@@ -1186,7 +1186,7 @@ static const struct frame_base avr_frame_base = {
    save_dummy_frame_tos(), and the PC match the dummy frame's breakpoint.  */
 
 static struct frame_id
-avr_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
+avr_dummy_id (struct gdbarch *gdbarch, const frame_info_ptr &this_frame)
 {
   ULONGEST base;
 

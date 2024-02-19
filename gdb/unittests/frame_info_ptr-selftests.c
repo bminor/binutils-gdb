@@ -36,7 +36,7 @@ validate_user_created_frame (frame_id id)
 }
 
 static frame_info_ptr
-user_created_frame_callee (frame_info_ptr frame)
+user_created_frame_callee (const frame_info_ptr &frame)
 {
   validate_user_created_frame (get_frame_id (frame));
 

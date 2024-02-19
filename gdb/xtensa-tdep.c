@@ -1026,7 +1026,7 @@ xtensa_frame_align (struct gdbarch *gdbarch, CORE_ADDR address)
 
 
 static CORE_ADDR
-xtensa_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
+xtensa_unwind_pc (struct gdbarch *gdbarch, const frame_info_ptr &next_frame)
 {
   gdb_byte buf[8];
   CORE_ADDR pc;
@@ -1044,7 +1044,7 @@ xtensa_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
 
 
 static struct frame_id
-xtensa_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
+xtensa_dummy_id (struct gdbarch *gdbarch, const frame_info_ptr &this_frame)
 {
   CORE_ADDR pc, fp;
   xtensa_gdbarch_tdep *tdep = gdbarch_tdep<xtensa_gdbarch_tdep> (gdbarch);
@@ -1217,16 +1217,16 @@ done:
 	cache->prev_sp = SP of the previous frame.  */
 
 static void
-call0_frame_cache (frame_info_ptr this_frame,
+call0_frame_cache (const frame_info_ptr &this_frame,
 		   xtensa_frame_cache_t *cache, CORE_ADDR pc);
 
 static void
-xtensa_window_interrupt_frame_cache (frame_info_ptr this_frame,
+xtensa_window_interrupt_frame_cache (const frame_info_ptr &this_frame,
 				     xtensa_frame_cache_t *cache,
 				     CORE_ADDR pc);
 
 static struct xtensa_frame_cache *
-xtensa_frame_cache (frame_info_ptr this_frame, void **this_cache)
+xtensa_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   xtensa_frame_cache_t *cache;
   CORE_ADDR ra, wb, ws, pc, sp, ps;
@@ -1392,7 +1392,7 @@ This message will not be repeated in this session.\n"));
 
 
 static void
-xtensa_frame_this_id (frame_info_ptr this_frame,
+xtensa_frame_this_id (const frame_info_ptr &this_frame,
 		      void **this_cache,
 		      struct frame_id *this_id)
 {
@@ -1406,7 +1406,7 @@ xtensa_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
-xtensa_frame_prev_register (frame_info_ptr this_frame,
+xtensa_frame_prev_register (const frame_info_ptr &this_frame,
 			    void **this_cache,
 			    int regnum)
 {
@@ -1509,7 +1509,7 @@ xtensa_unwind =
 };
 
 static CORE_ADDR
-xtensa_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+xtensa_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct xtensa_frame_cache *cache =
     xtensa_frame_cache (this_frame, this_cache);
@@ -2543,7 +2543,7 @@ done:
 /* Initialize frame cache for the current frame in CALL0 ABI.  */
 
 static void
-call0_frame_cache (frame_info_ptr this_frame,
+call0_frame_cache (const frame_info_ptr &this_frame,
 		   xtensa_frame_cache_t *cache, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -2892,7 +2892,7 @@ execute_code (struct gdbarch *gdbarch, CORE_ADDR current_pc, CORE_ADDR wb)
 /* Handle Window Overflow / Underflow exception frames.  */
 
 static void
-xtensa_window_interrupt_frame_cache (frame_info_ptr this_frame,
+xtensa_window_interrupt_frame_cache (const frame_info_ptr &this_frame,
 				     xtensa_frame_cache_t *cache,
 				     CORE_ADDR pc)
 {

@@ -100,7 +100,7 @@ static const struct regset sparc32_sol2_fpregset =
 
 
 static struct sparc_frame_cache *
-sparc32_sol2_sigtramp_frame_cache (frame_info_ptr this_frame,
+sparc32_sol2_sigtramp_frame_cache (const frame_info_ptr &this_frame,
 				   void **this_cache)
 {
   struct sparc_frame_cache *cache;
@@ -151,7 +151,7 @@ sparc32_sol2_sigtramp_frame_cache (frame_info_ptr this_frame,
 }
 
 static void
-sparc32_sol2_sigtramp_frame_this_id (frame_info_ptr this_frame,
+sparc32_sol2_sigtramp_frame_this_id (const frame_info_ptr &this_frame,
 				     void **this_cache,
 				     struct frame_id *this_id)
 {
@@ -162,7 +162,7 @@ sparc32_sol2_sigtramp_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
-sparc32_sol2_sigtramp_frame_prev_register (frame_info_ptr this_frame,
+sparc32_sol2_sigtramp_frame_prev_register (const frame_info_ptr &this_frame,
 					   void **this_cache,
 					   int regnum)
 {
@@ -174,7 +174,7 @@ sparc32_sol2_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 
 static int
 sparc32_sol2_sigtramp_frame_sniffer (const struct frame_unwind *self,
-				     frame_info_ptr this_frame,
+				     const frame_info_ptr &this_frame,
 				     void **this_cache)
 {
   return sol2_sigtramp_p (this_frame);

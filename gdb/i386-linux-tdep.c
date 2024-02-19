@@ -122,7 +122,7 @@ static const gdb_byte linux_sigtramp_code[] =
    start of the routine.  Otherwise, return 0.  */
 
 static CORE_ADDR
-i386_linux_sigtramp_start (frame_info_ptr this_frame)
+i386_linux_sigtramp_start (const frame_info_ptr &this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   gdb_byte buf[LINUX_SIGTRAMP_LEN];
@@ -190,7 +190,7 @@ static const gdb_byte linux_rt_sigtramp_code[] =
    start of the routine.  Otherwise, return 0.  */
 
 static CORE_ADDR
-i386_linux_rt_sigtramp_start (frame_info_ptr this_frame)
+i386_linux_rt_sigtramp_start (const frame_info_ptr &this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   gdb_byte buf[LINUX_RT_SIGTRAMP_LEN];
@@ -227,7 +227,7 @@ i386_linux_rt_sigtramp_start (frame_info_ptr this_frame)
    routine.  */
 
 static int
-i386_linux_sigtramp_p (frame_info_ptr this_frame)
+i386_linux_sigtramp_p (const frame_info_ptr &this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   const char *name;
@@ -252,7 +252,7 @@ i386_linux_sigtramp_p (frame_info_ptr this_frame)
 
 static int
 i386_linux_dwarf_signal_frame_p (struct gdbarch *gdbarch,
-				 frame_info_ptr this_frame)
+				 const frame_info_ptr &this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   const char *name;
@@ -275,7 +275,7 @@ i386_linux_dwarf_signal_frame_p (struct gdbarch *gdbarch,
    address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-i386_linux_sigcontext_addr (frame_info_ptr this_frame)
+i386_linux_sigcontext_addr (const frame_info_ptr &this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

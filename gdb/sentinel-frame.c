@@ -42,7 +42,7 @@ sentinel_frame_cache (struct regcache *regcache)
 /* Here the register value is taken direct from the register cache.  */
 
 static struct value *
-sentinel_frame_prev_register (frame_info_ptr this_frame,
+sentinel_frame_prev_register (const frame_info_ptr &this_frame,
 			      void **this_prologue_cache,
 			      int regnum)
 {
@@ -59,7 +59,7 @@ sentinel_frame_prev_register (frame_info_ptr this_frame,
 }
 
 static void
-sentinel_frame_this_id (frame_info_ptr this_frame,
+sentinel_frame_this_id (const frame_info_ptr &this_frame,
 			void **this_prologue_cache,
 			struct frame_id *this_id)
 {
@@ -70,7 +70,7 @@ sentinel_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct gdbarch *
-sentinel_frame_prev_arch (frame_info_ptr this_frame,
+sentinel_frame_prev_arch (const frame_info_ptr &this_frame,
 			  void **this_prologue_cache)
 {
   struct frame_unwind_cache *cache

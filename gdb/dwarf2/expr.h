@@ -137,7 +137,7 @@ struct dwarf_expr_context
      The ADDR_INFO property can be specified to override the range of
      memory addresses with the passed in buffer.  */
   value *evaluate (const gdb_byte *addr, size_t len, bool as_lval,
-		   dwarf2_per_cu_data *per_cu, frame_info_ptr frame,
+		   dwarf2_per_cu_data *per_cu, const frame_info_ptr &frame,
 		   const struct property_addr_info *addr_info = nullptr,
 		   struct type *type = nullptr,
 		   struct type *subobj_type = nullptr,
@@ -256,7 +256,7 @@ private:
 
 /* Return the value of register number REG (a DWARF register number),
    read as an address in a given FRAME.  */
-CORE_ADDR read_addr_from_reg (frame_info_ptr frame, int reg);
+CORE_ADDR read_addr_from_reg (const frame_info_ptr &frame, int reg);
 
 void dwarf_expr_require_composition (const gdb_byte *, const gdb_byte *,
 				     const char *);

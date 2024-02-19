@@ -32,7 +32,7 @@ get_imported_name (const struct symbol *sym)
 /* Implement the read_variable method from symbol_computed_ops.  */
 
 static struct value *
-ada_imported_read_variable (struct symbol *symbol, frame_info_ptr frame)
+ada_imported_read_variable (struct symbol *symbol, const frame_info_ptr &frame)
 {
   const char *name = get_imported_name (symbol);
   bound_minimal_symbol minsym = lookup_minimal_symbol_linkage (name, false);

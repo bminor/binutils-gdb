@@ -555,7 +555,7 @@ z80_return_value (struct gdbarch *gdbarch, struct value *function,
 
 /* function unwinds current stack frame and returns next one */
 static struct z80_unwind_cache *
-z80_frame_unwind_cache (frame_info_ptr this_frame,
+z80_frame_unwind_cache (const frame_info_ptr &this_frame,
 			void **this_prologue_cache)
 {
   CORE_ADDR start_pc, current_pc;
@@ -658,7 +658,7 @@ z80_frame_unwind_cache (frame_info_ptr this_frame,
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct.  */
 static void
-z80_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+z80_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
 		   struct frame_id *this_id)
 {
   struct frame_id id;
@@ -682,7 +682,7 @@ z80_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 }
 
 static struct value *
-z80_frame_prev_register (frame_info_ptr this_frame,
+z80_frame_prev_register (const frame_info_ptr &this_frame,
 			 void **this_prologue_cache, int regnum)
 {
   struct z80_unwind_cache *info

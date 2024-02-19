@@ -41,7 +41,7 @@ struct loongarch_gdbarch_tdep : gdbarch_tdep_base
   struct loongarch_gdbarch_features abi_features;
 
   /* Return the expected next PC if FRAME is stopped at a syscall instruction.  */
-  CORE_ADDR (*syscall_next_pc) (frame_info_ptr frame) = nullptr;
+  CORE_ADDR (*syscall_next_pc) (const frame_info_ptr &frame) = nullptr;
 };
 
 #endif /* LOONGARCH_TDEP_H  */

@@ -153,7 +153,7 @@ cplus_make_method_ptr (struct type *type, gdb_byte *contents,
 }
 
 CORE_ADDR
-cplus_skip_trampoline (frame_info_ptr frame,
+cplus_skip_trampoline (const frame_info_ptr &frame,
 		       CORE_ADDR stop_pc)
 {
   if (current_cp_abi.skip_trampoline == NULL)

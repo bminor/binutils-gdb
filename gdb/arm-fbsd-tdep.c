@@ -105,7 +105,7 @@ static const struct regcache_map_entry arm_fbsd_tls_regmap[] =
 
 static void
 arm_fbsd_sigframe_init (const struct tramp_frame *self,
-			frame_info_ptr this_frame,
+			const frame_info_ptr &this_frame,
 			struct trad_frame_cache *this_cache,
 			CORE_ADDR func)
 {

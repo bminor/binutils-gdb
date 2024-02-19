@@ -62,7 +62,7 @@ create_inferior_call_event_object (inferior_call_kind flag, ptid_t ptid,
    register number. */
 
 static gdbpy_ref<>
-create_register_changed_event_object (frame_info_ptr frame, 
+create_register_changed_event_object (const frame_info_ptr &frame,
 				      int regnum)
 {
   gdbpy_ref<> event = create_event_object (&register_changed_event_object_type);
@@ -151,7 +151,7 @@ emit_memory_changed_event (CORE_ADDR addr, ssize_t len)
    will create a new Python register changed event object. */
 
 int
-emit_register_changed_event (frame_info_ptr frame, int regnum)
+emit_register_changed_event (const frame_info_ptr &frame, int regnum)
 {
   if (evregpy_no_listeners_p (gdb_py_events.register_changed))
     return 0;

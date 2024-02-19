@@ -79,7 +79,7 @@ tic6x_register_sigcontext_offset (unsigned int regnum, struct gdbarch *gdbarch)
 
 static void
 tic6x_linux_rt_sigreturn_init (const struct tramp_frame *self,
-			       frame_info_ptr this_frame,
+			       const frame_info_ptr &this_frame,
 			       struct trad_frame_cache *this_cache,
 			       CORE_ADDR func)
 {
@@ -149,7 +149,7 @@ static struct tramp_frame tic6x_linux_rt_sigreturn_tramp_frame =
    instruction to be executed.  */
 
 static CORE_ADDR
-tic6x_linux_syscall_next_pc (frame_info_ptr frame)
+tic6x_linux_syscall_next_pc (const frame_info_ptr &frame)
 {
   ULONGEST syscall_number = get_frame_register_unsigned (frame,
 							 TIC6X_B0_REGNUM);

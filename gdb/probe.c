@@ -786,7 +786,7 @@ ignore_probes_command (const char *arg, int from_tty)
 /* See comments in probe.h.  */
 
 struct value *
-probe_safe_evaluate_at_pc (frame_info_ptr frame, unsigned n)
+probe_safe_evaluate_at_pc (const frame_info_ptr &frame, unsigned n)
 {
   struct bound_probe probe;
   unsigned n_args;

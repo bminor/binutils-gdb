@@ -321,7 +321,7 @@ struct language_defn
 
   virtual struct value *read_var_value (struct symbol *var,
 					const struct block *var_block,
-					frame_info_ptr frame) const;
+					const frame_info_ptr &frame) const;
 
   /* Return information about whether TYPE should be passed
      (and returned) by reference at the language level.  The default

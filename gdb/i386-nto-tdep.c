@@ -270,7 +270,7 @@ i386nto_regset_fill (const struct regcache *regcache, int regset, char *data)
    routine.  */
 
 static int
-i386nto_sigtramp_p (frame_info_ptr this_frame)
+i386nto_sigtramp_p (const frame_info_ptr &this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   const char *name;
@@ -283,7 +283,7 @@ i386nto_sigtramp_p (frame_info_ptr this_frame)
    address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-i386nto_sigcontext_addr (frame_info_ptr this_frame)
+i386nto_sigcontext_addr (const frame_info_ptr &this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

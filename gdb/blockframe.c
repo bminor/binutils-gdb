@@ -52,7 +52,7 @@
    slot instruction.  */
 
 const struct block *
-get_frame_block (frame_info_ptr frame, CORE_ADDR *addr_in_block)
+get_frame_block (const frame_info_ptr &frame, CORE_ADDR *addr_in_block)
 {
   CORE_ADDR pc;
   const struct block *bl;
@@ -115,7 +115,7 @@ get_pc_function_start (CORE_ADDR pc)
 /* Return the symbol for the function executing in frame FRAME.  */
 
 struct symbol *
-get_frame_function (frame_info_ptr frame)
+get_frame_function (const frame_info_ptr &frame)
 {
   const struct block *bl = get_frame_block (frame, 0);
 

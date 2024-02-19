@@ -275,7 +275,7 @@ mips_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
 static void
 mips_fbsd_sigframe_init (const struct tramp_frame *self,
-			 frame_info_ptr this_frame,
+			 const frame_info_ptr &this_frame,
 			 struct trad_frame_cache *cache,
 			 CORE_ADDR func)
 {
@@ -367,7 +367,7 @@ static const struct tramp_frame mips_fbsd_sigframe =
 
 static void
 mips64_fbsd_sigframe_init (const struct tramp_frame *self,
-			   frame_info_ptr this_frame,
+			   const frame_info_ptr &this_frame,
 			   struct trad_frame_cache *cache,
 			   CORE_ADDR func)
 {

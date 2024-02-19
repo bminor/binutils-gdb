@@ -361,7 +361,7 @@ frapy_function (PyObject *self, PyObject *args)
    Sets a Python exception and returns NULL on error.  */
 
 PyObject *
-frame_info_to_frame_object (frame_info_ptr frame)
+frame_info_to_frame_object (const frame_info_ptr &frame)
 {
   gdbpy_ref<frame_object> frame_obj (PyObject_New (frame_object,
 						   &frame_object_type));

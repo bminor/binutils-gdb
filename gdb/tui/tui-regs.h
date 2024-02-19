@@ -74,7 +74,7 @@ struct tui_data_window : public tui_win_info
     return DATA_NAME;
   }
 
-  void check_register_values (frame_info_ptr frame);
+  void check_register_values (const frame_info_ptr &frame);
 
   void set_register_group (const reggroup *group);
 

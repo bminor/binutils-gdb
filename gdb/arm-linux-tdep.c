@@ -277,7 +277,7 @@ static struct arm_get_next_pcs_ops arm_linux_get_next_pcs_ops = {
 };
 
 static void
-arm_linux_sigtramp_cache (frame_info_ptr this_frame,
+arm_linux_sigtramp_cache (const frame_info_ptr &this_frame,
 			  struct trad_frame_cache *this_cache,
 			  CORE_ADDR func, int regs_offset)
 {
@@ -300,7 +300,7 @@ arm_linux_sigtramp_cache (frame_info_ptr this_frame,
 /* See arm-linux.h for stack layout details.  */
 static void
 arm_linux_sigreturn_init (const struct tramp_frame *self,
-			  frame_info_ptr this_frame,
+			  const frame_info_ptr &this_frame,
 			  struct trad_frame_cache *this_cache,
 			  CORE_ADDR func)
 {
@@ -320,7 +320,7 @@ arm_linux_sigreturn_init (const struct tramp_frame *self,
 
 static void
 arm_linux_rt_sigreturn_init (const struct tramp_frame *self,
-			  frame_info_ptr this_frame,
+			  const frame_info_ptr &this_frame,
 			  struct trad_frame_cache *this_cache,
 			  CORE_ADDR func)
 {
@@ -343,7 +343,7 @@ arm_linux_rt_sigreturn_init (const struct tramp_frame *self,
 
 static void
 arm_linux_restart_syscall_init (const struct tramp_frame *self,
-				frame_info_ptr this_frame,
+				const frame_info_ptr &this_frame,
 				struct trad_frame_cache *this_cache,
 				CORE_ADDR func)
 {
@@ -756,7 +756,7 @@ arm_linux_core_read_description (struct gdbarch *gdbarch,
    will return to ARM or Thumb code.  Return 0 if it is not a
    rt_sigreturn/sigreturn syscall.  */
 static int
-arm_linux_sigreturn_return_addr (frame_info_ptr frame,
+arm_linux_sigreturn_return_addr (const frame_info_ptr &frame,
 				 unsigned long svc_number,
 				 CORE_ADDR *pc, int *is_thumb)
 {
@@ -1720,7 +1720,7 @@ arm_linux_syscall_record (struct regcache *regcache, unsigned long svc_number)
 /* Implement the skip_trampoline_code gdbarch method.  */
 
 static CORE_ADDR
-arm_linux_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
+arm_linux_skip_trampoline_code (const frame_info_ptr &frame, CORE_ADDR pc)
 {
   CORE_ADDR target_pc = arm_skip_stub (frame, pc);
 

@@ -458,7 +458,7 @@ msp430_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    return that struct as the value of this function.  */
 
 static struct msp430_prologue *
-msp430_analyze_frame_prologue (frame_info_ptr this_frame,
+msp430_analyze_frame_prologue (const frame_info_ptr &this_frame,
 			       void **this_prologue_cache)
 {
   if (!*this_prologue_cache)
@@ -486,7 +486,7 @@ msp430_analyze_frame_prologue (frame_info_ptr this_frame,
 /* Given a frame and a prologue cache, return this frame's base.  */
 
 static CORE_ADDR
-msp430_frame_base (frame_info_ptr this_frame, void **this_prologue_cache)
+msp430_frame_base (const frame_info_ptr &this_frame, void **this_prologue_cache)
 {
   struct msp430_prologue *p
     = msp430_analyze_frame_prologue (this_frame, this_prologue_cache);
@@ -498,7 +498,7 @@ msp430_frame_base (frame_info_ptr this_frame, void **this_prologue_cache)
 /* Implement the "frame_this_id" method for unwinding frames.  */
 
 static void
-msp430_this_id (frame_info_ptr this_frame,
+msp430_this_id (const frame_info_ptr &this_frame,
 		void **this_prologue_cache, struct frame_id *this_id)
 {
   *this_id = frame_id_build (msp430_frame_base (this_frame,
@@ -509,7 +509,7 @@ msp430_this_id (frame_info_ptr this_frame,
 /* Implement the "frame_prev_register" method for unwinding frames.  */
 
 static struct value *
-msp430_prev_register (frame_info_ptr this_frame,
+msp430_prev_register (const frame_info_ptr &this_frame,
 		      void **this_prologue_cache, int regnum)
 {
   struct msp430_prologue *p
@@ -805,7 +805,7 @@ msp430_in_return_stub (struct gdbarch *gdbarch, CORE_ADDR pc,
 
 /* Implement the "skip_trampoline_code" gdbarch method.  */
 static CORE_ADDR
-msp430_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
+msp430_skip_trampoline_code (const frame_info_ptr &frame, CORE_ADDR pc)
 {
   struct bound_minimal_symbol bms;
   const char *stub_name;

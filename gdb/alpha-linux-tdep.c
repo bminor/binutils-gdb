@@ -126,7 +126,7 @@ alpha_linux_pc_in_sigtramp (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-alpha_linux_sigcontext_addr (frame_info_ptr this_frame)
+alpha_linux_sigcontext_addr (const frame_info_ptr &this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR pc;

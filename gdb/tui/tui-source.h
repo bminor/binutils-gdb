@@ -46,7 +46,7 @@ struct tui_source_window : public tui_source_window_base
 
   bool showing_source_p (const char *filename) const;
 
-  void maybe_update (frame_info_ptr fi, symtab_and_line sal) override;
+  void maybe_update (const frame_info_ptr &fi, symtab_and_line sal) override;
 
   void erase_source_content () override
   {

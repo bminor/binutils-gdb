@@ -66,7 +66,7 @@ tui_all_objfiles_removed (program_space *pspace)
 /* Observer for the register_changed notification.  */
 
 static void
-tui_register_changed (frame_info_ptr frame, int regno)
+tui_register_changed (const frame_info_ptr &frame, int regno)
 {
   frame_info_ptr fi;
 

@@ -22,7 +22,7 @@
 
 struct gdbarch;
 
-int sol2_sigtramp_p (frame_info_ptr this_frame);
+int sol2_sigtramp_p (const frame_info_ptr &this_frame);
 
 void sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
 

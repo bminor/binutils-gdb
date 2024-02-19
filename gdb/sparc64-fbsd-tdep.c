@@ -89,7 +89,7 @@ sparc64fbsd_pc_in_sigtramp (CORE_ADDR pc, const char *name)
 }
 
 static struct sparc_frame_cache *
-sparc64fbsd_sigtramp_frame_cache (frame_info_ptr this_frame,
+sparc64fbsd_sigtramp_frame_cache (const frame_info_ptr &this_frame,
 				   void **this_cache)
 {
   struct sparc_frame_cache *cache;
@@ -162,7 +162,7 @@ sparc64fbsd_sigtramp_frame_cache (frame_info_ptr this_frame,
 }
 
 static void
-sparc64fbsd_sigtramp_frame_this_id (frame_info_ptr this_frame,
+sparc64fbsd_sigtramp_frame_this_id (const frame_info_ptr &this_frame,
 				    void **this_cache,
 				    struct frame_id *this_id)
 {
@@ -173,7 +173,7 @@ sparc64fbsd_sigtramp_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
-sparc64fbsd_sigtramp_frame_prev_register (frame_info_ptr this_frame,
+sparc64fbsd_sigtramp_frame_prev_register (const frame_info_ptr &this_frame,
 					  void **this_cache, int regnum)
 {
   struct sparc_frame_cache *cache =
@@ -184,7 +184,7 @@ sparc64fbsd_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 
 static int
 sparc64fbsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
-				    frame_info_ptr this_frame,
+				    const frame_info_ptr &this_frame,
 				    void **this_cache)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);

@@ -150,7 +150,7 @@ clear_inline_frame_state (thread_info *thread)
 }
 
 static void
-inline_frame_this_id (frame_info_ptr this_frame,
+inline_frame_this_id (const frame_info_ptr &this_frame,
 		      void **this_cache,
 		      struct frame_id *this_id)
 {
@@ -186,7 +186,7 @@ inline_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
-inline_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
+inline_frame_prev_register (const frame_info_ptr &this_frame, void **this_cache,
 			    int regnum)
 {
   /* Use get_frame_register_value instead of
@@ -208,7 +208,7 @@ inline_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 
 static int
 inline_frame_sniffer (const struct frame_unwind *self,
-		      frame_info_ptr this_frame,
+		      const frame_info_ptr &this_frame,
 		      void **this_cache)
 {
   CORE_ADDR this_pc;
@@ -441,7 +441,7 @@ inline_skipped_symbol (thread_info *thread)
    skip_inline_frames).  */
 
 int
-frame_inlined_callees (frame_info_ptr this_frame)
+frame_inlined_callees (const frame_info_ptr &this_frame)
 {
   frame_info_ptr next_frame;
   int inline_count = 0;

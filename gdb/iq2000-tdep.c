@@ -198,7 +198,7 @@ static CORE_ADDR
 iq2000_scan_prologue (struct gdbarch *gdbarch,
 		      CORE_ADDR scan_start,
 		      CORE_ADDR scan_end,
-		      frame_info_ptr fi,
+		      const frame_info_ptr &fi,
 		      struct iq2000_frame_cache *cache)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -358,7 +358,7 @@ iq2000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 }
 
 static struct iq2000_frame_cache *
-iq2000_frame_cache (frame_info_ptr this_frame, void **this_cache)
+iq2000_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct iq2000_frame_cache *cache;
@@ -391,7 +391,7 @@ iq2000_frame_cache (frame_info_ptr this_frame, void **this_cache)
 }
 
 static struct value *
-iq2000_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
+iq2000_frame_prev_register (const frame_info_ptr &this_frame, void **this_cache,
 			    int regnum)
 {
   struct iq2000_frame_cache *cache = iq2000_frame_cache (this_frame,
@@ -411,7 +411,7 @@ iq2000_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 }
 
 static void
-iq2000_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+iq2000_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
 		      struct frame_id *this_id)
 {
   struct iq2000_frame_cache *cache = iq2000_frame_cache (this_frame,
@@ -435,7 +435,7 @@ static const struct frame_unwind iq2000_frame_unwind = {
 };
 
 static CORE_ADDR
-iq2000_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+iq2000_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct iq2000_frame_cache *cache = iq2000_frame_cache (this_frame,
 							 this_cache);

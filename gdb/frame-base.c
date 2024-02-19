@@ -29,19 +29,19 @@
    really need to override this.  */
 
 static CORE_ADDR
-default_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+default_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   return get_frame_base (this_frame); /* sigh! */
 }
 
 static CORE_ADDR
-default_frame_locals_address (frame_info_ptr this_frame, void **this_cache)
+default_frame_locals_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   return default_frame_base_address (this_frame, this_cache);
 }
 
 static CORE_ADDR
-default_frame_args_address (frame_info_ptr this_frame, void **this_cache)
+default_frame_args_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   return default_frame_base_address (this_frame, this_cache);
 }
@@ -99,7 +99,7 @@ frame_base_set_default (struct gdbarch *gdbarch,
 }
 
 const struct frame_base *
-frame_base_find_by_frame (frame_info_ptr this_frame)
+frame_base_find_by_frame (const frame_info_ptr &this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct frame_base_table *table = get_frame_base_table (gdbarch);

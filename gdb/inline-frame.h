@@ -68,6 +68,6 @@ struct symbol *inline_skipped_symbol (thread_info *thread);
    the callees may not have associated frames (see
    skip_inline_frames).  */
 
-int frame_inlined_callees (frame_info_ptr this_frame);
+int frame_inlined_callees (const frame_info_ptr &this_frame);
 
 #endif /* !defined (INLINE_FRAME_H) */

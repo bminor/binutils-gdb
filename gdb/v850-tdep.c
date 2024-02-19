@@ -1212,7 +1212,7 @@ v850_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 }
 
 static struct v850_frame_cache *
-v850_alloc_frame_cache (frame_info_ptr this_frame)
+v850_alloc_frame_cache (const frame_info_ptr &this_frame)
 {
   struct v850_frame_cache *cache;
 
@@ -1231,7 +1231,7 @@ v850_alloc_frame_cache (frame_info_ptr this_frame)
 }
 
 static struct v850_frame_cache *
-v850_frame_cache (frame_info_ptr this_frame, void **this_cache)
+v850_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct v850_frame_cache *cache;
@@ -1297,7 +1297,7 @@ v850_frame_cache (frame_info_ptr this_frame, void **this_cache)
 
 
 static struct value *
-v850_frame_prev_register (frame_info_ptr this_frame,
+v850_frame_prev_register (const frame_info_ptr &this_frame,
 			  void **this_cache, int regnum)
 {
   struct v850_frame_cache *cache = v850_frame_cache (this_frame, this_cache);
@@ -1308,7 +1308,7 @@ v850_frame_prev_register (frame_info_ptr this_frame,
 }
 
 static void
-v850_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+v850_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
 		    struct frame_id *this_id)
 {
   struct v850_frame_cache *cache = v850_frame_cache (this_frame, this_cache);
@@ -1331,7 +1331,7 @@ static const struct frame_unwind v850_frame_unwind = {
 };
 
 static CORE_ADDR
-v850_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+v850_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct v850_frame_cache *cache = v850_frame_cache (this_frame, this_cache);
 

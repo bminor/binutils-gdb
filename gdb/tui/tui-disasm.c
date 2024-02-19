@@ -490,7 +490,7 @@ tui_disasm_window::addr_is_displayed (CORE_ADDR addr) const
 }
 
 void
-tui_disasm_window::maybe_update (frame_info_ptr fi, symtab_and_line sal)
+tui_disasm_window::maybe_update (const frame_info_ptr &fi, symtab_and_line sal)
 {
   CORE_ADDR low;
 

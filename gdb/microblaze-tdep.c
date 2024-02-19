@@ -368,7 +368,7 @@ microblaze_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 }
 
 static CORE_ADDR
-microblaze_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
+microblaze_unwind_pc (struct gdbarch *gdbarch, const frame_info_ptr &next_frame)
 {
   gdb_byte buf[4];
   CORE_ADDR pc;
@@ -417,7 +417,7 @@ microblaze_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 /* Normal frames.  */
 
 static struct microblaze_frame_cache *
-microblaze_frame_cache (frame_info_ptr next_frame, void **this_cache)
+microblaze_frame_cache (const frame_info_ptr &next_frame, void **this_cache)
 {
   struct microblaze_frame_cache *cache;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
@@ -443,7 +443,7 @@ microblaze_frame_cache (frame_info_ptr next_frame, void **this_cache)
 }
 
 static void
-microblaze_frame_this_id (frame_info_ptr next_frame, void **this_cache,
+microblaze_frame_this_id (const frame_info_ptr &next_frame, void **this_cache,
 		       struct frame_id *this_id)
 {
   struct microblaze_frame_cache *cache =
@@ -457,7 +457,7 @@ microblaze_frame_this_id (frame_info_ptr next_frame, void **this_cache,
 }
 
 static struct value *
-microblaze_frame_prev_register (frame_info_ptr this_frame,
+microblaze_frame_prev_register (const frame_info_ptr &this_frame,
 				 void **this_cache, int regnum)
 {
   struct microblaze_frame_cache *cache =
@@ -490,7 +490,7 @@ static const struct frame_unwind microblaze_frame_unwind =
 };
 
 static CORE_ADDR
-microblaze_frame_base_address (frame_info_ptr next_frame,
+microblaze_frame_base_address (const frame_info_ptr &next_frame,
 			       void **this_cache)
 {
   struct microblaze_frame_cache *cache =

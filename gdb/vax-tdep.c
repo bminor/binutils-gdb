@@ -187,7 +187,7 @@ vax_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 }
 
 static struct frame_id
-vax_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
+vax_dummy_id (struct gdbarch *gdbarch, const frame_info_ptr &this_frame)
 {
   CORE_ADDR fp;
 
@@ -303,7 +303,7 @@ struct vax_frame_cache
 };
 
 static struct vax_frame_cache *
-vax_frame_cache (frame_info_ptr this_frame, void **this_cache)
+vax_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct vax_frame_cache *cache;
   CORE_ADDR addr;
@@ -365,7 +365,7 @@ vax_frame_cache (frame_info_ptr this_frame, void **this_cache)
 }
 
 static void
-vax_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+vax_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
 		   struct frame_id *this_id)
 {
   struct vax_frame_cache *cache = vax_frame_cache (this_frame, this_cache);
@@ -378,7 +378,7 @@ vax_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 }
 
 static struct value *
-vax_frame_prev_register (frame_info_ptr this_frame,
+vax_frame_prev_register (const frame_info_ptr &this_frame,
 			 void **this_cache, int regnum)
 {
   struct vax_frame_cache *cache = vax_frame_cache (this_frame, this_cache);
@@ -399,7 +399,7 @@ static const struct frame_unwind vax_frame_unwind =
 
 
 static CORE_ADDR
-vax_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+vax_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct vax_frame_cache *cache = vax_frame_cache (this_frame, this_cache);
 
@@ -407,7 +407,7 @@ vax_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 }
 
 static CORE_ADDR
-vax_frame_args_address (frame_info_ptr this_frame, void **this_cache)
+vax_frame_args_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   return get_frame_register_unsigned (this_frame, VAX_AP_REGNUM);
 }
@@ -423,7 +423,7 @@ static const struct frame_base vax_frame_base =
 /* Return number of arguments for FRAME.  */
 
 static int
-vax_frame_num_args (frame_info_ptr frame)
+vax_frame_num_args (const frame_info_ptr &frame)
 {
   CORE_ADDR args;
 

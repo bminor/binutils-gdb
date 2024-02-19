@@ -348,7 +348,7 @@ amd64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 }
 
 static value *
-amd64_pseudo_register_read_value (gdbarch *gdbarch, frame_info_ptr next_frame,
+amd64_pseudo_register_read_value (gdbarch *gdbarch, const frame_info_ptr &next_frame,
 				  int regnum)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
@@ -379,7 +379,7 @@ amd64_pseudo_register_read_value (gdbarch *gdbarch, frame_info_ptr next_frame,
 }
 
 static void
-amd64_pseudo_register_write (gdbarch *gdbarch, frame_info_ptr next_frame,
+amd64_pseudo_register_write (gdbarch *gdbarch, const frame_info_ptr &next_frame,
 			     int regnum, gdb::array_view<const gdb_byte> buf)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
@@ -2510,7 +2510,7 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 /* Normal frames.  */
 
 static void
-amd64_frame_cache_1 (frame_info_ptr this_frame,
+amd64_frame_cache_1 (const frame_info_ptr &this_frame,
 		     struct amd64_frame_cache *cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -2579,7 +2579,7 @@ amd64_frame_cache_1 (frame_info_ptr this_frame,
 }
 
 static struct amd64_frame_cache *
-amd64_frame_cache (frame_info_ptr this_frame, void **this_cache)
+amd64_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct amd64_frame_cache *cache;
 
@@ -2603,7 +2603,7 @@ amd64_frame_cache (frame_info_ptr this_frame, void **this_cache)
 }
 
 static enum unwind_stop_reason
-amd64_frame_unwind_stop_reason (frame_info_ptr this_frame,
+amd64_frame_unwind_stop_reason (const frame_info_ptr &this_frame,
 				void **this_cache)
 {
   struct amd64_frame_cache *cache =
@@ -2620,7 +2620,7 @@ amd64_frame_unwind_stop_reason (frame_info_ptr this_frame,
 }
 
 static void
-amd64_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+amd64_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
 		     struct frame_id *this_id)
 {
   struct amd64_frame_cache *cache =
@@ -2638,7 +2638,7 @@ amd64_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 }
 
 static struct value *
-amd64_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
+amd64_frame_prev_register (const frame_info_ptr &this_frame, void **this_cache,
 			   int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -2692,7 +2692,7 @@ amd64_gen_return_address (struct gdbarch *gdbarch,
    on both platforms.  */
 
 static struct amd64_frame_cache *
-amd64_sigtramp_frame_cache (frame_info_ptr this_frame, void **this_cache)
+amd64_sigtramp_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
@@ -2732,7 +2732,7 @@ amd64_sigtramp_frame_cache (frame_info_ptr this_frame, void **this_cache)
 }
 
 static enum unwind_stop_reason
-amd64_sigtramp_frame_unwind_stop_reason (frame_info_ptr this_frame,
+amd64_sigtramp_frame_unwind_stop_reason (const frame_info_ptr &this_frame,
 					 void **this_cache)
 {
   struct amd64_frame_cache *cache =
@@ -2745,7 +2745,7 @@ amd64_sigtramp_frame_unwind_stop_reason (frame_info_ptr this_frame,
 }
 
 static void
-amd64_sigtramp_frame_this_id (frame_info_ptr this_frame,
+amd64_sigtramp_frame_this_id (const frame_info_ptr &this_frame,
 			      void **this_cache, struct frame_id *this_id)
 {
   struct amd64_frame_cache *cache =
@@ -2763,7 +2763,7 @@ amd64_sigtramp_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
-amd64_sigtramp_frame_prev_register (frame_info_ptr this_frame,
+amd64_sigtramp_frame_prev_register (const frame_info_ptr &this_frame,
 				    void **this_cache, int regnum)
 {
   /* Make sure we've initialized the cache.  */
@@ -2774,7 +2774,7 @@ amd64_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 
 static int
 amd64_sigtramp_frame_sniffer (const struct frame_unwind *self,
-			      frame_info_ptr this_frame,
+			      const frame_info_ptr &this_frame,
 			      void **this_cache)
 {
   gdbarch *arch = get_frame_arch (this_frame);
@@ -2816,7 +2816,7 @@ static const struct frame_unwind amd64_sigtramp_frame_unwind =
 
 
 static CORE_ADDR
-amd64_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+amd64_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct amd64_frame_cache *cache =
     amd64_frame_cache (this_frame, this_cache);
@@ -2878,7 +2878,7 @@ amd64_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 static int
 amd64_epilogue_frame_sniffer_1 (const struct frame_unwind *self,
-				frame_info_ptr this_frame,
+				const frame_info_ptr &this_frame,
 				void **this_prologue_cache, bool override_p)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -2911,7 +2911,7 @@ amd64_epilogue_frame_sniffer_1 (const struct frame_unwind *self,
 
 static int
 amd64_epilogue_override_frame_sniffer (const struct frame_unwind *self,
-				       frame_info_ptr this_frame,
+				       const frame_info_ptr &this_frame,
 				       void **this_prologue_cache)
 {
   return amd64_epilogue_frame_sniffer_1 (self, this_frame, this_prologue_cache,
@@ -2920,7 +2920,7 @@ amd64_epilogue_override_frame_sniffer (const struct frame_unwind *self,
 
 static int
 amd64_epilogue_frame_sniffer (const struct frame_unwind *self,
-			      frame_info_ptr this_frame,
+			      const frame_info_ptr &this_frame,
 			      void **this_prologue_cache)
 {
   return amd64_epilogue_frame_sniffer_1 (self, this_frame, this_prologue_cache,
@@ -2928,7 +2928,7 @@ amd64_epilogue_frame_sniffer (const struct frame_unwind *self,
 }
 
 static struct amd64_frame_cache *
-amd64_epilogue_frame_cache (frame_info_ptr this_frame, void **this_cache)
+amd64_epilogue_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -2969,7 +2969,7 @@ amd64_epilogue_frame_cache (frame_info_ptr this_frame, void **this_cache)
 }
 
 static enum unwind_stop_reason
-amd64_epilogue_frame_unwind_stop_reason (frame_info_ptr this_frame,
+amd64_epilogue_frame_unwind_stop_reason (const frame_info_ptr &this_frame,
 					 void **this_cache)
 {
   struct amd64_frame_cache *cache
@@ -2982,7 +2982,7 @@ amd64_epilogue_frame_unwind_stop_reason (frame_info_ptr this_frame,
 }
 
 static void
-amd64_epilogue_frame_this_id (frame_info_ptr this_frame,
+amd64_epilogue_frame_this_id (const frame_info_ptr &this_frame,
 			      void **this_cache,
 			      struct frame_id *this_id)
 {
@@ -3018,7 +3018,7 @@ static const struct frame_unwind amd64_epilogue_frame_unwind =
 };
 
 static struct frame_id
-amd64_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
+amd64_dummy_id (struct gdbarch *gdbarch, const frame_info_ptr &this_frame)
 {
   CORE_ADDR fp;
 
@@ -3081,7 +3081,7 @@ const struct regset amd64_fpregset =
    success.  */
 
 static int
-amd64_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
+amd64_get_longjmp_target (const frame_info_ptr &frame, CORE_ADDR *pc)
 {
   gdb_byte buf[8];
   CORE_ADDR jb_addr;

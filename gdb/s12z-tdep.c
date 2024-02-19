@@ -241,7 +241,7 @@ push_pull_get_stack_adjustment (int n_operands,
 /* Initialize a prologue cache.  */
 
 static struct trad_frame_cache *
-s12z_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
+s12z_frame_cache (const frame_info_ptr &this_frame, void **prologue_cache)
 {
   struct trad_frame_cache *info;
 
@@ -420,7 +420,7 @@ s12z_frame_cache (frame_info_ptr this_frame, void **prologue_cache)
 
 /* Implement the this_id function for the stub unwinder.  */
 static void
-s12z_frame_this_id (frame_info_ptr this_frame,
+s12z_frame_this_id (const frame_info_ptr &this_frame,
 		    void **prologue_cache, struct frame_id *this_id)
 {
   struct trad_frame_cache *info = s12z_frame_cache (this_frame,
@@ -432,7 +432,7 @@ s12z_frame_this_id (frame_info_ptr this_frame,
 
 /* Implement the prev_register function for the stub unwinder.  */
 static struct value *
-s12z_frame_prev_register (frame_info_ptr this_frame,
+s12z_frame_prev_register (const frame_info_ptr &this_frame,
 			  void **prologue_cache, int regnum)
 {
   struct trad_frame_cache *info = s12z_frame_cache (this_frame,
@@ -491,7 +491,7 @@ static const char ccw_bits[] =
 static void
 s12z_print_ccw_info (struct gdbarch *gdbarch,
 		     struct ui_file *file,
-		     frame_info_ptr frame,
+		     const frame_info_ptr &frame,
 		     int reg)
 {
   value *v = value_of_register (reg, get_next_frame_sentinel_okay (frame));
@@ -524,7 +524,7 @@ s12z_print_ccw_info (struct gdbarch *gdbarch,
 static void
 s12z_print_registers_info (struct gdbarch *gdbarch,
 			    struct ui_file *file,
-			    frame_info_ptr frame,
+			    const frame_info_ptr &frame,
 			    int regnum, int print_all)
 {
   const int numregs = (gdbarch_num_regs (gdbarch)

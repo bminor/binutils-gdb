@@ -142,7 +142,7 @@ static CORE_ADDR
 tic6x_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 			const CORE_ADDR current_pc,
 			struct tic6x_unwind_cache *cache,
-			frame_info_ptr this_frame)
+			const frame_info_ptr &this_frame)
 {
   unsigned int src_reg, base_reg, dst_reg;
   int i;
@@ -340,7 +340,7 @@ tic6x_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 static void
 tic6x_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			     struct dwarf2_frame_state_reg *reg,
-			     frame_info_ptr this_frame)
+			     const frame_info_ptr &this_frame)
 {
   /* Mark the PC as the destination for the return address.  */
   if (regnum == gdbarch_pc_regnum (gdbarch))
@@ -365,7 +365,7 @@ tic6x_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 /* This is the implementation of gdbarch method unwind_pc.  */
 
 static CORE_ADDR
-tic6x_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
+tic6x_unwind_pc (struct gdbarch *gdbarch, const frame_info_ptr &next_frame)
 {
   gdb_byte buf[8];
 
@@ -376,7 +376,7 @@ tic6x_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
 /* Frame base handling.  */
 
 static struct tic6x_unwind_cache*
-tic6x_frame_unwind_cache (frame_info_ptr this_frame,
+tic6x_frame_unwind_cache (const frame_info_ptr &this_frame,
 			  void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -404,7 +404,7 @@ tic6x_frame_unwind_cache (frame_info_ptr this_frame,
 }
 
 static void
-tic6x_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+tic6x_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
 		     struct frame_id *this_id)
 {
   struct tic6x_unwind_cache *cache =
@@ -418,7 +418,7 @@ tic6x_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 }
 
 static struct value *
-tic6x_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
+tic6x_frame_prev_register (const frame_info_ptr &this_frame, void **this_cache,
 			   int regnum)
 {
   struct tic6x_unwind_cache *cache =
@@ -445,7 +445,7 @@ tic6x_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 }
 
 static CORE_ADDR
-tic6x_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+tic6x_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct tic6x_unwind_cache *info
     = tic6x_frame_unwind_cache (this_frame, this_cache);
@@ -473,7 +473,7 @@ static const struct frame_base tic6x_frame_base =
 
 
 static struct tic6x_unwind_cache *
-tic6x_make_stub_cache (frame_info_ptr this_frame)
+tic6x_make_stub_cache (const frame_info_ptr &this_frame)
 {
   struct tic6x_unwind_cache *cache;
 
@@ -489,7 +489,7 @@ tic6x_make_stub_cache (frame_info_ptr this_frame)
 }
 
 static void
-tic6x_stub_this_id (frame_info_ptr this_frame, void **this_cache,
+tic6x_stub_this_id (const frame_info_ptr &this_frame, void **this_cache,
 		    struct frame_id *this_id)
 {
   struct tic6x_unwind_cache *cache;
@@ -503,7 +503,7 @@ tic6x_stub_this_id (frame_info_ptr this_frame, void **this_cache,
 
 static int
 tic6x_stub_unwind_sniffer (const struct frame_unwind *self,
-			   frame_info_ptr this_frame,
+			   const frame_info_ptr &this_frame,
 			   void **this_prologue_cache)
 {
   CORE_ADDR addr_in_block;
@@ -1103,7 +1103,7 @@ tic6x_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* This is the implementation of gdbarch method get_longjmp_target.  */
 
 static int
-tic6x_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
+tic6x_get_longjmp_target (const frame_info_ptr &frame, CORE_ADDR *pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

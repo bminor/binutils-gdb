@@ -151,7 +151,7 @@ public:
 
   /* See probe.h.  */
   struct value *evaluate_argument (unsigned n,
-				   frame_info_ptr frame) override;
+				   const frame_info_ptr &frame) override;
 
   /* See probe.h.  */
   void compile_to_ax (struct agent_expr *aexpr,
@@ -1438,7 +1438,7 @@ stap_probe::can_evaluate_arguments () const
    corresponding to it.  Assertion is thrown if N does not exist.  */
 
 struct value *
-stap_probe::evaluate_argument (unsigned n, frame_info_ptr frame)
+stap_probe::evaluate_argument (unsigned n, const frame_info_ptr &frame)
 {
   struct stap_probe_arg *arg;
   struct gdbarch *gdbarch = get_frame_arch (frame);

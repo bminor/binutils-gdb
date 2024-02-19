@@ -27,7 +27,7 @@
 #include "gdbarch.h"
 
 static struct value *
-value_of_builtin_frame_fp_reg (frame_info_ptr frame, const void *baton)
+value_of_builtin_frame_fp_reg (const frame_info_ptr &frame, const void *baton)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
@@ -53,7 +53,7 @@ value_of_builtin_frame_fp_reg (frame_info_ptr frame, const void *baton)
 }
 
 static struct value *
-value_of_builtin_frame_pc_reg (frame_info_ptr frame, const void *baton)
+value_of_builtin_frame_pc_reg (const frame_info_ptr &frame, const void *baton)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
@@ -73,7 +73,7 @@ value_of_builtin_frame_pc_reg (frame_info_ptr frame, const void *baton)
 }
 
 static struct value *
-value_of_builtin_frame_sp_reg (frame_info_ptr frame, const void *baton)
+value_of_builtin_frame_sp_reg (const frame_info_ptr &frame, const void *baton)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
@@ -84,7 +84,7 @@ value_of_builtin_frame_sp_reg (frame_info_ptr frame, const void *baton)
 }
 
 static struct value *
-value_of_builtin_frame_ps_reg (frame_info_ptr frame, const void *baton)
+value_of_builtin_frame_ps_reg (const frame_info_ptr &frame, const void *baton)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 

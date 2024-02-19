@@ -341,7 +341,7 @@ extern enum ada_renaming_category ada_parse_renaming (struct symbol *,
 						      const char **,
 						      int *, const char **);
 
-extern void ada_find_printable_frame (frame_info_ptr fi);
+extern void ada_find_printable_frame (const frame_info_ptr &fi);
 
 extern const char *ada_main_name ();
 

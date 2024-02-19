@@ -306,7 +306,7 @@ static CORE_ADDR
 xstormy16_analyze_prologue (struct gdbarch *gdbarch,
 			    CORE_ADDR start_addr, CORE_ADDR end_addr,
 			    struct xstormy16_frame_cache *cache,
-			    frame_info_ptr this_frame)
+			    const frame_info_ptr &this_frame)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR next_addr;
@@ -581,7 +581,7 @@ xstormy16_find_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
 }
 
 static CORE_ADDR
-xstormy16_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
+xstormy16_skip_trampoline_code (const frame_info_ptr &frame, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   CORE_ADDR tmp = xstormy16_resolve_jmp_table_entry (gdbarch, pc);
@@ -653,7 +653,7 @@ xstormy16_alloc_frame_cache (void)
 }
 
 static struct xstormy16_frame_cache *
-xstormy16_frame_cache (frame_info_ptr this_frame, void **this_cache)
+xstormy16_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct xstormy16_frame_cache *cache;
@@ -689,7 +689,7 @@ xstormy16_frame_cache (frame_info_ptr this_frame, void **this_cache)
 }
 
 static struct value *
-xstormy16_frame_prev_register (frame_info_ptr this_frame, 
+xstormy16_frame_prev_register (const frame_info_ptr &this_frame,
 			       void **this_cache, int regnum)
 {
   struct xstormy16_frame_cache *cache = xstormy16_frame_cache (this_frame,
@@ -707,7 +707,7 @@ xstormy16_frame_prev_register (frame_info_ptr this_frame,
 }
 
 static void
-xstormy16_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+xstormy16_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
 			 struct frame_id *this_id)
 {
   struct xstormy16_frame_cache *cache = xstormy16_frame_cache (this_frame,
@@ -721,7 +721,7 @@ xstormy16_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 }
 
 static CORE_ADDR
-xstormy16_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+xstormy16_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct xstormy16_frame_cache *cache = xstormy16_frame_cache (this_frame,
 							       this_cache);

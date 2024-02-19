@@ -199,7 +199,7 @@ tui_source_window::line_is_displayed (int line) const
 }
 
 void
-tui_source_window::maybe_update (frame_info_ptr fi, symtab_and_line sal)
+tui_source_window::maybe_update (const frame_info_ptr &fi, symtab_and_line sal)
 {
   int start_line = (sal.line - ((height - box_size ()) / 2)) + 1;
   if (start_line <= 0)

@@ -85,7 +85,7 @@ tab_expansion_file::write (const char *buf, long length_buf)
    representation of it.  */
 
 static std::string
-tui_register_format (frame_info_ptr frame, int regnum)
+tui_register_format (const frame_info_ptr &frame, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
@@ -406,7 +406,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
    given a particular frame.  If the values have changed, they are
    updated with the new value and highlighted.  */
 void
-tui_data_window::check_register_values (frame_info_ptr frame)
+tui_data_window::check_register_values (const frame_info_ptr &frame)
 {
   if (frame == nullptr)
     set_register_group (nullptr);

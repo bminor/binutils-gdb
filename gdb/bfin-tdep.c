@@ -288,7 +288,7 @@ bfin_alloc_frame_cache (void)
 }
 
 static struct bfin_frame_cache *
-bfin_frame_cache (frame_info_ptr this_frame, void **this_cache)
+bfin_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct bfin_frame_cache *cache;
   int i;
@@ -340,7 +340,7 @@ bfin_frame_cache (frame_info_ptr this_frame, void **this_cache)
 }
 
 static void
-bfin_frame_this_id (frame_info_ptr this_frame,
+bfin_frame_this_id (const frame_info_ptr &this_frame,
 		    void **this_cache,
 		    struct frame_id *this_id)
 {
@@ -355,7 +355,7 @@ bfin_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
-bfin_frame_prev_register (frame_info_ptr this_frame,
+bfin_frame_prev_register (const frame_info_ptr &this_frame,
 			  void **this_cache,
 			  int regnum)
 {
@@ -724,7 +724,7 @@ bfin_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 }
 
 static CORE_ADDR
-bfin_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+bfin_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct bfin_frame_cache *cache = bfin_frame_cache (this_frame, this_cache);
 
@@ -732,7 +732,7 @@ bfin_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 }
 
 static CORE_ADDR
-bfin_frame_local_address (frame_info_ptr this_frame, void **this_cache)
+bfin_frame_local_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct bfin_frame_cache *cache = bfin_frame_cache (this_frame, this_cache);
 
@@ -740,7 +740,7 @@ bfin_frame_local_address (frame_info_ptr this_frame, void **this_cache)
 }
 
 static CORE_ADDR
-bfin_frame_args_address (frame_info_ptr this_frame, void **this_cache)
+bfin_frame_args_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct bfin_frame_cache *cache = bfin_frame_cache (this_frame, this_cache);
 

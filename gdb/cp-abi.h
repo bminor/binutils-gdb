@@ -204,7 +204,7 @@ extern std::string cplus_typename_from_type_info (struct value *value);
    address of the routine we are thunking to and continue to there
    instead.  */
 
-CORE_ADDR cplus_skip_trampoline (frame_info_ptr frame,
+CORE_ADDR cplus_skip_trampoline (const frame_info_ptr &frame,
 				 CORE_ADDR stop_pc);
 
 /* Return a struct that provides pass-by-reference information
@@ -247,7 +247,7 @@ struct cp_abi_ops
   struct type *(*get_typeid_type) (struct gdbarch *gdbarch);
   struct type *(*get_type_from_type_info) (struct value *value);
   std::string (*get_typename_from_type_info) (struct value *value);
-  CORE_ADDR (*skip_trampoline) (frame_info_ptr, CORE_ADDR);
+  CORE_ADDR (*skip_trampoline) (const frame_info_ptr &, CORE_ADDR);
   struct language_pass_by_ref_info (*pass_by_reference) (struct type *type);
 };
 

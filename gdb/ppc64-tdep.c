@@ -85,7 +85,7 @@
    Return the function's entry point.  */
 
 static CORE_ADDR
-ppc64_plt_entry_point (frame_info_ptr frame, CORE_ADDR plt_off)
+ppc64_plt_entry_point (const frame_info_ptr &frame, CORE_ADDR plt_off)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -108,7 +108,7 @@ ppc64_plt_entry_point (frame_info_ptr frame, CORE_ADDR plt_off)
 }
 
 static CORE_ADDR
-ppc64_plt_pcrel_entry_point (frame_info_ptr frame, CORE_ADDR plt_off,
+ppc64_plt_pcrel_entry_point (const frame_info_ptr &frame, CORE_ADDR plt_off,
 			     CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -546,7 +546,7 @@ static const struct ppc_insn_pattern ppc64_standard_linkage12[] =
    dynamic linker lazy symbol resolution stubs.)  */
 
 static CORE_ADDR
-ppc64_standard_linkage1_target (frame_info_ptr frame, unsigned int *insn)
+ppc64_standard_linkage1_target (const frame_info_ptr &frame, unsigned int *insn)
 {
   CORE_ADDR plt_off = ((ppc_insn_d_field (insn[0]) << 16)
 		       + ppc_insn_ds_field (insn[2]));
@@ -555,7 +555,7 @@ ppc64_standard_linkage1_target (frame_info_ptr frame, unsigned int *insn)
 }
 
 static CORE_ADDR
-ppc64_standard_linkage2_target (frame_info_ptr frame, unsigned int *insn)
+ppc64_standard_linkage2_target (const frame_info_ptr &frame, unsigned int *insn)
 {
   CORE_ADDR plt_off = ((ppc_insn_d_field (insn[1]) << 16)
 		       + ppc_insn_ds_field (insn[3]));
@@ -564,7 +564,7 @@ ppc64_standard_linkage2_target (frame_info_ptr frame, unsigned int *insn)
 }
 
 static CORE_ADDR
-ppc64_standard_linkage3_target (frame_info_ptr frame, unsigned int *insn)
+ppc64_standard_linkage3_target (const frame_info_ptr &frame, unsigned int *insn)
 {
   CORE_ADDR plt_off = ppc_insn_ds_field (insn[1]);
 
@@ -572,7 +572,7 @@ ppc64_standard_linkage3_target (frame_info_ptr frame, unsigned int *insn)
 }
 
 static CORE_ADDR
-ppc64_standard_linkage4_target (frame_info_ptr frame, unsigned int *insn)
+ppc64_standard_linkage4_target (const frame_info_ptr &frame, unsigned int *insn)
 {
   CORE_ADDR plt_off = ((ppc_insn_d_field (insn[1]) << 16)
 		       + ppc_insn_ds_field (insn[2]));
@@ -581,7 +581,7 @@ ppc64_standard_linkage4_target (frame_info_ptr frame, unsigned int *insn)
 }
 
 static CORE_ADDR
-ppc64_pcrel_linkage1_target (frame_info_ptr frame, unsigned int *insn,
+ppc64_pcrel_linkage1_target (const frame_info_ptr &frame, unsigned int *insn,
 			     CORE_ADDR pc)
 {
   /* insn[0] is for the std instruction.  */
@@ -591,7 +591,7 @@ ppc64_pcrel_linkage1_target (frame_info_ptr frame, unsigned int *insn,
 }
 
 static CORE_ADDR
-ppc64_pcrel_linkage2_target (frame_info_ptr frame, unsigned int *insn,
+ppc64_pcrel_linkage2_target (const frame_info_ptr &frame, unsigned int *insn,
 			     CORE_ADDR pc)
 {
   CORE_ADDR plt_off;
@@ -611,7 +611,7 @@ ppc64_pcrel_linkage2_target (frame_info_ptr frame, unsigned int *insn,
    check whether we are in the middle of a PLT stub.  */
 
 static CORE_ADDR
-ppc64_skip_trampoline_code_1 (frame_info_ptr frame, CORE_ADDR pc)
+ppc64_skip_trampoline_code_1 (const frame_info_ptr &frame, CORE_ADDR pc)
 {
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
   unsigned int insns[MAX (MAX (MAX (ARRAY_SIZE (ppc64_standard_linkage1),
@@ -707,7 +707,7 @@ ppc64_skip_trampoline_code_1 (frame_info_ptr frame, CORE_ADDR pc)
    ppc_elfv2_skip_entrypoint.  */
 
 CORE_ADDR
-ppc64_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
+ppc64_skip_trampoline_code (const frame_info_ptr &frame, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 

@@ -131,7 +131,7 @@ extern const struct sparc_gregmap sparc64nbsd_gregmap;
 
 extern struct trad_frame_saved_reg *
   sparc64nbsd_sigcontext_saved_regs (CORE_ADDR sigcontext_addr,
-				     frame_info_ptr next_frame);
+				     const frame_info_ptr &next_frame);
 
 extern const struct sparc_fpregmap sparc64_bsd_fpregmap;
 

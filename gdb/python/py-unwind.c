@@ -769,7 +769,7 @@ pending_framepy_level (PyObject *self, PyObject *args)
 /* frame_unwind.this_id method.  */
 
 static void
-pyuw_this_id (frame_info_ptr this_frame, void **cache_ptr,
+pyuw_this_id (const frame_info_ptr &this_frame, void **cache_ptr,
 	      struct frame_id *this_id)
 {
   *this_id = ((cached_frame_info *) *cache_ptr)->frame_id;
@@ -779,7 +779,7 @@ pyuw_this_id (frame_info_ptr this_frame, void **cache_ptr,
 /* frame_unwind.prev_register.  */
 
 static struct value *
-pyuw_prev_register (frame_info_ptr this_frame, void **cache_ptr,
+pyuw_prev_register (const frame_info_ptr &this_frame, void **cache_ptr,
 		    int regnum)
 {
   PYUW_SCOPED_DEBUG_ENTER_EXIT;
@@ -802,7 +802,7 @@ pyuw_prev_register (frame_info_ptr this_frame, void **cache_ptr,
 /* Frame sniffer dispatch.  */
 
 static int
-pyuw_sniffer (const struct frame_unwind *self, frame_info_ptr this_frame,
+pyuw_sniffer (const struct frame_unwind *self, const frame_info_ptr &this_frame,
 	      void **cache_ptr)
 {
   PYUW_SCOPED_DEBUG_ENTER_EXIT;

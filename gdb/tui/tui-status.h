@@ -51,6 +51,6 @@ private:
 };
 
 extern void tui_show_status_content (void);
-extern void tui_show_frame_info (frame_info_ptr);
+extern void tui_show_frame_info (const frame_info_ptr &);
 
 #endif /* TUI_TUI_STATUS_H */

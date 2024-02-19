@@ -338,7 +338,7 @@ powerpc_linux_in_dynsym_resolve_code (CORE_ADDR pc)
    stub sequence.  */
 
 static CORE_ADDR
-ppc_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
+ppc_skip_trampoline_code (const frame_info_ptr &frame, CORE_ADDR pc)
 {
   unsigned int insnbuf[POWERPC32_PLT_CHECK_LEN];
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -1169,7 +1169,7 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 }
 
 static void
-ppc_linux_sigtramp_cache (frame_info_ptr this_frame,
+ppc_linux_sigtramp_cache (const frame_info_ptr &this_frame,
 			  struct trad_frame_cache *this_cache,
 			  CORE_ADDR func, LONGEST offset,
 			  int bias)
@@ -1241,7 +1241,7 @@ ppc_linux_sigtramp_cache (frame_info_ptr this_frame,
 
 static void
 ppc32_linux_sigaction_cache_init (const struct tramp_frame *self,
-				  frame_info_ptr this_frame,
+				  const frame_info_ptr &this_frame,
 				  struct trad_frame_cache *this_cache,
 				  CORE_ADDR func)
 {
@@ -1253,7 +1253,7 @@ ppc32_linux_sigaction_cache_init (const struct tramp_frame *self,
 
 static void
 ppc64_linux_sigaction_cache_init (const struct tramp_frame *self,
-				  frame_info_ptr this_frame,
+				  const frame_info_ptr &this_frame,
 				  struct trad_frame_cache *this_cache,
 				  CORE_ADDR func)
 {
@@ -1265,7 +1265,7 @@ ppc64_linux_sigaction_cache_init (const struct tramp_frame *self,
 
 static void
 ppc32_linux_sighandler_cache_init (const struct tramp_frame *self,
-				   frame_info_ptr this_frame,
+				   const frame_info_ptr &this_frame,
 				   struct trad_frame_cache *this_cache,
 				   CORE_ADDR func)
 {
@@ -1277,7 +1277,7 @@ ppc32_linux_sighandler_cache_init (const struct tramp_frame *self,
 
 static void
 ppc64_linux_sighandler_cache_init (const struct tramp_frame *self,
-				   frame_info_ptr this_frame,
+				   const frame_info_ptr &this_frame,
 				   struct trad_frame_cache *this_cache,
 				   CORE_ADDR func)
 {

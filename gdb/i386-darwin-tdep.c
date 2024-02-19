@@ -66,7 +66,7 @@ const int i386_darwin_thread_state_num_regs =
    address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-i386_darwin_sigcontext_addr (frame_info_ptr this_frame)
+i386_darwin_sigcontext_addr (const frame_info_ptr &this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -99,7 +99,7 @@ i386_darwin_sigcontext_addr (frame_info_ptr this_frame)
 
 int
 darwin_dwarf_signal_frame_p (struct gdbarch *gdbarch,
-			     frame_info_ptr this_frame)
+			     const frame_info_ptr &this_frame)
 {
   return i386_sigtramp_p (this_frame);
 }

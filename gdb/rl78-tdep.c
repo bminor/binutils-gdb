@@ -1079,7 +1079,7 @@ rl78_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* Implement the "unwind_pc" gdbarch method.  */
 
 static CORE_ADDR
-rl78_unwind_pc (struct gdbarch *arch, frame_info_ptr next_frame)
+rl78_unwind_pc (struct gdbarch *arch, const frame_info_ptr &next_frame)
 {
   return rl78_addr_bits_remove
 	   (arch, frame_unwind_register_unsigned (next_frame,
@@ -1092,7 +1092,7 @@ rl78_unwind_pc (struct gdbarch *arch, frame_info_ptr next_frame)
    return that struct as the value of this function.  */
 
 static struct rl78_prologue *
-rl78_analyze_frame_prologue (frame_info_ptr this_frame,
+rl78_analyze_frame_prologue (const frame_info_ptr &this_frame,
 			   void **this_prologue_cache)
 {
   if (!*this_prologue_cache)
@@ -1119,7 +1119,7 @@ rl78_analyze_frame_prologue (frame_info_ptr this_frame,
 /* Given a frame and a prologue cache, return this frame's base.  */
 
 static CORE_ADDR
-rl78_frame_base (frame_info_ptr this_frame, void **this_prologue_cache)
+rl78_frame_base (const frame_info_ptr &this_frame, void **this_prologue_cache)
 {
   struct rl78_prologue *p
     = rl78_analyze_frame_prologue (this_frame, this_prologue_cache);
@@ -1131,7 +1131,7 @@ rl78_frame_base (frame_info_ptr this_frame, void **this_prologue_cache)
 /* Implement the "frame_this_id" method for unwinding frames.  */
 
 static void
-rl78_this_id (frame_info_ptr this_frame,
+rl78_this_id (const frame_info_ptr &this_frame,
 	      void **this_prologue_cache, struct frame_id *this_id)
 {
   *this_id = frame_id_build (rl78_frame_base (this_frame,
@@ -1142,7 +1142,7 @@ rl78_this_id (frame_info_ptr this_frame,
 /* Implement the "frame_prev_register" method for unwinding frames.  */
 
 static struct value *
-rl78_prev_register (frame_info_ptr this_frame,
+rl78_prev_register (const frame_info_ptr &this_frame,
 		    void **this_prologue_cache, int regnum)
 {
   struct rl78_prologue *p
@@ -1316,7 +1316,7 @@ rl78_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 /* Implement the "dummy_id" gdbarch method.  */
 
 static struct frame_id
-rl78_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
+rl78_dummy_id (struct gdbarch *gdbarch, const frame_info_ptr &this_frame)
 {
   return
     frame_id_build (rl78_make_data_address

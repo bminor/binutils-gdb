@@ -94,7 +94,7 @@ enum
 #define MIPS_LINUX_JB_PC 0
 
 static int
-mips_linux_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
+mips_linux_get_longjmp_target (const frame_info_ptr &frame, CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -247,7 +247,7 @@ mips_fill_gregset_wrapper (const struct regset *regset,
 #define MIPS64_LINUX_JB_PC 0
 
 static int
-mips64_linux_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
+mips64_linux_get_longjmp_target (const frame_info_ptr &frame, CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -714,21 +714,21 @@ mips_linux_skip_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
    efficient way, but simplest.  First, declare all the unwinders.  */
 
 static void mips_linux_o32_sigframe_init (const struct tramp_frame *self,
-					  frame_info_ptr this_frame,
+					  const frame_info_ptr &this_frame,
 					  struct trad_frame_cache *this_cache,
 					  CORE_ADDR func);
 
 static void mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
-					     frame_info_ptr this_frame,
+					     const frame_info_ptr &this_frame,
 					     struct trad_frame_cache *this_cache,
 					     CORE_ADDR func);
 
 static int mips_linux_sigframe_validate (const struct tramp_frame *self,
-					 frame_info_ptr this_frame,
+					 const frame_info_ptr &this_frame,
 					 CORE_ADDR *pc);
 
 static int micromips_linux_sigframe_validate (const struct tramp_frame *self,
-					      frame_info_ptr this_frame,
+					      const frame_info_ptr &this_frame,
 					      CORE_ADDR *pc);
 
 #define MIPS_NR_LINUX 4000
@@ -957,7 +957,7 @@ static const struct tramp_frame micromips_linux_n64_rt_sigframe = {
 
 static void
 mips_linux_o32_sigframe_init (const struct tramp_frame *self,
-			      frame_info_ptr this_frame,
+			      const frame_info_ptr &this_frame,
 			      struct trad_frame_cache *this_cache,
 			      CORE_ADDR func)
 {
@@ -1150,7 +1150,7 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
 
 static void
 mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
-				 frame_info_ptr this_frame,
+				 const frame_info_ptr &this_frame,
 				 struct trad_frame_cache *this_cache,
 				 CORE_ADDR func)
 {
@@ -1235,7 +1235,7 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 
 static int
 mips_linux_sigframe_validate (const struct tramp_frame *self,
-			      frame_info_ptr this_frame,
+			      const frame_info_ptr &this_frame,
 			      CORE_ADDR *pc)
 {
   return mips_pc_is_mips (*pc);
@@ -1245,7 +1245,7 @@ mips_linux_sigframe_validate (const struct tramp_frame *self,
 
 static int
 micromips_linux_sigframe_validate (const struct tramp_frame *self,
-				   frame_info_ptr this_frame,
+				   const frame_info_ptr &this_frame,
 				   CORE_ADDR *pc)
 {
   if (mips_pc_is_micromips (get_frame_arch (this_frame), *pc))
@@ -1290,7 +1290,7 @@ mips_linux_restart_reg_p (struct gdbarch *gdbarch)
    instruction to be executed.  */
 
 static CORE_ADDR
-mips_linux_syscall_next_pc (frame_info_ptr frame)
+mips_linux_syscall_next_pc (const frame_info_ptr &frame)
 {
   CORE_ADDR pc = get_frame_pc (frame);
   ULONGEST v0 = get_frame_register_unsigned (frame, MIPS_V0_REGNUM);

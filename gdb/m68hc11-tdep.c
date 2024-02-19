@@ -777,7 +777,7 @@ m68hc11_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    for it IS the sp for the next frame.  */
 
 static struct m68hc11_unwind_cache *
-m68hc11_frame_unwind_cache (frame_info_ptr this_frame,
+m68hc11_frame_unwind_cache (const frame_info_ptr &this_frame,
 			    void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -874,7 +874,7 @@ m68hc11_frame_unwind_cache (frame_info_ptr this_frame,
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-m68hc11_frame_this_id (frame_info_ptr this_frame,
+m68hc11_frame_this_id (const frame_info_ptr &this_frame,
 		       void **this_prologue_cache,
 		       struct frame_id *this_id)
 {
@@ -899,7 +899,7 @@ m68hc11_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
-m68hc11_frame_prev_register (frame_info_ptr this_frame,
+m68hc11_frame_prev_register (const frame_info_ptr &this_frame,
 			     void **this_prologue_cache, int regnum)
 {
   struct value *value;
@@ -947,7 +947,7 @@ static const struct frame_unwind m68hc11_frame_unwind = {
 };
 
 static CORE_ADDR
-m68hc11_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+m68hc11_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct m68hc11_unwind_cache *info
     = m68hc11_frame_unwind_cache (this_frame, this_cache);
@@ -956,7 +956,7 @@ m68hc11_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 }
 
 static CORE_ADDR
-m68hc11_frame_args_address (frame_info_ptr this_frame, void **this_cache)
+m68hc11_frame_args_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   CORE_ADDR addr;
   struct m68hc11_unwind_cache *info
@@ -983,7 +983,7 @@ static const struct frame_base m68hc11_frame_base = {
    save_dummy_frame_tos(), and the PC match the dummy frame's breakpoint.  */
 
 static struct frame_id
-m68hc11_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
+m68hc11_dummy_id (struct gdbarch *gdbarch, const frame_info_ptr &this_frame)
 {
   ULONGEST tos;
   CORE_ADDR pc = get_frame_pc (this_frame);
@@ -997,7 +997,7 @@ m68hc11_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
 /* Get and print the register from the given frame.  */
 static void
 m68hc11_print_register (struct gdbarch *gdbarch, struct ui_file *file,
-			frame_info_ptr frame, int regno)
+			const frame_info_ptr &frame, int regno)
 {
   LONGEST rval;
 
@@ -1084,7 +1084,7 @@ m68hc11_print_register (struct gdbarch *gdbarch, struct ui_file *file,
 /* Same as 'info reg' but prints the registers in a different way.  */
 static void
 m68hc11_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
-			      frame_info_ptr frame, int regno, int cpregs)
+			      const frame_info_ptr &frame, int regno, int cpregs)
 {
   if (regno >= 0)
     {

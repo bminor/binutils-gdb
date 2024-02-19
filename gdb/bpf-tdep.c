@@ -154,7 +154,7 @@ bpf_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 /* Given THIS_FRAME, return its ID.  */
 
 static void
-bpf_frame_this_id (frame_info_ptr this_frame,
+bpf_frame_this_id (const frame_info_ptr &this_frame,
 		   void **this_prologue_cache,
 		   struct frame_id *this_id)
 {
@@ -165,7 +165,7 @@ bpf_frame_this_id (frame_info_ptr this_frame,
 /* Return the reason why we can't unwind past THIS_FRAME.  */
 
 static enum unwind_stop_reason
-bpf_frame_unwind_stop_reason (frame_info_ptr this_frame,
+bpf_frame_unwind_stop_reason (const frame_info_ptr &this_frame,
 			      void **this_cache)
 {
   return UNWIND_OUTERMOST;
@@ -174,7 +174,7 @@ bpf_frame_unwind_stop_reason (frame_info_ptr this_frame,
 /* Ask THIS_FRAME to unwind its register.  */
 
 static struct value *
-bpf_frame_prev_register (frame_info_ptr this_frame,
+bpf_frame_prev_register (const frame_info_ptr &this_frame,
 			 void **this_prologue_cache, int regnum)
 {
   return frame_unwind_got_register (this_frame, regnum, regnum);
@@ -235,7 +235,7 @@ bpf_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 /* Assuming THIS_FRAME is a dummy frame, return its frame ID.  */
 
 static struct frame_id
-bpf_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
+bpf_dummy_id (struct gdbarch *gdbarch, const frame_info_ptr &this_frame)
 {
   CORE_ADDR sp = get_frame_register_unsigned (this_frame,
 					      gdbarch_sp_regnum (gdbarch));

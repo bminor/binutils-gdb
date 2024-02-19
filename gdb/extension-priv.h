@@ -180,7 +180,7 @@ struct extension_language_ops
      or SCR_BT_COMPLETED on success.  */
   enum ext_lang_bt_status (*apply_frame_filter)
     (const struct extension_language_defn *,
-     frame_info_ptr frame, frame_filter_flags flags,
+     const frame_info_ptr &frame, frame_filter_flags flags,
      enum ext_lang_frame_args args_type,
      struct ui_out *out, int frame_low, int frame_high);
 

@@ -62,7 +62,7 @@ microblaze_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
 }
 
 static void
-microblaze_linux_sigtramp_cache (frame_info_ptr next_frame,
+microblaze_linux_sigtramp_cache (const frame_info_ptr &next_frame,
 				 struct trad_frame_cache *this_cache,
 				 CORE_ADDR func, LONGEST offset,
 				 int bias)
@@ -90,7 +90,7 @@ microblaze_linux_sigtramp_cache (frame_info_ptr next_frame,
 
 static void
 microblaze_linux_sighandler_cache_init (const struct tramp_frame *self,
-					frame_info_ptr next_frame,
+					const frame_info_ptr &next_frame,
 					struct trad_frame_cache *this_cache,
 					CORE_ADDR func)
 {

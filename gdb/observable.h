@@ -217,7 +217,7 @@ extern observable<ptid_t /* thread */, CORE_ADDR /* address */>
     inferior_call_post;
 
 /* A register in the inferior has been modified by the gdb user.  */
-extern observable<frame_info_ptr /* frame */, int /* regnum */>
+extern observable<const frame_info_ptr &/* frame */, int /* regnum */>
     register_changed;
 
 /* The user-selected inferior, thread and/or frame has changed.  The

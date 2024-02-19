@@ -159,7 +159,7 @@ python_on_memory_change (struct inferior *inferior, CORE_ADDR addr, ssize_t len,
    command). */
 
 static void
-python_on_register_change (frame_info_ptr frame, int regnum)
+python_on_register_change (const frame_info_ptr &frame, int regnum)
 {
   gdbpy_enter enter_py (current_inferior ()->arch ());
 

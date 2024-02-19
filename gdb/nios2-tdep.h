@@ -73,7 +73,7 @@ struct nios2_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Assumes FRAME is stopped at a syscall (trap) instruction; returns
      the expected next PC.  */
-  CORE_ADDR (*syscall_next_pc) (frame_info_ptr frame,
+  CORE_ADDR (*syscall_next_pc) (const frame_info_ptr &frame,
 				const struct nios2_opcode *op) = nullptr;
 
   /* Returns true if PC points to a kernel helper function.  */

@@ -90,7 +90,7 @@ static int i386_windows_gregset_reg_offset[] =
 #define I386_WINDOWS_SIZEOF_GREGSET 716
 
 static CORE_ADDR
-i386_windows_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
+i386_windows_skip_trampoline_code (const frame_info_ptr &frame, CORE_ADDR pc)
 {
   return i386_pe_skip_trampoline_code (frame, pc, NULL);
 }

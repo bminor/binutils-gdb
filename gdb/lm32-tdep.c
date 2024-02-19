@@ -379,7 +379,7 @@ lm32_return_value (struct gdbarch *gdbarch, struct value *function,
    for it IS the sp for the next frame.  */
 
 static struct lm32_frame_cache *
-lm32_frame_cache (frame_info_ptr this_frame, void **this_prologue_cache)
+lm32_frame_cache (const frame_info_ptr &this_frame, void **this_prologue_cache)
 {
   CORE_ADDR current_pc;
   ULONGEST prev_sp;
@@ -425,7 +425,7 @@ lm32_frame_cache (frame_info_ptr this_frame, void **this_prologue_cache)
 }
 
 static void
-lm32_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+lm32_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
 		    struct frame_id *this_id)
 {
   struct lm32_frame_cache *cache = lm32_frame_cache (this_frame, this_cache);
@@ -438,7 +438,7 @@ lm32_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 }
 
 static struct value *
-lm32_frame_prev_register (frame_info_ptr this_frame,
+lm32_frame_prev_register (const frame_info_ptr &this_frame,
 			  void **this_prologue_cache, int regnum)
 {
   struct lm32_frame_cache *info;
@@ -458,7 +458,7 @@ static const struct frame_unwind lm32_frame_unwind = {
 };
 
 static CORE_ADDR
-lm32_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+lm32_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct lm32_frame_cache *info = lm32_frame_cache (this_frame, this_cache);
 

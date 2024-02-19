@@ -44,7 +44,7 @@ enum what_to_list { locals, arguments, all };
 static void list_args_or_locals (const frame_print_options &fp_opts,
 				 enum what_to_list what,
 				 enum print_values values,
-				 frame_info_ptr fi,
+				 const frame_info_ptr &fi,
 				 int skip_unavailable);
 
 /* True if we want to allow Python-based frame filters.  */
@@ -62,7 +62,7 @@ mi_cmd_enable_frame_filters (const char *command, const char *const *argv,
 /* Like apply_ext_lang_frame_filter, but take a print_values */
 
 static enum ext_lang_bt_status
-mi_apply_ext_lang_frame_filter (frame_info_ptr frame,
+mi_apply_ext_lang_frame_filter (const frame_info_ptr &frame,
 				frame_filter_flags flags,
 				enum print_values print_values,
 				struct ui_out *out,
@@ -577,7 +577,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 static void
 list_args_or_locals (const frame_print_options &fp_opts,
 		     enum what_to_list what, enum print_values values,
-		     frame_info_ptr fi, int skip_unavailable)
+		     const frame_info_ptr &fi, int skip_unavailable)
 {
   const struct block *block;
   const char *name_of_result;

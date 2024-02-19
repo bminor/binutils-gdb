@@ -162,13 +162,14 @@ public:
   /* Allocate a lazy value representing register REGNUM in the frame previous
      to NEXT_FRAME.  If TYPE is non-nullptr, use it as the value type.
      Otherwise, use `register_type` to obtain the type.  */
-  static struct value *allocate_register_lazy (frame_info_ptr next_frame,
-					  int regnum, type *type = nullptr);
+  static struct value *allocate_register_lazy (const frame_info_ptr &next_frame,
+					       int regnum,
+					       type *type = nullptr);
 
   /* Same as `allocate_register_lazy`, but make the value non-lazy.
   
      The caller is responsible for filling the value's contents.  */
-  static struct value *allocate_register (frame_info_ptr next_frame,
+  static struct value *allocate_register (const frame_info_ptr &next_frame,
 					  int regnum, type *type = nullptr);
 
   /* Create a computed lvalue, with type TYPE, function pointers
@@ -1110,7 +1111,7 @@ extern struct value *value_at (struct type *type, CORE_ADDR addr);
    properties.  */
 
 extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr,
-				    frame_info_ptr frame = nullptr);
+				    const frame_info_ptr &frame = nullptr);
 
 /* Like value_at, but ensures that the result is marked not_lval.
    This can be important if the memory is "volatile".  */
@@ -1120,7 +1121,7 @@ extern struct value *value_from_contents_and_address_unresolved
      (struct type *, const gdb_byte *, CORE_ADDR);
 extern struct value *value_from_contents_and_address
      (struct type *, const gdb_byte *, CORE_ADDR,
-      frame_info_ptr frame = nullptr);
+      const frame_info_ptr &frame = nullptr);
 extern struct value *value_from_contents (struct type *, const gdb_byte *);
 
 extern value *default_value_from_register (gdbarch *gdbarch, type *type,
@@ -1128,10 +1129,10 @@ extern value *default_value_from_register (gdbarch *gdbarch, type *type,
 					   const frame_info_ptr &this_frame);
 
 extern struct value *value_from_register (struct type *type, int regnum,
-					  frame_info_ptr frame);
+					  const frame_info_ptr &frame);
 
 extern CORE_ADDR address_from_register (int regnum,
-					frame_info_ptr frame);
+					const frame_info_ptr &frame);
 
 extern struct value *value_of_variable (struct symbol *var,
 					const struct block *b);
@@ -1142,11 +1143,11 @@ extern struct value *address_of_variable (struct symbol *var,
 /* Return a value with the contents of register REGNUM as found in the frame
    previous to NEXT_FRAME.  */
 
-extern value *value_of_register (int regnum, frame_info_ptr next_frame);
+extern value *value_of_register (int regnum, const frame_info_ptr &next_frame);
 
 /* Same as the above, but the value is not fetched.  */
 
-extern value *value_of_register_lazy (frame_info_ptr next_frame, int regnum);
+extern value *value_of_register_lazy (const frame_info_ptr &next_frame, int regnum);
 
 /* Return the symbol's reading requirement.  */
 
@@ -1159,7 +1160,7 @@ extern int symbol_read_needs_frame (struct symbol *);
 
 extern struct value *read_var_value (struct symbol *var,
 				     const struct block *var_block,
-				     frame_info_ptr frame);
+				     const frame_info_ptr &frame);
 
 extern struct value *allocate_repeat_value (struct type *type, int count);
 
@@ -1556,7 +1557,7 @@ extern int val_print_string (struct type *elttype, const char *encoding,
 
 extern void print_variable_and_value (const char *name,
 				      struct symbol *var,
-				      frame_info_ptr frame,
+				      const frame_info_ptr &frame,
 				      struct ui_file *stream,
 				      int indent);
 
@@ -1667,13 +1668,13 @@ private:
    The size of the pseudo register specifies how many bytes to use.  The
    offset plus the size must not overflow the raw register's size.  */
 
-value *pseudo_from_raw_part (frame_info_ptr next_frame, int pseudo_reg_num,
+value *pseudo_from_raw_part (const frame_info_ptr &next_frame, int pseudo_reg_num,
 			     int raw_reg_num, int raw_offset);
 
 /* Write PSEUDO_BUF, the contents of a pseudo register, to part of raw register
    RAW_REG_NUM starting at RAW_OFFSET.  */
 
-void pseudo_to_raw_part (frame_info_ptr next_frame,
+void pseudo_to_raw_part (const frame_info_ptr &next_frame,
 			 gdb::array_view<const gdb_byte> pseudo_buf,
 			 int raw_reg_num, int raw_offset);
 
@@ -1683,26 +1684,26 @@ void pseudo_to_raw_part (frame_info_ptr next_frame,
    The sum of the sizes of raw registers must be equal to the size of the
    pseudo register.  */
 
-value *pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
+value *pseudo_from_concat_raw (const frame_info_ptr &next_frame, int pseudo_reg_num,
 			       int raw_reg_1_num, int raw_reg_2_num);
 
 /* Write PSEUDO_BUF, the contents of a pseudo register, to the two raw registers
    RAW_REG_1_NUM and RAW_REG_2_NUM.  */
 
-void pseudo_to_concat_raw (frame_info_ptr next_frame,
+void pseudo_to_concat_raw (const frame_info_ptr &next_frame,
 			   gdb::array_view<const gdb_byte> pseudo_buf,
 			   int raw_reg_1_num, int raw_reg_2_num);
 
 /* Same as the above, but with three raw registers.  */
 
-value *pseudo_from_concat_raw (frame_info_ptr next_frame, int pseudo_reg_num,
+value *pseudo_from_concat_raw (const frame_info_ptr &next_frame, int pseudo_reg_num,
 			       int raw_reg_1_num, int raw_reg_2_num,
 			       int raw_reg_3_num);
 
 /* Write PSEUDO_BUF, the contents of a pseudo register, to the three raw
    registers RAW_REG_1_NUM, RAW_REG_2_NUM and RAW_REG_3_NUM.  */
 
-void pseudo_to_concat_raw (frame_info_ptr next_frame,
+void pseudo_to_concat_raw (const frame_info_ptr &next_frame,
 			   gdb::array_view<const gdb_byte> pseudo_buf,
 			   int raw_reg_1_num, int raw_reg_2_num,
 			   int raw_reg_3_num);

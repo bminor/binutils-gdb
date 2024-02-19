@@ -35,7 +35,7 @@
    routine.  */
 
 static int
-amd64nbsd_sigtramp_p (frame_info_ptr this_frame)
+amd64nbsd_sigtramp_p (const frame_info_ptr &this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
   const char *name;
@@ -48,7 +48,7 @@ amd64nbsd_sigtramp_p (frame_info_ptr this_frame)
    return the address of the associated mcontext structure.  */
 
 static CORE_ADDR
-amd64nbsd_mcontext_addr (frame_info_ptr this_frame)
+amd64nbsd_mcontext_addr (const frame_info_ptr &this_frame)
 {
   CORE_ADDR addr;
 

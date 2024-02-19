@@ -156,7 +156,7 @@ extern void reopen_exec_file (void);
 
 extern void default_print_registers_info (struct gdbarch *gdbarch,
 					  struct ui_file *file,
-					  frame_info_ptr frame,
+					  const frame_info_ptr &frame,
 					  int regnum, int all);
 
 /* Default implementation of gdbarch_print_float_info.  Print
@@ -164,7 +164,7 @@ extern void default_print_registers_info (struct gdbarch *gdbarch,
 
 extern void default_print_float_info (struct gdbarch *gdbarch,
 				      struct ui_file *file,
-				      frame_info_ptr frame,
+				      const frame_info_ptr &frame,
 				      const char *args);
 
 /* Try to determine whether TTY is GDB's input terminal.  Returns

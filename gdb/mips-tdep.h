@@ -125,7 +125,7 @@ struct mips_gdbarch_tdep : gdbarch_tdep_base
 
   /* Return the expected next PC if FRAME is stopped at a syscall
      instruction.  */
-  CORE_ADDR (*syscall_next_pc) (frame_info_ptr frame) = nullptr;
+  CORE_ADDR (*syscall_next_pc) (const frame_info_ptr &frame) = nullptr;
 };
 
 /* Register numbers of various important registers.  */

@@ -233,7 +233,7 @@ alpha_convert_register_p (struct gdbarch *gdbarch, int regno,
 }
 
 static int
-alpha_register_to_value (frame_info_ptr frame, int regnum,
+alpha_register_to_value (const frame_info_ptr &frame, int regnum,
 			 struct type *valtype, gdb_byte *out,
 			int *optimizedp, int *unavailablep)
 {
@@ -260,7 +260,7 @@ alpha_register_to_value (frame_info_ptr frame, int regnum,
 }
 
 static void
-alpha_value_to_register (frame_info_ptr frame, int regnum,
+alpha_value_to_register (const frame_info_ptr &frame, int regnum,
 			 struct type *valtype, const gdb_byte *in)
 {
   int reg_size = register_size (get_frame_arch (frame), regnum);
@@ -840,7 +840,7 @@ alpha_deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
    into the "pc".  This routine returns true on success.  */
 
 static int
-alpha_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
+alpha_get_longjmp_target (const frame_info_ptr &frame, CORE_ADDR *pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (gdbarch);
@@ -871,7 +871,7 @@ struct alpha_sigtramp_unwind_cache
 };
 
 static struct alpha_sigtramp_unwind_cache *
-alpha_sigtramp_frame_unwind_cache (frame_info_ptr this_frame,
+alpha_sigtramp_frame_unwind_cache (const frame_info_ptr &this_frame,
 				   void **this_prologue_cache)
 {
   struct alpha_sigtramp_unwind_cache *info;
@@ -912,7 +912,7 @@ alpha_sigtramp_register_address (struct gdbarch *gdbarch,
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-alpha_sigtramp_frame_this_id (frame_info_ptr this_frame,
+alpha_sigtramp_frame_this_id (const frame_info_ptr &this_frame,
 			      void **this_prologue_cache,
 			      struct frame_id *this_id)
 {
@@ -954,7 +954,7 @@ alpha_sigtramp_frame_this_id (frame_info_ptr this_frame,
 /* Retrieve the value of REGNUM in FRAME.  Don't give up!  */
 
 static struct value *
-alpha_sigtramp_frame_prev_register (frame_info_ptr this_frame,
+alpha_sigtramp_frame_prev_register (const frame_info_ptr &this_frame,
 				    void **this_prologue_cache, int regnum)
 {
   struct alpha_sigtramp_unwind_cache *info
@@ -979,7 +979,7 @@ alpha_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 
 static int
 alpha_sigtramp_frame_sniffer (const struct frame_unwind *self,
-			      frame_info_ptr this_frame,
+			      const frame_info_ptr &this_frame,
 			      void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -1221,7 +1221,7 @@ alpha_heuristic_analyze_probing_loop (struct gdbarch *gdbarch, CORE_ADDR *pc,
 }
 
 static struct alpha_heuristic_unwind_cache *
-alpha_heuristic_frame_unwind_cache (frame_info_ptr this_frame,
+alpha_heuristic_frame_unwind_cache (const frame_info_ptr &this_frame,
 				    void **this_prologue_cache,
 				    CORE_ADDR start_pc)
 {
@@ -1398,7 +1398,7 @@ alpha_heuristic_frame_unwind_cache (frame_info_ptr this_frame,
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-alpha_heuristic_frame_this_id (frame_info_ptr this_frame,
+alpha_heuristic_frame_this_id (const frame_info_ptr &this_frame,
 			       void **this_prologue_cache,
 			       struct frame_id *this_id)
 {
@@ -1411,7 +1411,7 @@ alpha_heuristic_frame_this_id (frame_info_ptr this_frame,
 /* Retrieve the value of REGNUM in FRAME.  Don't give up!  */
 
 static struct value *
-alpha_heuristic_frame_prev_register (frame_info_ptr this_frame,
+alpha_heuristic_frame_prev_register (const frame_info_ptr &this_frame,
 				     void **this_prologue_cache, int regnum)
 {
   struct alpha_heuristic_unwind_cache *info
@@ -1438,7 +1438,7 @@ static const struct frame_unwind alpha_heuristic_frame_unwind =
 };
 
 static CORE_ADDR
-alpha_heuristic_frame_base_address (frame_info_ptr this_frame,
+alpha_heuristic_frame_base_address (const frame_info_ptr &this_frame,
 				    void **this_prologue_cache)
 {
   struct alpha_heuristic_unwind_cache *info

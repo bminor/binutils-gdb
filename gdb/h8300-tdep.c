@@ -404,7 +404,7 @@ h8300_analyze_prologue (struct gdbarch *gdbarch,
 }
 
 static struct h8300_frame_cache *
-h8300_frame_cache (frame_info_ptr this_frame, void **this_cache)
+h8300_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct h8300_frame_cache *cache;
@@ -466,7 +466,7 @@ h8300_frame_cache (frame_info_ptr this_frame, void **this_cache)
 }
 
 static void
-h8300_frame_this_id (frame_info_ptr this_frame, void **this_cache,
+h8300_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
 		     struct frame_id *this_id)
 {
   struct h8300_frame_cache *cache =
@@ -480,7 +480,7 @@ h8300_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 }
 
 static struct value *
-h8300_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
+h8300_frame_prev_register (const frame_info_ptr &this_frame, void **this_cache,
 			   int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -511,7 +511,7 @@ static const struct frame_unwind h8300_frame_unwind = {
 };
 
 static CORE_ADDR
-h8300_frame_base_address (frame_info_ptr this_frame, void **this_cache)
+h8300_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct h8300_frame_cache *cache = h8300_frame_cache (this_frame, this_cache);
   return cache->base;
@@ -991,7 +991,7 @@ h8300sx_register_name (struct gdbarch *gdbarch, int regno)
 
 static void
 h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
-		      frame_info_ptr frame, int regno)
+		      const frame_info_ptr &frame, int regno)
 {
   LONGEST rval;
   const char *name = gdbarch_register_name (gdbarch, regno);
@@ -1068,7 +1068,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
 
 static void
 h8300_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
-			    frame_info_ptr frame, int regno, int cpregs)
+			    const frame_info_ptr &frame, int regno, int cpregs)
 {
   if (regno < 0)
     {

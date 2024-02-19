@@ -20,7 +20,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-gdb::unique_xmalloc_ptr<char> find_frame_funname (frame_info_ptr frame,
+gdb::unique_xmalloc_ptr<char> find_frame_funname (const frame_info_ptr &frame,
 						  enum language *funlang,
 						  struct symbol **funcp);
 
@@ -43,7 +43,7 @@ void get_user_print_what_frame_info (std::optional<enum print_what> *what);
 /* Return true if we should display the address in addition to the location,
    because we are in the middle of a statement.  */
 
-bool frame_show_address (frame_info_ptr frame, struct symtab_and_line sal);
+bool frame_show_address (const frame_info_ptr &frame, struct symtab_and_line sal);
 
 /* Forget the last sal we displayed.  */
 
