@@ -149,7 +149,7 @@ strwinerror (ULONGEST error)
 void
 throw_winerror_with_name (const char *string, ULONGEST err)
 {
-  error (_("%s (error %d): %s"), string, err, strwinerror (err));
+  error (_("%s (error %u): %s"), string, (unsigned) err, strwinerror (err));
 }
 
 #endif /* USE_WIN32API */
