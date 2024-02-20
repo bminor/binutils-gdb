@@ -2052,11 +2052,9 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_KVX_S64_LO10:
     case BFD_RELOC_KVX_S64_UP27:
     case BFD_RELOC_KVX_S64_EX27:
-      /* When generating a shared object or relocatable executable, these
-	 relocations are copied into the output file to be resolved at
-	 run time.  */
-      if (((bfd_link_pic (info) == true)
-	   || globals->root.is_relocatable_executable)
+      /* When generating a shared library or PIE, these relocations
+	 are copied into the output file to be resolved at run time.  */
+      if (bfd_link_pic (info)
 	  && (input_section->flags & SEC_ALLOC)
 	  && (h == NULL
 	      || (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT

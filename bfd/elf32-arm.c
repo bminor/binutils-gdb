@@ -7351,7 +7351,6 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
   free (tmp_name);
 
   if (bfd_link_pic (link_info)
-      || globals->root.is_relocatable_executable
       || globals->pic_veneer)
     size = ARM2THUMB_PIC_GLUE_SIZE;
   else if (globals->use_blx)
@@ -9259,7 +9258,6 @@ elf32_arm_create_thumb_stub (struct bfd_link_info * info,
       myh->root.u.def.value = my_offset;
 
       if (bfd_link_pic (info)
-	  || globals->root.is_relocatable_executable
 	  || globals->pic_veneer)
 	{
 	  /* For relocatable objects we can't use absolute addresses,
@@ -10507,11 +10505,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 					   rel->r_addend);
 	}
 
-      /* When generating a shared object or relocatable executable, these
-	 relocations are copied into the output file to be resolved at
-	 run time.  */
+      /* When generating a shared library or PIE, these relocations
+	 are copied into the output file to be resolved at run time.  */
       if ((bfd_link_pic (info)
-	   || globals->root.is_relocatable_executable
 	   || globals->fdpic_p)
 	  && (input_section->flags & SEC_ALLOC)
 	  && !(globals->root.target_os == is_vxworks
@@ -15321,15 +15317,6 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   sreloc = NULL;
 
-  /* Create dynamic sections for relocatable executables so that we can
-     copy relocations.  */
-  if (htab->root.is_relocatable_executable
-      && ! htab->root.dynamic_sections_created)
-    {
-      if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
-	return false;
-    }
-
   if (htab->root.dynobj == NULL)
     htab->root.dynobj = abfd;
   if (!create_ifunc_sections (info))
@@ -15601,7 +15588,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  case R_ARM_THM_MOVT_PREL:
 
 	    /* Should the interworking branches be listed here?  */
-	    if ((bfd_link_pic (info) || htab->root.is_relocatable_executable
+	    if ((bfd_link_pic (info)
 		 || htab->fdpic_p)
 		&& (sec->flags & SEC_ALLOC) != 0)
 	      {
@@ -16213,10 +16200,8 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
   /* If we are creating a shared library, we must presume that the
      only references to the symbol are via the global offset table.
      For such cases we need not do anything here; the relocations will
-     be handled correctly by relocate_section.  Relocatable executables
-     can reference data in shared objects directly, so we don't need to
-     do anything here.  */
-  if (bfd_link_pic (info) || globals->root.is_relocatable_executable)
+     be handled correctly by relocate_section.  */
+  if (bfd_link_pic (info))
     return true;
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -16615,7 +16600,6 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
      visibility changes.  */
 
   if (bfd_link_pic (info)
-      || htab->root.is_relocatable_executable
       || htab->fdpic_p)
     {
       /* Relocs that use pc_count are PC-relative forms, which will appear
@@ -16670,17 +16654,6 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 		return false;
 	    }
 	}
-
-      else if (htab->root.is_relocatable_executable && h->dynindx == -1
-	       && h->root.type == bfd_link_hash_new)
-	{
-	  /* Output absolute symbols so that we can create relocations
-	     against them.  For normal symbols we output a relocation
-	     against the section that contains them.  */
-	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
-	    return false;
-	}
-
     }
   else
     {
@@ -18213,7 +18186,7 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 
       osi.sec_shndx = _bfd_elf_section_from_bfd_section
 	  (output_bfd, osi.sec->output_section);
-      if (bfd_link_pic (info) || htab->root.is_relocatable_executable
+      if (bfd_link_pic (info)
 	  || htab->pic_veneer)
 	size = ARM2THUMB_PIC_GLUE_SIZE;
       else if (htab->use_blx)

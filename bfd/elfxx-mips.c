@@ -3928,8 +3928,7 @@ count_section_dynsyms (bfd *output_bfd, struct bfd_link_info *info)
   bfd_size_type count;
 
   count = 0;
-  if (bfd_link_pic (info)
-      || elf_hash_table (info)->is_relocatable_executable)
+  if (bfd_link_pic (info))
     {
       asection *p;
       const struct elf_backend_data *bed;
