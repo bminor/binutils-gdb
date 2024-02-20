@@ -413,6 +413,7 @@ record_btrace_target::stop_recording ()
 {
   DEBUG ("stop recording");
 
+  record_stop_replaying ();
   record_btrace_auto_disable ();
 
   for (thread_info &tp : current_inferior ()->non_exited_threads ())
