@@ -28,21 +28,29 @@ if ![runto_main] {
     return -1
 }
 
-# trace the call to the test function
+# Trace the call to the test function.
 with_test_prefix "record" {
     gdb_test_no_output "record btrace"
-    gdb_test "next"
+    gdb_test "step"
+    gdb_test "next 2"
 }
 
-# let's step around a bit
+# Let's step around a bit.
 with_test_prefix "replay" {
-    gdb_test "reverse-next" ".*main\.2.*" "reverse-next.1"
+    gdb_test "reverse-finish" ".*main\.2.*" "reverse-finish.1"
     gdb_test "step" ".*fun4\.2.*" "step.1"
     gdb_test "next" ".*fun4\.3.*" "next.1"
     gdb_test "step" ".*fun2\.2.*" "step.2"
-    gdb_test "finish" ".*fun4\.4.*" "finish.1"
-    gdb_test "reverse-step" ".*fun2\.3.*" "reverse-step.1"
-    gdb_test "reverse-finish" ".*fun4\.3.*" "reverse-finish.1"
-    gdb_test "reverse-next" ".*fun4\.2.*" "reverse-next.2"
-    gdb_test "reverse-finish" ".*main\.2.*" "reverse-finish.2"
+    gdb_test "reverse-finish" ".*fun4\.3.*" "reverse-finish.2"
+    gdb_test "reverse-step" ".*fun1\.2.*" "reverse-step.1"
+    gdb_test "finish" ".*fun4\.3.*" "finish.1"
+    gdb_test "reverse-next" ".*fun4\.2.*" "reverse-next.1"
+    gdb_test "reverse-finish" ".*main\.2.*" "reverse-finish.3"
+}
+
+# Stop recording and try to step live (pr19340).
+with_test_prefix "live" {
+    gdb_test "record stop" "Process record is stopped.*"
+    gdb_test "reverse-next" "Target .* does not support this command.*"
+    gdb_test "step" ".*fun3\.2.*"
 }
