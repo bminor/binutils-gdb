@@ -298,6 +298,8 @@ riscv_is_insn_reloc (const reloc_howto_type *howto)
 #define PLT_HEADER_SIZE (PLT_HEADER_INSNS * 4)
 #define PLT_ENTRY_SIZE (PLT_ENTRY_INSNS * 4)
 #define GOT_ENTRY_SIZE RISCV_ELF_WORD_BYTES
+#define TLS_GD_GOT_ENTRY_SIZE (RISCV_ELF_WORD_BYTES * 2)
+#define TLS_IE_GOT_ENTRY_SIZE RISCV_ELF_WORD_BYTES
 /* Reserve two entries of GOTPLT for ld.so, one is used for PLT resolver,
    the other is used for link map.  Other targets also reserve one more
    entry used for runtime profile?  */
@@ -1320,7 +1322,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  /* TLS_GD needs two dynamic relocs and two GOT slots.  */
 	  if (tls_type & GOT_TLS_GD)
 	    {
-	      s->size += 2 * RISCV_ELF_WORD_BYTES;
+	      s->size += TLS_GD_GOT_ENTRY_SIZE;
 	      if (need_reloc)
 		htab->elf.srelgot->size += 2 * sizeof (ElfNN_External_Rela);
 	    }
@@ -1328,14 +1330,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  /* TLS_IE needs one dynamic reloc and one GOT slot.  */
 	  if (tls_type & GOT_TLS_IE)
 	    {
-	      s->size += RISCV_ELF_WORD_BYTES;
+	      s->size += TLS_IE_GOT_ENTRY_SIZE;
 	      if (need_reloc)
 		htab->elf.srelgot->size += sizeof (ElfNN_External_Rela);
 	    }
 	}
       else
 	{
-	  s->size += RISCV_ELF_WORD_BYTES;
+	  s->size += GOT_ENTRY_SIZE;
 	  if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h)
 	      && ! UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    htab->elf.srelgot->size += sizeof (ElfNN_External_Rela);
@@ -1563,20 +1565,20 @@ riscv_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 		{
 		  if (*local_tls_type & GOT_TLS_GD)
 		    {
-		      s->size += 2 * RISCV_ELF_WORD_BYTES;
+		      s->size += TLS_GD_GOT_ENTRY_SIZE;
 		      if (bfd_link_dll (info))
 			srel->size += sizeof (ElfNN_External_Rela);
 		    }
 		  if (*local_tls_type & GOT_TLS_IE)
 		    {
-		      s->size += RISCV_ELF_WORD_BYTES;
+		      s->size += TLS_IE_GOT_ENTRY_SIZE;
 		      if (bfd_link_dll (info))
 			srel->size += sizeof (ElfNN_External_Rela);
 		    }
 		}
 	      else
 		{
-		  s->size += RISCV_ELF_WORD_BYTES;
+		  s->size += GOT_ENTRY_SIZE;
 		  if (bfd_link_pic (info))
 		    srel->size += sizeof (ElfNN_External_Rela);
 		}
@@ -2928,7 +2930,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	     reference's GOT slot follows the GD reference's slots.  */
 	  ie_off = 0;
 	  if ((tls_type & GOT_TLS_GD) && (tls_type & GOT_TLS_IE))
-	    ie_off = 2 * GOT_ENTRY_SIZE;
+	    ie_off = TLS_GD_GOT_ENTRY_SIZE;
 
 	  if ((off & 1) != 0)
 	    off &= ~1;
