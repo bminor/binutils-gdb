@@ -1303,10 +1303,6 @@ captured_main_1 (struct captured_main_args *context)
   /* Process '-x' and '-ex' options.  */
   execute_cmdargs (&cmdarg_vec, CMDARG_FILE, CMDARG_COMMAND, &ret);
 
-  /* Read in the old history after all the command files have been
-     read.  */
-  init_history ();
-
   if (batch_flag)
     {
       int error_status = EXIT_FAILURE;
@@ -1315,6 +1311,14 @@ captured_main_1 (struct captured_main_args *context)
       /* We have hit the end of the batch file.  */
       quit_force (exit_arg, 0);
     }
+
+  /* We are starting an interactive session.  */
+
+  /* Read in the history.  This is after all the command files have been read,
+     so that the user can change the history file via a .gdbinit file.  This
+     is also after the batch_flag check, because we don't need the history in
+     batch mode.  */
+  init_history ();
 }
 
 static void
