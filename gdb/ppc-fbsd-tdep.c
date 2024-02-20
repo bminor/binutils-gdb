@@ -262,7 +262,7 @@ ppcfbsd_sigtramp_frame_prev_register (frame_info_ptr this_frame,
   return trad_frame_get_register (cache, this_frame, regnum);
 }
 
-static const struct frame_unwind ppcfbsd_sigtramp_frame_unwind = {
+static const struct frame_unwind_legacy ppcfbsd_sigtramp_frame_unwind (
   "ppc freebsd sigtramp",
   SIGTRAMP_FRAME,
   FRAME_UNWIND_ARCH,
@@ -271,7 +271,7 @@ static const struct frame_unwind ppcfbsd_sigtramp_frame_unwind = {
   ppcfbsd_sigtramp_frame_prev_register,
   NULL,
   ppcfbsd_sigtramp_frame_sniffer
-};
+);
 
 static enum return_value_convention
 ppcfbsd_return_value (struct gdbarch *gdbarch, struct value *function,

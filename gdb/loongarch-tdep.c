@@ -450,7 +450,7 @@ loongarch_frame_prev_register (frame_info_ptr this_frame,
   return trad_frame_get_register (info, this_frame, regnum);
 }
 
-static const struct frame_unwind loongarch_frame_unwind = {
+static const struct frame_unwind_legacy loongarch_frame_unwind (
   "loongarch prologue",
   /*.type	   =*/NORMAL_FRAME,
   /*.unwinder_class=*/FRAME_UNWIND_ARCH,
@@ -460,8 +460,8 @@ static const struct frame_unwind loongarch_frame_unwind = {
   /*.unwind_data   =*/nullptr,
   /*.sniffer	   =*/default_frame_sniffer,
   /*.dealloc_cache =*/nullptr,
-  /*.prev_arch	   =*/nullptr,
-};
+  /*.prev_arch	   =*/nullptr
+);
 
 /* Write the contents of buffer VAL into the general-purpose argument
    register defined by GAR in REGCACHE.  GAR indicates the available

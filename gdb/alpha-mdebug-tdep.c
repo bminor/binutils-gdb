@@ -331,8 +331,7 @@ alpha_mdebug_frame_sniffer (const struct frame_unwind *self,
   return 1;
 }
 
-static const struct frame_unwind alpha_mdebug_frame_unwind =
-{
+static const struct frame_unwind_legacy alpha_mdebug_frame_unwind (
   "alpha mdebug",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -341,7 +340,7 @@ static const struct frame_unwind alpha_mdebug_frame_unwind =
   alpha_mdebug_frame_prev_register,
   NULL,
   alpha_mdebug_frame_sniffer
-};
+);
 
 static CORE_ADDR
 alpha_mdebug_frame_base_address (frame_info_ptr this_frame,

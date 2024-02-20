@@ -301,7 +301,7 @@ m32r_linux_sigtramp_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind m32r_linux_sigtramp_frame_unwind = {
+static const struct frame_unwind_legacy m32r_linux_sigtramp_frame_unwind (
   "m32r linux sigtramp",
   SIGTRAMP_FRAME,
   FRAME_UNWIND_ARCH,
@@ -310,7 +310,7 @@ static const struct frame_unwind m32r_linux_sigtramp_frame_unwind = {
   m32r_linux_sigtramp_frame_prev_register,
   NULL,
   m32r_linux_sigtramp_frame_sniffer
-};
+);
 
 /* Mapping between the registers in `struct pt_regs'
    format and GDB's register array layout.  */

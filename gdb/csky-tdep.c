@@ -2159,7 +2159,7 @@ csky_frame_prev_register (frame_info_ptr this_frame,
 /* Data structures for the normal prologue-analysis-based
    unwinder.  */
 
-static const struct frame_unwind csky_unwind_cache = {
+static const struct frame_unwind_legacy csky_unwind_cache (
   "cski prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2170,7 +2170,7 @@ static const struct frame_unwind csky_unwind_cache = {
   default_frame_sniffer,
   NULL,
   NULL
-};
+);
 
 static CORE_ADDR
 csky_check_long_branch (frame_info_ptr frame, CORE_ADDR pc)
@@ -2294,7 +2294,7 @@ csky_stub_prev_register (frame_info_ptr this_frame,
 				       prev_regnum);
 }
 
-static frame_unwind csky_stub_unwind = {
+static frame_unwind_legacy csky_stub_unwind (
   "csky stub",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2303,7 +2303,7 @@ static frame_unwind csky_stub_unwind = {
   csky_stub_prev_register,
   NULL,
   csky_stub_unwind_sniffer
-};
+  );
 
 /* Implement the this_base, this_locals, and this_args hooks
    for the normal unwinder.  */

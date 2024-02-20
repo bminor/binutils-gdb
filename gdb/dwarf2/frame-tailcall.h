@@ -34,6 +34,6 @@ extern struct value *
   dwarf2_tailcall_prev_register_first (frame_info_ptr this_frame,
 				       void **tailcall_cachep, int regnum);
 
-extern const struct frame_unwind dwarf2_tailcall_frame_unwind;
+extern const struct frame_unwind_legacy dwarf2_tailcall_frame_unwind;
 
 #endif /* !DWARF2_FRAME_TAILCALL_H */

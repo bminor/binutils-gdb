@@ -424,7 +424,7 @@ iq2000_frame_this_id (frame_info_ptr this_frame, void **this_cache,
   *this_id = frame_id_build (cache->saved_sp, cache->pc);
 }
 
-static const struct frame_unwind iq2000_frame_unwind = {
+static const struct frame_unwind_legacy iq2000_frame_unwind (
   "iq2000 prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -433,7 +433,7 @@ static const struct frame_unwind iq2000_frame_unwind = {
   iq2000_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 static CORE_ADDR
 iq2000_frame_base_address (frame_info_ptr this_frame, void **this_cache)

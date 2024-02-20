@@ -900,7 +900,7 @@ tilegx_frame_base_address (frame_info_ptr this_frame, void **this_cache)
   return cache->base;
 }
 
-static const struct frame_unwind tilegx_frame_unwind = {
+static const struct frame_unwind_legacy tilegx_frame_unwind (
   "tilegx prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -910,7 +910,7 @@ static const struct frame_unwind tilegx_frame_unwind = {
   NULL,                        /* const struct frame_data *unwind_data  */
   default_frame_sniffer,       /* frame_sniffer_ftype *sniffer  */
   NULL                         /* frame_prev_pc_ftype *prev_pc  */
-};
+);
 
 static const struct frame_base tilegx_frame_base = {
   &tilegx_frame_unwind,

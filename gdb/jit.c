@@ -1104,8 +1104,7 @@ jit_frame_prev_register (frame_info_ptr this_frame, void **cache, int reg)
 /* Relay everything back to the unwinder registered by the JIT debug
    info reader.*/
 
-static const struct frame_unwind jit_frame_unwind =
-{
+static const struct frame_unwind_legacy jit_frame_unwind (
   "jit",
   NORMAL_FRAME,
   FRAME_UNWIND_EXTENSION,
@@ -1115,7 +1114,7 @@ static const struct frame_unwind jit_frame_unwind =
   NULL,
   jit_frame_sniffer,
   jit_dealloc_cache
-};
+);
 
 
 /* This is the information that is stored at jit_gdbarch_data for each

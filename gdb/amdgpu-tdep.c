@@ -892,7 +892,7 @@ amdgpu_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
-static const frame_unwind amdgpu_frame_unwind = {
+static const frame_unwind_legacy amdgpu_frame_unwind (
   "amdgpu",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -903,7 +903,7 @@ static const frame_unwind amdgpu_frame_unwind = {
   default_frame_sniffer,
   nullptr,
   nullptr,
-};
+);
 
 static int
 print_insn_amdgpu (bfd_vma memaddr, struct disassemble_info *info)

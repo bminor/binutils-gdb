@@ -372,8 +372,7 @@ bfin_frame_prev_register (frame_info_ptr this_frame,
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
-static const struct frame_unwind bfin_frame_unwind =
-{
+static const struct frame_unwind_legacy bfin_frame_unwind (
   "bfin prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -382,7 +381,7 @@ static const struct frame_unwind bfin_frame_unwind =
   bfin_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 /* Check for "[--SP] = <reg>;" insns.  These are appear in function
    prologues to save misc registers onto the stack.  */

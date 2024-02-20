@@ -131,7 +131,7 @@ frame_unwind_try_unwinder (frame_info_ptr this_frame, void **this_cache,
 
   try
     {
-      frame_debug_printf ("trying unwinder \"%s\"", unwinder->name);
+      frame_debug_printf ("trying unwinder \"%s\"", unwinder->name ());
       res = unwinder->sniffer (unwinder, this_frame, this_cache);
     }
   catch (const gdb_exception &ex)
@@ -337,6 +337,78 @@ frame_unwind_got_address (frame_info_ptr frame, int regnum,
   return reg_val;
 }
 
+/* See frame-unwind.h.  */
+
+enum unwind_stop_reason
+frame_unwind::stop_reason (frame_info_ptr this_frame,
+				   void **this_prologue_cache) const
+{
+  return default_frame_unwind_stop_reason (this_frame, this_prologue_cache);
+}
+
+/* See frame-unwind.h.  */
+
+int
+frame_unwind::sniffer (const struct frame_unwind *self,
+		frame_info_ptr this_frame,
+		void **this_prologue_cache) const
+{
+  return 1;
+}
+
+/* This method just passes the parameters to the callback pointer.  */
+enum unwind_stop_reason
+frame_unwind_legacy::stop_reason (frame_info_ptr this_frame,
+				  void **this_prologue_cache) const
+{
+  return stop_reason_p (this_frame, this_prologue_cache);
+}
+
+/* This method just passes the parameters to the callback pointer.  */
+void
+frame_unwind_legacy::this_id (frame_info_ptr this_frame,
+			      void **this_prologue_cache,
+			      struct frame_id *id) const
+{
+  return this_id_p (this_frame, this_prologue_cache, id);
+}
+
+/* This method just passes the parameters to the callback pointer.  */
+struct value *
+frame_unwind_legacy::prev_register (frame_info_ptr this_frame,
+				void **this_prologue_cache,
+				int regnum) const
+{
+  return prev_register_p (this_frame, this_prologue_cache, regnum);
+}
+
+/* This method just passes the parameters to the callback pointer.  */
+int
+frame_unwind_legacy::sniffer (const struct frame_unwind *self,
+		frame_info_ptr this_frame,
+		void **this_prologue_cache) const
+{
+  return sniffer_p (self, this_frame, this_prologue_cache);
+}
+
+/* This method just passes the parameters to the callback pointer.  */
+void
+frame_unwind_legacy::dealloc_cache (frame_info *self, void *this_cache) const
+{
+  if (dealloc_cache_p != nullptr)
+    dealloc_cache_p (self, this_cache);
+}
+
+/* This method just passes the parameters to the callback pointer.  */
+struct gdbarch *
+frame_unwind_legacy::prev_arch (frame_info_ptr this_frame,
+			      void **this_prologue_cache) const
+{
+  if (prev_arch_p == nullptr)
+    error (_("No prev_arch callback installed"));
+  return prev_arch_p (this_frame, this_prologue_cache);
+}
+
 /* Implement "maintenance info frame-unwinders" command.  */
 
 static void
@@ -354,9 +426,9 @@ maintenance_info_frame_unwinders (const char *args, int from_tty)
 
   for (const struct frame_unwind* unwinder: table)
     {
-      const char *name = unwinder->name;
-      const char *type = frame_type_str (unwinder->type);
-      const char *uclass = frame_unwinder_class_str (unwinder->unwinder_class);
+      const char *name = unwinder->name ();
+      const char *type = frame_type_str (unwinder->type ());
+      const char *uclass = frame_unwinder_class_str (unwinder->unwinder_class ());
 
       ui_out_emit_list tuple_emitter (uiout, nullptr);
       uiout->field_string ("name", name);

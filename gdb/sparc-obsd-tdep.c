@@ -134,8 +134,7 @@ sparc32obsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
   return 0;
 }
-static const struct frame_unwind sparc32obsd_sigtramp_frame_unwind =
-{
+static const struct frame_unwind_legacy sparc32obsd_sigtramp_frame_unwind (
   "sparc32 openbsd sigtramp",
   SIGTRAMP_FRAME,
   FRAME_UNWIND_ARCH,
@@ -144,7 +143,7 @@ static const struct frame_unwind sparc32obsd_sigtramp_frame_unwind =
   sparc32obsd_sigtramp_frame_prev_register,
   NULL,
   sparc32obsd_sigtramp_frame_sniffer
-};
+);
 
 
 

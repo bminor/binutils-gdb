@@ -1007,8 +1007,7 @@ alpha_sigtramp_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind alpha_sigtramp_frame_unwind =
-{
+static const struct frame_unwind_legacy alpha_sigtramp_frame_unwind (
   "alpha sigtramp",
   SIGTRAMP_FRAME,
   FRAME_UNWIND_ARCH,
@@ -1017,7 +1016,7 @@ static const struct frame_unwind alpha_sigtramp_frame_unwind =
   alpha_sigtramp_frame_prev_register,
   NULL,
   alpha_sigtramp_frame_sniffer
-};
+);
 
 
 
@@ -1427,8 +1426,7 @@ alpha_heuristic_frame_prev_register (frame_info_ptr this_frame,
   return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
-static const struct frame_unwind alpha_heuristic_frame_unwind =
-{
+static const struct frame_unwind_legacy alpha_heuristic_frame_unwind (
   "alpha prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -1437,7 +1435,7 @@ static const struct frame_unwind alpha_heuristic_frame_unwind =
   alpha_heuristic_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 static CORE_ADDR
 alpha_heuristic_frame_base_address (frame_info_ptr this_frame,

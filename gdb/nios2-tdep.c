@@ -1977,8 +1977,7 @@ nios2_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 /* Data structures for the normal prologue-analysis-based
    unwinder.  */
 
-static const struct frame_unwind nios2_frame_unwind =
-{
+static const struct frame_unwind_legacy nios2_frame_unwind (
   "nios2 prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -1987,7 +1986,7 @@ static const struct frame_unwind nios2_frame_unwind =
   nios2_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 static const struct frame_base nios2_frame_base =
 {
@@ -2079,8 +2078,7 @@ nios2_stub_frame_sniffer (const struct frame_unwind *self,
 
 /* Define the data structures for the stub unwinder.  */
 
-static const struct frame_unwind nios2_stub_frame_unwind =
-{
+static const struct frame_unwind_legacy nios2_stub_frame_unwind (
   "nios2 stub",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2089,7 +2087,7 @@ static const struct frame_unwind nios2_stub_frame_unwind =
   nios2_stub_frame_prev_register,
   NULL,
   nios2_stub_frame_sniffer
-};
+);
 
 
 

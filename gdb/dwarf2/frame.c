@@ -1332,16 +1332,15 @@ dwarf2_frame_sniffer (const struct frame_unwind *self,
   if (fde->cie->signal_frame
       || dwarf2_frame_signal_frame_p (get_frame_arch (this_frame),
 				      this_frame))
-    return self->type == SIGTRAMP_FRAME;
+    return self->type () == SIGTRAMP_FRAME;
 
-  if (self->type != NORMAL_FRAME)
+  if (self->type () != NORMAL_FRAME)
     return 0;
 
   return 1;
 }
 
-static const struct frame_unwind dwarf2_frame_unwind =
-{
+static const struct frame_unwind_legacy dwarf2_frame_unwind (
   "dwarf2",
   NORMAL_FRAME,
   FRAME_UNWIND_DEBUGINFO,
@@ -1351,10 +1350,9 @@ static const struct frame_unwind dwarf2_frame_unwind =
   NULL,
   dwarf2_frame_sniffer,
   dwarf2_frame_dealloc_cache
-};
+);
 
-static const struct frame_unwind dwarf2_signal_frame_unwind =
-{
+static const struct frame_unwind_legacy dwarf2_signal_frame_unwind (
   "dwarf2 signal",
   SIGTRAMP_FRAME,
   FRAME_UNWIND_DEBUGINFO,
@@ -1366,7 +1364,7 @@ static const struct frame_unwind dwarf2_signal_frame_unwind =
 
   /* TAILCALL_CACHE can never be in such frame to need dealloc_cache.  */
   NULL
-};
+);
 
 /* Append the DWARF-2 frame unwinders to GDBARCH's list.  */
 

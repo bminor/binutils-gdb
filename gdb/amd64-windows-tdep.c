@@ -1181,8 +1181,7 @@ amd64_windows_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 
 /* Windows x64 SEH unwinder.  */
 
-static const struct frame_unwind amd64_windows_frame_unwind =
-{
+static const struct frame_unwind_legacy amd64_windows_frame_unwind (
   "amd64 windows",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -1191,7 +1190,7 @@ static const struct frame_unwind amd64_windows_frame_unwind =
   &amd64_windows_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 /* Implement the "skip_prologue" gdbarch method.  */
 

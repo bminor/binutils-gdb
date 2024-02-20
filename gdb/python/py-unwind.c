@@ -807,7 +807,7 @@ pyuw_sniffer (const struct frame_unwind *self, frame_info_ptr this_frame,
 {
   PYUW_SCOPED_DEBUG_ENTER_EXIT;
 
-  struct gdbarch *gdbarch = (struct gdbarch *) (self->unwind_data);
+  struct gdbarch *gdbarch = (struct gdbarch *) (self->unwind_data ());
   cached_frame_info *cached_frame;
 
   gdbpy_enter enter_py (gdbarch);
@@ -948,6 +948,41 @@ struct pyuw_gdbarch_data_type
 
 static const registry<gdbarch>::key<pyuw_gdbarch_data_type> pyuw_gdbarch_data;
 
+/* Class for frame unwinders registered by the Python architecture callback.  */
+class frame_unwind_python : public frame_unwind
+{
+public:
+  frame_unwind_python (const struct frame_data *newarch)
+    : frame_unwind ("python", NORMAL_FRAME, FRAME_UNWIND_EXTENSION, newarch)
+  { }
+
+  /* No need to override stop_reason, we want the default.  */
+
+  int sniffer (const frame_unwind *self, frame_info_ptr this_frame,
+		void **this_prologue_cache) const override
+  {
+    return pyuw_sniffer (self, this_frame, this_prologue_cache);
+  }
+
+  void this_id (frame_info_ptr this_frame, void **this_prologue_cache,
+		struct frame_id *id) const override
+  {
+    pyuw_this_id (this_frame, this_prologue_cache, id);
+  }
+
+  struct value *prev_register (frame_info_ptr this_frame,
+			       void **this_prologue_cache,
+			       int regnum) const override
+  {
+      return pyuw_prev_register (this_frame, this_prologue_cache, regnum);
+  }
+
+  void dealloc_cache (frame_info *self, void *this_cache) const override
+  {
+      pyuw_dealloc_cache (self, this_cache);
+  }
+};
+
 /* New inferior architecture callback: register the Python unwinders
    intermediary.  */
 
@@ -961,17 +996,9 @@ pyuw_on_new_gdbarch (gdbarch *newarch)
   if (!data->unwinder_registered)
     {
       struct frame_unwind *unwinder
-	  = GDBARCH_OBSTACK_ZALLOC (newarch, struct frame_unwind);
+	  = obstack_new<frame_unwind_python>
+	    (gdbarch_obstack(newarch), (const struct frame_data *) newarch);
 
-      unwinder->name = "python";
-      unwinder->type = NORMAL_FRAME;
-      unwinder->unwinder_class = FRAME_UNWIND_EXTENSION;
-      unwinder->stop_reason = default_frame_unwind_stop_reason;
-      unwinder->this_id = pyuw_this_id;
-      unwinder->prev_register = pyuw_prev_register;
-      unwinder->unwind_data = (const struct frame_data *) newarch;
-      unwinder->sniffer = pyuw_sniffer;
-      unwinder->dealloc_cache = pyuw_dealloc_cache;
       frame_unwind_prepend_unwinder (newarch, unwinder);
       data->unwinder_registered = 1;
     }

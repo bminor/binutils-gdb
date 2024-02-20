@@ -161,8 +161,7 @@ mips_sde_frame_sniffer (const struct frame_unwind *self,
 
 /* Data structure for the SDE frame unwinder.  */
 
-static const struct frame_unwind mips_sde_frame_unwind =
-{
+static const struct frame_unwind_legacy mips_sde_frame_unwind (
   "mips sde sigtramp",
   SIGTRAMP_FRAME,
   FRAME_UNWIND_ARCH,
@@ -171,7 +170,7 @@ static const struct frame_unwind mips_sde_frame_unwind =
   mips_sde_frame_prev_register,
   NULL,
   mips_sde_frame_sniffer
-};
+);
 
 /* Implement the this_base, this_locals, and this_args hooks
    for the normal unwinder.  */

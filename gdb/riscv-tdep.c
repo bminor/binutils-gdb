@@ -3901,8 +3901,7 @@ riscv_frame_prev_register (frame_info_ptr this_frame,
    are the fallback unwinder (DWARF unwinder is used first), we use the
    default frame sniffer, which always accepts the frame.  */
 
-static const struct frame_unwind riscv_frame_unwind =
-{
+static const struct frame_unwind_legacy riscv_frame_unwind (
   /*.name          =*/ "riscv prologue",
   /*.type          =*/ NORMAL_FRAME,
   /*.unwinder_class=*/FRAME_UNWIND_ARCH,
@@ -3912,8 +3911,8 @@ static const struct frame_unwind riscv_frame_unwind =
   /*.unwind_data   =*/ NULL,
   /*.sniffer       =*/ default_frame_sniffer,
   /*.dealloc_cache =*/ NULL,
-  /*.prev_arch     =*/ NULL,
-};
+  /*.prev_arch     =*/ NULL
+);
 
 /* Extract a set of required target features out of ABFD.  If ABFD is
    nullptr then a RISCV_GDBARCH_FEATURES is returned in its default state.  */

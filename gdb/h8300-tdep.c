@@ -500,7 +500,7 @@ h8300_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
-static const struct frame_unwind h8300_frame_unwind = {
+static const struct frame_unwind_legacy h8300_frame_unwind (
   "h8300 prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -509,7 +509,7 @@ static const struct frame_unwind h8300_frame_unwind = {
   h8300_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 static CORE_ADDR
 h8300_frame_base_address (frame_info_ptr this_frame, void **this_cache)

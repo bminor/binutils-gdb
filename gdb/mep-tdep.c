@@ -2061,7 +2061,7 @@ mep_frame_prev_register (frame_info_ptr this_frame,
 }
 
 
-static const struct frame_unwind mep_frame_unwind = {
+static const struct frame_unwind_legacy mep_frame_unwind (
   "mep prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2070,7 +2070,7 @@ static const struct frame_unwind mep_frame_unwind = {
   mep_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 
 /* Return values.  */

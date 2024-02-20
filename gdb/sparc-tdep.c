@@ -1346,8 +1346,7 @@ sparc32_frame_prev_register (frame_info_ptr this_frame,
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
-static const struct frame_unwind sparc32_frame_unwind =
-{
+static const struct frame_unwind_legacy sparc32_frame_unwind (
   "sparc32 prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -1356,7 +1355,7 @@ static const struct frame_unwind sparc32_frame_unwind =
   sparc32_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 
 static CORE_ADDR

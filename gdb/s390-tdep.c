@@ -2646,7 +2646,7 @@ s390_frame_prev_register (frame_info_ptr this_frame,
 
 /* Default S390 frame unwinder.  */
 
-static const struct frame_unwind s390_frame_unwind = {
+static const struct frame_unwind_legacy s390_frame_unwind (
   "s390 prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2655,7 +2655,7 @@ static const struct frame_unwind s390_frame_unwind = {
   s390_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 /* Code stubs and their stack frames.  For things like PLTs and NULL
    function calls (where there is no true frame and the return address
@@ -2741,7 +2741,7 @@ s390_stub_frame_sniffer (const struct frame_unwind *self,
 
 /* S390 stub frame unwinder.  */
 
-static const struct frame_unwind s390_stub_frame_unwind = {
+static const struct frame_unwind_legacy s390_stub_frame_unwind (
   "s390 stub",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2750,7 +2750,7 @@ static const struct frame_unwind s390_stub_frame_unwind = {
   s390_stub_frame_prev_register,
   NULL,
   s390_stub_frame_sniffer
-};
+);
 
 /* Frame base handling.  */
 

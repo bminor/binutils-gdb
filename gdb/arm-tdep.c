@@ -2469,7 +2469,7 @@ arm_prologue_prev_register (frame_info_ptr this_frame,
 				       prev_regnum);
 }
 
-static frame_unwind arm_prologue_unwind = {
+static frame_unwind_legacy arm_prologue_unwind = {
   "arm prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -3189,7 +3189,7 @@ arm_exidx_unwind_sniffer (const struct frame_unwind *self,
   return 1;
 }
 
-struct frame_unwind arm_exidx_unwind = {
+struct frame_unwind_legacy arm_exidx_unwind = {
   "arm exidx",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -3299,8 +3299,7 @@ arm_epilogue_frame_sniffer (const struct frame_unwind *self,
 
 /* Frame unwinder from epilogue.  */
 
-static const struct frame_unwind arm_epilogue_frame_unwind =
-{
+static const struct frame_unwind_legacy arm_epilogue_frame_unwind (
   "arm epilogue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -3308,8 +3307,8 @@ static const struct frame_unwind arm_epilogue_frame_unwind =
   arm_epilogue_frame_this_id,
   arm_epilogue_frame_prev_register,
   NULL,
-  arm_epilogue_frame_sniffer,
-};
+  arm_epilogue_frame_sniffer
+);
 
 /* Recognize GCC's trampoline for thumb call-indirect.  If we are in a
    trampoline, return the target PC.  Otherwise return 0.
@@ -3430,7 +3429,7 @@ arm_stub_unwind_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-struct frame_unwind arm_stub_unwind = {
+struct frame_unwind_legacy arm_stub_unwind (
   "arm stub",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -3439,7 +3438,7 @@ struct frame_unwind arm_stub_unwind = {
   arm_prologue_prev_register,
   NULL,
   arm_stub_unwind_sniffer
-};
+);
 
 /* Put here the code to store, into CACHE->saved_regs, the addresses
    of the saved registers of frame described by THIS_FRAME.  CACHE is
@@ -3956,8 +3955,7 @@ arm_m_exception_unwind_sniffer (const struct frame_unwind *self,
 /* Frame unwinder for M-profile exceptions (EXC_RETURN on stack),
    lockup and secure/nonsecure interstate function calls (FNC_RETURN).  */
 
-struct frame_unwind arm_m_exception_unwind =
-{
+struct frame_unwind_legacy arm_m_exception_unwind (
   "arm m exception lockup sec_fnc",
   SIGTRAMP_FRAME,
   FRAME_UNWIND_ARCH,
@@ -3966,7 +3964,7 @@ struct frame_unwind arm_m_exception_unwind =
   arm_m_exception_prev_register,
   NULL,
   arm_m_exception_unwind_sniffer
-};
+);
 
 static CORE_ADDR
 arm_normal_frame_base (frame_info_ptr this_frame, void **this_cache)

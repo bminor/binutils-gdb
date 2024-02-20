@@ -249,8 +249,7 @@ sparc32nbsd_sigcontext_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind sparc32nbsd_sigcontext_frame_unwind =
-{
+static const struct frame_unwind_legacy sparc32nbsd_sigcontext_frame_unwind (
   "sparc32 netbsd sigcontext",
   SIGTRAMP_FRAME,
   FRAME_UNWIND_ARCH,
@@ -259,7 +258,7 @@ static const struct frame_unwind sparc32nbsd_sigcontext_frame_unwind =
   sparc32nbsd_sigcontext_frame_prev_register,
   NULL,
   sparc32nbsd_sigcontext_frame_sniffer
-};
+);
 
 /* Return the address of a system call's alternative return
    address.  */

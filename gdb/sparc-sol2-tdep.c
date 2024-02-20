@@ -180,8 +180,7 @@ sparc32_sol2_sigtramp_frame_sniffer (const struct frame_unwind *self,
   return sol2_sigtramp_p (this_frame);
 }
 
-static const struct frame_unwind sparc32_sol2_sigtramp_frame_unwind =
-{
+static const struct frame_unwind_legacy sparc32_sol2_sigtramp_frame_unwind (
   "sparc32 solaris sigtramp",
   SIGTRAMP_FRAME,
   FRAME_UNWIND_ARCH,
@@ -190,7 +189,7 @@ static const struct frame_unwind sparc32_sol2_sigtramp_frame_unwind =
   sparc32_sol2_sigtramp_frame_prev_register,
   NULL,
   sparc32_sol2_sigtramp_frame_sniffer
-};
+);
 
 
 

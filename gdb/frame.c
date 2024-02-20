@@ -268,12 +268,10 @@ frame_addr_hash_eq (const void *a, const void *b)
 static void
 frame_info_del (frame_info *frame)
 {
-  if (frame->prologue_cache != nullptr
-      && frame->unwind->dealloc_cache != nullptr)
+  if (frame->prologue_cache != nullptr)
     frame->unwind->dealloc_cache (frame, frame->prologue_cache);
 
-  if (frame->base_cache != nullptr
-      && frame->base->unwind->dealloc_cache != nullptr)
+  if (frame->base_cache != nullptr)
     frame->base->unwind->dealloc_cache (frame, frame->base_cache);
 }
 
@@ -486,12 +484,12 @@ frame_info::to_string () const
   res += string_printf ("{level=%d,", fi->level);
 
   if (fi->unwind != NULL)
-    res += string_printf ("type=%s,", frame_type_str (fi->unwind->type));
+    res += string_printf ("type=%s,", frame_type_str (fi->unwind->type ()));
   else
     res += "type=<unknown>,";
 
   if (fi->unwind != NULL)
-    res += string_printf ("unwinder=\"%s\",", fi->unwind->name);
+    res += string_printf ("unwinder=\"%s\",", fi->unwind->name ());
   else
     res += "unwinder=<unknown>,";
 
@@ -2356,7 +2354,7 @@ get_prev_frame_always_1 (frame_info_ptr this_frame)
      This check is valid only if this frame and the next frame are NORMAL.
      See the comment at frame_id_inner for details.  */
   if (get_frame_type (this_frame) == NORMAL_FRAME
-      && this_frame->next->unwind->type == NORMAL_FRAME
+      && this_frame->next->unwind->type () == NORMAL_FRAME
       && frame_id_inner (get_frame_arch (frame_info_ptr (this_frame->next)),
 			 get_frame_id (this_frame),
 			 get_frame_id (frame_info_ptr (this_frame->next))))
@@ -2952,7 +2950,7 @@ get_frame_type (frame_info_ptr frame)
     /* Initialize the frame's unwinder because that's what
        provides the frame's type.  */
     frame_unwind_find_by_frame (frame, &frame->prologue_cache);
-  return frame->unwind->type;
+  return frame->unwind->type ();
 }
 
 struct program_space *
@@ -3033,11 +3031,15 @@ frame_unwind_arch (frame_info_ptr next_frame)
       if (next_frame->unwind == NULL)
 	frame_unwind_find_by_frame (next_frame, &next_frame->prologue_cache);
 
-      if (next_frame->unwind->prev_arch != NULL)
-	arch = next_frame->unwind->prev_arch (next_frame,
-					      &next_frame->prologue_cache);
-      else
-	arch = get_frame_arch (next_frame);
+      try
+	{
+	  arch = next_frame->unwind->prev_arch (next_frame,
+						&next_frame->prologue_cache);
+	}
+      catch (gdb_exception &e)
+	{
+	  arch = get_frame_arch (next_frame);
+	}
 
       next_frame->prev_arch.arch = arch;
       next_frame->prev_arch.p = true;

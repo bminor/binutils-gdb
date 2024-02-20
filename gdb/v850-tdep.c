@@ -1320,7 +1320,7 @@ v850_frame_this_id (frame_info_ptr this_frame, void **this_cache,
   *this_id = frame_id_build (cache->saved_regs[E_SP_REGNUM].addr (), cache->pc);
 }
 
-static const struct frame_unwind v850_frame_unwind = {
+static const struct frame_unwind_legacy v850_frame_unwind (
   "v850 prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -1329,7 +1329,7 @@ static const struct frame_unwind v850_frame_unwind = {
   v850_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 static CORE_ADDR
 v850_frame_base_address (frame_info_ptr this_frame, void **this_cache)

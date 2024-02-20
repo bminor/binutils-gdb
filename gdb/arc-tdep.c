@@ -1900,7 +1900,7 @@ arc_sigtramp_frame_sniffer (const struct frame_unwind *self,
    the fallback unwinder, we use the default frame sniffer, which always
    accepts the frame.  */
 
-static const struct frame_unwind arc_frame_unwind = {
+static const struct frame_unwind_legacy arc_frame_unwind (
   "arc prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -1911,13 +1911,13 @@ static const struct frame_unwind arc_frame_unwind = {
   default_frame_sniffer,
   NULL,
   NULL
-};
+);
 
 /* Structure defining the ARC signal frame unwind functions.  Custom
    sniffer is used, because this frame must be accepted only in the right
    context.  */
 
-static const struct frame_unwind arc_sigtramp_frame_unwind = {
+static const struct frame_unwind_legacy arc_sigtramp_frame_unwind (
   "arc sigtramp",
   SIGTRAMP_FRAME,
   FRAME_UNWIND_ARCH,
@@ -1928,7 +1928,7 @@ static const struct frame_unwind arc_sigtramp_frame_unwind = {
   arc_sigtramp_frame_sniffer,
   NULL,
   NULL
-};
+);
 
 
 static const struct frame_base arc_normal_base = {

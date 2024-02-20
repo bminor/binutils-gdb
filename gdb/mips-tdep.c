@@ -2929,8 +2929,7 @@ mips_insn16_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind mips_insn16_frame_unwind =
-{
+static const struct frame_unwind_legacy mips_insn16_frame_unwind (
   "mips insn16 prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2939,7 +2938,7 @@ static const struct frame_unwind mips_insn16_frame_unwind =
   mips_insn16_frame_prev_register,
   NULL,
   mips_insn16_frame_sniffer
-};
+);
 
 static CORE_ADDR
 mips_insn16_frame_base_address (frame_info_ptr this_frame,
@@ -3366,8 +3365,7 @@ mips_micro_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind mips_micro_frame_unwind =
-{
+static const struct frame_unwind_legacy mips_micro_frame_unwind (
   "mips micro prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -3376,7 +3374,7 @@ static const struct frame_unwind mips_micro_frame_unwind =
   mips_micro_frame_prev_register,
   NULL,
   mips_micro_frame_sniffer
-};
+);
 
 static CORE_ADDR
 mips_micro_frame_base_address (frame_info_ptr this_frame,
@@ -3746,8 +3744,7 @@ mips_insn32_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind mips_insn32_frame_unwind =
-{
+static const struct frame_unwind_legacy mips_insn32_frame_unwind (
   "mips insn32 prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -3756,7 +3753,7 @@ static const struct frame_unwind mips_insn32_frame_unwind =
   mips_insn32_frame_prev_register,
   NULL,
   mips_insn32_frame_sniffer
-};
+);
 
 static CORE_ADDR
 mips_insn32_frame_base_address (frame_info_ptr this_frame,
@@ -3864,8 +3861,7 @@ mips_stub_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind mips_stub_frame_unwind =
-{
+static const struct frame_unwind_legacy mips_stub_frame_unwind (
   "mips stub",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -3874,7 +3870,7 @@ static const struct frame_unwind mips_stub_frame_unwind =
   mips_stub_frame_prev_register,
   NULL,
   mips_stub_frame_sniffer
-};
+);
 
 static CORE_ADDR
 mips_stub_frame_base_address (frame_info_ptr this_frame,

@@ -163,25 +163,143 @@ enum frame_unwind_class {
   FRAME_UNWIND_ARCH,
 };
 
-struct frame_unwind
+class frame_unwind
 {
-  const char *name;
+private:
+  const char *m_name;
   /* The frame's type.  Should this instead be a collection of
      predicates that test the frame for various attributes?  */
-  enum frame_type type;
+  enum frame_type m_type;
   /* What kind of unwinder is this.  It generally follows from where
      the unwinder was added or where it looks for information to do the
      unwinding.  */
-  enum frame_unwind_class unwinder_class;
+  enum frame_unwind_class m_unwinder_class;
+  const struct frame_data *m_unwind_data;
+public:
+  frame_unwind (const char *n, frame_type t, frame_unwind_class c,
+		       const struct frame_data *d)
+    : m_name (n), m_type (t), m_unwinder_class (c), m_unwind_data (d) { }
+
+  const char *name () const
+  {
+    return m_name;
+  }
+
+  enum frame_type type () const
+  {
+    return m_type;
+  }
+
+  enum frame_unwind_class unwinder_class () const
+  {
+    return m_unwinder_class;
+  }
+
+  const struct frame_data *unwind_data () const
+  {
+    return m_unwind_data;
+  }
+
+  /* Default stop_reason function.  It reports NO_REASON, unless the
+     frame is the outermost.  */
+  virtual enum unwind_stop_reason stop_reason (frame_info_ptr this_frame,
+					       void **this_prologue_cache) const;
+
+  /* Default frame sniffer.  Will always return that the unwinder
+     is able to unwind the frame.  */
+  virtual int sniffer (const frame_unwind *self,
+		       frame_info_ptr this_frame,
+		       void **this_prologue_cache) const;
+
+  /* The following methods are here mostly for interface functionality.  They
+     all throw an error when called, as a safe way to check if an unwinder has
+     implemented the desired functionality.  */
+
+  /* Calculate the ID of the given frame using this unwinder.  */
+  virtual void this_id (frame_info_ptr this_frame, void **this_prologue_cache,
+			struct frame_id *id) const
+  {
+    error (_("No method this_id implemented for unwinder %s"), m_name);
+  }
+
+  /* Get the value of a register in a previous frame.  */
+  virtual struct value *prev_register (frame_info_ptr this_frame,
+					     void **this_prologue_cache,
+					     int regnum) const
+  {
+    error (_("No method prev_register implemented for unwinder %s"), m_name);
+  }
+  
+  /* Properly deallocate the cache.  */
+  virtual void dealloc_cache (frame_info *self, void *this_cache) const
+  {
+    error (_("No method dealloc_cache implemented for unwinder %s"), m_name);
+  }
+
+  /* Get the previous architecture.  */
+  virtual struct gdbarch *prev_arch (frame_info_ptr this_frame,
+				     void **this_prologue_cache) const
+  {
+    error (_("No method prev_arch implemented for unwinder %s"), m_name);
+  }
+};
+
+/* This is a legacy version of the frame unwinder.  The original struct
+   used function pointers for callbacks, this updated version has a
+   method that just passes the parameters along to the callback
+   pointer.  */
+class frame_unwind_legacy : public frame_unwind
+{
+public:
   /* Should an attribute indicating the frame's address-in-block go
      here?  */
-  frame_unwind_stop_reason_ftype *stop_reason;
-  frame_this_id_ftype *this_id;
-  frame_prev_register_ftype *prev_register;
-  const struct frame_data *unwind_data;
-  frame_sniffer_ftype *sniffer;
-  frame_dealloc_cache_ftype *dealloc_cache;
-  frame_prev_arch_ftype *prev_arch;
+  frame_unwind_stop_reason_ftype *stop_reason_p;
+  frame_this_id_ftype *this_id_p;
+  frame_prev_register_ftype *prev_register_p;
+  frame_sniffer_ftype *sniffer_p;
+  frame_dealloc_cache_ftype *dealloc_cache_p;
+  frame_prev_arch_ftype *prev_arch_p;
+//public:
+  frame_unwind_legacy (const char *n, frame_type t, frame_unwind_class c,
+		       frame_unwind_stop_reason_ftype *sr,
+		       frame_this_id_ftype *ti,
+		       frame_prev_register_ftype *pr,
+		       const struct frame_data *ud,
+		       frame_sniffer_ftype *s,
+		       frame_dealloc_cache_ftype *dc = nullptr,
+		       frame_prev_arch_ftype *pa = nullptr)
+  : frame_unwind (n, t, c, ud), stop_reason_p (sr),
+    this_id_p (ti), prev_register_p (pr), sniffer_p (s),
+    dealloc_cache_p (dc), prev_arch_p (pa) { }
+
+  /* This method just passes the parameters to the callback pointer.  */
+  enum unwind_stop_reason stop_reason (frame_info_ptr this_frame,
+					void **this_prologue_cache) const override;
+
+  /* This method just passes the parameters to the callback pointer.  */
+  void this_id (frame_info_ptr this_frame, void **this_prologue_cache,
+		 struct frame_id *id) const override;
+
+  /* This method just passes the parameters to the callback pointer.  */
+  struct value *prev_register (frame_info_ptr this_frame,
+				void **this_prologue_cache,
+				int regnum) const override;
+
+  /* This method just passes the parameters to the callback pointer.  */
+  int sniffer (const frame_unwind *self,
+		frame_info_ptr this_frame,
+		void **this_prologue_cache) const override;
+
+  /* This method just passes the parameters to the callback pointer.
+     It is safe to call this method if no callback is installed, it
+     just turns into a noop.  */
+  void dealloc_cache (frame_info *self, void *this_cache) const override;
+
+  /* This method just passes the parameters to the callback pointer.
+     If this function is called with no installed callback, this method
+     will error out.  Wrap calls in try-catch blocks.  */
+  struct gdbarch *prev_arch (frame_info_ptr this_frame,
+			      void **this_prologue_cache) const override;
 };
 
 /* Register a frame unwinder, _prepending_ it to the front of the

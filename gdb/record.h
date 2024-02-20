@@ -36,8 +36,8 @@ extern struct cmd_list_element *show_record_cmdlist;
 extern struct cmd_list_element *info_record_cmdlist;
 
 /* Unwinders for some record targets.  */
-extern const struct frame_unwind record_btrace_frame_unwind;
-extern const struct frame_unwind record_btrace_tailcall_frame_unwind;
+extern const struct frame_unwind_legacy record_btrace_frame_unwind;
+extern const struct frame_unwind_legacy record_btrace_tailcall_frame_unwind;
 
 /* A list of different recording methods.  */
 enum record_method

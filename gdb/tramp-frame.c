@@ -58,6 +58,7 @@ tramp_frame_cache (frame_info_ptr this_frame,
 }
 
 static void
+__attribute__ ((__used__))
 tramp_frame_this_id (frame_info_ptr this_frame,
 		     void **this_cache,
 		     struct frame_id *this_id)
@@ -69,6 +70,7 @@ tramp_frame_this_id (frame_info_ptr this_frame,
 }
 
 static struct value *
+__attribute__ ((__used__))
 tramp_frame_prev_register (frame_info_ptr this_frame,
 			   void **this_cache,
 			   int prev_regnum)
@@ -80,6 +82,7 @@ tramp_frame_prev_register (frame_info_ptr this_frame,
 }
 
 static CORE_ADDR
+__attribute__ ((__used__))
 tramp_frame_start (const struct tramp_frame *tramp,
 		   frame_info_ptr this_frame, CORE_ADDR pc)
 {
@@ -120,11 +123,12 @@ tramp_frame_start (const struct tramp_frame *tramp,
 }
 
 static int
+__attribute__ ((__used__))
 tramp_frame_sniffer (const struct frame_unwind *self,
 		     frame_info_ptr this_frame,
 		     void **this_cache)
 {
-  const struct tramp_frame *tramp = self->unwind_data->tramp_frame;
+  const struct tramp_frame *tramp = self->unwind_data ()->tramp_frame;
   CORE_ADDR pc = get_frame_pc (this_frame);
   CORE_ADDR func;
   struct tramp_frame_cache *tramp_cache;
@@ -142,6 +146,39 @@ tramp_frame_sniffer (const struct frame_unwind *self,
   (*this_cache) = tramp_cache;
   return 1;
 }
+
+class frame_unwind_trampoline : public frame_unwind {
+private:
+  frame_prev_arch_ftype *prev_arch_p;
+public:
+  frame_unwind_trampoline (enum frame_type t, const struct frame_data *d,
+			   frame_prev_arch_ftype *pa)
+    : frame_unwind ("trampoline", t, FRAME_UNWIND_GDB, d), prev_arch_p (pa)
+  { }
+
+  int sniffer(const frame_unwind *self, frame_info_ptr this_frame,
+	      void **this_prologue_cache) const override
+  {
+    return tramp_frame_sniffer (self, this_frame, this_prologue_cache);
+  }
+  void this_id (frame_info_ptr this_frame, void **this_prologue_cache,
+		struct frame_id *id) const override
+  {
+    tramp_frame_this_id (this_frame, this_prologue_cache, id);
+  }
+  struct value *prev_register (frame_info_ptr this_frame,
+			       void **this_prologue_cache,
+			       int regnum) const override
+  {
+    return tramp_frame_prev_register (this_frame, this_prologue_cache, regnum);
+  }
+
+  struct gdbarch *prev_arch (frame_info_ptr this_frame,
+			     void **this_prologue_cache) const override
+  {
+    return prev_arch_p (this_frame, this_prologue_cache);
+  }
+};
 
 void
 tramp_frame_prepend_unwinder (struct gdbarch *gdbarch,
@@ -161,16 +198,11 @@ tramp_frame_prepend_unwinder (struct gdbarch *gdbarch,
   gdb_assert (tramp_frame->insn_size <= sizeof (tramp_frame->insn[0].bytes));
 
   data = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_data);
-  unwinder = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_unwind);
-
   data->tramp_frame = tramp_frame;
-  unwinder->type = tramp_frame->frame_type;
-  unwinder->unwind_data = data;
-  unwinder->unwinder_class = FRAME_UNWIND_GDB;
-  unwinder->sniffer = tramp_frame_sniffer;
-  unwinder->stop_reason = default_frame_unwind_stop_reason;
-  unwinder->this_id = tramp_frame_this_id;
-  unwinder->prev_register = tramp_frame_prev_register;
-  unwinder->prev_arch = tramp_frame->prev_arch;
+
+  unwinder = obstack_new <frame_unwind_trampoline> (gdbarch_obstack (gdbarch),
+						    tramp_frame->frame_type,
+						    data,
+						    tramp_frame->prev_arch);
   frame_unwind_prepend_unwinder (gdbarch, unwinder);
 }

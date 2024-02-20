@@ -1955,7 +1955,7 @@ m32c_prev_register (frame_info_ptr this_frame,
 }
 
 
-static const struct frame_unwind m32c_unwind = {
+static const struct frame_unwind_legacy m32c_unwind (
   "m32c prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -1964,7 +1964,7 @@ static const struct frame_unwind m32c_unwind = {
   m32c_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 
 /* Inferior calls.  */
