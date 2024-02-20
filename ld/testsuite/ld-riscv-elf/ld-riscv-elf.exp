@@ -319,4 +319,12 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "pcrel-reloc-rel-pie"
     run_dump_test "pcrel-reloc-abs-nopie"
     run_dump_test "pcrel-reloc-abs-pie"
+
+    run_ld_link_tests {
+       { "Build shared library for TLS runtime"
+	 "-shared" "" "" {tlslib.s}
+	 {} "tlslib.so" }
+    }
+    run_dump_test "tls"
+    run_dump_test "tlsbin"
 }

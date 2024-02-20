@@ -1559,12 +1559,27 @@ riscv_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	  if (*local_got > 0)
 	    {
 	      *local_got = s->size;
-	      s->size += RISCV_ELF_WORD_BYTES;
-	      if (*local_tls_type & GOT_TLS_GD)
-		s->size += RISCV_ELF_WORD_BYTES;
-	      if (bfd_link_pic (info)
-		  || (*local_tls_type & (GOT_TLS_GD | GOT_TLS_IE)))
-		srel->size += sizeof (ElfNN_External_Rela);
+	      if (*local_tls_type & (GOT_TLS_GD | GOT_TLS_IE))
+		{
+		  if (*local_tls_type & GOT_TLS_GD)
+		    {
+		      s->size += 2 * RISCV_ELF_WORD_BYTES;
+		      if (bfd_link_dll (info))
+			srel->size += sizeof (ElfNN_External_Rela);
+		    }
+		  if (*local_tls_type & GOT_TLS_IE)
+		    {
+		      s->size += RISCV_ELF_WORD_BYTES;
+		      if (bfd_link_dll (info))
+			srel->size += sizeof (ElfNN_External_Rela);
+		    }
+		}
+	      else
+		{
+		  s->size += RISCV_ELF_WORD_BYTES;
+		  if (bfd_link_pic (info))
+		    srel->size += sizeof (ElfNN_External_Rela);
+		}
 	    }
 	  else
 	    *local_got = (bfd_vma) -1;
