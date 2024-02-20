@@ -2202,6 +2202,7 @@ static const struct percent_op_match percent_op_utype[] =
   {"tprel_hi", BFD_RELOC_RISCV_TPREL_HI20},
   {"pcrel_hi", BFD_RELOC_RISCV_PCREL_HI20},
   {"got_pcrel_hi", BFD_RELOC_RISCV_GOT_HI20},
+  {"tlsdesc_hi", BFD_RELOC_RISCV_TLSDESC_HI20},
   {"tls_ie_pcrel_hi", BFD_RELOC_RISCV_TLS_GOT_HI20},
   {"tls_gd_pcrel_hi", BFD_RELOC_RISCV_TLS_GD_HI20},
   {"hi", BFD_RELOC_RISCV_HI20},
@@ -2213,6 +2214,8 @@ static const struct percent_op_match percent_op_itype[] =
   {"lo", BFD_RELOC_RISCV_LO12_I},
   {"tprel_lo", BFD_RELOC_RISCV_TPREL_LO12_I},
   {"pcrel_lo", BFD_RELOC_RISCV_PCREL_LO12_I},
+  {"tlsdesc_load_lo", BFD_RELOC_RISCV_TLSDESC_LOAD_LO12},
+  {"tlsdesc_add_lo", BFD_RELOC_RISCV_TLSDESC_ADD_LO12},
   {0, 0}
 };
 
@@ -2224,8 +2227,9 @@ static const struct percent_op_match percent_op_stype[] =
   {0, 0}
 };
 
-static const struct percent_op_match percent_op_rtype[] =
+static const struct percent_op_match percent_op_relax_only[] =
 {
+  {"tlsdesc_call", BFD_RELOC_RISCV_TLSDESC_CALL},
   {"tprel_add", BFD_RELOC_RISCV_TPREL_ADD},
   {0, 0}
 };
@@ -3386,10 +3390,10 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      *imm_reloc = BFD_RELOC_RISCV_LO12_I;
 	      goto load_store;
 	    case '1':
-	      /* This is used for TLS, where the fourth operand is
-		 %tprel_add, to get a relocation applied to an add
-		 instruction, for relaxation to use.  */
-	      p = percent_op_rtype;
+	      /* This is used for TLS relocations that acts as relaxation
+		 markers and do not change the instruction encoding,
+		 i.e. %tprel_add and %tlsdesc_call.  */
+	      p = percent_op_relax_only;
 	      goto alu_op;
 	    case '0': /* AMO displacement, which must be zero.  */
 	    load_store:
@@ -4252,6 +4256,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_RISCV_TPREL_LO12_I:
     case BFD_RELOC_RISCV_TPREL_LO12_S:
     case BFD_RELOC_RISCV_TPREL_ADD:
+    case BFD_RELOC_RISCV_TLSDESC_HI20:
       relaxable = true;
       /* Fall through.  */
 
@@ -4433,6 +4438,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
     case BFD_RELOC_RISCV_CALL:
     case BFD_RELOC_RISCV_CALL_PLT:
+    case BFD_RELOC_RISCV_TLSDESC_LOAD_LO12:
+    case BFD_RELOC_RISCV_TLSDESC_ADD_LO12:
+    case BFD_RELOC_RISCV_TLSDESC_CALL:
       relaxable = true;
       break;
 
