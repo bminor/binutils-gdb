@@ -214,6 +214,159 @@ noop_completer (struct cmd_list_element *ignore,
 {
 }
 
+/* Return 1 if the character at EINDEX in STRING is quoted (there is an
+   unclosed quoted string), or if the character at EINDEX is quoted by a
+   backslash.  */
+
+static int
+gdb_completer_file_name_char_is_quoted (char *string, int eindex)
+{
+  for (int i = 0; i <= eindex && string[i] != '\0'; )
+    {
+      char c = string[i];
+
+      if (c == '\\')
+	{
+	  /* The backslash itself is not quoted.  */
+	  if (i >= eindex)
+	    return 0;
+	  ++i;
+	  /* But the next character is.  */
+	  if (i >= eindex)
+	    return 1;
+	  if (string[i] == '\0')
+	    return 0;
+	  ++i;
+	  continue;
+	}
+      else if (strchr (rl_completer_quote_characters, c) != nullptr)
+	{
+	  /* This assumes that extract_string_maybe_quoted can handle a
+	     string quoted with character C.  Currently this is true as the
+	     only characters we put in rl_completer_quote_characters are
+	     single and/or double quotes, both of which
+	     extract_string_maybe_quoted can handle.  */
+	  gdb_assert (c == '"' || c == '\'');
+	  const char *tmp = &string[i];
+	  (void) extract_string_maybe_quoted (&tmp);
+	  i = tmp - string;
+
+	  /* Consider any character within the string we just skipped over
+	     as quoted, though this might not be completely correct; the
+	     opening and closing quotes are not themselves quoted.  But so
+	     far this doesn't seem to have caused any issues.  */
+	  if (i >= eindex)
+	    return 1;
+	}
+      else
+	++i;
+    }
+
+  return 0;
+}
+
+/* Removing character escaping from FILENAME.  QUOTE_CHAR is the quote
+   character around FILENAME or the null-character if there is no quoting
+   around FILENAME.  */
+
+static char *
+gdb_completer_file_name_dequote (char *filename, int quote_char)
+{
+  std::string tmp;
+
+  if (quote_char == '\'')
+    {
+      /* There is no backslash escaping within a single quoted string.  In
+	 this case we can just return the input string.  */
+      tmp = filename;
+    }
+  else if (quote_char == '"')
+    {
+      /* Remove escaping from a double quoted string.  */
+      for (const char *input = filename;
+	   *input != '\0';
+	   ++input)
+	{
+	  if (input[0] == '\\'
+	      && input[1] != '\0'
+	      && strchr ("\"\\", input[1]) != nullptr)
+	    ++input;
+	  tmp += *input;
+	}
+    }
+  else
+    {
+      gdb_assert (quote_char == '\0');
+
+      /* Remove escaping from an unquoted string.  */
+      for (const char *input = filename;
+	   *input != '\0';
+	   ++input)
+	{
+	  /* We allow anything to be escaped in an unquoted string.  */
+	  if (*input == '\\')
+	    {
+	      ++input;
+	      if (*input == '\0')
+		break;
+	    }
+
+	  tmp += *input;
+	}
+    }
+
+  return strdup (tmp.c_str ());
+}
+
+/* Apply character escaping to the file name in TEXT.  QUOTE_PTR points to
+   the quote character surrounding TEXT, or points to the null-character if
+   there are no quotes around TEXT.  MATCH_TYPE will be one of the readline
+   constants SINGLE_MATCH or MULTI_MATCH depending on if there is one or
+   many completions.  */
+
+static char *
+gdb_completer_file_name_quote (char *text, int match_type ATTRIBUTE_UNUSED,
+			       char *quote_ptr)
+{
+  std::string str;
+
+  if (*quote_ptr == '\'')
+    {
+      /* There is no backslash escaping permitted within a single quoted
+	 string, so in this case we can just return the input sting.  */
+      str = text;
+    }
+  else if (*quote_ptr == '"')
+    {
+      /* Add escaping for a double quoted filename.  */
+      for (const char *input = text;
+	   *input != '\0';
+	   ++input)
+	{
+	  if (strchr ("\"\\", *input) != nullptr)
+	    str += '\\';
+	  str += *input;
+	}
+    }
+  else
+    {
+      gdb_assert (*quote_ptr == '\0');
+
+      /* Add escaping for an unquoted filename.  */
+      for (const char *input = text;
+	   *input != '\0';
+	   ++input)
+	{
+	  if (strchr (" \t\n\\\"'", *input)
+	      != nullptr)
+	    str += '\\';
+	  str += *input;
+	}
+    }
+
+  return strdup (str.c_str ());
+}
+
 /* Generate filename completions of WORD, storing the completions into
    TRACKER.  This is used for generating completions for commands that
    only accept unquoted filenames as well as for commands that accept
@@ -272,6 +425,7 @@ filename_maybe_quoted_completer_handle_brkchars
     (gdb_completer_file_name_break_characters);
 
   rl_completer_quote_characters = gdb_completer_file_name_quote_characters;
+  rl_char_is_quoted_p = gdb_completer_file_name_char_is_quoted;
 }
 
 /* Complete on filenames.  This is for commands that accepts possibly
@@ -1314,6 +1468,7 @@ complete_line_internal_1 (completion_tracker &tracker,
      completing file names then we can switch to the file name quote
      character set (i.e., both single- and double-quotes).  */
   rl_completer_quote_characters = gdb_completer_expression_quote_characters;
+  rl_char_is_quoted_p = nullptr;
 
   /* Decide whether to complete on a list of gdb commands or on
      symbols.  */
@@ -2209,9 +2364,11 @@ completion_tracker::build_completion_result (const char *text,
   /* Build replacement word, based on the LCD.  */
 
   recompute_lowest_common_denominator ();
-  match_list[0]
-    = expand_preserving_ws (text, end - start,
-			    m_lowest_common_denominator);
+  if (rl_filename_completion_desired)
+    match_list[0] = xstrdup (m_lowest_common_denominator);
+  else
+    match_list[0]
+      = expand_preserving_ws (text, end - start, m_lowest_common_denominator);
 
   if (m_lowest_common_denominator_unique)
     {
@@ -3073,6 +3230,11 @@ _initialize_completer ()
   rl_completion_word_break_hook = gdb_completion_word_break_characters;
   rl_attempted_completion_function = gdb_rl_attempted_completion_function;
   set_rl_completer_word_break_characters (default_word_break_characters ());
+
+  /* Setup readline globals relating to filename completion.  */
+  rl_filename_quote_characters = " \t\n\\\"'";
+  rl_filename_dequoting_function = gdb_completer_file_name_dequote;
+  rl_filename_quoting_function = gdb_completer_file_name_quote;
 
   add_setshow_zuinteger_unlimited_cmd ("max-completions", no_class,
 				       &max_completions, _("\

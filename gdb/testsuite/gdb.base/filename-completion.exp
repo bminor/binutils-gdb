@@ -52,6 +52,9 @@ proc setup_directory_tree {} {
     remote_exec host "touch \"${root}/bb2/dir 2/file 1\""
     remote_exec host "touch \"${root}/bb2/dir 2/file 2\""
 
+    remote_exec host "touch \"${root}/bb1/aa\\\"bb\""
+    remote_exec host "touch \"${root}/bb1/aa'bb\""
+
     return $root
 }
 
@@ -107,6 +110,37 @@ proc run_quoting_and_escaping_tests { root } {
 			"aa cc"
 		    } "" "${qc}" false \
 		    "expand filenames containing spaces"
+
+		test_gdb_complete_multiple "$cmd ${qc}${root}/bb1/" \
+		    "a" "a" {
+			"aa\"bb"
+			"aa'bb"
+		    } "" "${qc}" false \
+		    "expand filenames containing quotes"
+	    } else {
+		set sp "\\ "
+
+		test_gdb_complete_tab_multiple "$cmd ${qc}${root}/aaa/a" \
+		    "a${sp}" {
+			"aa bb"
+			"aa cc"
+		    } false \
+		    "expand filenames containing spaces"
+
+		test_gdb_complete_tab_multiple "$cmd ${qc}${root}/bb1/a" \
+		    "a" {
+			"aa\"bb"
+			"aa'bb"
+		    } false \
+		    "expand filenames containing quotes"
+
+		test_gdb_complete_tab_unique "$cmd ${qc}${root}/bb1/aa\\\"" \
+		    "$cmd ${qc}${root}/bb1/aa\\\\\"bb${qc}" " " \
+		    "expand unique filename containing double quotes"
+
+		test_gdb_complete_tab_unique "$cmd ${qc}${root}/bb1/aa\\'" \
+		    "$cmd ${qc}${root}/bb1/aa\\\\'bb${qc}" " " \
+		    "expand unique filename containing single quote"
 	    }
 	}
 
