@@ -26,6 +26,9 @@ set remote_python_file \
     [gdb_remote_download host ${srcdir}/${subdir}/${gdb_test_file_name}.py]
 gdb_test_no_output "source ${remote_python_file}" "load python file"
 
+set logfile [new_dap_log_file]
+gdb_test_no_output "set debug dap-log-file $logfile" "set dap log file"
+
 gdb_test_multiple "python check_everything()" "type checker" {
     -re -wrap "OK" {
 	pass $gdb_test_name

@@ -26,6 +26,19 @@ set dap_gdb_instance 0
 # is restarted.
 set dap_seq 1
 
+# Return the current DAP log file.
+proc current_dap_log_file {} {
+    global dap_gdb_instance
+    return [standard_output_file "dap.log.$dap_gdb_instance"]
+}
+
+# Return a new DAP log file.
+proc new_dap_log_file {} {
+    global dap_gdb_instance
+    incr dap_gdb_instance
+    return [current_dap_log_file]
+}
+
 # Start gdb using the DAP interpreter.
 proc dap_gdb_start {} {
     # Keep track of the number of times GDB has been launched.
@@ -34,13 +47,10 @@ proc dap_gdb_start {} {
 
     gdb_stdin_log_init
 
-    global dap_gdb_instance
-    incr dap_gdb_instance
-
     global GDBFLAGS stty_init
     save_vars { GDBFLAGS stty_init } {
 	set stty_init "-echo raw"
-	set logfile [standard_output_file "dap.log.$dap_gdb_instance"]
+	set logfile [new_dap_log_file]
 	append GDBFLAGS " -iex \"set debug dap-log-file $logfile\" -q -i=dap"
 	set res [gdb_spawn]
 	if {$res != 0} {
@@ -337,9 +347,7 @@ proc dap_target_remote {target} {
 
 # Read the most recent DAP log file and check it for exceptions.
 proc dap_check_log_file {} {
-    global dap_gdb_instance
-
-    set fd [open [standard_output_file "dap.log.$dap_gdb_instance"]]
+    set fd [open [current_dap_log_file]]
     set contents [read $fd]
     close $fd
 
