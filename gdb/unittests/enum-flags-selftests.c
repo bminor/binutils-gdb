@@ -253,10 +253,8 @@ CHECK_VALID (true,  EF,   true ? RE () : EF ())
 
 CHECK_VALID (true,  int,  true ? EF () : EF2 ())
 CHECK_VALID (true,  int,  true ? EF2 () : EF ())
-#if GCC_VERSION >= 5003 || defined __clang__
 CHECK_VALID (true,  int,  true ? EF () : RE2 ())
 CHECK_VALID (true,  int,  true ? RE2 () : EF ())
-#endif
 
 /* Same, but with an unsigned enum.  */
 
@@ -264,10 +262,8 @@ typedef unsigned int uns;
 
 CHECK_VALID (true,  uns,  true ? EF () : UEF ())
 CHECK_VALID (true,  uns,  true ? UEF () : EF ())
-#if GCC_VERSION >= 5003 || defined __clang__
 CHECK_VALID (true,  uns,  true ? EF () : URE ())
 CHECK_VALID (true,  uns,  true ? URE () : EF ())
-#endif
 
 /* Unfortunately this can't work due to the way C++ computes the
    return type of the ternary conditional operator.  int isn't
@@ -279,10 +275,8 @@ CHECK_VALID (true,  uns,  true ? URE () : EF ())
      error: operands to ?: have different types ‘enum_flags<RE>’ and ‘int’
    Confirmed to work with gcc 4.9, 5.3 and clang 3.7.
 */
-#if GCC_VERSION >= 4009 || defined __clang__
 CHECK_VALID (false, void, true ? EF () : 0)
 CHECK_VALID (false, void, true ? 0 : EF ())
-#endif
 
 /* Check that the ++/--/<</>>/<<=/>>= operators are deleted.  */
 

@@ -38,11 +38,7 @@ void initialize_tracepoint (void);
 #if defined _WIN32 || defined __CYGWIN__
 # define EXPORTED_SYMBOL __declspec (dllexport)
 #else
-# if __GNUC__ >= 4
-#  define EXPORTED_SYMBOL __attribute__ ((visibility ("default")))
-# else
-#  define EXPORTED_SYMBOL
-# endif
+# define EXPORTED_SYMBOL __attribute__ ((visibility ("default")))
 #endif
 
 /* Use these to make sure the functions and variables the IPA needs to
