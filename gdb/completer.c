@@ -2372,23 +2372,30 @@ completion_tracker::build_completion_result (const char *text,
 
   if (m_lowest_common_denominator_unique)
     {
-      /* We don't rely on readline appending the quote char as
-	 delimiter as then readline wouldn't append the ' ' after the
-	 completion.  */
-      char buf[2] = { (char) quote_char () };
+      bool completion_suppress_append;
 
-      match_list[0] = reconcat (match_list[0], match_list[0],
-				buf, (char *) NULL);
-      match_list[1] = NULL;
+      if (from_readline ())
+	{
+	  /* We don't rely on readline appending the quote char as
+	     delimiter as then readline wouldn't append the ' ' after the
+	     completion.  */
+	  char buf[2] = { (char) quote_char (), '\0' };
 
-      /* If the tracker wants to, or we already have a space at the
-	 end of the match, tell readline to skip appending
-	 another.  */
-      char *match = match_list[0];
-      bool completion_suppress_append
-	= (suppress_append_ws ()
-	   || (match[0] != '\0'
-	       && match[strlen (match) - 1] == ' '));
+	  match_list[0] = reconcat (match_list[0], match_list[0], buf,
+				    (char *) nullptr);
+
+	  /* If the tracker wants to, or we already have a space at the end
+	     of the match, tell readline to skip appending another.  */
+	  char *match = match_list[0];
+	  completion_suppress_append
+	    = (suppress_append_ws ()
+	       || (match[0] != '\0'
+		   && match[strlen (match) - 1] == ' '));
+	}
+      else
+	completion_suppress_append = false;
+
+      match_list[1] = nullptr;
 
       return completion_result (match_list, 1, completion_suppress_append);
     }
@@ -2510,21 +2517,14 @@ void
 completion_result::print_matches (const std::string &prefix,
 				  const char *word, int quote_char)
 {
-  if (this->number_matches == 1)
-    printf_unfiltered ("%s%s\n", prefix.c_str (), this->match_list[0]);
-  else
-    {
-      this->sort_match_list ();
+  this->sort_match_list ();
 
-      for (size_t i = 0; i < this->number_matches; i++)
-	{
-	  printf_unfiltered ("%s%s", prefix.c_str (),
-			     this->match_list[i + 1]);
-	  if (quote_char)
-	    printf_unfiltered ("%c", quote_char);
-	  printf_unfiltered ("\n");
-	}
-    }
+  char buf[2] = { (char) quote_char, '\0' };
+  size_t off = this->number_matches == 1 ? 0 : 1;
+
+  for (size_t i = 0; i < this->number_matches; i++)
+    printf_unfiltered ("%s%s%s\n", prefix.c_str (),
+		       this->match_list[i + off], buf);
 
   if (this->number_matches == max_completions)
     {

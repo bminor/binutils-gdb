@@ -81,8 +81,25 @@ proc run_quoting_and_escaping_tests { root } {
 	    test_gdb_complete_none "$cmd ${qc}${root}/xx" \
 		"expand a non-existent filename"
 
-	    test_gdb_complete_unique "$cmd ${qc}${root}/a" \
-		"$cmd ${qc}${root}/aaa/" "" false \
+	    # The following test is split into separate cmd and tab calls
+	    # so we can xfail the cmd version.  The cmd version will add a
+	    # closing quote, it shouldn't be doing this.  This will be
+	    # fixed in a later commit.
+	    if { $qc ne "" } {
+		setup_xfail "*-*-*"
+	    }
+	    test_gdb_complete_cmd_unique "$cmd ${qc}${root}/a" \
+		"$cmd ${qc}${root}/aaa/" \
+		"expand a unique directory name"
+
+	    if { [readline_is_used] } {
+		test_gdb_complete_tab_unique "$cmd ${qc}${root}/a" \
+		    "$cmd ${qc}${root}/aaa/" "" \
+		    "expand a unique directory name"
+	    }
+
+	    test_gdb_complete_unique "$cmd ${qc}${root}/cc2" \
+		"$cmd ${qc}${root}/cc2${qc}" " " false \
 		"expand a unique filename"
 
 	    test_gdb_complete_multiple "$cmd ${qc}${root}/" \
