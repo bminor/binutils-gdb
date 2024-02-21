@@ -2314,14 +2314,14 @@ btrace_step_spurious (void)
   return status;
 }
 
-/* Return a target_waitstatus indicating that the thread was not resumed.  */
+/* Return a target_waitstatus indicating that nothing is moving.  */
 
 static struct target_waitstatus
-btrace_step_no_resumed (void)
+btrace_step_no_moving_threads (void)
 {
   struct target_waitstatus status;
 
-  status.set_no_resumed ();
+  status.set_ignore ();
 
   return status;
 }
@@ -2626,7 +2626,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
   if (moving.empty ())
     {
-      *status = btrace_step_no_resumed ();
+      *status = btrace_step_no_moving_threads ();
 
       DEBUG ("wait ended by %s: %s", null_ptid.to_string ().c_str (),
 	     status->to_string ().c_str ());
