@@ -17627,7 +17627,7 @@ i386_elf_section_change_hook (void)
       break;
   if (!curr)
     {
-      curr = XNEW (struct i386_segment_info);
+      curr = notes_alloc (sizeof (*curr));
       curr->subseg = info->subseg;
       curr->next = NULL;
       prev->next = curr;
