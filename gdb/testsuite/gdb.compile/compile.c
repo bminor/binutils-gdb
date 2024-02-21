@@ -100,6 +100,13 @@ int globalshadow = 10;
 static int staticshadow = 20;
 int externed = 7;
 
+struct struct_with_array
+{
+  char val[7];
+};
+
+static struct struct_with_array swa;
+
 int
 main (void)
 {

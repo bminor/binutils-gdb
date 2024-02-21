@@ -397,3 +397,6 @@ gdb_test "p globalvar" " = 1" "expect 1"
 
 gdb_test_no_output "compile code shlibvar += 5;" "modify shared library variable"
 gdb_test "p shlibvar" " = 15" "expect 15"
+
+# This used to fail due to alignment.  PR compile/31397.
+gdb_test_no_output "compile code swa.val\[0\] = 1"
