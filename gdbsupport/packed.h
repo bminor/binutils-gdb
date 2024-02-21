@@ -80,9 +80,7 @@ public:
     static_assert (alignof (packed) == 1);
 
     /* Make sure packed can be wrapped with std::atomic.  */
-#if HAVE_IS_TRIVIALLY_COPYABLE
     static_assert (std::is_trivially_copyable<packed>::value);
-#endif
     static_assert (std::is_copy_constructible<packed>::value);
     static_assert (std::is_move_constructible<packed>::value);
     static_assert (std::is_copy_assignable<packed>::value);

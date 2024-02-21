@@ -30,14 +30,10 @@ namespace array_view_tests {
 #define CHECK_TRAIT(TRAIT)			\
   static_assert (std::TRAIT<gdb::array_view<gdb_byte>>::value, "")
 
-#if HAVE_IS_TRIVIALLY_COPYABLE
-
 CHECK_TRAIT (is_trivially_copyable);
 CHECK_TRAIT (is_trivially_move_assignable);
 CHECK_TRAIT (is_trivially_move_constructible);
 CHECK_TRAIT (is_trivially_destructible);
-
-#endif
 
 #undef CHECK_TRAIT
 

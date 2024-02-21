@@ -61,9 +61,7 @@ trad_frame_reset_saved_regs (struct gdbarch *gdbarch,
 trad_frame_saved_reg *
 trad_frame_alloc_saved_regs (struct gdbarch *gdbarch)
 {
-#ifdef HAVE_IS_TRIVIALLY_CONSTRUCTIBLE
   static_assert (std::is_trivially_constructible<trad_frame_saved_reg>::value);
-#endif
 
   int numregs = gdbarch_num_cooked_regs (gdbarch);
   trad_frame_saved_reg *this_saved_regs

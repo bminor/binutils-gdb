@@ -63,13 +63,9 @@ DEF_ENUM_FLAGS_TYPE (RE, EF);
 DEF_ENUM_FLAGS_TYPE (RE2, EF2);
 DEF_ENUM_FLAGS_TYPE (URE, UEF);
 
-#if HAVE_IS_TRIVIALLY_COPYABLE
-
 /* So that std::vectors of types that have enum_flags fields can
    reallocate efficiently memcpy.  */
 static_assert (std::is_trivially_copyable<EF>::value);
-
-#endif
 
 /* A couple globals used as lvalues in the CHECK_VALID expressions
    below.  Their names (and types) match the uppercase type names
