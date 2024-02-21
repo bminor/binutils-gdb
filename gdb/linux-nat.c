@@ -180,7 +180,63 @@ execing thread, the leader will be zombie, and the execing thread will
 be in `D (disc sleep)' state.  As soon as all other threads are
 reaped, the execing thread changes its tid to the tgid, and the
 previous (zombie) leader vanishes, giving place to the "new"
-leader.  */
+leader.
+
+Accessing inferior memory
+=========================
+
+To access inferior memory, we strongly prefer /proc/PID/mem.  We
+fallback to ptrace if and only if /proc/PID/mem is not writable, as a
+concession for obsolescent kernels (such as found in RHEL6).  For
+modern kernels, the fallback shouldn't trigger.  GDBserver does not
+have the ptrace fallback already, and at some point, we'll consider
+removing it from native GDB too.
+
+/proc/PID/mem has a few advantages over alternatives like
+PTRACE_PEEKTEXT/PTRACE_POKETEXT or process_vm_readv/process_vm_writev:
+
+- Because we can use a single read/write call, /proc/PID/mem can be
+  much more efficient than banging away at
+  PTRACE_PEEKTEXT/PTRACE_POKETEXT, one word at a time.
+
+- /proc/PID/mem allows writing to read-only pages, which we need to
+  e.g., plant breakpoint instructions.  process_vm_writev does not
+  allow this.
+
+- /proc/PID/mem allows memory access even if all threads are running.
+  OTOH, PTRACE_PEEKTEXT/PTRACE_POKETEXT require passing down the tid
+  of a stopped task.  This lets us e.g., install breakpoints while the
+  inferior is running, clear a displaced stepping scratch pad when the
+  thread that was displaced stepping exits, print inferior globals,
+  etc., all without having to worry about temporarily pausing some
+  thread.
+
+- /proc/PID/mem does not suffer from a race that could cause us to
+  access memory of the wrong address space when the inferior execs.
+
+  process_vm_readv/process_vm_writev have this problem.
+
+  E.g., say GDB decides to write to memory just while the inferior
+  execs.  In this scenario, GDB could write memory to the post-exec
+  address space thinking it was writing to the pre-exec address space,
+  with high probability of corrupting the inferior.  Or if GDB decides
+  instead to read memory just while the inferior execs, it could read
+  bogus contents out of the wrong address space.
+
+  ptrace used to have this problem too, but no longer has since Linux
+  commit dbb5afad100a ("ptrace: make ptrace() fail if the tracee
+  changed its pid unexpectedly"), in Linux 5.13.  (And if ptrace were
+  ever changed to allow access memory via zombie or running threads,
+  it would better not forget to consider this scenario.)
+
+  We avoid this race with /proc/PID/mem, by opening the file as soon
+  as we start debugging the inferior, when it is known the inferior is
+  stopped, and holding on to the open file descriptor, to be used
+  whenever we need to access inferior memory.  If the inferior execs
+  or exits, reading/writing from/to the file returns 0 (EOF),
+  indicating the address space is gone, and so we return
+  TARGET_XFER_EOF to the core.  We close the old file and open a new
+  one when we finally see the PTRACE_EVENT_EXEC event.  */
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
