@@ -178,6 +178,7 @@ def log_stack(level=LogLevel.DEFAULT):
     """Log a stack trace to the log file, if logging is enabled."""
     if dap_log.log_file is not None and level <= _log_level.value:
         traceback.print_exc(file=dap_log.log_file)
+        dap_log.log_file.flush()
 
 
 @in_gdb_thread
