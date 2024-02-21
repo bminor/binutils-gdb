@@ -25,12 +25,8 @@ require allow_shlib_tests
 
 standard_testfile
 
+require allow_in_proc_agent
 set libipa [get_in_proc_agent]
-
-if { ![file exists $libipa] } {
-    unsupported "missing libinproctrace.so"
-    return -1
-}
 
 gdb_download_shlib $libipa
 
