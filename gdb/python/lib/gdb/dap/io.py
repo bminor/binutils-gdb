@@ -79,4 +79,4 @@ def start_json_writer(stream, queue):
             stream.write(body_bytes)
             stream.flush()
 
-    start_thread("JSON writer", _json_writer)
+    return start_thread("JSON writer", _json_writer)

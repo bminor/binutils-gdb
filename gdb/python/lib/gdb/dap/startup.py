@@ -80,6 +80,7 @@ def start_thread(name, target, args=()):
 
     result = gdb.Thread(name=name, target=thread_wrapper, args=args, daemon=True)
     result.start()
+    return result
 
 
 def start_dap(target):
