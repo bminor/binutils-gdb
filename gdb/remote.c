@@ -7919,12 +7919,24 @@ remote_target::remote_notif_remove_queued_reply (ptid_t ptid)
 {
   remote_state *rs = get_remote_state ();
 
+  auto pred = [=] (const stop_reply_up &event)
+  {
+    /* A null ptid should only happen if we have a single process.  It
+       wouldn't match the process ptid, though, so let's check this case
+       separately.  */
+    if ((event->ptid == null_ptid) && ptid.is_pid ())
+      return true;
+
+    /* A minus one ptid should only happen for events that match
+       everything.  It wouldn't match a process or thread ptid, though, so
+       let's check this case separately.  */
+    if (event->ptid == minus_one_ptid)
+      return true;
+
+    return event->ptid.matches (ptid);
+  };
   auto iter = std::find_if (rs->stop_reply_queue.begin (),
-			    rs->stop_reply_queue.end (),
-			    [=] (const stop_reply_up &event)
-			    {
-			      return event->ptid.matches (ptid);
-			    });
+			    rs->stop_reply_queue.end (), pred);
   stop_reply_up result;
   if (iter != rs->stop_reply_queue.end ())
     {

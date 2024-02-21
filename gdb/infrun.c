@@ -4203,7 +4203,24 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs,
 
   auto do_wait = [&] (inferior *inf)
   {
-    ecs->ptid = do_target_wait_1 (inf, wait_ptid, &ecs->ws, options);
+    ptid_t ptid { inf->pid };
+
+    /* Make sure we're not widening WAIT_PTID.  */
+    if (!ptid.matches (wait_ptid)
+	/* Targets that cannot async will be asked for a blocking wait.
+
+	   Blocking wait does not work inferior-by-inferior if the target
+	   provides more than one inferior.  Fall back to waiting for
+	   WAIT_PTID in that case.  */
+	|| !target_can_async_p () || ((options & TARGET_WNOHANG) == 0)
+	/* We cannot wait for inferiors without a pid.
+
+	   One such inferior is created by initialize_inferiors () to
+	   ensure that there always is an inferior.  */
+	|| !ptid.is_pid ())
+      ptid = wait_ptid;
+
+    ecs->ptid = do_target_wait_1 (inf, ptid, &ecs->ws, options);
     ecs->target = inf->process_target ();
     return (ecs->ws.kind () != TARGET_WAITKIND_IGNORE);
   };
@@ -4212,6 +4229,18 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs,
      here spuriously after the target is all stopped and we've already
      reported the stop to the user, polling for events.  */
   scoped_restore_current_thread restore_thread;
+
+  /* The first TARGET_WAITKIND_NO_RESUMED execution state.
+
+     We do not want to return TARGET_WAITKIND_NO_RESUMED right away since
+     another inferior may have a more interesting event to report.  If
+     there is no other event to report, after all, we want to report the
+     first such event.
+
+     This variable holds that first event, which will be copied on the
+     first TARGET_WAITKIND_NO_RESUMED below.  */
+  execution_control_state no_resumed {};
+  no_resumed.ptid = null_ptid;
 
   intrusive_list_iterator<inferior> start
     = inferior_list.iterator_to (*selected);
@@ -4223,7 +4252,13 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs,
       inferior *inf = &*it;
 
       if (inferior_matches (inf) && do_wait (inf))
-	return true;
+	{
+	  if (ecs->ws.kind () != TARGET_WAITKIND_NO_RESUMED)
+	    return true;
+
+	  if (no_resumed.ptid == null_ptid)
+	    no_resumed = *ecs;
+	}
     }
 
   for (intrusive_list_iterator<inferior> it = inferior_list.begin ();
@@ -4233,7 +4268,19 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs,
       inferior *inf = &*it;
 
       if (inferior_matches (inf) && do_wait (inf))
-	return true;
+	{
+	  if (ecs->ws.kind () != TARGET_WAITKIND_NO_RESUMED)
+	    return true;
+
+	  if (no_resumed.ptid == null_ptid)
+	    no_resumed = *ecs;
+	}
+    }
+
+  if (no_resumed.ptid != null_ptid)
+    {
+      *ecs = no_resumed;
+      return true;
     }
 
   ecs->ws.set_ignore ();

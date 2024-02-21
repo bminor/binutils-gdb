@@ -1162,6 +1162,7 @@ linux_nat_target::attach (const char *args, int from_tty)
 
   /* Add the initial process as the first LWP to the list.  */
   lp = add_initial_lwp (ptid);
+  lp->last_resume_kind = resume_stop;
 
   status = linux_nat_post_attach_wait (lp->ptid, &lp->signalled);
   if (!WIFSTOPPED (status))
@@ -3324,12 +3325,18 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
      moment at which we know its PID.  */
   if (ptid.is_pid () && find_lwp_pid (ptid) == nullptr)
     {
-      ptid_t lwp_ptid (ptid.pid (), ptid.pid ());
+      /* Unless we already did and this is simply a request to wait for a
+	 particular inferior.  */
+      inferior *inf = find_inferior_ptid (linux_target, ptid);
+      if ((inf != nullptr) && (inf->find_thread (ptid) != nullptr))
+	{
+	  ptid_t lwp_ptid (ptid.pid (), ptid.pid ());
 
-      /* Upgrade the main thread's ptid.  */
-      thread_change_ptid (linux_target, ptid, lwp_ptid);
-      lp = add_initial_lwp (lwp_ptid);
-      lp->resumed = 1;
+	  /* Upgrade the main thread's ptid.  */
+	  thread_change_ptid (linux_target, ptid, lwp_ptid);
+	  lp = add_initial_lwp (lwp_ptid);
+	  lp->resumed = 1;
+	}
     }
 
   /* Make sure SIGCHLD is blocked until the sigsuspend below.  */
