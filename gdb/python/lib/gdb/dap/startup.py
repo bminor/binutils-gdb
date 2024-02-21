@@ -146,6 +146,7 @@ class LoggingParam(gdb.Parameter):
     set_doc = "Set the DAP logging status."
     show_doc = "Show the DAP logging status."
 
+    lock = threading.Lock()
     log_file = None
 
     def __init__(self):
@@ -155,12 +156,13 @@ class LoggingParam(gdb.Parameter):
         self.value = None
 
     def get_set_string(self):
-        # Close any existing log file, no matter what.
-        if self.log_file is not None:
-            self.log_file.close()
-            self.log_file = None
-        if self.value is not None:
-            self.log_file = open(self.value, "w")
+        with dap_log.lock:
+            # Close any existing log file, no matter what.
+            if self.log_file is not None:
+                self.log_file.close()
+                self.log_file = None
+            if self.value is not None:
+                self.log_file = open(self.value, "w")
         return ""
 
 
@@ -169,16 +171,18 @@ dap_log = LoggingParam()
 
 def log(something, level=LogLevel.DEFAULT):
     """Log SOMETHING to the log file, if logging is enabled."""
-    if dap_log.log_file is not None and level <= _log_level.value:
-        print(something, file=dap_log.log_file)
-        dap_log.log_file.flush()
+    with dap_log.lock:
+        if dap_log.log_file is not None and level <= _log_level.value:
+            print(something, file=dap_log.log_file)
+            dap_log.log_file.flush()
 
 
 def log_stack(level=LogLevel.DEFAULT):
     """Log a stack trace to the log file, if logging is enabled."""
-    if dap_log.log_file is not None and level <= _log_level.value:
-        traceback.print_exc(file=dap_log.log_file)
-        dap_log.log_file.flush()
+    with dap_log.lock:
+        if dap_log.log_file is not None and level <= _log_level.value:
+            traceback.print_exc(file=dap_log.log_file)
+            dap_log.log_file.flush()
 
 
 @in_gdb_thread
