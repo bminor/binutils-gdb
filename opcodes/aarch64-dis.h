@@ -99,6 +99,7 @@ AARCH64_DECL_OPD_EXTRACTOR (ext_hint);
 AARCH64_DECL_OPD_EXTRACTOR (ext_prfop);
 AARCH64_DECL_OPD_EXTRACTOR (ext_reg_extended);
 AARCH64_DECL_OPD_EXTRACTOR (ext_reg_shifted);
+AARCH64_DECL_OPD_EXTRACTOR (ext_reg_lsl_shifted);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_addr_ri_s4);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_addr_ri_s4xvl);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_addr_ri_s6xvl);

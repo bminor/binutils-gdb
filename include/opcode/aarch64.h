@@ -228,6 +228,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SVE2p1,
   /* RCPC3 instructions.  */
   AARCH64_FEATURE_RCPC3,
+  /* Checked Pointer Arithmetic instructions. */
+  AARCH64_FEATURE_CPA,
   AARCH64_NUM_FEATURES
 };
 
@@ -490,6 +492,7 @@ enum aarch64_opnd
   AARCH64_OPND_PAIRREG_OR_XZR,	/* Paired register operand, optionally xzr.  */
   AARCH64_OPND_Rm_EXT,	/* Integer Rm extended.  */
   AARCH64_OPND_Rm_SFT,	/* Integer Rm shifted.  */
+  AARCH64_OPND_Rm_LSL,	/* Integer Rm shifted (LSL-only).  */
 
   AARCH64_OPND_Fd,	/* Floating-point Fd.  */
   AARCH64_OPND_Fn,	/* Floating-point Fn.  */

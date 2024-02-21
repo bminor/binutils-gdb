@@ -1020,6 +1020,21 @@ aarch64_ins_reg_shifted (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return true;
 }
 
+/* Encode the LSL-shifted register operand for e.g.
+     ADDPT <Xd|SP>, <Xn|SP>, <Xm>{, LSL #<amount>}.  */
+bool
+aarch64_ins_reg_lsl_shifted (const aarch64_operand *self ATTRIBUTE_UNUSED,
+			     const aarch64_opnd_info *info, aarch64_insn *code,
+			     const aarch64_inst *inst ATTRIBUTE_UNUSED,
+			     aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  /* Rm */
+  insert_field (FLD_Rm, code, info->reg.regno, 0);
+  /* imm3 */
+  insert_field (FLD_imm3_10, code, info->shifter.amount, 0);
+  return true;
+}
+
 /* Encode an SVE address [<base>, #<simm4>*<factor>, MUL VL],
    where <simm4> is a 4-bit signed value and where <factor> is 1 plus
    SELF's operand-dependent value.  fields[0] specifies the field that

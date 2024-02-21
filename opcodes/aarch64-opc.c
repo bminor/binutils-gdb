@@ -3270,6 +3270,17 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_Rm_LSL:
+	  /* We expect here that opnd->shifter.kind != AARCH64_MOD_LSL
+	     because the parser already restricts the type of shift to LSL only,
+	     so another check of shift kind would be redundant.  */
+	  if (!value_in_range_p (opnd->shifter.amount, 0, 7))
+	    {
+	      set_sft_amount_out_of_range_error (mismatch_detail, idx, 0, 7);
+	      return 0;
+	    }
+	  break;
+
 	default:
 	  break;
 	}
@@ -3995,6 +4006,20 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       assert (opnd->qualifier == AARCH64_OPND_QLF_W
 	      || opnd->qualifier == AARCH64_OPND_QLF_X);
       if (opnd->shifter.amount == 0 && opnd->shifter.kind == AARCH64_MOD_LSL)
+	snprintf (buf, size, "%s",
+		  style_reg (styler, get_int_reg_name (opnd->reg.regno,
+						       opnd->qualifier, 0)));
+      else
+	snprintf (buf, size, "%s, %s %s",
+		  style_reg (styler, get_int_reg_name (opnd->reg.regno, opnd->qualifier, 0)),
+		  style_sub_mnem (styler, aarch64_operand_modifiers[opnd->shifter.kind].name),
+		  style_imm (styler, "#%" PRIi64, opnd->shifter.amount));
+      break;
+
+    case AARCH64_OPND_Rm_LSL:
+      assert (opnd->qualifier == AARCH64_OPND_QLF_X);
+      assert (opnd->shifter.kind == AARCH64_MOD_LSL);
+      if (opnd->shifter.amount == 0)
 	snprintf (buf, size, "%s",
 		  style_reg (styler, get_int_reg_name (opnd->reg.regno,
 						       opnd->qualifier, 0)));

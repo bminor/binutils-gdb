@@ -240,6 +240,12 @@
   QLF4(X,X,X,X),		\
 }
 
+/* e.g. MADDPT <Xd>, <Xn>, <Xm>, <Xa>.  */
+#define QL_I4SAMEX		\
+{				\
+  QLF4(X,X,X,X),		\
+}
+
 /* e.g. SMADDL <Xd>, <Wn>, <Wm>, <Xa>.  */
 #define QL_I3SAMEL		\
 {				\
@@ -2649,7 +2655,8 @@ static const aarch64_feature_set aarch64_feature_sve2p1 =
   AARCH64_FEATURE (SVE2p1);
 static const aarch64_feature_set aarch64_feature_rcpc3 =
   AARCH64_FEATURE (RCPC3);
-
+static const aarch64_feature_set aarch64_feature_cpa =
+  AARCH64_FEATURE (CPA);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2716,6 +2723,7 @@ static const aarch64_feature_set aarch64_feature_rcpc3 =
 #define SME2p1  &aarch64_feature_sme2p1
 #define SVE2p1  &aarch64_feature_sve2p1
 #define RCPC3	  &aarch64_feature_rcpc3
+#define CPA	  &aarch64_feature_cpa
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2888,6 +2896,8 @@ static const aarch64_feature_set aarch64_feature_rcpc3 =
   { NAME, OPCODE, MASK, the, 0, D128_THE, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define RCPC3_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, RCPC3, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define CPA_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS) \
+  { NAME, OPCODE, MASK, CLASS, 0, CPA, OPS, QUALS, 0, 0, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -6392,6 +6402,12 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SVE2p1_INSNC("st3q",0xe4a00000, 0xffe0e000, sve_misc, 0, OP3 (SME_Zt3, SVE_Pg3, SVE_ADDR_RR_LSL4), OP_SVE_QUU, 0, C_SCAN_MOVPRFX, 0),
   SVE2p1_INSNC("st4q",0xe4e00000, 0xffe0e000, sve_misc, 0, OP3 (SME_Zt4, SVE_Pg3, SVE_ADDR_RR_LSL4), OP_SVE_QUU, 0, C_SCAN_MOVPRFX, 0),
 
+/* Checked Pointer Arithmetic Instructions.  */
+  CPA_INSN ("addpt",  0x9a002000, 0xffe0e000, aarch64_misc, OP3 (Rd_SP, Rn_SP, Rm_LSL), QL_I3SAMEX),
+  CPA_INSN ("subpt",  0xda002000, 0xffe0e000, aarch64_misc, OP3 (Rd_SP, Rn_SP, Rm_LSL), QL_I3SAMEX),
+  CPA_INSN ("maddpt", 0x9b600000, 0xffe08000, aarch64_misc, OP4 (Rd, Rn, Rm, Ra), QL_I4SAMEX),
+  CPA_INSN ("msubpt", 0x9b608000, 0xffe08000, aarch64_misc, OP4 (Rd, Rn, Rm, Ra), QL_I4SAMEX),
+
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };
 
@@ -6440,6 +6456,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "an integer register with optional extension")			\
     Y(MODIFIED_REG, reg_shifted, "Rm_SFT", 0, F(),			\
       "an integer register with optional shift")			\
+    Y(MODIFIED_REG, reg_lsl_shifted, "Rm_LSL", 0, F(),			\
+      "an integer register with optional LSL shift")			\
     Y(FP_REG, regno, "Fd", 0, F(FLD_Rd), "a floating-point register")	\
     Y(FP_REG, regno, "Fn", 0, F(FLD_Rn), "a floating-point register")	\
     Y(FP_REG, regno, "Fm", 0, F(FLD_Rm), "a floating-point register")	\
