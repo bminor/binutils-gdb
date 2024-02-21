@@ -530,15 +530,7 @@ bfd_elf_link_record_dynamic_symbol (struct bfd_link_info *info,
 	      && h->root.type != bfd_link_hash_undefweak)
 	    {
 	      h->forced_local = 1;
-	      if (!elf_hash_table (info)->is_relocatable_executable
-		  || ((h->root.type == bfd_link_hash_defined
-		       || h->root.type == bfd_link_hash_defweak)
-		      && h->root.u.def.section->owner != NULL
-		      && h->root.u.def.section->owner->no_export)
-		  || (h->root.type == bfd_link_hash_common
-		      && h->root.u.c.p->section->owner != NULL
-		      && h->root.u.c.p->section->owner->no_export))
-		return true;
+	      return true;
 	    }
 
 	default:
@@ -734,8 +726,7 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 
   if ((h->def_dynamic
        || h->ref_dynamic
-       || bfd_link_dll (info)
-       || elf_hash_table (info)->is_relocatable_executable)
+       || bfd_link_dll (info))
       && !h->forced_local
       && h->dynindx == -1)
     {
