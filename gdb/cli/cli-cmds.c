@@ -423,31 +423,7 @@ complete_command (const char *arg, int from_tty)
     {
       std::string arg_prefix (arg, word - arg);
 
-      if (result.number_matches == 1)
-	printf_unfiltered ("%s%s\n", arg_prefix.c_str (), result.match_list[0]);
-      else
-	{
-	  result.sort_match_list ();
-
-	  for (size_t i = 0; i < result.number_matches; i++)
-	    {
-	      printf_unfiltered ("%s%s",
-				 arg_prefix.c_str (),
-				 result.match_list[i + 1]);
-	      if (quote_char)
-		printf_unfiltered ("%c", quote_char);
-	      printf_unfiltered ("\n");
-	    }
-	}
-
-      if (result.number_matches == max_completions)
-	{
-	  /* ARG_PREFIX and WORD are included in the output so that emacs
-	     will include the message in the output.  */
-	  printf_unfiltered (_("%s%s %s\n"),
-			     arg_prefix.c_str (), word,
-			     get_max_completions_reached_message ());
-	}
+      result.print_matches (arg_prefix, word, quote_char);
     }
 }
 

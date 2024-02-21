@@ -2504,6 +2504,39 @@ completion_result::reset_match_list ()
     }
 }
 
+/* See completer.h  */
+
+void
+completion_result::print_matches (const std::string &prefix,
+				  const char *word, int quote_char)
+{
+  if (this->number_matches == 1)
+    printf_unfiltered ("%s%s\n", prefix.c_str (), this->match_list[0]);
+  else
+    {
+      this->sort_match_list ();
+
+      for (size_t i = 0; i < this->number_matches; i++)
+	{
+	  printf_unfiltered ("%s%s", prefix.c_str (),
+			     this->match_list[i + 1]);
+	  if (quote_char)
+	    printf_unfiltered ("%c", quote_char);
+	  printf_unfiltered ("\n");
+	}
+    }
+
+  if (this->number_matches == max_completions)
+    {
+      /* PREFIX and WORD are included in the output so that emacs will
+	 include the message in the output.  */
+      printf_unfiltered (_("%s%s %s\n"),
+			 prefix.c_str (), word,
+			 get_max_completions_reached_message ());
+    }
+
+}
+
 /* Helper for gdb_rl_attempted_completion_function, which does most of
    the work.  This is called by readline to build the match list array
    and to determine the lowest common denominator.  The real matches

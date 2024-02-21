@@ -268,6 +268,19 @@ struct completion_result
   /* Sort the match list.  */
   void sort_match_list ();
 
+  /* Called to display all matches (used by the 'complete' command).
+     PREFIX is everything before the completion word.  WORD is the word
+     being completed, this is only used if we reach the maximum number of
+     completions, otherwise, each line of output consists of PREFIX
+     followed by one of the possible completion words.
+
+     The QUOTE_CHAR is appended after each possible completion word and
+     should be the quote character that appears before the completion word,
+     or the null-character if there is no quote before the completion
+     word.  */
+  void print_matches (const std::string &prefix, const char *word,
+		      int quote_char);
+
 private:
   /* Destroy the match list array and its contents.  */
   void reset_match_list ();
