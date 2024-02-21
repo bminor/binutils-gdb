@@ -147,6 +147,8 @@ proc dap_send_request {command {obj {}}} {
 # "last_ton" will be set to the TON form of the result.
 proc _dap_read_json {} {
     set length ""
+    set seen_timeout 0
+    set seen_eof 0
     gdb_expect {
 	-re "^Content-Length: (\[0-9\]+)\r\n" {
 	    set length $expect_out(1,string)
@@ -160,11 +162,18 @@ proc _dap_read_json {} {
 	    # Done.
 	}
 	timeout {
-	    error "timeout reading json header"
+	    set seen_timeout 1
 	}
 	eof {
-	    error "eof reading json header"
+	    set seen_eof 1
 	}
+    }
+
+    if {$seen_timeout} {
+	error "timeout reading json header"	
+    }
+    if {$seen_eof} {
+	error "eof reading json header"
     }
 
     if {$length == ""} {
@@ -176,17 +185,27 @@ proc _dap_read_json {} {
 	# Tcl only allows up to 255 characters in a {} expression in a
 	# regexp, so we may need to read in chunks.
 	set this_len [expr {min ($length, 255)}]
+	set seen_timeout 0
+	set seen_eof 0
 	gdb_expect {
 	    -re "^.{$this_len}" {
 		append json $expect_out(0,string)
 	    }
 	    timeout {
-		error "timeout reading json body"
+		set seen_timeout 1
 	    }
 	    eof {
-		error "eof reading json body"
+		set seen_eof 1
 	    }
 	}
+
+	if {$seen_timeout} {
+	    error "timeout reading json header"	
+	}
+	if {$seen_eof} {
+	    error "eof reading json header"
+	}
+
 	incr length -$this_len
     }
 
