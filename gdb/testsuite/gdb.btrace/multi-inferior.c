@@ -15,8 +15,16 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+static int
+fun (void)
+{
+  int x = fun (); /* fun.1 */
+  return x;       /* fun.2 */
+}
+
 int
 main (void)
 {
-  return 0;
+  int x = fun (); /* main.1 */
+  return x;       /* main.2 */
 }

@@ -2191,11 +2191,14 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
      For non-stop targets this means that no thread is replaying.  In order to
      make progress, we may need to explicitly move replaying threads to the end
      of their execution history.  */
-  if ((::execution_direction != EXEC_REVERSE)
-      && !record_is_replaying (minus_one_ptid))
+  if (::execution_direction != EXEC_REVERSE)
     {
-      this->beneath ()->resume (ptid, step, signal);
-      return;
+      ptid_t check { ptid == minus_one_ptid ? ptid : ptid_t (ptid.pid ()) };
+      if (!record_is_replaying (check))
+	{
+	  this->beneath ()->resume (ptid, step, signal);
+	  return;
+	}
     }
 
   /* Compute the btrace thread flag for the requested move.  */
@@ -2215,24 +2218,44 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 
      For all-stop targets, we only step INFERIOR_PTID and continue others.  */
 
-  process_stratum_target *proc_target = current_inferior ()->process_target ();
+  process_stratum_target *proc_target
+    = current_inferior ()->process_target ();
 
-  if (!target_is_non_stop_p ())
+  /* Split a minus_one_ptid request into per-inferior requests, so we can
+     forward them for inferiors that are not replaying.  */
+  if ((::execution_direction != EXEC_REVERSE) && (ptid == minus_one_ptid))
+    {
+      for (inferior *inf : all_non_exited_inferiors (proc_target))
+	{
+	  ptid_t inf_ptid { inf->pid };
+	  if (!record_is_replaying (inf_ptid))
+	    {
+	      this->beneath ()->resume (inf_ptid, step, signal);
+	      continue;
+	    }
+
+	  for (thread_info *tp : inf->non_exited_threads ())
+	    {
+	      if (target_is_non_stop_p ()
+		  || tp->ptid.matches (inferior_ptid))
+		record_btrace_resume_thread (tp, flag);
+	      else
+		record_btrace_resume_thread (tp, cflag);
+	    }
+	}
+    }
+  else
     {
       gdb_assert (inferior_ptid.matches (ptid));
 
       for (thread_info *tp : all_non_exited_threads (proc_target, ptid))
 	{
-	  if (tp->ptid.matches (inferior_ptid))
+	  if (target_is_non_stop_p ()
+	      || tp->ptid.matches (inferior_ptid))
 	    record_btrace_resume_thread (tp, flag);
 	  else
 	    record_btrace_resume_thread (tp, cflag);
 	}
-    }
-  else
-    {
-      for (thread_info *tp : all_non_exited_threads (proc_target, ptid))
-	record_btrace_resume_thread (tp, flag);
     }
 
   /* Async support.  */
@@ -2610,10 +2633,11 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
 	 (unsigned) options);
 
   /* As long as we're not replaying, just forward the request.  */
-  if ((::execution_direction != EXEC_REVERSE)
-      && !record_is_replaying (minus_one_ptid))
+  if (::execution_direction != EXEC_REVERSE)
     {
-      return this->beneath ()->wait (ptid, status, options);
+      ptid_t check { ptid == minus_one_ptid ? ptid : ptid_t (ptid.pid ()) };
+      if (!record_is_replaying (check))
+	return this->beneath ()->wait (ptid, status, options);
     }
 
   /* Keep a work list of moving threads.  */
@@ -2624,6 +2648,19 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
   if (moving.empty ())
     {
+      /* Splitting a minus_one_ptid wait request per inferior is not safe
+	 for blocking targets.  If one of the inferiors has an event to
+	 report, but we happen to forward the wait request on another
+	 inferior first that has nothing to report, we'd hang, whereas a
+	 minus_one_ptid request would succeed.
+
+	 A replaying inferior would be completely stopped for the target
+	 beneath, so waiting for it should not result in any events.  It
+	 should be safe to forward the minus_one_ptid request.  */
+      if ((::execution_direction != EXEC_REVERSE)
+	  && (ptid == minus_one_ptid))
+	return this->beneath ()->wait (ptid, status, options);
+
       *status = btrace_step_no_moving_threads ();
 
       DEBUG ("wait ended by %s: %s", null_ptid.to_string ().c_str (),
@@ -2694,16 +2731,27 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
   gdb_assert (eventing != NULL);
 
-  /* We kept threads replaying at the end of their execution history.  Stop
-     replaying EVENTING now that we are going to report its stop.  */
-  record_btrace_stop_replaying_at_end (eventing);
-
   /* Stop all other threads. */
   if (!target_is_non_stop_p ())
     {
       for (thread_info *tp : current_inferior ()->non_exited_threads ())
-	record_btrace_cancel_resume (tp);
+	if (tp != eventing)
+	  record_btrace_cancel_resume (tp);
+
+      if ((::execution_direction != EXEC_REVERSE) && (ptid == minus_one_ptid))
+	{
+	  for (inferior *inf : all_non_exited_inferiors (proc_target))
+	    {
+	      ptid_t inf_ptid { inf->pid };
+	      if (!record_is_replaying (inf_ptid))
+		this->beneath ()->stop (inf_ptid);
+	    }
+	}
     }
+
+  /* We kept threads replaying at the end of their execution history.  Stop
+     replaying EVENTING now that we are going to report its stop.  */
+  record_btrace_stop_replaying_at_end (eventing);
 
   /* In async mode, we need to announce further events.  */
   if (target_is_async_p ())
@@ -2731,21 +2779,46 @@ record_btrace_target::stop (ptid_t ptid)
   DEBUG ("stop %s", ptid.to_string ().c_str ());
 
   /* As long as we're not replaying, just forward the request.  */
-  if ((::execution_direction != EXEC_REVERSE)
-      && !record_is_replaying (minus_one_ptid))
+  if (::execution_direction != EXEC_REVERSE)
     {
-      this->beneath ()->stop (ptid);
+      ptid_t check { ptid == minus_one_ptid ? ptid : ptid_t (ptid.pid ()) };
+      if (!record_is_replaying (check))
+	{
+	  this->beneath ()->stop (ptid);
+	  return;
+	}
+    }
+
+  process_stratum_target *proc_target
+    = current_inferior ()->process_target ();
+
+  /* Split a minus_one_ptid request into per-inferior requests, so we can
+     forward them for inferiors that are not replaying.  */
+  if ((::execution_direction != EXEC_REVERSE) && (ptid == minus_one_ptid))
+    {
+      for (inferior *inf : all_non_exited_inferiors (proc_target))
+	{
+	  ptid_t inf_ptid { inf->pid };
+	  if (!record_is_replaying (inf_ptid))
+	    {
+	      this->beneath ()->stop (inf_ptid);
+	      continue;
+	    }
+
+	  for (thread_info *tp : inf->non_exited_threads ())
+	    {
+	      tp->btrace.flags &= ~BTHR_MOVE;
+	      tp->btrace.flags |= BTHR_STOP;
+	    }
+	}
     }
   else
     {
-      process_stratum_target *proc_target
-	= current_inferior ()->process_target ();
-
       for (thread_info *tp : all_non_exited_threads (proc_target, ptid))
-	{
-	  tp->btrace.flags &= ~BTHR_MOVE;
-	  tp->btrace.flags |= BTHR_STOP;
-	}
+      {
+	tp->btrace.flags &= ~BTHR_MOVE;
+	tp->btrace.flags |= BTHR_STOP;
+      }
     }
  }
 

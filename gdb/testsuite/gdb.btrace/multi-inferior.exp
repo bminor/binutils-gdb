@@ -39,6 +39,8 @@ with_test_prefix "inferior 1" {
     }
 
     gdb_test_no_output "record btrace"
+    gdb_test "step 4" "fun\.1.*"
+    gdb_test "reverse-step" "fun\.1.*"
 }
 
 with_test_prefix "inferior 2" {
@@ -51,4 +53,21 @@ with_test_prefix "inferior 2" {
     }
 
     gdb_test_no_output "record btrace"
+    gdb_test "step 4" "fun\.1.*"
+    gdb_test "reverse-step" "fun\.1.*"
+
+    gdb_test "info record" "Replay in progress.*"
+    gdb_test "record stop" "Process record is stopped.*"
+
+    gdb_test "step" "fun\.1.*"
+}
+
+with_test_prefix "inferior 1" {
+    gdb_test "inferior 1" "Switching to inferior 1.*"
+
+    gdb_test "info record" "Replay in progress.*"
+    gdb_test "reverse-finish" "fun\.1.*"
+    gdb_test "record goto end" "fun\.1.*"
+    gdb_test "step 2" "fun\.1.*"
+    gdb_test "reverse-step 3"
 }
