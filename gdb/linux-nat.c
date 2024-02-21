@@ -2179,6 +2179,27 @@ wait_for_signal ()
     }
 }
 
+/* Mark LWP dead, with STATUS as exit status pending to report
+   later.  */
+
+static void
+mark_lwp_dead (lwp_info *lp, int status)
+{
+  /* Store the exit status lp->waitstatus, because lp->status would be
+     ambiguous (W_EXITCODE(0,0) == 0).  */
+  lp->waitstatus = host_status_to_waitstatus (status);
+
+  /* If we're processing LP's status, there should be no other event
+     already recorded as pending.  */
+  gdb_assert (lp->status == 0);
+
+  /* Dead LWPs aren't expected to report a pending sigstop.  */
+  lp->signalled = 0;
+
+  /* Prevent trying to stop it.  */
+  lp->stopped = 1;
+}
+
 /* Wait for LP to stop.  Returns the wait status, or 0 if the LWP has
    exited.  */
 
@@ -2263,9 +2284,8 @@ wait_lwp (struct lwp_info *lp)
 
 	      /* If this is the leader exiting, it means the whole
 		 process is gone.  Store the status to report to the
-		 core.  Store it in lp->waitstatus, because lp->status
-		 would be ambiguous (W_EXITCODE(0,0) == 0).  */
-	      lp->waitstatus = host_status_to_waitstatus (status);
+		 core.  */
+	      mark_lwp_dead (lp, status);
 	      return 0;
 	    }
 
@@ -3069,12 +3089,7 @@ linux_nat_filter_event (int lwpid, int status)
       linux_nat_debug_printf ("LWP %ld exited (resumed=%d)",
 			      lp->ptid.lwp (), lp->resumed);
 
-      /* Dead LWP's aren't expected to reported a pending sigstop.  */
-      lp->signalled = 0;
-
-      /* Store the pending event in the waitstatus, because
-	 W_EXITCODE(0,0) == 0.  */
-      lp->waitstatus = host_status_to_waitstatus (status);
+      mark_lwp_dead (lp, status);
       return;
     }
 
@@ -3424,6 +3439,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
     }
 
   gdb_assert (lp);
+  gdb_assert (lp->stopped);
 
   status = lp->status;
   lp->status = 0;
