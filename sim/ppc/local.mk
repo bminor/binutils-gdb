@@ -265,7 +265,7 @@ BUILT_SOURCES += \
 ## NB: The first for loop is to remove duplicates.
 %C%_PACKAGE_SRC = %D%/pk_disklabel.c
 $(srcdir)/%D%/pk.h: @MAINT@ %D%/stamp-pk ; @true
-%D%/stamp-pk: $(srcdir)/%D%/Makefile.in $(%C%_PACKAGE_SRC) $(srcroot)/move-if-change
+%D%/stamp-pk: $(srcdir)/%D%/local.mk $(%C%_PACKAGE_SRC) $(srcroot)/move-if-change
 	$(AM_V_GEN)echo "/* Generated file by local.mk; do not edit.  */" > %D%/pk.hin; \
 	f=""; \
 	for i in $(%C%_PACKAGE_SRC) ; do \

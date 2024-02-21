@@ -5900,7 +5900,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)touch $@
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/hw.c ppc/hw.h: ppc/stamp-igen
 @SIM_ENABLE_ARCH_ppc_TRUE@$(srcdir)/ppc/pk.h: @MAINT@ ppc/stamp-pk ; @true
-@SIM_ENABLE_ARCH_ppc_TRUE@ppc/stamp-pk: $(srcdir)/ppc/Makefile.in $(ppc_PACKAGE_SRC) $(srcroot)/move-if-change
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc/stamp-pk: $(srcdir)/ppc/local.mk $(ppc_PACKAGE_SRC) $(srcroot)/move-if-change
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_GEN)echo "/* Generated file by local.mk; do not edit.  */" > ppc/pk.hin; \
 @SIM_ENABLE_ARCH_ppc_TRUE@	f=""; \
 @SIM_ENABLE_ARCH_ppc_TRUE@	for i in $(ppc_PACKAGE_SRC) ; do \
