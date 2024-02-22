@@ -52,6 +52,8 @@ static const char *completion_find_completion_word (completion_tracker &tracker,
 
 static void set_rl_completer_word_break_characters (const char *break_chars);
 
+static bool gdb_path_isdir (const char *filename);
+
 /* See completer.h.  */
 
 class completion_tracker::completion_hash_entry
@@ -367,6 +369,28 @@ gdb_completer_file_name_quote (char *text, int match_type ATTRIBUTE_UNUSED,
   return strdup (str.c_str ());
 }
 
+/* The function is used to update the completion word MATCH before
+   displaying it to the user in the 'complete' command output.  This
+   function is only used for formatting filename or directory names.
+
+   This function checks to see if the completion word MATCH is a directory,
+   in which case a trailing "/" (forward-slash) is added, otherwise
+   QUOTE_CHAR is added as a trailing quote.
+
+   Return the updated completion word as a string.  */
+
+static std::string
+filename_match_formatter (const char *match, char quote_char)
+{
+  std::string result (match);
+  if (gdb_path_isdir (gdb_tilde_expand (match).c_str ()))
+    result += "/";
+  else
+    result += quote_char;
+
+  return result;
+}
+
 /* Generate filename completions of WORD, storing the completions into
    TRACKER.  This is used for generating completions for commands that
    only accept unquoted filenames as well as for commands that accept
@@ -376,6 +400,8 @@ static void
 filename_completer_generate_completions (completion_tracker &tracker,
 					 const char *word)
 {
+  tracker.set_match_format_func (filename_match_formatter);
+
   int subsequent_name = 0;
   while (1)
     {
@@ -393,20 +419,6 @@ filename_completer_generate_completions (completion_tracker &tracker,
       const char *p = p_rl.get ();
       if (p[strlen (p) - 1] == '~')
 	continue;
-
-      /* Readline appends a trailing '/' if the completion is a
-	 directory.  If this completion request originated from outside
-	 readline (e.g. GDB's 'complete' command), then we append the
-	 trailing '/' ourselves now.  */
-      if (!tracker.from_readline ())
-	{
-	  std::string expanded = gdb_tilde_expand (p_rl);
-	  struct stat finfo;
-	  const bool isdir = (stat (expanded.c_str (), &finfo) == 0
-			      && S_ISDIR (finfo.st_mode));
-	  if (isdir)
-	    p_rl.reset (concat (p_rl.get (), "/", nullptr));
-	}
 
       tracker.add_completion
 	(make_completion_match_str (std::move (p_rl), word, word));
@@ -1688,10 +1700,25 @@ int max_completions = 200;
 /* Initial size of the table.  It automagically grows from here.  */
 #define INITIAL_COMPLETION_HTAB_SIZE 200
 
+/* The function is used to update the completion word MATCH before
+   displaying it to the user in the 'complete' command output.  This
+   default function is used in all cases except those where a completion
+   function overrides this function by calling set_match_format_func.
+
+   This function returns MATCH with QUOTE_CHAR appended.  If QUOTE_CHAR is
+   the null-character then the returned string will just contain MATCH.  */
+
+static std::string
+default_match_formatter (const char *match, char quote_char)
+{
+  return std::string (match) + quote_char;
+}
+
 /* See completer.h.  */
 
 completion_tracker::completion_tracker (bool from_readline)
-  : m_from_readline (from_readline)
+  : m_from_readline (from_readline),
+    m_match_format_func (default_match_formatter)
 {
   discard_completions ();
 }
@@ -2397,7 +2424,8 @@ completion_tracker::build_completion_result (const char *text,
 
       match_list[1] = nullptr;
 
-      return completion_result (match_list, 1, completion_suppress_append);
+      return completion_result (match_list, 1, completion_suppress_append,
+				m_match_format_func);
     }
   else
     {
@@ -2434,7 +2462,8 @@ completion_tracker::build_completion_result (const char *text,
       htab_traverse_noresize (m_entries_hash.get (), func, &builder);
       match_list[builder.index] = NULL;
 
-      return completion_result (match_list, builder.index - 1, false);
+      return completion_result (match_list, builder.index - 1, false,
+				m_match_format_func);
     }
 }
 
@@ -2442,18 +2471,23 @@ completion_tracker::build_completion_result (const char *text,
 
 completion_result::completion_result ()
   : match_list (NULL), number_matches (0),
-    completion_suppress_append (false)
+    completion_suppress_append (false),
+    m_match_formatter (default_match_formatter)
 {}
 
 /* See completer.h  */
 
 completion_result::completion_result (char **match_list_,
 				      size_t number_matches_,
-				      bool completion_suppress_append_)
+				      bool completion_suppress_append_,
+				      match_format_func_t match_formatter_)
   : match_list (match_list_),
     number_matches (number_matches_),
-    completion_suppress_append (completion_suppress_append_)
-{}
+    completion_suppress_append (completion_suppress_append_),
+    m_match_formatter (match_formatter_)
+{
+  gdb_assert (m_match_formatter != nullptr);
+}
 
 /* See completer.h  */
 
@@ -2466,10 +2500,12 @@ completion_result::~completion_result ()
 
 completion_result::completion_result (completion_result &&rhs) noexcept
   : match_list (rhs.match_list),
-    number_matches (rhs.number_matches)
+    number_matches (rhs.number_matches),
+    m_match_formatter (rhs.m_match_formatter)
 {
   rhs.match_list = NULL;
   rhs.number_matches = 0;
+  rhs.m_match_formatter = default_match_formatter;
 }
 
 /* See completer.h  */
@@ -2519,12 +2555,18 @@ completion_result::print_matches (const std::string &prefix,
 {
   this->sort_match_list ();
 
-  char buf[2] = { (char) quote_char, '\0' };
   size_t off = this->number_matches == 1 ? 0 : 1;
 
   for (size_t i = 0; i < this->number_matches; i++)
-    printf_unfiltered ("%s%s%s\n", prefix.c_str (),
-		       this->match_list[i + off], buf);
+    {
+      gdb_assert (this->m_match_formatter != nullptr);
+      std::string formatted_match
+	= this->m_match_formatter (this->match_list[i + off],
+				   (char) quote_char);
+
+      printf_unfiltered ("%s%s\n", prefix.c_str (),
+			 formatted_match.c_str ());
+    }
 
   if (this->number_matches == max_completions)
     {
@@ -2716,10 +2758,10 @@ gdb_display_match_list_pager (int lines,
     return 0;
 }
 
-/* Return non-zero if FILENAME is a directory.
+/* Return true if FILENAME is a directory.
    Based on readline/complete.c:path_isdir.  */
 
-static int
+static bool
 gdb_path_isdir (const char *filename)
 {
   struct stat finfo;

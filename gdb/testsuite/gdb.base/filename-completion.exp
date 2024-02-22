@@ -58,6 +58,49 @@ proc setup_directory_tree {} {
     return $root
 }
 
+# This proc started as a copy of test_gdb_complete_multiple, however, this
+# version does some extra work.  See the original test_gdb_complete_multiple
+# for a description of all the arguments.
+#
+# When using the 'complete' command with filenames, GDB will add a trailing
+# quote for filenames, and a trailing "/" for directory names.  As the
+# trailing "/" is also added in the tab-completion output the
+# COMPLETION_LIST will include the "/" character, but the trailing quote is
+# only added when using the 'complete' command.
+#
+# Pass the trailing quote will be passed as END_QUOTE_CHAR, this proc will
+# run the tab completion test, and will then add the trailing quote to those
+# entries in COMPLETION_LIST that don't have a trailing "/" before running
+# the 'complete' command test.
+proc test_gdb_complete_filename_multiple {
+  cmd_prefix completion_word add_completed_line completion_list
+  {start_quote_char ""} {end_quote_char ""} {max_completions false}
+  {testname ""}
+} {
+    if { [readline_is_used] } {
+	test_gdb_complete_tab_multiple "$cmd_prefix$completion_word" \
+	    $add_completed_line $completion_list $max_completions $testname
+    }
+
+    if { $start_quote_char eq "" && $end_quote_char ne "" } {
+	set updated_completion_list {}
+
+	foreach entry $completion_list {
+	    if {[string range $entry end end] ne "/"} {
+		set entry $entry$end_quote_char
+	    }
+	    lappend updated_completion_list $entry
+	}
+
+	set completion_list $updated_completion_list
+	set end_quote_char ""
+    }
+
+    test_gdb_complete_cmd_multiple $cmd_prefix $completion_word \
+	$completion_list $start_quote_char $end_quote_char $max_completions \
+	$testname
+}
+
 # Run filename completetion tests for those command that accept quoting and
 # escaping of the filename argument.
 #
@@ -81,35 +124,22 @@ proc run_quoting_and_escaping_tests { root } {
 	    test_gdb_complete_none "$cmd ${qc}${root}/xx" \
 		"expand a non-existent filename"
 
-	    # The following test is split into separate cmd and tab calls
-	    # so we can xfail the cmd version.  The cmd version will add a
-	    # closing quote, it shouldn't be doing this.  This will be
-	    # fixed in a later commit.
-	    if { $qc ne "" } {
-		setup_xfail "*-*-*"
-	    }
-	    test_gdb_complete_cmd_unique "$cmd ${qc}${root}/a" \
-		"$cmd ${qc}${root}/aaa/" \
+	    test_gdb_complete_unique "$cmd ${qc}${root}/a" \
+		"$cmd ${qc}${root}/aaa/" "" false \
 		"expand a unique directory name"
-
-	    if { [readline_is_used] } {
-		test_gdb_complete_tab_unique "$cmd ${qc}${root}/a" \
-		    "$cmd ${qc}${root}/aaa/" "" \
-		    "expand a unique directory name"
-	    }
 
 	    test_gdb_complete_unique "$cmd ${qc}${root}/cc2" \
 		"$cmd ${qc}${root}/cc2${qc}" " " false \
 		"expand a unique filename"
 
-	    test_gdb_complete_multiple "$cmd ${qc}${root}/" \
+	    test_gdb_complete_filename_multiple "$cmd ${qc}${root}/" \
 		"b" "b" {
 		    "bb1/"
 		    "bb2/"
 		} "" "${qc}" false \
 		"expand multiple directory names"
 
-	    test_gdb_complete_multiple "$cmd ${qc}${root}/" \
+	    test_gdb_complete_filename_multiple "$cmd ${qc}${root}/" \
 		"c" "c" {
 		    "cc1/"
 		    "cc2"
@@ -121,14 +151,14 @@ proc run_quoting_and_escaping_tests { root } {
 	    if { $qc ne "" } {
 		set sp " "
 
-		test_gdb_complete_multiple "$cmd ${qc}${root}/aaa/" \
+		test_gdb_complete_filename_multiple "$cmd ${qc}${root}/aaa/" \
 		    "a" "a${sp}" {
 			"aa bb"
 			"aa cc"
 		    } "" "${qc}" false \
 		    "expand filenames containing spaces"
 
-		test_gdb_complete_multiple "$cmd ${qc}${root}/bb1/" \
+		test_gdb_complete_filename_multiple "$cmd ${qc}${root}/bb1/" \
 		    "a" "a" {
 			"aa\"bb"
 			"aa'bb"

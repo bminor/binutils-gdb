@@ -247,12 +247,24 @@ struct completion_match_result
 
 struct completion_result
 {
+  /* The type of a function that is used to format completion results when
+     using the 'complete' command.  MATCH is the completion word to be
+     printed, and QUOTE_CHAR is a trailing quote character to (possibly)
+     add at the end of MATCH.  QUOTE_CHAR can be the null-character in
+     which case no trailing quote should be added.
+
+     Return the possibly modified completion match word which should be
+     presented to the user.  */
+  using match_format_func_t = std::string (*) (const char *match,
+					       char quote_char);
+
   /* Create an empty result.  */
   completion_result ();
 
   /* Create a result.  */
   completion_result (char **match_list, size_t number_matches,
-		     bool completion_suppress_append);
+		     bool completion_suppress_append,
+		     match_format_func_t match_format_func);
 
   /* Destroy a result.  */
   ~completion_result ();
@@ -274,10 +286,15 @@ struct completion_result
      completions, otherwise, each line of output consists of PREFIX
      followed by one of the possible completion words.
 
-     The QUOTE_CHAR is appended after each possible completion word and
-     should be the quote character that appears before the completion word,
-     or the null-character if there is no quote before the completion
-     word.  */
+     The QUOTE_CHAR is usually appended after each possible completion
+     word and should be the quote character that appears before the
+     completion word, or the null-character if there is no quote before
+     the completion word.
+
+     The QUOTE_CHAR is not always appended to the completion output.  For
+     example, filename completions will not append QUOTE_CHAR if the
+     completion is a directory name.  This is all handled by calling this
+     function.  */
   void print_matches (const std::string &prefix, const char *word,
 		      int quote_char);
 
@@ -305,6 +322,12 @@ public:
   /* Whether readline should suppress appending a whitespace, when
      there's only one possible completion.  */
   bool completion_suppress_append;
+
+private:
+  /* A function which formats a single completion match ready for display
+     as part of the 'complete' command output.  Different completion
+     functions can set different formatter functions.  */
+  match_format_func_t m_match_formatter;
 };
 
 /* Object used by completers to build a completion match list to hand
@@ -441,6 +464,14 @@ public:
   bool from_readline () const
   { return m_from_readline; }
 
+  /* Set the function used to format the completion word before displaying
+     it to the user to F, this is used by the 'complete' command.  */
+  void set_match_format_func (completion_result::match_format_func_t f)
+  {
+    gdb_assert (f != nullptr);
+    m_match_format_func = f;
+  }
+
 private:
 
   /* The type that we place into the m_entries_hash hash table.  */
@@ -535,6 +566,10 @@ private:
      interactively. The 'complete' command is a way to generate completions
      not to be displayed by readline.  */
   bool m_from_readline;
+
+  /* The function used to format the completion word before it is printed
+     in the 'complete' command output.  */
+  completion_result::match_format_func_t m_match_format_func;
 };
 
 /* Return a string to hand off to readline as a completion match
