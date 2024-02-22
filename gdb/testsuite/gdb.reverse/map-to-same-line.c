@@ -11,7 +11,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https://urldefense.proofpoint.com/v2/url?u=http-3A__www.gnu.org_licenses_&d=DwIDAg&c=jf_iaSHvJObTbx-siA1ZOg&r=RFEmMkZAk--_wFGN5tkM_A&m=hvslrRyYSFfiB2uOFjd7I62ZBKNJkGFWTdsHWVjwDIkK3MWESdWS4tI89FoblXn9&s=Ety3VhMg8aZcBncPPcPCS5XzUde9hjKVulkt8r7mD2k&e= >.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* The purpose of this test is to create a DWARF line table that contains two
    or more entries for the same line.  When stepping (forwards or backwards),
