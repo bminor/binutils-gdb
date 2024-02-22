@@ -68,7 +68,7 @@ proc start_structs_test { types } {
 
     # Advance to main
     if {![runto_main]} {
-	return
+	return -1
     }
 
     # Get the debug format
