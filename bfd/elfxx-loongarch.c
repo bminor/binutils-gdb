@@ -278,8 +278,8 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_IRELATIVE,	  /* type (12).  */
 	 0,				  /* rightshift */
-	 4,				  /* size */
-	 32,				  /* bitsize */
+	 8,				  /* size */
+	 64,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
 	 complain_overflow_dont,	  /* complain_on_overflow */
@@ -312,7 +312,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_TLS_DESC64,	  /* type (14).  */
 	 0,				  /* rightshift.  */
-	 4,				  /* size.  */
+	 8,				  /* size.  */
 	 64,				  /* bitsize.  */
 	 false,				  /* pc_relative.  */
 	 0,				  /* bitpos.  */
@@ -514,8 +514,8 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 bfd_elf_generic_reloc,			  /* special_function.  */
 	 "R_LARCH_SOP_POP_32_S_0_5_10_16_S2",	  /* name.  */
 	 false,					  /* partial_inplace.  */
-	 0xfc0003e0,				  /* src_mask */
-	 0xfc0003e0,				  /* dst_mask */
+	 0x0,					  /* src_mask */
+	 0x03fffc1f,				  /* dst_mask */
 	 false,					  /* pcrel_offset */
 	 BFD_RELOC_LARCH_SOP_POP_32_S_0_5_10_16_S2,
 						  /* bfd_reloc_code_real_type */
