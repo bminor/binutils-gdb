@@ -28,7 +28,7 @@
 # - create 2 breakpoints #1 main() #2 tf() (the thread function)
 # - run gdb till #1 main() breakpoint is reached
 # - continue to breakpoint #2 tf()
-# - delete all breakpoints 
+# - delete all breakpoints, watchpoints, tracepoints, and catchpoints
 # - exit gdb.
 
 
@@ -71,7 +71,7 @@ gdb_test "backtrace" \
 
 
 #
-# delete all breakpoints
+# delete all breakpoints, watchpoints, tracepoints, and catchpoints
 #
 delete_breakpoints
 

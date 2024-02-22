@@ -289,7 +289,7 @@ proc_with_prefix catch_fork_child_follow {second_inferior} {
     gdb_test "delete breakpoints" \
 	"" \
 	"set follow-fork child, cleanup" \
-	"Delete all breakpoints. \\(y or n\\) $" \
+	"Delete all breakpoints, watchpoints, tracepoints, and catchpoints. \\(y or n\\) $" \
 	"y"
 }
 
@@ -316,7 +316,7 @@ proc_with_prefix catch_fork_unpatch_child {} {
 	"Catchpoint \[0-9\]* \\(forked process \[0-9\]*\\),.*" \
 	"unpatch child, catch fork"
 
-    # Delete all breakpoints and catchpoints.
+    # Delete all breakpoints, watchpoints, tracepoints, and catchpoints.
     delete_breakpoints
 
     # Force $srcfile as the current GDB source can be in glibc sourcetree.
@@ -393,7 +393,7 @@ proc_with_prefix tcatch_fork_parent_follow {} {
     gdb_test "delete breakpoints" \
 	"" \
 	"set follow-fork parent, cleanup" \
-	"Delete all breakpoints. \\(y or n\\) $" \
+	"Delete all breakpoints, watchpoints, tracepoints, and catchpoints. \\(y or n\\) $" \
 	"y"
 }
 

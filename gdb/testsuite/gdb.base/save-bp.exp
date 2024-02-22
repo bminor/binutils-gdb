@@ -22,8 +22,8 @@ if { [prepare_for_testing "failed to prepare" ${testfile} $srcfile] } {
 if ![runto_main] {
     return -1
 }
-# Delete all breakpoints so that the "runto_main" breakpoint above
-# does not interfere with our testing.
+# Delete all breakpoints, watchpoints, tracepoints, and catchpoints so that
+# the "runto_main" breakpoint above does not interfere with our testing.
 delete_breakpoints
 
 # Insert a bunch of breakpoints... The goal is to create breakpoints
@@ -64,8 +64,8 @@ clean_restart $testfile
 if ![runto_main] {
     return -1
 }
-# Delete all breakpoints so that the "runto_main" breakpoint above
-# does not interfere with our testing.
+# Delete all breakpoints, watchpoints, tracepoints, and catchpoints so that
+# the "runto_main" breakpoint above does not interfere with our testing.
 delete_breakpoints
 
 # ... and restore the breakpoints.

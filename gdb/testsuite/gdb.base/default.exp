@@ -265,7 +265,7 @@ gdb_test "info args" "No frame selected."
 #test info bogus-gdb-command
 gdb_test "info bogus-gdb-command" "Undefined info command: \"bogus-gdb-command\".  Try \"help info\".*"
 #test info breakpoints
-gdb_test "info breakpoints" "No breakpoints or watchpoints."
+gdb_test "info breakpoints" "No breakpoints, watchpoints, tracepoints, or catchpoints."
 #test info copying
 # The license text is very big, so it may overwhelm Expect's output buffer
 # and cause the test to fail occasionally.  To avoid this problem, verify

@@ -29,8 +29,8 @@ proc restart {} {
     if ![runto_main] {
 	return 0
     }
-    # Delete all breakpoints so that the "runto_main" breakpoint above
-    # does not interfere with our testing.
+    # Delete all breakpoints, watchpoints, tracepoints, and catchpoints so that
+    # the "runto_main" breakpoint above does not interfere with our testing.
     delete_breakpoints
 
     return 1

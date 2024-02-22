@@ -158,11 +158,11 @@ gdb_test_multiple "continue" "continue until exit" {
 }
 
 #
-# delete all breakpoints
+# delete all breakpoints, watchpoints, tracepoints, and catchpoints
 #
 send_gdb "delete\n"
 gdb_expect {
-  -re ".*Delete all breakpoints. \\(y or n\\) \r\n\032\032query.*$" {
+  -re ".*Delete all breakpoints, watchpoints, tracepoints, and catchpoints. \\(y or n\\) \r\n\032\032query.*$" {
            send_gdb "y\n"
            gdb_expect {
 	     -re "\r\n\032\032post-query\r\n${breakpoints_invalid}$gdb_prompt$" { pass "delete bps" }

@@ -219,7 +219,7 @@ gdb_test "step" \
     "step onto breakpoint"
 
 #
-# delete all breakpoints so we can start over, course this can be a test too
+# delete all breakpoints, watchpoints, tracepoints, and catchpoints so we can start over, course this can be a test too
 #
 delete_breakpoints
 

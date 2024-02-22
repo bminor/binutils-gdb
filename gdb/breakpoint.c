@@ -7080,10 +7080,11 @@ breakpoint_1 (const char *bp_num_list, bool show_internal,
       if (!filter)
 	{
 	  if (bp_num_list == NULL || *bp_num_list == '\0')
-	    uiout->message ("No breakpoints or watchpoints.\n");
+	    uiout->message ("No breakpoints, watchpoints, tracepoints, "
+			    "or catchpoints.\n");
 	  else
-	    uiout->message ("No breakpoint or watchpoint matching '%s'.\n",
-			    bp_num_list);
+	    uiout->message ("No breakpoint, watchpoint, tracepoint, "
+			    "or catchpoint matching '%s'.\n", bp_num_list);
 	}
     }
   else
@@ -12699,9 +12700,9 @@ delete_command (const char *arg, int from_tty)
     {
       int breaks_to_delete = 0;
 
-      /* Delete all breakpoints if no argument.  Do not delete
-	 internal breakpoints, these have to be deleted with an
-	 explicit breakpoint number argument.  */
+      /* Delete all breakpoints, watchpoints, tracepoints, and catchpoints
+	 if no argument.  Do not delete internal breakpoints, these have to
+	 be deleted with an explicit breakpoint number argument.  */
       for (breakpoint &b : all_breakpoints ())
 	if (user_breakpoint_p (&b))
 	  {
@@ -12711,7 +12712,9 @@ delete_command (const char *arg, int from_tty)
 
       /* Ask user only if there are some breakpoints to delete.  */
       if (!from_tty
-	  || (breaks_to_delete && query (_("Delete all breakpoints? "))))
+	  || (breaks_to_delete
+	      && query (_("Delete all breakpoints, watchpoints, tracepoints, "
+			  "and catchpoints? "))))
 	for (breakpoint &b : all_breakpoints_safe ())
 	  if (user_breakpoint_p (&b))
 	    delete_breakpoint (&b);
@@ -14236,7 +14239,7 @@ delete_trace_command (const char *arg, int from_tty)
     {
       int breaks_to_delete = 0;
 
-      /* Delete all breakpoints if no argument.
+      /* Delete all tracepoints if no argument.
 	 Do not delete internal or call-dummy breakpoints, these
 	 have to be deleted with an explicit breakpoint number 
 	 argument.  */
@@ -14830,7 +14833,8 @@ This command may be abbreviated \"disable\"."),
 Delete all or some breakpoints.\n\
 Usage: delete [BREAKPOINTNUM]...\n\
 Arguments are breakpoint numbers with spaces in between.\n\
-To delete all breakpoints, give no argument.\n\
+To delete all breakpoints, watchpoints, tracepoints, and catchpoints,\n\
+give no argument.\n\
 \n\
 Also a prefix command for deletion of other GDB objects."),
 		      &deletelist, 1, &cmdlist);
@@ -14841,7 +14845,8 @@ Also a prefix command for deletion of other GDB objects."),
 Delete all or some breakpoints or auto-display expressions.\n\
 Usage: delete breakpoints [BREAKPOINTNUM]...\n\
 Arguments are breakpoint numbers with spaces in between.\n\
-To delete all breakpoints, give no argument.\n\
+To delete all breakpoints, watchpoints, tracepoints, and catchpoints,\n\
+give no argument.\n\
 This command may be abbreviated \"delete\"."),
 	   &deletelist);
 

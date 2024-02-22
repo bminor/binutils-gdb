@@ -34,7 +34,7 @@ set remote_python_file [gdb_remote_download host \
 mi_clean_restart $binfile
 mi_runto_main
 
-# Delete all breakpoints.
+# Delete all breakpoints, watchpoints, tracepoints, and catchpoints.
 mi_delete_breakpoints
 
 # Create a breakpoint.  At this point the breakpoint is global, but

@@ -50,7 +50,7 @@ mi_runto callee4
 
 mi_gdb_test "205-break-delete" \
 	"205\\^done.*" \
-	"delete all breakpoints"
+	"delete all breakpoints, watchpoints, tracepoints, and catchpoints"
 
 test_return_simple
 

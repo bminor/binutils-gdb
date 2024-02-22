@@ -333,7 +333,7 @@ proc_with_prefix test_bkpt_invisible { } {
 	"py-breakpoint\.c:$ibp_location*" "Check breakpoint location 2"
     gdb_test "python print (ilist\[0\].visible)" \
 	"False" "Check breakpoint visibility 2"
-    gdb_test "info breakpoints" "No breakpoints or watchpoints.*" \
+    gdb_test "info breakpoints" "No breakpoints, watchpoints, tracepoints, or catchpoints.*" \
 	"Check info breakpoints does not show invisible breakpoints"
     gdb_test "maint info breakpoints" \
 	"py-breakpoint\.c:$ibp_location.*" \
@@ -428,7 +428,7 @@ proc_with_prefix test_bkpt_internal { } {
     gdb_py_test_silent_cmd  "python wp1 = gdb.Breakpoint (\"result\", type=gdb.BP_WATCHPOINT, wp_class=gdb.WP_WRITE, internal=True )" \
 	"Set watchpoint" 0
     gdb_test "info breakpoints" \
-	"No breakpoints or watchpoints.*" \
+	"No breakpoints, watchpoints, tracepoints, or catchpoints.*" \
 	"Check info breakpoints does not show invisible breakpoints"
     gdb_test "maint info breakpoints" \
 	".*watchpoint.*result.*" \
@@ -591,7 +591,7 @@ proc_with_prefix test_bkpt_temporary { } {
 	"Check temporary stop callback executed before deletion."
     gdb_test "python print (ibp.temporary)" "RuntimeError: Breakpoint 2 is invalid.*" \
 	"Check temporary breakpoint is deleted after being hit"
-    gdb_test "info breakpoints" "No breakpoints or watchpoints.*" \
+    gdb_test "info breakpoints" "No breakpoints, watchpoints, tracepoints, or catchpoints.*" \
 	"Check info breakpoints shows temporary breakpoint is deleted"
 }
 
@@ -600,7 +600,7 @@ proc_with_prefix test_bkpt_temporary { } {
 proc_with_prefix test_bkpt_address {} {
     global gdb_prompt decimal srcfile
 
-    # Delete all breakpoints
+    # Delete all breakpoints, watchpoints, tracepoints, and catchpoints
     delete_breakpoints
 
     gdb_test "python gdb.Breakpoint(\"*main\")" \

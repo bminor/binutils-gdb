@@ -67,7 +67,7 @@ proc test {} {
     set test "delete breakpoints, answer prompt"
     set saw_prompt 0
     gdb_test_multiple "delete breakpoints" $test {
-	-re "Delete all breakpoints.*y or n.*$" {
+	-re "Delete all breakpoints, watchpoints, tracepoints, and catchpoints.*y or n.*$" {
 	    set saw_prompt 1
 	    send_gdb "y\n"
 	    exp_continue

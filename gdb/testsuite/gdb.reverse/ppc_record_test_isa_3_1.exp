@@ -105,7 +105,7 @@ gdb_test_no_output "set exec-direction forward" "start forward test3"
 gdb_test "record stop" ".*Process record is stopped.*" "stopped recording 2"
 set test_del_bkpts "delete breakpoints, answer prompt 2"
 
-# Delete all breakpoints and catchpoints.
+# Delete all breakpoints, watchpoints, tracepoints, and catchpoints.
 delete_breakpoints
 
 gdb_test_no_output "record" "start recording test2"

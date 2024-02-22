@@ -35,7 +35,7 @@ proc test_delete_alias { alias } {
              "remove all breakpoints"
 
     gdb_test "info break" \
-             "No breakpoints or watchpoints." \
+	     "No breakpoints, watchpoints, tracepoints, or catchpoints." \
              "info break after clearing breakpoints"
 
 
@@ -50,7 +50,7 @@ proc test_delete_alias { alias } {
              "Remove last breakpoint"
 
     gdb_test "info break" \
-             "No breakpoints or watchpoints." \
+	     "No breakpoints, watchpoints, tracepoints, or catchpoints." \
              "info break after removing break on main"
 }
 

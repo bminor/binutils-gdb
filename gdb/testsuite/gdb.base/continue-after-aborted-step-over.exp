@@ -27,7 +27,7 @@
 #
 #  Command aborted.
 #  delete breakpoints
-#  Delete all breakpoints? (y or n) y
+#  Delete all breakpoints, watchpoints, tracepoints, and catchpoints? (y or n) y
 #  (gdb) b function
 #  Breakpoint 3 at 0x40048b: file test.c, line 33.
 #  continue

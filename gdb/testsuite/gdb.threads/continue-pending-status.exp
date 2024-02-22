@@ -89,9 +89,9 @@ for {set i 0} {$i < $attempts} {incr i} {
 	    "Switching to thread $thread .*" \
 	    "switch to non-event thread"
 
-	# Delete all breakpoints so that continuing doesn't switch
-	# back to the event thread to do a step-over, which would mask
-	# away the original bug, which depended on the event thread
+	# Delete all breakpoints, watchpoints, tracepoints, and catchpoints
+	# so that continuing doesn't switch back to the event thread to do a step-over,
+	# which would mask away the original bug, which depended on the event thread
 	# still having TARGET_STOPPED_BY_SW_BREAKPOINT stop_reason.
 	delete_breakpoints
 

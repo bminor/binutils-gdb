@@ -140,7 +140,7 @@ gdb_test "continue" \
     "continue to auto-deleted break marker3"
 
 gdb_test "info break $bp" \
-    ".*No breakpoint or watchpoint matching.*" \
+    ".*No breakpoint, watchpoint, tracepoint, or catchpoint matching.*" \
     "info auto-deleted break marker3"
 
 # Verify that we can set a breakpoint and manually disable it (we've

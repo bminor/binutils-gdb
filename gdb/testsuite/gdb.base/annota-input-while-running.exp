@@ -57,7 +57,7 @@ gdb_annota_test "set annotate 2" ".*" "annotation set at level 2"
 
 set test "delete breakpoints"
 gdb_test_multiple "delete" $test {
-    -re "Delete all breakpoints. .y or n." {
+    -re "Delete all breakpoints, watchpoints, tracepoints, and catchpoints. .y or n." {
 	send_gdb "y\n"
 	exp_continue
     }

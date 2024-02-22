@@ -71,5 +71,5 @@ gdb_test "info break" "hw breakpoint.*y.*0x0\+\[ \t\]\+" \
 gdb_test_no_output "delete \$bpnum" "" "delete" \
     "delete hw breakpoint"
 
-gdb_test "info break" "No breakpoints or watchpoints\." \
-    "info break shows no breakpoints"
+gdb_test "info break" "No breakpoints, watchpoints, tracepoints, or catchpoints\." \
+    "info break shows no breakpoints, watchpoints, tracepoints, or catchpoints"

@@ -89,7 +89,8 @@ set expected_help_delete {
     "Delete all or some breakpoints\.\[\r\n\]+"
     "Usage: delete \\\[BREAKPOINTNUM\\\]...\[\r\n\]+"
     "Arguments are breakpoint numbers with spaces in between\.\[\r\n\]+"
-    "To delete all breakpoints, give no argument\.\[\r\n\]+"
+    "To delete all breakpoints, watchpoints, tracepoints, and catchpoints,\.\[\r\n\]+"
+    "give no argument\.\[\r\n\]+"
     "Also a prefix command for deletion of other GDB objects\.\[\r\n\]+"
 }
 test_prefix_command_help {"d" "delete"} $expected_help_delete "help delete \"d\" abbreviation"

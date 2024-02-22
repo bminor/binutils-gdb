@@ -224,7 +224,7 @@ proc_with_prefix test_bkpt_invisible { } {
     gdb_test "guile (print (breakpoint-visible? ibp))" \
 	"= #f" "check breakpoint invisibility"
     gdb_test "info breakpoints" \
-	"No breakpoints or watchpoints.*" \
+	"No breakpoints, watchpoints, tracepoints, or catchpoints.*" \
 	"check info breakpoints does not show invisible breakpoints"
     gdb_test "maint info breakpoints" \
 	"scm-breakpoint\.c:$ibp_location.*" \
@@ -287,7 +287,7 @@ proc_with_prefix test_bkpt_internal { } {
     gdb_scm_test_silent_cmd "guile (register-breakpoint! wp1)" \
 	"register wp1"
     gdb_test "info breakpoints" \
-	"No breakpoints or watchpoints.*" \
+	"No breakpoints, watchpoints, tracepoints, or catchpoints.*" \
 	"check info breakpoints does not show invisible watchpoint"
     gdb_test "maint info breakpoints" \
 	".*watchpoint.*result.*" \
@@ -511,7 +511,7 @@ proc_with_prefix test_bkpt_temporary { } {
 	".*$srcfile:$ibp_location.*"
     gdb_test "guile (print (breakpoint-temporary? ibp))" "Invalid object: <gdb:breakpoint>.*" \
 	"check temporary breakpoint is deleted after being hit"
-    gdb_test "info breakpoints" "No breakpoints or watchpoints.*" \
+    gdb_test "info breakpoints" "No breakpoints, watchpoints, tracepoints, or catchpoints.*" \
 	"check info breakpoints shows temporary breakpoint is deleted"
 }
 

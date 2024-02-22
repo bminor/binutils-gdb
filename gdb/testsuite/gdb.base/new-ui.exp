@@ -130,17 +130,17 @@ proc_with_prefix do_test {} {
     # Verify that we get proper queries on the main UI, but that they are
     # auto-answered on secondary UIs.
     with_spawn_id $gdb_main_spawn_id {
-	gdb_test "delete" "" "delete all breakpoint on main console" \
-		 "Delete all breakpoints. .y or n. $" "n"
+	gdb_test "delete" "" "delete all breakpoints, watchpoints, tracepoints, and catchpoints on main console" \
+		 "Delete all breakpoints, watchpoints, tracepoints, and catchpoints. .y or n. $" "n"
     }
     with_spawn_id $extra_spawn_id {
 	# Check output in two stages in order to override
 	# gdb_test_multiple's internal "got interactive prompt" fail
 	# that would otherwise match if the expect buffer happens to
 	# fill with partial output that ends in "(y or n) ".
-	set test "delete all breakpoints on extra console"
+	set test "delete all breakpoints, watchpoints, tracepoints, and catchpoints on extra console"
 	gdb_test_multiple "delete" $test {
-	    -re "Delete all breakpoints. .y or n. " {
+	    -re "Delete all breakpoints, watchpoints, tracepoints, and catchpoints. .y or n. " {
 		gdb_test "" \
 		    ".answered Y; input not from terminal." \
 		    $test

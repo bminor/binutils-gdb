@@ -121,8 +121,8 @@ proc test_break { initial_load always_inserted break_command } {
 	# re-insert, GDB would fill the shadow buffer with a
 	# breakpoint instruction).  Avoid delete_breakpoints as that
 	# doesn't record a pass/fail.
-	gdb_test "delete" "" "delete all breakpoints" \
-	    "Delete all breakpoints.*y or n.*$" "y"
+	gdb_test "delete" "" "delete all breakpoints, watchpoints, tracepoints, and catchpoints" \
+	    "Delete all breakpoints, watchpoints, tracepoints, and catchpoints.*y or n.*$" "y"
 
 	# Re-add symbols back.
 	set test "file \$binfile"

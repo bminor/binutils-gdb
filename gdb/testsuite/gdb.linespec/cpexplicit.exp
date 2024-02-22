@@ -31,8 +31,8 @@ namespace eval $testfile {
     # at LOCATION.
     proc test_breakpoint {linespec location} {
 
-	# Delete all breakpoints, set a new breakpoint at LINESPEC,
-	# and attempt to run to it.
+	# Delete all breakpoints, watchpoints, tracepoints, and catchpoints,
+	# set a new breakpoint at LINESPEC, and attempt to run to it.
 	delete_breakpoints
 	gdb_breakpoint $linespec
 	gdb_continue_to_breakpoint $linespec $location

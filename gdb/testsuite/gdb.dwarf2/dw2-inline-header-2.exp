@@ -148,8 +148,8 @@ if ![runto_main] {
     return -1
 }
 
-# Delete all breakpoints so that the output of "info breakpoints"
-# below will only contain a single breakpoint.
+# Delete all breakpoints, watchpoints, tracepoints, and catchpoints so that
+# the output of "info breakpoints" below will only contain a single breakpoint.
 delete_breakpoints
 
 # Place a breakpoint within the function in the header file.
@@ -162,8 +162,8 @@ gdb_test "info breakpoints" \
     ".* in callee at \[^\r\n\]+${srcfile4}:22\\y.*" \
     "check for breakpoint at ${srcfile4}"
 
-# Delete all breakpoints so that the output of "info breakpoints"
-# below will only contain a single breakpoint.
+# Delete all breakpoints, watchpoints, tracepoints, and catchpoints so that
+# the output of "info breakpoints" below will only contain a single breakpoint.
 delete_breakpoints
 
 # Place a breakpoint within the function in the header file.

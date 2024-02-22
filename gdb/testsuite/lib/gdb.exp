@@ -373,10 +373,10 @@ proc delete_breakpoints {} {
     #
     set timeout 100
 
-    set msg "delete all breakpoints in delete_breakpoints"
+    set msg "delete all breakpoints, watchpoints, tracepoints, and catchpoints in delete_breakpoints"
     set deleted 0
     gdb_test_multiple "delete breakpoints" "$msg" {
-	-re "Delete all breakpoints.*y or n.*$" {
+	-re "Delete all breakpoints, watchpoints, tracepoints, and catchpoints.*y or n.*$" {
 	    send_gdb "y\n" answer
 	    exp_continue
 	}
@@ -390,7 +390,7 @@ proc delete_breakpoints {} {
 	set deleted 0
 	set msg "info breakpoints"
 	gdb_test_multiple $msg $msg {
-	    -re "No breakpoints or watchpoints..*$gdb_prompt $" {
+	    -re "No breakpoints, watchpoints, tracepoints, or catchpoints..*$gdb_prompt $" {
 		set deleted 1
 	    }
 	    -re "$gdb_prompt $" {

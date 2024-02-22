@@ -4343,7 +4343,8 @@ running or not, what process it is, and why it stopped.
 @end table
 
 @menu
-* Breakpoints::                 Breakpoints, watchpoints, and catchpoints
+* Breakpoints::                 Breakpoints, watchpoints, tracepoints,
+                                and catchpoints
 * Continuing and Stepping::     Resuming execution
 * Skipping Over Functions and Files::
                                 Skipping over functions and files
@@ -4721,15 +4722,15 @@ optionally be surrounded by spaces.
 @cindex @code{$_} and @code{info breakpoints}
 @item info breakpoints @r{[}@var{list}@dots{}@r{]}
 @itemx info break @r{[}@var{list}@dots{}@r{]}
-Print a table of all breakpoints, watchpoints, and catchpoints set and
-not deleted.  Optional argument @var{n} means print information only
-about the specified breakpoint(s) (or watchpoint(s) or catchpoint(s)).
+Print a table of all breakpoints, watchpoints, tracepoints, and catchpoints set
+and not deleted.  Optional argument @var{n} means print information only about
+the specified breakpoint(s) (or watchpoint(s) or tracepoint(s) or catchpoint(s)).
 For each breakpoint, following columns are printed:
 
 @table @emph
 @item Breakpoint Numbers
 @item Type
-Breakpoint, watchpoint, or catchpoint.
+Breakpoint, watchpoint, tracepoint, or catchpoint.
 @item Disposition
 Whether the breakpoint is marked to be disabled or deleted when hit.
 @item Enabled or Disabled
@@ -5650,10 +5651,11 @@ in @ref{Location Specifications}.
 @kindex delete
 @kindex d @r{(@code{delete})}
 @item delete @r{[}breakpoints@r{]} @r{[}@var{list}@dots{}@r{]}
-Delete the breakpoints, watchpoints, or catchpoints of the breakpoint
-list specified as argument.  If no argument is specified, delete all
-breakpoints (@value{GDBN} asks confirmation, unless you have @code{set
-confirm off}).  You can abbreviate this command as @code{d}.
+Delete the breakpoints, watchpoints, tracepoints, or catchpoints of the
+breakpoint list specified as argument.  If no argument is specified, delete
+all breakpoints, watchpoints, tracepoints, and catchpoints (@value{GDBN} asks
+confirmation, unless you have @code{set confirm off}).  You can abbreviate this
+command as @code{d}.
 @end table
 
 @node Disabling
@@ -5665,10 +5667,10 @@ prefer to @dfn{disable} it.  This makes the breakpoint inoperative as if
 it had been deleted, but remembers the information on the breakpoint so
 that you can @dfn{enable} it again later.
 
-You disable and enable breakpoints, watchpoints, and catchpoints with
-the @code{enable} and @code{disable} commands, optionally specifying
-one or more breakpoint numbers as arguments.  Use @code{info break} to
-print a list of all breakpoints, watchpoints, and catchpoints if you
+You disable and enable breakpoints, watchpoints, tracepoints, and catchpoints
+with the @code{enable} and @code{disable} commands, optionally specifying
+one or more breakpoint numbers as arguments.  Use @code{info break} to print
+a list of all breakpoints, watchpoints, tracepoints, and catchpoints if you
 do not know which numbers to use.
 
 Disabling and enabling a breakpoint that has multiple locations
@@ -5696,7 +5698,7 @@ set with the @code{tbreak} command starts out in this state.
 @end itemize
 
 You can use the following commands to enable or disable breakpoints,
-watchpoints, and catchpoints:
+watchpoints, tracepoints, and catchpoints:
 
 @table @code
 @kindex disable
@@ -5874,7 +5876,7 @@ is decremented each time.  @xref{Convenience Vars, ,Convenience
 Variables}.
 @end table
 
-Ignore counts apply to breakpoints, watchpoints, and catchpoints.
+Ignore counts apply to breakpoints, watchpoints, tracepoints, and catchpoints.
 
 
 @node Break Commands
@@ -32987,8 +32989,8 @@ list of thread groups to which this breakpoint applies
 number of times the breakpoint has been hit
 @end table
 
-If there are no breakpoints or watchpoints, the @code{BreakpointTable}
-@code{body} field is an empty list.
+If there are no breakpoints, watchpoints, tracepoints, or catchpoints,
+the @code{BreakpointTable} @code{body} field is an empty list.
 
 @subsubheading @value{GDBN} Command
 
@@ -33980,7 +33982,7 @@ to execute until it reaches a debugger stop event.  If the
 it reaches a stop event.  Stop events may include
 @itemize @bullet
 @item
-breakpoints or watchpoints
+breakpoints, watchpoints, tracepoints, or catchpoints
 @item
 signals or exceptions
 @item

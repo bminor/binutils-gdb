@@ -56,7 +56,7 @@ foreach_mi_ui_mode mode {
     # trigger an assertion.
     if {$mode eq "separate"} {
 	with_spawn_id $gdb_main_spawn_id {
-	    gdb_test "info breakpoints" "No breakpoints or watchpoints\\." \
+	    gdb_test "info breakpoints" "No breakpoints, watchpoints, tracepoints, or catchpoints\\." \
 		"check CLI 'info breakpoints' when there are no breakpoints"
 	}
     }

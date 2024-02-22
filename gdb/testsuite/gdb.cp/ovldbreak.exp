@@ -309,23 +309,23 @@ with_test_prefix "multiple breakpoints" {
 
 send_gdb "delete breakpoints\n"
 gdb_expect {
-    -re "Delete all breakpoints.* $" {
+    -re "Delete all breakpoints, watchpoints, tracepoints, and catchpoints.* $" {
         send_gdb "y\n"
         gdb_expect {
             -re ".*$gdb_prompt $" {
-                pass "delete all breakpoints"
+		pass "delete all breakpoints, watchpoints, tracepoints, and catchpoints"
             }
             timeout {
-                fail "delete all breakpoints (timeout)"
+		fail "delete all breakpoints, watchpoints, tracepoints, and catchpoints (timeout)"
             }
         }
     }
     timeout {
-        fail "delete all breakpoints (timeout)"
+	fail "delete all breakpoints, watchpoints, tracepoints, and catchpoints (timeout)"
     }
 }
 
-gdb_test "info breakpoints" "No breakpoints or watchpoints." "breakpoint info (after delete)"
+gdb_test "info breakpoints" "No breakpoints, watchpoints, tracepoints, or catchpoints." "breakpoint info (after delete)"
 
 
 

@@ -2358,8 +2358,8 @@ ppc_linux_nat_target::can_use_watchpoint_cond_accel (void)
 
   auto process_it = m_process_info.find (inferior_ptid.pid ());
 
-  /* No breakpoints or watchpoints have been requested for this process,
-     we have at least one free DVC register.  */
+  /* No breakpoints, watchpoints, tracepoints, or catchpoints have been
+     requested for this process, we have at least one free DVC register.  */
   if (process_it == m_process_info.end ())
     return true;
 

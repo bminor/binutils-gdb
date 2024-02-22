@@ -76,7 +76,7 @@ gdb_test_multiple "watch gap1" "$test" {
 gdb_test "delete" \
     "" \
     "delete all watchpoints" \
-    {Delete all breakpoints\? \(y or n\) $} \
+    {Delete all breakpoints, watchpoints, tracepoints, and catchpoints\? \(y or n\) $} \
     "y"
 
 # If debug registers were left occupied by mistake, we'll fail to set

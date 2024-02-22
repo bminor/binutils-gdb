@@ -234,7 +234,7 @@ proc test_single_step { always_inserted auto_hw } {
     }
 
     gdb_test "maint info breakpoints 0" \
-	"No breakpoint or watchpoint matching '0'\." \
+	"No breakpoint, watchpoint, tracepoint, or catchpoint matching '0'\." \
 	"single-step breakpoint is not left behind"
 
     # Confirm the thread really advanced.
