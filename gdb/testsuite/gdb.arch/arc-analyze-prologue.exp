@@ -19,7 +19,13 @@ require {istarget "arc*-*-*"}
 
 standard_testfile .S
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
+# arc-analyze-prologue.S test does not contain debug information thus it must
+# be compiled without -g option. Otherwise GDB will try to unwind frames using
+# debug information (which does not exist for .S code!) instead of analyzing
+# frames manually.
+set options {}
+
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile $options] } {
     return -1
 }
 
