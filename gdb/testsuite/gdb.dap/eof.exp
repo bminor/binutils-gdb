@@ -38,3 +38,12 @@ dap_check_log_file
 
 # Check that first log message is present.
 dap_check_log_file_re [string_to_regexp "starting DAP server"]
+
+# There should be one "READ:" for the initialize request, and at least one
+# "WROTE:" for the initialize response.
+dap_check_log_file_re "READ:"
+dap_check_log_file_re "WROTE:"
+
+# Check that all thread termination messages are there.
+dap_check_log_file_re "JSON writer: terminating"
+dap_check_log_file_re "DAP: terminating"

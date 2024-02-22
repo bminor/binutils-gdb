@@ -93,7 +93,15 @@ def start_dap(target):
         _dap_thread = threading.current_thread()
         target()
 
-    start_thread("DAP", really_start_dap)
+    # Note: unlike _dap_thread, dap_thread is a local variable.
+    dap_thread = start_thread("DAP", really_start_dap)
+
+    def _on_gdb_exiting(event):
+        thread_log("joining DAP thread ...")
+        dap_thread.join()
+        thread_log("joining DAP thread done")
+
+    gdb.events.gdb_exiting.connect(_on_gdb_exiting)
 
 
 def in_gdb_thread(func):
