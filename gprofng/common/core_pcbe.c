@@ -2746,6 +2746,11 @@ core_pcbe_init (void)
     case ARM_CPU_IMP_CAVIUM:
     case ARM_CPU_IMP_APM:
     case ARM_CPU_IMP_QCOM:
+    case ARM_CPU_IMP_FUJITSU:
+    case ARM_CPU_IMP_NVIDIA:
+    case ARM_CPU_IMP_HISI:
+    case ARM_CPU_IMP_APPLE:
+    case ARM_CPU_IMP_AMPERE:
       snprintf (core_impl_name, sizeof (core_impl_name), "%s", AARCH64_VENDORSTR_ARM);
       events_table = events_generic;
       num_gpc = 4;  // MEZ: a real implementation is needed

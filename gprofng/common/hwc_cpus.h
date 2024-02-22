@@ -117,13 +117,19 @@ extern cpu_info_t *read_cpuinfo();
 #define CPC_SPARC64_X       4006 /* Athena */
 #define CPC_SPARC64_XII     4010 /* Athena++ */
 
-// aarch64. Constants from arch/arm64/include/asm/cputype.h
+// aarch64. Constants from tools/arch/arm64/include/asm/cputype.h
+// in https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
 enum {
     ARM_CPU_IMP_ARM     = 0x41,
     ARM_CPU_IMP_BRCM    = 0x42,
     ARM_CPU_IMP_CAVIUM  = 0x43,
+    ARM_CPU_IMP_FUJITSU = 0x46,
+    ARM_CPU_IMP_NVIDIA  = 0x4E,
+    ARM_CPU_IMP_HISI    = 0x48,
     ARM_CPU_IMP_APM     = 0x50,
-    ARM_CPU_IMP_QCOM    = 0x51
+    ARM_CPU_IMP_QCOM    = 0x51,
+    ARM_CPU_IMP_APPLE   = 0x61,
+    ARM_CPU_IMP_AMPERE  = 0xC0
 };
 
 #define	AARCH64_VENDORSTR_ARM	"ARM"
