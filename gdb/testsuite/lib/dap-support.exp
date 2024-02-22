@@ -385,6 +385,16 @@ proc dap_check_log_file {} {
     }
 }
 
+# Read the most recent DAP log file and check that regexp RE matches.
+proc dap_check_log_file_re { re } {
+    set fd [open [current_dap_log_file]]
+    set contents [read $fd]
+    close $fd
+
+    set ok [regexp $re $contents]
+    gdb_assert {$ok} "log file matched $re"
+}
+
 # Cleanly shut down gdb.  TERMINATE is passed as the terminateDebuggee
 # parameter to the request.
 proc dap_shutdown {{terminate false}} {

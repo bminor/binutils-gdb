@@ -35,3 +35,6 @@ catch "wait -i $gdb_spawn_id"
 unset gdb_spawn_id
 
 dap_check_log_file
+
+# Check that first log message is present.
+dap_check_log_file_re [string_to_regexp "starting DAP server"]

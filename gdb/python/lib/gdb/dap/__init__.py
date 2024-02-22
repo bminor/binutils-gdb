@@ -69,5 +69,23 @@ def run():
     os.close(wfd)
 
     # Note the inferior output is opened in text mode.
+    global server
     server = Server(open(saved_in, "rb"), open(saved_out, "wb"), open(rfd, "r"))
-    startup.start_dap(server.main_loop)
+
+
+# Whether the interactive session has started.
+session_started = False
+
+
+def pre_command_loop():
+    """DAP's pre_command_loop interpreter hook.  This is called by the GDB DAP
+    interpreter."""
+    global session_started
+    if not session_started:
+        # The pre_command_loop interpreter hook can be called several times.
+        # The first time it's called, it means we're starting an interactive
+        # session.
+        session_started = True
+        startup.thread_log("starting DAP server")
+        global server
+        startup.start_dap(server.main_loop)
