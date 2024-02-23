@@ -403,6 +403,15 @@ proc dap_check_log_file_re { re } {
 proc dap_shutdown {{terminate false}} {
     dap_check_request_and_response "shutdown" disconnect \
 	[format {o terminateDebuggee [l %s]} $terminate]
+
+    # Check gdb's exit status.
+    global gdb_spawn_id
+    set result [wait -i $gdb_spawn_id]
+    gdb_assert {[lindex $result 2] == 0}
+    gdb_assert {[lindex $result 3] == 0}
+
+    clear_gdb_spawn_id
+
     dap_check_log_file
 }
 

@@ -230,6 +230,7 @@ class Server:
         # responses are flushed to the client before exiting.
         self.write_queue.put(None)
         json_writer.join()
+        send_gdb("quit")
 
     @in_dap_thread
     def send_event_later(self, event, body=None):
