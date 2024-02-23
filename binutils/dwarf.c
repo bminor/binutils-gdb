@@ -8654,7 +8654,8 @@ static const char *const dwarf_regnames_x86_64[] =
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 99 - 106  */
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 107 - 114  */
   NULL, NULL, NULL,				  /* 115 - 117  */
-  "k0", "k1", "k2", "k3", "k4", "k5", "k6", "k7"
+  "k0", "k1", "k2", "k3", "k4", "k5", "k6", "k7",
+  "bnd0", "bnd1", "bnd2", "bnd3",
 };
 
 static void
