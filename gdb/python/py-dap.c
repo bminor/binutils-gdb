@@ -92,10 +92,14 @@ call_dap_fn (const char *fn_name)
 void
 dap_interp::init (bool top_level)
 {
+#if CXX_STD_THREAD
   call_dap_fn ("run");
 
   current_ui->input_fd = -1;
   current_ui->m_input_interactive_p = false;
+#else
+  error (_("GDB was compiled without threading, which DAP requires"));
+#endif
 }
 
 void
