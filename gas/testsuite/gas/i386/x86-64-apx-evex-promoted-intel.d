@@ -90,9 +90,9 @@ Disassembly of section \.text:
 [	 ]*[a-f0-9]+:[	 ]*62 4c 7f 08 f8 bc 87 23 01 00 00[	 ]+enqcmd[	 ]+r31,\[r31\+rax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*67 62 4c 7e 08 f8 8c 87 23 01 00 00[	 ]+enqcmds[	 ]+r25d,\[r31d\+eax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*62 4c 7e 08 f8 bc 87 23 01 00 00[	 ]+enqcmds[	 ]+r31,\[r31\+rax\*4\+0x123\]
-[	 ]*[a-f0-9]+:[	 ]*62 4c fe 08 f0 bc 87 23 01 00 00[	 ]+invept[	 ]+r31,OWORD PTR \[r31\+rax\*4\+0x123\]
-[	 ]*[a-f0-9]+:[	 ]*62 4c fe 08 f2 bc 87 23 01 00 00[	 ]+invpcid[	 ]+r31,\[r31\+rax\*4\+0x123\]
-[	 ]*[a-f0-9]+:[	 ]*62 4c fe 08 f1 bc 87 23 01 00 00[	 ]+invvpid[	 ]+r31,OWORD PTR \[r31\+rax\*4\+0x123\]
+[	 ]*[a-f0-9]+:[	 ]*62 4c 7e 08 f0 bc 87 23 01 00 00[	 ]+invept[	 ]+r31,OWORD PTR \[r31\+rax\*4\+0x123\]
+[	 ]*[a-f0-9]+:[	 ]*62 4c 7e 08 f2 bc 87 23 01 00 00[	 ]+invpcid[	 ]+r31,\[r31\+rax\*4\+0x123\]
+[	 ]*[a-f0-9]+:[	 ]*62 4c 7e 08 f1 bc 87 23 01 00 00[	 ]+invvpid[	 ]+r31,OWORD PTR \[r31\+rax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*62 61 7d 08 93 cd[	 ]+kmovb[	 ]+r25d,k5
 [	 ]*[a-f0-9]+:[	 ]*62 d9 7d 08 91 ac 87 23 01 00 00[	 ]+kmovb[	 ]+BYTE PTR \[r31\+rax\*4\+0x123\],k5
 [	 ]*[a-f0-9]+:[	 ]*62 d9 7d 08 92 e9[	 ]+kmovb[	 ]+k5,r25d
@@ -254,9 +254,9 @@ Disassembly of section \.text:
 [	 ]*[a-f0-9]+:[	 ]*62 4c 7f 08 f8 bc 87 23 01 00 00[	 ]+enqcmd[	 ]+r31,\[r31\+rax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*67 62 4c 7e 08 f8 8c 87 23 01 00 00[	 ]+enqcmds[	 ]+r25d,\[r31d\+eax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*62 4c 7e 08 f8 bc 87 23 01 00 00[	 ]+enqcmds[	 ]+r31,\[r31\+rax\*4\+0x123\]
-[	 ]*[a-f0-9]+:[	 ]*62 4c fe 08 f0 bc 87 23 01 00 00[	 ]+invept[	 ]+r31,OWORD PTR \[r31\+rax\*4\+0x123\]
-[	 ]*[a-f0-9]+:[	 ]*62 4c fe 08 f2 bc 87 23 01 00 00[	 ]+invpcid[	 ]+r31,\[r31\+rax\*4\+0x123\]
-[	 ]*[a-f0-9]+:[	 ]*62 4c fe 08 f1 bc 87 23 01 00 00[	 ]+invvpid[	 ]+r31,OWORD PTR \[r31\+rax\*4\+0x123\]
+[	 ]*[a-f0-9]+:[	 ]*62 4c 7e 08 f0 bc 87 23 01 00 00[	 ]+invept[	 ]+r31,OWORD PTR \[r31\+rax\*4\+0x123\]
+[	 ]*[a-f0-9]+:[	 ]*62 4c 7e 08 f2 bc 87 23 01 00 00[	 ]+invpcid[	 ]+r31,\[r31\+rax\*4\+0x123\]
+[	 ]*[a-f0-9]+:[	 ]*62 4c 7e 08 f1 bc 87 23 01 00 00[	 ]+invvpid[	 ]+r31,OWORD PTR \[r31\+rax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*62 61 7d 08 93 cd[	 ]+kmovb[	 ]+r25d,k5
 [	 ]*[a-f0-9]+:[	 ]*62 d9 7d 08 91 ac 87 23 01 00 00[	 ]+kmovb[	 ]+BYTE PTR \[r31\+rax\*4\+0x123\],k5
 [	 ]*[a-f0-9]+:[	 ]*62 d9 7d 08 92 e9[	 ]+kmovb[	 ]+k5,r25d

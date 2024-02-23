@@ -1402,16 +1402,16 @@ getsec, 0xf37, SMX, NoSuf, {}
 
 invept, 0x660f3880, EPT&No64, Modrm|IgnoreSize|NoSuf, { Oword|Unspecified|BaseIndex, Reg32 }
 invept, 0x660f3880, EPT&x64, Modrm|NoSuf|NoRex64, { Oword|Unspecified|BaseIndex, Reg64 }
-invept, 0xf3f0, EPT&APX_F, Modrm|NoSuf|EVexMap4, { Oword|Unspecified|BaseIndex, Reg64 }
+invept, 0xf3f0, EPT&APX_F, Modrm|NoSuf|EVexMap4|VexWIG, { Oword|Unspecified|BaseIndex, Reg64 }
 invvpid, 0x660f3881, EPT&No64, Modrm|IgnoreSize|NoSuf, { Oword|Unspecified|BaseIndex, Reg32 }
 invvpid, 0x660f3881, EPT&x64, Modrm|NoSuf|NoRex64, { Oword|Unspecified|BaseIndex, Reg64 }
-invvpid, 0xf3f1, EPT&APX_F, Modrm|NoSuf|EVexMap4, { Oword|Unspecified|BaseIndex, Reg64 }
+invvpid, 0xf3f1, EPT&APX_F, Modrm|NoSuf|EVexMap4|VexWIG, { Oword|Unspecified|BaseIndex, Reg64 }
 
 // INVPCID instruction
 
 invpcid, 0x660f3882, INVPCID&No64, Modrm|IgnoreSize|NoSuf, { Oword|Unspecified|BaseIndex, Reg32 }
 invpcid, 0x660f3882, INVPCID&x64, Modrm|NoSuf|NoRex64, { Oword|Unspecified|BaseIndex, Reg64 }
-invpcid, 0xf3f2, INVPCID&APX_F, Modrm|NoSuf|EVexMap4, { Oword|Unspecified|BaseIndex, Reg64 }
+invpcid, 0xf3f2, INVPCID&APX_F, Modrm|NoSuf|EVexMap4|VexWIG, { Oword|Unspecified|BaseIndex, Reg64 }
 
 // SSSE3 instructions.
 
