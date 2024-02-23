@@ -2057,7 +2057,7 @@ static struct cmd_list_element *user_show_python_list;
    interpreter.  This lets Python's 'atexit' work.  */
 
 static void
-finalize_python (void *ignore)
+finalize_python ()
 {
   struct active_ext_lang_state *previous_active;
 
@@ -2297,7 +2297,7 @@ init_done:
   /* Release the GIL while gdb runs.  */
   PyEval_SaveThread ();
 
-  make_final_cleanup (finalize_python, NULL);
+  add_final_cleanup (finalize_python);
 
   /* Only set this when initialization has succeeded.  */
   gdb_python_initialized = 1;

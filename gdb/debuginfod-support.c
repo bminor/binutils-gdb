@@ -188,15 +188,6 @@ progressfn (debuginfod_client *c, long cur, long total)
   return 0;
 }
 
-/* Cleanup ARG, which is a debuginfod_client pointer.  */
-
-static void
-cleanup_debuginfod_client (void *arg)
-{
-  debuginfod_client *client = static_cast<debuginfod_client *> (arg);
-  debuginfod_end (client);
-}
-
 /* Return a pointer to the single global debuginfod_client, initialising it
    first if needed.  */
 
@@ -221,7 +212,10 @@ get_debuginfod_client ()
 	     handlers, which is too late.
 
 	     So instead, we make use of GDB's final cleanup mechanism.  */
-	  make_final_cleanup (cleanup_debuginfod_client, global_client);
+	  add_final_cleanup ([] ()
+	    {
+	      debuginfod_end (global_client);
+	    });
 	  debuginfod_set_progressfn (global_client, progressfn);
 	}
     }
