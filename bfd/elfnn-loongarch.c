@@ -2550,6 +2550,16 @@ loongarch_reloc_is_fatal (struct bfd_link_info *info,
   })
 
 
+static bfd_vma
+tls_dtpoff_base (struct bfd_link_info *info)
+{
+  /* If tls_sec is NULL, we should have signalled an error already.  */
+  if (elf_hash_table (info)->tls_sec == NULL)
+    return 0;
+  return elf_hash_table (info)->tls_sec->vma;
+}
+
+
 static int
 loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 				bfd *input_bfd, asection *input_section,
@@ -3708,7 +3718,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  rela.r_offset = sec_addr (got) + got_off + desc_off;
 		  rela.r_addend = 0;
 		  if (indx == 0)
-		    rela.r_addend = relocation - elf_hash_table (info)->tls_sec->vma;
+		    rela.r_addend = relocation - tls_dtpoff_base (info);
 
 		  rela.r_info = ELFNN_R_INFO (indx, R_LARCH_TLS_DESCNN);
 		  loongarch_elf_append_rela (output_bfd, relgot, &rela);
