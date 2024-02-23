@@ -15,7 +15,7 @@
 
 import json
 
-from .startup import start_thread, send_gdb, log, log_stack, LogLevel
+from .startup import start_thread, log, log_stack, LogLevel
 
 
 def read_json(stream):
