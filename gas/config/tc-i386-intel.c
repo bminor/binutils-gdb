@@ -209,10 +209,10 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
 	      || i386_types[j].sz[0] > 8
 	      || (i386_types[j].sz[0] & (i386_types[j].sz[0] - 1)))
 	    return O_illegal;
-	  if (i.vec_encoding == vex_encoding_default)
-	    i.vec_encoding = vex_encoding_evex;
-	  else if (i.vec_encoding != vex_encoding_evex
-		   && i.vec_encoding != vex_encoding_evex512)
+	  if (i.encoding == encoding_default)
+	    i.encoding = encoding_evex;
+	  else if (i.encoding != encoding_evex
+		   && i.encoding != encoding_evex512)
 	    return O_illegal;
 	  if (!i.broadcast.bytes && !i.broadcast.type)
 	    {

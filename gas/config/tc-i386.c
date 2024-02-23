@@ -445,16 +445,16 @@ struct _i386_insn
     /* Disable instruction size optimization.  */
     bool no_optimize;
 
-    /* How to encode vector instructions.  */
+    /* How to encode instructions.  */
     enum
       {
-	vex_encoding_default = 0,
-	vex_encoding_vex,
-	vex_encoding_vex3,
-	vex_encoding_evex,
-	vex_encoding_evex512,
-	vex_encoding_error
-      } vec_encoding;
+	encoding_default = 0,
+	encoding_vex,
+	encoding_vex3,
+	encoding_evex,
+	encoding_evex512,
+	encoding_error
+      } encoding;
 
     /* REP prefix.  */
     const char *rep_prefix;
@@ -1885,8 +1885,8 @@ static const i386_cpu_flags avx512 = CPU_ANY_AVX512F_FLAGS;
 
 static INLINE bool need_evex_encoding (const insn_template *t)
 {
-  return i.vec_encoding == vex_encoding_evex
-	|| i.vec_encoding == vex_encoding_evex512
+  return i.encoding == encoding_evex
+	|| i.encoding == encoding_evex512
 	|| (t->opcode_modifier.vex && i.has_egpr)
 	|| i.mask.reg;
 }
@@ -2489,7 +2489,7 @@ static INLINE int
 fits_in_imm4 (offsetT num)
 {
   /* Despite the name, check for imm3 if we're dealing with EVEX.  */
-  return (num & (i.vec_encoding != vex_encoding_evex ? 0xf : 7)) == num;
+  return (num & (i.encoding != encoding_evex ? 0xf : 7)) == num;
 }
 
 static i386_operand_type
@@ -3801,7 +3801,7 @@ build_vex_prefix (const insn_template *t)
   /* Use 2-byte VEX prefix by swapping destination and source operand
      if there are more than 1 register operand.  */
   if (i.reg_operands > 1
-      && i.vec_encoding != vex_encoding_vex3
+      && i.encoding != encoding_vex3
       && i.dir_encoding == dir_encoding_default
       && i.operands == i.reg_operands
       && operand_type_equal (&i.types[0], &i.types[i.operands - 1])
@@ -3830,7 +3830,7 @@ build_vex_prefix (const insn_template *t)
   /* Use 2-byte VEX prefix by swapping commutative source operands if there
      are no memory operands and at least 3 register ones.  */
   if (i.reg_operands >= 3
-      && i.vec_encoding != vex_encoding_vex3
+      && i.encoding != encoding_vex3
       && i.reg_operands == i.operands - i.imm_operands
       && i.tm.opcode_modifier.vex
       && i.tm.opcode_modifier.commutative
@@ -3893,7 +3893,7 @@ build_vex_prefix (const insn_template *t)
 
   /* Use 2-byte VEX prefix if possible.  */
   if (w == 0
-      && i.vec_encoding != vex_encoding_vex3
+      && i.encoding != encoding_vex3
       && i.tm.opcode_space == SPACE_0F
       && (i.rex & (REX_W | REX_X | REX_B)) == 0)
     {
@@ -4759,7 +4759,7 @@ optimize_encoding (void)
 	   && (i.tm.opcode_modifier.vex
 	       || ((!i.mask.reg || i.mask.zeroing)
 		   && i.tm.opcode_modifier.evex
-		   && (i.vec_encoding != vex_encoding_evex
+		   && (i.encoding != encoding_evex
 		       || cpu_arch_isa_flags.bitfield.cpuavx512vl
 		       || is_cpu (&i.tm, CpuAVX512VL)
 		       || (i.tm.operand_types[2].bitfield.zmmword
@@ -4809,12 +4809,12 @@ optimize_encoding (void)
        */
       if (i.tm.opcode_modifier.evex)
 	{
-	  if (i.vec_encoding != vex_encoding_evex)
+	  if (i.encoding != encoding_evex)
 	    {
 	      i.tm.opcode_modifier.vex = VEX128;
 	      i.tm.opcode_modifier.vexw = VEXW0;
 	      i.tm.opcode_modifier.evex = 0;
-	      i.vec_encoding = vex_encoding_vex;
+	      i.encoding = encoding_vex;
 	      i.mask.reg = NULL;
 	    }
 	  else if (optimize > 1)
@@ -4837,7 +4837,7 @@ optimize_encoding (void)
 	    i.types[j].bitfield.ymmword = 0;
 	  }
     }
-  else if (i.vec_encoding != vex_encoding_evex
+  else if (i.encoding != encoding_evex
 	   && !i.types[0].bitfield.zmmword
 	   && !i.types[1].bitfield.zmmword
 	   && !i.mask.reg
@@ -4979,7 +4979,7 @@ optimize_encoding (void)
 	   && i.tm.opcode_modifier.vex
 	   && !(i.op[0].regs->reg_flags & RegRex)
 	   && i.op[0].regs->reg_type.bitfield.xmmword
-	   && i.vec_encoding != vex_encoding_vex3)
+	   && i.encoding != encoding_vex3)
     {
       /* Optimize: -Os:
          vpbroadcastq %xmmN, %xmmM  -> vpunpcklqdq %xmmN, %xmmN, %xmmM (N < 8)
@@ -6872,10 +6872,10 @@ md_assemble (char *line)
   if (optimize && !i.no_optimize && i.tm.opcode_modifier.optimize)
     optimize_encoding ();
 
-  /* Past optimization there's no need to distinguish vex_encoding_evex and
-     vex_encoding_evex512 anymore.  */
-  if (i.vec_encoding == vex_encoding_evex512)
-    i.vec_encoding = vex_encoding_evex;
+  /* Past optimization there's no need to distinguish encoding_evex and
+     encoding_evex512 anymore.  */
+  if (i.encoding == encoding_evex512)
+    i.encoding = encoding_evex;
 
   if (use_unaligned_vector_move)
     encode_with_unaligned_vector_move ();
@@ -7169,15 +7169,15 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 		  break;
 		case Prefix_VEX:
 		  /* {vex} */
-		  i.vec_encoding = vex_encoding_vex;
+		  i.encoding = encoding_vex;
 		  break;
 		case Prefix_VEX3:
 		  /* {vex3} */
-		  i.vec_encoding = vex_encoding_vex3;
+		  i.encoding = encoding_vex3;
 		  break;
 		case Prefix_EVEX:
 		  /* {evex} */
-		  i.vec_encoding = vex_encoding_evex;
+		  i.encoding = encoding_evex;
 		  break;
 		case Prefix_REX:
 		  /* {rex} */
@@ -8293,7 +8293,7 @@ check_VecOperands (const insn_template *t)
 static int
 VEX_check_encoding (const insn_template *t)
 {
-  if (i.vec_encoding == vex_encoding_error)
+  if (i.encoding == encoding_error)
     {
       i.error = unsupported;
       return 1;
@@ -8310,8 +8310,8 @@ VEX_check_encoding (const insn_template *t)
       return 1;
     }
 
-  if (i.vec_encoding == vex_encoding_evex
-      || i.vec_encoding == vex_encoding_evex512)
+  if (i.encoding == encoding_evex
+      || i.encoding == encoding_evex512)
     {
       /* This instruction must be encoded with EVEX prefix.  */
       if (!t->opcode_modifier.evex)
@@ -8325,7 +8325,7 @@ VEX_check_encoding (const insn_template *t)
   if (!t->opcode_modifier.vex)
     {
       /* This instruction template doesn't have VEX prefix.  */
-      if (i.vec_encoding != vex_encoding_default)
+      if (i.encoding != encoding_default)
 	{
 	  i.error = no_vex_encoding;
 	  return 1;
@@ -9000,7 +9000,7 @@ match_template (char mnem_suffix)
 	 Note that the semantics have not been changed.  */
       if (optimize
 	  && !i.no_optimize
-	  && i.vec_encoding != vex_encoding_evex
+	  && i.encoding != encoding_evex
 	  && ((t + 1 < current_templates.end
 	       && !t[1].opcode_modifier.evex
 	       && t[1].opcode_space <= SPACE_0F38
@@ -10190,7 +10190,7 @@ process_operands (void)
       if (dot_insn () && i.reg_operands == 2)
 	{
 	  gas_assert (is_any_vex_encoding (&i.tm)
-		      || i.vec_encoding != vex_encoding_default);
+		      || i.encoding != encoding_default);
 	  i.vex.register_specifier = i.op[i.operands - 1].regs;
 	}
     }
@@ -10200,7 +10200,7 @@ process_operands (void)
 	      == InstanceNone)
     {
       gas_assert (is_any_vex_encoding (&i.tm)
-		  || i.vec_encoding != vex_encoding_default);
+		  || i.encoding != encoding_default);
       i.vex.register_specifier = i.op[i.operands - 1].regs;
     }
 
@@ -10308,7 +10308,7 @@ build_modrm_byte (void)
 	}
       exp->X_add_number |= register_number (i.op[reg_slot].regs)
 			   << (3 + !(i.tm.opcode_modifier.evex
-				     || i.vec_encoding == vex_encoding_evex));
+				     || i.encoding == encoding_evex));
     }
 
   if (i.tm.opcode_modifier.vexvvvv == VexVVVV_DST)
@@ -12621,20 +12621,20 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
     }
 
   if (vex || xop
-      ? i.vec_encoding == vex_encoding_evex
+      ? i.encoding == encoding_evex
       : evex
-	? i.vec_encoding == vex_encoding_vex
-	  || i.vec_encoding == vex_encoding_vex3
-	: i.vec_encoding != vex_encoding_default)
+	? i.encoding == encoding_vex
+	  || i.encoding == encoding_vex3
+	: i.encoding != encoding_default)
     {
       as_bad (_("pseudo-prefix conflicts with encoding specifier"));
       goto bad;
     }
 
-  if (line > end && i.vec_encoding == vex_encoding_default)
-    i.vec_encoding = evex ? vex_encoding_evex : vex_encoding_vex;
+  if (line > end && i.encoding == encoding_default)
+    i.encoding = evex ? encoding_evex : encoding_vex;
 
-  if (i.vec_encoding != vex_encoding_default)
+  if (i.encoding != encoding_default)
     {
       /* Only address size and segment override prefixes are permitted with
          VEX/XOP/EVEX encodings.  */
@@ -12965,20 +12965,20 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	  goto done;
 	}
 
-      /* No need to distinguish vex_encoding_evex and vex_encoding_evex512.  */
-      if (i.vec_encoding == vex_encoding_evex512)
-	i.vec_encoding = vex_encoding_evex;
+      /* No need to distinguish encoding_evex and encoding_evex512.  */
+      if (i.encoding == encoding_evex512)
+	i.encoding = encoding_evex;
 
       /* Are we to emit ModR/M encoding?  */
       if (!i.short_form
 	  && (i.mem_operands
-	      || i.reg_operands > (i.vec_encoding != vex_encoding_default)
+	      || i.reg_operands > (i.encoding != encoding_default)
 	      || i.tm.extension_opcode != None))
 	i.tm.opcode_modifier.modrm = 1;
 
       if (!i.tm.opcode_modifier.modrm
 	  && (i.reg_operands
-	      > i.short_form + 0U + (i.vec_encoding != vex_encoding_default)
+	      > i.short_form + 0U + (i.encoding != encoding_default)
 	      || i.mem_operands))
 	{
 	  as_bad (_("too many register/memory operands"));
@@ -13017,7 +13017,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	    }
 	  /* Fall through.  */
 	case 3:
-	  if (i.vec_encoding != vex_encoding_default)
+	  if (i.encoding != encoding_default)
 	    {
 	      i.tm.opcode_modifier.vexvvvv = 1;
 	      break;
@@ -13073,13 +13073,13 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	      || i.index_reg->reg_type.bitfield.ymmword
 	      || i.index_reg->reg_type.bitfield.zmmword))
 	{
-	  if (i.vec_encoding == vex_encoding_default)
+	  if (i.encoding == encoding_default)
 	    {
 	      as_bad (_("VSIB unavailable with legacy encoding"));
 	      goto done;
 	    }
 
-	  if (i.vec_encoding == vex_encoding_evex
+	  if (i.encoding == encoding_evex
 	      && i.reg_operands > 1)
 	    {
 	      /* We could allow two register operands, encoding the 2nd one in
@@ -13099,7 +13099,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
       for (j = i.imm_operands; j < i.operands; ++j)
 	{
 	  /* Look for 8-bit operands that use old registers.  */
-	  if (i.vec_encoding != vex_encoding_default
+	  if (i.encoding != encoding_default
 	      && flag_code == CODE_64BIT
 	      && i.types[j].bitfield.class == Reg
 	      && i.types[j].bitfield.byte
@@ -13158,7 +13158,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	case  4: combined.bitfield.dword = 1; break;
 	}
 
-      if (i.vec_encoding == vex_encoding_default)
+      if (i.encoding == encoding_default)
 	{
 	  if (flag_code == CODE_64BIT && combined.bitfield.qword)
 	    i.rex |= REX_W;
@@ -13235,7 +13235,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
       if (i.memshift >= 32)
 	i.memshift = 0;
       else if (!evex)
-	i.vec_encoding = vex_encoding_error;
+	i.encoding = encoding_error;
 
       if (i.disp_operands && !optimize_disp (&i.tm))
 	goto done;
@@ -13301,8 +13301,8 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
      potential special casing there.  */
   i.tm.base_opcode |= val;
 
-  if (i.vec_encoding == vex_encoding_error
-      || (i.vec_encoding != vex_encoding_evex
+  if (i.encoding == encoding_error
+      || (i.encoding != encoding_evex
 	  ? i.broadcast.type || i.broadcast.bytes
 	    || i.rounding.type != rc_none
 	    || i.mask.reg
@@ -13413,10 +13413,10 @@ RC_SAE_specifier (const char *pstr)
 	      return NULL;
 	    }
 
-	  if (i.vec_encoding == vex_encoding_default)
-	    i.vec_encoding = vex_encoding_evex512;
-	  else if (i.vec_encoding != vex_encoding_evex
-		   && i.vec_encoding != vex_encoding_evex512)
+	  if (i.encoding == encoding_default)
+	    i.encoding = encoding_evex512;
+	  else if (i.encoding != encoding_evex
+		   && i.encoding != encoding_evex512)
 	    return NULL;
 
 	  i.rounding.type = RC_NamesTable[j].type;
@@ -13478,10 +13478,10 @@ check_VecOperations (char *op_string)
 		}
 	      op_string++;
 
-	      if (i.vec_encoding == vex_encoding_default)
-		i.vec_encoding = vex_encoding_evex;
-	      else if (i.vec_encoding != vex_encoding_evex
-		       && i.vec_encoding != vex_encoding_evex512)
+	      if (i.encoding == encoding_default)
+		i.encoding = encoding_evex;
+	      else if (i.encoding != encoding_evex
+		       && i.encoding != encoding_evex512)
 		goto unknown_vec_op;
 
 	      i.broadcast.type = bcst_type;
@@ -15750,11 +15750,11 @@ static bool check_register (const reg_entry *r)
       if (vector_size < VSZ512)
 	return false;
 
-      if (i.vec_encoding == vex_encoding_default)
-	i.vec_encoding = vex_encoding_evex512;
-      else if (i.vec_encoding != vex_encoding_evex
-	       && i.vec_encoding != vex_encoding_evex512)
-	i.vec_encoding = vex_encoding_error;
+      if (i.encoding == encoding_default)
+	i.encoding = encoding_evex512;
+      else if (i.encoding != encoding_evex
+	       && i.encoding != encoding_evex512)
+	i.encoding = encoding_error;
     }
 
   if (vector_size < VSZ256 && r->reg_type.bitfield.ymmword)
@@ -15780,11 +15780,11 @@ static bool check_register (const reg_entry *r)
 	  || flag_code != CODE_64BIT)
 	return false;
 
-      if (i.vec_encoding == vex_encoding_default
-	  || i.vec_encoding == vex_encoding_evex512)
-	i.vec_encoding = vex_encoding_evex;
-      else if (i.vec_encoding != vex_encoding_evex)
-	i.vec_encoding = vex_encoding_error;
+      if (i.encoding == encoding_default
+	  || i.encoding == encoding_evex512)
+	i.encoding = encoding_evex;
+      else if (i.encoding != encoding_evex)
+	i.encoding = encoding_error;
     }
 
   if (r->reg_flags & RegRex2)
