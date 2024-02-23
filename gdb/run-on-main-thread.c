@@ -133,4 +133,15 @@ _initialize_run_on_main_thread ()
   runnable_event = make_serial_event ();
   add_file_handler (serial_event_fd (runnable_event), run_events, nullptr,
 		    "run-on-main-thread");
+
+  /* A runnable may refer to an extension language.  So, we want to
+     make sure any pending ones have been deleted before the extension
+     languages are shut down.  */
+  add_final_cleanup ([] ()
+    {
+#if CXX_STD_THREAD
+      std::lock_guard lock (runnable_mutex);
+#endif
+      runnables.clear ();
+    });
 }
