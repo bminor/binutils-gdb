@@ -119,6 +119,10 @@ struct extension_language_ops
      This method is required.  */
   int (*initialized) (const struct extension_language_defn *);
 
+  /* Called just before GDB exits.  This shuts down the extension
+     language.  This can be NULL.  */
+  void (*shutdown) (const struct extension_language_defn *);
+
   /* Process a sequence of commands embedded in GDB's own scripting language.
      E.g.,
      python

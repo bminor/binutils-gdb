@@ -1819,6 +1819,8 @@ quit_force (int *exit_arg, int from_tty)
       exception_print (gdb_stderr, ex);
     }
 
+  ext_lang_shutdown ();
+
   exit (exit_code);
 }
 

@@ -110,6 +110,7 @@ static objfile_script_sourcer_func gdbpy_source_objfile_script;
 static objfile_script_executor_func gdbpy_execute_objfile_script;
 static void gdbpy_initialize (const struct extension_language_defn *);
 static int gdbpy_initialized (const struct extension_language_defn *);
+static void finalize_python (const struct extension_language_defn *);
 static void gdbpy_eval_from_control_command
   (const struct extension_language_defn *, struct command_line *cmd);
 static void gdbpy_start_type_printers (const struct extension_language_defn *,
@@ -147,6 +148,7 @@ static const struct extension_language_ops python_extension_ops =
 {
   gdbpy_initialize,
   gdbpy_initialized,
+  finalize_python,
 
   gdbpy_eval_from_control_command,
 
@@ -2057,7 +2059,7 @@ static struct cmd_list_element *user_show_python_list;
    interpreter.  This lets Python's 'atexit' work.  */
 
 static void
-finalize_python ()
+finalize_python (const struct extension_language_defn *ignore)
 {
   struct active_ext_lang_state *previous_active;
 
@@ -2296,8 +2298,6 @@ init_done:
 
   /* Release the GIL while gdb runs.  */
   PyEval_SaveThread ();
-
-  add_final_cleanup (finalize_python);
 
   /* Only set this when initialization has succeeded.  */
   gdb_python_initialized = 1;

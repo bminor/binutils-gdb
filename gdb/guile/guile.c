@@ -115,6 +115,7 @@ static const struct extension_language_ops guile_extension_ops =
 {
   gdbscm_initialize,
   gdbscm_initialized,
+  nullptr,
 
   gdbscm_eval_from_control_command,
 

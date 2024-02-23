@@ -341,6 +341,18 @@ ext_lang_initialization (void)
     }
 }
 
+/* See extension.h.  */
+
+void
+ext_lang_shutdown ()
+{
+  for (const struct extension_language_defn *extlang : extension_languages)
+    {
+      if (extlang->ops != nullptr && extlang->ops->shutdown != nullptr)
+	extlang->ops->shutdown (extlang);
+    }
+}
+
 /* Invoke the appropriate extension_language_ops.eval_from_control_command
    method to perform CMD, which is a list of commands in an extension language.
 

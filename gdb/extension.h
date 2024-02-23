@@ -282,6 +282,9 @@ extern bool ext_lang_auto_load_enabled (const struct extension_language_defn *);
 
 extern void ext_lang_initialization (void);
 
+/* Shut down all extension languages.  */
+extern void ext_lang_shutdown ();
+
 extern void eval_ext_lang_from_control_command (struct command_line *cmd);
 
 extern void auto_load_ext_lang_scripts_for_objfile (struct objfile *);
