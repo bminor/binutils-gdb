@@ -4038,6 +4038,12 @@ md_parse_option (int c, const char *arg)
   switch (c)
     {
     case OPTION_MARCH:
+      /* List all avaiable extensions.  */
+      if (strcmp (arg, "help") == 0)
+	{
+	  riscv_print_extensions ();
+	  exit (EXIT_SUCCESS);
+	}
       default_arch_with_ext = arg;
       break;
 

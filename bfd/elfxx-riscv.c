@@ -2941,3 +2941,49 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return NULL;
     }
 }
+
+/* Print supported extensions with versions if -march=help.  */
+
+void
+riscv_print_extensions (void)
+{
+  /* Record the previous printed extension.
+     Print the current one if they are not the same.  */
+  const struct riscv_supported_ext *cur = NULL, *prev = NULL;
+  int i, j;
+
+  printf ("All available -march extensions for RISC-V:");
+
+  for (i = 0; riscv_all_supported_ext[i] != NULL; i++)
+    {
+      const struct riscv_supported_ext *exts = riscv_all_supported_ext[i];
+      prev = NULL;
+      for (j = 0; exts[j].name != NULL; j++)
+	{
+	  cur = &exts[j];
+	  /* Unclear version information, skip.  */
+	  if (cur->isa_spec_class == ISA_SPEC_CLASS_NONE
+	      || cur->major_version == RISCV_UNKNOWN_VERSION
+	      || cur->minor_version == RISCV_UNKNOWN_VERSION)
+	    continue;
+
+	  /* Same extension.  */
+	  if (prev && strcmp (prev->name, cur->name) == 0)
+	    {
+	      /* Same version, skip.  */
+	      if (prev->major_version == cur->major_version
+		  && prev->minor_version == cur->minor_version)
+		continue;
+	      /* Different version, print version with comma.  */
+	      else
+		printf (", %d.%d", cur->major_version, cur->minor_version);
+	    }
+	  /* Different extension, print extension and version with newline.  */
+	  else
+	    printf ("\n\t%-40s%d.%d", cur->name, cur->major_version,
+		    cur->minor_version);
+	  prev = &exts[j];
+	}
+    }
+  printf ("\n");
+}

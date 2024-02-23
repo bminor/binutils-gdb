@@ -21,4 +21,5 @@
 if [istarget riscv*-*-*] {
     run_dump_tests [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
     run_list_test "align-1"
+    run_list_test "march-help" "-march=help"
 }

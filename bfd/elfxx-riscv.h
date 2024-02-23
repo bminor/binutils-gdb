@@ -122,6 +122,9 @@ extern const char *
 riscv_multi_subset_supports_ext (riscv_parse_subset_t *, enum riscv_insn_class);
 
 extern void
+riscv_print_extensions (void);
+
+extern void
 bfd_elf32_riscv_set_data_segment_info (struct bfd_link_info *, int *);
 extern void
 bfd_elf64_riscv_set_data_segment_info (struct bfd_link_info *, int *);
