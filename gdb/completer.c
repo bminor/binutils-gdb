@@ -320,25 +320,24 @@ gdb_completer_file_name_dequote (char *filename, int quote_char)
   return strdup (tmp.c_str ());
 }
 
-/* Apply character escaping to the file name in TEXT.  QUOTE_PTR points to
-   the quote character surrounding TEXT, or points to the null-character if
-   there are no quotes around TEXT.  MATCH_TYPE will be one of the readline
-   constants SINGLE_MATCH or MULTI_MATCH depending on if there is one or
-   many completions.  */
+/* Apply character escaping to the filename in TEXT and return a newly
+   allocated buffer containing the possibly updated filename.
+
+   QUOTE_CHAR is the quote character surrounding TEXT, or the
+   null-character if there are no quotes around TEXT.  */
 
 static char *
-gdb_completer_file_name_quote (char *text, int match_type ATTRIBUTE_UNUSED,
-			       char *quote_ptr)
+gdb_completer_file_name_quote_1 (const char *text, char quote_char)
 {
   std::string str;
 
-  if (*quote_ptr == '\'')
+  if (quote_char == '\'')
     {
       /* There is no backslash escaping permitted within a single quoted
 	 string, so in this case we can just return the input sting.  */
       str = text;
     }
-  else if (*quote_ptr == '"')
+  else if (quote_char == '"')
     {
       /* Add escaping for a double quoted filename.  */
       for (const char *input = text;
@@ -352,7 +351,7 @@ gdb_completer_file_name_quote (char *text, int match_type ATTRIBUTE_UNUSED,
     }
   else
     {
-      gdb_assert (*quote_ptr == '\0');
+      gdb_assert (quote_char == '\0');
 
       /* Add escaping for an unquoted filename.  */
       for (const char *input = text;
@@ -369,6 +368,19 @@ gdb_completer_file_name_quote (char *text, int match_type ATTRIBUTE_UNUSED,
   return strdup (str.c_str ());
 }
 
+/* Apply character escaping to the filename in TEXT.  QUOTE_PTR points to
+   the quote character surrounding TEXT, or points to the null-character if
+   there are no quotes around TEXT.  MATCH_TYPE will be one of the readline
+   constants SINGLE_MATCH or MULTI_MATCH depending on if there is one or
+   many completions.  */
+
+static char *
+gdb_completer_file_name_quote (char *text, int match_type ATTRIBUTE_UNUSED,
+			       char *quote_ptr)
+{
+  return gdb_completer_file_name_quote_1 (text, *quote_ptr);
+}
+
 /* The function is used to update the completion word MATCH before
    displaying it to the user in the 'complete' command output.  This
    function is only used for formatting filename or directory names.
@@ -377,12 +389,28 @@ gdb_completer_file_name_quote (char *text, int match_type ATTRIBUTE_UNUSED,
    in which case a trailing "/" (forward-slash) is added, otherwise
    QUOTE_CHAR is added as a trailing quote.
 
+   When ADD_ESCAPES is true any special characters (e.g. whitespace,
+   quotes) will be escaped with a backslash.  See
+   gdb_completer_file_name_quote_1 for full details on escaping.  When
+   ADD_ESCAPES is false then no escaping will be added and MATCH (with the
+   correct trailing character) will be used unmodified.
+
    Return the updated completion word as a string.  */
 
 static std::string
-filename_match_formatter (const char *match, char quote_char)
+filename_match_formatter_1 (const char *match, char quote_char,
+			    bool add_escapes)
 {
-  std::string result (match);
+  std::string result;
+  if (add_escapes)
+    {
+      gdb::unique_xmalloc_ptr<char> quoted_match
+	(gdb_completer_file_name_quote_1 (match, quote_char));
+      result = quoted_match.get ();
+    }
+  else
+    result = match;
+
   if (gdb_path_isdir (gdb_tilde_expand (match).c_str ()))
     result += "/";
   else
@@ -391,16 +419,52 @@ filename_match_formatter (const char *match, char quote_char)
   return result;
 }
 
+/* The formatting function used to format the results of a 'complete'
+   command when the result is a filename, but the filename should not have
+   any escape characters added.  Most commands that accept a filename don't
+   expect the filename to be quoted or to contain escape characters.
+
+   See filename_match_formatter_1 for more argument details.  */
+
+static std::string
+filename_unquoted_match_formatter (const char *match, char quote_char)
+{
+  return filename_match_formatter_1 (match, quote_char, false);
+}
+
+/* The formatting function used to format the results of a 'complete'
+   command when the result is a filename, and the filename should have any
+   special character (e.g. whitespace, quotes) within it escaped with a
+   backslash.  A limited number of commands accept this style of filename
+   argument.
+
+   See filename_match_formatter_1 for more argument details.  */
+
+static std::string
+filename_maybe_quoted_match_formatter (const char *match, char quote_char)
+{
+  return filename_match_formatter_1 (match, quote_char, true);
+}
+
 /* Generate filename completions of WORD, storing the completions into
    TRACKER.  This is used for generating completions for commands that
    only accept unquoted filenames as well as for commands that accept
-   quoted and escaped filenames.  */
+   quoted and escaped filenames.
+
+   When QUOTE_MATCHES is true TRACKER will be given a match formatter
+   function which will add escape characters (if needed) in the results.
+   When QUOTE_MATCHES is false the match formatter provided will not add
+   any escaping to the results.  */
 
 static void
 filename_completer_generate_completions (completion_tracker &tracker,
-					 const char *word)
+					 const char *word,
+					 bool quote_matches)
 {
-  tracker.set_match_format_func (filename_match_formatter);
+  if (quote_matches)
+    tracker.set_match_format_func (filename_maybe_quoted_match_formatter);
+  else
+    tracker.set_match_format_func (filename_unquoted_match_formatter);
 
   int subsequent_name = 0;
   while (1)
@@ -450,7 +514,7 @@ filename_maybe_quoted_completer (struct cmd_list_element *ignore,
 {
   filename_maybe_quoted_completer_handle_brkchars (ignore, tracker,
 						   text, word);
-  filename_completer_generate_completions (tracker, word);
+  filename_completer_generate_completions (tracker, word, true);
 }
 
 /* The brkchars callback used by commands that don't accept quoted
@@ -481,7 +545,7 @@ deprecated_filename_completer
 {
   gdb_assert (tracker.use_custom_word_point ());
   gdb_assert (word != nullptr);
-  filename_completer_generate_completions (tracker, word);
+  filename_completer_generate_completions (tracker, word, false);
 }
 
 /* Find the bounds of the current word for completion purposes, and
