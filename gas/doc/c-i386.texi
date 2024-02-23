@@ -293,6 +293,21 @@ generated.
 Valid @var{CPU} values are identical to the processor list of
 @option{-march=@var{CPU}}.
 
+@cindex @samp{-moperand-check=} option, i386
+@cindex @samp{-moperand-check=} option, x86-64
+@item -moperand-check=@var{none}
+@itemx -moperand-check=@var{warning}
+@itemx -moperand-check=@var{error}
+These options control if the assembler should check certain instruction
+operands or operand combinations.  An example instructions where operand size
+cannot be inferred from its operands and also hasn't been specified by way of
+an instruction suffix.
+@option{-moperand-check=@var{none}} will make the assembler not perform
+these checks.  @option{-moperand-check=@var{warning}} will make the assembler
+issue a warning when respective checks fail, which is the default.
+@option{-moperand-check=@var{error}} will make the assembler issue an error
+when respective checks fail.
+
 @cindex @samp{-msse2avx} option, i386
 @cindex @samp{-msse2avx} option, x86-64
 @item -msse2avx
