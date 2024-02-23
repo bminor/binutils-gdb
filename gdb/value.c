@@ -4499,12 +4499,13 @@ and exceeds this limit will cause an error."),
 			    selftests::test_insert_into_bit_range_vector);
   selftests::register_test ("value_copy", selftests::test_value_copy);
 #endif
-}
 
-/* See value.h.  */
-
-void
-finalize_values ()
-{
-  all_values.clear ();
+  /* Destroy any values currently allocated in a final cleanup instead
+     of leaving it to global destructors, because that may be too
+     late.  For example, the destructors of xmethod values call into
+     the Python runtime.  */
+  add_final_cleanup ([] ()
+    {
+      all_values.clear ();
+    });
 }
