@@ -132,10 +132,7 @@ public:
   bool can_execute_reverse () override;
 
   bool stopped_by_sw_breakpoint () override;
-  bool supports_stopped_by_sw_breakpoint () override;
-
   bool stopped_by_hw_breakpoint () override;
-  bool supports_stopped_by_hw_breakpoint () override;
 
   enum exec_direction_kind execution_direction () override;
   void prepare_to_generate_core () override;
@@ -2773,18 +2770,6 @@ record_btrace_target::stopped_by_sw_breakpoint ()
   return this->beneath ()->stopped_by_sw_breakpoint ();
 }
 
-/* The supports_stopped_by_sw_breakpoint method of target
-   record-btrace.  */
-
-bool
-record_btrace_target::supports_stopped_by_sw_breakpoint ()
-{
-  if (record_is_replaying (minus_one_ptid))
-    return true;
-
-  return this->beneath ()->supports_stopped_by_sw_breakpoint ();
-}
-
 /* The stopped_by_sw_breakpoint method of target record-btrace.  */
 
 bool
@@ -2798,18 +2783,6 @@ record_btrace_target::stopped_by_hw_breakpoint ()
     }
 
   return this->beneath ()->stopped_by_hw_breakpoint ();
-}
-
-/* The supports_stopped_by_hw_breakpoint method of target
-   record-btrace.  */
-
-bool
-record_btrace_target::supports_stopped_by_hw_breakpoint ()
-{
-  if (record_is_replaying (minus_one_ptid))
-    return true;
-
-  return this->beneath ()->supports_stopped_by_hw_breakpoint ();
 }
 
 /* The update_thread_list method of target record-btrace.  */
