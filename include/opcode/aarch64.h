@@ -70,7 +70,7 @@ enum aarch64_feature_bit {
   /* Atomic 64-byte load/store.  */
   AARCH64_FEATURE_LS64,
   /* v8.3 Pointer Authentication.  */
-  AARCH64_FEATURE_PAC,
+  AARCH64_FEATURE_PAUTH,
   /* FP instructions.  */
   AARCH64_FEATURE_FP,
   /* SIMD instructions.  */
@@ -258,7 +258,7 @@ enum aarch64_feature_bit {
 					 | AARCH64_FEATBIT (X, RDMA))
 #define AARCH64_ARCH_V8_2A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_2A))
 #define AARCH64_ARCH_V8_3A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_3A)	\
-					 | AARCH64_FEATBIT (X, PAC)	\
+					 | AARCH64_FEATBIT (X, PAUTH)	\
 					 | AARCH64_FEATBIT (X, RCPC)	\
 					 | AARCH64_FEATBIT (X, COMPNUM) \
 					 | AARCH64_FEATBIT (X, JSCVT))
