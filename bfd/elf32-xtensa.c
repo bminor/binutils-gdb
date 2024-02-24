@@ -11253,7 +11253,7 @@ xtensa_add_names (const char *base, const char *suffix)
 
 static int linkonce_len = sizeof (".gnu.linkonce.") - 1;
 
-static char *
+char *
 xtensa_property_section_name (asection *sec, const char *base_name,
 			      bool separate_sections)
 {
@@ -11331,38 +11331,6 @@ xtensa_get_property_section (asection *sec, const char *base_name)
   if (!prop_sec)
     prop_sec = xtensa_get_separate_property_section (sec, base_name, false);
 
-  return prop_sec;
-}
-
-
-asection *
-xtensa_make_property_section (asection *sec, const char *base_name)
-{
-  char *prop_sec_name;
-  asection *prop_sec;
-
-  /* Check if the section already exists.  */
-  prop_sec_name = xtensa_property_section_name (sec, base_name,
-						elf32xtensa_separate_props);
-  prop_sec = bfd_get_section_by_name_if (sec->owner, prop_sec_name,
-					 match_section_group,
-					 (void *) elf_group_name (sec));
-  /* If not, create it.  */
-  if (! prop_sec)
-    {
-      flagword flags = (SEC_RELOC | SEC_HAS_CONTENTS | SEC_READONLY);
-      flags |= (bfd_section_flags (sec)
-		& (SEC_LINK_ONCE | SEC_LINK_DUPLICATES));
-
-      prop_sec = bfd_make_section_anyway_with_flags
-	(sec->owner, strdup (prop_sec_name), flags);
-      if (! prop_sec)
-	return 0;
-
-      elf_group_name (prop_sec) = elf_group_name (sec);
-    }
-
-  free (prop_sec_name);
   return prop_sec;
 }
 

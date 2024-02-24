@@ -215,7 +215,7 @@ typedef struct property_table_entry_t
 
 #define XTENSA_PROP_INSN_ABSLIT        0x00020000
 
-extern asection *xtensa_make_property_section (asection *, const char *);
+extern char *xtensa_property_section_name (asection *, const char *, bool);
 extern int
 xtensa_read_table_entries (bfd *abfd,
 			   asection *section,

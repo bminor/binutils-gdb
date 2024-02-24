@@ -11789,6 +11789,36 @@ get_frag_is_literal (const fragS *fragP)
   return fragP->tc_frag_data.is_literal;
 }
 
+static asection *
+xtensa_make_property_section (asection *sec, const char *base_name)
+{
+  char *prop_sec_name;
+  asection *prop_sec;
+
+  /* Check if the section already exists.  */
+  prop_sec_name = xtensa_property_section_name (sec, base_name,
+						elf32xtensa_separate_props);
+  prop_sec = bfd_get_section_by_name_if (sec->owner, prop_sec_name,
+					 match_section_group,
+					 (void *) elf_group_name (sec));
+  /* If not, create it.  */
+  if (! prop_sec)
+    {
+      flagword flags = (SEC_RELOC | SEC_HAS_CONTENTS | SEC_READONLY);
+      flags |= (bfd_section_flags (sec)
+		& (SEC_LINK_ONCE | SEC_LINK_DUPLICATES));
+
+      prop_sec = bfd_make_section_anyway_with_flags
+	(sec->owner, strdup (prop_sec_name), flags);
+      if (! prop_sec)
+	return 0;
+
+      elf_group_name (prop_sec) = elf_group_name (sec);
+    }
+
+  free (prop_sec_name);
+  return prop_sec;
+}
 
 static void
 xtensa_create_property_segments (frag_predicate property_function,
