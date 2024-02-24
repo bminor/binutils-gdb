@@ -166,10 +166,8 @@ proc run_quoting_and_escaping_tests { root } {
 
 	    if { $qc eq "'" } {
 		set dq "\""
-		set dq_re "\""
 	    } else {
 		set dq "\\\""
-		set dq_re "\\\\\""
 	    }
 
 	    test_gdb_complete_filename_multiple "$cmd ${qc}${root}/bb2/" \
@@ -193,8 +191,8 @@ proc run_quoting_and_escaping_tests { root } {
 		} "" "${qc}" false \
 		"expand filenames containing quotes"
 
-	    test_gdb_complete_tab_unique "$cmd ${qc}${root}/bb1/aa${dq}" \
-		"$cmd ${qc}${root}/bb1/aa${dq_re}bb${qc}" " " \
+	    test_gdb_complete_unique "$cmd ${qc}${root}/bb1/aa${dq}" \
+		"$cmd ${qc}${root}/bb1/aa${dq}bb${qc}" " " false \
 		"expand unique filename containing double quotes"
 
 	    # It is not possible to include a single quote character
@@ -205,14 +203,12 @@ proc run_quoting_and_escaping_tests { root } {
 	    if { $qc ne "'" } {
 		if { $qc eq "" } {
 		    set sq "\\'"
-		    set sq_re "\\\\'"
 		} else {
 		    set sq "'"
-		    set sq_re "'"
 		}
 
-		test_gdb_complete_tab_unique "$cmd ${qc}${root}/bb1/aa${sq}" \
-		    "$cmd ${qc}${root}/bb1/aa${sq_re}bb${qc}" " " \
+		test_gdb_complete_unique "$cmd ${qc}${root}/bb1/aa${sq}" \
+		    "$cmd ${qc}${root}/bb1/aa${sq}bb${qc}" " " false \
 		    "expand unique filename containing single quote"
 	    }
 	}

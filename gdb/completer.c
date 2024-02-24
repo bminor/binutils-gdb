@@ -48,7 +48,8 @@
 /* Forward declarations.  */
 static const char *completion_find_completion_word (completion_tracker &tracker,
 						    const char *text,
-						    int *quote_char);
+						    int *quote_char,
+						    bool *found_any_quoting);
 
 static void set_rl_completer_word_break_characters (const char *break_chars);
 
@@ -560,7 +561,9 @@ deprecated_filename_completer
    boundaries of the current word.  QC, if non-null, is set to the
    opening quote character if we found an unclosed quoted substring,
    '\0' otherwise.  DP, if non-null, is set to the value of the
-   delimiter character that caused a word break.  */
+   delimiter character that caused a word break.  FOUND_ANY_QUOTING, if
+   non-null, is set to true if we found any quote characters (single or
+   double quotes, or a backslash) while finding the completion word.  */
 
 struct gdb_rl_completion_word_info
 {
@@ -571,7 +574,7 @@ struct gdb_rl_completion_word_info
 
 static const char *
 gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
-			     int *qc, int *dp,
+			     int *qc, int *dp, bool *found_any_quoting,
 			     const char *line_buffer)
 {
   int scan, end, delimiter, pass_next, isbrk;
@@ -583,6 +586,8 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
      the empty string.  */
   if (point == 0)
     {
+      if (found_any_quoting != nullptr)
+	*found_any_quoting = false;
       if (qc != NULL)
 	*qc = '\0';
       if (dp != NULL)
@@ -593,6 +598,7 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
   end = point;
   delimiter = 0;
   quote_char = '\0';
+  bool found_quote = false;
 
   brkchars = info->word_break_characters;
 
@@ -618,6 +624,7 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
 	  if (quote_char != '\'' && line_buffer[scan] == '\\')
 	    {
 	      pass_next = 1;
+	      found_quote = true;
 	      continue;
 	    }
 
@@ -638,6 +645,7 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
 	      /* Found start of a quoted substring.  */
 	      quote_char = line_buffer[scan];
 	      point = scan + 1;
+	      found_quote = true;
 	    }
 	}
     }
@@ -651,8 +659,22 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
 	{
 	  scan = line_buffer[point];
 
-	  if (strchr (brkchars, scan) != 0)
-	    break;
+	  if (strchr (brkchars, scan) == 0)
+	    continue;
+
+	  /* Call the application-specific function to tell us whether
+	     this word break character is quoted and should be skipped.
+	     The const_cast is needed here to comply with the readline
+	     API.  The only function we register for rl_char_is_quoted_p
+	     treats the input buffer as 'const', so we're OK.  */
+	  if (rl_char_is_quoted_p != nullptr && found_quote
+	      && (*rl_char_is_quoted_p) (const_cast<char *> (line_buffer),
+					 point))
+	    continue;
+
+	  /* Convoluted code, but it avoids an n^2 algorithm with calls
+	     to char_is_quoted.  */
+	  break;
 	}
     }
 
@@ -676,6 +698,8 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
 	}
     }
 
+  if (found_any_quoting != nullptr)
+    *found_any_quoting = found_quote;
   if (qc != NULL)
     *qc = quote_char;
   if (dp != NULL)
@@ -702,7 +726,7 @@ advance_to_completion_word (completion_tracker &tracker,
 
   int delimiter;
   const char *start
-    = gdb_rl_find_completion_word (&info, NULL, &delimiter, text);
+    = gdb_rl_find_completion_word (&info, nullptr, &delimiter, nullptr, text);
 
   tracker.advance_custom_word_point_by (start - text);
 
@@ -775,7 +799,8 @@ complete_nested_command_line (completion_tracker &tracker, const char *text)
 
   int quote_char = '\0';
   const char *word = completion_find_completion_word (tracker, text,
-						      &quote_char);
+						      &quote_char,
+						      nullptr);
 
   if (tracker.use_custom_word_point ())
     {
@@ -1992,8 +2017,11 @@ complete (const char *line, char const **word, int *quote_char)
 
   try
     {
+      bool found_any_quoting = false;
+
       *word = completion_find_completion_word (tracker_handle_brkchars,
-					      line, quote_char);
+					       line, quote_char,
+					       &found_any_quoting);
 
       /* Completers that provide a custom word point in the
 	 handle_brkchars phase also compute their completions then.
@@ -2003,6 +2031,12 @@ complete (const char *line, char const **word, int *quote_char)
 	tracker = &tracker_handle_brkchars;
       else
 	{
+	  /* Setting this global matches what readline does within
+	     gen_completion_matches.  We need this set correctly in case
+	     our completion function calls back into readline to perform
+	     completion (e.g. filename_completer does this).  */
+	  rl_completion_found_quote = found_any_quoting;
+
 	  complete_line (tracker_handle_completions, *word, line, strlen (line));
 	  tracker = &tracker_handle_completions;
 	}
@@ -2280,7 +2314,7 @@ gdb_completion_word_break_characters () noexcept
 
 static const char *
 completion_find_completion_word (completion_tracker &tracker, const char *text,
-				 int *quote_char)
+				 int *quote_char, bool *found_any_quoting)
 {
   size_t point = strlen (text);
 
@@ -2290,6 +2324,13 @@ completion_find_completion_word (completion_tracker &tracker, const char *text,
     {
       gdb_assert (tracker.custom_word_point () > 0);
       *quote_char = tracker.quote_char ();
+      /* This isn't really correct, we're ignoring the case where we found
+	 a backslash escaping a character.  However, this isn't an issue
+	 right now as we only rely on *FOUND_ANY_QUOTING being set when
+	 performing filename completion, which doesn't go through this
+	 path.  */
+      if (found_any_quoting != nullptr)
+	*found_any_quoting = *quote_char != '\0';
       return text + tracker.custom_word_point ();
     }
 
@@ -2299,7 +2340,8 @@ completion_find_completion_word (completion_tracker &tracker, const char *text,
   info.quote_characters = rl_completer_quote_characters;
   info.basic_quote_characters = rl_basic_quote_characters;
 
-  return gdb_rl_find_completion_word (&info, quote_char, NULL, text);
+  return gdb_rl_find_completion_word (&info, quote_char, nullptr,
+				      found_any_quoting, text);
 }
 
 /* See completer.h.  */
