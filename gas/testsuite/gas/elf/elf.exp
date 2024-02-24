@@ -149,6 +149,7 @@ if { [is_elf_format] } then {
     run_dump_test "group3"
 
     run_dump_test "attach-1"
+    run_dump_test "attach-2"
     run_dump_test "attach-err"
 
     switch -glob $target_triplet {

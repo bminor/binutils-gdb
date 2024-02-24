@@ -493,16 +493,19 @@ static struct section_stack *section_stack;
 /* ELF section flags for unique sections.  */
 #define SEC_ASSEMBLER_SHF_MASK SHF_GNU_RETAIN
 
-/* Return TRUE iff SEC matches the section info INF.  */
+struct group_list
+{
+  asection **head;		/* Section lists.  */
+  unsigned int num_group;	/* Number of lists.  */
+  htab_t indexes; /* Maps group name to index in head array.  */
+};
+
+static struct group_list groups;
 
 static bool
-get_section_by_match (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
+match_section (const asection *sec, const struct elf_section_match *match)
 {
-  struct elf_section_match *match = (struct elf_section_match *) inf;
-  const char *gname = match->group_name;
-  const char *group_name = elf_group_name (sec);
-  const char *linked_to_symbol_name
-    = sec->map_head.linked_to_symbol_name;
+  const char *linked_to_symbol_name = sec->map_head.linked_to_symbol_name;
   unsigned int sh_info = elf_section_data (sec)->this_hdr.sh_info;
   bfd_vma sh_flags = (elf_section_data (sec)->this_hdr.sh_flags
 		      & SEC_ASSEMBLER_SHF_MASK);
@@ -512,15 +515,98 @@ get_section_by_match (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 	  && ((bfd_section_flags (sec) & SEC_ASSEMBLER_SECTION_ID)
 	       == (match->flags & SEC_ASSEMBLER_SECTION_ID))
 	  && sec->section_id == match->section_id
-	  && (group_name == gname
-	      || (group_name != NULL
-		  && gname != NULL
-		  && strcmp (group_name, gname) == 0))
 	  && (linked_to_symbol_name == match->linked_to_symbol_name
 	      || (linked_to_symbol_name != NULL
 		  && match->linked_to_symbol_name != NULL
 		  && strcmp (linked_to_symbol_name,
 			     match->linked_to_symbol_name) == 0)));
+}
+
+/* Return TRUE iff SEC matches the section info INF.  */
+
+static bool
+get_section_by_match (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
+{
+  struct elf_section_match *match = (struct elf_section_match *) inf;
+  const char *gname = match->group_name;
+  const char *group_name = elf_group_name (sec);
+
+  return ((group_name == gname
+	   || (group_name != NULL
+	       && gname != NULL
+	       && strcmp (group_name, gname) == 0))
+	  && match_section (sec, match));
+}
+
+static void
+free_section_idx (void *ent)
+{
+  string_tuple_t *tuple = ent;
+  free ((char *) tuple->value);
+}
+
+/* Go look in section lists kept per group for SEC_NAME with
+   properties given by MATCH.  If info for the group named by
+   MATCH->GROUP_NAME has been initialised, set GROUP_IDX.  */
+
+static asection *
+group_section_find (const struct elf_section_match *match,
+		    const char *sec_name,
+		    unsigned int **group_idx)
+{
+  if (!groups.indexes)
+    {
+      groups.num_group = 0;
+      groups.head = NULL;
+      groups.indexes = htab_create_alloc (16, hash_string_tuple, eq_string_tuple,
+					  free_section_idx, notes_calloc, NULL);
+      *group_idx = NULL;
+      return NULL;
+    }
+
+  *group_idx = str_hash_find (groups.indexes, match->group_name);
+  if (*group_idx == NULL)
+    return NULL;
+
+  asection *s;
+  for (s = groups.head[**group_idx]; s != NULL; s = elf_next_in_group (s))
+    if ((s->name == sec_name
+	 || strcmp (s->name, sec_name) == 0)
+	&& match_section (s, match))
+      break;
+  return s;
+}
+
+/* Insert SEC into section lists kept per group.  MATCH and GROUP_IDX
+   must be from a prior call to group_section_find.  */
+
+static void
+group_section_insert (const struct elf_section_match *match,
+		      asection *sec,
+		      unsigned int **group_idx)
+{
+  if (*group_idx != NULL)
+    {
+      elf_next_in_group (sec) = groups.head[**group_idx];
+      groups.head[**group_idx] = sec;
+      return;
+    }
+
+  unsigned int i = groups.num_group;
+  if ((i & 127) == 0)
+    groups.head = XRESIZEVEC (asection *, groups.head, i + 128);
+  groups.head[i] = sec;
+  groups.num_group += 1;
+
+  /* We keep the index into groups.head rather than the entry address
+     because groups.head may be realloc'd, and because str_hash values
+     are a void* we make a copy of the index.  Strictly speaking there
+     is no guarantee that void* can represent any int value, so doing
+     without the indirection by casting an int or even uintptr_t may
+     for example lose lsbs of the value.  */
+  unsigned int *idx_ptr = XNEW (unsigned int);
+  *idx_ptr = i;
+  str_hash_insert (groups.indexes, match->group_name, idx_ptr, 0);
 }
 
 /* Handle the .section pseudo-op.  This code supports two different
@@ -582,15 +668,23 @@ change_section (const char *name,
 
   obj_elf_section_change_hook ();
 
-  old_sec = bfd_get_section_by_name_if (stdoutput, name, get_section_by_match,
-					(void *) match_p);
+  unsigned int *group_idx = NULL;
+  if (match_p->group_name)
+    old_sec = group_section_find (match_p, name, &group_idx);
+  else
+    old_sec = bfd_get_section_by_name_if (stdoutput, name, get_section_by_match,
+					  (void *) match_p);
   if (old_sec)
     {
       sec = old_sec;
       subseg_set (sec, new_subsection);
     }
   else
-    sec = subseg_force_new (name, new_subsection);
+    {
+      sec = subseg_force_new (name, new_subsection);
+      if (match_p->group_name)
+	group_section_insert (match_p, sec, &group_idx);
+    }
 
   bed = get_elf_backend_data (stdoutput);
   ssect = (*bed->get_sec_type_attr) (stdoutput, sec);
@@ -1084,6 +1178,29 @@ obj_elf_section_name (void)
   return name;
 }
 
+/* Arrange to put SEC, known to be in group GNAME into the per-group
+   section lists kept by gas.  */
+
+void
+elf_set_group_name (asection *sec, const char *gname)
+{
+  elf_group_name (sec) = gname;
+  elf_section_flags (sec) |= SHF_GROUP;
+
+  struct elf_section_match match;
+  match.group_name = gname;
+  match.linked_to_symbol_name = sec->map_head.linked_to_symbol_name;
+  match.section_id = sec->section_id;
+  match.sh_info = elf_section_data (sec)->this_hdr.sh_info;
+  match.sh_flags = (elf_section_data (sec)->this_hdr.sh_flags
+		    & SEC_ASSEMBLER_SHF_MASK);
+  match.flags = bfd_section_flags (sec) & SEC_ASSEMBLER_SECTION_ID;
+
+  unsigned int *group_idx;
+  if (!group_section_find (&match, sec->name, &group_idx))
+    group_section_insert (&match, sec, &group_idx);
+}
+
 static void
 obj_elf_attach_to_group (int dummy ATTRIBUTE_UNUSED)
 {
@@ -1102,9 +1219,7 @@ obj_elf_attach_to_group (int dummy ATTRIBUTE_UNUSED)
 		 bfd_section_name (now_seg), elf_group_name (now_seg));
       return;
     }
-
-  elf_group_name (now_seg) = gname;
-  elf_section_flags (now_seg) |= SHF_GROUP;
+  elf_set_group_name (now_seg, gname);
 }
 
 void
@@ -2588,11 +2703,27 @@ obj_elf_init_stab_section (segT stab, segT stabstr)
 
 #endif
 
-/* Fill in the counts in the first entry in a .stabs section.  */
+/* Called via bfd_map_over_sections.  If SEC's linked_to_symbol_name
+   isn't NULL, set up its linked-to section.
+   For .stabs section, fill in the counts in the first entry.  */
 
 static void
-adjust_stab_sections (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
+set_additional_section_info (bfd *abfd,
+			     asection *sec,
+			     void *inf ATTRIBUTE_UNUSED)
 {
+  if (sec->map_head.linked_to_symbol_name)
+    {
+      symbolS *linked_to_sym;
+      linked_to_sym = symbol_find (sec->map_head.linked_to_symbol_name);
+      if (!linked_to_sym || !S_IS_DEFINED (linked_to_sym))
+	as_bad (_("undefined linked-to symbol `%s' on section `%s'"),
+		sec->map_head.linked_to_symbol_name,
+		bfd_section_name (sec));
+      else
+	elf_linked_to_section (sec) = S_GET_SEGMENT (linked_to_sym);
+    }
+
   char *name;
   asection *strsec;
   char *p;
@@ -2811,94 +2942,12 @@ elf_fixup_removed_symbol (symbolS **sympp)
   *sympp = symp;
 }
 
-struct group_list
-{
-  asection **head;		/* Section lists.  */
-  unsigned int num_group;	/* Number of lists.  */
-  htab_t indexes; /* Maps group name to index in head array.  */
-};
-
-static struct group_list groups;
-
-/* Called via bfd_map_over_sections.  If SEC is a member of a group,
-   add it to a list of sections belonging to the group.  INF is a
-   pointer to a struct group_list, which is where we store the head of
-   each list.  If its link_to_symbol_name isn't NULL, set up its
-   linked-to section.  */
-
-static void
-build_additional_section_info (bfd *abfd ATTRIBUTE_UNUSED,
-				  asection *sec, void *inf)
-{
-  struct group_list *list = (struct group_list *) inf;
-  const char *group_name = elf_group_name (sec);
-  unsigned int i;
-  unsigned int *elem_idx;
-  unsigned int *idx_ptr;
-
-  if (sec->map_head.linked_to_symbol_name)
-    {
-      symbolS *linked_to_sym;
-      linked_to_sym = symbol_find (sec->map_head.linked_to_symbol_name);
-      if (!linked_to_sym || !S_IS_DEFINED (linked_to_sym))
-	as_bad (_("undefined linked-to symbol `%s' on section `%s'"),
-		sec->map_head.linked_to_symbol_name,
-		bfd_section_name (sec));
-      else
-	elf_linked_to_section (sec) = S_GET_SEGMENT (linked_to_sym);
-    }
-
-  if (group_name == NULL)
-    return;
-
-  /* If this group already has a list, add the section to the head of
-     the list.  */
-  elem_idx = (unsigned int *) str_hash_find (list->indexes, group_name);
-  if (elem_idx != NULL)
-    {
-      elf_next_in_group (sec) = list->head[*elem_idx];
-      list->head[*elem_idx] = sec;
-      return;
-    }
-
-  /* New group.  Make the arrays bigger in chunks to minimize calls to
-     realloc.  */
-  i = list->num_group;
-  if ((i & 127) == 0)
-    {
-      unsigned int newsize = i + 128;
-      list->head = XRESIZEVEC (asection *, list->head, newsize);
-    }
-  list->head[i] = sec;
-  list->num_group += 1;
-
-  /* Add index to hash.  */
-  idx_ptr = XNEW (unsigned int);
-  *idx_ptr = i;
-  str_hash_insert (list->indexes, group_name, idx_ptr, 0);
-}
-
-static void
-free_section_idx (void *ent)
-{
-  string_tuple_t *tuple = ent;
-  free ((char *) tuple->value);
-}
-
 /* Create symbols for group signature.  */
 
 void
 elf_adjust_symtab (void)
 {
   unsigned int i;
-
-  /* Go find section groups.  */
-  groups.num_group = 0;
-  groups.head = NULL;
-  groups.indexes = htab_create_alloc (16, hash_string_tuple, eq_string_tuple,
-				      free_section_idx, notes_calloc, NULL);
-  bfd_map_over_sections (stdoutput, build_additional_section_info,
-			 &groups);
 
   /* Make the SHT_GROUP sections that describe each section group.  We
      can't set up the section contents here yet, because elf section
@@ -2966,7 +3015,7 @@ elf_adjust_symtab (void)
 void
 elf_frob_file (void)
 {
-  bfd_map_over_sections (stdoutput, adjust_stab_sections, NULL);
+  bfd_map_over_sections (stdoutput, set_additional_section_info, NULL);
 
 #ifdef elf_tc_final_processing
   elf_tc_final_processing ();

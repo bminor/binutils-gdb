@@ -297,4 +297,6 @@ extern asection *elf_com_section_ptr;
 extern symbolS * elf_common_parse (int ignore ATTRIBUTE_UNUSED, symbolS *symbolP,
 				   addressT size);
 
+extern void elf_set_group_name (asection *, const char *);
+
 #endif /* _OBJ_ELF_H */

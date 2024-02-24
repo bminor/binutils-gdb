@@ -11718,10 +11718,11 @@ cache_literal_section (bool use_abs_literals)
 	       | (linkonce ? (SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD) : 0)
 	       | (use_abs_literals ? SEC_DATA : SEC_CODE));
 
-      elf_group_name (seg) = group_name;
-
       bfd_set_section_flags (seg, flags);
       bfd_set_section_alignment (seg, 2);
+
+      if (group_name)
+	elf_set_group_name (seg, group_name);
     }
 
   *pcached = seg;
@@ -11813,7 +11814,8 @@ xtensa_make_property_section (asection *sec, const char *base_name)
       if (! prop_sec)
 	return 0;
 
-      elf_group_name (prop_sec) = elf_group_name (sec);
+      if (elf_group_name (sec))
+	elf_set_group_name (prop_sec, elf_group_name (sec));
     }
 
   free (prop_sec_name);
