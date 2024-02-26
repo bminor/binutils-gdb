@@ -536,7 +536,7 @@ public:
     abstract_to_concrete;
 
   /* The address map that is used by the DWARF index code.  */
-  struct addrmap *index_addrmap = nullptr;
+  addrmap_fixed *index_addrmap = nullptr;
 };
 
 /* An iterator for all_units that is based on index.  This

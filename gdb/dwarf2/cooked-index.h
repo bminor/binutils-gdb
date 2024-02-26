@@ -362,7 +362,7 @@ private:
   cooked_index_entry *m_main = nullptr;
   /* The addrmap.  This maps address ranges to dwarf2_per_cu_data
      objects.  */
-  addrmap *m_addrmap = nullptr;
+  addrmap_fixed *m_addrmap = nullptr;
   /* Storage for canonical names.  */
   std::vector<gdb::unique_xmalloc_ptr<char>> m_names;
 };

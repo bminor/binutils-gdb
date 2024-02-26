@@ -30,7 +30,7 @@ struct compunit_symtab;
 struct block_namespace_info;
 struct using_direct;
 struct obstack;
-struct addrmap;
+struct addrmap_fixed;
 
 /* Blocks can occupy non-contiguous address ranges.  When this occurs,
    startaddr and endaddr within struct block (still) specify the lowest
@@ -410,22 +410,22 @@ struct blockvector
   { return this->block (STATIC_BLOCK); }
 
   /* Return the address -> block map of this blockvector.  */
-  addrmap *map ()
+  addrmap_fixed *map ()
   { return m_map; }
 
   /* Const version of the above.  */
-  const addrmap *map () const
+  const addrmap_fixed *map () const
   { return m_map; }
 
   /* Set this blockvector's address -> block map.  */
-  void set_map (addrmap *map)
+  void set_map (addrmap_fixed *map)
   { m_map = map; }
 
 private:
   /* An address map mapping addresses to blocks in this blockvector.
      This pointer is zero if the blocks' start and end addresses are
      enough.  */
-  struct addrmap *m_map;
+  addrmap_fixed *m_map;
 
   /* Number of blocks in the list.  */
   int m_num_blocks;
