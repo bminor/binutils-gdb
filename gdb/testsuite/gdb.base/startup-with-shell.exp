@@ -66,6 +66,7 @@ with_test_prefix "startup_with_shell = on; run_args = *.unique-extension" {
 
 with_test_prefix "startup_with_shell = off; run_args = *.unique-extension" {
     initial_setup_simple "off" "$unique_file_dir/*.unique-extension"
+    gdb_test_no_output "set print characters unlimited"
     gdb_test "print argv\[1\]" "\\\$$decimal = $hex \"$unique_file_dir/\\\*\.unique-extension\"" \
 	"first argument not expanded"
 }
