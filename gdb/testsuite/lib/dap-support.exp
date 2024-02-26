@@ -381,6 +381,9 @@ proc dap_check_log_file {} {
     if {$ok} {
 	pass "exceptions in log file"
     } else {
+	verbose -log --  "--- DAP LOG START ---"
+	verbose -log -- $contents
+	verbose -log --  "--- DAP LOG END ---"
 	fail "exceptions in log file"
     }
 }
