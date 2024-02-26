@@ -211,7 +211,7 @@ struct variant_part;
    control other variant parts as well.  This struct corresponds to
    DW_TAG_variant in DWARF.  */
 
-struct variant : allocate_on_obstack
+struct variant : allocate_on_obstack<variant>
 {
   /* * The discriminant ranges for this variant.  */
   gdb::array_view<discriminant_range> discriminants;
@@ -243,7 +243,7 @@ struct variant : allocate_on_obstack
    and holds an array of variants.  This struct corresponds to
    DW_TAG_variant_part in DWARF.  */
 
-struct variant_part : allocate_on_obstack
+struct variant_part : allocate_on_obstack<variant_part>
 {
   /* * The index of the discriminant field in the outer type.  This is
      an index into the type's array of fields.  If this is -1, there

@@ -1244,7 +1244,7 @@ extern gdb::array_view<const struct symbol_impl> symbol_impls;
 
 /* This structure is space critical.  See space comments at the top.  */
 
-struct symbol : public general_symbol_info, public allocate_on_obstack
+struct symbol : public general_symbol_info, public allocate_on_obstack<symbol>
 {
   symbol ()
     /* Class-initialization of bitfields is only allowed in C++20.  */

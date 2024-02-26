@@ -105,7 +105,7 @@ struct blockranges
    This implies that within the body of one function
    the blocks appear in the order of a depth-first tree walk.  */
 
-struct block : public allocate_on_obstack
+struct block : public allocate_on_obstack<block>
 {
   /* Return this block's start address.  */
   CORE_ADDR start () const

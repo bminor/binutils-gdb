@@ -104,7 +104,7 @@ extern bool language_requires_canonicalization (enum language lang);
    This is an "open" class and the members are all directly
    accessible.  It is read-only after the index has been fully read
    and processed.  */
-struct cooked_index_entry : public allocate_on_obstack
+struct cooked_index_entry : public allocate_on_obstack<cooked_index_entry>
 {
   cooked_index_entry (sect_offset die_offset_, enum dwarf_tag tag_,
 		      cooked_index_flag flags_,

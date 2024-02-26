@@ -31,7 +31,7 @@
    C++ files, namely using declarations and the current namespace in
    scope.  */
 
-struct block_namespace_info : public allocate_on_obstack
+struct block_namespace_info : public allocate_on_obstack<block_namespace_info>
 {
   const char *scope = nullptr;
   struct using_direct *using_decl = nullptr;

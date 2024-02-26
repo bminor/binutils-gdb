@@ -133,14 +133,18 @@ struct auto_obstack : obstack
   { obstack_free (this, obstack_base (this)); }
 };
 
-/* Objects are allocated on obstack instead of heap.  */
+/* Objects are allocated on obstack instead of heap.  This is a mixin
+   that uses CRTP to ensure that the type in question is trivially
+   destructible.  */
 
+template<typename T>
 struct allocate_on_obstack
 {
   allocate_on_obstack () = default;
 
   void* operator new (size_t size, struct obstack *obstack)
   {
+    static_assert (IsFreeable<T>::value);
     return obstack_alloc (obstack, size);
   }
 
