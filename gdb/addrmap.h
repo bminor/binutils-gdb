@@ -44,8 +44,6 @@ using addrmap_foreach_const_fn
 /* The base class for addrmaps.  */
 struct addrmap
 {
-  virtual ~addrmap () = default;
-
   /* Return the object associated with ADDR in MAP.  */
   const void *find (CORE_ADDR addr) const
   { return this->do_find (addr); }
@@ -67,6 +65,9 @@ struct addrmap
   int foreach (addrmap_foreach_fn fn)
   { return this->do_foreach (fn); }
 
+
+protected:
+  ~addrmap () = default;
 
 private:
   /* Worker for find, implemented by sub-classes.  */
