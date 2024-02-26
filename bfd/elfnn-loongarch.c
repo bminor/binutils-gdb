@@ -2868,14 +2868,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      else if (resolved_dynly)
 		{
 		  if (h->dynindx == -1)
-		    {
-		      if (h->root.type == bfd_link_hash_undefined)
-			(*info->callbacks->undefined_symbol)
-			  (info, name, input_bfd, input_section,
-			   rel->r_offset, true);
-
-		      outrel.r_info = ELFNN_R_INFO (0, r_type);
-		    }
+		    outrel.r_info = ELFNN_R_INFO (0, r_type);
 		  else
 		    outrel.r_info = ELFNN_R_INFO (h->dynindx, r_type);
 
