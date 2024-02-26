@@ -22,15 +22,20 @@
 #include "gdbsupport/common-regcache.h"
 #include "arch/aarch32.h"
 
-static struct target_desc *tdesc_aarch32;
+static struct target_desc *tdesc_aarch32_list[2];
 
 /* See aarch32-tdep.h.  */
 
 const target_desc *
-aarch32_read_description ()
+aarch32_read_description (bool tls)
 {
-  if (tdesc_aarch32 == nullptr)
-    tdesc_aarch32 = aarch32_create_target_description ();
+  struct target_desc *tdesc = tdesc_aarch32_list[tls];
 
-  return tdesc_aarch32;
+  if (tdesc == nullptr)
+    {
+      tdesc = aarch32_create_target_description (tls);
+      tdesc_aarch32_list[tls] = tdesc;
+    }
+
+  return tdesc;
 }

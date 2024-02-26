@@ -22,6 +22,6 @@ struct target_desc;
 
 /* Get the AArch32 target description.  */
 
-const target_desc *aarch32_read_description ();
+const target_desc *aarch32_read_description (bool tls);
 
 #endif /* aarch32-tdep.h.  */

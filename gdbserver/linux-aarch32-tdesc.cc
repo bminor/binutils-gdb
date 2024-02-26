@@ -32,7 +32,7 @@ aarch32_linux_read_description ()
 {
   if (tdesc_aarch32 == nullptr)
     {
-      tdesc_aarch32 = aarch32_create_target_description ();
+      tdesc_aarch32 = aarch32_create_target_description (false);
 
       static const char *expedite_regs[] = { "r11", "sp", "pc", 0 };
       init_target_desc (tdesc_aarch32, expedite_regs);

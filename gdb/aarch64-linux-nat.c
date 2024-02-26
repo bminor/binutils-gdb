@@ -887,7 +887,7 @@ aarch64_linux_nat_target::read_description ()
 
   ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iovec);
   if (ret == 0)
-    return aarch32_read_description ();
+    return aarch32_read_description (false);
 
   CORE_ADDR hwcap = linux_get_hwcap ();
   CORE_ADDR hwcap2 = linux_get_hwcap2 ();

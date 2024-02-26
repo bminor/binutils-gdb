@@ -350,7 +350,7 @@ arm_netbsd_nat_target::read_description ()
 
   len = sizeof(flag);
   if (sysctlbyname("machdep.neon_present", &flag, &len, NULL, 0) == 0 && flag)
-    return aarch32_read_description ();
+    return aarch32_read_description (false);
 
   return arm_read_description (ARM_FP_TYPE_VFPV3, false);
 }
