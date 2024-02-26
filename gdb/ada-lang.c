@@ -10993,7 +10993,7 @@ ada_unop_ind_operation::evaluate (struct type *expect_type,
 					  arg1));
       else
 	return value_at_lazy (builtin_type (exp->gdbarch)->builtin_int,
-			      (CORE_ADDR) value_as_address (arg1));
+			      value_as_address (arg1));
     }
 
   if (ada_is_array_descriptor_type (type))
