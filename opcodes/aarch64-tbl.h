@@ -1885,6 +1885,10 @@
   QLF4(S_S,P_M,S_S,S_S),                                \
   QLF4(S_D,P_M,S_D,S_D),                                \
 }
+#define OP_SVE_VMVV_D                                  	\
+{                                                       \
+  QLF4(S_D,P_M,S_D,S_D),                                \
+}
 #define OP_SVE_VMVVU_HSD                                \
 {                                                       \
   QLF5(S_H,P_M,S_H,S_H,NIL),                            \
@@ -2657,6 +2661,8 @@ static const aarch64_feature_set aarch64_feature_rcpc3 =
   AARCH64_FEATURE (RCPC3);
 static const aarch64_feature_set aarch64_feature_cpa =
   AARCH64_FEATURE (CPA);
+static const aarch64_feature_set aarch64_feature_cpa_sve =
+  AARCH64_FEATURES (2, CPA, SVE);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2724,6 +2730,7 @@ static const aarch64_feature_set aarch64_feature_cpa =
 #define SVE2p1  &aarch64_feature_sve2p1
 #define RCPC3	  &aarch64_feature_rcpc3
 #define CPA	  &aarch64_feature_cpa
+#define CPA_SVE   &aarch64_feature_cpa_sve
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2898,6 +2905,9 @@ static const aarch64_feature_set aarch64_feature_cpa =
   { NAME, OPCODE, MASK, CLASS, 0, RCPC3, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define CPA_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS) \
   { NAME, OPCODE, MASK, CLASS, 0, CPA, OPS, QUALS, 0, 0, 0, NULL }
+#define CPA_SVE_INSNC(NAME,OPCODE,MASK,CLASS,OPS,QUALS,CONSTRAINTS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, CPA_SVE, OPS, QUALS, \
+    F_STRICT, CONSTRAINTS, TIED, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -6407,6 +6417,14 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   CPA_INSN ("subpt",  0xda002000, 0xffe0e000, aarch64_misc, OP3 (Rd_SP, Rn_SP, Rm_LSL), QL_I3SAMEX),
   CPA_INSN ("maddpt", 0x9b600000, 0xffe08000, aarch64_misc, OP4 (Rd, Rn, Rm, Ra), QL_I4SAMEX),
   CPA_INSN ("msubpt", 0x9b608000, 0xffe08000, aarch64_misc, OP4 (Rd, Rn, Rm, Ra), QL_I4SAMEX),
+
+  CPA_SVE_INSNC ("addpt", 0x04c40000, 0xffffe000, sve_misc, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_VMVV_D, C_SCAN_MOVPRFX, 2),
+  CPA_SVE_INSNC ("addpt", 0x04e00800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_D, 0, 0),
+  CPA_SVE_INSNC ("subpt", 0x04c50000, 0xffffe000, sve_misc, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_VMVV_D, C_SCAN_MOVPRFX, 2),
+  CPA_SVE_INSNC ("subpt", 0x04e00c00, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_D, 0, 0),
+
+  CPA_SVE_INSNC ("madpt", 0x44c0d800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zm_16, SVE_Za_5), OP_SVE_VVV_D, C_SCAN_MOVPRFX, 0),
+  CPA_SVE_INSNC ("mlapt", 0x44c0d000, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_D, C_SCAN_MOVPRFX, 0),
 
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };
