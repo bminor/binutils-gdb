@@ -1400,7 +1400,7 @@ consume_one_event (int pid)
 
 ptid_t
 amd_dbgapi_target::wait (ptid_t ptid, struct target_waitstatus *ws,
-		       target_wait_flags target_options)
+			 target_wait_flags target_options)
 {
   gdb_assert (!current_inferior ()->process_target ()->commit_resumed_state);
   gdb_assert (ptid == minus_one_ptid || ptid.is_pid ());
