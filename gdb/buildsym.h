@@ -25,7 +25,6 @@
 
 struct objfile;
 struct symbol;
-struct addrmap;
 struct compunit_symtab;
 enum language;
 

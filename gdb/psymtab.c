@@ -24,7 +24,6 @@
 #include "block.h"
 #include "filenames.h"
 #include "source.h"
-#include "addrmap.h"
 #include "gdbtypes.h"
 #include "ui-out.h"
 #include "command.h"
