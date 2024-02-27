@@ -7,8 +7,8 @@
 	.endm
 
 	.macro	rwreg, name
-	mrs	x0, \name
 	msr	\name, x0
+	mrs	x0, \name
 	.endm
 
 	roreg	id_dfr1_el1

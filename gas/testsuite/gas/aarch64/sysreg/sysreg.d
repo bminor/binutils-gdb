@@ -24,12 +24,12 @@ Disassembly of section \.text:
 .*:	d5380260 	mrs	x0, id_isar3_el1
 .*:	d5380280 	mrs	x0, id_isar4_el1
 .*:	d53802a0 	mrs	x0, id_isar5_el1
-.*:	d538cf00 	mrs	x0, s3_0_c12_c15_0
-.*:	d5384b00 	mrs	x0, s3_0_c4_c11_0
-.*:	d5184b00 	msr	s3_0_c4_c11_0, x0
-.*:	d5310300 	mrs	x0, trcstatr
-.*:	d5110300 	msr	trcstatr, x0
 .*:	d5380640 	mrs	x0, id_aa64isar2_el1
 .*:	d538065e 	mrs	x30, id_aa64isar2_el1
 .*:	d5380660 	mrs	x0, id_aa64isar3_el1
 .*:	d538067e 	mrs	x30, id_aa64isar3_el1
+.*:	d538cf00 	mrs	x0, s3_0_c12_c15_0
+.*:	d5184b00 	msr	s3_0_c4_c11_0, x0
+.*:	d5384b00 	mrs	x0, s3_0_c4_c11_0
+.*:	d5110300 	msr	trcstatr, x0
+.*:	d5310300 	mrs	x0, trcstatr

@@ -1,8 +1,8 @@
 	.arch armv9.4-a+d128+the
 
 	.macro	rwreg128, name
-	mrrs	x2, x3, \name
 	msrr	\name, x2, x3
+	mrrs	x2, x3, \name
 	.endm
 
 	rwreg128	par_el1

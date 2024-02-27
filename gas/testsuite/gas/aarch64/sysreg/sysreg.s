@@ -24,15 +24,15 @@
 	mrs x0, id_isar4_el1
 	mrs x0, id_isar5_el1
 
-	mrs x0, s3_0_c12_c15_0
-	mrs x0, s3_0_c4_c11_0
-	msr s3_0_c4_c11_0, x0
-
-	mrs x0, s2_1_c0_c3_0
-	msr s2_1_c0_c3_0, x0
-
 	mrs x0, id_aa64isar2_el1
 	mrs x30, id_aa64isar2_el1
 
 	mrs x0, id_aa64isar3_el1
 	mrs x30, id_aa64isar3_el1
+
+	mrs x0, s3_0_c12_c15_0
+	msr s3_0_c4_c11_0, x0
+	mrs x0, s3_0_c4_c11_0
+
+	msr s2_1_c0_c3_0, x0
+	mrs x0, s2_1_c0_c3_0
