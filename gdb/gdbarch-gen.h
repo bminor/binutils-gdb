@@ -1794,7 +1794,8 @@ extern void set_gdbarch_core_parse_exec_context (struct gdbarch *gdbarch, gdbarc
    technologies.  For example, the Intel Control-Flow Enforcement Technology
    (Intel CET) on x86 provides a shadow stack and indirect branch tracking.
    To enable shadow stack support for inferior calls the shadow_stack_push
-   gdbarch hook has to be provided.
+   gdbarch hook has to be provided.  The get_shadow_stack_pointer gdbarch
+   hook has to be provided to enable displaced stepping.
 
    Push NEW_ADDR to the shadow stack and update the shadow stack pointer. */
 
@@ -1803,3 +1804,16 @@ extern bool gdbarch_shadow_stack_push_p (struct gdbarch *gdbarch);
 typedef void (gdbarch_shadow_stack_push_ftype) (struct gdbarch *gdbarch, CORE_ADDR new_addr, regcache *regcache);
 extern void gdbarch_shadow_stack_push (struct gdbarch *gdbarch, CORE_ADDR new_addr, regcache *regcache);
 extern void set_gdbarch_shadow_stack_push (struct gdbarch *gdbarch, gdbarch_shadow_stack_push_ftype *shadow_stack_push);
+
+/* If possible, return the shadow stack pointer.  If the shadow stack
+   feature is enabled then set SHADOW_STACK_ENABLED to true, otherwise
+   set SHADOW_STACK_ENABLED to false.  This hook has to be provided to enable
+   displaced stepping for shadow stack enabled programs.
+   On some architectures, the shadow stack pointer is available even if the
+   feature is disabled.  So dependent on the target, an implementation of
+   this function may return a valid shadow stack pointer, but set
+   SHADOW_STACK_ENABLED to false. */
+
+typedef std::optional<CORE_ADDR> (gdbarch_get_shadow_stack_pointer_ftype) (struct gdbarch *gdbarch, regcache *regcache, bool &shadow_stack_enabled);
+extern std::optional<CORE_ADDR> gdbarch_get_shadow_stack_pointer (struct gdbarch *gdbarch, regcache *regcache, bool &shadow_stack_enabled);
+extern void set_gdbarch_get_shadow_stack_pointer (struct gdbarch *gdbarch, gdbarch_get_shadow_stack_pointer_ftype *get_shadow_stack_pointer);
