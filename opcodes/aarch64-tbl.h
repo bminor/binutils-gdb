@@ -1644,6 +1644,14 @@
 {                                                       \
   QLF2(S_H,S_B),                                        \
 }
+#define OP_SVE_BH                                       \
+{                                                       \
+  QLF2(S_B,S_H),                                        \
+}
+#define OP_SVE_BS                                       \
+{                                                       \
+  QLF2(S_B,S_S),                                        \
+}
 #define OP_SVE_HHH                                      \
 {                                                       \
   QLF3(S_H,S_H,S_H),                                    \
@@ -6500,6 +6508,18 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   FP8_INSN("fcvtn", 0xe40f400,  0xbfe0fc00, asimdmisc, OP3 (Vd, Vn, Vm), QL_V3_BHH, F_SIZEQ),
   FP8_INSN("fscale", 0x2ec03c00, 0xbfe0fc00, asimdmisc, OP3 (Vd, Vn, Vm), QL_VSHIFT_H, F_SIZEQ),
   FP8_INSN("fscale", 0x2ea0fc00, 0xbfa0fc00, asimdmisc, OP3 (Vd, Vn, Vm), QL_V3SAMESD, F_SIZEQ),
+  FP8_SVE2_INSN ("bf1cvt", 0x65083800, 0xfffffc00, sve_misc, 0, OP2 (SVE_Zd, SVE_Zn), OP_SVE_HB, 0, 0),
+  FP8_SVE2_INSN ("bf2cvt", 0x65083c00, 0xfffffc00, sve_misc, 0, OP2 (SVE_Zd, SVE_Zn), OP_SVE_HB, 0, 0),
+  FP8_SVE2_INSN ("bf1cvtlt", 0x65093800, 0xfffffc00, sve_misc, 0, OP2 (SVE_Zd, SVE_Zn), OP_SVE_HB, 0, 0),
+  FP8_SVE2_INSN ("bf2cvtlt", 0x65093c00, 0xfffffc00, sve_misc, 0, OP2 (SVE_Zd, SVE_Zn), OP_SVE_HB, 0, 0),
+  FP8_SVE2_INSN ("f1cvt", 0x65083000, 0xfffffc00, sve_misc, 0, OP2 (SVE_Zd, SVE_Zn), OP_SVE_HB, 0, 0),
+  FP8_SVE2_INSN ("f2cvt", 0x65083400, 0xfffffc00, sve_misc, 0, OP2 (SVE_Zd, SVE_Zn), OP_SVE_HB, 0, 0),
+  FP8_SVE2_INSN ("f1cvtlt", 0x65093000, 0xfffffc00, sve_misc, 0, OP2 (SVE_Zd, SVE_Zn), OP_SVE_HB, 0, 0),
+  FP8_SVE2_INSN ("f2cvtlt", 0x65093400, 0xfffffc00, sve_misc, 0, OP2 (SVE_Zd, SVE_Zn), OP_SVE_HB, 0, 0),
+  FP8_SVE2_INSN ("bfcvtn", 0x650a3800, 0xfffffc20, sve_misc, 0, OP2 (SVE_Zd, SME_Znx2), OP_SVE_BH, 0, 0),
+  FP8_SVE2_INSN ("fcvtn", 0x650a3000, 0xfffffc20, sve_misc, 0, OP2 (SVE_Zd, SME_Znx2), OP_SVE_BH, 0, 0),
+  FP8_SVE2_INSN ("fcvtnb", 0x650a3400, 0xfffffc20, sve_misc, 0, OP2 (SVE_Zd, SME_Znx2), OP_SVE_BS, 0, 0),
+  FP8_SVE2_INSN ("fcvtnt", 0x650a3c00, 0xfffffc20, sve_misc, 0, OP2 (SVE_Zd, SME_Znx2), OP_SVE_BS, 0, 0),
 
 /* Checked Pointer Arithmetic Instructions.  */
   CPA_INSN ("addpt",  0x9a002000, 0xffe0e000, aarch64_misc, OP3 (Rd_SP, Rn_SP, Rm_LSL), QL_I3SAMEX),
