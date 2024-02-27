@@ -25,7 +25,7 @@ use warnings;
 # Disable before release
 # use Perl::Critic;
 
-use bignum;
+use bigint;
 use List::Util qw (max);
 use Cwd qw (abs_path cwd);
 use File::Basename;
