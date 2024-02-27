@@ -85,6 +85,9 @@ set s390xtests {
      "-m64" {pltoffset-1.s}
      {{objdump "-dzrj.text --stop-address=16" pltoffset-1.dd}}
      "pltoffset-1"}
+    {"WEAKUNDEF1: overflow test"
+     "-m elf64_s390 -dT 8GB.ld --no-error-rwx-segments" "" "-m64" {weakundef-1.s}
+     {{objdump "-dzrj.text" weakundef-1.dd}} "weakundef-1"}
 }
 
 if [istarget "s390-*-*"] {

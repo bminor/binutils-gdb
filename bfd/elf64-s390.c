@@ -2475,6 +2475,60 @@ elf_s390_relocate_section (bfd *output_bfd,
 			    + h->plt.offset);
 	      goto do_relocation;
 	    }
+
+	  /* Replace relative long addressing instructions of weak
+	     symbols, which will definitely resolve to zero, with
+	     either a load address of 0, a NOP, or a trapping insn.
+	     This prevents the PC32DBL relocation from overflowing in
+	     case the binary will be loaded at 4GB or more.  */
+	  if (h != NULL
+	      && h->root.type == bfd_link_hash_undefweak
+	      && !h->root.linker_def
+	      && (bfd_link_executable (info)
+		  || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	      && r_type == R_390_PC32DBL)
+	    {
+	      void *insn_start = contents + rel->r_offset - 2;
+	      uint16_t op = bfd_get_16 (input_bfd, insn_start) & 0xff0f;
+	      uint8_t reg = bfd_get_8 (input_bfd, insn_start + 1) & 0xf0;
+
+	      /* NOTE: The order of the if's is important!  */
+	      /* Replace load address relative long (larl) with load
+		 address (lay) */
+	      if (op == 0xc000)
+		{
+		  /* larl rX,<weak sym> -> lay rX,0(0)  */
+		  bfd_put_16 (output_bfd, 0xe300 | reg, insn_start);
+		  bfd_put_32 (output_bfd, 0x71, insn_start + 2);
+		  continue;
+		}
+	      /* Replace prefetch data relative long (pfdrl) with a NOP  */
+	      else if (op == 0xc602)
+		{
+		  /* Emit a 6-byte NOP: jgnop .  */
+		  bfd_put_16 (output_bfd, 0xc004, insn_start);
+		  bfd_put_32 (output_bfd, 0x0, insn_start + 2);
+		  continue;
+		}
+	      /* Replace the following instructions with a trap:
+		 - branch relative and save long (brasl)
+		 - load (logical) relative long (lrl, lgrl, lgfrl, llgfrl)
+		 - load (logical) halfword relative long (lhrl, lghrl, llhrl, llghrl)
+		 - store relative long (strl, stgrl)
+		 - store halfword relative long (sthrl)
+		 - execute relative long (exrl)
+		 - compare (logical) relative long (crl, clrl, cgrl, clgrl, cgfrl, clgfrl)
+		 - compare (logical) halfword relative long (chrl, cghrl, clhrl, clghrl)
+		 - branch relative on count high (brcth)  */
+	      else if (op == 0xc005 || (op & 0xff00) == 0xc400
+		       || (op & 0xff00) == 0xc600 || op == 0xcc06)
+		{
+		  /* Emit a 6-byte trap: jg .+2  */
+		  bfd_put_16 (output_bfd, 0xc0f4, insn_start);
+		  bfd_put_32 (output_bfd, 0x1, insn_start + 2);
+		  continue;
+		}
+	    }
 	  /* Fall through.  */
 
 	case R_390_8:
