@@ -2486,7 +2486,8 @@ elf_s390_relocate_section (bfd *output_bfd,
 	      && !h->root.linker_def
 	      && (bfd_link_executable (info)
 		  || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-	      && r_type == R_390_PC32DBL)
+	      && r_type == R_390_PC32DBL
+	      && rel->r_offset >= 2)
 	    {
 	      void *insn_start = contents + rel->r_offset - 2;
 	      uint16_t op = bfd_get_16 (input_bfd, insn_start) & 0xff0f;
