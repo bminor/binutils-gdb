@@ -9,10 +9,10 @@
 [^ :]+:[0-9]+: Info:    	bfcvtn z0\.h, {z0\.s-z3\.s}
 [^ :]+:[0-9]+: Error: operand mismatch -- `bfcvt z0\.s,{z0\.h-z3\.h}'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	bfcvt z0\.h, {z0\.s-z3\.s}
+[^ :]+:[0-9]+: Info:    	bfcvt z0\.b, {z0\.h-z3\.h}
 [^ :]+:[0-9]+: Error: operand mismatch -- `fcvt z0\.s,{z0\.h-z1\.h}'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	fcvt z0\.h, {z0\.s-z1\.s}
+[^ :]+:[0-9]+: Info:    	fcvt z0\.b, {z0\.h-z1\.h}
 [^ :]+:[0-9]+: Error: operand mismatch -- `fcvt z0\.s,{z0\.s-z1\.s}'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	fcvt z0\.h, {z0\.s-z1\.s}
