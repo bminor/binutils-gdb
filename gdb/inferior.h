@@ -86,13 +86,7 @@ struct infcall_suspend_state_deleter
 	/* If we are restoring the inferior state due to an exception,
 	   some error message will be printed.  So, only warn the user
 	   when we cannot restore during normal execution.  */
-	bool unwinding;
-#if __cpp_lib_uncaught_exceptions
-	unwinding = std::uncaught_exceptions () > 0;
-#else
-	unwinding = std::uncaught_exception ();
-#endif
-	if (!unwinding)
+	if (std::uncaught_exceptions () == 0)
 	  warning (_("Failed to restore inferior state: %s"), e.what ());
       }
   }
