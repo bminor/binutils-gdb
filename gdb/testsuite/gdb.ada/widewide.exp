@@ -42,33 +42,9 @@ gdb_test "print my_wws(1)" "= 32 ' '"
 
 gdb_test "print my_wws(2)" "= 104 'h'"
 
-set kfail_re \
-    [multi_line \
-	 [string_to_regexp {Symbol: ada.strings.maps."="}] \
-	 ".*" \
-	 "\\$$decimal = false"]
+gdb_test "print my_wws = \" helo\"" " = true"
 
-gdb_test_no_output "set debug expr 1"
-
-gdb_test_multiple {print my_wws = " helo"} "" {
-    -re -wrap " = true" {
-	pass $gdb_test_name
-    }
-    -re -wrap $kfail_re {
-	kfail ada/30908 $gdb_test_name
-    }
-}
-gdb_test_multiple {print my_ws = "wide"} "" {
-    -re -wrap " = true" {
-	pass $gdb_test_name
-    }
-    -re -wrap $kfail_re {
-	kfail ada/30908 $gdb_test_name
-    }
-}
-
-gdb_test "set debug expr 0"
-
+gdb_test "print my_ws = \"wide\"" " = true"
 gdb_test "print my_ws = \"nope\"" " = false"
 
 gdb_test "print \"x\" & my_ws & \"y\"" " = \"xwidey\""
