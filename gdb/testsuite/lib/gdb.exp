@@ -6859,6 +6859,15 @@ proc default_gdb_init { test_file_name } {
 	    return [uplevel 1 ::gdb_tcl_unknown $args]
 	}
     }
+
+    # Dejagnu version 1.6.3 and later produce an unresolved at the end of a
+    # testcase if an error triggered, resetting errcnt and warncnt to 0, in
+    # order to avoid errors in one test-case influencing the following
+    # test-case.  Do this manually here, to support older versions.
+    global errcnt
+    global warncnt
+    set errcnt 0
+    set warncnt 0
 }
 
 # Return a path using GDB_PARALLEL.
