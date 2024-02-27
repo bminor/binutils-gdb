@@ -161,8 +161,6 @@ automatically cause those extensions to be disabled.
 @headitem Extension @tab Depends upon @tab Description
 @item @code{aes} @tab @code{simd}
  @tab Enable the AES and PMULL cryptographic extensions.
-@item @code{b16b16} @tab @code{sve2}
- @tab Enable BFloat16 to BFloat16 arithmetic for SVE2 and SME2.
 @item @code{bf16} @tab @code{fp}
  @tab Enable BFloat16 extension.
 @item @code{chk} @tab
@@ -263,8 +261,6 @@ automatically cause those extensions to be disabled.
  @tab Enable SME I16I64 Extension.
 @item @code{sme2} @tab @code{sme}
  @tab Enable SME2.
-@item @code{sme2p1} @tab @code{sme2}
- @tab Enable SME2.1.
 @item @code{ssbs} @tab
  @tab Enable Speculative Store Bypassing Safe state read and write.
 @item @code{sve} @tab @code{fcma}
@@ -279,8 +275,6 @@ automatically cause those extensions to be disabled.
  @tab Enable the SVE2 SHA3 Extension.
 @item @code{sve2-sm4} @tab @code{sve2}, @code{sm4}
  @tab Enable the SVE2 SM4 Extension.
-@item @code{sve2p1} @tab @code{sve2}
- @tab Enable SVE2.1.
 @item @code{the} @tab
  @tab Enable the Translation Hardening Extension.
 @item @code{tme} @tab

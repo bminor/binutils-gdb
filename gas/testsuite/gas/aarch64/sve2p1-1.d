@@ -1,6 +1,7 @@
 #name: Test of SVE2.1 min max instructions.
 #as: -march=armv9.4-a+sve2p1
 #objdump: -dr
+#xfail: *-*-*
 
 [^:]+:     file format .*
 

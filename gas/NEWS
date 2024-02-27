@@ -1,15 +1,14 @@
 -*- text -*-
 
+Changes in 2.42.1:
+
+* The options to enable the AArch64 SVE2.1, SME2.1 and B16B16 extensions have
+  been disabled, because of a number of known issues with their implementation
+  in the 2.42 release.
+
 Changes in 2.42:
 
 * Added support for AMD znver5 processor (available from GNU Binutils 2.42 release).
-
-* Add support for the AArch64 Scalable Vector Extension version 2.1 (SVE2.1).
-
-* Add support for the AArch64 Scalable Matrix Extension version 2.1 (SME2.1).
-
-* Add support for the AArch64 BFloat16 to BFloat16 arithmetic for SVE2 and SME2
-  (B16B16).
 
 * Add support for the AArch64 Reliability, Availability and Serviceability
   extension v2 (RASv2).

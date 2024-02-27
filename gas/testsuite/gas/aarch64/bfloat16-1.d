@@ -1,6 +1,7 @@
 #name: Test of SVE2.1 and SME2.1 non-widening BFloat16 instructions.
 #as: -march=armv9.4-a+b16b16
 #objdump: -dr
+#xfail: *-*-*
 
 [^:]+:     file format .*
 
