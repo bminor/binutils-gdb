@@ -2,7 +2,7 @@
 
 	.macro	rwreg128, name
 	mrrs	x2, x3, \name
-	msrr	\name, x4, x5
+	msrr	\name, x2, x3
 	.endm
 
 	rwreg128	par_el1

@@ -8,14 +8,14 @@
 	.text
 
 	test sys_reg=apiakeylo_el1 xreg=x0
-	test sys_reg=apiakeyhi_el1 xreg=x1
-	test sys_reg=apibkeylo_el1 xreg=x2
-	test sys_reg=apibkeyhi_el1 xreg=x3
+	test sys_reg=apiakeyhi_el1 xreg=x0
+	test sys_reg=apibkeylo_el1 xreg=x0
+	test sys_reg=apibkeyhi_el1 xreg=x0
 
-	test sys_reg=apdakeylo_el1 xreg=x4
-	test sys_reg=apdakeyhi_el1 xreg=x5
-	test sys_reg=apdbkeylo_el1 xreg=x6
-	test sys_reg=apdbkeyhi_el1 xreg=x7
+	test sys_reg=apdakeylo_el1 xreg=x0
+	test sys_reg=apdakeyhi_el1 xreg=x0
+	test sys_reg=apdbkeylo_el1 xreg=x0
+	test sys_reg=apdbkeyhi_el1 xreg=x0
 
-	test sys_reg=apgakeylo_el1 xreg=x8
-	test sys_reg=apgakeyhi_el1 xreg=x9
+	test sys_reg=apgakeylo_el1 xreg=x0
+	test sys_reg=apgakeyhi_el1 xreg=x0

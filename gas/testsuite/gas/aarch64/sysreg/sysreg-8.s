@@ -3,12 +3,12 @@
 	.endm
 
 	.macro	woreg, name
-	msr	\name, x1
+	msr	\name, x0
 	.endm
 
 	.macro	rwreg, name
-	mrs	x2, \name
-	msr	\name, x3
+	mrs	x0, \name
+	msr	\name, x0
 	.endm
 
 	roreg	id_dfr1_el1
