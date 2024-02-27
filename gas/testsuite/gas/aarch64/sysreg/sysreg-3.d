@@ -1,5 +1,6 @@
+#source: sysreg-3.s
+#as: -march=armv8.3-a -I$srcdir/$subdir
 #objdump: -dr
-#as: -march=armv8.3-a
 
 .*:     file .*
 

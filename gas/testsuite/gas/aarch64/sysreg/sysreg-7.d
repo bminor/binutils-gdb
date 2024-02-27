@@ -1,3 +1,5 @@
+#source: sysreg-7.s
+#as: -I$srcdir/$subdir
 #objdump: -dr
 
 .*:     file format .*

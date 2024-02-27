@@ -1,3 +1,5 @@
+#source: sysreg-8.s
+#as: -I$srcdir/$subdir
 #objdump: -dr
 
 .*

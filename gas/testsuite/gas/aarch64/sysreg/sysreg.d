@@ -1,3 +1,5 @@
+#source: sysreg.s
+#as: -I$srcdir/$subdir
 #objdump: -dr
 
 .*:     file format .*
@@ -5,9 +7,9 @@
 Disassembly of section \.text:
 
 0+ <.*>:
-.*:	d51b9c67 	msr	pmovsclr_el0, x7
+.*:	d51b9c60 	msr	pmovsclr_el0, x0
 .*:	d53b9c60 	mrs	x0, pmovsclr_el0
-.*:	d51b9e67 	msr	pmovsset_el0, x7
+.*:	d51b9e60 	msr	pmovsset_el0, x0
 .*:	d53b9e60 	mrs	x0, pmovsset_el0
 .*:	d5380140 	mrs	x0, id_dfr0_el1
 .*:	d5380100 	mrs	x0, id_pfr0_el1

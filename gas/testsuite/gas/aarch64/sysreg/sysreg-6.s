@@ -1,2 +1,5 @@
-msr hcr_el2, x0
-mrs x0,hcr_el2
+	.include "sysreg-test-utils.inc"
+
+	.text
+
+	rw_sys_reg sys_reg=hcr_el2
