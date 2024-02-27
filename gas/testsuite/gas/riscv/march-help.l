@@ -87,6 +87,7 @@ All available -march extensions for RISC-V:
 	zcb                                     1.0
 	zcf                                     1.0
 	zcd                                     1.0
+	zcmp                                    1.0
 	smaia                                   1.0
 	smcntrpmf                               1.0
 	smepmp                                  1.0

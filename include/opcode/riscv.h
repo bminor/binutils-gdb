@@ -112,6 +112,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   (RV_X(x, 6, 1) | (RV_X(x, 5, 1) << 1))
 #define EXTRACT_ZCB_HALFWORD_UIMM(x) \
   (RV_X(x, 5, 1) << 1)
+#define EXTRACT_ZCMP_SPIMM(x) \
+  (RV_X(x, 2, 2) << 4)
 /* Vendor-specific (CORE-V) extract macros.  */
 #define EXTRACT_CV_IS2_UIMM5(x) \
   (RV_X(x, 20, 5))
@@ -168,6 +170,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   ((RV_X(x, 0, 1) << 6) | (RV_X(x, 1, 1) << 5))
 #define ENCODE_ZCB_HALFWORD_UIMM(x) \
   (RV_X(x, 1, 1) << 5)
+#define ENCODE_ZCMP_SPIMM(x) \
+  (RV_X(x, 4, 2) << 2)
 /* Vendor-specific (CORE-V) encode macros.  */
 #define ENCODE_CV_IS2_UIMM5(x) \
   (RV_X(x, 0, 5) << 20)
@@ -200,6 +204,7 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define VALID_RVV_VC_IMM(x) (EXTRACT_RVV_VC_IMM(ENCODE_RVV_VC_IMM(x)) == (x))
 #define VALID_ZCB_BYTE_UIMM(x) (EXTRACT_ZCB_BYTE_UIMM(ENCODE_ZCB_BYTE_UIMM(x)) == (x))
 #define VALID_ZCB_HALFWORD_UIMM(x) (EXTRACT_ZCB_HALFWORD_UIMM(ENCODE_ZCB_HALFWORD_UIMM(x)) == (x))
+#define VALID_ZCMP_SPIMM(x) (EXTRACT_ZCMP_SPIMM(ENCODE_ZCMP_SPIMM(x)) == (x))
 
 #define RISCV_RTYPE(insn, rd, rs1, rs2) \
   ((MATCH_ ## insn) | ((rd) << OP_SH_RD) | ((rs1) << OP_SH_RS1) | ((rs2) << OP_SH_RS2))
@@ -337,6 +342,11 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define OP_MASK_XTHEADVTYPE_RES	0xf
 #define OP_SH_XTHEADVTYPE_RES	7
 
+/* Zc fields.  */
+#define OP_MASK_REG_LIST	0xf
+#define OP_SH_REG_LIST		4
+#define ZCMP_SP_ALIGNMENT	16
+
 #define NVECR 32
 #define NVECM 1
 
@@ -355,6 +365,11 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define X_T0 5
 #define X_T1 6
 #define X_T2 7
+#define X_S0 8
+#define X_S1 9
+#define X_S2 18
+#define X_S10 26
+#define X_S11 27
 #define X_T3 28
 
 #define NGPR 32
@@ -464,6 +479,7 @@ enum riscv_insn_class
   INSN_CLASS_ZCB_AND_ZBA,
   INSN_CLASS_ZCB_AND_ZBB,
   INSN_CLASS_ZCB_AND_ZMMUL,
+  INSN_CLASS_ZCMP,
   INSN_CLASS_SVINVAL,
   INSN_CLASS_ZICBOM,
   INSN_CLASS_ZICBOP,
@@ -612,5 +628,7 @@ extern const float riscv_fli_numval[32];
 
 extern const struct riscv_opcode riscv_opcodes[];
 extern const struct riscv_opcode riscv_insn_types[];
+
+extern unsigned int riscv_get_sp_base (insn_t, unsigned int);
 
 #endif /* _RISCV_H_ */

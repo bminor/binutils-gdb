@@ -143,6 +143,20 @@ const float riscv_fli_numval[32] =
   0x1p+3, 0x1p+4, 0x1p+7, 0x1p+8, 0x1p+15, 0x1p+16, 0x0p+0, 0x0p+0
 };
 
+/* Get sp base adjustment.  */
+
+unsigned int
+riscv_get_sp_base (insn_t opcode, unsigned int xlen)
+{
+  unsigned reg_size = xlen / 8;
+  unsigned reg_list = EXTRACT_BITS (opcode, OP_MASK_REG_LIST, OP_SH_REG_LIST);
+  unsigned min_sp_adj = (reg_list - 3) * reg_size
+			+ (reg_list == 15 ? reg_size : 0);
+  return (((min_sp_adj / ZCMP_SP_ALIGNMENT)
+	   + (min_sp_adj % ZCMP_SP_ALIGNMENT != 0))
+	  * ZCMP_SP_ALIGNMENT);
+}
+
 #define MASK_RS1 (OP_MASK_RS1 << OP_SH_RS1)
 #define MASK_RS2 (OP_MASK_RS2 << OP_SH_RS2)
 #define MASK_RD (OP_MASK_RD << OP_SH_RD)
@@ -2067,6 +2081,12 @@ const struct riscv_opcode riscv_opcodes[] =
 {"c.zext.w",  64, INSN_CLASS_ZCB_AND_ZBA, "Cs",  MATCH_C_ZEXT_W, MASK_C_ZEXT_W, match_opcode, 0 },
 {"c.zext.b",   0, INSN_CLASS_ZCB, "Cs",  MATCH_C_ZEXT_B, MASK_C_ZEXT_B, match_opcode, 0 },
 {"c.sext.w",  64, INSN_CLASS_ZCB, "d",  MATCH_C_ADDIW, MASK_C_ADDIW|MASK_RVC_IMM, match_rd_nonzero, INSN_ALIAS },
+
+/* Zcmp instructions.  */
+{"cm.push",    0,  INSN_CLASS_ZCMP, "{Wcr},Wcp",  MATCH_CM_PUSH, MASK_CM_PUSH, match_opcode, 0 },
+{"cm.pop",     0,  INSN_CLASS_ZCMP, "{Wcr},Wcp",  MATCH_CM_POP, MASK_CM_POP, match_opcode, 0 },
+{"cm.popret",  0,  INSN_CLASS_ZCMP, "{Wcr},Wcp",  MATCH_CM_POPRET, MASK_CM_POPRET, match_opcode, 0 },
+{"cm.popretz", 0,  INSN_CLASS_ZCMP, "{Wcr},Wcp",  MATCH_CM_POPRETZ, MASK_CM_POPRETZ, match_opcode, 0 },
 
 /* Supervisor instructions.  */
 {"csrr",       0, INSN_CLASS_ZICSR, "d,E",   MATCH_CSRRS, MASK_CSRRS|MASK_RS1, match_opcode, INSN_ALIAS },

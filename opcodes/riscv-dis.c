@@ -215,6 +215,48 @@ maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset,
     pd->print_addr = (bfd_vma)(uint32_t)pd->print_addr;
 }
 
+/* Get Zcmp reg_list field.  */
+
+static void
+print_reg_list (disassemble_info *info, insn_t l)
+{
+  bool numeric = riscv_gpr_names == riscv_gpr_names_numeric;
+  unsigned reg_list = (int)EXTRACT_OPERAND (REG_LIST, l);
+  unsigned r_start = numeric ? X_S2 : X_S0;
+  info->fprintf_func (info->stream, "%s", riscv_gpr_names[X_RA]);
+
+  if (reg_list == 5)
+    info->fprintf_func (info->stream, ",%s",
+			riscv_gpr_names[X_S0]);
+  else if (reg_list == 6 || (numeric && reg_list > 6))
+    info->fprintf_func (info->stream, ",%s-%s",
+			riscv_gpr_names[X_S0],
+			riscv_gpr_names[X_S1]);
+  if (reg_list == 15)
+    info->fprintf_func (info->stream, ",%s-%s",
+			riscv_gpr_names[r_start],
+			riscv_gpr_names[X_S11]);
+  else if (reg_list == 7 && numeric)
+    info->fprintf_func (info->stream, ",%s",
+			riscv_gpr_names[X_S2]);
+  else if (reg_list > 6)
+    info->fprintf_func (info->stream, ",%s-%s",
+			riscv_gpr_names[r_start],
+			riscv_gpr_names[reg_list + 11]);
+}
+
+/* Get Zcmp sp adjustment immediate.  */
+
+static int
+riscv_get_spimm (insn_t l)
+{
+  int spimm = riscv_get_sp_base(l, *riscv_rps_dis.xlen);
+  spimm += EXTRACT_ZCMP_SPIMM (l);
+  if (((l ^ MATCH_CM_PUSH) & MASK_CM_PUSH) == 0)
+    spimm *= -1;
+  return spimm;
+}
+
 /* Print insn arguments for 32/64-bit code.  */
 
 static void
@@ -420,6 +462,8 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	case ')':
 	case '[':
 	case ']':
+	case '{':
+	case '}':
 	  print (info->stream, dis_style_text, "%c", *oparg);
 	  break;
 
@@ -633,6 +677,13 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		case 'h':
 		  print (info->stream, dis_style_immediate, "%d",
 			 (int)EXTRACT_ZCB_HALFWORD_UIMM (l));
+		  break;
+		case 'r':
+		  print_reg_list (info, l);
+		  break;
+		case 'p':
+		  print (info->stream, dis_style_immediate, "%d",
+			 riscv_get_spimm (l));
 		  break;
 		default:
 		  goto undefined_modifier;
