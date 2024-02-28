@@ -2590,7 +2590,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 
   if (elf_section_data (sec)->this_hdr.contents != contents)
     {
-      if (!converted && !_bfd_link_keep_memory (info))
+      if (!converted)
 	_bfd_elf_munmap_section_contents (sec, contents);
       else
 	{

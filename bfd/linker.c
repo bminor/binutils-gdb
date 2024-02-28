@@ -3556,38 +3556,3 @@ _bfd_nolink_bfd_define_start_stop (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 {
   return (struct bfd_link_hash_entry *) _bfd_ptr_bfd_null_error (sec->owner);
 }
-
-/* Return false if linker should avoid caching relocation infomation
-   and symbol tables of input files in memory.  */
-
-bool
-_bfd_link_keep_memory (struct bfd_link_info * info)
-{
-  bfd *abfd;
-  bfd_size_type size;
-
-  if (!info->keep_memory)
-    return false;
-
-  if (info->max_cache_size == (bfd_size_type) -1)
-    return true;
-
-  abfd = info->input_bfds;
-  size = info->cache_size;
-  do
-    {
-      if (size >= info->max_cache_size)
-	{
-	  /* Over the limit.  Reduce the memory usage.  */
-	  info->keep_memory = false;
-	  return false;
-	}
-      if (!abfd)
-	break;
-      size += abfd->alloc_size;
-      abfd = abfd->link.next;
-    }
-  while (1);
-
-  return true;
-}

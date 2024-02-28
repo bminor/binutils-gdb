@@ -1932,7 +1932,7 @@ elf_i386_scan_relocs (bfd *abfd,
 
   if (elf_section_data (sec)->this_hdr.contents != contents)
     {
-      if (!converted && !_bfd_link_keep_memory (info))
+      if (!converted)
 	_bfd_elf_munmap_section_contents (sec, contents);
       else
 	{

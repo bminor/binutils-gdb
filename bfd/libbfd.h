@@ -854,9 +854,6 @@ extern bfd_byte * _bfd_write_unsigned_leb128
 extern struct bfd_link_info *_bfd_get_link_info (bfd *)
   ATTRIBUTE_HIDDEN;
 
-extern bool _bfd_link_keep_memory (struct bfd_link_info *)
-  ATTRIBUTE_HIDDEN;
-
 extern uintptr_t _bfd_pagesize ATTRIBUTE_HIDDEN;
 extern uintptr_t _bfd_pagesize_m1 ATTRIBUTE_HIDDEN;
 extern uintptr_t _bfd_minimum_mmap_size ATTRIBUTE_HIDDEN;
