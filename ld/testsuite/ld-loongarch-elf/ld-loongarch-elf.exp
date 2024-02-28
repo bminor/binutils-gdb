@@ -52,6 +52,8 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "underflow_s_5_20"
     run_dump_test "tls-le-norelax"
     run_dump_test "tls-le-relax"
+    run_dump_test "relax-medium-call"
+    run_dump_test "relax-medium-call-1"
 }
 
 if [istarget "loongarch32-*-*"] {

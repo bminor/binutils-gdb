@@ -26,7 +26,7 @@ Disassembly of section .eh_frame:
 [ 	]+2c:[ 	]+d6400016[ 	]+.word[ 	]+[ 	]+0xd6400016
 [ 	]+2e: R_LARCH_ADD6[ 	]+L0\^A
 [ 	]+2e: R_LARCH_SUB6[ 	]+L0\^A
-[ 	]+30:[ 	]+4000160c[ 	]+beqz[ 	]+\$t4, 3145748[ 	]+# 300044 <L0\^A\+0x2ffffc>
+[ 	]+30:[ 	]+4000160c[ 	]+beqz[ 	]+\$t4, 3145748[ 	]+# 300044 <L0\^A\+0x2ffff4>
 [ 	]+33: R_LARCH_ADD6[ 	]+L0\^A
 [ 	]+33: R_LARCH_SUB6[ 	]+L0\^A
 [ 	]+34:[ 	]+00160cd6[ 	]+orn[ 	]+\$fp, \$a2, \$sp
@@ -39,14 +39,16 @@ Disassembly of section .eh_frame:
 [ 	]+40:[ 	]+d6400016[ 	]+.word[ 	]+[ 	]+0xd6400016
 [ 	]+42: R_LARCH_ADD6[ 	]+L0\^A
 [ 	]+42: R_LARCH_SUB6[ 	]+L0\^A
-[ 	]+44:[ 	]+4000160c[ 	]+beqz[ 	]+\$t4, 3145748[ 	]+# 300058 <L0\^A\+0x300010>
+[ 	]+44:[ 	]+4000160c[ 	]+beqz[ 	]+\$t4, 3145748[ 	]+# 300058 <L0\^A\+0x300008>
 [ 	]+47: R_LARCH_ADD6[ 	]+L0\^A
 [ 	]+47: R_LARCH_SUB6[ 	]+L0\^A
 [ 	]+48:[ 	]+00160cd6[ 	]+orn[ 	]+\$fp, \$a2, \$sp
 [ 	]+4c:[ 	]+160cd640[ 	]+lu32i.d[ 	]+\$zero, 26290
 [ 	]+4c: R_LARCH_ADD6[ 	]+L0\^A
 [ 	]+4c: R_LARCH_SUB6[ 	]+L0\^A
-[ 	]+50:[ 	]+00d64000[ 	]+bstrpick.d[ 	]+\$zero, \$zero, 0x16, 0x10
+[ 	]+50:[ 	]+0cd64000[ 	]+.word[ 	]+[ 	]+0x0cd64000
 [ 	]+51: R_LARCH_ADD6[ 	]+L0\^A
 [ 	]+51: R_LARCH_SUB6[ 	]+L0\^A
-[ 	]+54:[ 	]+00000000[ 	]+.word[ 	]+[ 	]+0x00000000
+[ 	]+54:[ 	]+d6400016[ 	]+.word[ 	]+[ 	]+0xd6400016
+[ 	]+56: R_LARCH_ADD6[ 	]+L0\^A
+[ 	]+56: R_LARCH_SUB6[ 	]+L0\^A

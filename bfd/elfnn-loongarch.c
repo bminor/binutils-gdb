@@ -4334,6 +4334,60 @@ loongarch_relax_pcala_addi (bfd *abfd, asection *sec, asection *sym_sec,
   return true;
 }
 
+/* call36 f -> bl f
+   tail36 $t0, f -> b f.  */
+static bool
+loongarch_relax_call36 (bfd *abfd, asection *sec,
+			    Elf_Internal_Rela *rel, bfd_vma symval,
+			    struct bfd_link_info *info, bool *again,
+			    bfd_vma max_alignment)
+{
+  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
+  uint32_t jirl = bfd_get (32, abfd, contents + rel->r_offset + 4);
+  uint32_t rd = jirl & 0x1f;
+
+  /* This section's output_offset need to subtract the bytes of instructions
+     relaxed by the previous sections, so it needs to be updated beforehand.
+     size_input_section already took care of updating it after relaxation,
+     so we additionally update once here.  */
+  sec->output_offset = sec->output_section->size;
+  bfd_vma pc = sec_addr (sec) + rel->r_offset;
+
+  /* If pc and symbol not in the same segment, add/sub segment alignment.
+     FIXME: if there are multiple readonly segments? How to determine if
+     two sections are in the same segment.  */
+  if (symval > pc)
+    pc -= (max_alignment > 4 ? max_alignment : 0);
+  else if (symval < pc)
+    pc += (max_alignment > 4 ? max_alignment : 0);
+
+  const uint32_t jirl_opcode = 0x4c000000;
+
+  /* Is pcalau12i + addi.d insns?  */
+  if ((ELFNN_R_TYPE ((rel + 1)->r_info) != R_LARCH_RELAX)
+      || ((jirl & jirl_opcode) != jirl_opcode)
+      || ((bfd_signed_vma)(symval - pc) < (bfd_signed_vma)(int32_t)0xf8000000)
+      || ((bfd_signed_vma)(symval - pc) > (bfd_signed_vma)(int32_t)0x7fffffc))
+    return false;
+
+  /* Continue next relax trip.  */
+  *again = true;
+
+  const uint32_t bl = 0x54000000;
+  const uint32_t b = 0x50000000;
+
+  if (rd)
+    bfd_put (32, abfd, bl, contents + rel->r_offset);
+  else
+    bfd_put (32, abfd, b, contents + rel->r_offset);
+
+  /* Adjust relocations.  */
+  rel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel->r_info), R_LARCH_B26);
+  /* Delete jirl instruction.  */
+  loongarch_relax_delete_bytes (abfd, sec, rel->r_offset + 4, 4, info);
+  return true;
+}
+
 /* Relax pcalau12i,ld.d => pcalau12i,addi.d.  */
 static bool
 loongarch_relax_pcala_ld (bfd *abfd, asection *sec,
@@ -4751,6 +4805,11 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	      loongarch_relax_delete_bytes (abfd, sec, rel->r_offset, 4, info);
 	      rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
 	    }
+	  break;
+	case R_LARCH_CALL36:
+	  if (0 == info->relax_pass && (i + 2) <= sec->reloc_count)
+	    loongarch_relax_call36 (abfd, sec, rel, symval, info, again,
+				    max_alignment);
 	  break;
 
 	case R_LARCH_TLS_LE_HI20_R:

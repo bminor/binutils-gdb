@@ -116,6 +116,8 @@ const char *md_shortopts = "O::g::G:";
 
 static const char default_arch[] = DEFAULT_ARCH;
 
+static bool call36 = 0;
+
 /* The lowest 4-bit is the bytes of instructions.  */
 #define RELAX_BRANCH_16 0xc0000014
 #define RELAX_BRANCH_21 0xc0000024
@@ -720,7 +722,8 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 			|| BFD_RELOC_LARCH_TLS_LE_HI20 == reloc_type
 			|| BFD_RELOC_LARCH_TLS_LE_LO12 == reloc_type
 			|| BFD_RELOC_LARCH_TLS_LE64_LO20 == reloc_type
-			|| BFD_RELOC_LARCH_TLS_LE64_HI12 == reloc_type))
+			|| BFD_RELOC_LARCH_TLS_LE64_HI12 == reloc_type
+			|| BFD_RELOC_LARCH_CALL36 == reloc_type))
 		{
 		  ip->reloc_info[ip->reloc_num].type = BFD_RELOC_LARCH_RELAX;
 		  ip->reloc_info[ip->reloc_num].value = const_0;
@@ -1016,6 +1019,20 @@ append_fixed_insn (struct loongarch_cl_insn *insn)
 
   char *f = frag_more (insn->insn_length);
   move_insn (insn, frag_now, f - frag_now->fr_literal);
+
+  if (call36)
+    {
+      if (strcmp (insn->name, "jirl") == 0)
+	{
+	  /* See comment at end of append_fixp_and_insn.  */
+	  frag_wane (frag_now);
+	  frag_new (0);
+	}
+      call36 = 0;
+    }
+
+  if (BFD_RELOC_LARCH_CALL36 == insn->reloc_info[0].type)
+    call36 = 1;
 }
 
 /* Add instructions based on the worst-case scenario firstly.  */

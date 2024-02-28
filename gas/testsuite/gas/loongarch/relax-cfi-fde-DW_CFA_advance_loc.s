@@ -38,4 +38,8 @@ la.tls.ie $t0, a
 la.tls.le $t0, a
 .cfi_restore 22
 
+.cfi_def_cfa 22, 0
+call36 f
+.cfi_restore 22
+
 .cfi_endproc
