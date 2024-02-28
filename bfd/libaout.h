@@ -570,7 +570,7 @@ extern bool NAME (aout, adjust_sizes_and_vmas)
 extern void NAME (aout, swap_exec_header_in)
   (bfd *, struct external_exec *, struct internal_exec *);
 
-extern void NAME (aout, swap_exec_header_out)
+extern bool NAME (aout, swap_exec_header_out)
   (bfd *, struct internal_exec *, struct external_exec *);
 
 extern struct bfd_hash_entry * NAME (aout, link_hash_newfunc)
@@ -631,7 +631,8 @@ extern bool NAME (aout, bfd_free_cached_info)
 		       * obj_reloc_entry_size (abfd));			\
     execp->a_drsize = ((obj_datasec (abfd)->reloc_count)		\
 		       * obj_reloc_entry_size (abfd));			\
-    NAME (aout, swap_exec_header_out) (abfd, execp, &exec_bytes);	\
+    if (!NAME (aout, swap_exec_header_out) (abfd, execp, &exec_bytes))	\
+      return false;							\
 									\
     if (bfd_seek (abfd, 0, SEEK_SET) != 0				\
 	|| bfd_write (&exec_bytes, EXEC_BYTES_SIZE,			\

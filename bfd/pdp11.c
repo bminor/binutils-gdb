@@ -365,7 +365,8 @@ pdp11_aout_write_headers (bfd *abfd, struct internal_exec *execp)
       execp->a_drsize = 0;
     }
 
-  NAME (aout, swap_exec_header_out) (abfd, execp, & exec_bytes);
+  if (!NAME (aout, swap_exec_header_out) (abfd, execp, & exec_bytes))
+    return false;
 
   if (bfd_seek (abfd, 0, SEEK_SET) != 0)
     return false;
@@ -456,11 +457,33 @@ NAME (aout, swap_exec_header_in) (bfd *abfd,
 
 /*  Swap the information in an internal exec header structure
     "execp" into the buffer "bytes" ready for writing to disk.  */
-void
+bool
 NAME (aout, swap_exec_header_out) (bfd *abfd,
 				   struct internal_exec *execp,
 				   struct external_exec *bytes)
 {
+  const char *err = NULL;
+  uint64_t val;
+#define MAXVAL(x) ((UINT64_C (1) << (8 * sizeof (x) - 1) << 1) - 1)
+  if ((val = execp->a_text) > MAXVAL (bytes->e_text))
+    err = "e_text";
+  else if ((val = execp->a_data) > MAXVAL (bytes->e_data))
+    err = "e_data";
+  else if ((val = execp->a_bss) > MAXVAL (bytes->e_bss))
+    err = "e_bss";
+  else if ((val = execp->a_syms) > MAXVAL (bytes->e_syms))
+    err = "e_syms";
+  else if ((val = execp->a_entry) > MAXVAL (bytes->e_entry))
+    err = "e_entry";
+#undef MAXVAL
+  if (err)
+    {
+      _bfd_error_handler (_("%pB: %#" PRIx64 " overflows header %s field"),
+			  abfd, val, err);
+      bfd_set_error (bfd_error_file_too_big);
+      return false;
+    }
+
   /* Now fill in fields in the raw data, from the fields in the exec struct.  */
   PUT_MAGIC (abfd, execp->a_info,		bytes->e_info);
   PUT_WORD (abfd, execp->a_text,		bytes->e_text);
@@ -482,6 +505,7 @@ NAME (aout, swap_exec_header_out) (bfd *abfd,
       fprintf (stderr, "BFD:%s:%d: internal error\n", __FILE__, __LINE__);
       PUT_WORD (abfd, 0,			bytes->e_flag);
     }
+  return true;
 }
 
 /* Make all the section for an a.out file.  */

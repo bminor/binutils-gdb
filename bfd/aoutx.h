@@ -407,7 +407,7 @@ FUNCTION
 	aout_@var{size}_swap_exec_header_out
 
 SYNOPSIS
-	void aout_@var{size}_swap_exec_header_out
+	bool aout_@var{size}_swap_exec_header_out
 	  (bfd *abfd,
 	   struct internal_exec *execp,
 	   struct external_exec *raw_bytes);
@@ -416,11 +416,37 @@ DESCRIPTION
 	Swap the information in an internal exec header structure
 	@var{execp} into the buffer @var{raw_bytes} ready for writing to disk.
 */
-void
+bool
 NAME (aout, swap_exec_header_out) (bfd *abfd,
 				   struct internal_exec *execp,
 				   struct external_exec *bytes)
 {
+  const char *err = NULL;
+  uint64_t val;
+#define MAXVAL(x) ((UINT64_C (1) << (8 * sizeof (x) - 1) << 1) - 1)
+  if ((val = execp->a_text) > MAXVAL (bytes->e_text))
+    err = "e_text";
+  else if ((val = execp->a_data) > MAXVAL (bytes->e_data))
+    err = "e_data";
+  else if ((val = execp->a_bss) > MAXVAL (bytes->e_bss))
+    err = "e_bss";
+  else if ((val = execp->a_syms) > MAXVAL (bytes->e_syms))
+    err = "e_syms";
+  else if ((val = execp->a_entry) > MAXVAL (bytes->e_entry))
+    err = "e_entry";
+  else if ((val = execp->a_trsize) > MAXVAL (bytes->e_trsize))
+    err = "e_trsize";
+  else if ((val = execp->a_drsize) > MAXVAL (bytes->e_drsize))
+    err = "e_drsize";
+#undef MAXVAL
+  if (err)
+    {
+      _bfd_error_handler (_("%pB: %#" PRIx64 " overflows header %s field"),
+			  abfd, val, err);
+      bfd_set_error (bfd_error_file_too_big);
+      return false;
+    }
+
   /* Now fill in fields in the raw data, from the fields in the exec struct.  */
   H_PUT_32 (abfd, execp->a_info  , bytes->e_info);
   PUT_WORD (abfd, execp->a_text  , bytes->e_text);
@@ -430,6 +456,7 @@ NAME (aout, swap_exec_header_out) (bfd *abfd,
   PUT_WORD (abfd, execp->a_entry , bytes->e_entry);
   PUT_WORD (abfd, execp->a_trsize, bytes->e_trsize);
   PUT_WORD (abfd, execp->a_drsize, bytes->e_drsize);
+  return true;
 }
 
 /* Make all the section for an a.out file.  */

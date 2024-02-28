@@ -32,6 +32,7 @@ if { [is_pecoff_format] } then {
     set IMAGE_BASE ""
 }
 
+setup_xfail "pdp11-*-*"
 if {![ld_link $ld tmpdir/map-address \
 	 "$LDFLAGS -T $srcdir/$subdir/map-address.t \
 	  $IMAGE_BASE tmpdir/map-address.o \
