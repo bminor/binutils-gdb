@@ -5468,13 +5468,16 @@ size_input_section
       /* Align this section first to the input sections requirement,
 	 then to the output section's requirement.  If this alignment
 	 is greater than any seen before, then record it too.  Perform
-	 the alignment by inserting a magic 'padding' statement.  */
+	 the alignment by inserting a magic 'padding' statement.
+         We can force input section alignment within an output section 
+         by using SUBALIGN.  The value specified overrides any alignment 
+         given by input sections, whether larger or smaller.  */
 
       if (output_section_statement->subsection_alignment != NULL)
-	i->alignment_power
-	  = exp_get_power (output_section_statement->subsection_alignment,
-			   output_section_statement,
-			   "subsection alignment");
+	o->alignment_power = i->alignment_power =
+	  exp_get_power (output_section_statement->subsection_alignment,
+			 output_section_statement,
+			 "subsection alignment");
 
       if (o->alignment_power < i->alignment_power)
 	o->alignment_power = i->alignment_power;
