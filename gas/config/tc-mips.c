@@ -15287,7 +15287,9 @@ mips_after_parse_args (void)
   if (arch_info == 0)
     {
       arch_info = mips_parse_cpu ("default CPU", MIPS_CPU_STRING_DEFAULT);
-      gas_assert (arch_info);
+      if (!arch_info)
+	as_fatal  (_("gas doesn't understand your configure target %s"),
+		   TARGET_ALIAS);
     }
 
   if (ABI_NEEDS_64BIT_REGS (mips_abi) && !ISA_HAS_64BIT_REGS (arch_info->isa))
