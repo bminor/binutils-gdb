@@ -2298,12 +2298,13 @@ the i386 PE and ELF targetted ports of the linker.
 @item -pie
 @itemx --pic-executable
 @cindex position independent executables
-Create a position independent executable.  This is currently only supported on
-ELF platforms.  Position independent executables are similar to shared
-libraries in that they are relocated by the dynamic linker to the virtual
-address the OS chooses for them (which can vary between invocations).  Like
-normal dynamically linked executables they can be executed and symbols
-defined in the executable cannot be overridden by shared libraries.
+Create a position independent executable.  This is currently only
+supported on ELF platforms.  Position independent executables are
+relocated by the dynamic linker to the virtual address the OS chooses
+for them, which can vary between invocations.  They are marked ET_DYN
+in the ELF file header, but differ from shared libraries in a number
+of ways.  In particular, defined symbols in a PIE by default can not
+be overridden by another object as they can be in a shared library.
 
 @kindex -no-pie
 @item -no-pie
