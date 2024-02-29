@@ -366,4 +366,15 @@
   <syscall name="landlock_restrict_self" number="5446"/>
   <syscall name="process_mrelease" number="5448"/>
   <syscall name="futex_waitv" number="5449"/>
+  <syscall name="cachestat" number="5451"/>
+  <syscall name="fchmodat2" number="5452"/>
+  <syscall name="map_shadow_stack" number="5453"/>
+  <syscall name="futex_wake" number="5454"/>
+  <syscall name="futex_wait" number="5455"/>
+  <syscall name="futex_requeue" number="5456"/>
+  <syscall name="statmount" number="5457"/>
+  <syscall name="listmount" number="5458"/>
+  <syscall name="lsm_get_self_attr" number="5459"/>
+  <syscall name="lsm_set_self_attr" number="5460"/>
+  <syscall name="lsm_list_modules" number="5461"/>
 </syscalls_info>
