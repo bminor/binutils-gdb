@@ -305,6 +305,7 @@ parse_lo16 (CGEN_CPU_DESC cd,
     }
 
   if (**strp == '%')
+    /* xgettext:no-c-format */
     return _("invalid %function() here");
 
   return cgen_parse_signed_integer (cd, strp, opindex, valuep);
@@ -501,6 +502,7 @@ parse_unsigned7 (CGEN_CPU_DESC cd, const char **strp,
     }
 
   if (**strp == '%')
+    /* xgettext:no-c-format */
     return _("invalid %function() here");
 
   return parse_mep_alignu (cd, strp, opindex, valuep);
