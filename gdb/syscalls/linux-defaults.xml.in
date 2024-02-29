@@ -34,6 +34,7 @@
   <syscall name="bsd43_statfs" groups="file"/>
   <syscall name="bsd43_stat" groups="file"/>
   <syscall name="cacheflush" groups="memory"/>
+  <syscall name="cachestat" groups="descriptor"/>
   <syscall name="chdir" groups="file"/>
   <syscall name="chmod" groups="file"/>
   <syscall name="chown32" groups="file"/>
@@ -70,6 +71,7 @@
   <syscall name="fanotify_init" groups="descriptor"/>
   <syscall name="fanotify_mark" groups="descriptor,file"/>
   <syscall name="fchdir" groups="descriptor"/>
+  <syscall name="fchmodat2" groups="descriptor,file"/>
   <syscall name="fchmodat" groups="descriptor,file"/>
   <syscall name="fchmod" groups="descriptor"/>
   <syscall name="fchown32" groups="descriptor"/>
@@ -138,6 +140,7 @@
   <syscall name="lstat64" groups="file"/>
   <syscall name="lstat" groups="file"/>
   <syscall name="madvise" groups="memory"/>
+  <syscall name="map_shadow_stack" groups="memory"/>
   <syscall name="mbind" groups="memory"/>
   <syscall name="memfd_create" groups="descriptor"/>
   <syscall name="memfd_secret" groups="descriptor"/>
