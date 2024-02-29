@@ -82,6 +82,20 @@ EXTERNAL
 .    lto_fat_ir_object		{* A fat LTO IR object.  *}
 .  };
 .
+.struct bfd_mmapped_entry
+.  {
+.    void *addr;
+.    size_t size;
+.  };
+.
+.struct bfd_mmapped
+.  {
+.    struct bfd_mmapped *next;
+.    unsigned int max_entry;
+.    unsigned int next_entry;
+.    struct bfd_mmapped_entry entries[1];
+.  };
+.
 
 CODE_FRAGMENT
 .struct bfd
@@ -414,6 +428,9 @@ CODE_FRAGMENT
 .
 .  {* For input BFDs, the build ID, if the object has one. *}
 .  const struct bfd_build_id *build_id;
+.
+.  {* For input BFDs, mmapped entries. *}
+.  struct bfd_mmapped *mmapped;
 .};
 .
 

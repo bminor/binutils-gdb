@@ -157,7 +157,7 @@ bfd_get_file_window (bfd *abfd,
 		     bool writable)
 {
   static int ok_to_map = 1;
-  static size_t pagesize;
+  size_t pagesize = _bfd_pagesize;
   bfd_window_internal *i = windowp->i;
   bfd_size_type size_to_alloc = size;
 
@@ -166,12 +166,6 @@ bfd_get_file_window (bfd *abfd,
 	     abfd, (long) offset, (long) size,
 	     windowp, windowp->data, (unsigned long) windowp->size,
 	     windowp->i, writable);
-
-  /* Make sure we know the page size, so we can be friendly to mmap.  */
-  if (pagesize == 0)
-    pagesize = getpagesize ();
-  if (pagesize == 0)
-    abort ();
 
   if (i == NULL)
     {

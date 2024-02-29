@@ -98,6 +98,10 @@
 #define MAP_FAILED ((void *) -1)
 #endif
 
+#ifndef MAP_ANONYMOUS
+#define MAP_ANONYMOUS  MAP_ANON
+#endif
+
 #include "filenames.h"
 
 #if !HAVE_DECL_FFS

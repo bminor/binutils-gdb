@@ -851,6 +851,10 @@ extern struct bfd_link_info *_bfd_get_link_info (bfd *)
 extern bool _bfd_link_keep_memory (struct bfd_link_info *)
   ATTRIBUTE_HIDDEN;
 
+extern uintptr_t _bfd_pagesize ATTRIBUTE_HIDDEN;
+extern uintptr_t _bfd_pagesize_m1 ATTRIBUTE_HIDDEN;
+extern uintptr_t _bfd_minimum_mmap_size ATTRIBUTE_HIDDEN;
+
 #if GCC_VERSION >= 7000
 #define _bfd_mul_overflow(a, b, res) __builtin_mul_overflow (a, b, res)
 #else
@@ -888,6 +892,19 @@ _bfd_alloc_and_read (bfd *abfd, bfd_size_type asize, bfd_size_type rsize)
   return NULL;
 }
 
+#ifdef USE_MMAP
+extern void *_bfd_mmap_readonly_persistent
+  (bfd *, size_t) ATTRIBUTE_HIDDEN;
+extern void *_bfd_mmap_readonly_temporary
+  (bfd *, size_t, void **, size_t *) ATTRIBUTE_HIDDEN;
+extern void _bfd_munmap_readonly_temporary
+  (void *, size_t) ATTRIBUTE_HIDDEN;
+#else
+#define _bfd_mmap_readonly_persistent(abfd, rsize) \
+  _bfd_alloc_and_read (abfd, rsize, rsize)
+#define _bfd_munmap_readonly_temporary(ptr, rsize) free (ptr)
+#endif
+
 static inline void *
 _bfd_malloc_and_read (bfd *abfd, bfd_size_type asize, bfd_size_type rsize)
 {
@@ -910,3 +927,15 @@ _bfd_malloc_and_read (bfd *abfd, bfd_size_type asize, bfd_size_type rsize)
     }
   return NULL;
 }
+
+#ifndef USE_MMAP
+static inline void *
+_bfd_mmap_readonly_temporary (bfd *abfd, size_t rsize, void **map_addr,
+			      size_t *map_size)
+{
+  void *mem = _bfd_malloc_and_read (abfd, rsize, rsize);
+  *map_addr = mem;
+  *map_size = rsize;
+  return mem;
+}
+#endif

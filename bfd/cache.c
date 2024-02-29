@@ -494,10 +494,10 @@ cache_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
 #ifdef HAVE_MMAP
   else
     {
-      static uintptr_t pagesize_m1;
+      uintptr_t pagesize_m1 = _bfd_pagesize_m1;
       FILE *f;
       file_ptr pg_offset;
-      bfd_size_type pg_len;
+      size_t pg_len;
 
       f = bfd_cache_lookup (abfd, CACHE_NO_SEEK_ERROR);
       if (f == NULL)
@@ -505,9 +505,6 @@ cache_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
 	  bfd_unlock ();
 	  return ret;
 	}
-
-      if (pagesize_m1 == 0)
-	pagesize_m1 = getpagesize () - 1;
 
       /* Align.  */
       pg_offset = offset & ~pagesize_m1;

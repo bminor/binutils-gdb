@@ -96,7 +96,7 @@ lynx_core_file_p (bfd *abfd)
   asection *newsect;
   size_t amt;
 
-  pagesize = getpagesize ();	/* Serious cross-target issue here...  This
+  pagesize = _bfd_pagesize;	/* Serious cross-target issue here...  This
 				   really needs to come from a system-specific
 				   header file.  */
 
