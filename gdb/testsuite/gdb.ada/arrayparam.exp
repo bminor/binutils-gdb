@@ -55,4 +55,14 @@ foreach_with_prefix scenario {all minimal} {
     gdb_test "print pck.length" \
 	"= 7" \
 	"print length after function call"
+
+    gdb_breakpoint "pck.call_me"
+    gdb_continue_to_breakpoint call_me
+
+    gdb_test "print str" " = \"Hello World\""
+    gdb_test "ptype str" "type = array \\(<>\\) of character"
+    gdb_test "ptype str.all" "type = array \\(<>\\) of character"
+    # This surrounds the type in <> -- I don't know why but it's not
+    # really relevant to the test.
+    gdb_test "ptype str.all(0)" "type = <character>"
 }

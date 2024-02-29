@@ -10930,12 +10930,18 @@ ada_unop_ind_operation::evaluate (struct type *expect_type,
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
       if (ada_is_array_descriptor_type (type))
-	/* GDB allows dereferencing GNAT array descriptors.  */
 	{
+	  /* GDB allows dereferencing GNAT array descriptors.
+	     However, for 'ptype' we don't want to try to
+	     "dereference" a thick pointer here -- that will end up
+	     giving us an array with (1 .. 0) for bounds, which is
+	     less clear than (<>).  */
 	  struct type *arrType = ada_type_of_array (arg1, 0);
 
 	  if (arrType == NULL)
 	    error (_("Attempt to dereference null array pointer."));
+	  if (is_thick_pntr (type))
+	    return arg1;
 	  return value_at_lazy (arrType, 0);
 	}
       else if (type->code () == TYPE_CODE_PTR
