@@ -387,4 +387,15 @@
   <syscall name="process_mrelease" number="6448" groups="descriptor"/>
   <syscall name="futex_waitv" number="6449"/>
   <syscall name="set_mempolicy_home_node" number="6450" groups="memory"/>
+  <syscall name="cachestat" number="6451" groups="descriptor"/>
+  <syscall name="fchmodat2" number="6452" groups="descriptor,file"/>
+  <syscall name="map_shadow_stack" number="6453" groups="memory"/>
+  <syscall name="futex_wake" number="6454"/>
+  <syscall name="futex_wait" number="6455"/>
+  <syscall name="futex_requeue" number="6456"/>
+  <syscall name="statmount" number="6457"/>
+  <syscall name="listmount" number="6458"/>
+  <syscall name="lsm_get_self_attr" number="6459"/>
+  <syscall name="lsm_set_self_attr" number="6460"/>
+  <syscall name="lsm_list_modules" number="6461"/>
 </syscalls_info>
