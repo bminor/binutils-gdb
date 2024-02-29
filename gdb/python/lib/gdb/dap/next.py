@@ -16,8 +16,8 @@
 import gdb
 
 from .events import exec_and_expect_stop
-from .server import capability, request
-from .startup import in_gdb_thread, send_gdb, send_gdb_with_response
+from .server import capability, request, send_gdb, send_gdb_with_response
+from .startup import in_gdb_thread
 from .state import set_thread
 
 
