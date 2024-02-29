@@ -845,7 +845,8 @@ extern bfd_vma _bfd_safe_read_leb128
 extern bfd_byte * _bfd_write_unsigned_leb128
   (bfd_byte *, bfd_byte *, bfd_vma) ATTRIBUTE_HIDDEN;
 
-extern struct bfd_link_info *_bfd_get_link_info (bfd *);
+extern struct bfd_link_info *_bfd_get_link_info (bfd *)
+  ATTRIBUTE_HIDDEN;
 
 extern bool _bfd_link_keep_memory (struct bfd_link_info *)
   ATTRIBUTE_HIDDEN;
