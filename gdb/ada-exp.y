@@ -800,10 +800,10 @@ exp	:	relation
 
 and_exp :
 		relation _AND_ relation 
-			{ ada_wrap2<ada_bitwise_and_operation>
+			{ ada_wrap2<bitwise_and_operation>
 			    (BINOP_BITWISE_AND); }
 	|	and_exp _AND_ relation
-			{ ada_wrap2<ada_bitwise_and_operation>
+			{ ada_wrap2<bitwise_and_operation>
 			    (BINOP_BITWISE_AND); }
 	;
 
@@ -818,10 +818,10 @@ and_then_exp :
 
 or_exp :
 		relation OR relation 
-			{ ada_wrap2<ada_bitwise_ior_operation>
+			{ ada_wrap2<bitwise_ior_operation>
 			    (BINOP_BITWISE_IOR); }
 	|	or_exp OR relation
-			{ ada_wrap2<ada_bitwise_ior_operation>
+			{ ada_wrap2<bitwise_ior_operation>
 			    (BINOP_BITWISE_IOR); }
 	;
 
@@ -833,10 +833,10 @@ or_else_exp :
 	;
 
 xor_exp :       relation XOR relation
-			{ ada_wrap2<ada_bitwise_xor_operation>
+			{ ada_wrap2<bitwise_xor_operation>
 			    (BINOP_BITWISE_XOR); }
 	|	xor_exp XOR relation
-			{ ada_wrap2<ada_bitwise_xor_operation>
+			{ ada_wrap2<bitwise_xor_operation>
 			    (BINOP_BITWISE_XOR); }
 	;
 

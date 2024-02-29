@@ -286,33 +286,6 @@ public:
   { return std::get<0> (m_storage); }
 };
 
-/* Bitwise operators for Ada.  */
-template<enum exp_opcode OP>
-class ada_bitwise_operation
-  : public maybe_constant_operation<operation_up, operation_up>
-{
-public:
-
-  using maybe_constant_operation::maybe_constant_operation;
-
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
-		   enum noside noside) override
-  {
-    value *lhs = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
-    value *rhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
-    value *result = eval_op_binary (expect_type, exp, noside, OP, lhs, rhs);
-    return value_cast (lhs->type (), result);
-  }
-
-  enum exp_opcode opcode () const override
-  { return OP; }
-};
-
-using ada_bitwise_and_operation = ada_bitwise_operation<BINOP_BITWISE_AND>;
-using ada_bitwise_ior_operation = ada_bitwise_operation<BINOP_BITWISE_IOR>;
-using ada_bitwise_xor_operation = ada_bitwise_operation<BINOP_BITWISE_XOR>;
-
 /* Ada array- or string-slice operation.  */
 class ada_ternop_slice_operation
   : public maybe_constant_operation<operation_up, operation_up, operation_up>,
