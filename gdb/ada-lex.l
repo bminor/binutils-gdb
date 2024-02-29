@@ -225,6 +225,7 @@ thread{WHITE}+{DIG} {
 
 abs		{ return ABS; }
 and		{ return _AND_; }
+delta		{ return DELTA; }
 else		{ return ELSE; }
 in		{ return IN; }
 mod		{ return MOD; }
@@ -235,6 +236,7 @@ or		{ return OR; }
 others          { return OTHERS; }
 rem		{ return REM; }
 then		{ return THEN; }
+with		{ return WITH; }
 xor		{ return XOR; }
 
 	/* BOOLEAN "KEYWORDS" */

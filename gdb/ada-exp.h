@@ -660,6 +660,10 @@ public:
   {
   }
 
+  /* This is the "with delta" form -- BASE is the base expression.  */
+  ada_aggregate_component (operation_up &&base,
+			   std::vector<ada_component_up> &&components);
+
   void assign (struct value *container,
 	       struct value *lhs, struct expression *exp,
 	       std::vector<LONGEST> &indices,
@@ -671,6 +675,10 @@ public:
 
 private:
 
+  /* If the assignment has a "with delta" clause, this is the
+     base expression.  */
+  operation_up m_base;
+  /* The individual components to assign.  */
   std::vector<ada_component_up> m_components;
 };
 

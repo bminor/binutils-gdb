@@ -453,6 +453,7 @@ static std::vector<ada_assign_up> assignments;
 %token <typed_char> CHARLIT
 %token <typed_val_float> FLOAT
 %token TRUEKEYWORD FALSEKEYWORD
+%token WITH DELTA
 %token COLONCOLON
 %token <sval> STRING NAME DOT_ID TICK_COMPLETE DOT_COMPLETE NAME_COMPLETE
 %type <bval> block
@@ -1032,7 +1033,16 @@ block   :       NAME COLONCOLON
 	;
 
 aggregate :
-		'(' aggregate_component_list ')'  
+		'(' exp WITH DELTA aggregate_component_list ')'
+			{
+			  std::vector<ada_component_up> components
+			    = pop_components ($5);
+			  operation_up base = ada_pop ();
+
+			  push_component<ada_aggregate_component>
+			    (std::move (base), std::move (components));
+			}
+	|	'(' aggregate_component_list ')'
 			{
 			  std::vector<ada_component_up> components
 			    = pop_components ($2);

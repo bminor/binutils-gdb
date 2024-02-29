@@ -9323,10 +9323,9 @@ check_objfile (const std::unique_ptr<ada_component> &comp,
   return comp->uses_objfile (objfile);
 }
 
-/* Assign the result of evaluating ARG starting at *POS to the INDEXth
-   component of LHS (a simple array or a record).  Does not modify the
-   inferior's memory, nor does it modify LHS (unless LHS ==
-   CONTAINER).  */
+/* Assign the result of evaluating ARG to the INDEXth component of LHS
+   (a simple array or a record).  Does not modify the inferior's
+   memory, nor does it modify LHS (unless LHS == CONTAINER).  */
 
 static void
 assign_component (struct value *container, struct value *lhs, LONGEST index,
@@ -9363,6 +9362,8 @@ assign_component (struct value *container, struct value *lhs, LONGEST index,
 bool
 ada_aggregate_component::uses_objfile (struct objfile *objfile)
 {
+  if (m_base != nullptr && m_base->uses_objfile (objfile))
+    return true;
   for (const auto &item : m_components)
     if (item->uses_objfile (objfile))
       return true;
@@ -9373,6 +9374,11 @@ void
 ada_aggregate_component::dump (ui_file *stream, int depth)
 {
   gdb_printf (stream, _("%*sAggregate\n"), depth, "");
+  if (m_base != nullptr)
+    {
+      gdb_printf (stream, _("%*swith delta\n"), depth + 1, "");
+      m_base->dump (stream, depth + 2);
+    }
   for (const auto &item : m_components)
     item->dump (stream, depth + 1);
 }
@@ -9383,8 +9389,36 @@ ada_aggregate_component::assign (struct value *container,
 				 std::vector<LONGEST> &indices,
 				 LONGEST low, LONGEST high)
 {
+  if (m_base != nullptr)
+    {
+      value *base = m_base->evaluate (nullptr, exp, EVAL_NORMAL);
+      if (ada_is_direct_array_type (base->type ()))
+	base = ada_coerce_to_simple_array (base);
+      if (!types_deeply_equal (container->type (), base->type ()))
+	error (_("Type mismatch in delta aggregate"));
+      value_assign_to_component (container, container, base);
+    }
+
   for (auto &item : m_components)
     item->assign (container, lhs, exp, indices, low, high);
+}
+
+/* See ada-exp.h.  */
+
+ada_aggregate_component::ada_aggregate_component
+     (operation_up &&base, std::vector<ada_component_up> &&components)
+       : m_base (std::move (base)),
+	 m_components (std::move (components))
+{
+  for (const auto &component : m_components)
+    if (dynamic_cast<const ada_others_component *> (component.get ())
+	!= nullptr)
+      {
+	/* It's invalid and nonsensical to have 'others => ...' with a
+	   delta aggregate.  It was simpler to enforce this
+	   restriction here as opposed to in the parser.  */
+	error (_("'others' invalid in delta aggregate"));
+      }
 }
 
 /* See ada-exp.h.  */
