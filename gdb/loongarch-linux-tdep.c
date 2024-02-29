@@ -27,6 +27,10 @@
 #include "target-descriptions.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
+#include "xml-syscall.h"
+
+/* The syscall's XML filename for LoongArch.  */
+#define XML_SYSCALL_FILENAME_LOONGARCH "syscalls/loongarch-linux.xml"
 
 /* Unpack an elf_gregset_t into GDB's register cache.  */
 
@@ -589,6 +593,9 @@ loongarch_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_iterate_over_regset_sections (gdbarch, loongarch_iterate_over_regset_sections);
 
   tdep->syscall_next_pc = loongarch_linux_syscall_next_pc;
+
+  /* Set the correct XML syscall filename.  */
+  set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_LOONGARCH);
 
   /* Get the syscall number from the arch's register.  */
   set_gdbarch_get_syscall_number (gdbarch, loongarch_linux_get_syscall_number);

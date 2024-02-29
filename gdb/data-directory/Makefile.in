@@ -53,6 +53,7 @@ GEN_SYSCALLS_FILES = \
 	amd64-linux.xml \
 	arm-linux.xml \
 	i386-linux.xml \
+	loongarch-linux.xml \
 	mips-n32-linux.xml \
 	mips-n64-linux.xml \
 	mips-o32-linux.xml \
