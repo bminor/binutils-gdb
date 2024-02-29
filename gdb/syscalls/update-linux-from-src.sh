@@ -154,6 +154,10 @@ for f in *.in; do
 	    echo "Skipping $f, use arm-linux.py instead"
 	    continue
 	    ;;
+	loongarch-linux.xml.in)
+	    echo "Skipping $f, no syscall.tbl"
+	    continue
+	    ;;
 	linux-defaults.xml.in)
 	    continue
 	    ;;
