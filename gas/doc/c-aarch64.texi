@@ -291,6 +291,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the XS memory attribute extension.
 @item @code{cpa} @tab
  @tab Enable the Checked Pointer Arithmetic extension.
+@item @code{fp8} @tab
+ @tab Enable the Floating Point 8 (FP8) extension.
 @end multitable
 
 @multitable @columnfractions .20 .80

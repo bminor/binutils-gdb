@@ -2669,6 +2669,13 @@ static const aarch64_feature_set aarch64_feature_faminmax_sve2 =
   AARCH64_FEATURES (2, FAMINMAX, SVE2);
 static const aarch64_feature_set aarch64_feature_faminmax_sme2 =
   AARCH64_FEATURES (3, SVE2, FAMINMAX, SME2);
+static const aarch64_feature_set aarch64_feature_fp8 =
+  AARCH64_FEATURE (FP8);
+static const aarch64_feature_set aarch64_feature_fp8_sve2 =
+  AARCH64_FEATURES (2, FP8, SVE2);
+static const aarch64_feature_set aarch64_feature_fp8_sme2 =
+  AARCH64_FEATURES (2, FP8, SME2);
+
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2740,6 +2747,9 @@ static const aarch64_feature_set aarch64_feature_faminmax_sme2 =
 #define FAMINMAX  &aarch64_feature_faminmax
 #define FAMINMAX_SVE2  &aarch64_feature_faminmax_sve2
 #define FAMINMAX_SME2  &aarch64_feature_faminmax_sme2
+#define FP8	  &aarch64_feature_fp8
+#define FP8_SVE2   &aarch64_feature_fp8_sve2
+#define FP8_SME2   &aarch64_feature_fp8_sme2
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2925,6 +2935,14 @@ static const aarch64_feature_set aarch64_feature_faminmax_sme2 =
 #define FAMINMAX_SME2_INSN(NAME,OPCODE,MASK,OPS,QUALS) \
   { NAME, OPCODE, MASK, sme_size_22_hsd, 0, FAMINMAX_SME2, OPS, QUALS, \
     F_STRICT | 0, 0, 1, NULL }
+#define FP8_INSN(NAME, OPCODE, MASK, CLASS, OPS, QUALS, FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, FP8, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define FP8_SVE2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, FP8_SVE2, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
+#define FP8_SME2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, FP8_SME2, OPS, QUALS,	      \
+    F_STRICT | FLAGS, 0, TIED, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \

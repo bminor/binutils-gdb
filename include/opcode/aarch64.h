@@ -234,6 +234,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_CPA,
   /* FAMINMAX instructions.  */
   AARCH64_FEATURE_FAMINMAX,
+  /* FP8 instructions.  */
+  AARCH64_FEATURE_FP8,
   AARCH64_NUM_FEATURES
 };
 
