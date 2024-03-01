@@ -47,7 +47,7 @@ static unsigned int current_flags = S390_INSTR_FLAG_FACILITY_MASK;
 static unsigned int current_mode_mask = 0;
 
 /* Set to TRUE if the highgprs flag in the ELF header needs to be set
-   for the output file.  */
+   for the output file. The default is picked in init_default_arch().  */
 static bool set_highgprs_p = false;
 
 /* Whether to use user friendly register names. Default is TRUE.  */
@@ -221,6 +221,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 static void
 init_default_arch (void)
 {
+  /* Default architecture size.  */
   if (strcmp (default_arch, "s390") == 0)
     {
       if (s390_arch_size == 0)
@@ -234,6 +235,7 @@ init_default_arch (void)
   else
     as_fatal (_("Invalid default architecture, broken assembler."));
 
+  /* Default current architecture mode.  */
   if (current_mode_mask == 0)
     {
       /* Default to z/Architecture mode if the CPU supports it.  */
@@ -242,6 +244,10 @@ init_default_arch (void)
       else
 	current_mode_mask = 1 << S390_OPCODE_ZARCH;
     }
+
+  /* Determine whether the highgprs flag in the ELF header needs to be set.  */
+  if ((s390_arch_size == 32) && (current_mode_mask & (1 << S390_OPCODE_ZARCH)))
+    set_highgprs_p = true;
 }
 
 /* Called by TARGET_FORMAT.  */
@@ -419,11 +425,7 @@ md_parse_option (int c, const char *arg)
 	current_mode_mask = 1 << S390_OPCODE_ESA;
 
       else if (arg != NULL && strcmp (arg, "zarch") == 0)
-	{
-	  if (s390_arch_size == 32)
-	    set_highgprs_p = true;
-	  current_mode_mask = 1 << S390_OPCODE_ZARCH;
-	}
+	current_mode_mask = 1 << S390_OPCODE_ZARCH;
 
       else if (arg != NULL && startswith (arg, "arch="))
 	{
