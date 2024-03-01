@@ -396,6 +396,11 @@ extern void tc_x86_parse_to_dw2regnum (expressionS *);
 #define tc_cfi_frame_initial_instructions tc_x86_frame_initial_instructions
 extern void tc_x86_frame_initial_instructions (void);
 
+/* DWARF register number of the frame-pointer register in 64-bit mode.  */
+#define REG_FP 6
+/* DWARF register number of the stack-pointer register in 64-bit mode.  */
+#define REG_SP 7
+
 #define md_elf_section_type(str,len) i386_elf_section_type (str, len)
 extern int i386_elf_section_type (const char *, size_t);
 
@@ -425,10 +430,6 @@ extern void x86_cleanup (void);
    R15 (15).  Use SCFI_CALLEE_SAVED_REG_P to identify which registers
    are callee-saved from this set.  */
 #define SCFI_MAX_REG_ID 15
-/* Identify the DWARF register number of the frame-pointer register.  */
-#define REG_FP 6
-/* Identify the DWARF register number of the stack-pointer register.  */
-#define REG_SP 7
 /* Some ABIs, like AMD64, use stack for call instruction.  For such an ABI,
    identify the initial (CFA) offset from RSP at the entry of function.  */
 #define SCFI_INIT_CFA_OFFSET 8

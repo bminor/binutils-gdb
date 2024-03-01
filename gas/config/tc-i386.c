@@ -3275,7 +3275,7 @@ md_begin (void)
       operand_chars[(unsigned char) *p] = *p;
   }
 
-  if (flag_code == CODE_64BIT)
+  if (object_64bit)
     {
 #if defined (OBJ_COFF) && defined (TE_PE)
       x86_dwarf2_return_column = (OUTPUT_FLAVOR == bfd_target_coff_flavour
@@ -5438,7 +5438,7 @@ ginsn_dw2_regnum (const reg_entry *ireg)
   if (ireg->reg_num == RegIP || ireg->reg_num == RegIZ)
     return GINSN_DW2_REGNUM_RSI_DUMMY;
 
-  dwarf_reg = ireg->dw2_regnum[flag_code >> 1];
+  dwarf_reg = ireg->dw2_regnum[object_64bit];
 
   if (dwarf_reg == Dw2Inval)
     {
@@ -17663,7 +17663,7 @@ tc_x86_parse_to_dw2regnum (expressionS *exp)
       if ((addressT) exp->X_add_number < i386_regtab_size)
 	{
 	  exp->X_add_number = i386_regtab[exp->X_add_number]
-			      .dw2_regnum[flag_code >> 1];
+			      .dw2_regnum[object_64bit];
 	  if (exp->X_add_number != Dw2Inval)
 	    exp->X_op = O_constant;
 	}
@@ -17673,22 +17673,7 @@ tc_x86_parse_to_dw2regnum (expressionS *exp)
 void
 tc_x86_frame_initial_instructions (void)
 {
-  static unsigned int sp_regno[2];
-
-  if (!sp_regno[flag_code >> 1])
-    {
-      char *saved_input = input_line_pointer;
-      char sp[][4] = {"esp", "rsp"};
-      expressionS exp;
-
-      input_line_pointer = sp[flag_code >> 1];
-      tc_x86_parse_to_dw2regnum (&exp);
-      gas_assert (exp.X_op == O_constant);
-      sp_regno[flag_code >> 1] = exp.X_add_number;
-      input_line_pointer = saved_input;
-    }
-
-  cfi_add_CFA_def_cfa (sp_regno[flag_code >> 1], -x86_cie_data_alignment);
+  cfi_add_CFA_def_cfa (object_64bit ? REG_SP : 4, -x86_cie_data_alignment);
   cfi_add_CFA_offset (x86_dwarf2_return_column, x86_cie_data_alignment);
 }
 
