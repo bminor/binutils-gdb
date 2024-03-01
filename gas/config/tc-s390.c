@@ -475,15 +475,23 @@ void
 md_show_usage (FILE *stream)
 {
   fprintf (stream, _("\
-        S390 options:\n\
-        -mregnames        Allow symbolic names for registers\n\
-        -mwarn-areg-zero  Warn about zero base/index registers\n\
-        -mno-regnames     Do not allow symbolic names for registers\n\
-        -m31              Set file format to 31 bit format\n\
-        -m64              Set file format to 64 bit format\n"));
+S390 options:\n\
+  -m31                    generate 31-bit file format (31/32 bit word size)\n\
+  -m64                    generate 64-bit file format (64 bit word size)\n\
+  -mesa                   assemble for Enterprise System Architecture/390\n\
+  -mzarch                 assemble for z/Architecture\n\
+  -march=<processor>      assemble for processor <processor>\n\
+  -mregnames              allow symbolic names for registers\n\
+  -mno-regnames           do not allow symbolic names for registers\n\
+  -mwarn-areg-zero        warn about base/index register zero\n\
+"));
   fprintf (stream, _("\
-        -V                print assembler version number\n\
-        -Qy, -Qn          ignored\n"));
+  -V                      print assembler version number\n\
+  -Qy, -Qn                ignored\n"));
+  fprintf (stream, _("\
+Deprecated S390 options:\n\
+  -Aesa                   assemble for processor IBM S/390 G5 (g5/arch3)\n\
+  -Aesame                 assemble for processor IBM zSeries 900 (z900/arch5)\n"));
 }
 
 /* Generate the hash table mapping mnemonics to struct s390_opcode.
@@ -557,9 +565,9 @@ md_begin (void)
   const struct s390_opcode *op;
   const struct s390_opcode *op_end;
 
-  /* Give a warning if the combination -m64-bit and -Aesa is used.  */
+  /* Give a warning if the combination -m64 and -Aesa is used.  */
   if (s390_arch_size == 64 && current_cpu < S390_OPCODE_Z900)
-    as_warn (_("The 64 bit file format is used without esame instructions."));
+    as_warn (_("The 64-bit file format is used without z/Architecture instructions."));
 
   s390_cie_data_alignment = -s390_arch_size / 8;
 
