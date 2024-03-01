@@ -10,6 +10,7 @@ foo:
 
 #		V1,D2(VX2,B2),M3
 	vgef	%v1,16(%v2,),0
+	vgef	%v1,16(%v2),0
 	vgef	%v1,16(),0
 
 #		D1(L1,B1),D2(B2)

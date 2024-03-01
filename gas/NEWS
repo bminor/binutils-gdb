@@ -1,5 +1,11 @@
 -*- text -*-
 
+* Warn when a register name type does not match the operand type on s390.
+  Add support for s390-specific option "warn-regtype-mismatch=[strict|relaxed|
+  no]" to override the register name type check behavior. The default
+  is "relaxed", which allows floating-point and vector register names to be
+  used interchangeably.
+
 * Add support for 'armv9.5-a' for -march in Arm GAS.
 
 Changes in 2.42:

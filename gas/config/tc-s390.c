@@ -60,6 +60,20 @@ static bool reg_names_p = TARGET_REG_NAMES_P;
 /* Set to TRUE if we want to warn about zero base/index registers.  */
 static bool warn_areg_zero = false;
 
+/* Whether to warn about register name type check mismatches.  */
+#ifndef S390_REGTYPE_CHECK
+#define S390_REGTYPE_CHECK S390_REGTYPE_CHECK_RELAXED
+#endif
+
+enum s390_regtype_check {
+  S390_REGTYPE_CHECK_NONE = 0,	/* No register name type checks.  */
+  S390_REGTYPE_CHECK_RELAXED,	/* Relaxed register name type checks.  */
+  S390_REGTYPE_CHECK_STRICT	/* Strict register name type checks.  */
+};
+
+/* Whether to warn about register name type check mismatches.  */
+static enum s390_regtype_check warn_regtype_mismatch = S390_REGTYPE_CHECK;
+
 /* Generic assembler global variables which must be defined by all
    targets.  */
 
@@ -109,6 +123,16 @@ const pseudo_typeS md_pseudo_table[] =
   { "machinemode",  s390_machinemode,   0 },
   { NULL,	    NULL,		0 }
 };
+
+/* Register types.  */
+enum s390_register_type
+  {
+    S390_REGTYPE_AR,	/* Access register.  */
+    S390_REGTYPE_CR,	/* Control register.  */
+    S390_REGTYPE_FPR,	/* Floating-point register.  */
+    S390_REGTYPE_GR,	/* General register.  */
+    S390_REGTYPE_VR,	/* Vector register.  */
+  };
 
 /* Given NAME, find the register number associated with that name, return
    the integer value associated with the given name or -1 on failure.  */
@@ -180,6 +204,26 @@ register_name (expressionS *expressionP)
     {
       expressionP->X_op = O_register;
       expressionP->X_add_number = reg_number;
+      switch (name[0])
+	{
+	  case 'a':
+	    expressionP->X_md = S390_REGTYPE_AR;
+	    break;
+	  case 'c':
+	    expressionP->X_md = S390_REGTYPE_CR;
+	    break;
+	  case 'f':
+	    expressionP->X_md = S390_REGTYPE_FPR;
+	    break;
+	  case 'r':
+	    expressionP->X_md = S390_REGTYPE_GR;
+	    break;
+	  case 'v':
+	    expressionP->X_md = S390_REGTYPE_VR;
+	    break;
+	  default:
+	    expressionP->X_md = 0;
+	}
 
       /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
@@ -415,6 +459,18 @@ md_parse_option (int c, const char *arg)
       else if (arg != NULL && strcmp (arg, "warn-areg-zero") == 0)
 	warn_areg_zero = true;
 
+      else if (arg != NULL && strcmp (arg, "warn-regtype-mismatch=strict") == 0)
+	warn_regtype_mismatch = S390_REGTYPE_CHECK_STRICT;
+
+      else if (arg != NULL && strcmp (arg, "warn-regtype-mismatch=relaxed") == 0)
+	warn_regtype_mismatch = S390_REGTYPE_CHECK_RELAXED;
+
+      else if (arg != NULL && strcmp (arg, "warn-regtype-mismatch=no") == 0)
+	warn_regtype_mismatch = S390_REGTYPE_CHECK_NONE;
+
+      else if (arg != NULL && strcmp (arg, "no-warn-regtype-mismatch") == 0)
+	warn_regtype_mismatch = S390_REGTYPE_CHECK_NONE;
+
       else if (arg != NULL && strcmp (arg, "31") == 0)
 	s390_arch_size = 32;
 
@@ -484,6 +540,13 @@ S390 options:\n\
   -mregnames              allow symbolic names for registers\n\
   -mno-regnames           do not allow symbolic names for registers\n\
   -mwarn-areg-zero        warn about base/index register zero\n\
+  -mwarn-regtype-mismatch=strict\n\
+                          warn about register name type mismatches\n\
+  -mwarn-regtype-mismatch=relaxed\n\
+                          warn about register name type mismatches,\n\
+                          but allow FPR and VR to be used interchangeably\n\
+  -mno-warn-regtype-mismatch\n\
+                          do not warn about register name type mismatches\n\
 "));
   fprintf (stream, _("\
   -V                      print assembler version number\n\
@@ -1279,6 +1342,7 @@ md_gather_operands (char *str,
   elf_suffix_type suffix;
   bfd_reloc_code_real_type reloc;
   int omitted_base_or_index;
+  int operand_number;
   char *f;
   int fc, i;
 
@@ -1287,6 +1351,7 @@ md_gather_operands (char *str,
 
   /* Gather the operands.  */
   omitted_base_or_index = 0;	/* Whether B in D(L,B) or X in D(X,B) were omitted.  */
+  operand_number = 1;		/* Current operand number in e.g. R1,I2,M3,D4(B4).  */
   fc = 0;
   for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
     {
@@ -1378,6 +1443,44 @@ md_gather_operands (char *str,
 		as_bad (_("invalid floating point register pair.  Valid fp "
 			  "register pair operands are 0, 1, 4, 5, 8, 9, "
 			  "12 or 13."));
+	      if (warn_regtype_mismatch && ex.X_op == O_register
+		  && !(opcode->flags & S390_INSTR_FLAG_PSEUDO_MNEMONIC))
+		{
+		  const char *expected_regtype = NULL;
+
+		  if ((operand->flags & S390_OPERAND_AR)
+		      && ex.X_md != S390_REGTYPE_AR)
+		    expected_regtype = _("access register");
+		  else if ((operand->flags & S390_OPERAND_CR)
+			   && ex.X_md != S390_REGTYPE_CR)
+		    expected_regtype = _("control register");
+		  else if ((operand->flags & S390_OPERAND_FPR)
+			   && ex.X_md != S390_REGTYPE_FPR
+			   && (warn_regtype_mismatch == S390_REGTYPE_CHECK_STRICT
+			       || (ex.X_md != S390_REGTYPE_VR)))
+		    expected_regtype = _("floating-point register");
+		  else if ((operand->flags & S390_OPERAND_GPR)
+			   && ex.X_md != S390_REGTYPE_GR)
+		    expected_regtype = _("general register");
+		  else if ((operand->flags & S390_OPERAND_VR)
+			   && ex.X_md != S390_REGTYPE_VR
+			   && (warn_regtype_mismatch == S390_REGTYPE_CHECK_STRICT
+			       || (ex.X_md != S390_REGTYPE_FPR)))
+		    expected_regtype = _("vector register");
+
+		  if (expected_regtype)
+		    {
+		      if (operand->flags & S390_OPERAND_BASE)
+			as_warn (_("operand %d: expected %s name as base register"),
+				 operand_number, expected_regtype);
+		      else if (operand->flags & S390_OPERAND_INDEX)
+			as_warn (_("operand %d: expected %s name as index register"),
+				 operand_number, expected_regtype);
+		      else
+			as_warn (_("operand %d: expected %s name"),
+				 operand_number, expected_regtype);
+		    }
+		}
 	      s390_insert_operand (insn, operand, ex.X_add_number, NULL, 0);
 	    }
 	}
@@ -1516,6 +1619,7 @@ md_gather_operands (char *str,
 		    {
 		      /* Comma.  */
 		      str++;
+		      operand_number++;
 		    }
 		}
 	    }
@@ -1572,6 +1676,7 @@ md_gather_operands (char *str,
 		{
 		  /* Comma.  */
 		  str++;
+		  operand_number++;
 		}
 	    }
 	}
@@ -1610,6 +1715,9 @@ md_gather_operands (char *str,
 		{
 		  /* Comma.  */
 		  str++;
+		  if (!(operand->flags & (S390_OPERAND_INDEX
+					  | S390_OPERAND_LENGTH)))
+		    operand_number++;
 		}
 	    }
 	}

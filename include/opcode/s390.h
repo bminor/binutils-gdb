@@ -77,6 +77,9 @@ enum s390_opcode_cpu_val
   (S390_INSTR_FLAG_CLASS_BRANCH | S390_INSTR_FLAG_CLASS_RELATIVE \
    | S390_INSTR_FLAG_CLASS_SUBROUTINE)
 
+/* Instruction is an .insn pseudo-mnemonic.  */
+#define S390_INSTR_FLAG_PSEUDO_MNEMONIC 0x100
+
 /* The opcode table is an array of struct s390_opcode.  */
 
 struct s390_opcode

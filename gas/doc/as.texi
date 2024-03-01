@@ -584,6 +584,10 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-m31}|@b{-m64}] [@b{-mesa}|@b{-mzarch}] [@b{-march}=@var{CPU}]
    [@b{-mregnames}|@b{-mno-regnames}]
    [@b{-mwarn-areg-zero}]
+   [@b{-mwarn-regtype-mismatch=strict}
+    @b{-mwarn-regtype-mismatch=relaxed}
+    @b{-mwarn-regtype-mismatch=no}
+    @b{-mno-warn-regtype-mismatch}]
 @end ifset
 @ifset SCORE
 
@@ -1963,6 +1967,22 @@ Allow or disallow symbolic names for registers.
 @item -mwarn-areg-zero
 Warn whenever the operand for a base or index register has been specified
 but evaluates to zero.
+@item -mwarn-regtype-mismatch=strict
+@itemx -mwarn-regtype-mismatch=relaxed
+@itemx -mwarn-regtype-mismatch=no
+@itemx -mno-warn-regtype-mismatch
+Controls whether the assembler performs register name type checks and generates
+a warning message in case of a mismatch with the operand register type.
+The default (which can be restored by using the @option{relaxed} argument) is
+to perform relaxed register name type checks, which allow floating point
+register (FPR) names %f0 to %f15 to be specified as argument to vector register
+(VR) operands and vector register (VR) names %v0 to %v15 to be specified as
+argument to floating point register (FPR) operands.  This is acceptable as the
+FPR are embedded into the lower half of the VR.
+Using the @option{strict} argument strict register name type checks are
+performed.
+The @option{no} argument, which is equivalent to
+@samp{-mno-warn-regtype-mismatch}, disables any register name type checks.
 @end table
 @end ifset
 @c man end
