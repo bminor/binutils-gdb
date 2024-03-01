@@ -6,8 +6,8 @@
 .*:11: Warning: operand 2: expected general register name as base register
 .*:12: Error: bad expression
 .*:12: Error: operand 2: syntax error; missing '\)' after base register
-.*:15: Error: operand 1: missing operand
-.*:16: Error: operand 1: missing operand
+.*:15: Error: operand 1: missing length operand
+.*:16: Error: operand 1: missing length operand
 .*:17: Error: operand 1: invalid length field specified
 .*:18: Error: bad expression
 .*:18: Error: operand 1: operand out of range \(0 is not between 1 and 256\)

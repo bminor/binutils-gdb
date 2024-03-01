@@ -16,9 +16,9 @@
 .*:16: Error: bad expression
 .*:16: Error: operand 2: syntax error; missing '\)' after base register
 .*:17: Error: operand 1: operand out of range \(0 is not between 1 and 256\)
-.*:18: Error: operand 1: missing operand
-.*:19: Error: operand 1: missing operand
-.*:20: Error: operand 1: missing operand
+.*:18: Error: operand 1: missing length operand
+.*:19: Error: operand 1: missing length operand
+.*:20: Error: operand 1: missing length operand
 .*:21: Error: bad expression
 .*:21: Error: operand 1: operand out of range \(0 is not between 1 and 256\)
 .*:21: Error: operand 1: operand out of range \(32 is not between 0 and 15\)
@@ -31,9 +31,9 @@
 .*:22: Error: operand 1: syntax error; missing '\(' after displacement
 .*:23: Error: operand 1: invalid length field specified
 .*:26: Error: operand 1: operand out of range \(0 is not between 1 and 16\)
-.*:27: Error: operand 1: missing operand
-.*:28: Error: operand 1: missing operand
-.*:29: Error: operand 1: missing operand
+.*:27: Error: operand 1: missing length operand
+.*:28: Error: operand 1: missing length operand
+.*:29: Error: operand 1: missing length operand
 .*:30: Error: bad expression
 .*:30: Error: operand 1: operand out of range \(0 is not between 1 and 16\)
 .*:30: Error: operand 1: operand out of range \(32 is not between 0 and 15\)
@@ -42,21 +42,21 @@
 .*:30: Error: found ',', expected: '\)'
 .*:31: Error: operand 1: syntax error; missing '\(' after displacement
 .*:32: Error: operand 2: operand out of range \(0 is not between 1 and 16\)
-.*:33: Error: operand 2: missing operand
-.*:34: Error: operand 2: missing operand
-.*:35: Error: operand 2: missing operand
+.*:33: Error: operand 2: missing length operand
+.*:34: Error: operand 2: missing length operand
+.*:35: Error: operand 2: missing length operand
 .*:36: Error: bad expression
 .*:36: Error: operand 2: operand out of range \(0 is not between 1 and 16\)
 .*:36: Error: operand 2: syntax error; expected ','
 .*:37: Error: operand 2: syntax error; missing '\(' after displacement
 .*:38: Error: operand 1: operand out of range \(0 is not between 1 and 16\)
 .*:38: Error: operand 2: operand out of range \(0 is not between 1 and 16\)
-.*:39: Error: operand 1: missing operand
-.*:39: Error: operand 2: missing operand
-.*:40: Error: operand 1: missing operand
-.*:40: Error: operand 2: missing operand
-.*:41: Error: operand 1: missing operand
-.*:41: Error: operand 2: missing operand
+.*:39: Error: operand 1: missing length operand
+.*:39: Error: operand 2: missing length operand
+.*:40: Error: operand 1: missing length operand
+.*:40: Error: operand 2: missing length operand
+.*:41: Error: operand 1: missing length operand
+.*:41: Error: operand 2: missing length operand
 .*:42: Error: bad expression
 .*:42: Error: operand 1: operand out of range \(0 is not between 1 and 16\)
 .*:42: Error: operand 1: operand out of range \(32 is not between 0 and 15\)

@@ -1329,6 +1329,41 @@ s390_elf_cons (int nbytes /* 1=.byte, 2=.word, 4=.long */)
   demand_empty_rest_of_line ();
 }
 
+static const char *
+operand_type_str(const struct s390_operand * operand)
+{
+  if (operand->flags & S390_OPERAND_BASE)
+    return _("base register");
+  else if (operand->flags & S390_OPERAND_DISP)
+    return _("displacement");
+  else if (operand->flags & S390_OPERAND_INDEX)
+    {
+      if (operand->flags & S390_OPERAND_VR)
+	return _("vector index register");
+      else
+	return _("index register");
+    }
+  else if (operand->flags & S390_OPERAND_LENGTH)
+    return _("length");
+  else if (operand->flags & S390_OPERAND_AR)
+    return _("access register");
+  else if (operand->flags & S390_OPERAND_CR)
+    return _("control register");
+  else if (operand->flags & S390_OPERAND_FPR)
+    return _("floating-point register");
+  else if (operand->flags & S390_OPERAND_GPR)
+    return _("general-purpose register");
+  else if (operand->flags & S390_OPERAND_VR)
+    return _("vector register");
+  else
+    {
+      if (operand->flags & S390_OPERAND_SIGNED)
+	return _("signed number");
+      else
+	return _("unsigned number");
+    }
+}
+
 /* Return true if all remaining operands in the opcode with
    OPCODE_FLAGS can be skipped.  */
 static bool
@@ -1431,7 +1466,8 @@ md_gather_operands (char *str,
 	{
 	  if (opindex_ptr[0] == '\0')
 	    break;
-	  as_bad (_("operand %d: missing operand"), operand_number);
+	  as_bad (_("operand %d: missing %s operand"), operand_number,
+		  operand_type_str(operand));
 	}
       else if (ex.X_op == O_register || ex.X_op == O_constant)
 	{
