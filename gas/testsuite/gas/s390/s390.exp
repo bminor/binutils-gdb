@@ -60,4 +60,5 @@ if [expr [istarget "s390-*-*"] ||  [istarget "s390x-*-*"]]  then {
     run_list_test "zarch-omitted-base-index-err" ""
     run_dump_test "zarch-base-index-0" "{as -m64}"
     run_list_test "zarch-base-index-0-err" ""
+    run_list_test "zarch-warn-areg-zero" "-m64 -mwarn-areg-zero"
 }
