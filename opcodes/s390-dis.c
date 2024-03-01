@@ -204,10 +204,11 @@ s390_print_insn_with_opcode (bfd_vma memaddr,
       union operand_value val = s390_extract_operand (buffer, operand);
       unsigned long flags = operand->flags;
 
+      /* Omit index register 0.  */
       if ((flags & S390_OPERAND_INDEX) && val.u == 0)
 	continue;
-      if ((flags & S390_OPERAND_BASE) &&
-	  val.u == 0 && separator == '(')
+      /* Omit base register 0, if no or omitted index register 0.  */
+      if ((flags & S390_OPERAND_BASE) && val.u == 0 && separator == '(')
 	{
 	  separator = ',';
 	  continue;
