@@ -1474,9 +1474,10 @@ md_gather_operands (char *str,
 	  /* After a displacement a block in parentheses can start.  */
 	  if (*str != '(')
 	    {
-	      /* Check if parenthesized block can be skipped. If the next
-		 operand is neither an optional operand nor a base register
-		 then we have a syntax error.  */
+	      /* There is no opening parentheses. Check if operands of
+		 parenthesized block can be skipped. Only index and base
+		 register operands as well as optional operands may be
+		 skipped. A length operand may not be skipped.  */
 	      operand = s390_operands + *(++opindex_ptr);
 	      if (!(operand->flags & (S390_OPERAND_INDEX|S390_OPERAND_BASE)))
 		as_bad (_("syntax error; missing '(' after displacement"));
@@ -1485,6 +1486,8 @@ md_gather_operands (char *str,
 	      while (!(operand->flags & S390_OPERAND_BASE))
 		operand = s390_operands + *(++opindex_ptr);
 
+	      /* If there is no further input and the remaining operands are
+	         optional then have these optional operands processed.  */
 	      if (*str == '\0' && skip_optargs_p (opcode->flags, &opindex_ptr[1]))
 		continue;
 
@@ -1493,6 +1496,7 @@ md_gather_operands (char *str,
 		{
 		  if (*str != ',')
 		    {
+		      /* There is no comma. Skip all operands and stop.  */
 		      while (opindex_ptr[1] != '\0')
 			{
 			  operand = s390_operands + *(++opindex_ptr);
@@ -1501,7 +1505,10 @@ md_gather_operands (char *str,
 			}
 		    }
 		  else
-		    str++;
+		    {
+		      /* Comma.  */
+		      str++;
+		    }
 		}
 	    }
 	  else
@@ -1535,6 +1542,8 @@ md_gather_operands (char *str,
 	    str++;
 	  omitted_base_or_index = 0;
 
+	  /* If there is no further input and the remaining operands are
+	     optional then have these optional operands processed.  */
 	  if (*str == '\0' && skip_optargs_p (opcode->flags, &opindex_ptr[1]))
 	    continue;
 
@@ -1543,6 +1552,7 @@ md_gather_operands (char *str,
 	    {
 	      if (*str != ',')
 		{
+		  /* There is no comma. Skip all operands and stop.  */
 		  while (opindex_ptr[1] != '\0')
 		    {
 		      operand = s390_operands + *(++opindex_ptr);
@@ -1551,7 +1561,10 @@ md_gather_operands (char *str,
 		    }
 		}
 	      else
-		str++;
+		{
+		  /* Comma.  */
+		  str++;
+		}
 	    }
 	}
       else
@@ -1567,6 +1580,8 @@ md_gather_operands (char *str,
 	      str++;
 	    }
 
+	  /* If there is no further input and the remaining operands are
+	     optional then have these optional operands processed.  */
 	  if (*str == '\0' && skip_optargs_p (opcode->flags, &opindex_ptr[1]))
 	    continue;
 
@@ -1575,6 +1590,7 @@ md_gather_operands (char *str,
 	    {
 	      if (*str != ',')
 		{
+		  /* There is no comma. Skip all operands and stop.  */
 		  while (opindex_ptr[1] != '\0')
 		    {
 		      operand = s390_operands + *(++opindex_ptr);
@@ -1583,7 +1599,10 @@ md_gather_operands (char *str,
 		    }
 		}
 	      else
-		str++;
+		{
+		  /* Comma.  */
+		  str++;
+		}
 	    }
 	}
     }
