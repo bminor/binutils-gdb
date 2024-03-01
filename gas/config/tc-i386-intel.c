@@ -209,11 +209,18 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
 	      || i386_types[j].sz[0] > 8
 	      || (i386_types[j].sz[0] & (i386_types[j].sz[0] - 1)))
 	    return O_illegal;
-	  if (i.encoding == encoding_default)
-	    i.encoding = encoding_evex;
-	  else if (i.encoding != encoding_evex
-		   && i.encoding != encoding_evex512)
-	    return O_illegal;
+	  switch (i.encoding)
+	    {
+	    case encoding_default:
+	    case encoding_egpr:
+	      i.encoding = encoding_evex;
+	      break;
+	    case encoding_evex:
+	    case encoding_evex512:
+	      break;
+	    default:
+	      return O_illegal;
+	    }
 	  if (!i.broadcast.bytes && !i.broadcast.type)
 	    {
 	      i.broadcast.bytes = i386_types[j].sz[0];

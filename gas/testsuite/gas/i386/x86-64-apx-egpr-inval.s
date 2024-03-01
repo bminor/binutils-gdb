@@ -207,3 +207,13 @@
 	vtestpd (%r27),%ymm6
 	vtestps (%r27),%xmm6
 	vtestps (%r27),%ymm6
+# {vex}
+	{vex} and %eax, %eax
+	{vex} and %r8, %r8
+	{vex} and %r16, %r16
+	{vex} and %eax, %eax, %eax
+	{vex} and %r8, %r8, %r8
+	{vex} and %r16, %r16, %r16
+	{vex} andn %eax, %eax, %eax		# This one's valid.
+	{vex} andn %r8, %r8, %r8		# And this.
+	{vex} andn %r16, %r16, %r16

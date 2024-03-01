@@ -439,9 +439,6 @@ struct _i386_insn
     /* Prefer the REX2 prefix in encoding.  */
     bool rex2_encoding;
 
-    /* Need to use an Egpr capable encoding (REX2 or EVEX).  */
-    bool has_egpr;
-
     /* Disable instruction size optimization.  */
     bool no_optimize;
 
@@ -451,6 +448,7 @@ struct _i386_insn
 	encoding_default = 0,
 	encoding_vex,
 	encoding_vex3,
+	encoding_egpr, /* REX2 or EVEX.  */
 	encoding_evex,
 	encoding_evex512,
 	encoding_error
@@ -1887,7 +1885,7 @@ static INLINE bool need_evex_encoding (const insn_template *t)
 {
   return i.encoding == encoding_evex
 	|| i.encoding == encoding_evex512
-	|| (t->opcode_modifier.vex && i.has_egpr)
+	|| (t->opcode_modifier.vex && i.encoding == encoding_egpr)
 	|| i.mask.reg;
 }
 
@@ -2489,7 +2487,8 @@ static INLINE int
 fits_in_imm4 (offsetT num)
 {
   /* Despite the name, check for imm3 if we're dealing with EVEX.  */
-  return (num & (i.encoding != encoding_evex ? 0xf : 7)) == num;
+  return (num & (i.encoding != encoding_evex
+		 && i.encoding != encoding_egpr ? 0xf : 7)) == num;
 }
 
 static i386_operand_type
@@ -4838,6 +4837,7 @@ optimize_encoding (void)
 	  }
     }
   else if (i.encoding != encoding_evex
+	   && i.encoding != encoding_egpr
 	   && !i.types[0].bitfield.zmmword
 	   && !i.types[1].bitfield.zmmword
 	   && !i.mask.reg
@@ -6872,10 +6872,13 @@ md_assemble (char *line)
   if (optimize && !i.no_optimize && i.tm.opcode_modifier.optimize)
     optimize_encoding ();
 
-  /* Past optimization there's no need to distinguish encoding_evex and
-     encoding_evex512 anymore.  */
+  /* Past optimization there's no need to distinguish encoding_evex,
+     encoding_evex512, and encoding_egpr anymore.  */
   if (i.encoding == encoding_evex512)
     i.encoding = encoding_evex;
+  else if (i.encoding == encoding_egpr)
+    i.encoding = is_any_vex_encoding (&i.tm) ? encoding_evex
+					     : encoding_default;
 
   if (use_unaligned_vector_move)
     encode_with_unaligned_vector_move ();
@@ -8310,27 +8313,42 @@ VEX_check_encoding (const insn_template *t)
       return 1;
     }
 
-  if (i.encoding == encoding_evex
-      || i.encoding == encoding_evex512)
+  switch (i.encoding)
     {
+    case encoding_default:
+      break;
+
+    case encoding_vex:
+    case encoding_vex3:
+      /* This instruction must be encoded with VEX prefix.  */
+      if (!t->opcode_modifier.vex)
+	{
+	  i.error = no_vex_encoding;
+	  return 1;
+	}
+      break;
+
+    case encoding_evex:
+    case encoding_evex512:
       /* This instruction must be encoded with EVEX prefix.  */
       if (!t->opcode_modifier.evex)
 	{
 	  i.error = no_evex_encoding;
 	  return 1;
 	}
-      return 0;
-    }
+      break;
 
-  if (!t->opcode_modifier.vex)
-    {
-      /* This instruction template doesn't have VEX prefix.  */
-      if (i.encoding != encoding_default)
+    case encoding_egpr:
+      /* This instruction must be encoded with REX2 or EVEX prefix.  */
+      if (t->opcode_modifier.vex && !t->opcode_modifier.evex)
 	{
-	  i.error = no_vex_encoding;
+	  i.error = no_evex_encoding;
 	  return 1;
 	}
-      return 0;
+      break;
+
+    default:
+      abort ();
     }
 
   return 0;
@@ -12969,6 +12987,19 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
       if (i.encoding == encoding_evex512)
 	i.encoding = encoding_evex;
 
+      if (i.encoding == encoding_egpr)
+	{
+	  if (vex || xop)
+	    {
+	      as_bad (_("eGPR use conflicts with encoding specifier"));
+	      goto done;
+	    }
+	  if (evex)
+	    i.encoding = encoding_evex;
+	  else
+	    i.encoding = encoding_default;
+	}
+
       /* Are we to emit ModR/M encoding?  */
       if (!i.short_form
 	  && (i.mem_operands
@@ -13413,11 +13444,18 @@ RC_SAE_specifier (const char *pstr)
 	      return NULL;
 	    }
 
-	  if (i.encoding == encoding_default)
-	    i.encoding = encoding_evex512;
-	  else if (i.encoding != encoding_evex
-		   && i.encoding != encoding_evex512)
-	    return NULL;
+	  switch (i.encoding)
+	    {
+	    case encoding_default:
+	    case encoding_egpr:
+	      i.encoding = encoding_evex512;
+	      break;
+	    case encoding_evex:
+	    case encoding_evex512:
+	      break;
+	    default:
+	      return NULL;
+	    }
 
 	  i.rounding.type = RC_NamesTable[j].type;
 
@@ -13478,11 +13516,18 @@ check_VecOperations (char *op_string)
 		}
 	      op_string++;
 
-	      if (i.encoding == encoding_default)
-		i.encoding = encoding_evex;
-	      else if (i.encoding != encoding_evex
-		       && i.encoding != encoding_evex512)
-		goto unknown_vec_op;
+	      switch (i.encoding)
+		{
+		case encoding_default:
+		case encoding_egpr:
+		  i.encoding = encoding_evex;
+		  break;
+		case encoding_evex:
+		case encoding_evex512:
+		  break;
+		default:
+		  goto unknown_vec_op;
+		}
 
 	      i.broadcast.type = bcst_type;
 	      i.broadcast.operand = this_operand;
@@ -15750,11 +15795,19 @@ static bool check_register (const reg_entry *r)
       if (vector_size < VSZ512)
 	return false;
 
-      if (i.encoding == encoding_default)
-	i.encoding = encoding_evex512;
-      else if (i.encoding != encoding_evex
-	       && i.encoding != encoding_evex512)
-	i.encoding = encoding_error;
+      switch (i.encoding)
+	{
+	case encoding_default:
+	case encoding_egpr:
+	  i.encoding = encoding_evex512;
+	  break;
+	case encoding_evex:
+	case encoding_evex512:
+	  break;
+	default:
+	  i.encoding = encoding_error;
+	  break;
+	}
     }
 
   if (vector_size < VSZ256 && r->reg_type.bitfield.ymmword)
@@ -15780,11 +15833,19 @@ static bool check_register (const reg_entry *r)
 	  || flag_code != CODE_64BIT)
 	return false;
 
-      if (i.encoding == encoding_default
-	  || i.encoding == encoding_evex512)
-	i.encoding = encoding_evex;
-      else if (i.encoding != encoding_evex)
-	i.encoding = encoding_error;
+      switch (i.encoding)
+	{
+	  case encoding_default:
+	  case encoding_egpr:
+	  case encoding_evex512:
+	    i.encoding = encoding_evex;
+	    break;
+	  case encoding_evex:
+	    break;
+	  default:
+	    i.encoding = encoding_error;
+	    break;
+	}
     }
 
   if (r->reg_flags & RegRex2)
@@ -15793,7 +15854,19 @@ static bool check_register (const reg_entry *r)
 	  || flag_code != CODE_64BIT)
 	return false;
 
-      i.has_egpr = true;
+      switch (i.encoding)
+	{
+	case encoding_default:
+	  i.encoding = encoding_egpr;
+	  break;
+	case encoding_egpr:
+	case encoding_evex:
+	case encoding_evex512:
+	  break;
+	default:
+	  i.encoding = encoding_error;
+	  break;
+	}
     }
 
   if (((r->reg_flags & (RegRex64 | RegRex)) || r->reg_type.bitfield.qword)
