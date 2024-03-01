@@ -663,6 +663,41 @@ s390_md_finish (void)
     bfd_set_arch_mach (stdoutput, bfd_arch_s390, bfd_mach_s390_31);
 }
 
+static void
+s390_bad_operand_out_of_range (int operand_number,
+			       offsetT value,
+			       offsetT min,
+			       offsetT max,
+			       const char *file,
+			       unsigned line)
+{
+  const char * err;
+
+  if (operand_number > 0)
+    {
+      /* xgettext:c-format.  */
+      err =_("operand %d: operand out of range (%" PRId64
+	     " is not between %" PRId64 " and %" PRId64 ")");
+      if (file)
+	as_bad_where (file, line, err, operand_number,
+		      (int64_t) value, (int64_t) min, (int64_t) max);
+      else
+	as_bad (err, operand_number,
+		(int64_t) value, (int64_t) min, (int64_t) max);
+    }
+  else
+    {
+      /* xgettext:c-format.  */
+      err = _("operand out of range (%" PRId64
+	      " is not between %" PRId64 " and %" PRId64 ")");
+      if (file)
+	as_bad_where (file, line, err,
+		      (int64_t) value, (int64_t) min, (int64_t) max);
+      else
+	as_bad (err, (int64_t) value, (int64_t) min, (int64_t) max);
+    }
+}
+
 /* Insert an operand value into an instruction.  */
 
 static void
@@ -670,7 +705,8 @@ s390_insert_operand (unsigned char *insn,
 		     const struct s390_operand *operand,
 		     offsetT val,
 		     const char *file,
-		     unsigned int line)
+		     unsigned int line,
+		     int operand_number)
 {
   addressT uval;
   int offset;
@@ -687,21 +723,16 @@ s390_insert_operand (unsigned char *insn,
       /* Check for underflow / overflow.  */
       if (val < min || val > max)
 	{
-	  const char *err =
-	    _("operand out of range (%" PRId64 " not between %" PRId64
-	      " and %" PRId64 ")");
-
 	  if (operand->flags & S390_OPERAND_PCREL)
 	    {
 	      val = (offsetT) ((addressT) val << 1);
 	      min = (offsetT) ((addressT) min << 1);
 	      max = (offsetT) ((addressT) max << 1);
 	    }
-	  if (file == (char *) NULL)
-	    as_bad (err, (int64_t) val, (int64_t) min, (int64_t) max);
-	  else
-	    as_bad_where (file, line,
-			  err, (int64_t) val, (int64_t) min, (int64_t) max);
+
+	  s390_bad_operand_out_of_range (operand_number, val, min, max,
+					 file, line);
+
 	  return;
 	}
       /* val is ok, now restrict it to operand->bits bits.  */
@@ -736,7 +767,8 @@ s390_insert_operand (unsigned char *insn,
 	      max++;
 	    }
 
-	  as_bad_value_out_of_range (_("operand"), uval, (offsetT) min, (offsetT) max, file, line);
+	  s390_bad_operand_out_of_range (operand_number, val, min, max,
+					 file, line);
 
 	  return;
 	}
@@ -1364,7 +1396,7 @@ md_gather_operands (char *str,
 	{
 	  /* Optional parameters might need to be ORed with a
 	     value so calling s390_insert_operand is needed.  */
-	  s390_insert_operand (insn, operand, 0, NULL, 0);
+	  s390_insert_operand (insn, operand, 0, NULL, 0, operand_number);
 	  break;
 	}
 
@@ -1394,12 +1426,12 @@ md_gather_operands (char *str,
 
       /* Write the operand to the insn.  */
       if (ex.X_op == O_illegal)
-	as_bad (_("illegal operand"));
+	as_bad (_("operand %d: illegal operand"), operand_number);
       else if (ex.X_op == O_absent)
 	{
 	  if (opindex_ptr[0] == '\0')
 	    break;
-	  as_bad (_("missing operand"));
+	  as_bad (_("operand %d: missing operand"), operand_number);
 	}
       else if (ex.X_op == O_register || ex.X_op == O_constant)
 	{
@@ -1410,7 +1442,7 @@ md_gather_operands (char *str,
 	      /* We need to generate a fixup for the
 		 expression returned by s390_lit_suffix.  */
 	      if (fc >= MAX_INSN_FIXUPS)
-		as_fatal (_("too many fixups"));
+		as_fatal (_("operand %d: too many fixups"), operand_number);
 	      fixups[fc].exp = ex;
 	      fixups[fc].opindex = *opindex_ptr;
 	      fixups[fc].reloc = BFD_RELOC_UNUSED;
@@ -1420,29 +1452,32 @@ md_gather_operands (char *str,
 	    {
 	      if ((operand->flags & S390_OPERAND_LENGTH)
 		  && ex.X_op != O_constant)
-		as_bad (_("invalid length field specified"));
+		as_bad (_("operand %d: invalid length field specified"),
+			operand_number);
 	      if ((operand->flags & S390_OPERAND_INDEX)
 		  && ex.X_add_number == 0
 		  && warn_areg_zero)
-		as_warn (_("index register specified but zero"));
+		as_warn (_("operand %d: index register specified but zero"),
+			 operand_number);
 	      if ((operand->flags & S390_OPERAND_BASE)
 		  && ex.X_add_number == 0
 		  && warn_areg_zero)
-		as_warn (_("base register specified but zero"));
+		as_warn (_("operand %d: base register specified but zero"),
+			 operand_number);
 	      if ((operand->flags & S390_OPERAND_GPR)
 		  && (operand->flags & S390_OPERAND_REG_PAIR)
 		  && (ex.X_add_number & 1))
-		as_bad (_("odd numbered general purpose register specified as "
-			  "register pair"));
+		as_bad (_("operand %d: odd numbered general purpose register "
+			  "specified as register pair"), operand_number);
 	      if ((operand->flags & S390_OPERAND_FPR)
 		  && (operand->flags & S390_OPERAND_REG_PAIR)
 		  && ex.X_add_number != 0 && ex.X_add_number != 1
 		  && ex.X_add_number != 4 && ex.X_add_number != 5
 		  && ex.X_add_number != 8 && ex.X_add_number != 9
 		  && ex.X_add_number != 12 && ex.X_add_number != 13)
-		as_bad (_("invalid floating point register pair.  Valid fp "
-			  "register pair operands are 0, 1, 4, 5, 8, 9, "
-			  "12 or 13."));
+		as_bad (_("operand %d: invalid floating-point register (FPR) "
+			  "pair (valid FPR pair operands are 0, 1, 4, 5, 8, 9, "
+			  "12 or 13)"), operand_number);
 	      if (warn_regtype_mismatch && ex.X_op == O_register
 		  && !(opcode->flags & S390_INSTR_FLAG_PSEUDO_MNEMONIC))
 		{
@@ -1481,7 +1516,7 @@ md_gather_operands (char *str,
 				 operand_number, expected_regtype);
 		    }
 		}
-	      s390_insert_operand (insn, operand, ex.X_add_number, NULL, 0);
+	      s390_insert_operand (insn, operand, ex.X_add_number, NULL, 0, operand_number);
 	    }
 	}
       else
@@ -1567,11 +1602,11 @@ md_gather_operands (char *str,
 	    }
 
 	  if (suffix != ELF_SUFFIX_NONE && reloc == BFD_RELOC_UNUSED)
-	    as_bad (_("invalid operand suffix"));
+	    as_bad (_("operand %d: invalid operand suffix"), operand_number);
 	  /* We need to generate a fixup of type 'reloc' for this
 	     expression.  */
 	  if (fc >= MAX_INSN_FIXUPS)
-	    as_fatal (_("too many fixups"));
+	    as_fatal (_("operand %d: too many fixups"), operand_number);
 	  fixups[fc].exp = ex;
 	  fixups[fc].opindex = *opindex_ptr;
 	  fixups[fc].reloc = reloc;
@@ -1591,7 +1626,8 @@ md_gather_operands (char *str,
 		 skipped. A length operand may not be skipped.  */
 	      operand = s390_operands + *(++opindex_ptr);
 	      if (!(operand->flags & (S390_OPERAND_INDEX|S390_OPERAND_BASE)))
-		as_bad (_("syntax error; missing '(' after displacement"));
+		as_bad (_("operand %d: syntax error; missing '(' after displacement"),
+			operand_number);
 
 	      /* Ok, skip all operands until S390_OPERAND_BASE.  */
 	      while (!(operand->flags & S390_OPERAND_BASE))
@@ -1611,7 +1647,8 @@ md_gather_operands (char *str,
 		      while (opindex_ptr[1] != '\0')
 			{
 			  operand = s390_operands + *(++opindex_ptr);
-			  as_bad (_("syntax error; expected ','"));
+			  as_bad (_("operand %d: syntax error; expected ','"),
+				  operand_number);
 			  break;
 			}
 		    }
@@ -1649,7 +1686,8 @@ md_gather_operands (char *str,
 	{
 	  /* After the base register the parenthesised block ends.  */
 	  if (*str != ')')
-	    as_bad (_("syntax error; missing ')' after base register"));
+	    as_bad (_("operand %d: syntax error; missing ')' after base register"),
+		    operand_number);
 	  else
 	    str++;
 	  omitted_base_or_index = 0;
@@ -1668,7 +1706,8 @@ md_gather_operands (char *str,
 		  while (opindex_ptr[1] != '\0')
 		    {
 		      operand = s390_operands + *(++opindex_ptr);
-		      as_bad (_("syntax error; expected ','"));
+		      as_bad (_("operand %d: syntax error; expected ','"),
+			      operand_number);
 		      break;
 		    }
 		}
@@ -1691,7 +1730,8 @@ md_gather_operands (char *str,
 	      operand = s390_operands + *(++opindex_ptr);
 
 	      if (!(operand->flags & S390_OPERAND_BASE))
-		as_bad (_("syntax error; '%c' not allowed here"), *str);
+		as_bad (_("operand %d: syntax error; '%c' not allowed here"),
+			operand_number, *str);
 	      if (*str == ',')
 		str++;
 	      str++;
@@ -1711,7 +1751,8 @@ md_gather_operands (char *str,
 		  while (opindex_ptr[1] != '\0')
 		    {
 		      operand = s390_operands + *(++opindex_ptr);
-		      as_bad (_("syntax error; expected ','"));
+		      as_bad (_("operand %d: syntax error; expected ','"),
+			      operand_number);
 		      break;
 		    }
 		}
@@ -2419,7 +2460,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	{
 	  /* Insert the fully resolved operand value.  */
 	  s390_insert_operand ((unsigned char *) where, operand,
-			       (offsetT) value, fixP->fx_file, fixP->fx_line);
+			       (offsetT) value, fixP->fx_file, fixP->fx_line, 0);
 	  return;
 	}
 
