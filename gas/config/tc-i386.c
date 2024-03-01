@@ -12922,46 +12922,9 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	}
     }
 
-  /* Trim off encoding space.  */
-  if (j > 1 && !i.insn_opcode_space && (val >> ((j - 1) * 8)) == 0x0f)
-    {
-      uint8_t byte = val >> ((--j - 1) * 8);
-
-      i.insn_opcode_space = SPACE_0F;
-      switch (byte & -(j > 1))
-	{
-	case 0x38:
-	  i.insn_opcode_space = SPACE_0F38;
-	  --j;
-	  break;
-	case 0x3a:
-	  i.insn_opcode_space = SPACE_0F3A;
-	  --j;
-	  break;
-	}
-      i.tm.opcode_space = i.insn_opcode_space;
-      val &= ((uint64_t)1 << (j * 8)) - 1;
-    }
-  if (!i.tm.opcode_space && (vex || evex))
-    /* Arrange for build_vex_prefix() to properly emit 0xC4/0xC5.
-       Also avoid hitting abort() there or in build_evex_prefix().  */
-    i.tm.opcode_space = i.insn_opcode_space == SPACE_0F ? SPACE_0F
-						   : SPACE_0F38;
-
-  if (j > 2)
-    {
-      as_bad (_("opcode residual (%#"PRIx64") too wide"), (uint64_t) val);
-      goto bad;
-    }
-  i.opcode_length = j;
-
-  /* Handle operands, if any.  */
+  /* Parse operands, if any, before evaluating encoding space.  */
   if (*line == ',')
     {
-      i386_operand_type combined;
-      expressionS *disp_exp = NULL;
-      bool changed;
-
       i.memshift = -1;
 
       ptr = parse_operands (line + 1, &i386_mnemonics[MN__insn]);
@@ -12986,6 +12949,48 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
       /* No need to distinguish encoding_evex and encoding_evex512.  */
       if (i.encoding == encoding_evex512)
 	i.encoding = encoding_evex;
+    }
+
+  /* Trim off encoding space.  */
+  if (j > 1 && !i.insn_opcode_space && (val >> ((j - 1) * 8)) == 0x0f)
+    {
+      uint8_t byte = val >> ((--j - 1) * 8);
+
+      i.insn_opcode_space = SPACE_0F;
+      switch (byte & -(j > 1 && !i.rex2_encoding
+		       && (i.encoding != encoding_egpr || evex)))
+	{
+	case 0x38:
+	  i.insn_opcode_space = SPACE_0F38;
+	  --j;
+	  break;
+	case 0x3a:
+	  i.insn_opcode_space = SPACE_0F3A;
+	  --j;
+	  break;
+	}
+      i.tm.opcode_space = i.insn_opcode_space;
+      val &= ((uint64_t)1 << (j * 8)) - 1;
+    }
+  if (!i.tm.opcode_space && (vex || evex))
+    /* Arrange for build_vex_prefix() to properly emit 0xC4/0xC5.
+       Also avoid hitting abort() there or in build_evex_prefix().  */
+    i.tm.opcode_space = i.insn_opcode_space == SPACE_0F ? SPACE_0F
+						   : SPACE_0F38;
+
+  if (j > 2)
+    {
+      as_bad (_("opcode residual (%#"PRIx64") too wide"), (uint64_t) val);
+      goto done;
+    }
+  i.opcode_length = j;
+
+  /* Handle operands, if any.  */
+  if (i.operands)
+    {
+      i386_operand_type combined;
+      expressionS *disp_exp = NULL;
+      bool changed;
 
       if (i.encoding == encoding_egpr)
 	{
