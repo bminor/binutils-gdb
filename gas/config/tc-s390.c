@@ -1346,7 +1346,7 @@ md_gather_operands (char *str,
 	    {
 	      if ((operand->flags & S390_OPERAND_LENGTH)
 		  && ex.X_op != O_constant)
-		as_fatal (_("invalid length field specified"));
+		as_bad (_("invalid length field specified"));
 	      if ((operand->flags & S390_OPERAND_INDEX)
 		  && ex.X_add_number == 0
 		  && warn_areg_zero)
@@ -1358,17 +1358,17 @@ md_gather_operands (char *str,
 	      if ((operand->flags & S390_OPERAND_GPR)
 		  && (operand->flags & S390_OPERAND_REG_PAIR)
 		  && (ex.X_add_number & 1))
-		as_fatal (_("odd numbered general purpose register specified as "
-			    "register pair"));
+		as_bad (_("odd numbered general purpose register specified as "
+			  "register pair"));
 	      if ((operand->flags & S390_OPERAND_FPR)
 		  && (operand->flags & S390_OPERAND_REG_PAIR)
 		  && ex.X_add_number != 0 && ex.X_add_number != 1
 		  && ex.X_add_number != 4 && ex.X_add_number != 5
 		  && ex.X_add_number != 8 && ex.X_add_number != 9
 		  && ex.X_add_number != 12 && ex.X_add_number != 13)
-		as_fatal (_("invalid floating point register pair.  Valid fp "
-			    "register pair operands are 0, 1, 4, 5, 8, 9, "
-			    "12 or 13."));
+		as_bad (_("invalid floating point register pair.  Valid fp "
+			  "register pair operands are 0, 1, 4, 5, 8, 9, "
+			  "12 or 13."));
 	      s390_insert_operand (insn, operand, ex.X_add_number, NULL, 0);
 	    }
 	}
