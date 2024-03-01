@@ -1683,13 +1683,17 @@ md_gather_operands (char *str,
       else
 	{
 	  /* We can find an 'early' closing parentheses in e.g. D(L) instead
-	     of D(L,B).  In this case the base register has to be skipped.  */
-	  if (*str == ')')
+	     of D(L,B). In this case the base register has to be skipped.
+	     Same if the base register has been explicilty omitted in e.g.
+	     D(X,) or D(L,).  */
+	  if (*str == ')' || (str[0] == ',' && str[1] == ')'))
 	    {
 	      operand = s390_operands + *(++opindex_ptr);
 
 	      if (!(operand->flags & S390_OPERAND_BASE))
-		as_bad (_("syntax error; ')' not allowed here"));
+		as_bad (_("syntax error; '%c' not allowed here"), *str);
+	      if (*str == ',')
+		str++;
 	      str++;
 	    }
 

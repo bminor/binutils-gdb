@@ -18,13 +18,13 @@ foo:
 	a	%r1,16(%r3)
 	a	%r1,16(%r2,%r0)
 	a	%r1,16(%r2,0)
-#	a	%r1,16(%r2,)		# syntax error: explicitly omitted base
+	a	%r1,16(%r2,)		# syntax error: explicitly omitted base
 	a	%r1,16(%r0,%r0)
 	a	%r1,16(%r0,0)
-#	a	%r1,16(%r0,)		# syntax error: explicitly omitted base
+	a	%r1,16(%r0,)		# syntax error: explicitly omitted base
 	a	%r1,16(0,%r0)
 	a	%r1,16(0,0)
-#	a	%r1,16(0,)		# syntax error: explicitly omitted base
+	a	%r1,16(0,)		# syntax error: explicitly omitted base
 	a	%r1,16(0,%r0)
 	a	%r1,16(,%r0)
 	a	%r1,16(,0)
@@ -39,7 +39,7 @@ foo:
 	mvc	16(1,%r1),32(%r2)
 	mvc	16(1,%r0),32(%r2)
 	mvc	16(1,0),32(%r2)
-#	mvc	16(1,),32(%r2)		# syntax error: explicitly omitted base
+	mvc	16(1,),32(%r2)
 	mvc	16(1),32(%r2)
 	mvc	16(1,%r1),32(%r0)
 	mvc	16(1,%r1),32(0)
@@ -53,10 +53,10 @@ foo:
 	mvc	16(1,0),32(0)
 #	mvc	16(1,0),32()		# syntax error: empty parentheses
 	mvc	16(1,0),32
-#	mvc	16(1,),32(%r0)		# syntax error: explicitly omitted base
-#	mvc	16(1,),32(0)		# syntax error: explicitly omitted base
+	mvc	16(1,),32(%r0)
+	mvc	16(1,),32(0)
 #	mvc	16(1,),32()		# syntax error: explicitly omitted base & empty parentheses
-#	mvc	16(1,),32		# syntax error: explicitly omitted base
+	mvc	16(1,),32
 	mvc	16(1),32(%r0)
 	mvc	16(1),32(0)
 #	mvc	16(1),32()		# syntax error: empty parentheses
@@ -67,27 +67,27 @@ foo:
 	unpk	16(1,%r1),32(2,%r2)
 	unpk	16(1,%r0),32(2,%r2)
 	unpk	16(1,0),32(2,%r2)
-#	unpk	16(1,),32(2,%r2)	# syntax error: explicitly omitted base
+	unpk	16(1,),32(2,%r2)
 	unpk	16(1),32(2,%r2)
 	unpk	16(1,%r1),32(2,%r0)
 	unpk	16(1,%r1),32(2,0)
-#	unpk	16(1,%r1),32(2,)	# syntax error: explicitly omitted base
+	unpk	16(1,%r1),32(2,)
 	unpk	16(1,%r1),32(2)
 	unpk	16(1,%r0),32(2,%r0)
 	unpk	16(1,%r0),32(2,0)
-#	unpk	16(1,%r0),32(2,)	# syntax error: explicitly omitted base
+	unpk	16(1,%r0),32(2,)
 	unpk	16(1,%r0),32(2)
 	unpk	16(1,0),32(2,%r0)
 	unpk	16(1,0),32(2,0)
-#	unpk	16(1,0),32(2,)		# syntax error: explicitly omitted base
+	unpk	16(1,0),32(2,)
 	unpk	16(1,0),32(2)
-#	unpk	16(1,),32(2,%r0)	# syntax error: explicitly omitted base
-#	unpk	16(1,),32(2,0)		# syntax error: explicitly omitted base
-#	unpk	16(1,),32(2,)		# syntax error: explicitly omitted base
-#	unpk	16(1,),32(2)		# syntax error: explicitly omitted base
+	unpk	16(1,),32(2,%r0)
+	unpk	16(1,),32(2,0)
+	unpk	16(1,),32(2,)
+	unpk	16(1,),32(2)
 	unpk	16(1),32(2,%r0)
 	unpk	16(1),32(2,0)
-#	unpk	16(1),32(2,)		# syntax error: explicitly omitted base
+	unpk	16(1),32(2,)
 	unpk	16(1),32(2)
 	unpk	0(1),0(2)
 
@@ -99,13 +99,13 @@ foo:
 	vgef	%v1,16(%r3),0
 	vgef	%v1,16(%v2,%r0),0
 	vgef	%v1,16(%v2,0),0
-#	vgef	%v1,16(%v2,),0		# syntax error: explicitly omitted base
+	vgef	%v1,16(%v2,),0
 	vgef	%v1,16(%v0,%r0),0
 	vgef	%v1,16(%v0,0),0
-#	vgef	%v1,16(%v0,),0		# syntax error: explicitly omitted base
+	vgef	%v1,16(%v0,),0
 	vgef	%v1,16(0,%r0),0
 	vgef	%v1,16(0,0),0
-#	vgef	%v1,16(0,),0		# syntax error: explicitly omitted base
+	vgef	%v1,16(0,),0
 	vgef	%v1,16(,%r0),0
 	vgef	%v1,16(,0),0
 #	vgef	%v1,16(,),0		# syntax error: explicitly omitted index & base

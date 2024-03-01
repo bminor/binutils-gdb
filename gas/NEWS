@@ -1,5 +1,9 @@
 -*- text -*-
 
+* The base register operand in D(X,B) and D(L,B) may be explicitly omitted
+  in assembly on s390. It can now be coded as D(X,) or D(L,) instead of D(X,0)
+  D(X,%r0), D(L,0), and D(L,%r0).
+
 * Warn when a register name type does not match the operand type on s390.
   Add support for s390-specific option "warn-regtype-mismatch=[strict|relaxed|
   no]" to override the register name type check behavior. The default
