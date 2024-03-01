@@ -4694,6 +4694,34 @@ optimize_encoding (void)
 	    }
 	}
     }
+  else if (i.reg_operands == 3
+	   && i.op[0].regs == i.op[1].regs
+	   && i.encoding != encoding_evex
+	   && (i.tm.mnem_off == MN_xor
+	       || i.tm.mnem_off == MN_sub))
+    {
+      /* Optimize: -O:
+	   xorb %rNb, %rNb, %rMb  -> xorl %rMd, %rMd
+	   xorw %rNw, %rNw, %rMw  -> xorl %rMd, %rMd
+	   xorl %rNd, %rNd, %rMd  -> xorl %rMd, %rMd
+	   xorq %rN,  %rN,  %rM   -> xorl %rMd, %rMd
+	   subb %rNb, %rNb, %rMb  -> subl %rMd, %rMd
+	   subw %rNw, %rNw, %rMw  -> subl %rMd, %rMd
+	   subl %rNd, %rNd, %rMd  -> subl %rMd, %rMd
+	   subq %rN,  %rN,  %rM   -> subl %rMd, %rMd
+        */
+      i.tm.opcode_space = SPACE_BASE;
+      i.tm.opcode_modifier.evex = 0;
+      i.tm.opcode_modifier.size = SIZE32;
+      i.types[0].bitfield.byte = 0;
+      i.types[0].bitfield.word = 0;
+      i.types[0].bitfield.dword = 1;
+      i.types[0].bitfield.qword = 0;
+      i.op[0].regs = i.op[2].regs;
+      i.types[1] = i.types[0];
+      i.op[1].regs = i.op[2].regs;
+      i.reg_operands = 2;
+    }
   else if (optimize > 1
 	   && !optimize_for_space
 	   && i.reg_operands == 2

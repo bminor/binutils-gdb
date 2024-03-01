@@ -65,3 +65,27 @@ _start:
 	btr	$31, %rax
 	bts	$15, %ax
 	bts	$31, %rax
+	xor	%rcx, %rcx, %rcx
+	xor	%rdx, %rcx, %rcx
+	xor	%rdx, %rdx, %rcx
+	sub	%rcx, %rcx, %rcx
+	sub	%rdx, %rcx, %rcx
+	sub	%rdx, %rdx, %rcx
+	xor	%r17, %r17, %r17
+	xor	%r18, %r17, %r17
+	xor	%r18, %r18, %r17
+	sub	%r17, %r17, %r17
+	sub	%r18, %r17, %r17
+	sub	%r18, %r18, %r17
+	xor	%cx, %cx, %cx
+	xor	%dx, %cx, %cx
+	xor	%dx, %dx, %cx
+	sub	%cx, %cx, %cx
+	sub	%dx, %cx, %cx
+	sub	%dx, %dx, %cx
+	xor	%r17b, %r17b, %r17b
+	xor	%r18b, %r17b, %r17b
+	xor	%r18b, %r18b, %r17b
+	sub	%r17b, %r17b, %r17b
+	sub	%r18b, %r17b, %r17b
+	sub	%r18b, %r18b, %r17b
