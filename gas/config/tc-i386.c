@@ -9136,6 +9136,15 @@ match_template (char mnem_suffix)
     i.tm.operand_types[addr_prefix_disp]
       = operand_types[addr_prefix_disp];
 
+  /* APX insns acting on byte operands are WIG, yet that can't be expressed
+     in the templates (they're also covering word/dword/qword operands).  */
+  if (t->opcode_space == SPACE_EVEXMAP4 && !t->opcode_modifier.vexw &&
+      i.types[i.operands - 1].bitfield.byte)
+    {
+      gas_assert (t->opcode_modifier.w);
+      i.tm.opcode_modifier.vexw = VEXWIG;
+    }
+
   switch (found_reverse_match)
     {
     case 0:
