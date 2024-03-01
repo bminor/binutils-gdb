@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Base register 0 is now printed as "0" instead of "%r0" in s390 disassembly.
+
 * When objdump or readelf are used to display the contents of a .eh_frame
   section they will now also display the contents of the .eh_frame_hdr section,
   if present.
