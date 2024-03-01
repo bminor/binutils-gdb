@@ -1268,16 +1268,15 @@ md_gather_operands (char *str,
   expressionS ex;
   elf_suffix_type suffix;
   bfd_reloc_code_real_type reloc;
-  int skip_optional;
+  int omitted_base_or_index;
   char *f;
   int fc, i;
 
   while (ISSPACE (*str))
     str++;
 
-  skip_optional = 0;
-
   /* Gather the operands.  */
+  omitted_base_or_index = 0;	/* Whether B in D(L,B) or X in D(X,B) were omitted.  */
   fc = 0;
   for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
     {
@@ -1294,13 +1293,13 @@ md_gather_operands (char *str,
 	  break;
 	}
 
-      if (skip_optional && (operand->flags & S390_OPERAND_INDEX))
+      if (omitted_base_or_index && (operand->flags & S390_OPERAND_INDEX))
 	{
-	  /* We do an early skip. For D(X,B) constructions the index
-	     register is skipped (X is optional). For D(L,B) the base
-	     register will be the skipped operand, because L is NOT
-	     optional.  */
-	  skip_optional = 0;
+	  /* Skip omitted optional index register operand in D(X,B) due to
+	     D(,B) or D(B). Skip comma, if D(,B).  */
+	  if (*str == ',')
+	    str++;
+	  omitted_base_or_index = 0;
 	  continue;
 	}
 
@@ -1510,17 +1509,19 @@ md_gather_operands (char *str,
 	      for (f = str; *f != '\0'; f++)
 		if (*f == ',' || *f == ')')
 		  break;
-	      /* If there is no comma until the closing parentheses OR
-		 there is a comma right after the opening parentheses,
-		 we have to skip optional operands.  */
+	      /* If there is no comma until the closing parenthesis ')' or
+		 there is a comma right after the opening parenthesis '(',
+		 we have to skip the omitted optional index or base register
+		 operand:
+		 - Index X in D(X,B), when D(,B) or D(B)
+		 - Base B in D(L,B), when D(L)  */
 	      if (*f == ',' && f == str)
 		{
-		  /* comma directly after '(' ? */
-		  skip_optional = 1;
-		  str++;
+		  /* Comma directly after opening parenthesis '(' ? */
+		  omitted_base_or_index = 1;
 		}
 	      else
-		skip_optional = (*f != ',');
+		omitted_base_or_index = (*f != ',');
 	    }
 	}
       else if (operand->flags & S390_OPERAND_BASE)
@@ -1530,7 +1531,7 @@ md_gather_operands (char *str,
 	    as_bad (_("syntax error; missing ')' after base register"));
 	  else
 	    str++;
-	  skip_optional = 0;
+	  omitted_base_or_index = 0;
 
 	  if (*str == '\0' && skip_optargs_p (opcode->flags, &opindex_ptr[1]))
 	    continue;
