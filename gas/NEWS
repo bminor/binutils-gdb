@@ -6,11 +6,7 @@ Changes in 2.42:
 
 * Add support for AMD znver5 processor.
 
-* Add support for the AArch64 Scalable Vector Extension version 2.1 (SVE2.1).
-
-* Add support for the AArch64 Scalable Matrix Extension version 2.1 (SME2.1).
-
-* Add support for the AArch64 BFloat16 to BFloat16 arithmetic for SVE2 and SME2
+* Add support for the AArch64 BFloat16 to BFloat16 arithmetic for SVE2
   (B16B16).
 
 * Add support for the AArch64 Reliability, Availability and Serviceability
