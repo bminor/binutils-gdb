@@ -148,6 +148,9 @@
 #ifndef elf_backend_strtab_flags
 #define elf_backend_strtab_flags 0
 #endif
+#ifndef elf_backend_use_mmap
+#define elf_backend_use_mmap false
+#endif
 
 #define bfd_elfNN_bfd_debug_info_start		_bfd_void_bfd
 #define bfd_elfNN_bfd_debug_info_end		_bfd_void_bfd
@@ -979,7 +982,8 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_extern_protected_data,
   elf_backend_always_renumber_dynsyms,
   elf_backend_linux_prpsinfo32_ugid16,
-  elf_backend_linux_prpsinfo64_ugid16
+  elf_backend_linux_prpsinfo64_ugid16,
+  elf_backend_use_mmap
 };
 
 /* Forward declaration for use when initialising alternative_target field.  */

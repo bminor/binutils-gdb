@@ -1111,12 +1111,12 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
     {
       bfd_byte *contents;
 
-      if (!bfd_malloc_and_get_section (abfd, newsect, &contents))
+      if (!_bfd_elf_mmap_section_contents (abfd, newsect, &contents))
 	return false;
 
       elf_parse_notes (abfd, (char *) contents, hdr->sh_size,
 		       hdr->sh_offset, hdr->sh_addralign);
-      free (contents);
+      _bfd_elf_munmap_section_contents (newsect, contents);
     }
 
   if ((newsect->flags & SEC_ALLOC) != 0)
@@ -1686,7 +1686,7 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
 
       fprintf (f, _("\nDynamic Section:\n"));
 
-      if (!bfd_malloc_and_get_section (abfd, s, &dynbuf))
+      if (!_bfd_elf_mmap_section_contents (abfd, s, &dynbuf))
 	goto error_return;
 
       elfsec = _bfd_elf_section_from_bfd_section (abfd, s);
@@ -1808,7 +1808,7 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
 	  fprintf (f, "\n");
 	}
 
-      free (dynbuf);
+      _bfd_elf_munmap_section_contents (s, dynbuf);
       dynbuf = NULL;
     }
 
@@ -1865,7 +1865,7 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
   return true;
 
  error_return:
-  free (dynbuf);
+  _bfd_elf_munmap_section_contents (s, dynbuf);
   return false;
 }
 
@@ -14369,4 +14369,81 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
     }
 
   return result;
+}
+
+/* Mmap in section contents.  */
+
+bool
+_bfd_elf_mmap_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **buf)
+{
+#ifdef USE_MMAP
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  if (bed->use_mmap
+      && sec->compress_status == COMPRESS_SECTION_NONE
+      && (sec->flags & SEC_LINKER_CREATED) == 0)
+    {
+      /* Use mmap only if section size >= the minimum mmap section
+	 size.  */
+      size_t readsz = bfd_get_section_limit_octets (abfd, sec);
+      size_t allocsz = bfd_get_section_alloc_size (abfd, sec);
+      if (readsz == allocsz && readsz >= _bfd_minimum_mmap_size)
+	{
+	  if (sec->contents != NULL)
+	    {
+	      if (!sec->mmapped_p)
+		abort ();
+	      *buf = sec->contents;
+	      return true;
+	    }
+	  if (sec->mmapped_p)
+	    abort ();
+	  sec->mmapped_p = 1;
+	}
+    }
+#endif
+  *buf = NULL;
+  bool ret = bfd_get_full_section_contents (abfd, sec, buf);
+  if (ret && sec->mmapped_p)
+    *buf = sec->contents;
+  return ret;
+}
+
+/* Munmap section contents.  */
+
+void
+_bfd_elf_munmap_section_contents (asection *sec ATTRIBUTE_UNUSED,
+				  void *contents)
+{
+  /* NB: Since _bfd_elf_munmap_section_contents is called like free,
+     CONTENTS may be NULL.  */
+  if (contents == NULL)
+    return;
+
+#ifdef USE_MMAP
+  if (sec->mmapped_p)
+    {
+      /* _bfd_elf_mmap_section_contents may return the previously
+	 mapped section contents.  Munmap the section contents only
+	 if they haven't been cached.  */
+      if (elf_section_data (sec)->this_hdr.contents == contents)
+	return;
+
+      /* When _bfd_elf_mmap_section_contents returns CONTENTS as
+	 malloced, CONTENTS_ADDR is set to NULL.  */
+      if (elf_section_data (sec)->contents_addr != NULL)
+	{
+	  /* NB: CONTENTS_ADDR and CONTENTS_SIZE must be valid.  */
+	  if (munmap (elf_section_data (sec)->contents_addr,
+		      elf_section_data (sec)->contents_size) != 0)
+	    abort ();
+	  sec->mmapped_p = 0;
+	  sec->contents = NULL;
+	  elf_section_data (sec)->contents_addr = NULL;
+	  elf_section_data (sec)->contents_size = 0;
+	  return;
+	}
+    }
+#endif
+
+  free (contents);
 }

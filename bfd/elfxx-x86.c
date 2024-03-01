@@ -1566,9 +1566,9 @@ elf_x86_size_or_finish_relative_reloc
 			  = elf_section_data (sec)->this_hdr.contents;
 		      else
 			{
-			  if (!bfd_malloc_and_get_section (sec->owner,
-							   sec,
-							   &contents))
+			  if (!_bfd_elf_mmap_section_contents (sec->owner,
+							       sec,
+							       &contents))
 			    info->callbacks->einfo
 			      /* xgettext:c-format */
 			      (_("%F%P: %pB: failed to allocate memory for section `%pA'\n"),
@@ -3789,7 +3789,7 @@ _bfd_x86_elf_get_synthetic_symtab (bfd *abfd,
     count = n;
 
   for (j = 0; plts[j].name != NULL; j++)
-    free (plts[j].contents);
+    _bfd_elf_munmap_section_contents (plts[j].sec, plts[j].contents);
 
   free (dynrelbuf);
 

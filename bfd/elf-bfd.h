@@ -1778,6 +1778,12 @@ struct elf_backend_data
   /* True if the 64-bit Linux PRPSINFO structure's `pr_uid' and `pr_gid'
      members use a 16-bit data type.  */
   unsigned linux_prpsinfo64_ugid16 : 1;
+
+  /* True if the backend can use mmap to map in all input section
+     contents.  All bfd_malloc_and_get_section and free usages on
+     section contents must be replaced by _bfd_elf_mmap_section_contents
+     and _bfd_elf_munmap_section_contents.  */
+  unsigned use_mmap : 1;
 };
 
 /* Information about reloc sections associated with a bfd_elf_section_data
@@ -1858,6 +1864,15 @@ struct bfd_elf_section_data
 
   /* Link from a text section to its .eh_frame_entry section.  */
   asection *eh_frame_entry;
+
+  /* If the mmapped_p flag is set, this points to the actual mmapped
+     address of contents.  If it is set to NULL, contents isn't
+     mmapped.  */
+  void *contents_addr;
+
+  /* If the mmapped_p flag is set, this is the actual mmapped size of
+     contents.  */
+  size_t contents_size;
 
   /* TRUE if the section has secondary reloc sections associated with it.
      FIXME: In the future it might be better to change this into a list
@@ -3126,6 +3141,11 @@ extern bool _bfd_elf_maybe_set_textrel
 
 extern bool _bfd_elf_add_dynamic_tags
   (bfd *, struct bfd_link_info *, bool);
+
+extern bool _bfd_elf_mmap_section_contents
+  (bfd *abfd, asection *section, bfd_byte **buf);
+extern void _bfd_elf_munmap_section_contents
+  (asection *, void *);
 
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;

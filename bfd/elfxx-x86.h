@@ -960,6 +960,7 @@ extern void _bfd_x86_elf_link_report_relative_reloc
   _bfd_elf_x86_size_relative_relocs
 #define elf_backend_finish_relative_relocs \
   _bfd_elf_x86_finish_relative_relocs
+#define elf_backend_use_mmap true
 
 #define ELF_P_ALIGN ELF_MINPAGESIZE
 

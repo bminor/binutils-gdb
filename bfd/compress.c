@@ -753,7 +753,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
   switch (compress_status)
     {
     case COMPRESS_SECTION_NONE:
-      if (p == NULL)
+      if (p == NULL && !sec->mmapped_p)
 	{
 	  p = (bfd_byte *) bfd_malloc (allocsz);
 	  if (p == NULL)

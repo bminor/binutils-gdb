@@ -2057,7 +2057,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
   /* Get the section contents.  */
   if (elf_section_data (sec)->this_hdr.contents != NULL)
     contents = elf_section_data (sec)->this_hdr.contents;
-  else if (!bfd_malloc_and_get_section (abfd, sec, &contents))
+  else if (!_bfd_elf_mmap_section_contents (abfd, sec, &contents))
     {
       sec->check_relocs_failed = 1;
       return false;
@@ -2591,7 +2591,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
   if (elf_section_data (sec)->this_hdr.contents != contents)
     {
       if (!converted && !_bfd_link_keep_memory (info))
-	free (contents);
+	_bfd_elf_munmap_section_contents (sec, contents);
       else
 	{
 	  /* Cache the section contents for elf_link_input_bfd if any
@@ -2609,7 +2609,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 
  error_return:
   if (elf_section_data (sec)->this_hdr.contents != contents)
-    free (contents);
+    _bfd_elf_munmap_section_contents (sec, contents);
   sec->check_relocs_failed = 1;
   return false;
 }
@@ -5273,7 +5273,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 	continue;
 
       /* Get the PLT section contents.  */
-      if (!bfd_malloc_and_get_section (abfd, plt, &plt_contents))
+      if (!_bfd_elf_mmap_section_contents (abfd, plt, &plt_contents))
 	break;
 
       /* Check what kind of PLT it is.  */
@@ -5366,7 +5366,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 
       if (plt_type == plt_unknown)
 	{
-	  free (plt_contents);
+	  _bfd_elf_munmap_section_contents (plt, plt_contents);
 	  continue;
 	}
 

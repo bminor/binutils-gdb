@@ -21,6 +21,7 @@
 
 #include "sysdep.h"
 #include "bfd.h"
+#include "elf-bfd.h"
 #include "libbfd.h"
 #include "objalloc.h"
 
@@ -1196,6 +1197,19 @@ _bfd_generic_get_section_contents (bfd *abfd,
       return false;
     }
 
+#ifdef USE_MMAP
+  if (section->mmapped_p
+      && (section->contents != NULL || location != NULL))
+    {
+      _bfd_error_handler
+	/* xgettext:c-format */
+	(_("%pB: mapped section %pA has non-NULL buffer"),
+	 abfd, section);
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
+#endif
+
   sz = bfd_get_section_limit_octets (abfd, section);
   if (offset + count < count
       || offset + count > sz
@@ -1208,8 +1222,49 @@ _bfd_generic_get_section_contents (bfd *abfd,
       return false;
     }
 
-  if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
-      || bfd_read (location, count, abfd) != count)
+  if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0)
+    return false;
+
+#ifdef USE_MMAP
+  if (section->mmapped_p)
+    {
+      if (location != 0
+	  || bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+	abort ();
+
+      int prot = ((section->reloc_count == 0)
+		  ? PROT_READ : PROT_READ | PROT_WRITE);
+
+      location = bfd_mmap_local
+	(abfd, count, prot, &elf_section_data (section)->contents_addr,
+	 &elf_section_data (section)->contents_size);
+
+      if (location == NULL)
+	return false;
+
+      /* Check for iovec not supporting mmap.  */
+      if (location != MAP_FAILED)
+	{
+	  section->contents = location;
+	  return true;
+	}
+
+      /* Malloc the buffer and call bfd_read.  */
+      location = (bfd_byte *) bfd_malloc (count);
+      if (location == NULL)
+	{
+	  if (bfd_get_error () == bfd_error_no_memory)
+	    _bfd_error_handler
+	      /* xgettext:c-format */
+	      (_("error: %pB(%pA) is too large (%#" PRIx64 " bytes)"),
+	       abfd, section, (uint64_t) count);
+	  return false;
+	}
+      section->contents = location;
+    }
+#endif
+
+  if (bfd_read (location, count, abfd) != count)
     return false;
 
   return true;

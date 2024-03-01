@@ -4426,10 +4426,10 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  unsigned int elfsec;
 	  unsigned long shlink;
 
-	  if (!bfd_malloc_and_get_section (abfd, s, &dynbuf))
+	  if (!_bfd_elf_mmap_section_contents (abfd, s, &dynbuf))
 	    {
 	    error_free_dyn:
-	      free (dynbuf);
+	      _bfd_elf_munmap_section_contents (s, dynbuf);
 	      goto error_return;
 	    }
 
@@ -4535,7 +4535,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		elf_tdata (abfd)->is_pie = (dyn.d_un.d_val & DF_1_PIE) != 0;
 	    }
 
-	  free (dynbuf);
+	  _bfd_elf_munmap_section_contents (s, dynbuf);
 	}
 
       /* DT_RUNPATH overrides DT_RPATH.  Do _NOT_ bfd_release, as that
@@ -8282,7 +8282,7 @@ bfd_elf_get_bfd_needed_list (bfd *abfd,
   if (s == NULL || s->size == 0 || (s->flags & SEC_HAS_CONTENTS) == 0)
     return true;
 
-  if (!bfd_malloc_and_get_section (abfd, s, &dynbuf))
+  if (!_bfd_elf_mmap_section_contents (abfd, s, &dynbuf))
     goto error_return;
 
   elfsec = _bfd_elf_section_from_bfd_section (abfd, s);
@@ -8328,12 +8328,12 @@ bfd_elf_get_bfd_needed_list (bfd *abfd,
 	}
     }
 
-  free (dynbuf);
+  _bfd_elf_munmap_section_contents (s, dynbuf);
 
   return true;
 
  error_return:
-  free (dynbuf);
+  _bfd_elf_munmap_section_contents (s, dynbuf);
   return false;
 }
 

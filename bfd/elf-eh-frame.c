@@ -618,7 +618,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
   /* Read the frame unwind information from abfd.  */
 
-  REQUIRE (bfd_malloc_and_get_section (abfd, sec, &ehbuf));
+  REQUIRE (_bfd_elf_mmap_section_contents (abfd, sec, &ehbuf));
 
   /* If .eh_frame section size doesn't fit into int, we cannot handle
      it (it would need to use 64-bit .eh_frame format anyway).  */
@@ -1052,7 +1052,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
   hdr_info->u.dwarf.table = false;
   free (sec_info);
  success:
-  free (ehbuf);
+  _bfd_elf_munmap_section_contents (sec, ehbuf);
   free (local_cies);
 #undef REQUIRE
 }

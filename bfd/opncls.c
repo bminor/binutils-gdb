@@ -164,6 +164,15 @@ static void
 _bfd_delete_bfd (bfd *abfd)
 {
 #ifdef USE_MMAP
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    {
+      asection *sec;
+      for (sec = abfd->sections; sec != NULL; sec = sec->next)
+	if (sec->mmapped_p)
+	  munmap (elf_section_data (sec)->contents_addr,
+		  elf_section_data (sec)->contents_size);
+    }
+
   struct bfd_mmapped *mmapped, *next;
   for (mmapped = abfd->mmapped; mmapped != NULL; mmapped = next)
     {
