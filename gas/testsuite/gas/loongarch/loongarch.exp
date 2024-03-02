@@ -32,4 +32,8 @@ if [istarget loongarch*-*-*] {
 
   run_list_test "align"
   run_list_test "reg-s9"
+
+  if [istarget loongarch64-*-*] {
+    run_list_test "illegal-operand"
+  }
 }

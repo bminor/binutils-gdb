@@ -1,6 +1,6 @@
 gcsrrd	$r0, 1
 gcsrwr	$r0, 1
-gcsrxchg	$r0, $r1, 1
+gcsrxchg	$r0, $r2, 1
 gtlbflush
 hvcl	1
 movgr2scr	$scr0, $r1

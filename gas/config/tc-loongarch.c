@@ -958,8 +958,8 @@ check_this_insn_before_appending (struct loongarch_cl_insn *ip)
       /* For AMO insn amswap.[wd], amadd.[wd], etc.  */
       if (ip->args[0] != 0
 	  && (ip->args[0] == ip->args[1] || ip->args[0] == ip->args[2]))
-	as_fatal (_("AMO insns require rd != base && rd != rt"
-		    " when rd isn't $r0"));
+	as_bad (_("automic memory operations insns require rd != rj"
+		  " && rd != rk when rd isn't r0"));
     }
   else if ((ip->insn->mask == 0xffe08000
 	    /* bstrins.w  rd, rj, msbw, lsbw  */
@@ -970,12 +970,13 @@ check_this_insn_before_appending (struct loongarch_cl_insn *ip)
     {
       /* For bstr(ins|pick).[wd].  */
       if (ip->args[2] < ip->args[3])
-	as_fatal (_("bstr(ins|pick).[wd] require msbd >= lsbd"));
+	as_bad (_("bstr(ins|pick).[wd] require msbd >= lsbd"));
     }
   else if (ip->insn->mask != 0 && (ip->insn_bin & 0xfe0003c0) == 0x04000000
 	   /* csrxchg  rd, rj, csr_num  */
-	   && (strcmp ("csrxchg", ip->name) == 0))
-    as_fatal (_("csrxchg require rj != $r0 && rj != $r1"));
+	   && (strcmp ("csrxchg", ip->name) == 0
+	       || strcmp ("gcsrxchg", ip->name) == 0))
+    as_bad (_("g?csrxchg require rj != r0 && rj != r1"));
 
   return ret;
 }
