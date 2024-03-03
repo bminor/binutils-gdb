@@ -697,7 +697,7 @@ init_signals(void)
 extern struct disassemble_info dinfo;
 
 struct estate   ebase;
-struct evcell   evbuf[EVENT_MAX];
+struct evcell   evbuf[MAX_EVENTS];
 struct irqcell  irqarr[16];
 
 static int
@@ -864,10 +864,10 @@ init_event(void)
 
     ebase.eq.nxt = NULL;
     ebase.freeq = evbuf;
-    for (i = 0; i < EVENT_MAX; i++) {
+    for (i = 0; i < MAX_EVENTS; i++) {
 	evbuf[i].nxt = &evbuf[i + 1];
     }
-    evbuf[EVENT_MAX - 1].nxt = NULL;
+    evbuf[MAX_EVENTS - 1].nxt = NULL;
 }
 
 void

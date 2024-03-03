@@ -31,7 +31,7 @@
 #define I_ACC_EXC 1
 
 /* Maximum events in event queue */
-#define EVENT_MAX	256
+#define MAX_EVENTS	256
 
 /* Maximum # of floating point queue */
 #define FPUQN	1
