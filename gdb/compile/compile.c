@@ -39,7 +39,9 @@
 #include "osabi.h"
 #include "gdbsupport/gdb_wait.h"
 #include "valprint.h"
+#include <filesystem>
 #include <optional>
+#include <system_error>
 #include "gdbsupport/gdb_unlinker.h"
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/scoped_ignore_signal.h"
@@ -449,15 +451,11 @@ get_compile_file_tempdir (void)
   tempdir_name = xstrdup (tempdir_name);
   add_final_cleanup ([] ()
     {
-      char *zap;
-      int wstat;
-
-      gdb_assert (startswith (tempdir_name, TMP_PREFIX));
-      zap = concat ("rm -rf ", tempdir_name, (char *) NULL);
-      wstat = system (zap);
-      if (wstat == -1 || !WIFEXITED (wstat) || WEXITSTATUS (wstat) != 0)
-	warning (_("Could not remove temporary directory %s"), tempdir_name);
-      XDELETEVEC (zap);
+      std::error_code error;
+      if (std::filesystem::remove_all (tempdir_name, error)
+	  == static_cast<std::uintmax_t> (-1))
+	warning (_("Could not remove temporary directory %s (%s)"),
+		 tempdir_name, error.message ().c_str ());
     });
   return tempdir_name;
 }
