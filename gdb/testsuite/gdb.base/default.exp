@@ -612,7 +612,7 @@ set show_conv_list \
 	{$_gdb_setting_str = <internal function _gdb_setting_str>} \
 	{$_gdb_setting = <internal function _gdb_setting>} \
 	{$_gdb_major = 14} \
-	{$_gdb_minor = 2} \
+	{$_gdb_minor = 3} \
 	{$_shell_exitsignal = void} \
 	{$_shell_exitcode = 0} \
     }
