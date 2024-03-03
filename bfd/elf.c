@@ -460,19 +460,16 @@ bfd_elf_get_elf_syms (bfd *ibfd,
       goto out;
     }
   pos = symtab_hdr->sh_offset + symoffset * extsym_size;
-  if (extsym_buf == NULL)
-    {
-      alloc_ext = bfd_malloc (amt);
-      extsym_buf = alloc_ext;
-    }
-  if (extsym_buf == NULL
-      || bfd_seek (ibfd, pos, SEEK_SET) != 0
-      || bfd_read (extsym_buf, amt, ibfd) != amt)
+  size_t alloc_ext_size = amt;
+  if (bfd_seek (ibfd, pos, SEEK_SET) != 0
+      || !_bfd_mmap_read_temporary (&extsym_buf, &alloc_ext_size,
+				    &alloc_ext, ibfd, false))
     {
       intsym_buf = NULL;
       goto out;
     }
 
+  size_t alloc_extshndx_size = 0;
   if (shndx_hdr == NULL || shndx_hdr->sh_size == 0)
     extshndx_buf = NULL;
   else
@@ -483,15 +480,13 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 	  intsym_buf = NULL;
 	  goto out;
 	}
+      alloc_extshndx_size = amt;
       pos = shndx_hdr->sh_offset + symoffset * sizeof (Elf_External_Sym_Shndx);
-      if (extshndx_buf == NULL)
-	{
-	  alloc_extshndx = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
-	  extshndx_buf = alloc_extshndx;
-	}
-      if (extshndx_buf == NULL
-	  || bfd_seek (ibfd, pos, SEEK_SET) != 0
-	  || bfd_read (extshndx_buf, amt, ibfd) != amt)
+      if (bfd_seek (ibfd, pos, SEEK_SET) != 0
+	  || !_bfd_mmap_read_temporary ((void **) &extshndx_buf,
+					&alloc_extshndx_size,
+					(void **) &alloc_extshndx,
+					ibfd, false))
 	{
 	  intsym_buf = NULL;
 	  goto out;
@@ -530,8 +525,8 @@ bfd_elf_get_elf_syms (bfd *ibfd,
       }
 
  out:
-  free (alloc_ext);
-  free (alloc_extshndx);
+  _bfd_munmap_readonly_temporary (alloc_ext, alloc_ext_size);
+  _bfd_munmap_readonly_temporary (alloc_extshndx, alloc_extshndx_size);
 
   return intsym_buf;
 }

@@ -911,6 +911,9 @@ extern void _bfd_munmap_readonly_temporary
 #define _bfd_munmap_readonly_temporary(ptr, rsize) free (ptr)
 #endif
 
+extern bool _bfd_mmap_read_temporary
+  (void **, size_t *, void **, bfd *, bool) ATTRIBUTE_HIDDEN;
+
 static inline void *
 _bfd_malloc_and_read (bfd *abfd, bfd_size_type asize, bfd_size_type rsize)
 {

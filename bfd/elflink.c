@@ -2644,8 +2644,11 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
    may be either a REL or a RELA section.  The relocations are
    translated into RELA relocations and stored in INTERNAL_RELOCS,
    which should have already been allocated to contain enough space.
-   The EXTERNAL_RELOCS are a buffer where the external form of the
-   relocations should be stored.
+   The *EXTERNAL_RELOCS_P are a buffer where the external form of the
+   relocations should be stored.  If *EXTERNAL_RELOCS_ADDR is NULL,
+   *EXTERNAL_RELOCS_ADDR and *EXTERNAL_RELOCS_SIZE returns the mmap
+   memory address and size.  Otherwise, *EXTERNAL_RELOCS_ADDR is
+   unchanged and *EXTERNAL_RELOCS_SIZE returns 0.
 
    Returns FALSE if something goes wrong.  */
 
@@ -2653,7 +2656,8 @@ static bool
 elf_link_read_relocs_from_section (bfd *abfd,
 				   const asection *sec,
 				   Elf_Internal_Shdr *shdr,
-				   void *external_relocs,
+				   void **external_relocs_addr,
+				   size_t *external_relocs_size,
 				   Elf_Internal_Rela *internal_relocs)
 {
   const struct elf_backend_data *bed;
@@ -2663,13 +2667,17 @@ elf_link_read_relocs_from_section (bfd *abfd,
   Elf_Internal_Rela *irela;
   Elf_Internal_Shdr *symtab_hdr;
   size_t nsyms;
+  void *external_relocs = *external_relocs_addr;
 
   /* Position ourselves at the start of the section.  */
   if (bfd_seek (abfd, shdr->sh_offset, SEEK_SET) != 0)
     return false;
 
   /* Read the relocations.  */
-  if (bfd_read (external_relocs, shdr->sh_size, abfd) != shdr->sh_size)
+  *external_relocs_size = shdr->sh_size;
+  if (!_bfd_mmap_read_temporary (&external_relocs,
+				 external_relocs_size,
+				 external_relocs_addr, abfd, true))
     return false;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -2754,6 +2762,7 @@ _bfd_elf_link_info_read_relocs (bfd *abfd,
 				bool keep_memory)
 {
   void *alloc1 = NULL;
+  size_t alloc1_size;
   Elf_Internal_Rela *alloc2 = NULL;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct bfd_elf_section_data *esdo = elf_section_data (o);
@@ -2782,26 +2791,12 @@ _bfd_elf_link_info_read_relocs (bfd *abfd,
 	goto error_return;
     }
 
-  if (external_relocs == NULL)
-    {
-      bfd_size_type size = 0;
-
-      if (esdo->rel.hdr)
-	size += esdo->rel.hdr->sh_size;
-      if (esdo->rela.hdr)
-	size += esdo->rela.hdr->sh_size;
-
-      alloc1 = bfd_malloc (size);
-      if (alloc1 == NULL)
-	goto error_return;
-      external_relocs = alloc1;
-    }
-
+  alloc1 = external_relocs;
   internal_rela_relocs = internal_relocs;
   if (esdo->rel.hdr)
     {
       if (!elf_link_read_relocs_from_section (abfd, o, esdo->rel.hdr,
-					      external_relocs,
+					      &alloc1, &alloc1_size,
 					      internal_relocs))
 	goto error_return;
       external_relocs = (((bfd_byte *) external_relocs)
@@ -2812,7 +2807,7 @@ _bfd_elf_link_info_read_relocs (bfd *abfd,
 
   if (esdo->rela.hdr
       && (!elf_link_read_relocs_from_section (abfd, o, esdo->rela.hdr,
-					      external_relocs,
+					      &alloc1, &alloc1_size,
 					      internal_rela_relocs)))
     goto error_return;
 
@@ -2820,7 +2815,7 @@ _bfd_elf_link_info_read_relocs (bfd *abfd,
   if (keep_memory)
     esdo->relocs = internal_relocs;
 
-  free (alloc1);
+  _bfd_munmap_readonly_temporary (alloc1, alloc1_size);
 
   /* Don't free alloc2, since if it was allocated we are passing it
      back (under the name of internal_relocs).  */
@@ -2828,7 +2823,7 @@ _bfd_elf_link_info_read_relocs (bfd *abfd,
   return internal_relocs;
 
  error_return:
-  free (alloc1);
+  _bfd_munmap_readonly_temporary (alloc1, alloc1_size);
   if (alloc2 != NULL)
     {
       if (keep_memory)
@@ -12446,7 +12441,14 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
      section, so that we know the sizes of the reloc sections.  We
      also figure out some maximum sizes.  */
   max_contents_size = 0;
+#ifdef USE_MMAP
+  /* Mmap is used only if section size >= the minimum mmap section
+     size.  max_external_reloc_size covers all relocation sections
+     smaller than the minimum mmap section size.   */
+  max_external_reloc_size = _bfd_minimum_mmap_size;
+#else
   max_external_reloc_size = 0;
+#endif
   max_internal_reloc_count = 0;
   max_sym_count = 0;
   max_sym_shndx_count = 0;
@@ -12535,8 +12537,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		      if (esdi->rela.hdr != NULL)
 			ext_size += esdi->rela.hdr->sh_size;
 
+#ifndef USE_MMAP
 		      if (ext_size > max_external_reloc_size)
 			max_external_reloc_size = ext_size;
+#endif
 		      if (sec->reloc_count > max_internal_reloc_count)
 			max_internal_reloc_count = sec->reloc_count;
 		    }

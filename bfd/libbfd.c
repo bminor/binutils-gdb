@@ -1174,6 +1174,58 @@ _bfd_mmap_readonly_persistent (bfd *abfd, size_t rsize)
 }
 #endif
 
+/* Attempt to read *SIZE_P bytes from ABFD's iostream to *DATA_P.
+   Return true if the full the amount has been read.  If *DATA_P is
+   NULL, mmap should be used, return the memory address at the
+   current offset in *DATA_P as well as return mmap address and size
+   in *MMAP_BASE and *SIZE_P.  Otherwise, return NULL in *MMAP_BASE
+   and 0 in *SIZE_P.  If FINAL_LINK is true, this is called from
+   elf_link_read_relocs_from_section.  */
+
+bool
+_bfd_mmap_read_temporary (void **data_p, size_t *size_p,
+			  void **mmap_base, bfd *abfd,
+			  bool final_link ATTRIBUTE_UNUSED)
+{
+  void *data = *data_p;
+  size_t size = *size_p;
+
+#ifdef USE_MMAP
+  /* NB: When FINAL_LINK is true, the size of the preallocated buffer
+     is _bfd_minimum_mmap_size and use mmap if the data size >=
+     _bfd_minimum_mmap_size.  Otherwise, use mmap if ABFD isn't an IR
+     input or the data size >= _bfd_minimum_mmap_size.  */
+  bool use_mmmap;
+  bool mmap_size = size >= _bfd_minimum_mmap_size;
+  if (final_link)
+    use_mmmap = mmap_size;
+  else
+    use_mmmap = (mmap_size
+		 && data == NULL
+		 && (abfd->flags & BFD_PLUGIN) == 0);
+  if (use_mmmap)
+    {
+      data = _bfd_mmap_readonly_temporary (abfd, size, mmap_base,
+					   size_p);
+      if (data == NULL || data == MAP_FAILED)
+	abort ();
+      *data_p = data;
+      return true;
+    }
+#endif
+
+  if (data == NULL)
+    {
+      data = bfd_malloc (size);
+      if (data == NULL)
+	return false;
+      *data_p = data;
+    }
+  *mmap_base = NULL;
+  *size_p = 0;
+  return bfd_read (data, size, abfd) == size;
+}
+
 /* Default implementation */
 
 bool
