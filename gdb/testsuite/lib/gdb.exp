@@ -1026,7 +1026,10 @@ proc command_to_message { command } {
 #   should not be anchored at the end of the buffer.  This means that the
 #   pattern can match even if there is stuff output after the prompt.  Does not
 #   have any effect if -prompt is specified.
-# -lbl specifies that line-by-line matching will be used.
+# -lbl specifies that line-by-line matching will be used.  This means
+#   that lines from GDB not matched by any pattern will be consumed from
+#   the output buffer.  This helps avoid buffer overflows and timeouts
+#   when testing verbose commands.
 # EXPECT_ARGUMENTS will be fed to expect in addition to the standard
 #   patterns.  Pattern elements will be evaluated in the caller's
 #   context; action elements will be executed in the caller's context.
