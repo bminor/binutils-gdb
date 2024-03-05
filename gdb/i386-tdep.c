@@ -9132,17 +9132,19 @@ is \"default\"."),
 
   /* Add "bound" command for the show mpx commands list.  */
 
-  add_cmd ("bound", no_class, i386_mpx_info_bounds,
+  cmd_list_element *c = add_cmd ("bound", no_class, i386_mpx_info_bounds,
 	   "Show the memory bounds for a given array/pointer storage\
  in the bound table.",
 	   &mpx_show_cmdlist);
+  deprecate_cmd (c, nullptr);
 
   /* Add "bound" command for the set mpx commands list.  */
 
-  add_cmd ("bound", no_class, i386_mpx_set_bounds,
+  c = add_cmd ("bound", no_class, i386_mpx_set_bounds,
 	   "Set the memory bounds for a given array/pointer storage\
  in the bound table.",
 	   &mpx_set_cmdlist);
+  deprecate_cmd (c, nullptr);
 
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_SVR4,
 			  i386_svr4_init_abi);

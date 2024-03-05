@@ -26652,6 +26652,9 @@ whose bounds are to be changed, @var{lbound} and @var{ubound} are new values
 for lower and upper bounds respectively.
 @end table
 
+Both commands are deprecated and will be removed in future versions of
+@value{GDBN}.  MPX itself was listed as removed by Intel in 2019.
+
 When you call an inferior function on an Intel MPX enabled program,
 GDB sets the inferior's bound registers to the init (disabled) state
 before calling the function.  As a consequence, bounds checks for the

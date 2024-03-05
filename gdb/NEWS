@@ -3,6 +3,9 @@
 
 *** Changes since GDB 14
 
+* The MPX commands "show/set mpx bound" have been deprecated, as Intel
+  listed MPX as removed in 2019.
+
 * Building GDB and GDBserver now requires a C++17 compiler.
   For example, GCC 9 or later.
 
