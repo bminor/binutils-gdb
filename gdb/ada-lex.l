@@ -227,6 +227,7 @@ abs		{ return ABS; }
 and		{ return _AND_; }
 delta		{ return DELTA; }
 else		{ return ELSE; }
+for		{ return FOR; }
 in		{ return IN; }
 mod		{ return MOD; }
 new		{ return NEW; }

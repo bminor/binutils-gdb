@@ -421,6 +421,10 @@ typedef std::unique_ptr<ada_assign_operation> ada_assign_up;
    to implement '@', the target name symbol.  */
 static std::vector<ada_assign_up> assignments;
 
+/* Track currently active iterated assignment names.  */
+static std::unordered_map<std::string, std::vector<ada_index_var_operation *>>
+     iterated_associations;
+
 %}
 
 %union
@@ -487,7 +491,7 @@ static std::vector<ada_assign_up> assignments;
     forces a.b.c, e.g., to be LEFT-associated.  */
 %right '.' '(' '[' DOT_ID DOT_COMPLETE
 
-%token NEW OTHERS
+%token NEW OTHERS FOR
 
 
 %%
@@ -1097,6 +1101,33 @@ component_group :
 			  ada_choices_component *choices = choice_component ();
 			  choices->set_associations (pop_associations ($1));
 			}
+	|	FOR NAME IN
+			{
+			  std::string name = copy_name ($2);
+
+			  auto iter = iterated_associations.find (name);
+			  if (iter != iterated_associations.end ())
+			    error (_("Nested use of index parameter '%s'"),
+				   name.c_str ());
+
+			  iterated_associations[name] = {};
+			}
+		component_associations
+			{
+			  std::string name = copy_name ($2);
+
+			  ada_choices_component *choices = choice_component ();
+			  choices->set_associations (pop_associations ($5));
+
+			  auto iter = iterated_associations.find (name);
+			  gdb_assert (iter != iterated_associations.end ());
+			  for (ada_index_var_operation *var : iter->second)
+			    var->set_choices (choices);
+
+			  iterated_associations.erase (name);
+
+			  choices->set_name (std::move (name));
+			}
 	;
 
 /* We use this somewhat obscure definition in order to handle NAME => and
@@ -1206,6 +1237,7 @@ ada_parse (struct parser_state *par_state)
   associations.clear ();
   int_storage.clear ();
   assignments.clear ();
+  iterated_associations.clear ();
 
   int result = yyparse ();
   if (!result)
@@ -1651,10 +1683,22 @@ write_var_or_type (struct parser_state *par_state,
   char *encoded_name;
   int name_len;
 
-  if (block == NULL)
-    block = par_state->expression_context_block;
-
   std::string name_storage = ada_encode (name0.ptr);
+
+  if (block == nullptr)
+    {
+      auto iter = iterated_associations.find (name_storage);
+      if (iter != iterated_associations.end ())
+	{
+	  auto op = std::make_unique<ada_index_var_operation> ();
+	  iter->second.push_back (op.get ());
+	  par_state->push (std::move (op));
+	  return nullptr;
+	}
+
+      block = par_state->expression_context_block;
+    }
+
   name_len = name_storage.size ();
   encoded_name = obstack_strndup (&temp_parse_space, name_storage.c_str (),
 				  name_len);

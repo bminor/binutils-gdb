@@ -611,6 +611,15 @@ struct aggregate_assigner
      to.  */
   std::vector<LONGEST> indices;
 
+private:
+
+  /* The current index value.  This is only valid during the 'assign'
+     operation and is part of the implementation of iterated component
+     association.  */
+  LONGEST m_current_index = 0;
+
+public:
+
   /* Assign the result of evaluating ARG to the INDEXth component of
      LHS (a simple array or a record).  Does not modify the inferior's
      memory, nor does it modify LHS (unless LHS == CONTAINER).  */
@@ -620,6 +629,10 @@ struct aggregate_assigner
      [ INDICES[0] .. INDICES[1] ],...  The resulting intervals do not
      overlap.  */
   void add_interval (LONGEST low, LONGEST high);
+
+  /* Return the current index as a value, using the index type of
+     LHS.  */
+  value *current_value () const;
 };
 
 /* This abstract class represents a single component in an Ada
@@ -800,16 +813,80 @@ public:
     m_assocs = std::move (assoc);
   }
 
+  /* Set the underlying operation  */
+  void set_operation (operation_up op)
+  { m_op = std::move (op); }
+
+  /* Set the index variable name for an iterated association.  */
+  void set_name (std::string &&name)
+  { m_name = std::move (name); }
+
+  /* The name of this choice component.  This is empty unless this is
+     an iterated association.  */
+  const std::string &name () const
+  { return m_name; }
+
   void assign (aggregate_assigner &assigner) override;
 
   bool uses_objfile (struct objfile *objfile) override;
 
   void dump (ui_file *stream, int depth) override;
 
+  /* Return the current value of the index variable.  This may only be
+     called underneath a call to 'assign'.  */
+  value *current_value () const
+  { return m_assigner->current_value (); }
+
 private:
 
   std::vector<ada_association_up> m_assocs;
   operation_up m_op;
+
+  /* Name of the variable used for iteration.  This isn't needed for
+     evaluation, only for debug dumping.  This is the empty string for
+     ordinary (non-iterated) choices.  */
+  std::string m_name;
+
+  /* A pointer to the current assignment operation; only valid when in
+     a call to the 'assign' method.  This is used to find the index
+     variable value during the evaluation of the RHS of the =>, via
+     ada_index_var_operation.  */
+  const aggregate_assigner *m_assigner = nullptr;
+};
+
+/* Implement the index variable for iterated component
+   association.  */
+class ada_index_var_operation : public operation
+{
+public:
+
+  ada_index_var_operation ()
+  { }
+
+  /* Link this variable to the choices object.  May only be called
+     once.  */
+  void set_choices (ada_choices_component *var)
+  {
+    gdb_assert (m_var == nullptr && var != nullptr);
+    m_var = var;
+  }
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  {
+    /* It doesn't really matter.  */
+    return OP_VAR_VALUE;
+  }
+
+  void dump (struct ui_file *stream, int depth) const override;
+
+private:
+
+  /* The choices component that introduced the index variable.  */
+  ada_choices_component *m_var = nullptr;
 };
 
 /* An association that uses a discrete range.  */

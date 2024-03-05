@@ -9342,6 +9342,8 @@ aggregate_assigner::assign (LONGEST index, operation_up &arg)
       elt = ada_to_fixed_value (elt);
     }
 
+  scoped_restore save_index = make_scoped_restore (&m_current_index, index);
+
   ada_aggregate_operation *ag_op
     = dynamic_cast<ada_aggregate_operation *> (arg.get ());
   if (ag_op != nullptr)
@@ -9350,6 +9352,18 @@ aggregate_assigner::assign (LONGEST index, operation_up &arg)
     value_assign_to_component (container, elt,
 			       arg->evaluate (nullptr, exp,
 					      EVAL_NORMAL));
+}
+
+/* See ada-exp.h.  */
+
+value *
+aggregate_assigner::current_value () const
+{
+  /* Note that using an integer type here is incorrect -- the type
+     should be the array's index type.  Unfortunately, though, this
+     isn't currently available during parsing and type resolution.  */
+  struct type *index_type = builtin_type (exp->gdbarch)->builtin_int;
+  return value_from_longest (index_type, m_current_index);
 }
 
 bool
@@ -9597,8 +9611,15 @@ ada_choices_component::uses_objfile (struct objfile *objfile)
 void
 ada_choices_component::dump (ui_file *stream, int depth)
 {
-  gdb_printf (stream, _("%*sChoices:\n"), depth, "");
+  if (m_name.empty ())
+    gdb_printf (stream, _("%*sChoices:\n"), depth, "");
+  else
+    {
+      gdb_printf (stream, _("%*sIterated choices:\n"), depth, "");
+      gdb_printf (stream, _("%*sName: %s\n"), depth + 1, "", m_name.c_str ());
+    }
   m_op->dump (stream, depth + 1);
+
   for (const auto &item : m_assocs)
     item->dump (stream, depth + 1);
 }
@@ -9610,8 +9631,34 @@ ada_choices_component::dump (ui_file *stream, int depth)
 void
 ada_choices_component::assign (aggregate_assigner &assigner)
 {
+  scoped_restore save_index = make_scoped_restore (&m_assigner, &assigner);
   for (auto &item : m_assocs)
     item->assign (assigner, m_op);
+}
+
+void
+ada_index_var_operation::dump (struct ui_file *stream, int depth) const
+{
+  gdb_printf (stream, _("%*sIndex variable: %s\n"), depth, "",
+	      m_var->name ().c_str ());
+}
+
+value *
+ada_index_var_operation::evaluate (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside)
+{
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      /* Note that using an integer type here is incorrect -- the type
+	 should be the array's index type.  Unfortunately, though,
+	 this isn't currently available during parsing and type
+	 resolution.  */
+      struct type *index_type = builtin_type (exp->gdbarch)->builtin_int;
+      return value::zero (index_type, not_lval);
+    }
+
+  return m_var->current_value ();
 }
 
 bool
