@@ -45,7 +45,7 @@ proc do_test {} {
     gdb_test_no_output "set follow-fork-mode child"
     gdb_test_no_output "set detach-on-fork off"
 
-    runto "add" allow-pending
+    runto "add" qualified allow-pending
 
     # Since we have debug info in the shlib, we should have the file name available.
     gdb_test "frame" "add \(.*\) at .*$::srcfile2:\[0-9\]+.*"
