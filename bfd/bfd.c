@@ -2050,17 +2050,17 @@ bfd_assert (const char *file, int line)
 void
 _bfd_abort (const char *file, int line, const char *fn)
 {
+  fflush (stdout);
+
   if (fn != NULL)
-    _bfd_error_handler
-      /* xgettext:c-format */
-      (_("BFD %s internal error, aborting at %s:%d in %s\n"),
-       BFD_VERSION_STRING, file, line, fn);
+    fprintf (stderr, _("%s: BFD %s internal error, aborting at %s:%d in %s\n"),
+	     _bfd_get_error_program_name (), BFD_VERSION_STRING,
+	     file, line, fn);
   else
-    _bfd_error_handler
-      /* xgettext:c-format */
-      (_("BFD %s internal error, aborting at %s:%d\n"),
-       BFD_VERSION_STRING, file, line);
-  _bfd_error_handler (_("Please report this bug.\n"));
+    fprintf (stderr, _("%s: BFD %s internal error, aborting at %s:%d\n"),
+	     _bfd_get_error_program_name (), BFD_VERSION_STRING,
+	     file, line);
+  fprintf (stderr, _("Please report this bug.\n"));
   _exit (EXIT_FAILURE);
 }
 
