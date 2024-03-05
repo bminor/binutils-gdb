@@ -190,9 +190,6 @@ static int ada_is_direct_array_type (struct type *);
 static struct value *ada_index_struct_field (int, struct value *, int,
 					     struct type *);
 
-static void add_component_interval (LONGEST, LONGEST, std::vector<LONGEST> &);
-
-
 static struct type *ada_find_any_type (const char *name);
 
 static symbol_name_matcher_ftype *ada_get_symbol_name_matcher
@@ -9322,13 +9319,10 @@ check_objfile (const std::unique_ptr<ada_component> &comp,
   return comp->uses_objfile (objfile);
 }
 
-/* Assign the result of evaluating ARG to the INDEXth component of LHS
-   (a simple array or a record).  Does not modify the inferior's
-   memory, nor does it modify LHS (unless LHS == CONTAINER).  */
+/* See ada-exp.h.  */
 
-static void
-assign_component (struct value *container, struct value *lhs, LONGEST index,
-		  struct expression *exp, operation_up &arg)
+void
+aggregate_assigner::assign (LONGEST index, operation_up &arg)
 {
   scoped_value_mark mark;
 
@@ -9383,23 +9377,21 @@ ada_aggregate_component::dump (ui_file *stream, int depth)
 }
 
 void
-ada_aggregate_component::assign (struct value *container,
-				 struct value *lhs, struct expression *exp,
-				 std::vector<LONGEST> &indices,
-				 LONGEST low, LONGEST high)
+ada_aggregate_component::assign (aggregate_assigner &assigner)
 {
   if (m_base != nullptr)
     {
-      value *base = m_base->evaluate (nullptr, exp, EVAL_NORMAL);
+      value *base = m_base->evaluate (nullptr, assigner.exp, EVAL_NORMAL);
       if (ada_is_direct_array_type (base->type ()))
 	base = ada_coerce_to_simple_array (base);
-      if (!types_deeply_equal (container->type (), base->type ()))
+      if (!types_deeply_equal (assigner.container->type (), base->type ()))
 	error (_("Type mismatch in delta aggregate"));
-      value_assign_to_component (container, container, base);
+      value_assign_to_component (assigner.container, assigner.container,
+				 base);
     }
 
   for (auto &item : m_components)
-    item->assign (container, lhs, exp, indices, low, high);
+    item->assign (assigner);
 }
 
 /* See ada-exp.h.  */
@@ -9428,7 +9420,7 @@ ada_aggregate_operation::assign_aggregate (struct value *container,
 					   struct expression *exp)
 {
   struct type *lhs_type;
-  LONGEST low_index, high_index;
+  aggregate_assigner assigner;
 
   container = ada_coerce_ref (container);
   if (ada_is_direct_array_type (container->type ()))
@@ -9442,23 +9434,27 @@ ada_aggregate_operation::assign_aggregate (struct value *container,
     {
       lhs = ada_coerce_to_simple_array (lhs);
       lhs_type = check_typedef (lhs->type ());
-      low_index = lhs_type->bounds ()->low.const_val ();
-      high_index = lhs_type->bounds ()->high.const_val ();
+      assigner.low = lhs_type->bounds ()->low.const_val ();
+      assigner.high = lhs_type->bounds ()->high.const_val ();
     }
   else if (lhs_type->code () == TYPE_CODE_STRUCT)
     {
-      low_index = 0;
-      high_index = num_visible_fields (lhs_type) - 1;
+      assigner.low = 0;
+      assigner.high = num_visible_fields (lhs_type) - 1;
     }
   else
     error (_("Left-hand side must be array or record."));
 
-  std::vector<LONGEST> indices (4);
-  indices[0] = indices[1] = low_index - 1;
-  indices[2] = indices[3] = high_index + 1;
+  assigner.indices.push_back (assigner.low - 1);
+  assigner.indices.push_back (assigner.low - 1);
+  assigner.indices.push_back (assigner.high + 1);
+  assigner.indices.push_back (assigner.high + 1);
 
-  std::get<0> (m_storage)->assign (container, lhs, exp, indices,
-				   low_index, high_index);
+  assigner.container = container;
+  assigner.lhs = lhs;
+  assigner.exp = exp;
+
+  std::get<0> (m_storage)->assign (assigner);
 
   return container;
 }
@@ -9482,19 +9478,16 @@ ada_positional_component::dump (ui_file *stream, int depth)
    LOW, where HIGH is the upper bound.  Record the position in
    INDICES.  CONTAINER is as for assign_aggregate.  */
 void
-ada_positional_component::assign (struct value *container,
-				  struct value *lhs, struct expression *exp,
-				  std::vector<LONGEST> &indices,
-				  LONGEST low, LONGEST high)
+ada_positional_component::assign (aggregate_assigner &assigner)
 {
-  LONGEST ind = m_index + low;
+  LONGEST ind = m_index + assigner.low;
 
-  if (ind - 1 == high)
+  if (ind - 1 == assigner.high)
     warning (_("Extra components in aggregate ignored."));
-  if (ind <= high)
+  if (ind <= assigner.high)
     {
-      add_component_interval (ind, ind, indices);
-      assign_component (container, lhs, ind, exp, m_op);
+      assigner.add_interval (ind, ind);
+      assigner.assign (ind, m_op);
     }
 }
 
@@ -9513,23 +9506,21 @@ ada_discrete_range_association::dump (ui_file *stream, int depth)
 }
 
 void
-ada_discrete_range_association::assign (struct value *container,
-					struct value *lhs,
-					struct expression *exp,
-					std::vector<LONGEST> &indices,
-					LONGEST low, LONGEST high,
+ada_discrete_range_association::assign (aggregate_assigner &assigner,
 					operation_up &op)
 {
-  LONGEST lower = value_as_long (m_low->evaluate (nullptr, exp, EVAL_NORMAL));
-  LONGEST upper = value_as_long (m_high->evaluate (nullptr, exp, EVAL_NORMAL));
+  LONGEST lower = value_as_long (m_low->evaluate (nullptr, assigner.exp,
+						  EVAL_NORMAL));
+  LONGEST upper = value_as_long (m_high->evaluate (nullptr, assigner.exp,
+						   EVAL_NORMAL));
 
-  if (lower <= upper && (lower < low || upper > high))
+  if (lower <= upper && (lower < assigner.low || upper > assigner.high))
     error (_("Index in component association out of bounds."));
 
-  add_component_interval (lower, upper, indices);
+  assigner.add_interval (lower, upper);
   while (lower <= upper)
     {
-      assign_component (container, lhs, lower, exp, op);
+      assigner.assign (lower, op);
       lower += 1;
     }
 }
@@ -9548,18 +9539,16 @@ ada_name_association::dump (ui_file *stream, int depth)
 }
 
 void
-ada_name_association::assign (struct value *container,
-			      struct value *lhs,
-			      struct expression *exp,
-			      std::vector<LONGEST> &indices,
-			      LONGEST low, LONGEST high,
+ada_name_association::assign (aggregate_assigner &assigner,
 			      operation_up &op)
 {
   int index;
 
-  if (ada_is_direct_array_type (lhs->type ()))
-    index = longest_to_int (value_as_long (m_val->evaluate (nullptr, exp,
-							    EVAL_NORMAL)));
+  if (ada_is_direct_array_type (assigner.lhs->type ()))
+    {
+      value *tem = m_val->evaluate (nullptr, assigner.exp, EVAL_NORMAL);
+      index = longest_to_int (value_as_long (tem));
+    }
   else
     {
       ada_string_operation *strop
@@ -9585,13 +9574,13 @@ ada_name_association::assign (struct value *container,
 	}
 
       index = 0;
-      if (! find_struct_field (name, lhs->type (), 0,
+      if (! find_struct_field (name, assigner.lhs->type (), 0,
 			       NULL, NULL, NULL, NULL, &index))
 	error (_("Unknown component name: %s."), name);
     }
 
-  add_component_interval (index, index, indices);
-  assign_component (container, lhs, index, exp, op);
+  assigner.add_interval (index, index);
+  assigner.assign (index, op);
 }
 
 bool
@@ -9619,13 +9608,10 @@ ada_choices_component::dump (ui_file *stream, int depth)
    the allowable indices are LOW..HIGH.  Record the indices assigned
    to in INDICES.  CONTAINER is as for assign_aggregate.  */
 void
-ada_choices_component::assign (struct value *container,
-			       struct value *lhs, struct expression *exp,
-			       std::vector<LONGEST> &indices,
-			       LONGEST low, LONGEST high)
+ada_choices_component::assign (aggregate_assigner &assigner)
 {
   for (auto &item : m_assocs)
-    item->assign (container, lhs, exp, indices, low, high, m_op);
+    item->assign (assigner, m_op);
 }
 
 bool
@@ -9646,16 +9632,15 @@ ada_others_component::dump (ui_file *stream, int depth)
    have not been previously assigned.  The index intervals already assigned
    are in INDICES.  CONTAINER is as for assign_aggregate.  */
 void
-ada_others_component::assign (struct value *container,
-			      struct value *lhs, struct expression *exp,
-			      std::vector<LONGEST> &indices,
-			      LONGEST low, LONGEST high)
+ada_others_component::assign (aggregate_assigner &assigner)
 {
-  int num_indices = indices.size ();
+  int num_indices = assigner.indices.size ();
   for (int i = 0; i < num_indices - 2; i += 2)
     {
-      for (LONGEST ind = indices[i + 1] + 1; ind < indices[i + 2]; ind += 1)
-	assign_component (container, lhs, ind, exp, m_op);
+      for (LONGEST ind = assigner.indices[i + 1] + 1;
+	   ind < assigner.indices[i + 2];
+	   ind += 1)
+	assigner.assign (ind, m_op);
     }
 }
 
@@ -9696,45 +9681,43 @@ ada_assign_operation::evaluate (struct type *expect_type,
   return ada_value_assign (arg1, arg2);
 }
 
-} /* namespace expr */
+/* See ada-exp.h.  */
 
-/* Add the interval [LOW .. HIGH] to the sorted set of intervals
-   [ INDICES[0] .. INDICES[1] ],...  The resulting intervals do not
-   overlap.  */
-static void
-add_component_interval (LONGEST low, LONGEST high, 
-			std::vector<LONGEST> &indices)
+void
+aggregate_assigner::add_interval (LONGEST from, LONGEST to)
 {
   int i, j;
 
   int size = indices.size ();
   for (i = 0; i < size; i += 2) {
-    if (high >= indices[i] && low <= indices[i + 1])
+    if (to >= indices[i] && from <= indices[i + 1])
       {
 	int kh;
 
 	for (kh = i + 2; kh < size; kh += 2)
-	  if (high < indices[kh])
+	  if (to < indices[kh])
 	    break;
-	if (low < indices[i])
-	  indices[i] = low;
+	if (from < indices[i])
+	  indices[i] = from;
 	indices[i + 1] = indices[kh - 1];
-	if (high > indices[i + 1])
-	  indices[i + 1] = high;
+	if (to > indices[i + 1])
+	  indices[i + 1] = to;
 	memcpy (indices.data () + i + 2, indices.data () + kh, size - kh);
 	indices.resize (kh - i - 2);
 	return;
       }
-    else if (high < indices[i])
+    else if (to < indices[i])
       break;
   }
 	
   indices.resize (indices.size () + 2);
   for (j = indices.size () - 1; j >= i + 2; j -= 1)
     indices[j] = indices[j - 2];
-  indices[i] = low;
-  indices[i + 1] = high;
+  indices[i] = from;
+  indices[i + 1] = to;
 }
+
+} /* namespace expr */
 
 /* Perform and Ada cast of ARG2 to type TYPE if the type of ARG2
    is different.  */

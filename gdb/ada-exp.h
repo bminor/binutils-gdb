@@ -588,20 +588,48 @@ private:
   ada_assign_operation *m_lhs;
 };
 
+/* When constructing an aggregate, an object of this type is created
+   to track the needed state.  */
+
+struct aggregate_assigner
+{
+  /* An lvalue containing LHS (possibly LHS itself).  */
+  value *container;
+
+  /* An lvalue of record or array type; this is the object being
+     assigned to.  */
+  value *lhs;
+
+  /* The expression being evaluated.  */
+  expression *exp;
+
+  /* The bounds of LHS.  This is used by the 'others' component.  */
+  LONGEST low;
+  LONGEST high;
+
+  /* This indicates which sub-components have already been assigned
+     to.  */
+  std::vector<LONGEST> indices;
+
+  /* Assign the result of evaluating ARG to the INDEXth component of
+     LHS (a simple array or a record).  Does not modify the inferior's
+     memory, nor does it modify LHS (unless LHS == CONTAINER).  */
+  void assign (LONGEST index, operation_up &arg);
+
+  /* Add the interval [FROM .. TO] to the sorted set of intervals
+     [ INDICES[0] .. INDICES[1] ],...  The resulting intervals do not
+     overlap.  */
+  void add_interval (LONGEST low, LONGEST high);
+};
+
 /* This abstract class represents a single component in an Ada
    aggregate assignment.  */
 class ada_component
 {
 public:
 
-  /* Assign to LHS, which is part of CONTAINER.  EXP is the expression
-     being evaluated.  INDICES, LOW, and HIGH indicate which
-     sub-components have already been assigned; INDICES should be
-     updated by this call.  */
-  virtual void assign (struct value *container,
-		       struct value *lhs, struct expression *exp,
-		       std::vector<LONGEST> &indices,
-		       LONGEST low, LONGEST high) = 0;
+  /* Assign to ASSIGNER.  */
+  virtual void assign (aggregate_assigner &assigner) = 0;
 
   /* Same as operation::uses_objfile.  */
   virtual bool uses_objfile (struct objfile *objfile) = 0;
@@ -664,10 +692,7 @@ public:
   ada_aggregate_component (operation_up &&base,
 			   std::vector<ada_component_up> &&components);
 
-  void assign (struct value *container,
-	       struct value *lhs, struct expression *exp,
-	       std::vector<LONGEST> &indices,
-	       LONGEST low, LONGEST high) override;
+  void assign (aggregate_assigner &assigner) override;
 
   bool uses_objfile (struct objfile *objfile) override;
 
@@ -694,10 +719,7 @@ public:
   {
   }
 
-  void assign (struct value *container,
-	       struct value *lhs, struct expression *exp,
-	       std::vector<LONGEST> &indices,
-	       LONGEST low, LONGEST high) override;
+  void assign (aggregate_assigner &assigner) override;
 
   bool uses_objfile (struct objfile *objfile) override;
 
@@ -719,10 +741,7 @@ public:
   {
   }
 
-  void assign (struct value *container,
-	       struct value *lhs, struct expression *exp,
-	       std::vector<LONGEST> &indices,
-	       LONGEST low, LONGEST high) override;
+  void assign (aggregate_assigner &assigner) override;
 
   bool uses_objfile (struct objfile *objfile) override;
 
@@ -740,14 +759,10 @@ class ada_association
 public:
 
   /* Like ada_component::assign, but takes an operation as a
-     parameter.  The operation is evaluated and then assigned into LHS
-     according to the rules of the concrete implementation.  */
-  virtual void assign (struct value *container,
-		       struct value *lhs,
-		       struct expression *exp,
-		       std::vector<LONGEST> &indices,
-		       LONGEST low, LONGEST high,
-		       operation_up &op) = 0;
+     parameter.  The operation is evaluated and then assigned into
+     ASSIGNER according to the rules of the concrete
+     implementation.  */
+  virtual void assign (aggregate_assigner &assigner, operation_up &op) = 0;
 
   /* Same as operation::uses_objfile.  */
   virtual bool uses_objfile (struct objfile *objfile) = 0;
@@ -785,10 +800,7 @@ public:
     m_assocs = std::move (assoc);
   }
 
-  void assign (struct value *container,
-	       struct value *lhs, struct expression *exp,
-	       std::vector<LONGEST> &indices,
-	       LONGEST low, LONGEST high) override;
+  void assign (aggregate_assigner &assigner) override;
 
   bool uses_objfile (struct objfile *objfile) override;
 
@@ -811,11 +823,7 @@ public:
   {
   }
 
-  void assign (struct value *container,
-	       struct value *lhs, struct expression *exp,
-	       std::vector<LONGEST> &indices,
-	       LONGEST low, LONGEST high,
-	       operation_up &op) override;
+  void assign (aggregate_assigner &assigner, operation_up &op) override;
 
   bool uses_objfile (struct objfile *objfile) override;
 
@@ -839,11 +847,7 @@ public:
   {
   }
 
-  void assign (struct value *container,
-	       struct value *lhs, struct expression *exp,
-	       std::vector<LONGEST> &indices,
-	       LONGEST low, LONGEST high,
-	       operation_up &op) override;
+  void assign (aggregate_assigner &assigner, operation_up &op) override;
 
   bool uses_objfile (struct objfile *objfile) override;
 
