@@ -7077,33 +7077,6 @@ $1 = (void *) 0x7ffff7ff7000
 
 Depending on target support, @code{$_siginfo} may also be writable.
 
-@cindex Intel MPX boundary violations
-@cindex boundary violations, Intel MPX
-On some targets, a @code{SIGSEGV} can be caused by a boundary
-violation, i.e., accessing an address outside of the allowed range.
-In those cases @value{GDBN} may displays additional information,
-depending on how @value{GDBN} has been told to handle the signal.
-With @code{handle stop SIGSEGV}, @value{GDBN} displays the violation
-kind: "Upper" or "Lower", the memory address accessed and the
-bounds, while with @code{handle nostop SIGSEGV} no additional
-information is displayed.
-
-The usual output of a segfault is:
-@smallexample
-Program received signal SIGSEGV, Segmentation fault
-0x0000000000400d7c in upper () at i386-mpx-sigsegv.c:68
-68        value = *(p + len);
-@end smallexample
-
-While a bound violation is presented as:
-@smallexample
-Program received signal SIGSEGV, Segmentation fault
-Upper bound violation while accessing address 0x7fffffffc3b3
-Bounds: [lower = 0x7fffffffc390, upper = 0x7fffffffc3a3]
-0x0000000000400d7c in upper () at i386-mpx-sigsegv.c:68
-68        value = *(p + len);
-@end smallexample
-
 @node Thread Stops
 @section Stopping and Starting Multi-thread Programs
 
@@ -26802,91 +26775,6 @@ be returned in a register.
 Show the current setting of the convention to return @code{struct}s
 from functions.
 @end table
-
-
-@subsubsection Intel @dfn{Memory Protection Extensions} (MPX).
-@cindex Intel Memory Protection Extensions (MPX).
-
-Memory Protection Extension (MPX) adds the bound registers @samp{BND0}
-@footnote{The register named with capital letters represent the architecture
-registers.} through @samp{BND3}.  Bound registers store a pair of 64-bit values
-which are the lower bound and upper bound.  Bounds are effective addresses or
-memory locations.  The upper bounds are architecturally represented in 1's
-complement form.  A bound having lower bound = 0, and upper bound = 0
-(1's complement of all bits set) will allow access to the entire address space.
-
-@samp{BND0} through @samp{BND3} are represented in @value{GDBN} as @samp{bnd0raw}
-through @samp{bnd3raw}.  Pseudo registers @samp{bnd0} through @samp{bnd3}
-display the upper bound performing the complement of one operation on the
-upper bound value, i.e.@ when upper bound in @samp{bnd0raw} is 0 in the
-@value{GDBN} @samp{bnd0} it will be @code{0xfff@dots{}}.  In this sense it
-can also be noted that the upper bounds are inclusive.
-
-As an example, assume that the register BND0 holds bounds for a pointer having
-access allowed for the range between 0x32 and 0x71.  The values present on
-bnd0raw and bnd registers are presented as follows:
-
-@smallexample
-	bnd0raw = @{0x32, 0xffffffff8e@}
-	bnd0 = @{lbound = 0x32, ubound = 0x71@} : size 64
-@end smallexample
-
-This way the raw value can be accessed via bnd0raw@dots{}bnd3raw.  Any
-change on bnd0@dots{}bnd3 or bnd0raw@dots{}bnd3raw is reflect on its
-counterpart.  When the bnd0@dots{}bnd3 registers are displayed via
-Python, the display includes the memory size, in bits, accessible to
-the pointer.
-
-Bounds can also be stored in bounds tables, which are stored in
-application memory.  These tables store bounds for pointers by specifying
-the bounds pointer's value along with its bounds.  Evaluating and changing
-bounds located in bound tables is therefore interesting while investigating
-bugs on MPX context.  @value{GDBN} provides commands for this purpose:
-
-@table @code
-@item show mpx bound @var{pointer}
-@kindex show mpx bound
-Display bounds of the given @var{pointer}.
-
-@item set mpx bound @var{pointer}, @var{lbound}, @var{ubound}
-@kindex  set mpx bound
-Set the bounds of a pointer in the bound table.
-This command takes three parameters: @var{pointer} is the pointers
-whose bounds are to be changed, @var{lbound} and @var{ubound} are new values
-for lower and upper bounds respectively.
-@end table
-
-Both commands are deprecated and will be removed in future versions of
-@value{GDBN}.  MPX itself was listed as removed by Intel in 2019.
-
-When you call an inferior function on an Intel MPX enabled program,
-GDB sets the inferior's bound registers to the init (disabled) state
-before calling the function.  As a consequence, bounds checks for the
-pointer arguments passed to the function will always pass.
-
-This is necessary because when you call an inferior function, the
-program is usually in the middle of the execution of other function.
-Since at that point bound registers are in an arbitrary state, not
-clearing them would lead to random bound violations in the called
-function.
-
-You can still examine the influence of the bound registers on the
-execution of the called function by stopping the execution of the
-called function at its prologue, setting bound registers, and
-continuing the execution.  For example:
-
-@smallexample
-	$ break *upper
-	Breakpoint 2 at 0x4009de: file i386-mpx-call.c, line 47.
-	$ print upper (a, b, c, d, 1)
-	Breakpoint 2, upper (a=0x0, b=0x6e0000005b, c=0x0, d=0x0, len=48)....
-	$ print $bnd0
-	@{lbound = 0x0, ubound = ffffffff@} : size -1
-@end smallexample
-
-At this last step the value of bnd0 can be changed for investigation of bound
-violations caused along the execution of the call.  In order to know how to
-set the bound registers or bound table for the call consult the ABI.
 
 @subsubsection x87 registers
 
@@ -49744,16 +49632,6 @@ describe the upper 128 bits of @sc{ymm} registers:
 @samp{ymm0h} through @samp{ymm7h} for i386
 @item
 @samp{ymm0h} through @samp{ymm15h} for amd64
-@end itemize
-
-The @samp{org.gnu.gdb.i386.mpx} is an optional feature representing Intel
-Memory Protection Extension (MPX).  It should describe the following registers:
-
-@itemize @minus
-@item
-@samp{bnd0raw} through @samp{bnd3raw} for i386 and amd64.
-@item
-@samp{bndcfgu} and @samp{bndstatus} for i386 and amd64.
 @end itemize
 
 The @samp{org.gnu.gdb.i386.linux} feature is optional.  It should

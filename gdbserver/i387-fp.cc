@@ -23,8 +23,6 @@
 /* Default to SSE.  */
 static uint64_t x86_xcr0 = X86_XSTATE_SSE_MASK;
 
-static const int num_mpx_bnd_registers = 4;
-static const int num_mpx_cfg_registers = 2;
 static const int num_avx512_k_registers = 8;
 static const int num_pkeys_registers = 1;
 
@@ -117,15 +115,6 @@ public:
   /* Memory address of eight upper 128-bit YMM values, or 16 on x86-64.  */
   unsigned char *ymmh_space ()
   { return xsave () + xsave_layout.avx_offset; }
-
-  /* Memory address of 4 bound registers values of 128 bits.  */
-  unsigned char *bndregs_space ()
-  { return xsave () + xsave_layout.bndregs_offset; }
-
-  /* Memory address of 2 MPX configuration registers of 64 bits
-     plus reserved space.  */
-  unsigned char *bndcfg_space ()
-  { return xsave () + xsave_layout.bndcfg_offset; }
 
   /* Memory address of 8 OpMask register values of 64 bits.  */
   unsigned char *k_space ()
@@ -308,14 +297,6 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
       if ((clear_bv & X86_XSTATE_SSE) && (clear_bv & X86_XSTATE_AVX))
 	memset (((char *) &fp->mxcsr), 0, 4);
 
-      if ((clear_bv & X86_XSTATE_BNDREGS))
-	for (i = 0; i < num_mpx_bnd_registers; i++)
-	  memset (fp->bndregs_space () + i * 16, 0, 16);
-
-      if ((clear_bv & X86_XSTATE_BNDCFG))
-	for (i = 0; i < num_mpx_cfg_registers; i++)
-	  memset (fp->bndcfg_space () + i * 8, 0, 8);
-
       if ((clear_bv & X86_XSTATE_K))
 	for (i = 0; i < num_avx512_k_registers; i++)
 	  memset (fp->k_space () + i * 8, 0, 8);
@@ -380,40 +361,6 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	    {
 	      xstate_bv |= X86_XSTATE_AVX;
 	      memcpy (p, raw, 16);
-	    }
-	}
-    }
-
-  /* Check if any bound register has changed.  */
-  if ((x86_xcr0 & X86_XSTATE_BNDREGS))
-    {
-     int bnd0r_regnum = find_regno (regcache->tdesc, "bnd0raw");
-
-      for (i = 0; i < num_mpx_bnd_registers; i++)
-	{
-	  collect_register (regcache, i + bnd0r_regnum, raw);
-	  p = fp->bndregs_space () + i * 16;
-	  if (memcmp (raw, p, 16))
-	    {
-	      xstate_bv |= X86_XSTATE_BNDREGS;
-	      memcpy (p, raw, 16);
-	    }
-	}
-    }
-
-  /* Check if any status register has changed.  */
-  if ((x86_xcr0 & X86_XSTATE_BNDCFG))
-    {
-      int bndcfg_regnum = find_regno (regcache->tdesc, "bndcfgu");
-
-      for (i = 0; i < num_mpx_cfg_registers; i++)
-	{
-	  collect_register (regcache, i + bndcfg_regnum, raw);
-	  p = fp->bndcfg_space () + i * 8;
-	  if (memcmp (raw, p, 8))
-	    {
-	      xstate_bv |= X86_XSTATE_BNDCFG;
-	      memcpy (p, raw, 8);
 	    }
 	}
     }
@@ -762,42 +709,6 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 	  p = fp->ymmh_space ();
 	  for (i = 0; i < num_xmm_registers; i++)
 	    supply_register (regcache, i + ymm0h_regnum, p + i * 16);
-	}
-    }
-
-  if ((x86_xcr0 & X86_XSTATE_BNDREGS))
-    {
-      int bnd0r_regnum = find_regno (regcache->tdesc, "bnd0raw");
-
-
-      if ((clear_bv & X86_XSTATE_BNDREGS) != 0)
-	{
-	  for (i = 0; i < num_mpx_bnd_registers; i++)
-	    supply_register_zeroed (regcache, i + bnd0r_regnum);
-	}
-      else
-	{
-	  p = fp->bndregs_space ();
-	  for (i = 0; i < num_mpx_bnd_registers; i++)
-	    supply_register (regcache, i + bnd0r_regnum, p + i * 16);
-	}
-
-    }
-
-  if ((x86_xcr0 & X86_XSTATE_BNDCFG))
-    {
-      int bndcfg_regnum = find_regno (regcache->tdesc, "bndcfgu");
-
-      if ((clear_bv & X86_XSTATE_BNDCFG) != 0)
-	{
-	  for (i = 0; i < num_mpx_cfg_registers; i++)
-	    supply_register_zeroed (regcache, i + bndcfg_regnum);
-	}
-      else
-	{
-	  p = fp->bndcfg_space ();
-	  for (i = 0; i < num_mpx_cfg_registers; i++)
-	    supply_register (regcache, i + bndcfg_regnum, p + i * 8);
 	}
     }
 

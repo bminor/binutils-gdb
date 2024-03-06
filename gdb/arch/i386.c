@@ -25,7 +25,6 @@
 #include "../features/i386/32bit-sse.c"
 #include "../features/i386/32bit-avx.c"
 #include "../features/i386/32bit-avx512.c"
-#include "../features/i386/32bit-mpx.c"
 #include "../features/i386/32bit-segments.c"
 #include "../features/i386/pkeys.c"
 
@@ -58,9 +57,6 @@ i386_create_target_description (uint64_t xcr0, bool is_linux, bool segments)
 
   if (xcr0 & X86_XSTATE_AVX)
     regnum = create_feature_i386_32bit_avx (tdesc.get (), regnum);
-
-  if (xcr0 & X86_XSTATE_MPX)
-    regnum = create_feature_i386_32bit_mpx (tdesc.get (), regnum);
 
   if (xcr0 & X86_XSTATE_AVX512)
     regnum = create_feature_i386_32bit_avx512 (tdesc.get (), regnum);

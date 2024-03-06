@@ -79,6 +79,8 @@ static int amd64_linux_gregset32_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
+   /* MPX is deprecated.  Yet we keep this to not give the registers below
+      a new number.  That could break older gdbservers.  */
   -1, -1, -1, -1,		  /* MPX registers BND0 ... BND3.  */
   -1, -1,			  /* MPX registers BNDCFGU, BNDSTATUS.  */
   -1, -1, -1, -1, -1, -1, -1, -1, /* k0 ... k7 (AVX512)  */

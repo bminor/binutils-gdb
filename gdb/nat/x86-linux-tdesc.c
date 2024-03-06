@@ -106,12 +106,6 @@ x86_linux_tdesc_for_tid (int tid, uint64_t *xcr0_storage,
 	  *xcr0_storage = xstateregs[(I386_LINUX_XSAVE_XCR0_OFFSET
 				      / sizeof (uint64_t))];
 
-#ifdef __x86_64__
-	  /* No MPX on x32.  */
-	  if (is_64bit && is_x32)
-	    *xcr0_storage &= ~X86_XSTATE_MPX;
-#endif /* __x86_64__ */
-
 	  *xsave_layout_storage
 	    = x86_fetch_xsave_layout (*xcr0_storage, x86_xsave_length ());
 	}

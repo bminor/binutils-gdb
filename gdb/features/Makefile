@@ -222,12 +222,10 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	i386/32bit-sse.xml \
 	i386/32bit-linux.xml \
 	i386/32bit-avx.xml \
-	i386/32bit-mpx.xml \
 	i386/32bit-avx512.xml \
 	i386/32bit-segments.xml \
 	i386/64bit-avx512.xml \
 	i386/64bit-core.xml \
-	i386/64bit-mpx.xml \
 	i386/64bit-segments.xml \
 	i386/64bit-avx.xml \
 	i386/64bit-linux.xml \

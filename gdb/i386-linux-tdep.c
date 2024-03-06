@@ -390,62 +390,6 @@ i386_canonicalize_syscall (int syscall)
 
 #define SIG_CODE_BOUNDARY_FAULT 3
 
-/* i386 GNU/Linux implementation of the report_signal_info
-   gdbarch hook.  Displays information related to MPX bound
-   violations.  */
-void
-i386_linux_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout,
-			       enum gdb_signal siggnal)
-{
-  /* -Wmaybe-uninitialized  */
-  CORE_ADDR lower_bound = 0, upper_bound = 0, access = 0;
-  int is_upper;
-  long sig_code = 0;
-
-  if (!i386_mpx_enabled () || siggnal != GDB_SIGNAL_SEGV)
-    return;
-
-  try
-    {
-      /* Sigcode evaluates if the actual segfault is a boundary violation.  */
-      sig_code = parse_and_eval_long ("$_siginfo.si_code\n");
-
-      lower_bound
-	= parse_and_eval_long ("$_siginfo._sifields._sigfault._addr_bnd._lower");
-      upper_bound
-	= parse_and_eval_long ("$_siginfo._sifields._sigfault._addr_bnd._upper");
-      access
-	= parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
-    }
-  catch (const gdb_exception_error &exception)
-    {
-      return;
-    }
-
-  /* If this is not a boundary violation just return.  */
-  if (sig_code != SIG_CODE_BOUNDARY_FAULT)
-    return;
-
-  is_upper = (access > upper_bound ? 1 : 0);
-
-  uiout->text ("\n");
-  if (is_upper)
-    uiout->field_string ("sigcode-meaning", _("Upper bound violation"));
-  else
-    uiout->field_string ("sigcode-meaning", _("Lower bound violation"));
-
-  uiout->text (_(" while accessing address "));
-  uiout->field_core_addr ("bound-access", gdbarch, access);
-
-  uiout->text (_("\nBounds: [lower = "));
-  uiout->field_core_addr ("lower-bound", gdbarch, lower_bound);
-
-  uiout->text (_(", upper = "));
-  uiout->field_core_addr ("upper-bound", gdbarch, upper_bound);
-
-  uiout->text (_("]"));
-}
-
 /* Parse the arguments of current system call instruction and record
    the values of the registers and memory that will be changed into
    "record_arch_list".  This instruction is "int 0x80" (Linux
@@ -608,6 +552,8 @@ int i386_linux_gregset_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
+  /* MPX is deprecated.  Yet we keep this to not give the registers below
+     a new number.  That could break older gdbservers.  */
   -1, -1, -1, -1,		  /* MPX registers BND0 ... BND3.  */
   -1, -1,			  /* MPX registers BNDCFGU, BNDSTATUS.  */
   -1, -1, -1, -1, -1, -1, -1, -1, /* k0 ... k7 (AVX512)  */
@@ -719,12 +665,6 @@ i386_linux_supply_xstateregset (const struct regset *regset,
 				const void *xstateregs, size_t len)
 {
   i387_supply_xsave (regcache, regnum, xstateregs);
-}
-
-struct type *
-x86_linux_get_siginfo_type (struct gdbarch *gdbarch)
-{
-  return linux_get_siginfo_type_with_fields (gdbarch, LINUX_SIGINFO_FIELD_ADDR_BND);
 }
 
 /* Similar to i386_collect_fpregset, but use XSAVE extended state.  */
@@ -1064,9 +1004,6 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_I386);
   set_gdbarch_get_syscall_number (gdbarch,
 				  i386_linux_get_syscall_number);
-
-  set_gdbarch_get_siginfo_type (gdbarch, x86_linux_get_siginfo_type);
-  set_gdbarch_report_signal_info (gdbarch, i386_linux_report_signal_info);
 }
 
 void _initialize_i386_linux_tdep ();

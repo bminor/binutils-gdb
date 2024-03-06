@@ -3,6 +3,13 @@
 
 *** Changes since GDB 15
 
+* Debugging support for Intel MPX has been removed.  This includes the
+  removal of
+  ** MPX register support
+  ** the commands "show/set mpx bound" (deprecated since GDB 15)
+  ** i386 and amd64 implementation of the hooks report_signal_info and
+     get_siginfo_type.
+
 * GDB now supports printing of asynchronous events from the Intel Processor
   Trace during 'record instruction-history', 'record function-call-history'
   and all stepping commands.  This can be controlled with the new

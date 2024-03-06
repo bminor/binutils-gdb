@@ -65,7 +65,6 @@ static constexpr x86_xstate_feature x86_linux_all_xstate_features[] = {
   { X86_XSTATE_PKRU,	true,	true, 	true },
   { X86_XSTATE_AVX512,	true,	true, 	true },
   { X86_XSTATE_AVX,	true,	true, 	true },
-  { X86_XSTATE_MPX,	true,	true, 	false },
   { X86_XSTATE_SSE,	true,	false, 	false },
   { X86_XSTATE_X87,	true,	false, 	false }
 };
@@ -150,9 +149,9 @@ x86_linux_xcr0_to_tdesc_idx (uint64_t xcr0)
      the target descriptions (see nat/x86-linux-tdesc.c), the feature order
      represents the bit order within the generated index number.
 
-     i386  | x87 sse mpx avx avx512 pkru
-     amd64 |         mpx avx avx512 pkru
-     i32   |             avx avx512 pkru
+     i386  | x87 sse avx avx512 pkru
+     amd64 |         avx avx512 pkru
+     i32   |         avx avx512 pkru
 
      The features are ordered so that for each mode (i386, amd64, i32) the
      generated index will form a continuous range.  */

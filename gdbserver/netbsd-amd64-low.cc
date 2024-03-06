@@ -63,6 +63,8 @@ enum netbsd_x86_64_gdb_regnum
   AMD64_MXCSR_REGNUM = AMD64_XMM0_REGNUM + 16,
   AMD64_YMM0H_REGNUM,	   /* %ymm0h */
   AMD64_YMM15H_REGNUM = AMD64_YMM0H_REGNUM + 15,
+  /* MPX is deprecated.  Yet we keep this to not give the registers below
+     a new number.  That could break older gdbservers.  */
   AMD64_BND0R_REGNUM = AMD64_YMM15H_REGNUM + 1,
   AMD64_BND3R_REGNUM = AMD64_BND0R_REGNUM + 3,
   AMD64_BNDCFGU_REGNUM,

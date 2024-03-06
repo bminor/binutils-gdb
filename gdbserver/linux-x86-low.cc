@@ -240,6 +240,8 @@ static const int x86_64_regmap[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   ORIG_RAX * 8,
   21 * 8,  22 * 8,
+  /* MPX is deprecated.  Yet we keep this to not give the registers below
+     a new number.  That could break older gdbs.  */
   -1, -1, -1, -1,			/* MPX registers BND0 ... BND3.  */
   -1, -1,				/* MPX registers BNDCFGU, BNDSTATUS.  */
   -1, -1, -1, -1, -1, -1, -1, -1,       /* xmm16 ... xmm31 (AVX512)  */

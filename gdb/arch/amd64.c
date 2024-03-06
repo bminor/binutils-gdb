@@ -23,7 +23,6 @@
 #include "../features/i386/64bit-avx512.c"
 #include "../features/i386/64bit-core.c"
 #include "../features/i386/64bit-linux.c"
-#include "../features/i386/64bit-mpx.c"
 #include "../features/i386/64bit-segments.c"
 #include "../features/i386/64bit-sse.c"
 #include "../features/i386/pkeys.c"
@@ -64,13 +63,6 @@ amd64_create_target_description (uint64_t xcr0, bool is_x32, bool is_linux,
 
   if (xcr0 & X86_XSTATE_AVX)
     regnum = create_feature_i386_64bit_avx (tdesc.get (), regnum);
-
-  if (xcr0 & X86_XSTATE_MPX)
-    {
-      /* MPX is not available on x32.  */
-      gdb_assert (!is_x32);
-      regnum = create_feature_i386_64bit_mpx (tdesc.get (), regnum);
-    }
 
   if (xcr0 & X86_XSTATE_AVX512)
     regnum = create_feature_i386_64bit_avx512 (tdesc.get (), regnum);

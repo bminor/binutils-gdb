@@ -86,6 +86,8 @@ int amd64_linux_gregset_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
+  /* MPX is deprecated.  Yet we keep this to not give the registers below
+     a new number.  That could break older gdbservers.  */
   -1, -1, -1, -1,		/* MPX registers BND0 ... BND3.  */
   -1, -1,			/* MPX registers BNDCFGU and BNDSTATUS.  */
   -1, -1, -1, -1, -1, -1, -1, -1,     /* xmm16 ... xmm31 (AVX512)  */
@@ -1816,9 +1818,6 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch,
 
   set_gdbarch_process_record (gdbarch, i386_process_record);
   set_gdbarch_process_record_signal (gdbarch, amd64_linux_record_signal);
-
-  set_gdbarch_get_siginfo_type (gdbarch, x86_linux_get_siginfo_type);
-  set_gdbarch_report_signal_info (gdbarch, i386_linux_report_signal_info);
 }
 
 static void

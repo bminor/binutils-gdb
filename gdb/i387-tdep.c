@@ -818,30 +818,6 @@ static int xsave_xmm_avx512_offset[] =
   (xsave + (tdep)->xsave_layout.zmm_offset				\
    + xsave_xmm_avx512_offset[regnum - I387_XMM16_REGNUM (tdep)])
 
-/* At xsave_bndregs_offset[REGNUM] you'll find the relative offset
-   within the BNDREGS region of the XSAVE extended state where the GDB
-   register BND0R + REGNUM is stored.  */
-
-static int xsave_bndregs_offset[] = {
-  0 * 16,			/* bnd0r...bnd3r registers.  */
-  1 * 16,
-  2 * 16,
-  3 * 16
-};
-
-#define XSAVE_BNDREGS_ADDR(tdep, xsave, regnum)				\
-  (xsave + (tdep)->xsave_layout.bndregs_offset				\
-   + xsave_bndregs_offset[regnum - I387_BND0R_REGNUM (tdep)])
-
-static int xsave_bndcfg_offset[] = {
-  0 * 8,			/* bndcfg ... bndstatus.  */
-  1 * 8,
-};
-
-#define XSAVE_BNDCFG_ADDR(tdep, xsave, regnum)			\
-  (xsave + (tdep)->xsave_layout.bndcfg_offset			\
-   + xsave_bndcfg_offset[regnum - I387_BNDCFGU_REGNUM (tdep)])
-
 /* At xsave_avx512_k_offset[REGNUM] you'll find the relative offset
    within the K region of the XSAVE extended state where the AVX512
    opmask register K0 + REGNUM is stored.  */
@@ -944,8 +920,6 @@ i387_guess_xsave_layout (uint64_t xcr0, size_t xsave_size,
     {
       /* Intel CPUs supporting PKRU.  */
       layout.avx_offset = 576;
-      layout.bndregs_offset = 960;
-      layout.bndcfg_offset = 1024;
       layout.k_offset = 1088;
       layout.zmm_h_offset = 1152;
       layout.zmm_offset = 1664;
@@ -964,20 +938,14 @@ i387_guess_xsave_layout (uint64_t xcr0, size_t xsave_size,
     {
       /* Intel CPUs supporting AVX512.  */
       layout.avx_offset = 576;
-      layout.bndregs_offset = 960;
-      layout.bndcfg_offset = 1024;
       layout.k_offset = 1088;
       layout.zmm_h_offset = 1152;
       layout.zmm_offset = 1664;
     }
-  else if (HAS_MPX (xcr0) && xsave_size == 1088)
-    {
-      /* Intel CPUs supporting MPX.  */
-      layout.avx_offset = 576;
-      layout.bndregs_offset = 960;
-      layout.bndcfg_offset = 1024;
-    }
-  else if (HAS_AVX (xcr0) && xsave_size == 832)
+  /* As MPX has been removed, we need the additional check
+     (xsave_size == 1088) to allow reading AVX registers from corefiles
+     on CPUs with MPX as the highest supported feature.  */
+  else if (HAS_AVX (xcr0) && (xsave_size == 832 || xsave_size == 1088))
     {
       /* Intel and AMD CPUs supporting AVX.  */
       layout.avx_offset = 576;
@@ -1000,8 +968,6 @@ i387_fallback_xsave_layout (uint64_t xcr0)
     {
       /* Intel CPUs supporting PKRU.  */
       layout.avx_offset = 576;
-      layout.bndregs_offset = 960;
-      layout.bndcfg_offset = 1024;
       layout.k_offset = 1088;
       layout.zmm_h_offset = 1152;
       layout.zmm_offset = 1664;
@@ -1012,20 +978,10 @@ i387_fallback_xsave_layout (uint64_t xcr0)
     {
       /* Intel CPUs supporting AVX512.  */
       layout.avx_offset = 576;
-      layout.bndregs_offset = 960;
-      layout.bndcfg_offset = 1024;
       layout.k_offset = 1088;
       layout.zmm_h_offset = 1152;
       layout.zmm_offset = 1664;
       layout.sizeof_xsave = 2688;
-    }
-  else if (HAS_MPX (xcr0))
-    {
-      /* Intel CPUs supporting MPX.  */
-      layout.avx_offset = 576;
-      layout.bndregs_offset = 960;
-      layout.bndcfg_offset = 1024;
-      layout.sizeof_xsave = 1088;
     }
   else if (HAS_AVX (xcr0))
     {
@@ -1082,16 +1038,14 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
       x87 = 0x1,
       sse = 0x2,
       avxh = 0x4,
-      bndregs = 0x8,
-      bndcfg = 0x10,
-      avx512_k = 0x20,
-      avx512_zmm0_h = 0x40,
-      avx512_zmm16_h = 0x80,
-      avx512_ymmh_avx512 = 0x100,
-      avx512_xmm_avx512 = 0x200,
-      pkeys = 0x400,
-      all = x87 | sse | avxh | bndregs | bndcfg | avx512_k | avx512_zmm0_h
-	    | avx512_zmm16_h | avx512_ymmh_avx512 | avx512_xmm_avx512 | pkeys
+      avx512_k = 0x8,
+      avx512_zmm0_h = 0x10,
+      avx512_zmm16_h = 0x20,
+      avx512_ymmh_avx512 = 0x40,
+      avx512_xmm_avx512 = 0x80,
+      pkeys = 0x100,
+      all = x87 | sse | avxh | avx512_k | avx512_zmm0_h | avx512_zmm16_h
+	    | avx512_ymmh_avx512 | avx512_xmm_avx512 | pkeys
     } regclass;
 
   gdb_assert (regs != NULL);
@@ -1121,12 +1075,6 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
   else if (regnum >= I387_YMM0H_REGNUM (tdep)
 	   && regnum < I387_YMMENDH_REGNUM (tdep))
     regclass = avxh;
-  else if (regnum >= I387_BND0R_REGNUM (tdep)
-	   && regnum < I387_BNDCFGU_REGNUM (tdep))
-    regclass = bndregs;
-  else if (regnum >= I387_BNDCFGU_REGNUM (tdep)
-	   && regnum < I387_MPXEND_REGNUM (tdep))
-    regclass = bndcfg;
   else if (regnum >= I387_XMM0_REGNUM (tdep)
 	   && regnum < I387_MXCSR_REGNUM (tdep))
     regclass = sse;
@@ -1203,20 +1151,6 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	regcache->raw_supply (regnum, zero);
       else
 	regcache->raw_supply (regnum, XSAVE_AVXH_ADDR (tdep, regs, regnum));
-      return;
-
-    case bndcfg:
-      if ((clear_bv & X86_XSTATE_BNDCFG))
-	regcache->raw_supply (regnum, zero);
-      else
-	regcache->raw_supply (regnum, XSAVE_BNDCFG_ADDR (tdep, regs, regnum));
-      return;
-
-    case bndregs:
-      if ((clear_bv & X86_XSTATE_BNDREGS))
-	regcache->raw_supply (regnum, zero);
-      else
-	regcache->raw_supply (regnum, XSAVE_BNDREGS_ADDR (tdep, regs, regnum));
       return;
 
     case sse:
@@ -1338,40 +1272,6 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 		   i < I387_YMMENDH_REGNUM (tdep);
 		   i++)
 		regcache->raw_supply (i, XSAVE_AVXH_ADDR (tdep, regs, i));
-	    }
-	}
-
-      /* Handle the MPX registers.  */
-      if ((tdep->xcr0 & X86_XSTATE_BNDREGS))
-	{
-	  if (clear_bv & X86_XSTATE_BNDREGS)
-	    {
-	      for (i = I387_BND0R_REGNUM (tdep);
-		   i < I387_BNDCFGU_REGNUM (tdep); i++)
-		regcache->raw_supply (i, zero);
-	    }
-	  else
-	    {
-	      for (i = I387_BND0R_REGNUM (tdep);
-		   i < I387_BNDCFGU_REGNUM (tdep); i++)
-		regcache->raw_supply (i, XSAVE_BNDREGS_ADDR (tdep, regs, i));
-	    }
-	}
-
-      /* Handle the MPX registers.  */
-      if ((tdep->xcr0 & X86_XSTATE_BNDCFG))
-	{
-	  if (clear_bv & X86_XSTATE_BNDCFG)
-	    {
-	      for (i = I387_BNDCFGU_REGNUM (tdep);
-		   i < I387_MPXEND_REGNUM (tdep); i++)
-		regcache->raw_supply (i, zero);
-	    }
-	  else
-	    {
-	      for (i = I387_BNDCFGU_REGNUM (tdep);
-		   i < I387_MPXEND_REGNUM (tdep); i++)
-		regcache->raw_supply (i, XSAVE_BNDCFG_ADDR (tdep, regs, i));
 	    }
 	}
 
@@ -1527,16 +1427,14 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
       x87 = 0x2,
       sse = 0x4,
       avxh = 0x8,
-      bndregs = 0x10,
-      bndcfg = 0x20,
-      avx512_k = 0x40,
-      avx512_zmm0_h = 0x80,
-      avx512_zmm16_h = 0x100,
-      avx512_ymmh_avx512 = 0x200,
-      avx512_xmm_avx512 = 0x400,
-      pkeys = 0x800,
-      all = x87 | sse | avxh | bndregs | bndcfg | avx512_k | avx512_zmm0_h
-	    | avx512_zmm16_h | avx512_ymmh_avx512 | avx512_xmm_avx512 | pkeys
+      avx512_k = 0x10,
+      avx512_zmm0_h = 0x20,
+      avx512_zmm16_h = 0x40,
+      avx512_ymmh_avx512 = 0x80,
+      avx512_xmm_avx512 = 0x100,
+      pkeys = 0x200,
+      all = x87 | sse | avxh | avx512_k | avx512_zmm0_h | avx512_zmm16_h
+	    | avx512_ymmh_avx512 | avx512_xmm_avx512 | pkeys
     } regclass;
 
   gdb_assert (tdep->st0_regnum >= I386_ST0_REGNUM);
@@ -1565,12 +1463,6 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
   else if (regnum >= I387_YMM0H_REGNUM (tdep)
 	   && regnum < I387_YMMENDH_REGNUM (tdep))
     regclass = avxh;
-  else if (regnum >= I387_BND0R_REGNUM (tdep)
-	   && regnum < I387_BNDCFGU_REGNUM (tdep))
-    regclass = bndregs;
-  else if (regnum >= I387_BNDCFGU_REGNUM (tdep)
-	   && regnum < I387_MPXEND_REGNUM (tdep))
-    regclass = bndcfg;
   else if (regnum >= I387_XMM0_REGNUM (tdep)
 	   && regnum < I387_MXCSR_REGNUM (tdep))
     regclass = sse;
@@ -1618,16 +1510,6 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	for (i = I387_PKRU_REGNUM (tdep);
 	     i < I387_PKEYSEND_REGNUM (tdep); i++)
 	  memset (XSAVE_PKEYS_ADDR (tdep, regs, i), 0, 4);
-
-      if ((clear_bv & X86_XSTATE_BNDREGS))
-	for (i = I387_BND0R_REGNUM (tdep);
-	     i < I387_BNDCFGU_REGNUM (tdep); i++)
-	  memset (XSAVE_BNDREGS_ADDR (tdep, regs, i), 0, 16);
-
-      if ((clear_bv & X86_XSTATE_BNDCFG))
-	for (i = I387_BNDCFGU_REGNUM (tdep);
-	     i < I387_MPXEND_REGNUM (tdep); i++)
-	  memset (XSAVE_BNDCFG_ADDR (tdep, regs, i), 0, 8);
 
       if ((clear_bv & X86_XSTATE_ZMM_H))
 	for (i = I387_ZMM0H_REGNUM (tdep); i < zmm_endlo_regnum; i++)
@@ -1771,34 +1653,6 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	    }
 	}
 
-      /* Check if any upper MPX registers are changed.  */
-      if ((tdep->xcr0 & X86_XSTATE_BNDREGS))
-	for (i = I387_BND0R_REGNUM (tdep);
-	     i < I387_BNDCFGU_REGNUM (tdep); i++)
-	  {
-	    regcache->raw_collect (i, raw);
-	    p = XSAVE_BNDREGS_ADDR (tdep, regs, i);
-	    if (memcmp (raw, p, 16))
-	      {
-		xstate_bv |= X86_XSTATE_BNDREGS;
-		memcpy (p, raw, 16);
-	      }
-	  }
-
-      /* Check if any upper MPX registers are changed.  */
-      if ((tdep->xcr0 & X86_XSTATE_BNDCFG))
-	for (i = I387_BNDCFGU_REGNUM (tdep);
-	     i < I387_MPXEND_REGNUM (tdep); i++)
-	  {
-	    regcache->raw_collect (i, raw);
-	    p = XSAVE_BNDCFG_ADDR (tdep, regs, i);
-	    if (memcmp (raw, p, 8))
-	      {
-		xstate_bv |= X86_XSTATE_BNDCFG;
-		memcpy (p, raw, 8);
-	      }
-	  }
-
       /* Check if any upper YMM registers are changed.  */
       if ((tdep->xcr0 & X86_XSTATE_AVX))
 	for (i = I387_YMM0H_REGNUM (tdep);
@@ -1938,22 +1792,6 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	      xstate_bv |= X86_XSTATE_AVX;
 	      memcpy (p, raw, 16);
 	    }
-	  break;
-
-	case bndregs:
-	  regcache->raw_collect (regnum, raw);
-	  p = XSAVE_BNDREGS_ADDR (tdep, regs, regnum);
-	  if (memcmp (raw, p, 16))
-	    {
-	      xstate_bv |= X86_XSTATE_BNDREGS;
-	      memcpy (p, raw, 16);
-	    }
-	  break;
-
-	case bndcfg:
-	  p = XSAVE_BNDCFG_ADDR (tdep, regs, regnum);
-	  xstate_bv |= X86_XSTATE_BNDCFG;
-	  memcpy (p, raw, 8);
 	  break;
 
 	case sse:
@@ -2142,21 +1980,4 @@ i387_return_value (struct gdbarch *gdbarch, struct regcache *regcache)
      tag word is 0x3fff.  */
   regcache_raw_write_unsigned (regcache, I387_FTAG_REGNUM (tdep), 0x3fff);
 
-}
-
-/* See i387-tdep.h.  */
-
-void
-i387_reset_bnd_regs (struct gdbarch *gdbarch, struct regcache *regcache)
-{
-  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
-
-  if (I387_BND0R_REGNUM (tdep) > 0)
-    {
-      gdb_byte bnd_buf[16];
-
-      memset (bnd_buf, 0, 16);
-      for (int i = 0; i < I387_NUM_BND_REGS; i++)
-	regcache->raw_write (I387_BND0R_REGNUM (tdep) + i, bnd_buf);
-    }
 }

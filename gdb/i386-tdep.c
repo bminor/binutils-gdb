@@ -117,21 +117,10 @@ static const char * const i386_ymmh_names[] =
   "ymm4h",  "ymm5h",   "ymm6h",  "ymm7h",
 };
 
-static const char * const i386_mpx_names[] =
-{
-  "bnd0raw", "bnd1raw", "bnd2raw", "bnd3raw", "bndcfgu", "bndstatus"
-};
 
 static const char * const i386_pkeys_names[] =
 {
   "pkru"
-};
-
-/* Register names for MPX pseudo-registers.  */
-
-static const char * const i386_bnd_names[] =
-{
-  "bnd0", "bnd1", "bnd2", "bnd3"
 };
 
 /* Register names for MMX pseudo-registers.  */
@@ -311,21 +300,6 @@ i386_ymm_avx512_regnum_p (struct gdbarch *gdbarch, int regnum)
   return regnum >= 0 && regnum < tdep->num_ymm_avx512_regs;
 }
 
-/* BND register?  */
-
-int
-i386_bnd_regnum_p (struct gdbarch *gdbarch, int regnum)
-{
-  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
-  int bnd0_regnum = tdep->bnd0_regnum;
-
-  if (bnd0_regnum < 0)
-    return 0;
-
-  regnum -= bnd0_regnum;
-  return regnum >= 0 && regnum < I387_NUM_BND_REGS;
-}
-
 /* SSE register?  */
 
 int
@@ -393,34 +367,6 @@ i386_fpc_regnum_p (struct gdbarch *gdbarch, int regnum)
 	  && regnum < I387_XMM0_REGNUM (tdep));
 }
 
-/* BNDr (raw) register?  */
-
-static int
-i386_bndr_regnum_p (struct gdbarch *gdbarch, int regnum)
-{
-  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
-
-   if (I387_BND0R_REGNUM (tdep) < 0)
-     return 0;
-
-  regnum -= tdep->bnd0r_regnum;
-  return regnum >= 0 && regnum < I387_NUM_BND_REGS;
-}
-
-/* BND control register?  */
-
-static int
-i386_mpx_ctrl_regnum_p (struct gdbarch *gdbarch, int regnum)
-{
-  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
-
-   if (I387_BNDCFGU_REGNUM (tdep) < 0)
-     return 0;
-
-  regnum -= I387_BNDCFGU_REGNUM (tdep);
-  return regnum >= 0 && regnum < I387_NUM_MPX_CTRL_REGS;
-}
-
 /* PKRU register?  */
 
 bool
@@ -463,8 +409,6 @@ const char *
 i386_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
-  if (i386_bnd_regnum_p (gdbarch, regnum))
-    return i386_bnd_names[regnum - tdep->bnd0_regnum];
   if (i386_mmx_regnum_p (gdbarch, regnum))
     return i386_mmx_names[regnum - I387_MM0_REGNUM (tdep)];
   else if (i386_ymm_regnum_p (gdbarch, regnum))
@@ -2738,13 +2682,6 @@ i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int write_pass;
   int args_space = 0;
 
-  /* BND registers can be in arbitrary values at the moment of the
-     inferior call.  This can cause boundary violations that are not
-     due to a real bug or even desired by the user.  The best to be done
-     is set the BND registers to allow access to the whole memory, INIT
-     state, before pushing the inferior call.   */
-  i387_reset_bnd_regs (gdbarch, regcache);
-
   /* Determine the total space required for arguments and struct
      return address in a first pass (allowing for 16-byte-aligned
      arguments), then push arguments in a second pass.  */
@@ -3161,43 +3098,6 @@ i387_ext_type (struct gdbarch *gdbarch)
   return tdep->i387_ext_type;
 }
 
-/* Construct type for pseudo BND registers.  We can't use
-   tdesc_find_type since a complement of one value has to be used
-   to describe the upper bound.  */
-
-static struct type *
-i386_bnd_type (struct gdbarch *gdbarch)
-{
-  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
-
-
-  if (!tdep->i386_bnd_type)
-    {
-      struct type *t;
-      const struct builtin_type *bt = builtin_type (gdbarch);
-
-      /* The type we're building is described bellow:  */
-#if 0
-      struct __bound128
-      {
-	void *lbound;
-	void *ubound;		/* One complement of raw ubound field.  */
-      };
-#endif
-
-      t = arch_composite_type (gdbarch,
-			       "__gdb_builtin_type_bound128", TYPE_CODE_STRUCT);
-
-      append_composite_type_field (t, "lbound", bt->builtin_data_ptr);
-      append_composite_type_field (t, "ubound", bt->builtin_data_ptr);
-
-      t->set_name ("builtin_type_bound128");
-      tdep->i386_bnd_type = t;
-    }
-
-  return tdep->i386_bnd_type;
-}
-
 /* Construct vector type for pseudo ZMM registers.  We can't use
    tdesc_find_type since ZMM isn't described in target description.  */
 
@@ -3364,8 +3264,6 @@ i386_mmx_type (struct gdbarch *gdbarch)
 struct type *
 i386_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  if (i386_bnd_regnum_p (gdbarch, regnum))
-    return i386_bnd_type (gdbarch);
   if (i386_mmx_regnum_p (gdbarch, regnum))
     return i386_mmx_type (gdbarch);
   else if (i386_ymm_regnum_p (gdbarch, regnum))
@@ -3425,39 +3323,7 @@ i386_pseudo_register_read_value (gdbarch *gdbarch, const frame_info_ptr &next_fr
   else
     {
       i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
-      if (i386_bnd_regnum_p (gdbarch, pseudo_reg_num))
-	{
-	  int i = pseudo_reg_num - tdep->bnd0_regnum;
-
-	  /* Extract (always little endian).  Read lower 128bits.  */
-	  value *bndr_value
-	    = value_of_register (I387_BND0R_REGNUM (tdep) + i, next_frame);
-	  int size = builtin_type (gdbarch)->builtin_data_ptr->length ();
-	  value *result
-	    = value::allocate_register (next_frame, pseudo_reg_num);
-
-	  /* Copy the lower. */
-	  bndr_value->contents_copy (result, 0, 0, size);
-
-	  /* Copy the upper.  */
-	  bndr_value->contents_copy (result, size, 8, size);
-
-	  /* If upper bytes are available, compute ones' complement.  */
-	  if (result->bytes_available (size, size))
-	    {
-	      bfd_endian byte_order
-		= gdbarch_byte_order (frame_unwind_arch (next_frame));
-	      gdb::array_view<gdb_byte> upper_bytes
-		= result->contents_raw ().slice (size, size);
-	      ULONGEST upper
-		= extract_unsigned_integer (upper_bytes, byte_order);
-	      upper = ~upper;
-	      store_unsigned_integer (upper_bytes, byte_order, upper);
-	    }
-
-	  return result;
-	}
-      else if (i386_zmm_regnum_p (gdbarch, pseudo_reg_num))
+      if (i386_zmm_regnum_p (gdbarch, pseudo_reg_num))
 	{
 	  /* Which register is it, relative to zmm0.  */
 	  int i_0 = pseudo_reg_num - tdep->zmm0_regnum;
@@ -3530,33 +3396,7 @@ i386_pseudo_register_write (gdbarch *gdbarch, const frame_info_ptr &next_frame,
     {
       i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
-      if (i386_bnd_regnum_p (gdbarch, pseudo_reg_num))
-	{
-	  int size = builtin_type (gdbarch)->builtin_data_ptr->length ();
-	  bfd_endian byte_order
-	    = gdbarch_byte_order (current_inferior ()->arch ());
-
-	  /* New values from input value.  */
-	  int reg_index = pseudo_reg_num - tdep->bnd0_regnum;
-	  int raw_regnum = I387_BND0R_REGNUM (tdep) + reg_index;
-
-	  value *bndr_value = value_of_register (raw_regnum, next_frame);
-	  gdb::array_view<gdb_byte> bndr_view
-	    = bndr_value->contents_writeable ();
-
-	  /* Copy lower bytes directly.  */
-	  copy (buf.slice (0, size), bndr_view.slice (0, size));
-
-	  /* Convert and then copy upper bytes.  */
-	  ULONGEST upper
-	    = extract_unsigned_integer (buf.slice (size, size), byte_order);
-	  upper = ~upper;
-	  store_unsigned_integer (bndr_view.slice (8, size), byte_order,
-				  upper);
-
-	  put_frame_register (next_frame, raw_regnum, bndr_view);
-	}
-      else if (i386_zmm_regnum_p (gdbarch, pseudo_reg_num))
+      if (i386_zmm_regnum_p (gdbarch, pseudo_reg_num))
 	{
 	  /* Which register is it, relative to zmm0.  */
 	  int reg_index_0 = pseudo_reg_num - tdep->zmm0_regnum;
@@ -3625,12 +3465,6 @@ i386_ax_pseudo_register_collect (struct gdbarch *gdbarch,
       ax_reg_mask (ax, I387_FSTAT_REGNUM (tdep));
       for (i = 0; i < 8; i++)
 	ax_reg_mask (ax, I387_ST0_REGNUM (tdep) + i);
-      return 0;
-    }
-  else if (i386_bnd_regnum_p (gdbarch, regnum))
-    {
-      regnum -= tdep->bnd0_regnum;
-      ax_reg_mask (ax, I387_BND0R_REGNUM (tdep) + regnum);
       return 0;
     }
   else if (i386_zmm_regnum_p (gdbarch, regnum))
@@ -4480,9 +4314,8 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   const i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
   int fp_regnum_p, mmx_regnum_p, xmm_regnum_p, mxcsr_regnum_p,
       ymm_regnum_p, ymmh_regnum_p, ymm_avx512_regnum_p, ymmh_avx512_regnum_p,
-      bndr_regnum_p, bnd_regnum_p, zmm_regnum_p, zmmh_regnum_p,
-      mpx_ctrl_regnum_p, xmm_avx512_regnum_p,
-      avx512_p, avx_p, sse_p, pkru_regnum_p;
+      zmm_regnum_p, zmmh_regnum_p, xmm_avx512_regnum_p, avx512_p, avx_p,
+      sse_p, pkru_regnum_p;
 
   /* Don't include pseudo registers, except for MMX, in any register
      groups.  */
@@ -4542,21 +4375,6 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 	  || zmmh_regnum_p))
     return 0;
 
-  bnd_regnum_p = i386_bnd_regnum_p (gdbarch, regnum);
-  if (group == all_reggroup
-      && ((bnd_regnum_p && (tdep->xcr0 & X86_XSTATE_MPX_MASK))))
-    return bnd_regnum_p;
-
-  bndr_regnum_p = i386_bndr_regnum_p (gdbarch, regnum);
-  if (group == all_reggroup
-      && ((bndr_regnum_p && (tdep->xcr0 & X86_XSTATE_MPX_MASK))))
-    return 0;
-
-  mpx_ctrl_regnum_p = i386_mpx_ctrl_regnum_p (gdbarch, regnum);
-  if (group == all_reggroup
-      && ((mpx_ctrl_regnum_p && (tdep->xcr0 & X86_XSTATE_MPX_MASK))))
-    return mpx_ctrl_regnum_p;
-
   if (group == general_reggroup)
     return (!fp_regnum_p
 	    && !mmx_regnum_p
@@ -4567,9 +4385,6 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 	    && !ymmh_regnum_p
 	    && !ymm_avx512_regnum_p
 	    && !ymmh_avx512_regnum_p
-	    && !bndr_regnum_p
-	    && !bnd_regnum_p
-	    && !mpx_ctrl_regnum_p
 	    && !zmm_regnum_p
 	    && !zmmh_regnum_p
 	    && !pkru_regnum_p);
@@ -8186,7 +8001,7 @@ i386_xcr0_from_tdesc (const struct target_desc *tdesc)
 
   const struct tdesc_feature *feature_core;
 
-  const struct tdesc_feature *feature_sse, *feature_avx, *feature_mpx,
+  const struct tdesc_feature *feature_sse, *feature_avx,
 			     *feature_avx512, *feature_pkeys;
 
   /* Get core registers.  */
@@ -8199,9 +8014,6 @@ i386_xcr0_from_tdesc (const struct target_desc *tdesc)
 
   /* Try AVX registers.  */
   feature_avx = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx");
-
-  /* Try MPX registers.  */
-  feature_mpx = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.mpx");
 
   /* Try AVX512 registers.  */
   feature_avx512 = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx512");
@@ -8223,9 +8035,6 @@ i386_xcr0_from_tdesc (const struct target_desc *tdesc)
 
       xcr0 |= X86_XSTATE_AVX;
     }
-
-  if (feature_mpx)
-    xcr0 |= X86_XSTATE_MPX_MASK;
 
   if (feature_avx512)
     {
@@ -8249,8 +8058,8 @@ i386_validate_tdesc_p (i386_gdbarch_tdep *tdep,
   const struct target_desc *tdesc = tdep->tdesc;
   const struct tdesc_feature *feature_core;
 
-  const struct tdesc_feature *feature_sse, *feature_avx, *feature_mpx,
-			     *feature_avx512, *feature_pkeys, *feature_segments;
+  const struct tdesc_feature *feature_sse, *feature_avx, *feature_avx512,
+			     *feature_pkeys, *feature_segments;
   int i, num_regs, valid_p;
 
   if (! tdesc_has_registers (tdesc))
@@ -8266,9 +8075,6 @@ i386_validate_tdesc_p (i386_gdbarch_tdep *tdep,
 
   /* Try AVX registers.  */
   feature_avx = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx");
-
-  /* Try MPX registers.  */
-  feature_mpx = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.mpx");
 
   /* Try AVX512 registers.  */
   feature_avx512 = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx512");
@@ -8368,23 +8174,6 @@ i386_validate_tdesc_p (i386_gdbarch_tdep *tdep,
 					    tdep->register_names[i]);
     }
 
-  if (feature_mpx)
-    {
-      tdep->xcr0 |= X86_XSTATE_MPX_MASK;
-
-      if (tdep->bnd0r_regnum < 0)
-	{
-	  tdep->mpx_register_names = i386_mpx_names;
-	  tdep->bnd0r_regnum = I386_BND0R_REGNUM;
-	  tdep->bndcfgu_regnum = I386_BNDCFGU_REGNUM;
-	}
-
-      for (i = 0; i < I387_NUM_MPX_REGS; i++)
-	valid_p &= tdesc_numbered_register (feature_mpx, tdesc_data,
-	    I387_BND0R_REGNUM (tdep) + i,
-	    tdep->mpx_register_names[i]);
-    }
-
   if (feature_segments)
     {
       if (tdep->fsbase_regnum < 0)
@@ -8448,8 +8237,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   const struct target_desc *tdesc;
   int mm0_regnum;
   int ymm0_regnum;
-  int bnd0_regnum;
-  int num_bnd_cooked;
 
   x86_xsave_layout xsave_layout = target_fetch_x86_xsave_layout ();
 
@@ -8655,7 +8442,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Even though the default ABI only includes general-purpose registers,
      floating-point registers and the SSE registers, we have to leave a
-     gap for the upper AVX, MPX and AVX512 registers.  */
+     gap for the upper AVX, (deprecated) MPX and AVX512 registers.  */
   set_gdbarch_num_regs (gdbarch, I386_NUM_REGS);
 
   set_gdbarch_gnu_triplet_regexp (gdbarch, i386_gnu_triplet_regexp);
@@ -8690,10 +8477,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->num_dword_regs = 0;
   tdep->num_mmx_regs = 8;
   tdep->num_ymm_regs = 0;
-
-  /* No MPX registers.  */
-  tdep->bnd0r_regnum = -1;
-  tdep->bndcfgu_regnum = -1;
 
   /* No AVX512 registers.  */
   tdep->k0_regnum = -1;
@@ -8731,8 +8514,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
   tdep->xsave_layout = xsave_layout;
 
-  num_bnd_cooked = (tdep->bnd0r_regnum > 0 ? I387_NUM_BND_REGS : 0);
-
   /* Wire in pseudo registers.  Number of pseudo registers may be
      changed.  */
   set_gdbarch_num_pseudo_regs (gdbarch, (tdep->num_byte_regs
@@ -8740,7 +8521,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					 + tdep->num_dword_regs
 					 + tdep->num_mmx_regs
 					 + tdep->num_ymm_regs
-					 + num_bnd_cooked
 					 + tdep->num_ymm_avx512_regs
 					 + tdep->num_zmm_regs));
 
@@ -8794,20 +8574,13 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     tdep->zmm0_regnum = -1;
 
-  bnd0_regnum = mm0_regnum;
   if (tdep->num_mmx_regs != 0)
     {
       /* Support MMX pseudo-register if MMX hasn't been disabled.  */
       tdep->mm0_regnum = mm0_regnum;
-      bnd0_regnum += tdep->num_mmx_regs;
     }
   else
     tdep->mm0_regnum = -1;
-
-  if (tdep->bnd0r_regnum > 0)
-      tdep->bnd0_regnum = bnd0_regnum;
-  else
-    tdep-> bnd0_regnum = -1;
 
   /* Hook in the legacy prologue-based unwinders last (fallback).  */
   if (info.bfd_arch_info->bits_per_word == 32)
@@ -8838,12 +8611,11 @@ const struct target_desc *
 i386_target_description (uint64_t xcr0, bool segments)
 {
   static target_desc *i386_tdescs \
-    [2/*SSE*/][2/*AVX*/][2/*MPX*/][2/*AVX512*/][2/*PKRU*/][2/*segments*/] = {};
+    [2/*SSE*/][2/*AVX*/][2/*AVX512*/][2/*PKRU*/][2/*segments*/] = {};
   target_desc **tdesc;
 
   tdesc = &i386_tdescs[(xcr0 & X86_XSTATE_SSE) ? 1 : 0]
     [(xcr0 & X86_XSTATE_AVX) ? 1 : 0]
-    [(xcr0 & X86_XSTATE_MPX) ? 1 : 0]
     [(xcr0 & X86_XSTATE_AVX512) ? 1 : 0]
     [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0]
     [segments ? 1 : 0];
@@ -8853,245 +8625,6 @@ i386_target_description (uint64_t xcr0, bool segments)
 
   return *tdesc;
 }
-
-#define MPX_BASE_MASK (~(ULONGEST) 0xfff)
-
-/* Find the bound directory base address.  */
-
-static unsigned long
-i386_mpx_bd_base (void)
-{
-  ULONGEST ret;
-  enum register_status regstatus;
-
-  regcache *rcache = get_thread_regcache (inferior_thread ());
-  gdbarch *arch = rcache->arch ();
-  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (arch);
-
-  regstatus = regcache_raw_read_unsigned (rcache, tdep->bndcfgu_regnum, &ret);
-
-  if (regstatus != REG_VALID)
-    error (_("BNDCFGU register invalid, read status %d."), regstatus);
-
-  return ret & MPX_BASE_MASK;
-}
-
-int
-i386_mpx_enabled (void)
-{
-  gdbarch *arch = get_current_arch ();
-  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (arch);
-  const struct target_desc *tdesc = tdep->tdesc;
-
-  return (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.mpx") != NULL);
-}
-
-#define MPX_BD_MASK     0xfffffff00000ULL	/* select bits [47:20]  */
-#define MPX_BT_MASK     0x0000000ffff8	        /* select bits [19:3]   */
-#define MPX_BD_MASK_32  0xfffff000	        /* select bits [31:12]  */
-#define MPX_BT_MASK_32  0x00000ffc	        /* select bits [11:2]   */
-
-/* Find the bound table entry given the pointer location and the base
-   address of the table.  */
-
-static CORE_ADDR
-i386_mpx_get_bt_entry (CORE_ADDR ptr, CORE_ADDR bd_base)
-{
-  CORE_ADDR offset1;
-  CORE_ADDR offset2;
-  CORE_ADDR mpx_bd_mask, bd_ptr_r_shift, bd_ptr_l_shift;
-  CORE_ADDR bt_mask, bt_select_r_shift, bt_select_l_shift;
-  CORE_ADDR bd_entry_addr;
-  CORE_ADDR bt_addr;
-  CORE_ADDR bd_entry;
-  struct gdbarch *gdbarch = get_current_arch ();
-  struct type *data_ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-
-
-  if (gdbarch_ptr_bit (gdbarch) == 64)
-    {
-      mpx_bd_mask = (CORE_ADDR) MPX_BD_MASK;
-      bd_ptr_r_shift = 20;
-      bd_ptr_l_shift = 3;
-      bt_select_r_shift = 3;
-      bt_select_l_shift = 5;
-      bt_mask = (CORE_ADDR) MPX_BT_MASK;
-
-      if ( sizeof (CORE_ADDR) == 4)
-	error (_("bound table examination not supported\
- for 64-bit process with 32-bit GDB"));
-    }
-  else
-    {
-      mpx_bd_mask = MPX_BD_MASK_32;
-      bd_ptr_r_shift = 12;
-      bd_ptr_l_shift = 2;
-      bt_select_r_shift = 2;
-      bt_select_l_shift = 4;
-      bt_mask = MPX_BT_MASK_32;
-    }
-
-  offset1 = ((ptr & mpx_bd_mask) >> bd_ptr_r_shift) << bd_ptr_l_shift;
-  bd_entry_addr = bd_base + offset1;
-  bd_entry = read_memory_typed_address (bd_entry_addr, data_ptr_type);
-
-  if ((bd_entry & 0x1) == 0)
-    error (_("Invalid bounds directory entry at %s."),
-	   paddress (get_current_arch (), bd_entry_addr));
-
-  /* Clearing status bit.  */
-  bd_entry--;
-  bt_addr = bd_entry & ~bt_select_r_shift;
-  offset2 = ((ptr & bt_mask) >> bt_select_r_shift) << bt_select_l_shift;
-
-  return bt_addr + offset2;
-}
-
-/* Print routine for the mpx bounds.  */
-
-static void
-i386_mpx_print_bounds (const CORE_ADDR bt_entry[4])
-{
-  struct ui_out *uiout = current_uiout;
-  LONGEST size;
-  struct gdbarch *gdbarch = get_current_arch ();
-  CORE_ADDR onecompl = ~((CORE_ADDR) 0);
-  int bounds_in_map = ((~bt_entry[1] == 0 && bt_entry[0] == onecompl) ? 1 : 0);
-
-  if (bounds_in_map == 1)
-    {
-      uiout->text ("Null bounds on map:");
-      uiout->text (" pointer value = ");
-      uiout->field_core_addr ("pointer-value", gdbarch, bt_entry[2]);
-      uiout->text (".");
-      uiout->text ("\n");
-    }
-  else
-    {
-      uiout->text ("{lbound = ");
-      uiout->field_core_addr ("lower-bound", gdbarch, bt_entry[0]);
-      uiout->text (", ubound = ");
-
-      /* The upper bound is stored in 1's complement.  */
-      uiout->field_core_addr ("upper-bound", gdbarch, ~bt_entry[1]);
-      uiout->text ("}: pointer value = ");
-      uiout->field_core_addr ("pointer-value", gdbarch, bt_entry[2]);
-
-      if (gdbarch_ptr_bit (gdbarch) == 64)
-	size = ( (~(int64_t) bt_entry[1]) - (int64_t) bt_entry[0]);
-      else
-	size = ( ~((int32_t) bt_entry[1]) - (int32_t) bt_entry[0]);
-
-      /* In case the bounds are 0x0 and 0xffff... the difference will be -1.
-	 -1 represents in this sense full memory access, and there is no need
-	 one to the size.  */
-
-      size = (size > -1 ? size + 1 : size);
-      uiout->text (", size = ");
-      uiout->field_string ("size", plongest (size));
-
-      uiout->text (", metadata = ");
-      uiout->field_core_addr ("metadata", gdbarch, bt_entry[3]);
-      uiout->text ("\n");
-    }
-}
-
-/* Implement the command "show mpx bound".  */
-
-static void
-i386_mpx_info_bounds (const char *args, int from_tty)
-{
-  CORE_ADDR bd_base = 0;
-  CORE_ADDR addr;
-  CORE_ADDR bt_entry_addr = 0;
-  CORE_ADDR bt_entry[4];
-  int i;
-  struct gdbarch *gdbarch = get_current_arch ();
-  struct type *data_ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-
-  if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_i386
-      || !i386_mpx_enabled ())
-    {
-      gdb_printf (_("Intel Memory Protection Extensions not "
-		    "supported on this target.\n"));
-      return;
-    }
-
-  if (args == NULL)
-    {
-      gdb_printf (_("Address of pointer variable expected.\n"));
-      return;
-    }
-
-  addr = parse_and_eval_address (args);
-
-  bd_base = i386_mpx_bd_base ();
-  bt_entry_addr = i386_mpx_get_bt_entry (addr, bd_base);
-
-  memset (bt_entry, 0, sizeof (bt_entry));
-
-  for (i = 0; i < 4; i++)
-    bt_entry[i] = read_memory_typed_address (bt_entry_addr
-					     + i * data_ptr_type->length (),
-					     data_ptr_type);
-
-  i386_mpx_print_bounds (bt_entry);
-}
-
-/* Implement the command "set mpx bound".  */
-
-static void
-i386_mpx_set_bounds (const char *args, int from_tty)
-{
-  CORE_ADDR bd_base = 0;
-  CORE_ADDR addr, lower, upper;
-  CORE_ADDR bt_entry_addr = 0;
-  CORE_ADDR bt_entry[2];
-  const char *input = args;
-  int i;
-  struct gdbarch *gdbarch = get_current_arch ();
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct type *data_ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-
-  if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_i386
-      || !i386_mpx_enabled ())
-    error (_("Intel Memory Protection Extensions not supported\
- on this target."));
-
-  if (args == NULL)
-    error (_("Pointer value expected."));
-
-  addr = value_as_address (parse_to_comma_and_eval (&input));
-
-  if (input[0] == ',')
-    ++input;
-  if (input[0] == '\0')
-    error (_("wrong number of arguments: missing lower and upper bound."));
-  lower = value_as_address (parse_to_comma_and_eval (&input));
-
-  if (input[0] == ',')
-    ++input;
-  if (input[0] == '\0')
-    error (_("Wrong number of arguments; Missing upper bound."));
-  upper = value_as_address (parse_to_comma_and_eval (&input));
-
-  bd_base = i386_mpx_bd_base ();
-  bt_entry_addr = i386_mpx_get_bt_entry (addr, bd_base);
-  for (i = 0; i < 2; i++)
-    bt_entry[i] = read_memory_typed_address (bt_entry_addr
-					     + i * data_ptr_type->length (),
-					     data_ptr_type);
-  bt_entry[0] = (uint64_t) lower;
-  bt_entry[1] = ~(uint64_t) upper;
-
-  for (i = 0; i < 2; i++)
-    write_memory_unsigned_integer (bt_entry_addr
-				   + i * data_ptr_type->length (),
-				   data_ptr_type->length (), byte_order,
-				   bt_entry[i]);
-}
-
-static struct cmd_list_element *mpx_set_cmdlist, *mpx_show_cmdlist;
 
 void _initialize_i386_tdep ();
 void
@@ -9120,30 +8653,6 @@ is \"default\"."),
 			NULL,
 			NULL, /* FIXME: i18n: */
 			&setlist, &showlist);
-
-  /* Add "mpx" prefix for the set and show commands.  */
-
-  add_setshow_prefix_cmd
-    ("mpx", class_support,
-     _("Set Intel Memory Protection Extensions specific variables."),
-     _("Show Intel Memory Protection Extensions specific variables."),
-     &mpx_set_cmdlist, &mpx_show_cmdlist, &setlist, &showlist);
-
-  /* Add "bound" command for the show mpx commands list.  */
-
-  cmd_list_element *c = add_cmd ("bound", no_class, i386_mpx_info_bounds,
-	   "Show the memory bounds for a given array/pointer storage\
- in the bound table.",
-	   &mpx_show_cmdlist);
-  deprecate_cmd (c, nullptr);
-
-  /* Add "bound" command for the set mpx commands list.  */
-
-  c = add_cmd ("bound", no_class, i386_mpx_set_bounds,
-	   "Set the memory bounds for a given array/pointer storage\
- in the bound table.",
-	   &mpx_set_cmdlist);
-  deprecate_cmd (c, nullptr);
 
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_SVR4,
 			  i386_svr4_init_abi);

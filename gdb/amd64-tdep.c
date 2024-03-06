@@ -110,11 +110,6 @@ static const char * const amd64_ymmh_avx512_names[] =
   "ymm28h", "ymm29h", "ymm30h", "ymm31h"
 };
 
-static const char * const amd64_mpx_names[] =
-{
-  "bnd0raw", "bnd1raw", "bnd2raw", "bnd3raw", "bndcfgu", "bndstatus"
-};
-
 static const char * const amd64_k_names[] =
 {
   "k0", "k1", "k2", "k3",
@@ -1038,13 +1033,6 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[8];
-
-  /* BND registers can be in arbitrary values at the moment of the
-     inferior call.  This can cause boundary violations that are not
-     due to a real bug or even desired by the user.  The best to be done
-     is set the BND registers to allow access to the whole memory, INIT
-     state, before pushing the inferior call.   */
-  i387_reset_bnd_regs (gdbarch, regcache);
 
   /* Pass arguments.  */
   sp = amd64_push_arguments (regcache, nargs, args, sp, return_method);
@@ -3196,13 +3184,6 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
       tdep->ymm0h_regnum = AMD64_YMM0H_REGNUM;
     }
 
-  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.mpx") != NULL)
-    {
-      tdep->mpx_register_names = amd64_mpx_names;
-      tdep->bndcfgu_regnum = AMD64_BNDCFGU_REGNUM;
-      tdep->bnd0r_regnum = AMD64_BND0R_REGNUM;
-    }
-
   if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.segments") != NULL)
     {
       tdep->fsbase_regnum = AMD64_FSBASE_REGNUM;
@@ -3377,11 +3358,10 @@ const struct target_desc *
 amd64_target_description (uint64_t xcr0, bool segments)
 {
   static target_desc *amd64_tdescs \
-    [2/*AVX*/][2/*MPX*/][2/*AVX512*/][2/*PKRU*/][2/*segments*/] = {};
+    [2/*AVX*/][2/*AVX512*/][2/*PKRU*/][2/*segments*/] = {};
   target_desc **tdesc;
 
   tdesc = &amd64_tdescs[(xcr0 & X86_XSTATE_AVX) ? 1 : 0]
-    [(xcr0 & X86_XSTATE_MPX) ? 1 : 0]
     [(xcr0 & X86_XSTATE_AVX512) ? 1 : 0]
     [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0]
     [segments ? 1 : 0];
