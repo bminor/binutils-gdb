@@ -112,7 +112,7 @@ Approx time to complete from here: 2 hours ...
 
      Regenerate various files on both branch and HEAD by configuring
      with "--enable-maintainer-mode --enable-gold --enable-shared" and then building
-     with "make all-binutils all-gas all-gold all-gprof all-gprofng all-ld"
+     with "make -j1 all-binutils all-gas all-gold all-gprof all-gprofng all-ld"
 
      Add ChangeLog entries for the updated files.  Commit the changes.
      Make sure that this includes the .pot files as well as the
@@ -257,7 +257,7 @@ How to create the release.
       c. Regenerate the configure and makefiles.  And *info* files.
 
             cd <build-configured-with-enable-maintainer-mode>
-            make all-gas all-ld all-binutils all-gprof all-gold all-gprofng all-libctf
+            make -j1 all-gas all-ld all-binutils all-gprof all-gold all-gprofng all-libctf
 	    make info
 
       d. Create a ChangeLog from the git refs for all of the commits
@@ -336,7 +336,7 @@ How to create the release.
 	mkdir build
 	cd build
 	../binutils-2.*/configure --quiet --enable-gold --prefix=`pwd`/install --enable-plugins --enable-shared
-	make all-gas all-gold all-ld all-binutils all-gprof all-gprofng
+	make -j1 all-gas all-gold all-ld all-binutils all-gprof all-gprofng
 	make check-gas check-binutils check-ld check-gold
         make install-gas install-gold install-ld install-binutils install-gprofng
 
