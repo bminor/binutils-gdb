@@ -54,16 +54,12 @@ checked_static_cast (V *v)
 		 "types must be related");
 
 #ifdef DEVELOPMENT
-  if (v == nullptr)
-    return nullptr;
-
-  T result = dynamic_cast<T> (v);
-  gdb_assert (result != nullptr);
-#else
-  T result = static_cast<T> (v);
+  gdb_assert (v == nullptr || dynamic_cast<T> (v) != nullptr);
 #endif
 
-  return result;
+  /* If a base class of V is virtual then the dynamic_cast above will
+     succeed, but this static_cast will fail.  */
+  return static_cast<T> (v);
 }
 
 /* Same as the above, but to cast from a reference type to another.  */
