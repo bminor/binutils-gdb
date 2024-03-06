@@ -113,7 +113,7 @@ AC_ARG_WITH(mmap,
   yes)  want_mmap=true ;;
   no)   want_mmap=false ;;
   *)    AC_MSG_ERROR(bad value ${withval} for BFD with-mmap option) ;;
-esac],[want_mmap=false])dnl
+esac],[want_mmap=true])dnl
 
 AC_ARG_ENABLE(secureplt,
 [  --enable-secureplt      Default to creating read-only plt entries],

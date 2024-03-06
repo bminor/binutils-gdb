@@ -12018,7 +12018,7 @@ if test "${with_mmap+set}" = set; then :
   *)    as_fn_error $? "bad value ${withval} for BFD with-mmap option" "$LINENO" 5 ;;
 esac
 else
-  want_mmap=false
+  want_mmap=true
 fi
 
 # Check whether --enable-secureplt was given.
