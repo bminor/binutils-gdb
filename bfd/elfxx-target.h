@@ -230,6 +230,8 @@
   _bfd_elf_copy_private_symbol_data
 #endif
 
+#define bfd_elfNN_init_private_section_data \
+  _bfd_elf_init_private_section_data
 #ifndef bfd_elfNN_bfd_copy_private_section_data
 #define bfd_elfNN_bfd_copy_private_section_data \
   _bfd_elf_copy_private_section_data

@@ -10129,6 +10129,7 @@ bfd_vms_get_data (bfd *abfd)
 
 #define vms_bfd_copy_private_bfd_data	  _bfd_generic_bfd_copy_private_bfd_data
 #define vms_bfd_merge_private_bfd_data	  _bfd_generic_bfd_merge_private_bfd_data
+#define vms_init_private_section_data	  _bfd_generic_init_private_section_data
 #define vms_bfd_copy_private_section_data _bfd_generic_bfd_copy_private_section_data
 #define vms_bfd_copy_private_symbol_data  _bfd_generic_bfd_copy_private_symbol_data
 #define vms_bfd_copy_private_header_data  _bfd_generic_bfd_copy_private_header_data

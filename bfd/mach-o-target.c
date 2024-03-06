@@ -75,6 +75,7 @@
 #define bfd_mach_o_write_armap			  _bfd_noarchive_write_armap
 #define bfd_mach_o_get_elt_at_index		  _bfd_noarchive_get_elt_at_index
 #define bfd_mach_o_update_armap_timestamp	  _bfd_noarchive_update_armap_timestamp
+#define bfd_mach_o_init_private_section_data	  _bfd_generic_init_private_section_data
 
 #define TARGET_NAME_BACKEND XCONCAT2(TARGET_NAME,_backend)
 

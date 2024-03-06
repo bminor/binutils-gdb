@@ -7685,7 +7685,7 @@ typedef struct bfd_target
 #define BFD_JUMP_TABLE_COPY(NAME) \
   NAME##_bfd_copy_private_bfd_data, \
   NAME##_bfd_merge_private_bfd_data, \
-  _bfd_generic_init_private_section_data, \
+  NAME##_init_private_section_data, \
   NAME##_bfd_copy_private_section_data, \
   NAME##_bfd_copy_private_symbol_data, \
   NAME##_bfd_copy_private_header_data, \

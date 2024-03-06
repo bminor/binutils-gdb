@@ -5968,6 +5968,8 @@ static const bfd_coff_backend_data bigobj_swap_table =
 #define coff_bfd_copy_private_header_data   _bfd_generic_bfd_copy_private_header_data
 #endif
 
+#define coff_init_private_section_data	    _bfd_generic_init_private_section_data
+
 #ifndef coff_bfd_copy_private_section_data
 #define coff_bfd_copy_private_section_data  _bfd_generic_bfd_copy_private_section_data
 #endif
