@@ -1441,6 +1441,25 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
 	= get_dw_fde_end_addrS (xlate_ctx->dw_fde);
     }
 
+#ifdef SFRAME_FRE_RA_TRACKING
+  if (sframe_ra_tracking_p ())
+    {
+      struct sframe_row_entry *fre;
+
+      /* Iterate over the scratchpad FREs and validate them.  */
+      for (fre = xlate_ctx->first_fre; fre; fre = fre->next)
+	{
+	  /* SFrame format cannot represent FP on stack without RA on stack.  */
+	  if (fre->ra_loc != SFRAME_FRE_ELEM_LOC_STACK
+	      && fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	    {
+	      as_warn (_("skipping SFrame FDE due to FP without RA on stack"));
+	      return SFRAME_XLATE_ERR_NOTREPRESENTED;
+	    }
+	}
+    }
+#endif /* SFRAME_FRE_RA_TRACKING  */
+
   return SFRAME_XLATE_OK;
 }
 
