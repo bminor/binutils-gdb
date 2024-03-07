@@ -181,13 +181,15 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
       printf ("%-10s", temp);
 
       /* Dump RA info.
-	 If an ABI does not track RA offset, e.g., AMD64, display a 'u',
+	 If an ABI does not track RA offset, e.g., AMD64, display 'f',
 	 else display the offset d as 'c+-d'.  */
-      if (sframe_decoder_get_fixed_ra_offset(sfd_ctx)
+      if (sframe_decoder_get_fixed_ra_offset (sfd_ctx)
 	  != SFRAME_CFA_FIXED_RA_INVALID)
-	strcpy (temp, "u");
+	strcpy (temp, "f");
       else if (err[2] == 0)
 	sprintf (temp, "c%+d", ra_offset);
+      else
+	strcpy (temp, "u");
 
       /* Mark SFrame FRE's RA information with "[s]" if the RA is mangled
 	 with signature bits.  */
