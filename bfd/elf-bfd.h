@@ -2592,9 +2592,9 @@ extern char *_bfd_elfcore_strndup
   (bfd *, char *, size_t);
 
 extern Elf_Internal_Rela *_bfd_elf_link_read_relocs
-  (bfd *, asection *, void *, Elf_Internal_Rela *, bool);
+  (bfd *, const asection *, void *, Elf_Internal_Rela *, bool);
 extern Elf_Internal_Rela *_bfd_elf_link_info_read_relocs
-  (bfd *, struct bfd_link_info *, asection *, void *, Elf_Internal_Rela *,
+  (bfd *, struct bfd_link_info *, const asection *, void *, Elf_Internal_Rela *,
    bool);
 
 extern bool _bfd_elf_link_output_relocs

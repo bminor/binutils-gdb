@@ -7298,11 +7298,23 @@ _bfd_mips_elf_eh_frame_address_size (bfd *abfd, const asection *sec)
       if (long64_p)
 	return 8;
 
-      if (sec->reloc_count > 0
-	  && elf_section_data (sec)->relocs != NULL
-	  && (ELF32_R_TYPE (elf_section_data (sec)->relocs[0].r_info)
-	      == R_MIPS_64))
-	return 8;
+      if (sec->reloc_count > 0)
+	{
+	  /* Load the relocations for this section.  */
+	  Elf_Internal_Rela *internal_relocs =
+	    _bfd_elf_link_read_relocs (abfd, sec, NULL, NULL, true);
+	  if (internal_relocs == NULL)
+	    return 0;
+
+	  unsigned int size = 0;
+	  if (ELF32_R_TYPE (internal_relocs[0].r_info) == R_MIPS_64)
+	    size = 8;
+
+	  if (elf_section_data (sec)->relocs != internal_relocs)
+	    free (internal_relocs);
+
+	  return size;
+	}
 
       return 0;
     }

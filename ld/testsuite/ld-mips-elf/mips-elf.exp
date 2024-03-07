@@ -771,6 +771,7 @@ if {$linux_gnu} {
     run_dump_test_n64 "eh-frame2-n64"
 }
 run_dump_test_eabi "eh-frame3"
+run_dump_test_eabi "eh-frame3" {{ld --no-keep-memory} {name --no-keep-memory}}
 run_dump_test_eabi "eh-frame4"
 if {$linux_gnu} {
     set eh_frame5_test {

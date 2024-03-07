@@ -2649,7 +2649,7 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 
 static bool
 elf_link_read_relocs_from_section (bfd *abfd,
-				   asection *sec,
+				   const asection *sec,
 				   Elf_Internal_Shdr *shdr,
 				   void *external_relocs,
 				   Elf_Internal_Rela *internal_relocs)
@@ -2746,7 +2746,7 @@ elf_link_read_relocs_from_section (bfd *abfd,
 Elf_Internal_Rela *
 _bfd_elf_link_info_read_relocs (bfd *abfd,
 				struct bfd_link_info *info,
-				asection *o,
+				const asection *o,
 				void *external_relocs,
 				Elf_Internal_Rela *internal_relocs,
 				bool keep_memory)
@@ -2843,7 +2843,7 @@ _bfd_elf_link_info_read_relocs (bfd *abfd,
 
 Elf_Internal_Rela *
 _bfd_elf_link_read_relocs (bfd *abfd,
-			   asection *o,
+			   const asection *o,
 			   void *external_relocs,
 			   Elf_Internal_Rela *internal_relocs,
 			   bool keep_memory)
