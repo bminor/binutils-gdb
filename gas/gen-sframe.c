@@ -1110,6 +1110,28 @@ sframe_xlate_do_val_offset (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
   return SFRAME_XLATE_OK;
 }
 
+/* Translate DW_CFA_register into SFrame context.
+   Return SFRAME_XLATE_OK if success.  */
+
+static int
+sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
+			  struct cfi_insn_data *cfi_insn)
+{
+  /* Previous value of register1 is register2.  However, if the specified
+     register1 is not interesting (SP, FP, or RA reg), the current DW_CFA_register
+     instruction can be safely skipped without sacrificing the asynchronicity of
+     stack trace information.  */
+  if (cfi_insn->u.rr.reg1 == SFRAME_CFA_SP_REG
+#ifdef SFRAME_FRE_RA_TRACKING
+      || (cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
+#endif
+      || cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
+    return SFRAME_XLATE_ERR_NOTREPRESENTED;  /* Not represented.  */
+
+  /* Safe to skip.  */
+  return SFRAME_XLATE_OK;
+}
+
 /* Translate DW_CFA_remember_state into SFrame context.
    Return SFRAME_XLATE_OK if success.  */
 
@@ -1298,19 +1320,12 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
     case DW_CFA_GNU_window_save:
       err = sframe_xlate_do_gnu_window_save (xlate_ctx, cfi_insn);
       break;
-    /* Other CFI opcodes are not processed at this time.
-       These do not impact the coverage of the basic stack tracing
-       information as conveyed in the SFrame format.
-	- DW_CFA_register,
-	- etc.  */
     case DW_CFA_register:
-      if (cfi_insn->u.rr.reg1 == SFRAME_CFA_SP_REG
-#ifdef SFRAME_FRE_RA_TRACKING
-	  || cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG
-#endif
-	  || cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
-	err = SFRAME_XLATE_ERR_NOTREPRESENTED;
+      err = sframe_xlate_do_register (xlate_ctx, cfi_insn);
       break;
+    /* Following CFI opcodes are not processed at this time.
+       These do not impact the coverage of the basic stack tracing
+       information as conveyed in the SFrame format.  */
     case DW_CFA_undefined:
     case DW_CFA_same_value:
       break;
