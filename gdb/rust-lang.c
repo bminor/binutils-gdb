@@ -475,6 +475,17 @@ rust_language::val_print_slice
 	}
     }
 
+  /* Print the slice type here.  This was gdb's historical behavior
+     (from before unsized types were generically handled) and helps
+     make it clear that the user is seeing a slice, not an array.
+     Only arrays must be handled as the other cases are handled by
+     value_print_inner.  */
+  if (type->code () == TYPE_CODE_ARRAY)
+    {
+      type_print (orig_type, "", stream, -1);
+      gdb_printf (stream, " ");
+    }
+
   value_print_inner (val, stream, recurse, options);
 }
 

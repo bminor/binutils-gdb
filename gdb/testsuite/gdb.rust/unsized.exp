@@ -33,6 +33,6 @@ if {![runto ${srcfile}:$line]} {
 gdb_test "ptype us" " = .*V<\\\[u8\\\]>.*"
 
 if {[rust_at_least 1.61]} {
-    gdb_test "print us2" " = \\\[1, 2, 3\\\]"
+    gdb_test "print us2" " = .*u8.* \\\[1, 2, 3\\\]"
     gdb_test "ptype us2" "type = .*"
 }
