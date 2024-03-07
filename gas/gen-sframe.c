@@ -1536,6 +1536,18 @@ output_sframe (segT sframe_seg)
   /* Setup the version specific access functions.  */
   sframe_set_version (SFRAME_VERSION_2);
 
+#ifdef SFRAME_FRE_RA_TRACKING
+  if (sframe_ra_tracking_p ())
+    /* With RA tracking the fixed RA offset must be invalid.  */
+    gas_assert (sframe_cfa_ra_offset () == SFRAME_CFA_FIXED_RA_INVALID);
+  else
+    /* Without RA tracking the fixed RA offset may not be invalid.  */
+    gas_assert (sframe_cfa_ra_offset () != SFRAME_CFA_FIXED_RA_INVALID);
+#else
+  /* Without RA tracking the fixed RA offset may not be invalid.  */
+  gas_assert (sframe_cfa_ra_offset () != SFRAME_CFA_FIXED_RA_INVALID);
+#endif
+
   /* Process all fdes and create SFrame stack trace information.  */
   create_sframe_all ();
 
