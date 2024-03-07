@@ -48,12 +48,16 @@ Disassembly of section .text:
 			48: R_LARCH_GOT64_HI12	.L1
   4c:	14000004 	lu12i.w     	\$a0, 0
 			4c: R_LARCH_TLS_LE_HI20	TLSL1
+			4c: R_LARCH_RELAX	\*ABS\*
   50:	03800085 	ori         	\$a1, \$a0, 0x0
 			50: R_LARCH_TLS_LE_LO12	TLSL1
+			50: R_LARCH_RELAX	\*ABS\*
   54:	16000004 	lu32i.d     	\$a0, 0
 			54: R_LARCH_TLS_LE64_LO20	TLSL1
+			54: R_LARCH_RELAX	\*ABS\*
   58:	03000085 	lu52i.d     	\$a1, \$a0, 0
 			58: R_LARCH_TLS_LE64_HI12	TLSL1
+			58: R_LARCH_RELAX	\*ABS\*
   5c:	1a000004 	pcalau12i   	\$a0, 0
 			5c: R_LARCH_TLS_IE_PC_HI20	TLSL1
   60:	02c00005 	li.d        	\$a1, 0

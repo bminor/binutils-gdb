@@ -1,5 +1,5 @@
 #as:
-#ld: -z norelro -e0 --no-relax
+#ld: -e0 --no-relax
 #objdump: -dr
 #skip: loongarch32-*-*
 

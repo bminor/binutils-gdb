@@ -133,6 +133,10 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "desc-relax"
   }
 
+  if [check_pie_support] {
+    run_dump_test "pie_discard"
+  }
+
   run_dump_test "max_imm_b16"
   run_dump_test "max_imm_b21"
   run_dump_test "max_imm_b26"
@@ -145,7 +149,6 @@ if [istarget "loongarch64-*-*"] {
   run_dump_test "underflow_b21"
   run_dump_test "underflow_b26"
   run_dump_test "underflow_pcrel20"
-  run_dump_test "pie_discard"
   run_dump_test "desc-le-norelax"
   run_dump_test "desc-le-relax"
   run_dump_test "ie-le-norelax"

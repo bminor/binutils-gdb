@@ -30,8 +30,10 @@ Disassembly of section .text:
 			24: R_LARCH_GOT_LO12	.L1
   28:	14000004 	lu12i.w     	\$a0, 0
 			28: R_LARCH_TLS_LE_HI20	TLSL1
+			28: R_LARCH_RELAX	\*ABS\*
   2c:	03800085 	ori         	\$a1, \$a0, 0x0
 			2c: R_LARCH_TLS_LE_LO12	TLSL1
+			2c: R_LARCH_RELAX	\*ABS\*
   30:	1a000004 	pcalau12i   	\$a0, 0
 			30: R_LARCH_TLS_IE_PC_HI20	TLSL1
   34:	02c00005 	li.d        	\$a1, 0
