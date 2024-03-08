@@ -288,12 +288,13 @@ gdbpy_check_quit_flag (const struct extension_language_defn *extlang)
 
 /* Evaluate a Python command like PyRun_SimpleString, but takes a
    Python start symbol, and does not automatically print the stack on
-   errors.  FILENAME is used to set the file name in error
-   messages.  */
+   errors.  FILENAME is used to set the file name in error messages;
+   NULL means that this is evaluating a string, not the contents of a
+   file.  */
 
 static int
 eval_python_command (const char *command, int start_symbol,
-		     const char *filename = "<string>")
+		     const char *filename = nullptr)
 {
   PyObject *m, *d;
 
@@ -305,17 +306,69 @@ eval_python_command (const char *command, int start_symbol,
   if (d == NULL)
     return -1;
 
+  bool file_set = false;
+  if (filename != nullptr)
+    {
+      gdbpy_ref<> file = host_string_to_python_string ("__file__");
+      if (file == nullptr)
+	return -1;
+
+      /* PyDict_GetItemWithError returns a borrowed reference.  */
+      PyObject *found = PyDict_GetItemWithError (d, file.get ());
+      if (found == nullptr)
+	{
+	  if (PyErr_Occurred ())
+	    return -1;
+
+	  gdbpy_ref<> filename_obj = host_string_to_python_string (filename);
+	  if (filename_obj == nullptr)
+	    return -1;
+
+	  if (PyDict_SetItem (d, file.get (), filename_obj.get ()) < 0)
+	    return -1;
+	  if (PyDict_SetItemString (d, "__cached__", Py_None) < 0)
+	    return -1;
+
+	  file_set = true;
+	}
+    }
+
   /* Use this API because it is in Python 3.2.  */
-  gdbpy_ref<> code (Py_CompileStringExFlags (command, filename, start_symbol,
+  gdbpy_ref<> code (Py_CompileStringExFlags (command,
+					     filename == nullptr
+					     ? "<string>"
+					     : filename,
+					     start_symbol,
 					     nullptr, -1));
-  if (code == nullptr)
-    return -1;
 
-  gdbpy_ref<> result (PyEval_EvalCode (code.get (), d, d));
-  if (result == nullptr)
-    return -1;
+  int result = -1;
+  if (code != nullptr)
+    {
+      gdbpy_ref<> eval_result (PyEval_EvalCode (code.get (), d, d));
+      if (eval_result != nullptr)
+	result = 0;
+    }
 
-  return 0;
+  if (file_set)
+    {
+      /* If there's already an exception occurring, preserve it and
+	 restore it before returning from this function.  */
+      std::optional<gdbpy_err_fetch> save_error;
+      if (result < 0)
+	save_error.emplace ();
+
+      /* CPython also just ignores errors here.  These should be
+	 expected to be exceedingly rare anyway.  */
+      if (PyDict_DelItemString (d, "__file__") < 0)
+	PyErr_Clear ();
+      if (PyDict_DelItemString (d, "__cached__") < 0)
+	PyErr_Clear ();
+
+      if (save_error.has_value ())
+	save_error->restore ();
+    }
+
+  return result;
 }
 
 /* Implementation of the gdb "python-interactive" command.  */
