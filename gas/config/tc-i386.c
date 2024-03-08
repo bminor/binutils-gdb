@@ -5735,7 +5735,7 @@ x86_ginsn_lea (const symbolS *insn_end_sym)
   unsigned int dst_reg;
   bool index_regiz_p;
 
-  if (!i.base_reg != (!i.index_reg || i.index_reg->reg_num == RegIZ))
+  if ((!i.base_reg) != (!i.index_reg || i.index_reg->reg_num == RegIZ))
     {
       /* lea disp(%base), %dst    or    lea disp(,%index,imm), %dst.
 	 Either index_reg or base_reg exists, but not both.  Further, as per
