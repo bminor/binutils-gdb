@@ -675,14 +675,22 @@ public:
 
   bool type_matches (PyObject *type) const
   {
-    return PyErr_GivenExceptionMatches (m_error_type.get (), type);
+    gdbpy_ref<> err_type = this->type ();
+    return PyErr_GivenExceptionMatches (err_type.get (), type);
   }
 
   /* Return a new reference to the exception value object.  */
 
-  gdbpy_ref<> value ()
+  gdbpy_ref<> value () const
   {
     return m_error_value;
+  }
+
+  /* Return a new reference to the exception type object.  */
+
+  gdbpy_ref<> type () const
+  {
+    return m_error_type;
   }
 
 private:
