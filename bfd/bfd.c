@@ -1742,7 +1742,6 @@ bfd_init (void)
   input_bfd = NULL;
   _bfd_clear_error_data ();
   input_error = bfd_error_no_error;
-  _bfd_error_program_name = NULL;
   _bfd_error_internal = error_handler_fprintf;
   _bfd_assert_handler = _bfd_default_assert_handler;
 
