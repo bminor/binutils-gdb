@@ -683,6 +683,18 @@ public:
 
   gdbpy_ref<> value () const
   {
+    if (!m_normalized)
+      {
+	PyObject *error_type, *error_value, *error_traceback;
+	error_type = m_error_type.release ();
+	error_value = m_error_value.release ();
+	error_traceback = m_error_traceback.release ();
+	PyErr_NormalizeException (&error_type, &error_value, &error_traceback);
+	m_error_type.reset (error_type);
+	m_error_value.reset (error_value);
+	m_error_traceback.reset (error_traceback);
+	m_normalized = true;
+      }
     return m_error_value;
   }
 
@@ -695,7 +707,8 @@ public:
 
 private:
 
-  gdbpy_ref<> m_error_type, m_error_value, m_error_traceback;
+  mutable gdbpy_ref<> m_error_type, m_error_value, m_error_traceback;
+  mutable bool m_normalized = false;
 };
 
 /* Called before entering the Python interpreter to install the
