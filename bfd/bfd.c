@@ -1450,13 +1450,39 @@ _bfd_doprnt_scan (const char *format, va_list ap, union _bfd_doprnt_args *args)
 }
 
 static void
-bfd_print_error (bfd_print_callback print_func, void *stream,
-		 const char *fmt, va_list ap)
+_bfd_print (bfd_print_callback print_func, void *stream,
+	    const char *fmt, va_list ap)
 {
   union _bfd_doprnt_args args[MAX_ARGS];
 
   _bfd_doprnt_scan (fmt, ap, args);
   _bfd_doprnt (print_func, stream, fmt, args);
+}
+
+/*
+FUNCTION
+	bfd_print_error
+
+SYNOPSIS
+	void bfd_print_error (bfd_print_callback print_func,
+	  void *stream, const char *fmt, va_list ap);
+
+DESCRIPTION
+
+	This formats FMT and AP according to BFD "printf" rules,
+	sending the output to STREAM by repeated calls to PRINT_FUNC.
+	PRINT_FUNC is a printf-like function; it does not need to
+	implement the BFD printf format extensions.  This can be used
+	in a callback that is set via bfd_set_error_handler to turn
+	the error into ordinary output.
+*/
+
+void
+bfd_print_error (bfd_print_callback print_func, void *stream,
+		 const char *fmt, va_list ap)
+{
+  print_func (stream, "%s: ", _bfd_get_error_program_name ());
+  _bfd_print (print_func, stream, fmt, ap);
 }
 
 /* The standard error handler that prints to stderr.  */
@@ -1467,7 +1493,6 @@ error_handler_fprintf (const char *fmt, va_list ap)
   /* PR 4992: Don't interrupt output being sent to stdout.  */
   fflush (stdout);
 
-  fprintf (stderr, "%s: ", _bfd_get_error_program_name ());
   bfd_print_error ((bfd_print_callback) fprintf, stderr, fmt, ap);
 
   /* On AIX, putc is implemented as a macro that triggers a -Wunused-value
@@ -1526,7 +1551,7 @@ error_handler_sprintf (const char *fmt, va_list ap)
   error_stream.ptr = error_buf;
   error_stream.left = sizeof (error_buf);
 
-  bfd_print_error (err_sprintf, &error_stream, fmt, ap);
+  _bfd_print (err_sprintf, &error_stream, fmt, ap);
 
   size_t len = error_stream.ptr - error_buf;
   struct per_xvec_message **warn
