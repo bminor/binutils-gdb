@@ -255,15 +255,8 @@ bfd_preserve_finish (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_preserve *preserve)
 static void
 print_warnmsg (struct per_xvec_message **list)
 {
-  fflush (stdout);
-  fprintf (stderr, "%s: ", _bfd_get_error_program_name ());
-
   for (struct per_xvec_message *warn = *list; warn; warn = warn->next)
-    {
-      fputs (warn->message, stderr);
-      fputc ('\n', stderr);
-    }
-  fflush (stderr);
+    _bfd_error_handler ("%s", warn->message);
 }
 
 static void
