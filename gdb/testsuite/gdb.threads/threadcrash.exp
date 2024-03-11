@@ -53,64 +53,64 @@ proc thread_apply_all {} {
 
     set unwind_fail false
 
-    gdb_test_multiple "thread apply all backtrace" \
-	"Get thread information" -lbl {
-	    -re "#\[0-9\]+\\\?\\\?\[^\n\]*" {
-		set unwind_fail true
-		exp_continue
-	    }
-	    -re "\[^\n\]*syscall_task .location=SIGNAL_ALT_STACK\[^\n\]*" {
-		lappend test_list [multi_line ".*sleep.*" \
-					      ".*do_syscall_task .location=SIGNAL_ALT_STACK.*" \
-					      ".*signal_handler.*" \
-					      ".*signal handler called.*" \
-					      ".*pthread_kill.*" \
-					      ".*thread_function.*"]
-		exp_continue
-	    }
-	    -re "\[^\n\]*syscall_task .location=SIGNAL_HANDLER\[^\n\]*" {
-		lappend test_list [multi_line ".*sleep.*" \
-					      ".*do_syscall_task .location=SIGNAL_HANDLER.*" \
-					      ".*signal_handler.*" \
-					      ".*signal handler called.*" \
-					      ".*pthread_kill.*" \
-					      ".*thread_function.*"]
-		exp_continue
-	    }
-	    -re "\[^\n\]*syscall_task .location=NORMAL\[^\n\]*" {
-		lappend test_list [multi_line ".*sleep.*" \
-					      ".*do_syscall_task .location=NORMAL.*" \
-					      ".*thread_function.*"]
-		exp_continue
-	    }
-	    -re "\[^\n\]*spin_task .location=SIGNAL_ALT_STACK\[^\n\]*" {
-		lappend test_list [multi_line ".*do_spin_task .location=SIGNAL_ALT_STACK.*" \
-					      ".*signal_handler.*" \
-					      ".*signal handler called.*" \
-					      ".*pthread_kill.*" \
-					      ".*thread_function.*"]
-		exp_continue
-	    }
-	    -re "\[^\n\]*spin_task .location=SIGNAL_HANDLER\[^\n\]*" {
-		lappend test_list [multi_line ".*do_spin_task .location=SIGNAL_HANDLER.*" \
-					      ".*signal_handler.*" \
-					      ".*signal handler called.*" \
-					      ".*pthread_kill.*" \
-					      ".*thread_function.*"]
-		exp_continue
-	    }
-	    -re "\[^\n\]*spin_task .location=NORMAL\[^\n\]*" {
-		lappend test_list [multi_line ".*do_spin_task .location=NORMAL..*" \
-					      ".*thread_function.*"]
-		exp_continue
-	    }
-	    -re "\[^\n\]*main\[^\n\]*" {
-		lappend test_list ".*main.*"
-		exp_continue
-	    }
-	    -re "$::gdb_prompt " {
-		pass $gdb_test_name
-	    }
+    set cmd "thread apply all backtrace"
+    gdb_test_multiple $cmd "Get thread information" -lbl {
+	-re "#\[0-9\]+\\\?\\\?\[^\n\]*" {
+	    set unwind_fail true
+	    exp_continue
+	}
+	-re "\[^\n\]*syscall_task .location=SIGNAL_ALT_STACK\[^\n\]*" {
+	    lappend test_list [multi_line ".*sleep.*" \
+				   ".*do_syscall_task .location=SIGNAL_ALT_STACK.*" \
+				   ".*signal_handler.*" \
+				   ".*signal handler called.*" \
+				   ".*pthread_kill.*" \
+				   ".*thread_function.*"]
+	    exp_continue
+	}
+	-re "\[^\n\]*syscall_task .location=SIGNAL_HANDLER\[^\n\]*" {
+	    lappend test_list [multi_line ".*sleep.*" \
+				   ".*do_syscall_task .location=SIGNAL_HANDLER.*" \
+				   ".*signal_handler.*" \
+				   ".*signal handler called.*" \
+				   ".*pthread_kill.*" \
+				   ".*thread_function.*"]
+	    exp_continue
+	}
+	-re "\[^\n\]*syscall_task .location=NORMAL\[^\n\]*" {
+	    lappend test_list [multi_line ".*sleep.*" \
+				   ".*do_syscall_task .location=NORMAL.*" \
+				   ".*thread_function.*"]
+	    exp_continue
+	}
+	-re "\[^\n\]*spin_task .location=SIGNAL_ALT_STACK\[^\n\]*" {
+	    lappend test_list [multi_line ".*do_spin_task .location=SIGNAL_ALT_STACK.*" \
+				   ".*signal_handler.*" \
+				   ".*signal handler called.*" \
+				   ".*pthread_kill.*" \
+				   ".*thread_function.*"]
+	    exp_continue
+	}
+	-re "\[^\n\]*spin_task .location=SIGNAL_HANDLER\[^\n\]*" {
+	    lappend test_list [multi_line ".*do_spin_task .location=SIGNAL_HANDLER.*" \
+				   ".*signal_handler.*" \
+				   ".*signal handler called.*" \
+				   ".*pthread_kill.*" \
+				   ".*thread_function.*"]
+	    exp_continue
+	}
+	-re "\[^\n\]*spin_task .location=NORMAL\[^\n\]*" {
+	    lappend test_list [multi_line ".*do_spin_task .location=NORMAL..*" \
+				   ".*thread_function.*"]
+	    exp_continue
+	}
+	-re "\[^\n\]*main\[^\n\]*" {
+	    lappend test_list ".*main.*"
+	    exp_continue
+	}
+	-re "$::gdb_prompt " {
+	    pass $gdb_test_name
+	}
     }
 
     gdb_assert {$unwind_fail == false}
