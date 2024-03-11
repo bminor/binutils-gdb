@@ -35,7 +35,6 @@ def set_break_bt_here_frame_id(pc, cfa):
 
 
 class break_unwinding(Unwinder):
-
     """An unwinder for the function 'break_bt_here'.  This unwinder will
     claim any frame for the function in question, but doesn't provide
     any unwound register values.  Importantly, we don't provide a
