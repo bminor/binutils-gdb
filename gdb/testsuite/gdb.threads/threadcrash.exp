@@ -46,52 +46,31 @@ proc thread_apply_all {} {
 	    exp_continue
 	}
 	-re "^\r\n${hs}syscall_task .location=SIGNAL_ALT_STACK$hs$eol" {
-	    lappend test_list [multi_line ".*sleep.*" \
-				   ".*do_syscall_task .location=SIGNAL_ALT_STACK.*" \
-				   ".*signal_handler.*" \
-				   ".*signal handler called.*" \
-				   ".*pthread_kill.*" \
-				   ".*thread_function.*"]
+	    lappend test_list 1
 	    exp_continue
 	}
 	-re "^\r\n${hs}syscall_task .location=SIGNAL_HANDLER$hs$eol" {
-	    lappend test_list [multi_line ".*sleep.*" \
-				   ".*do_syscall_task .location=SIGNAL_HANDLER.*" \
-				   ".*signal_handler.*" \
-				   ".*signal handler called.*" \
-				   ".*pthread_kill.*" \
-				   ".*thread_function.*"]
+	    lappend test_list 2
 	    exp_continue
 	}
 	-re "^\r\n${hs}syscall_task .location=NORMAL$hs$eol" {
-	    lappend test_list [multi_line ".*sleep.*" \
-				   ".*do_syscall_task .location=NORMAL.*" \
-				   ".*thread_function.*"]
+	    lappend test_list 3
 	    exp_continue
 	}
 	-re "^\r\n${hs}spin_task .location=SIGNAL_ALT_STACK$hs$eol" {
-	    lappend test_list [multi_line ".*do_spin_task .location=SIGNAL_ALT_STACK.*" \
-				   ".*signal_handler.*" \
-				   ".*signal handler called.*" \
-				   ".*pthread_kill.*" \
-				   ".*thread_function.*"]
+	    lappend test_list 4
 	    exp_continue
 	}
 	-re "^\r\n${hs}spin_task .location=SIGNAL_HANDLER$hs$eol" {
-	    lappend test_list [multi_line ".*do_spin_task .location=SIGNAL_HANDLER.*" \
-				   ".*signal_handler.*" \
-				   ".*signal handler called.*" \
-				   ".*pthread_kill.*" \
-				   ".*thread_function.*"]
+	    lappend test_list 5
 	    exp_continue
 	}
 	-re "^\r\n${hs}spin_task .location=NORMAL$hs$eol" {
-	    lappend test_list [multi_line ".*do_spin_task .location=NORMAL..*" \
-				   ".*thread_function.*"]
+	    lappend test_list 6
 	    exp_continue
 	}
 	-re "^\r\n${hs}main$hs$eol" {
-	    lappend test_list ".*main.*"
+	    lappend test_list 7
 	    exp_continue
 	}
 	-re "^\r\n$hs$eol" {
@@ -122,7 +101,59 @@ proc do_full_test {} {
     for {set i 0} {$i < $thread_count } {incr i} {
 	set thread_num [expr [llength $test_list] - $i]
 
-	gdb_test "thread apply $thread_num backtrace" [lindex $test_list $i]
+	set type [lindex $test_list $i]
+	if { $type == 1 } {
+	    set re \
+		[multi_line \
+		     ".sleep.*" \
+		     ".*do_syscall_task .location=SIGNAL_ALT_STACK.*" \
+		     ".*signal_handler.*" \
+		     ".*signal handler called.*" \
+		     ".*pthread_kill.*" \
+		     ".*thread_function.*"]
+	} elseif { $type == 2 } {
+	    set re \
+		[multi_line \
+		     ".*sleep.*" \
+		     ".*do_syscall_task .location=SIGNAL_HANDLER.*" \
+		     ".*signal_handler.*" \
+		     ".*signal handler called.*" \
+		     ".*pthread_kill.*" \
+		     ".*thread_function.*"]
+	} elseif { $type == 3 } {
+	    set re \
+		[multi_line \
+		     ".*sleep.*" \
+		     ".*do_syscall_task .location=NORMAL.*" \
+		     ".*thread_function.*"]
+	} elseif { $type == 4 } {
+	    set re \
+		[multi_line \
+		     ".*do_spin_task .location=SIGNAL_ALT_STACK.*" \
+		     ".*signal_handler.*" \
+		     ".*signal handler called.*" \
+		     ".*pthread_kill.*" \
+		     ".*thread_function.*"]
+	} elseif { $type == 5 } {
+	    set re \
+		[multi_line \
+		     ".*do_spin_task .location=SIGNAL_HANDLER.*" \
+		     ".*signal_handler.*" \
+		     ".*signal handler called.*" \
+		     ".*pthread_kill.*" \
+		     ".*thread_function.*"]
+	} elseif { $type == 6 } {
+	    set re \
+		[multi_line \
+		     ".*do_spin_task .location=NORMAL..*" \
+		     ".*thread_function.*"]
+	} elseif { $type == 7 } {
+	    set re ".*main.*"
+	} else {
+	    error "invalid type: $type"
+	}
+
+	gdb_test "thread apply $thread_num backtrace" $re
     }
 }
 
