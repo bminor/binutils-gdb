@@ -3285,8 +3285,8 @@ md_begin (void)
 #endif
       x86_cie_data_alignment = -8;
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-      x86_sframe_cfa_sp_reg = 7;
-      x86_sframe_cfa_fp_reg = 6;
+      x86_sframe_cfa_sp_reg = REG_SP;
+      x86_sframe_cfa_fp_reg = REG_FP;
 #endif
     }
   else
