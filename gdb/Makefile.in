@@ -2317,7 +2317,6 @@ config.status: $(srcdir)/configure configure.nat configure.tgt configure.host ..
 	$(SHELL) config.status --recheck
 
 ACLOCAL = aclocal
-ACLOCAL_AMFLAGS = -I ../config
 
 # Keep these in sync with the includes in acinclude.m4.
 aclocal_m4_deps = \
@@ -2345,7 +2344,7 @@ aclocal_m4_deps = \
 	../config/ax_pthread.m4
 
 $(srcdir)/aclocal.m4: @MAINTAINER_MODE_TRUE@ $(aclocal_m4_deps)
-	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
+	cd $(srcdir) && $(ACLOCAL)
 
 AUTOCONF = autoconf
 configure_deps = $(srcdir)/configure.ac $(srcdir)/aclocal.m4
