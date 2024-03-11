@@ -20,26 +20,6 @@
 # a gcore.
 
 
-# Check that the inferior has 7 threads, and return the number of threads (7).
-# We return the thread count so that, even if there is some error in the test,
-# the final log doesn't get flooded with failures.
-
-proc test_thread_count {} {
-    set thread_count 0
-
-    gdb_test_multiple "info threads" "getting thread count" -lbl {
-	-re "Thread" {
-	    incr thread_count
-	    exp_continue
-	}
-	-re "$::gdb_prompt " {
-	    gdb_assert {$thread_count == 7}
-	}
-    }
-
-    return $thread_count
-}
-
 # Use 'thread apply all backtrace' to check if all expected threads
 # are present, and stopped in the expected locations.  Set the global
 # TEST_LIST to be the a list of regexps expected to match all the
@@ -132,7 +112,8 @@ proc thread_apply_all {} {
 
 proc do_full_test {} {
     global test_list
-    set thread_count [test_thread_count]
+    set thread_count [get_valueof "" "\$_inferior_thread_count" 0]
+    gdb_assert {$thread_count == 7}
 
     thread_apply_all
 
