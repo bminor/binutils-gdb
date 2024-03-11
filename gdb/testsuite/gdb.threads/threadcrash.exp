@@ -20,6 +20,9 @@
 # a gcore.
 
 
+set have_sleep -1
+set have_pthread_kill -1
+
 # Use 'thread apply all backtrace' to check if all expected threads
 # are present, and stopped in the expected locations.  Set the global
 # TEST_LIST to be the a list of regexps expected to match all the
@@ -27,6 +30,8 @@
 # GDB sees the threads.
 
 proc thread_apply_all {} {
+    global have_sleep
+    global have_pthread_kill
     global test_list
 
     set test_list { }
@@ -73,6 +78,14 @@ proc thread_apply_all {} {
 	    lappend test_list 7
 	    exp_continue
 	}
+	-re "^\r\n${hs} in sleep $hs$eol" {
+	    set have_sleep 1
+	    exp_continue
+	}
+	-re "^\r\n${hs} in pthread_kill $hs$eol" {
+	    set have_pthread_kill 1
+	    exp_continue
+	}
 	-re "^\r\n$hs$eol" {
 	    exp_continue
 	}
@@ -82,6 +95,13 @@ proc thread_apply_all {} {
     }
 
     gdb_assert {$unwind_fail == false}
+
+    if { $have_sleep == -1 } {
+	set have_sleep 0
+    }
+    if { $have_pthread_kill == -1 } {
+	set have_pthread_kill 0
+    }
 }
 
 # Perform all the tests we're interested in.  They are:
@@ -90,6 +110,8 @@ proc thread_apply_all {} {
 # * testing if GDB recreated the full backtrace we expect for all threads
 
 proc do_full_test {} {
+    global have_sleep
+    global have_pthread_kill
     global test_list
     set thread_count [get_valueof "" "\$_inferior_thread_count" 0]
     gdb_assert {$thread_count == 7}
@@ -98,6 +120,18 @@ proc do_full_test {} {
 
     gdb_assert {$thread_count == [llength $test_list]}
 
+    if { $have_sleep } {
+	set sleep ".*sleep.*"
+    } else {
+	set sleep ".*"
+    }
+
+    if { $have_pthread_kill } {
+	set pthread_kill ".*pthread_kill.*"
+    } else {
+	set pthread_kill ".*"
+    }
+
     for {set i 0} {$i < $thread_count } {incr i} {
 	set thread_num [expr [llength $test_list] - $i]
 
@@ -105,25 +139,25 @@ proc do_full_test {} {
 	if { $type == 1 } {
 	    set re \
 		[multi_line \
-		     ".sleep.*" \
+		     $sleep \
 		     ".*do_syscall_task .location=SIGNAL_ALT_STACK.*" \
 		     ".*signal_handler.*" \
 		     ".*signal handler called.*" \
-		     ".*pthread_kill.*" \
+		     $pthread_kill \
 		     ".*thread_function.*"]
 	} elseif { $type == 2 } {
 	    set re \
 		[multi_line \
-		     ".*sleep.*" \
+		     $sleep \
 		     ".*do_syscall_task .location=SIGNAL_HANDLER.*" \
 		     ".*signal_handler.*" \
 		     ".*signal handler called.*" \
-		     ".*pthread_kill.*" \
+		     $pthread_kill \
 		     ".*thread_function.*"]
 	} elseif { $type == 3 } {
 	    set re \
 		[multi_line \
-		     ".*sleep.*" \
+		     $sleep \
 		     ".*do_syscall_task .location=NORMAL.*" \
 		     ".*thread_function.*"]
 	} elseif { $type == 4 } {
@@ -132,7 +166,7 @@ proc do_full_test {} {
 		     ".*do_spin_task .location=SIGNAL_ALT_STACK.*" \
 		     ".*signal_handler.*" \
 		     ".*signal handler called.*" \
-		     ".*pthread_kill.*" \
+		     $pthread_kill \
 		     ".*thread_function.*"]
 	} elseif { $type == 5 } {
 	    set re \
@@ -140,7 +174,7 @@ proc do_full_test {} {
 		     ".*do_spin_task .location=SIGNAL_HANDLER.*" \
 		     ".*signal_handler.*" \
 		     ".*signal handler called.*" \
-		     ".*pthread_kill.*" \
+		     $pthread_kill \
 		     ".*thread_function.*"]
 	} elseif { $type == 6 } {
 	    set re \
