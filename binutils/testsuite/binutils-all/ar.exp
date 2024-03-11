@@ -538,6 +538,7 @@ proc replacing_deterministic_member { } {
 }
 
 # Test replacing a member of a non-deterministic archive.
+# This test expects SOURCE_DATE_EPOCH to not be set in the environment.
 
 proc replacing_non_deterministic_member { } {
     global AR
@@ -581,7 +582,7 @@ proc replacing_non_deterministic_member { } {
 
     # Build the archive with the *newer* object file.
     
-    set got [binutils_run $AR "rc $archive ${newer_objfile}"]
+    set got [binutils_run $AR "rcU $archive ${newer_objfile}"]
     if ![string match "" $got] {
 	fail "$testname: (could not build archive)"
 	return
@@ -589,7 +590,7 @@ proc replacing_non_deterministic_member { } {
 
     # Now try to replace the newer file with the older one.  This should not work.
     
-    set got [binutils_run $AR "ru $archive $older_objfile"]
+    set got [binutils_run $AR "ruU $archive $older_objfile"]
     if ![string match "" $got] {
 	fail "$testname: (failed to replace file)"
 	return
@@ -651,7 +652,7 @@ proc replacing_sde_deterministic_member { } {
     # Build the archive with the *newer* object file.
     setenv SOURCE_DATE_EPOCH "1000"
     
-    set got [binutils_run $AR "rc $archive ${newer_objfile}"]
+    set got [binutils_run $AR "rcU $archive ${newer_objfile}"]
     if ![string match "" $got] {
 	fail "$testname: (could not build archive)"
 	unsetenv SOURCE_DATE_EPOCH
@@ -662,7 +663,7 @@ proc replacing_sde_deterministic_member { } {
     # archive this will not work, but one created to be deterministic
     # should always replace its members.
     
-    set got [binutils_run $AR "ru $archive $older_objfile"]
+    set got [binutils_run $AR "ruU $archive $older_objfile"]
     if ![string match "" $got] {
 	fail "$testname: (failed to replace file)"
 	unsetenv SOURCE_DATE_EPOCH
