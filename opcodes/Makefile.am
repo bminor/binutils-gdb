@@ -502,7 +502,7 @@ MAINTAINERCLEANFILES = $(srcdir)/aarch64-asm-2.c $(srcdir)/aarch64-dis-2.c \
 	$(srcdir)/rx-decode.c
 
 aarch64-gen$(EXEEXT_FOR_BUILD): aarch64-gen.o $(BUILD_LIB_DEPS)
-	$(LINK_FOR_BUILD) aarch64-gen.o $(BUILD_LIBS)
+	$(AM_V_CCLD)$(LINK_FOR_BUILD) aarch64-gen.o $(BUILD_LIBS)
 
 aarch64-gen.o: aarch64-gen.c $(BFD_H) $(INCDIR)/getopt.h $(INCDIR)/libiberty.h\
 	$(INCDIR)/opcode/aarch64.h config.h aarch64-opc.h aarch64-tbl.h
@@ -522,7 +522,7 @@ i386-gen.o: i386-gen.c i386-opc.h $(srcdir)/../include/opcode/i386.h \
 	$(INCDIR)/ansidecl.h $(INCDIR)/getopt.h $(INCDIR)/hashtab.h \
 	$(INCDIR)/libiberty.h $(INCDIR)/opcode/i386.h $(INCDIR)/safe-ctype.h \
 	config.h sysdep.h
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/i386-gen.c
+	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $(srcdir)/i386-gen.c
 
 # i386-gen will generate all headers in one go.  Use a pattern rule to properly
 # express this, with the inner dash ('-') arbitrarily chosen to be the stem.
@@ -544,7 +544,7 @@ ia64-gen.o: ia64-gen.c $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/getopt.h \
 	$(INCDIR)/symcat.h config.h ia64-opc-a.c ia64-opc-b.c \
 	ia64-opc-d.c ia64-opc-f.c ia64-opc-i.c ia64-opc-m.c \
 	ia64-opc-x.c ia64-opc.h sysdep.h
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/ia64-gen.c
+	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $(srcdir)/ia64-gen.c
 
 # Use a helper variable for the dependencies to avoid 'make' issues
 # with continuations in comments, as @MAINT@ can be expanded to '#'.
@@ -574,7 +574,7 @@ s390-mkopc$(EXEEXT_FOR_BUILD): s390-mkopc.o
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) s390-mkopc.o
 
 s390-mkopc.o: s390-mkopc.c $(INCDIR)/opcode/s390.h
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/s390-mkopc.c
+	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $(srcdir)/s390-mkopc.c
 
 s390-opc.tab: s390-mkopc$(EXEEXT_FOR_BUILD) s390-opc.txt
 	$(AM_V_GEN)./s390-mkopc$(EXEEXT_FOR_BUILD) < $(srcdir)/s390-opc.txt > s390-opc.tab
