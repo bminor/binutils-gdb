@@ -11486,7 +11486,8 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
       else
 	{
 	  contents = flinfo->contents;
-	  if (! bfd_get_full_section_contents (input_bfd, o, &contents))
+	  if (! _bfd_elf_link_mmap_section_contents (input_bfd, o,
+						     &contents))
 	    return false;
 	}
 
@@ -12047,6 +12048,9 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  }
 	  break;
 	}
+
+      /* Munmap the section contents for each input section.  */
+      _bfd_elf_link_munmap_section_contents (o);
     }
 
   return true;
@@ -12485,13 +12489,17 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   /* Count up the number of relocations we will output for each output
      section, so that we know the sizes of the reloc sections.  We
      also figure out some maximum sizes.  */
-  max_contents_size = 0;
 #ifdef USE_MMAP
   /* Mmap is used only if section size >= the minimum mmap section
-     size.  max_external_reloc_size covers all relocation sections
-     smaller than the minimum mmap section size.   */
+     size.  The initial max_contents_size value covers all sections
+     smaller than the minimum mmap section size.  It may be increased
+     for compressed or linker created sections or sections whose
+     rawsize != size.  max_external_reloc_size covers all relocation
+     sections smaller than the minimum mmap section size.  */
+  max_contents_size = _bfd_minimum_mmap_size;
   max_external_reloc_size = _bfd_minimum_mmap_size;
 #else
+  max_contents_size = 0;
   max_external_reloc_size = 0;
 #endif
   max_internal_reloc_count = 0;
@@ -12527,10 +12535,19 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      if (sec->flags & SEC_MERGE)
 		merged = true;
 
-	      if (sec->rawsize > max_contents_size)
-		max_contents_size = sec->rawsize;
-	      if (sec->size > max_contents_size)
-		max_contents_size = sec->size;
+#ifdef USE_MMAP
+	      /* Mmap is used only on non-compressed, non-linker created
+		 sections whose rawsize == size.  */
+	      if (sec->compress_status != COMPRESS_SECTION_NONE
+		 || (sec->flags & SEC_LINKER_CREATED) != 0
+		 || sec->rawsize != sec->size)
+#endif
+		{
+		  if (sec->rawsize > max_contents_size)
+		    max_contents_size = sec->rawsize;
+		  if (sec->size > max_contents_size)
+		    max_contents_size = sec->size;
+		}
 
 	      if (bfd_get_flavour (sec->owner) == bfd_target_elf_flavour
 		  && (sec->owner->flags & DYNAMIC) == 0)

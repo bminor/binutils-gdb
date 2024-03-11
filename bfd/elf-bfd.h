@@ -3146,6 +3146,10 @@ extern bool _bfd_elf_mmap_section_contents
   (bfd *abfd, asection *section, bfd_byte **buf);
 extern void _bfd_elf_munmap_section_contents
   (asection *, void *);
+extern bool _bfd_elf_link_mmap_section_contents
+  (bfd *abfd, asection *section, bfd_byte **buf);
+extern void _bfd_elf_link_munmap_section_contents
+  (asection *);
 
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;

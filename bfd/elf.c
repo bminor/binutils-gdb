@@ -14366,10 +14366,12 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
   return result;
 }
 
-/* Mmap in section contents.  */
+/* Mmap in section contents.  If FINAL_LINK is false, set *BUF to NULL
+   before calling bfd_get_full_section_contents.  */
 
-bool
-_bfd_elf_mmap_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **buf)
+static bool
+elf_mmap_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **buf,
+			   bool final_link)
 {
 #ifdef USE_MMAP
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
@@ -14393,14 +14395,39 @@ _bfd_elf_mmap_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **buf)
 	  if (sec->mmapped_p)
 	    abort ();
 	  sec->mmapped_p = 1;
+
+	  /* Never use the preallocated buffer if mmapp is used.  */
+	  *buf = NULL;
 	}
     }
 #endif
-  *buf = NULL;
+  /* NB: When this is called from elf_link_input_bfd, FINAL_LINK is
+     true.  If FINAL_LINK is false, *BUF is set to the preallocated
+     buffer if USE_MMAP is undefined and *BUF is set to NULL if
+     USE_MMAP is defined.  */
+  if (!final_link)
+    *buf = NULL;
   bool ret = bfd_get_full_section_contents (abfd, sec, buf);
   if (ret && sec->mmapped_p)
     *buf = sec->contents;
   return ret;
+}
+
+/* Mmap in section contents.  */
+
+bool
+_bfd_elf_mmap_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **buf)
+{
+  return elf_mmap_section_contents (abfd, sec, buf, false);
+}
+
+/* Mmap in the full section contents for the final link.  */
+
+bool
+_bfd_elf_link_mmap_section_contents (bfd *abfd, sec_ptr sec,
+				     bfd_byte **buf)
+{
+  return elf_mmap_section_contents (abfd, sec, buf, true);
 }
 
 /* Munmap section contents.  */
@@ -14441,4 +14468,26 @@ _bfd_elf_munmap_section_contents (asection *sec ATTRIBUTE_UNUSED,
 #endif
 
   free (contents);
+}
+
+/* Munmap the full section contents for the final link.  */
+
+void
+_bfd_elf_link_munmap_section_contents (asection *sec ATTRIBUTE_UNUSED)
+{
+#ifdef USE_MMAP
+  if (sec->mmapped_p && elf_section_data (sec)->contents_addr != NULL)
+    {
+      /* When _bfd_elf_link_mmap_section_contents returns CONTENTS as
+	 malloced, CONTENTS_ADDR is set to NULL.  */
+      /* NB: CONTENTS_ADDR and CONTENTS_SIZE must be valid.  */
+      if (munmap (elf_section_data (sec)->contents_addr,
+		  elf_section_data (sec)->contents_size) != 0)
+	abort ();
+      sec->mmapped_p = 0;
+      sec->contents = NULL;
+      elf_section_data (sec)->contents_addr = NULL;
+      elf_section_data (sec)->contents_size = 0;
+    }
+#endif
 }
