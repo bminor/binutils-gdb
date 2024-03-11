@@ -53,13 +53,19 @@ proc thread_apply_all {} {
 
     set unwind_fail false
 
+    set eol "(?=\r\n)"
+    set hs "\[^\r\n\]*"
+
     set cmd "thread apply all backtrace"
-    gdb_test_multiple $cmd "Get thread information" -lbl {
-	-re "#\[0-9\]+\\\?\\\?\[^\n\]*" {
+    gdb_test_multiple $cmd "Get thread information" {
+	-re "^$cmd$eol" {
+	    exp_continue
+	}
+	-re "^\r\n#$::decimal\\\?\\\?$hs$eol" {
 	    set unwind_fail true
 	    exp_continue
 	}
-	-re "\[^\n\]*syscall_task .location=SIGNAL_ALT_STACK\[^\n\]*" {
+	-re "^\r\n${hs}syscall_task .location=SIGNAL_ALT_STACK$hs$eol" {
 	    lappend test_list [multi_line ".*sleep.*" \
 				   ".*do_syscall_task .location=SIGNAL_ALT_STACK.*" \
 				   ".*signal_handler.*" \
@@ -68,7 +74,7 @@ proc thread_apply_all {} {
 				   ".*thread_function.*"]
 	    exp_continue
 	}
-	-re "\[^\n\]*syscall_task .location=SIGNAL_HANDLER\[^\n\]*" {
+	-re "^\r\n${hs}syscall_task .location=SIGNAL_HANDLER$hs$eol" {
 	    lappend test_list [multi_line ".*sleep.*" \
 				   ".*do_syscall_task .location=SIGNAL_HANDLER.*" \
 				   ".*signal_handler.*" \
@@ -77,13 +83,13 @@ proc thread_apply_all {} {
 				   ".*thread_function.*"]
 	    exp_continue
 	}
-	-re "\[^\n\]*syscall_task .location=NORMAL\[^\n\]*" {
+	-re "^\r\n${hs}syscall_task .location=NORMAL$hs$eol" {
 	    lappend test_list [multi_line ".*sleep.*" \
 				   ".*do_syscall_task .location=NORMAL.*" \
 				   ".*thread_function.*"]
 	    exp_continue
 	}
-	-re "\[^\n\]*spin_task .location=SIGNAL_ALT_STACK\[^\n\]*" {
+	-re "^\r\n${hs}spin_task .location=SIGNAL_ALT_STACK$hs$eol" {
 	    lappend test_list [multi_line ".*do_spin_task .location=SIGNAL_ALT_STACK.*" \
 				   ".*signal_handler.*" \
 				   ".*signal handler called.*" \
@@ -91,7 +97,7 @@ proc thread_apply_all {} {
 				   ".*thread_function.*"]
 	    exp_continue
 	}
-	-re "\[^\n\]*spin_task .location=SIGNAL_HANDLER\[^\n\]*" {
+	-re "^\r\n${hs}spin_task .location=SIGNAL_HANDLER$hs$eol" {
 	    lappend test_list [multi_line ".*do_spin_task .location=SIGNAL_HANDLER.*" \
 				   ".*signal_handler.*" \
 				   ".*signal handler called.*" \
@@ -99,16 +105,19 @@ proc thread_apply_all {} {
 				   ".*thread_function.*"]
 	    exp_continue
 	}
-	-re "\[^\n\]*spin_task .location=NORMAL\[^\n\]*" {
+	-re "^\r\n${hs}spin_task .location=NORMAL$hs$eol" {
 	    lappend test_list [multi_line ".*do_spin_task .location=NORMAL..*" \
 				   ".*thread_function.*"]
 	    exp_continue
 	}
-	-re "\[^\n\]*main\[^\n\]*" {
+	-re "^\r\n${hs}main$hs$eol" {
 	    lappend test_list ".*main.*"
 	    exp_continue
 	}
-	-re "$::gdb_prompt " {
+	-re "^\r\n$hs$eol" {
+	    exp_continue
+	}
+	-re "^\r\n$::gdb_prompt $" {
 	    pass $gdb_test_name
 	}
     }
