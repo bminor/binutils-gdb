@@ -8230,7 +8230,9 @@ check_VecOperands (const insn_template *t)
 
   /* Check the special Imm4 cases; must be the first operand.  */
   if ((is_cpu (t, CpuXOP) && t->operands == 5)
-      || (is_cpu (t, CpuAPX_F) && t->opcode_space == SPACE_0F3A))
+      || (t->opcode_space == SPACE_0F3A
+	  && (t->base_opcode | 3) == 0x0b
+	  && is_cpu (t, CpuAPX_F)))
     {
       if (i.op[0].imms->X_op != O_constant
 	  || !fits_in_imm4 (i.op[0].imms->X_add_number))
