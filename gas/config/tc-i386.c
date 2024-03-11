@@ -6761,7 +6761,8 @@ md_assemble (char *line)
       && !is_cpu (&i.tm, CpuSSE4a)
       && !is_any_vex_encoding (t))
     {
-      bool simd = false;
+      /* Some KL and all WideKL insns have only implicit %xmm operands.  */
+      bool simd = is_cpu (t, CpuKL) || is_cpu (t, CpuWideKL);
 
       for (j = 0; j < t->operands; ++j)
 	{
