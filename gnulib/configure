@@ -8433,7 +8433,7 @@ else
 int
 main ()
 {
-char* cs = nl_langinfo(CODESET);
+char* cs = nl_langinfo(CODESET); return !cs;
   ;
   return 0;
 }

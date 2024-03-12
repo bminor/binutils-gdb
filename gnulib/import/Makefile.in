@@ -259,7 +259,12 @@ target_triplet = @target@
 @GL_COND_OBJ_WMEMPCPY_TRUE@am__append_81 = wmempcpy.c
 subdir = import
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/import/m4/00gnulib.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
+	$(top_srcdir)/../config/largefile.m4 \
+	$(top_srcdir)/../config/lead-dot.m4 \
+	$(top_srcdir)/../config/override.m4 \
+	$(top_srcdir)/../config/plugins.m4 \
+	$(top_srcdir)/import/m4/00gnulib.m4 \
 	$(top_srcdir)/import/m4/__inline.m4 \
 	$(top_srcdir)/import/m4/absolute-header.m4 \
 	$(top_srcdir)/import/m4/alloca.m4 \
@@ -272,6 +277,7 @@ am__aclocal_m4_deps = $(top_srcdir)/import/m4/00gnulib.m4 \
 	$(top_srcdir)/import/m4/clock_time.m4 \
 	$(top_srcdir)/import/m4/close.m4 \
 	$(top_srcdir)/import/m4/closedir.m4 \
+	$(top_srcdir)/import/m4/codeset.m4 \
 	$(top_srcdir)/import/m4/ctype_h.m4 \
 	$(top_srcdir)/import/m4/d-ino.m4 \
 	$(top_srcdir)/import/m4/d-type.m4 \
@@ -428,13 +434,7 @@ am__aclocal_m4_deps = $(top_srcdir)/import/m4/00gnulib.m4 \
 	$(top_srcdir)/import/m4/wmemchr.m4 \
 	$(top_srcdir)/import/m4/wmempcpy.m4 \
 	$(top_srcdir)/import/m4/year2038.m4 \
-	$(top_srcdir)/import/m4/zzgnulib.m4 \
-	$(top_srcdir)/../config/codeset.m4 \
-	$(top_srcdir)/../config/depstand.m4 \
-	$(top_srcdir)/../config/largefile.m4 \
-	$(top_srcdir)/../config/lead-dot.m4 \
-	$(top_srcdir)/../config/override.m4 \
-	$(top_srcdir)/../config/plugins.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/import/m4/zzgnulib.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(noinst_HEADERS)
