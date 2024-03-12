@@ -326,7 +326,7 @@ _bfd_elf_strtab_emit (register bfd *abfd, struct elf_strtab_hash *tab)
 
       BFD_ASSERT (tab->array[i]->refcount == 0);
       len = tab->array[i]->len;
-      if ((int) len < 0)
+      if ((int) len <= 0)
 	continue;
 
       str = tab->array[i]->root.string;
