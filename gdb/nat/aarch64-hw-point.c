@@ -73,6 +73,31 @@ aarch64_watchpoint_length (unsigned int ctrl)
   return retval;
 }
 
+/* Utility function that returns the type of a watchpoint according to the
+   content of a hardware debug control register CTRL.  */
+
+enum target_hw_bp_type
+aarch64_watchpoint_type (unsigned int ctrl)
+{
+  unsigned int type = DR_CONTROL_TYPE (ctrl);
+
+  switch (type)
+    {
+    case 1:
+      return hw_read;
+    case 2:
+      return hw_write;
+    case 3:
+      return hw_access;
+    case 0:
+      /* Reserved for a watchpoint.  It must behave as if the watchpoint is
+	 disabled.  */
+      return hw_execute;
+    default:
+      gdb_assert_not_reached ("");
+    }
+}
+
 /* Given the hardware breakpoint or watchpoint type TYPE and its
    length LEN, return the expected encoding for a hardware
    breakpoint/watchpoint control register.  */

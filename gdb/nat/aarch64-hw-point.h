@@ -73,6 +73,7 @@
 
 #define DR_CONTROL_ENABLED(ctrl)	(((ctrl) & 0x1) == 1)
 #define DR_CONTROL_MASK(ctrl)		(((ctrl) >> 5) & 0xff)
+#define DR_CONTROL_TYPE(ctrl)		(((ctrl) >> 3) & 0x3)
 
 /* Structure for managing the hardware breakpoint/watchpoint resources.
    DR_ADDR_* stores the address, DR_CTRL_* stores the control register
@@ -107,6 +108,7 @@ void aarch64_notify_debug_reg_change (ptid_t ptid, int is_watchpoint,
 
 unsigned int aarch64_watchpoint_offset (unsigned int ctrl);
 unsigned int aarch64_watchpoint_length (unsigned int ctrl);
+enum target_hw_bp_type aarch64_watchpoint_type (unsigned int ctrl);
 
 int aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 			       int len, int is_insert, ptid_t ptid,

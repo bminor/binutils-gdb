@@ -164,9 +164,7 @@ aarch64_fbsd_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 bool
 aarch64_fbsd_nat_target::stopped_by_watchpoint ()
 {
-  CORE_ADDR addr;
-
-  return stopped_data_address (&addr);
+  return stopped_data_address (nullptr);
 }
 
 /* Implement the "stopped_by_hw_breakpoint" target_ops method.  */

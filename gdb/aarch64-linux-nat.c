@@ -972,9 +972,7 @@ aarch64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 bool
 aarch64_linux_nat_target::stopped_by_watchpoint ()
 {
-  CORE_ADDR addr;
-
-  return stopped_data_address (&addr);
+  return stopped_data_address (nullptr);
 }
 
 /* Implement the "can_do_single_step" target_ops method.  */
