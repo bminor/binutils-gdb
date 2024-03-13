@@ -666,7 +666,7 @@ bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
   if (abfd->iovec == NULL)
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return (void *) -1;
+      return MAP_FAILED;
     }
 
   return abfd->iovec->bmmap (abfd, addr, len, prot, flags, offset,

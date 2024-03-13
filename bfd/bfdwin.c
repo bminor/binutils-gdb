@@ -31,14 +31,6 @@
 
 #undef HAVE_MPROTECT /* code's not tested yet */
 
-#if HAVE_MMAP || HAVE_MPROTECT || HAVE_MADVISE
-#include <sys/mman.h>
-#endif
-
-#ifndef MAP_FILE
-#define MAP_FILE 0
-#endif
-
 static int debug_windows;
 
 /* The idea behind the next and refcount fields is that one mapped
@@ -234,7 +226,7 @@ bfd_get_file_window (bfd *abfd,
 		       ? MAP_FILE | MAP_PRIVATE
 		       : MAP_FILE | MAP_SHARED),
 		      fd, file_offset);
-      if (i->data == (void *) -1)
+      if (i->data == MAP_FAILED)
 	{
 	  /* An error happened.  Report it, or try using malloc, or
 	     something.  */

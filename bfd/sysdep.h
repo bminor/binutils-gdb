@@ -86,6 +86,18 @@
 #define SEEK_CUR 1
 #endif
 
+#ifdef HAVE_MMAP
+#include <sys/mman.h>
+#endif
+
+#ifndef MAP_FILE
+#define MAP_FILE 0
+#endif
+
+#ifndef MAP_FAILED
+#define MAP_FAILED ((void *) -1)
+#endif
+
 #include "filenames.h"
 
 #if !HAVE_DECL_FFS

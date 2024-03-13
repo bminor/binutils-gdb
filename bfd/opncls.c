@@ -675,7 +675,7 @@ opncls_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
 	      void **map_addr ATTRIBUTE_UNUSED,
 	      bfd_size_type *map_len ATTRIBUTE_UNUSED)
 {
-  return (void *) -1;
+  return MAP_FAILED;
 }
 
 static const struct bfd_iovec opncls_iovec =
