@@ -16261,6 +16261,13 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 	  const abbrev_info *new_abbrev = peek_die_abbrev (*new_reader,
 							   new_info_ptr,
 							   &bytes_read);
+
+	  if (new_abbrev == nullptr)
+	    error (_("Dwarf Error: Unexpected null DIE at offset %s "
+		     "[in module %s]"),
+		   sect_offset_str (origin_offset),
+		   bfd_get_filename (new_reader->abfd));
+
 	  new_info_ptr += bytes_read;
 
 	  if (new_reader->cu == reader->cu && new_info_ptr == watermark_ptr)
