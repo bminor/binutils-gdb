@@ -2768,9 +2768,9 @@ ufile_ptr bfd_get_size (bfd *abfd);
 
 ufile_ptr bfd_get_file_size (bfd *abfd);
 
-void *bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
+void *bfd_mmap (bfd *abfd, void *addr, size_t len,
     int prot, int flags, file_ptr offset,
-    void **map_addr, bfd_size_type *map_len)
+    void **map_addr, size_t *map_len)
 ATTRIBUTE_WARN_UNUSED_RESULT;
 
 time_t bfd_get_current_time (time_t now);

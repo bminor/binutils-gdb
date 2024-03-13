@@ -969,9 +969,9 @@ struct bfd_iovec
      Also write in MAP_ADDR the address of the page aligned buffer and in
      MAP_LEN the size mapped (a page multiple).  Use unmap with MAP_ADDR and
      MAP_LEN to unmap.  */
-  void *(*bmmap) (struct bfd *abfd, void *addr, bfd_size_type len,
+  void *(*bmmap) (struct bfd *abfd, void *addr, size_t len,
 		  int prot, int flags, file_ptr offset,
-		  void **map_addr, bfd_size_type *map_len);
+		  void **map_addr, size_t *map_len);
 };
 extern const struct bfd_iovec _bfd_memory_iovec;
 

@@ -219,9 +219,9 @@ DESCRIPTION
 .     Also write in MAP_ADDR the address of the page aligned buffer and in
 .     MAP_LEN the size mapped (a page multiple).  Use unmap with MAP_ADDR and
 .     MAP_LEN to unmap.  *}
-.  void *(*bmmap) (struct bfd *abfd, void *addr, bfd_size_type len,
+.  void *(*bmmap) (struct bfd *abfd, void *addr, size_t len,
 .		   int prot, int flags, file_ptr offset,
-.		   void **map_addr, bfd_size_type *map_len);
+.		   void **map_addr, size_t *map_len);
 .};
 
 .extern const struct bfd_iovec _bfd_memory_iovec;
@@ -638,9 +638,9 @@ FUNCTION
 	bfd_mmap
 
 SYNOPSIS
-	void *bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
+	void *bfd_mmap (bfd *abfd, void *addr, size_t len,
 			int prot, int flags, file_ptr offset,
-			void **map_addr, bfd_size_type *map_len)
+			void **map_addr, size_t *map_len)
 			ATTRIBUTE_WARN_UNUSED_RESULT;
 
 DESCRIPTION
@@ -651,9 +651,9 @@ DESCRIPTION
 */
 
 void *
-bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
+bfd_mmap (bfd *abfd, void *addr, size_t len,
 	  int prot, int flags, file_ptr offset,
-	  void **map_addr, bfd_size_type *map_len)
+	  void **map_addr, size_t *map_len)
 {
   while (abfd->my_archive != NULL
 	 && !bfd_is_thin_archive (abfd->my_archive))
@@ -815,10 +815,10 @@ memory_bstat (bfd *abfd, struct stat *statbuf)
 
 static void *
 memory_bmmap (bfd *abfd ATTRIBUTE_UNUSED, void *addr ATTRIBUTE_UNUSED,
-	      bfd_size_type len ATTRIBUTE_UNUSED, int prot ATTRIBUTE_UNUSED,
+	      size_t len ATTRIBUTE_UNUSED, int prot ATTRIBUTE_UNUSED,
 	      int flags ATTRIBUTE_UNUSED, file_ptr offset ATTRIBUTE_UNUSED,
 	      void **map_addr ATTRIBUTE_UNUSED,
-	      bfd_size_type *map_len ATTRIBUTE_UNUSED)
+	      size_t *map_len ATTRIBUTE_UNUSED)
 {
   return (void *)-1;
 }
