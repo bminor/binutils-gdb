@@ -237,6 +237,9 @@ typedef struct sframe_func_desc_entry
    may or may not be tracked.  */
 #define SFRAME_FRE_FP_OFFSET_IDX    2
 
+/* Invalid RA offset.  Used as padding to represent FP without RA on stack.  */
+#define SFRAME_FRE_RA_OFFSET_INVALID 0
+
 typedef struct sframe_fre_info
 {
   /* Information about
@@ -288,9 +291,11 @@ typedef struct sframe_fre_info
     offset1 (interpreted as CFA = BASE_REG + offset1)
 
     if RA is being tracked
-      offset2 (interpreted as RA = CFA + offset2)
+      offset2 (interpreted as RA = CFA + offset2; an offset value of
+	       SFRAME_FRE_RA_OFFSET_INVALID indicates a dummy padding RA offset
+	       to represent FP without RA saved on stack)
       if FP is being tracked
-	offset3 (intrepreted as FP = CFA + offset2)
+	offset3 (intrepreted as FP = CFA + offset3)
       fi
     else
       if FP is being tracked

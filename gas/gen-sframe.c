@@ -347,7 +347,9 @@ get_fre_num_offsets (struct sframe_row_entry *sframe_fre)
     fre_num_offsets++;
 #ifdef SFRAME_FRE_RA_TRACKING
   if (sframe_ra_tracking_p ()
-      && sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+      && (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK
+	  /* Accommodate for padding RA offset if FP without RA on stack.  */
+	  || sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK))
     fre_num_offsets++;
 #endif
   return fre_num_offsets;
@@ -371,9 +373,14 @@ sframe_get_fre_offset_size (struct sframe_row_entry *sframe_fre)
   if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
     bp_offset_size = get_offset_size_in_bytes (sframe_fre->bp_offset);
 #ifdef SFRAME_FRE_RA_TRACKING
-  if (sframe_ra_tracking_p ()
-      && sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
-    ra_offset_size = get_offset_size_in_bytes (sframe_fre->ra_offset);
+  if (sframe_ra_tracking_p ())
+    {
+      if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	ra_offset_size = get_offset_size_in_bytes (sframe_fre->ra_offset);
+      /* Accommodate for padding RA offset if FP without RA on stack.  */
+      else if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	ra_offset_size = get_offset_size_in_bytes (SFRAME_FRE_RA_OFFSET_INVALID);
+    }
 #endif
 
   /* Get the maximum size needed to represent the offsets.  */
@@ -537,11 +544,19 @@ output_sframe_row_entry (symbolS *fde_start_addr,
   fre_write_offsets++;
 
 #ifdef SFRAME_FRE_RA_TRACKING
-  if (sframe_ra_tracking_p ()
-      && sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+  if (sframe_ra_tracking_p ())
     {
-      fre_offset_func_map[idx].out_func (sframe_fre->ra_offset);
-      fre_write_offsets++;
+      if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	{
+	  fre_offset_func_map[idx].out_func (sframe_fre->ra_offset);
+	  fre_write_offsets++;
+	}
+      /* Write padding RA offset if FP without RA on stack.  */
+      else if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	{
+	  fre_offset_func_map[idx].out_func (SFRAME_FRE_RA_OFFSET_INVALID);
+	  fre_write_offsets++;
+	}
     }
 #endif
   if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
@@ -1498,25 +1513,6 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
       xlate_ctx->last_fre->pc_end
 	= get_dw_fde_end_addrS (xlate_ctx->dw_fde);
     }
-
-#ifdef SFRAME_FRE_RA_TRACKING
-  if (sframe_ra_tracking_p ())
-    {
-      struct sframe_row_entry *fre;
-
-      /* Iterate over the scratchpad FREs and validate them.  */
-      for (fre = xlate_ctx->first_fre; fre; fre = fre->next)
-	{
-	  /* SFrame format cannot represent FP on stack without RA on stack.  */
-	  if (fre->ra_loc != SFRAME_FRE_ELEM_LOC_STACK
-	      && fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
-	    {
-	      as_warn (_("skipping SFrame FDE due to FP without RA on stack"));
-	      return SFRAME_XLATE_ERR_NOTREPRESENTED;
-	    }
-	}
-    }
-#endif /* SFRAME_FRE_RA_TRACKING  */
 
   return SFRAME_XLATE_OK;
 }
