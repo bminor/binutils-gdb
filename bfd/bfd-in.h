@@ -36,6 +36,7 @@ extern "C" {
 #include "symcat.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include <time.h>
 #include "diagnostics.h"
 #include <stdarg.h>
 #include <string.h>
