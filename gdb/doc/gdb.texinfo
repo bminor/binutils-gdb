@@ -42373,7 +42373,7 @@ would potentially conflict with the @var{sequence-id}).
 
 @cindex remote protocol, binary data
 @anchor{Binary Data}
-Binary data in most packets is encoded either as two hexadecimal
+Binary data in most packets is encoded as two hexadecimal
 digits per byte of binary data.  This allowed the traditional remote
 protocol to work over connections which were only seven-bit clean.
 Some packets designed more recently assume an eight-bit clean
