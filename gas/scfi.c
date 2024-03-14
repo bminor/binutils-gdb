@@ -155,7 +155,7 @@ cmp_scfi_state (scfi_stateS *state1, scfi_stateS *state2)
   int ret;
 
   if (!state1 || !state2)
-    ret = 1;
+    return 1;
 
   /* Skip comparing the scratch[] value of registers.  The user visible
      unwind information is derived from the regs[] from the SCFI state.  */
@@ -164,10 +164,12 @@ cmp_scfi_state (scfi_stateS *state1, scfi_stateS *state2)
 
   /* For user functions which perform dynamic stack allocation, after switching
      t REG_FP based CFA tracking, it is perfectly possible to have stack usage
-     in some control flows.  However, double-checking that all control flows
-     have the same idea of CFA tracking before this wont hurt.  */
-  gas_assert (state1->regs[REG_CFA].base == state2->regs[REG_CFA].base);
-  if (state1->regs[REG_CFA].base == REG_SP)
+     in some control flows.  Further, the different control flows may even not
+     have the same idea of CFA tracking (likely later necessitating generation
+     of .cfi_remember_state / .cfi_restore_state pair).  */
+  ret |= state1->regs[REG_CFA].base != state2->regs[REG_CFA].base;
+
+  if (!ret && state1->regs[REG_CFA].base == REG_SP)
     ret |= state1->stack_size != state2->stack_size;
 
   ret |= state1->traceable_p != state2->traceable_p;
@@ -911,11 +913,11 @@ gen_scfi_ops (ginsnS *ginsn, scfi_stateS *state)
   return ret;
 }
 
-/* Recursively perform forward flow of the (unwind information) SCFI state
+/* Recursively perform forward flow of the (unwind information) SCFI STATE
    starting at basic block GBB.
 
-   The forward flow process propagates the SCFI state at exit of a basic block
-   to the successor basic block.
+   The core of forward flow process takes the SCFI state at the entry of a bb
+   and updates it incrementally as per the semantics of each ginsn in the bb.
 
    Returns error code, if any.  */
 
@@ -961,6 +963,8 @@ forward_flow_scfi_state (gcfgS *gcfg, gbbS *gbb, scfi_stateS *state)
       bb_for_each_edge(gbb, gedge)
 	{
 	  gbb = gedge->dst_bb;
+	  /* Ensure that the state is the one from the exit of the prev bb.  */
+	  memcpy (state, prev_bb->exit_state, sizeof (scfi_stateS));
 	  if (gbb->visited)
 	    {
 	      ret = cmp_scfi_state (gbb->entry_state, state);
