@@ -64,6 +64,8 @@ struct name_info {
 
 static struct parser_state *pstate = NULL;
 
+using namespace expr;
+
 /* Data that must be held for the duration of a parse.  */
 
 struct ada_parse_state
@@ -80,6 +82,12 @@ struct ada_parse_state
     auto &result = m_int_storage.emplace_back (new gdb_mpz (std::move (val)));
     return result.get ();
   }
+
+  /* The components being constructed during this parse.  */
+  std::vector<ada_component_up> components;
+
+  /* The associations being constructed during this parse.  */
+  std::vector<ada_association_up> associations;
 
 private:
 
@@ -124,8 +132,6 @@ static void write_ambiguous_var (struct parser_state *,
 static struct type *type_for_char (struct parser_state *, ULONGEST);
 
 static struct type *type_system_address (struct parser_state *);
-
-using namespace expr;
 
 /* Handle Ada type resolution for OP.  DEPROCEDURE_P and CONTEXT_TYPE
    are passed to the resolve method, if called.  */
@@ -335,16 +341,13 @@ ada_funcall (int nargs)
   pstate->push (std::move (funcall));
 }
 
-/* The components being constructed during this parse.  */
-static std::vector<ada_component_up> components;
-
 /* Create a new ada_component_up of the indicated type and arguments,
    and push it on the global 'components' vector.  */
 template<typename T, typename... Arg>
 void
 push_component (Arg... args)
 {
-  components.emplace_back (new T (std::forward<Arg> (args)...));
+  ada_parser->components.emplace_back (new T (std::forward<Arg> (args)...));
 }
 
 /* Examine the final element of the 'components' vector, and return it
@@ -354,7 +357,7 @@ push_component (Arg... args)
 static ada_choices_component *
 choice_component ()
 {
-  ada_component *last = components.back ().get ();
+  ada_component *last = ada_parser->components.back ().get ();
   return gdb::checked_static_cast<ada_choices_component *> (last);
 }
 
@@ -363,8 +366,8 @@ choice_component ()
 static ada_component_up
 pop_component ()
 {
-  ada_component_up result = std::move (components.back ());
-  components.pop_back ();
+  ada_component_up result = std::move (ada_parser->components.back ());
+  ada_parser->components.pop_back ();
   return result;
 }
 
@@ -379,16 +382,13 @@ pop_components (int n)
   return result;
 }
 
-/* The associations being constructed during this parse.  */
-static std::vector<ada_association_up> associations;
-
 /* Create a new ada_association_up of the indicated type and
    arguments, and push it on the global 'associations' vector.  */
 template<typename T, typename... Arg>
 void
 push_association (Arg... args)
 {
-  associations.emplace_back (new T (std::forward<Arg> (args)...));
+  ada_parser->associations.emplace_back (new T (std::forward<Arg> (args)...));
 }
 
 /* Pop the most recent association from the global stack, and return
@@ -396,8 +396,8 @@ push_association (Arg... args)
 static ada_association_up
 pop_association ()
 {
-  ada_association_up result = std::move (associations.back ());
-  associations.pop_back ();
+  ada_association_up result = std::move (ada_parser->associations.back ());
+  ada_parser->associations.pop_back ();
   return result;
 }
 
@@ -1256,8 +1256,6 @@ ada_parse (struct parser_state *par_state)
   lexer_init (yyin);		/* (Re-)initialize lexer.  */
   obstack_free (&temp_parse_space, NULL);
   obstack_init (&temp_parse_space);
-  components.clear ();
-  associations.clear ();
   assignments.clear ();
   iterated_associations.clear ();
 
