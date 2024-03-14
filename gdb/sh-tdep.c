@@ -1950,7 +1950,7 @@ sh_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
   *this_id = frame_id_build (cache->saved_sp, cache->pc);
 }
 
-static const struct frame_unwind sh_frame_unwind = {
+static const struct frame_unwind_legacy sh_frame_unwind (
   "sh prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -1959,7 +1959,7 @@ static const struct frame_unwind sh_frame_unwind = {
   sh_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 static CORE_ADDR
 sh_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
@@ -2017,8 +2017,7 @@ sh_stub_unwind_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind sh_stub_unwind =
-{
+static const struct frame_unwind_legacy sh_stub_unwind (
   "sh stub",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2027,7 +2026,7 @@ static const struct frame_unwind sh_stub_unwind =
   sh_frame_prev_register,
   NULL,
   sh_stub_unwind_sniffer
-};
+);
 
 /* Implement the stack_frame_destroyed_p gdbarch method.
 

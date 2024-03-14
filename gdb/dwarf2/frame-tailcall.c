@@ -468,8 +468,7 @@ tailcall_frame_prev_arch (const frame_info_ptr &this_frame,
 /* Virtual tail call frame unwinder if dwarf2_tailcall_sniffer_first finds
    a chain to create.  */
 
-const struct frame_unwind dwarf2_tailcall_frame_unwind =
-{
+const struct frame_unwind_legacy dwarf2_tailcall_frame_unwind (
   "dwarf2 tailcall",
   TAILCALL_FRAME,
   FRAME_UNWIND_DEBUGINFO,
@@ -480,7 +479,7 @@ const struct frame_unwind dwarf2_tailcall_frame_unwind =
   tailcall_frame_sniffer,
   tailcall_frame_dealloc_cache,
   tailcall_frame_prev_arch
-};
+);
 
 void _initialize_tailcall_frame ();
 void

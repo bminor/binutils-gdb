@@ -27,7 +27,7 @@ struct process_stratum_target;
 
 /* The inline frame unwinder.  */
 
-extern const struct frame_unwind inline_frame_unwind;
+extern const struct frame_unwind_legacy inline_frame_unwind;
 
 /* Skip all inlined functions whose call sites are at the current PC.
 

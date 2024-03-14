@@ -2666,8 +2666,7 @@ amd64_frame_prev_register (const frame_info_ptr &this_frame, void **this_cache,
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
-static const struct frame_unwind amd64_frame_unwind =
-{
+static const struct frame_unwind_legacy amd64_frame_unwind (
   "amd64 prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2676,7 +2675,7 @@ static const struct frame_unwind amd64_frame_unwind =
   amd64_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 /* Generate a bytecode expression to get the value of the saved PC.  */
 
@@ -2813,8 +2812,7 @@ amd64_sigtramp_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind amd64_sigtramp_frame_unwind =
-{
+static const struct frame_unwind_legacy amd64_sigtramp_frame_unwind (
   "amd64 sigtramp",
   SIGTRAMP_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2823,7 +2821,7 @@ static const struct frame_unwind amd64_sigtramp_frame_unwind =
   amd64_sigtramp_frame_prev_register,
   NULL,
   amd64_sigtramp_frame_sniffer
-};
+);
 
 
 static CORE_ADDR
@@ -3006,8 +3004,7 @@ amd64_epilogue_frame_this_id (const frame_info_ptr &this_frame,
     (*this_id) = frame_id_build (cache->base + 16, cache->pc);
 }
 
-static const struct frame_unwind amd64_epilogue_override_frame_unwind =
-{
+static const struct frame_unwind_legacy amd64_epilogue_override_frame_unwind (
   "amd64 epilogue override",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -3016,10 +3013,9 @@ static const struct frame_unwind amd64_epilogue_override_frame_unwind =
   amd64_frame_prev_register,
   NULL,
   amd64_epilogue_override_frame_sniffer
-};
+);
 
-static const struct frame_unwind amd64_epilogue_frame_unwind =
-{
+static const struct frame_unwind_legacy amd64_epilogue_frame_unwind (
   "amd64 epilogue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -3028,7 +3024,7 @@ static const struct frame_unwind amd64_epilogue_frame_unwind =
   amd64_frame_prev_register,
   NULL, 
   amd64_epilogue_frame_sniffer
-};
+);
 
 static struct frame_id
 amd64_dummy_id (struct gdbarch *gdbarch, const frame_info_ptr &this_frame)

@@ -54,7 +54,7 @@ extern void dummy_frame_discard (frame_id dummy_id, thread_info *thread);
 /* If the PC falls in a dummy frame, return a dummy frame
    unwinder.  */
 
-extern const struct frame_unwind dummy_frame_unwind;
+extern const struct frame_unwind_legacy dummy_frame_unwind;
 
 /* Destructor for dummy_frame.  DATA is supplied by registrant.
    REGISTERS_VALID is 1 for dummy_frame_pop, 0 for dummy_frame_discard.  */

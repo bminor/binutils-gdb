@@ -122,8 +122,8 @@ frame_unwind_try_unwinder (const frame_info_ptr &this_frame, void **this_cache,
 
   try
     {
-      frame_debug_printf ("trying unwinder \"%s\"", unwinder->name);
-      res = unwinder->sniffer (unwinder, this_frame, this_cache);
+      frame_debug_printf ("trying unwinder \"%s\"", unwinder->name ());
+      res = unwinder->sniff (this_frame, this_cache);
     }
   catch (const gdb_exception &ex)
     {
@@ -340,6 +340,64 @@ frame_unwind_got_address (const frame_info_ptr &frame, int regnum,
   return reg_val;
 }
 
+/* See frame-unwind.h.  */
+
+enum unwind_stop_reason
+frame_unwind_legacy::stop_reason (const frame_info_ptr &this_frame,
+				  void **this_prologue_cache) const
+{
+  return m_stop_reason (this_frame, this_prologue_cache);
+}
+
+/* See frame-unwind.h.  */
+
+void
+frame_unwind_legacy::this_id (const frame_info_ptr &this_frame,
+			      void **this_prologue_cache,
+			      struct frame_id *id) const
+{
+  return m_this_id (this_frame, this_prologue_cache, id);
+}
+
+/* See frame-unwind.h.  */
+
+struct value *
+frame_unwind_legacy::prev_register (const frame_info_ptr &this_frame,
+				    void **this_prologue_cache,
+				    int regnum) const
+{
+  return m_prev_register (this_frame, this_prologue_cache, regnum);
+}
+
+/* See frame-unwind.h.  */
+
+int
+frame_unwind_legacy::sniff (const frame_info_ptr &this_frame,
+			    void **this_prologue_cache) const
+{
+  return m_sniffer (this, this_frame, this_prologue_cache);
+}
+
+/* See frame-unwind.h.  */
+
+void
+frame_unwind_legacy::dealloc_cache (frame_info *self, void *this_cache) const
+{
+  if (m_dealloc_cache != nullptr)
+    m_dealloc_cache (self, this_cache);
+}
+
+/* See frame-unwind.h.  */
+
+struct gdbarch *
+frame_unwind_legacy::prev_arch (const frame_info_ptr &this_frame,
+				void **this_prologue_cache) const
+{
+  if (m_prev_arch == nullptr)
+    return frame_unwind::prev_arch (this_frame, this_prologue_cache);
+  return m_prev_arch (this_frame, this_prologue_cache);
+}
+
 /* Implement "maintenance info frame-unwinders" command.  */
 
 static void
@@ -358,10 +416,10 @@ maintenance_info_frame_unwinders (const char *args, int from_tty)
   for (const auto &unwinder : table)
     {
       ui_out_emit_list tuple_emitter (uiout, nullptr);
-      uiout->field_string ("name", unwinder->name);
-      uiout->field_string ("type", frame_type_str (unwinder->type));
+      uiout->field_string ("name", unwinder->name ());
+      uiout->field_string ("type", frame_type_str (unwinder->type ()));
       uiout->field_string ("class", frame_unwinder_class_str (
-					unwinder->unwinder_class));
+					unwinder->unwinder_class ()));
       uiout->text ("\n");
     }
 }

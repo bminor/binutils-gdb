@@ -2139,8 +2139,7 @@ i386_frame_prev_register (const frame_info_ptr &this_frame, void **this_cache,
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
-static const struct frame_unwind i386_frame_unwind =
-{
+static const struct frame_unwind_legacy i386_frame_unwind (
   "i386 prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2149,7 +2148,7 @@ static const struct frame_unwind i386_frame_unwind =
   i386_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 /* Normal frames, but in a function epilogue.  */
 
@@ -2295,8 +2294,7 @@ i386_epilogue_frame_prev_register (const frame_info_ptr &this_frame,
   return i386_frame_prev_register (this_frame, this_cache, regnum);
 }
 
-static const struct frame_unwind i386_epilogue_override_frame_unwind =
-{
+static const struct frame_unwind_legacy i386_epilogue_override_frame_unwind (
   "i386 epilogue override",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2305,10 +2303,9 @@ static const struct frame_unwind i386_epilogue_override_frame_unwind =
   i386_epilogue_frame_prev_register,
   NULL,
   i386_epilogue_override_frame_sniffer
-};
+);
 
-static const struct frame_unwind i386_epilogue_frame_unwind =
-{
+static const struct frame_unwind_legacy i386_epilogue_frame_unwind (
   "i386 epilogue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2317,7 +2314,7 @@ static const struct frame_unwind i386_epilogue_frame_unwind =
   i386_epilogue_frame_prev_register,
   NULL,
   i386_epilogue_frame_sniffer
-};
+);
 
 
 /* Stack-based trampolines.  */
@@ -2390,8 +2387,7 @@ i386_stack_tramp_frame_sniffer (const struct frame_unwind *self,
     return 0;
 }
 
-static const struct frame_unwind i386_stack_tramp_frame_unwind =
-{
+static const struct frame_unwind_legacy i386_stack_tramp_frame_unwind (
   "i386 stack tramp",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2400,7 +2396,7 @@ static const struct frame_unwind i386_stack_tramp_frame_unwind =
   i386_epilogue_frame_prev_register,
   NULL,
   i386_stack_tramp_frame_sniffer
-};
+);
 
 /* Generate a bytecode expression to get the value of the saved PC.  */
 
@@ -2540,8 +2536,7 @@ i386_sigtramp_frame_sniffer (const struct frame_unwind *self,
   return 0;
 }
 
-static const struct frame_unwind i386_sigtramp_frame_unwind =
-{
+static const struct frame_unwind_legacy i386_sigtramp_frame_unwind (
   "i386 sigtramp",
   SIGTRAMP_FRAME,
   FRAME_UNWIND_ARCH,
@@ -2550,7 +2545,7 @@ static const struct frame_unwind i386_sigtramp_frame_unwind =
   i386_sigtramp_frame_prev_register,
   NULL,
   i386_sigtramp_frame_sniffer
-};
+);
 
 
 static CORE_ADDR

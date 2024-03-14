@@ -1496,9 +1496,7 @@ xtensa_frame_prev_register (const frame_info_ptr &this_frame,
 }
 
 
-static const struct frame_unwind
-xtensa_unwind =
-{
+static const struct frame_unwind_legacy xtensa_unwind (
   "xtensa prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -1507,7 +1505,7 @@ xtensa_unwind =
   xtensa_frame_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 static CORE_ADDR
 xtensa_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)

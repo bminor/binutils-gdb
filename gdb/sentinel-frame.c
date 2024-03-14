@@ -78,8 +78,7 @@ sentinel_frame_prev_arch (const frame_info_ptr &this_frame,
   return cache->regcache->arch ();
 }
 
-const struct frame_unwind sentinel_frame_unwind =
-{
+const struct frame_unwind_legacy sentinel_frame_unwind (
   "sentinel",
   SENTINEL_FRAME,
   FRAME_UNWIND_GDB,
@@ -89,5 +88,5 @@ const struct frame_unwind sentinel_frame_unwind =
   NULL,
   NULL,
   NULL,
-  sentinel_frame_prev_arch,
-};
+  sentinel_frame_prev_arch
+);

@@ -171,25 +171,147 @@ enum frame_unwind_class
   UNWIND_CLASS_NUMBER,
 };
 
-struct frame_unwind
+class frame_unwind
 {
-  const char *name;
+public:
+  frame_unwind (const char *name, frame_type type, frame_unwind_class uclass,
+		const frame_data *data)
+    : m_name (name), m_type (type), m_unwinder_class (uclass),
+      m_unwind_data (data)
+  { }
+
+  const char *name () const
+  { return m_name; }
+
+  frame_type type () const
+  { return m_type; }
+
+  frame_unwind_class unwinder_class () const
+  { return m_unwinder_class; }
+
+  const frame_data *unwind_data () const
+  { return m_unwind_data; }
+
+  /* Default stop_reason implementation.  It reports NO_REASON, unless the
+     frame is the outermost.  */
+
+  virtual unwind_stop_reason stop_reason (const frame_info_ptr &this_frame,
+					  void **this_prologue_cache) const
+  {
+    return default_frame_unwind_stop_reason (this_frame, this_prologue_cache);
+  }
+
+  /* Default frame sniffer.  Will always return that the unwinder
+     is able to unwind the frame.  */
+
+  virtual int sniff (const frame_info_ptr &this_frame,
+		     void **this_prologue_cache) const
+  { return 1; }
+
+  /* Calculate the ID of the given frame using this unwinder.  */
+
+  virtual void this_id (const frame_info_ptr &this_frame,
+			void **this_prologue_cache,
+			struct frame_id *id) const = 0;
+
+  /* Get the value of a register in a previous frame.  */
+
+  virtual struct value *prev_register (const frame_info_ptr &this_frame,
+				       void **this_prologue_cache,
+				       int regnum) const = 0;
+
+  /* Properly deallocate the cache.  */
+
+  virtual void dealloc_cache (frame_info *self, void *this_cache) const
+  { }
+
+  /* Get the previous architecture.  */
+
+  virtual gdbarch *prev_arch (const frame_info_ptr &this_frame,
+			      void **this_prologue_cache) const
+  { return get_frame_arch (this_frame); }
+
+private:
+
+  /* Name of the unwinder.  Used to uniquely identify unwinders.  */
+  const char *m_name;
+
   /* The frame's type.  Should this instead be a collection of
      predicates that test the frame for various attributes?  */
-  enum frame_type type;
+  frame_type m_type;
+
   /* What kind of unwinder is this.  It generally follows from where
      the unwinder was added or where it looks for information to do the
      unwinding.  */
-  enum frame_unwind_class unwinder_class;
-  /* Should an attribute indicating the frame's address-in-block go
-     here?  */
-  frame_unwind_stop_reason_ftype *stop_reason;
-  frame_this_id_ftype *this_id;
-  frame_prev_register_ftype *prev_register;
-  const struct frame_data *unwind_data;
-  frame_sniffer_ftype *sniffer;
-  frame_dealloc_cache_ftype *dealloc_cache;
-  frame_prev_arch_ftype *prev_arch;
+  frame_unwind_class m_unwinder_class;
+
+  /* Additional data used by the trampoline and python frame unwinders.  */
+  const frame_data *m_unwind_data;
+};
+
+/* This is a legacy version of the frame unwinder.  The original struct
+   used function pointers for callbacks, this updated version has a
+   method that just passes the parameters along to the callback
+   pointer.
+   Do not use this class for new unwinders.  Instead, see other classes
+   that inherit from frame_unwind, such as the python unwinder.  */
+struct frame_unwind_legacy : public frame_unwind
+{
+  frame_unwind_legacy (const char *name, frame_type type,
+		       frame_unwind_class uclass,
+		       frame_unwind_stop_reason_ftype *stop_reason_func,
+		       frame_this_id_ftype *this_id_func,
+		       frame_prev_register_ftype *prev_register_func,
+		       const struct frame_data *data,
+		       frame_sniffer_ftype *sniffer_func,
+		       frame_dealloc_cache_ftype *dealloc_cache_func = nullptr,
+		       frame_prev_arch_ftype *prev_arch_func = nullptr)
+  : frame_unwind (name, type, uclass, data), m_stop_reason (stop_reason_func),
+    m_this_id (this_id_func), m_prev_register (prev_register_func),
+    m_sniffer (sniffer_func), m_dealloc_cache (dealloc_cache_func),
+    m_prev_arch (prev_arch_func)
+  { }
+
+  /* This method just passes the parameters to the callback pointer.  */
+
+  enum unwind_stop_reason stop_reason (const frame_info_ptr &this_frame,
+				       void **this_prologue_cache) const override;
+
+  /* This method just passes the parameters to the callback pointer.  */
+
+  void this_id (const frame_info_ptr &this_frame, void **this_prologue_cache,
+		struct frame_id *id) const override;
+
+  /* This method just passes the parameters to the callback pointer.  */
+
+  struct value *prev_register (const frame_info_ptr &this_frame,
+			       void **this_prologue_cache,
+			       int regnum) const override;
+
+  /* This method just passes the parameters to the callback pointer.  */
+
+  int sniff (const frame_info_ptr &this_frame,
+	     void **this_prologue_cache) const override;
+
+  /* This method just passes the parameters to the callback pointer.
+     It is safe to call this method if no callback is installed, it
+     just turns into a noop.  */
+
+  void dealloc_cache (frame_info *self, void *this_cache) const override;
+
+  /* This method just passes the parameters to the callback pointer.  */
+
+  struct gdbarch *prev_arch (const frame_info_ptr &this_frame,
+			     void **this_prologue_cache) const override;
+
+private:
+
+  frame_unwind_stop_reason_ftype *m_stop_reason;
+  frame_this_id_ftype *m_this_id;
+  frame_prev_register_ftype *m_prev_register;
+  frame_sniffer_ftype *m_sniffer;
+  frame_dealloc_cache_ftype *m_dealloc_cache;
+  frame_prev_arch_ftype *m_prev_arch;
 };
 
 /* Register a frame unwinder, _prepending_ it to the front of the

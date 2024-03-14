@@ -1205,8 +1205,7 @@ aarch64_prologue_prev_register (const frame_info_ptr &this_frame,
 }
 
 /* AArch64 prologue unwinder.  */
-static frame_unwind aarch64_prologue_unwind =
-{
+static const frame_unwind_legacy aarch64_prologue_unwind (
   "aarch64 prologue",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -1215,7 +1214,7 @@ static frame_unwind aarch64_prologue_unwind =
   aarch64_prologue_prev_register,
   NULL,
   default_frame_sniffer
-};
+);
 
 /* Allocate and fill in *THIS_CACHE with information about the prologue of
    *THIS_FRAME.  Do not do this is if *THIS_CACHE was already allocated.
@@ -1301,8 +1300,7 @@ aarch64_stub_unwind_sniffer (const struct frame_unwind *self,
 }
 
 /* AArch64 stub unwinder.  */
-static frame_unwind aarch64_stub_unwind =
-{
+static const frame_unwind_legacy aarch64_stub_unwind (
   "aarch64 stub",
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
@@ -1311,7 +1309,7 @@ static frame_unwind aarch64_stub_unwind =
   aarch64_prologue_prev_register,
   NULL,
   aarch64_stub_unwind_sniffer
-};
+);
 
 /* Return the frame base address of *THIS_FRAME.  */
 

@@ -1941,8 +1941,7 @@ record_btrace_frame_dealloc_cache (frame_info *self, void *this_cache)
    Therefore this unwinder reports any possibly unwound registers as
    <unavailable>.  */
 
-const struct frame_unwind record_btrace_frame_unwind =
-{
+const struct frame_unwind_legacy record_btrace_frame_unwind (
   "record-btrace",
   NORMAL_FRAME,
   FRAME_UNWIND_GDB,
@@ -1952,10 +1951,9 @@ const struct frame_unwind record_btrace_frame_unwind =
   NULL,
   record_btrace_frame_sniffer,
   record_btrace_frame_dealloc_cache
-};
+);
 
-const struct frame_unwind record_btrace_tailcall_frame_unwind =
-{
+const struct frame_unwind_legacy record_btrace_tailcall_frame_unwind (
   "record-btrace tailcall",
   TAILCALL_FRAME,
   FRAME_UNWIND_GDB,
@@ -1965,7 +1963,7 @@ const struct frame_unwind record_btrace_tailcall_frame_unwind =
   NULL,
   record_btrace_tailcall_frame_sniffer,
   record_btrace_frame_dealloc_cache
-};
+);
 
 /* Implement the get_unwinder method.  */
 

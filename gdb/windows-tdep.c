@@ -1321,10 +1321,9 @@ cygwin_sigwrapper_frame_cache (frame_info_ptr this_frame, void **this_cache)
   return cache;
 }
 
-static struct value *
-cygwin_sigwrapper_frame_prev_register (const frame_info_ptr &this_frame,
-				       void **this_cache,
-				       int regnum)
+struct value *
+cygwin_sigwrapper_frame_unwind::prev_register
+    (const frame_info_ptr &this_frame, void **this_cache, int regnum) const
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct cygwin_sigwrapper_frame_cache *cache
@@ -1340,20 +1339,18 @@ cygwin_sigwrapper_frame_prev_register (const frame_info_ptr &this_frame,
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
-static void
-cygwin_sigwrapper_frame_this_id (const frame_info_ptr &this_frame,
-				 void **this_cache,
-				 struct frame_id *this_id)
+void
+cygwin_sigwrapper_frame_unwind::this_id (const frame_info_ptr &this_frame,
+					 void **this_cache,
+					 struct frame_id *this_id) const
 {
   *this_id = frame_id_build_unavailable_stack (get_frame_func (this_frame));
 }
 
-static int
-cygwin_sigwrapper_frame_sniffer (const struct frame_unwind *self_,
-				 const frame_info_ptr &this_frame,
-				 void **this_cache)
+int
+cygwin_sigwrapper_frame_unwind::sniff (const frame_info_ptr &this_frame,
+					 void **this_cache) const
 {
-  const auto *self = (const struct cygwin_sigwrapper_frame_unwind *) self_;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
 
   CORE_ADDR pc = get_frame_pc (this_frame);
@@ -1376,7 +1373,7 @@ cygwin_sigwrapper_frame_sniffer (const struct frame_unwind *self_,
 		      paddress (gdbarch, end));
 
   int tlsoffset;
-  cygwin_sigwrapper_frame_analyze (gdbarch, start, end, self->patterns_list,
+  cygwin_sigwrapper_frame_analyze (gdbarch, start, end, patterns_list,
 				   &tlsoffset);
   if (tlsoffset == 0)
     return 0;
@@ -1396,13 +1393,7 @@ cygwin_sigwrapper_frame_sniffer (const struct frame_unwind *self_,
 
 cygwin_sigwrapper_frame_unwind::cygwin_sigwrapper_frame_unwind
   (gdb::array_view<const gdb::array_view<const gdb_byte>> patterns_list)
-    : frame_unwind (),
-      patterns_list (patterns_list)
+    : frame_unwind ("cygwin sigwrapper", NORMAL_FRAME, FRAME_UNWIND_GDB,
+		    nullptr), patterns_list (patterns_list)
 {
-  name = "cygwin sigwrapper";
-  type = NORMAL_FRAME;
-  stop_reason = default_frame_unwind_stop_reason;
-  this_id = cygwin_sigwrapper_frame_this_id;
-  prev_register = cygwin_sigwrapper_frame_prev_register;
-  sniffer = cygwin_sigwrapper_frame_sniffer;
 }
