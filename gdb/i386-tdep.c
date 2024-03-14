@@ -4886,6 +4886,22 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 	}
       break;
 
+    case 0x60:	/* VPUNPCKLBW  */
+    case 0x61:	/* VPUNPCKLWD  */
+    case 0x62:	/* VPUNPCKLDQ  */
+    case 0x6c:	/* VPUNPCKLQDQ */
+    case 0x68:	/* VPUNPCKHBW  */
+    case 0x69:	/* VPUNPCKHWD  */
+    case 0x6a:	/* VPUNPCKHDQ  */
+    case 0x6d:	/* VPUNPCKHQDQ */
+      {
+	i386_record_modrm (ir);
+	int reg_offset = ir->reg + vex_r * 8;
+	record_full_arch_list_add_reg (ir->regcache,
+				       tdep->ymm0_regnum + reg_offset);
+      }
+      break;
+
     default:
       gdb_printf (gdb_stderr,
 		  _("Process record does not support VEX instruction 0x%02x "

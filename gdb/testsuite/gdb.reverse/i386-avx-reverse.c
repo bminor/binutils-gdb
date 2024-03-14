@@ -78,6 +78,58 @@ vmov_test ()
   return 0; /* end vmov_test */
 }
 
+/* Test if we can properly record (and undo) vpunpck style instructions.
+   Most tests will use xmm0 and xmm1 as sources. The registers xmm15 and xmm2
+   are used as destination to ensure we're reading the VEX.R bit correctly.  */
+int
+vpunpck_test  ()
+{
+  /* Using GDB, load these values onto registers, for ease of testing.
+     ymm0.v2_int128  = {0x1f1e1d1c1b1a19181716151413121110, 0x2f2e2d2c2b2a29282726252423222120}
+     ymm1.v2_int128  = {0x4f4e4d4c4b4a49484746454443424140, 0x3f3e3d3c3b3a39383736353433323130}
+     ymm15.v2_int128 = {0xdead, 0xbeef}
+     so that's easy to confirm that the unpacking went as expected.  */
+
+  /* start vpunpck_test.  */
+
+  /* First try all low bit unpack instructions with xmm registers.  */
+  /* 17 27 16 26 15 25 14 24 ...*/
+  asm volatile ("vpunpcklbw  %xmm0, %xmm1, %xmm15");
+  /* 17 16 27 26 15 14 25 24 ...*/
+  asm volatile ("vpunpcklwd  %0, %%xmm1, %%xmm15"
+      : : "m" (global_buf0));
+  /* 17 16 15 14 27 26 25 24 ...*/
+  asm volatile ("vpunpckldq  %0, %%xmm1,  %%xmm2"
+      : : "m" (global_buf0));
+  /* 17 16 15 14 13 12 11 10 ...*/
+  asm volatile ("vpunpcklqdq %xmm0, %xmm1, %xmm2");
+
+  /* Then try all high bit unpack instructions with xmm registers.  */
+  /* 17 27 16 26 15 25 14 24 ...*/
+  asm volatile ("vpunpckhbw  %xmm0, %xmm1, %xmm15");
+  /* 17 16 27 26 15 14 25 24 ...*/
+  asm volatile ("vpunpckhwd  %0, %%xmm1, %%xmm15"
+      : : "m" (global_buf0));
+  /* 17 16 15 14 27 26 25 24 ...*/
+  asm volatile ("vpunpckhdq  %0, %%xmm1,  %%xmm2"
+      : : "m" (global_buf0));
+  /* 17 16 15 14 13 12 11 10 ...*/
+  asm volatile ("vpunpckhqdq %xmm0, %xmm1, %xmm2");
+
+  /* Lastly, lets test a few unpack instructions with ymm registers.  */
+  /* 17 27 16 26 15 25 14 24 ...*/
+  asm volatile ("vpunpcklbw  %ymm0, %ymm1, %ymm15");
+  /* 17 16 27 26 15 14 25 24 ...*/
+  asm volatile ("vpunpcklwd  %ymm0, %ymm1, %ymm15");
+  /* 17 16 15 14 27 26 25 24 ...*/
+  asm volatile ("vpunpckhdq  %ymm0, %ymm1,  %ymm15");
+  /* 17 16 15 14 13 12 11 10 ...*/
+  asm volatile ("vpunpckhqdq %ymm0, %ymm1, %ymm15");
+  /* We have a return statement to deal with
+     epilogue in different compilers.  */
+  return 0; /* end vpunpck_test */
+}
+
 int
 main ()
 {
@@ -90,8 +142,11 @@ main ()
     }
   /* Zero relevant xmm registers, se we know what to look for.  */
   asm volatile ("vmovq %0, %%xmm0": : "m" (global_buf1));
+  asm volatile ("vmovq %0, %%xmm1": : "m" (global_buf1));
+  asm volatile ("vmovq %0, %%xmm2": : "m" (global_buf1));
   asm volatile ("vmovq %0, %%xmm15": : "m" (global_buf1));
 
   vmov_test ();
+  vpunpck_test ();
   return 0;	/* end of main */
 }

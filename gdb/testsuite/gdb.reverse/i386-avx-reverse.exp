@@ -53,8 +53,12 @@ proc test_one_register {insn register value {prefix ""}} {
     gdb_test "reverse-step" "$insn.*" \
 	"${prefix}reverse-step from $insn to test register $register"
 
+    if {[regexp {^ymm} $register]} {
+	set value "\\\{$value\\\}"
+    }
+
     gdb_test "info register $register" \
-	"$register.*uint128 = $value.*" \
+	"$register.*int128 = $value.*" \
 	"${prefix}verify $register before $insn"
 }
 
@@ -188,3 +192,48 @@ if {[record_full_function "vmov"] == true} {
 
 # Move to the end of vmov_test to set up next.
 gdb_test "finish" "Run till exit from.*vmov_test.*" "leaving vmov_test"
+
+# Starting vpunpck tests.
+gdb_test_no_output \
+    "set \$ymm0.v4_int64 = {0x1716151413121110, 0x1f1e1d1c1b1a1918, 0x2726252423222120, 0x2f2e2d2c2b2a2928}"
+gdb_test_no_output \
+    "set \$ymm1.v4_int64 = {0x3736353433323130, 0x3f3e3d3c3b3a3938, 0x4746454443424140, 0x4f4e4d4c4b4a4948}"
+gdb_test_no_output "set \$ymm2.v2_int128 = {0x0, 0x0}"
+gdb_test_no_output "set \$ymm15.v2_int128 = {0xdead, 0xbeef}"
+if {[record_full_function "vpunpck"] == true} {
+    test_one_register "vpunpckhqdq" "ymm15" \
+	"0x1f1e1d1c3f3e3d3c1b1a19183b3a3938, 0x2f2e2d2c4f4e4d4c2b2a29284b4a4948" \
+	"ymm: "
+    test_one_register "vpunpckhdq" "ymm15" \
+	"0x17163736151435341312333211103130, 0x27264746252445442322434221204140" \
+	"ymm: "
+    test_one_register "vpunpcklwd" "ymm15" \
+	"0x17371636153514341333123211311030, 0x27472646254524442343224221412040" \
+	"ymm: "
+    test_one_register "vpunpcklbw" "ymm15" \
+	"0x1f1e3f3e1d1c3d3c1b1a3b3a19183938, 0x0" "ymm: "
+
+    test_one_register "vpunpckhqdq" "ymm2" \
+	"0x1f1e1d1c3f3e3d3c1b1a19183b3a3938, 0x0"
+    test_one_register "vpunpckhdq" "ymm2" \
+	"0x17161514131211103736353433323130, 0x0"
+    test_one_register "vpunpckhwd" "ymm15" \
+	"0x1f3f1e3e1d3d1c3c1b3b1a3a19391838, 0x0"
+    test_one_register "vpunpckhbw" "ymm15" \
+	"0x17163736151435341312333211103130, 0x0"
+
+    test_one_register "vpunpcklqdq" "ymm2" \
+	"0x17161514373635341312111033323130, 0x0"
+    test_one_register "vpunpckldq" "ymm2" "0x0, 0x0"
+    test_one_register "vpunpcklwd" "ymm15" \
+	"0x17371636153514341333123211311030, 0x0"
+    test_one_register "vpunpcklbw" "ymm15" "0xdead, 0xbeef"
+} else {
+    untested "couldn't test vpunpck tests"
+}
+
+# Move to the end of vmov_test to set up next.
+# Stop recording in case of recording errors.
+gdb_test "record stop" "Process record is stopped.*" \
+    "delete history for vpunpck_test"
+gdb_test "finish" "Run till exit from.*vpunpck_test.*" "leaving vpunpck_test"
