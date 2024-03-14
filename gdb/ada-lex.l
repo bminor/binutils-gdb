@@ -59,9 +59,7 @@ DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER
 #define NUMERAL_WIDTH 256
 #define LONGEST_SIGN ((ULONGEST) 1 << (sizeof(LONGEST) * HOST_CHAR_BIT - 1))
 
-/* Temporary staging for numeric literals.  */
-static char numbuf[NUMERAL_WIDTH];
- static void canonicalizeNumeral (char *s1, const char *);
+static void canonicalizeNumeral (char *s1, const char *);
 static struct stoken processString (const char*, int);
 static int processInt (struct parser_state *, const char *, const char *,
 		       const char *);
@@ -114,6 +112,7 @@ static void rewind_to_char (int);
 "--".*		 { yyterminate(); }
 
 {NUM10}{POSEXP}  {
+		   char numbuf[NUMERAL_WIDTH];
 		   canonicalizeNumeral (numbuf, yytext);
 		   char *e_ptr = strrchr (numbuf, 'e');
 		   *e_ptr = '\0';
@@ -121,11 +120,13 @@ static void rewind_to_char (int);
 		 }
 
 {NUM10}          {
+		   char numbuf[NUMERAL_WIDTH];
 		   canonicalizeNumeral (numbuf, yytext);
 		   return processInt (pstate, NULL, numbuf, NULL);
 		 }
 
 {NUM10}"#"{HEXDIG}({HEXDIG}|_)*"#"{POSEXP} {
+		   char numbuf[NUMERAL_WIDTH];
 		   canonicalizeNumeral (numbuf, yytext);
 		   char *e_ptr = strrchr (numbuf, 'e');
 		   *e_ptr = '\0';
@@ -139,23 +140,27 @@ static void rewind_to_char (int);
 	   floating-point number is formed by reinterpreting the
 	   bytes, allowing direct control over the bits.  */
 {NUM10}(l{0,2}f)?"#"{HEXDIG}({HEXDIG}|_)*"#" {
+		   char numbuf[NUMERAL_WIDTH];
 		   canonicalizeNumeral (numbuf, yytext);
 		   return processInt (pstate, numbuf, strchr (numbuf, '#') + 1,
 				      NULL);
 		 }
 
 "0x"{HEXDIG}+	{
+		  char numbuf[NUMERAL_WIDTH];
 		  canonicalizeNumeral (numbuf, yytext+2);
 		  return processInt (pstate, "16#", numbuf, NULL);
 		}
 
 
 {NUM10}"."{NUM10}{EXP} {
+		   char numbuf[NUMERAL_WIDTH];
 		   canonicalizeNumeral (numbuf, yytext);
 		   return processReal (pstate, numbuf);
 		}
 
 {NUM10}"."{NUM10} {
+		   char numbuf[NUMERAL_WIDTH];
 		   canonicalizeNumeral (numbuf, yytext);
 		   return processReal (pstate, numbuf);
 		}
