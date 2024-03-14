@@ -96,6 +96,10 @@ struct ada_parse_state
      to implement '@', the target name symbol.  */
   std::vector<ada_assign_up> assignments;
 
+  /* Track currently active iterated assignment names.  */
+  std::unordered_map<std::string, std::vector<ada_index_var_operation *>>
+       iterated_associations;
+
 private:
 
   /* We don't have a good way to manage non-POD data in Yacc, so store
@@ -442,10 +446,6 @@ make_tick_completer (struct stoken tok)
   return (std::unique_ptr<expr_completion_base>
 	  (new ada_tick_completer (std::string (tok.ptr, tok.length))));
 }
-
-/* Track currently active iterated assignment names.  */
-static std::unordered_map<std::string, std::vector<ada_index_var_operation *>>
-     iterated_associations;
 
 %}
 
@@ -1127,12 +1127,12 @@ component_group :
 			{
 			  std::string name = copy_name ($2);
 
-			  auto iter = iterated_associations.find (name);
-			  if (iter != iterated_associations.end ())
+			  auto iter = ada_parser->iterated_associations.find (name);
+			  if (iter != ada_parser->iterated_associations.end ())
 			    error (_("Nested use of index parameter '%s'"),
 				   name.c_str ());
 
-			  iterated_associations[name] = {};
+			  ada_parser->iterated_associations[name] = {};
 			}
 		component_associations
 			{
@@ -1141,12 +1141,12 @@ component_group :
 			  ada_choices_component *choices = choice_component ();
 			  choices->set_associations (pop_associations ($5));
 
-			  auto iter = iterated_associations.find (name);
-			  gdb_assert (iter != iterated_associations.end ());
+			  auto iter = ada_parser->iterated_associations.find (name);
+			  gdb_assert (iter != ada_parser->iterated_associations.end ());
 			  for (ada_index_var_operation *var : iter->second)
 			    var->set_choices (choices);
 
-			  iterated_associations.erase (name);
+			  ada_parser->iterated_associations.erase (name);
 
 			  choices->set_name (std::move (name));
 			}
@@ -1256,7 +1256,6 @@ ada_parse (struct parser_state *par_state)
   lexer_init (yyin);		/* (Re-)initialize lexer.  */
   obstack_free (&temp_parse_space, NULL);
   obstack_init (&temp_parse_space);
-  iterated_associations.clear ();
 
   int result = yyparse ();
   if (!result)
@@ -1706,8 +1705,8 @@ write_var_or_type (struct parser_state *par_state,
 
   if (block == nullptr)
     {
-      auto iter = iterated_associations.find (name_storage);
-      if (iter != iterated_associations.end ())
+      auto iter = ada_parser->iterated_associations.find (name_storage);
+      if (iter != ada_parser->iterated_associations.end ())
 	{
 	  auto op = std::make_unique<ada_index_var_operation> ();
 	  iter->second.push_back (op.get ());
