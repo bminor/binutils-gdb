@@ -46,7 +46,7 @@ with_timeout_factor 20 {
 	-re -wrap "Breakpoint .* end of main .*" {
 	    pass $gdb_test_name
 	}
-	-re -wrap "Process record does not support instruction 0xc5 at.*" {
+	-re -wrap "Process record does not support VEX instruction.*" {
 	    kfail "record/23188" $gdb_test_name
 	}
 	-re -wrap "Process record does not support instruction 0xfae64 at.*" {

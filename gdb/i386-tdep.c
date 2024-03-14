@@ -4451,6 +4451,12 @@ struct i386_record_s
   int rip_offset;
   int popl_esp_hack;
   const int *regmap;
+
+  /* These are used by VEX and XOP prefixes.  */
+  uint8_t map_select;
+  uint8_t vvvv;
+  uint8_t pp;
+  uint8_t l;
 };
 
 /* Parse the "modrm" part of the memory address irp->addr points at.
@@ -4789,6 +4795,43 @@ static int i386_record_floats (struct gdbarch *gdbarch,
   return 0;
 }
 
+/* i386_process_record helper to deal with instructions that start
+   with VEX prefix.  */
+
+static int
+i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
+		 int opcode, struct gdbarch *gdbarch)
+{
+  /* We need this to find YMM (and once AVX-512 is supported, ZMM) registers.
+     We should always save the largest available register, since an
+     instruction that handles a smaller reg may zero out the higher bits,
+     so we must have them saved.  */
+  i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
+
+  /* Since we are reading pseudo registers, we need to tell GDB that it is
+     safe to do so, by saying we aren't _really_ running the inferior right
+     now.  */
+  SCOPE_EXIT { inferior_thread ()->set_executing (true); };
+  inferior_thread () -> set_executing (false);
+
+  switch (opcode)
+    {
+    default:
+      gdb_printf (gdb_stderr,
+		  _("Process record does not support VEX instruction 0x%02x "
+		    "at address %s.\n"),
+		  (unsigned int) (opcode),
+		  paddress (gdbarch, ir->orig_addr));
+      return -1;
+    }
+
+  record_full_arch_list_add_reg (ir->regcache, ir->regmap[X86_RECORD_REIP_REGNUM]);
+  if (record_full_arch_list_add_end ())
+    return -1;
+
+  return 0;
+}
+
 /* Parse the current instruction, and record the values of the
    registers and memory that will be changed by the current
    instruction.  Returns -1 if something goes wrong, 0 otherwise.  */
@@ -4811,6 +4854,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
   uint8_t rex_w = -1;
   uint8_t rex_r = 0;
+  bool vex_prefix = false;
 
   memset (&ir, 0, sizeof (struct i386_record_s));
   ir.regcache = regcache;
@@ -4896,6 +4940,53 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  else					/* 32 bit target */
 	    goto out_prefixes;
 	  break;
+	case 0xc4:	/* 3-byte VEX prefixes (for AVX/AVX2 instructions).  */
+	  {
+	    /* The first byte just identifies the VEX prefix.  Data is stored
+	       on the following 2 bytes.  */
+	    uint8_t byte;
+	    if (record_read_memory (gdbarch, ir.addr, &byte, 1))
+	      return -1;
+	    ir.addr++;
+
+	    rex_r = !((byte >> 7) & 0x1);
+	    ir.rex_x = !((byte >> 6) & 0x1);
+	    ir.rex_b = !((byte >> 5) & 0x1);
+	    ir.map_select = byte & 0x1f;
+	    /* Collect the last byte of the prefix.  */
+	    if (record_read_memory (gdbarch, ir.addr, &byte, 1))
+	      return -1;
+	    ir.addr++;
+	    rex_w = (byte >> 7) & 0x1;
+	    ir.vvvv = (~(byte >> 3) & 0xf);
+	    ir.l = (byte >> 2) & 0x1;
+	    ir.pp = byte & 0x3;
+	    vex_prefix = true;
+
+	    break;
+	  }
+	case 0xc5:	/* 2-byte VEX prefix for AVX/AVX2 instructions.  */
+	  {
+	    /* The first byte just identifies the VEX prefix.  Data is stored
+	       on the following 2 bytes.  */
+	    uint8_t byte;
+	    if (record_read_memory (gdbarch, ir.addr, &byte, 1))
+	      return -1;
+	    ir.addr++;
+
+	    /* On the 2-byte versions, these are pre-defined.  */
+	    ir.rex_x = 0;
+	    ir.rex_b = 0;
+	    rex_w = 0;
+	    ir.map_select = 1;
+
+	    rex_r = !((byte >> 7) & 0x1);
+	    ir.vvvv = (~(byte >> 3) & 0xf);
+	    ir.l = (byte >> 2) & 0x1;
+	    ir.pp = byte & 0x3;
+	    vex_prefix = true;
+	    break;
+	  }
 	default:
 	  goto out_prefixes;
 	  break;
@@ -4918,6 +5009,12 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
   /* Now check op code.  */
   opcode = (uint32_t) opcode8;
+  if (vex_prefix)
+    {
+      /* If we found the VEX prefix, i386 will either record or warn that
+	 the instruction isn't supported, so we can return the VEX result.  */
+      return i386_record_vex (&ir, rex_w, rex_r, opcode, gdbarch);
+    }
  reswitch:
   switch (opcode)
     {
@@ -7902,9 +7999,11 @@ static const int i386_record_regmap[] =
 {
   I386_EAX_REGNUM, I386_ECX_REGNUM, I386_EDX_REGNUM, I386_EBX_REGNUM,
   I386_ESP_REGNUM, I386_EBP_REGNUM, I386_ESI_REGNUM, I386_EDI_REGNUM,
-  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0,
+  0, 0, 0, 0,
   I386_EIP_REGNUM, I386_EFLAGS_REGNUM, I386_CS_REGNUM, I386_SS_REGNUM,
-  I386_DS_REGNUM, I386_ES_REGNUM, I386_FS_REGNUM, I386_GS_REGNUM
+  I386_DS_REGNUM, I386_ES_REGNUM, I386_FS_REGNUM, I386_GS_REGNUM,
+  /* xmm0_regnum */ 0
 };
 
 /* Check that the given address appears suitable for a fast
