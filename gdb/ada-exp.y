@@ -64,8 +64,26 @@ struct name_info {
 
 static struct parser_state *pstate = NULL;
 
-/* The original expression string.  */
-static const char *original_expr;
+/* Data that must be held for the duration of a parse.  */
+
+struct ada_parse_state
+{
+  explicit ada_parse_state (const char *expr)
+    : m_original_expr (expr)
+  {
+  }
+
+  std::string find_completion_bounds ();
+
+private:
+
+  /* The original expression string.  */
+  const char *m_original_expr;
+};
+
+/* The current Ada parser object.  */
+
+static ada_parse_state *ada_parser;
 
 /* We don't have a good way to manage non-POD data in Yacc, so store
    values here.  The storage here is only valid for the duration of
@@ -100,8 +118,6 @@ static void write_ambiguous_var (struct parser_state *,
 static struct type *type_for_char (struct parser_state *, ULONGEST);
 
 static struct type *type_system_address (struct parser_state *);
-
-static std::string find_completion_bounds (struct parser_state *);
 
 using namespace expr;
 
@@ -548,7 +564,7 @@ primary :	primary DOT_COMPLETE
 			  ada_structop_operation *str_op
 			    = (new ada_structop_operation
 			       (std::move (arg), copy_name ($2)));
-			  str_op->set_prefix (find_completion_bounds (pstate));
+			  str_op->set_prefix (ada_parser->find_completion_bounds ());
 			  pstate->push (operation_up (str_op));
 			  pstate->mark_struct_expression (str_op);
 			}
@@ -1222,10 +1238,11 @@ int
 ada_parse (struct parser_state *par_state)
 {
   /* Setting up the parser state.  */
-  scoped_restore pstate_restore = make_scoped_restore (&pstate);
+  scoped_restore pstate_restore = make_scoped_restore (&pstate, par_state);
   gdb_assert (par_state != NULL);
-  pstate = par_state;
-  original_expr = par_state->lexptr;
+
+  ada_parse_state parser (par_state->lexptr);
+  scoped_restore parser_restore = make_scoped_restore (&ada_parser, &parser);
 
   scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
 							par_state->debug);
@@ -1848,13 +1865,13 @@ write_var_or_type (struct parser_state *par_state,
    Without this, an attempt like "complete print abc.d" will give a
    result like "print def" rather than "print abc.def".  */
 
-static std::string
-find_completion_bounds (struct parser_state *par_state)
+std::string
+ada_parse_state::find_completion_bounds ()
 {
   const char *end = pstate->lexptr;
   /* First the end of the prefix.  Here we stop at the token start or
      at '.' or space.  */
-  for (; end > original_expr && end[-1] != '.' && !isspace (end[-1]); --end)
+  for (; end > m_original_expr && end[-1] != '.' && !isspace (end[-1]); --end)
     {
       /* Nothing.  */
     }
@@ -1862,11 +1879,11 @@ find_completion_bounds (struct parser_state *par_state)
   const char *ptr = end;
   /* Here we allow '.'.  */
   for (;
-       ptr > original_expr && (ptr[-1] == '.'
-			       || ptr[-1] == '_'
-			       || (ptr[-1] >= 'a' && ptr[-1] <= 'z')
-			       || (ptr[-1] >= 'A' && ptr[-1] <= 'Z')
-			       || (ptr[-1] & 0xff) >= 0x80);
+       ptr > m_original_expr && (ptr[-1] == '.'
+				 || ptr[-1] == '_'
+				 || (ptr[-1] >= 'a' && ptr[-1] <= 'z')
+				 || (ptr[-1] >= 'A' && ptr[-1] <= 'Z')
+				 || (ptr[-1] & 0xff) >= 0x80);
        --ptr)
     {
       /* Nothing.  */
@@ -1902,7 +1919,7 @@ write_var_or_type_completion (struct parser_state *par_state,
 
   ada_structop_operation *op = write_selectors (par_state,
 						name0.ptr + tail_index);
-  op->set_prefix (find_completion_bounds (par_state));
+  op->set_prefix (ada_parser->find_completion_bounds ());
   par_state->mark_struct_expression (op);
   return nullptr;
 }
