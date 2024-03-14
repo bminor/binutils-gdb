@@ -311,6 +311,7 @@ hppa_linux_sigtramp_frame_sniffer (const struct frame_unwind *self,
 static const struct frame_unwind hppa_linux_sigtramp_frame_unwind = {
   "hppa linux sigtramp",
   SIGTRAMP_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   hppa_linux_sigtramp_frame_this_id,
   hppa_linux_sigtramp_frame_prev_register,

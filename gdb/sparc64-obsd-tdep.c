@@ -224,6 +224,7 @@ static const struct frame_unwind sparc64obsd_frame_unwind =
 {
   "sparc64 openbsd sigtramp",
   SIGTRAMP_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   sparc64obsd_frame_this_id,
   sparc64obsd_frame_prev_register,
@@ -308,6 +309,7 @@ static const struct frame_unwind sparc64obsd_trapframe_unwind =
 {
   "sparc64 openbsd trap",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   sparc64obsd_trapframe_this_id,
   sparc64obsd_trapframe_prev_register,

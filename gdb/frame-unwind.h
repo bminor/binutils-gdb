@@ -156,12 +156,31 @@ typedef void (frame_dealloc_cache_ftype) (frame_info *self,
 typedef gdbarch *(frame_prev_arch_ftype) (const frame_info_ptr &this_frame,
 					  void **this_prologue_cache);
 
+/* Unwinders are classified by what part of GDB code created it.  */
+enum frame_unwind_class
+{
+  /* This is mostly handled by core GDB code.  */
+  FRAME_UNWIND_GDB,
+  /* This unwinder was added by one of GDB's extension languages.  */
+  FRAME_UNWIND_EXTENSION,
+  /* The unwinder was created and mostly handles debug information.  */
+  FRAME_UNWIND_DEBUGINFO,
+  /* The unwinder was created and handles target dependent things.  */
+  FRAME_UNWIND_ARCH,
+  /* Meta enum value, to ensure we're always sent a valid unwinder class.  */
+  UNWIND_CLASS_NUMBER,
+};
+
 struct frame_unwind
 {
   const char *name;
   /* The frame's type.  Should this instead be a collection of
      predicates that test the frame for various attributes?  */
   enum frame_type type;
+  /* What kind of unwinder is this.  It generally follows from where
+     the unwinder was added or where it looks for information to do the
+     unwinding.  */
+  enum frame_unwind_class unwinder_class;
   /* Should an attribute indicating the frame's address-in-block go
      here?  */
   frame_unwind_stop_reason_ftype *stop_reason;

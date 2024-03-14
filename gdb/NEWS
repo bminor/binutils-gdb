@@ -233,6 +233,10 @@ maintenance print remote-registers
   which registers were included in the last stop reply packet received by
   GDB.
 
+mainenance info frame-unwinders
+  Add a CLASS column to the output.  This class is a somewhat arbitrary
+  grouping of unwinders, based on which area of GDB adds the unwinder.
+
 show configuration
   Now includes the version of GNU Readline library that GDB is using.
 

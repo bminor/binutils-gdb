@@ -1407,6 +1407,7 @@ frv_frame_prev_register (const frame_info_ptr &this_frame,
 static const struct frame_unwind frv_frame_unwind = {
   "frv prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   frv_frame_this_id,
   frv_frame_prev_register,

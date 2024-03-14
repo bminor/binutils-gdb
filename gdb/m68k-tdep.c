@@ -1011,6 +1011,7 @@ static const struct frame_unwind m68k_frame_unwind =
 {
   "m68k prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   m68k_frame_this_id,
   m68k_frame_prev_register,

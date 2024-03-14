@@ -1068,6 +1068,7 @@ z80_frame_unwind =
 {
   "z80",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   z80_frame_this_id,
   z80_frame_prev_register,

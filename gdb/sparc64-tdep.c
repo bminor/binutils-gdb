@@ -1139,6 +1139,7 @@ static const struct frame_unwind sparc64_frame_unwind =
 {
   "sparc64 prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   sparc64_frame_this_id,
   sparc64_frame_prev_register,

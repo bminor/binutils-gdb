@@ -336,6 +336,7 @@ static const struct frame_unwind frv_linux_sigtramp_frame_unwind =
 {
   "frv linux sigtramp",
   SIGTRAMP_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   frv_linux_sigtramp_frame_this_id,
   frv_linux_sigtramp_frame_prev_register,

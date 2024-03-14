@@ -166,6 +166,7 @@ tramp_frame_prepend_unwinder (struct gdbarch *gdbarch,
   data->tramp_frame = tramp_frame;
   unwinder->type = tramp_frame->frame_type;
   unwinder->unwind_data = data;
+  unwinder->unwinder_class = FRAME_UNWIND_GDB;
   unwinder->sniffer = tramp_frame_sniffer;
   unwinder->stop_reason = default_frame_unwind_stop_reason;
   unwinder->this_id = tramp_frame_this_id;

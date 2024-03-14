@@ -42292,7 +42292,20 @@ architecture, then enabling this flag does not cause them to be used.
 
 @kindex maint info frame-unwinders
 @item maint info frame-unwinders
-List the frame unwinders currently in effect, starting with the highest priority.
+List the frame unwinders currently in effect, starting with the highest
+priority.  This also lists the unwinder class, which is mostly defined by
+which area of @value{GDBN} uses it.  The currently available classes are:
+
+@table @samp
+@item GDB
+Internal unwinders, added by @value{GDBN} core.
+@item EXTENSION
+Unwinders added by extension languages.
+@item DEBUGINFO
+Unwinders installed by debug information readers.
+@item ARCH
+Unwinders installed by the architecture specific code.
+@end table
 
 @kindex maint set worker-threads
 @kindex maint show worker-threads

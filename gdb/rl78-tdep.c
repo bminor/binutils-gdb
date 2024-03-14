@@ -1187,6 +1187,7 @@ static const struct frame_unwind rl78_unwind =
 {
   "rl78 prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   rl78_this_id,
   rl78_prev_register,

@@ -1945,6 +1945,7 @@ const struct frame_unwind record_btrace_frame_unwind =
 {
   "record-btrace",
   NORMAL_FRAME,
+  FRAME_UNWIND_GDB,
   record_btrace_frame_unwind_stop_reason,
   record_btrace_frame_this_id,
   record_btrace_frame_prev_register,
@@ -1957,6 +1958,7 @@ const struct frame_unwind record_btrace_tailcall_frame_unwind =
 {
   "record-btrace tailcall",
   TAILCALL_FRAME,
+  FRAME_UNWIND_GDB,
   record_btrace_frame_unwind_stop_reason,
   record_btrace_frame_this_id,
   record_btrace_frame_prev_register,

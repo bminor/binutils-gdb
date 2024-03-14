@@ -409,6 +409,7 @@ static const struct frame_unwind amd64obsd_trapframe_unwind =
      which really is not what we want here.  */
   "amd64 openbsd trap",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   amd64obsd_trapframe_this_id,
   amd64obsd_trapframe_prev_register,

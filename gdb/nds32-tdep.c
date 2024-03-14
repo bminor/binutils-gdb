@@ -992,6 +992,7 @@ static const struct frame_unwind nds32_frame_unwind =
 {
   "nds32 prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   nds32_frame_this_id,
   nds32_frame_prev_register,
@@ -1376,6 +1377,7 @@ static const struct frame_unwind nds32_epilogue_frame_unwind =
 {
   "nds32 epilogue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   nds32_epilogue_frame_this_id,
   nds32_epilogue_frame_prev_register,

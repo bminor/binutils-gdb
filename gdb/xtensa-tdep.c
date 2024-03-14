@@ -1501,6 +1501,7 @@ xtensa_unwind =
 {
   "xtensa prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   xtensa_frame_this_id,
   xtensa_frame_prev_register,

@@ -1011,6 +1011,7 @@ static const struct frame_unwind alpha_sigtramp_frame_unwind =
 {
   "alpha sigtramp",
   SIGTRAMP_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   alpha_sigtramp_frame_this_id,
   alpha_sigtramp_frame_prev_register,
@@ -1430,6 +1431,7 @@ static const struct frame_unwind alpha_heuristic_frame_unwind =
 {
   "alpha prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   alpha_heuristic_frame_this_id,
   alpha_heuristic_frame_prev_register,

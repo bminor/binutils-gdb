@@ -376,6 +376,7 @@ static const struct frame_unwind bfin_frame_unwind =
 {
   "bfin prologue",
   NORMAL_FRAME,
+  FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
   bfin_frame_this_id,
   bfin_frame_prev_register,

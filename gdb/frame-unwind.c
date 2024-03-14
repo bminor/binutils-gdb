@@ -31,6 +31,16 @@
 #include "cli/cli-cmds.h"
 #include "inferior.h"
 
+/* Conversion list between the enum for frame_unwind_class and
+   string.  */
+static const char * unwind_class_conversion[] =
+{
+  "GDB",
+  "EXTENSION",
+  "DEBUGINFO",
+  "ARCH",
+};
+
 /* Default sniffers, that must always be the first in the unwinder list,
    no matter the architecture.  */
 static constexpr std::initializer_list<const frame_unwind *>
@@ -71,6 +81,13 @@ get_frame_unwind_table (struct gdbarch *gdbarch)
   frame_unwind_data.set (gdbarch, table);
 
   return *table;
+}
+
+static const char *
+frame_unwinder_class_str (frame_unwind_class uclass)
+{
+  gdb_assert (uclass < UNWIND_CLASS_NUMBER);
+  return unwind_class_conversion[uclass];
 }
 
 void
@@ -332,9 +349,10 @@ maintenance_info_frame_unwinders (const char *args, int from_tty)
   std::vector<const frame_unwind *> &table = get_frame_unwind_table (gdbarch);
 
   ui_out *uiout = current_uiout;
-  ui_out_emit_table table_emitter (uiout, 2, -1, "FrameUnwinders");
+  ui_out_emit_table table_emitter (uiout, 3, -1, "FrameUnwinders");
   uiout->table_header (27, ui_left, "name", "Name");
   uiout->table_header (25, ui_left, "type", "Type");
+  uiout->table_header (9, ui_left, "class", "Class");
   uiout->table_body ();
 
   for (const auto &unwinder : table)
@@ -342,6 +360,8 @@ maintenance_info_frame_unwinders (const char *args, int from_tty)
       ui_out_emit_list tuple_emitter (uiout, nullptr);
       uiout->field_string ("name", unwinder->name);
       uiout->field_string ("type", frame_type_str (unwinder->type));
+      uiout->field_string ("class", frame_unwinder_class_str (
+					unwinder->unwinder_class));
       uiout->text ("\n");
     }
 }

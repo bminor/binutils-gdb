@@ -1341,6 +1341,7 @@ static const struct frame_unwind dwarf2_frame_unwind =
 {
   "dwarf2",
   NORMAL_FRAME,
+  FRAME_UNWIND_DEBUGINFO,
   dwarf2_frame_unwind_stop_reason,
   dwarf2_frame_this_id,
   dwarf2_frame_prev_register,
@@ -1353,6 +1354,7 @@ static const struct frame_unwind dwarf2_signal_frame_unwind =
 {
   "dwarf2 signal",
   SIGTRAMP_FRAME,
+  FRAME_UNWIND_DEBUGINFO,
   dwarf2_frame_unwind_stop_reason,
   dwarf2_frame_this_id,
   dwarf2_frame_prev_register,
