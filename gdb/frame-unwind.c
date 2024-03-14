@@ -31,49 +31,12 @@
 #include "cli/cli-cmds.h"
 #include "inferior.h"
 
-struct frame_unwind_table_entry
+/* Default sniffers, that must always be the first in the unwinder list,
+   no matter the architecture.  */
+static constexpr std::initializer_list<const frame_unwind *>
+  standard_unwinders =
 {
-  const struct frame_unwind *unwinder;
-  struct frame_unwind_table_entry *next;
-};
-
-struct frame_unwind_table
-{
-  struct frame_unwind_table_entry *list = nullptr;
-  /* The head of the OSABI part of the search list.  */
-  struct frame_unwind_table_entry **osabi_head = nullptr;
-};
-
-static const registry<gdbarch>::key<struct frame_unwind_table>
-     frame_unwind_data;
-
-/* A helper function to add an unwinder to a list.  LINK says where to
-   install the new unwinder.  The new link is returned.  */
-
-static struct frame_unwind_table_entry **
-add_unwinder (struct obstack *obstack, const struct frame_unwind *unwinder,
-	      struct frame_unwind_table_entry **link)
-{
-  *link = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);
-  (*link)->unwinder = unwinder;
-  return &(*link)->next;
-}
-
-static struct frame_unwind_table *
-get_frame_unwind_table (struct gdbarch *gdbarch)
-{
-  struct frame_unwind_table *table = frame_unwind_data.get (gdbarch);
-  if (table != nullptr)
-    return table;
-
-  table = new frame_unwind_table;
-
-  /* Start the table out with a few default sniffers.  OSABI code
-     can't override this.  */
-  struct frame_unwind_table_entry **link = &table->list;
-
-  struct obstack *obstack = gdbarch_obstack (gdbarch);
-  link = add_unwinder (obstack, &dummy_frame_unwind, link);
+  &dummy_frame_unwind,
   /* The DWARF tailcall sniffer must come before the inline sniffer.
      Otherwise, we can end up in a situation where a DWARF frame finds
      tailcall information, but then the inline sniffer claims a frame
@@ -81,41 +44,49 @@ get_frame_unwind_table (struct gdbarch *gdbarch)
      safe to do always because the tailcall sniffer can only ever be
      activated if the newer frame was created using the DWARF
      unwinder, and it also found tailcall information.  */
-  link = add_unwinder (obstack, &dwarf2_tailcall_frame_unwind, link);
-  link = add_unwinder (obstack, &inline_frame_unwind, link);
+  &dwarf2_tailcall_frame_unwind,
+  &inline_frame_unwind,
+};
 
-  /* The insertion point for OSABI sniffers.  */
-  table->osabi_head = link;
+/* If an unwinder should be prepended to the list, this is the
+   index in which it should be inserted.  */
+static constexpr int prepend_unwinder_index = standard_unwinders.size ();
+
+static const registry<gdbarch>::key<std::vector<const frame_unwind *>>
+     frame_unwind_data;
+
+/* Retrieve the list of frame unwinders available in GDBARCH.
+   If this list is empty, it is initialized before being returned.  */
+static std::vector<const frame_unwind *> &
+get_frame_unwind_table (struct gdbarch *gdbarch)
+{
+  std::vector<const frame_unwind *> *table = frame_unwind_data.get (gdbarch);
+  if (table != nullptr)
+    return *table;
+
+  table = new std::vector<const frame_unwind *>;
+  table->insert (table->begin (), standard_unwinders.begin (),
+		 standard_unwinders.end ());
+
   frame_unwind_data.set (gdbarch, table);
 
-  return table;
+  return *table;
 }
 
 void
 frame_unwind_prepend_unwinder (struct gdbarch *gdbarch,
 				const struct frame_unwind *unwinder)
 {
-  struct frame_unwind_table *table = get_frame_unwind_table (gdbarch);
-  struct frame_unwind_table_entry *entry;
+  std::vector<const frame_unwind *> &table = get_frame_unwind_table (gdbarch);
 
-  /* Insert the new entry at the start of the list.  */
-  entry = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_unwind_table_entry);
-  entry->unwinder = unwinder;
-  entry->next = (*table->osabi_head);
-  (*table->osabi_head) = entry;
+  table.insert (table.begin () + prepend_unwinder_index, unwinder);
 }
 
 void
 frame_unwind_append_unwinder (struct gdbarch *gdbarch,
 			      const struct frame_unwind *unwinder)
 {
-  struct frame_unwind_table *table = get_frame_unwind_table (gdbarch);
-  struct frame_unwind_table_entry **ip;
-
-  /* Find the end of the list and insert the new entry there.  */
-  for (ip = table->osabi_head; (*ip) != NULL; ip = &(*ip)->next);
-  (*ip) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_unwind_table_entry);
-  (*ip)->unwinder = unwinder;
+  get_frame_unwind_table (gdbarch).push_back (unwinder);
 }
 
 /* Call SNIFFER from UNWINDER.  If it succeeded set UNWINDER for
@@ -188,9 +159,6 @@ frame_unwind_find_by_frame (const frame_info_ptr &this_frame, void **this_cache)
   FRAME_SCOPED_DEBUG_ENTER_EXIT;
   frame_debug_printf ("this_frame=%d", frame_relative_level (this_frame));
 
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct frame_unwind_table *table = get_frame_unwind_table (gdbarch);
-  struct frame_unwind_table_entry *entry;
   const struct frame_unwind *unwinder_from_target;
 
   unwinder_from_target = target_get_unwinder ();
@@ -205,8 +173,10 @@ frame_unwind_find_by_frame (const frame_info_ptr &this_frame, void **this_cache)
 				   unwinder_from_target))
     return;
 
-  for (entry = table->list; entry != NULL; entry = entry->next)
-    if (frame_unwind_try_unwinder (this_frame, this_cache, entry->unwinder))
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  std::vector<const frame_unwind *> &table = get_frame_unwind_table (gdbarch);
+  for (const auto &unwinder : table)
+    if (frame_unwind_try_unwinder (this_frame, this_cache, unwinder))
       return;
 
   internal_error (_("frame_unwind_find_by_frame failed"));
@@ -359,7 +329,7 @@ static void
 maintenance_info_frame_unwinders (const char *args, int from_tty)
 {
   gdbarch *gdbarch = current_inferior ()->arch ();
-  struct frame_unwind_table *table = get_frame_unwind_table (gdbarch);
+  std::vector<const frame_unwind *> &table = get_frame_unwind_table (gdbarch);
 
   ui_out *uiout = current_uiout;
   ui_out_emit_table table_emitter (uiout, 2, -1, "FrameUnwinders");
@@ -367,15 +337,11 @@ maintenance_info_frame_unwinders (const char *args, int from_tty)
   uiout->table_header (25, ui_left, "type", "Type");
   uiout->table_body ();
 
-  for (struct frame_unwind_table_entry *entry = table->list; entry != NULL;
-       entry = entry->next)
+  for (const auto &unwinder : table)
     {
-      const char *name = entry->unwinder->name;
-      const char *type = frame_type_str (entry->unwinder->type);
-
       ui_out_emit_list tuple_emitter (uiout, nullptr);
-      uiout->field_string ("name", name);
-      uiout->field_string ("type", type);
+      uiout->field_string ("name", unwinder->name);
+      uiout->field_string ("type", frame_type_str (unwinder->type));
       uiout->text ("\n");
     }
 }
