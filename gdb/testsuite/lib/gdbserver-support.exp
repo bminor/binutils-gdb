@@ -433,6 +433,7 @@ proc close_gdbserver {} {
     # -nowait makes expect tell Tcl to wait for the process in the
     # background.
     catch "wait -nowait -i $server_spawn_id"
+    clean_up_spawn_id target $server_spawn_id
     unset server_spawn_id
 }
 

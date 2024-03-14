@@ -3310,6 +3310,20 @@ proc with_spawn_id { spawn_id body } {
     }
 }
 
+# DejaGNU records spawn ids in a global array and tries to wait for
+# them when exiting.  Sometimes this caused problems if gdb's test
+# suite has already waited for the particular spawn id.  And, dejagnu
+# only seems to allow a single spawn id per "machine".  This proc can
+# be used to clean up after a spawn id has been closed.
+proc clean_up_spawn_id {host id} {
+    global board_info
+    set name [board_info $host name]
+    if {[info exists board_info($name,fileid)]
+	&& $board_info($name,fileid) == $id} {
+	unset -nocomplain board_info($name,fileid)
+    }
+}
+
 # Select the largest timeout from all the timeouts:
 # - the local "timeout" variable of the scope two levels above,
 # - the global "timeout" variable,
@@ -6194,6 +6208,7 @@ proc kill_wait_spawned_process { proc_spawn_id } {
     # wait for the PID in the background.  That's fine because we
     # don't care about the exit status.  */
     wait -nowait -i $proc_spawn_id
+    clean_up_spawn_id target $proc_spawn_id
 }
 
 # Returns the process id corresponding to the given spawn id.
