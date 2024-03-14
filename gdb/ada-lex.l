@@ -108,9 +108,6 @@ static bool returned_complete = false;
       pstate->lexptr += 1;						\
     }
 
-/* Depth of parentheses.  */
-static int paren_depth;
-
 %}
 
 %option case-insensitive interactive nodefault noyywrap
@@ -268,7 +265,7 @@ false		{ return FALSEKEYWORD; }
 
 [-&*+{}@/:<>=|;\[\]] { return yytext[0]; }
 
-","		{ if (paren_depth == 0 && pstate->comma_terminates)
+","		{ if (ada_parser->paren_depth == 0 && pstate->comma_terminates)
 		    {
 		      rewind_to_char (',');
 		      return 0;
@@ -277,15 +274,15 @@ false		{ return FALSEKEYWORD; }
 		    return ',';
 		}
 
-"("		{ paren_depth += 1; return '('; }
-")"		{ if (paren_depth == 0)
+"("		{ ada_parser->paren_depth += 1; return '('; }
+")"		{ if (ada_parser->paren_depth == 0)
 		    {
 		      rewind_to_char (')');
 		      return 0;
 		    }
 		  else
  		    {
-		      paren_depth -= 1;
+		      ada_parser->paren_depth -= 1;
 		      return ')';
 		    }
 		}
@@ -349,7 +346,6 @@ static void
 lexer_init (FILE *inp)
 {
   BEGIN INITIAL;
-  paren_depth = 0;
   returned_complete = false;
   yyrestart (inp);
 }

@@ -102,6 +102,9 @@ struct ada_parse_state
 
   auto_obstack temp_space;
 
+  /* Depth of parentheses, used by the lexer.  */
+  int paren_depth = 0;
+
 private:
 
   /* We don't have a good way to manage non-POD data in Yacc, so store
