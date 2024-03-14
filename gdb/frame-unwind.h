@@ -192,6 +192,12 @@ public:
   const frame_data *unwind_data () const
   { return m_unwind_data; }
 
+  bool enabled () const
+  { return m_enabled; }
+
+  void set_enabled (bool state) const
+  { m_enabled = state; }
+
   /* Default stop_reason implementation.  It reports NO_REASON, unless the
      frame is the outermost.  */
 
@@ -247,6 +253,9 @@ private:
 
   /* Additional data used by the trampoline and python frame unwinders.  */
   const frame_data *m_unwind_data;
+
+  /* Whether this unwinder can be used when sniffing.  */
+  mutable bool m_enabled = true;
 };
 
 /* This is a legacy version of the frame unwinder.  The original struct

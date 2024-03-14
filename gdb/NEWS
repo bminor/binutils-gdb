@@ -194,6 +194,13 @@ maintenance info blocks [ADDRESS]
   are listed starting at the inner global block out to the most inner
   block.
 
+maintenance frame-unwinder disable [-all | -name NAME | [-class] CLASS]
+maintenance frame-unwinder enable [-all | -name NAME | [-class] CLASS]
+  Enable or disable frame unwinders.  This is only meant to be used when
+  testing unwinders themselves, and you want to ensure that a fallback
+  algorithm won't obscure a regression.  GDB is not expected to behave
+  well if you try to execute the inferior with unwinders disabled.
+
 info missing-objfile-handlers
   List all the registered missing-objfile handlers.
 
@@ -236,6 +243,16 @@ maintenance print remote-registers
 mainenance info frame-unwinders
   Add a CLASS column to the output.  This class is a somewhat arbitrary
   grouping of unwinders, based on which area of GDB adds the unwinder.
+  Also add an ENABLED column, that will show if the unwinder is enabled
+  or not.
+
+maintenance set dwarf unwinders (on|off)
+  This command has been removed because the same functionality can be
+  achieved with maint frame-unwinder (enable|disable) DEBUGINFO.
+
+maintenance show dwarf unwinders
+  This command has been removed since the functionality can be achieved
+  by checking the last column of maint info frame-unwinders.
 
 show configuration
   Now includes the version of GNU Readline library that GDB is using.

@@ -183,9 +183,6 @@ static ULONGEST read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
 				    unrelocated_addr func_base);
 
 
-/* See dwarf2/frame.h.  */
-bool dwarf2_frame_unwinders_enabled_p = true;
-
 /* Store the length the expression for the CFA in the `cfa_reg' field,
    which is unused in that case.  */
 #define cfa_exp_len cfa_reg
@@ -1306,9 +1303,6 @@ static int
 dwarf2_frame_sniffer (const struct frame_unwind *self,
 		      const frame_info_ptr &this_frame, void **this_cache)
 {
-  if (!dwarf2_frame_unwinders_enabled_p)
-    return 0;
-
   /* Grab an address that is guaranteed to reside somewhere within the
      function.  get_frame_pc(), with a no-return next function, can
      end up returning something past the end of this function's body.
@@ -2253,34 +2247,10 @@ dwarf2_build_frame_info (struct objfile *objfile)
   set_comp_unit (objfile, unit.release ());
 }
 
-/* Handle 'maintenance show dwarf unwinders'.  */
-
-static void
-show_dwarf_unwinders_enabled_p (struct ui_file *file, int from_tty,
-				struct cmd_list_element *c,
-				const char *value)
-{
-  gdb_printf (file,
-	      _("The DWARF stack unwinders are currently %s.\n"),
-	      value);
-}
-
 void _initialize_dwarf2_frame ();
 void
 _initialize_dwarf2_frame ()
 {
-  add_setshow_boolean_cmd ("unwinders", class_obscure,
-			   &dwarf2_frame_unwinders_enabled_p , _("\
-Set whether the DWARF stack frame unwinders are used."), _("\
-Show whether the DWARF stack frame unwinders are used."), _("\
-When enabled the DWARF stack frame unwinders can be used for architectures\n\
-that support the DWARF unwinders.  Enabling the DWARF unwinders for an\n\
-architecture that doesn't support them will have no effect."),
-			   NULL,
-			   show_dwarf_unwinders_enabled_p,
-			   &set_dwarf_cmdlist,
-			   &show_dwarf_cmdlist);
-
 #if GDB_SELF_TEST
   selftests::register_test_foreach_arch ("execute_cfa_program",
 					 selftests::execute_cfa_program_test);

@@ -42265,31 +42265,6 @@ On hosts without threading, or where worker threads have been disabled
 at runtime, this setting has no effect, as DWARF reading is always
 done on the main thread, and is therefore always synchronous.
 
-@kindex maint set dwarf unwinders
-@kindex maint show dwarf unwinders
-@item maint set dwarf unwinders
-@itemx maint show dwarf unwinders
-Control use of the DWARF frame unwinders.
-
-@cindex DWARF frame unwinders
-Many targets that support DWARF debugging use @value{GDBN}'s DWARF
-frame unwinders to build the backtrace.  Many of these targets will
-also have a second mechanism for building the backtrace for use in
-cases where DWARF information is not available, this second mechanism
-is often an analysis of a function's prologue.
-
-In order to extend testing coverage of the second level stack
-unwinding mechanisms it is helpful to be able to disable the DWARF
-stack unwinders, this can be done with this switch.
-
-In normal use of @value{GDBN} disabling the DWARF unwinders is not
-advisable, there are cases that are better handled through DWARF than
-prologue analysis, and the debug experience is likely to be better
-with the DWARF frame unwinders enabled.
-
-If DWARF frame unwinders are not supported for a particular target
-architecture, then enabling this flag does not cause them to be used.
-
 @kindex maint info frame-unwinders
 @item maint info frame-unwinders
 List the frame unwinders currently in effect, starting with the highest
@@ -42306,6 +42281,30 @@ Unwinders installed by debug information readers.
 @item ARCH
 Unwinders installed by the architecture specific code.
 @end table
+
+@kindex maint frame-unwinder disable
+@kindex maint frame-unwinder enable
+@item maint frame-unwinder disable [@code{-all} | @code{-name} @var{name} | [@code{-class}] @var{class}]
+@item maint frame-unwinder enable [@code{-all} | @code{-name} @var{name} | [@code{-class}] @var{class}]
+Disable or enable frame unwinders.  This is meant only as a testing tool, and
+@value{GDBN} is not guaranteed to work properly if it is unable to find
+valid frame unwinders.
+
+The meaning of each of the invocations are as follows:
+
+@table @samp
+@item @code{-all}
+Disable or enable all unwinders.
+@item @code{-name} @var{name}
+@var{name} is the exact name of the unwinder to be disabled or enabled.
+@item [@code{-class}] @var{class}
+@var{class} is the class of frame unwinders to be disabled or enabled.
+The class may include the prefix @code{FRAME_UNWINDER_}, but it is not
+required.
+@end table
+
+@var{name} and @var{class} are always case insensitive.  If no option
+starting wth @code{-} is given, @value{GDBN} assumes @code{-class}.
 
 @kindex maint set worker-threads
 @kindex maint show worker-threads
