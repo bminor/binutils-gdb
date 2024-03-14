@@ -1,3 +1,9 @@
+2024-03-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.def: Add configure-gdbserver and all-gdbserver
+	dependencies on all-libiconv.
+	* Makefile.in: Re-generate.
+
 2024-01-15  Nick Clifton  <nickc@redhat.com>
 
 	* 2.42 branch point.

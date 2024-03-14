@@ -67904,7 +67904,9 @@ all-gdb: maybe-all-opcodes
 all-gdb: maybe-all-libdecnumber
 all-gdb: maybe-all-libctf
 all-gdb: maybe-all-libbacktrace
+configure-gdbserver: maybe-all-libiconv
 all-gdbserver: maybe-all-libiberty
+all-gdbserver: maybe-all-libiconv
 configure-gdbsupport: maybe-configure-gettext
 all-gdbsupport: maybe-all-gettext
 configure-gprof: maybe-configure-gettext

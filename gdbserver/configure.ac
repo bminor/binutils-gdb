@@ -456,6 +456,22 @@ if test x"$STDINT_H" != x; then
 fi
 AC_SUBST(GNULIB_STDINT_H)
 
+# Check for libiconv.  It is a requirement for Linux hosts, and others hosts
+# don't use it at all.  Define MAYBE_LIBICONV only if the host is Linux.
+AM_ICONV
+MAYBE_LIBICONV=
+case "$host" in
+  *linux*)
+    if test "$am_cv_func_iconv" != yes; then
+      AC_MSG_ERROR([could not find libiconv (required for host $host)])
+    fi
+
+    MAYBE_LIBICONV="$LIBICONV"
+    ;;
+esac
+
+AC_SUBST(MAYBE_LIBICONV)
+
 AC_CONFIG_FILES([Makefile])
 
 AC_OUTPUT

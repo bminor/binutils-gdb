@@ -461,9 +461,11 @@ dependencies = { module=all-gdb; on=all-libbacktrace; };
 
 // Host modules specific to gdbserver.
 dependencies = { module=configure-gdbserver; on=all-gnulib; };
+dependencies = { module=configure-gdbserver; on=all-libiconv; };
 dependencies = { module=all-gdbserver; on=all-gdbsupport; };
 dependencies = { module=all-gdbserver; on=all-gnulib; };
 dependencies = { module=all-gdbserver; on=all-libiberty; };
+dependencies = { module=all-gdbserver; on=all-libiconv; };
 
 dependencies = { module=configure-libgui; on=configure-tcl; };
 dependencies = { module=configure-libgui; on=configure-tk; };
