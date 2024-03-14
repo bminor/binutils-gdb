@@ -662,7 +662,7 @@ subseqMatch (const char *subseq, const char *str)
 }
 
 
-static struct { const char *name; int code; }
+static const struct { const char *name; int code; }
 attributes[] = {
   { "address", TICK_ADDRESS },
   { "unchecked_access", TICK_ACCESS },
