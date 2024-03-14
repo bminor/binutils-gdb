@@ -531,7 +531,7 @@ processReal (struct parser_state *par_state, const char *num0)
 static struct stoken
 processId (const char *name0, int len)
 {
-  char *name = (char *) obstack_alloc (&temp_parse_space, len + 11);
+  char *name = (char *) obstack_alloc (&ada_parser->temp_space, len + 11);
   int i0, i;
   struct stoken result;
 
@@ -593,7 +593,7 @@ processString (const char *text, int len)
   const char *lim = text + len;
   struct stoken result;
 
-  q = (char *) obstack_alloc (&temp_parse_space, len);
+  q = (char *) obstack_alloc (&ada_parser->temp_space, len);
   result.ptr = q;
   p = text;
   while (p < lim)
@@ -706,7 +706,8 @@ processAttribute (const char *str)
     {
       /* This is enforced by YY_INPUT.  */
       gdb_assert (pstate->parse_completion);
-      yylval.sval.ptr = obstack_strndup (&temp_parse_space, str, len - 1);
+      yylval.sval.ptr = obstack_strndup (&ada_parser->temp_space,
+					 str, len - 1);
       yylval.sval.length = len - 1;
       return TICK_COMPLETE;
     }
