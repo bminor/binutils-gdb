@@ -75,7 +75,18 @@ struct ada_parse_state
 
   std::string find_completion_bounds ();
 
+  const gdb_mpz *push_integer (gdb_mpz &&val)
+  {
+    auto &result = m_int_storage.emplace_back (new gdb_mpz (std::move (val)));
+    return result.get ();
+  }
+
 private:
+
+  /* We don't have a good way to manage non-POD data in Yacc, so store
+     values here.  The storage here is only valid for the duration of
+     the parse.  */
+  std::vector<std::unique_ptr<gdb_mpz>> m_int_storage;
 
   /* The original expression string.  */
   const char *m_original_expr;
@@ -84,11 +95,6 @@ private:
 /* The current Ada parser object.  */
 
 static ada_parse_state *ada_parser;
-
-/* We don't have a good way to manage non-POD data in Yacc, so store
-   values here.  The storage here is only valid for the duration of
-   the parse.  */
-static std::vector<std::unique_ptr<gdb_mpz>> int_storage;
 
 int yyparse (void);
 
@@ -1252,7 +1258,6 @@ ada_parse (struct parser_state *par_state)
   obstack_init (&temp_parse_space);
   components.clear ();
   associations.clear ();
-  int_storage.clear ();
   assignments.clear ();
   iterated_associations.clear ();
 
