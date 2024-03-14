@@ -105,6 +105,13 @@ struct ada_parse_state
   /* Depth of parentheses, used by the lexer.  */
   int paren_depth = 0;
 
+  /* When completing, we'll return a special character at the end of the
+     input, to signal the completion position to the lexer.  This is
+     done because flex does not have a generally useful way to detect
+     EOF in a pattern.  This variable records whether the special
+     character has been emitted.  */
+  bool returned_complete = false;
+
 private:
 
   /* We don't have a good way to manage non-POD data in Yacc, so store

@@ -78,13 +78,6 @@ static void rewind_to_char (int);
    Defining YY_NO_INPUT comments it out.  */
 #define YY_NO_INPUT
 
-/* When completing, we'll return a special character at the end of the
-   input, to signal the completion position to the lexer.  This is
-   done because flex does not have a generally useful way to detect
-   EOF in a pattern.  This variable records whether the special
-   character has been emitted.  */
-static bool returned_complete = false;
-
 /* The character we use to represent the completion point.  */
 #define COMPLETE_CHAR '\001'
 
@@ -92,9 +85,9 @@ static bool returned_complete = false;
 #define YY_INPUT(BUF, RESULT, MAX_SIZE)					\
   if ( *pstate->lexptr == '\000' )					\
     {									\
-      if (pstate->parse_completion && !returned_complete)		\
+      if (pstate->parse_completion && !ada_parser->returned_complete)	\
 	{								\
-	  returned_complete = true;					\
+	  ada_parser->returned_complete = true;				\
 	  *(BUF) = COMPLETE_CHAR;					\
 	  (RESULT) = 1;							\
 	}								\
@@ -346,7 +339,6 @@ static void
 lexer_init (FILE *inp)
 {
   BEGIN INITIAL;
-  returned_complete = false;
   yyrestart (inp);
 }
 
