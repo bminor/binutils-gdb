@@ -71,9 +71,9 @@ gdb_bfd_unlock (void *ignore)
 struct gdb_bfd_section_data
 {
   /* Size of the data.  */
-  bfd_size_type size;
+  size_t size;
   /* If the data was mmapped, this is the length of the map.  */
-  bfd_size_type map_len;
+  size_t map_len;
   /* The data.  If NULL, the section data has not been read.  */
   void *data;
   /* If the data was mmapped, this is the map address.  */
