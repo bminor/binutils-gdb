@@ -10016,6 +10016,13 @@ process_operands (void)
   for (unsigned int j = 0; j < i.operands; j++)
     if (i.types[j].bitfield.instance != InstanceNone)
       i.reg_operands--;
+    else if (i.tm.opcode_space == SPACE_EVEXMAP4
+	     && i.types[j].bitfield.class == RegSIMD
+	     && (i.op[j].regs->reg_flags & RegVRex)
+	     && !dot_insn ())
+      /* Just raise an error, but continue processing.  */
+      as_bad (_("`%s%s' cannot be used with `%s'"),
+	      register_prefix, i.op[j].regs->reg_name, insn_name (&i.tm));
 
   if (i.tm.opcode_modifier.sse2avx)
     {

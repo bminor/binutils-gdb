@@ -45,5 +45,15 @@ _start:
 	.byte 0xff, 0xff, 0xff
 	# pop2 %rax, %r8 set EVEX.vvvv = 1111.
 	.insn EVEX.L0.M4.W0 0x8f,  %rax, {rn-sae},%r8
-	# pop2 %r8, %r8.
-	.byte 0x62, 0xd4, 0x3c, 0x18, 0x8f, 0xc0
+
+	# pop2 %r11, %r11
+	.insn EVEX.L0.NP.M4.W0 0x8f/0, {sae}, %xmm11, %xmm11
+
+	# aesenc128kl (%rax), %xmm20
+	.insn EVEX.L0.F3.M4.W0 0xdc, (%rax), %xmm20
+
+	# sha1msg1 %xmm20, %xmm0
+	.insn EVEX.L0.NP.M4.W0 0xd9, %xmm20, %xmm0
+
+	# sha1msg1 (%rax), %xmm20
+	.insn EVEX.L0.NP.M4.W0 0xd9, (%rax), %xmm20

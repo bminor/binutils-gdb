@@ -29,6 +29,10 @@
 	bzhi %r15,%r15,%r11
 
 	.arch default
+	aesenc128kl (%rax), %xmm20
+	sha1msg1 %xmm20, %xmm0
+	sha256msg2 (%rax), %xmm20
+
 	.arch .noapx_f
 	{evex} andn %r15, %r15, %r11
 	{evex} bzhi %r15, %r15, %r11

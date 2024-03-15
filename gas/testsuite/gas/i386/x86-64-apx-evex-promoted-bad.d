@@ -1,3 +1,4 @@
+#as: --divide
 #objdump: -dw
 #name: x86-64 EVEX-promoted bad
 
@@ -37,6 +38,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:[ 	]+62 f4 3c[ 	]+\(bad\)
 [ 	]*[a-f0-9]+:[ 	]+08 8f c0 ff ff ff[ 	]+or.*
 [ 	]*[a-f0-9]+:[ 	]+62 74 7c 18 8f c0[ 	]+pop2   %rax,\(bad\)
-[ 	]*[a-f0-9]+:[ 	]+62 d4 3c 18 8f[ 	]+\(bad\)
-[ 	]*[a-f0-9]+:[ 	]+c0[ 	]+.*
+[ 	]*[a-f0-9]+:[ 	]+62 d4 24 18 8f[ 	]+\(bad\)
+[ 	]*[a-f0-9]+:[ 	]+c3[ 	]+.*
+[ 	]*[a-f0-9]+:[ 	]+62 e4 7e 08 dc 20[ 	]+aesenc128kl \(%rax\),%xmm20\(bad\)
+[ 	]*[a-f0-9]+:[ 	]+62 b4 7c 08 d9 c4[ 	]+sha1msg1 %xmm20\(bad\),%xmm0
+[ 	]*[a-f0-9]+:[ 	]+62 e4 7c 08 d9 20[ 	]+sha1msg1 \(%rax\),%xmm20\(bad\)
 #pass

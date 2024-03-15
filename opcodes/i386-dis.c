@@ -12828,6 +12828,11 @@ print_vector_reg (instr_info *ins, unsigned int reg, int bytemode)
   else
     names = att_names_xmm;
   oappend_register (ins, names[reg]);
+
+  /* Legacy insns promoted to EVEX, like the legacy insns themselves, don't
+     allow use of the upper 16 vector registers.  */
+  if (ins->evex_type == evex_from_legacy && reg >= 16)
+    oappend (ins, "(bad)");
 }
 
 static bool
