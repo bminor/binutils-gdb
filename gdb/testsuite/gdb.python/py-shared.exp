@@ -64,3 +64,18 @@ gdb_test "python print (gdb.solib_name(int(main)))" "None" "test main solib loca
 if {[is_lp64_target]} {
     gdb_test "python print (len(\[gdb.solib_name(0xffffffffffffffff)\]))" "1"
 }
+
+gdb_test "python print(gdb.solib_name(-1))" \
+    [multi_line \
+	 "Python Exception <class 'OverflowError'>: can't convert negative int to unsigned" \
+	 "Error occurred in Python: can't convert negative int to unsigned"]
+
+gdb_test "python print(gdb.current_progspace().solib_name(-1))" \
+    [multi_line \
+	 "Python Exception <class 'OverflowError'>: can't convert negative int to unsigned" \
+	 "Error occurred in Python: can't convert negative int to unsigned"]
+
+gdb_test "python print(gdb.current_progspace().solib_name(\"string\"))" \
+    [multi_line \
+	 "Python Exception <class 'ValueError'>: invalid literal for int\\(\\) with base 10: 'string'" \
+	 "Error occurred in Python: invalid literal for int\\(\\) with base 10: 'string'"]
