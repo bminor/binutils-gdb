@@ -21,6 +21,23 @@
 # Written by Jeffrey Wheat (cassidy@cygnus.com)
 #
 
+if [info exists env(LD_UNDER_TEST)] {
+    # LD_UNDER_TEST must be an absolute full path.
+    if {[file pathtype $env(LD_UNDER_TEST)] ne "absolute"} {
+	perror "**************************************************"
+	perror "Environment variable LD_UNDER_TEST ($env(LD_UNDER_TEST)) isn't an absolute full path."
+	perror "**************************************************"
+	exit 1
+    } elseif {![file exists $env(LD_UNDER_TEST)]} {
+	perror "**************************************************"
+	perror "Environment variable LD_UNDER_TEST ($env(LD_UNDER_TEST)) doesn't exist."
+	perror "**************************************************"
+	exit 1
+    }
+    set ld "$env(LD_UNDER_TEST)"
+    set LD "$ld"
+}
+
 if ![info exists ld] then {
     set ld [findfile $base_dir/ld-new $base_dir/ld-new [transform ld]]
 }
@@ -64,12 +81,17 @@ remote_exec host "mkdir -p tmpdir"
 if {[info exists ld_testsuite_bindir]} {
     set gcc_B_opt "-B$ld_testsuite_bindir/"
 } else {
-    if {![file isdirectory tmpdir/ld]} then {
-	catch "exec mkdir tmpdir/ld" status
+    # Delete tmpdir/ld first to remove tmpdir/ld/ld created by the
+    # previous LD_UNDER_TEST runs.
+    file delete -force tmpdir/ld
+    catch "exec mkdir tmpdir/ld" status
+    if [info exists env(LD_UNDER_TEST)] {
+	catch "exec ln -s $env(LD_UNDER_TEST) tmpdir/ld/ld" status
+    } else {
 	catch "exec ln -s ../../ld-new tmpdir/ld/ld" status
-	catch "exec ln -s ld tmpdir/ld/collect-ld" status
-	catch "exec ln -s ../../../gas/as-new tmpdir/ld/as" status
     }
+    catch "exec ln -s ld tmpdir/ld/collect-ld" status
+    catch "exec ln -s ../../../gas/as-new tmpdir/ld/as" status
     set gcc_B_opt "-B[pwd]/tmpdir/ld/"
 }
 
