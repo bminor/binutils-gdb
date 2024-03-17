@@ -56,6 +56,7 @@ extern int linux_proc_pid_is_gone (pid_t pid);
 
 /* Index of fields of interest in /proc/PID/stat, from procfs(5) man page.  */
 #define LINUX_PROC_STAT_STATE 3
+#define LINUX_PROC_STAT_STARTTIME 22
 #define LINUX_PROC_STAT_PROCESSOR 39
 
 /* Returns FIELD (as numbered in procfs(5) man page) of

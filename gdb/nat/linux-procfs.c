@@ -20,6 +20,8 @@
 #include "gdbsupport/filestuff.h"
 #include <dirent.h>
 #include <sys/stat.h>
+#include <unordered_set>
+#include <utility>
 
 /* Return the TGID of LWPID from /proc/pid/status.  Returns -1 if not
    found.  */
@@ -272,6 +274,29 @@ linux_proc_get_stat_field (ptid_t ptid, int field)
     return content->substr (pos, end_pos - pos);
 }
 
+/* Get the start time of thread PTID.  */
+
+static std::optional<ULONGEST>
+linux_proc_get_starttime (ptid_t ptid)
+{
+  std::optional<std::string> field
+    = linux_proc_get_stat_field (ptid, LINUX_PROC_STAT_STARTTIME);
+
+  if (!field.has_value ())
+    return {};
+
+  errno = 0;
+  const char *trailer;
+  ULONGEST starttime = strtoulst (field->c_str (), &trailer, 10);
+  if (starttime == ULONGEST_MAX && errno == ERANGE)
+    return {};
+  else if (*trailer != '\0')
+    /* There were unexpected characters.  */
+    return {};
+
+  return starttime;
+}
+
 /* See linux-procfs.h.  */
 
 const char *
@@ -333,6 +358,21 @@ linux_proc_attach_tgid_threads (pid_t pid,
       return;
     }
 
+  /* Callable object to hash elements in visited_lpws.  */
+  struct pair_hash
+  {
+    std::size_t operator() (const std::pair<unsigned long, ULONGEST> &v) const
+    {
+      return (std::hash<unsigned long>() (v.first)
+	      ^ std::hash<ULONGEST>() (v.second));
+    }
+  };
+
+  /* Keeps track of the LWPs we have already visited in /proc,
+     identified by their PID and starttime to detect PID reuse.  */
+  std::unordered_set<std::pair<unsigned long, ULONGEST>,
+		     pair_hash> visited_lwps;
+
   /* Scan the task list for existing threads.  While we go through the
      threads, new threads may be spawned.  Cycle through the list of
      threads until we have done two iterations without finding new
@@ -351,6 +391,19 @@ linux_proc_attach_tgid_threads (pid_t pid,
 	  if (lwp != 0)
 	    {
 	      ptid_t ptid = ptid_t (pid, lwp);
+	      std::optional<ULONGEST> starttime
+		= linux_proc_get_starttime (ptid);
+
+	      if (starttime.has_value ())
+		{
+		  std::pair<unsigned long, ULONGEST> key (lwp, *starttime);
+
+		  /* If we already visited this LWP, skip it this time.  */
+		  if (visited_lwps.find (key) != visited_lwps.cend ())
+		    continue;
+
+		  visited_lwps.insert (key);
+		}
 
 	      if (attach_lwp (ptid))
 		new_threads_found = 1;
