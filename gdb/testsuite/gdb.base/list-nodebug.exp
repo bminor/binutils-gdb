@@ -16,10 +16,13 @@
 # Test that using the command "list" in a file with no debug information
 # will not crash GDB and will give reasonable output.
 
-standard_testfile .c
+standard_testfile .c -2.c
 
-if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
-    {nodebug}]} {
+if { [prepare_for_testing_full "failed to prepare" \
+	  [list \
+	       $testfile {} \
+	       $srcfile {nodebug} \
+	       $srcfile2 {debug}]] } {
     return -1
 }
 
