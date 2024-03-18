@@ -758,6 +758,7 @@ behaviour of the AIX linker.
 @kindex --library-path=@var{dir}
 @item -L @var{searchdir}
 @itemx --library-path=@var{searchdir}
+@anchor{-L}
 Add path @var{searchdir} to the list of paths that @command{ld} will search
 for archive libraries and @command{ld} control scripts.  You may use this
 option any number of times.  The directories are searched in the order
@@ -2427,11 +2428,11 @@ of the input files.
 When the linker encounters such a dependency when doing a non-shared,
 non-relocatable link, it will automatically try to locate the required
 shared library and include it in the link, if it is not included
-explicitly.  In such a case, the @option{-rpath-link} option
-specifies the first set of directories to search.  The
-@option{-rpath-link} option may specify a sequence of directory names
-either by specifying a list of names separated by colons, or by
-appearing multiple times.
+explicitly.  In such a case, several directories are searched as
+described below.  The @option{-rpath-link} option specifies the first
+set of directories to search.  This option may specify a sequence of
+directory names either by providing a list of names separated by
+colons, or by appearing multiple times.
 
 The tokens @var{$ORIGIN} and @var{$LIB} can appear in these search
 directories.  They will be replaced by the full path to the directory
@@ -2443,13 +2444,18 @@ The alternative form of these tokens - @var{$@{ORIGIN@}} and
 @var{$@{LIB@}} can also be used.  The token @var{$PLATFORM} is not
 supported.
 
-This option should be used with caution as it overrides the search path
-that may have been hard compiled into a shared library. In such a case it
-is possible to use unintentionally a different search path than the
-runtime linker would do.
+The @option{--rpath-link} option should be used with caution as it
+overrides the search path that may have been hard compiled into a
+shared library.  In such a case it is possible to unintentionally use
+a different search path than the runtime linker would have used.
 
-The linker uses the following search paths to locate required shared
-libraries:
+When additional shared libraries are required, the linker will search
+directories in the order listed below in order to find them.  Note
+however that this only applies to additional libraries needed to
+satisfy already included shared libraries.  It does does @emph{not}
+apply to libraries that are included via the @option{-l} command line
+option.  Searches for @option{-l} libraries are only conducted in
+directories specified by the @option{-L} option (@xref{-L}).
 
 @enumerate
 @item
