@@ -43,6 +43,7 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_INT_REG, "PAIRREG_OR_XZR", OPD_F_HAS_EXTRACTOR, {}, "the second reg of a pair"},
   {AARCH64_OPND_CLASS_MODIFIED_REG, "Rm_EXT", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "an integer register with optional extension"},
   {AARCH64_OPND_CLASS_MODIFIED_REG, "Rm_SFT", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "an integer register with optional shift"},
+  {AARCH64_OPND_CLASS_MODIFIED_REG, "Rm_LSL", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "an integer register with optional LSL shift"},
   {AARCH64_OPND_CLASS_FP_REG, "Fd", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rd}, "a floating-point register"},
   {AARCH64_OPND_CLASS_FP_REG, "Fn", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn}, "a floating-point register"},
   {AARCH64_OPND_CLASS_FP_REG, "Fm", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rm}, "a floating-point register"},
