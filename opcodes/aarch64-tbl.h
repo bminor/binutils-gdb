@@ -6344,9 +6344,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   B16B16_INSN("bfmul", 0x65000800, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_HHH, 0, 0),
   B16B16_INSNC("bfsub", 0x65018000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_SMSS, 0, C_SCAN_MOVPRFX, 0),
   B16B16_INSN("bfsub", 0x65000400, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_HHH, 0, 0),
-  B16B16_INSN("bfmla", 0x64200800, 0xffa0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_11_INDEX), OP_SVE_VVV_H, 0, 0),
-  B16B16_INSN("bfmls", 0x64200c00, 0xffa0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_11_INDEX), OP_SVE_VVV_H, 0, 0),
-  B16B16_INSN("bfmul", 0x64202800, 0xffa0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_11_INDEX), OP_SVE_VVV_H, 0, 0),
+  B16B16_INSN("bfmla", 0x64200800, 0xffa0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_22_INDEX), OP_SVE_VVV_H, 0, 0),
+  B16B16_INSN("bfmls", 0x64200c00, 0xffa0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_22_INDEX), OP_SVE_VVV_H, 0, 0),
+  B16B16_INSN("bfmul", 0x64202800, 0xffa0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_22_INDEX), OP_SVE_VVV_H, 0, 0),
 
 /* SME2.1 movaz instructions.  */
   SME2p1_INSN ("movaz", 0xc0060600, 0xffff1f83, sme2_movaz, 0, OP2 (SME_Zdnx4, SME_ZA_array_vrsb_2), OP_SVE_BB, 0, 0),
