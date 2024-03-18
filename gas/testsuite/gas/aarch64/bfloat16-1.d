@@ -50,24 +50,24 @@
 .*:	64222604 	bfclamp	z4.h, z16.h, z2.h
 .*:	64212688 	bfclamp	z8.h, z20.h, z1.h
 .*:	64202710 	bfclamp	z16.h, z24.h, z0.h
-.*:	65300000 	bfmla	z0.h, p0\/m, z0.h, z16.h
-.*:	65280421 	bfmla	z1.h, p1\/m, z1.h, z8.h
-.*:	65240842 	bfmla	z2.h, p2\/m, z2.h, z4.h
-.*:	65221084 	bfmla	z4.h, p4\/m, z4.h, z2.h
-.*:	65211908 	bfmla	z8.h, p6\/m, z8.h, z1.h
-.*:	65201e10 	bfmla	z16.h, p7\/m, z16.h, z0.h
+.*:	65300080 	bfmla	z0.h, p0\/m, z4.h, z16.h
+.*:	65280501 	bfmla	z1.h, p1\/m, z8.h, z8.h
+.*:	65240982 	bfmla	z2.h, p2\/m, z12.h, z4.h
+.*:	65221204 	bfmla	z4.h, p4\/m, z16.h, z2.h
+.*:	65211a88 	bfmla	z8.h, p6\/m, z20.h, z1.h
+.*:	65201f10 	bfmla	z16.h, p7\/m, z24.h, z0.h
 .*:	647e0a00 	bfmla	z0.h, z16.h, z6.h\[7\]
 .*:	64750901 	bfmla	z1.h, z8.h, z5.h\[6\]
 .*:	646409c2 	bfmla	z2.h, z14.h, z4.h\[4\]
 .*:	64320aa4 	bfmla	z4.h, z21.h, z2.h\[2\]
 .*:	64290988 	bfmla	z8.h, z12.h, z1.h\[1\]
 .*:	64200950 	bfmla	z16.h, z10.h, z0.h\[0\]
-.*:	65302000 	bfmls	z0.h, p0\/m, z0.h, z16.h
-.*:	65282421 	bfmls	z1.h, p1\/m, z1.h, z8.h
-.*:	65242842 	bfmls	z2.h, p2\/m, z2.h, z4.h
-.*:	65223084 	bfmls	z4.h, p4\/m, z4.h, z2.h
-.*:	65213908 	bfmls	z8.h, p6\/m, z8.h, z1.h
-.*:	65203e10 	bfmls	z16.h, p7\/m, z16.h, z0.h
+.*:	65302080 	bfmls	z0.h, p0\/m, z4.h, z16.h
+.*:	65282501 	bfmls	z1.h, p1\/m, z8.h, z8.h
+.*:	65242982 	bfmls	z2.h, p2\/m, z12.h, z4.h
+.*:	65223204 	bfmls	z4.h, p4\/m, z16.h, z2.h
+.*:	65213a88 	bfmls	z8.h, p6\/m, z20.h, z1.h
+.*:	65203f10 	bfmls	z16.h, p7\/m, z24.h, z0.h
 .*:	647e0e00 	bfmls	z0.h, z16.h, z6.h\[7\]
 .*:	64750d01 	bfmls	z1.h, z8.h, z5.h\[6\]
 .*:	64640dc2 	bfmls	z2.h, z14.h, z4.h\[4\]

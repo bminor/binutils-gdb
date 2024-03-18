@@ -32211,14 +32211,14 @@ aarch64_find_next_opcode (const aarch64_opcode *opcode)
     case 1705: return NULL;		/* ldff1h --> NULL.  */
     case 1659: value = 3313; break;	/* ld2h --> ld2q.  */
     case 3313: return NULL;		/* ld2q --> NULL.  */
-    case 2464: value = 3279; break;	/* fclamp --> bfclamp.  */
-    case 3279: return NULL;		/* bfclamp --> NULL.  */
+    case 2464: value = 3281; break;	/* fclamp --> bfclamp.  */
+    case 3281: return NULL;		/* bfclamp --> NULL.  */
     case 1778: value = 1779; break;	/* ldr --> ldr.  */
     case 1779: return NULL;		/* ldr --> NULL.  */
-    case 1434: value = 3278; break;	/* fadd --> bfadd.  */
-    case 3278: return NULL;		/* bfadd --> NULL.  */
-    case 1501: value = 3281; break;	/* fmul --> bfmul.  */
-    case 3281: return NULL;		/* bfmul --> NULL.  */
+    case 1434: value = 3280; break;	/* fadd --> bfadd.  */
+    case 3280: return NULL;		/* bfadd --> NULL.  */
+    case 1501: value = 3282; break;	/* fmul --> bfmul.  */
+    case 3282: return NULL;		/* bfmul --> NULL.  */
     case 1527: value = 3283; break;	/* fsub --> bfsub.  */
     case 3283: return NULL;		/* bfsub --> NULL.  */
     case 1492: value = 3276; break;	/* fmla --> bfmla.  */
@@ -32251,12 +32251,12 @@ aarch64_find_next_opcode (const aarch64_opcode *opcode)
     case 3271: return NULL;		/* bfadd --> NULL.  */
     case 1482: value = 3273; break;	/* fmaxnm --> bfmaxnm.  */
     case 3273: return NULL;		/* bfmaxnm --> NULL.  */
-    case 1502: value = 3280; break;	/* fmul --> bfmul.  */
-    case 3280: return NULL;		/* bfmul --> NULL.  */
+    case 1502: value = 3278; break;	/* fmul --> bfmul.  */
+    case 3278: return NULL;		/* bfmul --> NULL.  */
     case 1480: value = 3272; break;	/* fmax --> bfmax.  */
     case 3272: return NULL;		/* bfmax --> NULL.  */
-    case 1528: value = 3282; break;	/* fsub --> bfsub.  */
-    case 3282: return NULL;		/* bfsub --> NULL.  */
+    case 1528: value = 3279; break;	/* fsub --> bfsub.  */
+    case 3279: return NULL;		/* bfsub --> NULL.  */
     case 1488: value = 3275; break;	/* fminnm --> bfminnm.  */
     case 3275: return NULL;		/* bfminnm --> NULL.  */
     case 1486: value = 3274; break;	/* fmin --> bfmin.  */

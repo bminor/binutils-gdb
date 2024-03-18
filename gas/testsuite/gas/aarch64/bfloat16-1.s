@@ -46,12 +46,13 @@ bfclamp z2.h, z12.h, z4.h
 bfclamp z4.h, z16.h, z2.h
 bfclamp z8.h, z20.h, z1.h
 bfclamp z16.h, z24.h, z0.h
-bfmla z0.h, p0/m, z0.h, z16.h
-bfmla z1.h, p1/m, z1.h, z8.h
-bfmla z2.h, p2/m, z2.h, z4.h
-bfmla z4.h, p4/m, z4.h, z2.h
-bfmla z8.h, p6/m, z8.h, z1.h
-bfmla z16.h, p7/m, z16.h, z0.h
+
+bfmla z0.h, p0/m, z4.h, z16.h
+bfmla z1.h, p1/m, z8.h, z8.h
+bfmla z2.h, p2/m, z12.h, z4.h
+bfmla z4.h, p4/m, z16.h, z2.h
+bfmla z8.h, p6/m, z20.h, z1.h
+bfmla z16.h, p7/m, z24.h, z0.h
 
 bfmla z0.h, z16.h, z6.h[7]
 bfmla z1.h, z8.h, z5.h[6]
@@ -60,12 +61,12 @@ bfmla z4.h, z21.h, z2.h[2]
 bfmla z8.h, z12.h, z1.h[1]
 bfmla z16.h, z10.h, z0.h[0]
 
-bfmls z0.h, p0/m, z0.h, z16.h
-bfmls z1.h, p1/m, z1.h, z8.h
-bfmls z2.h, p2/m, z2.h, z4.h
-bfmls z4.h, p4/m, z4.h, z2.h
-bfmls z8.h, p6/m, z8.h, z1.h
-bfmls z16.h, p7/m, z16.h, z0.h
+bfmls z0.h, p0/m, z4.h, z16.h
+bfmls z1.h, p1/m, z8.h, z8.h
+bfmls z2.h, p2/m, z12.h, z4.h
+bfmls z4.h, p4/m, z16.h, z2.h
+bfmls z8.h, p6/m, z20.h, z1.h
+bfmls z16.h, p7/m, z24.h, z0.h
 
 bfmls z0.h, z16.h, z6.h[7]
 bfmls z1.h, z8.h, z5.h[6]
