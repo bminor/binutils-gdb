@@ -52,6 +52,10 @@ typedef long long TIME_T;
 
 #define MAX_PID_T_STRLEN  (sizeof ("-9223372036854775808") - 1)
 
+/* Index of fields of interest in /proc/PID/stat, from procfs(5) man page.  */
+#define LINUX_PROC_STAT_STATE 3
+#define LINUX_PROC_STAT_PROCESSOR 39
+
 /* Returns the CPU core that thread PTID is currently running on.  */
 
 /* Compute and return the processor core of a given thread.  */
@@ -74,10 +78,9 @@ linux_common_core_of_thread (ptid_t ptid)
   if (pos == std::string::npos)
     return -1;
 
-  /* If the first field after program name has index 0, then core number is
-     the field with index 36 (so, the 37th).  There's no constant for that
-     anywhere.  */
-  for (int i = 0; i < 37; ++i)
+  /* The first field after program name is LINUX_PROC_STAT_STATE, and we are
+     interested in field LINUX_PROC_STAT_PROCESSOR.  */
+  for (int i = LINUX_PROC_STAT_STATE; i <= LINUX_PROC_STAT_PROCESSOR; ++i)
     {
       /* Find separator.  */
       pos = content->find_first_of (' ', pos);
