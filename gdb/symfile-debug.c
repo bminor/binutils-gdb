@@ -37,6 +37,7 @@
 #include "cli/cli-style.h"
 #include "build-id.h"
 #include "debuginfod-support.h"
+#include "dwarf2/public.h"
 
 /* We need to save a pointer to the real symbol functions.
    Plus, the debug versions are malloc'd because we have to NULL out the
@@ -610,6 +611,16 @@ objfile::find_and_add_separate_symbol_file (symfile_add_flags symfile_flags)
 	std::tie (debug_bfd, filename)
 	  = simple_find_and_open_separate_symbol_file
 	      (this, find_separate_debug_file_by_debuglink, &warnings);
+
+      /* Attempt to download only an index from the separate debug info.
+	 As with debuginfod_find_and_open_separate_symbol_file, only attempt
+	 this once.  */
+      if (debug_bfd == nullptr && attempt == 0
+	  && dwarf2_has_separate_index (this))
+	{
+	  has_dwarf2 = true;
+	  break;
+	}
 
       /* Only try debuginfod on the first attempt.  Sure, we could imagine
 	 an extension that somehow adds the required debug info to the

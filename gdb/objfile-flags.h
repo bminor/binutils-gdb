@@ -56,6 +56,10 @@ enum objfile_flag : unsigned
     /* User requested that we do not read this objfile's symbolic
        information.  */
     OBJF_READNEVER = 1 << 6,
+
+    /* A separate .gdb_index has been downloaded for this objfile.
+       Debuginfo for this objfile can be downloaded when required.  */
+    OBJF_DOWNLOAD_DEFERRED = 1 << 7,
   };
 
 DEF_ENUM_FLAGS_TYPE (enum objfile_flag, objfile_flags);

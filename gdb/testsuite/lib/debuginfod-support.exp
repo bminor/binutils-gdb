@@ -113,6 +113,8 @@ proc with_debuginfod_env { cache body } {
 proc start_debuginfod { db debugdir } {
     global debuginfod_spawn_id spawn_id
 
+    set logfile [standard_output_file "server_log"]
+
     # Find an unused port.
     set port 7999
     set found false
@@ -127,7 +129,8 @@ proc start_debuginfod { db debugdir } {
 	    set old_spawn_id $spawn_id
 	}
 
-	spawn debuginfod -vvvv -d $db -p $port -F $debugdir
+	spawn sh -c "debuginfod -vvvv -d $db -p $port -F $debugdir 2>&1 \
+		| tee $logfile"
 	set debuginfod_spawn_id $spawn_id
 
 	if { [info exists old_spawn_id] } {
@@ -192,5 +195,25 @@ proc stop_debuginfod { } {
     if [info exists debuginfod_spawn_id] {
 	kill_wait_spawned_process $debuginfod_spawn_id
 	unset debuginfod_spawn_id
+    }
+}
+
+# Return true if gdb is configured to download ELF/DWARF sections from
+# debuginfod servers.  Otherwise return false.
+proc allow_debuginfod_section_downloads { } {
+    set cmd "maint set debuginfod download-sections on"
+    set msg "enable section downloads"
+
+    gdb_test_multiple $cmd $msg {
+	-re -wrap ".*not compiled into GDB.*" {
+	    return false
+	}
+	-re -wrap "^" {
+	    return true
+	}
+	-re -wrap "" {
+	    fail "$gdb_test_name (unexpected output)"
+	    return false
+	}
     }
 }

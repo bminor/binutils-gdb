@@ -1777,14 +1777,10 @@ restore_selected_frame (frame_id frame_id, int frame_level)
   selected_frame = nullptr;
 }
 
-/* Lookup the frame_info object for the selected frame FRAME_ID /
-   FRAME_LEVEL and cache the result.
-
-   If FRAME_LEVEL > 0 and the originally selected frame isn't found,
-   warn and select the innermost (current) frame.  */
+/* See lookup_selected_frame.  */
 
 static void
-lookup_selected_frame (struct frame_id a_frame_id, int frame_level)
+lookup_selected_frame_1 (struct frame_id &a_frame_id, int frame_level)
 {
   frame_info_ptr frame = NULL;
   int count;
@@ -1854,6 +1850,25 @@ lookup_selected_frame (struct frame_id a_frame_id, int frame_level)
 	 bother for now.  */
       print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
     }
+}
+
+/* Lookup the frame_info object for the selected frame FRAME_ID /
+   FRAME_LEVEL and cache the result.
+
+   If FRAME_LEVEL > 0 and the originally selected frame isn't found,
+   warn and select the innermost (current) frame.  */
+
+static void
+lookup_selected_frame (struct frame_id a_frame_id, int frame_level)
+{
+  lookup_selected_frame_1 (selected_frame_id, selected_frame_level);
+
+  /* It is possible for lookup_selected_frame_1 to cause a new objfile
+     to be loaded.  However some objfile observers may choose to clear
+     selected_frame when an objfile is loaded.  Work around this by
+     calling lookup_selected_frame_1 again if the first call failed.  */
+  if (selected_frame == nullptr)
+    lookup_selected_frame_1 (selected_frame_id, selected_frame_level);
 }
 
 bool

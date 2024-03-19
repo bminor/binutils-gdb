@@ -139,6 +139,8 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
      gdb.dwarf2/gdb-index.exp testcase.  */
   void dump (struct objfile *objfile) override;
 
+  /* Calls do_expand_symtabs_matching and triggers debuginfo downloading
+     if necessary.  */
   bool expand_symtabs_matching
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
@@ -147,7 +149,58 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
      domain_search_flags domain) override;
+
+  /* Expand symtabs matching a given symbol or file.  */
+  bool do_expand_symtabs_matching
+    (struct objfile *objfile,
+     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     const lookup_name_info *lookup_name,
+     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     block_search_flags search_flags,
+     domain_search_flags domain);
+
+  /* Calls dwarf2_base_index_functions::expand_all_symtabs and downloads
+     debuginfo if necessary.  */
+  void expand_all_symtabs (struct objfile *objfile) override;
+
+  /* Calls dwarf2_base_index_functions::find_last_source_symtab and downloads
+     debuginfo if necessary.  */
+  struct symtab *find_last_source_symtab (struct objfile *objfile) override;
 };
+
+void
+dwarf2_gdb_index::expand_all_symtabs (struct objfile *objfile)
+{
+  try
+    {
+      dwarf2_base_index_functions::expand_all_symtabs (objfile);
+    }
+  catch (const gdb_exception &e)
+    {
+      if ((objfile->flags & OBJF_DOWNLOAD_DEFERRED) == 0)
+	exception_print (gdb_stderr, e);
+      else
+	read_full_dwarf_from_debuginfod (objfile, this);
+    }
+}
+
+struct symtab *
+dwarf2_gdb_index::find_last_source_symtab (struct objfile *objfile)
+{
+  try
+    {
+      return dwarf2_base_index_functions::find_last_source_symtab (objfile);
+    }
+  catch (const gdb_exception &e)
+    {
+      if ((objfile->flags & OBJF_DOWNLOAD_DEFERRED) == 0)
+	exception_print (gdb_stderr, e);
+      else
+	read_full_dwarf_from_debuginfod (objfile, this);
+      return nullptr;
+    }
+}
 
 /* This dumps minimal information about the index.
    It is called via "mt print objfiles".
@@ -264,7 +317,7 @@ dw2_expand_marked_cus
 }
 
 bool
-dwarf2_gdb_index::expand_symtabs_matching
+dwarf2_gdb_index::do_expand_symtabs_matching
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
      const lookup_name_info *lookup_name,
@@ -310,6 +363,38 @@ dwarf2_gdb_index::expand_symtabs_matching
     }, per_objfile);
 
   return result;
+}
+
+bool
+dwarf2_gdb_index::expand_symtabs_matching
+    (struct objfile *objfile,
+     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     const lookup_name_info *lookup_name,
+     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     block_search_flags search_flags,
+     domain_search_flags domain)
+{
+  if ((objfile->flags & OBJF_READNEVER) != 0)
+    return false;
+
+  try
+    {
+      return do_expand_symtabs_matching (objfile, file_matcher, lookup_name,
+					 symbol_matcher, expansion_notify,
+					 search_flags, domain);
+    }
+  catch (const gdb_exception &e)
+    {
+      if ((objfile->flags & OBJF_DOWNLOAD_DEFERRED) == 0)
+	{
+	  exception_print (gdb_stderr, e);
+	  return false;
+	}
+
+      read_full_dwarf_from_debuginfod (objfile, this);
+      return true;
+    }
 }
 
 quick_symbol_functions_up
@@ -647,28 +732,32 @@ dwarf2_read_gdb_index
 
   /* If there is a .dwz file, read it so we can get its CU list as
      well.  */
-  dwz = dwarf2_get_dwz_file (per_bfd);
-  if (dwz != NULL)
+  if (get_gdb_index_contents_dwz != nullptr)
     {
       mapped_gdb_index dwz_map;
       const gdb_byte *dwz_types_ignore;
       offset_type dwz_types_elements_ignore;
+      dwz = dwarf2_get_dwz_file (per_bfd);
 
-      gdb::array_view<const gdb_byte> dwz_index_content
-	= get_gdb_index_contents_dwz (objfile, dwz);
-
-      if (dwz_index_content.empty ())
-	return 0;
-
-      if (!read_gdb_index_from_buffer (bfd_get_filename (dwz->dwz_bfd.get ()),
-				       1, dwz_index_content, &dwz_map,
-				       &dwz_list, &dwz_list_elements,
-				       &dwz_types_ignore,
-				       &dwz_types_elements_ignore))
+      if (dwz != nullptr)
 	{
-	  warning (_("could not read '.gdb_index' section from %s; skipping"),
-		   bfd_get_filename (dwz->dwz_bfd.get ()));
-	  return 0;
+	  gdb::array_view<const gdb_byte> dwz_index_content
+	    = get_gdb_index_contents_dwz (objfile, dwz);
+
+	  if (dwz_index_content.empty ())
+	    return 0;
+
+	  if (!read_gdb_index_from_buffer (bfd_get_filename
+					     (dwz->dwz_bfd.get ()),
+					   1, dwz_index_content, &dwz_map,
+					   &dwz_list, &dwz_list_elements,
+					   &dwz_types_ignore,
+					   &dwz_types_elements_ignore))
+	    {
+	      warning (_("could not read '.gdb_index' section from %s; skipping"),
+		       bfd_get_filename (dwz->dwz_bfd.get ()));
+		return 0;
+	    }
 	}
     }
 

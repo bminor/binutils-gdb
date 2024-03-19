@@ -628,6 +628,26 @@ public:
 					       domain_search_flags domain,
 					       bool *symbol_found_p);
 
+  /* Indicate that the acquisition of this objfile's separate debug objfile
+     is no longer deferred.  Used when the debug objfile has been acquired
+     or could not be found.  */
+  void remove_deferred_status ()
+  {
+    flags &= ~OBJF_DOWNLOAD_DEFERRED;
+
+    /* Remove quick_symbol_functions derived from a separately downloaded
+       index.  If available the separate debug objfile's index will be used
+       instead, since that objfile actually contains the symbols and CUs
+       referenced in the index.
+
+       No more than one element of qf should have from_separate_index set
+       to true.  */
+    qf.remove_if ([&] (const quick_symbol_functions_up &qf_up)
+      {
+	return qf_up->from_separate_index;
+      });
+  }
+
   /* Return the relocation offset applied to SECTION.  */
   CORE_ADDR section_offset (bfd_section *section) const
   {

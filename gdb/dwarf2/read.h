@@ -860,6 +860,10 @@ struct dwarf2_base_index_functions : public quick_symbol_functions
      CORE_ADDR pc, struct obj_section *section, int warn_if_readin)
        override;
 
+  struct compunit_symtab *do_find_pc_sect_compunit_symtab
+    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
+     CORE_ADDR pc, struct obj_section *section, int warn_if_readin);
+
   struct compunit_symtab *find_compunit_symtab_by_address
     (struct objfile *objfile, CORE_ADDR address) override
   {
@@ -931,5 +935,11 @@ extern void create_all_units (dwarf2_per_objfile *per_objfile);
 /* Create a quick_file_names hash table.  */
 
 extern htab_up create_quick_file_names_table (unsigned int nr_initial_entries);
+
+/* If OBJFILE contains information from a separately downloaded .gdb_index,
+   attempt to download the full debuginfo.  */
+
+extern void read_full_dwarf_from_debuginfod (struct objfile *,
+					     dwarf2_base_index_functions *);
 
 #endif /* DWARF2READ_H */

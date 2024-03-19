@@ -2957,14 +2957,30 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
   if (best_cust != NULL)
     return best_cust;
 
+  int warn_if_readin = 1;
+
   /* Not found in symtabs, search the "quick" symtabs (e.g. psymtabs).  */
 
   for (objfile *objf : current_program_space->objfiles ())
     {
+      bool was_deferred = (objf->flags & OBJF_DOWNLOAD_DEFERRED) != 0;
+
       struct compunit_symtab *result
-	= objf->find_pc_sect_compunit_symtab (msymbol, pc, section, 1);
+	= objf->find_pc_sect_compunit_symtab (msymbol, pc, section,
+					      warn_if_readin);
+
       if (result != NULL)
 	return result;
+
+      /* If OBJF's separate debug info was just acquired, disable
+	 warn_if_readin for the next iteration of this loop.  This prevents
+	 a spurious warning in case an observer already triggered expansion
+	 of the separate debug objfile's symtabs.  */
+      if (was_deferred && objf->separate_debug_objfile != nullptr
+	  && (objf->flags & OBJF_DOWNLOAD_DEFERRED) == 0)
+	warn_if_readin = 0;
+      else if (warn_if_readin == 0)
+	warn_if_readin = 1;
     }
 
   return NULL;
