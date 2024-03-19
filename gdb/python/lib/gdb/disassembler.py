@@ -93,21 +93,14 @@ def _print_insn(info):
     disassembled."""
 
     def lookup_disassembler(arch):
-        try:
-            name = arch.name()
-            if name is None:
-                return None
-            if name in _disassemblers_dict:
-                return _disassemblers_dict[name]
-            if None in _disassemblers_dict:
-                return _disassemblers_dict[None]
+        name = arch.name()
+        if name is None:
             return None
-        except:
-            # It's pretty unlikely this exception case will ever
-            # trigger, one situation would be if the user somehow
-            # corrupted the _disassemblers_dict variable such that it
-            # was no longer a dictionary.
-            return None
+        if name in _disassemblers_dict:
+            return _disassemblers_dict[name]
+        if None in _disassemblers_dict:
+            return _disassemblers_dict[None]
+        return None
 
     disassembler = lookup_disassembler(info.architecture)
     if disassembler is None:
