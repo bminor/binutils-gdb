@@ -131,9 +131,14 @@ with_test_prefix "cycle at level 1" {
 gdb_test "maint flush register-cache" \
     "Register cache flushed\\." ""
 gdb_test_no_output "set debug frame 1"
+set ok 1
 gdb_test_multiple "bt" "backtrace with debugging on" {
     -re "^$gdb_prompt $" {
-	pass $gdb_test_name
+	gdb_assert { $ok } $gdb_test_name
+    }
+    -re "Python Exception <class 'gdb.error'>: \[^\r\n\]*\r\n" {
+	set ok 0
+	exp_continue
     }
     -re "\[^\r\n\]+\r\n" {
 	exp_continue
