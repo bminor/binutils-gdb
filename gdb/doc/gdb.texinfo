@@ -42970,7 +42970,9 @@ server was able to read only part of the region of memory.
 
 Unlike most packets, this packet does not support
 @samp{E.@var{errtext}}-style textual error replies (@pxref{textual
-error reply}).
+error reply}) by default.  Stubs should be careful to only send such a
+reply if @value{GDBN} reported support for it with the
+@code{error-message} feature (@pxref{error-message}).
 
 @item M @var{addr},@var{length}:@var{XX@dots{}}
 @cindex @samp{M} packet
@@ -44480,7 +44482,9 @@ A command response with the hex encoded output string @var{OUTPUT}.
 
 Unlike most packets, this packet does not support
 @samp{E.@var{errtext}}-style textual error replies (@pxref{textual
-error reply}).
+error reply}) by default.  Stubs should be careful to only send such a
+reply if @value{GDBN} reported support for it with the
+@code{error-message} feature (@pxref{error-message}).
 
 (Note that the @code{qRcmd} packet's name is separated from the
 command by a @samp{,}, not a @samp{:}, contrary to the naming
@@ -44627,6 +44631,17 @@ including @samp{exec-events+} in its @samp{qSupported} reply.
 @item vContSupported
 This feature indicates whether @value{GDBN} wants to know the
 supported actions in the reply to @samp{vCont?} packet.
+
+@anchor{error-message}
+@item error-message
+This feature indicates whether @value{GDBN} supports accepting a reply
+in @samp{E.@var{errtext}} format (@xref{textual error reply}) from the
+@samp{qRcmd} and @samp{m} packets.  These packets, historically,
+didn't support @samp{E.@var{errtext}}, and older versions of
+@value{GDBN} didn't expect to see a reply in this format.
+
+New packets should be written to support @samp{E.@var{errtext}}
+regardless of this feature being true or not.
 @end table
 
 Stubs should ignore any unknown values for
@@ -44910,6 +44925,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{error-message}
+@tab No
+@tab @samp{+}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -45143,6 +45163,13 @@ inspected, if @samp{qIsAddressTagged} (@pxref{qIsAddressTagged}) packet
 is not supported by the stub.  Access to the @file{/proc/@var{pid}/smaps}
 file is done via @samp{vFile} requests.
 
+@item error-message
+The remote stub supports replying with an error in a
+@samp{E.@var{errtext}} (@xref{textual error reply}) format from the
+@samp{m} and @samp{qRcmd} packets.  It is not usually necessary to
+send this feature back to @value{GDBN} in the @samp{qSupported} reply,
+@value{GDBN} will always support @samp{E.@var{errtext}} format replies
+if it sent the @samp{error-message} feature.
 @end table
 
 @item qSymbol::

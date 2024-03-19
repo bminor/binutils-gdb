@@ -192,6 +192,11 @@ struct client_state
   /* If true, memory tagging features are supported.  */
   bool memory_tagging_feature = false;
 
+  /* If true then E.errtext style errors are supported everywhere,
+     including for the qRcmd and m packet.  When false E.errtext errors
+     are not supported with qRcmd and m packets, but are still supported
+     everywhere else.  This is for backward compatibility reasons.  */
+  bool error_message_supported = false;
 };
 
 client_state &get_client_state ();

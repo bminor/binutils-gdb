@@ -379,6 +379,18 @@ enum {
   /* Support for the qIsAddressTagged packet.  */
   PACKET_qIsAddressTagged,
 
+  /* Support for accepting error message in a E.errtext format.
+     This allows every remote packet to return E.errtext.
+
+     This feature only exists to fix a backwards compatibility issue
+     with the qRcmd and m packets.  Historically, these two packets didn't
+     support E.errtext style errors, but when this feature is on
+     these two packets can receive E.errtext style errors.
+
+     All new packets should be written to always accept E.errtext style
+     errors, and so they should not need to check for this feature.  */
+  PACKET_accept_error_message,
+
   PACKET_MAX
 };
 
@@ -2502,10 +2514,9 @@ add_packet_config_cmd (const unsigned int which_packet, const char *name,
    PACKET_ERROR case.
 
    An error packet can always take the form Exx (where xx is a hex
-   code).  When ACCEPT_MSG is true error messages can also take the
-   form E.msg (where msg is any arbitrary string).  */
+   code).  */
 static packet_result
-packet_check_result (const char *buf, bool accept_msg)
+packet_check_result (const char *buf)
 {
   if (buf[0] != '\0')
     {
@@ -2520,17 +2531,14 @@ packet_check_result (const char *buf, bool accept_msg)
       /* Not every request accepts an error in a E.msg form.
 	 Some packets accepts only Enn, in this case E. is not
 	 defined and E. is treated as PACKET_OK.  */
-      if (accept_msg)
+      /* Always treat "E." as an error.  This will be used for
+	 more verbose error messages, such as E.memtypes.  */
+      if (buf[0] == 'E' && buf[1] == '.')
 	{
-	  /* Always treat "E." as an error.  This will be used for
-	     more verbose error messages, such as E.memtypes.  */
-	  if (buf[0] == 'E' && buf[1] == '.')
-	    {
-	      if (buf[2] != '\0')
-		return packet_result::make_textual_error (buf + 2);
-	      else
-		return packet_result::make_textual_error ("no error provided");
-	    }
+	  if (buf[2] != '\0')
+	    return packet_result::make_textual_error (buf + 2);
+	  else
+	    return packet_result::make_textual_error ("no error provided");
 	}
 
       /* The packet may or may not be OK.  Just assume it is.  */
@@ -2544,9 +2552,9 @@ packet_check_result (const char *buf, bool accept_msg)
 }
 
 static packet_result
-packet_check_result (const gdb::char_vector &buf, bool accept_msg)
+packet_check_result (const gdb::char_vector &buf)
 {
-  return packet_check_result (buf.data (), accept_msg);
+  return packet_check_result (buf.data ());
 }
 
 packet_result
@@ -2559,7 +2567,7 @@ remote_features::packet_ok (const char *buf, const int which_packet)
       && config->support == PACKET_DISABLE)
     internal_error (_("packet_ok: attempt to use a disabled packet"));
 
-  packet_result result = packet_check_result (buf, true);
+  packet_result result = packet_check_result (buf);
   switch (result.status ())
     {
     case PACKET_OK:
@@ -5820,6 +5828,8 @@ static const struct protocol_feature remote_protocol_features[] = {
   { "no-resumed", PACKET_DISABLE, remote_supported_packet, PACKET_no_resumed },
   { "memory-tagging", PACKET_DISABLE, remote_supported_packet,
     PACKET_memory_tagging_feature },
+  { "error-message", PACKET_ENABLE, remote_supported_packet,
+    PACKET_accept_error_message },
 };
 
 static char *remote_support_xml;
@@ -5937,6 +5947,10 @@ remote_target::remote_query_supported ()
 	  && (m_features.packet_support (PACKET_qXfer_features)
 	      != PACKET_DISABLE))
 	remote_query_supported_append (&q, remote_support_xml);
+
+      if (m_features.packet_set_cmd_state (PACKET_accept_error_message)
+	  != AUTO_BOOLEAN_FALSE)
+      remote_query_supported_append (&q, "error-message+");
 
       q = "qSupported:" + q;
       putpkt (q.c_str ());
@@ -8892,7 +8906,7 @@ remote_target::send_g_packet ()
   xsnprintf (rs->buf.data (), get_remote_packet_size (), "g");
   putpkt (rs->buf);
   getpkt (&rs->buf);
-  packet_result result = packet_check_result (rs->buf, true);
+  packet_result result = packet_check_result (rs->buf);
   if (result.status () == PACKET_ERROR)
     error (_("Could not read registers; remote failure reply '%s'"),
 	   result.err_msg ());
@@ -9202,7 +9216,7 @@ remote_target::store_registers_using_G (const struct regcache *regcache)
   bin2hex (regs, p, rsa->sizeof_g_packet);
   putpkt (rs->buf);
   getpkt (&rs->buf);
-  packet_result pkt_status = packet_check_result (rs->buf, true);
+  packet_result pkt_status = packet_check_result (rs->buf);
   if (pkt_status.status () == PACKET_ERROR)
     error (_("Could not write registers; remote failure reply '%s'"),
 	   pkt_status.err_msg ());
@@ -9654,7 +9668,7 @@ remote_target::remote_read_bytes_1 (CORE_ADDR memaddr, gdb_byte *myaddr,
   *p = '\0';
   putpkt (rs->buf);
   getpkt (&rs->buf);
-  packet_result result = packet_check_result (rs->buf, false);
+  packet_result result = packet_check_result (rs->buf);
   if (result.status () == PACKET_ERROR)
     return TARGET_XFER_E_IO;
   /* Reply describes memory byte by byte, each byte encoded as two hex
@@ -9809,7 +9823,7 @@ remote_target::remote_send_printf (const char *format, ...)
   rs->buf[0] = '\0';
   getpkt (&rs->buf);
 
-  return packet_check_result (rs->buf, true).status ();
+  return packet_check_result (rs->buf).status ();
 }
 
 /* Flash writing can take quite some time.  We'll set
@@ -12002,7 +12016,7 @@ remote_target::rcmd (const char *command, struct ui_file *outbuf)
 	  remote_console_output (buf + 1, outbuf);
 	  continue;
 	}
-      packet_result result = packet_check_result (buf, false);
+      packet_result result = packet_check_result (buf);
       switch (result.status ())
 	{
 	case PACKET_UNKNOWN:
@@ -15682,7 +15696,7 @@ remote_target::store_memtags (CORE_ADDR address, size_t len,
   getpkt (&rs->buf);
 
   /* Verify if the request was successful.  */
-  return packet_check_result (rs->buf, true).status () == PACKET_OK;
+  return packet_check_result (rs->buf).status () == PACKET_OK;
 }
 
 /* Implement the "is_address_tagged" target_ops method.  */
@@ -15883,29 +15897,26 @@ static void
 test_packet_check_result ()
 {
   std::string buf = "E.msg";
-  packet_result result = packet_check_result (buf.data (), true);
+  packet_result result = packet_check_result (buf.data ());
 
   SELF_CHECK (result.status () == PACKET_ERROR);
   SELF_CHECK (strcmp(result.err_msg (), "msg") == 0);
 
-  result = packet_check_result ("E01", true);
+  result = packet_check_result ("E01");
   SELF_CHECK (result.status () == PACKET_ERROR);
   SELF_CHECK (strcmp(result.err_msg (), "01") == 0);
 
-  SELF_CHECK (packet_check_result ("E1", true).status () == PACKET_OK);
+  SELF_CHECK (packet_check_result ("E1").status () == PACKET_OK);
 
-  SELF_CHECK (packet_check_result ("E000", true).status () == PACKET_OK);
+  SELF_CHECK (packet_check_result ("E000").status () == PACKET_OK);
 
-  result = packet_check_result ("E.", true);
+  result = packet_check_result ("E.");
   SELF_CHECK (result.status () == PACKET_ERROR);
   SELF_CHECK (strcmp(result.err_msg (), "no error provided") == 0);
 
-  SELF_CHECK (packet_check_result ("some response", true).status () == PACKET_OK);
+  SELF_CHECK (packet_check_result ("some response").status () == PACKET_OK);
 
-  SELF_CHECK (packet_check_result ("", true).status () == PACKET_UNKNOWN);
-
-  result = packet_check_result ("E.msg", false);
-  SELF_CHECK (result.status () == PACKET_OK);
+  SELF_CHECK (packet_check_result ("").status () == PACKET_UNKNOWN);
 }
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
@@ -16273,6 +16284,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (PACKET_qIsAddressTagged,
 			 "qIsAddressTagged", "memory-tagging-address-check", 0);
+
+  add_packet_config_cmd (PACKET_accept_error_message,
+			 "error-message", "error-message", 0);
 
   /* Assert that we've registered "set remote foo-packet" commands
      for all packet configs.  */

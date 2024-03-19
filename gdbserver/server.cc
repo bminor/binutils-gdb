@@ -2699,6 +2699,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		  if (target_supports_memory_tagging ())
 		    cs.memory_tagging_feature = true;
 		}
+	      else if (feature == "error-message+")
+		cs.error_message_supported = true;
 	      else
 		{
 		  /* Move the unknown features all together.  */
@@ -4364,6 +4366,7 @@ captured_main (int argc, char *argv[])
       cs.hwbreak_feature = 0;
       cs.vCont_supported = 0;
       cs.memory_tagging_feature = false;
+      cs.error_message_supported = false;
 
       remote_open (port);
 
