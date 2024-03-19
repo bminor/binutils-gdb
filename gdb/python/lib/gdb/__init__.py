@@ -159,7 +159,7 @@ def _auto_load_packages():
                         reload(__import__(modname))
                     else:
                         __import__(modname)
-                except:
+                except Exception:
                     sys.stderr.write(traceback.format_exc() + "\n")
 
 

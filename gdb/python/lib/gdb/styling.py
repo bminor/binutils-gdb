@@ -39,7 +39,7 @@ try:
             return highlight(contents, lexer, formatter).encode(
                 gdb.host_charset(), "backslashreplace"
             )
-        except:
+        except Exception:
             return None
 
     class HandleNasmComments(TokenMergeFilter):
@@ -70,7 +70,7 @@ try:
             flavor = gdb.parameter("disassembly-flavor")
             if flavor == "intel" and gdbarch.name()[:4] == "i386":
                 lexer_type = "nasm"
-        except:
+        except Exception:
             # If GDB is built without i386 support then attempting to fetch
             # the 'disassembly-flavor' parameter will throw an error, which we
             # ignore.
@@ -89,7 +89,7 @@ try:
             lexer = __get_asm_lexer(gdbarch)
             formatter = get_formatter()
             return highlight(content, lexer, formatter).rstrip().encode()
-        except:
+        except Exception:
             return content
 
 except ImportError:
