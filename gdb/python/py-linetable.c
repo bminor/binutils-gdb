@@ -397,7 +397,8 @@ ltpy_iternext (PyObject *self)
 
   LTPY_REQUIRE_VALID (iter_obj->source, symtab);
 
-  if (iter_obj->current_index >= symtab->linetable ()->nitems)
+  if (symtab->linetable () == nullptr
+      || iter_obj->current_index >= symtab->linetable ()->nitems)
     {
       PyErr_SetNone (PyExc_StopIteration);
       return NULL;
