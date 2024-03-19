@@ -26,6 +26,8 @@ if sys.version_info >= (3, 4):
 else:
     from imp import reload
 
+import _gdb
+
 # Note that two indicators are needed here to silence flake8.
 from _gdb import *  # noqa: F401,F403
 
@@ -56,15 +58,14 @@ class _GdbFile(object):
             self.write(line)
 
     def flush(self):
-        flush(stream=self.stream)
+        _gdb.flush(stream=self.stream)
 
     def write(self, s):
-        write(s, stream=self.stream)
+        _gdb.write(s, stream=self.stream)
 
 
-sys.stdout = _GdbFile(STDOUT)
-
-sys.stderr = _GdbFile(STDERR)
+sys.stdout = _GdbFile(_gdb.STDOUT)
+sys.stderr = _GdbFile(_gdb.STDERR)
 
 # Default prompt hook does nothing.
 prompt_hook = None
@@ -185,7 +186,7 @@ def GdbSetPythonDirectory(dir):
 
 def current_progspace():
     "Return the current Progspace."
-    return selected_inferior().progspace
+    return _gdb.selected_inferior().progspace
 
 
 def objfiles():
@@ -222,14 +223,14 @@ def set_parameter(name, value):
             value = "on"
         else:
             value = "off"
-    execute("set " + name + " " + str(value), to_string=True)
+    _gdb.execute("set " + name + " " + str(value), to_string=True)
 
 
 @contextmanager
 def with_parameter(name, value):
     """Temporarily set the GDB parameter NAME to VALUE.
     Note that this is a context manager."""
-    old_value = parameter(name)
+    old_value = _gdb.parameter(name)
     set_parameter(name, value)
     try:
         # Nothing that useful to return.
