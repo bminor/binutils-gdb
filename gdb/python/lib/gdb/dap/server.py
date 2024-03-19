@@ -32,6 +32,7 @@ from .startup import (
     log,
     log_stack,
     LogLevel,
+    thread_log,
 )
 from .typecheck import type_check
 
@@ -478,7 +479,7 @@ class Cancellable(object):
                 pass
             else:
                 # Exception happened.  Ignore and log it.
-                err_string = "%s, %s" % (err, type(err))
+                err_string = "%s, %s" % (e, type(e))
                 thread_log("caught exception: " + err_string)
                 log_stack()
 
