@@ -20198,13 +20198,6 @@ print_core_note (Elf_Internal_Note *pnote)
       return true;
     }
 
-  if (!is_32bit_elf)
-    {
-      printf (_("    Cannot decode 64-bit note in 32-bit build\n"));
-      /* Still "successful".  */
-      return true;
-    }
-
   if (pnote->descsz < 2 * addr_size)
     {
       error (_("    Malformed note - too short for header\n"));
