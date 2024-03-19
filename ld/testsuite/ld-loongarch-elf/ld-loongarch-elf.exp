@@ -134,6 +134,9 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "desc-norelax"
     run_dump_test "desc-relax"
     run_dump_test "data-got"
+    run_dump_test "reloc_le_with_shared"
+    run_dump_test "reloc_ler_with_shared"
+    run_dump_test "reloc_abs_with_shared"
   }
 
   if [check_pie_support] {
