@@ -585,6 +585,10 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec)
   if (compressed && orig_header_size < 0)
     abort ();
 
+  /* PR 31455: Check for a corrupt uncompressed size.  */
+  if (uncompressed_size == (bfd_size_type) -1)
+    return uncompressed_size;
+
   /* Either ELF compression header or the 12-byte, "ZLIB" + 8-byte size,
      overhead in .zdebug* section.  */
   if (!new_header_size)
