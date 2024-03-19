@@ -250,28 +250,32 @@ struct program_space
        unwrapping_objfile_iterator (objfiles_list.end ()));
   }
 
-  using objfiles_safe_range = basic_safe_range<objfiles_range>;
+  using objfiles_it_range = iterator_range<objfile_list::iterator>;
+  using objfiles_safe_reverse_range
+    = basic_safe_reverse_range<objfiles_it_range>;
 
   /* An iterable object that can be used to iterate over all objfiles.
      The basic use is in a foreach, like:
 
      for (objfile *objf : pspace->objfiles_safe ()) { ... }
 
-     This variant uses a basic_safe_iterator so that objfiles can be
-     deleted during iteration.  */
-  objfiles_safe_range objfiles_safe ()
+     This variant uses a basic_safe_reverse_iterator so that objfiles
+     can be deleted during iteration.
+
+     The use of a reverse iterator helps ensure that separate debug
+     objfiles are deleted before their parent objfile.  This prevents
+     iterator invalidation due to the deletion of a parent objfile.  */
+ objfiles_safe_reverse_range objfiles_safe ()
   {
-    return objfiles_safe_range
-      (objfiles_range
-	 (unwrapping_objfile_iterator (objfiles_list.begin ()),
-	  unwrapping_objfile_iterator (objfiles_list.end ())));
+    return objfiles_safe_reverse_range
+      (objfiles_it_range (objfiles_list.begin (), objfiles_list.end ()));
   }
 
-  /* Add OBJFILE to the list of objfiles, putting it just before
-     BEFORE.  If BEFORE is nullptr, it will go at the end of the
+  /* Add OBJFILE to the list of objfiles, putting it just after
+     AFTER.  If AFTER is nullptr, it will go at the end of the
      list.  */
   void add_objfile (std::unique_ptr<objfile> &&objfile,
-		    struct objfile *before);
+		    struct objfile *after);
 
   /* Remove OBJFILE from the list of objfiles.  */
   void remove_objfile (struct objfile *objfile);
@@ -285,6 +289,11 @@ struct program_space
 
   /* Free all the objfiles associated with this program space.  */
   void free_all_objfiles ();
+
+  /* Unlink all objfiles associated with this program space for which
+     PREDICATE evaluates to true.  */
+  void unlink_objfiles_if
+    (gdb::function_view<bool (const objfile *objfile)> predicate);
 
   /* Return the objfile containing ADDRESS, or nullptr if the address
      is outside all objfiles in this progspace.  */

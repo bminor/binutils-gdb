@@ -1240,11 +1240,10 @@ jit_breakpoint_re_set (void)
 static void
 jit_inferior_exit_hook (struct inferior *inf)
 {
-  for (objfile *objf : current_program_space->objfiles_safe ())
+  current_program_space->unlink_objfiles_if ([&] (const objfile *objf)
     {
-      if (objf->jited_data != nullptr && objf->jited_data->addr != 0)
-	objf->unlink ();
-    }
+      return (objf->jited_data != nullptr) && (objf->jited_data->addr != 0);
+    });
 }
 
 void

@@ -470,6 +470,12 @@ objfile::unlink ()
   current_program_space->remove_objfile (this);
 }
 
+qf_safe_range
+objfile::qf_safe ()
+{
+  return qf_safe_range (qf_range (qf.begin (), qf.end ()));
+}
+
 /* Free all separate debug objfile of OBJFILE, but don't free OBJFILE
    itself.  */
 
@@ -793,14 +799,12 @@ have_full_symbols (void)
 void
 objfile_purge_solibs (void)
 {
-  for (objfile *objf : current_program_space->objfiles_safe ())
+  current_program_space->unlink_objfiles_if ([&] (const objfile *objf)
     {
       /* We assume that the solib package has been purged already, or will
 	 be soon.  */
-
-      if (!(objf->flags & OBJF_USERLOADED) && (objf->flags & OBJF_SHARED))
-	objf->unlink ();
-    }
+      return !(objf->flags & OBJF_USERLOADED) && (objf->flags & OBJF_SHARED);
+    });
 }
 
 

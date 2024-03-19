@@ -370,6 +370,12 @@ private:
 
 typedef iterator_range<separate_debug_iterator> separate_debug_range;
 
+/* See objfile::qf_safe.  */
+
+using qf_list = std::forward_list<quick_symbol_functions_up>;
+using qf_range = iterator_range<qf_list::iterator>;
+using qf_safe_range = basic_safe_range<qf_range>;
+
 /* Sections in an objfile.  The section offsets are stored in the
    OBJFILE.  */
 
@@ -767,8 +773,15 @@ public:
   const struct sym_fns *sf = nullptr;
 
   /* The "quick" (aka partial) symbol functions for this symbol
-     reader.  */
-  std::forward_list<quick_symbol_functions_up> qf;
+     reader.  Many quick_symbol_functions methods may result
+     in the deletion of a quick_symbol_functions from this
+     qf_list.  It is recommended that qf_safe be used to iterate
+     over the qf_list.  */
+  qf_list qf;
+
+  /* Returns an iterable object that allows for safe deletion during
+     iteration.  See gdbsupport/safe-iterator.h.  */
+  qf_safe_range qf_safe ();
 
   /* Per objfile data-pointers required by other GDB modules.  */
 

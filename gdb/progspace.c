@@ -141,19 +141,19 @@ program_space::free_all_objfiles ()
 
 void
 program_space::add_objfile (std::unique_ptr<objfile> &&objfile,
-			    struct objfile *before)
+			    struct objfile *after)
 {
-  if (before == nullptr)
+  if (after == nullptr)
     objfiles_list.push_back (std::move (objfile));
   else
     {
       auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
 				[=] (const std::unique_ptr<::objfile> &objf)
 				{
-				  return objf.get () == before;
+				  return objf.get () == after;
 				});
       gdb_assert (iter != objfiles_list.end ());
-      objfiles_list.insert (iter, std::move (objfile));
+      objfiles_list.insert (++iter, std::move (objfile));
     }
 }
 
@@ -178,6 +178,17 @@ program_space::remove_objfile (struct objfile *objfile)
 
   if (objfile == symfile_object_file)
     symfile_object_file = NULL;
+}
+
+/* See progspace.h.  */
+
+void
+program_space::unlink_objfiles_if
+  (gdb::function_view<bool (const objfile *objfile)> predicate)
+{
+  for (auto &it : objfiles_safe ())
+    if (predicate (it.get ()))
+      it->unlink ();
 }
 
 /* See progspace.h.  */

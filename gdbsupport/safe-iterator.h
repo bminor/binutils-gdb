@@ -136,4 +136,119 @@ private:
   Range m_range;
 };
 
+/* A reverse basic_safe_iterator.  See basic_safe_iterator for intended use.  */
+
+template<typename Iterator>
+class basic_safe_reverse_iterator
+{
+public:
+  typedef basic_safe_reverse_iterator self_type;
+  typedef typename Iterator::value_type value_type;
+  typedef typename Iterator::reference reference;
+  typedef typename Iterator::pointer pointer;
+  typedef typename Iterator::iterator_category iterator_category;
+  typedef typename Iterator::difference_type difference_type;
+
+  /* Construct the iterator using ARG, and construct the end iterator
+     using ARG2.  ARG and ARG2 should be forward iterators, typically
+     from begin and end methods, respectively.
+
+     For example if ARG1 is created with container.begin and ARG2 is
+     is created with container.end, then the basic_safe_reverse_iterator
+     will traverse from the last element in the container to the first
+     element in the container.  */
+  template<typename Arg>
+  explicit basic_safe_reverse_iterator (Arg &&arg, Arg &&arg2)
+    : m_begin (std::forward<Arg> (arg)),
+      m_end (std::forward<Arg> (arg2)),
+      m_it (m_end),
+      m_next (m_end)
+  {
+    /* M_IT and M_NEXT are initialized as one-past-end.  Set M_IT to point
+       to the last element and set M_NEXT to point to the second last element,
+       if such elements exist.  */
+    if (m_it != m_begin)
+      {
+	--m_it;
+
+	if (m_it != m_begin)
+	  {
+	    --m_next;
+	    --m_next;
+	  }
+      }
+  }
+
+  typename std::invoke_result<decltype(&Iterator::operator*), Iterator>::type
+    operator* () const
+  { return *m_it; }
+
+  self_type &operator++ ()
+  {
+    m_it = m_next;
+
+    if (m_it != m_end)
+      {
+	/* Use M_BEGIN only if we sure that it is valid.  */
+	if (m_it == m_begin)
+	  m_next = m_end;
+	else
+	  --m_next;
+      }
+
+    return *this;
+  }
+
+  bool operator== (const self_type &other) const
+  { return m_it == other.m_it; }
+
+  bool operator!= (const self_type &other) const
+  { return m_it != other.m_it; }
+
+private:
+  /* The first element.  */
+  Iterator m_begin {};
+
+  /* A one-past-end iterator.  */
+  Iterator m_end {};
+
+  /* The current element.  */
+  Iterator m_it {};
+
+  /* The next element.  Always one element ahead of M_IT.  */
+  Iterator m_next {};
+};
+
+/* A range adapter that wraps a forward range, and then returns
+   safe reverse iterators wrapping the original range's iterators.  */
+
+template<typename Range>
+class basic_safe_reverse_range
+{
+public:
+
+  typedef basic_safe_reverse_iterator<typename Range::iterator> iterator;
+
+  /* RANGE must be a forward range.  basic_safe_reverse_iterators
+     will be used to traverse the forward range from the last element
+     to the first.  */
+  explicit basic_safe_reverse_range (Range range)
+    : m_range (range)
+  {
+  }
+
+  iterator begin ()
+  {
+    return iterator (m_range.begin (), m_range.end ());
+  }
+
+  iterator end ()
+  {
+    return iterator (m_range.end (), m_range.end ());
+  }
+
+private:
+
+  Range m_range;
+};
 #endif /* COMMON_SAFE_ITERATOR_H */
