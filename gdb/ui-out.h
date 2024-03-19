@@ -296,6 +296,21 @@ class ui_out
       BAR
     };
 
+    /* Used to communicate the status of a newline prefix for the next progress
+       update message.  */
+    enum prefix_state
+    {
+      /* Do not modify the next progress update message.  */
+      NEWLINE_OFF,
+
+      /* The next progress update message should include a newline prefix.  */
+      NEWLINE_NEEDED,
+
+      /* A newline prefix was included in a debuginfod progress update
+	 message.  */
+      NEWLINE_PRINTED
+    };
+
     /* SHOULD_PRINT indicates whether something should be printed for a tty.  */
     progress_update ()
     {
@@ -392,6 +407,11 @@ protected:
   int level () const;
   ui_out_level *current_level () const;
 };
+
+typedef ui_out::progress_update::prefix_state prefix_state_t;
+
+/* Current state of the newline prefix.  */
+extern prefix_state_t cur_prefix_state;
 
 /* Start a new tuple or list on construction, and end it on
    destruction.  Normally this is used via the typedefs

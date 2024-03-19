@@ -18,6 +18,7 @@
 standard_testfile
 
 load_lib debuginfod-support.exp
+load_lib completion-support.exp
 
 clean_restart
 require allow_debuginfod_tests
@@ -144,6 +145,32 @@ proc_with_prefix local_url { } {
     # Hit the breakpoint.
     set res ".*Breakpoint 2, libsection2_test.*\"In ${libfile2}\\\\n\".*"
     gdb_test "c" $res "break continue"
+
+    clean_restart_with_prompt $binfile "line 1"
+
+    # List source file using .debug_line download.
+    set res ".*\.debug_line.*$lib_sl1.*21.*extern void libsection2_test.*"
+    gdb_test "list $libsrc1:21" $res "line 1 list"
+
+    clean_restart_with_prompt $binfile "line 2"
+
+    # Set breakpoint using .debug_line download.
+    set res ".*section \.debug_line for $lib_sl1.*Breakpoint 2 at.*$libsrc1.*"
+    gdb_test "br $libsrc1:41" $res "line 2 br"
+
+    # Continue to breakpoint.
+    set res "Breakpoint 2, libsection1_test.*\"Cancelling thread\\\\n\".*"
+    gdb_test "c" $res "line 2 continue"
+
+    # Check that download progress message is correctly formatted
+    # when printing threads.
+    set res ".*separate debug info for $lib_sl2\.\.\.\r\n.* 2    Thread.*"
+    gdb_test "info thr" $res "line thread"
+
+    clean_restart_with_prompt $binfile "autocomplete"
+
+    # Download debuginfo during autocompletion.
+    test_gdb_complete_tab_unique "br lib" ".*Downloading separate debug.*" ""
 }
 
 # Create CACHE and DB directories ready for debuginfod to use.

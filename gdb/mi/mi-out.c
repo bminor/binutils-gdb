@@ -278,7 +278,14 @@ mi_ui_out::do_progress_notify (const std::string &msg, const char *unit,
 
   if (info.state == progress_update::START)
     {
-      gdb_printf ("%s...\n", msg.c_str ());
+      std::string prefix;
+      if (cur_prefix_state == prefix_state_t::NEWLINE_NEEDED)
+	{
+	  prefix = "\n";
+	  cur_prefix_state = prefix_state_t::NEWLINE_PRINTED;
+	}
+
+      gdb_printf ("%s...\n", (prefix + msg).c_str ());
       info.state = progress_update::WORKING;
     }
 }
