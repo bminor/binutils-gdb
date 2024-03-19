@@ -128,6 +128,11 @@ static bool call36 = 0;
 #define RELAX_BRANCH_ENCODE(x) \
   (BFD_RELOC_LARCH_B16 == (x) ? RELAX_BRANCH_16 : RELAX_BRANCH_21)
 
+#define ALIGN_MAX_ADDEND(n, max) ((max << 8) | n)
+#define ALIGN_MAX_NOP_BYTES(addend) ((1 << (addend & 0xff)) - 4)
+#define FRAG_AT_START_OF_SECTION(frag)	\
+  (0 == frag->fr_address && 0 == frag->fr_fix)
+
 enum options
 {
   OPTION_IGNORE = OPTION_MD_BASE,
@@ -1647,10 +1652,32 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     }
 }
 
+/* Estimate the size of a frag before relaxing.  */
+
 int
-md_estimate_size_before_relax (fragS *fragp ATTRIBUTE_UNUSED,
-			       asection *segtype ATTRIBUTE_UNUSED)
+md_estimate_size_before_relax (fragS *fragp, asection *sec)
 {
+  /* align pseudo instunctions.  */
+  if (rs_align_code == fragp->fr_subtype)
+    {
+      offsetT nop_bytes;
+      if (NULL == fragp->fr_symbol)
+	nop_bytes = fragp->fr_offset;
+      else
+	nop_bytes = ALIGN_MAX_NOP_BYTES (fragp->fr_offset);
+
+      /* Normally, nop_bytes should be >= 4.  */
+      gas_assert (nop_bytes > 0);
+
+      if (FRAG_AT_START_OF_SECTION (fragp)
+	  && 0 == ((1 << sec->alignment_power) % (nop_bytes + 4)))
+	return (fragp->fr_var = 0);
+      else
+	  return (fragp->fr_var = nop_bytes);
+    }
+
+  /* branch instructions and other instructions.
+     branch instructions may become 8 bytes after relaxing.  */
   return (fragp->fr_var = 4);
 }
 
@@ -1767,8 +1794,7 @@ bool
 loongarch_frag_align_code (int n, int max)
 {
   char *nops;
-  symbolS *s;
-  expressionS ex;
+  symbolS *s = NULL;
 
   bfd_vma insn_alignment = 4;
   bfd_vma bytes = (bfd_vma) 1 << n;
@@ -1783,8 +1809,6 @@ loongarch_frag_align_code (int n, int max)
   if (!LARCH_opts.relax)
     return false;
 
-  nops = frag_more (worst_case_bytes);
-
   /* If max <= 0, ignore max.
      If max >= worst_case_bytes, max has no effect.
      Similar to gas/write.c relax_segment function rs_align_code case:
@@ -1792,20 +1816,20 @@ loongarch_frag_align_code (int n, int max)
   if (max > 0 && (bfd_vma) max < worst_case_bytes)
     {
       s = symbol_find (now_seg->name);
-      ex.X_add_symbol = s;
-      ex.X_op = O_symbol;
-      ex.X_add_number = (max << 8) | n;
-    }
-  else
-    {
-      ex.X_op = O_constant;
-      ex.X_add_number = worst_case_bytes;
+      worst_case_bytes = ALIGN_MAX_ADDEND (n, max);
     }
 
+  frag_grow (worst_case_bytes);
+  /* Use relaxable frag for .align.
+     If .align at the start of section, do nothing. Section alignment can
+     ensure correct alignment.
+     If .align is not at the start of a section, reserve NOP instructions
+     and R_LARCH_ALIGN relocation.  */
+  nops = frag_var (rs_machine_dependent, worst_case_bytes, worst_case_bytes,
+		   rs_align_code, s, worst_case_bytes, NULL);
+
+  /* Default write NOP for aligned bytes.  */
   loongarch_make_nops (nops, worst_case_bytes);
-
-  fix_new_exp (frag_now, nops - frag_now->fr_literal, 0,
-	       &ex, false, BFD_RELOC_LARCH_ALIGN);
 
   /* We need to start a new frag after the alignment which may be removed by
      the linker, to prevent the assembler from computing static offsets.
@@ -1963,14 +1987,34 @@ loongarch_relaxed_branch_length (fragS *fragp, asection *sec, int update)
 }
 
 int
-loongarch_relax_frag (asection *sec ATTRIBUTE_UNUSED,
-		      fragS *fragp ATTRIBUTE_UNUSED,
+loongarch_relax_frag (asection *sec, fragS *fragp,
 		      long stretch ATTRIBUTE_UNUSED)
 {
   if (RELAX_BRANCH (fragp->fr_subtype))
     {
       offsetT old_var = fragp->fr_var;
       fragp->fr_var = loongarch_relaxed_branch_length (fragp, sec, true);
+      return fragp->fr_var - old_var;
+    }
+  else if (rs_align_code == fragp->fr_subtype)
+    {
+      offsetT nop_bytes;
+      if (NULL == fragp->fr_symbol)
+	nop_bytes = fragp->fr_offset;
+      else
+	nop_bytes = ALIGN_MAX_NOP_BYTES (fragp->fr_offset);
+
+      /* Normally, nop_bytes should be >= 4.  */
+      gas_assert (nop_bytes > 0);
+
+      offsetT old_var = fragp->fr_var;
+      /* If .align at the start of a section, do nothing. Section alignment
+       * can ensure correct alignment.  */
+      if (FRAG_AT_START_OF_SECTION (fragp)
+	  && 0 == ((1 << sec->alignment_power) % (nop_bytes + 4)))
+	fragp->fr_var = 0;
+      else
+	fragp->fr_var = nop_bytes;
       return fragp->fr_var - old_var;
     }
   return 0;
@@ -2048,13 +2092,53 @@ loongarch_convert_frag_branch (fragS *fragp)
   fragp->fr_fix += fragp->fr_var;
 }
 
-/* Relax a machine dependent frag.  This returns the amount by which
-   the current size of the frag should change.  */
+/*  Relax .align frag.  */
+
+static void
+loongarch_convert_frag_align (fragS *fragp, asection *sec)
+{
+  bfd_byte *buf = (bfd_byte *)fragp->fr_literal + fragp->fr_fix;
+
+  offsetT nop_bytes;
+  if (NULL == fragp->fr_symbol)
+    nop_bytes = fragp->fr_offset;
+  else
+    nop_bytes = ALIGN_MAX_NOP_BYTES (fragp->fr_offset);
+
+  /* Normally, nop_bytes should be >= 4.  */
+  gas_assert (nop_bytes > 0);
+
+  if (!(FRAG_AT_START_OF_SECTION (fragp)
+	&& 0 == ((1 << sec->alignment_power) % (nop_bytes + 4))))
+    {
+      expressionS exp;
+      exp.X_op = O_symbol;
+      exp.X_add_symbol = fragp->fr_symbol;
+      exp.X_add_number = fragp->fr_offset;
+
+      fixS *fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
+				nop_bytes, &exp, false, BFD_RELOC_LARCH_ALIGN);
+      fixp->fx_file = fragp->fr_file;
+      fixp->fx_line = fragp->fr_line;
+
+      buf += nop_bytes;
+    }
+
+  gas_assert (buf == (bfd_byte *)fragp->fr_literal
+	      + fragp->fr_fix + fragp->fr_var);
+
+  fragp->fr_fix += fragp->fr_var;
+}
+
+/* Relax a machine dependent frag.  */
 
 void
-md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec ATTRIBUTE_UNUSED,
-		 fragS *fragp)
+md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 {
-  gas_assert (RELAX_BRANCH (fragp->fr_subtype));
-  loongarch_convert_frag_branch (fragp);
+  gas_assert (RELAX_BRANCH (fragp->fr_subtype)
+	      || rs_align_code == fragp->fr_subtype);
+  if (RELAX_BRANCH (fragp->fr_subtype))
+    loongarch_convert_frag_branch (fragp);
+  else if (rs_align_code == fragp->fr_subtype)
+    loongarch_convert_frag_align (fragp, asec);
 }

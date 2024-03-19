@@ -20,6 +20,7 @@
 #
 
 if [istarget loongarch64-*-*] {
+  run_dump_test "relax-align-first"
 
   if [isbuild loongarch64-*-*] {
     set testname "loongarch relax .exe build"
