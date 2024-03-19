@@ -2452,7 +2452,7 @@ a different search path than the runtime linker would have used.
 When additional shared libraries are required, the linker will search
 directories in the order listed below in order to find them.  Note
 however that this only applies to additional libraries needed to
-satisfy already included shared libraries.  It does does @emph{not}
+satisfy already included shared libraries.  It does @emph{not}
 apply to libraries that are included via the @option{-l} command line
 option.  Searches for @option{-l} libraries are only conducted in
 directories specified by the @option{-L} option (@xref{-L}).
