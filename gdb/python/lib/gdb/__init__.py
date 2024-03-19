@@ -18,7 +18,6 @@ import threading
 import traceback
 import os
 import sys
-import _gdb
 from contextlib import contextmanager
 
 # Python 3 moved "reload"
