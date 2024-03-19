@@ -230,6 +230,50 @@ linux_proc_pid_is_zombie (pid_t pid)
 
 /* See linux-procfs.h.  */
 
+std::optional<std::string>
+linux_proc_get_stat_field (ptid_t ptid, int field)
+{
+  /* We never need to read PID from the stat file, and there's
+     command_from_pid to read the comm field.  */
+  gdb_assert (field >= LINUX_PROC_STAT_STATE);
+
+  std::string filename = string_printf ("/proc/%ld/task/%ld/stat",
+					(long) ptid.pid (), (long) ptid.lwp ());
+
+  std::optional<std::string> content
+    = read_text_file_to_string (filename.c_str ());
+  if (!content.has_value ())
+    return {};
+
+  /* ps command also relies on no trailing fields ever containing ')'.  */
+  std::string::size_type pos = content->find_last_of (')');
+  if (pos == std::string::npos)
+    return {};
+
+  /* The first field after program name is LINUX_PROC_STAT_STATE.  */
+  for (int i = LINUX_PROC_STAT_STATE; i <= field; ++i)
+    {
+      /* Find separator.  */
+      pos = content->find_first_of (' ', pos);
+      if (pos == std::string::npos)
+	return {};
+
+      /* Find beginning of field.  */
+      pos = content->find_first_not_of (' ', pos);
+      if (pos == std::string::npos)
+	return {};
+    }
+
+  /* Find end of field.  */
+  std::string::size_type end_pos = content->find_first_of (' ', pos);
+  if (end_pos == std::string::npos)
+    return content->substr (pos);
+  else
+    return content->substr (pos, end_pos - pos);
+}
+
+/* See linux-procfs.h.  */
+
 const char *
 linux_proc_tid_get_name (ptid_t ptid)
 {
