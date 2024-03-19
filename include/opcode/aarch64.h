@@ -230,6 +230,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_RCPC3,
   /* Checked Pointer Arithmetic instructions. */
   AARCH64_FEATURE_CPA,
+  /* FAMINMAX instructions.  */
+  AARCH64_FEATURE_FAMINMAX,
   AARCH64_NUM_FEATURES
 };
 

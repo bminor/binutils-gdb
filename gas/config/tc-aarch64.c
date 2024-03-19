@@ -10476,6 +10476,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"sve2p1",		AARCH64_FEATURE (SVE2p1), AARCH64_FEATURE (SVE2)},
   {"rcpc3",		AARCH64_FEATURE (RCPC3), AARCH64_FEATURE (RCPC2)},
   {"cpa",		AARCH64_FEATURE (CPA), AARCH64_NO_FEATURES},
+  {"faminmax",		AARCH64_FEATURE (FAMINMAX), AARCH64_FEATURE (SIMD)},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 

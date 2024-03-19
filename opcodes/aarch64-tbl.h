@@ -2663,6 +2663,12 @@ static const aarch64_feature_set aarch64_feature_cpa =
   AARCH64_FEATURE (CPA);
 static const aarch64_feature_set aarch64_feature_cpa_sve =
   AARCH64_FEATURES (2, CPA, SVE);
+static const aarch64_feature_set aarch64_feature_faminmax =
+  AARCH64_FEATURE (FAMINMAX);
+static const aarch64_feature_set aarch64_feature_faminmax_sve2 =
+  AARCH64_FEATURES (2, FAMINMAX, SVE2);
+static const aarch64_feature_set aarch64_feature_faminmax_sme2 =
+  AARCH64_FEATURES (3, SVE2, FAMINMAX, SME2);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2731,6 +2737,9 @@ static const aarch64_feature_set aarch64_feature_cpa_sve =
 #define RCPC3	  &aarch64_feature_rcpc3
 #define CPA	  &aarch64_feature_cpa
 #define CPA_SVE   &aarch64_feature_cpa_sve
+#define FAMINMAX  &aarch64_feature_faminmax
+#define FAMINMAX_SVE2  &aarch64_feature_faminmax_sve2
+#define FAMINMAX_SME2  &aarch64_feature_faminmax_sme2
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2908,6 +2917,14 @@ static const aarch64_feature_set aarch64_feature_cpa_sve =
 #define CPA_SVE_INSNC(NAME,OPCODE,MASK,CLASS,OPS,QUALS,CONSTRAINTS,TIED) \
   { NAME, OPCODE, MASK, CLASS, 0, CPA_SVE, OPS, QUALS, \
     F_STRICT, CONSTRAINTS, TIED, NULL }
+#define FAMINMAX_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS)	\
+  { NAME, OPCODE, MASK, asimdsame, 0, FAMINMAX, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define FAMINMAX_SVE2_INSN(NAME,OPCODE,MASK,OPS,QUALS,CONSTRAINTS) \
+  { NAME, OPCODE, MASK, sve_size_hsd, 0, FAMINMAX_SVE2, OPS, QUALS, \
+    0 | F_STRICT, CONSTRAINTS, 2, NULL }
+#define FAMINMAX_SME2_INSN(NAME,OPCODE,MASK,OPS,QUALS) \
+  { NAME, OPCODE, MASK, sme_size_22_hsd, 0, FAMINMAX_SME2, OPS, QUALS, \
+    F_STRICT | 0, 0, 1, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -4245,6 +4262,19 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   RCPC3_INSN ("ldap1", 0x0d418400, 0xbffffc00, rcpc3, OP2 (LEt, SIMD_ADDR_SIMPLE), QL_SIMD_IMM_D, F_OD(1)),
   RCPC3_INSN ("ldapur", 0x1d400800, 0x3f600C00, rcpc3, OP2 (Ft, RCPC3_ADDR_OFFSET), QL_LDST_FP, F_RCPC3_SIZE),
   RCPC3_INSN ("stlur", 0x1d000800, 0x3f600C00, rcpc3, OP2 (Ft, RCPC3_ADDR_OFFSET), QL_LDST_FP, F_RCPC3_SIZE),
+  /* AdvSIMD faminmax.  */
+  FAMINMAX_INSN ("famax", 0xec01c00, 0xbfe0fc00, OP3 (Vd, Vn, Vm), QL_V3SAMEH, F_SIZEQ),
+  FAMINMAX_INSN ("famax", 0xea0dc00, 0xbfa0fc00, OP3 (Vd, Vn, Vm), QL_V3SAMESD, F_SIZEQ),
+  FAMINMAX_INSN ("famin", 0x2ec01c00, 0xbfe0fc00, OP3 (Vd, Vn, Vm), QL_V3SAMEH, F_SIZEQ),
+  FAMINMAX_INSN ("famin", 0x2ea0dc00, 0xbfa0fc00, OP3 (Vd, Vn, Vm), QL_V3SAMESD, F_SIZEQ),
+  /* SVE2 faminmax.  */
+  FAMINMAX_SVE2_INSN ("famax", 0x650e8000, 0xff3fe000, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_VMVV_HSD, C_SCAN_MOVPRFX),
+  FAMINMAX_SVE2_INSN ("famin", 0x650f8000, 0xff3fe000, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_VMVV_HSD, C_SCAN_MOVPRFX),
+  /* SME2 faminmax.  */
+  FAMINMAX_SME2_INSN ("famax", 0xc120b140, 0xff21ffe1, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zmx2), OP_SVE_VVV_HSD),
+  FAMINMAX_SME2_INSN ("famax", 0xc120b940, 0xff23ffe3, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zmx4), OP_SVE_VVV_HSD),
+  FAMINMAX_SME2_INSN ("famin", 0xc120b141, 0xff21ffe1, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zmx2), OP_SVE_VVV_HSD),
+  FAMINMAX_SME2_INSN ("famin", 0xc120b941, 0xff23ffe3, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zmx4), OP_SVE_VVV_HSD),
   /* Move wide (immediate).  */
   CORE_INSN ("movn", 0x12800000, 0x7f800000, movewide, OP_MOVN, OP2 (Rd, HALF), QL_DST_R, F_SF | F_HAS_ALIAS),
   CORE_INSN ("mov",  0x12800000, 0x7f800000, movewide, OP_MOV_IMM_WIDEN, OP2 (Rd, IMM_MOV), QL_DST_R, F_SF | F_ALIAS | F_CONV),
