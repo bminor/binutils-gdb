@@ -92,7 +92,7 @@ try:
         except:
             return content
 
-except:
+except ImportError:
 
     def colorize(filename, contents):
         return None
