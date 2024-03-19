@@ -5046,16 +5046,8 @@ proc gdb_wrapper_init { args } {
 }
 
 # Determine options that we always want to pass to the compiler.
-gdb_caching_proc universal_compile_options {} {
-    set me "universal_compile_options"
+proc universal_compile_options {src obj} {
     set options {}
-
-    set src [standard_temp_file ccopts.c]
-    set obj [standard_temp_file ccopts.o]
-
-    gdb_produce_source $src {
-	int foo(void) { return 0; }
-    }
 
     # Try an option for disabling colored diagnostics.  Some compilers
     # yield colored diagnostics by default (when run from a tty) unless
@@ -5066,7 +5058,43 @@ gdb_caching_proc universal_compile_options {} {
 	# Seems to have worked; use the option.
 	lappend options $opt
     }
+
+    return $options
+}
+
+# Determine options that we always want to pass to the C compiler.
+gdb_caching_proc universal_compile_options_c {} {
+    set me "universal_compile_options_c"
+
+    set src [standard_temp_file ccopts.c]
+    set obj [standard_temp_file ccopts.o]
+
+    gdb_produce_source $src {
+	int foo(void) { return 0; }
+    }
+
+    set options [universal_compile_options $src $obj]
+
     file delete $src
+    file delete $obj
+
+    verbose "$me:  returning $options" 2
+    return $options
+}
+
+# Determine options that we always want to pass to the compiler for
+# assembly source files with the extension ".s".
+gdb_caching_proc universal_compile_options_assembly {} {
+    set me "universal_compile_options_assembly"
+
+    set src [standard_temp_file ccopts.s]
+    set obj [standard_temp_file csymbol.o]
+
+    gdb_produce_source $src {
+	main:
+    }
+
+    set options [universal_compile_options $src $obj]
     file delete $obj
 
     verbose "$me:  returning $options" 2
@@ -5252,7 +5280,13 @@ proc gdb_compile {source dest type options} {
     if {[lsearch -exact $options rust] != -1} {
 	# -fdiagnostics-color is not a rustcc option.
     } else {
-	set new_options [universal_compile_options]
+	# icx/clang compilers support the -fdiagnostics-color option for
+	# ".S" files and only it is not supported for ".s" files.
+	if {[string match *.s $source] != 0} {
+	    set new_options [universal_compile_options_assembly]
+	} else {
+	    set new_options [universal_compile_options_c]
+	}
     }
 
     # C/C++ specific settings.
