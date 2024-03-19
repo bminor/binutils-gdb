@@ -14,25 +14,27 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import gdb
 
 # This must come before other DAP imports.
 from . import startup
 
-# Load modules that define commands.
-from . import breakpoint
-from . import bt
-from . import disassemble
-from . import evaluate
-from . import launch
-from . import locations
-from . import memory
-from . import modules
-from . import next
-from . import pause
-from . import scopes
-from . import sources
-from . import threads
+# Load modules that define commands.  These imports intentionally
+# ignore the unused import warning, as these modules are being loaded
+# for their side effects -- namely, registering DAP commands with the
+# server object.  "F401" is the flake8 "imported but unused" code.
+from . import breakpoint  # noqa: F401
+from . import bt  # noqa: F401
+from . import disassemble  # noqa: F401
+from . import evaluate  # noqa: F401
+from . import launch  # noqa: F401
+from . import locations  # noqa: F401
+from . import memory  # noqa: F401
+from . import modules  # noqa: F401
+from . import next  # noqa: F401
+from . import pause  # noqa: F401
+from . import scopes  # noqa: F401
+from . import sources  # noqa: F401
+from . import threads  # noqa: F401
 
 from .server import Server
 
