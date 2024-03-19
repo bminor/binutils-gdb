@@ -10728,9 +10728,18 @@ display_debug_names (struct dwarf_section *section, void *file)
 	{
 	  uint64_t string_offset, entry_offset;
 	  unsigned char *p;
+	  /* We need to scan first whether there is a single or multiple
+	     entries.  TAGNO is -2 for the first entry, it is -1 for the
+	     initial tag read of the second entry, then it becomes 0 for the
+	     first entry for real printing etc.  */
+	  int tagno = -2;
+	  /* Initialize it due to a false compiler warning.  */
+	  uint64_t second_abbrev_tag = -1;
+	  unsigned char *entryptr;
 
 	  p = name_table_string_offsets + namei * offset_size;
 	  SAFE_BYTE_GET (string_offset, p, offset_size, unit_end);
+
 	  p = name_table_entry_offsets + namei * offset_size;
 	  SAFE_BYTE_GET (entry_offset, p, offset_size, unit_end);
 
@@ -10739,17 +10748,17 @@ display_debug_names (struct dwarf_section *section, void *file)
 	  printf ("[%3u] ", namei + 1);
 	  if (bucket_count != 0)
 	    printf ("#%08x ", hash_table_hashes[namei]);
+
 	  printf ("%s:", fetch_indirect_string (string_offset));
 
-	  unsigned char *entryptr = entry_pool + entry_offset;
+	  entryptr = entry_pool + entry_offset;
+	  /* PR 31456: Check for invalid entry offset.  */
+	  if (entryptr < entry_pool || entryptr >= unit_end)
+	    {
+	      warn (_("Invalid entry offset value: %" PRIx64 "\n"), entry_offset);
+	      break;
+	    }
 
-	  /* We need to scan first whether there is a single or multiple
-	     entries.  TAGNO is -2 for the first entry, it is -1 for the
-	     initial tag read of the second entry, then it becomes 0 for the
-	     first entry for real printing etc.  */
-	  int tagno = -2;
-	  /* Initialize it due to a false compiler warning.  */
-	  uint64_t second_abbrev_tag = -1;
 	  for (;;)
 	    {
 	      uint64_t abbrev_tag;
