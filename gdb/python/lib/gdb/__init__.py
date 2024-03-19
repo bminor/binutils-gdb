@@ -26,7 +26,8 @@ if sys.version_info >= (3, 4):
 else:
     from imp import reload
 
-from _gdb import *
+# Note that two indicators are needed here to silence flake8.
+from _gdb import *  # noqa: F401,F403
 
 # Historically, gdb.events was always available, so ensure it's
 # still available without an explicit import.
