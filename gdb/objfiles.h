@@ -228,14 +228,14 @@ struct objfile_per_bfd_storage
 
   const char *intern (const char *str)
   {
-    return (const char *) string_cache.insert (str, strlen (str) + 1);
+    return string_cache.insert (str, strlen (str) + 1);
   }
 
   /* Same as the above, but for an std::string.  */
 
   const char *intern (const std::string &str)
   {
-    return (const char *) string_cache.insert (str.c_str (), str.size () + 1);
+    return string_cache.insert (str.c_str (), str.size () + 1);
   }
 
   /* Get the BFD this object is associated to.  */
