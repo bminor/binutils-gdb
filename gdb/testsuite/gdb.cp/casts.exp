@@ -180,6 +180,9 @@ gdb_test "print (unsigned long long) (LeftRight *) (Right *) &gd == gd_value" \
 gdb_test "print (unsigned long long) (LeftRight *) (Right *) r_value == gd_value" \
     " = true"
 
+gdb_test "print (const int &) gd.left" \
+    " = \\(const int \\&\\) @$nonzero_hex: 23"
+
 gdb_test "print reinterpret_cast<LeftRight *>(l) == lr_l" " = true"
 gdb_test "print reinterpret_cast<LeftRight *>(r) == lr_r" " = true"
 gdb_test "print reinterpret_cast<Left *>(lr) == l_lr" " = true"

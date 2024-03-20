@@ -411,7 +411,8 @@ value_cast (struct type *type, struct value *arg2)
      In this case we want to preserve the LVAL of ARG2 as this allows the
      resulting value to be used in more places.  We do this by calling
      VALUE_COPY if appropriate.  */
-  if (types_deeply_equal (arg2->type (), type))
+  if (types_deeply_equal (make_unqualified_type (arg2->type ()),
+			  make_unqualified_type (type)))
     {
       /* If the types are exactly equal then we can avoid creating a new
 	 value completely.  */

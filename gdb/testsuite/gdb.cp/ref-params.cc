@@ -36,6 +36,11 @@ int f2(Child& C)
   return f1(C);			/* Set breakpoint marker2 here.  */
 }
 
+int f3(const int &i)
+{
+  return i;
+}
+
 struct OtherParent {
   OtherParent (int other_id0) : other_id(other_id0) { }
   int other_id;
@@ -64,6 +69,7 @@ int main(void)
 
   f2(Q);
   f2(QR);
+  f3(Q.id);
 
   MultiChild MQ(53);
   MultiChild& MQR = MQ;
