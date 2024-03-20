@@ -4622,6 +4622,25 @@ proc skip_libstdcxx_probe_tests {} {
     return [skip_libstdcxx_probe_tests_prompt "$gdb_prompt $"]
 }
 
+# Return 1 if libc supports the longjmp probe.  Note that we're not using
+# gdb_caching_proc because the probe may have been disabled.
+
+proc have_longjmp_probe {} {
+    set have_probe -1
+    gdb_test_multiple "info probes stap libc ^longjmp$" "" {
+	-re -wrap "No probes matched\\." {
+	    set have_probe 0
+	}
+	-re -wrap "\r\nstap\[ \t\]+libc\[ \t\]+longjmp\[ \t\]+.*" {
+	    set have_probe 1
+	}
+    }
+    if { $have_probe == -1 } {
+	error "failed to get libc longjmp probe status"
+    }
+    return $have_probe
+}
+
 # Helper for gdb_is_target_* procs.  TARGET_NAME is the name of the target
 # we're looking for (used to build the test name).  TARGET_STACK_REGEXP
 # is a regexp that will match the output of "maint print target-stack" if

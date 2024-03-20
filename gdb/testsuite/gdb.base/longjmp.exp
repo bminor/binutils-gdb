@@ -62,16 +62,7 @@ proc do_test { with_probes } {
     #
     # We detect the different failure modes and kfail these.
 
-    set have_longjmp_probe 0
-    gdb_test_multiple "info probes stap libc ^longjmp$" "" {
-	-re -wrap "No probes matched\\." {
-	    pass $gdb_test_name
-	}
-	-re -wrap "\r\nstap\[ \t\]+libc\[ \t\]+longjmp\[ \t\]+.*" {
-	    pass $gdb_test_name
-	    set have_longjmp_probe 1
-	}
-    }
+    set have_longjmp_probe [have_longjmp_probe]
 
     if { $with_probes } {
 	if { !$have_longjmp_probe } {

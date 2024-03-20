@@ -49,7 +49,27 @@ if {![runto_main]} {
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
 gdb_test_no_output "source ${pyfile}" "load python file"
 
-gdb_test "p some_func ()" " = 0"
+set have_longjmp_probe [have_longjmp_probe]
+
+set re_cannot_insert_bp \
+    [multi_line \
+	 "Warning:" \
+	 "Cannot insert breakpoint $::decimal\\." \
+	 "Cannot access memory at address $::hex"]
+
+gdb_test_multiple "p some_func ()" "" {
+    -re -wrap "\r\n$re_cannot_insert_bp\r\n.*" {
+	if { $have_longjmp_probe } {
+	    fail $gdb_test_name
+	} else {
+	    kfail gdb/26967 $gdb_test_name
+	    return 0
+	}
+    }
+    -re -wrap " = 0" {
+	pass $gdb_test_name
+    }
+}
 
 # When frame debugging is turned on, this test has (previously)
 # revealed some crashes due to the Python frame unwinder trying to
