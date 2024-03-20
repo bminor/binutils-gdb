@@ -31,6 +31,8 @@ import _gdb
 # Note that two indicators are needed here to silence flake8.
 from _gdb import *  # noqa: F401,F403
 
+# isort: split
+
 # Historically, gdb.events was always available, so ensure it's
 # still available without an explicit import.
 import _gdbevents as events

@@ -18,6 +18,8 @@ import os
 # This must come before other DAP imports.
 from . import startup
 
+# isort: split
+
 # Load modules that define commands.  These imports intentionally
 # ignore the unused import warning, as these modules are being loaded
 # for their side effects -- namely, registering DAP commands with the
@@ -36,6 +38,7 @@ from . import scopes  # noqa: F401
 from . import sources  # noqa: F401
 from . import threads  # noqa: F401
 
+# isort: split
 from .server import Server
 
 
