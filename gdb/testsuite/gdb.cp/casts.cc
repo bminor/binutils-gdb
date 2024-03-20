@@ -88,6 +88,14 @@ main (int argc, char **argv)
   unsigned long long gd_value = (unsigned long long) (std::uintptr_t)&gd;
   unsigned long long r_value = (unsigned long long) (Right *) &gd;
 
+  LeftRight *lr = &gd;
+  Left *l = lr;
+  Right *r = lr;
+  LeftRight *lr_l = reinterpret_cast<LeftRight *>(l);
+  LeftRight *lr_r = reinterpret_cast<LeftRight *>(r);
+  Left *l_lr = reinterpret_cast<Left *>(lr);
+  Right *r_lr = reinterpret_cast<Right *>(lr);
+
   VirtualLeftRight *vlr = new VirtualLeftRight ();
   VirtualLeft *vl = vlr;
   VirtualRight *vr = vlr;

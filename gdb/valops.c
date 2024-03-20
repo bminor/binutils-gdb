@@ -694,10 +694,17 @@ value_reinterpret_cast (struct type *type, struct value *arg)
       || (dest_code == TYPE_CODE_MEMBERPTR && arg_code == TYPE_CODE_INT)
       || (dest_code == TYPE_CODE_INT && arg_code == TYPE_CODE_MEMBERPTR)
       || (dest_code == arg_code
-	  && (dest_code == TYPE_CODE_PTR
-	      || dest_code == TYPE_CODE_METHODPTR
+	  && (dest_code == TYPE_CODE_METHODPTR
 	      || dest_code == TYPE_CODE_MEMBERPTR)))
     result = value_cast (dest_type, arg);
+  else if (dest_code == TYPE_CODE_PTR && arg_code == TYPE_CODE_PTR)
+    {
+      /* Don't do any up- or downcasting.  */
+      result = arg->copy ();
+      result->deprecated_set_type (dest_type);
+      result->set_enclosing_type (dest_type);
+      result->set_pointed_to_offset (0);
+    }
   else
     error (_("Invalid reinterpret_cast"));
 

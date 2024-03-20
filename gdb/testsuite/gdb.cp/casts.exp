@@ -180,6 +180,16 @@ gdb_test "print (unsigned long long) (LeftRight *) (Right *) &gd == gd_value" \
 gdb_test "print (unsigned long long) (LeftRight *) (Right *) r_value == gd_value" \
     " = true"
 
+gdb_test "print reinterpret_cast<LeftRight *>(l) == lr_l" " = true"
+gdb_test "print reinterpret_cast<LeftRight *>(r) == lr_r" " = true"
+gdb_test "print reinterpret_cast<Left *>(lr) == l_lr" " = true"
+gdb_test "print reinterpret_cast<Right *>(lr) == r_lr" " = true"
+
+gdb_test "print &reinterpret_cast<LeftRight &>(*l) == lr_l" " = true"
+gdb_test "print &reinterpret_cast<LeftRight &>(*r) == lr_r" " = true"
+gdb_test "print &reinterpret_cast<Left &>(*lr) == l_lr" " = true"
+gdb_test "print &reinterpret_cast<Right &>(*lr) == r_lr" " = true"
+
 gdb_test "print dynamic_cast<VirtualLeftRight *> (vlr) == vlr" " = true"
 gdb_test "print dynamic_cast<VirtualLeftRight *> (vl) == vlr" " = true"
 gdb_test "print dynamic_cast<VirtualLeftRight *> (vr) == vlr" " = true"
