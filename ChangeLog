@@ -1,5 +1,9 @@
 2024-03-20  Simon Marchi  <simon.marchi@efficios.com>
 
+	* .pre-commit-config.yaml: Bump black hook to 24.3.0
+
+2024-03-20  Simon Marchi  <simon.marchi@efficios.com>
+
 	* .pre-commit-config.yaml: New.
 
 2024-03-14  Simon Marchi  <simon.marchi@efficios.com>
