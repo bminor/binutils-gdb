@@ -88,6 +88,9 @@ save_vars { GDB_TEST_SOCKETHOST } {
 	    } else {
 		if { $gdbserver_should_fail } {
 		    fail "$test: gdbserver should fail but did not"
+		} elseif { [llength $res] == 0 } {
+		    unsupported $test
+		    continue
 		} else {
 		    pass "$test"
 		}

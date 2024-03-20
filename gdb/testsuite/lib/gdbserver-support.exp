@@ -382,6 +382,9 @@ proc gdbserver_start { options arguments } {
 	    -re ".*: cannot resolve name: .*\r\n" {
 		error "gdbserver cannot resolve name."
 	    }
+	    -re "Can't open socket: Address family not supported by protocol." {
+		return {}
+	    }
 	    timeout {
 		error "Timeout waiting for gdbserver response."
 	    }
