@@ -938,6 +938,10 @@ x86_linux_read_description (void)
 	  xcr0 = xstateregs[(I386_LINUX_XSAVE_XCR0_OFFSET
 			     / sizeof (uint64_t))];
 
+	  /* No MPX on x32.  */
+	  if (machine == EM_X86_64 && !is_elf64)
+	    xcr0 &= ~X86_XSTATE_MPX;
+
 	  xsave_len = x86_xsave_length ();
 
 	  /* Use PTRACE_GETREGSET if it is available.  */
