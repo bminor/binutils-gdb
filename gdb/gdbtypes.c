@@ -4372,7 +4372,7 @@ check_types_worklist (std::vector<type_equality_entry> *worklist,
 
       /* If the type pair has already been visited, we know it is
 	 ok.  */
-      cache->insert (&entry, sizeof (entry), &added);
+      cache->insert (entry, &added);
       if (!added)
 	continue;
 

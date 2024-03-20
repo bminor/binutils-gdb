@@ -1062,10 +1062,8 @@ partial_symtab::add_psymbol (const partial_symbol &psymbol,
   bool added;
 
   /* Stash the partial symbol away in the cache.  */
-  partial_symbol *psym
-    = ((struct partial_symbol *)
-       partial_symtabs->psymbol_cache.insert
-       (&psymbol, sizeof (struct partial_symbol), &added));
+  const partial_symbol *psym = partial_symtabs->psymbol_cache.insert (psymbol,
+								      &added);
 
   /* Do not duplicate global partial symbols.  */
   if (where == psymbol_placement::GLOBAL && !added)
