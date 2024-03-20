@@ -263,6 +263,7 @@ public:
   bool producer_is_clang : 1;
   bool producer_is_gas_lt_2_38 : 1;
   bool producer_is_gas_2_39 : 1;
+  bool producer_is_gas_ge_2_40 : 1;
 
   /* When true, the file that we're processing is known to have
      debugging info for C++ namespaces.  GCC 3.3.x did not produce
