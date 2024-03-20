@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import copy
+
 import gdb
 
 """GDB commands for working with type-printers."""

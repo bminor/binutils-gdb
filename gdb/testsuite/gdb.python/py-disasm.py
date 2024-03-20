@@ -13,11 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gdb
-import gdb.disassembler
 import struct
 import sys
 
+import gdb
+import gdb.disassembler
 from gdb.disassembler import Disassembler, DisassemblerResult
 
 # A global, holds the program-counter address at which we should

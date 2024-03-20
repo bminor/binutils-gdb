@@ -15,7 +15,7 @@
 
 import gdb
 
-from .server import request, capability
+from .server import capability, request
 
 
 @request("disassemble")

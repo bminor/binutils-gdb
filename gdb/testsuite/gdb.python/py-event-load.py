@@ -17,7 +17,6 @@
 
 import gdb
 
-
 freed_objfile = None
 
 

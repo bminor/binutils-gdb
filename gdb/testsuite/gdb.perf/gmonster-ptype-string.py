@@ -19,9 +19,7 @@
 # these before it searches the index (there is work-in-progress to fix this),
 # this test helps measure the issue.
 
-from perftest import perftest
-from perftest import measure
-from perftest import utils
+from perftest import measure, perftest, utils
 
 
 class GmonsterPtypeString(perftest.TestCaseWithBasicMeasurements):

@@ -14,28 +14,28 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import functools
-import gdb
 import heapq
 import inspect
 import json
 import threading
 from contextlib import contextmanager
 
-from .io import start_json_writer, read_json
+import gdb
+
+from .io import read_json, start_json_writer
 from .startup import (
-    exec_and_log,
     DAPException,
     DAPQueue,
+    LogLevel,
+    exec_and_log,
     in_dap_thread,
     in_gdb_thread,
-    start_thread,
     log,
     log_stack,
-    LogLevel,
+    start_thread,
     thread_log,
 )
 from .typecheck import type_check
-
 
 # Map capability names to values.
 _capabilities = {}

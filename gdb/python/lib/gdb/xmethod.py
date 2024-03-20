@@ -16,8 +16,9 @@
 
 """Utilities for defining xmethods"""
 
-import gdb
 import re
+
+import gdb
 
 
 class XMethod(object):

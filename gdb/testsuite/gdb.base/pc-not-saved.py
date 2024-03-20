@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gdb
-from gdb.unwinder import Unwinder, FrameId
+from gdb.unwinder import FrameId, Unwinder
 
 # Cached FrameId.  See set_break_bt_here_frame_id for details.
 break_bt_here_frame_id = None

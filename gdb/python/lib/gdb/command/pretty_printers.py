@@ -17,8 +17,9 @@
 """GDB commands for working with pretty-printers."""
 
 import copy
-import gdb
 import re
+
+import gdb
 
 
 def parse_printer_regexps(arg):

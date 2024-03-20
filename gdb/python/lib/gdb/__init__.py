@@ -13,11 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import signal
+import sys
 import threading
 import traceback
-import os
-import sys
 from contextlib import contextmanager
 
 # Python 3 moved "reload"

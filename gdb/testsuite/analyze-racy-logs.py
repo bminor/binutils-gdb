@@ -29,9 +29,9 @@
 # This program is invoked when the user runs "make check" and
 # specifies the RACY_ITER environment variable.
 
-import sys
 import os
 import re
+import sys
 
 # The (global) dictionary that stores the associations between a *.sum
 # file and its results.  The data inside it will be stored as:

@@ -16,8 +16,9 @@
 
 """$_memeq, $_strlen, $_streq, $_regex"""
 
-import gdb
 import re
+
+import gdb
 
 
 class _MemEq(gdb.Function):

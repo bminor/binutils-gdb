@@ -15,8 +15,9 @@
 
 """Configure GDB using the ELinOS environment."""
 
-import os
 import glob
+import os
+
 import gdb
 
 

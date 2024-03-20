@@ -15,7 +15,7 @@
 
 import json
 
-from .startup import start_thread, log, log_stack, LogLevel
+from .startup import LogLevel, log, log_stack, start_thread
 
 
 def read_json(stream):

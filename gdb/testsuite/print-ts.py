@@ -30,10 +30,10 @@
 # FORMAT must be a string compatible with "strftime".  If nothing is
 # provided, we choose a reasonable format.
 
-import fileinput
 import datetime
-import sys
+import fileinput
 import os
+import sys
 
 if len(sys.argv) > 1:
     fmt = sys.argv[1]

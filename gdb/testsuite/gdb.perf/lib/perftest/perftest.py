@@ -15,13 +15,15 @@
 
 from __future__ import absolute_import
 
-import perftest.testresult as testresult
 import perftest.reporter as reporter
-from perftest.measure import Measure
-from perftest.measure import MeasurementPerfCounter
-from perftest.measure import MeasurementProcessTime
-from perftest.measure import MeasurementWallTime
-from perftest.measure import MeasurementVmSize
+import perftest.testresult as testresult
+from perftest.measure import (
+    Measure,
+    MeasurementPerfCounter,
+    MeasurementProcessTime,
+    MeasurementVmSize,
+    MeasurementWallTime,
+)
 
 
 class TestCase(object):

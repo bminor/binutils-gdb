@@ -16,10 +16,11 @@
 
 """Utilities for working with pretty-printers."""
 
-import gdb
-import gdb.types
 import itertools
 import re
+
+import gdb
+import gdb.types
 
 
 class PrettyPrinter(object):

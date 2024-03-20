@@ -14,9 +14,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import base64
+
 import gdb
 
-from .server import request, capability
+from .server import capability, request
 
 
 @request("readMemory")

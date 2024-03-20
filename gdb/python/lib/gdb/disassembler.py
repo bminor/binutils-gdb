@@ -15,13 +15,14 @@
 
 """Disassembler related module."""
 
-import gdb
 import _gdb.disassembler
 
 # Re-export everything from the _gdb.disassembler module, which is
 # defined within GDB's C++ code.  Note that two indicators are needed
 # here to silence flake8.
 from _gdb.disassembler import *  # noqa: F401,F403
+
+import gdb
 
 # Module global dictionary of gdb.disassembler.Disassembler objects.
 # The keys of this dictionary are bfd architecture names, or the

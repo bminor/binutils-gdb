@@ -17,8 +17,9 @@
 # printer registration.
 
 import re
-import gdb.types
+
 import gdb.printing
+import gdb.types
 
 
 def lookup_function_lookup_test(val):

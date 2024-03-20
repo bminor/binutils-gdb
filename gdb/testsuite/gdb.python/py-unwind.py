@@ -14,8 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gdb
-from gdb.unwinder import Unwinder, FrameId
-
+from gdb.unwinder import FrameId, Unwinder
 
 # These are set to test whether invalid register names cause an error.
 add_saved_register_errors = {}

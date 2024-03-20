@@ -16,8 +16,9 @@
 
 """ Extended prompt library functions."""
 
-import gdb
 import os
+
+import gdb
 
 
 def _prompt_pwd(ignore):

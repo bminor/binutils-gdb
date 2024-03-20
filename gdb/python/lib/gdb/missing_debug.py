@@ -17,8 +17,9 @@
 MissingDebugHandler base class, and register_handler function.
 """
 
-import gdb
 import sys
+
+import gdb
 
 if sys.version_info >= (3, 7):
     # Functions str.isascii() and str.isalnum are available starting Python
@@ -32,7 +33,7 @@ if sys.version_info >= (3, 7):
 else:
     # Fall back to curses.ascii.isascii() and curses.ascii.isalnum() for
     # earlier versions.
-    from curses.ascii import isascii, isalnum
+    from curses.ascii import isalnum, isascii
 
 
 def _validate_name(name):

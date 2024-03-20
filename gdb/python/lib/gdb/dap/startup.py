@@ -16,13 +16,13 @@
 # Do not import other gdbdap modules here -- this module must come
 # first.
 import functools
-import gdb
 import queue
+import sys
 import threading
 import traceback
-import sys
-
 from enum import IntEnum, auto
+
+import gdb
 
 # Adapt to different Queue types.  This is exported for use in other
 # modules as well.

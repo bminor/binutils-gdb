@@ -16,6 +16,7 @@
 # This file is part of the GDB testsuite.  It tests python unwinders.
 
 import re
+
 import gdb.types
 from gdb.unwinder import Unwinder, register_unwinder
 

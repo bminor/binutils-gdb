@@ -5,8 +5,8 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-import sys
 import re
+import sys
 import time
 
 infname = sys.argv[1]

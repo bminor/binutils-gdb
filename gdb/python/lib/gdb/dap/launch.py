@@ -13,14 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gdb
-
 # These are deprecated in 3.9, but required in older versions.
 from typing import Mapping, Optional, Sequence
 
+import gdb
+
 from .events import exec_and_expect_stop, expect_process, expect_stop
-from .server import request, capability
-from .startup import exec_and_log, DAPException
+from .server import capability, request
+from .startup import DAPException, exec_and_log
 
 
 # Any parameters here are necessarily extensions -- DAP requires this

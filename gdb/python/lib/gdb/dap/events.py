@@ -15,11 +15,10 @@
 
 import gdb
 
+from .modules import is_module, make_module
 from .scopes import set_finish_value
 from .server import send_event
 from .startup import exec_and_log, in_gdb_thread, log
-from .modules import is_module, make_module
-
 
 # True when the inferior is thought to be running, False otherwise.
 # This may be accessed from any thread, which can be racy.  However,

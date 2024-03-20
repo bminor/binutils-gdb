@@ -17,9 +17,8 @@ import os
 
 import gdb
 
-from .server import request, capability
-from .startup import in_gdb_thread, DAPException
-
+from .server import capability, request
+from .startup import DAPException, in_gdb_thread
 
 # The next available source reference ID.  Must be greater than 0.
 _next_source = 1

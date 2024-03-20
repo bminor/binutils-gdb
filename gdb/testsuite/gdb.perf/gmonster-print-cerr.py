@@ -25,9 +25,7 @@
 # is that here we do not pre-expand the symtab: we don't want include
 # GDB's slowness in searching expanded symtabs first to color these results.
 
-from perftest import perftest
-from perftest import measure
-from perftest import utils
+from perftest import measure, perftest, utils
 
 
 class PrintCerr(perftest.TestCaseWithBasicMeasurements):

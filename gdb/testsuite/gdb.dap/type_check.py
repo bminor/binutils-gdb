@@ -16,6 +16,7 @@
 # Test the type checker.
 
 import typing
+
 from gdb.dap.typecheck import type_check
 
 

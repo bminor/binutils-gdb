@@ -13,15 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gdb
-
 # This is deprecated in 3.9, but required in older versions.
 from typing import Optional
 
+import gdb
+
 from .frames import select_frame
-from .server import capability, request, client_bool_capability
-from .startup import in_gdb_thread, parse_and_eval, DAPException
-from .varref import find_variable, VariableReference, apply_format
+from .server import capability, client_bool_capability, request
+from .startup import DAPException, in_gdb_thread, parse_and_eval
+from .varref import VariableReference, apply_format, find_variable
 
 
 class EvaluateResult(VariableReference):

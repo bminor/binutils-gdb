@@ -17,9 +17,7 @@
 # typedef used pervasively.  This exercises the perf regression introduced by
 # the original patch to pr 16253.
 
-from perftest import perftest
-from perftest import measure
-from perftest import utils
+from perftest import measure, perftest, utils
 
 
 class PervasiveTypedef(perftest.TestCaseWithBasicMeasurements):

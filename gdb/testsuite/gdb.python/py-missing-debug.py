@@ -13,10 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+from enum import Enum
+
 import gdb
 from gdb.missing_debug import MissingDebugHandler
-from enum import Enum
-import os
 
 # A global log that is filled in by instances of the LOG_HANDLER class
 # when they are called.

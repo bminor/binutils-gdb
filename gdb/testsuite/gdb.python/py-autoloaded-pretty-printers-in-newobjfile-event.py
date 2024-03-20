@@ -18,8 +18,9 @@
 # registered when a custom event handler for the new_objfile event
 # is called.
 
-import gdb
 import os
+
+import gdb
 
 
 def new_objfile_handler(event):

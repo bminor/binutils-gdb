@@ -19,9 +19,9 @@
 import gdb
 
 try:
-    from pygments import formatters, lexers, highlight
-    from pygments.token import Error, Comment, Text
+    from pygments import formatters, highlight, lexers
     from pygments.filters import TokenMergeFilter
+    from pygments.token import Comment, Error, Text
 
     _formatter = None
 

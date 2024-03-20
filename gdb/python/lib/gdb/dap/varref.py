@@ -13,13 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gdb
-from .startup import in_gdb_thread, DAPException
-from .server import client_bool_capability
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from contextlib import contextmanager
 
+import gdb
+
+from .server import client_bool_capability
+from .startup import DAPException, in_gdb_thread
 
 # A list of all the variable references created during this pause.
 all_variables = []

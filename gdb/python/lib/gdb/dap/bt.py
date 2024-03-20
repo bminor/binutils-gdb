@@ -13,16 +13,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gdb
 import os
 
 # This is deprecated in 3.9, but required in older versions.
 from typing import Optional
 
+import gdb
+
 from .frames import dap_frame_generator
 from .modules import module_id
 from .scopes import symbol_value
-from .server import request, capability
+from .server import capability, request
 from .sources import make_source
 from .startup import in_gdb_thread
 from .state import set_thread

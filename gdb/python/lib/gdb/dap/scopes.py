@@ -16,10 +16,9 @@
 import gdb
 
 from .frames import frame_for_id
-from .startup import in_gdb_thread
 from .server import request
+from .startup import in_gdb_thread
 from .varref import BaseReference
-
 
 # Map DAP frame IDs to scopes.  This ensures that scopes are re-used.
 frame_to_scope = {}
