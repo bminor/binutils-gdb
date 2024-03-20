@@ -444,7 +444,7 @@ struct partial_symtab
      improve access.  Binary search will be the usual method of
      finding a symbol within it.  */
 
-  std::vector<partial_symbol *> global_psymbols;
+  std::vector<const partial_symbol *> global_psymbols;
 
   /* Static symbol list.  This list will *not* be sorted after readin;
      to find a symbol in it, exhaustive search must be used.  This is
@@ -453,7 +453,7 @@ struct partial_symtab
      to take a *lot* of time; check) or an error (and we don't care
      how long errors take).  */
 
-  std::vector<partial_symbol *> static_psymbols;
+  std::vector<const partial_symbol *> static_psymbols;
 
   /* True if the name of this partial symtab is not a source file name.  */
 
