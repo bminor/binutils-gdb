@@ -9640,7 +9640,7 @@ show_disassembly_style_sfunc (struct ui_file *file, int from_tty,
 			      struct cmd_list_element *c, const char *value)
 {
   struct gdbarch *gdbarch = get_current_arch ();
-  char *options = get_disassembler_options (gdbarch);
+  const char *options = get_disassembler_options (gdbarch);
   const char *style = "";
   int len = 0;
   const char *opt;

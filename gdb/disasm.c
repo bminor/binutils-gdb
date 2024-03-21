@@ -1291,7 +1291,7 @@ gdb_buffered_insn_length (struct gdbarch *gdbarch,
   return result;
 }
 
-char *
+const char *
 get_disassembler_options (struct gdbarch *gdbarch)
 {
   char **disassembler_options = gdbarch_disassembler_options (gdbarch);
