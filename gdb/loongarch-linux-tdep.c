@@ -498,7 +498,9 @@ loongarch_iterate_over_regset_sections (struct gdbarch *gdbarch,
   int fpsize = fprsize * LOONGARCH_LINUX_NUM_FPREGSET +
     fccsize * LOONGARCH_LINUX_NUM_FCC + fcsrsize;
   int lsxrsize = register_size (gdbarch, LOONGARCH_FIRST_LSX_REGNUM);
+  int lsxsize = lsxrsize * LOONGARCH_LINUX_NUM_LSXREGSET;
   int lasxrsize = register_size (gdbarch, LOONGARCH_FIRST_LASX_REGNUM);
+  int lasxsize = lasxrsize * LOONGARCH_LINUX_NUM_LASXREGSET;
   int scrsize = register_size (gdbarch, LOONGARCH_FIRST_SCR_REGNUM);
   int eflagssize = register_size (gdbarch, LOONGARCH_EFLAGS_REGNUM);
   int ftopsize = register_size (gdbarch, LOONGARCH_FTOP_REGNUM);
@@ -507,9 +509,9 @@ loongarch_iterate_over_regset_sections (struct gdbarch *gdbarch,
   cb (".reg", LOONGARCH_LINUX_NUM_GREGSET * gprsize,
       LOONGARCH_LINUX_NUM_GREGSET * gprsize, &loongarch_gregset, nullptr, cb_data);
   cb (".reg2", fpsize, fpsize, &loongarch_fpregset, nullptr, cb_data);
-  cb (".reg-loongarch-lsx", lsxrsize, lsxrsize,
+  cb (".reg-loongarch-lsx", lsxsize, lsxsize,
       &loongarch_lsxregset, nullptr, cb_data);
-  cb (".reg-loongarch-lasx", lasxrsize, lasxrsize,
+  cb (".reg-loongarch-lasx", lasxsize, lasxsize,
       &loongarch_lasxregset, nullptr, cb_data);
   cb (".reg-loongarch-lbt", lbtsize, lbtsize,
       &loongarch_lbtregset, nullptr, cb_data);
