@@ -213,7 +213,7 @@ struct target_desc *mips_tdesc_gp32;
 struct target_desc *mips_tdesc_gp64;
 
 /* The current set of options to be passed to the disassembler.  */
-static char *mips_disassembler_options;
+static std::string mips_disassembler_options;
 
 /* Implicit disassembler options for individual ABIs.  These tell
    libopcodes to use general-purpose register names corresponding

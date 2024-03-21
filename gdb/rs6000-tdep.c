@@ -130,7 +130,7 @@
     && (regnum) < (tdep)->ppc_cefpr0_regnum + ppc_num_efprs)
 
 /* Holds the current set of options to be passed to the disassembler.  */
-static char *powerpc_disassembler_options;
+static std::string powerpc_disassembler_options;
 
 /* The list of available "set powerpc ..." and "show powerpc ..."
    commands.  */

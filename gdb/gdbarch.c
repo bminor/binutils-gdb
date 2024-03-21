@@ -252,7 +252,7 @@ struct gdbarch
   gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp = default_gnu_triplet_regexp;
   gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size = default_addressable_memory_unit_size;
   const char * disassembler_options_implicit = 0;
-  char ** disassembler_options = 0;
+  std::string * disassembler_options = 0;
   const disasm_options_and_args_t * valid_disassembler_options = 0;
   gdbarch_type_align_ftype *type_align = default_type_align;
   gdbarch_get_pc_address_flags_ftype *get_pc_address_flags = default_get_pc_address_flags;
@@ -5362,7 +5362,7 @@ set_gdbarch_disassembler_options_implicit (struct gdbarch *gdbarch,
   gdbarch->disassembler_options_implicit = disassembler_options_implicit;
 }
 
-char **
+std::string *
 gdbarch_disassembler_options (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -5374,7 +5374,7 @@ gdbarch_disassembler_options (struct gdbarch *gdbarch)
 
 void
 set_gdbarch_disassembler_options (struct gdbarch *gdbarch,
-				  char ** disassembler_options)
+				  std::string * disassembler_options)
 {
   gdbarch->disassembler_options = disassembler_options;
 }

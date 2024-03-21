@@ -133,7 +133,7 @@ static const char *riscv_feature_name_virtual = "org.gnu.gdb.riscv.virtual";
 static const char *riscv_feature_name_vector = "org.gnu.gdb.riscv.vector";
 
 /* The current set of options to be passed to the disassembler.  */
-static char *riscv_disassembler_options;
+static std::string riscv_disassembler_options;
 
 /* Cached information about a frame.  */
 

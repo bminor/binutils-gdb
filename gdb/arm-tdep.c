@@ -232,7 +232,7 @@ static const char *const arm_register_names[] =
  "fps", "cpsr" };		/* 24 25       */
 
 /* Holds the current set of options to be passed to the disassembler.  */
-static char *arm_disassembler_options;
+static std::string arm_disassembler_options;
 
 /* Valid register name styles.  */
 static const char **valid_disassembly_styles;
@@ -11042,7 +11042,7 @@ _initialize_arm_tdep ()
 			  &setarmcmdlist, &showarmcmdlist,
 			  &setlist, &showlist);
 
-  arm_disassembler_options = xstrdup ("reg-names-std");
+  arm_disassembler_options = "reg-names-std";
   const disasm_options_t *disasm_options
     = &disassembler_options_arm ()->options;
   int num_disassembly_styles = 0;

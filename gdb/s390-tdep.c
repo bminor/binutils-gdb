@@ -45,7 +45,7 @@
 #include "features/s390x-linux64.c"
 
 /* Holds the current set of options to be passed to the disassembler.  */
-static char *s390_disassembler_options;
+static std::string s390_disassembler_options;
 
 /* Breakpoints.  */
 
