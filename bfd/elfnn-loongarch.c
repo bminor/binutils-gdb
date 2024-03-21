@@ -159,6 +159,27 @@ struct loongarch_elf_link_hash_table
    || (R_TYPE) == R_LARCH_TLS_LE64_LO20	  \
    || (R_TYPE) == R_LARCH_TLS_LE64_HI12)
 
+/* If TLS GD/IE need dynamic relocations, INDX will be the dynamic indx,
+   and set NEED_RELOC to true used in allocate_dynrelocs and
+   loongarch_elf_relocate_section for TLS GD/IE.  */
+#define LARCH_TLS_GD_IE_NEED_DYN_RELOC(INFO, DYN, H, INDX, NEED_RELOC) \
+  do \
+    { \
+      if ((H) != NULL \
+	  && (H)->dynindx != -1 \
+	  && WILL_CALL_FINISH_DYNAMIC_SYMBOL ((DYN), \
+				    bfd_link_pic (INFO), (H))) \
+      (INDX) = (H)->dynindx; \
+      if (((H) == NULL \
+	    || ELF_ST_VISIBILITY ((H)->other) == STV_DEFAULT \
+	    || (H)->root.type != bfd_link_hash_undefweak) \
+	    && (!bfd_link_executable (INFO) \
+	      || (INDX) != 0)) \
+      (NEED_RELOC) = true; \
+    } \
+    while (0)
+
+
 /* Generate a PLT header.  */
 
 static bool
@@ -1276,40 +1297,24 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       h->got.offset = s->size;
       if (tls_type & (GOT_TLS_GD | GOT_TLS_IE | GOT_TLS_GDESC))
 	{
+	  int indx = 0;
+	  bool need_reloc = false;
+	  LARCH_TLS_GD_IE_NEED_DYN_RELOC (info, dyn, h, indx,
+					need_reloc);
 	  /* TLS_GD needs two dynamic relocs and two GOT slots.  */
 	  if (tls_type & GOT_TLS_GD)
 	    {
 	      s->size += 2 * GOT_ENTRY_SIZE;
-	      if (bfd_link_executable (info))
-		{
-		  /* Link exe and not defined local.  */
-		  if (!SYMBOL_REFERENCES_LOCAL (info, h))
-		    htab->elf.srelgot->size += 2 * sizeof (ElfNN_External_Rela);
-		}
-	      else
-		{
-		  if (SYMBOL_REFERENCES_LOCAL (info, h))
-		    htab->elf.srelgot->size += sizeof (ElfNN_External_Rela);
-		  else
-		    htab->elf.srelgot->size += 2 * sizeof (ElfNN_External_Rela);
-		}
+	      if (need_reloc)
+		htab->elf.srelgot->size += 2 * sizeof (ElfNN_External_Rela);
 	    }
 
 	  /* TLS_IE needs one dynamic reloc and one GOT slot.  */
 	  if (tls_type & GOT_TLS_IE)
 	    {
 	      s->size += GOT_ENTRY_SIZE;
-
-	      if (bfd_link_executable (info))
-		{
-		  /* Link exe and not defined local.  */
-		  if (!SYMBOL_REFERENCES_LOCAL (info, h))
-		    htab->elf.srelgot->size += sizeof (ElfNN_External_Rela);
-		}
-	      else
-		{
-		  htab->elf.srelgot->size += sizeof (ElfNN_External_Rela);
-		}
+	      if (need_reloc)
+		htab->elf.srelgot->size += 2 * sizeof (ElfNN_External_Rela);
 	    }
 
 	  /* TLS_DESC needs one dynamic reloc and two GOT slot.  */
@@ -2550,13 +2555,18 @@ loongarch_reloc_is_fatal (struct bfd_link_info *info,
   })
 
 
+/* Compute the tp/dtp offset of a tls symbol.
+   It is dtp offset in dynamic tls model (gd/ld) and tp
+   offset in static tls model (ie/le). Both offsets are
+   calculated the same way on LoongArch, so the same
+   function is used.  */
 static bfd_vma
-tls_dtpoff_base (struct bfd_link_info *info)
+tlsoff (struct bfd_link_info *info, bfd_vma addr)
 {
   /* If tls_sec is NULL, we should have signalled an error already.  */
   if (elf_hash_table (info)->tls_sec == NULL)
     return 0;
-  return elf_hash_table (info)->tls_sec->vma;
+  return addr - elf_hash_table (info)->tls_sec->vma;
 }
 
 
@@ -2890,7 +2900,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			  is_undefweak, name, "TLS section not be created");
 		}
 	      else
-		relocation -= elf_hash_table (info)->tls_sec->vma;
+		relocation = tlsoff (info, relocation);
 	    }
 	  else
 	    {
@@ -3416,7 +3426,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	case R_LARCH_TLS_LE_HI20_R:
 	  relocation += rel->r_addend;
-	  relocation -= elf_hash_table (info)->tls_sec->vma;
+	  relocation = tlsoff (info, relocation);
 	  RELOCATE_TLS_TP32_HI20 (relocation);
 	  break;
 
@@ -3599,7 +3609,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  BFD_ASSERT (resolved_local && elf_hash_table (info)->tls_sec);
 
 	  relocation += rel->r_addend;
-	  relocation -= elf_hash_table (info)->tls_sec->vma;
+	  relocation = tlsoff (info, relocation);
 	  break;
 
 	/* TLS IE LD/GD process separately is troublesome.
@@ -3654,71 +3664,72 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  /* If a tls variable is accessed in multiple ways, GD uses
 	     the first two slots of GOT, desc follows with two slots,
 	     and IE uses one slot at the end.  */
-	  desc_off = 0;
-	  if (GOT_TLS_GD_BOTH_P (tls_type))
-	    desc_off = 2 * GOT_ENTRY_SIZE;
-
-	  ie_off = 0;
-	  if (GOT_TLS_GD_BOTH_P (tls_type) && (tls_type & GOT_TLS_IE))
-	    ie_off = 4 * GOT_ENTRY_SIZE;
-	  else if (GOT_TLS_GD_ANY_P (tls_type) && (tls_type & GOT_TLS_IE))
-	    ie_off = 2 * GOT_ENTRY_SIZE;
+	  off = 0;
+	  if (tls_type & GOT_TLS_GD)
+	    off += 2 * GOT_ENTRY_SIZE;
+	  desc_off = off;
+	  if (tls_type & GOT_TLS_GDESC)
+	    off += 2 * GOT_ENTRY_SIZE;
+	  ie_off = off;
 
 	  if ((got_off & 1) == 0)
 	    {
 	      Elf_Internal_Rela rela;
 	      asection *relgot = htab->elf.srelgot;
-	      bfd_vma tls_block_off = 0;
 
-	      if (SYMBOL_REFERENCES_LOCAL (info, h))
-		{
-		  BFD_ASSERT (elf_hash_table (info)->tls_sec);
-		  tls_block_off = relocation
-		      - elf_hash_table (info)->tls_sec->vma;
-		}
+	      int indx = 0;
+	      bool need_reloc = false;
+	      LARCH_TLS_GD_IE_NEED_DYN_RELOC (info, is_dyn, h, indx,
+					      need_reloc);
 
 	      if (tls_type & GOT_TLS_GD)
 		{
-		  rela.r_offset = sec_addr (got) + got_off;
-		  rela.r_addend = 0;
-		  if (SYMBOL_REFERENCES_LOCAL (info, h))
+		  if (need_reloc)
 		    {
-		      /* Local sym, used in exec, set module id 1.  */
-		      if (bfd_link_executable (info))
-			bfd_put_NN (output_bfd, 1, got->contents + got_off);
+		  /* Dynamic resolved Module ID.  */
+		      rela.r_offset = sec_addr (got) + got_off;
+		      rela.r_addend = 0;
+		      rela.r_info = ELFNN_R_INFO (indx,R_LARCH_TLS_DTPMODNN);
+		      bfd_put_NN (output_bfd, 0, got->contents + got_off);
+		      loongarch_elf_append_rela (output_bfd, relgot, &rela);
+
+		      if (indx == 0)
+			{
+			  /* Local symbol, tp offset has been known.  */
+			  BFD_ASSERT (! unresolved_reloc);
+			  bfd_put_NN (output_bfd,
+			      tlsoff (info, relocation),
+			      (got->contents + got_off + GOT_ENTRY_SIZE));
+			}
 		      else
 			{
-			  rela.r_info = ELFNN_R_INFO (0, R_LARCH_TLS_DTPMODNN);
+			  /* Dynamic resolved block offset.  */
+			  bfd_put_NN (output_bfd, 0,
+			      got->contents + got_off + GOT_ENTRY_SIZE);
+			  rela.r_info = ELFNN_R_INFO (indx,
+						R_LARCH_TLS_DTPRELNN);
+			  rela.r_offset += GOT_ENTRY_SIZE;
 			  loongarch_elf_append_rela (output_bfd, relgot, &rela);
 			}
-
-		      bfd_put_NN (output_bfd, tls_block_off,
-				  got->contents + got_off + GOT_ENTRY_SIZE);
 		    }
-		  /* Dynamic resolved.  */
 		  else
 		    {
-		      /* Dynamic relocate module id.  */
-		      rela.r_info = ELFNN_R_INFO (h->dynindx,
-						  R_LARCH_TLS_DTPMODNN);
-		      loongarch_elf_append_rela (output_bfd, relgot, &rela);
-
-		      /* Dynamic relocate offset of block.  */
-		      rela.r_offset += GOT_ENTRY_SIZE;
-		      rela.r_info = ELFNN_R_INFO (h->dynindx,
-						  R_LARCH_TLS_DTPRELNN);
-		      loongarch_elf_append_rela (output_bfd, relgot, &rela);
+		      /* In a static link or an executable link with the symbol
+			 binding locally.  Mark it as belonging to module 1.  */
+		      bfd_put_NN (output_bfd, 1, got->contents + got_off);
+		      bfd_put_NN (output_bfd, tlsoff (info, relocation),
+			  got->contents + got_off + GOT_ENTRY_SIZE);
 		    }
 		}
 	      if (tls_type & GOT_TLS_GDESC)
 		{
 		  /* Unless it is a static link, DESC always emits a
 		     dynamic relocation.  */
-		  int indx = h && h->dynindx != -1 ? h->dynindx : 0;
+		  indx = h && h->dynindx != -1 ? h->dynindx : 0;
 		  rela.r_offset = sec_addr (got) + got_off + desc_off;
 		  rela.r_addend = 0;
 		  if (indx == 0)
-		    rela.r_addend = relocation - tls_dtpoff_base (info);
+		    rela.r_addend = tlsoff (info, relocation);
 
 		  rela.r_info = ELFNN_R_INFO (indx, R_LARCH_TLS_DESCNN);
 		  loongarch_elf_append_rela (output_bfd, relgot, &rela);
@@ -3727,28 +3738,24 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		}
 	      if (tls_type & GOT_TLS_IE)
 		{
-		  rela.r_offset = sec_addr (got) + got_off + ie_off;
-		  if (SYMBOL_REFERENCES_LOCAL (info, h))
+		  if (need_reloc)
 		    {
-		      /* Local sym, used in exec, set module id 1.  */
-		      if (!bfd_link_executable (info))
-			{
-			  rela.r_info = ELFNN_R_INFO (0, R_LARCH_TLS_TPRELNN);
-			  rela.r_addend = tls_block_off;
-			  loongarch_elf_append_rela (output_bfd, relgot, &rela);
-			}
+		      bfd_put_NN (output_bfd, 0,
+			  got->contents + got_off + ie_off);
+		      rela.r_offset = sec_addr (got) + got_off + ie_off;
+		      rela.r_addend = 0;
 
-		      bfd_put_NN (output_bfd, tls_block_off,
-				  got->contents + got_off + ie_off);
+		      if (indx == 0)
+			rela.r_addend = tlsoff (info, relocation);
+		      rela.r_info = ELFNN_R_INFO (indx, R_LARCH_TLS_TPRELNN);
+		      loongarch_elf_append_rela (output_bfd, relgot, &rela);
 		    }
-		  /* Dynamic resolved.  */
 		  else
 		    {
-		      /* Dynamic relocate offset of block.  */
-		      rela.r_info = ELFNN_R_INFO (h->dynindx,
-						  R_LARCH_TLS_TPRELNN);
-		      rela.r_addend = 0;
-		      loongarch_elf_append_rela (output_bfd, relgot, &rela);
+		      /* In a static link or an executable link with the symbol
+			 bindinglocally, compute offset directly.  */
+		      bfd_put_NN (output_bfd, tlsoff (info, relocation),
+			  got->contents + got_off + ie_off);
 		    }
 		}
 	    }
@@ -3787,7 +3794,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	    tls_type = _bfd_loongarch_elf_tls_type (input_bfd, h, r_symndx);
 	    /* Use both TLS_GD and TLS_DESC.  */
-	    if ((tls_type & GOT_TLS_GD) && (tls_type & GOT_TLS_GDESC))
+	    if (GOT_TLS_GD_BOTH_P (tls_type))
 	      relocation += 2 * GOT_ENTRY_SIZE;
 
 	    if (r_type == R_LARCH_TLS_DESC64_PC_LO20)
