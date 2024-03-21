@@ -2611,9 +2611,14 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       bfd_vma relocation, off, ie_off, desc_off;
       int i, j;
 
+      /* When an unrecognized relocation is encountered, which usually
+	 occurs when using a newer assembler but an older linker, an error
+	 should be reported instead of continuing to the next relocation.  */
       howto = loongarch_elf_rtype_to_howto (input_bfd, r_type);
-      if (howto == NULL || r_type == R_LARCH_GNU_VTINHERIT
-	  || r_type == R_LARCH_GNU_VTENTRY)
+      if (howto == NULL)
+	return _bfd_unrecognized_reloc (input_bfd, input_section, r_type);
+
+      if (r_type == R_LARCH_GNU_VTINHERIT || r_type == R_LARCH_GNU_VTENTRY)
 	continue;
 
       /* This is a final link.  */
