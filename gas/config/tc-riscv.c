@@ -210,7 +210,8 @@ riscv_set_default_priv_spec (const char *s)
   obj_attribute *attr;
 
   RISCV_GET_PRIV_SPEC_CLASS (s, class);
-  if (class != PRIV_SPEC_CLASS_NONE)
+  if (class != PRIV_SPEC_CLASS_NONE
+      && class != PRIV_SPEC_CLASS_1P9P1)
     {
       default_priv_spec = class;
       return 1;
@@ -5009,7 +5010,7 @@ RISC-V options:\n\
   -fno-pic                    don't generate position-independent code (default)\n\
   -march=ISA                  set the RISC-V architecture\n\
   -misa-spec=ISAspec          set the RISC-V ISA spec (2.2, 20190608, 20191213)\n\
-  -mpriv-spec=PRIVspec        set the RISC-V privilege spec (1.9.1, 1.10, 1.11, 1.12)\n\
+  -mpriv-spec=PRIVspec        set the RISC-V privilege spec (1.10, 1.11, 1.12)\n\
   -mabi=ABI                   set the RISC-V ABI\n\
   -mrelax                     enable relax (default)\n\
   -mno-relax                  disable relax\n\

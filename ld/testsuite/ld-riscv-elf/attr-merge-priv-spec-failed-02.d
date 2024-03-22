@@ -2,8 +2,7 @@
 #source: attr-merge-priv-spec-a.s
 #as:
 #ld: -r
-#warning: .*use privileged spec version 1.9.1 but the output use version 1.11.0
-#warning: .*privileged spec version 1.9.1 can not be linked with other spec versions
+#warning: .*use privileged spec version 1.10.0 but the output use version 1.11.0
 #readelf: -A
 
 Attribute Section: riscv

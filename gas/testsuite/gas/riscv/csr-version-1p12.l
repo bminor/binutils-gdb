@@ -1231,58 +1231,6 @@
 .*Info: macro .*
 .*Warning: invalid CSR `vstimecmph', needs `sstc' extension
 .*Info: macro .*
-.*Warning: invalid CSR `ubadaddr' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `ubadaddr' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `sbadaddr' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `sbadaddr' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `sptbr' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `sptbr' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mbadaddr' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mbadaddr' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mucounteren' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mucounteren' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mscounteren' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mscounteren' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mhcounteren' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mhcounteren' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mbase' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mbase' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mbound' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mbound' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mibase' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mibase' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mibound' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mibound' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mdbase' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mdbase' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mdbound' for the privileged spec `1.12'
-.*Info: macro .*
-.*Warning: invalid CSR `mdbound' for the privileged spec `1.12'
-.*Info: macro .*
 .*Warning: invalid CSR `ustatus' for the privileged spec `1.12'
 .*Info: macro .*
 .*Warning: invalid CSR `ustatus' for the privileged spec `1.12'

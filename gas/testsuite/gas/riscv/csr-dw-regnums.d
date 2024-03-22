@@ -403,19 +403,6 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4445 \(stimecmph\) at cfa\+1396
   DW_CFA_offset_extended_sf: r4685 \(vstimecmp\) at cfa\+2356
   DW_CFA_offset_extended_sf: r4701 \(vstimecmph\) at cfa\+2420
-  DW_CFA_offset_extended_sf: r4163 \(utval\) at cfa\+268
-  DW_CFA_offset_extended_sf: r4419 \(stval\) at cfa\+1292
-  DW_CFA_offset_extended_sf: r4480 \(satp\) at cfa\+1536
-  DW_CFA_offset_extended_sf: r4931 \(mtval\) at cfa\+3340
-  DW_CFA_offset_extended_sf: r4896 \(mcountinhibit\) at cfa\+3200
-  DW_CFA_offset_extended_sf: r4897 \(mcyclecfg\) at cfa\+3204
-  DW_CFA_offset_extended_sf: r4898 \(minstretcfg\) at cfa\+3208
-  DW_CFA_offset_extended_sf: r4992 \(mbase\) at cfa\+3584
-  DW_CFA_offset_extended_sf: r4993 \(mbound\) at cfa\+3588
-  DW_CFA_offset_extended_sf: r4994 \(mibase\) at cfa\+3592
-  DW_CFA_offset_extended_sf: r4995 \(mibound\) at cfa\+3596
-  DW_CFA_offset_extended_sf: r4996 \(mdbase\) at cfa\+3600
-  DW_CFA_offset_extended_sf: r4997 \(mdbound\) at cfa\+3604
   DW_CFA_offset_extended: r4096 \(ustatus\) at cfa\+0
   DW_CFA_offset_extended_sf: r4100 \(uie\) at cfa\+16
   DW_CFA_offset_extended_sf: r4101 \(utvec\) at cfa\+20

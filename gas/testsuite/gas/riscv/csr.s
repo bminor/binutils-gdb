@@ -3,7 +3,7 @@
 	csrw \val, a1
 	.endm
 
-	# Supported privileged specs, 1.9.1, 1.10, 1.11 and 1.12.
+	# Supported privileged specs, 1.10, 1.11 and 1.12.
 
 	# User Counter/Timers
 	csr cycle
@@ -441,29 +441,16 @@
 
 	# Supported in previous priv spec, but dropped now
 
-	csr ubadaddr		# 0x043 in 1.9.1, but the value is utval since 1.10
-	csr sbadaddr		# 0x143 in 1.9.1, but the value is stval since 1.10
-	csr sptbr		# 0x180 in 1.9.1, but the value is satp since 1.10
-	csr mbadaddr		# 0x343 in 1.9.1, but the value is mtval since 1.10
-	csr mucounteren		# 0x320 in 1.9.1, dropped in 1.10, but the value is mcountinhibit since 1.11
-	csr mscounteren		# 0x321 in 1.9.1, dropped in 1.10, but the value is mcyclecfg for Smcntrpmf extension
-	csr mhcounteren		# 0x322 in 1.9.1, dropped in 1.10, but the value is minstretcfg for Smcntrpmf extension
-	csr mbase		# 0x380 in 1.9.1, dropped in 1.10
-	csr mbound		# 0x381 in 1.9.1, dropped in 1.10
-	csr mibase		# 0x382 in 1.9.1, dropped in 1.10
-	csr mibound		# 0x383 in 1.9.1, dropped in 1.10
-	csr mdbase		# 0x384 in 1.9.1, dropped in 1.10
-	csr mdbound		# 0x385 in 1.9.1, dropped in 1.10
-	csr ustatus		# 0x0   in 1.9.1, dropped in 1.12
-	csr uie			# 0x4   in 1.9.1, dropped in 1.12
-	csr utvec		# 0x5   in 1.9.1, dropped in 1.12
-	csr uscratch		# 0x40  in 1.9.1, dropped in 1.12
-	csr uepc		# 0x41  in 1.9.1, dropped in 1.12
-	csr ucause		# 0x42  in 1.9.1, dropped in 1.12
+	csr ustatus		# 0x0   in 1.10, dropped in 1.12
+	csr uie			# 0x4   in 1.10, dropped in 1.12
+	csr utvec		# 0x5   in 1.10, dropped in 1.12
+	csr uscratch		# 0x40  in 1.10, dropped in 1.12
+	csr uepc		# 0x41  in 1.10, dropped in 1.12
+	csr ucause		# 0x42  in 1.10, dropped in 1.12
 	csr utval		# 0x43  in 1.10,  dropped in 1.12
-	csr uip			# 0x44  in 1.9.1, dropped in 1.12
-	csr sedeleg		# 0x102 in 1.9.1, dropped in 1.12
-	csr sideleg		# 0x103 in 1.9.1, dropped in 1.12
+	csr uip			# 0x44  in 1.10, dropped in 1.12
+	csr sedeleg		# 0x102 in 1.10, dropped in 1.12
+	csr sideleg		# 0x103 in 1.10, dropped in 1.12
 
 	# Unprivileged CSR which are not controlled by privilege spec
 
