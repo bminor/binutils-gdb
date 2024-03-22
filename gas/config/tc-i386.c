@@ -12161,10 +12161,6 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 		 instructions without data prefix.  Always generate
 		 R_386_GOT32X for "sym*GOT" operand in 32-bit mode.  */
 	      if (i.prefix[DATA_PREFIX] == 0
-		  && (generate_relax_relocations
-		      || (!object_64bit
-			  && i.rm.mode == 0
-			  && i.rm.regmem == 5))
 		  && (i.rm.mode == 2
 		      || (i.rm.mode == 0 && i.rm.regmem == 5))
 		  && i.tm.opcode_space == SPACE_BASE
@@ -12184,7 +12180,7 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 			  if (is_apx_rex2_encoding ())
 			    fixP->fx_tcbit = 1;
 			}
-		      else
+		      else if (generate_relax_relocations)
 			{
 			  /* Set fx_tcbit3 for REX2 prefix.  */
 			  if (is_apx_rex2_encoding ())
@@ -12195,7 +12191,8 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 			    fixP->fx_tcbit = 1;
 			}
 		    }
-		  else
+		  else if (generate_relax_relocations
+			   || (i.rm.mode == 0 && i.rm.regmem == 5))
 		    fixP->fx_tcbit2 = 1;
 		}
 	    }
