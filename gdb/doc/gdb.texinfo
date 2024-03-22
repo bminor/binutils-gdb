@@ -13867,6 +13867,9 @@ Produce a core dump of the inferior process.  The optional argument
 specified, the file name defaults to @file{core.@var{pid}}, where
 @var{pid} is the inferior process ID.
 
+If supported by the filesystem where the core is written to,
+@value{GDBN} generates a sparse core dump file.
+
 Note that this command is implemented only for some systems (as of
 this writing, @sc{gnu}/Linux, FreeBSD, Solaris, and S390).
 

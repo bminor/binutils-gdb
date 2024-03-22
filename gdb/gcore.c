@@ -39,10 +39,21 @@
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/scope-exit.h"
 
+/* To generate sparse cores, we look at the data to write in chunks of
+   this size when considering whether to skip the write.  Only if we
+   have a full block of this size with all zeros do we skip writing
+   it.  A simpler algorithm that would try to skip all zeros would
+   result in potentially many more write/lseek syscalls, as normal
+   data is typically sprinkled with many small holes of zeros.  Also,
+   it's much more efficient to memcmp a block of data against an
+   all-zero buffer than to check each and every data byte against zero
+   one by one.  */
+#define SPARSE_BLOCK_SIZE 0x1000
+
 /* The largest amount of memory to read from the target at once.  We
    must throttle it to limit the amount of memory used by GDB during
    generate-core-file for programs with large resident data.  */
-#define MAX_COPY_BYTES (1024 * 1024)
+#define MAX_COPY_BYTES (256 * SPARSE_BLOCK_SIZE)
 
 static const char *default_gcore_target (void);
 static enum bfd_architecture default_gcore_arch (void);
@@ -98,7 +109,12 @@ write_gcore_file_1 (bfd *obfd)
   bfd_set_section_alignment (note_sec, 0);
   bfd_set_section_size (note_sec, note_size);
 
-  /* Now create the memory/load sections.  */
+  /* Now create the memory/load sections.  Note
+     gcore_memory_sections's sparse logic is assuming that we'll
+     always write something afterwards, which we do: just below, we
+     write the note section.  So there's no need for an ftruncate-like
+     call to grow the file to the right size if the last memory
+     sections were zeros and we skipped writing them.  */
   if (gcore_memory_sections (obfd) == 0)
     error (_("gcore: failed to get corefile memory sections from target."));
 
@@ -567,6 +583,167 @@ objfile_find_memory_regions (struct target_ops *self,
   return 0;
 }
 
+/* Check if we have a block full of zeros at DATA within the [DATA,
+   DATA+SIZE) buffer.  Returns the size of the all-zero block found.
+   Returns at most the minimum between SIZE and SPARSE_BLOCK_SIZE.  */
+
+static size_t
+get_all_zero_block_size (const gdb_byte *data, size_t size)
+{
+  size = std::min (size, (size_t) SPARSE_BLOCK_SIZE);
+
+  /* A memcmp of a whole block is much faster than a simple for loop.
+     This makes a big difference, as with a for loop, this code would
+     dominate the performance and result in doubling the time to
+     generate a core, at the time of writing.  With an optimized
+     memcmp, this doesn't even show up in the perf trace.  */
+  static const gdb_byte all_zero_block[SPARSE_BLOCK_SIZE] = {};
+  if (memcmp (data, all_zero_block, size) == 0)
+    return size;
+  return 0;
+}
+
+/* Basically a named-elements pair, used as return type of
+   find_next_all_zero_block.  */
+
+struct offset_and_size
+{
+  size_t offset;
+  size_t size;
+};
+
+/* Find the next all-zero block at DATA+OFFSET within the [DATA,
+   DATA+SIZE) buffer.  Returns the offset and the size of the all-zero
+   block if found, or zero if not found.  */
+
+static offset_and_size
+find_next_all_zero_block (const gdb_byte *data, size_t offset, size_t size)
+{
+  for (; offset < size; offset += SPARSE_BLOCK_SIZE)
+    {
+      size_t zero_block_size
+	= get_all_zero_block_size (data + offset, size - offset);
+      if (zero_block_size != 0)
+	return {offset, zero_block_size};
+    }
+  return {0, 0};
+}
+
+/* Wrapper around bfd_set_section_contents that avoids writing
+   all-zero blocks to disk, so we create a sparse core file.
+   SKIP_ALIGN is a recursion helper -- if true, we'll skip aligning
+   the file position to SPARSE_BLOCK_SIZE.  */
+
+static bool
+sparse_bfd_set_section_contents (bfd *obfd, asection *osec,
+				 const gdb_byte *data,
+				 size_t sec_offset,
+				 size_t size,
+				 bool skip_align = false)
+{
+  /* Note, we don't have to have special handling for the case of the
+     last memory region ending with zeros, because our caller always
+     writes out the note section after the memory/load sections.  If
+     it didn't, we'd have to seek+write the last byte to make the file
+     size correct.  (Or add an ftruncate abstraction to bfd and call
+     that.)  */
+
+  if (size == 0)
+    return true;
+
+  size_t data_offset = 0;
+
+  if (!skip_align)
+    {
+      /* Align the all-zero block search with SPARSE_BLOCK_SIZE, to
+	 better align with filesystem blocks.  If we find we're
+	 misaligned, then write/skip the bytes needed to make us
+	 aligned.  We do that with (one level) recursion.  */
+
+      /* We need to know the section's file offset on disk.  We can
+	 only look at it after the bfd's 'output_has_begun' flag has
+	 been set, as bfd hasn't computed the file offsets
+	 otherwise.  */
+      if (!obfd->output_has_begun)
+	{
+	  gdb_byte dummy = 0;
+
+	  /* A write forces BFD to compute the bfd's section file
+	     positions.  Zero size works for that too.  */
+	  if (!bfd_set_section_contents (obfd, osec, &dummy, 0, 0))
+	    return false;
+
+	  gdb_assert (obfd->output_has_begun);
+	}
+
+      /* How much after the last aligned offset are we writing at.  */
+      size_t aligned_offset_remainder
+	= (osec->filepos + sec_offset) % SPARSE_BLOCK_SIZE;
+
+      /* Do we need to align?  */
+      if (aligned_offset_remainder != 0)
+	{
+	  /* How much we need to advance in order to find the next
+	     SPARSE_BLOCK_SIZE filepos-aligned block.  */
+	  size_t distance_to_next_aligned
+	    = SPARSE_BLOCK_SIZE - aligned_offset_remainder;
+
+	  /* How much we'll actually write in the recursion call.  The
+	     caller may want us to write fewer bytes than
+	     DISTANCE_TO_NEXT_ALIGNED.  */
+	  size_t align_write_size = std::min (size, distance_to_next_aligned);
+
+	  /* Recurse, skipping the alignment code.  */
+	  if (!sparse_bfd_set_section_contents (obfd, osec, data,
+						sec_offset,
+						align_write_size, true))
+	    return false;
+
+	  /* Skip over what we've written, and proceed with
+	     assumes-aligned logic.  */
+	  data_offset += align_write_size;
+	}
+    }
+
+  while (data_offset < size)
+    {
+      size_t all_zero_block_size
+	= get_all_zero_block_size (data + data_offset, size - data_offset);
+      if (all_zero_block_size != 0)
+	{
+	  /* Skip writing all-zero blocks.  */
+	  data_offset += all_zero_block_size;
+	  continue;
+	}
+
+      /* We have some non-zero data to write to file.  Find the next
+	 all-zero block within the data, and only write up to it.  */
+
+      offset_and_size next_all_zero_block
+	= find_next_all_zero_block (data,
+				    data_offset + SPARSE_BLOCK_SIZE,
+				    size);
+      size_t next_data_offset = (next_all_zero_block.offset == 0
+				 ? size
+				 : next_all_zero_block.offset);
+
+      if (!bfd_set_section_contents (obfd, osec, data + data_offset,
+				     sec_offset + data_offset,
+				     next_data_offset - data_offset))
+	return false;
+
+      data_offset = next_data_offset;
+
+      /* If we already know we have an all-zero block at the next
+	 offset, we can skip calling get_all_zero_block_size for
+	 it again.  */
+      if (next_all_zero_block.offset != 0)
+	data_offset += next_all_zero_block.size;
+    }
+
+  return true;
+}
+
 static void
 gcore_copy_callback (bfd *obfd, asection *osec)
 {
@@ -599,8 +776,9 @@ gcore_copy_callback (bfd *obfd, asection *osec)
 			     bfd_section_vma (osec)));
 	  break;
 	}
-      if (!bfd_set_section_contents (obfd, osec, memhunk.data (),
-				     offset, size))
+
+      if (!sparse_bfd_set_section_contents (obfd, osec, memhunk.data (),
+					    offset, size))
 	{
 	  warning (_("Failed to write corefile contents (%s)."),
 		   bfd_errmsg (bfd_get_error ()));
