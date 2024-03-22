@@ -826,6 +826,10 @@ windows_nat_target::store_registers (struct regcache *regcache, int r)
 static windows_solib *
 windows_make_so (const char *name, LPVOID load_addr)
 {
+  windows_solib *so = &windows_process.solibs.emplace_back ();
+  so->load_addr = load_addr;
+  so->original_name = name;
+
 #ifndef __CYGWIN__
   char *p;
   char buf[__PMAX];
@@ -854,6 +858,8 @@ windows_make_so (const char *name, LPVOID load_addr)
       GetSystemDirectory (buf, sizeof (buf));
       strcat (buf, "\\ntdll.dll");
     }
+
+  so->name = buf;
 #else
   wchar_t buf[__PMAX];
 
@@ -866,13 +872,6 @@ windows_make_so (const char *name, LPVOID load_addr)
 	  wcscat (buf, L"\\ntdll.dll");
 	}
     }
-#endif
-  windows_solib *so = &windows_process.solibs.emplace_back ();
-  so->load_addr = load_addr;
-  so->original_name = name;
-#ifndef __CYGWIN__
-  so->name = buf;
-#else
   if (buf[0])
     {
       char cname[SO_NAME_MAX_PATH_SIZE];
