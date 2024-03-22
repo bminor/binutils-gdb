@@ -1371,8 +1371,8 @@ windows_nat_target::fake_create_process ()
       throw_winerror_with_name (_("OpenProcess call failed"), err);
       /*  We can not debug anything in that case.  */
     }
-  add_thread (ptid_t (windows_process.current_event.dwProcessId, 0,
-			      windows_process.current_event.dwThreadId),
+  add_thread (ptid_t (windows_process.current_event.dwProcessId,
+		      windows_process.current_event.dwThreadId, 0),
 		      windows_process.current_event.u.CreateThread.hThread,
 		      windows_process.current_event.u.CreateThread.lpThreadLocalBase,
 		      true /* main_thread_p */);
