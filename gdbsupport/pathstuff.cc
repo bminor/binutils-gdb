@@ -72,7 +72,8 @@ gdb_realpath (const char *filename)
   }
 #else
   {
-    char *rp = canonicalize_file_name (filename);
+#undef canonicalize_file_name
+  char *rp = canonicalize_file_name (filename);
 
     if (rp != NULL)
       return gdb::unique_xmalloc_ptr<char> (rp);
