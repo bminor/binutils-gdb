@@ -891,12 +891,9 @@ windows_make_so (const char *name, LPVOID load_addr)
     }
   else
     {
-      char *rname = realpath (name, NULL);
+      gdb::unique_xmalloc_ptr<char> rname = gdb_realpath (name);
       if (rname != nullptr)
-	{
-	  so->name = rname;
-	  free (rname);
-	}
+	so->name = rname.get ();
       else
 	{
 	  warning (_("dll path for \"%s\" inaccessible"), name);
