@@ -5569,10 +5569,20 @@ proc gdb_compile {source dest type options} {
 	    #  which is time consuming, especially if we're remote
 	    #  host testing.
 	    #
+	    # Note the special care for GDB_PARALLEL.  In that
+	    # scenario, multiple expect instances will potentially try
+	    # to compile the object file at the same time.  The result
+	    # should be identical for every one of them, so we just
+	    # need to make sure that the final objfile is written to
+	    # atomically.
+
 	    if { $gdb_saved_set_unbuffered_mode_obj == "" } {
 		verbose "compiling gdb_saved_set_unbuffered_obj"
 		set unbuf_src ${srcdir}/lib/set_unbuffered_mode.c
-		set unbuf_obj ${objdir}/set_unbuffered_mode.o
+		# This gives us a per-expect-instance unique filename,
+		# which is important for GDB_PARALLEL.  See comments
+		# above.
+		set unbuf_obj [standard_temp_file set_unbuffered_mode.o]
 
 		set result [gdb_compile "${unbuf_src}" "${unbuf_obj}" object {nowarnings}]
 		if { $result != "" } {
@@ -5585,7 +5595,14 @@ proc gdb_compile {source dest type options} {
 		}
 		# Link a copy of the output object, because the
 		# original may be automatically deleted.
-		remote_download host $unbuf_obj $gdb_saved_set_unbuffered_mode_obj
+		if {[info exists ::GDB_PARALLEL]} {
+		    # Make sure to write the .o file atomically.
+		    # (Note GDB_PARALLEL mode does not support remote
+		    # host testing.)
+		    file rename -force -- $unbuf_obj $gdb_saved_set_unbuffered_mode_obj
+		} else {
+		    remote_download host $unbuf_obj $gdb_saved_set_unbuffered_mode_obj
+		}
 	    } else {
 		verbose "gdb_saved_set_unbuffered_obj already compiled"
 	    }
