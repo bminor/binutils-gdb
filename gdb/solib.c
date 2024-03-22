@@ -591,8 +591,6 @@ solib_map_sections (solib &so)
      the library's host-side path.  If we let the target dictate
      that objfile's path, and the target is different from the host,
      GDB/MI will not provide the correct host-side path.  */
-  if (strlen (bfd_get_filename (so.abfd.get ())) >= SO_NAME_MAX_PATH_SIZE)
-    error (_ ("Shared library file name is too long."));
 
   so.so_name = bfd_get_filename (so.abfd.get ());
   so.sections = build_section_table (so.abfd.get ());
