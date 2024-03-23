@@ -86,6 +86,13 @@ DESCRIPTION
 
 	o <<bfd_error_file_ambiguously_recognized>> -
 	more than one backend recognised the file format.
+
+	When calling bfd_check_format (or bfd_check_format_matches),
+	any underlying file descriptor will be kept open for the
+	duration of the call.  This is done to avoid races when
+	another thread calls bfd_cache_close_all.  In this scenario,
+	the thread calling bfd_check_format must call bfd_cache_close
+	itself.
 */
 
 bool
@@ -383,6 +390,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   bfd_cleanup cleanup = NULL;
   struct per_xvec_messages messages = { abfd, PER_XVEC_NO_TARGET, NULL, NULL };
   struct per_xvec_messages *orig_messages;
+  bool old_in_format_matches;
 
   if (matching != NULL)
     *matching = NULL;
@@ -409,6 +417,11 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (!matching_vector)
 	return false;
     }
+
+  /* Avoid clashes with bfd_cache_close_all running in another
+     thread.  */
+  if (!bfd_cache_set_uncloseable (abfd, true, &old_in_format_matches))
+    return false;
 
   /* Presume the answer is yes.  */
   abfd->format = format;
@@ -665,7 +678,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       bfd_set_lto_type (abfd);
 
       /* File position has moved, BTW.  */
-      return true;
+      return bfd_cache_set_uncloseable (abfd, old_in_format_matches, NULL);
     }
 
   if (match_count == 0)
@@ -708,6 +721,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   bfd_preserve_restore (abfd, &preserve);
   _bfd_restore_error_handler_caching (orig_messages);
   print_and_clear_messages (&messages, PER_XVEC_NO_TARGET);
+  bfd_cache_set_uncloseable (abfd, old_in_format_matches, NULL);
   return false;
 }
 

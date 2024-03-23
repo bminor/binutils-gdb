@@ -2186,6 +2186,12 @@ struct bfd
   /* LTO object type.  */
   ENUM_BITFIELD (bfd_lto_object_type) lto_type : 2;
 
+  /* Set if this BFD is currently being processed by
+     bfd_check_format_matches.  This is checked by the cache to
+     avoid closing the BFD in this case.  This should only be
+     examined or modified while the BFD lock is held.  */
+  unsigned int in_format_matches : 1;
+
   /* Set to dummy BFD created when claimed by a compiler plug-in
      library.  */
   bfd *plugin_dummy_bfd;

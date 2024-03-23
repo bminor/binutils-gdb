@@ -226,6 +226,20 @@ close_one (void)
    ? (FILE *) (bfd_last_cache->iostream)	\
    : bfd_cache_lookup_worker (x, flag))
 
+/* A helper function that returns true if ABFD can possibly be cached
+   -- that is, whether bfd_cache_lookup_worker will accept it.  */
+
+static bool
+possibly_cached (bfd *abfd)
+{
+  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+    return false;
+  if (abfd->my_archive != NULL
+      && !bfd_is_thin_archive (abfd->my_archive))
+    return false;
+  return true;
+}
+
 /* Called when the macro <<bfd_cache_lookup>> fails to find a
    quick answer.  Find a file descriptor for @var{abfd}.  If
    necessary, it open it.  If there are already more than
@@ -236,12 +250,17 @@ close_one (void)
 static FILE *
 bfd_cache_lookup_worker (bfd *abfd, enum cache_flag flag)
 {
-  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+  if (!possibly_cached (abfd))
     abort ();
 
-  if (abfd->my_archive != NULL
-      && !bfd_is_thin_archive (abfd->my_archive))
-    abort ();
+  /* If the BFD is being processed by bfd_check_format_matches, it
+     must already be open and won't be on the list.  */
+  if (abfd->in_format_matches)
+    {
+      if (abfd->iostream == NULL)
+	abort ();
+      return (FILE *) abfd->iostream;
+    }
 
   if (abfd->iostream != NULL)
     {
@@ -652,6 +671,63 @@ bfd_cache_close_all (void)
   if (!bfd_unlock ())
     return false;
   return ret;
+}
+
+/*
+INTERNAL_FUNCTION
+	bfd_cache_set_uncloseable
+
+SYNOPSIS
+	bool bfd_cache_set_uncloseable (bfd *abfd, bool value, bool *old);
+
+DESCRIPTION
+	Internal function to mark ABFD as either closeable or not.
+	This is used by bfd_check_format_matches to avoid races
+	where bfd_cache_close_all is called in another thread.
+	VALUE is true to mark the BFD as temporarily uncloseable
+	by the cache; false to mark it as closeable once again.
+	OLD, if non-NULL, is set to the previous value of the flag.
+	Returns false on error, true on success.
+*/
+
+bool
+bfd_cache_set_uncloseable (bfd *abfd, bool value, bool *old)
+{
+  bool result = true;
+
+  if (!bfd_lock ())
+    return false;
+  if (old != NULL)
+    *old = abfd->in_format_matches;
+
+  /* Only perform any action when the state changes,and only when this
+     BFD is actually using the cache.  */
+  if (value != abfd->in_format_matches
+      && abfd->iovec == &cache_iovec
+      && possibly_cached (abfd))
+    {
+      if (value)
+	{
+	  /* Marking as uncloseable for the first time.  Ensure the
+	     file is open, and remove from the cache list.  */
+	  FILE *f = bfd_cache_lookup (abfd, CACHE_NORMAL);
+	  if (f == NULL)
+	    result = false;
+	  else
+	    snip (abfd);
+	}
+      else
+	{
+	  /* Mark as closeable again.  */
+	  insert (abfd);
+	}
+
+      abfd->in_format_matches = value;
+    }
+
+  if (!bfd_unlock ())
+    return false;
+  return result;
 }
 
 /*

@@ -1055,6 +1055,8 @@ void *bfd_arch_default_fill (bfd_size_type count,
 /* Extracted from cache.c.  */
 bool bfd_cache_init (bfd *abfd) ATTRIBUTE_HIDDEN;
 
+bool bfd_cache_set_uncloseable (bfd *abfd, bool value, bool *old) ATTRIBUTE_HIDDEN;
+
 FILE* bfd_open_file (bfd *abfd) ATTRIBUTE_HIDDEN;
 
 /* Extracted from hash.c.  */
