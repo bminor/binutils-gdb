@@ -50,7 +50,7 @@ proc test_thread_find {} {
     }
     set any "\[^\r\n\]*"
     gdb_test_multiple "info threads" "collect thread id" {
-	-re ". ($decimal).$decimal  (Thread ${any}) \"threadname_\[0-9\]+\" $any" {
+	-re ". ($decimal).$decimal  (${tdlabel_re} ${any}) \"threadname_\[0-9\]+\" $any" {
 	    set thr_num $expect_out(1,string)
 	    set target_id($thr_num) $expect_out(2,string)
 	    exp_continue

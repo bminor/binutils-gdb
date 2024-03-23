@@ -84,13 +84,13 @@ proc run_test { target_non_stop disable_feature } {
 
     # There should be only one thread listed at this point.
     gdb_test_multiple "info threads" "" {
-	-re "2 Thread.*$gdb_prompt $" {
+	-re "2 ${tdlabel_re}.*$gdb_prompt $" {
 	    fail $gdb_test_name
 	}
 	-re "has terminated.*$gdb_prompt $" {
 	    fail $gdb_test_name
 	}
-	-re "\\\* 1\[\t \]*Thread\[^\r\n\]*\r\n$gdb_prompt $" {
+	-re "\\\* 1\[\t \]*${tdlabel_re}\[^\r\n\]*\r\n$gdb_prompt $" {
 	    pass $gdb_test_name
 	}
     }
@@ -100,7 +100,7 @@ proc run_test { target_non_stop disable_feature } {
 
     # There should be two threads at this point with thread 1 selected.
     gdb_test "info threads" \
-	"\\\* 1\[\t \]*Thread\[^\r\n\]*\r\n  2\[\t \]*Thread\[^\r\n\]*" \
+	"\\\* 1\[\t \]*${tdlabel_re}\[^\r\n\]*\r\n  2\[\t \]*${tdlabel_re}\[^\r\n\]*" \
 	"second thread should now exist"
 
     # Switch threads.
@@ -124,7 +124,7 @@ proc run_test { target_non_stop disable_feature } {
 
     # Check that thread 2 is still selected.
     gdb_test "info threads" \
-	"  1\[\t \]*Thread\[^\r\n\]*\r\n\\\* 2\[\t \]*Thread\[^\r\n\]*" \
+	"  1\[\t \]*${tdlabel_re}\[^\r\n\]*\r\n\\\* 2\[\t \]*${tdlabel_re}\[^\r\n\]*" \
 	"second thread should still be selected after stepi"
 
     # Turn scheduler locking off again so that when we continue all

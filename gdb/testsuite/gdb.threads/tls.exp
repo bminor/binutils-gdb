@@ -207,19 +207,19 @@ gdb_expect {
     timeout { fail "continue to first thread (timeout)" }
 }
 
-gdb_test "info thread" ".*Thread.*spin.*" \
+gdb_test "info thread" ".*${tdlabel_re}.*spin.*" \
 	"at least one th in spin while stopped at first th"
 
 check_thread_local "first"
 
 gdb_test "continue" ".*Breakpoint 2.*tls value.*" "continue to second thread"
-gdb_test "info thread" "Thread.*spin.*" \
+gdb_test "info thread" "${tdlabel_re}.*spin.*" \
 	"at least one th in spin while stopped at second th"
 
 check_thread_local "second"
 
 gdb_test "continue" ".*Breakpoint 2.*tls value.*" "continue to third thread"
-gdb_test "info thread" ".*Thread.*spin.*" \
+gdb_test "info thread" ".*${tdlabel_re}.*spin.*" \
 	"at least one th in spin while stopped at third th"
 
 check_thread_local "third"
@@ -229,7 +229,7 @@ gdb_test "continue" ".*Breakpoint 3.*still alive.*" "continue to synch point"
 set no_of_threads 0
 send_gdb "info thread\n"
 gdb_expect {
-    -re "^info thread\[ \t\r\n\]+ *Id .*Frame\[ \t\r\n\]+.*(\[0-9\]+) *Thread\[^\r\n\]+\r\n$gdb_prompt $" {
+    -re "^info thread\[ \t\r\n\]+ *Id .*Frame\[ \t\r\n\]+.*(\[0-9\]+) *${tdlabel_re}\[^\r\n\]+\r\n$gdb_prompt $" {
 	   set no_of_threads $expect_out(1,string)
 	   pass "get number of threads"
         }
@@ -280,10 +280,10 @@ gdb_test "continue" ".*Breakpoint 4.*before exit.*" "threads exited"
 
 send_gdb "info thread\n" 
 gdb_expect {
-    -re ".* 1 *Thread.*2 *Thread.*$gdb_prompt $" {
+    -re ".* 1 *${tdlabel_re}.*2 *${tdlabel_re}.*$gdb_prompt $" {
         fail "too many threads left at end"
     }
-    -re ".*\\\* 1 *Thread.*main.*$gdb_prompt $" {
+    -re ".*\\\* 1 *${tdlabel_re}.*main.*$gdb_prompt $" {
         pass "expect only base thread at end"
     }
     -re ".*No stack.*$gdb_prompt $" {

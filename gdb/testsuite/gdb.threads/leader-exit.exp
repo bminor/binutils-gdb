@@ -34,7 +34,7 @@ gdb_breakpoint [gdb_get_line_number "break-here"]
 gdb_continue_to_breakpoint "break-here" ".* break-here .*"
 
 gdb_test "info threads" \
-	 "\r\n\[ \t\]*Id\[ \t\]+Target\[ \t\]+Id\[ \t\]+Frame\[ \t\]*\r\n\\* 2 *Thread \[^\r\n\]* at \[^\r\n\]*" \
+	 "\r\n\[ \t\]*Id\[ \t\]+Target\[ \t\]+Id\[ \t\]+Frame\[ \t\]*\r\n\\* 2 *${tdlabel_re} \[^\r\n\]* at \[^\r\n\]*" \
 	 "single thread has been left"
 
 # Test that ctrl-c works even if the leader has exited.

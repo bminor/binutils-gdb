@@ -63,7 +63,7 @@ gdb_test "continue" \
 # reported in the "Id" column.
 
 gdb_test "info threads"  \
-	{.*[\r\n]+\* +([0-9]+) +Thread[^\r\n]* do_something \(n=\1\) at.*}
+	[format {.*[\r\n]+\* +([0-9]+) +%s[^\r\n]* do_something \(n=\1\) at.*} $tdlabel_re]
 
 # Check for expected results when passing a valid thread handle to
 # thread_from_handle().

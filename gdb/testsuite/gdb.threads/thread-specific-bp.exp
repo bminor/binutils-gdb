@@ -29,11 +29,12 @@ if {[gdb_compile_pthreads \
 
 proc get_thread_id {func} {
     global gdb_prompt
+    global tdlabel_re
 
     set thre -1
     set test "get $func thread id"
     gdb_test_multiple "info threads" $test {
-	-re "(\[0-9\]+)\[^\n\r\]*Thread\[^\n\r\]*$func.*$gdb_prompt $" {
+	-re "(\[0-9\]+)\[^\n\r\]*${tdlabel_re}\[^\n\r\]*$func.*$gdb_prompt $" {
 	    # Get the thread's id.
 	    set thre $expect_out(1,string)
 	    pass $test

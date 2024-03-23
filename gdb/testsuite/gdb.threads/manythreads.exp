@@ -112,7 +112,7 @@ interrupt_and_wait "stop threads 1"
 set cmd "info threads"
 set ok 0
 gdb_test_multiple $cmd $cmd {
-    -re " 1 *Thread " {
+    -re " 1 *${tdlabel_re} " {
 	set ok 1
 	exp_continue
     }

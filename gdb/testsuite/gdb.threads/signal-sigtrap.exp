@@ -29,7 +29,7 @@ if {[build_executable "failed to prepare" $testfile $srcfile \
 # SIGTRAP.
 
 proc test { sigtrap_thread } {
-    global srcfile binfile
+    global srcfile binfile tdlabel_re
 
     with_test_prefix "sigtrap thread $sigtrap_thread" {
 	clean_restart ${binfile}
@@ -38,7 +38,7 @@ proc test { sigtrap_thread } {
 	    return 0
 	}
 
-	set pattern "\\\* 2\[ \t\]+Thread.*"
+	set pattern "\\\* 2\[ \t\]+${tdlabel_re}.*"
 	gdb_test "info threads" $pattern "thread 2 hit breakpoint"
 
 	gdb_test "break sigtrap_handler" "Breakpoint .* at .*$srcfile.*"
@@ -54,7 +54,7 @@ proc test { sigtrap_thread } {
 	    "Continuing with signal SIGTRAP.*Breakpoint .* sigtrap_handler .*" \
 	    "signal SIGTRAP reaches handler"
 
-	set pattern "\\\* $sigtrap_thread\[ \t\]+Thread.*"
+	set pattern "\\\* $sigtrap_thread\[ \t\]+${tdlabel_re}.*"
 	gdb_test "info threads" $pattern "right thread got the signal"
     }
 }

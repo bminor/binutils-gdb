@@ -43,8 +43,8 @@ gdb_test "list $line" \
 gdb_test "info threads" \
     [multi_line \
 	 "\[ \t\]*Id\[ \t\]+Target\[ \t\]+Id\[ \t\]+Frame\[ \t\]*" \
-	 "  1 *Thread \[^\r\n\]* .* \[^\r\n\]*" \
-	 "\\* 2 *Thread \[^\r\n\]* at \[^\r\n\]*"] \
+	 "  1 *${tdlabel_re} \[^\r\n\]* .* \[^\r\n\]*" \
+	 "\\* 2 *${tdlabel_re} \[^\r\n\]* at \[^\r\n\]*"] \
     "info threads before break"
 
 # Check that "break" is still operating on the same file by default.
@@ -53,8 +53,8 @@ gdb_test "break $line" ".*${srcfile2}.*" "break on line"
 gdb_test "info threads" \
     [multi_line \
 	 "\[ \t\]*Id\[ \t\]+Target\[ \t\]+Id\[ \t\]+Frame\[ \t\]*" \
-	 "  1 *Thread \[^\r\n\]* .* \[^\r\n\]*" \
-	 "\\* 2 *Thread \[^\r\n\]* at \[^\r\n\]*"] \
+	 "  1 *${tdlabel_re} \[^\r\n\]* .* \[^\r\n\]*" \
+	 "\\* 2 *${tdlabel_re} \[^\r\n\]* at \[^\r\n\]*"] \
     "info threads before list"
 
 # And that so is "list".

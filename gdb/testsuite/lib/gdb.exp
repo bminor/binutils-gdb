@@ -289,6 +289,10 @@ set octal "\[0-7\]+"
 
 set inferior_exited_re "(?:\\\[Inferior \[0-9\]+ \\(\[^\n\r\]*\\) exited)"
 
+# A regular expression that matches the first word of a thread
+# description after the thread number info 'info threads'
+set tdlabel_re "(process|Thread|LWP)"
+
 # A regular expression that matches a value history number.
 # E.g., $1, $2, etc.
 set valnum_re "\\\$$decimal"

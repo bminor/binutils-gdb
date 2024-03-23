@@ -139,7 +139,7 @@ proc strace_info_marker { } {
 	# List all the thread.  It is expected to get three threads without
 	# any errors.
 	gdb_test_multiple "info threads 3 2 1" "info threads" {
-	    -re "3\[ \t\]+Thread .*2\[ \t\]+Thread .*1\[ \t\]+Thread .*${gdb_prompt} $" {
+	    -re "3\[ \t\]+${tdlabel_re} .*2\[ \t\]+${tdlabel_re} .*1\[ \t\]+${tdlabel_re} .*${gdb_prompt} $" {
 		pass "info threads"
 	    }
 	}
