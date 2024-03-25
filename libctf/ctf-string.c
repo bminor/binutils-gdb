@@ -17,6 +17,7 @@
    along with this program; see the file COPYING.  If not see
    <http://www.gnu.org/licenses/>.  */
 
+#include <assert.h>
 #include <ctf-impl.h>
 #include <string.h>
 #include <assert.h>
@@ -107,17 +108,28 @@ ctf_str_purge_atom_refs (ctf_str_atom_t *atom)
     {
       next = ctf_list_next (ref);
       ctf_list_delete (&atom->csa_refs, ref);
+      if (atom->csa_flags & CTF_STR_ATOM_MOVABLE)
+	{
+	  ctf_str_atom_ref_movable_t *movref;
+	  movref = (ctf_str_atom_ref_movable_t *) ref;
+	  ctf_dynhash_remove (movref->caf_movable_refs, ref);
+	}
+
       free (ref);
     }
 }
 
-/* Free an atom (only called on ctf_close().)  */
+/* Free an atom.  */
 static void
 ctf_str_free_atom (void *a)
 {
   ctf_str_atom_t *atom = a;
 
   ctf_str_purge_atom_refs (atom);
+
+  if (atom->csa_flags & CTF_STR_ATOM_FREEABLE)
+    free (atom->csa_str);
+
   free (atom);
 }
 
@@ -138,6 +150,12 @@ ctf_str_create_atoms (ctf_dict_t *fp)
   if (!fp->ctf_prov_strtab)
     goto oom_prov_strtab;
 
+  fp->ctf_str_movable_refs = ctf_dynhash_create (ctf_hash_integer,
+						 ctf_hash_eq_integer,
+						 NULL, NULL);
+  if (!fp->ctf_str_movable_refs)
+    goto oom_movable_refs;
+
   errno = 0;
   ctf_str_add (fp, "");
   if (errno == ENOMEM)
@@ -146,6 +164,9 @@ ctf_str_create_atoms (ctf_dict_t *fp)
   return 0;
 
  oom_str_add:
+  ctf_dynhash_destroy (fp->ctf_str_movable_refs);
+  fp->ctf_str_movable_refs = NULL;
+ oom_movable_refs:
   ctf_dynhash_destroy (fp->ctf_prov_strtab);
   fp->ctf_prov_strtab = NULL;
  oom_prov_strtab:
@@ -154,62 +175,140 @@ ctf_str_create_atoms (ctf_dict_t *fp)
   return -ENOMEM;
 }
 
-/* Destroy the atoms table.  */
+/* Destroy the atoms table and associated refs.  */
 void
 ctf_str_free_atoms (ctf_dict_t *fp)
 {
   ctf_dynhash_destroy (fp->ctf_prov_strtab);
   ctf_dynhash_destroy (fp->ctf_str_atoms);
+  ctf_dynhash_destroy (fp->ctf_str_movable_refs);
 }
 
-/* Add a string to the atoms table, copying the passed-in string.  Return the
-   atom added. Return NULL only when out of memory (and do not touch the
-   passed-in string in that case).  Possibly augment the ref list with the
-   passed-in ref.  Possibly add a provisional entry for this string to the
-   provisional strtab.   */
+#define CTF_STR_ADD_REF 0x1
+#define CTF_STR_PROVISIONAL 0x2
+#define CTF_STR_MOVABLE 0x4
+
+/* Allocate a ref and bind it into a ref list.  */
+
+static ctf_str_atom_ref_t *
+aref_create (ctf_dict_t *fp, ctf_str_atom_t *atom, uint32_t *ref, int flags)
+{
+  ctf_str_atom_ref_t *aref;
+  size_t s = sizeof (struct ctf_str_atom_ref);
+
+  if (flags & CTF_STR_MOVABLE)
+    s = sizeof (struct ctf_str_atom_ref_movable);
+
+  aref = malloc (s);
+
+  if (!aref)
+    return NULL;
+
+  aref->caf_ref = ref;
+
+  /* Movable refs get a backpointer to them in ctf_str_movable_refs, and a
+     pointer to ctf_str_movable_refs itself in the ref, for use when freeing
+     refs: they can be moved later in batches via a call to
+     ctf_str_move_refs.  */
+
+  if (flags & CTF_STR_MOVABLE)
+    {
+      ctf_str_atom_ref_movable_t *movref = (ctf_str_atom_ref_movable_t *) aref;
+
+      movref->caf_movable_refs = fp->ctf_str_movable_refs;
+
+      if (ctf_dynhash_insert (fp->ctf_str_movable_refs, ref, aref) < 0)
+	{
+	  free (aref);
+	  return NULL;
+	}
+    }
+
+  ctf_list_append (&atom->csa_refs, aref);
+
+  return aref;
+}
+
+/* Add a string to the atoms table, copying the passed-in string if
+   necessary.  Return the atom added. Return NULL only when out of memory
+   (and do not touch the passed-in string in that case).
+
+   Possibly add a provisional entry for this string to the provisional
+   strtab.  If the string is in the provisional strtab, update its ref list
+   with the passed-in ref, causing the ref to be updated when the strtab is
+   written out.  */
+
 static ctf_str_atom_t *
 ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
-			  int add_ref, int make_provisional, uint32_t *ref)
+			  int flags, uint32_t *ref)
 {
   char *newstr = NULL;
   ctf_str_atom_t *atom = NULL;
-  ctf_str_atom_ref_t *aref = NULL;
+  int added = 0;
 
   atom = ctf_dynhash_lookup (fp->ctf_str_atoms, str);
 
-  if (add_ref)
-    {
-      if ((aref = malloc (sizeof (struct ctf_str_atom_ref))) == NULL) {
-	ctf_set_errno (fp, ENOMEM);
-	return NULL;
-      }
-      aref->caf_ref = ref;
-    }
+  /* Existing atoms get refs added only if they are provisional:
+     non-provisional strings already have a fixed strtab offset, and just
+     get their ref updated immediately, since its value cannot change.  */
 
   if (atom)
     {
-      if (add_ref)
+      if (!ctf_dynhash_lookup (fp->ctf_prov_strtab, (void *) (uintptr_t)
+			       atom->csa_offset))
 	{
-	  ctf_list_append (&atom->csa_refs, aref);
-	  fp->ctf_str_num_refs++;
+	  if (flags & CTF_STR_ADD_REF)
+	    {
+	      if (atom->csa_external_offset)
+		*ref = atom->csa_external_offset;
+	      else
+		*ref = atom->csa_offset;
+	    }
+	  return atom;
 	}
+
+      if (flags & CTF_STR_ADD_REF)
+	{
+	  if (!aref_create (fp, atom, ref, flags))
+	    {
+	      ctf_set_errno (fp, ENOMEM);
+	      return NULL;
+	    }
+	}
+
       return atom;
     }
+
+  /* New atom.  */
 
   if ((atom = malloc (sizeof (struct ctf_str_atom))) == NULL)
     goto oom;
   memset (atom, 0, sizeof (struct ctf_str_atom));
 
-  if ((newstr = strdup (str)) == NULL)
-    goto oom;
+  /* Don't allocate new strings if this string is within an mmapped
+     strtab.  */
 
-  if (ctf_dynhash_insert (fp->ctf_str_atoms, newstr, atom) < 0)
-    goto oom;
+  if ((unsigned char *) str < (unsigned char *) fp->ctf_data_mmapped
+      || (unsigned char *) str > (unsigned char *) fp->ctf_data_mmapped + fp->ctf_data_mmapped_len)
+    {
+      if ((newstr = strdup (str)) == NULL)
+	goto oom;
+      atom->csa_flags |= CTF_STR_ATOM_FREEABLE;
+      atom->csa_str = newstr;
+    }
+  else
+    atom->csa_str = (char *) str;
 
-  atom->csa_str = newstr;
+  if (ctf_dynhash_insert (fp->ctf_str_atoms, atom->csa_str, atom) < 0)
+    goto oom;
+  added = 1;
+
   atom->csa_snapshot_id = fp->ctf_snapshots;
 
-  if (make_provisional)
+  /* New atoms marked provisional go into the provisional strtab, and get a
+     ref added.  */
+
+  if (flags & CTF_STR_PROVISIONAL)
     {
       atom->csa_offset = fp->ctf_str_prov_offset;
 
@@ -218,20 +317,20 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
 	goto oom;
 
       fp->ctf_str_prov_offset += strlen (atom->csa_str) + 1;
+
+      if (flags & CTF_STR_ADD_REF)
+      {
+	if (!aref_create (fp, atom, ref, flags))
+	  goto oom;
+      }
     }
 
-  if (add_ref)
-    {
-      ctf_list_append (&atom->csa_refs, aref);
-      fp->ctf_str_num_refs++;
-    }
   return atom;
 
  oom:
-  if (newstr)
-    ctf_dynhash_remove (fp->ctf_str_atoms, newstr);
+  if (added)
+    ctf_dynhash_remove (fp->ctf_str_atoms, atom->csa_str);
   free (atom);
-  free (aref);
   free (newstr);
   ctf_set_errno (fp, ENOMEM);
   return NULL;
@@ -250,7 +349,7 @@ ctf_str_add (ctf_dict_t *fp, const char *str)
   if (!str)
     str = "";
 
-  atom = ctf_str_add_ref_internal (fp, str, FALSE, TRUE, 0);
+  atom = ctf_str_add_ref_internal (fp, str, CTF_STR_PROVISIONAL, 0);
   if (!atom)
     return 0;
 
@@ -268,7 +367,26 @@ ctf_str_add_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
   if (!str)
     str = "";
 
-  atom = ctf_str_add_ref_internal (fp, str, TRUE, TRUE, ref);
+  atom = ctf_str_add_ref_internal (fp, str, CTF_STR_ADD_REF
+				   | CTF_STR_PROVISIONAL, ref);
+  if (!atom)
+    return 0;
+
+  return atom->csa_offset;
+}
+
+/* Like ctf_str_add_ref(), but note that the ref may be moved later on.  */
+uint32_t
+ctf_str_add_movable_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
+{
+  ctf_str_atom_t *atom;
+
+  if (!str)
+    str = "";
+
+  atom = ctf_str_add_ref_internal (fp, str, CTF_STR_ADD_REF
+				   | CTF_STR_PROVISIONAL
+				   | CTF_STR_MOVABLE, ref);
   if (!atom)
     return 0;
 
@@ -285,7 +403,7 @@ ctf_str_add_external (ctf_dict_t *fp, const char *str, uint32_t offset)
   if (!str)
     str = "";
 
-  atom = ctf_str_add_ref_internal (fp, str, FALSE, FALSE, 0);
+  atom = ctf_str_add_ref_internal (fp, str, 0, 0);
   if (!atom)
     return 0;
 
@@ -313,6 +431,41 @@ ctf_str_add_external (ctf_dict_t *fp, const char *str, uint32_t offset)
     }
 
   return 1;
+}
+
+/* Note that refs have moved from (SRC, LEN) to DEST.  We use the movable
+   refs backpointer for this, because it is done an amortized-constant
+   number of times during structure member and enumerand addition, and if we
+   did a linear search this would turn such addition into an O(n^2)
+   operation.  Even this is not linear, but it's better than that.  */
+int
+ctf_str_move_refs (ctf_dict_t *fp, void *src, size_t len, void *dest)
+{
+  uintptr_t p;
+
+  if (src == dest)
+    return 0;
+
+  for (p = (uintptr_t) src; p - (uintptr_t) src < len; p++)
+    {
+      ctf_str_atom_ref_t *ref;
+
+      if ((ref = ctf_dynhash_lookup (fp->ctf_str_movable_refs,
+				     (ctf_str_atom_ref_t *) p)) != NULL)
+	{
+	  int out_of_memory;
+
+	  ref->caf_ref = (uint32_t *) (((uintptr_t) ref->caf_ref +
+					(uintptr_t) dest - (uintptr_t) src));
+	  ctf_dynhash_remove (fp->ctf_str_movable_refs,
+			      (ctf_str_atom_ref_t *) p);
+	  out_of_memory = ctf_dynhash_insert (fp->ctf_str_movable_refs,
+					      ref->caf_ref, ref);
+	  assert (out_of_memory == 0);
+	}
+    }
+
+  return 0;
 }
 
 /* Remove a single ref.  */
@@ -371,9 +524,7 @@ ctf_str_purge_one_atom_refs (void *key _libctf_unused_, void *value,
 void
 ctf_str_purge_refs (ctf_dict_t *fp)
 {
-  if (fp->ctf_str_num_refs > 0)
-    ctf_dynhash_iter (fp->ctf_str_atoms, ctf_str_purge_one_atom_refs, NULL);
-  fp->ctf_str_num_refs = 0;
+  ctf_dynhash_iter (fp->ctf_str_atoms, ctf_str_purge_one_atom_refs, NULL);
 }
 
 /* Update a list of refs to the specified value. */
@@ -384,7 +535,7 @@ ctf_str_update_refs (ctf_str_atom_t *refs, uint32_t value)
 
   for (ref = ctf_list_next (&refs->csa_refs); ref != NULL;
        ref = ctf_list_next (ref))
-      *(ref->caf_ref) = value;
+    *(ref->caf_ref) = value;
 }
 
 /* State shared across the strtab write process.  */

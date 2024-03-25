@@ -1079,11 +1079,15 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
     return -1;					/* errno is set for us.  */
   en = (ctf_enum_t *) dtd->dtd_vlen;
 
+  /* Remove refs in the old vlen region and reapply them.  */
+
+  ctf_str_move_refs (fp, old_vlen, sizeof (ctf_enum_t) * vlen, dtd->dtd_vlen);
+
   for (i = 0; i < vlen; i++)
     if (strcmp (ctf_strptr (fp, en[i].cte_name), name) == 0)
       return (ctf_set_errno (ofp, ECTF_DUPLICATE));
 
-  en[i].cte_name = ctf_str_add_ref (fp, name, &en[i].cte_name);
+  en[i].cte_name = ctf_str_add_movable_ref (fp, name, &en[i].cte_name);
   en[i].cte_value = value;
 
   if (en[i].cte_name == 0 && name != NULL && name[0] != '\0')
@@ -1143,6 +1147,10 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
     return (ctf_set_errno (ofp, ctf_errno (fp)));
   memb = (ctf_lmember_t *) dtd->dtd_vlen;
 
+  /* Remove pending refs in the old vlen region and reapply them.  */
+
+  ctf_str_move_refs (fp, old_vlen, sizeof (ctf_lmember_t) * vlen, dtd->dtd_vlen);
+
   if (name != NULL)
     {
       for (i = 0; i < vlen; i++)
@@ -1172,7 +1180,7 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 	return -1;		/* errno is set for us.  */
     }
 
-  memb[vlen].ctlm_name = ctf_str_add_ref (fp, name, &memb[vlen].ctlm_name);
+  memb[vlen].ctlm_name = ctf_str_add_movable_ref (fp, name, &memb[vlen].ctlm_name);
   memb[vlen].ctlm_type = type;
   if (memb[vlen].ctlm_name == 0 && name != NULL && name[0] != '\0')
     return -1;			/* errno is set for us.  */

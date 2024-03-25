@@ -1104,11 +1104,9 @@ ctf_serialize (ctf_dict_t *fp)
   ctf_qsort_r (dvarents, nvars, sizeof (ctf_varent_t), ctf_sort_var,
 	       &sort_var_arg);
 
-  if ((newbuf = ctf_realloc (fp, buf, buf_size + strtab.cts_len)) == NULL)
-    {
-      free (strtab.cts_strs);
-      goto oom;
-    }
+  if ((newbuf = realloc (buf, buf_size + strtab.cts_len)) == NULL)
+    goto oom;
+
   buf = newbuf;
   memcpy (buf + buf_size, strtab.cts_strs, strtab.cts_len);
   hdrp = (ctf_header_t *) buf;
@@ -1191,8 +1189,10 @@ ctf_serialize (ctf_dict_t *fp)
   ctf_str_free_atoms (nfp);
   nfp->ctf_str_atoms = fp->ctf_str_atoms;
   nfp->ctf_prov_strtab = fp->ctf_prov_strtab;
+  nfp->ctf_str_movable_refs = fp->ctf_str_movable_refs;
   fp->ctf_str_atoms = NULL;
   fp->ctf_prov_strtab = NULL;
+  fp->ctf_str_movable_refs = NULL;
   memset (&fp->ctf_dtdefs, 0, sizeof (ctf_list_t));
   memset (&fp->ctf_errs_warnings, 0, sizeof (ctf_list_t));
   fp->ctf_add_processing = NULL;

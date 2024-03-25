@@ -207,13 +207,17 @@ typedef struct ctf_err_warning
    removed from this table on ctf_close(), but on every ctf_serialize(), all
    the csa_refs in all entries are purged.  */
 
+#define CTF_STR_ATOM_FREEABLE	0x1
+#define CTF_STR_ATOM_MOVABLE	0x2
+
 typedef struct ctf_str_atom
 {
-  const char *csa_str;		/* Backpointer to string (hash key).  */
+  char *csa_str;		/* Pointer to string (also used as hash key).  */
   ctf_list_t csa_refs;		/* This string's refs.  */
   uint32_t csa_offset;		/* Strtab offset, if any.  */
   uint32_t csa_external_offset;	/* External strtab offset, if any.  */
   unsigned long csa_snapshot_id; /* Snapshot ID at time of creation.  */
+  int csa_flags;		 /* CTF_STR_ATOM_* flags. */
 } ctf_str_atom_t;
 
 /* The refs of a single string in the atoms table.  */
@@ -223,6 +227,15 @@ typedef struct ctf_str_atom_ref
   ctf_list_t caf_list;		/* List forward/back pointers.  */
   uint32_t *caf_ref;		/* A single ref to this string.  */
 } ctf_str_atom_ref_t;
+
+  /* Like a ctf_str_atom_ref_t, but specific to movable refs.  */
+
+typedef struct ctf_str_atom_ref_movable
+{
+  ctf_list_t caf_list;		/* List forward/back pointers.  */
+  uint32_t *caf_ref;		/* A single ref to this string.  */
+  ctf_dynhash_t *caf_movable_refs; /* Backpointer to ctf_str_movable_refs for this dict. */  
+} ctf_str_atom_ref_movable_t;
 
 /* A single linker-provided symbol, during symbol addition, possibly before we
    have been given external strtab refs.  */
@@ -384,7 +397,7 @@ struct ctf_dict
   ctf_lookup_t ctf_lookups[5];	    /* Pointers to nametabs for name lookup.  */
   ctf_strs_t ctf_str[2];	    /* Array of string table base and bounds.  */
   ctf_dynhash_t *ctf_str_atoms;	  /* Hash table of ctf_str_atoms_t.  */
-  uint64_t ctf_str_num_refs;	  /* Number of refs to cts_str_atoms.  */
+  ctf_dynhash_t *ctf_str_movable_refs; /* Hash table of void * -> ctf_str_atom_ref_t.  */
   uint32_t ctf_str_prov_offset;	  /* Latest provisional offset assigned so far.  */
   unsigned char *ctf_base;	  /* CTF file pointer.  */
   unsigned char *ctf_dynbase;	  /* Freeable CTF file pointer. */
@@ -725,6 +738,9 @@ extern int ctf_str_create_atoms (ctf_dict_t *);
 extern void ctf_str_free_atoms (ctf_dict_t *);
 extern uint32_t ctf_str_add (ctf_dict_t *, const char *);
 extern uint32_t ctf_str_add_ref (ctf_dict_t *, const char *, uint32_t *ref);
+extern uint32_t ctf_str_add_movable_ref (ctf_dict_t *, const char *,
+					 uint32_t *ref);
+extern int ctf_str_move_refs (ctf_dict_t *fp, void *src, size_t len, void *dest);
 extern int ctf_str_add_external (ctf_dict_t *, const char *, uint32_t offset);
 extern void ctf_str_remove_ref (ctf_dict_t *, const char *, uint32_t *ref);
 extern void ctf_str_rollback (ctf_dict_t *, ctf_snapshot_id_t);
@@ -758,7 +774,6 @@ extern void *ctf_mmap (size_t length, size_t offset, int fd);
 extern void ctf_munmap (void *, size_t);
 extern ssize_t ctf_pread (int fd, void *buf, ssize_t count, off_t offset);
 
-extern void *ctf_realloc (ctf_dict_t *, void *, size_t);
 extern char *ctf_str_append (char *, const char *);
 extern char *ctf_str_append_noerr (char *, const char *);
 
