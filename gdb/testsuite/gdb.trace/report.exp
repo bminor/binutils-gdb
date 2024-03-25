@@ -173,6 +173,8 @@ gdb_test "help tdump" "Print everything collected at the current.*" \
 # inferior and tfile.
 
 proc use_collected_data { data_source } {
+    global tdlabel_re
+
     with_test_prefix "${data_source}" {
 	global tdp1 tdp2 tdp3 tdp4 tdp5 tdp6
 	global testline1 testline2 testline3 testline4 testline5 testline6

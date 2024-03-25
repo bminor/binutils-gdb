@@ -23,7 +23,7 @@ if {![multi_target_prepare]} {
 }
 
 proc test_thread_find {} {
-    global decimal gdb_prompt
+    global decimal gdb_prompt tdlabel_re
 
     set NUM_INFS 6
 

@@ -124,6 +124,7 @@ proc strace_info_marker { } {
 	global executable
 	global gdb_prompt
 	global libipa
+	global tdlabel_re
 
 	# Restart with a fresh gdb.
 	clean_restart $executable

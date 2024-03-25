@@ -42,7 +42,7 @@ set target_binfile [gdb_remote_download target $binfile]
 # Run the tests with different features of GDBserver disabled.
 # TARGET_NON_STOP is passed to "maint set target-non-stop".
 proc run_test { target_non_stop disable_feature } {
-    global binfile gdb_prompt decimal hex
+    global binfile gdb_prompt decimal hex tdlabel_re
     global GDBFLAGS
 
     save_vars { GDBFLAGS } {
