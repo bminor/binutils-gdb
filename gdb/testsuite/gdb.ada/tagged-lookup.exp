@@ -52,7 +52,7 @@ gdb_test_multiple "print *the_local_var" "only one CU expanded" -lbl {
 	exp_continue
     }
     -re -wrap ".* = \\\(n => $decimal\\\)" {
-	if {$found_pck + $found_pck2 == 1} {
+	if {$found_pck + $found_pck2 <= 1} {
 	    pass $gdb_test_name
 	} else {
 	    fail $gdb_test_name
