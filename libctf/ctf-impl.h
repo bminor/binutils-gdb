@@ -396,6 +396,7 @@ struct ctf_dict
   ctf_dynhash_t *ctf_names;	    /* Hash table of remaining type names.  */
   ctf_lookup_t ctf_lookups[5];	    /* Pointers to nametabs for name lookup.  */
   ctf_strs_t ctf_str[2];	    /* Array of string table base and bounds.  */
+  ctf_strs_writable_t *ctf_dynstrtab; /* Dynamically allocated string table, if any. */
   ctf_dynhash_t *ctf_str_atoms;	  /* Hash table of ctf_str_atoms_t.  */
   ctf_dynhash_t *ctf_str_movable_refs; /* Hash table of void * -> ctf_str_atom_ref_t.  */
   uint32_t ctf_str_prov_offset;	  /* Latest provisional offset assigned so far.  */
@@ -734,7 +735,7 @@ extern const char *ctf_strraw (ctf_dict_t *, uint32_t);
 extern const char *ctf_strraw_explicit (ctf_dict_t *, uint32_t,
 					ctf_strs_t *);
 extern const char *ctf_strptr_validate (ctf_dict_t *, uint32_t);
-extern int ctf_str_create_atoms (ctf_dict_t *);
+extern int ctf_str_create_atoms (ctf_dict_t *, ctf_dynhash_t *atoms);
 extern void ctf_str_free_atoms (ctf_dict_t *);
 extern uint32_t ctf_str_add (ctf_dict_t *, const char *);
 extern uint32_t ctf_str_add_ref (ctf_dict_t *, const char *, uint32_t *ref);
@@ -745,7 +746,7 @@ extern int ctf_str_add_external (ctf_dict_t *, const char *, uint32_t offset);
 extern void ctf_str_remove_ref (ctf_dict_t *, const char *, uint32_t *ref);
 extern void ctf_str_rollback (ctf_dict_t *, ctf_snapshot_id_t);
 extern void ctf_str_purge_refs (ctf_dict_t *);
-extern ctf_strs_writable_t ctf_str_write_strtab (ctf_dict_t *);
+extern const ctf_strs_writable_t *ctf_str_write_strtab (ctf_dict_t *);
 
 extern struct ctf_archive_internal *
 ctf_new_archive_internal (int is_archive, int unmap_on_close,
@@ -762,10 +763,10 @@ extern int ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *, int);
 extern ctf_dict_t *ctf_simple_open_internal (const char *, size_t, const char *,
 					     size_t, size_t,
 					     const char *, size_t,
-					     ctf_dynhash_t *, int *);
+					     ctf_dynhash_t *, ctf_dynhash_t *, int *);
 extern ctf_dict_t *ctf_bufopen_internal (const ctf_sect_t *, const ctf_sect_t *,
 					 const ctf_sect_t *, ctf_dynhash_t *,
-					 int *);
+					 ctf_dynhash_t *, int *);
 extern int ctf_import_unref (ctf_dict_t *fp, ctf_dict_t *pfp);
 extern int ctf_serialize (ctf_dict_t *);
 

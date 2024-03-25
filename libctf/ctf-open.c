@@ -1290,7 +1290,7 @@ ctf_dict_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
 {
   return ctf_simple_open_internal (ctfsect, ctfsect_size, symsect, symsect_size,
 				   symsect_entsize, strsect, strsect_size, NULL,
-				   errp);
+				   NULL, errp);
 }
 
 /* Open a CTF file, mocking up a suitable ctf_sect and overriding the external
@@ -1300,7 +1300,8 @@ ctf_dict_t *ctf_simple_open_internal (const char *ctfsect, size_t ctfsect_size,
 				      const char *symsect, size_t symsect_size,
 				      size_t symsect_entsize,
 				      const char *strsect, size_t strsect_size,
-				      ctf_dynhash_t *syn_strtab, int *errp)
+				      ctf_dynhash_t *syn_strtab,
+				      ctf_dynhash_t *atoms, int *errp)
 {
   ctf_sect_t skeleton;
 
@@ -1338,7 +1339,7 @@ ctf_dict_t *ctf_simple_open_internal (const char *ctfsect, size_t ctfsect_size,
     }
 
   return ctf_bufopen_internal (ctfsectp, symsectp, strsectp, syn_strtab,
-			       errp);
+			       atoms, errp);
 }
 
 /* Decode the specified CTF buffer and optional symbol table, and create a new
@@ -1350,7 +1351,7 @@ ctf_dict_t *
 ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	     const ctf_sect_t *strsect, int *errp)
 {
-  return ctf_bufopen_internal (ctfsect, symsect, strsect, NULL, errp);
+  return ctf_bufopen_internal (ctfsect, symsect, strsect, NULL, NULL, errp);
 }
 
 /* Like ctf_bufopen, but overriding the external strtab with a synthetic one.  */
@@ -1358,7 +1359,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 ctf_dict_t *
 ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 		      const ctf_sect_t *strsect, ctf_dynhash_t *syn_strtab,
-		      int *errp)
+		      ctf_dynhash_t *atoms, int *errp)
 {
   const ctf_preamble_t *pp;
   size_t hdrsz = sizeof (ctf_header_t);
@@ -1615,7 +1616,14 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
      ctf_set_base().  */
 
   ctf_set_version (fp, hp, hp->cth_version);
-  if (ctf_str_create_atoms (fp) < 0)
+
+  /* Temporary assignment, just enough to be able to initialize
+     the atoms table.  */
+
+  fp->ctf_str[CTF_STRTAB_0].cts_strs = (const char *) fp->ctf_buf
+    + hp->cth_stroff;
+  fp->ctf_str[CTF_STRTAB_0].cts_len = hp->cth_strlen;
+  if (ctf_str_create_atoms (fp, atoms) < 0)
     {
       err = ENOMEM;
       goto bad;

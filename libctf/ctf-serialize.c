@@ -955,7 +955,7 @@ ctf_serialize (ctf_dict_t *fp)
   ctf_header_t hdr, *hdrp;
   ctf_dvdef_t *dvd;
   ctf_varent_t *dvarents;
-  ctf_strs_writable_t strtab;
+  const ctf_strs_writable_t *strtab;
   int err;
   int sym_functions = 0;
 
@@ -1090,36 +1090,34 @@ ctf_serialize (ctf_dict_t *fp)
   assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_stroff);
 
   /* Construct the final string table and fill out all the string refs with the
-     final offsets.  Then purge the refs list, because we're about to move this
-     strtab onto the end of the buf, invalidating all the offsets.  */
-  strtab = ctf_str_write_strtab (fp);
-  ctf_str_purge_refs (fp);
+     final offsets.  */
 
-  if (strtab.cts_strs == NULL)
+  strtab = ctf_str_write_strtab (fp);
+
+  if (strtab == NULL)
     goto oom;
 
   /* Now the string table is constructed, we can sort the buffer of
      ctf_varent_t's.  */
-  ctf_sort_var_arg_cb_t sort_var_arg = { fp, (ctf_strs_t *) &strtab };
+  ctf_sort_var_arg_cb_t sort_var_arg = { fp, (ctf_strs_t *) strtab };
   ctf_qsort_r (dvarents, nvars, sizeof (ctf_varent_t), ctf_sort_var,
 	       &sort_var_arg);
 
-  if ((newbuf = realloc (buf, buf_size + strtab.cts_len)) == NULL)
+  if ((newbuf = realloc (buf, buf_size + strtab->cts_len)) == NULL)
     goto oom;
 
   buf = newbuf;
-  memcpy (buf + buf_size, strtab.cts_strs, strtab.cts_len);
+  memcpy (buf + buf_size, strtab->cts_strs, strtab->cts_len);
   hdrp = (ctf_header_t *) buf;
-  hdrp->cth_strlen = strtab.cts_len;
+  hdrp->cth_strlen = strtab->cts_len;
   buf_size += hdrp->cth_strlen;
-  free (strtab.cts_strs);
 
   /* Finally, we are ready to ctf_simple_open() the new dict.  If this is
      successful, we then switch nfp and fp and free the old dict.  */
 
   if ((nfp = ctf_simple_open_internal ((char *) buf, buf_size, NULL, 0,
 				       0, NULL, 0, fp->ctf_syn_ext_strtab,
-				       &err)) == NULL)
+				       fp->ctf_str_atoms, &err)) == NULL)
     {
       free (buf);
       return (ctf_set_errno (fp, err));
@@ -1189,9 +1187,11 @@ ctf_serialize (ctf_dict_t *fp)
   ctf_str_free_atoms (nfp);
   nfp->ctf_str_atoms = fp->ctf_str_atoms;
   nfp->ctf_prov_strtab = fp->ctf_prov_strtab;
+  nfp->ctf_dynstrtab = fp->ctf_dynstrtab;
   nfp->ctf_str_movable_refs = fp->ctf_str_movable_refs;
   fp->ctf_str_atoms = NULL;
   fp->ctf_prov_strtab = NULL;
+  fp->ctf_dynstrtab = NULL;
   fp->ctf_str_movable_refs = NULL;
   memset (&fp->ctf_dtdefs, 0, sizeof (ctf_list_t));
   memset (&fp->ctf_errs_warnings, 0, sizeof (ctf_list_t));
