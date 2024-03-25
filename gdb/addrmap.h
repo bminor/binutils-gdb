@@ -80,8 +80,8 @@ private:
 struct addrmap_mutable;
 
 /* Fixed address maps.  */
-struct addrmap_fixed : public addrmap,
-		       public allocate_on_obstack<addrmap_fixed>
+struct addrmap_fixed final : public addrmap,
+			     public allocate_on_obstack<addrmap_fixed>
 {
 public:
 
@@ -116,7 +116,7 @@ private:
 
 /* Mutable address maps.  */
 
-struct addrmap_mutable : public addrmap
+struct addrmap_mutable final : public addrmap
 {
 public:
 
