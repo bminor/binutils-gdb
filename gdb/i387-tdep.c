@@ -762,11 +762,11 @@ static int xsave_avxh_offset[] =
   (xsave + (tdep)->xsave_layout.avx_offset			\
    + xsave_avxh_offset[regnum - I387_YMM0H_REGNUM (tdep)])
 
-/* At xsave_ymm_avx512_offset[REGNUM] you'll find the relative offset
+/* At xsave_ymm_h_avx512_offset[REGNUM] you'll find the relative offset
    within the ZMM region of the XSAVE extended state where the second
    128bits of GDB register YMM16 + REGNUM is stored.  */
 
-static int xsave_ymm_avx512_offset[] =
+static int xsave_ymm_h_avx512_offset[] =
 {
   16 + 0 * 64,		/* %ymm16 through...  */
   16 + 1 * 64,
@@ -786,9 +786,9 @@ static int xsave_ymm_avx512_offset[] =
   16 + 15 * 64		/* ...  %ymm31 (128 bits each).  */
 };
 
-#define XSAVE_YMM_AVX512_ADDR(tdep, xsave, regnum)			\
+#define XSAVE_YMM_H_AVX512_ADDR(tdep, xsave, regnum)			\
   (xsave + (tdep)->xsave_layout.zmm_offset				\
-   + xsave_ymm_avx512_offset[regnum - I387_YMM16H_REGNUM (tdep)])
+   + xsave_ymm_h_avx512_offset[regnum - I387_YMM16H_REGNUM (tdep)])
 
 /* At xsave_xmm_avx512_offset[REGNUM] you'll find the relative offset
    within the ZMM region of the XSAVE extended state where the first
@@ -1187,7 +1187,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	regcache->raw_supply (regnum, zero);
       else
 	regcache->raw_supply (regnum,
-			      XSAVE_YMM_AVX512_ADDR (tdep, regs, regnum));
+			      XSAVE_YMM_H_AVX512_ADDR (tdep, regs, regnum));
       return;
 
     case avx512_xmm_avx512:
@@ -1314,7 +1314,8 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	      for (i = I387_YMM16H_REGNUM (tdep);
 		   i < I387_YMMH_AVX512_END_REGNUM (tdep);
 		   i++)
-		regcache->raw_supply (i, XSAVE_YMM_AVX512_ADDR (tdep, regs, i));
+		regcache->raw_supply (i,
+				      XSAVE_YMM_H_AVX512_ADDR (tdep, regs, i));
 	      for (i = I387_XMM16_REGNUM (tdep);
 		   i < I387_XMM_AVX512_END_REGNUM (tdep);
 		   i++)
@@ -1644,7 +1645,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	    memset (XSAVE_AVX512_ZMM16_H_ADDR (tdep, regs, i), 0, 32);
 	  for (i = I387_YMM16H_REGNUM (tdep);
 	       i < I387_YMMH_AVX512_END_REGNUM (tdep); i++)
-	    memset (XSAVE_YMM_AVX512_ADDR (tdep, regs, i), 0, 16);
+	    memset (XSAVE_YMM_H_AVX512_ADDR (tdep, regs, i), 0, 16);
 	  for (i = I387_XMM16_REGNUM (tdep);
 	       i < I387_XMM_AVX512_END_REGNUM (tdep); i++)
 	    memset (XSAVE_XMM_AVX512_ADDR (tdep, regs, i), 0, 16);
@@ -1750,7 +1751,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	       i < I387_YMMH_AVX512_END_REGNUM (tdep); i++)
 	    {
 	      regcache->raw_collect (i, raw);
-	      p = XSAVE_YMM_AVX512_ADDR (tdep, regs, i);
+	      p = XSAVE_YMM_H_AVX512_ADDR (tdep, regs, i);
 	      if (memcmp (raw, p, 16) != 0)
 		{
 		  xstate_bv |= X86_XSTATE_ZMM;
@@ -1911,7 +1912,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 
 	case avx512_ymmh_avx512:
 	  /* This is an upper YMM16-31 register.  */
-	  p = XSAVE_YMM_AVX512_ADDR (tdep, regs, regnum);
+	  p = XSAVE_YMM_H_AVX512_ADDR (tdep, regs, regnum);
 	  if (memcmp (raw, p, 16) != 0)
 	    {
 	      xstate_bv |= X86_XSTATE_ZMM;
