@@ -1233,9 +1233,8 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
   return 0;
 }
 
-/* Flip the endianness of BUF, given the offsets in the (already endian-
-   converted) CTH.  If TO_FOREIGN is set, flip to foreign-endianness; if not,
-   flip away.
+/* Flip the endianness of BUF, given the offsets in the (native-endianness) CTH.
+   If TO_FOREIGN is set, flip to foreign-endianness; if not, flip away.
 
    All of this stuff happens before the header is fully initialized, so the
    LCTF_*() macros cannot be used yet.  Since we do not try to endian-convert v1
@@ -1288,21 +1287,6 @@ ctf_dict_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
 			     const char *strsect, size_t strsect_size,
 			     int *errp)
 {
-  return ctf_simple_open_internal (ctfsect, ctfsect_size, symsect, symsect_size,
-				   symsect_entsize, strsect, strsect_size, NULL,
-				   NULL, errp);
-}
-
-/* Open a CTF file, mocking up a suitable ctf_sect and overriding the external
-   strtab with a synthetic one.  */
-
-ctf_dict_t *ctf_simple_open_internal (const char *ctfsect, size_t ctfsect_size,
-				      const char *symsect, size_t symsect_size,
-				      size_t symsect_entsize,
-				      const char *strsect, size_t strsect_size,
-				      ctf_dynhash_t *syn_strtab,
-				      ctf_dynhash_t *atoms, int *errp)
-{
   ctf_sect_t skeleton;
 
   ctf_sect_t ctf_sect, sym_sect, str_sect;
@@ -1338,8 +1322,7 @@ ctf_dict_t *ctf_simple_open_internal (const char *ctfsect, size_t ctfsect_size,
       strsectp = &str_sect;
     }
 
-  return ctf_bufopen_internal (ctfsectp, symsectp, strsectp, syn_strtab,
-			       atoms, errp);
+  return ctf_bufopen (ctfsectp, symsectp, strsectp, errp);
 }
 
 /* Decode the specified CTF buffer and optional symbol table, and create a new
@@ -1351,16 +1334,6 @@ ctf_dict_t *
 ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	     const ctf_sect_t *strsect, int *errp)
 {
-  return ctf_bufopen_internal (ctfsect, symsect, strsect, NULL, NULL, errp);
-}
-
-/* Like ctf_bufopen, but overriding the external strtab with a synthetic one.  */
-
-ctf_dict_t *
-ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
-		      const ctf_sect_t *strsect, ctf_dynhash_t *syn_strtab,
-		      ctf_dynhash_t *atoms, int *errp)
-{
   const ctf_preamble_t *pp;
   size_t hdrsz = sizeof (ctf_header_t);
   ctf_header_t *hp;
@@ -1370,8 +1343,7 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   libctf_init_debug();
 
-  if ((ctfsect == NULL) || ((symsect != NULL) &&
-			    ((strsect == NULL) && syn_strtab == NULL)))
+  if ((ctfsect == NULL) || ((symsect != NULL) && (strsect == NULL)))
     return (ctf_set_open_errno (errp, EINVAL));
 
   if (symsect != NULL && symsect->cts_entsize != sizeof (Elf32_Sym) &&
@@ -1623,7 +1595,7 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   fp->ctf_str[CTF_STRTAB_0].cts_strs = (const char *) fp->ctf_buf
     + hp->cth_stroff;
   fp->ctf_str[CTF_STRTAB_0].cts_len = hp->cth_strlen;
-  if (ctf_str_create_atoms (fp, atoms) < 0)
+  if (ctf_str_create_atoms (fp) < 0)
     {
       err = ENOMEM;
       goto bad;
@@ -1669,7 +1641,6 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       fp->ctf_str[CTF_STRTAB_1].cts_strs = strsect->cts_data;
       fp->ctf_str[CTF_STRTAB_1].cts_len = strsect->cts_size;
     }
-  fp->ctf_syn_ext_strtab = syn_strtab;
 
   /* Dynamic state, for dynamic addition to this dict after loading.  */
 

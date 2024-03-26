@@ -253,21 +253,18 @@ ctf_arc_write (const char *file, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
   return err;
 }
 
-/* Write one CTF file out.  Return the file position of the written file (or
+/* Write one CTF dict out.  Return the file position of the written file (or
    rather, of the file-size uint64_t that precedes it): negative return is a
    negative errno or ctf_errno value.  On error, the file position may no longer
    be at the end of the file.  */
 static off_t
-arc_write_one_ctf (ctf_dict_t * f, int fd, size_t threshold)
+arc_write_one_ctf (ctf_dict_t *f, int fd, size_t threshold)
 {
   off_t off, end_off;
   uint64_t ctfsz = 0;
   char *ctfszp;
   size_t ctfsz_len;
   int (*writefn) (ctf_dict_t * fp, int fd);
-
-  if (ctf_serialize (f) < 0)
-    return f->ctf_errno * -1;
 
   if ((off = lseek (fd, 0, SEEK_CUR)) < 0)
     return errno * -1;

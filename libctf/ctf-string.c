@@ -144,15 +144,9 @@ ctf_str_free_atom (void *a)
    calls to ctf_str_add_external to populate external strtab entries, since
    these are often not quite the same as what appears in any external
    strtab, and the external strtab is often huge and best not aggressively
-   pulled in.)
-
-   Alternatively, if passed, populate atoms from the passed-in table, but do
-   not propagate their flags or refs: they are all non-freeable and
-   non-movable.  (This is used when serializing a dict: this entire atoms
-   table will be thrown away shortly, so it is important that we not create
-   any new strings.)  */
+   pulled in.)  */
 int
-ctf_str_create_atoms (ctf_dict_t *fp, ctf_dynhash_t *atoms)
+ctf_str_create_atoms (ctf_dict_t *fp)
 {
   size_t i;
 
@@ -179,61 +173,26 @@ ctf_str_create_atoms (ctf_dict_t *fp, ctf_dynhash_t *atoms)
   if (errno == ENOMEM)
     goto oom_str_add;
 
-  /* Serializing.  We have existing strings in an existing atoms table with
-     possibly-live pointers to them which must be used unchanged.  Import
-     them into this atoms table.  */
+  /* Pull in all the strings in the strtab as new atoms.  The provisional
+     strtab must be empty at this point, so there is no need to populate
+     atoms from it as well.  Types in this subset are frozen and readonly,
+     so the refs list and movable refs list need not be populated.  */
 
-  if (atoms)
+  for (i = 0; i < fp->ctf_str[CTF_STRTAB_0].cts_len;
+       i += strlen (&fp->ctf_str[CTF_STRTAB_0].cts_strs[i]) + 1)
     {
-      ctf_next_t *it = NULL;
-      void *k, *v;
-      int err;
+      ctf_str_atom_t *atom;
 
-      while ((err = ctf_dynhash_next (atoms, &it, &k, &v)) == 0)
-	{
-	  ctf_str_atom_t *existing = v;
-	  ctf_str_atom_t *atom;
+      if (fp->ctf_str[CTF_STRTAB_0].cts_strs[i] == 0)
+	continue;
 
-	  if (existing->csa_str[0] == 0)
-	    continue;
+      atom = ctf_str_add_ref_internal (fp, &fp->ctf_str[CTF_STRTAB_0].cts_strs[i],
+				       0, 0);
 
-	  if ((atom = malloc (sizeof (struct ctf_str_atom))) == NULL)
-	    goto oom_str_add;
-	  memcpy (atom, existing, sizeof (struct ctf_str_atom));
-	  memset (&atom->csa_refs, 0, sizeof(ctf_list_t));
-	  atom->csa_flags = 0;
+      if (!atom)
+	goto oom_str_add;
 
-	  if (ctf_dynhash_insert (fp->ctf_str_atoms, atom->csa_str, atom) < 0)
-	    {
-	      free (atom);
-	      goto oom_str_add;
-	    }
-	}
-    }
-  else
-    {
-      /* Not serializing.  Pull in all the strings in the strtab as new
-	 atoms.  The provisional strtab must be empty at this point, so
-	 there is no need to populate atoms from it as well.  Types in this
-	 subset are frozen and readonly, so the refs list and movable refs
-	 list need not be populated.  */
-
-      for (i = 0; i < fp->ctf_str[CTF_STRTAB_0].cts_len;
-	   i += strlen (&fp->ctf_str[CTF_STRTAB_0].cts_strs[i]) + 1)
-	{
-	  ctf_str_atom_t *atom;
-
-	  if (fp->ctf_str[CTF_STRTAB_0].cts_strs[i] == 0)
-	    continue;
-
-	  atom = ctf_str_add_ref_internal (fp, &fp->ctf_str[CTF_STRTAB_0].cts_strs[i],
-					   0, 0);
-
-	  if (!atom)
-	    goto oom_str_add;
-
-	  atom->csa_offset = i;
-	}
+      atom->csa_offset = i;
     }
 
   return 0;

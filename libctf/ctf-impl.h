@@ -364,14 +364,7 @@ typedef struct ctf_dedup
    clients, who see it only as an opaque pointer.  Modifications can therefore
    be made freely to this structure without regard to client versioning.  The
    ctf_dict_t typedef appears in <ctf-api.h> and declares a forward tag.
-   (A ctf_file_t typedef also appears there, for historical reasons.)
-
-   NOTE: ctf_serialize requires that everything inside of ctf_dict either be an
-   immediate value, a pointer to dynamically allocated data *outside* of the
-   ctf_dict itself, a pointer to statically allocated data, or specially handled
-   in ctf_serialize.  If you add a pointer to ctf_dict that points to something
-   within the ctf_dict itself, you must make corresponding changes to
-   ctf_serialize.  */
+   (A ctf_file_t typedef also appears there, for historical reasons.)  */
 
 struct ctf_dict
 {
@@ -735,7 +728,7 @@ extern const char *ctf_strraw (ctf_dict_t *, uint32_t);
 extern const char *ctf_strraw_explicit (ctf_dict_t *, uint32_t,
 					ctf_strs_t *);
 extern const char *ctf_strptr_validate (ctf_dict_t *, uint32_t);
-extern int ctf_str_create_atoms (ctf_dict_t *, ctf_dynhash_t *atoms);
+extern int ctf_str_create_atoms (ctf_dict_t *);
 extern void ctf_str_free_atoms (ctf_dict_t *);
 extern uint32_t ctf_str_add (ctf_dict_t *, const char *);
 extern uint32_t ctf_str_add_ref (ctf_dict_t *, const char *, uint32_t *ref);
@@ -760,15 +753,7 @@ extern void *ctf_set_open_errno (int *, int);
 extern void ctf_flip_header (ctf_header_t *);
 extern int ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *, int);
 
-extern ctf_dict_t *ctf_simple_open_internal (const char *, size_t, const char *,
-					     size_t, size_t,
-					     const char *, size_t,
-					     ctf_dynhash_t *, ctf_dynhash_t *, int *);
-extern ctf_dict_t *ctf_bufopen_internal (const ctf_sect_t *, const ctf_sect_t *,
-					 const ctf_sect_t *, ctf_dynhash_t *,
-					 ctf_dynhash_t *, int *);
 extern int ctf_import_unref (ctf_dict_t *fp, ctf_dict_t *pfp);
-extern int ctf_serialize (ctf_dict_t *);
 
 _libctf_malloc_
 extern void *ctf_mmap (size_t length, size_t offset, int fd);

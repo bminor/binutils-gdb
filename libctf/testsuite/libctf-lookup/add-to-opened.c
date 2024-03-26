@@ -118,11 +118,9 @@ main (int argc, char *argv[])
   if (ctf_errno (fp) != ECTF_RDONLY)
     fprintf (stderr, "unexpected error %s attempting to set array in readonly portion\n", ctf_errmsg (ctf_errno (fp)));
 
-  if ((ctf_written = ctf_write_mem (fp, &size, 4096)) != NULL)
-    fprintf (stderr, "Writeout unexpectedly succeeded: %s\n", ctf_errmsg (ctf_errno (fp)));
-
-  if (ctf_errno (fp) != ECTF_RDONLY)
-    fprintf (stderr, "unexpected error %s trying to write out previously serialized dict\n", ctf_errmsg (ctf_errno (fp)));
+  if ((ctf_written = ctf_write_mem (fp, &size, 4096)) == NULL)
+    fprintf (stderr, "Re-writeout unexpectedly failed: %s\n", ctf_errmsg (ctf_errno (fp)));
+  free (ctf_written);
 
   /* Finally, make sure we can add new types, and look them up again.  */
 
@@ -137,6 +135,9 @@ main (int argc, char *argv[])
 
   if (ctf_type_reference (fp, ptrtype) != type)
     fprintf (stderr, "Look up of newly-added type in serialized dict yields ID %lx, expected %lx\n", ctf_type_reference (fp, ptrtype), type);
+
+  ctf_dict_close (fp);
+  ctf_close (ctf);
 
   printf ("All done.\n");
   return 0;
