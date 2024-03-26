@@ -43,7 +43,6 @@
    Probably also lots of other problems, less well defined PM.  */
 %{
 
-#include "defs.h"
 #include <ctype.h>
 #include "expression.h"
 #include "value.h"

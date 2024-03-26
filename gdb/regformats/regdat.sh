@@ -107,7 +107,6 @@ EOF
 
 exec > new-$2
 copyright $1
-echo '#include "server.h"'
 echo '#include "regdef.h"'
 echo '#include "tdesc.h"'
 echo

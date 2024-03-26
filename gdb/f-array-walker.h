@@ -21,7 +21,6 @@
 #ifndef F_ARRAY_WALKER_H
 #define F_ARRAY_WALKER_H
 
-#include "defs.h"
 #include "gdbtypes.h"
 #include "f-lang.h"
 

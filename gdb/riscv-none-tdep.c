@@ -17,7 +17,6 @@
 
 /* This file contain code that is specific for bare-metal RISC-V targets.  */
 
-#include "defs.h"
 #include "arch-utils.h"
 #include "regcache.h"
 #include "riscv-tdep.h"

@@ -23,7 +23,6 @@
    Strings are handled specially here, at least for now, in case the Python
    support is unavailable.  */
 
-#include "defs.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
 #include "go-lang.h"

@@ -21,7 +21,6 @@
    dependencies, since we want to be able to use them in contexts
    outside of GDB (test suites, the stub, etc.)  */
 
-#include "defs.h"
 #include "ax.h"
 #include "gdbarch.h"
 

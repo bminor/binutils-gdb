@@ -24,7 +24,6 @@
    FOR_EACH.  The FOR_EACH-defined part reads like a regular function.  */
 #ifndef FOR_EACH
 
-#include "defs.h"
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/parallel-for.h"
 

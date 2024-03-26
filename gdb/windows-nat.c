@@ -21,7 +21,6 @@
 
 /* Originally by Steve Chamberlain, sac@cygnus.com */
 
-#include "defs.h"
 #include "frame.h"
 #include "inferior.h"
 #include "infrun.h"

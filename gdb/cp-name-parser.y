@@ -37,7 +37,6 @@
 
 %{
 
-#include "defs.h"
 
 #include <unistd.h>
 #include "gdbsupport/gdb-safe-ctype.h"

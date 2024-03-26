@@ -22,7 +22,6 @@
    sac@cygnus.com
  */
 
-#include "defs.h"
 #include "value.h"
 #include "arch-utils.h"
 #include "regcache.h"

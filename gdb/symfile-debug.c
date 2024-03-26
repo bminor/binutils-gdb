@@ -25,7 +25,6 @@
    and then if the function returns a result printing a message after it
    returns.  */
 
-#include "defs.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "observable.h"

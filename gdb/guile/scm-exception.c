@@ -28,7 +28,6 @@
    The non-static functions in this file have prefix gdbscm_ and
    not exscm_ on purpose.  */
 
-#include "defs.h"
 #include <signal.h>
 #include "guile-internal.h"
 

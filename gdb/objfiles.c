@@ -22,7 +22,6 @@
 /* This file contains support routines for creating, manipulating, and
    destroying objfile structures.  */
 
-#include "defs.h"
 #include "bfd.h"
 #include "symtab.h"
 #include "symfile.h"

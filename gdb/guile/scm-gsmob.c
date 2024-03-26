@@ -41,7 +41,6 @@
    seeing if it's already in the table.  Eqable gsmobs can also be used where
    lifetime-tracking is required.  */
 
-#include "defs.h"
 #include "hashtab.h"
 #include "objfiles.h"
 #include "guile-internal.h"

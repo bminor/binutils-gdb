@@ -27,7 +27,6 @@
 /* FIXME: Various die-reading functions need to be more careful with
    reading off the end of the section.  */
 
-#include "defs.h"
 #include "dwarf2/read.h"
 #include "dwarf2/abbrev.h"
 #include "dwarf2/aranges.h"

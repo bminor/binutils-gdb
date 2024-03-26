@@ -15,7 +15,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "server.h"
 #include "arch/arm.h"
 #include "arch/arm-linux.h"
 #include "linux-low.h"

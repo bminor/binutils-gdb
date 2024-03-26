@@ -23,7 +23,6 @@
 #endif
 
 #if !__has_feature(address_sanitizer) && !defined(__SANITIZE_ADDRESS__)
-#include "common-defs.h"
 #include "host-defs.h"
 #include <new>
 

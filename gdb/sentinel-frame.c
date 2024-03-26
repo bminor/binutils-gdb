@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
-#include "defs.h"
 #include "regcache.h"
 #include "sentinel-frame.h"
 #include "inferior.h"

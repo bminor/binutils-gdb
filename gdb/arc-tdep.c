@@ -19,7 +19,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* GDB header files.  */
-#include "defs.h"
 #include "arch-utils.h"
 #include "elf-bfd.h"
 #include "disasm.h"

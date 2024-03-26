@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
-#include "defs.h"
 #include "gdbcmd.h"
 
 /* Command list for "maint set test-settings".  */

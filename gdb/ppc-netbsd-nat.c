@@ -21,7 +21,6 @@
 
 /* We define this to get types like register_t.  */
 #define _KERNTYPES
-#include "defs.h"
 
 #include <sys/types.h>
 #include <sys/ptrace.h>

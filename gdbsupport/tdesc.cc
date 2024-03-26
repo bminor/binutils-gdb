@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "common-defs.h"
 #include "gdbsupport/tdesc.h"
 
 tdesc_reg::tdesc_reg (struct tdesc_feature *feature, const std::string &name_,

@@ -19,7 +19,6 @@
 
 
 
-#include "defs.h"
 #include "top.h"
 #include "python-internal.h"
 #include "breakpoint.h"

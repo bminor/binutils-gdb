@@ -36,7 +36,6 @@
    to figure out what full symbol table entries need to be read in.  */
 
 
-#include "defs.h"
 #include <ctype.h>
 #include "symtab.h"
 #include "bfd.h"

@@ -25,7 +25,6 @@
  *
  */
 
-#include "defs.h"
 
 #include <sys/types.h>
 #include <sys/procfs.h>

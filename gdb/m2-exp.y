@@ -37,7 +37,6 @@
    
 %{
 
-#include "defs.h"
 #include "expression.h"
 #include "language.h"
 #include "value.h"

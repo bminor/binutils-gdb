@@ -16,7 +16,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
-#include "gdbsupport/common-defs.h"
 #include "arc.h"
 #include <stdlib.h>
 #include <unordered_map>

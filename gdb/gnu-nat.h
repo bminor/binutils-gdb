@@ -19,8 +19,6 @@
 #ifndef GNU_NAT_H
 #define GNU_NAT_H
 
-#include "defs.h"
-
 /* Work around conflict between Mach's 'thread_info' function, and GDB's
    'thread_info' class.  Make the former available as 'mach_thread_info'.  */
 #define thread_info mach_thread_info

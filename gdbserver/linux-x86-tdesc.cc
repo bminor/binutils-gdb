@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "server.h"
 #include "tdesc.h"
 #include "linux-x86-tdesc.h"
 #include "arch/i386.h"

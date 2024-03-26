@@ -19,7 +19,6 @@
 
 /* GDB/MI commands implemented in Python.  */
 
-#include "defs.h"
 #include "python-internal.h"
 #include "arch-utils.h"
 #include "charset.h"

@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "defs.h"
 #include "i386-tdep.h"
 #include "gdbsupport/x86-xstate.h"
 #include "target-descriptions.h"

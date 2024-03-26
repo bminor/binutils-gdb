@@ -20,7 +20,6 @@
 /* See README file in this directory for implementation notes, coding
    conventions, et.al.  */
 
-#include "defs.h"
 #include "objfiles.h"
 #include "language.h"
 #include "guile-internal.h"

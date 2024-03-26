@@ -22,7 +22,6 @@
    new prototype target and then overriding target methods as
    necessary.  */
 
-#include "defs.h"
 #include "regcache.h"
 #include "memattr.h"
 #include "symtab.h"

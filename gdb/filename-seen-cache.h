@@ -20,7 +20,6 @@
 #ifndef FILENAME_SEEN_CACHE_H
 #define FILENAME_SEEN_CACHE_H
 
-#include "defs.h"
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/gdb-hashtab.h"
 

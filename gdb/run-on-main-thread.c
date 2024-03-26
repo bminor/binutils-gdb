@@ -16,7 +16,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "defs.h"
 #include "run-on-main-thread.h"
 #include "ser-event.h"
 #if CXX_STD_THREAD

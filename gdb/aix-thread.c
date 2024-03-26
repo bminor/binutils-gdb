@@ -39,7 +39,6 @@
 
      */
 
-#include "defs.h"
 #include "gdbthread.h"
 #include "target.h"
 #include "inferior.h"

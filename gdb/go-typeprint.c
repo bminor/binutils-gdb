@@ -23,7 +23,6 @@
      want a Python API for type printing
 */
 
-#include "defs.h"
 #include "gdbtypes.h"
 #include "c-lang.h"
 #include "go-lang.h"

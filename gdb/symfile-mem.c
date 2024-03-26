@@ -41,7 +41,6 @@
    entry point.  */
 
 
-#include "defs.h"
 #include "symtab.h"
 #include "gdbcore.h"
 #include "objfiles.h"

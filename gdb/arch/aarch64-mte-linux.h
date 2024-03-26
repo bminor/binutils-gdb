@@ -20,7 +20,6 @@
 #ifndef ARCH_AARCH64_MTE_LINUX_H
 #define ARCH_AARCH64_MTE_LINUX_H
 
-#include "gdbsupport/common-defs.h"
 
 /* Feature check for Memory Tagging Extension.  */
 #ifndef HWCAP2_MTE

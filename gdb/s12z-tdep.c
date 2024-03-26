@@ -18,7 +18,6 @@
 
 /* Much of this file is shamelessly copied from or1k-tdep.c and others.  */
 
-#include "defs.h"
 
 #include "arch-utils.h"
 #include "dwarf2/frame.h"

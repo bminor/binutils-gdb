@@ -17,7 +17,6 @@
 
 #include "gdbsupport/tdesc.h"
 #include "tic6x.h"
-#include "gdbsupport/common-defs.h"
 
 #include "../features/tic6x-core.c"
 #include "../features/tic6x-gp.c"

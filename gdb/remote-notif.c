@@ -31,7 +31,6 @@
    remote_async_get_pending_events_handler, while in all-stop mode,
    they are processed in remote_resume.  */
 
-#include "defs.h"
 #include "remote.h"
 #include "remote-notif.h"
 #include "observable.h"

@@ -29,7 +29,6 @@ extern "C"
 #include <mach/exception.h>
 }
 
-#include "defs.h"
 #include "x86-nat.h"
 #include "inferior.h"
 #include "floatformat.h"

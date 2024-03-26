@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
-#include "defs.h"
 #include "gdbtypes.h"
 #include "compile-internal.h"
 #include "compile-c.h"

@@ -28,7 +28,6 @@
    FIXME: At present, the syscall translation table must be
    initialized, which is not true of the other translation tables.  */
 
-#include "defs.h"
 
 #include <sys/types.h>
 #include <sys/procfs.h>

@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* GDB header files.  */
-#include "defs.h"
 #include "linux-tdep.h"
 #include "objfiles.h"
 #include "opcode/arc.h"

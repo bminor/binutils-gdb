@@ -18,7 +18,6 @@
 
 /* This file is derived from p-typeprint.c */
 
-#include "defs.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "bfd.h"
 #include "symtab.h"

@@ -20,7 +20,6 @@
 /* Note: With few exceptions, external functions and variables in this file
    have "ext_lang" in the name, and no other symbol in gdb does.  */
 
-#include "defs.h"
 #include <signal.h>
 #include "target.h"
 #include "auto-load.h"

@@ -75,7 +75,6 @@
    already in the symbol table, and the CTF string table does not contain any
    duplicated strings.  */
 
-#include "defs.h"
 #include "buildsym.h"
 #include "complaints.h"
 #include "block.h"

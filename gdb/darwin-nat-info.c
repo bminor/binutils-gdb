@@ -27,7 +27,6 @@
    the future.  It'd be good to remove this at some point when compiling on
    Tiger is no longer important.  */
 
-#include "defs.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"

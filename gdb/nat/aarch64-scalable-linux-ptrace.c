@@ -19,7 +19,6 @@
 
 #include <sys/utsname.h>
 #include <sys/uio.h>
-#include "gdbsupport/common-defs.h"
 #include "elf/external.h"
 #include "elf/common.h"
 #include "aarch64-scalable-linux-ptrace.h"

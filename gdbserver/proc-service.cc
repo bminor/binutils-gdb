@@ -18,7 +18,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "server.h"
 
 /* This file is currently tied to GNU/Linux.  It should scale well to
    another libthread_db implementation, with the appropriate gdbserver

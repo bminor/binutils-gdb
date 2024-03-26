@@ -50,7 +50,6 @@
    There is SRFI 41, Streams.  We might support that too eventually (not with
    this interface of course).  */
 
-#include "defs.h"
 #include "guile-internal.h"
 
 /* A smob for iterating over something.

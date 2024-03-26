@@ -21,7 +21,6 @@
 #ifndef ARCH_AARCH64_SCALABLE_LINUX_H
 #define ARCH_AARCH64_SCALABLE_LINUX_H
 
-#include "gdbsupport/common-defs.h"
 #include "gdbsupport/common-regcache.h"
 
 /* Feature check for Scalable Matrix Extension.  */

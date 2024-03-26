@@ -24,7 +24,6 @@
    for instance, error output is normally identified by a leading
    "&".  */
 
-#include "defs.h"
 #include "mi-console.h"
 
 /* Create a console that wraps the given output stream RAW with the

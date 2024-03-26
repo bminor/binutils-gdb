@@ -19,7 +19,6 @@
 
 /* This file is used for both 31-bit and 64-bit S/390 systems.  */
 
-#include "server.h"
 #include "linux-low.h"
 #include "elf/common.h"
 #include "ax.h"

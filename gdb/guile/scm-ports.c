@@ -21,7 +21,6 @@
 /* See README file in this directory for implementation notes, coding
    conventions, et.al.  */
 
-#include "defs.h"
 #include "gdbsupport/gdb_select.h"
 #include "ui.h"
 #include "target.h"

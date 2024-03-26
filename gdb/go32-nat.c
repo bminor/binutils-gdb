@@ -81,7 +81,6 @@
    GDB does not use those as of this writing, and will never need
    to.  */
 
-#include "defs.h"
 
 #include <fcntl.h>
 

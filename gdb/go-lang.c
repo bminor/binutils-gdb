@@ -31,7 +31,6 @@
    - 6g mangling isn't supported yet
 */
 
-#include "defs.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "block.h"
 #include "symtab.h"

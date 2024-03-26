@@ -23,7 +23,6 @@
 /* Read symbols from an ECOFF file.  Most of the work is done in
    mdebugread.c.  */
 
-#include "defs.h"
 #include "bfd.h"
 #include "symtab.h"
 #include "objfiles.h"

@@ -39,7 +39,6 @@
    This module can read all four of the known byte-order combinations,
    on any type of host.  */
 
-#include "defs.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"

@@ -20,7 +20,6 @@
 /* Contributed by Steve Chamberlain
    sac@cygnus.com.  */
 
-#include "defs.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"

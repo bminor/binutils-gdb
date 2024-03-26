@@ -19,7 +19,6 @@
 #include <sys/ptrace.h>
 #include <limits.h>
 
-#include "server.h"
 #include "netbsd-low.h"
 #include "arch/aarch64.h"
 #include "arch/aarch64-insn.h"
