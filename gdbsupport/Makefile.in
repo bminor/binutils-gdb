@@ -403,6 +403,7 @@ AM_CPPFLAGS = \
 	$(INCINTL) \
 	-I../bfd \
 	-I$(srcdir)/../bfd \
+	-include $(srcdir)/common-defs.h \
 	@LARGEFILE_CPPFLAGS@
 
 AM_CXXFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS)

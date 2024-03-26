@@ -607,6 +607,7 @@ GDB_CFLAGS = \
 	-I. \
 	-I$(srcdir) \
 	-I$(srcdir)/config \
+	-include $(srcdir)/defs.h \
 	-DLOCALEDIR="\"$(localedir)\"" \
 	$(DEFS)
 
@@ -2050,7 +2051,7 @@ check-headers:
 	@echo Checking headers.
 	for i in $(CHECK_HEADERS) ; do \
 		$(CXX) $(CXX_DIALECT) -x c++-header -c -fsyntax-only \
-		$(INTERNAL_CFLAGS) $(CXXFLAGS) -include defs.h $(srcdir)/$$i ; \
+		$(INTERNAL_CFLAGS) $(CXXFLAGS) $(srcdir)/$$i ; \
 	done
 .PHONY: check-headers
 
