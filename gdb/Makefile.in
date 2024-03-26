@@ -260,7 +260,9 @@ LIBBACKTRACE_LIB=@LIBBACKTRACE_LIB@
 
 SUPPORT = ../gdbsupport
 LIBSUPPORT = $(SUPPORT)/libgdbsupport.a
-INCSUPPORT = -I$(srcdir)/.. -I..
+INCSUPPORT = \
+	-I$(srcdir)/.. \
+	-I..
 
 #
 # CLI sub directory definitons
@@ -601,8 +603,12 @@ CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 # your system doesn't have fcntl.h in /usr/include (which is where it
 # should be according to Posix).
 DEFS = @DEFS@
-GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config \
-	-DLOCALEDIR="\"$(localedir)\"" $(DEFS)
+GDB_CFLAGS = \
+	-I. \
+	-I$(srcdir) \
+	-I$(srcdir)/config \
+	-DLOCALEDIR="\"$(localedir)\"" \
+	$(DEFS)
 
 # MH_CFLAGS, if defined, has host-dependent CFLAGS from the config directory.
 GLOBAL_CFLAGS = $(MH_CFLAGS)
@@ -626,12 +632,27 @@ INTERNAL_CPPFLAGS = $(CPPFLAGS) @GUILE_CPPFLAGS@ @PYTHON_CPPFLAGS@ \
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS_BASE = \
-	$(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
-	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(BFD_CFLAGS) $(INCLUDE_CFLAGS) \
-	$(READLINE_CFLAGS) $(ZLIBINC) $(ZSTD_CFLAGS) $(LIBDECNUMBER_CFLAGS) \
-	$(INTL_CFLAGS) $(INCGNU) $(INCSUPPORT) $(LIBBACKTRACE_INC) \
-	$(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS) $(SRCHIGH_CFLAGS) \
-	$(TOP_CFLAGS) $(PTHREAD_CFLAGS) $(DEBUGINFOD_CFLAGS) $(GMPINC) \
+	$(GLOBAL_CFLAGS) \
+	$(PROFILE_CFLAGS) \
+	$(GDB_CFLAGS) \
+	$(OPCODES_CFLAGS) \
+	$(BFD_CFLAGS) \
+	$(INCLUDE_CFLAGS) \
+	$(READLINE_CFLAGS) \
+	$(ZLIBINC) \
+	$(ZSTD_CFLAGS) \
+	$(LIBDECNUMBER_CFLAGS) \
+	$(INTL_CFLAGS) \
+	$(INCGNU) \
+	$(INCSUPPORT) \
+	$(LIBBACKTRACE_INC) \
+	$(ENABLE_CFLAGS) \
+	$(INTERNAL_CPPFLAGS) \
+	$(SRCHIGH_CFLAGS) \
+	$(TOP_CFLAGS) \
+	$(PTHREAD_CFLAGS) \
+	$(DEBUGINFOD_CFLAGS) \
+	$(GMPINC) \
 	$(AMD_DBGAPI_CFLAGS)
 INTERNAL_WARN_CFLAGS = $(INTERNAL_CFLAGS_BASE) $(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)

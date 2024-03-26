@@ -25,10 +25,17 @@ ACLOCAL_AMFLAGS = -I . -I ../config
 # ZW_GNU_GETTEXT_SISTER_DIR, but doesn't have any translations (currently).
 SUBDIRS =
 
-AM_CPPFLAGS = -I$(srcdir)/../include -I$(srcdir)/../gdb \
-    -I../gnulib/import -I$(srcdir)/../gnulib/import \
-    -I.. -I$(srcdir)/.. $(INCINTL) -I../bfd -I$(srcdir)/../bfd \
-    @LARGEFILE_CPPFLAGS@
+AM_CPPFLAGS = \
+	-I$(srcdir)/../include \
+	-I$(srcdir)/../gdb \
+	-I../gnulib/import \
+	-I$(srcdir)/../gnulib/import \
+	-I.. \
+	-I$(srcdir)/.. \
+	$(INCINTL) \
+	-I../bfd \
+	-I$(srcdir)/../bfd \
+	@LARGEFILE_CPPFLAGS@
 
 override CXX += $(CXX_DIALECT)
 
