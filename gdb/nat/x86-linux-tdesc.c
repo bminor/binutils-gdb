@@ -160,6 +160,8 @@ static constexpr x86_tdesc_feature x86_linux_all_tdesc_features[] = {
   { X86_XSTATE_X87,	true,	false, 	false }
 };
 
+#if defined __i386__ || !defined IN_PROCESS_AGENT
+
 /* Return a compile time constant which is a mask of all the cpu features
    that are checked for when building an i386 target description.  */
 
@@ -174,6 +176,10 @@ x86_linux_i386_tdesc_feature_mask ()
 
   return mask;
 }
+
+#endif /* __i386__ || !IN_PROCESS_AGENT */
+
+#ifdef __x86_64__
 
 /* Return a compile time constant which is a mask of all the cpu features
    that are checked for when building an amd64 target description.  */
@@ -205,6 +211,8 @@ x86_linux_x32_tdesc_feature_mask ()
   return mask;
 }
 
+#endif /* __x86_64__ */
+
 /* Return a compile time constant which is a count of the number of cpu
    features that are checked for when building an i386 target description.  */
 
@@ -221,6 +229,8 @@ x86_linux_i386_tdesc_count ()
 
   return (1 << count);
 }
+
+#if defined __x86_64__ || defined IN_PROCESS_AGENT
 
 /* Return a compile time constant which is a count of the number of cpu
    features that are checked for when building an amd64 target description.  */
@@ -255,6 +265,8 @@ x86_linux_x32_tdesc_count ()
 
   return (1 << count);
 }
+
+#endif /* __x86_64__ || IN_PROCESS_AGENT */
 
 #ifdef IN_PROCESS_AGENT
 
