@@ -42,7 +42,6 @@
 #include "arch/amd64.h"
 #include "target-descriptions.h"
 #include "expop.h"
-#include "nat/x86-linux.h"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_AMD64 "syscalls/amd64-linux.xml"
