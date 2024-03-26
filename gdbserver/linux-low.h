@@ -951,7 +951,7 @@ void thread_db_notice_clone (struct thread_info *parent_thr, ptid_t child_ptid);
 
 bool thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len);
 
-extern enum tribool have_ptrace_getregset;
+extern int have_ptrace_getregset;
 
 /* Search for the value with type MATCH in the auxv vector, with entries of
    length WORDSIZE bytes, of process with pid PID.  If found, store the
