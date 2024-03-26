@@ -681,12 +681,29 @@ i386_linux_core_read_x86_xsave_layout (struct gdbarch *gdbarch,
 					  layout) != 0;
 }
 
-/* See nat/x86-linux-tdesc.h.  */
+/* See i386-linux-tdep.h.  */
 
-void
-x86_linux_post_init_tdesc (target_desc *tdesc, bool is_64bit)
+const struct target_desc *
+i386_linux_read_description (uint64_t xcr0)
 {
-  /* Nothing.  */
+  if (xcr0 == 0)
+    return NULL;
+
+  static struct target_desc *i386_linux_tdescs \
+    [2/*X87*/][2/*SSE*/][2/*AVX*/][2/*MPX*/][2/*AVX512*/][2/*PKRU*/] = {};
+  struct target_desc **tdesc;
+
+  tdesc = &i386_linux_tdescs[(xcr0 & X86_XSTATE_X87) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_SSE) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_AVX) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_MPX) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_AVX512) ? 1 : 0]
+    [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0];
+
+  if (*tdesc == NULL)
+    *tdesc = i386_create_target_description (xcr0, true, false);
+
+  return *tdesc;
 }
 
 /* Get Linux/x86 target description from core dump.  */
@@ -699,10 +716,7 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
   /* Linux/i386.  */
   x86_xsave_layout layout;
   uint64_t xcr0 = i386_linux_core_read_xsave_info (abfd, layout);
-
-  const struct target_desc *tdesc;
-  if (xcr0 != 0)
-    tdesc = i386_linux_read_description (xcr0);
+  const struct target_desc *tdesc = i386_linux_read_description (xcr0);
 
   if (tdesc != NULL)
     return tdesc;
