@@ -110,8 +110,6 @@ proc parse_number { lang n } {
 	    return [list "i64" $n]
 	} elseif { [fits_in_type $n 128 u] } {
 	    return [list "i128" $n]
-	} elseif { [fits_in_type $n 128 u] } {
-	    return [list "i128" $n]
 	} else {
 	    # Overflow.
 	    return [list $re_overflow $re_overflow]
