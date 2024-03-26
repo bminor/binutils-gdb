@@ -94,7 +94,8 @@ proc vgdb_start { {active_at_startup 1} } {
     if { $active_at_startup } {
 	set start_re1 " in \\.?_start "
 	set start_re2 "\\.?_start \\(\\) at "
-	gdb_test "$vgdbcmd" "($start_re1|$start_re2).*" \
+	set start_re3 "$::hex in \\?\\? \\(\\) from "
+	gdb_test "$vgdbcmd" "($start_re1|$start_re2|$start_re3).*" \
 	    "target remote for vgdb"
     } else {
 	# Let $binfile run a bit before attaching.  This is a bit of a hack,
