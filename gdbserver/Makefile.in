@@ -520,7 +520,7 @@ gdbsupport/%-ipa.o: ../gdbsupport/%.cc
 	$(POSTCOMPILE)
 
 nat/%-ipa.o: ../gdb/nat/%.c
-	$(IPAGENT_COMPILE) -x c++ $<
+	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
 %-ipa.o: ../gdb/%.c
