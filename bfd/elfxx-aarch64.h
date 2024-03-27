@@ -96,6 +96,17 @@ extern bool elf32_aarch64_size_stubs
 extern bool elf32_aarch64_build_stubs
   (struct bfd_link_info *);
 
+/* AArch64 relative relocation packing support for ELF64.  */
+extern bool elf64_aarch64_size_relative_relocs
+  (struct bfd_link_info *, bool *);
+extern bool elf64_aarch64_finish_relative_relocs
+  (struct bfd_link_info *);
+/* AArch64 relative relocation packing support for ELF32.  */
+extern bool elf32_aarch64_size_relative_relocs
+  (struct bfd_link_info *, bool *);
+extern bool elf32_aarch64_finish_relative_relocs
+  (struct bfd_link_info *);
+
 /* Take the PAGE component of an address or offset.  */
 #define PG(x)	     ((x) & ~ (bfd_vma) 0xfff)
 #define PG_OFFSET(x) ((x) &   (bfd_vma) 0xfff)
