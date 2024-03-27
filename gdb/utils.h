@@ -444,10 +444,18 @@ struct deferred_warnings
      hook; see scoped_restore_warning_hook.  Note that no locking is
      done, so users have to be careful to only install this into a
      single thread at a time.  */
-  void operator() (const char *format, va_list args) ATTRIBUTE_PRINTF (2, 0)
+  void operator() (const char *format, va_list args)
   {
     string_file msg (m_can_style);
+    /* Clang warns if we add ATTRIBUTE_PRINTF to this method (because
+       the function-view wrapper doesn't also have the attribute), but
+       then warns again if we remove it, because this vprintf call
+       does not use a literal format string.  So, suppress the
+       warnings here.  */
+    DIAGNOSTIC_PUSH
+    DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
     msg.vprintf (format, args);
+    DIAGNOSTIC_POP
     m_warnings.emplace_back (std::move (msg));
   }
 
