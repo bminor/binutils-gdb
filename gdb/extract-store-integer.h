@@ -18,9 +18,9 @@
 #ifndef GDB_EXTRACT_STORE_INTEGER_H
 #define GDB_EXTRACT_STORE_INTEGER_H
 
-#include "gdbsupport/traits.h"
+#include <type_traits>
 
-template<typename T, typename = RequireLongest<T>>
+template<typename T, typename = std::is_integral<T>>
 T extract_integer (gdb::array_view<const gdb_byte>, enum bfd_endian byte_order);
 
 static inline LONGEST
