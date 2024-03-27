@@ -7056,11 +7056,6 @@ handle_signal_stop (struct execution_control_state *ecs)
 					   ecs->event_thread->stop_pc (),
 					   ecs->ws);
 	  skip_inline_frames (ecs->event_thread, stop_chain);
-
-	  /* Re-fetch current thread's frame in case that invalidated
-	     the frame cache.  */
-	  frame = get_current_frame ();
-	  gdbarch = get_frame_arch (frame);
 	}
     }
 
@@ -7419,12 +7414,6 @@ process_event_stop_test (struct execution_control_state *ecs)
      bp_jit_event).  Run them now.  */
   bpstat_run_callbacks (ecs->event_thread->control.stop_bpstat);
 
-  /* If we hit an internal event that triggers symbol changes, the
-     current frame will be invalidated within bpstat_what (e.g., if we
-     hit an internal solib event).  Re-fetch it.  */
-  frame = get_current_frame ();
-  gdbarch = get_frame_arch (frame);
-
   /* Shorthand to make if statements smaller.  */
   struct frame_id original_frame_id
     = ecs->event_thread->control.step_frame_id;
@@ -7670,11 +7659,6 @@ process_event_stop_test (struct execution_control_state *ecs)
       return;
     }
 
-  /* Re-fetch current thread's frame in case the code above caused
-     the frame cache to be re-initialized, making our FRAME variable
-     a dangling pointer.  */
-  frame = get_current_frame ();
-  gdbarch = get_frame_arch (frame);
   fill_in_stop_func (gdbarch, ecs);
 
   /* If stepping through a line, keep going if still within it.
@@ -7855,7 +7839,7 @@ process_event_stop_test (struct execution_control_state *ecs)
   if ((get_stack_frame_id (frame)
        != ecs->event_thread->control.step_stack_frame_id)
       && get_frame_type (frame) != SIGTRAMP_FRAME
-      && ((frame_unwind_caller_id (get_current_frame ())
+      && ((frame_unwind_caller_id (frame)
 	   == ecs->event_thread->control.step_stack_frame_id)
 	  && ((ecs->event_thread->control.step_stack_frame_id
 	       != outer_frame_id)
@@ -8138,7 +8122,7 @@ process_event_stop_test (struct execution_control_state *ecs)
     {
       infrun_debug_printf ("stepped into inlined function");
 
-      symtab_and_line call_sal = find_frame_sal (get_current_frame ());
+      symtab_and_line call_sal = find_frame_sal (frame);
 
       if (ecs->event_thread->control.step_over_calls != STEP_OVER_ALL)
 	{
@@ -8180,9 +8164,9 @@ process_event_stop_test (struct execution_control_state *ecs)
      to go further up to find the exact frame ID, we are stepping
      through a more inlined call beyond its call site.  */
 
-  if (get_frame_type (get_current_frame ()) == INLINE_FRAME
+  if (get_frame_type (frame) == INLINE_FRAME
       && (*curr_frame_id != original_frame_id)
-      && stepped_in_from (get_current_frame (), original_frame_id))
+      && stepped_in_from (frame, original_frame_id))
     {
       infrun_debug_printf ("stepping through inlined function");
 
