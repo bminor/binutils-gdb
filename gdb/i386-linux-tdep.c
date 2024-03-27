@@ -714,15 +714,16 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
   /* Linux/i386.  */
   x86_xsave_layout layout;
   uint64_t xcr0 = i386_linux_core_read_xsave_info (abfd, layout);
-  const struct target_desc *tdesc = i386_linux_read_description (xcr0);
 
-  if (tdesc != NULL)
-    return tdesc;
+  if (xcr0 == 0)
+    {
+      if (bfd_get_section_by_name (abfd, ".reg-xfp") != nullptr)
+	xcr0 = X86_XSTATE_SSE_MASK;
+      else
+	xcr0 = X86_XSTATE_X87_MASK;
+    }
 
-  if (bfd_get_section_by_name (abfd, ".reg-xfp") != NULL)
-    return i386_linux_read_description (X86_XSTATE_SSE_MASK);
-  else
-    return i386_linux_read_description (X86_XSTATE_X87_MASK);
+  return i386_linux_read_description (xcr0);
 }
 
 /* Similar to i386_supply_fpregset, but use XSAVE extended state.  */
