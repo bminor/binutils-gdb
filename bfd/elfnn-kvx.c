@@ -4031,8 +4031,8 @@ kvx_readonly_dynrelocs (struct elf_link_hash_entry * h, void * inf)
 /* This is the most important function of all . Innocuosly named
    though !  */
 static bool
-elfNN_kvx_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				 struct bfd_link_info *info)
+elfNN_kvx_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			      struct bfd_link_info *info)
 {
   struct elf_kvx_link_hash_table *htab;
   bfd *dynobj;
@@ -4042,8 +4042,8 @@ elfNN_kvx_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   htab = elf_kvx_hash_table ((info));
   dynobj = htab->root.dynobj;
-
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   if (htab->root.dynamic_sections_created)
     {
@@ -4357,8 +4357,7 @@ elfNN_kvx_create_small_pltn_entry (struct elf_link_hash_entry *h,
    _TLS_MODULE_BASE_, if needed.  */
 
 static bool
-elfNN_kvx_always_size_sections (bfd *output_bfd,
-				struct bfd_link_info *info)
+elfNN_kvx_early_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
   asection *tls_sec;
 
@@ -4713,8 +4712,8 @@ elfNN_kvx_plt_sym_val (bfd_vma i, const asection *plt,
 #define elf_backend_adjust_dynamic_symbol	\
   elfNN_kvx_adjust_dynamic_symbol
 
-#define elf_backend_always_size_sections	\
-  elfNN_kvx_always_size_sections
+#define elf_backend_early_size_sections		\
+  elfNN_kvx_early_size_sections
 
 #define elf_backend_check_relocs		\
   elfNN_kvx_check_relocs
@@ -4757,8 +4756,8 @@ elfNN_kvx_plt_sym_val (bfd_vma i, const asection *plt,
 #define elf_backend_reloc_type_class		\
   elfNN_kvx_reloc_type_class
 
-#define elf_backend_size_dynamic_sections	\
-  elfNN_kvx_size_dynamic_sections
+#define elf_backend_late_size_sections	\
+  elfNN_kvx_late_size_sections
 
 #define elf_backend_can_refcount       1
 #define elf_backend_can_gc_sections    1

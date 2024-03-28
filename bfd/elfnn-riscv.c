@@ -1500,7 +1500,7 @@ allocate_local_ifunc_dynrelocs (void **slot, void *inf)
 }
 
 static bool
-riscv_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
+riscv_elf_late_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
   struct riscv_elf_link_hash_table *htab;
   bfd *dynobj;
@@ -1510,7 +1510,8 @@ riscv_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
   htab = riscv_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
   dynobj = htab->elf.dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -5667,7 +5668,7 @@ riscv_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 #define elf_backend_create_dynamic_sections	riscv_elf_create_dynamic_sections
 #define elf_backend_check_relocs		riscv_elf_check_relocs
 #define elf_backend_adjust_dynamic_symbol	riscv_elf_adjust_dynamic_symbol
-#define elf_backend_size_dynamic_sections	riscv_elf_size_dynamic_sections
+#define elf_backend_late_size_sections		riscv_elf_late_size_sections
 #define elf_backend_relocate_section		riscv_elf_relocate_section
 #define elf_backend_finish_dynamic_symbol	riscv_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	riscv_elf_finish_dynamic_sections

@@ -2966,8 +2966,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * dat)
 /* Set the sizes of the dynamic sections.  */
 
 static bool
-microblaze_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				      struct bfd_link_info *info)
+microblaze_elf_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+				   struct bfd_link_info *info)
 {
   struct elf32_mb_link_hash_table *htab;
   bfd *dynobj;
@@ -2979,7 +2979,8 @@ microblaze_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
     return false;
 
   dynobj = htab->elf.dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
@@ -3495,7 +3496,7 @@ microblaze_elf_add_symbol_hook (bfd *abfd,
 #define elf_backend_create_dynamic_sections	_bfd_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_sections	microblaze_elf_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol	microblaze_elf_finish_dynamic_symbol
-#define elf_backend_size_dynamic_sections	microblaze_elf_size_dynamic_sections
+#define elf_backend_late_size_sections		microblaze_elf_late_size_sections
 #define elf_backend_add_symbol_hook		microblaze_elf_add_symbol_hook
 
 #include "elf32-target.h"

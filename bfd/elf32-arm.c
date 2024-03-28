@@ -16725,8 +16725,8 @@ bfd_elf32_arm_set_byteswap_code (struct bfd_link_info *info,
 /* Set the sizes of the dynamic sections.  */
 
 static bool
-elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
-				 struct bfd_link_info * info)
+elf32_arm_late_size_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
+			      struct bfd_link_info * info)
 {
   bfd * dynobj;
   asection * s;
@@ -16739,7 +16739,9 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
     return false;
 
   dynobj = elf_hash_table (info)->dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
+
   check_use_blx (htab);
 
   if (elf_hash_table (info)->dynamic_sections_created)
@@ -17111,8 +17113,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
    _TLS_MODULE_BASE_, if needed.  */
 
 static bool
-elf32_arm_always_size_sections (bfd *output_bfd,
-				struct bfd_link_info *info)
+elf32_arm_early_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
   asection *tls_sec;
   struct elf32_arm_link_hash_table *htab;
@@ -20312,8 +20313,8 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
 #define elf_backend_create_dynamic_sections	elf32_arm_create_dynamic_sections
 #define elf_backend_finish_dynamic_symbol	elf32_arm_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	elf32_arm_finish_dynamic_sections
-#define elf_backend_size_dynamic_sections	elf32_arm_size_dynamic_sections
-#define elf_backend_always_size_sections	elf32_arm_always_size_sections
+#define elf_backend_late_size_sections		elf32_arm_late_size_sections
+#define elf_backend_early_size_sections		elf32_arm_early_size_sections
 #define elf_backend_init_index_section		_bfd_elf_init_2_index_sections
 #define elf_backend_init_file_header		elf32_arm_init_file_header
 #define elf_backend_reloc_type_class		elf32_arm_reloc_type_class

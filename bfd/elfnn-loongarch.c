@@ -1741,8 +1741,8 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 }
 
 static bool
-loongarch_elf_size_dynamic_sections (bfd *output_bfd,
-				     struct bfd_link_info *info)
+loongarch_elf_late_size_sections (bfd *output_bfd,
+				  struct bfd_link_info *info)
 {
   struct loongarch_elf_link_hash_table *htab;
   bfd *dynobj;
@@ -1752,7 +1752,8 @@ loongarch_elf_size_dynamic_sections (bfd *output_bfd,
   htab = loongarch_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
   dynobj = htab->elf.dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   if (htab->elf.dynamic_sections_created)
     {
@@ -5497,7 +5498,7 @@ loongarch_elf_is_rela_normal (Elf_Internal_Rela *rel)
   loongarch_elf_create_dynamic_sections
 #define elf_backend_check_relocs loongarch_elf_check_relocs
 #define elf_backend_adjust_dynamic_symbol loongarch_elf_adjust_dynamic_symbol
-#define elf_backend_size_dynamic_sections loongarch_elf_size_dynamic_sections
+#define elf_backend_late_size_sections loongarch_elf_late_size_sections
 #define elf_backend_relocate_section loongarch_elf_relocate_section
 #define elf_backend_finish_dynamic_symbol loongarch_elf_finish_dynamic_symbol
 #define elf_backend_output_arch_local_syms \

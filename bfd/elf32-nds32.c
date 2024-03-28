@@ -4302,8 +4302,8 @@ elf32_nds32_add_dynreloc (bfd *output_bfd,
 /* Set the sizes of the dynamic sections.  */
 
 static bool
-nds32_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				 struct bfd_link_info *info)
+nds32_elf_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			      struct bfd_link_info *info)
 {
   struct elf_nds32_link_hash_table *htab;
   bfd *dynobj;
@@ -4316,7 +4316,8 @@ nds32_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
     return false;
 
   dynobj = elf_hash_table (info)->dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -13984,7 +13985,7 @@ nds32_elf_unify_tls_model (bfd *inbfd, asection *insec, bfd_byte *incontents,
 #define elf_backend_create_dynamic_sections	nds32_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_sections	nds32_elf_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol	nds32_elf_finish_dynamic_symbol
-#define elf_backend_size_dynamic_sections	nds32_elf_size_dynamic_sections
+#define elf_backend_late_size_sections		nds32_elf_late_size_sections
 #define elf_backend_relocate_section		nds32_elf_relocate_section
 #define elf_backend_gc_mark_hook		nds32_elf_gc_mark_hook
 #define elf_backend_grok_prstatus		nds32_elf_grok_prstatus

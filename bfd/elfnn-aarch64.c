@@ -112,7 +112,7 @@
   allocate space for one relocation on the slot. Record the GOT offset
   for this symbol.
 
-  elfNN_aarch64_size_dynamic_sections ()
+  elfNN_aarch64_late_size_sections ()
 
   Iterate all input BFDS, look for in the local symbol data structure
   constructed earlier for local TLS symbols and allocate them double
@@ -9173,8 +9173,8 @@ elfNN_aarch64_allocate_local_ifunc_dynrelocs (void **slot, void *inf)
    though !  */
 
 static bool
-elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				     struct bfd_link_info *info)
+elfNN_aarch64_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+				  struct bfd_link_info *info)
 {
   struct elf_aarch64_link_hash_table *htab;
   bfd *dynobj;
@@ -9185,7 +9185,8 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   htab = elf_aarch64_hash_table ((info));
   dynobj = htab->root.dynobj;
 
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   if (htab->root.dynamic_sections_created)
     {
@@ -9587,8 +9588,8 @@ elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
    _TLS_MODULE_BASE_, if needed.  */
 
 static bool
-elfNN_aarch64_always_size_sections (bfd *output_bfd,
-				    struct bfd_link_info *info)
+elfNN_aarch64_early_size_sections (bfd *output_bfd,
+				   struct bfd_link_info *info)
 {
   asection *tls_sec;
 
@@ -10320,8 +10321,8 @@ const struct elf_size_info elfNN_aarch64_size_info =
 #define elf_backend_adjust_dynamic_symbol	\
   elfNN_aarch64_adjust_dynamic_symbol
 
-#define elf_backend_always_size_sections	\
-  elfNN_aarch64_always_size_sections
+#define elf_backend_early_size_sections		\
+  elfNN_aarch64_early_size_sections
 
 #define elf_backend_check_relocs		\
   elfNN_aarch64_check_relocs
@@ -10376,8 +10377,8 @@ const struct elf_size_info elfNN_aarch64_size_info =
 #define elf_backend_modify_headers		\
   elfNN_aarch64_modify_headers
 
-#define elf_backend_size_dynamic_sections	\
-  elfNN_aarch64_size_dynamic_sections
+#define elf_backend_late_size_sections		\
+  elfNN_aarch64_late_size_sections
 
 #define elf_backend_size_info			\
   elfNN_aarch64_size_info

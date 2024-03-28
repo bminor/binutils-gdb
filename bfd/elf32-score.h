@@ -78,10 +78,10 @@ s7_bfd_score_elf_adjust_dynamic_symbol (struct bfd_link_info *,
 					struct elf_link_hash_entry *);
 
 extern bool
-s7_bfd_score_elf_always_size_sections (bfd *, struct bfd_link_info *);
+s7_bfd_score_elf_early_size_sections (bfd *, struct bfd_link_info *);
 
 extern bool
-s7_bfd_score_elf_size_dynamic_sections (bfd *, struct bfd_link_info *);
+s7_bfd_score_elf_late_size_sections (bfd *, struct bfd_link_info *);
 
 extern bool
 s7_bfd_score_elf_create_dynamic_sections (bfd *, struct bfd_link_info *);

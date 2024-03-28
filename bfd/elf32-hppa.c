@@ -2042,8 +2042,8 @@ clobber_millicode_symbols (struct elf_link_hash_entry *eh,
 /* Set the sizes of the dynamic sections.  */
 
 static bool
-elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				  struct bfd_link_info *info)
+elf32_hppa_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			       struct bfd_link_info *info)
 {
   struct elf32_hppa_link_hash_table *htab;
   bfd *dynobj;
@@ -2057,7 +2057,7 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   dynobj = htab->etab.dynobj;
   if (dynobj == NULL)
-    abort ();
+    return true;
 
   if (htab->etab.dynamic_sections_created)
     {
@@ -4494,7 +4494,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define elf_backend_hide_symbol		     elf32_hppa_hide_symbol
 #define elf_backend_finish_dynamic_symbol    elf32_hppa_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections  elf32_hppa_finish_dynamic_sections
-#define elf_backend_size_dynamic_sections    elf32_hppa_size_dynamic_sections
+#define elf_backend_late_size_sections	     elf32_hppa_late_size_sections
 #define elf_backend_init_index_section	     _bfd_elf_init_1_index_section
 #define elf_backend_gc_mark_hook	     elf32_hppa_gc_mark_hook
 #define elf_backend_grok_prstatus	     elf32_hppa_grok_prstatus

@@ -975,7 +975,7 @@ score_elf_got_info (bfd *abfd, asection **sgotp)
    appear towards the end.  This reduces the amount of GOT space
    required.  MAX_LOCAL is used to set the number of local symbols
    known to be in the dynamic symbol table.  During
-   s7_bfd_score_elf_size_dynamic_sections, this value is 1.  Afterward, the
+   s7_bfd_score_elf_late_size_sections, this value is 1.  Afterward, the
    section symbols are added and the count is higher.  */
 
 static bool
@@ -2969,8 +2969,8 @@ s7_bfd_score_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
    and the input sections have been assigned to output sections.  */
 
 bool
-s7_bfd_score_elf_always_size_sections (bfd *output_bfd,
-				       struct bfd_link_info *info)
+s7_bfd_score_elf_early_size_sections (bfd *output_bfd,
+				      struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *s;
@@ -3047,14 +3047,15 @@ s7_bfd_score_elf_always_size_sections (bfd *output_bfd,
 /* Set the sizes of the dynamic sections.  */
 
 bool
-s7_bfd_score_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
+s7_bfd_score_elf_late_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *s;
   bool reltext;
 
   dynobj = elf_hash_table (info)->dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -3123,7 +3124,7 @@ s7_bfd_score_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
 	}
       else if (startswith (name, ".got"))
 	{
-	  /* s7_bfd_score_elf_always_size_sections() has already done
+	  /* s7_bfd_score_elf_early_size_sections() has already done
 	     most of the work, but some symbols may have been mapped
 	     to versions that we must now resolve in the got_entries
 	     hash tables.  */

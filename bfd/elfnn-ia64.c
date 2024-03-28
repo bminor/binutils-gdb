@@ -2987,8 +2987,8 @@ elfNN_ia64_adjust_dynamic_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 }
 
 static bool
-elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				  struct bfd_link_info *info)
+elfNN_ia64_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			       struct bfd_link_info *info)
 {
   struct elfNN_ia64_allocate_data data;
   struct elfNN_ia64_link_hash_table *ia64_info;
@@ -2999,8 +2999,9 @@ elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (ia64_info == NULL)
     return false;
   dynobj = ia64_info->root.dynobj;
+  if (dynobj == NULL)
+    return true;
   ia64_info->self_dtpmod_offset = (bfd_vma) -1;
-  BFD_ASSERT(dynobj != NULL);
   data.info = info;
 
   /* Set the contents of the .interp section to the interpreter.  */
@@ -5034,8 +5035,8 @@ ignore_errors (const char *fmt ATTRIBUTE_UNUSED, ...)
 	elfNN_ia64_check_relocs
 #define elf_backend_adjust_dynamic_symbol \
 	elfNN_ia64_adjust_dynamic_symbol
-#define elf_backend_size_dynamic_sections \
-	elfNN_ia64_size_dynamic_sections
+#define elf_backend_late_size_sections \
+	elfNN_ia64_late_size_sections
 #define elf_backend_omit_section_dynsym \
 	_bfd_elf_omit_section_dynsym_all
 #define elf_backend_relocate_section \

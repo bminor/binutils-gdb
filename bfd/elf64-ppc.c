@@ -119,8 +119,8 @@ static bfd_vma opd_entry_value
 #define elf_backend_adjust_dynamic_symbol     ppc64_elf_adjust_dynamic_symbol
 #define elf_backend_hide_symbol		      ppc64_elf_hide_symbol
 #define elf_backend_maybe_function_sym	      ppc64_elf_maybe_function_sym
-#define elf_backend_always_size_sections      ppc64_elf_edit
-#define elf_backend_size_dynamic_sections     ppc64_elf_size_dynamic_sections
+#define elf_backend_early_size_sections	      ppc64_elf_edit
+#define elf_backend_late_size_sections	      ppc64_elf_late_size_sections
 #define elf_backend_hash_symbol		      ppc64_elf_hash_symbol
 #define elf_backend_init_index_section	      _bfd_elf_init_2_index_sections
 #define elf_backend_action_discarded	      ppc64_elf_action_discarded
@@ -10148,7 +10148,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   ((((v) & 0x3ffff0000ULL) << 16) | (v & 0xffff))
 #define HA34(v) ((v + (1ULL << 33)) >> 34)
 
-/* Called via elf_link_hash_traverse from ppc64_elf_size_dynamic_sections
+/* Called via elf_link_hash_traverse from ppc64_elf_late_size_sections
    to set up space for global entry stubs.  These are put in glink,
    after the branch table.  */
 
@@ -10225,8 +10225,8 @@ size_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
 /* Set the sizes of the dynamic sections.  */
 
 static bool
-ppc64_elf_size_dynamic_sections (bfd *output_bfd,
-				 struct bfd_link_info *info)
+ppc64_elf_late_size_sections (bfd *output_bfd,
+			      struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
   bfd *dynobj;
@@ -10241,7 +10241,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 
   dynobj = htab->elf.dynobj;
   if (dynobj == NULL)
-    abort ();
+    return true;
 
   if (htab->elf.dynamic_sections_created)
     {

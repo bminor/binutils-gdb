@@ -2717,8 +2717,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 /* Set the sizes of the dynamic sections.  */
 
 static bool
-elf_metag_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				 struct bfd_link_info *info)
+elf_metag_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			      struct bfd_link_info *info)
 {
   struct elf_metag_link_hash_table *htab;
   bfd *dynobj;
@@ -2729,7 +2729,7 @@ elf_metag_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   htab = metag_link_hash_table (info);
   dynobj = htab->etab.dynobj;
   if (dynobj == NULL)
-    abort ();
+    return true;
 
   if (htab->etab.dynamic_sections_created)
     {
@@ -4019,7 +4019,7 @@ elf_metag_plt_sym_val (bfd_vma i, const asection *plt,
 #define elf_backend_adjust_dynamic_symbol	elf_metag_adjust_dynamic_symbol
 #define elf_backend_finish_dynamic_symbol	elf_metag_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	elf_metag_finish_dynamic_sections
-#define elf_backend_size_dynamic_sections	elf_metag_size_dynamic_sections
+#define elf_backend_late_size_sections		elf_metag_late_size_sections
 #define elf_backend_omit_section_dynsym \
 	_bfd_elf_omit_section_dynsym_all
 #define elf_backend_init_file_header		elf_metag_init_file_header

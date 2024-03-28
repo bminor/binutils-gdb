@@ -2927,7 +2927,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
    It's a convenient place to determine the PLT style.  */
 
 static bool
-sh_elf_always_size_sections (bfd *output_bfd, struct bfd_link_info *info)
+sh_elf_early_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
   sh_elf_hash_table (info)->plt_info = get_plt_info (output_bfd,
 						     bfd_link_pic (info));
@@ -2942,8 +2942,8 @@ sh_elf_always_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 /* Set the sizes of the dynamic sections.  */
 
 static bool
-sh_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-			      struct bfd_link_info *info)
+sh_elf_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			   struct bfd_link_info *info)
 {
   struct elf_sh_link_hash_table *htab;
   bfd *dynobj;
@@ -2956,7 +2956,8 @@ sh_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
     return false;
 
   dynobj = htab->root.dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   if (htab->root.dynamic_sections_created)
     {
@@ -6598,10 +6599,8 @@ sh_elf_encode_eh_address (bfd *abfd,
 					sh_elf_link_hash_table_create
 #define elf_backend_adjust_dynamic_symbol \
 					sh_elf_adjust_dynamic_symbol
-#define elf_backend_always_size_sections \
-					sh_elf_always_size_sections
-#define elf_backend_size_dynamic_sections \
-					sh_elf_size_dynamic_sections
+#define elf_backend_early_size_sections	sh_elf_early_size_sections
+#define elf_backend_late_size_sections	sh_elf_late_size_sections
 #define elf_backend_omit_section_dynsym	sh_elf_omit_section_dynsym
 #define elf_backend_finish_dynamic_symbol \
 					sh_elf_finish_dynamic_symbol

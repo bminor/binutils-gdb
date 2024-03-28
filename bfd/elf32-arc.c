@@ -2712,8 +2712,8 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
 
 /* Set the sizes of the dynamic sections.  */
 static bool
-elf_arc_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-			       struct bfd_link_info *info)
+elf_arc_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			    struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *s;
@@ -2721,7 +2721,8 @@ elf_arc_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   dynobj = htab->dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   if (htab->dynamic_sections_created)
     {
@@ -3137,7 +3138,7 @@ arc_elf_relax_section (bfd *abfd, asection *sec,
 #define elf_backend_finish_dynamic_symbol    elf_arc_finish_dynamic_symbol
 
 #define elf_backend_finish_dynamic_sections  elf_arc_finish_dynamic_sections
-#define elf_backend_size_dynamic_sections    elf_arc_size_dynamic_sections
+#define elf_backend_late_size_sections       elf_arc_late_size_sections
 
 #define elf_backend_can_gc_sections	1
 #define elf_backend_want_got_plt	1

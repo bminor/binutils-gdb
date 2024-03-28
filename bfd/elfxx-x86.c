@@ -2241,7 +2241,7 @@ _bfd_elf_x86_valid_reloc_p (asection *input_section,
 /* Set the sizes of the dynamic sections.  */
 
 bool
-_bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
+_bfd_x86_elf_late_size_sections (bfd *output_bfd,
 				    struct bfd_link_info *info)
 {
   struct elf_x86_link_hash_table *htab;
@@ -2257,7 +2257,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
     return false;
   dynobj = htab->elf.dynobj;
   if (dynobj == NULL)
-    abort ();
+    return true;
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
@@ -3003,8 +3003,8 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 
 
 bool
-_bfd_x86_elf_always_size_sections (bfd *output_bfd,
-				   struct bfd_link_info *info)
+_bfd_x86_elf_early_size_sections (bfd *output_bfd,
+				  struct bfd_link_info *info)
 {
   asection *tls_sec = elf_hash_table (info)->tls_sec;
 

@@ -176,9 +176,6 @@ static bool elf64_hppa_adjust_dynamic_symbol
 static bool elf64_hppa_mark_milli_and_exported_functions
   (struct elf_link_hash_entry *, void *);
 
-static bool elf64_hppa_size_dynamic_sections
-  (bfd *, struct bfd_link_info *);
-
 static int elf64_hppa_link_output_symbol_hook
   (struct bfd_link_info *, const char *, Elf_Internal_Sym *,
    asection *, struct elf_link_hash_entry *);
@@ -1520,7 +1517,7 @@ elf64_hppa_mark_milli_and_exported_functions (struct elf_link_hash_entry *eh,
    the contents of our special sections.  */
 
 static bool
-elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
+elf64_hppa_late_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
   struct elf64_hppa_link_hash_table *hppa_info;
   struct elf64_hppa_allocate_data data;
@@ -1534,7 +1531,8 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
     return false;
 
   dynobj = hppa_info->root.dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   /* Mark each function this program exports so that we will allocate
      space in the .opd section for each function's FPTR.  If we are
@@ -3982,8 +3980,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_adjust_dynamic_symbol \
 					elf64_hppa_adjust_dynamic_symbol
 
-#define elf_backend_size_dynamic_sections \
-					elf64_hppa_size_dynamic_sections
+#define elf_backend_late_size_sections	elf64_hppa_late_size_sections
 
 #define elf_backend_finish_dynamic_symbol \
 					elf64_hppa_finish_dynamic_symbol

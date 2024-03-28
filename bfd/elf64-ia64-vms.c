@@ -2591,8 +2591,8 @@ elf64_ia64_adjust_dynamic_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 }
 
 static bool
-elf64_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				  struct bfd_link_info *info)
+elf64_ia64_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			       struct bfd_link_info *info)
 {
   struct elf64_ia64_allocate_data data;
   struct elf64_ia64_link_hash_table *ia64_info;
@@ -2601,11 +2601,12 @@ elf64_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   struct elf_link_hash_table *hash_table;
 
   hash_table = elf_hash_table (info);
-  dynobj = hash_table->dynobj;
   ia64_info = elf64_ia64_hash_table (info);
   if (ia64_info == NULL)
     return false;
-  BFD_ASSERT(dynobj != NULL);
+  dynobj = hash_table->dynobj;
+  if (dynobj == NULL)
+    return true;
   data.info = info;
 
   /* Allocate the GOT entries.  */
@@ -5486,8 +5487,8 @@ static const struct elf_size_info elf64_ia64_vms_size_info = {
 	elf64_ia64_check_relocs
 #define elf_backend_adjust_dynamic_symbol \
 	elf64_ia64_adjust_dynamic_symbol
-#define elf_backend_size_dynamic_sections \
-	elf64_ia64_size_dynamic_sections
+#define elf_backend_late_size_sections \
+	elf64_ia64_late_size_sections
 #define elf_backend_omit_section_dynsym \
 	_bfd_elf_omit_section_dynsym_all
 #define elf_backend_relocate_section \

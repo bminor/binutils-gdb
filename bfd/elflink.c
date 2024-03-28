@@ -6667,8 +6667,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
   /* The backend may have to create some sections regardless of whether
      we're dynamic or not.  */
-  if (bed->elf_backend_always_size_sections
-      && ! (*bed->elf_backend_always_size_sections) (output_bfd, info))
+  if (bed->elf_backend_early_size_sections
+      && !bed->elf_backend_early_size_sections (output_bfd, info))
     return false;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -7474,9 +7474,8 @@ NOTE: This behaviour is deprecated and will be removed in a future version of th
 
   /* The backend must work out the sizes of all the other dynamic
      sections.  */
-  if (dynobj != NULL
-      && bed->elf_backend_size_dynamic_sections != NULL
-      && ! (*bed->elf_backend_size_dynamic_sections) (output_bfd, info))
+  if (bed->elf_backend_late_size_sections != NULL
+      && !bed->elf_backend_late_size_sections (output_bfd, info))
     return false;
 
   if (dynobj != NULL && elf_hash_table (info)->dynamic_sections_created)

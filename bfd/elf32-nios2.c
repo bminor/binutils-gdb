@@ -5413,7 +5413,7 @@ nios2_elf32_adjust_dynamic_symbol (struct bfd_link_info *info,
   return true;
 }
 
-/* Worker function for nios2_elf32_size_dynamic_sections.  */
+/* Worker function for nios2_elf32_late_size_sections.  */
 static bool
 adjust_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
@@ -5440,7 +5440,7 @@ adjust_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return true;
 }
 
-/* Another worker function for nios2_elf32_size_dynamic_sections.
+/* Another worker function for nios2_elf32_late_size_sections.
    Allocate space in .plt, .got and associated reloc sections for
    dynamic relocs.  */
 static bool
@@ -5675,11 +5675,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return true;
 }
 
-/* Implement elf_backend_size_dynamic_sections:
+/* Implement elf_backend_late_size_sections:
    Set the sizes of the dynamic sections.  */
 static bool
-nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				   struct bfd_link_info *info)
+nios2_elf32_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+				struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *s;
@@ -5689,7 +5689,8 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   htab = elf32_nios2_hash_table (info);
   dynobj = htab->root.dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   htab->res_n_size = 0;
   if (htab->root.dynamic_sections_created)
@@ -6060,7 +6061,7 @@ const struct bfd_elf_special_section elf32_nios2_special_sections[] =
 					  nios2_elf32_finish_dynamic_sections
 #define elf_backend_adjust_dynamic_symbol nios2_elf32_adjust_dynamic_symbol
 #define elf_backend_reloc_type_class	  nios2_elf32_reloc_type_class
-#define elf_backend_size_dynamic_sections nios2_elf32_size_dynamic_sections
+#define elf_backend_late_size_sections	  nios2_elf32_late_size_sections
 #define elf_backend_add_symbol_hook	  nios2_elf_add_symbol_hook
 #define elf_backend_copy_indirect_symbol  nios2_elf32_copy_indirect_symbol
 #define elf_backend_object_p		  nios2_elf32_object_p

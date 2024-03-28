@@ -1301,7 +1301,7 @@ elf_s390_gc_mark_hook (asection *sec,
    entry but we found we will not create any.  Called when we find we will
    not have any PLT for this symbol, by for example
    elf_s390_adjust_dynamic_symbol when we're doing a proper dynamic link,
-   or elf_s390_size_dynamic_sections if no dynamic sections will be
+   or elf_s390_late_size_sections if no dynamic sections will be
    created (we're only linking static objects).  */
 
 static void
@@ -1714,8 +1714,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h,
 /* Set the sizes of the dynamic sections.  */
 
 static bool
-elf_s390_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				struct bfd_link_info *info)
+elf_s390_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			     struct bfd_link_info *info)
 {
   struct elf_s390_link_hash_table *htab;
   bfd *dynobj;
@@ -1729,7 +1729,7 @@ elf_s390_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   dynobj = htab->elf.dynobj;
   if (dynobj == NULL)
-    abort ();
+    return true;
 
   if (htab->elf.dynamic_sections_created)
     {
@@ -3965,7 +3965,7 @@ const struct elf_size_info s390_elf64_size_info =
 #define elf_backend_gc_mark_hook	      elf_s390_gc_mark_hook
 #define elf_backend_reloc_type_class	      elf_s390_reloc_type_class
 #define elf_backend_relocate_section	      elf_s390_relocate_section
-#define elf_backend_size_dynamic_sections     elf_s390_size_dynamic_sections
+#define elf_backend_late_size_sections	      elf_s390_late_size_sections
 #define elf_backend_init_index_section	      _bfd_elf_init_1_index_section
 #define elf_backend_grok_prstatus	      elf_s390_grok_prstatus
 #define elf_backend_grok_psinfo		      elf_s390_grok_psinfo

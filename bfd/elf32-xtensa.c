@@ -1557,8 +1557,8 @@ elf_xtensa_allocate_local_got_size (struct bfd_link_info *info)
 /* Set the sizes of the dynamic sections.  */
 
 static bool
-elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				  struct bfd_link_info *info)
+elf_xtensa_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			       struct bfd_link_info *info)
 {
   struct elf_xtensa_link_hash_table *htab;
   bfd *dynobj, *abfd;
@@ -1575,7 +1575,7 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj == NULL)
-    abort ();
+    return true;
   srelgot = htab->elf.srelgot;
   srelplt = htab->elf.srelplt;
 
@@ -1780,8 +1780,7 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 }
 
 static bool
-elf_xtensa_always_size_sections (bfd *output_bfd,
-				 struct bfd_link_info *info)
+elf_xtensa_early_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
   struct elf_xtensa_link_hash_table *htab;
   asection *tls_sec;
@@ -11512,8 +11511,8 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
 #define elf_backend_object_p		     elf_xtensa_object_p
 #define elf_backend_reloc_type_class	     elf_xtensa_reloc_type_class
 #define elf_backend_relocate_section	     elf_xtensa_relocate_section
-#define elf_backend_size_dynamic_sections    elf_xtensa_size_dynamic_sections
-#define elf_backend_always_size_sections     elf_xtensa_always_size_sections
+#define elf_backend_late_size_sections	     elf_xtensa_late_size_sections
+#define elf_backend_early_size_sections	     elf_xtensa_early_size_sections
 #define elf_backend_omit_section_dynsym      _bfd_elf_omit_section_dynsym_all
 #define elf_backend_special_sections	     elf_xtensa_special_sections
 #define elf_backend_action_discarded	     elf_xtensa_action_discarded

@@ -2525,7 +2525,7 @@ cris_elf_plt_sym_val (bfd_vma i ATTRIBUTE_UNUSED, const asection *plt,
    entry but we found we will not create any.  Called when we find we will
    not have any PLT for this symbol, by for example
    elf_cris_adjust_dynamic_symbol when we're doing a proper dynamic link,
-   or elf_cris_size_dynamic_sections if no dynamic sections will be
+   or elf_cris_late_size_sections if no dynamic sections will be
    created (we're only linking static objects).  */
 
 static bool
@@ -3506,8 +3506,8 @@ cris_elf_check_relocs (bfd *abfd,
 /* Set the sizes of the dynamic sections.  */
 
 static bool
-elf_cris_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				struct bfd_link_info *info)
+elf_cris_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			     struct bfd_link_info *info)
 {
   struct elf_cris_link_hash_table * htab;
   bfd *dynobj;
@@ -3519,7 +3519,8 @@ elf_cris_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
     return false;
 
   dynobj = htab->root.dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   if (htab->root.dynamic_sections_created)
     {
@@ -4088,8 +4089,8 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 	elf_cris_adjust_dynamic_symbol
 #define elf_backend_copy_indirect_symbol \
 	elf_cris_copy_indirect_symbol
-#define elf_backend_size_dynamic_sections \
-	elf_cris_size_dynamic_sections
+#define elf_backend_late_size_sections \
+	elf_cris_late_size_sections
 #define elf_backend_init_index_section		_bfd_elf_init_1_index_section
 #define elf_backend_finish_dynamic_symbol \
 	elf_cris_finish_dynamic_symbol

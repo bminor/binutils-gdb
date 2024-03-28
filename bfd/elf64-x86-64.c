@@ -2615,8 +2615,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 }
 
 static bool
-elf_x86_64_always_size_sections (bfd *output_bfd,
-				 struct bfd_link_info *info)
+elf_x86_64_early_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
   bfd *abfd;
 
@@ -2629,7 +2628,7 @@ elf_x86_64_always_size_sections (bfd *output_bfd,
 					     elf_x86_64_scan_relocs))
       return false;
 
-  return _bfd_x86_elf_always_size_sections (output_bfd, info);
+  return _bfd_x86_elf_early_size_sections (output_bfd, info);
 }
 
 /* Return the relocation value for @tpoff relocation
@@ -5747,7 +5746,7 @@ elf_x86_64_special_sections[]=
   elf_x86_64_reloc_name_lookup
 
 #define elf_backend_relocs_compatible	    elf_x86_64_relocs_compatible
-#define elf_backend_always_size_sections    elf_x86_64_always_size_sections
+#define elf_backend_early_size_sections	    elf_x86_64_early_size_sections
 #define elf_backend_create_dynamic_sections _bfd_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_sections elf_x86_64_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol   elf_x86_64_finish_dynamic_symbol

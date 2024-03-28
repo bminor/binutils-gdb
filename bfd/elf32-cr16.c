@@ -2391,15 +2391,16 @@ _bfd_cr16_elf_adjust_dynamic_symbol (struct bfd_link_info * info,
 /* Set the sizes of the dynamic sections.  */
 
 static bool
-_bfd_cr16_elf_size_dynamic_sections (bfd * output_bfd,
-				     struct bfd_link_info * info)
+_bfd_cr16_elf_late_size_sections (bfd * output_bfd,
+				  struct bfd_link_info * info)
 {
   bfd * dynobj;
   asection * s;
   bool relocs;
 
   dynobj = elf_hash_table (info)->dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -2836,8 +2837,8 @@ _bfd_cr16_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
 				  _bfd_cr16_elf_create_dynamic_sections
 #define elf_backend_adjust_dynamic_symbol \
 				  _bfd_cr16_elf_adjust_dynamic_symbol
-#define elf_backend_size_dynamic_sections \
-				  _bfd_cr16_elf_size_dynamic_sections
+#define elf_backend_late_size_sections \
+				  _bfd_cr16_elf_late_size_sections
 #define elf_backend_omit_section_dynsym _bfd_elf_omit_section_dynsym_all
 #define elf_backend_finish_dynamic_symbol \
 				   _bfd_cr16_elf_finish_dynamic_symbol

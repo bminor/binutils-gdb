@@ -9649,8 +9649,8 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
    check for any mips16 stub sections that we can discard.  */
 
 bool
-_bfd_mips_elf_always_size_sections (bfd *output_bfd,
-				    struct bfd_link_info *info)
+_bfd_mips_elf_early_size_sections (bfd *output_bfd,
+				   struct bfd_link_info *info)
 {
   asection *sect;
   struct mips_elf_link_hash_table *htab;
@@ -9993,8 +9993,8 @@ mips_elf_set_plt_sym_value (struct mips_elf_link_hash_entry *h, void *data)
 /* Set the sizes of the dynamic sections.  */
 
 bool
-_bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
-				     struct bfd_link_info *info)
+_bfd_mips_elf_late_size_sections (bfd *output_bfd,
+				  struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *s, *sreldyn;
@@ -10004,7 +10004,8 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
   dynobj = elf_hash_table (info)->dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -14943,7 +14944,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      input_section->flags &= ~SEC_HAS_CONTENTS;
 	    }
 
-	  /* Size has been set in _bfd_mips_elf_always_size_sections.  */
+	  /* Size has been set in _bfd_mips_elf_early_size_sections.  */
 	  BFD_ASSERT(o->size == sizeof (Elf_External_ABIFlags_v0));
 
 	  /* Skip this section later on (I don't think this currently
@@ -15002,7 +15003,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      input_section->flags &= ~SEC_HAS_CONTENTS;
 	    }
 
-	  /* Size has been set in _bfd_mips_elf_always_size_sections.  */
+	  /* Size has been set in _bfd_mips_elf_early_size_sections.  */
 	  BFD_ASSERT(o->size == sizeof (Elf32_External_RegInfo));
 
 	  /* Skip this section later on (I don't think this currently

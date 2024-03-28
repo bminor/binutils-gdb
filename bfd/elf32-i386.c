@@ -1957,8 +1957,7 @@ elf_i386_scan_relocs (bfd *abfd,
 }
 
 static bool
-elf_i386_always_size_sections (bfd *output_bfd,
-			       struct bfd_link_info *info)
+elf_i386_early_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
   bfd *abfd;
 
@@ -1971,7 +1970,7 @@ elf_i386_always_size_sections (bfd *output_bfd,
 					     elf_i386_scan_relocs))
       return false;
 
-  return _bfd_x86_elf_always_size_sections (output_bfd, info);
+  return _bfd_x86_elf_early_size_sections (output_bfd, info);
 }
 
 /* Set the correct type for an x86 ELF section.  We do this by the
@@ -4477,7 +4476,7 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 #define bfd_elf32_get_synthetic_symtab	      elf_i386_get_synthetic_symtab
 
 #define elf_backend_relocs_compatible	      _bfd_elf_relocs_compatible
-#define elf_backend_always_size_sections      elf_i386_always_size_sections
+#define elf_backend_early_size_sections	      elf_i386_early_size_sections
 #define elf_backend_create_dynamic_sections   _bfd_elf_create_dynamic_sections
 #define elf_backend_fake_sections	      elf_i386_fake_sections
 #define elf_backend_finish_dynamic_sections   elf_i386_finish_dynamic_sections

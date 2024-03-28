@@ -5479,8 +5479,8 @@ static const unsigned char glink_eh_frame_cie[] =
 /* Set the sizes of the dynamic sections.  */
 
 static bool
-ppc_elf_size_dynamic_sections (bfd *output_bfd,
-			       struct bfd_link_info *info)
+ppc_elf_late_size_sections (bfd *output_bfd,
+			    struct bfd_link_info *info)
 {
   struct ppc_elf_link_hash_table *htab;
   asection *s;
@@ -5488,11 +5488,12 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
   bfd *ibfd;
 
 #ifdef DEBUG
-  fprintf (stderr, "ppc_elf_size_dynamic_sections called\n");
+  fprintf (stderr, "ppc_elf_late_size_sections called\n");
 #endif
 
   htab = ppc_elf_hash_table (info);
-  BFD_ASSERT (htab->elf.dynobj != NULL);
+  if (htab->elf.dynobj == NULL)
+    return true;
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -10433,7 +10434,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_copy_indirect_symbol	ppc_elf_copy_indirect_symbol
 #define elf_backend_adjust_dynamic_symbol	ppc_elf_adjust_dynamic_symbol
 #define elf_backend_add_symbol_hook		ppc_elf_add_symbol_hook
-#define elf_backend_size_dynamic_sections	ppc_elf_size_dynamic_sections
+#define elf_backend_late_size_sections		ppc_elf_late_size_sections
 #define elf_backend_hash_symbol			ppc_elf_hash_symbol
 #define elf_backend_finish_dynamic_symbol	ppc_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	ppc_elf_finish_dynamic_sections

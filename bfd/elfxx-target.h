@@ -489,11 +489,11 @@
 #ifndef elf_backend_adjust_dynamic_symbol
 #define elf_backend_adjust_dynamic_symbol 0
 #endif
-#ifndef elf_backend_always_size_sections
-#define elf_backend_always_size_sections 0
+#ifndef elf_backend_early_size_sections
+#define elf_backend_early_size_sections 0
 #endif
-#ifndef elf_backend_size_dynamic_sections
-#define elf_backend_size_dynamic_sections 0
+#ifndef elf_backend_late_size_sections
+#define elf_backend_late_size_sections 0
 #endif
 #ifndef elf_backend_strip_zero_sized_dynamic_sections
 #define elf_backend_strip_zero_sized_dynamic_sections 0
@@ -859,8 +859,8 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_check_directives,
   elf_backend_notice_as_needed,
   elf_backend_adjust_dynamic_symbol,
-  elf_backend_always_size_sections,
-  elf_backend_size_dynamic_sections,
+  elf_backend_early_size_sections,
+  elf_backend_late_size_sections,
   elf_backend_strip_zero_sized_dynamic_sections,
   elf_backend_init_index_section,
   elf_backend_relocate_section,

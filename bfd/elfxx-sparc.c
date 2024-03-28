@@ -2381,8 +2381,8 @@ _bfd_sparc_elf_omit_section_dynsym (bfd *output_bfd,
 /* Set the sizes of the dynamic sections.  */
 
 bool
-_bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
-				      struct bfd_link_info *info)
+_bfd_sparc_elf_late_size_sections (bfd *output_bfd,
+				   struct bfd_link_info *info)
 {
   struct _bfd_sparc_elf_link_hash_table *htab;
   bfd *dynobj;
@@ -2392,7 +2392,8 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
   htab = _bfd_sparc_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
   dynobj = htab->elf.dynobj;
-  BFD_ASSERT (dynobj != NULL);
+  if (dynobj == NULL)
+    return true;
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {

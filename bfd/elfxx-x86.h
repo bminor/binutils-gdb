@@ -853,13 +853,13 @@ extern bool _bfd_elf_x86_valid_reloc_p
    const Elf_Internal_Rela *, struct elf_link_hash_entry *,
    Elf_Internal_Sym *, Elf_Internal_Shdr *, bool *) ATTRIBUTE_HIDDEN;
 
-extern bool _bfd_x86_elf_size_dynamic_sections
+extern bool _bfd_x86_elf_late_size_sections
   (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 
 extern struct elf_x86_link_hash_table *_bfd_x86_elf_finish_dynamic_sections
   (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 
-extern bool _bfd_x86_elf_always_size_sections
+extern bool _bfd_x86_elf_early_size_sections
   (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 
 extern void _bfd_x86_elf_merge_symbol_attribute
@@ -934,8 +934,8 @@ extern void _bfd_x86_elf_link_report_relative_reloc
 
 #define elf_backend_check_relocs \
   _bfd_x86_elf_check_relocs
-#define elf_backend_size_dynamic_sections \
-  _bfd_x86_elf_size_dynamic_sections
+#define elf_backend_late_size_sections \
+  _bfd_x86_elf_late_size_sections
 #define elf_backend_merge_symbol_attribute \
   _bfd_x86_elf_merge_symbol_attribute
 #define elf_backend_copy_indirect_symbol \
