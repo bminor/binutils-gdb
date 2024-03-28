@@ -206,8 +206,8 @@ gdb_test_multiple "next" "step out of main" {
 	# This is what happens on system using uClibc.
 	pass "step out of main"
     }
-    -re "0x.*\\?\\? \\(\\) from /lib/powerpc.*$gdb_prompt $" {
-	# This case occurs on Powerpc when gdb steps out of main and the
+    -re -wrap "$hex in \\?\\? \\(\\) from \[^\r\n\]+" {
+	# This case occurs when gdb steps out of main and the
 	# needed debug info files are not loaded on the system, preventing
 	# GDB to determine which function it reached (__libc_start_call_main).
 	# Ideally, the target system would have the necessary debugging
