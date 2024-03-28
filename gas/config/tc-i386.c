@@ -1980,17 +1980,7 @@ cpu_flags_match (const insn_template *t)
 
       cpu = cpu_flags_and (any, active);
       if (cpu_flags_all_zero (&any) || !cpu_flags_all_zero (&cpu))
-	{
-	  if (all.bitfield.cpuavx)
-	    {
-	      /* We need to check SSE2AVX with AVX.  */
-	      if (!t->opcode_modifier.sse2avx
-		  || (sse2avx && !i.prefix[DATA_PREFIX]))
-		match |= CPU_FLAGS_ARCH_MATCH;
-	    }
-	  else
-	    match |= CPU_FLAGS_ARCH_MATCH;
-	}
+	match |= CPU_FLAGS_ARCH_MATCH;
     }
   return match;
 }
@@ -8541,6 +8531,15 @@ match_template (char mnem_suffix)
       /* Must have right number of operands.  */
       if (i.operands != t->operands)
 	continue;
+
+      /* Skip SSE2AVX templates when inapplicable.  */
+      if (t->opcode_modifier.sse2avx
+	  && (!sse2avx || i.prefix[DATA_PREFIX]))
+	{
+	  /* Another non-SSE2AVX template has to follow.  */
+	  gas_assert (t + 1 < current_templates.end);
+	  continue;
+	}
 
       /* Check processor support.  */
       specific_error = progress (unsupported);
