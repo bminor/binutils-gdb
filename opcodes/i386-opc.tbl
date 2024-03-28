@@ -407,77 +407,28 @@ imul, 0x69, i186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm16|Imm32|Imm32S, Reg16|R
 
 <div>
 
-rol, 0xd0/0, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-rol, 0xd0/0, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rol, 0xc0/0, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { Imm8|Imm8S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-rol, 0xc0/0, i186, W|Modrm|No_sSuf, { Imm8|Imm8S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rol, 0xd2/0, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-rol, 0xd2/0, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rol, 0xd0/0, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<sr:opc:imm8:nf, +
+    rol:0:Imm8|Imm8S:NF, +
+    ror:1:Imm8|Imm8S:NF, +
+    rcl:2:Imm8:, +
+    rcr:3:Imm8:, +
+    sal:4:Imm8:NF, +
+    shl:4:Imm8:NF, +
+    shr:5:Imm8:NF, +
+    sar:7:Imm8:NF>
 
-ror, 0xd0/1, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-ror, 0xd0/1, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-ror, 0xc0/1, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { Imm8|Imm8S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-ror, 0xc0/1, i186, W|Modrm|No_sSuf, { Imm8|Imm8S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-ror, 0xd2/1, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-ror, 0xd2/1, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-ror, 0xd0/1, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<sr>, 0xd0/<sr:opc>, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|<sr:nf>, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
+<sr>, 0xd0/<sr:opc>, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<sr>, 0xd0/<sr:opc>, APX_F, W|Modrm|No_sSuf|EVexMap4|<sr:nf>, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<sr>, 0xc0/<sr:opc>, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|<sr:nf>, { <sr:imm8>, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
+<sr>, 0xc0/<sr:opc>, i186, W|Modrm|No_sSuf, { <sr:imm8>, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<sr>, 0xc0/<sr:opc>, APX_F, W|Modrm|No_sSuf|EVexMap4|<sr:nf>, { <sr:imm8>, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<sr>, 0xd2/<sr:opc>, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|<sr:nf>, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
+<sr>, 0xd2/<sr:opc>, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<sr>, 0xd2/<sr:opc>, APX_F, W|Modrm|No_sSuf|EVexMap4|<sr:nf>, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<sr>, 0xd0/<sr:opc>, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
-rcl, 0xd0/2, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-rcl, 0xd0/2, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcl, 0xd0/2, APX_F, W|Modrm|No_sSuf|EVexMap4, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcl, 0xc0/2, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-rcl, 0xc0/2, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcl, 0xc0/2, APX_F, W|Modrm|No_sSuf|EVexMap4, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcl, 0xd2/2, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-rcl, 0xd2/2, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcl, 0xd2/2, APX_F, W|Modrm|No_sSuf|EVexMap4, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcl, 0xd0/2, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcl, 0xd0/2, APX_F, W|Modrm|No_sSuf|EVexMap4, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-
-rcr, 0xd0/3, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-rcr, 0xd0/3, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcr, 0xd0/3, APX_F, W|Modrm|No_sSuf|EVexMap4, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcr, 0xc0/3, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-rcr, 0xc0/3, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcr, 0xc0/3, APX_F, W|Modrm|No_sSuf|EVexMap4, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcr, 0xd2/3, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-rcr, 0xd2/3, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcr, 0xd2/3, APX_F, W|Modrm|No_sSuf|EVexMap4, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcr, 0xd0/3, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-rcr, 0xd0/3, APX_F, W|Modrm|No_sSuf|EVexMap4, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-
-sal, 0xd0/4, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-sal, 0xd0/4, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-sal, 0xc0/4, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-sal, 0xc0/4, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-sal, 0xd2/4, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-sal, 0xd2/4, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-sal, 0xd0/4, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-
-shl, 0xd0/4, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-shl, 0xd0/4, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-shl, 0xc0/4, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-shl, 0xc0/4, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-shl, 0xd2/4, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-shl, 0xd2/4, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-shl, 0xd0/4, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-
-shr, 0xd0/5, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-shr, 0xd0/5, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-shr, 0xc0/5, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-shr, 0xc0/5, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-shr, 0xd2/5, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-shr, 0xd2/5, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-shr, 0xd0/5, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-
-sar, 0xd0/7, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-sar, 0xd0/7, 0, W|Modrm|No_sSuf, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-sar, 0xc0/7, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-sar, 0xc0/7, i186, W|Modrm|No_sSuf, { Imm8, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-sar, 0xd2/7, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-sar, 0xd2/7, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-sar, 0xd0/7, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<sr>
 
 shld, 0x24, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|NF, { Imm8, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 shld, 0xfa4, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Imm8, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
