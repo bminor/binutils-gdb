@@ -4748,8 +4748,6 @@ const struct elf_size_info mips_elf64_size_info =
 #define elf_backend_get_target_dtag	_bfd_mips_elf_get_target_dtag
 #define elf_backend_adjust_dynamic_symbol \
 				_bfd_mips_elf_adjust_dynamic_symbol
-#define elf_backend_early_size_sections \
-				_bfd_mips_elf_early_size_sections
 #define elf_backend_late_size_sections \
 				_bfd_mips_elf_late_size_sections
 #define elf_backend_init_index_section	_bfd_elf_init_1_index_section
