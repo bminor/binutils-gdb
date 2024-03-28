@@ -1262,9 +1262,6 @@ read_a_source_file (const char *name)
 
 	      temp = next_char - '0';
 
-	      if (nul_char == '"')
-		++ input_line_pointer;
-
 	      /* Read the whole number.  */
 	      while (ISDIGIT (*input_line_pointer))
 		{
