@@ -444,16 +444,26 @@ ginsn_indirect_jump_p (ginsnS *ginsn)
   return ret_p;
 }
 
+/* Return whether the GINSN is an unconditional jump to a label which is
+   defined locally in the scope of the block of insns, which are currently
+   being processed for GCFG creation.  */
+
 static bool
 ginsn_direct_local_jump_p (ginsnS *ginsn)
 {
-  bool ret_p = false;
-  if (!ginsn)
-    return ret_p;
+  bool local_p = false;
+  const symbolS *taken_label;
 
-  ret_p |= (ginsn->type == GINSN_TYPE_JUMP
-	    && ginsn->src[0].type == GINSN_SRC_SYMBOL);
-  return ret_p;
+  if (!ginsn)
+    return local_p;
+
+  if (ginsn->type == GINSN_TYPE_JUMP
+      && ginsn->src[0].type == GINSN_SRC_SYMBOL)
+    {
+      taken_label = ginsn->src[0].sym;
+      local_p = (label_ginsn_map_find (taken_label) != NULL);
+    }
+  return local_p;
 }
 
 static char *
@@ -785,16 +795,13 @@ add_bb_at_ginsn (const symbolS *func, gcfgS *gcfg, ginsnS *ginsn, gbbS *prev_bb,
 	  || ginsn->type == GINSN_TYPE_JUMP_COND
 	  || ginsn->type == GINSN_TYPE_RETURN)
 	{
-	  /* Indirect Jumps or direct jumps to symbols non-local to the
-	     function must not be seen here.  The caller must have already
-	     checked for that.  */
+	  /* Indirect jumps must not be seen here.  The caller must have
+	     already checked for that.  */
 	  gas_assert (!ginsn_indirect_jump_p (ginsn));
-	  if (ginsn->type == GINSN_TYPE_JUMP)
-	    gas_assert (ginsn_direct_local_jump_p (ginsn));
 
-	  /* Direct Jumps.  May include conditional or unconditional change of
-	     flow.  What is important for CFG creation is that the target be
-	     local to function.  */
+	  /* Handle direct jumps.  For unconditional direct jumps, where the
+	     target is not local to the function, treat them later as similar
+	     to an exit from function (in the else block).  */
 	  if (ginsn->type == GINSN_TYPE_JUMP_COND
 	      || ginsn_direct_local_jump_p (ginsn))
 	    {
@@ -822,10 +829,14 @@ add_bb_at_ginsn (const symbolS *func, gcfgS *gcfg, ginsnS *ginsn, gbbS *prev_bb,
 	      /* Add the bb for the fall through path.  */
 	      find_or_make_bb (func, gcfg, ginsn->next, prev_bb, errp);
 	    }
-	 else if (ginsn->type == GINSN_TYPE_RETURN)
+	 else
 	   {
-	     /* We'll come back to the ginsns following GINSN_TYPE_RETURN
-		from another path if they are indeed reachable code.  */
+	     gas_assert (ginsn->type == GINSN_TYPE_RETURN
+			 || (ginsn->type == GINSN_TYPE_JUMP
+			     && !ginsn_direct_local_jump_p (ginsn)));
+	     /* We'll come back to the ginsns following GINSN_TYPE_RETURN or
+		other (non-local) unconditional jmps from another path if they
+		are indeed reachable code.  */
 	     break;
 	   }
 
@@ -1083,9 +1094,7 @@ frch_ginsn_data_append (ginsnS *ginsn)
     {
       temp->id = ++id;
 
-      if (ginsn_indirect_jump_p (temp)
-	  || (ginsn->type == GINSN_TYPE_JUMP
-	      && !ginsn_direct_local_jump_p (temp)))
+      if (ginsn_indirect_jump_p (temp))
 	frchain_now->frch_ginsn_data->gcfg_apt_p = false;
 
       if (listing & LISTING_GINSN_SCFI)

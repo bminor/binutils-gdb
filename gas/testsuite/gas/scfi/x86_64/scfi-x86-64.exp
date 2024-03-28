@@ -78,6 +78,8 @@ if  { ([istarget "x86_64-*-*"] && ![istarget "x86_64-*-linux*-gnux32"]) } then {
     run_list_test "scfi-cfg-1" "--scfi=experimental --warn"
     run_dump_test "scfi-cfg-2"
     run_list_test "scfi-cfg-2" "--scfi=experimental --warn"
+    run_dump_test "scfi-cfg-3"
+    run_list_test "scfi-cfg-3" "--scfi=experimental --warn"
     run_dump_test "scfi-asm-marker-1"
     run_list_test "scfi-asm-marker-1" "--scfi=experimental --warn"
     run_dump_test "scfi-asm-marker-2"
