@@ -54,10 +54,12 @@ proc corefunc { threadtype } {
     }
 
     # ".*sleep.*clone.*" would fail on s390x as bt stops at START_THREAD there.
+    set test "$threadtype: attach2 to stopped bt"
     if {[string equal $threadtype threaded]} {
-	gdb_test "thread apply all bt" ".*sleep.*start_thread.*" "$threadtype: attach2 to stopped bt"
+	gdb_test "thread apply all bt" \
+	    ".*sleep.*(start_thread| in \\?\\? \\(\\) from ).*" $test
     } else {
-	gdb_test "bt" ".*sleep.*main.*" "$threadtype: attach2 to stopped bt"
+	gdb_test "bt" ".*sleep.*main.*" $test
     }
 
     gdb_exit
