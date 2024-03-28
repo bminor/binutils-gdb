@@ -1269,6 +1269,10 @@ read_a_source_file (const char *name)
 	      while (ISDIGIT (*input_line_pointer))
 		{
 		  const long digit = *input_line_pointer - '0';
+
+		  /* Don't accept labels which look like octal numbers.  */
+		  if (temp == 0)
+		    break;
 		  if (temp > (INT_MAX - digit) / 10)
 		    {
 		      as_bad (_("local label too large near %s"), backup);

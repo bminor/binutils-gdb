@@ -284,7 +284,7 @@ integer_constant (int radix, expressionS *expressionP)
   char *name;		/* Points to name of symbol.  */
   symbolS *symbolP;	/* Points to symbol.  */
 
-  int small;			/* True if fits in 32 bits.  */
+  bool small;		/* True if fits in 32 bits (64 bits with BFD64).  */
 
   /* May be bignum, or may fit in 32 bits.  */
   /* Most numbers fit into 32 bits, and we want this case to be fast.
@@ -549,10 +549,12 @@ integer_constant (int radix, expressionS *expressionP)
 #ifndef tc_allow_L_suffix
 #define tc_allow_L_suffix 1
 #endif
+  bool l_seen = !tc_allow_L_suffix;
   /* PR 20732: Look for, and ignore, a L or LL suffix to the number.  */
   if (tc_allow_L_suffix && (c == 'L' || c == 'l'))
     {
       c = * input_line_pointer++;
+      l_seen = true;
       if (c == 'L' || c == 'l')
 	c = *input_line_pointer++;
       if (!u_seen && (c == 'U' || c == 'u'))
@@ -561,13 +563,14 @@ integer_constant (int radix, expressionS *expressionP)
 
   if (small)
     {
-      /* Here with number, in correct radix. c is the next char.
-	 Note that unlike un*x, we allow "011f" "0x9f" to both mean
-	 the same as the (conventional) "9f".
-	 This is simply easier than checking for strict canonical
-	 form.  Syntax sux!  */
+      /* Here with number, in correct radix. c is the next char.  */
+      bool maybe_label = suffix == NULL
+			 && (!tc_allow_U_suffix || !u_seen)
+			 && (!tc_allow_L_suffix || !l_seen)
+			 && (radix == 10 ||
+			     (radix == 8 && input_line_pointer == start + 1));
 
-      if (LOCAL_LABELS_FB && c == 'b')
+      if (LOCAL_LABELS_FB && c == 'b' && maybe_label)
 	{
 	  /* Backward ref to local label.
 	     Because it is backward, expect it to be defined.  */
@@ -593,7 +596,7 @@ integer_constant (int radix, expressionS *expressionP)
 
 	  expressionP->X_add_number = 0;
 	}			/* case 'b' */
-      else if (LOCAL_LABELS_FB && c == 'f')
+      else if (LOCAL_LABELS_FB && c == 'f' && maybe_label)
 	{
 	  /* Forward reference.  Expect symbol to be undefined or
 	     unknown.  undefined: seen it before.  unknown: never seen
@@ -609,7 +612,7 @@ integer_constant (int radix, expressionS *expressionP)
 	  expressionP->X_add_symbol = symbolP;
 	  expressionP->X_add_number = 0;
 	}			/* case 'f' */
-      else if (LOCAL_LABELS_DOLLAR && c == '$')
+      else if (LOCAL_LABELS_DOLLAR && c == '$' && maybe_label)
 	{
 	  /* If the dollar label is *currently* defined, then this is just
 	     another reference to it.  If it is not *currently* defined,

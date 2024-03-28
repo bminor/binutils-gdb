@@ -1,5 +1,9 @@
 -*- text -*-
 
+* References to FB and dollar labels, when supported, are no longer permitted
+  in a radix other than 10.  (Note that definitions of such labels were already
+  thus restricted, except that leading zeroes were permitted.)
+
 * Remove support for RISC-V privileged spec 1.9.1, but linker can still
   recognize it in case of linking old objects.
 

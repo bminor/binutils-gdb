@@ -13,7 +13,7 @@ valueadr = 0x1234
 _start::
 ;comment
 	ld      hl, #4+0
-00000$:
+0$:
 	adc	a, a
 	adc	a, b
 	adc	a, c
@@ -29,7 +29,7 @@ _start::
 	adc	a, (hl)
 	adc	a, 5 (ix)
 	adc	a, -2 (iy)
-00100$:
+100$:
 	add	a, a
 	add	a, b
 	add	a, c
@@ -45,7 +45,7 @@ _start::
 	add	a, (hl)
 	add	a, 5 (ix)
 	add	a, -2 (iy)
-00200$:
+200$:
 	and	a, a
 	and	a, b
 	and	a, c
@@ -61,7 +61,7 @@ _start::
 	and	a, (hl)
 	and	a, 5 (ix)
 	and	a, -2 (iy)
-00300$:
+300$:
 	cp	a, a
 	cp	a, b
 	cp	a, c
@@ -77,7 +77,7 @@ _start::
 	cp	a, (hl)
 	cp	a, 5 (ix)
 	cp	a, -2 (iy)
-00400$:
+400$:
 	or	a, a
 	or	a, b
 	or	a, c
@@ -93,7 +93,7 @@ _start::
 	or	a, (hl)
 	or	a, 5 (ix)
 	or	a, -2 (iy)
-00500$:
+500$:
 	sbc	a, a
 	sbc	a, b
 	sbc	a, c
@@ -109,7 +109,7 @@ _start::
 	sbc	a, (hl)
 	sbc	a, 5 (ix)
 	sbc	a, -2 (iy)
-00600$:
+600$:
 	sub	a, a
 	sub	a, b
 	sub	a, c
@@ -125,7 +125,7 @@ _start::
 	sub	a, (hl)
 	sub	a, 5 (ix)
 	sub	a, -2 (iy)
-00700$:
+700$:
 	xor	a, a
 	xor	a, b
 	xor	a, c
@@ -152,10 +152,10 @@ _start::
 _func:
 	ld	hl,0
 	ld	(hl),#<function
-00100$:
+100$:
 	inc	hl
 	ld	(hl),#>function
-00600$:
+600$:
 	jr	100$
 _finish::
 	ld	a, 2 (iy)
