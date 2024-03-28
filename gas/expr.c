@@ -279,7 +279,6 @@ integer_constant (int radix, expressionS *expressionP)
   char c;
   valueT number;	/* Offset or (absolute) value.  */
   short int digit;	/* Value of next digit in current radix.  */
-  short int maxdig = 0;	/* Highest permitted digit value.  */
   int too_many_digits = 0;	/* If we see >= this number of.  */
   char *name;		/* Points to name of symbol.  */
   symbolS *symbolP;	/* Points to symbol.  */
@@ -365,26 +364,23 @@ integer_constant (int radix, expressionS *expressionP)
   switch (radix)
     {
     case 2:
-      maxdig = 2;
       too_many_digits = valuesize + 1;
       break;
     case 8:
-      maxdig = radix = 8;
       too_many_digits = (valuesize + 2) / 3 + 1;
       break;
     case 16:
-      maxdig = radix = 16;
       too_many_digits = (valuesize + 3) / 4 + 1;
       break;
     case 10:
-      maxdig = radix = 10;
       too_many_digits = (valuesize + 11) / 4; /* Very rough.  */
+      break;
     }
 #undef valuesize
   start = input_line_pointer;
   c = *input_line_pointer++;
   for (number = 0;
-       (digit = hex_value (c)) < maxdig;
+       (digit = hex_value (c)) < radix;
        c = *input_line_pointer++)
     {
       number = number * radix + digit;
@@ -411,7 +407,7 @@ integer_constant (int radix, expressionS *expressionP)
 	  int ndigit = 0;
 	  number = 0;
 	  for (c = *input_line_pointer++;
-	       (digit = hex_value (c)) < maxdig;
+	       (digit = hex_value (c)) < radix;
 	       c = *(input_line_pointer++))
 	    {
 	      number = number * radix + digit;
@@ -487,7 +483,7 @@ integer_constant (int radix, expressionS *expressionP)
       generic_bignum[3] = 0;
       input_line_pointer = start;	/* -> 1st digit.  */
       c = *input_line_pointer++;
-      for (; (carry = hex_value (c)) < maxdig; c = *input_line_pointer++)
+      for (; (carry = hex_value (c)) < radix; c = *input_line_pointer++)
 	{
 	  for (pointer = generic_bignum; pointer <= leader; pointer++)
 	    {
