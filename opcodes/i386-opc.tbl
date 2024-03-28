@@ -2046,12 +2046,11 @@ xcryptofb, 0xf30fa7e8, PadLock, NoSuf|RepPrefixOk, {}
 xstore, 0xfa7c0, PadLock, NoSuf|RepPrefixOk, {}
 
 // Multy-precision Add Carry, rdseed instructions.
-adcx, 0x6666, ADX&APX_F, C|Modrm|CheckOperandSize|No_bSuf|No_wSuf|No_sSuf|DstVVVV|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64, Reg32|Reg64 }
-adcx, 0x660f38f6, ADX, Modrm|CheckOperandSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
-adcx, 0x6666, ADX&APX_F, Modrm|CheckOperandSize|No_bSuf|No_wSuf|No_sSuf|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
-adox, 0xf366, ADX&APX_F, C|Modrm|CheckOperandSize|No_bSuf|No_wSuf|No_sSuf|DstVVVV|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64, Reg32|Reg64 }
-adox, 0xf30f38f6, ADX, Modrm|CheckOperandSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
-adox, 0xf366, ADX&APX_F, Modrm|CheckOperandSize|No_bSuf|No_wSuf|No_sSuf|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
+<adx:pfx, c:66, o:f3>
+ad<adx>x, 0x<adx:pfx>66, ADX&APX_F, C|Modrm|CheckOperandSize|No_bSuf|No_wSuf|No_sSuf|DstVVVV|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64, Reg32|Reg64 }
+ad<adx>x, 0x<adx:pfx>0f38f6, ADX, Modrm|CheckOperandSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
+ad<adx>x, 0x<adx:pfx>66, ADX&APX_F, Modrm|CheckOperandSize|No_bSuf|No_wSuf|No_sSuf|EVexMap4, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
+<adx>
 rdseed, 0xfc7/7, RdSeed, Modrm|NoSuf, { Reg16|Reg32|Reg64 }
 
 // SMAP instructions.
