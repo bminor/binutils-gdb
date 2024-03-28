@@ -316,10 +316,6 @@ add, 0x4, 0, W|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 add, 0x80/0, APX_F, W|Modrm|CheckOperandSize|No_sSuf|DstVVVV|EVexMap4|NF, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64}
 add, 0x80/0, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
-inc, 0x40, No64, No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
-inc, 0xfe/0, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, {Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64}
-inc, 0xfe/0, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-
 sub, 0x28, APX_F, D|W|CheckOperandSize|Modrm|No_sSuf|DstVVVV|EVexMap4|NF|Optimize, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64, }
 sub, 0x28, 0, D|W|CheckOperandSize|Modrm|No_sSuf|HLEPrefixLock|Optimize, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 sub, 0x83/5, APX_F, Modrm|No_bSuf|No_sSuf|DstVVVV|EVexMap4|NF, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
@@ -327,10 +323,6 @@ sub, 0x83/5, 0, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8S, Reg16|Reg32|Reg64|
 sub, 0x2c, 0, W|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 sub, 0x80/5, APX_F, W|Modrm|CheckOperandSize|No_sSuf|DstVVVV|EVexMap4|NF, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
 sub, 0x80/5, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-
-dec, 0x48, No64, No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
-dec, 0xfe/1, APX_F, W|Modrm|CheckOperandSize|No_sSuf|DstVVVV|EVexMap4|NF, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-dec, 0xfe/1, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 sbb, 0x18, APX_F, D|W|CheckOperandSize|Modrm|No_sSuf|DstVVVV|EVexMap4, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
 sbb, 0x18, 0, D|W|CheckOperandSize|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
@@ -384,6 +376,14 @@ adc, 0x83/2, 0, Modrm|No_bSuf|No_sSuf|HLEPrefixLock, { Imm8S, Reg16|Reg32|Reg64|
 adc, 0x14, 0, W|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 adc, 0x80/2, APX_F, W|Modrm|CheckOperandSize|No_sSuf|DstVVVV|EVexMap4, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
 adc, 0x80/2, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+
+<incdec:opc, inc:0, dec:1>
+
+<incdec>, 0x40 | (<incdec:opc> << 3), No64, No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
+<incdec>, 0xfe/<incdec:opc>, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, {Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64}
+<incdec>, 0xfe/<incdec:opc>, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+
+<incdec>
 
 neg, 0xf6/3, APX_F, W|Modrm|CheckOperandSize|No_sSuf|DstVVVV|EVexMap4|NF, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
 neg, 0xf6/3, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }

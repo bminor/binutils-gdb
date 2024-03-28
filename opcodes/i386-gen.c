@@ -1538,10 +1538,10 @@ opcode_hash_eq (const void *p, const void *q)
   return strcmp (name, entry->name) == 0;
 }
 
-static void
+static bool
 parse_template (char *buf, int lineno)
 {
-  char sep, *end, *name;
+  char sep, *end, *ptr;
   struct template *tmpl;
   struct template_instance *last_inst = NULL;
 
@@ -1568,8 +1568,16 @@ parse_template (char *buf, int lineno)
 	prev->next = tmpl->next;
       else
 	templates = tmpl->next;
-      return;
+      return true;
     }
+
+  /* Check whether this actually is a reference to an existing template:
+     If there's '>' ahead of ':', it can't be a new template definition
+     (and template undefs have are dealt with above).  */
+  ptr = strchr (buf, '>');
+  if (ptr != NULL && ptr < end)
+    return false;
+
   *end++ = '\0';
   remove_trailing_whitespaces (buf);
 
@@ -1644,6 +1652,8 @@ parse_template (char *buf, int lineno)
 
   tmpl->next = templates;
   templates = tmpl;
+
+  return true;
 }
 
 static unsigned int
@@ -1900,10 +1910,12 @@ process_i386_opcodes (FILE *table)
 	  /* Ignore comments.  */
 	case '\0':
 	  continue;
-	  break;
+
 	case '<':
-	  parse_template (p, lineno);
-	  continue;
+	  if (parse_template (p, lineno))
+	    continue;
+	  break;
+
 	default:
 	  if (!marker)
 	    continue;
