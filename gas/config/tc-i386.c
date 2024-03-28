@@ -3885,7 +3885,7 @@ build_vex_prefix (const insn_template *t)
   /* Check the REX.W bit and VEXW.  */
   if (i.tm.opcode_modifier.vexw == VEXWIG)
     w = (vexwig == vexw1 || (i.rex & REX_W)) ? 1 : 0;
-  else if (i.tm.opcode_modifier.vexw)
+  else if (i.tm.opcode_modifier.vexw && !(i.rex & REX_W))
     w = i.tm.opcode_modifier.vexw == VEXW1 ? 1 : 0;
   else
     w = (flag_code == CODE_64BIT ? i.rex & REX_W : vexwig == vexw1) ? 1 : 0;
@@ -8413,7 +8413,7 @@ check_EgprOperands (const insn_template *t)
     }
 
   /* Check if pseudo prefix {rex2} is valid.  */
-  if (i.rex2_encoding)
+  if (i.rex2_encoding && !t->opcode_modifier.sse2avx)
     {
       i.error = invalid_pseudo_prefix;
       return true;
@@ -10031,6 +10031,7 @@ process_operands (void)
       i.rex |= i.prefix[REX_PREFIX] & (REX_W | REX_R | REX_X | REX_B);
       i.prefix[REX_PREFIX] = 0;
       i.rex_encoding = 0;
+      i.rex2_encoding = 0;
     }
   /* ImmExt should be processed after SSE2AVX.  */
   else if (i.tm.opcode_modifier.immext)

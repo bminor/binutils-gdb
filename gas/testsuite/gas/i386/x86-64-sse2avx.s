@@ -841,6 +841,15 @@ _start:
 	rex64 pcmpestri $0, %xmm0, %xmm0
 	rex64 pcmpestrm $0, %xmm0, %xmm0
 
+		movd	%xmm1, %eax
+	rex	movd	%xmm1, %eax
+	rex.b	movd	%xmm1, %eax
+	rex.r	movd	%xmm1, %eax
+	rex.x	movd	%xmm1, %eax
+	rex.w	movd	%xmm1, %eax
+	{rex}	movd	%xmm1, %eax
+	{rex2}	movd	%xmm1, %eax
+	{vex3}	movd	%xmm1, %eax
 
 	.intel_syntax noprefix
 # Tests for op mem64
