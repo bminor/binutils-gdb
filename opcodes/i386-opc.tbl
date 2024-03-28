@@ -3388,14 +3388,10 @@ wrmsrlist, 0xf30f01c6, MSRLIST, NoSuf, {}
 
 // RAO-INT instructions.
 
-aadd, 0xf38fc, RAO_INT, Modrm|IgnoreSize|CheckOperandSize|NoSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-aadd, 0xfc, RAO_INT&APX_F, Modrm|CheckOperandSize|NoSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-aand, 0x660f38fc, RAO_INT, Modrm|IgnoreSize|CheckOperandSize|NoSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-aand, 0x66fc, RAO_INT&APX_F, Modrm|CheckOperandSize|NoSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-aor, 0xf20f38fc, RAO_INT, Modrm|IgnoreSize|CheckOperandSize|NoSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-aor, 0xf2fc, RAO_INT&APX_F, Modrm|CheckOperandSize|NoSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-axor, 0xf30f38fc, RAO_INT, Modrm|IgnoreSize|CheckOperandSize|NoSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
-axor, 0xf3fc, RAO_INT&APX_F, Modrm|CheckOperandSize|NoSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+<rao:pfx, add:, and:66, or:f2, xor:f3>
+a<rao>, 0x<rao:pfx>0f38fc, RAO_INT, Modrm|IgnoreSize|CheckOperandSize|NoSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+a<rao>, 0x<rao:pfx>fc, RAO_INT&APX_F, Modrm|CheckOperandSize|NoSuf|EVexMap4, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+<rao>
 
 // RAO-INT instructions end.
 
