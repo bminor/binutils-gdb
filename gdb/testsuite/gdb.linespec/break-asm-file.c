@@ -18,7 +18,7 @@
 void func3();
 void func2();
 
-static func()
+static void func()
 {
 }
 
