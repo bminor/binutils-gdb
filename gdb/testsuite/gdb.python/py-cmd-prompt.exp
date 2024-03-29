@@ -39,7 +39,8 @@ gdb_test_no_output "source $pyfile" "source the script"
 
 set gdbserver [gdbserver_start "" [standard_output_file $binfile]]
 set gdbserver_gdbport [lindex $gdbserver 1]
-gdb_test_no_output "python the_listener.port = '${gdbserver_gdbport}'"
+gdb_test_no_output "python the_listener.port = '${gdbserver_gdbport}'" \
+    "set the_listener.port value"
 
 gdb_run_cmd
 
