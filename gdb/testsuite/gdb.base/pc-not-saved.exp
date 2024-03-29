@@ -64,7 +64,8 @@ clean_restart $binfile
 gdb_test_no_output "source ${remote_python_file}" "load python file"
 
 # Tell the Python unwinder to use the frame-id we cached above.
-gdb_test_no_output "python set_break_bt_here_frame_id($pc, $cfa)"
+gdb_test_no_output "python set_break_bt_here_frame_id($pc, $cfa)" \
+    "call set_break_bt_here_frame_id to set the frame-id"
 
 # Run up to the function which the unwinder will claim.
 if { ![runto "break_bt_here"] } {
