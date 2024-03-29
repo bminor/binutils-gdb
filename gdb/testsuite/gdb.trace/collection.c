@@ -19,6 +19,9 @@
  * Test program for trace collection
  */
 
+#include <string.h>
+#include <stdlib.h>
+
 /*
  * Typedefs
  */
