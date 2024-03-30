@@ -564,15 +564,7 @@ tui_puts_internal (WINDOW *w, const char *string, int *height)
 void
 tui_redisplay_readline (void)
 {
-  int prev_col;
-  int height;
-  int col;
-  int c_pos;
-  int c_line;
-  int in;
-  WINDOW *w;
   const char *prompt;
-  int start_line;
 
   /* Detect when we temporarily left SingleKey and now the readline
      edit buffer is empty, automatically restore the SingleKey
@@ -588,18 +580,17 @@ tui_redisplay_readline (void)
   else
     prompt = rl_display_prompt;
   
-  c_pos = -1;
-  c_line = -1;
-  w = TUI_CMD_WIN->handle.get ();
-  start_line = TUI_CMD_WIN->start_line;
+  int c_pos = -1;
+  int c_line = -1;
+  WINDOW *w = TUI_CMD_WIN->handle.get ();
+  int start_line = TUI_CMD_WIN->start_line;
   wmove (w, start_line, 0);
-  prev_col = 0;
-  height = 1;
+  int height = 1;
   if (prompt != nullptr)
     tui_puts_internal (w, prompt, &height);
 
-  prev_col = getcurx (w);
-  for (in = 0; in <= rl_end; in++)
+  int prev_col = getcurx (w);
+  for (int in = 0; in <= rl_end; in++)
     {
       unsigned char c;
       
@@ -620,7 +611,7 @@ tui_redisplay_readline (void)
       else if (c == '\t')
 	{
 	  /* Expand TABs, since ncurses on MS-Windows doesn't.  */
-	  col = getcurx (w);
+	  int col = getcurx (w);
 	  do
 	    {
 	      waddch (w, ' ');
@@ -633,7 +624,7 @@ tui_redisplay_readline (void)
 	}
       if (c == '\n')
 	TUI_CMD_WIN->start_line = getcury (w);
-      col = getcurx (w);
+      int col = getcurx (w);
       if (col < prev_col)
 	height++;
       prev_col = col;
