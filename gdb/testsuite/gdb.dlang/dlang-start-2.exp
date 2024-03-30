@@ -79,10 +79,8 @@ if {[gdb_start_cmd] < 0} {
     return -1
 }
 
-# We should probably have "D main" instead of "_Dmain" here, filed PR30276
-# '[gdb/symtab] function name is _Dmain instead of "D main"' about that.
 gdb_test "" \
-    "in _Dmain \\(\\)" \
+    "in D main \\(\\)" \
     "start"
 
 gdb_test "show language" {"auto; currently d".}
