@@ -282,9 +282,14 @@ dwarf2_read_dwz_file (dwarf2_per_objfile *per_objfile)
 struct dwz_file *
 dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd, bool require)
 {
-  gdb_assert (per_bfd->dwz_file.has_value ());
-  dwz_file *result = per_bfd->dwz_file->get ();
-  if (require && result == nullptr)
-    error (_("could not read '.gnu_debugaltlink' section"));
+  gdb_assert (!require || per_bfd->dwz_file.has_value ());
+
+  dwz_file *result = nullptr;
+  if (per_bfd->dwz_file.has_value ())
+    {
+      result = per_bfd->dwz_file->get ();
+      if (require && result == nullptr)
+	error (_("could not read '.gnu_debugaltlink' section"));
+    }
   return result;
 }

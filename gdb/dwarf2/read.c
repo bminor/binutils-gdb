@@ -1362,11 +1362,11 @@ dwarf2_has_info (struct objfile *objfile,
     return false;
 
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+  bool just_created = false;
 
   if (per_objfile == NULL)
     {
       dwarf2_per_bfd *per_bfd;
-      bool just_created = false;
 
       /* We can share a "dwarf2_per_bfd" with other objfiles if the
 	 BFD doesn't require relocations.
@@ -1398,27 +1398,29 @@ dwarf2_has_info (struct objfile *objfile,
 	}
 
       per_objfile = dwarf2_objfile_data_key.emplace (objfile, objfile, per_bfd);
+    }
 
-      if (just_created)
+  const bool has_info = (!per_objfile->per_bfd->info.is_virtual
+			 && per_objfile->per_bfd->info.s.section != nullptr
+			 && !per_objfile->per_bfd->abbrev.is_virtual
+			 && per_objfile->per_bfd->abbrev.s.section != nullptr);
+
+  if (just_created && has_info)
+    {
+      /* Try to fetch any potential dwz file early, while still on
+	 the main thread.  Also, be sure to do it just once per
+	 BFD, to avoid races.  */
+      try
 	{
-	  /* Try to fetch any potential dwz file early, while still on
-	     the main thread.  Also, be sure to do it just once per
-	     BFD, to avoid races.  */
-	  try
-	    {
-	      dwarf2_read_dwz_file (per_objfile);
-	    }
-	  catch (const gdb_exception_error &err)
-	    {
-	      warning (_("%s"), err.what ());
-	    }
+	  dwarf2_read_dwz_file (per_objfile);
+	}
+      catch (const gdb_exception_error &err)
+	{
+	  warning (_("%s"), err.what ());
 	}
     }
 
-  return (!per_objfile->per_bfd->info.is_virtual
-	  && per_objfile->per_bfd->info.s.section != NULL
-	  && !per_objfile->per_bfd->abbrev.is_virtual
-	  && per_objfile->per_bfd->abbrev.s.section != NULL);
+  return has_info;
 }
 
 /* See declaration.  */
