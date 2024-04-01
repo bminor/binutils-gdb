@@ -17010,7 +17010,6 @@ read_attribute_value (const struct die_reader_specs *reader,
       {
 	unrelocated_addr addr = cu_header->read_address (abfd, info_ptr,
 							 &bytes_read);
-	addr = per_objfile->adjust (addr);
 	attr->set_address (addr);
 	info_ptr += bytes_read;
       }
