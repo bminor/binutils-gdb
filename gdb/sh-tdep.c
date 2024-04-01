@@ -1401,6 +1401,11 @@ sh_sh2a_register_type (struct gdbarch *gdbarch, int reg_nr)
     return builtin_type (gdbarch)->builtin_float;
   else if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
     return builtin_type (gdbarch)->builtin_double;
+  else if (reg_nr == PC_REGNUM || reg_nr == PR_REGNUM || reg_nr == VBR_REGNUM
+	   || reg_nr == SPC_REGNUM)
+    return builtin_type (gdbarch)->builtin_func_ptr;
+  else if (reg_nr == R0_REGNUM + 15 || reg_nr == GBR_REGNUM)
+    return builtin_type (gdbarch)->builtin_data_ptr;
   else
     return builtin_type (gdbarch)->builtin_int;
 }
@@ -1413,6 +1418,11 @@ sh_sh3e_register_type (struct gdbarch *gdbarch, int reg_nr)
   if ((reg_nr >= gdbarch_fp0_regnum (gdbarch)
        && (reg_nr <= FP_LAST_REGNUM)) || (reg_nr == FPUL_REGNUM))
     return builtin_type (gdbarch)->builtin_float;
+  else if (reg_nr == PC_REGNUM || reg_nr == PR_REGNUM || reg_nr == VBR_REGNUM
+	   || reg_nr == SPC_REGNUM)
+    return builtin_type (gdbarch)->builtin_func_ptr;
+  else if (reg_nr == R0_REGNUM + 15 || reg_nr == GBR_REGNUM)
+    return builtin_type (gdbarch)->builtin_data_ptr;
   else
     return builtin_type (gdbarch)->builtin_int;
 }
@@ -1434,6 +1444,11 @@ sh_sh4_register_type (struct gdbarch *gdbarch, int reg_nr)
     return builtin_type (gdbarch)->builtin_double;
   else if (reg_nr >= FV0_REGNUM && reg_nr <= FV_LAST_REGNUM)
     return sh_sh4_build_float_register_type (gdbarch, 3);
+  else if (reg_nr == PC_REGNUM || reg_nr == PR_REGNUM || reg_nr == VBR_REGNUM
+	   || reg_nr == SPC_REGNUM)
+    return builtin_type (gdbarch)->builtin_func_ptr;
+  else if (reg_nr == R0_REGNUM + 15 || reg_nr == GBR_REGNUM)
+    return builtin_type (gdbarch)->builtin_data_ptr;
   else
     return builtin_type (gdbarch)->builtin_int;
 }
@@ -1441,7 +1456,13 @@ sh_sh4_register_type (struct gdbarch *gdbarch, int reg_nr)
 static struct type *
 sh_default_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
-  return builtin_type (gdbarch)->builtin_int;
+  if (reg_nr == PC_REGNUM || reg_nr == PR_REGNUM || reg_nr == VBR_REGNUM
+      || reg_nr == SPC_REGNUM)
+    return builtin_type (gdbarch)->builtin_func_ptr;
+  else if (reg_nr == R0_REGNUM + 15 || reg_nr == GBR_REGNUM)
+    return builtin_type (gdbarch)->builtin_data_ptr;
+  else
+    return builtin_type (gdbarch)->builtin_int;
 }
 
 /* Is a register in a reggroup?
