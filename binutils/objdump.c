@@ -3923,29 +3923,25 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 		   (*rel_pp)->address - rel_offset < sym_offset)
 			  ++rel_pp;
 
+		  loop_until = next_sym;
 		  if (sym->flags & BSF_FUNCTION)
 		    {
-		      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
-			  && ((elf_symbol_type *) sym)->internal_elf_sym.st_size > 0)
+		      loop_until = function_sym;
+
+		      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
 			{
-			  /* Sym is a function symbol with a size associated
-			     with it.  Turn on automatic disassembly for the
-			     next VALUE bytes.  */
-			  stop_offset = addr_offset
-			    + ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
-			  loop_until = stop_offset_reached;
+			  bfd_size_type fsize =
+			    ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
+			  if (addr_offset + fsize > addr_offset
+			      && addr_offset + fsize <= stop_offset)
+			    {
+			      /* Sym is a function symbol with a valid
+				 size associated with it.  Disassemble
+				 to the end of the function.  */
+			      stop_offset = addr_offset + fsize;
+			      loop_until = stop_offset_reached;
+			    }
 			}
-		      else
-			{
-			  /* Otherwise we need to tell the loop heuristic to
-			     loop until the next function symbol is encountered.  */
-			  loop_until = function_sym;
-			}
-		    }
-		  else
-		    {
-		      /* Otherwise loop until the next symbol is encountered.  */
-		      loop_until = next_sym;
 		    }
 		}
 
