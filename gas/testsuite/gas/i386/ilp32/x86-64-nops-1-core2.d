@@ -2,4 +2,4 @@
 #as: -mtune=core2
 #objdump: -drw
 #name: x86-64 (ILP32) -mtune=core2 nops 1
-#dump: ../x86-64-nops-1.d
+#dump: ../x86-64-nops-1-core2.d
