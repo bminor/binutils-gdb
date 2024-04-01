@@ -10231,7 +10231,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 		 sect_offset_str (die->sect_off), objfile_name (objfile));
       return;
     }
-  unrelocated_addr pc = per_objfile->adjust (attr->as_address ());
+  unrelocated_addr pc = attr->as_address ();
 
   if (cu->call_site_htab == NULL)
     cu->call_site_htab = htab_create_alloc_ex (16, call_site::hash,
@@ -10406,10 +10406,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 			 "low pc, for referencing DIE %s [in module %s]"),
 		       sect_offset_str (die->sect_off), objfile_name (objfile));
 	  else
-	    {
-	      lowpc = per_objfile->adjust (lowpc);
-	      call_site->target.set_loc_physaddr (lowpc);
-	    }
+	    call_site->target.set_loc_physaddr (lowpc);
 	}
     }
   else
