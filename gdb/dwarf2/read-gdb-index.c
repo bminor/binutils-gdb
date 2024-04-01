@@ -567,8 +567,6 @@ create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
 	  continue;
 	}
 
-      lo = (ULONGEST) per_objfile->adjust ((unrelocated_addr) lo);
-      hi = (ULONGEST) per_objfile->adjust ((unrelocated_addr) hi);
       mutable_map.set_empty (lo, hi - 1, per_bfd->get_cu (cu_index));
     }
 

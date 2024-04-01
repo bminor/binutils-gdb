@@ -190,8 +190,6 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 	      continue;
 	    }
 	  ULONGEST end = start + length;
-	  start = (ULONGEST) per_objfile->adjust ((unrelocated_addr) start);
-	  end = (ULONGEST) per_objfile->adjust ((unrelocated_addr) end);
 	  mutable_map->set_empty (start, end - 1, per_cu);
 	}
 
