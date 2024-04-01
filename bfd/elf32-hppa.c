@@ -3110,7 +3110,7 @@ final_link_relocate (asection *input_section,
   unsigned int r_type = ELF32_R_TYPE (rela->r_info);
   unsigned int orig_r_type = r_type;
   reloc_howto_type *howto = elf_hppa_howto_table + r_type;
-  int r_format = howto->bitsize;
+  int r_format;
   enum hppa_reloc_field_selector_type_alt r_field;
   bfd *input_bfd = input_section->owner;
   bfd_vma offset = rela->r_offset;
@@ -3432,6 +3432,50 @@ final_link_relocate (asection *input_section,
       break;
     }
 
+  r_format = bfd_hppa_insn2fmt (input_bfd, insn);
+  switch (r_format)
+    {
+    case 10:
+    case -10:
+      if (val & 7)
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%pB(%pA+%#" PRIx64 "): displacement %#x for insn %#x "
+	       "is not a multiple of 8 (gp %#x)"),
+	     input_bfd,
+	     input_section,
+	     (uint64_t) offset,
+	     val,
+	     insn,
+	     (unsigned int) elf_gp (input_section->output_section->owner));
+	  bfd_set_error (bfd_error_bad_value);
+	  return bfd_reloc_notsupported;
+	}
+      break;
+
+    case -11:
+    case -16:
+      if (val & 3)
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%pB(%pA+%#" PRIx64 "): displacement %#x for insn %#x "
+	       "is not a multiple of 4 (gp %#x)"),
+	     input_bfd,
+	     input_section,
+	     (uint64_t) offset,
+	     val,
+	     insn,
+	     (unsigned int) elf_gp (input_section->output_section->owner));
+	  bfd_set_error (bfd_error_bad_value);
+	  return bfd_reloc_notsupported;
+	}
+      break;
+
+    default:
+      break;
+    }
   insn = hppa_rebuild_insn (insn, val, r_format);
 
   /* Update the instruction word.  */

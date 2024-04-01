@@ -669,7 +669,7 @@ cat <<EOF
 
   ${DATA_PLT+${PLT_BEFORE_GOT-${PLT}}}
 
-  .data         ${RELOCATING-0} :
+  .data         ${RELOCATING-0}${RELOCATING+${DATA_SECTION_ALIGNMENT}} :
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data${RELOCATING+ .data.* .gnu.linkonce.d.*})
