@@ -2946,7 +2946,7 @@ disassemble_jumps (struct disassemble_info * inf,
 		   bfd_vma                   start_offset,
 		   bfd_vma                   stop_offset,
 		   bfd_vma		     rel_offset,
-		   arelent ***               relppp,
+		   arelent **                relpp,
 		   arelent **                relppend)
 {
   struct objdump_disasm_info *aux;
@@ -2988,11 +2988,11 @@ disassemble_jumps (struct disassemble_info * inf,
       if (inf->disassembler_needs_relocs
 	  && (bfd_get_file_flags (aux->abfd) & EXEC_P) == 0
 	  && (bfd_get_file_flags (aux->abfd) & DYNAMIC) == 0
-	  && *relppp < relppend)
+	  && relpp < relppend)
 	{
 	  bfd_signed_vma distance_to_rel;
 
-	  distance_to_rel = (**relppp)->address - (rel_offset + addr_offset);
+	  distance_to_rel = (*relpp)->address - (rel_offset + addr_offset);
 
 	  /* Check to see if the current reloc is associated with
 	     the instruction that we are about to disassemble.  */
@@ -3205,7 +3205,7 @@ disassemble_bytes (struct disassemble_info *inf,
 		   bfd_vma start_offset,
 		   bfd_vma stop_offset,
 		   bfd_vma rel_offset,
-		   arelent ***relppp,
+		   arelent **relpp,
 		   arelent **relppend)
 {
   struct objdump_disasm_info *aux;
@@ -3377,13 +3377,13 @@ disassemble_bytes (struct disassemble_info *inf,
 	      if (inf->disassembler_needs_relocs
 		  && (bfd_get_file_flags (aux->abfd) & EXEC_P) == 0
 		  && (bfd_get_file_flags (aux->abfd) & DYNAMIC) == 0
-		  && *relppp < relppend)
+		  && relpp < relppend)
 		{
 		  bfd_signed_vma distance_to_rel;
 		  int max_reloc_offset
 		    = aux->abfd->arch_info->max_reloc_offset_into_insn;
 
-		  distance_to_rel = ((**relppp)->address - rel_offset
+		  distance_to_rel = ((*relpp)->address - rel_offset
 				     - addr_offset);
 
 		  insn_size = 0;
@@ -3427,7 +3427,7 @@ disassemble_bytes (struct disassemble_info *inf,
 			  && distance_to_rel < insn_size / (int) opb))
 		    {
 		      inf->flags |= INSN_HAS_RELOC;
-		      aux->reloc = **relppp;
+		      aux->reloc = *relpp;
 		    }
 		}
 
@@ -3600,14 +3600,14 @@ disassemble_bytes (struct disassemble_info *inf,
 	    need_nl = true;
 	}
 
-      while ((*relppp) < relppend
-	     && (**relppp)->address < rel_offset + addr_offset + octets / opb)
+      while (relpp < relppend
+	     && (*relpp)->address < rel_offset + addr_offset + octets / opb)
 	{
 	  if (dump_reloc_info || dump_dynamic_reloc_info)
 	    {
 	      arelent *q;
 
-	      q = **relppp;
+	      q = *relpp;
 
 	      if (wide_output)
 		putchar ('\t');
@@ -3665,7 +3665,7 @@ disassemble_bytes (struct disassemble_info *inf,
 	      printf ("\n");
 	      need_nl = false;
 	    }
-	  ++(*relppp);
+	  ++relpp;
 	}
 
       if (need_nl)
@@ -3809,12 +3809,6 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
   if (sorted_symcount > 1)
     qsort (sorted_syms, sorted_symcount, sizeof (asymbol *), compare_symbols);
 
-  /* Skip over the relocs belonging to addresses below the
-     start address.  */
-  while (rel_pp < rel_ppend
-	 && (*rel_pp)->address < rel_offset + addr_offset)
-    ++rel_pp;
-
   printf (_("\nDisassembly of section %s:\n"), sanitize_string (section->name));
 
   /* Find the nearest symbol forwards from our current position.  */
@@ -3845,6 +3839,12 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
       asymbol *nextsym;
       bfd_vma nextstop_offset;
       bool insns;
+
+      /* Skip over the relocs belonging to addresses below the
+	 start address.  */
+      while (rel_pp < rel_ppend
+	     && (*rel_pp)->address < rel_offset + addr_offset)
+	++rel_pp;
 
       addr = section->vma + addr_offset;
       addr = ((addr & ((sign_adjust << 1) - 1)) ^ sign_adjust) - sign_adjust;
@@ -3912,16 +3912,10 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 
 	      /* We are not currently printing.  Check to see
 		 if the current symbol matches the requested symbol.  */
-	      if (streq (name, paux->symbol))
+	      if (streq (name, paux->symbol)
+		  && bfd_asymbol_value (sym) <= addr)
 		{
 		  do_print = true;
-
-		  /* Skip over the relocs belonging to addresses below the
-		     symbol address.  */
-		  const bfd_vma sym_offset = bfd_asymbol_value (sym) - section->vma;
-		  while (rel_pp < rel_ppend &&
-		   (*rel_pp)->address - rel_offset < sym_offset)
-			  ++rel_pp;
 
 		  loop_until = next_sym;
 		  if (sym->flags & BSF_FUNCTION)
@@ -3932,13 +3926,14 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 			{
 			  bfd_size_type fsize =
 			    ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
-			  if (addr_offset + fsize > addr_offset
-			      && addr_offset + fsize <= stop_offset)
+			  bfd_vma fend =
+			    bfd_asymbol_value (sym) - section->vma + fsize;
+			  if (fend > addr_offset && fend <= stop_offset)
 			    {
 			      /* Sym is a function symbol with a valid
 				 size associated with it.  Disassemble
 				 to the end of the function.  */
-			      stop_offset = addr_offset + fsize;
+			      stop_offset = fend;
 			      loop_until = stop_offset_reached;
 			    }
 			}
@@ -4046,11 +4041,9 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	      objdump_print_symname (abfd, &di, sym);
 
 	      /* Fetch jump information.  */
-	      detected_jumps = disassemble_jumps
-		(pinfo, paux->disassemble_fn,
-		 addr_offset, nextstop_offset,
-		 rel_offset, &rel_pp, rel_ppend);
-
+	      detected_jumps = disassemble_jumps (pinfo, paux->disassemble_fn,
+						  addr_offset, nextstop_offset,
+						  rel_offset, rel_pp, rel_ppend);
 	      /* Free symbol name.  */
 	      free (sf.buffer);
 	    }
@@ -4058,7 +4051,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	  /* Add jumps to output.  */
 	  disassemble_bytes (pinfo, paux->disassemble_fn, insns, data,
 			     addr_offset, nextstop_offset,
-			     rel_offset, &rel_pp, rel_ppend);
+			     rel_offset, rel_pp, rel_ppend);
 
 	  /* Free jumps.  */
 	  while (detected_jumps)
