@@ -39,6 +39,10 @@ gdb_test_multiple "catch syscall group:process" "catch process syscalls" {
 	unsupported $gdb_test_name
 	return
     }
+    -re "Can not parse XML syscalls information; XML support was disabled at compile time.*\r\n$gdb_prompt $" {
+	unsupported $gdb_test_name
+	return
+    }
     -re ".*$gdb_prompt $" {
 	pass $gdb_test_name
     }
