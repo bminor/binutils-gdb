@@ -692,10 +692,6 @@ struct dwarf2_per_objfile
      any that are too old.  */
   void age_comp_units ();
 
-  /* Apply any needed adjustments to ADDR, returning an adjusted but
-     still unrelocated address.  */
-  unrelocated_addr adjust (unrelocated_addr addr);
-
   /* Apply any needed adjustments to ADDR and then relocate the
      address according to the objfile's section offsets, returning a
      relocated address.  */

@@ -1210,17 +1210,6 @@ dwarf2_invalid_attrib_class_complaint (const char *arg1, const char *arg2)
 
 /* See read.h.  */
 
-unrelocated_addr
-dwarf2_per_objfile::adjust (unrelocated_addr addr)
-{
-  CORE_ADDR baseaddr = objfile->text_section_offset ();
-  CORE_ADDR tem = (CORE_ADDR) addr + baseaddr;
-  tem = gdbarch_adjust_dwarf2_addr (objfile->arch (), tem);
-  return (unrelocated_addr) (tem - baseaddr);
-}
-
-/* See read.h.  */
-
 CORE_ADDR
 dwarf2_per_objfile::relocate (unrelocated_addr addr)
 {
