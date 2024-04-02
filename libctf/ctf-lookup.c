@@ -1045,7 +1045,9 @@ ctf_lookup_by_sym_or_name (ctf_dict_t *fp, unsigned long symidx,
     }
 
   err = ECTF_NOSYMTAB;
-  if (sp->cts_data == NULL)
+  if (sp->cts_data == NULL && symname == NULL &&
+      ((is_function && !fp->ctf_funcidx_names) ||
+       (!is_function && !fp->ctf_objtidx_names)))
     goto try_parent;
 
   /* This covers both out-of-range lookups by index and a dynamic dict which
