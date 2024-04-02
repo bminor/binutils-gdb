@@ -455,7 +455,7 @@ ctf_symidx_sort (ctf_dict_t *fp, uint32_t *idx, size_t *nidx,
   if (!(fp->ctf_header->cth_flags & CTF_F_IDXSORTED))
     {
       ctf_symidx_sort_arg_cb_t arg = { fp, idx };
-      ctf_dprintf ("Index section unsorted: sorting.");
+      ctf_dprintf ("Index section unsorted: sorting.\n");
       ctf_qsort_r (sorted, *nidx, sizeof (uint32_t), sort_symidx_by_name, &arg);
       fp->ctf_header->cth_flags |= CTF_F_IDXSORTED;
     }
