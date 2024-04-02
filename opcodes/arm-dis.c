@@ -7965,6 +7965,30 @@ print_mve_size (struct disassemble_info *info,
     }
 }
 
+/* Return true if INSN is a shift insn with an immediate shift amount
+   which needs decoding as per print_mve_shift_n.  */
+
+static bool
+mve_shift_insn_p (enum mve_instructions insn)
+{
+  switch (insn)
+    {
+    case MVE_VQSHL_T2:
+    case MVE_VQSHLU_T3:
+    case MVE_VRSHR:
+    case MVE_VRSHRN:
+    case MVE_VSHL_T1:
+    case MVE_VSHLL_T1:
+    case MVE_VSHR:
+    case MVE_VSHRN:
+    case MVE_VSLI:
+    case MVE_VSRI:
+      return true;
+    default:
+      return false;
+    }
+}
+
 static void
 print_mve_shift_n (struct disassemble_info *info, long given,
 		   enum mve_instructions matched_insn)
@@ -10225,16 +10249,7 @@ print_insn_mve (struct disassemble_info *info, long given)
 				  arm_regnames[value]);
 			    break;
 			  case 'd':
-			    if (insn->mve_op == MVE_VQSHL_T2
-				|| insn->mve_op == MVE_VQSHLU_T3
-				|| insn->mve_op == MVE_VRSHR
-				|| insn->mve_op == MVE_VRSHRN
-				|| insn->mve_op == MVE_VSHL_T1
-				|| insn->mve_op == MVE_VSHLL_T1
-				|| insn->mve_op == MVE_VSHR
-				|| insn->mve_op == MVE_VSHRN
-				|| insn->mve_op == MVE_VSLI
-				|| insn->mve_op == MVE_VSRI)
+			    if (mve_shift_insn_p (insn->mve_op))
 			      print_mve_shift_n (info, given, insn->mve_op);
 			    else if (insn->mve_op == MVE_VSHLL_T2)
 			      {
