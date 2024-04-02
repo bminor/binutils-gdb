@@ -24,6 +24,8 @@
  *	First the basic C types.
  */
 
+#include <stdlib.h>
+
 #if !defined (__STDC__) && !defined (_AIX)
 #define signed  /**/
 #endif
@@ -234,9 +236,6 @@ func_type v_func_type;
 
 int main ()
 {
-  /* Ensure that malloc is a pointer type; avoid use of "void" and any include files. */
-/*  extern char *malloc();*/
-
   /* Some of the tests in ptype.exp require invoking malloc, so make
      sure it is linked in to this program.  */
   v_char_pointer = (char *) malloc (1);
