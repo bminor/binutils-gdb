@@ -5,4 +5,20 @@ repos:
     rev: 24.3.0
     hooks:
       - id: black
-        files: 'gdb/.*'
+        types_or: [file]
+        files: 'gdb/.*\.py(\.in)?$'
+  - repo:  https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+    - id: flake8
+      types_or: [file]
+      # Note this one is only run on gdb/python, not (for now) the
+      # test suite.
+      files: 'gdb/python/.*\.py(\.in)?$'
+      args: [--config, gdb/setup.cfg]
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+    - id: isort
+      types_or: [file]
+      files: 'gdb/.*\.py(\.in)?$'
