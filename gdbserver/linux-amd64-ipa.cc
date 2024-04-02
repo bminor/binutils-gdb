@@ -23,10 +23,6 @@
 #include "linux-x86-tdesc.h"
 #include "gdbsupport/x86-xstate.h"
 
-/* Defined in auto-generated file amd64-linux.c.  */
-void init_registers_amd64_linux (void);
-extern const struct target_desc *tdesc_amd64_linux;
-
 /* fast tracepoints collect registers.  */
 
 #define FT_CR_RIP 0
