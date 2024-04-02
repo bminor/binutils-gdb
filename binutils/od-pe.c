@@ -138,7 +138,7 @@ static const struct xlat_table section_flag_xlat[] =
   { IMAGE_SCN_LNK_NRELOC_OVFL, "NRELOC OVFL" },
   { IMAGE_SCN_MEM_NOT_CACHED,  "NOT CACHED" },
   { IMAGE_SCN_MEM_NOT_PAGED,   "NOT PAGED" },
-  { IMAGE_SCN_MEM_SHARED,      "SHARED" },    
+  { IMAGE_SCN_MEM_SHARED,      "SHARED" },
   { 0, NULL }
 };
 
@@ -591,7 +591,44 @@ dump_pe_file_header (bfd *                            abfd,
     printf (_("\n  Optional header not present\n"));
 }
 
-/* Dump the sections header.  */
+static void
+dump_alignment (unsigned int flags)
+{
+  flags &= IMAGE_SCN_ALIGN_POWER_BIT_MASK;
+
+  if (flags == IMAGE_SCN_ALIGN_8192BYTES)
+    printf (_("Align: 8192 "));
+  else if (flags == IMAGE_SCN_ALIGN_4096BYTES)
+    printf (_("Align: 4096 "));
+  else if (flags == IMAGE_SCN_ALIGN_2048BYTES)
+    printf (_("Align: 2048 "));
+  else if (flags == IMAGE_SCN_ALIGN_1024BYTES)
+    printf (_("Align: 1024 "));
+  else if (flags == IMAGE_SCN_ALIGN_512BYTES)
+    printf (_("Align: 512 "));
+  else if (flags == IMAGE_SCN_ALIGN_256BYTES)
+    printf (_("Align: 256 "));
+  else if (flags == IMAGE_SCN_ALIGN_128BYTES)
+    printf (_("Align: 128 "));
+  else if (flags == IMAGE_SCN_ALIGN_64BYTES)
+    printf (_("Align: 64 "));
+  else if (flags == IMAGE_SCN_ALIGN_32BYTES)
+    printf (_("Align: 32 "));
+  else if (flags == IMAGE_SCN_ALIGN_16BYTES)
+    printf (_("Align: 16 "));
+  else if (flags == IMAGE_SCN_ALIGN_8BYTES)
+    printf (_("Align: 8 "));
+  else if (flags == IMAGE_SCN_ALIGN_4BYTES)
+    printf (_("Align: 4 "));
+  else if (flags == IMAGE_SCN_ALIGN_2BYTES)
+    printf (_("Align: 2 "));
+  else if (flags == IMAGE_SCN_ALIGN_1BYTES)
+    printf (_("Align: 1 "));
+  else
+    printf (_("Align: *unknown* "));
+}
+
+/* Dump the section's header.  */
 
 static void
 dump_pe_sections_header (bfd *                            abfd,
@@ -656,12 +693,14 @@ dump_pe_sections_header (bfd *                            abfd,
       else
 	printf (_("\n            Flags: %08x: "), flags);
 
-      if (flags != 0)
-        {
-	  /* Skip the alignment bits.  */
+      if (flags & IMAGE_SCN_ALIGN_POWER_BIT_MASK)
+	{
+	  dump_alignment (flags);
 	  flags &= ~ IMAGE_SCN_ALIGN_POWER_BIT_MASK;
-          dump_flags (section_flag_xlat, flags);
-        }
+	}
+
+      if (flags != 0)
+	dump_flags (section_flag_xlat, flags);
 
       putchar ('\n');
     }

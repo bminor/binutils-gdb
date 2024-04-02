@@ -1463,6 +1463,7 @@ if [is_elf_format] {
 run_dump_test "pr23633"
 
 run_dump_test "set-section-alignment"
+run_dump_test "section-alignment"
 
 setup_xfail "hppa*-*-*"
 setup_xfail "spu-*-*"

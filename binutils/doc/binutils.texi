@@ -1737,6 +1737,10 @@ above.  If @var{sectionpattern} does not match any sections in the
 input file, a warning will be issued, unless
 @option{--no-change-warnings} is used.
 
+Note - changing the VMA of sections in a fully linked binary can be
+dangerous since there may be code that expects the sections to be
+located at their old address.
+
 @item --change-warnings
 @itemx --adjust-warnings
 If @option{--change-section-address} or @option{--change-section-lma} or
@@ -1766,7 +1770,14 @@ SHF_X86_64_LARGE.
 @item --set-section-alignment @var{sectionpattern}=@var{align}
 Set the alignment for any sections matching @var{sectionpattern}.
 @var{align} specifies the alignment in bytes and must be a power of
-two, i.e. 1, 2, 4, 8@dots{}. 
+two, i.e. 1, 2, 4, 8@dots{}.
+
+Note - setting a section's alignment will not automatically align its
+LMA or VMA addresses.  If those need to be changed as well then the
+@option{--change-section-lma} and/or @option{--change-section-vma}
+options should be used.  Also note that changing VMAs can cause
+problems in fully linked binaries where there may be code that expects
+the contents of the sections to be located at their old address.
 
 @item --add-section @var{sectionname}=@var{filename}
 Add a new section named @var{sectionname} while copying the file.  The
@@ -2129,10 +2140,20 @@ for dlls.
 [This option is specific to PE targets.]
 
 @item --section-alignment @var{num}
-Sets the section alignment field in the PE header.  Sections in memory
-will always begin at addresses which are a multiple of this number.
-Defaults to 0x1000.
 [This option is specific to PE targets.]
+
+Sets the section alignment field in the PE header - if one is present
+in the binary.  Sections in memory will always begin at addresses
+which are a multiple of this number.  Defaults to 0x1000.
+
+Note - this option will also set the alignment field in each section's
+flags.
+
+Note - if a section's LMA or VMA addresses are no longer aligned, and
+those addresses have not been set via the @option{--set-section-lma} or
+@option{--set-section-vma} options, and the file has been fully
+relocated then a warning message will be issued.  It will then be up
+to the user to decide if the LMA and VMA need updating.
 
 @item --stack @var{reserve}
 @itemx --stack @var{reserve},@var{commit}
