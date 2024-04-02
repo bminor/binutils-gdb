@@ -239,7 +239,8 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
  oom:
   ctf_set_errno (fp, errno);
  err:
-  ctf_err_warn (fp, 1, 0, _("cannot format name dumping type 0x%lx"), id);
+  ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot format name dumping type 0x%lx"),
+		id);
   free (buf);
   free (str);
   free (bit);
