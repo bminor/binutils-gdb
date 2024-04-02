@@ -333,13 +333,12 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 		    ? ", " : "",
 		    fp->ctf_openflags & CTF_F_NEWFUNCINFO
 		    ? "CTF_F_NEWFUNCINFO" : "",
-		    (fp->ctf_openflags & (CTF_F_COMPRESS | CTF_F_NEWFUNCINFO))
+		    (fp->ctf_openflags & (CTF_F_NEWFUNCINFO))
 		    && (fp->ctf_openflags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO))
 		    ? ", " : "",
 		    fp->ctf_openflags & CTF_F_IDXSORTED
 		    ? "CTF_F_IDXSORTED" : "",
-		    fp->ctf_openflags & (CTF_F_COMPRESS | CTF_F_NEWFUNCINFO
-					 | CTF_F_IDXSORTED)
+		    fp->ctf_openflags & (CTF_F_IDXSORTED)
 		    && (fp->ctf_openflags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO
 					      | CTF_F_IDXSORTED))
 		    ? ", " : "",
