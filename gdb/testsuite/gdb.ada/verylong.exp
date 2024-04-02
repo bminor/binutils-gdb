@@ -29,15 +29,29 @@ clean_restart ${testfile}
 set bp_location [gdb_get_line_number "START" ${testdir}/prog.adb]
 runto "prog.adb:$bp_location"
 
-gdb_test "print x" " = 170141183460469231731687303715884105727"
-gdb_test "print x / 2" " = 85070591730234615865843651857942052863"
-gdb_test "print (x / 4) * 2" " = 85070591730234615865843651857942052862"
+set lll_int_size 0
+gdb_test_multiple "ptype Long_Long_Long_Integer" "" {
+    -re -wrap "type = <8-byte integer>" {
+	set lll_int_size 8
+	set max 9223372036854775807
+    }
+    -re -wrap "type = <16-byte integer>" {
+	set lll_int_size 16
+	set max 170141183460469231731687303715884105727
+    }
+}
+
+require {expr $lll_int_size == 8 || $lll_int_size == 16}
+
+gdb_test "print x" " = $max"
+gdb_test "print x / 2" " = [expr $max / 2]"
+gdb_test "print (x / 4) * 2" " = [expr ($max / 4) * 2]"
 gdb_test "print x - x" " = 0"
-gdb_test "print x - 99 + 1" " = 170141183460469231731687303715884105629"
-gdb_test "print -x" " = -170141183460469231731687303715884105727"
-gdb_test "print +x" " = 170141183460469231731687303715884105727"
+gdb_test "print x - 99 + 1" " = [expr $max - 99 + 1]"
+gdb_test "print -x" " = -$max"
+gdb_test "print +x" " = $max"
 
 gdb_test "print 170141183460469231731687303715884105727" \
     " = 170141183460469231731687303715884105727"
-gdb_test "print x = 170141183460469231731687303715884105727" \
+gdb_test "print x = $max" \
     " = true"
