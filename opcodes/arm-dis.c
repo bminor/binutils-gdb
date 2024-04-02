@@ -7975,6 +7975,10 @@ mve_shift_insn_p (enum mve_instructions insn)
     {
     case MVE_VQSHL_T2:
     case MVE_VQSHLU_T3:
+    case MVE_VQSHRN:
+    case MVE_VQSHRUN:
+    case MVE_VQRSHRN:
+    case MVE_VQRSHRUN:
     case MVE_VRSHR:
     case MVE_VRSHRN:
     case MVE_VSHL_T1:
