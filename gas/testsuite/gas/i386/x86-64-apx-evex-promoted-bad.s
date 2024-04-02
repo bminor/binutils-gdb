@@ -48,12 +48,3 @@ _start:
 
 	# pop2 %r11, %r11
 	.insn EVEX.L0.NP.M4.W0 0x8f/0, {sae}, %xmm11, %xmm11
-
-	# aesenc128kl (%rax), %xmm20
-	.insn EVEX.L0.F3.M4.W0 0xdc, (%rax), %xmm20
-
-	# sha1msg1 %xmm20, %xmm0
-	.insn EVEX.L0.NP.M4.W0 0xd9, %xmm20, %xmm0
-
-	# sha1msg1 (%rax), %xmm20
-	.insn EVEX.L0.NP.M4.W0 0xd9, (%rax), %xmm20

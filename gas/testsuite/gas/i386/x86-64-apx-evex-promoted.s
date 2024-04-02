@@ -6,14 +6,6 @@ _start:
 	aadd	%r31,0x123(%r31,%rax,4)
 	aand	%r25d,0x123(%r31,%rax,4)
 	aand	%r31,0x123(%r31,%rax,4)
-	aesdec128kl	0x123(%r31,%rax,4),%xmm12
-	aesdec256kl	0x123(%r31,%rax,4),%xmm12
-	aesdecwide128kl	0x123(%r31,%rax,4)
-	aesdecwide256kl	0x123(%r31,%rax,4)
-	aesenc128kl	0x123(%r31,%rax,4),%xmm12
-	aesenc256kl	0x123(%r31,%rax,4),%xmm12
-	aesencwide128kl	0x123(%r31,%rax,4)
-	aesencwide256kl	0x123(%r31,%rax,4)
 	aor	%r25d,0x123(%r31,%rax,4)
 	aor	%r31,0x123(%r31,%rax,4)
 	axor	%r25d,0x123(%r31,%rax,4)
@@ -78,8 +70,6 @@ _start:
 	crc32w	%r31w, %r21d
 	crc32w	(%r31),%r21d
 	crc32	%rax, %r18
-	encodekey128	%r25d,%edx
-	encodekey256	%r25d,%edx
 	enqcmd	0x123(%r31d,%eax,4),%r25d
 	enqcmd	0x123(%r31,%rax,4),%r31
 	enqcmds	0x123(%r31d,%eax,4),%r25d
@@ -127,13 +117,6 @@ _start:
 	pext	%r31,%r15,%r11
 	pext	0x123(%r31,%rax,4),%r25d,%edx
 	pext	0x123(%r31,%rax,4),%r31,%r15
-	sha1msg1	0x123(%r31,%rax,4),%xmm12
-	sha1msg2	0x123(%r31,%rax,4),%xmm12
-	sha1nexte	0x123(%r31,%rax,4),%xmm12
-	sha1rnds4	$0x7b,0x123(%r31,%rax,4),%xmm12
-	sha256msg1	0x123(%r31,%rax,4),%xmm12
-	sha256msg2	0x123(%r31,%rax,4),%xmm12
-	sha256rnds2	0x123(%r31,%rax,4),%xmm12
 	shlx	%r25d,%edx,%r10d
 	shlx	%r25d,0x123(%r31,%rax,4),%edx
 	shlx	%r31,%r15,%r11
@@ -166,14 +149,6 @@ _start:
 	aadd	[r31+rax*4+0x123],r31
 	aand	[r31+rax*4+0x123],r25d
 	aand	[r31+rax*4+0x123],r31
-	aesdec128kl	xmm12,[r31+rax*4+0x123]
-	aesdec256kl	xmm12,[r31+rax*4+0x123]
-	aesdecwide128kl	[r31+rax*4+0x123]
-	aesdecwide256kl	[r31+rax*4+0x123]
-	aesenc128kl	xmm12,[r31+rax*4+0x123]
-	aesenc256kl	xmm12,[r31+rax*4+0x123]
-	aesencwide128kl	[r31+rax*4+0x123]
-	aesencwide256kl	[r31+rax*4+0x123]
 	aor	[r31+rax*4+0x123],r25d
 	aor	[r31+rax*4+0x123],r31
 	axor	[r31+rax*4+0x123],r25d
@@ -238,8 +213,6 @@ _start:
 	crc32	r21d,r31w
 	crc32	r21d,WORD PTR [r31]
 	crc32	r18,rax
-	encodekey128	edx,r25d
-	encodekey256	edx,r25d
 	enqcmd	r25d,[r31d+eax*4+0x123]
 	enqcmd	r31,[r31+rax*4+0x123]
 	enqcmds	r25d,[r31d+eax*4+0x123]
@@ -287,13 +260,6 @@ _start:
 	pext	r11,r15,r31
 	pext	edx,r25d,DWORD PTR [r31+rax*4+0x123]
 	pext	r15,r31,QWORD PTR [r31+rax*4+0x123]
-	sha1msg1	xmm12,XMMWORD PTR [r31+rax*4+0x123]
-	sha1msg2	xmm12,XMMWORD PTR [r31+rax*4+0x123]
-	sha1nexte	xmm12,XMMWORD PTR [r31+rax*4+0x123]
-	sha1rnds4	xmm12,XMMWORD PTR [r31+rax*4+0x123],0x7b
-	sha256msg1	xmm12,XMMWORD PTR [r31+rax*4+0x123]
-	sha256msg2	xmm12,XMMWORD PTR [r31+rax*4+0x123]
-	sha256rnds2	xmm12,XMMWORD PTR [r31+rax*4+0x123]
 	shlx	r10d,edx,r25d
 	shlx	edx,DWORD PTR [r31+rax*4+0x123],r25d
 	shlx	r11,r15,r31

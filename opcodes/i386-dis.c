@@ -1198,13 +1198,6 @@ enum
   PREFIX_EVEX_0F3A67,
   PREFIX_EVEX_0F3AC2,
 
-  PREFIX_EVEX_MAP4_D8,
-  PREFIX_EVEX_MAP4_DA,
-  PREFIX_EVEX_MAP4_DB,
-  PREFIX_EVEX_MAP4_DC,
-  PREFIX_EVEX_MAP4_DD,
-  PREFIX_EVEX_MAP4_DE,
-  PREFIX_EVEX_MAP4_DF,
   PREFIX_EVEX_MAP4_F0,
   PREFIX_EVEX_MAP4_F1,
   PREFIX_EVEX_MAP4_F2,
@@ -12828,11 +12821,6 @@ print_vector_reg (instr_info *ins, unsigned int reg, int bytemode)
   else
     names = att_names_xmm;
   oappend_register (ins, names[reg]);
-
-  /* Legacy insns promoted to EVEX, like the legacy insns themselves, don't
-     allow use of the upper 16 vector registers.  */
-  if (ins->evex_type == evex_from_legacy && reg >= 16)
-    oappend (ins, "(bad)");
 }
 
 static bool

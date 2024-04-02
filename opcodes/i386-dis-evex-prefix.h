@@ -338,41 +338,6 @@
     { "vcmpp%XH", { MaskG, Vex, EXxh, EXxEVexS, CMP }, 0 },
     { "vcmps%XH", { MaskG, VexScalar, EXw, EXxEVexS, CMP }, 0 },
   },
-  /* PREFIX_EVEX_MAP4_D8 */
-  {
-    { "sha1nexte", { XM, EXxmm }, 0 },
-    { REG_TABLE (REG_0F38D8_PREFIX_1) },
-  },
-  /* PREFIX_EVEX_MAP4_DA */
-  {
-    { "sha1msg2", { XM, EXxmm }, 0 },
-    { "encodekey128", { Gd, Rd }, 0 },
-  },
-  /* PREFIX_EVEX_MAP4_DB */
-  {
-    { "sha256rnds2", { XM, EXxmm, XMM0 }, 0 },
-    { "encodekey256", { Gd, Rd }, 0 },
-  },
-  /* PREFIX_EVEX_MAP4_DC */
-  {
-    { "sha256msg1", { XM, EXxmm }, 0 },
-    { "aesenc128kl", { XM, M }, 0 },
-  },
-  /* PREFIX_EVEX_MAP4_DD */
-  {
-    { "sha256msg2", { XM, EXxmm }, 0 },
-    { "aesdec128kl", { XM, M }, 0 },
-  },
-  /* PREFIX_EVEX_MAP4_DE */
-  {
-    { Bad_Opcode },
-    { "aesenc256kl", { XM, M }, 0 },
-  },
-  /* PREFIX_EVEX_MAP4_DF */
-  {
-    { Bad_Opcode },
-    { "aesdec256kl", { XM, M }, 0 },
-  },
   /* PREFIX_EVEX_MAP4_F0 */
   {
     { "crc32A", { Gdq, Eb }, 0 },

@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Remove KEYLOCKER and SHA promotions from EVEX MAP4.
+
 * References to FB and dollar labels, when supported, are no longer permitted
   in a radix other than 10.  (Note that definitions of such labels were already
   thus restricted, except that leading zeroes were permitted.)
