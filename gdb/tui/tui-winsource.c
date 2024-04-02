@@ -467,6 +467,16 @@ tui_source_window_base::rerender ()
       struct symtab *s = find_pc_line_symtab (get_frame_pc (frame));
       if (this != TUI_SRC_WIN)
 	find_line_pc (s, cursal.line, &cursal.pc);
+
+      /* This centering code is copied from tui_source_window::maybe_update.
+	 It would be nice to do centering more often, and do it in just one
+	 location.  But since this is a regression fix, handle this
+	 conservatively for now.  */
+      int start_line = (cursal.line - ((height - box_size ()) / 2)) + 1;
+      if (start_line <= 0)
+	start_line = 1;
+      cursal.line = start_line;
+
       update_source_window (gdbarch, cursal);
     }
   else

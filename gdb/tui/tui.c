@@ -466,7 +466,7 @@ tui_enable (void)
       tui_set_term_width_to (COLS);
       def_prog_mode ();
 
-      tui_show_frame_info (0);
+      tui_show_frame_info (deprecated_safe_get_selected_frame ());
       tui_set_initial_layout ();
       tui_set_win_focus_to (TUI_SRC_WIN);
       keypad (TUI_CMD_WIN->handle.get (), TRUE);
