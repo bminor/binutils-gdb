@@ -2,6 +2,8 @@
 
 Changes in 2.42.1:
 
+* Remove KEYLOCKER and SHA promotions from EVEX MAP4.
+
 * The options to enable the AArch64 SVE2.1, SME2.1 and B16B16 extensions have
   been disabled, because of a number of known issues with their implementation
   in the 2.42 release.

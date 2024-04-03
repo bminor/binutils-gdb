@@ -2144,21 +2144,13 @@ bndldx, 0x0f1a, MPX, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex, RegBND }
 
 // SHA instructions.
 sha1rnds4, 0xf3acc, SHA, Modrm|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
-sha1rnds4, 0xd4, SHA&APX_F, Modrm|NoSuf|EVexMap4, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 sha1nexte, 0xf38c8, SHA, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-sha1nexte, 0xd8, SHA&APX_F, Modrm|NoSuf|EVexMap4, { RegXMM|Unspecified|BaseIndex, RegXMM }
 sha1msg1, 0xf38c9, SHA, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-sha1msg1, 0xd9, SHA&APX_F, Modrm|NoSuf|EVexMap4, { RegXMM|Unspecified|BaseIndex, RegXMM }
 sha1msg2, 0xf38ca, SHA, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-sha1msg2, 0xda, SHA&APX_F, Modrm|NoSuf|EVexMap4, { RegXMM|Unspecified|BaseIndex, RegXMM }
 sha256rnds2, 0xf38cb, SHA, Modrm|NoSuf, { Acc|Xmmword, RegXMM|Unspecified|BaseIndex, RegXMM }
-sha256rnds2, 0xdb, SHA&APX_F, Modrm|NoSuf|EVexMap4, { Acc|Xmmword, RegXMM|Unspecified|BaseIndex, RegXMM }
 sha256rnds2, 0xf38cb, SHA, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-sha256rnds2, 0xdb, SHA&APX_F, Modrm|NoSuf|EVexMap4, { RegXMM|Unspecified|BaseIndex, RegXMM }
 sha256msg1, 0xf38cc, SHA, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-sha256msg1, 0xdc, SHA&APX_F, Modrm|NoSuf|EVexMap4, { RegXMM|Unspecified|BaseIndex, RegXMM }
 sha256msg2, 0xf38cd, SHA, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-sha256msg2, 0xdd, SHA&APX_F, Modrm|NoSuf|EVexMap4, { RegXMM|Unspecified|BaseIndex, RegXMM }
 
 // SHA512 instructions.
 
@@ -3273,25 +3265,15 @@ tilezero, 0xf249, AMX_TILE, Modrm|Vex128|Space0F38|VexW0|NoSuf, { RegTMM }
 
 loadiwkey, 0xf30f38dc, KL, Load|Modrm|NoSuf, { RegXMM, RegXMM }
 encodekey128, 0xf30f38fa, KL, Modrm|NoSuf, { Reg32, Reg32 }
-encodekey128, 0xf3da, KL&APX_F, Modrm|NoSuf|EVexMap4, { Reg32, Reg32 }
 encodekey256, 0xf30f38fb, KL, Modrm|NoSuf, { Reg32, Reg32 }
-encodekey256, 0xf3db, KL&APX_F, Modrm|NoSuf|EVexMap4, { Reg32, Reg32 }
 aesenc128kl, 0xf30f38dc, KL, Modrm|NoSuf, { Unspecified|BaseIndex, RegXMM }
-aesenc128kl, 0xf3dc, KL&APX_F, Modrm|NoSuf|EVexMap4, { Unspecified|BaseIndex, RegXMM }
 aesdec128kl, 0xf30f38dd, KL, Modrm|NoSuf, { Unspecified|BaseIndex, RegXMM }
-aesdec128kl, 0xf3dd, KL&APX_F, Modrm|NoSuf|EVexMap4, { Unspecified|BaseIndex, RegXMM }
 aesenc256kl, 0xf30f38de, KL, Modrm|NoSuf, { Unspecified|BaseIndex, RegXMM }
-aesenc256kl, 0xf3de, KL&APX_F, Modrm|NoSuf|EVexMap4, { Unspecified|BaseIndex, RegXMM }
 aesdec256kl, 0xf30f38df, KL, Modrm|NoSuf, { Unspecified|BaseIndex, RegXMM }
-aesdec256kl, 0xf3df, KL&APX_F, Modrm|NoSuf|EVexMap4, { Unspecified|BaseIndex, RegXMM }
 aesencwide128kl, 0xf30f38d8/0, WideKL, Modrm|NoSuf, { Unspecified|BaseIndex }
-aesencwide128kl, 0xf3d8/0, WideKL&APX_F, Modrm|NoSuf|EVexMap4, { Unspecified|BaseIndex }
 aesdecwide128kl, 0xf30f38d8/1, WideKL, Modrm|NoSuf, { Unspecified|BaseIndex }
-aesdecwide128kl, 0xf3d8/1, WideKL&APX_F, Modrm|NoSuf|EVexMap4, { Unspecified|BaseIndex }
 aesencwide256kl, 0xf30f38d8/2, WideKL, Modrm|NoSuf, { Unspecified|BaseIndex }
-aesencwide256kl, 0xf3d8/2, WideKL&APX_F, Modrm|NoSuf|EVexMap4, { Unspecified|BaseIndex }
 aesdecwide256kl, 0xf30f38d8/3, WideKL, Modrm|NoSuf, { Unspecified|BaseIndex }
-aesdecwide256kl, 0xf3d8/3, WideKL&APX_F, Modrm|NoSuf|EVexMap4, { Unspecified|BaseIndex }
 
 // KEYLOCKER instructions end.
 
