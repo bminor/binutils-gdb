@@ -4248,14 +4248,17 @@ process_debug_info (struct dwarf_section * section,
 			  compunit.cu_version,
 			  debug_info_p);
 
-	      /* This check was in place before, keep it.  */
-	      stemp = debug_info_p->rnglists_base;
-	      if (stemp < 0)
+	      if (debug_info_p)
 		{
-		  warn (_("CU @ %#" PRIx64 " has has a negative rnglists_base "
-			  "value of %#" PRIx64 " - treating as zero"),
-			debug_info_p->cu_offset, stemp);
-		  debug_info_p->rnglists_base = 0;
+		  /* This check was in place before, keep it.  */
+		  stemp = debug_info_p->rnglists_base;
+		  if (stemp < 0)
+		    {
+		      warn (_("CU @ %#" PRIx64 " has has a negative rnglists_base "
+			      "value of %#" PRIx64 " - treating as zero"),
+			    debug_info_p->cu_offset, stemp);
+		      debug_info_p->rnglists_base = 0;
+		    }
 		}
 	    }
 
