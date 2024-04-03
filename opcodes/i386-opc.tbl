@@ -3021,8 +3021,8 @@ saveprevssp, 0xf30f01ea, SHSTK, NoSuf, {}
 rstorssp, 0xf30f01/5, SHSTK, Modrm|NoSuf, { Qword|Unspecified|BaseIndex }
 wrssd, 0x0f38f6, SHSTK, Modrm|IgnoreSize|NoSuf, { Reg32, Dword|Unspecified|BaseIndex }
 wrssd, 0x66, SHSTK&APX_F, Modrm|NoSuf|EVexMap4, { Reg32, Dword|Unspecified|BaseIndex }
-wrssq, 0x0f38f6, SHSTK&x64, Modrm|NoSuf|Size64, { Reg64, Qword|Unspecified|BaseIndex }
-wrssq, 0x66, SHSTK&APX_F, Modrm|NoSuf|Size64|EVexMap4, { Reg64, Qword|Unspecified|BaseIndex }
+wrssq, 0x0f38f6, SHSTK&x64, Modrm|NoSuf, { Reg64, Qword|Unspecified|BaseIndex }
+wrssq, 0x66, SHSTK&APX_F, Modrm|NoSuf|EVexMap4, { Reg64, Qword|Unspecified|BaseIndex }
 wrussd, 0x660f38f5, SHSTK, Modrm|IgnoreSize|NoSuf, { Reg32, Dword|Unspecified|BaseIndex }
 wrussd, 0x6665, SHSTK&APX_F, Modrm|NoSuf|EVexMap4, { Reg32, Dword|Unspecified|BaseIndex }
 wrussq, 0x660f38f5, SHSTK&x64, Modrm|NoSuf, { Reg64, Qword|Unspecified|BaseIndex }
