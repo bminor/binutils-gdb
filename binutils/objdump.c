@@ -1652,6 +1652,42 @@ objdump_print_addr_with_sym (bfd *abfd, asection *sec, asymbol *sym,
 			      (long int)(sec->filepos + (vma - sec->vma)));
 }
 
+/* Displays all symbols in the sorted symbol table starting at PLACE
+   which match the address VMA.  Assumes that show_all_symbols == true.  */
+
+static void
+display_extra_syms (long place,
+		    bfd_vma vma,
+		    struct disassemble_info *inf)
+{
+  struct objdump_disasm_info *aux = (struct objdump_disasm_info *) inf->application_data;
+
+  if (place == 0)
+    return;
+
+  bool first = true;
+
+  for (; place < sorted_symcount; place++)
+    {
+      asymbol *sym = sorted_syms[place];
+		  
+      if (bfd_asymbol_value (sym) != vma)
+	break;
+
+      if (! inf->symbol_is_valid (sym, inf))
+	continue;
+
+      if (first && ! do_wide)
+	inf->fprintf_styled_func (inf->stream, dis_style_immediate, ",\n\t<");
+      else  
+	inf->fprintf_styled_func (inf->stream, dis_style_immediate, ", <");
+
+      objdump_print_symname (aux->abfd, inf, sym);
+      inf->fprintf_styled_func (inf->stream, dis_style_immediate, ">");
+      first = false;
+    }
+}
+		    
 /* Print an address (VMA), symbolically if possible.
    If SKIP_ZEROES is TRUE, don't output leading zeroes.  */
 
@@ -1663,6 +1699,7 @@ objdump_print_addr (bfd_vma vma,
   struct objdump_disasm_info *aux;
   asymbol *sym = NULL;
   bool skip_find = false;
+  long place = 0;
 
   aux = (struct objdump_disasm_info *) inf->application_data;
 
@@ -1696,10 +1733,34 @@ objdump_print_addr (bfd_vma vma,
     }
 
   if (!skip_find)
-    sym = find_symbol_for_address (vma, inf, NULL);
+    sym = find_symbol_for_address (vma, inf, &place);
 
   objdump_print_addr_with_sym (aux->abfd, inf->section, sym, vma, inf,
 			       skip_zeroes);
+
+  /* If requested, display any extra symbols at this address.  */
+  if (sym == NULL || ! show_all_symbols)
+    return;
+
+  if (place)
+    display_extra_syms (place + 1, vma, inf);
+    
+  /* If we found an absolute symbol in the reloc (ie: "*ABS*+0x....")
+     and there is a valid symbol at the address contained in the absolute symbol
+     then display any extra symbols that match this address.  This helps
+     particularly with relocations for PLT entries.  */
+  if (startswith (sym->name, BFD_ABS_SECTION_NAME "+"))
+    {
+      bfd_vma addr = strtoul (sym->name + strlen (BFD_ABS_SECTION_NAME "+"), NULL, 0);
+
+      if (addr && addr != vma)
+	{
+	  sym = find_symbol_for_address (addr, inf, &place);
+
+	  if (sym)
+	    display_extra_syms (place, addr, inf);
+	}
+    }
 }
 
 /* Print VMA to INFO.  This function is passed to the disassembler
