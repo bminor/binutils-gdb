@@ -3006,7 +3006,7 @@ rdpid, 0xf30fc7/7, RDPID&x64, Modrm|NoSuf|NoRex64, { Reg64 }
 
 // PTWRITE instructions.
 
-ptwrite, 0xf30fae/4, PTWRITE&No64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Reg32|Unspecified|BaseIndex }
+ptwrite, 0xf30fae/4, PTWRITE&No64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Reg32|Unspecified|BaseIndex }
 ptwrite, 0xf30fae/4, PTWRITE&x64, Modrm|No_bSuf|No_wSuf|No_sSuf, { Reg32|Reg64|Unspecified|BaseIndex }
 
 // PTWRITE instructions end.
