@@ -3061,6 +3061,8 @@ windows_nat_target::continue_status_for_event_detaching
 void
 windows_nat_target::detach (inferior *inf, int from_tty)
 {
+  target_announce_detach (from_tty);
+
   DWORD continue_status = DBG_CONTINUE;
 
   /* For any thread the core hasn't resumed, call prepare_resume with
@@ -3175,8 +3177,6 @@ windows_nat_target::detach (inferior *inf, int from_tty)
 			 windows_process.process_id);
       throw_winerror_with_name (msg.c_str (), *err);
     }
-
-  target_announce_detach (from_tty);
 
   x86_cleanup_dregs ();
   switch_to_no_thread ();
