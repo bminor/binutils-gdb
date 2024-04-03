@@ -133,6 +133,7 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "tlsdesc-dso"
     run_dump_test "desc-norelax"
     run_dump_test "desc-relax"
+    run_dump_test "data-got"
   }
 
   if [check_pie_support] {

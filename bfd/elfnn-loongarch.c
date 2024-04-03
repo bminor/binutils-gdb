@@ -127,6 +127,8 @@ struct loongarch_elf_link_hash_table
 
 #define GOT_ENTRY_SIZE (LARCH_ELF_WORD_BYTES)
 
+/* Reserve two entries of GOTPLT for ld.so, one is used for PLT
+   resolver _dl_runtime_resolve, the other is used for link map.  */
 #define GOTPLT_HEADER_SIZE (GOT_ENTRY_SIZE * 2)
 
 #define elf_backend_want_got_plt 1
