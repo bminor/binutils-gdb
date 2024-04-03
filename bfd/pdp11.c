@@ -534,12 +534,12 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
 				 bfd_cleanup (*callback_to_real_object_p) (bfd *))
 {
   struct aout_data_struct *rawptr, *oldrawptr;
-  bfd_cleanup cleanup;
-  size_t amt = sizeof (struct aout_data_struct);
+  bfd_cleanup result;
+  size_t amt = sizeof (*rawptr);
 
   rawptr = bfd_zalloc (abfd, amt);
   if (rawptr == NULL)
-    return 0;
+    return NULL;
 
   oldrawptr = abfd->tdata.aout_data;
   abfd->tdata.aout_data = rawptr;
@@ -549,7 +549,8 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
     *abfd->tdata.aout_data = *oldrawptr;
 
   abfd->tdata.aout_data->a.hdr = &rawptr->e;
-  *(abfd->tdata.aout_data->a.hdr) = *execp;	/* Copy in the internal_exec struct.  */
+  /* Copy in the internal_exec struct.  */
+  *(abfd->tdata.aout_data->a.hdr) = *execp;
   execp = abfd->tdata.aout_data->a.hdr;
 
   /* Set the file flags.  */
@@ -585,7 +586,6 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
 
   abfd->start_address = execp->a_entry;
 
-  obj_aout_symbols (abfd) = NULL;
   abfd->symcount = execp->a_syms / sizeof (struct external_nlist);
 
   /* The default relocation entry size is that of traditional V7 Unix.  */
@@ -599,12 +599,8 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
   bfd_init_window (&obj_aout_string_window (abfd));
 #endif
 
-  obj_aout_external_syms (abfd) = NULL;
-  obj_aout_external_strings (abfd) = NULL;
-  obj_aout_sym_hashes (abfd) = NULL;
-
   if (! NAME (aout, make_sections) (abfd))
-    return NULL;
+    goto error_ret;
 
   obj_datasec (abfd)->size = execp->a_data;
   obj_bsssec (abfd)->size = execp->a_bss;
@@ -654,9 +650,9 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
   /* Determine the architecture and machine type of the object file.  */
   abfd->obj_arch = bfd_arch_obscure;
 
-  adata(abfd)->page_size = TARGET_PAGE_SIZE;
-  adata(abfd)->segment_size = SEGMENT_SIZE;
-  adata(abfd)->exec_bytes_size = EXEC_BYTES_SIZE;
+  adata (abfd)->page_size = TARGET_PAGE_SIZE;
+  adata (abfd)->segment_size = SEGMENT_SIZE;
+  adata (abfd)->exec_bytes_size = EXEC_BYTES_SIZE;
 
   return _bfd_no_cleanup;
 
@@ -670,7 +666,7 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
      header, should cope with them in this callback as well.  */
 #endif	/* DOCUMENTATION */
 
-  cleanup = (*callback_to_real_object_p)(abfd);
+  result = (*callback_to_real_object_p) (abfd);
 
   /* Now that the segment addresses have been worked out, take a better
      guess at whether the file is executable.  If the entry point
@@ -685,7 +681,7 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
 
      To fix this, we now accept any non-zero entry point as an indication of
      executability.  This will work most of the time, since only the linker
-     sets the entry point, and that is likely to be non-zero for most systems. */
+     sets the entry point, and that is likely to be non-zero for most systems.  */
 
   if (execp->a_entry != 0
       || (execp->a_entry >= obj_textsec (abfd)->vma
@@ -708,18 +704,19 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
 	issue.  Many kernels are loaded at non standard addresses.  */
       if (abfd->iostream != NULL
 	  && (abfd->flags & BFD_IN_MEMORY) == 0
-	  && (fstat(fileno((FILE *) (abfd->iostream)), &stat_buf) == 0)
+	  && (fstat (fileno ((FILE *) (abfd->iostream)), &stat_buf) == 0)
 	  && ((stat_buf.st_mode & 0111) != 0))
 	abfd->flags |= EXEC_P;
     }
 #endif /* STAT_FOR_EXEC */
 
-  if (!cleanup)
-    {
-      free (rawptr);
-      abfd->tdata.aout_data = oldrawptr;
-    }
-  return cleanup;
+  if (result)
+    return result;
+
+ error_ret:
+  bfd_release (abfd, rawptr);
+  abfd->tdata.aout_data = oldrawptr;
+  return NULL;
 }
 
 /* Initialize ABFD for use with a.out files.  */
@@ -1279,38 +1276,43 @@ NAME (aout, set_section_contents) (bfd *abfd,
 static bool
 aout_get_external_symbols (bfd *abfd)
 {
+#ifdef USE_MMAP
+  ufile_ptr filesize = bfd_get_file_size (abfd);
+#endif
+
   if (obj_aout_external_syms (abfd) == NULL)
     {
       bfd_size_type count;
-      struct external_nlist *syms;
+      struct external_nlist *syms = NULL;
+      bfd_size_type amt = exec_hdr (abfd)->a_syms;
 
-      count = exec_hdr (abfd)->a_syms / EXTERNAL_NLIST_SIZE;
+      count = amt / EXTERNAL_NLIST_SIZE;
 
       /* PR 17512: file: 011f5a08.  */
       if (count == 0)
-	{
-	  obj_aout_external_syms (abfd) = NULL;
-	  obj_aout_external_sym_count (abfd) = count;
-	  return true;
-	}
+	return true;
 
 #ifdef USE_MMAP
-      if (! bfd_get_file_window (abfd, obj_sym_filepos (abfd),
-				 exec_hdr (abfd)->a_syms,
-				 &obj_aout_sym_window (abfd), true))
-	return false;
-      syms = (struct external_nlist *) obj_aout_sym_window (abfd).data;
+      if (filesize >= (ufile_ptr) obj_sym_filepos (abfd)
+	  && filesize - obj_sym_filepos (abfd) >= amt)
+	{
+	  if (! bfd_get_file_window (abfd, obj_sym_filepos (abfd), amt,
+				     &obj_aout_sym_window (abfd), true))
+	    return false;
+	  syms = (struct external_nlist *) obj_aout_sym_window (abfd).data;
+	}
+      else
 #else
-      /* We allocate using malloc to make the values easy to free
-	 later on.  If we put them on the objalloc it might not be
-	 possible to free them.  */
-      if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
-	return false;
-      syms = (struct external_nlist *)
-	_bfd_malloc_and_read (abfd, count * EXTERNAL_NLIST_SIZE,
-			      count * EXTERNAL_NLIST_SIZE);
-      if (syms == NULL)
-	return false;
+	{
+	  /* We allocate using malloc to make the values easy to free
+	     later on.  If we put them on the objalloc it might not be
+	     possible to free them.  */
+	  if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
+	    return false;
+	  syms = (struct external_nlist *) _bfd_malloc_and_read (abfd, amt, amt);
+	  if (syms == NULL)
+	    return false;
+	}
 #endif
 
       obj_aout_external_syms (abfd) = syms;
@@ -1332,7 +1334,7 @@ aout_get_external_symbols (bfd *abfd)
       stringsize = H_GET_32 (abfd, string_chars);
       if (stringsize == 0)
 	stringsize = 1;
-      else if (stringsize < BYTES_IN_LONG
+      else if (stringsize + 1 < BYTES_IN_LONG + 1
 	       || (size_t) stringsize != stringsize)
 	{
 	  bfd_set_error (bfd_error_bad_value);
@@ -1340,7 +1342,9 @@ aout_get_external_symbols (bfd *abfd)
 	}
 
 #ifdef USE_MMAP
-      if (stringsize >= BYTES_IN_LONG)
+      if (stringsize >= BYTES_IN_LONG
+	  && filesize >= (ufile_ptr) obj_str_filepos (abfd)
+	  && filesize - obj_str_filepos (abfd) >= stringsize + 1)
 	{
 	  if (! bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize + 1,
 				     &obj_aout_string_window (abfd), true))
