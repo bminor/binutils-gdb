@@ -24,6 +24,7 @@ prefix = @prefix@
 infodir = @infodir@
 datarootdir = @datarootdir@
 docdir = @docdir@
+dvidir = @dvidir@
 pdfdir = @pdfdir@
 htmldir = @htmldir@
 mandir = @mandir@
@@ -87,6 +88,8 @@ SET_TEXINPUTS = \
 # Files which should be generated via 'info' and installed by 'install-info'
 INFO_DEPS = gdb.info stabs.info annotate.info
 
+# Files which should be generated via 'dvi' and installed by 'install-dvi'
+DVIFILES = gdb.dvi stabs.dvi refcard.dvi annotate.dvi
 # Files which should be generated via 'pdf' and installed by 'install-pdf'
 PDFFILES = gdb.pdf stabs.pdf refcard.pdf annotate.pdf
 # Files which should be generated via 'html' and installed by 'install-html'
@@ -191,7 +194,7 @@ HAVE_NATIVE_GCORE_HOST = @HAVE_NATIVE_GCORE_HOST@
 all: info
 
 info: $(INFO_DEPS)
-dvi: gdb.dvi stabs.dvi refcard.dvi annotate.dvi
+dvi: $(DVIFILES)
 ps: gdb.ps stabs.ps refcard.ps annotate.ps
 html: $(HTMLFILES)
 pdf: $(PDFFILES)
@@ -233,7 +236,7 @@ Doxyfile-gdb-xref:	$(srcdir)/Doxyfile-gdb-xref.in
 Doxyfile-gdbserver:	$(srcdir)/Doxyfile-gdbserver.in
 	$(doxyedit) $(srcdir)/Doxyfile-gdbserver.in >Doxyfile-gdbserver
 
-all-doc: info dvi ps # pdf
+all-doc: info dvi ps pdf
 diststuff: info man
 	rm -f gdb-cfg.texi
 
@@ -291,6 +294,18 @@ install-html: $(HTMLFILES)
 	    echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(htmldir)/$$f'"; \
 	    $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(htmldir)/$$f"; \
 	  fi; \
+	done
+
+dvi__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+
+install-dvi: $(DVIFILES)
+	@$(NORMAL_INSTALL)
+	test -z "$(dvidir)" || $(mkinstalldirs) "$(DESTDIR)$(dvidir)"
+	@list='$(DVIFILES)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(dvi__strip_dir) \
+	  echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(dvidir)/$$f'"; \
+	  $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(dvidir)/$$f"; \
 	done
 
 pdf__strip_dir = `echo $$p | sed -e 's|^.*/||'`;

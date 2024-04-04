@@ -2055,7 +2055,7 @@ check-headers:
 	done
 .PHONY: check-headers
 
-info install-info clean-info dvi pdf install-pdf html install-html: force
+info install-info clean-info dvi install-dvi pdf install-pdf html install-html: force
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 # Traditionally "install" depends on "all".  But it may be useful

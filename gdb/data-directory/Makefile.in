@@ -429,7 +429,7 @@ maintainer-clean realclean distclean: clean
 .PHONY: install-info install-pdf install-html clean-info
 check installcheck:
 info dvi pdf html:
-install-info install-pdf install-html:
+install-info install-dvi install-pdf install-html:
 clean-info:
 
 # GNU Make has an annoying habit of putting *all* the Makefile variables
