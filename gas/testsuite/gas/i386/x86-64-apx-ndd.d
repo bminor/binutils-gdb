@@ -126,7 +126,10 @@ Disassembly of section .text:
 \s*[a-f0-9]+:\s*62 74 04 10 24 38 02 	shld   \$0x2,%r15d,\(%rax\),%r31d
 \s*[a-f0-9]+:\s*62 54 05 10 24 c4 02 	shld   \$0x2,%r8w,%r12w,%r31w
 \s*[a-f0-9]+:\s*62 7c bc 18 a5 e0    	shld   %cl,%r12,%r16,%r8
+\s*[a-f0-9]+:\s*62 7c bc 18 a5 e0    	shld   %cl,%r12,%r16,%r8
 \s*[a-f0-9]+:\s*62 7c 05 10 a5 2c 83 	shld   %cl,%r13w,\(%r19,%rax,4\),%r31w
+\s*[a-f0-9]+:\s*62 7c 05 10 a5 2c 83 	shld   %cl,%r13w,\(%r19,%rax,4\),%r31w
+\s*[a-f0-9]+:\s*62 74 05 10 a5 08    	shld   %cl,%r9w,\(%rax\),%r31w
 \s*[a-f0-9]+:\s*62 74 05 10 a5 08    	shld   %cl,%r9w,\(%rax\),%r31w
 \s*[a-f0-9]+:\s*62 f4 04 10 c1 20 02 	shl    \$0x2,\(%rax\),%r31d
 \s*[a-f0-9]+:\s*62 f4 04 10 c1 20 02 	shl    \$0x2,\(%rax\),%r31d
@@ -141,7 +144,10 @@ Disassembly of section .text:
 \s*[a-f0-9]+:\s*62 74 04 10 2c 38 02 	shrd   \$0x2,%r15d,\(%rax\),%r31d
 \s*[a-f0-9]+:\s*62 54 05 10 2c c4 02 	shrd   \$0x2,%r8w,%r12w,%r31w
 \s*[a-f0-9]+:\s*62 7c bc 18 ad e0    	shrd   %cl,%r12,%r16,%r8
+\s*[a-f0-9]+:\s*62 7c bc 18 ad e0    	shrd   %cl,%r12,%r16,%r8
 \s*[a-f0-9]+:\s*62 7c 05 10 ad 2c 83 	shrd   %cl,%r13w,\(%r19,%rax,4\),%r31w
+\s*[a-f0-9]+:\s*62 7c 05 10 ad 2c 83 	shrd   %cl,%r13w,\(%r19,%rax,4\),%r31w
+\s*[a-f0-9]+:\s*62 74 05 10 ad 08    	shrd   %cl,%r9w,\(%rax\),%r31w
 \s*[a-f0-9]+:\s*62 74 05 10 ad 08    	shrd   %cl,%r9w,\(%rax\),%r31w
 \s*[a-f0-9]+:\s*62 f4 04 10 c1 28 02 	shr    \$0x2,\(%rax\),%r31d
 \s*[a-f0-9]+:\s*62 f4 05 10 d1 28    	shr    \$1,\(%rax\),%r31w

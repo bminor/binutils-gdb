@@ -120,8 +120,11 @@ _start:
 	shld   $0x2,%r15d,(%rax),%r31d
 	shld   $0x2,%r8w,%r12w,%r31w
 	shld   %cl,%r12,%r16,%r8
+	shld   %r12,%r16,%r8
 	shld   %cl,%r13w,(%r19,%rax,4),%r31w
+	shld   %r13w,(%r19,%rax,4),%r31w
 	shld   %cl,%r9w,(%rax),%r31w
+	shld   %r9w,(%rax),%r31w
 	shll   $0x2,(%rax),%r31d
 	shll   $0x2,(%rax),%r31d
 	shlw   $0x1,(%rax),%r31w
@@ -135,8 +138,11 @@ _start:
 	shrd   $0x2,%r15d,(%rax),%r31d
 	shrd   $0x2,%r8w,%r12w,%r31w
 	shrd   %cl,%r12,%r16,%r8
+	shrd   %r12,%r16,%r8
 	shrd   %cl,%r13w,(%r19,%rax,4),%r31w
+	shrd   %r13w,(%r19,%rax,4),%r31w
 	shrd   %cl,%r9w,(%rax),%r31w
+	shrd   %r9w,(%rax),%r31w
 	shrl   $0x2,(%rax),%r31d
 	shrw   $0x1,(%rax),%r31w
 	shrw   %cl,(%r19,%rax,4),%r31w
