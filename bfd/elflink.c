@@ -12490,18 +12490,23 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
      section, so that we know the sizes of the reloc sections.  We
      also figure out some maximum sizes.  */
 #ifdef USE_MMAP
-  /* Mmap is used only if section size >= the minimum mmap section
-     size.  The initial max_contents_size value covers all sections
-     smaller than the minimum mmap section size.  It may be increased
-     for compressed or linker created sections or sections whose
-     rawsize != size.  max_external_reloc_size covers all relocation
-     sections smaller than the minimum mmap section size.  */
-  max_contents_size = _bfd_minimum_mmap_size;
-  max_external_reloc_size = _bfd_minimum_mmap_size;
-#else
-  max_contents_size = 0;
-  max_external_reloc_size = 0;
+  if (bed->use_mmap)
+    {
+      /* Mmap is used only if section size >= the minimum mmap section
+	 size.  The initial max_contents_size value covers all sections
+	 smaller than the minimum mmap section size.  It may be increased
+	 for compressed or linker created sections or sections whose
+	 rawsize != size.  max_external_reloc_size covers all relocation
+	 sections smaller than the minimum mmap section size.  */
+      max_contents_size = _bfd_minimum_mmap_size;
+      max_external_reloc_size = _bfd_minimum_mmap_size;
+    }
+  else
 #endif
+    {
+      max_contents_size = 0;
+      max_external_reloc_size = 0;
+    }
   max_internal_reloc_count = 0;
   max_sym_count = 0;
   max_sym_shndx_count = 0;
@@ -12538,9 +12543,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 #ifdef USE_MMAP
 	      /* Mmap is used only on non-compressed, non-linker created
 		 sections whose rawsize == size.  */
-	      if (sec->compress_status != COMPRESS_SECTION_NONE
-		 || (sec->flags & SEC_LINKER_CREATED) != 0
-		 || sec->rawsize != sec->size)
+	      if (!bed->use_mmap
+		  || sec->compress_status != COMPRESS_SECTION_NONE
+		  || (sec->flags & SEC_LINKER_CREATED) != 0
+		  || sec->rawsize != sec->size)
 #endif
 		{
 		  if (sec->rawsize > max_contents_size)
@@ -12592,17 +12598,20 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 		  if ((sec->flags & SEC_RELOC) != 0)
 		    {
-#ifndef USE_MMAP
-		      size_t ext_size = 0;
-
-		      if (esdi->rel.hdr != NULL)
-			ext_size = esdi->rel.hdr->sh_size;
-		      if (esdi->rela.hdr != NULL)
-			ext_size += esdi->rela.hdr->sh_size;
-
-		      if (ext_size > max_external_reloc_size)
-			max_external_reloc_size = ext_size;
+#ifdef USE_MMAP
+		      if (!bed->use_mmap)
 #endif
+			{
+			  size_t ext_size = 0;
+
+			  if (esdi->rel.hdr != NULL)
+			    ext_size = esdi->rel.hdr->sh_size;
+			  if (esdi->rela.hdr != NULL)
+			    ext_size += esdi->rela.hdr->sh_size;
+
+			  if (ext_size > max_external_reloc_size)
+			    max_external_reloc_size = ext_size;
+			}
 		      if (sec->reloc_count > max_internal_reloc_count)
 			max_internal_reloc_count = sec->reloc_count;
 		    }
