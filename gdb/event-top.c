@@ -251,6 +251,14 @@ gdb_rl_callback_handler (char *rl) noexcept
   static struct gdb_exception gdb_rl_expt;
   struct ui *ui = current_ui;
 
+  /* In bracketed paste mode, pasting a complete line can result in a
+     literal newline appearing at the end of LINE.  However, we never
+     want this in gdb.  */
+  size_t len = strlen (rl);
+  while (len > 0 && (rl[len - 1] == '\r' || rl[len - 1] == '\n'))
+    --len;
+  rl[len] = '\0';
+
   try
     {
       /* Ensure the exception is reset on each call.  */
