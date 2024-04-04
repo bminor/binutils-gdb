@@ -768,7 +768,7 @@ proc runto { linespec args } {
     
     # the "at foo.c:36" output we get with -g.
     # the "in func" output we get without -g.
-    gdb_expect 30 {
+    gdb_expect {
 	-re "(?:Break|Temporary break).* at .*:$decimal.*$gdb_prompt $" {
 	    if { $print_pass } {
 		pass $test_name
