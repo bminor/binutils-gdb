@@ -1299,21 +1299,20 @@ aout_get_external_symbols (bfd *abfd)
 	  if (! bfd_get_file_window (abfd, obj_sym_filepos (abfd), amt,
 				     &obj_aout_sym_window (abfd), true))
 	    return false;
-	  syms = (struct external_nlist *) obj_aout_sym_window (abfd).data;
+	  syms = obj_aout_sym_window (abfd).data;
 	}
       else
-#else
+#endif
 	{
 	  /* We allocate using malloc to make the values easy to free
 	     later on.  If we put them on the objalloc it might not be
 	     possible to free them.  */
 	  if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
 	    return false;
-	  syms = (struct external_nlist *) _bfd_malloc_and_read (abfd, amt, amt);
+	  syms = _bfd_malloc_and_read (abfd, amt, amt);
 	  if (syms == NULL)
 	    return false;
 	}
-#endif
 
       obj_aout_external_syms (abfd) = syms;
       obj_aout_external_sym_count (abfd) = count;
