@@ -456,8 +456,7 @@ bfd_elf_get_elf_syms (bfd *ibfd,
   if (_bfd_mul_overflow (symcount, extsym_size, &amt))
     {
       bfd_set_error (bfd_error_file_too_big);
-      intsym_buf = NULL;
-      goto out;
+      return NULL;
     }
   pos = symtab_hdr->sh_offset + symoffset * extsym_size;
   size_t alloc_ext_size = amt;
@@ -466,7 +465,7 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 				    &alloc_ext, ibfd, false))
     {
       intsym_buf = NULL;
-      goto out;
+      goto out2;
     }
 
   size_t alloc_extshndx_size = 0;
@@ -478,7 +477,7 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 	{
 	  bfd_set_error (bfd_error_file_too_big);
 	  intsym_buf = NULL;
-	  goto out;
+	  goto out1;
 	}
       alloc_extshndx_size = amt;
       pos = shndx_hdr->sh_offset + symoffset * sizeof (Elf_External_Sym_Shndx);
@@ -489,7 +488,7 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 					ibfd, false))
 	{
 	  intsym_buf = NULL;
-	  goto out;
+	  goto out1;
 	}
     }
 
@@ -498,12 +497,12 @@ bfd_elf_get_elf_syms (bfd *ibfd,
       if (_bfd_mul_overflow (symcount, sizeof (Elf_Internal_Sym), &amt))
 	{
 	  bfd_set_error (bfd_error_file_too_big);
-	  goto out;
+	  goto out1;
 	}
       alloc_intsym = (Elf_Internal_Sym *) bfd_malloc (amt);
       intsym_buf = alloc_intsym;
       if (intsym_buf == NULL)
-	goto out;
+	goto out1;
     }
 
   /* Convert the symbols to internal form.  */
@@ -521,12 +520,13 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 			    ibfd, (unsigned long) symoffset);
 	free (alloc_intsym);
 	intsym_buf = NULL;
-	goto out;
+	goto out1;
       }
 
- out:
-  _bfd_munmap_readonly_temporary (alloc_ext, alloc_ext_size);
+ out1:
   _bfd_munmap_readonly_temporary (alloc_extshndx, alloc_extshndx_size);
+ out2:
+  _bfd_munmap_readonly_temporary (alloc_ext, alloc_ext_size);
 
   return intsym_buf;
 }

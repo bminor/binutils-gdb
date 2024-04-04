@@ -2835,7 +2835,7 @@ _bfd_elf_link_info_read_relocs (bfd *abfd,
       else
 	internal_relocs = alloc2 = (Elf_Internal_Rela *) bfd_malloc (size);
       if (internal_relocs == NULL)
-	goto error_return;
+	return NULL;
     }
 
   alloc1 = external_relocs;
@@ -12592,6 +12592,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 		  if ((sec->flags & SEC_RELOC) != 0)
 		    {
+#ifndef USE_MMAP
 		      size_t ext_size = 0;
 
 		      if (esdi->rel.hdr != NULL)
@@ -12599,7 +12600,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		      if (esdi->rela.hdr != NULL)
 			ext_size += esdi->rela.hdr->sh_size;
 
-#ifndef USE_MMAP
 		      if (ext_size > max_external_reloc_size)
 			max_external_reloc_size = ext_size;
 #endif
