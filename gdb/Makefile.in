@@ -2333,7 +2333,18 @@ nm.h: stamp-nmh ; @true
 stamp-nmh: config.status
 	$(SHELL) config.status nm.h
 
-config.status: $(srcdir)/configure configure.nat configure.tgt configure.host ../bfd/development.sh
+# Files included from config.status or the configure script.  When
+# these change the configure script doesn't need regenerating, but its
+# output (and so that of config.status) might change.
+config_status_deps = \
+	$(srcdir)/configure \
+	$(srcdir)/configure.nat \
+	$(srcdir)/configure.tgt \
+	$(srcdir)/configure.host \
+	$(srcdir)/../bfd/development.sh \
+	$(srcdir)/../bfd/config.bfd
+
+config.status: $(config_status_deps)
 	$(SHELL) config.status --recheck
 
 ACLOCAL = aclocal
