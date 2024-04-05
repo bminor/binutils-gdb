@@ -1938,7 +1938,7 @@ generated_files = \
 # Flags needed to compile Python code
 PYTHON_CFLAGS = @PYTHON_CFLAGS@
 
-all: gdb$(EXEEXT) $(CONFIG_ALL) gdb-gdb.py gdb-gdb.gdb
+all: gdb$(EXEEXT) $(CONFIG_ALL) gdb-gdb.py gdb-gdb.gdb gcore
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=$(SUBDIRS)" subdir_do
 
 # Rule for compiling .c files in the top-level gdb directory.
