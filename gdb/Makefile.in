@@ -2307,31 +2307,31 @@ subdir_do: force
 	done
 
 Makefile: Makefile.in config.status
-	$(SHELL) config.status $@
+	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@
 
 .PHONY: run
 run: Makefile
 	./gdb$(EXEEXT) --data-directory=`pwd`/data-directory $(GDBFLAGS)
 
 jit-reader.h: $(srcdir)/jit-reader.in config.status
-	$(SHELL) config.status $@
+	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@
 
 gcore: $(srcdir)/gcore.in config.status
-	$(SHELL) config.status $@
+	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@
 
 gdb-gdb.py: $(srcdir)/gdb-gdb.py.in config.status
-	$(SHELL) config.status $@
+	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@
 
 gdb-gdb.gdb: $(srcdir)/gdb-gdb.gdb.in config.status
-	$(SHELL) config.status $@
+	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@
 
 config.h: stamp-h ; @true
 stamp-h: $(srcdir)/config.in config.status
-	$(SHELL) config.status config.h
+	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) config.h
 
 nm.h: stamp-nmh ; @true
 stamp-nmh: config.status
-	$(SHELL) config.status nm.h
+	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) nm.h
 
 # Files included from config.status or the configure script.  When
 # these change the configure script doesn't need regenerating, but its
@@ -2345,7 +2345,7 @@ config_status_deps = \
 	$(srcdir)/../bfd/config.bfd
 
 config.status: $(config_status_deps)
-	$(SHELL) config.status --recheck
+	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) --recheck
 
 ACLOCAL = aclocal
 
