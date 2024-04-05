@@ -29,6 +29,8 @@
 #if defined (_WIN32)
 #include <windows.h>
 #include <locale.h>
+/* FIXME: Do we need a configure time test for the presence of this headers ?  */
+#include <shlwapi.h>  /* Needed for PathIsNetworkPathA().  */
 #endif
 
 #ifndef S_IXUSR
@@ -118,61 +120,95 @@ _bfd_real_fopen (const char *filename, const char *modes)
 
 #elif defined (_WIN32)
   /* PR 25713: Handle extra long path names possibly containing '..' and '.'.  */
-   wchar_t **     lpFilePart = {NULL};
-   const wchar_t  prefix[] = L"\\\\?\\";
-   const size_t   partPathLen = strlen (filename) + 1;
+  wchar_t **      lpFilePart = {NULL};
+  const wchar_t   prefixDOS[] = L"\\\\?\\";
+  const wchar_t   prefixUNC[] = L"\\\\?\\UNC\\";
+  const size_t    partPathLen = strlen (filename) + 1;
+  const wchar_t * prefix;
+  size_t          sizeof_prefix;
+
+  /* PR 31527: Paths that begin with two backslash characters
+     (\\) are interpreted as Universal Naming Convention (UNC)
+     paths.  They use the "\\?\UNC\" prefix for network UNC paths
+     and  the "\\?\" prefix for dos UNC paths.  For more information
+     see: https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry
+  */
+  bool is_network_path = PathIsNetworkPathA (filename);
+
+  if (is_network_path)
+    {
+      prefix = prefixUNC;
+      sizeof_prefix = sizeof (prefixUNC);
+    }
+  else
+    {
+      prefix = prefixDOS;
+      sizeof_prefix = sizeof (prefixDOS);
+    }
+
 #ifdef __MINGW32__
 #if !HAVE_DECL____LC_CODEPAGE_FUNC
-/* This prototype was added to locale.h in version 9.0 of MinGW-w64.  */
-   _CRTIMP unsigned int __cdecl ___lc_codepage_func (void);
+  /* This prototype was added to locale.h in version 9.0 of MinGW-w64.  */
+  _CRTIMP unsigned int __cdecl ___lc_codepage_func (void);
 #endif
-   const unsigned int cp = ___lc_codepage_func ();
+  const unsigned int cp = ___lc_codepage_func ();
 #else
-   const unsigned int cp = CP_UTF8;
+  const unsigned int cp = CP_UTF8;
 #endif
 
-   /* Converting the partial path from ascii to unicode.
-      1) Get the length: Calling with lpWideCharStr set to null returns the length.
-      2) Convert the string: Calling with cbMultiByte set to -1 includes the terminating null.  */
-   size_t         partPathWSize = MultiByteToWideChar (cp, 0, filename, -1, NULL, 0);
-   wchar_t *      partPath = calloc (partPathWSize, sizeof(wchar_t));
-   size_t         ix;
+  /* Converting the partial path from ascii to unicode.
+     1) Get the length: Calling with lpWideCharStr set to null returns the length.
+     2) Convert the string: Calling with cbMultiByte set to -1 includes the terminating null.  */
+  size_t     partPathWSize = MultiByteToWideChar (cp, 0, filename, -1, NULL, 0);
+  wchar_t *  partPath = calloc (partPathWSize, sizeof(wchar_t));
+  size_t     ix;
 
-   MultiByteToWideChar (cp, 0, filename, -1, partPath, partPathWSize);
+  MultiByteToWideChar (cp, 0, filename, -1, partPath, partPathWSize);
 
-   /* Convert any UNIX style path separators into the DOS i.e. backslash separator.  */
-   for (ix = 0; ix < partPathLen; ix++)
-     if (IS_UNIX_DIR_SEPARATOR(filename[ix]))
-       partPath[ix] = '\\';
+  /* Convert any UNIX style path separators into the DOS i.e. backslash separator.  */
+  for (ix = 0; ix < partPathLen; ix++)
+    if (IS_UNIX_DIR_SEPARATOR(filename[ix]))
+      partPath[ix] = '\\';
 
-   /* Getting the full path from the provided partial path.
-      1) Get the length.
-      2) Resolve the path.  */
-   long       fullPathWSize = GetFullPathNameW (partPath, 0, NULL, lpFilePart);
-   wchar_t *  fullPath = calloc (fullPathWSize + sizeof(prefix) + 1, sizeof(wchar_t));
+  /* Getting the full path from the provided partial path.
+     1) Get the length.
+     2) Resolve the path.  */
+  long       fullPathWSize = GetFullPathNameW (partPath, 0, NULL, lpFilePart);
+  wchar_t *  fullPath = calloc (fullPathWSize + sizeof_prefix + 1, sizeof(wchar_t));
 
-   wcscpy (fullPath, prefix);
+  wcscpy (fullPath, prefix);
 
-   int        prefixLen = sizeof(prefix) / sizeof(wchar_t);
+  int  prefixLen = sizeof_prefix / sizeof(wchar_t);
 
-   /* Do not add a prefix to the null device.  */
-   if (stricmp (filename, "nul") == 0)
+  /* Do not add a prefix to the null device.  */
+  if (stricmp (filename, "nul") == 0)
     prefixLen = 1;
 
-   wchar_t *  fullPathOffset = fullPath + prefixLen - 1;
+  wchar_t *  fullPathOffset = fullPath + prefixLen - 1;
 
-   GetFullPathNameW (partPath, fullPathWSize, fullPathOffset, lpFilePart);
-   free (partPath);
+  GetFullPathNameW (partPath, fullPathWSize, fullPathOffset, lpFilePart);
 
-   /* It is non-standard for modes to exceed 16 characters.  */
-   wchar_t    modesW[16];
+  if (is_network_path)
+    {
+      /* Remove begining of the beginning two backslash characters (\\).  */
+      wchar_t *_fullPath = calloc (fullPathWSize + sizeof_prefix + 1, sizeof(wchar_t));
 
-   MultiByteToWideChar (cp, 0, modes, -1, modesW, sizeof(modesW));
+      GetFullPathNameW (fullPath, fullPathWSize + sizeof_prefix + 1, _fullPath, lpFilePart);
+      free (fullPath);
+      fullPath = _fullPath;
+    }
 
-   FILE *     file = _wfopen (fullPath, modesW);
-   free (fullPath);
+  free (partPath);
 
-   return close_on_exec (file);
+  /* It is non-standard for modes to exceed 16 characters.  */
+  wchar_t  modesW[16];
+
+  MultiByteToWideChar (cp, 0, modes, -1, modesW, sizeof(modesW));
+
+  FILE *  file = _wfopen (fullPath, modesW);
+  free (fullPath);
+
+  return close_on_exec (file);
 
 #elif defined (HAVE_FOPEN64)
   return close_on_exec (fopen64 (filename, modes));
