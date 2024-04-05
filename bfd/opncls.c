@@ -172,16 +172,6 @@ _bfd_delete_bfd (bfd *abfd)
 	  munmap (elf_section_data (sec)->contents_addr,
 		  elf_section_data (sec)->contents_size);
     }
-
-  struct bfd_mmapped *mmapped, *next;
-  for (mmapped = abfd->mmapped; mmapped != NULL; mmapped = next)
-    {
-      struct bfd_mmapped_entry *entries = mmapped->entries;
-      next = mmapped->next;
-      for (unsigned int i = 0; i < mmapped->next_entry; i++)
-	munmap (entries[i].addr, entries[i].size);
-      munmap (mmapped, _bfd_pagesize);
-    }
 #endif
 
   /* Give the target _bfd_free_cached_info a chance to free memory.  */
@@ -196,6 +186,18 @@ _bfd_delete_bfd (bfd *abfd)
     }
   else
     free ((char *) bfd_get_filename (abfd));
+
+#ifdef USE_MMAP
+  struct bfd_mmapped *mmapped, *next;
+  for (mmapped = abfd->mmapped; mmapped != NULL; mmapped = next)
+    {
+      struct bfd_mmapped_entry *entries = mmapped->entries;
+      next = mmapped->next;
+      for (unsigned int i = 0; i < mmapped->next_entry; i++)
+	munmap (entries[i].addr, entries[i].size);
+      munmap (mmapped, _bfd_pagesize);
+    }
+#endif
 
   free (abfd->arelt_data);
   free (abfd);
