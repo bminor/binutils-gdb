@@ -912,6 +912,30 @@ run_cc_link_tests [list \
 	{{readelf {--dyn-syms --wide} pr28348.rd}} \
 	"pr28348" \
     ] \
+    [list \
+	"Build pr31482b-no-lto.so" \
+	"-shared" \
+	"-fPIC" \
+	{pr31482b-no-lto.c} \
+	{} \
+	"pr31482b-no-lto.so" \
+    ] \
+    [list \
+	"Build pr31482c-no-lto.a" \
+	"" \
+	"" \
+	{pr31482c-no-lto.c} \
+	{} \
+	"pr31482c-no-lto.a" \
+    ] \
+    [list \
+	"Build pr31482d-no-lto.a" \
+	"" \
+	"" \
+	{pr31482d-no-lto.c} \
+	{} \
+	"pr31482d-no-lto.a" \
+    ] \
 ]
 
 # pr19073.s uses .set, which has a different meaning on alpha.
@@ -1165,6 +1189,18 @@ set run_tests [list \
      "" "" \
      {pr26590c.c pr26590d.c} "pr26590" "pass.out" "" "c" "" \
      "-Wl,--as-needed tmpdir/libpr26590a.so tmpdir/libpr26590b.so" ] \
+    [list "Run pr31482 (no-lto)" \
+     "-Wl,--no-as-needed" \
+     "" \
+     {pr31482a-no-lto.c} \
+     "pr31482-no-lto" \
+     "pass.out" \
+     "" \
+     "c" \
+     "" \
+     "tmpdir/pr31482b-no-lto.so tmpdir/pr31482c-no-lto.a \
+      tmpdir/pr31482d-no-lto.a" \
+    ] \
 ]
 
 # NetBSD ELF systems do not currently support the .*_array sections.

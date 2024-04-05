@@ -539,6 +539,22 @@ set lto_link_elf_tests [list \
    "" \
    "pr30281.so" \
   ] \
+  [list \
+   "Build pr31482b.a" \
+   "" \
+   "" \
+   {pr31482b.c} \
+   "" \
+   "pr31482b.a" \
+  ] \
+  [list \
+   "Build pr31482c.so" \
+   "-shared" \
+   "-fPIC" \
+   {pr31482c.c} \
+   "" \
+   "pr31482c.so" \
+  ] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of
@@ -722,6 +738,22 @@ set lto_run_elf_shared_tests [list \
    {-Wl,--as-needed,-R,tmpdir} {} \
    {lto-19c.c} {lto-19.exe} {pass.out} {-flto -O2} {c} {} \
    {tmpdir/liblto-19.so tmpdir/liblto-19.a}] \
+  [list {pr31482a} \
+   {-Wl,--no-as-needed,-R,tmpdir} {} \
+   {pr31482a.c} {pr31482a.exe} {pass.out} {-flto} {c} {} \
+   {tmpdir/pr31482b.a tmpdir/pr31482c.so}] \
+  [list {pr31482b} \
+   {-Wl,--no-as-needed,-R,tmpdir} {} \
+   {pr31482a.c} {pr31482b.exe} {pass1.out} {-flto} {c} {} \
+   {tmpdir/pr31482c.so tmpdir/pr31482b.a}] \
+  [list {pr31489a} \
+   {-Wl,--as-needed,-R,tmpdir} {} \
+   {pr31482a.c} {pr31489a.exe} {pass.out} {-flto} {c} {} \
+   {tmpdir/pr31482b.a tmpdir/pr31482c.so}] \
+  [list {pr31489b} \
+   {-Wl,--as-needed,-R,tmpdir} {} \
+   {pr31482a.c} {pr31489b.exe} {pass1.out} {-flto} {c} {} \
+   {tmpdir/pr31482c.so tmpdir/pr31482b.a}] \
 ]
 
 # LTO run-time tests for ELF

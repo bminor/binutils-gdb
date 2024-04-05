@@ -737,6 +737,10 @@ struct elf_link_hash_table
   /* Small local sym cache.  */
   struct sym_cache sym_cache;
 
+  /* Hash table of symbols which are first defined in archives or shared
+     objects when there are any IR inputs.  */
+  struct bfd_link_hash_table *first_hash;
+
   /* Short-cuts to get to dynamic linker sections.  */
   asection *sgot;
   asection *sgotplt;

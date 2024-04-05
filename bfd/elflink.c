@@ -4261,6 +4261,32 @@ _bfd_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
   return true;
 }
 
+/* Add the symbol NAME from ABFD to first hash.  */
+
+static void
+elf_link_add_to_first_hash (bfd *abfd, struct bfd_link_info *info,
+			    const char *name)
+{
+  struct elf_link_hash_table *htab = elf_hash_table (info);
+  /* Skip if there is no first hash.  */
+  if (htab->first_hash == NULL)
+    return;
+
+  struct bfd_link_hash_entry *e
+    = bfd_link_hash_lookup (htab->first_hash, name, true, false, true);
+  if (e == NULL)
+    info->callbacks->einfo
+      (_("%F%P: %pB: failed to add %s to first hash\n"), abfd, name);
+
+  if (e->type == bfd_link_hash_new)
+    {
+      /* Change the type to bfd_link_hash_undefined and store ABFD in
+	 u.undef->abfd.  */
+      e->type = bfd_link_hash_undefined;
+      e->u.undef.abfd = abfd;
+    }
+}
+
 /* Add symbols from an ELF object file to the linker hash table.  */
 
 static bool
@@ -4308,7 +4334,22 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
     }
 
   if ((abfd->flags & DYNAMIC) == 0)
-    dynamic = false;
+    {
+      dynamic = false;
+      if ((abfd->flags & BFD_PLUGIN) != 0
+	  && is_elf_hash_table (&htab->root)
+	  && htab->first_hash == NULL)
+	{
+	  /* Initialize first_hash for an IR input.  */
+	  htab->first_hash = (struct bfd_link_hash_table *)
+	    xmalloc (sizeof (struct bfd_link_hash_table));
+	  if (!bfd_hash_table_init (&htab->first_hash->table,
+				    _bfd_link_hash_newfunc,
+				    sizeof (struct bfd_link_hash_entry)))
+	    info->callbacks->einfo
+	      (_("%F%P: first_hash failed to initialize: %E\n"));
+	}
+    }
   else
     {
       dynamic = true;
@@ -5161,15 +5202,30 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  if (skip)
 	    continue;
 
-	  /* Override a definition only if the new symbol matches the
-	     existing one.  */
-	  if (override && matched)
-	    definition = false;
-
 	  h = *sym_hash;
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  /* Override a definition only if the new symbol matches the
+	     existing one.  */
+	  if (override && matched)
+	    {
+	      definition = false;
+	      if (htab->first_hash != NULL
+		  && (elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0
+		  && h->root.non_ir_ref_regular)
+		{
+		  /* When reloading --as-needed shared objects for new
+		     symbols added from IR inputs, if this shared object
+		     has the first definition, use it.  */
+		  struct bfd_link_hash_entry *e
+		    = bfd_link_hash_lookup (htab->first_hash, name,
+					    false, false, true);
+		  if (e != NULL && e->u.undef.abfd == abfd)
+		    definition = true;
+		}
+	    }
 
 	  if (h->versioned != unversioned
 	      && elf_tdata (abfd)->verdef != NULL
@@ -5520,8 +5576,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  if (!add_needed
 	      && matched
 	      && definition
-	      && h->root.type != bfd_link_hash_indirect
-	      && ((dynsym
+	      && h->root.type != bfd_link_hash_indirect)
+	    {
+	      if ((dynsym
 		   && h->ref_regular_nonweak)
 		  || (old_bfd != NULL
 		      && (old_bfd->flags & BFD_PLUGIN) != 0
@@ -5530,37 +5587,43 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  || (h->ref_dynamic_nonweak
 		      && (elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0
 		      && !on_needed_list (elf_dt_name (abfd),
-					  htab->needed, NULL))))
-	    {
-	      const char *soname = elf_dt_name (abfd);
-
-	      info->callbacks->minfo ("%!", soname, old_bfd,
-				      h->root.root.string);
-
-	      /* A symbol from a library loaded via DT_NEEDED of some
-		 other library is referenced by a regular object.
-		 Add a DT_NEEDED entry for it.  Issue an error if
-		 --no-add-needed is used and the reference was not
-		 a weak one.  */
-	      if (old_bfd != NULL
-		  && (elf_dyn_lib_class (abfd) & DYN_NO_NEEDED) != 0)
+					  htab->needed, NULL)))
 		{
-		  _bfd_error_handler
-		    /* xgettext:c-format */
-		    (_("%pB: undefined reference to symbol '%s'"),
-		     old_bfd, name);
-		  bfd_set_error (bfd_error_missing_dso);
-		  goto error_free_vers;
+		  const char *soname = elf_dt_name (abfd);
+
+		  info->callbacks->minfo ("%!", soname, old_bfd,
+					  h->root.root.string);
+
+		  /* A symbol from a library loaded via DT_NEEDED of some
+		     other library is referenced by a regular object.
+		     Add a DT_NEEDED entry for it.  Issue an error if
+		     --no-add-needed is used and the reference was not
+		     a weak one.  */
+		  if (old_bfd != NULL
+		      && (elf_dyn_lib_class (abfd) & DYN_NO_NEEDED) != 0)
+		    {
+		      _bfd_error_handler
+			/* xgettext:c-format */
+			(_("%pB: undefined reference to symbol '%s'"),
+			 old_bfd, name);
+		      bfd_set_error (bfd_error_missing_dso);
+		      goto error_free_vers;
+		    }
+
+		  elf_dyn_lib_class (abfd) = (enum dynamic_lib_link_class)
+		    (elf_dyn_lib_class (abfd) & ~DYN_AS_NEEDED);
+
+		  /* Create dynamic sections for backends that require
+		     that be done before setup_gnu_properties.  */
+		  if (!_bfd_elf_link_create_dynamic_sections (abfd, info))
+		    return false;
+		  add_needed = true;
 		}
-
-	      elf_dyn_lib_class (abfd) = (enum dynamic_lib_link_class)
-		(elf_dyn_lib_class (abfd) & ~DYN_AS_NEEDED);
-
-	      /* Create dynamic sections for backends that require
-		 that be done before setup_gnu_properties.  */
-	      if (!_bfd_elf_link_create_dynamic_sections (abfd, info))
-		return false;
-	      add_needed = true;
+	      else if (dynamic
+		       && h->root.u.def.section->owner == abfd)
+		/* Add this symbol to first hash if this shared
+		   object has the first definition.  */
+		elf_link_add_to_first_hash (abfd, info, name);
 	    }
 	}
     }
@@ -6005,7 +6068,12 @@ _bfd_elf_archive_symbol_lookup (bfd *abfd,
 
   p = strchr (name, ELF_VER_CHR);
   if (p == NULL || p[1] != ELF_VER_CHR)
-    return h;
+    {
+      /* Add this symbol to first hash if this archive has the first
+	 definition.  */
+      elf_link_add_to_first_hash (abfd, info, name);
+      return h;
+    }
 
   /* First check with only one `@'.  */
   len = strlen (name);
@@ -6144,7 +6212,22 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 	      if (h->type != bfd_link_hash_undefweak)
 		/* Symbol must be defined.  Don't check it again.  */
 		included[i] = true;
-	      continue;
+
+	      /* Ignore the archive if the symbol isn't defined in a
+		 shared object.  */
+	      if (!((struct elf_link_hash_entry *) h)->def_dynamic)
+		continue;
+	      /* Ignore the dynamic definition if symbol is first
+		 defined in this archive.  */
+	      struct elf_link_hash_table *htab = elf_hash_table (info);
+	      if (htab->first_hash == NULL)
+		continue;
+	      struct bfd_link_hash_entry *e
+		= bfd_link_hash_lookup (htab->first_hash,
+					symdef->name, false, false,
+					true);
+	      if (e == NULL || e->u.undef.abfd != abfd)
+		continue;
 	    }
 
 	  /* We need to include this archive member.  */
@@ -8226,6 +8309,11 @@ _bfd_elf_link_hash_table_free (bfd *obfd)
     _bfd_elf_strtab_free (htab->dynstr);
   _bfd_merge_sections_free (htab->merge_info);
   _bfd_generic_link_hash_table_free (obfd);
+  if (htab->first_hash != NULL)
+    {
+      bfd_hash_table_free (&htab->first_hash->table);
+      free (htab->first_hash);
+    }
 }
 
 /* This is a hook for the ELF emulation code in the generic linker to
