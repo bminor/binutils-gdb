@@ -4261,6 +4261,45 @@ _bfd_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
   return true;
 }
 
+/* An entry in the first definition hash table.  */
+
+struct elf_link_first_hash_entry
+{
+  struct bfd_hash_entry root;
+  /* The object of the first definition.  */
+  bfd *abfd;
+};
+
+/* The function to create a new entry in the first definition hash
+   table.  */
+
+static struct bfd_hash_entry *
+elf_link_first_hash_newfunc (struct bfd_hash_entry *entry,
+			     struct bfd_hash_table *table,
+			     const char *string)
+{
+  struct elf_link_first_hash_entry *ret =
+    (struct elf_link_first_hash_entry *) entry;
+
+  /* Allocate the structure if it has not already been allocated by a
+     subclass.  */
+  if (ret == NULL)
+    ret = (struct elf_link_first_hash_entry *)
+	bfd_hash_allocate (table,
+			   sizeof (struct elf_link_first_hash_entry));
+  if (ret == NULL)
+    return NULL;
+
+  /* Call the allocation method of the superclass.  */
+  ret = ((struct elf_link_first_hash_entry *)
+	 bfd_hash_newfunc ((struct bfd_hash_entry *) ret, table,
+			   string));
+  if (ret != NULL)
+    ret->abfd = NULL;
+
+  return (struct bfd_hash_entry *) ret;
+}
+
 /* Add the symbol NAME from ABFD to first hash.  */
 
 static void
@@ -4272,19 +4311,16 @@ elf_link_add_to_first_hash (bfd *abfd, struct bfd_link_info *info,
   if (htab->first_hash == NULL)
     return;
 
-  struct bfd_link_hash_entry *e
-    = bfd_link_hash_lookup (htab->first_hash, name, true, false, true);
+  struct elf_link_first_hash_entry *e
+    = ((struct elf_link_first_hash_entry *)
+       bfd_hash_lookup (htab->first_hash, name, true, false));
   if (e == NULL)
     info->callbacks->einfo
       (_("%F%P: %pB: failed to add %s to first hash\n"), abfd, name);
 
-  if (e->type == bfd_link_hash_new)
-    {
-      /* Change the type to bfd_link_hash_undefined and store ABFD in
-	 u.undef->abfd.  */
-      e->type = bfd_link_hash_undefined;
-      e->u.undef.abfd = abfd;
-    }
+  if (e->abfd == NULL)
+    /* Store ABFD in abfd.  */
+    e->abfd = abfd;
 }
 
 /* Add symbols from an ELF object file to the linker hash table.  */
@@ -4341,11 +4377,11 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  && htab->first_hash == NULL)
 	{
 	  /* Initialize first_hash for an IR input.  */
-	  htab->first_hash = (struct bfd_link_hash_table *)
-	    xmalloc (sizeof (struct bfd_link_hash_table));
-	  if (!bfd_hash_table_init (&htab->first_hash->table,
-				    _bfd_link_hash_newfunc,
-				    sizeof (struct bfd_link_hash_entry)))
+	  htab->first_hash = (struct bfd_hash_table *)
+	    xmalloc (sizeof (struct bfd_hash_table));
+	  if (!bfd_hash_table_init
+	      (htab->first_hash, elf_link_first_hash_newfunc,
+	       sizeof (struct elf_link_first_hash_entry)))
 	    info->callbacks->einfo
 	      (_("%F%P: first_hash failed to initialize: %E\n"));
 	}
@@ -5219,10 +5255,11 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  /* When reloading --as-needed shared objects for new
 		     symbols added from IR inputs, if this shared object
 		     has the first definition, use it.  */
-		  struct bfd_link_hash_entry *e
-		    = bfd_link_hash_lookup (htab->first_hash, name,
-					    false, false, true);
-		  if (e != NULL && e->u.undef.abfd == abfd)
+		  struct elf_link_first_hash_entry *e
+		    = ((struct elf_link_first_hash_entry *)
+		       bfd_hash_lookup (htab->first_hash, name, false,
+					false));
+		  if (e != NULL && e->abfd == abfd)
 		    definition = true;
 		}
 	    }
@@ -6222,11 +6259,11 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 	      struct elf_link_hash_table *htab = elf_hash_table (info);
 	      if (htab->first_hash == NULL)
 		continue;
-	      struct bfd_link_hash_entry *e
-		= bfd_link_hash_lookup (htab->first_hash,
-					symdef->name, false, false,
-					true);
-	      if (e == NULL || e->u.undef.abfd != abfd)
+	      struct elf_link_first_hash_entry *e
+		= ((struct elf_link_first_hash_entry *)
+		   bfd_hash_lookup (htab->first_hash, symdef->name,
+				    false, false));
+	      if (e == NULL || e->abfd != abfd)
 		continue;
 	    }
 
@@ -8308,12 +8345,12 @@ _bfd_elf_link_hash_table_free (bfd *obfd)
   if (htab->dynstr != NULL)
     _bfd_elf_strtab_free (htab->dynstr);
   _bfd_merge_sections_free (htab->merge_info);
-  _bfd_generic_link_hash_table_free (obfd);
   if (htab->first_hash != NULL)
     {
-      bfd_hash_table_free (&htab->first_hash->table);
+      bfd_hash_table_free (htab->first_hash);
       free (htab->first_hash);
     }
+  _bfd_generic_link_hash_table_free (obfd);
 }
 
 /* This is a hook for the ELF emulation code in the generic linker to
