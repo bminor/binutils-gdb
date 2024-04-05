@@ -2313,16 +2313,16 @@ Makefile: Makefile.in config.status
 run: Makefile
 	./gdb$(EXEEXT) --data-directory=`pwd`/data-directory $(GDBFLAGS)
 
-jit-reader.h: $(srcdir)/jit-reader.in
+jit-reader.h: $(srcdir)/jit-reader.in config.status
 	$(SHELL) config.status $@
 
-gcore: $(srcdir)/gcore.in
+gcore: $(srcdir)/gcore.in config.status
 	$(SHELL) config.status $@
 
-gdb-gdb.py: $(srcdir)/gdb-gdb.py.in
+gdb-gdb.py: $(srcdir)/gdb-gdb.py.in config.status
 	$(SHELL) config.status $@
 
-gdb-gdb.gdb: $(srcdir)/gdb-gdb.gdb.in
+gdb-gdb.gdb: $(srcdir)/gdb-gdb.gdb.in config.status
 	$(SHELL) config.status $@
 
 config.h: stamp-h ; @true
