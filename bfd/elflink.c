@@ -4304,7 +4304,7 @@ elf_link_first_hash_newfunc (struct bfd_hash_entry *entry,
 
 static void
 elf_link_add_to_first_hash (bfd *abfd, struct bfd_link_info *info,
-			    const char *name)
+			    const char *name, bool copy)
 {
   struct elf_link_hash_table *htab = elf_hash_table (info);
   /* Skip if there is no first hash.  */
@@ -4313,7 +4313,7 @@ elf_link_add_to_first_hash (bfd *abfd, struct bfd_link_info *info,
 
   struct elf_link_first_hash_entry *e
     = ((struct elf_link_first_hash_entry *)
-       bfd_hash_lookup (htab->first_hash, name, true, false));
+       bfd_hash_lookup (htab->first_hash, name, true, copy));
   if (e == NULL)
     info->callbacks->einfo
       (_("%F%P: %pB: failed to add %s to first hash\n"), abfd, name);
@@ -4920,6 +4920,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       asection *sec, *new_sec;
       flagword flags;
       const char *name;
+      bool must_copy_name = false;
       struct elf_link_hash_entry *h;
       struct elf_link_hash_entry *hi;
       bool definition;
@@ -5217,6 +5218,11 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      memcpy (p, verstr, verlen + 1);
 
 	      name = newname;
+	      /* Since bfd_hash_alloc is used for "name", the string
+		 must be copied if added to first_hash.  The string
+		 memory can be freed when an --as-needed library is
+		 not needed.  */
+	      must_copy_name = true;
 	    }
 
 	  /* If this symbol has default visibility and the user has
@@ -5660,7 +5666,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		       && h->root.u.def.section->owner == abfd)
 		/* Add this symbol to first hash if this shared
 		   object has the first definition.  */
-		elf_link_add_to_first_hash (abfd, info, name);
+		elf_link_add_to_first_hash (abfd, info, name, must_copy_name);
 	    }
 	}
     }
@@ -6108,7 +6114,7 @@ _bfd_elf_archive_symbol_lookup (bfd *abfd,
     {
       /* Add this symbol to first hash if this archive has the first
 	 definition.  */
-      elf_link_add_to_first_hash (abfd, info, name);
+      elf_link_add_to_first_hash (abfd, info, name, false);
       return h;
     }
 
