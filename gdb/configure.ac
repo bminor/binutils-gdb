@@ -2032,8 +2032,8 @@ AC_PATH_X
 #
 AC_ARG_ENABLE(sim,
 AS_HELP_STRING([--enable-sim], [link gdb with simulator]),
-[echo "enable_sim = $enable_sim";
- echo "enableval = ${enableval}";
+[AC_MSG_NOTICE([enable_sim = $enable_sim]);
+ AC_MSG_NOTICE([enableval = ${enableval}]);
  case "${enableval}" in
   yes) ignore_sim=false ;;
   no)  ignore_sim=true ;;

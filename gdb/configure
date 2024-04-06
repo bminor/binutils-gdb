@@ -32848,8 +32848,10 @@ fi
 #
 # Check whether --enable-sim was given.
 if test "${enable_sim+set}" = set; then :
-  enableval=$enable_sim; echo "enable_sim = $enable_sim";
- echo "enableval = ${enableval}";
+  enableval=$enable_sim; { $as_echo "$as_me:${as_lineno-$LINENO}: enable_sim = $enable_sim" >&5
+$as_echo "$as_me: enable_sim = $enable_sim" >&6;};
+ { $as_echo "$as_me:${as_lineno-$LINENO}: enableval = ${enableval}" >&5
+$as_echo "$as_me: enableval = ${enableval}" >&6;};
  case "${enableval}" in
   yes) ignore_sim=false ;;
   no)  ignore_sim=true ;;
