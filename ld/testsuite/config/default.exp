@@ -481,6 +481,9 @@ if { ![info exists NOSANITIZE_CFLAGS] } then {
     }
 }
 
+append CFLAGS_FOR_TARGET " $NOSANITIZE_CFLAGS"
+append CXXFLAGS_FOR_TARGET " $NOSANITIZE_CFLAGS"
+
 if { ![info exists NOLTO_CFLAGS] } then {
     set NOLTO_CFLAGS ""
     if [compiler_supports "-fno-lto"] {
