@@ -4378,12 +4378,13 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	{
 	  /* Initialize first_hash for an IR input.  */
 	  htab->first_hash = (struct bfd_hash_table *)
-	    xmalloc (sizeof (struct bfd_hash_table));
-	  if (!bfd_hash_table_init
-	      (htab->first_hash, elf_link_first_hash_newfunc,
-	       sizeof (struct elf_link_first_hash_entry)))
+	    bfd_malloc (sizeof (struct bfd_hash_table));
+	  if (htab->first_hash == NULL
+	      || !bfd_hash_table_init
+		   (htab->first_hash, elf_link_first_hash_newfunc,
+		    sizeof (struct elf_link_first_hash_entry)))
 	    info->callbacks->einfo
-	      (_("%F%P: first_hash failed to initialize: %E\n"));
+	      (_("%F%P: first_hash failed to create: %E\n"));
 	}
     }
   else
