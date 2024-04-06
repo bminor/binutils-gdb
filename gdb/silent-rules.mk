@@ -20,4 +20,8 @@ ECHO_RANLIB = @echo "  RANLIB $@";
 SILENCE = @
 # Silence libtool.
 SILENT_FLAG = --silent
+# Used in shell snippets instead of 'echo'.
+SILENT_ECHO = true
+else
+SILENT_ECHO = echo
 endif
