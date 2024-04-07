@@ -1678,6 +1678,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	case MIND:
 	  /* Multiple indirect symbols.  This is OK if they both point
 	     to the same symbol.  */
+	  if (h->u.i.link == inh)
+	    break;
 	  if (h->u.i.link->type == bfd_link_hash_defweak)
 	    {
 	      /* It is also OK to redefine a symbol that indirects to
@@ -1689,8 +1691,6 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	      cycle = true;
 	      break;
 	    }
-	  if (string != NULL && strcmp (h->u.i.link->root.string, string) == 0)
-	    break;
 	  /* Fall through.  */
 	case MDEF:
 	  /* Handle a multiple definition.  */
