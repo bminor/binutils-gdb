@@ -139,15 +139,17 @@ enum options
 
   OPTION_ABI,
   OPTION_FLOAT_ABI,
-
   OPTION_FLOAT_ISA,
 
   OPTION_LA_LOCAL_WITH_ABS,
   OPTION_LA_GLOBAL_WITH_PCREL,
   OPTION_LA_GLOBAL_WITH_ABS,
+
   OPTION_RELAX,
   OPTION_NO_RELAX,
+
   OPTION_THIN_ADD_SUB,
+  OPTION_IGNORE_START_ALIGN,
 
   OPTION_END_OF_ENUM,
 };
@@ -165,6 +167,7 @@ struct option md_longopts[] =
   { "mrelax", no_argument, NULL, OPTION_RELAX },
   { "mno-relax", no_argument, NULL, OPTION_NO_RELAX },
   { "mthin-add-sub", no_argument, NULL, OPTION_THIN_ADD_SUB},
+  { "mignore-start-align", no_argument, NULL, OPTION_IGNORE_START_ALIGN},
 
   { NULL, no_argument, NULL, 0 }
 };
@@ -245,6 +248,10 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_THIN_ADD_SUB:
       LARCH_opts.thin_add_sub = 1;
+      break;
+
+    case OPTION_IGNORE_START_ALIGN:
+      LARCH_opts.ignore_start_align = 1;
       break;
 
     case OPTION_IGNORE:
@@ -1772,7 +1779,9 @@ md_show_usage (FILE *stream)
   -mthin-add-sub	  Convert a pair of R_LARCH_ADD32/64 and R_LARCH_SUB32/64 to\n\
 			  R_LARCH_32/64_PCREL as much as possible\n\
 			  The option does not affect the generation of R_LARCH_32_PCREL\n\
-			  relocations in .eh_frame\n"));
+			  relocations in .eh_frame\n\
+  -mignore-start-align	  Ignore .align if it is at the start of a section. This option\n\
+			  can't be used when partial linking (ld -r).\n"));
 }
 
 static void
@@ -1794,39 +1803,60 @@ bool
 loongarch_frag_align_code (int n, int max)
 {
   char *nops;
+  expressionS ex;
   symbolS *s = NULL;
-
-  bfd_vma insn_alignment = 4;
-  bfd_vma bytes = (bfd_vma) 1 << n;
-  bfd_vma worst_case_bytes = bytes - insn_alignment;
-
-  /* If we are moving to a smaller alignment than the instruction size, then no
-     alignment is required.  */
-  if (bytes <= insn_alignment)
-    return true;
 
   /* When not relaxing, loongarch_handle_align handles code alignment.  */
   if (!LARCH_opts.relax)
     return false;
 
+  bfd_vma align_bytes = (bfd_vma) 1 << n;
+  bfd_vma worst_case_bytes = align_bytes - 4;
+  bfd_vma addend = worst_case_bytes;
+  bool align_max = max > 0 && (bfd_vma) max < worst_case_bytes;
+
+  /* If we are moving to a smaller alignment than the instruction size, then no
+     alignment is required.  */
+  if (align_bytes <= 4)
+    return true;
+
   /* If max <= 0, ignore max.
      If max >= worst_case_bytes, max has no effect.
      Similar to gas/write.c relax_segment function rs_align_code case:
      if (fragP->fr_subtype != 0 && offset > fragP->fr_subtype).  */
-  if (max > 0 && (bfd_vma) max < worst_case_bytes)
+  if (align_max)
     {
       s = symbol_find (now_seg->name);
-      worst_case_bytes = ALIGN_MAX_ADDEND (n, max);
+      addend = ALIGN_MAX_ADDEND (n, max);
     }
 
-  frag_grow (worst_case_bytes);
-  /* Use relaxable frag for .align.
-     If .align at the start of section, do nothing. Section alignment can
-     ensure correct alignment.
-     If .align is not at the start of a section, reserve NOP instructions
-     and R_LARCH_ALIGN relocation.  */
-  nops = frag_var (rs_machine_dependent, worst_case_bytes, worst_case_bytes,
-		   rs_align_code, s, worst_case_bytes, NULL);
+  if (LARCH_opts.ignore_start_align)
+    {
+      frag_grow (worst_case_bytes);
+      /* Use relaxable frag for .align.
+	 If .align at the start of section, do nothing. Section alignment can
+	 ensure correct alignment.
+	 If .align is not at the start of a section, reserve NOP instructions
+	 and R_LARCH_ALIGN relocation.  */
+      nops = frag_var (rs_machine_dependent, worst_case_bytes, worst_case_bytes,
+		       rs_align_code, s, addend, NULL);
+    }
+  else
+    {
+      nops = frag_more (worst_case_bytes);
+      if (align_max)
+	{
+	  ex.X_add_symbol = s;
+	  ex.X_op = O_symbol;
+	}
+      else
+	  ex.X_op = O_constant;
+
+      ex.X_add_number = addend;
+
+      fix_new_exp (frag_now, nops - frag_now->fr_literal, 0,
+		   &ex, false, BFD_RELOC_LARCH_ALIGN);
+    }
 
   /* Default write NOP for aligned bytes.  */
   loongarch_make_nops (nops, worst_case_bytes);

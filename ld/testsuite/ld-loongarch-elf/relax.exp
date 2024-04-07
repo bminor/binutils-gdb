@@ -19,10 +19,38 @@
 # MA 02110-1301, USA.
 #
 
-if [istarget loongarch64-*-*] {
-  run_dump_test "relax-align-first"
+proc run_partial_linking_align_test {} {
+  global as
+  global ld
+  global srcdir
+  global subdir
+  global runtests
 
+  set testname "partial-link-align"
+  if ![runtest_file_p $runtests $testname] then {
+    return
+  }
+
+  if { ![ld_assemble $as "$srcdir/$subdir/$testname-a.s" tmpdir/a.o]
+      || ![ld_assemble $as "$srcdir/$subdir/$testname-b.s" tmpdir/b.o]
+      || ![ld_link $ld tmpdir/$testname.os "tmpdir/a.o tmpdir/b.o -r"]
+      || ![ld_link $ld tmpdir/$testname "tmpdir/$testname.os -e0 -Ttext 0x1000"] } {
+    fail $testname
+  } else {
+    set objdump_output [run_host_cmd "objdump" "-d tmpdir/$testname"]
+    if { [ regexp ".*1010:\\s*4c000020\\s*jirl.*" $objdump_output ] } {
+      pass $testname
+    } else {
+      fail $testname
+    }
+  }
+}
+
+if [istarget loongarch64-*-*] {
   if [isbuild loongarch64-*-*] {
+    run_dump_test "relax-align-ignore-start"
+    run_partial_linking_align_test
+
     set testname "loongarch relax .exe build"
     set pre_builds [list \
       [list \

@@ -74,6 +74,7 @@ if { ![check_compiler_available] } {
     # in a literal pool outside the function, so that both the
     # "undefined function" and "undefined line" tests fail.
     setup_xfail xtensa*-*-linux*
+    setup_xfail loongarch*-*-*
 
     set mf "tmpdir/undefined.o* in function `function':"
     checkund $mf $testfn
@@ -154,6 +155,7 @@ if { ![check_compiler_available] } {
 
     # eBPF doesn't support dwarf yet.
     setup_xfail bpf-*-*
+    setup_xfail loongarch*-*-*
 
     checkund $ml $testline
 }

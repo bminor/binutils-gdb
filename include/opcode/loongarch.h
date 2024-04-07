@@ -256,6 +256,7 @@ dec2 : [1-9][0-9]?
 
     int relax;
     int thin_add_sub;
+    int ignore_start_align;
   } LARCH_opts;
 
   extern size_t loongarch_insn_length (insn_t insn);

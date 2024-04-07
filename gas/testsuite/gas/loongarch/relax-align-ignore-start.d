@@ -1,4 +1,4 @@
-#as:
+#as: -mignore-start-align
 #objdump: -dr
 
 .*:[    ]+file format .*
