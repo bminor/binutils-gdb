@@ -2365,7 +2365,8 @@ extern const char i386_mnemonics[];
 #define MN__load_ 0x476b
 #define MN__store_ 0x4772
 #define MN__nooptimize_ 0x477a
-#define MN__rex_ 0x4787
-#define MN__evex_ 0x478d
-#define MN__vex_ 0x4794
-#define MN__insn 0x479a
+#define MN__nf_ 0x4787
+#define MN__rex_ 0x478c
+#define MN__evex_ 0x4792
+#define MN__vex_ 0x4799
+#define MN__insn 0x479f

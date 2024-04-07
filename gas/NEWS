@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Support the NF feature in Intel APX.
+
 * Remove KEYLOCKER and SHA promotions from EVEX MAP4.
 
 * References to FB and dollar labels, when supported, are no longer permitted

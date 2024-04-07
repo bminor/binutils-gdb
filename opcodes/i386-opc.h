@@ -1018,6 +1018,7 @@ typedef struct insn_template
 #define Prefix_REX		8	/* {rex} */
 #define Prefix_REX2		9	/* {rex2} */
 #define Prefix_NoOptimize	10	/* {nooptimize} */
+#define Prefix_NF		11	/* {nf} */
 
   /* the bits in opcode_modifier are used to generate the final opcode from
      the base_opcode.  These bits also are used to detect alternate forms of

@@ -242,6 +242,7 @@ enum i386_error
     unsupported_with_intel_mnemonic,
     unsupported_syntax,
     unsupported_EGPR_for_addressing,
+    unsupported_nf,
     unsupported,
     unsupported_on_arch,
     unsupported_64bit,
@@ -438,6 +439,9 @@ struct _i386_insn
 
     /* Prefer the REX2 prefix in encoding.  */
     bool rex2_encoding;
+
+    /* No CSPAZO flags update.  */
+    bool has_nf;
 
     /* Disable instruction size optimization.  */
     bool no_optimize;
@@ -3944,7 +3948,7 @@ is_any_vex_encoding (const insn_template *t)
 static INLINE bool
 is_apx_evex_encoding (void)
 {
-  return i.rex2 || i.tm.opcode_space == SPACE_EVEXMAP4
+  return i.rex2 || i.tm.opcode_space == SPACE_EVEXMAP4 || i.has_nf
     || (i.vex.register_specifier
 	&& (i.vex.register_specifier->reg_flags & RegRex2));
 }
@@ -4251,6 +4255,10 @@ build_apx_evex_prefix (void)
      space.  */
   if (i.vex.register_specifier && i.tm.opcode_space == SPACE_EVEXMAP4)
     i.vex.bytes[3] |= 0x10;
+
+  /* Encode the NF bit.  */
+  if (i.has_nf)
+    i.vex.bytes[3] |= 0x04;
 }
 
 static void establish_rex (void)
@@ -6645,6 +6653,9 @@ md_assemble (char *line)
 	case unsupported_EGPR_for_addressing:
 	  err_msg = _("extended GPR cannot be used as base/index");
 	  break;
+	case unsupported_nf:
+	  err_msg = _("{nf} unsupported");
+	  break;
 	case unsupported:
 	  as_bad (_("unsupported instruction `%s'"),
 		  pass1_mnem ? pass1_mnem : insn_name (current_templates.start));
@@ -7209,12 +7220,23 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 		  /* {rex2} */
 		  i.rex2_encoding = true;
 		  break;
+		case Prefix_NF:
+		  /* {nf} */
+		  i.has_nf = true;
+		  if (i.encoding == encoding_default)
+		    i.encoding = encoding_evex;
+		  break;
 		case Prefix_NoOptimize:
 		  /* {nooptimize} */
 		  i.no_optimize = true;
 		  break;
 		default:
 		  abort ();
+		}
+	      if (i.has_nf && i.encoding != encoding_evex)
+		{
+		  as_bad (_("{nf} cannot be combined with {vex}/{vex3}"));
+		  return NULL;
 		}
 	    }
 	  else
@@ -8468,8 +8490,7 @@ can_convert_NDD_to_legacy (const insn_template *t)
 {
   unsigned int match_dest_op = ~0;
 
-  if (!i.tm.opcode_modifier.nf
-      && i.reg_operands >= 2)
+  if (!i.has_nf && i.reg_operands >= 2)
     {
       unsigned int dest = i.operands - 1;
       unsigned int src1 = i.operands - 2;
@@ -8557,6 +8578,11 @@ match_template (char mnem_suffix)
       if (intel_syntax
 	   ? t->opcode_modifier.dialect >= ATT_SYNTAX
 	   : t->opcode_modifier.dialect == INTEL_SYNTAX)
+	continue;
+
+      /* Check NF support.  */
+      specific_error = progress (unsupported_nf);
+      if (i.has_nf && !t->opcode_modifier.nf)
 	continue;
 
       /* Check Intel64/AMD64 ISA.   */
@@ -8902,7 +8928,8 @@ match_template (char mnem_suffix)
 		  found_reverse_match = Opcode_VexW;
 		  goto check_operands_345;
 		}
-	      else if (is_cpu (t, CpuAPX_F) && i.operands == 3)
+	      else if (t->opcode_space == SPACE_EVEXMAP4
+		       && t->opcode_modifier.w)
 		{
 		  found_reverse_match = Opcode_D;
 		  goto check_operands_345;

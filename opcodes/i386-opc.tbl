@@ -320,17 +320,20 @@ sti, 0xfb, 0, NoSuf, {}
 
 <alu2>, <alu2:opc> << 3, APX_F, D|<alu2:c>|W|CheckOperandSize|Modrm|No_sSuf|DstVVVV|EVexMap4|<alu2:nf>|<alu2:optz>, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
 <alu2>, <alu2:opc> << 3, 0, D|W|CheckOperandSize|Modrm|No_sSuf|HLEPrefixLock|<alu2:optz>|<alu2:optt>, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<alu2>, <alu2:opc> << 3, APX_F, D|W|CheckOperandSize|Modrm|No_sSuf|EVexMap4|<alu2:nf>, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 <alu2>, 0x83/<alu2:opc>, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|<alu2:nf>, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 <alu2>, 0x83/<alu2:opc>, 0, Modrm|No_bSuf|No_sSuf|HLEPrefixLock|<alu2:opti>, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<alu2>, 0x83/<alu2:opc>, 0, Modrm|No_bSuf|No_sSuf|EVexMap4|<alu2:nf>, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 <alu2>, 0x04 | (<alu2:opc> << 3), 0, W|No_sSuf|<alu2:opti>, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 <alu2>, 0x80/<alu2:opc>, APX_F, W|Modrm|CheckOperandSize|No_sSuf|DstVVVV|EVexMap4|<alu2:nf>, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
 <alu2>, 0x80/<alu2:opc>, 0, W|Modrm|No_sSuf|HLEPrefixLock|<alu2:opti>, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-<alu2>, 0x80/<alu2:opc>, APX_F, W|Modrm|EVexMap4|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<alu2>, 0x80/<alu2:opc>, APX_F, W|Modrm|EVexMap4|No_sSuf|<alu2:nf>, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 <alu2>
 
 // clr with 1 operand is really xor with 2 operands.
 clr, 0x30, 0, W|Modrm|No_sSuf|RegKludge|Optimize, { Reg8|Reg16|Reg32|Reg64 }
+clr, 0x30, APX_F, W|Modrm|No_sSuf|RegKludge|EVexMap4|NF, { Reg8|Reg16|Reg32|Reg64 }
 
 cmp, 0x38, 0, D|W|CheckOperandSize|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 cmp, 0x83/7, 0, Modrm|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
@@ -346,6 +349,7 @@ test, 0xf6/0, 0, W|Modrm|No_sSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16
 <incdec>, 0x40 | (<incdec:opc> << 3), No64, No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
 <incdec>, 0xfe/<incdec:opc>, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|NF, {Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64}
 <incdec>, 0xfe/<incdec:opc>, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<incdec>, 0xfe/<incdec:opc>, APX_F, W|Modrm|No_sSuf|EVexMap4|NF, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 <incdec>
 
@@ -353,6 +357,7 @@ test, 0xf6/0, 0, W|Modrm|No_sSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16
 
 <alu1>, 0xf6/<alu1:opc>, APX_F, W|Modrm|CheckOperandSize|No_sSuf|DstVVVV|EVexMap4|<alu1:nf>, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
 <alu1>, 0xf6/<alu1:opc>, 0, W|Modrm|No_sSuf|HLEPrefixLock, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<alu1>, 0xf6/<alu1:opc>, APX_F, W|Modrm|No_sSuf|EVexMap4|<alu1:nf>, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 <alu1>
 
@@ -388,22 +393,30 @@ cqto, 0x99, x64, Size64|NoSuf, {}
 <mul:opc, mul:4, imul:5>
 
 <mul>, 0xf6/<mul:opc>, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<mul>, 0xf6/<mul:opc>, APX_F, W|Modrm|No_sSuf|EVexMap4|NF, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 imul, 0xaf, APX_F, C|Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|NF, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
 imul, 0xfaf, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+imul, 0xaf, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 imul, 0x6b, i186, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+imul, 0x6b, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 imul, 0x69, i186, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+imul, 0x69, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 // imul with 2 operands mimics imul with 3 by putting the register in
 // both i.rm.reg & i.rm.regmem fields.  RegKludge enables this
 // transformation.
 imul, 0x6b, i186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm8S, Reg16|Reg32|Reg64 }
+imul, 0x6b, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF, { Imm8S, Reg16|Reg32|Reg64 }
 imul, 0x69, i186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64 }
+imul, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64 }
 
 <mul>
 
 <div:opc, div:6, idiv:7>
 
 <div>, 0xf6/<div:opc>, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<div>, 0xf6/<div:opc>, APX_F, W|Modrm|No_sSuf|EVexMap4|NF, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 <div>, 0xf6/<div:opc>, 0, W|CheckOperandSize|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
+<div>, 0xf6/<div:opc>, APX_F, W|CheckOperandSize|Modrm|No_sSuf|EVexMap4|NF, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
 
 <div>
 
@@ -434,8 +447,10 @@ imul, 0x69, i186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm16|Imm32|Imm32S, Reg16|R
 
 sh<shd>d, 0x24 | <shd:opc>, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|NF, { Imm8, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 sh<shd>d, 0x0fa4 | <shd:opc>, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Imm8, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+sh<shd>d, 0x24 | <shd:opc>, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Imm8, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 sh<shd>d, 0xa5 | <shd:opc>, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|NF, { ShiftCount, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 sh<shd>d, 0x0fa5 | <shd:opc>, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { ShiftCount, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+sh<shd>d, 0xa5 | <shd:opc>, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { ShiftCount, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 sh<shd>d, 0x0fa5 | <shd:opc>, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 <shd>
@@ -896,7 +911,8 @@ rex.wrxb, 0x4f, x64, NoSuf|IsPrefix, {}
 <pseudopfx:ident:cpu, disp8:Disp8:0, disp16:Disp16:No64, disp32:Disp32:i386, +
                       load:Load:0, store:Store:0, +
                       vex:VEX:0, vex2:VEX:0, vex3:VEX3:0, evex:EVEX:0, +
-                      rex:REX:x64, rex2:REX2:APX_F, nooptimize:NoOptimize:0>
+                      rex:REX:x64, rex2:REX2:APX_F, nf:NF:APX_F, +
+                      nooptimize:NoOptimize:0>
 
 {<pseudopfx>}, PSEUDO_PREFIX/Prefix_<pseudopfx:ident>, <pseudopfx:cpu>, NoSuf|IsPrefix, {}
 
@@ -1944,6 +1960,7 @@ blsi, 0xf3/3, APX_F(BMI), Modrm|CheckOperandSize|Vex128|EVex128|Space0F38|VexVVV
 blsmsk, 0xf3/2, APX_F(BMI), Modrm|CheckOperandSize|Vex128|EVex128|Space0F38|VexVVVV|No_bSuf|No_wSuf|No_sSuf|NF, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
 blsr, 0xf3/1, APX_F(BMI), Modrm|CheckOperandSize|Vex128|EVex128|Space0F38|VexVVVV|No_bSuf|No_wSuf|No_sSuf|NF, { Reg32|Reg64|Unspecified|BaseIndex, Reg32|Reg64 }
 tzcnt, 0xf30fbc, BMI, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+tzcnt, 0xf4, BMI&APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // TBM instructions
 
@@ -2021,9 +2038,11 @@ insertq, 0xf20f78, SSE4a, Modrm|NoSuf, { Imm8, Imm8, RegXMM, RegXMM }
 
 // LZCNT instruction
 lzcnt, 0xf30fbd, LZCNT, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+lzcnt, 0xf5, LZCNT&APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // POPCNT instruction
 popcnt, 0xf30fb8, POPCNT, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+popcnt, 0x88, POPCNT&APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // VIA PadLock extensions.
 xstore-rng, 0xfa7c0, PadLock, NoSuf|RepPrefixOk, {}
