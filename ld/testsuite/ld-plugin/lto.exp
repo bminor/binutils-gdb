@@ -555,6 +555,30 @@ set lto_link_elf_tests [list \
    "" \
    "pr31482c.so" \
   ] \
+  [list \
+   "Build pr31615b.so" \
+   "-shared -Wl,--version-script=pr31615.ver" \
+   "-fPIC" \
+   {pr31615b.c} \
+   "" \
+   "pr31615b.so" \
+  ] \
+  [list \
+   "Build pr31615c.so" \
+   "-shared -Wl,--version-script=pr31615.ver" \
+   "-fPIC" \
+   {pr31615c.c} \
+   "" \
+   "pr31615c.so" \
+  ] \
+  [list \
+   "Build pr31615d.so" \
+   "-shared -Wl,--version-script=pr31615.ver" \
+   "-fPIC" \
+   {pr31615d.c} \
+   "" \
+   "pr31615d.so" \
+  ] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of
@@ -754,6 +778,16 @@ set lto_run_elf_shared_tests [list \
    {-Wl,--as-needed,-R,tmpdir} {} \
    {pr31482a.c} {pr31489b.exe} {pass1.out} {-flto} {c} {} \
    {tmpdir/pr31482c.so tmpdir/pr31482b.a}] \
+  [list {pr31615a} \
+   {-Wl,-R,tmpdir} {} \
+   {pr31615a.c} {pr31615a.exe} {pass.out} {-O3 -flto} {c} {} \
+   {-Wl,--as-needed tmpdir/pr31615b.so -Wl,--no-as-needed \
+    tmpdir/pr31615d.so}] \
+  [list {pr31615b} \
+   {-Wl,-R,tmpdir} {} \
+   {pr31615a.c} {pr31615b.exe} {pass.out} {-O3 -flto} {c} {} \
+   {-Wl,--as-needed tmpdir/pr31615c.so -Wl,--no-as-needed \
+    tmpdir/pr31615d.so}] \
 ]
 
 # LTO run-time tests for ELF
