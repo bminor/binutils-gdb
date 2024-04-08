@@ -551,6 +551,10 @@ ctf_add_encoded (ctf_dict_t *fp, uint32_t flag,
     case CTF_K_FLOAT:
       encoding = CTF_FP_DATA (ep->cte_format, ep->cte_offset, ep->cte_bits);
       break;
+    default:
+      /* ctf_assert is opaque with -fno-inline.  This dead code avoids
+	 a warning about "encoding" being used uninitialized.  */
+      return CTF_ERR;
     }
   memcpy (dtd->dtd_vlen, &encoding, sizeof (encoding));
 

@@ -202,17 +202,15 @@ symtypetab_density (ctf_dict_t *fp, ctf_dict_t *symfp, ctf_dynhash_t *symhash,
 	    }
 
 	  ctf_dynhash_remove (linker_known, name);
-	}
-      *unpadsize += sizeof (uint32_t);
-      (*count)++;
 
-      if (!(flags & CTF_SYMTYPETAB_FORCE_INDEXED))
-	{
 	  if (*max < sym->st_symidx)
 	    *max = sym->st_symidx;
 	}
       else
 	(*max)++;
+
+      *unpadsize += sizeof (uint32_t);
+      (*count)++;
     }
   if (err != ECTF_NEXT_END)
     {

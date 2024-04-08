@@ -762,7 +762,7 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
       ctf_link_input_t *one_input;
       ctf_dict_t *one_fp;
       ctf_dict_t *parent_fp = NULL;
-      uint32_t parent_i;
+      uint32_t parent_i = 0;
       ctf_next_t *j = NULL;
 
       /* If we are processing CU names, get the real input.  All the inputs

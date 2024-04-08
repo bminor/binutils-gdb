@@ -1646,7 +1646,7 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
 {
   ctf_dict_t *ofp = fp;
   ctf_id_t otype = type;
-  const ctf_type_t *tp;
+  const ctf_type_t *tp = NULL;
   const ctf_dtdef_t *dtd;
   unsigned char *vlen;
   ssize_t size, increment, vbytes;

@@ -67,7 +67,9 @@ bswap_64 (uint64_t v)
 /* < C11? define away static assertions.  */
 
 #if !defined (__STDC_VERSION__) || __STDC_VERSION__ < 201112L
+#ifndef _Static_assert
 #define _Static_assert(cond, err)
+#endif
 #endif
 
 /* Swap the endianness of something.  */
