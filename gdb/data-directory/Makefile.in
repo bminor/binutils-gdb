@@ -44,7 +44,7 @@ LN_S = @LN_S@
 
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
-INSTALL_DIR = $(SHELL) $(srcdir)/../../mkinstalldirs
+INSTALL_DIR = $(SHELL) $(srcdir)/../../install-sh -d
 
 GDB_DATADIR = @GDB_DATADIR@
 
