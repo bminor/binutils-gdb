@@ -15,8 +15,21 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+static int
+call2 ()
+{
+  return 42; /* break call2.  */
+}
+
+static int
+call1 ()
+{
+  return call2 (); /* break call1.  */
+}
+
 int
 main ()
 {
+  call1 (); /* break main.  */
   return 0;
 }

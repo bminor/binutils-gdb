@@ -113,4 +113,11 @@ extern CORE_ADDR linux_get_hwcap2 (const std::optional<gdb::byte_vector> &auxv,
 
 extern CORE_ADDR linux_get_hwcap2 ();
 
+/* Returns true if ADDR belongs to a shadow stack memory range.  If this
+   is the case, assign the shadow stack memory range to RANGE
+   [start_address, end_address).  */
+
+extern bool linux_address_in_shadow_stack_mem_range
+  (CORE_ADDR addr, std::pair<CORE_ADDR, CORE_ADDR> *range);
+
 #endif /* GDB_LINUX_TDEP_H */
