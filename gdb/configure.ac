@@ -2030,16 +2030,16 @@ AC_PATH_X
 # are when --disable-sim is specified, or if the simulator directory is
 # not part of the source tree.
 #
-AC_ARG_ENABLE(sim,
-AS_HELP_STRING([--enable-sim], [link gdb with simulator]),
-[AC_MSG_NOTICE([enable_sim = $enable_sim]);
- AC_MSG_NOTICE([enableval = ${enableval}]);
- case "${enableval}" in
-  yes) ignore_sim=false ;;
-  no)  ignore_sim=true ;;
-  *)   ignore_sim=false ;;
- esac],
-[ignore_sim=false])
+AC_ARG_ENABLE([sim],
+	      [AS_HELP_STRING([--enable-sim], [link gdb with simulator])],
+	      [AC_MSG_NOTICE([enable_sim = $enable_sim]);
+	       AC_MSG_NOTICE([enableval = ${enableval}]);
+	       case "${enableval}" in
+		 yes) ignore_sim=false ;;
+		 no)  ignore_sim=true ;;
+		 *)   ignore_sim=false ;;
+	       esac],
+	       [ignore_sim=false])
 
 if test ! -d "${srcdir}/../sim"; then
   ignore_sim=true
