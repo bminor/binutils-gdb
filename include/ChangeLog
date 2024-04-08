@@ -1,3 +1,10 @@
+2024-04-07  Simon Marchi  <simon.marchi@efficios.com>
+
+	* diagnostics.h (DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER): Rename
+	to...
+	(DIAGNOSTIC_IGNORE_REGISTER): ... this.  Ignore `-Wregister`
+	instead of `-Wdeprecated-register`.
+
 2024-02-14  Yuriy Kolerov  <ykolerov@synopsys.com>
 
 	* opcode/arc.h (enum insn_class_t): Add DBNZ class.
