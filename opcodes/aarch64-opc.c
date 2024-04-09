@@ -4236,7 +4236,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_SME_list_of_64bit_tiles:
-      print_sme_za_list (buf, size, opnd->reg.regno, styler);
+      print_sme_za_list (buf, size, opnd->imm.value, styler);
       break;
 
     case AARCH64_OPND_SME_ZA_array_off1x4:
