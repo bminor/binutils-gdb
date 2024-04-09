@@ -1223,8 +1223,12 @@ _bfd_mmap_read_temporary (void **data_p, size_t *size_p,
       if (data == NULL)
 	return false;
       *data_p = data;
+      /* NB: _bfd_munmap_readonly_temporary will free *MMAP_BASE if
+	 *SIZE_P == 0.  */
+      *mmap_base = data;
     }
-  *mmap_base = NULL;
+  else
+    *mmap_base = NULL;
   *size_p = 0;
   return bfd_read (data, size, abfd) == size;
 }
