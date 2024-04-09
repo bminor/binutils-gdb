@@ -983,8 +983,8 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 60 */
-    { "movbeS",	{ Gv, Ev }, PREFIX_NP_OR_DATA },
-    { "movbeS",	{ Ev, Gv }, PREFIX_NP_OR_DATA },
+    { "%MEmovbeS",	{ Gv, Ev }, PREFIX_NP_OR_DATA },
+    { "%MEmovbeS",	{ Ev, Gv }, PREFIX_NP_OR_DATA },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },

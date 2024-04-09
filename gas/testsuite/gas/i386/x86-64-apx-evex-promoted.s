@@ -95,11 +95,14 @@ _start:
 	kmovw	0x123(%r31,%rax,4),%k5
 	ldtilecfg	0x123(%r31,%rax,4)
 	movbe	%r18w,%ax
+	movbe	%r15w,%ax
 	movbe	%r18w,0x123(%r16,%rax,4)
 	movbe	%r18w,0x123(%r31,%rax,4)
 	movbe	%r25d,%edx
+	movbe	%r15d,%edx
 	movbe	%r25d,0x123(%r16,%rax,4)
 	movbe	%r31,%r15
+	movbe	%r8,%r15
 	movbe	%r31,0x123(%r16,%rax,4)
 	movbe	%r31,0x123(%r31,%rax,4)
 	movbe	0x123(%r16,%rax,4),%r31

@@ -101,11 +101,14 @@ Disassembly of section \.text:
 [	 ]*[a-f0-9]+:[	 ]*62 d9 7c 08 90 ac 87 23 01 00 00[	 ]+kmovw[	 ]+k5,WORD PTR \[r31\+rax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*62 da 7c 08 49 84 87 23 01 00 00[	 ]+ldtilecfg[	 ]+\[r31\+rax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*62 fc 7d 08 60 c2[	 ]+movbe[	 ]+ax,r18w
+[	 ]*[a-f0-9]+:[	 ]*62 d4 7d 08 60 c7[	 ]+movbe[	 ]+ax,r15w
 [	 ]*[a-f0-9]+:[	 ]*62 ec 7d 08 61 94 80 23 01 00 00[	 ]+movbe[	 ]+WORD PTR \[r16\+rax\*4\+0x123\],r18w
 [	 ]*[a-f0-9]+:[	 ]*62 cc 7d 08 61 94 87 23 01 00 00[	 ]+movbe[	 ]+WORD PTR \[r31\+rax\*4\+0x123\],r18w
 [	 ]*[a-f0-9]+:[	 ]*62 dc 7c 08 60 d1[	 ]+movbe[	 ]+edx,r25d
+[	 ]*[a-f0-9]+:[	 ]*62 d4 7c 08 60 d7[	 ]+movbe[	 ]+edx,r15d
 [	 ]*[a-f0-9]+:[	 ]*62 6c 7c 08 61 8c 80 23 01 00 00[	 ]+movbe[	 ]+DWORD PTR \[r16\+rax\*4\+0x123\],r25d
 [	 ]*[a-f0-9]+:[	 ]*62 5c fc 08 60 ff[	 ]+movbe[	 ]+r15,r31
+[	 ]*[a-f0-9]+:[	 ]*62 54 fc 08 60 f8[	 ]+movbe[	 ]+r15,r8
 [	 ]*[a-f0-9]+:[	 ]*62 6c fc 08 61 bc 80 23 01 00 00[	 ]+movbe[	 ]+QWORD PTR \[r16\+rax\*4\+0x123\],r31
 [	 ]*[a-f0-9]+:[	 ]*62 4c fc 08 61 bc 87 23 01 00 00[	 ]+movbe[	 ]+QWORD PTR \[r31\+rax\*4\+0x123\],r31
 [	 ]*[a-f0-9]+:[	 ]*62 6c fc 08 60 bc 80 23 01 00 00[	 ]+movbe[	 ]+r31,QWORD PTR \[r16\+rax\*4\+0x123\]
