@@ -141,10 +141,13 @@ scfi_ops_cleanup (scfi_opS **head)
 
   while (op)
     {
+      free (op->op_data);
       free (op);
       op = next;
       next = op ? op->next : NULL;
     }
+
+  free (head);
 }
 
 /* Compare two SCFI states.  */
