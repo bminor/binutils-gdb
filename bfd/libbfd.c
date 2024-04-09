@@ -1572,6 +1572,7 @@ _bfd_generic_init_private_section_data (bfd *ibfd ATTRIBUTE_UNUSED,
   return true;
 }
 
+#ifdef HAVE_MMAP
 uintptr_t _bfd_pagesize;
 uintptr_t _bfd_pagesize_m1;
 uintptr_t _bfd_minimum_mmap_size;
@@ -1587,3 +1588,4 @@ bfd_init_pagesize (void)
   /* The minimum section size to use mmap.  */
   _bfd_minimum_mmap_size = _bfd_pagesize * 4;
 }
+#endif
