@@ -164,7 +164,7 @@ void
 vwarning (const char *string, va_list args)
 {
   if (warning_hook != nullptr)
-    warning_hook (string, args);
+    warning_hook->warn (string, args);
   else
     {
       std::optional<target_terminal::scoped_restore_terminal_state> term_state;

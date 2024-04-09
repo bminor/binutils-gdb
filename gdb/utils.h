@@ -374,8 +374,19 @@ assign_return_if_changed (T &lval, const T &val)
   return true;
 }
 
-/* A function that can be used to intercept warnings.  */
-typedef gdb::function_view<void (const char *, va_list)> warning_hook_handler;
+/* A class that can be used to intercept warnings.  A class is used
+   here, rather than a gdb::function_view because it proved difficult
+   to use a function view in conjunction with ATTRIBUTE_PRINTF in a
+   way that would satisfy all compilers on all systems.  And, even
+   though gdb only ever uses deferred_warnings here, a virtual
+   function is used to help Insight.  */
+struct warning_hook_handler_type
+{
+  virtual void warn (const char *format, va_list args) ATTRIBUTE_PRINTF (2, 0)
+    = 0;
+};
+
+typedef warning_hook_handler_type *warning_hook_handler;
 
 /* Set the thread-local warning hook, and restore the old value when
    finished.  */
@@ -418,7 +429,7 @@ extern warning_hook_handler get_warning_hook_handler ();
    instance of this class with the 'warn' function, and all warnings can be
    emitted with a single call to 'emit'.  */
 
-struct deferred_warnings
+struct deferred_warnings final : public warning_hook_handler_type
 {
   deferred_warnings ()
     : m_can_style (gdb_stderr->can_emit_style_escape ())
@@ -426,36 +437,23 @@ struct deferred_warnings
   }
 
   /* Add a warning to the list of deferred warnings.  */
-  void warn (const char *format, ...) ATTRIBUTE_PRINTF(2,3)
+  void warn (const char *format, ...) ATTRIBUTE_PRINTF (2, 3)
   {
-    /* Generate the warning text into a string_file.  */
-    string_file msg (m_can_style);
-
     va_list args;
     va_start (args, format);
-    msg.vprintf (format, args);
+    this->warn (format, args);
     va_end (args);
-
-    /* Move the text into the list of deferred warnings.  */
-    m_warnings.emplace_back (std::move (msg));
   }
 
   /* A variant of 'warn' so that this object can be used as a warning
      hook; see scoped_restore_warning_hook.  Note that no locking is
      done, so users have to be careful to only install this into a
      single thread at a time.  */
-  void operator() (const char *format, va_list args)
+  void warn (const char *format, va_list args) override
+    ATTRIBUTE_PRINTF (2, 0)
   {
     string_file msg (m_can_style);
-    /* Clang warns if we add ATTRIBUTE_PRINTF to this method (because
-       the function-view wrapper doesn't also have the attribute), but
-       then warns again if we remove it, because this vprintf call
-       does not use a literal format string.  So, suppress the
-       warnings here.  */
-    DIAGNOSTIC_PUSH
-    DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
     msg.vprintf (format, args);
-    DIAGNOSTIC_POP
     m_warnings.emplace_back (std::move (msg));
   }
 

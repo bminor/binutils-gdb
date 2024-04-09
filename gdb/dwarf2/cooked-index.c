@@ -589,7 +589,7 @@ cooked_index_worker::write_to_cache (const cooked_index *idx,
 	 See PR symtab/30837.  This arranges to capture all such
 	 warnings.  This is safe because we know the deferred_warnings
 	 object isn't in use by any other thread at this point.  */
-      scoped_restore_warning_hook defer (*warn);
+      scoped_restore_warning_hook defer (warn);
       m_cache_store.store ();
     }
 }
