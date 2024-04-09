@@ -942,10 +942,10 @@ ec00000000ff clib$12 RIS_R0RDU "compare logical immediate and branch (32<8)" z10
 ec00000000ff clib RIS_RURDU "compare logical immediate and branch (32<8)" z10 zarch
 ec00000000fd clgib$12 RIS_R0RDU "compare logical immediate and branch (64<8)" z10 zarch
 ec00000000fd clgib RIS_RURDU "compare logical immediate and branch (64<8)" z10 zarch
-ec000000007f clij$12 RIE_R0PU "compare logical immediate and branch relative (32<8)" z10 zarch
-ec000000007f clij RIE_RUPU "compare logical immediate and branch relative (32<8)" z10 zarch
-ec000000007d clgij$12 RIE_R0PU "compare logical immediate and branch relative (64<8)" z10 zarch
-ec000000007d clgij RIE_RUPU "compare logical immediate and branch relative (64<8)" z10 zarch
+ec000000007f clij$12 RIE_R0PU "compare logical immediate and branch relative (32<8)" z10 zarch condjump
+ec000000007f clij RIE_RUPU "compare logical immediate and branch relative (32<8)" z10 zarch condjump
+ec000000007d clgij$12 RIE_R0PU "compare logical immediate and branch relative (64<8)" z10 zarch condjump
+ec000000007d clgij RIE_RUPU "compare logical immediate and branch relative (64<8)" z10 zarch condjump
 b9730000 clrt$16 RRF_00RR "compare logical and trap (32)" z10 zarch
 b973 clrt RRF_U0RR "compare logical and trap (32)" z10 zarch
 b9610000 clgrt$16 RRF_00RR "compare logical and trap (64)" z10 zarch
