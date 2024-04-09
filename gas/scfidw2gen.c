@@ -57,8 +57,8 @@ scfi_process_cfi_label (void)
   frch_ginsn_data_append (ginsn);
 
   scfi_op_add_cfi_label (ginsn, name);
-  /* TODO.  */
-  // free (name);
+  /* NB: Can't free NAME here since it will be used later.  Free it in
+     handle_scfi_dot_cfi after it is unused.  */
 
   demand_empty_rest_of_line ();
 }

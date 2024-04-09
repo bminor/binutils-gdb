@@ -1141,6 +1141,7 @@ handle_scfi_dot_cfi (ginsnS *ginsn)
 	  break;
 	case CFI_label:
 	  scfi_dot_cfi (CFI_label, 0, 0, 0, op->op_data->name, ginsn->sym);
+	  free ((char *) op->op_data->name);
 	  break;
 	case CFI_signal_frame:
 	  scfi_dot_cfi (CFI_signal_frame, 0, 0, 0, NULL, ginsn->sym);
