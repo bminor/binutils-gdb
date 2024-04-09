@@ -2427,10 +2427,11 @@ namespace eval Dwarf {
 	    variable _line_file_names
 	    lappend _line_file_names $filename $diridx
 
+	    set nr_filenames [expr [llength $_line_file_names] / 2]
 	    if { $Dwarf::_line_unit_version >= 5 } {
-		return [expr [llength $_line_file_names] - 1]
+		return [expr $nr_filenames - 1]
 	    } else {
-		return [llength $_line_file_names]
+		return $nr_filenames
 	    }
 	}
 

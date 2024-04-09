@@ -4159,8 +4159,15 @@ find_epilogue_using_linetable (CORE_ADDR func_addr)
 
   /* While the standard allows for multiple points marked with epilogue_begin
      in the same function, for performance reasons, this function will only
-     find the last address that sets this flag for a given block.  */
-  const struct symtab_and_line sal = find_pc_line (start_pc, 0);
+     find the last address that sets this flag for a given block.
+
+     The lines of a function can be described by several line tables in case
+     there are different files involved.  There's a corner case where a
+     function epilogue is in a different file than a function start, and using
+     start_pc as argument to find_pc_line will mean we won't find the
+     epilogue.  Instead, use "end_pc - 1" to maximize our chances of picking
+     the line table containing an epilogue.  */
+  const struct symtab_and_line sal = find_pc_line (end_pc - 1, 0);
   if (sal.symtab != nullptr && sal.symtab->language () != language_asm)
     {
       struct objfile *objfile = sal.symtab->compunit ()->objfile ();

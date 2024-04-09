@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-standard_testfile .c .S
+standard_testfile dw2-epilogue-begin.c dw2-epilogue-begin.S
 
-set version 1
+set version 2
 
 source $srcdir/$subdir/dw2-epilogue-begin.exp.tcl
