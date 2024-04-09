@@ -18802,6 +18802,9 @@ done
 
 
 
+save_ASAN_OPTIONS="$ASAN_OPTIONS"
+  ASAN_OPTIONS=detect_leaks=0
+  export ASAN_OPTIONS
 
 for ac_func in getpagesize
 do :
@@ -18979,6 +18982,8 @@ $as_echo "#define HAVE_MMAP 1" >>confdefs.h
 
 fi
 rm -f conftest.mmap conftest.txt
+
+  ASAN_OPTIONS="$save_ASAN_OPTIONS"
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dlopen" >&5

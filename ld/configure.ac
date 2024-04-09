@@ -401,7 +401,7 @@ BFD_BINARY_FOPEN
 
 AC_CHECK_DECLS([asprintf, environ, stpcpy])
 
-AC_FUNC_MMAP
+GCC_AC_FUNC_MMAP
 
 AC_SEARCH_LIBS([dlopen], [dl])
 

@@ -65,7 +65,7 @@ AM_MAINTAINER_MODE
 AM_INSTALL_LIBBFD
 ACX_PROG_CC_WARNING_OPTS([-Wall], [ac_libctf_warn_cflags])
 
-AC_FUNC_MMAP
+GCC_AC_FUNC_MMAP
 # Needed for BFD capability checks.
 AC_SEARCH_LIBS(dlsym, dl)
 AM_ZLIB

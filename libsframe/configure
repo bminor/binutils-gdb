@@ -12520,6 +12520,9 @@ done
 
 
 
+save_ASAN_OPTIONS="$ASAN_OPTIONS"
+  ASAN_OPTIONS=detect_leaks=0
+  export ASAN_OPTIONS
 
 for ac_func in getpagesize
 do :
@@ -12697,6 +12700,8 @@ $as_echo "#define HAVE_MMAP 1" >>confdefs.h
 
 fi
 rm -f conftest.mmap conftest.txt
+
+  ASAN_OPTIONS="$save_ASAN_OPTIONS"
 
 for ac_header in byteswap.h endian.h
 do :
