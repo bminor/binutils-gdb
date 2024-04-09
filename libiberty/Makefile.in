@@ -508,6 +508,7 @@ aclocal_deps = \
 	$(srcdir)/../config/cet.m4 \
 	$(srcdir)/../config/enable.m4 \
 	$(srcdir)/../config/gcc-plugin.m4 \
+	$(srcdir)/../config/mmap.m4 \
 	$(srcdir)/../config/no-executables.m4 \
 	$(srcdir)/../config/override.m4 \
 	$(srcdir)/../config/picflag.m4 \
