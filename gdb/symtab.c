@@ -4157,6 +4157,9 @@ find_epilogue_using_linetable (CORE_ADDR func_addr)
   if (!find_pc_partial_function (func_addr, nullptr, &start_pc, &end_pc))
     return {};
 
+  /* While the standard allows for multiple points marked with epilogue_begin
+     in the same function, for performance reasons, this function will only
+     find the last address that sets this flag for a given block.  */
   const struct symtab_and_line sal = find_pc_line (start_pc, 0);
   if (sal.symtab != nullptr && sal.symtab->language () != language_asm)
     {
@@ -4167,24 +4170,95 @@ find_epilogue_using_linetable (CORE_ADDR func_addr)
 	= unrelocated_addr (end_pc - objfile->text_section_offset ());
 
       const linetable *linetable = sal.symtab->linetable ();
-      /* This should find the last linetable entry of the current function.
-	 It is probably where the epilogue begins, but since the DWARF 5
-	 spec doesn't guarantee it, we iterate backwards through the function
-	 until we either find it or are sure that it doesn't exist.  */
+      if (linetable == nullptr || linetable->nitems == 0)
+	{
+	  /* Empty line table.  */
+	  return {};
+	}
+
+      /* Find the first linetable entry after the current function.  Note that
+	 this also may be an end_sequence entry.  */
       auto it = std::lower_bound
 	(linetable->item, linetable->item + linetable->nitems, unrel_end,
 	 [] (const linetable_entry &lte, unrelocated_addr pc)
 	 {
 	   return lte.unrelocated_pc () < pc;
 	 });
+      if (it == linetable->item + linetable->nitems)
+	{
+	  /* We couldn't find either:
+	     - a linetable entry starting the function after the current
+	       function, or
+	     - an end_sequence entry that terminates the current function
+	       at unrel_end.
 
-      while (it->unrelocated_pc () >= unrel_start)
-      {
-	if (it->epilogue_begin)
-	  return {it->pc (objfile)};
-	it --;
-      }
+	     This can happen when the linetable doesn't describe the full
+	     extent of the function.  This can be triggered with:
+	     - compiler-generated debug info, in the cornercase that the pc
+	       with which we call find_pc_line resides in a different file
+	       than unrel_end, or
+	     - invalid dwarf assembly debug info.
+	     In the former case, there's no point in iterating further, simply
+	     return "not found".  In the latter case, there's no current
+	     incentive to attempt to support this, so handle this
+	     conservatively and do the same.  */
+	  return {};
+	}
+
+      if (unrel_end < it->unrelocated_pc ())
+	{
+	  /* We found a line entry that starts past the end of the
+	     function.  This can happen if the previous entry straddles
+	     two functions, which shouldn't happen with compiler-generated
+	     debug info.  Handle the corner case conservatively.  */
+	  return {};
+	}
+      gdb_assert (unrel_end == it->unrelocated_pc ());
+
+      /* Move to the last linetable entry of the current function.  */
+      if (it == &linetable->item[0])
+	{
+	  /* Doing it-- would introduce undefined behaviour, avoid it by
+	     explicitly handling this case.  */
+	  return {};
+	}
+      it--;
+      if (it->unrelocated_pc () < unrel_start)
+	{
+	  /* Not in the current function.  */
+	  return {};
+	}
+      gdb_assert (it->unrelocated_pc () < unrel_end);
+
+      /* We're at the the last linetable entry of the current function.  This
+	 is probably where the epilogue begins, but since the DWARF 5 spec
+	 doesn't guarantee it, we iterate backwards through the current
+	 function until we either find the epilogue beginning, or are sure
+	 that it doesn't exist.  */
+      for (; it >= &linetable->item[0]; it--)
+	{
+	  if (it->unrelocated_pc () < unrel_start)
+	    {
+	      /* No longer in the current function.  */
+	      break;
+	    }
+
+	  if (it->epilogue_begin)
+	    {
+	      /* Found the beginning of the epilogue.  */
+	      return {it->pc (objfile)};
+	    }
+
+	  if (it == &linetable->item[0])
+	    {
+	      /* No more entries in the current function.
+		 Doing it-- would introduce undefined behaviour, avoid it by
+		 explicitly handling this case.  */
+	      break;
+	    }
+	}
     }
+
   return {};
 }
 
