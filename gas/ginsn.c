@@ -507,6 +507,7 @@ ginsn_dst_print (struct ginsn_dst *dst)
       char *buf = XNEWVEC (char, 32);
       sprintf (buf, "%%r%d", ginsn_get_dst_reg (dst));
       strcat (dst_str, buf);
+      free (buf);
     }
   else if (dst->type == GINSN_DST_INDIRECT)
     {
@@ -514,6 +515,7 @@ ginsn_dst_print (struct ginsn_dst *dst)
       sprintf (buf, "[%%r%d+%lld]", ginsn_get_dst_reg (dst),
 		 (long long int) ginsn_get_dst_disp (dst));
       strcat (dst_str, buf);
+      free (buf);
     }
 
   gas_assert (strlen (dst_str) < GINSN_LISTING_OPND_LEN);
@@ -570,20 +572,26 @@ ginsn_print (ginsnS *ginsn)
 
   /* src 1.  */
   src = ginsn_get_src1 (ginsn);
+  char *src_buf = ginsn_src_print (src);
   str_size += snprintf (ginsn_str + str_size, GINSN_LISTING_LEN - str_size,
-			" %s", ginsn_src_print (src));
+			" %s", src_buf);
+  free (src_buf);
   gas_assert (str_size >= 0 && str_size < GINSN_LISTING_LEN);
 
   /* src 2.  */
   src = ginsn_get_src2 (ginsn);
+  src_buf = ginsn_src_print (src);
   str_size += snprintf (ginsn_str + str_size, GINSN_LISTING_LEN - str_size,
-			"%s", ginsn_src_print (src));
+			"%s", src_buf);
+  free (src_buf);
   gas_assert (str_size >= 0 && str_size < GINSN_LISTING_LEN);
 
   /* dst.  */
   dst = ginsn_get_dst (ginsn);
+  char *dst_buf = ginsn_dst_print (dst);
   str_size += snprintf (ginsn_str + str_size, GINSN_LISTING_LEN - str_size,
-			"%s", ginsn_dst_print (dst));
+			"%s", dst_buf);
+  free (dst_buf);
 
 end:
   gas_assert (str_size >= 0 && str_size < GINSN_LISTING_LEN);
