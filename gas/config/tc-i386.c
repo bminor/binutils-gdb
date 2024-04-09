@@ -6515,6 +6515,7 @@ md_assemble (char *line)
 {
   unsigned int j;
   char mnemonic[MAX_MNEM_SIZE], mnem_suffix = 0, *copy = NULL;
+  char *xstrdup_copy = NULL;
   const char *end, *pass1_mnem = NULL;
   enum i386_error pass1_err = 0;
   const insn_template *t;
@@ -6553,10 +6554,12 @@ md_assemble (char *line)
       return;
     }
   t = current_templates.start;
-  if (may_need_pass2 (t))
+  /* NB: LINE may be change to be the same as XSTRDUP_COPY.  */
+  if (xstrdup_copy != line && may_need_pass2 (t))
     {
       /* Make a copy of the full line in case we need to retry.  */
-      copy = xstrdup (line);
+      xstrdup_copy = xstrdup (line);
+      copy = xstrdup_copy;
     }
   line += end - line;
   mnem_suffix = i.suffix;
@@ -6565,7 +6568,7 @@ md_assemble (char *line)
   this_operand = -1;
   if (line == NULL)
     {
-      free (copy);
+      free (xstrdup_copy);
       return;
     }
 
@@ -6650,7 +6653,7 @@ md_assemble (char *line)
 	pass1_mnem = NULL;
 
   match_error:
-      free (copy);
+      free (xstrdup_copy);
 
       switch (pass1_mnem ? pass1_err : i.error)
 	{
@@ -6782,7 +6785,7 @@ md_assemble (char *line)
       return;
     }
 
-  free (copy);
+  free (xstrdup_copy);
 
   if (sse_check != check_none
       /* The opcode space check isn't strictly needed; it's there only to
