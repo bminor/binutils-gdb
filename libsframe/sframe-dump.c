@@ -40,6 +40,14 @@ is_sframe_abi_arch_aarch64 (sframe_decoder_ctx *sfd_ctx)
   return aarch64_p;
 }
 
+/* Return TRUE if the SFrame section is associated with the s390 ABIs.  */
+
+static bool
+is_sframe_abi_arch_s390 (sframe_decoder_ctx *sfd_ctx)
+{
+  return sframe_decoder_get_abi_arch (sfd_ctx) == SFRAME_ABI_S390_ENDIAN_BIG;
+}
+
 static void
 dump_sframe_header (sframe_decoder_ctx *sfd_ctx)
 {
@@ -175,7 +183,12 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
 
       /* Dump SP/FP info.  */
       if (err[1] == 0)
-	sprintf (temp, "c%+d", fp_offset);
+	{
+	  if (is_sframe_abi_arch_s390 (sfd_ctx) && (fp_offset & 1))
+	    sprintf (temp, "r%d", fp_offset >> 1);
+	  else
+	    sprintf (temp, "c%+d", fp_offset);
+	}
       else
 	strcpy (temp, "u");
       printf ("%-10s", temp);
@@ -187,7 +200,12 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
 	  != SFRAME_CFA_FIXED_RA_INVALID)
 	strcpy (temp, "f");
       else if (err[2] == 0)
-	sprintf (temp, "c%+d", ra_offset);
+	{
+	  if (is_sframe_abi_arch_s390 (sfd_ctx) && (ra_offset & 1))
+	    sprintf (temp, "r%d", ra_offset >> 1);
+	  else
+	    sprintf (temp, "c%+d", ra_offset);
+	}
       else
 	strcpy (temp, "u");
 

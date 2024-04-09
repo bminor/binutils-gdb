@@ -1152,6 +1152,37 @@ sframe_xlate_do_val_offset (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
   return SFRAME_XLATE_OK;
 }
 
+/* S390-specific translate DW_CFA_register into SFrame context.
+   Return SFRAME_XLATE_OK if success.  */
+
+static int
+s390_sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
+			       struct cfi_insn_data *cfi_insn)
+{
+  /* The scratchpad FRE currently being updated with each cfi_insn
+     being interpreted.  This FRE eventually gets linked in into the
+     list of FREs for the specific function.  */
+  struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
+
+  gas_assert (cur_fre);
+
+  /* Change the rule for the register indicated by the register number to
+     be the specified register.  Encode the register number as offset by
+     shifting it to the left by one and setting the least-significant bit
+     (LSB).  The LSB can be used to differentiate offsets from register
+     numbers, as offsets from CFA are always a multiple of -8 on s390x.  */
+  if (cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
+    sframe_fre_set_bp_track (cur_fre, cfi_insn->u.rr.reg2 << 1 | 1);
+#ifdef SFRAME_FRE_RA_TRACKING
+  else if (sframe_ra_tracking_p ()
+	   && cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
+    sframe_fre_set_ra_track (cur_fre, cfi_insn->u.rr.reg2 << 1 | 1);
+#endif
+
+  /* Safe to skip.  */
+  return SFRAME_XLATE_OK;
+}
+
 /* Translate DW_CFA_register into SFrame context.
    Return SFRAME_XLATE_OK if success.  */
 
@@ -1159,6 +1190,10 @@ static int
 sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
 			  struct cfi_insn_data *cfi_insn)
 {
+  /* Conditionally invoke S390-specific implementation.  */
+  if (sframe_get_abi_arch () == SFRAME_ABI_S390_ENDIAN_BIG)
+    return s390_sframe_xlate_do_register (xlate_ctx, cfi_insn);
+
   /* Previous value of register1 is register2.  However, if the specified
      register1 is not interesting (FP or RA reg), the current DW_CFA_register
      instruction can be safely skipped without sacrificing the asynchronicity of

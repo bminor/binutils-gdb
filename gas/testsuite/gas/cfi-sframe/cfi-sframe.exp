@@ -110,6 +110,6 @@ if { [istarget "s390x*-*-*"] && [gas_sframe_check] } then {
     run_dump_test "cfi-sframe-s390-err-3"
     run_dump_test "cfi-sframe-s390-fpra-offset-1"
     run_dump_test "cfi-sframe-s390-fpra-offset-err-1"
+    run_dump_test "cfi-sframe-s390-fpra-register-1"
     run_dump_test "cfi-sframe-s390-fpra-register-err-1"
-    run_dump_test "cfi-sframe-s390-fpra-register-err-2"
 }
