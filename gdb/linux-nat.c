@@ -296,6 +296,8 @@ static struct lwp_info *find_lwp_pid (ptid_t ptid);
 
 static int lwp_status_pending_p (struct lwp_info *lp);
 
+static bool is_lwp_marked_dead (lwp_info *lp);
+
 static void save_stop_reason (struct lwp_info *lp);
 
 static bool proc_mem_file_is_writable ();
@@ -1467,9 +1469,7 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
 
   /* If the lwp has exited or was terminated due to a signal, there's
      nothing left to do.  */
-  if (lp->waitstatus.kind () == TARGET_WAITKIND_EXITED
-      || lp->waitstatus.kind () == TARGET_WAITKIND_THREAD_EXITED
-      || lp->waitstatus.kind () == TARGET_WAITKIND_SIGNALLED)
+  if (is_lwp_marked_dead (lp))
     {
       linux_nat_debug_printf
 	("Can't detach %s - it has exited or was terminated: %s.",
@@ -2197,6 +2197,21 @@ mark_lwp_dead (lwp_info *lp, int status)
 
   /* Prevent trying to stop it.  */
   lp->stopped = 1;
+}
+
+/* Return true if LP is dead, with a pending exit/signalled event.  */
+
+static bool
+is_lwp_marked_dead (lwp_info *lp)
+{
+  switch (lp->waitstatus.kind ())
+    {
+    case TARGET_WAITKIND_EXITED:
+    case TARGET_WAITKIND_THREAD_EXITED:
+    case TARGET_WAITKIND_SIGNALLED:
+      return true;
+    }
+  return false;
 }
 
 /* Wait for LP to stop.  Returns the wait status, or 0 if the LWP has
@@ -3830,6 +3845,20 @@ linux_proc_xfer_memory_partial (int pid, gdb_byte *readbuf,
 				const gdb_byte *writebuf, ULONGEST offset,
 				LONGEST len, ULONGEST *xfered_len);
 
+/* Look for an LWP of PID that we know is ptrace-stopped.  Returns
+   NULL if none is found.  */
+
+static lwp_info *
+find_stopped_lwp (int pid)
+{
+  for (lwp_info *lp : all_lwps ())
+    if (lp->ptid.pid () == pid
+	&& lp->stopped
+	&& !is_lwp_marked_dead (lp))
+      return lp;
+  return nullptr;
+}
+
 enum target_xfer_status
 linux_nat_target::xfer_partial (enum target_object object,
 				const char *annex, gdb_byte *readbuf,
@@ -3876,6 +3905,32 @@ linux_nat_target::xfer_partial (enum target_object object,
 	return linux_proc_xfer_memory_partial (inferior_ptid.pid (), readbuf,
 					       writebuf, offset, len,
 					       xfered_len);
+
+      /* Fallback to ptrace.  This should only really trigger on old
+	 systems.  See "Accessing inferior memory" at the top.
+
+	 The target_xfer interface for memory access uses
+	 inferior_ptid as sideband argument to indicate which process
+	 to access.  Memory access is process-wide, it is not
+	 thread-specific, so inferior_ptid sometimes points at a
+	 process ptid_t.  If we fallback to inf_ptrace_target with
+	 that inferior_ptid, then the ptrace code will do the ptrace
+	 call targeting inferior_ptid.pid(), the leader LWP.  That
+	 may fail with ESRCH if the leader is currently running, or
+	 zombie.  So if we get a pid-ptid, we try to find a stopped
+	 LWP to use with ptrace.
+
+	 Note that inferior_ptid may not exist in the lwp / thread /
+	 inferior lists.  This can happen when we're removing
+	 breakpoints from a fork child that we're not going to stay
+	 attached to.  So if we don't find a stopped LWP, still do the
+	 ptrace call, targeting the inferior_ptid we had on entry.  */
+      scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
+      lwp_info *stopped = find_stopped_lwp (inferior_ptid.pid ());
+      if (stopped != nullptr)
+	inferior_ptid = stopped->ptid;
+      return inf_ptrace_target::xfer_partial (object, annex, readbuf, writebuf,
+					      offset, len, xfered_len);
     }
 
   return inf_ptrace_target::xfer_partial (object, annex, readbuf, writebuf,
