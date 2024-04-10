@@ -1575,6 +1575,8 @@ initialize_env (SIM_DESC sd, const char * const *argv, const char * const *env)
   sp = sp_flat - ((argc + 1 + envc + 1) * sizeof (address_word));
   /* Then the argc.  */
   sp -= sizeof (unsigned_word);
+  /* Align to 16 bytes.  */
+  sp = align_down (sp, 16);
 
   /* Set up the regs the libgloss crt0 expects.  */
   riscv_cpu->a0 = argc;
