@@ -164,7 +164,8 @@ static void
 _bfd_delete_bfd (bfd *abfd)
 {
 #ifdef USE_MMAP
-  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+  if (abfd->xvec
+      && abfd->xvec->flavour == bfd_target_elf_flavour)
     {
       asection *sec;
       for (sec = abfd->sections; sec != NULL; sec = sec->next)
