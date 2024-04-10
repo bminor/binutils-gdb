@@ -58,18 +58,18 @@ struct using_direct;
 
 struct demangle_parse_info
 {
-  demangle_parse_info ();
+  demangle_parse_info () = default;
 
   ~demangle_parse_info ();
 
   /* The memory used during the parse.  */
-  struct demangle_info *info;
+  struct demangle_info *info = nullptr;
 
   /* The result of the parse.  */
-  struct demangle_component *tree;
+  struct demangle_component *tree = nullptr;
 
   /* Any temporary memory used during typedef replacement.  */
-  struct obstack obstack;
+  auto_obstack obstack;
 };
 
 

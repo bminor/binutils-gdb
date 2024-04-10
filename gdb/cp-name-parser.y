@@ -1955,15 +1955,6 @@ cp_comp_to_string (struct demangle_component *result, int estimated_len)
   return gdb::unique_xmalloc_ptr<char> (res);
 }
 
-/* Constructor for demangle_parse_info.  */
-
-demangle_parse_info::demangle_parse_info ()
-: info (NULL),
-  tree (NULL)
-{
-  obstack_init (&obstack);
-}
-
 /* Destructor for demangle_parse_info.  */
 
 demangle_parse_info::~demangle_parse_info ()
@@ -1976,9 +1967,6 @@ demangle_parse_info::~demangle_parse_info ()
       free (info);
       info = next;
     }
-
-  /* Free any memory allocated during typedef replacement.  */
-  obstack_free (&obstack, NULL);
 }
 
 /* Merge the two parse trees given by DEST and SRC.  The parse tree
