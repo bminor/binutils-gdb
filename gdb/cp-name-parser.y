@@ -44,6 +44,7 @@
 #include "cp-support.h"
 #include "c-support.h"
 #include "parser-defs.h"
+#include "gdbsupport/selftest.h"
 
 #define GDB_YY_REMAP_PREFIX cpname
 #include "yy-remap.h"
@@ -1514,6 +1515,7 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
   int c;
   int namelen;
   const char *tokstart;
+  char *copy;
 
  retry:
   state->prev_lexptr = state->lexptr;
@@ -1544,6 +1546,10 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
 	  return ERROR;
 	}
 
+      /* We over-allocate here, but it doesn't really matter . */
+      copy = (char *) obstack_alloc (&state->demangle_info->obstack, 30);
+      xsnprintf (copy, 30, "%d", c);
+
       c = *state->lexptr++;
       if (c != '\'')
 	{
@@ -1551,15 +1557,10 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
 	  return ERROR;
 	}
 
-      /* FIXME: We should refer to a canonical form of the character,
-	 presumably the same one that appears in manglings - the decimal
-	 representation.  But if that isn't in our input then we have to
-	 allocate memory for it somewhere.  */
       lvalp->comp
 	= state->fill_comp (DEMANGLE_COMPONENT_LITERAL,
 			    state->make_builtin_type ("char"),
-			    state->make_name (tokstart,
-					      state->lexptr - tokstart));
+			    state->make_name (copy, strlen (copy)));
 
       return INT;
 
@@ -1965,4 +1966,40 @@ cp_demangled_name_to_comp (const char *demangled_name,
   result->tree = state.global_result;
 
   return result;
+}
+
+#if GDB_SELF_TEST
+
+static void
+should_be_the_same (const char *one, const char *two)
+{
+  gdb::unique_xmalloc_ptr<char> cpone = cp_canonicalize_string (one);
+  gdb::unique_xmalloc_ptr<char> cptwo = cp_canonicalize_string (two);
+
+  if (cpone != nullptr)
+    one = cpone.get ();
+  if (cptwo != nullptr)
+    two = cptwo.get ();
+
+  SELF_CHECK (strcmp (one, two) == 0);
+}
+
+static void
+canonicalize_tests ()
+{
+  should_be_the_same ("short int", "short");
+  should_be_the_same ("int short", "short");
+
+  should_be_the_same ("C<(char) 1>::m()", "C<(char) '\\001'>::m()");
+}
+
+#endif
+
+void _initialize_cp_name_parser ();
+void
+_initialize_cp_name_parser ()
+{
+#if GDB_SELF_TEST
+  selftests::register_test ("canonicalize", canonicalize_tests);
+#endif
 }
