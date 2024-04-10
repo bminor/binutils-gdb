@@ -7248,7 +7248,6 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
 		       imported_declaration,
 		       excludes,
 		       read_decl_line (die, cu),
-		       0,
 		       &objfile->objfile_obstack);
 }
 
@@ -14071,7 +14070,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 			       previous_prefix, type->name (), NULL,
 			       NULL, excludes,
 			       read_decl_line (die, cu),
-			       0, &objfile->objfile_obstack);
+			       &objfile->objfile_obstack);
 	}
     }
 

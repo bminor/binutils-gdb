@@ -100,8 +100,9 @@ cp_scan_for_anonymous_namespaces (struct buildsym_compunit *compunit,
 		 to 0, this way it is always considered valid.  */
 	      std::vector<const char *> excludes;
 	      add_using_directive (compunit->get_local_using_directives (),
-				   dest, src, NULL, NULL, excludes, 0,
-				   1, &objfile->objfile_obstack);
+				   objfile->intern (dest), objfile->intern (src),
+				   nullptr, nullptr, excludes, 0,
+				   &objfile->objfile_obstack);
 	    }
 	  /* The "+ 2" is for the "::".  */
 	  previous_component = next_component + 2;
