@@ -2152,16 +2152,6 @@ uninstall: force $(CONFIG_UNINSTALL)
 	rm -f $(DESTDIR)$(bindir)/$$transformed_name
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
 
-# The C++ name parser can be built standalone for testing.
-test-cp-name-parser.o: cp-name-parser.c
-	$(COMPILE) -DTEST_CPNAMES cp-name-parser.c
-	$(POSTCOMPILE)
-
-test-cp-name-parser$(EXEEXT): test-cp-name-parser.o $(LIBIBERTY)
-	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_LDFLAGS) \
-		-o test-cp-name-parser$(EXEEXT) test-cp-name-parser.o \
-		$(LIBIBERTY)
-
 # We do this by grepping through sources.  If that turns out to be too slow,
 # maybe we could just require every .o file to have an initialization routine
 # of a given name (top.o -> _initialize_top, etc.).
@@ -2173,7 +2163,6 @@ test-cp-name-parser$(EXEEXT): test-cp-name-parser.o $(LIBIBERTY)
 # computing the list of source files from the list of object files.
 
 INIT_FILES_FILTER_OUT = \
-	cp-name-parser.o \
 	init.o \
 	version.o \
 	xml-builtin.o \
@@ -2249,7 +2238,6 @@ clean mostlyclean: $(CONFIG_CLEAN)
 	rm -f init.c stamp-init version.c stamp-version
 	rm -f gdb$(EXEEXT) core make.log
 	rm -f gdb[0-9]$(EXEEXT)
-	rm -f test-cp-name-parser$(EXEEXT)
 	rm -f xml-builtin.c stamp-xml
 	rm -f $(DEPDIR)/*
 	for i in $(CONFIG_SRC_SUBDIR); do \
@@ -2682,8 +2670,7 @@ endif
 
 # A list of all the objects we might care about in this build, for
 # dependency tracking.
-all_object_files = gdb.o $(LIBGDB_OBS) gdbtk-main.o \
-	test-cp-name-parser.o
+all_object_files = gdb.o $(LIBGDB_OBS) gdbtk-main.o
 
 # All the .deps files to include.
 all_deps_files = $(foreach dep,$(patsubst %.o,%.Po,$(all_object_files)),\

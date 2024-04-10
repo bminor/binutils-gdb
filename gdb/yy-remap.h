@@ -93,8 +93,4 @@
 # define YYDEBUG 1  /* Default to yydebug support */
 #endif
 
-#ifndef TEST_CPNAMES
-# define YYFPRINTF parser_fprintf
-#endif
-
 #endif /* YY_REMAP_H */
