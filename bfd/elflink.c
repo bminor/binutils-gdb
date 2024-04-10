@@ -355,6 +355,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (s == NULL
       || !bfd_set_section_alignment (s, bed->s->log_file_align))
     return false;
+  elf_hash_table (info)->dynamic = s;
 
   /* The special symbol _DYNAMIC is always set to the start of the
      .dynamic section.  We could set _DYNAMIC in a linker script, but we
@@ -3729,7 +3730,7 @@ _bfd_elf_add_dynamic_entry (struct bfd_link_info *info,
     hash_table->dynamic_relocs = true;
 
   bed = get_elf_backend_data (hash_table->dynobj);
-  s = bfd_get_linker_section (hash_table->dynobj, ".dynamic");
+  s = hash_table->dynamic;
   BFD_ASSERT (s != NULL);
 
   newsize = s->size + bed->s->sizeof_dyn;
@@ -3772,7 +3773,7 @@ _bfd_elf_strip_zero_sized_dynamic_sections (struct bfd_link_info *info)
   if (!hash_table->dynobj)
     return true;
 
-  sdynamic= bfd_get_linker_section (hash_table->dynobj, ".dynamic");
+  sdynamic= hash_table->dynamic;
   if (!sdynamic)
     return true;
 
@@ -3872,7 +3873,7 @@ bfd_elf_add_dt_needed_tag (bfd *abfd, struct bfd_link_info *info)
       bfd_byte *extdyn;
 
       bed = get_elf_backend_data (hash_table->dynobj);
-      sdyn = bfd_get_linker_section (hash_table->dynobj, ".dynamic");
+      sdyn = hash_table->dynamic;
       if (sdyn != NULL && sdyn->size != 0)
 	for (extdyn = sdyn->contents;
 	     extdyn < sdyn->contents + sdyn->size;
@@ -4017,7 +4018,7 @@ elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
     info->callbacks->examine_strtab (dynstr);
 
   bed = get_elf_backend_data (dynobj);
-  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
+  sdyn = hash_table->dynamic;
   BFD_ASSERT (sdyn != NULL);
 
   /* Update all .dynamic entries referencing .dynstr strings.  */
@@ -8352,6 +8353,9 @@ _bfd_elf_link_hash_table_free (bfd *obfd)
   if (htab->dynstr != NULL)
     _bfd_elf_strtab_free (htab->dynstr);
   _bfd_merge_sections_free (htab->merge_info);
+  /* NB: htab->dynamic->contents is always allocated by bfd_realloc.  */
+  if (htab->dynamic != NULL)
+    free (htab->dynamic->contents);
   if (htab->first_hash != NULL)
     {
       bfd_hash_table_free (htab->first_hash);
@@ -13420,7 +13424,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       bfd_byte *dyncon, *dynconend;
 
       /* Fix up .dynamic entries.  */
-      o = bfd_get_linker_section (dynobj, ".dynamic");
+      o = htab->dynamic;
       BFD_ASSERT (o != NULL);
 
       dyncon = o->contents;
@@ -13654,7 +13658,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
       /* Check for DT_TEXTREL (late, in case the backend removes it).  */
       if (bfd_link_textrel_check (info)
-	  && (o = bfd_get_linker_section (dynobj, ".dynamic")) != NULL
+	  && (o = htab->dynamic) != NULL
 	  && o->size != 0)
 	{
 	  bfd_byte *dyncon, *dynconend;

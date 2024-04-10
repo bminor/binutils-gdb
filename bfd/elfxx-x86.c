@@ -2715,7 +2715,7 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
     return htab;
 
   dynobj = htab->elf.dynobj;
-  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
+  sdyn = htab->elf.dynamic;
 
   /* GOT is always created in setup_gnu_properties.  But it may not be
      needed.  .got.plt section may be needed for static IFUNC.  */
