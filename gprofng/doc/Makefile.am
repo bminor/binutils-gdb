@@ -19,6 +19,7 @@
 
 AUTOMAKE_OPTIONS = info-in-builddir foreign no-texinfo.tex
 
+DVIS  = gprofng.dvi
 PDFS  = gprofng.pdf
 HTMLS = gprofng.html
 

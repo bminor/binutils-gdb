@@ -168,7 +168,6 @@ am__v_texidevnull_0 = > /dev/null
 am__v_texidevnull_1 = 
 INFO_DEPS = gprofng.info
 am__TEXINFO_TEX_DIR = $(srcdir)/.
-DVIS = gprofng_ug.dvi
 PSS = gprofng_ug.ps
 TEXINFOS = gprofng_ug.texi
 TEXI2DVI = texi2dvi
@@ -361,6 +360,7 @@ top_srcdir = @top_srcdir@
 zlibdir = @zlibdir@
 zlibinc = @zlibinc@
 AUTOMAKE_OPTIONS = info-in-builddir foreign no-texinfo.tex
+DVIS = gprofng.dvi
 PDFS = gprofng.pdf
 HTMLS = gprofng.html
 
