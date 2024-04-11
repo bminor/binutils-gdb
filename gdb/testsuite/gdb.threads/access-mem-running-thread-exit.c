@@ -102,6 +102,8 @@ main (void)
 {
   int i;
 
+  global_var++;
+
   for (i = 0; i < 4; i++)
     {
       struct thread_arg *p;
