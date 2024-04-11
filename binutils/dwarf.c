@@ -4236,7 +4236,7 @@ process_debug_info (struct dwarf_section * section,
 	     Only needed for the top DIE on DWARFv5+.
 	     No simiar treatment for loclists_base because there should
 	     be no loclist attributes in top DIE.  */
-	  if (compunit.cu_version >= 5 && level == 0)
+	  if (debug_info_p && compunit.cu_version >= 5 && level == 0)
 	    {
 	      int64_t stemp;
 
@@ -4248,17 +4248,14 @@ process_debug_info (struct dwarf_section * section,
 			  compunit.cu_version,
 			  debug_info_p);
 
-	      if (debug_info_p)
+	      /* This check was in place before, keep it.  */
+	      stemp = debug_info_p->rnglists_base;
+	      if (stemp < 0)
 		{
-		  /* This check was in place before, keep it.  */
-		  stemp = debug_info_p->rnglists_base;
-		  if (stemp < 0)
-		    {
-		      warn (_("CU @ %#" PRIx64 " has has a negative rnglists_base "
-			      "value of %#" PRIx64 " - treating as zero"),
-			    debug_info_p->cu_offset, stemp);
-		      debug_info_p->rnglists_base = 0;
-		    }
+		  warn (_("CU @ %#" PRIx64 " has has a negative rnglists_base "
+			  "value of %#" PRIx64 " - treating as zero"),
+			debug_info_p->cu_offset, stemp);
+		  debug_info_p->rnglists_base = 0;
 		}
 	    }
 
