@@ -4340,7 +4340,9 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
      and the VMA was not set by the user
      and the section does not have relocations associated with it
      then warn the user.  */
-  if ((osection->vma & (((bfd_vma) 1 << alignment) - 1)) != 0
+  if (osection->vma != 0
+      && (alignment >= sizeof (bfd_vma) * CHAR_BIT
+	  || (osection->vma & (((bfd_vma) 1 << alignment) - 1)) != 0)
       && alignment != bfd_section_alignment (isection)
       && change_section_address == 0
       && ! vma_set_by_user
@@ -4352,7 +4354,9 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   /* Similar check for a non-aligned LMA.
      FIXME: Since this is only an LMA, maybe it does not matter if
      it is not aligned ?  */
-  if ((osection->lma & (((bfd_vma) 1 << alignment) - 1)) != 0
+  if (osection->lma != 0
+      && (alignment >= sizeof (bfd_vma) * CHAR_BIT
+	  || (osection->lma & (((bfd_vma) 1 << alignment) - 1)) != 0)
       && alignment != bfd_section_alignment (isection)
       && change_section_address == 0
       && ! lma_set_by_user
