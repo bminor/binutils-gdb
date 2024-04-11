@@ -58,18 +58,15 @@ struct using_direct;
 
 struct demangle_parse_info
 {
-  demangle_parse_info () = default;
-
-  ~demangle_parse_info ();
-
-  /* The memory used during the parse.  */
-  struct demangle_info *info = nullptr;
-
   /* The result of the parse.  */
   struct demangle_component *tree = nullptr;
 
-  /* Any temporary memory used during typedef replacement.  */
+  /* Any memory used during processing.  */
   auto_obstack obstack;
+
+  /* Any other objects referred to by this object, and whose storage
+     lifetime must be linked.  */
+  std::vector<std::unique_ptr<demangle_parse_info>> infos;
 };
 
 
@@ -182,7 +179,7 @@ extern gdb::unique_xmalloc_ptr<char> cp_comp_to_string
 
 extern void cp_merge_demangle_parse_infos (struct demangle_parse_info *,
 					   struct demangle_component *,
-					   struct demangle_parse_info *);
+					   std::unique_ptr<demangle_parse_info>);
 
 /* The list of "maint cplus" commands.  */
 

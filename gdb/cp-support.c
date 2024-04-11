@@ -258,7 +258,7 @@ inspect_type (struct demangle_parse_info *info,
 	  if (i != NULL)
 	    {
 	      /* Merge the two trees.  */
-	      cp_merge_demangle_parse_infos (info, ret_comp, i.get ());
+	      cp_merge_demangle_parse_infos (info, ret_comp, std::move (i));
 
 	      /* Replace any newly introduced typedefs -- but not
 		 if the type is anonymous (that would lead to infinite

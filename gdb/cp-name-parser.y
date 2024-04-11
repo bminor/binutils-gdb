@@ -48,17 +48,6 @@
 #define GDB_YY_REMAP_PREFIX cpname
 #include "yy-remap.h"
 
-/* The components built by the parser are allocated ahead of time,
-   and cached in this structure.  */
-
-#define ALLOC_CHUNK 100
-
-struct demangle_info {
-  int used;
-  struct demangle_info *next;
-  struct demangle_component comps[ALLOC_CHUNK];
-};
-
 %}
 
 %union
@@ -92,7 +81,7 @@ struct cpname_state
 
   const char *lexptr, *prev_lexptr, *error_lexptr, *global_errmsg;
 
-  struct demangle_info *demangle_info;
+  demangle_parse_info *demangle_info;
 
   /* The parse tree created by the parser is stored here after a
      successful parse.  */
@@ -136,23 +125,7 @@ struct cpname_state
 struct demangle_component *
 cpname_state::d_grab ()
 {
-  struct demangle_info *more;
-
-  if (demangle_info->used >= ALLOC_CHUNK)
-    {
-      if (demangle_info->next == NULL)
-	{
-	  more = XNEW (struct demangle_info);
-	  more->next = NULL;
-	  demangle_info->next = more;
-	}
-      else
-	more = demangle_info->next;
-
-      more->used = 0;
-      demangle_info = more;
-    }
-  return &demangle_info->comps[demangle_info->used++];
+  return obstack_new<demangle_component> (&demangle_info->obstack);
 }
 
 /* Flags passed to d_qualify.  */
@@ -1929,20 +1902,6 @@ yyerror (cpname_state *state, const char *msg)
   state->global_errmsg = msg ? msg : "parse error";
 }
 
-/* Allocate a chunk of the components we'll need to build a tree.  We
-   generally allocate too many components, but the extra memory usage
-   doesn't hurt because the trees are temporary and the storage is
-   reused.  More may be allocated later, by d_grab.  */
-static struct demangle_info *
-allocate_info (void)
-{
-  struct demangle_info *info = XNEW (struct demangle_info);
-
-  info->next = NULL;
-  info->used = 0;
-  return info;
-}
-
 /* See cp-support.h.  */
 
 gdb::unique_xmalloc_ptr<char>
@@ -1953,20 +1912,6 @@ cp_comp_to_string (struct demangle_component *result, int estimated_len)
   char *res = gdb_cplus_demangle_print (DMGL_PARAMS | DMGL_ANSI,
 					result, estimated_len, &err);
   return gdb::unique_xmalloc_ptr<char> (res);
-}
-
-/* Destructor for demangle_parse_info.  */
-
-demangle_parse_info::~demangle_parse_info ()
-{
-  /* Free any allocated chunks of memory for the parse.  */
-  while (info != NULL)
-    {
-      struct demangle_info *next = info->next;
-
-      free (info);
-      info = next;
-    }
 }
 
 /* Merge the two parse trees given by DEST and SRC.  The parse tree
@@ -1982,21 +1927,14 @@ demangle_parse_info::~demangle_parse_info ()
 void
 cp_merge_demangle_parse_infos (struct demangle_parse_info *dest,
 			       struct demangle_component *target,
-			       struct demangle_parse_info *src)
+			       std::unique_ptr<demangle_parse_info> src)
 
 {
-  struct demangle_info *di;
-
   /* Copy the SRC's parse data into DEST.  */
   *target = *src->tree;
-  di = dest->info;
-  while (di->next != NULL)
-    di = di->next;
-  di->next = src->info;
 
-  /* Clear the (pointer to) SRC's parse data so that it is not freed when
-     cp_demangled_parse_info_free is called.  */
-  src->info = NULL;
+  /* Make sure SRC is owned by DEST.  */
+  dest->infos.push_back (std::move (src));
 }
 
 /* Convert a demangled name to a demangle_component tree.  On success,
@@ -2014,10 +1952,8 @@ cp_demangled_name_to_comp (const char *demangled_name,
   state.error_lexptr = NULL;
   state.global_errmsg = NULL;
 
-  state.demangle_info = allocate_info ();
-
   auto result = std::make_unique<demangle_parse_info> ();
-  result->info = state.demangle_info;
+  state.demangle_info = result.get ();
 
   if (yyparse (&state))
     {
