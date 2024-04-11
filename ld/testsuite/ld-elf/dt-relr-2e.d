@@ -13,5 +13,9 @@ Relocation section '\.rel(a|)\.data' at offset 0x[0-9a-f]+ contains 1 entry:
 [0-9a-f]+ +[0-9a-f]+ +R_.*_(RELATIVE|UADDR.*) .*
 #...
 Relocation section '\.relr\.dyn' at offset 0x[0-9a-f]+ contains 2 entries:
-  4 offsets
+#...
+0000: +[0-9a-f]+ [0-9a-f]+ +data \(new starting address\)
+0001: +[0-9a-f]+ [0-9a-f]+ +data \+ 0x[0-9a-f]+ \(start of bitmap\)
+ +[0-9a-f]+ +data \+ 0x[0-9a-f]+
+ +[0-9a-f]+ +data \+ 0x[0-9a-f]+
 #pass

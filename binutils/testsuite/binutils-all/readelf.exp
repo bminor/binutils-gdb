@@ -642,3 +642,70 @@ readelf_test {-j .rela.debug_info --display-section=.rel.debug_info} $tempfile d
 readelf_test --display-section=0 $tempfile display-section.0
 
 
+# Test that RELR relocations are display correctly.
+proc readelf_relr_test {} {
+    global srcdir
+    global subdir
+    global READELF
+    global READELFFLAGS
+    
+    set testname "readelf -r (RELR)"
+
+    # Assemble the RELR test file (using magic to work for both 32-bit and
+    # 64-bit targets).
+    if {![binutils_assemble $srcdir/$subdir/relr.s tmpdir/relr.o]} then {
+      unsupported "$testname: failed to assemble RELR test file"
+      return
+    }
+
+    # Download it.
+    set tempfile [remote_download host tmpdir/relr.o]
+
+    # Run "readelf -r" on it.
+    set got [remote_exec host "$READELF $READELFFLAGS -r $tempfile" "" "/dev/null" "readelf.out"]
+    set got [lindex $got 1]
+
+    # Upload the results.
+    set output [remote_upload host readelf.out]
+
+    # Check for something going wrong.
+    if ![string match "" $got] then {
+	fail "$testname: unexpected output"
+	send_log $got
+	send_log "\n"
+	return
+    }
+
+    # Search for strings that should be in the output.
+    # There will also be these strings:
+    #   readelf: Error: Section 4 has invalid sh_entsize of 0
+    #   readelf: Error: (Using the expected size of 8 for the rest of this dump)
+    # But we ignore them...
+
+    set sought {
+	"0000:  0+01000 0+01000 .*"
+	"0001:  0+00003 0+0100. .*"
+    }
+
+    foreach looked_for $sought {
+	set lines [grep $output $looked_for]
+	if ![llength $lines] then {
+	    fail "$testname: missing: $looked_for"
+	    send_log readelf.out
+	    return
+	}
+    }
+
+    file_on_host delete $tempfile
+    file_on_host delete $output
+
+    # All done.
+    pass "$testname"
+}
+
+# The AVR, H8300, IP2K and Z80 targets' .dc.a pseudo-op creates a
+# 16-bit entry rather than a 32-bit entry.  Thus creating an
+# invalid RELR relocation.
+setup_xfail "avr-*-*" "h8300-*-*" "ip2k-*-*" "z80-*-*"
+
+readelf_relr_test

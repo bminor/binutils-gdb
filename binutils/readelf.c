@@ -338,6 +338,7 @@ typedef enum print_mode
   PREFIX_HEX_5,
   FULL_HEX,
   LONG_HEX,
+  ZERO_HEX,
   OCTAL,
   OCTAL_5
 }
@@ -580,6 +581,11 @@ print_vma (uint64_t vma, print_mode mode)
 	return nc + printf ("%16.16" PRIx64, vma);
       return nc + printf ("%8.8" PRIx64, vma);
 
+    case ZERO_HEX:
+      if (is_32bit_elf)
+	return printf ("%08" PRIx64, vma);
+      return printf ("%016" PRIx64, vma);
+      
     case DEC_5:
       if (vma <= 99999)
 	return printf ("%5" PRId64, vma);
@@ -1109,6 +1115,26 @@ find_section_by_type (Filedata * filedata, unsigned int type)
   return NULL;
 }
 
+static Elf_Internal_Shdr *
+find_section_by_name (Filedata * filedata, const char * name)
+{
+  unsigned int i;
+
+  if (filedata->section_headers == NULL || filedata->string_table_length == 0)
+    return NULL;
+
+  for (i = 0; i < filedata->file_header.e_shnum; i++)
+    {
+      Elf_Internal_Shdr *sec = filedata->section_headers + i;
+
+      if (sec->sh_name < filedata->string_table_length
+	  && streq (name, filedata->string_table + sec->sh_name))
+	return sec;
+    }
+
+  return NULL;
+}
+
 /* Return a pointer to section NAME, or NULL if no such section exists,
    restricted to the list of sections given in SET.  */
 
@@ -1467,76 +1493,6 @@ slurp_rel_relocs (Filedata *filedata,
   return true;
 }
 
-static bool
-slurp_relr_relocs (Filedata *filedata,
-		   uint64_t relr_offset,
-		   uint64_t relr_size,
-		   uint64_t **relrsp,
-		   uint64_t *nrelrsp)
-{
-  void *relrs;
-  size_t size = 0, nentries, i;
-  uint64_t base = 0, addr, entry;
-
-  relrs = get_data (NULL, filedata, relr_offset, 1, relr_size,
-		    _("RELR relocation data"));
-  if (!relrs)
-    return false;
-
-  if (is_32bit_elf)
-    nentries = relr_size / sizeof (Elf32_External_Relr);
-  else
-    nentries = relr_size / sizeof (Elf64_External_Relr);
-  for (i = 0; i < nentries; i++)
-    {
-      if (is_32bit_elf)
-	entry = BYTE_GET (((Elf32_External_Relr *)relrs)[i].r_data);
-      else
-	entry = BYTE_GET (((Elf64_External_Relr *)relrs)[i].r_data);
-      if ((entry & 1) == 0)
-	size++;
-      else
-	while ((entry >>= 1) != 0)
-	  if ((entry & 1) == 1)
-	    size++;
-    }
-
-  *relrsp = malloc (size * sizeof (**relrsp));
-  if (*relrsp == NULL)
-    {
-      free (relrs);
-      error (_("out of memory parsing relocs\n"));
-      return false;
-    }
-
-  size = 0;
-  for (i = 0; i < nentries; i++)
-    {
-      const uint64_t entry_bytes = is_32bit_elf ? 4 : 8;
-
-      if (is_32bit_elf)
-	entry = BYTE_GET (((Elf32_External_Relr *)relrs)[i].r_data);
-      else
-	entry = BYTE_GET (((Elf64_External_Relr *)relrs)[i].r_data);
-      if ((entry & 1) == 0)
-	{
-	  (*relrsp)[size++] = entry;
-	  base = entry + entry_bytes;
-	}
-      else
-	{
-	  for (addr = base; (entry >>= 1) != 0; addr += entry_bytes)
-	    if ((entry & 1) != 0)
-	      (*relrsp)[size++] = addr;
-	  base += entry_bytes * (entry_bytes * CHAR_BIT - 1);
-	}
-    }
-
-  *nrelrsp = size;
-  free (relrs);
-  return true;
-}
-
 /* Returns the reloc type extracted from the reloc info field.  */
 
 static unsigned int
@@ -1578,19 +1534,227 @@ uses_msp430x_relocs (Filedata * filedata)
 	|| (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_NONE));
 }
 
+
+static const char *
+get_symbol_at (Elf_Internal_Sym *  symtab,
+	       uint64_t            nsyms,
+	       char *              strtab,
+	       uint64_t            strtablen,
+	       uint64_t            where,
+	       uint64_t *          offset_return)
+{
+  Elf_Internal_Sym *  beg = symtab;
+  Elf_Internal_Sym *  end = symtab + nsyms;
+  Elf_Internal_Sym *  best = NULL;
+  uint64_t            dist = 0x100000;
+
+  /* FIXME: Since this function is likely to be called repeatedly with
+     slightly increasing addresses each time, we could speed things up by
+     caching the last returned value and starting our search from there.  */
+  while (beg < end)
+    {
+      Elf_Internal_Sym *  sym;
+      uint64_t            value;
+
+      sym = beg + (end - beg) / 2;
+
+      value = sym->st_value;
+
+      if (sym->st_name != 0
+	  && where >= value
+	  && where - value < dist)
+	{
+	  best = sym;
+	  dist = where - value;
+	  if (dist == 0)
+	    break;
+	}
+
+      if (where < value)
+	end = sym;
+      else
+	beg = sym + 1;
+    }
+
+  if (best == NULL)
+    return NULL;
+
+  if (best->st_name >= strtablen)
+    return NULL;
+
+  if (offset_return != NULL)
+    * offset_return = dist;
+
+  return strtab + best->st_name;
+}
+
+static void
+print_relr_addr_and_sym (Elf_Internal_Sym *  symtab,
+			 uint64_t            nsyms,
+			 char *              strtab,
+			 uint64_t            strtablen,
+			 uint64_t            where)
+{
+  const char * symname = NULL;
+  uint64_t     offset = 0;
+
+  print_vma (where, ZERO_HEX);
+  printf ("  ");
+
+  symname = get_symbol_at (symtab, nsyms, strtab, strtablen, where, & offset);
+
+  if (symname == NULL)
+    printf ("<no sym>");
+  else if (offset == 0)
+    print_symbol_name (38, symname);
+  else
+    {
+      print_symbol_name (28, symname);
+      printf (" + ");
+      print_vma (offset, PREFIX_HEX);
+    }
+}
+
+static /* signed */ int
+symcmp (const void *p, const void *q)
+{
+  Elf_Internal_Sym *sp = (Elf_Internal_Sym *) p;
+  Elf_Internal_Sym *sq = (Elf_Internal_Sym *) q;
+
+  return sp->st_value > sq->st_value ? 1 : (sp->st_value < sq->st_value ? -1 : 0);
+}
+
+static bool
+dump_relr_relocations (Filedata *          filedata,
+		       Elf_Internal_Shdr * section,
+		       Elf_Internal_Sym *  symtab,
+		       uint64_t            nsyms,
+		       char *              strtab,
+		       uint64_t            strtablen)
+{
+  uint64_t *  relrs;
+  uint64_t    nentries, i;
+  uint64_t    relr_size = section->sh_size;
+  int         relr_entsize = section->sh_entsize;
+  uint64_t    relr_offset = section->sh_offset;
+  uint64_t    where = 0;
+  int         num_bits_in_entry;
+
+  relrs = get_data (NULL, filedata, relr_offset, 1, relr_size, _("RELR relocation data"));
+  if (relrs == NULL)
+    return false;
+
+  if (relr_entsize == 0)
+    relr_entsize = is_32bit_elf ? 4 : 8;
+
+  nentries = relr_size / relr_entsize;
+
+  if (relr_entsize == sizeof (Elf32_External_Relr))
+    num_bits_in_entry = 31;
+  else if (relr_entsize == sizeof (Elf64_External_Relr))
+    num_bits_in_entry = 63;
+  else
+    {
+      warn (_("Unexpected entsize for RELR section\n"));
+      return false;
+    }
+  
+  /* Symbol tables are not sorted on address, but we want a quick lookup
+     for the symbol associated with each address computed below, so sort
+     the table now.  FIXME: This assumes that the symbol table will not
+     be used later on for some other purpose.  */
+  qsort (symtab, nsyms, sizeof (Elf_Internal_Sym), symcmp);
+
+  if (do_wide)
+    {
+      if (relr_entsize == 4)
+	printf (_("Index: Entry:   Address  Symbolic Address     Notes\n"));
+      else
+	printf (_("Index: Entry:           Address relocated Symbolic Address        Notes\n"));
+    }
+  else
+    {
+      if (relr_entsize == 4)
+	printf (_("Index: Entry:   Address  Symbolic Address\n"));
+      else
+	printf (_("Index: Entry:           Address relocated Symbolic Address\n"));
+    }
+
+  for (i = 0; i < nentries; i++)
+    {
+      uint64_t entry;
+
+      if (relr_entsize == 4)
+	entry = BYTE_GET (((Elf32_External_Relr *)relrs)[i].r_data);
+      else
+	entry = BYTE_GET (((Elf64_External_Relr *)relrs)[i].r_data);
+
+      /* We assume that there will never be more than 9999 entries.  */
+      printf (_("%04u:  "), (unsigned int) i);
+      print_vma (entry, ZERO_HEX);
+      printf (" ");
+
+      if ((entry & 1) == 0)
+	{
+	  where = entry;
+	  print_relr_addr_and_sym (symtab, nsyms, strtab, strtablen, where);
+	  if (do_wide)
+	    printf (_(" (new starting address)"));
+	  printf ("\n");
+	  where += relr_entsize;
+	}
+      else
+	{
+	  bool first = true;
+	  int j;
+
+	  /* The least significant bit is ignored.  */
+	  if (entry == 1)
+	    warn (_("Malformed RELR bitmap - no significant bits are set\n"));
+	  else if (i == 0)
+	    warn (_("Unusual RELR bitmap - no previous entry to set the base address\n"));
+
+	  for (j = 0; entry >>= 1; j++)
+	    if ((entry & 1) == 1)
+	      {
+		uint64_t addr = where + (j * relr_entsize);
+		
+		if (first)
+		  {
+		    print_relr_addr_and_sym (symtab, nsyms, strtab, strtablen, addr);
+		    if (do_wide)
+		      printf (_(" (start of bitmap)"));
+		    first = false;
+		  }
+		else
+		  {
+		    printf (_("\n%*s "), relr_entsize == 4 ? 15 : 23, " ");
+		    print_relr_addr_and_sym (symtab, nsyms, strtab, strtablen, addr);
+		  }
+	      }
+
+	  printf ("\n");
+	  where += num_bits_in_entry * relr_entsize;
+	}
+    }
+
+  free (relrs);
+  return true;
+}
+		       
 /* Display the contents of the relocation data found at the specified
    offset.  */
 
 static bool
-dump_relocations (Filedata *filedata,
-		  uint64_t rel_offset,
-		  uint64_t rel_size,
-		  Elf_Internal_Sym *symtab,
-		  uint64_t nsyms,
-		  char *strtab,
-		  uint64_t strtablen,
-		  relocation_type rel_type,
-		  bool is_dynsym)
+dump_relocations (Filedata *          filedata,
+		  uint64_t            rel_offset,
+		  uint64_t            rel_size,
+		  Elf_Internal_Sym *  symtab,
+		  uint64_t            nsyms,
+		  char *              strtab,
+		  uint64_t            strtablen,
+		  relocation_type     rel_type,
+		  bool                is_dynsym)
 {
   size_t i;
   Elf_Internal_Rela * rels;
@@ -1611,21 +1775,8 @@ dump_relocations (Filedata *filedata,
     }
   else if (rel_type == reltype_relr)
     {
-      uint64_t * relrs;
-      const char *format
-	= is_32bit_elf ? "%08" PRIx64 "\n" : "%016" PRIx64 "\n";
-
-      if (!slurp_relr_relocs (filedata, rel_offset, rel_size, &relrs,
-			      &rel_size))
-	return false;
-
-      printf (ngettext ("  %" PRIu64 " offset\n",
-			"  %" PRIu64 " offsets\n", rel_size),
-	      rel_size);
-      for (i = 0; i < rel_size; i++)
-	printf (format, relrs[i]);
-      free (relrs);
-      return true;
+      /* This should have been handled by display_relocations().  */
+      return false;
     }
 
   if (is_32bit_elf)
@@ -7996,6 +8147,7 @@ process_section_headers (Filedata * filedata)
       switch (section->sh_type)
 	{
 	case SHT_REL:
+	case SHT_RELR:
 	case SHT_RELA:
 	  if (section->sh_link == 0
 	      && (filedata->file_header.e_type == ET_EXEC
@@ -8349,9 +8501,12 @@ process_section_headers (Filedata * filedata)
 }
 
 static bool
-get_symtab (Filedata *filedata, Elf_Internal_Shdr *symsec,
-	    Elf_Internal_Sym **symtab, uint64_t *nsyms,
-	    char **strtab, uint64_t *strtablen)
+get_symtab (Filedata *           filedata,
+	    Elf_Internal_Shdr *  symsec,
+	    Elf_Internal_Sym **  symtab,
+	    uint64_t *           nsyms,
+	    char **              strtab,
+	    uint64_t *           strtablen)
 {
   *strtab = NULL;
   *strtablen = 0;
@@ -8912,9 +9067,9 @@ static bool
 display_relocations (Elf_Internal_Shdr *  section,
 		     Filedata *           filedata)
 {
-  if (section->sh_type != SHT_RELA
-      && section->sh_type != SHT_REL
-      && section->sh_type != SHT_RELR)
+  relocation_type rel_type = rel_type_from_sh_type (section->sh_type);
+
+  if (rel_type == reltype_unknown)
     return false;
 
   uint64_t rel_size = section->sh_size;
@@ -8943,33 +9098,43 @@ display_relocations (Elf_Internal_Shdr *  section,
 		    num_rela),
 	  rel_offset, num_rela);
 
-  relocation_type rel_type = rel_type_from_sh_type (section->sh_type);
-
-  if (section->sh_link == 0
-      || section->sh_link >= filedata->file_header.e_shnum)
-    /* Symbol data not available.  */
-    return dump_relocations (filedata, rel_offset, rel_size,
-			     NULL, 0, NULL, 0, rel_type,
-			     false /* is_dynamic */);
-    
-  Elf_Internal_Shdr * symsec = filedata->section_headers + section->sh_link;
-
-  if (symsec->sh_type != SHT_SYMTAB
-      && symsec->sh_type != SHT_DYNSYM)
-    return false;
-
-  Elf_Internal_Sym *  symtab;
-  uint64_t            nsyms;
+  Elf_Internal_Shdr * symsec;
+  Elf_Internal_Sym *  symtab = NULL;
+  uint64_t            nsyms = 0;
   uint64_t            strtablen = 0;
   char *              strtab = NULL;
 
-  if (!get_symtab (filedata, symsec, &symtab, &nsyms, &strtab, &strtablen))
+  if (section->sh_link == 0
+      || section->sh_link >= filedata->file_header.e_shnum)
+    {
+      /* Symbol data not available.
+	 This can happen, especially with RELR relocs.
+	 See if there is a .symtab section present.
+	 If so then use it.  */
+      symsec = find_section_by_name (filedata, ".symtab");
+    }
+  else
+    {
+      symsec = filedata->section_headers + section->sh_link;
+
+      if (symsec->sh_type != SHT_SYMTAB
+	  && symsec->sh_type != SHT_DYNSYM)
+	return false;
+    }
+
+  if (symsec != NULL
+      && !get_symtab (filedata, symsec, &symtab, &nsyms, &strtab, &strtablen))
     return false;
 
-  bool res = dump_relocations (filedata, rel_offset, rel_size,
-			       symtab, nsyms, strtab, strtablen,
-			       rel_type,
-			       symsec->sh_type == SHT_DYNSYM);
+  bool res;
+
+  if (rel_type == reltype_relr)
+    res = dump_relr_relocations (filedata, section, symtab, nsyms, strtab, strtablen);
+  else
+    res = dump_relocations (filedata, rel_offset, rel_size,
+			    symtab, nsyms, strtab, strtablen,
+			    rel_type,
+			    symsec == NULL ? false : symsec->sh_type == SHT_DYNSYM);
   free (strtab);
   free (symtab);
 
@@ -9171,15 +9336,6 @@ find_symbol_for_address (Filedata *filedata,
 
   *symname = NULL;
   *offset = addr.offset;
-}
-
-static /* signed */ int
-symcmp (const void *p, const void *q)
-{
-  Elf_Internal_Sym *sp = (Elf_Internal_Sym *) p;
-  Elf_Internal_Sym *sq = (Elf_Internal_Sym *) q;
-
-  return sp->st_value > sq->st_value ? 1 : (sp->st_value < sq->st_value ? -1 : 0);
 }
 
 /* Process the unwind section.  */

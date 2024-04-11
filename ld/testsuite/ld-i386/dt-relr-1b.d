@@ -17,11 +17,10 @@ Relocation section '\.rel\.plt' at offset 0x[0-9a-f]+ contains 1 entry:
 [0-9a-f]+ +[0-9a-f]+ +R_386_JUMP_SLOT +0+ +func1
 
 Relocation section '.relr.dyn' at offset 0x[a-f0-9]+ contains 2 entries:
- +3 offsets
-[a-f0-9]+
-[a-f0-9]+
-[a-f0-9]+
-
+#...
+0000: +[0-9a-f]+ [0-9a-f]+ +.* \(new starting address\)
+0001: +[0-9a-f]+ [0-9a-f]+ +.* \(start of bitmap\)
+ +[0-9a-f]+ +.*
 #...
 Symbol table '.symtab' contains [0-9]+ entries:
    Num:    Value  Size Type    Bind   Vis      Ndx Name

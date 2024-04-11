@@ -13,5 +13,6 @@ Relocation section '\.rela\.dyn' at offset .* contains 6 entries:
 0+10450  0+400000026 R_PPC64_ADDR64         123456789abcdef0 c \+ 0
 
 Relocation section '\.relr\.dyn' at offset .* contains 1 entry:
-  1 offset
-0+10438
+Index: Entry: +Address relocated Symbolic Address +Notes
+0000: +[0-9a-f]+ [0-9a-f]+ +x \(new starting address\)
+
