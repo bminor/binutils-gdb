@@ -5012,6 +5012,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-x} <number or name>|@option{--hex-dump=}<number or name>]
         [@option{-p} <number or name>|@option{--string-dump=}<number or name>]
         [@option{-R} <number or name>|@option{--relocated-dump=}<number or name>]
+        [@option{-j} <number or name>|@option{--display-section=}<number or name>]
         [@option{-z}|@option{--decompress}]
         [@option{-c}|@option{--archive-index}]
         [@option{-w[lLiaprmfFsoORtUuTgAck]}|
@@ -5270,6 +5271,8 @@ displayed.
 Displays the contents of the indicated section as a hexadecimal bytes.
 A number identifies a particular section by index in the section table;
 any other string identifies all sections with that name in the object file.
+This option can be repeated multiple times on the command line in
+order to request multiple hex dumps.
 
 @item -R <number or name>
 @itemx --relocated-dump=<number or name>
@@ -5278,12 +5281,31 @@ bytes.  A number identifies a particular section by index in the
 section table; any other string identifies all sections with that name
 in the object file.  The contents of the section will be relocated
 before they are displayed.
+This option can be repeated multiple times on the command line in
+order to request multiple relocated dumps.
 
 @item -p <number or name>
 @itemx --string-dump=<number or name>
 Displays the contents of the indicated section as printable strings.
 A number identifies a particular section by index in the section table;
 any other string identifies all sections with that name in the object file.
+This option can be repeated multiple times on the command line in
+order to request multiple string dumps.
+
+@item -j <number or name>
+@itemx --display-section
+Displays the contents of the indicated section according to its
+section header type.  Sections containing relocations will be
+displayed as if the @option{--relocations} option had been used,
+sections contains symbols will be displayed as if the @option{--syms}
+option had been used and so on.
+
+A number identifies a particular section by index in the section
+table; any other string identifies all sections with that name in the
+input file(s).
+
+This option can be repeated multiple times on the command line in
+order to request multiple section dumps.
 
 @item -z
 @itemx --decompress

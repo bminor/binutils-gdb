@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Readelf now has a -j/--display-section option which takes the name or index
+  of a section and displays its contents according to its type.  The option can
+  be used multiple times on the command line to display multiple sections.
+
 * Base register 0 is now printed as "0" instead of "%r0" in s390 disassembly.
 
 * When objdump or readelf are used to display the contents of a .eh_frame

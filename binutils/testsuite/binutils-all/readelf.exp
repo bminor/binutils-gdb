@@ -634,3 +634,11 @@ readelf_find_size $tempfile 2
 # Make sure that readelf can decode the contents.
 readelf_test -wi $tempfile dw5-op.W
 }
+
+# Test the -j/--display-section option.
+# Check that multiple options accumulate.
+# Check that both numbers and names can be used.
+readelf_test {-j .rela.debug_info --display-section=.rel.debug_info} $tempfile display-section.r
+readelf_test --display-section=0 $tempfile display-section.0
+
+

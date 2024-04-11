@@ -28,6 +28,7 @@
 
 extern void error (const char *, ...) ATTRIBUTE_PRINTF_1;
 extern void warn (const char *, ...) ATTRIBUTE_PRINTF_1;
+extern void inform (const char *, ...) ATTRIBUTE_PRINTF_1;
 
 extern void (*byte_put) (unsigned char *, uint64_t, unsigned int);
 extern void byte_put_little_endian (unsigned char *, uint64_t, unsigned int);

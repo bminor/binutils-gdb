@@ -63,6 +63,20 @@ warn (const char *message, ...)
   va_end (args);
 }
 
+void
+inform (const char *message, ...)
+{
+  va_list args;
+
+  /* Try to keep info messages in sync with the program's normal output.  */
+  fflush (stdout);
+
+  va_start (args, message);
+  fprintf (stderr, _("%s: Info: "), program_name);
+  vfprintf (stderr, message, args);
+  va_end (args);
+}
+
 void (*byte_put) (unsigned char *, uint64_t, unsigned int);
 
 void
