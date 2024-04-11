@@ -1,9 +1,8 @@
 /* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically
    generated from "bfd-in.h", "libbfd.c", "hash.c", "section.c",
-   "syms.c", "archive.c", "archures.c", "bfd.c", "bfdio.c", "bfdwin.c",
-   "cache.c", "compress.c", "corefile.c", "format.c", "linker.c",
-   "opncls.c", "reloc.c", "simple.c", "stab-syms.c", "stabs.c" and
-   "targets.c".
+   "syms.c", "archive.c", "archures.c", "bfd.c", "bfdio.c", "cache.c",
+   "compress.c", "corefile.c", "format.c", "linker.c", "opncls.c",
+   "reloc.c", "simple.c", "stab-syms.c", "stabs.c" and "targets.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* Main header file for the bfd library -- portable access to object files.
@@ -2811,31 +2810,6 @@ void *bfd_mmap (bfd *abfd, void *addr, size_t len,
 ATTRIBUTE_WARN_UNUSED_RESULT;
 
 time_t bfd_get_current_time (time_t now);
-
-/* Extracted from bfdwin.c.  */
-struct _bfd_window_internal;
-
-typedef struct _bfd_window
-{
-  /* What the user asked for.  */
-  void *data;
-  bfd_size_type size;
-  /* The actual window used by BFD.  Small user-requested read-only
-     regions sharing a page may share a single window into the object
-     file.  Read-write versions shouldn't until I've fixed things to
-     keep track of which portions have been claimed by the
-     application; don't want to give the same region back when the
-     application wants two writable copies!  */
-  struct _bfd_window_internal *i;
-}
-bfd_window;
-
-void bfd_init_window (bfd_window *);
-
-void bfd_free_window (bfd_window *);
-
-bool bfd_get_file_window
-   (bfd *, file_ptr, bfd_size_type, bfd_window *, bool /*writable*/);
 
 /* Extracted from cache.c.  */
 bool bfd_cache_close (bfd *abfd);
@@ -7703,8 +7677,7 @@ typedef struct bfd_target
   NAME##_close_and_cleanup, \
   NAME##_bfd_free_cached_info, \
   NAME##_new_section_hook, \
-  NAME##_get_section_contents, \
-  NAME##_get_section_contents_in_window
+  NAME##_get_section_contents
 
   /* Called when the BFD is being closed to do any necessary cleanup.  */
   bool (*_close_and_cleanup) (bfd *);
@@ -7715,8 +7688,6 @@ typedef struct bfd_target
   /* Read the contents of a section.  */
   bool (*_bfd_get_section_contents) (bfd *, sec_ptr, void *, file_ptr,
 				     bfd_size_type);
-  bool (*_bfd_get_section_contents_in_window) (bfd *, sec_ptr, bfd_window *,
-					       file_ptr, bfd_size_type);
 
   /* Entry points to copy private data.  */
 #define BFD_JUMP_TABLE_COPY(NAME) \

@@ -1329,63 +1329,6 @@ _bfd_generic_get_section_contents (bfd *abfd,
   return true;
 }
 
-bool
-_bfd_generic_get_section_contents_in_window
-  (bfd *abfd ATTRIBUTE_UNUSED,
-   sec_ptr section ATTRIBUTE_UNUSED,
-   bfd_window *w ATTRIBUTE_UNUSED,
-   file_ptr offset ATTRIBUTE_UNUSED,
-   bfd_size_type count ATTRIBUTE_UNUSED)
-{
-#ifdef USE_MMAP
-  bfd_size_type sz;
-
-  if (count == 0)
-    return true;
-  if (abfd->xvec->_bfd_get_section_contents
-      != _bfd_generic_get_section_contents)
-    {
-      /* We don't know what changes the bfd's get_section_contents
-	 method may have to make.  So punt trying to map the file
-	 window, and let get_section_contents do its thing.  */
-      /* @@ FIXME : If the internal window has a refcount of 1 and was
-	 allocated with malloc instead of mmap, just reuse it.  */
-      bfd_free_window (w);
-      w->i = bfd_zmalloc (sizeof (bfd_window_internal));
-      if (w->i == NULL)
-	return false;
-      w->i->data = bfd_malloc (count);
-      if (w->i->data == NULL)
-	{
-	  free (w->i);
-	  w->i = NULL;
-	  return false;
-	}
-      w->i->mapped = 0;
-      w->i->refcount = 1;
-      w->size = w->i->size = count;
-      w->data = w->i->data;
-      return bfd_get_section_contents (abfd, section, w->data, offset, count);
-    }
-  if (abfd->direction != write_direction && section->rawsize != 0)
-    sz = section->rawsize;
-  else
-    sz = section->size;
-  if (offset + count < count
-      || offset + count > sz
-      || (abfd->my_archive != NULL
-	  && !bfd_is_thin_archive (abfd->my_archive)
-	  && ((ufile_ptr) section->filepos + offset + count
-	      > arelt_size (abfd)))
-      || ! bfd_get_file_window (abfd, section->filepos + offset, count, w,
-				true))
-    return false;
-  return true;
-#else
-  abort ();
-#endif
-}
-
 /* This generic function can only be used in implementations where creating
    NEW sections is disallowed.  It is useful in patching existing sections
    in read-write files, though.  See other set_section_contents functions

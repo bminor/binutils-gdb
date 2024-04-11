@@ -2440,10 +2440,6 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
 #define _bfd_ecoff_bfd_get_relocated_section_contents \
   alpha_ecoff_get_relocated_section_contents
 
-/* Handling file windows is generic.  */
-#define _bfd_ecoff_get_section_contents_in_window \
-  _bfd_generic_get_section_contents_in_window
-
 /* Input section flag lookup is generic.  */
 #define _bfd_ecoff_bfd_lookup_section_flags bfd_generic_lookup_section_flags
 

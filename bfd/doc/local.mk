@@ -24,7 +24,6 @@ DOCFILES = \
 	%D%/bfdio.texi \
 	%D%/bfdt.texi \
 	%D%/bfdver.texi \
-	%D%/bfdwin.texi \
 	%D%/cache.texi \
 	%D%/coffcode.texi \
 	%D%/corefile.texi \
@@ -47,7 +46,6 @@ DOCFILES = \
 SRCDOC = \
 	$(srcdir)/aoutx.h $(srcdir)/archive.c \
 	$(srcdir)/archures.c $(srcdir)/bfd.c \
-	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
 	$(srcdir)/cache.c $(srcdir)/coffcode.h \
 	$(srcdir)/corefile.c $(srcdir)/elf.c \
 	$(srcdir)/elfcode.h $(srcdir)/format.c \
@@ -60,13 +58,12 @@ SRCDOC = \
 SRCPROT = $(srcdir)/archive.c $(srcdir)/archures.c \
 	$(srcdir)/bfd.c $(srcdir)/coffcode.h $(srcdir)/corefile.c \
 	$(srcdir)/format.c $(srcdir)/libbfd.c \
-	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
 	$(srcdir)/opncls.c $(srcdir)/reloc.c \
 	$(srcdir)/section.c $(srcdir)/syms.c \
 	$(srcdir)/targets.c
 
 SRCIPROT = $(srcdir)/cache.c $(srcdir)/libbfd.c \
-	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
+	$(srcdir)/bfdio.c \
 	$(srcdir)/reloc.c $(srcdir)/cpu-h8300.c \
 	$(srcdir)/archures.c
 

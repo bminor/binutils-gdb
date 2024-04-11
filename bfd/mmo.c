@@ -3323,8 +3323,6 @@ mmo_write_object_contents (bfd *abfd)
 #define mmo_read_minisymbols _bfd_generic_read_minisymbols
 #define mmo_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 
-#define mmo_get_section_contents_in_window \
-  _bfd_generic_get_section_contents_in_window
 #define mmo_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
 #define mmo_bfd_gc_sections bfd_generic_gc_sections

@@ -75,7 +75,7 @@ BFD_H = bfd.h
 # need two copies of the executable, one to download and one for the
 # debugger).
 BFD32_LIBS = \
-	archive.lo archures.lo bfd.lo bfdio.lo bfdwin.lo cache.lo \
+	archive.lo archures.lo bfd.lo bfdio.lo cache.lo \
 	coff-bfd.lo compress.lo corefile.lo elf-properties.lo format.lo \
 	hash.lo libbfd.lo linker.lo merge.lo opncls.lo reloc.lo \
 	section.lo simple.lo stab-syms.lo stabs.lo syms.lo targets.lo \
@@ -84,7 +84,7 @@ BFD32_LIBS = \
 BFD64_LIBS = archive64.lo
 
 BFD32_LIBS_CFILES = \
-	archive.c archures.c bfd.c bfdio.c bfdwin.c cache.c coff-bfd.c \
+	archive.c archures.c bfd.c bfdio.c cache.c coff-bfd.c \
 	compress.c corefile.c elf-properties.c format.c hash.c \
 	libbfd.c linker.c merge.c opncls.c reloc.c \
 	section.c simple.c stab-syms.c stabs.c syms.c targets.c \
@@ -928,12 +928,12 @@ stmp-bfd-h: bfd-in3.h
 	touch stmp-bfd-h
 
 BFD_H_FILES = bfd-in.h libbfd.c hash.c section.c syms.c \
-	archive.c archures.c bfd.c bfdio.c bfdwin.c \
+	archive.c archures.c bfd.c bfdio.c \
 	cache.c compress.c corefile.c format.c linker.c opncls.c \
 	reloc.c simple.c stab-syms.c stabs.c targets.c
 BFD64_H_FILES = archive64.c
 LIBBFD_H_FILES = libbfd-in.h libbfd.c bfd.c bfdio.c \
-	archive.c archures.c bfdwin.c cache.c hash.c linker.c opncls.c \
+	archive.c archures.c cache.c hash.c linker.c opncls.c \
 	reloc.c section.c stabs.c targets.c
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 

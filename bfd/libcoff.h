@@ -639,9 +639,6 @@ extern bool bfd_coff_gc_sections
 extern const char *bfd_coff_group_name
   (bfd *, const asection *);
 
-#define coff_get_section_contents_in_window \
-  _bfd_generic_get_section_contents_in_window
-
 /* Functions in xcofflink.c.  */
 
 extern long _bfd_xcoff_get_dynamic_symtab_upper_bound

@@ -391,7 +391,6 @@ verilog_mkobject (bfd *abfd)
 #define verilog_bfd_make_debug_symbol		     _bfd_nosymbols_bfd_make_debug_symbol
 #define verilog_read_minisymbols		     _bfd_generic_read_minisymbols
 #define verilog_minisymbol_to_symbol		     _bfd_generic_minisymbol_to_symbol
-#define verilog_get_section_contents_in_window	     _bfd_generic_get_section_contents_in_window
 #define verilog_bfd_get_relocated_section_contents   bfd_generic_get_relocated_section_contents
 #define verilog_bfd_relax_section		     bfd_generic_relax_section
 #define verilog_bfd_gc_sections			     bfd_generic_gc_sections

@@ -931,7 +931,6 @@ ihex_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define	ihex_close_and_cleanup			  _bfd_generic_close_and_cleanup
 #define ihex_bfd_free_cached_info		  _bfd_generic_bfd_free_cached_info
 #define ihex_new_section_hook			  _bfd_generic_new_section_hook
-#define ihex_get_section_contents_in_window	  _bfd_generic_get_section_contents_in_window
 #define ihex_get_symtab_upper_bound		  _bfd_long_bfd_0
 #define ihex_canonicalize_symtab		  _bfd_nosymbols_canonicalize_symtab
 #define ihex_make_empty_symbol			  _bfd_generic_make_empty_symbol

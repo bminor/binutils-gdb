@@ -12,7 +12,6 @@ archive64.c
 archures.c
 bfd.c
 bfdio.c
-bfdwin.c
 binary.c
 cache.c
 cf-i386lynx.c

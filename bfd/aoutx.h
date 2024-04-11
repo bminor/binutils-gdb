@@ -559,11 +559,6 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
   /* The default symbol entry size is that of traditional Unix.  */
   obj_symbol_entry_size (abfd) = EXTERNAL_NLIST_SIZE;
 
-#ifdef USE_MMAP
-  bfd_init_window (&obj_aout_sym_window (abfd));
-  bfd_init_window (&obj_aout_string_window (abfd));
-#endif
-
   if (! NAME (aout, make_sections) (abfd))
     goto error_ret;
 
@@ -1301,10 +1296,6 @@ NAME (aout, set_section_contents) (bfd *abfd,
 static bool
 aout_get_external_symbols (bfd *abfd)
 {
-#ifdef USE_MMAP
-  ufile_ptr filesize = bfd_get_file_size (abfd);
-#endif
-
   if (obj_aout_external_syms (abfd) == NULL)
     {
       bfd_size_type count;
@@ -1315,27 +1306,14 @@ aout_get_external_symbols (bfd *abfd)
       if (count == 0)
 	return true;
 
-#ifdef USE_MMAP
-      if (filesize >= (ufile_ptr) obj_sym_filepos (abfd)
-	  && filesize - obj_sym_filepos (abfd) >= amt)
-	{
-	  if (! bfd_get_file_window (abfd, obj_sym_filepos (abfd), amt,
-				     &obj_aout_sym_window (abfd), true))
-	    return false;
-	  syms = obj_aout_sym_window (abfd).data;
-	}
-      else
-#endif
-	{
-	  /* We allocate using malloc to make the values easy to free
-	     later on.  If we put them on the objalloc it might not be
-	     possible to free them.  */
-	  if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
-	    return false;
-	  syms = _bfd_malloc_and_read (abfd, amt, amt);
-	  if (syms == NULL)
-	    return false;
-	}
+      /* We allocate using malloc to make the values easy to free
+	 later on.  If we put them on the objalloc it might not be
+	 possible to free them.  */
+      if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
+	return false;
+      syms = _bfd_malloc_and_read (abfd, amt, amt);
+      if (syms == NULL)
+	return false;
 
       obj_aout_external_syms (abfd) = syms;
       obj_aout_external_sym_count (abfd) = count;
@@ -1363,33 +1341,20 @@ aout_get_external_symbols (bfd *abfd)
 	  return false;
 	}
 
-#ifdef USE_MMAP
-      if (stringsize >= BYTES_IN_WORD
-	  && filesize >= (ufile_ptr) obj_str_filepos (abfd)
-	  && filesize - obj_str_filepos (abfd) >= stringsize + 1)
-	{
-	  if (! bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize + 1,
-				     &obj_aout_string_window (abfd), true))
-	    return false;
-	  strings = (char *) obj_aout_string_window (abfd).data;
-	}
-      else
-#endif
-	{
-	  strings = (char *) bfd_malloc (stringsize + 1);
-	  if (strings == NULL)
-	    return false;
+      strings = (char *) bfd_malloc (stringsize + 1);
+      if (strings == NULL)
+	return false;
 
-	  if (stringsize >= BYTES_IN_WORD)
+      if (stringsize >= BYTES_IN_WORD)
+	{
+	  amt = stringsize - BYTES_IN_WORD;
+	  if (bfd_read (strings + BYTES_IN_WORD, amt, abfd) != amt)
 	    {
-	      amt = stringsize - BYTES_IN_WORD;
-	      if (bfd_read (strings + BYTES_IN_WORD, amt, abfd) != amt)
-		{
-		  free (strings);
-		  return false;
-		}
+	      free (strings);
+	      return false;
 	    }
 	}
+
       /* Ensure that a zero index yields an empty string.  */
       if (stringsize >= BYTES_IN_WORD)
 	memset (strings, 0, BYTES_IN_WORD);
@@ -1816,11 +1781,7 @@ NAME (aout, slurp_symbol_table) (bfd *abfd)
   if (old_external_syms == NULL
       && obj_aout_external_syms (abfd) != NULL)
     {
-#ifdef USE_MMAP
-      bfd_free_window (&obj_aout_sym_window (abfd));
-#else
       free (obj_aout_external_syms (abfd));
-#endif
       obj_aout_external_syms (abfd) = NULL;
     }
 
@@ -2937,15 +2898,8 @@ NAME (aout, bfd_free_cached_info) (bfd *abfd)
 #define BFCI_FREE(x) do { free (x); x = NULL; } while (0)
       BFCI_FREE (adata (abfd).line_buf);
       BFCI_FREE (obj_aout_symbols (abfd));
-#ifdef USE_MMAP
-      obj_aout_external_syms (abfd) = 0;
-      bfd_free_window (&obj_aout_sym_window (abfd));
-      bfd_free_window (&obj_aout_string_window (abfd));
-      obj_aout_external_strings (abfd) = 0;
-#else
       BFCI_FREE (obj_aout_external_syms (abfd));
       BFCI_FREE (obj_aout_external_strings (abfd));
-#endif
       for (asection *o = abfd->sections; o != NULL; o = o->next)
 	BFCI_FREE (o->relocation);
 #undef BFCI_FREE
@@ -3260,20 +3214,12 @@ aout_link_free_symbols (bfd *abfd)
 {
   if (obj_aout_external_syms (abfd) != NULL)
     {
-#ifdef USE_MMAP
-      bfd_free_window (&obj_aout_sym_window (abfd));
-#else
       free ((void *) obj_aout_external_syms (abfd));
-#endif
       obj_aout_external_syms (abfd) = NULL;
     }
   if (obj_aout_external_strings (abfd) != NULL)
     {
-#ifdef USE_MMAP
-      bfd_free_window (&obj_aout_string_window (abfd));
-#else
       free ((void *) obj_aout_external_strings (abfd));
-#endif
       obj_aout_external_strings (abfd) = NULL;
     }
   return true;

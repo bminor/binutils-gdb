@@ -179,8 +179,8 @@ am__installdirs = "$(DESTDIR)$(bfdlibdir)" "$(DESTDIR)$(infodir)" \
 	"$(DESTDIR)$(bfdincludedir)"
 LTLIBRARIES = $(bfdlib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
-am__objects_1 = archive.lo archures.lo bfd.lo bfdio.lo bfdwin.lo \
-	cache.lo coff-bfd.lo compress.lo corefile.lo elf-properties.lo \
+am__objects_1 = archive.lo archures.lo bfd.lo bfdio.lo cache.lo \
+	coff-bfd.lo compress.lo corefile.lo elf-properties.lo \
 	format.lo hash.lo libbfd.lo linker.lo merge.lo opncls.lo \
 	reloc.lo section.lo simple.lo stab-syms.lo stabs.lo syms.lo \
 	targets.lo binary.lo ihex.lo srec.lo tekhex.lo verilog.lo
@@ -542,7 +542,7 @@ BFD_H = bfd.h
 # need two copies of the executable, one to download and one for the
 # debugger).
 BFD32_LIBS = \
-	archive.lo archures.lo bfd.lo bfdio.lo bfdwin.lo cache.lo \
+	archive.lo archures.lo bfd.lo bfdio.lo cache.lo \
 	coff-bfd.lo compress.lo corefile.lo elf-properties.lo format.lo \
 	hash.lo libbfd.lo linker.lo merge.lo opncls.lo reloc.lo \
 	section.lo simple.lo stab-syms.lo stabs.lo syms.lo targets.lo \
@@ -550,7 +550,7 @@ BFD32_LIBS = \
 
 BFD64_LIBS = archive64.lo
 BFD32_LIBS_CFILES = \
-	archive.c archures.c bfd.c bfdio.c bfdwin.c cache.c coff-bfd.c \
+	archive.c archures.c bfd.c bfdio.c cache.c coff-bfd.c \
 	compress.c corefile.c elf-properties.c format.c hash.c \
 	libbfd.c linker.c merge.c opncls.c reloc.c \
 	section.c simple.c stab-syms.c stabs.c syms.c targets.c \
@@ -1219,13 +1219,13 @@ EXTRA_libbfd_la_SOURCES = $(CFILES)
 libbfd_la_DEPENDENCIES = $(OFILES) ofiles ../libsframe/libsframe.la
 libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL) $(ZLIB) $(ZSTD_LIBS) ../libsframe/libsframe.la
 BFD_H_FILES = bfd-in.h libbfd.c hash.c section.c syms.c \
-	archive.c archures.c bfd.c bfdio.c bfdwin.c \
+	archive.c archures.c bfd.c bfdio.c \
 	cache.c compress.c corefile.c format.c linker.c opncls.c \
 	reloc.c simple.c stab-syms.c stabs.c targets.c
 
 BFD64_H_FILES = archive64.c
 LIBBFD_H_FILES = libbfd-in.h libbfd.c bfd.c bfdio.c \
-	archive.c archures.c bfdwin.c cache.c hash.c linker.c opncls.c \
+	archive.c archures.c cache.c hash.c linker.c opncls.c \
 	reloc.c section.c stabs.c targets.c
 
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
@@ -1258,7 +1258,6 @@ DOCFILES = \
 	doc/bfdio.texi \
 	doc/bfdt.texi \
 	doc/bfdver.texi \
-	doc/bfdwin.texi \
 	doc/cache.texi \
 	doc/coffcode.texi \
 	doc/corefile.texi \
@@ -1282,7 +1281,6 @@ DOCFILES = \
 SRCDOC = \
 	$(srcdir)/aoutx.h $(srcdir)/archive.c \
 	$(srcdir)/archures.c $(srcdir)/bfd.c \
-	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
 	$(srcdir)/cache.c $(srcdir)/coffcode.h \
 	$(srcdir)/corefile.c $(srcdir)/elf.c \
 	$(srcdir)/elfcode.h $(srcdir)/format.c \
@@ -1295,13 +1293,12 @@ SRCDOC = \
 SRCPROT = $(srcdir)/archive.c $(srcdir)/archures.c \
 	$(srcdir)/bfd.c $(srcdir)/coffcode.h $(srcdir)/corefile.c \
 	$(srcdir)/format.c $(srcdir)/libbfd.c \
-	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
 	$(srcdir)/opncls.c $(srcdir)/reloc.c \
 	$(srcdir)/section.c $(srcdir)/syms.c \
 	$(srcdir)/targets.c
 
 SRCIPROT = $(srcdir)/cache.c $(srcdir)/libbfd.c \
-	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
+	$(srcdir)/bfdio.c \
 	$(srcdir)/reloc.c $(srcdir)/cpu-h8300.c \
 	$(srcdir)/archures.c
 
@@ -1455,7 +1452,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archures.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bfd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bfdio.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bfdwin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cf-i386lynx.Plo@am__quote@

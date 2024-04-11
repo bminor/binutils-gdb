@@ -24,7 +24,6 @@
 #ifndef MACH_O_TARGET_COMMON_DEFINED
 #define MACH_O_TARGET_COMMON_DEFINED
 
-#define bfd_mach_o_get_section_contents_in_window     _bfd_generic_get_section_contents_in_window
 #define bfd_mach_o_bfd_print_private_bfd_data	      bfd_mach_o_bfd_print_private_bfd_data
 #define bfd_mach_o_bfd_is_target_special_symbol	      _bfd_bool_bfd_asymbol_false
 #define bfd_mach_o_bfd_is_local_label_name	      bfd_generic_is_local_label_name

@@ -10159,7 +10159,6 @@ bfd_vms_get_data (bfd *abfd)
 #define alpha_vms_bfd_free_cached_info	   _bfd_bool_bfd_true
 #define alpha_vms_new_section_hook	   vms_new_section_hook
 #define alpha_vms_set_section_contents	   _bfd_vms_set_section_contents
-#define alpha_vms_get_section_contents_in_window _bfd_generic_get_section_contents_in_window
 
 #define alpha_vms_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents

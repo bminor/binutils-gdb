@@ -262,8 +262,6 @@ extern bool _bfd_generic_new_section_hook
   (bfd *, asection *) ATTRIBUTE_HIDDEN;
 extern bool _bfd_generic_get_section_contents
   (bfd *, asection *, void *, file_ptr, bfd_size_type) ATTRIBUTE_HIDDEN;
-extern bool _bfd_generic_get_section_contents_in_window
-  (bfd *, asection *, bfd_window *, file_ptr, bfd_size_type) ATTRIBUTE_HIDDEN;
 
 /* Generic routines to use for BFD_JUMP_TABLE_COPY.  Use
    BFD_JUMP_TABLE_COPY (_bfd_generic).  */

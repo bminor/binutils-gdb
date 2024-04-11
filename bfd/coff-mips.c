@@ -1396,10 +1396,6 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 #define _bfd_ecoff_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
 
-/* Handling file windows is generic.  */
-#define _bfd_ecoff_get_section_contents_in_window \
-  _bfd_generic_get_section_contents_in_window
-
 /* Relaxing sections is MIPS specific.  */
 #define _bfd_ecoff_bfd_relax_section bfd_generic_relax_section
 

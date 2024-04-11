@@ -939,7 +939,6 @@ coff_aarch64_new_section_hook (bfd *abfd, asection *section)
 #define coff_aarch64_close_and_cleanup coff_close_and_cleanup
 #define coff_aarch64_bfd_free_cached_info coff_bfd_free_cached_info
 #define coff_aarch64_get_section_contents coff_get_section_contents
-#define coff_aarch64_get_section_contents_in_window coff_get_section_contents_in_window
 
 /* Target vectors.  */
 const bfd_target

@@ -91,9 +91,6 @@
 #define bfd_elfNN_write_object_contents _bfd_elf_write_object_contents
 #define bfd_elfNN_write_corefile_contents _bfd_elf_write_corefile_contents
 
-#define bfd_elfNN_get_section_contents_in_window \
-  _bfd_generic_get_section_contents_in_window
-
 #ifndef elf_backend_can_refcount
 #define elf_backend_can_refcount 0
 #endif

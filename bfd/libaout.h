@@ -408,10 +408,8 @@ struct aoutdata
   /* The external symbol information.  */
   struct external_nlist *external_syms;
   bfd_size_type external_sym_count;
-  bfd_window sym_window;
   char *external_strings;
   bfd_size_type external_string_size;
-  bfd_window string_window;
   struct aout_link_hash_entry **sym_hashes;
 
   /* A pointer for shared library information.  */
@@ -442,10 +440,8 @@ struct  aout_data_struct
 #define obj_aout_subformat(bfd)		   (adata (bfd).subformat)
 #define obj_aout_external_syms(bfd)	   (adata (bfd).external_syms)
 #define obj_aout_external_sym_count(bfd)   (adata (bfd).external_sym_count)
-#define obj_aout_sym_window(bfd)	   (adata (bfd).sym_window)
 #define obj_aout_external_strings(bfd)	   (adata (bfd).external_strings)
 #define obj_aout_external_string_size(bfd) (adata (bfd).external_string_size)
-#define obj_aout_string_window(bfd)	   (adata (bfd).string_window)
 #define obj_aout_sym_hashes(bfd)	   (adata (bfd).sym_hashes)
 #define obj_aout_dynamic_info(bfd)	   (adata (bfd).dynamic_info)
 

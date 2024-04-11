@@ -70,7 +70,6 @@
   _bfd_generic_copy_link_hash_symbol_type
 #define bfd_pef_bfd_final_link			    _bfd_generic_final_link
 #define bfd_pef_bfd_link_split_section		    _bfd_generic_link_split_section
-#define bfd_pef_get_section_contents_in_window	    _bfd_generic_get_section_contents_in_window
 #define bfd_pef_bfd_link_check_relocs		    _bfd_generic_link_check_relocs
 
 static int
@@ -1063,7 +1062,6 @@ const bfd_target pef_vec =
 #define bfd_pef_xlib_new_section_hook		    _bfd_generic_new_section_hook
 #define bfd_pef_xlib_get_section_contents	    _bfd_generic_get_section_contents
 #define bfd_pef_xlib_set_section_contents	    _bfd_generic_set_section_contents
-#define bfd_pef_xlib_get_section_contents_in_window _bfd_generic_get_section_contents_in_window
 #define bfd_pef_xlib_set_section_contents_in_window _bfd_generic_set_section_contents_in_window
 
 static int

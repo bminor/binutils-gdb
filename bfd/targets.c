@@ -266,8 +266,7 @@ BFD_JUMP_TABLE macros.
 .  NAME##_close_and_cleanup, \
 .  NAME##_bfd_free_cached_info, \
 .  NAME##_new_section_hook, \
-.  NAME##_get_section_contents, \
-.  NAME##_get_section_contents_in_window
+.  NAME##_get_section_contents
 .
 .  {* Called when the BFD is being closed to do any necessary cleanup.  *}
 .  bool (*_close_and_cleanup) (bfd *);
@@ -278,8 +277,6 @@ BFD_JUMP_TABLE macros.
 .  {* Read the contents of a section.  *}
 .  bool (*_bfd_get_section_contents) (bfd *, sec_ptr, void *, file_ptr,
 .				      bfd_size_type);
-.  bool (*_bfd_get_section_contents_in_window) (bfd *, sec_ptr, bfd_window *,
-.						file_ptr, bfd_size_type);
 .
 .  {* Entry points to copy private data.  *}
 .#define BFD_JUMP_TABLE_COPY(NAME) \
