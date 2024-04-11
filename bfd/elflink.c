@@ -6116,7 +6116,8 @@ _bfd_elf_archive_symbol_lookup (bfd *abfd,
     {
       /* Add this symbol to first hash if this archive has the first
 	 definition.  */
-      elf_link_add_to_first_hash (abfd, info, name, false);
+      if (is_elf_hash_table (info->hash))
+	elf_link_add_to_first_hash (abfd, info, name, false);
       return h;
     }
 
@@ -6258,6 +6259,8 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 		/* Symbol must be defined.  Don't check it again.  */
 		included[i] = true;
 
+	      if (!is_elf_hash_table (info->hash))
+		continue;
 	      /* Ignore the archive if the symbol isn't defined in a
 		 shared object.  */
 	      if (!((struct elf_link_hash_entry *) h)->def_dynamic)
