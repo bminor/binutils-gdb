@@ -2739,14 +2739,14 @@ remote_target::remote_query_attached (int pid)
   getpkt (&rs->buf);
 
   packet_result result = m_features.packet_ok (rs->buf, PACKET_qAttached);
-  switch (result.status())
+  switch (result.status ())
     {
     case PACKET_OK:
       if (strcmp (rs->buf.data (), "1") == 0)
 	return 1;
       break;
     case PACKET_ERROR:
-      warning (_("Remote failure reply: %s"), result.err_msg());
+      warning (_("Remote failure reply: %s"), result.err_msg ());
       break;
     case PACKET_UNKNOWN:
       break;
@@ -3107,7 +3107,7 @@ remote_target::set_syscall_catchpoint (int pid, bool needed, int any_count,
   putpkt (catch_packet);
   getpkt (&rs->buf);
   packet_result result = m_features.packet_ok (rs->buf, PACKET_QCatchSyscalls);
-  if (result.status() == PACKET_OK)
+  if (result.status () == PACKET_OK)
     return 0;
   else
     return -1;
