@@ -1336,8 +1336,35 @@ cpname_state::parse_number (const char *p, int len, int parsed_float,
       return FLOAT;
     }
 
-  /* This treats 0x1 and 1 as different literals.  We also do not
-     automatically generate unsigned types.  */
+  /* Note that we do not automatically generate unsigned types.  This
+     can't be done because we don't have access to the gdbarch
+     here.  */
+
+  int base = 10;
+  if (len > 1 && p[0] == '0')
+    {
+      if (p[1] == 'x' || p[1] == 'X')
+	{
+	  base = 16;
+	  p += 2;
+	  len -= 2;
+	}
+      else if (p[1] == 'b' || p[1] == 'B')
+	{
+	  base = 2;
+	  p += 2;
+	  len -= 2;
+	}
+      else if (p[1] == 'd' || p[1] == 'D' || p[1] == 't' || p[1] == 'T')
+	{
+	  /* Apparently gdb extensions.  */
+	  base = 10;
+	  p += 2;
+	  len -= 2;
+	}
+      else
+	base = 8;
+    }
 
   long_p = 0;
   unsigned_p = 0;
@@ -1357,6 +1384,24 @@ cpname_state::parse_number (const char *p, int len, int parsed_float,
 	}
       break;
     }
+
+  /* Use gdb_mpz here in case a 128-bit value appears.  */
+  gdb_mpz value (0);
+  for (int off = 0; off < len; ++off)
+    {
+      int dig;
+      if (ISDIGIT (p[off]))
+	dig = p[off] - '0';
+      else
+	dig = TOLOWER (p[off]) - 'a' + 10;
+      if (dig >= base)
+	return ERROR;
+      value *= base;
+      value += dig;
+    }
+
+  std::string printed = value.str ();
+  const char *copy = obstack_strdup (&demangle_info->obstack, printed);
 
   if (long_p == 0)
     {
@@ -1380,10 +1425,10 @@ cpname_state::parse_number (const char *p, int len, int parsed_float,
 	type = make_builtin_type ("long long");
     }
 
-   name = make_name (p, len);
-   lvalp->comp = fill_comp (literal_type, type, name);
+  name = make_name (copy, strlen (copy));
+  lvalp->comp = fill_comp (literal_type, type, name);
 
-   return INT;
+  return INT;
 }
 
 static const char backslashable[] = "abefnrtv";
@@ -1990,6 +2035,12 @@ canonicalize_tests ()
   should_be_the_same ("int short", "short");
 
   should_be_the_same ("C<(char) 1>::m()", "C<(char) '\\001'>::m()");
+  should_be_the_same ("x::y::z<1>", "x::y::z<0x01>");
+  should_be_the_same ("x::y::z<1>", "x::y::z<01>");
+  should_be_the_same ("x::y::z<(unsigned long long) 1>", "x::y::z<01ull>");
+  should_be_the_same ("x::y::z<0b111>", "x::y::z<7>");
+  should_be_the_same ("x::y::z<0b111>", "x::y::z<0t7>");
+  should_be_the_same ("x::y::z<0b111>", "x::y::z<0D7>");
 }
 
 #endif
