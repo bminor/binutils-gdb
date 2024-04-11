@@ -847,6 +847,8 @@ sframe_xlate_ctx_cleanup (struct sframe_xlate_ctx *xlate_ctx)
 	}
     }
 
+  XDELETE (xlate_ctx->cur_fre);
+
   sframe_xlate_ctx_init (xlate_ctx);
 }
 
@@ -1360,6 +1362,8 @@ create_sframe_all (void)
 	  sframe_fde_link (sframe_fde);
 	}
     }
+
+  XDELETE (xlate_ctx);
 }
 
 void
