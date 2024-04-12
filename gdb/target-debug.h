@@ -38,6 +38,10 @@
    more simply done there, and target_xfer_partial additionally
    bypasses the debug target.  */
 
+#include "gdbsupport/x86-xstate.h"
+#include "target.h"
+#include "target/wait.h"
+#include "target/waitstatus.h"
 
 /* Helper macro.  */
 
