@@ -1290,8 +1290,6 @@ cpname_state::parse_number (const char *p, int len, int parsed_float,
   /* Number of "L" suffixes encountered.  */
   int long_p = 0;
 
-  struct demangle_component *signed_type;
-  struct demangle_component *unsigned_type;
   struct demangle_component *type, *name;
   enum demangle_component_type literal_type;
 
@@ -1362,24 +1360,25 @@ cpname_state::parse_number (const char *p, int len, int parsed_float,
 
   if (long_p == 0)
     {
-      unsigned_type = make_builtin_type ("unsigned int");
-      signed_type = make_builtin_type ("int");
+      if (unsigned_p)
+	type = make_builtin_type ("unsigned int");
+      else
+	type = make_builtin_type ("int");
     }
   else if (long_p == 1)
     {
-      unsigned_type = make_builtin_type ("unsigned long");
-      signed_type = make_builtin_type ("long");
+      if (unsigned_p)
+	type = make_builtin_type ("unsigned long");
+      else
+	type = make_builtin_type ("long");
     }
   else
     {
-      unsigned_type = make_builtin_type ("unsigned long long");
-      signed_type = make_builtin_type ("long long");
+      if (unsigned_p)
+	type = make_builtin_type ("unsigned long long");
+      else
+	type = make_builtin_type ("long long");
     }
-
-   if (unsigned_p)
-     type = unsigned_type;
-   else
-     type = signed_type;
 
    name = make_name (p, len);
    lvalp->comp = fill_comp (literal_type, type, name);
