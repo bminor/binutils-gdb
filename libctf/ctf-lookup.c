@@ -665,8 +665,8 @@ ctf_lookup_symbol_idx (ctf_dict_t *fp, const char *symname, int try_parent,
     }
 oom:
   ctf_set_errno (fp, ENOMEM);
-  ctf_err_warn (fp, 0, ENOMEM, _("cannot allocate memory for symbol "
-				 "lookup hashtab"));
+  ctf_err_warn (fp, 0, 0, _("cannot allocate memory for symbol "
+			    "lookup hashtab"));
   return (unsigned long) -1;
 
 }

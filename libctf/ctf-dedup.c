@@ -2398,8 +2398,8 @@ ctf_dedup_walk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
     }
   if (err != ECTF_NEXT_END)
     {
-      ctf_err_warn (output, 0, err, _("cannot recurse over output mapping"));
       ctf_set_errno (output, err);
+      ctf_err_warn (output, 0, 0, _("cannot recurse over output mapping"));
       goto err;
     }
   ctf_dynset_destroy (already_visited);
@@ -3092,9 +3092,9 @@ ctf_dedup_emit (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
 
   if ((outputs = calloc (num_outputs, sizeof (ctf_dict_t *))) == NULL)
     {
-      ctf_err_warn (output, 0, ENOMEM,
-		    _("out of memory allocating link outputs array"));
       ctf_set_errno (output, ENOMEM);
+      ctf_err_warn (output, 0, 0,
+		    _("out of memory allocating link outputs array"));
       return NULL;
     }
   *noutputs = num_outputs;
@@ -3146,7 +3146,7 @@ ctf_dedup_type_mapping (ctf_dict_t *fp, ctf_dict_t *src_fp, ctf_id_t src_type)
   else
     {
       ctf_set_errno (fp, ECTF_INTERNAL);
-      ctf_err_warn (fp, 0, ECTF_INTERNAL,
+      ctf_err_warn (fp, 0, 0,
 		    _("dict %p passed to ctf_dedup_type_mapping is not a "
 		      "deduplicated output"), (void *) fp);
       return CTF_ERR;

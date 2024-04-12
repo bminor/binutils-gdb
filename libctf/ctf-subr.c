@@ -340,7 +340,7 @@ void
 ctf_assert_fail_internal (ctf_dict_t *fp, const char *file, size_t line,
 			  const char *exprstr)
 {
-  ctf_err_warn (fp, 0, ECTF_INTERNAL, _("%s: %lu: libctf assertion failed: %s"),
-		file, (long unsigned int) line, exprstr);
   ctf_set_errno (fp, ECTF_INTERNAL);
+  ctf_err_warn (fp, 0, 0, _("%s: %lu: libctf assertion failed: %s"),
+		file, (long unsigned int) line, exprstr);
 }

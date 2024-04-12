@@ -330,9 +330,9 @@ ctf_create_per_cu (ctf_dict_t *fp, ctf_dict_t *input, const char *cu_name)
 
       if ((cu_fp = ctf_create (&err)) == NULL)
 	{
-	  ctf_err_warn (fp, 0, err, _("cannot create per-CU CTF archive for "
-				      "input CU %s"), cu_name);
 	  ctf_set_errno (fp, err);
+	  ctf_err_warn (fp, 0, 0, _("cannot create per-CU CTF archive for "
+				    "input CU %s"), cu_name);
 	  return NULL;
 	}
 
@@ -886,9 +886,9 @@ ctf_link_deduplicating_close_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 	}
       if (err != ECTF_NEXT_END)
 	{
-	  ctf_err_warn (fp, 0, err, _("iteration error in deduplicating link "
-				      "input freeing"));
 	  ctf_set_errno (fp, err);
+	  ctf_err_warn (fp, 0, 0, _("iteration error in deduplicating link "
+				    "input freeing"));
 	}
     }
   else
@@ -1087,8 +1087,8 @@ ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
   if (ctf_errno (input) != ECTF_NEXT_END)
     {
       ctf_set_errno (fp, ctf_errno (input));
-      ctf_err_warn (fp, 0, ctf_errno (input),
-		    functions ? _("iterating over function symbols") :
+      ctf_err_warn (fp, 0, 0, functions ?
+		    _("iterating over function symbols") :
 		    _("iterating over data symbols"));
       return -1;
     }
@@ -1156,9 +1156,9 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 
       if (labs ((long int) ninputs) > 0xfffffffe)
 	{
-	  ctf_err_warn (fp, 0, EFBIG, _("too many inputs in deduplicating "
-					"link: %li"), (long int) ninputs);
 	  ctf_set_errno (fp, EFBIG);
+	  ctf_err_warn (fp, 0, 0, _("too many inputs in deduplicating "
+				    "link: %li"), (long int) ninputs);
 	  goto err_open_inputs;
 	}
 
@@ -1180,10 +1180,10 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 						  &ai, NULL, 0, &err);
 	  if (!only_input->clin_fp)
 	    {
-	      ctf_err_warn (fp, 0, err, _("cannot open archive %s in "
-					  "CU-mapped CTF link"),
-			    only_input->clin_filename);
 	      ctf_set_errno (fp, err);
+	      ctf_err_warn (fp, 0, 0, _("cannot open archive %s in "
+					"CU-mapped CTF link"),
+			    only_input->clin_filename);
 	      goto err_open_inputs;
 	    }
 	  ctf_next_destroy (ai);
