@@ -1940,46 +1940,41 @@ parse_number (struct parser_state *par_state,
   /* We have found a "L" or "U" (or "i") suffix.  */
   int found_suffix = 0;
 
-  char *p;
-
-  p = (char *) alloca (len);
-  memcpy (p, buf, len);
-
   if (parsed_float)
     {
-      if (len >= 1 && p[len - 1] == 'i')
+      if (len >= 1 && buf[len - 1] == 'i')
 	{
 	  imaginary_p = true;
 	  --len;
 	}
 
       /* Handle suffixes for decimal floating-point: "df", "dd" or "dl".  */
-      if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'f')
+      if (len >= 2 && buf[len - 2] == 'd' && buf[len - 1] == 'f')
 	{
 	  putithere->typed_val_float.type
 	    = parse_type (par_state)->builtin_decfloat;
 	  len -= 2;
 	}
-      else if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'd')
+      else if (len >= 2 && buf[len - 2] == 'd' && buf[len - 1] == 'd')
 	{
 	  putithere->typed_val_float.type
 	    = parse_type (par_state)->builtin_decdouble;
 	  len -= 2;
 	}
-      else if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'l')
+      else if (len >= 2 && buf[len - 2] == 'd' && buf[len - 1] == 'l')
 	{
 	  putithere->typed_val_float.type
 	    = parse_type (par_state)->builtin_declong;
 	  len -= 2;
 	}
       /* Handle suffixes: 'f' for float, 'l' for long double.  */
-      else if (len >= 1 && TOLOWER (p[len - 1]) == 'f')
+      else if (len >= 1 && TOLOWER (buf[len - 1]) == 'f')
 	{
 	  putithere->typed_val_float.type
 	    = parse_type (par_state)->builtin_float;
 	  len -= 1;
 	}
-      else if (len >= 1 && TOLOWER (p[len - 1]) == 'l')
+      else if (len >= 1 && TOLOWER (buf[len - 1]) == 'l')
 	{
 	  putithere->typed_val_float.type
 	    = parse_type (par_state)->builtin_long_double;
@@ -1992,7 +1987,7 @@ parse_number (struct parser_state *par_state,
 	    = parse_type (par_state)->builtin_double;
 	}
 
-      if (!parse_float (p, len,
+      if (!parse_float (buf, len,
 			putithere->typed_val_float.type,
 			putithere->typed_val_float.val))
 	return ERROR;
@@ -2005,14 +2000,14 @@ parse_number (struct parser_state *par_state,
     }
 
   /* Handle base-switching prefixes 0x, 0t, 0d, 0 */
-  if (p[0] == '0' && len > 1)
-    switch (p[1])
+  if (buf[0] == '0' && len > 1)
+    switch (buf[1])
       {
       case 'x':
       case 'X':
 	if (len >= 3)
 	  {
-	    p += 2;
+	    buf += 2;
 	    base = 16;
 	    len -= 2;
 	  }
@@ -2022,7 +2017,7 @@ parse_number (struct parser_state *par_state,
       case 'B':
 	if (len >= 3)
 	  {
-	    p += 2;
+	    buf += 2;
 	    base = 2;
 	    len -= 2;
 	  }
@@ -2034,7 +2029,7 @@ parse_number (struct parser_state *par_state,
       case 'D':
 	if (len >= 3)
 	  {
-	    p += 2;
+	    buf += 2;
 	    base = 10;
 	    len -= 2;
 	  }
@@ -2047,7 +2042,7 @@ parse_number (struct parser_state *par_state,
 
   while (len-- > 0)
     {
-      c = *p++;
+      c = *buf++;
       if (c >= 'A' && c <= 'Z')
 	c += 'a' - 'A';
       if (c != 'l' && c != 'u' && c != 'i')
