@@ -299,6 +299,7 @@ enum aarch64_feature_bit {
 					 | AARCH64_FEATBIT (X, MOPS)	\
 					 | AARCH64_FEATBIT (X, HBC))
 #define AARCH64_ARCH_V8_9A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_9A)	\
+					 | AARCH64_FEATBIT (X, CSSC) \
 					 | AARCH64_FEATBIT (X, SPEv1p4) \
 					 | AARCH64_FEATBIT (X, SPE_CRR)	\
 					 | AARCH64_FEATBIT (X, SPE_FDS) \
