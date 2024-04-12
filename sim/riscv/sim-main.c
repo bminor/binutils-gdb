@@ -623,9 +623,7 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
       break;
     case MATCH_EBREAK:
       TRACE_INSN (cpu, "ebreak;");
-      /* GDB expects us to step over EBREAK.  */
-      sim_engine_halt (sd, cpu, NULL, riscv_cpu->pc + 4, sim_stopped,
-		       SIM_SIGTRAP);
+      sim_engine_halt (sd, cpu, NULL, riscv_cpu->pc, sim_stopped, SIM_SIGTRAP);
       break;
     case MATCH_ECALL:
       TRACE_INSN (cpu, "ecall;");
