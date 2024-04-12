@@ -4781,6 +4781,10 @@ write @samp{<4.3 !> 5.4!!>} to get the literal text @samp{4.3 > 5.4!}.
 @item Expression results as strings
 You can write @samp{%@var{expr}} to evaluate the expression @var{expr}
 and use the result as a string.
+
+@item No passing arguments to macros based upon keyword assignment.
+In altmacro mode arguments cannot be passed to macros by keyword assignment.
+See @xref{altmacro-keyword-arguments} for more details
 @end ftable
 
 @node Ascii
@@ -6217,7 +6221,36 @@ will get assigned all remaining arguments specified at invocation time.
 
 When you call a macro, you can specify the argument values either by
 position, or by keyword.  For example, @samp{sum 9,17} is equivalent to
-@samp{sum to=17, from=9}.
+@samp{sum to=17, from=9}.  You can also omit values when using keywords,
+so for example @samp{sum to=6} is equivalent to @samp{sum 0, 6}.
+
+@anchor{altmacro-keyword-arguments}
+Note however that when operating in altmacro mode arguments can only be
+specified by position, not keyword.  @xref{Altmacro,,@code{.altmacro}}.
+
+Thus for example:
+
+@example
+.altmacro
+.macro foo bar=1, baz=2
+.print "\bar \baz"
+.endm
+
+foo baz=3
+@end example
+
+Will print:
+
+@smallexample
+baz=3 2
+@end smallexample
+
+Rather than the expected:
+
+@smallexample
+1 3
+@end smallexample
+
 
 @end table
 
