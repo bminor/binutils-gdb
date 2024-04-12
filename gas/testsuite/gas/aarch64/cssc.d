@@ -1,5 +1,6 @@
 #name: CSSC extension
 #as: -march=armv8-a+cssc
+#as: -march=armv8.9-a
 #objdump: -dr
 
 .*:     file format .*
