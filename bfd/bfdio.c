@@ -29,8 +29,6 @@
 #if defined (_WIN32)
 #include <windows.h>
 #include <locale.h>
-/* FIXME: Do we need a configure time test for the presence of this headers ?  */
-#include <shlwapi.h>  /* Needed for PathIsNetworkPathA().  */
 #endif
 
 #ifndef S_IXUSR
@@ -123,27 +121,71 @@ _bfd_real_fopen (const char *filename, const char *modes)
   wchar_t **      lpFilePart = {NULL};
   const wchar_t   prefixDOS[] = L"\\\\?\\";
   const wchar_t   prefixUNC[] = L"\\\\?\\UNC\\";
+  const wchar_t   prefixNone[] = L"";
   const size_t    partPathLen = strlen (filename) + 1;
   const wchar_t * prefix;
   size_t          sizeof_prefix;
+  bool            strip_network_prefix = false;
 
-  /* PR 31527: Paths that begin with two backslash characters
-     (\\) are interpreted as Universal Naming Convention (UNC)
-     paths.  They use the "\\?\UNC\" prefix for network UNC paths
-     and  the "\\?\" prefix for dos UNC paths.  For more information
-     see: https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry
+  /* PR 31527: In order to not hit limits in the maximum file path, all paths
+     need converting to Universal Naming Convention (UNC) syntax. The following
+     forms may be provided to this function and are converted accordingly.
+
+     1. UNC paths (start with \\?\), these are unconverted;
+     2. Network paths (start with \\ or // but not \\?\), these are given the
+	\\?UNC\ prefix, and have the incoming \\ or // removed;
+     3. DOS drive paths (a letter followed by a colon), these are given the
+	\\?\ prefix;
+     4. Paths relative to CWD, the current working directory is tested for the
+	above conditions, and otherwise are assumed to be DOS paths.
+
+     For more information see:
+     https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry
   */
-  bool is_network_path = PathIsNetworkPathA (filename);
 
-  if (is_network_path)
+  if (startswith (filename, "\\\\?\\"))
+    {
+      prefix = prefixNone;
+      sizeof_prefix = sizeof (prefixNone);
+    }
+  else if (startswith (filename, "\\\\") || startswith (filename, "//"))
     {
       prefix = prefixUNC;
       sizeof_prefix = sizeof (prefixUNC);
+      strip_network_prefix = true;
     }
-  else
+  else if (strlen (filename) > 2 && filename[1] == ':')
     {
       prefix = prefixDOS;
       sizeof_prefix = sizeof (prefixDOS);
+    }
+  else
+    {
+      /* The partial path is relative to the current working directory, use this
+	 to determine the prefix.
+	 1) Get the length: Calling with lpBuffer set to null returns the length.
+	 2) Resolve the path.  */
+      size_t    pwdWSize = GetCurrentDirectoryW (0, NULL);
+      wchar_t * pwdPath = calloc (pwdWSize, sizeof(wchar_t));
+      GetCurrentDirectoryW (pwdWSize, pwdPath);
+      if (wcsncmp (pwdPath, L"\\\\?\\", 6) == 0)
+	{
+	  prefix = prefixNone;
+	  sizeof_prefix = sizeof (prefixNone);
+	}
+      else if (wcsncmp (pwdPath, L"\\\\", 2) == 0
+	       || wcsncmp (pwdPath, L"//", 2) == 0)
+	{
+	  prefix = prefixUNC;
+	  sizeof_prefix = sizeof (prefixUNC);
+	  strip_network_prefix = true;
+	}
+      else
+	{
+	  prefix = prefixDOS;
+	  sizeof_prefix = sizeof (prefixDOS);
+	}
+      free (pwdPath);
     }
 
 #ifdef __MINGW32__
@@ -188,7 +230,7 @@ _bfd_real_fopen (const char *filename, const char *modes)
 
   GetFullPathNameW (partPath, fullPathWSize, fullPathOffset, lpFilePart);
 
-  if (is_network_path)
+  if (strip_network_prefix)
     {
       /* Remove begining of the beginning two backslash characters (\\).  */
       wchar_t *_fullPath = calloc (fullPathWSize + sizeof_prefix + 1, sizeof(wchar_t));
@@ -206,6 +248,8 @@ _bfd_real_fopen (const char *filename, const char *modes)
   MultiByteToWideChar (cp, 0, modes, -1, modesW, sizeof(modesW));
 
   FILE *  file = _wfopen (fullPath, modesW);
+  if (!file)
+    perror("Error opening file");
   free (fullPath);
 
   return close_on_exec (file);
