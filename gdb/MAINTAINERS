@@ -346,6 +346,7 @@ the native maintainer when resolving ABI issues.
 	h8300		--target=h8300-elf
 
 	i386		--target=i386-elf
+			Felix Willgerodt	felix.willgerodt@intel.com
 
 	ia64		--target=ia64-linux-gnu
 			(--target=ia64-elf broken)
@@ -421,6 +422,7 @@ the native maintainer when resolving ABI issues.
 	vax		--target=vax-netbsd
 
 	x86-64		--target=x86_64-linux-gnu
+			Felix Willgerodt	felix.willgerodt@intel.com
 
 	xstormy16	--target=xstormy16-elf
 	xtensa		--target=xtensa-elf
