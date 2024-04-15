@@ -1014,9 +1014,9 @@ execute_c (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
       TRACE_BRANCH (cpu, "to %#" PRIxTW, pc);
       break;
     case MATCH_C_JAL | MATCH_C_ADDIW:
-      /* JAL and ADDIW have the same mask but are only available on RV64 or
-	 RV32 respectively.  */
-      if (RISCV_XLEN (cpu) == 64)
+      /* JAL and ADDIW have the same mask but are only available on RV32 or
+	 RV64 respectively.  */
+      if (RISCV_XLEN (cpu) == 32)
 	{
 	  imm = EXTRACT_CJTYPE_IMM (iw);
 	  TRACE_INSN (cpu, "c.jal %" PRIxTW,
@@ -1025,7 +1025,7 @@ execute_c (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 	  pc = riscv_cpu->pc + imm;
 	  TRACE_BRANCH (cpu, "to %#" PRIxTW, pc);
 	}
-      else if (RISCV_XLEN (cpu) == 32)
+      else if (RISCV_XLEN (cpu) == 64)
 	{
 	  imm = EXTRACT_CITYPE_IMM (iw);
 	  TRACE_INSN (cpu, "c.addiw %s, %s, %#" PRIxTW ";  // %s += %#" PRIxTW,
