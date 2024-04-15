@@ -254,10 +254,13 @@ gdb_rl_callback_handler (char *rl) noexcept
   /* In bracketed paste mode, pasting a complete line can result in a
      literal newline appearing at the end of LINE.  However, we never
      want this in gdb.  */
-  size_t len = strlen (rl);
-  while (len > 0 && (rl[len - 1] == '\r' || rl[len - 1] == '\n'))
-    --len;
-  rl[len] = '\0';
+  if (rl != nullptr)
+    {
+      size_t len = strlen (rl);
+      while (len > 0 && (rl[len - 1] == '\r' || rl[len - 1] == '\n'))
+	--len;
+      rl[len] = '\0';
+    }
 
   try
     {
