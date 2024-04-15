@@ -8394,7 +8394,9 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
       /* Check to see if any sections in the input BFD
 	 covered by ELF program header have changed.  */
       Elf_Internal_Phdr *segment;
-      asection *section, *osec;
+      asection * section;
+      asection * osec;
+      asection * prev;
       unsigned int i, num_segments;
       Elf_Internal_Shdr *this_hdr;
       const struct elf_backend_data *bed;
@@ -8425,7 +8427,7 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 		  || segment->p_type == PT_DYNAMIC))
 	    goto rewrite;
 
-	  for (section = ibfd->sections;
+	  for (section = prev = ibfd->sections;
 	       section != NULL; section = section->next)
 	    {
 	      /* We mark the output section so that we know it comes
@@ -8446,9 +8448,13 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 		      || section->vma != osec->vma
 		      || section->size != osec->size
 		      || section->rawsize != osec->rawsize
-		      || section->alignment_power != osec->alignment_power)
+		      || section->alignment_power != osec->alignment_power
+		      /* PR 31450: Make sure this section's vma to lma
+			 relationship is the same as previous section's.  */
+		      || section->lma - section->vma != prev->lma - prev->vma)
 		    goto rewrite;
 		}
+	      prev = section;
 	    }
 	}
 
