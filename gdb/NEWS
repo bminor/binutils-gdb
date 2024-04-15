@@ -36,6 +36,10 @@ set unwindonsignal on|off
 show unwindonsignal
   These commands are now aliases for the new set/show unwind-on-signal.
 
+target record-full
+  This command now gives an error if any unexpected arguments are
+  found after the command.
+
 * New commands
 
 info missing-debug-handler

@@ -910,7 +910,7 @@ record_full_async_inferior_event_handler (gdb_client_data data)
 /* Open the process record target for 'core' files.  */
 
 static void
-record_full_core_open_1 (const char *name, int from_tty)
+record_full_core_open_1 ()
 {
   regcache *regcache = get_thread_regcache (inferior_thread ());
   int regnum = gdbarch_num_regs (regcache->arch ());
@@ -933,7 +933,7 @@ record_full_core_open_1 (const char *name, int from_tty)
 /* Open the process record target for 'live' processes.  */
 
 static void
-record_full_open_1 (const char *name, int from_tty)
+record_full_open_1 ()
 {
   if (record_debug)
     gdb_printf (gdb_stdlog, "Process record: record_full_open_1\n");
@@ -957,10 +957,13 @@ static void record_full_init_record_breakpoints (void);
 /* Open the process record target.  */
 
 static void
-record_full_open (const char *name, int from_tty)
+record_full_open (const char *args, int from_tty)
 {
   if (record_debug)
     gdb_printf (gdb_stdlog, "Process record: record_full_open\n");
+
+  if (args != nullptr)
+    error (_("Trailing junk: '%s'"), args);
 
   record_preopen ();
 
@@ -971,9 +974,9 @@ record_full_open (const char *name, int from_tty)
   record_full_list->next = NULL;
 
   if (current_program_space->core_bfd ())
-    record_full_core_open_1 (name, from_tty);
+    record_full_core_open_1 ();
   else
-    record_full_open_1 (name, from_tty);
+    record_full_open_1 ();
 
   /* Register extra event sources in the event loop.  */
   record_full_async_inferior_event_token
@@ -2520,7 +2523,7 @@ static void
 cmd_record_full_restore (const char *args, int from_tty)
 {
   core_file_command (args, from_tty);
-  record_full_open (args, from_tty);
+  record_full_open (nullptr, from_tty);
 }
 
 /* Save the execution log to a file.  We use a modified elf corefile
