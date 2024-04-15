@@ -1192,7 +1192,7 @@ increment_bfd_error_count (const std::string &str)
 
 /* A print callback for bfd_print_error.  */
 
-static int
+static int ATTRIBUTE_PRINTF (2, 0)
 print_error_callback (void *stream, const char *fmt, ...)
 {
   string_file *file = (string_file *) stream;
@@ -1208,7 +1208,7 @@ print_error_callback (void *stream, const char *fmt, ...)
    messages which have been printed once already.  This is done on a
    per-inferior basis.  */
 
-static void ATTRIBUTE_PRINTF (1, 0)
+static void
 gdb_bfd_error_handler (const char *fmt, va_list ap)
 {
   string_file output;
