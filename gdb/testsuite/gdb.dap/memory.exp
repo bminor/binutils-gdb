@@ -55,6 +55,11 @@ set obj [dap_check_request_and_response "evaluate global pointer" \
 	     evaluate {o expression [s thirty_two_p]}]
 set addr [dict get [lindex $obj 0] body memoryReference]
 
+set obj [dap_request_and_response \
+	     readMemory [format {o memoryReference [s %s] count [i 18446744073709551615]} $addr]]
+set response [lindex $obj 0]
+gdb_assert { [dict get $response success] == "false" } "read memory, count to big"
+
 set obj [dap_check_request_and_response "read memory" \
 	     readMemory [format {o memoryReference [s %s] count [i 4]} $addr]]
 

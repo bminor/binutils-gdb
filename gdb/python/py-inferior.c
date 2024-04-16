@@ -555,14 +555,24 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
       || get_addr_from_python (length_obj, &length) < 0)
     return NULL;
 
+  if (length == 0)
+    {
+      PyErr_SetString (PyExc_ValueError,
+		       _("Argument 'count' should be greater than zero"));
+      return NULL;
+    }
+
+  void *p = malloc (length);
+  if (p == nullptr)
+    return PyErr_NoMemory ();
+  buffer.reset ((gdb_byte *) p);
+
   try
     {
       /* Use this scoped-restore because we want to be able to read
 	 memory from an unwinder.  */
       scoped_restore_current_inferior_for_memory restore_inferior
 	(inf->inferior);
-
-      buffer.reset ((gdb_byte *) xmalloc (length));
 
       read_memory (addr, buffer.get (), length);
     }

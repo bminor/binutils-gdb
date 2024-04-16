@@ -34,6 +34,12 @@ switch [get_endianness] {
     big { set python_pack_char ">" }
 }
 
+gdb_test \
+    "python gdb.selected_inferior().read_memory (0, 0xffffffffffffffff)" \
+    [multi_line \
+	 [string_to_regexp "Python Exception <class 'MemoryError'>: "] \
+	 [string_to_regexp "Error occurred in Python."]]
+
 # Test memory read operations without execution.
 
 gdb_py_test_silent_cmd "python addr = gdb.lookup_global_symbol ('int8_global').value().address" \

@@ -18,13 +18,17 @@ import base64
 import gdb
 
 from .server import capability, request
+from .startup import DAPException
 
 
 @request("readMemory")
 @capability("supportsReadMemoryRequest")
 def read_memory(*, memoryReference: str, offset: int = 0, count: int, **extra):
     addr = int(memoryReference, 0) + offset
-    buf = gdb.selected_inferior().read_memory(addr, count)
+    try:
+        buf = gdb.selected_inferior().read_memory(addr, count)
+    except MemoryError as e:
+        raise DAPException("Out of memory") from e
     return {
         "address": hex(addr),
         "data": base64.b64encode(buf).decode("ASCII"),
