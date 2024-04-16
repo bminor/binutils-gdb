@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifndef ARCH_CSKY_H
-#define ARCH_CSKy_H
+#define ARCH_CSKY_H
 
 #include "gdbsupport/tdesc.h"
 
