@@ -149,8 +149,9 @@ def parse_argtypes(typestr: str):
     typestr = re.sub(r"^\((.*)\)$", r"\1", typestr)
     result: list[str] = []
     for item in re.split(r",\s*", typestr):
-        if item == "void" or item == "":
+        if item == "":
             continue
+
         m = ARGTYPES.match(item)
         if m:
             if m.group("E"):
