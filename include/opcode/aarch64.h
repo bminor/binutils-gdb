@@ -894,6 +894,9 @@ enum aarch64_opnd_qualifier
   /* Special qualifier helping retrieve qualifier information during the
      decoding time (currently not in use).  */
   AARCH64_OPND_QLF_RETRIEVE,
+
+  /* Special qualifier used for indicating error in qualifier retrieval.  */
+  AARCH64_OPND_QLF_ERR,
 };
 
 /* Instruction class.  */
