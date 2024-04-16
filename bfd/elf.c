@@ -8427,7 +8427,7 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 		  || segment->p_type == PT_DYNAMIC))
 	    goto rewrite;
 
-	  for (section = prev = ibfd->sections;
+	  for (section = ibfd->sections, prev = NULL;
 	       section != NULL; section = section->next)
 	    {
 	      /* We mark the output section so that we know it comes
@@ -8448,13 +8448,20 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 		      || section->vma != osec->vma
 		      || section->size != osec->size
 		      || section->rawsize != osec->rawsize
-		      || section->alignment_power != osec->alignment_power
-		      /* PR 31450: Make sure this section's vma to lma
-			 relationship is the same as previous section's.  */
-		      || section->lma - section->vma != prev->lma - prev->vma)
+		      || section->alignment_power != osec->alignment_power)
 		    goto rewrite;
+
+		  /* PR 31450: If this is an allocated section then make sure
+		     that this section's vma to lma relationship is the same
+		     as previous (allocated) section's.  */
+		  if (prev != NULL
+		      && section->flags & SEC_ALLOC
+		      && section->lma - section->vma != prev->lma - prev->vma)
+		    goto rewrite;
+
+		  if (section->flags & SEC_ALLOC)
+		    prev = section;
 		}
-	      prev = section;
 	    }
 	}
 
