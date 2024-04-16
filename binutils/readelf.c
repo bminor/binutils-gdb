@@ -1665,20 +1665,10 @@ dump_relr_relocations (Filedata *          filedata,
      be used later on for some other purpose.  */
   qsort (symtab, nsyms, sizeof (Elf_Internal_Sym), symcmp);
 
-  if (do_wide)
-    {
-      if (relr_entsize == 4)
-	printf (_("Index: Entry:   Address  Symbolic Address     Notes\n"));
-      else
-	printf (_("Index: Entry:           Address relocated Symbolic Address        Notes\n"));
-    }
+  if (relr_entsize == 4)
+    printf (_ ("Index: Entry    Address   Symbolic Address\n"));
   else
-    {
-      if (relr_entsize == 4)
-	printf (_("Index: Entry:   Address  Symbolic Address\n"));
-      else
-	printf (_("Index: Entry:           Address relocated Symbolic Address\n"));
-    }
+    printf (_ ("Index: Entry            Address           Symbolic Address\n"));
 
   for (i = 0; i < nentries; i++)
     {
@@ -1698,8 +1688,6 @@ dump_relr_relocations (Filedata *          filedata,
 	{
 	  where = entry;
 	  print_relr_addr_and_sym (symtab, nsyms, strtab, strtablen, where);
-	  if (do_wide)
-	    printf (_(" (new starting address)"));
 	  printf ("\n");
 	  where += relr_entsize;
 	}
@@ -1722,8 +1710,6 @@ dump_relr_relocations (Filedata *          filedata,
 		if (first)
 		  {
 		    print_relr_addr_and_sym (symtab, nsyms, strtab, strtablen, addr);
-		    if (do_wide)
-		      printf (_(" (start of bitmap)"));
 		    first = false;
 		  }
 		else

@@ -15,8 +15,8 @@ Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entry:
 
 Relocation section '.relr.dyn' at offset 0x[a-f0-9]+ contains 2 entries:
 #...
-0000: +[0-9a-f]+ [0-9a-f]+ +.* \(new starting address\)
-0001: +[0-9a-f]+ [0-9a-f]+ +.* \(start of bitmap\)
+0000: +[0-9a-f]+ [0-9a-f]+ +.*
+0001: +[0-9a-f]+ [0-9a-f]+ +.*
  +[0-9a-f]+ +.*
 #...
 Symbol table '.symtab' contains [0-9]+ entries:

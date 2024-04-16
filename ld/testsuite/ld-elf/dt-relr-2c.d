@@ -14,7 +14,7 @@ Relocation section '\.rel(a|)\.dyn' at offset 0x[0-9a-f]+ contains 2 entries:
 #...
 Relocation section '\.relr\.dyn' at offset 0x[0-9a-f]+ contains 2 entries:
 #...
-0000: +[0-9a-f]+ [0-9a-f]+ +.* \(new starting address\)
-0001: +[0-9a-f]+ [0-9a-f]+ +.* \(start of bitmap\)
+0000: +[0-9a-f]+ [0-9a-f]+ +.*
+0001: +[0-9a-f]+ [0-9a-f]+ +.*
  +[0-9a-f]+ +.*
 #pass
