@@ -6261,9 +6261,11 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	      if (!is_elf_hash_table (info->hash))
 		continue;
-	      /* Ignore the archive if the symbol isn't defined in a
-		 shared object.  */
-	      if (!((struct elf_link_hash_entry *) h)->def_dynamic)
+	      struct elf_link_hash_entry *eh
+		= (struct elf_link_hash_entry *) h;
+	      /* Ignore the archive if the symbol isn't referenced by a
+		 regular object or isn't defined in a shared object.  */
+	      if (!eh->ref_regular || !eh->def_dynamic)
 		continue;
 	      /* Ignore the dynamic definition if symbol is first
 		 defined in this archive.  */

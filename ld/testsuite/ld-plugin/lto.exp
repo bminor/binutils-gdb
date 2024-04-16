@@ -579,6 +579,22 @@ set lto_link_elf_tests [list \
    "" \
    "pr31615d.so" \
   ] \
+  [list \
+   "Build pr31644b.a" \
+   "" \
+   "" \
+   {pr31644b.c} \
+   "" \
+   "pr31644b.a" \
+  ] \
+  [list \
+   "Build pr31644c.so" \
+   "-shared" \
+   "-fPIC" \
+   {pr31644c.c} \
+   "" \
+   "pr31644c.so" \
+  ] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of
@@ -788,6 +804,14 @@ set lto_run_elf_shared_tests [list \
    {pr31615a.c} {pr31615b.exe} {pass.out} {-O3 -flto} {c} {} \
    {-Wl,--as-needed tmpdir/pr31615c.so -Wl,--no-as-needed \
     tmpdir/pr31615d.so}] \
+  [list {pr31644a} \
+   {-Wl,-R,tmpdir} {} \
+   {pr31644a.c} {pr31644a.exe} {pass.out} {-flto} {c} {} \
+   {-Wl,--no-as-needed tmpdir/pr31644b.a tmpdir/pr31644c.so}] \
+  [list {pr31644b} \
+   {-Wl,-R,tmpdir} {} \
+   {pr31644a.c} {pr31644b.exe} {pass.out} {-flto} {c} {} \
+   {-Wl,--as-needed tmpdir/pr31644b.a tmpdir/pr31644c.so}] \
 ]
 
 # LTO run-time tests for ELF
