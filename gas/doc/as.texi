@@ -6231,26 +6231,21 @@ specified by position, not keyword.  @xref{Altmacro,,@code{.altmacro}}.
 Thus for example:
 
 @example
-.altmacro
 .macro foo bar=1, baz=2
 .print "\bar \baz"
 .endm
 
+foo baz=3
+.altmacro
 foo baz=3
 @end example
 
 Will print:
 
 @smallexample
+1 3
 baz=3 2
 @end smallexample
-
-Rather than the expected:
-
-@smallexample
-1 3
-@end smallexample
-
 
 @end table
 
