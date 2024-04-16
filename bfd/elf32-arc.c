@@ -1045,9 +1045,6 @@ static bool
 arc_elf_final_write_processing (bfd *abfd)
 {
   unsigned long emf;
-  int osver = bfd_elf_get_obj_attr_int (abfd, OBJ_ATTR_PROC,
-					Tag_ARC_ABI_osver);
-  flagword e_flags = elf_elfheader (abfd)->e_flags & ~EF_ARC_OSABI_MSK;
 
   switch (bfd_get_mach (abfd))
     {
@@ -1062,12 +1059,15 @@ arc_elf_final_write_processing (bfd *abfd)
   elf_elfheader (abfd)->e_machine = emf;
 
   /* Record whatever is the current syscall ABI version.  */
+  int osver = bfd_elf_get_obj_attr_int (abfd, OBJ_ATTR_PROC,
+					Tag_ARC_ABI_osver);
+  flagword e_flags = elf_elfheader (abfd)->e_flags;
   if (osver)
-    e_flags |= ((osver & 0x0f) << 8);
-  else
+    e_flags = (e_flags & ~EF_ARC_OSABI_MSK) | ((osver & 0x0f) << 8);
+  else if ((e_flags & EF_ARC_OSABI_MSK) == 0)
     e_flags |= E_ARC_OSABI_V3;
 
-  elf_elfheader (abfd)->e_flags |= e_flags;
+  elf_elfheader (abfd)->e_flags = e_flags;
   return _bfd_elf_final_write_processing (abfd);
 }
 
