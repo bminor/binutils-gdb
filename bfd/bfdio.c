@@ -248,8 +248,6 @@ _bfd_real_fopen (const char *filename, const char *modes)
   MultiByteToWideChar (cp, 0, modes, -1, modesW, sizeof(modesW));
 
   FILE *  file = _wfopen (fullPath, modesW);
-  if (!file)
-    perror("Error opening file");
   free (fullPath);
 
   return close_on_exec (file);
