@@ -174,6 +174,9 @@ arc_linux_is_sigtramp (const frame_info_ptr &this_frame)
     0x22, 0x6f, 0x00, 0x3f	/* swi */
   };
 
+  constexpr size_t max_insn_sz = std::max (sizeof (insns_be_hs),
+					   sizeof (insns_be_700));
+
   gdb_byte arc_sigtramp_insns[sizeof (insns_be_700)];
   size_t insns_sz;
   if (arc_mach_is_arcv2 (gdbarch))
@@ -200,7 +203,8 @@ arc_linux_is_sigtramp (const frame_info_ptr &this_frame)
 	std::swap (arc_sigtramp_insns[i], arc_sigtramp_insns[i+1]);
     }
 
-  gdb_byte buf[insns_sz];
+  gdb_assert (insns_sz <= max_insn_sz);
+  gdb_byte buf[max_insn_sz];
 
   /* Read the memory at the PC.  Since we are stopped, any breakpoint must
      have been removed.  */

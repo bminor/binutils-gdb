@@ -5713,7 +5713,7 @@ aarch64_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 			CORE_ADDR insn_addr)
 {
   uint32_t rec_no = 0;
-  uint8_t insn_size = 4;
+  const uint8_t insn_size = 4;
   uint32_t ret = 0;
   gdb_byte buf[insn_size];
   aarch64_insn_decode_record aarch64_record;
