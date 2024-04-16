@@ -12,6 +12,4 @@ SECTIONS
   .text : { *(.text) } > ROM
 
   .bss : { *(.bss) } > RAM
-
-  /DISCARD/ : { *(.*) }
 }
