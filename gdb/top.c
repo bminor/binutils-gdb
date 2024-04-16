@@ -2267,7 +2267,7 @@ input settings."),
 
   add_setshow_boolean_cmd ("startup-quietly", class_support,
 			       &startup_quiet, _("\
-Set whether GDB should start up quietly."), _("		\
+Set whether GDB should start up quietly."), _("\
 Show whether GDB should start up quietly."), _("\
 This setting will not affect the current session.  Instead this command\n\
 should be added to the .gdbearlyinit file in the users home directory to\n\

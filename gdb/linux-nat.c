@@ -4701,8 +4701,8 @@ _initialize_linux_nat ()
 {
   add_setshow_boolean_cmd ("linux-nat", class_maintenance,
 			   &debug_linux_nat, _("\
-Set debugging of GNU/Linux native target."), _("	\
-Show debugging of GNU/Linux native target."), _("	\
+Set debugging of GNU/Linux native target."), _("\
+Show debugging of GNU/Linux native target."), _("\
 When on, print debug messages relating to the GNU/Linux native target."),
 			   nullptr,
 			   show_debug_linux_nat,

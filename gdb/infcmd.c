@@ -3093,10 +3093,10 @@ _initialize_infcmd ()
   /* Add the filename of the terminal connected to inferior I/O.  */
   auto tty_set_show
     = add_setshow_optional_filename_cmd ("inferior-tty", class_run, _("\
-Set terminal for future runs of program being debugged."), _("		\
-Show terminal for future runs of program being debugged."), _("		\
-Usage: set inferior-tty [TTY]\n\n					\
-If TTY is omitted, the default behavior of using the same terminal as GDB\n \
+Set terminal for future runs of program being debugged."), _("\
+Show terminal for future runs of program being debugged."), _("\
+Usage: set inferior-tty [TTY]\n\n\
+If TTY is omitted, the default behavior of using the same terminal as GDB\n\
 is restored."),
 					 set_tty_value,
 					 get_tty_value,
@@ -3117,8 +3117,8 @@ Follow this command with any number of args, to be passed to the program."),
 
   auto cwd_set_show
     = add_setshow_string_noescape_cmd ("cwd", class_run, _("\
-Set the current working directory to be used when the inferior is started.\n \
-Changing this setting does not have any effect on inferiors that are\n	\
+Set the current working directory to be used when the inferior is started.\n\
+Changing this setting does not have any effect on inferiors that are\n\
 already running."),
 				       _("\
 Show the current working directory that is used when the inferior is started."),
