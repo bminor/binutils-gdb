@@ -48,8 +48,6 @@ puts $fd \
 "import gdb
 
 def do_gdb_stuff ():
-    gdb.execute ('file $host_binfile')
-    gdb.execute ('target $gdbserver_protocol $gdbserver_gdbport')
     gdb.execute ('break $srcfile:$break_linenr')
     gdb.execute ('continue')
     gdb.execute ('p server_pid')
@@ -63,10 +61,14 @@ set host_file1 [gdb_remote_download host $file1]
 # Now start GDB, sourcing the python command file we generated above.
 # Set the height and width so we don't end up at a paging prompt.
 if {[gdb_spawn_with_cmdline_opts \
-	 "-quiet -iex \"set height 0\" -iex \"set width 0\" -ex \"source $host_file1\""] != 0} {
+	 "-quiet -iex \"set height 0\" -iex \"set width 0\""] != 0} {
     fail "spawn"
     return
 }
+
+gdb_load $binfile
+gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport
+send_gdb "source $host_file1\n"
 
 # Get the gdbserver PID.
 set gdbserver_pid 0
