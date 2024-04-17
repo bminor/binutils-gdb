@@ -203,6 +203,9 @@ Dwarf::assemble $asm_file {
 	    line [gdb_get_line_number "main start"]
 	    DW_LNS_set_prologue_end
 	    DW_LNS_copy
+
+	    DW_LNE_set_address $main_end
+	    DW_LNE_end_sequence
 	}
     }
 }

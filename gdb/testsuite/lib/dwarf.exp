@@ -2546,16 +2546,20 @@ namespace eval Dwarf {
 	    variable _line_header_end_label
 	    variable _line
 	    variable _line_address_update
+	    variable _line_program_terminated
 
 
 	    set _line 1
 	    set _line_address_update 0
+	    set _line_program_terminated 0
 
 	    _line_finalize_header
 
 	    proc DW_LNE_set_address {addr} {
 		variable _line_address_update
 		set _line_address_update 1
+		variable _line_program_terminated
+		set _line_program_terminated 0
 		_op .byte 0
 		set start [new_label "set_address_start"]
 		set end [new_label "set_address_end"]
@@ -2576,6 +2580,8 @@ namespace eval Dwarf {
 		    error "Missing address update for end_sequence"
 		}
 		set _line_address_update 0
+		variable _line_program_terminated
+		set _line_program_terminated 1
 		variable _line
 		_op .byte 0
 		_op .uleb128 1
@@ -2584,6 +2590,8 @@ namespace eval Dwarf {
 	    }
 
 	    proc DW_LNE_user { len opcode } {
+		variable _line_program_terminated
+		set _line_program_terminated 0
 		set DW_LNE_lo_usr 0x80
 		set DW_LNE_hi_usr 0xff
 		if { $DW_LNE_lo_usr <= $opcode
@@ -2605,22 +2613,32 @@ namespace eval Dwarf {
 		    error "Missing address update for copy"
 		}
 		set _line_address_update 0
+		variable _line_program_terminated
+		set _line_program_terminated 0
 		_op .byte 1
 	    }
 
 	    proc DW_LNS_negate_stmt {} {
+		variable _line_program_terminated
+		set _line_program_terminated 0
 		_op .byte 6
 	    }
 
 	    proc DW_LNS_set_prologue_end {} {
+		variable _line_program_terminated
+		set _line_program_terminated 0
 		_op .byte 0x0a
 	    }
 
 	    proc DW_LNS_set_epilogue_begin {} {
+		variable _line_program_terminated
+		set _line_program_terminated 0
 		_op .byte 0x0b
 	    }
 
 	    proc DW_LNS_advance_pc {offset} {
+		variable _line_program_terminated
+		set _line_program_terminated 0
 		variable _line_address_update
 		set _line_address_update 1
 		_op .byte 2
@@ -2628,6 +2646,8 @@ namespace eval Dwarf {
 	    }
 
 	    proc DW_LNS_advance_line {offset} {
+		variable _line_program_terminated
+		set _line_program_terminated 0
 		variable _line
 		_op .byte 3
 		_op .sleb128 ${offset}
@@ -2650,11 +2670,17 @@ namespace eval Dwarf {
 	    }
 
 	    proc DW_LNS_set_file {num} {
+		variable _line_program_terminated
+		set _line_program_terminated 0
 		_op .byte 4
 		_op .sleb128 ${num}
 	    }
 
 	    uplevel $body
+
+	    if { $_line_program_terminated == 0 } {
+		error "Missing end_seq"
+	    }
 	}
 
 	uplevel $body

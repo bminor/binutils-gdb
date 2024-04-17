@@ -50,6 +50,8 @@ Dwarf::assemble $asm_file {
     declare_labels partial_label lines_label
     global srcdir subdir srcfile
 
+    get_func_info main
+
     cu {} {
 	partial_label: partial_unit {
 	    {stmt_list ${lines_label} DW_FORM_sec_offset}
@@ -77,7 +79,12 @@ Dwarf::assemble $asm_file {
 	include_dir "${srcdir}/${subdir}"
 	file_name "dw2-symtab-includes.h" 1
 	program {
+	    DW_LNE_set_address $main_start
 	    DW_LNS_advance_line 1
+	    DW_LNS_copy
+
+	    DW_LNE_set_address $main_end
+	    DW_LNE_end_sequence
 	}
     }
 }
