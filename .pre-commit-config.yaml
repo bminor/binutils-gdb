@@ -59,3 +59,12 @@ repos:
     - id: isort
       types_or: [file]
       files: 'gdb/.*\.py(\.in)?$'
+  - repo: local
+    hooks:
+    - id: check-include-guards
+      name: check-include-guards
+      language: python
+      entry: gdb/check-include-guards.py
+      # All gdb header files, but not headers in the test suite.
+      files: '^(gdb(support|server)?)/.*\.h$'
+      exclude: '.*/testsuite/.*'
