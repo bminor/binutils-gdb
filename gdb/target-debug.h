@@ -38,150 +38,273 @@
    more simply done there, and target_xfer_partial additionally
    bypasses the debug target.  */
 
+#include "gdbarch.h"
 #include "gdbsupport/x86-xstate.h"
+#include "progspace.h"
 #include "target.h"
 #include "target/wait.h"
 #include "target/waitstatus.h"
 
-/* Helper macro.  */
+/* The functions defined in this header file are not marked "inline", such
+   that any function not used by target-delegates.c (the only user of this file)
+   will be flagged as unused.  */
 
-#define target_debug_do_print(E)			\
-  gdb_puts ((E), gdb_stdlog);
+static void
+target_debug_do_print (const char *s)
+{ gdb_puts (s, gdb_stdlog); }
 
-#define target_debug_print_target_object(X)	\
-  target_debug_do_print (plongest (X))
-#define target_debug_print_CORE_ADDR(X)		\
-  target_debug_do_print (core_addr_to_string (X))
-#define target_debug_print_const_char_p(X)	\
-  target_debug_do_print (((X) ? (X) : "(null)"))
-#define target_debug_print_char_p(X)		\
-  target_debug_do_print (((X) ? (X) : "(null)"))
-#define target_debug_print_int(X)		\
-  target_debug_do_print (plongest (X))
-#define target_debug_print_bool(X)		\
-  target_debug_do_print ((X) ? "true" : "false")
-#define target_debug_print_long(X)		\
-  target_debug_do_print (plongest (X))
-#define target_debug_print_target_xfer_status(X)	\
-  target_debug_do_print (plongest (X))
-#define target_debug_print_exec_direction_kind(X)	\
-  target_debug_do_print (plongest (X))
-#define target_debug_print_trace_find_type(X)	\
-  target_debug_do_print (plongest (X))
-#define target_debug_print_btrace_read_type(X)	\
-  target_debug_do_print (plongest (X))
-#define target_debug_print_btrace_error(X) \
-  target_debug_do_print (plongest (X))
-#define target_debug_print_ptid_t(X)		\
-  target_debug_do_print (plongest (X.pid ()))
-#define target_debug_print_gdbarch_p(X)	\
-  target_debug_do_print (gdbarch_bfd_arch_info (X)->printable_name)
-#define target_debug_print_const_gdb_byte_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_gdb_byte_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_const_gdb_byte_pp(X)	\
-  target_debug_do_print (host_address_to_string (*(X)))
-#define target_debug_print_gdb_signal(X)	\
-  target_debug_do_print (gdb_signal_to_name (X))
-#define target_debug_print_ULONGEST(X)		\
-  target_debug_do_print (hex_string (X))
-#define target_debug_print_ULONGEST_p(X)	\
-  target_debug_do_print (hex_string (*(X)))
-#define target_debug_print_LONGEST(X)		\
-  target_debug_do_print (phex (X, 0))
-#define target_debug_print_LONGEST_p(X)		\
-  target_debug_do_print (phex (*(X), 0))
-#define target_debug_print_address_space_p(X)	\
-  target_debug_do_print (plongest ((X)->num ()))
-#define target_debug_print_bp_target_info_p(X)	\
-  target_debug_do_print (core_addr_to_string ((X)->placed_address))
-#define target_debug_print_expression_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_CORE_ADDR_p(X)	\
-  target_debug_do_print (core_addr_to_string (*(X)))
-#define target_debug_print_int_p(X)		\
-  target_debug_do_print (plongest (*(X)))
-#define target_debug_print_regcache_p(X) \
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_thread_info_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_ui_file_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_const_std_vector_target_section_p(X) \
-  target_debug_do_print (host_address_to_string (X->data ()))
-#define target_debug_print_void_p(X) \
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_find_memory_region_ftype(X) \
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_bfd_p(X) \
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_std_vector_mem_region(X) \
-  target_debug_do_print (host_address_to_string (X.data ()))
-#define target_debug_print_std_vector_static_tracepoint_marker(X)	\
-  target_debug_do_print (host_address_to_string (X.data ()))
-#define target_debug_print_const_target_desc_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_bp_location_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_const_trace_state_variable_r(X)	\
-  target_debug_do_print (host_address_to_string (&X))
-#define target_debug_print_trace_status_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_breakpoint_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_tracepoint_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_uploaded_tp_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_uploaded_tp_pp(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_uploaded_tsv_pp(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_static_tracepoint_marker_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_btrace_target_info_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_const_frame_unwind_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_btrace_data_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_record_method(X)	\
-  target_debug_do_print (plongest (X))
-#define target_debug_print_const_btrace_config_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_const_btrace_target_info_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_target_hw_bp_type(X) \
-  target_debug_do_print (plongest (X))
-#define target_debug_print_bptype(X) \
-  target_debug_do_print (plongest (X))
-#define target_debug_print_inferior_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_remove_bp_reason(X) \
-  target_debug_do_print (plongest (X))
-#define target_debug_print_gdb_disassembly_flags(X) \
-  target_debug_do_print (plongest (X))
-#define target_debug_print_traceframe_info_up(X) \
-  target_debug_do_print (host_address_to_string (X.get ()))
-#define target_debug_print_gdb_array_view_const_int(X)	\
-  target_debug_do_print (host_address_to_string (X.data ()))
-#define target_debug_print_record_print_flags(X) \
-  target_debug_do_print (plongest (X))
-#define target_debug_print_thread_control_capabilities(X) \
-  target_debug_do_print (plongest (X))
-#define target_debug_print_thread_info_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_std_string(X) \
-  target_debug_do_print ((X).c_str ())
-#define target_debug_print_gdb_byte_vector(X)	\
-  target_debug_do_print (host_address_to_string (X.data ()))
-#define target_debug_print_gdb_unique_xmalloc_ptr_char(X) \
-  target_debug_do_print (X.get ())
-#define target_debug_print_target_waitkind(X) \
-  target_debug_do_print (pulongest (X))
-#define target_debug_print_gdb_thread_options(X) \
-  target_debug_do_print (to_string (X).c_str ())
+static void
+target_debug_print_target_object (target_object object)
+{ target_debug_do_print (plongest (object)); }
+
+static void
+target_debug_print_CORE_ADDR (CORE_ADDR addr)
+{ target_debug_do_print (core_addr_to_string (addr)); }
+
+static void
+target_debug_print_const_char_p (const char *s)
+{ target_debug_do_print (s != nullptr ? s : "(null)"); }
+
+static void
+target_debug_print_int (int v)
+{ target_debug_do_print (plongest (v)); }
+
+static void
+target_debug_print_bool (bool v)
+{ target_debug_do_print (v ? "true" : "false"); }
+
+static void
+target_debug_print_long (long v)
+{ target_debug_do_print (plongest (v)); }
+
+static void
+target_debug_print_target_xfer_status (target_xfer_status status)
+{ target_debug_do_print (plongest (status)); }
+
+static void
+target_debug_print_exec_direction_kind (exec_direction_kind kind)
+{ target_debug_do_print (plongest (kind)); }
+
+static void
+target_debug_print_trace_find_type (trace_find_type type)
+{ target_debug_do_print (plongest (type)); }
+
+static void
+target_debug_print_btrace_read_type (btrace_read_type type)
+{ target_debug_do_print (plongest (type)); }
+
+static void
+target_debug_print_btrace_error (btrace_error error)
+{ target_debug_do_print (plongest (error)); }
+
+static void
+target_debug_print_ptid_t (ptid_t ptid)
+{ target_debug_do_print (plongest (ptid.pid ())); }
+
+static void
+target_debug_print_gdbarch_p (gdbarch *arch)
+{ target_debug_do_print (gdbarch_bfd_arch_info (arch)->printable_name); }
+
+static void
+target_debug_print_const_gdb_byte_p (const gdb_byte *p)
+{ target_debug_do_print (host_address_to_string (p)); }
+
+static void
+target_debug_print_gdb_byte_p (gdb_byte *p)
+{ target_debug_do_print (host_address_to_string (p)); }
+
+static void
+target_debug_print_const_gdb_byte_pp (const gdb_byte **p)
+{ target_debug_do_print (host_address_to_string (*p)); }
+
+static void
+target_debug_print_gdb_signal (gdb_signal sig)
+{ target_debug_do_print (gdb_signal_to_name (sig)); }
+
+static void
+target_debug_print_ULONGEST (ULONGEST v)
+{ target_debug_do_print (hex_string (v)); }
+
+static void
+target_debug_print_ULONGEST_p (ULONGEST *p)
+{ target_debug_do_print (hex_string (*p)); }
+
+static void
+target_debug_print_LONGEST (LONGEST v)
+{ target_debug_do_print (phex (v, 0)); }
+
+static void
+target_debug_print_LONGEST_p (LONGEST *p)
+{ target_debug_do_print (phex (*p, 0)); }
+
+static void
+target_debug_print_bp_target_info_p (bp_target_info *bp)
+{ target_debug_do_print (core_addr_to_string (bp->placed_address)); }
+
+static void
+target_debug_print_expression_p (expression *exp)
+{ target_debug_do_print (host_address_to_string (exp)); }
+
+static void
+target_debug_print_CORE_ADDR_p (CORE_ADDR *p)
+{ target_debug_do_print (core_addr_to_string (*p)); }
+
+static void
+target_debug_print_int_p (int *p)
+{ target_debug_do_print (plongest (*p)); }
+
+static void
+target_debug_print_regcache_p (regcache *regcache)
+{ target_debug_do_print (host_address_to_string (regcache)); }
+
+static void
+target_debug_print_thread_info_p (thread_info *thread)
+{ target_debug_do_print (host_address_to_string (thread)); }
+
+static void
+target_debug_print_ui_file_p (ui_file *file)
+{ target_debug_do_print (host_address_to_string (file)); }
+
+static void
+target_debug_print_const_std_vector_target_section_p
+  (const std::vector<target_section> *vec)
+{ target_debug_do_print (host_address_to_string (vec->data ())); }
+
+static void
+target_debug_print_void_p (void *p)
+{ target_debug_do_print (host_address_to_string (p)); }
+
+static void
+target_debug_print_find_memory_region_ftype (find_memory_region_ftype func)
+{ target_debug_do_print (host_address_to_string (func)); }
+
+static void
+target_debug_print_bfd_p (bfd *bfd)
+{ target_debug_do_print (host_address_to_string (bfd)); }
+
+static void
+target_debug_print_std_vector_mem_region (const std::vector<mem_region> &vec)
+{ target_debug_do_print (host_address_to_string (vec.data ())); }
+
+static void
+target_debug_print_std_vector_static_tracepoint_marker
+  (const std::vector<static_tracepoint_marker> &vec)
+{ target_debug_do_print (host_address_to_string (vec.data ())); }
+
+static void
+target_debug_print_const_target_desc_p (const target_desc *tdesc)
+{ target_debug_do_print (host_address_to_string (tdesc)); }
+
+static void
+target_debug_print_bp_location_p (bp_location *loc)
+{ target_debug_do_print (host_address_to_string (loc)); }
+
+static void
+target_debug_print_const_trace_state_variable_r
+  (const trace_state_variable &tsv)
+{ target_debug_do_print (host_address_to_string (&tsv)); }
+
+static void
+target_debug_print_trace_status_p (trace_status *status)
+{ target_debug_do_print (host_address_to_string (status)); }
+
+static void
+target_debug_print_tracepoint_p (tracepoint *tp)
+{ target_debug_do_print (host_address_to_string (tp)); }
+
+static void
+target_debug_print_uploaded_tp_p (uploaded_tp *tp)
+{ target_debug_do_print (host_address_to_string (tp)); }
+
+static void
+target_debug_print_uploaded_tp_pp (uploaded_tp **v)
+{ target_debug_do_print (host_address_to_string (*v)); }
+
+static void
+target_debug_print_uploaded_tsv_pp (uploaded_tsv **tsv)
+{ target_debug_do_print (host_address_to_string (tsv)); }
+
+static void
+target_debug_print_static_tracepoint_marker_p (static_tracepoint_marker *marker)
+{ target_debug_do_print (host_address_to_string (marker)); }
+
+static void
+target_debug_print_btrace_target_info_p (btrace_target_info *info)
+{ target_debug_do_print (host_address_to_string (info)); }
+
+static void
+target_debug_print_const_frame_unwind_p (const frame_unwind *fu)
+{ target_debug_do_print (host_address_to_string (fu)); }
+
+static void
+target_debug_print_btrace_data_p (btrace_data *data)
+{ target_debug_do_print (host_address_to_string (data)); }
+
+static void
+target_debug_print_record_method (record_method method)
+{ target_debug_do_print (plongest (method)); }
+
+static void
+target_debug_print_const_btrace_config_p (const btrace_config *config)
+{ target_debug_do_print (host_address_to_string (config)); }
+
+static void
+target_debug_print_const_btrace_target_info_p (const btrace_target_info *info)
+{ target_debug_do_print (host_address_to_string (info)); }
+
+static void
+target_debug_print_target_hw_bp_type (target_hw_bp_type type)
+{ target_debug_do_print (plongest (type)); }
+
+static void
+target_debug_print_bptype (bptype type)
+{ target_debug_do_print (plongest (type)); }
+
+static void
+target_debug_print_inferior_p (inferior *inf)
+{ target_debug_do_print (host_address_to_string (inf)); }
+
+static void
+target_debug_print_remove_bp_reason (remove_bp_reason reason)
+{ target_debug_do_print (plongest (reason)); }
+
+static void
+target_debug_print_gdb_disassembly_flags (gdb_disassembly_flags flags)
+{ target_debug_do_print (plongest (flags)); }
+
+static void
+target_debug_print_traceframe_info_up (std::unique_ptr<traceframe_info> &info)
+{ target_debug_do_print (host_address_to_string (info.get ())); }
+
+static void
+target_debug_print_gdb_array_view_const_int
+  (const gdb::array_view<const int> &view)
+{ target_debug_do_print (host_address_to_string (view.data ())); }
+
+static void
+target_debug_print_record_print_flags (record_print_flags flags)
+{ target_debug_do_print (plongest (flags)); }
+
+static void
+target_debug_print_thread_control_capabilities (thread_control_capabilities cap)
+{ target_debug_do_print (plongest (cap)); }
+
+static void
+target_debug_print_std_string (const std::string &str)
+{ target_debug_do_print (str.c_str ()); }
+
+static void
+target_debug_print_gdb_unique_xmalloc_ptr_char
+  (const gdb::unique_xmalloc_ptr<char> &p)
+{ target_debug_do_print (p.get ()); }
+
+static void
+target_debug_print_target_waitkind (target_waitkind kind)
+{ target_debug_do_print (pulongest (kind)); }
+
+static void
+target_debug_print_gdb_thread_options (gdb_thread_options options)
+{ target_debug_do_print (to_string (options).c_str ()); }
 
 static void
 target_debug_print_target_waitstatus_p (struct target_waitstatus *status)
@@ -189,12 +312,11 @@ target_debug_print_target_waitstatus_p (struct target_waitstatus *status)
   gdb_puts (status->to_string ().c_str (), gdb_stdlog);
 }
 
-
+/* Functions that are used via TARGET_DEBUG_PRINTER.  */
 
-/* Macros or functions that are used via TARGET_DEBUG_PRINTER.  */
-
-#define target_debug_print_step(X) \
-  target_debug_do_print ((X) ? "step" : "continue")
+static void
+target_debug_print_step (int step)
+{ target_debug_do_print (step ? "step" : "continue"); }
 
 static void
 target_debug_print_target_wait_flags (target_wait_flags options)
