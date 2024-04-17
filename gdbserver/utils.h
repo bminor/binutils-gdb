@@ -19,6 +19,6 @@
 #ifndef GDBSERVER_UTILS_H
 #define GDBSERVER_UTILS_H
 
-char *paddress (CORE_ADDR addr);
+const char *paddress (CORE_ADDR addr);
 
 #endif /* GDBSERVER_UTILS_H */

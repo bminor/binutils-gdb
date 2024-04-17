@@ -31,7 +31,7 @@ DEFINE_OFFSET_TYPE (cu_offset, unsigned int);
    section.  */
 DEFINE_OFFSET_TYPE (sect_offset, uint64_t);
 
-static inline char *
+static inline const char *
 sect_offset_str (sect_offset offset)
 {
   return hex_string (to_underlying (offset));

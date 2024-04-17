@@ -5177,7 +5177,7 @@ static void
 print_msymbol_info (struct bound_minimal_symbol msymbol)
 {
   struct gdbarch *gdbarch = msymbol.objfile->arch ();
-  char *tmp;
+  const char *tmp;
 
   if (gdbarch_addr_bit (gdbarch) <= 32)
     tmp = hex_string_custom (msymbol.value_address ()

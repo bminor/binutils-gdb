@@ -122,7 +122,7 @@ octal2str (ULONGEST addr, int width)
 
 /* See print-utils.h.  */
 
-char *
+const char *
 pulongest (ULONGEST u)
 {
   return decimal2str ("", u, 0);
@@ -130,7 +130,7 @@ pulongest (ULONGEST u)
 
 /* See print-utils.h.  */
 
-char *
+const char *
 plongest (LONGEST l)
 {
   if (l < 0)
@@ -144,7 +144,7 @@ static int thirty_two = 32;
 
 /* See print-utils.h.  */
 
-char *
+const char *
 phex (ULONGEST l, int sizeof_l)
 {
   char *str;
@@ -170,7 +170,7 @@ phex (ULONGEST l, int sizeof_l)
       xsnprintf (str, PRINT_CELL_SIZE, "%02x", (unsigned short) (l & 0xff));
       break;
     default:
-      str = phex (l, sizeof (l));
+      return phex (l, sizeof (l));
       break;
     }
 
@@ -179,7 +179,7 @@ phex (ULONGEST l, int sizeof_l)
 
 /* See print-utils.h.  */
 
-char *
+const char *
 phex_nz (ULONGEST l, int sizeof_l)
 {
   char *str;
@@ -212,7 +212,7 @@ phex_nz (ULONGEST l, int sizeof_l)
       xsnprintf (str, PRINT_CELL_SIZE, "%x", (unsigned short) (l & 0xff));
       break;
     default:
-      str = phex_nz (l, sizeof (l));
+      return phex_nz (l, sizeof (l));
       break;
     }
 
@@ -221,7 +221,7 @@ phex_nz (ULONGEST l, int sizeof_l)
 
 /* See print-utils.h.  */
 
-char *
+const char *
 hex_string (LONGEST num)
 {
   char *result = get_print_cell ();
@@ -232,7 +232,7 @@ hex_string (LONGEST num)
 
 /* See print-utils.h.  */
 
-char *
+const char *
 hex_string_custom (LONGEST num, int width)
 {
   char *result = get_print_cell ();
@@ -254,7 +254,7 @@ hex_string_custom: insufficient space to store result"));
 
 /* See print-utils.h.  */
 
-char *
+const char *
 int_string (LONGEST val, int radix, int is_signed, int width,
 	    int use_c_format)
 {
@@ -262,7 +262,7 @@ int_string (LONGEST val, int radix, int is_signed, int width,
     {
     case 16:
       {
-	char *result;
+	const char *result;
 
 	if (width == 0)
 	  result = hex_string (val);

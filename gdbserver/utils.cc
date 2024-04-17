@@ -99,7 +99,7 @@ internal_vwarning (const char *file, int line, const char *fmt, va_list args)
 /* Convert a CORE_ADDR into a HEX string, like %lx.
    The result is stored in a circular static buffer, NUMCELLS deep.  */
 
-char *
+const char *
 paddress (CORE_ADDR addr)
 {
   return phex_nz (addr, sizeof (CORE_ADDR));
