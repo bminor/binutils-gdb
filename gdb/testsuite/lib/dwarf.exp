@@ -2545,13 +2545,17 @@ namespace eval Dwarf {
 	proc program { body } {
 	    variable _line_header_end_label
 	    variable _line
+	    variable _line_address_update
 
 
 	    set _line 1
+	    set _line_address_update 0
 
 	    _line_finalize_header
 
 	    proc DW_LNE_set_address {addr} {
+		variable _line_address_update
+		set _line_address_update 1
 		_op .byte 0
 		set start [new_label "set_address_start"]
 		set end [new_label "set_address_end"]
@@ -2567,6 +2571,11 @@ namespace eval Dwarf {
 	    }
 
 	    proc DW_LNE_end_sequence {} {
+		variable _line_address_update
+		if { $_line_address_update == 0 } {
+		    error "Missing address update for end_sequence"
+		}
+		set _line_address_update 0
 		variable _line
 		_op .byte 0
 		_op .uleb128 1
@@ -2591,6 +2600,8 @@ namespace eval Dwarf {
 	    }
 
 	    proc DW_LNS_copy {} {
+		variable _line_address_update
+		set _line_address_update 0
 		_op .byte 1
 	    }
 
@@ -2607,6 +2618,8 @@ namespace eval Dwarf {
 	    }
 
 	    proc DW_LNS_advance_pc {offset} {
+		variable _line_address_update
+		set _line_address_update 1
 		_op .byte 2
 		_op .uleb128 ${offset}
 	    }

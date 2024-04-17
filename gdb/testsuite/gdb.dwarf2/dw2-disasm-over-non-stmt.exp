@@ -87,7 +87,6 @@ Dwarf::assemble $asm_file {
 	    DW_LNS_copy
 
 	    DW_LNE_set_address $main_end
-	    DW_LNS_copy
 	    DW_LNE_end_sequence
 	}
     }
