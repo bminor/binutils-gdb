@@ -2601,6 +2601,9 @@ namespace eval Dwarf {
 
 	    proc DW_LNS_copy {} {
 		variable _line_address_update
+		if { $_line_address_update == 0 } {
+		    error "Missing address update for copy"
+		}
 		set _line_address_update 0
 		_op .byte 1
 	    }

@@ -129,6 +129,7 @@ proc do_test { start_label func_name tag } {
 		DW_LNS_advance_line 1
 		DW_LNS_copy
 
+		DW_LNS_advance_pc 0
 		DW_LNS_advance_line -4
 		DW_LNS_set_file 1
 		DW_LNS_negate_stmt
