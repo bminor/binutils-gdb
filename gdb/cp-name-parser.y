@@ -1702,10 +1702,6 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
 				       lvalp);
 	if (toktype == ERROR)
 	  {
-	    char *err_copy = (char *) alloca (p - tokstart + 1);
-
-	    memcpy (err_copy, tokstart, p - tokstart);
-	    err_copy[p - tokstart] = 0;
 	    yyerror (state, _("invalid number"));
 	    return ERROR;
 	  }

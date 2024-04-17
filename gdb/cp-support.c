@@ -2214,19 +2214,11 @@ test_cp_remove_params ()
 static void
 first_component_command (const char *arg, int from_tty)
 {
-  int len;  
-  char *prefix; 
-
   if (!arg)
     return;
 
-  len = cp_find_first_component (arg);
-  prefix = (char *) alloca (len + 1);
-
-  memcpy (prefix, arg, len);
-  prefix[len] = '\0';
-
-  gdb_printf ("%s\n", prefix);
+  int len = cp_find_first_component (arg);
+  gdb_printf ("%.*s\n", len, arg);
 }
 
 /* Implement "info vtbl".  */

@@ -2784,13 +2784,8 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	toktype = parse_number (par_state, tokstart, p - tokstart,
 				got_dot | got_e | got_p, &yylval);
 	if (toktype == ERROR)
-	  {
-	    char *err_copy = (char *) alloca (p - tokstart + 1);
-
-	    memcpy (err_copy, tokstart, p - tokstart);
-	    err_copy[p - tokstart] = 0;
-	    error (_("Invalid number \"%s\"."), err_copy);
-	  }
+	  error (_("Invalid number \"%.*s\"."), (int) (p - tokstart),
+		 tokstart);
 	pstate->lexptr = p;
 	return toktype;
       }
@@ -3434,14 +3429,8 @@ c_print_token (FILE *file, int type, YYSTYPE value)
 
     case CHAR:
     case STRING:
-      {
-	char *copy = (char *) alloca (value.tsval.length + 1);
-
-	memcpy (copy, value.tsval.ptr, value.tsval.length);
-	copy[value.tsval.length] = '\0';
-
-	parser_fprintf (file, "tsval<type=%d, %s>", value.tsval.type, copy);
-      }
+      parser_fprintf (file, "tsval<type=%d, %.*s>", value.tsval.type,
+		      value.tsval.length, val.tsval.ptr);
       break;
 
     case NSSTRING:
