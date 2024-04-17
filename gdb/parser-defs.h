@@ -390,4 +390,3 @@ extern bool fits_in_type (int n_sign, const gdb_mpz &n, int type_bits,
 extern void parser_fprintf (FILE *, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
 
 #endif /* PARSER_DEFS_H */
-

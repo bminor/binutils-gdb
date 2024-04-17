@@ -1,5 +1,5 @@
-  /* Include file for stabs debugging format support functions.
-     Copyright (C) 1986-2024 Free Software Foundation, Inc.
+/* Include file for stabs debugging format support functions.
+   Copyright (C) 1986-2024 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

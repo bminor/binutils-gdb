@@ -1,4 +1,3 @@
-
 /* Internal type definitions for GDB.
 
    Copyright (C) 1992-2024 Free Software Foundation, Inc.

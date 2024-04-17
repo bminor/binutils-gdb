@@ -39,4 +39,3 @@ enum gdb_disassembly_flag : unsigned
 DEF_ENUM_FLAGS_TYPE (enum gdb_disassembly_flag, gdb_disassembly_flags);
 
 #endif /* DISASM_FLAGS_H */
-
