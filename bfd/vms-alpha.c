@@ -9834,12 +9834,15 @@ alpha_vms_get_section_contents (bfd *abfd, asection *section,
 				void *buf, file_ptr offset,
 				bfd_size_type count)
 {
-  asection *sec;
-
-  /* Image are easy.  */
-  if (bfd_get_file_flags (abfd) & (EXEC_P | DYNAMIC))
+  /* Handle image sections.  */
+  if (section->filepos != 0
+      || (section->flags & SEC_HAS_CONTENTS) == 0)
     return _bfd_generic_get_section_contents (abfd, section,
 					      buf, offset, count);
+
+  /* A section with a zero filepos implies the section has no direct
+     file backing.  Its contents must be calculated by processing ETIR
+     records.  */
 
   /* Safety check.  */
   if (offset + count < count
@@ -9849,33 +9852,32 @@ alpha_vms_get_section_contents (bfd *abfd, asection *section,
       return false;
     }
 
-  /* If the section is already in memory, just copy it.  */
-  if (section->flags & SEC_IN_MEMORY)
-    {
-      BFD_ASSERT (section->contents != NULL);
-      memcpy (buf, section->contents + offset, count);
-      return true;
-    }
   if (section->size == 0)
     return true;
 
-  /* Alloc in memory and read ETIRs.  */
-  for (sec = abfd->sections; sec; sec = sec->next)
+  /* If we haven't yet read ETIR/EDBG/ETBT records, do so.  */
+  if ((section->flags & SEC_IN_MEMORY) == 0)
     {
-      BFD_ASSERT (sec->contents == NULL);
-
-      if (sec->size != 0 && (sec->flags & SEC_HAS_CONTENTS))
+      /* Alloc memory and read ETIRs.  */
+      for (asection *sec = abfd->sections; sec; sec = sec->next)
 	{
-	  sec->contents = bfd_alloc (abfd, sec->size);
-	  if (sec->contents == NULL)
-	    return false;
+	  if (sec->size != 0
+	      && sec->filepos == 0
+	      && (sec->flags & SEC_HAS_CONTENTS) != 0)
+	    {
+	      BFD_ASSERT (sec->contents == NULL);
+
+	      sec->contents = bfd_zalloc (abfd, sec->size);
+	      sec->flags |= SEC_IN_MEMORY;
+	      if (sec->contents == NULL)
+		return false;
+	    }
 	}
+      if (!alpha_vms_read_sections_content (abfd, NULL))
+	return false;
     }
-  if (!alpha_vms_read_sections_content (abfd, NULL))
-    return false;
-  for (sec = abfd->sections; sec; sec = sec->next)
-    if (sec->contents)
-      sec->flags |= SEC_IN_MEMORY;
+
+  BFD_ASSERT (section->contents != NULL);
   memcpy (buf, section->contents + offset, count);
   return true;
 }
