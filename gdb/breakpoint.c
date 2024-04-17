@@ -14598,7 +14598,7 @@ command" [PROBE_MODIFIER] [LOCATION] [thread THREADNUM]\n\
 \t[-force-condition] [if CONDITION]\n\
 PROBE_MODIFIER shall be present if the command is to be placed in a\n\
 probe point.  Accepted values are `-probe' (for a generic, automatically\n\
-guessed probe type), `-probe-stap' (for a SystemTap probe) or \n\
+guessed probe type), `-probe-stap' (for a SystemTap probe) or\n\
 `-probe-dtrace' (for a DTrace probe).\n\
 LOCATION may be a linespec, address, or explicit location as described\n\
 below.\n\
@@ -15029,7 +15029,7 @@ Do \"help tracepoints\" for info on other tracepoint commands."));
 Set a static tracepoint at location or marker.\n\
 \n\
 strace [LOCATION] [if CONDITION]\n\
-LOCATION may be a linespec, explicit, or address location (described below) \n\
+LOCATION may be a linespec, explicit, or address location (described below)\n\
 or -m MARKER_ID.\n\n\
 If a marker id is specified, probe the marker with that name.  With\n\
 no LOCATION, uses current execution address of the selected stack frame.\n\

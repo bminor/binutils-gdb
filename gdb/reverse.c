@@ -320,12 +320,12 @@ Execute backward until just before selected stack frame is called."));
 
   add_com ("bookmark", class_bookmark, save_bookmark_command, _("\
 Set a bookmark in the program's execution history.\n\
-A bookmark represents a point in the execution history \n\
+A bookmark represents a point in the execution history\n\
 that can be returned to at a later point in the debug session."));
   add_info ("bookmarks", info_bookmarks_command, _("\
 Status of user-settable bookmarks.\n\
-Bookmarks are user-settable markers representing a point in the \n\
-execution history that can be returned to later in the same debug \n\
+Bookmarks are user-settable markers representing a point in the\n\
+execution history that can be returned to later in the same debug\n\
 session."));
   add_cmd ("bookmark", class_bookmark, delete_bookmark_command, _("\
 Delete a bookmark from the bookmark list.\n\
@@ -334,7 +334,7 @@ Argument is a bookmark number or numbers,\n\
 	   &deletelist);
   add_com ("goto-bookmark", class_bookmark, goto_bookmark_command, _("\
 Go to an earlier-bookmarked point in the program's execution history.\n\
-Argument is the bookmark number of a bookmark saved earlier by using \n\
+Argument is the bookmark number of a bookmark saved earlier by using\n\
 the 'bookmark' command, or the special arguments:\n\
   start (beginning of recording)\n\
   end   (end of recording)"));

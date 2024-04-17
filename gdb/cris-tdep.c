@@ -3829,7 +3829,7 @@ _initialize_cris_tdep ()
 			     _("Show the current CRIS version."),
 			     _("\
 Set to 10 for CRISv10 or 32 for CRISv32 if autodetection fails.\n\
-Defaults to 10. "),
+Defaults to 10."),
 			     set_cris_version,
 			     NULL, /* FIXME: i18n: Current CRIS version
 				      is %s.  */

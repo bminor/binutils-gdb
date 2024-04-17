@@ -3077,7 +3077,7 @@ shell that will start the program (specified by the \"$SHELL\" environment\n\
 variable).  Input and output redirection with \">\", \"<\", or \">>\"\n\
 are also allowed.\n\
 \n\
-With no arguments, uses arguments last specified (with \"run\" or \n\
+With no arguments, uses arguments last specified (with \"run\" or\n\
 \"set args\").  To cancel previous arguments and run with no arguments,\n\
 use \"set args\" without arguments.\n\
 \n\
@@ -3303,7 +3303,7 @@ which means to set the ignore count of that breakpoint to N - 1 (so that\n\
 the breakpoint won't break until the Nth time it is reached).\n\
 \n\
 If non-stop mode is enabled, continue only the current thread,\n\
-otherwise all the threads in the program are continued.  To \n\
+otherwise all the threads in the program are continued.  To\n\
 continue all stopped threads in non-stop mode, use the -a option.\n\
 Specifying -a and an ignore count simultaneously is an error."));
   add_com_alias ("c", continue_cmd, class_run, 1);
@@ -3329,7 +3329,7 @@ RUN_ARGS_HELP));
   add_com ("interrupt", class_run, interrupt_command,
 	   _("Interrupt the execution of the debugged program.\n\
 If non-stop mode is enabled, interrupt only the current thread,\n\
-otherwise all the threads in the program are stopped.  To \n\
+otherwise all the threads in the program are stopped.  To\n\
 interrupt all running threads in non-stop mode, use the -a option."));
 
   cmd_list_element *info_registers_cmd

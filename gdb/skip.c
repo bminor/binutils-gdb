@@ -723,7 +723,7 @@ If you don't specify any numbers or ranges, we'll delete all skip entries."),
   add_info ("skip", info_skip_command, _("\
 Display the status of skips.\n\
 Usage: info skip [NUMBER | RANGES]...\n\
-You can specify numbers (e.g. \"info skip 1 3\"), \n\
+You can specify numbers (e.g. \"info skip 1 3\"),\n\
 ranges (e.g. \"info skip 4-8\"), or both (e.g. \"info skip 1 3 4-8\").\n\n\
 If you don't specify any numbers or ranges, we'll show all skips."));
   set_cmd_completer (c, complete_skip_number);
