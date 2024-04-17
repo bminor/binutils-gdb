@@ -37,7 +37,7 @@ set host_binfile [gdb_remote_download host $binfile]
 set res [gdbserver_spawn "${target_binfile}"]
 set gdbserver_protocol [lindex $res 0]
 set gdbserver_gdbport [lindex $res 1]
-set gdbserver_pid [exp_pid -i $server_spawn_id]
+set gdbserver_pid_check [exp_pid -i $server_spawn_id]
 
 set break_linenr [gdb_get_line_number "@@XX@@ Inferior Starting @@XX@@"]
 
@@ -48,9 +48,6 @@ puts $fd \
 "import gdb
 
 def do_gdb_stuff ():
-    gdb.execute ('break $srcfile:$break_linenr')
-    gdb.execute ('continue')
-    gdb.execute ('p server_pid')
     gdb.execute ('continue')
 
 do_gdb_stuff()"
@@ -68,24 +65,32 @@ if {[gdb_spawn_with_cmdline_opts \
 
 gdb_load $binfile
 gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport
-send_gdb "source $host_file1\n"
+
+gdb_test "break $srcfile:$break_linenr"
 
 # Get the gdbserver PID.
 set gdbserver_pid 0
+gdb_test "continue"
+gdb_test_multiple "print server_pid" "get gdbserver PID" {
+    -re -wrap " = ($decimal)" {
+	set gdbserver_pid $expect_out(1,string)
+	pass $gdb_test_name
+    }
+}
+
+if { $gdbserver_pid == 0 } {
+    return
+}
+
+if { ![is_remote target] && $gdbserver_pid != $gdbserver_pid_check } {
+    error "Failed to get correct gdbserver pid"
+}
+
+send_gdb "source $host_file1\n"
+
 
 # Wait for the inferior to start up.
 with_spawn_id $server_spawn_id {
-    gdb_test_multiple "" "get gdbserver PID" {
-	-re " = ($decimal)\r\n" {
-	    set gdbserver_pid $expect_out(1,string)
-	    pass $gdb_test_name
-	}
-    }
-
-    if { $gdbserver_pid == 0 } {
-	return
-    }
-
     gdb_test_multiple "" "ensure inferior is running" {
 	-re "@@XX@@ Inferior Starting @@XX@@" {
 	    pass $gdb_test_name
