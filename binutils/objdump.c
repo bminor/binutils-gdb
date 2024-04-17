@@ -3356,28 +3356,28 @@ disassemble_bytes (struct disassemble_info *inf,
       /* If we see more than SKIP_ZEROES octets of zeroes, we just
 	 print `...'.  */
       if (! disassemble_zeroes)
-	for (; addr_offset * opb + octets < stop_offset * opb; octets++)
+	for (; octets < (stop_offset - addr_offset) * opb; octets++)
 	  if (data[addr_offset * opb + octets] != 0)
 	    break;
       if (! disassemble_zeroes
 	  && (inf->insn_info_valid == 0
 	      || inf->branch_delay_insns == 0)
 	  && (octets >= skip_zeroes
-	      || (addr_offset * opb + octets == stop_offset * opb
+	      || (octets == (stop_offset - addr_offset) * opb
 		  && octets < skip_zeroes_at_end)))
 	{
 	  /* If there are more nonzero octets to follow, we only skip
 	     zeroes in multiples of 4, to try to avoid running over
 	     the start of an instruction which happens to start with
 	     zero.  */
-	  if (addr_offset * opb + octets != stop_offset * opb)
+	  if (octets != (stop_offset - addr_offset) * opb)
 	    octets &= ~3;
 
 	  /* If we are going to display more data, and we are displaying
 	     file offsets, then tell the user how many zeroes we skip
 	     and the file offset from where we resume dumping.  */
 	  if (display_file_offsets
-	      && addr_offset + octets / opb < stop_offset)
+	      && octets / opb < stop_offset - addr_offset)
 	    printf (_("\t... (skipping %lu zeroes, "
 		      "resuming at file offset: 0x%lx)\n"),
 		    (unsigned long) (octets / opb),
@@ -3529,7 +3529,7 @@ disassemble_bytes (struct disassemble_info *inf,
 	      bfd_vma j;
 
 	      octets = octets_per_line;
-	      if (addr_offset + octets / opb > stop_offset)
+	      if (octets / opb > stop_offset - addr_offset)
 		octets = (stop_offset - addr_offset) * opb;
 
 	      for (j = addr_offset * opb; j < addr_offset * opb + octets; ++j)
