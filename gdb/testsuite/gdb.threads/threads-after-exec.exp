@@ -38,7 +38,7 @@ proc do_test { } {
     # leader detection racy") this isn't always thread 1.1.
     set cur_thr [get_integer_valueof "\$_thread" 0]
 
-    if {[istarget *-*-linux*] && [gdb_is_target_native]} {
+    if {[istarget *-*-linux*] && [gdb_protocol_is_native]} {
 	# Confirm there's only one LWP in the list as well, and that
 	# it is bound to the existing GDB thread.
 	set inf_pid [get_inferior_pid]

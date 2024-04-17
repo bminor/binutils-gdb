@@ -406,7 +406,7 @@ with_test_prefix "selected_inferior" {
     gdb_test "py print (gdb.selected_inferior().connection.num)" "1" \
 	"first inferior's connection number, though connection object"
     # Figure out if inf 1 has a native target.
-    set inf_1_is_native [gdb_is_target_native]
+    set inf_1_is_native [gdb_protocol_is_native]
 
     set num [add_inferior "-no-connection"]
     gdb_test "inferior $num" ".*" "switch to inferior $num"

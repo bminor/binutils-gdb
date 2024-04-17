@@ -4754,6 +4754,10 @@ proc gdb_is_target_remote_prompt { prompt_regexp } {
 # Check whether we're testing with the remote or extended-remote
 # targets.
 #
+# This is meant to be used on testcases that connect to targets
+# different from the default board protocol.  For most tests, you can
+# check whether gdb_protocol is "remote" or "extended-remote" instead.
+#
 # NOTE: GDB must be running BEFORE this procedure is called!
 
 proc gdb_is_target_remote { } {
@@ -4764,12 +4768,23 @@ proc gdb_is_target_remote { } {
 
 # Check whether we're testing with the native target.
 #
+# This is meant to be used on testcases that connect to targets
+# different from the default board protocol.  For most tests, you can
+# check whether gdb_protocol is the empty string instead.
+#
 # NOTE: GDB must be running BEFORE this procedure is called!
 
 proc gdb_is_target_native { } {
     global gdb_prompt
 
     return [gdb_is_target_1 "native" ".*native \\(Native process\\).*" "$gdb_prompt $"]
+}
+
+# Returns true if gdb_protocol is empty, indicating use of the native
+# target.
+
+proc gdb_protocol_is_native { } {
+    return [expr {[target_info gdb_protocol] == ""}]
 }
 
 # Like istarget, but checks a list of targets.

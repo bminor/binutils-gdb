@@ -470,16 +470,9 @@ proc_with_prefix test_command_line_attach_run {} {
     global gdb_prompt
     global binfile
 
-    # The --pid option is used to attach to a process using the native target.
-    # Start GDB and run to main just to see what the execution target is, skip
-    # if it's not the native target.
-    clean_restart $binfile
-
-    if { ![runto_main] } {
-	return
-    }
-
-    if { ![gdb_is_target_native] } {
+    # The --pid option is used to attach to a process using the native
+    # target.
+    if { ![gdb_protocol_is_native] } {
 	unsupported "commandline attach run test"
 	return
     }
