@@ -824,9 +824,7 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
 {
   CORE_ADDR pc;
   CORE_ADDR sw_breakpoint_pc;
-#if USE_SIGTRAP_SIGINFO
   siginfo_t siginfo;
-#endif
 
   if (!low_supports_breakpoints ())
     return false;
@@ -846,7 +844,6 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
   scoped_restore_current_thread restore_thread;
   switch_to_thread (get_lwp_thread (lwp));
 
-#if USE_SIGTRAP_SIGINFO
   if (ptrace (PTRACE_GETSIGINFO, lwpid_of (current_thread),
 	      (PTRACE_TYPE_ARG3) 0, &siginfo) == 0)
     {
@@ -888,21 +885,6 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
 	    }
 	}
     }
-#else
-  /* We may have just stepped a breakpoint instruction.  E.g., in
-     non-stop mode, GDB first tells the thread A to step a range, and
-     then the user inserts a breakpoint inside the range.  In that
-     case we need to report the breakpoint PC.  */
-  if ((!lwp->stepping || lwp->stop_pc == sw_breakpoint_pc)
-      && low_breakpoint_at (sw_breakpoint_pc))
-    lwp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
-
-  if (hardware_breakpoint_inserted_here (pc))
-    lwp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
-
-  if (lwp->stop_reason == TARGET_STOPPED_BY_NO_REASON)
-    check_stopped_by_watchpoint (lwp);
-#endif
 
   if (lwp->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT)
     {
@@ -1703,23 +1685,6 @@ linux_process_target::thread_still_has_status_pending (thread_info *thread)
 				lwpid_of (thread));
 	  discard = 1;
 	}
-
-#if !USE_SIGTRAP_SIGINFO
-      else if (lp->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT
-	       && !low_breakpoint_at (pc))
-	{
-	  threads_debug_printf ("previous SW breakpoint of %ld gone",
-				lwpid_of (thread));
-	  discard = 1;
-	}
-      else if (lp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT
-	       && !hardware_breakpoint_inserted_here (pc))
-	{
-	  threads_debug_printf ("previous HW breakpoint of %ld gone",
-				lwpid_of (thread));
-	  discard = 1;
-	}
-#endif
 
       if (discard)
 	{
@@ -5652,7 +5617,7 @@ linux_process_target::stopped_by_sw_breakpoint ()
 bool
 linux_process_target::supports_stopped_by_sw_breakpoint ()
 {
-  return USE_SIGTRAP_SIGINFO;
+  return true;
 }
 
 /* Implement the stopped_by_hw_breakpoint target_ops
@@ -5672,7 +5637,7 @@ linux_process_target::stopped_by_hw_breakpoint ()
 bool
 linux_process_target::supports_stopped_by_hw_breakpoint ()
 {
-  return USE_SIGTRAP_SIGINFO;
+  return true;
 }
 
 /* Implement the supports_hardware_single_step target_ops method.  */

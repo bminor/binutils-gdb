@@ -2633,18 +2633,6 @@ status_callback (struct lwp_info *lp)
 	  discard = 1;
 	}
 
-#if !USE_SIGTRAP_SIGINFO
-      else if (!breakpoint_inserted_here_p (lwp_inferior (lp)->aspace, pc))
-	{
-	  linux_nat_debug_printf ("previous breakpoint of %s, at %s gone",
-				  lp->ptid.to_string ().c_str (),
-				  paddress (current_inferior ()->arch (),
-					    lp->stop_pc));
-
-	  discard = 1;
-	}
-#endif
-
       if (discard)
 	{
 	  linux_nat_debug_printf ("pending event of %s cancelled.",
@@ -2724,9 +2712,7 @@ save_stop_reason (struct lwp_info *lp)
   struct gdbarch *gdbarch;
   CORE_ADDR pc;
   CORE_ADDR sw_bp_pc;
-#if USE_SIGTRAP_SIGINFO
   siginfo_t siginfo;
-#endif
 
   gdb_assert (lp->stop_reason == TARGET_STOPPED_BY_NO_REASON);
   gdb_assert (lp->status != 0);
@@ -2744,7 +2730,6 @@ save_stop_reason (struct lwp_info *lp)
   pc = regcache_read_pc (regcache);
   sw_bp_pc = pc - gdbarch_decr_pc_after_break (gdbarch);
 
-#if USE_SIGTRAP_SIGINFO
   if (linux_nat_get_siginfo (lp->ptid, &siginfo))
     {
       if (siginfo.si_signo == SIGTRAP)
@@ -2787,21 +2772,6 @@ save_stop_reason (struct lwp_info *lp)
 	    }
 	}
     }
-#else
-  if ((!lp->step || lp->stop_pc == sw_bp_pc)
-      && software_breakpoint_inserted_here_p (inf->aspace, sw_bp_pc))
-    {
-      /* The LWP was either continued, or stepped a software
-	 breakpoint instruction.  */
-      lp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
-    }
-
-  if (hardware_breakpoint_inserted_here_p (inf->aspace, pc))
-    lp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
-
-  if (lp->stop_reason == TARGET_STOPPED_BY_NO_REASON)
-    check_stopped_by_watchpoint (lp);
-#endif
 
   if (lp->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT)
     {
@@ -2847,7 +2817,7 @@ linux_nat_target::stopped_by_sw_breakpoint ()
 bool
 linux_nat_target::supports_stopped_by_sw_breakpoint ()
 {
-  return USE_SIGTRAP_SIGINFO;
+  return true;
 }
 
 /* Returns true if the LWP had stopped for a hardware
@@ -2868,7 +2838,7 @@ linux_nat_target::stopped_by_hw_breakpoint ()
 bool
 linux_nat_target::supports_stopped_by_hw_breakpoint ()
 {
-  return USE_SIGTRAP_SIGINFO;
+  return true;
 }
 
 /* Select one LWP out of those that have events pending.  */
@@ -3460,25 +3430,6 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
     select_event_lwp (ptid, &lp, &status);
 
   gdb_assert (lp != NULL);
-
-  /* Now that we've selected our final event LWP, un-adjust its PC if
-     it was a software breakpoint, and we can't reliably support the
-     "stopped by software breakpoint" stop reason.  */
-  if (lp->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT
-      && !USE_SIGTRAP_SIGINFO)
-    {
-      struct regcache *regcache = get_thread_regcache (linux_target, lp->ptid);
-      struct gdbarch *gdbarch = regcache->arch ();
-      int decr_pc = gdbarch_decr_pc_after_break (gdbarch);
-
-      if (decr_pc != 0)
-	{
-	  CORE_ADDR pc;
-
-	  pc = regcache_read_pc (regcache);
-	  regcache_write_pc (regcache, pc + decr_pc);
-	}
-    }
 
   /* We'll need this to determine whether to report a SIGSTOP as
      GDB_SIGNAL_0.  Need to take a copy because resume_clear_callback
