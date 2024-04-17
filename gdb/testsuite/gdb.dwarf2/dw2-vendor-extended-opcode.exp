@@ -30,6 +30,8 @@ Dwarf::assemble $asm_file {
     set DW_LNE_lo_usr 0x80
     set DW_LNE_hi_usr 0xff
 
+    get_func_info main
+
     cu {} {
 	compile_unit {
 	    {language @DW_LANG_C}
@@ -54,7 +56,7 @@ Dwarf::assemble $asm_file {
 	    DW_LNE_user 2 $DW_LNE_hi_usr
 	    DW_LNS_copy
 
-	    DW_LNE_set_address main_label_2
+	    DW_LNE_set_address $main_end
 	    DW_LNE_end_sequence
 	}
     }

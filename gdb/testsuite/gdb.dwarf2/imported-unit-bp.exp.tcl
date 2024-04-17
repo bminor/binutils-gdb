@@ -110,7 +110,7 @@ Dwarf::assemble $asm_file {
 	    DW_LNS_negate_stmt
 	    DW_LNS_copy
 
-	    DW_LNE_set_address line_label_7
+	    DW_LNE_set_address "$func_start + $func_len"
 	    DW_LNE_end_sequence
 	}
     }

@@ -100,7 +100,8 @@ Dwarf::assemble $asm_file {
 	    DW_LNE_set_address main_return
 	    line [gdb_get_line_number "TAG: main return"]
 	    DW_LNS_copy
-	    DW_LNE_set_address end_of_sequence
+
+	    DW_LNE_set_address $main_end
 	    DW_LNE_end_sequence
 	}
     }

@@ -27,6 +27,9 @@ Dwarf::assemble $asm_file {
     declare_labels Llines
     global srcdir subdir srcfile
 
+    get_func_info bar1
+    get_func_info bar2
+
     cu {} {
 	compile_unit {
 	    {language @DW_LANG_C}
@@ -69,7 +72,7 @@ Dwarf::assemble $asm_file {
 	    line 33
 	    DW_LNS_copy
 
-	    DW_LNE_set_address bar1_label_5
+	    DW_LNE_set_address $bar1_end
 	    DW_LNE_end_sequence
 
 
@@ -91,7 +94,7 @@ Dwarf::assemble $asm_file {
 	    line 47
 	    DW_LNS_copy
 
-	    DW_LNE_set_address bar2_label_5
+	    DW_LNE_set_address $bar2_end
 	    DW_LNE_end_sequence
 	}
     }

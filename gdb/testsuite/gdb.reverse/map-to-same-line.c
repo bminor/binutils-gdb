@@ -53,6 +53,5 @@ main (void)
   asm ("main_return: .globl main_return");
   k = j; f3 = f2; str_3 = str_2;    /* TAG: main return */
 
-  asm ("end_of_sequence: .globl end_of_sequence");
   return 0; /* TAG: main return */
 }

@@ -70,7 +70,7 @@ Dwarf::assemble $asm_file {
 	    line [line_for bar_label]
 	    DW_LNS_copy
 
-	    DW_LNE_set_address bar_label_2
+	    DW_LNE_set_address $bar_end
 	    DW_LNE_end_sequence
 	}
     }
