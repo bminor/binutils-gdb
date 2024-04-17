@@ -447,6 +447,14 @@
     { "pop2", { { PUSH2_POP2_Fixup, q_mode}, Eq }, NO_PREFIX },
     { "pop2p", { { PUSH2_POP2_Fixup, q_mode}, Eq }, NO_PREFIX },
   },
+  /* EVEX_W_MAP4_F8_P1_M_1 */
+  {
+    { "uwrmsr",		{ Gq, Eq }, 0 },
+  },
+  /* EVEX_W_MAP4_F8_P3_M_1 */
+  {
+    { "urdmsr",		{ Eq, Gq }, 0 },
+  },
   /* EVEX_W_MAP4_FF_R_6 */
   {
     { "push2", { { PUSH2_POP2_Fixup, q_mode}, Eq }, 0 },
