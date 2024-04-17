@@ -2863,15 +2863,6 @@ proc mi_skip_libstdcxx_probe_tests {} {
     return [skip_libstdcxx_probe_tests_prompt "$mi_gdb_prompt$"]
 }
 
-# Check whether we're testing with the remote or extended-remote
-# targets.
-
-proc mi_is_target_remote {} {
-    global mi_gdb_prompt
-
-    return [gdb_is_target_remote_prompt "$mi_gdb_prompt"]
-}
-
 # Retrieve the value of EXP in the inferior, represented in format
 # specified in FMT (using "printFMT").  DEFAULT is used as fallback if
 # print fails.  TEST is the test message to use.  It can be omitted,
