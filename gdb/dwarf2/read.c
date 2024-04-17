@@ -17469,8 +17469,9 @@ read_str_index (struct dwarf2_cu *cu,
     str_offset = bfd_get_64 (abfd, info_ptr);
   if (str_offset >= str_section->size)
     error (_("Offset from %s pointing outside of"
-	     " .debug_str.dwo section in CU at offset %s [in module %s]"),
-	   form_name, sect_offset_str (cu->header.sect_off), objf_name);
+	     " %s section in CU at offset %s [in module %s]"),
+	   form_name, str_section->get_name (),
+	   sect_offset_str (cu->header.sect_off), objf_name);
   return (const char *) (str_section->buffer + str_offset);
 }
 
