@@ -288,14 +288,14 @@ proc tracepoint_install_in_trace_disabled { trace_type } {
 	global pcreg
 	global gdb_prompt
 
+	# This test only makes sense with remote targets.
+	if ![gdb_protocol_is_remote] {
+	    return
+	}
+
 	clean_restart ${testfile}
 	if ![runto_main] {
 	    return -1
-	}
-
-	# This test only makes sense with the remote target.
-	if ![gdb_is_target_remote] {
-	    return
 	}
 
 	gdb_test_no_output "delete break 1"

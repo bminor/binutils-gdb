@@ -217,7 +217,7 @@ gdb_test "set dprintf-style foobar" "Undefined item: \"foobar\"." \
 # Test that force-disabling the BreakpointCommands RSP feature works
 # as expected.  dprintf relies on support for target-side breakpoint
 # commands --- use it as proxy.
-if [gdb_is_target_remote] {
+if [gdb_protocol_is_remote] {
     gdb_test \
 	"set remote breakpoint-commands-packet off" \
 	"Support for the 'BreakpointCommands' packet on the current remote target is set to \"off\"."

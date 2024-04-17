@@ -126,7 +126,7 @@ mi_gdb_test "-thread-select 2" "\\^done.*" "select first worker thread"
 mi_gdb_test "-gdb-set --thread 3 variable exit_first_thread=1" ".*\\^done" "ask the second thread to exit"
 
 set test "wait for thread exit"
-if { [mi_is_target_remote] } {
+if { [gdb_protocol_is_remote] } {
     # The remote protocol doesn't have support for thread exit
     # notifications.
     unsupported $test

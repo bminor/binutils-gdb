@@ -120,7 +120,7 @@ proc run_test { spawn_inferior } {
     # In both cases the stop arrives while GDB is processing the
     # detach, however, for remote targets GDB doesn't report the stop,
     # while for local targets GDB does report the stop.
-    if {![gdb_is_target_remote]} {
+    if {![gdb_protocol_is_remote]} {
 	set stop_re "\\\[Thread.*exited\\\]\r\n"
     } else {
 	set stop_re ""

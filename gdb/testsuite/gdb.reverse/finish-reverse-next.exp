@@ -52,7 +52,6 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
 }
 
 runto_main
-set target_remote [gdb_is_target_remote]
 
 if [supports_process_record] {
     # Activate process record/replay.

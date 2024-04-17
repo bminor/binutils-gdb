@@ -158,17 +158,17 @@ proc test_sme_core_file { id_start id_end } {
 		continue
 	    }
 
-	    if ![runto_main] {
-		untested "could not run to main"
-		return -1
-	    }
-
 	    # Check if we are talking to a remote target.  If so, bail out,
 	    # as right now remote targets can't communicate vector length (vl
 	    # or svl) changes to gdb via the RSP.  When this restriction is
 	    # lifted, we can remove this guard.
-	    if {[gdb_is_target_remote]} {
+	    if {[gdb_protocol_is_remote]} {
 		unsupported "aarch64 sve/sme tests not supported for remote targets"
+		return -1
+	    }
+
+	    if ![runto_main] {
+		untested "could not run to main"
 		return -1
 	    }
 

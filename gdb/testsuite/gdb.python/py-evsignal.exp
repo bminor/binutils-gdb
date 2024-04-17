@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if {[target_info gdb_protocol] == "remote"
-    || [target_info gdb_protocol] == "extended-remote"} {
+if {[gdb_protocol_is_remote]} {
     # RuntimeError: Could not find event thread
     kfail "python/12966" "Signal Thread 3"
     return -1

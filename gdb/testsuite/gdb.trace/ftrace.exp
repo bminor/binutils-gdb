@@ -189,7 +189,7 @@ proc test_fast_tracepoints {} {
     # fast tracepoints RSP feature, and confirm fast tracepoints
     # can no longer be downloaded.
     set test "fast tracepoint could not be downloaded with the feature disabled"
-    if [gdb_is_target_remote] {
+    if [gdb_protocol_is_remote] {
         gdb_test "set remote fast-tracepoints-packet off"
 
         gdb_test_multiple "tstart" $test {

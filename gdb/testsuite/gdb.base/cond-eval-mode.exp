@@ -58,7 +58,7 @@ gdb_test_multiple $test_target $test_target {
 # We now know that the target supports target-side conditional
 # evaluation.  Now make sure we can force-disable the
 # ConditionalBreakpoints RSP feature.
-if [gdb_is_target_remote] {
+if [gdb_protocol_is_remote] {
     gdb_test \
 	"set remote conditional-breakpoints-packet off" \
 	"Support for the 'ConditionalBreakpoints' packet on the current remote target is set to \"off\"."

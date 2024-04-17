@@ -17,6 +17,14 @@
 
 load_lib aarch64-scalable.exp
 
+require is_aarch64_target
+require allow_aarch64_sve_tests
+require allow_aarch64_sme_tests
+
+# Remote targets can't communicate vector length (vl or svl) changes
+# to GDB via the RSP.
+require !gdb_protocol_is_remote
+
 #
 # Validate the state of registers in the signal frame for various states.
 #
@@ -36,14 +44,6 @@ proc test_sme_registers_sigframe { id_start id_end } {
 
     if ![runto_main] {
 	untested "could not run to main"
-	return -1
-    }
-
-    # Check if we are talking to a remote target.  If so, bail out, as right now
-    # remote targets can't communicate vector length (vl or svl) changes to gdb
-    # via the RSP.  When this restriction is lifted, we can remove this guard.
-    if {[gdb_is_target_remote]} {
-	unsupported "aarch64 sve/sme tests not supported for remote targets"
 	return -1
     }
 
@@ -182,9 +182,5 @@ proc test_sme_registers_sigframe { id_start id_end } {
 	}
     }
 }
-
-require is_aarch64_target
-require allow_aarch64_sve_tests
-require allow_aarch64_sme_tests
 
 test_sme_registers_sigframe $id_start $id_end

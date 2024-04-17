@@ -18,6 +18,14 @@
 
 load_lib aarch64-scalable.exp
 
+require is_aarch64_target
+require allow_aarch64_sve_tests
+require allow_aarch64_sme_tests
+
+# Remote targets can't communicate vector length (vl or svl) changes
+# to GDB via the RSP.
+require !gdb_protocol_is_remote
+
 #
 # Cycle through all ZA registers and pseudo-registers and validate that their
 # contents are available for vector length SVL.
@@ -160,14 +168,6 @@ proc test_sme_registers_available { id_start id_end } {
 	return -1
     }
 
-    # Check if we are talking to a remote target.  If so, bail out, as right now
-    # remote targets can't communicate vector length (vl or svl) changes to gdb
-    # via the RSP.  When this restriction is lifted, we can remove this guard.
-    if {[gdb_is_target_remote]} {
-	unsupported "aarch64 sve/sme tests not supported for remote targets"
-	return -1
-    }
-
     gdb_test_no_output "set print repeats 1"
 
     set prctl_breakpoint "stop 1"
@@ -254,9 +254,5 @@ proc test_sme_registers_available { id_start id_end } {
 	}
     }
 }
-
-require is_aarch64_target
-require allow_aarch64_sve_tests
-require allow_aarch64_sme_tests
 
 test_sme_registers_available $id_start $id_end
