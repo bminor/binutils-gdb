@@ -15682,6 +15682,8 @@ test_memory_tagging_functions ()
   scoped_restore restore_memtag_support_
     = make_scoped_restore (&config->support);
 
+  struct gdbarch *gdbarch = current_inferior ()->arch ();
+
   /* Test memory tagging packet support.  */
   config->support = PACKET_SUPPORT_UNKNOWN;
   SELF_CHECK (remote.supports_memory_tagging () == false);
@@ -15748,6 +15750,71 @@ test_memory_tagging_functions ()
   create_store_memtags_request (packet, 0xdeadbeef, 255, 1, tags);
   SELF_CHECK (memcmp (packet.data (), expected.c_str (),
 		      expected.length ()) == 0);
+
+  /* Test creating a qIsAddressTagged request.  */
+  expected = "qIsAddressTagged:deadbeef";
+  create_is_address_tagged_request (gdbarch, packet, 0xdeadbeef);
+  SELF_CHECK (strcmp (packet.data (), expected.c_str ()) == 0);
+
+  /* Test error reply on qIsAddressTagged request.  */
+  reply = "E00";
+  strcpy (packet.data (), reply.c_str ());
+  /* is_tagged must not change, hence it's tested too.  */
+  bool is_tagged = false;
+  SELF_CHECK (check_is_address_tagged_reply (&remote, packet, is_tagged) ==
+	      false);
+  SELF_CHECK (is_tagged == false);
+
+  /* Test 'tagged' as reply.  */
+  reply = "01";
+  strcpy (packet.data (), reply.c_str ());
+  /* Because the byte is 01, is_tagged should be set to true.  */
+  is_tagged = false;
+  SELF_CHECK (check_is_address_tagged_reply (&remote, packet, is_tagged) ==
+	      true);
+  SELF_CHECK (is_tagged == true);
+
+  /* Test 'not tagged' as reply.  */
+  reply = "00";
+  strcpy (packet.data (), reply.c_str ());
+  /* Because the byte is 00, is_tagged should be set to false.  */
+  is_tagged = true;
+  SELF_CHECK (check_is_address_tagged_reply (&remote, packet, is_tagged) ==
+	      true);
+  SELF_CHECK (is_tagged == false);
+
+  /* Test an invalid reply (neither 00 nor 01).  */
+  reply = "04";
+  strcpy (packet.data (), reply.c_str ());
+  /* Because the byte is invalid is_tagged must not change.  */
+  is_tagged = false;
+  SELF_CHECK (check_is_address_tagged_reply (&remote, packet, is_tagged) ==
+	      false);
+  SELF_CHECK (is_tagged == false);
+
+  /* Test malformed reply of incorrect length.  */
+  reply = "0104A590001234006";
+  strcpy (packet.data (), reply.c_str ());
+  /* Because this is a malformed reply is_tagged must not change.  */
+  is_tagged = false;
+  SELF_CHECK (check_is_address_tagged_reply (&remote, packet, is_tagged) ==
+	      false);
+  SELF_CHECK (is_tagged == false);
+
+  /* Test empty reply.  */
+  reply = "";
+  strcpy (packet.data (), reply.c_str ());
+  /* is_tagged must not change, hence it's tested too.  */
+  is_tagged = true;
+  /* On the previous tests, qIsAddressTagged packet was auto detected and set
+     as supported.  But an empty reply means the packet is unsupported, so for
+     testing the empty reply the support is reset to unknown state, otherwise
+     packet_ok will complain.   */
+  remote.m_features.m_protocol_packets[PACKET_qIsAddressTagged].support =
+    PACKET_SUPPORT_UNKNOWN;
+  SELF_CHECK (check_is_address_tagged_reply (&remote, packet, is_tagged) ==
+	      false);
+  SELF_CHECK (is_tagged == true);
 }
 
 static void
