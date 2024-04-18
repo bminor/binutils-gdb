@@ -110,6 +110,8 @@ public:
   /* Write allocation tags to memory via PTRACE.  */
   bool store_memtags (CORE_ADDR address, size_t len,
 		      const gdb::byte_vector &tags, int type) override;
+  /* Check if an address is tagged.  */
+  bool is_address_tagged (gdbarch *gdbarch, CORE_ADDR address) override;
 };
 
 static aarch64_linux_nat_target the_aarch64_linux_nat_target;
@@ -1069,6 +1071,19 @@ aarch64_linux_nat_target::store_memtags (CORE_ADDR address, size_t len,
     return aarch64_mte_store_memtags (tid, address, len, tags);
 
   return false;
+}
+
+bool
+aarch64_linux_nat_target::is_address_tagged (gdbarch *gdbarch, CORE_ADDR address)
+{
+  /* Here we take a detour going to linux-tdep layer to read the smaps file,
+     because currently there isn't a better way to get that information to
+     check if a given address is tagged or not.
+
+     In the future, if this check is made, for instance, available via PTRACE,
+     it will be possible to drop the smaps path in favor of a PTRACE one for
+     this check.  */
+  return gdbarch_tagged_address_p (gdbarch, address);
 }
 
 void _initialize_aarch64_linux_nat ();

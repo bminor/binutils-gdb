@@ -707,8 +707,8 @@ extern void set_gdbarch_memtag_to_string (struct gdbarch *gdbarch, gdbarch_memta
 /* Return true if ADDRESS contains a tag and false otherwise.  ADDRESS
    must be either a pointer or a reference type. */
 
-typedef bool (gdbarch_tagged_address_p_ftype) (struct gdbarch *gdbarch, struct value *address);
-extern bool gdbarch_tagged_address_p (struct gdbarch *gdbarch, struct value *address);
+typedef bool (gdbarch_tagged_address_p_ftype) (struct gdbarch *gdbarch, CORE_ADDR address);
+extern bool gdbarch_tagged_address_p (struct gdbarch *gdbarch, CORE_ADDR address);
 extern void set_gdbarch_tagged_address_p (struct gdbarch *gdbarch, gdbarch_tagged_address_p_ftype *tagged_address_p);
 
 /* Return true if the tag from ADDRESS matches the memory tag for that

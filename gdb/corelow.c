@@ -109,6 +109,10 @@ public:
   bool fetch_memtags (CORE_ADDR address, size_t len,
 		      gdb::byte_vector &tags, int type) override;
 
+  /* If the architecture supports it, check if ADDRESS is within a memory range
+     mapped with tags.  For example,  MTE tags for AArch64.  */
+  bool is_address_tagged (gdbarch *gdbarch, CORE_ADDR address) override;
+
   x86_xsave_layout fetch_x86_xsave_layout () override;
 
   /* A few helpers.  */
@@ -1408,6 +1412,12 @@ core_target::fetch_memtags (CORE_ADDR address, size_t len,
   }
 
   return false;
+}
+
+bool
+core_target::is_address_tagged (gdbarch *gdbarch, CORE_ADDR address)
+{
+  return gdbarch_tagged_address_p (gdbarch, address);
 }
 
 /* Implementation of the "fetch_x86_xsave_layout" target_ops method.  */

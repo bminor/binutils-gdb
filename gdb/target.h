@@ -1334,6 +1334,10 @@ struct target_ops
 				const gdb::byte_vector &tags, int type)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
+    /* Returns true if ADDRESS is tagged, otherwise returns false.  */
+    virtual bool is_address_tagged (gdbarch *gdbarch, CORE_ADDR address)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
+
     /* Return the x86 XSAVE extended state area layout.  */
     virtual x86_xsave_layout fetch_x86_xsave_layout ()
       TARGET_DEFAULT_RETURN (x86_xsave_layout ());
@@ -2316,6 +2320,8 @@ extern bool target_fetch_memtags (CORE_ADDR address, size_t len,
 
 extern bool target_store_memtags (CORE_ADDR address, size_t len,
 				  const gdb::byte_vector &tags, int type);
+
+extern bool target_is_address_tagged (gdbarch *gdbarch, CORE_ADDR address);
 
 extern x86_xsave_layout target_fetch_x86_xsave_layout ();
 

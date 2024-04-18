@@ -1084,6 +1084,8 @@ public:
   bool store_memtags (CORE_ADDR address, size_t len,
 		      const gdb::byte_vector &tags, int type) override;
 
+  bool is_address_tagged (gdbarch *gdbarch, CORE_ADDR address) override;
+
 public: /* Remote specific methods.  */
 
   void remote_download_command_source (int num, ULONGEST addr,
@@ -15572,6 +15574,14 @@ remote_target::store_memtags (CORE_ADDR address, size_t len,
 
   /* Verify if the request was successful.  */
   return packet_check_result (rs->buf, true).status () == PACKET_OK;
+}
+
+/* Implement the "is_address_tagged" target_ops method.  */
+
+bool
+remote_target::is_address_tagged (gdbarch *gdbarch, CORE_ADDR address)
+{
+  return gdbarch_tagged_address_p (gdbarch, address);
 }
 
 /* Return true if remote target T is non-stop.  */

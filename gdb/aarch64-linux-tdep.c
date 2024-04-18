@@ -2451,17 +2451,13 @@ aarch64_mte_get_atag (CORE_ADDR address)
 /* Implement the tagged_address_p gdbarch method.  */
 
 static bool
-aarch64_linux_tagged_address_p (struct gdbarch *gdbarch, struct value *address)
+aarch64_linux_tagged_address_p (struct gdbarch *gdbarch, CORE_ADDR address)
 {
-  gdb_assert (address != nullptr);
-
-  CORE_ADDR addr = value_as_address (address);
-
   /* Remove the top byte for the memory range check.  */
-  addr = gdbarch_remove_non_address_bits (gdbarch, addr);
+  address = gdbarch_remove_non_address_bits (gdbarch, address);
 
   /* Check if the page that contains ADDRESS is mapped with PROT_MTE.  */
-  if (!linux_address_in_memtag_page (addr))
+  if (!linux_address_in_memtag_page (address))
     return false;
 
   /* We have a valid tag in the top byte of the 64-bit address.  */

@@ -796,6 +796,12 @@ target_store_memtags (CORE_ADDR address, size_t len,
   return current_inferior ()->top_target ()->store_memtags (address, len, tags, type);
 }
 
+bool
+target_is_address_tagged (gdbarch *gdbarch, CORE_ADDR address)
+{
+  return current_inferior ()->top_target ()->is_address_tagged (gdbarch, address);
+}
+
 x86_xsave_layout
 target_fetch_x86_xsave_layout ()
 {

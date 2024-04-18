@@ -197,6 +197,7 @@ struct dummy_target : public target_ops
   bool supports_memory_tagging () override;
   bool fetch_memtags (CORE_ADDR arg0, size_t arg1, gdb::byte_vector &arg2, int arg3) override;
   bool store_memtags (CORE_ADDR arg0, size_t arg1, const gdb::byte_vector &arg2, int arg3) override;
+  bool is_address_tagged (gdbarch *arg0, CORE_ADDR arg1) override;
   x86_xsave_layout fetch_x86_xsave_layout () override;
 };
 
@@ -373,6 +374,7 @@ struct debug_target : public target_ops
   bool supports_memory_tagging () override;
   bool fetch_memtags (CORE_ADDR arg0, size_t arg1, gdb::byte_vector &arg2, int arg3) override;
   bool store_memtags (CORE_ADDR arg0, size_t arg1, const gdb::byte_vector &arg2, int arg3) override;
+  bool is_address_tagged (gdbarch *arg0, CORE_ADDR arg1) override;
   x86_xsave_layout fetch_x86_xsave_layout () override;
 };
 
@@ -4556,6 +4558,34 @@ debug_target::store_memtags (CORE_ADDR arg0, size_t arg1, const gdb::byte_vector
   target_debug_print_const_gdb_byte_vector_r (arg2);
   gdb_puts (", ", gdb_stdlog);
   target_debug_print_int (arg3);
+  gdb_puts (") = ", gdb_stdlog);
+  target_debug_print_bool (result);
+  gdb_puts ("\n", gdb_stdlog);
+  return result;
+}
+
+bool
+target_ops::is_address_tagged (gdbarch *arg0, CORE_ADDR arg1)
+{
+  return this->beneath ()->is_address_tagged (arg0, arg1);
+}
+
+bool
+dummy_target::is_address_tagged (gdbarch *arg0, CORE_ADDR arg1)
+{
+  tcomplain ();
+}
+
+bool
+debug_target::is_address_tagged (gdbarch *arg0, CORE_ADDR arg1)
+{
+  gdb_printf (gdb_stdlog, "-> %s->is_address_tagged (...)\n", this->beneath ()->shortname ());
+  bool result
+    = this->beneath ()->is_address_tagged (arg0, arg1);
+  gdb_printf (gdb_stdlog, "<- %s->is_address_tagged (", this->beneath ()->shortname ());
+  target_debug_print_gdbarch_p (arg0);
+  gdb_puts (", ", gdb_stdlog);
+  target_debug_print_CORE_ADDR (arg1);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);

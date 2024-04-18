@@ -3232,7 +3232,7 @@ set_gdbarch_memtag_to_string (struct gdbarch *gdbarch,
 }
 
 bool
-gdbarch_tagged_address_p (struct gdbarch *gdbarch, struct value *address)
+gdbarch_tagged_address_p (struct gdbarch *gdbarch, CORE_ADDR address)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->tagged_address_p != NULL);

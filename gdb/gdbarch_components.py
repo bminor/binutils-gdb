@@ -1267,7 +1267,7 @@ must be either a pointer or a reference type.
 """,
     type="bool",
     name="tagged_address_p",
-    params=[("struct value *", "address")],
+    params=[("CORE_ADDR", "address")],
     predefault="default_tagged_address_p",
     invalid=False,
 )
