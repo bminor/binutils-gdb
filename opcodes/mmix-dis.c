@@ -117,6 +117,7 @@ initialize_mmix_dis_info (struct disassemble_info *info)
 		  && minfop->reg_name[syms[i]->value] == NULL)
 		minfop->reg_name[syms[i]->value] = syms[i]->name;
 	    }
+	  free (syms);
 	}
     }
 
