@@ -42559,6 +42559,11 @@ number.  In almost all cases, the protocol does not specify the
 meaning of the error numbers; @value{GDBN} usually ignores the
 numbers, or displays them to the user without further interpretation.
 
+@anchor{textual error reply}
+@item @samp{E.@var{errtext}}
+An error has occurred; @var{errtext} is the textual error message,
+encoded in @sc{ascii}.
+
 @end table
 
 @node Packets
@@ -42884,6 +42889,10 @@ Memory contents; each byte is transmitted as a two-digit hexadecimal number.
 The reply may contain fewer addressable memory units than requested if the
 server was able to read only part of the region of memory.
 @end table
+
+Unlike most packets, this packet does not support
+@samp{E.@var{errtext}}-style textual error replies (@pxref{textual
+error reply}).
 
 @item M @var{addr},@var{length}:@var{XX@dots{}}
 @cindex @samp{M} packet
@@ -44391,6 +44400,10 @@ A command response with no output.
 A command response with the hex encoded output string @var{OUTPUT}.
 @end table
 
+Unlike most packets, this packet does not support
+@samp{E.@var{errtext}}-style textual error replies (@pxref{textual
+error reply}).
+
 (Note that the @code{qRcmd} packet's name is separated from the
 command by a @samp{,}, not a @samp{:}, contrary to the naming
 conventions above.  Please don't use this packet as a model for new
@@ -45447,8 +45460,6 @@ Reply:
 @table @samp
 @item OK
 Branch tracing has been enabled.
-@item E.errtext
-A badly formed request or an error was encountered.
 @end table
 
 @item Qbtrace:pt
@@ -45458,8 +45469,6 @@ Reply:
 @table @samp
 @item OK
 Branch tracing has been enabled.
-@item E.errtext
-A badly formed request or an error was encountered.
 @end table
 
 @item Qbtrace:off
@@ -45469,8 +45478,6 @@ Reply:
 @table @samp
 @item OK
 Branch tracing has been disabled.
-@item E.errtext
-A badly formed request or an error was encountered.
 @end table
 
 @item Qbtrace-conf:bts:size=@var{value}
@@ -45481,8 +45488,6 @@ Reply:
 @table @samp
 @item OK
 The ring buffer size has been set.
-@item E.errtext
-A badly formed request or an error was encountered.
 @end table
 
 @item Qbtrace-conf:pt:size=@var{value}
@@ -45493,8 +45498,6 @@ Reply:
 @table @samp
 @item OK
 The ring buffer size has been set.
-@item E.errtext
-A badly formed request or an error was encountered.
 @end table
 
 @end table
