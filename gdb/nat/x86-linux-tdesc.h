@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef NAT_X86_LINUX_TDESC_H
-#define NAT_X86_LINUX_TDESC_H
+#ifndef GDB_NAT_X86_LINUX_TDESC_H
+#define GDB_NAT_X86_LINUX_TDESC_H
 
 #include "gdbsupport/function-view.h"
 
@@ -47,4 +47,4 @@ struct x86_xsave_layout;
 extern const target_desc *x86_linux_tdesc_for_tid
   (int tid, uint64_t *xcr0_storage, x86_xsave_layout *xsave_layout_storage);
 
-#endif /* NAT_X86_LINUX_TDESC_H */
+#endif /* GDB_NAT_X86_LINUX_TDESC_H */

@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef REMOTE_H
-#define REMOTE_H
+#ifndef GDB_REMOTE_H
+#define GDB_REMOTE_H
 
 #include "remote-notif.h"
 
@@ -126,4 +126,4 @@ extern bool is_remote_target (process_stratum_target *target);
 
 extern bool remote_register_is_expedited (int regnum);
 
-#endif
+#endif /* GDB_REMOTE_H */

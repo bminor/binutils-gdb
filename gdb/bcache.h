@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef BCACHE_H
-#define BCACHE_H 1
+#ifndef GDB_BCACHE_H
+#define GDB_BCACHE_H
 
 /* A bcache is a data structure for factoring out duplication in
    read-only structures.  You give the bcache some string of bytes S.
@@ -230,4 +230,4 @@ private:
 
 } /* namespace gdb */
 
-#endif /* BCACHE_H */
+#endif /* GDB_BCACHE_H */

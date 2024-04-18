@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ANNOTATE_H
-#define ANNOTATE_H
+#ifndef GDB_ANNOTATE_H
+#define GDB_ANNOTATE_H
 
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -140,4 +140,4 @@ extern void annotate_array_section_end (void);
 extern void (*deprecated_annotate_signalled_hook) (void);
 extern void (*deprecated_annotate_signal_hook) (void);
 
-#endif /* ANNOTATE_H */
+#endif /* GDB_ANNOTATE_H */

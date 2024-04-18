@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef MI_MI_OUT_H
-#define MI_MI_OUT_H
+#ifndef GDB_MI_MI_OUT_H
+#define GDB_MI_MI_OUT_H
 
 #include "ui-out.h"
 #include <vector>
@@ -153,4 +153,4 @@ std::unique_ptr<mi_ui_out> mi_out_new (const char *mi_version);
 void mi_out_put (ui_out *uiout, struct ui_file *stream);
 void mi_out_rewind (ui_out *uiout);
 
-#endif /* MI_MI_OUT_H */
+#endif /* GDB_MI_MI_OUT_H */

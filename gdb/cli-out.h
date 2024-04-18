@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef CLI_OUT_H
-#define CLI_OUT_H
+#ifndef GDB_CLI_OUT_H
+#define GDB_CLI_OUT_H
 
 #include "ui-out.h"
 #include <chrono>
@@ -113,4 +113,4 @@ private:
 
 extern void cli_display_match_list (char **matches, int len, int max);
 
-#endif
+#endif /* GDB_CLI_OUT_H */

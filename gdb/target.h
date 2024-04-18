@@ -41,8 +41,8 @@
    dummy target at the bottom stratum, so we can call the target
    methods without checking them.  */
 
-#if !defined (TARGET_H)
-#define TARGET_H
+#ifndef GDB_TARGET_H
+#define GDB_TARGET_H
 
 struct objfile;
 struct ui_file;
@@ -2629,4 +2629,4 @@ extern void target_prepare_to_generate_core (void);
 /* See to_done_generating_core.  */
 extern void target_done_generating_core (void);
 
-#endif /* !defined (TARGET_H) */
+#endif /* GDB_TARGET_H */

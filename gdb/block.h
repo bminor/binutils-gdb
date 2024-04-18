@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef BLOCK_H
-#define BLOCK_H
+#ifndef GDB_BLOCK_H
+#define GDB_BLOCK_H
 
 #include "dictionary.h"
 #include "gdbsupport/array-view.h"
@@ -654,4 +654,4 @@ extern struct symbol *block_find_symbol (const struct block *block,
 struct blockranges *make_blockranges (struct objfile *objfile,
 				      const std::vector<blockrange> &rangevec);
 
-#endif /* BLOCK_H */
+#endif /* GDB_BLOCK_H */

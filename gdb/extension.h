@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef EXTENSION_H
-#define EXTENSION_H
+#ifndef GDB_EXTENSION_H
+#define GDB_EXTENSION_H
 
 #include "mi/mi-cmds.h"
 #include "gdbsupport/array-view.h"
@@ -483,4 +483,4 @@ extern bool check_quit_flag ();
 
 extern void set_quit_flag ();
 
-#endif /* EXTENSION_H */
+#endif /* GDB_EXTENSION_H */

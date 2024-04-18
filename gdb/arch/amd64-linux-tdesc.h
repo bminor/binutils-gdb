@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ARCH_AMD64_LINUX_TDESC_H
-#define ARCH_AMD64_LINUX_TDESC_H
+#ifndef GDB_ARCH_AMD64_LINUX_TDESC_H
+#define GDB_ARCH_AMD64_LINUX_TDESC_H
 
 struct target_desc;
 
@@ -27,4 +27,4 @@ struct target_desc;
 extern const target_desc *amd64_linux_read_description (uint64_t xcr0,
 							bool is_x32);
 
-#endif /* ARCH_AMD64_LINUX_TDESC_H */
+#endif /* GDB_ARCH_AMD64_LINUX_TDESC_H */

@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TOP_H
-#define TOP_H
+#ifndef GDB_TOP_H
+#define GDB_TOP_H
 
 #include "gdbsupport/event-loop.h"
 #include "gdbsupport/next-iterator.h"
@@ -133,4 +133,4 @@ extern bool check_quiet_mode ();
 
 extern void unbuffer_stream (FILE *stream);
 
-#endif
+#endif /* GDB_TOP_H */

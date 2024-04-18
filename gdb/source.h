@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef SOURCE_H
-#define SOURCE_H
+#ifndef GDB_SOURCE_H
+#define GDB_SOURCE_H
 
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/scoped_fd.h"
@@ -223,4 +223,4 @@ extern void forget_cached_source_info (void);
    need to would make things slower than necessary.  */
 extern void select_source_symtab ();
 
-#endif
+#endif /* GDB_SOURCE_H */

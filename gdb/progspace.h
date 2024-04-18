@@ -18,8 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
-#ifndef PROGSPACE_H
-#define PROGSPACE_H
+#ifndef GDB_PROGSPACE_H
+#define GDB_PROGSPACE_H
 
 #include "target.h"
 #include "gdb_bfd.h"
@@ -424,4 +424,4 @@ extern address_space_ref_ptr maybe_new_address_space ();
    mappings.  */
 extern void update_address_spaces (void);
 
-#endif
+#endif /* GDB_PROGSPACE_H */

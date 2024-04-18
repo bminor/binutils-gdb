@@ -20,8 +20,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (LANGUAGE_H)
-#define LANGUAGE_H 1
+#ifndef GDB_LANGUAGE_H
+#define GDB_LANGUAGE_H
 
 #include "symtab.h"
 #include "gdbsupport/function-view.h"
@@ -936,4 +936,4 @@ private:
   enum language m_lang;
 };
 
-#endif /* defined (LANGUAGE_H) */
+#endif /* GDB_LANGUAGE_H */

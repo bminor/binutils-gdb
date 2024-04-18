@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (OBJFILES_H)
-#define OBJFILES_H
+#ifndef GDB_OBJFILES_H
+#define GDB_OBJFILES_H
 
 #include "gdbsupport/gdb_obstack.h"
 #include "objfile-flags.h"
@@ -1061,4 +1061,4 @@ extern void objfile_register_static_link
 extern const struct dynamic_prop *objfile_lookup_static_link
   (struct objfile *objfile, const struct block *block);
 
-#endif /* !defined (OBJFILES_H) */
+#endif /* GDB_OBJFILES_H */

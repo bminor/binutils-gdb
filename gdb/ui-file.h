@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef UI_FILE_H
-#define UI_FILE_H
+#ifndef GDB_UI_FILE_H
+#define GDB_UI_FILE_H
 
 #include <string>
 #include "ui-style.h"
@@ -467,4 +467,4 @@ private:
   bool m_needs_timestamp = true;
 };
 
-#endif
+#endif /* GDB_UI_FILE_H */

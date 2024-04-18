@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TARGET_DESCRIPTIONS_H
-#define TARGET_DESCRIPTIONS_H 1
+#ifndef GDB_TARGET_DESCRIPTIONS_H
+#define GDB_TARGET_DESCRIPTIONS_H
 #include "gdbsupport/tdesc.h"
 #include "gdbarch.h"
 
@@ -236,4 +236,4 @@ void record_xml_tdesc (const char *xml_file,
 }
 #endif
 
-#endif /* TARGET_DESCRIPTIONS_H */
+#endif /* GDB_TARGET_DESCRIPTIONS_H */

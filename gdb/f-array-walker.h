@@ -18,8 +18,8 @@
 /* Support classes to wrap up the process of iterating over a
    multi-dimensional Fortran array.  */
 
-#ifndef F_ARRAY_WALKER_H
-#define F_ARRAY_WALKER_H
+#ifndef GDB_F_ARRAY_WALKER_H
+#define GDB_F_ARRAY_WALKER_H
 
 #include "gdbtypes.h"
 #include "f-lang.h"
@@ -298,4 +298,4 @@ private:
   int m_nss;
 };
 
-#endif /* F_ARRAY_WALKER_H */
+#endif /* GDB_F_ARRAY_WALKER_H */

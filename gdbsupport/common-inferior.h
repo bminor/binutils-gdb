@@ -18,8 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_COMMON_INFERIOR_H
-#define COMMON_COMMON_INFERIOR_H
+#ifndef GDBSUPPORT_COMMON_INFERIOR_H
+#define GDBSUPPORT_COMMON_INFERIOR_H
 
 #include "gdbsupport/array-view.h"
 
@@ -57,4 +57,4 @@ extern bool startup_with_shell;
 extern std::string
 construct_inferior_arguments (gdb::array_view<char * const>);
 
-#endif /* COMMON_COMMON_INFERIOR_H */
+#endif /* GDBSUPPORT_COMMON_INFERIOR_H */

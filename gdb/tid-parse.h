@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TID_PARSE_H
-#define TID_PARSE_H
+#ifndef GDB_TID_PARSE_H
+#define GDB_TID_PARSE_H
 
 #include "cli/cli-utils.h"
 
@@ -194,4 +194,4 @@ private:
 extern int tid_is_in_list (const char *list, int default_inferior,
 			   int inf_num, int thr_num);
 
-#endif /* TID_PARSE_H */
+#endif /* GDB_TID_PARSE_H */

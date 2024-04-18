@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef PSYMTAB_H
-#define PSYMTAB_H
+#ifndef GDB_PSYMTAB_H
+#define GDB_PSYMTAB_H
 
 #include "objfiles.h"
 #include <string_view>
@@ -688,4 +688,4 @@ private:
   std::shared_ptr<psymtab_storage> m_partial_symtabs;
 };
 
-#endif /* PSYMTAB_H */
+#endif /* GDB_PSYMTAB_H */

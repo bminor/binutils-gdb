@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_BTRACE_COMMON_H
-#define COMMON_BTRACE_COMMON_H
+#ifndef GDBSUPPORT_BTRACE_COMMON_H
+#define GDBSUPPORT_BTRACE_COMMON_H
 
 /* Branch tracing (btrace) is a per-thread control-flow execution trace of the
    inferior.  For presentation purposes, the branch trace is represented as a
@@ -285,4 +285,4 @@ extern const char *btrace_format_short_string (enum btrace_format format);
 extern int btrace_data_append (struct btrace_data *dst,
 			       const struct btrace_data *src);
 
-#endif /* COMMON_BTRACE_COMMON_H */
+#endif /* GDBSUPPORT_BTRACE_COMMON_H */

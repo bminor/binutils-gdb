@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef AMD64_LINUX_TDEP_H
-#define AMD64_LINUX_TDEP_H
+#ifndef GDB_AMD64_LINUX_TDEP_H
+#define GDB_AMD64_LINUX_TDEP_H
 
 /* Like for i386 GNU/Linux, there is an extra "register"
    used to control syscall restarting.  */
@@ -586,4 +586,4 @@ enum amd64_x32_syscall {
   amd64_x32_sys_getsockopt = (amd64_x32_syscall_bit + 542),
 };
 
-#endif /* amd64-linux-tdep.h */
+#endif /* GDB_AMD64_LINUX_TDEP_H */

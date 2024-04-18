@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef NAT_FORK_INFERIOR_H
-#define NAT_FORK_INFERIOR_H
+#ifndef GDB_NAT_FORK_INFERIOR_H
+#define GDB_NAT_FORK_INFERIOR_H
 
 #include <string>
 #include "gdbsupport/function-view.h"
@@ -92,4 +92,4 @@ extern void gdb_flush_out_err ();
    function does not return.  */
 [[noreturn]] extern void trace_start_error_with_name (const char *string);
 
-#endif /* NAT_FORK_INFERIOR_H */
+#endif /* GDB_NAT_FORK_INFERIOR_H */

@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (GDBTYPES_H)
-#define GDBTYPES_H 1
+#ifndef GDB_GDBTYPES_H
+#define GDB_GDBTYPES_H
 
 /* * \page gdbtypes GDB Types
 
@@ -2825,4 +2825,4 @@ extern unsigned int overload_debug;
 
 extern bool is_nocall_function (const struct type *type);
 
-#endif /* GDBTYPES_H */
+#endif /* GDB_GDBTYPES_H */

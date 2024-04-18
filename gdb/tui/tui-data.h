@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TUI_TUI_DATA_H
-#define TUI_TUI_DATA_H
+#ifndef GDB_TUI_TUI_DATA_H
+#define GDB_TUI_TUI_DATA_H
 
 #include "tui/tui.h"
 #include "gdb_curses.h"
@@ -297,4 +297,4 @@ extern struct tui_win_info *tui_prev_win (struct tui_win_info *);
 
 extern unsigned int tui_tab_width;
 
-#endif /* TUI_TUI_DATA_H */
+#endif /* GDB_TUI_TUI_DATA_H */

@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ARCH_UTILS_H
-#define ARCH_UTILS_H
+#ifndef GDB_ARCH_UTILS_H
+#define GDB_ARCH_UTILS_H
 
 #include "gdbarch.h"
 
@@ -325,4 +325,4 @@ extern enum return_value_convention default_gdbarch_return_value
       struct regcache *regcache, struct value **read_value,
       const gdb_byte *writebuf);
 
-#endif /* ARCH_UTILS_H */
+#endif /* GDB_ARCH_UTILS_H */

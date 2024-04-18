@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef FILENAME_SEEN_CACHE_H
-#define FILENAME_SEEN_CACHE_H
+#ifndef GDB_FILENAME_SEEN_CACHE_H
+#define GDB_FILENAME_SEEN_CACHE_H
 
 #include "gdbsupport/unordered_set.h"
 #include "filenames.h"
@@ -61,4 +61,4 @@ private:
   gdb::unordered_set<const char *, hash, eq> m_tab;
 };
 
-#endif /* FILENAME_SEEN_CACHE_H */
+#endif /* GDB_FILENAME_SEEN_CACHE_H */

@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef NAT_LINUX_NAT_H
-#define NAT_LINUX_NAT_H
+#ifndef GDB_NAT_LINUX_NAT_H
+#define GDB_NAT_LINUX_NAT_H
 
 #include "gdbsupport/function-view.h"
 #include "target/waitstatus.h"
@@ -94,4 +94,4 @@ extern void linux_stop_lwp (struct lwp_info *lwp);
 
 extern int lwp_is_stepping (struct lwp_info *lwp);
 
-#endif /* NAT_LINUX_NAT_H */
+#endif /* GDB_NAT_LINUX_NAT_H */

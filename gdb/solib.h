@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef SOLIB_H
-#define SOLIB_H
+#ifndef GDB_SOLIB_H
+#define GDB_SOLIB_H
 
 /* Forward decl's for prototypes */
 struct solib;
@@ -136,4 +136,4 @@ extern void update_solib_breakpoints (void);
 
 extern void handle_solib_event (void);
 
-#endif /* SOLIB_H */
+#endif /* GDB_SOLIB_H */

@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ARCH_I386_LINUX_TDESC_H
-#define ARCH_I386_LINUX_TDESC_H
+#ifndef GDB_ARCH_I386_LINUX_TDESC_H
+#define GDB_ARCH_I386_LINUX_TDESC_H
 
 struct target_desc;
 
@@ -26,4 +26,4 @@ struct target_desc;
 
 extern const struct target_desc *i386_linux_read_description (uint64_t xcr0);
 
-#endif /* ARCH_I386_LINUX_TDESC_H */
+#endif /* GDB_ARCH_I386_LINUX_TDESC_H */

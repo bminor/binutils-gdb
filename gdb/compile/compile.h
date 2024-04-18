@@ -15,8 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMPILE_COMPILE_H
-#define COMPILE_COMPILE_H
+#ifndef GDB_COMPILE_COMPILE_H
+#define GDB_COMPILE_COMPILE_H
 
 #include "gcc-c-interface.h"
 #include "gdbsupport/unordered_map.h"
@@ -262,4 +262,4 @@ extern void compile_print_value (struct value *val, void *data_voidp);
 /* Command element for the 'compile' command.  */
 extern cmd_list_element *compile_cmd_element;
 
-#endif /* COMPILE_COMPILE_H */
+#endif /* GDB_COMPILE_COMPILE_H */

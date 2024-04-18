@@ -15,8 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_ARRAY_VIEW_H
-#define COMMON_ARRAY_VIEW_H
+#ifndef GDBSUPPORT_ARRAY_VIEW_H
+#define GDBSUPPORT_ARRAY_VIEW_H
 
 #include "traits.h"
 #include <algorithm>
@@ -296,4 +296,4 @@ make_array_view (U *array, size_t size) noexcept
 
 } /* namespace gdb */
 
-#endif
+#endif /* GDBSUPPORT_ARRAY_VIEW_H */

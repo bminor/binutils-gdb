@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (COMPLAINTS_H)
-#define COMPLAINTS_H
+#ifndef GDB_COMPLAINTS_H
+#define GDB_COMPLAINTS_H
 
 #include "gdbsupport/scoped_restore.h"
 #include <unordered_set>
@@ -109,4 +109,4 @@ private:
 
 extern void re_emit_complaints (const complaint_collection &);
 
-#endif /* !defined (COMPLAINTS_H) */
+#endif /* GDB_COMPLAINTS_H */

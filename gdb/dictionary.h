@@ -20,8 +20,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef DICTIONARY_H
-#define DICTIONARY_H
+#ifndef GDB_DICTIONARY_H
+#define GDB_DICTIONARY_H
 
 #include "symfile.h"
 
@@ -208,4 +208,4 @@ private:
   struct mdict_iterator m_iter;
 };
 
-#endif /* DICTIONARY_H */
+#endif /* GDB_DICTIONARY_H */

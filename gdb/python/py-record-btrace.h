@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef PYTHON_PY_RECORD_BTRACE_H
-#define PYTHON_PY_RECORD_BTRACE_H
+#ifndef GDB_PYTHON_PY_RECORD_BTRACE_H
+#define GDB_PYTHON_PY_RECORD_BTRACE_H
 
 #include "python-internal.h"
 
@@ -94,4 +94,4 @@ extern PyObject *recpy_bt_func_next (PyObject *self, void *closure);
 /* Implementation of RecordAuxiliary.decoded [str].  */
 extern PyObject *recpy_bt_aux_data (PyObject *self, void *closure);
 
-#endif /* PYTHON_PY_RECORD_BTRACE_H */
+#endif /* GDB_PYTHON_PY_RECORD_BTRACE_H */

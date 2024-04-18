@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef LINUX_NAT_H
-#define LINUX_NAT_H
+#ifndef GDB_LINUX_NAT_H
+#define GDB_LINUX_NAT_H
 
 #include "nat/linux-nat.h"
 #include "inf-ptrace.h"
@@ -342,4 +342,4 @@ void linux_nat_switch_fork (ptid_t new_ptid);
    uninitialized in such case).  */
 bool linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo);
 
-#endif /* LINUX_NAT_H */
+#endif /* GDB_LINUX_NAT_H */

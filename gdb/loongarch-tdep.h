@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef LOONGARCH_TDEP_H
-#define LOONGARCH_TDEP_H
+#ifndef GDB_LOONGARCH_TDEP_H
+#define GDB_LOONGARCH_TDEP_H
 
 #include "gdbarch.h"
 #include "arch/loongarch.h"
@@ -51,4 +51,4 @@ struct loongarch_gdbarch_tdep : gdbarch_tdep_base
 extern int loongarch_process_record (struct gdbarch *gdbarch,
 				     struct regcache *regcache, CORE_ADDR addr);
 
-#endif /* LOONGARCH_TDEP_H  */
+#endif /* GDB_LOONGARCH_TDEP_H */

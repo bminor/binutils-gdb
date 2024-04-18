@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TYPEPRINT_H
-#define TYPEPRINT_H
+#ifndef GDB_TYPEPRINT_H
+#define GDB_TYPEPRINT_H
 
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/unordered_set.h"
@@ -213,4 +213,4 @@ extern void val_print_not_allocated (struct ui_file *stream);
 
 extern void val_print_not_associated (struct ui_file *stream);
 
-#endif
+#endif /* GDB_TYPEPRINT_H */

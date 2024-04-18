@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_GDB_SIGNALS_H
-#define COMMON_GDB_SIGNALS_H
+#ifndef GDBSUPPORT_GDB_SIGNALS_H
+#define GDBSUPPORT_GDB_SIGNALS_H
 
 #include "gdb/signals.h"
 
@@ -55,4 +55,4 @@ extern const char *gdb_signal_to_name (enum gdb_signal);
 /* Given a name (SIGHUP, etc.), return its signal.  */
 enum gdb_signal gdb_signal_from_name (const char *);
 
-#endif /* COMMON_GDB_SIGNALS_H */
+#endif /* GDBSUPPORT_GDB_SIGNALS_H */

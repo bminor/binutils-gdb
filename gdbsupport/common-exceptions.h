@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_COMMON_EXCEPTIONS_H
-#define COMMON_COMMON_EXCEPTIONS_H
+#ifndef GDBSUPPORT_COMMON_EXCEPTIONS_H
+#define GDBSUPPORT_COMMON_EXCEPTIONS_H
 
 #include <setjmp.h>
 #include <new>
@@ -358,4 +358,4 @@ struct gdb_quit_bad_alloc
 [[noreturn]] [[noreturn]] extern void throw_forced_quit (const char *fmt, ...)
   ATTRIBUTE_PRINTF (1, 2);
 
-#endif /* COMMON_COMMON_EXCEPTIONS_H */
+#endif /* GDBSUPPORT_COMMON_EXCEPTIONS_H */

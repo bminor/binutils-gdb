@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ADA_EXP_H
-#define ADA_EXP_H
+#ifndef GDB_ADA_EXP_H
+#define GDB_ADA_EXP_H
 
 #include "expop.h"
 
@@ -991,4 +991,4 @@ public:
 
 } /* namespace expr */
 
-#endif /* ADA_EXP_H */
+#endif /* GDB_ADA_EXP_H */

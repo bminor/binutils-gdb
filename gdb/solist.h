@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef SOLIST_H
-#define SOLIST_H
+#ifndef GDB_SOLIST_H
+#define GDB_SOLIST_H
 
 #define SO_NAME_MAX_PATH_SIZE 512	/* FIXME: Should be dynamic */
 
@@ -204,4 +204,4 @@ extern gdb_bfd_ref_ptr solib_bfd_open (const char *in_pathname);
    unable to find an address within the library SO.  */
 extern std::optional<CORE_ADDR> default_find_solib_addr (solib &so);
 
-#endif
+#endif /* GDB_SOLIST_H */

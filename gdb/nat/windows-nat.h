@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef NAT_WINDOWS_NAT_H
-#define NAT_WINDOWS_NAT_H
+#ifndef GDB_NAT_WINDOWS_NAT_H
+#define GDB_NAT_WINDOWS_NAT_H
 
 #include <windows.h>
 #include <psapi.h>
@@ -557,4 +557,4 @@ extern bool initialize_loadable ();
 
 }
 
-#endif
+#endif /* GDB_NAT_WINDOWS_NAT_H */

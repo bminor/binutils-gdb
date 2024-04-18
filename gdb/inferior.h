@@ -18,8 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (INFERIOR_H)
-#define INFERIOR_H 1
+#ifndef GDB_INFERIOR_H
+#define GDB_INFERIOR_H
 
 #include <exception>
 #include <list>
@@ -866,4 +866,4 @@ valid_global_inferior_id (int id)
   return false;
 }
 
-#endif /* !defined (INFERIOR_H) */
+#endif /* GDB_INFERIOR_H */

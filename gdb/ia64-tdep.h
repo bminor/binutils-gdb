@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef IA64_TDEP_H
-#define IA64_TDEP_H
+#ifndef GDB_IA64_TDEP_H
+#define GDB_IA64_TDEP_H
 
 #include "gdbarch.h"
 
@@ -265,4 +265,4 @@ extern unw_accessors_t ia64_unw_rse_accessors;
 extern struct libunwind_descr ia64_libunwind_descr;
 #endif
 
-#endif /* ia64-tdep.h */
+#endif /* GDB_IA64_TDEP_H */

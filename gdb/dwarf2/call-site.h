@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef CALL_SITE_H
-#define CALL_SITE_H
+#ifndef GDB_DWARF2_CALL_SITE_H
+#define GDB_DWARF2_CALL_SITE_H
 
 #include "dwarf2/types.h"
 #include "../frame.h"
@@ -258,4 +258,4 @@ struct call_site_eq_pc
 using call_site_htab_t
   = gdb::unordered_set<call_site *, call_site_hash_pc, call_site_eq_pc>;
 
-#endif /* CALL_SITE_H */
+#endif /* GDB_DWARF2_CALL_SITE_H */

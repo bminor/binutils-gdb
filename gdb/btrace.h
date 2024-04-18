@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef BTRACE_H
-#define BTRACE_H
+#ifndef GDB_BTRACE_H
+#define GDB_BTRACE_H
 
 /* Branch tracing (btrace) is a per-thread control-flow execution trace of the
    inferior.  For presentation purposes, the branch trace is represented as a
@@ -535,4 +535,4 @@ extern int btrace_is_replaying (struct thread_info *tp);
 /* Return non-zero if the branch trace for TP is empty; zero otherwise.  */
 extern int btrace_is_empty (struct thread_info *tp);
 
-#endif /* BTRACE_H */
+#endif /* GDB_BTRACE_H */

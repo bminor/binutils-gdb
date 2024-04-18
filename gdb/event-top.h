@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef EVENT_TOP_H
-#define EVENT_TOP_H
+#ifndef GDB_EVENT_TOP_H
+#define GDB_EVENT_TOP_H
 
 #include <signal.h>
 
@@ -167,4 +167,4 @@ class scoped_segv_handler_restore
   segv_handler_t m_old_handler;
 };
 
-#endif
+#endif /* GDB_EVENT_TOP_H */

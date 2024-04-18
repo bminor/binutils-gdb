@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TUI_TUI_LAYOUT_H
-#define TUI_TUI_LAYOUT_H
+#ifndef GDB_TUI_TUI_LAYOUT_H
+#define GDB_TUI_TUI_LAYOUT_H
 
 #include "ui-file.h"
 
@@ -418,4 +418,4 @@ using known_window_names_range
 
 extern known_window_names_range all_known_window_names ();
 
-#endif /* TUI_TUI_LAYOUT_H */
+#endif /* GDB_TUI_TUI_LAYOUT_H */

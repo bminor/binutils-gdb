@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TARGET_DEBUG_H
-#define TARGET_DEBUG_H
+#ifndef GDB_TARGET_DEBUG_H
+#define GDB_TARGET_DEBUG_H
 
 /* Printers for the debug target.  Each prints an object of a given
    type to a string that needn't be freed.  Most printers are macros,
@@ -379,4 +379,4 @@ target_debug_print_x86_xsave_layout (const x86_xsave_layout &layout)
 
   return s;
 }
-#endif /* TARGET_DEBUG_H */
+#endif /* GDB_TARGET_DEBUG_H */

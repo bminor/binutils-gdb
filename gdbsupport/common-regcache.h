@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_COMMON_REGCACHE_H
-#define COMMON_COMMON_REGCACHE_H
+#ifndef GDBSUPPORT_COMMON_REGCACHE_H
+#define GDBSUPPORT_COMMON_REGCACHE_H
 
 struct reg_buffer_common;
 
@@ -126,4 +126,4 @@ struct reg_buffer_common
   virtual bool raw_compare (int regnum, const void *buf, int offset) const = 0;
 };
 
-#endif /* COMMON_COMMON_REGCACHE_H */
+#endif /* GDBSUPPORT_COMMON_REGCACHE_H */

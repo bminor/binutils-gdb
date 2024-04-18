@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef GDB_UTILS_H
+#define GDB_UTILS_H
 
 #include <chrono>
 
@@ -486,4 +486,4 @@ private:
   std::vector<string_file> m_warnings;
 };
 
-#endif /* UTILS_H */
+#endif /* GDB_UTILS_H */

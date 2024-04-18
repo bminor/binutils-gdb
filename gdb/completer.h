@@ -14,8 +14,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (COMPLETER_H)
-#define COMPLETER_H 1
+#ifndef GDB_COMPLETER_H
+#define GDB_COMPLETER_H
 
 #include "gdbsupport/gdb-hashtab.h"
 #include "command.h"
@@ -734,4 +734,4 @@ extern bool skip_over_slash_fmt (completion_tracker &tracker,
 
 extern int max_completions;
 
-#endif /* defined (COMPLETER_H) */
+#endif /* GDB_COMPLETER_H */

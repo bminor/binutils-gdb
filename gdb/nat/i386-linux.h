@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef NAT_I386_LINUX_H
-#define NAT_I386_LINUX_H
+#ifndef GDB_NAT_I386_LINUX_H
+#define GDB_NAT_I386_LINUX_H
 
 /* Does the current host support the GETFPXREGS request?  The system header
    file may or may not define it, but even if it is defined, the kernel
@@ -34,4 +34,4 @@
    variable.  */
 extern tribool have_ptrace_getfpxregs;
 
-#endif /* NAT_I386_LINUX_H */
+#endif /* GDB_NAT_I386_LINUX_H */

@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef MACROTAB_H
-#define MACROTAB_H
+#ifndef GDB_MACROTAB_H
+#define GDB_MACROTAB_H
 
 #include "gdbsupport/function-view.h"
 
@@ -358,4 +358,4 @@ void macro_for_each_in_scope (struct macro_source_file *file, int line,
    of macro filenames printing was "absolute".  */
 extern std::string macro_source_fullname (struct macro_source_file *file);
 
-#endif /* MACROTAB_H */
+#endif /* GDB_MACROTAB_H */

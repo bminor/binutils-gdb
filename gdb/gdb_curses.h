@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_CURSES_H
-#define GDB_CURSES_H 1
+#ifndef GDB_GDB_CURSES_H
+#define GDB_GDB_CURSES_H
 
 #ifdef __MINGW32__
 /* Windows API headers, included e.g. by serial.h, define MOUSE_MOVED,
@@ -71,4 +71,4 @@ extern "C" int tgetnum (const char *);
 #undef reg
 #endif
 
-#endif /* gdb_curses.h */
+#endif /* GDB_GDB_CURSES_H */

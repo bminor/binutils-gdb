@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_PATHSTUFF_H
-#define COMMON_PATHSTUFF_H
+#ifndef GDBSUPPORT_PATHSTUFF_H
+#define GDBSUPPORT_PATHSTUFF_H
 
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/array-view.h"
@@ -180,4 +180,4 @@ extern const char *get_shell ();
 
 extern gdb::char_vector make_temp_filename (const std::string &f);
 
-#endif /* COMMON_PATHSTUFF_H */
+#endif /* GDBSUPPORT_PATHSTUFF_H */

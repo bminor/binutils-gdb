@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef CLI_CLI_STYLE_H
-#define CLI_CLI_STYLE_H
+#ifndef GDB_CLI_CLI_STYLE_H
+#define GDB_CLI_CLI_STYLE_H
 
 #include "ui-file.h"
 #include "command.h"
@@ -160,4 +160,4 @@ extern bool disassembler_styling;
 /* True if styling is enabled.  */
 extern bool cli_styling;
 
-#endif /* CLI_CLI_STYLE_H */
+#endif /* GDB_CLI_CLI_STYLE_H */

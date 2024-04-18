@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef PYTHON_PY_RECORD_H
-#define PYTHON_PY_RECORD_H
+#ifndef GDB_PYTHON_PY_RECORD_H
+#define GDB_PYTHON_PY_RECORD_H
 
 #include "inferior.h"
 #include "python-internal.h"
@@ -78,4 +78,4 @@ extern PyObject *recpy_gap_new (int reason_code, const char *reason_string,
 extern PyObject *recpy_aux_new (thread_info *thread, enum record_method method,
 				Py_ssize_t number);
 
-#endif /* PYTHON_PY_RECORD_H */
+#endif /* GDB_PYTHON_PY_RECORD_H */

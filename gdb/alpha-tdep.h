@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ALPHA_TDEP_H
-#define ALPHA_TDEP_H
+#ifndef GDB_ALPHA_TDEP_H
+#define GDB_ALPHA_TDEP_H
 
 #include "gdbarch.h"
 
@@ -121,4 +121,4 @@ extern void alpha_supply_fp_regs (struct regcache *, int,
 extern void alpha_fill_fp_regs (const struct regcache *,
 				int, void *, void *);
 
-#endif /* ALPHA_TDEP_H */
+#endif /* GDB_ALPHA_TDEP_H */

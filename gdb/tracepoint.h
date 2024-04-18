@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (TRACEPOINT_H)
-#define TRACEPOINT_H 1
+#ifndef GDB_TRACEPOINT_H
+#define GDB_TRACEPOINT_H
 
 #include "breakpoint.h"
 #include "memrange.h"
@@ -431,4 +431,4 @@ extern struct bp_location *get_traceframe_location (int *stepping_frame_p);
 /* Command element for the 'while-stepping' command.  */
 extern cmd_list_element *while_stepping_cmd_element;
 
-#endif	/* TRACEPOINT_H */
+#endif /* GDB_TRACEPOINT_H */

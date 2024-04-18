@@ -18,8 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef NAT_LOONGARCH_LINUX_HW_POINT_H
-#define NAT_LOONGARCH_LINUX_HW_POINT_H
+#ifndef GDB_NAT_LOONGARCH_LINUX_HW_POINT_H
+#define GDB_NAT_LOONGARCH_LINUX_HW_POINT_H
 
 #include "gdbsupport/break-common.h" /* For enum target_hw_bp_type.  */
 
@@ -123,4 +123,4 @@ struct loongarch_debug_reg_state *loongarch_get_debug_reg_state (pid_t pid);
 void loongarch_remove_debug_reg_state (pid_t pid);
 
 
-#endif /* NAT_LOONGARCH_LINUX_HW_POINT_H */
+#endif /* GDB_NAT_LOONGARCH_LINUX_HW_POINT_H */

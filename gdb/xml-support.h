@@ -18,8 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
-#ifndef XML_SUPPORT_H
-#define XML_SUPPORT_H
+#ifndef GDB_XML_SUPPORT_H
+#define GDB_XML_SUPPORT_H
 
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/xml-utils.h"
@@ -234,4 +234,4 @@ ULONGEST gdb_xml_parse_ulongest (struct gdb_xml_parser *parser,
 extern std::optional<gdb::char_vector> xml_fetch_content_from_file
     (const char *filename, const char *dirname);
 
-#endif
+#endif /* GDB_XML_SUPPORT_H */

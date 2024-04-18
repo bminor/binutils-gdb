@@ -20,8 +20,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef F_LANG_H
-#define F_LANG_H
+#ifndef GDB_F_LANG_H
+#define GDB_F_LANG_H
 
 #include "language.h"
 #include "valprint.h"
@@ -386,4 +386,4 @@ extern struct type *fortran_preserve_arg_pointer (struct value *arg,
 extern CORE_ADDR fortran_adjust_dynamic_array_base_address_hack
 	(struct type *type, CORE_ADDR address);
 
-#endif /* F_LANG_H */
+#endif /* GDB_F_LANG_H */

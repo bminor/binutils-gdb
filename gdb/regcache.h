@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef REGCACHE_H
-#define REGCACHE_H
+#ifndef GDB_REGCACHE_H
+#define GDB_REGCACHE_H
 
 #include "gdbsupport/array-view.h"
 #include "gdbsupport/common-regcache.h"
@@ -557,4 +557,4 @@ protected:
   gdbarch *m_gdbarch;
 };
 
-#endif /* REGCACHE_H */
+#endif /* GDB_REGCACHE_H */

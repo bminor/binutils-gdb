@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef INF_CHILD_H
-#define INF_CHILD_H
+#ifndef GDB_INF_CHILD_H
+#define GDB_INF_CHILD_H
 
 #include "target.h"
 #include "process-stratum-target.h"
@@ -117,4 +117,4 @@ extern void add_inf_child_target (inf_child_target *target);
    targets use add_inf_child_target instead.  */
 extern void inf_child_open_target (const char *arg, int from_tty);
 
-#endif
+#endif /* GDB_INF_CHILD_H */

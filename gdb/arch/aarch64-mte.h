@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ARCH_AARCH64_MTE_H
-#define ARCH_AARCH64_MTE_H
+#ifndef GDB_ARCH_AARCH64_MTE_H
+#define GDB_ARCH_AARCH64_MTE_H
 
 
 /* We have one tag per 16 bytes of memory.  */
@@ -48,4 +48,4 @@ extern CORE_ADDR aarch64_mte_set_ltag (CORE_ADDR address, CORE_ADDR tag);
    It is always possible to get the logical tag.  */
 extern CORE_ADDR aarch64_mte_get_ltag (CORE_ADDR address);
 
-#endif /* ARCH_AARCH64_MTE_H */
+#endif /* GDB_ARCH_AARCH64_MTE_H */

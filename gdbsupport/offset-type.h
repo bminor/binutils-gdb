@@ -45,8 +45,8 @@
 
    However, unlike pointers, you can't deference offset types.  */
 
-#ifndef COMMON_OFFSET_TYPE_H
-#define COMMON_OFFSET_TYPE_H
+#ifndef GDBSUPPORT_OFFSET_TYPE_H
+#define GDBSUPPORT_OFFSET_TYPE_H
 
 /* Declare TYPE as being an offset type.  This declares the type and
    enables the operators defined below.  */
@@ -130,4 +130,4 @@ operator- (E lhs, E rhs)
   return static_cast<underlying> (lhs) - static_cast<underlying> (rhs);
 }
 
-#endif /* COMMON_OFFSET_TYPE_H */
+#endif /* GDBSUPPORT_OFFSET_TYPE_H */

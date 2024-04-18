@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TUI_TUI_WINSOURCE_H
-#define TUI_TUI_WINSOURCE_H
+#ifndef GDB_TUI_TUI_WINSOURCE_H
+#define GDB_TUI_TUI_WINSOURCE_H
 
 #include "gdbsupport/observable.h"
 #include "tui/tui-data.h"
@@ -368,4 +368,4 @@ extern std::string tui_copy_source_line (const char **ptr,
 /* Constant definitions. */
 #define SCROLL_THRESHOLD 2	/* Threshold for lazy scroll.  */
 
-#endif /* TUI_TUI_WINSOURCE_H */
+#endif /* GDB_TUI_TUI_WINSOURCE_H */

@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef DWARF2READ_H
-#define DWARF2READ_H
+#ifndef GDB_DWARF2_READ_H
+#define GDB_DWARF2_READ_H
 
 #include <queue>
 #include <unordered_map>
@@ -982,4 +982,4 @@ extern void create_all_units (dwarf2_per_objfile *per_objfile);
 
 extern htab_up create_quick_file_names_table (unsigned int nr_initial_entries);
 
-#endif /* DWARF2READ_H */
+#endif /* GDB_DWARF2_READ_H */

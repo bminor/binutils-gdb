@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ARCH_X86_LINUX_TDESC_FEATURES_H
-#define ARCH_X86_LINUX_TDESC_FEATURES_H
+#ifndef GDB_ARCH_X86_LINUX_TDESC_FEATURES_H
+#define GDB_ARCH_X86_LINUX_TDESC_FEATURES_H
 
 #include "gdbsupport/x86-xstate.h"
 #include "gdbsupport/gdb_assert.h"
@@ -59,4 +59,4 @@ extern uint64_t x86_linux_tdesc_idx_to_xcr0 (int idx);
 
 #endif /* IN_PROCESS_AGENT */
 
-#endif /* ARCH_X86_LINUX_TDESC_FEATURES_H */
+#endif /* GDB_ARCH_X86_LINUX_TDESC_FEATURES_H */

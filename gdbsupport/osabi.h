@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef OSABI_COMMON_H
-#define OSABI_COMMON_H
+#ifndef GDBSUPPORT_OSABI_H
+#define GDBSUPPORT_OSABI_H
 
 /* List of known OS ABIs.  If you change this, make sure to update the
    table in osabi.cc.  */
@@ -51,4 +51,4 @@ const char *gdbarch_osabi_name (enum gdb_osabi);
    configury triplet for the given OSABI.  */
 const char *osabi_triplet_regexp (enum gdb_osabi osabi);
 
-#endif /* OSABI_COMMON_H */
+#endif /* GDBSUPPORT_OSABI_H */

@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef NAT_X86_LINUX_H
-#define NAT_X86_LINUX_H
+#ifndef GDB_NAT_X86_LINUX_H
+#define GDB_NAT_X86_LINUX_H
 
 #include "nat/linux-nat.h"
 
@@ -75,4 +75,4 @@ private:
 
 extern x86_linux_arch_size x86_linux_ptrace_get_arch_size (int tid);
 
-#endif /* NAT_X86_LINUX_H */
+#endif /* GDB_NAT_X86_LINUX_H */

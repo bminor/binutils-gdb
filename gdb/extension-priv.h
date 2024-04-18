@@ -18,8 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef EXTENSION_PRIV_H
-#define EXTENSION_PRIV_H
+#ifndef GDB_EXTENSION_PRIV_H
+#define GDB_EXTENSION_PRIV_H
 
 #include "extension.h"
 #include <signal.h>
@@ -339,4 +339,4 @@ extern struct active_ext_lang_state *set_active_ext_lang
 
 extern void restore_active_ext_lang (struct active_ext_lang_state *previous);
 
-#endif /* EXTENSION_PRIV_H */
+#endif /* GDB_EXTENSION_PRIV_H */

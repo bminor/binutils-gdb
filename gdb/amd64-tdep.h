@@ -18,8 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef AMD64_TDEP_H
-#define AMD64_TDEP_H
+#ifndef GDB_AMD64_TDEP_H
+#define GDB_AMD64_TDEP_H
 
 struct gdbarch;
 class frame_info_ptr;
@@ -146,4 +146,4 @@ extern int amd64nbsd_r_reg_offset[];
 /* Variables exported from amd64-obsd-tdep.c.  */
 extern int amd64obsd_r_reg_offset[];
 
-#endif /* amd64-tdep.h */
+#endif /* GDB_AMD64_TDEP_H */

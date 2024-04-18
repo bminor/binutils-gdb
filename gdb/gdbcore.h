@@ -19,8 +19,8 @@
 
 /* Interface routines for core, executable, etc.  */
 
-#if !defined (GDBCORE_H)
-#define GDBCORE_H 1
+#ifndef GDB_GDBCORE_H
+#define GDB_GDBCORE_H
 
 struct type;
 struct regcache;
@@ -258,4 +258,4 @@ std::optional<core_target_mapped_file_info>
 core_target_find_mapped_file (const char *filename,
 			      std::optional<CORE_ADDR> addr);
 
-#endif /* !defined (GDBCORE_H) */
+#endif /* GDB_GDBCORE_H */

@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef LINUX_RECORD_H
-#define LINUX_RECORD_H
+#ifndef GDB_LINUX_RECORD_H
+#define GDB_LINUX_RECORD_H
 
 struct linux_record_tdep
 {
@@ -550,4 +550,4 @@ extern int record_linux_system_call (enum gdb_syscall num,
 				     struct regcache *regcache,
 				     struct linux_record_tdep *tdep);
 
-#endif /* LINUX_RECORD_H */
+#endif /* GDB_LINUX_RECORD_H */

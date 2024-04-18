@@ -15,8 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (BREAK_COND_PARSE_H)
-#define BREAK_COND_PARSE_H 1
+#ifndef GDB_BREAK_COND_PARSE_H
+#define GDB_BREAK_COND_PARSE_H
 
 /* Given TOK, a string possibly containing a condition, thread, inferior,
    task and force-condition flag, as accepted by the 'break' command,
@@ -49,4 +49,4 @@ extern void create_breakpoint_parse_arg_string
    int *thread, int *inferior, int *task,
    gdb::unique_xmalloc_ptr<char> *rest, bool *force);
 
-#endif
+#endif /* GDB_BREAK_COND_PARSE_H */

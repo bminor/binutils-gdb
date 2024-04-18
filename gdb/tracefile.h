@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TRACEFILE_H
-#define TRACEFILE_H 1
+#ifndef GDB_TRACEFILE_H
+#define GDB_TRACEFILE_H
 
 #include "tracepoint.h"
 #include "target.h"
@@ -151,4 +151,4 @@ public:
 
 extern void tracefile_fetch_registers (struct regcache *regcache, int regno);
 
-#endif /* TRACEFILE_H */
+#endif /* GDB_TRACEFILE_H */

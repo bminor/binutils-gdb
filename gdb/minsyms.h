@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef MINSYMS_H
-#define MINSYMS_H
+#ifndef GDB_MINSYMS_H
+#define GDB_MINSYMS_H
 
 struct program_space;
 struct type;
@@ -326,4 +326,4 @@ CORE_ADDR minimal_symbol_upper_bound (bound_minimal_symbol minsym);
 type *find_minsym_type_and_address (minimal_symbol *msymbol, objfile *objf,
 				    CORE_ADDR *address_p);
 
-#endif /* MINSYMS_H */
+#endif /* GDB_MINSYMS_H */

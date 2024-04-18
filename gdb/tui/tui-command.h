@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TUI_TUI_COMMAND_H
-#define TUI_TUI_COMMAND_H
+#ifndef GDB_TUI_TUI_COMMAND_H
+#define GDB_TUI_TUI_COMMAND_H
 
 #include "tui/tui-data.h"
 
@@ -62,4 +62,4 @@ tui_cmd_win ()
   return dynamic_cast<tui_cmd_window *> (tui_win_list[CMD_WIN]);
 }
 
-#endif /* TUI_TUI_COMMAND_H */
+#endif /* GDB_TUI_TUI_COMMAND_H */

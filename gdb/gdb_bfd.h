@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_BFD_H
-#define GDB_BFD_H
+#ifndef GDB_GDB_BFD_H
+#define GDB_GDB_BFD_H
 
 #include "registry.h"
 #include "gdbsupport/byte-vector.h"
@@ -274,4 +274,4 @@ extern std::string gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
 
 extern void gdb_bfd_init ();
 
-#endif /* GDB_BFD_H */
+#endif /* GDB_GDB_BFD_H */

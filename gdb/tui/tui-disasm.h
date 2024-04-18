@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TUI_TUI_DISASM_H
-#define TUI_TUI_DISASM_H
+#ifndef GDB_TUI_TUI_DISASM_H
+#define GDB_TUI_TUI_DISASM_H
 
 #include "gdbsupport/gdb-checked-static-cast.h"
 #include "tui/tui.h"
@@ -76,4 +76,4 @@ tui_disasm_win ()
 
 extern void tui_get_begin_asm_address (struct gdbarch **, CORE_ADDR *);
 
-#endif /* TUI_TUI_DISASM_H */
+#endif /* GDB_TUI_TUI_DISASM_H */
