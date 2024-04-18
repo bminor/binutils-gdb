@@ -3101,11 +3101,6 @@ parse_set_allocation_tag_input (const char *args, struct value **val,
     error (_("Error parsing tags argument. Tags should be 2 digits per byte."));
 
   tags = hex2bin (tags_string.c_str ());
-
-  /* If the address is not in a region memory mapped with a memory tagging
-     flag, it is no use trying to access/manipulate its allocation tag.  */
-  if (!gdbarch_tagged_address_p (current_inferior ()->arch (), *val))
-    show_addr_not_tagged (value_as_address (*val));
 }
 
 /* Implement the "memory-tag set-allocation-tag" command.
@@ -3126,6 +3121,11 @@ memory_tag_set_allocation_tag_command (const char *args, int from_tty)
 
   /* Parse the input.  */
   parse_set_allocation_tag_input (args, &val, &length, tags);
+
+  /* If the address is not in a region memory-mapped with a memory tagging
+     flag, it is no use trying to manipulate its allocation tag.  */
+  if (!gdbarch_tagged_address_p (current_inferior ()->arch (), val))
+    show_addr_not_tagged (value_as_address (val));
 
   if (!gdbarch_set_memtags (current_inferior ()->arch (), val, length, tags,
 			    memtag_type::allocation))

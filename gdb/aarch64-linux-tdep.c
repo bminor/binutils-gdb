@@ -2525,10 +2525,6 @@ aarch64_linux_set_memtags (struct gdbarch *gdbarch, struct value *address,
       /* Remove the top byte.  */
       addr = gdbarch_remove_non_address_bits (gdbarch, addr);
 
-      /* Make sure we are dealing with a tagged address to begin with.  */
-      if (!aarch64_linux_tagged_address_p (gdbarch, address))
-	return false;
-
       /* With G being the number of tag granules and N the number of tags
 	 passed in, we can have the following cases:
 
