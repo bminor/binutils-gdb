@@ -27,6 +27,10 @@
 #include "elf64-hppa.h"
 #include "libiberty.h"
 
+/* Target vectors for HPUX and non-HPUX versions of HPPA ELF binaries.  */
+extern const bfd_target hppa_elf64_vec;
+extern const bfd_target hppa_elf64_linux_vec;
+
 #define ARCH_SIZE	       64
 
 #define PLT_ENTRY_SIZE 0x10
@@ -316,7 +320,7 @@ elf64_hppa_object_p (bfd *abfd)
   unsigned int flags;
 
   i_ehdrp = elf_elfheader (abfd);
-  if (strcmp (bfd_get_target (abfd), "elf64-hppa-linux") == 0)
+  if (abfd->xvec == & hppa_elf64_linux_vec)
     {
       /* GCC on hppa-linux produces binaries with OSABI=GNU,
 	 but the kernel produces corefiles with OSABI=SysV.  */
@@ -1833,9 +1837,13 @@ elf64_hppa_late_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 	}
 
       /* Force DT_FLAGS to always be set.
-	 Required by HPUX 11.00 patch PHSS_26559.  */
-      if (!add_dynamic_entry (DT_FLAGS, (info)->flags))
-	return false;
+	 Required by HPUX 11.00 patch PHSS_26559.
+	 PR 30743: But do not set them for non-HPUX targets.  */
+      if (output_bfd->xvec == & hppa_elf64_vec)
+	{
+	  if (!add_dynamic_entry (DT_FLAGS, (info)->flags))
+	    return false;
+	}
     }
 #undef add_dynamic_entry
 
