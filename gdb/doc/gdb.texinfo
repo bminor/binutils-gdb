@@ -44093,6 +44093,35 @@ although this should not happen given @value{GDBN} will only send this packet
 if the stub has advertised support for memory tagging via @samp{qSupported}.
 @end table
 
+@cindex check if a given address is in a memory tagged region
+@cindex @samp{qIsAddressTagged} packet
+@item qIsAddressTagged:@var{address}
+@anchor {qIsAddressTagged}
+Check if address @var{address} is in a memory tagged region; if it is, it's
+said to be @dfn{tagged}.  The target is responsible for checking it, as this
+is architecture-specific.
+
+@var{address} is the address to be checked.
+
+Reply:
+@table @samp
+Replies to this packet should all be in two hex digit format, as follows:
+
+@item @samp{01}
+Address @var{address} is tagged.
+
+@item @samp{00}
+Address @var{address} is not tagged.
+
+@item E @var{nn}
+An error occurred whose code is @var{nn}.  This means that address could not
+be checked for some reason.
+
+@item @w{}
+An empty reply indicates that @samp{qIsAddressTagged} is not supported by the
+stub.
+@end table
+
 @item QMemTags:@var{start address},@var{length}:@var{type}:@var{tag bytes}
 @anchor{QMemTags}
 @cindex store memory tags
@@ -45141,9 +45170,11 @@ The remote stub supports and implements the required memory tagging
 functionality and understands the @samp{qMemTags} (@pxref{qMemTags}) and
 @samp{QMemTags} (@pxref{QMemTags}) packets.
 
-For AArch64 GNU/Linux systems, this feature also requires access to the
-@file{/proc/@var{pid}/smaps} file so memory mapping page flags can be inspected.
-This is done via the @samp{vFile} requests.
+For AArch64 GNU/Linux systems, this feature can require access to the
+@file{/proc/@var{pid}/smaps} file so memory mapping page flags can be
+inspected, if @samp{qIsAddressTagged} (@pxref{qIsAddressTagged}) packet
+is not supported by the stub.  Access to the @file{/proc/@var{pid}/smaps}
+file is done via @samp{vFile} requests.
 
 @end table
 
