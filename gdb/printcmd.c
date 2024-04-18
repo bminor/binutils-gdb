@@ -1132,7 +1132,7 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	    = value_from_ulongest (builtin_type (gdbarch)->builtin_data_ptr,
 				   tag_laddr);
 
-	  if (gdbarch_tagged_address_p (current_inferior ()->arch  (), v_addr))
+	  if (gdbarch_tagged_address_p (gdbarch, v_addr))
 	    {
 	      /* Fetch the allocation tag.  */
 	      struct value *tag
