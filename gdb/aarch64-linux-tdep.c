@@ -2476,10 +2476,6 @@ aarch64_linux_memtag_matches_p (struct gdbarch *gdbarch,
 {
   gdb_assert (address != nullptr);
 
-  /* Make sure we are dealing with a tagged address to begin with.  */
-  if (!aarch64_linux_tagged_address_p (gdbarch, address))
-    return true;
-
   CORE_ADDR addr = value_as_address (address);
 
   /* Fetch the allocation tag for ADDRESS.  */
