@@ -337,6 +337,9 @@ enum {
      packets and the tag violation stop replies.  */
   PACKET_memory_tagging_feature,
 
+  /* Support for the qIsAddressTagged packet.  */
+  PACKET_qIsAddressTagged,
+
   PACKET_MAX
 };
 
@@ -15535,6 +15538,50 @@ create_store_memtags_request (gdb::char_vector &packet, CORE_ADDR address,
   strcpy (packet.data (), request.c_str ());
 }
 
+static void
+create_is_address_tagged_request (gdbarch *gdbarch, gdb::char_vector &packet,
+				  CORE_ADDR address)
+{
+  int addr_size;
+  std::string request;
+
+  addr_size = gdbarch_addr_bit (gdbarch) / 8;
+  request = string_printf ("qIsAddressTagged:%s", phex_nz (address, addr_size));
+
+  if (packet.size () < request.length () + 1)
+    error (_("Contents too big for packet qIsAddressTagged."));
+
+  strcpy (packet.data (), request.c_str ());
+}
+
+static bool
+check_is_address_tagged_reply (remote_target *remote, gdb::char_vector &packet,
+			       bool &tagged)
+{
+  gdb_assert (remote != nullptr);
+  /* Check reply and disable qIsAddressTagged usage if it's not supported.  */
+  packet_result result = remote->m_features.packet_ok (packet,
+						       PACKET_qIsAddressTagged);
+
+  /* Return false on error (Exx), empty reply (packet not supported), or reply
+     size doesn't match 2 hex digits.  */
+  if ((result.status () != PACKET_OK) || (strlen (packet.data ()) != 2))
+    return false;
+
+  gdb_byte reply;
+  /* Convert only 2 hex digits, i.e. 1 byte in hex format.  */
+  hex2bin (packet.data (), &reply, 1);
+
+  if (reply == 0x00 || reply == 0x01)
+    {
+      tagged = !!reply;
+      return true;
+    }
+
+  /* Invalid reply.  */
+  return false;
+}
+
 /* Implement the "fetch_memtags" target_ops method.  */
 
 bool
@@ -15581,6 +15628,31 @@ remote_target::store_memtags (CORE_ADDR address, size_t len,
 bool
 remote_target::is_address_tagged (gdbarch *gdbarch, CORE_ADDR address)
 {
+  /* Firstly, attempt to check the address using the qIsAddressTagged
+     packet.  */
+  if (m_features.packet_support (PACKET_qIsAddressTagged) != PACKET_DISABLE)
+    {
+      remote_target *remote = get_current_remote_target ();
+      struct remote_state *rs = get_remote_state ();
+      bool is_addr_tagged;
+
+      create_is_address_tagged_request (gdbarch, rs->buf, address);
+
+      putpkt (rs->buf);
+      getpkt (&rs->buf);
+
+      /* If qIsAddressTagged is not supported PACKET_qIsAddressTagged will be
+	 set to PACKET_DISABLE so no further attempt is made to check addresses
+	 using this packet and the fallback mechanism below will be used
+	 instead.  Also, if the check fails due to an error (Exx reply) the
+	 fallback is used too.  Otherwise, the qIsAddressTagged query succeeded
+	 and is_addr_tagged is valid.  */
+      if (check_is_address_tagged_reply (remote, rs->buf, is_addr_tagged))
+	return is_addr_tagged;
+    }
+
+  /* Fallback to arch-specific method of checking whether an address is tagged
+     in case check via qIsAddressTagged fails.  */
   return gdbarch_tagged_address_p (gdbarch, address);
 }
 
@@ -16069,6 +16141,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (PACKET_memory_tagging_feature,
 			 "memory-tagging-feature", "memory-tagging-feature", 0);
+
+  add_packet_config_cmd (PACKET_qIsAddressTagged,
+			 "qIsAddressTagged", "memory-tagging-address-check", 0);
 
   /* Assert that we've registered "set remote foo-packet" commands
      for all packet configs.  */
