@@ -264,6 +264,24 @@ run_ld_link_tests [list \
 	 {objdump -drj.plt tlsdesc.pd}} \
 	 "libtlsdesc.so" \
     ] \
+    [list \
+	"Generate x86-64-weakundef-1.so" \
+	"-shared -melf_x86_64" \
+	"" \
+	"--64" \
+	{weakundef-1a.s} \
+	{} \
+	"x86-64-weakundef-1.so" \
+    ] \
+    [list \
+	"Generate x86-64-weakundef-1" \
+	"-melf_x86_64" \
+	"tmpdir/x86-64-weakundef-1.so" \
+	"--64" \
+	{weakundef-1b.s} \
+	{{nm -n weakundef-1.nd}} \
+	"x86-64-weakundef-1" \
+    ] \
 ]
 
 set test_name "Mixed x86_64 and i386 input test 1"

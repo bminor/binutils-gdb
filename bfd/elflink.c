@@ -2942,8 +2942,7 @@ _bfd_elf_link_output_relocs (bfd *output_bfd,
 			     asection *input_section,
 			     Elf_Internal_Shdr *input_rel_hdr,
 			     Elf_Internal_Rela *internal_relocs,
-			     struct elf_link_hash_entry **rel_hash
-			       ATTRIBUTE_UNUSED)
+			     struct elf_link_hash_entry **rel_hash)
 {
   Elf_Internal_Rela *irela;
   Elf_Internal_Rela *irelaend;
@@ -2986,9 +2985,12 @@ _bfd_elf_link_output_relocs (bfd *output_bfd,
 		      * bed->s->int_rels_per_ext_rel);
   while (irela < irelaend)
     {
+      if (*rel_hash)
+	(*rel_hash)->has_reloc = 1;
       (*swap_out) (output_bfd, irela, erel);
       irela += bed->s->int_rels_per_ext_rel;
       erel += input_rel_hdr->sh_entsize;
+      rel_hash++;
     }
 
   /* Bump the counter, so that we know where to add the next set of
@@ -10769,6 +10771,13 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	   && (h->root.u.undef.abfd->flags & BFD_PLUGIN) != 0)
     strip = true;
 
+  /* Remember if this symbol should be stripped.  */
+  bool should_strip = strip;
+
+  /* Strip undefined weak symbols link if they don't have relocation.  */
+  if (!strip)
+    strip = !h->has_reloc && h->root.type == bfd_link_hash_undefweak;
+
   type = h->type;
 
   /* If we're stripping it, and it's not a dynamic symbol, there's
@@ -10917,6 +10926,10 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	  eoinfo->failed = true;
 	  return false;
 	}
+      /* If a symbol is in the dynamic symbol table and isn't a
+	 should-strip symbol, also keep it in the symbol table.  */
+      if (!should_strip)
+	strip = false;
     }
 
   /* If we are marking the symbol as undefined, and there are no

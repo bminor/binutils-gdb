@@ -171,6 +171,21 @@ run_ld_link_tests [list \
 	"implib" ] \
 ] \[uses_genelf\]
 
+run_ld_link_tests [list \
+    [list "Generate undefweak-1.a" \
+	"" "" \
+	$hpux \
+	{undefweak-1a.s} \
+	{} \
+	"undefweak-1.a" ] \
+    [list "Generate undefweak-1.o" \
+	"-r" "tmpdir/undefweak-1.a" \
+	$hpux \
+	{undefweak-1b.s} \
+	{{readelf {-rsW} undefweak-1.rd}} \
+	"undefweak-1.o" ] \
+] \[uses_genelf\]
+
 #v850 gas complains about .tbss.var section attributes.
 if { [check_gc_sections_available] && ![istarget "v850-*-*"] } {
     run_ld_link_tests {
