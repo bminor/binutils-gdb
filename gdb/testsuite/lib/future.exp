@@ -694,12 +694,16 @@ if {[info procs find_gnatmake] == ""} {
     rename gdb_find_gnatmake find_gnatmake
     set use_gdb_compile(ada) 1
     gdb_note [join [list $note_prefix "Ada" $note_suffix] ""]
+} else {
+    rename gdb_find_gnatmake ""
 }
 
 if {[info procs find_gfortran] == ""} {
     rename gdb_find_gfortran find_gfortran
     set use_gdb_compile(fortran) 1
     gdb_note [join [list $note_prefix "Fortran" $note_suffix] ""]
+} else {
+    rename gdb_find_gfortran ""
 }
 
 if {[info procs find_go_linker] == ""} {
@@ -707,24 +711,33 @@ if {[info procs find_go_linker] == ""} {
     rename gdb_find_go_linker find_go_linker
     set use_gdb_compile(go) 1
     gdb_note [join [list $note_prefix "Go" $note_suffix] ""]
+} else {
+    rename gdb_find_go ""
+    rename gdb_find_go_linker ""
 }
 
 if {[info procs find_gdc] == ""} {
     rename gdb_find_gdc find_gdc
     set use_gdb_compile(d) 1
     gdb_note [join [list $note_prefix "D" $note_suffix] ""]
+} else {
+    rename gdb_find_gdc ""
 }
 
 if {[info procs find_rustc] == ""} {
     rename gdb_find_rustc find_rustc
     set use_gdb_compile(rust) 1
     gdb_note [join [list $note_prefix "Rust" $note_suffix] ""]
+} else {
+    rename gdb_find_rustc ""
 }
 
 if {[info procs find_hipcc] == ""} {
     rename gdb_find_hipcc find_hipcc
     set use_gdb_compile(hip) 1
     gdb_note [join [list $note_prefix "HIP" $note_suffix] ""]
+} else {
+    rename gdb_find_hipcc ""
 }
 
 # If dejagnu's default_target_compile is missing support for any language,
@@ -732,6 +745,8 @@ if {[info procs find_hipcc] == ""} {
 if { [array size use_gdb_compile] != 0 } {
     catch {rename default_target_compile dejagnu_default_target_compile}
     rename gdb_default_target_compile default_target_compile
+} else {
+    rename gdb_default_target_compile ""
 }
 
 

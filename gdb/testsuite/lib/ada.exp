@@ -151,7 +151,7 @@ proc find_ada_tool {tool} {
 # Return 1 if gnatmake is at least version $MAJOR.x.x
 
 proc gnatmake_version_at_least { major } {
-    set gnatmake [gdb_find_gnatmake]
+    set gnatmake [find_gnatmake]
     set gnatmake [lindex [split $gnatmake] 0]
     if {[catch {exec $gnatmake --version} output]} {
 	return 0
