@@ -2575,10 +2575,6 @@ aarch64_linux_get_memtag (struct gdbarch *gdbarch, struct value *address,
     tag = aarch64_mte_get_ltag (addr);
   else
     {
-      /* Make sure we are dealing with a tagged address to begin with.  */
-      if (!aarch64_linux_tagged_address_p (gdbarch, address))
-	return nullptr;
-
       /* Remove the top byte.  */
       addr = gdbarch_remove_non_address_bits (gdbarch, addr);
       std::optional<CORE_ADDR> atag = aarch64_mte_get_atag (addr);
