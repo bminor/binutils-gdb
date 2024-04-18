@@ -42517,6 +42517,22 @@ For any @var{command} not supported by the stub, an empty response
 protocol.  A newer @value{GDBN} can tell if a packet is supported based
 on that response.
 
+In describing packets (commands and responses), each description has a
+template showing the overall syntax, followed by an explanation of the
+packet's meaning.  We include spaces in some of the templates for
+clarity; these are not part of the packet's syntax.  No @value{GDBN}
+packet uses spaces to separate its components.  For example, a
+template like @samp{foo @var{bar} @var{baz}} describes a packet
+beginning with the three ASCII bytes @samp{foo}, followed by a
+@var{bar}, followed directly by a @var{baz}.  @value{GDBN} does not
+transmit a space character between the @samp{foo} and the @var{bar},
+or between the @var{bar} and the @var{baz}.
+
+We place optional portions of a packet in [square brackets];
+for example, a template like @samp{c @r{[}@var{addr}@r{]}} describes a
+packet beginning with the single ASCII character @samp{c}, possibly
+followed by an @var{addr}.
+
 At a minimum, a stub is required to support the @samp{?} command to
 tell @value{GDBN} the reason for halting, @samp{g} and @samp{G}
 commands for register access, and the @samp{m} and @samp{M} commands
