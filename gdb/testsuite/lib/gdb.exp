@@ -3699,6 +3699,62 @@ proc support_displaced_stepping {} {
     return 0
 }
 
+# Return 1 if GDB can find the libc debug info, or 0 and a reason string if it
+# can't.  This procedure is meant to be called by the require procedure.
+gdb_caching_proc libc_has_debug_info {} {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "libc_has_debug_info"
+
+    # Compile a test program.
+    set src {
+	#include <stdio.h>
+
+	int main (void) {
+	    printf ("Hello, world!\n");
+	    return 0;
+	}
+    }
+    if {![gdb_simple_compile $me $src executable {debug}]} {
+	return [list 0 "failed to compile test program"]
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+    runto_main
+    set test "info sharedlibrary libc.so"
+    gdb_test_multiple $test $test {
+	-re ".*\(\\*\)\[^\r\n\]*/libc\.so.*$gdb_prompt $" {
+	    # Matched the "(*)" in the "Syms Read" columns which means:
+	    # "(*): Shared library is missing debugging information."
+	    verbose -log "$me: libc doesn't have debug info"
+	    set libc_has_debug_info 0
+	    set message "libc doesn't have debug info"
+	}
+	-re ".*Yes\[ \t\]+\[^\r\n\]*/libc\.so.*$gdb_prompt $" {
+	    verbose -log "$me: libc has debug info"
+	    set libc_has_debug_info 1
+	}
+	default {
+	    set libc_has_debug_info 0
+	    set message "libc not found in the inferior"
+	}
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me: returning $libc_has_debug_info" 2
+    if { $libc_has_debug_info } {
+	return $libc_has_debug_info
+    } else {
+	return [list $libc_has_debug_info $message]
+    }
+}
+
 # Run a test on the target to see if it supports vmx hardware.  Return 1 if so, 
 # 0 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 
