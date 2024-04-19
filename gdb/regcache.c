@@ -1463,36 +1463,38 @@ reg_buffer::num_raw_registers () const
   return gdbarch_num_regs (arch ());
 }
 
-void
-regcache::debug_print_register (const char *func,  int regno)
+std::string
+regcache::register_debug_string (int regno)
 {
   struct gdbarch *gdbarch = arch ();
+  std::string s;
 
-  gdb_printf (gdb_stdlog, "%s ", func);
   if (regno >= 0 && regno < gdbarch_num_regs (gdbarch)
       && gdbarch_register_name (gdbarch, regno)[0] != '\0')
-    gdb_printf (gdb_stdlog, "(%s)",
-		gdbarch_register_name (gdbarch, regno));
+    string_appendf (s, "register %s:", gdbarch_register_name (gdbarch, regno));
   else
-    gdb_printf (gdb_stdlog, "(%d)", regno);
+    string_appendf (s, "register %d:", regno);
+
   if (regno >= 0 && regno < gdbarch_num_regs (gdbarch))
     {
-      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       gdb::array_view<gdb_byte> buf = register_buffer (regno);
 
-      gdb_printf (gdb_stdlog, " = ");
+      string_appendf (s, " = ");
+
       for (gdb_byte byte : buf)
-	gdb_printf (gdb_stdlog, "%02x", byte);
+	string_appendf (s, "%02x", byte);
 
       if (buf.size () <= sizeof (LONGEST))
 	{
-	  ULONGEST val = extract_unsigned_integer (buf, byte_order);
+	  ULONGEST val
+	    = extract_unsigned_integer (buf, gdbarch_byte_order (gdbarch));
 
-	  gdb_printf (gdb_stdlog, " %s %s",
-		      core_addr_to_string_nz (val), plongest (val));
+	  string_appendf (s, " %s %s",
+			  core_addr_to_string_nz (val), plongest (val));
 	}
     }
-  gdb_printf (gdb_stdlog, "\n");
+
+    return s;
 }
 
 /* Implement 'maint flush register-cache' command.  */

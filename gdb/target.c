@@ -3895,7 +3895,8 @@ target_fetch_registers (struct regcache *regcache, int regno)
 {
   current_inferior ()->top_target ()->fetch_registers (regcache, regno);
   if (targetdebug)
-    regcache->debug_print_register ("target_fetch_registers", regno);
+    gdb_printf (gdb_stdlog, "target_fetch_registers: %s",
+		regcache->register_debug_string (regno).c_str ());
 }
 
 void
@@ -3906,9 +3907,8 @@ target_store_registers (struct regcache *regcache, int regno)
 
   current_inferior ()->top_target ()->store_registers (regcache, regno);
   if (targetdebug)
-    {
-      regcache->debug_print_register ("target_store_registers", regno);
-    }
+    gdb_printf (gdb_stdlog, "target_store_registers: %s",
+		regcache->register_debug_string (regno).c_str ());
 }
 
 int

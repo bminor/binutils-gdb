@@ -454,9 +454,8 @@ public:
     this->m_ptid = ptid;
   }
 
-/* Dump the contents of a register from the register cache to the target
-   debug.  */
-  void debug_print_register (const char *func, int regno);
+  /* Return a string with the contents of a register, suitable for debug output.  */
+  std::string register_debug_string (int regno);
 
 protected:
   regcache (inferior *inf_for_target_calls, gdbarch *gdbarch);
