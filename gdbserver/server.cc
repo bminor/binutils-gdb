@@ -3318,7 +3318,10 @@ handle_v_attach (char *own_buf)
 	    prepare_resume_reply (own_buf, cs.last_ptid, cs.last_status);
 	}
       else
-	write_enn (own_buf);
+	{
+	  /* Not supported.  */
+	  own_buf[0] = 0;
+	}
     }
   catch (const gdb_exception_error &exception)
     {
