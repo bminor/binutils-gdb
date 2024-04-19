@@ -301,7 +301,10 @@ def write_debugmethod(
         if i > 0:
             print('  gdb_puts (", ", gdb_stdlog);', file=f)
         printer = munge_type(argtypes[i])
-        print("  " + printer + " (" + names[i] + ");", file=f)
+        print(
+            "  gdb_puts (" + printer + " (" + names[i] + "), gdb_stdlog);",
+            file=f,
+        )
     if return_type != "void":
         print('  gdb_puts (") = ", gdb_stdlog);', file=f)
         printer = munge_type(return_type)

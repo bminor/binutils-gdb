@@ -1838,6 +1838,12 @@ gdb_puts (const char *linebuffer, struct ui_file *stream)
   stream->puts (linebuffer);
 }
 
+void
+gdb_puts (const std::string &s, ui_file *stream)
+{
+  gdb_puts (s.c_str (), stream);
+}
+
 /* See utils.h.  */
 
 void

@@ -49,337 +49,324 @@
    that any function not used by target-delegates.c (the only user of this file)
    will be flagged as unused.  */
 
-static void
-target_debug_do_print (const char *s)
-{ gdb_puts (s, gdb_stdlog); }
-
-static void
+static std::string
 target_debug_print_target_object (target_object object)
-{ target_debug_do_print (plongest (object)); }
+{ return plongest (object); }
 
-static void
+static std::string
 target_debug_print_CORE_ADDR (CORE_ADDR addr)
-{ target_debug_do_print (core_addr_to_string (addr)); }
+{ return core_addr_to_string (addr); }
 
-static void
+static std::string
 target_debug_print_const_char_p (const char *s)
-{ target_debug_do_print (s != nullptr ? s : "(null)"); }
+{ return s != nullptr ? s : "(null)"; }
 
-static void
+static std::string
 target_debug_print_int (int v)
-{ target_debug_do_print (plongest (v)); }
+{ return plongest (v); }
 
-static void
+static std::string
 target_debug_print_bool (bool v)
-{ target_debug_do_print (v ? "true" : "false"); }
+{ return v ? "true" : "false"; }
 
-static void
+static std::string
 target_debug_print_long (long v)
-{ target_debug_do_print (plongest (v)); }
+{ return plongest (v); }
 
-static void
+static std::string
 target_debug_print_target_xfer_status (target_xfer_status status)
-{ target_debug_do_print (plongest (status)); }
+{ return plongest (status); }
 
-static void
+static std::string
 target_debug_print_exec_direction_kind (exec_direction_kind kind)
-{ target_debug_do_print (plongest (kind)); }
+{ return plongest (kind); }
 
-static void
+static std::string
 target_debug_print_trace_find_type (trace_find_type type)
-{ target_debug_do_print (plongest (type)); }
+{ return plongest (type); }
 
-static void
+static std::string
 target_debug_print_btrace_read_type (btrace_read_type type)
-{ target_debug_do_print (plongest (type)); }
+{ return plongest (type); }
 
-static void
+static std::string
 target_debug_print_btrace_error (btrace_error error)
-{ target_debug_do_print (plongest (error)); }
+{ return plongest (error); }
 
-static void
+static std::string
 target_debug_print_ptid_t (ptid_t ptid)
-{ target_debug_do_print (plongest (ptid.pid ())); }
+{ return plongest (ptid.pid ()); }
 
-static void
+static std::string
 target_debug_print_gdbarch_p (gdbarch *arch)
-{ target_debug_do_print (gdbarch_bfd_arch_info (arch)->printable_name); }
+{ return gdbarch_bfd_arch_info (arch)->printable_name; }
 
-static void
+static std::string
 target_debug_print_const_gdb_byte_p (const gdb_byte *p)
-{ target_debug_do_print (host_address_to_string (p)); }
+{ return host_address_to_string (p); }
 
-static void
+static std::string
 target_debug_print_gdb_byte_p (gdb_byte *p)
-{ target_debug_do_print (host_address_to_string (p)); }
+{ return host_address_to_string (p); }
 
-static void
+static std::string
 target_debug_print_const_gdb_byte_pp (const gdb_byte **p)
-{ target_debug_do_print (host_address_to_string (*p)); }
+{ return host_address_to_string (*p); }
 
-static void
+static std::string
 target_debug_print_gdb_signal (gdb_signal sig)
-{ target_debug_do_print (gdb_signal_to_name (sig)); }
+{ return gdb_signal_to_name (sig); }
 
-static void
+static std::string
 target_debug_print_ULONGEST (ULONGEST v)
-{ target_debug_do_print (hex_string (v)); }
+{ return hex_string (v); }
 
-static void
+static std::string
 target_debug_print_ULONGEST_p (ULONGEST *p)
-{ target_debug_do_print (hex_string (*p)); }
+{ return hex_string (*p); }
 
-static void
+static std::string
 target_debug_print_LONGEST (LONGEST v)
-{ target_debug_do_print (phex (v, 0)); }
+{ return phex (v, 0); }
 
-static void
+static std::string
 target_debug_print_LONGEST_p (LONGEST *p)
-{ target_debug_do_print (phex (*p, 0)); }
+{ return phex (*p, 0); }
 
-static void
+static std::string
 target_debug_print_bp_target_info_p (bp_target_info *bp)
-{ target_debug_do_print (core_addr_to_string (bp->placed_address)); }
+{ return core_addr_to_string (bp->placed_address); }
 
-static void
+static std::string
 target_debug_print_expression_p (expression *exp)
-{ target_debug_do_print (host_address_to_string (exp)); }
+{ return host_address_to_string (exp); }
 
-static void
+static std::string
 target_debug_print_CORE_ADDR_p (CORE_ADDR *p)
-{ target_debug_do_print (core_addr_to_string (*p)); }
+{ return core_addr_to_string (*p); }
 
-static void
+static std::string
 target_debug_print_int_p (int *p)
-{ target_debug_do_print (plongest (*p)); }
+{ return plongest (*p); }
 
-static void
+static std::string
 target_debug_print_regcache_p (regcache *regcache)
-{ target_debug_do_print (host_address_to_string (regcache)); }
+{ return host_address_to_string (regcache); }
 
-static void
+static std::string
 target_debug_print_thread_info_p (thread_info *thread)
-{ target_debug_do_print (host_address_to_string (thread)); }
+{ return host_address_to_string (thread); }
 
-static void
+static std::string
 target_debug_print_ui_file_p (ui_file *file)
-{ target_debug_do_print (host_address_to_string (file)); }
+{ return host_address_to_string (file); }
 
-static void
+static std::string
 target_debug_print_const_std_vector_target_section_p
   (const std::vector<target_section> *vec)
-{ target_debug_do_print (host_address_to_string (vec->data ())); }
+{ return host_address_to_string (vec->data ()); }
 
-static void
+static std::string
 target_debug_print_void_p (void *p)
-{ target_debug_do_print (host_address_to_string (p)); }
+{ return host_address_to_string (p); }
 
-static void
+static std::string
 target_debug_print_find_memory_region_ftype (find_memory_region_ftype func)
-{ target_debug_do_print (host_address_to_string (func)); }
+{ return host_address_to_string (func); }
 
-static void
+static std::string
 target_debug_print_bfd_p (bfd *bfd)
-{ target_debug_do_print (host_address_to_string (bfd)); }
+{ return host_address_to_string (bfd); }
 
-static void
+static std::string
 target_debug_print_std_vector_mem_region (const std::vector<mem_region> &vec)
-{ target_debug_do_print (host_address_to_string (vec.data ())); }
+{ return host_address_to_string (vec.data ()); }
 
-static void
+static std::string
 target_debug_print_std_vector_static_tracepoint_marker
   (const std::vector<static_tracepoint_marker> &vec)
-{ target_debug_do_print (host_address_to_string (vec.data ())); }
+{ return host_address_to_string (vec.data ()); }
 
-static void
+static std::string
 target_debug_print_const_target_desc_p (const target_desc *tdesc)
-{ target_debug_do_print (host_address_to_string (tdesc)); }
+{ return host_address_to_string (tdesc); }
 
-static void
+static std::string
 target_debug_print_bp_location_p (bp_location *loc)
-{ target_debug_do_print (host_address_to_string (loc)); }
+{ return host_address_to_string (loc); }
 
-static void
+static std::string
 target_debug_print_const_trace_state_variable_r
   (const trace_state_variable &tsv)
-{ target_debug_do_print (host_address_to_string (&tsv)); }
+{ return host_address_to_string (&tsv); }
 
-static void
+static std::string
 target_debug_print_trace_status_p (trace_status *status)
-{ target_debug_do_print (host_address_to_string (status)); }
+{ return host_address_to_string (status); }
 
-static void
+static std::string
 target_debug_print_tracepoint_p (tracepoint *tp)
-{ target_debug_do_print (host_address_to_string (tp)); }
+{ return host_address_to_string (tp); }
 
-static void
+static std::string
 target_debug_print_uploaded_tp_p (uploaded_tp *tp)
-{ target_debug_do_print (host_address_to_string (tp)); }
+{ return host_address_to_string (tp); }
 
-static void
+static std::string
 target_debug_print_uploaded_tp_pp (uploaded_tp **v)
-{ target_debug_do_print (host_address_to_string (*v)); }
+{ return host_address_to_string (*v); }
 
-static void
+static std::string
 target_debug_print_uploaded_tsv_pp (uploaded_tsv **tsv)
-{ target_debug_do_print (host_address_to_string (tsv)); }
+{ return host_address_to_string (tsv); }
 
-static void
+static std::string
 target_debug_print_static_tracepoint_marker_p (static_tracepoint_marker *marker)
-{ target_debug_do_print (host_address_to_string (marker)); }
+{ return host_address_to_string (marker); }
 
-static void
+static std::string
 target_debug_print_btrace_target_info_p (btrace_target_info *info)
-{ target_debug_do_print (host_address_to_string (info)); }
+{ return host_address_to_string (info); }
 
-static void
+static std::string
 target_debug_print_const_frame_unwind_p (const frame_unwind *fu)
-{ target_debug_do_print (host_address_to_string (fu)); }
+{ return host_address_to_string (fu); }
 
-static void
+static std::string
 target_debug_print_btrace_data_p (btrace_data *data)
-{ target_debug_do_print (host_address_to_string (data)); }
+{ return host_address_to_string (data); }
 
-static void
+static std::string
 target_debug_print_record_method (record_method method)
-{ target_debug_do_print (plongest (method)); }
+{ return plongest (method); }
 
-static void
+static std::string
 target_debug_print_const_btrace_config_p (const btrace_config *config)
-{ target_debug_do_print (host_address_to_string (config)); }
+{ return host_address_to_string (config); }
 
-static void
+static std::string
 target_debug_print_const_btrace_target_info_p (const btrace_target_info *info)
-{ target_debug_do_print (host_address_to_string (info)); }
+{ return host_address_to_string (info); }
 
-static void
+static std::string
 target_debug_print_target_hw_bp_type (target_hw_bp_type type)
-{ target_debug_do_print (plongest (type)); }
+{ return plongest (type); }
 
-static void
+static std::string
 target_debug_print_bptype (bptype type)
-{ target_debug_do_print (plongest (type)); }
+{ return plongest (type); }
 
-static void
+static std::string
 target_debug_print_inferior_p (inferior *inf)
-{ target_debug_do_print (host_address_to_string (inf)); }
+{ return host_address_to_string (inf); }
 
-static void
+static std::string
 target_debug_print_remove_bp_reason (remove_bp_reason reason)
-{ target_debug_do_print (plongest (reason)); }
+{ return plongest (reason); }
 
-static void
+static std::string
 target_debug_print_gdb_disassembly_flags (gdb_disassembly_flags flags)
-{ target_debug_do_print (plongest (flags)); }
+{ return plongest (flags); }
 
-static void
+static std::string
 target_debug_print_traceframe_info_up (std::unique_ptr<traceframe_info> &info)
-{ target_debug_do_print (host_address_to_string (info.get ())); }
+{ return host_address_to_string (info.get ()); }
 
-static void
+static std::string
 target_debug_print_gdb_array_view_const_int
   (const gdb::array_view<const int> &view)
-{ target_debug_do_print (host_address_to_string (view.data ())); }
+{ return host_address_to_string (view.data ()); }
 
-static void
+static std::string
 target_debug_print_record_print_flags (record_print_flags flags)
-{ target_debug_do_print (plongest (flags)); }
+{ return plongest (flags); }
 
-static void
+static std::string
 target_debug_print_thread_control_capabilities (thread_control_capabilities cap)
-{ target_debug_do_print (plongest (cap)); }
+{ return plongest (cap); }
 
-static void
+static std::string
 target_debug_print_std_string (const std::string &str)
-{ target_debug_do_print (str.c_str ()); }
+{ return str.c_str (); }
 
-static void
+static std::string
 target_debug_print_gdb_unique_xmalloc_ptr_char
   (const gdb::unique_xmalloc_ptr<char> &p)
-{ target_debug_do_print (p.get ()); }
+{ return p.get (); }
 
-static void
+static std::string
 target_debug_print_target_waitkind (target_waitkind kind)
-{ target_debug_do_print (pulongest (kind)); }
+{ return pulongest (kind); }
 
-static void
+static std::string
 target_debug_print_gdb_thread_options (gdb_thread_options options)
-{ target_debug_do_print (to_string (options).c_str ()); }
+{ return to_string (options); }
 
-static void
+static std::string
 target_debug_print_target_waitstatus_p (struct target_waitstatus *status)
-{
-  gdb_puts (status->to_string ().c_str (), gdb_stdlog);
-}
+{ return status->to_string (); }
 
 /* Functions that are used via TARGET_DEBUG_PRINTER.  */
 
-static void
+static const char *
 target_debug_print_step (int step)
-{ target_debug_do_print (step ? "step" : "continue"); }
+{ return step ? "step" : "continue"; }
 
-static void
+static std::string
 target_debug_print_target_wait_flags (target_wait_flags options)
-{
-  std::string str = target_options_to_string (options);
+{ return target_options_to_string (options); }
 
-  gdb_puts (str.c_str (), gdb_stdlog);
-}
-
-static void
+static std::string
 target_debug_print_signals (gdb::array_view<const unsigned char> sigs)
 {
-  gdb_puts ("{", gdb_stdlog);
+  std::string s = "{";
 
   for (size_t i = 0; i < sigs.size (); i++)
     if (sigs[i] != 0)
-      {
-	gdb_printf (gdb_stdlog, " %s",
-		    gdb_signal_to_name ((enum gdb_signal) i));
-      }
-  gdb_puts (" }", gdb_stdlog);
+      string_appendf (s, " %s",
+		      gdb_signal_to_name (static_cast<gdb_signal>(i)));
+
+  s += " }";
+
+  return s;
 }
 
-static void
+static const char *
 target_debug_print_size_t (size_t size)
 {
-  gdb_printf (gdb_stdlog, "%s", pulongest (size));
+  return pulongest (size);
 }
 
-static void
+static std::string
 target_debug_print_gdb_array_view_const_gdb_byte (gdb::array_view<const gdb_byte> vector)
 {
-  gdb_puts ("{", gdb_stdlog);
+  std::string s = "{";
 
-  for (size_t i = 0; i < vector.size (); i++)
-    {
-      gdb_printf (gdb_stdlog, " %s",
-		  phex_nz (vector[i], 1));
-    }
-  gdb_puts (" }", gdb_stdlog);
+  for (const auto b : vector)
+    string_appendf (s, " %s", phex_nz (b, 1));
+
+  s += " }";
+
+  return s;
 }
 
-static void
+static std::string
 target_debug_print_const_gdb_byte_vector_r (const gdb::byte_vector &vector)
-{
-  target_debug_print_gdb_array_view_const_gdb_byte (vector);
-}
+{ return target_debug_print_gdb_array_view_const_gdb_byte (vector); }
 
-static void
+static std::string
 target_debug_print_gdb_byte_vector_r (gdb::byte_vector &vector)
-{
-  target_debug_print_const_gdb_byte_vector_r (vector);
-}
+{ return target_debug_print_const_gdb_byte_vector_r (vector); }
 
-static void
+static std::string
 target_debug_print_x86_xsave_layout (const x86_xsave_layout &layout)
 {
-  gdb_puts ("{", gdb_stdlog);
-  gdb_printf (gdb_stdlog, " sizeof_xsave=%d", layout.sizeof_xsave);
-#define POFFS(region)							\
-  if (layout.region##_offset != 0)					\
-    gdb_printf (gdb_stdlog, ", %s_offset=%d", #region,			\
-		layout.region##_offset)
+  std::string s = string_printf ("{ sizeof_xsave=%d", layout.sizeof_xsave);
+
+#define POFFS(region)						\
+  if (layout.region##_offset != 0)				\
+    string_appendf (s, ", " #region "_offset=%d", layout.region##_offset);
+
   POFFS(avx);
   POFFS(bndregs);
   POFFS(bndcfg);
@@ -387,7 +374,11 @@ target_debug_print_x86_xsave_layout (const x86_xsave_layout &layout)
   POFFS(zmm_h);
   POFFS(zmm);
   POFFS(pkru);
+
 #undef POFFS
-  gdb_puts (" }", gdb_stdlog);
+
+  s += " }";
+
+  return s;
 }
 #endif /* TARGET_DEBUG_H */

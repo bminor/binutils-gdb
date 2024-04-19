@@ -395,7 +395,7 @@ debug_target::post_attach (int arg0)
   gdb_printf (gdb_stdlog, "-> %s->post_attach (...)\n", this->beneath ()->shortname ());
   this->beneath ()->post_attach (arg0);
   gdb_printf (gdb_stdlog, "<- %s->post_attach (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -416,9 +416,9 @@ debug_target::detach (inferior *arg0, int arg1)
   gdb_printf (gdb_stdlog, "-> %s->detach (...)\n", this->beneath ()->shortname ());
   this->beneath ()->detach (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->detach (", this->beneath ()->shortname ());
-  target_debug_print_inferior_p (arg0);
+  gdb_puts (target_debug_print_inferior_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -440,9 +440,9 @@ debug_target::disconnect (const char *arg0, int arg1)
   gdb_printf (gdb_stdlog, "-> %s->disconnect (...)\n", this->beneath ()->shortname ());
   this->beneath ()->disconnect (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->disconnect (", this->beneath ()->shortname ());
-  target_debug_print_const_char_p (arg0);
+  gdb_puts (target_debug_print_const_char_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -464,11 +464,11 @@ debug_target::resume (ptid_t arg0, int arg1, enum gdb_signal arg2)
   gdb_printf (gdb_stdlog, "-> %s->resume (...)\n", this->beneath ()->shortname ());
   this->beneath ()->resume (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->resume (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  gdb_puts (target_debug_print_ptid_t (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_step (arg1);
+  gdb_puts (target_debug_print_step (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_gdb_signal (arg2);
+  gdb_puts (target_debug_print_gdb_signal (arg2), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -511,11 +511,11 @@ debug_target::wait (ptid_t arg0, struct target_waitstatus *arg1, target_wait_fla
   ptid_t result
     = this->beneath ()->wait (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->wait (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  gdb_puts (target_debug_print_ptid_t (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_target_waitstatus_p (arg1);
+  gdb_puts (target_debug_print_target_waitstatus_p (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_target_wait_flags (arg2);
+  gdb_puts (target_debug_print_target_wait_flags (arg2), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_ptid_t (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -539,9 +539,9 @@ debug_target::fetch_registers (struct regcache *arg0, int arg1)
   gdb_printf (gdb_stdlog, "-> %s->fetch_registers (...)\n", this->beneath ()->shortname ());
   this->beneath ()->fetch_registers (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->fetch_registers (", this->beneath ()->shortname ());
-  target_debug_print_regcache_p (arg0);
+  gdb_puts (target_debug_print_regcache_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -563,9 +563,9 @@ debug_target::store_registers (struct regcache *arg0, int arg1)
   gdb_printf (gdb_stdlog, "-> %s->store_registers (...)\n", this->beneath ()->shortname ());
   this->beneath ()->store_registers (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->store_registers (", this->beneath ()->shortname ());
-  target_debug_print_regcache_p (arg0);
+  gdb_puts (target_debug_print_regcache_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -587,7 +587,7 @@ debug_target::prepare_to_store (struct regcache *arg0)
   gdb_printf (gdb_stdlog, "-> %s->prepare_to_store (...)\n", this->beneath ()->shortname ());
   this->beneath ()->prepare_to_store (arg0);
   gdb_printf (gdb_stdlog, "<- %s->prepare_to_store (", this->beneath ()->shortname ());
-  target_debug_print_regcache_p (arg0);
+  gdb_puts (target_debug_print_regcache_p (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -630,9 +630,9 @@ debug_target::insert_breakpoint (struct gdbarch *arg0, struct bp_target_info *ar
   int result
     = this->beneath ()->insert_breakpoint (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->insert_breakpoint (", this->beneath ()->shortname ());
-  target_debug_print_gdbarch_p (arg0);
+  gdb_puts (target_debug_print_gdbarch_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_bp_target_info_p (arg1);
+  gdb_puts (target_debug_print_bp_target_info_p (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -658,11 +658,11 @@ debug_target::remove_breakpoint (struct gdbarch *arg0, struct bp_target_info *ar
   int result
     = this->beneath ()->remove_breakpoint (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->remove_breakpoint (", this->beneath ()->shortname ());
-  target_debug_print_gdbarch_p (arg0);
+  gdb_puts (target_debug_print_gdbarch_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_bp_target_info_p (arg1);
+  gdb_puts (target_debug_print_bp_target_info_p (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_remove_bp_reason (arg2);
+  gdb_puts (target_debug_print_remove_bp_reason (arg2), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -788,11 +788,11 @@ debug_target::can_use_hw_breakpoint (enum bptype arg0, int arg1, int arg2)
   int result
     = this->beneath ()->can_use_hw_breakpoint (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->can_use_hw_breakpoint (", this->beneath ()->shortname ());
-  target_debug_print_bptype (arg0);
+  gdb_puts (target_debug_print_bptype (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg2);
+  gdb_puts (target_debug_print_int (arg2), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -843,9 +843,9 @@ debug_target::insert_hw_breakpoint (struct gdbarch *arg0, struct bp_target_info 
   int result
     = this->beneath ()->insert_hw_breakpoint (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->insert_hw_breakpoint (", this->beneath ()->shortname ());
-  target_debug_print_gdbarch_p (arg0);
+  gdb_puts (target_debug_print_gdbarch_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_bp_target_info_p (arg1);
+  gdb_puts (target_debug_print_bp_target_info_p (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -871,9 +871,9 @@ debug_target::remove_hw_breakpoint (struct gdbarch *arg0, struct bp_target_info 
   int result
     = this->beneath ()->remove_hw_breakpoint (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->remove_hw_breakpoint (", this->beneath ()->shortname ());
-  target_debug_print_gdbarch_p (arg0);
+  gdb_puts (target_debug_print_gdbarch_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_bp_target_info_p (arg1);
+  gdb_puts (target_debug_print_bp_target_info_p (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -899,13 +899,13 @@ debug_target::remove_watchpoint (CORE_ADDR arg0, int arg1, enum target_hw_bp_typ
   int result
     = this->beneath ()->remove_watchpoint (arg0, arg1, arg2, arg3);
   gdb_printf (gdb_stdlog, "<- %s->remove_watchpoint (", this->beneath ()->shortname ());
-  target_debug_print_CORE_ADDR (arg0);
+  gdb_puts (target_debug_print_CORE_ADDR (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_target_hw_bp_type (arg2);
+  gdb_puts (target_debug_print_target_hw_bp_type (arg2), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_expression_p (arg3);
+  gdb_puts (target_debug_print_expression_p (arg3), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -931,13 +931,13 @@ debug_target::insert_watchpoint (CORE_ADDR arg0, int arg1, enum target_hw_bp_typ
   int result
     = this->beneath ()->insert_watchpoint (arg0, arg1, arg2, arg3);
   gdb_printf (gdb_stdlog, "<- %s->insert_watchpoint (", this->beneath ()->shortname ());
-  target_debug_print_CORE_ADDR (arg0);
+  gdb_puts (target_debug_print_CORE_ADDR (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_target_hw_bp_type (arg2);
+  gdb_puts (target_debug_print_target_hw_bp_type (arg2), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_expression_p (arg3);
+  gdb_puts (target_debug_print_expression_p (arg3), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -963,11 +963,11 @@ debug_target::insert_mask_watchpoint (CORE_ADDR arg0, CORE_ADDR arg1, enum targe
   int result
     = this->beneath ()->insert_mask_watchpoint (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->insert_mask_watchpoint (", this->beneath ()->shortname ());
-  target_debug_print_CORE_ADDR (arg0);
+  gdb_puts (target_debug_print_CORE_ADDR (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR (arg1);
+  gdb_puts (target_debug_print_CORE_ADDR (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_target_hw_bp_type (arg2);
+  gdb_puts (target_debug_print_target_hw_bp_type (arg2), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -993,11 +993,11 @@ debug_target::remove_mask_watchpoint (CORE_ADDR arg0, CORE_ADDR arg1, enum targe
   int result
     = this->beneath ()->remove_mask_watchpoint (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->remove_mask_watchpoint (", this->beneath ()->shortname ());
-  target_debug_print_CORE_ADDR (arg0);
+  gdb_puts (target_debug_print_CORE_ADDR (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR (arg1);
+  gdb_puts (target_debug_print_CORE_ADDR (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_target_hw_bp_type (arg2);
+  gdb_puts (target_debug_print_target_hw_bp_type (arg2), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1073,7 +1073,7 @@ debug_target::stopped_data_address (CORE_ADDR *arg0)
   bool result
     = this->beneath ()->stopped_data_address (arg0);
   gdb_printf (gdb_stdlog, "<- %s->stopped_data_address (", this->beneath ()->shortname ());
-  target_debug_print_CORE_ADDR_p (arg0);
+  gdb_puts (target_debug_print_CORE_ADDR_p (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1099,11 +1099,11 @@ debug_target::watchpoint_addr_within_range (CORE_ADDR arg0, CORE_ADDR arg1, int 
   bool result
     = this->beneath ()->watchpoint_addr_within_range (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->watchpoint_addr_within_range (", this->beneath ()->shortname ());
-  target_debug_print_CORE_ADDR (arg0);
+  gdb_puts (target_debug_print_CORE_ADDR (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR (arg1);
+  gdb_puts (target_debug_print_CORE_ADDR (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg2);
+  gdb_puts (target_debug_print_int (arg2), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1129,9 +1129,9 @@ debug_target::region_ok_for_hw_watchpoint (CORE_ADDR arg0, int arg1)
   int result
     = this->beneath ()->region_ok_for_hw_watchpoint (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->region_ok_for_hw_watchpoint (", this->beneath ()->shortname ());
-  target_debug_print_CORE_ADDR (arg0);
+  gdb_puts (target_debug_print_CORE_ADDR (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1157,13 +1157,13 @@ debug_target::can_accel_watchpoint_condition (CORE_ADDR arg0, int arg1, int arg2
   bool result
     = this->beneath ()->can_accel_watchpoint_condition (arg0, arg1, arg2, arg3);
   gdb_printf (gdb_stdlog, "<- %s->can_accel_watchpoint_condition (", this->beneath ()->shortname ());
-  target_debug_print_CORE_ADDR (arg0);
+  gdb_puts (target_debug_print_CORE_ADDR (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg2);
+  gdb_puts (target_debug_print_int (arg2), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_expression_p (arg3);
+  gdb_puts (target_debug_print_expression_p (arg3), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1189,9 +1189,9 @@ debug_target::masked_watch_num_registers (CORE_ADDR arg0, CORE_ADDR arg1)
   int result
     = this->beneath ()->masked_watch_num_registers (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->masked_watch_num_registers (", this->beneath ()->shortname ());
-  target_debug_print_CORE_ADDR (arg0);
+  gdb_puts (target_debug_print_CORE_ADDR (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR (arg1);
+  gdb_puts (target_debug_print_CORE_ADDR (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1366,9 +1366,9 @@ debug_target::terminal_info (const char *arg0, int arg1)
   gdb_printf (gdb_stdlog, "-> %s->terminal_info (...)\n", this->beneath ()->shortname ());
   this->beneath ()->terminal_info (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->terminal_info (", this->beneath ()->shortname ());
-  target_debug_print_const_char_p (arg0);
+  gdb_puts (target_debug_print_const_char_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -1411,9 +1411,9 @@ debug_target::load (const char *arg0, int arg1)
   gdb_printf (gdb_stdlog, "-> %s->load (...)\n", this->beneath ()->shortname ());
   this->beneath ()->load (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->load (", this->beneath ()->shortname ());
-  target_debug_print_const_char_p (arg0);
+  gdb_puts (target_debug_print_const_char_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -1436,7 +1436,7 @@ debug_target::insert_fork_catchpoint (int arg0)
   int result
     = this->beneath ()->insert_fork_catchpoint (arg0);
   gdb_printf (gdb_stdlog, "<- %s->insert_fork_catchpoint (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1462,7 +1462,7 @@ debug_target::remove_fork_catchpoint (int arg0)
   int result
     = this->beneath ()->remove_fork_catchpoint (arg0);
   gdb_printf (gdb_stdlog, "<- %s->remove_fork_catchpoint (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1488,7 +1488,7 @@ debug_target::insert_vfork_catchpoint (int arg0)
   int result
     = this->beneath ()->insert_vfork_catchpoint (arg0);
   gdb_printf (gdb_stdlog, "<- %s->insert_vfork_catchpoint (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1514,7 +1514,7 @@ debug_target::remove_vfork_catchpoint (int arg0)
   int result
     = this->beneath ()->remove_vfork_catchpoint (arg0);
   gdb_printf (gdb_stdlog, "<- %s->remove_vfork_catchpoint (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1539,15 +1539,15 @@ debug_target::follow_fork (inferior *arg0, ptid_t arg1, target_waitkind arg2, bo
   gdb_printf (gdb_stdlog, "-> %s->follow_fork (...)\n", this->beneath ()->shortname ());
   this->beneath ()->follow_fork (arg0, arg1, arg2, arg3, arg4);
   gdb_printf (gdb_stdlog, "<- %s->follow_fork (", this->beneath ()->shortname ());
-  target_debug_print_inferior_p (arg0);
+  gdb_puts (target_debug_print_inferior_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_ptid_t (arg1);
+  gdb_puts (target_debug_print_ptid_t (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_target_waitkind (arg2);
+  gdb_puts (target_debug_print_target_waitkind (arg2), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_bool (arg3);
+  gdb_puts (target_debug_print_bool (arg3), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_bool (arg4);
+  gdb_puts (target_debug_print_bool (arg4), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -1569,7 +1569,7 @@ debug_target::follow_clone (ptid_t arg0)
   gdb_printf (gdb_stdlog, "-> %s->follow_clone (...)\n", this->beneath ()->shortname ());
   this->beneath ()->follow_clone (arg0);
   gdb_printf (gdb_stdlog, "<- %s->follow_clone (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  gdb_puts (target_debug_print_ptid_t (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -1592,7 +1592,7 @@ debug_target::insert_exec_catchpoint (int arg0)
   int result
     = this->beneath ()->insert_exec_catchpoint (arg0);
   gdb_printf (gdb_stdlog, "<- %s->insert_exec_catchpoint (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1618,7 +1618,7 @@ debug_target::remove_exec_catchpoint (int arg0)
   int result
     = this->beneath ()->remove_exec_catchpoint (arg0);
   gdb_printf (gdb_stdlog, "<- %s->remove_exec_catchpoint (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1642,11 +1642,11 @@ debug_target::follow_exec (inferior *arg0, ptid_t arg1, const char *arg2)
   gdb_printf (gdb_stdlog, "-> %s->follow_exec (...)\n", this->beneath ()->shortname ());
   this->beneath ()->follow_exec (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->follow_exec (", this->beneath ()->shortname ());
-  target_debug_print_inferior_p (arg0);
+  gdb_puts (target_debug_print_inferior_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_ptid_t (arg1);
+  gdb_puts (target_debug_print_ptid_t (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_const_char_p (arg2);
+  gdb_puts (target_debug_print_const_char_p (arg2), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -1669,13 +1669,13 @@ debug_target::set_syscall_catchpoint (int arg0, bool arg1, int arg2, gdb::array_
   int result
     = this->beneath ()->set_syscall_catchpoint (arg0, arg1, arg2, arg3);
   gdb_printf (gdb_stdlog, "<- %s->set_syscall_catchpoint (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_bool (arg1);
+  gdb_puts (target_debug_print_bool (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg2);
+  gdb_puts (target_debug_print_int (arg2), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_gdb_array_view_const_int (arg3);
+  gdb_puts (target_debug_print_gdb_array_view_const_int (arg3), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1720,7 +1720,7 @@ debug_target::pass_signals (gdb::array_view<const unsigned char> arg0)
   gdb_printf (gdb_stdlog, "-> %s->pass_signals (...)\n", this->beneath ()->shortname ());
   this->beneath ()->pass_signals (arg0);
   gdb_printf (gdb_stdlog, "<- %s->pass_signals (", this->beneath ()->shortname ());
-  target_debug_print_signals (arg0);
+  gdb_puts (target_debug_print_signals (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -1741,7 +1741,7 @@ debug_target::program_signals (gdb::array_view<const unsigned char> arg0)
   gdb_printf (gdb_stdlog, "-> %s->program_signals (...)\n", this->beneath ()->shortname ());
   this->beneath ()->program_signals (arg0);
   gdb_printf (gdb_stdlog, "<- %s->program_signals (", this->beneath ()->shortname ());
-  target_debug_print_signals (arg0);
+  gdb_puts (target_debug_print_signals (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -1764,7 +1764,7 @@ debug_target::thread_alive (ptid_t arg0)
   bool result
     = this->beneath ()->thread_alive (arg0);
   gdb_printf (gdb_stdlog, "<- %s->thread_alive (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  gdb_puts (target_debug_print_ptid_t (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1810,7 +1810,7 @@ debug_target::pid_to_str (ptid_t arg0)
   std::string result
     = this->beneath ()->pid_to_str (arg0);
   gdb_printf (gdb_stdlog, "<- %s->pid_to_str (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  gdb_puts (target_debug_print_ptid_t (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_std_string (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1836,7 +1836,7 @@ debug_target::extra_thread_info (thread_info *arg0)
   const char * result
     = this->beneath ()->extra_thread_info (arg0);
   gdb_printf (gdb_stdlog, "<- %s->extra_thread_info (", this->beneath ()->shortname ());
-  target_debug_print_thread_info_p (arg0);
+  gdb_puts (target_debug_print_thread_info_p (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_const_char_p (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1862,7 +1862,7 @@ debug_target::thread_name (thread_info *arg0)
   const char * result
     = this->beneath ()->thread_name (arg0);
   gdb_printf (gdb_stdlog, "<- %s->thread_name (", this->beneath ()->shortname ());
-  target_debug_print_thread_info_p (arg0);
+  gdb_puts (target_debug_print_thread_info_p (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_const_char_p (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1888,11 +1888,11 @@ debug_target::thread_handle_to_thread_info (const gdb_byte *arg0, int arg1, infe
   thread_info * result
     = this->beneath ()->thread_handle_to_thread_info (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->thread_handle_to_thread_info (", this->beneath ()->shortname ());
-  target_debug_print_const_gdb_byte_p (arg0);
+  gdb_puts (target_debug_print_const_gdb_byte_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_inferior_p (arg2);
+  gdb_puts (target_debug_print_inferior_p (arg2), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_thread_info_p (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1918,7 +1918,7 @@ debug_target::thread_info_to_thread_handle (struct thread_info *arg0)
   gdb::array_view<const_gdb_byte> result
     = this->beneath ()->thread_info_to_thread_handle (arg0);
   gdb_printf (gdb_stdlog, "<- %s->thread_info_to_thread_handle (", this->beneath ()->shortname ());
-  target_debug_print_thread_info_p (arg0);
+  gdb_puts (target_debug_print_thread_info_p (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_gdb_array_view_const_gdb_byte (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -1942,7 +1942,7 @@ debug_target::stop (ptid_t arg0)
   gdb_printf (gdb_stdlog, "-> %s->stop (...)\n", this->beneath ()->shortname ());
   this->beneath ()->stop (arg0);
   gdb_printf (gdb_stdlog, "<- %s->stop (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  gdb_puts (target_debug_print_ptid_t (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -2005,9 +2005,9 @@ debug_target::rcmd (const char *arg0, struct ui_file *arg1)
   gdb_printf (gdb_stdlog, "-> %s->rcmd (...)\n", this->beneath ()->shortname ());
   this->beneath ()->rcmd (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->rcmd (", this->beneath ()->shortname ());
-  target_debug_print_const_char_p (arg0);
+  gdb_puts (target_debug_print_const_char_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_ui_file_p (arg1);
+  gdb_puts (target_debug_print_ui_file_p (arg1), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -2030,7 +2030,7 @@ debug_target::pid_to_exec_file (int arg0)
   const char * result
     = this->beneath ()->pid_to_exec_file (arg0);
   gdb_printf (gdb_stdlog, "<- %s->pid_to_exec_file (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_const_char_p (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -2054,7 +2054,7 @@ debug_target::log_command (const char *arg0)
   gdb_printf (gdb_stdlog, "-> %s->log_command (...)\n", this->beneath ()->shortname ());
   this->beneath ()->log_command (arg0);
   gdb_printf (gdb_stdlog, "<- %s->log_command (", this->beneath ()->shortname ());
-  target_debug_print_const_char_p (arg0);
+  gdb_puts (target_debug_print_const_char_p (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -2201,7 +2201,7 @@ debug_target::async (bool arg0)
   gdb_printf (gdb_stdlog, "-> %s->async (...)\n", this->beneath ()->shortname ());
   this->beneath ()->async (arg0);
   gdb_printf (gdb_stdlog, "<- %s->async (", this->beneath ()->shortname ());
-  target_debug_print_bool (arg0);
+  gdb_puts (target_debug_print_bool (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -2272,7 +2272,7 @@ debug_target::thread_events (int arg0)
   gdb_printf (gdb_stdlog, "-> %s->thread_events (...)\n", this->beneath ()->shortname ());
   this->beneath ()->thread_events (arg0);
   gdb_printf (gdb_stdlog, "<- %s->thread_events (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -2295,7 +2295,7 @@ debug_target::supports_set_thread_options (gdb_thread_options arg0)
   bool result
     = this->beneath ()->supports_set_thread_options (arg0);
   gdb_printf (gdb_stdlog, "<- %s->supports_set_thread_options (", this->beneath ()->shortname ());
-  target_debug_print_gdb_thread_options (arg0);
+  gdb_puts (target_debug_print_gdb_thread_options (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -2371,9 +2371,9 @@ debug_target::find_memory_regions (find_memory_region_ftype arg0, void *arg1)
   int result
     = this->beneath ()->find_memory_regions (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->find_memory_regions (", this->beneath ()->shortname ());
-  target_debug_print_find_memory_region_ftype (arg0);
+  gdb_puts (target_debug_print_find_memory_region_ftype (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_void_p (arg1);
+  gdb_puts (target_debug_print_void_p (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -2399,9 +2399,9 @@ debug_target::make_corefile_notes (bfd *arg0, int *arg1)
   gdb::unique_xmalloc_ptr<char> result
     = this->beneath ()->make_corefile_notes (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->make_corefile_notes (", this->beneath ()->shortname ());
-  target_debug_print_bfd_p (arg0);
+  gdb_puts (target_debug_print_bfd_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int_p (arg1);
+  gdb_puts (target_debug_print_int_p (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_gdb_unique_xmalloc_ptr_char (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -2427,9 +2427,9 @@ debug_target::get_bookmark (const char *arg0, int arg1)
   gdb_byte * result
     = this->beneath ()->get_bookmark (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->get_bookmark (", this->beneath ()->shortname ());
-  target_debug_print_const_char_p (arg0);
+  gdb_puts (target_debug_print_const_char_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_gdb_byte_p (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -2454,9 +2454,9 @@ debug_target::goto_bookmark (const gdb_byte *arg0, int arg1)
   gdb_printf (gdb_stdlog, "-> %s->goto_bookmark (...)\n", this->beneath ()->shortname ());
   this->beneath ()->goto_bookmark (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->goto_bookmark (", this->beneath ()->shortname ());
-  target_debug_print_const_gdb_byte_p (arg0);
+  gdb_puts (target_debug_print_const_gdb_byte_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -2479,11 +2479,11 @@ debug_target::get_thread_local_address (ptid_t arg0, CORE_ADDR arg1, CORE_ADDR a
   CORE_ADDR result
     = this->beneath ()->get_thread_local_address (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->get_thread_local_address (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  gdb_puts (target_debug_print_ptid_t (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR (arg1);
+  gdb_puts (target_debug_print_CORE_ADDR (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR (arg2);
+  gdb_puts (target_debug_print_CORE_ADDR (arg2), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_CORE_ADDR (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -2509,19 +2509,19 @@ debug_target::xfer_partial (enum target_object arg0, const char *arg1, gdb_byte 
   enum target_xfer_status result
     = this->beneath ()->xfer_partial (arg0, arg1, arg2, arg3, arg4, arg5, arg6);
   gdb_printf (gdb_stdlog, "<- %s->xfer_partial (", this->beneath ()->shortname ());
-  target_debug_print_target_object (arg0);
+  gdb_puts (target_debug_print_target_object (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_const_char_p (arg1);
+  gdb_puts (target_debug_print_const_char_p (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_gdb_byte_p (arg2);
+  gdb_puts (target_debug_print_gdb_byte_p (arg2), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_const_gdb_byte_p (arg3);
+  gdb_puts (target_debug_print_const_gdb_byte_p (arg3), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_ULONGEST (arg4);
+  gdb_puts (target_debug_print_ULONGEST (arg4), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_ULONGEST (arg5);
+  gdb_puts (target_debug_print_ULONGEST (arg5), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_ULONGEST_p (arg6);
+  gdb_puts (target_debug_print_ULONGEST_p (arg6), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_target_xfer_status (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -2596,9 +2596,9 @@ debug_target::flash_erase (ULONGEST arg0, LONGEST arg1)
   gdb_printf (gdb_stdlog, "-> %s->flash_erase (...)\n", this->beneath ()->shortname ());
   this->beneath ()->flash_erase (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->flash_erase (", this->beneath ()->shortname ());
-  target_debug_print_ULONGEST (arg0);
+  gdb_puts (target_debug_print_ULONGEST (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_LONGEST (arg1);
+  gdb_puts (target_debug_print_LONGEST (arg1), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -2667,9 +2667,9 @@ debug_target::get_ada_task_ptid (long arg0, ULONGEST arg1)
   ptid_t result
     = this->beneath ()->get_ada_task_ptid (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->get_ada_task_ptid (", this->beneath ()->shortname ());
-  target_debug_print_long (arg0);
+  gdb_puts (target_debug_print_long (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_ULONGEST (arg1);
+  gdb_puts (target_debug_print_ULONGEST (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_ptid_t (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -2695,13 +2695,13 @@ debug_target::auxv_parse (const gdb_byte **arg0, const gdb_byte *arg1, CORE_ADDR
   int result
     = this->beneath ()->auxv_parse (arg0, arg1, arg2, arg3);
   gdb_printf (gdb_stdlog, "<- %s->auxv_parse (", this->beneath ()->shortname ());
-  target_debug_print_const_gdb_byte_pp (arg0);
+  gdb_puts (target_debug_print_const_gdb_byte_pp (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_const_gdb_byte_p (arg1);
+  gdb_puts (target_debug_print_const_gdb_byte_p (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR_p (arg2);
+  gdb_puts (target_debug_print_CORE_ADDR_p (arg2), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR_p (arg3);
+  gdb_puts (target_debug_print_CORE_ADDR_p (arg3), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -2727,15 +2727,15 @@ debug_target::search_memory (CORE_ADDR arg0, ULONGEST arg1, const gdb_byte *arg2
   int result
     = this->beneath ()->search_memory (arg0, arg1, arg2, arg3, arg4);
   gdb_printf (gdb_stdlog, "<- %s->search_memory (", this->beneath ()->shortname ());
-  target_debug_print_CORE_ADDR (arg0);
+  gdb_puts (target_debug_print_CORE_ADDR (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_ULONGEST (arg1);
+  gdb_puts (target_debug_print_ULONGEST (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_const_gdb_byte_p (arg2);
+  gdb_puts (target_debug_print_const_gdb_byte_p (arg2), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_ULONGEST (arg3);
+  gdb_puts (target_debug_print_ULONGEST (arg3), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR_p (arg4);
+  gdb_puts (target_debug_print_CORE_ADDR_p (arg4), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -2959,7 +2959,7 @@ debug_target::dumpcore (const char *arg0)
   gdb_printf (gdb_stdlog, "-> %s->dumpcore (...)\n", this->beneath ()->shortname ());
   this->beneath ()->dumpcore (arg0);
   gdb_printf (gdb_stdlog, "<- %s->dumpcore (", this->beneath ()->shortname ());
-  target_debug_print_const_char_p (arg0);
+  gdb_puts (target_debug_print_const_char_p (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3007,7 +3007,7 @@ debug_target::thread_architecture (ptid_t arg0)
   struct gdbarch * result
     = this->beneath ()->thread_architecture (arg0);
   gdb_printf (gdb_stdlog, "<- %s->thread_architecture (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  gdb_puts (target_debug_print_ptid_t (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_gdbarch_p (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3078,7 +3078,7 @@ debug_target::download_tracepoint (struct bp_location *arg0)
   gdb_printf (gdb_stdlog, "-> %s->download_tracepoint (...)\n", this->beneath ()->shortname ());
   this->beneath ()->download_tracepoint (arg0);
   gdb_printf (gdb_stdlog, "<- %s->download_tracepoint (", this->beneath ()->shortname ());
-  target_debug_print_bp_location_p (arg0);
+  gdb_puts (target_debug_print_bp_location_p (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3125,7 +3125,7 @@ debug_target::download_trace_state_variable (const trace_state_variable &arg0)
   gdb_printf (gdb_stdlog, "-> %s->download_trace_state_variable (...)\n", this->beneath ()->shortname ());
   this->beneath ()->download_trace_state_variable (arg0);
   gdb_printf (gdb_stdlog, "<- %s->download_trace_state_variable (", this->beneath ()->shortname ());
-  target_debug_print_const_trace_state_variable_r (arg0);
+  gdb_puts (target_debug_print_const_trace_state_variable_r (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3147,7 +3147,7 @@ debug_target::enable_tracepoint (struct bp_location *arg0)
   gdb_printf (gdb_stdlog, "-> %s->enable_tracepoint (...)\n", this->beneath ()->shortname ());
   this->beneath ()->enable_tracepoint (arg0);
   gdb_printf (gdb_stdlog, "<- %s->enable_tracepoint (", this->beneath ()->shortname ());
-  target_debug_print_bp_location_p (arg0);
+  gdb_puts (target_debug_print_bp_location_p (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3169,7 +3169,7 @@ debug_target::disable_tracepoint (struct bp_location *arg0)
   gdb_printf (gdb_stdlog, "-> %s->disable_tracepoint (...)\n", this->beneath ()->shortname ());
   this->beneath ()->disable_tracepoint (arg0);
   gdb_printf (gdb_stdlog, "<- %s->disable_tracepoint (", this->beneath ()->shortname ());
-  target_debug_print_bp_location_p (arg0);
+  gdb_puts (target_debug_print_bp_location_p (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3234,7 +3234,7 @@ debug_target::get_trace_status (struct trace_status *arg0)
   int result
     = this->beneath ()->get_trace_status (arg0);
   gdb_printf (gdb_stdlog, "<- %s->get_trace_status (", this->beneath ()->shortname ());
-  target_debug_print_trace_status_p (arg0);
+  gdb_puts (target_debug_print_trace_status_p (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3259,9 +3259,9 @@ debug_target::get_tracepoint_status (tracepoint *arg0, struct uploaded_tp *arg1)
   gdb_printf (gdb_stdlog, "-> %s->get_tracepoint_status (...)\n", this->beneath ()->shortname ());
   this->beneath ()->get_tracepoint_status (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->get_tracepoint_status (", this->beneath ()->shortname ());
-  target_debug_print_tracepoint_p (arg0);
+  gdb_puts (target_debug_print_tracepoint_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_uploaded_tp_p (arg1);
+  gdb_puts (target_debug_print_uploaded_tp_p (arg1), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3305,15 +3305,15 @@ debug_target::trace_find (enum trace_find_type arg0, int arg1, CORE_ADDR arg2, C
   int result
     = this->beneath ()->trace_find (arg0, arg1, arg2, arg3, arg4);
   gdb_printf (gdb_stdlog, "<- %s->trace_find (", this->beneath ()->shortname ());
-  target_debug_print_trace_find_type (arg0);
+  gdb_puts (target_debug_print_trace_find_type (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR (arg2);
+  gdb_puts (target_debug_print_CORE_ADDR (arg2), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR (arg3);
+  gdb_puts (target_debug_print_CORE_ADDR (arg3), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int_p (arg4);
+  gdb_puts (target_debug_print_int_p (arg4), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3339,9 +3339,9 @@ debug_target::get_trace_state_variable_value (int arg0, LONGEST *arg1)
   bool result
     = this->beneath ()->get_trace_state_variable_value (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->get_trace_state_variable_value (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_LONGEST_p (arg1);
+  gdb_puts (target_debug_print_LONGEST_p (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3367,7 +3367,7 @@ debug_target::save_trace_data (const char *arg0)
   int result
     = this->beneath ()->save_trace_data (arg0);
   gdb_printf (gdb_stdlog, "<- %s->save_trace_data (", this->beneath ()->shortname ());
-  target_debug_print_const_char_p (arg0);
+  gdb_puts (target_debug_print_const_char_p (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3393,7 +3393,7 @@ debug_target::upload_tracepoints (struct uploaded_tp **arg0)
   int result
     = this->beneath ()->upload_tracepoints (arg0);
   gdb_printf (gdb_stdlog, "<- %s->upload_tracepoints (", this->beneath ()->shortname ());
-  target_debug_print_uploaded_tp_pp (arg0);
+  gdb_puts (target_debug_print_uploaded_tp_pp (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3419,7 +3419,7 @@ debug_target::upload_trace_state_variables (struct uploaded_tsv **arg0)
   int result
     = this->beneath ()->upload_trace_state_variables (arg0);
   gdb_printf (gdb_stdlog, "<- %s->upload_trace_state_variables (", this->beneath ()->shortname ());
-  target_debug_print_uploaded_tsv_pp (arg0);
+  gdb_puts (target_debug_print_uploaded_tsv_pp (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3445,11 +3445,11 @@ debug_target::get_raw_trace_data (gdb_byte *arg0, ULONGEST arg1, LONGEST arg2)
   LONGEST result
     = this->beneath ()->get_raw_trace_data (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->get_raw_trace_data (", this->beneath ()->shortname ());
-  target_debug_print_gdb_byte_p (arg0);
+  gdb_puts (target_debug_print_gdb_byte_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_ULONGEST (arg1);
+  gdb_puts (target_debug_print_ULONGEST (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_LONGEST (arg2);
+  gdb_puts (target_debug_print_LONGEST (arg2), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_LONGEST (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3498,7 +3498,7 @@ debug_target::set_disconnected_tracing (int arg0)
   gdb_printf (gdb_stdlog, "-> %s->set_disconnected_tracing (...)\n", this->beneath ()->shortname ());
   this->beneath ()->set_disconnected_tracing (arg0);
   gdb_printf (gdb_stdlog, "<- %s->set_disconnected_tracing (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3519,7 +3519,7 @@ debug_target::set_circular_trace_buffer (int arg0)
   gdb_printf (gdb_stdlog, "-> %s->set_circular_trace_buffer (...)\n", this->beneath ()->shortname ());
   this->beneath ()->set_circular_trace_buffer (arg0);
   gdb_printf (gdb_stdlog, "<- %s->set_circular_trace_buffer (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3540,7 +3540,7 @@ debug_target::set_trace_buffer_size (LONGEST arg0)
   gdb_printf (gdb_stdlog, "-> %s->set_trace_buffer_size (...)\n", this->beneath ()->shortname ());
   this->beneath ()->set_trace_buffer_size (arg0);
   gdb_printf (gdb_stdlog, "<- %s->set_trace_buffer_size (", this->beneath ()->shortname ());
-  target_debug_print_LONGEST (arg0);
+  gdb_puts (target_debug_print_LONGEST (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3563,11 +3563,11 @@ debug_target::set_trace_notes (const char *arg0, const char *arg1, const char *a
   bool result
     = this->beneath ()->set_trace_notes (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->set_trace_notes (", this->beneath ()->shortname ());
-  target_debug_print_const_char_p (arg0);
+  gdb_puts (target_debug_print_const_char_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_const_char_p (arg1);
+  gdb_puts (target_debug_print_const_char_p (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_const_char_p (arg2);
+  gdb_puts (target_debug_print_const_char_p (arg2), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3593,7 +3593,7 @@ debug_target::core_of_thread (ptid_t arg0)
   int result
     = this->beneath ()->core_of_thread (arg0);
   gdb_printf (gdb_stdlog, "<- %s->core_of_thread (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  gdb_puts (target_debug_print_ptid_t (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3619,11 +3619,11 @@ debug_target::verify_memory (const gdb_byte *arg0, CORE_ADDR arg1, ULONGEST arg2
   int result
     = this->beneath ()->verify_memory (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->verify_memory (", this->beneath ()->shortname ());
-  target_debug_print_const_gdb_byte_p (arg0);
+  gdb_puts (target_debug_print_const_gdb_byte_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR (arg1);
+  gdb_puts (target_debug_print_CORE_ADDR (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_ULONGEST (arg2);
+  gdb_puts (target_debug_print_ULONGEST (arg2), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_int (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3649,9 +3649,9 @@ debug_target::get_tib_address (ptid_t arg0, CORE_ADDR *arg1)
   bool result
     = this->beneath ()->get_tib_address (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->get_tib_address (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  gdb_puts (target_debug_print_ptid_t (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR_p (arg1);
+  gdb_puts (target_debug_print_CORE_ADDR_p (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3697,9 +3697,9 @@ debug_target::static_tracepoint_marker_at (CORE_ADDR arg0, static_tracepoint_mar
   bool result
     = this->beneath ()->static_tracepoint_marker_at (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->static_tracepoint_marker_at (", this->beneath ()->shortname ());
-  target_debug_print_CORE_ADDR (arg0);
+  gdb_puts (target_debug_print_CORE_ADDR (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_static_tracepoint_marker_p (arg1);
+  gdb_puts (target_debug_print_static_tracepoint_marker_p (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3725,7 +3725,7 @@ debug_target::static_tracepoint_markers_by_strid (const char *arg0)
   std::vector<static_tracepoint_marker> result
     = this->beneath ()->static_tracepoint_markers_by_strid (arg0);
   gdb_printf (gdb_stdlog, "<- %s->static_tracepoint_markers_by_strid (", this->beneath ()->shortname ());
-  target_debug_print_const_char_p (arg0);
+  gdb_puts (target_debug_print_const_char_p (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_std_vector_static_tracepoint_marker (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3776,7 +3776,7 @@ debug_target::use_agent (bool arg0)
   bool result
     = this->beneath ()->use_agent (arg0);
   gdb_printf (gdb_stdlog, "<- %s->use_agent (", this->beneath ()->shortname ());
-  target_debug_print_bool (arg0);
+  gdb_puts (target_debug_print_bool (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3827,9 +3827,9 @@ debug_target::enable_btrace (thread_info *arg0, const struct btrace_config *arg1
   struct btrace_target_info * result
     = this->beneath ()->enable_btrace (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->enable_btrace (", this->beneath ()->shortname ());
-  target_debug_print_thread_info_p (arg0);
+  gdb_puts (target_debug_print_thread_info_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_const_btrace_config_p (arg1);
+  gdb_puts (target_debug_print_const_btrace_config_p (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_btrace_target_info_p (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3854,7 +3854,7 @@ debug_target::disable_btrace (struct btrace_target_info *arg0)
   gdb_printf (gdb_stdlog, "-> %s->disable_btrace (...)\n", this->beneath ()->shortname ());
   this->beneath ()->disable_btrace (arg0);
   gdb_printf (gdb_stdlog, "<- %s->disable_btrace (", this->beneath ()->shortname ());
-  target_debug_print_btrace_target_info_p (arg0);
+  gdb_puts (target_debug_print_btrace_target_info_p (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3876,7 +3876,7 @@ debug_target::teardown_btrace (struct btrace_target_info *arg0)
   gdb_printf (gdb_stdlog, "-> %s->teardown_btrace (...)\n", this->beneath ()->shortname ());
   this->beneath ()->teardown_btrace (arg0);
   gdb_printf (gdb_stdlog, "<- %s->teardown_btrace (", this->beneath ()->shortname ());
-  target_debug_print_btrace_target_info_p (arg0);
+  gdb_puts (target_debug_print_btrace_target_info_p (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -3899,11 +3899,11 @@ debug_target::read_btrace (struct btrace_data *arg0, struct btrace_target_info *
   enum btrace_error result
     = this->beneath ()->read_btrace (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->read_btrace (", this->beneath ()->shortname ());
-  target_debug_print_btrace_data_p (arg0);
+  gdb_puts (target_debug_print_btrace_data_p (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_btrace_target_info_p (arg1);
+  gdb_puts (target_debug_print_btrace_target_info_p (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_btrace_read_type (arg2);
+  gdb_puts (target_debug_print_btrace_read_type (arg2), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_btrace_error (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3929,7 +3929,7 @@ debug_target::btrace_conf (const struct btrace_target_info *arg0)
   const struct btrace_config * result
     = this->beneath ()->btrace_conf (arg0);
   gdb_printf (gdb_stdlog, "<- %s->btrace_conf (", this->beneath ()->shortname ());
-  target_debug_print_const_btrace_target_info_p (arg0);
+  gdb_puts (target_debug_print_const_btrace_target_info_p (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_const_btrace_config_p (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -3955,7 +3955,7 @@ debug_target::record_method (ptid_t arg0)
   enum record_method result
     = this->beneath ()->record_method (arg0);
   gdb_printf (gdb_stdlog, "<- %s->record_method (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  gdb_puts (target_debug_print_ptid_t (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_record_method (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -4020,7 +4020,7 @@ debug_target::save_record (const char *arg0)
   gdb_printf (gdb_stdlog, "-> %s->save_record (...)\n", this->beneath ()->shortname ());
   this->beneath ()->save_record (arg0);
   gdb_printf (gdb_stdlog, "<- %s->save_record (", this->beneath ()->shortname ());
-  target_debug_print_const_char_p (arg0);
+  gdb_puts (target_debug_print_const_char_p (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -4089,7 +4089,7 @@ debug_target::record_is_replaying (ptid_t arg0)
   bool result
     = this->beneath ()->record_is_replaying (arg0);
   gdb_printf (gdb_stdlog, "<- %s->record_is_replaying (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  gdb_puts (target_debug_print_ptid_t (arg0), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -4115,9 +4115,9 @@ debug_target::record_will_replay (ptid_t arg0, int arg1)
   bool result
     = this->beneath ()->record_will_replay (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->record_will_replay (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  gdb_puts (target_debug_print_ptid_t (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -4204,7 +4204,7 @@ debug_target::goto_record (ULONGEST arg0)
   gdb_printf (gdb_stdlog, "-> %s->goto_record (...)\n", this->beneath ()->shortname ());
   this->beneath ()->goto_record (arg0);
   gdb_printf (gdb_stdlog, "<- %s->goto_record (", this->beneath ()->shortname ());
-  target_debug_print_ULONGEST (arg0);
+  gdb_puts (target_debug_print_ULONGEST (arg0), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -4226,9 +4226,9 @@ debug_target::insn_history (int arg0, gdb_disassembly_flags arg1)
   gdb_printf (gdb_stdlog, "-> %s->insn_history (...)\n", this->beneath ()->shortname ());
   this->beneath ()->insn_history (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->insn_history (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_gdb_disassembly_flags (arg1);
+  gdb_puts (target_debug_print_gdb_disassembly_flags (arg1), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -4250,11 +4250,11 @@ debug_target::insn_history_from (ULONGEST arg0, int arg1, gdb_disassembly_flags 
   gdb_printf (gdb_stdlog, "-> %s->insn_history_from (...)\n", this->beneath ()->shortname ());
   this->beneath ()->insn_history_from (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->insn_history_from (", this->beneath ()->shortname ());
-  target_debug_print_ULONGEST (arg0);
+  gdb_puts (target_debug_print_ULONGEST (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_gdb_disassembly_flags (arg2);
+  gdb_puts (target_debug_print_gdb_disassembly_flags (arg2), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -4276,11 +4276,11 @@ debug_target::insn_history_range (ULONGEST arg0, ULONGEST arg1, gdb_disassembly_
   gdb_printf (gdb_stdlog, "-> %s->insn_history_range (...)\n", this->beneath ()->shortname ());
   this->beneath ()->insn_history_range (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->insn_history_range (", this->beneath ()->shortname ());
-  target_debug_print_ULONGEST (arg0);
+  gdb_puts (target_debug_print_ULONGEST (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_ULONGEST (arg1);
+  gdb_puts (target_debug_print_ULONGEST (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_gdb_disassembly_flags (arg2);
+  gdb_puts (target_debug_print_gdb_disassembly_flags (arg2), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -4302,9 +4302,9 @@ debug_target::call_history (int arg0, record_print_flags arg1)
   gdb_printf (gdb_stdlog, "-> %s->call_history (...)\n", this->beneath ()->shortname ());
   this->beneath ()->call_history (arg0, arg1);
   gdb_printf (gdb_stdlog, "<- %s->call_history (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  gdb_puts (target_debug_print_int (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_record_print_flags (arg1);
+  gdb_puts (target_debug_print_record_print_flags (arg1), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -4326,11 +4326,11 @@ debug_target::call_history_from (ULONGEST arg0, int arg1, record_print_flags arg
   gdb_printf (gdb_stdlog, "-> %s->call_history_from (...)\n", this->beneath ()->shortname ());
   this->beneath ()->call_history_from (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->call_history_from (", this->beneath ()->shortname ());
-  target_debug_print_ULONGEST (arg0);
+  gdb_puts (target_debug_print_ULONGEST (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  gdb_puts (target_debug_print_int (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_record_print_flags (arg2);
+  gdb_puts (target_debug_print_record_print_flags (arg2), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -4352,11 +4352,11 @@ debug_target::call_history_range (ULONGEST arg0, ULONGEST arg1, record_print_fla
   gdb_printf (gdb_stdlog, "-> %s->call_history_range (...)\n", this->beneath ()->shortname ());
   this->beneath ()->call_history_range (arg0, arg1, arg2);
   gdb_printf (gdb_stdlog, "<- %s->call_history_range (", this->beneath ()->shortname ());
-  target_debug_print_ULONGEST (arg0);
+  gdb_puts (target_debug_print_ULONGEST (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_ULONGEST (arg1);
+  gdb_puts (target_debug_print_ULONGEST (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_record_print_flags (arg2);
+  gdb_puts (target_debug_print_record_print_flags (arg2), gdb_stdlog);
   gdb_puts (")\n", gdb_stdlog);
 }
 
@@ -4519,13 +4519,13 @@ debug_target::fetch_memtags (CORE_ADDR arg0, size_t arg1, gdb::byte_vector &arg2
   bool result
     = this->beneath ()->fetch_memtags (arg0, arg1, arg2, arg3);
   gdb_printf (gdb_stdlog, "<- %s->fetch_memtags (", this->beneath ()->shortname ());
-  target_debug_print_CORE_ADDR (arg0);
+  gdb_puts (target_debug_print_CORE_ADDR (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_size_t (arg1);
+  gdb_puts (target_debug_print_size_t (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_gdb_byte_vector_r (arg2);
+  gdb_puts (target_debug_print_gdb_byte_vector_r (arg2), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  gdb_puts (target_debug_print_int (arg3), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);
@@ -4551,13 +4551,13 @@ debug_target::store_memtags (CORE_ADDR arg0, size_t arg1, const gdb::byte_vector
   bool result
     = this->beneath ()->store_memtags (arg0, arg1, arg2, arg3);
   gdb_printf (gdb_stdlog, "<- %s->store_memtags (", this->beneath ()->shortname ());
-  target_debug_print_CORE_ADDR (arg0);
+  gdb_puts (target_debug_print_CORE_ADDR (arg0), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_size_t (arg1);
+  gdb_puts (target_debug_print_size_t (arg1), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_const_gdb_byte_vector_r (arg2);
+  gdb_puts (target_debug_print_const_gdb_byte_vector_r (arg2), gdb_stdlog);
   gdb_puts (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  gdb_puts (target_debug_print_int (arg3), gdb_stdlog);
   gdb_puts (") = ", gdb_stdlog);
   target_debug_print_bool (result);
   gdb_puts ("\n", gdb_stdlog);

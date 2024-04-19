@@ -205,6 +205,8 @@ extern void set_screen_width_and_height (int width, int height);
 
 extern void gdb_puts (const char *, struct ui_file *);
 
+extern void gdb_puts (const std::string &s, ui_file *stream);
+
 extern void gdb_putc (int c, struct ui_file *);
 
 extern void gdb_putc (int c);
