@@ -98,3 +98,34 @@ extern int s390_cie_data_alignment;
 extern void s390_elf_final_processing (void);
 
 #define elf_tc_final_processing s390_elf_final_processing
+
+/* SFrame  */
+
+/* Whether SFrame stack trace info is supported.  */
+extern bool s390_support_sframe_p (void);
+#define support_sframe_p s390_support_sframe_p
+
+/* The stack-pointer register number for SFrame stack trace info.  */
+extern unsigned int s390_sframe_cfa_sp_reg;
+#define SFRAME_CFA_SP_REG s390_sframe_cfa_sp_reg
+
+/* The frame-pointer register number for SFrame stack trace info.  */
+extern unsigned int s390_sframe_cfa_fp_reg;
+#define SFRAME_CFA_FP_REG s390_sframe_cfa_fp_reg
+
+/* The return address register number for SFrame stack trace info.  */
+extern unsigned int s390_sframe_cfa_ra_reg;
+#define SFRAME_CFA_RA_REG s390_sframe_cfa_ra_reg
+
+/* Specify if RA tracking is needed.  */
+extern bool s390_sframe_ra_tracking_p (void);
+#define sframe_ra_tracking_p s390_sframe_ra_tracking_p
+
+/* Specify the fixed offset to recover RA from CFA.
+   (useful only when RA tracking is not needed).  */
+extern offsetT s390_sframe_cfa_ra_offset (void);
+#define sframe_cfa_ra_offset s390_sframe_cfa_ra_offset
+
+/* The abi/arch indentifier for SFrame.  */
+unsigned char s390_sframe_get_abi_arch (void);
+#define sframe_get_abi_arch s390_sframe_get_abi_arch

@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Initial support to generate .sframe from CFI directives on s390x. 
+
 * Support the NF feature in Intel APX.
 
 * Remove KEYLOCKER and SHA promotions from EVEX MAP4.

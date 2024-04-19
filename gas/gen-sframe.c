@@ -675,7 +675,7 @@ output_sframe_internal (void)
 #endif
   out_one (fixed_ra_offset);
 
-  /* None of the AMD64, or AARCH64 ABIs need the auxiliary header.
+  /* None of the AMD64, AARCH64, or S390 ABIs need the auxiliary header.
      When the need does arise to use this field, the appropriate backend
      must provide this information.  */
   out_one (0); /* Auxiliary SFrame header length.  */

@@ -24,6 +24,8 @@
 #include "subsegs.h"
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
+#include "sframe.h"
+#include "gen-sframe.h"
 
 #include "opcode/s390.h"
 #include "elf/s390.h"
@@ -96,6 +98,17 @@ const char FLT_CHARS[] = "dD";
 
 /* The dwarf2 data alignment, adjusted for 32 or 64 bit.  */
 int s390_cie_data_alignment;
+
+/* Register numbers used for SFrame stack trace info.  */
+
+/* Stack-pointer DWARF register number according to s390x ELF ABI.  */
+unsigned int s390_sframe_cfa_sp_reg = 15;
+
+/* Frame-pointer DWARF register number accoring to s390x GCC/LLVM convention.  */
+unsigned int s390_sframe_cfa_fp_reg = 11;
+
+/* Return-address DWARF register number according to s390x ELF ABI.  */
+unsigned int s390_sframe_cfa_ra_reg = DWARF2_DEFAULT_RETURN_COLUMN;
 
 /* The target specific pseudo-ops which we support.  */
 
@@ -2858,6 +2871,48 @@ tc_s390_regname_to_dw2regnum (char *regname)
   else if (strcmp (regname, "cc") == 0)
     regnum = 33;
   return regnum;
+}
+
+/* Whether SFrame stack trace info is supported.  */
+
+bool
+s390_support_sframe_p (void)
+{
+  /* At this time, SFrame is supported for s390x (64-bit) only.  */
+  return (s390_arch_size == 64);
+}
+
+/* Specify if RA tracking is needed.  */
+
+bool
+s390_sframe_ra_tracking_p (void)
+{
+  return true;
+}
+
+/* Specify the fixed offset to recover RA from CFA.
+   (useful only when RA tracking is not needed).  */
+
+offsetT
+s390_sframe_cfa_ra_offset (void)
+{
+  return (offsetT) SFRAME_CFA_FIXED_RA_INVALID;
+}
+
+/* Get the abi/arch indentifier for SFrame.  */
+
+unsigned char
+s390_sframe_get_abi_arch (void)
+{
+  unsigned char sframe_abi_arch = 0;
+
+  if (s390_support_sframe_p ())
+    {
+      gas_assert (target_big_endian);
+      sframe_abi_arch = SFRAME_ABI_S390_ENDIAN_BIG;
+    }
+
+  return sframe_abi_arch;
 }
 
 void

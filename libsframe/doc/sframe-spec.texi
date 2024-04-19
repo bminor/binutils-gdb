@@ -74,8 +74,8 @@ The SFrame stack trace information is provided in a loaded section, known as the
 @code{.sframe} section.  When available, the @code{.sframe} section appears in
 a new segment of its own, PT_GNU_SFRAME.
 
-The SFrame format is currently supported only for select ABIs, namely, AMD64
-and AAPCS64.
+The SFrame format is currently supported only for select ABIs, namely, AMD64,
+AAPCS64, and s390.
 
 A portion of the SFrame format follows an unaligned on-disk representation.
 Some data structures, however, (namely the SFrame header and the SFrame
@@ -365,6 +365,10 @@ in the format.
 @tindex SFRAME_ABI_AMD64_ENDIAN_LITTLE
 @item @code{SFRAME_ABI_AMD64_ENDIAN_LITTLE}
 @tab 3 @tab AMD64 little-endian
+
+@tindex SFRAME_ABI_S390_ENDIAN_BIG
+@item @code{SFRAME_ABI_S390_ENDIAN_BIG}
+@tab 4 @tab s390 big-endian
 
 @end multitable
 
