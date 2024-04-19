@@ -184,7 +184,7 @@ run_ld_link_tests [list \
 	{undefweak-1b.s} \
 	{{readelf {-rsW} undefweak-1.rd}} \
 	"undefweak-1.o" ] \
-] \[uses_genelf\]
+] "alpha-*-*"
 
 #v850 gas complains about .tbss.var section attributes.
 if { [check_gc_sections_available] && ![istarget "v850-*-*"] } {
