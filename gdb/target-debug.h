@@ -308,7 +308,7 @@ target_debug_print_target_waitstatus_p (struct target_waitstatus *status)
 
 /* Functions that are used via TARGET_DEBUG_PRINTER.  */
 
-static const char *
+static std::string
 target_debug_print_step (int step)
 { return step ? "step" : "continue"; }
 
@@ -331,7 +331,7 @@ target_debug_print_signals (gdb::array_view<const unsigned char> sigs)
   return s;
 }
 
-static const char *
+static std::string
 target_debug_print_size_t (size_t size)
 {
   return pulongest (size);
