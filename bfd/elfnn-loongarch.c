@@ -656,7 +656,14 @@ loongarch_can_trans_tls (bfd *input_bfd,
 	  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX))
     return false;
 
-  symbol_tls_type = _bfd_loongarch_elf_tls_type (input_bfd, h, r_symndx);
+  /* Obtaining tls got type here may occur before
+     loongarch_elf_record_tls_and_got_reference, so it is necessary
+     to ensure that tls got type has been initialized, otherwise it
+     is set to GOT_UNKNOWN.  */
+  symbol_tls_type = GOT_UNKNOWN;
+  if (_bfd_loongarch_elf_local_got_tls_type (input_bfd) || h)
+    symbol_tls_type = _bfd_loongarch_elf_tls_type (input_bfd, h, r_symndx);
+
   reloc_got_type = loongarch_reloc_got_type (r_type);
 
   if (symbol_tls_type == GOT_TLS_IE && GOT_TLS_GD_ANY_P (reloc_got_type))
