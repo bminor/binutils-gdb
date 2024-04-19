@@ -26,6 +26,7 @@
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/signals-state-save-restore.h"
 #include "gdbsupport/gdb_tilde_expand.h"
+#include "gdbsupport/gdb_signals.h"
 #include <vector>
 
 extern char **environ;

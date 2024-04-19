@@ -21,7 +21,7 @@
 #define TARGET_WAITSTATUS_H
 
 #include "diagnostics.h"
-#include "gdbsupport/gdb_signals.h"
+#include "gdb/signals.h"
 
 /* Stuff for target_wait.  */
 
