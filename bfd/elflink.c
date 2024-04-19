@@ -2985,12 +2985,13 @@ _bfd_elf_link_output_relocs (bfd *output_bfd,
 		      * bed->s->int_rels_per_ext_rel);
   while (irela < irelaend)
     {
-      if (*rel_hash)
+      if (rel_hash && *rel_hash)
 	(*rel_hash)->has_reloc = 1;
       (*swap_out) (output_bfd, irela, erel);
       irela += bed->s->int_rels_per_ext_rel;
       erel += input_rel_hdr->sh_entsize;
-      rel_hash++;
+      if (rel_hash)
+	rel_hash++;
     }
 
   /* Bump the counter, so that we know where to add the next set of
