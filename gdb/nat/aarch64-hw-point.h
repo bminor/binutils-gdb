@@ -110,6 +110,14 @@ unsigned int aarch64_watchpoint_offset (unsigned int ctrl);
 unsigned int aarch64_watchpoint_length (unsigned int ctrl);
 enum target_hw_bp_type aarch64_watchpoint_type (unsigned int ctrl);
 
+/* Helper for the "stopped_data_address" target method.  Returns TRUE
+   if a hardware watchpoint trap at ADDR_TRAP matches a set
+   watchpoint.  The address of the matched watchpoint is returned in
+   *ADDR_P.  */
+
+bool aarch64_stopped_data_address (const struct aarch64_debug_reg_state *state,
+				   CORE_ADDR addr_trap, CORE_ADDR *addr_p);
+
 int aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 			       int len, int is_insert, ptid_t ptid,
 			       struct aarch64_debug_reg_state *state);
