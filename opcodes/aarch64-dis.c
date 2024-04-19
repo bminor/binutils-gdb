@@ -1038,7 +1038,7 @@ aarch64_ext_ft (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	return false;
       info->qualifier = get_sreg_qualifier_from_value (value);
       if (info->qualifier == AARCH64_OPND_QLF_ERR)
-	return 0;
+	return false;
     }
 
   return true;
