@@ -274,9 +274,7 @@ def write_debugmethod(
     debugname = "debug_target::" + name
     names = write_function_header(f, False, debugname, return_type, argtypes)
     print(
-        '  gdb_printf (gdb_stdlog, "-> %s->'
-        + name
-        + ' (...)\\n", this->beneath ()->shortname ());',
+        f'  target_debug_printf_nofunc ("-> %s->{name} (...)", this->beneath ()->shortname ());',
         file=f,
     )
 
@@ -311,11 +309,8 @@ def write_debugmethod(
         ret = ""
 
     print(
-        (
-            "  gdb_printf (gdb_stdlog,\n"
-            '\t      "<- %s->{name} ({args_fmt}){ret_fmt}\\n",\n'
-            "\t      this->beneath ()->shortname (){args}{ret});"
-        ).format(name=name, args_fmt=args_fmt, args=args, ret_fmt=ret_fmt, ret=ret),
+        f'  target_debug_printf_nofunc ("<- %s->{name} ({args_fmt}){ret_fmt}",\n'
+        f"\t      this->beneath ()->shortname (){args}{ret});",
         file=f,
     )
 

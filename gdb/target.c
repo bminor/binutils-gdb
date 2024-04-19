@@ -110,6 +110,16 @@ bool may_stop = true;
 
 static unsigned int targetdebug = 0;
 
+/* Print a "target" debug statement with the function name prefix.  */
+
+#define target_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (targetdebug > 0, "target", fmt, ##__VA_ARGS__)
+
+/* Print a "target" debug statement without the function name prefix.  */
+
+#define target_debug_printf_nofunc(fmt, ...) \
+  debug_prefixed_printf_cond_nofunc (targetdebug > 0, "target", fmt, ##__VA_ARGS__)
+
 static void
 set_targetdebug  (const char *args, int from_tty, struct cmd_list_element *c)
 {
@@ -822,15 +832,9 @@ open_target (const char *args, int from_tty, struct cmd_list_element *command)
   auto *ti = static_cast<target_info *> (command->context ());
   target_open_ftype *func = target_factories[ti];
 
-  if (targetdebug)
-    gdb_printf (gdb_stdlog, "-> %s->open (...)\n",
-		ti->shortname);
-
+  target_debug_printf_nofunc ("-> %s->open (...)", ti->shortname);
   func (args, from_tty);
-
-  if (targetdebug)
-    gdb_printf (gdb_stdlog, "<- %s->open (%s, %d)\n",
-		ti->shortname, args, from_tty);
+  target_debug_printf_nofunc ("<- %s->open (%s, %d)", ti->shortname, args, from_tty);
 }
 
 /* See target.h.  */
@@ -1157,8 +1161,7 @@ target_ops_ref_policy::decref (target_ops *t)
 
       t->close ();
 
-      if (targetdebug)
-	gdb_printf (gdb_stdlog, "closing target\n");
+      target_debug_printf_nofunc ("closing target");
     }
 }
 
@@ -1693,18 +1696,15 @@ target_xfer_partial (struct target_ops *ops,
   if (targetdebug)
     {
       const unsigned char *myaddr = NULL;
-
-      gdb_printf (gdb_stdlog,
-		  "%s:target_xfer_partial "
-		  "(%d, %s, %s, %s, %s, %s) = %d, %s",
-		  ops->shortname (),
-		  (int) object,
-		  (annex ? annex : "(null)"),
-		  host_address_to_string (readbuf),
-		  host_address_to_string (writebuf),
-		  core_addr_to_string_nz (offset),
-		  pulongest (len), retval,
-		  pulongest (*xfered_len));
+      std::string s
+	= string_printf ("%s:target_xfer_partial "
+			 "(%d, %s, %s, %s, %s, %s) = %d, %s",
+			 ops->shortname (), (int) object,
+			 (annex ? annex : "(null)"),
+			 host_address_to_string (readbuf),
+			 host_address_to_string (writebuf),
+			 core_addr_to_string_nz (offset), pulongest (len),
+			 retval, pulongest (*xfered_len));
 
       if (readbuf)
 	myaddr = readbuf;
@@ -1714,24 +1714,26 @@ target_xfer_partial (struct target_ops *ops,
 	{
 	  int i;
 
-	  gdb_puts (", bytes =", gdb_stdlog);
+	  string_appendf (s, ", bytes =");
 	  for (i = 0; i < *xfered_len; i++)
 	    {
 	      if ((((intptr_t) &(myaddr[i])) & 0xf) == 0)
 		{
 		  if (targetdebug < 2 && i > 0)
 		    {
-		      gdb_printf (gdb_stdlog, " ...");
+		      string_appendf (s, " ...");
 		      break;
 		    }
-		  gdb_printf (gdb_stdlog, "\n");
+
+		  target_debug_printf_nofunc ("%s", s.c_str ());
+		  s.clear();
 		}
 
-	      gdb_printf (gdb_stdlog, " %02x", myaddr[i] & 0xff);
+	      string_appendf (s, " %02x", myaddr[i] & 0xff);
 	    }
 	}
 
-      gdb_putc ('\n', gdb_stdlog);
+      target_debug_printf_nofunc ("%s", s.c_str ());
     }
 
   /* Check implementations of to_xfer_partial update *XFERED_LEN
@@ -2944,10 +2946,7 @@ target_info_proc (const char *args, enum info_proc_what what)
     {
       if (t->info_proc (args, what))
 	{
-	  if (targetdebug)
-	    gdb_printf (gdb_stdlog,
-			"target_info_proc (\"%s\", %d)\n", args, what);
-
+	  target_debug_printf_nofunc ("target_info_proc (\"%s\", %d)", args, what);
 	  return 1;
 	}
     }
@@ -3238,14 +3237,9 @@ target_fileio_open (struct inferior *inf, const char *filename,
       else
 	fd = acquire_fileio_fd (t, fd);
 
-      if (targetdebug)
-	gdb_printf (gdb_stdlog,
-		    "target_fileio_open (%d,%s,0x%x,0%o,%d)"
-		    " = %d (%d)\n",
-		    inf == NULL ? 0 : inf->num,
-		    filename, flags, mode,
-		    warn_if_slow, fd,
-		    fd != -1 ? 0 : *target_errno);
+      target_debug_printf_nofunc ("target_fileio_open (%d,%s,0x%x,0%o,%d) = %d (%d)",
+			   inf == NULL ? 0 : inf->num, filename, flags, mode,
+			   warn_if_slow, fd, fd != -1 ? 0 : *target_errno);
       return fd;
     }
 
@@ -3270,12 +3264,9 @@ target_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
     ret = fh->target->fileio_pwrite (fh->target_fd, write_buf,
 				     len, offset, target_errno);
 
-  if (targetdebug)
-    gdb_printf (gdb_stdlog,
-		"target_fileio_pwrite (%d,...,%d,%s) "
-		"= %d (%d)\n",
-		fd, len, pulongest (offset),
-		ret, ret != -1 ? 0 : *target_errno);
+  target_debug_printf_nofunc ("target_fileio_pwrite (%d,...,%d,%s) = %d (%d)", fd,
+		       len, pulongest (offset), ret,
+		       ret != -1 ? 0 : *target_errno);
   return ret;
 }
 
@@ -3296,12 +3287,8 @@ target_fileio_pread (int fd, gdb_byte *read_buf, int len,
     ret = fh->target->fileio_pread (fh->target_fd, read_buf,
 				    len, offset, target_errno);
 
-  if (targetdebug)
-    gdb_printf (gdb_stdlog,
-		"target_fileio_pread (%d,...,%d,%s) "
-		"= %d (%d)\n",
-		fd, len, pulongest (offset),
-		ret, ret != -1 ? 0 : *target_errno);
+  target_debug_printf_nofunc ("target_fileio_pread (%d,...,%d,%s) = %d (%d)", fd, len,
+		       pulongest (offset), ret, ret != -1 ? 0 : *target_errno);
   return ret;
 }
 
@@ -3320,10 +3307,8 @@ target_fileio_fstat (int fd, struct stat *sb, fileio_error *target_errno)
   else
     ret = fh->target->fileio_fstat (fh->target_fd, sb, target_errno);
 
-  if (targetdebug)
-    gdb_printf (gdb_stdlog,
-		"target_fileio_fstat (%d) = %d (%d)\n",
-		fd, ret, ret != -1 ? 0 : *target_errno);
+  target_debug_printf_nofunc ("target_fileio_fstat (%d) = %d (%d)", fd, ret,
+		       ret != -1 ? 0 : *target_errno);
   return ret;
 }
 
@@ -3347,10 +3332,8 @@ target_fileio_close (int fd, fileio_error *target_errno)
       release_fileio_fd (fd, fh);
     }
 
-  if (targetdebug)
-    gdb_printf (gdb_stdlog,
-		"target_fileio_close (%d) = %d (%d)\n",
-		fd, ret, ret != -1 ? 0 : *target_errno);
+  target_debug_printf_nofunc ("target_fileio_close (%d) = %d (%d)", fd, ret,
+		       ret != -1 ? 0 : *target_errno);
   return ret;
 }
 
@@ -3367,12 +3350,9 @@ target_fileio_unlink (struct inferior *inf, const char *filename,
       if (ret == -1 && *target_errno == FILEIO_ENOSYS)
 	continue;
 
-      if (targetdebug)
-	gdb_printf (gdb_stdlog,
-		    "target_fileio_unlink (%d,%s)"
-		    " = %d (%d)\n",
-		    inf == NULL ? 0 : inf->num, filename,
-		    ret, ret != -1 ? 0 : *target_errno);
+      target_debug_printf_nofunc ("target_fileio_unlink (%d,%s) = %d (%d)",
+			   inf == NULL ? 0 : inf->num, filename, ret,
+			   ret != -1 ? 0 : *target_errno);
       return ret;
     }
 
@@ -3394,13 +3374,10 @@ target_fileio_readlink (struct inferior *inf, const char *filename,
       if (!ret.has_value () && *target_errno == FILEIO_ENOSYS)
 	continue;
 
-      if (targetdebug)
-	gdb_printf (gdb_stdlog,
-		    "target_fileio_readlink (%d,%s)"
-		    " = %s (%d)\n",
-		    inf == NULL ? 0 : inf->num,
-		    filename, ret ? ret->c_str () : "(nil)",
-		    ret ? 0 : *target_errno);
+      target_debug_printf_nofunc ("target_fileio_readlink (%d,%s) = %s (%d)",
+			   inf == NULL ? 0 : inf->num, filename,
+			   ret ? ret->c_str () : "(nil)",
+			   ret ? 0 : *target_errno);
       return ret;
     }
 
@@ -3894,9 +3871,7 @@ void
 target_fetch_registers (struct regcache *regcache, int regno)
 {
   current_inferior ()->top_target ()->fetch_registers (regcache, regno);
-  if (targetdebug)
-    gdb_printf (gdb_stdlog, "target_fetch_registers: %s",
-		regcache->register_debug_string (regno).c_str ());
+  target_debug_printf ("%s", regcache->register_debug_string (regno).c_str ());
 }
 
 void
@@ -3906,9 +3881,7 @@ target_store_registers (struct regcache *regcache, int regno)
     error (_("Writing to registers is not allowed (regno %d)"), regno);
 
   current_inferior ()->top_target ()->store_registers (regcache, regno);
-  if (targetdebug)
-    gdb_printf (gdb_stdlog, "target_store_registers: %s",
-		regcache->register_debug_string (regno).c_str ());
+  target_debug_printf ("%s", regcache->register_debug_string (regno).c_str ());
 }
 
 int
