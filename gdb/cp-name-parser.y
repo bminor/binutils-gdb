@@ -596,6 +596,7 @@ template_arg	:	typespec_2
 		|	'&' '(' start ')'
 			{ $$ = state->fill_comp (DEMANGLE_COMPONENT_UNARY, state->make_operator ("&", 1), $3); }
 		|	exp
+		|	function
 		;
 
 function_args	:	typespec_2
@@ -2062,6 +2063,9 @@ canonicalize_tests ()
   should_be_the_same ("x::y::z<0b111>", "x::y::z<0D7>");
 
   should_be_the_same ("x::y::z<0xff'ff>", "x::y::z<65535>");
+
+  should_be_the_same ("something<void ()>", "something<  void()  >");
+  should_be_the_same ("something<void ()>", "something<void (void)>");
 }
 
 #endif
