@@ -297,7 +297,7 @@ static void yyerror (cpname_state *, const char *);
 %left '^'
 %left '&'
 %left EQUAL NOTEQUAL
-%left '<' '>' LEQ GEQ
+%left '<' '>' LEQ GEQ SPACESHIP
 %left LSH RSH
 %left '@'
 %left '+' '-'
@@ -451,6 +451,8 @@ oper	:	OPERATOR NEW
 			{ $$ = state->make_operator ("<=", 2); }
 		|	OPERATOR GEQ
 			{ $$ = state->make_operator (">=", 2); }
+		|	OPERATOR SPACESHIP
+			{ $$ = state->make_operator ("<=>", 2); }
 		|	OPERATOR ANDAND
 			{ $$ = state->make_operator ("&&", 2); }
 		|	OPERATOR OROR
@@ -1075,6 +1077,10 @@ exp	:	exp LEQ exp
 
 exp	:	exp GEQ exp
 		{ $$ = state->d_binary (">=", $1, $3); }
+	;
+
+exp	:	exp SPACESHIP exp
+		{ $$ = state->d_binary ("<=>", $1, $3); }
 	;
 
 exp	:	exp '<' exp
@@ -1779,6 +1785,7 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
       return c;
     case '<':
       HANDLE_TOKEN3 ("<<=", ASSIGN_MODIFY);
+      HANDLE_TOKEN3 ("<=>", SPACESHIP);
       HANDLE_TOKEN2 ("<=", LEQ);
       HANDLE_TOKEN2 ("<<", LSH);
       state->lexptr++;
@@ -2049,6 +2056,14 @@ should_be_the_same (const char *one, const char *two)
 }
 
 static void
+should_parse (const char *name)
+{
+  std::string err;
+  auto parsed = cp_demangled_name_to_comp (name, &err);
+  SELF_CHECK (parsed != nullptr);
+}
+
+static void
 canonicalize_tests ()
 {
   should_be_the_same ("short int", "short");
@@ -2066,6 +2081,8 @@ canonicalize_tests ()
 
   should_be_the_same ("something<void ()>", "something<  void()  >");
   should_be_the_same ("something<void ()>", "something<void (void)>");
+
+  should_parse ("void whatever::operator<=><int, int>");
 }
 
 #endif
