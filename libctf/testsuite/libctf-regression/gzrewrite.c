@@ -88,7 +88,7 @@ main (int argc, char *argv[])
 
   if (a_len != b_len || memcmp (a, b, a_len) != 0)
     {
-      fprintf (stderr, "consecutive gzwrites are different: lengths %i and %i\n", a_len, b_len);
+      fprintf (stderr, "consecutive gzwrites are different: lengths %zu and %zu\n", a_len, b_len);
       return 1;
     }
 
