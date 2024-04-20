@@ -2755,6 +2755,10 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	    hex = 0;
 	  }
 
+	/* If the token includes the C++14 digits separator, we make a
+	   copy so that we don't have to handle the separator in
+	   parse_number.  */
+	std::optional<std::string> no_tick;
 	for (;; ++p)
 	  {
 	    /* This test includes !hex because 'e' is a valid hex digit
@@ -2771,18 +2775,32 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	    else if (((got_e && (p[-1] == 'e' || p[-1] == 'E'))
 		      || (got_p && (p[-1] == 'p' || p[-1] == 'P')))
 		     && (*p == '-' || *p == '+'))
-	      /* This is the sign of the exponent, not the end of the
-		 number.  */
-	      continue;
+	      {
+		/* This is the sign of the exponent, not the end of
+		   the number.  */
+	      }
+	    else if (*p == '\'')
+	      {
+		if (!no_tick.has_value ())
+		  no_tick.emplace (tokstart, p);
+		continue;
+	      }
 	    /* We will take any letters or digits.  parse_number will
 	       complain if past the radix, or if L or U are not final.  */
 	    else if ((*p < '0' || *p > '9')
 		     && ((*p < 'a' || *p > 'z')
 				  && (*p < 'A' || *p > 'Z')))
 	      break;
+	    if (no_tick.has_value ())
+	      no_tick->push_back (*p);
 	  }
-	toktype = parse_number (par_state, tokstart, p - tokstart,
-				got_dot | got_e | got_p, &yylval);
+	if (no_tick.has_value ())
+	  toktype = parse_number (par_state, no_tick->c_str (),
+				  no_tick->length (),
+				  got_dot | got_e | got_p, &yylval);
+	else
+	  toktype = parse_number (par_state, tokstart, p - tokstart,
+				  got_dot | got_e | got_p, &yylval);
 	if (toktype == ERROR)
 	  error (_("Invalid number \"%.*s\"."), (int) (p - tokstart),
 		 tokstart);

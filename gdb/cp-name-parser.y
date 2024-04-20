@@ -1686,6 +1686,10 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
 	    hex = 0;
 	  }
 
+	/* If the token includes the C++14 digits separator, we make a
+	   copy so that we don't have to handle the separator in
+	   parse_number.  */
+	std::optional<std::string> no_tick;
 	for (;; ++p)
 	  {
 	    /* This test includes !hex because 'e' is a valid hex digit
@@ -1703,16 +1707,31 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
 	      got_dot = 1;
 	    else if (got_e && (p[-1] == 'e' || p[-1] == 'E')
 		     && (*p == '-' || *p == '+'))
-	      /* This is the sign of the exponent, not the end of the
-		 number.  */
-	      continue;
+	      {
+		/* This is the sign of the exponent, not the end of
+		   the number.  */
+	      }
+	    /* C++14 allows a separator.  */
+	    else if (*p == '\'')
+	      {
+		if (!no_tick.has_value ())
+		  no_tick.emplace (tokstart, p);
+		continue;
+	      }
 	    /* We will take any letters or digits.  parse_number will
 	       complain if past the radix, or if L or U are not final.  */
 	    else if (! ISALNUM (*p))
 	      break;
+	    if (no_tick.has_value ())
+	      no_tick->push_back (*p);
 	  }
-	toktype = state->parse_number (tokstart, p - tokstart, got_dot|got_e,
-				       lvalp);
+	if (no_tick.has_value ())
+	  toktype = state->parse_number (no_tick->c_str (),
+					 no_tick->length (),
+					 got_dot|got_e, lvalp);
+	else
+	  toktype = state->parse_number (tokstart, p - tokstart,
+					 got_dot|got_e, lvalp);
 	if (toktype == ERROR)
 	  {
 	    yyerror (state, _("invalid number"));
@@ -2041,6 +2060,8 @@ canonicalize_tests ()
   should_be_the_same ("x::y::z<0b111>", "x::y::z<7>");
   should_be_the_same ("x::y::z<0b111>", "x::y::z<0t7>");
   should_be_the_same ("x::y::z<0b111>", "x::y::z<0D7>");
+
+  should_be_the_same ("x::y::z<0xff'ff>", "x::y::z<65535>");
 }
 
 #endif

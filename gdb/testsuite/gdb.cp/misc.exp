@@ -114,3 +114,7 @@ gdb_test "print *(number_ref + v_bool_array)" "\\$\[0-9\]* = false" \
     "integer reference addition with pointer"
 gdb_test "print *(v_bool_array - number_ref)" "\\$\[0-9\]* = false" \
     "pointer subtraction with integer reference"
+
+# C++14 digit separator.
+gdb_test "print 23'23" " = 2323"
+gdb_test "print 2'3.5" " = 23.5"
