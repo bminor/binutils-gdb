@@ -5188,6 +5188,71 @@ aarch64_record_asimd_load_store (aarch64_insn_decode_record *aarch64_insn_r)
   return AARCH64_RECORD_SUCCESS;
 }
 
+/* Record handler for Memory Copy and Memory Set instructions.  */
+
+static unsigned int
+aarch64_record_memcopy_memset (aarch64_insn_decode_record *aarch64_insn_r)
+{
+  if (record_debug)
+    debug_printf ("Process record: memory copy and memory set\n");
+
+  uint8_t op1 = bits (aarch64_insn_r->aarch64_insn, 22, 23);
+  uint8_t op2 = bits (aarch64_insn_r->aarch64_insn, 12, 15);
+  uint32_t reg_rd = bits (aarch64_insn_r->aarch64_insn, 0, 4);
+  uint32_t reg_rn = bits (aarch64_insn_r->aarch64_insn, 5, 9);
+  uint32_t record_buf[3];
+  uint64_t record_buf_mem[4];
+
+  if (op1 == 3 && op2 > 11)
+    /* Unallocated instructions.  */
+    return AARCH64_RECORD_UNKNOWN;
+
+  /* Set instructions have two registers and one memory region to be
+     recorded.  */
+  record_buf[0] = reg_rd;
+  record_buf[1] = reg_rn;
+  aarch64_insn_r->reg_rec_count = 2;
+
+  ULONGEST dest_addr;
+  regcache_raw_read_unsigned (aarch64_insn_r->regcache, reg_rd, &dest_addr);
+
+  LONGEST length;
+  regcache_raw_read_signed (aarch64_insn_r->regcache, reg_rn, &length);
+
+  /* In one of the algorithm options a processor can implement, the length
+     in Rn has an inverted sign.  */
+  if (length < 0)
+    length *= -1;
+
+  record_buf_mem[0] = length;
+  record_buf_mem[1] = dest_addr;
+  aarch64_insn_r->mem_rec_count = 1;
+
+  if (op1 != 3)
+    {
+      /* Copy instructions have an additional register and an additional
+	 memory region to be recorded.  */
+      uint32_t reg_rs = bits (aarch64_insn_r->aarch64_insn, 16, 20);
+
+      record_buf[2] = reg_rs;
+      aarch64_insn_r->reg_rec_count++;
+
+      ULONGEST source_addr;
+      regcache_raw_read_unsigned (aarch64_insn_r->regcache, reg_rs,
+				  &source_addr);
+
+      record_buf_mem[2] = length;
+      record_buf_mem[3] = source_addr;
+      aarch64_insn_r->mem_rec_count++;
+    }
+
+  MEM_ALLOC (aarch64_insn_r->aarch64_mems, aarch64_insn_r->mem_rec_count,
+	     record_buf_mem);
+  REG_ALLOC (aarch64_insn_r->aarch64_regs, aarch64_insn_r->reg_rec_count,
+	     record_buf);
+  return AARCH64_RECORD_SUCCESS;
+}
+
 /* Record handler for load and store instructions.  */
 
 static unsigned int
@@ -5465,6 +5530,10 @@ aarch64_record_load_store (aarch64_insn_decode_record *aarch64_insn_r)
       if (insn_bits10_11 == 0x01 || insn_bits10_11 == 0x03)
 	record_buf[aarch64_insn_r->reg_rec_count++] = reg_rn;
     }
+  /* Memory Copy and Memory Set instructions.  */
+  else if ((insn_bits24_27 & 1) == 1 && insn_bits28_29 == 1
+	   && insn_bits10_11 == 1 && !insn_bit21)
+    return aarch64_record_memcopy_memset (aarch64_insn_r);
   /* Advanced SIMD load/store instructions.  */
   else
     return aarch64_record_asimd_load_store (aarch64_insn_r);
