@@ -4573,36 +4573,32 @@ _bfd_elf_filter_global_symbols (bfd *abfd, struct bfd_link_info *info,
   return dst_count;
 }
 
-/* Don't output section symbols for sections that are not going to be
-   output, that are duplicates or there is no BFD section.  */
+/* Don't output symbols for sections that are not going to be output,
+   that are duplicates or there is no BFD section.  */
 
 static bool
-ignore_section_sym (bfd *abfd, asymbol *sym)
+ignore_sym (asymbol *sym)
 {
-  elf_symbol_type *type_ptr;
-
   if (sym == NULL)
     return false;
-
-  if ((sym->flags & BSF_SECTION_SYM) == 0)
-    return false;
-
-  /* Ignore the section symbol if it isn't used.  */
-  if ((sym->flags & BSF_SECTION_SYM_USED) == 0)
-    return true;
 
   if (sym->section == NULL)
     return true;
 
-  type_ptr = elf_symbol_from (sym);
-  return ((type_ptr != NULL
-	   && type_ptr->internal_elf_sym.st_shndx != 0
-	   && bfd_is_abs_section (sym->section))
-	  || !(sym->section->owner == abfd
-	       || (sym->section->output_section != NULL
-		   && sym->section->output_section->owner == abfd
-		   && sym->section->output_offset == 0)
-	       || bfd_is_abs_section (sym->section)));
+  if ((sym->flags & BSF_SECTION_SYM) != 0)
+    {
+      if ((sym->flags & BSF_SECTION_SYM_USED) == 0)
+	return true;
+      /* With ld -r on generic elf targets it is possible to have
+	 multiple section symbols in the output for a given section.
+	 We'd like to get rid of all but the first one.  This drops
+	 them if the first input section is non-zero size, but fails
+	 to do so if the first input section is zero sized.  */
+      if (sym->section->output_offset != 0)
+	return true;
+    }
+
+  return discarded_section (sym->section);
 }
 
 /* Map symbol from it's internal number to the external number, moving
@@ -4616,8 +4612,6 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
   asymbol **sect_syms;
   unsigned int num_locals = 0;
   unsigned int num_globals = 0;
-  unsigned int num_locals2 = 0;
-  unsigned int num_globals2 = 0;
   unsigned int max_index = 0;
   unsigned int idx;
   asection *asect;
@@ -4651,7 +4645,7 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
 
       if ((sym->flags & BSF_SECTION_SYM) != 0
 	  && sym->value == 0
-	  && !ignore_section_sym (abfd, sym)
+	  && !ignore_sym (sym)
 	  && !bfd_is_abs_section (sym->section))
 	{
 	  asection *sec = sym->section;
@@ -4666,9 +4660,11 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
   /* Classify all of the symbols.  */
   for (idx = 0; idx < symcount; idx++)
     {
+      if (ignore_sym (syms[idx]))
+	continue;
       if (sym_is_global (abfd, syms[idx]))
 	num_globals++;
-      else if (!ignore_section_sym (abfd, syms[idx]))
+      else
 	num_locals++;
     }
 
@@ -4680,13 +4676,13 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
     {
       asymbol *sym = asect->symbol;
       /* Don't include ignored section symbols.  */
-      if (!ignore_section_sym (abfd, sym)
+      if (!ignore_sym (sym)
 	  && sect_syms[asect->index] == NULL)
 	{
-	  if (!sym_is_global (abfd, asect->symbol))
-	    num_locals++;
-	  else
+	  if (sym_is_global (abfd, asect->symbol))
 	    num_globals++;
+	  else
+	    num_locals++;
 	}
     }
 
@@ -4696,34 +4692,36 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
   if (new_syms == NULL)
     return false;
 
+  unsigned int num_globals2 = 0;
+  unsigned int num_locals2 = 0;
   for (idx = 0; idx < symcount; idx++)
     {
       asymbol *sym = syms[idx];
       unsigned int i;
 
+      if (ignore_sym (sym))
+	continue;
+
       if (sym_is_global (abfd, sym))
 	i = num_locals + num_globals2++;
-      /* Don't include ignored section symbols.  */
-      else if (!ignore_section_sym (abfd, sym))
-	i = num_locals2++;
       else
-	continue;
+	i = num_locals2++;
       new_syms[i] = sym;
       sym->udata.i = i + 1;
     }
   for (asect = abfd->sections; asect; asect = asect->next)
     {
       asymbol *sym = asect->symbol;
-      if (!ignore_section_sym (abfd, sym)
+      if (!ignore_sym (sym)
 	  && sect_syms[asect->index] == NULL)
 	{
 	  unsigned int i;
 
 	  sect_syms[asect->index] = sym;
-	  if (!sym_is_global (abfd, sym))
-	    i = num_locals2++;
-	  else
+	  if (sym_is_global (abfd, sym))
 	    i = num_locals + num_globals2++;
+	  else
+	    i = num_locals2++;
 	  new_syms[i] = sym;
 	  sym->udata.i = i + 1;
 	}
@@ -8897,8 +8895,8 @@ swap_out_syms (bfd *abfd,
     sym.st_other = 0;
     sym.st_shndx = SHN_UNDEF;
     sym.st_target_internal = 0;
-    symstrtab[0].sym = sym;
-    symstrtab[0].dest_index = outbound_syms_index;
+    symstrtab[outbound_syms_index].sym = sym;
+    symstrtab[outbound_syms_index].dest_index = outbound_syms_index;
     outbound_syms_index++;
   }
 
@@ -8907,14 +8905,11 @@ swap_out_syms (bfd *abfd,
        && bed->elf_backend_name_local_section_symbols (abfd));
 
   syms = bfd_get_outsymbols (abfd);
-  for (idx = 0; idx < symcount;)
+  for (idx = 0; idx < symcount; idx++)
     {
       Elf_Internal_Sym sym;
-      bfd_vma value = syms[idx]->value;
-      elf_symbol_type *type_ptr;
-      flagword flags = syms[idx]->flags;
-      int type;
 
+      flagword flags = syms[idx]->flags;
       if (!name_local_sections
 	  && (flags & (BSF_SECTION_SYM | BSF_GLOBAL)) == BSF_SECTION_SYM)
 	{
@@ -8932,10 +8927,11 @@ swap_out_syms (bfd *abfd,
 	    goto error_return;
 	}
 
-      type_ptr = elf_symbol_from (syms[idx]);
+      bfd_vma value = syms[idx]->value;
+      elf_symbol_type *type_ptr = elf_symbol_from (syms[idx]);
+      asection *sec = syms[idx]->section;
 
-      if ((flags & BSF_SECTION_SYM) == 0
-	  && bfd_is_com_section (syms[idx]->section))
+      if ((flags & BSF_SECTION_SYM) == 0 && bfd_is_com_section (sec))
 	{
 	  /* ELF common symbols put the alignment into the `value' field,
 	     and the size into the `size' field.  This is backwards from
@@ -8946,12 +8942,10 @@ swap_out_syms (bfd *abfd,
 	    sym.st_value = value >= 16 ? 16 : (1 << bfd_log2 (value));
 	  else
 	    sym.st_value = type_ptr->internal_elf_sym.st_value;
-	  sym.st_shndx = _bfd_elf_section_from_bfd_section
-	    (abfd, syms[idx]->section);
+	  sym.st_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
 	}
       else
 	{
-	  asection *sec = syms[idx]->section;
 	  unsigned int shndx;
 
 	  if (sec->output_section)
@@ -9049,6 +9043,7 @@ Unable to handle section index %x in ELF symbol.  Using ABS instead."),
 	  sym.st_shndx = shndx;
 	}
 
+      int type;
       if ((flags & BSF_THREAD_LOCAL) != 0)
 	type = STT_TLS;
       else if ((flags & BSF_GNU_INDIRECT_FUNCTION) != 0)
@@ -9128,10 +9123,8 @@ Unable to handle section index %x in ELF symbol.  Using ABS instead."),
 	  sym.st_target_internal = 0;
 	}
 
-      idx++;
-      symstrtab[idx].sym = sym;
-      symstrtab[idx].dest_index = outbound_syms_index;
-
+      symstrtab[outbound_syms_index].sym = sym;
+      symstrtab[outbound_syms_index].dest_index = outbound_syms_index;
       outbound_syms_index++;
     }
 
@@ -9139,7 +9132,7 @@ Unable to handle section index %x in ELF symbol.  Using ABS instead."),
   _bfd_elf_strtab_finalize (stt);
 
   /* Swap out the .strtab section.  */
-  for (idx = 0; idx <= symcount; idx++)
+  for (idx = 0; idx < outbound_syms_index; idx++)
     {
       struct elf_sym_strtab *elfsym = &symstrtab[idx];
       if (elfsym->sym.st_name == (unsigned long) -1)

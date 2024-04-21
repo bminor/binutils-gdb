@@ -6,5 +6,5 @@
 
 #failif
 #...
-.*: 0+ +0 +FUNC +WEAK +DEFAULT +UND +bar
+.* bar
 #pass
