@@ -54,6 +54,7 @@
 #include "cli/cli-cmds.h"
 #include "xml-tdesc.h"
 #include "memtag.h"
+#include "cli/cli-style.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -210,8 +211,50 @@ core_target::core_target ()
 void
 core_target::build_file_mappings ()
 {
+  /* Type holding information about a single file mapped into the inferior
+     at the point when the core file was created.  Associates a build-id
+     with the list of regions the file is mapped into.  */
+  struct mapped_file
+  {
+    /* Type for a region of a file that was mapped into the inferior when
+       the core file was generated.  */
+    struct region
+    {
+      /* Constructor.   See member variables for argument descriptions.  */
+      region (CORE_ADDR start_, CORE_ADDR end_, CORE_ADDR file_ofs_)
+	: start (start_),
+	  end (end_),
+	  file_ofs (file_ofs_)
+      { /* Nothing.  */ }
+
+      /* The inferior address for the start of the mapped region.  */
+      CORE_ADDR start;
+
+      /* The inferior address immediately after the mapped region.  */
+      CORE_ADDR end;
+
+      /* The offset within the mapped file for this content.  */
+      CORE_ADDR file_ofs;
+    };
+
+    /* If not nullptr, then this is the build-id associated with this
+       file.  */
+    const bfd_build_id *build_id = nullptr;
+
+    /* If true then we have seen multiple different build-ids associated
+       with the same filename.  The build_id field will have been set back
+       to nullptr, and we should not set build_id in future.  */
+    bool ignore_build_id_p = false;
+
+    /* All the mapped regions of this file.  */
+    std::vector<region> regions;
+  };
+
   std::unordered_map<std::string, struct bfd *> bfd_map;
   std::unordered_set<std::string> unavailable_paths;
+
+  /* All files mapped into the core file.  The key is the filename.  */
+  std::unordered_map<std::string, mapped_file> mapped_files;
 
   /* See linux_read_core_file_mappings() in linux-tdep.c for an example
      read_core_file_mappings method.  */
@@ -233,87 +276,172 @@ core_target::build_file_mappings ()
 	   weed out non-file-backed mappings.  */
 	gdb_assert (filename != nullptr);
 
-	if (unavailable_paths.find (filename) != unavailable_paths.end ())
+	/* Add this mapped region to the data for FILENAME.  */
+	mapped_file &file_data = mapped_files[filename];
+	file_data.regions.emplace_back (start, end, file_ofs);
+	if (build_id != nullptr && !file_data.ignore_build_id_p)
 	  {
-	    /* We have already seen some mapping for FILENAME but failed to
-	       find/open the file.  There is no point in trying the same
-	       thing again so just record that the range [start, end) is
-	       unavailable.  */
-	    m_core_unavailable_mappings.emplace_back (start, end - start);
-	    return;
-	  }
-
-	struct bfd *bfd = bfd_map[filename];
-	if (bfd == nullptr)
-	  {
-	    /* Use exec_file_find() to do sysroot expansion.  It'll
-	       also strip the potential sysroot "target:" prefix.  If
-	       there is no sysroot, an equivalent (possibly more
-	       canonical) pathname will be provided.  */
-	    gdb::unique_xmalloc_ptr<char> expanded_fname
-	      = exec_file_find (filename, NULL);
-
-	    if (expanded_fname == nullptr && build_id != nullptr)
-	      debuginfod_exec_query (build_id->data, build_id->size,
-				     filename, &expanded_fname);
-
-	    if (expanded_fname == nullptr)
+	    if (file_data.build_id == nullptr)
+	      file_data.build_id = build_id;
+	    else if (!build_id_equal (build_id, file_data.build_id))
 	      {
-		m_core_unavailable_mappings.emplace_back (start, end - start);
-		unavailable_paths.insert (filename);
-		warning (_("Can't open file %s during file-backed mapping "
-			   "note processing"),
-			 filename);
-		return;
+		warning (_("Multiple build-ids found for %ps"),
+			 styled_string (file_name_style.style (), filename));
+		file_data.build_id = nullptr;
+		file_data.ignore_build_id_p = true;
 	      }
-
-	    bfd = bfd_openr (expanded_fname.get (), "binary");
-
-	    if (bfd == nullptr || !bfd_check_format (bfd, bfd_object))
-	      {
-		m_core_unavailable_mappings.emplace_back (start, end - start);
-		unavailable_paths.insert (filename);
-		warning (_("Can't open file %s which was expanded to %s "
-			   "during file-backed mapping note processing"),
-			 filename, expanded_fname.get ());
-
-		if (bfd != nullptr)
-		  bfd_close (bfd);
-		return;
-	      }
-	    /* Ensure that the bfd will be closed when core_bfd is closed. 
-	       This can be checked before/after a core file detach via
-	       "maint info bfds".  */
-	    gdb_bfd_record_inclusion (current_program_space->core_bfd (), bfd);
-	    bfd_map[filename] = bfd;
-	  }
-
-	/* Make new BFD section.  All sections have the same name,
-	   which is permitted by bfd_make_section_anyway().  */
-	asection *sec = bfd_make_section_anyway (bfd, "load");
-	if (sec == nullptr)
-	  error (_("Can't make section"));
-	sec->filepos = file_ofs;
-	bfd_set_section_flags (sec, SEC_READONLY | SEC_HAS_CONTENTS);
-	bfd_set_section_size (sec, end - start);
-	bfd_set_section_vma (sec, start);
-	bfd_set_section_lma (sec, start);
-	bfd_set_section_alignment (sec, 2);
-
-	/* Set target_section fields.  */
-	m_core_file_mappings.emplace_back (start, end, sec);
-
-	/* If this is a bfd of a shared library, record its soname
-	   and build id.  */
-	if (build_id != nullptr)
-	  {
-	    gdb::unique_xmalloc_ptr<char> soname
-	      = gdb_bfd_read_elf_soname (bfd->filename);
-	    if (soname != nullptr)
-	      set_cbfd_soname_build_id (current_program_space->cbfd,
-					soname.get (), build_id);
 	  }
       });
+
+  for (const auto &iter : mapped_files)
+    {
+      const std::string &filename = iter.first;
+      const mapped_file &file_data = iter.second;
+
+      /* Use exec_file_find() to do sysroot expansion.  It'll
+	 also strip the potential sysroot "target:" prefix.  If
+	 there is no sysroot, an equivalent (possibly more
+	 canonical) pathname will be provided.  */
+      gdb::unique_xmalloc_ptr<char> expanded_fname
+	= exec_file_find (filename.c_str (), nullptr);
+
+      bool build_id_mismatch = false;
+      if (expanded_fname != nullptr && file_data.build_id != nullptr)
+	{
+	  /* We temporarily open the bfd as a structured target, this
+	     allows us to read the build-id from the bfd if there is one.
+	     For this task it's OK if we reuse an already open bfd object,
+	     so we make this call through GDB's bfd cache.  Once we've
+	     checked the build-id (if there is one) we'll drop this
+	     reference and re-open the bfd using the "binary" target.  */
+	  gdb_bfd_ref_ptr tmp_bfd
+	    = gdb_bfd_open (expanded_fname.get (), gnutarget);
+
+	  if (tmp_bfd != nullptr
+	      && bfd_check_format (tmp_bfd.get (), bfd_object)
+	      && build_id_bfd_get (tmp_bfd.get ()) != nullptr)
+	    {
+	      /* The newly opened TMP_BFD has a build-id, and this mapped
+		 file has a build-id extracted from the core-file.  Check
+		 the build-id's match, and if not, reject TMP_BFD.  */
+	      const struct bfd_build_id *found
+		= build_id_bfd_get (tmp_bfd.get ());
+	      if (!build_id_equal (found, file_data.build_id))
+		build_id_mismatch = true;
+	    }
+	}
+
+      gdb_bfd_ref_ptr abfd;
+      if (expanded_fname != nullptr && !build_id_mismatch)
+	{
+	  struct bfd *b = bfd_openr (expanded_fname.get (), "binary");
+	  abfd = gdb_bfd_ref_ptr::new_reference (b);
+	}
+
+      if ((expanded_fname == nullptr
+	   || abfd == nullptr
+	   || !bfd_check_format (abfd.get (), bfd_object))
+	  && file_data.build_id != nullptr)
+	{
+	  expanded_fname = nullptr;
+	  debuginfod_exec_query (file_data.build_id->data,
+				 file_data.build_id->size,
+				 filename.c_str (), &expanded_fname);
+	  if (expanded_fname != nullptr)
+	    {
+	      struct bfd *b = bfd_openr (expanded_fname.get (), "binary");
+	      abfd = gdb_bfd_ref_ptr::new_reference (b);
+	    }
+	}
+
+      if (expanded_fname == nullptr
+	  || abfd == nullptr
+	  || !bfd_check_format (abfd.get (), bfd_object))
+	{
+	  /* If ABFD was opened, but the wrong format, close it now.  */
+	  abfd = nullptr;
+
+	  /* Record all regions for this file as unavailable.  */
+	  for (const mapped_file::region &region : file_data.regions)
+	    m_core_unavailable_mappings.emplace_back (region.start,
+						      region.end
+						      - region.start);
+
+	  /* And give the user an appropriate warning.  */
+	  if (build_id_mismatch)
+	    {
+	      if (expanded_fname == nullptr
+		  || filename == expanded_fname.get ())
+		warning (_("File %ps doesn't match build-id from core-file "
+			   "during file-backed mapping processing"),
+			 styled_string (file_name_style.style (),
+					filename.c_str ()));
+	      else
+		warning (_("File %ps which was expanded to %ps, doesn't match "
+			   "build-id from core-file during file-backed "
+			   "mapping processing"),
+			 styled_string (file_name_style.style (),
+					filename.c_str ()),
+			 styled_string (file_name_style.style (),
+					expanded_fname.get ()));
+	    }
+	  else
+	    {
+	      if (expanded_fname == nullptr
+		  || filename == expanded_fname.get ())
+		warning (_("Can't open file %ps during file-backed mapping "
+			   "note processing"),
+			 styled_string (file_name_style.style (),
+					filename.c_str ()));
+	      else
+		warning (_("Can't open file %ps which was expanded to %ps "
+			   "during file-backed mapping note processing"),
+			 styled_string (file_name_style.style (),
+					filename.c_str ()),
+			 styled_string (file_name_style.style (),
+					expanded_fname.get ()));
+	    }
+	}
+      else
+	{
+	  /* Ensure that the bfd will be closed when core_bfd is closed.
+	     This can be checked before/after a core file detach via "maint
+	     info bfds".  */
+	  gdb_bfd_record_inclusion (current_program_space->core_bfd (),
+				    abfd.get ());
+
+	  /* Create sections for each mapped region.  */
+	  for (const mapped_file::region &region : file_data.regions)
+	    {
+	      /* Make new BFD section.  All sections have the same name,
+		 which is permitted by bfd_make_section_anyway().  */
+	      asection *sec = bfd_make_section_anyway (abfd.get (), "load");
+	      if (sec == nullptr)
+		error (_("Can't make section"));
+	      sec->filepos = region.file_ofs;
+	      bfd_set_section_flags (sec, SEC_READONLY | SEC_HAS_CONTENTS);
+	      bfd_set_section_size (sec, region.end - region.start);
+	      bfd_set_section_vma (sec, region.start);
+	      bfd_set_section_lma (sec, region.start);
+	      bfd_set_section_alignment (sec, 2);
+
+	      /* Set target_section fields.  */
+	      m_core_file_mappings.emplace_back (region.start, region.end, sec);
+	    }
+	}
+
+      /* If this is a bfd of a shared library, record its soname and
+	 build-id.  */
+      if (file_data.build_id != nullptr && abfd != nullptr)
+	{
+	  gdb::unique_xmalloc_ptr<char> soname
+	    = gdb_bfd_read_elf_soname (bfd_get_filename (abfd.get ()));
+
+	  if (soname != nullptr)
+	    set_cbfd_soname_build_id (current_program_space->cbfd,
+				      soname.get (), file_data.build_id);
+	}
+    }
 
   normalize_mem_ranges (&m_core_unavailable_mappings);
 }
