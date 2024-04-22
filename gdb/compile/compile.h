@@ -19,6 +19,7 @@
 #define COMPILE_COMPILE_H
 
 #include "gcc-c-interface.h"
+#include "gdbsupport/gdb-hashtab.h"
 
 struct ui_file;
 struct gdbarch;
@@ -26,6 +27,33 @@ struct dwarf2_per_cu_data;
 struct dwarf2_per_objfile;
 struct symbol;
 struct dynamic_prop;
+
+/* Scope types enumerator.  List the types of scopes the compiler will
+   accept.  */
+
+enum compile_i_scope_types
+  {
+    COMPILE_I_INVALID_SCOPE,
+
+    /* A simple scope.  Wrap an expression into a simple scope that
+       takes no arguments, returns no value, and uses the generic
+       function name "_gdb_expr". */
+
+    COMPILE_I_SIMPLE_SCOPE,
+
+    /* Do not wrap the expression,
+       it has to provide function "_gdb_expr" on its own.  */
+    COMPILE_I_RAW_SCOPE,
+
+    /* A printable expression scope.  Wrap an expression into a scope
+       suitable for the "compile print" command.  It uses the generic
+       function name "_gdb_expr".  COMPILE_I_PRINT_ADDRESS_SCOPE variant
+       is the usual one, taking address of the object.
+       COMPILE_I_PRINT_VALUE_SCOPE is needed for arrays where the array
+       name already specifies its address.  See get_out_value_type.  */
+    COMPILE_I_PRINT_ADDRESS_SCOPE,
+    COMPILE_I_PRINT_VALUE_SCOPE,
+  };
 
 /* An object of this type holds state associated with a given
    compilation job.  */

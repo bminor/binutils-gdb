@@ -18,6 +18,7 @@
 #define COMPILE_COMPILE_OBJECT_LOAD_H
 
 #include "compile-internal.h"
+#include "compile.h"
 #include <list>
 
 struct munmap_list
