@@ -3380,6 +3380,13 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       symcount = filter_symbols (ibfd, obfd, osympp, isympp, symcount);
     }
 
+  for (i = 0; i < symcount; i++)
+    if (!bfd_copy_private_symbol_data (ibfd, osympp[i], obfd, osympp[i]))
+      {
+	status = 1;
+	return false;
+      }
+
   if (dhandle != NULL)
     {
       bool res;
