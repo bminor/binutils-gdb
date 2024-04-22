@@ -3430,7 +3430,7 @@ c_print_token (FILE *file, int type, YYSTYPE value)
     case CHAR:
     case STRING:
       parser_fprintf (file, "tsval<type=%d, %.*s>", value.tsval.type,
-		      value.tsval.length, val.tsval.ptr);
+		      value.tsval.length, value.tsval.ptr);
       break;
 
     case NSSTRING:
