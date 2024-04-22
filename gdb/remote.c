@@ -11997,18 +11997,23 @@ remote_target::rcmd (const char *command, struct ui_file *outbuf)
 	  continue;
 	}
       packet_result result = packet_check_result (buf, false);
-      if (strcmp (buf, "OK") == 0)
-	break;
-      else if (result.status () == PACKET_UNKNOWN)
-	error (_("Target does not support this command."));
-      else
-	error (_("Protocol error with Rcmd: %s."), result.err_msg ());
-
-      for (p = buf; p[0] != '\0' && p[1] != '\0'; p += 2)
+      switch (result.status ())
 	{
-	  char c = (fromhex (p[0]) << 4) + fromhex (p[1]);
+	case PACKET_UNKNOWN:
+	  error (_("Target does not support this command."));
+	case PACKET_ERROR:
+	  error (_("Protocol error with Rcmd: %s."), result.err_msg ());
+	case PACKET_OK:
+	  break;
+	}
 
-	  gdb_putc (c, outbuf);
+      if (strcmp (buf, "OK") != 0)
+	{
+	  for (p = buf; p[0] != '\0' && p[1] != '\0'; p += 2)
+	    {
+	      char c = (fromhex (p[0]) << 4) + fromhex (p[1]);
+	      gdb_putc (c, outbuf);
+	    }
 	}
       break;
     }
