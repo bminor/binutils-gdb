@@ -39,4 +39,6 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:[ 	]+62 d4 24 18 8f[ 	]+\(bad\)
 [ 	]*[a-f0-9]+:[ 	]+c3[ 	]+.*
 [ 	]*[a-f0-9]+:[ 	]+62 fc 7d 0c 60 c7[ 	]+movbe  \{bad-nf\},%r23w,%ax
+[ 	]*[a-f0-9]+:[ 	]+62 fc 79 08 60[ 	]+\(bad\)
+[ 	]*[a-f0-9]+:[ 	]+c2[ 	]+.*
 #pass

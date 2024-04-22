@@ -9192,6 +9192,9 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       if (!fetch_modrm (ins))
 	return &err_opcode;
 
+      if (ins->modrm.mod == 3 && (ins->rex2 & REX_X))
+	return &bad_opcode;
+
       /* Set vector length. For EVEX-promoted instructions, evex.ll == 0b00,
 	 which has the same encoding as vex.length == 128 and they can share
 	 the same processing with vex.length in OP_VEX.  */

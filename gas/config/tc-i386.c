@@ -4276,7 +4276,10 @@ build_apx_evex_prefix (void)
   if (i.rex2 & REX_B)
     i.vex.bytes[1] |= 0x08;
   if (i.rex2 & REX_X)
-    i.vex.bytes[2] &= ~0x04;
+    {
+      gas_assert (i.rm.mode != 3);
+      i.vex.bytes[2] &= ~0x04;
+    }
   if (i.vex.register_specifier
       && i.vex.register_specifier->reg_flags & RegRex2)
     i.vex.bytes[3] &= ~0x08;

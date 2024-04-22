@@ -53,3 +53,6 @@ _start:
 
 	#EVEX_MAP4 movbe %r18w,%ax set EVEX.nf = 1.
 	.insn EVEX.L0.66.M12.W0 0x60, %di, %ax {%k4}
+
+	# EVEX_MAP4 movbe %r18w,%ax set EVEX.P[10] = 0.
+	.byte 0x62, 0xfc, 0x79, 0x08, 0x60, 0xc2
