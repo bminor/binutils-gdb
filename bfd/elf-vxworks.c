@@ -186,7 +186,7 @@ elf_vxworks_emit_relocs (bfd *output_bfd,
 		     library.  We are creating a definition in the output
 		     file but it does not come from any of our normal (.o)
 		     files. ie. a PLT stub.  Normally this would be a
-		     relocation against against SHN_UNDEF with the VMA of
+		     relocation against SHN_UNDEF with the VMA of
 		     the PLT stub.  This upsets the VxWorks loader.
 		     Convert it to a section-relative relocation.  This
 		     gets some other symbols (for instance .dynbss), but
