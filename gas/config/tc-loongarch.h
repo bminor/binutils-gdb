@@ -91,9 +91,7 @@ extern bool loongarch_frag_align_code (int, int);
 #define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEC)	\
   (LARCH_opts.relax ?  \
     (GENERIC_FORCE_RELOCATION_SUB_SAME (FIX, SEC)	\
-      || ((SEC)->flags & SEC_CODE) != 0		\
-      || ((SEC)->flags & SEC_DEBUGGING) != 0	\
-      || TC_FORCE_RELOCATION (FIX)) \
+      || ((SEC)->flags & SEC_CODE) != 0)		\
     : (GENERIC_FORCE_RELOCATION_SUB_SAME (FIX, SEC))) \
 
 #define TC_LINKRELAX_FIXUP(seg) ((seg->flags & SEC_CODE)  \
