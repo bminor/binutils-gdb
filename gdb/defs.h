@@ -61,7 +61,6 @@
 
 #include "gdbsupport/host-defs.h"
 #include "gdbsupport/enum-flags.h"
-#include "gdbsupport/array-view.h"
 
 /* Just in case they're not defined in stdio.h.  */
 
