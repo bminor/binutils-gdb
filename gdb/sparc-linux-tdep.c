@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "dwarf2/frame.h"
+#include "extract-store-integer.h"
 #include "frame.h"
 #include "frame-unwind.h"
 #include "gdbtypes.h"

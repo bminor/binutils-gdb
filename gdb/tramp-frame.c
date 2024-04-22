@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "tramp-frame.h"
+#include "extract-store-integer.h"
 #include "frame-unwind.h"
 #include "gdbcore.h"
 #include "symtab.h"

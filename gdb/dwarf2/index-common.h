@@ -20,6 +20,8 @@
 #ifndef DWARF_INDEX_COMMON_H
 #define DWARF_INDEX_COMMON_H
 
+#include "extract-store-integer.h"
+
 /* The suffix for an index file.  */
 #define INDEX4_SUFFIX ".gdb-index"
 #define INDEX5_SUFFIX ".debug_names"

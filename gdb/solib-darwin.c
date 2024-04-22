@@ -19,6 +19,7 @@
 
 
 #include "bfd.h"
+#include "extract-store-integer.h"
 #include "objfiles.h"
 #include "gdbcore.h"
 #include "target.h"

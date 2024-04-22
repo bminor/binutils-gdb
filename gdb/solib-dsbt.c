@@ -17,6 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
+#include "extract-store-integer.h"
 #include "inferior.h"
 #include "gdbcore.h"
 #include "solib.h"

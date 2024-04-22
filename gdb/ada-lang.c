@@ -19,6 +19,7 @@
 
 
 #include <ctype.h>
+#include "extract-store-integer.h"
 #include "gdbsupport/gdb_regex.h"
 #include "frame.h"
 #include "symtab.h"

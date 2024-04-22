@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "tracefile.h"
+#include "extract-store-integer.h"
 #include "tracectf.h"
 #include "exec.h"
 #include "regcache.h"

@@ -19,6 +19,7 @@
 
 #include "arm-tdep.h"
 #include "arch-utils.h"
+#include "extract-store-integer.h"
 #include "regcache.h"
 #include "elf-bfd.h"
 #include "regset.h"

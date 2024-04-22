@@ -16,6 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "windows-tdep.h"
+#include "extract-store-integer.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "xml-support.h"
 #include "gdbarch.h"

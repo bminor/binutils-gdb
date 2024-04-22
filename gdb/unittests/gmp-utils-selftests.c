@@ -19,6 +19,7 @@
 
 #include "gmp-utils.h"
 #include "gdbsupport/selftest.h"
+#include "extract-store-integer.h"
 
 #include <math.h>
 

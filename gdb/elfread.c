@@ -24,6 +24,7 @@
 #include "elf/common.h"
 #include "elf/internal.h"
 #include "elf/mips.h"
+#include "extract-store-integer.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"

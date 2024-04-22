@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "target.h"
+#include "extract-store-integer.h"
 #include "target-dcache.h"
 #include "gdbcmd.h"
 #include "symtab.h"

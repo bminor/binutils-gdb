@@ -1109,6 +1109,7 @@ COMMON_SFILES = \
 	dwarf2/read-gdb-index.c \
 	dwarf2/section.c \
 	dwarf2/stringify.c \
+	extract-store-integer.c \
 	eval.c \
 	event-top.c \
 	exceptions.c \
@@ -1362,6 +1363,7 @@ HFILES_NO_SRCDIR = \
 	expression.h \
 	extension.h \
 	extension-priv.h \
+	extract-store-integer.h \
 	f-array-walker.h \
 	f-lang.h \
 	fbsd-nat.h \

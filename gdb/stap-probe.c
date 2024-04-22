@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "stap-probe.h"
+#include "extract-store-integer.h"
 #include "probe.h"
 #include "ui-out.h"
 #include "objfiles.h"

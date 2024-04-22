@@ -21,6 +21,7 @@
 
 #include "arch-utils.h"
 #include "bfdlink.h"
+#include "extract-store-integer.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"

@@ -15,6 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "extract-store-integer.h"
 #include "osabi.h"
 #include "amd64-tdep.h"
 #include "gdbsupport/x86-xstate.h"

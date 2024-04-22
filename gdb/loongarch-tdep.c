@@ -20,6 +20,7 @@
 #include "arch-utils.h"
 #include "dwarf2/frame.h"
 #include "elf-bfd.h"
+#include "extract-store-integer.h"
 #include "frame-unwind.h"
 #include "gdbcore.h"
 #include "loongarch-tdep.h"

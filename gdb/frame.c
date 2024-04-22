@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "frame.h"
+#include "extract-store-integer.h"
 #include "target.h"
 #include "value.h"
 #include "inferior.h"

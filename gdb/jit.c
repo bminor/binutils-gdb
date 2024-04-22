@@ -19,6 +19,7 @@
 
 
 #include "jit.h"
+#include "extract-store-integer.h"
 #include "jit-reader.h"
 #include "block.h"
 #include "breakpoint.h"

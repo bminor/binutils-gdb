@@ -23,6 +23,7 @@
 #include "elf-bfd.h"
 #include "disasm.h"
 #include "dwarf2/frame.h"
+#include "extract-store-integer.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
 #include "gdbcore.h"

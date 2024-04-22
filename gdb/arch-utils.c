@@ -19,6 +19,7 @@
 
 
 #include "arch-utils.h"
+#include "extract-store-integer.h"
 #include "gdbcmd.h"
 #include "inferior.h"
 #include "infrun.h"

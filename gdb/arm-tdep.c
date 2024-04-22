@@ -20,6 +20,7 @@
 
 #include <ctype.h>
 
+#include "extract-store-integer.h"
 #include "frame.h"
 #include "language.h"
 #include "inferior.h"

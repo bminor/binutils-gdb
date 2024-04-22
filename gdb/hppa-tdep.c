@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "bfd.h"
+#include "extract-store-integer.h"
 #include "inferior.h"
 #include "regcache.h"
 #include "completer.h"

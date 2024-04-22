@@ -19,6 +19,7 @@
 
 /* This file is derived from c-valprint.c */
 
+#include "extract-store-integer.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "symtab.h"
 #include "gdbtypes.h"

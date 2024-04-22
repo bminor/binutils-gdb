@@ -19,6 +19,7 @@
 
 #include "arch-utils.h"
 #include "dis-asm.h"
+#include "extract-store-integer.h"
 #include "frame.h"
 #include "frame-unwind.h"
 #include "frame-base.h"

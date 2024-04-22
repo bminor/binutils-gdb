@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
+#include "extract-store-integer.h"
 #include "gdbarch.h"
 #include "fbsd-tdep.h"
 #include "aarch64-tdep.h"

@@ -23,6 +23,7 @@
 #include "dwarf2/frame.h"
 #include "elf/s390.h"
 #include "elf-bfd.h"
+#include "extract-store-integer.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
 #include "gdbarch.h"

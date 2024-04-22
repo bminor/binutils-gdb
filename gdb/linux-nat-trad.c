@@ -19,6 +19,7 @@
 
 #include "linux-nat-trad.h"
 
+#include "extract-store-integer.h"
 #include "nat/gdb_ptrace.h"
 #include "inf-ptrace.h"
 #include "gdbarch.h"

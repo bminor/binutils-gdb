@@ -20,6 +20,7 @@
 /* Contributed by Steve Chamberlain
    sac@cygnus.com.  */
 
+#include "extract-store-integer.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"

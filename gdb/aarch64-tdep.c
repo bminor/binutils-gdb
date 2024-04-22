@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
+#include "extract-store-integer.h"
 #include "frame.h"
 #include "language.h"
 #include "gdbcmd.h"

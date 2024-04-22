@@ -19,6 +19,7 @@
 
 /* This file is derived from c-lang.c */
 
+#include "extract-store-integer.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"

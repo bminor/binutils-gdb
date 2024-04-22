@@ -19,6 +19,7 @@
 
 #include "arch-utils.h"
 #include "dis-asm.h"
+#include "extract-store-integer.h"
 #include "gdbtypes.h"
 #include "regcache.h"
 #include "gdbcore.h"

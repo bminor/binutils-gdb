@@ -22,6 +22,7 @@
    sac@cygnus.com
  */
 
+#include "extract-store-integer.h"
 #include "value.h"
 #include "arch-utils.h"
 #include "regcache.h"
