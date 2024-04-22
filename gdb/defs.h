@@ -82,8 +82,6 @@
 #define O_BINARY 0
 #endif
 
-#include "hashtab.h"
-
 /* * System root path, used to find libraries etc.  */
 extern std::string gdb_sysroot;
 

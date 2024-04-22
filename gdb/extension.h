@@ -22,6 +22,7 @@
 
 #include "mi/mi-cmds.h"
 #include "gdbsupport/array-view.h"
+#include "hashtab.h"
 #include <optional>
 
 struct breakpoint;

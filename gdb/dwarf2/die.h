@@ -22,6 +22,7 @@
 
 #include "complaints.h"
 #include "dwarf2/attribute.h"
+#include "hashtab.h"
 
 /* This data structure holds a complete die structure.  */
 struct die_info
