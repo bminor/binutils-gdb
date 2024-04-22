@@ -7578,10 +7578,9 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
        7. SHF_TLS sections are only in PT_TLS or PT_LOAD segments.
        8. PT_DYNAMIC should not contain empty sections at the beginning
 	  (with the possible exception of .dynamic).  */
-#define IS_SECTION_IN_INPUT_SEGMENT(section, segment, bed, opb)		\
+#define IS_SECTION_IN_INPUT_SEGMENT(section, segment, opb, paddr_valid)	\
   (((is_contained_by (section, segment, segment->p_paddr,		\
-		      segment->p_vaddr, opb,				\
-		      bed->want_p_paddr_set_to_zero)			\
+		      segment->p_vaddr, opb, !paddr_valid)		\
      && (section->flags & SEC_ALLOC) != 0)				\
     || is_note (section, segment))					\
    && segment->p_type != PT_GNU_STACK					\
@@ -7600,8 +7599,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 
 /* If the output section of a section in the input segment is NULL,
    it is removed from the corresponding output segment.   */
-#define INCLUDE_SECTION_IN_SEGMENT(section, segment, bed, opb)		\
-  (IS_SECTION_IN_INPUT_SEGMENT (section, segment, bed, opb)		\
+#define INCLUDE_SECTION_IN_SEGMENT(section, segment, opb, paddr_valid)	\
+  (IS_SECTION_IN_INPUT_SEGMENT (section, segment, opb, paddr_valid)	\
    && section->output_section != NULL)
 
   /* Returns TRUE iff seg1 starts after the end of seg2.  */
@@ -7746,7 +7745,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 	{
 	  /* Find the first section in the input segment, which may be
 	     removed from the corresponding output segment.   */
-	  if (IS_SECTION_IN_INPUT_SEGMENT (section, segment, bed, opb))
+	  if (IS_SECTION_IN_INPUT_SEGMENT (section, segment, opb, p_paddr_valid))
 	    {
 	      if (first_section == NULL)
 		first_section = section;
@@ -7882,7 +7881,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 	   section != NULL;
 	   section = section->next)
 	{
-	  if (INCLUDE_SECTION_IN_SEGMENT (section, segment, bed, opb))
+	  if (INCLUDE_SECTION_IN_SEGMENT (section, segment, opb, p_paddr_valid))
 	    {
 	      output_section = section->output_section;
 
