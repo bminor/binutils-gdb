@@ -435,10 +435,10 @@ program_space::clear_solib_cache ()
   deleted_solibs.clear ();
 }
 
-
+/* See progspace.h.  */
 
 void
-initialize_progspace (void)
+initialize_progspace ()
 {
   add_cmd ("program-spaces", class_maintenance,
 	   maintenance_info_program_spaces_command,

@@ -588,11 +588,6 @@ extern int (*deprecated_ui_load_progress_hook) (const char *section,
 /* * A width that can achieve a better legibility for GDB MI mode.  */
 #define GDB_MI_MSG_WIDTH  80
 
-/* From progspace.c */
-
-extern void initialize_progspace (void);
-extern void initialize_inferiors (void);
-
 /* * Special block numbers */
 
 enum block_enum

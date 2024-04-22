@@ -424,6 +424,9 @@ extern std::vector<struct program_space *>program_spaces;
 /* The current program space.  This is always non-null.  */
 extern struct program_space *current_program_space;
 
+/* Initialize progspace-related global state.  */
+extern void initialize_progspace ();
+
 /* Copies program space SRC to DEST.  Copies the main executable file,
    and the main symbol file.  Returns DEST.  */
 extern struct program_space *clone_program_space (struct program_space *dest,

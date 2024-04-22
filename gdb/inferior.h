@@ -327,6 +327,9 @@ struct inferior_control_state
   enum stop_kind stop_soon;
 };
 
+/* Initialize the inferior-related global state.  */
+extern void initialize_inferiors ();
+
 /* Return a pointer to the current inferior.  */
 extern inferior *current_inferior ();
 
