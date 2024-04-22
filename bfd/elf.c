@@ -8785,9 +8785,9 @@ _bfd_elf_copy_private_symbol_data (bfd *ibfd,
 	shndx = MAP_ONESYMTAB;
       else if (shndx == elf_dynsymtab (ibfd))
 	shndx = MAP_DYNSYMTAB;
-      else if (shndx == elf_strtab_sec (ibfd))
+      else if (shndx == elf_elfsections (ibfd)[elf_onesymtab (ibfd)]->sh_link)
 	shndx = MAP_STRTAB;
-      else if (shndx == elf_shstrtab_sec (ibfd))
+      else if (shndx == elf_elfheader (ibfd)->e_shstrndx)
 	shndx = MAP_SHSTRTAB;
       else if (find_section_in_list (shndx, elf_symtab_shndx_list (ibfd)))
 	shndx = MAP_SYM_SHNDX;
