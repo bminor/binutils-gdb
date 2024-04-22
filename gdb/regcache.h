@@ -23,6 +23,7 @@
 #include "gdbsupport/array-view.h"
 #include "gdbsupport/common-regcache.h"
 #include "gdbsupport/function-view.h"
+#include "gdbsupport/traits.h"
 
 struct regcache;
 struct regset;

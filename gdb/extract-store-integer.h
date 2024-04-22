@@ -18,6 +18,8 @@
 #ifndef GDB_EXTRACT_STORE_INTEGER_H
 #define GDB_EXTRACT_STORE_INTEGER_H
 
+#include "gdbsupport/traits.h"
+
 template<typename T, typename = RequireLongest<T>>
 T extract_integer (gdb::array_view<const gdb_byte>, enum bfd_endian byte_order);
 

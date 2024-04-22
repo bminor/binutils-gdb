@@ -63,10 +63,6 @@
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/array-view.h"
 
-template<typename T>
-using RequireLongest = gdb::Requires<gdb::Or<std::is_same<T, LONGEST>,
-					     std::is_same<T, ULONGEST>>>;
-
 /* Just in case they're not defined in stdio.h.  */
 
 #ifndef SEEK_SET

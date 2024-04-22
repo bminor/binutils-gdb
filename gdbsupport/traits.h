@@ -143,4 +143,8 @@ template<typename Condition>
 using Requires = typename std::enable_if<Condition::value, void>::type;
 }
 
+template<typename T>
+using RequireLongest = gdb::Requires<gdb::Or<std::is_same<T, LONGEST>,
+					     std::is_same<T, ULONGEST>>>;
+
 #endif /* COMMON_TRAITS_H */
