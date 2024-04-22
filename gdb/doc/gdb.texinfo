@@ -44953,7 +44953,7 @@ These are the currently defined stub features, in more detail:
 The remote stub can accept packets up to at least @var{bytes} in
 length.  @value{GDBN} will send packets up to this size for bulk
 transfers, and will never send larger packets.  This is a limit on the
-data characters in the packet, including the frame and checksum.
+data characters in the packet, not including the frame and checksum.
 There is no trailing NUL byte in a remote protocol packet; if the stub
 stores packets in a NUL-terminated format, it should allow an extra
 byte in its buffer for the NUL.  If this stub feature is not supported,
