@@ -239,18 +239,18 @@ darwin_current_sos ()
   for (int i = 0; i < info->all_image.count; i++)
     {
       CORE_ADDR iinfo = info->all_image.info + i * image_info_size;
-      gdb_byte buf[image_info_size];
+      gdb::byte_vector buf (image_info_size);
       CORE_ADDR load_addr;
       CORE_ADDR path_addr;
       struct mach_o_header_external hdr;
       unsigned long hdr_val;
 
       /* Read image info from inferior.  */
-      if (target_read_memory (iinfo, buf, image_info_size))
+      if (target_read_memory (iinfo, buf.data (), image_info_size))
 	break;
 
-      load_addr = extract_typed_address (buf, ptr_type);
-      path_addr = extract_typed_address (buf + ptr_len, ptr_type);
+      load_addr = extract_typed_address (buf.data (), ptr_type);
+      path_addr = extract_typed_address (buf.data () + ptr_len, ptr_type);
 
       /* Read Mach-O header from memory.  */
       if (target_read_memory (load_addr, (gdb_byte *) &hdr, sizeof (hdr) - 4))
@@ -333,14 +333,14 @@ darwin_read_exec_load_addr_from_dyld (struct darwin_info *info)
   for (i = 0; i < info->all_image.count; i++)
     {
       CORE_ADDR iinfo = info->all_image.info + i * image_info_size;
-      gdb_byte buf[image_info_size];
+      gdb::byte_vector buf (image_info_size);
       CORE_ADDR load_addr;
 
       /* Read image info from inferior.  */
-      if (target_read_memory (iinfo, buf, image_info_size))
+      if (target_read_memory (iinfo, buf.data (), image_info_size))
 	break;
 
-      load_addr = extract_typed_address (buf, ptr_type);
+      load_addr = extract_typed_address (buf.data (), ptr_type);
       if (darwin_validate_exec_header (load_addr) == load_addr)
 	return load_addr;
     }
