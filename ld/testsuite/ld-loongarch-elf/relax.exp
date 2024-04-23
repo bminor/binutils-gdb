@@ -37,7 +37,7 @@ proc run_partial_linking_align_test {} {
       || ![ld_link $ld tmpdir/$testname "tmpdir/$testname.os -e0 -Ttext 0x1000"] } {
     fail $testname
   } else {
-    set objdump_output [run_host_cmd "objdump" "-d tmpdir/$testname"]
+    set objdump_output [run_host_cmd "objdump" "-d -M no-aliases tmpdir/$testname"]
     if { [ regexp ".*1010:\\s*4c000020\\s*jirl.*" $objdump_output ] } {
       pass $testname
     } else {
