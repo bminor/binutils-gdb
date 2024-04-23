@@ -121,7 +121,7 @@ static enum ext_lang_rc gdbpy_apply_type_printers
 static void gdbpy_free_type_printers (const struct extension_language_defn *,
 				      struct ext_lang_type_printers *);
 static void gdbpy_set_quit_flag (const struct extension_language_defn *);
-static int gdbpy_check_quit_flag (const struct extension_language_defn *);
+static bool gdbpy_check_quit_flag (const struct extension_language_defn *);
 static enum ext_lang_rc gdbpy_before_prompt_hook
   (const struct extension_language_defn *, const char *current_gdb_prompt);
 static std::optional<std::string> gdbpy_colorize
@@ -275,11 +275,11 @@ gdbpy_set_quit_flag (const struct extension_language_defn *extlang)
 
 /* Return true if the quit flag has been set, false otherwise.  */
 
-static int
+static bool
 gdbpy_check_quit_flag (const struct extension_language_defn *extlang)
 {
   if (!gdb_python_initialized)
-    return 0;
+    return false;
 
   gdbpy_gil gil;
   return PyOS_InterruptOccurred ();

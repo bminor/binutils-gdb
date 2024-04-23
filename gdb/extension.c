@@ -890,21 +890,21 @@ set_quit_flag ()
 
 /* See extension.h.  */
 
-int
+bool
 check_quit_flag ()
 {
 #if CXX_STD_THREAD
   std::lock_guard guard (ext_lang_mutex);
 #endif /* CXX_STD_THREAD */
 
-  int result = 0;
+  bool result = false;
 
   for (const struct extension_language_defn *extlang : extension_languages)
     {
       if (extlang->ops != nullptr
 	  && extlang->ops->check_quit_flag != NULL)
-	if (extlang->ops->check_quit_flag (extlang) != 0)
-	  result = 1;
+	if (extlang->ops->check_quit_flag (extlang))
+	  result = true;
     }
 
   /* This is written in a particular way to avoid races.  */
@@ -915,7 +915,7 @@ check_quit_flag ()
 	 request.  */
       quit_serial_event_clear ();
       quit_flag = 0;
-      result = 1;
+      result = true;
     }
 
   return result;

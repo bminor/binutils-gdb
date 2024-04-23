@@ -447,7 +447,7 @@ private:
    The flag is checked in all extension languages that support cooperative
    SIGINT handling, not just the current one.  This simplifies transitions.  */
 
-extern int check_quit_flag ();
+extern bool check_quit_flag ();
 
 /* Set the quit flag.
    This only sets the flag in the currently active extension language.

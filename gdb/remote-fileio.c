@@ -316,7 +316,7 @@ static void
 remote_fileio_reply (remote_target *remote, int retcode, int error)
 {
   char buf[32];
-  int ctrl_c = check_quit_flag ();
+  bool ctrl_c = check_quit_flag ();
 
   strcpy (buf, "F");
   if (retcode < 0)

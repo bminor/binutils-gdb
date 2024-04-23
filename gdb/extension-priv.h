@@ -229,9 +229,9 @@ struct extension_language_ops
      This is called by GDB's SIGINT handler and must be async-safe.  */
   void (*set_quit_flag) (const struct extension_language_defn *);
 
-  /* Return non-zero if a SIGINT has occurred.
+  /* Return true if a SIGINT has occurred.
      This is expected to also clear the indicator.  */
-  int (*check_quit_flag) (const struct extension_language_defn *);
+  bool (*check_quit_flag) (const struct extension_language_defn *);
 
   /* Called before gdb prints its prompt, giving extension languages an
      opportunity to change it with set_prompt.
