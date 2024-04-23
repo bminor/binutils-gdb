@@ -29,8 +29,6 @@
 #include <vector>
 #include "gdbsupport/array-view.h"
 #include "gdbsupport/filtered-iterator.h"
-#include "gdbsupport/function-view.h"
-#include "gdbsupport/next-iterator.h"
 #include "gdbsupport/iterator-range.h"
 #include "gdbsupport/refcounted-object.h"
 #include "gdbsupport/safe-iterator.h"
