@@ -36,14 +36,14 @@ static insn_t
 loongarch_fetch_instruction (CORE_ADDR pc)
 {
   size_t insn_len = loongarch_insn_length (0);
-  gdb_byte buf[insn_len];
+  gdb::byte_vector buf (insn_len);
   int err;
 
-  err = target_read_memory (pc, buf, insn_len);
+  err = target_read_memory (pc, buf.data (), insn_len);
   if (err)
     memory_error (TARGET_XFER_E_IO, pc);
 
-  return extract_unsigned_integer (buf, insn_len, BFD_ENDIAN_LITTLE);
+  return extract_unsigned_integer (buf.data (), insn_len, BFD_ENDIAN_LITTLE);
 }
 
 /* Return TRUE if INSN is a unconditional branch instruction, otherwise return FALSE.  */
@@ -1306,18 +1306,24 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 	   and the signed integer scalars are sign-extended.  */
 	if (writebuf)
 	  {
-	    gdb_byte buf[regsize];
+	    gdb::byte_vector buf (regsize);
 	    if (type->is_unsigned ())
 	      {
-		ULONGEST data = extract_unsigned_integer (writebuf, len, BFD_ENDIAN_LITTLE);
-		store_unsigned_integer (buf, regsize, BFD_ENDIAN_LITTLE, data);
+		ULONGEST data = extract_unsigned_integer (writebuf, len,
+							  BFD_ENDIAN_LITTLE);
+		store_unsigned_integer (buf.data (), regsize,
+					BFD_ENDIAN_LITTLE, data);
 	      }
 	    else
 	      {
-		LONGEST data = extract_signed_integer (writebuf, len, BFD_ENDIAN_LITTLE);
-		store_signed_integer (buf, regsize, BFD_ENDIAN_LITTLE, data);
+		LONGEST data
+		  = extract_signed_integer (writebuf, len, BFD_ENDIAN_LITTLE);
+		store_signed_integer (buf.data (), regsize, BFD_ENDIAN_LITTLE,
+				      data);
 	      }
-	    loongarch_xfer_reg (regcache, a0, regsize, nullptr, buf, 0);
+
+	    loongarch_xfer_reg (regcache, a0, regsize, nullptr, buf.data (),
+				0);
 	  }
 	else
 	  loongarch_xfer_reg (regcache, a0, len, readbuf, nullptr, 0);

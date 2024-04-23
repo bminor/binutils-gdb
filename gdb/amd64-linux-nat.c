@@ -235,7 +235,7 @@ amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 
       if (have_ptrace_getregset == TRIBOOL_TRUE)
 	{
-	  char xstateregs[tdep->xsave_layout.sizeof_xsave];
+	  gdb::byte_vector xstateregs (tdep->xsave_layout.sizeof_xsave);
 	  struct iovec iov;
 
 	  /* Pre-4.14 kernels have a bug (fixed by commit 0852b374173b
@@ -243,14 +243,14 @@ amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 	     Intel Skylake CPUs") that sometimes causes the mxcsr location in
 	     xstateregs not to be copied by PTRACE_GETREGSET.  Make sure that
 	     the location is at least initialized with a defined value.  */
-	  memset (xstateregs, 0, sizeof (xstateregs));
-	  iov.iov_base = xstateregs;
-	  iov.iov_len = sizeof (xstateregs);
+	  memset (xstateregs.data (), 0, xstateregs.size ());
+	  iov.iov_base = xstateregs.data ();
+	  iov.iov_len = xstateregs.size ();
 	  if (ptrace (PTRACE_GETREGSET, tid,
 		      (unsigned int) NT_X86_XSTATE, (long) &iov) < 0)
 	    perror_with_name (_("Couldn't get extended state status"));
 
-	  amd64_supply_xsave (regcache, -1, xstateregs);
+	  amd64_supply_xsave (regcache, -1, xstateregs.data ());
 	}
       else
 	{
@@ -300,16 +300,16 @@ amd64_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 
       if (have_ptrace_getregset == TRIBOOL_TRUE)
 	{
-	  char xstateregs[tdep->xsave_layout.sizeof_xsave];
+	  gdb::byte_vector xstateregs (tdep->xsave_layout.sizeof_xsave);
 	  struct iovec iov;
 
-	  iov.iov_base = xstateregs;
-	  iov.iov_len = sizeof (xstateregs);
+	  iov.iov_base = xstateregs.data ();
+	  iov.iov_len = xstateregs.size ();
 	  if (ptrace (PTRACE_GETREGSET, tid,
 		      (unsigned int) NT_X86_XSTATE, (long) &iov) < 0)
 	    perror_with_name (_("Couldn't get extended state status"));
 
-	  amd64_collect_xsave (regcache, regnum, xstateregs, 0);
+	  amd64_collect_xsave (regcache, regnum, xstateregs.data (), 0);
 
 	  if (ptrace (PTRACE_SETREGSET, tid,
 		      (unsigned int) NT_X86_XSTATE, (long) &iov) < 0)

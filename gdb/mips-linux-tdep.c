@@ -99,16 +99,17 @@ mips_linux_get_longjmp_target (const frame_info_ptr &frame, CORE_ADDR *pc)
   CORE_ADDR jb_addr;
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  gdb_byte buf[gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT];
+  gdb::byte_vector buf (gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT);
 
   jb_addr = get_frame_register_unsigned (frame, MIPS_A0_REGNUM);
 
   if (target_read_memory ((jb_addr
 			   + MIPS_LINUX_JB_PC * MIPS_LINUX_JB_ELEMENT_SIZE),
-			  buf, gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT))
+			  buf.data (),
+			  gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT))
     return 0;
 
-  *pc = extract_unsigned_integer (buf,
+  *pc = extract_unsigned_integer (buf.data (),
 				  gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT,
 				  byte_order);
 
