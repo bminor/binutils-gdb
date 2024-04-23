@@ -35,7 +35,7 @@
 #include "main.h"
 #include "gdbthread.h"
 #include "observable.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "annotate.h"
 #include "maint.h"
 #include "ser-event.h"

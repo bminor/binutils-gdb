@@ -29,7 +29,7 @@
    the readline command interface, and it is probably simpler to just let
    them take over the input in their resume proc.  */
 
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "ui-out.h"
 #include "gdbsupport/event-loop.h"
 #include "event-top.h"

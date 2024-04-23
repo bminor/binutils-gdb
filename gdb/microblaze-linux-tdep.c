@@ -22,7 +22,7 @@
 #include "symtab.h"
 #include "target.h"
 #include "gdbcore.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "regcache.h"

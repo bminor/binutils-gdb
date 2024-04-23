@@ -35,7 +35,7 @@
 #include "frame-base.h"
 
 #include "gdbcore.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "gdbtypes.h"
 #include "objfiles.h"
 #include "hppa-tdep.h"

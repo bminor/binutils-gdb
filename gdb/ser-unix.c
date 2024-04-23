@@ -28,7 +28,7 @@
 #include "gdbsupport/gdb_sys_time.h"
 
 #include "gdbsupport/gdb_select.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "gdbsupport/filestuff.h"
 #include <termios.h>
 #include "gdbsupport/scoped_ignore_sigttou.h"

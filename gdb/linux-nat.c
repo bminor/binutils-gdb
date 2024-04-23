@@ -32,7 +32,7 @@
 #include "nat/linux-personality.h"
 #include "linux-fork.h"
 #include "gdbthread.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "regcache.h"
 #include "regset.h"
 #include "inf-child.h"

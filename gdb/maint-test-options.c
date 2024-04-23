@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "cli/cli-option.h"
 
 /* This file defines three "maintenance test-options" subcommands to

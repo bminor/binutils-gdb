@@ -43,7 +43,7 @@
 #include "target.h"
 #include "inferior.h"
 #include "regcache.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "ppc-tdep.h"
 #include "observable.h"
 #include "objfiles.h"

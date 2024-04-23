@@ -35,7 +35,7 @@
 #include "c-lang.h"
 #include "target-float.h"
 #include "gdbarch.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "f-array-walker.h"
 #include "f-exp.h"
 

@@ -25,7 +25,7 @@
 #include "regcache.h"
 #include "regset.h"
 #include "gdbarch.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "gdbthread.h"
 #include "gdbsupport/buildargv.h"
 #include "gdbsupport/gdb_wait.h"

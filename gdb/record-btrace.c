@@ -23,7 +23,7 @@
 #include "record-btrace.h"
 #include "gdbthread.h"
 #include "target.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "disasm.h"
 #include "observable.h"
 #include "cli/cli-utils.h"

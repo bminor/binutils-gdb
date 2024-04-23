@@ -28,7 +28,7 @@
 #include "target.h"
 #include "demangle.h"
 #include "language.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "regcache.h"
 #include "cp-abi.h"
 #include "block.h"

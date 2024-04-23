@@ -27,7 +27,7 @@
 #include "symfile.h"
 #include "target.h"
 #include "process-stratum-target.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "objfiles.h"
 #include "gdbthread.h"
 #include "remote.h"

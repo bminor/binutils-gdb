@@ -34,7 +34,7 @@
 #include <sys/stat.h>
 #include "dictionary.h"
 #include "typeprint.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "source.h"
 #include "readline/tilde.h"
 #include <cli/cli-style.h>

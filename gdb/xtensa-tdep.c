@@ -37,7 +37,7 @@
 #include "gdbarch.h"
 
 #include "command.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 
 #include "xtensa-isa.h"
 #include "xtensa-tdep.h"

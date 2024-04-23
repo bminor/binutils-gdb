@@ -21,7 +21,7 @@
 
 #include "event-top.h"
 #include "extract-store-integer.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "remote.h"
 #include "gdbsupport/gdb_wait.h"
 #include <sys/stat.h>

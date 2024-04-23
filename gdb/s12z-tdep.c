@@ -24,7 +24,7 @@
 #include "gdbsupport/errors.h"
 #include "frame-unwind.h"
 #include "gdbcore.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "inferior.h"
 #include "opcode/s12z.h"
 #include "trad-frame.h"

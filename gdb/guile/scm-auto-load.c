@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "top.h"
-#include "gdbcmd.h"
 #include "objfiles.h"
 #include "cli/cli-cmds.h"
 #include "auto-load.h"

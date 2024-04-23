@@ -21,7 +21,7 @@
 #include "xml-support.h"
 #include "osdata.h"
 #include "ui-out.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 
 #if !defined(HAVE_LIBEXPAT)
 

@@ -7,7 +7,7 @@ BEGIN	{
 	  print "   Modify copying.awk instead.  <== */";
 	  print ""
 	  print "#include \"command.h\""
-	  print "#include \"gdbcmd.h\""
+	  print "#include \"cli/cli-cmds.h\""
 	  print ""
 	  print "static void show_copying_command (const char *, int);"
 	  print ""

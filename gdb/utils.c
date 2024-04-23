@@ -37,7 +37,7 @@
 #endif
 
 #include <signal.h>
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "serial.h"
 #include "bfd.h"
 #include "target.h"

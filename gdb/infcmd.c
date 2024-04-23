@@ -25,7 +25,7 @@
 #include "infrun.h"
 #include "gdbsupport/environ.h"
 #include "value.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "symfile.h"
 #include "gdbcore.h"
 #include "target.h"

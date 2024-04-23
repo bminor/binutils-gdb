@@ -27,7 +27,7 @@
 #include "dictionary.h"
 #include "filenames.h"
 #include "frame-unwind.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "gdbcore.h"
 #include "inferior.h"
 #include "observable.h"

@@ -21,7 +21,7 @@
 #include "command.h"
 #include "ui-out.h"
 #include "cli/cli-script.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "progspace.h"
 #include "objfiles.h"
 #include "value.h"

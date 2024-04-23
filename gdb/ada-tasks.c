@@ -17,7 +17,7 @@
 
 #include "extract-store-integer.h"
 #include "observable.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "target.h"
 #include "ada-lang.h"
 #include "gdbcore.h"

@@ -38,7 +38,7 @@
 #include "target.h"
 #include "inferior.h"
 #include "infrun.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "async-event.h"
 
 bool notif_debug = false;

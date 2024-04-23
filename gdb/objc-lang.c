@@ -35,7 +35,7 @@
 #include "objfiles.h"
 #include "target.h"
 #include "gdbcore.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "frame.h"
 #include "gdbsupport/gdb_regex.h"
 #include "regcache.h"

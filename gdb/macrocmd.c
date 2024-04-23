@@ -24,7 +24,7 @@
 #include "cli/cli-style.h"
 #include "cli/cli-utils.h"
 #include "command.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "linespec.h"
 
 

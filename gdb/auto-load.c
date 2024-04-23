@@ -27,7 +27,6 @@
 #include "observable.h"
 #include "objfiles.h"
 #include "cli/cli-script.h"
-#include "gdbcmd.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-setshow.h"

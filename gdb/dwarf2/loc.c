@@ -31,7 +31,7 @@
 #include "regcache.h"
 #include "objfiles.h"
 #include "block.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "complaints.h"
 #include "dwarf2.h"
 #include "dwarf2/expr.h"

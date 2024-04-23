@@ -19,7 +19,7 @@
 
 #include "filesystem.h"
 #include "gdbarch.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "inferior.h"
 
 const char file_system_kind_auto[] = "auto";

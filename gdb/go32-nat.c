@@ -91,7 +91,7 @@
 #include "gdbsupport/gdb_wait.h"
 #include "gdbcore.h"
 #include "command.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "floatformat.h"
 #include "buildsym-legacy.h"
 #include "i387-tdep.h"

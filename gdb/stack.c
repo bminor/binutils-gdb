@@ -26,7 +26,7 @@
 #include "expression.h"
 #include "language.h"
 #include "frame.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "gdbcore.h"
 #include "target.h"
 #include "source.h"

@@ -26,7 +26,7 @@
 #include "command.h"
 #include "ravenscar-thread.h"
 #include "observable.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "top.h"
 #include "regcache.h"
 #include "objfiles.h"

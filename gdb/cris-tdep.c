@@ -30,7 +30,7 @@
 #include "inferior.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "target.h"
 #include "value.h"
 #include "opcode/cris.h"

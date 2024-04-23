@@ -31,7 +31,7 @@
 #include "gdbtypes.h"
 #include "gdbcore.h"
 #include "value.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "inferior.h"
 #include "gdbarch.h"
 

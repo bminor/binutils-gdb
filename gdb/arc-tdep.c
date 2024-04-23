@@ -29,7 +29,7 @@
 #include "gdbcore.h"
 #include "inferior.h"
 #include "reggroups.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "objfiles.h"
 #include "osabi.h"
 #include "prologue-value.h"

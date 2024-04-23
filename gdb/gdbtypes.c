@@ -30,7 +30,7 @@
 #include "value.h"
 #include "demangle.h"
 #include "complaints.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "cp-abi.h"
 #include "hashtab.h"
 #include "cp-support.h"

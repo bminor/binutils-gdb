@@ -20,7 +20,7 @@
 #include "gdb_bfd.h"
 #include "event-top.h"
 #include "ui-out.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "hashtab.h"
 #include "gdbsupport/filestuff.h"
 #ifdef HAVE_MMAP

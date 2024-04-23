@@ -25,7 +25,6 @@
 #include "cli/cli-script.h"
 #include "cli/cli-utils.h"
 #include "command.h"
-#include "gdbcmd.h"
 #include "top.h"
 #include "ui.h"
 #include "extension-priv.h"

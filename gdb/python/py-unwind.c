@@ -20,7 +20,7 @@
 #include "arch-utils.h"
 #include "frame-unwind.h"
 #include "gdbsupport/gdb_obstack.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "language.h"
 #include "observable.h"
 #include "python-internal.h"

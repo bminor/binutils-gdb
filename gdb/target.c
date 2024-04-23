@@ -22,7 +22,7 @@
 #include "target.h"
 #include "extract-store-integer.h"
 #include "target-dcache.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "symtab.h"
 #include "inferior.h"
 #include "infrun.h"

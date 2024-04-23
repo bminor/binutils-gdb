@@ -31,7 +31,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "source.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "breakpoint.h"
 #include "language.h"
 #include "complaints.h"

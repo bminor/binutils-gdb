@@ -23,7 +23,7 @@
 #include "gdbsupport/gdb_vecs.h"
 #include "bfd.h"
 #include "command.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "gdbthread.h"
 #include "inferior.h"
 #include "infrun.h"

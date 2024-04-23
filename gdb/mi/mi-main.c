@@ -50,7 +50,7 @@
 #include "ada-lang.h"
 #include "linespec.h"
 #include "extension.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "observable.h"
 #include <optional>
 #include "gdbsupport/byte-vector.h"

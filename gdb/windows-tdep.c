@@ -24,7 +24,7 @@
 #include "value.h"
 #include "inferior.h"
 #include "command.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "gdbthread.h"
 #include "objfiles.h"
 #include "symfile.h"

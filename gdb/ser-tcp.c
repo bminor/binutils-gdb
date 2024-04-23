@@ -20,7 +20,7 @@
 #include "serial.h"
 #include "ser-base.h"
 #include "ser-tcp.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-setshow.h"
 #include "gdbsupport/filestuff.h"

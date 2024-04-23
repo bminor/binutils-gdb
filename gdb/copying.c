@@ -3,7 +3,7 @@
    Modify copying.awk instead.  <== */
 
 #include "command.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 
 static void show_copying_command (const char *, int);
 

@@ -28,7 +28,7 @@
 #include "gdbcore.h"
 #include "language.h"
 #include "objfiles.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "command.h"
 #include "dummy-frame.h"
 #include "ada-lang.h"

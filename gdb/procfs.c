@@ -26,7 +26,7 @@
 #include "target.h"
 #include "gdbcore.h"
 #include "elf-bfd.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "gdbthread.h"
 #include "regcache.h"
 #include "inf-child.h"

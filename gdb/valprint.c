@@ -23,7 +23,7 @@
 #include "gdbtypes.h"
 #include "value.h"
 #include "gdbcore.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "target.h"
 #include "language.h"
 #include "annotate.h"

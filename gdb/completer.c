@@ -34,7 +34,7 @@
 
 /* FIXME: This is needed because of lookup_cmd_1 ().  We should be
    calling a hook instead so we eliminate the CLI dependency.  */
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 
 /* Needed for rl_completer_word_break_characters and for
    rl_filename_completion_function.  */

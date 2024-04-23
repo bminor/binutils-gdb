@@ -23,7 +23,7 @@
 #include "frame.h"
 #include "gdbtypes.h"
 #include "expression.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "value.h"
 #include "target.h"
 #include "target-dcache.h"

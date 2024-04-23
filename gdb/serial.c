@@ -19,7 +19,7 @@
 
 #include <ctype.h>
 #include "serial.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "cli/cli-utils.h"
 
 /* Is serial being debugged?  */

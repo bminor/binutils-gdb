@@ -22,7 +22,7 @@
 #include "inferior.h"
 #include "infrun.h"
 #include "regcache.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "infcall.h"
 #include "objfiles.h"
 #include "linux-fork.h"

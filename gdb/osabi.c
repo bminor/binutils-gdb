@@ -20,7 +20,7 @@
 
 #include "osabi.h"
 #include "arch-utils.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "command.h"
 #include "gdb_bfd.h"
 

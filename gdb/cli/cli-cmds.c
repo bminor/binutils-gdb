@@ -22,7 +22,6 @@
 #include "completer.h"
 #include "target.h"
 #include "gdbsupport/gdb_wait.h"
-#include "gdbcmd.h"
 #include "gdbsupport/gdb_regex.h"
 #include "gdb_vfork.h"
 #include "linespec.h"

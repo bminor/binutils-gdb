@@ -32,7 +32,7 @@
 #include "dictionary.h"
 #include "language.h"
 #include "cp-support.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include <algorithm>
 #include <set>
 #include "gdbsupport/buildargv.h"

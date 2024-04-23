@@ -31,7 +31,7 @@
 #include "gdbtypes.h"
 #include "dwarf2/loc.h"
 #include "cp-support.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "compile-c.h"
 #include "inferior.h"
 

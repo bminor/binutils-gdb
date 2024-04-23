@@ -25,7 +25,7 @@
    and then if the function returns a result printing a message after it
    returns.  */
 
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "objfiles.h"
 #include "observable.h"
 #include "source.h"

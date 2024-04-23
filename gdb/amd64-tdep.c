@@ -30,7 +30,7 @@
 #include "frame-unwind.h"
 #include "inferior.h"
 #include "infrun.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "gdbcore.h"
 #include "objfiles.h"
 #include "regcache.h"

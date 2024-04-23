@@ -1384,7 +1384,6 @@ HFILES_NO_SRCDIR = \
 	gdb_vfork.h \
 	gdb_wchar.h \
 	gdbarch.h \
-	gdbcmd.h \
 	gdbcore.h \
 	gdbthread.h \
 	gdbtypes.h \

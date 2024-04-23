@@ -28,7 +28,7 @@
 #include "gregset.h"
 #include "regset.h"
 #include "nat/linux-ptrace.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "gdbarch.h"
 
 #include "s390-tdep.h"

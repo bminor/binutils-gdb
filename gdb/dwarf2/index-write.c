@@ -34,7 +34,7 @@
 #include "dwarf2/read.h"
 #include "dwarf2/dwz.h"
 #include "gdb/gdb-index.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "objfiles.h"
 #include "ada-lang.h"
 #include "dwarf2/tag.h"

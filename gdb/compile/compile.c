@@ -24,7 +24,7 @@
 #include "cli/cli-utils.h"
 #include "cli/cli-option.h"
 #include "completer.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "compile.h"
 #include "compile-internal.h"
 #include "compile-object-load.h"

@@ -19,7 +19,7 @@
 
 #include "complaints.h"
 #include "command.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "run-on-main-thread.h"
 #include "top.h"
 #include "gdbsupport/selftest.h"

@@ -24,7 +24,7 @@
 #include "tui/tui-data.h"
 #include "symtab.h"
 #include "gdbtypes.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "frame.h"
 #include "regcache.h"
 #include "inferior.h"

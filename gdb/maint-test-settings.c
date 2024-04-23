@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 
 /* Command list for "maint set test-settings".  */
 static cmd_list_element *maintenance_set_test_settings_list;

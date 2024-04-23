@@ -19,7 +19,7 @@
 #include "expression.h"
 #include "frame.h"
 #include "language.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "block.h"
 #include "valprint.h"
 #include "gdbsupport/gdb_regex.h"

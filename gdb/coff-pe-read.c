@@ -28,7 +28,7 @@
 #include "gdbtypes.h"
 
 #include "command.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"

@@ -29,7 +29,7 @@
 #include "cp-abi.h"
 #include "objfiles.h"
 #include "block.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "c-lang.h"
 #include "compile-c.h"
 #include <algorithm>

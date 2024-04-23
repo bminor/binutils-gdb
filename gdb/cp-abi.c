@@ -21,7 +21,7 @@
 #include "value.h"
 #include "cp-abi.h"
 #include "command.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "ui-out.h"
 static struct cp_abi_ops *find_cp_abi (const char *short_name);
 

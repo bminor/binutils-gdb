@@ -24,7 +24,7 @@
 #include "inferior.h"
 #include "frame-unwind.h"
 #include "command.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "observable.h"
 #include "gdbthread.h"
 #include "infcall.h"

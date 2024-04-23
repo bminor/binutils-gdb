@@ -25,7 +25,7 @@
 #include "linux-nat.h"
 #include "target-descriptions.h"
 #include "auxv.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "aarch64-nat.h"
 #include "aarch64-tdep.h"
 #include "aarch64-linux-tdep.h"

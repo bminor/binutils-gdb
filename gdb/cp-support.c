@@ -21,7 +21,7 @@
 #include "cp-support.h"
 #include "language.h"
 #include "demangle.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "dictionary.h"
 #include "objfiles.h"
 #include "frame.h"

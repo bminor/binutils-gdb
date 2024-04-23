@@ -17,7 +17,7 @@
 
 #include "bt-utils.h"
 #include "command.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "ui.h"
 #include "cli/cli-decode.h"
 

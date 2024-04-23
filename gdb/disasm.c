@@ -24,7 +24,7 @@
 #include "ui-out.h"
 #include "disasm.h"
 #include "gdbcore.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "dis-asm.h"
 #include "source.h"
 #include "gdbsupport/gdb-safe-ctype.h"

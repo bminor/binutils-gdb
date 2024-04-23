@@ -24,7 +24,7 @@
 #include "inferior.h"
 #include "symtab.h"
 #include "command.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "bfd.h"
 #include "target.h"
 #include "gdbcore.h"

@@ -30,7 +30,7 @@
 #include "regcache.h"
 #include "dummy-frame.h"
 #include "command.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "block.h"
 #include "inline-frame.h"
 

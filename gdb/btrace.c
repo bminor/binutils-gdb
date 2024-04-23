@@ -30,7 +30,7 @@
 #include "filenames.h"
 #include "regcache.h"
 #include "gdbsupport/rsp-low.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "cli/cli-utils.h"
 #include "gdbarch.h"
 

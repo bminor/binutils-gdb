@@ -24,7 +24,7 @@
 #include "gdbcore.h"
 #include "readline/tilde.h"
 #include "bfdlink.h"
-#include "gdbcmd.h"
+#include "cli/cli-cmds.h"
 #include "regcache.h"
 #include "inferior.h"
 #include "gdbthread.h"
