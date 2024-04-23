@@ -96,6 +96,10 @@ private:
 				 const char *value);
 };
 
+/* Chains containing all defined "set/show style" subcommands.  */
+extern struct cmd_list_element *style_set_list;
+extern struct cmd_list_element *style_show_list;
+
 /* The file name style.  */
 extern cli_style_option file_name_style;
 

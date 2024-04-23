@@ -29,8 +29,4 @@
 #include "cli/cli-script.h"
 #include "cli/cli-cmds.h"
 
-/* Chains containing all defined "set/show style" subcommands.  */
-extern struct cmd_list_element *style_set_list;
-extern struct cmd_list_element *style_show_list;
-
 #endif /* !defined (GDBCMD_H) */
