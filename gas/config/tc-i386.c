@@ -10463,12 +10463,9 @@ build_modrm_byte (void)
       break;
      }
 
-  if (i.tm.extension_opcode != None)
-    {
-      if (dest != source)
-	v = dest;
-      dest = ~0;
-    }
+  if (dest == source)
+    dest = ~0;
+
   gas_assert (source < dest);
 
   if (v < MAX_OPERANDS)

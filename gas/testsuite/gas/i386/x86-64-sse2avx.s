@@ -822,6 +822,13 @@ _start:
 	{store} rexz movss %xmm0, %xmm1
 
 	rexz psllw $0, %xmm0
+	rexz pslld $0, %xmm0
+	rexz psllq $0, %xmm0
+	rexz psraw $0, %xmm0
+	rexz psrad $0, %xmm0
+	rexz psrlw $0, %xmm0
+	rexz psrld $0, %xmm0
+	rexz psrlq $0, %xmm0
 
 	rexx pextrw $0, %xmm0, %ecx
 	rexz pextrw $0, %xmm0, %ecx

@@ -728,6 +728,13 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 72 11 c1          	vmovss %xmm8,%xmm1,%xmm1
 [ 	]*[a-f0-9]+:	c4 c1 32 11 c1       	vmovss %xmm0,%xmm9,%xmm9
 [ 	]*[a-f0-9]+:	c4 c1 39 71 f0 00    	vpsllw \$(0x)?0,%xmm8,%xmm8
+[ 	]*[a-f0-9]+:	c4 c1 39 72 f0 00    	vpslld \$(0x)?0,%xmm8,%xmm8
+[ 	]*[a-f0-9]+:	c4 c1 39 73 f0 00    	vpsllq \$(0x)?0,%xmm8,%xmm8
+[ 	]*[a-f0-9]+:	c4 c1 39 71 e0 00    	vpsraw \$(0x)?0,%xmm8,%xmm8
+[ 	]*[a-f0-9]+:	c4 c1 39 72 e0 00    	vpsrad \$(0x)?0,%xmm8,%xmm8
+[ 	]*[a-f0-9]+:	c4 c1 39 71 d0 00    	vpsrlw \$(0x)?0,%xmm8,%xmm8
+[ 	]*[a-f0-9]+:	c4 c1 39 72 d0 00    	vpsrld \$(0x)?0,%xmm8,%xmm8
+[ 	]*[a-f0-9]+:	c4 c1 39 73 d0 00    	vpsrlq \$(0x)?0,%xmm8,%xmm8
 [ 	]*[a-f0-9]+:	c5 79 c5 c8 00       	vpextrw \$(0x)?0,%xmm0,%r9d
 [ 	]*[a-f0-9]+:	c4 c1 79 c5 c8 00    	vpextrw \$(0x)?0,%xmm8,%ecx
 [ 	]*[a-f0-9]+:	c4 63 79 14 c1 00    	vpextrb \$(0x)?0,%xmm8,%ecx
