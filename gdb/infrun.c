@@ -18,6 +18,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "cli/cli-cmds.h"
 #include "displaced-stepping.h"
 #include "infrun.h"
 #include <ctype.h>
@@ -26,7 +27,6 @@
 #include "inferior.h"
 #include "breakpoint.h"
 #include "gdbcore.h"
-#include "gdbcmd.h"
 #include "target.h"
 #include "target-connection.h"
 #include "gdbthread.h"
