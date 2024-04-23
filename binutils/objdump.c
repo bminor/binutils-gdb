@@ -2949,10 +2949,10 @@ jump_info_visualize_address (bfd_vma address,
 		{
 		  if (address <= ji->end)
 		    line_buffer[offset] =
-		      (jump_info_min_address (ji) == address) ? '/': '+';
+		      (jump_info_min_address (ji) == address) ? ',': '+';
 		  else
 		    line_buffer[offset] =
-		      (jump_info_max_address (ji) == address) ? '\\': '+';
+		      (jump_info_max_address (ji) == address) ? '\'': '+';
 		  color_buffer[offset] = color;
 		}
 	    }
@@ -2983,9 +2983,9 @@ jump_info_visualize_address (bfd_vma address,
 		{
 		  if (jump_info_min_address (ji) < address)
 		    line_buffer[offset] =
-		      (jump_info_max_address (ji) > address) ? '>' : '\\';
+		      (jump_info_max_address (ji) > address) ? '>' : '\'';
 		  else
-		    line_buffer[offset] = '/';
+		    line_buffer[offset] = ',';
 		  color_buffer[offset] = color;
 		}
 	    }
