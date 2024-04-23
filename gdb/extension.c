@@ -863,16 +863,10 @@ restore_active_ext_lang (struct active_ext_lang_state *previous)
   xfree (previous);
 }
 
-/* Set the quit flag.
-   This only sets the flag in the currently active extension language.
-   If the currently active extension language does not have cooperative
-   SIGINT handling, then GDB's global flag is set, and it is up to the
-   extension language to call check_quit_flag.  The extension language
-   is free to install its own SIGINT handler, but we still need to handle
-   the transition.  */
+/* See extension.h.  */
 
 void
-set_quit_flag (void)
+set_quit_flag ()
 {
 #if CXX_STD_THREAD
   std::lock_guard guard (ext_lang_mutex);
@@ -894,13 +888,10 @@ set_quit_flag (void)
     }
 }
 
-/* Return true if the quit flag has been set, false otherwise.
-   Note: The flag is cleared as a side-effect.
-   The flag is checked in all extension languages that support cooperative
-   SIGINT handling, not just the current one.  This simplifies transitions.  */
+/* See extension.h.  */
 
 int
-check_quit_flag (void)
+check_quit_flag ()
 {
 #if CXX_STD_THREAD
   std::lock_guard guard (ext_lang_mutex);

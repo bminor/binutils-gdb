@@ -429,4 +429,34 @@ private:
   bool m_prev_cooperative_sigint_handling_disabled;
 };
 
+/* GDB's SIGINT handler basically sets a flag; code that might take a
+   long time before it gets back to the event loop, and which ought to
+   be interruptible, checks this flag using the QUIT macro, which, if
+   GDB has the terminal, throws a quit exception.
+
+   In addition to setting a flag, the SIGINT handler also marks a
+   select/poll-able file descriptor as read-ready.  That is used by
+   interruptible_select in order to support interrupting blocking I/O
+   in a race-free manner.
+
+   These functions use the extension_language_ops API to allow extension
+   language(s) and GDB SIGINT handling to coexist seamlessly.  */
+
+/* Return true if the quit flag has been set, false otherwise.
+   Note: The flag is cleared as a side-effect.
+   The flag is checked in all extension languages that support cooperative
+   SIGINT handling, not just the current one.  This simplifies transitions.  */
+
+extern int check_quit_flag ();
+
+/* Set the quit flag.
+   This only sets the flag in the currently active extension language.
+   If the currently active extension language does not have cooperative
+   SIGINT handling, then GDB's global flag is set, and it is up to the
+   extension language to call check_quit_flag.  The extension language
+   is free to install its own SIGINT handler, but we still need to handle
+   the transition.  */
+
+extern void set_quit_flag ();
+
 #endif /* EXTENSION_H */

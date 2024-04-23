@@ -94,25 +94,6 @@ extern std::string python_libdir;
 /* * Search path for separate debug files.  */
 extern std::string debug_file_directory;
 
-/* GDB's SIGINT handler basically sets a flag; code that might take a
-   long time before it gets back to the event loop, and which ought to
-   be interruptible, checks this flag using the QUIT macro, which, if
-   GDB has the terminal, throws a quit exception.
-
-   In addition to setting a flag, the SIGINT handler also marks a
-   select/poll-able file descriptor as read-ready.  That is used by
-   interruptible_select in order to support interrupting blocking I/O
-   in a race-free manner.
-
-   These functions use the extension_language_ops API to allow extension
-   language(s) and GDB SIGINT handling to coexist seamlessly.  */
-
-/* * Evaluate to non-zero if the quit flag is set, zero otherwise.  This
-   will clear the quit flag as a side effect.  */
-extern int check_quit_flag (void);
-/* * Set the quit flag.  */
-extern void set_quit_flag (void);
-
 /* The current quit handler (and its type).  This is called from the
    QUIT macro.  See default_quit_handler below for default behavior.
    Parts of GDB temporarily override this to e.g., completely suppress
