@@ -119,7 +119,9 @@ check_PROGRAMS = $(am__EXEEXT_1)
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.find/findfre-1 \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.find/findfunc-1 \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.find/plt-findfre-1
-@HAVE_DL_ITERATE_PHDR_TRUE@@HAVE_SFRAME_AS_TRUE@am__append_5 = testsuite/libsframe.stacktrace/libsframest/libsframest.la
+
+# Build libsframest only when not cross-building
+@CROSS_COMPILE_FALSE@@HAVE_DL_ITERATE_PHDR_TRUE@am__append_5 = testsuite/libsframe.stacktrace/libsframest/libsframest.la
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
@@ -133,8 +135,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
 	$(top_srcdir)/../config/warnings.m4 \
 	$(top_srcdir)/../libtool.m4 $(top_srcdir)/../ltoptions.m4 \
 	$(top_srcdir)/../ltsugar.m4 $(top_srcdir)/../ltversion.m4 \
-	$(top_srcdir)/../lt~obsolete.m4 $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/../lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -200,8 +201,10 @@ testsuite_libsframe_stacktrace_libsframest_libsframest_la_LINK =  \
 	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(testsuite_libsframe_stacktrace_libsframest_libsframest_la_CFLAGS) \
-	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-@HAVE_DL_ITERATE_PHDR_TRUE@@HAVE_SFRAME_AS_TRUE@am_testsuite_libsframe_stacktrace_libsframest_libsframest_la_rpath =
+	$(CFLAGS) \
+	$(testsuite_libsframe_stacktrace_libsframest_libsframest_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+@CROSS_COMPILE_FALSE@@HAVE_DL_ITERATE_PHDR_TRUE@am_testsuite_libsframe_stacktrace_libsframest_libsframest_la_rpath =
 @HAVE_COMPAT_DEJAGNU_TRUE@am__EXEEXT_1 = testsuite/libsframe.decode/be-flipping$(EXEEXT) \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.decode/frecnt-1$(EXEEXT) \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.decode/frecnt-2$(EXEEXT) \
@@ -596,9 +599,13 @@ testsuite_libsframe_stacktrace_libsframest_libsframest_la_SOURCES = testsuite/li
 testsuite_libsframe_stacktrace_libsframest_libsframest_la_LIBADD = ${top_builddir}/libsframe.la
 testsuite_libsframe_stacktrace_libsframest_libsframest_la_CPPFLAGS = -I${top_srcdir}/../include \
 			      -I${top_srcdir}/testsuite/libsframe.stacktrace/libsframest/include \
+			      -B${top_builddir}/tmpdir/libsframe \
 			      -Wall -Wno-unused-but-set-variable
 
-testsuite_libsframe_stacktrace_libsframest_libsframest_la_CFLAGS = -Wa,--gsframe
+testsuite_libsframe_stacktrace_libsframest_libsframest_la_CFLAGS = -B${top_builddir}/tmpdir/libsframe \
+			    -Wa,--gsframe
+
+testsuite_libsframe_stacktrace_libsframest_libsframest_la_LDFLAGS = -B${top_builddir}/tmpdir/libsframe
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -1677,6 +1684,10 @@ uninstall-am: uninstall-dvi-am uninstall-html-am \
 .PRECIOUS: Makefile
 
 diststuff: $(EXTRA_DIST) info
+check-am: all-am setup.sh
+	$(SHELL) $(srcdir)/setup.sh
+	$(MAKE) $(AM_MAKEFLAGS) $(check_LTLIBRARIES) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) check-DEJAGNU
 
 @BUILD_INFO_TRUE@html-local: doc/sframe-spec/index.html
 @BUILD_INFO_TRUE@doc/sframe-spec/index.html: doc/sframe-spec.texi doc/$(am__dirstamp)

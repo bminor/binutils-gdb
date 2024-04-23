@@ -55,6 +55,10 @@ libsframe_la_LDFLAGS = $(libsframe_version_info) $(libsframe_version_script)
 
 EXTRA_DIST = libtool-version libsframe.ver
 diststuff: $(EXTRA_DIST) info
+check-am: all-am setup.sh
+	$(SHELL) $(srcdir)/setup.sh
+	$(MAKE) $(AM_MAKEFLAGS) $(check_LTLIBRARIES) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) check-DEJAGNU
 
 include doc/local.mk
 

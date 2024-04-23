@@ -31,15 +31,6 @@ if ![info exists as] then {
 
 remote_exec host "mkdir -p tmpdir"
 
-# Make symlinks from tmpdir/libsframe to the linker and assembler in the
-# build tree, so that we can use a -B option to gcc to force it to use
-# the newly built linker and assembler.
-if {![file isdirectory tmpdir/libsframe]} then {
-    catch "exec mkdir tmpdir/libsframe" status
-    catch "exec ln -s ../../../ld/ld-new tmpdir/libsframe/ld" status
-    catch "exec ln -s ld tmpdir/libsframe/collect-ld" status
-    catch "exec ln -s ../../../gas/as-new tmpdir/libsframe/as" status
-}
 set gcc_B_opt "-B[pwd]/tmpdir/libsframe/"
 set ld_L_opt ""
 

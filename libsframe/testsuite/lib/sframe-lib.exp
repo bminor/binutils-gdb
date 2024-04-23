@@ -53,7 +53,7 @@ proc compile_link_one_host_cc { src output additional_args } {
     global CC
     global CFLAGS
 
-    return [run_native_host_cmd "./libtool --quiet --tag=CC --mode=link $CC $CFLAGS $src -o $output $additional_args" ]
+    return [run_native_host_cmd "./libtool --quiet --tag=CC --mode=link $CC -B./tmpdir/libsframe $CFLAGS $src -o $output $additional_args" ]
 }
 
 proc make_unwind_parallel_path { args } {
