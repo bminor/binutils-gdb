@@ -920,8 +920,7 @@ aarch64_za_regs_copy_to_reg_buf (int tid, struct reg_buffer_common *reg_buf,
   else
     {
       size_t za_bytes = header->vl * header->vl;
-      gdb_byte za_zeroed[za_bytes];
-      memset (za_zeroed, 0, za_bytes);
+      gdb::byte_vector za_zeroed (za_bytes, 0);
       reg_buf->raw_supply (za_regnum, za_zeroed);
     }
 
@@ -994,8 +993,7 @@ aarch64_za_regs_copy_from_reg_buf (int tid,
   bool has_za_state = aarch64_has_za_state (tid);
 
   size_t za_bytes = sve_vl_from_vg (old_svg) * sve_vl_from_vg (old_svg);
-  gdb_byte za_zeroed[za_bytes];
-  memset (za_zeroed, 0, za_bytes);
+  gdb::byte_vector za_zeroed (za_bytes, 0);
 
   /* If the streaming vector length changed, zero out the contents of ZA in
      the register cache.  Otherwise, we will need to update the ZA contents
@@ -1007,8 +1005,7 @@ aarch64_za_regs_copy_from_reg_buf (int tid,
   /* When we update svg, we don't automatically initialize the ZA buffer.  If
      we have no ZA state and the ZA register contents in the register cache are
      zero, just return and leave the ZA register cache contents as zero.  */
-  if (!has_za_state
-      && reg_buf->raw_compare (za_regnum, za_zeroed, 0))
+  if (!has_za_state && reg_buf->raw_compare (za_regnum, za_zeroed.data (), 0))
     {
       /* No ZA state in the thread or in the register cache.  This was likely
 	 just an adjustment of the streaming vector length.  Let this fall
@@ -1020,7 +1017,7 @@ aarch64_za_regs_copy_from_reg_buf (int tid,
 	 need to initialize the ZA data through ptrace.  First we initialize
 	 all the bytes of ZA to zero.  */
       if (!has_za_state
-	  && !reg_buf->raw_compare (za_regnum, za_zeroed, 0))
+	  && !reg_buf->raw_compare (za_regnum, za_zeroed.data (), 0))
 	aarch64_initialize_za_regset (tid);
 
       /* From this point onwards, it is assumed we have a ZA payload in
