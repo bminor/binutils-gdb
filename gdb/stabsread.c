@@ -25,6 +25,7 @@
    this file.  */
 
 #include "bfd.h"
+#include "event-top.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "symtab.h"
 #include "gdbtypes.h"

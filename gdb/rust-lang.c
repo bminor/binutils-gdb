@@ -25,6 +25,7 @@
 #include "charset.h"
 #include "cp-support.h"
 #include "demangle.h"
+#include "event-top.h"
 #include "gdbarch.h"
 #include "infcall.h"
 #include "objfiles.h"

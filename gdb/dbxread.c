@@ -31,6 +31,7 @@
    for real.  dbx_psymtab_to_symtab() is the function that does this */
 
 
+#include "event-top.h"
 #include "gdbsupport/gdb_obstack.h"
 #include <sys/stat.h>
 #include "symtab.h"

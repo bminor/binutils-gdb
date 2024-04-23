@@ -652,47 +652,6 @@ warning_filename_and_errno (const char *filename, int saved_errno)
 	   safe_strerror (saved_errno));
 }
 
-/* Control C eventually causes this to be called, at a convenient time.  */
-
-void
-quit (void)
-{
-  if (sync_quit_force_run)
-    {
-      sync_quit_force_run = false;
-      throw_forced_quit ("SIGTERM");
-    }
-
-#ifdef __MSDOS__
-  /* No steenking SIGINT will ever be coming our way when the
-     program is resumed.  Don't lie.  */
-  throw_quit ("Quit");
-#else
-  if (job_control
-      /* If there is no terminal switching for this target, then we can't
-	 possibly get screwed by the lack of job control.  */
-      || !target_supports_terminal_ours ())
-    throw_quit ("Quit");
-  else
-    throw_quit ("Quit (expect signal SIGINT when the program is resumed)");
-#endif
-}
-
-/* See defs.h.  */
-
-void
-maybe_quit (void)
-{
-  if (!is_main_thread ())
-    return;
-
-  if (sync_quit_force_run)
-    quit ();
-
-  quit_handler ();
-}
-
-
 /* Called when a memory allocation fails, with the number of bytes of
    memory requested in SIZE.  */
 

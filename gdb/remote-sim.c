@@ -20,6 +20,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "event-top.h"
 #include "gdb_bfd.h"
 #include "inferior.h"
 #include "infrun.h"

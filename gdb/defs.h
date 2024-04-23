@@ -94,50 +94,6 @@ extern std::string python_libdir;
 /* * Search path for separate debug files.  */
 extern std::string debug_file_directory;
 
-/* The current quit handler (and its type).  This is called from the
-   QUIT macro.  See default_quit_handler below for default behavior.
-   Parts of GDB temporarily override this to e.g., completely suppress
-   Ctrl-C because it would not be safe to throw.  E.g., normally, you
-   wouldn't want to quit between a RSP command and its response, as
-   that would break the communication with the target, but you may
-   still want to intercept the Ctrl-C and offer to disconnect if the
-   user presses Ctrl-C multiple times while the target is stuck
-   waiting for the wedged remote stub.  */
-typedef void (quit_handler_ftype) (void);
-extern quit_handler_ftype *quit_handler;
-
-/* The default quit handler.  Checks whether Ctrl-C was pressed, and
-   if so:
-
-     - If GDB owns the terminal, throws a quit exception.
-
-     - If GDB does not own the terminal, forwards the Ctrl-C to the
-       target.
-*/
-extern void default_quit_handler (void);
-
-/* Flag that function quit should call quit_force.  */
-extern volatile bool sync_quit_force_run;
-
-/* Set sync_quit_force_run and also call set_quit_flag().  */
-extern void set_force_quit_flag ();
-
-extern void quit (void);
-
-/* Helper for the QUIT macro.  */
-
-extern void maybe_quit (void);
-
-/* Check whether a Ctrl-C was typed, and if so, call the current quit
-   handler.  */
-#define QUIT maybe_quit ()
-
-/* Set the serial event associated with the quit flag.  */
-extern void quit_serial_event_set (void);
-
-/* Clear the serial event associated with the quit flag.  */
-extern void quit_serial_event_clear (void);
-
 /* * Languages represented in the symbol table and elsewhere.
    This should probably be in language.h, but since enum's can't
    be forward declared to satisfy opaque references before their

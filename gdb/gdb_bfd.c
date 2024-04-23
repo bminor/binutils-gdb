@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "gdb_bfd.h"
+#include "event-top.h"
 #include "ui-out.h"
 #include "gdbcmd.h"
 #include "hashtab.h"

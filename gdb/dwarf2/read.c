@@ -47,6 +47,7 @@
 #include "dwarf2/public.h"
 #include "bfd.h"
 #include "elf-bfd.h"
+#include "event-top.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "objfiles.h"

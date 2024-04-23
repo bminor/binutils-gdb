@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "arch-utils.h"
+#include "event-top.h"
 #include "target.h"
 #include "value.h"
 #include "ui-out.h"

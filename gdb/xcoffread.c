@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "bfd.h"
+#include "event-top.h"
 
 #include <sys/types.h>
 #include <fcntl.h>

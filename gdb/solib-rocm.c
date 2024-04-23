@@ -23,6 +23,7 @@
 #include "arch-utils.h"
 #include "elf-bfd.h"
 #include "elf/amdgpu.h"
+#include "event-top.h"
 #include "gdbsupport/fileio.h"
 #include "inferior.h"
 #include "observable.h"

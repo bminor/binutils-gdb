@@ -17,6 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "bfd.h"
+#include "event-top.h"
 #include "gdbtypes.h"
 #include "value.h"
 #include "c-lang.h"

@@ -16,6 +16,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "event-top.h"
 #include "language.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "bfd.h"

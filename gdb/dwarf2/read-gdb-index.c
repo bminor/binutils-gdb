@@ -22,6 +22,7 @@
 #include "cli/cli-cmds.h"
 #include "complaints.h"
 #include "dwz.h"
+#include "event-top.h"
 #include "gdb/gdb-index.h"
 #include "gdbsupport/gdb-checked-static-cast.h"
 #include "mapped-index.h"

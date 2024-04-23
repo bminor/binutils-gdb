@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <ctype.h>
+#include "event-top.h"
 #include "extract-store-integer.h"
 #include "gdbtypes.h"
 #include "expression.h"

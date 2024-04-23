@@ -19,6 +19,7 @@
 
 /* See the GDB User Guide for details of the GDB remote protocol.  */
 
+#include "event-top.h"
 #include "extract-store-integer.h"
 #include "gdbcmd.h"
 #include "remote.h"
