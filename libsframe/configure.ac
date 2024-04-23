@@ -121,13 +121,7 @@ else
 fi
 CROSS_COMPILE=$is_cross_compiler
 AC_SUBST([CROSS_COMPILE])
-
-dnl The libsframebt library needs to be built with SFrame info.
-dnl If the build assembler is not capable of generate SFrame then
-dnl the library is not built.
-
-SFRAME_CHECK_HAVE_SFRAME_AS
-AM_CONDITIONAL([HAVE_SFRAME_AS], [test "x$sframe_cv_have_sframe_as" = "xyes"])
+AM_CONDITIONAL(CROSS_COMPILE, test "is_cross_compiler" = "yes")
 
 AM_MAINTAINER_MODE
 AM_INSTALL_LIBBFD

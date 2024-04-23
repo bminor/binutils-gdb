@@ -30,6 +30,7 @@ if [catch "exec ls $objdir/testsuite/libsframe.stacktrace/libsframest/.libs/libs
 proc run_unwind_test { name } {
     global CC
     global CFLAGS
+    global CROSS_COMPILE
     global copyfile env runtests srcdir subdir verbose
 
     # Append additional flags for unwinder to work properly
@@ -77,6 +78,11 @@ proc run_unwind_test { name } {
 	}
 
 	set opts($opt_name) [concat $opts($opt_name) $opt_val]
+    }
+
+    if { "$CROSS_COMPILE" eq "yes" } {
+	untested "$subdir/$name not tested when cross-compiling"
+	return
     }
 
     if { [llength $opts(unwind)] == 0 } {

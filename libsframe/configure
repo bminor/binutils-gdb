@@ -645,8 +645,8 @@ INSTALL_LIBBFD_TRUE
 MAINT
 MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
-HAVE_SFRAME_AS_FALSE
-HAVE_SFRAME_AS_TRUE
+CROSS_COMPILE_FALSE
+CROSS_COMPILE_TRUE
 CROSS_COMPILE
 HAVE_LD_VERSION_SCRIPT_FALSE
 HAVE_LD_VERSION_SCRIPT_TRUE
@@ -12476,50 +12476,12 @@ else
 fi
 CROSS_COMPILE=$is_cross_compiler
 
-
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if as supports --gsframe" >&5
-$as_echo_n "checking if as supports --gsframe... " >&6; }
-if ${sframe_cv_have_sframe_as+:} false; then :
-  $as_echo_n "(cached) " >&6
+ if test "is_cross_compiler" = "yes"; then
+  CROSS_COMPILE_TRUE=
+  CROSS_COMPILE_FALSE='#'
 else
-
-    ac_save_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -Wa,--gsframe"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for as that supports --gsframe" >&5
-$as_echo_n "checking for as that supports --gsframe... " >&6; }
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-return 0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  sframe_cv_have_sframe_as=yes
-else
-  sframe_cv_have_sframe_as=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sframe_cv_have_sframe_as" >&5
-$as_echo "$sframe_cv_have_sframe_as" >&6; }
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sframe_cv_have_sframe_as" >&5
-$as_echo "$sframe_cv_have_sframe_as" >&6; }
-  CFLAGS="$ac_save_CFLAGS"
-
- if test "x$sframe_cv_have_sframe_as" = "xyes"; then
-  HAVE_SFRAME_AS_TRUE=
-  HAVE_SFRAME_AS_FALSE='#'
-else
-  HAVE_SFRAME_AS_TRUE='#'
-  HAVE_SFRAME_AS_FALSE=
+  CROSS_COMPILE_TRUE='#'
+  CROSS_COMPILE_FALSE=
 fi
 
 
@@ -13072,8 +13034,8 @@ if test -z "${HAVE_LD_VERSION_SCRIPT_TRUE}" && test -z "${HAVE_LD_VERSION_SCRIPT
   as_fn_error $? "conditional \"HAVE_LD_VERSION_SCRIPT\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${HAVE_SFRAME_AS_TRUE}" && test -z "${HAVE_SFRAME_AS_FALSE}"; then
-  as_fn_error $? "conditional \"HAVE_SFRAME_AS\" was never defined.
+if test -z "${CROSS_COMPILE_TRUE}" && test -z "${CROSS_COMPILE_FALSE}"; then
+  as_fn_error $? "conditional \"CROSS_COMPILE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
