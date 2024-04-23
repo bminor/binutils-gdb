@@ -136,13 +136,6 @@ static_assert (nr_languages <= (1 << LANGUAGE_BITS));
 /* The number of bytes needed to represent all languages.  */
 #define LANGUAGE_BYTES ((LANGUAGE_BITS + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT)
 
-enum precision_type
-  {
-    single_precision,
-    double_precision,
-    unspecified_precision
-  };
-
 /* * A generic, not quite boolean, enumeration.  This is used for
    set/show commands in which the options are on/off/automatic.  */
 enum auto_boolean
