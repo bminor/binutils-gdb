@@ -24,6 +24,7 @@
 #include "frame.h"
 #include "inferior.h"
 #include "gdbsupport/environ.h"
+#include "top.h"
 #include "value.h"
 #include "target.h"
 #include "gdbthread.h"

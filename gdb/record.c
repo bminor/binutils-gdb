@@ -26,6 +26,7 @@
 #include "cli/cli-utils.h"
 #include "disasm.h"
 #include "interps.h"
+#include "top.h"
 
 #include <ctype.h>
 

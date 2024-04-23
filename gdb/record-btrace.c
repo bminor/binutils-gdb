@@ -28,6 +28,7 @@
 #include "observable.h"
 #include "cli/cli-utils.h"
 #include "source.h"
+#include "top.h"
 #include "ui-out.h"
 #include "symtab.h"
 #include "filenames.h"

@@ -19,6 +19,7 @@
 
 #include "event-top.h"
 #include "extract-store-integer.h"
+#include "top.h"
 #include "value.h"
 #include "symtab.h"
 #include "gdbtypes.h"

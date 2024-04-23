@@ -598,9 +598,10 @@ execute_command (const char *p, int from_tty)
   cleanup_if_error.release ();
 }
 
-/* See gdbcmd.h.  */
+/* Run FN.  Send its output to FILE, do not display it to the screen.
+   The global BATCH_FLAG will be temporarily set to true.  */
 
-void
+static void
 execute_fn_to_ui_file (struct ui_file *file, std::function<void(void)> fn)
 {
   /* GDB_STDOUT should be better already restored during these
@@ -627,7 +628,7 @@ execute_fn_to_ui_file (struct ui_file *file, std::function<void(void)> fn)
   }
 }
 
-/* See gdbcmd.h.  */
+/* See top.h.  */
 
 void
 execute_fn_to_string (std::string &res, std::function<void(void)> fn,
@@ -650,7 +651,7 @@ execute_fn_to_string (std::string &res, std::function<void(void)> fn,
   res = str_file.release ();
 }
 
-/* See gdbcmd.h.  */
+/* See top.h.  */
 
 void
 execute_command_to_ui_file (struct ui_file *file,
@@ -659,7 +660,7 @@ execute_command_to_ui_file (struct ui_file *file,
   execute_fn_to_ui_file (file, [=]() { execute_command (p, from_tty); });
 }
 
-/* See gdbcmd.h.  */
+/* See top.h.  */
 
 void
 execute_command_to_string (std::string &res, const char *p, int from_tty,
@@ -669,7 +670,7 @@ execute_command_to_string (std::string &res, const char *p, int from_tty,
 			term_out);
 }
 
-/* See gdbcmd.h.  */
+/* See top.h.  */
 
 void
 execute_command_to_string (const char *p, int from_tty,

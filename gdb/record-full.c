@@ -39,6 +39,7 @@
 #include "gdbsupport/gdb_unlinker.h"
 #include "gdbsupport/byte-vector.h"
 #include "async-event.h"
+#include "top.h"
 #include "valprint.h"
 #include "interps.h"
 

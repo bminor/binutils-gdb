@@ -22,6 +22,7 @@
 #include "frame.h"
 #include "symtab.h"
 #include "gdbtypes.h"
+#include "top.h"
 #include "value.h"
 #include "language.h"
 #include "c-lang.h"
