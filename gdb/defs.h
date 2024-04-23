@@ -188,10 +188,6 @@ struct value;
    globals that are currently only available to main.c.  */
 extern std::string relocate_gdb_directory (const char *initial, bool relocatable);
 
-/* From symfile.c */
-
-extern void symbol_file_command (const char *, int);
-
 /* From top.c */
 
 typedef void initialize_file_ftype (void);
