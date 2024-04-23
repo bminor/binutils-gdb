@@ -22,6 +22,14 @@
 #include "symtab.h"
 #include "gdbtypes.h"
 
+/* Zero means do things normally; we are interacting directly with the
+   user.  One means print the full filename and linenumber when a
+   frame is printed, and do so in a format emacs18/emacs19.22 can
+   parse.  Two means print similar annotations, but in many more
+   cases and in a slightly different syntax.  */
+
+extern int annotation_level;
+
 extern void annotate_breakpoint (int);
 extern void annotate_catchpoint (int);
 extern void annotate_watchpoint (int);

@@ -29,6 +29,10 @@
 #include "source-cache.h"
 #include "ui.h"
 
+/* See annotate.h.  */
+
+int annotation_level = 0;
+
 /* Prototypes for local functions.  */
 
 static void print_value_flags (struct type *);

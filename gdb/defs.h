@@ -195,12 +195,6 @@ struct value;
    globals that are currently only available to main.c.  */
 extern std::string relocate_gdb_directory (const char *initial, bool relocatable);
 
-
-/* Annotation stuff.  */
-
-extern int annotation_level;	/* in stack.c */
-
-
 /* From symfile.c */
 
 extern void symbol_file_command (const char *, int);
