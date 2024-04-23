@@ -17984,9 +17984,9 @@ do_neon_mac_maybe_scalar (void)
       constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext), BAD_FPU);
 
       enum neon_shape rs = neon_select_shape (NS_QQR, NS_NULL);
-      neon_check_type (3, rs, N_EQK, N_EQK, N_SU_MVE | N_KEY);
+      neon_check_type (3, rs, N_EQK, N_EQK, N_SU_MVE | N_I_MVE | N_KEY);
 
-      neon_dyadic_misc (NT_unsigned, N_SU_MVE, 0);
+      neon_dyadic_misc (NT_untyped, N_SU_MVE | N_I_MVE, 0);
     }
   else
     {
