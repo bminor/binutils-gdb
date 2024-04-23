@@ -663,7 +663,7 @@ static std::recursive_mutex ext_lang_mutex;
 /* This flag tracks quit requests when we haven't called out to an
    extension language.  it also holds quit requests when we transition to
    an extension language that doesn't have cooperative SIGINT handling.  */
-static int quit_flag;
+static bool quit_flag;
 
 /* The current extension language we've called out to, or
    extension_language_gdb if there isn't one.
@@ -877,7 +877,7 @@ set_quit_flag ()
     active_ext_lang->ops->set_quit_flag (active_ext_lang);
   else
     {
-      quit_flag = 1;
+      quit_flag = true;
 
       /* Now wake up the event loop, or any interruptible_select.  Do
 	 this after setting the flag, because signals on Windows
@@ -914,7 +914,7 @@ check_quit_flag ()
 	 interruptible_select.  The caller handles the quit
 	 request.  */
       quit_serial_event_clear ();
-      quit_flag = 0;
+      quit_flag = false;
       result = true;
     }
 
