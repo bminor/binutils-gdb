@@ -29,11 +29,6 @@
 #include "cli/cli-script.h"
 #include "cli/cli-cmds.h"
 
-extern void print_command_line (struct command_line *, unsigned int,
-				struct ui_file *);
-extern void print_command_lines (struct ui_out *,
-				 struct command_line *, unsigned int);
-
 /* Chains containing all defined "set/show style" subcommands.  */
 extern struct cmd_list_element *style_set_list;
 extern struct cmd_list_element *style_show_list;
