@@ -32,16 +32,20 @@ _id_map = {}
 
 
 @in_gdb_thread
-def make_source(fullname, filename):
+def make_source(fullname, filename=None):
     """Return the Source for a given file name.
 
     FULLNAME is the full name.  This is used as the key.
-    FILENAME is the base name.
+    FILENAME is the base name; if None (the default), then it is
+    computed from FULLNAME.
     """
     global _source_map
     if fullname in _source_map:
         result = _source_map[fullname]
     else:
+        if filename is None:
+            filename = os.path.basename(fullname)
+
         result = {
             "name": filename,
             "path": fullname,

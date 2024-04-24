@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-
 # This is deprecated in 3.9, but required in older versions.
 from typing import Optional
 
@@ -98,7 +96,7 @@ def _backtrace(thread_id, levels, startFrame, stack_format):
                     name += ", module " + objfile.username
             filename = current_frame.filename()
             if filename is not None:
-                newframe["source"] = make_source(filename, os.path.basename(filename))
+                newframe["source"] = make_source(filename)
             newframe["name"] = name
             frames.append(newframe)
         # Note that we do not calculate totalFrames here.  Its absence
