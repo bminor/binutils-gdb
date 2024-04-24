@@ -109,7 +109,7 @@ main (int argc, char *argv[])
 
   b = read_file ("tmpdir/two", &b_len);
 
-  if (memcmp (a, b, b_len) == 0)
+  if (a_len == b_len && memcmp (a, b, b_len) == 0)
     {
       fprintf (stderr, "compress_writes after adding types does not change the dict\n");
       return 1;

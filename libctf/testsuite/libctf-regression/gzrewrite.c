@@ -114,7 +114,7 @@ main (int argc, char *argv[])
   if ((b = read_gz ("tmpdir/two.gz", &b_len)) == NULL)
     goto read_err;
 
-  if (memcmp (a, b, b_len) == 0)
+  if (a_len == b_len && memcmp (a, b, b_len) == 0)
     {
       fprintf (stderr, "gzwrites after adding types does not change the dict\n");
       return 1;
