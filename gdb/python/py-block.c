@@ -452,6 +452,28 @@ blpy_repr (PyObject *self)
 			       name, str.c_str ());
 }
 
+/* Implements the equality comparison for Block objects.  All other
+   comparison operators will throw NotImplemented, as they aren't
+   valid for blocks.  */
+
+static PyObject *
+blpy_richcompare (PyObject *self, PyObject *other, int op)
+{
+  if (!PyObject_TypeCheck (other, &block_object_type)
+      || (op != Py_EQ && op != Py_NE))
+    {
+      Py_INCREF (Py_NotImplemented);
+      return Py_NotImplemented;
+    }
+
+  block_object *self_block = (block_object *) self;
+  block_object *other_block = (block_object *) other;
+
+  bool expected = self_block->block == other_block->block;
+  bool equal = op == Py_EQ;
+  return PyBool_FromLong (equal == expected);
+}
+
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_blocks (void)
 {
@@ -530,7 +552,7 @@ PyTypeObject block_object_type = {
   "GDB block object",		  /* tp_doc */
   0,				  /* tp_traverse */
   0,				  /* tp_clear */
-  0,				  /* tp_richcompare */
+  blpy_richcompare,		  /* tp_richcompare */
   0,				  /* tp_weaklistoffset */
   blpy_iter,			  /* tp_iter */
   0,				  /* tp_iternext */
