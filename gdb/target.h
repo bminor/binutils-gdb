@@ -19,6 +19,28 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This include file defines the interface between the main part of
+   the debugger, and the part which is target-specific, or specific to
+   the communications interface between us and the target.
+
+   A TARGET is an interface between the debugger and a particular
+   kind of file or process.  Targets can be STACKED in STRATA,
+   so that more than one target can potentially respond to a request.
+   In particular, memory accesses will walk down the stack of targets
+   until they find a target that is interested in handling that particular
+   address.  STRATA are artificial boundaries on the stack, within
+   which particular kinds of targets live.  Strata exist so that
+   people don't get confused by pushing e.g. a process target and then
+   a file target, and wondering why they can't see the current values
+   of variables any more (the file target is handling them and they
+   never get to the process target).  So when you push a file target,
+   it goes into the file stratum, which is always below the process
+   stratum.
+
+   Note that rather than allow an empty stack, we always have the
+   dummy target at the bottom stratum, so we can call the target
+   methods without checking them.  */
+
 #if !defined (TARGET_H)
 #define TARGET_H
 
@@ -48,30 +70,6 @@ typedef const gdb_byte const_gdb_byte;
 #include "gdbsupport/scoped_restore.h"
 #include "gdbsupport/refcounted-object.h"
 #include "target-section.h"
-
-/* This include file defines the interface between the main part
-   of the debugger, and the part which is target-specific, or
-   specific to the communications interface between us and the
-   target.
-
-   A TARGET is an interface between the debugger and a particular
-   kind of file or process.  Targets can be STACKED in STRATA,
-   so that more than one target can potentially respond to a request.
-   In particular, memory accesses will walk down the stack of targets
-   until they find a target that is interested in handling that particular
-   address.  STRATA are artificial boundaries on the stack, within
-   which particular kinds of targets live.  Strata exist so that
-   people don't get confused by pushing e.g. a process target and then
-   a file target, and wondering why they can't see the current values
-   of variables any more (the file target is handling them and they
-   never get to the process target).  So when you push a file target,
-   it goes into the file stratum, which is always below the process
-   stratum.
-
-   Note that rather than allow an empty stack, we always have the
-   dummy target at the bottom stratum, so we can call the target
-   methods without checking them.  */
-
 #include "target/target.h"
 #include "target/resume.h"
 #include "target/wait.h"
@@ -433,6 +431,24 @@ struct target_info
   const char *doc;
 };
 
+/* A GDB target.
+
+   Each inferior has a stack of these.  See overall description at the
+   top.
+
+   Most target methods traverse the current inferior's target stack;
+   you call the method on the top target (normally via one of the
+   target_foo wrapper free functions), and the implementation of said
+   method does its work and returns, or defers to the same method on
+   the target beneath on the current inferior's target stack.  Thus,
+   the inferior you want to call the target method on must be made the
+   current inferior before calling a target method, so that the stack
+   traversal works correctly.
+
+   Methods that traverse the stack have a TARGET_DEFAULT_XXX marker in
+   their declaration below.  See the macros' description above, where
+   they're defined.  */
+
 struct target_ops
   : public refcounted_object
   {
@@ -783,6 +799,17 @@ struct target_ops
        1 byte long.  The OFFSET, for a seekable object, specifies the
        starting point.  The ANNEX can be used to provide additional
        data-specific information to the target.
+
+       When accessing memory, inferior_ptid indicates which process's
+       memory is to be accessed.  This is usually the same process as
+       the current inferior, however it may also be a process that is
+       a fork child of the current inferior, at a moment that the
+       child does not exist in GDB's inferior lists.  This happens
+       when we remove software breakpoints from the address space of a
+       fork child process that we're not going to stay attached to.
+       Because the fork child is a clone of the fork parent, we can
+       use the fork parent inferior's stack for target method
+       delegation.
 
        Return the transferred status, error or OK (an
        'enum target_xfer_status' value).  Save the number of addressable units
