@@ -189,15 +189,3 @@ tui_win_info::make_visible (bool visible)
   else
     handle.reset (nullptr);
 }
-
-/* Function to refresh all the windows currently displayed.  */
-
-void
-tui_refresh_all ()
-{
-  for (tui_win_info *win_info : all_tui_windows ())
-    {
-      if (win_info->is_visible ())
-	win_info->refresh_window ();
-    }
-}

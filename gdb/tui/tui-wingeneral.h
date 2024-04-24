@@ -28,7 +28,6 @@ struct tui_win_info;
 
 extern void tui_unhighlight_win (struct tui_win_info *);
 extern void tui_highlight_win (struct tui_win_info *);
-extern void tui_refresh_all ();
 
 /* An RAII class that suppresses output on construction (calling
    wnoutrefresh on the existing windows), and then flushes the output
