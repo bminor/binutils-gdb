@@ -74,7 +74,7 @@ proc thread_apply_all {} {
 	    lappend test_list 6
 	    exp_continue
 	}
-	-re "^\r\n${hs}main$hs$eol" {
+	-re "^\r\n${hs}in main$hs$eol" {
 	    lappend test_list 7
 	    exp_continue
 	}
