@@ -71,6 +71,8 @@
 
 #ifdef PHONY_ICONV
 
+#include "extract-store-integer.h"
+
 /* Provide a phony iconv that does as little as possible.  Also,
    arrange for there to be a single available character set.  */
 
