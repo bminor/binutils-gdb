@@ -251,17 +251,15 @@ proc_with_prefix test_gcore {} {
     }
     gdb_test "continue" ".*Segmentation fault.*" "continue to crash"
 
-    set gcore_name "${::binfile}.gcore"
-    set gcore_supported [gdb_gcore_cmd "$gcore_name" "saving gcore"]
+    set gcore_host [host_standard_output_file $::testfile.gcore]
+    set gcore_supported [gdb_gcore_cmd "$gcore_host" "saving gcore"]
 
     if {!$gcore_supported} {
 	unsupported "couldn't generate gcore file"
 	return
     }
 
-    set corefile [gdb_remote_download host $gcore_name]
-
-    gdb_test "core-file $corefile" \
+    gdb_test "core-file $gcore_host" \
 	     "" \
 	     "loading_corefile" \
 	     "A program is being debugged already\\\.  Kill it\\\? \\\(y or n\\\) " \
