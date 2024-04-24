@@ -1548,6 +1548,10 @@ get_symbol_at (Elf_Internal_Sym *  symtab,
   Elf_Internal_Sym *  best = NULL;
   uint64_t            dist = 0x100000;
 
+  /* Paranoia.  */
+  if (symtab == NULL || nsyms == 0 || strtab == NULL || strtablen == 0)
+    return NULL;
+
   /* FIXME: Since this function is likely to be called repeatedly with
      slightly increasing addresses each time, we could speed things up by
      caching the last returned value and starting our search from there.  */
@@ -1624,6 +1628,69 @@ symcmp (const void *p, const void *q)
   return sp->st_value > sq->st_value ? 1 : (sp->st_value < sq->st_value ? -1 : 0);
 }
 
+static uint64_t
+count_relr_relocations (Filedata *          filedata,
+			Elf_Internal_Shdr * section)
+{
+  uint64_t *  relrs;
+  uint64_t    nentries;
+  uint64_t    i;
+  uint64_t    count;
+  int         entsize;
+
+  if (section == NULL
+      || section->sh_type != SHT_RELR
+      || section->sh_size == 0)
+    return 0;
+
+  entsize = section->sh_entsize;
+  if (entsize == 0)
+    entsize = is_32bit_elf
+      ? sizeof (Elf32_External_Relr) : sizeof (Elf64_External_Relr);
+  else if (entsize != sizeof (Elf32_External_Relr)
+	   && entsize != sizeof (Elf64_External_Relr))
+    return 0;
+
+  nentries = section->sh_size / entsize;
+  if (nentries == 0)
+    return 0;
+  
+  /* FIXME: This call to get_data duplicates one that follows in
+     dump_relr_relocations().  They could be combined into just
+     one call.  */
+  relrs = get_data (NULL, filedata, section->sh_offset, 1,
+		    section->sh_size, _("RELR relocation data"));
+  if (relrs == NULL)
+    return 0;
+
+  for (count = i = 0; i < nentries; i++)
+    {
+      uint64_t entry;
+
+      if (entsize == sizeof (Elf32_External_Relr))
+	entry = BYTE_GET (((Elf32_External_Relr *)relrs)[i].r_data);
+      else
+	entry = BYTE_GET (((Elf64_External_Relr *)relrs)[i].r_data);
+
+      if ((entry & 1) == 0)
+	{
+	  ++ count;
+	}
+      else
+	{
+	  if (entry == 1)
+	    continue;
+
+	  for (; entry >>= 1;)
+	    if ((entry & 1) == 1)
+	      ++ count;
+	}
+    }
+
+  free (relrs);
+  return count;
+}
+
 static bool
 dump_relr_relocations (Filedata *          filedata,
 		       Elf_Internal_Shdr * section,
@@ -1640,14 +1707,14 @@ dump_relr_relocations (Filedata *          filedata,
   uint64_t    where = 0;
   int         num_bits_in_entry;
 
-  relrs = get_data (NULL, filedata, relr_offset, 1, relr_size, _("RELR relocation data"));
-  if (relrs == NULL)
-    return false;
-
   if (relr_entsize == 0)
-    relr_entsize = is_32bit_elf ? 4 : 8;
+    relr_entsize = is_32bit_elf
+      ? sizeof (Elf32_External_Relr) : sizeof (Elf64_External_Relr);
 
   nentries = relr_size / relr_entsize;
+
+  if (nentries == 0)
+    return true;
 
   if (relr_entsize == sizeof (Elf32_External_Relr))
     num_bits_in_entry = 31;
@@ -1658,14 +1725,21 @@ dump_relr_relocations (Filedata *          filedata,
       warn (_("Unexpected entsize for RELR section\n"));
       return false;
     }
-  
-  /* Symbol tables are not sorted on address, but we want a quick lookup
-     for the symbol associated with each address computed below, so sort
-     the table now.  FIXME: This assumes that the symbol table will not
-     be used later on for some other purpose.  */
-  qsort (symtab, nsyms, sizeof (Elf_Internal_Sym), symcmp);
 
-  if (relr_entsize == 4)
+  relrs = get_data (NULL, filedata, relr_offset, 1, relr_size, _("RELR relocation data"));
+  if (relrs == NULL)
+    return false;
+
+  if (symtab != NULL)
+    {
+      /* Symbol tables are not sorted on address, but we want a quick lookup
+	 for the symbol associated with each address computed below, so sort
+	 the table now.  FIXME: This assumes that the symbol table will not
+	 be used later on for some other purpose.  */
+      qsort (symtab, nsyms, sizeof (Elf_Internal_Sym), symcmp);
+    }
+
+  if (relr_entsize == sizeof (Elf32_External_Relr))
     printf (_ ("Index: Entry    Address   Symbolic Address\n"));
   else
     printf (_ ("Index: Entry            Address           Symbolic Address\n"));
@@ -1674,7 +1748,7 @@ dump_relr_relocations (Filedata *          filedata,
     {
       uint64_t entry;
 
-      if (relr_entsize == 4)
+      if (relr_entsize == sizeof (Elf32_External_Relr))
 	entry = BYTE_GET (((Elf32_External_Relr *)relrs)[i].r_data);
       else
 	entry = BYTE_GET (((Elf64_External_Relr *)relrs)[i].r_data);
@@ -1698,7 +1772,9 @@ dump_relr_relocations (Filedata *          filedata,
 
 	  /* The least significant bit is ignored.  */
 	  if (entry == 1)
-	    warn (_("Malformed RELR bitmap - no significant bits are set\n"));
+	    /* This can actually happen when the linker is allowed to shrink
+	       RELR sections.  For more details see: https://reviews.llvm.org/D67164. */
+	    continue;
 	  else if (i == 0)
 	    warn (_("Unusual RELR bitmap - no previous entry to set the base address\n"));
 
@@ -9077,12 +9153,31 @@ display_relocations (Elf_Internal_Shdr *  section,
   uint64_t num_rela = rel_size / section->sh_entsize;
   uint64_t rel_offset = section->sh_offset;
 
-  printf (ngettext (" at offset %#" PRIx64
-		    " contains %" PRIu64 " entry:\n",
-		    " at offset %#" PRIx64
-		    " contains %" PRId64 " entries:\n",
-		    num_rela),
-	  rel_offset, num_rela);
+  if (rel_type == reltype_relr)
+    {
+      /* Just stating the 'number of entries' in a RELR section can be
+	 misleading, since this is not the number of locations relocated, but
+	 the number of words in the compressed RELR format.  So also provide
+	 the number of locations affected.  */
+      if (num_rela == 1)
+	/* This is unlikely, but possible.  */
+	printf (_(" at offset %#" PRIx64
+		  " contains 1 entry which relocates 1 location:\n"),
+		rel_offset);
+      else
+	printf (_(" at offset %#" PRIx64 " contains %" PRIu64
+		  " entries which relocate %" PRIu64 " locations:\n"),
+		rel_offset, num_rela, count_relr_relocations (filedata, section));
+    }
+  else
+    {
+      printf (ngettext (" at offset %#" PRIx64
+			" contains %" PRIu64 " entry:\n",
+			" at offset %#" PRIx64
+			" contains %" PRIu64 " entries:\n",
+			num_rela),
+	      rel_offset, num_rela);
+    }
 
   Elf_Internal_Shdr * symsec;
   Elf_Internal_Sym *  symtab = NULL;

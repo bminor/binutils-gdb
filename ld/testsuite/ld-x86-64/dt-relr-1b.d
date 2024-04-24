@@ -16,7 +16,7 @@ Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entry:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
 [0-9a-f]+ +[0-9a-f]+ +R_X86_64_JUMP_SLOT +0+ +func1 \+ 0
 
-Relocation section '.relr.dyn' at offset 0x[a-f0-9]+ contains 2 entries:
+Relocation section '.relr.dyn' at offset 0x[a-f0-9]+ contains 2 entries which relocate [0-9]+ locations:
 #...
 0000: +[0-9a-f]+ [0-9a-f]+ +.*
 0001: +[0-9a-f]+ [0-9a-f]+ +.*
