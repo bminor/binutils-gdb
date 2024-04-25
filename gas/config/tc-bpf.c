@@ -434,6 +434,7 @@ relaxed_branch_length (fragS *fragp, asection *sec, int update)
           && sec == S_GET_SEGMENT (fragp->fr_symbol))
         {
           offsetT val = S_GET_VALUE (fragp->fr_symbol) + fragp->fr_offset;
+          val -= fragp->fr_address + fragp->fr_fix;
 
           /* Convert to 64-bit words, minus one.  */
           val = (val - 8) / 8;
@@ -578,6 +579,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
            && sec == S_GET_SEGMENT (fragp->fr_symbol))
     {
       offsetT val = S_GET_VALUE (fragp->fr_symbol) + fragp->fr_offset;
+      val -= fragp->fr_address + fragp->fr_fix;
       /* Convert to 64-bit blocks minus one.  */
       disp_to_target = (val - 8) / 8;
       disp_is_known = 1;
@@ -626,15 +628,27 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
             {
               /* 16-bit disp is known and not in range.  Turn the JA
                  into a JAL with a 32-bit displacement.  */
-              char bytes[8];
+              char bytes[8] = {0};
 
               bytes[0] = ((BPF_CLASS_JMP32|BPF_CODE_JA|BPF_SRC_K) >> 56) & 0xff;
               bytes[1] = (word >> 48) & 0xff;
               bytes[2] = 0; /* disp16 high */
               bytes[3] = 0; /* disp16 lo */
-              encode_int32 ((int32_t) disp_to_target, bytes + 4);
-
               write_insn_bytes (buf, bytes);
+
+              /* Install fixup for the JAL.  */
+              reloc_howto_type *reloc_howto
+                = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_BPF_DISP32);
+              if (!reloc_howto)
+                abort();
+
+              fixp = fix_new_exp (fragp, buf - (bfd_byte *) fragp->fr_literal,
+                                  bfd_get_reloc_size (reloc_howto),
+                                  &exp,
+                                  reloc_howto->pc_relative,
+                                  BFD_RELOC_BPF_DISP32);
+              fixp->fx_file = fragp->fr_file;
+              fixp->fx_line = fragp->fr_line;
             }
         }
       else
@@ -731,8 +745,23 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
               bytes[1] = 0;
               bytes[2] = 0;
               bytes[3] = 0;
-              encode_int32 ((int32_t) disp_to_target, bytes + 4);
+              encode_int32 ((int32_t) 0, bytes + 4);
               write_insn_bytes (buf, bytes);
+
+              /* Install fixup for the JAL.  */
+              reloc_howto_type *reloc_howto
+                = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_BPF_DISP32);
+              if (!reloc_howto)
+                abort();
+
+              fixp = fix_new_exp (fragp, buf - (bfd_byte *) fragp->fr_literal,
+                                  bfd_get_reloc_size (reloc_howto),
+                                  &exp,
+                                  reloc_howto->pc_relative,
+                                  BFD_RELOC_BPF_DISP32);
+              fixp->fx_file = fragp->fr_file;
+              fixp->fx_line = fragp->fr_line;
+
               buf += 8;
             }
         }
