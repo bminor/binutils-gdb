@@ -49,7 +49,7 @@ sframe_bt_errmsg (enum sframe_bt_errcode ecode)
   return sframe_bt_errlist[ecode];
 }
 
-/* sframe_bt_errno - Check if there is error code in ERRP.  */
+/* Check if there is error code in ERRP.  */
 
 int
 sframe_bt_errno (const int *errp)
@@ -68,4 +68,3 @@ sframe_bt_ret_set_errno (int *errp, int error)
 
   return error;
 }
-

@@ -80,7 +80,7 @@ sframe_bt_set_errno (int *errp, int error)
 
 #endif
 
-/* sframe_add_dso - Add .sframe info in D_DATA, which is associated with
+/* Add .sframe info in D_DATA, which is associated with
    a dynamic shared object, to D_LIST.  */
 
 static int
@@ -118,7 +118,7 @@ sframe_add_dso (struct sframe_stinfo_list *d_list,
   return SFRAME_BT_OK;
 }
 
-/* sframe_free_cfi - Free up space allocated for .sframe info for CF.  */
+/* Free up space allocated for .sframe info for CF.  */
 
 void
 sframe_free_cfi (struct sframe_state *sf)
@@ -146,7 +146,7 @@ sframe_free_cfi (struct sframe_state *sf)
   free (d_list->entry);
 }
 
-/* sframe_find_context - Find the decode data that contains ADDR from CF.
+/* Find the decode data that contains ADDR from CF.
    Return the pointer to the decode data or NULL.  */
 
 struct sframe_stinfo *
@@ -175,9 +175,9 @@ sframe_find_context (struct sframe_state *sf, uint64_t addr)
   return NULL;
 }
 
-/* sframe_load_ctx - Call decoder to create and set up the SFrame info for
-   either the main module or one of the DSOs from CF, based on the input
-   RADDR argument.  Return the newly created decode context or NULL.  */
+/* Call decoder to create and set up the SFrame info for either the main module
+   or one of the DSOs from CF, based on the input RADDR argument.  Return the
+   newly created decode context or NULL.  */
 
 sframe_decoder_ctx *
 sframe_load_ctx (struct sframe_state *sf, uint64_t raddr)
@@ -205,10 +205,10 @@ sframe_load_ctx (struct sframe_state *sf, uint64_t raddr)
   return NULL;
 }
 
-/* sframe_update_ctx - Check if need to do a decode context switch, based on
-   the input RADDR argument, from CF. A new decode context will be created
-   and set up if it isn't already done so. Return the new decode context in
-   CTX and vma in CFI_VMA.  */
+/* Check if need to do a decode context switch, based on the input RADDR
+   argument, from CF. A new decode context will be created and set up if it
+   isn't already done so. Return the new decode context in CTX and vma in
+   CFI_VMA.  */
 
 void
 sframe_update_ctx (struct sframe_state *sf, uint64_t raddr,
@@ -236,8 +236,8 @@ sframe_update_ctx (struct sframe_state *sf, uint64_t raddr,
     }
 }
 
-/* sframe_fd_open - Open /proc image associated with the process id and return
-   the file descriptor.  */
+/* Open /proc image associated with the process id and return the file
+   descriptor.  */
 
 static int
 sframe_fd_open (int *errp)
