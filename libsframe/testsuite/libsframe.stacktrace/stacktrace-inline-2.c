@@ -13,12 +13,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This is a revised version of gdb/testsuite/gdb.opt/inline-cmds.c.  */
+
 /* This is only ever run if it is compiled with a new-enough GCC, but
    we don't want the compilation to fail if compiled by some other
    compiler.  */
-
-/* This is a revised version of gdb/testsuite/gdb.opt/inline-cmds.c.  */
-
 #ifdef __GNUC__
 #define ATTR __attribute__((always_inline))
 #else

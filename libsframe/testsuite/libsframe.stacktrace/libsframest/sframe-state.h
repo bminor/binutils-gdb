@@ -38,8 +38,9 @@
 #include "sframe-stacktrace-api.h"
 #include "sframe-stacktrace-regs.h"
 
+/* glibc's elf.h will bring this in future.  */
 #ifndef PT_SFRAME
-#define PT_SFRAME 0x6474e554		/* FIXME.  */
+#define PT_SFRAME 0x6474e554
 #endif
 
 /* SFrame decode data for the main module or a DSO.  */
@@ -58,15 +59,15 @@ struct sframe_stinfo_list
 {
   int alloced;				/* Entries allocated.  */
   int used;				/* Entries used.  */
-  struct sframe_stinfo *entry;	/* DSO's decode data.  */
+  struct sframe_stinfo *entry;		/* DSO's decode data.  */
 };
 
 /* Data that's passed through sframe_callback.  */
 struct sframe_state
 {
   int sui_fd;				/* File descriptor.  */
-  struct sframe_stinfo sui_ctx;	/* The decode data.  */
-  struct sframe_stinfo_list sui_dsos;		/* The DSO list.  */
+  struct sframe_stinfo sui_ctx;		/* The decode data.  */
+  struct sframe_stinfo_list sui_dsos;	/* The DSO list.  */
 };
 
 
@@ -81,8 +82,8 @@ void sframe_update_ctx (struct sframe_state *sf, uint64_t raddr,
 
 sframe_decoder_ctx *sframe_load_ctx (struct sframe_state *sf, uint64_t raddr);
 
-struct sframe_stinfo *
-sframe_find_context (struct sframe_state *sf, uint64_t addr);
+struct sframe_stinfo *sframe_find_context (struct sframe_state *sf,
+					   uint64_t addr);
 
 void sframe_free_cfi (struct sframe_state *sf);
 
