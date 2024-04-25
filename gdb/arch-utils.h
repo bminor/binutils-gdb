@@ -74,6 +74,58 @@ struct bp_manipulation_endian
   bp_manipulation_endian<sizeof (BREAK_INSN_LITTLE),		  \
   BREAK_INSN_LITTLE, BREAK_INSN_BIG>
 
+/* Structure returned from gdbarch core_parse_exec_context method.  Wraps
+   the execfn string and a vector containing the inferior argument.  If a
+   gdbarch is unable to parse this information then an empty structure is
+   returned, check the execfn as an indication, if this is nullptr then no
+   other fields should be considered valid.  */
+
+struct core_file_exec_context
+{
+  /* Constructor, just move everything into place.  The EXEC_NAME should
+     never be nullptr.  Only call this constructor if all the arguments
+     have been collected successfully, i.e. if the EXEC_NAME could be
+     found but not ARGV then use the no-argument constructor to create an
+     empty context object.  */
+  core_file_exec_context (gdb::unique_xmalloc_ptr<char> exec_name,
+			  std::vector<gdb::unique_xmalloc_ptr<char>> argv)
+    : m_exec_name (std::move (exec_name)),
+      m_arguments (std::move (argv))
+  {
+    gdb_assert (m_exec_name != nullptr);
+  }
+
+  /* Create a default context object.  In its default state a context
+     object holds no useful information, and will return false from its
+     valid() method.  */
+  core_file_exec_context () = default;
+
+  /* Return true if this object contains valid context information.  */
+  bool valid () const
+  { return m_exec_name != nullptr; }
+
+  /* Return the execfn string (executable name) as extracted from the core
+     file.  Will always return non-nullptr if valid() returns true.  */
+  const char *execfn () const
+  { return m_exec_name.get (); }
+
+  /* Return the vector of inferior arguments as extracted from the core
+     file.  This does not include argv[0] (the executable name) for that
+     see the execfn() function.  */
+  const std::vector<gdb::unique_xmalloc_ptr<char>> &args () const
+  { return m_arguments; }
+
+private:
+
+  /* The executable filename as reported in the core file.  Can be nullptr
+     if no executable name is found.  */
+  gdb::unique_xmalloc_ptr<char> m_exec_name;
+
+  /* List of arguments.  Doesn't include argv[0] which is the executable
+     name, for this look at m_exec_name field.  */
+  std::vector<gdb::unique_xmalloc_ptr<char>> m_arguments;
+};
+
 /* Default implementation of gdbarch_displaced_hw_singlestep.  */
 extern bool default_displaced_step_hw_singlestep (struct gdbarch *);
 
@@ -304,6 +356,11 @@ extern void default_read_core_file_mappings
    struct bfd *cbfd,
    read_core_file_mappings_pre_loop_ftype pre_loop_cb,
    read_core_file_mappings_loop_ftype loop_cb);
+
+/* Default implementation of gdbarch_core_parse_exec_context.  Returns
+   an empty core_file_exec_context.  */
+extern core_file_exec_context default_core_parse_exec_context
+  (struct gdbarch *gdbarch, bfd *cbfd);
 
 /* Default implementation of gdbarch
    use_target_description_from_corefile_notes.  */

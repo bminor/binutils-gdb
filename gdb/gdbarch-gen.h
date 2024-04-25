@@ -1778,3 +1778,18 @@ extern void set_gdbarch_read_core_file_mappings (struct gdbarch *gdbarch, gdbarc
 typedef bool (gdbarch_use_target_description_from_corefile_notes_ftype) (struct gdbarch *gdbarch, struct bfd *corefile_bfd);
 extern bool gdbarch_use_target_description_from_corefile_notes (struct gdbarch *gdbarch, struct bfd *corefile_bfd);
 extern void set_gdbarch_use_target_description_from_corefile_notes (struct gdbarch *gdbarch, gdbarch_use_target_description_from_corefile_notes_ftype *use_target_description_from_corefile_notes);
+
+/* Examine the core file bfd object CBFD and try to extract the name of
+   the current executable and the argument list, which are return in a
+   core_file_exec_context object.
+
+   If for any reason the details can't be extracted from CBFD then an
+   empty context is returned.
+
+   It is required that the current inferior be the one associated with
+   CBFD, strings are read from the current inferior using target methods
+   which all assume current_inferior() is the one to read from. */
+
+typedef core_file_exec_context (gdbarch_core_parse_exec_context_ftype) (struct gdbarch *gdbarch, bfd *cbfd);
+extern core_file_exec_context gdbarch_core_parse_exec_context (struct gdbarch *gdbarch, bfd *cbfd);
+extern void set_gdbarch_core_parse_exec_context (struct gdbarch *gdbarch, gdbarch_core_parse_exec_context_ftype *core_parse_exec_context);

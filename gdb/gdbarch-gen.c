@@ -260,6 +260,7 @@ struct gdbarch
   gdbarch_get_pc_address_flags_ftype *get_pc_address_flags = default_get_pc_address_flags;
   gdbarch_read_core_file_mappings_ftype *read_core_file_mappings = default_read_core_file_mappings;
   gdbarch_use_target_description_from_corefile_notes_ftype *use_target_description_from_corefile_notes = default_use_target_description_from_corefile_notes;
+  gdbarch_core_parse_exec_context_ftype *core_parse_exec_context = default_core_parse_exec_context;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -531,6 +532,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of get_pc_address_flags, invalid_p == 0.  */
   /* Skip verify of read_core_file_mappings, invalid_p == 0.  */
   /* Skip verify of use_target_description_from_corefile_notes, invalid_p == 0.  */
+  /* Skip verify of core_parse_exec_context, invalid_p == 0.  */
   if (!log.empty ())
     internal_error (_("verify_gdbarch: the following are invalid ...%s"),
 		    log.c_str ());
@@ -1396,6 +1398,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file,
 	      "gdbarch_dump: use_target_description_from_corefile_notes = <%s>\n",
 	      host_address_to_string (gdbarch->use_target_description_from_corefile_notes));
+  gdb_printf (file,
+	      "gdbarch_dump: core_parse_exec_context = <%s>\n",
+	      host_address_to_string (gdbarch->core_parse_exec_context));
   if (gdbarch->dump_tdep != NULL)
     gdbarch->dump_tdep (gdbarch, file);
 }
@@ -5506,4 +5511,21 @@ set_gdbarch_use_target_description_from_corefile_notes (struct gdbarch *gdbarch,
 							gdbarch_use_target_description_from_corefile_notes_ftype use_target_description_from_corefile_notes)
 {
   gdbarch->use_target_description_from_corefile_notes = use_target_description_from_corefile_notes;
+}
+
+core_file_exec_context
+gdbarch_core_parse_exec_context (struct gdbarch *gdbarch, bfd *cbfd)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->core_parse_exec_context != NULL);
+  if (gdbarch_debug >= 2)
+    gdb_printf (gdb_stdlog, "gdbarch_core_parse_exec_context called\n");
+  return gdbarch->core_parse_exec_context (gdbarch, cbfd);
+}
+
+void
+set_gdbarch_core_parse_exec_context (struct gdbarch *gdbarch,
+				     gdbarch_core_parse_exec_context_ftype core_parse_exec_context)
+{
+  gdbarch->core_parse_exec_context = core_parse_exec_context;
 }

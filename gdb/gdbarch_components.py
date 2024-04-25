@@ -2815,3 +2815,23 @@ The corefile's bfd is passed through COREFILE_BFD.
     predefault="default_use_target_description_from_corefile_notes",
     invalid=False,
 )
+
+Method(
+    comment="""
+Examine the core file bfd object CBFD and try to extract the name of
+the current executable and the argument list, which are return in a
+core_file_exec_context object.
+
+If for any reason the details can't be extracted from CBFD then an
+empty context is returned.
+
+It is required that the current inferior be the one associated with
+CBFD, strings are read from the current inferior using target methods
+which all assume current_inferior() is the one to read from.
+""",
+    type="core_file_exec_context",
+    name="core_parse_exec_context",
+    params=[("bfd *", "cbfd")],
+    predefault="default_core_parse_exec_context",
+    invalid=False,
+)
