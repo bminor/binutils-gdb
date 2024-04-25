@@ -85,9 +85,8 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst,
 	       int *ra_size)
 {
   uint64_t cfa, return_addr, ra_stack_loc, rfp_stack_loc;
-  int8_t fixed_ra_offset;
   sframe_decoder_ctx *ctx;
-  int cfa_offset, rfp_offset, errnum, i, count;
+  int cfa_offset, rfp_offset, ra_offset, errnum, i, count;
   sframe_frame_row_entry fred, *frep = &fred;
   uint64_t pc, rfp, rsp, ra, cfi_vma;
   ucontext_t context, *cp = &context;
@@ -104,6 +103,8 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst,
   rsp = get_context_rsp (cp);
   rfp = get_context_rfp (cp);
   ra = get_context_ra (cp);
+
+  return_addr = ra;
 
   /* Load and set up the decoder.  */
   ctx = sframe_load_ctx (sf, pc);
@@ -126,20 +127,7 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst,
 	  cfa = (((frep->fre_info & 0x1) == SFRAME_BASE_REG_SP)
 		 ? rsp : rfp) + cfa_offset;
 
-#ifdef __x86_64__
-	  /* For x86, read the return address from the fixed RA offset from
-	     the SFrame header.  RA must be at location CFA - 8.  */
-	  fixed_ra_offset = sframe_decoder_get_fixed_ra_offset (ctx);
-	  if (fixed_ra_offset == SFRAME_CFA_FIXED_RA_INVALID)
-	   return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_FRE_INVAL);
-
-	  ra_stack_loc = cfa + fixed_ra_offset;
-	  errnum = get_contents_8b (sf->sui_fd, ra_stack_loc, &return_addr);
-	  if (sframe_bt_errno (&errnum))
-	    return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_FRE_INVAL);
-#else
-#ifdef __aarch64__
-	  int ra_offset = sframe_fre_get_ra_offset (ctx, frep, &errnum);
+	  ra_offset = sframe_fre_get_ra_offset (ctx, frep, &errnum);
 	  if (errnum == 0)
 	    {
 	      ra_stack_loc = cfa + ra_offset;
@@ -147,10 +135,6 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst,
 	      if (sframe_bt_errno (&errnum))
 		return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_FRE_INVAL);
 	    }
-	  else
-	    return_addr = ra;
-#endif
-#endif
 
 	  /* Validate and add return address to the list.  */
 	  if (sframe_valid_addr_p (sf, return_addr) == 0)
