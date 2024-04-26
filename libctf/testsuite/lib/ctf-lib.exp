@@ -109,6 +109,9 @@ proc compile_link_one_host_cc { src output additional_args } {
 #   no_cross:
 #       If set, do not run this test when host != target.
 #
+#   host:
+#       If set, only run this test on hosts matching the given glob.
+#
 # Each option may occur at most once unless otherwise mentioned.
 #
 # After the option lines come regexp lines.  run_lookup_test calls
@@ -147,6 +150,7 @@ proc run_lookup_test { name } {
     set opts(source) {}
     set opts(xfail) {}
     set opts(no_cross) {}
+    set opts(host) {}
 
     foreach i $opt_array {
 	set opt_name [lindex $i 0]
@@ -167,6 +171,11 @@ proc run_lookup_test { name } {
     if { [llength $opts(no_cross)] != 0
 	 && "$TEST_CROSS" eq "yes" } {
 	untested "$subdir/$name not tested when cross-compiling"
+	return
+    }
+
+    if { [llength $opts(host)] != 0 && ![ishost $opts(host)] } {
+	untested "$subdir/$name only runs on $opts(host)"
 	return
     }
 
