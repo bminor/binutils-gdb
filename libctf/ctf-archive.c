@@ -44,7 +44,8 @@ static void *arc_mmap_file (int fd, size_t size);
 static int arc_mmap_writeout (int fd, void *header, size_t headersz,
 			      const char **errmsg);
 static int arc_mmap_unmap (void *header, size_t headersz, const char **errmsg);
-static void ctf_arc_import_parent (const ctf_archive_t *arc, ctf_dict_t *fp);
+static int ctf_arc_import_parent (const ctf_archive_t *arc, ctf_dict_t *fp,
+				  int *errp);
 
 /* Flag to indicate "symbol not present" in ctf_archive_internal.ctfi_symdicts
    and ctfi_symnamedicts.  Never initialized.  */
@@ -602,7 +603,11 @@ ctf_dict_open_sections (const ctf_archive_t *arc,
       if (ret)
 	{
 	  ret->ctf_archive = (ctf_archive_t *) arc;
-	  ctf_arc_import_parent (arc, ret);
+	  if (ctf_arc_import_parent (arc, ret, errp) < 0)
+	    {
+	      ctf_dict_close (ret);
+	      return NULL;
+	    }
 	}
       return ret;
     }
@@ -757,19 +762,26 @@ ctf_arc_open_by_name_sections (const ctf_archive_t *arc,
    already set, and a suitable archive member exists.  No error is raised if
    this is not possible: this is just a best-effort helper operation to give
    people useful dicts to start with.  */
-static void
-ctf_arc_import_parent (const ctf_archive_t *arc, ctf_dict_t *fp)
+static int
+ctf_arc_import_parent (const ctf_archive_t *arc, ctf_dict_t *fp, int *errp)
 {
   if ((fp->ctf_flags & LCTF_CHILD) && fp->ctf_parname && !fp->ctf_parent)
     {
+      int err;
       ctf_dict_t *parent = ctf_dict_open_cached ((ctf_archive_t *) arc,
-						 fp->ctf_parname, NULL);
+						 fp->ctf_parname, &err);
+      if (errp)
+	*errp = err;
+
       if (parent)
 	{
 	  ctf_import (fp, parent);
 	  ctf_dict_close (parent);
 	}
+      else if (err != ECTF_ARNNAME)
+	return -1;				/* errno is set for us.  */
     }
+  return 0;
 }
 
 /* Return the number of members in an archive.  */
