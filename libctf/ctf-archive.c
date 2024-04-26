@@ -1063,7 +1063,7 @@ ctf_archive_iter (const ctf_archive_t *arc, ctf_archive_member_f *func,
   ctf_next_t *i = NULL;
   ctf_dict_t *fp;
   const char *name;
-  int err;
+  int err = 0;
 
   while ((fp = ctf_archive_next (arc, &i, &name, 0, &err)) != NULL)
     {
@@ -1076,6 +1076,11 @@ ctf_archive_iter (const ctf_archive_t *arc, ctf_archive_member_f *func,
 	  return rc;
 	}
       ctf_dict_close (fp);
+    }
+  if (err != ECTF_NEXT_END && err != 0)
+    {
+      ctf_next_destroy (i);
+      return -1;
     }
   return 0;
 }
