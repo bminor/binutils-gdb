@@ -4317,6 +4317,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   if (p != NULL)
     alignment = p->alignment;
   else if (pe_section_alignment != (bfd_vma) -1
+	   && bfd_get_flavour (ibfd) == bfd_target_coff_flavour
 	   && bfd_get_flavour (obfd) == bfd_target_coff_flavour)
     {
       alignment = power_of_two (pe_section_alignment);
