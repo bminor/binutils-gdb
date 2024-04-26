@@ -100,6 +100,9 @@ proc compile_link_one_host_cc { src output additional_args } {
 #   link_flags:
 #	If set, extra flags to pass to the linker.
 #
+#   lookup_link:
+#       If set, extra libraries to link the lookup program with.
+#
 #   xfail: GLOB|PROC ...
 #	This test is expected to fail on a specified list of targets.
 #
@@ -137,6 +140,7 @@ proc run_lookup_test { name } {
     set shared "-shared"
     set opts(link) {}
     set opts(link_flags) {}
+    set opts(lookup_link) {}
     set opts(nonshared) {}
     set opts(lookup) {}
     set opts(name) {}
@@ -191,7 +195,7 @@ proc run_lookup_test { name } {
     }
 
     # Compile and link the lookup program.
-    set comp_output [prune_warnings [compile_link_one_host_cc $opts(lookup) "tmpdir/lookup" "libctf.la"]]
+    set comp_output [prune_warnings [compile_link_one_host_cc $opts(lookup) "tmpdir/lookup" "libctf.la $opts(lookup_link)"]]
 
     if { $comp_output != ""} {
 	send_log "compilation of lookup program $opts(lookup) failed with <$comp_output>"
