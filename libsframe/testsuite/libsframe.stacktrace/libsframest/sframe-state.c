@@ -89,10 +89,10 @@ sframe_add_dso (struct sframe_stinfo_list *d_list,
 {
   int err = 0;
 
-  if (d_list->alloced == 0)
+  if (!d_list->alloced)
     {
       d_list->entry = malloc (no_of_entries * sizeof (struct sframe_stinfo));
-      if (d_list->entry == NULL)
+      if (!d_list->entry)
 	return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_MALLOC);
 
       memset (d_list->entry, 0,
@@ -104,7 +104,7 @@ sframe_add_dso (struct sframe_stinfo_list *d_list,
       d_list->entry = realloc (d_list->entry,
 			       ((d_list->alloced + no_of_entries)
 				* sizeof (struct sframe_stinfo)));
-      if (d_list->entry == NULL)
+      if (!d_list->entry)
 	return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_REALLOC);
 
       memset (&d_list->entry[d_list->alloced], 0,
@@ -126,7 +126,7 @@ sframe_free_cfi (struct sframe_state *sf)
   struct sframe_stinfo_list *d_list;
   int i;
 
-  if (sf == NULL)
+  if (!sf)
     return;
 
   // free (sf->sui_ctx.sfdd_data);
@@ -134,7 +134,7 @@ sframe_free_cfi (struct sframe_state *sf)
   close (sf->sui_fd);
 
   d_list = &sf-> sui_dsos;
-  if (d_list == NULL)
+  if (!d_list)
     return;
 
   for (i = 0; i < d_list->used; ++i)
@@ -156,7 +156,7 @@ sframe_find_context (struct sframe_state *sf, uint64_t addr)
   struct sframe_stinfo sdec_data;
   int i;
 
-  if (sf == NULL)
+  if (!sf)
     return NULL;
 
   if (sf->sui_ctx.sfdd_text_vma < addr
@@ -185,18 +185,18 @@ sframe_load_ctx (struct sframe_state *sf, uint64_t raddr)
   sframe_decoder_ctx *nctx;
   struct sframe_stinfo *cdp;
 
-  if (sf == NULL)
+  if (!sf)
     return NULL;
 
   cdp = sframe_find_context (sf, raddr);
-  if (cdp == NULL)
+  if (!cdp)
     return NULL;
 
-  if (cdp->sfdd_sframe_ctx == NULL)
+  if (!cdp->sfdd_sframe_ctx)
     {
       int err;
       nctx = sframe_decode (cdp->sfdd_data, cdp->sfdd_data_size, &err);
-      if (nctx == NULL)
+      if (!nctx)
 	return NULL;
       cdp->sfdd_sframe_ctx = nctx;
       return nctx;
@@ -218,13 +218,13 @@ sframe_update_ctx (struct sframe_state *sf, uint64_t raddr,
   struct sframe_stinfo *cdp;
 
   cdp = sframe_find_context (sf, raddr);
-  if (cdp != NULL)
+  if (cdp)
     {
-      if (cdp->sfdd_sframe_ctx == NULL)
+      if (!cdp->sfdd_sframe_ctx)
 	{
 	  int err;
 	  nctx = sframe_decode (cdp->sfdd_data, cdp->sfdd_data_size, &err);
-	  if (nctx == NULL)
+	  if (!nctx)
 	    {
 	      *ctx = NULL;
 	      return;
@@ -267,7 +267,7 @@ sframe_callback (struct dl_phdr_info *info,
   uint64_t text_vma = 0;
   int text_size = 0;
 
-  if (data == NULL || info == NULL)
+  if (!data || !info)
     return 1;
 
   debug_printf ("-- name: %s %14p\n", info->dlpi_name, (void *)info->dlpi_addr);

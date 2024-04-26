@@ -46,7 +46,7 @@ get_contents_8b (int fd, uint64_t addr, uint64_t *data)
   size_t sz = 0;
   int err = 0;
 
-  if (data == NULL)
+  if (!data)
     return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_ARG);
 
   if (lseek (fd, addr, SEEK_SET) == -1)
@@ -59,16 +59,19 @@ get_contents_8b (int fd, uint64_t addr, uint64_t *data)
   return SFRAME_BT_OK;
 }
 
-/* sframe_valid_addr_p - Check if ADDR is valid in CF. The address is considered
-   invalid, with regards to SFrame, if it's not in any address range of the
-   main module or any of its DSO's. Return 1 if valid, 0 otherwise.  */
+/* Check if ADDR is valid in SF.
 
-static int
+   The address is considered invalid, with regards to SFrame, if it's not in
+   any address range of the main module or any of its DSO's.
+
+   Return 1 if valid, 0 otherwise.  */
+
+static bool
 sframe_valid_addr_p (struct sframe_state *sf, uint64_t addr)
 {
   struct sframe_stinfo *cdp;
 
-  if (sf == NULL)
+  if (!sf)
     return 0;
 
   cdp = sframe_find_context (sf, addr);
@@ -81,8 +84,7 @@ sframe_valid_addr_p (struct sframe_state *sf, uint64_t addr)
    RA_LST and contains the number of the addresses collected.  */
 
 static int
-sframe_unwind (struct sframe_state *sf, void **ra_lst,
-	       int *ra_size)
+sframe_unwind (struct sframe_state *sf, void **ra_lst, int *ra_size)
 {
   uint64_t cfa, return_addr, ra_stack_loc, rfp_stack_loc;
   sframe_decoder_ctx *ctx;
@@ -92,11 +94,11 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst,
   ucontext_t context, *cp = &context;
   int err = 0;
 
-  if (sf == NULL || ra_lst == NULL || ra_size == NULL)
+  if (!sf || !ra_lst || !ra_size)
     return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_ARG);
 
   /* Get the user context for its registers.  */
-  if (getcontext (cp) != 0)
+  if (getcontext (cp))
     return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_GETCONTEXT);
 
   pc = get_context_pc (cp);
@@ -108,7 +110,7 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst,
 
   /* Load and set up the decoder.  */
   ctx = sframe_load_ctx (sf, pc);
-  if (ctx == NULL)
+  if (!ctx)
     return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_DECODE);
 
   cfi_vma = sf->sui_ctx.sfdd_sframe_vma;
@@ -118,7 +120,7 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst,
     {
       pc -= cfi_vma;
       errnum = sframe_find_fre (ctx, pc, frep);
-      if (errnum == 0)
+      if (!errnum)
 	{
 	  cfa_offset = sframe_fre_get_cfa_offset (ctx, frep, &errnum);
 	  if (errnum == SFRAME_ERR_FREOFFSET_NOPRESENT)
@@ -128,7 +130,7 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst,
 		  == SFRAME_BASE_REG_SP) ? rsp : rfp) + cfa_offset;
 
 	  ra_offset = sframe_fre_get_ra_offset (ctx, frep, &errnum);
-	  if (errnum == 0)
+	  if (!errnum)
 	    {
 	      ra_stack_loc = cfa + ra_offset;
 	      errnum = get_contents_8b (sf->sui_fd, ra_stack_loc, &return_addr);
@@ -137,7 +139,7 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst,
 	    }
 
 	  /* Validate and add return address to the list.  */
-	  if (sframe_valid_addr_p (sf, return_addr) == 0)
+	  if (!sframe_valid_addr_p (sf, return_addr))
 	    {
 	      i -= 1;
 	      goto find_fre_ra_err;
@@ -147,7 +149,7 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst,
 
 	  /* Set up for the next frame.  */
 	  rfp_offset = sframe_fre_get_fp_offset (ctx, frep, &errnum);
-	  if (errnum == 0)
+	  if (!errnum)
 	    {
 	      rfp_stack_loc = cfa + rfp_offset;
 	      errnum = get_contents_8b (sf->sui_fd, rfp_stack_loc, &rfp);
@@ -159,7 +161,7 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst,
 
 	  /* Check if need to update the decoder context and vma.  */
 	  sframe_update_ctx (sf, return_addr, &ctx, &cfi_vma);
-	  if (ctx == NULL)
+	  if (!ctx)
 	    return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_DECODE);
 	}
       else
@@ -196,7 +198,7 @@ sframe_stacktrace (void **buffer, int size, int *errp)
   /* Find the .sframe sections and setup the SFrame state for generating stack
      traces.  */
   (void) dl_iterate_phdr (sframe_callback, (void *)&sframeinfo);
-  if (sframeinfo.sui_fd == 0)
+  if (!sframeinfo.sui_fd)
     {
       sframe_bt_ret_set_errno (errp, SFRAME_BT_ERR_BAD_SFSTATE);
       return -1;
