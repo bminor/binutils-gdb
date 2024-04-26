@@ -1724,6 +1724,10 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 bad:
   ctf_set_open_errno (errp, err);
   ctf_err_warn_to_open (fp);
+  /* Without this, the refcnt is zero on entry and ctf_dict_close() won't
+     actually do anything on the grounds that this is a recursive call via
+     another dict being closed.  */
+  fp->ctf_refcnt = 1;
   ctf_dict_close (fp);
   return NULL;
 }
