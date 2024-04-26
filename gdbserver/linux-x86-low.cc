@@ -29,6 +29,8 @@
 
 #ifdef __x86_64__
 #include "nat/amd64-linux-siginfo.h"
+#else
+#include "nat/i386-linux.h"
 #endif
 
 #include "gdb_proc_service.h"
@@ -831,17 +833,6 @@ x86_target::low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
 
 static int use_xml;
 
-/* Does the current host support the GETFPXREGS request?  The header
-   file may or may not define it, and even if it is defined, the
-   kernel will return EIO if it's running on a pre-SSE processor.  */
-int have_ptrace_getfpxregs =
-#ifdef HAVE_PTRACE_GETFPXREGS
-  -1
-#else
-  0
-#endif
-;
-
 /* Get Linux/x86 target description from running target.  */
 
 static const struct target_desc *
@@ -886,18 +877,18 @@ x86_linux_read_description (void)
     }
 
 #if !defined __x86_64__ && defined HAVE_PTRACE_GETFPXREGS
-  if (machine == EM_386 && have_ptrace_getfpxregs == -1)
+  if (machine == EM_386 && have_ptrace_getfpxregs == TRIBOOL_UNKNOWN)
     {
       elf_fpxregset_t fpxregs;
 
       if (ptrace (PTRACE_GETFPXREGS, tid, 0, (long) &fpxregs) < 0)
 	{
-	  have_ptrace_getfpxregs = 0;
+	  have_ptrace_getfpxregs = TRIBOOL_FALSE;
 	  have_ptrace_getregset = TRIBOOL_FALSE;
 	  return i386_linux_read_description (X86_XSTATE_X87);
 	}
       else
-	have_ptrace_getfpxregs = 1;
+	have_ptrace_getfpxregs = TRIBOOL_TRUE;
     }
 #endif
 

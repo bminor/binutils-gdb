@@ -26,7 +26,7 @@
 #include "gregset.h"
 #include "gdb_proc_service.h"
 
-#include "i386-linux-nat.h"
+#include "nat/i386-linux.h"
 #include "i387-tdep.h"
 #include "i386-tdep.h"
 #include "i386-linux-tdep.h"
@@ -76,22 +76,6 @@ static i386_linux_nat_target the_i386_linux_nat_target;
 int have_ptrace_getregs =
 #ifdef HAVE_PTRACE_GETREGS
   1
-#else
-  0
-#endif
-;
-
-/* Does the current host support the GETFPXREGS request?  The header
-   file may or may not define it, and even if it is defined, the
-   kernel will return EIO if it's running on a pre-SSE processor.
-
-   My instinct is to attach this to some architecture- or
-   target-specific data structure, but really, a particular GDB
-   process can only run on top of one kernel at a time.  So it's okay
-   for this to be a simple variable.  */
-int have_ptrace_getfpxregs =
-#ifdef HAVE_PTRACE_GETFPXREGS
-  -1
 #else
   0
 #endif
@@ -388,14 +372,14 @@ fetch_fpxregs (struct regcache *regcache, int tid)
 {
   elf_fpxregset_t fpxregs;
 
-  if (! have_ptrace_getfpxregs)
+  if (have_ptrace_getfpxregs == TRIBOOL_FALSE)
     return 0;
 
   if (ptrace (PTRACE_GETFPXREGS, tid, 0, (int) &fpxregs) < 0)
     {
       if (errno == EIO)
 	{
-	  have_ptrace_getfpxregs = 0;
+	  have_ptrace_getfpxregs = TRIBOOL_FALSE;
 	  return 0;
 	}
 
@@ -415,14 +399,14 @@ store_fpxregs (const struct regcache *regcache, int tid, int regno)
 {
   elf_fpxregset_t fpxregs;
 
-  if (! have_ptrace_getfpxregs)
+  if (have_ptrace_getfpxregs == TRIBOOL_FALSE)
     return 0;
   
   if (ptrace (PTRACE_GETFPXREGS, tid, 0, &fpxregs) == -1)
     {
       if (errno == EIO)
 	{
-	  have_ptrace_getfpxregs = 0;
+	  have_ptrace_getfpxregs = TRIBOOL_FALSE;
 	  return 0;
 	}
 

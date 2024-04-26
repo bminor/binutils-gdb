@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux i386.
 
-   Copyright (C) 1999-2024 Free Software Foundation, Inc.
+   Copyright (C) 2024 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,10 +17,13 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef I386_LINUX_NAT_H
-#define I386_LINUX_NAT_H 1
+#include "nat/i386-linux.h"
 
-/* Does the current host support the GETFPXREGS request? */
-extern int have_ptrace_getfpxregs;
-
+/* See nat/i386-linux.h.  */
+tribool have_ptrace_getfpxregs =
+#ifdef HAVE_PTRACE_GETFPXREGS
+  TRIBOOL_UNKNOWN
+#else
+  TRIBOOL_FALSE
 #endif
+;

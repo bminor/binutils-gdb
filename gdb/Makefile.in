@@ -1397,7 +1397,6 @@ HFILES_NO_SRCDIR = \
 	hppa-tdep.h \
 	i386-bsd-nat.h \
 	i386-darwin-tdep.h \
-	i386-linux-nat.h \
 	i386-linux-tdep.h \
 	i386-tdep.h \
 	i387-tdep.h \
@@ -1594,6 +1593,7 @@ HFILES_NO_SRCDIR = \
 	nat/gdb_ptrace.h \
 	nat/gdb_thread_db.h \
 	nat/fork-inferior.h \
+	nat/i386-linux.h \
 	nat/linux-btrace.h \
 	nat/linux-namespaces.h \
 	nat/linux-nat.h \
