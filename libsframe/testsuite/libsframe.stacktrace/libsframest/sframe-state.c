@@ -84,31 +84,31 @@ sframe_bt_set_errno (int *errp, int error)
    a dynamic shared object, to D_LIST.  */
 
 static int
-sframe_add_dso (struct sframe_stinfo_list *d_list,
-		struct sframe_stinfo d_data)
+sframe_add_dso (struct sframest_info_list *d_list,
+		struct sframest_info d_data)
 {
   int err = 0;
 
   if (!d_list->alloced)
     {
-      d_list->entry = malloc (no_of_entries * sizeof (struct sframe_stinfo));
+      d_list->entry = malloc (no_of_entries * sizeof (struct sframest_info));
       if (!d_list->entry)
 	return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_MALLOC);
 
       memset (d_list->entry, 0,
-	      no_of_entries * sizeof (struct sframe_stinfo));
+	      no_of_entries * sizeof (struct sframest_info));
       d_list->alloced = no_of_entries;
     }
   else if (d_list->used == d_list->alloced)
     {
       d_list->entry = realloc (d_list->entry,
 			       ((d_list->alloced + no_of_entries)
-				* sizeof (struct sframe_stinfo)));
+				* sizeof (struct sframest_info)));
       if (!d_list->entry)
 	return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_REALLOC);
 
       memset (&d_list->entry[d_list->alloced], 0,
-	      no_of_entries * sizeof (struct sframe_stinfo));
+	      no_of_entries * sizeof (struct sframest_info));
       d_list->alloced += no_of_entries;
     }
 
@@ -121,26 +121,26 @@ sframe_add_dso (struct sframe_stinfo_list *d_list,
 /* Free up space allocated for .sframe info for CF.  */
 
 void
-sframe_free_cfi (struct sframe_state *sf)
+sframe_free_cfi (struct sframest_ctx *sf)
 {
-  struct sframe_stinfo_list *d_list;
+  struct sframest_info_list *d_list;
   int i;
 
   if (!sf)
     return;
 
   // free (sf->sui_ctx.sfdd_data);
-  sframe_decoder_free (&sf->sui_ctx.sfdd_sframe_ctx);
-  close (sf->sui_fd);
+  sframe_decoder_free (&sf->prog_sfinfo.dctx);
+  close (sf->fd);
 
-  d_list = &sf-> sui_dsos;
-  if (!d_list)
+  d_list = &sf->dsos_sfinfo;
+  if (!d_list->alloced)
     return;
 
   for (i = 0; i < d_list->used; ++i)
     {
       // free (d_list->entry[i].sfdd_data);
-      sframe_decoder_free (&d_list->entry[i].sfdd_sframe_ctx);
+      sframe_decoder_free (&d_list->entry[i].dctx);
     }
 
   free (d_list->entry);
@@ -149,26 +149,26 @@ sframe_free_cfi (struct sframe_state *sf)
 /* Find the decode data that contains ADDR from CF.
    Return the pointer to the decode data or NULL.  */
 
-struct sframe_stinfo *
-sframe_find_context (struct sframe_state *sf, uint64_t addr)
+struct sframest_info *
+sframe_find_context (struct sframest_ctx *sf, uint64_t addr)
 {
-  struct sframe_stinfo_list *d_list;
-  struct sframe_stinfo sdec_data;
+  struct sframest_info_list *d_list;
+  struct sframest_info sfinfo;
   int i;
 
   if (!sf)
     return NULL;
 
-  if (sf->sui_ctx.sfdd_text_vma < addr
-      && sf->sui_ctx.sfdd_text_vma + sf->sui_ctx.sfdd_text_size > addr)
-    return &sf->sui_ctx;
+  if (sf->prog_sfinfo.text_vma < addr
+      && sf->prog_sfinfo.text_vma + sf->prog_sfinfo.text_size > addr)
+    return &sf->prog_sfinfo;
 
-  d_list = &sf->sui_dsos;
-  for (i = 0; i < sf->sui_dsos.used; ++i)
+  d_list = &sf->dsos_sfinfo;
+  for (i = 0; i < sf->dsos_sfinfo.used; ++i)
     {
-      sdec_data = d_list->entry[i];
-      if ((sdec_data.sfdd_text_vma <= addr)
-	  && (sdec_data.sfdd_text_vma + sdec_data.sfdd_text_size >= addr))
+      sfinfo = d_list->entry[i];
+      if ((sfinfo.text_vma <= addr)
+	  && (sfinfo.text_vma + sfinfo.text_size >= addr))
 	return &d_list->entry[i];
     }
 
@@ -180,26 +180,26 @@ sframe_find_context (struct sframe_state *sf, uint64_t addr)
    newly created decode context or NULL.  */
 
 sframe_decoder_ctx *
-sframe_load_ctx (struct sframe_state *sf, uint64_t raddr)
+sframe_load_ctx (struct sframest_ctx *sf, uint64_t raddr)
 {
-  sframe_decoder_ctx *nctx;
-  struct sframe_stinfo *cdp;
+  sframe_decoder_ctx *dctx;
+  struct sframest_info *sfinfo;
 
   if (!sf)
     return NULL;
 
-  cdp = sframe_find_context (sf, raddr);
-  if (!cdp)
+  sfinfo = sframe_find_context (sf, raddr);
+  if (!sfinfo)
     return NULL;
 
-  if (!cdp->sfdd_sframe_ctx)
+  if (!sfinfo->dctx)
     {
       int err;
-      nctx = sframe_decode (cdp->sfdd_data, cdp->sfdd_data_size, &err);
-      if (!nctx)
+      dctx = sframe_decode (sfinfo->buf, sfinfo->buflen, &err);
+      if (!dctx)
 	return NULL;
-      cdp->sfdd_sframe_ctx = nctx;
-      return nctx;
+      sfinfo->dctx = dctx;
+      return dctx;
     }
 
   return NULL;
@@ -211,28 +211,26 @@ sframe_load_ctx (struct sframe_state *sf, uint64_t raddr)
    CFI_VMA.  */
 
 void
-sframe_update_ctx (struct sframe_state *sf, uint64_t raddr,
-		   sframe_decoder_ctx **ctx, uint64_t *cfi_vma)
+sframe_update_ctx (struct sframest_ctx *sf, uint64_t raddr,
+		   sframe_decoder_ctx **ctx, uint64_t *sframe_vma)
 {
-  sframe_decoder_ctx *nctx;
-  struct sframe_stinfo *cdp;
+  sframe_decoder_ctx *dctx = NULL;
+  struct sframest_info *sfinfo;
 
-  cdp = sframe_find_context (sf, raddr);
-  if (cdp)
+  sfinfo = sframe_find_context (sf, raddr);
+  if (sfinfo)
     {
-      if (!cdp->sfdd_sframe_ctx)
+      if (!sfinfo->dctx)
 	{
 	  int err;
-	  nctx = sframe_decode (cdp->sfdd_data, cdp->sfdd_data_size, &err);
-	  if (!nctx)
-	    {
-	      *ctx = NULL;
-	      return;
-	    }
-	  cdp->sfdd_sframe_ctx = nctx;
+	  dctx = sframe_decode (sfinfo->buf, sfinfo->buflen, &err);
+	  if (!dctx)
+	    return;
+
+	  sfinfo->dctx = dctx;
 	}
-	*ctx = cdp->sfdd_sframe_ctx;
-	*cfi_vma = cdp->sfdd_sframe_vma;
+	*ctx = sfinfo->dctx;
+	*sframe_vma = sfinfo->sframe_vma;
     }
 }
 
@@ -261,7 +259,7 @@ sframe_callback (struct dl_phdr_info *info,
 		 size_t size ATTRIBUTE_UNUSED,
 		 void *data)
 {
-  struct sframe_state *sf = (struct sframe_state *) data;
+  struct sframest_ctx *sf = (struct sframest_ctx *) data;
   int p_type, i, fd, sframe_err;
   ssize_t len;
   uint64_t text_vma = 0;
@@ -304,7 +302,7 @@ sframe_callback (struct dl_phdr_info *info,
 #endif
 
 	  // sf->sui_ctx.sfdd_data = malloc (info->dlpi_phdr[i].p_memsz);
-	  sf->sui_ctx.sfdd_data = (char *)(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr);
+	  sf->prog_sfinfo.buf = (char *)(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr);
 #if 0
 	  if (sf->sui_ctx.sfdd_data == NULL)
 	    {
@@ -322,19 +320,19 @@ sframe_callback (struct dl_phdr_info *info,
 	  len = info->dlpi_phdr[i].p_memsz;
 
 	  assert (text_vma);
-	  sf->sui_ctx.sfdd_data_size = len;
-	  sf->sui_ctx.sfdd_sframe_vma = info->dlpi_addr + info->dlpi_phdr[i].p_vaddr;
-	  sf->sui_fd = fd;
-	  sf->sui_ctx.sfdd_text_vma = text_vma;
-	  sf->sui_ctx.sfdd_text_size = text_size;
+	  sf->prog_sfinfo.buflen = len;
+	  sf->prog_sfinfo.sframe_vma = info->dlpi_addr + info->dlpi_phdr[i].p_vaddr;
+	  sf->fd = fd;
+	  sf->prog_sfinfo.text_vma = text_vma;
+	  sf->prog_sfinfo.text_size = text_size;
 	  text_vma = 0;
 	  return 0;
 	}
       else
 	{					/* a dynamic shared object.  */
-	  struct sframe_stinfo dt;
-	  memset (&dt, 0, sizeof (struct sframe_stinfo));
-	  assert (sf->sui_fd);
+	  struct sframest_info sfinfo;
+	  memset (&sfinfo, 0, sizeof (struct sframest_info));
+	  assert (sf->fd);
 #if 0
 	  if (lseek (sf->sui_fd, info->dlpi_addr + info->dlpi_phdr[i].p_vaddr,
 		     SEEK_SET) == -1)
@@ -344,8 +342,7 @@ sframe_callback (struct dl_phdr_info *info,
 	    }
 #endif
 
-	  // dt.sfdd_data = malloc (info->dlpi_phdr[i].p_memsz);
-	  dt.sfdd_data = (char *)(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr);
+	  sfinfo.buf = (char *)(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr);
 #if 0
 	  if (dt.sfdd_data == NULL)
 	    {
@@ -362,13 +359,13 @@ sframe_callback (struct dl_phdr_info *info,
 #endif
 	  len = info->dlpi_phdr[i].p_memsz;
 	  assert (text_vma);
-	  dt.sfdd_data_size = len;
-	  dt.sfdd_sframe_vma = info->dlpi_addr + info->dlpi_phdr[i].p_vaddr;
-	  dt.sfdd_text_vma = text_vma;
-	  dt.sfdd_text_size = text_size;
+	  sfinfo.buflen = len;
+	  sfinfo.sframe_vma = info->dlpi_addr + info->dlpi_phdr[i].p_vaddr;
+	  sfinfo.text_vma = text_vma;
+	  sfinfo.text_size = text_size;
 	  text_vma = 0;
 	  
-	  sframe_err = sframe_add_dso (&sf->sui_dsos, dt);
+	  sframe_err = sframe_add_dso (&sf->dsos_sfinfo, sfinfo);
 	  // FIXME TODO
 	  if (sframe_err != SFRAME_BT_OK)
 	    return 1;
