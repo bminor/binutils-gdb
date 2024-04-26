@@ -124,8 +124,8 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst,
 	  if (errnum == SFRAME_ERR_FREOFFSET_NOPRESENT)
 	    return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_CFA_OFFSET);
 
-	  cfa = (((frep->fre_info & 0x1) == SFRAME_BASE_REG_SP)
-		 ? rsp : rfp) + cfa_offset;
+	  cfa = ((sframe_fre_get_base_reg_id (frep, &errnum)
+		  == SFRAME_BASE_REG_SP) ? rsp : rfp) + cfa_offset;
 
 	  ra_offset = sframe_fre_get_ra_offset (ctx, frep, &errnum);
 	  if (errnum == 0)
