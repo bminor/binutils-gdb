@@ -67,15 +67,15 @@ get_contents_8b (int fd, uint64_t addr, uint64_t *data)
    Return 1 if valid, 0 otherwise.  */
 
 static bool
-sframe_valid_addr_p (struct sframe_state *sf, uint64_t addr)
+sframe_valid_addr_p (struct sframest_ctx *sf, uint64_t addr)
 {
-  struct sframe_stinfo *cdp;
+  struct sframest_info *sfinfo;
 
   if (!sf)
     return 0;
 
-  cdp = sframe_find_context (sf, addr);
-  return cdp ? 1 : 0;
+  sfinfo = sframe_find_context (sf, addr);
+  return sfinfo ? 1 : 0;
 }
 
 /* Unwind the stack and collect the stacktrace given SFrame unwind info SF.
@@ -84,13 +84,13 @@ sframe_valid_addr_p (struct sframe_state *sf, uint64_t addr)
    RA_LST and contains the number of the addresses collected.  */
 
 static int
-sframe_unwind (struct sframe_state *sf, void **ra_lst, int *ra_size)
+sframe_unwind (struct sframest_ctx *sf, void **ra_lst, int *ra_size)
 {
   uint64_t cfa, return_addr, ra_stack_loc, rfp_stack_loc;
-  sframe_decoder_ctx *ctx;
+  sframe_decoder_ctx *dctx;
   int cfa_offset, rfp_offset, ra_offset, errnum, i, count;
   sframe_frame_row_entry fred, *frep = &fred;
-  uint64_t pc, rfp, rsp, ra, cfi_vma;
+  uint64_t pc, rfp, rsp, ra, sframe_vma;
   ucontext_t context, *cp = &context;
   int err = 0;
 
@@ -109,31 +109,31 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst, int *ra_size)
   return_addr = ra;
 
   /* Load and set up the decoder.  */
-  ctx = sframe_load_ctx (sf, pc);
-  if (!ctx)
+  dctx = sframe_load_ctx (sf, pc);
+  if (!dctx)
     return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_DECODE);
 
-  cfi_vma = sf->sui_ctx.sfdd_sframe_vma;
+  sframe_vma = sf->prog_sfinfo.sframe_vma;
   count = *ra_size;
 
   for (i = 0; i < count; ++i)
     {
-      pc -= cfi_vma;
-      errnum = sframe_find_fre (ctx, pc, frep);
+      pc -= sframe_vma;
+      errnum = sframe_find_fre (dctx, pc, frep);
       if (!errnum)
 	{
-	  cfa_offset = sframe_fre_get_cfa_offset (ctx, frep, &errnum);
+	  cfa_offset = sframe_fre_get_cfa_offset (dctx, frep, &errnum);
 	  if (errnum == SFRAME_ERR_FREOFFSET_NOPRESENT)
 	    return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_CFA_OFFSET);
 
 	  cfa = ((sframe_fre_get_base_reg_id (frep, &errnum)
 		  == SFRAME_BASE_REG_SP) ? rsp : rfp) + cfa_offset;
 
-	  ra_offset = sframe_fre_get_ra_offset (ctx, frep, &errnum);
+	  ra_offset = sframe_fre_get_ra_offset (dctx, frep, &errnum);
 	  if (!errnum)
 	    {
 	      ra_stack_loc = cfa + ra_offset;
-	      errnum = get_contents_8b (sf->sui_fd, ra_stack_loc, &return_addr);
+	      errnum = get_contents_8b (sf->fd, ra_stack_loc, &return_addr);
 	      if (sframe_bt_errno (&errnum))
 		return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_FRE_INVAL);
 	    }
@@ -148,11 +148,11 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst, int *ra_size)
 	    ra_lst[i-1] = (void *)return_addr;
 
 	  /* Set up for the next frame.  */
-	  rfp_offset = sframe_fre_get_fp_offset (ctx, frep, &errnum);
+	  rfp_offset = sframe_fre_get_fp_offset (dctx, frep, &errnum);
 	  if (!errnum)
 	    {
 	      rfp_stack_loc = cfa + rfp_offset;
-	      errnum = get_contents_8b (sf->sui_fd, rfp_stack_loc, &rfp);
+	      errnum = get_contents_8b (sf->fd, rfp_stack_loc, &rfp);
 	      if (sframe_bt_errno (&errnum))
 		return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_FRE_INVAL);
 	    }
@@ -160,8 +160,8 @@ sframe_unwind (struct sframe_state *sf, void **ra_lst, int *ra_size)
 	  pc = return_addr;
 
 	  /* Check if need to update the decoder context and vma.  */
-	  sframe_update_ctx (sf, return_addr, &ctx, &cfi_vma);
-	  if (!ctx)
+	  sframe_update_ctx (sf, return_addr, &dctx, &sframe_vma);
+	  if (!dctx)
 	    return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_DECODE);
 	}
       else
@@ -189,27 +189,27 @@ find_fre_ra_err:
 int
 sframe_stacktrace (void **buffer, int size, int *errp)
 {
-  struct sframe_state sframeinfo;
+  struct sframest_ctx sf_ctx;
 
   sframe_unwind_init_debug ();
 
-  memset (&sframeinfo, 0, sizeof (struct sframe_state));
+  memset (&sf_ctx, 0, sizeof (struct sframest_ctx));
 
   /* Find the .sframe sections and setup the SFrame state for generating stack
      traces.  */
-  (void) dl_iterate_phdr (sframe_callback, (void *)&sframeinfo);
-  if (!sframeinfo.sui_fd)
+  (void) dl_iterate_phdr (sframe_callback, (void *)&sf_ctx);
+  if (!sf_ctx.fd)
     {
       sframe_bt_ret_set_errno (errp, SFRAME_BT_ERR_BAD_SFSTATE);
       return -1;
     }
 
   /* Do the stack unwinding.  */
-  *errp = sframe_unwind (&sframeinfo, buffer, &size);
+  *errp = sframe_unwind (&sf_ctx, buffer, &size);
   if (sframe_bt_errno (errp))
     size = -1;
 
-  sframe_free_cfi (&sframeinfo);
+  sframe_free_cfi (&sf_ctx);
 
   return size;
 }

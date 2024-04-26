@@ -43,33 +43,49 @@
 #define PT_SFRAME 0x6474e554
 #endif
 
-/* SFrame decode data for the main module or a DSO.  */
-struct sframe_stinfo
+/* SFrame stacktrace data.  */
+
+struct sframest_info
 {
-  char *sfdd_data;			/* SFrame decode data.  */
-  int sfdd_data_size;			/* SFrame decode data size.  */
-  uint64_t sfdd_text_vma;		/* Text segment's virtual address.  */
-  int sfdd_text_size;			/* Text segment's size.  */
-  uint64_t sfdd_sframe_vma;		/* SFrame segment's virtual address.  */
-  sframe_decoder_ctx *sfdd_sframe_ctx;	/* SFrame decoder context.  */
+  /* Reference to the SFrame section in process memory.  */
+  char *buf;
+  /* Length in bytes of the SFrame section in memory.  */
+  int buflen;
+  /* Text segment's virtual address.  */
+  uint64_t text_vma;
+  /* Text segment's length in bytes.  */
+  int text_size;
+  /* SFrame segment's virtual address.  */
+  uint64_t sframe_vma;
+  /* SFrame decoder context.  For access to decoded SFrame information.  */
+  sframe_decoder_ctx *dctx;
 };
 
-/* List that holds SFrame info for the shared libraries.  */
-struct sframe_stinfo_list
+/* List of SFrame stacktrace info objects.
+   Typically used to represent SFrame stacktrace info for set of shared
+   libraries of a program.  */
+
+struct sframest_info_list
 {
-  int alloced;				/* Entries allocated.  */
-  int used;				/* Entries used.  */
-  struct sframe_stinfo *entry;		/* DSO's decode data.  */
+  /* Number of entries allocated.  */
+  int alloced;
+  /* Number of entries used.  */
+  int used;
+  /* (Array) List of SFrame stacktrace info objects.  */
+  struct sframest_info *entry;
 };
 
-/* Data that's passed through sframe_callback.  */
-struct sframe_state
-{
-  int sui_fd;				/* File descriptor.  */
-  struct sframe_stinfo sui_ctx;		/* The decode data.  */
-  struct sframe_stinfo_list sui_dsos;	/* The DSO list.  */
-};
+/* SFrame stacktracing context.  */
 
+struct sframest_ctx
+{
+  /* File descriptor for the process memory.  */
+  int fd;
+  /* SFrame stacktrace info for program.  */
+  struct sframest_info prog_sfinfo;
+  /* SFrame stacktrace info for its DSOs.  */
+  struct sframest_info_list dsos_sfinfo;
+};
 
 void sframe_unwind_init_debug (void);
 
@@ -77,14 +93,14 @@ int sframe_callback (struct dl_phdr_info *info,
 		     size_t size ATTRIBUTE_UNUSED,
 		     void *data);
 
-void sframe_update_ctx (struct sframe_state *sf, uint64_t raddr,
+void sframe_update_ctx (struct sframest_ctx *sf, uint64_t raddr,
 			sframe_decoder_ctx **ctx, uint64_t *cfi_vma);
 
-sframe_decoder_ctx *sframe_load_ctx (struct sframe_state *sf, uint64_t raddr);
+sframe_decoder_ctx *sframe_load_ctx (struct sframest_ctx *sf, uint64_t raddr);
 
-struct sframe_stinfo *sframe_find_context (struct sframe_state *sf,
+struct sframest_info *sframe_find_context (struct sframest_ctx *sf,
 					   uint64_t addr);
 
-void sframe_free_cfi (struct sframe_state *sf);
+void sframe_free_cfi (struct sframest_ctx *sf);
 
 #endif /* SFRAME_STATE_H.  */
