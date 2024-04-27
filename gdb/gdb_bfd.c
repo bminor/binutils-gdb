@@ -930,6 +930,29 @@ gdb_bfd_openw (const char *filename, const char *target)
   return gdb_bfd_ref_ptr::new_reference (result);
 }
 
+/* Wrap f (args) and handle exceptions by:
+   - returning val, and
+   - calling set_quit_flag or set_force_quit_flag, if needed.  */
+
+template <typename R, R val, typename F, typename... Args>
+static R
+catch_exceptions (F &&f, Args&&... args)
+{
+   try
+     {
+       return f (std::forward<Args> (args)...);
+     }
+   catch (const gdb_exception &ex)
+     {
+       if (ex.reason == RETURN_QUIT)
+	 set_quit_flag ();
+       else if (ex.reason == RETURN_FORCED_QUIT)
+	 set_force_quit_flag ();
+     }
+
+   return val;
+}
+
 /* See gdb_bfd.h.  */
 
 gdb_bfd_ref_ptr
@@ -939,21 +962,51 @@ gdb_bfd_openr_iovec (const char *filename, const char *target,
   auto do_open = [] (bfd *nbfd, void *closure) -> void *
   {
     auto real_opener = static_cast<gdb_iovec_opener_ftype *> (closure);
-    return (*real_opener) (nbfd);
+    /* Prevent exceptions from escaping to C code and triggering an abort.  */
+    auto res = catch_exceptions<gdb_bfd_iovec_base *, nullptr> ([&]
+      {
+	return (*real_opener) (nbfd);
+      });
+    if (res == nullptr)
+      {
+	errno = EIO;
+	bfd_set_error (bfd_error_system_call);
+      }
+      return res;
   };
 
   auto read_trampoline = [] (bfd *nbfd, void *stream, void *buf,
 			     file_ptr nbytes, file_ptr offset) -> file_ptr
   {
     gdb_bfd_iovec_base *obj = static_cast<gdb_bfd_iovec_base *> (stream);
-    return obj->read (nbfd, buf, nbytes, offset);
+    /* Prevent exceptions from escaping to C code and triggering an abort.  */
+    auto res = catch_exceptions<long int, -1> ([&]
+      {
+	return obj->read (nbfd, buf, nbytes, offset);
+      });
+    if (res == -1)
+      {
+	errno = EIO;
+	bfd_set_error (bfd_error_system_call);
+      }
+    return res;
   };
 
   auto stat_trampoline = [] (struct bfd *abfd, void *stream,
 			     struct stat *sb) -> int
   {
     gdb_bfd_iovec_base *obj = static_cast<gdb_bfd_iovec_base *> (stream);
-    return obj->stat (abfd, sb);
+    /* Prevent exceptions from escaping to C code and triggering an abort.  */
+    auto res = catch_exceptions<int, -1> ([&]
+      {
+	return obj->stat (abfd, sb);
+      });
+    if (res == -1)
+      {
+	errno = EIO;
+	bfd_set_error (bfd_error_system_call);
+      }
+    return res;
   };
 
   auto close_trampoline = [] (struct bfd *nbfd, void *stream) -> int
