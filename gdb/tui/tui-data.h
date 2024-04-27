@@ -50,7 +50,8 @@ protected:
      window's contents.  */
   virtual void rerender ();
 
-  virtual void make_window ();
+  /* Create the curses window.  */
+  void make_window ();
 
 public:
   tui_win_info (tui_win_info &&) = default;
