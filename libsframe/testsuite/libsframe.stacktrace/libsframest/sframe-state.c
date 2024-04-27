@@ -179,11 +179,11 @@ sframe_find_context (struct sframest_ctx *sf, uint64_t addr)
    or one of the DSOs from CF, based on the input RADDR argument.  Return the
    newly created decode context or NULL.  */
 
-sframe_decoder_ctx *
-sframe_load_ctx (struct sframest_ctx *sf, uint64_t raddr)
+struct sframest_info *
+sframest_get_sfinfo (struct sframest_ctx *sf, uint64_t raddr)
 {
-  sframe_decoder_ctx *dctx;
-  struct sframest_info *sfinfo;
+  struct sframest_info *sfinfo = NULL;
+  int err = 0;
 
   if (!sf)
     return NULL;
@@ -192,53 +192,46 @@ sframe_load_ctx (struct sframest_ctx *sf, uint64_t raddr)
   if (!sfinfo)
     return NULL;
 
+  /* Decode the SFrame section the first time.  */
   if (!sfinfo->dctx)
-    {
-      int err;
-      dctx = sframe_decode (sfinfo->buf, sfinfo->buflen, &err);
-      if (!dctx)
-	return NULL;
-      sfinfo->dctx = dctx;
-      return dctx;
-    }
+    sfinfo->dctx = sframe_decode (sfinfo->buf, sfinfo->buflen, &err);
 
-  return NULL;
+  return sfinfo;
 }
 
-/* Check if need to do a decode context switch, based on the input RADDR
-   argument, from CF. A new decode context will be created and set up if it
-   isn't already done so. Return the new decode context in CTX and vma in
-   CFI_VMA.  */
-
-void
-sframe_update_ctx (struct sframest_ctx *sf, uint64_t raddr,
-		   sframe_decoder_ctx **ctx, uint64_t *sframe_vma)
+struct sframest_info *
+sframest_update_sfinfo (struct sframest_ctx *sf,
+			struct sframest_info *cur_sfinfo,
+			uint64_t raddr)
 {
-  sframe_decoder_ctx *dctx = NULL;
-  struct sframest_info *sfinfo;
+  struct sframest_info *sfinfo = NULL;
+  int err = 0;
+
+  if (!sf || !cur_sfinfo)
+    return NULL;
+
+  /* Detect if current SFrame stack trace info object serves for raddr.  */
+  if (cur_sfinfo->text_vma < raddr
+      && cur_sfinfo->text_vma + cur_sfinfo->text_size > raddr)
+    return cur_sfinfo;
 
   sfinfo = sframe_find_context (sf, raddr);
-  if (sfinfo)
-    {
-      if (!sfinfo->dctx)
-	{
-	  int err;
-	  dctx = sframe_decode (sfinfo->buf, sfinfo->buflen, &err);
-	  if (!dctx)
-	    return;
+  if (!sfinfo)
+    return NULL;
 
-	  sfinfo->dctx = dctx;
-	}
-	*ctx = sfinfo->dctx;
-	*sframe_vma = sfinfo->sframe_vma;
-    }
+  /* Decode the SFrame section the first time.  */
+  if (!sfinfo->dctx)
+    sfinfo->dctx = sframe_decode (sfinfo->buf, sfinfo->buflen, &err);
+
+  return sfinfo;
 }
+
 
 /* Open /proc image associated with the process id and return the file
    descriptor.  */
 
 static int
-sframe_fd_open (int *errp)
+get_proc_mem_fd (int *errp)
 {
   int fd;
 
@@ -289,7 +282,7 @@ sframe_callback (struct dl_phdr_info *info,
 
       if (info->dlpi_name[0] == '\0')		/* the main module.  */
 	{
-	  fd = sframe_fd_open (&sframe_err);
+	  fd = get_proc_mem_fd (&sframe_err);
 	  if (fd == -1)
 	    return 1;
 #if 0
