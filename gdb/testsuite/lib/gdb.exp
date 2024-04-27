@@ -848,6 +848,44 @@ proc gdb_continue_to_breakpoint {name {location_pattern .*}} {
     }]
 }
 
+# Check whether GDB is stopped at the given instruction.
+# INSTRUCTION should be just its mnemonic, without any arguments.
+
+proc is_at_instruction { instruction } {
+    global gdb_prompt hex
+
+    set test "pc points to $instruction"
+    gdb_test_multiple {x/i $pc} $test {
+	-re -wrap "=> $hex \[^\r\n\]+:\t$instruction\t\[^\r\n\]+" {
+	    return 1
+	}
+	-re "\r\n$gdb_prompt $" {
+	    return 0
+	}
+    }
+
+    return 0
+}
+
+# Single-steps GDB until it arrives at the given instruction.
+# INSTRUCTION should be just its mnemonic, without any arguments.
+
+proc arrive_at_instruction { instruction } {
+    set count 0
+
+    while { [is_at_instruction $instruction] != 1 } {
+	gdb_test -nopass "stepi" "\[^\r\n\]+" \
+	    "stepi #$count to reach $instruction"
+	incr count
+
+	if { $count > 50 } {
+	    fail "didn't reach $instruction"
+	    return 0
+	}
+    }
+
+    return 1
+}
 
 # gdb_internal_error_resync:
 #
@@ -4494,6 +4532,67 @@ proc aarch64_supports_sme_svl { length } {
 
     # The target supports SME svl LENGTH.
     return 1
+}
+
+# Run a test on the target to see if it supports AArch64 MOPS (Memory
+# Operations) extensions.  Return 1 if so, 0 if it does not.  Note this
+# causes a restart of GDB.
+
+gdb_caching_proc allow_aarch64_mops_tests {} {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "allow_aarch64_mops_tests"
+
+    if { ![is_aarch64_target]} {
+	return 0
+    }
+
+    # ARMv9.3-A contains the MOPS extension.  The test program doesn't use it,
+    # but take the opportunity to check whether the toolchain knows about MOPS.
+    set compile_flags "{additional_flags=-march=armv9.3-a}"
+
+    # Compile a program that tests the MOPS feature.
+    set src {
+	#include <stdbool.h>
+	#include <sys/auxv.h>
+
+	#ifndef HWCAP2_MOPS
+	#define HWCAP2_MOPS (1UL << 43)
+	#endif
+
+	int main() {
+	    bool mops_supported = getauxval (AT_HWCAP2) & HWCAP2_MOPS;
+
+	    return !mops_supported;
+	}
+    }
+
+    if {![gdb_simple_compile $me $src executable $compile_flags]} {
+	return 0
+    }
+
+    # Compilation succeeded so now run it via gdb.
+    clean_restart $obj
+    gdb_run_cmd
+    gdb_expect {
+	-re ".*$inferior_exited_re with code 01.*${gdb_prompt} $" {
+	    verbose -log "\n$me mops support not detected"
+	    set allow_mops_tests 0
+	}
+	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+	    verbose -log "\n$me: mops support detected"
+	    set allow_mops_tests 1
+	}
+	default {
+	  warning "\n$me: default case taken"
+	    set allow_mops_tests 0
+	}
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $allow_mops_tests" 2
+    return $allow_mops_tests
 }
 
 # A helper that compiles a test case to see if __int128 is supported.
