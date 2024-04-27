@@ -25,8 +25,6 @@
 #include "tui/tui-data.h"
 #include "tui-winsource.h"
 
-struct symtab;
-
 /* A TUI source window.  */
 
 struct tui_source_window : public tui_source_window_base
