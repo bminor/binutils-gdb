@@ -87,6 +87,7 @@ static int
 sframe_unwind (struct sframest_ctx *sf, void **ra_lst, int *ra_size)
 {
   uint64_t cfa, return_addr, ra_stack_loc, rfp_stack_loc;
+  struct sframest_info *sfinfo;
   sframe_decoder_ctx *dctx;
   int cfa_offset, rfp_offset, ra_offset, errnum, i, count;
   sframe_frame_row_entry fred, *frep = &fred;
@@ -108,18 +109,22 @@ sframe_unwind (struct sframest_ctx *sf, void **ra_lst, int *ra_size)
 
   return_addr = ra;
 
-  /* Load and set up the decoder.  */
-  dctx = sframe_load_ctx (sf, pc);
-  if (!dctx)
+  /* Load and set up the SFrame stack trace info for pc.  */
+  sfinfo = sframest_get_sfinfo (sf, pc);
+  if (!sfinfo || !sfinfo->dctx)
     return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_DECODE);
 
-  sframe_vma = sf->prog_sfinfo.sframe_vma;
   count = *ra_size;
 
   for (i = 0; i < count; ++i)
     {
+      dctx = sfinfo->dctx;
+      sframe_vma = sfinfo->sframe_vma;
+
       pc -= sframe_vma;
+
       errnum = sframe_find_fre (dctx, pc, frep);
+
       if (!errnum)
 	{
 	  cfa_offset = sframe_fre_get_cfa_offset (dctx, frep, &errnum);
@@ -159,9 +164,10 @@ sframe_unwind (struct sframest_ctx *sf, void **ra_lst, int *ra_size)
 	  rsp = cfa;
 	  pc = return_addr;
 
-	  /* Check if need to update the decoder context and vma.  */
-	  sframe_update_ctx (sf, return_addr, &dctx, &sframe_vma);
-	  if (!dctx)
+	  /* Check if need to update the SFrame stack trace info for the return
+	     addr.  */
+	  sfinfo = sframest_update_sfinfo (sf, sfinfo, return_addr);
+	  if (!sfinfo || !sfinfo->dctx)
 	    return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_DECODE);
 	}
       else

@@ -93,10 +93,12 @@ int sframe_callback (struct dl_phdr_info *info,
 		     size_t size ATTRIBUTE_UNUSED,
 		     void *data);
 
-void sframe_update_ctx (struct sframest_ctx *sf, uint64_t raddr,
-			sframe_decoder_ctx **ctx, uint64_t *cfi_vma);
+struct sframest_info *sframest_update_sfinfo (struct sframest_ctx *sf,
+					      struct sframest_info *cur_sfinfo,
+					      uint64_t raddr);
 
-sframe_decoder_ctx *sframe_load_ctx (struct sframest_ctx *sf, uint64_t raddr);
+struct sframest_info *sframest_get_sfinfo (struct sframest_ctx *sf,
+					   uint64_t raddr);
 
 struct sframest_info *sframe_find_context (struct sframest_ctx *sf,
 					   uint64_t addr);
