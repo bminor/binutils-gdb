@@ -3808,10 +3808,12 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
   if (aarch64_decode_insn (insn, &inst, 1, NULL) != 0)
     return NULL;
 
-  /* Look for a Load Exclusive instruction which begins the sequence.  */
-  if (inst.opcode->iclass == ldstexcl && bit (insn, 22))
+  /* Look for a Load Exclusive instruction which begins the sequence,
+     or for a MOPS instruction.  */
+  if ((inst.opcode->iclass == ldstexcl && bit (insn, 22))
+      || AARCH64_CPU_HAS_FEATURE (*inst.opcode->avariant, MOPS))
     {
-      /* We can't displaced step atomic sequences.  */
+      /* We can't displaced step atomic sequences nor MOPS instructions.  */
       return NULL;
     }
 
