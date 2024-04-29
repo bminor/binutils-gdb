@@ -140,12 +140,3 @@
 
 	vfp_test vldr vstr d0
 
-@ CFLDRS/CFLDRD/CFLDR32/CFLDR64/CFSTRS/CFSTRD/CFSTR32/CFSTR64
-
-	.cpu	ep9312
-
-	vfp_test cfldrs cfstrs mvf0
-	vfp_test cfldrd cfstrd mvd0
-	vfp_test cfldr32 cfstr32 mvfx0
-	vfp_test cfldr64 cfstr64 mvdx0
-

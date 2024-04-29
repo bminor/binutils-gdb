@@ -153,17 +153,3 @@
 	vfp_test vldr vstr d0 0x1
 	vfp_test vldr vstr d0 0x808
 
-@ CFLDRS/CFLDRD/CFLDR32/CFLDR64/CFSTRS/CFSTRD/CFSTR32/CFSTR64
-
-	.cpu	ep9312
-
-	vfp_test cfldrs cfstrs mvf0 0x1
-	vfp_test cfldrd cfstrd mvd0 0x1
-	vfp_test cfldr32 cfstr32 mvfx0 0x1
-	vfp_test cfldr64 cfstr64 mvdx0 0x1
-
-	vfp_test cfldrs cfstrs mvf0 0x808
-	vfp_test cfldrd cfstrd mvd0 0x808
-	vfp_test cfldr32 cfstr32 mvfx0 0x808
-	vfp_test cfldr64 cfstr64 mvdx0 0x808
-

@@ -54,14 +54,3 @@
 	ldctest2 vldr d0		FIXME
 	ldctest2 vstr d0
 
-	.cpu	ep9312
-
-	ldctest2 cfldrs mvf0
-	ldctest2 cfstrs mvf0
-	ldctest2 cfldrd mvd0
-	ldctest2 cfstrd mvd0
-	ldctest2 cfldr32 mvfx0
-	ldctest2 cfstr32 mvfx0
-	ldctest2 cfldr64 mvdx0
-	ldctest2 cfstr64 mvdx0
-
