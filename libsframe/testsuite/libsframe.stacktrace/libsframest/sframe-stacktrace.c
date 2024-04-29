@@ -166,9 +166,12 @@ sframe_unwind (struct sframest_ctx *sf, void **ra_lst, int *ra_size)
 
 	  /* Check if need to update the SFrame stack trace info for the return
 	     addr.  */
-	  sfinfo = sframest_update_sfinfo (sf, sfinfo, return_addr);
-	  if (!sfinfo || !sfinfo->dctx)
-	    return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_DECODE);
+	  if (!sframest_sfinfo_addr_range_p (sfinfo, return_addr))
+	    {
+	      sfinfo = sframest_get_sfinfo (sf, pc);
+	      if (!sfinfo || !sfinfo->dctx)
+		return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_DECODE);
+	    }
 	}
       else
 	{
