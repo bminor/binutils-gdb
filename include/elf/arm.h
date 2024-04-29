@@ -35,7 +35,7 @@
 #define EF_ARM_OLD_ABI     0x100
 #define EF_ARM_SOFT_FLOAT  0x200
 #define EF_ARM_VFP_FLOAT   0x400
-#define EF_ARM_MAVERICK_FLOAT 0x800
+/* Removed, was EF_ARM_MAVERICK_FLOAT 0x800  */
 
 /* Frame unwind information */
 #define PT_ARM_EXIDX (PT_LOPROC + 1)

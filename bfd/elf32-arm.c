@@ -13892,12 +13892,7 @@ elf32_arm_object_p (bfd *abfd)
   mach = bfd_arm_get_mach_from_notes (abfd, ARM_NOTE_SECTION);
 
   if (mach == bfd_mach_arm_unknown)
-    {
-      if (elf_elfheader (abfd)->e_flags & EF_ARM_MAVERICK_FLOAT)
-	mach = bfd_mach_arm_ep9312;
-      else
-	mach = bfd_arm_get_mach_from_attributes (abfd);
-    }
+    mach = bfd_arm_get_mach_from_attributes (abfd);
 
   bfd_default_set_arch_mach (abfd, bfd_arch_arm, mach);
   return true;
@@ -15136,8 +15131,6 @@ elf32_arm_print_private_bfd_data (bfd *abfd, void * ptr)
 
       if (flags & EF_ARM_VFP_FLOAT)
 	fprintf (file, _(" [VFP float format]"));
-      else if (flags & EF_ARM_MAVERICK_FLOAT)
-	fprintf (file, _(" [Maverick float format]"));
       else
 	fprintf (file, _(" [FPA float format]"));
 
@@ -15158,8 +15151,7 @@ elf32_arm_print_private_bfd_data (bfd *abfd, void * ptr)
 
       flags &= ~(EF_ARM_INTERWORK | EF_ARM_APCS_26 | EF_ARM_APCS_FLOAT
 		 | EF_ARM_PIC | EF_ARM_NEW_ABI | EF_ARM_OLD_ABI
-		 | EF_ARM_SOFT_FLOAT | EF_ARM_VFP_FLOAT
-		 | EF_ARM_MAVERICK_FLOAT);
+		 | EF_ARM_SOFT_FLOAT | EF_ARM_VFP_FLOAT);
       break;
 
     case EF_ARM_EABI_VER1:
@@ -20759,20 +20751,6 @@ elf32_arm_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	    _bfd_error_handler
 	      (_("error: %pB uses %s instructions, whereas %pB does not"),
 	       ibfd, "FPA", obfd);
-
-	  flags_compatible = false;
-	}
-
-      if ((in_flags & EF_ARM_MAVERICK_FLOAT) != (out_flags & EF_ARM_MAVERICK_FLOAT))
-	{
-	  if (in_flags & EF_ARM_MAVERICK_FLOAT)
-	    _bfd_error_handler
-	      (_("error: %pB uses %s instructions, whereas %pB does not"),
-	       ibfd, "Maverick", obfd);
-	  else
-	    _bfd_error_handler
-	      (_("error: %pB does not use %s instructions, whereas %pB does"),
-	       ibfd, "Maverick", obfd);
 
 	  flags_compatible = false;
 	}
