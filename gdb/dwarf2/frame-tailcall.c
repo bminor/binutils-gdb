@@ -17,6 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "exceptions.h"
 #include "frame.h"
 #include "dwarf2/frame-tailcall.h"
 #include "dwarf2/loc.h"

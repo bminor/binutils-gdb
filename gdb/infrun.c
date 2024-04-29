@@ -22,6 +22,7 @@
 #include "displaced-stepping.h"
 #include "infrun.h"
 #include <ctype.h>
+#include "exceptions.h"
 #include "symtab.h"
 #include "frame.h"
 #include "inferior.h"

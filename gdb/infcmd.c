@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "arch-utils.h"
+#include "exceptions.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "frame.h"

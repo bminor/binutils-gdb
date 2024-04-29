@@ -34,6 +34,7 @@
 #include "source.h"
 #include "gdbsupport/event-loop.h"
 #include "async-event.h"
+#include "ui-out.h"
 #include "utils.h"
 
 #include "tui/tui.h"

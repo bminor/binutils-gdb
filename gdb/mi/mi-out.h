@@ -20,6 +20,7 @@
 #ifndef MI_MI_OUT_H
 #define MI_MI_OUT_H
 
+#include "ui-out.h"
 #include <vector>
 
 struct ui_out;

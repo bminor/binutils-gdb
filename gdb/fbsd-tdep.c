@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "auxv.h"
+#include "exceptions.h"
 #include "extract-store-integer.h"
 #include "gdbcore.h"
 #include "inferior.h"

@@ -21,6 +21,7 @@
 #include "gdbsupport/event-loop.h"
 #include "gdbsupport/intrusive_list.h"
 #include "gdbsupport/next-iterator.h"
+#include "gdbsupport/scoped_restore.h"
 
 struct interp;
 

@@ -24,6 +24,7 @@
 
 #include "gdbsupport/function-view.h"
 #include <optional>
+#include "gdbsupport/scoped_restore.h"
 #include "mi/mi-main.h"
 
 enum print_values {

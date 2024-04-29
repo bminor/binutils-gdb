@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "event-top.h"
+#include "exceptions.h"
 #include "extract-store-integer.h"
 #include "top.h"
 #include "value.h"

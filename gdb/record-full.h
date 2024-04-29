@@ -20,6 +20,8 @@
 #ifndef RECORD_FULL_H
 #define RECORD_FULL_H
 
+#include "gdbsupport/scoped_restore.h"
+
 extern bool record_full_memory_query;
 
 extern int record_full_arch_list_add_reg (struct regcache *regcache, int num);

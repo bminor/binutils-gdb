@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "annotate.h"
+#include "exceptions.h"
 #include "top.h"
 #include "ui.h"
 #include "target.h"

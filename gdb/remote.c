@@ -21,6 +21,7 @@
 
 #include <ctype.h>
 #include <fcntl.h>
+#include "exceptions.h"
 #include "inferior.h"
 #include "infrun.h"
 #include "bfd.h"
