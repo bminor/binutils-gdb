@@ -17,6 +17,7 @@ import gdb
 
 from .frames import frame_for_id
 from .server import request
+from .sources import make_source
 from .startup import in_gdb_thread
 from .varref import BaseReference
 
@@ -93,7 +94,9 @@ class _ScopeReference(BaseReference):
         result["namedVariables"] = self.child_count()
         if self.line is not None:
             result["line"] = self.line
-            # FIXME construct a Source object
+        filename = self.frame.filename()
+        if filename is not None:
+            result["source"] = make_source(filename)
         return result
 
     def has_children(self):

@@ -59,6 +59,7 @@ set scopes [dict get [lindex $scopes 0] body scopes]
 # just in case something changes.
 lassign $scopes scope _ignore
 gdb_assert {[dict get $scope name] == "Locals"} "scope is locals"
+gdb_assert {[dict get $scope source name] == "prog.adb"} "scope has source"
 
 gdb_assert {[dict get $scope namedVariables] == 2} "two vars in scope"
 
