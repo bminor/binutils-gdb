@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "cli-interp.h"
+#include "exceptions.h"
 #include "interps.h"
 #include "event-top.h"
 #include "ui-out.h"

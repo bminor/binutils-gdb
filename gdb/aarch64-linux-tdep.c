@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
+#include "exceptions.h"
 #include "extract-store-integer.h"
 #include "gdbarch.h"
 #include "glibc-tdep.h"

@@ -20,6 +20,7 @@
 #include "arch-utils.h"
 #include <signal.h>
 #include <fcntl.h>
+#include "exceptions.h"
 #include "frame.h"
 #include "inferior.h"
 #include "infrun.h"

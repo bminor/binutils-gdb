@@ -68,6 +68,7 @@
 #include "gdbsupport/gdb_unlinker.h"
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/scoped_fd.h"
+#include "gdbsupport/scoped_restore.h"
 #include "nat/fork-inferior.h"
 
 /* Quick overview.

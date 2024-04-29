@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "elf-none-tdep.h"
+#include "exceptions.h"
 #include "regset.h"
 #include "elf-bfd.h"
 #include "inferior.h"

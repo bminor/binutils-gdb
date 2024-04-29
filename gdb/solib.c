@@ -19,6 +19,7 @@
 
 
 #include <fcntl.h>
+#include "exceptions.h"
 #include "extract-store-integer.h"
 #include "symtab.h"
 #include "bfd.h"

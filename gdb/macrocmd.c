@@ -26,6 +26,7 @@
 #include "command.h"
 #include "cli/cli-cmds.h"
 #include "linespec.h"
+#include "ui-out.h"
 
 
 /* The `macro' prefix command.  */

@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <dlfcn.h>
+#include "exceptions.h"
 #include "gdb_proc_service.h"
 #include "nat/gdb_thread_db.h"
 #include "gdbsupport/gdb_vecs.h"

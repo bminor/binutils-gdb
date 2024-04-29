@@ -25,6 +25,7 @@
 #include "c-lang.h"
 #include "ada-lang.h"
 #include "event-top.h"
+#include "exceptions.h"
 #include "split-name.h"
 #include "observable.h"
 #include "run-on-main-thread.h"

@@ -20,7 +20,7 @@
 #include "arch-utils.h"
 #include <ctype.h>
 #include "breakpoint.h"
-#include "cli/cli-cmds.h"
+#include "exceptions.h"
 #include "inferior.h"
 #include "annotate.h"
 #include "valprint.h"

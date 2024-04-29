@@ -22,6 +22,7 @@
 
 #include "addrmap.h"
 #include "cli/cli-decode.h"
+#include "exceptions.h"
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/filestuff.h"
 #include "gdbsupport/gdb_unlinker.h"

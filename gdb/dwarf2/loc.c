@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "event-top.h"
+#include "exceptions.h"
 #include "ui-out.h"
 #include "value.h"
 #include "frame.h"

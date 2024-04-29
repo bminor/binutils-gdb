@@ -21,6 +21,7 @@
 
 #include "dis-asm.h"
 #include "disasm-flags.h"
+#include "ui-out.h"
 
 struct gdbarch;
 struct ui_out;
