@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef	_SFRAME_BACKTRACE_API_H
-#define	_SFRAME_BACKTRACE_API_H
+#ifndef	_SFRAME_STACKTRACE_API_H
+#define	_SFRAME_STACKTRACE_API_H
 
 #ifdef	__cplusplus
 extern "C"
@@ -64,4 +64,4 @@ extern int sframe_bt_errno (const int *errp);
 }
 #endif
 
-#endif				/* _SFRAME_BACKTRACE_API_H */
+#endif				/* _SFRAME_STACKTRACE_API_H */
