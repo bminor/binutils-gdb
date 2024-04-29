@@ -80,10 +80,10 @@ sframe_bt_set_errno (int *errp, int error)
 
 #endif
 
-static void sframest_sfinfo_init(struct sframest_info *sfinfo,
-				 const char *buf, int64_t buflen,
-				 uint64_t sframe_vma,
-				 uint64_t text_vma, int64_t text_size)
+static void
+sframest_sfinfo_init (struct sframest_info *sfinfo, const char *buf,
+		      int64_t buflen, uint64_t sframe_vma,
+		      uint64_t text_vma, int64_t text_size)
 {
   if (!sfinfo)
     return;
@@ -98,8 +98,8 @@ static void sframest_sfinfo_init(struct sframest_info *sfinfo,
 /* Return whether the given SFrame stack trace info object SFINFO has (stack
    trace) information corresponding to addr.  */
 
-bool sframest_sfinfo_addr_range_p (struct sframest_info *sfinfo,
-				   uint64_t addr)
+bool
+sframest_sfinfo_addr_range_p (struct sframest_info *sfinfo, uint64_t addr)
 {
   if (!sfinfo || !addr)
     return false;
@@ -146,22 +146,22 @@ sframe_add_dso (struct sframest_info_list *d_list,
   return SFRAME_BT_OK;
 }
 
-/* Free up space allocated for .sframe info for CF.  */
+/* Free up space allocated SFrame stack trace context object SFCTX.  */
 
 void
-sframe_free_cfi (struct sframest_ctx *sf)
+sframest_ctx_free (struct sframest_ctx *sfctx)
 {
   struct sframest_info_list *d_list;
   int i;
 
-  if (!sf)
+  if (!sfctx)
     return;
 
   // free (sf->sui_ctx.sfdd_data);
-  sframe_decoder_free (&sf->prog_sfinfo.dctx);
-  close (sf->fd);
+  sframe_decoder_free (&sfctx->prog_sfinfo.dctx);
+  close (sfctx->fd);
 
-  d_list = &sf->dsos_sfinfo;
+  d_list = &sfctx->dsos_sfinfo;
   if (!d_list->alloced)
     return;
 
@@ -174,24 +174,24 @@ sframe_free_cfi (struct sframest_ctx *sf)
   free (d_list->entry);
 }
 
-/* Find the decode data that contains ADDR from CF.
+/* Find the decode data that contains ADDR from SFCTX.
    Return the pointer to the decode data or NULL.  */
 
 struct sframest_info *
-sframe_find_context (struct sframest_ctx *sf, uint64_t addr)
+sframe_find_context (struct sframest_ctx *sfctx, uint64_t addr)
 {
   struct sframest_info_list *d_list;
   struct sframest_info sfinfo;
   int i;
 
-  if (!sf)
+  if (!sfctx)
     return NULL;
 
-  if (sframest_sfinfo_addr_range_p (&sf->prog_sfinfo, addr))
-    return &sf->prog_sfinfo;
+  if (sframest_sfinfo_addr_range_p (&sfctx->prog_sfinfo, addr))
+    return &sfctx->prog_sfinfo;
 
-  d_list = &sf->dsos_sfinfo;
-  for (i = 0; i < sf->dsos_sfinfo.used; ++i)
+  d_list = &sfctx->dsos_sfinfo;
+  for (i = 0; i < sfctx->dsos_sfinfo.used; ++i)
     {
       sfinfo = d_list->entry[i];
       if (sframest_sfinfo_addr_range_p (&sfinfo, addr))
@@ -202,19 +202,19 @@ sframe_find_context (struct sframest_ctx *sf, uint64_t addr)
 }
 
 /* Call decoder to create and set up the SFrame info for either the main module
-   or one of the DSOs from CF, based on the input RADDR argument.  Return the
-   newly created decode context or NULL.  */
+   or one of the DSOs from SFCTX, based on the input RADDR argument.
+   Return the newly created decode context or NULL.  */
 
 struct sframest_info *
-sframest_get_sfinfo (struct sframest_ctx *sf, uint64_t raddr)
+sframest_get_sfinfo (struct sframest_ctx *sfctx, uint64_t raddr)
 {
   struct sframest_info *sfinfo = NULL;
   int err = 0;
 
-  if (!sf)
+  if (!sfctx)
     return NULL;
 
-  sfinfo = sframe_find_context (sf, raddr);
+  sfinfo = sframe_find_context (sfctx, raddr);
   if (!sfinfo)
     return NULL;
 
@@ -250,7 +250,7 @@ sframe_callback (struct dl_phdr_info *info,
 		 size_t size ATTRIBUTE_UNUSED,
 		 void *data)
 {
-  struct sframest_ctx *sf = (struct sframest_ctx *) data;
+  struct sframest_ctx *sfctx = (struct sframest_ctx *) data;
   int p_type, i, fd, sframe_err;
   uint64_t text_vma = 0;
   uint64_t text_size = 0;
@@ -285,13 +285,13 @@ sframe_callback (struct dl_phdr_info *info,
 	    return 1;
 
 	  assert (text_vma);
-	  sframest_sfinfo_init (&sf->prog_sfinfo,
+	  sframest_sfinfo_init (&sfctx->prog_sfinfo,
 				(char *)(info->dlpi_addr
 					 + info->dlpi_phdr[i].p_vaddr),
 				info->dlpi_phdr[i].p_memsz,
 				info->dlpi_addr + info->dlpi_phdr[i].p_vaddr,
 				text_vma, text_size);
-	  sf->fd = fd;
+	  sfctx->fd = fd;
 	  text_vma = 0;
 	  return 0;
 	}
@@ -300,7 +300,7 @@ sframe_callback (struct dl_phdr_info *info,
 	  /* a dynamic shared object.  */
 	  struct sframest_info sfinfo;
 	  memset (&sfinfo, 0, sizeof (struct sframest_info));
-	  assert (sf->fd);
+	  assert (sfctx->fd);
 
 	  assert (text_vma);
 	  sframest_sfinfo_init (&sfinfo,
@@ -312,7 +312,7 @@ sframe_callback (struct dl_phdr_info *info,
 
 	  text_vma = 0;
 	  
-	  sframe_err = sframe_add_dso (&sf->dsos_sfinfo, sfinfo);
+	  sframe_err = sframe_add_dso (&sfctx->dsos_sfinfo, sfinfo);
 	  // FIXME TODO
 	  if (sframe_err != SFRAME_BT_OK)
 	    return 1;

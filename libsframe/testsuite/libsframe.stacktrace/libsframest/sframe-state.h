@@ -96,12 +96,12 @@ int sframe_callback (struct dl_phdr_info *info,
 bool sframest_sfinfo_addr_range_p (struct sframest_info *sfinfo,
 				   uint64_t addr);
 
-struct sframest_info *sframest_get_sfinfo (struct sframest_ctx *sf,
+struct sframest_info *sframest_get_sfinfo (struct sframest_ctx *sfctx,
 					   uint64_t raddr);
 
-struct sframest_info *sframe_find_context (struct sframest_ctx *sf,
+struct sframest_info *sframe_find_context (struct sframest_ctx *sfctx,
 					   uint64_t addr);
 
-void sframe_free_cfi (struct sframest_ctx *sf);
+void sframest_ctx_free (struct sframest_ctx *sfctx);
 
 #endif /* SFRAME_STATE_H.  */

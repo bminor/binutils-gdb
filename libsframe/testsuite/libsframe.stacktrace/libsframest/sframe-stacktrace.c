@@ -218,7 +218,7 @@ sframe_stacktrace (void **buffer, int size, int *errp)
   if (sframe_bt_errno (errp))
     size = -1;
 
-  sframe_free_cfi (&sf_ctx);
+  sframest_ctx_free (&sf_ctx);
 
   return size;
 }
