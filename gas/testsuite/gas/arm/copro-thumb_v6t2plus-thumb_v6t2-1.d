@@ -10,17 +10,17 @@
 Disassembly of section .text:
 0+000 <[^>]*> ee42 1103 	dvfs	f1, f2, f3
 0+004 <[^>]*> [^ ]*      	it	eq
-0+006 <[^>]*> ee34 14a5 	cfadddeq	mvd1, mvd4, mvd5
-0+00a <[^>]*> ed93 9500 	cfldr32	mvfx9, \[r3\]
+0+006 <[^>]*> ee34 14a5 	cdpeq	4, 3, cr1, cr4, cr5, \{5\}
+0+00a <[^>]*> ed93 9500 	ldc	5, cr9, \[r3\]
 0+00e <[^>]*> edd1 e108 	ldfp	f6, \[r1, #32\]
 0+012 <[^>]*> [^ ]*      	ite	mi
 0+014 <[^>]*> edb2 00ff 	ldcmi	0, cr0, \[r2, #1020\]!.*
 0+018 <[^>]*> ecf3 1710 	ldclpl	7, cr1, \[r3\], #64.*
 0+01c <[^>]*> ed9f 8000 	ldc	0, cr8, \[pc]	@ .* <foo>
-0+020 <[^>]*> ed83 0500 	cfstr32	mvfx0, \[r3\]
+0+020 <[^>]*> ed83 0500 	stc	5, cr0, \[r3\]
 0+024 <[^>]*> edc0 f302 	stcl	3, cr15, \[r0, #8\]
 0+028 <[^>]*> [^ ]*      	it	eq
-0+02a <[^>]*> eda2 c419 	cfstrseq	mvf12, \[r2, #100\]!.*
+0+02a <[^>]*> eda2 c419 	stceq	4, cr12, \[r2, #100\]!	@.*
 0+02e <[^>]*> [^ ]*      	it	cc
 0+030 <[^>]*> eca4 860c 	stccc	6, cr8, \[r4\], #48.*
 0+034 <[^>]*> ed8f 7100 	stfs	f7, \[pc\]	@ .* <bar>
