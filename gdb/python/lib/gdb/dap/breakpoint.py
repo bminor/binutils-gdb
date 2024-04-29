@@ -277,7 +277,6 @@ def _rewrite_src_breakpoint(
     }
 
 
-# FIXME we do not specify a type for 'source'.
 @request("setBreakpoints")
 @capability("supportsHitConditionalBreakpoints")
 @capability("supportsConditionalBreakpoints")
