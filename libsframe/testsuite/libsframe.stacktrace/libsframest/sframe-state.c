@@ -80,6 +80,19 @@ sframe_bt_set_errno (int *errp, int error)
 
 #endif
 
+/* Return whether the given SFrame stack trace info object SFINFO has (stack
+   trace) information corresponding to addr.  */
+
+bool sframest_sfinfo_addr_range_p (struct sframest_info *sfinfo,
+				   uint64_t addr)
+{
+  if (!sfinfo || !addr)
+    return false;
+
+  return (sfinfo->text_vma <= addr
+	  && sfinfo->text_vma + sfinfo->text_size > addr);
+}
+
 /* Add .sframe info in D_DATA, which is associated with
    a dynamic shared object, to D_LIST.  */
 
@@ -159,16 +172,14 @@ sframe_find_context (struct sframest_ctx *sf, uint64_t addr)
   if (!sf)
     return NULL;
 
-  if (sf->prog_sfinfo.text_vma < addr
-      && sf->prog_sfinfo.text_vma + sf->prog_sfinfo.text_size > addr)
+  if (sframest_sfinfo_addr_range_p (&sf->prog_sfinfo, addr))
     return &sf->prog_sfinfo;
 
   d_list = &sf->dsos_sfinfo;
   for (i = 0; i < sf->dsos_sfinfo.used; ++i)
     {
       sfinfo = d_list->entry[i];
-      if ((sfinfo.text_vma <= addr)
-	  && (sfinfo.text_vma + sfinfo.text_size >= addr))
+      if (sframest_sfinfo_addr_range_p (&sfinfo, addr))
 	return &d_list->entry[i];
     }
 
@@ -198,34 +209,6 @@ sframest_get_sfinfo (struct sframest_ctx *sf, uint64_t raddr)
 
   return sfinfo;
 }
-
-struct sframest_info *
-sframest_update_sfinfo (struct sframest_ctx *sf,
-			struct sframest_info *cur_sfinfo,
-			uint64_t raddr)
-{
-  struct sframest_info *sfinfo = NULL;
-  int err = 0;
-
-  if (!sf || !cur_sfinfo)
-    return NULL;
-
-  /* Detect if current SFrame stack trace info object serves for raddr.  */
-  if (cur_sfinfo->text_vma < raddr
-      && cur_sfinfo->text_vma + cur_sfinfo->text_size > raddr)
-    return cur_sfinfo;
-
-  sfinfo = sframe_find_context (sf, raddr);
-  if (!sfinfo)
-    return NULL;
-
-  /* Decode the SFrame section the first time.  */
-  if (!sfinfo->dctx)
-    sfinfo->dctx = sframe_decode (sfinfo->buf, sfinfo->buflen, &err);
-
-  return sfinfo;
-}
-
 
 /* Open /proc image associated with the process id and return the file
    descriptor.  */

@@ -93,9 +93,8 @@ int sframe_callback (struct dl_phdr_info *info,
 		     size_t size ATTRIBUTE_UNUSED,
 		     void *data);
 
-struct sframest_info *sframest_update_sfinfo (struct sframest_ctx *sf,
-					      struct sframest_info *cur_sfinfo,
-					      uint64_t raddr);
+bool sframest_sfinfo_addr_range_p (struct sframest_info *sfinfo,
+				   uint64_t addr);
 
 struct sframest_info *sframest_get_sfinfo (struct sframest_ctx *sf,
 					   uint64_t raddr);
