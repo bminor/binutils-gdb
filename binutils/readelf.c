@@ -3583,10 +3583,6 @@ decode_ARM_machine_flags (char *out, unsigned e_flags)
 	      out = stpcpy (out, ", VFP");
 	      break;
 
-	    case EF_ARM_MAVERICK_FLOAT:
-	      out = stpcpy (out, ", Maverick FP");
-	      break;
-
 	    default:
 	      unknown = true;
 	      break;
