@@ -3569,7 +3569,7 @@ riscv_elf_finish_dynamic_sections (bfd *output_bfd,
 	}
     }
 
-  if (htab->elf.sgotplt)
+  if (htab->elf.sgotplt && htab->elf.sgotplt->size > 0)
     {
       asection *output_section = htab->elf.sgotplt->output_section;
 
@@ -3580,31 +3580,28 @@ riscv_elf_finish_dynamic_sections (bfd *output_bfd,
 	  return false;
 	}
 
-      if (htab->elf.sgotplt->size > 0)
-	{
-	  /* Write the first two entries in .got.plt, needed for the dynamic
-	     linker.  */
-	  bfd_put_NN (output_bfd, (bfd_vma) -1, htab->elf.sgotplt->contents);
-	  bfd_put_NN (output_bfd, (bfd_vma) 0,
-		      htab->elf.sgotplt->contents + GOT_ENTRY_SIZE);
-	}
+      /* Write the first two entries in .got.plt, needed for the dynamic
+	 linker.  */
+      bfd_put_NN (output_bfd, (bfd_vma) -1, htab->elf.sgotplt->contents);
+      bfd_put_NN (output_bfd, (bfd_vma) 0,
+		  htab->elf.sgotplt->contents + GOT_ENTRY_SIZE);
 
       elf_section_data (output_section)->this_hdr.sh_entsize = GOT_ENTRY_SIZE;
     }
 
-  if (htab->elf.sgot)
+  if (htab->elf.sgot && htab->elf.sgot->size > 0)
     {
       asection *output_section = htab->elf.sgot->output_section;
 
-      if (htab->elf.sgot->size > 0)
+      if (!bfd_is_abs_section (output_section))
 	{
 	  /* Set the first entry in the global offset table to the address of
 	     the dynamic section.  */
 	  bfd_vma val = sdyn ? sec_addr (sdyn) : 0;
 	  bfd_put_NN (output_bfd, val, htab->elf.sgot->contents);
-	}
 
-      elf_section_data (output_section)->this_hdr.sh_entsize = GOT_ENTRY_SIZE;
+	  elf_section_data (output_section)->this_hdr.sh_entsize = GOT_ENTRY_SIZE;
+	}
     }
 
   /* Fill PLT and GOT entries for local STT_GNU_IFUNC symbols.  */
