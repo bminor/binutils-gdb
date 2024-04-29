@@ -27,7 +27,10 @@
 #ifndef GDB_DWARF2_ABBREV_H
 #define GDB_DWARF2_ABBREV_H
 
-#include "hashtab.h"
+#include "dwarf2.h"
+#include "dwarf2/types.h"
+#include "gdbsupport/gdb-hashtab.h"
+#include "gdbsupport/gdb_obstack.h"
 
 struct attr_abbrev
 {

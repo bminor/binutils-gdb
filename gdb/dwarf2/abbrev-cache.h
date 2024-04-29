@@ -21,6 +21,8 @@
 #define GDB_DWARF2_ABBREV_CACHE_H
 
 #include "dwarf2/abbrev.h"
+#include "dwarf2/types.h"
+#include "gdbsupport/gdb-hashtab.h"
 
 /* An abbrev cache holds abbrev tables for easier reuse.  */
 class abbrev_cache

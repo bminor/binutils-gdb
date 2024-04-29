@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "dwarf2/read.h"
 #include "dwarf2/abbrev-cache.h"
 
 /* Hash function for an abbrev table.  */

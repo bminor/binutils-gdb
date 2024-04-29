@@ -28,7 +28,6 @@
 #include "dwarf2/mapped-index.h"
 #include "dwarf2/section.h"
 #include "dwarf2/cu.h"
-#include "filename-seen-cache.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/hash_enum.h"
 #include "gdbsupport/function-view.h"

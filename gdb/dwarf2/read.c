@@ -48,6 +48,7 @@
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "event-top.h"
+#include "gdbsupport/task-group.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "objfiles.h"
@@ -70,7 +71,6 @@
 #include "go-lang.h"
 #include "valprint.h"
 #include "gdbcore.h"
-#include "gdb/gdb-index.h"
 #include "gdb_bfd.h"
 #include "f-lang.h"
 #include "source.h"
@@ -92,7 +92,6 @@
 #include <unordered_set>
 #include "dwarf2/abbrev-cache.h"
 #include "cooked-index.h"
-#include "split-name.h"
 #include "gdbsupport/thread-pool.h"
 #include "run-on-main-thread.h"
 #include "dwarf2/parent-map.h"

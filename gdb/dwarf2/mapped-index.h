@@ -20,7 +20,9 @@
 #ifndef GDB_DWARF2_MAPPED_INDEX_H
 #define GDB_DWARF2_MAPPED_INDEX_H
 
+#include "dwarf2/index-common.h"
 #include "language.h"
+#include "quick-symbol.h"
 
 /* An index into a (C++) symbol name component in a symbol name as
    recorded in the mapped_index's symbol table.  For each C++ symbol

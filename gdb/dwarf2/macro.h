@@ -21,16 +21,20 @@
 #define GDB_DWARF2_MACRO_H
 
 struct buildsym_compunit;
+struct dwarf2_cu;
+struct dwarf2_per_objfile;
+struct dwarf2_section_info;
+struct line_header;
 
 extern void dwarf_decode_macros (dwarf2_per_objfile *per_objfile,
 				 buildsym_compunit *builder,
 				 const dwarf2_section_info *section,
-				 const struct line_header *lh,
+				 const line_header *lh,
 				 unsigned int offset_size,
 				 unsigned int offset,
 				 dwarf2_section_info *str_section,
 				 dwarf2_section_info *str_offsets_section,
 				 std::optional<ULONGEST> str_offsets_base,
-				 int section_is_gnu, struct dwarf2_cu *cu);
+				 int section_is_gnu, dwarf2_cu *cu);
 
 #endif /* GDB_DWARF2_MACRO_H */

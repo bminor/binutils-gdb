@@ -20,6 +20,8 @@
 #ifndef DWARF2_LINE_HEADER_H
 #define DWARF2_LINE_HEADER_H
 
+#include "dwarf2/types.h"
+
 /* dir_index is 1-based in DWARF 4 and before, and is 0-based in DWARF 5 and
    later.  */
 typedef int dir_index;
@@ -213,7 +215,7 @@ file_entry::include_dir (const line_header *lh) const
    and must not be freed.  */
 
 extern line_header_up dwarf_decode_line_header
-  (sect_offset sect_off, bool is_dwz, dwarf2_per_objfile *per_objfile,
+  (sect_offset sect_off, bool is_dwz, struct dwarf2_per_objfile *per_objfile,
    struct dwarf2_section_info *section, const struct comp_unit_head *cu_header,
    const char *comp_dir);
 
