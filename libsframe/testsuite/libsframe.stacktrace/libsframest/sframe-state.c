@@ -80,6 +80,21 @@ sframe_bt_set_errno (int *errp, int error)
 
 #endif
 
+static void sframest_sfinfo_init(struct sframest_info *sfinfo,
+				 const char *buf, int64_t buflen,
+				 uint64_t sframe_vma,
+				 uint64_t text_vma, int64_t text_size)
+{
+  if (!sfinfo)
+    return;
+
+  sfinfo->buf = buf;
+  sfinfo->buflen = buflen;
+  sfinfo->sframe_vma = sframe_vma;
+  sfinfo->text_vma = text_vma;
+  sfinfo->text_size = text_size;
+}
+
 /* Return whether the given SFrame stack trace info object SFINFO has (stack
    trace) information corresponding to addr.  */
 
@@ -237,9 +252,8 @@ sframe_callback (struct dl_phdr_info *info,
 {
   struct sframest_ctx *sf = (struct sframest_ctx *) data;
   int p_type, i, fd, sframe_err;
-  ssize_t len;
   uint64_t text_vma = 0;
-  int text_size = 0;
+  uint64_t text_size = 0;
 
   if (!data || !info)
     return 1;
@@ -263,82 +277,39 @@ sframe_callback (struct dl_phdr_info *info,
       if (p_type != PT_SFRAME)
 	continue;
 
-      if (info->dlpi_name[0] == '\0')		/* the main module.  */
+      if (info->dlpi_name[0] == '\0')
 	{
+	  /* the main module.  */
 	  fd = get_proc_mem_fd (&sframe_err);
 	  if (fd == -1)
 	    return 1;
-#if 0
-	  if (lseek (fd, info->dlpi_addr + info->dlpi_phdr[i].p_vaddr,
-		     SEEK_SET) == -1)
-	    {
-	      sframe_bt_ret_set_errno (&sframe_err, SFRAME_BT_ERR_LSEEK);
-	      return 1;
-	    }
-#endif
-
-	  // sf->sui_ctx.sfdd_data = malloc (info->dlpi_phdr[i].p_memsz);
-	  sf->prog_sfinfo.buf = (char *)(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr);
-#if 0
-	  if (sf->sui_ctx.sfdd_data == NULL)
-	    {
-	      sframe_bt_ret_set_errno (&sframe_err, SFRAME_BT_ERR_MALLOC);
-	      return 1;
-	    }
-
-	  len = read (fd, sf->sui_ctx.sfdd_data, info->dlpi_phdr[i].p_memsz);
-	  if (len == -1 || len != (ssize_t) info->dlpi_phdr[i].p_memsz)
-	    {
-	      sframe_bt_ret_set_errno (&sframe_err, SFRAME_BT_ERR_READ);
-	      return 1;
-	    }
-#endif
-	  len = info->dlpi_phdr[i].p_memsz;
 
 	  assert (text_vma);
-	  sf->prog_sfinfo.buflen = len;
-	  sf->prog_sfinfo.sframe_vma = info->dlpi_addr + info->dlpi_phdr[i].p_vaddr;
+	  sframest_sfinfo_init (&sf->prog_sfinfo,
+				(char *)(info->dlpi_addr
+					 + info->dlpi_phdr[i].p_vaddr),
+				info->dlpi_phdr[i].p_memsz,
+				info->dlpi_addr + info->dlpi_phdr[i].p_vaddr,
+				text_vma, text_size);
 	  sf->fd = fd;
-	  sf->prog_sfinfo.text_vma = text_vma;
-	  sf->prog_sfinfo.text_size = text_size;
 	  text_vma = 0;
 	  return 0;
 	}
       else
-	{					/* a dynamic shared object.  */
+	{
+	  /* a dynamic shared object.  */
 	  struct sframest_info sfinfo;
 	  memset (&sfinfo, 0, sizeof (struct sframest_info));
 	  assert (sf->fd);
-#if 0
-	  if (lseek (sf->sui_fd, info->dlpi_addr + info->dlpi_phdr[i].p_vaddr,
-		     SEEK_SET) == -1)
-	    {
-	      sframe_bt_ret_set_errno (&sframe_err, SFRAME_BT_ERR_LSEEK);
-	      return 1;
-	    }
-#endif
 
-	  sfinfo.buf = (char *)(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr);
-#if 0
-	  if (dt.sfdd_data == NULL)
-	    {
-	      sframe_bt_ret_set_errno (&sframe_err, SFRAME_BT_ERR_MALLOC);
-	      return 1;
-	    }
-
-	  len = read (sf->sui_fd, dt.sfdd_data, info->dlpi_phdr[i].p_memsz);
-	  if (len == -1 || len != (ssize_t) info->dlpi_phdr[i].p_memsz)
-	    {
-	      sframe_bt_ret_set_errno (&sframe_err, SFRAME_BT_ERR_READ);
-	      return 1;
-	    }
-#endif
-	  len = info->dlpi_phdr[i].p_memsz;
 	  assert (text_vma);
-	  sfinfo.buflen = len;
-	  sfinfo.sframe_vma = info->dlpi_addr + info->dlpi_phdr[i].p_vaddr;
-	  sfinfo.text_vma = text_vma;
-	  sfinfo.text_size = text_size;
+	  sframest_sfinfo_init (&sfinfo,
+				(char *)(info->dlpi_addr
+					 + info->dlpi_phdr[i].p_vaddr),
+				info->dlpi_phdr[i].p_memsz,
+				info->dlpi_addr + info->dlpi_phdr[i].p_vaddr,
+				text_vma, text_size);
+
 	  text_vma = 0;
 	  
 	  sframe_err = sframe_add_dso (&sf->dsos_sfinfo, sfinfo);
