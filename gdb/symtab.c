@@ -955,6 +955,13 @@ create_demangled_names_hash (struct objfile_per_bfd_storage *per_bfd)
      free_demangled_name_entry, xcalloc, xfree));
 }
 
+/* palves: should be a gdbarch hook?  */
+#ifdef __CYGWIN__
+# define LINKER_SYMBOLS_HAVE_WIN32_STDCALL_ARG_SIZES (1)
+#else
+# define LINKER_SYMBOLS_HAVE_WIN32_STDCALL_ARG_SIZES (0)
+#endif
+
 /* See symtab.h  */
 
 gdb::unique_xmalloc_ptr<char>
@@ -963,6 +970,44 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 {
   gdb::unique_xmalloc_ptr<char> demangled;
   int i;
+
+  /* On Windows, some functions use the `stdcall' calling convention,
+     in which the callee is expected to pop the arguments off the
+     stack.  Normally, the caller takes care of this, because only the
+     caller knows how many arguments it really passed.  To avoid
+     confusion, the linker symbols for `stdcall' functions have names
+     with a suffix "@N" attached to them, where "N" is the number of
+     bytes they'll pop.  That way, if a caller thinks some `stdcall'
+     function `foo' expects M argument bytes, but the definition of
+     `foo' expects N argument bytes, N != M, then the call will be a
+     reference to `foo@M', but the definition will have a linker
+     symbol `foo@N', and you'll get a link-time `symbol not found'
+     error, instead of a crash at run-time.
+
+     (Note how this fails to address calls through function pointers,
+     since the byte count isn't part of the function pointer's type.
+     Go, Microsoft!)
+
+     Whatever.  But our demangler doesn't like that '@N' suffix, so we
+     need to strip it off.  */
+
+#ifndef LINKER_SYMBOLS_HAVE_WIN32_STDCALL_ARG_SIZES
+# define LINKER_SYMBOLS_HAVE_WIN32_STDCALL_ARG_SIZES 0
+#endif
+
+  if (LINKER_SYMBOLS_HAVE_WIN32_STDCALL_ARG_SIZES)
+    {
+      const char *arg_byte_suffix = strchr (mangled, '@');
+      if (arg_byte_suffix)
+	{
+	  int prefix_len = arg_byte_suffix - mangled;
+	  char *mangled_sans_suffix = (char *) alloca (prefix_len + 1);
+	  memcpy (mangled_sans_suffix, mangled, prefix_len);
+	  mangled_sans_suffix[prefix_len] = '\0';
+
+	  mangled = mangled_sans_suffix;
+	}
+    }
 
   if (gsymbol->language () != language_unknown)
     {
