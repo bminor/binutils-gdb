@@ -782,7 +782,7 @@ bad_static_reloc (bfd *abfd, const Elf_Internal_Rela *rel, asection *sec,
   (*_bfd_error_handler)
    (_("%pB:(%pA+%#lx): relocation %s against `%s` can not be used when making "
       "a shared object; recompile with -fPIC"),
-    abfd, sec, rel->r_offset, r ? r->name : _("<unknown>"), name);
+    abfd, sec, (long) rel->r_offset, r ? r->name : _("<unknown>"), name);
   bfd_set_error (bfd_error_bad_value);
   return false;
 }
