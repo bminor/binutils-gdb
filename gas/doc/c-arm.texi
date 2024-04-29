@@ -162,7 +162,7 @@ recognized:
 @code{neoverse-v1},
 @code{xgene1},
 @code{xgene2},
-@code{ep9312} (ARM920 with Cirrus Maverick coprocessor),
+@code{ep9312},
 @code{i80200} (Intel XScale processor)
 @code{iwmmxt} (Intel XScale processor with Wireless MMX technology coprocessor)
 and
@@ -172,8 +172,8 @@ assembler to accept instructions valid for any ARM processor.
 
 In addition to the basic instruction set, the assembler can be told to
 accept various extension mnemonics that extend the processor using the
-co-processor instruction space.  For example, @code{-mcpu=arm920+maverick}
-is equivalent to specifying @code{-mcpu=ep9312}.
+co-processor instruction space.  For example, @code{-mcpu=cortex-a53+simd}
+enables the Advanced SIMD extension.
 
 Multiple extensions may be specified, separated by a @code{+}.  The
 extensions should be specified in ascending alphabetical order.
@@ -184,8 +184,7 @@ documented in the list of extensions below.
 Extension mnemonics may also be removed from those the assembler accepts.
 This is done be prepending @code{no} to the option that adds the extension.
 Extensions that are removed should be listed after all extensions which have
-been added, again in ascending alphabetical order.  For example,
-@code{-mcpu=ep9312+nomaverick} is equivalent to specifying @code{-mcpu=arm920}.
+been added, again in ascending alphabetical order.
 
 
 The following extensions are currently supported:
@@ -201,7 +200,6 @@ The following extensions are currently supported:
 @code{iwmmxt},
 @code{iwmmxt2},
 @code{xscale},
-@code{maverick},
 @code{mp} (Multiprocessing Extensions for v7-A and v7-R
 architectures),
 @code{os} (Operating System for v6M architecture),
@@ -525,7 +523,6 @@ The following format options are recognized:
 @code{arm1020t},
 @code{arm1020e},
 @code{arm1136jf-s},
-@code{maverick},
 @code{neon},
 @code{neon-vfpv3},
 @code{neon-fp16},

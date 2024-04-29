@@ -12,6 +12,10 @@
   section they will now also display the contents of the .eh_frame_hdr section,
   if present.
 
+* Support for the Maverick co-processor (via -mfpu=maverick) on Arm has been
+  removed.  The CPU name ep9312 is still recognized, but treated as an alias
+  for arm920t.
+
 Changes in 2.42:
 
 * The objdump program has a new command line option -Z/--decompress which
