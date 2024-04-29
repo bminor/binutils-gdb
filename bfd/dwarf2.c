@@ -2916,10 +2916,9 @@ decode_line_info (struct comp_unit *unit)
 
       if (table->num_files)
 	{
-	  if (table->use_dir_and_file_0)
-	    filename = concat_filename (table, 0);
-	  else
-	    filename = concat_filename (table, 1);
+	  /* PR 30783: Always start with a file index of 1, even
+	     for DWARF-5.  */
+	  filename = concat_filename (table, 1);
 	}
 
       /* Decode the table.  */
