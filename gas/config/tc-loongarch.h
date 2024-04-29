@@ -99,15 +99,19 @@ extern bool loongarch_frag_align_code (int, int);
 
 #define TC_FORCE_RELOCATION_LOCAL(FIX) 1
 
-/* Adjust debug_line after relaxation.  */
-#define DWARF2_USE_FIXED_ADVANCE_PC 1
-
 /* Values passed to md_apply_fix don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define TARGET_USE_CFIPOP 1
-#define DWARF2_DEFAULT_RETURN_COLUMN 1 /* $ra.  */
-#define DWARF2_CIE_DATA_ALIGNMENT -4
+/* Adjust debug_line after relaxation.  */
+#define DWARF2_USE_FIXED_ADVANCE_PC   1
+
+/* FDE Data Alignment Factor.
+   FDE Code Alignment Factor (DWARF2_LINE_MIN_INSN_LENGTH) should be 1
+   because DW_CFA_advance_loc need to be relocated in bytes
+   when linker relaxation.  */
+#define DWARF2_CIE_DATA_ALIGNMENT     (-8)
+#define DWARF2_DEFAULT_RETURN_COLUMN  1	    /* FDE Return Address Register.  */
 
 #define tc_cfi_frame_initial_instructions	\
   loongarch_cfi_frame_initial_instructions
