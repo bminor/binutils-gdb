@@ -189,9 +189,6 @@ static const arm_feature_set fpu_arch_vfp_v3 ATTRIBUTE_UNUSED = FPU_ARCH_VFP_V3;
 static const arm_feature_set fpu_arch_neon_v1 ATTRIBUTE_UNUSED = FPU_ARCH_NEON_V1;
 static const arm_feature_set fpu_arch_fpa = FPU_ARCH_FPA;
 static const arm_feature_set fpu_any_hard = FPU_ANY_HARD;
-#ifdef OBJ_ELF
-static const arm_feature_set fpu_arch_maverick = FPU_ARCH_MAVERICK;
-#endif
 static const arm_feature_set fpu_endian_pure = FPU_ARCH_ENDIAN_PURE;
 
 #ifdef CPU_DEFAULT
@@ -314,8 +311,6 @@ static const arm_feature_set arm_cext_iwmmxt =
   ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT);
 static const arm_feature_set arm_cext_xscale =
   ARM_FEATURE_COPROC (ARM_CEXT_XSCALE);
-static const arm_feature_set arm_cext_maverick =
-  ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK);
 static const arm_feature_set fpu_fpa_ext_v1 =
   ARM_FEATURE_COPROC (FPU_FPA_EXT_V1);
 static const arm_feature_set fpu_fpa_ext_v2 =
@@ -721,12 +716,6 @@ const char * const reg_expected_msgs[] =
   [REG_TYPE_NSDQ]   = N_("VFP single, double or Neon quad precision register"
 			 " expected"),
   [REG_TYPE_VFC]    = N_("VFP system register expected"),
-  [REG_TYPE_MVF]    = N_("Maverick MVF register expected"),
-  [REG_TYPE_MVD]    = N_("Maverick MVD register expected"),
-  [REG_TYPE_MVFX]   = N_("Maverick MVFX register expected"),
-  [REG_TYPE_MVDX]   = N_("Maverick MVDX register expected"),
-  [REG_TYPE_MVAX]   = N_("Maverick MVAX register expected"),
-  [REG_TYPE_DSPSC]  = N_("Maverick DSPSC register expected"),
   [REG_TYPE_MMXWR]  = N_("iWMMXt data register expected"),
   [REG_TYPE_MMXWC]  = N_("iWMMXt control register expected"),
   [REG_TYPE_MMXWCG] = N_("iWMMXt scalar register expected"),
@@ -7167,12 +7156,6 @@ enum operand_parse_code
   OP_RNSDQ,	/* Neon single, double or quad precision register */
   OP_RNSC,      /* Neon scalar D[X] */
   OP_RVC,	/* VFP control register */
-  OP_RMF,	/* Maverick F register */
-  OP_RMD,	/* Maverick D register */
-  OP_RMFX,	/* Maverick FX register */
-  OP_RMDX,	/* Maverick DX register */
-  OP_RMAX,	/* Maverick AX register */
-  OP_RMDS,	/* Maverick DSPSC register */
   OP_RIWR,	/* iWMMXt wR register */
   OP_RIWC,	/* iWMMXt wC register */
   OP_RIWG,	/* iWMMXt wCG register */
@@ -7543,12 +7526,6 @@ parse_operands (char *str, const unsigned int *pattern, bool thumb)
 	  else
 	    goto failure;
 	  break;
-	case OP_RMF:   po_reg_or_fail (REG_TYPE_MVF);	  break;
-	case OP_RMD:   po_reg_or_fail (REG_TYPE_MVD);	  break;
-	case OP_RMFX:  po_reg_or_fail (REG_TYPE_MVFX);	  break;
-	case OP_RMDX:  po_reg_or_fail (REG_TYPE_MVDX);	  break;
-	case OP_RMAX:  po_reg_or_fail (REG_TYPE_MVAX);	  break;
-	case OP_RMDS:  po_reg_or_fail (REG_TYPE_DSPSC);	  break;
 	case OP_RIWR:  po_reg_or_fail (REG_TYPE_MMXWR);	  break;
 	case OP_RIWC:  po_reg_or_fail (REG_TYPE_MMXWC);	  break;
 	case OP_RIWG:  po_reg_or_fail (REG_TYPE_MMXWCG);  break;
@@ -11284,57 +11261,6 @@ do_iwmmxt_wrwrwr_or_imm5 (void)
   }
 }
 
-/* Cirrus Maverick instructions.  Simple 2-, 3-, and 4-register
-   operations first, then control, shift, and load/store.  */
-
-/* Insns like "foo X,Y,Z".  */
-
-static void
-do_mav_triple (void)
-{
-  inst.instruction |= inst.operands[0].reg << 16;
-  inst.instruction |= inst.operands[1].reg;
-  inst.instruction |= inst.operands[2].reg << 12;
-}
-
-/* Insns like "foo W,X,Y,Z".
-    where W=MVAX[0:3] and X,Y,Z=MVFX[0:15].  */
-
-static void
-do_mav_quad (void)
-{
-  inst.instruction |= inst.operands[0].reg << 5;
-  inst.instruction |= inst.operands[1].reg << 12;
-  inst.instruction |= inst.operands[2].reg << 16;
-  inst.instruction |= inst.operands[3].reg;
-}
-
-/* cfmvsc32<cond> DSPSC,MVDX[15:0].  */
-static void
-do_mav_dspsc (void)
-{
-  inst.instruction |= inst.operands[1].reg << 12;
-}
-
-/* Maverick shift immediate instructions.
-   cfsh32<cond> MVFX[15:0],MVFX[15:0],Shift[6:0].
-   cfsh64<cond> MVDX[15:0],MVDX[15:0],Shift[6:0].  */
-
-static void
-do_mav_shift (void)
-{
-  int imm = inst.operands[2].imm;
-
-  inst.instruction |= inst.operands[0].reg << 12;
-  inst.instruction |= inst.operands[1].reg << 16;
-
-  /* Bits 0-3 of the insn should have bits 0-3 of the immediate.
-     Bits 5-7 of the insn should have bits 4-6 of the immediate.
-     Bit 4 should be 0.	 */
-  imm = (imm & 0xf) | ((imm & 0x70) << 1);
-
-  inst.instruction |= imm;
-}
 
 /* XScale instructions.	 Also sorted arithmetic before move.  */
 
@@ -24000,18 +23926,6 @@ static const struct reg_entry reg_names[] =
   REGDEF(fpcxtns,14,VFC), REGDEF(FPCXTNS,14,VFC),
   REGDEF(fpcxts,15,VFC), REGDEF(FPCXTS,15,VFC),
 
-  /* Maverick DSP coprocessor registers.  */
-  REGSET(mvf,MVF),  REGSET(mvd,MVD),  REGSET(mvfx,MVFX),  REGSET(mvdx,MVDX),
-  REGSET(MVF,MVF),  REGSET(MVD,MVD),  REGSET(MVFX,MVFX),  REGSET(MVDX,MVDX),
-
-  REGNUM(mvax,0,MVAX), REGNUM(mvax,1,MVAX),
-  REGNUM(mvax,2,MVAX), REGNUM(mvax,3,MVAX),
-  REGDEF(dspsc,0,DSPSC),
-
-  REGNUM(MVAX,0,MVAX), REGNUM(MVAX,1,MVAX),
-  REGNUM(MVAX,2,MVAX), REGNUM(MVAX,3,MVAX),
-  REGDEF(DSPSC,0,DSPSC),
-
   /* iWMMXt data registers - p0, c0-15.	 */
   REGSET(wr,MMXWR), REGSET(wR,MMXWR), REGSET(WR, MMXWR),
 
@@ -26314,86 +26228,6 @@ static const struct asm_opcode insns[] =
  cCE("wqmulwm",   ec000e0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
  cCE("wqmulwmr",  ee000e0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
  cCE("wsubaddhx", ed001c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
-
-#undef  ARM_VARIANT
-#define ARM_VARIANT  & arm_cext_maverick /* Cirrus Maverick instructions.  */
-
- cCE("cfldrs",	c100400, 2, (RMF, ADDRGLDC),	      rd_cpaddr),
- cCE("cfldrd",	c500400, 2, (RMD, ADDRGLDC),	      rd_cpaddr),
- cCE("cfldr32",	c100500, 2, (RMFX, ADDRGLDC),	      rd_cpaddr),
- cCE("cfldr64",	c500500, 2, (RMDX, ADDRGLDC),	      rd_cpaddr),
- cCE("cfstrs",	c000400, 2, (RMF, ADDRGLDC),	      rd_cpaddr),
- cCE("cfstrd",	c400400, 2, (RMD, ADDRGLDC),	      rd_cpaddr),
- cCE("cfstr32",	c000500, 2, (RMFX, ADDRGLDC),	      rd_cpaddr),
- cCE("cfstr64",	c400500, 2, (RMDX, ADDRGLDC),	      rd_cpaddr),
- cCE("cfmvsr",	e000450, 2, (RMF, RR),		      rn_rd),
- cCE("cfmvrs",	e100450, 2, (RR, RMF),		      rd_rn),
- cCE("cfmvdlr",	e000410, 2, (RMD, RR),		      rn_rd),
- cCE("cfmvrdl",	e100410, 2, (RR, RMD),		      rd_rn),
- cCE("cfmvdhr",	e000430, 2, (RMD, RR),		      rn_rd),
- cCE("cfmvrdh",	e100430, 2, (RR, RMD),		      rd_rn),
- cCE("cfmv64lr",e000510, 2, (RMDX, RR),		      rn_rd),
- cCE("cfmvr64l",e100510, 2, (RR, RMDX),		      rd_rn),
- cCE("cfmv64hr",e000530, 2, (RMDX, RR),		      rn_rd),
- cCE("cfmvr64h",e100530, 2, (RR, RMDX),		      rd_rn),
- cCE("cfmval32",e200440, 2, (RMAX, RMFX),	      rd_rn),
- cCE("cfmv32al",e100440, 2, (RMFX, RMAX),	      rd_rn),
- cCE("cfmvam32",e200460, 2, (RMAX, RMFX),	      rd_rn),
- cCE("cfmv32am",e100460, 2, (RMFX, RMAX),	      rd_rn),
- cCE("cfmvah32",e200480, 2, (RMAX, RMFX),	      rd_rn),
- cCE("cfmv32ah",e100480, 2, (RMFX, RMAX),	      rd_rn),
- cCE("cfmva32",	e2004a0, 2, (RMAX, RMFX),	      rd_rn),
- cCE("cfmv32a",	e1004a0, 2, (RMFX, RMAX),	      rd_rn),
- cCE("cfmva64",	e2004c0, 2, (RMAX, RMDX),	      rd_rn),
- cCE("cfmv64a",	e1004c0, 2, (RMDX, RMAX),	      rd_rn),
- cCE("cfmvsc32",e2004e0, 2, (RMDS, RMDX),	      mav_dspsc),
- cCE("cfmv32sc",e1004e0, 2, (RMDX, RMDS),	      rd),
- cCE("cfcpys",	e000400, 2, (RMF, RMF),		      rd_rn),
- cCE("cfcpyd",	e000420, 2, (RMD, RMD),		      rd_rn),
- cCE("cfcvtsd",	e000460, 2, (RMD, RMF),		      rd_rn),
- cCE("cfcvtds",	e000440, 2, (RMF, RMD),		      rd_rn),
- cCE("cfcvt32s",e000480, 2, (RMF, RMFX),	      rd_rn),
- cCE("cfcvt32d",e0004a0, 2, (RMD, RMFX),	      rd_rn),
- cCE("cfcvt64s",e0004c0, 2, (RMF, RMDX),	      rd_rn),
- cCE("cfcvt64d",e0004e0, 2, (RMD, RMDX),	      rd_rn),
- cCE("cfcvts32",e100580, 2, (RMFX, RMF),	      rd_rn),
- cCE("cfcvtd32",e1005a0, 2, (RMFX, RMD),	      rd_rn),
- cCE("cftruncs32",e1005c0, 2, (RMFX, RMF),	      rd_rn),
- cCE("cftruncd32",e1005e0, 2, (RMFX, RMD),	      rd_rn),
- cCE("cfrshl32",e000550, 3, (RMFX, RMFX, RR),	      mav_triple),
- cCE("cfrshl64",e000570, 3, (RMDX, RMDX, RR),	      mav_triple),
- cCE("cfsh32",	e000500, 3, (RMFX, RMFX, I63s),	      mav_shift),
- cCE("cfsh64",	e200500, 3, (RMDX, RMDX, I63s),	      mav_shift),
- cCE("cfcmps",	e100490, 3, (RR, RMF, RMF),	      rd_rn_rm),
- cCE("cfcmpd",	e1004b0, 3, (RR, RMD, RMD),	      rd_rn_rm),
- cCE("cfcmp32",	e100590, 3, (RR, RMFX, RMFX),	      rd_rn_rm),
- cCE("cfcmp64",	e1005b0, 3, (RR, RMDX, RMDX),	      rd_rn_rm),
- cCE("cfabss",	e300400, 2, (RMF, RMF),		      rd_rn),
- cCE("cfabsd",	e300420, 2, (RMD, RMD),		      rd_rn),
- cCE("cfnegs",	e300440, 2, (RMF, RMF),		      rd_rn),
- cCE("cfnegd",	e300460, 2, (RMD, RMD),		      rd_rn),
- cCE("cfadds",	e300480, 3, (RMF, RMF, RMF),	      rd_rn_rm),
- cCE("cfaddd",	e3004a0, 3, (RMD, RMD, RMD),	      rd_rn_rm),
- cCE("cfsubs",	e3004c0, 3, (RMF, RMF, RMF),	      rd_rn_rm),
- cCE("cfsubd",	e3004e0, 3, (RMD, RMD, RMD),	      rd_rn_rm),
- cCE("cfmuls",	e100400, 3, (RMF, RMF, RMF),	      rd_rn_rm),
- cCE("cfmuld",	e100420, 3, (RMD, RMD, RMD),	      rd_rn_rm),
- cCE("cfabs32",	e300500, 2, (RMFX, RMFX),	      rd_rn),
- cCE("cfabs64",	e300520, 2, (RMDX, RMDX),	      rd_rn),
- cCE("cfneg32",	e300540, 2, (RMFX, RMFX),	      rd_rn),
- cCE("cfneg64",	e300560, 2, (RMDX, RMDX),	      rd_rn),
- cCE("cfadd32",	e300580, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
- cCE("cfadd64",	e3005a0, 3, (RMDX, RMDX, RMDX),	      rd_rn_rm),
- cCE("cfsub32",	e3005c0, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
- cCE("cfsub64",	e3005e0, 3, (RMDX, RMDX, RMDX),	      rd_rn_rm),
- cCE("cfmul32",	e100500, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
- cCE("cfmul64",	e100520, 3, (RMDX, RMDX, RMDX),	      rd_rn_rm),
- cCE("cfmac32",	e100540, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
- cCE("cfmsc32",	e100560, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
- cCE("cfmadd32",e000600, 4, (RMAX, RMFX, RMFX, RMFX), mav_quad),
- cCE("cfmsub32",e100600, 4, (RMAX, RMFX, RMFX, RMFX), mav_quad),
- cCE("cfmadda32", e200600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
- cCE("cfmsuba32", e300600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
 
  /* ARMv8.5-A instructions.  */
 #undef  ARM_VARIANT
@@ -31037,10 +30871,6 @@ md_begin (void)
 	  flags |= F_VFP_FLOAT;
 
 #if defined OBJ_ELF
-	if (ARM_CPU_HAS_FEATURE (cpu_variant, fpu_arch_maverick))
-	    flags |= EF_ARM_MAVERICK_FLOAT;
-	break;
-
       case EF_ARM_EABI_VER4:
       case EF_ARM_EABI_VER5:
 	/* No additional flags to set.	*/
@@ -31078,8 +30908,6 @@ md_begin (void)
     mach = bfd_mach_arm_iWMMXt;
   else if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_cext_xscale))
     mach = bfd_mach_arm_XScale;
-  else if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_cext_maverick))
-    mach = bfd_mach_arm_ep9312;
   else if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v5e))
     mach = bfd_mach_arm_5TE;
   else if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v5))
@@ -31797,10 +31625,10 @@ static const struct arm_cpu_option_table arm_cpus[] =
 	       ARM_ARCH_NONE,
 	       FPU_ARCH_VFP_V2),
 
-  /* Maverick.  */
-  ARM_CPU_OPT ("ep9312",	  "ARM920T",
-	       ARM_FEATURE_LOW (ARM_AEXT_V4T, ARM_CEXT_MAVERICK),
-	       ARM_ARCH_NONE, FPU_ARCH_MAVERICK),
+  /* Maverick extensions are no-longer supported, but we can still
+     recognize the CPU name and treat it like an Arm920T.  */
+  ARM_CPU_OPT ("ep9312",	  "ARM920T",	       ARM_ARCH_V4T,
+	       ARM_ARCH_NONE, FPU_ARCH_FPA),
 
   /* Marvell processors.  */
   ARM_CPU_OPT ("marvell-pj4",	  NULL,		       ARM_ARCH_V7A,
@@ -32243,8 +32071,6 @@ static const struct arm_option_extension_value_table arm_extensions[] =
 			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT), ARM_ARCH_NONE),
   ARM_EXT_OPT ("iwmmxt2", ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2),
 			ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT2), ARM_ARCH_NONE),
-  ARM_EXT_OPT ("maverick", ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK),
-			ARM_FEATURE_COPROC (ARM_CEXT_MAVERICK), ARM_ARCH_NONE),
   ARM_EXT_OPT2 ("mp",	ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_MP),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_V7A),
@@ -32322,7 +32148,6 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"arm1020e",		FPU_ARCH_VFP_V2},
   {"arm1136jfs",	FPU_ARCH_VFP_V2}, /* Undocumented, use arm1136jf-s.  */
   {"arm1136jf-s",	FPU_ARCH_VFP_V2},
-  {"maverick",		FPU_ARCH_MAVERICK},
   {"neon",		FPU_ARCH_VFP_V3_PLUS_NEON_V1},
   {"neon-vfpv3",	FPU_ARCH_VFP_V3_PLUS_NEON_V1},
   {"neon-fp16",		FPU_ARCH_NEON_FP16},
