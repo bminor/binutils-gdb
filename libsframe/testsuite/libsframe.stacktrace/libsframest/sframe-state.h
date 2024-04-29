@@ -48,13 +48,13 @@
 struct sframest_info
 {
   /* Reference to the SFrame section in process memory.  */
-  char *buf;
+  const char *buf;
   /* Length in bytes of the SFrame section in memory.  */
-  int buflen;
+  uint64_t buflen;
   /* Text segment's virtual address.  */
   uint64_t text_vma;
   /* Text segment's length in bytes.  */
-  int text_size;
+  uint64_t text_size;
   /* SFrame segment's virtual address.  */
   uint64_t sframe_vma;
   /* SFrame decoder context.  For access to decoded SFrame information.  */
