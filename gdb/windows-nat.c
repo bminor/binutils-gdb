@@ -98,6 +98,8 @@ struct windows_per_inferior : public windows_process_info
   void handle_unload_dll () override;
   bool handle_access_violation (const EXCEPTION_RECORD *rec) override;
 
+  void invalidate_context (windows_thread_info *th);
+
   int windows_initialization_done = 0;
 
   std::vector<std::unique_ptr<windows_thread_info>> thread_list;
@@ -523,6 +525,18 @@ windows_per_inferior::find_thread (ptid_t ptid)
   return nullptr;
 }
 
+
+void
+windows_per_inferior::invalidate_context (windows_thread_info *th)
+{
+#ifdef __x86_64__
+  if (windows_process.wow64_process)
+    th->wow64_context.ContextFlags = 0;
+  else
+#endif
+    th->context.ContextFlags = 0;
+}
+
 windows_thread_info *
 windows_per_inferior::thread_rec
      (ptid_t ptid, thread_disposition_type disposition)
@@ -536,11 +550,11 @@ windows_per_inferior::thread_rec
 	case INVALIDATE_CONTEXT:
 	  if (ptid.lwp () != current_event.dwThreadId)
 	    th->suspend ();
-	  th->reload_context = true;
+	  invalidate_context (th);
 	  break;
 	case DONT_SUSPEND:
-	  th->reload_context = true;
 	  th->suspended = -1;
+	  invalidate_context (th);
 	  break;
 	}
     }
@@ -642,18 +656,13 @@ windows_nat_target::delete_thread (ptid_t ptid, DWORD exit_code,
    and supplies its value to the given regcache.
 
    This function assumes that R is non-negative.  A failed assertion
-   is raised if that is not true.
-
-   This function assumes that TH->RELOAD_CONTEXT is not set, meaning
-   that the windows_thread_info has an up-to-date context.  A failed
-   assertion is raised if that assumption is violated.  */
+   is raised if that is not true.  */
 
 static void
 windows_fetch_one_register (struct regcache *regcache,
 			    windows_thread_info *th, int r)
 {
   gdb_assert (r >= 0);
-  gdb_assert (!th->reload_context);
 
   char *context_ptr = (char *) &th->context;
 #ifdef __x86_64__
@@ -723,21 +732,23 @@ windows_nat_target::fetch_registers (struct regcache *regcache, int r)
   if (th == NULL)
     return;
 
-  if (th->reload_context)
-    {
 #ifdef __x86_64__
-      if (windows_process.wow64_process)
+  if (windows_process.wow64_process)
+    {
+      if (th->wow64_context.ContextFlags == 0)
 	{
 	  th->wow64_context.ContextFlags = CONTEXT_DEBUGGER_DR;
 	  CHECK (Wow64GetThreadContext (th->h, &th->wow64_context));
 	}
-      else
+    }
+  else
 #endif
+    {
+      if (th->context.ContextFlags == 0)
 	{
 	  th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
 	  CHECK (GetThreadContext (th->h, &th->context));
 	}
-      th->reload_context = false;
     }
 
   if (r < 0)
@@ -1533,10 +1544,7 @@ windows_nat_target::get_windows_debug_event
       *ourstatus = stop->status;
 
       ptid_t ptid (windows_process.current_event.dwProcessId, thread_id);
-      windows_thread_info *th
-	= windows_process.thread_rec (ptid, INVALIDATE_CONTEXT);
-      th->reload_context = true;
-
+      windows_process.thread_rec (ptid, INVALIDATE_CONTEXT);
       return ptid;
     }
 

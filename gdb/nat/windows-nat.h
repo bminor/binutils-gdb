@@ -84,10 +84,6 @@ struct windows_thread_info
      the thread.  */
   bool debug_registers_changed = false;
 
-  /* Nonzero if CONTEXT is invalidated and must be re-read from the
-     inferior thread.  */
-  bool reload_context = false;
-
   /* True if this thread is currently stopped at a software
      breakpoint.  This is used to offset the PC when needed.  */
   bool stopped_at_software_breakpoint = false;
