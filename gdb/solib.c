@@ -903,16 +903,19 @@ update_solib_list (int from_tty)
 	 stand out well.  */
 
       if (not_found == 1)
-	warning (_ ("Could not load shared library symbols for %s.\n"
+	warning (_ ("Could not load shared library symbols for %ps.\n"
 		    "Do you need \"set solib-search-path\" "
 		    "or \"set sysroot\"?"),
-		 not_found_filename);
+		 styled_string (file_name_style.style (),
+				not_found_filename));
       else if (not_found > 1)
 	warning (_ ("\
-Could not load shared library symbols for %d libraries, e.g. %s.\n\
+Could not load shared library symbols for %d libraries, e.g. %ps.\n\
 Use the \"info sharedlibrary\" command to see the complete listing.\n\
 Do you need \"set solib-search-path\" or \"set sysroot\"?"),
-		 not_found, not_found_filename);
+		 not_found,
+		 styled_string (file_name_style.style (),
+				not_found_filename));
     }
 }
 
@@ -1005,8 +1008,9 @@ solib_add (const char *pattern, int from_tty, int readsyms)
 		  /* If no pattern was given, be quiet for shared
 		     libraries we have already loaded.  */
 		  if (pattern && (from_tty || info_verbose))
-		    gdb_printf (_ ("Symbols already loaded for %s\n"),
-				gdb.so_name.c_str ());
+		    gdb_printf (_ ("Symbols already loaded for %ps\n"),
+				styled_string (file_name_style.style (),
+					       gdb.so_name.c_str ()));
 		}
 	      else if (solib_read_symbols (gdb, add_flags))
 		loaded_any_symbols = true;
