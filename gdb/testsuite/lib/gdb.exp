@@ -3699,8 +3699,9 @@ proc support_displaced_stepping {} {
     return 0
 }
 
-# Return 1 if GDB can find the libc debug info, or 0 and a reason string if it
-# can't.  This procedure is meant to be called by the require procedure.
+# Return 0 and a reason string if GDB can determine that libc doesn't have
+# debug info, and 1 otherwise.  This procedure is meant to be called by the
+# require procedure.
 gdb_caching_proc libc_has_debug_info {} {
     global srcdir subdir gdb_prompt inferior_exited_re
 
@@ -3726,22 +3727,20 @@ gdb_caching_proc libc_has_debug_info {} {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load "$obj"
     runto_main
-    set test "info sharedlibrary libc.so"
+    set libc_has_debug_info 1
+    set message "unable to get information on libc.so"
+    set test "info sharedlibrary"
     gdb_test_multiple $test $test {
 	-re ".*\(\\*\)\[^\r\n\]*/libc\.so.*$gdb_prompt $" {
 	    # Matched the "(*)" in the "Syms Read" columns which means:
 	    # "(*): Shared library is missing debugging information."
-	    verbose -log "$me: libc doesn't have debug info"
 	    set libc_has_debug_info 0
 	    set message "libc doesn't have debug info"
 	}
-	-re ".*Yes\[ \t\]+\[^\r\n\]*/libc\.so.*$gdb_prompt $" {
-	    verbose -log "$me: libc has debug info"
-	    set libc_has_debug_info 1
-	}
-	default {
-	    set libc_has_debug_info 0
-	    set message "libc not found in the inferior"
+	-re ".*$gdb_prompt $" {
+	    # The default pattern for the GDB prompt in gdb_test_multiple
+	    # causes a FAIL if it matches, but in our case we should just
+	    # assume that there is libc debug info.
 	}
     }
     gdb_exit
