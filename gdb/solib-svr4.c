@@ -1475,7 +1475,7 @@ svr4_current_sos ()
 
 	  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so->lm_info.get ());
 
-	  if (address_in_mem_range (li->l_ld, &vsyscall_range))
+	  if (vsyscall_range.contains (li->l_ld))
 	    {
 	      auto next = sos.erase (so);
 	      delete &*so;

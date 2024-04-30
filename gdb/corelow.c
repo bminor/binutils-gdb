@@ -994,9 +994,9 @@ core_target::xfer_memory_via_mappings (gdb_byte *readbuf,
 
   for (const auto &mr : m_core_unavailable_mappings)
     {
-      if (address_in_mem_range (memaddr, &mr))
+      if (mr.contains (memaddr))
 	{
-	  if (!address_in_mem_range (memend, &mr))
+	  if (!mr.contains (memend))
 	    len = mr.start + mr.length - memaddr;
 
 	  xfer_status = this->beneath ()->xfer_partial (TARGET_OBJECT_MEMORY,
