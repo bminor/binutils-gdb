@@ -469,58 +469,6 @@ solib_bfd_open (const char *pathname)
   return abfd;
 }
 
-/* Mapping of a core file's shared library sonames to their respective
-   build-ids.  Added to the registries of core file bfds.  */
-
-typedef std::unordered_map<std::string, std::string> soname_build_id_map;
-
-/* Key used to associate a soname_build_id_map to a core file bfd.  */
-
-static const struct registry<bfd>::key<soname_build_id_map>
-  cbfd_soname_build_id_data_key;
-
-/* See solib.h.  */
-
-void
-set_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd, const char *soname,
-			  const bfd_build_id *build_id)
-{
-  gdb_assert (abfd.get () != nullptr);
-  gdb_assert (soname != nullptr);
-  gdb_assert (build_id != nullptr);
-
-  soname_build_id_map *mapptr
-    = cbfd_soname_build_id_data_key.get (abfd.get ());
-
-  if (mapptr == nullptr)
-    mapptr = cbfd_soname_build_id_data_key.emplace (abfd.get ());
-
-  (*mapptr)[soname] = build_id_to_string (build_id);
-}
-
-/* If SONAME had a build-id associated with it in ABFD's registry by a
-   previous call to set_cbfd_soname_build_id then return the build-id
-   as a NULL-terminated hex string.  */
-
-static gdb::unique_xmalloc_ptr<char>
-get_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd, const char *soname)
-{
-  if (abfd.get () == nullptr || soname == nullptr)
-    return {};
-
-  soname_build_id_map *mapptr
-    = cbfd_soname_build_id_data_key.get (abfd.get ());
-
-  if (mapptr == nullptr)
-    return {};
-
-  auto it = mapptr->find (lbasename (soname));
-  if (it == mapptr->end ())
-    return {};
-
-  return make_unique_xstrdup (it->second.c_str ());
-}
-
 /* Given a pointer to one of the shared objects in our list of mapped
    objects, use the recorded name to open a bfd descriptor for the
    object, build a section table, relocate all the section addresses
@@ -540,36 +488,60 @@ solib_map_sections (solib &so)
 
   gdb::unique_xmalloc_ptr<char> filename (tilde_expand (so.so_name.c_str ()));
   gdb_bfd_ref_ptr abfd (ops->bfd_open (filename.get ()));
-  gdb::unique_xmalloc_ptr<char> build_id_hexstr
-    = get_cbfd_soname_build_id (current_program_space->cbfd,
-				so.so_name.c_str ());
+
+  /* If we have a core target then the core target might have some helpful
+     information (i.e. build-ids) about the shared libraries we are trying
+     to load.  Grab those hints now and use the below to validate or find
+     the shared libraries.
+
+     If we don't have a core target then this will return an empty struct
+     with no hint information, we then lookup the shared library based on
+     its filename.  */
+  std::optional<CORE_ADDR> solib_addr = ops->find_solib_addr (so);
+  std::optional <const core_target_mapped_file_info> mapped_file_info
+    = core_target_find_mapped_file (so.so_name.c_str (), solib_addr);
 
   /* If we already know the build-id of this solib from a core file, verify
      it matches ABFD's build-id.  If there is a mismatch or the solib wasn't
      found, attempt to query debuginfod for the correct solib.  */
-  if (build_id_hexstr.get () != nullptr)
+  if (mapped_file_info.has_value ())
     {
-      bool mismatch = false;
+      bool mismatch = (abfd != nullptr
+		       && build_id_bfd_get (abfd.get ()) != nullptr
+		       && !build_id_equal (mapped_file_info->build_id (),
+					   build_id_bfd_get (abfd.get ())));
 
-      if (abfd != nullptr && abfd->build_id != nullptr)
-	{
-	  std::string build_id = build_id_to_string (abfd->build_id);
-
-	  if (build_id != build_id_hexstr.get ())
-	    mismatch = true;
-	}
       if (abfd == nullptr || mismatch)
 	{
-	  scoped_fd fd = debuginfod_exec_query (
-	    (const unsigned char *) build_id_hexstr.get (), 0,
-	    so.so_name.c_str (), &filename);
+	  /* If GDB found a suitable file during the file mapping
+	     processing stage then lets use that.  We don't check the
+	     build-id after opening this file, either this file was found
+	     by build-id, in which case it's going to match, or this file
+	     doesn't have a build-id, so checking tells us nothing.
+	     However, if it was good enough during the mapped file
+	     processing, we assume it's good enough now.  */
+	  if (!mapped_file_info->filename ().empty ())
+	    abfd = ops->bfd_open (mapped_file_info->filename ().c_str ());
+	  else
+	    abfd = nullptr;
 
-	  if (fd.get () >= 0)
-	    abfd = ops->bfd_open (filename.get ());
-	  else if (mismatch)
-	    warning (_ ("Build-id of %ps does not match core file."),
-		     styled_string (file_name_style.style (),
-				    filename.get ()));
+	  if (abfd == nullptr)
+	    {
+	      scoped_fd fd = debuginfod_exec_query
+		(mapped_file_info->build_id ()->data,
+		 mapped_file_info->build_id ()->size,
+		 so.so_name.c_str (), &filename);
+
+	      if (fd.get () >= 0)
+		abfd = ops->bfd_open (filename.get ());
+	      else if (mismatch)
+		{
+		  warning (_ ("Build-id of %ps does not match core file."),
+			   styled_string (file_name_style.style (),
+					  filename.get ()));
+		  abfd = nullptr;
+		}
+	    }
 	}
     }
 
@@ -1706,6 +1678,14 @@ remove_user_added_objfile (struct objfile *objfile)
 	if (so.objfile == objfile)
 	  so.objfile = nullptr;
     }
+}
+
+/* See solist.h.  */
+
+std::optional<CORE_ADDR>
+default_find_solib_addr (solib &so)
+{
+  return {};
 }
 
 void _initialize_solib ();

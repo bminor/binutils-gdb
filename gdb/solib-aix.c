@@ -689,6 +689,11 @@ const solib_ops solib_aix_so_ops =
   solib_aix_open_symbol_file_object,
   solib_aix_in_dynsym_resolve_code,
   solib_aix_bfd_open,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  default_find_solib_addr,
 };
 
 void _initialize_solib_aix ();

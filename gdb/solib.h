@@ -136,11 +136,4 @@ extern void update_solib_breakpoints (void);
 
 extern void handle_solib_event (void);
 
-/* Associate SONAME with BUILD_ID in ABFD's registry so that it can be
-   retrieved with get_cbfd_soname_build_id.  */
-
-extern void set_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd,
-				      const char *soname,
-				      const bfd_build_id *build_id);
-
 #endif /* SOLIB_H */

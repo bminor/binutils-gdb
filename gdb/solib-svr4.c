@@ -3355,6 +3355,15 @@ svr4_iterate_over_objfiles_in_search_order
     }
 }
 
+/* See solib_ops::find_solib_addr in solist.h.  */
+
+static std::optional<CORE_ADDR>
+svr4_find_solib_addr (solib &so)
+{
+  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info.get ());
+  return li->l_addr_inferior;
+}
+
 const struct solib_ops svr4_so_ops =
 {
   svr4_relocate_section_addresses,
@@ -3369,6 +3378,7 @@ const struct solib_ops svr4_so_ops =
   svr4_keep_data_in_core,
   svr4_update_solib_event_breakpoints,
   svr4_handle_solib_event,
+  svr4_find_solib_addr,
 };
 
 void _initialize_svr4_solib ();

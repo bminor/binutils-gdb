@@ -1086,4 +1086,9 @@ const solib_ops frv_so_ops =
   open_symbol_file_object,
   frv_in_dynsym_resolve_code,
   solib_bfd_open,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  default_find_solib_addr,
 };

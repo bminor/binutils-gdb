@@ -665,4 +665,9 @@ const solib_ops darwin_so_ops =
   open_symbol_file_object,
   darwin_in_dynsym_resolve_code,
   darwin_bfd_open,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  default_find_solib_addr,
 };

@@ -60,6 +60,119 @@
 #define O_LARGEFILE 0
 #endif
 
+/* A mem_range and the build-id associated with the file mapped into the
+   given range.  */
+
+struct mem_range_and_build_id
+{
+  mem_range_and_build_id (mem_range &&r, const bfd_build_id *id)
+    : range (r),
+      build_id (id)
+  { /* Nothing.  */ }
+
+  /* A range of memory addresses.  */
+  mem_range range;
+
+  /* The build-id of the file mapped into RANGE.  */
+  const bfd_build_id *build_id;
+};
+
+/* An instance of this class is created within the core_target and is used
+   to hold all the information that relating to mapped files, their address
+   ranges, and their corresponding build-ids.  */
+
+struct mapped_file_info
+{
+  /* See comment on function definition.  */
+
+  void add (const char *soname, const char *expected_filename,
+	    const char *actual_filename, std::vector<mem_range> &&ranges,
+	    const bfd_build_id *build_id);
+
+  /* See comment on function definition.  */
+
+  std::optional <core_target_mapped_file_info>
+  lookup (const char *filename, const std::optional<CORE_ADDR> &addr);
+
+private:
+
+  /* Helper for ::lookup.  BUILD_ID is a build-id that was found in
+     one of the data structures within this class.  Lookup the
+     corresponding filename in m_build_id_to_filename_map and return a pair
+     containing the build-id and filename.
+
+     If no corresponding filename is found in m_build_id_to_filename_map
+     then the returned pair contains BUILD_ID and an empty string.
+
+     If BUILD_ID is nullptr then the returned pair contains nullptr and an
+     empty string.  */
+
+  struct core_target_mapped_file_info
+  make_result (const bfd_build_id *build_id)
+  {
+    if (build_id != nullptr)
+      {
+      auto it = m_build_id_to_filename_map.find (build_id);
+      if (it != m_build_id_to_filename_map.end ())
+	return { build_id, it->second };
+    }
+
+    return { build_id, {} };
+  }
+
+  /* A type that maps a string to a build-id.  */
+  using string_to_build_id_map
+    = std::unordered_map<std::string, const bfd_build_id *>;
+
+  /* A type that maps a build-id to a string.  */
+  using build_id_to_string_map
+    = std::unordered_map<const bfd_build_id *, std::string>;
+
+  /* When loading a core file, the build-ids are extracted based on the
+     file backed mappings.  This map associates the name of a file that was
+     mapped into the core file with the corresponding build-id.  The
+     build-id pointers in this map will never be nullptr as we only record
+     files if they have a build-id.  */
+
+  string_to_build_id_map m_filename_to_build_id_map;
+
+  /* Map a build-id pointer back to the name of the file that was mapped
+     into the inferior's address space.  If we lookup a matching build-id
+     using either a soname or an address then this map allows us to also
+     provide a full path to a file with a matching build-id.  */
+
+  build_id_to_string_map m_build_id_to_filename_map;
+
+  /* If the file that was mapped into the core file was a shared library
+     then it might have a DT_SONAME tag in its .dynamic section, this tag
+     contains the name of a shared object.  When opening a shared library,
+     if it's basename appears in this map then we can use the corresponding
+     build-id.
+
+     In the rare case that two different files have the same DT_SONAME
+     value then the build-id pointer in this map will be nullptr, this
+     indicates that it's not possible to find a build-id based on the given
+     DT_SONAME value.  */
+
+  string_to_build_id_map m_soname_to_build_id_map;
+
+  /* This vector maps memory ranges onto an associated build-id.  The
+     ranges are those of the files mapped into the core file.
+
+     Entries in this vector must not overlap, and are sorted be increasing
+     memory address.  Within each entry the build-id pointer will not be
+     nullptr.
+
+     While building this vector the entries are not sorted, they are
+     sorted once after the table has finished being built.  */
+
+  std::vector<mem_range_and_build_id> m_address_to_build_id_list;
+
+  /* False if address_to_build_id_list is unsorted, otherwise true.  */
+
+  bool m_address_to_build_id_list_sorted = false;
+};
+
 /* The core file target.  */
 
 static const target_info core_target_info = {
@@ -136,6 +249,13 @@ public:
   /* See definition.  */
   void info_proc_mappings (struct gdbarch *gdbarch);
 
+  std::optional <core_target_mapped_file_info>
+  lookup_mapped_file_info (const char *filename,
+			   const std::optional<CORE_ADDR> &addr)
+  {
+    return m_mapped_file_info.lookup (filename, addr);
+  }
+
 private: /* per-core data */
 
   /* Get rid of the core inferior.  */
@@ -158,7 +278,13 @@ private: /* per-core data */
      still be useful.  */
   std::vector<mem_range> m_core_unavailable_mappings;
 
-  /* Build m_core_file_mappings.  Called from the constructor.  */
+  /* Data structure that holds information mapping filenames and address
+     ranges to the corresponding build-ids as well as the reverse build-id
+     to filename mapping.  */
+  mapped_file_info m_mapped_file_info;
+
+  /* Build m_core_file_mappings and m_mapped_file_info.  Called from the
+     constructor.  */
   void build_file_mappings ();
 
   /* FIXME: kettenis/20031023: Eventually this field should
@@ -354,6 +480,10 @@ core_target::build_file_mappings ()
 	    }
 	}
 
+      std::vector<mem_range> ranges;
+      for (const mapped_file::region &region : file_data.regions)
+	ranges.emplace_back (region.start, region.end - region.start);
+
       if (expanded_fname == nullptr
 	  || abfd == nullptr
 	  || !bfd_check_format (abfd.get (), bfd_object))
@@ -430,16 +560,26 @@ core_target::build_file_mappings ()
 	    }
 	}
 
-      /* If this is a bfd of a shared library, record its soname and
-	 build-id.  */
-      if (file_data.build_id != nullptr && abfd != nullptr)
+      /* If this is a bfd with a build-id then record the filename,
+	 optional soname (DT_SONAME .dynamic attribute), and the range of
+	 addresses at which this bfd is mapped.  This information can be
+	 used to perform build-id checking when loading the shared
+	 libraries.  */
+      if (file_data.build_id != nullptr)
 	{
-	  gdb::unique_xmalloc_ptr<char> soname
-	    = gdb_bfd_read_elf_soname (bfd_get_filename (abfd.get ()));
+	  normalize_mem_ranges (&ranges);
 
-	  if (soname != nullptr)
-	    set_cbfd_soname_build_id (current_program_space->cbfd,
-				      soname.get (), file_data.build_id);
+	  const char *actual_filename = nullptr;
+	  gdb::unique_xmalloc_ptr<char> soname;
+	  if (abfd != nullptr)
+	    {
+	      actual_filename = bfd_get_filename (abfd.get ());
+	      soname = gdb_bfd_read_elf_soname (actual_filename);
+	    }
+
+	  m_mapped_file_info.add (soname.get (), filename.c_str (),
+				  actual_filename, std::move (ranges),
+				  file_data.build_id);
 	}
     }
 
@@ -1632,6 +1772,182 @@ maintenance_print_core_file_backed_mappings (const char *args, int from_tty)
   core_target *targ = get_current_core_target ();
   if (targ != nullptr)
     targ->info_proc_mappings (targ->core_gdbarch ());
+}
+
+/* Add more details discovered while processing the core-file's mapped file
+   information, we're building maps between filenames and the corresponding
+   build-ids, between address ranges and the corresponding build-ids, and
+   also a reverse map between build-id and the corresponding filename.
+
+   SONAME is the DT_SONAME attribute extracted from the .dynamic section of
+   a shared library that was mapped into the core file.  This can be
+   nullptr if the mapped files was not a shared library, or didn't have a
+   DT_SONAME attribute.
+
+   EXPECTED_FILENAME is the name of the file that was mapped into the
+   inferior as extracted from the core file, this should never be nullptr.
+
+   ACTUAL_FILENAME is the name of the actual file GDB found to provide the
+   mapped file information, this can be nullptr if GDB failed to find a
+   suitable file.  This might be different to EXPECTED_FILENAME, e.g. GDB
+   might have downloaded the file from debuginfod and so ACTUAL_FILENAME
+   will be a file in the debuginfod client cache.
+
+   RANGES is the list of memory ranges at which this file was mapped into
+   the inferior.
+
+   BUILD_ID is the build-id for this mapped file, this will never be
+   nullptr.  Not every mapped file will have a build-id, but there's no
+   point calling this function if we failed to find a build-id; this
+   structure only exists so we can lookup files based on their build-id.  */
+
+void
+mapped_file_info::add (const char *soname,
+		       const char *expected_filename,
+		       const char *actual_filename,
+		       std::vector<mem_range> &&ranges,
+		       const bfd_build_id *build_id)
+{
+  gdb_assert (build_id != nullptr);
+  gdb_assert (expected_filename != nullptr);
+
+  if (soname != nullptr)
+    {
+      /* If we already have an entry with this SONAME then this indicates
+	 that the inferior has two files mapped into memory with different
+	 file names (and most likely different build-ids), but with the
+	 same DT_SONAME attribute.  In this case we can't use the
+	 DT_SONAME to figure out the expected build-id of a shared
+	 library, so poison the entry for this SONAME by setting the entry
+	 to nullptr.  */
+      auto it = m_soname_to_build_id_map.find (soname);
+      if (it != m_soname_to_build_id_map.end ()
+	  && it->second != nullptr
+	  && !build_id_equal (it->second, build_id))
+	m_soname_to_build_id_map[soname] = nullptr;
+      else
+	m_soname_to_build_id_map[soname] = build_id;
+    }
+
+  /* When the core file is initially opened and the mapped files are
+     parsed, we group the build-id information based on the file name.  As
+     a consequence, we should see each EXPECTED_FILENAME value exactly
+     once.  This means that each insertion should always succeed.  */
+  const auto [it, inserted]
+    = m_filename_to_build_id_map.emplace (expected_filename, build_id);
+  gdb_assert (inserted);
+
+  /* Setup the reverse build-id to file name map.  */
+  if (actual_filename != nullptr)
+    m_build_id_to_filename_map.emplace (build_id, actual_filename);
+
+  /* Setup the list of memory range to build-id objects.  */
+  for (mem_range &r : ranges)
+    m_address_to_build_id_list.emplace_back (std::move (r), build_id);
+
+  /* At this point the m_address_to_build_id_list is unsorted (we just
+     added some entries to the end of the list).  All entries should be
+     added before any look-ups are performed, and the list is only sorted
+     when the first look-up is performed.  */
+  gdb_assert (!m_address_to_build_id_list_sorted);
+}
+
+/* FILENAME is the name of a file GDB is trying to load, and ADDR is
+   (optionally) an address within the file in the inferior's address space.
+
+   Search through the information gathered from the core-file's mapped file
+   information looking for a file named FILENAME, or for a file that covers
+   ADDR.  If a match is found then return the build-id for the file along
+   with the location where GDB found the mapped file.
+
+   The location of the mapped file might be the empty string if GDB was
+   unable to find the mapped file.
+
+   If no build-id can be found for FILENAME then GDB will return a pair
+   containing nullptr (for the build-id) and an empty string for the file
+   name.  */
+
+std::optional <core_target_mapped_file_info>
+mapped_file_info::lookup (const char *filename,
+			  const std::optional<CORE_ADDR> &addr)
+{
+  if (filename != nullptr)
+    {
+      /* If there's a matching entry in m_filename_to_build_id_map then the
+	 associated build-id will not be nullptr, and can be used to
+	 validate that FILENAME is correct.  */
+      auto it = m_filename_to_build_id_map.find (filename);
+      if (it != m_filename_to_build_id_map.end ())
+	return make_result (it->second);
+    }
+
+  if (addr.has_value ())
+    {
+      /* On the first lookup, sort the address_to_build_id_list.  */
+      if (!m_address_to_build_id_list_sorted)
+	{
+	  std::sort (m_address_to_build_id_list.begin (),
+		     m_address_to_build_id_list.end (),
+		     [] (const mem_range_and_build_id &a,
+			 const mem_range_and_build_id &b) {
+		       return a.range < b.range;
+		     });
+	  m_address_to_build_id_list_sorted = true;
+	}
+
+      /* Look for the first entry whose range's start address is not less
+	 than, or equal too, the address ADDR.  If we find such an entry,
+	 then the previous entry's range might contain ADDR.  If it does
+	 then that previous entry's build-id can be used.  */
+      auto it = std::lower_bound
+	(m_address_to_build_id_list.begin (),
+	 m_address_to_build_id_list.end (),
+	 *addr,
+	 [] (const mem_range_and_build_id &a,
+	     const CORE_ADDR &b) {
+	  return a.range.start <= b;
+	});
+
+      if (it != m_address_to_build_id_list.begin ())
+	{
+	  --it;
+
+	  if (it->range.contains (*addr))
+	    return make_result (it->build_id);
+	}
+    }
+
+  if (filename != nullptr)
+    {
+      /* If the basename of FILENAME appears in m_soname_to_build_id_map
+	 then when the mapped files were processed, we saw a file with a
+	 DT_SONAME attribute corresponding to FILENAME, use that build-id
+	 to validate FILENAME.
+
+	 However, the build-id in this map might be nullptr if we saw
+	 multiple mapped files with the same DT_SONAME attribute (though
+	 this should be pretty rare).  */
+      auto it
+	= m_soname_to_build_id_map.find (lbasename (filename));
+      if (it != m_soname_to_build_id_map.end ()
+	  && it->second != nullptr)
+	return make_result (it->second);
+    }
+
+  return {};
+}
+
+/* See gdbcore.h.  */
+
+std::optional <core_target_mapped_file_info>
+core_target_find_mapped_file (const char *filename,
+			      std::optional<CORE_ADDR> addr)
+{
+  core_target *targ = get_current_core_target ();
+  if (targ == nullptr || current_program_space->cbfd.get () == nullptr)
+    return {};
+
+  return targ->lookup_mapped_file_info (filename, addr);
 }
 
 void _initialize_corelow ();
