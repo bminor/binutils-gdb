@@ -2659,145 +2659,6 @@ is_hidden_alias (Hwcentry* pctr)
   return 0;
 }
 
-static int
-is_numeric_alias (Hwcentry* pctr)
-{
-  int is_numeric_alias = 0;
-  regno_t regno;
-  char *nameOnly = NULL;
-  hwcfuncs_parse_ctr (pctr->int_name, NULL, &nameOnly, NULL, NULL, &regno);
-  if (is_numeric (nameOnly, NULL))
-    is_numeric_alias = 1;
-  free (nameOnly);
-  return is_numeric_alias;
-}
-
-/* print list of register to a buffer */
-/*
- *  style      e x a m p l e s
- *    0        NONE    2       {0|1|2|3}
- *    1        NONE    2       : 0, 1, 2, or 3
- *    2                        0 1 2 3     6
- */
-static char *
-get_regnolist (char *buf, size_t sz, const regno_t *reg_list, int style)
-{
-  if (!buf || !sz)
-    return "INTERNAL ERROR";
-  buf[0] = 0;
-  if (style == 2)
-    {
-      int ii;
-      // width should be consistent with that in format_columns()
-      // the format will accommodate cpcx_npics regs
-      if (cpcx_npics < 1)
-	return "INTERNAL ERROR";
-      // clear out the buffer
-      for (ii = 0; ii < sz; ii++)
-	buf[ii] = '_';
-      if (cpcx_npics <= 9)
-	{
-	  // one char per reg, plus terminating null char
-	  if (cpcx_npics + 1 > sz)
-	    return "INTERNAL ERROR";
-	  buf[cpcx_npics] = '\0';
-
-	  // fill buf with regnos
-	  for (ii = 0; ii < MAX_PICS; ii++)
-	    {
-	      regno_t regno = reg_list[ii];
-	      if (REG_LIST_EOL (regno))
-		break;
-	      if (regno < 0 || regno >= cpcx_npics)
-		return "INTERNAL ERROR";
-	      buf[regno] = '0' + regno;
-	    }
-	}
-      else
-	{
-	  /* space between regs, which may be 1 or 2 digits each
-	   *   1 char  for reg 0
-	   *   2 chars for regs 1-9 each
-	   *   3 chars for regs 10- each
-	   *   1 char  for terminating null char
-	   */
-	  int nchars = 17 + 3 * (cpcx_npics - 9);
-	  if (nchars > sz)
-	    return "INTERNAL ERROR";
-	  buf[nchars - 1] = '\0';
-
-	  // fill buf with regnos
-	  for (ii = 0; ii < MAX_PICS; ii++)
-	    {
-	      regno_t regno = reg_list[ii];
-	      if (REG_LIST_EOL (regno))
-		break;
-	      if (regno <= 9)
-		buf[2 * regno ] = '0' + regno;
-	      else
-		{
-		  buf[3 * (regno - 9) + 17] = '0' + (regno / 10);
-		  buf[3 * (regno - 9) + 18] = '0' + (regno % 10);
-		}
-	    }
-	}
-      return buf;
-    }
-  if (REG_LIST_IS_EMPTY (reg_list))
-    {
-      snprintf (buf, sz, GTXT ("NONE"));
-      return buf;
-    }
-  else if (REG_LIST_EOL (reg_list[1]))
-    {
-      /* 1 item in list */
-      snprintf (buf, sz, "%d", reg_list[0]);
-      return buf;
-    }
-  else
-    {
-      /* 2 more items in list */
-      int ii, num_regs;
-      for (ii = 0; ii < MAX_PICS; ii++)
-	{
-	  regno_t regno = reg_list[ii];
-	  if (REG_LIST_EOL (regno))
-	    break;
-	}
-      num_regs = ii;
-      buf[0] = 0;
-      for (ii = 0; ii < num_regs; ii++)
-	{
-	  regno_t regno = reg_list[ii];
-	  if (style == 0)
-	    snprintf (buf + strlen (buf), sz - strlen (buf),
-		      "%c%d", ii ? '|' : '{', regno);
-	  else
-	    {
-	      if (num_regs == 2)
-		snprintf (buf + strlen (buf), sz - strlen (buf),
-			  "%d%s", regno, !ii ? " or " : "");
-	      else
-		{
-		  /* 3 or more items in list */
-		  if (ii < num_regs - 2)
-		    snprintf (buf + strlen (buf), sz - strlen (buf),
-			      "%d, ", regno);
-		  else if (ii == num_regs - 2)
-		    snprintf (buf + strlen (buf), sz - strlen (buf),
-			      "%d, or ", regno);
-		  else
-		    snprintf (buf + strlen (buf), sz - strlen (buf),
-			      "%d", regno);
-		}
-	    }
-	}
-      if (style == 0)
-	snprintf (buf + strlen (buf), sz - strlen (buf), "}");
-    }
-  return buf;
-}
-
 #if !HWC_DEBUG
 #define hwcentry_print(lvl,x1,x2)
 #else
@@ -2806,8 +2667,7 @@ get_regnolist (char *buf, size_t sz, const regno_t *reg_list, int style)
 static void
 hwcentry_print (int lvl, const char * header, const Hwcentry *pentry)
 {
-  char buf[1024];
-  Tprintf (lvl, "%s '%s', '%s', %d, '%s', %d, %d, %d, %d, %d, %d, /",
+  Tprintf (lvl, "%s '%s', '%s', %d, '%s', %d, %d, %d, %d, %d, %d, /\n",
 	   header,
 	   pentry->name ? pentry->name : "NULL",
 	   pentry->int_name ? pentry->int_name : "NULL",
@@ -2819,66 +2679,8 @@ hwcentry_print (int lvl, const char * header, const Hwcentry *pentry)
 	   pentry->timecvt,
 	   pentry->memop, /* type of instruction that can trigger */
 	   pentry->sort_order);
-  get_regnolist (buf, sizeof (buf), pentry->reg_list, 0);
-  Tprintf (lvl, "%s\n", buf);
 }
 #endif
-
-/* add <regno> to a Hwcentry's list */
-static void
-regno_add (Hwcentry * pctr, regno_t regno)
-{
-  int jj;
-  regno_t *reg_list;
-  if (!pctr)
-    {
-      Tprintf (0, "hwctable: regno_add(): ERROR: pctr==NULL\n");
-      return;
-    }
-  reg_list = pctr->reg_list;
-  if (!reg_list)
-    {
-      /* create list */
-      reg_list = (regno_t*) malloc (sizeof (regno_t*) * MAX_PICS);
-      if (!reg_list)
-	{
-	  hwcentry_print (DBG_LT0, "hwctable: regno_add: ERROR:"
-			  " Out of memory: ", pctr);
-	  return;
-	}
-      /* initialize list */
-      for (jj = 0; jj < MAX_PICS; jj++)
-	reg_list[jj] = REGNO_ANY;
-      pctr->reg_list = reg_list;
-    }
-  if (regno == REGNO_ANY)
-    {
-      /* add all counters up to cpcx_npics */
-      for (jj = 0; jj < MAX_PICS && jj < cpcx_npics; jj++)
-	reg_list[jj] = jj;
-    }
-  else
-    {
-      /* add <regno> to list of registers */
-      for (jj = 0; jj < MAX_PICS; jj++)
-	{
-	  if (reg_list[jj] == regno)
-	    {
-	      hwcentry_print (DBG_LT0, "hwctable: regno_add: WARNING: "
-			      "Duplicate regno: ", pctr);
-	      break;
-	    }
-	  if (reg_list[jj] == REGNO_ANY)
-	    {
-	      reg_list[jj] = regno;
-	      break;
-	    }
-	}
-    }
-  if (jj == MAX_PICS)
-    hwcentry_print (DBG_LT0, "hwctable: regno_add: WARNING:"
-		    " regno list is full:", pctr);
-}
 
 /*---------------------------------------------------------------------------*/
 /* utilities for rawlist (list of raw counters with reglist[] filled in) */
@@ -2931,8 +2733,6 @@ list_add (ptr_list *list, uint_t regno, const char *name)
       tmpctr.name = (char *) name;
       praw = list_append_shallow_copy (list, &tmpctr);
     }
-  if (praw)
-    regno_add (praw, regno);
   return praw;
 }
 
@@ -2989,28 +2789,7 @@ ptrarray_find (const Hwcentry **array, const char *name, const char *int_name,
 	  if (NULL == strstr (int_name, pctr->int_name))
 	    continue;
 	}
-      if (!check_regno)
-	return pctr;
-      else
-	{
-	  /* duplicates aliases are allowed in table because of 6759307 */
-	  if (REG_LIST_IS_EMPTY (pctr->reg_list))
-	    {
-	      /* skip aliases that don't have a valid list of registers */
-	      hwcentry_print (1, "hwctable: stdlist_find_by_name:"
-			      " WARNING: alias found, but event not supported by HW:",
-			      pctr);
-	      continue;
-	    }
-	  if (!regno_is_valid (pctr, regno))
-	    {
-	      hwcentry_print (1, "hwctable: stdlist_find_by_name():"
-			      " WARNING: alias found, but regno doesn't match:",
-			      pctr);
-	      continue;
-	    }
-	  return pctr;
-	}
+      return pctr;
     }
   return NULL;
 }
@@ -3046,49 +2825,15 @@ static_table_find (const Hwcentry *table, const char *name, const char *int_name
 static void
 stdlist_print (int dbg_lvl, const Hwcentry* table)
 {
-  const Hwcentry *pctr;
   if (!table)
     {
       Tprintf (0, "hwctable: stdlist_print: ERROR: "
 	       "table is invalid.\n");
       return;
     }
-  for (pctr = table; pctr->name; pctr++)
+  for (const Hwcentry *pctr = table; pctr->name; pctr++)
     {
-      int ii;
       hwcentry_print (dbg_lvl, "hwctable: stdlist: ", pctr);
-      if (REG_LIST_IS_EMPTY (pctr->reg_list))
-	{
-	  if (pctr->int_name || !pctr->metric)
-	    hwcentry_print (DBG_LT1, "hwctable: stdlist_print: WARNING: "
-			    "no hardware event found for table entry", pctr);
-	  continue;
-	}
-      /* check if incorrect reg_num used in table */
-      if (!regno_is_valid (pctr, pctr->reg_num))
-	{
-	  hwcentry_print (DBG_LT0, "hwctable: stdlist_print: ERROR: "
-			  "reg_num is not in table. ", pctr);
-	  continue;
-	}
-      for (ii = 0; ii < MAX_PICS; ii++)
-	{
-	  regno_t regno = pctr->reg_list[ii];
-	  if (REG_LIST_EOL (regno))
-	    break;
-	}
-      if (ii > 1 && pctr->reg_num != REGNO_ANY)
-	{
-	  /* several regnos were valid, but only one can be specified */
-	  if (pctr->metric || !pctr->int_name)
-	    {
-	      /* pctr is standard or a raw definition */
-	      /* (pctr is not an alias like cycles0) */
-	      hwcentry_print (DBG_LT0, "hwctable: stdlist_print: ERROR: "
-			      "regno in table should have been REGNO_ANY. ",
-			      pctr);
-	    }
-	}
     }
 }
 #endif
@@ -3173,51 +2918,23 @@ check_tables ()
 	      if (pentry->metric)
 		Tprintf (DBG_LT0, "hwctable: check_tables: ERROR:"
 			 " internal && metric @%d, %s\n", cputag, pentry->name);
-	      if (pentry->reg_num != REGNO_ANY)
-		Tprintf (DBG_LT1, "hwctable: check_tables: WARNING:"
-			 " internal && reg_num!=REGNO_ANY @%d, %s\n",
-			 cputag, pentry->name);
 	      if (pentry->val != PRELOAD_DEF
 		  && pentry->memop != ABST_EXACT_PEBS_PLUS1)
 		Tprintf (DBG_LT2, "hwctable: check_tables: INFO:"
 			 " internal && custom val=%d @%d, %s\n",
 			 pentry->val, cputag, pentry->name);
-#if 0
-	      if (!pentry->timecvt && pentry->memop == ABST_NONE)
-		Tprintf (DBG_LT0, "hwctable: check_tables: ERROR:"
-			 " internal && not special! @%d, %s\n",
-			 cputag, pentry->name);
-#endif
 	    }
 	  if (pentry->metric)
 	    { /* aliased */
 	      if (!pentry->int_name)
 		Tprintf (DBG_LT0, "hwctable: check_tables: ERROR:"
 			 " aliased && !int_name @%d, %s\n", cputag, pentry->name);
-#if 0
-	      else if (!strcmp (pentry->name, pentry->int_name))
-		Tprintf (DBG_LT0, "hwctable: check_tables: ERROR:"
-			 " name==int_name @%d, %s\n",
-			 cputag, pentry->name);
-#endif
-	      if (pentry->reg_num != REGNO_ANY && pentry->reg_num != REGNO_INVALID)
-		Tprintf (DBG_LT1, "hwctable: check_tables: INFO:"
-			 " aliased && custom reg_num==%d @%d, %s\n",
-			 pentry->reg_num, cputag, pentry->name);
-	      if (pentry->reg_num == REGNO_INVALID)
-		Tprintf (DBG_LT2, "hwctable: check_tables: INFO:"
-			 " aliased && reg_num==REGNO_INVALID @%d, %s\n",
-			 cputag, pentry->name);
 	    }
 	  if (pentry->int_name && !pentry->metric)
 	    { /* convenience */
 	      if (!strcmp (pentry->name, pentry->int_name))
 		  Tprintf (DBG_LT0, "hwctable: check_tables: ERROR:"
 			   " convenience && name==int_name @%d, %s\n",
-			   cputag, pentry->name);
-	      if (pentry->reg_num == REGNO_ANY)
-		  Tprintf (DBG_LT0, "hwctable: check_tables: ERROR:"
-			   " convenience && reg_num==REGNO_ANY @%d, %s\n",
 			   cputag, pentry->name);
 	    }
 	}
@@ -3417,17 +3134,13 @@ try_a_counter (int forKernel)
       return 0; /* consider this an automatic PASS */
     }
   /* look for a valid table entry, only try valid_cpu_tables[0] */
-  {
-    testevent = cpcx_std[forKernel][0];
-    if (!testevent || !testevent->name)
-      {
-	Tprintf (0, "hwctable: WARNING: no test metric"
-		 " available to verify counters\n");
-	return 0; /* consider this an automatic PASS */
-      }
-    if (REG_LIST_IS_EMPTY (testevent->reg_list))
-      return 0; // weird
-  }
+  testevent = cpcx_std[forKernel][0];
+  if (!testevent || !testevent->name)
+    {
+      Tprintf (0, "hwctable: WARNING: no test metric"
+	       " available to verify counters\n");
+      return 0; /* consider this an automatic PASS */
+    }
   Hwcentry tmp_testevent;
   tmp_testevent = *testevent; /* shallow copy */
   if (tmp_testevent.int_name == NULL)
@@ -3436,9 +3149,6 @@ try_a_counter (int forKernel)
       tmp_testevent.int_name = strdup (tmp_testevent.name);
     }
   Hwcentry * test_array[1] = {&tmp_testevent};
-  rc = hwcfuncs_assign_regnos (test_array, 1); /* may modify test_array */
-  if (rc)
-    return rc;
   rc = test_hwcs ((const Hwcentry**) test_array, 1);
   if (rc == HWCFUNCS_ERROR_UNAVAIL)
     {
@@ -3677,7 +3387,6 @@ process_ctr_def (int forKernel, hrtime_t global_min_time_nsec,
 	  if (tmp)
 	    {
 	      tmp->name = strdup (nameOnly);
-	      regno_add (tmp, REGNO_ANY);
 	      pfound = tmp;
 	    }
 	}
@@ -3779,27 +3488,6 @@ process_ctr_def (int forKernel, hrtime_t global_min_time_nsec,
     snprintf (UWbuf + strlen (UWbuf), UWsz - strlen (UWbuf),
 	      GTXT ("Warning: HW counter `%s' is not program-related -- callstacks will be not be recorded for this counter\n"),
 	      uname);
-
-  /* update reg_num */
-  if (!regno_is_valid (pfound, regno))
-    {
-      char buf[1024];
-      snprintf (UEbuf + strlen (UEbuf), UEsz - strlen (UEbuf),
-		GTXT ("For counter `%s', %s is not a valid register; valid registers: %s\n"),
-		nameOnly, regstr ? regstr + 1 : "?",
-		get_regnolist (buf, sizeof (buf), pfound->reg_list, 1));
-      goto process_ctr_def_wrapup;
-    }
-  if (pret_ctr->reg_num == REGNO_ANY)
-    { /* table's regno is a wildcard */
-      if (REG_LIST_EOL (pfound->reg_list[1]))
-	{
-	  /* valid list only contains one regno, so use it */
-	  pret_ctr->reg_num = pfound->reg_list[0];
-	}
-      else
-	pret_ctr->reg_num = regno;  /* use user's selection */
-    }
 
   /* update name and int_name */
   {
@@ -4073,43 +3761,9 @@ hwc_validate_ctrs (int forKernel, Hwcentry *entries[], unsigned numctrs)
   char UEbuf[1024 * 5];
   UEbuf[0] = 0;
 
-  /* search for obvious duplicates*/
-  unsigned ii;
-  for (ii = 0; ii < numctrs; ii++)
-    {
-      regno_t reg_a = entries[ii]->reg_num;
-      if (reg_a != REGNO_ANY)
-	{
-	  unsigned jj;
-	  for (jj = ii + 1; jj < numctrs; jj++)
-	    {
-	      int reg_b = entries[jj]->reg_num;
-	      if (reg_a == reg_b)
-		{
-		  snprintf (UEbuf + strlen (UEbuf), sizeof (UEbuf) - strlen (UEbuf),
-			    GTXT ("Only one HW counter is allowed per register.  The following counters use register %d: \n"),
-			    reg_a);
-		  for (jj = 0; jj < numctrs; jj++)
-		    {
-		      char buf[256];
-		      int reg_b = entries[jj]->reg_num;
-		      if (reg_a == reg_b)
-			snprintf (UEbuf + strlen (UEbuf), sizeof (UEbuf) - strlen (UEbuf),
-				  GTXT ("  %d. %s\n"), jj + 1,
-				  hwc_hwcentry_specd_string (buf, sizeof (buf),
-							     entries[jj]));
-		    }
-		  return strdup (UEbuf);
-		}
-	    }
-	}
-    }
-
   /* test counters */
   hwcfuncs_errmsg_get (NULL, 0, 1); /* enable errmsg capture */
-  int hwc_rc = hwcfuncs_assign_regnos (entries, numctrs);
-  if (!hwc_rc)
-    hwc_rc = test_hwcs ((const Hwcentry**) entries, numctrs);
+  int hwc_rc = test_hwcs ((const Hwcentry**) entries, numctrs);
   if (hwc_rc)
     {
       if (cpcx_cpuver == CPC_PENTIUM_4_HT || cpcx_cpuver == CPC_PENTIUM_4)
@@ -4172,15 +3826,12 @@ hwc_post_lookup (Hwcentry * pret_ctr, char *counter, char * int_name, int cpuver
 	}
       else
 	pret_ctr->int_name = strdup (counter);
-      if (pret_ctr->reg_num == REGNO_ANY)
-	pret_ctr->reg_num = regno;  /* table's regno is a wildcard */
     }
   else
     {
       /* not a standard counter */
       *pret_ctr = empty_ctr;
       pret_ctr->int_name = strdup (counter);
-      pret_ctr->reg_num = regno;
     }
 
   /* update the name */
@@ -4456,7 +4107,7 @@ int show_regs = 0;  // The register setting is available on Solaris only
  */
 static void
 format_columns (char *buf, int bufsiz, char *s1, char *s2, const char *s3,
-		const char *s4, char *s5, const char *s6)
+		const char *s4, const char *s6)
 {
   // NULL strings are blanks
   char *blank = NTXT ("");
@@ -4470,7 +4121,7 @@ format_columns (char *buf, int bufsiz, char *s1, char *s2, const char *s3,
   // get the lengths and target widths
   // (s6 can be as wide as it likes)
   int l1 = strlen (s1), n1 = 10, l2 = strlen (s2), n2 = 13;
-  int l3 = strlen (s3), n3 = 20, l4 = strlen (s4), n4 = 10, n5;
+  int l3 = strlen (s3), n3 = 20, l4 = strlen (s4), n4 = 10;
   char divide = ' ';
 
   // adjust widths, stealing from one column to help a neighbor
@@ -4518,26 +4169,8 @@ format_columns (char *buf, int bufsiz, char *s1, char *s2, const char *s3,
       n2 = 0;
     }
 
-  if (show_regs)
-    {
-      // fifth column should be wide enough for regnolist
-      //     see function get_regnolist()
-      if (cpcx_npics < 10)
-	n5 = cpcx_npics; // one char per regno
-      else
-	n5 = 16 + 3 * (cpcx_npics - 9); // spaces between regnos and some regnos are 2-char wide
-      // ... and be wide enough for header "regs"
-      if (n5 < 4)
-	n5 = 4;
-
-      // print to buffer
-      // (don't need a space before s4 since historical precedent to have a trailing space in s3)
-      snprintf (buf, bufsiz, "%-*s %-*s%c%*s%*s %-*s %s",
-		n1, s1, n2, s2, divide, n3, s3, n4, s4, n5, s5, s6);
-    }
-  else
-    snprintf (buf, bufsiz, "%-*s %-*s%c%*s%*s %s",
-	      n1, s1, n2, s2, divide, n3, s3, n4, s4, s6);
+  snprintf (buf, bufsiz, "%-*s %-*s%c%*s%*s %s",
+	    n1, s1, n2, s2, divide, n3, s3, n4, s4, s6);
   for (int i = strlen (buf); i > 0; i--)
     if (buf[i] == ' ' || buf[i] == '\t')
       buf[i] = 0;
@@ -4550,7 +4183,6 @@ static char *
 hwc_hwcentry_string_internal (char *buf, size_t buflen, const Hwcentry *ctr,
 			      int show_short_desc)
 {
-  char regnolist[256];
   if (!buf || !buflen)
     return buf;
   if (ctr == NULL)
@@ -4565,7 +4197,6 @@ hwc_hwcentry_string_internal (char *buf, size_t buflen, const Hwcentry *ctr,
     desc = ctr->metric ? hwc_i18n_metric (ctr) : NULL;
   format_columns (buf, buflen, ctr->name, ctr->int_name,
 		  hwc_memop_string (ctr->memop), timecvt_string (ctr->timecvt),
-		  get_regnolist (regnolist, sizeof (regnolist), ctr->reg_list, 2),
 		  desc);
   return buf;
 }
@@ -5157,7 +4788,7 @@ hwc_usage_internal (int forKernel, FILE *f_usage, const char *cmd, const char *d
   if (has_std_ctrs)
     {
       fprintf (f_usage, GTXT ("\nAliases for most useful HW counters:\n\n"));
-      format_columns (tmp, 1024, "alias", "raw name", "type ", "units", "regs", "description");
+      format_columns (tmp, 1024, "alias", "raw name", "type ", "units", "description");
       fprintf (f_usage, NTXT ("    %s\n\n"), tmp);
       for (Hwcentry **pctr = std_ctrs; *pctr; pctr++)
 	{
@@ -5170,7 +4801,7 @@ hwc_usage_internal (int forKernel, FILE *f_usage, const char *cmd, const char *d
     {
       fprintf (f_usage, GTXT ("\nRaw HW counters:\n\n"));
       hwc_usage_raw_overview_sparc (f_usage, cpuver);
-      format_columns (tmp, 1024, "name", NULL, "type ", "units", "regs", "description");
+      format_columns (tmp, 1024, "name", NULL, "type ", "units", "description");
       fprintf (f_usage, NTXT ("    %s\n\n"), tmp);
       for (Hwcentry **pctr = raw_ctrs; *pctr; pctr++)
 	{
@@ -5210,13 +4841,25 @@ static char* supported_pebs_counters[] = {
 };
 
 /* callback, (see setup_cpc()) called for each valid regno/name combo */
-
-/* builds rawlist,, creates and updates reg_list[] arrays in stdlist table */
 static void
 hwc_cb (uint_t cpc_regno, const char *name)
 {
   regno_t regno = cpc_regno; /* convert type */
   list_add (&unfiltered_raw, regno, name);
+}
+
+static int
+supported_hwc (Hwcentry *pctr)
+{
+  if (ABST_PLUS_BY_DEFAULT (pctr->memop) &&
+      (cpcx_support_bitmask & SUPPORT_MEMORYSPACE_PROFILING) == 0)
+    return 0;
+  // remove specific PEBs counters when back end doesn't support sampling
+  if ((cpcx_support_bitmask & HWCFUNCS_SUPPORT_PEBS_SAMPLING) == 0)
+    for (int ii = 0; supported_pebs_counters[ii]; ii++)
+      if (strcmp (supported_pebs_counters[ii], pctr->name) == 0)
+	return 0;
+  return 1;
 }
 
 /* input:
@@ -5248,57 +4891,29 @@ hwc_process_raw_ctrs (int forKernel, Hwcentry ***pstd_out,
   // copy records from std [0] and generic [1] static input tables into table_copy[0],[1],or[2]
   for (int tt = 0; tt < 2; tt++)
     for (Hwcentry *pctr = static_tables[tt]; pctr && pctr->name; pctr++)
-      if (is_hidden_alias (pctr))
-	list_append_shallow_copy (&table_copy[2], pctr); // hidden list
-      else
-	list_append_shallow_copy (&table_copy[tt], pctr);
+      {
+	if (!supported_hwc (pctr))
+	  continue;
+	if (is_hidden_alias (pctr))
+	  list_append_shallow_copy (&table_copy[2], pctr); // hidden list
+	else
+	  list_append_shallow_copy (&table_copy[tt], pctr);
+      }
 
   // copy raw_unfiltered_in to raw_out
   for (int ii = 0; raw_unfiltered_in && raw_unfiltered_in[ii]; ii++)
     {
       Hwcentry *pctr = raw_unfiltered_in[ii];
-      // filter out raw counters that don't work correctly
-
-#ifdef WORKAROUND_6231196_NIAGARA1_NO_CTR_0
-      if (cpcx_cpuver == CPC_ULTRA_T1)
-	if (!regno_is_valid (pctr, 1))
-	  continue;   /* Niagara can not profile on register zero; skip this */
-#endif
-      // remove specific PEBs counters when back end doesn't support sampling
-      const char *name = pctr->name;
-      if ((cpcx_support_bitmask & HWCFUNCS_SUPPORT_PEBS_SAMPLING) == 0 || forKernel)
-	{
-	  int skip = 0;
-	  for (int ii = 0; supported_pebs_counters[ii]; ii++)
-	    if (strcmp (supported_pebs_counters[ii], name) == 0)
-	      {
-		skip = 1;
-		break;
-	      }
-	  if (skip)
-	    continue;
-	}
-
-      Hwcentry *pnew = list_append_shallow_copy (raw_out, pctr);
-#ifdef WORKAROUND_6231196_NIAGARA1_NO_CTR_0
-      if (cpcx_cpuver == CPC_ULTRA_T1)
-	{
-	  free (pnew->reg_list);
-	  pnew->reg_list = NULL;
-	  regno_add (pnew, 1); // only allow register 1
-	}
-#endif
-    } // raw_unfiltered_in
+      if (supported_hwc (pctr))
+	list_append_shallow_copy (raw_out, pctr);
+    }
 
   // Scan raw counters to populate Hwcentry fields from matching static_tables entries
-  // Also populate reg_list for aliases found in table_copy[]
   for (int uu = 0; uu < raw_out->sz; uu++)
     {
       Hwcentry *praw = (Hwcentry*) raw_out->array[uu];
       Hwcentry *pstd = NULL; // set if non-alias entry from std table matches
       char *name = praw->name;
-      /* in the standard counter and generic lists,
-	 update reg_list for all matching items  */
       for (int tt = 0; tt < NUM_TABLES; tt++)
 	{ // std, generic, and hidden
 	  if (table_copy[tt].sz == 0)
@@ -5314,24 +4929,6 @@ hwc_process_raw_ctrs (int forKernel, Hwcentry ***pstd_out,
 		pname = pctr->name;
 	      if (!is_same (name, pname, '~'))
 		continue;
-
-	      /* truncated pname matches <name>... */
-	      // check to see if table entry applies only to specific register
-	      int specific_reg_num_only = 0;
-	      if (pctr->reg_num != REGNO_ANY)
-		{
-		  // table entry applies only to specific register
-		  if (!regno_is_valid (praw, pctr->reg_num))
-		    continue;
-		  specific_reg_num_only = 1;
-		}
-
-	      // Match!
-	      // Update cpu_table_copy's supported registers
-	      if (specific_reg_num_only)
-		regno_add (pctr, pctr->reg_num);
-	      else
-		pctr->reg_list = praw->reg_list;
 
 	      if (!is_visible_alias (pctr) && !is_hidden_alias (pctr))
 		{
@@ -5366,20 +4963,6 @@ hwc_process_raw_ctrs (int forKernel, Hwcentry ***pstd_out,
 	  // prune unsupported rows from std table
 	  if (!is_visible_alias (pctr) && !is_hidden_alias (pctr))
 	    continue; // only aliases
-	  if (REG_LIST_IS_EMPTY (pctr->reg_list))
-	    {
-	      if (is_numeric_alias (pctr))
-		{
-#if 1 //22844570 DTrace cpc provider does not accept numeric counter names
-		  if (forKernel)
-		    continue;
-#endif
-		  regno_add (pctr, REGNO_ANY); // hwcs specified by number allowed on any register
-		}
-	      else
-		continue;
-	    }
-
 	  ptr_list *dest = (tt == 0) ? std_out : hidden_out;
 	  Hwcentry *isInList;
 	  if (pctr->short_desc == NULL)

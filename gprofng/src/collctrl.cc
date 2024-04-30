@@ -1361,20 +1361,6 @@ Coll_Ctrl::hwcentry_dup (Hwcentry *hnew, Hwcentry *_hwc)
     hnew->short_desc = strdup (_hwc->short_desc);
   else
     hnew->short_desc = NULL;
-  if (_hwc->reg_list != NULL)
-    {
-      hnew->reg_list = (regno_t*) malloc (sizeof (regno_t*) * MAX_PICS);
-      // poor way of dealing with malloc failure
-      if (hnew->reg_list)
-	{
-	  for (int i = 0; i < MAX_PICS; i++)
-	    {
-	      hnew->reg_list[i] = _hwc->reg_list[i];
-	      if (hnew->reg_list[i] == REGNO_ANY)
-		break;
-	    }
-	}
-    }
 }
 
 // Routine to initialize the HWC tables, set up the default experiment, etc.

@@ -7121,10 +7121,7 @@ dbeGetHwcs (Hwcentry **hwcs)
     {
       Hwcentry *ctr = hwcs[i];
       Vector<int> *registers = new Vector<int>(MAX_PICS);
-      regno_t *reglist = ctr->reg_list;
-      for (int k = 0; !REG_LIST_EOL (reglist[k]) && k < MAX_PICS; k++)
-	registers->store (k, reglist[k]);
-
+      registers->store (0, REGNO_ANY);
       i18n->store (i, dbe_strdup (hwc_i18n_metric (ctr)));
       name->store (i, dbe_strdup (ctr->name));
       int_name->store (i, dbe_strdup (ctr->int_name));

@@ -119,9 +119,6 @@ extern "C"
     unsigned int type : 16; /* Type of perf_event_attr */
     long long config;   /* perf_event_type -specific configuration */
     int sort_order;     /* "tag" to associate experiment record with HWC def */
-    regno_t *reg_list;  /* if not NULL, legal values for <reg_num> field above */
-    /* Note: reg_list will be terminated by REGNO_ANY */
-    /* Max size of array is MAX_PICS */
     hrtime_t min_time;  /* target minimum time between overflow events.  0 is off.  See HWCTIME_* macros */
     hrtime_t min_time_default; /* if min_time==HWCTIME_AUTO, use this value instead.  0 is off. */
     int ref_val;    /* if min_time==HWCTIME_AUTO, use this time.  0 is off. */

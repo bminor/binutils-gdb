@@ -41,29 +41,6 @@
 #include "libcol_util.h"
 
 #define get_hwcdrv                  __collector_get_hwcdrv
-#define hwcdrv_drivers              __collector_hwcdrv_drivers
-#define hwcdrv_cpc1_api             __collector_hwcdrv_cpc1_api
-#define hwcdrv_cpc2_api             __collector_hwcdrv_cpc2_api
-#define hwcdrv_default              __collector_hwcdrv_default
-#define hwcdrv_driver               __collector_hwcdrv_driver
-#define hwcdrv_init                 __collector_hwcdrv_init
-#define hwcdrv_get_info             __collector_hwcdrv_get_info
-#define hwcdrv_enable_mt            __collector_hwcdrv_enable_mt
-#define hwcdrv_get_descriptions     __collector_hwcdrv_get_descriptions
-#define hwcdrv_assign_regnos        __collector_hwcdrv_assign_regnos
-#define hwcdrv_create_counters      __collector_hwcdrv_create_counters
-#define hwcdrv_start                __collector_hwcdrv_start
-#define hwcdrv_overflow             __collector_hwcdrv_overflow
-#define hwcdrv_read_events          __collector_hwcdrv_read_events
-#define hwcdrv_sighlr_restart       __collector_hwcdrv_sighlr_restart
-#define hwcdrv_lwp_suspend          __collector_hwcdrv_lwp_suspend
-#define hwcdrv_lwp_resume           __collector_hwcdrv_lwp_resume
-#define hwcdrv_free_counters        __collector_hwcdrv_free_counters
-#define hwcdrv_lwp_init             __collector_hwcdrv_lwp_init
-#define hwcdrv_lwp_fini             __collector_hwcdrv_lwp_fini
-#define hwcdrv_assign_all_regnos    __collector_hwcdrv_assign_all_regnos
-#define hwcdrv_lookup_cpuver        __collector_hwcdrv_lookup_cpuver
-#define hwcfuncs_int_capture_errmsg  __collector_hwcfuncs_int_capture_errmsg
 
 #define GTXT(x) x
 
@@ -263,7 +240,6 @@ extern "C"
   extern hwcdrv_api_t *__collector_get_hwcdrv ();
   extern int __collector_hwcfuncs_bind_descriptor (const char *defstring);
   extern Hwcentry **__collector_hwcfuncs_get_ctrs (unsigned *defcnt);
-  extern hwcdrv_api_t *hwcdrv_drivers[]; // array of available drivers
 
   /* prototypes for internal use by hwcdrv drivers */
   typedef struct
@@ -274,14 +250,6 @@ extern "C"
     const char *cpcN_cciname;
   } hwcdrv_about_t;
 
-  extern int hwcdrv_assign_all_regnos (Hwcentry* entries[], unsigned numctrs);
-  /* assign user's counters to specific CPU registers */
-
-  extern int hwcdrv_lookup_cpuver (const char * cpcN_cciname);
-  /* returns hwc_cpus.h ID for a given string. */
-
-  extern void hwcfuncs_int_capture_errmsg (const char *fn, int subcode,
-					   const char *fmt, va_list ap);
 #define logerr  hwcfuncs_int_logerr
 
   /*---------------------------------------------------------------------------*/

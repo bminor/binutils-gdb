@@ -44,83 +44,11 @@ static hdrv_pcbe_api_t *hdrv_pcbe_drivers[] = {
 #include "opteron_pcbe.c" /* CPU-specific code */
 #include "core_pcbe.c" /* CPU-specific code  */
 
-extern hwcdrv_api_t hwcdrv_pcl_api;
-IS_GLOBAL hwcdrv_api_t *hwcdrv_drivers[] = {
-  &hwcdrv_pcl_api,
-  NULL
-};
-
 /*---------------------------------------------------------------------------*/
-
-/* utils for drivers */
-IS_GLOBAL int
-hwcdrv_assign_all_regnos (Hwcentry* entries[], unsigned numctrs)
-{
-  unsigned int pmc_assigned[MAX_PICS];
-  unsigned idx;
-  for (int ii = 0; ii < MAX_PICS; ii++)
-    pmc_assigned[ii] = 0;
-
-  /* assign the HWCs that we already know about */
-  for (idx = 0; idx < numctrs; idx++)
-    {
-      regno_t regno = entries[idx]->reg_num;
-      if (regno == REGNO_ANY)
-	{
-	  /* check to see if list of possible registers only contains one entry */
-	  regno = REG_LIST_SINGLE_VALID_ENTRY (entries[idx]->reg_list);
-	}
-      if (regno != REGNO_ANY)
-	{
-	  if (regno < 0 || regno >= MAX_PICS || !regno_is_valid (entries[idx], regno))
-	    {
-	      logerr (GTXT ("For counter #%d, register %d is out of range\n"), idx + 1, regno); /*!*/
-	      return HWCFUNCS_ERROR_HWCARGS;
-	    }
-	  TprintfT (DBG_LT2, "hwcfuncs_assign_regnos(): preselected: idx=%d, regno=%d\n", idx, regno);
-	  entries[idx]->reg_num = regno; /* assigning back to entries */
-	  pmc_assigned[regno] = 1;
-	}
-    }
-
-  /* assign HWCs that are currently REGNO_ANY */
-  for (idx = 0; idx < numctrs; idx++)
-    {
-      if (entries[idx]->reg_num == REGNO_ANY)
-	{
-	  int assigned = 0;
-	  regno_t *reg_list = entries[idx]->reg_list;
-	  for (; reg_list && *reg_list != REGNO_ANY; reg_list++)
-	    {
-	      regno_t regno = *reg_list;
-	      if (regno < 0 || regno >= MAX_PICS)
-		{
-		  logerr (GTXT ("For counter #%d, register %d is out of range\n"), idx + 1, regno); /*!*/
-		  return HWCFUNCS_ERROR_HWCARGS;
-		}
-	      if (pmc_assigned[regno] == 0)
-		{
-		  TprintfT (DBG_LT2, "hwcfuncs_assign_regnos(): assigned:   idx=%d, regno=%d\n", idx, regno);
-		  entries[idx]->reg_num = regno; /* assigning back to entries */
-		  pmc_assigned[regno] = 1;
-		  assigned = 1;
-		  break;
-		}
-	    }
-	  if (!assigned)
-	    {
-	      logerr (GTXT ("Counter '%s' could not be bound to a register\n"),
-		      entries[idx]->name ? entries[idx]->name : "<NULL>");
-	      return HWCFUNCS_ERROR_HWCARGS;
-	    }
-	}
-    }
-  return 0;
-}
-
-IS_GLOBAL int
+static int
 hwcdrv_lookup_cpuver (const char * cpcN_cciname)
 {
+  /* returns hwc_cpus.h ID for a given string. */
   libcpc2_cpu_lookup_t *plookup;
   static libcpc2_cpu_lookup_t cpu_table[] = {
     LIBCPC2_CPU_LOOKUP_LIST
@@ -307,11 +235,6 @@ hwcfuncs_get_x86_eventsel (unsigned int regno, const char *int_name,
       return -1;
     }
   hwcfuncs_parse_ctr (int_name, NULL, &nameOnly, NULL, NULL, NULL);
-  if (regno == REGNO_ANY)
-    {
-      logerr (GTXT ("reg# could not be determined for `%s'\n"), nameOnly);
-      goto attr_wrapup;
-    }
 
   /* look up evntsel */
   if (myperfctr_get_x86_eventnum (nameOnly, regno,
@@ -987,7 +910,7 @@ hwcdrv_get_descriptions (hwcf_hwc_cb_t *hwc_cb, hwcf_attr_cb_t *attr_cb)
 HWCDRV_API int
 hwcdrv_assign_regnos (Hwcentry* entries[], unsigned numctrs)
 {
-  return hwcdrv_assign_all_regnos (entries, numctrs);
+  return 0;
 }
 
 static int
