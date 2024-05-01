@@ -4882,7 +4882,7 @@ proc get_compiler_info {{language "c"}} {
     if [is_remote host] {
 	# We have to use -E and -o together, despite the comments
 	# above, because of how DejaGnu handles remote host testing.
-	set ppout "$outdir/compiler.i"
+	set ppout [standard_temp_file compiler.i]
 	gdb_compile "${ifile}" "$ppout" preprocess [list "$language" quiet getting_compiler_info]
 	set file [open $ppout r]
 	set cppout [read $file]
