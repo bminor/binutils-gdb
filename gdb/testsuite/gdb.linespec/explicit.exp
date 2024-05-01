@@ -86,7 +86,7 @@ namespace eval $testfile {
     # These are also not yet supported; -line is silently ignored.
     add linespecs "-function myfunction -line 3" $location(normal)
     add linespecs "-function myfunction -label top -line 3" $location(top)
-    add linespecs "-line 3" $location(normal)
+    add linespecs "-line 25" $location(normal)
 
     # Fire up gdb.
     if {![runto_main]} {

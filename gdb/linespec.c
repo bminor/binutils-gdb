@@ -2067,12 +2067,19 @@ create_sals_line_offset (struct linespec_state *self,
       const linetable_entry *best_entry = NULL;
       int i, j;
 
+      /* True if the provided line gave an exact match.  False if we had to
+	 search for the next following line with code.  */
+      bool was_exact = true;
+
       std::vector<symtab_and_line> intermediate_results
 	= decode_digits_ordinary (self, ls, val.line, &best_entry);
       if (intermediate_results.empty () && best_entry != NULL)
-	intermediate_results = decode_digits_ordinary (self, ls,
-						       best_entry->line,
-						       &best_entry);
+	{
+	  was_exact = false;
+	  intermediate_results = decode_digits_ordinary (self, ls,
+							 best_entry->line,
+							 &best_entry);
+	}
 
       /* For optimized code, the compiler can scatter one source line
 	 across disjoint ranges of PC values, even when no duplicate
@@ -2115,11 +2122,45 @@ create_sals_line_offset (struct linespec_state *self,
 	    struct symbol *sym = (blocks[i]
 				  ? blocks[i]->containing_function ()
 				  : NULL);
+	    symtab_and_line &sal = intermediate_results[i];
+
+	    /* Don't consider a match if:
+
+	       - the provided line did not give an exact match (so we
+		 started looking for lines below until we found one with
+		 code associated to it)
+	       - the found location is exactly the start of a function
+	       - the provided line is above the declaration line of the
+		 function
+
+	       Consider the following source:
+
+	       10 } // end of a previous function
+	       11
+	       12 int
+	       13 main (void)
+	       14 {
+	       15   int i = 1;
+	       16
+	       17   return 0;
+	       18 }
+
+	       The intent of this heuristic is that a breakpoint requested on
+	       line 11 and 12 will not result in a breakpoint on main, but a
+	       breakpoint on line 13 will.  A breakpoint requested on the empty
+	       line 16 will also result in a breakpoint in main, at line 17.  */
+	    if (!was_exact
+		&& sym != nullptr
+		&& sym->aclass () == LOC_BLOCK
+		&& sal.pc == sym->value_block ()->entry_pc ()
+		&& val.line < sym->line ())
+	      continue;
 
 	    if (self->funfirstline)
-	      skip_prologue_sal (&intermediate_results[i]);
-	    intermediate_results[i].symbol = sym;
-	    add_sal_to_sals (self, &values, &intermediate_results[i],
+	      skip_prologue_sal (&sal);
+
+	    sal.symbol = sym;
+	    add_sal_to_sals (self, &values, &sal,
 			     sym ? sym->natural_name () : NULL, 0);
 	  }
     }
@@ -2127,10 +2168,12 @@ create_sals_line_offset (struct linespec_state *self,
   if (values.empty ())
     {
       if (ls->explicit_loc.source_filename)
-	throw_error (NOT_FOUND_ERROR, _("No line %d in file \"%s\"."),
+	throw_error (NOT_FOUND_ERROR,
+		     _("No compiled code for line %d in file \"%s\"."),
 		     val.line, ls->explicit_loc.source_filename.get ());
       else
-	throw_error (NOT_FOUND_ERROR, _("No line %d in the current file."),
+	throw_error (NOT_FOUND_ERROR,
+		     _("No compiled code for line %d in the current file."),
 		     val.line);
     }
 

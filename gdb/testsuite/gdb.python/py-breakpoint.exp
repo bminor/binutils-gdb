@@ -743,7 +743,9 @@ proc_with_prefix test_bkpt_explicit_loc {} {
 	"No source file named foo.*" \
 	"set invalid explicit breakpoint by missing source and line"
     gdb_test "python bp1 = gdb.Breakpoint (source=\"$srcfile\", line=\"900\")" \
-	"No line 900 in file \"$srcfile\".*" \
+	[multi_line \
+	     "^No compiled code for line 900 in file \"$srcfile\"\\." \
+	     "Breakpoint $::decimal \[^\r\n\]+ pending\\."] \
 	"set invalid explicit breakpoint by source and invalid line"
     gdb_test "python bp1 = gdb.Breakpoint (function=\"blah\")" \
 	"Function \"blah\" not defined.*" \

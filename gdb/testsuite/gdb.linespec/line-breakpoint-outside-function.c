@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2012-2024 Free Software Foundation, Inc.
+   Copyright 2022-2024 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,32 +15,37 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-int
-myfunction (int aa)
+/* The section where THE_LIB_PATH is not defined is compiled as a shared
+   library.  The rest is compiled as the main executable (which loads the
+   shared library.  */
+
+#if !defined(THE_LIB_PATH)
+
+void
+the_lib_func (void)
 {
-  int i;
-
-  i = aa + 42;
-
-  /* These lines are intentionally left blank such that the tests trying
-     to place breakpoints at line -10 relative to the "set.breakpoint.here"
-     line below land on a valid breakpoint location, inside the function.  */
-
-
-
-
-
-
-  return i;    /* set breakpoint here */
+  static int x;
+  /* break here */
+  x++;
 }
+
+#else
+#include <dlfcn.h>
+#include <assert.h>
+#include <stdlib.h>
 
 int
 main (void)
 {
-  int a;
+  void *lib = dlopen (THE_LIB_PATH, RTLD_NOW);
+  assert (lib != NULL);
 
-  a = myfunction (a);
+  void (*the_lib_func) (void) = dlsym (lib, "the_lib_func");
+  assert (the_lib_func != NULL);
 
- here:
-  return a;
+  the_lib_func ();
+
+  return 0;
 }
+
+#endif

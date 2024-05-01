@@ -296,7 +296,7 @@ if {![runto_main]} {
 #
 gdb_test_no_output "set breakpoint pending off"
 gdb_test "hbreak 999" \
-    "No line 999 in the current file." \
+    "^No compiled code for line 999 in the current file\\." \
     "hardware break on non-existent source line"
 
 # Run to the desired default location.  If not positioned here, the
