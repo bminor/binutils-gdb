@@ -22,6 +22,7 @@
 
 #include "gdbarch.h"
 #include "gdbsupport/environ.h"
+#include "filenames.h"
 
 class frame_info_ptr;
 struct minimal_symbol;
@@ -87,15 +88,23 @@ struct core_file_exec_context
      never be nullptr.  Only call this constructor if all the arguments
      have been collected successfully, i.e. if the EXEC_NAME could be
      found but not ARGV then use the no-argument constructor to create an
-     empty context object.  */
+     empty context object.
+
+     The EXEC_FILENAME must be the absolute filename of the executable
+     that generated this core file, or nullptr if the absolute filename
+     is not known.  */
   core_file_exec_context (gdb::unique_xmalloc_ptr<char> exec_name,
+			  gdb::unique_xmalloc_ptr<char> exec_filename,
 			  std::vector<gdb::unique_xmalloc_ptr<char>> argv,
 			  std::vector<gdb::unique_xmalloc_ptr<char>> envp)
     : m_exec_name (std::move (exec_name)),
+      m_exec_filename (std::move (exec_filename)),
       m_arguments (std::move (argv)),
       m_environment (std::move (envp))
   {
     gdb_assert (m_exec_name != nullptr);
+    gdb_assert (exec_filename == nullptr
+		|| IS_ABSOLUTE_PATH (exec_filename.get ()));
   }
 
   /* Create a default context object.  In its default state a context
@@ -112,6 +121,13 @@ struct core_file_exec_context
   const char *execfn () const
   { return m_exec_name.get (); }
 
+  /* Return the absolute path to the executable if known.  This might
+     return nullptr even when execfn() returns a non-nullptr value.
+     Additionally, the file referenced here might have a different name
+     than the file returned by execfn if execfn is a symbolic link.  */
+  const char *exec_filename () const
+  { return m_exec_filename.get (); }
+
   /* Return the vector of inferior arguments as extracted from the core
      file.  This does not include argv[0] (the executable name) for that
      see the execfn() function.  */
@@ -126,6 +142,13 @@ private:
   /* The executable filename as reported in the core file.  Can be nullptr
      if no executable name is found.  */
   gdb::unique_xmalloc_ptr<char> m_exec_name;
+
+  /* Full filename to the executable that was actually executed.  The name
+     within EXEC_FILENAME might not match what the user typed, e.g. if the
+     user typed ./symlinked_name which is a symlink to /tmp/real_name then
+     this is going to contain '/tmp/realname' while EXEC_NAME above will
+     contain './symlinkedname'.  */
+  gdb::unique_xmalloc_ptr<char> m_exec_filename;
 
   /* List of arguments.  Doesn't include argv[0] which is the executable
      name, for this look at m_exec_name field.  */

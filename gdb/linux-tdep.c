@@ -2090,7 +2090,29 @@ linux_corefile_parse_exec_context_1 (struct gdbarch *gdbarch, bfd *cbfd)
   if (execfn == nullptr)
     return {};
 
+  /* When the core-file was loaded GDB processed the file backed mappings
+     (from the NT_FILE note).  One of these should have been for the
+     executable.  The AT_EXECFN string might not be an absolute path, but
+     the path in NT_FILE will be absolute, though if AT_EXECFN is a
+     symlink, then the NT_FILE entry will point to the actual file, not the
+     symlink.
+
+     Use the AT_ENTRY address to look for the NT_FILE entry which contains
+     that address, this should be the executable.  */
+  gdb::unique_xmalloc_ptr<char> exec_filename;
+  CORE_ADDR exec_entry_addr;
+  if (target_auxv_search (contents, current_inferior ()->top_target (),
+			  gdbarch, AT_ENTRY, &exec_entry_addr) == 1)
+    {
+      std::optional<core_target_mapped_file_info> info
+	= core_target_find_mapped_file (nullptr, exec_entry_addr);
+      if (info.has_value () && !info->filename ().empty ()
+	  && IS_ABSOLUTE_PATH (info->filename ().c_str ()))
+	exec_filename = make_unique_xstrdup (info->filename ().c_str ());
+    }
+
   return core_file_exec_context (std::move (execfn),
+				 std::move (exec_filename),
 				 std::move (arguments),
 				 std::move (environment));
 }
