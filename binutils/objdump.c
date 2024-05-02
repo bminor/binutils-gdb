@@ -4286,6 +4286,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
       if (streq (section->filename, bfd_get_filename (abfd)))
 	return true;
       free (section->start);
+      section->start = NULL;
     }
 
   section->filename = bfd_get_filename (abfd);
@@ -4297,13 +4298,12 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   alloced = amt = section->size + 1;
   if (alloced != amt
       || alloced == 0
-      || (bfd_get_size (abfd) != 0 && alloced >= bfd_get_size (abfd)))
+      || bfd_section_size_insane (abfd, sec))
     {
-      section->start = NULL;
-      free_debug_section (debug);
       printf (_("\nSection '%s' has an invalid size: %#" PRIx64 ".\n"),
 	      sanitize_string (section->name),
 	      section->size);
+      free_debug_section (debug);
       return false;
     }
 
@@ -4345,9 +4345,9 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 
   if (!ret)
     {
-      free_debug_section (debug);
       printf (_("\nCan't get contents for section '%s'.\n"),
 	      sanitize_string (section->name));
+      free_debug_section (debug);
       return false;
     }
 
