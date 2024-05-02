@@ -5633,6 +5633,7 @@ proc quote_for_host { args } {
 #   - no-build-id: Ensure the final binary does not include a build-id.
 #   - column-info/no-column-info: Enable/Disable generation of column table
 #     information.
+#   - dwarf5: Force compilation with dwarf-5 debug information.
 #
 # And here are some of the not too obscure options understood by DejaGnu that
 # influence the compilation:
@@ -5893,6 +5894,13 @@ proc gdb_compile {source dest type options} {
 		error "Option gno-column-info not supported by compiler."
 	    }
 
+	} elseif { $opt == "dwarf5" } {
+	    if {[test_compiler_info {gcc-*}] \
+		|| [test_compiler_info {clang-*}]} {
+		lappend new_options "additional_flags=-gdwarf-5"
+	    } else {
+		error "No idea how to force DWARF-5 in this compiler"
+	    }
         } else {
             lappend new_options $opt
         }
