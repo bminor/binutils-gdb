@@ -16,6 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 extern int foo (void);
+extern int foo2 (void);
 
 int
 bar (void)
@@ -27,6 +28,6 @@ bar (void)
 int
 main (void)
 {
-  int res = foo () + bar ();
+  int res = foo () + bar () + foo2 ();
   return res;
 }

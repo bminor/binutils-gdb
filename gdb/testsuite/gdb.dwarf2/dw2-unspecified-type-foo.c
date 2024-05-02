@@ -21,3 +21,10 @@ foo (void)
   asm ("foo_label: .globl foo_label");
   return 0;
 }
+
+int
+foo2 (void)
+{
+  asm ("foo2_label: .globl foo2_label");
+  return 0;
+}

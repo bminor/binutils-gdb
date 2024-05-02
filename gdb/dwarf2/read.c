@@ -14549,10 +14549,13 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 
   type = die_type (die, cu);
 
+  /* PR gas/29517 occurs in 2.39, and is fixed in 2.40, but it's only fixed
+     for dwarf version >= 3 which supports DW_TAG_unspecified_type.  */
   if (type->code () == TYPE_CODE_VOID
       && !type->is_stub ()
       && die->child == nullptr
-      && producer_is_gas_2_39 (cu))
+      && (cu->per_cu->version () == 2
+	  || producer_is_gas_2_39 (cu)))
     {
       /* Work around PR gas/29517, pretend we have an DW_TAG_unspecified_type
 	 return type.  */
