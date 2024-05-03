@@ -54,6 +54,7 @@
 #include <sys/reg.h>
 #include <sched.h>
 #include <sys/pthdebug.h>
+#include <unordered_set>
 
 #if !HAVE_DECL_GETTHRDS
 extern int getthrds (pid_t, struct thrdsinfo64 *, int, tid_t *, int);
@@ -189,6 +190,9 @@ struct aix_thread_variables
   /* Whether the current architecture is 64-bit.
    Only valid when pd_able is true.  */
   int arch64;
+
+  /* Describes the number of thread exit events reported.  */
+  std::unordered_set<pthdb_pthread_t> exited_threads;
 };
 
 /* Key to our per-inferior data.  */
@@ -736,47 +740,6 @@ state2str (pthdb_state_t state)
     }
 }
 
-/* qsort() comparison function for sorting pd_thread structs by pthid.  */
-
-static int
-pcmp (const void *p1v, const void *p2v)
-{
-  struct pd_thread *p1 = (struct pd_thread *) p1v;
-  struct pd_thread *p2 = (struct pd_thread *) p2v;
-  return p1->pthid < p2->pthid ? -1 : p1->pthid > p2->pthid;
-}
-
-/* ptid comparison function */
-
-static int
-ptid_cmp (ptid_t ptid1, ptid_t ptid2)
-{
-  if (ptid1.pid () < ptid2.pid ())
-    return -1;
-  else if (ptid1.pid () > ptid2.pid ())
-    return 1;
-  else if (ptid1.tid () < ptid2.tid ())
-    return -1;
-  else if (ptid1.tid () > ptid2.tid ())
-    return 1;
-  else if (ptid1.lwp () < ptid2.lwp ())
-    return -1;
-  else if (ptid1.lwp () > ptid2.lwp ())
-    return 1;
-  else
-    return 0;
-}
-
-/* qsort() comparison function for sorting thread_info structs by pid.  */
-
-static int
-gcmp (const void *t1v, const void *t2v)
-{
-  struct thread_info *t1 = *(struct thread_info **) t1v;
-  struct thread_info *t2 = *(struct thread_info **) t2v;
-  return ptid_cmp (t1->ptid, t2->ptid);
-}
-
 /* Search through the list of all kernel threads for the thread
    that has stopped on a SIGTRAP signal, and return its TID.
    Return 0 if none found.  */
@@ -821,21 +784,16 @@ static void
 sync_threadlists (pid_t pid)
 {
   int cmd, status;
-  int pcount, psize, pi, gcount, gi;
-  struct pd_thread *pbuf;
-  struct thread_info **gbuf, **g, *thread;
   pthdb_pthread_t pdtid;
   pthread_t pthid;
   pthdb_tid_t tid;
   process_stratum_target *proc_target = current_inferior ()->process_target ();
   struct aix_thread_variables *data;
   data = get_thread_data_helper_for_pid (pid);
+  pthdb_state_t state;
+  std::set<pthdb_pthread_t> in_queue_threads;
 
   /* Accumulate an array of libpthdebug threads sorted by pthread id.  */
-
-  pcount = 0;
-  psize = 1;
-  pbuf = XNEWVEC (struct pd_thread, psize);
 
   for (cmd = PTHDB_LIST_FIRST;; cmd = PTHDB_LIST_NEXT)
     {
@@ -847,118 +805,66 @@ sync_threadlists (pid_t pid)
       if (status != PTHDB_SUCCESS || pthid == PTHDB_INVALID_PTID)
 	continue;
 
-      if (pcount == psize)
+      ptid_t ptid (pid, 0, pthid);
+      status = pthdb_pthread_state (data->pd_session, pdtid, &state);
+      in_queue_threads.insert (pdtid);
+
+      /* If this thread has reported and exited, do not add it again.  */
+      if (state == PST_TERM)
 	{
-	  psize *= 2;
-	  pbuf = (struct pd_thread *) xrealloc (pbuf, 
-						psize * sizeof *pbuf);
+	  if (data->exited_threads.count (pdtid) != 0)
+	     continue;
 	}
-      pbuf[pcount].pdtid = pdtid;
-      pbuf[pcount].pthid = pthid;
-      pcount++;
-    }
 
-  for (pi = 0; pi < pcount; pi++)
-    {
-      status = pthdb_pthread_tid (data->pd_session, pbuf[pi].pdtid, &tid);
-      if (status != PTHDB_SUCCESS)
-	tid = PTHDB_INVALID_TID;
-      pbuf[pi].tid = tid;
-    }
-
-  qsort (pbuf, pcount, sizeof *pbuf, pcmp);
-
-  /* Accumulate an array of GDB threads sorted by pid.  */
-
-  /* gcount is GDB thread count and pcount is pthreadlib thread count.  */
-
-  gcount = 0;
-  for (thread_info *tp : all_threads (proc_target, ptid_t (pid)))
-    gcount++;
-  g = gbuf = XNEWVEC (struct thread_info *, gcount);
-  for (thread_info *tp : all_threads (proc_target, ptid_t (pid)))
-    *g++ = tp;
-  qsort (gbuf, gcount, sizeof *gbuf, gcmp);
-
-  /* Apply differences between the two arrays to GDB's thread list.  */
-
-  for (pi = gi = 0; pi < pcount || gi < gcount;)
-    {
-      if (pi == pcount)
-	{
-	  delete_thread (gbuf[gi]);
-	  gi++;
-	}
-      else if (gi == gcount)
+      /* If this thread has never been reported to GDB, add it.  */
+      if (!in_thread_list (proc_target, ptid))
 	{
 	  aix_thread_info *priv = new aix_thread_info;
-	  priv->pdtid = pbuf[pi].pdtid;
-	  priv->tid = pbuf[pi].tid;
-
-	  thread = add_thread_with_info (proc_target,
-					 ptid_t (pid, 0, pbuf[pi].pthid),
-					 private_thread_info_up (priv));
-
-	  pi++;
-	}
-      else
-	{
-	  ptid_t pptid, gptid;
-	  int cmp_result;
-
-	  pptid = ptid_t (pid, 0, pbuf[pi].pthid);
-	  gptid = gbuf[gi]->ptid;
-	  pdtid = pbuf[pi].pdtid;
-	  tid = pbuf[pi].tid;
-
-	  cmp_result = ptid_cmp (pptid, gptid);
-
-	  if (cmp_result == 0)
+	  /* init priv */
+	  priv->pdtid = pdtid;
+	  status = pthdb_pthread_tid (data->pd_session, pdtid, &tid);
+	  priv->tid = tid;
+	  /* Check if this is the main thread.  If it is, then change
+	     its ptid and add its private data.  */
+	  if (in_thread_list (proc_target, ptid_t (pid)))
 	    {
-	      aix_thread_info *priv = get_aix_thread_info (gbuf[gi]);
-
-	      priv->pdtid = pdtid;
-	      priv->tid = tid;
-	      pi++;
-	      gi++;
-	    }
-	  else if (cmp_result > 0)
-	    {
-	      /* This is to make the main process thread now look
-		 like a thread.  */
-
-	      if (gptid.is_pid ())
-		{
-		  thread_info *tp = proc_target->find_thread (gptid);
-		  thread_change_ptid (proc_target, gptid, pptid);
-		  aix_thread_info *priv = new aix_thread_info;
-		  priv->pdtid = pbuf[pi].pdtid;
-		  priv->tid = pbuf[pi].tid;
-		  tp->priv.reset (priv);
-		  gi++;
-		  pi++;
-		}
-	      else
-		{
-		  delete_thread (gbuf[gi]);
-		  gi++;
-		}
+	      thread_info *tp = proc_target->find_thread (ptid_t (pid));
+	      thread_change_ptid (proc_target, ptid_t (pid), ptid);
+	      tp->priv.reset (priv);
 	    }
 	  else
-	    {
-	      thread = add_thread (proc_target, pptid);
+	    add_thread_with_info (proc_target, ptid,
+		private_thread_info_up (priv));
+	}
 
-	      aix_thread_info *priv = new aix_thread_info;
-	      thread->priv.reset (priv);
-	      priv->pdtid = pdtid;
-	      priv->tid = tid;
-	      pi++;
-	    }
+      /* The thread is terminated. Remove it.  */
+      if (state == PST_TERM)
+	{
+	  thread_info *thr = proc_target->find_thread (ptid);
+	  gdb_assert (thr != nullptr);
+	  delete_thread (thr);
+	  data->exited_threads.insert (pdtid);
 	}
     }
 
-  xfree (pbuf);
-  xfree (gbuf);
+    /* Sometimes there can be scenarios where the thread status is
+       unknown and we it will never iterate in the for loop above,
+       since cmd will be no longer be pointing to that threads.  One
+       such scenario is the gdb.threads/thread_events.exp testcase
+       where in the end after the threadfunc breakpoint is hit, the
+       thread exits and gets into a PST_UNKNOWN state.  So this thread
+       will not run in the above for loop.  Therefore the below for loop
+       is to manually delete such threads.  */
+    for (struct thread_info *it : all_threads ())
+      {
+	aix_thread_info *priv = get_aix_thread_info (it);
+	if (in_queue_threads.count (priv->pdtid) == 0
+		&& in_thread_list (proc_target, it->ptid))
+	  {
+	    delete_thread (it);
+	    data->exited_threads.insert (priv->pdtid);
+	  }
+      }
 }
 
 /* Iterate_over_threads() callback for locating a thread, using
@@ -1012,8 +918,8 @@ pd_update (pid_t pid)
 }
 
 /* Try to start debugging threads in the current process.
-   If successful and there exists and we can find an event thread, return a ptid
-   for that thread.  Otherwise, return a ptid-only ptid using PID.  */
+   If successful and there exists and we can find an event thread, set
+   pd_active for that thread.  Otherwise, return.  */
 
 static void
 pd_activate (pid_t pid)
@@ -2083,10 +1989,17 @@ aix_thread_target::thread_alive (ptid_t ptid)
 std::string
 aix_thread_target::pid_to_str (ptid_t ptid)
 {
-  if (ptid.tid () == 0)
-    return beneath ()->pid_to_str (ptid);
+  thread_info *thread_info = current_inferior ()->find_thread (ptid);
 
-  return string_printf (_("Thread %s"), pulongest (ptid.tid ()));
+  if (thread_info != NULL && thread_info->priv != NULL)
+    {
+      aix_thread_info *priv = get_aix_thread_info (thread_info);
+
+      return string_printf (_("Thread %s (tid %s)"), pulongest (ptid.tid ()),
+		pulongest (priv->tid));
+    }
+
+  return beneath ()->pid_to_str (ptid);
 }
 
 /* Return a printable representation of extra information about
@@ -2097,7 +2010,6 @@ aix_thread_target::extra_thread_info (struct thread_info *thread)
 {
   int status;
   pthdb_pthread_t pdtid;
-  pthdb_tid_t tid;
   pthdb_state_t state;
   pthdb_suspendstate_t suspendstate;
   pthdb_detachstate_t detachstate;
@@ -2114,33 +2026,31 @@ aix_thread_target::extra_thread_info (struct thread_info *thread)
   aix_thread_info *priv = get_aix_thread_info (thread);
 
   pdtid = priv->pdtid;
-  tid = priv->tid;
-
-  if (tid != PTHDB_INVALID_TID)
-    /* i18n: Like "thread-identifier %d, [state] running, suspended" */
-    buf.printf (_("tid %d"), (int)tid);
 
   status = pthdb_pthread_state (data->pd_session, pdtid, &state);
+
+  /* Output should look like Thread %d (tid %d) ([state]).  */
+  /* Example:- Thread 1 (tid 34144587) ([running]).  */
+  /* where state can be running, idle, sleeping, finished,
+     suspended, detached, cancel pending, ready or unknown.  */
+
   if (status != PTHDB_SUCCESS)
     state = PST_NOTSUP;
-  buf.printf (", %s", state2str (state));
+  buf.printf ("[%s]", state2str (state));
 
   status = pthdb_pthread_suspendstate (data->pd_session, pdtid,
 				       &suspendstate);
   if (status == PTHDB_SUCCESS && suspendstate == PSS_SUSPENDED)
-    /* i18n: Like "Thread-Id %d, [state] running, suspended" */
-    buf.printf (_(", suspended"));
+    buf.printf (_("[suspended]"));
 
   status = pthdb_pthread_detachstate (data->pd_session, pdtid,
 				      &detachstate);
   if (status == PTHDB_SUCCESS && detachstate == PDS_DETACHED)
-    /* i18n: Like "Thread-Id %d, [state] running, detached" */
-    buf.printf (_(", detached"));
+    buf.printf (_("[detached]"));
 
   pthdb_pthread_cancelpend (data->pd_session, pdtid, &cancelpend);
   if (status == PTHDB_SUCCESS && cancelpend)
-    /* i18n: Like "Thread-Id %d, [state] running, cancel pending" */
-    buf.printf (_(", cancel pending"));
+    buf.printf (_("[cancel pending]"));
 
   buf.write ("", 1);
 
