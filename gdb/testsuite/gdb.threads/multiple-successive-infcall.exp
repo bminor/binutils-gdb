@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-# multiple-successive-infcall.exp -- Test if GDB can invoke functions on
-# multiple inferiors, one after the other.
+# Test invoking functions on multiple threads, one after the other.
 
 standard_testfile
 
@@ -29,31 +28,97 @@ if {![runto_main]} {
    return 0
 }
 
-# Ensure that each new thread is detected by GDB in the order that the
-# test case creates them, so the thread identifiers match between
-# test and test case.
+# Ensure that each new pthread is spawned one at a time so we can
+# extract its target ID, and not the ID of some auxiliary thread
+# spawned by the runtime.
 gdb_breakpoint [gdb_get_line_number "prethreadcreationmarker"]
 gdb_continue_to_breakpoint "prethreadcreationmarker"
-set after_new_thread_message "created new thread"
-foreach_with_prefix thread {5 4 3}  {
-  gdb_test_multiple "continue" "${after_new_thread_message}" {
-    -re "\\\[New Thread ${hex} \\\(LWP \[0-9\]+\\\)\\\].*${gdb_prompt}" {
-      pass "${after_new_thread_message}"
+set after_new_thread_message "detected new pthread"
+
+# List of the target ids detected.
+set pthread_list {}
+
+# The first 3 pthreads are detected here.
+foreach_with_prefix pthread {1 2 3}  {
+    gdb_test_multiple "continue" "${after_new_thread_message}" {
+	-re -wrap "\\\[New (Thread \[^\r\n\]+)\\\]\r\n.*" {
+	    set thr $expect_out(1,string)
+	    verbose -log "detected pthread: $thr"
+	    lappend pthread_list $thr
+	    pass $gdb_test_name
+	}
     }
-    -re -wrap "\\\[New Thread $decimal\\.$decimal\\\]\r\n.*" {
-      pass $gdb_test_name
-    }
-  }
 }
 
+verbose -log "detected pthread list: $pthread_list"
+
 gdb_breakpoint [gdb_get_line_number "testmarker01"]
-gdb_continue_to_breakpoint "testmarker01"
+
+# Continue to breakpoint.  This detects that last pthread.  It also
+# ensures that no pthread ends up blocked in a syscall, which is
+# important for Windows -- the infcall wouldn't be able to complete
+# until the syscall returns, meaning, the infcall would deadlock.
+with_test_prefix "pthread 4" {
+    gdb_test_multiple "continue" "${after_new_thread_message}" {
+	-re "\\\[New (Thread \[^\r\n\]+)\\\]\r\n" {
+	    set thr $expect_out(1,string)
+	    verbose -log "detected pthread: $thr"
+	    lappend pthread_list $thr
+	    pass $gdb_test_name
+	}
+    }
+}
+
+# Consume the breakpoint hit and the prompt.
+gdb_test_multiple "" "stop at testmarker01" {
+    -re -wrap "hit Breakpoint .* testmarker01 .*" {
+	pass $gdb_test_name
+    }
+}
+
 gdb_test_no_output "set scheduler-locking on"
 gdb_test "show scheduler-locking" \
   "Mode for locking scheduler during execution is \"on\"."
 
-foreach_with_prefix thread {5 4 3 2 1}  {
-  gdb_test "thread ${thread}" "Switching to .*"
-  gdb_test "call get_value()" "= ${thread}" \
-      "call inferior function"
+set thread_count [get_valueof "" "\$_inferior_thread_count" 0]
+
+# pthread id to be used in test messages in the loop below.
+set testing_pthread 0
+
+for {set thread 1} {$thread <= $thread_count} {incr thread} {
+
+    # 1 if found, 0 if not found, -1 if the test failed.
+    set found -1
+    gdb_test_multiple "thread ${thread}" "extract thread target id" {
+	-re -wrap "Switching to thread $decimal \\((Thread \[^\r\n\]+)\\)\\\]\r\n.*" {
+	    set thr $expect_out(1,string)
+	    verbose -log "extracted: $thr"
+	    if {[lsearch -exact $pthread_list $thr] != -1} {
+		set found 1
+	    } else {
+		set found 0
+	    }
+	}
+    }
+    if {$found == -1} {
+	# gdb_test_multiple already issued a FAIL above.  No point in
+	# continuing.
+	return
+    } elseif {$found == 0} {
+	# Not recognized as a testcase pthread, so it must be a thread
+	# spawned by the runtime or the OS.  Don't use it for testing
+	# the infcall, as the thread may be blocked in a syscall -- on
+	# Windows, the infcall wouldn't be able to complete until the
+	# syscall returns, meaning, the infcall would deadlock.
+	verbose -log "not a known pthread"
+	continue
+    } else {
+	incr testing_pthread
+	with_test_prefix "pthread $testing_pthread" {
+	    gdb_test "call get_value()" "= $testing_pthread" \
+		"call inferior function"
+	}
+    }
 }
+
+gdb_assert {$testing_pthread == 4} "tested all pthreads"

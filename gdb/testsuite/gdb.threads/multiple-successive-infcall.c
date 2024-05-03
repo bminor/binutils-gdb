@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <unistd.h>
 
 /* This defines the number of threads to spawn.  */
 #define THREADCOUNT 4
@@ -41,8 +42,9 @@ get_value ()
       if (pthread_equal (threads[tid], pthread_self ()))
 	return thread_ids[tid];
     }
-  /* Value for the main thread.  */
-  return 1;
+
+  /* Should not get here.  */
+  return -1;
 }
 
 /* Return the nth Fibonacci number.  */
@@ -93,8 +95,9 @@ main (void)
   printf ("Spawning worker threads\n");
   for (int tid = 0; tid < THREADCOUNT; ++tid)
     {
-      /* Add 2 so the value maps to the debugger's thread identifiers.  */
-      thread_ids[tid] = tid + 2; /* prethreadcreationmarker */
+      /* Add 1 so the value maps to the testcase's thread
+	 identifiers.  */
+      thread_ids[tid] = tid + 1; /* prethreadcreationmarker */
       err = pthread_create (&threads[tid], NULL, thread_function,
 			    (void *) &thread_ids[tid]);
       if (err != 0)
