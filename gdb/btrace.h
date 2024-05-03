@@ -131,7 +131,7 @@ enum btrace_pt_error
   BDE_PT_USER_QUIT = 1,
 
   /* Tracing was temporarily disabled.  */
-  BDE_PT_DISABLED,
+  BDE_PT_NON_CONTIGUOUS,
 
   /* Trace recording overflowed.  */
   BDE_PT_OVERFLOW

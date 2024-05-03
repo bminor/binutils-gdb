@@ -1255,7 +1255,7 @@ handle_pt_insn_events (struct btrace_thread_info *btinfo,
 		&& !btinfo->functions.empty ())
 	      {
 		struct btrace_function *bfun
-		  = ftrace_new_gap (btinfo, BDE_PT_DISABLED, gaps);
+		  = ftrace_new_gap (btinfo, BDE_PT_NON_CONTIGUOUS, gaps);
 
 		pt_insn_get_offset (decoder, &offset);
 
@@ -1359,7 +1359,7 @@ handle_pt_insn_event_flags (struct btrace_thread_info *btinfo,
       struct btrace_function *bfun;
       uint64_t offset;
 
-      bfun = ftrace_new_gap (btinfo, BDE_PT_DISABLED, gaps);
+      bfun = ftrace_new_gap (btinfo, BDE_PT_NON_CONTIGUOUS, gaps);
 
       pt_insn_get_offset (decoder, &offset);
 
@@ -1966,8 +1966,8 @@ btrace_decode_error (enum btrace_format format, int errcode)
 	case BDE_PT_USER_QUIT:
 	  return _("trace decode cancelled");
 
-	case BDE_PT_DISABLED:
-	  return _("disabled");
+	case BDE_PT_NON_CONTIGUOUS:
+	  return _("non-contiguous");
 
 	case BDE_PT_OVERFLOW:
 	  return _("overflow");
