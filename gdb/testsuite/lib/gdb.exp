@@ -7471,8 +7471,23 @@ proc gdb_continue_to_end {{mssg ""} {command continue} {allow_extra 0}} {
   } else {
       set text "continue until exit at $mssg"
   }
+
   if {$allow_extra} {
       set extra ".*"
+  } elseif {[istarget *-*-cygwin*] || [istarget *-*-mingw*]} {
+      # On Windows, even on supposedly single-threaded programs, we
+      # may see thread exit output when running to end, for threads
+      # spawned by the runtime.  E.g.:
+      #
+      #  (gdb) continue
+      #  Continuing.
+      #  [Thread 14364.0x21d4 exited with code 0]
+      #  [Thread 14364.0x4374 exited with code 0]
+      #  [Thread 14364.0x3aec exited with code 0]
+      #  [Thread 14364.0x3368 exited with code 0]
+      #  [Inferior 1 (process 14364) exited normally]
+      #
+      set extra "(\\\[Thread \[^\r\n\]+ exited with code $::decimal\\\]\r\n)*"
   } else {
       set extra ""
   }
