@@ -1170,11 +1170,11 @@ maxss<SSE>, 0xf30f5f, <SSE:cpu>, Modrm|<SSE:scal>|<SSE:vvvv>|NoSuf, { Dword|Unsp
 minps<SSE>, 0x0f5d, <SSE:cpu>, Modrm|<SSE:attr>|<SSE:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 minss<SSE>, 0xf30f5d, <SSE:cpu>, Modrm|<SSE:scal>|<SSE:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
 movaps<SSE>, 0x0f28, <SSE:cpu>, D|Modrm|<SSE:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-movhlps<sse>, 0x0f12, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM, RegXMM }
+movhlps<SSE>, 0x0f12, <SSE:cpu>, Modrm|<SSE:attr>|<SSE:vvvv>|NoSuf, { RegXMM, RegXMM }
 movhps, 0x16, AVX|AVX512F, Modrm|Vex128|EVex128|Space0F|VexVVVV|VexW0|Disp8MemShift=3|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
 movhps, 0x17, AVX|AVX512F, Modrm|Vex128|EVex128|Space0F|VexW0|Disp8MemShift=3|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex }
 movhps, 0xf16, SSE, D|Modrm|NoSuf, { Qword|Unspecified|BaseIndex, RegXMM }
-movlhps<sse>, 0x0f16, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM, RegXMM }
+movlhps<SSE>, 0x0f16, <SSE:cpu>, Modrm|<SSE:attr>|<SSE:vvvv>|NoSuf, { RegXMM, RegXMM }
 movlps, 0x12, AVX|AVX512F, Modrm|Vex128|EVex128|Space0F|VexVVVV|VexW0|Disp8MemShift=3|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
 movlps, 0x13, AVX|AVX512F, Modrm|Vex128|EVex128|Space0F|VexW0|Disp8MemShift=3|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex }
 movlps, 0xf12, SSE, D|Modrm|NoSuf, { Qword|Unspecified|BaseIndex, RegXMM }
@@ -1183,7 +1183,7 @@ movntps<SSE>, 0x0f2b, <SSE:cpu>, Modrm|<SSE:attr>|NoSuf, { RegXMM, Xmmword|Unspe
 movntq, 0xfe7, SSE|3dnowA, Modrm|NoSuf, { RegMMX, Qword|Unspecified|BaseIndex }
 movntdq<SSE2D>, 0x660fe7, <SSE2D:cpu>, Modrm|<SSE2D:attr>|NoSuf, { RegXMM, Xmmword|Unspecified|BaseIndex }
 movss, 0xf310, AVX|AVX512F, D|Modrm|VexLIG|EVexLIG|Space0F|VexW0|Disp8MemShift=2|NoSuf|SSE2AVX, { Dword|Unspecified|BaseIndex, RegXMM }
-movss, 0xf310, AVX, D|Modrm|VexLIG|Space0F|VexVVVV|VexW0|NoSuf|SSE2AVX, { RegXMM, RegXMM }
+movss, 0xf310, AVX|AVX512F, D|Modrm|VexLIG|EVexLIG|Space0F|VexVVVV|VexW0|NoSuf|SSE2AVX, { RegXMM, RegXMM }
 movss, 0xf30f10, SSE, D|Modrm|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
 movups<SSE>, 0x0f10, <SSE:cpu>, D|Modrm|<SSE:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 mulps<SSE>, 0x0f59, <SSE:cpu>, Modrm|<SSE:attr>|<SSE:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
@@ -1278,6 +1278,7 @@ movntpd<SSE2Q>, 0x660f2b, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|NoSuf, { RegXMM, Xmmwo
 movsd, 0xf210, AVX, D|Modrm|VexLIG|Space0F|VexW0|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
 movsd, 0xf210, AVX512F, D|Modrm|EVexLIG|Space0F|VexW1|Disp8MemShift=3|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
 movsd, 0xf210, AVX, D|Modrm|VexLIG|Space0F|VexVVVV|VexW0|NoSuf|SSE2AVX, { RegXMM, RegXMM }
+movsd, 0xf210, AVX512F, D|Modrm|EVexLIG|Space0F|VexVVVV|VexW1|NoSuf|SSE2AVX, { RegXMM, RegXMM }
 movsd, 0xf20f10, SSE2, D|Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
 movupd<SSE2Q>, 0x660f10, <SSE2Q:cpu>, D|Modrm|<SSE2Q:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 mulpd<SSE2Q>, 0x660f59, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
@@ -1318,8 +1319,8 @@ pmuludq, 0xff4, SSE2, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX 
 pshufd<SSE2D>, 0x660f70, <SSE2D:cpu>, Modrm|<SSE2D:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 pshufhw<SSE2BW>, 0xf30f70, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 pshuflw<SSE2BW>, 0xf20f70, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
-pslldq<sse2>, 0x660f73/7, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { Imm8, RegXMM }
-psrldq<sse2>, 0x660f73/3, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { Imm8, RegXMM }
+pslldq<SSE2BW>, 0x660f73/7, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|<SSE2BW:vvvv>|NoSuf, { Imm8, RegXMM }
+psrldq<SSE2BW>, 0x660f73/3, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|<SSE2BW:vvvv>|NoSuf, { Imm8, RegXMM }
 punpckhqdq<SSE2Q>, 0x660f6d, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 punpcklqdq<SSE2Q>, 0x660f6c, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 
