@@ -847,9 +847,20 @@ _start:
 	rex.r	movd	%xmm1, %eax
 	rex.x	movd	%xmm1, %eax
 	rex.w	movd	%xmm1, %eax
+	{evex}	movd	%xmm1, %eax
 	{rex}	movd	%xmm1, %eax
 	{rex2}	movd	%xmm1, %eax
 	{vex3}	movd	%xmm1, %eax
+
+		movd	%xmm1, %r16d
+	rex	movd	%xmm1, %r16d
+	rex.b	movd	%xmm1, %r16d
+	rex.r	movd	%xmm1, %r16d
+	rex.x	movd	%xmm1, %r16d
+	rex.w	movd	%xmm1, %r16d
+	{evex}	movd	%xmm1, %r16d
+	{rex}	movd	%xmm1, %r16d
+	{rex2}	movd	%xmm1, %r16d
 
 	.intel_syntax noprefix
 # Tests for op mem64

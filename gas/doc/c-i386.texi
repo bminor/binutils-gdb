@@ -312,7 +312,9 @@ when respective checks fail.
 @cindex @samp{-msse2avx} option, x86-64
 @item -msse2avx
 This option specifies that the assembler should encode SSE instructions
-with VEX prefix.
+with VEX prefix, requiring AVX to be available.  SSE instructions using
+extended GPRs will be encoded with EVEX prefix, requiring AVX512 or AVX10 to
+be available.
 
 @cindex @samp{-muse-unaligned-vector-move} option, i386
 @cindex @samp{-muse-unaligned-vector-move} option, x86-64

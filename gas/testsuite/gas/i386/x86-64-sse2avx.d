@@ -746,9 +746,19 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 79 7e c8          	vmovd  %xmm9,%eax
 [ 	]*[a-f0-9]+:	c4 a1 79 7e c8       	vmovd  %xmm1,%eax
 [ 	]*[a-f0-9]+:	c4 e1 f9 7e c8       	vmovq  %xmm1,%rax
+[ 	]*[a-f0-9]+:	62 f1 7d 08 7e c8    	\{evex\} vmovd %xmm1,%eax
 [ 	]*[a-f0-9]+:	c5 f9 7e c8          	vmovd  %xmm1,%eax
 [ 	]*[a-f0-9]+:	c5 f9 7e c8          	vmovd  %xmm1,%eax
 [ 	]*[a-f0-9]+:	c4 e1 79 7e c8       	vmovd  %xmm1,%eax
+[ 	]*[a-f0-9]+:	62 f9 7d 08 7e c8    	vmovd  %xmm1,%r16d
+[ 	]*[a-f0-9]+:	62 f9 7d 08 7e c8    	vmovd  %xmm1,%r16d
+[ 	]*[a-f0-9]+:	62 d9 7d 08 7e c8    	vmovd  %xmm1,%r24d
+[ 	]*[a-f0-9]+:	62 79 7d 08 7e c8    	vmovd  %xmm9,%r16d
+[ 	]*[a-f0-9]+:	62 b9 7d 08 7e c8    	vmovd  %xmm1,%r16d
+[ 	]*[a-f0-9]+:	62 f9 fd 08 7e c8    	vmovq  %xmm1,%r16
+[ 	]*[a-f0-9]+:	62 f9 7d 08 7e c8    	vmovd  %xmm1,%r16d
+[ 	]*[a-f0-9]+:	62 f9 7d 08 7e c8    	vmovd  %xmm1,%r16d
+[ 	]*[a-f0-9]+:	62 f9 7d 08 7e c8    	vmovd  %xmm1,%r16d
 [ 	]*[a-f0-9]+:	c5 f8 ae 11          	vldmxcsr \(%rcx\)
 [ 	]*[a-f0-9]+:	c5 f8 ae 19          	vstmxcsr \(%rcx\)
 [ 	]*[a-f0-9]+:	c5 f8 5b f4          	vcvtdq2ps %xmm4,%xmm6

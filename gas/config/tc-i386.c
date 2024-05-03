@@ -4133,7 +4133,7 @@ build_evex_prefix (void)
   /* Check the REX.W bit and VEXW.  */
   if (i.tm.opcode_modifier.vexw == VEXWIG)
     w = (evexwig == evexw1 || (i.rex & REX_W)) ? 1 : 0;
-  else if (i.tm.opcode_modifier.vexw)
+  else if (i.tm.opcode_modifier.vexw && !(i.rex & REX_W))
     w = i.tm.opcode_modifier.vexw == VEXW1 ? 1 : 0;
   else
     w = (flag_code == CODE_64BIT ? i.rex & REX_W : evexwig == evexw1) ? 1 : 0;
@@ -8281,7 +8281,12 @@ check_VecOperands (const insn_template *t)
   if ((is_cpu (t, CpuXOP) && t->operands == 5)
       || (t->opcode_space == SPACE_0F3A
 	  && (t->base_opcode | 3) == 0x0b
-	  && is_cpu (t, CpuAPX_F)))
+	  && (is_cpu (t, CpuAPX_F)
+	   || (t->opcode_modifier.sse2avx && t->opcode_modifier.evex
+	       && (!t->opcode_modifier.vex
+		   || (i.encoding != encoding_default
+		       && i.encoding != encoding_vex
+		       && i.encoding != encoding_vex3))))))
     {
       if (i.op[0].imms->X_op != O_constant
 	  || !fits_in_imm4 (i.op[0].imms->X_add_number))

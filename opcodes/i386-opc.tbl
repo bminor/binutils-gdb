@@ -1004,9 +1004,39 @@ pause, 0xf390, i186, NoSuf, {}
     $avx:AVX:66:Vex128|VexVVVV|VexW0|SSE2AVX:RegXMM:Xmmword, +
     $sse:SSE2:66::RegXMM:Xmmword, +
     $mmx:MMX:::RegMMX:Qword>
+// As above, but also allowing AVX512 (EVEX) encoding, to transform
+// in particular insns using eGPR-s.
+<MMX:cpu:pfx:attr:reg:mem, +
+    $avx:AVX|AVX512VL:66:Vex128|EVex128|VexVVVV|VexW0|Disp8MemShift=4|SSE2AVX:RegXMM:Xmmword, +
+    $sse:SSE2:66::RegXMM:Xmmword, +
+    $mmx:MMX:::RegMMX:Qword>
+<MMXdq:opc:cpu:pfx:attr:reg:mem, +
+    d:0:AVX|AVX512VL:66:Vex128|EVex128|VexVVVV|VexW0|Disp8MemShift=4|SSE2AVX:RegXMM:Xmmword, +
+    d:0:SSE2:66::RegXMM:Xmmword, +
+    d:0:MMX:::RegMMX:Qword, +
+    q:1:AVX:66:Vex128|VexVVVV|VexW0|SSE2AVX:RegXMM:Xmmword, +
+    q:1:AVX512VL:66:EVex128|VexVVVV|VexW1|Disp8MemShift=4|SSE2AVX:RegXMM:Xmmword, +
+    q:1:SSE2:66::RegXMM:Xmmword, +
+    q:1:MMX:::RegMMX:Qword>
+<MMXBW:cpu:pfx:attr:reg:mem, +
+    $avx:AVX:66:Vex128|VexVVVV|VexW0|SSE2AVX:RegXMM:Xmmword, +
+    $apx:AVX512BW&AVX512VL:66:EVex128|VexVVVV|VexW0|Disp8MemShift=4|SSE2AVX:RegXMM:Xmmword, +
+    $sse:SSE2:66::RegXMM:Xmmword, +
+    $mmx:MMX:::RegMMX:Qword>
 
 <sse2:cpu:attr:scal:vvvv, +
     $avx:AVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV, +
+    $sse:SSE2:::>
+<SSE2BW:cpu:attr:vvvv, +
+    $avx:AVX:Vex128|VexW0|SSE2AVX:VexVVVV, +
+    $apx:AVX512BW&AVX512VL:EVex128|VexW0|Disp8MemShift=4|SSE2AVX:VexVVVV, +
+    $sse:SSE2::>
+<SSE2D:cpu:attr:scal:vvvv, +
+    $avx:AVX|AVX512VL:Vex128|EVex128|VexW0|Disp8MemShift=4|SSE2AVX:VexLIG|EVexLIG|VexW0|Disp8MemShift=2|SSE2AVX:VexVVVV, +
+    $sse:SSE2:::>
+<SSE2Q:cpu:attr:scal:vvvv, +
+    $avx:AVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV, +
+    $apx:AVX512VL:EVex128|VexW1|Disp8MemShift=4|SSE2AVX:EVexLIG|VexW1|Disp8MemShift=3|SSE2AVX:VexVVVV, +
     $sse:SSE2:::>
 
 <bw:opc:vexw:elem:kcpu:kpfx:cpubmi, +
@@ -1022,8 +1052,8 @@ emms, 0xf77, MMX, NoSuf, {}
 // copying between Reg64/Mem64 and RegXMM/RegMMX, as is mandated by Intel's
 // spec). AMD's spec, having been in existence for much longer, failed to
 // recognize that and specified movd for 32- and 64-bit operations.
-movd, 0x666e, AVX, D|Modrm|Vex128|Space0F|VexW0|NoSuf|SSE2AVX, { Reg32|Unspecified|BaseIndex, RegXMM }
-movd, 0x666e, AVX&x64, D|Modrm|Vex=1|Space0F|VexW1|NoSuf|Size64|SSE2AVX, { Reg64|BaseIndex, RegXMM }
+movd, 0x666e, AVX|AVX512F, D|Modrm|Vex128|EVex128|Space0F|VexW0|Disp8MemShift=2|NoSuf|SSE2AVX, { Reg32|Unspecified|BaseIndex, RegXMM }
+movd, 0x666e, x64&(AVX|AVX512F), D|Modrm|Vex128|EVex128|Space0F|VexW1|Disp8MemShift=3|NoSuf|Size64|SSE2AVX, { Reg64|BaseIndex, RegXMM }
 movd, 0x660f6e, SSE2, D|Modrm|IgnoreSize|NoSuf, { Reg32|Unspecified|BaseIndex, RegXMM }
 movd, 0x660f6e, SSE2&x64, D|Modrm|NoSuf|Size64, { Reg64|BaseIndex, RegXMM }
 // The MMX templates have to remain after at least the SSE2AVX ones.
@@ -1031,247 +1061,280 @@ movd, 0xf6e, MMX, D|Modrm|IgnoreSize|NoSuf, { Reg32|Unspecified|BaseIndex, RegMM
 movd, 0xf6e, MMX&x64, D|Modrm|NoSuf|Size64, { Reg64|BaseIndex, RegMMX }
 movq, 0xf37e, AVX, Load|Modrm|Vex128|Space0F|VexW0|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
 movq, 0x66d6, AVX, Modrm|Vex128|Space0F|VexW0|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex|RegXMM }
-movq, 0x666e, AVX&x64, D|Modrm|Vex=1|Space0F|VexW1|NoSuf|Size64|SSE2AVX, { Reg64|Unspecified|BaseIndex, RegXMM }
+movq, 0xf37e, AVX512F, Load|Modrm|EVex128|Space0F|VexW1|Disp8MemShift=3|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+movq, 0x66d6, AVX512F, Modrm|EVex128|Space0F|VexW1|Disp8MemShift=3|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex|RegXMM }
+movq, 0x666e, x64&(AVX|AVX512F), D|Modrm|Vex128|EVex128|Space0F|VexW1|Disp8MemShift=3|NoSuf|Size64|SSE2AVX, { Reg64|Unspecified|BaseIndex, RegXMM }
 movq, 0xf30f7e, SSE2, Load|Modrm|NoSuf, { Unspecified|Qword|BaseIndex|RegXMM, RegXMM }
 movq, 0x660fd6, SSE2, Modrm|NoSuf, { RegXMM, Unspecified|Qword|BaseIndex|RegXMM }
 movq, 0x660f6e, SSE2&x64, D|Modrm|NoSuf|Size64, { Reg64|Unspecified|BaseIndex, RegXMM }
 // The MMX templates have to remain after at least the SSE2AVX ones.
 movq, 0xf6f, MMX, D|Modrm|NoSuf, { Unspecified|Qword|BaseIndex|RegMMX, RegMMX }
 movq, 0xf6e, MMX&x64, D|Modrm|NoSuf|Size64, { Reg64|Unspecified|BaseIndex, RegMMX }
-packssdw<mmx>, 0x<mmx:pfx>0f6b, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-packsswb<mmx>, 0x<mmx:pfx>0f63, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-packuswb<mmx>, 0x<mmx:pfx>0f67, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-padd<bw><mmx>, 0x<mmx:pfx>0ffc | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-paddd<mmx>, 0x<mmx:pfx>0ffe, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-paddq<sse2>, 0x660fd4, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+packssdw<MMXBW>, 0x<MMXBW:pfx>0f6b, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+packsswb<MMXBW>, 0x<MMXBW:pfx>0f63, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+packuswb<MMXBW>, 0x<MMXBW:pfx>0f67, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+padd<bw><MMXBW>, 0x<MMXBW:pfx>0ffc | <bw:opc>, <MMXBW:cpu>, Modrm|<MMXBW:attr>|C|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+paddd<MMX>, 0x<MMX:pfx>0ffe, <MMX:cpu>, Modrm|<MMX:attr>|C|NoSuf, { <MMX:reg>|<MMX:mem>|Unspecified|BaseIndex, <MMX:reg> }
+paddq<SSE2Q>, 0x660fd4, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 paddq, 0xfd4, SSE2, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
-padds<bw><mmx>, 0x<mmx:pfx>0fec | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-paddus<bw><mmx>, 0x<mmx:pfx>0fdc | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-pand<mmx>, 0x<mmx:pfx>0fdb, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-pandn<mmx>, 0x<mmx:pfx>0fdf, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
+padds<bw><MMXBW>, 0x<MMXBW:pfx>0fec | <bw:opc>, <MMXBW:cpu>, Modrm|<MMXBW:attr>|C|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+paddus<bw><MMXBW>, 0x<MMXBW:pfx>0fdc | <bw:opc>, <MMXBW:cpu>, Modrm|<MMXBW:attr>|C|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+pand<MMX>, 0x<MMX:pfx>0fdb, <MMX:cpu>, Modrm|<MMX:attr>|C|NoSuf, { <MMX:reg>|<MMX:mem>|Unspecified|BaseIndex, <MMX:reg> }
+pandn<MMX>, 0x<MMX:pfx>0fdf, <MMX:cpu>, Modrm|<MMX:attr>|NoSuf, { <MMX:reg>|<MMX:mem>|Unspecified|BaseIndex, <MMX:reg> }
 pcmpeq<bw><mmx>, 0x<mmx:pfx>0f74 | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 pcmpeqd<mmx>, 0x<mmx:pfx>0f76, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 pcmpgt<bw><mmx>, 0x<mmx:pfx>0f64 | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf|Optimize, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
 pcmpgtd<mmx>, 0x<mmx:pfx>0f66, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf|Optimize, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-pmaddwd<mmx>, 0x<mmx:pfx>0ff5, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-pmulhw<mmx>, 0x<mmx:pfx>0fe5, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-pmullw<mmx>, 0x<mmx:pfx>0fd5, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-por<mmx>, 0x<mmx:pfx>0feb, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-psllw<mmx>, 0x<mmx:pfx>0ff1, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-psllw<mmx>, 0x<mmx:pfx>0f71/6, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { Imm8, <mmx:reg> }
-psll<dq><mmx>, 0x<mmx:pfx>0ff2 | <dq:opc>, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-psll<dq><mmx>, 0x<mmx:pfx>0f72 | <dq:opc>/6, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { Imm8, <mmx:reg> }
-psraw<mmx>, 0x<mmx:pfx>0fe1, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-psraw<mmx>, 0x<mmx:pfx>0f71/4, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { Imm8, <mmx:reg> }
-psrad<mmx>, 0x<mmx:pfx>0fe2, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-psrad<mmx>, 0x<mmx:pfx>0f72/4, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { Imm8, <mmx:reg> }
-psrlw<mmx>, 0x<mmx:pfx>0fd1, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-psrlw<mmx>, 0x<mmx:pfx>0f71/2, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { Imm8, <mmx:reg> }
-psrl<dq><mmx>, 0x<mmx:pfx>0fd2 | <dq:opc>, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-psrl<dq><mmx>, 0x<mmx:pfx>0f72 | <dq:opc>/2, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { Imm8, <mmx:reg> }
-psub<bw><mmx>, 0x<mmx:pfx>0ff8 | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-psubd<mmx>, 0x<mmx:pfx>0ffa, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-psubq<sse2>, 0x660ffb, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pmaddwd<MMXBW>, 0x<MMXBW:pfx>0ff5, <MMXBW:cpu>, Modrm|<MMXBW:attr>|C|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+pmulhw<MMXBW>, 0x<MMXBW:pfx>0fe5, <MMXBW:cpu>, Modrm|<MMXBW:attr>|C|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+pmullw<MMXBW>, 0x<MMXBW:pfx>0fd5, <MMXBW:cpu>, Modrm|<MMXBW:attr>|C|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+por<MMX>, 0x<MMX:pfx>0feb, <MMX:cpu>, Modrm|<MMX:attr>|C|NoSuf, { <MMX:reg>|<MMX:mem>|Unspecified|BaseIndex, <MMX:reg> }
+psllw<MMXBW>, 0x<MMXBW:pfx>0ff1, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+psllw<MMXBW>, 0x<MMXBW:pfx>0f71/6, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { Imm8, <MMXBW:reg> }
+psll<MMXdq>, 0x<MMXdq:pfx>0ff2 | <MMXdq:opc>, <MMXdq:cpu>, Modrm|<MMXdq:attr>|NoSuf, { <MMXdq:reg>|<MMXdq:mem>|Unspecified|BaseIndex, <MMXdq:reg> }
+psll<MMXdq>, 0x<MMXdq:pfx>0f72 | <MMXdq:opc>/6, <MMXdq:cpu>, Modrm|<MMXdq:attr>|NoSuf, { Imm8, <MMXdq:reg> }
+psraw<MMXBW>, 0x<MMXBW:pfx>0fe1, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+psraw<MMXBW>, 0x<MMXBW:pfx>0f71/4, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { Imm8, <MMXBW:reg> }
+psrad<MMX>, 0x<MMX:pfx>0fe2, <MMX:cpu>, Modrm|<MMX:attr>|NoSuf, { <MMX:reg>|<MMX:mem>|Unspecified|BaseIndex, <MMX:reg> }
+psrad<MMX>, 0x<MMX:pfx>0f72/4, <MMX:cpu>, Modrm|<MMX:attr>|NoSuf, { Imm8, <MMX:reg> }
+psrlw<MMXBW>, 0x<MMXBW:pfx>0fd1, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+psrlw<MMXBW>, 0x<MMXBW:pfx>0f71/2, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { Imm8, <MMXBW:reg> }
+psrl<MMXdq>, 0x<MMXdq:pfx>0fd2 | <MMXdq:opc>, <MMXdq:cpu>, Modrm|<MMXdq:attr>|NoSuf, { <MMXdq:reg>|<MMXdq:mem>|Unspecified|BaseIndex, <MMXdq:reg> }
+psrl<MMXdq>, 0x<MMXdq:pfx>0f72 | <MMXdq:opc>/2, <MMXdq:cpu>, Modrm|<MMXdq:attr>|NoSuf, { Imm8, <MMXdq:reg> }
+psub<bw><MMXBW>, 0x<MMXBW:pfx>0ff8 | <bw:opc>, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+psubd<MMX>, 0x<MMX:pfx>0ffa, <MMX:cpu>, Modrm|<MMX:attr>|NoSuf, { <MMX:reg>|<MMX:mem>|Unspecified|BaseIndex, <MMX:reg> }
+psubq<SSE2Q>, 0x660ffb, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 psubq, 0xffb, SSE2, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
-psubs<bw><mmx>, 0x<mmx:pfx>0fe8 | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-psubus<bw><mmx>, 0x<mmx:pfx>0fd8 | <bw:opc>, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-punpckhbw<mmx>, 0x<mmx:pfx>0f68, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-punpckhwd<mmx>, 0x<mmx:pfx>0f69, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-punpckhdq<mmx>, 0x<mmx:pfx>0f6a, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
-punpcklbw<sse2>, 0x660f60, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+psubs<bw><MMXBW>, 0x<MMXBW:pfx>0fe8 | <bw:opc>, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+psubus<bw><MMXBW>, 0x<MMXBW:pfx>0fd8 | <bw:opc>, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+punpckhbw<MMXBW>, 0x<MMXBW:pfx>0f68, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+punpckhwd<MMXBW>, 0x<MMXBW:pfx>0f69, <MMXBW:cpu>, Modrm|<MMXBW:attr>|NoSuf, { <MMXBW:reg>|<MMXBW:mem>|Unspecified|BaseIndex, <MMXBW:reg> }
+punpckhdq<MMX>, 0x<MMX:pfx>0f6a, <MMX:cpu>, Modrm|<MMX:attr>|NoSuf, { <MMX:reg>|<MMX:mem>|Unspecified|BaseIndex, <MMX:reg> }
+punpcklbw<SSE2BW>, 0x660f60, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|<SSE2BW:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 punpcklbw, 0xf60, MMX, Modrm|NoSuf, { Dword|Unspecified|BaseIndex|RegMMX, RegMMX }
-punpcklwd<sse2>, 0x660f61, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+punpcklwd<SSE2BW>, 0x660f61, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|<SSE2BW:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 punpcklwd, 0xf61, MMX, Modrm|NoSuf, { Dword|Unspecified|BaseIndex|RegMMX, RegMMX }
-punpckldq<sse2>, 0x660f62, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+punpckldq<SSE2D>, 0x660f62, <SSE2D:cpu>, Modrm|<SSE2D:attr>|<SSE2D:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 punpckldq, 0xf62, MMX, Modrm|NoSuf, { Dword|Unspecified|BaseIndex|RegMMX, RegMMX }
-pxor<mmx>, 0x<mmx:pfx>0fef, <mmx:cpu>, Modrm|<mmx:attr>|C|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }
+pxor<MMX>, 0x<MMX:pfx>0fef, <MMX:cpu>, Modrm|<MMX:attr>|C|NoSuf, { <MMX:reg>|<MMX:mem>|Unspecified|BaseIndex, <MMX:reg> }
 
 // SSE instructions.
 
 <sse:cpu:attr:scal:vvvv, +
     $avx:AVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV, +
     $sse:SSE:::>
+<SSE:cpu:attr:scal:vvvv, +
+    $avx:AVX|AVX512VL:Vex128|EVex128|VexW0|Disp8MemShift=4|SSE2AVX:VexLIG|EVexLIG|VexW0|Disp8MemShift=2|SSE2AVX:VexVVVV, +
+    $sse:SSE:::>
+<SSEDQ:cpu:attr, +
+    $avx:AVX:Vex128|VexW0|VexVVVV|SSE2AVX, +
+    $apx:AVX512DQ&AVX512VL:EVex128|VexW0|VexVVVV|Disp8MemShift=4|SSE2AVX, +
+    $sse:SSE:>
+<SSERP:recip:rsqrt:cpu:attr, +
+    $avx:0x0f53:0x0f52:AVX:Vex128|VexW0|SSE2AVX, +
+    $apx:0x660f384c:0x660f384e:AVX512VL:EVex128|VexW0|Disp8MemShift=4|SSE2AVX, +
+    $sse:0x0f53:0x0f52:SSE:::>
+<SSERS:recip:rsqrt:cpu:attr, +
+    $avx:0xf30f53:0xf30f52:AVX:VexLIG|VexW0|VexVVVV|SSE2AVX, +
+    $apx:0x660f384d:0x660f384f:AVX512F:EVexLIG|VexW0|VexVVVV|Disp8MemShift=2|SSE2AVX, +
+    $sse:0xf30f53:0xf30f52:SSE:::>
 <frel:imm:comm, eq:0:C, lt:1:, le:2:, unord:3:C, neq:4:C, nlt:5:, nle:6:, ord:7:C>
 
-addps<sse>, 0x0f58, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-addss<sse>, 0xf30f58, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-andnps<sse>, 0x0f55, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-andps<sse>, 0x0f54, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+addps<SSE>, 0x0f58, <SSE:cpu>, Modrm|<SSE:attr>|<SSE:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+addss<SSE>, 0xf30f58, <SSE:cpu>, Modrm|<SSE:scal>|<SSE:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+andnps<SSEDQ>, 0x0f55, <SSEDQ:cpu>, Modrm|<SSEDQ:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+andps<SSEDQ>, 0x0f54, <SSEDQ:cpu>, Modrm|<SSEDQ:attr>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 cmp<frel>ps<sse>, 0x0fc2/<frel:imm>, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|<frel:comm>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
 cmp<frel>ss<sse>, 0xf30fc2/<frel:imm>, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|<frel:comm>|NoSuf|ImmExt, { RegXMM|Dword|Unspecified|BaseIndex, RegXMM }
 cmpps<sse>, 0x0fc2, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 cmpss<sse>, 0xf30fc2, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|NoSuf, { Imm8, Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-comiss<sse>, 0x0f2f, <sse:cpu>, Modrm|<sse:scal>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+comiss<SSE>, 0x0f2f, <SSE:cpu>, Modrm|<SSE:scal>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
 cvtpi2ps, 0xf2a, SSE, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegXMM }
 cvtps2pi, 0xf2d, SSE, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegMMX }
 cvtsi2ss<sse>, 0xf30f2a, <sse:cpu>&No64, Modrm|<sse:scal>|<sse:vvvv>|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Reg32|Unspecified|BaseIndex, RegXMM }
-cvtsi2ss, 0xf32a, AVX&x64, Modrm|Vex=3|Space0F|VexVVVV|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|SSE2AVX|ATTSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM }
-cvtsi2ss, 0xf32a, AVX&x64, Modrm|Vex=3|Space0F|VexVVVV|No_bSuf|No_wSuf|No_sSuf|SSE2AVX|IntelSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM }
+cvtsi2ss, 0xf32a, x64&(AVX|AVX512F), Modrm|VexLIG|EVexLIG|Space0F|VexVVVV|IgnoreSize|Disp8ShiftVL|No_bSuf|No_wSuf|No_sSuf|SSE2AVX|ATTSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM }
+cvtsi2ss, 0xf32a, x64&(AVX|AVX512F), Modrm|VexLIG|EVexLIG|Space0F|VexVVVV|Disp8ShiftVL|No_bSuf|No_wSuf|No_sSuf|SSE2AVX|IntelSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM }
 cvtsi2ss, 0xf30f2a, SSE&x64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|ATTSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM }
 cvtsi2ss, 0xf30f2a, SSE&x64, Modrm|No_bSuf|No_wSuf|No_sSuf|IntelSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM }
-cvtss2si, 0xf32d, AVX, Modrm|VexLIG|Space0F|No_bSuf|No_wSuf|No_sSuf|SSE2AVX, { Dword|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
+cvtss2si, 0xf32d, AVX|AVX512F, Modrm|VexLIG|EVexLIG|Space0F|Disp8MemShift=2|No_bSuf|No_wSuf|No_sSuf|SSE2AVX, { Dword|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
 cvtss2si, 0xf30f2d, SSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Dword|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
 cvttps2pi, 0xf2c, SSE, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegMMX }
-cvttss2si, 0xf32c, AVX, Modrm|VexLIG|Space0F|No_bSuf|No_wSuf|No_sSuf|SSE2AVX, { Dword|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
+cvttss2si, 0xf32c, AVX|AVX512F, Modrm|VexLIG|EVexLIG|Space0F|Disp8MemShift=2|No_bSuf|No_wSuf|No_sSuf|SSE2AVX, { Dword|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
 cvttss2si, 0xf30f2c, SSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Dword|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
-divps<sse>, 0x0f5e, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-divss<sse>, 0xf30f5e, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+divps<SSE>, 0x0f5e, <SSE:cpu>, Modrm|<SSE:attr>|<SSE:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+divss<SSE>, 0xf30f5e, <SSE:cpu>, Modrm|<SSE:scal>|<SSE:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
 ldmxcsr<sse>, 0x0fae/2, <sse:cpu>, Modrm|<sse:attr>|NoSuf, { Dword|Unspecified|BaseIndex }
 maskmovq, 0xff7, SSE|3dnowA, Modrm|NoSuf, { RegMMX, RegMMX }
-maxps<sse>, 0x0f5f, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-maxss<sse>, 0xf30f5f, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-minps<sse>, 0x0f5d, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-minss<sse>, 0xf30f5d, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-movaps<sse>, 0x0f28, <sse:cpu>, D|Modrm|<sse:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+maxps<SSE>, 0x0f5f, <SSE:cpu>, Modrm|<SSE:attr>|<SSE:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+maxss<SSE>, 0xf30f5f, <SSE:cpu>, Modrm|<SSE:scal>|<SSE:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+minps<SSE>, 0x0f5d, <SSE:cpu>, Modrm|<SSE:attr>|<SSE:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+minss<SSE>, 0xf30f5d, <SSE:cpu>, Modrm|<SSE:scal>|<SSE:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+movaps<SSE>, 0x0f28, <SSE:cpu>, D|Modrm|<SSE:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 movhlps<sse>, 0x0f12, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM, RegXMM }
-movhps, 0x16, AVX, Modrm|Vex|Space0F|VexVVVV|VexW0|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
-movhps, 0x17, AVX, Modrm|Vex|Space0F|VexW0|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex }
+movhps, 0x16, AVX|AVX512F, Modrm|Vex128|EVex128|Space0F|VexVVVV|VexW0|Disp8MemShift=3|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
+movhps, 0x17, AVX|AVX512F, Modrm|Vex128|EVex128|Space0F|VexW0|Disp8MemShift=3|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex }
 movhps, 0xf16, SSE, D|Modrm|NoSuf, { Qword|Unspecified|BaseIndex, RegXMM }
 movlhps<sse>, 0x0f16, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM, RegXMM }
-movlps, 0x12, AVX, Modrm|Vex|Space0F|VexVVVV|VexW0|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
-movlps, 0x13, AVX, Modrm|Vex|Space0F|VexW0|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex }
+movlps, 0x12, AVX|AVX512F, Modrm|Vex128|EVex128|Space0F|VexVVVV|VexW0|Disp8MemShift=3|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
+movlps, 0x13, AVX|AVX512F, Modrm|Vex128|EVex128|Space0F|VexW0|Disp8MemShift=3|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex }
 movlps, 0xf12, SSE, D|Modrm|NoSuf, { Qword|Unspecified|BaseIndex, RegXMM }
 movmskps<sse>, 0x0f50, <sse:cpu>, Modrm|<sse:attr>|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|NoRex64, { RegXMM, Reg32|Reg64 }
-movntps<sse>, 0x0f2b, <sse:cpu>, Modrm|<sse:attr>|NoSuf, { RegXMM, Xmmword|Unspecified|BaseIndex }
+movntps<SSE>, 0x0f2b, <SSE:cpu>, Modrm|<SSE:attr>|NoSuf, { RegXMM, Xmmword|Unspecified|BaseIndex }
 movntq, 0xfe7, SSE|3dnowA, Modrm|NoSuf, { RegMMX, Qword|Unspecified|BaseIndex }
-movntdq<sse2>, 0x660fe7, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { RegXMM, Xmmword|Unspecified|BaseIndex }
-movss, 0xf310, AVX, D|Modrm|VexLIG|Space0F|VexW0|NoSuf|SSE2AVX, { Dword|Unspecified|BaseIndex, RegXMM }
+movntdq<SSE2D>, 0x660fe7, <SSE2D:cpu>, Modrm|<SSE2D:attr>|NoSuf, { RegXMM, Xmmword|Unspecified|BaseIndex }
+movss, 0xf310, AVX|AVX512F, D|Modrm|VexLIG|EVexLIG|Space0F|VexW0|Disp8MemShift=2|NoSuf|SSE2AVX, { Dword|Unspecified|BaseIndex, RegXMM }
 movss, 0xf310, AVX, D|Modrm|VexLIG|Space0F|VexVVVV|VexW0|NoSuf|SSE2AVX, { RegXMM, RegXMM }
 movss, 0xf30f10, SSE, D|Modrm|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-movups<sse>, 0x0f10, <sse:cpu>, D|Modrm|<sse:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-mulps<sse>, 0x0f59, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-mulss<sse>, 0xf30f59, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-orps<sse>, 0x0f56, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+movups<SSE>, 0x0f10, <SSE:cpu>, D|Modrm|<SSE:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+mulps<SSE>, 0x0f59, <SSE:cpu>, Modrm|<SSE:attr>|<SSE:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+mulss<SSE>, 0xf30f59, <SSE:cpu>, Modrm|<SSE:scal>|<SSE:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+orps<SSEDQ>, 0x0f56, <SSEDQ:cpu>, Modrm|<SSEDQ:attr>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pavg<bw>, 0xfe0 | (3 * <bw:opc>), SSE|3dnowA, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
-pavg<bw><sse2>, 0x660fe0 | (3 * <bw:opc>), <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pextrw<sse2>, 0x660fc5, <sse2:cpu>, Load|Modrm|<sse2:attr>|No_bSuf|No_wSuf|No_sSuf|IgnoreSize|NoRex64, { Imm8, RegXMM, Reg32|Reg64 }
+pavg<bw><SSE2BW>, 0x660fe0 | (3 * <bw:opc>), <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|<SSE2BW:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pextrw<SSE2D>, 0x660fc5, <SSE2D:cpu>, Load|Modrm|<SSE2D:attr>|No_bSuf|No_wSuf|No_sSuf|IgnoreSize|NoRex64, { Imm8, RegXMM, Reg32|Reg64 }
 pextrw, 0xfc5, SSE|3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Imm8, RegMMX, Reg32|Reg64 }
-pinsrw<sse2>, 0x660fc4, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|No_bSuf|No_wSuf|No_sSuf|IgnoreSize|NoRex64, { Imm8, Reg32|Reg64, RegXMM }
-pinsrw<sse2>, 0x660fc4, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { Imm8, Word|Unspecified|BaseIndex, RegXMM }
+pinsrw<SSE2D>, 0x660fc4, <SSE2D:cpu>, Modrm|<SSE2D:attr>|<SSE2D:vvvv>|No_bSuf|No_wSuf|No_sSuf|IgnoreSize|NoRex64, { Imm8, Reg32|Reg64, RegXMM }
+pinsrw<SSE2D>, 0x660fc4, <SSE2D:cpu>, Modrm|<SSE2D:attr>|<SSE2D:vvvv>|Disp8MemShift|NoSuf, { Imm8, Word|Unspecified|BaseIndex, RegXMM }
 pinsrw, 0xfc4, SSE|3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Imm8, Reg32|Reg64, RegMMX }
 pinsrw, 0xfc4, SSE|3dnowA, Modrm|NoSuf, { Imm8, Word|Unspecified|BaseIndex, RegMMX }
-pmaxsw<sse2>, 0x660fee, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pmaxsw<SSE2BW>, 0x660fee, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|<SSE2BW:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pmaxsw, 0xfee, SSE|3dnowA, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
-pmaxub<sse2>, 0x660fde, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pmaxub<SSE2BW>, 0x660fde, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|<SSE2BW:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pmaxub, 0xfde, SSE|3dnowA, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
-pminsw<sse2>, 0x660fea, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pminsw<SSE2BW>, 0x660fea, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|<SSE2BW:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pminsw, 0xfea, SSE|3dnowA, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
-pminub<sse2>, 0x660fda, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pminub<SSE2BW>, 0x660fda, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|<SSE2BW:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pminub, 0xfda, SSE|3dnowA, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
 pmovmskb<sse2>, 0x660fd7, <sse2:cpu>, Modrm|<sse2:attr>|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|NoRex64, { RegXMM, Reg32|Reg64 }
 pmovmskb, 0xfd7, SSE|3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|NoRex64, { RegMMX, Reg32|Reg64 }
-pmulhuw<sse2>, 0x660fe4, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pmulhuw<SSE2BW>, 0x660fe4, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|<SSE2BW:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pmulhuw, 0xfe4, SSE|3dnowA, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
 prefetchnta, 0xf18/0, SSE|3dnowA, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
 prefetcht0, 0xf18/1, SSE|3dnowA, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
 prefetcht1, 0xf18/2, SSE|3dnowA, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
 prefetcht2, 0xf18/3, SSE|3dnowA, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
 psadbw, 0xff6, SSE|3dnowA, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
-psadbw<sse2>, 0x660ff6, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+psadbw<SSE2BW>, 0x660ff6, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|<SSE2BW:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pshufw, 0xf70, SSE|3dnowA, Modrm|NoSuf, { Imm8|Imm8S, Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
-rcpps<sse>, 0x0f53, <sse:cpu>, Modrm|<sse:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-rcpss<sse>, 0xf30f53, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-rsqrtps<sse>, 0x0f52, <sse:cpu>, Modrm|<sse:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-rsqrtss<sse>, 0xf30f52, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+rcpps<SSERP>, <SSERP:recip>, <SSERP:cpu>, Modrm|<SSERP:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+rcpss<SSERS>, <SSERS:recip>, <SSERS:cpu>, Modrm|<SSERS:attr>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+rsqrtps<SSERP>, <SSERP:rsqrt>, <SSERP:cpu>, Modrm|<SSERP:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+rsqrtss<SSERS>, <SSERS:rsqrt>, <SSERS:cpu>, Modrm|<SSERS:attr>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
 sfence, 0xfaef8, SSE|3dnowA, NoSuf, {}
-shufps<sse>, 0x0fc6, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
-sqrtps<sse>, 0x0f51, <sse:cpu>, Modrm|<sse:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-sqrtss<sse>, 0xf30f51, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+shufps<SSE>, 0x0fc6, <SSE:cpu>, Modrm|<SSE:attr>|<SSE:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
+sqrtps<SSE>, 0x0f51, <SSE:cpu>, Modrm|<SSE:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+sqrtss<SSE>, 0xf30f51, <SSE:cpu>, Modrm|<SSE:scal>|<SSE:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
 stmxcsr<sse>, 0x0fae/3, <sse:cpu>, Modrm|<sse:attr>|NoSuf, { Dword|Unspecified|BaseIndex }
-subps<sse>, 0x0f5c, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-subss<sse>, 0xf30f5c, <sse:cpu>, Modrm|<sse:scal>|<sse:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-ucomiss<sse>, 0x0f2e, <sse:cpu>, Modrm|<sse:scal>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-unpckhps<sse>, 0x0f15, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-unpcklps<sse>, 0x0f14, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-xorps<sse>, 0x0f57, <sse:cpu>, Modrm|<sse:attr>|<sse:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+subps<SSE>, 0x0f5c, <SSE:cpu>, Modrm|<SSE:attr>|<SSE:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+subss<SSE>, 0xf30f5c, <SSE:cpu>, Modrm|<SSE:scal>|<SSE:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+ucomiss<SSE>, 0x0f2e, <SSE:cpu>, Modrm|<SSE:scal>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+unpckhps<SSE>, 0x0f15, <SSE:cpu>, Modrm|<SSE:attr>|<SSE:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+unpcklps<SSE>, 0x0f14, <SSE:cpu>, Modrm|<SSE:attr>|<SSE:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+xorps<SSEDQ>, 0x0f57, <SSEDQ:cpu>, Modrm|<SSEDQ:attr>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 
 // SSE2 instructions.
 
-addpd<sse2>, 0x660f58, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-addsd<sse2>, 0xf20f58, <sse2:cpu>, Modrm|<sse2:scal>|<sse2:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-andnpd<sse2>, 0x660f55, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-andpd<sse2>, 0x660f54, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+<SSE2DQ:cpu:attr, +
+    $avx:AVX:Vex128|VexW0|VexVVVV|SSE2AVX, +
+    $apx:AVX512DQ&AVX512VL:EVex128|VexW1|VexVVVV|Disp8MemShift=4|SSE2AVX, +
+    $sse:SSE2:>
+
+addpd<SSE2Q>, 0x660f58, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+addsd<SSE2Q>, 0xf20f58, <SSE2Q:cpu>, Modrm|<SSE2Q:scal>|<SSE2Q:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+andnpd<SSE2DQ>, 0x660f55, <SSE2DQ:cpu>, Modrm|<SSE2DQ:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+andpd<SSE2DQ>, 0x660f54, <SSE2DQ:cpu>, Modrm|<SSE2DQ:attr>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 cmp<frel>pd<sse2>, 0x660fc2/<frel:imm>, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|<frel:comm>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
 cmp<frel>sd<sse2>, 0xf20fc2/<frel:imm>, <sse2:cpu>, Modrm|<sse2:scal>|<sse2:vvvv>|<frel:comm>|NoSuf|ImmExt, { RegXMM|Qword|Unspecified|BaseIndex, RegXMM }
 cmppd<sse2>, 0x660fc2, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 cmpsd<sse2>, 0xf20fc2, <sse2:cpu>, Modrm|<sse2:scal>|<sse2:vvvv>|NoSuf, { Imm8, Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-comisd<sse2>, 0x660f2f, <sse2:cpu>, Modrm|<sse2:scal>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+comisd<SSE2Q>, 0x660f2f, <SSE2Q:cpu>, Modrm|<SSE2Q:scal>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
 cvtpi2pd, 0x660f2a, SSE2, Modrm|NoSuf, { RegMMX, RegXMM }
-cvtpi2pd, 0xf3e6, AVX, Modrm|Vex|Space0F|VexW0|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
+cvtpi2pd, 0xf3e6, AVX|AVX512VL, Modrm|Vex128|EVex128|Space0F|VexW0|Disp8MemShift=3|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
 cvtpi2pd, 0x660f2a, SSE2, Modrm|NoSuf, { Qword|Unspecified|BaseIndex, RegXMM }
 cvtsi2sd<sse2>, 0xf20f2a, <sse2:cpu>&No64, Modrm|IgnoreSize|<sse2:scal>|<sse2:vvvv>|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Reg32|Unspecified|BaseIndex, RegXMM }
-cvtsi2sd, 0xf22a, AVX&x64, Modrm|Vex=3|Space0F|VexVVVV|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|SSE2AVX|ATTSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM }
-cvtsi2sd, 0xf22a, AVX&x64, Modrm|Vex=3|Space0F|VexVVVV|No_bSuf|No_wSuf|No_sSuf|SSE2AVX|IntelSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM }
+cvtsi2sd, 0xf22a, x64&(AVX|AVX512F), Modrm|VexLIG|EVexLIG|Space0F|VexVVVV|Disp8ShiftVL|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|SSE2AVX|ATTSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM }
+cvtsi2sd, 0xf22a, x64&(AVX|AVX512F), Modrm|VexLIG|EVexLIG|Space0F|VexVVVV|Disp8ShiftVL|No_bSuf|No_wSuf|No_sSuf|SSE2AVX|IntelSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM }
 cvtsi2sd, 0xf20f2a, SSE2&x64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|ATTSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM }
 cvtsi2sd, 0xf20f2a, SSE2&x64, Modrm|No_bSuf|No_wSuf|No_sSuf|IntelSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM }
-divpd<sse2>, 0x660f5e, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-divsd<sse2>, 0xf20f5e, <sse2:cpu>, Modrm|<sse2:scal>|<sse2:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-maxpd<sse2>, 0x660f5f, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-maxsd<sse2>, 0xf20f5f, <sse2:cpu>, Modrm|<sse2:scal>|<sse2:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-minpd<sse2>, 0x660f5d, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-minsd<sse2>, 0xf20f5d, <sse2:cpu>, Modrm|<sse2:scal>|<sse2:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-movapd<sse2>, 0x660f28, <sse2:cpu>, D|Modrm|<sse2:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+divpd<SSE2Q>, 0x660f5e, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+divsd<SSE2Q>, 0xf20f5e, <SSE2Q:cpu>, Modrm|<SSE2Q:scal>|<SSE2Q:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+maxpd<SSE2Q>, 0x660f5f, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+maxsd<SSE2Q>, 0xf20f5f, <SSE2Q:cpu>, Modrm|<SSE2Q:scal>|<SSE2Q:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+minpd<SSE2Q>, 0x660f5d, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+minsd<SSE2Q>, 0xf20f5d, <SSE2Q:cpu>, Modrm|<SSE2Q:scal>|<SSE2Q:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+movapd<SSE2Q>, 0x660f28, <SSE2Q:cpu>, D|Modrm|<SSE2Q:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 movhpd, 0x6616, AVX, Modrm|Vex|Space0F|VexVVVV|VexW0|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
+movhpd, 0x6616, AVX512F, Modrm|EVex128|Space0F|VexVVVV|VexW1|Disp8MemShift=3|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
 movhpd, 0x6617, AVX, Modrm|Vex|Space0F|VexW0|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex }
+movhpd, 0x6617, AVX512F, Modrm|EVex128|Space0F|VexW1|Disp8MemShift=3|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex }
 movhpd, 0x660f16, SSE2, D|Modrm|NoSuf, { Qword|Unspecified|BaseIndex, RegXMM }
 movlpd, 0x6612, AVX, Modrm|Vex|Space0F|VexVVVV|VexW0|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
+movlpd, 0x6612, AVX512F, Modrm|EVex128|Space0F|VexVVVV|VexW1|Disp8MemShift=3|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
 movlpd, 0x6613, AVX, Modrm|Vex|Space0F|VexW0|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex }
+movlpd, 0x6613, AVX512F, Modrm|EVex128|Space0F|VexW1|Disp8MemShift=3|NoSuf|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex }
 movlpd, 0x660f12, SSE2, D|Modrm|NoSuf, { Qword|Unspecified|BaseIndex, RegXMM }
 movmskpd<sse2>, 0x660f50, <sse2:cpu>, Modrm|<sse2:attr>|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|NoRex64, { RegXMM, Reg32|Reg64 }
-movntpd<sse2>, 0x660f2b, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { RegXMM, Xmmword|Unspecified|BaseIndex }
+movntpd<SSE2Q>, 0x660f2b, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|NoSuf, { RegXMM, Xmmword|Unspecified|BaseIndex }
 movsd, 0xf210, AVX, D|Modrm|VexLIG|Space0F|VexW0|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
+movsd, 0xf210, AVX512F, D|Modrm|EVexLIG|Space0F|VexW1|Disp8MemShift=3|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex, RegXMM }
 movsd, 0xf210, AVX, D|Modrm|VexLIG|Space0F|VexVVVV|VexW0|NoSuf|SSE2AVX, { RegXMM, RegXMM }
 movsd, 0xf20f10, SSE2, D|Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-movupd<sse2>, 0x660f10, <sse2:cpu>, D|Modrm|<sse2:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-mulpd<sse2>, 0x660f59, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-mulsd<sse2>, 0xf20f59, <sse2:cpu>, Modrm|<sse2:scal>|<sse2:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-orpd<sse2>, 0x660f56, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-shufpd<sse2>, 0x660fc6, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
-sqrtpd<sse2>, 0x660f51, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-sqrtsd<sse2>, 0xf20f51, <sse2:cpu>, Modrm|<sse2:scal>|<sse2:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-subpd<sse2>, 0x660f5c, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-subsd<sse2>, 0xf20f5c, <sse2:cpu>, Modrm|<sse2:scal>|<sse2:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-ucomisd<sse2>, 0x660f2e, <sse2:cpu>, Modrm|<sse2:scal>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-unpckhpd<sse2>, 0x660f15, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-unpcklpd<sse2>, 0x660f14, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-xorpd<sse2>, 0x660f57, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-cvtdq2pd<sse2>, 0xf30fe6, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-cvtpd2dq<sse2>, 0xf20fe6, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-cvtdq2ps<sse2>, 0x0f5b, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+movupd<SSE2Q>, 0x660f10, <SSE2Q:cpu>, D|Modrm|<SSE2Q:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+mulpd<SSE2Q>, 0x660f59, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+mulsd<SSE2Q>, 0xf20f59, <SSE2Q:cpu>, Modrm|<SSE2Q:scal>|<SSE2Q:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+orpd<SSE2DQ>, 0x660f56, <SSE2DQ:cpu>, Modrm|<SSE2DQ:attr>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+shufpd<SSE2Q>, 0x660fc6, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
+sqrtpd<SSE2Q>, 0x660f51, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+sqrtsd<SSE2Q>, 0xf20f51, <SSE2Q:cpu>, Modrm|<SSE2Q:scal>|<SSE2Q:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+subpd<SSE2Q>, 0x660f5c, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+subsd<SSE2Q>, 0xf20f5c, <SSE2Q:cpu>, Modrm|<SSE2Q:scal>|<SSE2Q:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+ucomisd<SSE2Q>, 0x660f2e, <SSE2Q:cpu>, Modrm|<SSE2Q:scal>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+unpckhpd<SSE2Q>, 0x660f15, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+unpcklpd<SSE2Q>, 0x660f14, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+xorpd<SSE2DQ>, 0x660f57, <SSE2DQ:cpu>, Modrm|<SSE2DQ:attr>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+cvtdq2pd<SSE2D>, 0xf30fe6, <SSE2D:cpu>, Modrm|<SSE2D:attr>|Disp8MemShift|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+cvtpd2dq<SSE2Q>, 0xf20fe6, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+cvtdq2ps<SSE2D>, 0x0f5b, <SSE2D:cpu>, Modrm|<SSE2D:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 cvtpd2pi, 0x660f2d, SSE2, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegMMX }
-cvtpd2ps<sse2>, 0x660f5a, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-cvtps2pd<sse2>, 0x0f5a, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-cvtps2dq<sse2>, 0x660f5b, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-cvtsd2si, 0xf22d, AVX, Modrm|VexLIG|Space0F|No_bSuf|No_wSuf|No_sSuf|SSE2AVX, { Qword|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
+cvtpd2ps<SSE2Q>, 0x660f5a, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+cvtps2pd<SSE2D>, 0x0f5a, <SSE2D:cpu>, Modrm|<SSE2D:attr>|Disp8MemShift|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+cvtps2dq<SSE2D>, 0x660f5b, <SSE2D:cpu>, Modrm|<SSE2D:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+cvtsd2si, 0xf22d, AVX|AVX512F, Modrm|VexLIG|EVexLIG|Space0F|Disp8MemShift=3|No_bSuf|No_wSuf|No_sSuf|SSE2AVX, { Qword|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
 cvtsd2si, 0xf20f2d, SSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Qword|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
-cvtsd2ss<sse2>, 0xf20f5a, <sse2:cpu>, Modrm|<sse2:scal>|<sse2:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-cvtss2sd<sse2>, 0xf30f5a, <sse2:cpu>, Modrm|<sse2:scal>|<sse2:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-
+cvtsd2ss<SSE2Q>, 0xf20f5a, <SSE2Q:cpu>, Modrm|<SSE2Q:scal>|<SSE2Q:vvvv>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+cvtss2sd<SSE2D>, 0xf30f5a, <SSE2D:cpu>, Modrm|<SSE2D:scal>|<SSE2D:vvvv>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
 cvttpd2pi, 0x660f2c, SSE2, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegMMX }
-cvttsd2si, 0xf22c, AVX, Modrm|VexLIG|Space0F|No_bSuf|No_wSuf|No_sSuf|SSE2AVX, { Qword|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
+cvttsd2si, 0xf22c, AVX|AVX512F, Modrm|VexLIG|EVexLIG|Space0F|Disp8MemShift=3|No_bSuf|No_wSuf|No_sSuf|SSE2AVX, { Qword|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
 cvttsd2si, 0xf20f2c, SSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Qword|Unspecified|BaseIndex|RegXMM, Reg32|Reg64 }
-cvttpd2dq<sse2>, 0x660fe6, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-cvttps2dq<sse2>, 0xf30f5b, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+cvttpd2dq<SSE2Q>, 0x660fe6, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+cvttps2dq<SSE2D>, 0xf30f5b, <SSE2D:cpu>, Modrm|<SSE2D:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 maskmovdqu<sse2>, 0x660ff7, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { RegXMM, RegXMM }
-movdqa<sse2>, 0x660f6f, <sse2:cpu>, D|Modrm|<sse2:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-movdqu<sse2>, 0xf30f6f, <sse2:cpu>, D|Modrm|<sse2:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+movdqa<SSE2D>, 0x660f6f, <SSE2D:cpu>, D|Modrm|<SSE2D:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+movdqu<SSE2D>, 0xf30f6f, <SSE2D:cpu>, D|Modrm|<SSE2D:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 movdq2q, 0xf20fd6, SSE2, Modrm|NoSuf, { RegXMM, RegMMX }
 movq2dq, 0xf30fd6, SSE2, Modrm|NoSuf, { RegMMX, RegXMM }
-pmuludq<sse2>, 0x660ff4, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pmuludq<SSE2Q>, 0x660ff4, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|C|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pmuludq, 0xff4, SSE2, Modrm|NoSuf, { Qword|Unspecified|BaseIndex|RegMMX, RegMMX }
-pshufd<sse2>, 0x660f70, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
-pshufhw<sse2>, 0xf30f70, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
-pshuflw<sse2>, 0xf20f70, <sse2:cpu>, Modrm|<sse2:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
+pshufd<SSE2D>, 0x660f70, <SSE2D:cpu>, Modrm|<SSE2D:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
+pshufhw<SSE2BW>, 0xf30f70, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
+pshuflw<SSE2BW>, 0xf20f70, <SSE2BW:cpu>, Modrm|<SSE2BW:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 pslldq<sse2>, 0x660f73/7, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { Imm8, RegXMM }
 psrldq<sse2>, 0x660f73/3, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { Imm8, RegXMM }
-punpckhqdq<sse2>, 0x660f6d, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-punpcklqdq<sse2>, 0x660f6c, <sse2:cpu>, Modrm|<sse2:attr>|<sse2:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+punpckhqdq<SSE2Q>, 0x660f6d, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+punpcklqdq<SSE2Q>, 0x660f6c, <SSE2Q:cpu>, Modrm|<SSE2Q:attr>|<SSE2Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 
 <frel>
 
 // SSE3 instructions.
 
 <sse3:cpu:attr:vvvv, $avx:AVX:Vex128|VexW0|SSE2AVX:VexVVVV, $sse:SSE3::>
+<SSE3D:cpu:attr, +
+    $avx:AVX|AVX512VL:Vex128|EVex128|VexW0|Disp8MemShift=4|SSE2AVX, +
+    $sse:SSE3:>
+<SSE3Q:cpu:attr, +
+    $avx:AVX:Vex128|VexW0|SSE2AVX:VexVVVV, +
+    $apx:AVX512VL:EVex128|VexW1|Disp8MemShift=3|SSE2AVX, +
+    $sse:SSE3:>
 
 addsubpd<sse3>, 0x660fd0, <sse3:cpu>, Modrm|<sse3:attr>|<sse3:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 addsubps<sse3>, 0xf20fd0, <sse3:cpu>, Modrm|<sse3:attr>|<sse3:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
@@ -1279,10 +1342,13 @@ haddpd<sse3>, 0x660f7c, <sse3:cpu>, Modrm|<sse3:attr>|<sse3:vvvv>|NoSuf, { RegXM
 haddps<sse3>, 0xf20f7c, <sse3:cpu>, Modrm|<sse3:attr>|<sse3:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 hsubpd<sse3>, 0x660f7d, <sse3:cpu>, Modrm|<sse3:attr>|<sse3:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 hsubps<sse3>, 0xf20f7d, <sse3:cpu>, Modrm|<sse3:attr>|<sse3:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-lddqu<sse3>, 0xf20ff0, <sse3:cpu>, Modrm|<sse3:attr>|NoSuf, { Xmmword|Unspecified|BaseIndex, RegXMM }
-movddup<sse3>, 0xf20f12, <sse3:cpu>, Modrm|<sse3:attr>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-movshdup<sse3>, 0xf30f16, <sse3:cpu>, Modrm|<sse3:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-movsldup<sse3>, 0xf30f12, <sse3:cpu>, Modrm|<sse3:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+lddqu, 0xf20ff0, AVX, Modrm|Vex128|VexW0|SSE2AVX|NoSuf, { Xmmword|Unspecified|BaseIndex, RegXMM }
+// For use with eGPR-s in the memory operand, utilize VMOVDQU32.
+lddqu, 0xf30f6f, AVX512VL, Modrm|EVex128|VexW0|Disp8MemShift=4|SSE2AVX|NoSuf, { Xmmword|Unspecified|BaseIndex, RegXMM }
+lddqu, 0xf20ff0, SSE3, Modrm|NoSuf, { Xmmword|Unspecified|BaseIndex, RegXMM }
+movddup<SSE3Q>, 0xf20f12, <SSE3Q:cpu>, Modrm|<SSE3Q:attr>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+movshdup<SSE3D>, 0xf30f16, <SSE3D:cpu>, Modrm|<SSE3D:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+movsldup<SSE3D>, 0xf30f12, <SSE3D:cpu>, Modrm|<SSE3D:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 
 // FPU instructions also covered by SSE3 CPUID flag.
 
@@ -1352,6 +1418,15 @@ invpcid, 0xf3f2, INVPCID&APX_F, Modrm|NoSuf|EVexMap4|VexWIG, { Oword|Unspecified
     $avx:AVX:66:Vex128|VexW0|SSE2AVX:VexVVVV:RegXMM:Xmmword, +
     $sse:SSSE3:66:::RegXMM:Xmmword, +
     $mmx:SSSE3::::RegMMX:Qword>
+<SSSE3BW:cpu:pfx:attr:vvvv:reg:mem, +
+    $avx:AVX:66:Vex128|VexW0|SSE2AVX:VexVVVV:RegXMM:Xmmword, +
+    $apx:AVX512BW&AVX512VL:66:EVex128|VexW0|Disp8MemShift=4|SSE2AVX:VexVVVV:RegXMM:Xmmword, +
+    $sse:SSSE3:66:::RegXMM:Xmmword, +
+    $mmx:SSSE3::::RegMMX:Qword>
+<SSSE3D:cpu:pfx:attr:reg:mem, +
+    $avx:AVX|AVX512VL:66:Vex128|EVex128|VexW0|Disp8MemShift=4|SSE2AVX:RegXMM:Xmmword, +
+    $sse:SSSE3:66::RegXMM:Xmmword, +
+    $mmx:SSSE3:::RegMMX:Qword>
 
 phaddw<ssse3>, 0x<ssse3:pfx>0f3801, <ssse3:cpu>, Modrm|<ssse3:attr>|<ssse3:vvvv>|NoSuf, { <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
 phaddd<ssse3>, 0x<ssse3:pfx>0f3802, <ssse3:cpu>, Modrm|<ssse3:attr>|<ssse3:vvvv>|NoSuf, { <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
@@ -1359,18 +1434,34 @@ phaddsw<ssse3>, 0x<ssse3:pfx>0f3803, <ssse3:cpu>, Modrm|<ssse3:attr>|<ssse3:vvvv
 phsubw<ssse3>, 0x<ssse3:pfx>0f3805, <ssse3:cpu>, Modrm|<ssse3:attr>|<ssse3:vvvv>|NoSuf, { <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
 phsubd<ssse3>, 0x<ssse3:pfx>0f3806, <ssse3:cpu>, Modrm|<ssse3:attr>|<ssse3:vvvv>|NoSuf, { <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
 phsubsw<ssse3>, 0x<ssse3:pfx>0f3807, <ssse3:cpu>, Modrm|<ssse3:attr>|<ssse3:vvvv>|NoSuf, { <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
-pmaddubsw<ssse3>, 0x<ssse3:pfx>0f3804, <ssse3:cpu>, Modrm|<ssse3:attr>|<ssse3:vvvv>|NoSuf, { <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
-pmulhrsw<ssse3>, 0x<ssse3:pfx>0f380b, <ssse3:cpu>, Modrm|<ssse3:attr>|<ssse3:vvvv>|NoSuf, { <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
-pshufb<ssse3>, 0x<ssse3:pfx>0f3800, <ssse3:cpu>, Modrm|<ssse3:attr>|<ssse3:vvvv>|NoSuf, { <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
+pmaddubsw<SSSE3BW>, 0x<SSSE3BW:pfx>0f3804, <SSSE3BW:cpu>, Modrm|<SSSE3BW:attr>|<SSSE3BW:vvvv>|NoSuf, { <SSSE3BW:reg>|<SSSE3BW:mem>|Unspecified|BaseIndex, <SSSE3BW:reg> }
+pmulhrsw<SSSE3BW>, 0x<SSSE3BW:pfx>0f380b, <SSSE3BW:cpu>, Modrm|<SSSE3BW:attr>|<SSSE3BW:vvvv>|NoSuf, { <SSSE3BW:reg>|<SSSE3BW:mem>|Unspecified|BaseIndex, <SSSE3BW:reg> }
+pshufb<SSSE3BW>, 0x<SSSE3BW:pfx>0f3800, <SSSE3BW:cpu>, Modrm|<SSSE3BW:attr>|<SSSE3BW:vvvv>|NoSuf, { <SSSE3BW:reg>|<SSSE3BW:mem>|Unspecified|BaseIndex, <SSSE3BW:reg> }
 psign<bw><ssse3>, 0x<ssse3:pfx>0f3808 | <bw:opc>, <ssse3:cpu>, Modrm|<ssse3:attr>|<ssse3:vvvv>|NoSuf, { <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
 psignd<ssse3>, 0x<ssse3:pfx>0f380a, <ssse3:cpu>, Modrm|<ssse3:attr>|<ssse3:vvvv>|NoSuf, { <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
-palignr<ssse3>, 0x<ssse3:pfx>0f3a0f, <ssse3:cpu>, Modrm|<ssse3:attr>|<ssse3:vvvv>|NoSuf, { Imm8, <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
-pabs<bw><ssse3>, 0x<ssse3:pfx>0f381c | <bw:opc>, <ssse3:cpu>, Modrm|<ssse3:attr>|NoSuf, { <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
-pabsd<ssse3>, 0x<ssse3:pfx>0f381e, <ssse3:cpu>, Modrm|<ssse3:attr>|NoSuf, { <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
+palignr<SSSE3BW>, 0x<SSSE3BW:pfx>0f3a0f, <SSSE3BW:cpu>, Modrm|<SSSE3BW:attr>|<SSSE3BW:vvvv>|NoSuf, { Imm8, <SSSE3BW:reg>|<SSSE3BW:mem>|Unspecified|BaseIndex, <SSSE3BW:reg> }
+pabs<bw><SSSE3BW>, 0x<SSSE3BW:pfx>0f381c | <bw:opc>, <SSSE3BW:cpu>, Modrm|<SSSE3BW:attr>|NoSuf, { <SSSE3BW:reg>|<SSSE3BW:mem>|Unspecified|BaseIndex, <SSSE3BW:reg> }
+pabsd<SSSE3D>, 0x<SSSE3D:pfx>0f381e, <SSSE3D:cpu>, Modrm|<SSSE3D:attr>|NoSuf, { <SSSE3D:reg>|<SSSE3D:mem>|Unspecified|BaseIndex, <SSSE3D:reg> }
 
 // SSE4.1 instructions.
 
 <sse41:cpu:attr:scal:vvvv, $avx:AVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV, $sse:SSE4_1:::>
+<SSE41BW:cpu:attr:vvvv, +
+    $avx:AVX:Vex128|VexW0|SSE2AVX:VexVVVV, +
+    $apx:AVX512BW&AVX512VL:EVex128|VexW0|Disp8MemShift=4|SSE2AVX:VexVVVV, +
+    $sse:SSE4_1::>
+<SSE41DQ:cpu:attr:vvvv, +
+    $avx:AVX:Vex128|VexW0|SSE2AVX:VexVVVV, +
+    $apx:AVX512DQ&AVX512VL:EVex128|VexW0|Disp8MemShift=4|SSE2AVX:VexVVVV, +
+    $sse:SSE4_1::>
+<SSE41D:cpu:attr:scal:vvvv, +
+    $avx:AVX|AVX512VL:Vex128|EVex128|VexW0|Disp8MemShift=4|SSE2AVX:VexLIG|EVexLIG|VexW0|Disp8MemShift=2|SSE2AVX:VexVVVV, +
+    $sse:SSE4_1:::>
+<SSE41Q:cpu:attr:scal:vvvv, +
+    $avx:AVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV, +
+    $apx:AVX512VL:EVex128|VexW1|Disp8MemShift=4|SSE2AVX:EVexLIG|VexW1|Disp8MemShift=3|SSE2AVX:VexVVVV, +
+    $sse:SSE4_1:::>
+
 <sd:ppfx:spfx:opc:vexw:elem, s::f3:0:VexW0:Dword, d:66:f2:1:VexW1:Qword>
 
 blendp<sd><sse41>, 0x660f3a0c | <sd:opc>, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
@@ -1379,56 +1470,60 @@ blendvp<sd>, 0x664a | <sd:opc>, AVX, Modrm|Vex128|Space0F3A|VexVVVV|VexW0|NoSuf|
 blendvp<sd>, 0x660f3814 | <sd:opc>, SSE4_1, Modrm|NoSuf, { Acc|Xmmword, RegXMM|Unspecified|BaseIndex, RegXMM }
 blendvp<sd>, 0x660f3814 | <sd:opc>, SSE4_1, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 dpp<sd><sse41>, 0x660f3a40 | <sd:opc>, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
-extractps, 0x6617, AVX, Modrm|Vex128|Space0F3A|VexW0|NoSuf|SSE2AVX, { Imm8, RegXMM, Reg32|Unspecified|BaseIndex }
-extractps, 0x6617, AVX&x64, RegMem|Vex128|Space0F3A|VexW1|NoSuf|SSE2AVX, { Imm8, RegXMM, Reg64 }
+extractps, 0x6617, AVX|AVX512F, Modrm|Vex128|EVex128|Space0F3A|VexW0|Disp8MemShift=2|NoSuf|SSE2AVX, { Imm8, RegXMM, Reg32|Unspecified|BaseIndex }
+extractps, 0x6617, x64&(AVX|AVX512F), RegMem|Vex128|EVex128|Space0F3A|VexW1|NoSuf|SSE2AVX, { Imm8, RegXMM, Reg64 }
 extractps, 0x660f3a17, SSE4_1, Modrm|IgnoreSize|NoSuf, { Imm8, RegXMM, Reg32|Unspecified|BaseIndex }
 extractps, 0x660f3a17, SSE4_1&x64, RegMem|NoSuf|NoRex64, { Imm8, RegXMM, Reg64 }
-insertps<sse41>, 0x660f3a21, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8, Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-movntdqa<sse41>, 0x660f382a, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Xmmword|Unspecified|BaseIndex, RegXMM }
+insertps<SSE41D>, 0x660f3a21, <SSE41D:cpu>, Modrm|<SSE41D:attr>|<SSE41D:vvvv>|Disp8MemShift|NoSuf, { Imm8, Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+movntdqa<SSE41D>, 0x660f382a, <SSE41D:cpu>, Modrm|<SSE41D:attr>|NoSuf, { Xmmword|Unspecified|BaseIndex, RegXMM }
 mpsadbw<sse41>, 0x660f3a42, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
-packusdw<sse41>, 0x660f382b, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+packusdw<SSE41BW>, 0x660f382b, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|<SSE41BW:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pblendvb, 0x664c, AVX, Modrm|Vex128|Space0F3A|VexVVVV|VexW0|NoSuf|SSE2AVX, { Acc|Xmmword, RegXMM|Unspecified|BaseIndex, RegXMM }
 pblendvb, 0x664c, AVX, Modrm|Vex128|Space0F3A|VexVVVV|VexW0|NoSuf|Implicit1stXmm0|SSE2AVX, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pblendvb, 0x660f3810, SSE4_1, Modrm|NoSuf, { Acc|Xmmword, RegXMM|Unspecified|BaseIndex, RegXMM }
 pblendvb, 0x660f3810, SSE4_1, Modrm|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pblendw<sse41>, 0x660f3a0e, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
 pcmpeqq<sse41>, 0x660f3829, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf|Optimize, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pextr<bw><sse41>, 0x660f3a14 | <bw:opc>, <sse41:cpu>, RegMem|<sse41:attr>|NoSuf|IgnoreSize|NoRex64, { Imm8, RegXMM, Reg32|Reg64 }
-pextr<bw><sse41>, 0x660f3a14 | <bw:opc>, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Imm8, RegXMM, <bw:elem>|Unspecified|BaseIndex }
-pextrd<sse41>, 0x660f3a16, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf|IgnoreSize, { Imm8, RegXMM, Reg32|Unspecified|BaseIndex }
+pextr<bw><SSE41BW>, 0x660f3a14 | <bw:opc>, <SSE41BW:cpu>, RegMem|<SSE41BW:attr>|NoSuf|IgnoreSize|NoRex64, { Imm8, RegXMM, Reg32|Reg64 }
+pextr<bw><SSE41BW>, 0x660f3a14 | <bw:opc>, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|Disp8MemShift|NoSuf, { Imm8, RegXMM, <bw:elem>|Unspecified|BaseIndex }
+pextrd<SSE41DQ>, 0x660f3a16, <SSE41DQ:cpu>, Modrm|<SSE41DQ:attr>|Disp8MemShift|NoSuf|IgnoreSize, { Imm8, RegXMM, Reg32|Unspecified|BaseIndex }
 pextrq, 0x6616, AVX&x64, Modrm|Vex|Space0F3A|VexW1|NoSuf|SSE2AVX, { Imm8, RegXMM, Reg64|Unspecified|BaseIndex }
+pextrq, 0x6616, AVX512DQ&AVX512VL&x64, Modrm|EVex128|Space0F3A|VexW1|Disp8MemShift=3|NoSuf|SSE2AVX, { Imm8, RegXMM, Reg64|Unspecified|BaseIndex }
 pextrq, 0x660f3a16, SSE4_1&x64, Modrm|Size64|NoSuf, { Imm8, RegXMM, Reg64|Unspecified|BaseIndex }
 phminposuw<sse41>, 0x660f3841, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pinsrb<sse41>, 0x660f3a20, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf|IgnoreSize|NoRex64, { Imm8, Reg32|Reg64, RegXMM }
-pinsrb<sse41>, 0x660f3a20, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { Imm8, Byte|Unspecified|BaseIndex, RegXMM }
-pinsrd<sse41>, 0x660f3a22, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf|IgnoreSize, { Imm8, Reg32|Unspecified|BaseIndex, RegXMM }
+pinsrb<SSE41BW>, 0x660f3a20, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|<SSE41BW:vvvv>|NoSuf|IgnoreSize|NoRex64, { Imm8, Reg32|Reg64, RegXMM }
+pinsrb<SSE41BW>, 0x660f3a20, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|<SSE41BW:vvvv>|Disp8MemShift|NoSuf, { Imm8, Byte|Unspecified|BaseIndex, RegXMM }
+pinsrd<SSE41DQ>, 0x660f3a22, <SSE41DQ:cpu>, Modrm|<SSE41DQ:attr>|<SSE41DQ:vvvv>|Disp8MemShift|NoSuf|IgnoreSize, { Imm8, Reg32|Unspecified|BaseIndex, RegXMM }
 pinsrq, 0x6622, AVX&x64, Modrm|Vex|Space0F3A|VexVVVV|VexW1|NoSuf|SSE2AVX, { Imm8, Reg64|Unspecified|BaseIndex, RegXMM }
+pinsrq, 0x6622, AVX512DQ&AVX512VL&AVX&x64, Modrm|EVex128|Space0F3A|VexVVVV|VexW1|Disp8MemShift=3|NoSuf|SSE2AVX, { Imm8, Reg64|Unspecified|BaseIndex, RegXMM }
 pinsrq, 0x660f3a22, SSE4_1&x64, Modrm|Size64|NoSuf, { Imm8, Reg64|Unspecified|BaseIndex, RegXMM }
-pmaxsb<sse41>, 0x660f383c, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pmaxsd<sse41>, 0x660f383d, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pmaxud<sse41>, 0x660f383f, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pmaxuw<sse41>, 0x660f383e, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pminsb<sse41>, 0x660f3838, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pminsd<sse41>, 0x660f3839, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pminud<sse41>, 0x660f383b, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pminuw<sse41>, 0x660f383a, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pmovsxbw<sse41>, 0x660f3820, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-pmovsxbd<sse41>, 0x660f3821, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-pmovsxbq<sse41>, 0x660f3822, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Word|Unspecified|BaseIndex|RegXMM, RegXMM }
-pmovsxwd<sse41>, 0x660f3823, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-pmovsxwq<sse41>, 0x660f3824, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-pmovsxdq<sse41>, 0x660f3825, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-pmovzxbw<sse41>, 0x660f3830, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-pmovzxbd<sse41>, 0x660f3831, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-pmovzxbq<sse41>, 0x660f3832, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Word|Unspecified|BaseIndex|RegXMM, RegXMM }
-pmovzxwd<sse41>, 0x660f3833, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-pmovzxwq<sse41>, 0x660f3834, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
-pmovzxdq<sse41>, 0x660f3835, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
-pmuldq<sse41>, 0x660f3828, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pmulld<sse41>, 0x660f3840, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pmaxsb<SSE41BW>, 0x660f383c, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|<SSE41BW:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pmaxsd<SSE41D>, 0x660f383d, <SSE41D:cpu>, Modrm|<SSE41D:attr>|<SSE41D:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pmaxud<SSE41D>, 0x660f383f, <SSE41D:cpu>, Modrm|<SSE41D:attr>|<SSE41D:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pmaxuw<SSE41BW>, 0x660f383e, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|<SSE41BW:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pminsb<SSE41BW>, 0x660f3838, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|<SSE41BW:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pminsd<SSE41D>, 0x660f3839, <SSE41D:cpu>, Modrm|<SSE41D:attr>|<SSE41D:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pminud<SSE41D>, 0x660f383b, <SSE41D:cpu>, Modrm|<SSE41D:attr>|<SSE41D:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pminuw<SSE41BW>, 0x660f383a, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|<SSE41BW:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pmovsxbw<SSE41BW>, 0x660f3820, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|Disp8MemShift|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+pmovsxbd<SSE41D>, 0x660f3821, <SSE41D:cpu>, Modrm|<SSE41D:attr>|Disp8MemShift|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+pmovsxbq<SSE41D>, 0x660f3822, <SSE41D:cpu>, Modrm|<SSE41D:attr>|Disp8MemShift|NoSuf, { Word|Unspecified|BaseIndex|RegXMM, RegXMM }
+pmovsxwd<SSE41D>, 0x660f3823, <SSE41D:cpu>, Modrm|<SSE41D:attr>|Disp8MemShift|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+pmovsxwq<SSE41D>, 0x660f3824, <SSE41D:cpu>, Modrm|<SSE41D:attr>|Disp8MemShift|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+pmovsxdq<SSE41D>, 0x660f3825, <SSE41D:cpu>, Modrm|<SSE41D:attr>|Disp8MemShift|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+pmovzxbw<SSE41BW>, 0x660f3830, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|Disp8MemShift|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+pmovzxbd<SSE41D>, 0x660f3831, <SSE41D:cpu>, Modrm|<SSE41D:attr>|Disp8MemShift|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+pmovzxbq<SSE41D>, 0x660f3832, <SSE41D:cpu>, Modrm|<SSE41D:attr>|Disp8MemShift|NoSuf, { Word|Unspecified|BaseIndex|RegXMM, RegXMM }
+pmovzxwd<SSE41D>, 0x660f3833, <SSE41D:cpu>, Modrm|<SSE41D:attr>|Disp8MemShift|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+pmovzxwq<SSE41D>, 0x660f3834, <SSE41D:cpu>, Modrm|<SSE41D:attr>|Disp8MemShift|NoSuf, { Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
+pmovzxdq<SSE41D>, 0x660f3835, <SSE41D:cpu>, Modrm|<SSE41D:attr>|Disp8MemShift|NoSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+pmuldq<SSE41Q>, 0x660f3828, <SSE41Q:cpu>, Modrm|<SSE41Q:attr>|<SSE41Q:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pmulld<SSE41D>, 0x660f3840, <SSE41D:cpu>, Modrm|<SSE41D:attr>|<SSE41D:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 ptest<sse41>, 0x660f3817, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-roundp<sd><sse41>, 0x660f3a08 | <sd:opc>, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
-rounds<sd><sse41>, 0x660f3a0a | <sd:opc>, <sse41:cpu>, Modrm|<sse41:scal>|<sse41:vvvv>|NoSuf, { Imm8, <sd:elem>|Unspecified|BaseIndex|RegXMM, RegXMM }
+roundpd<SSE41Q>, 0x660f3a09, <SSE41Q:cpu>, Modrm|<SSE41Q:attr>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+roundps<SSE41D>, 0x660f3a08, <SSE41D:cpu>, Modrm|<SSE41D:attr>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+roundsd<SSE41Q>, 0x660f3a0b, <SSE41Q:cpu>, Modrm|<SSE41Q:scal>|<SSE41Q:vvvv>|NoSuf, { Imm8, Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
+roundss<SSE41D>, 0x660f3a0a, <SSE41D:cpu>, Modrm|<SSE41D:scal>|<SSE41D:vvvv>|NoSuf, { Imm8, Dword|Unspecified|BaseIndex|RegXMM, RegXMM }
 
 // SSE4.2 instructions.
 
@@ -1465,31 +1560,38 @@ xsaveopt64, 0xfae/6, Xsaveopt&x64, Modrm|NoSuf|Size64|NoEgpr, { Unspecified|Base
 // AES instructions.
 
 <aes:cpu:attr:vvvv, $avx:AVX&:Vex128|VexW0|SSE2AVX:VexVVVV, $sse:::>
+<AES:cpu:attr, +
+    $avx:&(AVX|AVX512VL):Vex128|EVex128|VexW0|VexVVVV|Disp8MemShift=4|SSE2AVX, +
+    $sse::>
 
-aesdec<aes>, 0x660f38de, <aes:cpu>AES, Modrm|<aes:attr>|<aes:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-aesdeclast<aes>, 0x660f38df, <aes:cpu>AES, Modrm|<aes:attr>|<aes:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-aesenc<aes>, 0x660f38dc, <aes:cpu>AES, Modrm|<aes:attr>|<aes:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-aesenclast<aes>, 0x660f38dd, <aes:cpu>AES, Modrm|<aes:attr>|<aes:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aesdec<AES>, 0x660f38de, AES<AES:cpu>, Modrm|<AES:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aesdeclast<AES>, 0x660f38df, AES<AES:cpu>, Modrm|<AES:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aesenc<AES>, 0x660f38dc, AES<AES:cpu>, Modrm|<AES:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aesenclast<AES>, 0x660f38dd, AES<AES:cpu>, Modrm|<AES:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 aesimc<aes>, 0x660f38db, <aes:cpu>AES, Modrm|<aes:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 aeskeygenassist<aes>, 0x660f3adf, <aes:cpu>AES, Modrm|<aes:attr>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 
 // PCLMULQDQ
 
-<pclmul:cpu:attr, $avx:AVX&:Vex128|VexW0|SSE2AVX|VexVVVV, $sse::>
+<pclmul:cpu:attr, +
+    $avx:&(AVX|AVX512VL):Vex128|EVex128|VexW0|VexVVVV|Disp8MemShift=4|SSE2AVX, +
+    $sse::>
 
-pclmulqdq<pclmul>, 0x660f3a44, <pclmul:cpu>PCLMULQDQ, Modrm|<pclmul:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
-pclmullqlqdq<pclmul>, 0x660f3a44/0x00, <pclmul:cpu>PCLMULQDQ, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pclmulhqlqdq<pclmul>, 0x660f3a44/0x01, <pclmul:cpu>PCLMULQDQ, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pclmullqhqdq<pclmul>, 0x660f3a44/0x10, <pclmul:cpu>PCLMULQDQ, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
-pclmulhqhqdq<pclmul>, 0x660f3a44/0x11, <pclmul:cpu>PCLMULQDQ, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pclmulqdq<pclmul>, 0x660f3a44, PCLMULQDQ<pclmul:cpu>, Modrm|<pclmul:attr>|NoSuf, { Imm8|Imm8S, RegXMM|Unspecified|BaseIndex, RegXMM }
+pclmullqlqdq<pclmul>, 0x660f3a44/0x00, PCLMULQDQ<pclmul:cpu>, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pclmulhqlqdq<pclmul>, 0x660f3a44/0x01, PCLMULQDQ<pclmul:cpu>, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pclmullqhqdq<pclmul>, 0x660f3a44/0x10, PCLMULQDQ<pclmul:cpu>, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
+pclmulhqhqdq<pclmul>, 0x660f3a44/0x11, PCLMULQDQ<pclmul:cpu>, Modrm|<pclmul:attr>|NoSuf|ImmExt, { RegXMM|Unspecified|BaseIndex, RegXMM }
 
 // GFNI
 
-<gfni:cpu:w0:w1, $avx:AVX&:Vex128|VexW0|SSE2AVX|VexVVVV:Vex128|VexW1|SSE2AVX|VexVVVV, $sse:::>
+<gfni:cpu:attr:vexw0:vexw1, +
+    $avx:&(AVX|AVX512VL):Vex128|EVex128|VexVVVV|Disp8MemShift=4|SSE2AVX:VexW0:VexW1, +
+    $sse::::>
 
-gf2p8affineqb<gfni>, 0x660f3ace, <gfni:cpu>GFNI, Modrm|<gfni:w1>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
-gf2p8affineinvqb<gfni>, 0x660f3acf, <gfni:cpu>GFNI, Modrm|<gfni:w1>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
-gf2p8mulb<gfni>, 0x660f38cf, <gfni:cpu>GFNI, Modrm|<gfni:w0>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+gf2p8affineqb<gfni>, 0x660f3ace, GFNI<gfni:cpu>, Modrm|<gfni:attr>|<gfni:vexw1>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+gf2p8affineinvqb<gfni>, 0x660f3acf, GFNI<gfni:cpu>, Modrm|<gfni:attr>|<gfni:vexw1>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+gf2p8mulb<gfni>, 0x660f38cf, GFNI<gfni:cpu>, Modrm|<gfni:attr>|<gfni:vexw0>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 
 // AVX instructions.
 
