@@ -54,7 +54,7 @@ if { "$CHECK_TARGET" == "check-install" } {
     }
 
     set f [open "gprofng_wraper" w+]
-    puts $f "#!/usr/bin/bash"
+    puts $f "#!$BASH"
     puts $f "LD_LIBRARY_PATH=$ld_library_path:$orig_ld_library_path"
     puts $f "GPROFNG_SYSCONFDIR=$env(srcroot)/src"
     puts $f "GPROFNG_PRELOAD_LIBDIRS=$BUILDDIR/libcollector/.libs"

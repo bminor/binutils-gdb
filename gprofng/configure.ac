@@ -228,6 +228,9 @@ fi
 AM_CONDITIONAL([BUILD_MAN], [test x$build_man = xtrue])
 AM_CONDITIONAL([BUILD_DOC], [test x$build_doc = xtrue])
 
+AC_PATH_PROG([BASH], [bash])
+AC_SUBST([BASH])
+
 AC_SUBST(LD_NO_AS_NEEDED, [${no_as_needed}])
 AC_SUBST(GPROFNG_CFLAGS, [${gprofng_cflags}])
 AC_SUBST(GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS)
