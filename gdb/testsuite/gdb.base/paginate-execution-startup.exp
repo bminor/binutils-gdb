@@ -27,25 +27,22 @@ if [is_remote host] {
   set file_arg [remote_download host $file_arg]
 }
 
-global GDBFLAGS
-set saved_gdbflags $GDBFLAGS
-
 # Returns true if the board can 'gdb -ex "start"', false otherwise.
 
 proc probe_can_run_cmdline  {} {
     global srcfile file_arg
-    global saved_gdbflags GDBFLAGS
+    global GDBFLAGS
     global gdb_prompt
-
-    set GDBFLAGS $saved_gdbflags
-    append GDBFLAGS " -ex \"start\""
-    append GDBFLAGS " --args \"$file_arg\""
 
     with_test_prefix "probe support" {
 	set test "run to main"
 
 	gdb_exit
-	set res [gdb_spawn]
+	save_vars { GDBFLAGS } {
+	    append GDBFLAGS " -ex \"start\""
+	    append GDBFLAGS " --args \"$file_arg\""
+	    set res [gdb_spawn]
+	}
 	if { $res != 0} {
 	    fail $test
 	    return -1
@@ -74,23 +71,25 @@ proc probe_can_run_cmdline  {} {
 
 proc test_fg_execution_pagination_return {} {
     global file_arg
-    global saved_gdbflags GDBFLAGS
+    global GDBFLAGS
     global gdb_prompt pagination_prompt
-
-    set GDBFLAGS $saved_gdbflags
-    append GDBFLAGS " -ex \"set height 2\""
-    append GDBFLAGS " -ex \"start\""
-    append GDBFLAGS " --args \"$file_arg\""
 
     with_test_prefix "return" {
 	set test "run to pagination"
 
 	gdb_exit
-	set res [gdb_spawn]
+
+	save_vars { GDBFLAGS  } {
+	    append GDBFLAGS " -ex \"set height 2\""
+	    append GDBFLAGS " -ex \"start\""
+	    append GDBFLAGS " --args \"$file_arg\""
+	    set res [gdb_spawn]
+	}
 	if { $res != 0} {
 	    fail $test
 	    return $res
 	}
+
 	gdb_test_multiple "" $test {
 	    -re "$pagination_prompt$" {
 		pass $test
@@ -127,24 +126,25 @@ proc test_fg_execution_pagination_return {} {
 
 proc test_fg_execution_pagination_cancel { how } {
     global file_arg
-    global saved_gdbflags GDBFLAGS
+    global GDBFLAGS
     global gdb_prompt pagination_prompt
-
-    set GDBFLAGS $saved_gdbflags
-
-    append GDBFLAGS " -ex \"set height 2\""
-    append GDBFLAGS " -ex \"start\""
-    append GDBFLAGS " --args \"$file_arg\""
 
     with_test_prefix "cancel with $how" {
 	set test "run to pagination"
 
 	gdb_exit
-	set res [gdb_spawn]
+
+	save_vars { GDBFLAGS } {
+	    append GDBFLAGS " -ex \"set height 2\""
+	    append GDBFLAGS " -ex \"start\""
+	    append GDBFLAGS " --args \"$file_arg\""
+	    set res [gdb_spawn]
+	}
 	if { $res != 0} {
 	    fail $test
 	    return $res
 	}
+
 	gdb_test_multiple "" $test {
 	    -re "$pagination_prompt$" {
 		pass $test
@@ -182,5 +182,3 @@ save_vars { INTERNAL_GDBFLAGS } {
 	test_fg_execution_pagination_cancel "quit"
     }
 }
-
-set GDBFLAGS $saved_gdbflags

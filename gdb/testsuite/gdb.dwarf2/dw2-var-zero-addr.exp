@@ -32,10 +32,10 @@ proc test { } {
 
 test
 
-set saved_gdbflags $GDBFLAGS
-set GDBFLAGS "$GDBFLAGS --readnow"
-clean_restart ${binfile}
-set GDBFLAGS $saved_gdbflags
+save_vars { GDBFLAGS } {
+    set GDBFLAGS "$GDBFLAGS --readnow"
+    clean_restart ${binfile}
+}
 
 with_test_prefix "readnow" {
     test

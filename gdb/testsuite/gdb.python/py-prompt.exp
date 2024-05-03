@@ -27,11 +27,9 @@ if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
     return -1
 }
 
-save_vars { INTERNAL_GDBFLAGS } {
+save_vars { INTERNAL_GDBFLAGS GDBFLAGS } {
     set INTERNAL_GDBFLAGS [string map {"-q" ""} $INTERNAL_GDBFLAGS]
 
-    global GDBFLAGS
-    set saved_gdbflags $GDBFLAGS
     set GDBFLAGS [concat $GDBFLAGS " -ex \"python p = list()\""]
     set prompt_func "python def foo(x): global p; p.append(x);  return \'(Foo) \'"
     set GDBFLAGS [concat $GDBFLAGS " -ex \"$prompt_func\""]
@@ -72,7 +70,6 @@ save_vars { INTERNAL_GDBFLAGS } {
     }
 
     if {![can_spawn_for_attach]} {
-	set GDBFLAGS $saved_gdbflags
 	return 0
     }
 
@@ -115,6 +112,5 @@ save_vars { INTERNAL_GDBFLAGS } {
 	gdb_exit
     }
 
-    set GDBFLAGS $saved_gdbflags
     kill_wait_spawned_process $test_spawn_id
 }

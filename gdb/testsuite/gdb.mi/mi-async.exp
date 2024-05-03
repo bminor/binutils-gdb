@@ -29,10 +29,6 @@ if {![istarget *-linux*]} {
 # Check if start command is supported.
 require !use_gdb_stub
 
-# The plan is for async mode to become the default but toggle for now.
-set saved_gdbflags $GDBFLAGS
-set GDBFLAGS [concat $GDBFLAGS " -ex \"set mi-async on\""]
-
 load_lib mi-support.exp
 
 standard_testfile basics.c
@@ -42,8 +38,13 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
 }
 
-if {[mi_clean_restart $binfile]} {
-    return
+# The plan is for async mode to become the default but toggle for now.
+save_vars { GDBFLAGS } {
+    set GDBFLAGS [concat $GDBFLAGS " -ex \"set mi-async on\""]
+
+    if {[mi_clean_restart $binfile]} {
+	return
+    }
 }
 
 # mi_gdb_test cannot be used for asynchronous commands because there are
@@ -75,5 +76,3 @@ proc linux_async_tests {} {
 linux_async_tests
 
 mi_gdb_exit
-
-set GDBFLAGS $saved_gdbflags

@@ -73,16 +73,14 @@ Dwarf::assemble $asm_file {
 
 # We need --readnow because otherwise we never read in the CUs we
 # created above.
-set saved_gdbflags $GDBFLAGS
-set GDBFLAGS "$GDBFLAGS -readnow"
+save_vars { GDBFLAGS } {
+    set GDBFLAGS "$GDBFLAGS -readnow"
 
-if { [prepare_for_testing "failed to prepare" ${testfile} \
-	  [list $srcfile $asm_file] {nodebug}] } {
-    set GDBFLAGS $saved_gdbflags
-    return -1
+    if { [prepare_for_testing "failed to prepare" ${testfile} \
+	      [list $srcfile $asm_file] {nodebug}] } {
+	return -1
+    }
 }
-
-set GDBFLAGS $saved_gdbflags
 
 gdb_py_test_silent_cmd "python with_producer = gdb.lookup_global_symbol(\"with_producer\")" \
     "get with_producer symbol" 0

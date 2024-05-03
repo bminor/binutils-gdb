@@ -108,10 +108,10 @@ if { [build_executable ${testfile}.exp ${testfile} \
 
 # We need --readnow because otherwise we never read in the CU we
 # created above.
-set saved_gdbflags $GDBFLAGS
-set GDBFLAGS "$GDBFLAGS -readnow"
-clean_restart ${testfile}
-set GDBFLAGS $saved_gdbflags
+save_vars { GDBFLAGS } {
+    set GDBFLAGS "$GDBFLAGS -readnow"
+    clean_restart ${testfile}
+}
 
 if ![runto_main] {
     return -1

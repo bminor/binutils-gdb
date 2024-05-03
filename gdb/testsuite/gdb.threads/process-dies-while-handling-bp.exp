@@ -40,10 +40,10 @@ proc do_test { non_stop cond_bp_target } {
     global binfile
     global linenum
 
-    set saved_gdbflags $GDBFLAGS
-    set GDBFLAGS [concat $GDBFLAGS " -ex \"set non-stop $non_stop\""]
-    clean_restart $binfile
-    set GDBFLAGS $saved_gdbflags
+    save_vars { GDBFLAGS } {
+	set GDBFLAGS [concat $GDBFLAGS " -ex \"set non-stop $non_stop\""]
+	clean_restart $binfile
+    }
 
     if {![runto_main]} {
 	return 0

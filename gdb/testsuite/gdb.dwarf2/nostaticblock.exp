@@ -38,9 +38,9 @@ if { [build_executable ${testfile}.exp ${testfile} \
     return -1
 }
 
-set saved_gdbflags $GDBFLAGS
-set GDBFLAGS "$GDBFLAGS --readnow"
-clean_restart $testfile
-set GDBFLAGS $saved_gdbflags
+save_vars { GDBFLAGS } {
+    set GDBFLAGS "$GDBFLAGS --readnow"
+    clean_restart $testfile
+}
 
 gdb_test "p 1" " = 1" "alive"

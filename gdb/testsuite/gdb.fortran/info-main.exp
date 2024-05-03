@@ -19,11 +19,12 @@ load_lib fortran.exp
 
 standard_testfile .f90
 
-set old_gdbflags $GDBFLAGS
-set GDBFLAGS [string map {"-readnow" ""} "$GDBFLAGS"]
+save_vars { GDBFLAGS } {
+    set GDBFLAGS [string map {"-readnow" ""} "$GDBFLAGS"]
 
-if {[prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug f90}]} {
-    return -1
+    if {[prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug f90}]} {
+	return -1
+    }
 }
 
 gdb_test "info main" "simple" "info main prior to start"
@@ -35,8 +36,8 @@ if ![fortran_runto_main] {
 
 gdb_test "info main" "simple" "info main post start"
 
-set GDBFLAGS "$GDBFLAGS -readnow"
-clean_restart $testfile
+save_vars { GDBFLAGS } {
+    set GDBFLAGS "$GDBFLAGS -readnow"
+    clean_restart $testfile
+}
 gdb_test "info main" "simple" "info main with readnow"
-
-set GDBFLAGS $old_gdbflags

@@ -228,8 +228,6 @@ proc test_terminal_settings_preserved_after_cli_exit { cmds } {
 	return
     }
 
-    set saved_gdbflags $GDBFLAGS
-
     set stty_supported [run_stty "stty before" stty_before]
 
     set test "start gdb"
@@ -295,8 +293,6 @@ proc test_terminal_settings_preserved_after_sigterm { } {
     if ![spawn_shell] {
 	return
     }
-
-    set saved_gdbflags $GDBFLAGS
 
     set stty_supported [run_stty "stty before" stty_before]
 

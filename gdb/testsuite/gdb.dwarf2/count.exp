@@ -138,11 +138,10 @@ if { [gdb_compile [list ${binfile}1.o ${binfile}2.o] \
     return -1
 }
 
-global GDBFLAGS
-set saved_gdbflags $GDBFLAGS
-set GDBFLAGS [concat $GDBFLAGS " -readnow"]
-clean_restart ${testfile}
-set GDBFLAGS $saved_gdbflags
+save_vars { GDBFLAGS } {
+    set GDBFLAGS [concat $GDBFLAGS " -readnow"]
+    clean_restart ${testfile}
+}
 
 if ![runto_main] {
     return -1

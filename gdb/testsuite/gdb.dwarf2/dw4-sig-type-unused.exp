@@ -24,9 +24,9 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {}] != ""
     return -1
 }
 
-set saved_gdbflags $GDBFLAGS
-set GDBFLAGS "$GDBFLAGS --readnow"
-clean_restart $executable
-set GDBFLAGS $saved_gdbflags
+save_vars { GDBFLAGS } {
+    set GDBFLAGS "$GDBFLAGS --readnow"
+    clean_restart $executable
+}
 
 gdb_test "p 1" " = 1" "alive"

@@ -19,9 +19,9 @@ if {[build_executable ${testfile}.exp $testfile ${testfile}.cc {c++ debug}] == -
     return -1
 }
 
-set old_gdbflags $GDBFLAGS
-set GDBFLAGS "$GDBFLAGS -readnow"
-clean_restart $testfile
-set GDBFLAGS $old_gdbflags
+save_vars { GDBFLAGS } {
+    set GDBFLAGS "$GDBFLAGS -readnow"
+    clean_restart $testfile
+}
 
 gdb_test "show language" {The current source language is "auto; currently c\+\+"\.}
