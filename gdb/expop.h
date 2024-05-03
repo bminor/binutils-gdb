@@ -1513,9 +1513,11 @@ public:
 		   struct expression *exp,
 		   enum noside noside) override
   {
-    if (expect_type != nullptr && expect_type->code () == TYPE_CODE_PTR)
-      expect_type = check_typedef (expect_type)->target_type ();
-    value *val = std::get<0> (m_storage)->evaluate (expect_type, exp, noside);
+    struct type *pointer_to_expect_type = (expect_type != nullptr
+					   ? lookup_pointer_type (expect_type)
+					   : nullptr);
+    value *val
+      = std::get<0> (m_storage)->evaluate (pointer_to_expect_type, exp, noside);
     return eval_op_ind (expect_type, exp, noside, val);
   }
 
