@@ -1126,6 +1126,7 @@ process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
 			      char **opnd, int lineno, bool rex2_disallowed)
 {
   char *str, *next, *last;
+  bool disp8_shift_derived = false;
   bitfield modifiers [ARRAY_SIZE (opcode_modifiers)];
   static const char *const spaces[] = {
 #define SPACE(n) [SPACE_##n] = #n
@@ -1190,7 +1191,10 @@ process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
 	      if (strcasecmp(str, "Broadcast") == 0)
 		val = get_element_size (opnd, lineno) + BYTE_BROADCAST;
 	      else if (strcasecmp(str, "Disp8MemShift") == 0)
-		val = get_element_size (opnd, lineno);
+		{
+		  val = get_element_size (opnd, lineno);
+		  disp8_shift_derived = true;
+		}
 
 	      set_bitfield (str, modifiers, val, ARRAY_SIZE (modifiers),
 			    lineno);
@@ -1243,13 +1247,21 @@ process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
 
   /* Rather than evaluating multiple conditions at runtime to determine
      whether an EVEX encoding is being dealt with, derive that information
-     right here.  A missing EVex attribute means "dynamic".  */
-  if (!modifiers[EVex].value
-      && (modifiers[Disp8MemShift].value
-	  || modifiers[Broadcast].value
+     right here.  A missing EVex attribute means "dynamic".  There's one
+     exception though: A value-less Disp8MemShift needs zapping rather than
+     respecting if no other attribute indicates EVEX encoding.  This is for
+     certain SSE2AVX templatized templates to work reasonably.  */
+  if (!modifiers[EVex].value)
+    {
+      if (modifiers[Broadcast].value
 	  || modifiers[Masking].value
-	  || modifiers[SAE].value))
-    modifiers[EVex].value = EVEXDYN;
+	  || modifiers[SAE].value)
+	modifiers[EVex].value = EVEXDYN;
+      else if (disp8_shift_derived)
+	modifiers[Disp8MemShift].value = 0;
+      else if (modifiers[Disp8MemShift].value)
+	modifiers[EVex].value = EVEXDYN;
+    }
 
   /* Vex, legacy map2 and map3 and rex2_disallowed do not support EGPR.
      For templates supporting both Vex and EVex allowing EGPR.  */
