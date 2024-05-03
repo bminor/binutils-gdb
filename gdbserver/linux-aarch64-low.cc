@@ -554,7 +554,7 @@ CORE_ADDR
 aarch64_target::low_stopped_data_address ()
 {
   siginfo_t siginfo;
-  int pid, i;
+  int pid;
   struct aarch64_debug_reg_state *state;
 
   pid = lwpid_of (current_thread);
