@@ -55,10 +55,8 @@ close $fd
 
 set host_file1 [gdb_remote_download host $file1]
 
-# Now start GDB, sourcing the python command file we generated above.
-# Set the height and width so we don't end up at a paging prompt.
-if {[gdb_spawn_with_cmdline_opts \
-	 "-quiet -iex \"set height 0\" -iex \"set width 0\""] != 0} {
+# Now start GDB.
+if {[gdb_spawn]} {
     fail "spawn"
     return
 }

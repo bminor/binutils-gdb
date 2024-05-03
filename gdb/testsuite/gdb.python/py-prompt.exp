@@ -32,8 +32,6 @@ save_vars { INTERNAL_GDBFLAGS } {
 
     global GDBFLAGS
     set saved_gdbflags $GDBFLAGS
-    set GDBFLAGS [concat $GDBFLAGS " -ex \"set height 0\""]
-    set GDBFLAGS [concat $GDBFLAGS " -ex \"set width 0\""]
     set GDBFLAGS [concat $GDBFLAGS " -ex \"python p = list()\""]
     set prompt_func "python def foo(x): global p; p.append(x);  return \'(Foo) \'"
     set GDBFLAGS [concat $GDBFLAGS " -ex \"$prompt_func\""]

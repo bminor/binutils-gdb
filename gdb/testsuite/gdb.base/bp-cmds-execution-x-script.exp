@@ -42,7 +42,6 @@ proc test {} {
     set GDBFLAGS "$GDBFLAGS -x $x_file $binfile"
 
     set GDBFLAGS $saved_gdbflags
-    append GDBFLAGS " -ex \"set height unlimited\""
     append GDBFLAGS " -x \"$x_file\""
     append GDBFLAGS " --args \"$binfile\""
 

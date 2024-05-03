@@ -35,9 +35,9 @@ proc allow_debuginfod_tests {} {
     #
     # If GDB is built with ASan, it warns that some signal handlers
     # (installed by ASan) exist on startup.  That makes TCL's exec throw an
-    # error.  Disable that by passing --quiet.
+    # error.  This is dealt with by the --quiet in INTERNAL_GDBFLAGS.
     if { [string first "with-debuginfod" \
-	      [eval exec $::GDB --quiet $::INTERNAL_GDBFLAGS \
+	      [eval exec $::GDB $::INTERNAL_GDBFLAGS \
 		   --configuration]] == -1 } {
 	return false
     }

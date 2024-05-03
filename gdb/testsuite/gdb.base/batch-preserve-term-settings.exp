@@ -139,7 +139,6 @@ proc test_terminal_settings_preserved {} {
 
     set test "gdb -batch -ex run"
     append EXTRA_GDBFLAGS "-batch"
-    append EXTRA_GDBFLAGS " -ex \"set height unlimited\""
     append EXTRA_GDBFLAGS " -ex \"start\""
     append EXTRA_GDBFLAGS " --args \"$file_arg\""
     send_gdb "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS $EXTRA_GDBFLAGS [host_info gdb_opts]\n"

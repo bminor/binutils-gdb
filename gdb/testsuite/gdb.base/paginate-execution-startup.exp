@@ -38,7 +38,6 @@ proc probe_can_run_cmdline  {} {
     global gdb_prompt
 
     set GDBFLAGS $saved_gdbflags
-    append GDBFLAGS " -ex \"set height 0\""
     append GDBFLAGS " -ex \"start\""
     append GDBFLAGS " --args \"$file_arg\""
 

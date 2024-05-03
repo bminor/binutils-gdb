@@ -37,7 +37,6 @@ set x_file ${srcdir}/${subdir}/$testfile.gdb
 # outside of the save_vars block.)
 save_vars { GDBFLAGS } {
     # Set flags with which to start GDB.
-    append GDBFLAGS " -ex \"set height unlimited\""
     append GDBFLAGS " -x \"$x_file\""
     append GDBFLAGS " --args \"$binfile\""
 

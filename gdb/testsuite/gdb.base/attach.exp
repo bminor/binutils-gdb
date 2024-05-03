@@ -485,8 +485,7 @@ proc_with_prefix test_command_line_attach_run {} {
     set test "run to prompt"
     gdb_exit
 
-    set res [gdb_spawn_with_cmdline_opts \
-		 "-quiet -iex \"set height 0\" -iex \"set width 0\" --pid=$testpid -ex \"start\""]
+    set res [gdb_spawn_with_cmdline_opts "--pid=$testpid -ex \"start\""]
     if { $res != 0} {
 	fail $test
 	kill_wait_spawned_process $test_spawn_id
