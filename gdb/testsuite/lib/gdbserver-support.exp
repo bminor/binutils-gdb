@@ -129,8 +129,31 @@ proc gdb_target_cmd { args } {
     return [expr $res == 0 ? 0 : 1]
 }
 
-global portnum
-set portnum "2345"
+# Return a usable port number.
+
+proc get_portnum {} {
+    if { [target_info exists gdb,socketport] } {
+	# Hard-coded in target board.
+	return [target_info gdb,socketport]
+    }
+
+    # Not hard-coded in target board.  Return increasing port numbers,
+    # starting at $initial_portnum, to avoid conflicts with hung ports.
+    set initial_portnum 2345
+
+    # Currently available port number.
+    global portnum
+
+    # Initialize, if necessary.
+    if { ![info exists portnum] } {
+	set portnum $initial_portnum
+    }
+
+    # Return currently available port number, and update it.
+    set res $portnum
+    incr portnum
+    return $res
+}
 
 # Locate the gdbserver binary.  Returns "" if gdbserver could not be found.
 
@@ -247,16 +270,10 @@ proc gdbserver_default_get_comm_port { port } {
 # Returns the target protocol and socket to connect to.
 
 proc gdbserver_start { options arguments } {
-    global portnum
     global GDB_TEST_SOCKETHOST
 
     # Port id -- either specified in baseboard file, or managed here.
-    if [target_info exists gdb,socketport] {
-	set portnum [target_info gdb,socketport]
-    } else {
-	# Bump the port number to avoid conflicts with hung ports.
-	incr portnum
-    }
+    set portnum [get_portnum]
 
     # Extract the local and remote host ids from the target board struct.
     if { [info exists GDB_TEST_SOCKETHOST] } {
@@ -372,10 +389,11 @@ proc gdbserver_start { options arguments } {
 	    -re "Listening on" { }
 	    -re "Can't (bind address|listen on socket): Address already in use\\.\r\n" {
 		verbose -log "Port $portnum is already in use."
-		if ![target_info exists gdb,socketport] {
+		set other_portnum [get_portnum]
+		if { $other_portnum != $portnum } {
 		    # Bump the port number to avoid the conflict.
 		    wait -i $expect_out(spawn_id)
-		    incr portnum
+		    set portnum $other_portnum
 		    continue
 		}
 	    }
