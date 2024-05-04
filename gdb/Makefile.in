@@ -2003,6 +2003,10 @@ check-all-boards: force
 	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check-all-boards; \
 	else true; fi
 
+testsuite.lockdir: force
+	rm -rf $@
+	mkdir -p $@
+
 # The idea is to parallelize testing of multilibs, for example:
 #   make -j3 check//sh-hms-sim/{-m1,-m2,-m3,-m3e,-m4}/{,-nofpu}
 # will run 3 concurrent sessions of check, eventually testing all 10
@@ -2011,7 +2015,7 @@ check-all-boards: force
 # used, this rule will harmlessly fail to match.  Used FORCE_PARALLEL to
 # prevent serialized checking due to the passed RUNTESTFLAGS.
 # FIXME: use config.status --config not --version, when available.
-check//%: force
+check//%: force testsuite.lockdir
 	@if [ -f testsuite/config.status ]; then \
 	  rootme=`pwd`; export rootme; \
 	  rootsrc=`cd $(srcdir); pwd`; export rootsrc; \
@@ -2029,7 +2033,7 @@ check//%: force
 	     ); \
 	  else :; fi && cd $$testdir && \
 	  $(MAKE) $(TARGET_FLAGS_TO_PASS) \
-	    RUNTESTFLAGS="--target_board=$$variant $(RUNTESTFLAGS)" \
+	    RUNTESTFLAGS="GDB_LOCK_DIR=$$rootme/testsuite.lockdir --target_board=$$variant $(RUNTESTFLAGS)" \
 	    FORCE_PARALLEL=$(if $(FORCE_PARALLEL),1,$(if $(RUNTESTFLAGS),,1)) \
 	    "$$target"; \
 	else true; fi

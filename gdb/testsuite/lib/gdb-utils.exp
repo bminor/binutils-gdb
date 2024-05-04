@@ -180,6 +180,11 @@ proc lock_file_release {info} {
 # Return directory where we keep lock files.
 
 proc lock_dir {} {
+    if { [info exists ::GDB_LOCK_DIR] } {
+	# When using check//.
+	return $::GDB_LOCK_DIR
+    }
+
     return [make_gdb_parallel_path cache]
 }
 
