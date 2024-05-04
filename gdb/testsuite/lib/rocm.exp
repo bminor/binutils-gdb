@@ -106,7 +106,7 @@ gdb_caching_proc allow_hipcc_tests {} {
 
 # The lock file used to ensure that only one GDB has access to the GPU
 # at a time.
-set gpu_lock_filename $objdir/gpu-parallel.lock
+set gpu_lock_filename gpu-parallel.lock
 
 # Run body under the GPU lock.  Also calls gdb_exit before releasing
 # the GPU lock.

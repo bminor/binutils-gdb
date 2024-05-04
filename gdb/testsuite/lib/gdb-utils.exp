@@ -177,10 +177,17 @@ proc lock_file_release {info} {
     }
 }
 
+# Return directory where we keep lock files.
+
+proc lock_dir {} {
+    return $objdir
+}
+
 # Run body under lock LOCK_FILE.
 
 proc with_lock { lock_file body } {
     if {[info exists ::GDB_PARALLEL]} {
+	set lock_file [file join [lock_dir] $lock_file]
 	set lock_rc [lock_file_acquire $lock_file]
     }
 
