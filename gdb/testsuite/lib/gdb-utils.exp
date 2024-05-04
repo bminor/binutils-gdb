@@ -138,3 +138,62 @@ proc version_compare { l1 op l2 } {
     }
     return 1
 }
+
+# Acquire lock file LOCKFILE.  Tries forever until the lock file is
+# successfully created.
+
+proc lock_file_acquire {lockfile} {
+    verbose -log "acquiring lock file: $::subdir/${::gdb_test_file_name}.exp"
+    while {true} {
+	if {![catch {open $lockfile {WRONLY CREAT EXCL}} rc]} {
+	    set msg "locked by $::subdir/${::gdb_test_file_name}.exp"
+	    verbose -log "lock file: $msg"
+	    # For debugging, put info in the lockfile about who owns
+	    # it.
+	    puts  $rc $msg
+	    flush $rc
+	    return [list $rc $lockfile]
+	}
+	after 10
+    }
+}
+
+# Release a lock file.
+
+proc lock_file_release {info} {
+    verbose -log "releasing lock file: $::subdir/${::gdb_test_file_name}.exp"
+
+    if {![catch {fconfigure [lindex $info 0]}]} {
+	if {![catch {
+	    close [lindex $info 0]
+	    file delete -force [lindex $info 1]
+	} rc]} {
+	    return ""
+	} else {
+	    return -code error "Error releasing lockfile: '$rc'"
+	}
+    } else {
+	error "invalid lock"
+    }
+}
+
+# Run body under lock LOCK_FILE.
+
+proc with_lock { lock_file body } {
+    if {[info exists ::GDB_PARALLEL]} {
+	set lock_rc [lock_file_acquire $lock_file]
+    }
+
+    set code [catch {uplevel 1 $body} result]
+
+    if {[info exists ::GDB_PARALLEL]} {
+	lock_file_release $lock_rc
+    }
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
