@@ -513,7 +513,7 @@ cooked_index_worker::wait (cooked_state desired_state, bool allow_quit)
 #else
   /* Without threads, all the work is done immediately on the main
      thread, and there is never anything to wait for.  */
-  done = true;
+  done = desired_state == cooked_state::CACHE_DONE;
 #endif /* CXX_STD_THREAD */
 
   /* Only the main thread is allowed to report complaints and the
