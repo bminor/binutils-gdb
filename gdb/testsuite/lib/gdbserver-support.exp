@@ -141,18 +141,47 @@ proc get_portnum {} {
     # starting at $initial_portnum, to avoid conflicts with hung ports.
     set initial_portnum 2345
 
-    # Currently available port number.
-    gdb_persistent_global portnum
+    if { ![info exists ::GDB_PARALLEL] } {
+	# Sequential case.
 
-    # Initialize, if necessary.
-    if { ![info exists portnum] } {
-	set portnum $initial_portnum
+	# Currently available port number.
+	gdb_persistent_global portnum
+
+	# Initialize, if necessary.
+	if { ![info exists portnum] } {
+	    set portnum $initial_portnum
+	}
+
+	# Return currently available port number, and update it.
+	set res $portnum
+	incr portnum
+	return $res
     }
 
-    # Return currently available port number, and update it.
-    set res $portnum
-    incr portnum
-    return $res
+    # Parallel case.
+    with_lock portnum.lock {
+	# Keep portnum file alongside the lock that guards it.
+	set portnum_file [lock_dir]/portnum
+
+	if { [file exists $portnum_file] } {
+	    set fd [open $portnum_file r]
+	    set portnum [read $fd]
+	    close $fd
+
+	    set portnum [string trim $portnum]
+	} else {
+	    # Initialize.
+	    set portnum $initial_portnum
+	}
+
+	set next_portnum [expr $portnum + 1]
+
+	set fd [open $portnum_file w]
+	puts $fd $next_portnum
+	close $fd
+    }
+
+    return $portnum
 }
 
 # Locate the gdbserver binary.  Returns "" if gdbserver could not be found.
