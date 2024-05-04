@@ -2042,7 +2042,7 @@ As long as the debug info file has been installed into one of these
 locations before the debugger is run everything should work
 correctly.
 
-@item --keep-section-symbils
+@item --keep-section-symbols
 When stripping a file, perhaps with @option{--strip-debug} or
 @option{--strip-unneeded}, retain any symbols specifying section names,
 which would otherwise get stripped.
