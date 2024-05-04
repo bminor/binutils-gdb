@@ -180,7 +180,7 @@ proc lock_file_release {info} {
 # Return directory where we keep lock files.
 
 proc lock_dir {} {
-    return $objdir
+    return [make_gdb_parallel_path cache]
 }
 
 # Run body under lock LOCK_FILE.
