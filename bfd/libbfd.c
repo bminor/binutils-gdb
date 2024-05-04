@@ -1072,7 +1072,18 @@ static void *
 bfd_mmap_local (bfd *abfd, size_t rsize, int prot, void **map_addr,
 		size_t *map_size)
 {
-  ufile_ptr filesize = bfd_get_file_size (abfd);
+  /* We mmap on the underlying file.  In an archive it might be nice
+     to limit RSIZE to the element size, but that can be fuzzed and
+     the offset returned by bfd_tell is relative to the start of the
+     element.  Therefore to reliably stop access beyond the end of a
+     file (and resulting bus errors) we must work with the underlying
+     file offset and size, and trust that callers will limit access to
+     within an archive element.  */
+  while (abfd->my_archive != NULL
+	 && !bfd_is_thin_archive (abfd->my_archive))
+    abfd = abfd->my_archive;
+
+  ufile_ptr filesize = bfd_get_size (abfd);
   ufile_ptr offset = bfd_tell (abfd);
   if (filesize < offset || filesize - offset < rsize)
     {
