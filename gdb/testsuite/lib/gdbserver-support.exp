@@ -142,7 +142,7 @@ proc get_portnum {} {
     set initial_portnum 2345
 
     # Currently available port number.
-    global portnum
+    gdb_persistent_global portnum
 
     # Initialize, if necessary.
     if { ![info exists portnum] } {
