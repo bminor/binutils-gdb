@@ -947,7 +947,7 @@ reserve_stack_space (const type *values_type, CORE_ADDR &sp)
   struct gdbarch *gdbarch = get_frame_arch (frame);
   CORE_ADDR addr = 0;
 
-  if (gdbarch_inner_than (gdbarch, 1, 2))
+  if (gdbarch_stack_grows_down (gdbarch))
     {
       /* Stack grows downward.  Align STRUCT_ADDR and SP after
 	 making space.  */
@@ -1128,7 +1128,7 @@ call_function_by_hand_dummy (struct value *function,
 	   address.  AMD64 called that region the "red zone".  Skip at
 	   least the "red zone" size before allocating any space on
 	   the stack.  */
-	if (gdbarch_inner_than (gdbarch, 1, 2))
+	if (gdbarch_stack_grows_down (gdbarch))
 	  sp -= gdbarch_frame_red_zone_size (gdbarch);
 	else
 	  sp += gdbarch_frame_red_zone_size (gdbarch);
@@ -1156,11 +1156,9 @@ call_function_by_hand_dummy (struct value *function,
 	   to pay :-).  */
 	if (sp == old_sp)
 	  {
-	    if (gdbarch_inner_than (gdbarch, 1, 2))
-	      /* Stack grows down.  */
+	    if (gdbarch_stack_grows_down (gdbarch))
 	      sp = gdbarch_frame_align (gdbarch, old_sp - 1);
 	    else
-	      /* Stack grows up.  */
 	      sp = gdbarch_frame_align (gdbarch, old_sp + 1);
 	  }
 	/* SP may have underflown address zero here from OLD_SP.  Memory access
@@ -1193,7 +1191,7 @@ call_function_by_hand_dummy (struct value *function,
 	  {
 	    CORE_ADDR lastval_addr = lastval->address ();
 
-	    if (gdbarch_inner_than (gdbarch, 1, 2))
+	    if (gdbarch_stack_grows_down (gdbarch))
 	      {
 		gdb_assert (sp >= lastval_addr);
 		sp = lastval_addr;
