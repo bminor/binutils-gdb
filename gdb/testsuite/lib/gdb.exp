@@ -8306,14 +8306,17 @@ proc get_build_id { filename } {
 
 # Return the build-id hex string (usually 160 bits as 40 hex characters)
 # converted to the form: .build-id/ab/cdef1234...89.debug
+#
+# The '.debug' suffix can be changed by passing the SUFFIX argument.
+#
 # Return "" if no build-id found.
-proc build_id_debug_filename_get { filename } {
+proc build_id_debug_filename_get { filename {suffix ".debug"} } {
     set data [get_build_id $filename]
     if { $data == "" } {
 	return ""
     }
     regsub {^..} $data {\0/} data
-    return ".build-id/${data}.debug"
+    return ".build-id/${data}${suffix}"
 }
 
 # DEST should be a file compiled with debug information.  This proc

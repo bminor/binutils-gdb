@@ -26,6 +26,8 @@
 #include "filenames.h"
 #include "gdbcore.h"
 #include "cli/cli-style.h"
+#include "gdbsupport/scoped_fd.h"
+#include "debuginfod-support.h"
 
 /* See build-id.h.  */
 
@@ -291,9 +293,11 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
   return build_id_to_bfd_suffix (build_id_len, build_id, ".debug");
 }
 
-/* See build-id.h.  */
+/* Find and open a BFD for an executable file given a build-id.  If no BFD
+   can be found, return NULL.  The returned reference to the BFD must be
+   released by the caller.  */
 
-gdb_bfd_ref_ptr
+static gdb_bfd_ref_ptr
 build_id_to_exec_bfd (size_t build_id_len, const bfd_byte *build_id)
 {
   return build_id_to_bfd_suffix (build_id_len, build_id, "");
@@ -334,4 +338,38 @@ find_separate_debug_file_by_buildid (struct objfile *objfile,
     }
 
   return std::string ();
+}
+
+/* See build-id.h.  */
+
+gdb_bfd_ref_ptr
+find_objfile_by_build_id (const bfd_build_id *build_id,
+			  const char *expected_filename)
+{
+  /* Try to find the executable (or shared object) by looking for a
+     (sym)link on disk from the build-id to the object file.  */
+  gdb_bfd_ref_ptr abfd = build_id_to_exec_bfd (build_id->size,
+					       build_id->data);
+
+  if (abfd != nullptr)
+    return abfd;
+
+  /* Attempt to query debuginfod for the executable.  */
+  gdb::unique_xmalloc_ptr<char> path;
+  scoped_fd fd = debuginfod_exec_query (build_id->data, build_id->size,
+					expected_filename, &path);
+  if (fd.get () >= 0)
+    {
+      abfd = gdb_bfd_open (path.get (), gnutarget);
+
+      if (abfd == nullptr)
+	warning (_("\"%ps\" from debuginfod cannot be opened as bfd: %s"),
+		 styled_string (file_name_style.style (), path.get ()),
+		 gdb_bfd_errmsg (bfd_get_error (), nullptr).c_str ());
+      else if (!build_id_verify (abfd.get (), build_id->size,
+				 build_id->data))
+	abfd = nullptr;
+    }
+
+  return abfd;
 }

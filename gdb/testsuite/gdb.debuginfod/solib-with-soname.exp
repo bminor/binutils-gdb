@@ -126,9 +126,18 @@ if {$corefile eq ""} {
 # If EXPECT_DOWNLOAD is true then we require a line indicating that
 # the shared library is being downloaded from debuginfod, otherwise
 # the shared library should not be downloaded.
-proc load_exec_and_core_file { expect_warning expect_download testname } {
+#
+# If DEBUGDIR is not the empty string then 'debug-file-directory' is
+# set to the value of DEBUGDIR.
+proc load_exec_and_core_file { expect_warning expect_download testname \
+				   {debugdir ""} } {
     with_test_prefix $testname {
 	clean_restart $::binfile
+
+	if { $debugdir ne "" } {
+	    gdb_test_no_output "set debug-file-directory $debugdir" \
+		"set debug directory"
+	}
 
 	set saw_warning false
 	set saw_download false
@@ -222,6 +231,27 @@ gdb_assert { [lindex $status 0] == 0 } \
 
 load_exec_and_core_file true false \
     "load core file, libfoo_1.so removed"
+
+# Symlink the .build-id/xx/xxx...xxx filename within the debug
+# directory to LIBRARY_1_BACKUP_FILENAME, now when we restart GDB it
+# should find the missing library within the debug directory.
+set debugdir [standard_output_file "debugdir"]
+set build_id_filename \
+    $debugdir/[build_id_debug_filename_get $library_1_backup_filename ""]
+set status \
+    [remote_exec build \
+	 "mkdir -p [file dirname $build_id_filename]"]
+gdb_assert { [lindex $status 0] == 0 } \
+    "create sub-directory within the debug directory"
+set status \
+    [remote_exec build \
+	 "ln -sf $library_1_backup_filename $build_id_filename"]
+gdb_assert { [lindex $status 0] == 0 } \
+    "create symlink within the debug directory "
+
+load_exec_and_core_file false false \
+    "load core file, find libfoo_1.so through debug-file-directory" \
+    $debugdir
 
 # Setup a debuginfod server which can serve the original shared
 # library file.

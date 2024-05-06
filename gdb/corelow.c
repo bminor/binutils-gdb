@@ -48,7 +48,6 @@
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/scoped_fd.h"
 #include "gdbsupport/x86-xstate.h"
-#include "debuginfod-support.h"
 #include <unordered_map>
 #include <unordered_set>
 #include "cli/cli-cmds.h"
@@ -469,13 +468,20 @@ core_target::build_file_mappings ()
 	   || !bfd_check_format (abfd.get (), bfd_object))
 	  && file_data.build_id != nullptr)
 	{
-	  expanded_fname = nullptr;
-	  debuginfod_exec_query (file_data.build_id->data,
-				 file_data.build_id->size,
-				 filename.c_str (), &expanded_fname);
-	  if (expanded_fname != nullptr)
+	  abfd = find_objfile_by_build_id (file_data.build_id,
+					   filename.c_str ());
+
+	  if (abfd != nullptr)
 	    {
+	      /* The find_objfile_by_build_id will have opened ABFD using
+		 the GNUTARGET global bfd type, however, we need the bfd
+		 opened as the binary type (see the function's header
+		 comment), so now we reopen ABFD with the desired binary
+		 type.  */
+	      expanded_fname
+		= make_unique_xstrdup (bfd_get_filename (abfd.get ()));
 	      struct bfd *b = bfd_openr (expanded_fname.get (), "binary");
+	      gdb_assert (b != nullptr);
 	      abfd = gdb_bfd_ref_ptr::new_reference (b);
 	    }
 	}
@@ -833,28 +839,7 @@ locate_exec_from_corefile_build_id (bfd *abfd, int from_tty)
     return;
 
   gdb_bfd_ref_ptr execbfd
-    = build_id_to_exec_bfd (build_id->size, build_id->data);
-
-  if (execbfd == nullptr)
-    {
-      /* Attempt to query debuginfod for the executable.  */
-      gdb::unique_xmalloc_ptr<char> execpath;
-      scoped_fd fd = debuginfod_exec_query (build_id->data, build_id->size,
-					    abfd->filename, &execpath);
-
-      if (fd.get () >= 0)
-	{
-	  execbfd = gdb_bfd_open (execpath.get (), gnutarget);
-
-	  if (execbfd == nullptr)
-	    warning (_("\"%s\" from debuginfod cannot be opened as bfd: %s"),
-		     execpath.get (),
-		     gdb_bfd_errmsg (bfd_get_error (), nullptr).c_str ());
-	  else if (!build_id_verify (execbfd.get (), build_id->size,
-				     build_id->data))
-	    execbfd.reset (nullptr);
-	}
-    }
+    = find_objfile_by_build_id (build_id, abfd->filename);
 
   if (execbfd != nullptr)
     {

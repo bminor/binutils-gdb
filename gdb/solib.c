@@ -46,7 +46,6 @@
 #include "gdb_bfd.h"
 #include "gdbsupport/filestuff.h"
 #include "gdbsupport/scoped_fd.h"
-#include "debuginfod-support.h"
 #include "source.h"
 #include "cli/cli-style.h"
 
@@ -526,21 +525,15 @@ solib_map_sections (solib &so)
 	    abfd = nullptr;
 
 	  if (abfd == nullptr)
-	    {
-	      scoped_fd fd = debuginfod_exec_query
-		(mapped_file_info->build_id ()->data,
-		 mapped_file_info->build_id ()->size,
-		 so.so_name.c_str (), &filename);
+	    abfd = find_objfile_by_build_id (mapped_file_info->build_id (),
+					     so.so_name.c_str ());
 
-	      if (fd.get () >= 0)
-		abfd = ops->bfd_open (filename.get ());
-	      else if (mismatch)
-		{
-		  warning (_ ("Build-id of %ps does not match core file."),
-			   styled_string (file_name_style.style (),
-					  filename.get ()));
-		  abfd = nullptr;
-		}
+	  if (abfd == nullptr && mismatch)
+	    {
+	      warning (_ ("Build-id of %ps does not match core file."),
+		       styled_string (file_name_style.style (),
+				      filename.get ()));
+	      abfd = nullptr;
 	    }
 	}
     }

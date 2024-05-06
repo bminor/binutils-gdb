@@ -296,6 +296,30 @@ set ptr_value [read_ptr_value]
 gdb_assert { $ptr_value eq "unavailable" } \
     "check value of pointer is unavailable with library file missing"
 
+# Now symlink the .build-id/xx/xxx...xxx filename within the debug
+# directory to library we just moved aside.  Restart GDB and setup the
+# debug-file-directory before loading the core file.
+#
+# GDB should lookup the file to map via the build-id link in the
+# .build-id/ directory.
+set debugdir [standard_output_file "debugdir"]
+set build_id_filename \
+    $debugdir/[build_id_debug_filename_get $library_backup_filename ""]
+
+remote_exec build "mkdir -p [file dirname $build_id_filename]"
+remote_exec build "ln -sf $library_backup_filename $build_id_filename"
+
+clean_restart $binfile
+
+gdb_test_no_output "set debug-file-directory $debugdir" \
+    "set debug-file-directory"
+
+load_core_file "load corefile, lookup in debug-file-directory"
+
+set ptr_value [read_ptr_value]
+gdb_assert { $ptr_value == $ptr_expected_value } \
+    "check value of pointer variable from core-file, lookup in debug-file-directory"
+
 # Build a new version of the shared library, keep the library the same size,
 # but change the contents so the build-id changes.  Then restart GDB and load
 # the core-file again.  GDB should spot that the build-id for the shared
