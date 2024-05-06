@@ -16644,12 +16644,16 @@ cooked_index_functions::expand_symtabs_matching
     {
       std::vector<std::string_view> name_vec
 	= lookup_name_without_params.split_name (lang);
-      std::string last_name (name_vec.back ());
+      std::vector<std::string> name_str_vec (name_vec.begin (), name_vec.end ());
+      std::vector<lookup_name_info> segment_lookup_names;
+      segment_lookup_names.reserve (name_vec.size ());
+      for (auto &segment_name : name_str_vec)
+	{
+	  segment_lookup_names.emplace_back (segment_name,
+	    symbol_name_match_type::FULL, completing, true);
+	}
 
-      lookup_name_info last_segment_lookup_name (
-	last_name, symbol_name_match_type::FULL, completing, true);
-
-      for (const cooked_index_entry *entry : table->find (last_name,
+      for (const cooked_index_entry *entry : table->find (name_str_vec.back (),
 							  completing))
 	{
 	  QUIT;
@@ -16678,12 +16682,23 @@ cooked_index_functions::expand_symtabs_matching
 	    {
 	      /* If we ran out of entries, or if this segment doesn't
 		 match, this did not match.  */
-	      if (parent == nullptr
-		  || strncmp (parent->name, name_vec[i - 1].data (),
-			      name_vec[i - 1].length ()) != 0)
+	      if (parent == nullptr)
 		{
 		  found = false;
 		  break;
+		}
+	      if (parent->lang != language_unknown)
+		{
+		  const language_defn *lang_def = language_def (parent->lang);
+		  symbol_name_matcher_ftype *name_matcher
+		    = lang_def->get_symbol_name_matcher
+		      (segment_lookup_names[i-1]);
+		  if (!name_matcher (parent->canonical,
+				     segment_lookup_names[i-1], nullptr))
+		    {
+		      found = false;
+		      break;
+		    }
 		}
 
 	      parent = parent->get_parent ();
@@ -16708,9 +16723,9 @@ cooked_index_functions::expand_symtabs_matching
 		      const language_defn *lang_def = language_def (entry->lang);
 		      symbol_name_matcher_ftype *name_matcher
 			= lang_def->get_symbol_name_matcher
-			  (last_segment_lookup_name);
+			  (segment_lookup_names.back ());
 		      if (!name_matcher (entry->canonical,
-					 last_segment_lookup_name, nullptr))
+					 segment_lookup_names.back (), nullptr))
 			continue;
 		    }
 	      }
