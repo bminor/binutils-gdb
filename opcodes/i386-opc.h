@@ -639,11 +639,12 @@ enum
 #define VEXScalar	3
   Vex,
   /* How to encode VEX.vvvv:
-     0: VEX.vvvv must be 1111b.
-     1: VEX.vvvv encodes one of the src register operands.
-     2: VEX.vvvv encodes the dest register operand.
+     1: VEX.vvvv encodes the src1 register operand.
+     3: VEX.vvvv encodes the dest register operand.
    */
-#define VexVVVV_DST   2
+#define VexVVVV_SRC1   1
+#define VexVVVV_DST    3
+
   VexVVVV,
   /* How the VEX.W bit is used:
      0: Set by the REX.W bit.

@@ -5045,7 +5045,7 @@ optimize_encoding (void)
        */
       i.tm.opcode_space = SPACE_0F;
       i.tm.base_opcode = 0x6c;
-      i.tm.opcode_modifier.vexvvvv = 1;
+      i.tm.opcode_modifier.vexvvvv = VexVVVV_SRC1;
 
       ++i.operands;
       ++i.reg_operands;
@@ -10365,7 +10365,7 @@ build_modrm_byte (void)
 			/* Compensate for kludge in md_assemble().  */
 			+ i.tm.operand_types[0].bitfield.imm1;
   unsigned int dest = i.operands - 1 - i.tm.opcode_modifier.immext;
-  unsigned int v, op, reg_slot = ~0;
+  unsigned int v, op, reg_slot;
 
   /* Accumulator (in particular %st), shift count (%cl), and alike need
      to be skipped just like immediate operands do.  */
@@ -10437,19 +10437,21 @@ build_modrm_byte (void)
 				     || i.encoding == encoding_evex));
     }
 
-  if (i.tm.opcode_modifier.vexvvvv == VexVVVV_DST)
+  switch (i.tm.opcode_modifier.vexvvvv)
     {
-      v = dest;
-      dest-- ;
-    }
-  else
-    {
-      for (v = source + 1; v < dest; ++v)
-	if (v != reg_slot)
-	  break;
-      if (v >= dest)
-	v = ~0;
-    }
+    /* VEX.vvvv encodes the first source register operand.  */
+    case VexVVVV_SRC1:
+      v =  dest - 1;
+      break;
+    /* VEX.vvvv encodes the destination register operand.  */
+    case VexVVVV_DST:
+      v = dest--;
+      break;
+    default:
+      v = ~0;
+      break;
+     }
+
   if (i.tm.extension_opcode != None)
     {
       if (dest != source)
@@ -13160,7 +13162,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	case 3:
 	  if (i.encoding != encoding_default)
 	    {
-	      i.tm.opcode_modifier.vexvvvv = 1;
+	      i.tm.opcode_modifier.vexvvvv = VexVVVV_SRC1;
 	      break;
 	    }
 	  /* Fall through.  */
