@@ -570,17 +570,15 @@ enum
      It implicitly denotes the register group of {x,y,z}mmN - {x,y,z}mm(N + 3).
    */
 #define IMPLICIT_QUAD_GROUP 5
-  /* Two source operands are swapped.  */
-#define SWAP_SOURCES 6
   /* Default mask isn't allowed.  */
-#define NO_DEFAULT_MASK 7
+#define NO_DEFAULT_MASK 6
   /* Address prefix changes register operand */
-#define ADDR_PREFIX_OP_REG 8
+#define ADDR_PREFIX_OP_REG 7
   /* Instrucion requires that destination must be distinct from source
      registers.  */
-#define DISTINCT_DEST 9
+#define DISTINCT_DEST 8
   /* Instruction updates stack pointer implicitly.  */
-#define IMPLICIT_STACK_OP 10
+#define IMPLICIT_STACK_OP 9
   OperandConstraint,
   /* instruction ignores operand size prefix and in Intel mode ignores
      mnemonic size suffix check.  */
@@ -640,9 +638,11 @@ enum
   Vex,
   /* How to encode VEX.vvvv:
      1: VEX.vvvv encodes the src1 register operand.
+     2: VEX.vvvv encodes the src2 register operand.
      3: VEX.vvvv encodes the dest register operand.
    */
 #define VexVVVV_SRC1   1
+#define VexVVVV_SRC2   2
 #define VexVVVV_DST    3
 
   VexVVVV,

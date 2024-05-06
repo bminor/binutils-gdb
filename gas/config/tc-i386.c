@@ -10439,6 +10439,17 @@ build_modrm_byte (void)
 
   switch (i.tm.opcode_modifier.vexvvvv)
     {
+    /* VEX.vvvv encodes the last source register operand.  */
+    case VexVVVV_SRC2:
+      if (source != op)
+	{
+	  v = source++;
+	  break;
+	}
+      /* For vprot*, vpshl*, and vpsha*, XOP.W controls the swapping of src1
+	 and src2, and it requires fall through when the operands are swapped.
+       */
+      /* Fall through.  */
     /* VEX.vvvv encodes the first source register operand.  */
     case VexVVVV_SRC1:
       v =  dest - 1;
@@ -10459,14 +10470,6 @@ build_modrm_byte (void)
       dest = ~0;
     }
   gas_assert (source < dest);
-  if (i.tm.opcode_modifier.operandconstraint == SWAP_SOURCES
-      && source != op)
-    {
-      unsigned int tmp = source;
-
-      source = v;
-      v = tmp;
-    }
 
   if (v < MAX_OPERANDS)
     {
