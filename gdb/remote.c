@@ -1521,7 +1521,7 @@ static ptid_t read_ptid (const char *buf, const char **obuf);
 
 static bool remote_read_description_p (struct target_ops *target);
 
-static void remote_console_output (const char *msg);
+static void remote_console_output (const char *msg, ui_file *stream);
 
 static void remote_btrace_reset (remote_state *rs);
 
@@ -1750,7 +1750,10 @@ remote_target::remote_get_noisy_reply ()
 	    }
 	}
       else if (buf[0] == 'O' && buf[1] != 'K')
-	remote_console_output (buf + 1);	/* 'O' message from stub */
+	{
+	  /* 'O' message from stub */
+	  remote_console_output (buf + 1, gdb_stdtarg);
+	}
       else
 	return buf;		/* Here's the actual reply.  */
     }
@@ -7642,7 +7645,7 @@ remote_target::terminal_ours ()
 }
 
 static void
-remote_console_output (const char *msg)
+remote_console_output (const char *msg, ui_file *stream)
 {
   const char *p;
 
@@ -7653,9 +7656,9 @@ remote_console_output (const char *msg)
 
       tb[0] = c;
       tb[1] = 0;
-      gdb_stdtarg->puts (tb);
+      stream->puts (tb);
     }
-  gdb_stdtarg->flush ();
+  stream->flush ();
 }
 
 /* Return the length of the stop reply queue.  */
@@ -8583,7 +8586,7 @@ remote_target::wait_ns (ptid_t ptid, struct target_waitstatus *status,
 	    warning (_("Remote failure reply: %s"), rs->buf.data ());
 	    break;
 	  case 'O':		/* Console output.  */
-	    remote_console_output (&rs->buf[1]);
+	    remote_console_output (&rs->buf[1], gdb_stdtarg);
 	    break;
 	  default:
 	    warning (_("Invalid remote reply: %s"), rs->buf.data ());
@@ -8717,7 +8720,7 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
 	    break;
 	  }
 	case 'O':		/* Console output.  */
-	  remote_console_output (buf + 1);
+	  remote_console_output (buf + 1, gdb_stdtarg);
 	  break;
 	case '\0':
 	  if (rs->last_sent_signal != GDB_SIGNAL_0)
@@ -11993,7 +11996,8 @@ remote_target::rcmd (const char *command, struct ui_file *outbuf)
       buf = rs->buf.data ();
       if (buf[0] == 'O' && buf[1] != 'K')
 	{
-	  remote_console_output (buf + 1); /* 'O' message from stub.  */
+	  /* 'O' message from stub.  */
+	  remote_console_output (buf + 1, outbuf);
 	  continue;
 	}
       packet_result result = packet_check_result (buf, false);
