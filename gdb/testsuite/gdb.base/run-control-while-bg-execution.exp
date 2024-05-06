@@ -110,6 +110,9 @@ proc do_test { action1 action2 } {
 
 foreach_with_prefix action1 { kill detach add none } {
     foreach_with_prefix action2 { start run attach } {
+	if { $action2 == "attach" && ![can_spawn_for_attach] } {
+	   continue
+	}
 	do_test $action1 $action2
     }
 }

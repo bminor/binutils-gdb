@@ -37,7 +37,8 @@
 # during the attach phase.
 
 # This test only works on Linux
-require !use_gdb_stub isnative
+require can_spawn_for_attach
+require isnative
 require {!is_remote host}
 require {istarget *-linux*}
 

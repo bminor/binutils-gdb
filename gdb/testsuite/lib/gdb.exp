@@ -6153,8 +6153,54 @@ proc gdb_exit { } {
     catch default_gdb_exit
 }
 
+# Helper function for can_spawn_for_attach.  Try to spawn and attach, and
+# return 0 only if we cannot attach because it's unsupported.
+
+gdb_caching_proc can_spawn_for_attach_1 {} {
+    # Assume yes.
+    set res 1
+
+    set me "can_spawn_for_attach"
+    set src {
+	#include <unistd.h>
+
+	int
+	main (void)
+	{
+	    sleep (600);
+	    return 0;
+	}
+    }
+    if {![gdb_simple_compile $me $src executable]} {
+	return $res
+    }
+
+    set test_spawn_id [spawn_wait_for_attach_1 $obj]
+    remote_file build delete $obj
+
+    gdb_start
+
+    set test_pid [spawn_id_get_pid $test_spawn_id]
+    set attaching_re "Attaching to process $test_pid"
+    gdb_test_multiple "attach $test_pid" "can spawn for attach" {
+	-re -wrap "$attaching_re\r\n.*ptrace: Operation not permitted\\." {
+	    # Not permitted.
+	    set res 0
+	}
+	-re -wrap "" {
+	    # Don't know, keep assuming yes.
+	}
+    }
+
+    gdb_exit
+
+    kill_wait_spawned_process $test_spawn_id
+
+    return $res
+}
+
 # Return true if we can spawn a program on the target and attach to
-# it.
+# it.  Calls gdb_exit for the first call in a test-case.
 
 proc can_spawn_for_attach { } {
     # We use exp_pid to get the inferior's pid, assuming that gives
@@ -6173,8 +6219,39 @@ proc can_spawn_for_attach { } {
 	return 0
     }
 
-    # Assume yes.
-    return 1
+    # The normal sequence to use for a runtime test like
+    # can_spawn_for_attach_1 is:
+    # - gdb_exit (don't use a running gdb, we don't know what state it is in),
+    # - gdb_start (start a new gdb), and
+    # - gdb_exit (cleanup).
+    #
+    # By making can_spawn_for_attach_1 a gdb_caching_proc, we make it
+    # unpredictable which test-case will call it first, and consequently a
+    # test-case may pass in say a full test run, but fail when run
+    # individually, due to a can_spawn_for_attach call in a location where a
+    # gdb_exit (as can_spawn_for_attach_1 does) breaks things.
+    # To avoid this, we move the initial gdb_exit out of
+    # can_spawn_for_attach_1, guaranteeing that we end up in the same state
+    # regardless of whether can_spawn_for_attach_1 is called.  However, that
+    # is only necessary for the first call in a test-case, so cache the result
+    # in a global (which should be reset after each test-case) to keep track
+    # of that.
+    #
+    # In summary, we distinguish between three cases:
+    # - first call in first test-case.  Executes can_spawn_for_attach_1.
+    #   Calls gdb_exit, gdb_start, gdb_exit.
+    # - first call in following test-cases.  Uses cached result of
+    #   can_spawn_for_attach_1.  Calls gdb_exit.
+    # - rest.  Use cached result in cache_can_spawn_for_attach_1. Calls no
+    #   gdb_start or gdb_exit.
+    global cache_can_spawn_for_attach_1
+    if { [info exists cache_can_spawn_for_attach_1] } {
+	return $cache_can_spawn_for_attach_1
+    }
+    gdb_exit
+
+    set cache_can_spawn_for_attach_1 [can_spawn_for_attach_1]
+    return $cache_can_spawn_for_attach_1
 }
 
 # Centralize the failure checking of "attach" command.
@@ -6287,19 +6364,11 @@ proc spawn_id_get_pid { spawn_id } {
     return $testpid
 }
 
-# Start a set of programs running and then wait for a bit, to be sure
-# that they can be attached to.  Return a list of processes spawn IDs,
-# one element for each process spawned.  It's a test error to call
-# this when [can_spawn_for_attach] is false.
+# Helper function for spawn_wait_for_attach and can_spawn_for_attach_1.  As
+# spawn_wait_for_attach, but doesn't check for can_spawn_for_attach.
 
-proc spawn_wait_for_attach { executable_list } {
+proc spawn_wait_for_attach_1 { executable_list } {
     set spawn_id_list {}
-
-    if ![can_spawn_for_attach] {
-	# The caller should have checked can_spawn_for_attach itself
-	# before getting here.
-	error "can't spawn for attach with this target/board"
-    }
 
     foreach {executable} $executable_list {
 	# Note we use Expect's spawn, not Tcl's exec, because with
@@ -6312,6 +6381,21 @@ proc spawn_wait_for_attach { executable_list } {
     sleep 2
 
     return $spawn_id_list
+}
+
+# Start a set of programs running and then wait for a bit, to be sure
+# that they can be attached to.  Return a list of processes spawn IDs,
+# one element for each process spawned.  It's a test error to call
+# this when [can_spawn_for_attach] is false.
+
+proc spawn_wait_for_attach { executable_list } {
+    if ![can_spawn_for_attach] {
+	# The caller should have checked can_spawn_for_attach itself
+	# before getting here.
+	error "can't spawn for attach with this target/board"
+    }
+
+    return [spawn_wait_for_attach_1 $executable_list]
 }
 
 #

@@ -21,7 +21,7 @@
 load_lib gdbserver-support.exp
 
 # The test relies on "detach/attach".
-require !use_gdb_stub
+require can_spawn_for_attach
 
 standard_testfile
 set escapedbinfile [string_to_regexp ${binfile}]

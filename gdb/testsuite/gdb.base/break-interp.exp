@@ -318,6 +318,10 @@ proc test_attach_gdb {file pid displacement prefix} {
 }
 
 proc test_attach {file displacement {relink_args ""}} {
+    if { ![can_spawn_for_attach] } {
+	return
+    }
+
     global board_info
     global exec
 

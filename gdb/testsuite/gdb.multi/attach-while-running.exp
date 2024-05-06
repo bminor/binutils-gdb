@@ -36,7 +36,7 @@
 
 standard_testfile
 
-require !use_gdb_stub
+require can_spawn_for_attach
 
 if { [build_executable "failed to prepare" ${testfile} ${srcfile}] } {
     return
