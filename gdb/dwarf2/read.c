@@ -16694,9 +16694,25 @@ cooked_index_functions::expand_symtabs_matching
 		= lookup_name_without_params.match_type ();
 	      if ((match_type == symbol_name_match_type::FULL
 		   || (lang != language_ada
-		       && match_type == symbol_name_match_type::EXPRESSION))
-		  && parent != nullptr)
-		continue;
+		       && match_type == symbol_name_match_type::EXPRESSION)))
+		{
+		  if (parent != nullptr)
+		    continue;
+
+		  if (entry->lang != language_unknown)
+		    {
+		      const language_defn *lang_def = language_def (entry->lang);
+		      lookup_name_info last_segment_lookup_name (
+			last_name.data (), symbol_name_match_type::FULL,
+			false, true);
+		      symbol_name_matcher_ftype *name_matcher
+			= lang_def->get_symbol_name_matcher
+			  (last_segment_lookup_name);
+		      if (!name_matcher (entry->canonical,
+					 last_segment_lookup_name, nullptr))
+			continue;
+		    }
+	      }
 	    }
 	  else
 	    {
