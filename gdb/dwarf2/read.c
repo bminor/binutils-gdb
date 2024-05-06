@@ -16637,6 +16637,9 @@ cooked_index_functions::expand_symtabs_matching
     language_ada
   };
 
+  symbol_name_match_type match_type
+    = lookup_name_without_params.match_type ();
+
   for (enum language lang : unique_styles)
     {
       std::vector<std::string_view> name_vec
@@ -16693,8 +16696,6 @@ cooked_index_functions::expand_symtabs_matching
 	     "x::a::b".  */
 	  if (symbol_matcher == nullptr)
 	    {
-	      symbol_name_match_type match_type
-		= lookup_name_without_params.match_type ();
 	      if ((match_type == symbol_name_match_type::FULL
 		   || (lang != language_ada
 		       && match_type == symbol_name_match_type::EXPRESSION)))
