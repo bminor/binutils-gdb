@@ -16643,6 +16643,9 @@ cooked_index_functions::expand_symtabs_matching
 	= lookup_name_without_params.split_name (lang);
       std::string last_name (name_vec.back ());
 
+      lookup_name_info last_segment_lookup_name (
+	last_name, symbol_name_match_type::FULL, completing, true);
+
       for (const cooked_index_entry *entry : table->find (last_name,
 							  completing))
 	{
@@ -16702,9 +16705,6 @@ cooked_index_functions::expand_symtabs_matching
 		  if (entry->lang != language_unknown)
 		    {
 		      const language_defn *lang_def = language_def (entry->lang);
-		      lookup_name_info last_segment_lookup_name (
-			last_name.data (), symbol_name_match_type::FULL,
-			false, true);
 		      symbol_name_matcher_ftype *name_matcher
 			= lang_def->get_symbol_name_matcher
 			  (last_segment_lookup_name);
