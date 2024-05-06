@@ -114,6 +114,7 @@ AC_DEFUN([GDB_AC_COMMON], [
     # endif
     #endif	/* __MINGW32__ || __CYGWIN__ */
     #include <thread>
+    #include <mutex>
     void callback() { }]],
   [[std::thread t(callback);]])],
 				gdb_cv_cxx_std_thread=yes,

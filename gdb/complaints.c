@@ -24,7 +24,9 @@
 #include "top.h"
 #include "gdbsupport/selftest.h"
 #include <unordered_map>
+#if CXX_STD_THREAD
 #include <mutex>
+#endif
 
 /* Map format strings to counters.  */
 
