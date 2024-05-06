@@ -70,4 +70,30 @@ build_id_to_string (const bfd_build_id *build_id)
   return bin2hex (build_id->data, build_id->size);
 }
 
+/* Compare the content of two build-ids.  One build-id (A) is passed as a
+   build-id pointer, while the second is passed using BUILD_ID_LEN and
+   BUILD_ID_DATA.  Return true if the build-ids match, otherwise false.  */
+
+static inline bool
+build_id_equal (const bfd_build_id *a, const bfd_size_type build_id_len,
+		const bfd_byte *build_id_data)
+{
+  gdb_assert (a != nullptr);
+  gdb_assert (build_id_data != nullptr);
+
+  return (a->size == build_id_len
+	  && memcmp (a->data, build_id_data, a->size) == 0);
+}
+
+/* Like the above, but take two build-id pointers A and B.  */
+
+static inline bool
+build_id_equal (const bfd_build_id *a, const bfd_build_id *b)
+{
+  gdb_assert (a != nullptr);
+  gdb_assert (b != nullptr);
+
+  return build_id_equal (a, b->size, b->data);
+}
+
 #endif /* BUILD_ID_H */

@@ -253,10 +253,8 @@ validate_exec_file (int from_tty)
 
 	  if (target_exec_file_build_id != nullptr)
 	    {
-	      if (exec_file_build_id->size == target_exec_file_build_id->size
-		  && memcmp (exec_file_build_id->data,
-			     target_exec_file_build_id->data,
-			     exec_file_build_id->size) == 0)
+	      if (build_id_equal (exec_file_build_id,
+				  target_exec_file_build_id))
 		{
 		  /* Match.  */
 		  return;

@@ -63,8 +63,7 @@ build_id_verify (bfd *abfd, size_t check_len, const bfd_byte *check)
     warning (_("File \"%ps\" has no build-id, file skipped"),
 	     styled_string (file_name_style.style (),
 			    bfd_get_filename (abfd)));
-  else if (found->size != check_len
-	   || memcmp (found->data, check, found->size) != 0)
+  else if (!build_id_equal (found, check_len, check))
     warning (_("File \"%ps\" has a different build-id, file skipped"),
 	     styled_string (file_name_style.style (),
 			    bfd_get_filename (abfd)));
