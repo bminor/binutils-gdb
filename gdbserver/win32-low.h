@@ -175,8 +175,8 @@ public:
 struct gdbserver_windows_process : public windows_nat::windows_process_info
 {
   windows_nat::windows_thread_info *find_thread (ptid_t ptid) override;
-  DWORD handle_output_debug_string (const DEBUG_EVENT &current_event,
-				    struct target_waitstatus *ourstatus) override;
+  bool handle_output_debug_string (const DEBUG_EVENT &current_event,
+				   struct target_waitstatus *ourstatus) override;
   void handle_load_dll (const char *dll_name, LPVOID base) override;
   void handle_unload_dll (const DEBUG_EVENT &current_event) override;
   bool handle_access_violation (const EXCEPTION_RECORD *rec) override;

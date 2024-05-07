@@ -81,11 +81,54 @@ struct windows_thread_info
   /* Thread Information Block address.  */
   CORE_ADDR thread_local_base;
 
+#ifdef __CYGWIN__
+  /* These two fields are used to handle Cygwin signals.  When a
+     thread is signaled, the "sig" thread inside the Cygwin runtime
+     reports the fact to us via a special OutputDebugString message.
+     In order to make stepping into a signal handler work, we can only
+     resume the "sig" thread when we also resume the target signaled
+     thread.  When we intercept a Cygwin signal, we set up a cross
+     link between the two threads using the two fields below, so we
+     can always identify one from the other.  See the "Cygwin signals"
+     description in gdb/windows-nat.c for more.  */
+
+  /* If this thread received a signal, then 'cygwin_sig_thread' points
+     to the "sig" thread within the Cygwin runtime.  */
+  windows_thread_info *cygwin_sig_thread = nullptr;
+
+  /* If this thread is the Cygwin runtime's "sig" thread, then
+     'signaled_thread' points at the thread that received a
+     signal.  */
+  windows_thread_info *signaled_thread = nullptr;
+#endif
+
+  /* If the thread had its event postponed with DBG_REPLY_LATER, when
+     we later ResumeThread this thread, WaitForDebugEvent will
+     re-report the postponed event.  This field holds the continue
+     status value to be automatically passed to ContinueDebugEvent
+     when we encounter this re-reported event.  0 if the thread has
+     not had its event postponed with DBG_REPLY_LATER. */
+  DWORD reply_later = 0;
+
   /* This keeps track of whether SuspendThread was called on this
      thread.  -1 means there was a failure or that the thread was
      explicitly not suspended, 1 means it was called, and 0 means it
      was not.  */
   int suspended = 0;
+
+  /* This flag indicates whether we are explicitly stopping this
+     thread in response to a target_stop request.  This allows
+     distinguishing between threads that are explicitly stopped by the
+     debugger and threads that are stopped due to other reasons.
+
+     Typically, when we want to stop a thread, we suspend it, enqueue
+     a pending GDB_SIGNAL_0 stop status on the thread, and then set
+     this flag to true.  However, if the thread has had its event
+     previously postponed with DBG_REPLY_LATER, it means that it
+     already has an event to report.  In such case, we simply set the
+     'stopping' flag without suspending the thread or enqueueing a
+     pending stop.  See stop_one_thread.  */
+  bool stopping = false;
 
 /* Info about a potential pending stop.
 
@@ -167,15 +210,15 @@ struct windows_process_info
   virtual windows_thread_info *find_thread (ptid_t ptid) = 0;
 
   /* Handle OUTPUT_DEBUG_STRING_EVENT from child process.  Updates
-     OURSTATUS and returns the thread id if this represents a thread
-     change (this is specific to Cygwin), otherwise 0.
+     OURSTATUS and returns true if this represents a Cygwin signal,
+     otherwise false.
 
      Cygwin prepends its messages with a "cygwin:".  Interpret this as
      a Cygwin signal.  Otherwise just print the string as a warning.
 
      This function must be supplied by the embedding application.  */
-  virtual DWORD handle_output_debug_string (const DEBUG_EVENT &current_event,
-					    struct target_waitstatus *ourstatus) = 0;
+  virtual bool handle_output_debug_string (const DEBUG_EVENT &current_event,
+					   struct target_waitstatus *ourstatus) = 0;
 
   /* Handle a DLL load event.
 

@@ -625,7 +625,7 @@ win32_process_target::attach (unsigned long pid)
 
 /* See nat/windows-nat.h.  */
 
-DWORD
+bool
 gdbserver_windows_process::handle_output_debug_string
   (const DEBUG_EVENT &current_event,
    struct target_waitstatus *ourstatus)
@@ -636,7 +636,7 @@ gdbserver_windows_process::handle_output_debug_string
   DWORD nbytes = current_event.u.DebugString.nDebugStringLength;
 
   if (nbytes == 0)
-    return 0;
+    return false;
 
   if (nbytes > READ_BUFFER_LEN)
     nbytes = READ_BUFFER_LEN;
@@ -655,7 +655,7 @@ gdbserver_windows_process::handle_output_debug_string
   else
     {
       if (read_inferior_memory (addr, (unsigned char *) s, nbytes) != 0)
-	return 0;
+	return false;
     }
 
   if (!startswith (s, "cYg"))
@@ -663,14 +663,14 @@ gdbserver_windows_process::handle_output_debug_string
       if (!server_waiting)
 	{
 	  OUTMSG2(("%s", s));
-	  return 0;
+	  return false;
 	}
 
       monitor_output (s);
     }
 #undef READ_BUFFER_LEN
 
-  return 0;
+  return false;
 }
 
 static void
