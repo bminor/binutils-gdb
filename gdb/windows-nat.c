@@ -261,6 +261,10 @@ enum windows_continue_flag
        all-stop mode.  This flag indicates that windows_continue
        should call ContinueDebugEvent even in non-stop mode.  */
     WCONT_CONTINUE_DEBUG_EVENT = 4,
+
+    /* Skip calling ContinueDebugEvent even in all-stop mode.  This is
+       the default in non-stop mode.  */
+    WCONT_DONT_CONTINUE_DEBUG_EVENT = 8,
   };
 
 DEF_ENUM_FLAGS_TYPE (windows_continue_flag, windows_continue_flags);
@@ -521,6 +525,8 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
     return serial_event_fd (m_wait_event);
   }
 
+  void debug_registers_changed_all_threads ();
+
 private:
 
   windows_thread_info *add_thread (ptid_t ptid, HANDLE h, void *tlb,
@@ -528,7 +534,8 @@ private:
   void delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p);
   DWORD fake_create_process (const DEBUG_EVENT &current_event);
 
-  void stop_one_thread (windows_thread_info *th);
+  void stop_one_thread (windows_thread_info *th,
+			enum stopping_kind stopping_kind);
 
   BOOL windows_continue (DWORD continue_status, int id,
 			 windows_continue_flags cont_flags = 0);
@@ -1295,7 +1302,7 @@ windows_per_inferior::handle_output_debug_string
 		 a pending event.  It will be picked up by
 		 windows_nat_target::wait.  */
 	      th->suspend ();
-	      th->stopping = true;
+	      th->stopping = SK_EXTERNAL;
 	      th->last_event = {};
 	      th->pending_status.set_stopped (gotasig);
 
@@ -1608,7 +1615,7 @@ windows_per_inferior::continue_one_thread (windows_thread_info *th,
     }
 
   th->resume ();
-  th->stopping = false;
+  th->stopping = SK_NOT_STOPPING;
   th->last_sig = GDB_SIGNAL_0;
 }
 
@@ -1683,8 +1690,19 @@ windows_nat_target::windows_continue (DWORD continue_status, int id,
 #endif
       }
 
-  if (!target_is_non_stop_p ()
-      || (cont_flags & WCONT_CONTINUE_DEBUG_EVENT) != 0)
+  /* WCONT_DONT_CONTINUE_DEBUG_EVENT and WCONT_CONTINUE_DEBUG_EVENT
+     can't both be enabled at the same time.  */
+  gdb_assert ((cont_flags & WCONT_DONT_CONTINUE_DEBUG_EVENT) == 0
+	      || (cont_flags & WCONT_CONTINUE_DEBUG_EVENT) == 0);
+
+  bool continue_debug_event;
+  if ((cont_flags & WCONT_CONTINUE_DEBUG_EVENT) != 0)
+    continue_debug_event = true;
+  else if ((cont_flags & WCONT_DONT_CONTINUE_DEBUG_EVENT) != 0)
+    continue_debug_event = false;
+  else
+    continue_debug_event = !target_is_non_stop_p ();
+  if (continue_debug_event)
     {
       DEBUG_EVENTS ("windows_continue -> continue_last_debug_event");
       continue_last_debug_event_main_thread
@@ -1879,11 +1897,13 @@ windows_nat_target::interrupt ()
 	     "Press Ctrl-c in the program console."));
 }
 
-/* Stop thread TH.  This leaves a GDB_SIGNAL_0 pending in the thread,
-   which is later consumed by windows_nat_target::wait.  */
+/* Stop thread TH, for STOPPING_KIND reason.  This leaves a
+   GDB_SIGNAL_0 pending in the thread, which is later consumed by
+   windows_nat_target::wait.  */
 
 void
-windows_nat_target::stop_one_thread (windows_thread_info *th)
+windows_nat_target::stop_one_thread (windows_thread_info *th,
+				     enum stopping_kind stopping_kind)
 {
   ptid_t thr_ptid (windows_process.process_id, th->tid);
 
@@ -1899,12 +1919,18 @@ windows_nat_target::stop_one_thread (windows_thread_info *th)
 #ifdef __CYGWIN__
   else if (th->suspended
 	   && th->signaled_thread != nullptr
-	   && th->pending_status.kind () == TARGET_WAITKIND_IGNORE)
+	   && th->pending_status.kind () == TARGET_WAITKIND_IGNORE
+	   /* If doing an internal stop to update debug registers,
+	      then just leave the "sig" thread suspended.  Otherwise
+	      windows_nat_target::wait would incorrectly break the
+	      signaled_thread lock when it later processes the pending
+	      stop and calls windows_continue on this thread.  */
+	   && stopping_kind == SK_EXTERNAL)
     {
       DEBUG_EVENTS ("explict stop for \"sig\" thread %s held for signal",
 		    thr_ptid.to_string ().c_str ());
 
-      th->stopping = true;
+      th->stopping = stopping_kind;
       th->pending_status.set_stopped (GDB_SIGNAL_0);
       th->last_event = {};
       serial_event_set (m_wait_event);
@@ -1918,7 +1944,9 @@ windows_nat_target::stop_one_thread (windows_thread_info *th)
 		    thr_ptid.to_string ().c_str (),
 		    th->suspended, th->stopping);
 
-      th->stopping = true;
+      /* Upgrade stopping.  */
+      if (stopping_kind > th->stopping)
+	th->stopping = stopping_kind;
     }
   else
     {
@@ -1927,9 +1955,13 @@ windows_nat_target::stop_one_thread (windows_thread_info *th)
       th->suspend ();
       gdb_assert (th->suspended);
 
-      th->stopping = true;
-      th->pending_status.set_stopped (GDB_SIGNAL_0);
-      th->last_event = {};
+      if (stopping_kind > th->stopping)
+	{
+	  th->stopping = stopping_kind;
+	  th->pending_status.set_stopped (GDB_SIGNAL_0);
+	  th->last_event = {};
+	}
+
       serial_event_set (m_wait_event);
     }
 }
@@ -1943,7 +1975,7 @@ windows_nat_target::stop (ptid_t ptid)
     {
       ptid_t thr_ptid (windows_process.process_id, th->tid);
       if (thr_ptid.matches (ptid))
-	stop_one_thread (th.get ());
+	stop_one_thread (th.get (), SK_EXTERNAL);
     }
 }
 
@@ -2370,6 +2402,17 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	    {
 	      windows_thread_info *th = windows_process.find_thread (result);
 
+	      /* If this thread was temporarily stopped just so we
+		 could update its debug registers on the next
+		 resumption, do it now.  */
+	      if (th->stopping == SK_INTERNAL)
+		{
+		  gdb_assert (fake);
+		  windows_continue (DBG_CONTINUE, th->tid,
+				    WCONT_DONT_CONTINUE_DEBUG_EVENT);
+		  continue;
+		}
+
 	      th->stopped_at_software_breakpoint = false;
 	      if (current_event.dwDebugEventCode
 		  == EXCEPTION_DEBUG_EVENT
@@ -2422,7 +2465,7 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		for (auto &thr : windows_process.thread_list)
 		  thr->suspend ();
 
-	      th->stopping = false;
+	      th->stopping = SK_NOT_STOPPING;
 	    }
 
 	  /* If something came out, assume there may be more.  This is
@@ -3905,6 +3948,41 @@ Use \"file\" or \"dll\" command to load executable/libraries directly."));
     }
 }
 
+/* For each thread, set the debug_registers_changed flag, and
+   temporarily stop it so we can update its debug registers.  */
+
+void
+windows_nat_target::debug_registers_changed_all_threads ()
+{
+  for (auto &th : windows_process.thread_list)
+    {
+      th->debug_registers_changed = true;
+
+      /* Note we don't SuspendThread => update debug regs =>
+	 ResumeThread, because SuspendThread is actually asynchronous
+	 (and GetThreadContext blocks until the thread really
+	 suspends), and doing that for all threads may take a bit.
+	 Also, the core does one call per DR register update, so that
+	 would result in a lot of suspend-resumes.  So instead, we
+	 suspend the thread if it wasn't already suspended, and queue
+	 a pending stop to be handled by windows_nat_target::wait.
+	 This means we only stop each thread once, and, we don't block
+	 waiting for each individual thread stop.  */
+      stop_one_thread (th.get (), SK_INTERNAL);
+    }
+}
+
+/* Trampoline helper to get at the
+   windows_nat_target::debug_registers_changed_all_threads method in
+   the native target.  */
+
+static void
+debug_registers_changed_all_threads ()
+{
+  auto *win_tgt = static_cast<windows_nat_target *> (get_native_target ());
+  win_tgt->debug_registers_changed_all_threads ();
+}
+
 /* Hardware watchpoint support, adapted from go32-nat.c code.  */
 
 /* Pass the address ADDR to the inferior in the I'th debug register.
@@ -3916,8 +3994,7 @@ windows_set_dr (int i, CORE_ADDR addr)
   if (i < 0 || i > 3)
     internal_error (_("Invalid register %d in windows_set_dr.\n"), i);
 
-  for (auto &th : windows_process.thread_list)
-    th->debug_registers_changed = true;
+  debug_registers_changed_all_threads ();
 }
 
 /* Pass the value VAL to the inferior in the DR7 debug control
@@ -3926,8 +4003,7 @@ windows_set_dr (int i, CORE_ADDR addr)
 static void
 windows_set_dr7 (unsigned long val)
 {
-  for (auto &th : windows_process.thread_list)
-    th->debug_registers_changed = true;
+  debug_registers_changed_all_threads ();
 }
 
 /* Get the value of debug register I from the inferior.  */

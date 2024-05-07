@@ -34,6 +34,24 @@ namespace windows_nat
 
 struct windows_process_info;
 
+/* The reason for explicitly stopping a thread.  Note the enumerators
+   are ordered such that when comparing two stopping_kind's numerical
+   value, the highest should prevail.  */
+enum stopping_kind
+  {
+    /* Not really stopping the thread.  */
+    SK_NOT_STOPPING = 0,
+
+    /* We're stopping the thread for internal reasons, the stop should
+       not be reported as an event to the core.  */
+    SK_INTERNAL = 1,
+
+    /* We're stopping the thread for external reasons, meaning, the
+       core/user asked us to stop the thread, so we must report a stop
+       event to the core.  */
+    SK_EXTERNAL = 2,
+  };
+
 /* Thread information structure used to track extra information about
    each thread.  */
 struct windows_thread_info
@@ -117,9 +135,10 @@ struct windows_thread_info
   int suspended = 0;
 
   /* This flag indicates whether we are explicitly stopping this
-     thread in response to a target_stop request.  This allows
-     distinguishing between threads that are explicitly stopped by the
-     debugger and threads that are stopped due to other reasons.
+     thread in response to a target_stop request or for
+     backend-internal reasons.  This allows distinguishing between
+     threads that are explicitly stopped by the debugger and threads
+     that are stopped due to other reasons.
 
      Typically, when we want to stop a thread, we suspend it, enqueue
      a pending GDB_SIGNAL_0 stop status on the thread, and then set
@@ -128,7 +147,7 @@ struct windows_thread_info
      already has an event to report.  In such case, we simply set the
      'stopping' flag without suspending the thread or enqueueing a
      pending stop.  See stop_one_thread.  */
-  bool stopping = false;
+  stopping_kind stopping = SK_NOT_STOPPING;
 
 /* Info about a potential pending stop.
 
