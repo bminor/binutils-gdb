@@ -32,6 +32,21 @@
 namespace windows_nat
 {
 
+/* Info about a potential pending stop.  Each thread holds one of
+   these.  See "windows_thread_info::pending_stop" for more
+   information.  */
+struct pending_stop
+{
+  /* The target waitstatus we computed.  TARGET_WAITKIND_IGNORE if the
+     thread does not have a pending stop.  */
+  target_waitstatus status;
+
+  /* The event.  A few fields of this can be referenced after a stop,
+     and it seemed simplest to store the entire event.  */
+  DEBUG_EVENT event;
+};
+
+
 /* Thread information structure used to track extra information about
    each thread.  */
 struct windows_thread_info
@@ -71,6 +86,18 @@ struct windows_thread_info
      was not.  */
   int suspended = 0;
 
+/* Info about a potential pending stop.
+
+   Sometimes, Windows will report a stop on a thread that has been
+   ostensibly suspended.  We believe what happens here is that two
+   threads hit a breakpoint simultaneously, and the Windows kernel
+   queues the stop events.  However, this can result in the strange
+   effect of trying to single step thread A -- leaving all other
+   threads suspended -- and then seeing a stop in thread B.  To handle
+   this scenario, we queue all such "pending" stops here, and then
+   process them once the step has completed.  See PR gdb/22992.  */
+  struct pending_stop pending_stop {};
+
   /* The context of the thread, including any manipulations.  */
   union
   {
@@ -97,22 +124,6 @@ struct windows_thread_info
   gdb::unique_xmalloc_ptr<char> name;
 };
 
-
-/* A single pending stop.  See "pending_stops" for more
-   information.  */
-struct pending_stop
-{
-  /* The thread id.  */
-  DWORD thread_id;
-
-  /* The target waitstatus we computed.  */
-  target_waitstatus status;
-
-  /* The event.  A few fields of this can be referenced after a stop,
-     and it seemed simplest to store the entire event.  */
-  DEBUG_EVENT event;
-};
-
 enum handle_exception_result
 {
   HANDLE_EXCEPTION_UNHANDLED = 0,
@@ -135,22 +146,6 @@ struct windows_process_info
   /* The current debug event from WaitForDebugEvent or from a pending
      stop.  */
   DEBUG_EVENT current_event {};
-
-  /* The ID of the thread for which we anticipate a stop event.
-     Normally this is -1, meaning we'll accept an event in any
-     thread.  */
-  DWORD desired_stop_thread_id = -1;
-
-  /* A vector of pending stops.  Sometimes, Windows will report a stop
-     on a thread that has been ostensibly suspended.  We believe what
-     happens here is that two threads hit a breakpoint simultaneously,
-     and the Windows kernel queues the stop events.  However, this can
-     result in the strange effect of trying to single step thread A --
-     leaving all other threads suspended -- and then seeing a stop in
-     thread B.  To handle this scenario, we queue all such "pending"
-     stops here, and then process them once the step has completed.  See
-     PR gdb/22992.  */
-  std::vector<pending_stop> pending_stops;
 
   /* Contents of $_siginfo */
   EXCEPTION_RECORD siginfo_er {};
@@ -216,18 +211,6 @@ struct windows_process_info
      add them to our list of solibs.  */
 
   void add_all_dlls ();
-
-  /* Return true if there is a pending stop matching
-     desired_stop_thread_id.  If DEBUG_EVENTS is true, logging will be
-     enabled.  */
-
-  bool matching_pending_stop (bool debug_events);
-
-  /* See if a pending stop matches DESIRED_STOP_THREAD_ID.  If so,
-     remove it from the list of pending stops, set 'current_event', and
-     return it.  Otherwise, return an empty optional.  */
-
-  std::optional<pending_stop> fetch_pending_stop (bool debug_events);
 
   const char *pid_to_exec_file (int);
 

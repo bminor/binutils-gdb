@@ -427,9 +427,14 @@ continue_one_thread (thread_info *thread, int thread_id)
 static BOOL
 child_continue (DWORD continue_status, int thread_id)
 {
-  windows_process.desired_stop_thread_id = thread_id;
-  if (windows_process.matching_pending_stop (debug_threads))
-    return TRUE;
+  for (thread_info *thread : all_threads)
+    {
+      auto *th = (windows_thread_info *) thread_target_data (thread);
+      if ((thread_id == -1 || thread_id == (int) th->tid)
+	  && !th->suspended
+	  && th->pending_stop.status.kind () != TARGET_WAITKIND_IGNORE)
+	return TRUE;
+    }
 
   /* The inferior will only continue after the ContinueDebugEvent
      call.  */
@@ -1012,15 +1017,20 @@ get_child_debug_event (DWORD *continue_status,
 
   windows_process.attaching = 0;
   {
-    std::optional<pending_stop> stop
-      = windows_process.fetch_pending_stop (debug_threads);
-    if (stop.has_value ())
+    for (thread_info *thread : all_threads)
       {
-	*ourstatus = stop->status;
-	windows_process.current_event = stop->event;
-	ptid = debug_event_ptid (&windows_process.current_event);
-	switch_to_thread (find_thread_ptid (ptid));
-	return 1;
+	auto *th = (windows_thread_info *) thread_target_data (thread);
+
+	if (!th->suspended
+	    && th->pending_stop.status.kind () != TARGET_WAITKIND_IGNORE)
+	  {
+	    *ourstatus = th->pending_stop.status;
+	    th->pending_stop.status.set_ignore ();
+	    windows_process.current_event = th->pending_stop.event;
+	    ptid = debug_event_ptid (&windows_process.current_event);
+	    switch_to_thread (find_thread_ptid (ptid));
+	    return 1;
+	  }
       }
 
     /* Keep the wait time low enough for comfortable remote
@@ -1112,7 +1122,7 @@ get_child_debug_event (DWORD *continue_status,
 	else
 	  ourstatus->set_signalled (gdb_signal_from_host (exit_signal));
       }
-      child_continue (DBG_CONTINUE, windows_process.desired_stop_thread_id);
+      continue_last_debug_event (DBG_CONTINUE, debug_threads);
       break;
 
     case LOAD_DLL_DEBUG_EVENT:
@@ -1169,17 +1179,19 @@ get_child_debug_event (DWORD *continue_status,
 
   ptid = debug_event_ptid (&windows_process.current_event);
 
-  if (windows_process.desired_stop_thread_id != -1
-      && windows_process.desired_stop_thread_id != ptid.lwp ())
+  windows_thread_info *th = windows_process.find_thread (ptid);
+
+  if (th != nullptr && th->suspended)
     {
       /* Pending stop.  See the comment by the definition of
-	 "pending_stops" for details on why this is needed.  */
+	 "windows_thread_info::pending_stop" for details on why this
+	 is needed.  */
       OUTMSG2 (("get_windows_debug_event - "
-		"unexpected stop in 0x%lx (expecting 0x%x)\n",
-		ptid.lwp (), windows_process.desired_stop_thread_id));
+		"unexpected stop in suspended thread 0x%x\n",
+		th->tid));
       maybe_adjust_pc ();
-      windows_process.pending_stops.push_back
-	({(DWORD) ptid.lwp (), *ourstatus, *current_event});
+      th->pending_stop.status = *ourstatus;
+      th->pending_stop.event = *current_event;
       ourstatus->set_spurious ();
     }
   else
@@ -1239,8 +1251,7 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 	  [[fallthrough]];
 	case TARGET_WAITKIND_SPURIOUS:
 	  /* do nothing, just continue */
-	  child_continue (continue_status,
-			  windows_process.desired_stop_thread_id);
+	  continue_last_debug_event (continue_status, debug_threads);
 	  break;
 	}
     }

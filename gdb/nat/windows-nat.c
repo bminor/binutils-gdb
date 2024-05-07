@@ -666,57 +666,6 @@ windows_process_info::add_all_dlls ()
 
 /* See nat/windows-nat.h.  */
 
-bool
-windows_process_info::matching_pending_stop (bool debug_events)
-{
-  /* If there are pending stops, and we might plausibly hit one of
-     them, we don't want to actually continue the inferior -- we just
-     want to report the stop.  In this case, we just pretend to
-     continue.  See the comment by the definition of "pending_stops"
-     for details on why this is needed.  */
-  for (const auto &item : pending_stops)
-    {
-      if (desired_stop_thread_id == -1
-	  || desired_stop_thread_id == item.thread_id)
-	{
-	  DEBUG_EVENTS ("pending stop anticipated, desired=0x%x, item=0x%x",
-			desired_stop_thread_id, item.thread_id);
-	  return true;
-	}
-    }
-
-  return false;
-}
-
-/* See nat/windows-nat.h.  */
-
-std::optional<pending_stop>
-windows_process_info::fetch_pending_stop (bool debug_events)
-{
-  std::optional<pending_stop> result;
-  for (auto iter = pending_stops.begin ();
-       iter != pending_stops.end ();
-       ++iter)
-    {
-      if (desired_stop_thread_id == -1
-	  || desired_stop_thread_id == iter->thread_id)
-	{
-	  result = *iter;
-	  current_event = iter->event;
-
-	  DEBUG_EVENTS ("pending stop found in 0x%x (desired=0x%x)",
-			iter->thread_id, desired_stop_thread_id);
-
-	  pending_stops.erase (iter);
-	  break;
-	}
-    }
-
-  return result;
-}
-
-/* See nat/windows-nat.h.  */
-
 BOOL
 continue_last_debug_event (DWORD continue_status, bool debug_events)
 {
