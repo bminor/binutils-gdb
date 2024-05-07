@@ -18,8 +18,6 @@
 # This test verifies that you can set a watchpoint that watches global
 # memory, when the selected thread is running.
 
-#require allow_hw_watchpoint_multi_tests
-
 set allow_hw_watchpoint_tests_p [allow_hw_watchpoint_tests]
 
 standard_testfile
