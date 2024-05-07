@@ -117,6 +117,7 @@ struct windows_per_inferior : public windows_process_info
   bool handle_access_violation (const EXCEPTION_RECORD *rec) override;
 
   void invalidate_context (windows_thread_info *th);
+  void fill_thread_context (windows_thread_info *th) override;
 
   void continue_one_thread (windows_thread_info *th,
 			    windows_continue_flags cont_flags);
@@ -740,15 +741,8 @@ windows_fetch_one_register (struct regcache *regcache,
 }
 
 void
-windows_nat_target::fetch_registers (struct regcache *regcache, int r)
+windows_per_inferior::fill_thread_context (windows_thread_info *th)
 {
-  windows_thread_info *th = windows_process.find_thread (regcache->ptid ());
-
-  /* Check if TH exists.  Windows sometimes uses a non-existent
-     thread id in its events.  */
-  if (th == NULL)
-    return;
-
    windows_process.with_context (th, [&] (auto *context)
      {
        if (context->ContextFlags == 0)
@@ -757,6 +751,19 @@ windows_nat_target::fetch_registers (struct regcache *regcache, int r)
 	   CHECK (get_thread_context (th->h, context));
 	 }
      });
+}
+
+void
+windows_nat_target::fetch_registers (struct regcache *regcache, int r)
+{
+  windows_thread_info *th = windows_process.find_thread (regcache->ptid ());
+
+  /* Check if TH exists.  Windows sometimes uses a non-existent
+     thread id in its events.  */
+  if (th == nullptr)
+    return;
+
+  windows_process.fill_thread_context (th);
 
   if (r < 0)
     for (r = 0; r < gdbarch_num_regs (regcache->arch()); r++)
@@ -1231,13 +1238,56 @@ windows_per_inferior::continue_one_thread (windows_thread_info *th,
     {
       if (th->debug_registers_changed)
 	{
-	  context->ContextFlags |= WindowsContext<decltype(context)>::debug;
-	  context->Dr0 = state->dr_mirror[0];
-	  context->Dr1 = state->dr_mirror[1];
-	  context->Dr2 = state->dr_mirror[2];
-	  context->Dr3 = state->dr_mirror[3];
-	  context->Dr6 = DR6_CLEAR_VALUE;
-	  context->Dr7 = state->dr_control_mirror;
+	  windows_process.fill_thread_context (th);
+
+	  gdb_assert ((context->ContextFlags & CONTEXT_DEBUG_REGISTERS) != 0);
+
+	  /* Check whether the thread has Dr6 set indicating a
+	     watchpoint hit, and we haven't seen the watchpoint event
+	     yet (reported as
+	     EXCEPTION_SINGLE_STEP/STATUS_WX86_SINGLE_STEP).  In that
+	     case, don't change the debug registers.  Changing debug
+	     registers, even if to the same values, makes the kernel
+	     clear Dr6.  The result would be we would lose the
+	     unreported watchpoint hit.  */
+	  if ((context->Dr6 & ~DR6_CLEAR_VALUE) != 0)
+	    {
+	      if (th->last_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT
+		  && (th->last_event.u.Exception.ExceptionRecord.ExceptionCode
+		      == EXCEPTION_SINGLE_STEP
+		      || (th->last_event.u.Exception.ExceptionRecord.ExceptionCode
+			  == STATUS_WX86_SINGLE_STEP)))
+		{
+		  DEBUG_EVENTS ("0x%x already reported watchpoint", th->tid);
+		}
+	      else
+		{
+		  DEBUG_EVENTS ("0x%x last reported something else (0x%x)",
+				th->tid,
+				th->last_event.dwDebugEventCode);
+
+		  /* Don't touch debug registers.  Let the pending
+		     watchpoint event be reported instead.  We will
+		     update the debug registers later when the thread
+		     is re-resumed by the core after the watchpoint
+		     event.  */
+		  context->ContextFlags &= ~CONTEXT_DEBUG_REGISTERS;
+		}
+	    }
+	  else
+	    DEBUG_EVENTS ("0x%x has no dr6 set", th->tid);
+
+	  if ((context->ContextFlags & CONTEXT_DEBUG_REGISTERS) != 0)
+	    {
+	      DEBUG_EVENTS ("0x%x changing dregs", th->tid);
+	      context->Dr0 = state->dr_mirror[0];
+	      context->Dr1 = state->dr_mirror[1];
+	      context->Dr2 = state->dr_mirror[2];
+	      context->Dr3 = state->dr_mirror[3];
+	      context->Dr6 = DR6_CLEAR_VALUE;
+	      context->Dr7 = state->dr_control_mirror;
+	    }
+
 	  th->debug_registers_changed = false;
 	}
       if (context->ContextFlags)
