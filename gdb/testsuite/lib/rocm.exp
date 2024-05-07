@@ -112,7 +112,7 @@ set gpu_lock_filename gpu-parallel.lock
 # the GPU lock.
 
 proc with_rocm_gpu_lock { body } {
-    with_lock $::gpu_lock_filename $body
+    with_lock $::gpu_lock_filename {uplevel 1 $body}
 
     # In case BODY returned early due to some testcase failing, and
     # left GDB running, debugging the GPU.
