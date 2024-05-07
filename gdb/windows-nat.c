@@ -1289,64 +1289,60 @@ windows_per_inferior::continue_one_thread (windows_thread_info *th,
   struct x86_debug_reg_state *state = x86_debug_reg_state (process_id);
 
 #ifdef __x86_64__
-  if (wow64_process)
+  DWORD &context_flags_ref = (wow64_process
+			      ? th->wow64_context.ContextFlags
+			      : th->context.ContextFlags);
+#else
+  DWORD &context_flags_ref = th->context.ContextFlags;
+#endif
+
+  if (th->debug_registers_changed)
     {
-      if (th->debug_registers_changed)
+      context_flags_ref |= CONTEXT_DEBUG_REGISTERS;
+#ifdef __x86_64__
+      if (wow64_process)
 	{
-	  th->wow64_context.ContextFlags |= CONTEXT_DEBUG_REGISTERS;
 	  th->wow64_context.Dr0 = state->dr_mirror[0];
 	  th->wow64_context.Dr1 = state->dr_mirror[1];
 	  th->wow64_context.Dr2 = state->dr_mirror[2];
 	  th->wow64_context.Dr3 = state->dr_mirror[3];
 	  th->wow64_context.Dr6 = DR6_CLEAR_VALUE;
 	  th->wow64_context.Dr7 = state->dr_control_mirror;
-	  th->debug_registers_changed = false;
 	}
-      if (th->wow64_context.ContextFlags)
-	{
-	  DWORD ec = 0;
-
-	  if (GetExitCodeThread (th->h, &ec)
-	      && ec == STILL_ACTIVE)
-	    {
-	      BOOL status = Wow64SetThreadContext (th->h,
-						   &th->wow64_context);
-
-	      if ((cont_flags & WCONT_KILLED) == 0)
-		CHECK (status);
-	    }
-	  th->wow64_context.ContextFlags = 0;
-	}
-    }
-  else
+      else
 #endif
-    {
-      if (th->debug_registers_changed)
 	{
-	  th->context.ContextFlags |= CONTEXT_DEBUG_REGISTERS;
 	  th->context.Dr0 = state->dr_mirror[0];
 	  th->context.Dr1 = state->dr_mirror[1];
 	  th->context.Dr2 = state->dr_mirror[2];
 	  th->context.Dr3 = state->dr_mirror[3];
 	  th->context.Dr6 = DR6_CLEAR_VALUE;
 	  th->context.Dr7 = state->dr_control_mirror;
-	  th->debug_registers_changed = false;
 	}
-      if (th->context.ContextFlags)
-	{
-	  DWORD ec = 0;
 
-	  if (GetExitCodeThread (th->h, &ec)
-	      && ec == STILL_ACTIVE)
-	    {
-	      BOOL status = SetThreadContext (th->h, &th->context);
-
-	      if ((cont_flags & WCONT_KILLED) == 0)
-		CHECK (status);
-	    }
-	  th->context.ContextFlags = 0;
-	}
+      th->debug_registers_changed = false;
     }
+  if (context_flags_ref != 0)
+    {
+      DWORD ec = 0;
+
+      if (GetExitCodeThread (th->h, &ec)
+	  && ec == STILL_ACTIVE)
+	{
+	  BOOL status;
+#ifdef __x86_64__
+	  if (wow64_process)
+	    status = Wow64SetThreadContext (th->h, &th->wow64_context);
+	  else
+#endif
+	    status = SetThreadContext (th->h, &th->context);
+
+	  if ((cont_flags & WCONT_KILLED) == 0)
+	    CHECK (status);
+	}
+      context_flags_ref = 0;
+    }
+
   th->resume ();
   th->last_sig = GDB_SIGNAL_0;
 }
