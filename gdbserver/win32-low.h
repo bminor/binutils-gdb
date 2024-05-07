@@ -181,6 +181,8 @@ struct gdbserver_windows_process : public windows_nat::windows_process_info
   void handle_unload_dll (const DEBUG_EVENT &current_event) override;
   bool handle_access_violation (const EXCEPTION_RECORD *rec) override;
 
+  void fill_thread_context (windows_nat::windows_thread_info *th) override;
+
   int attaching = 0;
 
   /* A status that hasn't been reported to the core yet, and so

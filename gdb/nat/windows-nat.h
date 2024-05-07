@@ -205,6 +205,13 @@ struct windows_process_info
 
   virtual bool handle_access_violation (const EXCEPTION_RECORD *rec) = 0;
 
+  /* Fill in the thread's CONTEXT/WOW64_CONTEXT, if it wasn't filled
+     in yet.
+
+     This function must be supplied by the embedding application.  */
+
+  virtual void fill_thread_context (windows_thread_info *th) = 0;
+
   handle_exception_result handle_exception
       (DEBUG_EVENT &current_event,
        struct target_waitstatus *ourstatus, bool debug_exceptions);

@@ -141,6 +141,14 @@ win32_require_context (windows_thread_info *th)
 
 /* See nat/windows-nat.h.  */
 
+void
+gdbserver_windows_process::fill_thread_context (windows_thread_info *th)
+{
+  win32_require_context (th);
+}
+
+/* See nat/windows-nat.h.  */
+
 windows_thread_info *
 gdbserver_windows_process::find_thread (ptid_t ptid)
 {
