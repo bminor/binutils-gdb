@@ -1266,15 +1266,22 @@ BOOL
 windows_nat_target::windows_continue (DWORD continue_status, int id,
 				      windows_continue_flags cont_flags)
 {
-  windows_process.desired_stop_thread_id = id;
-
-  if (windows_process.matching_pending_stop (debug_events))
+  for (auto &th : windows_process.thread_list)
     {
-      /* There's no need to really continue, because there's already
-	 another event pending.  However, we do need to inform the
-	 event loop of this.  */
-      serial_event_set (m_wait_event);
-      return TRUE;
+      if ((id == -1 || id == (int) th->tid)
+	  && !th->suspended
+	  && th->pending_stop.status.kind () != TARGET_WAITKIND_IGNORE)
+	{
+	  DEBUG_EVENTS ("got matching pending stop event "
+			"for 0x%x, not resuming",
+			th->tid);
+
+	  /* There's no need to really continue, because there's already
+	     another event pending.  However, we do need to inform the
+	     event loop of this.  */
+	  serial_event_set (m_wait_event);
+	  return TRUE;
+	}
     }
 
   for (auto &th : windows_process.thread_list)
@@ -1448,21 +1455,24 @@ windows_nat_target::get_windows_debug_event
   DWORD thread_id = 0;
 
   /* If there is a relevant pending stop, report it now.  See the
-     comment by the definition of "pending_stops" for details on why
-     this is needed.  */
-  std::optional<pending_stop> stop
-    = windows_process.fetch_pending_stop (debug_events);
-  if (stop.has_value ())
+     comment by the definition of "windows_thread_info::pending_stop"
+     for details on why this is needed.  */
+  for (auto &th : windows_process.thread_list)
     {
-      thread_id = stop->thread_id;
-      *ourstatus = stop->status;
-      windows_process.current_event = stop->event;
+      if (!th->suspended
+	  && th->pending_stop.status.kind () != TARGET_WAITKIND_IGNORE)
+	{
+	  DEBUG_EVENTS ("reporting pending event for 0x%x", th->tid);
 
-      ptid_t ptid (windows_process.current_event.dwProcessId, thread_id);
-      windows_thread_info *th = windows_process.find_thread (ptid);
-      if (th != nullptr)
-	windows_process.invalidate_context (th);
-      return ptid;
+	  thread_id = th->tid;
+	  *ourstatus = th->pending_stop.status;
+	  th->pending_stop.status.set_ignore ();
+	  windows_process.current_event = th->pending_stop.event;
+
+	  ptid_t ptid (windows_process.process_id, thread_id);
+	  windows_process.invalidate_context (th.get ());
+	  return ptid;
+	}
     }
 
   windows_process.last_sig = GDB_SIGNAL_0;
@@ -1504,12 +1514,18 @@ windows_nat_target::get_windows_debug_event
 	}
       /* Record the existence of this thread.  */
       thread_id = current_event->dwThreadId;
-      add_thread
-	(ptid_t (current_event->dwProcessId, current_event->dwThreadId, 0),
-	 current_event->u.CreateThread.hThread,
-	 current_event->u.CreateThread.lpThreadLocalBase,
-	 false /* main_thread_p */);
 
+      {
+	windows_thread_info *th
+	  = (add_thread
+	     (ptid_t (current_event->dwProcessId, current_event->dwThreadId, 0),
+	      current_event->u.CreateThread.hThread,
+	      current_event->u.CreateThread.lpThreadLocalBase,
+	      false /* main_thread_p */));
+
+	/* This updates debug registers if necessary.  */
+	windows_process.continue_one_thread (th, 0);
+      }
       break;
 
     case EXIT_THREAD_DEBUG_EVENT:
@@ -1521,6 +1537,7 @@ windows_nat_target::get_windows_debug_event
 			     current_event->dwThreadId, 0),
 		     current_event->u.ExitThread.dwExitCode,
 		     false /* main_thread_p */);
+      thread_id = 0;
       break;
 
     case CREATE_PROCESS_DEBUG_EVENT:
@@ -1571,8 +1588,7 @@ windows_nat_target::get_windows_debug_event
 	    ourstatus->set_exited (exit_status);
 	  else
 	    ourstatus->set_signalled (gdb_signal_from_host (exit_signal));
-
-	  thread_id = current_event->dwThreadId;
+	  return ptid_t (current_event->dwProcessId);
 	}
       break;
 
@@ -1662,17 +1678,22 @@ windows_nat_target::get_windows_debug_event
 
   if (!thread_id || windows_process.saw_create != 1)
     {
-      CHECK (windows_continue (continue_status,
-			       windows_process.desired_stop_thread_id, 0));
+      continue_last_debug_event_main_thread
+	(_("Failed to resume program execution"), continue_status);
+      ourstatus->set_ignore ();
+      return null_ptid;
     }
-  else if (windows_process.desired_stop_thread_id != -1
-	   && windows_process.desired_stop_thread_id != thread_id)
+
+  const ptid_t ptid = ptid_t (current_event->dwProcessId, thread_id, 0);
+  windows_thread_info *th = windows_process.find_thread (ptid);
+
+  if (th->suspended)
     {
       /* Pending stop.  See the comment by the definition of
 	 "pending_stops" for details on why this is needed.  */
       DEBUG_EVENTS ("get_windows_debug_event - "
-		    "unexpected stop in 0x%x (expecting 0x%x)",
-		    thread_id, windows_process.desired_stop_thread_id);
+		    "unexpected stop in suspended thread 0x%x",
+		    thread_id);
 
       if (current_event->dwDebugEventCode == EXCEPTION_DEBUG_EVENT
 	  && ((current_event->u.Exception.ExceptionRecord.ExceptionCode
@@ -1681,24 +1702,19 @@ windows_nat_target::get_windows_debug_event
 		  == STATUS_WX86_BREAKPOINT))
 	  && windows_process.windows_initialization_done)
 	{
-	  ptid_t ptid = ptid_t (current_event->dwProcessId, thread_id, 0);
-	  windows_thread_info *th = windows_process.find_thread (ptid);
 	  th->stopped_at_software_breakpoint = true;
 	  th->pc_adjusted = false;
 	}
-      windows_process.pending_stops.push_back
-	({thread_id, *ourstatus, windows_process.current_event});
-      thread_id = 0;
-      CHECK (windows_continue (continue_status,
-			       windows_process.desired_stop_thread_id, 0));
-    }
-
-  if (thread_id == 0)
-    {
+      th->pending_stop.status = *ourstatus;
+      th->pending_stop.event = *current_event;
       ourstatus->set_ignore ();
+
+      continue_last_debug_event_main_thread
+	(_("Failed to resume program execution"), continue_status);
       return null_ptid;
     }
-  return ptid_t (windows_process.current_event.dwProcessId, thread_id, 0);
+
+  return ptid;
 }
 
 /* Wait for interesting events to occur in the target process.  */
@@ -1724,8 +1740,8 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
       if (ourstatus->kind () == TARGET_WAITKIND_SPURIOUS)
 	{
-	  CHECK (windows_continue (DBG_CONTINUE,
-				   windows_process.desired_stop_thread_id, 0));
+	  continue_last_debug_event_main_thread
+	    (_("Failed to resume program execution"), DBG_CONTINUE);
 	}
       else if (ourstatus->kind () != TARGET_WAITKIND_IGNORE)
 	{
