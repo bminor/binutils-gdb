@@ -52,3 +52,29 @@ if [check_shared_lib_support] {
   run_cc_link_tests $build_tests
   run_ld_link_exec_tests $run_tests
 }
+
+run_ld_link_tests [list \
+    [list \
+	"Build libwrap2.a" \
+	"" \
+	"" \
+	"" \
+	{wrap2a.c} \
+	{} \
+	"libwrap2.a" \
+	"-g" \
+    ] \
+]
+
+# Test very simple native Linux/x86 programs with linux-x86.S.
+run_ld_link_exec_tests [list \
+    [list \
+	"Run wrap2" \
+	"-Wl,--wrap=impl" \
+	"" \
+	{ wrap2b.c } \
+	"wrap2" \
+	"pass.out" \
+	"-g" \
+    ] \
+]
