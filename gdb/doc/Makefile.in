@@ -66,8 +66,13 @@ MAKEHTMLFLAGS =
 # where to find texi2roff, ditto
 TEXI2ROFF=texi2roff
 
-# where to find texi2dvi, ditto
+# Where to find texi2dvi.  The use of --build and --build-dir options
+# mean that at least texinfo 4.9 is required.
 TEXI2DVI=texi2dvi
+TEXI2DVI_TMPDIR=texi2dvi_tmpdir
+TEXI2DVI_CMD = rm -fr $(TEXI2DVI_TMPDIR)/$(subst .,_,$@) \
+		&& $(TEXI2DVI) --build=tidy \
+			       --build-dir=$(TEXI2DVI_TMPDIR)/$(subst .,_,$@)
 
 # Package to install the docs under
 PACKAGE = @PACKAGE@
@@ -481,24 +486,17 @@ gdb-cfg.texi: ${srcdir}/${DOC_CONFIG}-cfg.texi
 	ln ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi || \
 	cp ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi
 
-# Clean these up before each run.  Avoids a catch 22 with not being
-# able to re-generate these files (to fix a corruption) because these
-# files contain a corruption.
-GDB_TEX_TMPS = gdb.aux gdb.cp* gdb.fn* gdb.ky* gdb.log gdb.pg* gdb.toc \
-	gdb.tp* gdb.vr*
-
 # GDB MANUAL: TeX dvi file
 gdb.dvi: ${GDB_DOC_FILES}
-	$(SILENCE) rm -f $(GDB_TEX_TMPS)
-	$(ECHO_TEXI2DVI) $(TEXI2DVI) $(SILENT_Q_FLAG) $(READLINE_TEXI_INCFLAG) \
-		-I ${GDBMI_DIR} -I $(srcdir) $(srcdir)/gdb.texinfo
+	$(ECHO_TEXI2DVI) $(TEXI2DVI_CMD) $(SILENT_Q_FLAG) \
+		$(READLINE_TEXI_INCFLAG) -I ${GDBMI_DIR} -I $(srcdir) \
+		$(srcdir)/gdb.texinfo
 
 gdb.ps: gdb.dvi
 	$(ECHO_DVIPS) $(DVIPS) $(SILENT_Q_FLAG) -o $@ $?
 
 gdb.pdf: ${GDB_DOC_FILES}
-	$(SILENCE) rm -f $(GDB_TEX_TMPS)
-	$(ECHO_TEXI2DVI) $(TEXI2DVI) $(SILENT_Q_FLAG) --pdf \
+	$(ECHO_TEXI2DVI) $(TEXI2DVI_CMD) $(SILENT_Q_FLAG) --pdf \
 		$(READLINE_TEXI_INCFLAG) -I ${GDBMI_DIR} -I $(srcdir) \
 		$(srcdir)/gdb.texinfo
 
@@ -596,44 +594,28 @@ stabs/index.html: $(STABS_DOC_FILES)
 		-I $(srcdir) \
 		$(srcdir)/stabs.texinfo
 
-# Clean these up before each run.  Avoids a catch 22 with not being
-# able to re-generate these files (to fix a corruption) because these
-# files contain a corruption.
-STABS_TEX_TMPS = stabs.aux stabs.cp* stabs.fn* stabs.ky* \
-	stabs.log stabs.pg* stabs.toc stabs.tp* stabs.vr*
-
 # STABS DOCUMENTATION: TeX dvi file
 stabs.dvi : $(STABS_DOC_FILES)
-	$(SILENCE) rm -f $(STABS_TEX_TMPS)
-	$(ECHO_TEXI2DVI) $(TEXI2DVI) $(SILENT_Q_FLAG) -I $(srcdir) \
+	$(ECHO_TEXI2DVI) $(TEXI2DVI_CMD) $(SILENT_Q_FLAG) -I $(srcdir) \
 		$(srcdir)/stabs.texinfo
 
 stabs.ps: stabs.dvi
 	$(ECHO_DVIPS) $(DVIPS) $(SILENT_Q_FLAG) -o $@ $?
 
 stabs.pdf: $(STABS_DOC_FILES)
-	$(SILENCE) rm -f $(STABS_TEX_TMPS)
-	$(ECHO_TEXI2DVI) $(TEXI2DVI) $(SILENT_Q_FLAG) --pdf -I $(srcdir) \
+	$(ECHO_TEXI2DVI) $(TEXI2DVI_CMD) $(SILENT_Q_FLAG) --pdf -I $(srcdir) \
 		$(srcdir)/stabs.texinfo
-
-# Clean these up before each run.  Avoids a catch 22 with not being
-# able to re-generate these files (to fix a corruption) because these
-# files contain a corruption.
-ANNOTATE_TEX_TMPS = annotate.aux annotate.cp* annotate.fn* annotate.ky* \
-	annotate.log annotate.pg* annotate.toc annotate.tp* annotate.vr*
 
 # ANNOTATE DOCUMENTATION: TeX dvi file
 annotate.dvi : $(ANNOTATE_DOC_FILES)
-	$(SILENCE) rm -f $(ANNOTATE_TEX_TMPS)
-	$(ECHO_TEXI2DVI) $(TEXI2DVI) $(SILENT_Q_FLAG) -I $(srcdir) \
+	$(ECHO_TEXI2DVI) $(TEXI2DVI_CMD) $(SILENT_Q_FLAG) -I $(srcdir) \
 		$(srcdir)/annotate.texinfo
 
 annotate.ps: annotate.dvi
 	$(ECHO_DVIPS) $(DVIPS) $(SILENT_Q_FLAG) -o $@ $?
 
 annotate.pdf: $(ANNOTATE_DOC_FILES)
-	$(SILENCE) rm -f $(ANNOTATE_TEX_TMPS)
-	$(ECHO_TEXI2DVI) $(TEXI2DVI) $(SILENT_Q_FLAG) --pdf -I $(srcdir) \
+	$(ECHO_TEXI2DVI) $(TEXI2DVI_CMD) $(SILENT_Q_FLAG) --pdf -I $(srcdir) \
 		$(srcdir)/annotate.texinfo
 
 annotate.info: $(ANNOTATE_DOC_FILES)
@@ -683,9 +665,7 @@ Makefile: Makefile.in $(host_makefile_frag) ../config.status
 
 mostlyclean:
 	rm -f gdb.mm gdb.ms gdb.me links2roff
-	rm -f $(GDB_TEX_TMPS)
-	rm -f $(STABS_TEX_TMPS)
-	rm -f $(ANNOTATE_TEX_TMPS)
+	rm -fr $(TEXI2DVI_TMPDIR)
 	rm -f refcard.sed sedref.tex sedref_dvi.* sedref_pdf.*
 	rm -f $(POD_FILE_TMPS)
 
