@@ -36,6 +36,9 @@ struct arch_lwp_info;
    instead SIGTRAP with bit 7 set.  */
 #define SYSCALL_SIGTRAP (SIGTRAP | 0x80)
 
+/* Does the current host support PTRACE_GETREGSET?  */
+extern tribool have_ptrace_getregset;
+
 /* Return the ptid of the current lightweight process.  With NPTL
    threads and LWPs map 1:1, so this is equivalent to returning the
    ptid of the current thread.  This function must be provided by

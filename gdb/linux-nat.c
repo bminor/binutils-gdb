@@ -243,7 +243,7 @@ PTRACE_PEEKTEXT/PTRACE_POKETEXT or process_vm_readv/process_vm_writev:
 
 struct linux_nat_target *linux_target;
 
-/* Does the current host support PTRACE_GETREGSET?  */
+/* See nat/linux-nat.h.  */
 enum tribool have_ptrace_getregset = TRIBOOL_UNKNOWN;
 
 /* When true, print debug messages relating to the linux native target.  */

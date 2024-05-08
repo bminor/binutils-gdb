@@ -299,9 +299,6 @@ lwp_info_range all_lwps ();
 
 lwp_info_safe_range all_lwps_safe ();
 
-/* Does the current host support PTRACE_GETREGSET?  */
-extern enum tribool have_ptrace_getregset;
-
 /* Called from the LWP layer to inform the thread_db layer that PARENT
    spawned CHILD.  Both LWPs are currently stopped.  This function
    does whatever is required to have the child LWP under the

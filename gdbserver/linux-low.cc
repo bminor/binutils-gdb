@@ -133,7 +133,7 @@ typedef struct
 } Elf64_auxv_t;
 #endif
 
-/* Does the current host support PTRACE_GETREGSET?  */
+/* See nat/linux-nat.h.  */
 enum tribool have_ptrace_getregset = TRIBOOL_UNKNOWN;
 
 /* Return TRUE if THREAD is the leader thread of the process.  */
