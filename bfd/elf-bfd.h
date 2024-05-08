@@ -3192,8 +3192,14 @@ extern asection _bfd_elf_large_com_section;
 									\
       if (info->wrap_hash != NULL					\
 	  && (input_section->flags & SEC_DEBUGGING) != 0)		\
-	h = ((struct elf_link_hash_entry *)				\
-	     unwrap_hash_lookup (info, input_bfd, &h->root));		\
+	{								\
+	  struct bfd_link_hash_entry * new_h;				\
+	  new_h = unwrap_hash_lookup (info, input_bfd, &h->root);	\
+	  /* PR 31710: This lookup can fail if the input source has a	\
+	     symbol that starts with __wrap_.  */			\
+	  if (new_h != NULL)						\
+	    h = (struct elf_link_hash_entry *) new_h;			\
+	}								\
 									\
       while (h->root.type == bfd_link_hash_indirect			\
 	     || h->root.type == bfd_link_hash_warning)			\
