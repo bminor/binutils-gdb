@@ -53,9 +53,6 @@ extract_unsigned_integer (const gdb_byte *addr, int len,
 				   byte_order);
 }
 
-extern int extract_long_unsigned_integer (const gdb_byte *, int,
-					  enum bfd_endian, LONGEST *);
-
 extern CORE_ADDR extract_typed_address (const gdb_byte *buf,
 					struct type *type);
 

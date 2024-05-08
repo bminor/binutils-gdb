@@ -68,59 +68,6 @@ template LONGEST extract_integer<LONGEST> (gdb::array_view<const gdb_byte> buf,
 template ULONGEST extract_integer<ULONGEST>
   (gdb::array_view<const gdb_byte> buf, enum bfd_endian byte_order);
 
-/* Sometimes a long long unsigned integer can be extracted as a
-   LONGEST value.  This is done so that we can print these values
-   better.  If this integer can be converted to a LONGEST, this
-   function returns 1 and sets *PVAL.  Otherwise it returns 0.  */
-
-int
-extract_long_unsigned_integer (const gdb_byte *addr, int orig_len,
-			       enum bfd_endian byte_order, LONGEST *pval)
-{
-  const gdb_byte *p;
-  const gdb_byte *first_addr;
-  int len;
-
-  len = orig_len;
-  if (byte_order == BFD_ENDIAN_BIG)
-    {
-      for (p = addr;
-	   len > (int) sizeof (LONGEST) && p < addr + orig_len;
-	   p++)
-	{
-	  if (*p == 0)
-	    len--;
-	  else
-	    break;
-	}
-      first_addr = p;
-    }
-  else
-    {
-      first_addr = addr;
-      for (p = addr + orig_len - 1;
-	   len > (int) sizeof (LONGEST) && p >= addr;
-	   p--)
-	{
-	  if (*p == 0)
-	    len--;
-	  else
-	    break;
-	}
-    }
-
-  if (len <= (int) sizeof (LONGEST))
-    {
-      *pval = (LONGEST) extract_unsigned_integer (first_addr,
-						  sizeof (LONGEST),
-						  byte_order);
-      return 1;
-    }
-
-  return 0;
-}
-
-
 /* Treat the bytes at BUF as a pointer of type TYPE, and return the
    address it represents.  */
 CORE_ADDR
