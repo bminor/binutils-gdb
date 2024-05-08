@@ -408,31 +408,32 @@ de-stage3: force
 	-(cd stage3 ; mv -f * ..)
 	-rmdir stage3
 
-# GDB QUICK REFERENCE (dvi output)
-refcard.dvi : refcard.tex $(REFEDITS)
-	$(SILENCE) echo > tmp.sed
+
+sedref.tex : refcard.tex $(REFEDITS)
+	$(SILENCE) echo > refcard.sed
 	$(SILENCE) for f in x $(REFEDITS) ; do \
 		test x$$f = xx && continue ; \
-		cat $(srcdir)/$$f >>tmp.sed ; \
+		cat $(srcdir)/$$f >>refcard.sed ; \
 	done
-	$(SILENCE) sed -f tmp.sed $(srcdir)/refcard.tex >sedref.tex
-	$(ECHO_TEX) $(SET_TEXINPUTS) $(TEX) sedref.tex
-	$(SILENCE) mv sedref.dvi refcard.dvi
-	$(SILENCE) rm -f sedref.log sedref.tex tmp.sed
+	$(ECHO_GEN) sed -f refcard.sed $(srcdir)/refcard.tex >$@
+	$(SILENCE) rm -f refcard.sed
+
+
+# GDB QUICK REFERENCE (dvi output)
+refcard.dvi : sedref.tex
+	$(SILENCE) rm -f sedref_dvi.*
+	$(SILENCE) cp $< sedref_dvi.tex
+	$(ECHO_TEX) $(SET_TEXINPUTS) $(TEX) sedref_dvi.tex && \
+		mv sedref_dvi.dvi $@
 
 refcard.ps : refcard.dvi
 	$(ECHO_DVIPS) $(DVIPS) $(SILENT_Q_FLAG) -t landscape -o $@ $?
 
-refcard.pdf : refcard.tex $(REFEDITS)
-	$(SILENCE) echo > tmp.sed
-	$(SILENCE) for f in x $(REFEDITS) ; do \
-		test x$$f = xx && continue ; \
-		cat $(srcdir)/$$f >>tmp.sed ; \
-	done
-	$(SILENCE) sed -f tmp.sed $(srcdir)/refcard.tex >sedref.tex
-	$(ECHO_PDFTEX) $(SET_TEXINPUTS) $(PDFTEX) sedref.tex
-	$(SILENCE) mv sedref.pdf refcard.pdf
-	$(SILENCE) rm -f sedref.log sedref.tex tmp.sed
+refcard.pdf : sedref.tex
+	$(SILENCE) rm -f sedref_pdf.*
+	$(SILENCE) cp $< sedref_pdf.tex
+	$(ECHO_PDFTEX) $(SET_TEXINPUTS) $(PDFTEX) sedref_pdf.tex && \
+		mv sedref_pdf.pdf $@
 
 # File to record current GDB version number.
 #
@@ -685,7 +686,7 @@ mostlyclean:
 	rm -f $(GDB_TEX_TMPS)
 	rm -f $(STABS_TEX_TMPS)
 	rm -f $(ANNOTATE_TEX_TMPS)
-	rm -f sedref.dvi sedref.tex tmp.sed sedref.log
+	rm -f refcard.sed sedref.tex sedref_dvi.* sedref_pdf.*
 	rm -f $(POD_FILE_TMPS)
 
 clean: mostlyclean
