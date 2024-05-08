@@ -361,6 +361,18 @@ unwind_infopy_add_saved_register (PyObject *self, PyObject *args, PyObject *kw)
       return nullptr;
     }
 
+  if (value->optimized_out () || !value->entirely_available ())
+    {
+      /* If we allow this value to be registered here, pyuw_sniffer is going
+	 to run into an exception when trying to access its contents.
+	 Throwing an exception here just puts a burden on the user to
+	 implement the same checks on the user side.  We could return False
+	 here and True otherwise, but again that might require changes in user
+	 code.  So, handle this with minimal impact for the user, while
+	 improving robustness: silently ignore the register/value pair.  */
+      Py_RETURN_NONE;
+    }
+
   gdbpy_ref<> new_value = gdbpy_ref<>::new_reference (pyo_reg_value);
   bool found = false;
   for (saved_reg &reg : *unwind_info->saved_regs)
