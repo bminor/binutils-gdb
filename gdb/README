@@ -451,7 +451,7 @@ more obscure GDB `configure' options are not listed here.
      library supplied as part of GDB.  Readline 7 or newer is required;
      this is enforced by the build system.
 
-`--with-system-zlib
+`--with-system-zlib'
      Use the zlib library installed on the host, rather than the
      library supplied as part of GDB.
 
