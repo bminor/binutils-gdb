@@ -415,6 +415,15 @@ extern DeleteProcThreadAttributeList_ftype *DeleteProcThreadAttributeList;
 
 extern bool disable_randomization_available ();
 
+/* This is available starting with Windows 10.  */
+#ifndef DBG_REPLY_LATER
+# define DBG_REPLY_LATER 0x40010001L
+#endif
+
+/* Return true if it's possible to use DBG_REPLY_LATER with
+   ContinueDebugEvent on this host.  */
+extern bool dbg_reply_later_available ();
+
 /* Load any functions which may not be available in ancient versions
    of Windows.  */
 

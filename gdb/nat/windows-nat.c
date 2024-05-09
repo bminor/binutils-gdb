@@ -942,6 +942,26 @@ disable_randomization_available ()
 /* See windows-nat.h.  */
 
 bool
+dbg_reply_later_available ()
+{
+  static int available = -1;
+  if (available == -1)
+    {
+      /* DBG_REPLY_LATER is supported since Windows 10, Version 1507.
+	 If supported, this fails with ERROR_INVALID_HANDLE (tested on
+	 Win10 and Win11).  If not supported, it fails with
+	 ERROR_INVALID_PARAMETER (tested on Win7).  */
+      if (ContinueDebugEvent (0, 0, DBG_REPLY_LATER))
+	internal_error (_("ContinueDebugEvent call should not "
+			  "have succeeded"));
+      available = (GetLastError () != ERROR_INVALID_PARAMETER);
+    }
+  return available;
+}
+
+/* See windows-nat.h.  */
+
+bool
 initialize_loadable ()
 {
   bool result = true;
