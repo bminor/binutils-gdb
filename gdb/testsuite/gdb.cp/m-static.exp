@@ -79,14 +79,14 @@ if { [is_aarch32_target] } {
 	"simple object class, ptype constructor"
 
     gdb_test "print test1.~gnu_obj_1" \
-	{ = {void \*\(gnu_obj_1 \* const, int\)} 0x[0-9a-f]+ <gnu_obj_1::~gnu_obj_1\(\)>} \
+	{ = {void \*\(gnu_obj_1 \* const(, int)?\)} 0x[0-9a-f]+ <gnu_obj_1::~gnu_obj_1\(\)>} \
 	"simple object instance, print destructor"
     gdb_test "ptype test1.~gnu_obj_1" \
-	{type = void \*\(gnu_obj_1 \* const, int\)} \
+	{type = void \*\(gnu_obj_1 \* const(, int)?\)} \
 	"simple object instance, ptype destructor"
 
     gdb_test "print test1.'~gnu_obj_1'" \
-	{ = {void \*\(gnu_obj_1 \*( const)?, int\)} 0x[0-9a-f]+ <gnu_obj_1::~gnu_obj_1\(\)>} \
+	{ = {void \*\(gnu_obj_1 \*( const)?(, int)?\)} 0x[0-9a-f]+ <gnu_obj_1::~gnu_obj_1\(\)>} \
 	"simple object instance, print quoted destructor"
 
     gdb_test "ptype gnu_obj_1::'~gnu_obj_1'" \
