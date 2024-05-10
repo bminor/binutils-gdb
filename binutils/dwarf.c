@@ -669,7 +669,7 @@ fetch_indexed_string (uint64_t idx,
       || index_offset + offset_size > index_section->size)
     {
       warn (_("string index of %" PRIu64 " converts to an offset of %#" PRIx64
-	      " which is too big for section %s"),
+	      " which is too big for section %s\n"),
 	    idx, index_offset, str_section->name);
 
       return _("<string index too big>");
@@ -2840,7 +2840,7 @@ read_and_display_attr_value (unsigned long attribute,
       break;
 
     default:
-      warn (_("Unrecognized form: %#lx"), form);
+      warn (_("Unrecognized form: %#lx\n"), form);
       /* What to do?  Consume a byte maybe?  */
       ++data;
       break;
@@ -2855,14 +2855,14 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_AT_loclists_base:
 	  if (debug_info_p->loclists_base)
 	    warn (_("CU @ %#" PRIx64 " has multiple loclists_base values "
-		    "(%#" PRIx64 " and %#" PRIx64 ")"),
+		    "(%#" PRIx64 " and %#" PRIx64 ")\n"),
 		  debug_info_p->cu_offset,
 		  debug_info_p->loclists_base, uvalue);
 	  svalue = uvalue;
 	  if (svalue < 0)
 	    {
 	      warn (_("CU @ %#" PRIx64 " has has a negative loclists_base "
-		      "value of %#" PRIx64 " - treating as zero"),
+		      "value of %#" PRIx64 " - treating as zero\n"),
 		    debug_info_p->cu_offset, svalue);
 	      uvalue = 0;
 	    }
@@ -2876,14 +2876,14 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_AT_str_offsets_base:
 	  if (debug_info_p->str_offsets_base)
 	    warn (_("CU @ %#" PRIx64 " has multiple str_offsets_base values "
-		    "%#" PRIx64 " and %#" PRIx64 ")"),
+		    "%#" PRIx64 " and %#" PRIx64 ")\n"),
 		  debug_info_p->cu_offset,
 		  debug_info_p->str_offsets_base, uvalue);
 	  svalue = uvalue;
 	  if (svalue < 0)
 	    {
 	      warn (_("CU @ %#" PRIx64 " has has a negative stroffsets_base "
-		      "value of %#" PRIx64 " - treating as zero"),
+		      "value of %#" PRIx64 " - treating as zero\n"),
 		    debug_info_p->cu_offset, svalue);
 	      uvalue = 0;
 	    }
@@ -4253,7 +4253,7 @@ process_debug_info (struct dwarf_section * section,
 	      if (stemp < 0)
 		{
 		  warn (_("CU @ %#" PRIx64 " has has a negative rnglists_base "
-			  "value of %#" PRIx64 " - treating as zero"),
+			  "value of %#" PRIx64 " - treating as zero\n"),
 			debug_info_p->cu_offset, stemp);
 		  debug_info_p->rnglists_base = 0;
 		}
@@ -4622,7 +4622,7 @@ display_debug_sup (struct dwarf_section *  section,
   /* Read the data.  */
   SAFE_BYTE_GET_AND_INC (version, start, 2, end);
   if (version < 5)
-    warn (_("corrupt .debug_sup section: version < 5"));
+    warn (_("corrupt .debug_sup section: version < 5\n"));
 
   SAFE_BYTE_GET_AND_INC (is_supplementary, start, 1, end);
   if (is_supplementary != 0 && is_supplementary != 1)
@@ -7858,7 +7858,7 @@ display_debug_addr (struct dwarf_section *section,
 
 	  if (header_size != 8 && header_size != 16)
 	    {
-	      warn (_("Corrupt %s section: expecting header size of 8 or 16, but found %zd instead"),
+	      warn (_("Corrupt %s section: expecting header size of 8 or 16, but found %zd instead\n"),
 		    section->name, header_size);
 	      break;
 	    }
@@ -7870,7 +7870,7 @@ display_debug_addr (struct dwarf_section *section,
 	      || length < (size_t) (entry - curr_header))
 	    {
 	      warn (_("Corrupt %s section: unit_length field of %#" PRIx64
-		      " is invalid"), section->name, length);
+		      " is invalid\n"), section->name, length);
 	      break;
 	    }
 	  end = curr_header + length;
@@ -7891,7 +7891,7 @@ display_debug_addr (struct dwarf_section *section,
 
       if (address_size < 1 || address_size > sizeof (uint64_t))
 	{
-	  warn (_("Corrupt %s section: address size (%x) is wrong"),
+	  warn (_("Corrupt %s section: address size (%x) is wrong\n"),
 		section->name, address_size);
 	  break;
 	}
@@ -10664,7 +10664,7 @@ display_debug_names (struct dwarf_section *section, void *file)
 	  if (name_count != buckets_filled + hash_clash_count)
 	    warn (_("The name_count (%" PRIu64 ")"
 		    " is not the same as the used bucket_count"
-		    " (%zu) + the hash clash count (%zu)"),
+		    " (%zu) + the hash clash count (%zu)\n"),
 		  name_count, buckets_filled, hash_clash_count);
 	}
 
@@ -11976,7 +11976,7 @@ load_separate_debug_info (const char *            main_filename,
 				    + 1);
   if (debug_filename == NULL)
     {
-      warn (_("Out of memory"));
+      warn (_("Out of memory\n"));
       free (canon_dir);
       free (canon_filename);
       return NULL;
@@ -12317,7 +12317,7 @@ load_debug_sup_file (const char * main_filename, void * file)
 			  filename);
       if (new_len < 3)
 	{
-	  warn (_("unable to construct path for supplementary debug file"));
+	  warn (_("unable to construct path for supplementary debug file\n"));
 	  if (new_len > -1)
 	    free (new_name);
 	  return;
