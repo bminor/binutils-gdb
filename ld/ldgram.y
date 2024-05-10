@@ -157,7 +157,7 @@ static void yyerror (const char *);
 %token LOG2CEIL FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE REL
 %token INPUT_SCRIPT INPUT_MRI_SCRIPT INPUT_DEFSYM CASE EXTERN START
 %token <name> VERS_TAG VERS_IDENTIFIER
-%token GLOBAL LOCAL VERSIONK INPUT_VERSION_SCRIPT
+%token GLOBAL LOCAL VERSIONK INPUT_VERSION_SCRIPT INPUT_SECTION_ORDERING_SCRIPT
 %token KEEP ONLY_IF_RO ONLY_IF_RW SPECIAL INPUT_SECTION_FLAGS ALIGN_WITH_INPUT
 %token EXCLUDE_FILE
 %token CONSTANT
@@ -172,6 +172,7 @@ file:
 		INPUT_SCRIPT script_file
 	|	INPUT_MRI_SCRIPT mri_script_file
 	|	INPUT_VERSION_SCRIPT version_script_file
+	|	INPUT_SECTION_ORDERING_SCRIPT section_ordering_script_file
 	|	INPUT_DYNAMIC_LIST dynamic_list_file
 	|	INPUT_DEFSYM defsym_expr
 	;
@@ -1538,6 +1539,39 @@ opt_semicolon:
 		/* empty */
 	|	';'
 	;
+
+section_ordering_script_file:
+		{
+		  ldlex_script ();
+		  PUSH_ERROR (_("section-ordering-file script"));
+		}
+		section_ordering_list
+		{
+		  ldlex_popstate ();
+		  POP_ERROR ();
+		}
+	;
+
+section_ordering_list:
+		section_ordering_list section_order
+	|	section_ordering_list statement_anywhere
+	|
+	;
+
+section_order:	NAME ':'
+		{
+		  ldlex_wild ();
+		  lang_enter_output_section_statement
+		    ($1, NULL, 0, NULL, NULL, NULL, NULL, 0, 0);
+		}
+		'{'
+		statement_list_opt
+		'}'
+		{
+		  ldlex_popstate ();
+		  lang_leave_output_section_statement (NULL, NULL, NULL, NULL);
+		}
+		opt_comma
 
 %%
 static void

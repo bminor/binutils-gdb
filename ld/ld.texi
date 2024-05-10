@@ -302,6 +302,7 @@ and the script command language.  If @emph{no} binary input files at all
 are specified, the linker does not produce any output, and issues the
 message @samp{No input files}.
 
+@anchor{unrecognised-input-files}
 If the linker cannot recognize the format of an object file, it will
 assume that it is a linker script.  A script specified in this way
 augments the main linker script used for the link (either the default
@@ -1163,18 +1164,32 @@ a linker bug report.
 @itemx --script=@var{scriptfile}
 Use @var{scriptfile} as the linker script.  This script replaces
 @command{ld}'s default linker script (rather than adding to it),
-unless the script contains @code{INSERT}, so
-@var{commandfile} must specify everything necessary to describe the
-output file.  @xref{Scripts}.  If @var{scriptfile} does not exist in
-the current directory, @code{ld} looks for it in the directories
-specified by any preceding @samp{-L} options.  Multiple @samp{-T}
-options accumulate.
+unless the script contains @code{INSERT}, so @var{commandfile} must
+specify everything necessary to describe the output file.
+@xref{Scripts}.
+
+If @var{scriptfile} does not exist in the current directory, @code{ld}
+looks for it in the directories specified by any preceding @samp{-L}
+options.
+
+Command line options that appear before the @option{-T} option can
+affect the script, but command line options that appear after it do
+not.
+
+Multiple @samp{-T} options will accumulate if they are augmenting the
+current script, otherwise the last, non-augmenting, @option{-T} option
+will be used.
+
+There are other ways of specifying linker scripts.  See
+@xref{--default-script}, @xref{--section-ordering-file} and
+@xref{unrecognised-input-files}.
 
 @kindex -dT @var{script}
 @kindex --default-script=@var{script}
 @cindex script files
 @item -dT @var{scriptfile}
 @itemx --default-script=@var{scriptfile}
+@anchor{--default-script}
 Use @var{scriptfile} as the default linker script.  @xref{Scripts}.
 
 This option is similar to the @option{--script} option except that
@@ -2520,6 +2535,51 @@ If the required shared library is not found, the linker will issue a
 warning and continue with the link.
 
 @end ifset
+
+@kindex --section-ordering-file
+@item --section-ordering-file=@var{script}
+@anchor{--section-ordering-file}
+This option is used to augment the current linker script with
+additional mapping of input sections to output sections.  This file
+must use the same syntax for @code{SECTIONS} as is used in normal
+linker scripts, but it should not do anything other than place input
+sections into output sections. @pxref{SECTIONS}
+
+A second constraint on the section ordering script is that it can only
+reference output sections that are already defined by whichever linker
+script is currently in use.  (Ie the default linker script or a script
+specified on the command line).  The benefit of the section ordering
+script however is that the input sections are mapped to the start of
+the output sections, so that they can ensure the ordering of sections
+in the output section.  For example, imagine that the default linker
+script looks like this:
+
+@smallexample
+SECTIONS @{
+  .text : @{ *(.text.hot) ; *(.text .text.*) @}
+  .data : @{ *(.data.big) ; *(.data .data.*) @}
+  @}
+@end smallexample
+
+Then if a section ordering file like this is used:
+
+@smallexample
+  .text : @{ *(.text.first) ; *(.text.z*) @}
+  .data : @{ foo.o(.data.first) ; *(.data.small) @}
+@end smallexample
+
+This would be equivalent to a linker script like this:
+
+@smallexample
+SECTIONS @{
+  .text : @{ *(.text.first) ; *(.text.z*) ; *(.text.hot) ; *(.text .text.*) @}
+  .data : @{ foo.o(.data.first) ; *(.data.small) ; *(.data.big) ; *(.data .data.*) @}
+  @}
+@end smallexample
+
+The advantage of the section ordering file is that it can be used to
+order those sections that matter to the user without having to worry
+about any other sections, or memory regions, or anything else.
 
 @kindex -shared
 @kindex -Bshareable

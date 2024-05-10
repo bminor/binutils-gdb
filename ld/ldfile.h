@@ -29,7 +29,8 @@ extern const char *ldfile_output_machine_name;
 /* Structure used to hold the list of directories to search for
    libraries.  */
 
-typedef struct search_dirs {
+typedef struct search_dirs
+{
   /* Next directory on list.  */
   struct search_dirs *next;
   /* Name of directory.  */
@@ -37,6 +38,22 @@ typedef struct search_dirs {
   /* TRUE if this is from the command line.  */
   bool cmdline;
 } search_dirs_type;
+
+enum script_open_style
+{
+  script_nonT,
+  script_T,
+  script_defaultT
+};
+
+struct script_name_list
+{
+  struct script_name_list *  next;
+  enum script_open_style     open_how;
+  char                       name[1];
+};
+
+extern struct script_name_list * processed_scripts;
 
 extern search_dirs_type *search_head;
 

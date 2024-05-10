@@ -90,6 +90,8 @@ bool version_printed;
 /* TRUE if we should demangle symbol names.  */
 bool demangling;
 
+bool in_section_ordering;
+
 args_type command_line;
 
 ld_config_type config;
@@ -244,6 +246,26 @@ ld_bfd_error_handler (const char *fmt, va_list ap)
   if (config.fatal_warnings)
     config.make_executable = false;
   (*default_bfd_error_handler) (fmt, ap);
+}
+
+static void
+display_external_script (void)
+{
+  if (saved_script_handle == NULL)
+    return;
+  
+  static const int ld_bufsz = 8193;
+  size_t n;
+  char *buf = (char *) xmalloc (ld_bufsz);
+
+  rewind (saved_script_handle);
+  while ((n = fread (buf, 1, ld_bufsz - 1, saved_script_handle)) > 0)
+    {
+      buf[n] = 0;
+      info_msg ("%s", buf);
+    }
+  rewind (saved_script_handle);
+  free (buf);
 }
 
 int
@@ -416,26 +438,13 @@ main (int argc, char **argv)
   if (verbose)
     {
       if (saved_script_handle)
-	info_msg (_("using external linker script:"));
+	info_msg (_("using external linker script: %s"), processed_scripts->name);
       else
 	info_msg (_("using internal linker script:"));
       info_msg ("\n==================================================\n");
 
       if (saved_script_handle)
-	{
-	  static const int ld_bufsz = 8193;
-	  size_t n;
-	  char *buf = (char *) xmalloc (ld_bufsz);
-
-	  rewind (saved_script_handle);
-	  while ((n = fread (buf, 1, ld_bufsz - 1, saved_script_handle)) > 0)
-	    {
-	      buf[n] = 0;
-	      info_msg ("%s", buf);
-	    }
-	  rewind (saved_script_handle);
-	  free (buf);
-	}
+	display_external_script ();
       else
 	{
 	  int isfile;
@@ -444,6 +453,22 @@ main (int argc, char **argv)
 	}
 
       info_msg ("\n==================================================\n");
+    }
+
+  if (command_line.section_ordering_file)
+    {
+      FILE *hold_script_handle;
+
+      hold_script_handle = saved_script_handle;
+      ldfile_open_command_file (command_line.section_ordering_file);
+      if (verbose)
+	display_external_script ();
+      saved_script_handle = hold_script_handle;
+      in_section_ordering = true;
+      parser_input = input_section_ordering_script;
+      yyparse ();
+      in_section_ordering = false;
+
     }
 
   if (command_line.force_group_allocation

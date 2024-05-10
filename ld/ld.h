@@ -196,6 +196,9 @@ typedef struct
 
   /* Default linker script.  */
   char *default_script;
+
+  /* Linker script fragment provided by the --section-order command line option.  */
+  char *section_ordering_file;
 } args_type;
 
 extern args_type command_line;
@@ -325,6 +328,7 @@ extern ld_config_type config;
 
 extern FILE * saved_script_handle;
 extern bool force_make_executable;
+extern bool in_section_ordering;
 
 extern int yyparse (void);
 extern void add_cref (const char *, bfd *, asection *, bfd_vma);

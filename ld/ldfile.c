@@ -871,19 +871,7 @@ ldfile_find_command_file (const char *name,
   return result;
 }
 
-enum script_open_style {
-  script_nonT,
-  script_T,
-  script_defaultT
-};
-
-struct script_name_list
-{
-  struct script_name_list *next;
-  enum script_open_style open_how;
-  char name[1];
-};
-
+struct script_name_list *processed_scripts = NULL;
 /* Open command file NAME.  */
 
 static void
@@ -891,7 +879,6 @@ ldfile_open_command_file_1 (const char *name, enum script_open_style open_how)
 {
   FILE *ldlex_input_stack;
   bool sysrooted;
-  static struct script_name_list *processed_scripts = NULL;
   struct script_name_list *script;
   size_t len;
 

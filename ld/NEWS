@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add --section-ordering-file <FILE> option to add extra mapping of input
+  sections to output sections.
+
 * Add -plugin-save-temps to store plugin intermediate files permanently.
 
 Changes in 2.42:

@@ -120,11 +120,12 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
       parser_input = input_selected;
       switch (t)
 	{
-	case input_script: return INPUT_SCRIPT; break;
-	case input_mri_script: return INPUT_MRI_SCRIPT; break;
-	case input_version_script: return INPUT_VERSION_SCRIPT; break;
-	case input_dynamic_list: return INPUT_DYNAMIC_LIST; break;
-	case input_defsym: return INPUT_DEFSYM; break;
+	case input_script: return INPUT_SCRIPT;
+	case input_mri_script: return INPUT_MRI_SCRIPT;
+	case input_version_script: return INPUT_VERSION_SCRIPT;
+	case input_section_ordering_script: return INPUT_SECTION_ORDERING_SCRIPT;
+	case input_dynamic_list: return INPUT_DYNAMIC_LIST;
+	case input_defsym: return INPUT_DEFSYM;
 	default: abort ();
 	}
     }

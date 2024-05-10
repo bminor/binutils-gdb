@@ -487,6 +487,9 @@ static const struct ld_option ld_options[] =
   { {"sort-section", required_argument, NULL, OPTION_SORT_SECTION},
     '\0', N_("name|alignment"),
     N_("Sort sections by name or maximum alignment"), TWO_DASHES },
+  { {"section-ordering-file", required_argument, NULL, OPTION_SECTION_ORDERING_FILE},
+    '\0', N_("FILE"),
+    N_("Sort sections by statements in FILE"), TWO_DASHES },
   { {"spare-dynamic-tags", required_argument, NULL, OPTION_SPARE_DYNAMIC_TAGS},
     '\0', N_("COUNT"), N_("How many tags to reserve in .dynamic section"),
     TWO_DASHES },
@@ -1399,6 +1402,12 @@ parse_args (unsigned argc, char **argv)
 	  else
 	    einfo (_("%F%P: invalid section sorting option: %s\n"),
 		   optarg);
+	  break;
+	case OPTION_SECTION_ORDERING_FILE:
+	  if (command_line.section_ordering_file != NULL
+	      && strcmp (optarg, command_line.section_ordering_file) != 0)
+	    einfo (_("%P: warning: section ordering file changed.  Ignoring earlier definition\n"));
+	  command_line.section_ordering_file = optarg;
 	  break;
 	case OPTION_STATS:
 	  config.stats = true;

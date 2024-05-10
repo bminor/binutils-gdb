@@ -141,7 +141,12 @@ typedef struct lang_output_section_phdr_list
 typedef struct lang_output_section_statement_struct
 {
   lang_statement_header_type header;
+  /* Input sections to be mapped to this output section.  */
   lang_statement_list_type children;
+  /* Input sections to be mapped to the start of this output section.
+     These sections are provided by the --section-ordering file, if used.  */
+  lang_statement_list_type sort_children;
+
   struct lang_output_section_statement_struct *next;
   struct lang_output_section_statement_struct *prev;
   const char *name;

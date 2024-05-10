@@ -1299,6 +1299,7 @@ output_section_statement_newfunc (struct bfd_hash_entry *entry,
   ret->s.output_section_statement.section_alignment = NULL;
   ret->s.output_section_statement.block_value = 1;
   lang_list_init (&ret->s.output_section_statement.children);
+  lang_list_init (&ret->s.output_section_statement.sort_children);
   lang_statement_append (stat_ptr, &ret->s, &ret->s.header.next);
 
   /* For every output section statement added to the list, except the
@@ -7613,13 +7614,22 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
   lang_output_section_statement_type *os;
 
   os = lang_output_section_statement_lookup (output_section_statement_name,
-					     constraint, 2);
+					     constraint,
+					     in_section_ordering ? 0 : 2);
+  if (os == NULL) /* && in_section_ordering */
+    einfo (_("%F%P:%pS: error: output section '%s' must already exist\n"),
+	   NULL, output_section_statement_name);
   current_section = os;
 
+  /* Make next things chain into subchain of this.  */
+  push_stat_ptr (in_section_ordering ? &os->sort_children : &os->children);
+
+  if (in_section_ordering)
+    return os;
+
   if (os->addr_tree == NULL)
-    {
-      os->addr_tree = address_exp;
-    }
+    os->addr_tree = address_exp;
+
   os->sectype = sectype;
   if (sectype == type_section || sectype == typed_readonly_section)
     os->sectype_value = sectype_value;
@@ -7628,9 +7638,6 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
   else
     os->flags = SEC_NO_FLAGS;
   os->block_value = 1;
-
-  /* Make next things chain into subchain of this.  */
-  push_stat_ptr (&os->children);
 
   os->align_lma_with_input = align_with_input == ALIGN_WITH_INPUT;
   if (os->align_lma_with_input && align != NULL)
@@ -7971,21 +7978,6 @@ find_rescan_insertion (lang_input_statement_type *add)
   return iter;
 }
 
-/* Insert SRCLIST into DESTLIST after given element by chaining
-   on FIELD as the next-pointer.  (Counterintuitively does not need
-   a pointer to the actual after-node itself, just its chain field.)  */
-
-static void
-lang_list_insert_after (lang_statement_list_type *destlist,
-			lang_statement_list_type *srclist,
-			lang_statement_union_type **field)
-{
-  *(srclist->tail) = *field;
-  *field = srclist->head;
-  if (destlist->tail == field)
-    destlist->tail = srclist->tail;
-}
-
 /* Detach new nodes added to DESTLIST since the time ORIGLIST
    was taken as a copy of it and leave them in ORIGLIST.  */
 
@@ -8032,6 +8024,21 @@ find_next_input_statement (lang_statement_union_type **s)
   return s;
 }
 #endif /* BFD_SUPPORTS_PLUGINS */
+
+/* Insert SRCLIST into DESTLIST after given element by chaining
+   on FIELD as the next-pointer.  (Counterintuitively does not need
+   a pointer to the actual after-node itself, just its chain field.)  */
+
+static void
+lang_list_insert_after (lang_statement_list_type *destlist,
+			lang_statement_list_type *srclist,
+			lang_statement_union_type **field)
+{
+  *(srclist->tail) = *field;
+  *field = srclist->head;
+  if (destlist->tail == field)
+    destlist->tail = srclist->tail;
+}
 
 /* Add NAME to the list of garbage collection entry points.  */
 
@@ -8127,9 +8134,34 @@ reset_resolved_wilds (void)
   lang_for_each_statement (reset_one_wild);
 }
 
+/* For each output section statement, splice any entries on the
+   sort_children list before the first wild statement on the children
+   list.  */
+
+static void
+lang_os_merge_sort_children (void)
+{
+  lang_output_section_statement_type *os;
+  for (os = (void *) lang_os_list.head; os != NULL; os = os->next)
+    {
+      if (os->sort_children.head != NULL)
+	{
+	  lang_statement_union_type **where;
+	  for (where = &os->children.head;
+	       *where != NULL;
+	       where = &(*where)->header.next)
+	    if ((*where)->header.type == lang_wild_statement_enum)
+	      break;
+	  lang_list_insert_after (&os->children, &os->sort_children, where);
+	}
+    }
+}
+
 void
 lang_process (void)
 {
+  lang_os_merge_sort_children ();
+
   /* Finalize dynamic list.  */
   if (link_info.dynamic_list)
     lang_finalize_version_expr_head (&link_info.dynamic_list->head);
@@ -8817,6 +8849,10 @@ lang_leave_output_section_statement (fill_type *fill, const char *memspec,
 				     lang_output_section_phdr_list *phdrs,
 				     const char *lma_memspec)
 {
+  pop_stat_ptr ();
+  if (in_section_ordering)
+    return;
+
   lang_get_regions (&current_section->region,
 		    &current_section->lma_region,
 		    memspec, lma_memspec,
@@ -8825,7 +8861,6 @@ lang_leave_output_section_statement (fill_type *fill, const char *memspec,
 
   current_section->fill = fill;
   current_section->phdrs = phdrs;
-  pop_stat_ptr ();
 }
 
 /* Set the output format type.  -oformat overrides scripts.  */
