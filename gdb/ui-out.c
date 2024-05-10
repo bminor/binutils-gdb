@@ -556,18 +556,6 @@ ui_out::field_fmt (const char *fldname, const ui_file_style &style,
 }
 
 void
-ui_out::spaces (int numspaces)
-{
-  do_spaces (numspaces);
-}
-
-void
-ui_out::text (const char *string)
-{
-  do_text (string);
-}
-
-void
 ui_out::call_do_message (const ui_file_style &style, const char *format,
 			 ...)
 {
@@ -778,37 +766,6 @@ ui_out::message (const char *format, ...)
   vmessage (ui_file_style (), format, args);
 
   va_end (args);
-}
-
-void
-ui_out::wrap_hint (int indent)
-{
-  do_wrap_hint (indent);
-}
-
-void
-ui_out::flush ()
-{
-  do_flush ();
-}
-
-void
-ui_out::redirect (ui_file *outstream)
-{
-  do_redirect (outstream);
-}
-
-/* Test the flags against the mask given.  */
-ui_out_flags
-ui_out::test_flags (ui_out_flags mask)
-{
-  return m_flags & mask;
-}
-
-bool
-ui_out::is_mi_like_p () const
-{
-  return do_is_mi_like_p ();
 }
 
 /* Verify that the field/tuple/list is correctly positioned.  Return

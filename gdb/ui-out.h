@@ -163,6 +163,8 @@ class ui_out
   explicit ui_out (ui_out_flags flags = 0);
   virtual ~ui_out ();
 
+  DISABLE_COPY_AND_ASSIGN (ui_out);
+
   void push_level (ui_out_type type);
   void pop_level (ui_out_type type);
 
@@ -203,8 +205,8 @@ class ui_out
 		  const char *format, ...)
     ATTRIBUTE_PRINTF (4, 5);
 
-  void spaces (int numspaces);
-  void text (const char *string);
+  void spaces (int numspaces) { do_spaces (numspaces); }
+  void text (const char *string) { do_text (string); }
   void text (const std::string &string) { text (string.c_str ()); }
 
   /* Output a printf-style formatted string.  In addition to the usual
@@ -255,21 +257,22 @@ class ui_out
   void vmessage (const ui_file_style &in_style,
 		 const char *format, va_list args) ATTRIBUTE_PRINTF (3, 0);
 
-  void wrap_hint (int indent);
+  void wrap_hint (int indent) { do_wrap_hint (indent); }
 
-  void flush ();
+  void flush () { do_flush (); }
 
   /* Redirect the output of a ui_out object temporarily.  */
-  void redirect (ui_file *outstream);
+  void redirect (ui_file *outstream) { do_redirect (outstream); }
 
-  ui_out_flags test_flags (ui_out_flags mask);
+  ui_out_flags test_flags (ui_out_flags mask)
+  { return m_flags & mask; }
 
   /* HACK: Code in GDB is currently checking to see the type of ui_out
      builder when determining which output to produce.  This function is
      a hack to encapsulate that test.  Once GDB manages to separate the
      CLI/MI from the core of GDB the problem should just go away ....  */
 
-  bool is_mi_like_p () const;
+  bool is_mi_like_p () const { return do_is_mi_like_p (); }
 
   bool query_table_field (int colno, int *width, int *alignment,
 			  const char **col_name);
