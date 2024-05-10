@@ -83,8 +83,8 @@ extern bool default_displaced_step_hw_singlestep (struct gdbarch *);
 extern CORE_ADDR displaced_step_at_entry_point (struct gdbarch *gdbarch);
 
 /* The only possible cases for inner_than.  */
-extern int core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs);
-extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
+extern bool core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs);
+extern bool core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 
 /* Identity functions on a CORE_ADDR.  Just return the "addr".  */
 

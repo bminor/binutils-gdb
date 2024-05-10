@@ -2788,7 +2788,7 @@ set_gdbarch_skip_entrypoint (struct gdbarch *gdbarch,
   gdbarch->skip_entrypoint = skip_entrypoint;
 }
 
-int
+bool
 gdbarch_inner_than (struct gdbarch *gdbarch, CORE_ADDR lhs, CORE_ADDR rhs)
 {
   gdb_assert (gdbarch != NULL);

@@ -375,7 +375,7 @@ gdbarch_num_cooked_regs (gdbarch *arch)
 static inline bool
 gdbarch_stack_grows_down (gdbarch *arch)
 {
-  return gdbarch_inner_than (arch, 1, 2) != 0;
+  return gdbarch_inner_than (arch, 1, 2);
 }
 
 #endif

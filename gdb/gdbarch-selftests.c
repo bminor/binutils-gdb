@@ -173,8 +173,8 @@ check_stack_growth (struct gdbarch *gdbarch)
      implementation by calling gdbarch_inner_than.  GDB assumes that stacks
      either grow down or up (see uses of gdbarch_stack_grows_down), so exactly
      one of these needs to be true.  */
-  bool stack_grows_down = gdbarch_inner_than (gdbarch, 1, 2) != 0;
-  bool stack_grows_up = gdbarch_inner_than (gdbarch, 2, 1) != 0;
+  bool stack_grows_down = gdbarch_inner_than (gdbarch, 1, 2);
+  bool stack_grows_up = gdbarch_inner_than (gdbarch, 2, 1);
 
   SELF_CHECK (stack_grows_up != stack_grows_down);
 }

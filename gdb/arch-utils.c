@@ -173,16 +173,16 @@ default_code_of_frame_writable (struct gdbarch *gdbarch,
 
 /* Helper functions for gdbarch_inner_than */
 
-int
+bool
 core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs)
 {
-  return (lhs < rhs);
+  return lhs < rhs;
 }
 
-int
+bool
 core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs)
 {
-  return (lhs > rhs);
+  return lhs > rhs;
 }
 
 /* Misc helper functions for targets.  */
