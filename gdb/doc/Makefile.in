@@ -477,15 +477,6 @@ gdb-cfg.texi: ${srcdir}/${DOC_CONFIG}-cfg.texi
 	ln ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi || \
 	cp ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi
 
-# GDB MANUAL: texinfo source, using @set/@clear/@value/@ifset/@ifclear
-# If your texinfo or makeinfo don't support these, get a new texinfo release
-#
-# The nonsense with GDBvn.texi gets this to run with both Sun and GNU make.
-#   Note that we can *generate* GDBvn.texi, but since we distribute one in the
-#   source directory for the benefit of people who *don't* use this makefile,
-#   VPATH will often tell make not to bother building it, because the one
-#   in the srcdir is up to date.  (if not, then make should build one here).
-
 # Clean these up before each run.  Avoids a catch 22 with not being
 # able to re-generate these files (to fix a corruption) because these
 # files contain a corruption.
@@ -494,10 +485,6 @@ GDB_TEX_TMPS = gdb.aux gdb.cp* gdb.fn* gdb.ky* gdb.log gdb.pg* gdb.toc \
 
 # GDB MANUAL: TeX dvi file
 gdb.dvi: ${GDB_DOC_FILES}
-	$(SILENCE) if [ ! -f ./GDBvn.texi ]; then \
-		(test "$(LN_S)" = "ln -s" && ln -s $(srcdir)/GDBvn.texi .) || \
-		ln $(srcdir)/GDBvn.texi . || \
-		cp $(srcdir)/GDBvn.texi . ; else true; fi
 	$(SILENCE) rm -f $(GDB_TEX_TMPS)
 	$(ECHO_TEXI2DVI) $(TEXI2DVI) $(SILENT_Q_FLAG) $(READLINE_TEXI_INCFLAG) \
 		-I ${GDBMI_DIR} -I $(srcdir) $(srcdir)/gdb.texinfo
@@ -506,10 +493,6 @@ gdb.ps: gdb.dvi
 	$(ECHO_DVIPS) $(DVIPS) $(SILENT_Q_FLAG) -o $@ $?
 
 gdb.pdf: ${GDB_DOC_FILES}
-	$(SILENCE) if [ ! -f ./GDBvn.texi ]; then \
-		(test "$(LN_S)" = "ln -s" && ln -s $(srcdir)/GDBvn.texi .) || \
-		ln $(srcdir)/GDBvn.texi . || \
-		cp $(srcdir)/GDBvn.texi . ; else true; fi
 	$(SILENCE) rm -f $(GDB_TEX_TMPS)
 	$(ECHO_TEXI2DVI) $(TEXI2DVI) $(SILENT_Q_FLAG) --pdf \
 		$(READLINE_TEXI_INCFLAG) -I ${GDBMI_DIR} -I $(srcdir) \
