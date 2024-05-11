@@ -23,7 +23,7 @@ set linkflags [list additional_flags="-static"]
 
 if { ![gdb_can_simple_compile static-libc \
 	   {
-	       void main (void) { return 0; }
+	       int main (void) { return 0; }
 	   } \
 	   executable $linkflags] } {
     untested "Can't statically link"
