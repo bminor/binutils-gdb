@@ -190,8 +190,8 @@ MANS = $(MAN1S) $(MAN5S)
 
 # The pod files that are generated as a side effect of creating the
 # man pages.
-POD_FILE_TMPS = $(patsubst %.1,%.pod,$MAN1S) \
-		$(patsubst %.5,%.pod,$MAN1S)
+POD_FILE_TMPS = $(patsubst %.1,%.pod,$(MAN1S)) \
+		$(patsubst %.5,%.pod,$(MAN5S))
 
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 HAVE_NATIVE_GCORE_HOST = @HAVE_NATIVE_GCORE_HOST@
@@ -665,12 +665,10 @@ annotate/index.html: $(ANNOTATE_DOC_FILES)
 $(MAN1S) : %.1 : %.pod $(GDB_DOC_FILES)
 	$(ECHO_TEXI2MAN) ($(POD2MAN1) $*.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
-	$(SILENCE) rm -f $*.pod
 
 $(MAN5S) : %.5 : %.pod $(GDB_DOC_FILES)
 	$(ECHO_TEXI2MAN) ($(POD2MAN1) $*.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
-	$(SILENCE) rm -f $*.pod
 
 force:
 
