@@ -1435,6 +1435,14 @@ amd64_canonicalize_syscall (enum amd64_syscall syscall_number)
   case amd64_x32_sys_move_pages:
     return gdb_sys_move_pages;
 
+  case amd64_sys_clone3:
+  case amd64_x32_sys_clone3:
+    return gdb_sys_clone3;
+
+  case amd64_sys_rseq:
+  case amd64_x32_sys_rseq:
+    return gdb_sys_rseq;
+
   default:
     return gdb_sys_no_syscall;
   }

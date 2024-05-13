@@ -2047,6 +2047,12 @@ Do you want to stop the program?"),
     case gdb_sys_inotify_init1:
       break;
 
+    case gdb_sys_clone3:
+      break;
+
+    case gdb_sys_rseq:
+      break;
+
     default:
       gdb_printf (gdb_stderr,
 		  _("Process record and replay target doesn't "

@@ -541,6 +541,8 @@ enum gdb_syscall {
   gdb_sys_msgctl = 531,
   gdb_sys_semtimedop = 532,
   gdb_sys_newfstatat = 540,
+  gdb_sys_clone3 = 541,
+  gdb_sys_rseq = 542,
 };
 
 /* Record a linux syscall.  */

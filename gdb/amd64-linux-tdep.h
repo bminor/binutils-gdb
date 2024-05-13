@@ -321,7 +321,9 @@ enum amd64_syscall {
   amd64_sys_vmsplice = 278,
   amd64_sys_move_pages = 279,
   amd64_sys_pipe2 = 293,
-  amd64_sys_getrandom = 318
+  amd64_sys_getrandom = 318,
+  amd64_sys_clone3 = 435,
+  amd64_sys_rseq = 334,
 };
 
 /* Enum that defines the syscall identifiers for x32 linux.
@@ -571,6 +573,8 @@ enum amd64_x32_syscall {
   amd64_x32_sys_splice = (amd64_x32_syscall_bit + 275),
   amd64_x32_sys_tee = (amd64_x32_syscall_bit + 276),
   amd64_x32_sys_sync_file_range = (amd64_x32_syscall_bit + 277),
+  amd64_x32_sys_rseq = (amd64_x32_syscall_bit + 334),
+  amd64_x32_sys_clone3 = (amd64_x32_syscall_bit + 435),
   amd64_x32_sys_rt_sigaction = (amd64_x32_syscall_bit + 512),
   amd64_x32_sys_rt_sigreturn = (amd64_x32_syscall_bit + 513),
   amd64_x32_sys_ioctl = (amd64_x32_syscall_bit + 514),
