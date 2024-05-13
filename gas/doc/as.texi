@@ -6362,6 +6362,14 @@ Exit early from the current macro definition.
 executed in this pseudo-variable; you can copy that number to your
 output with @samp{\@@}, but @emph{only within a macro definition}.
 
+@cindex number of times a macro has been executed
+@cindex macro, execution count
+@item \+
+Similar to the @code{\@@} pseudo-variable, @command{@value{AS}} also maintains
+a per-macro count of the number of times that that macro has been executed.
+You can copy that number to your output with @samp{\+}, but
+@emph{only within a macro definition}.
+
 @item LOCAL @var{name} [ , @dots{} ]
 @emph{Warning: @code{LOCAL} is only available if you select ``alternate
 macro syntax'' with @samp{--alternate} or @code{.altmacro}.}

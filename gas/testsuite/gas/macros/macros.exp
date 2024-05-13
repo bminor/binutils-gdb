@@ -100,3 +100,6 @@ if [string match "" [lindex [gas_run ../all/excl.s "-o /dev/null" ""] 0]] {
 #  prevented the assembler from parsing the rest of the file,
 #  and hence catching an erroroneous instruction.
 gas_test_error "exit.s" "" ".exitm outside of a macro"
+
+run_list_test altmacro
+run_list_test count

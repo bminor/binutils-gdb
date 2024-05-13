@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Assembler macros can now use the syntax \+ to access the number of times a
+  given macro has been executed.  This is similar to the already existing \@
+  syntax, except that the count is maintained on a per-macro basis.
+  
 * Support the NF feature in Intel APX.
 
 * Remove KEYLOCKER and SHA promotions from EVEX MAP4.

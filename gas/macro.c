@@ -56,7 +56,7 @@ int macro_defined;
 
 /* Number of macro expansions that have been done.  */
 
-static int macro_number;
+static unsigned int macro_number;
 
 static void free_macro (macro_entry *);
 
@@ -668,6 +668,7 @@ define_macro (sb *in, sb *label, size_t (*get_line) (sb *))
   macro->formal_count = 0;
   macro->formals = 0;
   macro->formal_hash = str_htab_create ();
+  macro->count = 0;
 
   idx = sb_skip_white (0, in);
   if (! buffer_and_nest ("MACRO", "ENDM", &macro->sub, get_line))
@@ -846,11 +847,20 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	    }
 	  else if (src < in->len && in->ptr[src] == '@')
 	    {
-	      /* Sub in the macro invocation number.  */
+	      /* Sub in the total macro invocation number.  */
 
 	      char buffer[12];
 	      src++;
-	      sprintf (buffer, "%d", macro_number);
+	      sprintf (buffer, "%u", macro_number);
+	      sb_add_string (out, buffer);
+	    }
+	  else if (src < in->len && in->ptr[src] == '+')
+	    {
+	      /* Sub in the current macro invocation number.  */
+
+	      char buffer[12];
+	      src++;
+	      sprintf (buffer, "%d", macro->count);
 	      sb_add_string (out, buffer);
 	    }
 	  else if (src < in->len && in->ptr[src] == '&')
@@ -1227,7 +1237,10 @@ macro_expand (size_t idx, sb *in, macro_entry *m, sb *out)
 
   sb_kill (&t);
   if (!err)
-    macro_number++;
+    {
+      macro_number++;
+      m->count++;
+    }
 
   return err;
 }
