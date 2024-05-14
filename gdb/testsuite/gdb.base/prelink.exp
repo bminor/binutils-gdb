@@ -29,10 +29,8 @@ set testfile "prelink"
 set libsrcfile ${testfile}-lib.c
 set libfile [standard_output_file ${testfile}.so]
 
-# Use -soname so that the new library gets copied by build_executable_own_libs.
-
-if { [gdb_compile_shlib "${srcdir}/${subdir}/${libsrcfile}" "${libfile}" [list debug "ldflags=-Wl,-soname,[file tail ${libfile}]"]] != ""} {
-    # If creating the shared library fails, maybe we don't have the right tools
+if {[build_executable "build library" ${libfile} ${libsrcfile} \
+	 {debug shlib}] == -1} {
     return -1
 }
 

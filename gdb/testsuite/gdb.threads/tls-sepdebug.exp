@@ -43,12 +43,8 @@ set binsharedfile      [standard_output_file ${binsharedbase}]
 # The compile flag -std=c11 is required because the test case uses
 # 'thread_local' to indicate thread local storage.  This is available
 # as a macro starting in C11 and became a C-language keyword in C23.
-if  { [gdb_compile_shlib \
-	"${srcdir}/${subdir}/${srcsharedfile}" "${binsharedfile}" \
-	[list debug \
-	      ldflags=-Wl,-soname=${binsharedbase} \
-	      additional_flags=-std=c11]] \
-       != "" } {
+if { [build_executable "build library" ${binsharedfile} ${srcsharedfile} \
+	  {debug shlib additional_flags=-std=c11}] == -1 } {
     untested "Couldn't compile test library"
     return -1
 }
