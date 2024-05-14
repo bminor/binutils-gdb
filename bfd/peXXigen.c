@@ -1390,7 +1390,7 @@ pe_print_idata (bfd * abfd, void * vfile)
 	  int ft_idx;
 	  int ft_allocated;
 
-	  fprintf (file, _("\tvma:  Hint/Ord Member-Name Bound-To\n"));
+	  fprintf (file, _("\tvma:     Ordinal  Hint  Member-Name  Bound-To\n"));
 
 	  idx = hint_addr - adj;
 
@@ -1457,20 +1457,25 @@ pe_print_idata (bfd * abfd, void * vfile)
 	      amt = member - adj;
 
 	      if (HighBitSet (member_high))
-		fprintf (file, "\t%lx%08lx\t %4lx%08lx  <none>",
-			 member_high, member,
-			 WithoutHighBit (member_high), member);
+	        {
+		  /* in low 16 bits is ordinal number, other bits are reserved */
+		  unsigned int ordinal = member & 0xffff;
+		  fprintf (file, "\t%08lx  %5u  <none> <none>",
+			   (unsigned long)(first_thunk + j), ordinal);
+	        }
 	      /* PR binutils/17512: Handle corrupt PE data.  */
 	      else if (amt >= datasize || amt + 2 >= datasize)
-		fprintf (file, _("\t<corrupt: 0x%04lx>"), member);
+		fprintf (file, _("\t<corrupt: 0x%08lx>"), member);
 	      else
 		{
-		  int ordinal;
+		  unsigned int hint;
 		  char *member_name;
 
-		  ordinal = bfd_get_16 (abfd, data + amt);
+		  /* First 16 bits is hint name index, rest is the name */
+		  hint = bfd_get_16 (abfd, data + amt);
 		  member_name = (char *) data + amt + 2;
-		  fprintf (file, "\t%04lx\t %4d  %.*s",member, ordinal,
+		  fprintf (file, "\t%08lx  <none>  %04x  %.*s",
+			   (unsigned long)(first_thunk + j), hint,
 			   (int) (datasize - (amt + 2)), member_name);
 		}
 
@@ -1480,8 +1485,9 @@ pe_print_idata (bfd * abfd, void * vfile)
 		  && first_thunk != 0
 		  && first_thunk != hint_addr
 		  && j + 4 <= ft_datasize)
-		fprintf (file, "\t%04lx",
+		fprintf (file, "\t%08lx",
 			 (unsigned long) bfd_get_32 (abfd, ft_data + j));
+
 	      fprintf (file, "\n");
 	    }
 #else
@@ -1497,20 +1503,24 @@ pe_print_idata (bfd * abfd, void * vfile)
 	      amt = member - adj;
 
 	      if (HighBitSet (member))
-		fprintf (file, "\t%04lx\t %4lu  <none>",
-			 member, WithoutHighBit (member));
+	        {
+		  /* in low 16 bits is ordinal number, other bits are reserved */
+		  unsigned int ordinal = member & 0xffff;
+		  fprintf (file, "\t%08lx  %5u  <none> <none>", (unsigned long)(first_thunk + j), ordinal);
+	        }
 	      /* PR binutils/17512: Handle corrupt PE data.  */
 	      else if (amt >= datasize || amt + 2 >= datasize)
-		fprintf (file, _("\t<corrupt: 0x%04lx>"), member);
+		fprintf (file, _("\t<corrupt: 0x%08lx>"), member);
 	      else
 		{
-		  int ordinal;
+		  unsigned int hint;
 		  char *member_name;
 
-		  ordinal = bfd_get_16 (abfd, data + amt);
+		  /* First 16 bits is hint name index, rest is the name */
+		  hint = bfd_get_16 (abfd, data + amt);
 		  member_name = (char *) data + amt + 2;
-		  fprintf (file, "\t%04lx\t %4d  %.*s",
-			   member, ordinal,
+		  fprintf (file, "\t%08lx  <none>  %04x  %.*s",
+			   (unsigned long)(first_thunk + j), hint,
 			   (int) (datasize - (amt + 2)), member_name);
 		}
 
@@ -1520,7 +1530,7 @@ pe_print_idata (bfd * abfd, void * vfile)
 		  && first_thunk != 0
 		  && first_thunk != hint_addr
 		  && j + 4 <= ft_datasize)
-		fprintf (file, "\t%04lx",
+		fprintf (file, "\t%08lx",
 			 (unsigned long) bfd_get_32 (abfd, ft_data + j));
 
 	      fprintf (file, "\n");
@@ -1719,6 +1729,7 @@ pe_print_edata (bfd * abfd, void * vfile)
   fprintf (file,
 	  _("\nExport Address Table -- Ordinal Base %ld\n"),
 	  edt.base);
+  fprintf (file, "\t          Ordinal  Address  Type\n");
 
   /* PR 17512: Handle corrupt PE binaries.  */
   /* PR 17512 file: 140-165018-0.004.  */
@@ -1741,7 +1752,7 @@ pe_print_edata (bfd * abfd, void * vfile)
 	  /* This rva is to a name (forwarding function) in our section.  */
 	  /* Should locate a function descriptor.  */
 	  fprintf (file,
-		   "\t[%4ld] +base[%4ld] %04lx %s -- %.*s\n",
+		   "\t[%4ld] +base[%4ld] %08lx %s -- %.*s\n",
 		   (long) i,
 		   (long) (i + edt.base),
 		   (unsigned long) eat_member,
@@ -1753,7 +1764,7 @@ pe_print_edata (bfd * abfd, void * vfile)
 	{
 	  /* Should locate a function descriptor in the reldata section.  */
 	  fprintf (file,
-		   "\t[%4ld] +base[%4ld] %04lx %s\n",
+		   "\t[%4ld] +base[%4ld] %08lx %s\n",
 		   (long) i,
 		   (long) (i + edt.base),
 		   (unsigned long) eat_member,
@@ -1764,7 +1775,9 @@ pe_print_edata (bfd * abfd, void * vfile)
   /* The Export Name Pointer Table is paired with the Export Ordinal Table.  */
   /* Dump them in parallel for clarity.  */
   fprintf (file,
-	   _("\n[Ordinal/Name Pointer] Table\n"));
+	   _("\n[Ordinal/Name Pointer] Table -- Ordinal Base %ld\n"),
+	  edt.base);
+  fprintf (file, "\t          Ordinal   Hint Name\n");
 
   /* PR 17512: Handle corrupt PE binaries.  */
   if (edt.npt_addr + (edt.num_names * 4) - adj >= datasize
@@ -1793,14 +1806,16 @@ pe_print_edata (bfd * abfd, void * vfile)
       if ((name_ptr - adj) >= datasize)
 	{
 	  /* xgettext:c-format */
-	  fprintf (file, _("\t[%4ld] <corrupt offset: %lx>\n"),
-		   (long) ord, (long) name_ptr);
+	  fprintf (file, _("\t[%4ld] +base[%4ld]  %04lx <corrupt offset: %lx>\n"),
+		   (long) ord, (long) (ord + edt.base), (long) i, (long) name_ptr);
 	}
       else
 	{
 	  char * name = (char *) data + name_ptr - adj;
 
-	  fprintf (file, "\t[%4ld] %.*s\n", (long) ord,
+	  fprintf (file,
+		   "\t[%4ld] +base[%4ld]  %04lx %.*s\n",
+		   (long) ord, (long) (ord + edt.base), (long) i,
 		   (int)((char *)(data + datasize) - name), name);
 	}
     }
