@@ -1076,11 +1076,9 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
   from_last_map_symbol = (last_map_symbol >= 0
 			  && info->stop_offset == last_stop_offset);
 
-  /* Start scanning at the start of the function, or wherever
-     we finished last time.  */
-  n = info->symtab_pos + 1;
-  if (from_last_map_symbol && n >= last_map_symbol)
-    n = last_map_symbol;
+  /* Start scanning from wherever we finished last time, or the start
+     of the function.  */
+  n = from_last_map_symbol ? last_map_symbol : info->symtab_pos + 1;
 
   /* Find the suitable mapping symbol to dump.  */
   for (; n < info->symtab_size; n++)
@@ -1105,9 +1103,7 @@ riscv_search_mapping_symbol (bfd_vma memaddr,
      can pick up a text mapping symbol of a preceeding section.  */
   if (!found)
     {
-      n = info->symtab_pos;
-      if (from_last_map_symbol && n >= last_map_symbol)
-	n = last_map_symbol;
+      n = from_last_map_symbol ? last_map_symbol : info->symtab_pos;
 
       for (; n >= 0; n--)
 	{
