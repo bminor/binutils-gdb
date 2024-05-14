@@ -89,10 +89,11 @@ AC_DEFUN([GDB_AC_COMMON], [
     no) want_threading=no ;;
     *) AC_MSG_ERROR([bad value $enableval for threading]) ;;
     esac],
-    [want_threading=yes])
+    [want_threading=auto])
 
   # Check for std::thread.  This does not work on some platforms, like
-  # mingw and DJGPP.
+  # mingw using the win32 threads model with gcc older than 13, and
+  # DJGPP.
   AC_LANG_PUSH([C++])
   AX_PTHREAD([threads=yes], [threads=no])
   save_LIBS="$LIBS"
@@ -128,10 +129,16 @@ AC_DEFUN([GDB_AC_COMMON], [
   LIBS="$save_LIBS"
   CXXFLAGS="$save_CXXFLAGS"
 
-  if test "$want_threading" = "yes"; then
+  if test "$want_threading" != "no"; then
     if test "$gdb_cv_cxx_std_thread" = "yes"; then
       AC_DEFINE(CXX_STD_THREAD, 1,
 		[Define to 1 if std::thread works.])
+    else
+	if test "$want_threading" = "yes"; then
+	    AC_MSG_ERROR([std::thread does not work; disable threading])
+	else
+	    AC_MSG_WARN([std::thread does not work; disabling threading])
+	fi
     fi
   fi
   AC_LANG_POP
