@@ -686,6 +686,11 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen)
 	      PUT (quotechar);
 	      continue;
 
+	      /* These two are used inside macros.  */
+	    case '@':
+	    case '+':
+	      break;
+
 	    case '"':
 	    case '\\':
 	    case 'b':
