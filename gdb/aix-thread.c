@@ -859,7 +859,8 @@ sync_threadlists (pid_t pid)
       {
 	aix_thread_info *priv = get_aix_thread_info (it);
 	if (in_queue_threads.count (priv->pdtid) == 0
-		&& in_thread_list (proc_target, it->ptid))
+		&& in_thread_list (proc_target, it->ptid)
+		&& pid == it->ptid.pid ())
 	  {
 	    delete_thread (it);
 	    data->exited_threads.insert (priv->pdtid);
