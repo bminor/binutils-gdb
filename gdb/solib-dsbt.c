@@ -616,6 +616,7 @@ dsbt_current_sos (void)
 	      sop->so_original_name = sop->so_name;
 	    }
 
+	  sop->lm_info = std::move (li);
 	  sos.push_back (*sop);
 	}
       else
