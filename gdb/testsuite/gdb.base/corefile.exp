@@ -199,6 +199,45 @@ gdb_test "up" "#\[0-9\]* *(\[0-9xa-fH'\]* in)? .* \\(.*\\).*" "up, reinit"
 
 gdb_test "core" "No core file now."
 
+# Temporarily move coremmap.data out of the way and reload the core
+# file.  We should still be able to read buf2 as the contents of this
+# are written into the core file.  In contrast buf2ro should no longer
+# be readable as the contents of this region are not within the core
+# file, GDB relies on reading this from the coremmap.data file, which
+# can no longer be found.
+set coremmap_data_filename \
+    [standard_output_file coredir.[getpid]/coremmap.data]
+set coremmap_data_backup_filename \
+    [standard_output_file coredir.[getpid]/coremmap.data.backup]
+remote_exec host "mv ${coremmap_data_filename} \
+		  ${coremmap_data_backup_filename}"
+
+clean_restart $binfile
+
+# Load the core file and check we get a warning about the
+# coremmap.data file being missing.
+gdb_test_multiple "core-file $corefile" "warn about coremmap.data missing" {
+    -re -wrap "warning: Can't open file \[^\r\n\]+/coremmap.data during file-backed mapping note processing\r\n.*" {
+	pass $gdb_test_name
+    }
+}
+
+# This xfail was just copied from earlier in the script where we also
+# read from buf2.
+setup_xfail "*-*-sunos*" "*-*-aix*"
+gdb_test "x/8bd buf2" \
+    ".*:.*0.*1.*2.*3.*4.*5.*6.*7.*" \
+    "accessing mmapped data in core file with coremmap.data removed"
+
+gdb_test "x/8bd buf2ro" \
+    "$hex\[^:\]*:\\s+Cannot access memory at address $hex" \
+    "accessing read-only mmapped data in core file with coremmap.data removed"
+
+# Restore the coremmap.data file so later tests don't give warnings
+# when the core file is reloaded.
+remote_exec host "mv ${coremmap_data_backup_filename} \
+		  ${coremmap_data_filename}"
+
 # Test that we can unload the core with the "detach" command.
 
 proc_with_prefix corefile_detach {} {

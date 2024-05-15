@@ -160,13 +160,6 @@ private: /* per-core data */
   /* Build m_core_file_mappings.  Called from the constructor.  */
   void build_file_mappings ();
 
-  /* Helper method for xfer_partial.  */
-  enum target_xfer_status xfer_memory_via_mappings (gdb_byte *readbuf,
-						    const gdb_byte *writebuf,
-						    ULONGEST offset,
-						    ULONGEST len,
-						    ULONGEST *xfered_len);
-
   /* FIXME: kettenis/20031023: Eventually this field should
      disappear.  */
   struct gdbarch *m_core_gdbarch = NULL;
@@ -964,55 +957,6 @@ core_target::files_info ()
   print_section_info (&m_core_section_table, current_program_space->core_bfd ());
 }
 
-/* Helper method for core_target::xfer_partial.  */
-
-enum target_xfer_status
-core_target::xfer_memory_via_mappings (gdb_byte *readbuf,
-				       const gdb_byte *writebuf,
-				       ULONGEST offset, ULONGEST len,
-				       ULONGEST *xfered_len)
-{
-  enum target_xfer_status xfer_status;
-
-  xfer_status = (section_table_xfer_memory_partial
-		   (readbuf, writebuf,
-		    offset, len, xfered_len,
-		    m_core_file_mappings));
-
-  if (xfer_status == TARGET_XFER_OK || m_core_unavailable_mappings.empty ())
-    return xfer_status;
-
-  /* There are instances - e.g. when debugging within a docker
-     container using the AUFS storage driver - where the pathnames
-     obtained from the note section are incorrect.  Despite the path
-     being wrong, just knowing the start and end addresses of the
-     mappings is still useful; we can attempt an access of the file
-     stratum constrained to the address ranges corresponding to the
-     unavailable mappings.  */
-
-  ULONGEST memaddr = offset;
-  ULONGEST memend = offset + len;
-
-  for (const auto &mr : m_core_unavailable_mappings)
-    {
-      if (mr.contains (memaddr))
-	{
-	  if (!mr.contains (memend))
-	    len = mr.start + mr.length - memaddr;
-
-	  xfer_status = this->beneath ()->xfer_partial (TARGET_OBJECT_MEMORY,
-							NULL,
-							readbuf,
-							writebuf,
-							offset,
-							len,
-							xfered_len);
-	  break;
-	}
-    }
-
-  return xfer_status;
-}
 
 enum target_xfer_status
 core_target::xfer_partial (enum target_object object, const char *annex,
@@ -1040,26 +984,72 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	if (xfer_status == TARGET_XFER_OK)
 	  return TARGET_XFER_OK;
 
-	/* Check file backed mappings.  If they're available, use
-	   core file provided mappings (e.g. from .note.linuxcore.file
-	   or the like) as this should provide a more accurate
-	   result.  If not, check the stratum beneath us, which should
-	   be the file stratum.
-
-	   We also check unavailable mappings due to Docker/AUFS driver
-	   issues.  */
-	if (!m_core_file_mappings.empty ()
-	    || !m_core_unavailable_mappings.empty ())
+	/* Check file backed mappings.  If they're available, use core file
+	   provided mappings (e.g. from .note.linuxcore.file or the like)
+	   as this should provide a more accurate result.  */
+	if (!m_core_file_mappings.empty ())
 	  {
-	    xfer_status = xfer_memory_via_mappings (readbuf, writebuf, offset,
-						    len, xfered_len);
+	    xfer_status = section_table_xfer_memory_partial
+			    (readbuf, writebuf, offset, len, xfered_len,
+			     m_core_file_mappings);
+	    if (xfer_status == TARGET_XFER_OK)
+	      return xfer_status;
 	  }
-	else
-	  xfer_status = this->beneath ()->xfer_partial (object, annex, readbuf,
-							writebuf, offset, len,
-							xfered_len);
-	if (xfer_status == TARGET_XFER_OK)
-	  return TARGET_XFER_OK;
+
+	/* If the access is within an unavailable file mapping then we try
+	   to check in the stratum below (the executable stratum).  The
+	   thinking here is that if the mapping was read/write then the
+	   contents would have been written into the core file and the
+	   access would have been satisfied by m_core_section_table.
+
+	   But if the access has not yet been resolved then we can assume
+	   the access is read-only.  If the executable was not found
+	   during the mapped file check then we'll have an unavailable
+	   mapping entry, however, if the user has provided the executable
+	   (maybe in a different location) then we might be able to
+	   resolve the access from there.
+
+	   If that fails, but the access is within an unavailable region,
+	   then the access itself should fail.  */
+	for (const auto &mr : m_core_unavailable_mappings)
+	  {
+	    if (mr.contains (offset))
+	      {
+		if (!mr.contains (offset + len))
+		  len = mr.start + mr.length - offset;
+
+		xfer_status
+		  = this->beneath ()->xfer_partial (TARGET_OBJECT_MEMORY,
+						    nullptr, readbuf,
+						    writebuf, offset,
+						    len, xfered_len);
+		if (xfer_status == TARGET_XFER_OK)
+		  return TARGET_XFER_OK;
+
+		return TARGET_XFER_E_IO;
+	      }
+	  }
+
+	/* The following is acting as a fallback in case we encounter a
+	   situation where the core file is lacking and mapped file
+	   information.  Here we query the exec file stratum to see if it
+	   can resolve the access.  Doing this when we are missing mapped
+	   file information might be the best we can do, but there are
+	   certainly cases this will get wrong, e.g. if an inferior created
+	   a zero initialised mapping over the top of some data that exists
+	   within the executable then this will return the executable data
+	   rather than the zero data.  Maybe we should just drop this
+	   block?  */
+	if (m_core_file_mappings.empty ()
+	    && m_core_unavailable_mappings.empty ())
+	  {
+	    xfer_status
+	      = this->beneath ()->xfer_partial (object, annex, readbuf,
+						writebuf, offset, len,
+						xfered_len);
+	    if (xfer_status == TARGET_XFER_OK)
+	      return TARGET_XFER_OK;
+	  }
 
 	/* Finally, attempt to access data in core file sections with
 	   no contents.  These will typically read as all zero.  */
