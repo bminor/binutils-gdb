@@ -8922,14 +8922,32 @@ move_or_literal_pool (int i, enum lit_type t, bool mode_3)
       uint64_t v;
       if (inst.relocs[0].exp.X_op == O_big)
 	{
-	  LITTLENUM_TYPE w[X_PRECISION];
-	  LITTLENUM_TYPE * l;
+	  LITTLENUM_TYPE *l;
 
-	  if (inst.relocs[0].exp.X_add_number == -1)
+	  if (inst.relocs[0].exp.X_add_number <= 0)  /* FP value.  */
 	    {
-	      gen_to_words (w, X_PRECISION, E_PRECISION);
-	      l = w;
-	      /* FIXME: Should we check words w[2..5] ?  */
+	      /* FIXME: The code that was here previously could not
+		 work.  Firstly, it tried to convert a floating point
+		 number into an extended precision format, but only
+		 provided a buffer of 5 littlenums, which was too
+		 small.  Secondly, it then didn't deal with the value
+		 converted correctly, just reading out the first 4
+		 littlenum fields and assuming that could be used
+		 directly.
+
+		 I think the code was intended to handle expressions
+		 such as:
+
+			LDR r0, =1.0
+			VLDR d0, =55.3
+
+		 but the parsers currently don't permit floating-point
+		 literal values to be written this way, so this code
+		 is probably unreachable.  To be safe, we simply
+		 return an error here.  */
+
+	      inst.error = _("constant expression not supported");
+	      return true;
 	    }
 	  else
 	    l = generic_bignum;
