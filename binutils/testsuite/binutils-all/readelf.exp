@@ -402,6 +402,7 @@ if {[which $AS] != 0} then {
     run_dump_test "retain1b"
     run_dump_test "readelf-maskos-1a"
     run_dump_test "readelf-maskos-1b"
+    run_dump_test "readelf-debug-str-offsets-dw4"
     if {![istarget *-*-hpux*]} then {
 	run_dump_test pr26548
 	if {![binutils_assemble_flags $srcdir/$subdir/pr26548.s tmpdir/pr26548e.o {--defsym ERROR=1}]} then {

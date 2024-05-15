@@ -7969,6 +7969,7 @@ display_debug_str_offsets (struct dwarf_section *section,
 	  length = section->size;
 	  curr   = section->start;
 	  entries_end = end;
+	  debug_str_offsets_hdr_len = 0;
 
 	  printf (_("    Length: %#" PRIx64 "\n"), length);
 	  printf (_("       Index   Offset [String]\n"));
