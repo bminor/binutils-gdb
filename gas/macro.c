@@ -854,7 +854,7 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	      sprintf (buffer, "%u", macro_number);
 	      sb_add_string (out, buffer);
 	    }
-	  else if (src < in->len && in->ptr[src] == '+')
+	  else if (macro && src < in->len && in->ptr[src] == '+')
 	    {
 	      /* Sub in the current macro invocation number.  */
 

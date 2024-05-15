@@ -17,3 +17,10 @@
 
 	mac1 2
 	mac2 3
+
+	.irp i,1
+	.print "\+"
+	.endr
+	.irpc i,1
+	.print "\+"
+	.endr
