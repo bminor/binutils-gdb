@@ -23,10 +23,8 @@
 
 #include "target.h"
 #include "gdb_bfd.h"
-#include "gdbsupport/gdb_vecs.h"
 #include "registry.h"
 #include "solist.h"
-#include "gdbsupport/next-iterator.h"
 #include "gdbsupport/safe-iterator.h"
 #include "gdbsupport/intrusive_list.h"
 #include "gdbsupport/refcounted-object.h"

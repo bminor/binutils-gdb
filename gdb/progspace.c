@@ -19,7 +19,6 @@
 
 #include "cli/cli-cmds.h"
 #include "objfiles.h"
-#include "arch-utils.h"
 #include "gdbcore.h"
 #include "solib.h"
 #include "solist.h"
