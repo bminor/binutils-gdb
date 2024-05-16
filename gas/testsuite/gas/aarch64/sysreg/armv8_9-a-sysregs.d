@@ -128,6 +128,13 @@ Disassembly of section \.text:
 .*:	d51b9600 	msr	pmicfiltr_el0, x0
 .*:	d53b9600 	mrs	x0, pmicfiltr_el0
 .*:	d51b9d80 	msr	pmzr_el0, x0
+.*:	d5109d60 	msr	spmaccessr_el1, x0
+.*:	d5309d60 	mrs	x0, spmaccessr_el1
+.*:	d5139c00 	msr	spmcr_el0, x0
+.*:	d5339c00 	mrs	x0, spmcr_el0
+.*:	d5309dc0 	mrs	x0, spmdevaff_el1
+.*:	d5109e20 	msr	spmintenset_el1, x0
+.*:	d5309e20 	mrs	x0, spmintenset_el1
 .*:	d5189ea0 	msr	pmecr_el1, x0
 .*:	d5389ea0 	mrs	x0, pmecr_el1
 .*:	d5189ee0 	msr	pmiar_el1, x0

@@ -107,6 +107,12 @@
 	rw_sys_reg sys_reg=pmicfiltr_el0 xreg=x0 r=1 w=1
 	msr pmzr_el0, x0
 
+	/* FEAT_SPMU */
+	rw_sys_reg sys_reg=spmaccessr_el1 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmcr_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmdevaff_el1 xreg=x0 r=1 w=0
+	rw_sys_reg sys_reg=spmintenset_el1 xreg=x0 r=1 w=1
+
 	/* FEAT_SEBEP Extension.  */
 	rw_sys_reg sys_reg=pmecr_el1 xreg=x0 r=1 w=1
 	rw_sys_reg sys_reg=pmiar_el1 xreg=x0 r=1 w=1

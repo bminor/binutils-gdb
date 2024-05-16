@@ -204,6 +204,20 @@
 .*: Error: selected processor does not support system register name 'pmicfiltr_el0'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'pmzr_el0'
+.*: Error: selected processor does not support system register name 'spmaccessr_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmaccessr_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmcr_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmcr_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmdevaff_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmintenset_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmintenset_el1'
+.*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'pmecr_el1'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'pmecr_el1'
