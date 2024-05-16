@@ -222,7 +222,7 @@ private:
 
   /* True if we have a textual error message, from an "E.MESSAGE"
      response.  */
-  bool m_textual_err_msg;
+  bool m_textual_err_msg = false;
 };
 
 /* Enumeration of packets for a remote target.  */
