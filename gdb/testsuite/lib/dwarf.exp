@@ -2252,6 +2252,8 @@ namespace eval Dwarf {
 	with_override Dwarf::end_file Dwarf::_macro_unit_end_file {
 	    uplevel $body
 	}}}}
+
+	_op .byte 0x0 "# End macro unit"
     }
 
     # Emit a DW_MACRO_define entry.
