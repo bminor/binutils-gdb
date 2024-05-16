@@ -439,7 +439,7 @@ public:
   static objfile *make (gdb_bfd_ref_ptr bfd_, const char *name_,
 			objfile_flags flags_, objfile *parent = nullptr);
 
-  /* Remove an objfile from the current program space, and free
+  /* Remove this objfile from its program space's objfile list, and frees
      it.  */
   void unlink ();
 

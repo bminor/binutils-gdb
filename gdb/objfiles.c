@@ -463,7 +463,7 @@ objfile::make (gdb_bfd_ref_ptr bfd_, const char *name_, objfile_flags flags_,
 void
 objfile::unlink ()
 {
-  current_program_space->remove_objfile (this);
+  this->pspace ()->remove_objfile (this);
 }
 
 /* Free all separate debug objfile of OBJFILE, but don't free OBJFILE
