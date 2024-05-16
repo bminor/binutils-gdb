@@ -918,7 +918,9 @@ obj_section::set_offset (CORE_ADDR offset)
 extern int entry_point_address_query (program_space *pspace,
 				      CORE_ADDR *entry_p);
 
-extern CORE_ADDR entry_point_address (void);
+/* Get the entry point address in PSPACE.  Call error if it is not known.  */
+
+extern CORE_ADDR entry_point_address (program_space *pspace);
 
 extern void build_objfile_section_table (struct objfile *);
 

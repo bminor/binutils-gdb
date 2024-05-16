@@ -360,14 +360,14 @@ entry_point_address_query (program_space *pspace, CORE_ADDR *entry_p)
   return 1;
 }
 
-/* Get current entry point address.  Call error if it is not known.  */
+/* See objfiles.h.  */
 
 CORE_ADDR
-entry_point_address (void)
+entry_point_address (program_space *pspace)
 {
   CORE_ADDR retval;
 
-  if (!entry_point_address_query (current_program_space, &retval))
+  if (!entry_point_address_query (pspace, &retval))
     error (_("Entry point address is not known."));
 
   return retval;
