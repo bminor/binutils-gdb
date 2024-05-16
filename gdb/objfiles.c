@@ -306,9 +306,10 @@ build_objfile_section_table (struct objfile *objfile)
    requests for specific operations.  Other bits like OBJF_SHARED are
    simply copied through to the new objfile flags member.  */
 
-objfile::objfile (gdb_bfd_ref_ptr bfd_, const char *name, objfile_flags flags_)
+objfile::objfile (gdb_bfd_ref_ptr bfd_, program_space *pspace,
+		  const char *name, objfile_flags flags_)
   : flags (flags_),
-    m_pspace (current_program_space),
+    m_pspace (pspace),
     obfd (std::move (bfd_))
 {
   const char *expanded_name;
@@ -444,7 +445,8 @@ objfile *
 objfile::make (gdb_bfd_ref_ptr bfd_, const char *name_, objfile_flags flags_,
 	       objfile *parent)
 {
-  objfile *result = new objfile (std::move (bfd_), name_, flags_);
+  objfile *result
+    = new objfile (std::move (bfd_), current_program_space, name_, flags_);
   if (parent != nullptr)
     add_separate_debug_objfile (result, parent);
 

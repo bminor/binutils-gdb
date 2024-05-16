@@ -423,7 +423,8 @@ struct objfile
 private:
 
   /* The only way to create an objfile is to call objfile::make.  */
-  objfile (gdb_bfd_ref_ptr, const char *, objfile_flags);
+  objfile (gdb_bfd_ref_ptr, program_space *pspace, const char *,
+	   objfile_flags);
 
 public:
 
