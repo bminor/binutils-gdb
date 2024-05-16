@@ -784,14 +784,12 @@ have_full_symbols (void)
 }
 
 
-/* This operations deletes all objfile entries that represent solibs that
-   weren't explicitly loaded by the user, via e.g., the add-symbol-file
-   command.  */
+/* See objfiles.h.  */
 
 void
-objfile_purge_solibs (void)
+objfile_purge_solibs (program_space *pspace)
 {
-  for (objfile *objf : current_program_space->objfiles_safe ())
+  for (objfile *objf : pspace->objfiles_safe ())
     {
       /* We assume that the solib package has been purged already, or will
 	 be soon.  */

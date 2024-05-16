@@ -1248,7 +1248,7 @@ no_shared_libraries (const char *ignored, int from_tty)
      solibs' objfiles before clear_solib has been called.  */
 
   clear_solib (current_program_space);
-  objfile_purge_solibs ();
+  objfile_purge_solibs (current_program_space);
 }
 
 /* See solib.h.  */

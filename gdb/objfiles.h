@@ -947,11 +947,11 @@ extern bool is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile);
 extern bool shared_objfile_contains_address_p (struct program_space *pspace,
 					       CORE_ADDR address);
 
-/* This operation deletes all objfile entries that represent solibs that
-   weren't explicitly loaded by the user, via e.g., the add-symbol-file
+/* This operation deletes all objfile entries in PSPACE that represent solibs
+   that weren't explicitly loaded by the user, via e.g., the add-symbol-file
    command.  */
 
-extern void objfile_purge_solibs (void);
+extern void objfile_purge_solibs (program_space *pspace);
 
 /* Functions for dealing with the minimal symbol table, really a misc
    address<->symbol mapping for things we don't have debug symbols for.  */
