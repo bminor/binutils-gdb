@@ -103,3 +103,9 @@ gas_test_error "exit.s" "" ".exitm outside of a macro"
 
 run_list_test altmacro
 run_list_test count
+
+# The AVR, CRIS, MSP430 and Z80 targets define ONLY_STANDARD_ESCAPES,
+#  so \+ is rejected.
+# AIX targets need an extended regexp to match "\+".
+setup_xfail "avr-*-*" "cris*-*-*" "msp430-*-*" "z80-*-*" "*-*-aix*"
+run_list_test irp-count
