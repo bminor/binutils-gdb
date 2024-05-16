@@ -54,7 +54,6 @@
 #include <optional>
 #include "source.h"
 #include "cli/cli-style.h"
-#include "dwarf2/loc.h"
 
 /* Local functions: */
 
