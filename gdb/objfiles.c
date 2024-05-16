@@ -564,7 +564,7 @@ objfile::~objfile ()
     struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
     if (cursal.symtab && cursal.symtab->compunit ()->objfile () == this)
-      clear_current_source_symtab_and_line ();
+      clear_current_source_symtab_and_line (this->pspace ());
   }
 
   /* Rebuild section map next time we need it.  */

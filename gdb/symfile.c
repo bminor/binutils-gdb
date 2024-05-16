@@ -2884,7 +2884,7 @@ clear_symtab_users (symfile_add_flags add_flags)
 
   /* Clear the "current" symtab first, because it is no longer valid.
      breakpoint_re_set may try to access the current symtab.  */
-  clear_current_source_symtab_and_line ();
+  clear_current_source_symtab_and_line (current_program_space);
 
   clear_displays ();
   clear_last_displayed_sal ();

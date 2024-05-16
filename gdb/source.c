@@ -298,9 +298,9 @@ set_current_source_symtab_and_line (const symtab_and_line &sal)
 /* Reset any information stored about a default file and line to print.  */
 
 void
-clear_current_source_symtab_and_line (void)
+clear_current_source_symtab_and_line (program_space *pspace)
 {
-  current_source_location *loc = get_source_location (current_program_space);
+  current_source_location *loc = get_source_location (pspace);
   loc->set (nullptr, 0);
 }
 

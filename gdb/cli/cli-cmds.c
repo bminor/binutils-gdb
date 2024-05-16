@@ -1295,7 +1295,7 @@ list_command (const char *arg, int from_tty)
 	    {
 	      /* The inferior is not running, so reset the current source
 		 location to the default (usually the main function).  */
-	      clear_current_source_symtab_and_line ();
+	      clear_current_source_symtab_and_line (current_program_space);
 	      try
 		{
 		  set_default_source_symtab_and_line ();

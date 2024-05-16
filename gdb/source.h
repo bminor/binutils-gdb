@@ -21,6 +21,7 @@
 
 #include "gdbsupport/scoped_fd.h"
 
+struct program_space;
 struct symtab;
 
 /* See openp function definition for their description.  */
@@ -126,7 +127,7 @@ extern symtab_and_line set_current_source_symtab_and_line
   (const symtab_and_line &sal);
 
 /* Reset any information stored about a default file and line to print.  */
-extern void clear_current_source_symtab_and_line (void);
+extern void clear_current_source_symtab_and_line (program_space *pspace);
 
 /* Add a source path substitution rule.  */
 extern void add_substitute_path_rule (const char *, const char *);
