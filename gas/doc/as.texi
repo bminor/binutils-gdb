@@ -260,7 +260,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--size-check=[error|warning]}]
  [@b{--statistics}]
  [@b{-v}] [@b{-version}] [@b{--version}]
- [@b{-W}] [@b{--warn}] [@b{--fatal-warnings}] [@b{-w}] [@b{-x}]
+ [@b{-W}] [@b{--no-warn}] [@b{--warn}] [@b{--fatal-warnings}]
+ [@b{-w}] [@b{-x}]
  [@b{-Z}] [@b{@@@var{FILE}}]
  [@var{target-options}]
  [@b{--}|@var{files} @dots{}]
@@ -983,11 +984,11 @@ Print the @command{as} version and exit.
 @itemx --no-warn
 Suppress warning messages.
 
-@item --fatal-warnings
-Treat warnings as errors.
-
 @item --warn
 Don't suppress warning messages or treat them as errors.
+
+@item --fatal-warnings
+Treat warnings as errors.
 
 @item -w
 Ignored.
@@ -2863,7 +2864,7 @@ option @samp{-v} (which you can also spell as @samp{-version}) on the
 command line.
 
 @node W
-@section Control Warnings: @option{-W}, @option{--warn}, @option{--no-warn}, @option{--fatal-warnings}
+@section Control Warnings: @option{-W}, @option{--no-warn}, @option{--warn}, @option{--fatal-warnings}
 
 @command{@value{AS}} should never give a warning or error message when
 assembling compiler output.  But programs written by people often
@@ -2874,21 +2875,23 @@ made.  All such warnings are directed to the standard error file.
 @kindex --no-warn
 @cindex suppressing warnings
 @cindex warnings, suppressing
-If you use the @option{-W} and @option{--no-warn} options, no warnings are issued.
+If you use the @option{-W} or @option{--no-warn} option, no warnings are issued.
 This only affects the warning messages: it does not change any particular of
 how @command{@value{AS}} assembles your file.  Errors, which stop the assembly,
 are still reported.
+
+@kindex --warn
+@cindex outputing warnings
+@cindex warnings, switching on
+Warnings are switched on by default. They can be switched off with @option{-W} or
+@option{--no-warn}. Specifying the @option{--warn} again later on the command line
+will switch on warnings again, and cause them to be output as usual.
 
 @kindex --fatal-warnings
 @cindex errors, caused by warnings
 @cindex warnings, causing error
 If you use the @option{--fatal-warnings} option, @command{@value{AS}} considers
 files that generate warnings to be in error.
-
-@kindex --warn
-@cindex warnings, switching on
-You can switch these options off again by specifying @option{--warn}, which
-causes warnings to be output as usual.
 
 @node Z
 @section Generate Object File in Spite of Errors: @option{-Z}
@@ -7804,7 +7807,7 @@ section, using the endian model of the target.  If an expression will not fit
 in two bytes, a warning message is displayed and the least significant two
 bytes of the expression's value are used.  If an expression cannot be evaluated
 at assembly time then relocations will be generated in order to compute the
-value at link time.  
+value at link time.
 
 This directive does not apply any alignment before or after inserting the
 values.  As a result of this, if relocations are generated, they may be

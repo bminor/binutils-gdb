@@ -333,7 +333,7 @@ Options:\n\
   fprintf (stream, _("\
   -f                      skip whitespace and comment preprocessing\n"));
   fprintf (stream, _("\
-  -g --gen-debug          generate debugging information\n"));
+  -g, --gen-debug         generate debugging information\n"));
   fprintf (stream, _("\
   --gstabs                generate STABS debugging information\n"));
   fprintf (stream, _("\
@@ -361,9 +361,9 @@ Options:\n\
   fprintf (stream, _("\
   -K                      warn when differences altered for long displacements\n"));
   fprintf (stream, _("\
-  -L,--keep-locals        keep local symbols (e.g. starting with `L')\n"));
+  -L, --keep-locals       keep local symbols (e.g. starting with `L')\n"));
   fprintf (stream, _("\
-  -M,--mri                assemble in MRI compatibility mode\n"));
+  -M, --mri               assemble in MRI compatibility mode\n"));
   fprintf (stream, _("\
   --MD FILE               write dependency information in FILE (default none)\n"));
   fprintf (stream, _("\
@@ -388,7 +388,7 @@ Options:\n\
   fprintf (stream, _("\
   --version               print assembler version number and exit\n"));
   fprintf (stream, _("\
-  -W  --no-warn           suppress warnings\n"));
+  -W, --no-warn           suppress warnings\n"));
   fprintf (stream, _("\
   --warn                  don't suppress warnings\n"));
   fprintf (stream, _("\

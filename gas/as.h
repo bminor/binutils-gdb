@@ -315,7 +315,7 @@ COMMON bool flag_macro_alternate;
 COMMON unsigned char flag_readonly_data_in_text; /* -R */
 
 /* True if warnings should be inhibited.  */
-COMMON int flag_no_warnings; /* -W */
+COMMON int flag_no_warnings; /* -W, --no-warn */
 
 /* True if warnings count as errors.  */
 COMMON int flag_fatal_warnings; /* --fatal-warnings */
