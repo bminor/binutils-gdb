@@ -943,7 +943,10 @@ extern bool have_full_symbols (program_space *pspace);
 extern void objfile_set_sym_fns (struct objfile *objfile,
 				 const struct sym_fns *sf);
 
-extern void objfiles_changed (void);
+/* Set section_map_dirty for PSPACE so the section map will be rebuilt next time
+   it is used.  */
+
+extern void objfiles_changed (program_space *pspace);
 
 /* Return true if ADDR maps into one of the sections of OBJFILE and false
    otherwise.  */

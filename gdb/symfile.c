@@ -2613,7 +2613,7 @@ reread_symbols (int from_tty)
 	     making the dangling pointers point to correct data
 	     again.  */
 
-	  objfiles_changed ();
+	  objfiles_changed (current_program_space);
 
 	  /* Recompute section offsets and section indices.  */
 	  objfile->sf->sym_offsets (objfile, {});

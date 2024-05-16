@@ -1163,16 +1163,14 @@ pc_in_section (CORE_ADDR pc, const char *name)
 	  && s->the_bfd_section->name != nullptr
 	  && strcmp (s->the_bfd_section->name, name) == 0);
 }
-
 
-/* Set section_map_dirty so section map will be rebuilt next time it
-   is used.  Called by reread_symbols.  */
+/* See objfiles.h.  */
 
 void
-objfiles_changed (void)
+objfiles_changed (program_space *pspace)
 {
   /* Rebuild section map next time we need it.  */
-  get_objfile_pspace_data (current_program_space)->section_map_dirty = 1;
+  get_objfile_pspace_data (pspace)->section_map_dirty = 1;
 }
 
 /* See comments in objfiles.h.  */
