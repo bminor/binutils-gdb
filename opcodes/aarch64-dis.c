@@ -219,9 +219,10 @@ static inline enum aarch64_opnd_qualifier
 get_greg_qualifier_from_value (aarch64_insn value)
 {
   enum aarch64_opnd_qualifier qualifier = AARCH64_OPND_QLF_W + value;
-  assert (value <= 0x1
-	  && aarch64_get_qualifier_standard_value (qualifier) == value);
-  return qualifier;
+  if (value <= 0x1
+      && aarch64_get_qualifier_standard_value (qualifier) == value)
+    return qualifier;
+  return AARCH64_OPND_QLF_ERR;
 }
 
 /* Given VALUE, return qualifier for a vector register.  This does not support
@@ -237,9 +238,10 @@ get_vreg_qualifier_from_value (aarch64_insn value)
   if (qualifier >= AARCH64_OPND_QLF_V_2H)
     qualifier += 1;
 
-  assert (value <= 0x8
-	  && aarch64_get_qualifier_standard_value (qualifier) == value);
-  return qualifier;
+  if (value <= 0x8
+      && aarch64_get_qualifier_standard_value (qualifier) == value)
+    return qualifier;
+  return AARCH64_OPND_QLF_ERR;
 }
 
 /* Given VALUE, return qualifier for an FP or AdvSIMD scalar register.  */
@@ -248,9 +250,10 @@ get_sreg_qualifier_from_value (aarch64_insn value)
 {
   enum aarch64_opnd_qualifier qualifier = AARCH64_OPND_QLF_S_B + value;
 
-  assert (value <= 0x4
-	  && aarch64_get_qualifier_standard_value (qualifier) == value);
-  return qualifier;
+  if (value <= 0x4
+      && aarch64_get_qualifier_standard_value (qualifier) == value)
+    return qualifier;
+  return AARCH64_OPND_QLF_ERR;
 }
 
 /* Given the instruction in *INST which is probably half way through the
@@ -263,13 +266,17 @@ get_expected_qualifier (const aarch64_inst *inst, int i)
 {
   aarch64_opnd_qualifier_seq_t qualifiers;
   /* Should not be called if the qualifier is known.  */
-  assert (inst->operands[i].qualifier == AARCH64_OPND_QLF_NIL);
-  int invalid_count;
-  if (aarch64_find_best_match (inst, inst->opcode->qualifiers_list,
-			       i, qualifiers, &invalid_count))
-    return qualifiers[i];
+  if (inst->operands[i].qualifier == AARCH64_OPND_QLF_NIL)
+    {
+      int invalid_count;
+      if (aarch64_find_best_match (inst, inst->opcode->qualifiers_list,
+				   i, qualifiers, &invalid_count))
+	return qualifiers[i];
+      else
+	return AARCH64_OPND_QLF_NIL;
+    }
   else
-    return AARCH64_OPND_QLF_NIL;
+    return AARCH64_OPND_QLF_ERR;
 }
 
 /* Operand extractors.  */
@@ -355,6 +362,8 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	  aarch64_insn value = extract_field (FLD_imm4_11, code, 0);
 	  /* Depend on AARCH64_OPND_Ed to determine the qualifier.  */
 	  info->qualifier = get_expected_qualifier (inst, info->idx);
+	  if (info->qualifier == AARCH64_OPND_QLF_ERR)
+	    return 0;
 	  shift = get_logsz (aarch64_get_qualifier_esize (info->qualifier));
 	  info->reglane.index = value >> shift;
 	}
@@ -374,6 +383,8 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	  if (pos > 3)
 	    return false;
 	  info->qualifier = get_sreg_qualifier_from_value (pos);
+	  if (info->qualifier == AARCH64_OPND_QLF_ERR)
+	    return 0;
 	  info->reglane.index = (unsigned) (value >> 1);
 	}
     }
@@ -381,6 +392,8 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
     {
       /* Need information in other operand(s) to help decoding.  */
       info->qualifier = get_expected_qualifier (inst, info->idx);
+      if (info->qualifier == AARCH64_OPND_QLF_ERR)
+	return 0;
       switch (info->qualifier)
 	{
 	case AARCH64_OPND_QLF_S_4B:
@@ -405,6 +418,8 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 
       /* Need information in other operand(s) to help decoding.  */
       info->qualifier = get_expected_qualifier (inst, info->idx);
+      if (info->qualifier == AARCH64_OPND_QLF_ERR)
+	return 0;
       switch (info->qualifier)
 	{
 	case AARCH64_OPND_QLF_S_H:
@@ -644,9 +659,15 @@ aarch64_ext_advsimd_imm_shift (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	 1xxx	1	2D  */
       info->qualifier =
 	get_vreg_qualifier_from_value ((pos << 1) | (int) Q);
+      if (info->qualifier == AARCH64_OPND_QLF_ERR)
+	return false;
     }
   else
-    info->qualifier = get_sreg_qualifier_from_value (pos);
+    {
+      info->qualifier = get_sreg_qualifier_from_value (pos);
+      if (info->qualifier == AARCH64_OPND_QLF_ERR)
+	return 0;
+    }
 
   if (info->type == AARCH64_OPND_IMM_VLSR)
     /* immh	<shift>
@@ -773,6 +794,8 @@ aarch64_ext_advsimd_imm_modified (const aarch64_operand *self ATTRIBUTE_UNUSED,
 
   /* cmode */
   info->qualifier = get_expected_qualifier (inst, info->idx);
+  if (info->qualifier == AARCH64_OPND_QLF_ERR)
+    return 0;
   switch (info->qualifier)
     {
     case AARCH64_OPND_QLF_NIL:
@@ -1014,6 +1037,8 @@ aarch64_ext_ft (const aarch64_operand *self ATTRIBUTE_UNUSED,
       if (value > 0x4)
 	return false;
       info->qualifier = get_sreg_qualifier_from_value (value);
+      if (info->qualifier == AARCH64_OPND_QLF_ERR)
+	return 0;
     }
 
   return true;
@@ -1086,6 +1111,8 @@ aarch64_ext_rcpc3_addr_offset (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			       aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   info->qualifier = get_expected_qualifier (inst, info->idx);
+  if (info->qualifier == AARCH64_OPND_QLF_ERR)
+    return 0;
 
   /* Rn */
   info->addr.base_regno = extract_field (self->fields[0], code, 0);
@@ -1105,6 +1132,8 @@ aarch64_ext_addr_offset (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   info->qualifier = get_expected_qualifier (inst, info->idx);
+  if (info->qualifier == AARCH64_OPND_QLF_ERR)
+    return 0;
 
   /* Rn */
   info->addr.base_regno = extract_field (self->fields[0], code, 0);
@@ -1154,6 +1183,8 @@ aarch64_ext_addr_regoff (const aarch64_operand *self ATTRIBUTE_UNUSED,
       /* Need information in other operand(s) to help achieve the decoding
 	 from 'S' field.  */
       info->qualifier = get_expected_qualifier (inst, info->idx);
+      if (info->qualifier == AARCH64_OPND_QLF_ERR)
+	return 0;
       /* Get the size of the data element that is accessed, which may be
 	 different from that of the source register size, e.g. in strb/ldrb.  */
       size = aarch64_get_qualifier_esize (info->qualifier);
@@ -1172,6 +1203,8 @@ aarch64_ext_addr_simm (const aarch64_operand *self, aarch64_opnd_info *info,
 {
   aarch64_insn imm;
   info->qualifier = get_expected_qualifier (inst, info->idx);
+  if (info->qualifier == AARCH64_OPND_QLF_ERR)
+    return 0;
 
   /* Rn */
   info->addr.base_regno = extract_field (FLD_Rn, code, 0);
@@ -1210,6 +1243,8 @@ aarch64_ext_addr_uimm12 (const aarch64_operand *self, aarch64_opnd_info *info,
 {
   int shift;
   info->qualifier = get_expected_qualifier (inst, info->idx);
+  if (info->qualifier == AARCH64_OPND_QLF_ERR)
+    return 0;
   shift = get_logsz (aarch64_get_qualifier_esize (info->qualifier));
   /* Rn */
   info->addr.base_regno = extract_field (self->fields[0], code, 0);
@@ -1228,6 +1263,8 @@ aarch64_ext_addr_simm10 (const aarch64_operand *self, aarch64_opnd_info *info,
   aarch64_insn imm;
 
   info->qualifier = get_expected_qualifier (inst, info->idx);
+  if (info->qualifier == AARCH64_OPND_QLF_ERR)
+    return 0;
   /* Rn */
   info->addr.base_regno = extract_field (self->fields[0], code, 0);
   /* simm10 */
@@ -2450,6 +2487,8 @@ decode_sizeq (aarch64_inst *inst)
   if (mask == 0x7)
     {
       inst->operands[idx].qualifier = get_vreg_qualifier_from_value (value);
+      if (inst->operands[idx].qualifier == AARCH64_OPND_QLF_ERR)
+	return 0;
       return 1;
     }
 
@@ -2632,6 +2671,8 @@ do_special_decoding (aarch64_inst *inst)
       idx = select_operand_for_sf_field_coding (inst->opcode);
       value = extract_field (FLD_sf, inst->value, 0);
       inst->operands[idx].qualifier = get_greg_qualifier_from_value (value);
+      if (inst->operands[idx].qualifier == AARCH64_OPND_QLF_ERR)
+	return 0;
       if ((inst->opcode->flags & F_N)
 	  && extract_field (FLD_N, inst->value, 0) != value)
 	return 0;
@@ -2642,6 +2683,8 @@ do_special_decoding (aarch64_inst *inst)
       idx = select_operand_for_sf_field_coding (inst->opcode);
       value = extract_field (FLD_lse_sz, inst->value, 0);
       inst->operands[idx].qualifier = get_greg_qualifier_from_value (value);
+      if (inst->operands[idx].qualifier == AARCH64_OPND_QLF_ERR)
+	return 0;
     }
   /* rcpc3 'size' field.  */
   if (inst->opcode->flags & F_RCPC3_SIZE)
@@ -2653,12 +2696,18 @@ do_special_decoding (aarch64_inst *inst)
 	{
 	  if (aarch64_operands[inst->operands[i].type].op_class
 	      == AARCH64_OPND_CLASS_INT_REG)
-	    inst->operands[i].qualifier = get_greg_qualifier_from_value (value & 1);
+	    {
+	      inst->operands[i].qualifier = get_greg_qualifier_from_value (value & 1);
+	      if (inst->operands[i].qualifier == AARCH64_OPND_QLF_ERR)
+		return 0;
+	    }
 	  else if (aarch64_operands[inst->operands[i].type].op_class
 	      == AARCH64_OPND_CLASS_FP_REG)
 	    {
 	      value += (extract_field (FLD_opc1, inst->value, 0) << 2);
 	      inst->operands[i].qualifier = get_sreg_qualifier_from_value (value);
+	      if (inst->operands[i].qualifier == AARCH64_OPND_QLF_ERR)
+		return 0;
 	    }
 	}
     }
@@ -2692,7 +2741,11 @@ do_special_decoding (aarch64_inst *inst)
       /* For most related instruciton, the 'size' field is fully available for
 	 operand encoding.  */
       if (mask == 0x3)
-	inst->operands[idx].qualifier = get_sreg_qualifier_from_value (value);
+	{
+	  inst->operands[idx].qualifier = get_sreg_qualifier_from_value (value);
+	  if (inst->operands[idx].qualifier == AARCH64_OPND_QLF_ERR)
+	    return 0;
+	}
       else
 	{
 	  get_operand_possible_qualifiers (idx, inst->opcode->qualifiers_list,
@@ -2727,6 +2780,9 @@ do_special_decoding (aarch64_inst *inst)
       Q = (unsigned) extract_field (FLD_Q, inst->value, inst->opcode->mask);
       inst->operands[0].qualifier =
 	get_vreg_qualifier_from_value ((num << 1) | Q);
+      if (inst->operands[0].qualifier == AARCH64_OPND_QLF_ERR)
+	return 0;
+
     }
 
   if ((inst->opcode->flags & F_OPD_SIZE) && inst->opcode->iclass == sve2_urqvs)
@@ -2736,7 +2792,11 @@ do_special_decoding (aarch64_inst *inst)
 				       inst->opcode->mask);
       inst->operands[0].qualifier
 	= get_vreg_qualifier_from_value (1 + (size << 1));
+      if (inst->operands[0].qualifier == AARCH64_OPND_QLF_ERR)
+	return 0;
       inst->operands[2].qualifier = get_sreg_qualifier_from_value (size);
+      if (inst->operands[2].qualifier == AARCH64_OPND_QLF_ERR)
+	return 0;
     }
 
   if (inst->opcode->flags & F_GPRSIZE_IN_Q)
@@ -2755,6 +2815,8 @@ do_special_decoding (aarch64_inst *inst)
       assert (idx == 0 || idx == 1);
       value = extract_field (FLD_Q, inst->value, 0);
       inst->operands[idx].qualifier = get_greg_qualifier_from_value (value);
+      if (inst->operands[idx].qualifier == AARCH64_OPND_QLF_ERR)
+	return 0;
     }
 
   if (inst->opcode->flags & F_LDS_SIZE)
