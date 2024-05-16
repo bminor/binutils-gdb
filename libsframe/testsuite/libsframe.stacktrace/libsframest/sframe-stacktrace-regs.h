@@ -77,6 +77,33 @@ get_context_ra (ucontext_t *cp)
   return cp->uc_mcontext.regs[UNWIND_AARCH64_X30];
 }
 
+#elif defined (__s390x__)
+
+static inline uint64_t
+get_context_pc (ucontext_t *cp)
+{
+//  return cp->uc_mcontext.psw.addr;
+  return cp->uc_mcontext.gregs[14];
+}
+
+static inline uint64_t
+get_context_rsp (ucontext_t *cp)
+{
+  return cp->uc_mcontext.gregs[15];
+}
+
+static inline uint64_t
+get_context_rfp (ucontext_t *cp)
+{
+  return cp->uc_mcontext.gregs[11];
+}
+
+static inline uint64_t
+get_context_ra (ucontext_t *cp)
+{
+  return cp->uc_mcontext.gregs[14];
+}
+
 #endif
 
 #endif /* SFRAME_STACKTRACE_REGS_H.  */

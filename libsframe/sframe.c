@@ -1159,6 +1159,40 @@ sframe_find_fre (sframe_decoder_ctx *ctx, int32_t pc,
   return sframe_set_errno (&err, SFRAME_ERR_FDE_INVAL);
 }
 
+/* Find the first SFrame Row Entry of the SFrame Function Descriptor Entry
+   which contains the PC.  Returns SFRAME_ERR if failure.  */
+
+int
+sframe_find_fre0 (sframe_decoder_ctx *ctx, int32_t pc,
+		  sframe_frame_row_entry *frep)
+{
+  sframe_frame_row_entry cur_fre;
+  sframe_func_desc_entry *fdep;
+  uint32_t fre_type;
+  const char *fres;
+  size_t size = 0;
+  int err = 0;
+
+  if ((ctx == NULL) || (frep == NULL))
+    return sframe_set_errno (&err, SFRAME_ERR_INVAL);
+
+  /* Find the FDE which contains the PC, then scan its fre entries.  */
+  fdep = sframe_get_funcdesc_with_addr_internal (ctx, pc, &err);
+  if (fdep == NULL || ctx->sfd_fres == NULL)
+    return sframe_set_errno (&err, SFRAME_ERR_DCTX_INVAL);
+
+  fre_type = sframe_get_fre_type (fdep);
+
+  fres = ctx->sfd_fres + fdep->sfde_func_start_fre_off;
+
+  err = sframe_decode_fre (fres, &cur_fre, fre_type, &size);
+  if (err)
+    return sframe_set_errno (&err, SFRAME_ERR_FRE_INVAL);
+
+  sframe_frame_row_entry_copy (frep, &cur_fre);
+  return 0;
+}
+
 /* Return the number of function descriptor entries in the SFrame decoder
    DCTX.  */
 

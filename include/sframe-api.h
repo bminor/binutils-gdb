@@ -152,6 +152,13 @@ extern int
 sframe_find_fre (sframe_decoder_ctx *ctx, int32_t pc,
 		 sframe_frame_row_entry *frep);
 
+/* Find the first SFrame Row Entry of the SFrame Function Descriptor Entry
+   which contains the PC.  Returns SFRAME_ERR if failure.  */
+
+int
+sframe_find_fre0 (sframe_decoder_ctx *ctx, int32_t pc,
+		  sframe_frame_row_entry *frep);
+
 /* Get the FRE_IDX'th FRE of the function at FUNC_IDX'th function
    index entry in the SFrame decoder CTX.  Returns error code as
    applicable.  */

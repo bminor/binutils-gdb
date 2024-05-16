@@ -91,6 +91,10 @@ sframe_unwind (struct sframest_ctx *sf, void **ra_lst, int *ra_size)
   sframe_decoder_ctx *dctx;
   int cfa_offset, rfp_offset, ra_offset, errnum, i, count;
   sframe_frame_row_entry fred, *frep = &fred;
+#if defined(__s390x__)
+  sframe_frame_row_entry fred0, *fre0p = &fred0;
+  int cfa0_offset;
+#endif
   uint64_t pc, rfp, rsp, ra, sframe_vma;
   ucontext_t context, *cp = &context;
   int err = 0;
@@ -161,7 +165,19 @@ sframe_unwind (struct sframest_ctx *sf, void **ra_lst, int *ra_size)
 	      if (sframe_bt_errno (&errnum))
 		return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_FRE_INVAL);
 	    }
+#if defined (__s390x__)
+	  errnum = sframe_find_fre0 (dctx, pc, fre0p);
+	  if (errnum != 0)
+	    goto find_fre_ra_err;
+
+	  cfa0_offset = sframe_fre_get_cfa_offset (dctx, fre0p, &errnum);
+	  if (errnum == SFRAME_ERR_FREOFFSET_NOPRESENT)
+	    return sframe_bt_ret_set_errno (&err, SFRAME_BT_ERR_CFA_OFFSET);
+
+	  rsp = cfa - cfa0_offset;
+#else
 	  rsp = cfa;
+#endif
 	  pc = return_addr;
 
 	  /* Check if need to update the SFrame stack trace info for the return
