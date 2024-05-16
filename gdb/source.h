@@ -23,6 +23,7 @@
 
 struct program_space;
 struct symtab;
+struct symtab_and_line;
 
 /* See openp function definition for their description.  */
 
@@ -108,7 +109,8 @@ extern int get_lines_to_list (void);
 
 /* Return the current source file for listing and next line to list.
    NOTE: The returned sal pc and end fields are not valid.  */
-extern struct symtab_and_line get_current_source_symtab_and_line (void);
+extern symtab_and_line get_current_source_symtab_and_line
+  (program_space *pspace);
 
 /* If the current source file for listing is not set, try and get a default.
    Usually called before get_current_source_symtab_and_line() is called.

@@ -963,7 +963,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
       else
 	{
 	  set_default_source_symtab_and_line ();
-	  def_sal = get_current_source_symtab_and_line ();
+	  def_sal = get_current_source_symtab_and_line (current_program_space);
 	  sals = def_sal;
 	}
     }

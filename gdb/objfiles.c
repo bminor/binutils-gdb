@@ -561,7 +561,8 @@ objfile::~objfile ()
      and if so, call clear_current_source_symtab_and_line.  */
 
   {
-    struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+    symtab_and_line cursal
+      = get_current_source_symtab_and_line (this->pspace ());
 
     if (cursal.symtab && cursal.symtab->compunit ()->objfile () == this)
       clear_current_source_symtab_and_line (this->pspace ());

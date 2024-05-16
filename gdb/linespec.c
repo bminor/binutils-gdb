@@ -3205,7 +3205,8 @@ decode_line_with_current_source (const char *string, int flags)
 
   /* We use whatever is set as the current source line.  We do not try
      and get a default source symtab+line or it will recursively call us!  */
-  symtab_and_line cursal = get_current_source_symtab_and_line ();
+  symtab_and_line cursal
+    = get_current_source_symtab_and_line (current_program_space);
 
   location_spec_up locspec = string_to_location_spec (&string,
 						      current_language);
@@ -3255,9 +3256,9 @@ initialize_defaults (struct symtab **default_symtab, int *default_line)
       /* Use whatever we have for the default source line.  We don't use
 	 get_current_or_default_symtab_and_line as it can recurse and call
 	 us back!  */
-      struct symtab_and_line cursal = 
-	get_current_source_symtab_and_line ();
-      
+      symtab_and_line cursal
+	= get_current_source_symtab_and_line (current_program_space);
+
       *default_symtab = cursal.symtab;
       *default_line = cursal.line;
     }

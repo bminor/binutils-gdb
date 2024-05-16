@@ -1078,7 +1078,8 @@ jump_command (const char *arg, int from_tty)
     {
       /* If multiple sal-objects were found, try dropping those that aren't
 	 from the current symtab.  */
-      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+      symtab_and_line cursal
+	= get_current_source_symtab_and_line (current_program_space);
       sals.erase (std::remove_if (sals.begin (), sals.end (),
 		  [&] (const symtab_and_line &sal)
 		    {

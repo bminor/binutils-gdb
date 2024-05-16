@@ -375,8 +375,8 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 
       if (!expression_context_block)
 	{
-	  struct symtab_and_line cursal
-	    = get_current_source_symtab_and_line ();
+	  symtab_and_line cursal
+	    = get_current_source_symtab_and_line (current_program_space);
 
 	  if (cursal.symtab)
 	    expression_context_block

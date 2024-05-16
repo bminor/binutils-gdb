@@ -984,7 +984,7 @@ edit_command (const char *arg, int from_tty)
   if (arg == 0)
     {
       set_default_source_symtab_and_line ();
-      sal = get_current_source_symtab_and_line ();
+      sal = get_current_source_symtab_and_line (current_program_space);
     }
 
   /* Bare "edit" edits file with present line.  */
@@ -1240,7 +1240,8 @@ list_command (const char *arg, int from_tty)
       if (get_first_line_listed () == 0 && (arg == nullptr || arg[0] != '.'))
 	{
 	  set_default_source_symtab_and_line ();
-	  list_around_line (arg, get_current_source_symtab_and_line ());
+	  list_around_line
+	    (arg, get_current_source_symtab_and_line (current_program_space));
 	}
 
       /* "l" and "l +" lists the next few lines, unless we're listing past
@@ -1248,7 +1249,8 @@ list_command (const char *arg, int from_tty)
       else if (arg == nullptr || arg[0] == '+')
 	{
 	  set_default_source_symtab_and_line ();
-	  const symtab_and_line cursal = get_current_source_symtab_and_line ();
+	  const symtab_and_line cursal
+	    = get_current_source_symtab_and_line (current_program_space);
 	  if (last_symtab_line (cursal.symtab) >= cursal.line)
 	    print_source_lines (cursal.symtab,
 				source_lines_range (cursal.line), 0);
@@ -1262,7 +1264,8 @@ list_command (const char *arg, int from_tty)
       else if (arg[0] == '-')
 	{
 	  set_default_source_symtab_and_line ();
-	  const symtab_and_line cursal = get_current_source_symtab_and_line ();
+	  const symtab_and_line cursal
+	    = get_current_source_symtab_and_line (current_program_space);
 
 	  if (get_first_line_listed () == 1)
 	    error (_("Already at the start of %s."),
@@ -1305,7 +1308,8 @@ list_command (const char *arg, int from_tty)
 		  error (_("Insufficient debug info for showing source "
 			   "lines at default location"));
 		}
-	      cursal = get_current_source_symtab_and_line ();
+	      cursal
+		= get_current_source_symtab_and_line (current_program_space);
 
 	      gdb_assert (cursal.symtab != nullptr);
 	    }

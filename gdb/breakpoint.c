@@ -8825,8 +8825,6 @@ static void
 parse_breakpoint_sals (location_spec *locspec,
 		       struct linespec_result *canonical)
 {
-  struct symtab_and_line cursal;
-
   if (locspec->type () == LINESPEC_LOCATION_SPEC)
     {
       const char *spec
@@ -8875,7 +8873,8 @@ parse_breakpoint_sals (location_spec *locspec,
 
      ObjC: However, don't match an Objective-C method name which
      may have a '+' or '-' succeeded by a '['.  */
-  cursal = get_current_source_symtab_and_line ();
+  symtab_and_line cursal
+    = get_current_source_symtab_and_line (current_program_space);
   if (last_displayed_sal_is_valid ())
     {
       const char *spec = NULL;

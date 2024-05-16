@@ -127,7 +127,8 @@ tui_refresh_frame_and_register_information ()
       /* Make sure that the source window is displayed.  */
       tui_add_win_to_layout (SRC_WIN);
 
-      struct symtab_and_line sal = get_current_source_symtab_and_line ();
+      symtab_and_line sal
+	= get_current_source_symtab_and_line (current_program_space);
       tui_update_source_windows_with_line (sal);
     }
 }

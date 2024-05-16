@@ -231,16 +231,15 @@ get_source_location (program_space *pspace)
   return loc;
 }
 
-/* Return the current source file for listing and next line to list.
-   NOTE: The returned sal pc and end fields are not valid.  */
+/* See source.h.  */
    
-struct symtab_and_line
-get_current_source_symtab_and_line (void)
+symtab_and_line
+get_current_source_symtab_and_line (program_space *pspace)
 {
   symtab_and_line cursal;
-  current_source_location *loc = get_source_location (current_program_space);
+  current_source_location *loc = get_source_location (pspace);
 
-  cursal.pspace = current_program_space;
+  cursal.pspace = pspace;
   cursal.symtab = loc->symtab ();
   cursal.line = loc->line ();
   cursal.pc = 0;

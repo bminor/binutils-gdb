@@ -440,8 +440,8 @@ tui_source_window_base::rerender ()
 
   if (!m_content.empty ())
     {
-      struct symtab_and_line cursal
-	= get_current_source_symtab_and_line ();
+      symtab_and_line cursal
+	= get_current_source_symtab_and_line (current_program_space);
 
       if (m_start_line_or_addr.loa == LOA_LINE)
 	cursal.line = m_start_line_or_addr.u.line_no;
@@ -451,8 +451,8 @@ tui_source_window_base::rerender ()
     }
   else if (deprecated_safe_get_selected_frame () != NULL)
     {
-      struct symtab_and_line cursal
-	= get_current_source_symtab_and_line ();
+      symtab_and_line cursal
+	= get_current_source_symtab_and_line (current_program_space);
       frame_info_ptr frame = deprecated_safe_get_selected_frame ();
       struct gdbarch *gdbarch = get_frame_arch (frame);
 
@@ -492,7 +492,7 @@ tui_source_window_base::refill ()
 
   if (this == tui_src_win ())
     {
-      sal = get_current_source_symtab_and_line ();
+      sal = get_current_source_symtab_and_line (current_program_space);
       if (sal.symtab == NULL)
 	{
 	  frame_info_ptr fi = deprecated_safe_get_selected_frame ();

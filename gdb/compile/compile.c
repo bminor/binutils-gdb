@@ -17,6 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "progspace.h"
 #include "ui.h"
 #include "ui-out.h"
 #include "command.h"
@@ -487,7 +488,8 @@ get_expr_block_and_pc (CORE_ADDR *pc)
 
   if (block == NULL)
     {
-      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+      symtab_and_line cursal
+	= get_current_source_symtab_and_line (current_program_space);
 
       if (cursal.symtab)
 	block = cursal.symtab->compunit ()->blockvector ()->static_block ();

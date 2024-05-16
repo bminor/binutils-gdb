@@ -136,7 +136,8 @@ tui_source_window::do_scroll_vertical (int num_to_scroll)
   if (!m_content.empty ())
     {
       struct symtab *s;
-      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+      symtab_and_line cursal
+	= get_current_source_symtab_and_line (current_program_space);
       struct gdbarch *arch = m_gdbarch;
 
       if (cursal.symtab == NULL)
@@ -220,7 +221,7 @@ void
 tui_source_window::display_start_addr (struct gdbarch **gdbarch_p,
 				       CORE_ADDR *addr_p)
 {
-  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+  symtab_and_line cursal = get_current_source_symtab_and_line (current_program_space);
 
   *gdbarch_p = m_gdbarch;
   find_line_pc (cursal.symtab, m_start_line_or_addr.u.line_no, addr_p);
