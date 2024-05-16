@@ -27,9 +27,8 @@ class _BlockTracker:
         # just one label -- DAP wouldn't let us return multiple labels
         # anyway.
         self.labels = {}
-        # List of blocks that have already been handled.  Note that
-        # blocks aren't hashable so a set is not used.
-        self.blocks = []
+        # Blocks that have already been handled.
+        self.blocks = set()
 
     # Add a gdb.Block and its superblocks, ignoring the static and
     # global block.  BLOCK can also be None, which is ignored.
@@ -37,7 +36,7 @@ class _BlockTracker:
         while block is not None:
             if block.is_static or block.is_global or block in self.blocks:
                 return
-            self.blocks.append(block)
+            self.blocks.add(block)
             if block.function is not None:
                 self.labels[block.start] = block.function.name
             for sym in block:
