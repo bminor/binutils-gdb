@@ -345,13 +345,12 @@ objfile::objfile (gdb_bfd_ref_ptr bfd_, const char *name, objfile_flags flags_)
   set_objfile_per_bfd (this);
 }
 
-/* If there is a valid and known entry point, function fills *ENTRY_P with it
-   and returns non-zero; otherwise it returns zero.  */
+/* See objfiles.h.  */
 
 int
-entry_point_address_query (CORE_ADDR *entry_p)
+entry_point_address_query (program_space *pspace, CORE_ADDR *entry_p)
 {
-  objfile *objf = current_program_space->symfile_object_file;
+  objfile *objf = pspace->symfile_object_file;
   if (objf == NULL || !objf->per_bfd->ei.entry_point_p)
     return 0;
 
@@ -368,7 +367,7 @@ entry_point_address (void)
 {
   CORE_ADDR retval;
 
-  if (!entry_point_address_query (&retval))
+  if (!entry_point_address_query (current_program_space, &retval))
     error (_("Entry point address is not known."));
 
   return retval;

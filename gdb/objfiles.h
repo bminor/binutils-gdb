@@ -912,7 +912,11 @@ obj_section::set_offset (CORE_ADDR offset)
 
 /* Declarations for functions defined in objfiles.c */
 
-extern int entry_point_address_query (CORE_ADDR *entry_p);
+/* If there is a valid and known entry point in PSPACE, fill *ENTRY_P with it
+   and return non-zero.  */
+
+extern int entry_point_address_query (program_space *pspace,
+				      CORE_ADDR *entry_p);
 
 extern CORE_ADDR entry_point_address (void);
 

@@ -687,7 +687,7 @@ enable_break (void)
       return 0;
     }
 
-  if (!entry_point_address_query (&entry_point))
+  if (!entry_point_address_query (current_program_space, &entry_point))
     {
       solib_debug_printf ("Symbol file has no entry point.");
       return 0;

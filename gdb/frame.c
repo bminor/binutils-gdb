@@ -2628,7 +2628,7 @@ inside_entry_func (const frame_info_ptr &this_frame)
 {
   CORE_ADDR entry_point;
 
-  if (!entry_point_address_query (&entry_point))
+  if (!entry_point_address_query (current_program_space, &entry_point))
     return false;
 
   return get_frame_func (this_frame) == entry_point;
