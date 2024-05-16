@@ -731,56 +731,49 @@ objfile_rebase (struct objfile *objfile, CORE_ADDR slide)
   if (changed)
     breakpoint_re_set ();
 }
-
-/* Return non-zero if OBJFILE has full symbols.  */
 
-int
-objfile_has_full_symbols (struct objfile *objfile)
+/* See objfiles.h.  */
+
+bool
+objfile_has_full_symbols (objfile *objfile)
 {
-  return objfile->compunit_symtabs != NULL;
+  return objfile->compunit_symtabs != nullptr;
 }
 
-/* Return non-zero if OBJFILE has full or partial symbols, either directly
-   or through a separate debug file.  */
+/* See objfiles.h.  */
 
-int
-objfile_has_symbols (struct objfile *objfile)
+bool
+objfile_has_symbols (objfile *objfile)
 {
   for (::objfile *o : objfile->separate_debug_objfiles ())
     if (o->has_partial_symbols () || objfile_has_full_symbols (o))
-      return 1;
-  return 0;
+      return true;
+
+  return false;
 }
 
+/* See objfiles.h.  */
 
-/* Many places in gdb want to test just to see if we have any partial
-   symbols available.  This function returns zero if none are currently
-   available, nonzero otherwise.  */
-
-int
-have_partial_symbols (void)
+bool
+have_partial_symbols ()
 {
   for (objfile *ofp : current_program_space->objfiles ())
-    {
-      if (ofp->has_partial_symbols ())
-	return 1;
-    }
-  return 0;
+    if (ofp->has_partial_symbols ())
+      return true;
+
+  return false;
 }
 
-/* Many places in gdb want to test just to see if we have any full
-   symbols available.  This function returns zero if none are currently
-   available, nonzero otherwise.  */
+/* See objfiles.h.  */
 
-int
-have_full_symbols (void)
+bool
+have_full_symbols ()
 {
   for (objfile *ofp : current_program_space->objfiles ())
-    {
-      if (objfile_has_full_symbols (ofp))
-	return 1;
-    }
-  return 0;
+    if (objfile_has_full_symbols (ofp))
+      return true;
+
+  return false;
 }
 
 
@@ -799,22 +792,16 @@ objfile_purge_solibs (program_space *pspace)
     }
 }
 
+/* See objfiles.h.  */
 
-/* Many places in gdb want to test just to see if we have any minimal
-   symbols available.  This function returns zero if none are currently
-   available, nonzero otherwise.  */
-
-int
-have_minimal_symbols (void)
+bool
+have_minimal_symbols ()
 {
   for (objfile *ofp : current_program_space->objfiles ())
-    {
-      if (ofp->per_bfd->minimal_symbol_count > 0)
-	{
-	  return 1;
-	}
-    }
-  return 0;
+    if (ofp->per_bfd->minimal_symbol_count > 0)
+      return true;
+
+  return false;
 }
 
 /* Qsort comparison function.  */

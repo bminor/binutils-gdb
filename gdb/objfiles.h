@@ -923,13 +923,23 @@ extern void free_objfile_separate_debug (struct objfile *);
 extern void objfile_relocate (struct objfile *, const section_offsets &);
 extern void objfile_rebase (struct objfile *, CORE_ADDR);
 
-extern int objfile_has_full_symbols (struct objfile *objfile);
+/* Return true if OBJFILE has full symbols.  */
 
-extern int objfile_has_symbols (struct objfile *objfile);
+extern bool objfile_has_full_symbols (objfile *objfile);
 
-extern int have_partial_symbols (void);
+/* Return true if OBJFILE has full or partial symbols, either directly
+   or through a separate debug file.  */
 
-extern int have_full_symbols (void);
+extern bool objfile_has_symbols (objfile *objfile);
+
+/* Return true if any objfile of the current program space has partial
+   symbols.  */
+
+extern bool have_partial_symbols ();
+
+/* Return true if any objfile of the current program space has full symbols.  */
+
+extern bool have_full_symbols ();
 
 extern void objfile_set_sym_fns (struct objfile *objfile,
 				 const struct sym_fns *sf);
@@ -956,7 +966,10 @@ extern void objfile_purge_solibs (program_space *pspace);
 /* Functions for dealing with the minimal symbol table, really a misc
    address<->symbol mapping for things we don't have debug symbols for.  */
 
-extern int have_minimal_symbols (void);
+/* Return true if any objfile of the current program space has minimal
+   symbols.  */
+
+extern bool have_minimal_symbols ();
 
 extern struct obj_section *find_pc_section (CORE_ADDR pc);
 
