@@ -98,6 +98,7 @@ PYTHON_FILE_LIST = \
 	gdb/dap/evaluate.py \
 	gdb/dap/events.py \
 	gdb/dap/frames.py \
+	gdb/dap/globalvars.py \
 	gdb/dap/__init__.py \
 	gdb/dap/io.py \
 	gdb/dap/launch.py \

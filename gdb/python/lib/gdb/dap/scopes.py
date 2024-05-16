@@ -16,6 +16,7 @@
 import gdb
 
 from .frames import frame_for_id
+from .globalvars import get_global_scope
 from .server import request
 from .sources import make_source
 from .startup import in_gdb_thread
@@ -164,4 +165,7 @@ def scopes(*, frameId: int, **extra):
             scopes.append(_ScopeReference("Locals", "locals", frame, locs))
         scopes.append(_RegisterReference("Registers", frame))
         frame_to_scope[frameId] = scopes
+        global_scope = get_global_scope(frame)
+        if global_scope is not None:
+            scopes.append(global_scope)
     return {"scopes": [x.to_object() for x in scopes]}

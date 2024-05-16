@@ -3,6 +3,11 @@
 
 *** Changes since GDB 15
 
+* Debugger Adapter Protocol changes
+
+  ** The "scopes" request will now return a scope holding global
+     variables from the stack frame's compilation unit.
+
 *** Changes in GDB 15
 
 * The MPX commands "show/set mpx bound" have been deprecated, as Intel
