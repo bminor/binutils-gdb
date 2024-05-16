@@ -549,6 +549,9 @@ namespace eval Dwarf {
     # The current CU's offset size.
     variable _cu_offset_size
 
+    # The current macro unit's offset size.
+    variable _mu_offset_size
+
     # Label generation number.
     variable _label_num
 
@@ -2229,6 +2232,8 @@ namespace eval Dwarf {
 	if { ${is-64} } {
 	    set flags [expr $flags | 0x1]
 	}
+	variable _mu_offset_size
+	set _mu_offset_size [expr ${is-64} ? 8 : 4]
 
 	if { ${debug-line-offset-label} != "" } {
 	    set flags [expr $flags | 0x2]
@@ -2241,11 +2246,12 @@ namespace eval Dwarf {
 		"debug_line offset"
 	}
 
+	with_override Dwarf::define_strp Dwarf::_macro_unit_define_strp {
 	with_override Dwarf::define Dwarf::_macro_unit_define {
 	with_override Dwarf::start_file Dwarf::_macro_unit_start_file {
 	with_override Dwarf::end_file Dwarf::_macro_unit_end_file {
 	    uplevel $body
-	}}}
+	}}}}
     }
 
     # Emit a DW_MACRO_define entry.
@@ -2254,6 +2260,26 @@ namespace eval Dwarf {
 	_op .byte 0x1 "DW_MACRO_define"
 	_op .uleb128 $lineno "Line number"
 	_op .asciz "\"$text\"" "Macro definition"
+    }
+
+    # Emit a DW_MACRO_define_strp entry.
+
+    proc _macro_unit_define_strp { lineno text } {
+	_op .byte 0x5 "DW_MACRO_define_strp"
+	_op .uleb128 $lineno "Line number"
+
+	variable _strings
+	variable _mu_offset_size
+
+	if {![info exists _strings($text)]} {
+	    set _strings($text) [new_label strp]
+	    _defer_output .debug_str {
+		define_label $_strings($text)
+		_op .ascii [_quote $text]
+	    }
+	}
+
+	_op_offset $_mu_offset_size "$_strings($text)" "strp: $text"
     }
 
     # Emit a DW_MACRO_start_file entry.
