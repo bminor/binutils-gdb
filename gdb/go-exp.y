@@ -577,8 +577,8 @@ variable:	name_not_typename
 			      if (msymbol.minsym != NULL)
 				pstate->push_new<var_msym_value_operation>
 				  (msymbol);
-			      else if (!have_full_symbols ()
-				       && !have_partial_symbols ())
+			      else if (!have_full_symbols (current_program_space)
+				       && !have_partial_symbols (current_program_space))
 				error (_("No symbol table is loaded.  "
 				       "Use the \"file\" command."));
 			      else

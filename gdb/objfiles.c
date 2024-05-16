@@ -755,9 +755,9 @@ objfile_has_symbols (objfile *objfile)
 /* See objfiles.h.  */
 
 bool
-have_partial_symbols ()
+have_partial_symbols (program_space *pspace)
 {
-  for (objfile *ofp : current_program_space->objfiles ())
+  for (objfile *ofp : pspace->objfiles ())
     if (ofp->has_partial_symbols ())
       return true;
 
@@ -767,9 +767,9 @@ have_partial_symbols ()
 /* See objfiles.h.  */
 
 bool
-have_full_symbols ()
+have_full_symbols (program_space *pspace)
 {
-  for (objfile *ofp : current_program_space->objfiles ())
+  for (objfile *ofp : pspace->objfiles ())
     if (objfile_has_full_symbols (ofp))
       return true;
 
@@ -795,9 +795,9 @@ objfile_purge_solibs (program_space *pspace)
 /* See objfiles.h.  */
 
 bool
-have_minimal_symbols ()
+have_minimal_symbols (program_space *pspace)
 {
-  for (objfile *ofp : current_program_space->objfiles ())
+  for (objfile *ofp : pspace->objfiles ())
     if (ofp->per_bfd->minimal_symbol_count > 0)
       return true;
 

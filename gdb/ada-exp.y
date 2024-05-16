@@ -1857,7 +1857,9 @@ write_var_or_type (struct parser_state *par_state,
 	    }
 	}
 
-      if (!have_full_symbols () && !have_partial_symbols () && block == NULL)
+      if (!have_full_symbols (current_program_space)
+	  && !have_partial_symbols (current_program_space)
+	  && block == NULL)
 	error (_("No symbol table is loaded.  Use the \"file\" command."));
       if (block == par_state->expression_context_block)
 	error (_("No definition of \"%s\" in current context."), name0.ptr);
