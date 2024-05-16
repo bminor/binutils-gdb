@@ -437,8 +437,9 @@ public:
   ~objfile ();
 
   /* Create an objfile.  */
-  static objfile *make (gdb_bfd_ref_ptr bfd_, const char *name_,
-			objfile_flags flags_, objfile *parent = nullptr);
+  static objfile *make (gdb_bfd_ref_ptr bfd_, program_space *pspace,
+			const char *name_, objfile_flags flags_,
+			objfile *parent = nullptr);
 
   /* Remove this objfile from its program space's objfile list, and frees
      it.  */

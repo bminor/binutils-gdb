@@ -442,8 +442,8 @@ add_separate_debug_objfile (struct objfile *objfile, struct objfile *parent)
 /* See objfiles.h.  */
 
 objfile *
-objfile::make (gdb_bfd_ref_ptr bfd_, const char *name_, objfile_flags flags_,
-	       objfile *parent)
+objfile::make (gdb_bfd_ref_ptr bfd_, program_space *pspace, const char *name_,
+	       objfile_flags flags_, objfile *parent)
 {
   objfile *result
     = new objfile (std::move (bfd_), current_program_space, name_, flags_);

@@ -1026,7 +1026,6 @@ symbol_file_add_with_addrs (const gdb_bfd_ref_ptr &abfd, const char *name,
 			    section_addr_info *addrs,
 			    objfile_flags flags, struct objfile *parent)
 {
-  struct objfile *objfile;
   const int from_tty = add_flags & SYMFILE_VERBOSE;
   const int mainline = add_flags & SYMFILE_MAINLINE;
   const int always_confirm = add_flags & SYMFILE_ALWAYS_CONFIRM;
@@ -1061,7 +1060,9 @@ symbol_file_add_with_addrs (const gdb_bfd_ref_ptr &abfd, const char *name,
 
   if (mainline)
     flags |= OBJF_MAINLINE;
-  objfile = objfile::make (abfd, name, flags, parent);
+
+  objfile *objfile
+    = objfile::make (abfd, current_program_space, name, flags, parent);
 
   /* We either created a new mapped symbol table, mapped an existing
      symbol table file which has not had initial symbol reading
