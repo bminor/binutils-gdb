@@ -27,7 +27,6 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "target.h"
-#include "bcache.h"
 #include "expression.h"
 #include "parser-defs.h"
 
@@ -46,13 +45,11 @@
 #include "exec.h"
 #include "observable.h"
 #include "complaints.h"
-#include "solist.h"
 #include "gdb_bfd.h"
 #include "btrace.h"
 #include "gdbsupport/pathstuff.h"
 
 #include <algorithm>
-#include <vector>
 
 /* Externally visible variables that are owned by this module.
    See declarations in objfile.h for more info.  */
