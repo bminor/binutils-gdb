@@ -319,6 +319,12 @@ extern void all_uis_on_sync_execution_starting (void);
    detach.  */
 extern void restart_after_all_stop_detach (process_stratum_target *proc_target);
 
+/* While detaching, return the signal PTID was supposed to be resumed
+   with, if it were resumed, so we can pass it down to PTID while
+   detaching.  */
+extern gdb_signal get_detach_signal (process_stratum_target *proc_target,
+				     ptid_t ptid);
+
 /* RAII object to temporarily disable the requirement for target
    stacks to commit their resumed threads.
 
