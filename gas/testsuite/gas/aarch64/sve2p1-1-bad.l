@@ -82,15 +82,15 @@
 .*: Error: selected processor does not support `fminqv v16.4s,p7,z0.s'
 .*: Error: selected processor does not support `ld1q Z0.Q,p4/Z,\[Z16.D,x0\]'
 .*: Error: selected processor does not support `ld2q {Z0.Q,Z1.Q},p4/Z,\[x0,#-4,MUL VL\]'
-.*: Error: selected processor does not support `ld3q {Z0.Q,Z1.Q,Z2.Q},p4/Z,\[x0,#-4,MUL VL\]'
-.*: Error: selected processor does not support `ld4q {Z0.Q,Z1.Q,Z2.Q,Z3.Q},p4/Z,\[x0,#-4,MUL VL\]'
+.*: Error: selected processor does not support `ld3q .*
+.*: Error: selected processor does not support `ld4q .*
 .*: Error: selected processor does not support `ld2q {Z0.Q,Z1.Q},p4/Z,\[x0,x2,lsl#4\]'
 .*: Error: selected processor does not support `ld3q {Z0.Q,Z1.Q,Z2.Q},p4/Z,\[x0,x4,lsl#4\]'
 .*: Error: selected processor does not support `ld4q {Z0.Q,Z1.Q,Z2.Q,Z3.Q},p4/Z,\[x0,x6,lsl#4\]'
 .*: Error: selected processor does not support `st1q Z0.Q,p4,\[Z16.D,x0\]'
 .*: Error: selected processor does not support `st2q {Z0.Q,Z1.Q},p4,\[x0,#-4,MUL VL\]'
-.*: Error: selected processor does not support `st3q {Z0.Q,Z1.Q,Z2.Q},p4,\[x0,#-4,MUL VL\]'
-.*: Error: selected processor does not support `st4q {Z0.Q,Z1.Q,Z2.Q,Z3.Q},p4,\[x0,#-4,MUL VL\]'
+.*: Error: selected processor does not support `st3q .*
+.*: Error: selected processor does not support `st4q .*
 .*: Error: selected processor does not support `st2q {Z0.Q,Z1.Q},p4,\[x0,x2,lsl#4\]'
 .*: Error: selected processor does not support `st3q {Z0.Q,Z1.Q,Z2.Q},p4,\[x0,x4,lsl#4\]'
 .*: Error: selected processor does not support `st4q {Z0.Q,Z1.Q,Z2.Q,Z3.Q},p4,\[x0,x6,lsl#4\]'

@@ -1,4 +1,4 @@
-#name: Test of SVE2.1 min max instructions.
+#name: Test of SVE2.1 instructions
 #as: -march=armv9.4-a+sve2p1
 #objdump: -dr
 
@@ -91,15 +91,15 @@
 .*:	6497bc10 	fminqv	v16.4s, p7, z0.s
 .*:	c400b200 	ld1q	z0.q, p4/z, \[z16.d, x0\]
 .*:	a49ef000 	ld2q	{z0.q, z1.q}, p4/z, \[x0, #-4, mul vl\]
-.*:	a51ef000 	ld3q	{z0.q, z1.q, z2.q}, p4/z, \[x0, #-4, mul vl\]
-.*:	a59ef000 	ld4q	{z0.q, z1.q, z2.q, z3.q}, p4/z, \[x0, #-4, mul vl\]
+.*:	a51ef000 	ld3q	{z0.q, z1.q, z2.q}, p4/z, \[x0, #-6, mul vl\]
+.*:	a59ef000 	ld4q	{z0.q, z1.q, z2.q, z3.q}, p4/z, \[x0, #-8, mul vl\]
 .*:	a4a2f000 	ld2h	{z0.h-z1.h}, p4/z, \[x0, #4, mul vl\]
 .*:	a5249000 	ld3q	{z0.q, z1.q, z2.q}, p4/z, \[x0, x4, lsl #4\]
 .*:	a5a69000 	ld4q	{z0.q, z1.q, z2.q, z3.q}, p4/z, \[x0, x6, lsl #4\]
 .*:	e4203200 	st1q	z0.q, p4, \[z16.d, x0\]
 .*:	e44e1000 	st2q	{z0.q, z1.q}, p4, \[x0, #-4, mul vl\]
-.*:	e48e1000 	st3q	{z0.q, z1.q, z2.q}, p4, \[x0, #-4, mul vl\]
-.*:	e4ce1000 	st4q	{z0.q, z1.q, z2.q, z3.q}, p4, \[x0, #-4, mul vl\]
+.*:	e48e1000 	st3q	{z0.q, z1.q, z2.q}, p4, \[x0, #-6, mul vl\]
+.*:	e4ce1000 	st4q	{z0.q, z1.q, z2.q, z3.q}, p4, \[x0, #-8, mul vl\]
 .*:	e4621000 	st2q	{z0.q, z1.q}, p4, \[x0, x2, lsl #4\]
 .*:	e4a41000 	st3q	{z0.q, z1.q, z2.q}, p4, \[x0, x4, lsl #4\]
 .*:	e4e61000 	st4q	{z0.q, z1.q, z2.q, z3.q}, p4, \[x0, x6, lsl #4\]
